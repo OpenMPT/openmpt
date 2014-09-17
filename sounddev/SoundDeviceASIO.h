@@ -95,7 +95,7 @@ public:
 	~CASIODevice();
 
 private:
-	void Init();
+	void InitMembers();
 	bool HandleRequests(); // return true if any work has been done
 	void UpdateLatency();
 

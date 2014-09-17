@@ -1652,14 +1652,14 @@ void CMainFrame::IdleHandlerSounddevice()
 	if(gpSoundDevice)
 	{
 		const LONG requestFlags = gpSoundDevice->GetRequestFlags();
-		if(requestFlags & SoundDevice::Base::RequestFlagClose)
+		if(requestFlags & SoundDevice::IBase::RequestFlagClose)
 		{
 			StopPlayback();
 			audioCloseDevice();
-		} else if(requestFlags & SoundDevice::Base::RequestFlagReset)
+		} else if(requestFlags & SoundDevice::IBase::RequestFlagReset)
 		{
 			ResetSoundCard();
-		} else if(requestFlags & SoundDevice::Base::RequestFlagRestart)
+		} else if(requestFlags & SoundDevice::IBase::RequestFlagRestart)
 		{
 			RestartPlayback();
 		} else

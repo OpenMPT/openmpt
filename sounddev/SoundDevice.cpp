@@ -582,8 +582,8 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(const std::wstring &identifie
 }
 
 
-bool Manager::OpenDriverSettings(SoundDevice::ID id, SoundDevice::IMessageReceiver *messageReceiver, SoundDevice::Base *currentSoundDevice)
-//-----------------------------------------------------------------------------------------------------------------------------------------
+bool Manager::OpenDriverSettings(SoundDevice::ID id, SoundDevice::IMessageReceiver *messageReceiver, SoundDevice::IBase *currentSoundDevice)
+//------------------------------------------------------------------------------------------------------------------------------------------
 {
 	bool result = false;
 	if(currentSoundDevice && FindDeviceInfo(id).IsValid() && (currentSoundDevice->GetDeviceID() == id) && (currentSoundDevice->GetDeviceInternalID() == FindDeviceInfo(id).internalID))
@@ -591,7 +591,7 @@ bool Manager::OpenDriverSettings(SoundDevice::ID id, SoundDevice::IMessageReceiv
 		result = currentSoundDevice->OpenDriverSettings();
 	} else
 	{
-		SoundDevice::Base *dummy = CreateSoundDevice(id);
+		SoundDevice::IBase *dummy = CreateSoundDevice(id);
 		if(dummy)
 		{
 			dummy->SetMessageReceiver(messageReceiver);
@@ -603,8 +603,8 @@ bool Manager::OpenDriverSettings(SoundDevice::ID id, SoundDevice::IMessageReceiv
 }
 
 
-SoundDevice::Caps Manager::GetDeviceCaps(SoundDevice::ID id, SoundDevice::Base *currentSoundDevice)
-//-------------------------------------------------------------------------------------------------
+SoundDevice::Caps Manager::GetDeviceCaps(SoundDevice::ID id, SoundDevice::IBase *currentSoundDevice)
+//--------------------------------------------------------------------------------------------------
 {
 	if(m_DeviceCaps.find(id) == m_DeviceCaps.end())
 	{
@@ -613,7 +613,7 @@ SoundDevice::Caps Manager::GetDeviceCaps(SoundDevice::ID id, SoundDevice::Base *
 			m_DeviceCaps[id] = currentSoundDevice->GetDeviceCaps();
 		} else
 		{
-			SoundDevice::Base *dummy = CreateSoundDevice(id);
+			SoundDevice::IBase *dummy = CreateSoundDevice(id);
 			if(dummy)
 			{
 				m_DeviceCaps[id] = dummy->GetDeviceCaps();
@@ -625,8 +625,8 @@ SoundDevice::Caps Manager::GetDeviceCaps(SoundDevice::ID id, SoundDevice::Base *
 }
 
 
-SoundDevice::DynamicCaps Manager::GetDeviceDynamicCaps(SoundDevice::ID id, const std::vector<uint32> &baseSampleRates, SoundDevice::IMessageReceiver *messageReceiver, SoundDevice::Base *currentSoundDevice, bool update)
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SoundDevice::DynamicCaps Manager::GetDeviceDynamicCaps(SoundDevice::ID id, const std::vector<uint32> &baseSampleRates, SoundDevice::IMessageReceiver *messageReceiver, SoundDevice::IBase *currentSoundDevice, bool update)
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if((m_DeviceDynamicCaps.find(id) == m_DeviceDynamicCaps.end()) || update)
 	{
@@ -635,7 +635,7 @@ SoundDevice::DynamicCaps Manager::GetDeviceDynamicCaps(SoundDevice::ID id, const
 			m_DeviceDynamicCaps[id] = currentSoundDevice->GetDeviceDynamicCaps(baseSampleRates);
 		} else
 		{
-			SoundDevice::Base *dummy = CreateSoundDevice(id);
+			SoundDevice::IBase *dummy = CreateSoundDevice(id);
 			if(dummy)
 			{
 				dummy->SetMessageReceiver(messageReceiver);
@@ -648,15 +648,15 @@ SoundDevice::DynamicCaps Manager::GetDeviceDynamicCaps(SoundDevice::ID id, const
 }
 
 
-SoundDevice::Base * Manager::CreateSoundDevice(SoundDevice::ID id)
-//----------------------------------------------------------------
+SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::ID id)
+//-----------------------------------------------------------------
 {
 	const SoundDevice::Info info = FindDeviceInfo(id);
 	if(!info.IsValid())
 	{
 		return nullptr;
 	}
-	SoundDevice::Base *result = nullptr;
+	SoundDevice::IBase *result = nullptr;
 	switch(id.GetType())
 	{
 	case TypeWAVEOUT: result = new CWaveDevice(id, info.internalID); break;

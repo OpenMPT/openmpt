@@ -184,14 +184,14 @@ CASIODevice::CASIODevice(SoundDevice::ID id, const std::wstring &internalID)
 //------------------------------------------------------------------------
 	: SoundDevice::Base(id, internalID)
 {
-	Init();
+	InitMembers();
 	m_QueriedFeatures.reset();
 	m_UsedFeatures.reset();
 }
 
 
-void CASIODevice::Init()
-//----------------------
+void CASIODevice::InitMembers()
+//-----------------------------
 {
 	m_pAsioDrv = nullptr;
 
@@ -243,7 +243,7 @@ bool CASIODevice::InternalOpen()
 
 	ASSERT(!IsDriverOpen());
 
-	Init();
+	InitMembers();
 
 	Log(mpt::String::Print("ASIO: Open(%1:'%2'): %3-bit, %4 channels, %5Hz, hw-timing=%6"
 		, GetDeviceIndex()
