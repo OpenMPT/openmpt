@@ -714,6 +714,7 @@ void COptionsSoundcard::OnOK()
 		m_CbnLatencyMS.GetWindowText(s);
 		m_Settings.Latency = ParseTime(s);
 		//Check given value.
+		if(m_Settings.Latency == 0.0) m_Settings.Latency = m_CurrentDeviceCaps.DefaultSettings.Latency;
 		m_Settings.Latency = Clamp(m_Settings.Latency, m_CurrentDeviceCaps.LatencyMin, m_CurrentDeviceCaps.LatencyMax);
 		m_CbnLatencyMS.SetWindowText(PrintTime(m_Settings.Latency));
 	}
@@ -723,6 +724,7 @@ void COptionsSoundcard::OnOK()
 		m_CbnUpdateIntervalMS.GetWindowText(s);
 		m_Settings.UpdateInterval = ParseTime(s);
 		//Check given value.
+		if(m_Settings.UpdateInterval == 0.0) m_Settings.UpdateInterval = m_CurrentDeviceCaps.DefaultSettings.UpdateInterval;
 		m_Settings.UpdateInterval = Clamp(m_Settings.UpdateInterval, m_CurrentDeviceCaps.UpdateIntervalMin, m_CurrentDeviceCaps.UpdateIntervalMax);
 		m_CbnUpdateIntervalMS.SetWindowText(PrintTime(m_Settings.UpdateInterval));
 	}
