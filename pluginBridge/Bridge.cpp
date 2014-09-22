@@ -386,7 +386,13 @@ void PluginBridge::InitBridge(InitMsg *msg)
 #endif
 
 	nativeEffect = nullptr;
-	library = LoadLibraryW(msg->str);
+	try
+	{
+		library = LoadLibraryW(msg->str);
+	} catch(...)
+	{
+		library = nullptr;
+	}
 
 	if(library == nullptr)
 	{

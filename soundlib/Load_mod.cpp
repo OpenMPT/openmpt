@@ -306,9 +306,9 @@ struct PACKED MODSampleHeader
 		loopLength = 1;
 		if(mptSmp.uFlags[CHN_LOOP] && (mptSmp.nLoopStart + 2u) < writeLength)
 		{
-			const SmpLength loopEnd = Clamp(mptSmp.nLoopEnd, mptSmp.nLoopStart + 2u, writeLength);
+			const SmpLength loopEnd = Clamp(mptSmp.nLoopEnd, (mptSmp.nLoopStart & ~1) + 2u, writeLength) & ~1;
 			loopStart = static_cast<uint16>(mptSmp.nLoopStart / 2u);
-			loopLength = static_cast<uint16>((loopEnd - mptSmp.nLoopStart) / 2u);
+			loopLength = static_cast<uint16>((loopEnd - (mptSmp.nLoopStart & ~1)) / 2u);
 		}
 
 		return writeLength;
@@ -980,12 +980,23 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 				ModCommand &m = rowBase[chn];
 				ReadMODPatternEntry(file, m);
 
+				if(!m.param || m.command == 0x0E)
+				{
+					autoSlide[chn] = 0;
+				}
 				if(m.command || m.param)
 				{
-					if(m.command != 0x0E && autoSlide[chn] != 0)
+					if(autoSlide[chn] != 0)
 					{
-						m.volcmd = (autoSlide[chn] & 0xF0) ? VOLCMD_VOLSLIDEUP : VOLCMD_VOLSLIDEDOWN;
-						m.vol = (autoSlide[chn] & 0xF0) ? (autoSlide[chn] >> 4) : (autoSlide[chn] & 0x0F);
+						if(autoSlide[chn] & 0xF0)
+						{
+							m.volcmd = VOLCMD_VOLSLIDEUP;
+							m.vol = autoSlide[chn] >> 4;
+						} else
+						{
+							m.volcmd = VOLCMD_VOLSLIDEDOWN;
+							m.vol = autoSlide[chn] & 0x0F;
+						}
 					}
 					if(m.command == 0x0D)
 					{
