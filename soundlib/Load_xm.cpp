@@ -720,10 +720,6 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 	{
 		AddToLog("Skip and stop order list items (+++ and ---) are not saved in XM files.");
 	}
-	if(compatibilityExport && (maxOrders > 256))
-	{
-		AddToLog("XM compatibilty export does only support up to 256 order list etries. Exceeding entries are not saved.");
-	}
 
 	fileHeader.orders = maxOrders;
 	fileHeader.patterns = numPatterns;
