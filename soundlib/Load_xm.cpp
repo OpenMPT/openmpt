@@ -720,10 +720,14 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 	{
 		AddToLog("Skip and stop order list items (+++ and ---) are not saved in XM files.");
 	}
+	if(compatibilityExport && (maxOrders > 256))
+	{
+		AddToLog("XM compatibilty export does only support up to 256 order list etries. Exceeding entries are not saved.");
+	}
 
 	fileHeader.orders = maxOrders;
 	fileHeader.patterns = numPatterns;
-	fileHeader.size = fileHeader.size + maxOrders;
+	fileHeader.size = fileHeader.size + (compatibilityExport ? 256 : maxOrders);
 
 	uint16 writeInstruments;
 	if(m_nInstruments > 0)
@@ -743,12 +747,27 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 	fwrite(&fileHeader, 1, sizeof(fileHeader), f);
 
 	// write order list (without +++ and ---, explained above)
+	ORDERINDEX writtenOrders = 0;
 	for(ORDERINDEX ord = 0; ord < Order.GetLengthTailTrimmed(); ord++)
 	{
+		if(compatibilityExport && (writtenOrders >= 256))
+		{
+			break;
+		}
 		if(Order[ord] != Order.GetIgnoreIndex() && Order[ord] != Order.GetInvalidPatIndex())
 		{
 			uint8 ordItem = static_cast<uint8>(Order[ord]);
 			fwrite(&ordItem, 1, 1, f);
+			writtenOrders++;
+		}
+	}
+	if(compatibilityExport)
+	{
+		while(writtenOrders < 256)
+		{
+			uint8 ordItem = 0;
+			fwrite(&ordItem, 1, 1, f);
+			writtenOrders++;
 		}
 	}
 
