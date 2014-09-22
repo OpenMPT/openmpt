@@ -581,35 +581,34 @@ PLUGINDEX CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
 	PLUGINDEX nRemoved = 0;
 	const PLUGINDEX maxPlug = MIN(MAX_MIXPLUGINS, keepMask.size());
 
-	for (PLUGINDEX nPlug = 0; nPlug < maxPlug; nPlug++)
+	for(PLUGINDEX nPlug = 0; nPlug < maxPlug; nPlug++)
 	{
-		SNDMIXPLUGIN* pPlug = &m_SndFile.m_MixPlugins[nPlug];
-		if (keepMask[nPlug] || !pPlug)
+		SNDMIXPLUGIN &plug = m_SndFile.m_MixPlugins[nPlug];
+		if(keepMask[nPlug])
 		{
 			continue;
 		}
 
-		if (pPlug->pPluginData)
+		if(plug.pMixPlugin || plug.IsValidPlugin())
 		{
-			delete[] pPlug->pPluginData;
-			pPlug->pPluginData = NULL;
-		}
-		if (pPlug->pMixPlugin)
-		{
-			pPlug->pMixPlugin->Release();
-			pPlug->pMixPlugin=NULL;
-		}
-		if (pPlug->pMixState)
-		{
-			delete pPlug->pMixState;
+			nRemoved++;
 		}
 
-		MemsetZero(pPlug->Info);
-		Log("Zeroing range (%d) %X - %X\n", nPlug, &(pPlug->Info),  &(pPlug->Info)+sizeof(SNDMIXPLUGININFO));
-		pPlug->nPluginDataSize=0;
-		pPlug->fDryRatio=0;	
-		pPlug->defaultProgram=0;
-		nRemoved++;
+		delete[] plug.pPluginData;
+		plug.pPluginData = nullptr;
+
+		if(plug.pMixPlugin)
+		{
+			plug.pMixPlugin->Release();
+			plug.pMixPlugin = nullptr;
+		}
+		delete plug.pMixState;
+		plug.pMixState= nullptr;
+
+		MemsetZero(plug.Info);
+		plug.nPluginDataSize = 0;
+		plug.fDryRatio = 0;
+		plug.defaultProgram = 0;
 	}
 
 	return nRemoved;
