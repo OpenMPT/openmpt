@@ -1,3 +1,15 @@
+v0.2.0 (2013-08-04):
+
+     * Decompression of archives using the -lhx- file format supported by
+       unlha32.dll is now supported (thanks Multi for the patch).
+     * The -p (print to stdout) command line option is now supported.
+     * The test suite should now run correctly on Windows.
+
+    Bugs fixed:
+     * Bug where archives read from pipes (eg. stdin) were not extracted
+       beyond the first file in the archive.
+     * Output when using the -w (extract directory) option now correctly
+       matches the output of Unix lha.
 
 v0.1.0 (2013-03-16):
 

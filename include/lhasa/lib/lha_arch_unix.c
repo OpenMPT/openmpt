@@ -163,11 +163,6 @@ LHAFileType lha_arch_exists(char *filename)
 	}
 }
 
-int lha_arch_chdir(char *path)
-{
-	return chdir(path) == 0;
-}
-
 int lha_arch_symlink(char *path, char *target)
 {
 	unlink(path);

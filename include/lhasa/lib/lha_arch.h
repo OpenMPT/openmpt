@@ -144,15 +144,6 @@ FILE *lha_arch_fopen(char *filename, int unix_uid,
 LHAFileType lha_arch_exists(char *filename);
 
 /**
- * Change to the specified directory.
- *
- * @param path        Path to change to.
- * @return            Non-zero for success.
- */
-
-int lha_arch_chdir(char *path);
-
-/**
  * Create a symbolic link.
  *
  * If a file already exists at the location of the link to be created, it is

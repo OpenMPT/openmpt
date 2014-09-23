@@ -26,6 +26,7 @@ SRC =                                                   \
 	lh5_decoder.c                                   \
 	lh6_decoder.c                                   \
 	lh7_decoder.c                                   \
+	lhx_decoder.c                                   \
 	lz5_decoder.c                                   \
 	lzs_decoder.c                                   \
 	pm1_decoder.c                                   \

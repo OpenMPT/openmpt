@@ -53,6 +53,10 @@ static char *file_full_path(LHAFileHeader *header, LHAOptions *options)
 
 	len = 0;
 
+	if (options->extract_path != NULL) {
+		len += strlen(options->extract_path) + 1;
+	}
+
 	if (options->use_path && header->path != NULL) {
 		len += strlen(header->path);
 	}
@@ -70,28 +74,36 @@ static char *file_full_path(LHAFileHeader *header, LHAOptions *options)
 
 	result[0] = '\0';
 
-	if (options->use_path && header->path != NULL) {
-		strcat(result, header->path);
+	if (options->extract_path != NULL) {
+		strcat(result, options->extract_path);
+		strcat(result, "/");
 	}
+
+	// Add path. If it is an absolute path (contains a leading '/')
+	// then skip over the leading '/' to make it a relative path.
+	// This prevents the possibility of a security threat with a
+	// malicious archive that might try to write to arbitrary
+	// filesystem locations.
+	// It also removes the double '/' when using the -w option.
+
+	if (options->use_path && header->path != NULL) {
+		p = header->path;
+		while (*p == '/') {
+			++p;
+		}
+		strcat(result, p);
+	}
+
+	// The filename header field might conceivably try to include
+	// a path separator as well, so skip over any leading '/'
+	// here too.
 
 	if (header->filename != NULL) {
-		strcat(result, header->filename);
-	}
-
-	// If the header contains leading '/' characters, it is an
-	// absolute path (eg. /etc/passwd). Strip these leading
-	// characters to always generate a relative path, otherwise
-	// it can be a security risk - extracting an archive might
-	// overwrite arbitrary files on the filesystem.
-
-	p = result;
-
-	while (*p == '/') {
-		++p;
-	}
-
-	if (p > result) {
-		memmove(result, p, strlen(p) + 1);
+		p = header->filename;
+		while (*p == '/') {
+			++p;
+		}
+		strcat(result, p);
 	}
 
 	return result;
@@ -161,6 +173,14 @@ static void progress_callback(unsigned int block,
 	}
 
 	fflush(stdout);
+}
+
+// Print a line to stdout describing a symlink.
+
+static void print_symlink_line(char *src, char *dest)
+{
+	safe_printf("Symbolic Link %s -> %s", src, dest);
+	printf("\n");
 }
 
 // Perform CRC check of an archived file.
@@ -254,63 +274,58 @@ static int check_parent_directory(char *path)
 	return 1;
 }
 
-// Given a file header, create its parent directories as necessary.
-// If include_final is zero, the final directory in the path is not
-// created.
+// Given a filename, create its parent directories as necessary.
 
-static int make_parent_directories(char *orig_path, int include_final)
+static int make_parent_directories(char *orig_path)
 {
 	int result;
 	char *p;
 	char *path;
-	char saved = 0;
 
 	result = 1;
+
+	// Duplicate the path and strip off any trailing '/'s:
+
 	path = strdup(orig_path);
+
+	if (path == NULL) {
+		exit(-1);
+	}
+
+	p = path + strlen(path) - 1;
+
+	while (p >= path && *p == '/') {
+		*p = '\0';
+		--p;
+	}
 
 	// Iterate through the string, finding each path separator. At
 	// each place, temporarily chop off the end of the path to get
 	// each parent directory in turn.
 
-	p = path;
+	for (p = path; *p == '/'; ++p);
 
-	do {
+	for (;;) {
 		p = strchr(p, '/');
 
-		// Terminate string after the path separator.
-
-		if (p != NULL) {
-			saved = *(p + 1);
-			*(p + 1) = '\0';
+		if (p == NULL) {
+			break;
 		}
 
-		// Check if this parent directory exists and create it;
-		// however, don't create the final directory in the path
-		// if include_final is false. This is used for handling
-		// directories, where we should only create missing
-		// parent directories - not the directory itself.
-		// eg. for:
-		//
-		//  -lhd-  subdir/subdir2/
-		//
-		// Only create subdir/ - subdir/subdir2/ is created
-		// by the call to lha_reader_extract.
+		*p = '\0';
 
-		if (include_final || strcmp(orig_path, path) != 0) {
-			if (!check_parent_directory(path)) {
-				result = 0;
-				break;
-			}
+		// Check if this parent directory exists and create it:
+
+		if (!check_parent_directory(path)) {
+			result = 0;
+			break;
 		}
 
-		// Restore character that was after the path separator
-		// and advance to the next path.
+		// Restore path separator and advance to the next path.
 
-		if (p != NULL) {
-			*(p + 1) = saved;
-			++p;
-		}
-	} while (p != NULL);
+		*p = '/';
+		++p;
+	}
 
 	free(path);
 
@@ -413,7 +428,6 @@ static int extract_archived_file(LHAReader *reader,
                                  LHAOptions *options)
 {
 	ProgressCallbackData progress;
-	char *path;
 	char *filename;
 	int success;
 	int is_dir, is_symlink;
@@ -422,30 +436,6 @@ static int extract_archived_file(LHAReader *reader,
 	is_symlink = header->symlink_target != NULL;
 	is_dir = !strcmp(header->compress_method, LHA_COMPRESS_TYPE_DIR)
 	      && !is_symlink;
-
-	// Print appropriate message and stop if we are performing a dry run.
-	// The message if we have an existing file is weird, but this is just
-	// accurately duplicating what the Unix LHA tool says.
-	// The symlink handling is particularly odd - they are treated as
-	// directories (a bleed-through of the way in which symlinks are
-	// stored).
-
-	if (options->dry_run) {
-		if (is_dir) {
-			safe_printf("EXTRACT %s (directory)", filename);
-		} else if (header->symlink_target != NULL) {
-			safe_printf("EXTRACT %s|%s (directory)",
-			            filename, header->symlink_target);
-		} else if (file_exists(filename)) {
-			safe_printf("EXTRACT %s but file is exist.", filename);
-		} else {
-			safe_printf("EXTRACT %s", filename);
-		}
-		printf("\n");
-
-		free(filename);
-		return 1;
-	}
 
 	// If a file already exists with this name, confirm overwrite.
 
@@ -467,17 +457,9 @@ static int extract_archived_file(LHAReader *reader,
 
 	// Create parent directories for file:
 
-	if (options->use_path && header->path != NULL) {
-		path = header->path;
-
-		while (path[0] == '/') {
-			++path;
-		}
-
-		if (*path != '\0' && !make_parent_directories(path, !is_dir)) {
-			free(filename);
-			return 0;
-		}
+	if (!make_parent_directories(filename)) {
+		free(filename);
+		return 0;
 	}
 
 	progress.invoked = 0;
@@ -499,9 +481,7 @@ static int extract_archived_file(LHAReader *reader,
 				printf("\n");
 			}
 		} else if (is_symlink) {
-			safe_printf("Symbolic Link %s -> %s", filename,
-			            header->symlink_target);
-			printf("\n");
+			print_symlink_line(filename, header->symlink_target);
 		}
 
 		fflush(stdout);
@@ -541,27 +521,63 @@ int test_file_crc(LHAFilter *filter, LHAOptions *options)
 	return result;
 }
 
+// lha -en / -xn / -pn:
+// Simulate extracting an archive file, but just print the operations
+// that would have been performed to stdout.
+
+static int extract_archive_dry_run(LHAFilter *filter, LHAOptions *options)
+{
+	char *filename;
+	int result;
+
+	result = 1;
+
+	for (;;) {
+		LHAFileHeader *header;
+
+		header = lha_filter_next_file(filter);
+
+		if (header == NULL) {
+			break;
+		}
+
+		filename = file_full_path(header, options);
+
+		// Every line begins the same - "EXTRACT filename..."
+
+		safe_printf("EXTRACT %s", filename);
+
+		// After the filename we might print something extra.
+		// The message if we have an existing file is weird, but this
+		// is just accurately duplicating what the Unix LHA tool says.
+		// The symlink handling is particularly odd - they are treated
+		// as directories (a bleed-through of the way in which
+		// symlinks are stored).
+
+		if (header->symlink_target != NULL) {
+			safe_printf("|%s (directory)", header->symlink_target);
+		} else if (!strcmp(header->compress_method,
+		                   LHA_COMPRESS_TYPE_DIR)) {
+			safe_printf(" (directory)");
+		} else if (file_exists(filename)) {
+			safe_printf(" but file is exist.");
+		}
+		printf("\n");
+
+		free(filename);
+	}
+
+	return result;
+}
+
 // lha -e / -x
 
 int extract_archive(LHAFilter *filter, LHAOptions *options)
 {
 	int result;
 
-	// Change directory before extract? (-w option).
-
-	if (options->extract_path != NULL) {
-		if (!make_parent_directories(options->extract_path, 1)) {
-			fprintf(stderr,
-			        "Failed to create extract directory: %s.\n",
-			        options->extract_path);
-			exit(-1);
-		}
-
-		if (!lha_arch_chdir(options->extract_path)) {
-			fprintf(stderr, "Failed to change directory to %s.\n",
-			        options->extract_path);
-			exit(-1);
-		}
+	if (options->dry_run) {
+		return extract_archive_dry_run(filter, options);
 	}
 
 	result = 1;
@@ -581,5 +597,80 @@ int extract_archive(LHAFilter *filter, LHAOptions *options)
 	}
 
 	return result;
+}
+
+// Dump contents of the current file from the specified reader to stdout.
+
+static int print_archived_file(LHAReader *reader)
+{
+	char buf[512];
+	size_t bytes;
+
+	for (;;) {
+		bytes = lha_reader_read(reader, buf, sizeof(buf));
+		if (bytes <= 0) {
+			break;
+		}
+
+		if (fwrite(buf, 1, bytes, stdout) < bytes) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+// lha -p
+
+int print_archive(LHAFilter *filter, LHAOptions *options)
+{
+	LHAFileHeader *header;
+	int is_normal_file;
+	char *full_path;
+
+	// As a weird quirk of Unix LHA, lha -pn is equivalent to lha -en:
+
+	if (options->dry_run) {
+		return extract_archive_dry_run(filter, options);
+	}
+
+	for (;;) {
+		header = lha_filter_next_file(filter);
+
+		if (header == NULL) {
+			break;
+		}
+
+		is_normal_file = strcmp(header->compress_method,
+		                        LHA_COMPRESS_TYPE_DIR) != 0;
+
+		// Print "header" before the file containing the filename.
+		// For normal files this is a three line separator.
+		// Symlinks get shown in the same way as during extract.
+		// Directories are ignored.
+
+		if (options->quiet < 2) {
+			full_path = file_full_path(header, options);
+
+			if (header->symlink_target != NULL) {
+				print_symlink_line(full_path,
+				                   header->symlink_target);
+			} else if (is_normal_file) {
+				printf("::::::::\n");
+				safe_printf("%s", full_path);
+				printf("\n::::::::\n");
+			}
+
+			free(full_path);
+		}
+
+		// If this is a normal file, dump the contents to stdout.
+
+		if (is_normal_file && !print_archived_file(filter->reader)) {
+			return 0;
+		}
+	}
+
+	return 1;
 }
 

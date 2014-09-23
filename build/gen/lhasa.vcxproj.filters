@@ -2,16 +2,16 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{A6F4B617-6322-F44E-A3F2-588A54F34CE3}</UniqueIdentifier>
+			<UniqueIdentifier>{5347F1AC-E81E-434A-80CF-594FD46C8AEB}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\lhasa">
-			<UniqueIdentifier>{CFC29837-5222-D84F-9D05-846E8F3C7DA0}</UniqueIdentifier>
+			<UniqueIdentifier>{2AA988BF-BBA8-5B47-BB82-345545624965}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\lhasa\lib">
-			<UniqueIdentifier>{5AEAA659-17AE-2C48-805E-72AA72560879}</UniqueIdentifier>
+			<UniqueIdentifier>{DCDB0AF6-FE6D-244E-BADF-36BCF126672E}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\lhasa\lib\public">
-			<UniqueIdentifier>{FAABDB2D-4E8E-B34A-9D32-B4EA00080BA7}</UniqueIdentifier>
+			<UniqueIdentifier>{1EFC59C9-1EE9-6F41-880B-EEC67B9934E4}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
@@ -99,6 +99,9 @@
 			<Filter>include\lhasa\lib</Filter>
 		</ClCompile>
 		<ClCompile Include="..\..\include\lhasa\lib\lha_reader.c">
+			<Filter>include\lhasa\lib</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\lhasa\lib\lhx_decoder.c">
 			<Filter>include\lhasa\lib</Filter>
 		</ClCompile>
 		<ClCompile Include="..\..\include\lhasa\lib\lz5_decoder.c">

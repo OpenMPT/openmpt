@@ -38,6 +38,7 @@ extern LHADecoderType lha_lh4_decoder;
 extern LHADecoderType lha_lh5_decoder;
 extern LHADecoderType lha_lh6_decoder;
 extern LHADecoderType lha_lh7_decoder;
+extern LHADecoderType lha_lhx_decoder;
 
 // PMarc compression algorithms:
 extern LHADecoderType lha_pm1_decoder;
@@ -56,6 +57,7 @@ static struct {
 	{ "-lh5-", &lha_lh5_decoder },
 	{ "-lh6-", &lha_lh6_decoder },
 	{ "-lh7-", &lha_lh7_decoder },
+	{ "-lhx-", &lha_lhx_decoder },
 	{ "-pm0-", &lha_null_decoder },
 	{ "-pm1-", &lha_pm1_decoder },
 	{ "-pm2-", &lha_pm2_decoder },
