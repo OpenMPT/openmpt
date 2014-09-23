@@ -91,7 +91,7 @@ bool ChannelMapping::IsValid(uint32 channels) const
 	{
 		return true;
 	}
-	if(ChannelToDeviceChannel.size() < channels)
+	if(ChannelToDeviceChannel.size() != channels)
 	{
 		return false;
 	}
