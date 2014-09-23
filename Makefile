@@ -14,9 +14,9 @@
 #
 # Build configuration (provide on each `make` invocation):
 #
-#  CONFIG=[gcc|clang|mingw64-win32|mingw64-win64] (default: CONFIG=)
+#  CONFIG=[gcc|clang|mingw64-win32|mingw64-win64|emscripten] (default: CONFIG=)
 #
-#  Build configurations can override or change defaults of other build otions.
+#  Build configurations can override or change defaults of other build options.
 #  See below and in `build/make/` for details.
 #
 #
