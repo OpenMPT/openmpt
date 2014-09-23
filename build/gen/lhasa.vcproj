@@ -585,6 +585,10 @@
 						>
 					</File>
 					<File
+						RelativePath="..\..\include\lhasa\lib\lhx_decoder.c"
+						>
+					</File>
+					<File
 						RelativePath="..\..\include\lhasa\lib\lz5_decoder.c"
 						>
 					</File>

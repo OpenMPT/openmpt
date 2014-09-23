@@ -249,6 +249,7 @@
    "../include/lhasa/lib/lha_file_header.c",
    "../include/lhasa/lib/lha_input_stream.c",
    "../include/lhasa/lib/lha_reader.c",
+   "../include/lhasa/lib/lhx_decoder.c",
    "../include/lhasa/lib/lz5_decoder.c",
    "../include/lhasa/lib/lzs_decoder.c",
    "../include/lhasa/lib/macbinary.c",

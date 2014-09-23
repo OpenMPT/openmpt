@@ -3,7 +3,7 @@ include ../config.make
 
 TOPLEVEL=../..
 
-EXE_FILES=$(TOPLEVEL)/src/.libs/lha.exe
+EXE_FILES=$(TOPLEVEL)/src/lha.exe
 
 ZIP=$(PACKAGE_TARNAME)-$(PACKAGE_VERSION)-win32.zip
 

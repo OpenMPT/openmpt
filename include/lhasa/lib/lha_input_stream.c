@@ -328,6 +328,16 @@ static int file_source_skip(void *handle, size_t bytes)
 {
 	int result;
 
+	// If this is an unseekable stream of some kind, always use the
+	// fallback behavior, as at least this is guaranteed to work.
+	// This is to work around problems on Windows, where fseek() can
+	// seek half-way on a stream and *then* fail, leaving us in an
+	// unworkable situation.
+
+	if (ftell(handle) < 0) {
+		return file_source_skip_fallback(handle, bytes);
+	}
+
 	result = fseek(handle, (long) bytes, SEEK_CUR);
 
 	if (result < 0) {

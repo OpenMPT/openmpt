@@ -7,6 +7,7 @@ is ignored:
   e/x       - Extract
   l/v       - List (normal / verbose mode)
   t         - Test CRC
+  p         - Print files to STDOUT
 
 Options - flags following the mode character. Options are accepted
 even if they are inappropriate for the mode, eg. "lha lf".
@@ -22,6 +23,9 @@ even if they are inappropriate for the mode, eg. "lha lf".
 
               in test mode, behavior is similar to extract mode, but
               level 2 behavior is similar to level 0.
+
+              in print mode, at quiet level 2 the filename is not
+              printed before the file contents.
 
               all quiet modes imply 'f', disabling overwrite without
               confirmation.
@@ -48,6 +52,9 @@ even if they are inappropriate for the mode, eg. "lha lf".
 
               Also applies to test mode - the output filename of the
               tested file does not include the directory.
+
+              In print mode, the path is not printed in the header
+              before each file.
 
   v         - Verbose mode, prints extra information.
 

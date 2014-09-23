@@ -330,6 +330,8 @@
 		</ClCompile>
 		<ClCompile Include="..\..\include\lhasa\lib\lha_reader.c">
 		</ClCompile>
+		<ClCompile Include="..\..\include\lhasa\lib\lhx_decoder.c">
+		</ClCompile>
 		<ClCompile Include="..\..\include\lhasa\lib\lz5_decoder.c">
 		</ClCompile>
 		<ClCompile Include="..\..\include\lhasa\lib\lzs_decoder.c">

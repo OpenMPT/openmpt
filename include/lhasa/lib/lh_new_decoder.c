@@ -60,7 +60,7 @@ typedef uint16_t TreeElement;
 // Number of possible codes in the "temporary table" used to encode the
 // codes table.
 
-#define MAX_TEMP_CODES       19
+#define MAX_TEMP_CODES       20
 
 typedef struct {
 	// Input bit stream.

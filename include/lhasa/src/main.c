@@ -35,7 +35,8 @@ typedef enum {
 	MODE_LIST,
 	MODE_LIST_VERBOSE,
 	MODE_CRC_CHECK,
-	MODE_EXTRACT
+	MODE_EXTRACT,
+	MODE_PRINT
 } ProgramMode;
 
 static void help_page(char *progname)
@@ -44,13 +45,13 @@ static void help_page(char *progname)
 	PACKAGE_NAME " v" PACKAGE_VERSION " command line LHA tool  "
 		"- Copyright (C) 2011,2012 Simon Howard\n"
 	"usage: %s [-]{lvtxe[q{num}][finv]}[w=<dir>] archive_file [file...]\n"
-	"commands:                        options:\n"
-	" l,v List / Verbose List          f  Force overwrite (no prompt)\n"
-	" t   Test file CRC in archive     i  Ignore directory path\n"
-	" x,e Extract from archive         n  Perform dry run\n"
-	"                                  q{num}  Quiet mode\n"
-	"                                  v  Verbose\n"
-	"                                  w=<dir> Specify extract directory\n"
+	"commands:                          options:\n"
+	" l,v List / Verbose List            f  Force overwrite (no prompt)\n"
+	" t   Test file CRC in archive       i  Ignore directory path\n"
+	" x,e Extract from archive           n  Perform dry run\n"
+	" p   Print to stdout from archive   q{num}  Quiet mode\n"
+	"                                    v  Verbose\n"
+	"                                    w=<dir> Specify extract directory\n"
 	, progname);
 
 	exit(-1);
@@ -101,6 +102,10 @@ static int do_command(ProgramMode mode, char *filename,
 			result = extract_archive(&filter, options);
 			break;
 
+		case MODE_PRINT:
+			result = print_archive(&filter, options);
+			break;
+
 		case MODE_UNKNOWN:
 			break;
 	}
@@ -138,6 +143,8 @@ static ProgramMode mode_for_char(char c)
 		case 'e':
 		case 'x':
 			return MODE_EXTRACT;
+		case 'p':
+			return MODE_PRINT;
 		default:
 			return MODE_UNKNOWN;
 	}
