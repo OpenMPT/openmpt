@@ -491,6 +491,11 @@ void COptionsSoundcard::UpdateChannelMapping()
 //--------------------------------------------
 {
 	int usedChannels = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
+	if(!m_Settings.ChannelMapping.IsValid(usedChannels))
+	{
+		// If the channel mapping is not valid for the selected number of channels, reset it to default identity mapping.
+		m_Settings.ChannelMapping = SoundDevice::ChannelMapping();
+	}
 	GetDlgItem(IDC_STATIC_CHANNELMAPPING)->EnableWindow(m_CurrentDeviceCaps.CanChannelMapping ? TRUE : FALSE);
 	for(int mch = 0; mch < NUM_CHANNELCOMBOBOXES; mch++)	// Host channels
 	{

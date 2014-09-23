@@ -183,11 +183,15 @@ public:
 	bool IsValid(uint32 channels) const;
 
 	// Get the number of required device channels for this mapping. Derived from the maximum mapped-to channel number.
-	uint32 GetRequiredDeviceChannels() const
+	uint32 GetRequiredDeviceChannels(uint32 numHostChannels) const
 	{
-		if(ChannelToDeviceChannel.empty())
+		if(!IsValid(numHostChannels))
 		{
 			return 0;
+		}
+		if(ChannelToDeviceChannel.empty())
+		{
+			return numHostChannels;
 		}
 		uint32 maxChannel = 0;
 		for(uint32 channel = 0; channel < ChannelToDeviceChannel.size(); ++channel)
