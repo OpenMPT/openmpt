@@ -24,9 +24,6 @@
 #include "../common/version.h"
 #include "ITTools.h"
 #include <time.h>
-#if MPT_COMPILER_GCC
-#include <ext/stdio_sync_filebuf.h>
-#endif
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -1622,24 +1619,11 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	//BEGIN: MPT SPECIFIC:
 	//--------------------
 
+	bool success = true;
+
 	fseek(f, 0, SEEK_END);
-	fflush(f);
-#if MPT_COMPILER_MSVC
-	std::ofstream fout(f);
-#elif MPT_COMPILER_GCC
-	__gnu_cxx::stdio_sync_filebuf<char> fout_buf(f);
-	std::ostream fout(&fout_buf);
-#else
-	fclose(f);
-	f = nullptr;
-	// Using std::ofstream implies std::ios::out, which implies truncation when std::ios::app or std::ios::in is not also set. (At least, it does so for MSVC2010 and GNU libstdc++).
-	// std::ios::app is not suitable for us, because it is very well allowed for called functions to seek and write somewhere else than the end,
-	//  and std::ios::app implies writing goes always to the end, regardless of the output position.
-	// Using std::ios::in | std::ios::out | std::ios::ate prevents truncation and sets the file pointer to the end of the so-far saved file,
-	//  but it also allows reading, which does no harm but is not what we actually really want here.
-	// That's a very broken interface.
-	mpt::ofstream fout(filename, std::ios::binary | std::ios::ate | std::ios::in);
-#endif
+	{
+	mpt::FILE_ostream fout(f);
 
 	const uint32 MPTStartPos = (uint32)fout.tellp();
 	
@@ -1666,8 +1650,6 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		AddToLog("Error occured in writing MPTM extensions.");
 	}
 
-	bool success = true;
-
 	//Last 4 bytes should tell where the hack mpt things begin.
 	if(!fout.good())
 	{
@@ -1676,16 +1658,10 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	}
 	mpt::IO::WriteIntLE<uint32>(fout, MPTStartPos);
 
-	fout.flush();
-#if MPT_COMPILER_MSVC
-	fout.close();
-#elif MPT_COMPILER_GCC
-	fflush(f);
+	fout.seekp(0, std::ios_base::end);
+	}
 	fclose(f);
 	f = nullptr;
-#else
-	fout.close();
-#endif
 
 	//END  : MPT SPECIFIC
 	//-------------------
