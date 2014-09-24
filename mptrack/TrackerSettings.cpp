@@ -450,6 +450,11 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		m_SoundDeviceSettingsDefaults.BoostThreadPriority = m_SoundDeviceBoostThreadPriority;
 		m_SoundDeviceSettingsDefaults.UseHardwareTiming = m_SoundDeviceUseHardwareTiming;
 		m_SoundDeviceSettingsDefaults.ChannelMapping = m_SoundDeviceChannelMapping;
+		if(m_SoundDeviceSettingsDefaults.ChannelMapping.GetNumHostChannels() != m_SoundDeviceSettingsDefaults.Channels)
+		{
+			// reset invalid channel mapping to default
+			m_SoundDeviceSettingsDefaults.ChannelMapping = SoundDevice::ChannelMapping(m_SoundDeviceSettingsDefaults.Channels);
+		}
 		m_SoundDeviceSettingsUseOldDefaults = true;
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,21,01,26))
@@ -599,6 +604,11 @@ public:
 		, DitherType(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"DitherType", defaults.DitherType)
 		, ChannelMapping(conf, L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"ChannelMapping", defaults.ChannelMapping)
 	{
+		if(ChannelMapping.Get().GetNumHostChannels() != Channels)
+		{
+			// reset invalid chanel mapping to default
+			ChannelMapping = SoundDevice::ChannelMapping(Channels);
+		}
 		// store informational data (not read back, just to allow the user to mock with the raw ini file)
 		conf.Write(L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"ID", deviceInfo.id);
 		conf.Write(L"Sound Settings", deviceInfo.GetIdentifier() + L"_" + L"InternalID", deviceInfo.internalID);

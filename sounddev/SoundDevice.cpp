@@ -58,23 +58,31 @@ ChannelMapping::ChannelMapping()
 }
 
 
-ChannelMapping::ChannelMapping(const std::vector<uint32> &mapping)
-//----------------------------------------------------------------
-	: ChannelToDeviceChannel(mapping)
+ChannelMapping::ChannelMapping(uint32 numHostChannels)
+//----------------------------------------------------
 {
-	return;
+	ChannelToDeviceChannel.resize(numHostChannels);
+	for(uint32 channel = 0; channel < numHostChannels; ++channel)
+	{
+		ChannelToDeviceChannel[channel] = channel;
+	}
 }
 
 
-ChannelMapping ChannelMapping::BaseChannel(uint32 channels, uint32 baseChannel)
-//-----------------------------------------------------------------------------
+ChannelMapping::ChannelMapping(const std::vector<int32> &mapping)
+//---------------------------------------------------------------
+{
+	if(IsValid(mapping))
+	{
+		ChannelToDeviceChannel = mapping;
+	}
+}
+
+
+ChannelMapping ChannelMapping::BaseChannel(uint32 channels, int32 baseChannel)
+//----------------------------------------------------------------------------
 {
 	SoundDevice::ChannelMapping result;
-	result.ChannelToDeviceChannel.clear();
-	if(baseChannel == 0)
-	{
-		return result;
-	}
 	result.ChannelToDeviceChannel.resize(channels);
 	for(uint32 channel = 0; channel < channels; ++channel)
 	{
@@ -84,23 +92,28 @@ ChannelMapping ChannelMapping::BaseChannel(uint32 channels, uint32 baseChannel)
 }
 
 
-bool ChannelMapping::IsValid(uint32 channels) const
-//-------------------------------------------------
+bool ChannelMapping::IsValid(const std::vector<int32> &mapping)
+//-------------------------------------------------------------
 {
-	if(ChannelToDeviceChannel.empty())
+	if(mapping.empty())
 	{
 		return true;
 	}
-	if(ChannelToDeviceChannel.size() != channels)
+	std::map<int32, uint32> inverseMapping;
+	for(uint32 hostChannel = 0; hostChannel < mapping.size(); ++hostChannel)
 	{
-		return false;
+		int32 deviceChannel = mapping[hostChannel];
+		if(deviceChannel < 0)
+		{
+			return false;
+		}
+		if(deviceChannel > MaxDeviceChannel)
+		{
+			return false;
+		}
+		inverseMapping[deviceChannel] = hostChannel;
 	}
-	std::map<uint32, uint32> inverseMapping;
-	for(uint32 channel = 0; channel < channels; ++channel)
-	{
-		inverseMapping[ChannelToDeviceChannel[channel]] = channel;
-	}
-	if(inverseMapping.size() != channels)
+	if(inverseMapping.size() != mapping.size())
 	{
 		return false;
 	}
@@ -111,14 +124,14 @@ bool ChannelMapping::IsValid(uint32 channels) const
 std::string ChannelMapping::ToString() const
 //------------------------------------------
 {
-	return mpt::String::Combine<uint32>(ChannelToDeviceChannel);
+	return mpt::String::Combine<int32>(ChannelToDeviceChannel);
 }
 
 
 ChannelMapping ChannelMapping::FromString(const std::string &str)
 //---------------------------------------------------------------
 {
-	return SoundDevice::ChannelMapping(mpt::String::Split<uint32>(str));
+	return SoundDevice::ChannelMapping(mpt::String::Split<int32>(str));
 }
 
 
@@ -235,9 +248,20 @@ bool Base::Open(const SoundDevice::Settings &settings)
 	if(m_Settings.UpdateInterval == 0.0) m_Settings.UpdateInterval = m_Caps.DefaultSettings.UpdateInterval;
 	m_Settings.Latency = Clamp(m_Settings.Latency, m_Caps.LatencyMin, m_Caps.LatencyMax);
 	m_Settings.UpdateInterval = Clamp(m_Settings.UpdateInterval, m_Caps.UpdateIntervalMin, m_Caps.UpdateIntervalMax);
-	if(!m_Settings.ChannelMapping.IsValid(m_Settings.Channels))
+	if(m_Caps.CanChannelMapping)
 	{
-		return false;
+		if(m_Settings.ChannelMapping.GetNumHostChannels() == 0)
+		{
+			// default mapping
+			m_Settings.ChannelMapping = SoundDevice::ChannelMapping(m_Settings.Channels);
+		}
+		if(m_Settings.ChannelMapping.GetNumHostChannels() != m_Settings.Channels)
+		{
+			return false;
+		}
+	} else
+	{
+		m_Settings.ChannelMapping = SoundDevice::ChannelMapping(m_Settings.Channels);
 	}
 	m_Flags = SoundDevice::Flags();
 	m_BufferAttributes.Latency = m_Settings.Latency;

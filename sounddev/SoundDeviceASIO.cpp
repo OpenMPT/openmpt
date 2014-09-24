@@ -272,11 +272,7 @@ bool CASIODevice::InternalOpen()
 		{
 			throw ASIOException("Not enough output channels.");
 		}
-		if(!m_Settings.ChannelMapping.IsValid(m_Settings.Channels))
-		{
-			throw ASIOException("Channel mapping has wrong channel count.");
-		}
-		if(m_Settings.ChannelMapping.GetRequiredDeviceChannels(m_Settings.Channels) > (std::size_t)outputChannels)
+		if(m_Settings.ChannelMapping.GetRequiredDeviceChannels() > outputChannels)
 		{
 			throw ASIOException("Channel mapping requires more channels than available.");
 		}
