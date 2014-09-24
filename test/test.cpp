@@ -1599,28 +1599,25 @@ static noinline void TestLoadSaveFile()
 }
 
 
-static void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpFormat, bool it215, int testcount)
-//----------------------------------------------------------------------------------------------------------------------
+static void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpFormat, bool it215)
+//-------------------------------------------------------------------------------------------------------
 {
-	mpt::PathString filename = GetTempFilenameBase() + MPT_PATHSTRING("itcomp") + mpt::PathString::FromWide(StringifyW(testcount)) + MPT_PATHSTRING(".raw");
 
 	ModSample smp;
 	smp.uFlags = smpFormat;
 	smp.pSample = const_cast<int8 *>(&sampleData[0]);
 	smp.nLength = sampleData.size() / smp.GetBytesPerSample();
 
+	std::string data;
+
 	{
-		FILE *f = mpt_fopen(filename, "wb");
-		ITCompression compression(smp, it215, f);
-		fclose(f);
+		std::ostringstream f;
+		ITCompression compression(smp, it215, &f);
+		data = f.str();
 	}
 
 	{
-		FILE *f = mpt_fopen(filename, "rb");
-		fseek(f, 0, SEEK_END);
-		std::vector<int8> fileData(ftell(f), 0);
-		fseek(f, 0, SEEK_SET);
-		VERIFY_EQUAL(fread(&fileData[0], fileData.size(), 1, f), 1);
+		std::vector<char> fileData(data.begin(), data.end());
 		FileReader file(&fileData[0], fileData.size());
 
 		std::vector<int8> sampleDataNew(sampleData.size(), 0);
@@ -1628,19 +1625,13 @@ static void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFla
 
 		ITDecompression decompression(file, smp, it215);
 		VERIFY_EQUAL_NONCONT(memcmp(&sampleData[0], &sampleDataNew[0], sampleData.size()), 0);
-		fclose(f);
 	}
-	RemoveFile(filename);
 }
 
 
 static noinline void TestITCompression()
 //--------------------------------------
 {
-	if(!ShouldRunTests())
-	{
-		return;
-	}
 	// Test loading / saving of IT-compressed samples
 	const int sampleDataSize = 65536;
 	std::vector<int8> sampleData(sampleDataSize, 0);
@@ -1650,15 +1641,13 @@ static noinline void TestITCompression()
 		sampleData[i] = (int8)std::rand();
 	}
 
-	int testcount = 0;
-
 	// Run each compression test with IT215 compression and without.
 	for(int i = 0; i < 2; i++)
 	{
-		RunITCompressionTest(sampleData, ChannelFlags(0), i == 0, testcount++);
-		RunITCompressionTest(sampleData, CHN_16BIT, i == 0, testcount++);
-		RunITCompressionTest(sampleData, CHN_STEREO, i == 0, testcount++);
-		RunITCompressionTest(sampleData, CHN_16BIT | CHN_STEREO, i == 0, testcount++);
+		RunITCompressionTest(sampleData, ChannelFlags(0), i == 0);
+		RunITCompressionTest(sampleData, CHN_16BIT, i == 0);
+		RunITCompressionTest(sampleData, CHN_STEREO, i == 0);
+		RunITCompressionTest(sampleData, CHN_16BIT | CHN_STEREO, i == 0);
 	}
 }
 

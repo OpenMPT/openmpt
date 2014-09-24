@@ -15,6 +15,7 @@
 #include "SampleIO.h"
 #include "SampleFormatConverters.h"
 #include "ITCompression.h"
+#include "../common/mptIO.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -736,7 +737,8 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 	else if(GetEncoding() == IT214 || GetEncoding() == IT215)
 	{
 		// IT2.14-encoded samples
-		ITCompression its(sample, GetEncoding() == IT215, f);
+		mpt::FILE_ostream s(f);
+		ITCompression its(sample, GetEncoding() == IT215, &s);
 		len = its.GetCompressedSize();
 	}
 
