@@ -12,6 +12,8 @@
 #include <stdafx.h>
 #include "ITCompression.h"
 #include "../common/misc_util.h"
+#include <ostream>
+#include "../common/mptIO.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -49,8 +51,8 @@ static const int ITWidthChangeSize[] = { 4, 5, 6, 7, 8, 9, 7, 8, 9, 10, 11, 12, 
 // IT 2.14 compression
 
 
-ITCompression::ITCompression(const ModSample &sample, bool it215, FILE *f) : file(f), mptSample(sample), is215(it215)
-//-------------------------------------------------------------------------------------------------------------------
+ITCompression::ITCompression(const ModSample &sample, bool it215, std::ostream *f) : file(f), mptSample(sample), is215(it215)
+//---------------------------------------------------------------------------------------------------------------------------
 {
 	packedData = new (std::nothrow) uint8[bufferSize];
 	sampleData = new (std::nothrow) uint8[blockSize];
@@ -77,7 +79,7 @@ ITCompression::ITCompression(const ModSample &sample, bool it215, FILE *f) : fil
 			else
 				Compress<IT8BitParams>(static_cast<const int8 *>(sample.pSample) + chn, offset, remain);
 
-			if(file) fwrite(&packedData[0], packedLength, 1, file);
+			if(file) mpt::IO::WriteRaw(*file, &packedData[0], packedLength);
 			packedTotalLength += packedLength;
 
 			offset += baseLength;

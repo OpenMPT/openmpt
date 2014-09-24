@@ -14,6 +14,7 @@
 #include <vector>
 #include "ModSample.h"
 #include "FileReader.h"
+#include <iosfwd>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -24,7 +25,7 @@ class ITCompression
 //=================
 {
 public:
-	ITCompression(const ModSample &sample, bool it215, FILE *f);
+	ITCompression(const ModSample &sample, bool it215, std::ostream *f);
 	size_t GetCompressedSize() const { return packedTotalLength; }
 
 	static const size_t bufferSize = 2 + 0xFFFF;	// Our output buffer can't be longer than this.
@@ -33,7 +34,7 @@ public:
 protected:
 	std::vector<int> bwt;			// Bit width table
 	uint8 *packedData;				// Compressed data for current sample block
-	FILE *file;						// File to which compressed data will be written (can be nullptr if you only want to find out the sample size)
+	std::ostream *file;						// File to which compressed data will be written (can be nullptr if you only want to find out the sample size)
 	void *sampleData;				// Pre-processed sample data for currently compressed sample block
 	const ModSample &mptSample;		// Sample that is being processed
 	size_t packedLength;			// Size of currently compressed sample block
