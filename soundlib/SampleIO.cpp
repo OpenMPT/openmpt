@@ -738,7 +738,7 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 	{
 		// IT2.14-encoded samples
 		mpt::FILE_ostream s(f);
-		ITCompression its(sample, GetEncoding() == IT215, &s);
+		ITCompression its(sample, GetEncoding() == IT215, f ? &s : nullptr);
 		len = its.GetCompressedSize();
 	}
 
