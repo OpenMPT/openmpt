@@ -438,6 +438,7 @@ public:
 
 	virtual bool IsInited() const = 0;
 	virtual bool IsOpen() const = 0;
+	virtual bool IsAvailable() const = 0;
 	virtual bool IsPlaying() const = 0;
 
 	virtual bool OnIdle() = 0; // return true if any work has been done
@@ -485,6 +486,7 @@ protected:
 
 	SoundDevice::Settings m_Settings;
 	SoundDevice::Flags m_Flags;
+	bool m_DeviceUnavailableOnOpen;
 
 private:
 
@@ -572,6 +574,7 @@ public:
 
 	bool IsInited() const { return m_Caps.Available; }
 	bool IsOpen() const { return IsInited() && InternalIsOpen(); }
+	bool IsAvailable() const { return m_Caps.Available && !m_DeviceUnavailableOnOpen; }
 	bool IsPlaying() const { return m_IsPlaying; }
 
 	virtual bool OnIdle() { return false; }
@@ -648,6 +651,7 @@ class Manager
 {
 private:
 	std::vector<SoundDevice::Info> m_SoundDevices;
+	std::map<SoundDevice::ID, bool> m_DeviceUnavailable;
 	std::map<SoundDevice::ID, SoundDevice::Caps> m_DeviceCaps;
 	std::map<SoundDevice::ID, SoundDevice::DynamicCaps> m_DeviceDynamicCaps;
 
@@ -668,6 +672,9 @@ public:
 	SoundDevice::Info FindDeviceInfoBestMatch(const std::wstring &identifier) const;
 
 	bool OpenDriverSettings(SoundDevice::ID id, SoundDevice::IMessageReceiver *messageReceiver = nullptr, SoundDevice::IBase *currentSoundDevice = nullptr);
+
+	void SetDeviceUnavailable(SoundDevice::ID id) { m_DeviceUnavailable[id] = true; }
+	bool IsDeviceUnavailable(SoundDevice::ID id) { return m_DeviceUnavailable[id]; }
 
 	SoundDevice::Caps GetDeviceCaps(SoundDevice::ID id, SoundDevice::IBase *currentSoundDevice = nullptr);
 	SoundDevice::DynamicCaps GetDeviceDynamicCaps(SoundDevice::ID id, const std::vector<uint32> &baseSampleRates, SoundDevice::IMessageReceiver *messageReceiver = nullptr, SoundDevice::IBase *currentSoundDevice = nullptr, bool update = false);
