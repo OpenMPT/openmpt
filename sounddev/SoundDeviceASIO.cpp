@@ -268,6 +268,11 @@ bool CASIODevice::InternalOpen()
 		long outputChannels = 0;
 		asioCall(getChannels(&inputChannels, &outputChannels));
 		Log(mpt::String::Print("ASIO: getChannels() => inputChannels=%1 outputChannel=%2", inputChannels, outputChannels));
+		if(inputChannels <= 0 && outputChannels <= 0)
+		{
+			m_DeviceUnavailableOnOpen = true;
+			throw ASIOException("Device unavailble.");
+		}
 		if(m_Settings.Channels > outputChannels)
 		{
 			throw ASIOException("Not enough output channels.");
@@ -1350,6 +1355,7 @@ SoundDevice::DynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uin
 	TemporaryASIODriverOpener opener(*this);
 	if(!IsDriverOpen())
 	{
+		m_DeviceUnavailableOnOpen = true;
 		return caps;
 	}
 
@@ -1386,6 +1392,10 @@ SoundDevice::DynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uin
 		long inputChannels = 0;
 		long outputChannels = 0;
 		asioCall(getChannels(&inputChannels, &outputChannels));
+		if(!((inputChannels > 0) || (outputChannels > 0)))
+		{
+			m_DeviceUnavailableOnOpen = true;
+		}
 		for(long i = 0; i < outputChannels; ++i)
 		{
 			ASIOChannelInfo channelInfo;
@@ -1408,7 +1418,6 @@ SoundDevice::DynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uin
 	{
 		// continue
 	}
-
 	return caps;
 }
 

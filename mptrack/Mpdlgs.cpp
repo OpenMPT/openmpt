@@ -157,7 +157,21 @@ COptionsSoundcard::COptionsSoundcard(SoundDevice::ID dev)
 	, m_CurrentDeviceDynamicCaps(theApp.GetSoundDevicesManager()->GetDeviceDynamicCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice, true))
 	, m_Settings(TrackerSettings::Instance().GetSoundDeviceSettings(dev))
 {
-	return;
+	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(dev))
+	{
+		Reporting::Information("Device not availble. Reverting to default device.");
+		// if the device is unavailable, use the default device
+		SoundDevice::ID newdev = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(std::wstring()).id;
+		if(newdev != dev)
+		{
+			Reporting::Information("Device not availble. Reverting to default device.");
+			SetDevice(newdev);
+			UpdateEverything();
+		} else
+		{
+			Reporting::Warning("Device not availble.");
+		}
+	}
 }
 
 
@@ -171,6 +185,20 @@ void COptionsSoundcard::SetDevice(SoundDevice::ID dev, bool forceReload)
 	if(deviceChanged || forceReload)
 	{
 		m_Settings = TrackerSettings::Instance().GetSoundDeviceSettings(dev);
+	}
+	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(dev))
+	{
+		// if the device is unavailable, use the default device
+		SoundDevice::ID newdev = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(std::wstring()).id;
+		if(newdev != dev)
+		{
+			Reporting::Information("Device not availble. Reverting to default device.");
+			SetDevice(newdev);
+			UpdateEverything();
+		} else
+		{
+			Reporting::Warning("Device not availble.");
+		}
 	}
 }
 
@@ -312,6 +340,11 @@ void COptionsSoundcard::UpdateEverything()
 					// can be overwritten via [Sound Settings]MorePortaudio=1
 					continue;
 				}
+			}
+
+			if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(it->id))
+			{
+				continue;
 			}
 
 			{

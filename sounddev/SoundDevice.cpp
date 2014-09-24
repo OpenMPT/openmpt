@@ -148,6 +148,8 @@ Base::Base(SoundDevice::ID id, const std::wstring &internalID)
 	, m_InternalID(internalID)
 {
 
+	m_DeviceUnavailableOnOpen = false;
+
 	m_BufferAttributes.Latency = m_Settings.Latency;
 	m_BufferAttributes.UpdateInterval = m_Settings.UpdateInterval;
 	m_BufferAttributes.NumBuffers = 0;
@@ -264,6 +266,7 @@ bool Base::Open(const SoundDevice::Settings &settings)
 		m_Settings.ChannelMapping = SoundDevice::ChannelMapping(m_Settings.Channels);
 	}
 	m_Flags = SoundDevice::Flags();
+	m_DeviceUnavailableOnOpen = false;
 	m_BufferAttributes.Latency = m_Settings.Latency;
 	m_BufferAttributes.UpdateInterval = m_Settings.UpdateInterval;
 	m_BufferAttributes.NumBuffers = 0;
@@ -451,7 +454,9 @@ void Manager::ReEnumerate()
 //-------------------------
 {
 	m_SoundDevices.clear();
+	m_DeviceUnavailable.clear();
 	m_DeviceCaps.clear();
+	m_DeviceDynamicCaps.clear();
 
 #ifndef NO_PORTAUDIO
 	SndDevPortaudioUnnitialize();
@@ -566,7 +571,7 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(const std::wstring &identifie
 	}
 	if(identifier.empty())
 	{
-		return m_SoundDevices[0];
+			return *begin();
 	}
 	for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
 	{
@@ -643,6 +648,9 @@ SoundDevice::Caps Manager::GetDeviceCaps(SoundDevice::ID id, SoundDevice::IBase 
 			if(dummy)
 			{
 				m_DeviceCaps[id] = dummy->GetDeviceCaps();
+			} else
+			{
+				SetDeviceUnavailable(id);
 			}
 			delete dummy;
 		}
@@ -659,6 +667,10 @@ SoundDevice::DynamicCaps Manager::GetDeviceDynamicCaps(SoundDevice::ID id, const
 		if(currentSoundDevice && FindDeviceInfo(id).IsValid() && (currentSoundDevice->GetDeviceID() == id) && (currentSoundDevice->GetDeviceInternalID() == FindDeviceInfo(id).internalID))
 		{
 			m_DeviceDynamicCaps[id] = currentSoundDevice->GetDeviceDynamicCaps(baseSampleRates);
+			if(!currentSoundDevice->IsAvailable())
+			{
+				SetDeviceUnavailable(id);
+			}
 		} else
 		{
 			SoundDevice::IBase *dummy = CreateSoundDevice(id);
@@ -666,6 +678,13 @@ SoundDevice::DynamicCaps Manager::GetDeviceDynamicCaps(SoundDevice::ID id, const
 			{
 				dummy->SetMessageReceiver(messageReceiver);
 				m_DeviceDynamicCaps[id] = dummy->GetDeviceDynamicCaps(baseSampleRates);
+				if(!dummy->IsAvailable())
+				{
+					SetDeviceUnavailable(id);
+				}
+			} else
+			{
+				SetDeviceUnavailable(id);
 			}
 			delete dummy;
 		}

@@ -836,7 +836,14 @@ bool CMainFrame::audioOpenDevice()
 	SoundDevice::Settings deviceSettings = TrackerSettings::Instance().GetSoundDeviceSettings(deviceID);
 	if(!gpSoundDevice->Open(deviceSettings))
 	{
-		Reporting::Error("Unable to open sound device: Could not open sound device.");
+		if(!gpSoundDevice->IsAvailable())
+		{
+			theApp.GetSoundDevicesManager()->SetDeviceUnavailable(deviceID);
+			Reporting::Error("Unable to open sound device: Device not available.");
+		} else
+		{
+			Reporting::Error("Unable to open sound device: Could not open sound device.");
+		}
 		return false;
 	}
 	SampleFormat actualSampleFormat = gpSoundDevice->GetActualSampleFormat();
