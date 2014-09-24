@@ -363,6 +363,227 @@ inline bool WriteConvertEndianness(Tfile & f, T & v)
 
 } // namespace IO
 
+
+// class FILE_ostream, FILE_output_streambuf and FILE_output_buffered_streambuf
+//  provide a portable way of wrapping a std::ostream around an FILE* opened for output.
+// They offer similar functionality to the badly documented
+//  MSVC std::fstream(FILE*) constructor or GCC libstdc++  __gnu_cxx::stdio_sync_filebuf class,
+//  and, for other compilers, provide a race-free alternative to
+//  closing the FILE* and opening it again as a std::ofstream.
+//
+// Only output functionality is implemented because we have no need for an input wrapper.
+//
+// During the whole lifetime of the iostream wrappers, the FILE* object is assumend to be
+//  - valid
+//  - opened for writing in non-append mode
+//  - opened in binary mode
+//  - seekable
+// Some of these preconditions cannot be verified,
+//  and even the others do not get verified.
+// Behaviour in case of any unmet preconditions is undefined.
+//
+// The buffered streambuf and the ostream use a buffer of 64KiB by default.
+//
+// For FILE_output_streambuf, coherency with the underlying FILE* is always guaranteed.
+// For FILE_ostream and FILE_output_buffered_streambuf, coherence is only
+//  guaranteed when flush() or pubsync() get called.
+// The constructors and destructors take care to not violate coherency.
+// When mixing FILE* and iostream I/O during the lifetime of the iostream objects,
+//  the user is responsible for providing coherency via the appropriate
+//  flush and sync functions.
+// Behaviour in case of incoherent access is undefined.
+
+
+class FILE_output_streambuf : public std::streambuf
+{
+public:
+	typedef std::streambuf::char_type char_type;
+	typedef std::streambuf::traits_type traits_type;
+	typedef traits_type::int_type int_type;
+	typedef traits_type::pos_type pos_type;
+	typedef traits_type::off_type off_type;
+protected:
+	FILE *f;
+public:
+	FILE_output_streambuf(FILE *f)
+		: f(f)
+	{
+		return;
+	}
+	~FILE_output_streambuf()
+	{
+		return;
+	}
+protected:
+	virtual int_type overflow(int_type ch)
+	{
+		if(traits_type::eq_int_type(ch, traits_type::eof()))
+		{
+			return traits_type::eof();
+		}
+		char_type c = traits_type::to_char_type(ch);
+		if(!mpt::IO::WriteRaw(f, &c, 1))
+		{
+			return traits_type::eof();
+		}
+		return ch;
+	}
+	virtual int sync()
+	{
+		if(!mpt::IO::Flush(f))
+		{
+			return -1;
+		}
+		return 0;
+	}
+	virtual pos_type seekpos(pos_type pos, std::ios_base::openmode which)
+	{
+		return seekoff(pos, std::ios_base::beg, which);
+	}
+	virtual pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which)
+	{
+		if(which & std::ios_base::in)
+		{
+			return pos_type(off_type(-1));
+		}
+		if(!(which & std::ios_base::out))
+		{
+			return pos_type(off_type(-1));
+		}
+		mpt::IO::Offset oldpos = mpt::IO::TellWrite(f);
+		if(dir == std::ios_base::beg)
+		{
+			if(!mpt::IO::SeekAbsolute(f, off))
+			{
+				mpt::IO::SeekAbsolute(f, oldpos);
+				return pos_type(off_type(-1));
+			}
+		} else if(dir == std::ios_base::cur)
+		{
+			if(!mpt::IO::SeekRelative(f, off))
+			{
+				mpt::IO::SeekAbsolute(f, oldpos);
+				return pos_type(off_type(-1));
+			}
+		} else if(dir == std::ios_base::end)
+		{
+			if(!(mpt::IO::SeekEnd(f) && mpt::IO::SeekRelative(f, off)))
+			{
+				mpt::IO::SeekAbsolute(f, oldpos);
+				return pos_type(off_type(-1));
+			}
+		} else
+		{
+			return pos_type(off_type(-1));
+		}
+		mpt::IO::Offset newpos = mpt::IO::TellWrite(f);
+		if(!mpt::IO::OffsetFits<off_type>(newpos))
+		{
+			mpt::IO::SeekAbsolute(f, oldpos);
+			return pos_type(off_type(-1));
+		}
+		return static_cast<pos_type>(newpos);
+	}
+}; // class FILE_output_streambuf
+
+
+class FILE_output_buffered_streambuf : public FILE_output_streambuf
+{
+public:
+	typedef std::streambuf::char_type char_type;
+	typedef std::streambuf::traits_type traits_type;
+	typedef traits_type::int_type int_type;
+	typedef traits_type::pos_type pos_type;
+	typedef traits_type::off_type off_type;
+private:
+	typedef FILE_output_streambuf Tparent;
+	std::vector<char_type> buf;
+public:
+	FILE_output_buffered_streambuf(FILE *f, std::size_t bufSize = 64*1024)
+		: FILE_output_streambuf(f)
+		, buf((bufSize > 0) ? bufSize : 1)
+	{
+		setp(&buf[0], &buf[0] + buf.size());
+	}
+	~FILE_output_buffered_streambuf()
+	{
+		WriteOut();
+	}
+private:
+	bool IsDirty() const
+	{
+		return ((pptr() - pbase()) > 0);
+	}
+	bool WriteOut()
+	{
+		std::ptrdiff_t n = pptr() - pbase();
+		pbump(-n);
+		return mpt::IO::WriteRaw(f, pbase(), n);
+	}
+protected:
+	virtual int_type overflow(int_type ch)
+	{
+		if(traits_type::eq_int_type(ch, traits_type::eof()))
+		{
+			return traits_type::eof();
+		}
+		if(!WriteOut())
+		{
+			return traits_type::eof();
+		}
+		char_type c = traits_type::to_char_type(ch);
+		*pptr() = c;
+		pbump(1);
+		return ch;
+	}
+	virtual int sync()
+	{
+		if(!WriteOut())
+		{
+			return -1;
+		}
+		return Tparent::sync();
+	}
+	virtual pos_type seekpos(pos_type pos, std::ios_base::openmode which)
+	{
+		if(!WriteOut())
+		{
+			return pos_type(off_type(-1));
+		}
+		return Tparent::seekpos(pos, which);
+	}
+	virtual pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which)
+	{
+		if(!WriteOut())
+		{
+			return pos_type(off_type(-1));
+		}
+		return Tparent::seekoff(off, dir, which);
+	}
+}; // class FILE_output_buffered_streambuf
+
+
+class FILE_ostream : public std::ostream {
+private:
+	FILE *f;
+	FILE_output_buffered_streambuf buf;
+public:
+	FILE_ostream(FILE *f, std::size_t bufSize = 64*1024)
+		: std::ostream(&buf)
+		, f(f)
+		, buf(f, bufSize)
+	{
+		mpt::IO::Flush(f);
+	}
+	~FILE_ostream()
+	{
+		flush();
+		buf.pubsync();
+		mpt::IO::Flush(f);
+	}
+}; // class FILE_ostream                                                                                        
+
+
 } // namespace mpt
 
 
