@@ -159,18 +159,31 @@ struct ChannelMapping
 
 private:
 
-	std::vector<uint32> ChannelToDeviceChannel;
+	std::vector<int32> ChannelToDeviceChannel;
 
 public:
 
-	// Construct default identity mapping
+	static const int32 MaxDeviceChannel = 32000;
+
+public:
+
+	// Construct default empty mapping
 	ChannelMapping();
 
+	// Construct default identity mapping
+	ChannelMapping(uint32 numHostChannels);
+
 	// Construct mapping from given vector.
-	ChannelMapping(const std::vector<uint32> &mapping);
+	// Silently fall back to identity mapping if mapping is invalid.
+	ChannelMapping(const std::vector<int32> &mapping);
 
 	// Construct mapping for #channels with a baseChannel offset.
-	static ChannelMapping BaseChannel(uint32 channels, uint32 baseChannel);
+	static ChannelMapping BaseChannel(uint32 channels, int32 baseChannel);
+
+private:
+
+	// check that the channel mapping is actually a 1:1 mapping
+	static bool IsValid(const std::vector<int32> &mapping);
 
 public:
 
@@ -178,22 +191,20 @@ public:
 	{
 		return (ChannelToDeviceChannel == cmp.ChannelToDeviceChannel);
 	}
-
-	// check that the channel mapping is actually a 1:1 mapping
-	bool IsValid(uint32 channels) const;
-
-	// Get the number of required device channels for this mapping. Derived from the maximum mapped-to channel number.
-	uint32 GetRequiredDeviceChannels(uint32 numHostChannels) const
+	
+	uint32 GetNumHostChannels() const
 	{
-		if(!IsValid(numHostChannels))
+		return ChannelToDeviceChannel.size();
+	}
+	
+	// Get the number of required device channels for this mapping. Derived from the maximum mapped-to channel number.
+	int32 GetRequiredDeviceChannels() const
+	{
+		if(ChannelToDeviceChannel.empty())
 		{
 			return 0;
 		}
-		if(ChannelToDeviceChannel.empty())
-		{
-			return numHostChannels;
-		}
-		uint32 maxChannel = 0;
+		int32 maxChannel = 0;
 		for(uint32 channel = 0; channel < ChannelToDeviceChannel.size(); ++channel)
 		{
 			if(ChannelToDeviceChannel[channel] > maxChannel)
@@ -205,12 +216,8 @@ public:
 	}
 	
 	// Convert OpenMPT channel number to the mapped device channel number.
-	uint32 ToDevice(uint32 channel) const
+	int32 ToDevice(uint32 channel) const
 	{
-		if(ChannelToDeviceChannel.empty())
-		{
-			return channel;
-		}
 		if(channel >= ChannelToDeviceChannel.size())
 		{
 			return channel;

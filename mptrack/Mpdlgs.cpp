@@ -491,7 +491,7 @@ void COptionsSoundcard::UpdateChannelMapping()
 //--------------------------------------------
 {
 	int usedChannels = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
-	if(!m_Settings.ChannelMapping.IsValid(usedChannels))
+	if(m_Settings.ChannelMapping.GetNumHostChannels() != static_cast<uint32>(usedChannels))
 	{
 		// If the channel mapping is not valid for the selected number of channels, reset it to default identity mapping.
 		m_Settings.ChannelMapping = SoundDevice::ChannelMapping();
@@ -514,7 +514,7 @@ void COptionsSoundcard::UpdateChannelMapping()
 				{
 					const int pos = (int)::SendMessageW(combo->m_hWnd, CB_ADDSTRING, 0, (LPARAM)m_CurrentDeviceDynamicCaps.channelNames[dch].c_str());
 					combo->SetItemData(pos, (DWORD_PTR)dch);
-					if(dch == m_Settings.ChannelMapping.ToDevice(mch))
+					if(static_cast<int32>(dch) == m_Settings.ChannelMapping.ToDevice(mch))
 					{
 						combo->SetCurSel(pos);
 					}
@@ -738,7 +738,7 @@ void COptionsSoundcard::OnOK()
 		if(m_CurrentDeviceCaps.CanChannelMapping)
 		{
 			int numChannels = std::min<int>(m_Settings.Channels, NUM_CHANNELCOMBOBOXES);
-			std::vector<uint32> channels(numChannels);
+			std::vector<int32> channels(numChannels);
 			for(int mch = 0; mch < numChannels; mch++)	// Host channels
 			{
 				CComboBox *combo = &m_CbnChannelMapping[mch];
