@@ -374,10 +374,13 @@ inline bool WriteConvertEndianness(Tfile & f, T & v)
 // Only output functionality is implemented because we have no need for an input wrapper.
 //
 // During the whole lifetime of the iostream wrappers, the FILE* object is assumend to be
-//  - valid
-//  - opened for writing in non-append mode
-//  - opened in binary mode
-//  - seekable
+//  either
+//   - NULL
+//  or
+//   - valid
+//   - opened for writing in non-append mode
+//   - opened in binary mode
+//   - seekable
 // Some of these preconditions cannot be verified,
 //  and even the others do not get verified.
 // Behaviour in case of any unmet preconditions is undefined.
@@ -417,6 +420,10 @@ public:
 protected:
 	virtual int_type overflow(int_type ch)
 	{
+		if(!mpt::IO::IsValid(f))
+		{
+			return traits_type::eof();
+		}
 		if(traits_type::eq_int_type(ch, traits_type::eof()))
 		{
 			return traits_type::eof();
@@ -430,6 +437,10 @@ protected:
 	}
 	virtual int sync()
 	{
+		if(!mpt::IO::IsValid(f))
+		{
+			return -1;
+		}
 		if(!mpt::IO::Flush(f))
 		{
 			return -1;
@@ -438,10 +449,18 @@ protected:
 	}
 	virtual pos_type seekpos(pos_type pos, std::ios_base::openmode which)
 	{
+		if(!mpt::IO::IsValid(f))
+		{
+			return pos_type(off_type(-1));
+		}
 		return seekoff(pos, std::ios_base::beg, which);
 	}
 	virtual pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which)
 	{
+		if(!mpt::IO::IsValid(f))
+		{
+			return pos_type(off_type(-1));
+		}
 		if(which & std::ios_base::in)
 		{
 			return pos_type(off_type(-1));
@@ -507,6 +526,10 @@ public:
 	}
 	~FILE_output_buffered_streambuf()
 	{
+		if(!mpt::IO::IsValid(f))
+		{
+			return;
+		}
 		WriteOut();
 	}
 private:
@@ -523,6 +546,10 @@ private:
 protected:
 	virtual int_type overflow(int_type ch)
 	{
+		if(!mpt::IO::IsValid(f))
+		{
+			return traits_type::eof();
+		}
 		if(traits_type::eq_int_type(ch, traits_type::eof()))
 		{
 			return traits_type::eof();
@@ -538,6 +565,10 @@ protected:
 	}
 	virtual int sync()
 	{
+		if(!mpt::IO::IsValid(f))
+		{
+			return -1;
+		}
 		if(!WriteOut())
 		{
 			return -1;
@@ -546,6 +577,10 @@ protected:
 	}
 	virtual pos_type seekpos(pos_type pos, std::ios_base::openmode which)
 	{
+		if(!mpt::IO::IsValid(f))
+		{
+			return pos_type(off_type(-1));
+		}
 		if(!WriteOut())
 		{
 			return pos_type(off_type(-1));
@@ -554,6 +589,10 @@ protected:
 	}
 	virtual pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which)
 	{
+		if(!mpt::IO::IsValid(f))
+		{
+			return pos_type(off_type(-1));
+		}
 		if(!WriteOut())
 		{
 			return pos_type(off_type(-1));
@@ -573,13 +612,13 @@ public:
 		, f(f)
 		, buf(f, bufSize)
 	{
-		mpt::IO::Flush(f);
+		if(mpt::IO::IsValid(f)) mpt::IO::Flush(f);
 	}
 	~FILE_ostream()
 	{
 		flush();
 		buf.pubsync();
-		mpt::IO::Flush(f);
+		if(mpt::IO::IsValid(f)) mpt::IO::Flush(f);
 	}
 }; // class FILE_ostream                                                                                        
 
