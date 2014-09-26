@@ -25,6 +25,10 @@
 #include "SelectPluginDialog.h"
 #include "../common/StringFixer.h"
 
+// This is used for retrieving the correct background colour for the
+// frames on the general tab when using WinXP Luna or Vista/Win7 Aero.
+#include <uxtheme.h>
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -1508,8 +1512,6 @@ void CViewGlobals::FillPluginProgramBox(VstInt32 firstProg, VstInt32 lastProg)
 
 // This is used for retrieving the correct background colour for the
 // frames on the general tab when using WinXP Luna or Vista/Win7 Aero.
-#include <uxtheme.h>
-
 HBRUSH CViewGlobals::OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor)
 //-------------------------------------------------------------------
 {
