@@ -1043,17 +1043,6 @@ std::wstring ToWide(Charset from, const std::string &str)
 	return String::DecodeImpl(from, str);
 }
 
-#if defined(MPT_WITH_CHARSET_LOCALE)
-std::string ToLocale(const std::wstring &str)
-{
-	return String::EncodeImpl<std::string>(CharsetLocale, str);
-}
-std::string ToLocale(Charset from, const std::string &str)
-{
-	return String::ConvertImpl<std::string>(CharsetLocale, from, str);
-}
-#endif
-
 std::string To(Charset to, const std::wstring &str)
 {
 	return String::EncodeImpl<std::string>(to, str);
@@ -1090,14 +1079,6 @@ std::wstring ToWide(const CString &str)
 		return ToWide(CharsetLocale, str.GetString());
 	#endif
 }
-std::string ToLocale(const CString &str)
-{
-	#ifdef UNICODE
-		return ToLocale(str.GetString());
-	#else
-		return str.GetString();
-	#endif
-}
 std::string To(Charset to, const CString &str)
 {
 	#ifdef UNICODE
@@ -1129,10 +1110,6 @@ CStringW ToCStringW(const CStringW &str)
 std::wstring ToWide(const CStringW &str)
 {
 	return str.GetString();
-}
-std::string ToLocale(const CStringW &str)
-{
-	return ToLocale(str.GetString());
 }
 std::string To(Charset to, const CStringW &str)
 {
