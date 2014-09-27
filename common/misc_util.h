@@ -296,27 +296,6 @@ inline void LimitMax(T& val, const C upperLimit)
 }
 
 
-// Greatest Common Divisor.
-template <class T>
-T gcd(T a, T b)
-//-------------
-{
-	if(a < 0)
-		a = -a;
-	if(b < 0)
-		b = -b;
-	do
-	{
-		if(a == 0)
-			return b;
-		b %= a;
-		if(b == 0)
-			return a;
-		a %= b;
-	} while(true);
-}
-
-
 // Returns sign of a number (-1 for negative numbers, 1 for positive numbers, 0 for 0)
 template <class T>
 int sgn(T value)
@@ -465,6 +444,38 @@ namespace Util {
 		a *= b;
 		a += c / 2;
 		return (a >= 0) ? mpt::saturate_cast<int32>(a / c) : mpt::saturate_cast<int32>((a - (c - 1)) / c);
+	}
+
+	// Greatest Common Divisor. Always returns non-negative number.
+	template <class T>
+	T gcd(T a, T b)
+	{
+		if(a < 0)
+			a = -a;
+		if(b < 0)
+			b = -b;
+		do
+		{
+			if(a == 0)
+				return b;
+			b %= a;
+			if(b == 0)
+				return a;
+			a %= b;
+		} while(true);
+	}
+
+	// Least Common Multiple. Always returns non-negative number.
+	template <class T>
+	int lcm(T a, T b)
+	{
+		if(a < 0)
+			a = -a;
+		if(b < 0)
+			b = -b;
+		if((a | b) == 0)
+			return 0;
+		return a / gcd<T>(a, b) * b;
 	}
 
 	template<typename T, std::size_t n>

@@ -775,13 +775,23 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 		if(patternLoopEndedOnThisRow)
 		{
 			p = Patterns[nPattern].GetRow(nRow);
+			std::map<double, int> startTimes;
+			// This is really just a simple estimation for nested pattern loops. It should handle cases correctly where all parallel loops start and end on the same row.
+			// If one of them starts or ends "in between", it will most likely calculate a wrong duration.
+			// For S3M files, it's also way off.
 			for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); p++, nChn++)
 			{
 				if((p->command == CMD_S3MCMDEX && p->param >= 0xB1 && p->param <= 0xBF)
 					|| (p->command == CMD_MODCMDEX && p->param >= 0x61 && p->param <= 0x6F))
 				{
-					memory.elapsedTime += (memory.elapsedTime - memory.chnSettings[nChn].patLoop) * (double)(p->param & 0x0F);
+					const double start = memory.chnSettings[nChn].patLoop;
+					if(!startTimes[start]) startTimes[start] = 1;
+					startTimes[start] = Util::lcm<int>(startTimes[start], 1 + (p->param & 0x0F));
 				}
+			}
+			for(std::map<double, int>::iterator i = startTimes.begin(); i != startTimes.end(); i++)
+			{
+				memory.elapsedTime += (memory.elapsedTime - i->first) * (double)(i->second - 1);
 			}
 			if(GetType() == MOD_TYPE_IT)
 			{
