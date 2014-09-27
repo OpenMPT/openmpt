@@ -189,19 +189,6 @@ enum Charset {
 static inline std::wstring ToWide(const std::wstring &str) { return str; }
 std::wstring ToWide(Charset from, const std::string &str);
 
-#if defined(MPT_WITH_CHARSET_LOCALE)
-// Convert to locale-encoded string.
-// On Windows, CP_ACP is used,
-// otherwise, the global "C" locale is used.
-// If str does not contain any invalid characters,
-// this conversion will be lossless iff, and only iff, the system is NOT
-// windows AND a UTF8 locale is set.
-// Invalid source bytes or characters that are not representable in the
-// destination charset will be replaced by some replacement character or string.
-std::string ToLocale(const std::wstring &str);
-std::string ToLocale(Charset from, const std::string &str);
-#endif
-
 // Convert to a string encoded in the 'to'-specified character set.
 // If str does not contain any invalid characters,
 // this conversion will be lossless iff, and only iff,
@@ -210,6 +197,7 @@ std::string ToLocale(Charset from, const std::string &str);
 // destination charset will be replaced by some replacement character or string.
 std::string To(Charset to, const std::wstring &str);
 std::string To(Charset to, Charset from, const std::string &str);
+
 
 #if defined(_MFC_VER)
 
@@ -224,12 +212,10 @@ CString ToCString(Charset from, const std::string &str);
 // This should also be used when converting from TCHAR strings.
 // If UNICODE is defined, this is a completely lossless operation.
 std::wstring ToWide(const CString &str);
-std::string ToLocale(const CString &str);
 std::string To(Charset to, const CString &str);
 
 // Provide un-ambiguous conversion from wide string literal.
 static inline std::wstring ToWide(const wchar_t * str) { return ToWide(str ? std::wstring(str) : std::wstring()); }
-static inline std::string ToLocale(const wchar_t * str) { return ToLocale(str ? std::wstring(str) : std::wstring()); }
 static inline std::string To(Charset to, const wchar_t * str) { return To(to, str ? std::wstring(str) : std::wstring()); }
 static inline CString ToCString(const wchar_t * str) { return ToCString(str ? std::wstring(str) : std::wstring()); }
 
@@ -237,17 +223,30 @@ static inline CString ToCString(const wchar_t * str) { return ToCString(str ? st
 MPT_DEPRECATED static inline CString ToCStringW(const CString &str) { return ToCString(str); }
 MPT_DEPRECATED static inline CString ToCStringW(const std::wstring &str) { return ToCString(str); }
 MPT_DEPRECATED static inline CString ToCStringW(Charset from, const std::string &str) { return ToCString(from, str); }
-#else
+#else // !UNICODE
 CStringW ToCStringW(const CString &str);
 CStringW ToCStringW(const std::wstring &str);
 CStringW ToCStringW(Charset from, const std::string &str);
 CStringW ToCStringW(const CStringW &str);
 std::wstring ToWide(const CStringW &str);
-std::string ToLocale(const CStringW &str);
 std::string To(Charset to, const CStringW &str);
 CString ToCString(const CStringW &str);
-#endif
+#endif // UNICODE
 
+#endif // MFC
+
+
+#if defined(MPT_WITH_CHARSET_LOCALE)
+// Convert to locale-encoded string.
+// On Windows, CP_ACP is used,
+// otherwise, the global C locale is used.
+// If str does not contain any invalid characters,
+// this conversion will be lossless iff, and only iff, the system is NOT
+// windows AND a UTF8 locale is set.
+// Invalid source bytes or characters that are not representable in the
+// destination charset will be replaced by some replacement character or string.
+template <typename Tsrc> inline std::string ToLocale(const Tsrc &str) { return To(CharsetLocale, str); }
+static inline std::string ToLocale(Charset from, const std::string &str) { return To(CharsetLocale, from, str); }
 #endif
 
 
