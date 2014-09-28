@@ -30,17 +30,6 @@ namespace String
 {
 
 
-#ifdef MODPLUG_TRACKER
-// There are 4 reasons why this is not available for library code:
-//  1. printf-like functionality is not type-safe.
-//  2. There are portability problems with char/wchar_t and the semantics of %s/%ls/%S .
-//  3. There are portability problems with specifying format for 64bit integers.
-//  4. Formatting of floating point values depends on the currently set C locale.
-//     A library is not allowed to mock with that and thus cannot influence the behavior in this case.
-std::string MPT_PRINTF_FUNC(1,2) Format(const char * format, ...);
-#endif
-
-
 // Remove whitespace at start of string
 static inline std::string LTrim(std::string str, const std::string &whitespace = " \n\r\t")
 //-----------------------------------------------------------------------------------------

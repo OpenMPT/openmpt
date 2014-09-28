@@ -244,10 +244,52 @@ static noinline void TestTypes()
 }
 
 
+
+#ifdef MODPLUG_TRACKER
+
+// In tracker debug builds, the sprintf-like function is retained in order to be able to validate our own formatting against sprintf.
+
+// There are 4 reasons why this is not available for library code:
+//  1. printf-like functionality is not type-safe.
+//  2. There are portability problems with char/wchar_t and the semantics of %s/%ls/%S .
+//  3. There are portability problems with specifying format for 64bit integers.
+//  4. Formatting of floating point values depends on the currently set C locale.
+//     A library is not allowed to mock with that and thus cannot influence the behavior in this case.
+
+static std::string MPT_PRINTF_FUNC(1,2) StringFormat(const char * format, ...);
+
+static std::string StringFormat(const char *format, ...)
+{
+	#if MPT_COMPILER_MSVC
+		va_list argList;
+		va_start(argList, format);
+
+		// Count the needed array size.
+		const size_t nCount = _vscprintf(format, argList); // null character not included.
+		std::vector<char> buf(nCount + 1); // + 1 is for null terminator.
+		vsprintf_s(&(buf[0]), buf.size(), format, argList);
+
+		va_end(argList);
+		return &(buf[0]);
+	#else
+		va_list argList;
+		va_start(argList, format);
+		int size = vsnprintf(NULL, 0, format, argList); // get required size, requires c99 compliant vsnprintf which msvc does not have
+		va_end(argList);
+		std::vector<char> temp(size + 1);
+		va_start(argList, format);
+		vsnprintf(&(temp[0]), size + 1, format, argList);
+		va_end(argList);
+		return &(temp[0]);
+	#endif
+}
+
+#endif
+
 static void TestFloatFormat(double x, const char * format, mpt::FormatFlags f, std::size_t width = 0, int precision = -1)
 {
 #ifdef MODPLUG_TRACKER
-	std::string str_sprintf = mpt::String::Format(format, x);
+	std::string str_sprintf = StringFormat(format, x);
 #endif
 	std::string str_iostreams = mpt::Format().SetFlags(f).SetWidth(width).SetPrecision(precision).ToString(x);
 	std::string str_parsed = mpt::Format().ParsePrintf(format).ToString(x);
