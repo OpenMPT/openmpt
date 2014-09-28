@@ -1090,7 +1090,7 @@ std::string To(Charset to, const CString &str)
 
 #ifdef UNICODE
 // inline
-#else
+#else // !UNICODE
 CStringW ToCStringW(const CString &str)
 {
 	return ToWide(str).c_str();
@@ -1119,9 +1119,9 @@ CString ToCString(const CStringW &str)
 {
 	return ToLocale(str).c_str();
 }
-#endif
+#endif // UNICODE
 
-#endif
+#endif // MFC
 
 
 } // namespace mpt

@@ -195,37 +195,37 @@
 
 #if MPT_OS_WINDOWS
 
-#define MPT_CHARSET_WIN32
+	#define MPT_CHARSET_WIN32
 
 #elif MPT_OS_LINUX
 
-#define MPT_CHARSET_ICONV
+	#define MPT_CHARSET_ICONV
 
 #elif MPT_OS_ANDROID
 
-#define MPT_CHARSET_INTERNAL
+	#define MPT_CHARSET_INTERNAL
 
 #elif MPT_OS_EMSCRIPTEN
 
-#define MPT_CHARSET_CODECVTUTF8
-#ifndef MPT_LOCALE_ASSUME_CHARSET
-#define MPT_LOCALE_ASSUME_CHARSET CharsetUTF8
-#endif
+	#define MPT_CHARSET_CODECVTUTF8
+	#ifndef MPT_LOCALE_ASSUME_CHARSET
+	#define MPT_LOCALE_ASSUME_CHARSET CharsetUTF8
+	#endif
 
 #elif MPT_OS_MACOSX_OR_IOS
 
-#if defined(MPT_WITH_ICONV)
-#define MPT_CHARSET_ICONV
-#ifndef MPT_ICONV_NO_WCHAR
-#define MPT_ICONV_NO_WCHAR
-#endif
-#else
-#define MPT_CHARSET_CODECVTUTF8
-#endif
+	#if defined(MPT_WITH_ICONV)
+	#define MPT_CHARSET_ICONV
+	#ifndef MPT_ICONV_NO_WCHAR
+	#define MPT_ICONV_NO_WCHAR
+	#endif
+	#else
+	#define MPT_CHARSET_CODECVTUTF8
+	#endif
 
 #elif defined(MPT_WITH_ICONV)
 
-#define MPT_CHARSET_ICONV
+	#define MPT_CHARSET_ICONV
 
 #endif
 
