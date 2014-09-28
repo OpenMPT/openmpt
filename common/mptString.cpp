@@ -62,37 +62,6 @@ int strnicmp(const char *a, const char *b, size_t count)
 namespace mpt { namespace String {
 
 
-#ifdef MODPLUG_TRACKER
-
-std::string Format(const char *format, ...)
-{
-	#if MPT_COMPILER_MSVC
-		va_list argList;
-		va_start(argList, format);
-
-		// Count the needed array size.
-		const size_t nCount = _vscprintf(format, argList); // null character not included.
-		std::vector<char> buf(nCount + 1); // + 1 is for null terminator.
-		vsprintf_s(&(buf[0]), buf.size(), format, argList);
-
-		va_end(argList);
-		return &(buf[0]);
-	#else
-		va_list argList;
-		va_start(argList, format);
-		int size = vsnprintf(NULL, 0, format, argList); // get required size, requires c99 compliant vsnprintf which msvc does not have
-		va_end(argList);
-		std::vector<char> temp(size + 1);
-		va_start(argList, format);
-		vsnprintf(&(temp[0]), size + 1, format, argList);
-		va_end(argList);
-		return &(temp[0]);
-	#endif
-}
-
-#endif
-
-
 
 /*
 default 1:1 mapping
