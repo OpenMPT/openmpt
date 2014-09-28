@@ -69,7 +69,7 @@ void VSTPluginLib::WriteToCache() const
 
 	const std::string libName = libraryName.ToUTF8();
 	const uint32 crc = crc32(0, reinterpret_cast<const Bytef *>(&libName[0]), libName.length());
-	const std::string IDs = mpt::String::Format("%08X%08X%08X", SwapBytesReturnLE(pluginId1), SwapBytesReturnLE(pluginId2), SwapBytesReturnLE(crc));
+	const std::string IDs = mpt::fmt::HEX0<8>(SwapBytesReturnLE(pluginId1)) + mpt::fmt::HEX0<8>(SwapBytesReturnLE(pluginId2)) + mpt::fmt::HEX0<8>(SwapBytesReturnLE(crc));
 	const std::string flagsKey = IDs + ".Flags";
 
 	mpt::PathString writePath = dllPath;

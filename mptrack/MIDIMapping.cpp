@@ -25,7 +25,7 @@ std::string CMIDIMappingDirective::ToString() const
 	if(m_Active) flags[0] = '1';
 	if(m_CaptureMIDI) flags[1] = '1';
 	if(m_AllowPatternEdit) flags[2] = '1';
-	return mpt::String::Format("%s:%d:%x:%d:%d:%d", flags, (int)GetChannel(), (int)GetEvent(), (int)GetController(), (int)m_PluginIndex, m_Parameter);
+	return mpt::String::Print("%1:%2:%3:%4:%5:%6", flags, (int)GetChannel(), mpt::fmt::hex((int)GetEvent()), (int)GetController(), (int)m_PluginIndex, m_Parameter);
 }
 
 
