@@ -64,6 +64,7 @@ namespace Test {
 static noinline void TestVersion();
 static noinline void TestTypes();
 static noinline void TestMisc();
+static noinline void TestStringFormatting();
 static noinline void TestSettings();
 static noinline void TestStringIO();
 static noinline void TestMIDIEvents();
@@ -102,6 +103,7 @@ void DoTests(std::string pathprefix)
 	DO_TEST(TestVersion);
 	DO_TEST(TestTypes);
 	DO_TEST(TestMisc);
+	DO_TEST(TestStringFormatting);
 	DO_TEST(TestSettings);
 	DO_TEST(TestStringIO);
 	DO_TEST(TestMIDIEvents);
@@ -277,7 +279,6 @@ static void TestFloatFormats(double x)
 	TestFloatFormat(x, "%6.3f", mpt::fmt::NotaFix | mpt::fmt::FillSpc, 6, 3);
 	TestFloatFormat(x, "%0.1f", mpt::fmt::NotaFix | mpt::fmt::FillNul, 0, 1);
 	TestFloatFormat(x, "%02.0f", mpt::fmt::NotaFix | mpt::fmt::FillNul, 2, 0);
-
 }
 
 
@@ -309,26 +310,9 @@ static bool IsEqualUUID(const UUID &lhs, const UUID &rhs)
 #endif
 
 
-static noinline void TestMisc()
-//-----------------------------
+static noinline void TestStringFormatting()
+//-----------------------------------------
 {
-
-	VERIFY_EQUAL(EncodeIEEE754binary32(1.0f), 0x3f800000u);
-	VERIFY_EQUAL(EncodeIEEE754binary32(-1.0f), 0xbf800000u);
-	VERIFY_EQUAL(DecodeIEEE754binary32(0x00000000u), 0.0f);
-	VERIFY_EQUAL(DecodeIEEE754binary32(0x41840000u), 16.5f);
-	VERIFY_EQUAL(DecodeIEEE754binary32(0x3faa0000u),  1.328125f);
-	VERIFY_EQUAL(DecodeIEEE754binary32(0xbfaa0000u), -1.328125f);
-	VERIFY_EQUAL(DecodeIEEE754binary32(0x3f800000u),  1.0f);
-	VERIFY_EQUAL(DecodeIEEE754binary32(0x00000000u),  0.0f);
-	VERIFY_EQUAL(DecodeIEEE754binary32(0xbf800000u), -1.0f);
-	VERIFY_EQUAL(DecodeIEEE754binary32(0x3f800000u),  1.0f);
-	VERIFY_EQUAL(IEEE754binary32LE(1.0f).GetInt32(), 0x3f800000u);
-	VERIFY_EQUAL(IEEE754binary32BE(1.0f).GetInt32(), 0x3f800000u);
-	VERIFY_EQUAL(IEEE754binary32LE(0x00,0x00,0x80,0x3f), 1.0f);
-	VERIFY_EQUAL(IEEE754binary32BE(0x3f,0x80,0x00,0x00), 1.0f);
-	VERIFY_EQUAL(IEEE754binary32LE(1.0f), IEEE754binary32LE(0x00,0x00,0x80,0x3f));
-	VERIFY_EQUAL(IEEE754binary32BE(1.0f), IEEE754binary32BE(0x3f,0x80,0x00,0x00));
 
 	VERIFY_EQUAL(Stringify(1.5f), "1.5");
 	VERIFY_EQUAL(Stringify(true), "1");
@@ -341,10 +325,14 @@ static noinline void TestMisc()
 	VERIFY_EQUAL(Stringify(42), "42");
 
 	VERIFY_EQUAL(mpt::fmt::hex<3>((int32)-1), "ffffffff");
-
 	VERIFY_EQUAL(mpt::fmt::hex(0x123e), "123e");
 	VERIFY_EQUAL(mpt::fmt::hex0<6>(0x123e), "00123e");
 	VERIFY_EQUAL(mpt::fmt::hex0<2>(0x123e), "123e");
+
+	VERIFY_EQUAL(mpt::wfmt::hex<3>((int32)-1), L"ffffffff");
+	VERIFY_EQUAL(mpt::wfmt::hex(0x123e), L"123e");
+	VERIFY_EQUAL(mpt::wfmt::hex0<6>(0x123e), L"00123e");
+	VERIFY_EQUAL(mpt::wfmt::hex0<2>(0x123e), L"123e");
 
 	VERIFY_EQUAL(Stringify(-87.0f), "-87");
 	if(Stringify(-0.5e-6) != "-5e-007"
@@ -402,6 +390,34 @@ static noinline void TestMisc()
 	// emscripten(1.21)/nodejs(v0.10.25) print 6.1234 instead of 6.1235 for unknown reasons.
 	// As this test case is not fatal, ignore it for now in order to make the test cases pass.
 	#endif
+
+	VERIFY_EQUAL(mpt::wfmt::flt(6.12345, 7, 3), L"  6.123");
+	VERIFY_EQUAL(mpt::wfmt::fix(6.12345, 7, 3), L"  6.123");
+	VERIFY_EQUAL(mpt::wfmt::flt(6.12345, 0, 4), L"6.123");
+
+}
+
+
+static noinline void TestMisc()
+//-----------------------------
+{
+
+	VERIFY_EQUAL(EncodeIEEE754binary32(1.0f), 0x3f800000u);
+	VERIFY_EQUAL(EncodeIEEE754binary32(-1.0f), 0xbf800000u);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x00000000u), 0.0f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x41840000u), 16.5f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x3faa0000u),  1.328125f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0xbfaa0000u), -1.328125f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x3f800000u),  1.0f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x00000000u),  0.0f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0xbf800000u), -1.0f);
+	VERIFY_EQUAL(DecodeIEEE754binary32(0x3f800000u),  1.0f);
+	VERIFY_EQUAL(IEEE754binary32LE(1.0f).GetInt32(), 0x3f800000u);
+	VERIFY_EQUAL(IEEE754binary32BE(1.0f).GetInt32(), 0x3f800000u);
+	VERIFY_EQUAL(IEEE754binary32LE(0x00,0x00,0x80,0x3f), 1.0f);
+	VERIFY_EQUAL(IEEE754binary32BE(0x3f,0x80,0x00,0x00), 1.0f);
+	VERIFY_EQUAL(IEEE754binary32LE(1.0f), IEEE754binary32LE(0x00,0x00,0x80,0x3f));
+	VERIFY_EQUAL(IEEE754binary32BE(1.0f), IEEE754binary32BE(0x3f,0x80,0x00,0x00));
 
 	VERIFY_EQUAL(ModCommand::IsPcNote(NOTE_MAX), false);
 	VERIFY_EQUAL(ModCommand::IsPcNote(NOTE_PC), true);
