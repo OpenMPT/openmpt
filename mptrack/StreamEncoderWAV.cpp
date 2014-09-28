@@ -192,7 +192,7 @@ WAVEncoder::WAVEncoder()
 				} else
 				{
 					format.Sampleformat = (SampleFormat)(bytes * 8);
-					format.Description = mpt::String::Format("%i Bit", bytes * 8);
+					format.Description = mpt::String::Print("%1 Bit", bytes * 8);
 				}
 				format.Bitrate = 0;
 				traits.formats.push_back(format);

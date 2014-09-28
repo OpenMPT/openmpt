@@ -360,7 +360,7 @@ void CWaveConvert::FillSamplerates()
 	for(std::vector<uint32>::const_iterator it = encTraits->samplerates.begin(); it != encTraits->samplerates.end(); ++it)
 	{
 		uint32 samplerate = *it;
-		int ndx = m_CbnSampleRate.AddString(mpt::String::Format("%d Hz", samplerate).c_str());
+		int ndx = m_CbnSampleRate.AddString(mpt::String::Print("%1 Hz", samplerate).c_str());
 		m_CbnSampleRate.SetItemData(ndx, samplerate);
 		if(samplerate == encSettings.Samplerate)
 		{
