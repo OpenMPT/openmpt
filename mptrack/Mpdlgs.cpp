@@ -472,7 +472,7 @@ void COptionsSoundcard::UpdateSampleFormat()
 		{
 			if(m_CurrentDeviceCaps.CanSampleFormat || ((SampleFormat)bits == m_Settings.sampleFormat))
 			{
-				UINT ndx = m_CbnSampleFormat.AddString(mpt::String::Format("%d Bit", bits).c_str());
+				UINT ndx = m_CbnSampleFormat.AddString(mpt::String::Print("%1 Bit", bits).c_str());
 				m_CbnSampleFormat.SetItemData(ndx, bits);
 				if((SampleFormat)bits == m_Settings.sampleFormat)
 				{

@@ -445,7 +445,7 @@ IAudioStreamEncoder *VorbisEncoder::ConstructStreamEncoder(std::ostream &file) c
 std::string VorbisEncoder::DescribeQuality(float quality) const
 //-------------------------------------------------------------
 {
-	return mpt::String::Format("Q%3.1f", quality * 10.0f);
+	return mpt::String::Print("Q%1", mpt::Format().ParsePrintf("%3.1f").ToString(quality * 10.0f));
 }
 
 

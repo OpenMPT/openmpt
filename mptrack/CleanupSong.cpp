@@ -386,7 +386,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns()
 
 	if(numRemovedPatterns)
 	{
-		modDoc.AddToLog(mpt::String::Format("%u pattern%s removed.", numRemovedPatterns, numRemovedPatterns == 1 ? "" : "s"));
+		modDoc.AddToLog(mpt::String::Print("%1 pattern%2 removed.", numRemovedPatterns, numRemovedPatterns == 1 ? "" : "s"));
 		return true;
 	}
 	return false;

@@ -344,7 +344,7 @@ struct LameDynBind
 				ok = false; \
 				if(warn) \
 				{ \
-					Reporting::Error(mpt::String::Format("Your '%s' is missing '%s'.\n\nPlease copy a newer 'libmp3lame.dll' into OpenMPT's root directory.", filename, #f ).c_str(), "OpenMPT - MP3 Export"); \
+					Reporting::Error(mpt::String::PrintW(L"Your '%1' is missing '%2'.\n\nPlease copy a newer 'libmp3lame.dll' into OpenMPT's root directory.", filename.ToWide(), L ## #f ).c_str(), L"OpenMPT - MP3 Export"); \
 				} \
 			} \
 		} while(0)
@@ -1495,7 +1495,7 @@ std::string MP3Encoder::DescribeQuality(float quality) const
 			return "VBR -V9.999";
 		} else
 		{
-			return mpt::String::Format("VBR -V%i", static_cast<int>((1.0f - quality) * 10.0f));
+			return mpt::String::Print("VBR -V%1", static_cast<int>((1.0f - quality) * 10.0f));
 		}
 	}
 #endif // MPT_MP3ENCODER_LAME
@@ -1508,7 +1508,7 @@ std::string MP3Encoder::DescribeBitrateABR(int bitrate) const
 #ifdef MPT_MP3ENCODER_BLADE
 	if(m_Type == MP3EncoderBlade)
 	{
-		return mpt::String::Format("%i kbit", bitrate);
+		return mpt::String::Print("%1 kbit", bitrate);
 	}
 #endif // MPT_MP3ENCODER_BLADE
 	return EncoderFactoryBase::DescribeBitrateABR(bitrate);

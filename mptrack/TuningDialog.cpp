@@ -671,7 +671,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 void CTuningDialog::OnBnClickedButtonImport()
 //-------------------------------------------
 {
-	std::string sFilter = mpt::String::Format(TEXT("Tuning files (*%s, *%s, *.scl)|*%s;*%s;*.scl|"),
+	std::string sFilter = mpt::String::Print("Tuning files (*%1, *%2, *.scl)|*%3;*%4;*.scl|",
 		CTuning::s_FileExtension,
 		CTuningCollection::s_FileExtension,
 		CTuning::s_FileExtension,
