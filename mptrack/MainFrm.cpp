@@ -1887,7 +1887,7 @@ void CMainFrame::OnViewOptions()
 
 	CPropertySheet dlg("OpenMPT Setup", this, m_nLastOptionsPage);
 	COptionsGeneral general;
-	COptionsSoundcard sounddlg(TrackerSettings::Instance().GetSoundDeviceID());
+	COptionsSoundcard sounddlg(TrackerSettings::Instance().m_SoundDeviceIdentifier);
 	COptionsSampleEditor smpeditor;
 	COptionsKeyboard keyboard;
 	COptionsColors colors;

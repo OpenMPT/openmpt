@@ -562,8 +562,8 @@ static SoundDevice::Type ParseType(const std::wstring &identifier)
 }
 
 
-SoundDevice::Info Manager::FindDeviceInfoBestMatch(const std::wstring &identifier) const
-//--------------------------------------------------------------------------------------
+SoundDevice::Info Manager::FindDeviceInfoBestMatch(const std::wstring &identifier, bool preferSameType)
+//-----------------------------------------------------------------------------------------------------
 {
 	if(m_SoundDevices.empty())
 	{
@@ -575,7 +575,7 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(const std::wstring &identifie
 	}
 	for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
 	{
-		if(it->GetIdentifier() == identifier)
+		if((it->GetIdentifier() == identifier) && !IsDeviceUnavailable(it->id))
 		{ // exact match
 			return *it;
 		}
@@ -589,7 +589,7 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(const std::wstring &identifie
 			// just find the first WASAPI device.
 			for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
 			{
-				if(it->id.GetType() == TypePORTAUDIO_WASAPI)
+				if((it->id.GetType() == TypePORTAUDIO_WASAPI) && !IsDeviceUnavailable(it->id))
 				{
 					return *it;
 				}
@@ -604,8 +604,20 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(const std::wstring &identifie
 		case TypeASIO:
 		case TypePORTAUDIO_WDMKS:
 		case TypePORTAUDIO_ASIO:
-			// default to first device
-			return *begin();
+			if(preferSameType)
+			{
+				for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
+				{
+					if((it->id.GetType() == type) && !IsDeviceUnavailable(it->id))
+					{
+						return *it;
+					}
+				}
+			} else
+			{
+				// default to first device
+				return *begin();
+			}
 			break;
 	}
 	// invalid
