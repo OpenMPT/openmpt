@@ -912,11 +912,11 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period) const
 				{
 					l = -l;
 					LimitMax(l, 255);
-					period = Util::muldiv(period, LinearSlideUpTable[l], 0x10000);
+					period = Util::muldiv(period, LinearSlideDownTable[l], 65536);
 				} else
 				{
 					LimitMax(l, 255);
-					period = Util::muldiv(period, LinearSlideDownTable[l], 0x10000);
+					period = Util::muldiv(period, LinearSlideUpTable[l], 65536);
 				}
 			} //End: Original behavior.
 		}
@@ -1341,18 +1341,18 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 			vdelta = (vdelta * (int)chn.nVibratoDepth) >> vdepth;
 			int16 midiDelta = static_cast<int16>(-vdelta);	// Periods are upside down
 
-			if (m_SongFlags[SONG_LINEARSLIDES] && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+			if (m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 			{
 				int l = vdelta;
 				if (l < 0)
 				{
 					l = -l;
-					vdelta = Util::muldiv(period, LinearSlideDownTable[l >> 2], 0x10000) - period;
-					if (l & 0x03) vdelta += Util::muldiv(period, FineLinearSlideDownTable[l & 0x03], 0x10000) - period;
+					vdelta = Util::muldiv(period, LinearSlideUpTable[l >> 2], 65536) - period;
+					if (l & 0x03) vdelta += Util::muldiv(period, FineLinearSlideDownTable[l & 0x03], 65536) - period;
 				} else
 				{
-					vdelta = Util::muldiv(period, LinearSlideUpTable[l >> 2], 0x10000) - period;
-					if (l & 0x03) vdelta += Util::muldiv(period, FineLinearSlideUpTable[l & 0x03], 0x10000) - period;
+					vdelta = Util::muldiv(period, LinearSlideDownTable[l >> 2], 65536) - period;
+					if (l & 0x03) vdelta += Util::muldiv(period, FineLinearSlideUpTable[l & 0x03], 65536) - period;
 				}
 			}
 			period += vdelta;
@@ -1402,6 +1402,13 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 		const ModSample *pSmp = pChn->pModSample;
 		const bool alternativeTuning = pChn->pModInstrument && pChn->pModInstrument->pTuning;
 
+		// In IT linear slide mode, we use frequencies, otherwise we use periods, which are upside down.
+		// In this context, the "up" tables refer to the tables that increase frequency, and the down tables are the ones that decrease frequency.
+		const uint32 (&upTable)[256] = m_SongFlags[SONG_LINEARSLIDES] ? LinearSlideUpTable : LinearSlideDownTable;
+		const uint32 (&downTable)[256] = m_SongFlags[SONG_LINEARSLIDES] ? LinearSlideDownTable : LinearSlideUpTable;
+		const uint32 (&fineUpTable)[16] = m_SongFlags[SONG_LINEARSLIDES] ? FineLinearSlideUpTable : FineLinearSlideDownTable;
+		const uint32 (&fineDownTable)[16] = m_SongFlags[SONG_LINEARSLIDES] ? FineLinearSlideDownTable : FineLinearSlideUpTable;
+
 		// IT compatibility: Autovibrato is so much different in IT that I just put this in a separate code block, to get rid of a dozen IsCompatibilityMode() calls.
 		if(IsCompatibleMode(TRK_IMPULSETRACKER) && !alternativeTuning)
 		{
@@ -1449,17 +1456,17 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 			int l = abs(vdelta);
 			if(vdelta < 0)
 			{
-				vdelta = Util::muldiv(period, LinearSlideDownTable[l >> 2], 0x10000) - period;
+				vdelta = Util::muldiv(period, upTable[l >> 2], 0x10000) - period;
 				if (l & 0x03)
 				{
-					vdelta += Util::muldiv(period, FineLinearSlideDownTable[l & 0x03], 0x10000) - period;
+					vdelta += Util::muldiv(period, fineUpTable[l & 0x03], 0x10000) - period;
 				}
 			} else
 			{
-				vdelta = Util::muldiv(period, LinearSlideUpTable[l >> 2], 0x10000) - period;
+				vdelta = Util::muldiv(period, downTable[l >> 2], 0x10000) - period;
 				if (l & 0x03)
 				{
-					vdelta += Util::muldiv(period, FineLinearSlideUpTable[l & 0x03], 0x10000) - period;
+					vdelta += Util::muldiv(period, fineDownTable[l & 0x03], 0x10000) - period;
 				}
 			}
 			period -= vdelta;
@@ -1527,20 +1534,20 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 			}
 			else //Original behavior
 			{
-				if (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
+				if (GetType() != MOD_TYPE_XM)
 				{
 					int df1, df2;
 					if (n < 0)
 					{
 						n = -n;
 						UINT n1 = n >> 8;
-						df1 = LinearSlideUpTable[n1];
-						df2 = LinearSlideUpTable[n1+1];
+						df1 = downTable[n1];
+						df2 = downTable[n1+1];
 					} else
 					{
 						UINT n1 = n >> 8;
-						df1 = LinearSlideDownTable[n1];
-						df2 = LinearSlideDownTable[n1+1];
+						df1 = upTable[n1];
+						df2 = upTable[n1+1];
 					}
 					n >>= 2;
 					period = Util::muldiv(period, df1 + ((df2 - df1) * (n & 0x3F) >> 6), 256);
@@ -1630,7 +1637,7 @@ uint32 CSoundFile::GetChannelIncrement(ModChannel *pChn, uint32 period, int peri
 	const ModInstrument *pIns = pChn->pModInstrument;
 	if(GetType() != MOD_TYPE_MPT || pIns == nullptr || pIns->pTuning == nullptr)
 	{
-		freq = GetFreqFromPeriod(period, pChn->nC5Speed, periodFrac);
+		freq = GetFreqFromPeriod(period, periodFrac);
 	} else
 	{
 		freq = pChn->m_Freq;
@@ -1834,15 +1841,7 @@ bool CSoundFile::ReadNote()
 				{
 					// Only recompute this whole thing in case the base period has changed.
 					pChn->cachedPeriod = period;
-					for(uint32 i = NOTE_MIN; i < NOTE_MAX; i++)
-					{
-						int32 n = GetPeriodFromNote(i, pChn->nFineTune, pChn->nC5Speed);
-						if(n > 0 && n <= period)
-						{
-							pChn->glissandoPeriod = n;
-							break;
-						}
-					}
+					pChn->glissandoPeriod = GetPeriodFromNote(GetNoteFromPeriod(period, pChn->nFineTune, pChn->nC5Speed), pChn->nFineTune, pChn->nC5Speed);
 				}
 				period = pChn->glissandoPeriod;
 			}
