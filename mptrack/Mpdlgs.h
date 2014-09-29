@@ -32,7 +32,8 @@ protected:
 	CStatic m_StaticChannelMapping[NUM_CHANNELCOMBOBOXES];
 	CComboBox m_CbnChannelMapping[NUM_CHANNELCOMBOBOXES];
 
-	SoundDevice::ID m_InitialDevice;
+	std::wstring m_InitialDeviceIdentifier;
+	void SetInitialDevice();
 
 	void SetDevice(SoundDevice::ID dev, bool forceReload=false);
 	SoundDevice::Info m_CurrentDeviceInfo;
@@ -41,7 +42,7 @@ protected:
 	SoundDevice::Settings m_Settings;
 
 public:
-	COptionsSoundcard(SoundDevice::ID sd);
+	COptionsSoundcard(std::wstring deviceIdentifier);
 
 	void UpdateStatistics();
 

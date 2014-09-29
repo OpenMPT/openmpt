@@ -149,12 +149,39 @@ void COptionsSoundcard::DoDataExchange(CDataExchange* pDX)
 }
 
 
-COptionsSoundcard::COptionsSoundcard(SoundDevice::ID dev)
-//-------------------------------------------------------
+COptionsSoundcard::COptionsSoundcard(std::wstring deviceIdentifier)
+//-----------------------------------------------------------------
 	: CPropertyPage(IDD_OPTIONS_SOUNDCARD)
-	, m_InitialDevice(dev)
+	, m_InitialDeviceIdentifier(deviceIdentifier)
 {
 	return;
+}
+
+
+void COptionsSoundcard::SetInitialDevice()
+//----------------------------------------
+{
+	bool ok = false;
+	std::set<SoundDevice::ID> triedSet;
+	while(!ok)
+	{
+		m_CurrentDeviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(m_InitialDeviceIdentifier, TrackerSettings::Instance().m_SoundDevicePreferSameTypeIfDeviceUnavailable);
+		SoundDevice::ID dev = m_CurrentDeviceInfo.id;
+		if(triedSet.find(dev) != triedSet.end())
+		{
+			Reporting::Error("No sound device available.");
+			break;
+		}
+		m_CurrentDeviceCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, CMainFrame::GetMainFrame()->gpSoundDevice);
+		m_CurrentDeviceDynamicCaps = theApp.GetSoundDevicesManager()->GetDeviceDynamicCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice, true);
+		if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(dev))
+		{
+			triedSet.insert(dev);
+			m_InitialDeviceIdentifier = m_CurrentDeviceInfo.GetIdentifier();
+			continue; // makes progress because FindDeviceInfoBestMatch will not return devices again that were found out to be unavailable
+		}
+		ok = true;
+	}
 }
 
 
@@ -171,16 +198,22 @@ void COptionsSoundcard::SetDevice(SoundDevice::ID dev, bool forceReload)
 	}
 	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(dev))
 	{
-		// if the device is unavailable, use the default device
-		SoundDevice::ID newdev = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(std::wstring()).id;
+		SoundDevice::ID newdev;
+		if(TrackerSettings::Instance().m_SoundDevicePreferSameTypeIfDeviceUnavailable)
+		{ // try finding a device of the same type
+			newdev = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(m_CurrentDeviceInfo.GetIdentifier(), true).id;
+		} else
+		{ // if the device is unavailable, use the default device
+			newdev = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(std::wstring()).id;
+		}
 		if(newdev != dev)
 		{
-			Reporting::Information("Device not availble. Reverting to default device.");
+			Reporting::Information("Device not available. Reverting to default device.");
 			SetDevice(newdev);
 			UpdateEverything();
 		} else
 		{
-			Reporting::Warning("Device not availble.");
+			Reporting::Warning("Device not available.");
 		}
 	}
 }
@@ -204,7 +237,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 //------------------------------------
 {
 	CPropertyPage::OnInitDialog();
-	SetDevice(m_InitialDevice, true);
+	SetInitialDevice();
 	UpdateEverything();
 	return TRUE;
 }

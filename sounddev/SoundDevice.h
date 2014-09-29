@@ -669,7 +669,7 @@ public:
 
 	SoundDevice::Info FindDeviceInfo(SoundDevice::ID id) const;
 	SoundDevice::Info FindDeviceInfo(const std::wstring &identifier) const;
-	SoundDevice::Info FindDeviceInfoBestMatch(const std::wstring &identifier) const;
+	SoundDevice::Info FindDeviceInfoBestMatch(const std::wstring &identifier, bool preferSameType = false);
 
 	bool OpenDriverSettings(SoundDevice::ID id, SoundDevice::IMessageReceiver *messageReceiver = nullptr, SoundDevice::IBase *currentSoundDevice = nullptr);
 
