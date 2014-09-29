@@ -97,7 +97,7 @@ std::size_t CUnarchiver::FindBestFile(const std::vector<const char *> &extension
 		{
 			continue;
 		}
-		const std::string ext = mpt::To(mpt::CharsetUTF8, GetExtension(at(i).name.ToWide()));
+		const std::string ext = mpt::ToCharset(mpt::CharsetUTF8, GetExtension(at(i).name.ToWide()));
 
 		// Compare with list of preferred extensions
 		if(std::find_if(extensions.begin(), extensions.end(), find_str(ext.c_str())) != extensions.end())

@@ -469,7 +469,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 
 		std::string str;
 		std::copy(textOut.begin(), textOut.end(), std::back_inserter(str));
-		str = mpt::To(mpt::CharsetCP437, mpt::CharsetCP437AMS, str);
+		str = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS, str);
 
 		// Packed text doesn't include any line breaks!
 		songMessage.ReadFixedLineLength(str.c_str(), str.length(), 76, 0);
@@ -895,7 +895,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		std::string str;
 		file.ReadString<mpt::String::spacePadded>(str, composerLength);
-		str = mpt::To(mpt::CharsetCP437, mpt::CharsetCP437AMS2, str);
+		str = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS2, str);
 		songMessage.Read(str.c_str(), str.length(), SongMessage::leAutodetect);
 		songArtist = str;
 	}
@@ -938,7 +938,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		std::string str;
 		std::copy(textOut.begin(), textOut.begin() + descriptionHeader.unpackedLen, std::back_inserter(str));
-		str = mpt::To(mpt::CharsetCP437, mpt::CharsetCP437AMS2, str);
+		str = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS2, str);
 		// Packed text doesn't include any line breaks!
 		songMessage.ReadFixedLineLength(str.c_str(), str.length(), 74, 0);
 	}

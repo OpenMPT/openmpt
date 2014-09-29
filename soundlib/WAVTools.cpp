@@ -507,7 +507,7 @@ void WAVWriter::WriteMetatags(const FileTags &tags)
 void WAVWriter::WriteTag(RIFFChunk::id_type id, const std::wstring &wideText)
 //---------------------------------------------------------------------------
 {
-	std::string text = mpt::To(mpt::CharsetWindows1252, wideText);
+	std::string text = mpt::ToCharset(mpt::CharsetWindows1252, wideText);
 	if(!text.empty())
 	{
 		const size_t length = text.length() + 1;

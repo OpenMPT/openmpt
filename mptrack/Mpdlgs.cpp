@@ -61,7 +61,7 @@ const char *gszChnCfgNames[3] =
 
 static double ParseTime(CString str)
 {
-	return ConvertStrTo<double>(mpt::To(mpt::CharsetASCII, str)) / 1000.0;
+	return ConvertStrTo<double>(mpt::ToCharset(mpt::CharsetASCII, str)) / 1000.0;
 }
 
 

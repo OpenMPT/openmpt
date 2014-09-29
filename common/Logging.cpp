@@ -128,7 +128,7 @@ static noinline void DoLog(const mpt::log::Context &context, std::wstring messag
 			}
 			if(s_logfile)
 			{
-				fprintf(s_logfile, "%s+%s %s(%i): %s [%s]\n", TimeAsAsString(cur).c_str(), TimeDiffAsString(diff).c_str(), context.file, context.line, mpt::To(mpt::CharsetUTF8, message).c_str(), context.function);
+				fprintf(s_logfile, "%s+%s %s(%i): %s [%s]\n", TimeAsAsString(cur).c_str(), TimeDiffAsString(diff).c_str(), context.file, context.line, mpt::ToCharset(mpt::CharsetUTF8, message).c_str(), context.function);
 				fflush(s_logfile);
 			}
 		}
@@ -143,7 +143,7 @@ static noinline void DoLog(const mpt::log::Context &context, std::wstring messag
 #if defined(MPT_WITH_CHARSET_LOCALE)
 			<< mpt::ToLocale(message)
 #else
-			<< mpt::To(mpt::CharsetUTF8, message)
+			<< mpt::ToCharset(mpt::CharsetUTF8, message)
 #endif
 			<< " [" << context.function << "]"
 			<< std::endl;

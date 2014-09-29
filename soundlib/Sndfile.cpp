@@ -2375,9 +2375,9 @@ void CSoundFile::UpgradeSong()
 		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 		{
 #if defined(MODPLUG_TRACKER)
-			const std::string name = mpt::To(mpt::CharsetUTF8, mpt::CharsetLocale, m_MixPlugins[i].Info.szLibraryName);
+			const std::string name = mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetLocale, m_MixPlugins[i].Info.szLibraryName);
 #else
-			const std::string name = mpt::To(mpt::CharsetUTF8, mpt::CharsetWindows1252, m_MixPlugins[i].Info.szLibraryName);
+			const std::string name = mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetWindows1252, m_MixPlugins[i].Info.szLibraryName);
 #endif
 			mpt::String::Copy(m_MixPlugins[i].Info.szLibraryName, name);
 		}
