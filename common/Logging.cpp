@@ -113,7 +113,7 @@ static noinline void DoLog(const mpt::log::Context &context, std::wstring messag
 //--------------------------------------------------------------------------------
 {
 	// remove eol if already present
-	message = mpt::String::RTrim(message, L"\r\n");
+	message = mpt::String::RTrim(message, std::wstring(L"\r\n"));
 	#if defined(MODPLUG_TRACKER)
 		static uint64_t s_lastlogtime = 0;
 		uint64 cur = GetTimeMS();

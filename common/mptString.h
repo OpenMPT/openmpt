@@ -45,8 +45,8 @@ template <> struct Traits<std::wstring> {
 
 // Remove whitespace at start of string
 template <typename Tstring>
-inline Tstring LTrim(Tstring str, const Tstring &whitespace = mpt::String::Traits<Tstring>::GetDefaultWhitespace())
-//-----------------------------------------------------------------------------------------------------------------
+inline Tstring LTrim(Tstring str, const Tstring &whitespace = Tstring(mpt::String::Traits<Tstring>::GetDefaultWhitespace()))
+//--------------------------------------------------------------------------------------------------------------------------
 {
 	typename Tstring::size_type pos = str.find_first_not_of(whitespace);
 	if(pos != Tstring::npos)
@@ -62,8 +62,8 @@ inline Tstring LTrim(Tstring str, const Tstring &whitespace = mpt::String::Trait
 
 // Remove whitespace at end of string
 template <typename Tstring>
-inline Tstring RTrim(Tstring str, const Tstring &whitespace = mpt::String::Traits<Tstring>::GetDefaultWhitespace())
-//-----------------------------------------------------------------------------------------------------------------
+inline Tstring RTrim(Tstring str, const Tstring &whitespace = Tstring(mpt::String::Traits<Tstring>::GetDefaultWhitespace()))
+//--------------------------------------------------------------------------------------------------------------------------
 {
 	typename Tstring::size_type pos = str.find_last_not_of(whitespace);
 	if(pos != Tstring::npos)
@@ -79,8 +79,8 @@ inline Tstring RTrim(Tstring str, const Tstring &whitespace = mpt::String::Trait
 
 // Remove whitespace at start and end of string
 template <typename Tstring>
-inline Tstring Trim(Tstring str, const Tstring &whitespace = mpt::String::Traits<Tstring>::GetDefaultWhitespace())
-//----------------------------------------------------------------------------------------------------------------
+inline Tstring Trim(Tstring str, const Tstring &whitespace = Tstring(mpt::String::Traits<Tstring>::GetDefaultWhitespace()))
+//-------------------------------------------------------------------------------------------------------------------------
 {
 	return RTrim(LTrim(str, whitespace), whitespace);
 }
