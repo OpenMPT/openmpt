@@ -32,6 +32,8 @@ protected:
 	CStatic m_StaticChannelMapping[NUM_CHANNELCOMBOBOXES];
 	CComboBox m_CbnChannelMapping[NUM_CHANNELCOMBOBOXES];
 
+	SoundDevice::ID m_InitialDevice;
+
 	void SetDevice(SoundDevice::ID dev, bool forceReload=false);
 	SoundDevice::Info m_CurrentDeviceInfo;
 	SoundDevice::Caps m_CurrentDeviceCaps;
