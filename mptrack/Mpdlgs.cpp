@@ -152,26 +152,9 @@ void COptionsSoundcard::DoDataExchange(CDataExchange* pDX)
 COptionsSoundcard::COptionsSoundcard(SoundDevice::ID dev)
 //-------------------------------------------------------
 	: CPropertyPage(IDD_OPTIONS_SOUNDCARD)
-	, m_CurrentDeviceInfo(theApp.GetSoundDevicesManager()->FindDeviceInfo(dev))
-	, m_CurrentDeviceCaps(theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, CMainFrame::GetMainFrame()->gpSoundDevice))
-	, m_CurrentDeviceDynamicCaps(theApp.GetSoundDevicesManager()->GetDeviceDynamicCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice, true))
-	, m_Settings(TrackerSettings::Instance().GetSoundDeviceSettings(dev))
+	, m_InitialDevice(dev)
 {
-	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(dev))
-	{
-		Reporting::Information("Device not availble. Reverting to default device.");
-		// if the device is unavailable, use the default device
-		SoundDevice::ID newdev = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(std::wstring()).id;
-		if(newdev != dev)
-		{
-			Reporting::Information("Device not availble. Reverting to default device.");
-			SetDevice(newdev);
-			UpdateEverything();
-		} else
-		{
-			Reporting::Warning("Device not availble.");
-		}
-	}
+	return;
 }
 
 
@@ -221,6 +204,7 @@ BOOL COptionsSoundcard::OnInitDialog()
 //------------------------------------
 {
 	CPropertyPage::OnInitDialog();
+	SetDevice(m_InitialDevice, true);
 	UpdateEverything();
 	return TRUE;
 }
