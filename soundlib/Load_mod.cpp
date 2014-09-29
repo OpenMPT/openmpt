@@ -464,7 +464,25 @@ void CSoundFile::ReadMODPatternEntry(FileReader &file, ModCommand &m) const
 	uint16 period = (((static_cast<uint16>(data[0]) & 0x0F) << 8) | data[1]);
 	if(period > 0 && period != 0xFFF)
 	{
-		m.note = static_cast<ModCommand::NOTE>(GetNoteFromPeriod(period * 4));
+		m.note = 6 * 12 + 35 + NOTE_MIN;
+		for(int i = 0; i < 6 * 12; i++)
+		{
+			if(period >= ProTrackerPeriodTable[i])
+			{
+				if(period != ProTrackerPeriodTable[i] && i != 0)
+				{
+					uint16 p1 = ProTrackerPeriodTable[i - 1];
+					uint16 p2 = ProTrackerPeriodTable[i];
+					if(p1 - period < (period - p2))
+					{
+						m.note = static_cast<ModCommand::NOTE>(i + 35 + NOTE_MIN);
+						break;
+					}
+				}
+				m.note = static_cast<ModCommand::NOTE>(i + 36 + NOTE_MIN);
+				break;
+			}
+		}
 	}
 	// Read Instrument
 	m.instr = (data[2] >> 4) | (data[0] & 0x10);
