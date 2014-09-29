@@ -82,7 +82,7 @@ protected:
 	void SetWakeupEvent(HANDLE ev);
 	void SetWakeupInterval(double seconds);
 public:
-	CSoundDeviceWithThread(SoundDevice::ID id, const std::wstring &internalID) : SoundDevice::Base(id, internalID), m_AudioThread(*this) {}
+	CSoundDeviceWithThread(SoundDevice::Info info) : SoundDevice::Base(info), m_AudioThread(*this) {}
 	virtual ~CSoundDeviceWithThread() {}
 	bool InternalStart();
 	void InternalStop();

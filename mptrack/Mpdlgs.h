@@ -32,10 +32,10 @@ protected:
 	CStatic m_StaticChannelMapping[NUM_CHANNELCOMBOBOXES];
 	CComboBox m_CbnChannelMapping[NUM_CHANNELCOMBOBOXES];
 
-	std::wstring m_InitialDeviceIdentifier;
+	SoundDevice::Identifier m_InitialDeviceIdentifier;
 	void SetInitialDevice();
 
-	void SetDevice(SoundDevice::ID dev, bool forceReload=false);
+	void SetDevice(SoundDevice::Identifier dev, bool forceReload=false);
 	SoundDevice::Info m_CurrentDeviceInfo;
 	SoundDevice::Caps m_CurrentDeviceCaps;
 	SoundDevice::DynamicCaps m_CurrentDeviceDynamicCaps;

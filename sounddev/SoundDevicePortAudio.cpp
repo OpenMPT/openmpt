@@ -37,11 +37,11 @@ namespace SoundDevice {
 #include "../include/portaudio/src/common/pa_debugprint.h"
 
 
-CPortaudioDevice::CPortaudioDevice(SoundDevice::ID id, const std::wstring &internalID)
-//----------------------------------------------------------------------------------
-	: SoundDevice::Base(id, internalID)
+CPortaudioDevice::CPortaudioDevice(SoundDevice::Info info)
+//--------------------------------------------------------
+	: SoundDevice::Base(info)
 {
-	m_HostApi = SndDevTypeToHostApi(id.GetType());
+	m_HostApi = SndDevTypeToHostApi(info.id.GetType());
 	MemsetZero(m_StreamParameters);
 	m_Stream = 0;
 	m_StreamInfo = 0;

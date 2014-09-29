@@ -44,7 +44,7 @@ protected:
 	std::vector<std::vector<char> > m_WaveBuffersData;
 
 public:
-	CWaveDevice(SoundDevice::ID id, const std::wstring &internalID);
+	CWaveDevice(SoundDevice::Info info);
 	~CWaveDevice();
 
 public:

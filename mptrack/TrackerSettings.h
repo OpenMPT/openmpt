@@ -380,10 +380,10 @@ public:
 
 	Setting<std::wstring> m_SoundDeviceIdentifier;
 	Setting<bool> m_SoundDevicePreferSameTypeIfDeviceUnavailable;
-	SoundDevice::ID GetSoundDeviceID() const;
-	void SetSoundDeviceID(const SoundDevice::ID &id);
-	SoundDevice::Settings GetSoundDeviceSettings(const SoundDevice::ID &device) const;
-	void SetSoundDeviceSettings(const SoundDevice::ID &device, const SoundDevice::Settings &settings);
+	SoundDevice::Identifier GetSoundDeviceIdentifier() const;
+	void SetSoundDeviceIdentifier(const SoundDevice::Identifier &identifier);
+	SoundDevice::Settings GetSoundDeviceSettings(const SoundDevice::Identifier &device) const;
+	void SetSoundDeviceSettings(const SoundDevice::Identifier &device, const SoundDevice::Settings &settings);
 
 	Setting<uint32> MixerMaxChannels;
 	Setting<uint32> MixerDSPMask;

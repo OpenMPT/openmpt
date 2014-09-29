@@ -154,6 +154,59 @@ public:
 };
 
 
+typedef std::wstring Identifier;
+
+SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier);
+
+
+struct Info
+{
+	SoundDevice::ID id;
+	std::wstring name;
+	std::wstring apiName;
+	std::wstring internalID;
+	bool isDefault;
+	Info() : id(TypeINVALID, 0), isDefault(false) { }
+	Info(SoundDevice::ID id, const std::wstring &name, const std::wstring &apiName, const std::wstring &internalID = std::wstring())
+		: id(id)
+		, name(name)
+		, apiName(apiName)
+		, internalID(internalID)
+		, isDefault(false)
+	{
+		return;
+	}
+	bool IsValid() const
+	{
+		return id.IsValid();
+	}
+	SoundDevice::Identifier GetIdentifier() const
+	{
+		if(!IsValid())
+		{
+			return std::wstring();
+		}
+		std::wstring result = apiName;
+		result += L"_";
+		if(!internalID.empty())
+		{
+			result += internalID; // safe to not contain special characters
+		} else if(!name.empty())
+		{
+			// UTF8-encode the name and convert the utf8 to hex.
+			// This ensures that no special characters are contained in the configuration key.
+			std::string utf8String = mpt::To(mpt::CharsetUTF8, name);
+			std::wstring hexString = Util::BinToHex(std::vector<char>(utf8String.begin(), utf8String.end()));
+			result += hexString;
+		} else
+		{
+			result += mpt::ToWString(id.GetIndex());
+		}
+		return result;
+	}
+};
+
+
 struct ChannelMapping
 {
 
@@ -420,10 +473,12 @@ public:
 	virtual void SetMessageReceiver(SoundDevice::IMessageReceiver *receiver) = 0;
 	virtual SoundDevice::IMessageReceiver *GetMessageReceiver() const = 0;
 
+	virtual SoundDevice::Info GetDeviceInfo() const = 0;
 	virtual SoundDevice::ID GetDeviceID() const = 0;
 	virtual SoundDevice::Type GetDeviceType() const = 0;
 	virtual SoundDevice::Index GetDeviceIndex() const = 0;
 	virtual std::wstring GetDeviceInternalID() const = 0;
+	virtual SoundDevice::Identifier GetDeviceIdentifier() const = 0;
 
 	virtual SoundDevice::Caps GetDeviceCaps() const = 0;
 	virtual SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates) = 0;
@@ -474,9 +529,7 @@ private:
 	SoundDevice::ISource *m_Source;
 	SoundDevice::IMessageReceiver *m_MessageReceiver;
 
-	const SoundDevice::ID m_ID;
-
-	std::wstring m_InternalID;
+	const SoundDevice::Info m_Info;
 
 private:
 
@@ -545,7 +598,7 @@ protected:
 
 protected:
 
-	Base(SoundDevice::ID id, const std::wstring &internalID);
+	Base(SoundDevice::Info info);
 
 public:
 
@@ -556,10 +609,12 @@ public:
 	void SetMessageReceiver(SoundDevice::IMessageReceiver *receiver) { m_MessageReceiver = receiver; }
 	SoundDevice::IMessageReceiver *GetMessageReceiver() const { return m_MessageReceiver; }
 
-	SoundDevice::ID GetDeviceID() const { return m_ID; }
-	SoundDevice::Type GetDeviceType() const { return m_ID.GetType(); }
-	SoundDevice::Index GetDeviceIndex() const { return m_ID.GetIndex(); }
-	std::wstring GetDeviceInternalID() const { return m_InternalID; }
+	SoundDevice::Info GetDeviceInfo() const { return m_Info; }
+	SoundDevice::ID GetDeviceID() const { return m_Info.id; }
+	SoundDevice::Type GetDeviceType() const { return m_Info.id.GetType(); }
+	SoundDevice::Index GetDeviceIndex() const { return m_Info.id.GetIndex(); }
+	std::wstring GetDeviceInternalID() const { return m_Info.internalID; }
+	SoundDevice::Identifier GetDeviceIdentifier() const { return m_Info.GetIdentifier(); }
 
 	SoundDevice::Caps GetDeviceCaps() const { return m_Caps; }
 	virtual SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
@@ -597,63 +652,15 @@ public:
 };
 
 
-struct Info
-{
-	SoundDevice::ID id;
-	std::wstring name;
-	std::wstring apiName;
-	std::wstring internalID;
-	bool isDefault;
-	Info() : id(TypeINVALID, 0), isDefault(false) { }
-	Info(SoundDevice::ID id, const std::wstring &name, const std::wstring &apiName, const std::wstring &internalID = std::wstring())
-		: id(id)
-		, name(name)
-		, apiName(apiName)
-		, internalID(internalID)
-		, isDefault(false)
-	{
-		return;
-	}
-	bool IsValid() const
-	{
-		return id.IsValid();
-	}
-	std::wstring GetIdentifier() const
-	{
-		if(!IsValid())
-		{
-			return std::wstring();
-		}
-		std::wstring result = apiName;
-		result += L"_";
-		if(!internalID.empty())
-		{
-			result += internalID; // safe to not contain special characters
-		} else if(!name.empty())
-		{
-			// UTF8-encode the name and convert the utf8 to hex.
-			// This ensures that no special characters are contained in the configuration key.
-			std::string utf8String = mpt::To(mpt::CharsetUTF8, name);
-			std::wstring hexString = Util::BinToHex(std::vector<char>(utf8String.begin(), utf8String.end()));
-			result += hexString;
-		} else
-		{
-			result += mpt::ToWString(id.GetIndex());
-		}
-		return result;
-	}
-};
-
-
 //===========
 class Manager
 //===========
 {
 private:
 	std::vector<SoundDevice::Info> m_SoundDevices;
-	std::map<SoundDevice::ID, bool> m_DeviceUnavailable;
-	std::map<SoundDevice::ID, SoundDevice::Caps> m_DeviceCaps;
-	std::map<SoundDevice::ID, SoundDevice::DynamicCaps> m_DeviceDynamicCaps;
+	std::map<SoundDevice::Identifier, bool> m_DeviceUnavailable;
+	std::map<SoundDevice::Identifier, SoundDevice::Caps> m_DeviceCaps;
+	std::map<SoundDevice::Identifier, SoundDevice::DynamicCaps> m_DeviceDynamicCaps;
 
 public:
 	Manager();
@@ -668,18 +675,18 @@ public:
 	const std::vector<SoundDevice::Info> & GetDeviceInfos() const { return m_SoundDevices; }
 
 	SoundDevice::Info FindDeviceInfo(SoundDevice::ID id) const;
-	SoundDevice::Info FindDeviceInfo(const std::wstring &identifier) const;
-	SoundDevice::Info FindDeviceInfoBestMatch(const std::wstring &identifier, bool preferSameType = false);
+	SoundDevice::Info FindDeviceInfo(SoundDevice::Identifier identifier) const;
+	SoundDevice::Info FindDeviceInfoBestMatch(SoundDevice::Identifier identifier, bool preferSameType);
 
-	bool OpenDriverSettings(SoundDevice::ID id, SoundDevice::IMessageReceiver *messageReceiver = nullptr, SoundDevice::IBase *currentSoundDevice = nullptr);
+	bool OpenDriverSettings(SoundDevice::Identifier identifier, SoundDevice::IMessageReceiver *messageReceiver = nullptr, SoundDevice::IBase *currentSoundDevice = nullptr);
 
-	void SetDeviceUnavailable(SoundDevice::ID id) { m_DeviceUnavailable[id] = true; }
-	bool IsDeviceUnavailable(SoundDevice::ID id) { return m_DeviceUnavailable[id]; }
+	void SetDeviceUnavailable(SoundDevice::Identifier identifier) { m_DeviceUnavailable[identifier] = true; }
+	bool IsDeviceUnavailable(SoundDevice::Identifier identifier) { return m_DeviceUnavailable[identifier]; }
 
-	SoundDevice::Caps GetDeviceCaps(SoundDevice::ID id, SoundDevice::IBase *currentSoundDevice = nullptr);
-	SoundDevice::DynamicCaps GetDeviceDynamicCaps(SoundDevice::ID id, const std::vector<uint32> &baseSampleRates, SoundDevice::IMessageReceiver *messageReceiver = nullptr, SoundDevice::IBase *currentSoundDevice = nullptr, bool update = false);
+	SoundDevice::Caps GetDeviceCaps(SoundDevice::Identifier identifier, SoundDevice::IBase *currentSoundDevice = nullptr);
+	SoundDevice::DynamicCaps GetDeviceDynamicCaps(SoundDevice::Identifier identifier, const std::vector<uint32> &baseSampleRates, SoundDevice::IMessageReceiver *messageReceiver = nullptr, SoundDevice::IBase *currentSoundDevice = nullptr, bool update = false);
 
-	SoundDevice::IBase * CreateSoundDevice(SoundDevice::ID id);
+	SoundDevice::IBase * CreateSoundDevice(SoundDevice::Identifier identifier);
 
 };
 

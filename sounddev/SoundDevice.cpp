@@ -140,12 +140,11 @@ ChannelMapping ChannelMapping::FromString(const std::string &str)
 // SoundDevice::Base base class
 //
 
-Base::Base(SoundDevice::ID id, const std::wstring &internalID)
-//------------------------------------------------------------
+Base::Base(SoundDevice::Info info)
+//--------------------------------
 	: m_Source(nullptr)
 	, m_MessageReceiver(nullptr)
-	, m_ID(id)
-	, m_InternalID(internalID)
+	, m_Info(info)
 {
 
 	m_DeviceUnavailableOnOpen = false;
@@ -525,8 +524,8 @@ SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::ID id) const
 }
 
 
-SoundDevice::Info Manager::FindDeviceInfo(const std::wstring &identifier) const
-//-----------------------------------------------------------------------------
+SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::Identifier identifier) const
+//---------------------------------------------------------------------------------
 {
 	if(m_SoundDevices.empty())
 	{
@@ -547,8 +546,8 @@ SoundDevice::Info Manager::FindDeviceInfo(const std::wstring &identifier) const
 }
 
 
-static SoundDevice::Type ParseType(const std::wstring &identifier)
-//----------------------------------------------------------------
+SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier)
+//--------------------------------------------------------------------
 {
 	for(int i = 0; i < TypeNUM_DEVTYPES; ++i)
 	{
@@ -562,8 +561,8 @@ static SoundDevice::Type ParseType(const std::wstring &identifier)
 }
 
 
-SoundDevice::Info Manager::FindDeviceInfoBestMatch(const std::wstring &identifier, bool preferSameType)
-//-----------------------------------------------------------------------------------------------------
+SoundDevice::Info Manager::FindDeviceInfoBestMatch(SoundDevice::Identifier identifier, bool preferSameType)
+//---------------------------------------------------------------------------------------------------------
 {
 	if(m_SoundDevices.empty())
 	{
@@ -575,7 +574,7 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(const std::wstring &identifie
 	}
 	for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
 	{
-		if((it->GetIdentifier() == identifier) && !IsDeviceUnavailable(it->id))
+		if((it->GetIdentifier() == identifier) && !IsDeviceUnavailable(it->GetIdentifier()))
 		{ // exact match
 			return *it;
 		}
@@ -589,7 +588,7 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(const std::wstring &identifie
 			// just find the first WASAPI device.
 			for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
 			{
-				if((it->id.GetType() == TypePORTAUDIO_WASAPI) && !IsDeviceUnavailable(it->id))
+				if((it->id.GetType() == TypePORTAUDIO_WASAPI) && !IsDeviceUnavailable(it->GetIdentifier()))
 				{
 					return *it;
 				}
@@ -608,7 +607,7 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(const std::wstring &identifie
 			{
 				for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
 				{
-					if((it->id.GetType() == type) && !IsDeviceUnavailable(it->id))
+					if((it->id.GetType() == type) && !IsDeviceUnavailable(it->GetIdentifier()))
 					{
 						return *it;
 					}
@@ -625,16 +624,16 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(const std::wstring &identifie
 }
 
 
-bool Manager::OpenDriverSettings(SoundDevice::ID id, SoundDevice::IMessageReceiver *messageReceiver, SoundDevice::IBase *currentSoundDevice)
-//------------------------------------------------------------------------------------------------------------------------------------------
+bool Manager::OpenDriverSettings(SoundDevice::Identifier identifier, SoundDevice::IMessageReceiver *messageReceiver, SoundDevice::IBase *currentSoundDevice)
+//----------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	bool result = false;
-	if(currentSoundDevice && FindDeviceInfo(id).IsValid() && (currentSoundDevice->GetDeviceID() == id) && (currentSoundDevice->GetDeviceInternalID() == FindDeviceInfo(id).internalID))
+	if(currentSoundDevice && FindDeviceInfo(identifier).IsValid() && (currentSoundDevice->GetDeviceIdentifier() == identifier))
 	{
 		result = currentSoundDevice->OpenDriverSettings();
 	} else
 	{
-		SoundDevice::IBase *dummy = CreateSoundDevice(id);
+		SoundDevice::IBase *dummy = CreateSoundDevice(identifier);
 		if(dummy)
 		{
 			dummy->SetMessageReceiver(messageReceiver);
@@ -646,82 +645,82 @@ bool Manager::OpenDriverSettings(SoundDevice::ID id, SoundDevice::IMessageReceiv
 }
 
 
-SoundDevice::Caps Manager::GetDeviceCaps(SoundDevice::ID id, SoundDevice::IBase *currentSoundDevice)
-//--------------------------------------------------------------------------------------------------
+SoundDevice::Caps Manager::GetDeviceCaps(SoundDevice::Identifier identifier, SoundDevice::IBase *currentSoundDevice)
+//------------------------------------------------------------------------------------------------------------------
 {
-	if(m_DeviceCaps.find(id) == m_DeviceCaps.end())
+	if(m_DeviceCaps.find(identifier) == m_DeviceCaps.end())
 	{
-		if(currentSoundDevice && FindDeviceInfo(id).IsValid() && (currentSoundDevice->GetDeviceID() == id) && (currentSoundDevice->GetDeviceInternalID() == FindDeviceInfo(id).internalID))
+		if(currentSoundDevice && FindDeviceInfo(identifier).IsValid() && (currentSoundDevice->GetDeviceIdentifier() == identifier))
 		{
-			m_DeviceCaps[id] = currentSoundDevice->GetDeviceCaps();
+			m_DeviceCaps[identifier] = currentSoundDevice->GetDeviceCaps();
 		} else
 		{
-			SoundDevice::IBase *dummy = CreateSoundDevice(id);
+			SoundDevice::IBase *dummy = CreateSoundDevice(identifier);
 			if(dummy)
 			{
-				m_DeviceCaps[id] = dummy->GetDeviceCaps();
+				m_DeviceCaps[identifier] = dummy->GetDeviceCaps();
 			} else
 			{
-				SetDeviceUnavailable(id);
+				SetDeviceUnavailable(identifier);
 			}
 			delete dummy;
 		}
 	}
-	return m_DeviceCaps[id];
+	return m_DeviceCaps[identifier];
 }
 
 
-SoundDevice::DynamicCaps Manager::GetDeviceDynamicCaps(SoundDevice::ID id, const std::vector<uint32> &baseSampleRates, SoundDevice::IMessageReceiver *messageReceiver, SoundDevice::IBase *currentSoundDevice, bool update)
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SoundDevice::DynamicCaps Manager::GetDeviceDynamicCaps(SoundDevice::Identifier identifier, const std::vector<uint32> &baseSampleRates, SoundDevice::IMessageReceiver *messageReceiver, SoundDevice::IBase *currentSoundDevice, bool update)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	if((m_DeviceDynamicCaps.find(id) == m_DeviceDynamicCaps.end()) || update)
+	if((m_DeviceDynamicCaps.find(identifier) == m_DeviceDynamicCaps.end()) || update)
 	{
-		if(currentSoundDevice && FindDeviceInfo(id).IsValid() && (currentSoundDevice->GetDeviceID() == id) && (currentSoundDevice->GetDeviceInternalID() == FindDeviceInfo(id).internalID))
+		if(currentSoundDevice && FindDeviceInfo(identifier).IsValid() && (currentSoundDevice->GetDeviceIdentifier() == identifier))
 		{
-			m_DeviceDynamicCaps[id] = currentSoundDevice->GetDeviceDynamicCaps(baseSampleRates);
+			m_DeviceDynamicCaps[identifier] = currentSoundDevice->GetDeviceDynamicCaps(baseSampleRates);
 			if(!currentSoundDevice->IsAvailable())
 			{
-				SetDeviceUnavailable(id);
+				SetDeviceUnavailable(identifier);
 			}
 		} else
 		{
-			SoundDevice::IBase *dummy = CreateSoundDevice(id);
+			SoundDevice::IBase *dummy = CreateSoundDevice(identifier);
 			if(dummy)
 			{
 				dummy->SetMessageReceiver(messageReceiver);
-				m_DeviceDynamicCaps[id] = dummy->GetDeviceDynamicCaps(baseSampleRates);
+				m_DeviceDynamicCaps[identifier] = dummy->GetDeviceDynamicCaps(baseSampleRates);
 				if(!dummy->IsAvailable())
 				{
-					SetDeviceUnavailable(id);
+					SetDeviceUnavailable(identifier);
 				}
 			} else
 			{
-				SetDeviceUnavailable(id);
+				SetDeviceUnavailable(identifier);
 			}
 			delete dummy;
 		}
 	}
-	return m_DeviceDynamicCaps[id];
+	return m_DeviceDynamicCaps[identifier];
 }
 
 
-SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::ID id)
-//-----------------------------------------------------------------
+SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifier)
+//---------------------------------------------------------------------------------
 {
-	const SoundDevice::Info info = FindDeviceInfo(id);
+	const SoundDevice::Info info = FindDeviceInfo(identifier);
 	if(!info.IsValid())
 	{
 		return nullptr;
 	}
 	SoundDevice::IBase *result = nullptr;
-	switch(id.GetType())
+	switch(info.id.GetType())
 	{
-	case TypeWAVEOUT: result = new CWaveDevice(id, info.internalID); break;
+	case TypeWAVEOUT: result = new CWaveDevice(info); break;
 #ifndef NO_DSOUND
-	case TypeDSOUND: result = new CDSoundDevice(id, info.internalID); break;
+	case TypeDSOUND: result = new CDSoundDevice(info); break;
 #endif // NO_DSOUND
 #ifndef NO_ASIO
-	case TypeASIO: result = new CASIODevice(id, info.internalID); break;
+	case TypeASIO: result = new CASIODevice(info); break;
 #endif // NO_ASIO
 #ifndef NO_PORTAUDIO
 	case TypePORTAUDIO_WASAPI:
@@ -729,7 +728,7 @@ SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::ID id)
 	case TypePORTAUDIO_WMME:
 	case TypePORTAUDIO_DS:
 	case TypePORTAUDIO_ASIO:
-		result = SndDevPortaudioIsInitialized() ? new CPortaudioDevice(id, info.internalID) : nullptr;
+		result = SndDevPortaudioIsInitialized() ? new CPortaudioDevice(info) : nullptr;
 		break;
 #endif // NO_PORTAUDIO
 	}
@@ -743,7 +742,7 @@ SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::ID id)
 		result = nullptr;
 		return nullptr;
 	}
-	m_DeviceCaps[id] = result->GetDeviceCaps(); // update cached caps
+	m_DeviceCaps[identifier] = result->GetDeviceCaps(); // update cached caps
 	return result;
 }
 

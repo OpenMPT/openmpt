@@ -243,19 +243,21 @@ void CMainFrame::Initialize()
 	OnUpdateFrameTitle(false);
 
 	// Check for valid sound device
-	if(!theApp.GetSoundDevicesManager()->FindDeviceInfo(TrackerSettings::Instance().GetSoundDeviceID()).IsValid())
+	SoundDevice::Identifier dev = TrackerSettings::Instance().GetSoundDeviceIdentifier();
+	if(!theApp.GetSoundDevicesManager()->FindDeviceInfo(dev).IsValid())
 	{
 		// Fall back to default WaveOut device
-		TrackerSettings::Instance().SetSoundDeviceID(SoundDevice::ID());
+		dev = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(dev, TrackerSettings::Instance().m_SoundDevicePreferSameTypeIfDeviceUnavailable).GetIdentifier();
+		TrackerSettings::Instance().SetSoundDeviceIdentifier(dev);
 	}
 	if(TrackerSettings::Instance().MixerSamplerate == 0)
 	{
 		TrackerSettings::Instance().MixerSamplerate = MixerSettings().gdwMixingFreq;
 		#ifndef NO_ASIO
 			// If no mixing rate is specified and we're using ASIO, get a mixing rate supported by the device.
-			if(TrackerSettings::Instance().GetSoundDeviceID().GetType() == SoundDevice::TypeASIO)
+			if(SoundDevice::ParseType(dev) == SoundDevice::TypeASIO)
 			{
-				TrackerSettings::Instance().MixerSamplerate = theApp.GetSoundDevicesManager()->GetDeviceDynamicCaps(TrackerSettings::Instance().GetSoundDeviceID(), TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice).currentSampleRate;
+				TrackerSettings::Instance().MixerSamplerate = theApp.GetSoundDevicesManager()->GetDeviceDynamicCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice).currentSampleRate;
 			}
 		#endif // NO_ASIO
 	}
@@ -810,8 +812,8 @@ bool CMainFrame::audioOpenDevice()
 		Reporting::Error("Unable to open sound device: Invalid mixer settings.");
 		return false;
 	}
-	const SoundDevice::ID deviceID = TrackerSettings::Instance().GetSoundDeviceID();
-	if(gpSoundDevice && (gpSoundDevice->GetDeviceID() != deviceID))
+	const SoundDevice::Identifier deviceIdentifier = TrackerSettings::Instance().GetSoundDeviceIdentifier();
+	if(gpSoundDevice && (gpSoundDevice->GetDeviceIdentifier() != deviceIdentifier))
 	{
 		gpSoundDevice->Stop();
 		gpSoundDevice->Close();
@@ -824,7 +826,7 @@ bool CMainFrame::audioOpenDevice()
 	}
 	if(!gpSoundDevice)
 	{
-		gpSoundDevice = theApp.GetSoundDevicesManager()->CreateSoundDevice(deviceID);
+		gpSoundDevice = theApp.GetSoundDevicesManager()->CreateSoundDevice(deviceIdentifier);
 	}
 	if(!gpSoundDevice)
 	{
@@ -833,12 +835,12 @@ bool CMainFrame::audioOpenDevice()
 	}
 	gpSoundDevice->SetMessageReceiver(this);
 	gpSoundDevice->SetSource(this);
-	SoundDevice::Settings deviceSettings = TrackerSettings::Instance().GetSoundDeviceSettings(deviceID);
+	SoundDevice::Settings deviceSettings = TrackerSettings::Instance().GetSoundDeviceSettings(deviceIdentifier);
 	if(!gpSoundDevice->Open(deviceSettings))
 	{
 		if(!gpSoundDevice->IsAvailable())
 		{
-			theApp.GetSoundDevicesManager()->SetDeviceUnavailable(deviceID);
+			theApp.GetSoundDevicesManager()->SetDeviceUnavailable(deviceIdentifier);
 			Reporting::Error("Unable to open sound device: Device not available.");
 		} else
 		{
@@ -854,7 +856,7 @@ bool CMainFrame::audioOpenDevice()
 	}
 	deviceSettings.sampleFormat = actualSampleFormat;
 	TrackerSettings::Instance().MixerSamplerate = gpSoundDevice->GetSettings().Samplerate;
-	TrackerSettings::Instance().SetSoundDeviceSettings(deviceID, deviceSettings);
+	TrackerSettings::Instance().SetSoundDeviceSettings(deviceIdentifier, deviceSettings);
 	return true;
 }
 
@@ -1680,16 +1682,16 @@ void CMainFrame::IdleHandlerSounddevice()
 BOOL CMainFrame::ResetSoundCard()
 //-------------------------------
 {
-	return CMainFrame::SetupSoundCard(TrackerSettings::Instance().GetSoundDeviceSettings(TrackerSettings::Instance().GetSoundDeviceID()), TrackerSettings::Instance().GetSoundDeviceID(), TrackerSettings::Instance().m_SoundSettingsStopMode, true);
+	return CMainFrame::SetupSoundCard(TrackerSettings::Instance().GetSoundDeviceSettings(TrackerSettings::Instance().GetSoundDeviceIdentifier()), TrackerSettings::Instance().GetSoundDeviceIdentifier(), TrackerSettings::Instance().m_SoundSettingsStopMode, true);
 }
 
 
-BOOL CMainFrame::SetupSoundCard(SoundDevice::Settings deviceSettings, SoundDevice::ID deviceID, SoundDevice::StopMode stoppedMode, bool forceReset)
-//-------------------------------------------------------------------------------------------------------------------------------------------------
+BOOL CMainFrame::SetupSoundCard(SoundDevice::Settings deviceSettings, SoundDevice::Identifier deviceIdentifier, SoundDevice::StopMode stoppedMode, bool forceReset)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(forceReset
-		|| (TrackerSettings::Instance().GetSoundDeviceID() != deviceID)
-		|| (TrackerSettings::Instance().GetSoundDeviceSettings(deviceID) != deviceSettings)
+		|| (TrackerSettings::Instance().GetSoundDeviceIdentifier() != deviceIdentifier)
+		|| (TrackerSettings::Instance().GetSoundDeviceSettings(deviceIdentifier) != deviceSettings)
 		|| (TrackerSettings::Instance().m_SoundSettingsStopMode != stoppedMode)
 		)
 	{
@@ -1716,8 +1718,8 @@ BOOL CMainFrame::SetupSoundCard(SoundDevice::Settings deviceSettings, SoundDevic
 				deviceSettings.KeepDeviceRunning = true;
 				break;
 		}
-		TrackerSettings::Instance().SetSoundDeviceID(deviceID);
-		TrackerSettings::Instance().SetSoundDeviceSettings(deviceID, deviceSettings);
+		TrackerSettings::Instance().SetSoundDeviceIdentifier(deviceIdentifier);
+		TrackerSettings::Instance().SetSoundDeviceSettings(deviceIdentifier, deviceSettings);
 		TrackerSettings::Instance().MixerOutputChannels = deviceSettings.Channels;
 		TrackerSettings::Instance().MixerSamplerate = deviceSettings.Samplerate;
 		if(pActiveMod)
