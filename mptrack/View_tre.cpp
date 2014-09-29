@@ -1745,7 +1745,7 @@ void CModTree::FillInstrumentLibrary()
 				} else if(wfd.nFileSizeHigh > 0 || wfd.nFileSizeLow >= 16)
 				{
 					// Get lower-case file extension without dot.
-					const std::string ext = mpt::To(mpt::CharsetUTF8, mpt::PathString::FromNative(wfd.cFileName).GetFileExt().ToWide());
+					const std::string ext = mpt::ToCharset(mpt::CharsetUTF8, mpt::PathString::FromNative(wfd.cFileName).GetFileExt().ToWide());
 					char s[16];
 					mpt::String::Copy(s, ext);
 

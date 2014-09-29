@@ -1012,11 +1012,11 @@ std::wstring ToWide(Charset from, const std::string &str)
 	return String::DecodeImpl(from, str);
 }
 
-std::string To(Charset to, const std::wstring &str)
+std::string ToCharset(Charset to, const std::wstring &str)
 {
 	return String::EncodeImpl<std::string>(to, str);
 }
-std::string To(Charset to, Charset from, const std::string &str)
+std::string ToCharset(Charset to, Charset from, const std::string &str)
 {
 	return String::ConvertImpl<std::string>(to, from, str);
 }
@@ -1048,12 +1048,12 @@ std::wstring ToWide(const CString &str)
 		return ToWide(CharsetLocale, str.GetString());
 	#endif
 }
-std::string To(Charset to, const CString &str)
+std::string ToCharset(Charset to, const CString &str)
 {
 	#ifdef UNICODE
-		return To(to, str.GetString());
+		return ToCharset(to, str.GetString());
 	#else
-		return To(to, CharsetLocale, str.GetString());
+		return ToCharset(to, CharsetLocale, str.GetString());
 	#endif
 }
 
@@ -1080,9 +1080,9 @@ std::wstring ToWide(const CStringW &str)
 {
 	return str.GetString();
 }
-std::string To(Charset to, const CStringW &str)
+std::string ToCharset(Charset to, const CStringW &str)
 {
-	return To(to, str.GetString());
+	return ToCharset(to, str.GetString());
 }
 CString ToCString(const CStringW &str)
 {
@@ -1131,10 +1131,10 @@ std::string ToString(const wchar_t * const & x) { return mpt::ToLocale(x); }
 std::string ToString(const char & x) { return std::string(1, x); }
 std::string ToString(const wchar_t & x) { return mpt::ToLocale(std::wstring(1, x)); }
 #else
-std::string ToString(const std::wstring & x) { return mpt::To(mpt::CharsetUTF8, x); }
-std::string ToString(const wchar_t * const & x) { return mpt::To(mpt::CharsetUTF8, x); }
+std::string ToString(const std::wstring & x) { return mpt::ToCharset(mpt::CharsetUTF8, x); }
+std::string ToString(const wchar_t * const & x) { return mpt::ToCharset(mpt::CharsetUTF8, x); }
 std::string ToString(const char & x) { return std::string(1, x); }
-std::string ToString(const wchar_t & x) { return mpt::To(mpt::CharsetUTF8, std::wstring(1, x)); }
+std::string ToString(const wchar_t & x) { return mpt::ToCharset(mpt::CharsetUTF8, std::wstring(1, x)); }
 #endif
 std::string ToString(const bool & x) { return ToStringHelper(x); }
 std::string ToString(const signed char & x) { return ToStringHelper(x); }

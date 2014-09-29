@@ -291,7 +291,7 @@ private:
 	{
 		if(!field.empty() && !data.empty())
 		{
-			vorbis.vorbis_comment_add_tag(&vc, field.c_str(), mpt::To(mpt::CharsetUTF8, data).c_str());
+			vorbis.vorbis_comment_add_tag(&vc, field.c_str(), mpt::ToCharset(mpt::CharsetUTF8, data).c_str());
 		}
 	}
 public:

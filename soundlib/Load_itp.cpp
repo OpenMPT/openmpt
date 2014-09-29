@@ -157,7 +157,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		file.ReadString<mpt::String::maybeNullTerminated>(path, size);
 		if(version <= 0x00000102)
 		{
-			path = mpt::To(mpt::CharsetUTF8, mpt::CharsetLocale, path);
+			path = mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetLocale, path);
 		}
 		m_szInstrumentPath[ins] = mpt::PathString::FromUTF8(path);
 

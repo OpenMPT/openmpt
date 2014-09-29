@@ -174,7 +174,7 @@ mpt::PathString PathString::TunnelOutofCString(const CString &path)
 		// that filenames we get from MFC are always encoded in our hacked UTF8-in-CString encoding.
 		// Instead, we use a rough heuristic: if the string is parseable as UTF8, we assume it is.
 		// This fails for CP_ACP strings, that are also valid UTF8. That's the trade-off here.
-		if(mpt::To(mpt::CharsetUTF8, mpt::ToWide(mpt::CharsetUTF8, path.GetString())) == path.GetString())
+		if(mpt::ToCharset(mpt::CharsetUTF8, mpt::ToWide(mpt::CharsetUTF8, path.GetString())) == path.GetString())
 		{
 			// utf8
 			return mpt::PathString::FromUTF8(path.GetString());
@@ -228,7 +228,7 @@ FILE * mpt_fopen(const mpt::PathString &filename, const wchar_t *mode)
 		#if defined(MPT_WITH_CHARSET_LOCALE)
 			return fopen(filename.AsNative().c_str(), mode ? mpt::ToLocale(mode).c_str() : nullptr);
 		#else
-			return fopen(filename.AsNative().c_str(), mode ? mpt::To(mpt::CharsetUTF8, mode).c_str() : nullptr);
+			return fopen(filename.AsNative().c_str(), mode ? mpt::ToCharset(mpt::CharsetUTF8, mode).c_str() : nullptr);
 		#endif
 	#endif // MPT_OS_WINDOWS
 }
