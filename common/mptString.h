@@ -30,91 +30,70 @@ namespace String
 {
 
 
+template <typename Tstring> struct Traits {
+	static const char * GetDefaultWhitespace() { return " \n\r\t"; }
+};
+
+template <> struct Traits<std::string> {
+	static const char * GetDefaultWhitespace() { return " \n\r\t"; }
+};
+
+template <> struct Traits<std::wstring> {
+	static const wchar_t * GetDefaultWhitespace() { return L" \n\r\t"; }
+};
+
+
 // Remove whitespace at start of string
-static inline std::string LTrim(std::string str, const std::string &whitespace = " \n\r\t")
-//-----------------------------------------------------------------------------------------
+template <typename Tstring>
+inline Tstring LTrim(Tstring str, const Tstring &whitespace = mpt::String::Traits<Tstring>::GetDefaultWhitespace())
+//-----------------------------------------------------------------------------------------------------------------
 {
-	std::string::size_type pos = str.find_first_not_of(whitespace);
-	if(pos != std::string::npos)
+	typename Tstring::size_type pos = str.find_first_not_of(whitespace);
+	if(pos != Tstring::npos)
 	{
 		str.erase(str.begin(), str.begin() + pos);
-	} else if(pos == std::string::npos && str.length() > 0 && str.find_last_of(whitespace) == str.length() - 1)
+	} else if(pos == Tstring::npos && str.length() > 0 && str.find_last_of(whitespace) == str.length() - 1)
 	{
-		return std::string();
-	}
-	return str;
-}
-static inline std::wstring LTrim(std::wstring str, const std::wstring &whitespace = L" \n\r\t")
-{
-	std::wstring::size_type pos = str.find_first_not_of(whitespace);
-	if(pos != std::wstring::npos)
-	{
-		str.erase(str.begin(), str.begin() + pos);
-	} else if(pos == std::wstring::npos && str.length() > 0 && str.find_last_of(whitespace) == str.length() - 1)
-	{
-		return std::wstring();
+		return Tstring();
 	}
 	return str;
 }
 
 
 // Remove whitespace at end of string
-static inline std::string RTrim(std::string str, const std::string &whitespace = " \n\r\t")
-//-----------------------------------------------------------------------------------------
+template <typename Tstring>
+inline Tstring RTrim(Tstring str, const Tstring &whitespace = mpt::String::Traits<Tstring>::GetDefaultWhitespace())
+//-----------------------------------------------------------------------------------------------------------------
 {
-	std::string::size_type pos = str.find_last_not_of(whitespace);
-	if(pos != std::string::npos)
+	typename Tstring::size_type pos = str.find_last_not_of(whitespace);
+	if(pos != Tstring::npos)
 	{
 		str.erase(str.begin() + pos + 1, str.end());
-	} else if(pos == std::string::npos && str.length() > 0 && str.find_first_of(whitespace) == 0)
+	} else if(pos == Tstring::npos && str.length() > 0 && str.find_first_of(whitespace) == 0)
 	{
-		return std::string();
-	}
-	return str;
-}
-static inline std::wstring RTrim(std::wstring str, const std::wstring &whitespace = L" \n\r\t")
-{
-	std::wstring::size_type pos = str.find_last_not_of(whitespace);
-	if(pos != std::wstring::npos)
-	{
-		str.erase(str.begin() + pos + 1, str.end());
-	} else if(pos == std::wstring::npos && str.length() > 0 && str.find_first_of(whitespace) == 0)
-	{
-		return std::wstring();
+		return Tstring();
 	}
 	return str;
 }
 
 
 // Remove whitespace at start and end of string
-static inline std::string Trim(std::string str, const std::string &whitespace = " \n\r\t")
-//----------------------------------------------------------------------------------------
+template <typename Tstring>
+inline Tstring Trim(Tstring str, const Tstring &whitespace = mpt::String::Traits<Tstring>::GetDefaultWhitespace())
+//----------------------------------------------------------------------------------------------------------------
 {
 	return RTrim(LTrim(str, whitespace), whitespace);
 }
-static inline std::wstring Trim(std::wstring str, const std::wstring &whitespace = L" \n\r\t")
-{
-	return RTrim(LTrim(str, whitespace), whitespace);
-}
 
 
-static inline std::string Replace(std::string str, const std::string &oldStr, const std::string &newStr)
-//------------------------------------------------------------------------------------------------------
+template <typename Tstring, typename Tstring2, typename Tstring3>
+inline Tstring Replace(Tstring str, const Tstring2 &oldStr_, const Tstring3 &newStr_)
+//-----------------------------------------------------------------------------------
 {
 	std::size_t pos = 0;
-	while((pos = str.find(oldStr, pos)) != std::string::npos)
-	{
-		str.replace(pos, oldStr.length(), newStr);
-		pos += newStr.length();
-	}
-	return str;
-}
-
-
-static inline std::wstring Replace(std::wstring str, const std::wstring &oldStr, const std::wstring &newStr)
-{
-	std::size_t pos = 0;
-	while((pos = str.find(oldStr, pos)) != std::string::npos)
+	const Tstring oldStr = oldStr_;
+	const Tstring newStr = newStr_;
+	while((pos = str.find(oldStr, pos)) != Tstring::npos)
 	{
 		str.replace(pos, oldStr.length(), newStr);
 		pos += newStr.length();
