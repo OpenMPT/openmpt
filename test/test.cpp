@@ -531,9 +531,9 @@ static noinline void TestMisc()
 
 	VERIFY_EQUAL( mpt::saturate_cast<uint32>(static_cast<double>(std::numeric_limits<int64>::max())), std::numeric_limits<uint32>::max() );
 
-	VERIFY_EQUAL( mpt::String::LTrim(" "), "" );
-	VERIFY_EQUAL( mpt::String::RTrim(" "), "" );
-	VERIFY_EQUAL( mpt::String::Trim(" "), "" );
+	VERIFY_EQUAL( mpt::String::LTrim(std::string(" ")), "" );
+	VERIFY_EQUAL( mpt::String::RTrim(std::string(" ")), "" );
+	VERIFY_EQUAL( mpt::String::Trim(std::string(" ")), "" );
 
 	// weird things with std::string containing \0 in the middle and trimming \0
 	VERIFY_EQUAL( std::string("\0\ta\0b ",6).length(), (std::size_t)6 );
