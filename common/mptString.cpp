@@ -1184,24 +1184,24 @@ inline void ApplyFormat(Tostream & o, const Format & format)
 	FormatFlags f = format.GetFlags();
 	std::size_t width = format.GetWidth();
 	int precision = format.GetPrecision();
-	if(precision != -1 && width != 0 && !(f & fmt::NotaFix) && !(f & fmt::NotaSci))
+	if(precision != -1 && width != 0 && !(f & fmt_base::NotaFix) && !(f & fmt_base::NotaSci))
 	{
 		// fixup:
 		// precision behaves differently from .#
 		// avoid default format when precision and width are set
-		f &= ~fmt::NotaNrm;
-		f |= fmt::NotaFix;
+		f &= ~fmt_base::NotaNrm;
+		f |= fmt_base::NotaFix;
 	}
-	if(f & fmt::BaseDec) { o << std::dec; }
-	else if(f & fmt::BaseHex) { o << std::hex; }
-	if(f & fmt::NotaNrm ) { /*nothing*/ }
-	else if(f & fmt::NotaFix ) { o << std::setiosflags(std::ios::fixed); }
-	else if(f & fmt::NotaSci ) { o << std::setiosflags(std::ios::scientific); }
-	if(f & fmt::CaseLow) { o << std::nouppercase; }
-	else if(f & fmt::CaseUpp) { o << std::uppercase; }
-	if(f & fmt::FillOff) { /* nothing */ }
-	else if(f & fmt::FillNul) { o << std::setw(width) << std::setfill(typename Tostream::char_type('0')); }
-	else if(f & fmt::FillSpc) { o << std::setw(width) << std::setfill(typename Tostream::char_type(' ')); }
+	if(f & fmt_base::BaseDec) { o << std::dec; }
+	else if(f & fmt_base::BaseHex) { o << std::hex; }
+	if(f & fmt_base::NotaNrm ) { /*nothing*/ }
+	else if(f & fmt_base::NotaFix ) { o << std::setiosflags(std::ios::fixed); }
+	else if(f & fmt_base::NotaSci ) { o << std::setiosflags(std::ios::scientific); }
+	if(f & fmt_base::CaseLow) { o << std::nouppercase; }
+	else if(f & fmt_base::CaseUpp) { o << std::uppercase; }
+	if(f & fmt_base::FillOff) { /* nothing */ }
+	else if(f & fmt_base::FillNul) { o << std::setw(width) << std::setfill(typename Tostream::char_type('0')); }
+	else if(f & fmt_base::FillSpc) { o << std::setw(width) << std::setfill(typename Tostream::char_type(' ')); }
 	if(precision != -1) { o << std::setprecision(precision); }
 }
 
@@ -1246,20 +1246,20 @@ inline Format ParseFormatStringFloat(const Tchar * str)
 	++p;
 	while(*p && (*p == Tchar(' ') || *p == Tchar('0')))
 	{
-		if(*p == Tchar(' ')) f |= mpt::fmt::FillSpc;
-		if(*p == Tchar('0')) f |= mpt::fmt::FillNul;
+		if(*p == Tchar(' ')) f |= mpt::fmt_base::FillSpc;
+		if(*p == Tchar('0')) f |= mpt::fmt_base::FillNul;
 		++p;
 	}
-	if(!(f & mpt::fmt::FillSpc) && !(f & mpt::fmt::FillNul))
+	if(!(f & mpt::fmt_base::FillSpc) && !(f & mpt::fmt_base::FillNul))
 	{
-		f |= mpt::fmt::FillOff;
+		f |= mpt::fmt_base::FillOff;
 	}
 	while(*p && (Tchar('0') <= *p && *p <= Tchar('9')))
 	{
-		if(f & mpt::fmt::FillOff)
+		if(f & mpt::fmt_base::FillOff)
 		{
-			f &= ~mpt::fmt::FillOff;
-			f |= mpt::fmt::FillSpc;
+			f &= ~mpt::fmt_base::FillOff;
+			f |= mpt::fmt_base::FillSpc;
 		}
 		width *= 10;
 		width += *p - Tchar('0');
@@ -1278,12 +1278,12 @@ inline Format ParseFormatStringFloat(const Tchar * str)
 	}
 	if(*p && (*p == Tchar('g') || *p == Tchar('G') || *p == Tchar('f') || *p == Tchar('F') || *p == Tchar('e') || *p == Tchar('E')))
 	{
-		if(*p == Tchar('g')) f |= mpt::fmt::NotaNrm | mpt::fmt::CaseLow;
-		if(*p == Tchar('G')) f |= mpt::fmt::NotaNrm | mpt::fmt::CaseUpp;
-		if(*p == Tchar('f')) f |= mpt::fmt::NotaFix | mpt::fmt::CaseLow;
-		if(*p == Tchar('F')) f |= mpt::fmt::NotaFix | mpt::fmt::CaseUpp;
-		if(*p == Tchar('e')) f |= mpt::fmt::NotaSci | mpt::fmt::CaseLow;
-		if(*p == Tchar('E')) f |= mpt::fmt::NotaSci | mpt::fmt::CaseUpp;
+		if(*p == Tchar('g')) f |= mpt::fmt_base::NotaNrm | mpt::fmt_base::CaseLow;
+		if(*p == Tchar('G')) f |= mpt::fmt_base::NotaNrm | mpt::fmt_base::CaseUpp;
+		if(*p == Tchar('f')) f |= mpt::fmt_base::NotaFix | mpt::fmt_base::CaseLow;
+		if(*p == Tchar('F')) f |= mpt::fmt_base::NotaFix | mpt::fmt_base::CaseUpp;
+		if(*p == Tchar('e')) f |= mpt::fmt_base::NotaSci | mpt::fmt_base::CaseLow;
+		if(*p == Tchar('E')) f |= mpt::fmt_base::NotaSci | mpt::fmt_base::CaseUpp;
 		++p;
 	}
 	return Format().SetFlags(f).SetWidth(width).SetPrecision(precision);
