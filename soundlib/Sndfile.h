@@ -876,7 +876,7 @@ public:
 	// Period/Note functions
 	UINT GetNoteFromPeriod(UINT period, int nFineTune = 0, UINT nC5Speed = 0) const;
 	UINT GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) const;
-	UINT GetFreqFromPeriod(UINT period, UINT nC5Speed, int nPeriodFrac = 0) const;
+	UINT GetFreqFromPeriod(UINT period, int nPeriodFrac = 0) const;
 	// Misc functions
 	ModSample &GetSample(SAMPLEINDEX sample) { ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
 	const ModSample &GetSample(SAMPLEINDEX sample) const { ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
