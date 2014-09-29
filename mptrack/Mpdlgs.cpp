@@ -174,6 +174,7 @@ void COptionsSoundcard::SetInitialDevice()
 		}
 		m_CurrentDeviceCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, CMainFrame::GetMainFrame()->gpSoundDevice);
 		m_CurrentDeviceDynamicCaps = theApp.GetSoundDevicesManager()->GetDeviceDynamicCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice, true);
+		m_Settings = TrackerSettings::Instance().GetSoundDeviceSettings(dev);
 		if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(dev))
 		{
 			triedSet.insert(dev);
