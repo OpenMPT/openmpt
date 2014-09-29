@@ -4928,44 +4928,23 @@ UINT CSoundFile::GetNoteFromPeriod(UINT period, int nFineTune, UINT nC5Speed) co
 //---------------------------------------------------------------------------------
 {
 	if (!period) return 0;
-	if (GetType() & (MOD_TYPE_MED|MOD_TYPE_MOD|MOD_TYPE_DIGI|MOD_TYPE_MTM|MOD_TYPE_669|MOD_TYPE_OKT|MOD_TYPE_AMF0))
+	// This essentially implements std::lower_bound, with the difference that we don't need an iterable container.
+	uint32 minNote = NOTE_MIN, maxNote = NOTE_MAX, count = maxNote - minNote + 1;
+	while(count > 0)
 	{
-		period >>= 2;
-		for (UINT i=0; i<6*12; i++)
+		const uint32 step = count / 2, midNote = minNote + step;
+		uint32 n = GetPeriodFromNote(midNote, nFineTune, nC5Speed);
+		if(n > period || !n)
 		{
-			if (period >= ProTrackerPeriodTable[i])
-			{
-				if ((period != ProTrackerPeriodTable[i]) && (i))
-				{
-					UINT p1 = ProTrackerPeriodTable[i-1];
-					UINT p2 = ProTrackerPeriodTable[i];
-					if (p1 - period < (period - p2)) return i+36;
-				}
-				return i+1+36;
-			}
-		}
-		return 6*12+36;
-	} else
-	{
-		// This essentially implements std::lower_bound, with the difference that we don't need an iterable container.
-		uint32 minNote = NOTE_MIN, maxNote = NOTE_MAX, count = maxNote - minNote + 1;
-		while(count > 0)
+			minNote = midNote + 1;
+			count -= step + 1;
+		} else
 		{
-			const uint32 step = count / 2, midNote = minNote + step;
-			uint32 n = GetPeriodFromNote(midNote, nFineTune, nC5Speed);
-			if(n > period || !n)
-			{
-				minNote = midNote + 1;
-				count -= step + 1;
-			} else
-			{
-				count = step;
-			}
+			count = step;
 		}
-		return minNote;
 	}
+	return minNote;
 }
-
 
 
 UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) const
