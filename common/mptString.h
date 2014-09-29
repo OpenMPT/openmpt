@@ -337,9 +337,6 @@ std::wstring ToWString(const float & x);
 std::wstring ToWString(const double & x);
 std::wstring ToWString(const long double & x);
 
-#define MPT_FMT
-
-#if defined(MPT_FMT)
 
 namespace fmt
 {
@@ -684,8 +681,6 @@ inline std::wstring sci(const T& x, std::size_t width = 0, int precision = -1)
 }
 
 } // namespace wfmt
-
-#endif // MPT_FMT
 
 } // namespace mpt
 

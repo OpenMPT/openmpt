@@ -1178,9 +1178,6 @@ std::wstring ToWString(const double & x) { return ToWStringHelper(x); }
 std::wstring ToWString(const long double & x) { return ToWStringHelper(x); }
 
 
-#if defined(MPT_FMT)
-
-
 template<typename Tostream>
 inline void ApplyFormat(Tostream & o, const Format & format)
 {
@@ -1349,9 +1346,6 @@ std::wstring FormatValW(const unsigned long long & x, const Format & f) { return
 std::wstring FormatValW(const float & x, const Format & f) { return FormatValWHelper(x, f); }
 std::wstring FormatValW(const double & x, const Format & f) { return FormatValWHelper(x, f); }
 std::wstring FormatValW(const long double & x, const Format & f) { return FormatValWHelper(x, f); }
-
-
-#endif // MPT_FMT
 
 
 namespace String
