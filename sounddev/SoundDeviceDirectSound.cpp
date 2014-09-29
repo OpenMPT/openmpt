@@ -73,9 +73,9 @@ std::vector<SoundDevice::Info> CDSoundDevice::EnumerateDevices()
 }
 
 
-CDSoundDevice::CDSoundDevice(SoundDevice::ID id, const std::wstring &internalID)
-//----------------------------------------------------------------------------
-	: CSoundDeviceWithThread(id, internalID)
+CDSoundDevice::CDSoundDevice(SoundDevice::Info info)
+//--------------------------------------------------
+	: CSoundDeviceWithThread(info)
 	, m_piDS(NULL)
 	, m_pPrimary(NULL)
 	, m_pMixBuffer(NULL)

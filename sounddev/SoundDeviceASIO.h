@@ -91,7 +91,7 @@ private:
 	void SetRenderSilence(bool silence, bool wait=false);
 
 public:
-	CASIODevice(SoundDevice::ID id, const std::wstring &internalID);
+	CASIODevice(SoundDevice::Info info);
 	~CASIODevice();
 
 private:

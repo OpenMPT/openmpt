@@ -43,7 +43,7 @@ protected:
 	DWORD m_dwLatency;
 
 public:
-	CDSoundDevice(SoundDevice::ID id, const std::wstring &internalID);
+	CDSoundDevice(SoundDevice::Info info);
 	~CDSoundDevice();
 
 public:

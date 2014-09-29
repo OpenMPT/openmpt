@@ -42,9 +42,9 @@ static const std::size_t WAVEOUT_MINBUFFERSIZE = 1024;
 static const std::size_t WAVEOUT_MAXBUFFERSIZE = 65536;
 
 
-CWaveDevice::CWaveDevice(SoundDevice::ID id, const std::wstring &internalID)
-//------------------------------------------------------------------------
-	: CSoundDeviceWithThread(id, internalID)
+CWaveDevice::CWaveDevice(SoundDevice::Info info)
+//----------------------------------------------
+	: CSoundDeviceWithThread(info)
 {
 	m_ThreadWakeupEvent;
 	m_hWaveOut = NULL;

@@ -914,11 +914,11 @@ BOOL CTrackApp::InitInstance()
 	if(TrackerSettings::Instance().m_SoundDeviceSettingsUseOldDefaults)
 	{
 		// get the old default device
-		TrackerSettings::Instance().m_SoundDeviceIdentifier = m_pSoundDevicesManager->FindDeviceInfo(TrackerSettings::Instance().m_SoundDeviceID_DEPRECATED).GetIdentifier();
+		TrackerSettings::Instance().SetSoundDeviceIdentifier(m_pSoundDevicesManager->FindDeviceInfo(TrackerSettings::Instance().m_SoundDeviceID_DEPRECATED).GetIdentifier());
 		// apply old global sound device settings to each found device
 		for(std::vector<SoundDevice::Info>::const_iterator it = m_pSoundDevicesManager->begin(); it != m_pSoundDevicesManager->end(); ++it)
 		{
-			TrackerSettings::Instance().SetSoundDeviceSettings(it->id, TrackerSettings::Instance().GetSoundDeviceSettingsDefaults());
+			TrackerSettings::Instance().SetSoundDeviceSettings(it->GetIdentifier(), TrackerSettings::Instance().GetSoundDeviceSettingsDefaults());
 		}
 	}
 

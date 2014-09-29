@@ -180,9 +180,9 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices()
 }
 
 
-CASIODevice::CASIODevice(SoundDevice::ID id, const std::wstring &internalID)
-//------------------------------------------------------------------------
-	: SoundDevice::Base(id, internalID)
+CASIODevice::CASIODevice(SoundDevice::Info info)
+//----------------------------------------------
+	: SoundDevice::Base(info)
 {
 	InitMembers();
 	m_QueriedFeatures.reset();

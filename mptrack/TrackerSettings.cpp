@@ -658,20 +658,20 @@ SoundDevice::Settings TrackerSettings::GetSoundDeviceSettingsDefaults() const
 	return m_SoundDeviceSettingsDefaults;
 }
 
-SoundDevice::ID TrackerSettings::GetSoundDeviceID() const
-//-------------------------------------------------------
+SoundDevice::Identifier TrackerSettings::GetSoundDeviceIdentifier() const
+//-----------------------------------------------------------------------
 {
-	return theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(m_SoundDeviceIdentifier).id;
+	return m_SoundDeviceIdentifier;
 }
 
-void TrackerSettings::SetSoundDeviceID(const SoundDevice::ID &id)
-//---------------------------------------------------------------
+void TrackerSettings::SetSoundDeviceIdentifier(const SoundDevice::Identifier &identifier)
+//---------------------------------------------------------------------------------------
 {
-	m_SoundDeviceIdentifier = theApp.GetSoundDevicesManager()->FindDeviceInfo(id).GetIdentifier();
+	m_SoundDeviceIdentifier = identifier;
 }
 
-SoundDevice::Settings TrackerSettings::GetSoundDeviceSettings(const SoundDevice::ID &device) const
-//------------------------------------------------------------------------------------------------
+SoundDevice::Settings TrackerSettings::GetSoundDeviceSettings(const SoundDevice::Identifier &device) const
+//--------------------------------------------------------------------------------------------------------
 {
 	const SoundDevice::Info deviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(device);
 	if(!deviceInfo.IsValid())
@@ -684,8 +684,8 @@ SoundDevice::Settings TrackerSettings::GetSoundDeviceSettings(const SoundDevice:
 	return settings;
 }
 
-void TrackerSettings::SetSoundDeviceSettings(const SoundDevice::ID &device, const SoundDevice::Settings &settings)
-//----------------------------------------------------------------------------------------------------------------
+void TrackerSettings::SetSoundDeviceSettings(const SoundDevice::Identifier &device, const SoundDevice::Settings &settings)
+//------------------------------------------------------------------------------------------------------------------------
 {
 	const SoundDevice::Info deviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(device);
 	if(!deviceInfo.IsValid())

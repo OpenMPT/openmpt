@@ -162,11 +162,11 @@ void COptionsSoundcard::SetInitialDevice()
 //----------------------------------------
 {
 	bool ok = false;
-	std::set<SoundDevice::ID> triedSet;
+	std::set<SoundDevice::Identifier> triedSet;
 	while(!ok)
 	{
 		m_CurrentDeviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(m_InitialDeviceIdentifier, TrackerSettings::Instance().m_SoundDevicePreferSameTypeIfDeviceUnavailable);
-		SoundDevice::ID dev = m_CurrentDeviceInfo.id;
+		SoundDevice::Identifier dev = m_CurrentDeviceInfo.GetIdentifier();
 		if(triedSet.find(dev) != triedSet.end())
 		{
 			Reporting::Error("No sound device available.");
@@ -186,10 +186,10 @@ void COptionsSoundcard::SetInitialDevice()
 }
 
 
-void COptionsSoundcard::SetDevice(SoundDevice::ID dev, bool forceReload)
-//----------------------------------------------------------------------
+void COptionsSoundcard::SetDevice(SoundDevice::Identifier dev, bool forceReload)
+//------------------------------------------------------------------------------
 {
-	bool deviceChanged = (dev != m_CurrentDeviceInfo.id);
+	bool deviceChanged = (dev != m_CurrentDeviceInfo.GetIdentifier());
 	m_CurrentDeviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(dev);
 	m_CurrentDeviceCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, CMainFrame::GetMainFrame()->gpSoundDevice);
 	m_CurrentDeviceDynamicCaps = theApp.GetSoundDevicesManager()->GetDeviceDynamicCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice, true);
@@ -199,14 +199,7 @@ void COptionsSoundcard::SetDevice(SoundDevice::ID dev, bool forceReload)
 	}
 	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(dev))
 	{
-		SoundDevice::ID newdev;
-		if(TrackerSettings::Instance().m_SoundDevicePreferSameTypeIfDeviceUnavailable)
-		{ // try finding a device of the same type
-			newdev = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(m_CurrentDeviceInfo.GetIdentifier(), true).id;
-		} else
-		{ // if the device is unavailable, use the default device
-			newdev = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(std::wstring()).id;
-		}
+		SoundDevice::Identifier newdev = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(m_CurrentDeviceInfo.GetIdentifier(), TrackerSettings::Instance().m_SoundDevicePreferSameTypeIfDeviceUnavailable).GetIdentifier();
 		if(newdev != dev)
 		{
 			Reporting::Information("Device not available. Reverting to default device.");
@@ -360,7 +353,7 @@ void COptionsSoundcard::UpdateEverything()
 				}
 			}
 
-			if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(it->id))
+			if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(it->GetIdentifier()))
 			{
 				continue;
 			}
@@ -582,7 +575,7 @@ void COptionsSoundcard::OnDeviceChanged()
 	int n = m_CbnDevice.GetCurSel();
 	if(n >= 0)
 	{
-		SetDevice(SoundDevice::ID::FromIdRaw(m_CbnDevice.GetItemData(n)));
+		SetDevice(theApp.GetSoundDevicesManager()->FindDeviceInfo(SoundDevice::ID::FromIdRaw(m_CbnDevice.GetItemData(n))).GetIdentifier());
 		UpdateDevice();
 		OnSettingsChanged();
 	}
@@ -608,7 +601,11 @@ void COptionsSoundcard::OnChannelsChanged()
 void COptionsSoundcard::OnSoundCardDriverPanel()
 //----------------------------------------------
 {
-	theApp.GetSoundDevicesManager()->OpenDriverSettings(SoundDevice::ID::FromIdRaw(m_CbnDevice.GetItemData(m_CbnDevice.GetCurSel())), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice);
+	theApp.GetSoundDevicesManager()->OpenDriverSettings(
+		theApp.GetSoundDevicesManager()->FindDeviceInfo(SoundDevice::ID::FromIdRaw(m_CbnDevice.GetItemData(m_CbnDevice.GetCurSel()))).GetIdentifier(),
+		CMainFrame::GetMainFrame(),
+		CMainFrame::GetMainFrame()->gpSoundDevice
+		);
 }
 
 
@@ -763,7 +760,6 @@ void COptionsSoundcard::OnOK()
 		UINT n = m_CbnDither.GetCurSel();
 		m_Settings.DitherType = (DitherMode)(n);
 	}
-	const SoundDevice::ID dev = m_CurrentDeviceInfo.id;
 	// Latency
 	{
 		CString s;
@@ -801,8 +797,8 @@ void COptionsSoundcard::OnOK()
 			m_Settings.ChannelMapping = SoundDevice::ChannelMapping();
 		}
 	}
-	CMainFrame::GetMainFrame()->SetupSoundCard(m_Settings, m_CurrentDeviceInfo.id, (SoundDevice::StopMode)m_CbnStoppedMode.GetCurSel());
-	SetDevice(m_CurrentDeviceInfo.id, true); // Poll changed ASIO sample format and channel names
+	CMainFrame::GetMainFrame()->SetupSoundCard(m_Settings, m_CurrentDeviceInfo.GetIdentifier(), (SoundDevice::StopMode)m_CbnStoppedMode.GetCurSel());
+	SetDevice(m_CurrentDeviceInfo.GetIdentifier(), true); // Poll changed ASIO sample format and channel names
 	UpdateDevice();
 	UpdateStatistics();
 	CPropertyPage::OnOK();

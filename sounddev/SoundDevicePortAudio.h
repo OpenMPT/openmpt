@@ -44,7 +44,7 @@ protected:
 	double m_CurrentRealLatency; // seconds
 
 public:
-	CPortaudioDevice(SoundDevice::ID id, const std::wstring &internalID);
+	CPortaudioDevice(SoundDevice::Info info);
 	~CPortaudioDevice();
 
 public:
