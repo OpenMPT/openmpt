@@ -86,6 +86,14 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 			nVibSweep = 255 - nVibSweep;
 		}
 	}
+	// Convert incompatible autovibrato types
+	if(toType == MOD_TYPE_IT && nVibType == VIB_RAMP_UP)
+	{
+		nVibType = VIB_RAMP_DOWN;
+	} else if(toType == MOD_TYPE_XM && nVibType == VIB_RANDOM)
+	{
+		nVibType = VIB_SINE;
+	}
 }
 
 

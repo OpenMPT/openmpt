@@ -243,13 +243,6 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_SpinVolume.SetRange(0, 64);
 	m_SpinGlobalVol.SetRange(0, 64);
 
-	// Auto vibrato
-	m_ComboAutoVib.AddString("Sine");
-	m_ComboAutoVib.AddString("Square");
-	m_ComboAutoVib.AddString("Ramp Up");
-	m_ComboAutoVib.AddString("Ramp Down");
-	m_ComboAutoVib.AddString("Random");
-
 	for (UINT i = BASENOTE_MIN; i < BASENOTE_MAX; i++)
 	{
 		CHAR s[32];
@@ -714,12 +707,32 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 			transp = (int)sample.RelativeTone;
 		}
 		int basenote = 60 - transp;
-		if (basenote < BASENOTE_MIN) basenote = BASENOTE_MIN;
-		if (basenote >= BASENOTE_MAX) basenote = BASENOTE_MAX-1;
+		Limit(basenote, BASENOTE_MIN, BASENOTE_MAX - 1);
 		basenote -= BASENOTE_MIN;
 		if (basenote != m_CbnBaseNote.GetCurSel()) m_CbnBaseNote.SetCurSel(basenote);
-		// AutoVibrato
-		m_ComboAutoVib.SetCurSel(sample.nVibType);
+
+		// Auto vibrato
+		// Ramp up and ramp down are swapped in XM - probably because they ramp up the *period* instead of *frequency*.
+		const VibratoType rampUp = m_sndFile.GetType() == MOD_TYPE_XM ? VIB_RAMP_DOWN : VIB_RAMP_UP;
+		const VibratoType rampDown = m_sndFile.GetType() == MOD_TYPE_XM ? VIB_RAMP_UP : VIB_RAMP_DOWN;
+		m_ComboAutoVib.ResetContent();
+		m_ComboAutoVib.SetItemData(m_ComboAutoVib.AddString(_T("Sine")), VIB_SINE);
+		m_ComboAutoVib.SetItemData(m_ComboAutoVib.AddString(_T("Square")), VIB_SQUARE);
+		if(m_sndFile.GetType() != MOD_TYPE_IT || sample.nVibType == VIB_RAMP_UP)
+			m_ComboAutoVib.SetItemData(m_ComboAutoVib.AddString(_T("Ramp Up")), rampUp);
+		m_ComboAutoVib.SetItemData(m_ComboAutoVib.AddString(_T("Ramp Down")), rampDown);
+		if(m_sndFile.GetType() != MOD_TYPE_XM || sample.nVibType == VIB_RANDOM)
+			m_ComboAutoVib.SetItemData(m_ComboAutoVib.AddString(_T("Random")), VIB_RANDOM);
+
+		for(int i = 0; i < m_ComboAutoVib.GetCount(); i++)
+		{
+			if(m_ComboAutoVib.GetItemData(i) == sample.nVibType)
+			{
+				m_ComboAutoVib.SetCurSel(i);
+				break;
+			}
+		}
+
 		SetDlgItemInt(IDC_EDIT14, (UINT)sample.nVibSweep);
 		SetDlgItemInt(IDC_EDIT15, (UINT)sample.nVibDepth);
 		SetDlgItemInt(IDC_EDIT16, (UINT)sample.nVibRate);
@@ -2556,7 +2569,7 @@ void CCtrlSamples::OnVibTypeChanged()
 	int n = m_ComboAutoVib.GetCurSel();
 	if (n >= 0)
 	{
-		m_sndFile.GetSample(m_nSample).nVibType = static_cast<uint8>(n);
+		m_sndFile.GetSample(m_nSample).nVibType = static_cast<uint8>(m_ComboAutoVib.GetItemData(n));
 
 		PropagateAutoVibratoChanges();
 		SetModified(HINT_SAMPLEINFO, false);
@@ -3232,13 +3245,13 @@ void CCtrlSamples::PropagateAutoVibratoChanges() const
 			// Propagate changes to all samples that belong to this instrument.
 			for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
 			{
-				if(*sample <= m_sndFile.GetNumSamples() && *sample != m_nSample)
+				if(*sample <= m_sndFile.GetNumSamples())
 				{
 					m_sndFile.GetSample(*sample).nVibDepth = m_sndFile.GetSample(m_nSample).nVibDepth;
 					m_sndFile.GetSample(*sample).nVibType = m_sndFile.GetSample(m_nSample).nVibType;
 					m_sndFile.GetSample(*sample).nVibRate = m_sndFile.GetSample(m_nSample).nVibRate;
 					m_sndFile.GetSample(*sample).nVibSweep = m_sndFile.GetSample(m_nSample).nVibSweep;
-					m_modDoc.UpdateAllViews(nullptr, HINT_SAMPLEINFO | ((*sample) << HINT_SHIFT_SMP));
+					m_modDoc.UpdateAllViews(nullptr, HINT_SAMPLEINFO | ((*sample) << HINT_SHIFT_SMP), (CObject *)this);
 				}
 			}
 		}
