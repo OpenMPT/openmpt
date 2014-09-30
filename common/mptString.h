@@ -316,6 +316,10 @@ std::wstring ToWString(const float & x);
 std::wstring ToWString(const double & x);
 std::wstring ToWString(const long double & x);
 
+template <typename Tstring> struct ToStringTHelper {};
+template <> struct ToStringTHelper<std::string> { template <typename T> inline std::string operator() (const T & x) { return ToString(x); } };
+template <> struct ToStringTHelper<std::wstring> { template <typename T> inline std::wstring operator() (const T & x) { return ToWString(x); } };
+template<typename Tstring, typename T> inline Tstring ToStringT(const T & x) { return ToStringTHelper<Tstring>()(x); }
 
 struct fmt_base
 {
@@ -593,7 +597,7 @@ std::string PrintImpl(const std::string & format
 	, const std::string & x8 = std::string()
 	);
 
-std::wstring PrintImplW(const std::wstring & format
+std::wstring PrintImpl(const std::wstring & format
 	, const std::wstring & x1 = std::wstring()
 	, const std::wstring & x2 = std::wstring()
 	, const std::wstring & x3 = std::wstring()
@@ -793,7 +797,7 @@ std::wstring PrintW(const std::wstring & format
 	, const T1& x1
 )
 {
-	return detail::PrintImplW(format
+	return detail::PrintImpl(format
 		, ToWString(x1)
 	);
 }
@@ -807,7 +811,7 @@ std::wstring PrintW(const std::wstring & format
 	, const T2& x2
 )
 {
-	return detail::PrintImplW(format
+	return detail::PrintImpl(format
 		, ToWString(x1)
 		, ToWString(x2)
 	);
@@ -824,7 +828,7 @@ std::wstring PrintW(const std::wstring & format
 	, const T3& x3
 )
 {
-	return detail::PrintImplW(format
+	return detail::PrintImpl(format
 		, ToWString(x1)
 		, ToWString(x2)
 		, ToWString(x3)
@@ -844,7 +848,7 @@ std::wstring PrintW(const std::wstring & format
 	, const T4& x4
 )
 {
-	return detail::PrintImplW(format
+	return detail::PrintImpl(format
 		, ToWString(x1)
 		, ToWString(x2)
 		, ToWString(x3)
@@ -867,7 +871,7 @@ std::wstring PrintW(const std::wstring & format
 	, const T5& x5
 )
 {
-	return detail::PrintImplW(format
+	return detail::PrintImpl(format
 		, ToWString(x1)
 		, ToWString(x2)
 		, ToWString(x3)
@@ -893,7 +897,7 @@ std::wstring PrintW(const std::wstring & format
 	, const T6& x6
 )
 {
-	return detail::PrintImplW(format
+	return detail::PrintImpl(format
 		, ToWString(x1)
 		, ToWString(x2)
 		, ToWString(x3)
@@ -922,7 +926,7 @@ std::wstring PrintW(const std::wstring & format
 	, const T7& x7
 )
 {
-	return detail::PrintImplW(format
+	return detail::PrintImpl(format
 		, ToWString(x1)
 		, ToWString(x2)
 		, ToWString(x3)
@@ -954,7 +958,7 @@ std::wstring PrintW(const std::wstring & format
 	, const T8& x8
 )
 {
-	return detail::PrintImplW(format
+	return detail::PrintImpl(format
 		, ToWString(x1)
 		, ToWString(x2)
 		, ToWString(x3)
