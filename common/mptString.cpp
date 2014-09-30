@@ -1415,7 +1415,7 @@ std::string PrintImpl(const std::string & format
 	return PrintImplTemplate<std::string>(format, x1,x2,x3,x4,x5,x6,x7,x8);
 }
 
-std::wstring PrintImplW(const std::wstring & format
+std::wstring PrintImpl(const std::wstring & format
 	, const std::wstring & x1
 	, const std::wstring & x2
 	, const std::wstring & x3
