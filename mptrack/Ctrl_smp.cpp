@@ -2459,7 +2459,7 @@ void CCtrlSamples::OnPanningChanged()
 	if (IsLocked()) return;
 	int nPan = GetDlgItemInt(IDC_EDIT9);
 	if (nPan < 0) nPan = 0;
-	//rewbs.fix36944: sample pan range to 0-64.
+
 	if (m_sndFile.GetType() == MOD_TYPE_XM)
 	{
 		if (nPan > 255) nPan = 255;	// displayed panning will be 0-255 with XM
@@ -2468,7 +2468,7 @@ void CCtrlSamples::OnPanningChanged()
 		if (nPan > 64) nPan = 64;	// displayed panning will be 0-64 with anything but XM.
 		nPan = nPan << 2;			// so we x4 to get MPT's internal 0-256 range.
 	}
-	//end rewbs.fix36944
+
 	if (nPan != m_sndFile.GetSample(m_nSample).nPan)
 	{
 		m_sndFile.GetSample(m_nSample).nPan = (uint16)nPan;
@@ -2482,6 +2482,7 @@ void CCtrlSamples::OnFineTuneChanged()
 {
 	if (IsLocked()) return;
 	int n = GetDlgItemInt(IDC_EDIT5);
+	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Finetune");
 	if (m_sndFile.m_nType & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
 	{
 		if ((n > 0) && (n <= (m_sndFile.GetType() == MOD_TYPE_S3M ? 65535 : 9999999)) && (n != (int)m_sndFile.GetSample(m_nSample).nC5Speed))
@@ -2521,6 +2522,7 @@ void CCtrlSamples::OnBaseNoteChanged()
 	int n = (NOTE_MIDDLEC - NOTE_MIN) - (m_CbnBaseNote.GetCurSel() + BASENOTE_MIN);
 
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
+	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Transpose");
 
 	if (m_sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
 	{
@@ -3230,7 +3232,7 @@ void CCtrlSamples::PropagateAutoVibratoChanges() const
 			// Propagate changes to all samples that belong to this instrument.
 			for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
 			{
-				if(*sample <= m_sndFile.GetNumSamples())
+				if(*sample <= m_sndFile.GetNumSamples() && *sample != m_nSample)
 				{
 					m_sndFile.GetSample(*sample).nVibDepth = m_sndFile.GetSample(m_nSample).nVibDepth;
 					m_sndFile.GetSample(*sample).nVibType = m_sndFile.GetSample(m_nSample).nVibType;
