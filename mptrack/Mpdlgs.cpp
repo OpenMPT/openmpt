@@ -189,27 +189,32 @@ void COptionsSoundcard::SetInitialDevice()
 void COptionsSoundcard::SetDevice(SoundDevice::Identifier dev, bool forceReload)
 //------------------------------------------------------------------------------
 {
-	bool deviceChanged = (dev != m_CurrentDeviceInfo.GetIdentifier());
-	m_CurrentDeviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(dev);
-	m_CurrentDeviceCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, CMainFrame::GetMainFrame()->gpSoundDevice);
-	m_CurrentDeviceDynamicCaps = theApp.GetSoundDevicesManager()->GetDeviceDynamicCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice, true);
+	SoundDevice::Identifier olddev = m_CurrentDeviceInfo.GetIdentifier();
+	SoundDevice::Info newInfo;
+	SoundDevice::Caps newCaps;
+	SoundDevice::DynamicCaps newDynamicCaps;
+	SoundDevice::Settings newSettigs;
+	newInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(dev);
+	newCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, CMainFrame::GetMainFrame()->gpSoundDevice);
+	newDynamicCaps = theApp.GetSoundDevicesManager()->GetDeviceDynamicCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice, true);
+	bool deviceChanged = (dev != olddev);
 	if(deviceChanged || forceReload)
 	{
-		m_Settings = TrackerSettings::Instance().GetSoundDeviceSettings(dev);
+		newSettigs = TrackerSettings::Instance().GetSoundDeviceSettings(dev);
+	} else
+	{
+		newSettigs = m_Settings;
 	}
 	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(dev))
 	{
-		SoundDevice::Identifier newdev = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(m_CurrentDeviceInfo.GetIdentifier(), TrackerSettings::Instance().m_SoundDevicePreferSameTypeIfDeviceUnavailable).GetIdentifier();
-		if(newdev != dev)
-		{
-			Reporting::Information("Device not available. Reverting to default device.");
-			SetDevice(newdev);
-			UpdateEverything();
-		} else
-		{
-			Reporting::Warning("Device not available.");
-		}
+		Reporting::Information("Device not available. Reverting to old device.");
+		UpdateEverything();
+		return;
 	}
+	m_CurrentDeviceInfo = newInfo;
+	m_CurrentDeviceCaps = newCaps;
+	m_CurrentDeviceDynamicCaps = newDynamicCaps;
+	m_Settings = newSettigs;
 }
 
 
