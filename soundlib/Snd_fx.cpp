@@ -3152,8 +3152,8 @@ void CSoundFile::FinePortamentoUp(ModChannel *pChn, UINT param)
 			} else
 			{
 				pChn->nPeriod -= (int)(param * 4);
+				if (pChn->nPeriod < 1) pChn->nPeriod = 1;
 			}
-			if (pChn->nPeriod < 1) pChn->nPeriod = 1;
 		}
 	}
 }
@@ -3182,13 +3182,13 @@ void CSoundFile::FinePortamentoDown(ModChannel *pChn, UINT param)
 				pChn->nPeriod = Util::muldivr(pChn->nPeriod, LinearSlideDownTable[param & 0x0F], 65536);
 				if(oldPeriod == pChn->nPeriod)
 				{
-					pChn->nPeriod++;
+					pChn->nPeriod--;
 				}
 			} else
 			{
 				pChn->nPeriod += (int)(param * 4);
+				if (pChn->nPeriod > 0xFFFF) pChn->nPeriod = 0xFFFF;
 			}
-			if (pChn->nPeriod > 0xFFFF) pChn->nPeriod = 0xFFFF;
 		}
 	}
 }
@@ -3217,13 +3217,13 @@ void CSoundFile::ExtraFinePortamentoUp(ModChannel *pChn, UINT param)
 				pChn->nPeriod = Util::muldivr(pChn->nPeriod, FineLinearSlideUpTable[param & 0x0F], 65536);
 				if(oldPeriod == pChn->nPeriod)
 				{
-					pChn->nPeriod--;
+					pChn->nPeriod++;
 				}
 			} else
 			{
 				pChn->nPeriod -= (int)(param);
+				if (pChn->nPeriod < 1) pChn->nPeriod = 1;
 			}
-			if (pChn->nPeriod < 1) pChn->nPeriod = 1;
 		}
 	}
 }
@@ -3252,13 +3252,13 @@ void CSoundFile::ExtraFinePortamentoDown(ModChannel *pChn, UINT param)
 				pChn->nPeriod = Util::muldivr(pChn->nPeriod, FineLinearSlideDownTable[param & 0x0F], 65536);
 				if(oldPeriod == pChn->nPeriod)
 				{
-					pChn->nPeriod++;
+					pChn->nPeriod--;
 				}
 			} else
 			{
 				pChn->nPeriod += (int)(param);
+				if (pChn->nPeriod > 0xFFFF) pChn->nPeriod = 0xFFFF;
 			}
-			if (pChn->nPeriod > 0xFFFF) pChn->nPeriod = 0xFFFF;
 		}
 	}
 }
@@ -4645,7 +4645,7 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, LONG nFreqSlide) const
 		int32 nOldPeriod = pChn->nPeriod;
 		if (nFreqSlide < 0)
 		{
-			UINT n = (- nFreqSlide) >> 2;
+			UINT n = (-nFreqSlide) / 4;
 			if (n)
 			{
 				if (n > 255) n = 255;
@@ -4654,7 +4654,7 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, LONG nFreqSlide) const
 			}
 		} else
 		{
-			UINT n = (nFreqSlide) >> 2;
+			UINT n = (nFreqSlide) / 4;
 			if (n)
 			{
 				if (n > 255) n = 255;
