@@ -585,7 +585,9 @@ const int8 ft2VibratoTable[256] =
 
 
 
-// Apart from a few small differences, this table seems to contain elements with a difference of 59.
+// round(65536 * 2**(n/768))
+// 768 = 64 extra-fine finetune steps for 12 notes
+// Table content is in 16.16 format
 const uint32 FineLinearSlideUpTable[16] =
 {
 	65536, 65595, 65654, 65714,	65773, 65832, 65892, 65951,
@@ -593,7 +595,13 @@ const uint32 FineLinearSlideUpTable[16] =
 };
 
 
-// Apart from a few small differences, this table seems to contain elements with a difference of 59.
+// round(65536 * 2**(-n/768))
+// 768 = 64 extra-fine finetune steps for 12 notes
+// Table content is in 16.16 format
+// Note that there are a few errors in this table (typos?), but well, this table comes straight from ITTECH.TXT...
+// Entry 0 (65535) should be 65536 (this value is unused and most likely stored this way so that it fits in a 16-bit integer)
+// Entry 11 (64888) should be 64889 - rounding error?
+// Entry 15 (64645) should be 64655 - typo?
 const uint32 FineLinearSlideDownTable[16] =
 {
 	65535, 65477, 65418, 65359, 65300, 65241, 65182, 65123,
