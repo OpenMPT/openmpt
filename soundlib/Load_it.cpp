@@ -309,7 +309,7 @@ std::string CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
 		}
 	} else
 	{
-		version = mpt::String::Print("Schism Tracker %1.%2", 0, mpt::fmt::hex(cwtv & 0xFF));
+		version = mpt::String::Print("Schism Tracker 0.%1", mpt::fmt::hex(cwtv & 0xFF));
 	}
 	return version;
 }
@@ -774,7 +774,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		std::vector<uint8> chnMask(GetNumChannels());
 		std::vector<ModCommand> lastValue(GetNumChannels(), ModCommand::Empty());
 
-		ModCommand *m = Patterns[pat];
+		ModCommand *patData = Patterns[pat];
 		ROWINDEX row = 0;
 		while(row < numRows && patternData.AreBytesLeft())
 		{
@@ -782,7 +782,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			if(!b)
 			{
 				row++;
-				m += GetNumChannels();
+				patData += GetNumChannels();
 				continue;
 			}
 
@@ -806,102 +806,92 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			// Now we grab the data for this particular row/channel.
+			ModCommand dummy;
+			ModCommand &m = ch < m_nChannels ? patData[ch] : dummy;
 
-			if((chnMask[ch] & 0x10) && (ch < m_nChannels))
+			if(chnMask[ch] & 0x10)
 			{
-				m[ch].note = lastValue[ch].note;
+				m.note = lastValue[ch].note;
 			}
-			if((chnMask[ch] & 0x20) && (ch < m_nChannels))
+			if(chnMask[ch] & 0x20)
 			{
-				m[ch].instr = lastValue[ch].instr;
+				m.instr = lastValue[ch].instr;
 			}
-			if((chnMask[ch] & 0x40) && (ch < m_nChannels))
+			if(chnMask[ch] & 0x40)
 			{
-				m[ch].volcmd = lastValue[ch].volcmd;
-				m[ch].vol = lastValue[ch].vol;
+				m.volcmd = lastValue[ch].volcmd;
+				m.vol = lastValue[ch].vol;
 			}
-			if((chnMask[ch] & 0x80) && (ch < m_nChannels))
+			if(chnMask[ch] & 0x80)
 			{
-				m[ch].command = lastValue[ch].command;
-				m[ch].param = lastValue[ch].param;
+				m.command = lastValue[ch].command;
+				m.param = lastValue[ch].param;
 			}
 			if(chnMask[ch] & 1)	// Note
 			{
 				uint8 note = patternData.ReadUint8();
-				if(ch < m_nChannels)
+				if(note < 0x80) note++;
+				if(!(GetType() & MOD_TYPE_MPT))
 				{
-					if(note < 0x80) note++;
-					if(!(GetType() & MOD_TYPE_MPT))
-					{
-						if(note > NOTE_MAX && note < 0xFD) note = NOTE_FADE;
-						else if(note == 0xFD) note = NOTE_NONE;
-					}
-					m[ch].note = note;
-					lastValue[ch].note = note;
+					if(note > NOTE_MAX && note < 0xFD) note = NOTE_FADE;
+					else if(note == 0xFD) note = NOTE_NONE;
 				}
+				m.note = note;
+				lastValue[ch].note = note;
 			}
 			if(chnMask[ch] & 2)
 			{
 				uint8 instr = patternData.ReadUint8();
-				if(ch < m_nChannels)
-				{
-					m[ch].instr = instr;
-					lastValue[ch].instr = instr;
-				}
+				m.instr = instr;
+				lastValue[ch].instr = instr;
 			}
 			if(chnMask[ch] & 4)
 			{
 				uint8 vol = patternData.ReadUint8();
-				if(ch < m_nChannels)
+				// 0-64: Set Volume
+				if(vol <= 64) { m.volcmd = VOLCMD_VOLUME; m.vol = vol; } else
+				// 128-192: Set Panning
+				if(vol >= 128 && vol <= 192) { m.volcmd = VOLCMD_PANNING; m.vol = vol - 128; } else
+				// 65-74: Fine Volume Up
+				if(vol < 75) { m.volcmd = VOLCMD_FINEVOLUP; m.vol = vol - 65; } else
+				// 75-84: Fine Volume Down
+				if(vol < 85) { m.volcmd = VOLCMD_FINEVOLDOWN; m.vol = vol - 75; } else
+				// 85-94: Volume Slide Up
+				if(vol < 95) { m.volcmd = VOLCMD_VOLSLIDEUP; m.vol = vol - 85; } else
+				// 95-104: Volume Slide Down
+				if(vol < 105) { m.volcmd = VOLCMD_VOLSLIDEDOWN; m.vol = vol - 95; } else
+				// 105-114: Pitch Slide Up
+				if(vol < 115) { m.volcmd = VOLCMD_PORTADOWN; m.vol = vol - 105; } else
+				// 115-124: Pitch Slide Down
+				if(vol < 125) { m.volcmd = VOLCMD_PORTAUP; m.vol = vol - 115; } else
+				// 193-202: Portamento To
+				if(vol >= 193 && vol <= 202) { m.volcmd = VOLCMD_TONEPORTAMENTO; m.vol = vol - 193; } else
+				// 203-212: Vibrato depth
+				if(vol >= 203 && vol <= 212)
 				{
-					// 0-64: Set Volume
-					if(vol <= 64) { m[ch].volcmd = VOLCMD_VOLUME; m[ch].vol = vol; } else
-					// 128-192: Set Panning
-					if(vol >= 128 && vol <= 192) { m[ch].volcmd = VOLCMD_PANNING; m[ch].vol = vol - 128; } else
-					// 65-74: Fine Volume Up
-					if(vol < 75) { m[ch].volcmd = VOLCMD_FINEVOLUP; m[ch].vol = vol - 65; } else
-					// 75-84: Fine Volume Down
-					if(vol < 85) { m[ch].volcmd = VOLCMD_FINEVOLDOWN; m[ch].vol = vol - 75; } else
-					// 85-94: Volume Slide Up
-					if(vol < 95) { m[ch].volcmd = VOLCMD_VOLSLIDEUP; m[ch].vol = vol - 85; } else
-					// 95-104: Volume Slide Down
-					if(vol < 105) { m[ch].volcmd = VOLCMD_VOLSLIDEDOWN; m[ch].vol = vol - 95; } else
-					// 105-114: Pitch Slide Up
-					if(vol < 115) { m[ch].volcmd = VOLCMD_PORTADOWN; m[ch].vol = vol - 105; } else
-					// 115-124: Pitch Slide Down
-					if(vol < 125) { m[ch].volcmd = VOLCMD_PORTAUP; m[ch].vol = vol - 115; } else
-					// 193-202: Portamento To
-					if(vol >= 193 && vol <= 202) { m[ch].volcmd = VOLCMD_TONEPORTAMENTO; m[ch].vol = vol - 193; } else
-					// 203-212: Vibrato depth
-					if(vol >= 203 && vol <= 212)
-					{
-						m[ch].volcmd = VOLCMD_VIBRATODEPTH; m[ch].vol = vol - 203;
-						// Old versions of ModPlug saved this as vibrato speed instead, so let's fix that.
-						if(m[ch].vol && m_dwLastSavedWithVersion && m_dwLastSavedWithVersion <= MAKE_VERSION_NUMERIC(1, 17, 02, 54))
-							m[ch].volcmd = VOLCMD_VIBRATOSPEED;
-					} else
-					// 213-222: Unused (was velocity)
-					// 223-232: Offset
-					if(vol >= 223 && vol <= 232) { m[ch].volcmd = VOLCMD_OFFSET; m[ch].vol = vol - 223; }
-					lastValue[ch].volcmd = m[ch].volcmd;
-					lastValue[ch].vol = m[ch].vol;
-				}
+					m.volcmd = VOLCMD_VIBRATODEPTH; m.vol = vol - 203;
+					// Old versions of ModPlug saved this as vibrato speed instead, so let's fix that.
+					if(m.vol && m_dwLastSavedWithVersion && m_dwLastSavedWithVersion <= MAKE_VERSION_NUMERIC(1, 17, 02, 54))
+						m.volcmd = VOLCMD_VIBRATOSPEED;
+				} else
+				// 213-222: Unused (was velocity)
+				// 223-232: Offset
+				if(vol >= 223 && vol <= 232) { m.volcmd = VOLCMD_OFFSET; m.vol = vol - 223; }
+				lastValue[ch].volcmd = m.volcmd;
+				lastValue[ch].vol = m.vol;
 			}
 			// Reading command/param
 			if(chnMask[ch] & 8)
 			{
 				uint8 cmd = patternData.ReadUint8();
 				uint8 param = patternData.ReadUint8();
-				if(ch < m_nChannels)
+				if(cmd)
 				{
-					if(cmd)
-					{
-						m[ch].command = cmd;
-						m[ch].param = param;
-						S3MConvert(m[ch], true);
-						lastValue[ch].command = m[ch].command;
-						lastValue[ch].param = m[ch].param;
-					}
+					m.command = cmd;
+					m.param = param;
+					S3MConvert(m, true);
+					lastValue[ch].command = m.command;
+					lastValue[ch].param = m.param;
 				}
 			}
 		}
@@ -1055,15 +1045,14 @@ static uint32 SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 	num += (pModDoc != nullptr) ? 1 : 0;	// + 1 for this session
 #endif // MODPLUG_TRACKER
 
-	uint16 fnum = (uint16)MIN(num, uint16_max);		// Number of entries that are actually going to be written
-	const uint32 bytes_written = 2 + fnum * 8;		// Number of bytes that are actually going to be written
+	uint16 fnum = mpt::saturate_cast<uint16>(num);	// Number of entries that are actually going to be written
+	const uint32 bytesWritten = 2 + fnum * 8;		// Number of bytes that are actually going to be written
 
 	if(f == nullptr)
-		return bytes_written;
+		return bytesWritten;
 
 	// Write number of history entries
-	SwapBytesLE(fnum);
-	fwrite(&fnum, 2, 1, f);
+	mpt::IO::WriteIntLE(f, fnum);
 
 	// Write history data
 	const size_t start = (num > uint16_max) ? num - uint16_max : 0;
@@ -1101,7 +1090,7 @@ static uint32 SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 		fwrite(&itHistory, 1, sizeof(itHistory), f);
 	}
 
-	return bytes_written;
+	return bytesWritten;
 }
 
 
@@ -1207,7 +1196,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	memset(itHeader.chnpan, 0xA0, 64);
 	memset(itHeader.chnvol, 64, 64);
 
-	for (CHANNELINDEX ich = 0; ich < MIN(m_nChannels, 64); ich++) // Header only has room for settings for 64 chans...
+	for(CHANNELINDEX ich = 0; ich < std::min(m_nChannels, CHANNELINDEX(64)); ich++) // Header only has room for settings for 64 chans...
 	{
 		itHeader.chnpan[ich] = (uint8)(ChnSettings[ich].nPan >> 2);
 		if (ChnSettings[ich].dwFlags[CHN_SURROUND]) itHeader.chnpan[ich] = 100;
@@ -1701,14 +1690,12 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 				nPluginSize += plugin.nPluginDataSize;
 			}
 
-			// rewbs.modularPlugData
-			DWORD MPTxPlugDataSize = 4 + (sizeof(m_MixPlugins[i].fDryRatio)) +     //4 for ID and size of dryRatio
-									 4 + (sizeof(m_MixPlugins[i].defaultProgram)) +		// rewbs.plugDefaultProgram
-									 4 + 3 * sizeof(int32);								// Editor data
-								// for each extra entity, add 4 for ID, plus size of entity, plus optionally 4 for size of entity.
+			uint32 MPTxPlugDataSize = 4 + sizeof(float32) +		// 4 for ID and size of dryRatio
+									 4 + sizeof(int32) +		// Default Program
+									 4 + 3 * sizeof(int32);		// Editor data
+								// for each extra entity, add 4 for ID, plus 4 for size of entity, plus size of entity
 
-			nPluginSize += MPTxPlugDataSize + 4; //+4 is for size itself: sizeof(DWORD) is 4
-			// rewbs.modularPlugData
+			nPluginSize += MPTxPlugDataSize + 4; //+4 is for size itself: sizeof(uint32) is 4
 			if(f)
 			{
 				// write plugin ID
@@ -1751,9 +1738,8 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 				uint32 size = 2 * sizeof(int32);
 				SwapBytesLE(size);
 				fwrite(&size, sizeof(uint32), 1, f);
-				int32 x = m_MixPlugins[i].editorX, y = m_MixPlugins[i].editorY;
-				SwapBytesLE(x);
-				SwapBytesLE(y);
+				int32 x = SwapBytesReturnLE(m_MixPlugins[i].editorX);
+				int32 y = SwapBytesReturnLE(m_MixPlugins[i].editorY);
 				fwrite(&x, sizeof(int32), 1, f);
 				fwrite(&y, sizeof(int32), 1, f);
 
@@ -1762,7 +1748,7 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 			nTotalSize += nPluginSize + 8;
 		}
 	}
-	for(CHANNELINDEX j = 0; j < m_nChannels; j++)
+	for(CHANNELINDEX j = 0; j < GetNumChannels(); j++)
 	{
 		if(j < MAX_BASECHANNELS)
 		{
@@ -1856,33 +1842,32 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 					{
 						// do we recognize this chunk?
 						modularData.ReadArray(code);
-						//TODO: turn this into a switch statement like for modular instrument data
+						uint32 dataSize = 0;
+						if(!memcmp(code, "DWRT", 4) || !memcmp(code, "PROG", 4))
+						{
+							// Legacy system with fixed size chunks
+							dataSize = 4;
+						} else
+						{
+							dataSize = modularData.ReadUint32LE();
+						}
+						FileReader dataChunk = modularData.ReadChunk(dataSize);
+
 						if(!memcmp(code, "DWRT", 4))
 						{
-							m_MixPlugins[plug].fDryRatio = modularData.ReadFloatLE();
-						}
-						else if(!memcmp(code, "PROG", 4))
+							m_MixPlugins[plug].fDryRatio = dataChunk.ReadFloatLE();
+						} else if(!memcmp(code, "PROG", 4))
 						{
-							m_MixPlugins[plug].defaultProgram = modularData.ReadUint32LE();
-						}
-						else if(!memcmp(code, "MCRO", 4))
+							m_MixPlugins[plug].defaultProgram = dataChunk.ReadUint32LE();
+						} else if(!memcmp(code, "MCRO", 4))
 						{
 							// Read plugin-specific macros
-							//modularData.ReadStructPartial(m_MixPlugins[plug].macros, modularData.ReadUint32LE());
-						}
-						else if(!memcmp(code, "EWND", 4))
+							//dataChunk.ReadStructPartial(m_MixPlugins[plug].macros, dataChunk.GetLength());
+						} else if(!memcmp(code, "EWND", 4))
 						{
-							FileReader editorChunk = modularData.ReadChunk(modularData.ReadUint32LE());
-							m_MixPlugins[plug].editorX = editorChunk.ReadInt32LE();
-							m_MixPlugins[plug].editorY = editorChunk.ReadInt32LE();
+							m_MixPlugins[plug].editorX = dataChunk.ReadInt32LE();
+							m_MixPlugins[plug].editorY = dataChunk.ReadInt32LE();
 						}
-						//else if.. (add extra attempts to recognize chunks here)
-						else // otherwise move forward a byte.
-						{
-							// Why on earth would you use a modular chunk structure, but not store the size of chunks in the file?!
-							break;
-						}
-
 					}
 
 				}
@@ -1908,7 +1893,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) const
 //---------------------------------------------------------------------------------
 {
-	uint32 code = MAGIC4BE('M','P','T','X');							// write extension header code
+	uint32 code = MAGIC4BE('M','P','T','X');	// write extension header code
 	mpt::IO::WriteIntLE<uint32>(f, code);
 
 	if (nInstruments == 0)
