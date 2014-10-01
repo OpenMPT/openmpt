@@ -180,7 +180,7 @@ public:
 	static PathString FromLocale(const std::string &path) { return PathString(path); }
 	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, path)); }
 	static PathString FromWide(const std::wstring &path) { return PathString(mpt::ToCharset(mpt::CharsetLocale, path)); }
-	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToCharset(mpt::CharsetLocale, path); }
+	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToCharset(mpt::CharsetLocale, path)); }
 	RawPathString AsNative() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
 #else
@@ -189,7 +189,7 @@ public:
 	mpt::ustring ToUnicode() const { return mpt::ToUnicode(mpt::CharsetUTF8, path); }
 	static PathString FromUTF8(const std::string &path) { return path; }
 	static PathString FromWide(const std::wstring &path) { return PathString(mpt::ToCharset(mpt::CharsetUTF8, path)); }
-	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToCharset(mpt::CharsetUTF8, path); }
+	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToCharset(mpt::CharsetUTF8, path)); }
 	RawPathString AsNative() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
 #endif
