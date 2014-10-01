@@ -504,10 +504,10 @@ void WAVWriter::WriteMetatags(const FileTags &tags)
 
 
 // Write a single tag into a open idLIST chunk
-void WAVWriter::WriteTag(RIFFChunk::id_type id, const std::wstring &wideText)
-//---------------------------------------------------------------------------
+void WAVWriter::WriteTag(RIFFChunk::id_type id, const mpt::ustring &utext)
+//------------------------------------------------------------------------
 {
-	std::string text = mpt::ToCharset(mpt::CharsetWindows1252, wideText);
+	std::string text = mpt::ToCharset(mpt::CharsetWindows1252, utext);
 	if(!text.empty())
 	{
 		const size_t length = text.length() + 1;

@@ -474,7 +474,7 @@ protected:
 	void Write(const void *data, size_t numBytes);
 
 	// Write a single tag into a open idLIST chunk
-	void WriteTag(RIFFChunk::id_type id, const std::wstring &wideText);
+	void WriteTag(RIFFChunk::id_type id, const mpt::ustring &utext);
 };
 
 #endif // MODPLUG_NO_FILESAVE
