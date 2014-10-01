@@ -784,7 +784,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 	);
 }
 
@@ -796,7 +796,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 		, ToStringTFunctor<Tstring>()(x1)
 	);
 }
@@ -811,7 +811,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 		, ToStringTFunctor<Tstring>()(x1)
 		, ToStringTFunctor<Tstring>()(x2)
 	);
@@ -829,7 +829,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 		, ToStringTFunctor<Tstring>()(x1)
 		, ToStringTFunctor<Tstring>()(x2)
 		, ToStringTFunctor<Tstring>()(x3)
@@ -850,7 +850,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 		, ToStringTFunctor<Tstring>()(x1)
 		, ToStringTFunctor<Tstring>()(x2)
 		, ToStringTFunctor<Tstring>()(x3)
@@ -874,7 +874,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 		, ToStringTFunctor<Tstring>()(x1)
 		, ToStringTFunctor<Tstring>()(x2)
 		, ToStringTFunctor<Tstring>()(x3)
@@ -901,7 +901,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 		, ToStringTFunctor<Tstring>()(x1)
 		, ToStringTFunctor<Tstring>()(x2)
 		, ToStringTFunctor<Tstring>()(x3)
@@ -931,7 +931,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 		, ToStringTFunctor<Tstring>()(x1)
 		, ToStringTFunctor<Tstring>()(x2)
 		, ToStringTFunctor<Tstring>()(x3)
@@ -964,7 +964,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 		, ToStringTFunctor<Tstring>()(x1)
 		, ToStringTFunctor<Tstring>()(x2)
 		, ToStringTFunctor<Tstring>()(x3)
@@ -984,7 +984,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 	);
 }
 
@@ -996,7 +996,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 		, ToStringTFunctor<Tstring>()(x1)
 	);
 }
@@ -1011,7 +1011,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 		, ToStringTFunctor<Tstring>()(x1)
 		, ToStringTFunctor<Tstring>()(x2)
 	);
@@ -1029,7 +1029,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 		, ToStringTFunctor<Tstring>()(x1)
 		, ToStringTFunctor<Tstring>()(x2)
 		, ToStringTFunctor<Tstring>()(x3)
@@ -1050,7 +1050,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 		, ToStringTFunctor<Tstring>()(x1)
 		, ToStringTFunctor<Tstring>()(x2)
 		, ToStringTFunctor<Tstring>()(x3)
@@ -1074,7 +1074,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 		, ToStringTFunctor<Tstring>()(x1)
 		, ToStringTFunctor<Tstring>()(x2)
 		, ToStringTFunctor<Tstring>()(x3)
@@ -1101,7 +1101,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 		, ToStringTFunctor<Tstring>()(x1)
 		, ToStringTFunctor<Tstring>()(x2)
 		, ToStringTFunctor<Tstring>()(x3)
@@ -1131,7 +1131,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 		, ToStringTFunctor<Tstring>()(x1)
 		, ToStringTFunctor<Tstring>()(x2)
 		, ToStringTFunctor<Tstring>()(x3)
@@ -1164,7 +1164,7 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 )
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(format
+	return detail::PrintImpl(Tstring(format)
 		, ToStringTFunctor<Tstring>()(x1)
 		, ToStringTFunctor<Tstring>()(x2)
 		, ToStringTFunctor<Tstring>()(x3)
