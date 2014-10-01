@@ -146,7 +146,7 @@ public:
 #endif
 	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToWide(mpt::CharsetUTF8, path)); }
 	static PathString FromWide(const std::wstring &path) { return PathString(path); }
-	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToWide(path); }
+	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToWide(path)); }
 	RawPathString AsNative() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
 #if defined(_MFC_VER)
