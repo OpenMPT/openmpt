@@ -140,11 +140,13 @@ public:
 #endif
 	std::string ToUTF8() const { return mpt::ToCharset(mpt::CharsetUTF8, path); }
 	std::wstring ToWide() const { return path; }
+	mpt::ustring ToUnicode() const { return mpt::ToUnicode(path); }
 #if defined(MPT_WITH_CHARSET_LOCALE)
 	MPT_DEPRECATED_PATH static PathString FromLocale(const std::string &path) { return PathString(mpt::ToWide(mpt::CharsetLocale, path)); }
 #endif
 	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToWide(mpt::CharsetUTF8, path)); }
 	static PathString FromWide(const std::wstring &path) { return PathString(path); }
+	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToWide(path); }
 	RawPathString AsNative() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
 #if defined(_MFC_VER)
@@ -174,16 +176,20 @@ public:
 	std::string ToLocale() const { return path; }
 	std::string ToUTF8() const { return mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetLocale, path); }
 	std::wstring ToWide() const { return mpt::ToWide(mpt::CharsetLocale, path); }
+	mpt::ustring ToUnicode() const { return mpt::ToUnicode(mpt::CharsetLocale, path); }
 	static PathString FromLocale(const std::string &path) { return PathString(path); }
 	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, path)); }
 	static PathString FromWide(const std::wstring &path) { return PathString(mpt::ToCharset(mpt::CharsetLocale, path)); }
+	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToCharset(mpt::CharsetLocale, path); }
 	RawPathString AsNative() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
 #else
 	std::string ToUTF8() const { return path; }
 	std::wstring ToWide() const { return mpt::ToWide(mpt::CharsetUTF8, path); }
+	mpt::ustring ToUnicode() const { return mpt::ToUnicode(mpt::CharsetUTF8, path); }
 	static PathString FromUTF8(const std::string &path) { return path; }
 	static PathString FromWide(const std::wstring &path) { return PathString(mpt::ToCharset(mpt::CharsetUTF8, path)); }
+	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToCharset(mpt::CharsetUTF8, path); }
 	RawPathString AsNative() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
 #endif
