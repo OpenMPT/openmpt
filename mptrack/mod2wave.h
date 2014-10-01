@@ -23,13 +23,13 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct StoredTags
 {
-	Setting<std::wstring> artist;
-	Setting<std::wstring> album;
-	Setting<std::wstring> trackno;
-	Setting<std::wstring> year;
-	Setting<std::wstring> url;
+	Setting<mpt::ustring> artist;
+	Setting<mpt::ustring> album;
+	Setting<mpt::ustring> trackno;
+	Setting<mpt::ustring> year;
+	Setting<mpt::ustring> url;
 
-	Setting<std::wstring> genre;
+	Setting<mpt::ustring> genre;
 
 	StoredTags(SettingsContainer &conf);
 

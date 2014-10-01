@@ -287,7 +287,7 @@ private:
 		std::memcpy(&buf[0], og.body, og.body_len);
 		WriteBuffer();
 	}
-	void AddCommentField(const std::string &field, const std::wstring &data)
+	void AddCommentField(const std::string &field, const mpt::ustring &data)
 	{
 		if(!field.empty() && !data.empty())
 		{
@@ -346,7 +346,7 @@ public:
 		AddCommentField("ENCODER", tags.encoder);
 		if(vorbis_tags)
 		{
-			AddCommentField("SOURCEMEDIA",L"tracked music file");
+			AddCommentField("SOURCEMEDIA", MPT_USTRING("tracked music file"));
 			AddCommentField("TITLE",       tags.title          );
 			AddCommentField("ARTIST",      tags.artist         );
 			AddCommentField("ALBUM",       tags.album          );

@@ -19,7 +19,7 @@ OPENMPT_NAMESPACE_BEGIN
 FileTags::FileTags()
 //------------------
 {
-	encoder = mpt::ToWide(mpt::CharsetASCII, MptVersion::GetOpenMPTVersionStr());
+	encoder = mpt::ToUnicode(mpt::CharsetASCII, MptVersion::GetOpenMPTVersionStr());
 }
 
 #endif // MODPLUG_NO_FILESAVE

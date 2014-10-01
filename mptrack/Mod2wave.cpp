@@ -78,32 +78,32 @@ static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outp
 }
 
 
-static std::wstring GetDefaultArtist()
+static mpt::ustring GetDefaultArtist()
 //------------------------------------
 {
 	if(std::getenv("USERNAME"))
 	{
-		return mpt::ToWide(mpt::CharsetLocale, std::getenv("USERNAME"));
+		return mpt::ToUnicode(mpt::CharsetLocale, std::getenv("USERNAME"));
 	}
-	return std::wstring();
+	return mpt::ustring();
 }
 
 
-static std::wstring GetDefaultYear()
+static mpt::ustring GetDefaultYear()
 //----------------------------------
 {
-	return mpt::ToWide(CTime::GetCurrentTime().Format("%Y"));
+	return mpt::ToUnicode(CTime::GetCurrentTime().Format("%Y"));
 }
 
 
 StoredTags::StoredTags(SettingsContainer &conf)
 //---------------------------------------------
 	: artist(conf, "Export", "TagArtist", GetDefaultArtist())
-	, album(conf, "Export", "TagAlbum", L"")
-	, trackno(conf, "Export", "TagTrackNo", L"")
+	, album(conf, "Export", "TagAlbum", MPT_USTRING(""))
+	, trackno(conf, "Export", "TagTrackNo", MPT_USTRING(""))
 	, year(conf, "Export", "TagYear", GetDefaultYear())
-	, url(conf, "Export", "TagURL", L"")
-	, genre(conf, "Export", "TagGenre", L"")
+	, url(conf, "Export", "TagURL", MPT_USTRING(""))
+	, genre(conf, "Export", "TagGenre", MPT_USTRING(""))
 {
 	return;
 }
@@ -239,8 +239,8 @@ BOOL CWaveConvert::OnInitDialog()
 void CWaveConvert::LoadTags()
 //---------------------------
 {
-	m_Settings.Tags.title = mpt::ToWide(mpt::CharsetLocale, m_SndFile.GetTitle());
-	m_Settings.Tags.comments = mpt::ToWide(mpt::CharsetLocale, m_SndFile.songMessage.GetFormatted(SongMessage::leLF));
+	m_Settings.Tags.title = mpt::ToUnicode(mpt::CharsetLocale, m_SndFile.GetTitle());
+	m_Settings.Tags.comments = mpt::ToUnicode(mpt::CharsetLocale, m_SndFile.songMessage.GetFormatted(SongMessage::leLF));
 	m_Settings.Tags.artist = m_Settings.storedTags.artist;
 	m_Settings.Tags.album = m_Settings.storedTags.album;
 	m_Settings.Tags.trackno = m_Settings.storedTags.trackno;
@@ -539,7 +539,7 @@ void CWaveConvert::FillDither()
 		m_CbnDither.EnableWindow(TRUE);
 		for(int dither = 0; dither < NumDitherModes; ++dither)
 		{
-			int ndx = m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName((DitherMode)dither) + L" dither"));
+			int ndx = m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName((DitherMode)dither) + MPT_USTRING(" dither")));
 			m_CbnDither.SetItemData(ndx, dither);
 		}
 	} else
@@ -547,7 +547,7 @@ void CWaveConvert::FillDither()
 		m_CbnDither.EnableWindow(FALSE);
 		for(int dither = 0; dither < NumDitherModes; ++dither)
 		{
-			int ndx = m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherNone) + L" dither"));
+			int ndx = m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherNone) + MPT_USTRING(" dither")));
 			m_CbnDither.SetItemData(ndx, dither);
 		}
 	}
@@ -735,40 +735,40 @@ void CWaveConvert::OnOK()
 		CString tmp;
 
 		m_EditTitle.GetWindowText(tmp);
-		m_Settings.Tags.title = mpt::ToWide(tmp);
+		m_Settings.Tags.title = mpt::ToUnicode(tmp);
 
 		m_EditAuthor.GetWindowText(tmp);
-		m_Settings.Tags.artist = mpt::ToWide(tmp);
+		m_Settings.Tags.artist = mpt::ToUnicode(tmp);
 
 		m_EditAlbum.GetWindowText(tmp);
-		m_Settings.Tags.album = mpt::ToWide(tmp);
+		m_Settings.Tags.album = mpt::ToUnicode(tmp);
 
 		m_EditURL.GetWindowText(tmp);
-		m_Settings.Tags.url = mpt::ToWide(tmp);
+		m_Settings.Tags.url = mpt::ToUnicode(tmp);
 
 		if((encTraits->modesWithFixedGenres & encSettings.Mode) && !encTraits->genres.empty())
 		{
 			m_CbnGenre.GetWindowText(tmp);
-			m_Settings.Tags.genre = mpt::ToWide(tmp);
+			m_Settings.Tags.genre = mpt::ToUnicode(tmp);
 		} else
 		{
 			m_EditGenre.GetWindowText(tmp);
-			m_Settings.Tags.genre = mpt::ToWide(tmp);
+			m_Settings.Tags.genre = mpt::ToUnicode(tmp);
 		}
 
 		m_EditYear.GetWindowText(tmp);
-		m_Settings.Tags.year = mpt::ToWide(tmp);
-		if(m_Settings.Tags.year == L"0")
+		m_Settings.Tags.year = mpt::ToUnicode(tmp);
+		if(m_Settings.Tags.year == MPT_USTRING("0"))
 		{
-			m_Settings.Tags.year = std::wstring();
+			m_Settings.Tags.year = mpt::ustring();
 		}
 
 		if(!m_SndFile.songMessage.empty())
 		{
-			m_Settings.Tags.comments = mpt::ToWide(mpt::CharsetLocale, m_SndFile.songMessage.GetFormatted(SongMessage::leLF));
+			m_Settings.Tags.comments = mpt::ToUnicode(mpt::CharsetLocale, m_SndFile.songMessage.GetFormatted(SongMessage::leLF));
 		}
 
-		m_Settings.Tags.bpm = mpt::ToWString(m_SndFile.GetCurrentBPM());
+		m_Settings.Tags.bpm = mpt::ToUString(m_SndFile.GetCurrentBPM());
 
 		SaveTags();
 

@@ -23,16 +23,16 @@ OPENMPT_NAMESPACE_BEGIN
 // Noise Shaping (Dithering)
 
 
-std::wstring Dither::GetModeName(DitherMode mode)
+mpt::ustring Dither::GetModeName(DitherMode mode)
 //-----------------------------------------------
 {
 	switch(mode)
 	{
-		case DitherNone   : return L"no"     ; break;
-		case DitherDefault: return L"default"; break;
-		case DitherModPlug: return L"0.5 bit"; break;
-		case DitherSimple : return L"1 bit"  ; break;
-		default           : return L""       ; break;
+		case DitherNone   : return MPT_USTRING("no"     ); break;
+		case DitherDefault: return MPT_USTRING("default"); break;
+		case DitherModPlug: return MPT_USTRING("0.5 bit"); break;
+		case DitherSimple : return MPT_USTRING("1 bit"  ); break;
+		default           : return MPT_USTRING(""       ); break;
 	}
 }
 
