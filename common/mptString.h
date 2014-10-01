@@ -491,11 +491,11 @@ std::string FormatVal(const signed long & x, const Format & f);
 std::string FormatVal(const unsigned long & x, const Format & f);
 std::string FormatVal(const signed long long & x, const Format & f);
 std::string FormatVal(const unsigned long long & x, const Format & f);
-
 std::string FormatVal(const float & x, const Format & f);
 std::string FormatVal(const double & x, const Format & f);
 std::string FormatVal(const long double & x, const Format & f);
 
+#if MPT_WSTRING_FORMAT
 MPT_DEPRECATED std::wstring FormatValW(const char & x, const Format & f); // deprecated to catch potential API mis-use, use std::string(1, x) instead
 MPT_DEPRECATED std::wstring FormatValW(const wchar_t & x, const Format & f); // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
 std::wstring FormatValW(const bool & x, const Format & f);
@@ -509,10 +509,10 @@ std::wstring FormatValW(const signed long & x, const Format & f);
 std::wstring FormatValW(const unsigned long & x, const Format & f);
 std::wstring FormatValW(const signed long long & x, const Format & f);
 std::wstring FormatValW(const unsigned long long & x, const Format & f);
-
 std::wstring FormatValW(const float & x, const Format & f);
 std::wstring FormatValW(const double & x, const Format & f);
 std::wstring FormatValW(const long double & x, const Format & f);
+#endif
 
 template <typename Tstring> struct FormatValTFunctor {};
 template <> struct FormatValTFunctor<std::string> { template <typename T> inline std::string operator() (const T & x, const Format & f) { return FormatVal(x, f); } };
@@ -595,11 +595,13 @@ public:
 	{
 		return FormatVal(x, *this);
 	}
+#if MPT_WSTRING_FORMAT
 	template<typename T>
 	inline std::wstring ToWString(const T & x) const
 	{
 		return FormatValW(x, *this);
 	}
+#endif
 };
 
 
@@ -709,7 +711,9 @@ static inline Tstring sci(const T& x, std::size_t width = 0, int precision = -1)
 }; // struct fmtT
 
 typedef fmtT<std::string> fmt;
+#if MPT_WSTRING_FORMAT
 typedef fmtT<std::wstring> wfmt;
+#endif
 #if MPT_USTRING_MODE_WIDE
 typedef fmtT<std::wstring> ufmt;
 #else
@@ -719,7 +723,9 @@ typedef fmtT<mpt::ustring> ufmt;
 } // namespace mpt
 
 #define Stringify(x) mpt::ToString(x)
+#if MPT_WSTRING_FORMAT
 #define StringifyW(x) mpt::ToWString(x)
+#endif
 
 namespace mpt { namespace String {
 
@@ -750,6 +756,7 @@ std::string PrintImpl(const std::string & format
 	, const std::string & x8 = std::string()
 	);
 
+#if MPT_WSTRING_FORMAT
 std::wstring PrintImpl(const std::wstring & format
 	, const std::wstring & x1 = std::wstring()
 	, const std::wstring & x2 = std::wstring()
@@ -760,6 +767,7 @@ std::wstring PrintImpl(const std::wstring & format
 	, const std::wstring & x7 = std::wstring()
 	, const std::wstring & x8 = std::wstring()
 	);
+#endif
 
 #if MPT_USTRING_MODE_UTF8
 mpt::ustring PrintImpl(const mpt::ustring & format

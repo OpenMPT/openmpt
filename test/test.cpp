@@ -371,10 +371,12 @@ static noinline void TestStringFormatting()
 	VERIFY_EQUAL(mpt::fmt::hex0<6>(0x123e), "00123e");
 	VERIFY_EQUAL(mpt::fmt::hex0<2>(0x123e), "123e");
 
+#if MPT_WSTRING_FORMAT
 	VERIFY_EQUAL(mpt::wfmt::hex<3>((int32)-1), L"ffffffff");
 	VERIFY_EQUAL(mpt::wfmt::hex(0x123e), L"123e");
 	VERIFY_EQUAL(mpt::wfmt::hex0<6>(0x123e), L"00123e");
 	VERIFY_EQUAL(mpt::wfmt::hex0<2>(0x123e), L"123e");
+#endif
 
 	VERIFY_EQUAL(Stringify(-87.0f), "-87");
 	if(Stringify(-0.5e-6) != "-5e-007"
@@ -433,9 +435,11 @@ static noinline void TestStringFormatting()
 	// As this test case is not fatal, ignore it for now in order to make the test cases pass.
 	#endif
 
+#if MPT_WSTRING_FORMAT
 	VERIFY_EQUAL(mpt::wfmt::flt(6.12345, 7, 3), L"  6.123");
 	VERIFY_EQUAL(mpt::wfmt::fix(6.12345, 7, 3), L"  6.123");
 	VERIFY_EQUAL(mpt::wfmt::flt(6.12345, 0, 4), L"6.123");
+#endif
 
 	// basic functionality
 	VERIFY_EQUAL(mpt::String::Print("%1%2%3",1,2,3), "123");
@@ -444,9 +448,11 @@ static noinline void TestStringFormatting()
 
 	// template argument deduction of string type
 	VERIFY_EQUAL(mpt::String::Print(std::string("%1%2%3"),1,2,3), "123");
+#if MPT_WSTRING_FORMAT
 	VERIFY_EQUAL(mpt::String::Print(std::wstring(L"%1%2%3"),1,2,3), L"123");
 	VERIFY_EQUAL(mpt::String::Print(L"%1%2%3",1,2,3), L"123");
 	VERIFY_EQUAL(mpt::String::PrintW(L"%1%2%3",1,2,3), L"123");
+#endif
 
 	// escaping and error behviour of '%'
 	VERIFY_EQUAL(mpt::String::Print("%"), "%");

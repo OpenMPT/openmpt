@@ -40,7 +40,6 @@ unsigned long long ConvertStrToUnsignedLongLong(const std::string &str);
 float ConvertStrToFloat(const std::string &str);
 double ConvertStrToDouble(const std::string &str);
 long double ConvertStrToLongDouble(const std::string &str);
-
 template<typename T> inline T ConvertStrTo(const std::string &str); // not defined, generates compiler error for non-specialized types
 template<> inline bool ConvertStrTo(const std::string &str) { return ConvertStrToBool(str); }
 template<> inline signed char ConvertStrTo(const std::string &str) { return ConvertStrToSignedChar(str); }
@@ -57,6 +56,7 @@ template<> inline float ConvertStrTo(const std::string &str) { return ConvertStr
 template<> inline double ConvertStrTo(const std::string &str) { return ConvertStrToDouble(str); }
 template<> inline long double ConvertStrTo(const std::string &str) { return ConvertStrToLongDouble(str); }
 
+#if MPT_WSTRING_FORMAT
 bool ConvertStrToBool(const std::wstring &str);
 signed char ConvertStrToSignedChar(const std::wstring &str);
 unsigned char ConvertStrToUnsignedChar(const std::wstring &str);
@@ -71,7 +71,6 @@ unsigned long long ConvertStrToUnsignedLongLong(const std::wstring &str);
 float ConvertStrToFloat(const std::wstring &str);
 double ConvertStrToDouble(const std::wstring &str);
 long double ConvertStrToLongDouble(const std::wstring &str);
-
 template<typename T> inline T ConvertStrTo(const std::wstring &str); // not defined, generates compiler error for non-specialized types
 template<> inline bool ConvertStrTo(const std::wstring &str) { return ConvertStrToBool(str); }
 template<> inline signed char ConvertStrTo(const std::wstring &str) { return ConvertStrToSignedChar(str); }
@@ -87,6 +86,7 @@ template<> inline unsigned long long ConvertStrTo(const std::wstring &str) { ret
 template<> inline float ConvertStrTo(const std::wstring &str) { return ConvertStrToFloat(str); }
 template<> inline double ConvertStrTo(const std::wstring &str) { return ConvertStrToDouble(str); }
 template<> inline long double ConvertStrTo(const std::wstring &str) { return ConvertStrToLongDouble(str); }
+#endif
 
 template<typename T>
 inline T ConvertStrTo(const char *str)
@@ -98,6 +98,7 @@ inline T ConvertStrTo(const char *str)
 	return ConvertStrTo<T>(std::string(str));
 }
 
+#if MPT_WSTRING_FORMAT
 template<typename T>
 inline T ConvertStrTo(const wchar_t *str)
 {
@@ -107,6 +108,7 @@ inline T ConvertStrTo(const wchar_t *str)
 	}
 	return ConvertStrTo<T>(std::wstring(str));
 }
+#endif
 
 
 namespace mpt { namespace String {

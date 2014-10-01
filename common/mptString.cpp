@@ -1169,6 +1169,7 @@ inline std::string ToStringHelper(const T & x)
 	return o.str();
 }
 
+#if MPT_WSTRING_FORMAT
 template<typename T>
 inline std::wstring ToWStringHelper(const T & x)
 {
@@ -1177,6 +1178,7 @@ inline std::wstring ToWStringHelper(const T & x)
 	SaneInsert(o, x);
 	return o.str();
 }
+#endif
 
 #if defined(MPT_WITH_CHARSET_LOCALE)
 std::string ToString(const std::wstring & x) { return mpt::ToLocale(x); }
@@ -1204,6 +1206,7 @@ std::string ToString(const float & x) { return ToStringHelper(x); }
 std::string ToString(const double & x) { return ToStringHelper(x); }
 std::string ToString(const long double & x) { return ToStringHelper(x); }
 
+#if MPT_WSTRING_FORMAT
 #if defined(MPT_WITH_CHARSET_LOCALE)
 std::wstring ToWString(const std::string & x) { return mpt::ToWide(mpt::CharsetLocale, x); }
 std::wstring ToWString(const char * const & x) { return mpt::ToWide(mpt::CharsetLocale, x); }
@@ -1229,6 +1232,7 @@ std::wstring ToWString(const unsigned long long & x) { return ToWStringHelper(x)
 std::wstring ToWString(const float & x) { return ToWStringHelper(x); }
 std::wstring ToWString(const double & x) { return ToWStringHelper(x); }
 std::wstring ToWString(const long double & x) { return ToWStringHelper(x); }
+#endif
 
 
 template<typename Tostream>
@@ -1269,6 +1273,7 @@ inline std::string FormatValHelper(const T & x, const Format & f)
 	return o.str();
 }
 
+#if MPT_WSTRING_FORMAT
 template<typename T>
 inline std::wstring FormatValWHelper(const T & x, const Format & f)
 {
@@ -1278,6 +1283,7 @@ inline std::wstring FormatValWHelper(const T & x, const Format & f)
 	SaneInsert(o, x);
 	return o.str();
 }
+#endif
 
 // Parses a useful subset of standard sprintf syntax for specifying floating point formatting.
 template<typename Tchar>
@@ -1377,11 +1383,11 @@ std::string FormatVal(const signed long & x, const Format & f) { return FormatVa
 std::string FormatVal(const unsigned long & x, const Format & f) { return FormatValHelper(x, f); }
 std::string FormatVal(const signed long long & x, const Format & f) { return FormatValHelper(x, f); }
 std::string FormatVal(const unsigned long long & x, const Format & f) { return FormatValHelper(x, f); }
-
 std::string FormatVal(const float & x, const Format & f) { return FormatValHelper(x, f); }
 std::string FormatVal(const double & x, const Format & f) { return FormatValHelper(x, f); }
 std::string FormatVal(const long double & x, const Format & f) { return FormatValHelper(x, f); }
 
+#if MPT_WSTRING_FORMAT
 std::wstring FormatValW(const char & x, const Format & f) { return FormatValWHelper(x, f); }
 std::wstring FormatValW(const wchar_t & x, const Format & f) { return FormatValWHelper(x, f); }
 std::wstring FormatValW(const bool & x, const Format & f) { return FormatValWHelper(x, f); }
@@ -1395,10 +1401,10 @@ std::wstring FormatValW(const signed long & x, const Format & f) { return Format
 std::wstring FormatValW(const unsigned long & x, const Format & f) { return FormatValWHelper(x, f); }
 std::wstring FormatValW(const signed long long & x, const Format & f) { return FormatValWHelper(x, f); }
 std::wstring FormatValW(const unsigned long long & x, const Format & f) { return FormatValWHelper(x, f); }
-
 std::wstring FormatValW(const float & x, const Format & f) { return FormatValWHelper(x, f); }
 std::wstring FormatValW(const double & x, const Format & f) { return FormatValWHelper(x, f); }
 std::wstring FormatValW(const long double & x, const Format & f) { return FormatValWHelper(x, f); }
+#endif
 
 
 namespace String
@@ -1468,6 +1474,7 @@ std::string PrintImpl(const std::string & format
 	return PrintImplTemplate<std::string>(format, x1,x2,x3,x4,x5,x6,x7,x8);
 }
 
+#if MPT_WSTRING_FORMAT
 std::wstring PrintImpl(const std::wstring & format
 	, const std::wstring & x1
 	, const std::wstring & x2
@@ -1481,6 +1488,7 @@ std::wstring PrintImpl(const std::wstring & format
 {
 	return PrintImplTemplate<std::wstring>(format, x1,x2,x3,x4,x5,x6,x7,x8);
 }
+#endif
 
 #if MPT_USTRING_MODE_UTF8
 mpt::ustring PrintImpl(const mpt::ustring & format
