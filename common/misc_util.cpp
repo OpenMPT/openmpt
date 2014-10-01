@@ -50,6 +50,7 @@ template<> inline bool ConvertStrToHelper(const std::string &str) { return Conve
 template<> inline signed char ConvertStrToHelper(const std::string &str) { return static_cast<signed char>(ConvertStrToHelper<signed int>(str)); }
 template<> inline unsigned char ConvertStrToHelper(const std::string &str) { return static_cast<unsigned char>(ConvertStrToHelper<unsigned int>(str)); }
 
+#if MPT_WSTRING_FORMAT
 template<typename T>
 inline T ConvertStrToHelper(const std::wstring &str)
 {
@@ -65,6 +66,7 @@ inline T ConvertStrToHelper(const std::wstring &str)
 template<> inline bool ConvertStrToHelper(const std::wstring &str) { return ConvertStrToHelper<int>(str)?true:false; }
 template<> inline signed char ConvertStrToHelper(const std::wstring &str) { return static_cast<signed char>(ConvertStrToHelper<signed int>(str)); }
 template<> inline unsigned char ConvertStrToHelper(const std::wstring &str) { return static_cast<unsigned char>(ConvertStrToHelper<unsigned int>(str)); }
+#endif
 
 bool ConvertStrToBool(const std::string &str) { return ConvertStrToHelper<bool>(str); }
 signed char ConvertStrToSignedChar(const std::string &str) { return ConvertStrToHelper<signed char>(str); }
@@ -81,6 +83,7 @@ float ConvertStrToFloat(const std::string &str) { return ConvertStrToHelper<floa
 double ConvertStrToDouble(const std::string &str) { return ConvertStrToHelper<double>(str); }
 long double ConvertStrToLongDouble(const std::string &str) { return ConvertStrToHelper<long double>(str); }
 
+#if MPT_WSTRING_FORMAT
 bool ConvertStrToBool(const std::wstring &str) { return ConvertStrToHelper<bool>(str); }
 signed char ConvertStrToSignedChar(const std::wstring &str) { return ConvertStrToHelper<signed char>(str); }
 unsigned char ConvertStrToUnsignedChar(const std::wstring &str) { return ConvertStrToHelper<unsigned char>(str); }
@@ -95,6 +98,7 @@ unsigned long long ConvertStrToUnsignedLongLong(const std::wstring &str) { retur
 float ConvertStrToFloat(const std::wstring &str) { return ConvertStrToHelper<float>(str); }
 double ConvertStrToDouble(const std::wstring &str) { return ConvertStrToHelper<double>(str); }
 long double ConvertStrToLongDouble(const std::wstring &str) { return ConvertStrToHelper<long double>(str); }
+#endif
 
 
 namespace Util
