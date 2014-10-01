@@ -1093,6 +1093,59 @@ CString ToCString(const CStringW &str)
 #endif // MFC
 
 
+#if MPT_USTRING_MODE_WIDE
+// inline
+#else // !MPT_USTRING_MODE_WIDE
+mpt::ustring ToUnicode(const std::wstring &str)
+{
+	return String::EncodeImpl<mpt::ustring>(mpt::CharsetUTF8, str);
+}
+mpt::ustring ToUnicode(Charset from, const std::string &str)
+{
+	return String::ConvertImpl<mpt::ustring>(mpt::CharsetUTF8, from, str);
+}
+#if defined(_MFC_VER)
+mpt::ustring ToUnicode(const CString &str)
+{
+	#ifdef UNICODE
+		return String::EncodeImpl<mpt::ustring>(mpt::CharsetUTF8, str.GetString());
+	#else // !UNICODE
+		return String::ConvertImpl<mpt::ustring, std::string>(mpt::CharsetUTF8, mpt::CharsetLocale, str.GetString());
+	#endif // UNICODE
+}
+#ifndef UNICODE
+mpt::ustring ToUnicode(const CStringW &str)
+{
+	return String::EncodeImpl<mpt::ustring>(mpt::CharsetUTF8, str.GetString());
+}
+#endif // !UNICODE
+#endif // MFC
+#endif // MPT_USTRING_MODE_WIDE
+
+#if MPT_USTRING_MODE_WIDE
+// nothing, std::wstring overloads will catch all stuff
+#else // !MPT_USTRING_MODE_WIDE
+std::wstring ToWide(const mpt::ustring &str)
+{
+	return String::DecodeImpl<mpt::ustring>(mpt::CharsetUTF8, str);
+}
+std::string ToCharset(Charset to, const mpt::ustring &str)
+{
+	return String::ConvertImpl<std::string, mpt::ustring>(to, mpt::CharsetUTF8, str);
+}
+#if defined(_MFC_VER)
+CString ToCString(const mpt::ustring &str)
+{
+	#ifdef UNICODE
+		return String::DecodeImpl<mpt::ustring>(mpt::CharsetUTF8, str).c_str();
+	#else // !UNICODE
+		return String::ConvertImpl<std::string, mpt::ustring>(mpt::CharsetLocale, mpt::CharsetUTF8, str).c_str();
+	#endif // UNICODE
+}
+#endif // MFC
+#endif // MPT_USTRING_MODE_WIDE
+
+
 } // namespace mpt
 
 
@@ -1428,6 +1481,22 @@ std::wstring PrintImpl(const std::wstring & format
 {
 	return PrintImplTemplate<std::wstring>(format, x1,x2,x3,x4,x5,x6,x7,x8);
 }
+
+#if MPT_USTRING_MODE_UTF8
+mpt::ustring PrintImpl(const mpt::ustring & format
+	, const mpt::ustring & x1
+	, const mpt::ustring & x2
+	, const mpt::ustring & x3
+	, const mpt::ustring & x4
+	, const mpt::ustring & x5
+	, const mpt::ustring & x6
+	, const mpt::ustring & x7
+	, const mpt::ustring & x8
+	)
+{
+	return PrintImplTemplate<mpt::ustring>(format, x1,x2,x3,x4,x5,x6,x7,x8);
+}
+#endif
 
 } // namespace detail
 
