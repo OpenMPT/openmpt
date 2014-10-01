@@ -141,6 +141,14 @@ public:
 		type = SettingTypeString;
 		valueString = val;
 	}
+#if MPT_USTRING_MODE_UTF8
+	SettingValue(const mpt::ustring &val)
+	{
+		Init();
+		type = SettingTypeString;
+		valueString = mpt::ToWide(val);
+	}
+#endif
 	SettingValue(const std::vector<char> &val)
 	{
 		Init();
@@ -196,6 +204,15 @@ public:
 		typeTag = typeTag_;
 		valueString = val;
 	}
+#if MPT_USTRING_MODE_UTF8
+	SettingValue(const mpt::ustring &val, const std::string &typeTag_)
+	{
+		Init();
+		type = SettingTypeString;
+		typeTag = typeTag_;
+		valueString = mpt::ToWide(val);
+	}
+#endif
 	SettingValue(const std::vector<char> &val, const std::string &typeTag_)
 	{
 		Init();
@@ -245,6 +262,13 @@ public:
 		ASSERT(type == SettingTypeString);
 		return valueString;
 	}
+#if MPT_USTRING_MODE_UTF8
+	operator mpt::ustring () const
+	{
+		ASSERT(type == SettingTypeString);
+		return mpt::ToUnicode(valueString);
+	}
+#endif
 	operator std::vector<char> () const
 	{
 		ASSERT(type == SettingTypeBinary);
