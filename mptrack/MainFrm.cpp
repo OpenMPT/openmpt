@@ -840,11 +840,10 @@ bool CMainFrame::audioOpenDevice()
 	{
 		if(!gpSoundDevice->IsAvailable())
 		{
-			theApp.GetSoundDevicesManager()->SetDeviceUnavailable(deviceIdentifier);
 			Reporting::Error("Unable to open sound device: Device not available.");
 		} else
 		{
-			Reporting::Error("Unable to open sound device: Could not open sound device.");
+			Reporting::Error("Unable to open sound device.");
 		}
 		return false;
 	}

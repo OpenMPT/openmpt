@@ -161,28 +161,7 @@ COptionsSoundcard::COptionsSoundcard(std::wstring deviceIdentifier)
 void COptionsSoundcard::SetInitialDevice()
 //----------------------------------------
 {
-	bool ok = false;
-	std::set<SoundDevice::Identifier> triedSet;
-	while(!ok)
-	{
-		m_CurrentDeviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(m_InitialDeviceIdentifier, TrackerSettings::Instance().m_SoundDevicePreferSameTypeIfDeviceUnavailable);
-		SoundDevice::Identifier dev = m_CurrentDeviceInfo.GetIdentifier();
-		if(triedSet.find(dev) != triedSet.end())
-		{
-			Reporting::Error("No sound device available.");
-			break;
-		}
-		m_CurrentDeviceCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, CMainFrame::GetMainFrame()->gpSoundDevice);
-		m_CurrentDeviceDynamicCaps = theApp.GetSoundDevicesManager()->GetDeviceDynamicCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice, true);
-		m_Settings = TrackerSettings::Instance().GetSoundDeviceSettings(dev);
-		if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(dev))
-		{
-			triedSet.insert(dev);
-			m_InitialDeviceIdentifier = m_CurrentDeviceInfo.GetIdentifier();
-			continue; // makes progress because FindDeviceInfoBestMatch will not return devices again that were found out to be unavailable
-		}
-		ok = true;
-	}
+	SetDevice(m_InitialDeviceIdentifier, true);
 }
 
 
@@ -193,28 +172,22 @@ void COptionsSoundcard::SetDevice(SoundDevice::Identifier dev, bool forceReload)
 	SoundDevice::Info newInfo;
 	SoundDevice::Caps newCaps;
 	SoundDevice::DynamicCaps newDynamicCaps;
-	SoundDevice::Settings newSettigs;
+	SoundDevice::Settings newSettings;
 	newInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(dev);
 	newCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(dev, CMainFrame::GetMainFrame()->gpSoundDevice);
 	newDynamicCaps = theApp.GetSoundDevicesManager()->GetDeviceDynamicCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice, true);
 	bool deviceChanged = (dev != olddev);
 	if(deviceChanged || forceReload)
 	{
-		newSettigs = TrackerSettings::Instance().GetSoundDeviceSettings(dev);
+		newSettings = TrackerSettings::Instance().GetSoundDeviceSettings(dev);
 	} else
 	{
-		newSettigs = m_Settings;
-	}
-	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(dev))
-	{
-		Reporting::Information("Device not available. Reverting to old device.");
-		UpdateEverything();
-		return;
+		newSettings = m_Settings;
 	}
 	m_CurrentDeviceInfo = newInfo;
 	m_CurrentDeviceCaps = newCaps;
 	m_CurrentDeviceDynamicCaps = newDynamicCaps;
-	m_Settings = newSettigs;
+	m_Settings = newSettings;
 }
 
 
@@ -228,6 +201,7 @@ void COptionsSoundcard::OnSoundCardRescan()
 		CMainFrame::GetMainFrame()->gpSoundDevice = nullptr;
 	}
 	theApp.GetSoundDevicesManager()->ReEnumerate();
+	SetDevice(m_CurrentDeviceInfo.GetIdentifier(), true);
 	UpdateEverything();
 }
 
@@ -245,6 +219,10 @@ BOOL COptionsSoundcard::OnInitDialog()
 void COptionsSoundcard::UpdateLatency()
 //-------------------------------------
 {
+	{
+		GetDlgItem(IDC_STATIC_LATENCY)->EnableWindow(TRUE);
+		m_CbnLatencyMS.EnableWindow(TRUE);
+	}
 	// latency
 	{
 		static const double latencies [] = {
@@ -276,12 +254,20 @@ void COptionsSoundcard::UpdateLatency()
 			}
 		}
 	}
+	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
+	{
+		GetDlgItem(IDC_STATIC_LATENCY)->EnableWindow(FALSE);
+		m_CbnLatencyMS.EnableWindow(FALSE);
+	}
 }
 
 
 void COptionsSoundcard::UpdateUpdateInterval()
 //--------------------------------------------
 {
+	{
+		m_CbnUpdateIntervalMS.EnableWindow(TRUE);
+	}
 	// update interval
 	{
 		static const double updateIntervals [] = {
@@ -304,12 +290,21 @@ void COptionsSoundcard::UpdateUpdateInterval()
 			}
 		}
 	}
+	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
+	{
+		m_CbnUpdateIntervalMS.EnableWindow(FALSE);
+	}
 }
 
 
 void COptionsSoundcard::UpdateGeneral()
 //-------------------------------------
 {
+	{
+		m_CbnStoppedMode.EnableWindow(TRUE);
+		CPropertySheet *sheet = dynamic_cast<CPropertySheet *>(GetParent());
+		if(sheet) sheet->GetDlgItem(IDOK)->EnableWindow(TRUE);
+	}
 	// General
 	{
 		if(m_CurrentDeviceCaps.CanKeepDeviceRunning)
@@ -330,6 +325,12 @@ void COptionsSoundcard::UpdateGeneral()
 			m_CbnStoppedMode.SetCurSel(TrackerSettings::Instance().m_SoundSettingsStopMode);
 		}
 		CheckDlgButton(IDC_CHECK7, TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup ? BST_CHECKED : BST_UNCHECKED);
+	}
+	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
+	{
+		m_CbnStoppedMode.EnableWindow(FALSE);
+		CPropertySheet *sheet = dynamic_cast<CPropertySheet *>(GetParent());
+		if(sheet) sheet->GetDlgItem(IDOK)->EnableWindow(FALSE);
 	}
 }
 
@@ -356,11 +357,6 @@ void COptionsSoundcard::UpdateEverything()
 					// can be overwritten via [Sound Settings]MorePortaudio=1
 					continue;
 				}
-			}
-
-			if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(it->GetIdentifier()))
-			{
-				continue;
 			}
 
 			{
@@ -442,6 +438,9 @@ void COptionsSoundcard::UpdateDevice()
 void COptionsSoundcard::UpdateChannels()
 //--------------------------------------
 {
+	{
+		m_CbnChannels.EnableWindow(TRUE);
+	}
 	m_CbnChannels.ResetContent();
 	UINT maxChannels = 0;
 	if(m_CurrentDeviceDynamicCaps.channelNames.size() > 0)
@@ -462,12 +461,19 @@ void COptionsSoundcard::UpdateChannels()
 		}
 	}
 	m_CbnChannels.SetCurSel(sel);
+	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
+	{
+		m_CbnChannels.EnableWindow(FALSE);
+	}
 }
 
 
 void COptionsSoundcard::UpdateSampleFormat()
 //------------------------------------------
 {
+	{
+		m_CbnSampleFormat.EnableWindow(TRUE);
+	}
 	UINT n = 0;
 	m_CbnSampleFormat.ResetContent();
 	m_CbnSampleFormat.EnableWindow(m_CurrentDeviceCaps.CanSampleFormat ? TRUE : FALSE);
@@ -498,12 +504,19 @@ void COptionsSoundcard::UpdateSampleFormat()
 		}
 	}
 	m_CbnSampleFormat.SetCurSel(n);
+	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
+	{
+		m_CbnSampleFormat.EnableWindow(FALSE);
+	}
 }
 
 
 void COptionsSoundcard::UpdateDither()
 //------------------------------------
 {
+	{
+		m_CbnDither.EnableWindow(TRUE);
+	}
 	m_CbnDither.ResetContent();
 	SampleFormat sampleFormat = static_cast<SampleFormatEnum>(m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel()));
 	if(sampleFormat.IsInt() && sampleFormat.GetBitsPerSample() < 32)
@@ -533,12 +546,26 @@ void COptionsSoundcard::UpdateDither()
 	{
 		m_CbnDither.SetCurSel(m_Settings.DitherType);
 	}
+	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
+	{
+		m_CbnDither.EnableWindow(FALSE);
+	}
 }
 
 
 void COptionsSoundcard::UpdateChannelMapping()
 //--------------------------------------------
 {
+	{
+		GetDlgItem(IDC_STATIC_CHANNELMAPPING)->EnableWindow(TRUE);
+		for(int mch = 0; mch < NUM_CHANNELCOMBOBOXES; mch++)
+		{
+			CStatic *statictext = &m_StaticChannelMapping[mch];
+			CComboBox *combo = &m_CbnChannelMapping[mch];
+			statictext->EnableWindow(TRUE);
+			combo->EnableWindow(TRUE);
+		}
+	}
 	int usedChannels = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
 	if(m_Settings.ChannelMapping.GetNumHostChannels() != static_cast<uint32>(usedChannels))
 	{
@@ -569,6 +596,17 @@ void COptionsSoundcard::UpdateChannelMapping()
 					}
 				}
 			}
+		}
+	}
+	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
+	{
+		GetDlgItem(IDC_STATIC_CHANNELMAPPING)->EnableWindow(FALSE);
+		for(int mch = 0; mch < NUM_CHANNELCOMBOBOXES; mch++)
+		{
+			CStatic *statictext = &m_StaticChannelMapping[mch];
+			CComboBox *combo = &m_CbnChannelMapping[mch];
+			statictext->EnableWindow(FALSE);
+			combo->EnableWindow(FALSE);
 		}
 	}
 }
@@ -670,6 +708,11 @@ void COptionsSoundcard::OnChannelChanged(int channel)
 void COptionsSoundcard::UpdateSampleRates()
 //-----------------------------------------
 {
+	{
+		GetDlgItem(IDC_STATIC_FORMAT)->EnableWindow(TRUE);
+		m_CbnMixingFreq.EnableWindow(TRUE);
+	}
+
 	m_CbnMixingFreq.ResetContent();
 
 	std::vector<uint32> samplerates;
@@ -701,12 +744,25 @@ void COptionsSoundcard::UpdateSampleRates()
 		}
 	}
 	m_CbnMixingFreq.SetCurSel(n);
+	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
+	{
+		GetDlgItem(IDC_STATIC_FORMAT)->EnableWindow(FALSE);
+		m_CbnMixingFreq.EnableWindow(FALSE);
+	}
 }
 
 
 void COptionsSoundcard::UpdateControls()
 //--------------------------------------
 {
+	{
+		m_BtnDriverPanel.EnableWindow(TRUE);
+		GetDlgItem(IDC_CHECK4)->EnableWindow(TRUE);
+		GetDlgItem(IDC_CHECK5)->EnableWindow(TRUE);
+		GetDlgItem(IDC_CHECK9)->EnableWindow(TRUE);
+		GetDlgItem(IDC_STATIC_UPDATEINTERVAL)->EnableWindow(TRUE);
+		GetDlgItem(IDC_COMBO_UPDATEINTERVAL)->EnableWindow(TRUE);
+	}
 	if(!m_CurrentDeviceCaps.CanKeepDeviceRunning)
 	{
 		m_Settings.KeepDeviceRunning = false;
@@ -721,6 +777,15 @@ void COptionsSoundcard::UpdateControls()
 	CheckDlgButton(IDC_CHECK4, m_CurrentDeviceCaps.CanExclusiveMode && m_Settings.ExclusiveMode ? MF_CHECKED : MF_UNCHECKED);
 	CheckDlgButton(IDC_CHECK5, m_CurrentDeviceCaps.CanBoostThreadPriority && m_Settings.BoostThreadPriority ? MF_CHECKED : MF_UNCHECKED);
 	CheckDlgButton(IDC_CHECK9, m_CurrentDeviceCaps.CanUseHardwareTiming && m_Settings.UseHardwareTiming ? MF_CHECKED : MF_UNCHECKED);
+	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
+	{
+		m_BtnDriverPanel.EnableWindow(FALSE);
+		GetDlgItem(IDC_CHECK4)->EnableWindow(FALSE);
+		GetDlgItem(IDC_CHECK5)->EnableWindow(FALSE);
+		GetDlgItem(IDC_CHECK9)->EnableWindow(FALSE);
+		GetDlgItem(IDC_STATIC_UPDATEINTERVAL)->EnableWindow(FALSE);
+		GetDlgItem(IDC_COMBO_UPDATEINTERVAL)->EnableWindow(FALSE);
+	}
 }
 
 
@@ -735,6 +800,9 @@ BOOL COptionsSoundcard::OnSetActive()
 void COptionsSoundcard::OnOK()
 //----------------------------
 {
+	if(!theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
+	{
+
 	// General
 	{
 		TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup = IsDlgButtonChecked(IDC_CHECK7) ? true : false;
@@ -806,6 +874,14 @@ void COptionsSoundcard::OnOK()
 	SetDevice(m_CurrentDeviceInfo.GetIdentifier(), true); // Poll changed ASIO sample format and channel names
 	UpdateDevice();
 	UpdateStatistics();
+
+	} else
+	{
+
+		Reporting::Error("Sound card currently not available.");
+
+	}
+
 	CPropertyPage::OnOK();
 }
 
@@ -835,7 +911,13 @@ void COptionsSoundcard::UpdateStatistics()
 		m_EditStatistics.SetWindowText(s.c_str());
 	}	else
 	{
-		m_EditStatistics.SetWindowText("");
+		if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
+		{
+			m_EditStatistics.SetWindowText("Device currently unavailable.");
+		} else
+		{
+			m_EditStatistics.SetWindowText("");
+		}
 	}
 }
 
