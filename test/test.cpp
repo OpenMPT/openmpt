@@ -437,6 +437,29 @@ static noinline void TestStringFormatting()
 	VERIFY_EQUAL(mpt::wfmt::fix(6.12345, 7, 3), L"  6.123");
 	VERIFY_EQUAL(mpt::wfmt::flt(6.12345, 0, 4), L"6.123");
 
+	// basic functionality
+	VERIFY_EQUAL(mpt::String::Print("%1%2%3",1,2,3), "123");
+	VERIFY_EQUAL(mpt::String::Print("%1%1%1",1,2,3), "111");
+	VERIFY_EQUAL(mpt::String::Print("%3%3%3",1,2,3), "333");
+
+	// template argument deduction of string type
+	VERIFY_EQUAL(mpt::String::Print(std::string("%1%2%3"),1,2,3), "123");
+	VERIFY_EQUAL(mpt::String::Print(std::wstring(L"%1%2%3"),1,2,3), L"123");
+	VERIFY_EQUAL(mpt::String::Print(L"%1%2%3",1,2,3), L"123");
+	VERIFY_EQUAL(mpt::String::PrintW(L"%1%2%3",1,2,3), L"123");
+
+	// escaping and error behviour of '%'
+	VERIFY_EQUAL(mpt::String::Print("%"), "%");
+	VERIFY_EQUAL(mpt::String::Print("%%"), "%");
+	VERIFY_EQUAL(mpt::String::Print("%%%"), "%%");
+	VERIFY_EQUAL(mpt::String::Print("%1", "a"), "a");
+	VERIFY_EQUAL(mpt::String::Print("%1%", "a"), "a%");
+	VERIFY_EQUAL(mpt::String::Print("%1%%", "a"), "a%");
+	VERIFY_EQUAL(mpt::String::Print("%1%%%", "a"), "a%%");
+	VERIFY_EQUAL(mpt::String::Print("%%1", "a"), "%1");
+	VERIFY_EQUAL(mpt::String::Print("%%%1", "a"), "%a");
+	VERIFY_EQUAL(mpt::String::Print("%b", "a"), "%b");
+
 }
 
 

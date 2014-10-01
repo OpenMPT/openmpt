@@ -316,10 +316,10 @@ std::wstring ToWString(const float & x);
 std::wstring ToWString(const double & x);
 std::wstring ToWString(const long double & x);
 
-template <typename Tstring> struct ToStringTHelper {};
-template <> struct ToStringTHelper<std::string> { template <typename T> inline std::string operator() (const T & x) { return ToString(x); } };
-template <> struct ToStringTHelper<std::wstring> { template <typename T> inline std::wstring operator() (const T & x) { return ToWString(x); } };
-template<typename Tstring, typename T> inline Tstring ToStringT(const T & x) { return ToStringTHelper<Tstring>()(x); }
+template <typename Tstring> struct ToStringTFunctor {};
+template <> struct ToStringTFunctor<std::string> { template <typename T> inline std::string operator() (const T & x) { return ToString(x); } };
+template <> struct ToStringTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x) { return ToWString(x); } };
+template<typename Tstring, typename T> inline Tstring ToStringT(const T & x) { return ToStringTFunctor<Tstring>()(x); }
 
 struct fmt_base
 {
@@ -586,6 +586,16 @@ namespace mpt { namespace String {
 namespace detail
 {
 
+template <typename T> struct to_string_type { };
+template <> struct to_string_type<std::string    > { typedef std::string  type; };
+template <> struct to_string_type<char           > { typedef std::string  type; };
+template <> struct to_string_type<char *         > { typedef std::string  type; };
+template <> struct to_string_type<const char *   > { typedef std::string  type; };
+template <> struct to_string_type<std::wstring   > { typedef std::wstring type; };
+template <> struct to_string_type<wchar_t        > { typedef std::wstring type; };
+template <> struct to_string_type<wchar_t *      > { typedef std::wstring type; };
+template <> struct to_string_type<const wchar_t *> { typedef std::wstring type; };
+
 std::string PrintImpl(const std::string & format
 	, const std::string & x1 = std::string()
 	, const std::string & x2 = std::string()
@@ -610,260 +620,96 @@ std::wstring PrintImpl(const std::wstring & format
 
 } // namespace detail
 
-template<
-	typename T1
+// C and C++ string version
+
+template<typename Tformat
 >
-std::string Print(const std::string & format
-	, const T1& x1
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat & format
 )
 {
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
 	return detail::PrintImpl(format
-		, ToString(x1)
 	);
 }
 
-template<
-	typename T1,
-	typename T2
+template<typename Tformat
+	, typename T1
 >
-std::string Print(const std::string & format
-	, const T1& x1
-	, const T2& x2
-)
-{
-	return detail::PrintImpl(format
-		, ToString(x1)
-		, ToString(x2)
-	);
-}
-
-template<
-	typename T1,
-	typename T2,
-	typename T3
->
-std::string Print(const std::string & format
-	, const T1& x1
-	, const T2& x2
-	, const T3& x3
-)
-{
-	return detail::PrintImpl(format
-		, ToString(x1)
-		, ToString(x2)
-		, ToString(x3)
-	);
-}
-
-template<
-	typename T1,
-	typename T2,
-	typename T3,
-	typename T4
->
-std::string Print(const std::string & format
-	, const T1& x1
-	, const T2& x2
-	, const T3& x3
-	, const T4& x4
-)
-{
-	return detail::PrintImpl(format
-		, ToString(x1)
-		, ToString(x2)
-		, ToString(x3)
-		, ToString(x4)
-	);
-}
-
-template<
-	typename T1,
-	typename T2,
-	typename T3,
-	typename T4,
-	typename T5
->
-std::string Print(const std::string & format
-	, const T1& x1
-	, const T2& x2
-	, const T3& x3
-	, const T4& x4
-	, const T5& x5
-)
-{
-	return detail::PrintImpl(format
-		, ToString(x1)
-		, ToString(x2)
-		, ToString(x3)
-		, ToString(x4)
-		, ToString(x5)
-	);
-}
-
-template<
-	typename T1,
-	typename T2,
-	typename T3,
-	typename T4,
-	typename T5,
-	typename T6
->
-std::string Print(const std::string & format
-	, const T1& x1
-	, const T2& x2
-	, const T3& x3
-	, const T4& x4
-	, const T5& x5
-	, const T6& x6
-)
-{
-	return detail::PrintImpl(format
-		, ToString(x1)
-		, ToString(x2)
-		, ToString(x3)
-		, ToString(x4)
-		, ToString(x5)
-		, ToString(x6)
-	);
-}
-
-template<
-	typename T1,
-	typename T2,
-	typename T3,
-	typename T4,
-	typename T5,
-	typename T6,
-	typename T7
->
-std::string Print(const std::string & format
-	, const T1& x1
-	, const T2& x2
-	, const T3& x3
-	, const T4& x4
-	, const T5& x5
-	, const T6& x6
-	, const T7& x7
-)
-{
-	return detail::PrintImpl(format
-		, ToString(x1)
-		, ToString(x2)
-		, ToString(x3)
-		, ToString(x4)
-		, ToString(x5)
-		, ToString(x6)
-		, ToString(x7)
-	);
-}
-
-template<
-	typename T1,
-	typename T2,
-	typename T3,
-	typename T4,
-	typename T5,
-	typename T6,
-	typename T7,
-	typename T8
->
-std::string Print(const std::string & format
-	, const T1& x1
-	, const T2& x2
-	, const T3& x3
-	, const T4& x4
-	, const T5& x5
-	, const T6& x6
-	, const T7& x7
-	, const T8& x8
-)
-{
-	return detail::PrintImpl(format
-		, ToString(x1)
-		, ToString(x2)
-		, ToString(x3)
-		, ToString(x4)
-		, ToString(x5)
-		, ToString(x6)
-		, ToString(x7)
-		, ToString(x8)
-	);
-}
-
-template<
-	typename T1
->
-std::wstring PrintW(const std::wstring & format
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat & format
 	, const T1& x1
 )
 {
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
 	return detail::PrintImpl(format
-		, ToWString(x1)
+		, ToStringTFunctor<Tstring>()(x1)
 	);
 }
 
-template<
-	typename T1,
-	typename T2
+template<typename Tformat
+	, typename T1
+	, typename T2
 >
-std::wstring PrintW(const std::wstring & format
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat & format
 	, const T1& x1
 	, const T2& x2
 )
 {
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
 	return detail::PrintImpl(format
-		, ToWString(x1)
-		, ToWString(x2)
+		, ToStringTFunctor<Tstring>()(x1)
+		, ToStringTFunctor<Tstring>()(x2)
 	);
 }
 
-template<
-	typename T1,
-	typename T2,
-	typename T3
+template<typename Tformat
+	, typename T1
+	, typename T2
+	, typename T3
 >
-std::wstring PrintW(const std::wstring & format
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat & format
 	, const T1& x1
 	, const T2& x2
 	, const T3& x3
 )
 {
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
 	return detail::PrintImpl(format
-		, ToWString(x1)
-		, ToWString(x2)
-		, ToWString(x3)
+		, ToStringTFunctor<Tstring>()(x1)
+		, ToStringTFunctor<Tstring>()(x2)
+		, ToStringTFunctor<Tstring>()(x3)
 	);
 }
 
-template<
-	typename T1,
-	typename T2,
-	typename T3,
-	typename T4
+template<typename Tformat
+	, typename T1
+	, typename T2
+	, typename T3
+	, typename T4
 >
-std::wstring PrintW(const std::wstring & format
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat & format
 	, const T1& x1
 	, const T2& x2
 	, const T3& x3
 	, const T4& x4
 )
 {
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
 	return detail::PrintImpl(format
-		, ToWString(x1)
-		, ToWString(x2)
-		, ToWString(x3)
-		, ToWString(x4)
+		, ToStringTFunctor<Tstring>()(x1)
+		, ToStringTFunctor<Tstring>()(x2)
+		, ToStringTFunctor<Tstring>()(x3)
+		, ToStringTFunctor<Tstring>()(x4)
 	);
 }
 
-template<
-	typename T1,
-	typename T2,
-	typename T3,
-	typename T4,
-	typename T5
+template<typename Tformat
+	, typename T1
+	, typename T2
+	, typename T3
+	, typename T4
+	, typename T5
 >
-std::wstring PrintW(const std::wstring & format
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat & format
 	, const T1& x1
 	, const T2& x2
 	, const T3& x3
@@ -871,24 +717,25 @@ std::wstring PrintW(const std::wstring & format
 	, const T5& x5
 )
 {
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
 	return detail::PrintImpl(format
-		, ToWString(x1)
-		, ToWString(x2)
-		, ToWString(x3)
-		, ToWString(x4)
-		, ToWString(x5)
+		, ToStringTFunctor<Tstring>()(x1)
+		, ToStringTFunctor<Tstring>()(x2)
+		, ToStringTFunctor<Tstring>()(x3)
+		, ToStringTFunctor<Tstring>()(x4)
+		, ToStringTFunctor<Tstring>()(x5)
 	);
 }
 
-template<
-	typename T1,
-	typename T2,
-	typename T3,
-	typename T4,
-	typename T5,
-	typename T6
+template<typename Tformat
+	, typename T1
+	, typename T2
+	, typename T3
+	, typename T4
+	, typename T5
+	, typename T6
 >
-std::wstring PrintW(const std::wstring & format
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat & format
 	, const T1& x1
 	, const T2& x2
 	, const T3& x3
@@ -897,26 +744,27 @@ std::wstring PrintW(const std::wstring & format
 	, const T6& x6
 )
 {
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
 	return detail::PrintImpl(format
-		, ToWString(x1)
-		, ToWString(x2)
-		, ToWString(x3)
-		, ToWString(x4)
-		, ToWString(x5)
-		, ToWString(x6)
+		, ToStringTFunctor<Tstring>()(x1)
+		, ToStringTFunctor<Tstring>()(x2)
+		, ToStringTFunctor<Tstring>()(x3)
+		, ToStringTFunctor<Tstring>()(x4)
+		, ToStringTFunctor<Tstring>()(x5)
+		, ToStringTFunctor<Tstring>()(x6)
 	);
 }
 
-template<
-	typename T1,
-	typename T2,
-	typename T3,
-	typename T4,
-	typename T5,
-	typename T6,
-	typename T7
+template<typename Tformat
+	, typename T1
+	, typename T2
+	, typename T3
+	, typename T4
+	, typename T5
+	, typename T6
+	, typename T7
 >
-std::wstring PrintW(const std::wstring & format
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat & format
 	, const T1& x1
 	, const T2& x2
 	, const T3& x3
@@ -926,28 +774,29 @@ std::wstring PrintW(const std::wstring & format
 	, const T7& x7
 )
 {
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
 	return detail::PrintImpl(format
-		, ToWString(x1)
-		, ToWString(x2)
-		, ToWString(x3)
-		, ToWString(x4)
-		, ToWString(x5)
-		, ToWString(x6)
-		, ToWString(x7)
+		, ToStringTFunctor<Tstring>()(x1)
+		, ToStringTFunctor<Tstring>()(x2)
+		, ToStringTFunctor<Tstring>()(x3)
+		, ToStringTFunctor<Tstring>()(x4)
+		, ToStringTFunctor<Tstring>()(x5)
+		, ToStringTFunctor<Tstring>()(x6)
+		, ToStringTFunctor<Tstring>()(x7)
 	);
 }
 
-template<
-	typename T1,
-	typename T2,
-	typename T3,
-	typename T4,
-	typename T5,
-	typename T6,
-	typename T7,
-	typename T8
+template<typename Tformat
+	, typename T1
+	, typename T2
+	, typename T3
+	, typename T4
+	, typename T5
+	, typename T6
+	, typename T7
+	, typename T8
 >
-std::wstring PrintW(const std::wstring & format
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat & format
 	, const T1& x1
 	, const T2& x2
 	, const T3& x3
@@ -958,17 +807,220 @@ std::wstring PrintW(const std::wstring & format
 	, const T8& x8
 )
 {
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
 	return detail::PrintImpl(format
-		, ToWString(x1)
-		, ToWString(x2)
-		, ToWString(x3)
-		, ToWString(x4)
-		, ToWString(x5)
-		, ToWString(x6)
-		, ToWString(x7)
-		, ToWString(x8)
+		, ToStringTFunctor<Tstring>()(x1)
+		, ToStringTFunctor<Tstring>()(x2)
+		, ToStringTFunctor<Tstring>()(x3)
+		, ToStringTFunctor<Tstring>()(x4)
+		, ToStringTFunctor<Tstring>()(x5)
+		, ToStringTFunctor<Tstring>()(x6)
+		, ToStringTFunctor<Tstring>()(x7)
+		, ToStringTFunctor<Tstring>()(x8)
 	);
 }
+
+// array version for literals
+
+template<typename Tformat, std::size_t N
+>
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
+)
+{
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
+	return detail::PrintImpl(format
+	);
+}
+
+template<typename Tformat, std::size_t N
+	, typename T1
+>
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
+	, const T1& x1
+)
+{
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
+	return detail::PrintImpl(format
+		, ToStringTFunctor<Tstring>()(x1)
+	);
+}
+
+template<typename Tformat, std::size_t N
+	, typename T1
+	, typename T2
+>
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
+	, const T1& x1
+	, const T2& x2
+)
+{
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
+	return detail::PrintImpl(format
+		, ToStringTFunctor<Tstring>()(x1)
+		, ToStringTFunctor<Tstring>()(x2)
+	);
+}
+
+template<typename Tformat, std::size_t N
+	, typename T1
+	, typename T2
+	, typename T3
+>
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
+	, const T1& x1
+	, const T2& x2
+	, const T3& x3
+)
+{
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
+	return detail::PrintImpl(format
+		, ToStringTFunctor<Tstring>()(x1)
+		, ToStringTFunctor<Tstring>()(x2)
+		, ToStringTFunctor<Tstring>()(x3)
+	);
+}
+
+template<typename Tformat, std::size_t N
+	, typename T1
+	, typename T2
+	, typename T3
+	, typename T4
+>
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
+	, const T1& x1
+	, const T2& x2
+	, const T3& x3
+	, const T4& x4
+)
+{
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
+	return detail::PrintImpl(format
+		, ToStringTFunctor<Tstring>()(x1)
+		, ToStringTFunctor<Tstring>()(x2)
+		, ToStringTFunctor<Tstring>()(x3)
+		, ToStringTFunctor<Tstring>()(x4)
+	);
+}
+
+template<typename Tformat, std::size_t N
+	, typename T1
+	, typename T2
+	, typename T3
+	, typename T4
+	, typename T5
+>
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
+	, const T1& x1
+	, const T2& x2
+	, const T3& x3
+	, const T4& x4
+	, const T5& x5
+)
+{
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
+	return detail::PrintImpl(format
+		, ToStringTFunctor<Tstring>()(x1)
+		, ToStringTFunctor<Tstring>()(x2)
+		, ToStringTFunctor<Tstring>()(x3)
+		, ToStringTFunctor<Tstring>()(x4)
+		, ToStringTFunctor<Tstring>()(x5)
+	);
+}
+
+template<typename Tformat, std::size_t N
+	, typename T1
+	, typename T2
+	, typename T3
+	, typename T4
+	, typename T5
+	, typename T6
+>
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
+	, const T1& x1
+	, const T2& x2
+	, const T3& x3
+	, const T4& x4
+	, const T5& x5
+	, const T6& x6
+)
+{
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
+	return detail::PrintImpl(format
+		, ToStringTFunctor<Tstring>()(x1)
+		, ToStringTFunctor<Tstring>()(x2)
+		, ToStringTFunctor<Tstring>()(x3)
+		, ToStringTFunctor<Tstring>()(x4)
+		, ToStringTFunctor<Tstring>()(x5)
+		, ToStringTFunctor<Tstring>()(x6)
+	);
+}
+
+template<typename Tformat, std::size_t N
+	, typename T1
+	, typename T2
+	, typename T3
+	, typename T4
+	, typename T5
+	, typename T6
+	, typename T7
+>
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
+	, const T1& x1
+	, const T2& x2
+	, const T3& x3
+	, const T4& x4
+	, const T5& x5
+	, const T6& x6
+	, const T7& x7
+)
+{
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
+	return detail::PrintImpl(format
+		, ToStringTFunctor<Tstring>()(x1)
+		, ToStringTFunctor<Tstring>()(x2)
+		, ToStringTFunctor<Tstring>()(x3)
+		, ToStringTFunctor<Tstring>()(x4)
+		, ToStringTFunctor<Tstring>()(x5)
+		, ToStringTFunctor<Tstring>()(x6)
+		, ToStringTFunctor<Tstring>()(x7)
+	);
+}
+
+template<typename Tformat, std::size_t N
+	, typename T1
+	, typename T2
+	, typename T3
+	, typename T4
+	, typename T5
+	, typename T6
+	, typename T7
+	, typename T8
+>
+typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
+	, const T1& x1
+	, const T2& x2
+	, const T3& x3
+	, const T4& x4
+	, const T5& x5
+	, const T6& x6
+	, const T7& x7
+	, const T8& x8
+)
+{
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
+	return detail::PrintImpl(format
+		, ToStringTFunctor<Tstring>()(x1)
+		, ToStringTFunctor<Tstring>()(x2)
+		, ToStringTFunctor<Tstring>()(x3)
+		, ToStringTFunctor<Tstring>()(x4)
+		, ToStringTFunctor<Tstring>()(x5)
+		, ToStringTFunctor<Tstring>()(x6)
+		, ToStringTFunctor<Tstring>()(x7)
+		, ToStringTFunctor<Tstring>()(x8)
+	);
+}
+
+#define PrintW Print
 
 } } // namespace mpt::String
 
