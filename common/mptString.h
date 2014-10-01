@@ -150,6 +150,46 @@ enum Charset {
 };
 
 
+#define MPT_CHAR(x)      x
+#define MPT_LITERAL(x)   x
+#define MPT_STRING(x)    std::string( x )
+
+#define MPT_WCHAR(x)     L ## x
+#define MPT_WLITERAL(x)  L ## x
+#define MPT_WSTRING(x)   std::wstring( L ## x )
+
+
+#if MPT_WITH_U8STRING
+
+template <mpt::Charset charset_tag>
+struct charset_char_traits : std::char_traits<char> {
+	static mpt::Charset charset() { return charset_tag; }
+};
+#define MPT_ENCODED_STRING_TYPE(charset) std::basic_string< char, mpt::charset_char_traits< charset > >
+
+typedef MPT_ENCODED_STRING_TYPE(mpt::CharsetUTF8) u8string;
+
+#define MPT_U8CHAR(x)    x
+#define MPT_U8LITERAL(x) x
+#define MPT_U8STRING(x)  mpt::u8string( x )
+
+// mpt::u8string is a moderately type-safe string that is meant to contain
+// UTF-8 encoded char bytes.
+//
+// mpt::u8string is not implicitely convertible to/from std::string, but
+// it is convertible to/from C strings the same way as std::string is.
+//
+// The implementation of mpt::u8string is a compromise of compatibilty
+// with implementation-defined STL details, efficiency, source code size,
+// executable bloat, type-safety  and simplicity.
+//
+// mpt::u8string is not meant to be used directly though.
+// mpt::u8string is meant as an alternative implementaion to std::wstring
+// for implementing the unicode string type mpt::ustring.
+
+#endif // MPT_WITH_U8STRING
+
+
 // Convert to a wide character string.
 // The wide encoding is UTF-16 or UTF-32, based on sizeof(wchar_t).
 // If str does not contain any invalid characters, this conversion is lossless.
@@ -217,6 +257,88 @@ template <typename Tsrc> inline std::string ToLocale(const Tsrc &str) { return T
 static inline std::string ToLocale(Charset from, const std::string &str) { return ToCharset(CharsetLocale, from, str); }
 #endif
 
+
+// mpt::ustring
+//
+// mpt::ustring is a string type that can hold unicode strings.
+// It is implemented as a std::basic_string either based on wchar_t (i.e. the
+//  same as std::wstring) or a custom-defined char_traits class that is derived
+//  from std::char_traits<char>.
+// The selection of the underlying implementation is done at compile-time.
+// MPT_UCHAR, MPT_ULITERAL and MPT_USTRING are macros that ease construction
+//  of ustring char literals, ustring char array literals and ustring objects
+//  from ustring char literals that work consistently in both modes.
+//  Note that these are not supported for non-ASCII characters appearing in
+//  the macro argument.
+// Also note that, as both UTF8 and UTF16 (it is less of an issue for UTF32)
+//  are variable-length encodings and mpt::ustring is implemented as a
+//  std::basic_string, all member functions that require individual character
+//  access will not work consistently or even at all in a meaningful way.
+//  This in particular affects operator[], at(), find() and substr().
+//  The code makes no effort in preventing these or generating warnings when
+//  these are used on mpt::ustring objects. However, compiling in the
+//  respectively other mpt::ustring mode will catch most of these anyway.
+
+#if MPT_USTRING_MODE_WIDE
+#if MPT_USTRING_MODE_UTF8
+#error "MPT_USTRING_MODE_WIDE and MPT_USTRING_MODE_UTF8 are mutually exclusive."
+#endif
+
+typedef std::wstring     ustring;
+#define MPT_UCHAR(x)     L ## x
+#define MPT_ULITERAL(x)  L ## x
+#define MPT_USTRING(x)   std::wstring( L ## x )
+
+#endif // MPT_USTRING_MODE_WIDE
+
+#if MPT_USTRING_MODE_UTF8
+#if MPT_USTRING_MODE_WIDE
+#error "MPT_USTRING_MODE_WIDE and MPT_USTRING_MODE_UTF8 are mutually exclusive."
+#endif
+
+typedef mpt::u8string    ustring;
+#define MPT_UCHAR(x)     x
+#define MPT_ULITERAL(x)  x
+#define MPT_USTRING(x)   mpt::ustring( x )
+
+#endif // MPT_USTRING_MODE_UTF8
+
+#if MPT_USTRING_MODE_WIDE
+static inline mpt::ustring ToUnicode(const std::wstring &str) { return str; }
+static inline mpt::ustring ToUnicode(Charset from, const std::string &str) { return ToWide(from, str); }
+#if defined(_MFC_VER)
+static inline mpt::ustring ToUnicode(const CString &str) { return ToWide(str); }
+static inline mpt::ustring ToUnicode(const wchar_t * str) { return ToUnicode(str ? std::wstring(str) : std::wstring()); }
+#ifndef UNICODE
+static inline mpt::ustring ToUnicode(const CStringW &str) { return ToWide(str); }
+#endif // !UNICODE
+#endif // MFC
+#else // !MPT_USTRING_MODE_WIDE
+mpt::ustring ToUnicode(const std::wstring &str);
+mpt::ustring ToUnicode(Charset from, const std::string &str);
+#if defined(_MFC_VER)
+mpt::ustring ToUnicode(const CString &str);
+static inline mpt::ustring ToUnicode(const wchar_t * str) { return ToUnicode(str ? std::wstring(str) : std::wstring()); }
+#ifndef UNICODE
+mpt::ustring ToUnicode(const CStringW &str);
+#endif // !UNICODE
+#endif // MFC
+#endif // MPT_USTRING_MODE_WIDE
+
+#if MPT_USTRING_MODE_WIDE
+// nothing, std::wstring overloads will catch all stuff
+#else // !MPT_USTRING_MODE_WIDE
+std::wstring ToWide(const mpt::ustring &str);
+std::string ToCharset(Charset to, const mpt::ustring &str);
+#if defined(_MFC_VER)
+CString ToCString(const mpt::ustring &str);
+#ifdef UNICODE
+MPT_DEPRECATED static inline CString ToCStringW(const mpt::ustring &str) { return ToCString(str); }
+#else // !UNICODE
+static inline CStringW ToCStringW(const mpt::ustring &str) { return ToCStringW(ToWide(str)); }
+#endif // UNICODE
+#endif // MFC
+#endif // MPT_USTRING_MODE_WIDE
 
 } // namespace mpt
 
@@ -319,7 +441,17 @@ std::wstring ToWString(const long double & x);
 template <typename Tstring> struct ToStringTFunctor {};
 template <> struct ToStringTFunctor<std::string> { template <typename T> inline std::string operator() (const T & x) { return ToString(x); } };
 template <> struct ToStringTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x) { return ToWString(x); } };
+#if MPT_USTRING_MODE_UTF8
+template <> struct ToStringTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToString(x)); } };
+#endif
 template<typename Tstring, typename T> inline Tstring ToStringT(const T & x) { return ToStringTFunctor<Tstring>()(x); }
+
+template<typename T>
+mpt::ustring ToUString(const T & x)
+{
+	return mpt::ToStringT<mpt::ustring>(x);
+}
+
 
 struct fmt_base
 {
@@ -385,6 +517,9 @@ std::wstring FormatValW(const long double & x, const Format & f);
 template <typename Tstring> struct FormatValTFunctor {};
 template <> struct FormatValTFunctor<std::string> { template <typename T> inline std::string operator() (const T & x, const Format & f) { return FormatVal(x, f); } };
 template <> struct FormatValTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x, const Format & f) { return FormatValW(x, f); } };
+#if MPT_USTRING_MODE_UTF8
+template <> struct FormatValTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x, const Format & f) { return mpt::ToUnicode(mpt::CharsetUTF8, FormatVal(x, f)); } };
+#endif
 
 
 class Format
@@ -575,6 +710,11 @@ static inline Tstring sci(const T& x, std::size_t width = 0, int precision = -1)
 
 typedef fmtT<std::string> fmt;
 typedef fmtT<std::wstring> wfmt;
+#if MPT_USTRING_MODE_WIDE
+typedef fmtT<std::wstring> ufmt;
+#else
+typedef fmtT<mpt::ustring> ufmt;
+#endif
 
 } // namespace mpt
 
@@ -595,6 +735,9 @@ template <> struct to_string_type<std::wstring   > { typedef std::wstring type; 
 template <> struct to_string_type<wchar_t        > { typedef std::wstring type; };
 template <> struct to_string_type<wchar_t *      > { typedef std::wstring type; };
 template <> struct to_string_type<const wchar_t *> { typedef std::wstring type; };
+#if MPT_USTRING_MODE_UTF8
+template <> struct to_string_type<mpt::ustring   > { typedef mpt::ustring type; };
+#endif
 
 std::string PrintImpl(const std::string & format
 	, const std::string & x1 = std::string()
@@ -617,6 +760,19 @@ std::wstring PrintImpl(const std::wstring & format
 	, const std::wstring & x7 = std::wstring()
 	, const std::wstring & x8 = std::wstring()
 	);
+
+#if MPT_USTRING_MODE_UTF8
+mpt::ustring PrintImpl(const mpt::ustring & format
+	, const mpt::ustring & x1 = mpt::ustring()
+	, const mpt::ustring & x2 = mpt::ustring()
+	, const mpt::ustring & x3 = mpt::ustring()
+	, const mpt::ustring & x4 = mpt::ustring()
+	, const mpt::ustring & x5 = mpt::ustring()
+	, const mpt::ustring & x6 = mpt::ustring()
+	, const mpt::ustring & x7 = mpt::ustring()
+	, const mpt::ustring & x8 = mpt::ustring()
+	);
+#endif
 
 } // namespace detail
 
