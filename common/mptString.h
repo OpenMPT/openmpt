@@ -417,6 +417,7 @@ std::string ToString(const float & x);
 std::string ToString(const double & x);
 std::string ToString(const long double & x);
 
+#if MPT_WSTRING_FORMAT
 MPT_DEPRECATED std::wstring ToWString(const std::string & x);
 MPT_DEPRECATED std::wstring ToWString(const char * const & x);
 static inline std::wstring ToWString(const std::wstring & x) { return x; }
@@ -437,10 +438,13 @@ std::wstring ToWString(const unsigned long long & x);
 std::wstring ToWString(const float & x);
 std::wstring ToWString(const double & x);
 std::wstring ToWString(const long double & x);
+#endif
 
 template <typename Tstring> struct ToStringTFunctor {};
 template <> struct ToStringTFunctor<std::string> { template <typename T> inline std::string operator() (const T & x) { return ToString(x); } };
+#if MPT_WSTRING_FORMAT
 template <> struct ToStringTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x) { return ToWString(x); } };
+#endif
 #if MPT_USTRING_MODE_UTF8
 template <> struct ToStringTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToString(x)); } };
 #endif

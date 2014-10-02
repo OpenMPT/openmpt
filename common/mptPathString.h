@@ -201,7 +201,9 @@ public:
 #if defined(MPT_WITH_CHARSET_LOCALE)
 MPT_DEPRECATED_PATH static inline std::string ToString(const mpt::PathString & x) { return mpt::ToLocale(x.ToWide()); }
 #endif
+#if MPT_WSTRING_FORMAT
 static inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWide(); }
+#endif
 
 } // namespace mpt
 
