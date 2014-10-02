@@ -338,8 +338,8 @@ static std::wstring LocaleDecode(const std::string &str, const std::locale & loc
 	std::mbstate_t state = std::mbstate_t();
 	const codecvt_type & facet = std::use_facet<codecvt_type>(locale);
 	codecvt_type::result result = codecvt_type::partial;
-	const char * in_begin = &*str.begin();
-	const char * in_end = in_begin + str.length();
+	const char * in_begin = str.data();
+	const char * in_end = in_begin + str.size();
 	out.resize((in_end - in_begin) * (facet.max_length() + 1));
 	wchar_t * out_begin = out.data();
 	wchar_t * out_end = out.data() + out.size();
@@ -382,8 +382,8 @@ static std::string LocaleEncode(const std::wstring &str, const std::locale & loc
 	std::mbstate_t state = std::mbstate_t();
 	const codecvt_type & facet = std::use_facet<codecvt_type>(locale);
 	codecvt_type::result result = codecvt_type::partial;
-	const wchar_t * in_begin = &*str.begin();
-	const wchar_t * in_end = in_begin + str.length();
+	const wchar_t * in_begin = str.data();
+	const wchar_t * in_end = in_begin + str.size();
 	out.resize((in_end - in_begin) * (facet.max_length() + 1));
 	char * out_begin = out.data();
 	char * out_end = out.data() + out.size();
@@ -955,7 +955,9 @@ Tdststring ConvertImpl(Charset to, Charset from, const Tsrcstring &src)
 	STATIC_ASSERT(sizeof(typename Tsrcstring::value_type) == sizeof(char));
 	if(to == from)
 	{
-		return Tdststring(reinterpret_cast<const typename Tdststring::value_type*>(&*src.begin()), reinterpret_cast<const typename Tdststring::value_type*>(&*src.end()));
+		const typename Tsrcstring::value_type * src_beg = src.data();
+		const typename Tsrcstring::value_type * src_end = src_beg + src.size();
+		return Tdststring(reinterpret_cast<const typename Tdststring::value_type *>(src_beg), reinterpret_cast<const typename Tdststring::value_type *>(src_end));
 	}
 	#if defined(MPT_CHARSET_ICONV)
 		if(to == CharsetCP437AMS || to == CharsetCP437AMS2 || from == CharsetCP437AMS || from == CharsetCP437AMS2)
