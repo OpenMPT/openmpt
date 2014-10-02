@@ -75,8 +75,11 @@ private:
 public:
 	Logger(const Context &context) : context(context) {}
 	void MPT_PRINTF_FUNC(2,3) operator () (const char *format, ...);
+	void operator () (const mpt::ustring &text);
 	void operator () (const std::string &text);
+#if !(MPT_USTRING_MODE_WIDE)
 	void operator () (const std::wstring &text);
+#endif
 };
 
 #define Log mpt::log::Logger(MPT_LOG_CURRENTCONTEXT())
@@ -89,8 +92,11 @@ class Logger
 {
 public:
 	inline void MPT_PRINTF_FUNC(2,3) operator () (const char * /*format*/, ...) {}
+	inline void operator () (const mpt::ustring & /*text*/ ) {}
 	inline void operator () (const std::string & /*text*/ ) {}
+#if !(MPT_USTRING_MODE_WIDE)
 	inline void operator () (const std::wstring & /*text*/ ) {}
+#endif
 };
 
 #define Log if(true) {} else mpt::log::Logger() // completely compile out arguments to Log() so that they do not even get evaluated
