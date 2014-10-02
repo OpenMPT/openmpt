@@ -219,20 +219,6 @@ FILE * mpt_fopen(const mpt::PathString &filename, const char *mode)
 	#endif // MPT_OS_WINDOWS
 }
 
-FILE * mpt_fopen(const mpt::PathString &filename, const wchar_t *mode)
-//--------------------------------------------------------------------
-{
-	#if MPT_OS_WINDOWS
-		return _wfopen(filename.AsNative().c_str(), mode);
-	#else // !MPT_OS_WINDOWS
-		#if defined(MPT_WITH_CHARSET_LOCALE)
-			return fopen(filename.AsNative().c_str(), mode ? mpt::ToLocale(mode).c_str() : nullptr);
-		#else
-			return fopen(filename.AsNative().c_str(), mode ? mpt::ToCharset(mpt::CharsetUTF8, mode).c_str() : nullptr);
-		#endif
-	#endif // MPT_OS_WINDOWS
-}
-
 
 #if defined(MODPLUG_TRACKER)
 
