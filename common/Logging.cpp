@@ -109,11 +109,11 @@ static std::wstring TimeDiffAsStringW(uint64 ms)
 #endif // MODPLUG_TRACKER
 
 
-static noinline void DoLog(const mpt::log::Context &context, std::wstring message)
+static noinline void DoLog(const mpt::log::Context &context, mpt::ustring message)
 //--------------------------------------------------------------------------------
 {
 	// remove eol if already present
-	message = mpt::String::RTrim(message, std::wstring(L"\r\n"));
+	message = mpt::String::RTrim(message, MPT_USTRING("\r\n"));
 	#if defined(MODPLUG_TRACKER)
 		static uint64_t s_lastlogtime = 0;
 		uint64 cur = GetTimeMS();
@@ -161,12 +161,18 @@ static noinline void DoLog(const mpt::log::Context &context, const char *format,
 	message[LOGBUF_SIZE - 1] = '\0';
 	va_end(va);
 #if defined(MPT_WITH_CHARSET_LOCALE)
-	DoLog(context, mpt::ToWide(mpt::CharsetLocale, message));
+	DoLog(context, mpt::ToUnicode(mpt::CharsetLocale, message));
 #else
-	DoLog(context, mpt::ToWide(mpt::CharsetUTF8, message));
+	DoLog(context, mpt::ToUnicode(mpt::CharsetUTF8, message));
 #endif
 }
 
+
+void Logger::operator () (const mpt::ustring &text)
+//-------------------------------------------------
+{
+	DoLog(context, text);
+}
 
 void Logger::operator () (const char *format, ...)
 //------------------------------------------------
@@ -181,17 +187,19 @@ void Logger::operator () (const std::string &text)
 //------------------------------------------------
 {
 #if defined(MPT_WITH_CHARSET_LOCALE)
-	DoLog(context, mpt::ToWide(mpt::CharsetLocale, text));
+	DoLog(context, mpt::ToUnicode(mpt::CharsetLocale, text));
 #else
-	DoLog(context, mpt::ToWide(mpt::CharsetUTF8, text));
+	DoLog(context, mpt::ToUnicode(mpt::CharsetUTF8, text));
 #endif
 }
 
+#if !(MPT_USTRING_MODE_WIDE)
 void Logger::operator () (const std::wstring &text)
 //-------------------------------------------------
 {
-	DoLog(context, text);
+	DoLog(context, mpt::ToUnicode(text));
 }
+#endif
 
 
 #endif // !NO_LOGGING
