@@ -272,6 +272,7 @@ protected:
 	afx_msg void OnCloseItem();
 	afx_msg void OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result);
 	afx_msg void OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result);
+	afx_msg void OnDropFiles(HDROP hDropInfo);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"

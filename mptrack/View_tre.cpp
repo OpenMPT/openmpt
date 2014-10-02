@@ -88,6 +88,7 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_WM_LBUTTONUP()
 	ON_WM_RBUTTONUP()
 	ON_WM_KEYDOWN()
+	ON_WM_DROPFILES()
 	ON_NOTIFY_REFLECT(NM_DBLCLK,		OnItemDblClk)
 	ON_NOTIFY_REFLECT(NM_RETURN,		OnItemReturn)
 	ON_NOTIFY_REFLECT(NM_RCLICK,		OnItemRightClick)
@@ -197,6 +198,7 @@ void CModTree::Init()
 		m_dwStatus |= TREESTATUS_SINGLEEXPAND;
 	}
 	ModifyStyle(dwRemove, dwAdd);
+	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
 
 	if(!IsSampleBrowser())
 	{
@@ -2340,7 +2342,7 @@ void CModTree::OnItemExpanded(LPNMHDR pnmhdr, LRESULT *pResult)
 	LPNMTREEVIEW pnm = (LPNMTREEVIEW)pnmhdr;
 	if ((pnm->itemNew.iImage == IMAGE_FOLDER) || (pnm->itemNew.iImage == IMAGE_OPENFOLDER))
 	{
-		UINT iNewImage = (pnm->itemNew.state & TVIS_EXPANDED) ? IMAGE_OPENFOLDER : IMAGE_FOLDER;
+		int iNewImage = (pnm->itemNew.state & TVIS_EXPANDED) ? IMAGE_OPENFOLDER : IMAGE_FOLDER;
 		SetItemImage(pnm->itemNew.hItem, iNewImage, iNewImage);
 	}
 	if (pResult) *pResult = TRUE;
@@ -2424,11 +2426,10 @@ void CModTree::OnItemDblClk(LPNMHDR, LRESULT *pResult)
 //----------------------------------------------------
 {
 	POINT pt;
-	UINT flags;
 	GetCursorPos(&pt);
 	ScreenToClient(&pt);
 	HTREEITEM hItem = GetSelectedItem();
-	if ((hItem) && (hItem == HitTest(pt, &flags)))
+	if ((hItem) && (hItem == HitTest(pt)))
 	{
 		ExecuteItem(hItem);
 	}
@@ -3640,6 +3641,46 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		}
 	}
 	*result = FALSE;
+}
+
+
+// Drop files from Windows
+void CModTree::OnDropFiles(HDROP hDropInfo)
+//-----------------------------------------
+{
+	bool refreshDLS = false;
+	const UINT nFiles = ::DragQueryFileW(hDropInfo, (UINT)-1, NULL, 0);
+	CMainFrame::GetMainFrame()->SetForegroundWindow();
+	for(UINT f = 0; f < nFiles; f++)
+	{
+		WCHAR fileName[MAX_PATH];
+		if(::DragQueryFileW(hDropInfo, f, fileName, CountOf(fileName)))
+		{
+			mpt::PathString file(mpt::PathString::FromNative(fileName));
+			if(IsSampleBrowser())
+			{
+				// Set sample browser location to this directory or file
+				CMainFrame::GetMainFrame()->GetUpperTreeview()->m_InstrLibPath = mpt::PathString();
+				CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(file, ::PathIsDirectoryW(fileName) == FALSE);
+				break;
+			} else
+			{
+				if(CTrackApp::AddDLSBank(file))
+				{
+					refreshDLS = true;
+				} else
+				{
+					// Pass message on
+					theApp.OpenDocumentFile(file);
+				}
+			}
+		}
+	}
+	if(refreshDLS)
+	{
+		RefreshDlsBanks();
+	}
+	::DragFinish(hDropInfo);
 }
 
 
