@@ -134,6 +134,9 @@ public:
 
 #if MPT_OS_WINDOWS
 
+#if !(MPT_WSTRING_CONVERT)
+#error "mpt::PathString on Windows depends on MPT_WSTRING_CONVERT)"
+#endif
 	// conversions
 #if defined(MPT_WITH_CHARSET_LOCALE)
 	MPT_DEPRECATED_PATH std::string ToLocale() const { return mpt::ToLocale(path); }
@@ -175,20 +178,28 @@ public:
 #if defined(MPT_WITH_CHARSET_LOCALE)
 	std::string ToLocale() const { return path; }
 	std::string ToUTF8() const { return mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetLocale, path); }
+#if MPT_WSTRING_CONVERT
 	std::wstring ToWide() const { return mpt::ToWide(mpt::CharsetLocale, path); }
+#endif
 	mpt::ustring ToUnicode() const { return mpt::ToUnicode(mpt::CharsetLocale, path); }
 	static PathString FromLocale(const std::string &path) { return PathString(path); }
 	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, path)); }
+#if MPT_WSTRING_CONVERT
 	static PathString FromWide(const std::wstring &path) { return PathString(mpt::ToCharset(mpt::CharsetLocale, path)); }
+#endif
 	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToCharset(mpt::CharsetLocale, path)); }
 	RawPathString AsNative() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
 #else
 	std::string ToUTF8() const { return path; }
+#if MPT_WSTRING_CONVERT
 	std::wstring ToWide() const { return mpt::ToWide(mpt::CharsetUTF8, path); }
+#endif
 	mpt::ustring ToUnicode() const { return mpt::ToUnicode(mpt::CharsetUTF8, path); }
 	static PathString FromUTF8(const std::string &path) { return path; }
+#if MPT_WSTRING_CONVERT
 	static PathString FromWide(const std::wstring &path) { return PathString(mpt::ToCharset(mpt::CharsetUTF8, path)); }
+#endif
 	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToCharset(mpt::CharsetUTF8, path)); }
 	RawPathString AsNative() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }

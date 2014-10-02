@@ -77,7 +77,7 @@ public:
 	void MPT_PRINTF_FUNC(2,3) operator () (const char *format, ...);
 	void operator () (const mpt::ustring &text);
 	void operator () (const std::string &text);
-#if !(MPT_USTRING_MODE_WIDE)
+#if MPT_WSTRING_CONVERT && !(MPT_USTRING_MODE_WIDE)
 	void operator () (const std::wstring &text);
 #endif
 };
@@ -94,7 +94,7 @@ public:
 	inline void MPT_PRINTF_FUNC(2,3) operator () (const char * /*format*/, ...) {}
 	inline void operator () (const mpt::ustring & /*text*/ ) {}
 	inline void operator () (const std::string & /*text*/ ) {}
-#if !(MPT_USTRING_MODE_WIDE)
+#if MPT_WSTRING_CONVERT && !(MPT_USTRING_MODE_WIDE)
 	inline void operator () (const std::wstring & /*text*/ ) {}
 #endif
 };

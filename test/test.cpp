@@ -336,6 +336,7 @@ static bool EndsWith(const std::string &str, const std::string &match)
 	return (str.rfind(match) == (str.length() - match.length()));
 }
 
+#if MPT_WSTRING_CONVERT
 static bool BeginsWith(const std::wstring &str, const std::wstring &match)
 {
 	return (str.find(match) == 0);
@@ -344,6 +345,7 @@ static bool EndsWith(const std::wstring &str, const std::wstring &match)
 {
 	return (str.rfind(match) == (str.length() - match.length()));
 }
+#endif
 
 #if MPT_USTRING_MODE_UTF8
 static bool BeginsWith(const mpt::ustring &str, const mpt::ustring &match)
@@ -714,6 +716,8 @@ static noinline void TestCharsets()
 	VERIFY_EQUAL(MPT_UTF8("abc\xE5\xAE\xB6xyz"),mpt::ToUnicode(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"));
 
 
+#if MPT_WSTRING_CONVERT
+
 	// wide L"" version
 
 	// Charset conversions (basic sanity checks)
@@ -799,6 +803,9 @@ static noinline void TestCharsets()
 	VERIFY_EQUAL(L"abc\u00E4xyz",mpt::ToWide(mpt::CharsetUTF8,"abc\xC3\xA4xyz"));
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetUTF8,L"abc\u5BB6xyz"),"abc\xE5\xAE\xB6xyz");
 	VERIFY_EQUAL(L"abc\u5BB6xyz",mpt::ToWide(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"));
+
+#endif
+
 
 	// Path conversions
 #ifdef MODPLUG_TRACKER
