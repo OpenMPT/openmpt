@@ -218,7 +218,6 @@ static inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWid
 #endif // MPT_OS_WINDOWS
 
 FILE * mpt_fopen(const mpt::PathString &filename, const char *mode);
-FILE * mpt_fopen(const mpt::PathString &filename, const wchar_t *mode);
 
 #if defined(MODPLUG_TRACKER)
 
