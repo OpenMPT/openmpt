@@ -1009,15 +1009,19 @@ Tdststring ConvertImpl(Charset to, Charset from, const Tsrcstring &src)
 } // namespace String
 
 
+#if MPT_WSTRING_CONVERT
 std::wstring ToWide(Charset from, const std::string &str)
 {
 	return String::DecodeImpl(from, str);
 }
+#endif
 
+#if MPT_WSTRING_CONVERT
 std::string ToCharset(Charset to, const std::wstring &str)
 {
 	return String::EncodeImpl<std::string>(to, str);
 }
+#endif
 std::string ToCharset(Charset to, Charset from, const std::string &str)
 {
 	return String::ConvertImpl<std::string>(to, from, str);
@@ -1127,10 +1131,12 @@ mpt::ustring ToUnicode(const CStringW &str)
 #if MPT_USTRING_MODE_WIDE
 // nothing, std::wstring overloads will catch all stuff
 #else // !MPT_USTRING_MODE_WIDE
+#if MPT_WSTRING_CONVERT
 std::wstring ToWide(const mpt::ustring &str)
 {
 	return String::DecodeImpl<mpt::ustring>(mpt::CharsetUTF8, str);
 }
+#endif
 std::string ToCharset(Charset to, const mpt::ustring &str)
 {
 	return String::ConvertImpl<std::string, mpt::ustring>(to, mpt::CharsetUTF8, str);
@@ -1182,18 +1188,21 @@ inline std::wstring ToWStringHelper(const T & x)
 }
 #endif
 
+#if MPT_WSTRING_CONVERT
 #if defined(MPT_WITH_CHARSET_LOCALE)
 std::string ToString(const std::wstring & x) { return mpt::ToLocale(x); }
 std::string ToString(const wchar_t * const & x) { return mpt::ToLocale(x); }
 std::string ToString(const wchar_t & x) { return mpt::ToLocale(std::wstring(1, x)); }
-#if MPT_USTRING_MODE_UTF8
-std::string ToString(const mpt::ustring & x) { return mpt::ToLocale(x); }
-#endif
 #else
 std::string ToString(const std::wstring & x) { return mpt::ToCharset(mpt::CharsetUTF8, x); }
 std::string ToString(const wchar_t * const & x) { return mpt::ToCharset(mpt::CharsetUTF8, x); }
 std::string ToString(const wchar_t & x) { return mpt::ToCharset(mpt::CharsetUTF8, std::wstring(1, x)); }
+#endif
+#endif
 #if MPT_USTRING_MODE_UTF8
+#if defined(MPT_WITH_CHARSET_LOCALE)
+std::string ToString(const mpt::ustring & x) { return mpt::ToLocale(x); }
+#else
 std::string ToString(const mpt::ustring & x) { return mpt::ToCharset(mpt::CharsetUTF8, x); }
 #endif
 #endif

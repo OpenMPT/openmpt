@@ -190,12 +190,14 @@ typedef MPT_ENCODED_STRING_TYPE(mpt::CharsetUTF8) u8string;
 #endif // MPT_WITH_U8STRING
 
 
+#if MPT_WSTRING_CONVERT
 // Convert to a wide character string.
 // The wide encoding is UTF-16 or UTF-32, based on sizeof(wchar_t).
 // If str does not contain any invalid characters, this conversion is lossless.
 // Invalid source bytes will be replaced by some replacement character or string.
 static inline std::wstring ToWide(const std::wstring &str) { return str; }
 std::wstring ToWide(Charset from, const std::string &str);
+#endif
 
 // Convert to a string encoded in the 'to'-specified character set.
 // If str does not contain any invalid characters,
@@ -203,11 +205,16 @@ std::wstring ToWide(Charset from, const std::string &str);
 // 'to' is UTF8.
 // Invalid source bytes or characters that are not representable in the
 // destination charset will be replaced by some replacement character or string.
+#if MPT_WSTRING_CONVERT
 std::string ToCharset(Charset to, const std::wstring &str);
+#endif
 std::string ToCharset(Charset to, Charset from, const std::string &str);
 
 
 #if defined(_MFC_VER)
+#if !(MPT_WSTRING_CONVERT)
+#error "MFC depends on MPT_WSTRING_CONVERT)"
+#endif
 
 // Convert to a MFC CString. The CString encoding depends on UNICODE.
 // This should also be used when converting to TCHAR strings.
@@ -304,6 +311,9 @@ typedef mpt::u8string    ustring;
 #endif // MPT_USTRING_MODE_UTF8
 
 #if MPT_USTRING_MODE_WIDE
+#if !(MPT_WSTRING_CONVERT)
+#error "MPT_USTRING_MODE_WIDE depends on MPT_WSTRING_CONVERT)"
+#endif
 static inline mpt::ustring ToUnicode(const std::wstring &str) { return str; }
 static inline mpt::ustring ToUnicode(Charset from, const std::string &str) { return ToWide(from, str); }
 #if defined(_MFC_VER)
@@ -326,9 +336,14 @@ mpt::ustring ToUnicode(const CStringW &str);
 #endif // MPT_USTRING_MODE_WIDE
 
 #if MPT_USTRING_MODE_WIDE
+#if !(MPT_WSTRING_CONVERT)
+#error "MPT_USTRING_MODE_WIDE depends on MPT_WSTRING_CONVERT)"
+#endif
 // nothing, std::wstring overloads will catch all stuff
 #else // !MPT_USTRING_MODE_WIDE
+#if MPT_WSTRING_CONVERT
 std::wstring ToWide(const mpt::ustring &str);
+#endif
 std::string ToCharset(Charset to, const mpt::ustring &str);
 #if defined(_MFC_VER)
 CString ToCString(const mpt::ustring &str);
@@ -354,7 +369,7 @@ static inline CStringW ToCStringW(const mpt::ustring &str) { return ToCStringW(T
 
 
 // The following section demands a rationale.
-//  1. ToString() and ToWString() mimic the semantics of c++11 std::to_string() and std::to_wstring().
+//  1. ToString(), ToWString() an ToUString() mimic the semantics of c++11 std::to_string() and std::to_wstring().
 //     There is an important difference though. The c++11 versions are specified in terms of sprintf formatting which in turn
 //     depend on the current C locale. This renders these functions unusable in a library context because the current
 //     C locale is set by the library-using application and could be anything. There is no way a library can get reliable semantics
@@ -363,7 +378,7 @@ static inline CStringW ToCStringW(const mpt::ustring &str) { return ToCStringW(T
 //     which results in "C" ASCII locale behavior.
 //  2. The full suite of printf-like or iostream like number formatting is generally not required. Instead, a sane subset functionality
 //     is provided here.
-//     For convenience, mpt::Format().ParsePrintf(const char *).ToString(float) allows formatting a single floating point value with a
+//     For convenience, mpt::fmt::f(const char *, float) allows formatting a single floating point value with a
 //     standard printf-like format string. This itself relies on iostream with classic() locale internally and is thus current locale
 //     agnostic.
 //     When formatting integers, it is recommended to use mpt::fmt::dec or mpt::fmt::hex. Appending a template argument '<n>' sets the width,
@@ -375,13 +390,13 @@ static inline CStringW ToCStringW(const mpt::ustring &str) { return ToCStringW(T
 //     This mimics the behaviour of QString::arg() in QT4/5 or MFC AfxFormatString2(). C printf-like functions offer similar functionality
 //     with a '%n$TYPE' syntax. In .NET, the syntax is '{n}'. This is useful to support  localization strings that can change the parameter
 //     ordering.
-//  4. Every function is available for std::string and std::wstring. std::string makes no assumption about the encoding, which basically means,
-//     it should work for any 7-bit or 8-bit encoding, including for example ASCII, UTF8 or the current locale encoding.
-//     std::string        std::wstring
-//     mpt::ToString      mpt::ToWString
-//     mpt::FormatVal     mpt::FormatValW
-//     mpt::fmt           mpt::wfmt
-//     mpt::String::Print mpt::String::PrintW
+//  4. Every function is available for std::string, std::wstring and mpt::ustring. std::string makes no assumption about the encoding, which
+//     basically means, it should work for any 7-bit or 8-bit encoding, including for example ASCII, UTF8 or the current locale encoding.
+//     std::string        std::wstring       mpt::ustring                           Tstring
+//     mpt::ToString      mpt::ToWString     mpt::ToUString                         mpt::ToStringT<Tstring>
+//     mpt::FormatVal     mpt::FormatValW    mpt::FormatValTFunctor<mpt::ustring>() mpt::FormatValTFunctor<Tstring>()
+//     mpt::fmt           mpt::wfmt          mpt::ufmt                              mpt::fmtT<Tstring>
+//     mpt::String::Print mpt::String::Print mpt::String::Print                     mpt::String::Print<Tstring>
 //  5. All functionality here delegates real work outside of the header file so that <sstream> and <locale> do not need to be included when
 //     using this functionality.
 //     Advantages:
@@ -389,12 +404,12 @@ static inline CStringW ToCStringW(const mpt::ustring &str) { return ToCStringW(T
 //      - Faster compile times because <sstream> and <locale> (2 very complex headers) are not included everywhere.
 //     Disadvantages:
 //      - Slightly more c++ code is required for delegating work.
-//      - As the header does not use iostreams, custom types need to overload mpt::ToString and mpt::ToWstring instead of iostream
-//        operator << to allow for custom type formatting.
-//      - std::string and std::wstring are returned from somewhat deep cascades of helper functions. Where possible, code is written in such
-//        a  way that return-value-optimization (RVO) or named-return-value-optimization (NRVO) should be able to eliminate almost all these
-//        copies. This should not be a problem for any decent modern compiler (and even less so for a c++11 compiler where move-semantics
-//        will kick in if RVO/NRVO fails).
+//      - As the header does not use iostreams, custom types need to overload mpt::ToString, mpt::ToWstring and mpt::ToUString instead of
+//        iostream operator << to allow for custom type formatting.
+//      - std::string, std::wstring and mpt::ustring are returned from somewhat deep cascades of helper functions. Where possible, code is
+//        written in such a way that return-value-optimization (RVO) or named-return-value-optimization (NRVO) should be able to eliminate
+//        almost all these copies. This should not be a problem for any decent modern compiler (and even less so for a c++11 compiler where
+//        move-semantics will kick in if RVO/NRVO fails).
 
 namespace mpt
 {
@@ -406,9 +421,11 @@ namespace mpt
 static inline std::string ToString(const std::string & x) { return x; }
 static inline std::string ToString(const char * const & x) { return x; }
 MPT_DEPRECATED static inline std::string ToString(const char & x) { return std::string(1, x); } // deprecated to catch potential API mis-use, use std::string(1, x) instead
+#if MPT_WSTRING_FORMAT
 MPT_DEPRECATED std::string ToString(const std::wstring & x);
 MPT_DEPRECATED std::string ToString(const wchar_t * const & x);
 MPT_DEPRECATED std::string ToString(const wchar_t & x); // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+#endif
 #if MPT_USTRING_MODE_UTF8
 MPT_DEPRECATED std::string ToString(const mpt::ustring & x);
 #endif
@@ -459,7 +476,9 @@ mpt::ustring ToUString(const T & x)
 {
 	return mpt::ToUnicode(mpt::CharsetUTF8, ToString(x));
 }
+#if MPT_WSTRING_FORMAT
 static inline mpt::ustring ToUString(const std::wstring & x) { return mpt::ToUnicode(x); }
+#endif
 #else
 template<typename T>
 mpt::ustring ToUString(const T & x)
@@ -733,6 +752,15 @@ static inline Tstring sci(const T& x, std::size_t width = 0, int precision = -1)
 	{
 		return FormatValTFunctor<Tstring>()(x, Format().NotaSci().FillSpc().Width(width).Precision(precision));
 	}
+}
+
+template <typename T, typename Tformat>
+static inline Tstring f(const Tformat & format, const T& x)
+{
+	#if defined(HAS_TYPE_TRAITS)
+		STATIC_ASSERT(std::is_floating_point<T>::value);
+	#endif
+	return FormatValTFunctor<Tstring>()(x, Format().ParsePrintf(format));
 }
 
 }; // struct fmtT

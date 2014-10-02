@@ -231,6 +231,60 @@
 
 
 
+#if MPT_COMPILER_MSVC
+
+	// Use wide strings for MSVC because this is the native encoding on 
+	// microsoft platforms.
+	#define MPT_USTRING_MODE_WIDE 1
+	#define MPT_USTRING_MODE_UTF8 0
+
+#else // !MPT_COMPILER_MSVC
+
+	#define MPT_USTRING_MODE_WIDE 0
+	#define MPT_USTRING_MODE_UTF8 1
+
+#endif // MPT_COMPILER_MSVC
+
+#if MPT_USTRING_MODE_UTF8
+
+	// MPT_USTRING_MODE_UTF8 mpt::ustring is implemented via mpt::u8string
+	#define MPT_WITH_U8STRING 1
+
+#else
+
+	#define MPT_WITH_U8STRING 0
+
+#endif
+
+#if defined(MODPLUG_TRACKER) || MPT_USTRING_MODE_WIDE
+
+	// mpt::ToWString, mpt::wfmt, mpt::String::PrintW, ConvertStrTo<std::wstring>
+	// Required by the tracker to ease interfacing with WinAPI.
+	// Required by MPT_USTRING_MODE_WIDE to ease type tunneling in mpt::String::Print.
+	#define MPT_WSTRING_FORMAT 1
+
+#else
+
+	#define MPT_WSTRING_FORMAT 0
+
+#endif
+
+#if MPT_OS_WINDOWS || MPT_USTRING_MODE_WIDE || MPT_WSTRING_FORMAT
+
+	// mpt::ToWide
+	// Required on Windows by mpt::PathString.
+	// Required by MPT_USTRING_MODE_WIDE as they share the conversion functions.
+	// Required by MPT_WSTRING_FORMAT because of std::string<->std::wstring conversion in mpt::ToString and mpt::ToWString.
+	#define MPT_WSTRING_CONVERT 1
+
+#else
+
+	#define MPT_WSTRING_CONVERT 0
+
+#endif
+
+
+
 // fixing stuff up
 
 #if !defined(ENABLE_MMX) && !defined(NO_REVERB)
@@ -248,21 +302,6 @@
 #if !defined(NO_ZLIB) && !defined(NO_MINIZ)
 // Only one deflate implementation should be used. Prefer zlib.
 #define NO_MINIZ
-#endif
-
-#if MPT_COMPILER_MSVC
-#define MPT_WITH_U8STRING 0
-#define MPT_USTRING_MODE_WIDE 1
-#define MPT_USTRING_MODE_UTF8 0
-#else // !MPT_COMPILER_MSVC
-#define MPT_WITH_U8STRING 1
-#define MPT_USTRING_MODE_WIDE 0
-#define MPT_USTRING_MODE_UTF8 1
-#endif // MPT_COMPILER_MSVC
-#if defined(MODPLUG_TRACKER) || MPT_USTRING_MODE_WIDE
-#define MPT_WSTRING_FORMAT 1
-#else
-#define MPT_WSTRING_FORMAT 0
 #endif
 
 #if !defined(MPT_CHARSET_WIN32) && !defined(MPT_CHARSET_ICONV) && !defined(MPT_CHARSET_CODECVTUTF8) && !defined(MPT_CHARSET_INTERNAL)

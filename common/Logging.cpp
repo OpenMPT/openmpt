@@ -193,7 +193,7 @@ void Logger::operator () (const std::string &text)
 #endif
 }
 
-#if !(MPT_USTRING_MODE_WIDE)
+#if MPT_WSTRING_CONVERT && !(MPT_USTRING_MODE_WIDE)
 void Logger::operator () (const std::wstring &text)
 //-------------------------------------------------
 {
