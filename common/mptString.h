@@ -440,6 +440,20 @@ std::wstring ToWString(const double & x);
 std::wstring ToWString(const long double & x);
 #endif
 
+#if MPT_USTRING_MODE_UTF8
+template<typename T>
+mpt::ustring ToUString(const T & x)
+{
+	return mpt::ToUnicode(mpt::CharsetUTF8, ToString(x));
+}
+#else
+template<typename T>
+mpt::ustring ToUString(const T & x)
+{
+	return ToWString(x);
+}
+#endif
+
 template <typename Tstring> struct ToStringTFunctor {};
 template <> struct ToStringTFunctor<std::string> { template <typename T> inline std::string operator() (const T & x) { return ToString(x); } };
 #if MPT_WSTRING_FORMAT
@@ -448,13 +462,8 @@ template <> struct ToStringTFunctor<std::wstring> { template <typename T> inline
 #if MPT_USTRING_MODE_UTF8
 template <> struct ToStringTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToString(x)); } };
 #endif
-template<typename Tstring, typename T> inline Tstring ToStringT(const T & x) { return ToStringTFunctor<Tstring>()(x); }
 
-template<typename T>
-mpt::ustring ToUString(const T & x)
-{
-	return mpt::ToStringT<mpt::ustring>(x);
-}
+template<typename Tstring, typename T> inline Tstring ToStringT(const T & x) { return ToStringTFunctor<Tstring>()(x); }
 
 
 struct fmt_base
