@@ -340,6 +340,13 @@ static inline CStringW ToCStringW(const mpt::ustring &str) { return ToCStringW(T
 #endif // MFC
 #endif // MPT_USTRING_MODE_WIDE
 
+// The MPT_UTF8 allows specifying UTF8 char arrays.
+// The resulting type is mpt::ustring and the construction might require runtime translation,
+// i.e. it is NOT generally available at compile time.
+// Use explicit UTF8 encoding,
+// i.e. U+00FC (LATIN SMALL LETTER U WITH DIAERESIS) would be written as "\xC3\xBC".
+#define MPT_UTF8(x) mpt::ToUnicode(mpt::CharsetUTF8, x )
+
 } // namespace mpt
 
 
