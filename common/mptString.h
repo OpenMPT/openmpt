@@ -409,6 +409,9 @@ MPT_DEPRECATED static inline std::string ToString(const char & x) { return std::
 MPT_DEPRECATED std::string ToString(const std::wstring & x);
 MPT_DEPRECATED std::string ToString(const wchar_t * const & x);
 MPT_DEPRECATED std::string ToString(const wchar_t & x); // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+#if MPT_USTRING_MODE_UTF8
+MPT_DEPRECATED std::string ToString(const mpt::ustring & x);
+#endif
 std::string ToString(const bool & x);
 std::string ToString(const signed char & x);
 std::string ToString(const unsigned char & x);
@@ -431,6 +434,9 @@ MPT_DEPRECATED std::wstring ToWString(const char & x); // deprecated to catch po
 static inline std::wstring ToWString(const std::wstring & x) { return x; }
 static inline std::wstring ToWString(const wchar_t * const & x) { return x; }
 MPT_DEPRECATED static inline std::wstring ToWString(const wchar_t & x) { return std::wstring(1, x); } // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+#if MPT_USTRING_MODE_UTF8
+std::wstring ToWString(const mpt::ustring & x);
+#endif
 std::wstring ToWString(const bool & x);
 std::wstring ToWString(const signed char & x);
 std::wstring ToWString(const unsigned char & x);
@@ -453,6 +459,7 @@ mpt::ustring ToUString(const T & x)
 {
 	return mpt::ToUnicode(mpt::CharsetUTF8, ToString(x));
 }
+static inline mpt::ustring ToUString(const std::wstring & x) { return mpt::ToUnicode(x); }
 #else
 template<typename T>
 mpt::ustring ToUString(const T & x)
