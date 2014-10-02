@@ -327,23 +327,35 @@ static void TestFloatFormats(double x)
 
 
 
+static bool BeginsWith(const std::string &str, const std::string &match)
+{
+	return (str.find(match) == 0);
+}
 static bool EndsWith(const std::string &str, const std::string &match)
 {
 	return (str.rfind(match) == (str.length() - match.length()));
+}
+
+static bool BeginsWith(const std::wstring &str, const std::wstring &match)
+{
+	return (str.find(match) == 0);
 }
 static bool EndsWith(const std::wstring &str, const std::wstring &match)
 {
 	return (str.rfind(match) == (str.length() - match.length()));
 }
 
-static bool BeginsWith(const std::string &str, const std::string &match)
+#if MPT_USTRING_MODE_UTF8
+static bool BeginsWith(const mpt::ustring &str, const mpt::ustring &match)
 {
 	return (str.find(match) == 0);
 }
-static bool BeginsWith(const std::wstring &str, const std::wstring &match)
+static bool EndsWith(const mpt::ustring &str, const mpt::ustring &match)
 {
-	return (str.find(match) == 0);
+	return (str.rfind(match) == (str.length() - match.length()));
 }
+#endif
+
 
 
 #ifdef MODPLUG_TRACKER
@@ -604,29 +616,29 @@ static noinline void TestMisc()
 static noinline void TestCharsets()
 //---------------------------------
 {
-
+	
 	// MPT_UTF8 version
 
 	// Charset conversions (basic sanity checks)
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetUTF8, MPT_USTRING("a")), "a");
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetISO8859_1, MPT_USTRING("a")), "a");
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetASCII, MPT_USTRING("a")), "a");
-	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetUTF8, "a"), MPT_USTRING("a"));
-	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetISO8859_1, "a"), MPT_USTRING("a"));
-	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetASCII, "a"), MPT_USTRING("a"));
+	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetUTF8, "a"), MPT_USTRING("a"));
+	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetISO8859_1, "a"), MPT_USTRING("a"));
+	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetASCII, "a"), MPT_USTRING("a"));
 #if defined(MPT_WITH_CHARSET_LOCALE)
 	VERIFY_EQUAL(mpt::ToLocale(MPT_USTRING("a")), "a");
-	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetLocale, "a"), MPT_USTRING("a"));
+	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetLocale, "a"), MPT_USTRING("a"));
 #endif
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetUTF8, MPT_UTF8("a")), "a");
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetISO8859_1, MPT_UTF8("a")), "a");
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetASCII, MPT_UTF8("a")), "a");
-	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetUTF8, "a"), MPT_UTF8("a"));
-	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetISO8859_1, "a"), MPT_UTF8("a"));
-	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetASCII, "a"), MPT_UTF8("a"));
+	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetUTF8, "a"), MPT_UTF8("a"));
+	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetISO8859_1, "a"), MPT_UTF8("a"));
+	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetASCII, "a"), MPT_UTF8("a"));
 #if defined(MPT_WITH_CHARSET_LOCALE)
 	VERIFY_EQUAL(mpt::ToLocale(MPT_UTF8("a")), "a");
-	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetLocale, "a"), MPT_UTF8("a"));
+	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetLocale, "a"), MPT_UTF8("a"));
 #endif
 	
 	// Check that some character replacement is done (and not just empty strings or truncated strings are returned)
@@ -658,30 +670,30 @@ static noinline void TestCharsets()
 	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::CharsetLocale,MPT_UTF8("abc\xE5\xAE\xB6xyz")),"abc"),true);
 #endif
 
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetASCII,"abc\xC3\xA4xyz"),L"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetISO8859_1,"abc\xC3\xA4xyz"),L"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetCP437,"abc\xC3\xA4xyz"),L"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetUTF8,"abc\xC3\xA4xyz"),L"xyz"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetASCII,"abc\xC3\xA4xyz"),L"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetISO8859_1,"abc\xC3\xA4xyz"),L"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetCP437,"abc\xC3\xA4xyz"),L"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetUTF8,"abc\xC3\xA4xyz"),L"abc"),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetASCII,"abc\xC3\xA4xyz"),MPT_USTRING("xyz")),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetISO8859_1,"abc\xC3\xA4xyz"),MPT_USTRING("xyz")),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetCP437,"abc\xC3\xA4xyz"),MPT_USTRING("xyz")),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetUTF8,"abc\xC3\xA4xyz"),MPT_USTRING("xyz")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetASCII,"abc\xC3\xA4xyz"),MPT_USTRING("abc")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetISO8859_1,"abc\xC3\xA4xyz"),MPT_USTRING("abc")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetCP437,"abc\xC3\xA4xyz"),MPT_USTRING("abc")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetUTF8,"abc\xC3\xA4xyz"),MPT_USTRING("abc")),true);
 #if defined(MPT_WITH_CHARSET_LOCALE)
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetLocale,"abc\xC3\xA4xyz"),L"xyz"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetLocale,"abc\xC3\xA4xyz"),L"abc"),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetLocale,"abc\xC3\xA4xyz"),MPT_USTRING("xyz")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetLocale,"abc\xC3\xA4xyz"),MPT_USTRING("abc")),true);
 #endif
 
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetASCII,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetISO8859_1,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetCP437,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetASCII,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetISO8859_1,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetCP437,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetASCII,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("xyz")),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetISO8859_1,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("xyz")),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetCP437,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("xyz")),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("xyz")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetASCII,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("abc")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetISO8859_1,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("abc")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetCP437,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("abc")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("abc")),true);
 #if defined(MPT_WITH_CHARSET_LOCALE)
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::CharsetLocale,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::CharsetLocale,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetLocale,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("xyz")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetLocale,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("abc")),true);
 #endif
 
 	// Check that characters are correctly converted
@@ -689,17 +701,17 @@ static noinline void TestCharsets()
 
 	// cp437
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetCP437,MPT_UTF8("abc\xC3\xA4xyz")),"abc\x84xyz");
-	VERIFY_EQUAL(MPT_UTF8("abc\xC3\xA4xyz"),mpt::ToWide(mpt::CharsetCP437,"abc\x84xyz"));
+	VERIFY_EQUAL(MPT_UTF8("abc\xC3\xA4xyz"),mpt::ToUnicode(mpt::CharsetCP437,"abc\x84xyz"));
 	
 	// iso8859
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetISO8859_1,MPT_UTF8("abc\xC3\xA4xyz")),"abc\xE4xyz");
-	VERIFY_EQUAL(MPT_UTF8("abc\xC3\xA4xyz"),mpt::ToWide(mpt::CharsetISO8859_1,"abc\xE4xyz"));
+	VERIFY_EQUAL(MPT_UTF8("abc\xC3\xA4xyz"),mpt::ToUnicode(mpt::CharsetISO8859_1,"abc\xE4xyz"));
 
 	// utf8
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetUTF8,MPT_UTF8("abc\xC3\xA4xyz")),"abc\xC3\xA4xyz");
-	VERIFY_EQUAL(MPT_UTF8("abc\xC3\xA4xyz"),mpt::ToWide(mpt::CharsetUTF8,"abc\xC3\xA4xyz"));
+	VERIFY_EQUAL(MPT_UTF8("abc\xC3\xA4xyz"),mpt::ToUnicode(mpt::CharsetUTF8,"abc\xC3\xA4xyz"));
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetUTF8,MPT_UTF8("abc\xE5\xAE\xB6xyz")),"abc\xE5\xAE\xB6xyz");
-	VERIFY_EQUAL(MPT_UTF8("abc\xE5\xAE\xB6xyz"),mpt::ToWide(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"));
+	VERIFY_EQUAL(MPT_UTF8("abc\xE5\xAE\xB6xyz"),mpt::ToUnicode(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"));
 
 
 	// wide L"" version
