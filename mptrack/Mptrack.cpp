@@ -64,6 +64,28 @@ const char *szHexChar = "0123456789ABCDEF";
 CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BOOL addToMru, BOOL makeVisible)
 //------------------------------------------------------------------------------------------------------------
 {
+	if(::PathIsDirectoryW(filename.AsNative().c_str()))
+	{
+		CDocument *pDoc = nullptr;
+		mpt::PathString path = filename;
+		if(!path.HasTrailingSlash()) path += MPT_PATHSTRING("\\");
+		HANDLE hFind;
+		WIN32_FIND_DATAW wfd;
+		MemsetZero(wfd);
+		if((hFind = FindFirstFileW((path + MPT_PATHSTRING("*.*")).AsNative().c_str(), &wfd)) != INVALID_HANDLE_VALUE)
+		{
+			do
+			{
+				if(wcscmp(wfd.cFileName, L"..") && wcscmp(wfd.cFileName, L"."))
+				{
+					pDoc = OpenDocumentFile(path + mpt::PathString::FromNative(wfd.cFileName), addToMru, makeVisible);
+				}
+			} while (FindNextFileW(hFind, &wfd));
+			FindClose(hFind);
+		}
+		return pDoc;
+	}
+
 	if(!mpt::PathString::CompareNoCase(filename.GetFileExt(), MPT_PATHSTRING(".dll")))
 	{
 		CVstPluginManager *pPluginManager = theApp.GetPluginManager();
@@ -1371,11 +1393,9 @@ BOOL CTrackApp::OnIdle(LONG lCount)
 	}
 
 	// Call plugins idle routine for open editor
-	DWORD curTime = timeGetTime();
-	// TODO: is it worth the overhead of checking that 10ms have passed,
-	//       or should we just do it on every idle message?
 	if (m_pPluginManager)
 	{
+		DWORD curTime = timeGetTime();
 		//rewbs.vstCompliance: call @ 50Hz
 		if (curTime - m_dwLastPluginIdleCall > 20) //20ms since last call?
 		{
@@ -1470,7 +1490,7 @@ void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText, BOOL bDisabled, BOO
 		::SetTextColor(hdc, GetSysColor((bDisabled) ? COLOR_GRAYTEXT : COLOR_BTNTEXT));
 		::SetBkMode(hdc, TRANSPARENT);
 		HGDIOBJ oldfont = ::SelectObject(hdc, CMainFrame::GetGUIFont());
-		::DrawText(hdc, lpszText, -1, &rect, dwFlags | DT_SINGLELINE | DT_NOPREFIX);
+		::DrawTextA(hdc, lpszText, -1, &rect, dwFlags | DT_SINGLELINE | DT_NOPREFIX);
 		::SelectObject(hdc, oldfont);
 	}
 }
