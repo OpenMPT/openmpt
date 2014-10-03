@@ -165,11 +165,8 @@ CModTree::~CModTree()
 	}
 	DocInfo.clear();
 
-	if(m_SongFile != nullptr)
-	{
-		delete m_SongFile;
-		m_SongFile = nullptr;
-	}
+	delete m_SongFile;
+	m_SongFile = nullptr;
 
 	if(m_pDataTree != nullptr)
 	{
@@ -368,7 +365,7 @@ bool CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::Path
 		if(f.Open(libPath + songName))
 		{
 			FileReader file = f.GetFile();
-			if (file.IsValid())
+			if(file.IsValid())
 			{
 				if(m_SongFile != nullptr)
 				{
@@ -393,7 +390,7 @@ bool CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::Path
 			return false;
 		}
 	}
-	m_InstrLibPath =  libPath;
+	m_InstrLibPath = libPath;
 	m_SongFileName = songName;
 	return true;
 }
@@ -3660,10 +3657,11 @@ void CModTree::OnDropFiles(HDROP hDropInfo)
 			if(IsSampleBrowser())
 			{
 				// Set sample browser location to this directory or file
+				const bool isSong = ::PathIsDirectoryW(fileName) == FALSE;
 				CModTree *dirBrowser = CMainFrame::GetMainFrame()->GetUpperTreeview();
 				dirBrowser->m_InstrLibPath = file.GetPath();
-				dirBrowser->PostMessage(WM_COMMAND, ID_MODTREE_REFRESHINSTRLIB);
-				dirBrowser->InstrumentLibraryChDir(file.GetFullFileName(), ::PathIsDirectoryW(fileName) == FALSE);
+				if(isSong) dirBrowser->RefreshInstrumentLibrary();
+				dirBrowser->InstrumentLibraryChDir(file.GetFullFileName(), isSong);
 				break;
 			} else
 			{
