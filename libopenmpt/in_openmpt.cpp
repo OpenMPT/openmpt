@@ -78,7 +78,7 @@ static std::wstring StringDecode( const std::string & src, UINT codepage )
 	return &decoded_string[0];
 }
 
-static HMODULE settings_dll = NULL;
+LIBOPENMPT_SETTINGS_DECLARE()
 
 struct self_winamp_t {
 	std::vector<char> filetypes_string;
@@ -156,13 +156,11 @@ static std::wstring generate_infotext( const std::wstring & filename, const open
 }
 
 static void config( HWND hwndParent ) {
-	if ( settings_dll ) {
-		if ( (libopenmpt_settings_edit_func)GetProcAddress( settings_dll, "libopenmpt_settings_edit" ) )  {
-			((libopenmpt_settings_edit_func)GetProcAddress( settings_dll, "libopenmpt_settings_edit" ))( &self->settings, hwndParent, SHORT_TITLE );
-		}
+	if ( LIBOPENMPT_SETTINGS_IS_AVAILABLE() ) {
+		LIBOPENMPT_SETTINGS_EDIT( &self->settings, hwndParent, SHORT_TITLE );
 		apply_options();
 	} else {
-		MessageBox( hwndParent, TEXT("libopenmpt_settings.dll failed to load. Please check if it is in the same folder as in_openmpt.dll and that .NET framework v4.0 is installed."), TEXT(SHORT_TITLE), MB_ICONERROR );
+		LIBOPENMPT_SETTINGS_UNAVAILABLE( hwndParent, TEXT("in_openmpt.dll"), TEXT(SHORT_TITLE) );
 	}
 }
 
@@ -184,12 +182,7 @@ static void about( HWND hwndParent ) {
 }
 
 static void init() {
-	if ( !settings_dll ) {
-		settings_dll = LoadLibrary( TEXT("libopenmpt_settings.dll") );
-	}
-	if ( !settings_dll ) {
-		settings_dll = LoadLibrary( TEXT("Plugins\\libopenmpt_settings.dll") );
-	}
+	LIBOPENMPT_SETTINGS_LOAD();
 	if ( !self ) {
 		self = new self_winamp_t();
 		inmod.FileExtensions = self->filetypes_string.data();
@@ -202,10 +195,7 @@ static void quit() {
 		delete self;
 		self = 0;
 	}
-	if ( settings_dll ) {
-		FreeLibrary( settings_dll );
-		settings_dll = NULL;
-	}
+	LIBOPENMPT_SETTINGS_UNLOAD();
 }
 
 static int isourfile( const in_char * fn ) {
