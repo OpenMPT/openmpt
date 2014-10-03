@@ -55,7 +55,7 @@ void libopenmpt_settings_edit( libopenmpt_settings * s, HWND parent, const char 
 	} while(0)
 
 #define LIBOPENMPT_SETTINGS_UNAVAILABLE( parent, dll, title ) \
-	MessageBox( parent , TEXT("libopenmpt_settings.dll failed to load. Please check if it is in the same folder as ") dll TEXT(" and that .NET framework v4.0 is installed."), title , MB_ICONERROR )
+	MessageBox( parent , TEXT("libopenmpt_settings.dll failed to load. Please check if it is in the same folder as ") dll TEXT("."), title , MB_ICONERROR )
 
 #define LIBOPENMPT_SETTINGS_LOAD() \
 	do { \
@@ -74,5 +74,7 @@ void libopenmpt_settings_edit( libopenmpt_settings * s, HWND parent, const char 
 			settings_dll = NULL; \
 		} \
 	} while(0)
+
+
 
 #endif /* LIBOPENMPT_SETTINGS_H */

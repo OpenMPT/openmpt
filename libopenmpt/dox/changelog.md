@@ -5,6 +5,11 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt svn
+
+ *  xmp-openmpt / in_openmpt: libopenmpt_settings.dll no longer requires
+    .NET 4 to be installed.
+
 ### 2014-09-07 - libopenmpt 0.2-beta7
 
  *  libopenmpt now has an GNU Autotools based build system (in addition to all

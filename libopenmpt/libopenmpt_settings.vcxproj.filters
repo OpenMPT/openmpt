@@ -18,21 +18,18 @@
     <ClCompile Include="libopenmpt_settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SettingsForm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="libopenmpt_settings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SettingsForm.h">
+    <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="SettingsForm.resx">
+    <ResourceCompile Include="libopenmpt_settings.rc">
       <Filter>Resource Files</Filter>
-    </EmbeddedResource>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
