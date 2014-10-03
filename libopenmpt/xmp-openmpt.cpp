@@ -78,7 +78,7 @@ static XMPFUNC_FILE * xmpffile = NULL;
 static XMPFUNC_TEXT * xmpftext = NULL;
 static XMPFUNC_STATUS * xmpfstatus = NULL;
 
-static HMODULE settings_dll = NULL;
+LIBOPENMPT_SETTINGS_DECLARE()
 
 struct self_xmplay_t;
 
@@ -324,13 +324,11 @@ static void WINAPI openmpt_About( HWND win ) {
 }
 
 static void WINAPI openmpt_Config( HWND win ) {
-	if ( settings_dll ) {
-		if ( (libopenmpt_settings_edit_func)GetProcAddress( settings_dll, "libopenmpt_settings_edit" ) )  {
-			((libopenmpt_settings_edit_func)GetProcAddress( settings_dll, "libopenmpt_settings_edit" ))( &self->settings, win, SHORT_TITLE );
-		}
+	if ( LIBOPENMPT_SETTINGS_IS_AVAILABLE() ) {
+		LIBOPENMPT_SETTINGS_EDIT( &self->settings, win, SHORT_TITLE );
 		apply_and_save_options();
 	} else {
-		MessageBox( win, TEXT("libopenmpt_settings.dll failed to load. Please check if it is in the same folder as xmp-openmpt.dll and that .NET framework v4.0 is installed."), TEXT(SHORT_TITLE), MB_ICONERROR );
+		LIBOPENMPT_SETTINGS_UNAVAILABLE( win, TEXT("xmp-openmpt.dll"), TEXT(SHORT_TITLE) );
 	}
 }
 
@@ -1347,17 +1345,14 @@ static void xmp_openmpt_on_dll_load() {
 	} else {
 		xmpin.exts = xmp_openmpt_default_exts;
 	}
-	settings_dll = LoadLibrary( TEXT("libopenmpt_settings.dll") );
+	LIBOPENMPT_SETTINGS_LOAD();
 	self = new self_xmplay_t();
 }
 
 static void xmp_openmpt_on_dll_unload() {
 	delete self;
 	self = nullptr;
-	if ( settings_dll ) {
-		FreeLibrary( settings_dll );
-		settings_dll = NULL;
-	}
+	LIBOPENMPT_SETTINGS_UNLOAD();
 	if ( !xmpin.exts ) {
 		return;
 	}
