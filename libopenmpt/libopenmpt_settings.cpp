@@ -7,26 +7,259 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+#endif // _MSC_VER
+
+#define _WIN32_WINNT 0x0500 // _WIN32_WINNT_WIN2000
+
+#include <afxwin.h>
+#include <afxcmn.h>
+
+#include "resource.h"
+
 #include "libopenmpt_settings.h"
-#include "SettingsForm.h"
+
+
+class CSettingsApp : public CWinApp {
+
+public:
+
+	CSettingsApp() {
+		return;
+	}
+
+public:
+
+	virtual BOOL InitInstance() {
+		if ( !CWinApp::InitInstance() )
+		{
+			return FALSE;
+		}
+		return TRUE;
+	}
+
+	virtual int ExitInstance() {
+		return CWinApp::ExitInstance();
+	}
+
+	DECLARE_MESSAGE_MAP()
+
+};
+
+BEGIN_MESSAGE_MAP(CSettingsApp, CWinApp)
+END_MESSAGE_MAP()
+
+
+CSettingsApp theApp;
+
+
+class CSettingsDialog : public CDialog {
+
+protected:
+
+	DECLARE_MESSAGE_MAP()
+
+	libopenmpt_settings * s;
+
+	CString m_Title;
+
+	CComboBox m_ComboBoxSamplerate;
+	CComboBox m_ComboBoxChannels;
+	CSliderCtrl m_SliderCtrlGain;
+	CComboBox m_ComboBoxInterpolation;
+	CComboBox m_ComboBoxRepeat;
+	CSliderCtrl m_SliderCtrlStereoSeparation;
+	CComboBox m_ComboBoxRamping;
+
+public:
+
+	CSettingsDialog( libopenmpt_settings * s, CString title, CWnd * parent = NULL )
+		: CDialog( IDD_SETTINGS, parent )
+		, s( s )
+		, m_Title( title )
+	{
+		return;
+	}
+
+protected:
+
+	virtual void DoDataExchange( CDataExchange * pDX )
+	{
+		CDialog::DoDataExchange( pDX );
+		DDX_Control( pDX, IDC_COMBO_SAMPLERATE, m_ComboBoxSamplerate );
+		DDX_Control( pDX, IDC_COMBO_CHANNELS, m_ComboBoxChannels );
+		DDX_Control( pDX, IDC_SLIDER_GAIN, m_SliderCtrlGain );
+		DDX_Control( pDX, IDC_COMBO_INTERPOLATION, m_ComboBoxInterpolation );
+		DDX_Control( pDX, IDC_COMBO_REPEAT, m_ComboBoxRepeat );
+		DDX_Control( pDX, IDC_SLIDER_STEREOSEPARATION, m_SliderCtrlStereoSeparation );
+		DDX_Control( pDX, IDC_COMBO_RAMPING, m_ComboBoxRamping );
+	}
+
+	afx_msg BOOL OnInitDialog() {
+
+		if ( !CDialog::OnInitDialog() ) {
+			return false;
+		}
+
+		SetWindowText( m_Title );
+
+		bool selected = false;
+
+		if ( !s->with_outputformat ) {
+
+			m_ComboBoxSamplerate.EnableWindow( FALSE );
+			m_ComboBoxChannels.EnableWindow( FALSE );
+
+			m_ComboBoxSamplerate.AddString( L"default" );
+			m_ComboBoxChannels.AddString( L"default" );
+
+			m_ComboBoxSamplerate.SelectString( 0, L"default" );
+			m_ComboBoxChannels.SelectString( 0, L"default" );
+
+		} else {
+
+			m_ComboBoxSamplerate.EnableWindow( TRUE );
+			m_ComboBoxChannels.EnableWindow( TRUE );
+
+			selected = false;
+			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"6000" ), 6000 );
+			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"8000" ), 8000 );
+			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"11025" ), 11025 );
+			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"16000" ), 16000 );
+			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"22050" ), 22050 );
+			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"32000" ), 32000 );
+			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"44100" ), 44100 );
+			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"48000" ), 48000 );
+			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"88200" ), 88200 );
+			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"96000" ), 96000 );
+			for ( int index = 0; index < m_ComboBoxSamplerate.GetCount(); ++index ) {
+				if ( m_ComboBoxSamplerate.GetItemData( index ) == s->samplerate ) {
+					m_ComboBoxSamplerate.SetCurSel( index );
+					selected = true;
+				}
+			}
+			if ( !selected ) {
+				m_ComboBoxSamplerate.SelectString( 0, L"48000" );
+			}
+
+			selected = false;
+			m_ComboBoxChannels.SetItemData( m_ComboBoxSamplerate.AddString( L"mono" ), 1 );
+			m_ComboBoxChannels.SetItemData( m_ComboBoxSamplerate.AddString( L"stereo" ), 2 );
+			m_ComboBoxChannels.SetItemData( m_ComboBoxSamplerate.AddString( L"quad" ), 4 );
+			for ( int index = 0; index < m_ComboBoxChannels.GetCount(); ++index ) {
+				if ( m_ComboBoxChannels.GetItemData( index ) == s->channels ) {
+					m_ComboBoxChannels.SetCurSel( index );
+					selected = true;
+				}
+			}
+			if ( !selected ) {
+				m_ComboBoxSamplerate.SelectString( 0, L"stereo" );
+			}
+
+		}
+
+		m_SliderCtrlGain.SetRange( -1200, 1200 );
+		m_SliderCtrlGain.SetTicFreq( 100 );
+		m_SliderCtrlGain.SetPageSize( 300 );
+		m_SliderCtrlGain.SetLineSize( 100 );
+		m_SliderCtrlGain.SetPos( s->mastergain_millibel );
+
+		selected = false;
+		m_ComboBoxInterpolation.SetItemData( m_ComboBoxInterpolation.AddString( L"off / 1 tap (nearest)" ), 1 );
+		m_ComboBoxInterpolation.SetItemData( m_ComboBoxInterpolation.AddString( L"2 tap (linear)" ), 2 );
+		m_ComboBoxInterpolation.SetItemData( m_ComboBoxInterpolation.AddString( L"4 tap (cubic)" ), 4 );
+		m_ComboBoxInterpolation.SetItemData( m_ComboBoxInterpolation.AddString( L"8 tap (polyphase fir)" ), 8 );
+		for ( int index = 0; index < m_ComboBoxInterpolation.GetCount(); ++index ) {
+			if ( m_ComboBoxInterpolation.GetItemData( index ) == s->interpolationfilterlength ) {
+				m_ComboBoxInterpolation.SetCurSel( index );
+				selected = true;
+			}
+		}
+		if ( !selected ) {
+			m_ComboBoxInterpolation.SelectString( 0, L"8 tap (polyphase fir)" );
+		}
+
+		selected = false;
+		m_ComboBoxRepeat.SetItemData( m_ComboBoxRepeat.AddString( L"forever" ), -1 );
+		m_ComboBoxRepeat.SetItemData( m_ComboBoxRepeat.AddString( L"never" ), 0 );
+		m_ComboBoxRepeat.SetItemData( m_ComboBoxRepeat.AddString( L"once" ), 1 );
+		for ( int index = 0; index < m_ComboBoxRepeat.GetCount(); ++index ) {
+			if ( m_ComboBoxRepeat.GetItemData( index ) == s->repeatcount ) {
+				m_ComboBoxRepeat.SetCurSel( index );
+				selected = true;
+			}
+		}
+		if ( !selected ) {
+			m_ComboBoxRepeat.SelectString( 0, L"never" );
+		}
+
+		m_SliderCtrlStereoSeparation.SetRange( 0, 400 );
+		m_SliderCtrlStereoSeparation.SetTicFreq( 100 );
+		m_SliderCtrlStereoSeparation.SetPageSize( 100 );
+		m_SliderCtrlStereoSeparation.SetLineSize( 25 );
+		m_SliderCtrlStereoSeparation.SetPos( s->stereoseparation );
+
+		selected = false;
+		m_ComboBoxRamping.SetItemData( m_ComboBoxRamping.AddString( L"default" ), -1 );
+		m_ComboBoxRamping.SetItemData( m_ComboBoxRamping.AddString( L"off" ), 0 );
+		m_ComboBoxRamping.SetItemData( m_ComboBoxRamping.AddString( L"1 ms" ), 1 );
+		m_ComboBoxRamping.SetItemData( m_ComboBoxRamping.AddString( L"2 ms" ), 2 );
+		m_ComboBoxRamping.SetItemData( m_ComboBoxRamping.AddString( L"3 ms" ), 3 );
+		m_ComboBoxRamping.SetItemData( m_ComboBoxRamping.AddString( L"5 ms" ), 5 );
+		m_ComboBoxRamping.SetItemData( m_ComboBoxRamping.AddString( L"10 ms" ), 10 );
+		for ( int index = 0; index < m_ComboBoxRamping.GetCount(); ++index ) {
+			if ( m_ComboBoxRamping.GetItemData( index ) == s->ramping ) {
+				m_ComboBoxRamping.SetCurSel( index );
+				selected = true;
+			}
+		}
+		if ( !selected ) {
+			m_ComboBoxRamping.SelectString( 0, L"default" );
+		}
+
+		return TRUE;
+
+	}
+
+	virtual void OnOK() {
+
+		if ( s->with_outputformat ) {
+
+			s->samplerate = m_ComboBoxSamplerate.GetItemData( m_ComboBoxSamplerate.GetCurSel() );
+
+			s->channels = m_ComboBoxChannels.GetItemData( m_ComboBoxChannels.GetCurSel() );
+
+		}
+
+		s->mastergain_millibel = m_SliderCtrlGain.GetPos();
+
+		s->interpolationfilterlength = m_ComboBoxInterpolation.GetItemData( m_ComboBoxInterpolation.GetCurSel() );
+
+		s->repeatcount = m_ComboBoxRepeat.GetItemData( m_ComboBoxRepeat.GetCurSel() );
+
+		s->stereoseparation = m_SliderCtrlStereoSeparation.GetPos();
+
+		s->ramping = m_ComboBoxRamping.GetItemData( m_ComboBoxRamping.GetCurSel() );
+
+		CDialog::OnOK();
+
+	}
+
+};
+
+BEGIN_MESSAGE_MAP(CSettingsDialog, CDialog)
+END_MESSAGE_MAP()
+
 
 extern "C" {
 
 void libopenmpt_settings_edit( libopenmpt_settings * s, HWND parent, const char * title ) {
-	try {
-		libopenmpt::SettingsForm ^ form = gcnew libopenmpt::SettingsForm( title, s );
-		bool topmost = false;
-		if ( parent && parent != INVALID_HANDLE_VALUE ) {
-			topmost = ( GetWindowLong( parent, GWL_EXSTYLE ) & WS_EX_TOPMOST ) ? true : false;
-		}
-		System::Windows::Forms::IWin32Window ^w = System::Windows::Forms::Control::FromHandle((System::IntPtr)parent);
-		if ( topmost ) {
-			form->TopMost = true;
-		}
-		form->ShowDialog(w);
-	} catch ( ... ) {
-		// nothing
-	}
+	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
+	CSettingsDialog dlg( s, title, parent ? CWnd::FromHandle( parent ) : NULL );
+	dlg.DoModal();
 }
 
 #pragma comment(linker, "/EXPORT:libopenmpt_settings_edit=_libopenmpt_settings_edit")
