@@ -99,7 +99,10 @@ public:
 	PathString GetPath() const;			// Drive + Dir, e.g. "C:\OpenMPT\"
 	PathString GetFileName() const;		// File name without extension, e.g. "mptrack"
 	PathString GetFileExt() const;		// Extension including dot, e.g. ".exe"
-	PathString GetFullFileName() const;	// File name + extension, e.g. "mptrack.exe"
+	PathString GetFullFileName() const;	// File name + extension, e.g. "mptrack.exe"+
+	
+	// Verify if this path represents a valid directory on the file system.
+	bool IsDirectory() const { return ::PathIsDirectoryW(path.c_str()) != FALSE; }
 
 	// Return the same path string with a different (or appended) extension (including "."), e.g. "foo.bar",".txt" -> "foo.txt" or "C:\OpenMPT\foo",".txt" -> "C:\OpenMPT\foo.txt"
 	PathString ReplaceExt(const mpt::PathString &newExt) const;

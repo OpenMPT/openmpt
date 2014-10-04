@@ -22,7 +22,6 @@ public:
 //Cons/Destr
 	CAutoSaver(bool enabled=true, int saveInterval=10, int backupHistory=3,
 			   bool useOriginalPath=true, mpt::PathString path=mpt::PathString(), mpt::PathString fileNameTemplate=mpt::PathString());
-	~CAutoSaver();
 	
 //Work
 	bool DoSave(DWORD curTime);
@@ -75,7 +74,6 @@ class CAutoSaverGUI : public CPropertyPage
 
 public:
 	CAutoSaverGUI(CAutoSaver* pAutoSaver);
-	virtual ~CAutoSaverGUI();
 
 // Dialog Data
 	enum { IDD = IDD_OPTIONS_AUTOSAVE };
