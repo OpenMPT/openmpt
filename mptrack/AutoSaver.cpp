@@ -16,9 +16,6 @@
 #include "moptions.h"
 #include "FileDialog.h"
 #include <algorithm>
-#include <io.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -32,17 +29,16 @@ OPENMPT_NAMESPACE_BEGIN
 // Construction/Destruction
 ///////////////////////////
 
-CAutoSaver::CAutoSaver(bool enabled, int saveInterval, int backupHistory, bool useOriginalPath, mpt::PathString path, mpt::PathString fileNameTemplate)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------
+CAutoSaver::CAutoSaver(bool enabled, int saveInterval, int backupHistory, bool useOriginalPath, mpt::PathString path)
+//-------------------------------------------------------------------------------------------------------------------
 	: m_bSaveInProgress(false)
+	, m_nLastSave(timeGetTime())
+	, m_bEnabled(enabled)
+	, m_nSaveInterval(saveInterval * 60 * 1000) //minutes to milliseconds
+	, m_nBackupHistory(backupHistory)
+	, m_bUseOriginalPath(useOriginalPath)
+	, m_csPath(path)
 {
-	m_nLastSave			 = timeGetTime();
-	m_bEnabled			 = enabled;
-	m_nSaveInterval		 = saveInterval*60*1000; //minutes to milliseconds
-	m_nBackupHistory	 = backupHistory;
-	m_bUseOriginalPath	 = useOriginalPath;
-	m_csPath			 = path;
-	m_csFileNameTemplate = fileNameTemplate;
 }
 
 
@@ -90,105 +86,6 @@ bool CAutoSaver::DoSave(DWORD curTime)
 }
 
 
-////////////////
-// Member access
-////////////////
-
-
-void CAutoSaver::Enable()
-//-----------------------
-{
-	m_bEnabled = true;
-}
-
-
-void CAutoSaver::Disable()
-//------------------------
-{
-	m_bEnabled = false;
-}
-
-
-bool CAutoSaver::IsEnabled()
-//--------------------------
-{
-	return m_bEnabled;
-}
-
-
-void CAutoSaver::SetUseOriginalPath(bool useOrgPath)
-//--------------------------------------------------
-{
-	m_bUseOriginalPath=useOrgPath;
-}
-
-
-bool CAutoSaver::GetUseOriginalPath()
-//-----------------------------------
-{
-	return m_bUseOriginalPath;
-}
-
-
-void CAutoSaver::SetPath(mpt::PathString path)
-//--------------------------------------------
-{
-	m_csPath = path;
-}
-
-
-mpt::PathString CAutoSaver::GetPath()
-//-----------------------------------
-{
-	return m_csPath;
-}
-
-
-void CAutoSaver::SetFilenameTemplate(mpt::PathString fnTemplate)
-//--------------------------------------------------------------
-{
-	m_csFileNameTemplate = fnTemplate;
-}
-
-
-mpt::PathString CAutoSaver::GetFilenameTemplate()
-//------------------------------------------------
-{
-	return m_csFileNameTemplate;
-}
-
-
-void CAutoSaver::SetHistoryDepth(int history)
-//-------------------------------------------
-{
-	Limit(history, 1, 100);
-	m_nBackupHistory = history;
-}
-
-
-int CAutoSaver::GetHistoryDepth()
-//-------------------------------
-{
-	return m_nBackupHistory;
-}
-
-
-void CAutoSaver::SetSaveInterval(int minutes)
-//-------------------------------------------
-{
-	Limit(minutes, 1, 10000);
-	
-	m_nSaveInterval=minutes * 60 * 1000; //minutes to milliseconds
-}
-
-
-int CAutoSaver::GetSaveInterval()
-//-------------------------------
-{
-	return m_nSaveInterval/60/1000;
-}
-
-
 ///////////////////////////
 // Implementation internals
 ///////////////////////////
@@ -210,14 +107,18 @@ mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 	
 	if(m_bUseOriginalPath)
 	{
-		if(modDoc.m_bHasValidPath)
+		if(modDoc.m_bHasValidPath && !(name = modDoc.GetPathNameMpt()).empty())
 		{
-			// Check that the file has a user-chosen path
-			name = modDoc.GetPathNameMpt();
+			// File has a user-chosen path - no change required
 		} else
 		{
-			// if it doesnt, put it in settings dir
-			name = theApp.GetConfigPath() + mpt::PathString::FromCStringSilent(modDoc.GetTitle()).SanitizeComponent();
+			// if it doesn't, put it in settings dir
+			name = theApp.GetConfigPath() + MPT_PATHSTRING("Autosave\\");
+			if(!CreateDirectoryW(name.AsNative().c_str(), nullptr))
+			{
+				name = theApp.GetConfigPath();
+			}
+			name += mpt::PathString::FromCStringSilent(modDoc.GetTitle()).SanitizeComponent();
 		}
 	} else
 	{
@@ -225,7 +126,7 @@ mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 	}
 	
 	name += MPT_PATHSTRING(".AutoSave.");					//append backup tag
-	name += mpt::PathString::FromWide(timeStamp);						//append timestamp
+	name += mpt::PathString::FromWide(timeStamp);			//append timestamp
 	name += MPT_PATHSTRING(".");							//append extension
 	if(modDoc.GetrSoundFile().m_SongFlags[SONG_ITPROJECT])
 	{
@@ -289,13 +190,14 @@ void CAutoSaver::CleanUpBackups(CModDoc &modDoc)
 	
 	if (m_bUseOriginalPath)
 	{
-		if (modDoc.m_bHasValidPath)	// Check that the file has a user-chosen path
+		if (modDoc.m_bHasValidPath && !(path = modDoc.GetPathNameMpt()).empty())
 		{
-			mpt::PathString fullPath = modDoc.GetPathNameMpt();
-			path = fullPath.GetDrive() + fullPath.GetDir(); // remove file name
+			// File has a user-chosen path - remove filename
+			path = path.GetPath();
 		} else
 		{
-			path = theApp.GetConfigPath();
+			// if it doesn't, put it in settings dir
+			path = theApp.GetConfigPath() + MPT_PATHSTRING("Autosave\\");
 		}
 	} else
 	{
@@ -388,8 +290,7 @@ void CAutoSaverGUI::OnOK()
 //------------------------
 {
 	WCHAR tempPath[MAX_PATH];
-	IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) ? m_pAutoSaver->Enable() : m_pAutoSaver->Disable();
-	m_pAutoSaver->SetFilenameTemplate(MPT_PATHSTRING("")); //TODO
+	m_pAutoSaver->SetEnabled(IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) != BST_UNCHECKED);
 	m_pAutoSaver->SetHistoryDepth(GetDlgItemInt(IDC_AUTOSAVE_HISTORY));
 	m_pAutoSaver->SetSaveInterval(GetDlgItemInt(IDC_AUTOSAVE_INTERVAL));
 	m_pAutoSaver->SetUseOriginalPath(IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR) == BST_CHECKED);
@@ -423,12 +324,12 @@ void CAutoSaverGUI::OnBnClickedAutosaveEnable()
 //---------------------------------------------
 {
 	BOOL enabled = IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_INTERVAL), enabled);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_HISTORY), enabled);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_USEORIGDIR), enabled);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_USECUSTOMDIR), enabled);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_PATH), enabled);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_BROWSE), enabled);
+	GetDlgItem(IDC_AUTOSAVE_INTERVAL)->EnableWindow(enabled);
+	GetDlgItem(IDC_AUTOSAVE_HISTORY)->EnableWindow(enabled);
+	GetDlgItem(IDC_AUTOSAVE_USEORIGDIR)->EnableWindow(enabled);
+	GetDlgItem(IDC_AUTOSAVE_USECUSTOMDIR)->EnableWindow(enabled);
+	GetDlgItem(IDC_AUTOSAVE_PATH)->EnableWindow(enabled);
+	GetDlgItem(IDC_AUTOSAVE_BROWSE)->EnableWindow(enabled);
 	OnSettingsChanged();
 	return;
 }
@@ -439,8 +340,8 @@ void CAutoSaverGUI::OnBnClickedAutosaveUseorigdir()
 	if (IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE))
 	{
 		BOOL enabled = IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_PATH), !enabled);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_BROWSE), !enabled);
+		GetDlgItem(IDC_AUTOSAVE_PATH)->EnableWindow(!enabled);
+		GetDlgItem(IDC_AUTOSAVE_BROWSE)->EnableWindow(!enabled);
 		OnSettingsChanged();
 	}
 	return;
@@ -467,8 +368,8 @@ BOOL CAutoSaverGUI::OnKillActive()
 
 	if (!::PathIsDirectoryW(szPath) && IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) && !IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR))
 	{
-		Reporting::Error("Error: backup path does not exist.");
-		::SetFocus(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_PATH));
+		Reporting::Error("Backup path does not exist.");
+		GetDlgItem(IDC_AUTOSAVE_PATH)->SetFocus();
 		return 0;
 	}
 
