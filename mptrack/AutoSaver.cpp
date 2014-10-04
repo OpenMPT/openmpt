@@ -114,7 +114,7 @@ mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 		{
 			// if it doesn't, put it in settings dir
 			name = theApp.GetConfigPath() + MPT_PATHSTRING("Autosave\\");
-			if(!CreateDirectoryW(name.AsNative().c_str(), nullptr))
+			if(!CreateDirectoryW(name.AsNative().c_str(), nullptr) && GetLastError() == ERROR_PATH_NOT_FOUND)
 			{
 				name = theApp.GetConfigPath();
 			}
