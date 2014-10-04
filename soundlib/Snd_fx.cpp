@@ -4952,10 +4952,10 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 //-------------------------------------------------------------------------------
 {
 	if (note == NOTE_NONE || (note >= NOTE_MIN_SPECIAL)) return 0;
+	note -= NOTE_MIN;
 	if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_MT2|MOD_TYPE_S3M|MOD_TYPE_STM|MOD_TYPE_MDL|MOD_TYPE_ULT|MOD_TYPE_WAV|MOD_TYPE_669
 				|MOD_TYPE_FAR|MOD_TYPE_DMF|MOD_TYPE_PTM|MOD_TYPE_AMS|MOD_TYPE_AMS2|MOD_TYPE_DBM|MOD_TYPE_AMF|MOD_TYPE_PSM|MOD_TYPE_J2B|MOD_TYPE_IMF))
 	{
-		note -= NOTE_MIN;
 		if(m_SongFlags[SONG_LINEARSLIDES])
 		{
 			// In IT linear slide mode, periods are equal to frequency.
@@ -4964,14 +4964,14 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 		{
 			if (!nC5Speed) nC5Speed = 8363;
 			//(a*b)/c
-			return Util::muldiv(8363, (FreqS3MTable[note % 12] << 5), nC5Speed << (note / 12));
+			return Util::muldiv_unsigned(8363, (FreqS3MTable[note % 12] << 5), nC5Speed << (note / 12));
 			//8363 * freq[note%12] / nC5Speed * 2^(5-note/12)
 		}
 	} else
 	if (GetType() == MOD_TYPE_XM)
 	{
-		if (note < 13) note = 13;
-		note -= 13;
+		if (note < 12) note = 12;
+		note -= 12;
 
 		// FT2 Compatibility: The lower three bits of the finetune are truncated.
 		// Test case: Finetune-Precision.xm
@@ -5010,7 +5010,6 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 		}
 	} else
 	{
-		note--;
 		nFineTune = XM2MODFineTune(nFineTune);
 		if ((nFineTune) || (note < 36) || (note >= 36 + 6 * 12))
 			return (ProTrackerTunedPeriods[nFineTune * 12 + note % 12] << 5) >> (note / 12);
