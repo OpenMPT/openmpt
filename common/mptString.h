@@ -482,7 +482,7 @@ mpt::ustring ToUString(const T & x)
 	return mpt::ToUnicode(mpt::CharsetUTF8, ToString(x));
 }
 template<>
-mpt::ustring ToUString<mpt::ustring>(const mpt::ustring & x)
+inline mpt::ustring ToUString<mpt::ustring>(const mpt::ustring & x)
 {
 	return x;
 }
