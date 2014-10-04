@@ -219,7 +219,7 @@ public:
 		return ID(bytes, bytes + sizeof(T));
 	}
 	bool IsPrintable() const;
-	std::string AsString() const;
+	mpt::ustring AsString() const;
 	const char *GetBytes() const { return m_ID.c_str(); }
 	std::size_t GetSize() const { return m_ID.length(); }
 	bool operator == (const ID &other) const { return m_ID == other.m_ID; }
@@ -250,11 +250,6 @@ protected:
 
 	void SetFlag(Rwf flag, bool val) {m_Flags.set(flag, val);}
 	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
-
-	// Write given string to log if log func is defined.
-	void AddToLog(const char *psz);
-
-	void AddNote(const SsbStatus s, const char* sz);
 
 protected:
 
