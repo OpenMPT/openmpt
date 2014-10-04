@@ -45,10 +45,6 @@ CAutoSaver::CAutoSaver(bool enabled, int saveInterval, int backupHistory, bool u
 	m_csFileNameTemplate = fileNameTemplate;
 }
 
-CAutoSaver::~CAutoSaver()
-{
-}
-
 
 //////////////
 // Entry Point
@@ -347,11 +343,9 @@ CAutoSaverGUI::CAutoSaverGUI(CAutoSaver* pAutoSaver)
 	m_pAutoSaver = pAutoSaver;
 }
 
-CAutoSaverGUI::~CAutoSaverGUI()
-{
-}
 
 void CAutoSaverGUI::DoDataExchange(CDataExchange* pDX)
+//----------------------------------------------------
 {
 	CPropertyPage::DoDataExchange(pDX);
 }
@@ -370,6 +364,7 @@ END_MESSAGE_MAP()
 // CAutoSaverGUI message handlers
 
 BOOL CAutoSaverGUI::OnInitDialog()
+//--------------------------------
 {
 	CPropertyPage::OnInitDialog();
 
@@ -390,6 +385,7 @@ BOOL CAutoSaverGUI::OnInitDialog()
 
 
 void CAutoSaverGUI::OnOK()
+//------------------------
 {
 	WCHAR tempPath[MAX_PATH];
 	IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) ? m_pAutoSaver->Enable() : m_pAutoSaver->Disable();
@@ -409,6 +405,7 @@ void CAutoSaverGUI::OnOK()
 }
 
 void CAutoSaverGUI::OnBnClickedAutosaveBrowse()
+//---------------------------------------------
 {
 	WCHAR szPath[MAX_PATH] = L"";
 	::GetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, szPath, CountOf(szPath));
@@ -423,6 +420,7 @@ void CAutoSaverGUI::OnBnClickedAutosaveBrowse()
 
 
 void CAutoSaverGUI::OnBnClickedAutosaveEnable()
+//---------------------------------------------
 {
 	BOOL enabled = IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_INTERVAL), enabled);
@@ -436,8 +434,10 @@ void CAutoSaverGUI::OnBnClickedAutosaveEnable()
 }
 
 void CAutoSaverGUI::OnBnClickedAutosaveUseorigdir()
+//-------------------------------------------------
 {
-	if (IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE)) {
+	if (IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE))
+	{
 		BOOL enabled = IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_PATH), !enabled);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_BROWSE), !enabled);
@@ -446,7 +446,9 @@ void CAutoSaverGUI::OnBnClickedAutosaveUseorigdir()
 	return;
 }
 
-void CAutoSaverGUI::OnSettingsChanged() {
+void CAutoSaverGUI::OnSettingsChanged()
+//-------------------------------------
+{
 	SetModified(TRUE);
 }
 
@@ -457,17 +459,13 @@ BOOL CAutoSaverGUI::OnSetActive()
 	return CPropertyPage::OnSetActive();
 }
 
-BOOL CAutoSaverGUI::OnKillActive() 
-//---------------------------------
+BOOL CAutoSaverGUI::OnKillActive()
+//--------------------------------
 {
-	CString path;
-	GetDlgItemText(IDC_AUTOSAVE_PATH, path);
-	if (!path.IsEmpty() && (path.Right(1)!="\\")) {
-		path.Append("\\");
-	}
-	bool pathIsOK = !_access(path, 0);
+	WCHAR szPath[MAX_PATH] = L"";
+	::GetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, szPath, CountOf(szPath));
 
-	if (!pathIsOK && IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) && !IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR))
+	if (!::PathIsDirectoryW(szPath) && IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) && !IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR))
 	{
 		Reporting::Error("Error: backup path does not exist.");
 		::SetFocus(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_PATH));

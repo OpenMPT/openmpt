@@ -64,7 +64,7 @@ const char *szHexChar = "0123456789ABCDEF";
 CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BOOL addToMru, BOOL makeVisible)
 //------------------------------------------------------------------------------------------------------------
 {
-	if(::PathIsDirectoryW(filename.AsNative().c_str()))
+	if(filename.IsDirectory())
 	{
 		CDocument *pDoc = nullptr;
 		mpt::PathString path = filename;
@@ -778,7 +778,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 		m_szConfigDirectory += MPT_PATHSTRING("\\OpenMPT\\");
 
 		// Path doesn't exist yet, so it has to be created
-		if(PathIsDirectoryW(m_szConfigDirectory.AsNative().c_str()) == 0)
+		if(!m_szConfigDirectory.IsDirectory())
 		{
 			CreateDirectoryW(m_szConfigDirectory.AsNative().c_str(), 0);
 		}
@@ -797,7 +797,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	mpt::PathString sTuningPath = m_szConfigDirectory + MPT_PATHSTRING("tunings\\");
 	TrackerDirectories::Instance().SetDefaultDirectory(sTuningPath, DIR_TUNING);
 
-	if(PathIsDirectoryW(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING).AsNative().c_str()) == 0)
+	if(!TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING).IsDirectory())
 	{
 		CreateDirectoryW(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING).AsNative().c_str(), 0);
 	}
@@ -809,7 +809,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 		sOldTunings = GetAppDirPath();
 		sOldTunings += MPT_PATHSTRING("tunings\\");
 
-		if(PathIsDirectoryW(sOldTunings.AsNative().c_str()) != 0)
+		if(sOldTunings.IsDirectory())
 		{
 			mpt::PathString sSearchPattern;
 			sSearchPattern = sOldTunings;

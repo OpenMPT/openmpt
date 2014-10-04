@@ -1957,7 +1957,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 			m_InstrLibHighlightPath = MPT_PATHSTRING("..");	// Highlight first entry
 		}
 
-		if(::PathIsDirectoryW(dir.AsNative().c_str()))
+		if(dir.IsDirectory())
 		{
 			m_SongFileName = MPT_PATHSTRING("");
 			delete m_SongFile;
@@ -3657,7 +3657,7 @@ void CModTree::OnDropFiles(HDROP hDropInfo)
 			if(IsSampleBrowser())
 			{
 				// Set sample browser location to this directory or file
-				const bool isSong = ::PathIsDirectoryW(fileName) == FALSE;
+				const bool isSong = !file.IsDirectory();
 				CModTree *dirBrowser = CMainFrame::GetMainFrame()->GetUpperTreeview();
 				dirBrowser->m_InstrLibPath = file.GetPath();
 				if(isSong) dirBrowser->RefreshInstrumentLibrary();

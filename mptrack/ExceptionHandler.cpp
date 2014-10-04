@@ -40,12 +40,12 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 	{
 		// Create a crash directory
 		baseRescuePath = Util::GetTempDirectory() + MPT_PATHSTRING("OpenMPT Crash Files\\");
-		if(!PathIsDirectoryW(baseRescuePath.AsNative().c_str()))
+		if(!baseRescuePath.IsDirectory())
 		{
 			CreateDirectoryW(baseRescuePath.AsNative().c_str(), nullptr);
 		}
 		baseRescuePath += timestampDir;
-		if(!PathIsDirectoryW(baseRescuePath.AsNative().c_str()) && !CreateDirectoryW(baseRescuePath.AsNative().c_str(), nullptr))
+		if(!baseRescuePath.IsDirectory() && !CreateDirectoryW(baseRescuePath.AsNative().c_str(), nullptr))
 		{
 			errorMessage += "\n\nCould not create the following directory for saving debug information and modified files to:\n"
 				+ mpt::ToCString(baseRescuePath.ToWide());
