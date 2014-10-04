@@ -12,6 +12,10 @@
 #define GetAppVersion StringChange(GetFileProductVersion("..\bin\Win32\mptrack.exe"), ",", ".")
 #define GetAppVersionShort Copy(GetAppVersion, 1, 4)
 
+#ifndef PlatformName
+#error You must specify which installer to build by compiliing either win32.iss or win64.iss
+#endif
+
 #ifndef BaseNameAddition
 #define BaseNameAddition
 #endif
@@ -129,10 +133,12 @@ Filename: {app}\mptrack.exe; Parameters: """{app}\ExampleSongs\manwe - evening g
 ; internet shortcut has to be deleted manually
 Type: files; Name: {app}\ModPlug Central.url
 ; normal installation
+Type: dirifempty; Name: {userappdata}\OpenMPT\Autosave; Tasks: not portable
 Type: dirifempty; Name: {userappdata}\OpenMPT\TemplateModules; Tasks: not portable
 Type: dirifempty; Name: {userappdata}\OpenMPT\tunings; Tasks: not portable
 Type: dirifempty; Name: {userappdata}\OpenMPT; Tasks: not portable
 ; portable installation
+Type: dirifempty; Name: {app}\Autosave; Tasks: portable
 Type: dirifempty; Name: {app}\TemplateModules; Tasks: portable
 Type: dirifempty; Name: {app}\tunings; Tasks: portable
 #ifdef DOWNLOAD_MO3
@@ -281,6 +287,7 @@ begin
                 DeleteFile(filepath + 'Keybindings.mkb');
                 DeleteFile(filepath + 'plugin.cache');
                 DeleteFile(filepath + 'tunings\local_tunings.tc');
+                DelTree(filepath + 'Autosave\*.Autosave.*', False, True, False);
 
                 filepath := GetTempDir();
                 if(filepath <> '') then

@@ -267,7 +267,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	CMainFrame::m_pAutoSaver->SetHistoryDepth(conf.Read<int32>("AutoSave", "BackupHistory", CMainFrame::m_pAutoSaver->GetHistoryDepth()));
 	CMainFrame::m_pAutoSaver->SetUseOriginalPath(conf.Read<bool>("AutoSave", "UseOriginalPath", CMainFrame::m_pAutoSaver->GetUseOriginalPath()));
 	CMainFrame::m_pAutoSaver->SetPath(theApp.RelativePathToAbsolute(conf.Read<mpt::PathString>("AutoSave", "Path", CMainFrame::m_pAutoSaver->GetPath())));
-	CMainFrame::m_pAutoSaver->SetFilenameTemplate(conf.Read<mpt::PathString>("AutoSave", "FileNameTemplate", CMainFrame::m_pAutoSaver->GetFilenameTemplate()));
 	// Paths
 	for(size_t i = 0; i < NUM_DIRS; i++)
 	{
@@ -862,7 +861,6 @@ void TrackerSettings::SaveSettings()
 	conf.Write<int32>("AutoSave", "BackupHistory", CMainFrame::m_pAutoSaver->GetHistoryDepth());
 	conf.Write<bool>("AutoSave", "UseOriginalPath", CMainFrame::m_pAutoSaver->GetUseOriginalPath());
 	conf.Write<mpt::PathString>("AutoSave", "Path", path);
-	conf.Write<mpt::PathString>("AutoSave", "FileNameTemplate", CMainFrame::m_pAutoSaver->GetFilenameTemplate());
 
 	// Paths
 	for(size_t i = 0; i < NUM_DIRS; i++)

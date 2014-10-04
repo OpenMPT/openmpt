@@ -21,26 +21,25 @@ class CAutoSaver
 public:
 //Cons/Destr
 	CAutoSaver(bool enabled=true, int saveInterval=10, int backupHistory=3,
-			   bool useOriginalPath=true, mpt::PathString path=mpt::PathString(), mpt::PathString fileNameTemplate=mpt::PathString());
+			   bool useOriginalPath=true, mpt::PathString path=mpt::PathString());
 	
 //Work
 	bool DoSave(DWORD curTime);
 
 //Member access
-	void Enable();
-	void Disable();
-	void SetEnabled(bool enabled) { if(enabled) Enable(); else Disable(); }
-	bool IsEnabled();
-	void SetUseOriginalPath(bool useOrgPath);
-	bool GetUseOriginalPath();
-	void SetPath(mpt::PathString path);
-	mpt::PathString GetPath();
-	void SetFilenameTemplate(mpt::PathString path);
-	mpt::PathString GetFilenameTemplate();
-	void SetHistoryDepth(int);
-	int GetHistoryDepth();
-	void SetSaveInterval(int minutes);
-	int GetSaveInterval();
+	void SetEnabled(bool enabled) { m_bEnabled = enabled; }
+	bool IsEnabled() const { return m_bEnabled; }
+	void SetUseOriginalPath(bool useOrgPath) { m_bUseOriginalPath = useOrgPath; }
+	bool GetUseOriginalPath() const { return m_bUseOriginalPath; }
+	void SetPath(const mpt::PathString &path) { m_csPath = path; }
+	mpt::PathString GetPath() const { return m_csPath; }
+	void SetHistoryDepth(int history) { m_nBackupHistory = Clamp(history, 1, 1000); }
+	int GetHistoryDepth() const { return m_nBackupHistory; }
+	void SetSaveInterval(int minutes)
+	{
+		m_nSaveInterval = Clamp(minutes, 1, 10000) * 60 * 1000; //minutes to milliseconds
+	}
+	int GetSaveInterval() const { return m_nSaveInterval / 60 / 1000; }
 
 //internal implementation
 private: 
@@ -61,7 +60,6 @@ private:
 	size_t m_nBackupHistory;
 	bool m_bUseOriginalPath;
 	mpt::PathString m_csPath;
-	mpt::PathString m_csFileNameTemplate;
 
 };
 

@@ -758,13 +758,12 @@ namespace mpt
 mpt::PathString GetAppPath()
 {
 #if defined(MODPLUG_TRACKER)
-	WCHAR exeFileName[MAX_PATH+1];
-	MemsetZero(exeFileName);
+	WCHAR exeFileName[MAX_PATH + 1] = L"";
 	if(!GetModuleFileNameW(NULL, exeFileName, MAX_PATH))
 	{
 		return mpt::PathString();
 	}
-	return mpt::GetAbsolutePath(mpt::PathString::FromNative(exeFileName).GetDrive() + mpt::PathString::FromNative(exeFileName).GetDir());
+	return mpt::GetAbsolutePath(mpt::PathString::FromNative(exeFileName).GetPath());
 #else
 	return mpt::PathString(); // dummy
 #endif
@@ -773,8 +772,7 @@ mpt::PathString GetAppPath()
 
 mpt::PathString GetSystemPath()
 {
-	WCHAR path[MAX_PATH+1];
-	MemsetZero(path);
+	WCHAR path[MAX_PATH + 1] = L"";
 	if(!GetSystemDirectoryW(path, MAX_PATH))
 	{
 		return mpt::PathString();
@@ -785,15 +783,14 @@ mpt::PathString GetSystemPath()
 
 mpt::PathString GetAbsolutePath(const mpt::PathString &path)
 {
-	WCHAR fullPathName[MAX_PATH+1];
-	MemsetZero(fullPathName);
+	WCHAR fullPathName[MAX_PATH + 1] = L"";
 	if(!GetFullPathNameW(path.AsNative().c_str(), MAX_PATH, fullPathName, NULL))
 	{
 		return path;
 	}
 	return mpt::PathString::FromNative(fullPathName);
 }
-		
+
 
 class LibraryHandle
 {
