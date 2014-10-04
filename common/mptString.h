@@ -150,10 +150,12 @@ enum Charset {
 };
 
 
+#define MPT_CHAR_TYPE    char
 #define MPT_CHAR(x)      x
 #define MPT_LITERAL(x)   x
 #define MPT_STRING(x)    std::string( x )
 
+#define MPT_WCHAR_TYPE   wchar_t
 #define MPT_WCHAR(x)     L ## x
 #define MPT_WLITERAL(x)  L ## x
 #define MPT_WSTRING(x)   std::wstring( L ## x )
@@ -169,6 +171,7 @@ struct charset_char_traits : std::char_traits<char> {
 
 typedef MPT_ENCODED_STRING_TYPE(mpt::CharsetUTF8) u8string;
 
+#define MPT_U8CHAR_TYPE  char
 #define MPT_U8CHAR(x)    x
 #define MPT_U8LITERAL(x) x
 #define MPT_U8STRING(x)  mpt::u8string( x )
@@ -292,6 +295,7 @@ static inline std::string ToLocale(Charset from, const std::string &str) { retur
 #endif
 
 typedef std::wstring     ustring;
+#define MPT_UCHAR_TYPE   wchar_t
 #define MPT_UCHAR(x)     L ## x
 #define MPT_ULITERAL(x)  L ## x
 #define MPT_USTRING(x)   std::wstring( L ## x )
@@ -304,6 +308,7 @@ typedef std::wstring     ustring;
 #endif
 
 typedef mpt::u8string    ustring;
+#define MPT_UCHAR_TYPE   char
 #define MPT_UCHAR(x)     x
 #define MPT_ULITERAL(x)  x
 #define MPT_USTRING(x)   mpt::ustring( x )
@@ -476,6 +481,11 @@ mpt::ustring ToUString(const T & x)
 {
 	return mpt::ToUnicode(mpt::CharsetUTF8, ToString(x));
 }
+template<>
+mpt::ustring ToUString<mpt::ustring>(const mpt::ustring & x)
+{
+	return x;
+}
 #if MPT_WSTRING_FORMAT
 static inline mpt::ustring ToUString(const std::wstring & x) { return mpt::ToUnicode(x); }
 #endif
@@ -493,7 +503,7 @@ template <> struct ToStringTFunctor<std::string> { template <typename T> inline 
 template <> struct ToStringTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x) { return ToWString(x); } };
 #endif
 #if MPT_USTRING_MODE_UTF8
-template <> struct ToStringTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x) { return mpt::ToUnicode(mpt::CharsetUTF8, ToString(x)); } };
+template <> struct ToStringTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x) { return ToUString(x); } };
 #endif
 
 template<typename Tstring, typename T> inline Tstring ToStringT(const T & x) { return ToStringTFunctor<Tstring>()(x); }
