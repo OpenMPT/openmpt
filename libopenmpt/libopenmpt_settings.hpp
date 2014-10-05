@@ -49,10 +49,10 @@ private:
 		}
 	}
 public:
-	settings( const std::wstring & subkey, bool withoutputformat )
+	settings( const std::wstring & subkey, bool no_default_format )
 		: subkey(subkey)
 	{
-		with_outputformat = withoutputformat;
+		no_default_format = no_default_format;
 		samplerate = 48000;
 		channels = 2;
 		mastergain_millibel = 0;

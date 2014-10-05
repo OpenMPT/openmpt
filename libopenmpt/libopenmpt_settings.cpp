@@ -108,57 +108,51 @@ protected:
 
 		bool selected = false;
 
-		if ( !s->with_outputformat ) {
-
-			m_ComboBoxSamplerate.EnableWindow( FALSE );
-			m_ComboBoxChannels.EnableWindow( FALSE );
-
-			m_ComboBoxSamplerate.AddString( L"default" );
-			m_ComboBoxChannels.AddString( L"default" );
-
+		selected = false;
+		if ( !s->no_default_format ) {
+			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"default" ), 0 );
+		}
+		m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"6000" ), 6000 );
+		m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"8000" ), 8000 );
+		m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"11025" ), 11025 );
+		m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"16000" ), 16000 );
+		m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"22050" ), 22050 );
+		m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"32000" ), 32000 );
+		m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"44100" ), 44100 );
+		m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"48000" ), 48000 );
+		m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"88200" ), 88200 );
+		m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"96000" ), 96000 );
+		if ( !s->no_default_format && s->samplerate == 0 ) {
 			m_ComboBoxSamplerate.SelectString( 0, L"default" );
+		}
+		for ( int index = 0; index < m_ComboBoxSamplerate.GetCount(); ++index ) {
+			if ( m_ComboBoxSamplerate.GetItemData( index ) == s->samplerate ) {
+				m_ComboBoxSamplerate.SetCurSel( index );
+				selected = true;
+			}
+		}
+		if ( !selected ) {
+			m_ComboBoxSamplerate.SelectString( 0, L"48000" );
+		}
+
+		selected = false;
+		if ( !s->no_default_format ) {
+			m_ComboBoxChannels.SetItemData( m_ComboBoxChannels.AddString( L"default" ), 0 );
+		}
+		m_ComboBoxChannels.SetItemData( m_ComboBoxChannels.AddString( L"mono" ), 1 );
+		m_ComboBoxChannels.SetItemData( m_ComboBoxChannels.AddString( L"stereo" ), 2 );
+		m_ComboBoxChannels.SetItemData( m_ComboBoxChannels.AddString( L"quad" ), 4 );
+		if ( !s->no_default_format && s->channels == 0 ) {
 			m_ComboBoxChannels.SelectString( 0, L"default" );
-
-		} else {
-
-			m_ComboBoxSamplerate.EnableWindow( TRUE );
-			m_ComboBoxChannels.EnableWindow( TRUE );
-
-			selected = false;
-			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"6000" ), 6000 );
-			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"8000" ), 8000 );
-			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"11025" ), 11025 );
-			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"16000" ), 16000 );
-			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"22050" ), 22050 );
-			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"32000" ), 32000 );
-			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"44100" ), 44100 );
-			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"48000" ), 48000 );
-			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"88200" ), 88200 );
-			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( L"96000" ), 96000 );
-			for ( int index = 0; index < m_ComboBoxSamplerate.GetCount(); ++index ) {
-				if ( m_ComboBoxSamplerate.GetItemData( index ) == s->samplerate ) {
-					m_ComboBoxSamplerate.SetCurSel( index );
-					selected = true;
-				}
+		}
+		for ( int index = 0; index < m_ComboBoxChannels.GetCount(); ++index ) {
+			if ( m_ComboBoxChannels.GetItemData( index ) == s->channels ) {
+				m_ComboBoxChannels.SetCurSel( index );
+				selected = true;
 			}
-			if ( !selected ) {
-				m_ComboBoxSamplerate.SelectString( 0, L"48000" );
-			}
-
-			selected = false;
-			m_ComboBoxChannels.SetItemData( m_ComboBoxChannels.AddString( L"mono" ), 1 );
-			m_ComboBoxChannels.SetItemData( m_ComboBoxChannels.AddString( L"stereo" ), 2 );
-			m_ComboBoxChannels.SetItemData( m_ComboBoxChannels.AddString( L"quad" ), 4 );
-			for ( int index = 0; index < m_ComboBoxChannels.GetCount(); ++index ) {
-				if ( m_ComboBoxChannels.GetItemData( index ) == s->channels ) {
-					m_ComboBoxChannels.SetCurSel( index );
-					selected = true;
-				}
-			}
-			if ( !selected ) {
-				m_ComboBoxChannels.SelectString( 0, L"stereo" );
-			}
-
+		}
+		if ( !selected ) {
+			m_ComboBoxChannels.SelectString( 0, L"stereo" );
 		}
 
 		m_SliderCtrlGain.SetRange( -1200, 1200 );
@@ -226,13 +220,9 @@ protected:
 
 	virtual void OnOK() {
 
-		if ( s->with_outputformat ) {
+		s->samplerate = m_ComboBoxSamplerate.GetItemData( m_ComboBoxSamplerate.GetCurSel() );
 
-			s->samplerate = m_ComboBoxSamplerate.GetItemData( m_ComboBoxSamplerate.GetCurSel() );
-
-			s->channels = m_ComboBoxChannels.GetItemData( m_ComboBoxChannels.GetCurSel() );
-
-		}
+		s->channels = m_ComboBoxChannels.GetItemData( m_ComboBoxChannels.GetCurSel() );
 
 		s->mastergain_millibel = m_SliderCtrlGain.GetPos();
 
@@ -243,6 +233,8 @@ protected:
 		s->stereoseparation = m_SliderCtrlStereoSeparation.GetPos();
 
 		s->ramping = m_ComboBoxRamping.GetItemData( m_ComboBoxRamping.GetCurSel() );
+
+		s->changed();
 
 		CDialog::OnOK();
 

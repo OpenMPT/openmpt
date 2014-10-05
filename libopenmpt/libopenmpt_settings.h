@@ -19,7 +19,7 @@ extern "C" {
 typedef void (*changed_func)(void);
 
 struct libopenmpt_settings {
-	bool with_outputformat;
+	bool no_default_format;
 	int samplerate;
 	int channels;
 	int mastergain_millibel;

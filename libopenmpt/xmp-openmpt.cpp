@@ -225,7 +225,7 @@ static void apply_and_save_options() {
 }
 
 static void reset_options() {
-	self->settings = openmpt::settings::settings( TEXT(SHORT_TITLE), self->settings.with_outputformat );
+	self->settings = openmpt::settings::settings( TEXT(SHORT_TITLE), false );
 	self->settings.changed = apply_and_save_options;
 	self->settings.load();
 }
