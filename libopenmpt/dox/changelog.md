@@ -9,12 +9,13 @@ is just a high-level summary.
 
  *  xmp-openmpt / in_openmpt: libopenmpt_settings.dll no longer requires
     .NET 4 to be installed.
+ *  foo_openmpt: Settings are now accessable via foobar2000 advanced settings.
 
 ### 2014-09-07 - libopenmpt 0.2-beta7
 
  *  libopenmpt now has an GNU Autotools based build system (in addition to all
     previously supported ways of building libopenmpt). Autotools support is
-    pacakged separately as tarballs ending in `-autotools.tar.gz`.
+    packaged separately as tarballs ending in `-autotools.tar.gz`.
 
  *  [Bug] The distributed windows .zip file did not include pugixml.
 
