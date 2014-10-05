@@ -56,6 +56,9 @@ public:
 	//on failure.
 	PATTERNINDEX Insert(const ROWINDEX rows);
 
+	// Duplicate an existing pattern. Returns new pattern index on success, or PATTERNINDEX_INVALID on failure.
+	PATTERNINDEX Duplicate(PATTERNINDEX from);
+
 	//Remove pattern from given position. Currently it actually makes the pattern
 	//'invisible' - the pattern data is cleared but the actual pattern object won't get removed.
 	bool Remove(const PATTERNINDEX index);
