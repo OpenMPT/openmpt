@@ -5,7 +5,7 @@ set -e
 # This script autoconficates the libopenmpt source tree and builds an
 # autotools-based release tarball.
 #
-# WARNING: The script expects the be run from the root of an OpenMPT svn
+# WARNING: The script expects to be run from the root of an OpenMPT svn
 #    checkout. The invests no effort in verifying this precondition.
 #
 
