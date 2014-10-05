@@ -11,12 +11,13 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
+#ifdef MODPLUG_TRACKER
+// For loading external samples
 #ifdef NO_FILEREADER_STD_ISTREAM
 #include "../mptrack/MemoryMappedFile.h"
 #else
 #include "../common/mptFstream.h"
 #endif
-#ifdef MODPLUG_TRACKER
 #include "../mptrack/Moddoc.h"
 #endif
 
@@ -370,6 +371,7 @@ static void ReadMT2Automation(uint16 version, FileReader &file)
 		flags = file.ReadUint16LE();
 		trkfxid = file.ReadUint16LE();
 	}
+	MPT_UNREFERENCED_PARAMETER(trkfxid);
 	while(flags != 0)
 	{
 		if(flags & 1)
@@ -579,6 +581,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 
 		case MAGIC4LE('V','S','T','2'):
+#ifndef NO_VST
 			if(!(loadFlags & loadPluginData))
 			{
 				break;
@@ -651,6 +654,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 					}
 				}
 			}
+#endif // NO_VST
 			break;
 		}
 	}
@@ -851,7 +855,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				mptIns->nMidiChannel = synthData.midiChannel + 1;
 				mptIns->nMidiProgram = synthData.midiProgram + 1;
 				mptIns->nMixPlug = synthData.device + 1;
-				if(synthData.device == -1)
+				if(synthData.device == 255)
 				{
 					// TODO: This is a MIDI device - maybe use MIDI I/O plugin to emulate those?
 				}
@@ -999,8 +1003,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			file.ReadString<mpt::String::maybeNullTerminated>(filename, filenameSize);
 			mpt::String::Copy(mptSmp.filename, filename);
 
-			mpt::PathString path(mpt::PathString::FromLocale(filename));
 #ifdef MODPLUG_TRACKER
+			mpt::PathString path(mpt::PathString::FromLocale(filename));
 			if(GetpModDoc() != nullptr)
 			{
 				std::wstring pathStart = path.ToWide().substr(0, 2);
@@ -1013,7 +1017,6 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				}
 				path = path.RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt().GetPath());
 			}
-#endif
 
 #ifdef NO_FILEREADER_STD_ISTREAM
 			CMappedFile f;
@@ -1027,6 +1030,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 #endif
 			if(sampleFile.IsValid())
 				ReadSampleFromFile(i + 1, sampleFile, false);
+#endif
 		}
 		mptSmp.nC5Speed = freq;
 		mptSmp.nFineTune = 0;
