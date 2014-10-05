@@ -23,6 +23,106 @@ DECLARE_COMPONENT_VERSION("OpenMPT component","0.2","libopenmpt based module fil
 VALIDATE_COMPONENT_FILENAME("foo_openmpt.dll");
 
 
+// settings
+
+
+// {FFD659CA-6AEA-479f-8E60-F03B297286FE}
+static const GUID guid_openmpt_root = 
+{ 0xffd659ca, 0x6aea, 0x479f, { 0x8e, 0x60, 0xf0, 0x3b, 0x29, 0x72, 0x86, 0xfe } };
+
+
+// {E698E101-FD93-4e6c-AF02-AEC7E8631D8E}
+static const GUID guid_openmpt_samplerate = 
+{ 0xe698e101, 0xfd93, 0x4e6c, { 0xaf, 0x2, 0xae, 0xc7, 0xe8, 0x63, 0x1d, 0x8e } };
+
+// {E4026686-02F9-4805-A3FD-2EECA655A92C}
+static const GUID guid_openmpt_channels = 
+{ 0xe4026686, 0x2f9, 0x4805, { 0xa3, 0xfd, 0x2e, 0xec, 0xa6, 0x55, 0xa9, 0x2c } };
+
+// {7C845F81-9BA3-4a9a-9C94-C7056DFD1B57}
+static const GUID guid_openmpt_gain = 
+{ 0x7c845f81, 0x9ba3, 0x4a9a, { 0x9c, 0x94, 0xc7, 0x5, 0x6d, 0xfd, 0x1b, 0x57 } };
+// {9115A820-67F5-4d0a-B0FB-D312F7FBBAFF}
+
+// {EDB0E1E5-BD2E-475c-B2FB-8448C92F6F29}
+static const GUID guid_openmpt_stereo = 
+{ 0xedb0e1e5, 0xbd2e, 0x475c, { 0xb2, 0xfb, 0x84, 0x48, 0xc9, 0x2f, 0x6f, 0x29 } };
+
+static const GUID guid_openmpt_repeat = 
+{ 0x9115a820, 0x67f5, 0x4d0a, { 0xb0, 0xfb, 0xd3, 0x12, 0xf7, 0xfb, 0xba, 0xff } };
+// {27145AB1-362E-44cb-B1F4-97BE0584F3FB}
+
+static const GUID guid_openmpt_filter = 
+{ 0x27145ab1, 0x362e, 0x44cb, { 0xb1, 0xf4, 0x97, 0xbe, 0x5, 0x84, 0xf3, 0xfb } };
+// {C54391A9-FDF8-4331-B527-D614160DE1B7}
+
+static const GUID guid_openmpt_ramping = 
+{ 0x27145ab1, 0x362e, 0x44cb, { 0xb1, 0xf4, 0x97, 0xbe, 0x5, 0x84, 0xf3, 0xfb } };
+// {C54391A9-FDF8-4331-B527-D614160DE1B7}
+
+
+static advconfig_branch_factory g_advconfigBranch("OpenMPT Component", guid_openmpt_root, advconfig_branch::guid_branch_decoding, 0);
+
+static advconfig_integer_factory   cfg_samplerate("Samplerate [6000..48000] (Hz)"                                     , guid_openmpt_samplerate, guid_openmpt_root, 0, 48000, 6000, 96000);
+static advconfig_integer_factory   cfg_channels  ("Channels [1=mono, 2=stereo, 4=quad]"                               , guid_openmpt_channels  , guid_openmpt_root, 0,     2,    1,     4);
+static advconfig_string_factory_MT cfg_gain      ("Gain [-12...12] (dB)"                                              , guid_openmpt_gain      , guid_openmpt_root, 0, "0.0");
+static advconfig_integer_factory   cfg_stereo    ("Stereo separation [0...400] (%)"                                   , guid_openmpt_stereo    , guid_openmpt_root, 0,   100,    0,   400);
+static advconfig_string_factory_MT cfg_repeat    ("Repeat [0=never, -1=forever, 1..] (#)"                             , guid_openmpt_repeat    , guid_openmpt_root, 0,   "0");
+static advconfig_integer_factory   cfg_filter    ("Interpolation filter length [1=nearest, 2=linear, 4=cubic, 8=sinc]", guid_openmpt_filter    , guid_openmpt_root, 0,     8,    1,     8);
+static advconfig_string_factory_MT cfg_ramping   ("Volume ramping [-1=default, 0=off, 1..10] (ms)"                    , guid_openmpt_ramping   , guid_openmpt_root, 0,  "-1");
+
+struct foo_openmpt_settings {
+	int samplerate;
+	int channels;
+	int mastergain_millibel;
+	int stereoseparation;
+	int repeatcount;
+	int interpolationfilterlength;
+	int ramping;
+	foo_openmpt_settings() {
+
+		/*
+		samplerate = 48000;
+		channels = 2;
+		mastergain_millibel = 0;
+		stereoseparation = 100;
+		repeatcount = 0;
+		interpolationfilterlength = 8;
+		ramping = -1;
+		*/
+
+		pfc::string8 tmp;
+		
+		samplerate = static_cast<int>( cfg_samplerate.get() );
+		
+		channels = static_cast<int>( cfg_channels.get() );
+		if ( channels == 3 ) {
+			channels = 2;
+		}
+		
+		cfg_gain.get( tmp );
+		mastergain_millibel = static_cast<int>( pfc::string_to_float( tmp ) * 100.0 );
+		
+		stereoseparation = static_cast<int>( cfg_stereo.get() );
+		
+		cfg_repeat.get( tmp );
+		repeatcount = static_cast<int>( pfc::atoi64_ex( tmp, ~0 ) );
+		if ( repeatcount < -1 ) {
+			repeatcount = 0;
+		}
+		
+		interpolationfilterlength = static_cast<int>( cfg_filter.get() );
+		
+		cfg_ramping.get( tmp );
+		ramping = static_cast<int>( pfc::atoi64_ex( tmp, ~0 ) );
+		if ( ramping < -1 ) {
+			ramping = -1;
+		}
+
+	}
+};
+
+
 
 // Sample initquit implementation. See also: initquit class documentation in relevant header.
 
@@ -54,12 +154,22 @@ public:
 		}
 		std::vector<char> data( static_cast<std::size_t>( m_file->get_size( p_abort ) ) );
 		m_file->read( data.data(), data.size(), p_abort );
-		mod = new openmpt::module( data );
+		try {
+			mod = new openmpt::module( data );
+		} catch ( std::exception & /*e*/ ) {
+			throw exception_io_data();
+		}
+		settings = foo_openmpt_settings();
+		mod->set_repeat_count( settings.repeatcount );
+		mod->set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, settings.mastergain_millibel );
+		mod->set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, settings.stereoseparation );
+		mod->set_render_param( openmpt::module::RENDER_INTERPOLATIONFILTER_LENGTH, settings.interpolationfilterlength );
+		mod->set_render_param( openmpt::module::RENDER_VOLUMERAMPING_STRENGTH, settings.ramping );
 	}
 	void get_info(file_info & p_info,abort_callback & p_abort) {
 		p_info.set_length( mod->get_duration_seconds() );
-		p_info.info_set_int( "samplerate", 48000 );
-		p_info.info_set_int( "channels", 2 );
+		p_info.info_set_int( "samplerate", settings.samplerate );
+		p_info.info_set_int( "channels", settings.channels );
 		p_info.info_set_int( "bitspersample", 32 );
 		std::vector<std::string> keys = mod->get_metadata_keys();
 		for ( std::vector<std::string>::iterator key = keys.begin(); key != keys.end(); ++key ) {
@@ -73,16 +183,50 @@ public:
 		m_file->reopen(p_abort); // equivalent to seek to zero, except it also works on nonseekable streams
 	}
 	bool decode_run(audio_chunk & p_chunk,abort_callback & p_abort) {
-		std::size_t count = mod->read( 48000, buffersize, left.data(), right.data() );
-		if ( count == 0 ) {
+		if ( settings.channels == 1 ) {
+
+			std::size_t count = mod->read( settings.samplerate, buffersize, left.data() );
+			if ( count == 0 ) {
+				return false;
+			}
+			for ( std::size_t frame = 0; frame < count; frame++ ) {
+				buffer[frame*1+0] = left[frame];
+			}
+			p_chunk.set_data_32( buffer.data(), count, settings.channels, settings.samplerate );
+			return true;
+
+		} else if ( settings.channels == 2 ) {
+
+			std::size_t count = mod->read( settings.samplerate, buffersize, left.data(), right.data() );
+			if ( count == 0 ) {
+				return false;
+			}
+			for ( std::size_t frame = 0; frame < count; frame++ ) {
+				buffer[frame*2+0] = left[frame];
+				buffer[frame*2+1] = right[frame];
+			}
+			p_chunk.set_data_32( buffer.data(), count, settings.channels, settings.samplerate );
+			return true;
+
+		} else if ( settings.channels == 4 ) {
+
+			std::size_t count = mod->read( settings.samplerate, buffersize, left.data(), right.data(), rear_left.data(), rear_right.data() );
+			if ( count == 0 ) {
+				return false;
+			}
+			for ( std::size_t frame = 0; frame < count; frame++ ) {
+				buffer[frame*4+0] = left[frame];
+				buffer[frame*4+1] = right[frame];
+				buffer[frame*4+2] = rear_left[frame];
+				buffer[frame*4+3] = rear_right[frame];
+			}
+			p_chunk.set_data_32( buffer.data(), count, settings.channels, settings.samplerate );
+			return true;
+
+		} else {
 			return false;
 		}
-		for ( std::size_t frame = 0; frame < count; frame++ ) {
-			buffer[frame*2+0] = left[frame];
-			buffer[frame*2+1] = right[frame];
-		}
-		p_chunk.set_data_32( buffer.data(), count, 2, 48000 );
-		return true;
+
 	}
 	void decode_seek(double p_seconds,abort_callback & p_abort) {
 		mod->set_position_seconds( p_seconds );
@@ -117,11 +261,14 @@ public:
 public:
 	service_ptr_t<file> m_file;
 	static const std::size_t buffersize = 1024;
+	foo_openmpt_settings settings;
 	openmpt::module * mod;
 	std::vector<float> left;
 	std::vector<float> right;
+	std::vector<float> rear_left;
+	std::vector<float> rear_right;
 	std::vector<float> buffer;
-	input_openmpt() : mod(0), left(buffersize), right(buffersize), buffer(2*buffersize) {}
+	input_openmpt() : mod(0), left(buffersize), right(buffersize), rear_left(buffersize), rear_right(buffersize), buffer(4*buffersize) {}
 	~input_openmpt() { delete mod; mod = 0; }
 };
 
