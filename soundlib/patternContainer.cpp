@@ -36,6 +36,30 @@ void CPatternContainer::DestroyPatterns()
 }
 
 
+PATTERNINDEX CPatternContainer::Duplicate(PATTERNINDEX from)
+//----------------------------------------------------------
+{
+	if(!IsValidPat(from))
+	{
+		return PATTERNINDEX_INVALID;
+	}
+
+	const CPattern &oldPat = m_Patterns[from];
+	PATTERNINDEX newPatIndex = Insert(oldPat.GetNumRows());
+
+	if(newPatIndex != PATTERNINDEX_INVALID)
+	{
+		CPattern &newPat = m_Patterns[newPatIndex];
+		memcpy(newPat.m_ModCommands, oldPat.m_ModCommands, newPat.GetNumChannels() * newPat.GetNumRows() * sizeof(ModCommand));
+		newPat.m_Rows = oldPat.m_Rows;
+		newPat.m_RowsPerBeat = oldPat.m_RowsPerBeat;
+		newPat.m_RowsPerMeasure = oldPat.m_RowsPerMeasure;
+		newPat.m_PatternName = oldPat.m_PatternName;
+	}
+	return newPatIndex;
+}
+
+
 PATTERNINDEX CPatternContainer::Insert(const ROWINDEX rows)
 //---------------------------------------------------------
 {

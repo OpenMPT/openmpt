@@ -797,7 +797,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		 && !ReadAMF_DSMI(file, loadFlags)
 		 && !ReadPSM(file, loadFlags)
 		 && !ReadPSM16(file, loadFlags)
-		 && !ReadMT2(lpStream, dwMemLength, loadFlags)
+		 && !ReadMT2(file, loadFlags)
 #ifdef MODPLUG_TRACKER
 		 && !ReadMID(lpStream, dwMemLength, loadFlags)
 #endif // MODPLUG_TRACKER
@@ -1768,7 +1768,7 @@ std::string CSoundFile::GetNoteName(const ModCommand::NOTE note)
 
 
 void CSoundFile::SetModSpecsPointer(const CModSpecifications*& pModSpecs, const MODTYPE type)
-//------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------
 {
 	switch(type)
 	{

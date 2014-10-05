@@ -640,7 +640,7 @@ public:
 	bool ReadDBM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadMT2(const uint8 *lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadMT2(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadPSM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadPSM16(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadUMX(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);

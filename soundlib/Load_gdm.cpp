@@ -260,6 +260,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 			sample.uFlags.set(CHN_PANNING);
 			// 0...15, 16 = surround (not supported), 255 = no default panning
 			sample.nPan = (gdmSample.panning > 15) ? 128 : MIN((gdmSample.panning * 16) + 8, 256);
+			sample.uFlags.set(CHN_SURROUND, gdmSample.panning == 16);
 		} else
 		{
 			sample.nPan = 128;

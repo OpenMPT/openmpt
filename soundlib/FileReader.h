@@ -870,6 +870,19 @@ public:
 		}
 	}
 
+	// Read a null-terminated string into a std::string or std::wstring
+	template<typename StrT>
+	bool ReadNullString(StrT &dest, const off_t maxLength = SIZE_MAX)
+	{
+		dest.clear();
+		StrT::traits_type::char_type c;
+		while(Read(c) && c != 0 && dest.length() < maxLength)
+		{
+			dest += c;
+		}
+		return dest.length() != 0;
+	}
+
 	// Read an array of byte-sized values.
 	// If successful, the file cursor is advanced by the size of the array.
 	// Otherwise, the target is zeroed.
@@ -993,12 +1006,12 @@ public:
 			return false;
 		}
 
-		off_t writtenBits = 0;
+		size_t writtenBits = 0;
 		uint8 b = ReadUint8();
 		target = (b & 0x7F);
 
 		// Count actual bits used in most significant byte (i.e. this one)
-		for(off_t bit = 0; bit < 7; bit++)
+		for(size_t bit = 0; bit < 7; bit++)
 		{
 			if((b & (1 << bit)) != 0)
 			{

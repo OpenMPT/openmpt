@@ -1141,7 +1141,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	pChn->nLength = pSmp->nLength;
 	pChn->nLoopStart = pSmp->nLoopStart;
 	pChn->nLoopEnd = pSmp->nLoopEnd;
-	pChn->dwFlags |= (pSmp->uFlags & CHN_SAMPLEFLAGS);
+	pChn->dwFlags |= (pSmp->uFlags & (CHN_SAMPLEFLAGS | CHN_SURROUND));
 
 	// IT Compatibility: Autovibrato reset
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))
@@ -1350,7 +1350,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 			{
 				pChn->proTrackerOffset = 0;
 			}
-			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
+			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (pSmp->uFlags & (CHN_SAMPLEFLAGS | CHN_SURROUND));
 			if(pChn->dwFlags[CHN_SUSTAINLOOP])
 			{
 				pChn->nLoopStart = pSmp->nSustainStart;
@@ -4716,7 +4716,7 @@ void CSoundFile::KeyOff(ModChannel *pChn) const
 {
 	const bool bKeyOn = !pChn->dwFlags[CHN_KEYOFF];
 	pChn->dwFlags.set(CHN_KEYOFF);
-	if(pChn->pModInstrument !=  nullptr && !pChn->VolEnv.flags[ENV_ENABLED])
+	if(pChn->pModInstrument != nullptr && !pChn->VolEnv.flags[ENV_ENABLED])
 	{
 		pChn->dwFlags.set(CHN_NOTEFADE);
 	}
