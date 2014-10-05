@@ -581,14 +581,13 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 
 		case MAGIC4LE('V','S','T','2'):
+			numVST = chunk.ReadUint32LE();
 #ifndef NO_VST
 			if(!(loadFlags & loadPluginData))
 			{
 				break;
 			}
-			numVST = chunk.ReadUint32LE();
-			LimitMax(numVST, MAX_MIXPLUGINS);
-			for(uint32 i = 0; i < numVST; i++)
+			for(uint32 i = 0; i < std::min(numVST, uint32(MAX_MIXPLUGINS)); i++)
 			{
 				MT2VST vstHeader;
 				if(chunk.ReadConvertEndianness(vstHeader))
@@ -812,7 +811,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				MT2IEnvelope mt2Env;
 				instrChunk.ReadConvertEndianness(mt2Env);
-					
+
 				const enmEnvelopeTypes envType[4] = { ENV_VOLUME, ENV_PANNING, ENV_PITCH, ENV_PITCH };
 				InstrumentEnvelope &mptEnv = mptIns->GetEnvelope(envType[env]);
 
