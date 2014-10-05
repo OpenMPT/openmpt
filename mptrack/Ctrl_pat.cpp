@@ -847,27 +847,10 @@ void CCtrlPatterns::OnPatternDuplicate()
 		PATTERNINDEX curPat = m_sndFile.Order[selection.firstOrd + i];
 		if(m_sndFile.Patterns.IsValidIndex(curPat) && patReplaceIndex[curPat] == PATTERNINDEX_INVALID)
 		{
-			ROWINDEX rows = m_sndFile.Patterns[curPat].GetNumRows();
-			Limit(rows, m_sndFile.GetModSpecifications().patternRowsMin, m_sndFile.GetModSpecifications().patternRowsMax);
-
-			PATTERNINDEX newPat = m_modDoc.InsertPattern(insertWhere + i, rows);
-			if((newPat != PATTERNINDEX_INVALID) && (newPat < m_sndFile.Patterns.Size()) && (m_sndFile.Patterns[curPat] != nullptr))
+			PATTERNINDEX newPat = m_sndFile.Patterns.Duplicate(curPat);
+			if(newPat != PATTERNINDEX_INVALID)
 			{
-				// Update time signature and pattern name
-				if(m_sndFile.Patterns[curPat].GetOverrideSignature())
-				{
-					m_sndFile.Patterns[newPat].SetSignature(m_sndFile.Patterns[curPat].GetRowsPerBeat(), m_sndFile.Patterns[curPat].GetRowsPerMeasure());
-				}
-				m_sndFile.Patterns[newPat].SetName(m_sndFile.Patterns[curPat].GetName());
-
-				// Copy pattern data
-				size_t n = m_sndFile.Patterns[curPat].GetNumRows();
-				if (m_sndFile.Patterns[newPat].GetNumRows() < n) n = m_sndFile.Patterns[newPat].GetNumRows();
-				n *= m_sndFile.GetNumChannels();
-				if(n)
-				{
-					memcpy(m_sndFile.Patterns[newPat], m_sndFile.Patterns[curPat], n * sizeof(ModCommand));
-				}
+				m_sndFile.Order.Insert(insertWhere + i, 1, newPat);
 				success = true;
 				// Mark as duplicated, so if this pattern is to be duplicated again, the same new pattern number is inserted into the order list.
 				patReplaceIndex[curPat] = newPat;
