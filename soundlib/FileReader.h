@@ -875,7 +875,7 @@ public:
 	bool ReadNullString(StrT &dest, const off_t maxLength = SIZE_MAX)
 	{
 		dest.clear();
-		StrT::traits_type::char_type c;
+		typename StrT::traits_type::char_type c;
 		while(Read(c) && c != 0 && dest.length() < maxLength)
 		{
 			dest += c;
