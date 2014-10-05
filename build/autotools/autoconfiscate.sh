@@ -88,6 +88,17 @@ make
 echo "Running 'make check' ..."
 make check
 
+echo "Testing the tarball ..."
+mkdir test-tarball
+cd test-tarball
+tar xvaf ../libopenmpt*.tar.gz
+cd libopenmpt*
+./configure
+make
+make check
+cd ..
+cd ..
+
 echo "Building dist-autotools.tar ..."
 cd "$OLDDIR"
 cd bin/dist-autotools
