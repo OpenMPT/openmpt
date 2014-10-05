@@ -20,7 +20,11 @@
 #include "ITTools.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/TrackerSettings.h"
+#ifdef NO_FILEREADER_STD_ISTREAM
 #include "../mptrack/MemoryMappedFile.h"
+#else
+#include "../common/mptFstream.h"
+#endif
 #include "../mptrack/Moddoc.h"
 #endif
 
@@ -163,7 +167,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(GetpModDoc() != nullptr)
 		{
-			m_szInstrumentPath[ins] = m_szInstrumentPath[ins].RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt());
+			m_szInstrumentPath[ins] = m_szInstrumentPath[ins].RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt().GetPath());
 		}
 	}
 
@@ -250,15 +254,24 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Load instruments
-	CMappedFile f;
 	for(INSTRUMENTINDEX ins = 0; ins < GetNumInstruments(); ins++)
 	{
-		if(m_szInstrumentPath[ins].empty() || !f.Open(m_szInstrumentPath[ins])) continue;
-
+		if(m_szInstrumentPath[ins].empty())
+			continue;
+#ifdef NO_FILEREADER_STD_ISTREAM
+		CMappedFile f;
+		if(!f.Open(m_szInstrumentPath[ins]))
+			continue;
 		FileReader file = f.GetFile();
+#else
+		mpt::ifstream f(m_szInstrumentPath[ins], std::ios_base::binary);
+		if(!f.good())
+			continue;
+		FileReader file(&f);
+#endif
+
 		if(file.IsValid())
 			ReadInstrumentFromFile(ins + 1, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
-		f.Close();
 	}
 
 	// Extra info data
@@ -423,7 +436,7 @@ bool CSoundFile::SaveITProject(const mpt::PathString &filename)
 	// instruments' path
 	for(i = 0; i < m_nInstruments; i++)
 	{
-		const std::string path = m_szInstrumentPath[i].AbsolutePathToRelative(filename).ToUTF8();
+		const std::string path = m_szInstrumentPath[i].AbsolutePathToRelative(filename.GetPath()).ToUTF8();
 		// path name string length
 		id = path.length();
 		fwrite(&id, 1, sizeof(id), f);
