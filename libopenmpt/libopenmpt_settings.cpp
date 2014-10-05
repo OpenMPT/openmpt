@@ -146,9 +146,9 @@ protected:
 			}
 
 			selected = false;
-			m_ComboBoxChannels.SetItemData( m_ComboBoxSamplerate.AddString( L"mono" ), 1 );
-			m_ComboBoxChannels.SetItemData( m_ComboBoxSamplerate.AddString( L"stereo" ), 2 );
-			m_ComboBoxChannels.SetItemData( m_ComboBoxSamplerate.AddString( L"quad" ), 4 );
+			m_ComboBoxChannels.SetItemData( m_ComboBoxChannels.AddString( L"mono" ), 1 );
+			m_ComboBoxChannels.SetItemData( m_ComboBoxChannels.AddString( L"stereo" ), 2 );
+			m_ComboBoxChannels.SetItemData( m_ComboBoxChannels.AddString( L"quad" ), 4 );
 			for ( int index = 0; index < m_ComboBoxChannels.GetCount(); ++index ) {
 				if ( m_ComboBoxChannels.GetItemData( index ) == s->channels ) {
 					m_ComboBoxChannels.SetCurSel( index );
@@ -156,7 +156,7 @@ protected:
 				}
 			}
 			if ( !selected ) {
-				m_ComboBoxSamplerate.SelectString( 0, L"stereo" );
+				m_ComboBoxChannels.SelectString( 0, L"stereo" );
 			}
 
 		}
