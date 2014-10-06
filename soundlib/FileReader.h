@@ -16,7 +16,7 @@
 #include "../common/misc_util.h"
 #include "../common/Endianness.h"
 #include <algorithm>
-#ifndef NO_FILEREADER_STD_ISTREAM
+#if defined(MPT_FILEREADER_STD_ISTREAM)
 #include <ios>
 #include <istream>
 #endif
@@ -33,7 +33,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define FILEREADER_DEPRECATED
 
 
-#ifndef NO_FILEREADER_STD_ISTREAM
+#if defined(MPT_FILEREADER_STD_ISTREAM)
 
 class IFileDataContainer {
 public:
@@ -290,12 +290,12 @@ public:
 
 
 class FileDataContainerMemory
-#ifndef NO_FILEREADER_STD_ISTREAM
+#if defined(MPT_FILEREADER_STD_ISTREAM)
 	: public IFileDataContainer
 #endif
 {
 
-#ifdef NO_FILEREADER_STD_ISTREAM
+#if !defined(MPT_FILEREADER_STD_ISTREAM)
 public:
 	typedef std::size_t off_t;
 #endif
@@ -308,7 +308,7 @@ private:
 public:
 	FileDataContainerMemory() : streamData(nullptr), streamLength(0) { }
 	FileDataContainerMemory(const char *data, off_t length) : streamData(data), streamLength(length) { }
-#ifndef NO_FILEREADER_STD_ISTREAM
+#if defined(MPT_FILEREADER_STD_ISTREAM)
 	virtual
 #endif
 		~FileDataContainerMemory() { }
@@ -374,7 +374,7 @@ class FileReader
 
 public:
 
-#ifndef NO_FILEREADER_STD_ISTREAM
+#if defined(MPT_FILEREADER_STD_ISTREAM)
 	typedef IFileDataContainer::off_t off_t;
 #else
 	typedef FileDataContainerMemory::off_t off_t;
@@ -382,7 +382,7 @@ public:
 
 private:
 
-#ifndef NO_FILEREADER_STD_ISTREAM
+#if defined(MPT_FILEREADER_STD_ISTREAM)
 	const IFileDataContainer & DataContainer() const { return *data; }
 	IFileDataContainer & DataContainer() { return *data; }
 	MPT_SHARED_PTR<IFileDataContainer> data;
@@ -396,7 +396,7 @@ private:
 
 public:
 
-#ifndef NO_FILEREADER_STD_ISTREAM
+#if defined(MPT_FILEREADER_STD_ISTREAM)
 
 	// Initialize invalid file reader object.
 	FileReader() : data(new FileDataContainerDummy()), streamPos(0) { }
@@ -536,7 +536,7 @@ public:
 		{
 			return FileReader();
 		}
-		#ifndef NO_FILEREADER_STD_ISTREAM
+		#if defined(MPT_FILEREADER_STD_ISTREAM)
 			return FileReader(MPT_SHARED_PTR<IFileDataContainer>(new FileDataContainerWindow(data, position, std::min(length, DataContainer().GetLength() - position))));
 		#else
 			return FileReader(DataContainer().GetRawData() + position, std::min(length, DataContainer().GetLength() - position));

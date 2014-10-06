@@ -94,8 +94,8 @@
 #define NO_ASSERTS
 #endif
 
-// Disable std::istream support in class FileReader (this is generally not needed for the tracker, local files can easily be mmapped as they have been before introducing std::istream support)
-#define NO_FILEREADER_STD_ISTREAM
+// Enable std::istream support in class FileReader (this is generally not needed for the tracker, local files can easily be mmapped as they have been before introducing std::istream support)
+//#define MPT_FILEREADER_STD_ISTREAM
 
 // Disable unarchiving support
 //#define NO_ARCHIVE_SUPPORT
@@ -159,7 +159,7 @@
 #endif
 //#define NO_ASSERTS
 //#define NO_LOGGING
-//#define NO_FILEREADER_STD_ISTREAM
+#define MPT_FILEREADER_STD_ISTREAM
 #define NO_ARCHIVE_SUPPORT
 #define NO_REVERB
 #define NO_DSP
