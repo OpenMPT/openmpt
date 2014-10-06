@@ -29,6 +29,8 @@
 #else
 #include "FloatMixer.h"
 #endif // MPT_INTMIXER
+#include <algorithm>
+#include <cstdlib>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -137,7 +139,7 @@ static forceinline int32 BufferLengthToSamples(int32 mixBufferCount, const ModCh
 static forceinline int32 SamplesToBufferLength(int32 numSamples, const ModChannel &chn)
 //-------------------------------------------------------------------------------------
 {
-	return std::max(1, ((numSamples << 16)/* + static_cast<int32>(chn.nPosLo) + 0xFFFF*/) / abs(chn.nInc));
+	return std::max(1, ((numSamples << 16)/* + static_cast<int32>(chn.nPosLo) + 0xFFFF*/) / std::abs(chn.nInc));
 }
 
 
