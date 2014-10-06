@@ -11,6 +11,10 @@ is just a high-level summary.
     .NET 4 to be installed.
  *  foo_openmpt: Settings are now accessable via foobar2000 advanced settings.
 
+ *  [Bug] The -autotools tarballs were not working at all.
+
+ *  Vastly improved MT2 loader.
+
 ### 2014-09-07 - libopenmpt 0.2-beta7
 
  *  libopenmpt now has an GNU Autotools based build system (in addition to all
