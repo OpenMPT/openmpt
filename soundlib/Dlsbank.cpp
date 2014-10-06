@@ -19,6 +19,7 @@
 #include "Wav.h"
 #include "../common/StringFixer.h"
 #include "../soundlib/FileReader.h"
+#include "../common/Endianness.h"
 #include "SampleIO.h"
 
 #include <math.h>
@@ -275,10 +276,17 @@ STATIC_ASSERT(sizeof(WSMPCHUNK) == 28);
 
 typedef struct PACKED WSMPSAMPLELOOP
 {
-	DWORD cbSize;
-	DWORD ulLoopType;
-	DWORD ulLoopStart;
-	DWORD ulLoopLength;
+	uint32 cbSize;
+	uint32 ulLoopType;
+	uint32 ulLoopStart;
+	uint32 ulLoopLength;
+	void ConvertEndianness()
+	{
+		SwapBytesLE(cbSize);
+		SwapBytesLE(ulLoopType);
+		SwapBytesLE(ulLoopStart);
+		SwapBytesLE(ulLoopLength);
+	}
 } WSMPSAMPLELOOP;
 
 STATIC_ASSERT(sizeof(WSMPSAMPLELOOP) == 16);
@@ -1611,7 +1619,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns
 				{
 					WSMPSAMPLELOOP loop;
 					wsmpChunk.Skip(8 + wsmp.cbSize);
-					wsmpChunk.Read(loop);
+					wsmpChunk.ReadConvertEndianness(loop);
 					if(loop.ulLoopLength > 3)
 					{
 						sample.uFlags.set(CHN_LOOP);

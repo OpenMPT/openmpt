@@ -562,7 +562,7 @@ struct PACKED AMS2Envelope
 	// Read envelope and do partial conversion.
 	void ConvertToMPT(InstrumentEnvelope &mptEnv, FileReader &file)
 	{
-		file.Read(*this);
+		file.ReadStruct(*this);
 
 		// Read envelope points
 		uint8 data[64][3];

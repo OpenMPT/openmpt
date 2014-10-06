@@ -32,6 +32,11 @@ protected:
 		uint32 mtime;	// UNIX time
 		uint8  xflags;	// Available for use by specific compression methods. We ignore this.
 		uint8  os;		// Which OS was used to compress the file? We also ignore this.
+
+		void ConvertEndianness()
+		{
+			SwapBytesLE(mtime);
+		}
 	};
 
 	STATIC_ASSERT(sizeof(GZheader) == 10);

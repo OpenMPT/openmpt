@@ -961,7 +961,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 {
 	DMFFileHeader fileHeader;
 	file.Rewind();
-	if(!file.Read(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.signature, "DDMF", 4)
 		|| !fileHeader.version || fileHeader.version > 10)
 	{

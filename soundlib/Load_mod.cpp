@@ -573,7 +573,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read order information
 	MODFileHeader fileHeader;
-	file.Read(fileHeader);
+	file.ReadStruct(fileHeader);
 	file.Skip(4);	// Magic bytes (we already parsed these)
 
 	Order.ReadFromArray(fileHeader.orderList);
@@ -862,7 +862,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	MODFileHeader fileHeader;
-	file.Read(fileHeader);
+	file.ReadStruct(fileHeader);
 
 	// Sanity check: No more than 128 positions. ST's GUI limits tempo to [1, 220].
 	if(fileHeader.numOrders > 128 || fileHeader.restartPos == 0 || fileHeader.restartPos > 220)

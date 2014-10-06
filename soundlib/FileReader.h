@@ -566,6 +566,8 @@ public:
 		streamPos += result;
 		return result;
 	}
+	
+protected:
 
 	// Read a "T" object from the stream.
 	// If not enough bytes can be read, false is returned.
@@ -782,6 +784,34 @@ public:
 	float ReadFloatBE()
 	{
 		IEEE754binary32BE target;
+		if(Read(target))
+		{
+			return target;
+		} else
+		{
+			return 0.0f;
+		}
+	}
+
+	// Read 64-Bit float in little-endian format.
+	// If successful, the file cursor is advanced by the size of the float.
+	double ReadDoubleLE()
+	{
+		IEEE754binary64LE target;
+		if(Read(target))
+		{
+			return target;
+		} else
+		{
+			return 0.0f;
+		}
+	}
+
+	// Read 64-Bit float in big-endian format.
+	// If successful, the file cursor is advanced by the size of the float.
+	double ReadDoubleBE()
+	{
+		IEEE754binary64BE target;
 		if(Read(target))
 		{
 			return target;

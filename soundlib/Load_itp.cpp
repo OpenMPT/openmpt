@@ -216,8 +216,9 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 			ModCommand *target = Patterns[pat].GetpModCommand(0, 0);
 			while(numCommands-- != 0)
 			{
+				STATIC_ASSERT(sizeof(MODCOMMAND_ORIGINAL) == 6);
 				MODCOMMAND_ORIGINAL data;
-				patternChunk.Read(data);
+				patternChunk.ReadStruct(data);
 				*(target++) = data;
 			}
 		}

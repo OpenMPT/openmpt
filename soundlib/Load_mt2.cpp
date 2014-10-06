@@ -495,7 +495,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				for(CHANNELINDEX chn = 0; chn < channelsWithoutDrums; chn++, m++)
 				{
 					MT2Command cmd;
-					chunk.Read(cmd);
+					chunk.ReadStruct(cmd);
 					ConvertMT2Command(this, *m, cmd);
 				}
 			}
@@ -514,10 +514,13 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		case MAGIC4LE('B','P','M','+'):
 			if(0)
 			{
-				double d;
-				if(chunk.Read(d) && fileHeader.samplesPerTick != 0 && d != 0.0)
+				if(chunk.CanRead(8))
 				{
-					m_nDefaultTempo = Util::Round<uint16>(44100.0 * 60.0 / (m_nDefaultSpeed * m_nDefaultRowsPerBeat * fileHeader.samplesPerTick * d));
+					double d = chunk.ReadDoubleLE();
+					if(fileHeader.samplesPerTick != 0 && d != 0.0)
+					{
+						m_nDefaultTempo = Util::Round<uint16>(44100.0 * 60.0 / (m_nDefaultSpeed * m_nDefaultRowsPerBeat * fileHeader.samplesPerTick * d));
+					}
 				}
 			}
 			break;

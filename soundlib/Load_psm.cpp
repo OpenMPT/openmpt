@@ -347,7 +347,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		ChunkReader chunk(*subsongIter);
 		PSMSongHeader songHeader;
-		if(!chunk.Read(songHeader))
+		if(!chunk.ReadStruct(songHeader))
 		{
 			return false;
 		}

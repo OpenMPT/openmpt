@@ -109,7 +109,7 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 	file.Rewind();
 
 	AsylumFileHeader fileHeader;
-	if(!file.Read(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| strncmp(fileHeader.signature, "ASYLUM Music Format V1.0", 25)
 		|| fileHeader.numSamples > 64
 		|| !file.CanRead(256 + 64 * sizeof(AsylumSampleHeader) + 64 * 4 * 8 * fileHeader.numPatterns))

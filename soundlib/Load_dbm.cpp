@@ -299,7 +299,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	DBMFileHeader fileHeader;
 
 	file.Rewind();
-	if(!file.Read(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.dbm0, "DBM0", 4)
 		|| fileHeader.trkVerHi > 3)
 	{
