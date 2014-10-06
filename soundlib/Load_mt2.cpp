@@ -210,7 +210,7 @@ struct PACKED MT2InstrSynth
 	uint8  attack;		// 0...128
 	uint8  decay;		// 0...128
 	uint8  midiChannel;	// 0...15
-	uint8  device;		// VST slot or MIDI device
+	int8   device;		// VST slot (positive) or MIDI device (negative)
 	int8   unknown1;	// Missing in MTIOModule_MT2.cpp
 	uint8  volume;		// 0...255
 	int8   finetune;	// -96...96
@@ -350,7 +350,40 @@ static void ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 #endif // MODPLUG_TRACKER
 		} else
 		{
-			// TODO: MT2 Effects
+			switch(p.fxcmd)
+			{
+			case 0x20:	// Cutoff + Resonance
+				m.command = CMD_MIDI;
+				m.param = p.fxparam1 >> 1;
+				break;
+				
+			case 0x22:	// Cutoff + Resonance + Attack + Decay
+				m.command = CMD_MIDI;
+				m.param = (p.fxparam1 & 0xF0) >> 1;
+				break;
+
+			case 0x24:	// Reverse
+				m.command = CMD_S3MCMDEX;
+				m.param = 0x9F;
+				break;
+
+			case 0x80:	// Track volume
+				m.command = CMD_CHANNELVOLUME;
+				m.param = p.fxparam1 / 4u;
+				break;
+
+			case 0x9D:	// Offset + delay
+				m.volcmd = CMD_OFFSET;
+				m.vol = p.fxparam1 >> 3;
+				m.command = CMD_S3MCMDEX;
+				m.param = 0xD0 | std::min(p.fxparam2, uint8(0x0F));
+				break;
+
+			case 0xCC:	// MIDI CC
+				//m.command = CMD_MIDI;
+				break;
+			}
+			// TODO: More MT2 Effects
 		}
 	}
 }
@@ -514,13 +547,10 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		case MAGIC4LE('B','P','M','+'):
 			if(0)
 			{
-				if(chunk.CanRead(8))
+				double d = chunk.ReadDoubleLE();
+				if(fileHeader.samplesPerTick != 0 && d != 0.0)
 				{
-					double d = chunk.ReadDoubleLE();
-					if(fileHeader.samplesPerTick != 0 && d != 0.0)
-					{
-						m_nDefaultTempo = Util::Round<uint16>(44100.0 * 60.0 / (m_nDefaultSpeed * m_nDefaultRowsPerBeat * fileHeader.samplesPerTick * d));
-					}
+					m_nDefaultTempo = Util::Round<uint16>(44100.0 * 60.0 / (m_nDefaultSpeed * m_nDefaultRowsPerBeat * fileHeader.samplesPerTick * d));
 				}
 			}
 			break;
@@ -601,6 +631,12 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 					mixPlug.Destroy();
 					mpt::String::Read<mpt::String::maybeNullTerminated>(mixPlug.Info.szLibraryName, vstHeader.dll);
 					mpt::String::Read<mpt::String::maybeNullTerminated>(mixPlug.Info.szName, vstHeader.programName);
+					const size_t len = strlen(mixPlug.Info.szLibraryName);
+					if(len > 4 && mixPlug.Info.szLibraryName[len - 4] == '.')
+					{
+						// Remove ".dll" from library name
+						mixPlug.Info.szLibraryName[len - 4] = '\0';
+					}
 					mixPlug.Info.dwPluginId1 = kEffectMagic;
 					mixPlug.Info.dwPluginId2 = vstHeader.fxID;
 					mixPlug.defaultProgram = vstHeader.programNr;
@@ -846,9 +882,10 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			MT2InstrSynth synthData;
 			instrChunk.ReadConvertEndianness(synthData);
 
-			float cutoff = Clamp(synthData.cutoff, uint16(130), uint16(10670));
-			cutoff = 28.8539f * std::log(0.00764451f * cutoff);	// Translate frequency back to IT cutoff factor
-			mptIns->SetCutoff(static_cast<uint8>(cutoff), (flags & 2) != 0);
+			// Translate frequency back to extended IT cutoff factor
+			float cutoff = 28.8539f * std::log(0.00764451f * synthData.cutoff);
+			Limit(cutoff, 0.0f, 127.0f);
+			mptIns->SetCutoff(Util::Round<uint8>(cutoff), (flags & 2) != 0);
 			mptIns->SetResonance(synthData.resonance, (flags & 2) != 0);
 			mptIns->nFilterMode = synthData.effectID == 1 ? FLTMODE_HIGHPASS : FLTMODE_LOWPASS;
 			if(flags & 4)
@@ -856,8 +893,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				// VST enabled
 				mptIns->nMidiChannel = synthData.midiChannel + 1;
 				mptIns->nMidiProgram = synthData.midiProgram + 1;
-				mptIns->nMixPlug = synthData.device + 1;
-				if(synthData.device == 255)
+				mptIns->nMixPlug = static_cast<PLUGINDEX>(synthData.device + 1);
+				if(synthData.device < 0)
 				{
 					// TODO: This is a MIDI device - maybe use MIDI I/O plugin to emulate those?
 				}
