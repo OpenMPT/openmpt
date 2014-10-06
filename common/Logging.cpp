@@ -168,6 +168,12 @@ static noinline void DoLog(const mpt::log::Context &context, const char *format,
 }
 
 
+void Logger::operator () (LogLevel level, const mpt::ustring &text)
+//-----------------------------------------------------------------
+{
+	DoLog(context, LogLevelToString(level) + MPT_USTRING(": ") + text);
+}
+
 void Logger::operator () (const mpt::ustring &text)
 //-------------------------------------------------
 {
