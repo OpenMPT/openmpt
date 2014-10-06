@@ -30,7 +30,6 @@
 #include "FloatMixer.h"
 #endif // MPT_INTMIXER
 #include <algorithm>
-#include <cstdlib>
 
 
 OPENMPT_NAMESPACE_BEGIN
