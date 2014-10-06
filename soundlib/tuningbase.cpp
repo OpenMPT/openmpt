@@ -12,6 +12,9 @@
 #include "tuningbase.h"
 #include "../common/serialization_utils.h"
 
+#include <istream>
+#include <ostream>
+
 
 OPENMPT_NAMESPACE_BEGIN
 
