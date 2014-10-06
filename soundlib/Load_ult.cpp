@@ -383,7 +383,7 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 	UltFileHeader fileHeader;
 
 	// Tracker ID
-	if(!file.Read(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| fileHeader.version < '1'
 		|| fileHeader.version > '4'
 		|| memcmp(fileHeader.signature, "MAS_UTrack_V00", sizeof(fileHeader.signature)) != 0)

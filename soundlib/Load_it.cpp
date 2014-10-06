@@ -537,7 +537,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Reading MIDI Output & Macros
-	if(m_SongFlags[SONG_EMBEDMIDICFG] && file.Read(m_MidiCfg))
+	if(m_SongFlags[SONG_EMBEDMIDICFG] && file.ReadStruct<MIDIMacroConfigData>(m_MidiCfg))
 	{
 			m_MidiCfg.Sanitize();
 	}

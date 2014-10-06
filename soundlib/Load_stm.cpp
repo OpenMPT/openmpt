@@ -94,6 +94,15 @@ struct PACKED STMFileHeader
 	uint8 reserved[13];				// More of PSi's internal crap
 	STMSampleHeader samples[31];	// Sample headers
 	uint8 order[128];				// Order list
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		for(std::size_t i = 0; i < 32; ++i)
+		{
+			samples[i].ConvertEndianness();
+		}
+	}
 };
 
 STATIC_ASSERT(sizeof(STMFileHeader) == 1168);
@@ -134,7 +143,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	file.Rewind();
 
 	STMFileHeader fileHeader;
-	if(!file.Read(fileHeader)
+	if(!file.ReadConvertEndianness(fileHeader)
 		|| fileHeader.filetype != 2
 		|| fileHeader.dosEof != 0x1A
 		|| (mpt::strnicmp(fileHeader.trackername, "!SCREAM!", 8)

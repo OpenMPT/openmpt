@@ -138,6 +138,12 @@ struct PACKED AMFFMainChunk
 	uint8  tempo;
 	uint32 unknown;		// 0x16078035 if original file was MOD, 0xC50100FF for everything else? it's 0xFF00FFFF in Carrotus.j2b (AMFF version)
 	uint8  globalvolume;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(unknown);
+	}
 };
 
 STATIC_ASSERT(sizeof(AMFFMainChunk) == 73);
@@ -766,7 +772,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	FileReader chunk(chunks.GetChunk(isAM ? AMFFRiffChunk::idINIT : AMFFRiffChunk::idMAIN));
 	AMFFMainChunk mainChunk;
 	if(!chunk.IsValid() 
-		|| !chunk.Read(mainChunk)
+		|| !chunk.ReadConvertEndianness(mainChunk)
 		|| mainChunk.channels < 1
 		|| !chunk.CanRead(mainChunk.channels))
 	{
