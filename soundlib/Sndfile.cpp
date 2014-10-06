@@ -657,7 +657,11 @@ void CSoundFile::AddToLog(LogLevel level, const std::string &text) const
 	#ifdef MODPLUG_TRACKER
 		if(GetpModDoc()) GetpModDoc()->AddToLog(level, text);
 	#else
-		std::clog << "openmpt: " << LogLevelToString(level) << ": " << text << std::endl;
+		#ifdef MPT_WITH_CHARSET_LOCALE
+			std::clog << "openmpt: " << mpt::ToLocale(LogLevelToString(level)) << ": " << text << std::endl;
+		#else
+			std::clog << "openmpt: " << mpt::ToCharset(mpt::CharsetUTF8, LogLevelToString(level)) << ": " << text << std::endl;
+		#endif
 	#endif
 }
 

@@ -23,16 +23,16 @@ enum LogLevel
 };
 
 
-inline std::string LogLevelToString(LogLevel level)
+inline mpt::ustring LogLevelToString(LogLevel level)
 {
 	switch(level)
 	{
-	case LogError:        return "error";   break;
-	case LogWarning:      return "warning"; break;
-	case LogInformation:  return "info";    break;
-	case LogNotification: return "notify";  break;
+	case LogError:        return MPT_USTRING("error");   break;
+	case LogWarning:      return MPT_USTRING("warning"); break;
+	case LogInformation:  return MPT_USTRING("info");    break;
+	case LogNotification: return MPT_USTRING("notify");  break;
 	}
-	return "unknown";
+	return MPT_USTRING("unknown");
 }
 
 
