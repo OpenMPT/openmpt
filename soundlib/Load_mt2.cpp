@@ -13,10 +13,10 @@
 #include "Loaders.h"
 #ifdef MODPLUG_TRACKER
 // For loading external samples
-#ifdef NO_FILEREADER_STD_ISTREAM
-#include "../mptrack/MemoryMappedFile.h"
-#else
+#if defined(MPT_FILEREADER_STD_ISTREAM)
 #include "../common/mptFstream.h"
+#else
+#include "../mptrack/MemoryMappedFile.h"
 #endif
 #include "../mptrack/Moddoc.h"
 #endif
@@ -1020,15 +1020,15 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				path = path.RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt().GetPath());
 			}
 
-#ifdef NO_FILEREADER_STD_ISTREAM
+#if defined(MPT_FILEREADER_STD_ISTREAM)
+			mpt::ifstream f(path, std::ios_base::binary);
+			if(f.good())
+				sampleFile = FileReader(&f);
+#else
 			CMappedFile f;
 			FileReader sampleFile;
 			if(f.Open(path))
 				sampleFile = f.GetFile();
-#else
-			mpt::ifstream f(path, std::ios_base::binary);
-			if(f.good())
-				sampleFile = FileReader(&f);
 #endif
 			if(sampleFile.IsValid())
 				ReadSampleFromFile(i + 1, sampleFile, false);
