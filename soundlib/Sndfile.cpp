@@ -24,7 +24,6 @@
 #include "tuningcollection.h"
 #include "../common/StringFixer.h"
 #include "FileReader.h"
-#include <iostream>
 #include <sstream>
 #include <time.h>
 
@@ -653,16 +652,20 @@ void CSoundFile::AddToLog(LogLevel level, const std::string &text) const
 //----------------------------------------------------------------------
 {
 	if(m_pCustomLog)
-		return m_pCustomLog->AddToLog(level, text);
-	#ifdef MODPLUG_TRACKER
-		if(GetpModDoc()) GetpModDoc()->AddToLog(level, text);
-	#else
-		#ifdef MPT_WITH_CHARSET_LOCALE
-			std::clog << "openmpt: " << mpt::ToLocale(LogLevelToString(level)) << ": " << text << std::endl;
+	{
+		m_pCustomLog->AddToLog(level, text);
+	} else
+	{
+		#ifdef MODPLUG_TRACKER
+			if(GetpModDoc()) GetpModDoc()->AddToLog(level, text);
 		#else
-			std::clog << "openmpt: " << mpt::ToCharset(mpt::CharsetUTF8, LogLevelToString(level)) << ": " << text << std::endl;
+			#ifdef MPT_WITH_CHARSET_LOCALE
+				Log(level, mpt::ToUnicode(mpt::CharsetLocale, text));
+			#else
+				Log(level, mpt::ToUnicode(mpt::CharsetUTF8, text));
+			#endif
 		#endif
-	#endif
+	}
 }
 
 

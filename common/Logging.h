@@ -75,6 +75,7 @@ private:
 public:
 	Logger(const Context &context) : context(context) {}
 	void MPT_PRINTF_FUNC(2,3) operator () (const char *format, ...);
+	void operator () (LogLevel level, const mpt::ustring &text);
 	void operator () (const mpt::ustring &text);
 	void operator () (const std::string &text);
 #if MPT_WSTRING_CONVERT && !(MPT_USTRING_MODE_WIDE)
@@ -92,6 +93,7 @@ class Logger
 {
 public:
 	inline void MPT_PRINTF_FUNC(2,3) operator () (const char * /*format*/, ...) {}
+	inline void operator () (LogLevel /*level*/ , const mpt::ustring & /*text*/ ) {}
 	inline void operator () (const mpt::ustring & /*text*/ ) {}
 	inline void operator () (const std::string & /*text*/ ) {}
 #if MPT_WSTRING_CONVERT && !(MPT_USTRING_MODE_WIDE)
