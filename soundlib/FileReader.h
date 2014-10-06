@@ -870,12 +870,11 @@ public:
 		}
 	}
 
-	// Read a null-terminated string into a std::string or std::wstring
-	template<typename StrT>
-	bool ReadNullString(StrT &dest, const off_t maxLength = SIZE_MAX)
+	// Read a null-terminated string into a std::string
+	bool ReadNullString(std::string &dest, const off_t maxLength = SIZE_MAX)
 	{
 		dest.clear();
-		typename StrT::traits_type::char_type c;
+		char c;
 		while(Read(c) && c != 0 && dest.length() < maxLength)
 		{
 			dest += c;
