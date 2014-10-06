@@ -233,7 +233,7 @@ static forceinline float64 DecodeIEEE754binary64(uint64 i)
 		conv.i = i;
 		return conv.f;
 	#else
-		float64 f = 0.0f;
+		float64 f = 0.0;
 		std::memcpy(&f, &i, sizeof(float64));
 		return f;
 	#endif
