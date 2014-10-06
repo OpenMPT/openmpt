@@ -192,7 +192,7 @@ static forceinline uint64 EncodeIEEE754binary64(float64 f)
 		return conv.i;
 	#else
 		uint64 i = 0;
-		std::memcpy(&i, &f, sizeof(float32));
+		std::memcpy(&i, &f, sizeof(float64));
 		return i;
 	#endif
 #else
