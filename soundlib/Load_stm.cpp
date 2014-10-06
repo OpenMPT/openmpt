@@ -186,7 +186,6 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	// Read samples
 	for(SAMPLEINDEX smp = 0; smp < 31; smp++)
 	{
-		fileHeader.samples[smp].ConvertEndianness();
 		fileHeader.samples[smp].ConvertToMPT(Samples[smp + 1]);
 		mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp + 1], fileHeader.samples[smp].filename);
 	}
