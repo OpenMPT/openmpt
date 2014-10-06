@@ -179,6 +179,26 @@ static forceinline uint32 EncodeIEEE754binary32(float32 f)
 	#error "IEEE754 single precision float support is required (for now)"
 #endif
 }
+static forceinline uint64 EncodeIEEE754binary64(float64 f)
+{
+#if MPT_PLATFORM_IEEE_FLOAT
+	STATIC_ASSERT(sizeof(uint64) == sizeof(float64));
+	#if MPT_COMPILER_UNION_TYPE_ALIASES
+		union {
+			float64 f;
+			uint64 i;
+		} conv;
+		conv.f = f;
+		return conv.i;
+	#else
+		uint64 i = 0;
+		std::memcpy(&i, &f, sizeof(float32));
+		return i;
+	#endif
+#else
+	#error "IEEE754 double precision float support is required (for now)"
+#endif
+}
 
 // 0x3f800000u --> 1.0f
 static forceinline float32 DecodeIEEE754binary32(uint32 i)
@@ -199,6 +219,26 @@ static forceinline float32 DecodeIEEE754binary32(uint32 i)
 	#endif
 #else
 	#error "IEEE754 single precision float support is required (for now)"
+#endif
+}
+static forceinline float64 DecodeIEEE754binary64(uint64 i)
+{
+#if MPT_PLATFORM_IEEE_FLOAT
+	STATIC_ASSERT(sizeof(uint64) == sizeof(float64));
+	#if MPT_COMPILER_UNION_TYPE_ALIASES
+		union {
+			uint64 i;
+			float64 f;
+		} conv;
+		conv.i = i;
+		return conv.f;
+	#else
+		float64 f = 0.0f;
+		std::memcpy(&f, &i, sizeof(float64));
+		return f;
+	#endif
+#else
+	#error "IEEE754 double precision float support is required (for now)"
 #endif
 }
 
@@ -265,11 +305,87 @@ public:
 		return !(*this == cmp);
 	}
 };
+template<std::size_t hihihi, std::size_t hihilo, std::size_t hilohi, std::size_t hilolo, std::size_t lohihi, std::size_t lohilo, std::size_t lolohi, std::size_t lololo>
+struct IEEE754binary64Emulated
+{
+private:
+	typedef IEEE754binary64Emulated<hihihi,hihilo,hilohi,hilolo,lohihi,lohilo,lolohi,lololo> self_t;
+	uint8 bytes[8];
+public:
+	forceinline uint8 GetByte(std::size_t i) const
+	{
+		return bytes[i];
+	}
+	forceinline IEEE754binary64Emulated() { }
+	forceinline explicit IEEE754binary64Emulated(float64 f)
+	{
+		SetInt64(EncodeIEEE754binary64(f));
+	}
+	forceinline explicit IEEE754binary64Emulated(uint8 b0, uint8 b1, uint8 b2, uint8 b3, uint8 b4, uint8 b5, uint8 b6, uint8 b7)
+	{
+		bytes[0] = b0;
+		bytes[1] = b1;
+		bytes[2] = b2;
+		bytes[3] = b3;
+		bytes[4] = b4;
+		bytes[5] = b5;
+		bytes[6] = b6;
+		bytes[7] = b7;
+	}
+	forceinline operator float64 () const
+	{
+		return DecodeIEEE754binary64(GetInt64());
+	}
+	forceinline self_t & SetInt64(uint64 i)
+	{
+		bytes[hihihi] = static_cast<uint8>(i >> 56);
+		bytes[hihilo] = static_cast<uint8>(i >> 48);
+		bytes[hilohi] = static_cast<uint8>(i >> 40);
+		bytes[hilolo] = static_cast<uint8>(i >> 32);
+		bytes[lohihi] = static_cast<uint8>(i >> 24);
+		bytes[lohilo] = static_cast<uint8>(i >> 16);
+		bytes[lolohi] = static_cast<uint8>(i >>  8);
+		bytes[lololo] = static_cast<uint8>(i >>  0);
+		return *this;
+	}
+	forceinline uint64 GetInt64() const
+	{
+		return 0u
+			| (static_cast<uint64>(bytes[hihihi]) << 56)
+			| (static_cast<uint64>(bytes[hihilo]) << 48)
+			| (static_cast<uint64>(bytes[hilohi]) << 40)
+			| (static_cast<uint64>(bytes[hilolo]) << 32)
+			| (static_cast<uint64>(bytes[lohihi]) << 24)
+			| (static_cast<uint64>(bytes[lohilo]) << 16)
+			| (static_cast<uint64>(bytes[lolohi]) <<  8)
+			| (static_cast<uint64>(bytes[lololo]) <<  0)
+			;
+	}
+	forceinline bool operator == (const self_t &cmp) const
+	{
+		return true
+			&& bytes[0] == cmp.bytes[0]
+			&& bytes[1] == cmp.bytes[1]
+			&& bytes[2] == cmp.bytes[2]
+			&& bytes[3] == cmp.bytes[3]
+			&& bytes[4] == cmp.bytes[4]
+			&& bytes[5] == cmp.bytes[5]
+			&& bytes[6] == cmp.bytes[6]
+			&& bytes[7] == cmp.bytes[7]
+			;
+	}
+	forceinline bool operator != (const self_t &cmp) const
+	{
+		return !(*this == cmp);
+	}
+};
 
 namespace mpt {
 
 template <> struct is_binary_safe<IEEE754binary32Emulated<0,1,2,3> > : public mpt::true_type { };
 template <> struct is_binary_safe<IEEE754binary32Emulated<3,2,1,0> > : public mpt::true_type { };
+template <> struct is_binary_safe<IEEE754binary64Emulated<0,1,2,3,4,5,6,7> > : public mpt::true_type { };
+template <> struct is_binary_safe<IEEE754binary64Emulated<7,6,5,4,3,2,1,0> > : public mpt::true_type { };
 
 } // namespace mpt
 
@@ -341,29 +457,109 @@ public:
 	}
 };
 
+struct IEEE754binary64Native
+{
+private:
+	float64 value;
+public:
+	forceinline uint8 GetByte(std::size_t i) const
+	{
+		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
+			return static_cast<uint8>(EncodeIEEE754binary64(value) >> (i*8));
+		#elif defined(MPT_PLATFORM_BIG_ENDIAN)
+			return static_cast<uint8>(EncodeIEEE754binary64(value) >> ((8-1-i)*8));
+		#else
+			STATIC_ASSERT(false);
+		#endif
+	}
+	forceinline IEEE754binary64Native() { }
+	forceinline explicit IEEE754binary64Native(float64 f)
+	{
+		value = f;
+	}
+	forceinline explicit IEEE754binary64Native(uint8 b0, uint8 b1, uint8 b2, uint8 b3, uint8 b4, uint8 b5, uint8 b6, uint8 b7)
+	{
+		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
+			value = DecodeIEEE754binary64(0ull
+				| (static_cast<uint64>(b0) <<  0)
+				| (static_cast<uint64>(b1) <<  8)
+				| (static_cast<uint64>(b2) << 16)
+				| (static_cast<uint64>(b3) << 24)
+				| (static_cast<uint64>(b4) << 32)
+				| (static_cast<uint64>(b5) << 40)
+				| (static_cast<uint64>(b6) << 48)
+				| (static_cast<uint64>(b7) << 56)
+				);
+		#elif defined(MPT_PLATFORM_BIG_ENDIAN)
+			value = DecodeIEEE754binary64(0ull
+				| (static_cast<uint64>(b0) << 56)
+				| (static_cast<uint64>(b1) << 48)
+				| (static_cast<uint64>(b2) << 40)
+				| (static_cast<uint64>(b3) << 32)
+				| (static_cast<uint64>(b4) << 24)
+				| (static_cast<uint64>(b5) << 16)
+				| (static_cast<uint64>(b6) <<  8)
+				| (static_cast<uint64>(b7) <<  0)
+				);
+		#else
+			STATIC_ASSERT(false);
+		#endif
+	}
+	forceinline operator float64 () const
+	{
+		return value;
+	}
+	forceinline IEEE754binary64Native & SetInt64(uint64 i)
+	{
+		value = DecodeIEEE754binary64(i);
+		return *this;
+	}
+	forceinline uint64 GetInt64() const
+	{
+		return EncodeIEEE754binary64(value);
+	}
+	forceinline bool operator == (const IEEE754binary64Native &cmp) const
+	{
+		return value == cmp.value;
+	}
+	forceinline bool operator != (const IEEE754binary64Native &cmp) const
+	{
+		return value != cmp.value;
+	}
+};
+
 namespace mpt {
 
 template <> struct is_binary_safe<IEEE754binary32Native> : public mpt::true_type { };
+template <> struct is_binary_safe<IEEE754binary64Native> : public mpt::true_type { };
 
 } // namespace mpt
 
 #if defined(MPT_PLATFORM_LITTLE_ENDIAN)
-typedef IEEE754binary32Native            IEEE754binary32LE;
-typedef IEEE754binary32Emulated<0,1,2,3> IEEE754binary32BE;
+typedef IEEE754binary32Native                    IEEE754binary32LE;
+typedef IEEE754binary32Emulated<0,1,2,3>         IEEE754binary32BE;
+typedef IEEE754binary64Native                    IEEE754binary64LE;
+typedef IEEE754binary64Emulated<0,1,2,3,4,5,6,7> IEEE754binary64BE;
 #elif defined(MPT_PLATFORM_BIG_ENDIAN)
-typedef IEEE754binary32Emulated<3,2,1,0> IEEE754binary32LE;
-typedef IEEE754binary32Native            IEEE754binary32BE;
+typedef IEEE754binary32Emulated<3,2,1,0>         IEEE754binary32LE;
+typedef IEEE754binary32Native                    IEEE754binary32BE;
+typedef IEEE754binary64Emulated<7,6,5,4,3,2,1,0> IEEE754binary64LE;
+typedef IEEE754binary64Native                    IEEE754binary64BE;
 #endif
 
 #else // !MPT_PLATFORM_IEEE_FLOAT
 
 typedef IEEE754binary32Emulated<3,2,1,0> IEEE754binary32LE;
 typedef IEEE754binary32Emulated<0,1,2,3> IEEE754binary32BE;
+typedef IEEE754binary64Emulated<7,6,5,4,3,2,1,0> IEEE754binary64LE;
+typedef IEEE754binary64Emulated<0,1,2,3,4,5,6,7> IEEE754binary64BE;
 
 #endif // MPT_PLATFORM_IEEE_FLOAT
 
 STATIC_ASSERT(sizeof(IEEE754binary32LE) == 4);
 STATIC_ASSERT(sizeof(IEEE754binary32BE) == 4);
+STATIC_ASSERT(sizeof(IEEE754binary64LE) == 8);
+STATIC_ASSERT(sizeof(IEEE754binary64BE) == 8);
 
 
 // Small helper class to support unaligned memory access on all platforms.
