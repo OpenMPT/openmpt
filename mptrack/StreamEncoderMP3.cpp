@@ -22,9 +22,6 @@
 #include "../common/StringFixer.h"
 
 #include <deque>
-#include <iomanip>
-#include <locale>
-#include <sstream>
 
 // For ACM debugging purposes
 #define ACMLOG(x, ...)
@@ -697,18 +694,18 @@ struct BladeDynBind
 		traits.fileDescription = "MPEG-1 Layer 3";
 		traits.encoderSettingsName = "MP3Blade";
 		traits.encoderName = lame ? "Lame_enc.dll" : "BladeEnc.dll";
-		std::ostringstream description;
-		description.imbue(std::locale::classic());
 		BE_VERSION ver;
 		MemsetZero(ver);
 		beVersion(&ver);
-		description << "DLL version: " << (int)ver.byDLLMajorVersion << "." << (int)ver.byDLLMinorVersion << std::endl;
-		description << "Engine version: " << (int)ver.byMajorVersion << "." << (int)ver.byMinorVersion << " ";
-		description << std::setfill('0') << std::setw(4) << (int)ver.wYear << "-" << std::setfill('0') << std::setw(2) << (int)ver.byMonth << "-" << std::setfill('0') << std::setw(2) << (int)ver.byDay << std::endl;
+		traits.description = "";
+		traits.description += mpt::String::Print<std::string>("DLL version: %1.%2\n", (int)ver.byDLLMajorVersion, (int)ver.byDLLMinorVersion);
+		traits.description += mpt::String::Print<std::string>("Engine version: %1.%2 %3-%4-%5\n"
+			, (int)ver.byMajorVersion, (int)ver.byMinorVersion
+			, mpt::fmt::dec0<4>((int)ver.wYear), mpt::fmt::dec0<2>((int)ver.byMonth), mpt::fmt::dec0<2>((int)ver.byDay)
+			);
 		std::string url;
 		mpt::String::Copy(url, ver.zHomepage);
-		description << "URL: " << url << std::endl;
-		traits.description = description.str();
+		traits.description += mpt::String::Print<std::string>("URL: \n", url);
 		traits.canTags = true;
 		traits.maxChannels = 2;
 		traits.samplerates = std::vector<uint32>(mpeg1layer3_samplerates, mpeg1layer3_samplerates + CountOf(mpeg1layer3_samplerates));;
@@ -897,13 +894,13 @@ struct AcmDynBind
 		return reinterpret_cast<AcmDynBind*>(inst)->AcmFormatEnumCB(driver, pafd, fdwSupport);
 	}
 	template<size_t size>
-	static void AppendField(std::ostream &s, const std::string &field, const CHAR(&val)[size])
+	static void AppendField(std::string &s, const std::string &field, const CHAR(&val)[size])
 	{
 		std::string tmp;
 		mpt::String::Copy(tmp, val);
 		if(!tmp.empty())
 		{
-			s << field << ": " << tmp << std::endl;
+			s += field + std::string(": ") + tmp + std::string("\n");
 		}
 	}
 	BOOL AcmFormatEnumCB(HACMDRIVERID driver, LPACMFORMATDETAILS pafd, DWORD fdwSupport)
@@ -973,8 +970,7 @@ struct AcmDynBind
 			std::string driverNameLong;
 			std::string driverNameShort;
 			std::string driverNameCombined;
-			std::ostringstream driverDescription;
-			driverDescription.imbue(std::locale::classic());
+			std::string driverDescription;
 
 			if(add.szLongName[0])
 			{
@@ -1047,9 +1043,9 @@ struct AcmDynBind
 						formats_waveformats.push_back(wfex);
 					}
 
-					if(!driverDescription.str().empty())
+					if(!driverDescription.empty())
 					{
-						drivers.insert(driverDescription.str());
+						drivers.insert(driverDescription);
 					}
 
 					found_codec = true;
@@ -1125,18 +1121,15 @@ struct AcmDynBind
 		traits.fileExtension = "mp3";
 		traits.fileShortDescription = "MP3 (ACM)";
 		traits.fileDescription = "MPEG Layer 3";
-		std::ostringstream name;
-		name.imbue(std::locale::classic());
 		DWORD ver = acmGetVersion();
 		if(ver & 0xffff)
 		{
-			name << "Microsoft Windows ACM " << ((ver>>24)&0xff) << "." << ((ver>>16)&0xff) << "." << ((ver>>0)&0xffff);
+			traits.encoderName = mpt::String::Print<std::string>("%1 %2.%3.%4", "Microsoft Windows ACM", mpt::fmt::hex0<2>((ver>>24)&0xff), mpt::fmt::hex0<2>((ver>>16)&0xff), mpt::fmt::hex0<4>((ver>>0)&0xffff));
 		} else
 		{
-			name << "Microsoft Windows ACM " << ((ver>>24)&0xff) << "." << ((ver>>16)&0xff);
+			traits.encoderName = mpt::String::Print<std::string>("%1 %2.%3", "Microsoft Windows ACM", mpt::fmt::hex0<2>((ver>>24)&0xff), mpt::fmt::hex0<2>((ver>>16)&0xff));
 		}
 		traits.encoderSettingsName = "MP3ACM";
-		traits.encoderName = name.str();
 		for(std::set<std::string>::const_iterator i = drivers.begin(); i != drivers.end(); ++i)
 		{
 			traits.description += (*i);
