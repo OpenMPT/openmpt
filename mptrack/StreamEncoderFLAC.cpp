@@ -16,9 +16,6 @@
 #include "Mptrack.h"
 #include "TrackerSettings.h"
 
-#include <locale>
-#include <sstream>
-
 #define FLAC__NO_DLL
 #include <flac/include/FLAC/metadata.h>
 #include <flac/include/FLAC/format.h>
@@ -263,13 +260,11 @@ FLACEncoder::FLACEncoder()
 	traits.fileDescription = "FLAC";
 	traits.encoderSettingsName = "FLAC";
 	traits.encoderName = "libFLAC";
-	std::ostringstream description;
-	description.imbue(std::locale::classic());
-	description << "Free Lossless Audio Codec" << std::endl;
-	description << "Vendor: " << FLAC__VENDOR_STRING << std::endl;
-	description << "Version: " << FLAC__VERSION_STRING << std::endl;
-	description << "API: " << FLAC_API_VERSION_CURRENT << "." << FLAC_API_VERSION_REVISION << "." << FLAC_API_VERSION_AGE << std::endl;
-	traits.description = description.str();
+	traits.description = "";
+	traits.description += mpt::String::Print<std::string>("Free Lossless Audio Codec\n");
+	traits.description += mpt::String::Print<std::string>("Vendor: %1\n", FLAC__VENDOR_STRING);
+	traits.description += mpt::String::Print<std::string>("Version: %1\n", FLAC__VERSION_STRING);
+	traits.description += mpt::String::Print<std::string>("API: %1.%2.%3\n", FLAC_API_VERSION_CURRENT, FLAC_API_VERSION_REVISION, FLAC_API_VERSION_AGE);
 	traits.canTags = true;
 	traits.maxChannels = 4;
 	traits.samplerates = TrackerSettings::Instance().GetSampleRates();
