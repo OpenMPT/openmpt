@@ -190,7 +190,7 @@ public:
 	}
 private:
 	void AddToLog( LogLevel level, const std::string & text ) const {
-		destination->log( LogLevelToString(level) + std::string(": ") + text );
+		destination->log( mpt::ToCharset( mpt::CharsetUTF8, LogLevelToString( level ) ) + std::string(": ") + text );
 	}
 }; // class log_forwarder
 
@@ -346,7 +346,7 @@ void module_impl::load( const FileReader & file ) {
 	std::vector<std::pair<LogLevel,std::string> > loaderMessages = loaderlog.GetMessages();
 	for ( std::vector<std::pair<LogLevel,std::string> >::iterator i = loaderMessages.begin(); i != loaderMessages.end(); ++i ) {
 		PushToCSoundFileLog( i->first, i->second );
-		m_loaderMessages.push_back( LogLevelToString( i->first ) + std::string(": ") + i->second );
+		m_loaderMessages.push_back( mpt::ToCharset( mpt::CharsetUTF8, LogLevelToString( i->first ) ) + std::string(": ") + i->second );
 	}
 }
 std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right ) {
