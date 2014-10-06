@@ -433,6 +433,9 @@ STATIC_ASSERT(sizeof(int24) == 3);
 typedef float float32;
 STATIC_ASSERT(sizeof(float32) == 4);
 
+typedef double float64;
+STATIC_ASSERT(sizeof(float64) == 8);
+
 
 
 OPENMPT_NAMESPACE_END
