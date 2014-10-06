@@ -29,10 +29,10 @@
 #include "modsmp_ctrl.h"
 #include "CleanupSong.h"
 #include "../common/StringFixer.h"
-#ifdef NO_FILEREADER_STD_ISTREAM
-#include "MemoryMappedFile.h"
-#else
+#if defined(MPT_FILEREADER_STD_ISTREAM)
 #include "../common/mptFstream.h"
+#else
+#include "MemoryMappedFile.h"
 #endif
 #include "soundlib/FileReader.h"
 #include <shlwapi.h>
@@ -219,7 +219,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 	if(filename.empty()) return OnNewDocument();
 
 	BeginWaitCursor();
-	#ifndef NO_FILEREADER_STD_ISTREAM
+	#if defined(MPT_FILEREADER_STD_ISTREAM)
 		mpt::ifstream f(filename, std::ios_base::binary);
 		m_SndFile.Create(FileReader(&f), CSoundFile::loadCompleteModule, this);
 	#else
