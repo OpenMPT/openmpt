@@ -540,7 +540,13 @@ private:
 	bool WriteOut()
 	{
 		std::ptrdiff_t n = pptr() - pbase();
-		pbump(-n);
+		std::ptrdiff_t left = n;
+		while(left > 0)
+		{
+			int backchunk = mpt::saturate_cast<int>(-left);
+			pbump(backchunk);
+			left += backchunk;
+		}
 		return mpt::IO::WriteRaw(f, pbase(), n);
 	}
 protected:
