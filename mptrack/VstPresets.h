@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <ostream>
+#include <iosfwd>
 
 OPENMPT_NAMESPACE_BEGIN
 

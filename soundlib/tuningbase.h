@@ -14,8 +14,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
-#include <istream>
-#include <ostream>
+#include <iosfwd>
 #include <map>
 #include <limits>
 #include "../common/typedefs.h"
