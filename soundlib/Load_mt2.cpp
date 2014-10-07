@@ -639,7 +639,6 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 					}
 					mixPlug.Info.dwPluginId1 = kEffectMagic;
 					mixPlug.Info.dwPluginId2 = vstHeader.fxID;
-					mixPlug.defaultProgram = vstHeader.programNr;
 					if(vstHeader.track >= m_nChannels)
 					{
 						mixPlug.SetMasterEffect(true);
@@ -667,10 +666,14 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 					// Read plugin settings
 					if(vstHeader.useChunks)
 					{
+						// MT2 only ever calls effGetChunk for programs, and OpenMPT uses the defaultProgram value to determine
+						// whether it should use effSetChunk for programs or banks...
+						mixPlug.defaultProgram = -1;
 						LimitMax(vstHeader.n, Util::MaxValueOfType(mixPlug.nPluginDataSize) - 4);
 						mixPlug.nPluginDataSize = vstHeader.n + 4;
 					} else
 					{
+						mixPlug.defaultProgram = vstHeader.programNr;
 						LimitMax(vstHeader.n, Util::MaxValueOfType(mixPlug.nPluginDataSize) / 4u);
 						mixPlug.nPluginDataSize = vstHeader.n * 4;
 					}
