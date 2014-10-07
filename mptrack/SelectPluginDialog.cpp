@@ -564,6 +564,33 @@ void CSelectPluginDlg::OnAddPlugin()
 				} else
 				{
 					plugLib = lib;
+
+					// If this plugin was missing anywhere, try loading it
+					std::vector<CModDoc *> docs(theApp.GetOpenDocuments());
+					for(size_t i = 0; i < docs.size(); i++)
+					{
+						CModDoc &doc = *docs[i];
+						CSoundFile &sndFile = doc.GetrSoundFile();
+						bool updateDoc = false;
+						for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
+						{
+							SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[plug];
+							if(plugin.pMixPlugin == nullptr
+								&& plugin.Info.dwPluginId1 == lib->pluginId1
+								&& plugin.Info.dwPluginId2 == lib->pluginId2)
+							{
+								CSoundFile::gpMixPluginCreateProc(plugin, sndFile);
+								if(plugin.pMixPlugin)
+								{
+									plugin.pMixPlugin->RestoreAllParameters(plugin.defaultProgram);
+								}
+							}
+						}
+						if(updateDoc)
+						{
+							doc.UpdateAllViews(nullptr, HINT_MIXPLUGINS);
+						}
+					}
 				}
 			}
 		}
