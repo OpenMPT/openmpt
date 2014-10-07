@@ -291,6 +291,7 @@ DWORD CreateExtensionFlags(const ModInstrument& ins)
 }
 } // unnamed namespace.
 
+#ifndef MODPLUG_NO_FILESAVE
 // Write (in 'file') 'input' ModInstrument with 'code' & 'size' extra field infos for each member
 void WriteInstrumentHeaderStructOrField(ModInstrument * input, FILE * file, uint32 only_this_code, int16 fixedsize)
 {
@@ -375,6 +376,7 @@ WRITE_MPTHEADER_sized_member(	PanEnv.dwFlags			, uint32		, AFLG							)
 WRITE_MPTHEADER_sized_member(	VolEnv.dwFlags			, uint32		, VFLG							)
 WRITE_MPTHEADER_sized_member(	midiPWD					, int8			, MPWD							)
 }
+#endif // !MODPLUG_NO_FILESAVE
 
 
 // --------------------------------------------------------------------------------------------
