@@ -59,8 +59,6 @@
 // <cstring>
 
 #include "../common/mptPathString.h"
-// <cstdio>
-// <stdio.h>
 
 #include "../common/Logging.h"
 
@@ -73,8 +71,14 @@
 // <cstring>
 // <time.h>
 
+// for std::abs
 #include <cstdlib>
 #include <stdlib.h>
+
+#ifndef MODPLUG_NO_FILESAVE
+// for FILE* definition (which cannot be forward-declared in a portable way)
+#include <stdio.h>
+#endif
 
 
 //{{AFX_INSERT_LOCATION}}

@@ -19,6 +19,7 @@ LOCAL_SRC_FILES := \
 	common/stdafx.cpp \
 	common/Logging.cpp \
 	common/misc_util.cpp \
+	common/mptIO.cpp \
 	common/mptPathString.cpp \
 	common/mptString.cpp \
 	common/Profiler.cpp \

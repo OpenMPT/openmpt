@@ -16,6 +16,9 @@
 #include "SampleFormatConverters.h"
 #include "ITCompression.h"
 #include "../common/mptIO.h"
+#ifndef MODPLUG_NO_FILESAVE
+#include "../common/mptFstream.h"
+#endif
 
 
 OPENMPT_NAMESPACE_BEGIN

@@ -11,6 +11,9 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "S3MTools.h"
+#ifndef MODPLUG_NO_FILESAVE
+#include "../common/mptFstream.h"
+#endif
 #include "../common/version.h"
 
 

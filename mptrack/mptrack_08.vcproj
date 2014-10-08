@@ -664,6 +664,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\mptIO.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\common\mptPathString.cpp"
 				>
 			</File>

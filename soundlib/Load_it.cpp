@@ -18,7 +18,9 @@
 #endif
 #include "../common/mptIO.h"
 #include "../common/serialization_utils.h"
+#ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFstream.h"
+#endif
 #include <sstream>
 #include <list>
 #include "../common/version.h"
