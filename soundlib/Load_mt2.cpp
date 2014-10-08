@@ -386,6 +386,19 @@ static void ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 			// TODO: More MT2 Effects
 		}
 	}
+
+	if(p.pan)
+	{
+		if(m.command == CMD_NONE)
+		{
+			m.command = CMD_PANNING8;
+			m.param = p.pan;
+		} else if(m.volcmd == VOLCMD_NONE)
+		{
+			m.volcmd = VOLCMD_PANNING;
+			m.vol = p.pan / 4;
+		}
+	}
 }
 
 
