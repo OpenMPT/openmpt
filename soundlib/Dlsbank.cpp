@@ -14,6 +14,7 @@
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/mptrack.h"
 #include "../mptrack/MemoryMappedFile.h"
+#include "../common/mptFstream.h"
 #endif
 #include "Dlsbank.h"
 #include "Wav.h"

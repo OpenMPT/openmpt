@@ -523,5 +523,8 @@
     <ClCompile Include="..\test\TestToolsLib.cpp">
       <Filter>Source Files\test</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\mptIO.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

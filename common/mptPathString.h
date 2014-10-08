@@ -10,9 +10,6 @@
 
 #pragma once
 
-#include <cstdio>
-#include <stdio.h>
-
 OPENMPT_NAMESPACE_BEGIN
 
 #if defined(MPT_WITH_PATHSTRING)
@@ -230,8 +227,6 @@ static inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWid
 #define MPT_PATHSTRING(x) mpt::PathString::FromNative( x )
 
 #endif // MPT_OS_WINDOWS
-
-FILE * mpt_fopen(const mpt::PathString &filename, const char *mode);
 
 #if defined(MODPLUG_TRACKER)
 

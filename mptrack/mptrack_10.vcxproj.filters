@@ -523,6 +523,9 @@
     <ClCompile Include="MPTrackLink.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\mptIO.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">

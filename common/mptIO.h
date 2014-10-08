@@ -5,6 +5,7 @@
  * Notes  : This is work-in-progress.
  *          Some useful functions for reading and writing are still missing.
  * Authors: Joern Heusipp
+ *          OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
@@ -15,16 +16,17 @@
 #include "../common/typedefs.h"
 #include "../common/Endianness.h"
 #include <algorithm>
-#include <ios>
-#include <istream>
+#include <iosfwd>
 #include <limits>
-#include <ostream>
 #if defined(HAS_TYPE_TRAITS)
 #include <type_traits>
 #endif
-#include <cstdio>
 #include <cstring>
+
+#if defined(MPT_WITH_PATHSTRING)
+#include <cstdio>
 #include <stdio.h>
+#endif
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -47,76 +49,55 @@ inline bool OffsetFits(IO::Offset off)
 
 
 
-//STATIC_ASSERT(sizeof(std::streamoff) == 8); // Assert 64bit file support.
-inline bool IsValid(std::ostream & f) { return !f.fail(); }
-inline bool IsValid(std::istream & f) { return !f.fail(); }
-inline bool IsValid(std::iostream & f) { return !f.fail(); }
-inline IO::Offset TellRead(std::istream & f) { return f.tellg(); }
-inline IO::Offset TellWrite(std::ostream & f) { return f.tellp(); }
-inline bool SeekBegin(std::ostream & f) { f.seekp(0); return !f.fail(); }
-inline bool SeekBegin(std::istream & f) { f.seekg(0); return !f.fail(); }
-inline bool SeekBegin(std::iostream & f) { f.seekg(0); f.seekp(0); return !f.fail(); }
-inline bool SeekEnd(std::ostream & f) { f.seekp(0, std::ios::end); return !f.fail(); }
-inline bool SeekEnd(std::istream & f) { f.seekg(0, std::ios::end); return !f.fail(); }
-inline bool SeekEnd(std::iostream & f) { f.seekg(0, std::ios::end); f.seekp(0, std::ios::end); return !f.fail(); }
-inline bool SeekAbsolute(std::ostream & f, IO::Offset pos) { if(!OffsetFits<std::streamoff>(pos)) { return false; } f.seekp(static_cast<std::streamoff>(pos), std::ios::beg); return !f.fail(); }
-inline bool SeekAbsolute(std::istream & f, IO::Offset pos) { if(!OffsetFits<std::streamoff>(pos)) { return false; } f.seekg(static_cast<std::streamoff>(pos), std::ios::beg); return !f.fail(); }
-inline bool SeekAbsolute(std::iostream & f, IO::Offset pos) { if(!OffsetFits<std::streamoff>(pos)) { return false; } f.seekg(static_cast<std::streamoff>(pos), std::ios::beg); f.seekp(static_cast<std::streamoff>(pos), std::ios::beg); return !f.fail(); }
-inline bool SeekRelative(std::ostream & f, IO::Offset off) { if(!OffsetFits<std::streamoff>(off)) { return false; } f.seekp(static_cast<std::streamoff>(off), std::ios::cur); return !f.fail(); }
-inline bool SeekRelative(std::istream & f, IO::Offset off) { if(!OffsetFits<std::streamoff>(off)) { return false; } f.seekg(static_cast<std::streamoff>(off), std::ios::cur); return !f.fail(); }
-inline bool SeekRelative(std::iostream & f, IO::Offset off) { if(!OffsetFits<std::streamoff>(off)) { return false; } f.seekg(static_cast<std::streamoff>(off), std::ios::cur); f.seekp(static_cast<std::streamoff>(off), std::ios::cur); return !f.fail(); }
-inline IO::Offset ReadRaw(std::istream & f, uint8 * data, std::size_t size) { return f.read(reinterpret_cast<char *>(data), size) ? f.gcount() : std::streamsize(0); }
-inline IO::Offset ReadRaw(std::istream & f, char * data, std::size_t size) { return f.read(data, size) ? f.gcount() : std::streamsize(0); }
-inline IO::Offset ReadRaw(std::istream & f, void * data, std::size_t size) { return f.read(reinterpret_cast<char *>(data), size) ? f.gcount() : std::streamsize(0); }
-inline bool WriteRaw(std::ostream & f, const uint8 * data, std::size_t size) { f.write(reinterpret_cast<const char *>(data), size); return !f.fail(); }
-inline bool WriteRaw(std::ostream & f, const char * data, std::size_t size) { f.write(data, size); return !f.fail(); }
-inline bool WriteRaw(std::ostream & f, const void * data, std::size_t size) { f.write(reinterpret_cast<const char *>(data), size); return !f.fail(); }
-inline bool IsEof(std::istream & f) { return f.eof(); }
-inline bool Flush(std::ostream & f) { f.flush(); return !f.fail(); }
+bool IsValid(std::ostream & f);
+bool IsValid(std::istream & f);
+bool IsValid(std::iostream & f);
+IO::Offset TellRead(std::istream & f);
+IO::Offset TellWrite(std::ostream & f);
+bool SeekBegin(std::ostream & f);
+bool SeekBegin(std::istream & f);
+bool SeekBegin(std::iostream & f);
+bool SeekEnd(std::ostream & f);
+bool SeekEnd(std::istream & f);
+bool SeekEnd(std::iostream & f);
+bool SeekAbsolute(std::ostream & f, IO::Offset pos);
+bool SeekAbsolute(std::istream & f, IO::Offset pos);
+bool SeekAbsolute(std::iostream & f, IO::Offset pos);
+bool SeekRelative(std::ostream & f, IO::Offset off);
+bool SeekRelative(std::istream & f, IO::Offset off);
+bool SeekRelative(std::iostream & f, IO::Offset off);
+IO::Offset ReadRaw(std::istream & f, uint8 * data, std::size_t size);
+IO::Offset ReadRaw(std::istream & f, char * data, std::size_t size);
+IO::Offset ReadRaw(std::istream & f, void * data, std::size_t size);
+bool WriteRaw(std::ostream & f, const uint8 * data, std::size_t size);
+bool WriteRaw(std::ostream & f, const char * data, std::size_t size);
+bool WriteRaw(std::ostream & f, const void * data, std::size_t size);
+bool IsEof(std::istream & f);
+bool Flush(std::ostream & f);
 
 
 
-inline bool IsValid(FILE* & f) { return f != NULL; }
+#if defined(MPT_WITH_PATHSTRING)
 
-#if MPT_COMPILER_MSVC
+// FILE* only makes sense if we support filenames at all.
 
-inline IO::Offset TellRead(FILE* & f) { return _ftelli64(f); }
-inline IO::Offset TellWrite(FILE* & f) { return _ftelli64(f); }
-inline bool SeekBegin(FILE* & f) { return _fseeki64(f, 0, SEEK_SET) == 0; }
-inline bool SeekEnd(FILE* & f) { return _fseeki64(f, 0, SEEK_END) == 0; }
-inline bool SeekAbsolute(FILE* & f, IO::Offset pos) { return _fseeki64(f, pos, SEEK_SET) == 0; }
-inline bool SeekRelative(FILE* & f, IO::Offset off) { return _fseeki64(f, off, SEEK_CUR) == 0; }
+bool IsValid(FILE* & f);
+IO::Offset TellRead(FILE* & f);
+IO::Offset TellWrite(FILE* & f);
+bool SeekBegin(FILE* & f);
+bool SeekEnd(FILE* & f);
+bool SeekAbsolute(FILE* & f, IO::Offset pos);
+bool SeekRelative(FILE* & f, IO::Offset off);
+IO::Offset ReadRaw(FILE * & f, uint8 * data, std::size_t size);
+IO::Offset ReadRaw(FILE * & f, char * data, std::size_t size);
+IO::Offset ReadRaw(FILE * & f, void * data, std::size_t size);
+bool WriteRaw(FILE* & f, const uint8 * data, std::size_t size);
+bool WriteRaw(FILE* & f, const char * data, std::size_t size);
+bool WriteRaw(FILE* & f, const void * data, std::size_t size);
+bool IsEof(FILE * & f);
+bool Flush(FILE* & f);
 
-#elif defined(_POSIX_SOURCE) && (_POSIX_SOURCE > 0) 
-
-//STATIC_ASSERT(sizeof(off_t) == 8);
-inline IO::Offset TellRead(FILE* & f) { return ftello(f); }
-inline IO::Offset TellWrite(FILE* & f) { return ftello(f); }
-inline bool SeekBegin(FILE* & f) { return fseeko(f, 0, SEEK_SET) == 0; }
-inline bool SeekEnd(FILE* & f) { return fseeko(f, 0, SEEK_END) == 0; }
-inline bool SeekAbsolute(FILE* & f, IO::Offset pos) { return OffsetFits<off_t>(pos) && (fseek(f, mpt::saturate_cast<off_t>(pos), SEEK_SET) == 0); }
-inline bool SeekRelative(FILE* & f, IO::Offset off) { return OffsetFits<off_t>(off) && (fseek(f, mpt::saturate_cast<off_t>(off), SEEK_CUR) == 0); }
-
-#else
-
-//STATIC_ASSERT(sizeof(long) == 8); // Fails on 32bit non-POSIX systems for now.
-inline IO::Offset TellRead(FILE* & f) { return ftell(f); }
-inline IO::Offset TellWrite(FILE* & f) { return ftell(f); }
-inline bool SeekBegin(FILE* & f) { return fseek(f, 0, SEEK_SET) == 0; }
-inline bool SeekEnd(FILE* & f) { return fseek(f, 0, SEEK_END) == 0; }
-inline bool SeekAbsolute(FILE* & f, IO::Offset pos) { return OffsetFits<long>(pos) && (fseek(f, mpt::saturate_cast<long>(pos), SEEK_SET) == 0); }
-inline bool SeekRelative(FILE* & f, IO::Offset off) { return OffsetFits<long>(off) && (fseek(f, mpt::saturate_cast<long>(off), SEEK_CUR) == 0); }
-
-#endif
-
-inline IO::Offset ReadRaw(FILE * & f, uint8 * data, std::size_t size) { return fread(data, 1, size, f); }
-inline IO::Offset ReadRaw(FILE * & f, char * data, std::size_t size) { return fread(data, 1, size, f); }
-inline IO::Offset ReadRaw(FILE * & f, void * data, std::size_t size) { return fread(data, 1, size, f); }
-inline bool WriteRaw(FILE* & f, const uint8 * data, std::size_t size) { return fwrite(data, 1, size, f) == size; }
-inline bool WriteRaw(FILE* & f, const char * data, std::size_t size) { return fwrite(data, 1, size, f) == size; }
-inline bool WriteRaw(FILE* & f, const void * data, std::size_t size) { return fwrite(data, 1, size, f) == size; }
-inline bool IsEof(FILE * & f) { return feof(f) != 0; }
-inline bool Flush(FILE* & f) { return fflush(f) == 0; }
+#endif // MPT_WITH_PATHSTRING
 
 
 
@@ -364,272 +345,243 @@ inline bool WriteConvertEndianness(Tfile & f, T & v)
 } // namespace IO
 
 
-// class FILE_ostream, FILE_output_streambuf and FILE_output_buffered_streambuf
-//  provide a portable way of wrapping a std::ostream around an FILE* opened for output.
-// They offer similar functionality to the badly documented
-//  MSVC std::fstream(FILE*) constructor or GCC libstdc++  __gnu_cxx::stdio_sync_filebuf class,
-//  and, for other compilers, provide a race-free alternative to
-//  closing the FILE* and opening it again as a std::ofstream.
-//
-// Only output functionality is implemented because we have no need for an input wrapper.
-//
-// During the whole lifetime of the iostream wrappers, the FILE* object is assumend to be
-//  either
-//   - NULL
-//  or
-//   - valid
-//   - opened for writing in non-append mode
-//   - opened in binary mode
-//   - seekable
-// Some of these preconditions cannot be verified,
-//  and even the others do not get verified.
-// Behaviour in case of any unmet preconditions is undefined.
-//
-// The buffered streambuf and the ostream use a buffer of 64KiB by default.
-//
-// For FILE_output_streambuf, coherency with the underlying FILE* is always guaranteed.
-// For FILE_ostream and FILE_output_buffered_streambuf, coherence is only
-//  guaranteed when flush() or pubsync() get called.
-// The constructors and destructors take care to not violate coherency.
-// When mixing FILE* and iostream I/O during the lifetime of the iostream objects,
-//  the user is responsible for providing coherency via the appropriate
-//  flush and sync functions.
-// Behaviour in case of incoherent access is undefined.
+} // namespace mpt
 
 
-class FILE_output_streambuf : public std::streambuf
-{
+
+#if defined(MPT_FILEREADER_STD_ISTREAM)
+
+class IFileDataContainer {
 public:
-	typedef std::streambuf::char_type char_type;
-	typedef std::streambuf::traits_type traits_type;
-	typedef traits_type::int_type int_type;
-	typedef traits_type::pos_type pos_type;
-	typedef traits_type::off_type off_type;
+	typedef std::size_t off_t;
 protected:
-	FILE *f;
+	IFileDataContainer() { }
 public:
-	FILE_output_streambuf(FILE *f)
-		: f(f)
+	virtual ~IFileDataContainer() { }
+public:
+	virtual bool IsValid() const = 0;
+	virtual const char *GetRawData() const = 0;
+	virtual off_t GetLength() const = 0;
+	virtual off_t Read(char *dst, off_t pos, off_t count) const = 0;
+
+	virtual const char *GetPartialRawData(off_t pos, off_t length) const // DO NOT USE!!! this is just for ReadMagic ... the pointer returned may be invalid after the next Read()
 	{
-		return;
+		if(pos + length > GetLength())
+		{
+			return nullptr;
+		}
+		return GetRawData() + pos;
 	}
-	~FILE_output_streambuf()
+
+	virtual bool CanRead(off_t pos, off_t length) const
 	{
-		return;
+		return pos + length <= GetLength();
 	}
-protected:
-	virtual int_type overflow(int_type ch)
+
+	virtual off_t GetReadableLength(off_t pos, off_t length) const
 	{
-		if(!mpt::IO::IsValid(f))
+		if(pos >= GetLength())
 		{
-			return traits_type::eof();
+			return 0;
 		}
-		if(traits_type::eq_int_type(ch, traits_type::eof()))
-		{
-			return traits_type::eof();
-		}
-		char_type c = traits_type::to_char_type(ch);
-		if(!mpt::IO::WriteRaw(f, &c, 1))
-		{
-			return traits_type::eof();
-		}
-		return ch;
+		return std::min<off_t>(length, GetLength() - pos);
 	}
-	virtual int sync()
+};
+
+
+class FileDataContainerDummy : public IFileDataContainer {
+public:
+	FileDataContainerDummy() { }
+	virtual ~FileDataContainerDummy() { }
+public:
+	bool IsValid() const
 	{
-		if(!mpt::IO::IsValid(f))
-		{
-			return -1;
-		}
-		if(!mpt::IO::Flush(f))
-		{
-			return -1;
-		}
+		return false;
+	}
+
+	const char *GetRawData() const
+	{
+		return nullptr;
+	}
+
+	off_t GetLength() const
+	{
 		return 0;
 	}
-	virtual pos_type seekpos(pos_type pos, std::ios_base::openmode which)
+	off_t Read(char * /*dst*/, off_t /*pos*/, off_t /*count*/) const
 	{
-		if(!mpt::IO::IsValid(f))
-		{
-			return pos_type(off_type(-1));
-		}
-		return seekoff(pos, std::ios_base::beg, which);
+		return 0;
 	}
-	virtual pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which)
-	{
-		if(!mpt::IO::IsValid(f))
-		{
-			return pos_type(off_type(-1));
-		}
-		if(which & std::ios_base::in)
-		{
-			return pos_type(off_type(-1));
-		}
-		if(!(which & std::ios_base::out))
-		{
-			return pos_type(off_type(-1));
-		}
-		mpt::IO::Offset oldpos = mpt::IO::TellWrite(f);
-		if(dir == std::ios_base::beg)
-		{
-			if(!mpt::IO::SeekAbsolute(f, off))
-			{
-				mpt::IO::SeekAbsolute(f, oldpos);
-				return pos_type(off_type(-1));
-			}
-		} else if(dir == std::ios_base::cur)
-		{
-			if(!mpt::IO::SeekRelative(f, off))
-			{
-				mpt::IO::SeekAbsolute(f, oldpos);
-				return pos_type(off_type(-1));
-			}
-		} else if(dir == std::ios_base::end)
-		{
-			if(!(mpt::IO::SeekEnd(f) && mpt::IO::SeekRelative(f, off)))
-			{
-				mpt::IO::SeekAbsolute(f, oldpos);
-				return pos_type(off_type(-1));
-			}
-		} else
-		{
-			return pos_type(off_type(-1));
-		}
-		mpt::IO::Offset newpos = mpt::IO::TellWrite(f);
-		if(!mpt::IO::OffsetFits<off_type>(newpos))
-		{
-			mpt::IO::SeekAbsolute(f, oldpos);
-			return pos_type(off_type(-1));
-		}
-		return static_cast<pos_type>(newpos);
-	}
-}; // class FILE_output_streambuf
+};
 
 
-class FILE_output_buffered_streambuf : public FILE_output_streambuf
+class FileDataContainerWindow : public IFileDataContainer
 {
-public:
-	typedef std::streambuf::char_type char_type;
-	typedef std::streambuf::traits_type traits_type;
-	typedef traits_type::int_type int_type;
-	typedef traits_type::pos_type pos_type;
-	typedef traits_type::off_type off_type;
 private:
-	typedef FILE_output_streambuf Tparent;
-	std::vector<char_type> buf;
+	MPT_SHARED_PTR<IFileDataContainer> data;
+	const off_t dataOffset;
+	const off_t dataLength;
 public:
-	FILE_output_buffered_streambuf(FILE *f, std::size_t bufSize = 64*1024)
-		: FILE_output_streambuf(f)
-		, buf((bufSize > 0) ? bufSize : 1)
+	FileDataContainerWindow(MPT_SHARED_PTR<IFileDataContainer> src, off_t off, off_t len) : data(src), dataOffset(off), dataLength(len) { }
+	virtual ~FileDataContainerWindow() { }
+
+	bool IsValid() const
 	{
-		setp(&buf[0], &buf[0] + buf.size());
+		return data->IsValid();
 	}
-	~FILE_output_buffered_streambuf()
+	const char *GetRawData() const {
+		return data->GetRawData() + dataOffset;
+	}
+	off_t GetLength() const {
+		return dataLength;
+	}
+	off_t Read(char *dst, off_t pos, off_t count) const
 	{
-		if(!mpt::IO::IsValid(f))
+		if(pos >= dataLength)
 		{
-			return;
+			return 0;
 		}
-		WriteOut();
+		return data->Read(dst, dataOffset + pos, std::min(count, dataLength - pos));
 	}
-private:
-	bool IsDirty() const
+	const char *GetPartialRawData(off_t pos, off_t length) const
 	{
-		return ((pptr() - pbase()) > 0);
+		if(pos + length > dataLength)
+		{
+			return nullptr;
+		}
+		return data->GetPartialRawData(dataOffset + pos, length);
 	}
-	bool WriteOut()
+	bool CanRead(off_t pos, off_t length) const {
+		return (pos + length <= dataLength);
+	}
+	off_t GetReadableLength(off_t pos, off_t length) const
 	{
-		std::ptrdiff_t n = pptr() - pbase();
-		std::ptrdiff_t left = n;
-		while(left > 0)
+		if(pos >= dataLength)
 		{
-			int backchunk = mpt::saturate_cast<int>(-left);
-			pbump(backchunk);
-			left += backchunk;
+			return 0;
 		}
-		return mpt::IO::WriteRaw(f, pbase(), n);
+		return std::min(length, dataLength - pos);
 	}
-protected:
-	virtual int_type overflow(int_type ch)
-	{
-		if(!mpt::IO::IsValid(f))
-		{
-			return traits_type::eof();
-		}
-		if(traits_type::eq_int_type(ch, traits_type::eof()))
-		{
-			return traits_type::eof();
-		}
-		if(!WriteOut())
-		{
-			return traits_type::eof();
-		}
-		char_type c = traits_type::to_char_type(ch);
-		*pptr() = c;
-		pbump(1);
-		return ch;
-	}
-	virtual int sync()
-	{
-		if(!mpt::IO::IsValid(f))
-		{
-			return -1;
-		}
-		if(!WriteOut())
-		{
-			return -1;
-		}
-		return Tparent::sync();
-	}
-	virtual pos_type seekpos(pos_type pos, std::ios_base::openmode which)
-	{
-		if(!mpt::IO::IsValid(f))
-		{
-			return pos_type(off_type(-1));
-		}
-		if(!WriteOut())
-		{
-			return pos_type(off_type(-1));
-		}
-		return Tparent::seekpos(pos, which);
-	}
-	virtual pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which)
-	{
-		if(!mpt::IO::IsValid(f))
-		{
-			return pos_type(off_type(-1));
-		}
-		if(!WriteOut())
-		{
-			return pos_type(off_type(-1));
-		}
-		return Tparent::seekoff(off, dir, which);
-	}
-}; // class FILE_output_buffered_streambuf
+};
 
 
-class FILE_ostream : public std::ostream {
+class FileDataContainerStdStream : public IFileDataContainer {
+
 private:
-	FILE *f;
-	FILE_output_buffered_streambuf buf;
+
+	mutable std::vector<char> cache;
+	mutable bool streamFullyCached;
+
+	std::istream *stream;
+
 public:
-	FILE_ostream(FILE *f, std::size_t bufSize = 64*1024)
-		: std::ostream(&buf)
-		, f(f)
-		, buf(f, bufSize)
-	{
-		if(mpt::IO::IsValid(f)) mpt::IO::Flush(f);
-	}
-	~FILE_ostream()
-	{
-		flush();
-		buf.pubsync();
-		if(mpt::IO::IsValid(f)) mpt::IO::Flush(f);
-	}
-}; // class FILE_ostream                                                                                        
+
+	FileDataContainerStdStream(std::istream *s);
+	virtual ~FileDataContainerStdStream();
+
+private:
+
+	static const std::size_t buffer_size = 65536;
+
+	void CacheStream() const;
+	void CacheStreamUpTo(std::streampos pos) const;
+
+private:
+
+	void ReadCached(char *dst, off_t pos, off_t count) const;
+
+public:
+
+	bool IsValid() const;
+	const char *GetRawData() const;
+	off_t GetLength() const;
+	off_t Read(char *dst, off_t pos, off_t count) const;
+	const char *GetPartialRawData(off_t pos, off_t length) const;
+	bool CanRead(off_t pos, off_t length) const;
+	off_t GetReadableLength(off_t pos, off_t length) const;
+
+};
+
+#endif 
 
 
-} // namespace mpt
+class FileDataContainerMemory
+#if defined(MPT_FILEREADER_STD_ISTREAM)
+	: public IFileDataContainer
+#endif
+{
+
+#if !defined(MPT_FILEREADER_STD_ISTREAM)
+public:
+	typedef std::size_t off_t;
+#endif
+
+private:
+
+	const char *streamData;	// Pointer to memory-mapped file
+	off_t streamLength;		// Size of memory-mapped file in bytes
+
+public:
+	FileDataContainerMemory() : streamData(nullptr), streamLength(0) { }
+	FileDataContainerMemory(const char *data, off_t length) : streamData(data), streamLength(length) { }
+#if defined(MPT_FILEREADER_STD_ISTREAM)
+	virtual
+#endif
+		~FileDataContainerMemory() { }
+
+public:
+
+	bool IsValid() const
+	{
+		return streamData != nullptr;
+	}
+
+	const char *GetRawData() const
+	{
+		return streamData;
+	}
+
+	off_t GetLength() const
+	{
+		return streamLength;
+	}
+
+	off_t Read(char *dst, off_t pos, off_t count) const
+	{
+		if(pos >= streamLength)
+		{
+			return 0;
+		}
+		off_t avail = std::min<off_t>(streamLength - pos, count);
+		std::copy(streamData + pos, streamData + pos + avail, dst);
+		return avail;
+	}
+
+	const char *GetPartialRawData(off_t pos, off_t length) const
+	{
+		if(pos + length > streamLength)
+		{
+			return nullptr;
+		}
+		return streamData + pos;
+	}
+
+	bool CanRead(off_t pos, off_t length) const
+	{
+		return pos + length <= streamLength;
+	}
+
+	off_t GetReadableLength(off_t pos, off_t length) const
+	{
+		if(pos >= streamLength)
+		{
+			return 0;
+		}
+		return std::min<off_t>(length, streamLength - pos);
+	}
+
+};
+
 
 
 OPENMPT_NAMESPACE_END

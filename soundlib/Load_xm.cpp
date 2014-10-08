@@ -15,6 +15,9 @@
 #include "../common/version.h"
 #include "../common/misc_util.h"
 #include "XMTools.h"
+#ifndef MODPLUG_NO_FILESAVE
+#include "../common/mptFstream.h"
+#endif
 #include <algorithm>
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/TrackerSettings.h"	// For super smooth ramping option

@@ -22,7 +22,8 @@
 #include "../mptrack/TrackerSettings.h"
 #if !defined(MPT_FILEREADER_STD_ISTREAM)
 #include "../mptrack/MemoryMappedFile.h"
-#else
+#endif
+#ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFstream.h"
 #endif
 #include "../mptrack/Moddoc.h"

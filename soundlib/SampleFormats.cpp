@@ -16,6 +16,9 @@
 #include "../mptrack/TrackerSettings.h"
 #endif //MODPLUG_TRACKER
 #include "../common/AudioCriticalSection.h"
+#ifndef MODPLUG_NO_FILESAVE
+#include "../common/mptFstream.h"
+#endif
 #include "Wav.h"
 #include "Tagging.h"
 #include "ITTools.h"

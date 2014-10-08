@@ -11,6 +11,9 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "WAVTools.h"
+#ifndef MODPLUG_NO_FILESAVE
+#include "../common/mptFstream.h"
+#endif
 
 
 OPENMPT_NAMESPACE_BEGIN

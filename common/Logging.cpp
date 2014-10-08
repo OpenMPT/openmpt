@@ -11,6 +11,7 @@
 #include "stdafx.h"
 
 #include "Logging.h"
+#include "mptFstream.h"
 
 #include <iostream>
 #include <cstring>
