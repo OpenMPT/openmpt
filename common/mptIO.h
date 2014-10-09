@@ -239,6 +239,33 @@ inline bool ReadAdaptiveInt64LE(Tfile & f, uint64 & v)
 	return result;
 }
 
+template <typename Tsize, typename Tfile>
+inline bool ReadSizedStringLE(Tfile & f, std::string & str, Tsize maxSize = std::numeric_limits<Tsize>::max())
+{
+	STATIC_ASSERT(std::numeric_limits<Tsize>::is_integer);
+	str.clear();
+	Tsize size = 0;
+	if(!mpt::IO::ReadIntLE(f, size))
+	{
+		return false;
+	}
+	if(size > maxSize)
+	{
+		return false;
+	}
+	for(Tsize i = 0; i != size; ++i)
+	{
+		char c = '\0';
+		if(!mpt::IO::ReadIntLE(f, c))
+		{
+			return false;
+		}
+		str.push_back(c);
+	}
+	return true;	
+}
+
+
 template <typename T, typename Tfile>
 inline bool WriteIntLE(Tfile & f, const T & v)
 {
@@ -331,6 +358,26 @@ inline bool WriteAdaptiveInt64LE(Tfile & f, const uint64 & v, std::size_t minSiz
 		ASSERT(false);
 		return false;
 	}
+}
+
+template <typename Tsize, typename Tfile>
+inline bool WriteSizedStringLE(Tfile & f, const std::string & str)
+{
+	STATIC_ASSERT(std::numeric_limits<Tsize>::is_integer);
+	if(str.size() > std::numeric_limits<Tsize>::max())
+	{
+		return false;
+	}
+	Tsize size = str.size();
+	if(!mpt::IO::WriteIntLE(f, size))
+	{
+		return false;
+	}
+	if(!mpt::IO::WriteRaw(f, str.data(), str.size()))
+	{
+		return false;
+	}
+	return true;
 }
 
 template <typename T, typename Tfile>
