@@ -11,6 +11,7 @@
 #include "stdafx.h"
 
 #include "tuning.h"
+#include "../common/mptIO.h"
 #include "../common/serialization_utils.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Reporting.h"
@@ -533,7 +534,7 @@ void ReadNoteMap(std::istream& iStrm, CTuning::NOTENAMEMAP& m, const size_t)
 		int16 key;
 		mpt::IO::ReadIntLE<int16>(iStrm, key);
 		std::string str;
-		srlztn::StringFromBinaryStream<uint8>(iStrm, str);
+		mpt::IO::ReadSizedStringLE<uint8>(iStrm, str);
 		m[key] = str;
 	}
 }
@@ -575,7 +576,7 @@ void WriteNoteMap(std::ostream& oStrm, const CTuning::NOTENAMEMAP& m)
 	for(; iter != end; iter++)
 	{
 		mpt::IO::WriteIntLE<int16>(oStrm, iter->first);
-		srlztn::StringToBinaryStream<uint8>(oStrm, iter->second);
+		mpt::IO::WriteSizedStringLE<uint8>(oStrm, iter->second);
 	}
 }
 

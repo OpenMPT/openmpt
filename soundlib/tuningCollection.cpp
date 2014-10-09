@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "tuningcollection.h"
+#include "../common/mptIO.h"
 #include "../common/serialization_utils.h"
 #include <algorithm>
 #include <bitset>
@@ -221,12 +222,12 @@ bool CTuningCollection::DeserializeOLD(std::istream& inStrm, bool& loadingSucces
 	//3. Name
 	if(version < 2)
 	{
-		if(srlztn::StringFromBinaryStream<uint32>(inStrm, m_Name, 256))
+		if(!mpt::IO::ReadSizedStringLE<uint32>(inStrm, m_Name, 256))
 			return false;
 	}
 	else
 	{
-        if(srlztn::StringFromBinaryStream<uint8>(inStrm, m_Name))
+		if(!mpt::IO::ReadSizedStringLE<uint8>(inStrm, m_Name))
 			return false;
 	}
 

@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "tuningbase.h"
+#include "../common/mptIO.h"
 #include "../common/serialization_utils.h"
 
 #include <istream>
@@ -440,7 +441,7 @@ bool CTuningBase::DeserializeOLD(std::istream& inStrm)
 	if(version != 4) return SERIALIZATION_FAILURE;
 
 	//Tuning name
-	if(srlztn::StringFromBinaryStream<uint8>(inStrm, m_TuningName))
+	if(!mpt::IO::ReadSizedStringLE<uint8>(inStrm, m_TuningName))
 		return SERIALIZATION_FAILURE;
 
 	//Const mask
@@ -461,7 +462,7 @@ bool CTuningBase::DeserializeOLD(std::istream& inStrm)
 		NOTEINDEXTYPE n;
 		std::string str;
 		inStrm.read(reinterpret_cast<char*>(&n), sizeof(n));
-		if(srlztn::StringFromBinaryStream<uint8>(inStrm, str))
+		if(!mpt::IO::ReadSizedStringLE<uint8>(inStrm, str))
 			return SERIALIZATION_FAILURE;
 		m_NoteNameMap[n] = str;
 	}

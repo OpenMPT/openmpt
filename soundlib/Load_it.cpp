@@ -105,9 +105,9 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 		for(TNTS_MAP_ITER iter = tNameToShort_Map.begin(); iter != tNameToShort_Map.end(); iter++)
 		{
 			if(iter->first)
-				srlztn::StringToBinaryStream<uint8>(oStrm, iter->first->GetName());
+				mpt::IO::WriteSizedStringLE<uint8>(oStrm, iter->first->GetName());
 			else //Case: Using original IT tuning.
-				srlztn::StringToBinaryStream<uint8>(oStrm, "->MPT_ORIGINAL_IT<-");
+				mpt::IO::WriteSizedStringLE<uint8>(oStrm, "->MPT_ORIGINAL_IT<-");
 
 			mpt::IO::WriteIntLE<uint16>(oStrm, iter->second);
 		}
@@ -144,7 +144,7 @@ static bool ReadTuningMapTemplate(std::istream& iStrm, std::map<uint16, std::str
 	{
 		std::string temp;
 		uint16 ui;
-		if(srlztn::StringFromBinaryStream<STRSIZETYPE>(iStrm, temp, 255))
+		if(!mpt::IO::ReadSizedStringLE<STRSIZETYPE>(iStrm, temp, 255))
 			return true;
 
 		iStrm.read(reinterpret_cast<char*>(&ui), sizeof(ui));

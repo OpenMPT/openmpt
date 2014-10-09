@@ -16,11 +16,14 @@
 
 #include <algorithm>
 #include <bitset>
-#include <istream>
+#include <ios>
+#include <iosfwd>
 #include <limits>
-#include <ostream>
 #include <string>
 #include <vector>
+
+#include <istream>
+#include <ostream>
 
 #ifdef HAS_TYPE_TRAITS
 #include <type_traits>
@@ -506,35 +509,6 @@ struct ArrayReader
 	size_t m_nCount;
 };
 
-template<class SIZETYPE>
-bool StringToBinaryStream(std::ostream& oStrm, const std::string& str)
-//--------------------------------------------------------------------
-{
-	if(!oStrm.good()) return true;
-	if((std::numeric_limits<SIZETYPE>::max)() < str.size()) return true;
-	SIZETYPE size = static_cast<SIZETYPE>(str.size());
-	Binarywrite(oStrm, size);
-	oStrm.write(str.c_str(), size);
-	if(oStrm.good()) return false;
-	else return true;
-}
-
-
-template<class SIZETYPE>
-bool StringFromBinaryStream(std::istream& iStrm, std::string& str, const SIZETYPE maxSize = (std::numeric_limits<SIZETYPE>::max)())
-//---------------------------------------------------------------------------------------------------------------------------------
-{
-	if(!iStrm.good()) return true;
-	SIZETYPE strSize;
-	Binaryread(iStrm, strSize);
-	if(strSize > maxSize)
-		return true;
-	str.resize(strSize);
-	for(SIZETYPE i = 0; i<strSize; i++)
-		iStrm.read(&str[i], 1);
-	if(iStrm.good()) return false;
-	else return true;
-}
 
 
 } //namespace srlztn.
