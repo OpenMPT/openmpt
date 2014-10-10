@@ -36,6 +36,13 @@ How to compile
 
         If you don't use `#define NO_VST`, you will need to put the VST 2.4 SDK
         in the `include/vstsdk2.4` folder.
+        
+        Note: The VST 2.4 SDK is no longer available on the Steinberg website.
+        However, the VST 3.x SDKs still contains all the relevant files.
+        Simply copy all files from `VST3 SDK/pluginterfaces/vst2.x` to
+        `include/vstsdk2.4/pluginterfaces/vst2.x` and the content of
+        `VST3 SDK/public.sdk/source/vst2.x` to
+        `include/vstsdk2.4/public.sdk/source/vst2.x`. 
 
         Please visit
         [steinberg.net](http://www.steinberg.net/en/company/developer.html) to
