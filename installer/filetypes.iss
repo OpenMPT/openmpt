@@ -29,6 +29,7 @@ Name: "associate_exotic\dsm"; Description: "DSIK (DSM)";
 Name: "associate_exotic\far"; Description: "Farandole Composer (FAR)";
 Name: "associate_exotic\gdm"; Description: "General Digital Music (GDM)";
 Name: "associate_exotic\imf"; Description: "Imago Orpheus (IMF)";
+Name: "associate_exotic\ice"; Description: "Ice Tracker (ICE)";
 Name: "associate_exotic\j2b"; Description: "Jazz Jackrabbit 2 Music (J2B)";
 Name: "associate_exotic\m15"; Description: "Ultimate Soundtracker (M15)";
 Name: "associate_exotic\mdl"; Description: "DigiTrakker (MDL)";
@@ -70,6 +71,7 @@ Root: HKCR; Subkey: ".dsm"; ValueType: string; ValueName: ""; ValueData: "OpenMP
 Root: HKCR; Subkey: ".far"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\far
 Root: HKCR; Subkey: ".gdm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\gdm
 Root: HKCR; Subkey: ".imf"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\imf
+Root: HKCR; Subkey: ".ice"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\ice
 Root: HKCR; Subkey: ".j2b"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\j2b
 Root: HKCR; Subkey: ".m15"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\m15
 Root: HKCR; Subkey: ".mdl"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\mdl

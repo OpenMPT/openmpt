@@ -41,7 +41,7 @@ struct ModFormatInfo
 	const char *extension;	// "mod"
 };
 
-// remember to also update libopenmpt/libopenmpt_foobar2000.cpp (all other plugins read these dynamically)
+// remember to also update libopenmpt/foo_openmpt.cpp (all other plugins read these dynamically)
 static const ModFormatInfo modFormatInfo[] =
 {
 	{ MOD_TYPE_MOD,		"ProTracker",				"mod" },
@@ -56,6 +56,8 @@ static const ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_MOD,		"NoiseTracker",				"nst" },
 	{ MOD_TYPE_MOD,		"Soundtracker",				"m15" },
 	{ MOD_TYPE_MOD,		"Soundtracker",				"stk" },
+	{ MOD_TYPE_MOD,		"SoundTracker 2.6",			"st26" },
+	{ MOD_TYPE_MOD,		"Ice Tracker",				"ice" },
 	{ MOD_TYPE_MOD,		"Mod's Grave",				"wow" },
 	{ MOD_TYPE_ULT,		"UltraTracker",				"ult" },
 	{ MOD_TYPE_669,		"Composer 669 / UNIS 669",	"669" },
