@@ -651,7 +651,8 @@ CTrackApp::CTrackApp()
 	#endif
 
 	m_GuiThreadId = GetCurrentThreadId();
-
+	mpt::log::Trace::SetThreadId(mpt::log::Trace::ThreadKindGUI, m_GuiThreadId);
+	
 	ExceptionHandler::Register();
 
 	m_bPortableMode = false;
@@ -900,6 +901,13 @@ BOOL CTrackApp::InitInstance()
 	m_pSettings = new SettingsContainer(m_pSettingsIniFile);
 
 	m_pTrackerSettings = new TrackerSettings(*m_pSettings);
+
+	// enable debug features (as early as possible after reading the settings)
+	if(TrackerSettings::Instance().DebugTraceEnable)
+	{
+		mpt::log::Trace::Enable(TrackerSettings::Instance().DebugTraceSize);
+	}
+	MPT_TRACE();
 
 	m_pPluginCache = new IniFileSettingsContainer(m_szPluginCacheFileName);
 
