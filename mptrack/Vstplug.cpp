@@ -959,21 +959,17 @@ bool CVstPlugin::GetParams(float *param, VstInt32 min, VstInt32 max)
 }
 
 
-bool CVstPlugin::RandomizeParams(PlugParamIndex minParam, PlugParamIndex maxParam)
-//--------------------------------------------------------------------------------
+void CVstPlugin::RandomizeParams(int amount)
+//------------------------------------------
 {
-	if (minParam == 0 && maxParam == 0)
+	PlugParamValue factor = PlugParamValue(amount) / 100.0f;
+	for(PlugParamIndex p = 0; p < m_Effect.numParams; p++)
 	{
-		maxParam = m_Effect.numParams;
+		PlugParamValue val = GetParameter(p);
+		val += (2.0f * PlugParamValue(rand()) / PlugParamValue(RAND_MAX) - 1.0f) * factor;
+		Limit(val, 0.0f, 1.0f);
+		SetParameter(p, val);
 	}
-	LimitMax(maxParam, PlugParamIndex(m_Effect.numParams));
-
-	for(PlugParamIndex p = minParam; p < maxParam; p++)
-	{
-		SetParameter(p, (float(rand()) / float(RAND_MAX)));
-	}
-
-	return true;
 }
 
 

@@ -21,6 +21,7 @@
 #include "VstPresets.h"
 #include "../soundlib/FileReader.h"
 #include "InputHandler.h"
+#include "dlg_misc.h"
 
 #include <sstream>
 
@@ -226,12 +227,15 @@ void CAbstractVstEditor::OnPasteParameters()
 }
 
 
-VOID CAbstractVstEditor::OnRandomizePreset()
+void CAbstractVstEditor::OnRandomizePreset()
 //-----------------------------------------
 {
-	if(Reporting::Confirm("Are you sure you want to randomize parameters?\nYou will lose current parameter values.", false, false, this) == cnfYes)
+	static int randomFactor = 10;
+	CInputDlg dlg(this, _T("Input parameter randomization amount (0 = no change, 100 = completely random)"), 0, 100, randomFactor);
+	if(dlg.DoModal() == IDOK)
 	{
-		m_VstPlugin.RandomizeParams();
+		randomFactor = dlg.resultNumber;
+		m_VstPlugin.RandomizeParams(randomFactor);
 		UpdateParamDisplays();
 	}
 }
@@ -494,10 +498,8 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 			// Can't process notes
 			return false;
 		}
-	} else
-	{
-		return true;
 	}
+	return true;
 
 }
 
