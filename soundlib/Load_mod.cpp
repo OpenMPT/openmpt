@@ -389,7 +389,7 @@ static void ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSampl
 	// Get rid of weird characters in sample names.
 	for(size_t i = 0; i < CountOf(sampleName); i++)
 	{
-		if(sampleName[i] && sampleName[i] < ' ')
+		if(sampleName[i] > 0 && sampleName[i] < ' ')
 		{
 			sampleName[i] = ' ';
 		}

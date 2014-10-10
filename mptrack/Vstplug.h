@@ -213,7 +213,7 @@ public:
 	// Check if programs should be stored as chunks or parameters
 	bool ProgramsAreChunks() const { return (m_Effect.flags & effFlagsProgramChunks) != 0; }
 	bool GetParams(float* param, VstInt32 min, VstInt32 max);
-	bool RandomizeParams(PlugParamIndex minParam = 0, PlugParamIndex maxParam = 0);
+	void RandomizeParams(int amount);
 	// If true, the plugin produces an output even if silence is being fed into it.
 	bool ShouldProcessSilence() { return m_Effect.numInputs == 0 || ((m_Effect.flags & effFlagsNoSoundInStop) == 0 && Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f) != 1); }
 	void ResetSilence() { m_MixState.ResetSilence(); }
