@@ -817,6 +817,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		 && !ReadJ2B(file, loadFlags)
 		 && !ReadMO3(file, loadFlags)
 		 && !ReadMod(file, loadFlags)
+		 && !ReadICE(file, loadFlags)
 		 && !ReadM15(file, loadFlags))
 		{
 			m_nType = MOD_TYPE_NONE;
@@ -2394,11 +2395,7 @@ void CSoundFile::UpgradeSong()
 	// Starting from OpenMPT 1.23.01.04, FT2-style panning has its own mix mode instead.
 	if(GetType() == MOD_TYPE_XM)
 	{
-		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 07, 19)
-			&& GetMixLevels() == mixLevels_compatible_FT2)
-		{
-			SetMixLevels(mixLevels_compatible);
-		} else if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 22, 07, 19)
+		if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 22, 07, 19)
 			&& m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 23, 01, 04)
 			&& GetMixLevels() == mixLevels_compatible)
 		{
