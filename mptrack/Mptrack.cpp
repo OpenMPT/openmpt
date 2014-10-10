@@ -1191,7 +1191,7 @@ void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files)
 	static int nFilterIndex = 0;
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
-		.ExtensionFilter("All Modules|" + exts +
+		.ExtensionFilter("All Modules|" + exts + ";mod.*"
 		"|"
 		"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz"
 #ifndef NO_MO3
@@ -1202,7 +1202,7 @@ void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files)
 		";*.mo3"
 #endif
 		"|"
-		"ProTracker Modules (*.mod,*.nst)|*.mod;mod.*;*.mdz;*.nst;*.m15|"
+		"ProTracker Modules (*.mod,*.nst)|*.mod;mod.*;*.mdz;*.nst;*.m15;*.stk|"
 		"ScreamTracker Modules (*.s3m,*.stm)|*.s3m;*.stm;*.s3z|"
 		"FastTracker Modules (*.xm)|*.xm;*.xmz|"
 		"Impulse Tracker Modules (*.it)|*.it;*.itz|"
@@ -1211,7 +1211,7 @@ void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files)
 		"Impulse Tracker Projects (*.itp)|*.itp;*.itpz|"
 		// -! NEW_FEATURE#0023
 		"OpenMPT Modules (*.mptm)|*.mptm;*.mptmz|"
-		"Other Modules (mtm,okt,mdl,669,far,...)|*.mtm;*.669;*.ult;*.wow;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.med;*.ams;*.dbm;*.digi;*.dsm;*.umx;*.amf;*.psm;*.mt2;*.gdm;*.imf;*.j2b|"
+		"Other Modules (mtm,okt,mdl,669,far,...)|*.mtm;*.669;*.ult;*.wow;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.med;*.ams;*.dbm;*.digi;*.dsm;*.umx;*.amf;*.psm;*.mt2;*.gdm;*.imf;*.j2b;*.ice;*.st26|"
 		"Wave Files (*.wav)|*.wav|"
 		"MIDI Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
 		"All Files (*.*)|*.*||")
