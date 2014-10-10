@@ -12,6 +12,10 @@
 
 #include "Logging.h"
 #include "mptFstream.h"
+#if defined(MODPLUG_TRACKER)
+#include "mptAtomic.h"
+#endif
+#include "version.h"
 
 #include <iostream>
 #include <cstring>
@@ -29,52 +33,28 @@ namespace log
 {
 
 
-#ifndef NO_LOGGING
-
-
 static const std::size_t LOGBUF_SIZE = 1024;
-
-
-Context::Context(const char *file, int line, const char *function)
-//----------------------------------------------------------------
-	: file(file)
-	, line(line)
-	, function(function)
-{
-	return;
-}
-
-
-Context::Context(const Context &c)
-//--------------------------------
-	: file(c.file)
-	, line(c.line)
-	, function(c.function)
-{
-	return;
-}
 
 
 #if defined(MODPLUG_TRACKER)
 
-
-static uint64 GetTimeMS()
-//-----------------------
+static uint64 GetTime100ns()
+//--------------------------
 {
 	FILETIME filetime;
 	GetSystemTimeAsFileTime(&filetime);
-	return ((uint64)filetime.dwHighDateTime << 32 | filetime.dwLowDateTime) / 10000;
+	return ((uint64)filetime.dwHighDateTime << 32 | filetime.dwLowDateTime);
 }
 
 
-static std::string TimeAsAsString(uint64 ms)
-//------------------------------------------
+static std::string TimeAsString(uint64 time100ns)
+//-------------------------------------------------
 {
 
 	FILETIME filetime;
 	SYSTEMTIME systime;
-	filetime.dwHighDateTime = (DWORD)(((uint64)ms * 10000) >> 32);
-	filetime.dwLowDateTime = (DWORD)((uint64)ms * 10000);
+	filetime.dwHighDateTime = (DWORD)(((uint64)time100ns) >> 32);
+	filetime.dwLowDateTime = (DWORD)((uint64)time100ns);
 	FileTimeToSystemTime(&filetime, &systime);
 
 	std::string result;
@@ -91,6 +71,14 @@ static std::string TimeAsAsString(uint64 ms)
 
 	return result;
 }
+
+#endif // MODPLUG_TRACKER
+
+
+#ifndef NO_LOGGING
+
+
+#if defined(MODPLUG_TRACKER)
 
 
 static std::string TimeDiffAsString(uint64 ms)
@@ -117,9 +105,9 @@ static noinline void DoLog(const mpt::log::Context &context, mpt::ustring messag
 	message = mpt::String::RTrim(message, MPT_USTRING("\r\n"));
 	#if defined(MODPLUG_TRACKER)
 		static uint64_t s_lastlogtime = 0;
-		uint64 cur = GetTimeMS();
-		uint64 diff = cur - s_lastlogtime;
-		s_lastlogtime = cur;
+		uint64 cur = GetTime100ns();
+		uint64 diff = cur/10000 - s_lastlogtime;
+		s_lastlogtime = cur/10000;
 		#ifdef LOG_TO_FILE
 		{
 			static FILE * s_logfile = nullptr;
@@ -129,7 +117,7 @@ static noinline void DoLog(const mpt::log::Context &context, mpt::ustring messag
 			}
 			if(s_logfile)
 			{
-				fprintf(s_logfile, "%s+%s %s(%i): %s [%s]\n", TimeAsAsString(cur).c_str(), TimeDiffAsString(diff).c_str(), context.file, context.line, mpt::ToCharset(mpt::CharsetUTF8, message).c_str(), context.function);
+				fprintf(s_logfile, "%s+%s %s(%i): %s [%s]\n", TimeAsString(cur).c_str(), TimeDiffAsString(diff).c_str(), context.file, context.line, mpt::ToCharset(mpt::CharsetUTF8, message).c_str(), context.function);
 				fflush(s_logfile);
 			}
 		}
@@ -210,6 +198,211 @@ void Logger::operator () (const std::wstring &text)
 
 
 #endif // !NO_LOGGING
+
+
+
+#if defined(MODPLUG_TRACKER)
+
+namespace Trace {
+
+// Debugging functionality will use simple globals.
+
+bool volatile g_Enabled = false;
+
+static bool g_Sealed = false;
+
+struct Entry {
+	uint32       Index;
+	uint32       ThreadId;
+	uint64       Timestamp;
+	const char * Function;
+	const char * File;
+	int          Line;
+};
+
+inline bool operator < (const Entry &a, const Entry &b)
+{
+/*
+	return false
+		|| (a.Timestamp < b.Timestamp)
+		|| (a.ThreadID < b.ThreadID)
+		|| (a.File < b.File)
+		|| (a.Line < b.Line)
+		|| (a.Function < b.Function)
+		;
+*/
+	return false
+		|| (a.Index < b.Index)
+		;
+}
+
+static std::vector<mpt::log::Trace::Entry> Entries;
+
+static mpt::atomic_uint32_t NextIndex = 0;
+
+static uint32 ThreadIdGUI = 0;
+static uint32 ThreadIdAudio = 0;
+static uint32 ThreadIdNotify = 0;
+
+void Enable(std::size_t numEntries)
+{
+	if(g_Sealed)
+	{
+		return;
+	}
+	Entries.clear();
+	Entries.resize(numEntries);
+	NextIndex.store(0);
+	g_Enabled = true;
+}
+
+void Disable()
+{
+	if(g_Sealed)
+	{
+		return;
+	}
+	g_Enabled = false;
+}
+
+noinline void Trace(const mpt::log::Context & context)
+{
+	// This will get called in realtime contexts and hot paths.
+	// No blocking allowed here.
+	const uint32 index = NextIndex.fetch_add(1);
+#if 1
+	LARGE_INTEGER time;
+	time.QuadPart = 0;
+	QueryPerformanceCounter(&time);
+	const uint64 timestamp = time.QuadPart;
+#else
+	FILETIME time = FILETIME();
+	GetSystemTimeAsFileTime(&time);
+	const uint64 timestamp = (static_cast<uint64>(time.dwHighDateTime) << 32) | (static_cast<uint64>(time.dwLowDateTime) << 0);
+#endif
+	const uint32 threadid = static_cast<uint32>(GetCurrentThreadId());
+	mpt::log::Trace::Entry & entry = Entries[index % Entries.size()];
+	entry.Index = index;
+	entry.ThreadId = threadid;
+	entry.Timestamp = timestamp;
+	entry.Function = context.function;
+	entry.File = context.file;
+	entry.Line = context.line;
+}
+
+void Seal()
+{
+	if(!g_Enabled)
+	{
+		return;
+	}
+	g_Enabled = false;
+	g_Sealed = true;
+	uint32 count = NextIndex.fetch_add(0);
+	if(count < Entries.size())
+	{
+		Entries.resize(count);
+	}
+}
+
+bool Dump(const mpt::PathString &filename)
+{
+	if(!g_Sealed)
+	{
+		return false;
+	}
+
+	LARGE_INTEGER qpcNow;
+	qpcNow.QuadPart = 0;
+	QueryPerformanceCounter(&qpcNow);
+	uint64 ftNow = GetTime100ns();
+
+	// sort according to index in case of overflows
+	std::stable_sort(Entries.begin(), Entries.end());
+
+	WCHAR tmp[1024];
+	GetCurrentDirectoryW(1023, tmp);
+
+	mpt::ofstream f(filename, std::ios::out);
+
+	f << "Build: OpenMPT " << MptVersion::GetVersionStringExtended() << std::endl;
+
+	bool qpcValid = false;
+
+	LARGE_INTEGER qpcFreq;
+	qpcFreq.QuadPart = 0;
+	QueryPerformanceFrequency(&qpcFreq);
+	if(qpcFreq.QuadPart > 0)
+	{
+		qpcValid = true;
+	}
+
+	f << "Dump: " << TimeAsString(ftNow) << std::endl;
+	f << "Captured events: " << Entries.size() << std::endl;
+	if(qpcValid && (Entries.size() > 0))
+	{
+		double period = static_cast<double>(Entries[Entries.size() - 1].Timestamp - Entries[0].Timestamp) / static_cast<double>(qpcFreq.QuadPart);
+		double eventsPerSecond = Entries.size() / period;
+		f << "Period [s]: " << mpt::fmt::fix(period) << std::endl;
+		f << "Events/second: " << mpt::fmt::fix(eventsPerSecond) << std::endl;
+	}
+
+	for(std::size_t i = 0; i < Entries.size(); ++i)
+	{
+		mpt::log::Trace::Entry & entry = Entries[i];
+		if(!entry.Function) entry.Function = "";
+		if(!entry.File) entry.File = "";
+		std::string time;
+		if(qpcValid)
+		{
+			time = TimeAsString( ftNow - static_cast<int64>( static_cast<double>(qpcNow.QuadPart - entry.Timestamp) * (10000000.0 / static_cast<double>(qpcFreq.QuadPart) ) ) );
+		} else
+		{
+			time = mpt::String::Print<std::string>("0x%1", mpt::fmt::hex0<16>(entry.Timestamp));
+		}
+		f << time;
+		if(entry.ThreadId == ThreadIdGUI)
+		{
+			f << " -----GUI ";
+		} else if(entry.ThreadId == ThreadIdAudio)
+		{
+			f << " ---Audio ";
+		} else if(entry.ThreadId == ThreadIdNotify)
+		{
+			f << " --Notify ";
+		} else
+		{
+			f << " " << mpt::fmt::hex0<8>(entry.ThreadId) << " ";
+		}
+		f << entry.File << "(" << entry.Line << "): " << entry.Function;
+		f << std::endl;
+	}
+	return true;
+}
+
+void SetThreadId(mpt::log::Trace::ThreadKind kind, uint32 id)
+{
+	if(id == 0)
+	{
+		return;
+	}
+	switch(kind)
+	{
+		case ThreadKindGUI:
+			ThreadIdGUI = id;
+			break;
+		case ThreadKindAudio:
+			ThreadIdAudio = id;
+			break;
+		case ThreadKindNotify:
+			ThreadIdNotify = id;
+			break;
+	}
+}
+
+} // namespace Trace
+
+#endif // MODPLUG_TRACKER
 
 
 } // namespace log

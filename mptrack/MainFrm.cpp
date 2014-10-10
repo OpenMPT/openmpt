@@ -674,6 +674,7 @@ void CMainFrame::FillAudioBufferLocked(SoundDevice::IFillAudioBuffer &callback)
 	CriticalSection cs;
 	ALWAYS_ASSERT(m_pSndFile != nullptr);
 	m_AudioThreadId = GetCurrentThreadId();
+	mpt::log::Trace::SetThreadId(mpt::log::Trace::ThreadKindAudio, m_AudioThreadId);
 	callback.FillAudioBuffer();
 	m_AudioThreadId = 0;
 }

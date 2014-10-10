@@ -33,6 +33,10 @@ enum DumpMode
 static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionInfo=NULL, DumpMode mode=DumpModeCrash)
 //--------------------------------------------------------------------------------------------------------------------
 {
+
+	// seal the trace log as early as possible
+	mpt::log::Trace::Seal();
+
 	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
 
 	const mpt::PathString timestampDir = mpt::PathString::FromCStringSilent((CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\"));
@@ -52,9 +56,27 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 		}
 	}
 
+	bool hasWrittenDebug = false;
+
 	// Create minidump...
-	const mpt::PathString filename = baseRescuePath + MPT_PATHSTRING("crash.dmp");
-	if(WriteMemoryDump(pExceptionInfo, filename.AsNative().c_str(), ExceptionHandler::fullMemDump))
+	{
+		const mpt::PathString filename = baseRescuePath + MPT_PATHSTRING("crash.dmp");
+		if(WriteMemoryDump(pExceptionInfo, filename.AsNative().c_str(), ExceptionHandler::fullMemDump))
+		{
+			hasWrittenDebug = true;
+		}
+	}
+
+	// Create trace log...
+	{
+		const mpt::PathString filename = baseRescuePath + MPT_PATHSTRING("trace.log");
+		if(mpt::log::Trace::Dump(filename))
+		{
+			hasWrittenDebug = true;
+		}
+	}
+
+	if(hasWrittenDebug)
 	{
 		errorMessage += "\n\nDebug information has been saved to\n"
 			+ mpt::ToCString(baseRescuePath.ToWide());
@@ -116,6 +138,10 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo)
 //----------------------------------------------------------------------------------
 {
+
+	// seal the trace log as early as possible
+	mpt::log::Trace::Seal();
+
 	// Shut down audio device...
 	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
 	if(pMainFrame)
@@ -151,8 +177,12 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 noinline void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
 //--------------------------------------------------------------------------------------------------------------
 {
+	// seal the trace log as early as possible
+	mpt::log::Trace::Seal();
+
 	if(IsDebuggerPresent())
 	{
+		mpt::log::Trace::Dump(MPT_PATHSTRING("mptrack.trace.log"));
 		OutputDebugString("ASSERT(");
 		OutputDebugString(expr);
 		OutputDebugString(") failed\n");
