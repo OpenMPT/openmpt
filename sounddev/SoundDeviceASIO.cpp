@@ -111,6 +111,7 @@ CASIODevice *CASIODevice::g_CallbacksInstance = nullptr;
 std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices()
 //----------------------------------------------------------
 {
+	MPT_TRACE();
 	std::vector<SoundDevice::Info> devices;
 
 	LONG cr;
@@ -184,6 +185,7 @@ CASIODevice::CASIODevice(SoundDevice::Info info)
 //----------------------------------------------
 	: SoundDevice::Base(info)
 {
+	MPT_TRACE();
 	InitMembers();
 	m_QueriedFeatures.reset();
 	m_UsedFeatures.reset();
@@ -193,6 +195,7 @@ CASIODevice::CASIODevice(SoundDevice::Info info)
 void CASIODevice::InitMembers()
 //-----------------------------
 {
+	MPT_TRACE();
 	m_pAsioDrv = nullptr;
 
 	m_nAsioBufferLen = 0;
@@ -219,6 +222,7 @@ void CASIODevice::InitMembers()
 bool CASIODevice::HandleRequests()
 //--------------------------------
 {
+	MPT_TRACE();
 	bool result = false;
 	LONG flags = InterlockedExchange(&m_AsioRequestFlags, 0);
 	if(flags & AsioRequestFlagLatenciesChanged)
@@ -233,6 +237,7 @@ bool CASIODevice::HandleRequests()
 CASIODevice::~CASIODevice()
 //-------------------------
 {
+	MPT_TRACE();
 	Close();
 }
 
@@ -240,6 +245,7 @@ CASIODevice::~CASIODevice()
 bool CASIODevice::InternalOpen()
 //------------------------------
 {
+	MPT_TRACE();
 
 	ASSERT(!IsDriverOpen());
 
@@ -468,6 +474,7 @@ bool CASIODevice::InternalOpen()
 void CASIODevice::UpdateLatency()
 //-------------------------------
 {
+	MPT_TRACE();
 	SoundDevice::BufferAttributes bufferAttributes;
 	long inputLatency = 0;
 	long outputLatency = 0;
@@ -497,6 +504,7 @@ void CASIODevice::UpdateLatency()
 void CASIODevice::SetRenderSilence(bool silence, bool wait)
 //---------------------------------------------------------
 {
+	MPT_TRACE();
 	InterlockedExchange(&m_RenderSilence, silence?1:0);
 	if(!wait)
 	{
@@ -536,6 +544,7 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 bool CASIODevice::InternalStart()
 //-------------------------------
 {
+	MPT_TRACE();
 	ALWAYS_ASSERT_WARN_MESSAGE(!CriticalSection::IsLocked(), "AudioCriticalSection locked while starting ASIO");
 
 	if(m_Settings.KeepDeviceRunning)
@@ -565,18 +574,21 @@ bool CASIODevice::InternalStart()
 void CASIODevice::InternalStopForce()
 //-----------------------------------
 {
+	MPT_TRACE();
 	InternalStopImpl(true);
 }
 
 void CASIODevice::InternalStop()
 //------------------------------
 {
+	MPT_TRACE();
 	InternalStopImpl(false);
 }
 
 void CASIODevice::InternalStopImpl(bool force)
 //--------------------------------------------
 {
+	MPT_TRACE();
 	ALWAYS_ASSERT_WARN_MESSAGE(!CriticalSection::IsLocked(), "AudioCriticalSection locked while stopping ASIO");
 
 	if(m_Settings.KeepDeviceRunning && !force)
@@ -602,6 +614,7 @@ void CASIODevice::InternalStopImpl(bool force)
 bool CASIODevice::InternalClose()
 //-------------------------------
 {
+	MPT_TRACE();
 	if(m_DeviceRunning)
 	{
 		m_DeviceRunning = false;
@@ -651,6 +664,7 @@ bool CASIODevice::InternalClose()
 void CASIODevice::OpenDriver()
 //----------------------------
 {
+	MPT_TRACE();
 	if(IsDriverOpen())
 	{
 		return;
@@ -690,6 +704,7 @@ void CASIODevice::OpenDriver()
 void CASIODevice::CloseDriver()
 //-----------------------------
 {
+	MPT_TRACE();
 	if(!IsDriverOpen())
 	{
 		return;
@@ -834,6 +849,7 @@ bool CASIODevice::IsSampleTypeBigEndian(ASIOSampleType sampleType)
 void CASIODevice::InternalFillAudioBuffer()
 //-----------------------------------------
 {
+	MPT_TRACE();
 	const bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
 	const int channels = m_Settings.Channels;
 	const std::size_t countChunk = m_nAsioBufferLen;
@@ -994,6 +1010,7 @@ void CASIODevice::InternalFillAudioBuffer()
 bool CASIODevice::InternalHasTimeInfo() const
 //-------------------------------------------
 {
+	MPT_TRACE();
 	return m_Settings.UseHardwareTiming;
 }
 
@@ -1001,6 +1018,7 @@ bool CASIODevice::InternalHasTimeInfo() const
 bool CASIODevice::InternalHasGetStreamPosition() const
 //----------------------------------------------------
 {
+	MPT_TRACE();
 	return m_Settings.UseHardwareTiming;
 }
 
@@ -1008,6 +1026,7 @@ bool CASIODevice::InternalHasGetStreamPosition() const
 int64 CASIODevice::InternalGetStreamPositionFrames() const
 //--------------------------------------------------------
 {
+	MPT_TRACE();
 	if(m_Settings.UseHardwareTiming)
 	{
 		const uint64 asioNow = Clock().NowNanoseconds();
@@ -1028,6 +1047,7 @@ int64 CASIODevice::InternalGetStreamPositionFrames() const
 void CASIODevice::UpdateTimeInfo(AsioTimeInfo asioTimeInfo)
 //---------------------------------------------------------
 {
+	MPT_TRACE();
 	if(m_Settings.UseHardwareTiming)
 	{
 		if((asioTimeInfo.flags & kSamplePositionValid) && (asioTimeInfo.flags & kSystemTimeValid))
@@ -1061,6 +1081,7 @@ void CASIODevice::UpdateTimeInfo(AsioTimeInfo asioTimeInfo)
 void CASIODevice::BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 //----------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	BufferSwitchTimeInfo(nullptr, doubleBufferIndex, directProcess); // delegate
 }
 
@@ -1068,6 +1089,7 @@ void CASIODevice::BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess)
 //-----------------------------------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	ASSERT(directProcess); // !directProcess is not handled correctly in OpenMPT, would require a separate thread and potentially additional buffering
 	if(!directProcess)
 	{
@@ -1135,6 +1157,7 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 void CASIODevice::SampleRateDidChange(ASIOSampleRate sRate)
 //---------------------------------------------------------
 {
+	MPT_TRACE();
 	if(Util::Round<uint32>(sRate) == m_Settings.Samplerate)
 	{
 		// not different, ignore it
@@ -1170,6 +1193,7 @@ static std::string AsioFeaturesToString(FlagSet<AsioFeatures> features)
 std::string CASIODevice::GetStatistics() const
 //--------------------------------------------
 {
+	MPT_TRACE();
 	const FlagSet<AsioFeatures> unsupported((AsioFeatures)(AsioFeatureNoDirectProcess | AsioFeatureOverload | AsioFeatureBufferSizeChange | AsioFeatureSampleRateChange));
 	FlagSet<AsioFeatures> unsupportedFeatues = m_UsedFeatures;
 	unsupportedFeatues &= unsupported;
@@ -1190,6 +1214,7 @@ std::string CASIODevice::GetStatistics() const
 long CASIODevice::AsioMessage(long selector, long value, void* message, double* opt)
 //----------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	long result = 0;
 	switch(selector)
 	{
@@ -1280,6 +1305,7 @@ long CASIODevice::AsioMessage(long selector, long value, void* message, double* 
 long CASIODevice::CallbackAsioMessage(long selector, long value, void* message, double* opt)
 //------------------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	ALWAYS_ASSERT(g_CallbacksInstance);
 	if(!g_CallbacksInstance) return 0;
 	return g_CallbacksInstance->AsioMessage(selector, value, message, opt);
@@ -1289,6 +1315,7 @@ long CASIODevice::CallbackAsioMessage(long selector, long value, void* message, 
 void CASIODevice::CallbackSampleRateDidChange(ASIOSampleRate sRate)
 //-----------------------------------------------------------------
 {
+	MPT_TRACE();
 	ALWAYS_ASSERT(g_CallbacksInstance);
 	if(!g_CallbacksInstance) return;
 	g_CallbacksInstance->SampleRateDidChange(sRate);
@@ -1298,6 +1325,7 @@ void CASIODevice::CallbackSampleRateDidChange(ASIOSampleRate sRate)
 void CASIODevice::CallbackBufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 //------------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	ALWAYS_ASSERT(g_CallbacksInstance);
 	if(!g_CallbacksInstance) return;
 	g_CallbacksInstance->BufferSwitch(doubleBufferIndex, directProcess);
@@ -1307,6 +1335,7 @@ void CASIODevice::CallbackBufferSwitch(long doubleBufferIndex, ASIOBool directPr
 ASIOTime* CASIODevice::CallbackBufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess)
 //-------------------------------------------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	ALWAYS_ASSERT(g_CallbacksInstance);
 	if(!g_CallbacksInstance) return params;
 	return g_CallbacksInstance->BufferSwitchTimeInfo(params, doubleBufferIndex, directProcess);
@@ -1316,6 +1345,7 @@ ASIOTime* CASIODevice::CallbackBufferSwitchTimeInfo(ASIOTime* params, long doubl
 void CASIODevice::ReportASIOException(const std::string &str)
 //-----------------------------------------------------------
 {
+	MPT_TRACE();
 	AudioSendMessage(str);
 	Log("%s", str.c_str());
 }
@@ -1324,6 +1354,7 @@ void CASIODevice::ReportASIOException(const std::string &str)
 SoundDevice::Caps CASIODevice::InternalGetDeviceCaps()
 //--------------------------------------------------
 {
+	MPT_TRACE();
 	SoundDevice::Caps caps;
 
 	caps.Available = true;
@@ -1350,6 +1381,7 @@ SoundDevice::Caps CASIODevice::InternalGetDeviceCaps()
 SoundDevice::DynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
 //--------------------------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	SoundDevice::DynamicCaps caps;
 
 	TemporaryASIODriverOpener opener(*this);
@@ -1425,6 +1457,7 @@ SoundDevice::DynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uin
 bool CASIODevice::OpenDriverSettings()
 //------------------------------------
 {
+	MPT_TRACE();
 	TemporaryASIODriverOpener opener(*this);
 	if(!IsDriverOpen())
 	{

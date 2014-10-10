@@ -458,6 +458,7 @@ BOOL CMainFrame::DestroyWindow()
 void CMainFrame::OnClose()
 //------------------------
 {
+	MPT_TRACE();
 	if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOCLOSEDIALOG))
 	{
 		// Show modified documents window
@@ -618,6 +619,7 @@ void CMainFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 void CMainFrame::OnTimerNotify()
 //------------------------------
 {
+	MPT_TRACE();
 	ASSERT(InGuiThread());
 	ASSERT(!InNotifyHandler());
 	m_InNotifyHandler = true;
@@ -664,6 +666,7 @@ void CMainFrame::OnTimerNotify()
 void CMainFrame::AudioMessage(const std::string &str)
 //---------------------------------------------------
 {
+	MPT_TRACE();
 	Reporting::Notification(str.c_str());
 }
 
@@ -671,6 +674,7 @@ void CMainFrame::AudioMessage(const std::string &str)
 void CMainFrame::FillAudioBufferLocked(SoundDevice::IFillAudioBuffer &callback)
 //-----------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	CriticalSection cs;
 	ALWAYS_ASSERT(m_pSndFile != nullptr);
 	m_AudioThreadId = GetCurrentThreadId();
@@ -755,6 +759,7 @@ public:
 void CMainFrame::AudioRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer)
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
 	TimingInfo timingInfo;
@@ -787,6 +792,7 @@ void CMainFrame::AudioRead(const SoundDevice::Settings &settings, const SoundDev
 void CMainFrame::AudioDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, int64 streamPosition)
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	MPT_UNREFERENCED_PARAMETER(settings);
 	MPT_UNREFERENCED_PARAMETER(flags);
 	MPT_UNREFERENCED_PARAMETER(bufferAttributes);
@@ -801,6 +807,7 @@ void CMainFrame::AudioDone(const SoundDevice::Settings &settings, const SoundDev
 bool CMainFrame::IsAudioDeviceOpen() const
 //----------------------------------------
 {
+	MPT_TRACE();
 	return gpSoundDevice && gpSoundDevice->IsOpen();
 }
 
@@ -808,6 +815,7 @@ bool CMainFrame::IsAudioDeviceOpen() const
 bool CMainFrame::audioOpenDevice()
 //--------------------------------
 {
+	MPT_TRACE();
 	if(!TrackerSettings::Instance().GetMixerSettings().IsValid())
 	{
 		Reporting::Error("Unable to open sound device: Invalid mixer settings.");
@@ -864,6 +872,7 @@ bool CMainFrame::audioOpenDevice()
 void CMainFrame::audioCloseDevice()
 //---------------------------------
 {
+	MPT_TRACE();
 	if(gpSoundDevice)
 	{
 		gpSoundDevice->Close();
@@ -913,6 +922,7 @@ void CMainFrame::CalcStereoVuMeters(int *pMix, unsigned long nSamples, unsigned 
 bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 //------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	ASSERT(InAudioThread());
 	if(!m_pSndFile) return false;
 
@@ -1195,6 +1205,7 @@ UINT CMainFrame::GetBaseOctave() const
 void CMainFrame::ResetNotificationBuffer()
 //----------------------------------------
 {
+	MPT_TRACE();
 	Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
 	m_NotifyBuffer.clear();
 }
@@ -1203,6 +1214,7 @@ void CMainFrame::ResetNotificationBuffer()
 bool CMainFrame::PreparePlayback()
 //--------------------------------
 {
+	MPT_TRACE();
 	// open the audio device to update needed TrackerSettings mixer parameters
 	if(!audioOpenDevice()) return false;
 	return true;
@@ -1212,6 +1224,7 @@ bool CMainFrame::PreparePlayback()
 bool CMainFrame::StartPlayback()
 //------------------------------
 {
+	MPT_TRACE();
 	if(!m_pSndFile) return false; // nothing to play
 	if(!IsAudioDeviceOpen()) return false;
 	if(!gpSoundDevice->Start()) return false;
@@ -1232,6 +1245,7 @@ bool CMainFrame::StartPlayback()
 void CMainFrame::StopPlayback()
 //-----------------------------
 {
+	MPT_TRACE();
 	if(!IsAudioDeviceOpen()) return;
 	gpSoundDevice->Stop();
 	if(m_NotifyTimer)
@@ -1250,6 +1264,7 @@ void CMainFrame::StopPlayback()
 bool CMainFrame::RestartPlayback()
 //--------------------------------
 {
+	MPT_TRACE();
 	if(!m_pSndFile) return false; // nothing to play
 	if(!IsAudioDeviceOpen()) return false;
 	if(!gpSoundDevice->IsPlaying()) return false;
@@ -1267,6 +1282,7 @@ bool CMainFrame::RestartPlayback()
 bool CMainFrame::PausePlayback()
 //------------------------------
 {
+	MPT_TRACE();
 	if(!IsAudioDeviceOpen()) return false;
 	gpSoundDevice->Stop();
 	if(m_NotifyTimer)
@@ -1658,6 +1674,7 @@ HWND CMainFrame::GetFollowSong() const
 void CMainFrame::IdleHandlerSounddevice()
 //---------------------------------------
 {
+	MPT_TRACE();
 	if(gpSoundDevice)
 	{
 		const LONG requestFlags = gpSoundDevice->GetRequestFlags();
@@ -1682,6 +1699,7 @@ void CMainFrame::IdleHandlerSounddevice()
 BOOL CMainFrame::ResetSoundCard()
 //-------------------------------
 {
+	MPT_TRACE();
 	return CMainFrame::SetupSoundCard(TrackerSettings::Instance().GetSoundDeviceSettings(TrackerSettings::Instance().GetSoundDeviceIdentifier()), TrackerSettings::Instance().GetSoundDeviceIdentifier(), TrackerSettings::Instance().m_SoundSettingsStopMode, true);
 }
 
@@ -1689,6 +1707,7 @@ BOOL CMainFrame::ResetSoundCard()
 BOOL CMainFrame::SetupSoundCard(SoundDevice::Settings deviceSettings, SoundDevice::Identifier deviceIdentifier, SoundDevice::StopMode stoppedMode, bool forceReset)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	if(forceReset
 		|| (TrackerSettings::Instance().GetSoundDeviceIdentifier() != deviceIdentifier)
 		|| (TrackerSettings::Instance().GetSoundDeviceSettings(deviceIdentifier) != deviceSettings)
