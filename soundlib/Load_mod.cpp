@@ -1,7 +1,7 @@
 /*
  * Load_mod.cpp
  * ------------
- * Purpose: MOD / NST (ProTracker / NoiseTracker) and M15 / STK (Ultimate Soundtracker / Soundtracker) module loader / saver
+ * Purpose: MOD / NST (ProTracker / NoiseTracker), M15 / STK (Ultimate Soundtracker / Soundtracker) and ST26 (SoundTracker 2.6 / Ice Tracker) module loader / saver
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
@@ -280,7 +280,7 @@ struct PACKED MODSampleHeader
 		}
 	}
 
-	// Convert OpenMPT's internal sample header to an MOD sample header.
+	// Convert OpenMPT's internal sample header to a MOD sample header.
 	SmpLength ConvertToMOD(const ModSample &mptSmp)
 	{
 		SmpLength writeLength = mptSmp.pSample != nullptr ? mptSmp.nLength : 0;
@@ -1127,6 +1127,122 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 			Samples[smp].nLoopEnd -= Samples[smp].nLoopStart;
 			Samples[smp].nLoopStart = 0;
 			MODSampleHeader::GetSampleFormat().ReadSample(Samples[smp], file);
+		}
+	}
+
+	return true;
+}
+
+
+// SoundTracker 2.6 / Ice Tracker variation of the MOD format
+// The only real difference to other SoundTracker formats is the way patterns are stored:
+// Every pattern consists of four independent, re-usable tracks.
+bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
+{
+	char magic[4];
+	if(!file.Seek(1464) || !file.ReadArray(magic))
+	{
+		return false;
+	}
+
+	InitializeGlobals();
+
+	if(IsMagic(magic, "MTN\0"))
+		madeWithTracker = "SoundTracker 2.6";
+	else if(IsMagic(magic, "IT10"))
+		madeWithTracker = "Ice Tracker 1.0 / 1.1";
+	else
+		return false;
+
+	// Reading song title
+	file.Seek(0);
+	file.ReadString<mpt::String::spacePadded>(songName, 20);
+
+	// Load Samples
+	m_nSamples = 31;
+	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
+	{
+		MODSampleHeader sampleHeader;
+		ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp]);
+	}
+
+	const uint8 numOrders = file.ReadUint8();
+	const uint8 numTracks = file.ReadUint8();
+	if(numOrders > 128)
+		return false;
+
+	uint8 tracks[128 * 4];
+	file.ReadArray(tracks);
+	for(size_t i = 0; i < CountOf(tracks); i++)
+	{
+		if(tracks[i] > numTracks)
+			return false;
+	}
+
+	if(loadFlags == onlyVerifyHeader)
+		return true;
+
+	// Now we can be pretty sure that this is a valid MOD file. Set up default song settings.
+	m_nType = MOD_TYPE_MOD;
+	m_nChannels = 4;
+	m_nInstruments = 0;
+	m_nDefaultSpeed = 6;
+	m_nDefaultTempo = 125;
+	m_nMinPeriod = 14 * 4;
+	m_nMaxPeriod = 3424 * 4;
+	m_nSamplePreAmp = 64;
+	m_SongFlags = SONG_PT1XMODE;
+
+	// Setup channel pan positions and volume
+	SetupMODPanning();
+
+	// Reading patterns
+	Order.resize(numOrders);
+	for(PATTERNINDEX pat = 0; pat < numOrders; pat++)
+	{
+		Order[pat] = pat;
+		if(Patterns.Insert(pat, 64))
+			continue;
+
+		for(CHANNELINDEX chn = 0; chn < 4; chn++)
+		{
+			file.Seek(1468 + tracks[pat * 4 + chn] * 64u * 4u);
+			ModCommand *m = Patterns[pat].GetpModCommand(0, chn);
+
+			for(ROWINDEX row = 0; row < 64; row++, m += 4)
+			{
+				ReadMODPatternEntry(file, *m);
+
+				if((m->command || m->param)
+					&& !(m->command == 0x0E && m->param >= 0x10)	// Exx only sets filter
+					&& !(m->command >= 0x05 && m->command <= 0x09))	// These don't exist in ST2.6
+				{
+					ConvertModCommand(*m);
+					if(m->command == CMD_TEMPO)
+					{
+						m->command = CMD_SPEED;
+					}
+				} else
+				{
+					m->command = CMD_NONE;
+				}
+			}
+		}
+	}
+
+	// Reading samples
+	if(loadFlags & loadSampleData)
+	{
+		file.Seek(1468 + numTracks * 64u * 4u);
+		for(SAMPLEINDEX smp = 1; smp <= 31; smp++) if(Samples[smp].nLength)
+		{
+			SampleIO(
+				SampleIO::_8bit,
+				SampleIO::mono,
+				SampleIO::littleEndian,
+				SampleIO::signedPCM)
+				.ReadSample(Samples[smp], file);
 		}
 	}
 

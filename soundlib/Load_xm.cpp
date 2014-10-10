@@ -283,7 +283,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals();
 	InitializeChannels();
 	ChangeModTypeTo(MOD_TYPE_XM);
-	m_nMixLevels = mixLevels_compatible_FT2;
+	m_nMixLevels = mixLevels_compatible;
 
 	FlagSet<TrackerVersions> madeWith(verUnknown);
 
@@ -583,6 +583,11 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		mpt::String::SetNullTerminator(mptVersion);
 		m_dwLastSavedWithVersion = MptVersion::ToNum(mptVersion);
 		madeWith = verOpenMPT | verConfirmed;
+
+		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 07, 19))
+			m_nMixLevels = mixLevels_compatible;
+		else
+			m_nMixLevels = mixLevels_compatible_FT2;
 	}
 
 	if(m_dwLastSavedWithVersion != 0 && !madeWith[verOpenMPT])
@@ -591,23 +596,27 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		SetModFlag(MSF_COMPATIBLE_PLAY, false);
 	}
 
-	if(madeWith[verFT2Generic] && !m_SongFlags[SONG_EMBEDMIDICFG])
+	if(madeWith[verFT2Generic])
 	{
-		// FT2 allows typing in arbitrary unsupported effect letters such as Zxx.
-		// Prevent these commands from being interpreted as filter commands by erasing the default MIDI Config.
-		MemsetZero(m_MidiCfg.szMidiSFXExt);
-		MemsetZero(m_MidiCfg.szMidiZXXExt);
-	}
+		m_nMixLevels = mixLevels_compatible_FT2;
 
-	if(madeWith[verFT2Generic]
-		&& fileHeader.version >= 0x0104	// Old versions of FT2 didn't have (smooth) ramping. Disable it for those versions where we can be sure that there should be no ramping.
+		if(!m_SongFlags[SONG_EMBEDMIDICFG])
+		{
+			// FT2 allows typing in arbitrary unsupported effect letters such as Zxx.
+			// Prevent these commands from being interpreted as filter commands by erasing the default MIDI Config.
+			MemsetZero(m_MidiCfg.szMidiSFXExt);
+			MemsetZero(m_MidiCfg.szMidiZXXExt);
+		}
+
+		if(fileHeader.version >= 0x0104	// Old versions of FT2 didn't have (smooth) ramping. Disable it for those versions where we can be sure that there should be no ramping.
 #ifdef MODPLUG_TRACKER
-		&& TrackerSettings::Instance().autoApplySmoothFT2Ramping
+			&& TrackerSettings::Instance().autoApplySmoothFT2Ramping
 #endif // MODPLUG_TRACKER
-		)
-	{
-		// apply FT2-style super-soft volume ramping
-		SetModFlag(MSF_VOLRAMP, true);
+			)
+		{
+			// apply FT2-style super-soft volume ramping
+			SetModFlag(MSF_VOLRAMP, true);
+		}
 	}
 
 	if(madeWithTracker.empty())
@@ -688,7 +697,7 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 	memcpy(fileHeader.signature, "Extended Module: ", 17);
 	mpt::String::Write<mpt::String::spacePadded>(fileHeader.songName, songName);
 	fileHeader.eof = 0x1A;
-	std::string openMptTrackerName = MptVersion::GetOpenMPTVersionStr();
+	const std::string openMptTrackerName = MptVersion::GetOpenMPTVersionStr();
 	mpt::String::Write<mpt::String::spacePadded>(fileHeader.trackerName, openMptTrackerName);
 
 	// Writing song header
