@@ -1199,6 +1199,7 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Reading patterns
 	Order.resize(numOrders);
+	uint8 speed[2] = { 0, 0 }, speedPos = 0;
 	for(PATTERNINDEX pat = 0; pat < numOrders; pat++)
 	{
 		Order[pat] = pat;
@@ -1219,14 +1220,41 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 					&& !(m->command >= 0x05 && m->command <= 0x09))	// These don't exist in ST2.6
 				{
 					ConvertModCommand(*m);
-					if(m->command == CMD_TEMPO)
-					{
-						m->command = CMD_SPEED;
-					}
 				} else
 				{
 					m->command = CMD_NONE;
 				}
+			}
+		}
+
+		// Handle speed command with both nibbles set - this enables auto-swing (alternates between the two nibbles)
+		ModCommand *m = Patterns[pat];
+		for(ROWINDEX row = 0; row < 64; row++)
+		{
+			for(CHANNELINDEX chn = 0; chn < 4; chn++, m++)
+			{
+				if(m->command == CMD_SPEED || m->command == CMD_TEMPO)
+				{
+					m->command = CMD_SPEED;
+					speedPos = 0;
+					if(m->param & 0xF0)
+					{
+						if((m->param >> 4) != (m->param & 0x0F) && (m->param & 0x0F) != 0)
+						{
+							// Both nibbles set
+							speed[0] = m->param >> 4;
+							speed[1] = m->param & 0x0F;
+							speedPos = 1;
+						}
+						m->param >>= 4;
+					}
+				}
+			}
+			if(speedPos)
+			{
+				Patterns[pat].WriteEffect(EffectWriter(CMD_SPEED, speed[speedPos - 1]).Row(row));
+				speedPos++;
+				if(speedPos == 3) speedPos = 1;
 			}
 		}
 	}
