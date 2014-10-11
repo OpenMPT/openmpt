@@ -583,7 +583,7 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, BOOL)
 	
 	std::string defaultExtension = m_SndFile.GetModSpecifications().fileExtension;
 	
-	switch(m_SndFile.GetType())
+	switch(m_SndFile.GetBestSaveFormat())
 	{
 	case MOD_TYPE_MOD:
 		MsgBoxHidable(ModSaveHint);
@@ -1231,16 +1231,17 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 
 	const ChannelFlags mask = (fade ? CHN_NOTEFADE : (CHN_NOTEFADE | CHN_KEYOFF));
 	ModChannel *pChn = &m_SndFile.m_PlayState.Chn[stopChn != CHANNELINDEX_INVALID ? stopChn : m_SndFile.m_nChannels];
-	for(CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++, pChn++) if (!pChn->nMasterChn)
+	for(CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++, pChn++)
 	{
-
-		// Fade all channels > m_nChannels which are playing this note. 
-		// Could conflict with NNAs.
-		if(!pChn->dwFlags[mask] && pChn->nLength && (note == pChn->nNewNote || !note))
+		// Fade all channels > m_nChannels which are playing this note and aren't NNA channels.
+		if(!pChn->nMasterChn && !pChn->dwFlags[mask] && pChn->nLength && (note == pChn->nNewNote || !note))
 		{
 			m_SndFile.KeyOff(pChn);
 			if (!m_SndFile.m_nInstruments) pChn->dwFlags.reset(CHN_LOOP);	// FIXME: If a sample with pingpong loop is playing backwards, stuff before the loop is played again!
 			if (fade) pChn->dwFlags.set(CHN_NOTEFADE);
+			// Instantly stop samples that would otherwise play forever
+			if (pChn->pModInstrument && !pChn->pModInstrument->nFadeOut)
+				pChn->nFadeOutVol = 0;
 			if (note) break;
 		}
 	}
