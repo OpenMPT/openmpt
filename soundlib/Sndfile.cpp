@@ -851,7 +851,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	// Adjust channels
 	for(CHANNELINDEX ich = 0; ich < MAX_BASECHANNELS; ich++)
 	{
-		if (ChnSettings[ich].nVolume > 64) ChnSettings[ich].nVolume = 64;
+		LimitMax(ChnSettings[ich].nVolume, uint16(64));
 		if (ChnSettings[ich].nPan > 256) ChnSettings[ich].nPan = 128;
 		m_PlayState.Chn[ich].Reset(ModChannel::resetTotal, *this, ich);
 	}
@@ -1494,10 +1494,10 @@ bool CSoundFile::IsSampleUsed(SAMPLEINDEX nSample) const
 		}
 	} else
 	{
-		for (PATTERNINDEX i = 0; i < Patterns.Size(); i++) if (Patterns[i])
+		for (PATTERNINDEX i = 0; i < Patterns.Size(); i++) if (Patterns.IsValidPat(i))
 		{
-			const ModCommand *m = Patterns[i];
-			for (UINT j=m_nChannels*Patterns[i].GetNumRows(); j; m++, j--)
+			CPattern::const_iterator mEnd = Patterns[i].End();
+			for(CPattern::const_iterator m = Patterns[i].Begin(); m != mEnd; m++)
 			{
 				if (m->instr == nSample && !m->IsPcNote()) return true;
 			}
@@ -1511,10 +1511,10 @@ bool CSoundFile::IsInstrumentUsed(INSTRUMENTINDEX nInstr) const
 //-------------------------------------------------------------
 {
 	if ((!nInstr) || (nInstr > GetNumInstruments()) || (!Instruments[nInstr])) return false;
-	for (UINT i=0; i<Patterns.Size(); i++) if (Patterns[i])
+	for (PATTERNINDEX i = 0; i < Patterns.Size(); i++) if (Patterns.IsValidPat(i))
 	{
-		const ModCommand *m = Patterns[i];
-		for (UINT j=m_nChannels*Patterns[i].GetNumRows(); j; m++, j--)
+		CPattern::const_iterator mEnd = Patterns[i].End();
+		for(CPattern::const_iterator m = Patterns[i].Begin(); m != mEnd; m++)
 		{
 			if (m->instr == nInstr && !m->IsPcNote()) return true;
 		}
@@ -1536,16 +1536,10 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(std::vector<bool> &sampleUsed) const
 	}
 	SAMPLEINDEX nExt = 0;
 
-	for (PATTERNINDEX nPat = 0; nPat < Patterns.GetNumPatterns(); nPat++)
+	for (PATTERNINDEX nPat = 0; nPat < Patterns.GetNumPatterns(); nPat++) if(Patterns.IsValidPat(nPat))
 	{
-		const ModCommand *p = Patterns[nPat];
-		if(p == nullptr)
-		{
-			continue;
-		}
-
-		UINT jmax = Patterns[nPat].GetNumRows() * GetNumChannels();
-		for (UINT j=0; j<jmax; j++, p++)
+		CPattern::const_iterator pEnd = Patterns[nPat].End();
+		for(CPattern::const_iterator p = Patterns[nPat].Begin(); p != pEnd; p++)
 		{
 			if(p->IsNote())
 			{
@@ -2079,7 +2073,7 @@ ModInstrument *CSoundFile::AllocateInstrument(INSTRUMENTINDEX instr, SAMPLEINDEX
 void CSoundFile::PrecomputeSampleLoops(bool updateChannels)
 //---------------------------------------------------------
 {
-	for(SAMPLEINDEX i = 1; i < GetNumSamples(); i++)
+	for(SAMPLEINDEX i = 1; i <= GetNumSamples(); i++)
 	{
 		Samples[i].PrecomputeLoops(*this, updateChannels);
 	}
