@@ -58,7 +58,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ksuser.lib ksguid.lib"
+				AdditionalDependencies="ksuser.lib"
 				GenerateDebugInformation="true"
 				TargetMachine="1"
 			/>
@@ -128,7 +128,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ksuser.lib ksguid.lib"
+				AdditionalDependencies="ksuser.lib"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
