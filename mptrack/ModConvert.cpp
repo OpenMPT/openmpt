@@ -497,7 +497,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	// Check for patterns with custom time signatures (fixing will be applied in the pattern container)
 	if(!CSoundFile::GetModSpecifications(nNewType).hasPatternSignatures)
 	{
-		for(PATTERNINDEX nPat = 0; nPat < m_SndFile.Patterns.GetNumPatterns(); nPat++)
+		for(PATTERNINDEX nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++)
 		{
 			if(m_SndFile.Patterns[nPat].GetOverrideSignature())
 			{

@@ -243,7 +243,8 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		foundHacks = true;
 		if(autofix)
 		{
-			for(PATTERNINDEX i = 0; i < m_SndFile.Patterns.GetNumPatterns(); i++)
+			const PATTERNINDEX numPats = m_SndFile.Patterns.GetNumPatterns();
+			for(PATTERNINDEX i = 0; i < numPats; i++)
 			{
 				m_SndFile.Patterns[i].SetName("");
 			}
@@ -400,7 +401,8 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	if(!originalSpecs->hasPatternSignatures)
 	{
 		foundHere = false;
-		for(PATTERNINDEX i = 0; i < m_SndFile.Patterns.GetNumPatterns(); i++)
+		const PATTERNINDEX numPats = m_SndFile.Patterns.GetNumPatterns();
+		for(PATTERNINDEX i = 0; i < numPats; i++)
 		{
 			if(m_SndFile.Patterns[i].GetOverrideSignature())
 			{
@@ -436,7 +438,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	}
 
 	// Embedded MIDI configuration in XM files
-	if(m_SndFile.m_SongFlags[SONG_EMBEDMIDICFG] != 0 && m_SndFile.GetType() == MOD_TYPE_XM)
+	if(m_SndFile.m_SongFlags[SONG_EMBEDMIDICFG] && !(originalSpecs->songFlags & SONG_EMBEDMIDICFG))
 	{
 		AddToLog("Found embedded MIDI macros");
 		foundHacks = true;

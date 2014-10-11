@@ -1536,7 +1536,7 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(std::vector<bool> &sampleUsed) const
 	}
 	SAMPLEINDEX nExt = 0;
 
-	for (PATTERNINDEX nPat = 0; nPat < Patterns.GetNumPatterns(); nPat++) if(Patterns.IsValidPat(nPat))
+	for (PATTERNINDEX nPat = 0; nPat < Patterns.Size(); nPat++) if(Patterns.IsValidPat(nPat))
 	{
 		CPattern::const_iterator pEnd = Patterns[nPat].End();
 		for(CPattern::const_iterator p = Patterns[nPat].Begin(); p != pEnd; p++)
