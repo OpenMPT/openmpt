@@ -973,7 +973,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	pChn->nNewIns = 0;
 
 	// IT Compatiblity: NNA is reset on every note change, not every instrument change (fixes s7xinsnum.it).
-	if (pIns && !IsCompatibleMode(TRK_IMPULSETRACKER)  && (pIns->nMixPlug || pSmp))		//rewbs.VSTiNNA
+	if (pIns && ((!IsCompatibleMode(TRK_IMPULSETRACKER) && pSmp) || pIns->nMixPlug))
 		pChn->nNNA = pIns->nNNA;
 
 	if (pSmp)
@@ -1690,7 +1690,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 						IMixPlugin *pPlugin =  m_MixPlugins[pIns->nMixPlug-1].pMixPlugin;
 						if(pPlugin && p->nNote != NOTE_NONE)
 						{
-							pPlugin->MidiCommand(GetBestMidiChannel(i), p->pModInstrument->nMidiProgram, p->pModInstrument->wMidiBank, p->nLastNote + NOTE_MAX_SPECIAL, 0, i);
+							pPlugin->MidiCommand(GetBestMidiChannel(i), p->pModInstrument->nMidiProgram, p->pModInstrument->wMidiBank, p->nNote + NOTE_MAX_SPECIAL, 0, i);
 						}
 						break;
 					}
@@ -1780,7 +1780,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 				case NNA_NOTEFADE:
 					//switch off note played on this plugin, on this tracker channel and midi channel
 					//pPlugin->MidiCommand(pChn->pModInstrument->nMidiChannel, pChn->pModInstrument->nMidiProgram, pChn->nNote + NOTE_MAX_SPECIAL, 0, n);
-					pPlugin->MidiCommand(GetBestMidiChannel(nChn), pChn->pModInstrument->nMidiProgram, pChn->pModInstrument->wMidiBank, /*pChn->nNote+*/NOTE_MAX_SPECIAL, 0, nChn);
+					pPlugin->MidiCommand(GetBestMidiChannel(nChn), pChn->pModInstrument->nMidiProgram, pChn->pModInstrument->wMidiBank, NOTE_KEYOFF, 0, nChn);
 					break;
 				}
 			}
@@ -3866,6 +3866,12 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 								{
 									bkp->dwFlags.set(CHN_NOTEFADE);
 									bkp->nFadeOutVol = 0;
+								}
+								const ModInstrument *pIns = bkp->pModInstrument;
+								IMixPlugin *pPlugin;
+								if(pIns != nullptr && pIns->nMixPlug && (pPlugin = m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin) != nullptr)
+								{
+									pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, bkp->nNote + NOTE_MAX_SPECIAL, 0, nChn);
 								}
 							}
 						}
