@@ -847,7 +847,7 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 				// drag multiple orders (not quite as easy...)
 				OrdSelection selection = GetCurSel(false);
 				// move how many orders from where?
-				ORDERINDEX moveCount = (selection.lastOrd - selection.firstOrd), nMovePos = selection.firstOrd;
+				ORDERINDEX moveCount = (selection.lastOrd - selection.firstOrd), movePos = selection.firstOrd;
 				// drop before or after the selection
 				bool moveBack = !(m_nDragOrder < m_nDropPos);
 				// don't do anything if drop position is inside the selection
@@ -857,15 +857,15 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 
 				for(int i = 0; i <= moveCount; i++)
 				{
-					if(!m_pModDoc.MoveOrder(nMovePos, m_nDropPos, true, copyOrders)) return;
+					if(!m_pModDoc.MoveOrder(movePos, m_nDropPos, true, copyOrders)) return;
 					if((moveBack ^ copyOrders) == true && multiSelection)
 					{
-						nMovePos++;
+						movePos++;
 						m_nDropPos++;
 					}
 					if(moveBack && copyOrders && multiSelection)
 					{
-						nMovePos += 2;
+						movePos += 2;
 						m_nDropPos++;
 					}
 				}
@@ -880,7 +880,11 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 				{
 					SetCurSel((m_nDragOrder < m_nDropPos && !copyOrders) ? m_nDropPos - 1 : m_nDropPos);
 				}
-				m_pModDoc.SetModified();
+				// Did we actually change anything?
+				if(n != selection.lastOrd + 1 || copyOrders)
+				{
+					m_pModDoc.SetModified();
+				}
 			} else
 			{
 				ORDERINDEX nOrder = GetOrderFromPoint(rect, pt);
