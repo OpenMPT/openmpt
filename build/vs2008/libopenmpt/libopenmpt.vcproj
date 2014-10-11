@@ -44,7 +44,7 @@
 				PreprocessorDefinitions="LIBOPENMPT_BUILD"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>

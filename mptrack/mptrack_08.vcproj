@@ -25,7 +25,7 @@
 			IntermediateDirectory="..\build\obj\$(ProjectName)\$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			UseOfMFC="2"
+			UseOfMFC="1"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			>
 			<Tool
@@ -57,7 +57,7 @@
 				StringPooling="true"
 				ExceptionHandling="2"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				BufferSecurityCheck="true"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
@@ -124,7 +124,7 @@
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			UseOfMFC="2"
+			UseOfMFC="1"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			>
 			<Tool
@@ -156,7 +156,7 @@
 				StringPooling="true"
 				ExceptionHandling="2"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				BufferSecurityCheck="true"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
@@ -1562,10 +1562,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\common\WriteMemoryDump.h"
-				>
-			</File>
-			<File
 				RelativePath=".\view_com.h"
 				>
 			</File>
@@ -1607,6 +1603,10 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\WindowedFIR.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\WriteMemoryDump.h"
 				>
 			</File>
 			<Filter
