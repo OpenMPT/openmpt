@@ -1140,7 +1140,9 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 
 #ifndef NO_VST
 	// Plugin arpeggio
-	if(pChn->pModInstrument && pChn->pModInstrument->nMixPlug)
+	if(pChn->pModInstrument && pChn->pModInstrument->nMixPlug
+		&& !pChn->pModInstrument->dwFlags[INS_MUTE]
+		&& !pChn->dwFlags[CHN_MUTE | CHN_SYNCMUTE])
 	{
 		const ModInstrument *pIns = pChn->pModInstrument;
 		IMixPlugin *pPlugin =  m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin;
