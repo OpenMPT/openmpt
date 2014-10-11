@@ -358,7 +358,7 @@ protected:
 			mpt::IO::SeekAbsolute(f, oldpos);
 			return pos_type(off_type(-1));
 		}
-		return static_cast<pos_type>(newpos);
+		return pos_type(static_cast<off_type>(newpos));
 	}
 }; // class FILE_output_streambuf
 

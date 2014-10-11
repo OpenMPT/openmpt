@@ -368,7 +368,7 @@ inline bool WriteSizedStringLE(Tfile & f, const std::string & str)
 	{
 		return false;
 	}
-	Tsize size = str.size();
+	Tsize size = static_cast<Tsize>(str.size());
 	if(!mpt::IO::WriteIntLE(f, size))
 	{
 		return false;
