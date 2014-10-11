@@ -30,11 +30,6 @@ OPENMPT_NAMESPACE_BEGIN
 #pragma comment(lib, "winmm.lib")
 
 #pragma comment(lib, "ksuser.lib")
-#if MPT_MSVC_BEFORE(2010,0) && defined(_M_X64)
-// VS2008 x64 SDK has no ksguid.lib. Work-around in include\portaudio\src\os\win\pa_win_wdmks_utils.c .
-#else
-#pragma comment(lib, "ksguid.lib")
-#endif
 
 #pragma comment(lib, "msacm32.lib")
 

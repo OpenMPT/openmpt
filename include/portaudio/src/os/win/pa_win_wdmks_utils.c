@@ -66,15 +66,6 @@
 #include "pa_util.h"
 #include "pa_win_wdmks_utils.h"
 
-// OpenMPT
-#if defined(_MSC_VER)
-#if (_MSC_VER < 1600) // before VS2010
-#if defined(_M_X64)
-#define PA_WDMKS_NO_KSGUID_LIB
-#endif
-#endif
-#endif
-
 #if !defined(PA_WDMKS_NO_KSGUID_LIB) && !defined(PAWIN_WDMKS_NO_KSGUID_LIB) && !defined(__GNUC__)
     #if (defined(WIN32) && (defined(_MSC_VER) && (_MSC_VER >= 1200))) /* MSC version 6 and above */
         #pragma comment( lib, "ksguid.lib" )

@@ -359,6 +359,7 @@
   includedirs { "../include/portaudio/include", "../include/portaudio/src/common", "../include/portaudio/src/os/win" }
   defines {
    "PAWIN_USE_WDMKS_DEVICE_INFO",
+   "PA_WDMKS_NO_KSGUID_LIB",
    "PA_USE_ASIO=0",
    "PA_USE_DS=0",
    "PA_USE_WMME=1",
