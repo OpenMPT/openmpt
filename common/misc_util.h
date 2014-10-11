@@ -16,6 +16,7 @@
 #include <type_traits>
 #endif
 #include <vector>
+#include <algorithm>
 
 #include <cmath>
 #include <cstring>
