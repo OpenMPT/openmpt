@@ -87,7 +87,7 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..;../common;../include;$(IntDir)svn_version;../build/svn_version</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -108,7 +108,7 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..;../common;../include;$(IntDir)svn_version;../build/svn_version</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
