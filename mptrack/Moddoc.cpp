@@ -34,7 +34,7 @@
 #else
 #include "MemoryMappedFile.h"
 #endif
-#include "soundlib/FileReader.h"
+#include "../soundlib/FileReader.h"
 #include <shlwapi.h>
 #include "FileDialog.h"
 
