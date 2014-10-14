@@ -269,7 +269,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 			// Since we don't want to render hours of silence, we are going to check if there are
 			// still any channels playing, and if that is no longer the case, we stop playback at
 			// the end of the next tick.
-			if(m_PlayState.m_nMusicSpeed == uint16_max && m_nMixStat == 0 && GetType() == MOD_TYPE_XM && !m_PlayState.m_nBufferCount)
+			if(m_PlayState.m_nMusicSpeed == uint16_max && (m_nMixStat == 0 || m_PlayState.m_nGlobalVolume == 0) && GetType() == MOD_TYPE_XM && !m_PlayState.m_nBufferCount)
 			{
 				m_SongFlags.set(SONG_ENDREACHED);
 			}
@@ -1229,7 +1229,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 					// Arpeggio is added on top of current note, but cannot do it the IT way because of
 					// the behaviour in ArpeggioClamp.xm.
 					// Test case: ArpSlide.xm
-					uint8 note = GetNoteFromPeriod(period, pChn->nFineTune, pChn->nC5Speed);//pChn->nNote;
+					uint8 note = (uint8)GetNoteFromPeriod(period, pChn->nFineTune, pChn->nC5Speed);//pChn->nNote;
 
 					// The fact that arpeggio behaves in a totally fucked up way at 16 ticks/row or more is that the arpeggio offset LUT only has 16 entries in FT2.
 					// At more than 16 ticks/row, FT2 reads into the vibrato table, which is placed right after the arpeggio table.
