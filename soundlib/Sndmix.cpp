@@ -2290,7 +2290,7 @@ void CSoundFile::ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long lCoun
 
 		m_PlayState.m_nGlobalVolumeDestination = m_PlayState.m_nGlobalVolume;
 		m_PlayState.m_nSamplesToGlobalVolRampDest = m_PlayState.m_nGlobalVolumeRampAmount = rampUp ? m_MixerSettings.GetVolumeRampUpSamples() : m_MixerSettings.GetVolumeRampDownSamples();
-	} 
+	}
 
 	// calculate ramping step
 	int32 step = 0;
@@ -2303,13 +2303,18 @@ void CSoundFile::ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long lCoun
 		const long delta = highResGlobalVolumeDestination - m_PlayState.m_lHighResRampingGlobalVolume;
 		step = delta / static_cast<long>(m_PlayState.m_nSamplesToGlobalVolRampDest);
 
-		// Define max step size as some factor of user defined ramping value: the lower the value, the more likely the click.
-		// If step is too big (might cause click), extend ramp length.
-		int32 maxStep = std::max(50, (10000 / (m_PlayState.m_nGlobalVolumeRampAmount + 1)));
-		while(abs(step) > maxStep)
+		if(m_nMixLevels == mixLevels_117RC2)
 		{
-			m_PlayState.m_nSamplesToGlobalVolRampDest += m_PlayState.m_nGlobalVolumeRampAmount;
-			step = delta / static_cast<int32>(m_PlayState.m_nSamplesToGlobalVolRampDest);
+			// Define max step size as some factor of user defined ramping value: the lower the value, the more likely the click.
+			// If step is too big (might cause click), extend ramp length.
+			// Warning: This increases the volume ramp length by EXTREME amounts (factors of 100 are easily reachable)
+			// compared to the user-defined setting, so this really should not be used!
+			int32 maxStep = std::max(50, (10000 / (m_PlayState.m_nGlobalVolumeRampAmount + 1)));
+			while(abs(step) > maxStep)
+			{
+				m_PlayState.m_nSamplesToGlobalVolRampDest += m_PlayState.m_nGlobalVolumeRampAmount;
+				step = delta / static_cast<int32>(m_PlayState.m_nSamplesToGlobalVolRampDest);
+			}
 		}
 	}
 
