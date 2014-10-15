@@ -121,7 +121,7 @@ private:
 
 private:
 
-	std::uintptr_t ThreadFuntion()
+	uintptr_t ThreadFuntion()
 	{
 		switch(functionMode)
 		{
