@@ -44,7 +44,15 @@ static const char * xmp_openmpt_string = "OpenMPT (" OPENMPT_API_VERSION_STRING 
 #define NOMINMAX
 #include <windows.h>
 
+// For now, in order to stay compatible with XMPlay before 3.8,
+// force pre XMPIN_FACE==4 SDK version for newer xmpin.h.
+// Older xmpin.h just ignore this completely.
+#define XMPIN_FACE 3
+
 #include "xmplay/xmpin.h"
+#ifndef XMPIN_FACE
+#define XMPIN_FACE 3 // older SDKs (pre XMPlay 3.8) do not define this
+#endif
 
 #include <algorithm>
 #include <fstream>
@@ -422,6 +430,51 @@ static void write_xmplay_string( char * dst, std::string src ) {
 	std::strcpy( dst, src.c_str() );
 }
 
+#if XMPIN_FACE >= 4
+
+static void append_xmplay_tag( std::string & tags, const std::string & tag, const std::string & val ) {
+	if ( tag.empty() ) {
+		return;
+	}
+	if ( val.empty() ) {
+		return;
+	}
+	tags.append( tag );
+	tags.append( 1, '\0' );
+	tags.append( val );
+	tags.append( 1, '\0' );
+}
+
+static char * build_xmplay_tags( const openmpt::module & mod ) {
+	std::string tags;
+	append_xmplay_tag( tags, "filetype", convert_to_native( mod.get_metadata("type") ) );
+	append_xmplay_tag( tags, "title", convert_to_native( mod.get_metadata("title") ) );
+	append_xmplay_tag( tags, "artist", convert_to_native( mod.get_metadata("artist") ) );
+	append_xmplay_tag( tags, "album", convert_to_native( mod.get_metadata("xmplay-album") ) ); // todo, libopenmpt does not support that
+	append_xmplay_tag( tags, "date", convert_to_native( mod.get_metadata("date") ) );
+	append_xmplay_tag( tags, "track", convert_to_native( mod.get_metadata("xmplay-tracknumber") ) ); // todo, libopenmpt does not support that
+	append_xmplay_tag( tags, "genre", convert_to_native( mod.get_metadata("xmplay-genre") ) ); // todo, libopenmpt does not support that
+	append_xmplay_tag( tags, "comment", convert_to_native( mod.get_metadata("message") ) );
+	tags.append( 1, '\0' );
+	char * result = static_cast<char*>( xmpfmisc->Alloc( tags.size() ) );
+	if ( !result ) {
+		return NULL;
+	}
+	std::copy( tags.data(), tags.data() + tags.size(), result );
+	return result;
+}
+
+static float * build_xmplay_length( const openmpt::module & mod ) {
+	float * result = static_cast<float*>( xmpfmisc->Alloc( sizeof( float ) ) );
+	if ( !result ) {
+		return NULL;
+	}
+	*result = static_cast<float>( mod.get_duration_seconds() );
+	return result;
+}
+
+#else
+
 static void write_xmplay_tag( char * * tag, const std::string & value ) {
 	if ( value == "" ) {
 		// empty value, do not update tag
@@ -466,6 +519,8 @@ static void write_xmplay_tags( char * tags[8], const openmpt::module & mod ) {
 static void clear_xmlpay_tags( char * tags[8] ) {
 	// leave tags alone
 }
+
+#endif
 
 static void clear_xmplay_string( char * str ) {
 	if ( !str ) {
@@ -548,6 +603,75 @@ static BOOL WINAPI openmpt_CheckFile( const char * filename, XMPFILE file ) {
 	#endif // FAST_CHECKFILE
 }
 
+#if XMPIN_FACE >= 4
+static DWORD WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, float * * length, char * * tags ) {
+	try {
+		#ifdef USE_XMPLAY_FILE_IO
+			#ifdef USE_XMPLAY_ISTREAM
+				switch ( xmpffile->GetType( file ) ) {
+					case XMPFILE_TYPE_MEMORY:
+						{
+							openmpt::module mod( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) );
+							if ( length ) {
+								*length = build_xmplay_length( mod );
+							}
+							if ( tags ) {
+								*tags = build_xmplay_tags( mod );
+							}
+						}
+						break;
+					case XMPFILE_TYPE_FILE:
+					case XMPFILE_TYPE_NETFILE:
+					case XMPFILE_TYPE_NETSTREAM:
+					default:
+						{
+							xmplay_istream stream( file );
+							openmpt::module mod( stream );
+							if ( length ) {
+								*length = build_xmplay_length( mod );
+							}
+							if ( tags ) {
+								*tags = build_xmplay_tags( mod );
+							}
+						}
+						break;
+				}
+			#else
+				if ( xmpffile->GetType( file ) == XMPFILE_TYPE_MEMORY ) {
+					openmpt::module mod( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) );
+					if ( length ) {
+						*length = build_xmplay_length( mod );
+					}
+					if ( tags ) {
+						*tags = build_xmplay_tags( mod );
+					}
+				} else {
+					openmpt::module mod( (read_XMPFILE( file )) );
+					if ( length ) {
+						*length = build_xmplay_length( mod );
+					}
+					if ( tags ) {
+						*tags = build_xmplay_tags( mod );
+					}
+				}
+			#endif
+		#else
+			openmpt::module mod( std::ifstream( filename, std::ios_base::binary ) );
+			if ( length ) {
+				*length = build_xmplay_length( mod );
+			}
+			if ( tags ) {
+				*tags = build_xmplay_tags( mod );
+			}
+		#endif
+	} catch ( ... ) {
+		if ( length ) *length = NULL;
+		if ( tags ) *tags = NULL;
+		return 0;
+	}
+	return 1;
+}
+#else
 //tags: 0=title,1=artist,2=album,3=year,4=track,5=genre,6=comment,7=filetype
 static BOOL WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, float * length, char * tags[8] ) {
 	try {
@@ -596,6 +720,7 @@ static BOOL WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, flo
 	}
 	return TRUE;
 }
+#endif
 
 // open a file for playback
 // return:  0=failed, 1=success, 2=success and XMPlay can close the file
@@ -691,6 +816,16 @@ static void WINAPI openmpt_SetFormat( XMPFORMAT * form ) {
 }
 
 // get the tags
+#if XMPIN_FACE >= 4
+static char * WINAPI openmpt_GetTags() {
+	if ( !self->mod ) {
+		char * tags = static_cast<char*>( xmpfmisc->Alloc( 1 ) );
+		tags[0] = '\0';
+		return tags;
+	}
+	return build_xmplay_tags( *self->mod );
+}
+#else
 // return TRUE to delay the title update when there are no tags (use UpdateTitle to request update when ready)
 static BOOL WINAPI openmpt_GetTags( char * tags[8] ) {
 	if ( !self->mod ) {
@@ -700,6 +835,7 @@ static BOOL WINAPI openmpt_GetTags( char * tags[8] ) {
 	write_xmplay_tags( tags, *self->mod );
 	return FALSE; // TRUE would delay
 }
+#endif
 
 // get the main panel info text
 static void WINAPI openmpt_GetInfoText( char * format, char * length ) {
