@@ -209,7 +209,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 	sigThreadExit.Create(true);
 	sigAutomation.Create(true);
 
-	otherThread = mpt::thread_member<BridgeWrapper, &BridgeWrapper::MessageThread>(this);
+	otherThread = mpt::UnmanagedThreadMember<BridgeWrapper, &BridgeWrapper::MessageThread>(this);
 
 	BridgeMessage initMsg;
 	initMsg.Init(pluginPath.ToWide().c_str(), MIXBUFFERSIZE, ExceptionHandler::fullMemDump);

@@ -152,9 +152,9 @@ PluginBridge::PluginBridge(const wchar_t *memName, HANDLE otherProcess_)
 	otherProcess.DuplicateFrom(otherProcess_);
 
 	sigThreadExit.Create(true);
-	otherThread = mpt::thread_member<PluginBridge, &PluginBridge::RenderThread>(this);
+	otherThread = mpt::UnmanagedThreadMember<PluginBridge, &PluginBridge::RenderThread>(this);
 
-	mpt::thread_member<PluginBridge, &PluginBridge::MessageThread>(this);
+	mpt::UnmanagedThreadMember<PluginBridge, &PluginBridge::MessageThread>(this);
 }
 
 

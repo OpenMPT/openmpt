@@ -53,7 +53,7 @@ protected:
 	HINTERNET internetHandle, connectionHandle;
 
 	// Force creation via "new" as we're using "delete this". Use CUpdateCheck::DoUpdateCheck to create an object.
-	CUpdateCheck::CUpdateCheck(bool autoUpdate) : internetHandle(nullptr), connectionHandle(nullptr), isAutoUpdate(autoUpdate) { }
+	CUpdateCheck(bool autoUpdate) : internetHandle(nullptr), connectionHandle(nullptr), isAutoUpdate(autoUpdate) { }
 
 	void UpdateThread();
 	void Die(CString errorMessage);

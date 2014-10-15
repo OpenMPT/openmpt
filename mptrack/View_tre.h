@@ -161,7 +161,7 @@ protected:
 	HWND m_hDropWnd;
 	volatile HANDLE m_hWatchDir;
 	HANDLE m_hWatchDirKillThread;
-	mpt::thread watchDirThread;
+	mpt::UnmanagedThread watchDirThread;
 	ModItem m_itemDrag;
 	DWORD m_dwStatus;
 	UINT m_nDocNdx, m_nDragDocNdx;
