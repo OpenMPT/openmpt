@@ -39,8 +39,7 @@ void CUpdateCheck::DoUpdateCheck(bool autoUpdate)
 	CUpdateCheck *that = new (std::nothrow) CUpdateCheck(autoUpdate);
 	if(that != nullptr)
 	{
-		mpt::thread threadHandle = mpt::thread_member<CUpdateCheck, &CUpdateCheck::UpdateThread>(that, autoUpdate ? mpt::thread::lower : mpt::thread::normal);
-		CloseHandle(threadHandle);
+		mpt::thread(MPT_DELEGATE(CUpdateCheck, UpdateThread, that)).detach();
 	}
 }
 
@@ -49,6 +48,12 @@ void CUpdateCheck::DoUpdateCheck(bool autoUpdate)
 void CUpdateCheck::UpdateThread()
 //-------------------------------
 {
+
+	if(isAutoUpdate)
+	{
+		mpt::SetCurrentThreadPriority(mpt::ThreadPriorityLower);
+	}
+
 	const time_t now = time(nullptr);
 
 	if(isAutoUpdate)

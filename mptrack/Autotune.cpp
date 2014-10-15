@@ -257,7 +257,7 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 		if(p == numProcs - 1)
 			threadInfo[p].endNote = END_NOTE;
 
-		threadHandles[p] = mpt::thread(AutotuneThread, &threadInfo[p]);
+		threadHandles[p] = mpt::UnmanagedThread(AutotuneThread, &threadInfo[p]);
 		ASSERT(threadHandles[p] != INVALID_HANDLE_VALUE);
 	}
 

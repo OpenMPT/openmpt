@@ -434,7 +434,7 @@ public:
 	// Signals for internal communication (wake up waiting threads). Confirm() => OK, Send() => Failure
 	Signal ackSignals[SharedMemLayout::queueSize];
 
-	mpt::thread otherThread;	// Handle of the "other" thread (host side: message thread, bridge side: process thread)
+	mpt::UnmanagedThread otherThread;	// Handle of the "other" thread (host side: message thread, bridge side: process thread)
 	Event otherProcess;			// Handle of "other" process (host handle in the bridge and vice versa)
 	Event sigThreadExit;		// Signal to kill helper thread
 

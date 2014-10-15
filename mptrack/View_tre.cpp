@@ -148,7 +148,7 @@ CModTree::CModTree(CModTree *pDataTree) :
 	{
 		// Set up instrument library monitoring thread
 		m_hWatchDirKillThread = CreateEvent(NULL, FALSE, FALSE, NULL);
-		watchDirThread = mpt::thread_member<CModTree, &CModTree::MonitorInstrumentLibrary>(this, mpt::thread::lowest);
+		watchDirThread = mpt::UnmanagedThreadMember<CModTree, &CModTree::MonitorInstrumentLibrary>(this);
 	}
 	MemsetZero(m_tiMidi);
 	MemsetZero(m_tiPerc);
@@ -1839,6 +1839,7 @@ void CModTree::FillInstrumentLibrary()
 void CModTree::MonitorInstrumentLibrary()
 //---------------------------------------
 {
+	mpt::SetCurrentThreadPriority(mpt::ThreadPriorityLowest);
 	DWORD result;
 	do
 	{
