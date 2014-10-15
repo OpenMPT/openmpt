@@ -1199,11 +1199,16 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 				const UINT tick = m_PlayState.m_nTickCount % (m_PlayState.m_nMusicSpeed + m_PlayState.m_nFrameDelay);
 				if(pChn->nArpeggio != 0)
 				{
+					uint32 arpRatio = 65536;
 					switch(tick % 3)
 					{
-					case 1: period *= LinearSlideUpTable[(pChn->nArpeggio >> 4) * 16]; break;
-					case 2: period *= LinearSlideUpTable[(pChn->nArpeggio & 0x0F) * 16]; break;
+					case 1: arpRatio = LinearSlideUpTable[(pChn->nArpeggio >> 4) * 16]; break;
+					case 2: arpRatio = LinearSlideUpTable[(pChn->nArpeggio & 0x0F) * 16]; break;
 					}
+					if(m_SongFlags[SONG_LINEARSLIDES])
+						period = Util::muldivr(period, arpRatio, 65536);
+					else
+						period = Util::muldivr(period, 65536, arpRatio);
 				}
 			} else if(IsCompatibleMode(TRK_FASTTRACKER2))
 			{
