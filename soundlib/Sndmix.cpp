@@ -51,22 +51,6 @@ static const UINT PreAmpAGCTable[16] =
 };
 #endif
 
-typedef CTuning::RATIOTYPE RATIOTYPE;
-
-static const RATIOTYPE TwoToPowerXOver12Table[16] =
-{
-	1.0F		   , 1.059463094359F, 1.122462048309F, 1.1892071150027F,
-	1.259921049895F, 1.334839854170F, 1.414213562373F, 1.4983070768767F,
-	1.587401051968F, 1.681792830507F, 1.781797436281F, 1.8877486253634F,
-	2.0F		   , 2.118926188719F, 2.244924096619F, 2.3784142300054F
-};
-
-inline RATIOTYPE TwoToPowerXOver12(const BYTE i)
-//-------------------------------------------
-{
-	return (i < 16) ? TwoToPowerXOver12Table[i] : 1;
-}
-
 
 void CSoundFile::SetMixerSettings(const MixerSettings &mixersettings)
 //-------------------------------------------------------------------
@@ -712,7 +696,7 @@ void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol) const
 				{
 					pChn->nTremorCount--;
 				}
-				
+
 				pChn->dwFlags.set(CHN_FASTVOLRAMP);
 			}
 
@@ -817,7 +801,7 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol) const
 			int envValueAtReleaseNode = pIns->VolEnv.Values[pIns->VolEnv.nReleaseNode] * 4;
 
 			//If we have just hit the release node, force the current env value
-			//to be that of the release node. This works around the case where 
+			//to be that of the release node. This works around the case where
 			// we have another node at the same position as the release node.
 			if(envpos == pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode])
 				envval = envValueAtReleaseNode;
@@ -1196,7 +1180,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 			case 0:
 				arpeggioSteps = 0;
 				break;
-			case 1: 
+			case 1:
 				arpeggioSteps = pChn->nArpeggio >> 4; // >> 4 <-> division by 16. This gives the first number in the parameter.
 				break;
 			case 2:
@@ -1217,8 +1201,8 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 				{
 					switch(tick % 3)
 					{
-					case 1: period = Util::Round<int>(period / TwoToPowerXOver12(pChn->nArpeggio >> 4)); break;
-					case 2: period = Util::Round<int>(period / TwoToPowerXOver12(pChn->nArpeggio & 0x0F)); break;
+					case 1: period *= LinearSlideUpTable[(pChn->nArpeggio >> 4) * 16]; break;
+					case 2: period *= LinearSlideUpTable[(pChn->nArpeggio & 0x0F) * 16]; break;
 					}
 				}
 			} else if(IsCompatibleMode(TRK_FASTTRACKER2))
@@ -1589,7 +1573,7 @@ void CSoundFile::ProcessRamping(ModChannel *pChn) const
 			// apply FT2-style super-soft volume ramping (5ms), overriding openmpt settings
 			rampLength = globalRampLength = Util::muldivr(5, m_MixerSettings.gdwMixingFreq, 1000);
 		}
-		
+
 		if(pChn->pModInstrument != nullptr && rampUp)
 		{
 			instrRampLength = pChn->pModInstrument->nVolRampUp;
@@ -1700,7 +1684,7 @@ bool CSoundFile::ReadNote()
 	DWORD nMasterVol;
 	{
 		CHANNELINDEX nchn32 = Clamp(m_nChannels, CHANNELINDEX(1), CHANNELINDEX(31));
-		
+
 		DWORD mastervol;
 
 		if (m_PlayConfig.getUseGlobalPreAmp())
@@ -1822,7 +1806,7 @@ bool CSoundFile::ReadNote()
 			{
 				// IMPORTANT: pChn->nRealVolume is 14 bits !!!
 				// -> Util::muldiv( 14+8, 6+6, 18); => RealVolume: 14-bit result (22+12-20)
-				
+
 				if(pChn->dwFlags[CHN_SYNCMUTE])
 				{
 					pChn->nRealVolume = 0;
@@ -1842,7 +1826,7 @@ bool CSoundFile::ReadNote()
 			if (pChn->nPeriod < m_nMinPeriod) pChn->nPeriod = m_nMinPeriod;
 			if(IsCompatibleMode(TRK_FASTTRACKER2)) Clamp(pChn->nPeriod, 1, 31999);
 			period = pChn->nPeriod;
-			
+
 			// When glissando mode is set to semitones, clamp to the next halftone.
 			if((pChn->dwFlags[CHN_GLISSANDO] && IsCompatibleMode(TRK_ALLTRACKERS))
 				|| ((pChn->dwFlags & (CHN_GLISSANDO | CHN_PORTAMENTO)) == (CHN_GLISSANDO | CHN_PORTAMENTO) && !IsCompatibleMode(TRK_ALLTRACKERS)))
@@ -1897,7 +1881,7 @@ bool CSoundFile::ReadNote()
 
 		// Plugins may also receive vibrato
 		ProcessVibrato(nChn, period, vibratoFactor);
-		
+
 		if(samplePlaying)
 		{
 			int nPeriodFrac = 0;
@@ -1923,7 +1907,7 @@ bool CSoundFile::ReadNote()
 				period = m_nMaxPeriod;
 				nPeriodFrac = 0;
 			}*/
-			
+
 			if(GetType() == MOD_TYPE_MPT && pIns != nullptr && pIns->pTuning != nullptr)
 			{
 				// In this case: GetType() == MOD_TYPE_MPT and using custom tunings.
@@ -2010,7 +1994,7 @@ bool CSoundFile::ReadNote()
 					// Extra attenuation required here if we're bypassing pre-amp.
 					realvol = (pChn->nRealVolume * kChnMasterVol) >> 8;
 				}
-				
+
 				const forcePanningMode panningMode = m_PlayConfig.getForcePanningMode();
 				if(panningMode == forceSoftPanning || (panningMode == dontForcePanningMode && (m_MixerSettings.MixerFlags & SNDMIX_SOFTPANNING)))
 				{
@@ -2195,7 +2179,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 	}
 
 	const uint32 defaultVolume = pIns->nGlobalVol;
-	
+
 	//If new note, determine notevelocity to use.
 	if(note != NOTE_NONE)
 	{
@@ -2215,7 +2199,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 		pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, realNote, velocity, nChn);
 	}
 
-	
+
 	const bool processVolumeAlsoOnNote = (pIns->nPluginVelocityHandling == PLUGIN_VELOCITYHANDLING_VOLUME);
 
 	if((hasVolCommand && !note) || (note && processVolumeAlsoOnNote))
