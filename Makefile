@@ -230,7 +230,7 @@ CFLAGS   += -O0 -g
 else
 ifeq ($(OPTIMIZE),1)
 CXXFLAGS += -O3 -ffast-math
-CFLAGS   += -O3 -ffast-math
+CFLAGS   += -O3 -ffast-math -fno-strict-aliasing
 endif
 endif
 
