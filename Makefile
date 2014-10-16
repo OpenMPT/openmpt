@@ -229,8 +229,8 @@ CXXFLAGS += -O0 -g
 CFLAGS   += -O0 -g
 else
 ifeq ($(OPTIMIZE),1)
-CXXFLAGS += -O3 -fno-strict-aliasing -ffast-math
-CFLAGS   += -O3 -fno-strict-aliasing -ffast-math
+CXXFLAGS += -O3 -ffast-math
+CFLAGS   += -O3 -ffast-math
 endif
 endif
 
