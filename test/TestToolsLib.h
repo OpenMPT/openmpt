@@ -84,6 +84,18 @@ struct ToStringHelper<FlagSet<enum_t, store_t> >
 
 namespace Test {
 
+// We do not generally have type_traits from C++03-TR2
+// and std::numeric_limits does not provide a is_integer which is useable as template argument.
+template <typename T> struct is_integer : public mpt::false_type { };
+template <> struct is_integer<signed short>     : public mpt::true_type { };
+template <> struct is_integer<signed int>       : public mpt::true_type { };
+template <> struct is_integer<signed long>      : public mpt::true_type { };
+template <> struct is_integer<signed long long> : public mpt::true_type { };
+template <> struct is_integer<unsigned short>     : public mpt::true_type { };
+template <> struct is_integer<unsigned int>       : public mpt::true_type { };
+template <> struct is_integer<unsigned long>      : public mpt::true_type { };
+template <> struct is_integer<unsigned long long> : public mpt::true_type { };
+
 class Testcase
 {
 
@@ -112,6 +124,33 @@ public:
 
 	void ReportException();
 
+private:
+
+	template <typename Tx, typename Ty>
+	inline bool IsEqual(const Tx &x, const Ty &y, mpt::false_type, mpt::false_type)
+	{
+		return (x == y);
+	}
+
+	template <typename Tx, typename Ty>
+	inline bool IsEqual(const Tx &x, const Ty &y, mpt::false_type, mpt::true_type)
+	{
+		return (x == y);
+	}
+
+	template <typename Tx, typename Ty>
+	inline bool IsEqual(const Tx &x, const Ty &y, mpt::true_type, mpt::false_type)
+	{
+		return (x == y);
+	}
+
+	template <typename Tx, typename Ty>
+	inline bool IsEqual(const Tx &x, const Ty &y, mpt::true_type /* is_integer */, mpt::true_type /* is_integer */ )
+	{
+		// Avoid signed-unsigned-comparison warnings and test equivalence in case of either type conversion direction.
+		return ((x == static_cast<Tx>(y)) && (static_cast<Ty>(x) == y));
+	}
+
 public:
 
 #if 0 // C++11 version
@@ -121,7 +160,7 @@ private:
 	template <typename Tx, typename Ty>
 	noinline void TypeCompareHelper(const Tx &x, const Ty &y)
 	{
-		if(x != y)
+		if(!IsEqual(x, y, is_integer<Tx>(), is_integer<Ty>()))
 		{
 			throw TestFailed(mpt::String::Print("%1 != %2", ToStringHelper<Tx>()(x), ToStringHelper<Ty>()(y)));
 			//throw TestFailed();
@@ -163,7 +202,7 @@ public:
 		ShowStart();
 		try
 		{
-			if(x != y)
+			if(!IsEqual(x, y, is_integer<Tx>(), is_integer<Ty>()))
 			{
 				//throw TestFailed(mpt::String::Print("%1 != %2", x, y));
 				throw TestFailed();

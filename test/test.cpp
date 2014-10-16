@@ -1257,7 +1257,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(strcmp(sndFile.ChnSettings[69].szName, "Last Channel______X"), 0);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].nPan, 256);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].nVolume, 7);
-	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].dwFlags, 0);
+	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].dwFlags, ChannelFlags(0));
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].nMixPlugin, 1);
 	// Samples
 	VERIFY_EQUAL_NONCONT(sndFile.GetNumSamples(), 3);
