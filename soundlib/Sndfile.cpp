@@ -170,6 +170,8 @@ MPWD			MIDI Pitch Wheel Depth
 
 #define MULTICHAR_STRING_TO_INT(str) MULTICHAR4_LE_MSVC((str)[0],(str)[1],(str)[2],(str)[3])
 
+#ifndef MODPLUG_NO_FILESAVE
+
 template<typename T, bool is_signed> struct IsNegativeFunctor { bool operator()(T val) const { return val < 0; } };
 template<typename T> struct IsNegativeFunctor<T, true> { bool operator()(T val) const { return val < 0; } };
 template<typename T> struct IsNegativeFunctor<T, false> { bool operator()(T /*val*/) const { return false; } };
@@ -266,10 +268,9 @@ bool IsNegative(const T &val)
 	} \
 /**/
 
-namespace {
 // Create 'dF..' entry.
-DWORD CreateExtensionFlags(const ModInstrument& ins)
-//--------------------------------------------------
+static DWORD CreateExtensionFlags(const ModInstrument& ins)
+//---------------------------------------------------------
 {
 	DWORD dwFlags = 0;
 	if(ins.VolEnv.dwFlags[ENV_ENABLED])		dwFlags |= dFdd_VOLUME;
@@ -289,9 +290,7 @@ DWORD CreateExtensionFlags(const ModInstrument& ins)
 	if(ins.dwFlags[INS_MUTE])				dwFlags |= dFdd_MUTE;
 	return dwFlags;
 }
-} // unnamed namespace.
 
-#ifndef MODPLUG_NO_FILESAVE
 // Write (in 'file') 'input' ModInstrument with 'code' & 'size' extra field infos for each member
 void WriteInstrumentHeaderStructOrField(ModInstrument * input, FILE * file, uint32 only_this_code, int16 fixedsize)
 {
@@ -376,6 +375,7 @@ WRITE_MPTHEADER_sized_member(	PanEnv.dwFlags			, uint32		, AFLG							)
 WRITE_MPTHEADER_sized_member(	VolEnv.dwFlags			, uint32		, VFLG							)
 WRITE_MPTHEADER_sized_member(	midiPWD					, int8			, MPWD							)
 }
+
 #endif // !MODPLUG_NO_FILESAVE
 
 
