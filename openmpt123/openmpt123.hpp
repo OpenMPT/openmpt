@@ -505,15 +505,19 @@ protected:
 		sampleQueueMaxFrames = frames;
 	}
 	template < typename Tsample >
+	float pop_queue() {
+		float val = 0.0f;
+		if ( !sampleQueue.empty() ) {
+			val = sampleQueue.front();
+			sampleQueue.pop_front();
+		}
+		return convert_sample_to<Tsample>( val );
+	}
+	template < typename Tsample >
 	void fill_buffer( Tsample * buf, std::size_t framesToRender ) {
 		for ( std::size_t frame = 0; frame < framesToRender; ++frame ) {
 			for ( std::size_t channel = 0; channel < channels; ++channel ) {
-				float val = 0.0f;
-				if ( !sampleQueue.empty() ) {
-					val = sampleQueue.front();
-					sampleQueue.pop_front();
-				}
-				*buf = convert_sample_to<Tsample>( val );
+				*buf = pop_queue<Tsample>();
 				buf++;
 			}
 		}

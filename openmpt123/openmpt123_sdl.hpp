@@ -66,7 +66,14 @@ private:
 		return reinterpret_cast<sdl_stream_raii*>( userdata )->sdl_callback( stream, len );
 	}
 	void sdl_callback( Uint8 * stream, int len ) {
-		fill_buffer( reinterpret_cast<std::int16_t*>( stream ), len / sizeof( std::int16_t ) / channels );
+		std::size_t framesToRender = len / sizeof( std::int16_t ) / channels;
+		for ( std::size_t frame = 0; frame < framesToRender; ++frame ) {
+			for ( std::size_t channel = 0; channel < channels; ++channel ) {
+				std::int16_t sample = pop_queue<std::int16_t>();
+				std::memcpy( stream, &sample, sizeof( std::int16_t ) );
+				stream += sizeof( std::int16_t );
+			}
+		}		
 	}
 public:
 	bool pause() {
