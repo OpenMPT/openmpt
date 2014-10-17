@@ -91,14 +91,37 @@ static mpt::PathString GetPathPrefix()
 }
 
 
-void DoTests(std::string pathprefix)
-//----------------------------------
+void DoTests()
+//------------
 {
 
 	#if MPT_OS_WINDOWS
-		PathPrefix = new mpt::PathString(mpt::PathString::FromLocale(pathprefix));
-	#else
+
+		// prefix for test suite
+		std::wstring pathprefix = std::wstring(); 
+
+		// set path prefix for test files (if provided)
+		std::vector<WCHAR> buf(GetEnvironmentVariableW(L"srcdir", NULL, 0) + 1);
+		if(GetEnvironmentVariableW(L"srcdir", &buf[0], buf.size()) > 0)
+		{
+			pathprefix = &buf[0];
+		}
+
 		PathPrefix = new mpt::PathString(mpt::PathString::FromNative(pathprefix));
+
+	#else
+
+		// prefix for test suite
+		std::string pathprefix = std::string();
+
+		// set path prefix for test files (if provided)
+		std::string env_srcdir = std::getenv( "srcdir" ) ? std::getenv( "srcdir" ) : std::string();
+		if ( !env_srcdir.empty() ) {
+			pathprefix = env_srcdir;
+		}
+
+		PathPrefix = new mpt::PathString(mpt::PathString::FromNative(pathprefix));
+
 	#endif
 
 	DO_TEST(TestVersion);
@@ -2392,8 +2415,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace Test {
 
-void DoTests(std::string /*pathprefix*/ )
-//-----------------------------....------
+void DoTests()
+//------------
 {
 	return;
 }
