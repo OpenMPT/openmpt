@@ -31,7 +31,7 @@ public:
 				interleaved_float_buffer.push_back( buffers[channel][frame] );
 			}
 		}
-		std::cout.write( (const char*)( interleaved_float_buffer.data() ), interleaved_float_buffer.size() * sizeof( float ) );
+		std::cout.write( reinterpret_cast<const char *>( interleaved_float_buffer.data() ), interleaved_float_buffer.size() * sizeof( float ) );
 	}
 	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) {
 		interleaved_int_buffer.clear();
@@ -40,7 +40,7 @@ public:
 				interleaved_int_buffer.push_back( buffers[channel][frame] );
 			}
 		}
-		std::cout.write( (const char*)( interleaved_int_buffer.data() ), interleaved_int_buffer.size() * sizeof( std::int16_t ) );
+		std::cout.write( reinterpret_cast<const char *>( interleaved_int_buffer.data() ), interleaved_int_buffer.size() * sizeof( std::int16_t ) );
 	}
 };
 
