@@ -369,7 +369,8 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 	{
 		// IMA ADPCM 4:1
 		LimitMax(sample.nLength, MAX_SAMPLE_LENGTH);
-		sample.uFlags |= CHN_16BIT;
+		sample.uFlags.set(CHN_16BIT);
+		sample.uFlags.reset(CHN_STEREO);
 		if(!sample.AllocateSample())
 		{
 			return false;
