@@ -441,7 +441,7 @@ static std::wstring FromLocale(const std::string &str, wchar_t replacement = L'\
 	{
 		// nothing
 	}
-	ASSERT(false);
+	MPT_ASSERT(false);
 	return String::FromAscii(str, replacement); // fallback
 }
 
@@ -472,7 +472,7 @@ static std::string ToLocale(const std::wstring &str, char replacement = '?')
 	{
 		// nothing
 	}
-	ASSERT(false);
+	MPT_ASSERT(false);
 	return String::ToAscii(str, replacement); // fallback
 }
 
@@ -1305,7 +1305,7 @@ inline std::wstring FormatValWHelper(const T & x, const Format & f)
 template<typename Tchar>
 inline Format ParseFormatStringFloat(const Tchar * str)
 {
-	ASSERT(str);
+	MPT_ASSERT(str);
 	FormatFlags f = FormatFlags();
 	std::size_t width = 0;
 	int precision = -1;

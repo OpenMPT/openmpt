@@ -357,7 +357,7 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 		pDlg = m_Pages[nIndex];
 	} else //Ctrl window is not created yet - creating one.
 	{
-		ALWAYS_ASSERT(GetDocument() != nullptr);
+		MPT_ASSERT_ALWAYS(GetDocument() != nullptr);
 		switch(nID)
 		{
 		//rewbs.graph

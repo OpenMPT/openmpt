@@ -195,72 +195,70 @@ OPENMPT_NAMESPACE_BEGIN
 #if !defined(ASSERT)
 #error "MFC is expected to #define ASSERT"
 #endif // !defined(ASERRT)
-#define MPT_ASSERT_IS_DEFINED
+#define MPT_FRAMEWORK_ASSERT_IS_DEFINED
 
 #if defined(_DEBUG)
- #define MPT_ASSERT_IS_ACTIVE 1
+ #define MPT_FRAMEWORK_ASSERT_IS_ACTIVE 1
 #else // !_DEBUG
- #define MPT_ASSERT_IS_ACTIVE 0
+ #define MPT_FRAMEWORK_ASSERT_IS_ACTIVE 0
 #endif // _DEBUG
+
+// let MFC handle our asserts
+#define MPT_ASSERT_USE_FRAMEWORK 1
 
 #else // !_MFC_VER
 
 #if defined(ASSERT)
-#error "ASSERT(expr) is expected to NOT be defined by any other header"
+#define MPT_FRAMEWORK_ASSERT_IS_DEFINED
+#if defined(_DEBUG)
+ #define MPT_FRAMEWORK_ASSERT_IS_ACTIVE 1
+#else // !_DEBUG
+ #define MPT_FRAMEWORK_ASSERT_IS_ACTIVE 0
+#endif // _DEBUG
 #endif // !defined(ASERRT)
+
+// handle assert in our own way without relying on some platform-/framework-specific assert implementation
+#define MPT_ASSERT_USE_FRAMEWORK 0
 
 #endif // _MFC_VER
 
 
-#if defined(MPT_ASSERT_IS_DEFINED)
+#if defined(MPT_FRAMEWORK_ASSERT_IS_DEFINED) && (MPT_ASSERT_USE_FRAMEWORK == 1)
 
-//#define ASSERT // already defined
-#define ASSERT_WARN_MESSAGE(expr,msg) ASSERT(expr)
+#define MPT_ASSERT(expr)                 ASSERT((expr))
+#define MPT_ASSERT_MSG(expr, msg)        ASSERT((expr) && (msg))
+#if (MPT_FRAMEWORK_ASSERT_IS_ACTIVE == 1)
+#define MPT_ASSERT_ALWAYS(expr)          ASSERT((expr))
+#define MPT_ASSERT_ALWAYS_MSG(expr, msg) ASSERT((expr) && (msg))
+#else
+#define MPT_ASSERT_ALWAYS(expr)          do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
+#define MPT_ASSERT_ALWAYS_MSG(expr, msg) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } } while(0)
+#ifndef MPT_ASSERT_HANDLER_NEEDED
+#define MPT_ASSERT_HANDLER_NEEDED
+#endif
+#endif
 
 #elif defined(NO_ASSERTS)
 
-#define MPT_ASSERT_IS_DEFINED
-#define MPT_ASSERT_IS_ACTIVE 0
-#define ASSERT(expr) do { } while(0)
-#define ASSERT_WARN_MESSAGE(expr,msg) do { } while(0)
+#define MPT_ASSERT(expr)                 do { } while(0)
+#define MPT_ASSERT_MSG(expr, msg)        do { } while(0)
+#define MPT_ASSERT_ALWAYS(expr)          do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
+#define MPT_ASSERT_ALWAYS_MSG(expr, msg) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } } while(0)
+#ifndef MPT_ASSERT_HANDLER_NEEDED
+#define MPT_ASSERT_HANDLER_NEEDED
+#endif
 
 #else // !NO_ASSERTS
 
-#define MPT_ASSERT_IS_DEFINED
-#define MPT_ASSERT_IS_ACTIVE 1
-#define ASSERT(expr) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
-#define ASSERT_WARN_MESSAGE(expr,msg) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } } while(0)
+#define MPT_ASSERT(expr)                 do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
+#define MPT_ASSERT_MSG(expr, msg)        do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } } while(0)
+#define MPT_ASSERT_ALWAYS(expr)          do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
+#define MPT_ASSERT_ALWAYS_MSG(expr, msg) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } } while(0)
 #ifndef MPT_ASSERT_HANDLER_NEEDED
 #define MPT_ASSERT_HANDLER_NEEDED
 #endif
 
 #endif // NO_ASSERTS
-
-// error checking
-#if !defined(MPT_ASSERT_IS_DEFINED)
-#error "ASSERT(expr) has to be defined"
-#endif // !MPT_ASSERT_IS_DEFINED
-#if MPT_ASSERT_IS_ACTIVE && defined(NO_ASSERTS)
-#error "ASSERT is active but NO_ASSERT is defined"
-#elif !MPT_ASSERT_IS_ACTIVE && !defined(NO_ASSERTS)
-#error "NO_ASSERT is not defined but ASSERTs are not active"
-#endif
-
-
-#if (MPT_ASSERT_IS_ACTIVE == 1)
-
-#define ALWAYS_ASSERT(expr) ASSERT(expr)
-#define ALWAYS_ASSERT_WARN_MESSAGE(expr,msg) ASSERT_WARN_MESSAGE(expr,msg)
-
-#else // (MPT_ASSERT_IS_ACTIVE != 1)
-
-#define ALWAYS_ASSERT(expr) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
-#define ALWAYS_ASSERT_WARN_MESSAGE(expr,msg) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } } while(0)
-#ifndef MPT_ASSERT_HANDLER_NEEDED
-#define MPT_ASSERT_HANDLER_NEEDED
-#endif
-
-#endif // MPT_ASSERT_IS_ACTIVE
 
 
 #if defined(MPT_ASSERT_HANDLER_NEEDED)

@@ -38,13 +38,13 @@ public:
 	// Initialize default sized sequence.
 	void Init();
 
-	PATTERNINDEX& operator[](const size_t i) {ASSERT(i < m_nSize); return m_pArray[i];}
-	const PATTERNINDEX& operator[](const size_t i) const {ASSERT(i < m_nSize); return m_pArray[i];}
+	PATTERNINDEX& operator[](const size_t i) {MPT_ASSERT(i < m_nSize); return m_pArray[i];}
+	const PATTERNINDEX& operator[](const size_t i) const {MPT_ASSERT(i < m_nSize); return m_pArray[i];}
 	PATTERNINDEX& At(const size_t i) {return (*this)[i];}
 	const PATTERNINDEX& At(const size_t i) const {return (*this)[i];}
 
-	PATTERNINDEX& Last() {ASSERT(m_nSize > 0); return m_pArray[m_nSize-1];}
-	const PATTERNINDEX& Last() const {ASSERT(m_nSize > 0); return m_pArray[m_nSize-1];}
+	PATTERNINDEX& Last() {MPT_ASSERT(m_nSize > 0); return m_pArray[m_nSize-1];}
+	const PATTERNINDEX& Last() const {MPT_ASSERT(m_nSize > 0); return m_pArray[m_nSize-1];}
 
 	// Returns last accessible index, i.e. GetLength() - 1. Behaviour is undefined if length is zero.
 	ORDERINDEX GetLastIndex() const {return m_nSize - 1;}

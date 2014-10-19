@@ -1950,9 +1950,9 @@ struct FLACDecoder
 		int8 *sampleData8 = static_cast<int8 *>(sample.pSample) + offset;
 		int16 *sampleData16 = static_cast<int16 *>(sample.pSample) + offset;
 
-		ASSERT((bps <= 8 && sample.GetElementarySampleSize() == 1) || (bps > 8 && sample.GetElementarySampleSize() == 2));
-		ASSERT(modChannels <= FLAC__stream_decoder_get_channels(decoder));
-		ASSERT(bps == FLAC__stream_decoder_get_bits_per_sample(decoder));
+		MPT_ASSERT((bps <= 8 && sample.GetElementarySampleSize() == 1) || (bps > 8 && sample.GetElementarySampleSize() == 2));
+		MPT_ASSERT(modChannels <= FLAC__stream_decoder_get_channels(decoder));
+		MPT_ASSERT(bps == FLAC__stream_decoder_get_bits_per_sample(decoder));
 		MPT_UNREFERENCED_PARAMETER(decoder); // decoder is unused if ASSERTs are compiled out
 
 		// Do the sample conversion
@@ -2232,7 +2232,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		SampleToFLAC32<int16>(sampleData, sample.pSample, numSamples);
 	} else
 	{
-		ASSERT(false);
+		MPT_ASSERT(false);
 	}
 
 	// Do the actual conversion.

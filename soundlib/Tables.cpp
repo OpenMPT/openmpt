@@ -863,8 +863,8 @@ static void getsinc(SINC_TYPE *psinc, double beta, double lowpass_factor)
 		double coeff = fsinc * lowpass_factor;
 #ifdef MPT_INTMIXER
 		int n = (int)std::floor(coeff * (1<<SINC_QUANTSHIFT) + 0.5);
-		ASSERT(n <= int16_max);
-		ASSERT(n > int16_min);
+		MPT_ASSERT(n <= int16_max);
+		MPT_ASSERT(n > int16_min);
 		*psinc++ = static_cast<SINC_TYPE>(n);
 #else
 		*psinc++ = static_cast<SINC_TYPE>(coeff);

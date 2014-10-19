@@ -676,7 +676,7 @@ void CMainFrame::FillAudioBufferLocked(SoundDevice::IFillAudioBuffer &callback)
 {
 	MPT_TRACE();
 	CriticalSection cs;
-	ALWAYS_ASSERT(m_pSndFile != nullptr);
+	MPT_ASSERT_ALWAYS(m_pSndFile != nullptr);
 	m_AudioThreadId = GetCurrentThreadId();
 	mpt::log::Trace::SetThreadId(mpt::log::Trace::ThreadKindAudio, m_AudioThreadId);
 	callback.FillAudioBuffer();
@@ -701,7 +701,7 @@ public:
 		, dither(dither_)
 		, buffer(buffer_)
 	{
-		ALWAYS_ASSERT(sampleFormat.IsValid());
+		MPT_ASSERT_ALWAYS(sampleFormat.IsValid());
 	}
 	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
 	{

@@ -63,7 +63,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		return 0;
 	}
 
-	ASSERT(sampleSize >= sample.GetSampleSizeInBytes());
+	MPT_ASSERT(sampleSize >= sample.GetSampleSizeInBytes());
 
 	//////////////////////////////////////////////////////
 	// 8-Bit / Mono / PCM
@@ -577,7 +577,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		}
 	}
 
-	ASSERT(filePosition + bytesRead <= file.GetLength());
+	MPT_ASSERT(filePosition + bytesRead <= file.GetLength());
 	file.Seek(filePosition + bytesRead);
 	return bytesRead;
 }

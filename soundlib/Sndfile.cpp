@@ -195,7 +195,7 @@ bool IsNegative(const T &val)
 		mpt::IO::WriteIntLE<int16>(file, fsize); \
 	} else if(only_this_code == fcode)\
 	{ \
-		ASSERT(fixedsize == fsize); \
+		MPT_ASSERT(fixedsize == fsize); \
 	} \
 	if(only_this_code == fcode || only_this_code == Util::MaxValueOfType(only_this_code)) \
 	{ \
@@ -224,7 +224,7 @@ bool IsNegative(const T &val)
 		/* hackish workaround to resolve mismatched size values: */ \
 		/* nResampling was a long time declared as uint32 but these macro tables used uint16 and UINT. */ \
 		/* This worked fine on little-endian, on big-endian not so much. Thus support writing size-mismatched fields. */ \
-		ASSERT(fixedsize >= fsize); \
+		MPT_ASSERT(fixedsize >= fsize); \
 		type tmp = (type)(input-> name ); \
 		tmp = SwapBytesReturnLE(tmp); \
 		fwrite(&tmp , 1 , fsize , file); \
@@ -244,7 +244,7 @@ bool IsNegative(const T &val)
 // ------------------------------------------------------------------------
 #define WRITE_MPTHEADER_array_member(name,type,code,arraysize) \
 	STATIC_ASSERT(sizeof(type) == sizeof(input-> name [0])); \
-	ASSERT(sizeof(input->name) >= sizeof(type) * arraysize);\
+	MPT_ASSERT(sizeof(input->name) >= sizeof(type) * arraysize);\
 	fcode = MULTICHAR_STRING_TO_INT(#code);\
 	fsize = sizeof( type ) * arraysize;\
 	if(only_this_code == Util::MaxValueOfType(only_this_code)) \
@@ -253,7 +253,7 @@ bool IsNegative(const T &val)
 		mpt::IO::WriteIntLE<int16>(file, fsize); \
 	} else if(only_this_code == fcode)\
 	{ \
-		/* ASSERT(fixedsize <= fsize); */ \
+		/* MPT_ASSERT(fixedsize <= fsize); */ \
 		fsize = fixedsize; /* just trust the size we got passed */ \
 	} \
 	if(only_this_code == fcode || only_this_code == Util::MaxValueOfType(only_this_code)) \
@@ -299,7 +299,7 @@ int16 fsize;
 
 if(only_this_code != Util::MaxValueOfType(only_this_code))
 {
-	ASSERT(fixedsize > 0);
+	MPT_ASSERT(fixedsize > 0);
 }
 
 WRITE_MPTHEADER_sized_member(	nFadeOut				, UINT			, FO..							)
@@ -1430,7 +1430,7 @@ MODTYPE CSoundFile::GetBestSaveFormat() const
 const char *CSoundFile::GetSampleName(SAMPLEINDEX nSample) const
 //--------------------------------------------------------------
 {
-	ASSERT(nSample <= GetNumSamples());
+	MPT_ASSERT(nSample <= GetNumSamples());
 	if (nSample < MAX_SAMPLES)
 	{
 		return m_szNames[nSample];
@@ -1447,7 +1447,7 @@ const char *CSoundFile::GetInstrumentName(INSTRUMENTINDEX nInstr) const
 	if((nInstr >= MAX_INSTRUMENTS) || (!Instruments[nInstr]))
 		return "";
 
-	ASSERT(nInstr <= GetNumInstruments());
+	MPT_ASSERT(nInstr <= GetNumInstruments());
 	return Instruments[nInstr]->name;
 }
 
@@ -1696,7 +1696,7 @@ bool CSoundFile::LoadStaticTunings()
 	}
 	if(s_pTuningsSharedBuiltIn->GetNumTunings() == 0)
 	{
-		ASSERT(false);
+		MPT_ASSERT(false);
 		CTuningRTI* pT = new CTuningRTI;
 		//Note: Tuning collection class handles deleting.
 		pT->CreateGeometric(1,1);
@@ -1919,7 +1919,7 @@ UINT CSoundFile::GetTickDuration(UINT tempo, UINT speed, ROWINDEX rowsPerBeat)
 				bufferCount--;
 				m_PlayState.m_dBufferDiff++;
 			}
-			ASSERT(abs(m_PlayState.m_dBufferDiff) < 1);
+			MPT_ASSERT(abs(m_PlayState.m_dBufferDiff) < 1);
 			retval = bufferCount;
 		}
 		break;

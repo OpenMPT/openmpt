@@ -175,7 +175,7 @@ bool RowVisitor::GetFirstUnvisitedRow(ORDERINDEX &order, ROWINDEX &row, bool fas
 void RowVisitor::ResetPatternLoop(ORDERINDEX order, ROWINDEX startRow)
 //--------------------------------------------------------------------
 {
-	ASSERT(order == currentOrder);	// Shouldn't trigger, unless we're jumping around in the GUI during a pattern loop.
+	MPT_ASSERT(order == currentOrder);	// Shouldn't trigger, unless we're jumping around in the GUI during a pattern loop.
 	
 	// Unvisit all rows that are in the visited row buffer, until we hit the start row for this pattern loop.
 	ROWINDEX row = ROWINDEX_INVALID;

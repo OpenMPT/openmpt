@@ -531,7 +531,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				}
 			case PSMChunk::idPPAN: // PPAN - Channel panning table (used in Sinaria)
 				// In some Sinaria tunes, this is actually longer than 2 * channels...
-				ASSERT(subChunkHead.length >= m_nChannels * 2u);
+				MPT_ASSERT(subChunkHead.length >= m_nChannels * 2u);
 				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 				{
 					if(!subChunk.CanRead(2))

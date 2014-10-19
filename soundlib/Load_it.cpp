@@ -799,7 +799,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				chnMask.resize(ch + 1, 0);
 				lastValue.resize(ch + 1, ModCommand::Empty());
-				ASSERT(chnMask.size() <= GetNumChannels());
+				MPT_ASSERT(chnMask.size() <= GetNumChannels());
 			}
 
 			if(b & IT_bitmask_patternChanEnabled_c)  // 0x80
@@ -1619,7 +1619,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	const uint32 MPTStartPos = (uint32)fout.tellp();
 	
 	// catch standard library truncating files
-	ALWAYS_ASSERT(MPTStartPos > 0);
+	MPT_ASSERT_ALWAYS(MPTStartPos > 0);
 
 	srlztn::SsbWrite ssb(fout);
 	ssb.BeginWrite("mptm", MptVersion::num);
@@ -1984,7 +1984,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	{ \
 		const uint32 code = MAGIC4BE(c1, c2, c3, c4); \
 		mpt::IO::WriteIntLE<uint32>(f, code); \
-		ASSERT(fsize <= uint16_max); \
+		MPT_ASSERT(fsize <= uint16_max); \
 		const uint16 size = fsize; \
 		mpt::IO::WriteIntLE<uint16>(f, size); \
 	}

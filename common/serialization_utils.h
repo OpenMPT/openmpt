@@ -465,7 +465,7 @@ inline SsbRead::IdMatchStatus SsbRead::CompareId(const ReadIterator& iter, const
 inline SsbRead::ReadIterator SsbRead::GetReadBegin()
 //------------------------------------------
 {
-	ASSERT(GetFlag(RwfRMapHasId) && (GetFlag(RwfRMapHasStartpos) || GetFlag(RwfRMapHasSize) || m_nFixedEntrySize > 0));
+	MPT_ASSERT(GetFlag(RwfRMapHasId) && (GetFlag(RwfRMapHasStartpos) || GetFlag(RwfRMapHasSize) || m_nFixedEntrySize > 0));
 	if (GetFlag(RwfRMapCached) == false)
 		CacheMap();
 	return mapData.begin();

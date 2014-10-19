@@ -31,7 +31,7 @@ DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier) const
 //-----------------------------------------------------------------------
 {
 	float Fc;
-	ASSERT(nCutOff < 128);
+	MPT_ASSERT(nCutOff < 128);
 	if(m_SongFlags[SONG_EXFILTERRANGE])
 		Fc = 110.0f * pow(2.0f, 0.25f + ((float)(nCutOff * (flt_modifier + 256))) / (20.0f * 512.0f));
 	else

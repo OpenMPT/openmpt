@@ -623,7 +623,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	// Files that have restart pos == 0x78: action's batman by DJ Uno (M.K.), 3ddance.mod (M15, so handled by ReadM15),
 	// VALLEY.MOD (M.K.), WormsTDC.MOD (M.K.), ZWARTZ.MOD (M.K.)
 	// Files that have an order list longer than 0x78 with restart pos = 0x78: my_shoe_is_barking.mod, papermix.mod
-	ASSERT(m_nRestartPos != 0x78 || m_nRestartPos + 1u >= realOrders);
+	MPT_ASSERT(m_nRestartPos != 0x78 || m_nRestartPos + 1u >= realOrders);
 	if(m_nRestartPos >= 128 || m_nRestartPos + 1u >= realOrders || m_nRestartPos == 0x78)
 	{
 		m_nRestartPos = 0;
@@ -839,7 +839,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			return false;
 		}
-		ASSERT(sampleHeader.finetune == 0);
+		MPT_ASSERT(sampleHeader.finetune == 0);
 
 		totalSampleLen += Samples[smp].nLength;
 

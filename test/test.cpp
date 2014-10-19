@@ -877,7 +877,7 @@ struct CustomSettingsTestType
 template <>
 inline Test::CustomSettingsTestType FromSettingValue(const SettingValue &val)
 {
-	ASSERT(val.GetTypeTag() == "myType");
+	MPT_ASSERT(val.GetTypeTag() == "myType");
 	std::string xy = val.as<std::string>();
 	if(xy.empty())
 	{
