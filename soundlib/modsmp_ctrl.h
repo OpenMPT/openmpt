@@ -95,7 +95,7 @@ namespace ctrlChn
 
 // Replaces sample from sound channels by given sample.
 void ReplaceSample( ModChannel (&Chn)[MAX_CHANNELS],
-					const ModSample * const pSample,
+					const ModSample &sample,
 					const void * const pNewSample,
 					const SmpLength nNewLength,
 					FlagSet<ChannelFlags> setFlags,

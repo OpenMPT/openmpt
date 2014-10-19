@@ -34,7 +34,7 @@ void ReplaceSample(ModSample &smp, void *pNewSample, const SmpLength nNewLength,
 
 	CriticalSection cs;
 
-	ctrlChn::ReplaceSample(sndFile.m_PlayState.Chn, &smp, pNewSample, nNewLength, setFlags, resetFlags);
+	ctrlChn::ReplaceSample(sndFile.m_PlayState.Chn, smp, pNewSample, nNewLength, setFlags, resetFlags);
 	smp.pSample = pNewSample;
 	smp.nLength = nNewLength;
 	ModSample::FreeSample(pOldSmp);
@@ -737,7 +737,7 @@ namespace ctrlChn
 {
 
 void ReplaceSample( ModChannel (&Chn)[MAX_CHANNELS],
-					const ModSample * const pSample,
+					const ModSample &sample,
 					const void * const pNewSample,
 					const SmpLength nNewLength,
 					FlagSet<ChannelFlags> setFlags,
@@ -745,14 +745,23 @@ void ReplaceSample( ModChannel (&Chn)[MAX_CHANNELS],
 {
 	for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 	{
-		if (Chn[i].pModSample == pSample)
+		if (Chn[i].pModSample == &sample)
 		{
 			if (Chn[i].pCurrentSample != nullptr)
 				Chn[i].pCurrentSample = pNewSample;
 			if (Chn[i].nPos > nNewLength)
 				Chn[i].nPos = 0;
 			if (Chn[i].nLength > 0)
-				Chn[i].nLength = nNewLength;
+				LimitMax(Chn[i].nLength, nNewLength);
+			if(Chn[i].InSustainLoop())
+			{
+				Chn[i].nLoopStart = sample.nSustainStart;
+				Chn[i].nLoopEnd = sample.nSustainEnd;
+			} else
+			{
+				Chn[i].nLoopStart = sample.nLoopStart;
+				Chn[i].nLoopEnd = sample.nLoopEnd;
+			}
 			Chn[i].dwFlags.set(setFlags);
 			Chn[i].dwFlags.reset(resetFlags);
 		}
