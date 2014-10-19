@@ -99,6 +99,13 @@ PortMidi library, which are both released under the MIT license.
 Visit http://www.portaudio.com/ and http://portmedia.sourceforge.net/ for more
 information.
 
+r8brain-free
+------------
+OpenMPT uses r8brain-free for sample rate conversion in the sample editor, which
+is released under the MIT license.
+Sample rate converter designed by Aleksey Vaneev of Voxengo
+Visit https://code.google.com/p/r8brain-free-src/ for more information.
+
 unmo3.dll
 ---------
 Copyright (c) 2001-2014 Ian Luck. All rights reserved

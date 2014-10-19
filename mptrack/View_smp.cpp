@@ -24,6 +24,7 @@
 #include "SampleEditorDialogs.h"
 #include "../soundlib/WAVTools.h"
 #include "../soundlib/FileReader.h"
+#include "../soundlib/SampleFormatConverters.h"
 
 #define new DEBUG_NEW
 
@@ -90,6 +91,7 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_SETLOOP,			OnSetLoop)
 	ON_COMMAND(ID_SAMPLE_SETSUSTAINLOOP,	OnSetSustainLoop)
 	ON_COMMAND(ID_SAMPLE_8BITCONVERT,		On8BitConvert)
+	ON_COMMAND(ID_SAMPLE_16BITCONVERT,		On16BitConvert)
 	ON_COMMAND(ID_SAMPLE_MONOCONVERT,		OnMonoConvertMix)
 	ON_COMMAND(ID_SAMPLE_MONOCONVERT_LEFT,	OnMonoConvertLeft)
 	ON_COMMAND(ID_SAMPLE_MONOCONVERT_RIGHT,	OnMonoConvertRight)
@@ -1728,10 +1730,10 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 		{
 			if (m_dwEndSel >= m_dwBeginSel + 4)
 			{
-				::AppendMenu(hMenu, MF_STRING | (CanZoomSelection() ? 0 : MF_GRAYED), ID_SAMPLE_ZOOMONSEL, "Zoom\t" + ih->GetKeyTextFromCommand(kcSampleZoomSelection));
-				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETLOOP, "Set As Loop");
+				::AppendMenu(hMenu, MF_STRING | (CanZoomSelection() ? 0 : MF_GRAYED), ID_SAMPLE_ZOOMONSEL, _T("Zoom\t") + ih->GetKeyTextFromCommand(kcSampleZoomSelection));
+				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETLOOP, _T("Set As Loop"));
 				if (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
-					::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETSUSTAINLOOP, "Set As Sustain Loop");
+					::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETSUSTAINLOOP, _T("Set As Sustain Loop"));
 				::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			} else
 			{
@@ -1740,10 +1742,10 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				if (dwPos <= sample.nLength)
 				{
 					//Set loop points
-					wsprintf(s, "Set &Loop Start to:\t%d", dwPos);
+					wsprintf(s, _T("Set &Loop Start to:\t%u"), dwPos);
 					::AppendMenu(hMenu, MF_STRING | (dwPos + 4 <= sample.nLoopEnd ? 0 : MF_GRAYED),
 						ID_SAMPLE_SETLOOPSTART, s);
-					wsprintf(s, "Set &Loop End to:\t%d", dwPos);
+					wsprintf(s, _T("Set &Loop End to:\t%u"), dwPos);
 					::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nLoopStart + 4 ? 0 : MF_GRAYED),
 						ID_SAMPLE_SETLOOPEND, s);
 
@@ -1751,27 +1753,28 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 					{
 						//Set sustain loop points
 						::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-						wsprintf(s, "Set &Sustain Start to:\t%d", dwPos);
+						wsprintf(s, _T("Set &Sustain Start to:\t%u"), dwPos);
 						::AppendMenu(hMenu, MF_STRING | (dwPos + 4 <= sample.nSustainEnd ? 0 : MF_GRAYED),
 							ID_SAMPLE_SETSUSTAINSTART, s);
-						wsprintf(s, "Set &Sustain End to:\t%d", dwPos);
+						wsprintf(s, _T("Set &Sustain End to:\t%u"), dwPos);
 						::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nSustainStart + 4 ? 0 : MF_GRAYED),
 							ID_SAMPLE_SETSUSTAINEND, s);
 					}
-					::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+					::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 					m_dwMenuParam = dwPos;
 				}
 			}
 
 			if(sample.GetElementarySampleSize() > 1) ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_8BITCONVERT, "Convert to &8-bit\t" + ih->GetKeyTextFromCommand(kcSample8Bit));
+			else ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_16BITCONVERT, "Convert to &16-bit\t" + ih->GetKeyTextFromCommand(kcSample8Bit));
 			if(sample.GetNumChannels() > 1)
 			{
 				HMENU hMonoMenu = ::CreatePopupMenu();
-				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT, "&Mix Channels\t" + ih->GetKeyTextFromCommand(kcSampleMonoMix));
-				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_LEFT, "&Left Channel\t" + ih->GetKeyTextFromCommand(kcSampleMonoLeft));
-				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_RIGHT, "&Right Channel\t" + ih->GetKeyTextFromCommand(kcSampleMonoRight));
-				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_SPLIT, "&Split Sample\t" + ih->GetKeyTextFromCommand(kcSampleMonoSplit));
-				::AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hMonoMenu), "Convert to &Mono");
+				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT, _T("&Mix Channels\t") + ih->GetKeyTextFromCommand(kcSampleMonoMix));
+				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_LEFT, _T("&Left Channel\t") + ih->GetKeyTextFromCommand(kcSampleMonoLeft));
+				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_RIGHT, _T("&Right Channel\t") + ih->GetKeyTextFromCommand(kcSampleMonoRight));
+				::AppendMenu(hMonoMenu, MF_STRING, ID_SAMPLE_MONOCONVERT_SPLIT, _T("&Split Sample\t") + ih->GetKeyTextFromCommand(kcSampleMonoSplit));
+				::AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hMonoMenu), _T("Convert to &Mono"));
 			}
 
 			// "Trim" menu item is responding differently if there's no selection,
@@ -1797,10 +1800,10 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			::AppendMenu(hMenu, MF_STRING|(bIsGrayed) ? MF_GRAYED : 0, ID_SAMPLE_TRIM, sTrimMenuText.c_str());
 			if((m_dwBeginSel == 0 && m_dwEndSel != 0) || (m_dwBeginSel < sample.nLength && m_dwEndSel == sample.nLength))
 			{
-				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_QUICKFADE, "Quick &fade\t" + ih->GetKeyTextFromCommand(kcSampleQuickFade));
+				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_QUICKFADE, _T("Quick &Fade\t") + ih->GetKeyTextFromCommand(kcSampleQuickFade));
 			}
-			::AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, "Cu&t\t" + ih->GetKeyTextFromCommand(kcEditCut));
-			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "&Copy\t" + ih->GetKeyTextFromCommand(kcEditCopy));
+			::AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, _T("Cu&t\t") + ih->GetKeyTextFromCommand(kcEditCut));
+			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, _T("&Copy\t") + ih->GetKeyTextFromCommand(kcEditCopy));
 		}
 		::AppendMenu(hMenu, MF_STRING | (IsClipboardFormatAvailable(CF_WAVE) ? 0 : MF_GRAYED), ID_EDIT_PASTE, "&Paste\t" + ih->GetKeyTextFromCommand(kcEditPaste));
 		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanUndo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_UNDO, "&Undo " + CString(pModDoc->GetSampleUndo().GetUndoName(m_nSample)) + "\t" + ih->GetKeyTextFromCommand(kcEditUndo));
@@ -1973,7 +1976,6 @@ void CViewSample::OnEditSelectAll()
 void CViewSample::AdjustLoopPoints(SmpLength &loopStart, SmpLength &loopEnd, SmpLength length) const
 //--------------------------------------------------------------------------------------------------
 {
-	const SmpLength selLength = m_dwEndSel - m_dwBeginSel;
 	Util::DeleteRange(m_dwBeginSel, m_dwEndSel - 1, loopStart, loopEnd);
 	LimitMax(loopEnd, length);
 	if(loopStart + 4 >= loopEnd)
@@ -2215,15 +2217,16 @@ void CViewSample::On8BitConvert()
 		ModSample &sample = sndFile.GetSample(m_nSample);
 		if(sample.uFlags[CHN_16BIT] && sample.pSample != nullptr && sample.nLength != 0)
 		{
+			ASSERT(sample.GetElementarySampleSize() == 2);
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "8-Bit Conversion");
 
 			CriticalSection cs;
 
-			signed char *p = (signed char *)(sample.pSample);
-			UINT len = (sample.nLength + 1) * sample.GetNumChannels();
-			for (UINT i=0; i<=len; i++)
+			int8 *p = (int8 *)(sample.pSample);
+			SmpLength len = (sample.nLength + 1) * sample.GetNumChannels();
+			for (SmpLength i=0; i<=len; i++)
 			{
-				p[i] = (signed char) ((*((short int *)(p+i*2))) / 256);
+				p[i] = (int8) ((*((int16 *)(p+i*2))) / 256);
 			}
 			sample.uFlags.reset(CHN_16BIT);
 			for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++) if (sndFile.m_PlayState.Chn[j].pModSample == &sample)
@@ -2235,6 +2238,37 @@ void CViewSample::On8BitConvert()
 			cs.Leave();
 
 			SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true);
+		}
+	}
+	EndWaitCursor();
+}
+
+
+void CViewSample::On16BitConvert()
+//--------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	BeginWaitCursor();
+	if ((pModDoc) && (m_nSample <= pModDoc->GetNumSamples()))
+	{
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		ModSample &sample = sndFile.GetSample(m_nSample);
+		if(!sample.uFlags[CHN_16BIT] && sample.pSample != nullptr && sample.nLength != 0)
+		{
+			ASSERT(sample.GetElementarySampleSize() == 1);
+			const SmpLength numSamples = sample.nLength * sample.GetNumChannels();
+			int16 *newSample = static_cast<int16 *>(ModSample::AllocateSample(numSamples, 2));
+			if(newSample != nullptr)
+			{
+				const int8 *oldSample = static_cast<const int8 *>(sample.pSample);
+				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "16-Bit Conversion");
+				CopySample<SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8> > >(newSample, numSamples, 1, oldSample, sample.GetSampleSizeInBytes(), 1);
+				sample.uFlags.set(CHN_16BIT);
+				ctrlSmp::ReplaceSample(sample, newSample, sample.nLength, sndFile);
+				sample.PrecomputeLoops(sndFile, false);
+
+				SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true);
+			}
 		}
 	}
 	EndWaitCursor();
@@ -2870,9 +2904,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	CModDoc *pModDoc = GetDocument();
 	if (!pModDoc) return NULL;
-
-	//CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 	switch(wParam)
 	{
@@ -2889,7 +2921,11 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcEditPaste:		OnEditPaste(); return wParam;
 		case kcEditUndo:		OnEditUndo(); return wParam;
 		case kcEditRedo:		OnEditRedo(); return wParam;
-		case kcSample8Bit:		On8BitConvert(); return wParam;
+		case kcSample8Bit:		if(sndFile.GetSample(m_nSample).uFlags[CHN_16BIT])
+									On8BitConvert();
+								else
+									On16BitConvert();
+								return wParam;
 		case kcSampleMonoMix:	OnMonoConvertMix(); return wParam;
 		case kcSampleMonoLeft:	OnMonoConvertLeft(); return wParam;
 		case kcSampleMonoRight:	OnMonoConvertRight(); return wParam;
@@ -2910,6 +2946,8 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcNoteOff:			PlayNote(NOTE_KEYOFF); return wParam;
 		case kcNoteCut:			PlayNote(NOTE_NOTECUT); return wParam;
 	}
+
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if(wParam >= kcSampStartNotes && wParam <= kcSampEndNotes)
 	{
 		const ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - kcSampStartNotes + NOTE_MIN + pMainFrm->GetBaseOctave() * 12);
@@ -2997,7 +3035,7 @@ void CViewSample::DoZoom(int direction, const CPoint &zoomPoint)
 		zoomOrder[i - 2] = MIN_ZOOM + i - 2;	// -6, -5, -4, -3...
 
 	for(int i = 1; i <= MAX_ZOOM; ++i)
-		zoomOrder[i + - 1 + (-MIN_ZOOM - 1)] = i; // 1, 2, 3...
+		zoomOrder[i - 1 + (-MIN_ZOOM - 1)] = i; // 1, 2, 3...
 	zoomOrder[CountOf(zoomOrder) - 1] = 0;
 	int* const pZoomOrderEnd = zoomOrder + CountOf(zoomOrder);
 	int autoZoomLevel = GetZoomLevel(sndFile.GetSample(m_nSample).nLength);

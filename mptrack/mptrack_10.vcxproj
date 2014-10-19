@@ -1137,6 +1137,9 @@
     <ProjectReference Include="..\build\gen\portaudio.vcxproj">
       <Project>{189b867f-ff4b-45a1-b741-a97492ee69af}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\build\gen\r8brain.vcxproj">
+      <Project>{bc116b29-9958-4389-b294-7529bb7c7d37}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\build\gen\smbPitchShift.vcxproj">
       <Project>{89af16dd-32cc-4a7e-b219-5f117d761f9f}</Project>
     </ProjectReference>

@@ -134,6 +134,7 @@
 #define IDD_OPTIONS_ADVANCED            534
 #define IDD_OPTIONS_SAMPLEEDITOR        535
 #define IDD_SCANPLUGINS                 536
+#define IDD_RESAMPLE                    537
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -607,7 +608,7 @@
 #define IDC_EDIT_SAMPLE                 2040
 #define IDC_SAMPLE_NORMALIZE            2041
 #define IDC_SAMPLE_AMPLIFY              2042
-#define IDC_SAMPLE_UPSAMPLE             2043
+#define IDC_SAMPLE_RESAMPLE             2043
 #define IDC_SAMPLE_REVERSE              2044
 #define IDC_COMBO_ZOOM                  2045
 #define IDC_SAMPLE_PLAY                 2046
@@ -1241,14 +1242,14 @@
 #define ID_MRU_LIST_FIRST               44611
 #define ID_MRU_LIST_LAST                44642
 #define ID_FILE_APPENDMODULE            44643
-
+#define ID_SAMPLE_16BITCONVERT          44644
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        537
-#define _APS_NEXT_COMMAND_VALUE         44644
+#define _APS_NEXT_RESOURCE_VALUE        538
+#define _APS_NEXT_COMMAND_VALUE         44645
 #define _APS_NEXT_CONTROL_VALUE         2483
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

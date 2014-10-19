@@ -97,8 +97,7 @@ protected:
 	afx_msg void OnAmplify();
 	afx_msg void OnQuickFade();
 	afx_msg void OnRemoveDCOffset();
-	afx_msg void OnUpsample();
-	afx_msg void OnDownsample();
+	afx_msg void OnResample();
 	afx_msg void OnReverse();
 	afx_msg void OnSilence();
 	afx_msg void OnInvert();
