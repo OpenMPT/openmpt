@@ -27,6 +27,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnRAR", "..\build\gen\UnRAR
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PluginBridge", "..\pluginBridge\PluginBridge.vcxproj", "{8D55AB6B-DAB3-4EFB-9169-7EAF995D5C10}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "r8brain", "..\build\gen\r8brain.vcxproj", "{BC116B29-9958-4389-B294-7529BB7C7D37}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -281,6 +283,26 @@ Global
 		{8D55AB6B-DAB3-4EFB-9169-7EAF995D5C10}.VSTi-Release|Win32.Build.0 = Release|Win32
 		{8D55AB6B-DAB3-4EFB-9169-7EAF995D5C10}.VSTi-Release|x64.ActiveCfg = Release|x64
 		{8D55AB6B-DAB3-4EFB-9169-7EAF995D5C10}.VSTi-Release|x64.Build.0 = Release|x64
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.Debug|Win32.Build.0 = Debug|Win32
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.Debug|x64.ActiveCfg = Debug|x64
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.Debug|x64.Build.0 = Debug|x64
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.Release|Win32.ActiveCfg = Release|Win32
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.Release|Win32.Build.0 = Release|Win32
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.Release|x64.ActiveCfg = Release|x64
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.Release|x64.Build.0 = Release|x64
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.ReleaseNoLTCG|Win32.ActiveCfg = ReleaseNoLTCG|Win32
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.ReleaseNoLTCG|Win32.Build.0 = ReleaseNoLTCG|Win32
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.ReleaseNoLTCG|x64.ActiveCfg = ReleaseNoLTCG|x64
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.ReleaseNoLTCG|x64.Build.0 = ReleaseNoLTCG|x64
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.VSTi-Debug|Win32.ActiveCfg = Debug|Win32
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.VSTi-Debug|Win32.Build.0 = Debug|Win32
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.VSTi-Debug|x64.ActiveCfg = Debug|x64
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.VSTi-Debug|x64.Build.0 = Debug|x64
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.VSTi-Release|Win32.ActiveCfg = Release|Win32
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.VSTi-Release|Win32.Build.0 = Release|Win32
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.VSTi-Release|x64.ActiveCfg = Release|x64
+		{BC116B29-9958-4389-B294-7529BB7C7D37}.VSTi-Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

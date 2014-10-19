@@ -40,7 +40,7 @@ protected:
 	HGDIOBJ offScreenBitmap;
 	SIZE m_sizeTotal;
 	UINT m_nBtnMouseOver;
-	int m_nZoom;
+	int m_nZoom;	// < 0: Zoom into sample (2^x:1 ratio), 0: Auto zoom, > 0: Zoom out (1:2^x ratio)
 	FlagSet<Flags> m_dwStatus;
 	SmpLength m_dwBeginSel, m_dwEndSel, m_dwBeginDrag, m_dwEndDrag;
 	DWORD m_dwMenuParam;
@@ -147,6 +147,7 @@ protected:
 	afx_msg void OnSetLoop();
 	afx_msg void OnSetSustainLoop();
 	afx_msg void On8BitConvert();
+	afx_msg void On16BitConvert();
 	afx_msg void OnMonoConvertMix() { OnMonoConvert(ctrlSmp::mixChannels); }
 	afx_msg void OnMonoConvertLeft() { OnMonoConvert(ctrlSmp::onlyLeft); }
 	afx_msg void OnMonoConvertRight() { OnMonoConvert(ctrlSmp::onlyRight); }

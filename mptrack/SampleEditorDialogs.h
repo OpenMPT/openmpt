@@ -154,4 +154,38 @@ protected:
 	virtual void OnOK();
 };
 
+
+/////////////////////////////////////////////////////////////////////////
+// Resampling dialog
+
+//==================================
+class CResamplingDlg: public CDialog
+//==================================
+{
+protected:
+	enum ResamplingOption
+	{
+		Upsample,
+		Downsample,
+		Custom
+	};
+
+	uint32 frequency;
+	static uint32 lastFrequency;
+	static ResamplingOption lastChoice;
+
+public:
+	CResamplingDlg(CWnd *parent, uint32 curFreq) : CDialog(IDD_RESAMPLE, parent), frequency(curFreq) { };
+	uint32 GetFrequency() const { return frequency; }
+
+protected:
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+
+	afx_msg void OnFocusEdit() { CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO3); }
+
+	DECLARE_MESSAGE_MAP()
+};
+
+
 OPENMPT_NAMESPACE_END

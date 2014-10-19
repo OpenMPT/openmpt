@@ -422,8 +422,8 @@ std::string GetFullCreditsString()
 #ifdef MODPLUG_TRACKER
 		"Stephan M. Bernsee for pitch shifting source code\n"
 		"http://www.dspdimension.com/\n"
-#endif
-#ifdef MODPLUG_TRACKER
+		"Aleksey Vaneev of Voxengo for r8brain sample rate converter\n"
+		"https://code.google.com/p/r8brain-free-src/\n"
 		"Olli Parviainen for SoundTouch Library (time stretching)\n"
 		"http://www.surina.net/soundtouch/\n"
 #endif

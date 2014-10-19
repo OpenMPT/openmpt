@@ -331,6 +331,36 @@ struct Convert<int16, float32>
 };
 
 template <>
+struct Convert<int8, double>
+{
+	typedef double input_t;
+	typedef int8 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		Limit(val, -1.0, 1.0);
+		val *= 128.0;
+		// MSVC with x87 floating point math calls floor for the more intuitive version
+		// return mpt::saturate_cast<int16>(static_cast<int>(std::floor(val + 0.5)));
+		return mpt::saturate_cast<int8>(static_cast<int>(val * 2.0 + 1.0) >> 1);
+	}
+};
+
+template <>
+struct Convert<int16, double>
+{
+	typedef double input_t;
+	typedef int16 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		Limit(val, -1.0, 1.0);
+		val *= 32768.0;
+		// MSVC with x87 floating point math calls floor for the more intuitive version
+		// return mpt::saturate_cast<int16>(static_cast<int>(std::floor(val + 0.5)));
+		return mpt::saturate_cast<int16>(static_cast<int>(val * 2.0 + 1.0) >> 1);
+	}
+};
+
+template <>
 struct Convert<int24, int8>
 {
 	typedef int8 input_t;
@@ -393,6 +423,28 @@ struct Convert<float32, int32>
 	forceinline output_t operator() (input_t val)
 	{
 		return val * (1.0f / static_cast<float>((unsigned int)1<<31));
+	}
+};
+
+template <>
+struct Convert<double, int8>
+{
+	typedef int8 input_t;
+	typedef double output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return val * (1.0 / static_cast<double>((unsigned int)1<<7));
+	}
+};
+
+template <>
+struct Convert<double, int16>
+{
+	typedef int16 input_t;
+	typedef double output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return val * (1.0 / static_cast<double>((unsigned int)1<<15));
 	}
 };
 

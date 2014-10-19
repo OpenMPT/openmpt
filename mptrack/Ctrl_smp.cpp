@@ -35,6 +35,10 @@
 #include <math.h>
 #endif
 
+#pragma warning(disable:4701)
+#include "../include/r8brain/CDSPResampler.h"
+#pragma warning(default:4701)
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -42,14 +46,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-
-#define FLOAT_ERROR 1.0e-20f
-
-// Float point comparison
-static bool EqualTof(const float a, const float b)
-{
-	return (fabs(a - b) <= FLOAT_ERROR);
-}
 
 // Round floating point value to "digit" number of digits
 static float Round(const float value, const int digit)
@@ -81,8 +77,7 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_COMMAND(IDC_SAMPLE_PLAY,			OnSamplePlay)
 	ON_COMMAND(IDC_SAMPLE_NORMALIZE,	OnNormalize)
 	ON_COMMAND(IDC_SAMPLE_AMPLIFY,		OnAmplify)
-	ON_COMMAND(IDC_SAMPLE_UPSAMPLE,		OnUpsample)
-	ON_COMMAND(IDC_SAMPLE_DOWNSAMPLE,	OnDownsample)
+	ON_COMMAND(IDC_SAMPLE_RESAMPLE,		OnResample)
 	ON_COMMAND(IDC_SAMPLE_REVERSE,		OnReverse)
 	ON_COMMAND(IDC_SAMPLE_SILENCE,		OnSilence)
 	ON_COMMAND(IDC_SAMPLE_INVERT,		OnInvert)
@@ -175,11 +170,11 @@ CCtrlSamples::CCtrlSamples(CModControlView &parent, CModDoc &document) :
 	m_nSequenceMs(0),
 	m_nSeekWindowMs(0),
 	m_nOverlapMs(0),
-	m_nPreviousRawFormat(SampleIO::_8bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::unsignedPCM)
+	m_nPreviousRawFormat(SampleIO::_8bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::unsignedPCM),
+	rememberRawFormat(false),
+	m_nSample(1)
 {
-	m_nSample = 1;
 	m_nLockCount = 1;
-	rememberRawFormat = false;
 }
 
 
@@ -231,8 +226,8 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ToolBar2.AddButton(IDC_SAMPLE_NORMALIZE, TIMAGE_SAMPLE_NORMALIZE);
 	m_ToolBar2.AddButton(IDC_SAMPLE_AMPLIFY, TIMAGE_SAMPLE_AMPLIFY);
 	m_ToolBar2.AddButton(IDC_SAMPLE_DCOFFSET, TIMAGE_SAMPLE_DCOFFSET);
-	m_ToolBar2.AddButton(IDC_SAMPLE_UPSAMPLE, TIMAGE_SAMPLE_UPSAMPLE);
-	m_ToolBar2.AddButton(IDC_SAMPLE_DOWNSAMPLE, TIMAGE_SAMPLE_DOWNSAMPLE);
+	m_ToolBar2.AddButton(IDC_SAMPLE_RESAMPLE, TIMAGE_SAMPLE_RESAMPLE);
+	//m_ToolBar2.AddButton(IDC_SAMPLE_DOWNSAMPLE, TIMAGE_SAMPLE_DOWNSAMPLE);
 	m_ToolBar2.AddButton(IDC_SAMPLE_REVERSE, TIMAGE_SAMPLE_REVERSE);
 	m_ToolBar2.AddButton(IDC_SAMPLE_SILENCE, TIMAGE_SAMPLE_SILENCE);
 	m_ToolBar2.AddButton(IDC_SAMPLE_INVERT, TIMAGE_SAMPLE_INVERT);
@@ -246,7 +241,7 @@ BOOL CCtrlSamples::OnInitDialog()
 	for (UINT i = BASENOTE_MIN; i < BASENOTE_MAX; i++)
 	{
 		CHAR s[32];
-		wsprintf(s, "%s%d", szNoteNames[i%12], i/12);
+		wsprintf(s, "%s%u", szNoteNames[i%12], i/12);
 		m_CbnBaseNote.AddString(s);
 	}
 
@@ -668,7 +663,7 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_SpinSample.SetRange(1, m_sndFile.GetNumSamples());
 		
 		// Length / Type
-		wsprintf(s, "%d-bit %s, len: %d", sample.GetElementarySampleSize() * 8, sample.uFlags[CHN_STEREO] ? "stereo" : "mono", sample.nLength);
+		wsprintf(s, "%u-bit %s, len: %u", sample.GetElementarySampleSize() * 8, sample.uFlags[CHN_STEREO] ? "stereo" : "mono", sample.nLength);
 		SetDlgItemText(IDC_TEXT5, s);
 		// Name
 		mpt::String::Copy(s, m_sndFile.m_szNames[m_nSample]);
@@ -1388,7 +1383,7 @@ void CCtrlSamples::OnRemoveDCOffset()
 		}
 		else
 		{
-			dcInfo.Format(GetStrI18N(TEXT("Removed DC offset from %d samples (avg %0.1f%%)")), numModified, fReportOffset / numModified * 100);
+			dcInfo.Format(GetStrI18N(TEXT("Removed DC offset from %u samples (avg %0.1f%%)")), numModified, fReportOffset / numModified * 100);
 		}
 	}
 	else
@@ -1433,262 +1428,169 @@ void CCtrlSamples::OnQuickFade()
 }
 
 
-const int gSinc2x16Odd[16] =
-{ // Kaiser window, beta=7.400
-  -19,    97,  -295,   710, -1494,  2958, -6155, 20582, 20582, -6155,  2958, -1494,   710,  -295,    97,   -19,
-};
-
-
-void CCtrlSamples::OnUpsample()
+void CCtrlSamples::OnResample()
 //-----------------------------
 {
-	SmpLength dwStart, dwEnd, dwNewLen;
-	UINT smplsize, newsmplsize;
-	PVOID pOriginal, pNewSample;
+	ModSample &sample = m_sndFile.GetSample(m_nSample);
+	if(sample.pSample == nullptr) return;
 
-	if((m_sndFile.GetSample(m_nSample).pSample == nullptr)) return;
+	const uint32 oldRate = sample.GetSampleRate(m_sndFile.GetType());
+	CResamplingDlg dlg(this, oldRate);
+	if(dlg.DoModal() != IDOK || oldRate == dlg.GetFrequency())
+	{
+		return;
+	}
+
 	BeginWaitCursor();
 
-	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	SampleSelectionPoints selection = GetSelectionPoints();
-
-	dwStart = selection.nStart;
-	dwEnd = selection.nEnd;
-	if (dwEnd > sample.nLength) dwEnd = sample.nLength;
-	if (dwStart >= dwEnd)
+	LimitMax(selection.nEnd, sample.nLength);
+	if(selection.nStart >= selection.nEnd)
 	{
-		dwStart = 0;
-		dwEnd = sample.nLength;
+		selection.nStart = 0;
+		selection.nEnd = sample.nLength;
 	}
 
-	smplsize = sample.GetBytesPerSample();
-	newsmplsize = sample.GetNumChannels() * 2;	// new sample is always 16-Bit
-	pOriginal = sample.pSample;
-	dwNewLen = sample.nLength + (dwEnd - dwStart);
-	pNewSample = NULL;
-	if (dwNewLen <= MAX_SAMPLE_LENGTH) pNewSample = ModSample::AllocateSample(dwNewLen, newsmplsize);
-	if (pNewSample)
+	const uint32 newRate = dlg.GetFrequency();
+	const SmpLength selLength = (selection.nEnd - selection.nStart);
+	const SmpLength newSelLength = Util::muldivr_unsigned(selLength, newRate, oldRate);
+	const SmpLength newSelEnd = selection.nStart + newSelLength;
+	const SmpLength newTotalLength = sample.nLength - selLength + newSelLength;
+	const uint8 numChannels = sample.GetNumChannels();
+
+	void *newSample = ModSample::AllocateSample(newTotalLength * numChannels, sample.GetElementarySampleSize());
+
+	if(newSample != nullptr)
 	{
-		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Upsample");
+		// First, copy parts of the sample that are not affected by partial upsampling
+		const SmpLength bps = sample.GetBytesPerSample();
+		std::memcpy(newSample, sample.pSample, selection.nStart * bps);
+		std::memcpy(static_cast<char *>(newSample) + newSelEnd * bps, static_cast<char *>(sample.pSample) + selection.nEnd * bps, (sample.nLength - selection.nEnd) * bps);
 
-		const UINT nCh = sample.GetNumChannels();
-		for (UINT iCh=0; iCh<nCh; iCh++)
+		std::vector<double> convBuffer(Clamp(selLength, SmpLength(oldRate), SmpLength(1024 * 1024)));
+		r8b::CDSPResampler16 resampler(oldRate, newRate, convBuffer.size());
+
+		for(uint8 chn = 0; chn < numChannels; chn++)
 		{
-			SmpLength len = dwEnd - dwStart;
-			int maxndx = sample.nLength;
-			if (sample.uFlags[CHN_16BIT])
+			if(chn != 0) resampler.clear();
+
+			SmpLength readCount = selLength, writeCount = newSelLength;
+			SmpLength readOffset = selection.nStart * numChannels + chn, writeOffset = readOffset;
+			SmpLength outLatency = newRate;
+			double *outBuffer, lastVal = 0.0;
+
 			{
-				signed short *psrc = ((signed short *)pOriginal)+iCh;
-				signed short *pdest = ((signed short *)pNewSample)+dwStart*nCh+iCh;
-				for (SmpLength i=0; i<len; i++)
+				// Pre-fill the resampler with the first sampling point.
+				// Otherwise, it will assume that all samples before the first sampling point are 0,
+				// which can lead to unwanted artefacts (ripples) if the sample doesn't start with a zero crossing.
+				double firstVal = 0.0;
+				switch(sample.GetElementarySampleSize())
 				{
-					int accum = 0x80;
-					for (int j=0; j<16; j++)
-					{
-						int ndx = dwStart + i + j - 7;
-						if (ndx < 0) ndx = 0;
-						if (ndx > maxndx) ndx = maxndx;
-						accum += (psrc[ndx*nCh] * gSinc2x16Odd[j] + 0x40) >> 7;
-					}
-					accum >>= 8;
-					if (accum > 0x7fff) accum = 0x7fff;
-					if (accum < -0x8000) accum = -0x8000;
-					pdest[0] = psrc[(dwStart+i)*nCh];
-					pdest[nCh] = (short int)(accum);
-					pdest += nCh*2;
+				case 1:
+					firstVal = SC::Convert<double, int8>()(static_cast<const int8 *>(sample.pSample)[readOffset]);
+					lastVal = SC::Convert<double, int8>()(static_cast<const int8 *>(sample.pSample)[readOffset + selLength - numChannels]);
+					break;
+				case 2:
+					firstVal = SC::Convert<double, int16>()(static_cast<const int16 *>(sample.pSample)[readOffset]);
+					lastVal = SC::Convert<double, int16>()(static_cast<const int16 *>(sample.pSample)[readOffset + selLength - numChannels]);
+					break;
+				default:
+					// When higher bit depth is added, feel free to also replace CDSPResampler16 by CDSPResampler24 above.
+					MPT_ASSERT_MSG(false, "Bit depth not implemented");
 				}
-			} else
+
+				// 10ms or less would probably be enough, but we will pre-fill the buffer with exactly "oldRate" samples
+				// to prevent any further rounding errors when using smaller buffers or when dividing oldRate or newRate.
+				for(SmpLength i = 0; i < oldRate; i++) convBuffer[i] = firstVal;
+				SmpLength procCount = resampler.process(&convBuffer[0], oldRate, outBuffer);
+				MPT_ASSERT(procCount <= outLatency);
+				LimitMax(procCount, outLatency);
+				outLatency -= procCount;
+			}
+
+			// Now we can start with the actual resampling work...
+			while(writeCount > 0)
 			{
-				signed char *psrc = ((signed char *)pOriginal)+iCh;
-				signed short *pdest = ((signed short *)pNewSample)+dwStart*nCh+iCh;
-				for (SmpLength i=0; i<len; i++)
+				SmpLength smpCount = (SmpLength)convBuffer.size();
+				if(readCount != 0)
 				{
-					int accum = 0x40;
-					for (int j=0; j<16; j++)
+					LimitMax(smpCount, readCount);
+
+					switch(sample.GetElementarySampleSize())
 					{
-						int ndx = dwStart + i + j - 7;
-						if (ndx < 0) ndx = 0;
-						if (ndx > maxndx) ndx = maxndx;
-						accum += psrc[ndx*nCh] * gSinc2x16Odd[j];
+					case 1:
+						CopySample<SC::ConversionChain<SC::Convert<double, int8>, SC::DecodeIdentity<int8> > >(&convBuffer[0], smpCount, 1, static_cast<const int8 *>(sample.pSample) + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
+						break;
+					case 2:
+						CopySample<SC::ConversionChain<SC::Convert<double, int16>, SC::DecodeIdentity<int16> > >(&convBuffer[0], smpCount, 1, static_cast<const int16 *>(sample.pSample) + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
+						break;
 					}
-					accum >>= 7;
-					if (accum > 0x7fff) accum = 0x7fff;
-					if (accum < -0x8000) accum = -0x8000;
-					pdest[0] = (signed short)((int)psrc[(dwStart+i)*nCh]<<8);
-					pdest[nCh] = (signed short)(accum);
-					pdest += nCh*2;
+					readOffset += smpCount * numChannels;
+					readCount -= smpCount;
+				} else
+				{
+					// Nothing to read, but still to write (compensate for r8brain's output latency)
+					for(SmpLength i = 0; i < smpCount; i++) convBuffer[i] = lastVal;
 				}
+
+				SmpLength procCount = resampler.process(&convBuffer[0], smpCount, outBuffer);
+				const SmpLength procLatency = std::min(outLatency, procCount);
+				procCount = std::min(procCount- procLatency, writeCount);
+				
+				switch(sample.GetElementarySampleSize())
+				{
+				case 1:
+					CopySample<SC::ConversionChain<SC::Convert<int8, double>, SC::DecodeIdentity<double> > >(static_cast<int8 *>(newSample) + writeOffset, procCount, sample.GetNumChannels(), outBuffer + procLatency, procCount * sizeof(double), 1);
+					break;
+				case 2:
+					CopySample<SC::ConversionChain<SC::Convert<int16, double>, SC::DecodeIdentity<double> > >(static_cast<int16 *>(newSample) + writeOffset, procCount, sample.GetNumChannels(), outBuffer + procLatency, procCount * sizeof(double), 1);
+					break;
+				}
+				writeOffset += procCount * numChannels;
+				writeCount -= procCount;
+				outLatency -= procLatency;
 			}
 		}
-		if (sample.uFlags[CHN_16BIT])
-		{
-			if (dwStart > 0) memcpy(pNewSample, pOriginal, dwStart*smplsize);
-			if (dwEnd < sample.nLength) memcpy(((int8 *)pNewSample)+(dwStart+(dwEnd-dwStart)*2)*smplsize, ((int8 *)pOriginal)+(dwEnd*smplsize), (sample.nLength-dwEnd)*smplsize);
-		} else
-		{
-			if (dwStart > 0)
-			{
-				for (SmpLength i=0; i<dwStart*nCh; i++)
-				{
-					((signed short *)pNewSample)[i] = (signed short)(((signed char *)pOriginal)[i] << 8);
-				}
-			}
-			if (dwEnd < sample.nLength)
-			{
-				signed short *pdest = ((signed short *)pNewSample) + (dwEnd-dwStart)*nCh;
-				for (SmpLength i=dwEnd*nCh; i<sample.nLength*nCh; i++)
-				{
-					pdest[i] = (signed short)(((signed char *)pOriginal)[i] << 8);
-				}
-			}
-		}
-		if (sample.nLoopStart >= dwEnd) sample.nLoopStart += (dwEnd-dwStart); else
-		if (sample.nLoopStart > dwStart) sample.nLoopStart += (sample.nLoopStart - dwStart);
-		if (sample.nLoopEnd >= dwEnd) sample.nLoopEnd += (dwEnd-dwStart); else
-		if (sample.nLoopEnd > dwStart) sample.nLoopEnd += (sample.nLoopEnd - dwStart);
-		if (sample.nSustainStart >= dwEnd) sample.nSustainStart += (dwEnd-dwStart); else
-		if (sample.nSustainStart > dwStart) sample.nSustainStart += (sample.nSustainStart - dwStart);
-		if (sample.nSustainEnd >= dwEnd) sample.nSustainEnd += (dwEnd-dwStart); else
-		if (sample.nSustainEnd > dwStart) sample.nSustainEnd += (sample.nSustainEnd - dwStart);
-		
-		sample.uFlags.set(CHN_16BIT);
-		ctrlSmp::ReplaceSample(sample, pNewSample, dwNewLen, m_sndFile);
-		// Update loop wrap-around buffer
-		sample.PrecomputeLoops(m_sndFile);
-		
-		if(!selection.selectionActive)
-		{
-			if(!(m_sndFile.GetType() & MOD_TYPE_MOD))
-			{
-				if(sample.nC5Speed < 1000000) sample.nC5Speed *= 2;
-				if(sample.RelativeTone < 84) sample.RelativeTone += 12;
-			}
-		} else
-		{
-			SetSelectionPoints(dwStart, dwEnd + (dwEnd - dwStart));
-		}
-		SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true);
-	}
-	EndWaitCursor();
-	SwitchToView();
-}
 
+		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, (newRate > oldRate) ? "Upsample" : "Downsample");
 
-void CCtrlSamples::OnDownsample()
-//-------------------------------
-{
-	SmpLength dwStart, dwEnd, dwRemove, dwNewLen;
-	SmpLength smplsize;
+		// Adjust loops
+		if(sample.nLoopStart >= selection.nEnd) sample.nLoopStart += newSelLength - selLength;
+		else if(sample.nLoopStart > selection.nStart) sample.nLoopStart = selection.nStart + Util::muldivr_unsigned(sample.nLoopStart - selection.nStart, newRate, oldRate);
+		if(sample.nLoopEnd >= selection.nEnd) sample.nLoopEnd += newSelLength - selLength;
+		else if(sample.nLoopEnd > selection.nStart) sample.nLoopEnd = selection.nStart + Util::muldivr_unsigned(sample.nLoopEnd - selection.nStart, newRate, oldRate);
+		if(sample.nLoopEnd > newTotalLength) sample.nLoopEnd = newTotalLength;
 
-	if((!m_sndFile.GetSample(m_nSample).pSample)) return;
-	BeginWaitCursor();
-	
-	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	SampleSelectionPoints selection = GetSelectionPoints();
+		if(sample.nSustainStart >= selection.nEnd) sample.nSustainStart += newSelLength - selLength;
+		else if(sample.nSustainStart > selection.nStart) sample.nSustainStart = selection.nStart + Util::muldivr_unsigned(sample.nSustainStart - selection.nStart, newRate, oldRate);
+		if(sample.nSustainEnd >= selection.nEnd) sample.nSustainEnd += newSelLength - selLength;
+		else if(sample.nSustainEnd > selection.nStart) sample.nSustainEnd = selection.nStart + Util::muldivr_unsigned(sample.nSustainEnd - selection.nStart, newRate, oldRate);
+		if(sample.nSustainEnd > newTotalLength) sample.nSustainEnd = newTotalLength;
 
-	dwStart = selection.nStart;
-	dwEnd = selection.nEnd;
-	if (dwEnd > sample.nLength) dwEnd = sample.nLength;
-	if (dwStart >= dwEnd)
-	{
-		dwStart = 0;
-		dwEnd = sample.nLength;
-	}
-	smplsize = sample.GetBytesPerSample();
-	void *pOriginal = sample.pSample, *pNewSample = nullptr;
-	dwRemove = (dwEnd-dwStart+1)>>1;
-	dwNewLen = sample.nLength - dwRemove;
-	dwEnd = dwStart+dwRemove*2;
-	if ((dwNewLen >= 4) && (dwRemove)) pNewSample = ModSample::AllocateSample(dwNewLen, smplsize);
-	if (pNewSample)
-	{
-
-		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Downsample");
-
-		const UINT nCh = sample.GetNumChannels();
-		for (UINT iCh=0; iCh<nCh; iCh++)
-		{
-			int len = dwRemove;
-			int maxndx = sample.nLength;
-			if (sample.uFlags[CHN_16BIT])
-			{
-				signed short *psrc = ((signed short *)pOriginal)+iCh;
-				signed short *pdest = ((signed short *)pNewSample)+dwStart*nCh+iCh;
-				for (int i=0; i<len; i++)
-				{
-					int accum = 0x100 + ((int)psrc[(dwStart+i*2)*nCh] << 8);
-					for (int j=0; j<16; j++)
-					{
-						int ndx = dwStart + (i + j)*2 - 15;
-						if (ndx < 0) ndx = 0;
-						if (ndx > maxndx) ndx = maxndx;
-						accum += (psrc[ndx*nCh] * gSinc2x16Odd[j] + 0x40) >> 7;
-					}
-					accum >>= 9;
-					if (accum > 0x7fff) accum = 0x7fff;
-					if (accum < -0x8000) accum = -0x8000;
-					pdest[0] = (short int)accum;
-					pdest += nCh;
-				}
-			} else
-			{
-				signed char *psrc = ((signed char *)pOriginal)+iCh;
-				signed char *pdest = ((signed char *)pNewSample)+dwStart*nCh+iCh;
-				for (int i=0; i<len; i++)
-				{
-					int accum = 0x100 + ((int)psrc[(dwStart+i*2)*nCh] << 8);
-					for (int j=0; j<16; j++)
-					{
-						int ndx = dwStart + (i + j)*2 - 15;
-						if (ndx < 0) ndx = 0;
-						if (ndx > maxndx) ndx = maxndx;
-						accum += (psrc[ndx*nCh] * gSinc2x16Odd[j] + 0x40) >> 7;
-					}
-					accum >>= 9;
-					if (accum > 0x7f) accum = 0x7f;
-					if (accum < -0x80) accum = -0x80;
-					pdest[0] = (signed char)accum;
-					pdest += nCh;
-				}
-			}
-		}
-		if (dwStart > 0) memcpy(pNewSample, pOriginal, dwStart*smplsize);
-		if (dwEnd < sample.nLength) memcpy(((int8 *)pNewSample)+(dwStart+dwRemove)*smplsize, ((int8 *)pOriginal)+((dwStart+dwRemove*2)*smplsize), (sample.nLength-dwEnd)*smplsize);
-		if (sample.nLoopStart >= dwEnd) sample.nLoopStart -= dwRemove; else
-		if (sample.nLoopStart > dwStart) sample.nLoopStart -= (sample.nLoopStart - dwStart)/2;
-		if (sample.nLoopEnd >= dwEnd) sample.nLoopEnd -= dwRemove; else
-		if (sample.nLoopEnd > dwStart) sample.nLoopEnd -= (sample.nLoopEnd - dwStart)/2;
-		if (sample.nLoopEnd > dwNewLen) sample.nLoopEnd = dwNewLen;
-		if (sample.nSustainStart >= dwEnd) sample.nSustainStart -= dwRemove; else
-		if (sample.nSustainStart > dwStart) sample.nSustainStart -= (sample.nSustainStart - dwStart)/2;
-		if (sample.nSustainEnd >= dwEnd) sample.nSustainEnd -= dwRemove; else
-		if (sample.nSustainEnd > dwStart) sample.nSustainEnd -= (sample.nSustainEnd - dwStart)/2;
-		if (sample.nSustainEnd > dwNewLen) sample.nSustainEnd = dwNewLen;
-
-		ctrlSmp::ReplaceSample(sample, pNewSample, dwNewLen, m_sndFile);
+		ctrlSmp::ReplaceSample(sample, newSample, newTotalLength, m_sndFile);
 		// Update loop wrap-around buffer
 		sample.PrecomputeLoops(m_sndFile);
 
 		if(!selection.selectionActive)
 		{
-			if(!(m_sndFile.GetType() & MOD_TYPE_MOD))
+			if(m_sndFile.GetType() != MOD_TYPE_MOD)
 			{
-				if(sample.nC5Speed > 2000) sample.nC5Speed /= 2;
-				if(sample.RelativeTone > -84) sample.RelativeTone -= 12;
+				sample.nC5Speed = newRate;
+				sample.FrequencyToTranspose();
 			}
 		} else
 		{
-			SetSelectionPoints(dwStart, dwStart + dwRemove);
+			SetSelectionPoints(selection.nStart, newSelEnd);
 		}
 		SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true);
 	}
+
 	EndWaitCursor();
 	SwitchToView();
 }
 
 
 #define MAX_BUFFER_LENGTH	8192
-#define CLIP_SOUND(v)		Limit(v, -1.0f, 1.0f);
 
 void CCtrlSamples::ReadTimeStretchParameters()
 //--------------------------------------------
@@ -1995,7 +1897,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 			CHAR progress[16];
 			float percent = 100.0f * (inPos + inChunkSize) / sample.nLength;
 			progressBarRECT.right = processButtonRect.left + (int)percent * (processButtonRect.right - processButtonRect.left) / 100;
-			wsprintf(progress,"%d%%",(UINT)percent);
+			wsprintf(progress,"%u%%",(UINT)percent);
 
 			::FillRect(processButtonDC,&processButtonRect,red);
 			::FrameRect(processButtonDC,&processButtonRect,CMainFrame::brushBlack);
@@ -2067,9 +1969,9 @@ int CCtrlSamples::TimeStretch(float ratio)
 	}
 
 	soundtouch_clear(handleSt);
-	ASSERT(soundtouch_isEmpty(handleSt) != 0);
+	MPT_ASSERT(soundtouch_isEmpty(handleSt) != 0);
 
-	ASSERT(nNewSampleLength >= outPos);
+	MPT_ASSERT(nNewSampleLength >= outPos);
 
 	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Time Stretch");
 	// Swap sample buffer pointer to new buffer, update song + sample data & free old sample buffer
@@ -2177,7 +2079,7 @@ int CCtrlSamples::PitchShift(float pitch)
 			CHAR progress[16];
 			float percent = (float)i * 50.0f + (100.0f / nChn) * (pos + len) / sample.nLength;
 			progressBarRECT.right = processButtonRect.left + (int)percent * (processButtonRect.right - processButtonRect.left) / 100;
-			wsprintf(progress,"%d%%",(UINT)percent);
+			wsprintf(progress,"%u%%",(UINT)percent);
 
 			::FillRect(processButtonDC,&processButtonRect,red);
 			::FrameRect(processButtonDC,&processButtonRect,CMainFrame::brushBlack);

@@ -311,6 +311,21 @@ BEGIN
     CTEXT           "",IDC_SCANTEXT,6,7,306,20,SS_NOPREFIX
 END
 
+IDD_RESAMPLE DIALOGEX 0, 0, 178, 65
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Resample"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "&Upsample",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,6,6,114,10
+    CONTROL         "&Downsample",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,6,24,114,10
+    CONTROL         "",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,6,42,12,10
+    EDITTEXT        IDC_EDIT1,18,41,48,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,49,44,10,14
+    LTEXT           "Hz",IDC_STATIC,72,43,9,8
+    DEFPUSHBUTTON   "&OK",IDOK,120,6,50,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,120,24,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -446,6 +461,14 @@ BEGIN
         RIGHTMARGIN, 309
         TOPMARGIN, 7
         BOTTOMMARGIN, 27
+    END
+
+    IDD_RESAMPLE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 171
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 58
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -2316,7 +2339,7 @@ BEGIN
     IDC_SAMPLE_SAVEAS       "Save the current sample to disk\nSave sample"
     IDC_SAMPLE_NORMALIZE    "Normalize the current sample (full scale)\nNormalize (hold shift to normalize all samples)"
     IDC_SAMPLE_AMPLIFY      "Amplify selection\nAmplify"
-    IDC_SAMPLE_UPSAMPLE     "Stretch selection\nUpsample"
+    IDC_SAMPLE_RESAMPLE     "Resample the entire sample or current selection\nResample"
     IDC_SAMPLE_REVERSE      "Reverse selection\nReverse"
     IDC_COMBO_ZOOM          "Changes the current zoom value\nZoom"
     IDC_SAMPLE_PLAY         "Play a middle C using the current sample\nPlay sample"
