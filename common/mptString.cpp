@@ -147,7 +147,7 @@ static const uint32 CharsetTableCP437[256] = {
 #endif // MPT_CHARSET_CODECVTUTF8 || MPT_CHARSET_INTERNAL
 
 
-#define C(x) ((uint8)(x))
+#define C(x) (static_cast<uint8>((x)))
 
 // AMS1 actually only supports ASCII plus the modified control characters and no high chars at all.
 // Just default to CP437 for those to keep things simple.
@@ -804,11 +804,11 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 		}
 		std::vector<wchar_t> wide_string(src.c_str(), src.c_str() + src.length() + 1);
 		std::vector<char> encoded_string(wide_string.size() * 8); // large enough
-		char * inbuf = (char*)&wide_string[0];
+		char * inbuf = reinterpret_cast<char*>(&wide_string[0]);
 		size_t inbytesleft = wide_string.size() * sizeof(wchar_t);
 		char * outbuf = &encoded_string[0];
 		size_t outbytesleft = encoded_string.size();
-		while(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == (size_t)-1)
+		while(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == static_cast<size_t>(-1))
 		{
 			if(errno == EILSEQ || errno == EILSEQ)
 			{
@@ -894,9 +894,9 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 		std::vector<wchar_t> wide_string(encoded_string.size() * 8); // large enough
 		char * inbuf = &encoded_string[0];
 		size_t inbytesleft = encoded_string.size();
-		char * outbuf = (char*)&wide_string[0];
+		char * outbuf = reinterpret_cast<char*>(&wide_string[0]);
 		size_t outbytesleft = wide_string.size() * sizeof(wchar_t);
-		while(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == (size_t)-1)
+		while(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == static_cast<size_t>(-1))
 		{
 			if(errno == EILSEQ || errno == EILSEQ)
 			{
@@ -980,7 +980,7 @@ Tdststring ConvertImpl(Charset to, Charset from, const Tsrcstring &src)
 		size_t inbytesleft = src_string.size();
 		char * outbuf = &dst_string[0];
 		size_t outbytesleft = dst_string.size();
-		while(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == (size_t)-1)
+		while(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == static_cast<size_t>(-1))
 		{
 			if(errno == EILSEQ || errno == EILSEQ)
 			{
