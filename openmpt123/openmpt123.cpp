@@ -346,12 +346,12 @@ static void show_info( std::ostream & log, bool verbose ) {
 	const SDL_version * linked_sdlver = SDL_Linked_Version();
 	log << " libSDL ";
 	if ( linked_sdlver ) {
-		log << (int)linked_sdlver->major << "." << (int)linked_sdlver->minor << "." << (int)linked_sdlver->patch << " ";
+		log << static_cast<int>( linked_sdlver->major ) << "." << static_cast<int>( linked_sdlver->minor ) << "." << static_cast<int>( linked_sdlver->patch ) << " ";
 	}
 	SDL_version sdlver;
 	std::memset( &sdlver, 0, sizeof( SDL_version ) );
 	SDL_VERSION( &sdlver );
-	log << "(API: " << (int)sdlver.major << "." << (int)sdlver.minor << "." << (int)sdlver.patch << ")";
+	log << "(API: " << static_cast<int>( sdlver.major ) << "." << static_cast<int>( sdlver.minor ) << "." << static_cast<int>( sdlver.patch ) << ")";
 	log << " <https://libsdl.org/>" << std::endl;
 #endif
 #ifdef MPT_WITH_FLAC
@@ -955,9 +955,9 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 			cpu_end = std::clock();
 			if ( count > 0 ) {
 				double cpu = 1.0;
-				cpu *= ( (double)cpu_end - (double)cpu_beg ) / (double)CLOCKS_PER_SEC;
-				cpu /= ( (double)count ) / (double)flags.samplerate;
-				double mix = ( (double)count ) / (double)flags.samplerate;
+				cpu *= ( static_cast<double>( cpu_end ) - static_cast<double>( cpu_beg ) ) / static_cast<double>( CLOCKS_PER_SEC );
+				cpu /= ( static_cast<double>( count ) ) / static_cast<double>( flags.samplerate );
+				double mix = ( static_cast<double>( count ) ) / static_cast<double>( flags.samplerate );
 				cpu_smooth = ( 1.0 - mix ) * cpu_smooth + mix * cpu;
 				sprintf( cpu_str, "%.2f%%", cpu_smooth * 100.0 );
 			}
