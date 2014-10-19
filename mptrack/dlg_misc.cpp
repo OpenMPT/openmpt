@@ -1079,7 +1079,10 @@ BOOL CEditHistoryDlg::OnInitDialog()
 
 		// Date
 		TCHAR szDate[32];
-		_tcsftime(szDate, CountOf(szDate), _T("%d %b %Y, %H:%M:%S"), &hist->loadDate);
+		if(hist->loadDate.tm_mday != 0)
+			_tcsftime(szDate, CountOf(szDate), _T("%d %b %Y, %H:%M:%S"), &hist->loadDate);
+		else
+			_tcscpy(szDate, _T("<unknown date>"));
 		// Time + stuff
 		uint32 duration = (uint32)((double)(hist->openTime) / HISTORY_TIMER_PRECISION);
 		s.AppendFormat(_T("Loaded %s, open for %luh %02lum %02lus\r\n"),

@@ -960,6 +960,23 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					madeWithTracker = mpt::String::Print("Impulse Tracker %1.%2", (fileHeader.cwtv & 0x0F00) >> 8, mpt::fmt::hex0<2>((fileHeader.cwtv & 0xFF)));
 				}
+				if(m_FileHistory.empty() && memcmp(fileHeader.reserved, "\0\0\0\0", 4))
+				{
+					// IT encrypts the total edit time of a module in the "reserved" fild
+					uint32 editTime;
+					memcpy(&editTime, fileHeader.reserved, 4);
+					SwapBytesLE(editTime);
+					editTime ^= 0x4954524B;	// 'ITRK'
+					editTime = (editTime >> 7) | (editTime << (32 - 7));
+					editTime = -(int32)editTime;
+					editTime = (editTime << 4) | (editTime >> (32 - 4));
+					editTime ^= 0x4A54484C;	// 'JTHL'
+
+					FileHistory hist;
+					MemsetZero(hist);
+					hist.openTime = static_cast<uint32>(editTime * (HISTORY_TIMER_PRECISION / 18.2f));
+					m_FileHistory.push_back(hist);
+				}
 			}
 			break;
 		case 1:
