@@ -705,12 +705,16 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 	fileHeader.size = sizeof(XMFileHeader) - 60;	// minus everything before this field
 	fileHeader.restartPos = m_nRestartPos;
 
-	fileHeader.channels = (m_nChannels + 1) & 0xFFFE; // avoid odd channel count for FT2 compatibility
-	if((m_nChannels % 2u) && m_nChannels < MAX_BASECHANNELS) addChannel = true;
-	if(compatibilityExport && fileHeader.channels > 32)
+	fileHeader.channels = m_nChannels;
+	if((m_nChannels % 2u) && m_nChannels < 32)
+	{
+		// Avoid odd channel count for FT2 compatibility
+		fileHeader.channels++;
+		addChannel = true;
+	} else if(compatibilityExport && fileHeader.channels > 32)
+	{
 		fileHeader.channels = 32;
-	if(fileHeader.channels > MAX_BASECHANNELS) fileHeader.channels = MAX_BASECHANNELS;
-	fileHeader.channels = fileHeader.channels;
+	}
 
 	// Find out number of orders and patterns used.
 	// +++ and --- patterns are not taken into consideration as FastTracker does not support them.
