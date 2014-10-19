@@ -1494,7 +1494,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 			if(IsCompatibleMode(TRK_IMPULSETRACKER))
 			{
 				// I think this is not necessary, so let's check if it is actually called.
-				ASSERT(pChn->nVibratoPos == 0);
+				MPT_ASSERT(pChn->nVibratoPos == 0);
 				pChn->nVibratoPos = 0;
 			}
 		}
@@ -4229,7 +4229,7 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro,
 float CSoundFile::CalculateSmoothParamChange(float currentValue, float param) const
 //---------------------------------------------------------------------------------
 {
-	ASSERT(GetNumTicksOnCurrentRow() > m_PlayState.m_nTickCount);
+	MPT_ASSERT(GetNumTicksOnCurrentRow() > m_PlayState.m_nTickCount);
 	const UINT ticksLeft = GetNumTicksOnCurrentRow() - m_PlayState.m_nTickCount;
 	if(ticksLeft > 1)
 	{

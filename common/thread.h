@@ -275,7 +275,7 @@ public:
 
 	~thread()
 	{
-		ASSERT(!joinable());
+		MPT_ASSERT(!joinable());
 	}
 
 };

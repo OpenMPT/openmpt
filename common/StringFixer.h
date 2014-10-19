@@ -34,7 +34,7 @@ namespace mpt { namespace String
 	inline void SetNullTerminator(char *buffer, size_t size)
 	//------------------------------------------------------
 	{
-		ASSERT(size > 0);
+		MPT_ASSERT(size > 0);
 		buffer[size - 1] = 0;
 	}
 
@@ -49,7 +49,7 @@ namespace mpt { namespace String
 	inline void SetNullTerminator(wchar_t *buffer, size_t size)
 	//---------------------------------------------------------
 	{
-		ASSERT(size > 0);
+		MPT_ASSERT(size > 0);
 		buffer[size - 1] = 0;
 	}
 
@@ -271,7 +271,7 @@ namespace mpt { namespace String
 	void Write(char *destBuffer, const size_t destSize, const char *srcBuffer, const size_t srcSize)
 	//----------------------------------------------------------------------------------------------
 	{
-		ASSERT(destSize > 0);
+		MPT_ASSERT(destSize > 0);
 
 		const size_t maxSize = MIN(destSize, srcSize);
 		char *dst = destBuffer;
@@ -314,7 +314,7 @@ namespace mpt { namespace String
 	void Write(std::vector<char> &destBuffer, const char *srcBuffer, const size_t srcSize)
 	//------------------------------------------------------------------------------------
 	{
-		ASSERT(destBuffer.size() > 0);
+		MPT_ASSERT(destBuffer.size() > 0);
 		Write<mode>(&destBuffer[0], destBuffer.size(), srcBuffer, srcSize);
 	}
 
@@ -345,7 +345,7 @@ namespace mpt { namespace String
 	void Write(char *destBuffer, const size_t destSize, const std::string &src)
 	//-------------------------------------------------------------------------
 	{
-		ASSERT(destSize > 0);
+		MPT_ASSERT(destSize > 0);
 		Write<mode>(destBuffer, destSize, src.c_str(), src.length());
 	}
 
@@ -353,7 +353,7 @@ namespace mpt { namespace String
 	void Write(std::vector<char> &destBuffer, const std::string &src)
 	//---------------------------------------------------------------
 	{
-		ASSERT(destBuffer.size() > 0);
+		MPT_ASSERT(destBuffer.size() > 0);
 		Write<mode>(destBuffer, src.c_str(), src.length());
 	}
 

@@ -442,7 +442,7 @@ void CSoundFile::CreateStereoMix(int count)
 
 				uint32 targetpos = chn.nPos + (BufferLengthToSamples(nSmpCount, chn) >> 16);
 				MixFuncTable::Functions[functionNdx | (chn.nRampLength ? MixFuncTable::ndxRamp : 0)](chn, m_Resampler, pbuffer, nSmpCount);
-				ASSERT(chn.nPos == targetpos);
+				MPT_ASSERT(chn.nPos == targetpos);
 
 				chn.nROfs += *(pbufmax-2);
 				chn.nLOfs += *(pbufmax-1);

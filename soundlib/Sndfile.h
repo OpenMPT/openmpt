@@ -881,8 +881,8 @@ public:
 	UINT GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) const;
 	UINT GetFreqFromPeriod(UINT period, int nPeriodFrac = 0) const;
 	// Misc functions
-	ModSample &GetSample(SAMPLEINDEX sample) { ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
-	const ModSample &GetSample(SAMPLEINDEX sample) const { ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
+	ModSample &GetSample(SAMPLEINDEX sample) { MPT_ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
+	const ModSample &GetSample(SAMPLEINDEX sample) const { MPT_ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
 
 	UINT MapMidiInstrument(DWORD dwProgram, UINT nChannel, UINT nNote);
 	size_t ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trkvers);

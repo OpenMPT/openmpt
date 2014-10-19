@@ -66,7 +66,7 @@ public:
 	static void AssertUnlocked()
 	{
 		// asserts that the critical section is currently not hold by THIS thread
-		ALWAYS_ASSERT(!IsLocked());
+		MPT_ASSERT_ALWAYS(!IsLocked());
 	}
 };
 

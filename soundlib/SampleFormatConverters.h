@@ -733,7 +733,7 @@ template <typename SampleConversion>
 void CopyInterleavedSampleStreams(typename SampleConversion::output_t * MPT_RESTRICT outBuf, const typename SampleConversion::input_t * MPT_RESTRICT inBuf, size_t numFrames, size_t numChannels, std::vector<SampleConversion> &conv)
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	ASSERT(conv.size() >= numChannels);
+	MPT_ASSERT(conv.size() >= numChannels);
 	CopyInterleavedSampleStreams(outBuf, inBuf, numFrames, numChannels, &(conv[0]));
 }
 
@@ -743,8 +743,8 @@ template <typename SampleConversion>
 size_t CopyMonoSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize, SampleConversion conv = SampleConversion())
 //-------------------------------------------------------------------------------------------------------------------------------
 {
-	ASSERT(sample.GetNumChannels() == 1);
-	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
+	MPT_ASSERT(sample.GetNumChannels() == 1);
+	MPT_ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
 
 	const size_t frameSize =  SampleConversion::input_inc;
 	const size_t countFrames = std::min<size_t>(sourceSize / frameSize, sample.nLength);
@@ -767,8 +767,8 @@ template <typename SampleConversion>
 size_t CopyStereoInterleavedSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize, SampleConversion conv = SampleConversion())
 //--------------------------------------------------------------------------------------------------------------------------------------------
 {
-	ASSERT(sample.GetNumChannels() == 2);
-	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
+	MPT_ASSERT(sample.GetNumChannels() == 2);
+	MPT_ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
 
 	const size_t frameSize = 2 * SampleConversion::input_inc;
 	const size_t countFrames = std::min<size_t>(sourceSize / frameSize, sample.nLength);
@@ -795,8 +795,8 @@ template <typename SampleConversion>
 size_t CopyStereoSplitSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize, SampleConversion conv = SampleConversion())
 //--------------------------------------------------------------------------------------------------------------------------------------
 {
-	ASSERT(sample.GetNumChannels() == 2);
-	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
+	MPT_ASSERT(sample.GetNumChannels() == 2);
+	MPT_ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
 
 	const size_t sampleSize = SampleConversion::input_inc;
 	const size_t sourceSizeLeft = std::min<size_t>(sample.nLength * SampleConversion::input_inc, sourceSize);
@@ -837,7 +837,7 @@ size_t CopyAndNormalizeSample(ModSample &sample, const char *sourceBuffer, size_
 {
 	const size_t inSize = sizeof(typename SampleConversion::input_t);
 
-	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
+	MPT_ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
 
 	size_t numSamples = sample.nLength * sample.GetNumChannels();
 	LimitMax(numSamples, sourceSize / inSize);

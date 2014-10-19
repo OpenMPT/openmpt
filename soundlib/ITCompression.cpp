@@ -153,7 +153,7 @@ void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actua
 			if(width <= 6)
 			{
 				// Mode A: 1 to 6 bits
-				ASSERT(width);
+				MPT_ASSERT(width);
 				WriteBits(width, (1 << (width - 1)));
 				WriteBits(Properties::fetchA, ConvertWidth(width, bwt[i]));
 			} else if(width < defWidth)
@@ -164,7 +164,7 @@ void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actua
 			} else
 			{
 				// Mode C: 9 / 17 bits
-				ASSERT((bwt[i] - 1) >= 0);
+				MPT_ASSERT((bwt[i] - 1) >= 0);
 				WriteBits(width, (1 << (width - 1)) + bwt[i] - 1);
 			}
 
@@ -183,7 +183,7 @@ void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actua
 int ITCompression::GetWidthChangeSize(int w, bool is16)
 //-----------------------------------------------------
 {
-	ASSERT(w > 0 && static_cast<unsigned int>(w) <= CountOf(ITWidthChangeSize));
+	MPT_ASSERT(w > 0 && static_cast<unsigned int>(w) <= CountOf(ITWidthChangeSize));
 	int wcs = ITWidthChangeSize[w - 1];
 	if(w <= 6 && is16)
 		wcs++;
@@ -202,7 +202,7 @@ void ITCompression::SquishRecurse(int sWidth, int lWidth, int rWidth, int width,
 		return;
 	}
 
-	ASSERT(width >= 0 && static_cast<unsigned int>(width) < CountOf(Properties::lowerTab));
+	MPT_ASSERT(width >= 0 && static_cast<unsigned int>(width) < CountOf(Properties::lowerTab));
 
 	SmpLength i = offset;
 	SmpLength end = offset + length;
@@ -265,7 +265,7 @@ int ITCompression::ConvertWidth(int curWidth, int newWidth)
 {
 	curWidth--;
 	newWidth--;
-	ASSERT(newWidth != curWidth);
+	MPT_ASSERT(newWidth != curWidth);
 	if(newWidth > curWidth)
 		newWidth--;
 	return newWidth;
@@ -304,7 +304,7 @@ void ITCompression::WriteByte(uint8 v)
 	} else
 	{
 		// How could this happen, anyway?
-		ASSERT(false);
+		MPT_ASSERT(false);
 	}
 }
 
@@ -390,7 +390,7 @@ void ITDecompression::ChangeWidth(int &curWidth, int width)
 	if(width >= curWidth)
 		width++;
 
-	ASSERT(curWidth != width);
+	MPT_ASSERT(curWidth != width);
 	curWidth = width;
 }
 

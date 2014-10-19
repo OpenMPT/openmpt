@@ -204,7 +204,7 @@ bool CWaveDevice::InternalClose()
 			waveOutUnprepareHeader(m_hWaveOut, &m_WaveBuffers[m_nPreparedHeaders], sizeof(WAVEHDR));
 		}
 		MMRESULT err = waveOutClose(m_hWaveOut);
-		ALWAYS_ASSERT(err == MMSYSERR_NOERROR);
+		MPT_ASSERT_ALWAYS(err == MMSYSERR_NOERROR);
 		m_hWaveOut = NULL;
 	}
 	if(m_ThreadWakeupEvent)

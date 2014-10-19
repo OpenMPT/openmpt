@@ -423,7 +423,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 	// To check: Was the channel table introduced in revision 1.0 or 0.9? I only have 0.8 files, in which it is missing...
-	ASSERT(fileHeader.version != 9);
+	MPT_ASSERT(fileHeader.version != 9);
 
 	// Get Tempo/Speed
 	if(fileHeader.version >= 13)

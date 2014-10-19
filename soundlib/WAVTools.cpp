@@ -334,7 +334,7 @@ size_t WAVWriter::Finalize()
 #ifdef _DEBUG
 		fseek(f, 0, SEEK_END);
 		size_t realSize = static_cast<size_t>(ftell(f));
-		ASSERT(totalSize == realSize);
+		MPT_ASSERT(totalSize == realSize);
 #endif
 		if(fileOwned)
 		{
@@ -425,7 +425,7 @@ void WAVWriter::Write(const void *data, size_t numBytes)
 		} else
 		{
 			// Should never happen - did we calculate a wrong memory size?
-			ASSERT(false);
+			MPT_ASSERT(false);
 		}
 	}
 	position += numBytes;

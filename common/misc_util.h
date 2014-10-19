@@ -392,7 +392,7 @@ namespace Util
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Type is a not an integer");
 		const double valRounded = Round(val);
-		ASSERT(valRounded >= (std::numeric_limits<T>::min)() && valRounded <= (std::numeric_limits<T>::max)());
+		MPT_ASSERT(valRounded >= (std::numeric_limits<T>::min)() && valRounded <= (std::numeric_limits<T>::max)());
 		const T intval = static_cast<T>(valRounded);
 		return intval;
 	}
@@ -401,7 +401,7 @@ namespace Util
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Type is a not an integer");
 		const float valRounded = Round(val);
-		ASSERT(valRounded >= (std::numeric_limits<T>::min)() && valRounded <= (std::numeric_limits<T>::max)());
+		MPT_ASSERT(valRounded >= (std::numeric_limits<T>::min)() && valRounded <= (std::numeric_limits<T>::max)());
 		const T intval = static_cast<T>(valRounded);
 		return intval;
 	}

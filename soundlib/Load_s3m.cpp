@@ -701,7 +701,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	size_t curPos = ftell(f);
 	if(curPos < sampleHeaderOffset)
 	{
-		ASSERT(sampleHeaderOffset - curPos < 16);
+		MPT_ASSERT(sampleHeaderOffset - curPos < 16);
 		fwrite(filler, sampleHeaderOffset - curPos, 1, f);
 	}
 
@@ -717,7 +717,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 			continue;
 		}
 
-		ASSERT((ftell(f) % 16) == 0);
+		MPT_ASSERT((ftell(f) % 16) == 0);
 		patternOffsets[pat] = static_cast<uint16>(ftell(f) / 16);
 		SwapBytesLE(patternOffsets[pat]);
 

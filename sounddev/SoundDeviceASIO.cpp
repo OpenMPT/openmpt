@@ -247,7 +247,7 @@ bool CASIODevice::InternalOpen()
 {
 	MPT_TRACE();
 
-	ASSERT(!IsDriverOpen());
+	MPT_ASSERT(!IsDriverOpen());
 
 	InitMembers();
 
@@ -356,7 +356,7 @@ bool CASIODevice::InternalOpen()
 			}
 		} else
 		{ // should not happen
-			ASSERT(false);
+			MPT_ASSERT(false);
 		}
 	
 		m_BufferInfo.resize(m_Settings.Channels);
@@ -370,7 +370,7 @@ bool CASIODevice::InternalOpen()
 		m_Callbacks.sampleRateDidChange = CallbackSampleRateDidChange;
 		m_Callbacks.asioMessage = CallbackAsioMessage;
 		m_Callbacks.bufferSwitchTimeInfo = CallbackBufferSwitchTimeInfo;
-		ALWAYS_ASSERT(g_CallbacksInstance == nullptr);
+		MPT_ASSERT_ALWAYS(g_CallbacksInstance == nullptr);
 		g_CallbacksInstance = this;
 		Log(mpt::String::Print("ASIO: createBuffers(numChannels=%1, bufferSize=%2)", m_Settings.Channels, m_nAsioBufferLen));
 		asioCall(createBuffers(&m_BufferInfo[0], m_Settings.Channels, m_nAsioBufferLen, &m_Callbacks));
@@ -383,7 +383,7 @@ bool CASIODevice::InternalOpen()
 			m_ChannelInfo[channel].isInput = ASIOFalse;
 			m_ChannelInfo[channel].channel = m_Settings.ChannelMapping.ToDevice(channel);
 			asioCall(getChannelInfo(&m_ChannelInfo[channel]));
-			ASSERT(m_ChannelInfo[channel].isActive);
+			MPT_ASSERT(m_ChannelInfo[channel].isActive);
 			mpt::String::SetNullTerminator(m_ChannelInfo[channel].name);
 			Log(mpt::String::Print("ASIO: getChannelInfo(isInput=%1 channel=%2) => isActive=%3 channelGroup=%4 type=%5 name='%6'"
 				, ASIOFalse
@@ -519,19 +519,19 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 			{
 				if(CriticalSection::IsLocked())
 				{
-					ASSERT_WARN_MESSAGE(false, "AudioCriticalSection locked while stopping ASIO");
+					MPT_ASSERT_MSG(false, "AudioCriticalSection locked while stopping ASIO");
 				} else
 				{
-					ASSERT_WARN_MESSAGE(false, "waiting for asio failed in Stop()");
+					MPT_ASSERT_MSG(false, "waiting for asio failed in Stop()");
 				}
 			} else
 			{
 				if(CriticalSection::IsLocked())
 				{
-					ASSERT_WARN_MESSAGE(false, "AudioCriticalSection locked while starting ASIO");
+					MPT_ASSERT_MSG(false, "AudioCriticalSection locked while starting ASIO");
 				} else
 				{
-					ASSERT_WARN_MESSAGE(false, "waiting for asio failed in Start()");
+					MPT_ASSERT_MSG(false, "waiting for asio failed in Start()");
 				}
 			}
 			break;
@@ -545,7 +545,7 @@ bool CASIODevice::InternalStart()
 //-------------------------------
 {
 	MPT_TRACE();
-	ALWAYS_ASSERT_WARN_MESSAGE(!CriticalSection::IsLocked(), "AudioCriticalSection locked while starting ASIO");
+	MPT_ASSERT_ALWAYS_MSG(!CriticalSection::IsLocked(), "AudioCriticalSection locked while starting ASIO");
 
 	if(m_Settings.KeepDeviceRunning)
 	{
@@ -589,7 +589,7 @@ void CASIODevice::InternalStopImpl(bool force)
 //--------------------------------------------
 {
 	MPT_TRACE();
-	ALWAYS_ASSERT_WARN_MESSAGE(!CriticalSection::IsLocked(), "AudioCriticalSection locked while stopping ASIO");
+	MPT_ASSERT_ALWAYS_MSG(!CriticalSection::IsLocked(), "AudioCriticalSection locked while stopping ASIO");
 
 	if(m_Settings.KeepDeviceRunning && !force)
 	{
@@ -648,7 +648,7 @@ bool CASIODevice::InternalClose()
 	}
 	if(g_CallbacksInstance)
 	{
-		ALWAYS_ASSERT(g_CallbacksInstance == this);
+		MPT_ASSERT_ALWAYS(g_CallbacksInstance == this);
 		g_CallbacksInstance = nullptr;
 	}
 	MemsetZero(m_Callbacks);
@@ -869,7 +869,7 @@ void CASIODevice::InternalFillAudioBuffer()
 			std::memset(&m_SampleBufferInt32[0], 0, countChunk * channels * sizeof(int32));
 		} else
 		{
-			ASSERT(false);
+			MPT_ASSERT(false);
 		}
 	} else
 	{
@@ -888,7 +888,7 @@ void CASIODevice::InternalFillAudioBuffer()
 			SourceAudioRead(&m_SampleBufferInt32[0], countChunk);
 		} else
 		{
-			ASSERT(false);
+			MPT_ASSERT(false);
 		}
 	}
 	for(int channel = 0; channel < channels; ++channel)
@@ -913,7 +913,7 @@ void CASIODevice::InternalFillAudioBuffer()
 					CopyInterleavedToChannel<SC::Convert<double, float> >(reinterpret_cast<double*>(dst), srcFloat, channels, countChunk, channel);
 					break;
 				default:
-					ASSERT(false);
+					MPT_ASSERT(false);
 					break;
 			}
 		} else if(m_Settings.sampleFormat == SampleFormatInt16)
@@ -926,7 +926,7 @@ void CASIODevice::InternalFillAudioBuffer()
 						CopyInterleavedToChannel<SC::Convert<int16, int16> >(reinterpret_cast<int16*>(dst), srcInt16, channels, countChunk, channel);
 						break;
 					default:
-						ASSERT(false);
+						MPT_ASSERT(false);
 						break;
 			}
 		} else if(m_Settings.sampleFormat == SampleFormatInt24)
@@ -939,7 +939,7 @@ void CASIODevice::InternalFillAudioBuffer()
 						CopyInterleavedToChannel<SC::Convert<int24, int24> >(reinterpret_cast<int24*>(dst), srcInt24, channels, countChunk, channel);
 						break;
 					default:
-						ASSERT(false);
+						MPT_ASSERT(false);
 						break;
 			}
 		} else if(m_Settings.sampleFormat == SampleFormatInt32)
@@ -984,12 +984,12 @@ void CASIODevice::InternalFillAudioBuffer()
 					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 8> >(reinterpret_cast<int32*>(dst), srcInt32, channels, countChunk, channel);
 					break;
 				default:
-					ASSERT(false);
+					MPT_ASSERT(false);
 					break;
 			}
 		} else
 		{
-			ASSERT(false);
+			MPT_ASSERT(false);
 		}
 		if(IsSampleTypeBigEndian(m_ChannelInfo[channel].type))
 		{
@@ -1090,7 +1090,7 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 //-----------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
-	ASSERT(directProcess); // !directProcess is not handled correctly in OpenMPT, would require a separate thread and potentially additional buffering
+	MPT_ASSERT(directProcess); // !directProcess is not handled correctly in OpenMPT, would require a separate thread and potentially additional buffering
 	if(!directProcess)
 	{
 		m_UsedFeatures.set(AsioFeatureNoDirectProcess);
@@ -1306,7 +1306,7 @@ long CASIODevice::CallbackAsioMessage(long selector, long value, void* message, 
 //------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
-	ALWAYS_ASSERT(g_CallbacksInstance);
+	MPT_ASSERT_ALWAYS(g_CallbacksInstance);
 	if(!g_CallbacksInstance) return 0;
 	return g_CallbacksInstance->AsioMessage(selector, value, message, opt);
 }
@@ -1316,7 +1316,7 @@ void CASIODevice::CallbackSampleRateDidChange(ASIOSampleRate sRate)
 //-----------------------------------------------------------------
 {
 	MPT_TRACE();
-	ALWAYS_ASSERT(g_CallbacksInstance);
+	MPT_ASSERT_ALWAYS(g_CallbacksInstance);
 	if(!g_CallbacksInstance) return;
 	g_CallbacksInstance->SampleRateDidChange(sRate);
 }
@@ -1326,7 +1326,7 @@ void CASIODevice::CallbackBufferSwitch(long doubleBufferIndex, ASIOBool directPr
 //------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
-	ALWAYS_ASSERT(g_CallbacksInstance);
+	MPT_ASSERT_ALWAYS(g_CallbacksInstance);
 	if(!g_CallbacksInstance) return;
 	g_CallbacksInstance->BufferSwitch(doubleBufferIndex, directProcess);
 }
@@ -1336,7 +1336,7 @@ ASIOTime* CASIODevice::CallbackBufferSwitchTimeInfo(ASIOTime* params, long doubl
 //-------------------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
-	ALWAYS_ASSERT(g_CallbacksInstance);
+	MPT_ASSERT_ALWAYS(g_CallbacksInstance);
 	if(!g_CallbacksInstance) return params;
 	return g_CallbacksInstance->BufferSwitchTimeInfo(params, doubleBufferIndex, directProcess);
 }

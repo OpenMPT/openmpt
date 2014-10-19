@@ -307,7 +307,7 @@ inline bool CTuningBase::IsStepCountRangeSufficient(USTEPINDEXTYPE fs, VRPAIR vr
 {
 	{ // avoid integer overload
 		//if(vrp.first == STEPINDEXTYPE_MIN && vrp.second == STEPINDEXTYPE_MAX) return true;
-		ASSERT(NOTEINDEXTYPE_MIN / 2 < vrp.first && vrp.second < NOTEINDEXTYPE_MAX / 2);
+		MPT_ASSERT(NOTEINDEXTYPE_MIN / 2 < vrp.first && vrp.second < NOTEINDEXTYPE_MAX / 2);
 		if(NOTEINDEXTYPE_MIN / 2 >= vrp.first || vrp.second >= NOTEINDEXTYPE_MAX / 2) return true;
 	}
 	if(fs > static_cast<USTEPINDEXTYPE>(STEPINDEXTYPE_MAX) / (vrp.second - vrp.first + 1)) return false;

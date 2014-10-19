@@ -255,7 +255,7 @@ CTuning::RATIOTYPE CTuningRTI::GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDE
 		if(GetType() == TT_GROUPGEOMETRIC)
 			return m_RatioTableFine[GetRefNote(note) * GetFineStepCount() + sd - 1];
 
-		ASSERT(false);
+		MPT_ASSERT(false);
 		return m_RatioTableFine[0]; //Shouldn't happen.
 	}
 	else //Calculating ratio 'on the fly'.

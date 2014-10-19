@@ -352,7 +352,7 @@ void CAudioThread::Activate()
 {
 	if(InterlockedExchangeAdd(&m_AudioThreadActive, 0))
 	{
-		ALWAYS_ASSERT(false);
+		MPT_ASSERT_ALWAYS(false);
 		return;
 	}
 	ResetEvent(m_hAudioThreadGoneIdle);
@@ -366,7 +366,7 @@ void CAudioThread::Deactivate()
 {
 	if(!InterlockedExchangeAdd(&m_AudioThreadActive, 0))
 	{
-		ALWAYS_ASSERT(false);
+		MPT_ASSERT_ALWAYS(false);
 		return;
 	}
 	InterlockedExchange(&m_AudioThreadActive, 0);

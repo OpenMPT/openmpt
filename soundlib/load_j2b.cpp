@@ -798,7 +798,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	else
 		madeWithTracker += "old version)";
 
-	ASSERT(mainChunk.unknown == LittleEndian(0xFF0001C5) || mainChunk.unknown == LittleEndian(0x35800716) || mainChunk.unknown == LittleEndian(0xFF00FFFF));
+	MPT_ASSERT(mainChunk.unknown == LittleEndian(0xFF0001C5) || mainChunk.unknown == LittleEndian(0x35800716) || mainChunk.unknown == LittleEndian(0xFF00FFFF));
 
 	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, mainChunk.songname);
 
@@ -918,7 +918,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				continue;
 			}
-			ASSERT(instrHeader.headSize + 4 == sizeof(instrHeader));
+			MPT_ASSERT(instrHeader.headSize + 4 == sizeof(instrHeader));
 
 			const INSTRUMENTINDEX instr = instrHeader.index + 1;
 			if(instr >= MAX_INSTRUMENTS)
@@ -936,7 +936,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 			// Read sample sub-chunks (RIFF nesting ftw)
 			ChunkReader::ChunkList<AMFFRiffChunk> sampleChunkFile = chunk.ReadChunks<AMFFRiffChunk>(2);
 			std::vector<FileReader> sampleChunks = sampleChunkFile.GetAllChunks(AMFFRiffChunk::idRIFF);
-			ASSERT(sampleChunks.size() == instrHeader.numSamples);
+			MPT_ASSERT(sampleChunks.size() == instrHeader.numSamples);
 
 			for(std::vector<FileReader>::iterator smpIter = sampleChunks.begin(); smpIter != sampleChunks.end(); smpIter++)
 			{

@@ -36,7 +36,7 @@ public:
 		, outputBuffer(buffer)
 		, outputBuffers(buffers)
 	{
-		ASSERT(SampleFormat(SampleFormatTraits<Tsample>::sampleFormat).IsValid());
+		MPT_ASSERT(SampleFormat(SampleFormatTraits<Tsample>::sampleFormat).IsValid());
 	}
 	virtual ~AudioReadTargetBuffer() { }
 	std::size_t GetRenderedCount() const { return countRendered; }

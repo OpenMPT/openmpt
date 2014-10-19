@@ -26,8 +26,8 @@ template <typename SampleConversion>
 bool CopyWavChannel(ModSample &sample, const FileReader &file, size_t channelIndex, size_t numChannels, SampleConversion conv = SampleConversion())
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	ASSERT(sample.GetNumChannels() == 1);
-	ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
+	MPT_ASSERT(sample.GetNumChannels() == 1);
+	MPT_ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
 
 	const size_t offset = channelIndex * sizeof(typename SampleConversion::input_t) * SampleConversion::input_inc;
 

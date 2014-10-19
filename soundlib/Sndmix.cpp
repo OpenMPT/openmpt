@@ -130,7 +130,7 @@ bool CSoundFile::FadeSong(UINT msec)
 CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget &target)
 //---------------------------------------------------------------------------------------
 {
-	ALWAYS_ASSERT(m_MixerSettings.IsValid());
+	MPT_ASSERT_ALWAYS(m_MixerSettings.IsValid());
 
 	bool mixPlugins = false;
 	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; ++i)
@@ -158,7 +158,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 				m_SongFlags.set(SONG_ENDREACHED);
 			} else if(ReadNote())
 			{ // render next tick (normal progress)
-				ASSERT(m_PlayState.m_nBufferCount > 0);
+				MPT_ASSERT(m_PlayState.m_nBufferCount > 0);
 				#ifdef MODPLUG_TRACKER
 					// Save pattern cue points for WAV rendering here (if we reached a new pattern, that is.)
 					if(IsRenderingToDisc() && (m_PatternCuePoints.empty() || m_PlayState.m_nCurrentOrder != m_PatternCuePoints.back().order))
@@ -185,7 +185,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 				{ // end of song reached, fade it out
 					if(FadeSong(FADESONGDELAY)) // sets m_nBufferCount xor returns false
 					{ // FadeSong sets m_nBufferCount here
-						ASSERT(m_PlayState.m_nBufferCount > 0);
+						MPT_ASSERT(m_PlayState.m_nBufferCount > 0);
 						m_SongFlags.set(SONG_FADINGSONG);
 					} else
 					{
@@ -201,7 +201,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 			break; // mix done
 		}
 
-		ASSERT(m_PlayState.m_nBufferCount > 0); // assert that we have actually something to do
+		MPT_ASSERT(m_PlayState.m_nBufferCount > 0); // assert that we have actually something to do
 
 		const samplecount_t countChunk = std::min<samplecount_t>(MIXBUFFERSIZE, std::min<samplecount_t>(m_PlayState.m_nBufferCount, countToRender));
 
