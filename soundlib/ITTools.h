@@ -65,7 +65,7 @@ struct PACKED ITFileHeader
 	uint8  pwd;				// Pitch Wheel Depth
 	uint16 msglength;		// Length of Song Message
 	uint32 msgoffset;		// Offset of Song Message in File (IT crops message after first null)
-	char   reserved[4];		// ChibiTracker writes "CHBI" here. OpenMPT writes "OMPT" here in some cases, see Load_it.cpp
+	char   reserved[4];		// Some IT versions save an edit timer here. ChibiTracker writes "CHBI" here. OpenMPT writes "OMPT" here in some cases, see Load_it.cpp
 	uint8  chnpan[64];		// Initial Channel Panning
 	uint8  chnvol[64];		// Initial Channel Volume
 
