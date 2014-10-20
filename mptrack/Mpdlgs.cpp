@@ -290,7 +290,7 @@ void COptionsSoundcard::UpdateUpdateInterval()
 			}
 		}
 	}
-	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
+	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()) || !m_CurrentDeviceCaps.CanUpdateInterval)
 	{
 		m_CbnUpdateIntervalMS.EnableWindow(FALSE);
 	}
