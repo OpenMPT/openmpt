@@ -166,7 +166,10 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		m_szInstrumentPath[ins] = mpt::PathString::FromUTF8(path);
 
-		if(GetpModDoc() != nullptr)
+		if(!file.GetFileName().empty())
+		{
+			m_szInstrumentPath[ins] = m_szInstrumentPath[ins].RelativePathToAbsolute(file.GetFileName().GetPath());
+		} else if(GetpModDoc() != nullptr)
 		{
 			m_szInstrumentPath[ins] = m_szInstrumentPath[ins].RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt().GetPath());
 		}
@@ -264,7 +267,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		mpt::ifstream f(m_szInstrumentPath[ins], std::ios_base::binary);
 		if(!f.good())
 			continue;
-		FileReader file(&f);
+		FileReader file(&f, &m_szInstrumentPath[ins]);
 #else
 		CMappedFile f;
 		if(!f.Open(m_szInstrumentPath[ins]))

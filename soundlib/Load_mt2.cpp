@@ -1060,7 +1060,15 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 #ifdef MODPLUG_TRACKER
 			mpt::PathString path(mpt::PathString::FromLocale(filename));
-			if(GetpModDoc() != nullptr)
+			mpt::PathString mt2FileName;
+			if(!file.GetFileName().empty())
+			{
+				mt2FileName = file.GetFileName();
+			} else if(GetpModDoc() != nullptr)
+			{
+				mt2FileName = GetpModDoc()->GetPathNameMpt();
+			}
+			if(!mt2FileName.empty())
 			{
 				std::wstring pathStart = path.ToWide().substr(0, 2);
 				if(pathStart.length() >= 2
@@ -1070,13 +1078,13 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 					// Relative path in sub directory
 					path = MPT_PATHSTRING(".\\") + path;
 				}
-				path = path.RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt().GetPath());
+				path = path.RelativePathToAbsolute(mt2FileName.GetPath());
 			}
 
 #if defined(MPT_FILEREADER_STD_ISTREAM)
 			mpt::ifstream f(path, std::ios_base::binary);
 			if(f.good())
-				sampleFile = FileReader(&f);
+				sampleFile = FileReader(&f, &path);
 #else
 			CMappedFile f;
 			FileReader sampleFile;

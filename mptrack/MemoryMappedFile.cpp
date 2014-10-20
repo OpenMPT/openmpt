@@ -38,6 +38,7 @@ bool CMappedFile::Open(const mpt::PathString &filename)
 		m_hFile = nullptr;
 		return false;
 	}
+	m_FileName = filename;
 	return true;
 }
 
@@ -45,6 +46,7 @@ bool CMappedFile::Open(const mpt::PathString &filename)
 void CMappedFile::Close()
 //-----------------------
 {
+	m_FileName = mpt::PathString();
 	// Unlock file
 	if(m_hFMap)
 	{
@@ -141,7 +143,7 @@ const void *CMappedFile::Lock()
 FileReader CMappedFile::GetFile()
 //-------------------------------
 {
-	return FileReader(Lock(), GetLength());
+	return FileReader(Lock(), GetLength(), &m_FileName);
 }
 
 
