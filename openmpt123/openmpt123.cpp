@@ -416,13 +416,17 @@ static std::string get_device_string( int device ) {
 	return str.str();
 }
 
-static void show_help( textout & log, bool with_info = true, bool longhelp = false, const std::string & message = std::string() ) {
+static void show_help( textout & log, bool with_info = true, bool longhelp = false, bool man_version = false, const std::string & message = std::string() ) {
 	if ( with_info ) {
 		show_info( log, false );
 	}
 	{
 		log << "Usage: openmpt123 [options] [--] file1 [file2] ..." << std::endl;
 		log << std::endl;
+		if ( man_version ) {
+			log << "openmpt123 plays module music files." << std::endl;
+			log << std::endl;
+		}
 		log << " -h, --help                 Show help" << std::endl;
 		log << "     --help-keyboard        Show keyboard hotkeys in ui mode" << std::endl;
 		log << " -q, --quiet                Suppress non-error screen output" << std::endl;
@@ -483,19 +487,21 @@ static void show_help( textout & log, bool with_info = true, bool longhelp = fal
 		log << std::endl;
 		log << "     --                     Interpret further arguments as filenames" << std::endl;
 		log << std::endl;
-		log << " Supported file formats: " << std::endl;
-		log << "    ";
-		std::vector<std::string> extensions = openmpt::get_supported_extensions();
-		bool first = true;
-		for ( std::vector<std::string>::iterator i = extensions.begin(); i != extensions.end(); ++i ) {
-			if ( first ) {
-				first = false;
-			} else {
-				log << ", ";
+		if ( !man_version ) {
+			log << " Supported file formats: " << std::endl;
+			log << "    ";
+			std::vector<std::string> extensions = openmpt::get_supported_extensions();
+			bool first = true;
+			for ( std::vector<std::string>::iterator i = extensions.begin(); i != extensions.end(); ++i ) {
+				if ( first ) {
+					first = false;
+				} else {
+					log << ", ";
+				}
+				log << *i;
 			}
-			log << *i;
+			log << std::endl;
 		}
-		log << std::endl;
 	}
 
 	log << std::endl;
@@ -1680,13 +1686,13 @@ static int main( int argc, char * argv [] ) {
 		show_help( std_out );
 		return 1;
 	} catch ( show_man_help_exception & ) {
-		show_help( std_out, false, true );
+		show_help( std_out, false, true, true );
 		return 0;
 	} catch ( show_man_version_exception & ) {
 		show_man_version( std_out );
 		return 0;
 	} catch ( show_help_exception & e ) {
-		show_help( std_out, true, e.longhelp, e.message );
+		show_help( std_out, true, e.longhelp, false, e.message );
 		if ( flags.verbose ) {
 			show_credits( std_out );
 		}
