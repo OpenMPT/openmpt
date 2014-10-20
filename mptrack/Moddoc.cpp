@@ -221,7 +221,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 	BeginWaitCursor();
 	#if defined(MPT_FILEREADER_STD_ISTREAM)
 		mpt::ifstream f(filename, std::ios_base::binary);
-		m_SndFile.Create(FileReader(&f), CSoundFile::loadCompleteModule, this);
+		m_SndFile.Create(FileReader(&f, &filename), CSoundFile::loadCompleteModule, this);
 	#else
 	{
 		CMappedFile f;

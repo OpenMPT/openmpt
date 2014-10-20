@@ -25,6 +25,7 @@ protected:
 	HANDLE m_hFile;
 	HANDLE m_hFMap;
 	void *m_pData;
+	mpt::PathString m_FileName;
 
 public:
 	CMappedFile() : m_hFile(nullptr), m_hFMap(nullptr), m_pData(nullptr) { }
