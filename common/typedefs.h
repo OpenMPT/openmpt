@@ -179,13 +179,35 @@ typedef std::bad_alloc & MPTMemoryException;
 
 
 
+// For mpt::make_shared<T>, we sacrifice perfect forwarding in order to keep things simple here.
+// Templated for up to 4 parameters. Add more when required.
+
 OPENMPT_NAMESPACE_END
 #include <memory>
 OPENMPT_NAMESPACE_BEGIN
+
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
+
 #define MPT_SHARED_PTR std::tr1::shared_ptr
+namespace mpt {
+template <typename T> inline MPT_SHARED_PTR<T> make_shared() { return MPT_SHARED_PTR<T>(new T()); }
+template <typename T, typename T1> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1) { return MPT_SHARED_PTR<T>(new T(x1)); }
+template <typename T, typename T1, typename T2> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1, const T2 &x2) { return MPT_SHARED_PTR<T>(new T(x1, x2)); }
+template <typename T, typename T1, typename T2, typename T3> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1, const T2 &x2, const T3 &x3) { return MPT_SHARED_PTR<T>(new T(x1, x2, x3)); }
+template <typename T, typename T1, typename T2, typename T3, typename T4> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1, const T2 &x2, const T3 &x3, const T4 &x4) { return MPT_SHARED_PTR<T>(new T(x1, x2, x3, x4)); }
+} // namespace mpt
+
 #else
+
 #define MPT_SHARED_PTR std::shared_ptr
+namespace mpt {
+template <typename T> inline MPT_SHARED_PTR<T> make_shared() { return std::make_shared<T>(); }
+template <typename T, typename T1> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1) { return std::make_shared<T>(x1); }
+template <typename T, typename T1, typename T2> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1, const T2 &x2) { return std::make_shared<T>(x1, x2); }
+template <typename T, typename T1, typename T2, typename T3> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1, const T2 &x2, const T3 &x3) { return std::make_shared<T>(x1, x2, x3); }
+template <typename T, typename T1, typename T2, typename T3, typename T4> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1, const T2 &x2, const T3 &x3, const T4 &x4) { return std::make_shared<T>(x1, x2, x3, x4); }
+} // namespace mpt
+
 #endif
 
 
