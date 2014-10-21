@@ -1481,14 +1481,15 @@ std::string MP3Encoder::DescribeQuality(float quality) const
 #ifdef MPT_MP3ENCODER_LAME
 	if(m_Type == MP3EncoderLame)
 	{
-		int q = static_cast<int>((1.0f - quality) * 10.0f);
+		static const int q_table[11] = { 240, 220, 190, 170, 160, 130, 120, 100, 80, 70, 50 }; // http://wiki.hydrogenaud.io/index.php?title=LAME
+		int q = Util::Round<int>((1.0f - quality) * 10.0f);
 		if(q < 0) q = 0;
 		if(q >= 10)
 		{
-			return "VBR -V9.999";
+			return mpt::String::Print("VBR -V%1 (~%2 kbit)", "9.999", q_table[q]);
 		} else
 		{
-			return mpt::String::Print("VBR -V%1", static_cast<int>((1.0f - quality) * 10.0f));
+			return mpt::String::Print("VBR -V%1 (~%2 kbit)", Util::Round<int>((1.0f - quality) * 10.0f), q_table[q]);
 		}
 	}
 #endif // MPT_MP3ENCODER_LAME
