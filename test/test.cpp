@@ -1943,7 +1943,7 @@ static noinline void TestPCnoteSerialization()
 //--------------------------------------------
 {
 	FileReader file;
-	MPT_SHARED_PTR<CSoundFile> pSndFile(new CSoundFile());
+	MPT_SHARED_PTR<CSoundFile> pSndFile = mpt::make_shared<CSoundFile>();
 	CSoundFile &sndFile = *pSndFile.get();
 	sndFile.ChangeModTypeTo(MOD_TYPE_MPT);
 	sndFile.Patterns.DestroyPatterns();
