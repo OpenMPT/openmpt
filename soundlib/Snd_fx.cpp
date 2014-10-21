@@ -4050,11 +4050,12 @@ void CSoundFile::InvertLoop(ModChannel *pChn)
 void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro, uint8 param, PLUGINDEX plugin)
 //-------------------------------------------------------------------------------------------------------------
 {
-	const ModChannel *pChn = &m_PlayState.Chn[nChn];
+	ModChannel *pChn = &m_PlayState.Chn[nChn];
 	const ModInstrument *pIns = GetNumInstruments() ? pChn->pModInstrument : nullptr;
 
 	unsigned char out[MACRO_LENGTH];
 	size_t outPos = 0;	// output buffer position, which also equals the number of complete bytes
+	const uint8 lastZxxParam = pChn->lastZxxParam;
 	bool firstNibble = true;
 
 	for(size_t pos = 0; pos < (MACRO_LENGTH - 1) && macro[pos]; pos++)
@@ -4121,7 +4122,15 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro,
 			}
 		} else if(macro[pos] == 'z')		// z: macro data
 		{
-			data = (unsigned char)(param & 0x7F);
+			data = param & 0x7F;
+			if(isSmooth && pChn->lastZxxParam < 0x80
+				&& (outPos < 3 || out[outPos - 3] != 0xF0 || out[outPos - 2] < 0xF0))
+			{
+				// Interpolation for external MIDI messages - interpolation for internal messages
+				// is handled separately to allow for more than 7-bit granularity where it's possible
+				data = (uint8)CalculateSmoothParamChange((float)lastZxxParam, (float)data);
+			}
+			pChn->lastZxxParam = data;
 		} else								// unrecognized byte (e.g. space char)
 		{
 			continue;
@@ -4230,7 +4239,7 @@ float CSoundFile::CalculateSmoothParamChange(float currentValue, float param) co
 //---------------------------------------------------------------------------------
 {
 	MPT_ASSERT(GetNumTicksOnCurrentRow() > m_PlayState.m_nTickCount);
-	const UINT ticksLeft = GetNumTicksOnCurrentRow() - m_PlayState.m_nTickCount;
+	const uint32 ticksLeft = GetNumTicksOnCurrentRow() - m_PlayState.m_nTickCount;
 	if(ticksLeft > 1)
 	{
 		// Slide param
