@@ -189,6 +189,9 @@ OPENMPT_NAMESPACE_BEGIN
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
 
 #define MPT_SHARED_PTR std::tr1::shared_ptr
+#define MPT_CONST_POINTER_CAST std::tr1::const_pointer_cast
+#define MPT_STATIC_POINTER_CAST std::tr1::static_pointer_cast
+#define MPT_DYNAMIC_POINTER_CAST std::tr1::dynamic_pointer_cast
 namespace mpt {
 template <typename T> inline MPT_SHARED_PTR<T> make_shared() { return MPT_SHARED_PTR<T>(new T()); }
 template <typename T, typename T1> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1) { return MPT_SHARED_PTR<T>(new T(x1)); }
@@ -200,6 +203,9 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 #else
 
 #define MPT_SHARED_PTR std::shared_ptr
+#define MPT_CONST_POINTER_CAST std::const_pointer_cast
+#define MPT_STATIC_POINTER_CAST std::static_pointer_cast
+#define MPT_DYNAMIC_POINTER_CAST std::dynamic_pointer_cast
 namespace mpt {
 template <typename T> inline MPT_SHARED_PTR<T> make_shared() { return std::make_shared<T>(); }
 template <typename T, typename T1> inline MPT_SHARED_PTR<T> make_shared(const T1 &x1) { return std::make_shared<T>(x1); }
