@@ -13,6 +13,8 @@
 #include "StreamEncoder.h"
 #include "StreamEncoderVorbis.h"
 
+#include "../common/ComponentManager.h"
+
 #include "Mptrack.h"
 
 #include <vorbis/vorbisenc.h>
@@ -23,12 +25,11 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-struct VorbisDynBind
+class ComponentVorbis
+	: public ComponentBase
 {
 
-	mpt::Library hOgg;
-	mpt::Library hVorbis;
-	mpt::Library hVorbisEnc;
+public:
 
 	// ogg
 	int      (*ogg_stream_init)(ogg_stream_state *os,int serialno);
@@ -61,11 +62,26 @@ struct VorbisDynBind
 	int (*vorbis_encode_init)(vorbis_info *vi, long channels, long rate, long max_bitrate, long nominal_bitrate, long min_bitrate);
 	int (*vorbis_encode_init_vbr)(vorbis_info *vi, long channels, long rate, float base_quality);
 
+private:
+
 	void Reset()
+	{
+		ClearLibraries();
+	}
+
+public:
+
+	ComponentVorbis()
+		: ComponentBase(ComponentTypeForeign, false)
 	{
 		return;
 	}
-	VorbisDynBind()
+
+	std::string GetSettingsKey() const { return "Vorbis"; }
+
+protected:
+
+	bool DoInitialize()
 	{
 		Reset();
 		struct dll_names_t {
@@ -85,100 +101,75 @@ struct VorbisDynBind
 			{ "libogg-0" , "libvorbis-0", "libvorbisenc-0"}, // mingw builds
 			{ "libogg-0" , "libvorbis-0", "libvorbisenc-2"}  // mingw 64-bit builds
 		};
+		bool ok = false;
 		for(std::size_t i=0; i<CountOf(dll_names); ++i)
 		{
 			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].ogg), mpt::PathString::FromUTF8(dll_names[i].vorbis), mpt::PathString::FromUTF8(dll_names[i].vorbisenc)))
 			{
-				// success
+				ok = true;
 				break;
 			}
 		}
+		return ok;
 	}
 	bool TryLoad(const mpt::PathString &Ogg_fn, const mpt::PathString &Vorbis_fn, const mpt::PathString &VorbisEnc_fn)
 	{
-		hOgg = mpt::Library(mpt::LibraryPath::AppFullName(Ogg_fn));
-		if(!hOgg.IsValid())
+		Reset();
+		ClearBindFailed();
+		if(!AddLibrary("ogg", mpt::LibraryPath::AppFullName(Ogg_fn)))
 		{
-			if(hOgg.IsValid()) { hOgg.Unload(); }
-			if(hVorbis.IsValid()) { hVorbis.Unload(); }
-			if(hVorbisEnc.IsValid()) { hVorbisEnc.Unload(); }
+			Reset();
 			return false;
 		}
-		hVorbis = mpt::Library(mpt::LibraryPath::AppFullName(Vorbis_fn));
-		if(!hVorbis.IsValid())
+		if(!AddLibrary("vorbis", mpt::LibraryPath::AppFullName(Vorbis_fn)))
 		{
-			if(hOgg.IsValid()) { hOgg.Unload(); }
-			if(hVorbis.IsValid()) { hVorbis.Unload(); }
-			if(hVorbisEnc.IsValid()) { hVorbisEnc.Unload(); }
+			Reset();
 			return false;
 		}
-		hVorbisEnc = mpt::Library(mpt::LibraryPath::AppFullName(VorbisEnc_fn));
-		if(!hVorbisEnc.IsValid())
+		if(!AddLibrary("vorbisenc", mpt::LibraryPath::AppFullName(VorbisEnc_fn)))
 		{
-			if(hOgg.IsValid()) { hOgg.Unload(); }
-			if(hVorbis.IsValid()) { hVorbis.Unload(); }
-			if(hVorbisEnc.IsValid()) { hVorbisEnc.Unload(); }
+			Reset();
 			return false;
 		}
-		bool ok = true;
-		#define VORBIS_BIND(l,f) do { \
-			if(!l.Bind( f , #f )) \
-			{ \
-				ok = false; \
-			} \
-		} while(0)
-		#define VORBIS_BIND_OPTIONAL(l,f) do { \
-			l.Bind( f , #f ); \
-		} while(0)
-		VORBIS_BIND(hOgg,ogg_stream_init);
-		VORBIS_BIND(hOgg,ogg_stream_packetin);
-		VORBIS_BIND(hOgg,ogg_stream_flush);
-		VORBIS_BIND(hOgg,ogg_stream_pageout);
-		VORBIS_BIND(hOgg,ogg_page_eos);
-		VORBIS_BIND(hOgg,ogg_stream_clear);
-		VORBIS_BIND_OPTIONAL(hVorbis,vorbis_version_string);
-		VORBIS_BIND(hVorbis,vorbis_info_init);
-		VORBIS_BIND(hVorbis,vorbis_comment_init);
-		VORBIS_BIND(hVorbis,vorbis_comment_add_tag);
-		VORBIS_BIND(hVorbis,vorbis_analysis_init);
-		VORBIS_BIND(hVorbis,vorbis_block_init);
-		VORBIS_BIND(hVorbis,vorbis_analysis_headerout);
-		VORBIS_BIND(hVorbis,vorbis_analysis_buffer);
-		VORBIS_BIND(hVorbis,vorbis_analysis_wrote);
-		VORBIS_BIND(hVorbis,vorbis_analysis_blockout);
-		VORBIS_BIND(hVorbis,vorbis_analysis);
-		VORBIS_BIND(hVorbis,vorbis_bitrate_addblock);
-		VORBIS_BIND(hVorbis,vorbis_bitrate_flushpacket);
-		VORBIS_BIND(hVorbis,vorbis_block_clear);
-		VORBIS_BIND(hVorbis,vorbis_dsp_clear);
-		VORBIS_BIND(hVorbis,vorbis_comment_clear);
-		VORBIS_BIND(hVorbis,vorbis_info_clear);
-		VORBIS_BIND(hVorbisEnc,vorbis_encode_init);
-		VORBIS_BIND(hVorbisEnc,vorbis_encode_init_vbr);
-		#undef VORBIS_BIND
-		#undef VORBIS_BIND_OPTIONAL
-		if(!ok)
+		MPT_COMPONENT_BIND("ogg",ogg_stream_init);
+		MPT_COMPONENT_BIND("ogg",ogg_stream_packetin);
+		MPT_COMPONENT_BIND("ogg",ogg_stream_flush);
+		MPT_COMPONENT_BIND("ogg",ogg_stream_pageout);
+		MPT_COMPONENT_BIND("ogg",ogg_page_eos);
+		MPT_COMPONENT_BIND("ogg",ogg_stream_clear);
+		MPT_COMPONENT_BIND_OPTIONAL("vorbis",vorbis_version_string);
+		MPT_COMPONENT_BIND("vorbis",vorbis_info_init);
+		MPT_COMPONENT_BIND("vorbis",vorbis_comment_init);
+		MPT_COMPONENT_BIND("vorbis",vorbis_comment_add_tag);
+		MPT_COMPONENT_BIND("vorbis",vorbis_analysis_init);
+		MPT_COMPONENT_BIND("vorbis",vorbis_block_init);
+		MPT_COMPONENT_BIND("vorbis",vorbis_analysis_headerout);
+		MPT_COMPONENT_BIND("vorbis",vorbis_analysis_buffer);
+		MPT_COMPONENT_BIND("vorbis",vorbis_analysis_wrote);
+		MPT_COMPONENT_BIND("vorbis",vorbis_analysis_blockout);
+		MPT_COMPONENT_BIND("vorbis",vorbis_analysis);
+		MPT_COMPONENT_BIND("vorbis",vorbis_bitrate_addblock);
+		MPT_COMPONENT_BIND("vorbis",vorbis_bitrate_flushpacket);
+		MPT_COMPONENT_BIND("vorbis",vorbis_block_clear);
+		MPT_COMPONENT_BIND("vorbis",vorbis_dsp_clear);
+		MPT_COMPONENT_BIND("vorbis",vorbis_comment_clear);
+		MPT_COMPONENT_BIND("vorbis",vorbis_info_clear);
+		MPT_COMPONENT_BIND("vorbisenc",vorbis_encode_init);
+		MPT_COMPONENT_BIND("vorbisenc",vorbis_encode_init_vbr);
+		if(HasBindFailed())
 		{
-			if(hOgg.IsValid()) { hOgg.Unload(); }
-			if(hVorbis.IsValid()) { hVorbis.Unload(); }
-			if(hVorbisEnc.IsValid()) { hVorbisEnc.Unload(); }
 			Reset();
 			return false;
 		}
 		return true;
 	}
-	operator bool () const { return hOgg.IsValid() && hVorbis.IsValid() && hVorbisEnc.IsValid(); }
-	~VorbisDynBind()
-	{
-		if(hOgg.IsValid()) { hOgg.Unload(); }
-		if(hVorbis.IsValid()) { hVorbis.Unload(); }
-		if(hVorbisEnc.IsValid()) { hVorbisEnc.Unload(); }
-		Reset();
-	}
+
+public:
+
 	Encoder::Traits BuildTraits()
 	{
 		Encoder::Traits traits;
-		if(!*this)
+		if(!IsAvailable())
 		{
 			return traits;
 		}
@@ -203,11 +194,12 @@ struct VorbisDynBind
 		return traits;
 	}
 };
+MPT_REGISTERED_COMPONENT(ComponentVorbis)
 
 class VorbisStreamWriter : public StreamWriterBase
 {
 private:
-	VorbisDynBind &vorbis;
+	ComponentVorbis &vorbis;
   ogg_stream_state os;
   ogg_page         og;
   ogg_packet       op;
@@ -295,7 +287,7 @@ private:
 		}
 	}
 public:
-	VorbisStreamWriter(VorbisDynBind &vorbis_, std::ostream &stream)
+	VorbisStreamWriter(ComponentVorbis &vorbis_, std::ostream &stream)
 		: StreamWriterBase(stream)
 		, vorbis(vorbis_)
 	{
@@ -403,10 +395,9 @@ public:
 
 VorbisEncoder::VorbisEncoder()
 //----------------------------
-	: m_Vorbis(nullptr)
 {
-	m_Vorbis = new VorbisDynBind();
-	if(*m_Vorbis)
+	m_Vorbis = MPT_GET_COMPONENT(ComponentVorbis);
+	if(IsComponentAvailable(m_Vorbis))
 	{
 		SetTraits(m_Vorbis->BuildTraits());
 	}
@@ -416,18 +407,14 @@ VorbisEncoder::VorbisEncoder()
 bool VorbisEncoder::IsAvailable() const
 //-------------------------------------
 {
-	return m_Vorbis && *m_Vorbis;
+	return IsComponentAvailable(m_Vorbis);
 }
 
 
 VorbisEncoder::~VorbisEncoder()
 //-----------------------------
 {
-	if(m_Vorbis)
-	{
-		delete m_Vorbis;
-		m_Vorbis = nullptr;
-	}
+	return;
 }
 
 

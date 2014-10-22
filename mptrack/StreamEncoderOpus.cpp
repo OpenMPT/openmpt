@@ -13,6 +13,8 @@
 #include "StreamEncoder.h"
 #include "StreamEncoderOpus.h"
 
+#include "../common/ComponentManager.h"
+
 #include "Mptrack.h"
 
 #include <deque>
@@ -38,11 +40,11 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-struct OpusDynBind
+class ComponentOpus
+	: public ComponentBase
 {
 
-	mpt::Library hOgg;
-	mpt::Library hOpus;
+public:
 
 	// ogg
 	int      (*ogg_stream_init)(ogg_stream_state *os,int serialno);
@@ -64,11 +66,26 @@ struct OpusDynBind
 	// 1.1
 	OpusMSEncoder * (*opus_multistream_surround_encoder_create)(opus_int32 Fs, int channels, int mapping_family, int *streams, int *coupled_streams, unsigned char *mapping, int application, int *error);
 		
+private:
+
 	void Reset()
+	{
+		ClearLibraries();
+	}
+
+public:
+
+	ComponentOpus()
+		: ComponentBase(ComponentTypeForeign, false)
 	{
 		return;
 	}
-	OpusDynBind()
+
+	std::string GetSettingsKey() const { return "Opus"; }
+
+protected:
+
+	bool DoInitialize()
 	{
 		Reset();
 		struct dll_names_t {
@@ -84,70 +101,59 @@ struct OpusDynBind
 			{ "libogg"   , "libopus"    },
 			{ "ogg"      , "opus"       }
 		};
+		bool ok = false;
 		for(std::size_t i=0; i<CountOf(dll_names); ++i)
 		{
 			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].ogg), mpt::PathString::FromUTF8(dll_names[i].opus)))
 			{
-				// success
+				ok = true;
 				break;
 			}
 		}
+		return ok;
 	}
+
+private:
+
 	bool TryLoad(const mpt::PathString &Ogg_fn, const mpt::PathString &Opus_fn)
 	{
-		hOgg = mpt::Library(mpt::LibraryPath::AppFullName(Ogg_fn));
-		if(!hOgg.IsValid())
+		Reset();
+		ClearBindFailed();
+		if(!AddLibrary("ogg", mpt::LibraryPath::AppFullName(Ogg_fn)))
 		{
-			if(hOgg.IsValid()) { hOgg.Unload(); }
-			if(hOpus.IsValid()) { hOpus.Unload(); }
+			Reset();
 			return false;
 		}
-		hOpus = mpt::Library(mpt::LibraryPath::AppFullName(Opus_fn));
-		if(!hOpus.IsValid())
+		if(!AddLibrary("opus", mpt::LibraryPath::AppFullName(Opus_fn)))
 		{
-			if(hOgg.IsValid()) { hOgg.Unload(); }
-			if(hOpus.IsValid()) { hOpus.Unload(); }
+			Reset();
 			return false;
 		}
-		bool ok = true;
-		#define OPUS_BIND(l,f,req) do { \
-			if(!l.Bind( f , #f ) && req) \
-			{ \
-				ok = false; \
-			} \
-		} while(0)
-		OPUS_BIND(hOgg,ogg_stream_init,true);
-		OPUS_BIND(hOgg,ogg_stream_packetin,true);
-		OPUS_BIND(hOgg,ogg_stream_flush,true);
-		OPUS_BIND(hOgg,ogg_stream_pageout,true);
-		OPUS_BIND(hOgg,ogg_stream_clear,true);
-		OPUS_BIND(hOpus,opus_get_version_string,false);
-		OPUS_BIND(hOpus,opus_multistream_encoder_ctl,true);
-		OPUS_BIND(hOpus,opus_multistream_encode_float,true);
-		OPUS_BIND(hOpus,opus_multistream_encoder_destroy,true);
-		OPUS_BIND(hOpus,opus_multistream_encoder_create,true);
-		OPUS_BIND(hOpus,opus_multistream_surround_encoder_create,false);
-		#undef OPUS_BIND
-		if(!ok)
+		MPT_COMPONENT_BIND("ogg", ogg_stream_init);
+		MPT_COMPONENT_BIND("ogg", ogg_stream_packetin);
+		MPT_COMPONENT_BIND("ogg", ogg_stream_flush);
+		MPT_COMPONENT_BIND("ogg", ogg_stream_pageout);
+		MPT_COMPONENT_BIND("ogg", ogg_stream_clear);
+		MPT_COMPONENT_BIND_OPTIONAL("opus", opus_get_version_string);
+		MPT_COMPONENT_BIND("opus", opus_multistream_encoder_ctl);
+		MPT_COMPONENT_BIND("opus", opus_multistream_encode_float);
+		MPT_COMPONENT_BIND("opus", opus_multistream_encoder_destroy);
+		MPT_COMPONENT_BIND("opus", opus_multistream_encoder_create);
+		MPT_COMPONENT_BIND_OPTIONAL("opus", opus_multistream_surround_encoder_create);
+		if(HasBindFailed())
 		{
-			if(hOgg.IsValid()) { hOgg.Unload(); }
-			if(hOpus.IsValid()) { hOpus.Unload(); }
 			Reset();
 			return false;
 		}
 		return true;
 	}
-	operator bool () const { return hOgg.IsValid() && hOpus.IsValid(); }
-	~OpusDynBind()
-	{
-		if(hOgg.IsValid()) { hOgg.Unload(); }
-		if(hOpus.IsValid()) { hOpus.Unload(); }
-		Reset();
-	}
+
+public:
+
 	Encoder::Traits BuildTraits()
 	{
 		Encoder::Traits traits;
-		if(!*this)
+		if(!IsAvailable())
 		{
 			return traits;
 		}
@@ -170,14 +176,16 @@ struct OpusDynBind
 		traits.defaultBitrate = 128;
 		return traits;
 	}
+
 };
+MPT_REGISTERED_COMPONENT(ComponentOpus)
 
 
 
 class OpusStreamWriter : public StreamWriterBase
 {
 private:
-	OpusDynBind &opus;
+	ComponentOpus &opus;
   ogg_stream_state os;
   ogg_page         og;
   ogg_packet       op;
@@ -330,7 +338,7 @@ private:
 		}
 	}
 public:
-	OpusStreamWriter(OpusDynBind &opus_, std::ostream &stream)
+	OpusStreamWriter(ComponentOpus &opus_, std::ostream &stream)
 		: StreamWriterBase(stream)
 		, opus(opus_)
 	{
@@ -555,10 +563,9 @@ public:
 
 OggOpusEncoder::OggOpusEncoder()
 //------------------------------
-	: m_Opus(nullptr)
 {
-	m_Opus = new OpusDynBind();
-	if(*m_Opus)
+	m_Opus = MPT_GET_COMPONENT(ComponentOpus);
+	if(IsComponentAvailable(m_Opus))
 	{
 		SetTraits(m_Opus->BuildTraits());
 	}
@@ -568,18 +575,14 @@ OggOpusEncoder::OggOpusEncoder()
 bool OggOpusEncoder::IsAvailable() const
 //--------------------------------------
 {
-	return m_Opus && *m_Opus;
+	return IsComponentAvailable(m_Opus);
 }
 
 
 OggOpusEncoder::~OggOpusEncoder()
 //-------------------------------
 {
-	if(m_Opus)
-	{
-		delete m_Opus;
-		m_Opus = nullptr;
-	}
+	return;
 }
 
 

@@ -13,6 +13,8 @@
 #include "StreamEncoder.h"
 #include "StreamEncoderMP3.h"
 
+#include "../common/ComponentManager.h"
+
 #include "Mptrack.h"
 
 #include "../soundlib/Sndfile.h"
@@ -252,10 +254,11 @@ struct lame_global_struct;
 typedef struct lame_global_struct lame_global_flags;
 typedef lame_global_flags *lame_t;
 
-struct LameDynBind
+class ComponentLame
+	: public ComponentBase
 {
 
-	mpt::Library hLame;
+public:
 
 	const char* (CDECL * get_lame_version)();
 	const char* (CDECL * get_lame_short_version)();
@@ -314,89 +317,109 @@ struct LameDynBind
 
 	int  (CDECL * lame_close) (lame_global_flags *);
 
+private:
+
 	void Reset()
+	{
+		ClearLibraries();
+	}
+
+public:
+
+	ComponentLame()
+		: ComponentBase(ComponentTypeForeign, false)
 	{
 		return;
 	}
-	LameDynBind()
+
+	std::string GetSettingsKey() const { return "LibMP3Lame"; }
+
+protected:
+
+	bool DoInitialize()
 	{
 		Reset();
-		if(!hLame.IsValid()) TryLoad(MPT_PATHSTRING("libmp3lame"), true);
-		if(!hLame.IsValid()) TryLoad(MPT_PATHSTRING("liblame"), true);
-		if(!hLame.IsValid()) TryLoad(MPT_PATHSTRING("mp3lame"), true);
-		if(!hLame.IsValid()) TryLoad(MPT_PATHSTRING("lame"), true);
-		if(!hLame.IsValid()) TryLoad(MPT_PATHSTRING("lame_enc"), false);
-	}
-	void TryLoad(const mpt::PathString &filename, bool warn)
-	{
-		hLame = mpt::Library(mpt::LibraryPath::AppFullName(filename));
-		if(!hLame.IsValid())
+		struct dll_names_t {
+			const char *lame;
+		};
+		static const dll_names_t dll_names[] = {
+			{ "libmp3lame" },
+			{ "liblame" },
+			{ "mp3lame" },
+			{ "lame" },
+			{ "lame_enc" },
+		};
+		bool ok = false;
+		for(std::size_t i=0; i<CountOf(dll_names); ++i)
 		{
-			return;
+			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].lame)))
+			{
+				ok = true;
+				break;
+			}
 		}
-		bool ok = true;
-		#define LAME_BIND(f) do { \
-			if(!hLame.Bind( f , #f )) \
-			{ \
-				ok = false; \
-				if(warn) \
-				{ \
-					Reporting::Error(mpt::String::PrintW(L"Your '%1' is missing '%2'.\n\nPlease copy a newer 'libmp3lame.dll' into OpenMPT's root directory.", filename.ToWide(), L ## #f ).c_str(), L"OpenMPT - MP3 Export"); \
-				} \
-			} \
-		} while(0)
-		LAME_BIND(get_lame_version);
-		LAME_BIND(get_lame_short_version);
-		LAME_BIND(get_lame_very_short_version);
-		LAME_BIND(get_psy_version);
-		LAME_BIND(get_lame_url);
-		LAME_BIND(lame_init);
-		LAME_BIND(lame_set_in_samplerate);
-		LAME_BIND(lame_set_num_channels);
-		LAME_BIND(lame_get_num_channels);
-		LAME_BIND(lame_get_quality);
-		LAME_BIND(lame_set_quality);
-		LAME_BIND(lame_set_out_samplerate);
-		LAME_BIND(lame_set_brate);
-		LAME_BIND(lame_set_VBR_quality);
-		LAME_BIND(lame_set_VBR);
-		LAME_BIND(lame_set_bWriteVbrTag);
-		LAME_BIND(lame_set_strict_ISO);
-		LAME_BIND(lame_set_disable_reservoir);
-		LAME_BIND(id3tag_genre_list);
-		LAME_BIND(id3tag_init);
-		LAME_BIND(id3tag_v1_only);
-		LAME_BIND(id3tag_add_v2);
-		LAME_BIND(id3tag_v2_only);
-		LAME_BIND(lame_set_write_id3tag_automatic);
-		LAME_BIND(id3tag_set_title);
-		LAME_BIND(id3tag_set_artist);
-		LAME_BIND(id3tag_set_album);
-		LAME_BIND(id3tag_set_year);
-		LAME_BIND(id3tag_set_comment);
-		LAME_BIND(id3tag_set_track);
-		LAME_BIND(id3tag_set_genre);
-		LAME_BIND(lame_init_params);
-		LAME_BIND(lame_encode_buffer_ieee_float);
-		LAME_BIND(lame_encode_buffer_interleaved_ieee_float);
-		LAME_BIND(lame_encode_flush);
-		LAME_BIND(lame_get_lametag_frame);
-		LAME_BIND(lame_get_id3v2_tag);
-		LAME_BIND(lame_close);
-		#undef LAME_BIND
-		if(!ok)
+		return ok;
+	}
+
+private:
+
+	bool TryLoad(const mpt::PathString &filename)
+	{
+		Reset();
+		ClearBindFailed();
+		if(!AddLibrary("libmp3lame", mpt::LibraryPath::AppFullName(filename)))
 		{
-			hLame.Unload();
 			Reset();
-			return;
+			return false;
 		}
+		MPT_COMPONENT_BIND("libmp3lame", get_lame_version);
+		MPT_COMPONENT_BIND("libmp3lame", get_lame_short_version);
+		MPT_COMPONENT_BIND("libmp3lame", get_lame_very_short_version);
+		MPT_COMPONENT_BIND("libmp3lame", get_psy_version);
+		MPT_COMPONENT_BIND("libmp3lame", get_lame_url);
+		MPT_COMPONENT_BIND("libmp3lame", lame_init);
+		MPT_COMPONENT_BIND("libmp3lame", lame_set_in_samplerate);
+		MPT_COMPONENT_BIND("libmp3lame", lame_set_num_channels);
+		MPT_COMPONENT_BIND("libmp3lame", lame_get_num_channels);
+		MPT_COMPONENT_BIND("libmp3lame", lame_get_quality);
+		MPT_COMPONENT_BIND("libmp3lame", lame_set_quality);
+		MPT_COMPONENT_BIND("libmp3lame", lame_set_out_samplerate);
+		MPT_COMPONENT_BIND("libmp3lame", lame_set_brate);
+		MPT_COMPONENT_BIND("libmp3lame", lame_set_VBR_quality);
+		MPT_COMPONENT_BIND("libmp3lame", lame_set_VBR);
+		MPT_COMPONENT_BIND("libmp3lame", lame_set_bWriteVbrTag);
+		MPT_COMPONENT_BIND("libmp3lame", lame_set_strict_ISO);
+		MPT_COMPONENT_BIND("libmp3lame", lame_set_disable_reservoir);
+		MPT_COMPONENT_BIND("libmp3lame", id3tag_genre_list);
+		MPT_COMPONENT_BIND("libmp3lame", id3tag_init);
+		MPT_COMPONENT_BIND("libmp3lame", id3tag_v1_only);
+		MPT_COMPONENT_BIND("libmp3lame", id3tag_add_v2);
+		MPT_COMPONENT_BIND("libmp3lame", id3tag_v2_only);
+		MPT_COMPONENT_BIND("libmp3lame", lame_set_write_id3tag_automatic);
+		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_title);
+		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_artist);
+		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_album);
+		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_year);
+		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_comment);
+		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_track);
+		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_genre);
+		MPT_COMPONENT_BIND("libmp3lame", lame_init_params);
+		MPT_COMPONENT_BIND("libmp3lame", lame_encode_buffer_ieee_float);
+		MPT_COMPONENT_BIND("libmp3lame", lame_encode_buffer_interleaved_ieee_float);
+		MPT_COMPONENT_BIND("libmp3lame", lame_encode_flush);
+		MPT_COMPONENT_BIND("libmp3lame", lame_get_lametag_frame);
+		MPT_COMPONENT_BIND("libmp3lame", lame_get_id3v2_tag);
+		MPT_COMPONENT_BIND("libmp3lame", lame_close);
+		if(HasBindFailed())
+		{
+			Reset();
+			return false;
+		}
+		return true;
 	}
-	operator bool () const { return hLame.IsValid() ? true : false; }
-	~LameDynBind()
-	{
-		hLame.Unload();
-		Reset();
-	}
+
+public:
+
 	static void GenreEnumCallback(int num, const char *name, void *cookie)
 	{
 		MPT_UNREFERENCED_PARAMETER(num);
@@ -409,7 +432,7 @@ struct LameDynBind
 	Encoder::Traits BuildTraits()
 	{
 		Encoder::Traits traits;
-		if(!*this)
+		if(!IsAvailable())
 		{
 			return traits;
 		}
@@ -445,16 +468,17 @@ struct LameDynBind
 		return traits;
 	}
 };
+MPT_REGISTERED_COMPONENT(ComponentLame)
 
 class MP3LameStreamWriter : public StreamWriterBase
 {
 private:
-	LameDynBind &lame;
+	ComponentLame &lame;
 	Encoder::Mode Mode;
 	bool gfp_inited;
 	lame_t gfp;
 public:
-	MP3LameStreamWriter(LameDynBind &lame_, std::ostream &stream)
+	MP3LameStreamWriter(ComponentLame &lame_, std::ostream &stream)
 		: StreamWriterBase(stream)
 		, lame(lame_)
 	{
@@ -618,10 +642,11 @@ public:
 
 #ifdef MPT_MP3ENCODER_BLADE
 
-struct BladeDynBind
+class ComponentBlade
+	: public ComponentBase
 {
 
-	mpt::Library hBlade;
+public:
 
 	int lame;
 
@@ -631,61 +656,71 @@ struct BladeDynBind
 	BE_ERR (*beDeinitStream) (HBE_STREAM, PBYTE, PDWORD);
 	BE_ERR (*beCloseStream) (HBE_STREAM);
 
+private:
+
 	void Reset()
 	{
+		ClearLibraries();
 		lame = 0;
 	}
-	BladeDynBind()
+
+public:
+
+	ComponentBlade()
+		: ComponentBase(ComponentTypeForeign, false)
+	{
+		return;
+	}
+
+	std::string GetSettingsKey() const { return "BladeEnc"; }
+
+protected:
+
+	bool DoInitialize()
 	{
 		Reset();
-		if(!hBlade.IsValid())
+		if(TryLoad(MPT_PATHSTRING("lame_enc")))
 		{
-			TryLoad(MPT_PATHSTRING("lame_enc"));
-			if(hBlade.IsValid()) lame = 1;
-		}
-		if(!hBlade.IsValid())
+			lame = 1;
+			return true;
+		} else if(TryLoad(MPT_PATHSTRING("bladeenc")))
 		{
-			TryLoad(MPT_PATHSTRING("bladeenc"));
-			if(hBlade.IsValid()) lame = 0;
+			lame = 0;
+			return true;
 		}
+		return false;
 	}
-	void TryLoad(const mpt::PathString &filename)
+
+private:
+
+	bool TryLoad(const mpt::PathString &filename)
 	{
-		hBlade = mpt::Library(mpt::LibraryPath::AppFullName(filename));
-		if(!hBlade.IsValid())
+		Reset();
+		ClearBindFailed();
+		if(!AddLibrary("BladeEnc", mpt::LibraryPath::AppFullName(filename)))
 		{
-			return;
-		}
-		bool ok = true;
-		#define BLADE_BIND(f) do { \
-			if(!hBlade.Bind( f , #f )) \
-			{ \
-				ok = false; \
-			} \
-		} while(0)
-		BLADE_BIND(beVersion);
-		BLADE_BIND(beInitStream);
-		BLADE_BIND(beEncodeChunk);
-		BLADE_BIND(beDeinitStream);
-		BLADE_BIND(beCloseStream);
-		#undef BLADE_BIND
-		if(!ok)
-		{
-			hBlade.Unload();
 			Reset();
-			return;
+			return false;
 		}
+		MPT_COMPONENT_BIND("BladeEnc", beVersion);
+		MPT_COMPONENT_BIND("BladeEnc", beInitStream);
+		MPT_COMPONENT_BIND("BladeEnc", beEncodeChunk);
+		MPT_COMPONENT_BIND("BladeEnc", beDeinitStream);
+		MPT_COMPONENT_BIND("BladeEnc", beCloseStream);
+		if(HasBindFailed())
+		{
+			Reset();
+			return false;
+		}
+		return true;
 	}
-	operator bool () const { return hBlade.IsValid(); }
-	~BladeDynBind()
-	{
-		hBlade.Unload();
-		Reset();
-	}
+
+public:
+
 	Encoder::Traits BuildTraits()
 	{
 		Encoder::Traits traits;
-		if(!*this)
+		if(!IsAvailable())
 		{
 			return traits;
 		}
@@ -718,11 +753,12 @@ struct BladeDynBind
 		return traits;
 	}
 };
+MPT_REGISTERED_COMPONENT(ComponentBlade)
 
 class MP3BladeStreamWriter : public StreamWriterBase
 {
 private:
-	BladeDynBind &blade;
+	ComponentBlade &blade;
 	DWORD blade_inputsamples;
 	DWORD blade_outputbytes;
 	SC::Convert<int16,float> sampleConv[2];
@@ -733,7 +769,7 @@ private:
 	std::vector<float> interleaved;
 	std::vector<SHORT> samples;
 public:
-	MP3BladeStreamWriter(BladeDynBind &blade_, std::ostream &stream)
+	MP3BladeStreamWriter(ComponentBlade &blade_, std::ostream &stream)
 		: StreamWriterBase(stream)
 		, blade(blade_)
 	{
@@ -866,8 +902,12 @@ public:
 
 #ifdef MPT_MP3ENCODER_ACM
 
-struct AcmDynBind
+class ComponentAcmMP3
+	: public ComponentBase
 {
+
+public:
+
 	bool found_codec;
 	int samplerates[CountOf(layer3_samplerates)];
 
@@ -875,6 +915,8 @@ struct AcmDynBind
 	std::vector<HACMDRIVERID> formats_driverids;
 	std::vector<std::vector<char> > formats_waveformats;
 	std::set<std::string> drivers;
+
+private:
 
 	void Reset()
 	{
@@ -884,14 +926,30 @@ struct AcmDynBind
 		formats_driverids.clear();
 		formats_waveformats.clear();
 	}
-	AcmDynBind()
+
+public:
+
+	ComponentAcmMP3()
+		: ComponentBase(ComponentTypeSystemInstallable, false)
+	{
+		return;
+	}
+
+	std::string GetSettingsKey() const { return "ACM_MP3"; }
+
+protected:
+
+	bool DoInitialize()
 	{
 		Reset();
-		TryLoad();
+		return TryLoad();
 	}
+
+private:
+
 	static BOOL CALLBACK AcmFormatEnumCallback(HACMDRIVERID driver, LPACMFORMATDETAILS pafd, DWORD_PTR inst, DWORD fdwSupport)
 	{
-		return reinterpret_cast<AcmDynBind*>(inst)->AcmFormatEnumCB(driver, pafd, fdwSupport);
+		return reinterpret_cast<ComponentAcmMP3*>(inst)->AcmFormatEnumCB(driver, pafd, fdwSupport);
 	}
 	template<size_t size>
 	static void AppendField(std::string &s, const std::string &field, const CHAR(&val)[size])
@@ -1073,12 +1131,15 @@ struct AcmDynBind
 		pwfx->nAvgBytesPerSec = pwfx->nSamplesPerSec * pwfx->nBlockAlign;
 		acmFormatEnum(NULL, &afd, AcmFormatEnumCallback, reinterpret_cast<DWORD_PTR>(this), ACM_FORMATENUMF_CONVERT);
 	}
-	void TryLoad()
+
+private:
+
+	bool TryLoad()
 	{
 		if(acmGetVersion() <= 0x03320000)
 		{
 			Reset();
-			return;
+			return false;
 		}
 		try
 		{
@@ -1103,18 +1164,17 @@ struct AcmDynBind
 		if(!found_codec)
 		{
 			Reset();
-			return;
+			return false;
 		}
+		return true;
 	}
-	operator bool () const { return found_codec ? true : false; }
-	~AcmDynBind()
-	{
-		Reset();
-	}
+
+public:
+
 	Encoder::Traits BuildTraits()
 	{
 		Encoder::Traits traits;
-		if(!*this)
+		if(!IsAvailable())
 		{
 			return traits;
 		}
@@ -1154,11 +1214,12 @@ struct AcmDynBind
 		return traits;
 	}
 };
+MPT_REGISTERED_COMPONENT(ComponentAcmMP3)
 
 class MP3AcmStreamWriter : public StreamWriterBase
 {
 private:
-	AcmDynBind &acm;
+	ComponentAcmMP3 &acm;
 	static const size_t acmBufSize = 1024;
 	int acmChannels;
 	SC::Convert<int16,float> sampleConv[2];
@@ -1172,7 +1233,7 @@ private:
 	std::vector<float> interleaved;
 	std::vector<int16> samples;
 public:
-	MP3AcmStreamWriter(AcmDynBind &acm_, std::ostream &stream)
+	MP3AcmStreamWriter(ComponentAcmMP3 &acm_, std::ostream &stream)
 		: StreamWriterBase(stream)
 		, acm(acm_)
 	{
@@ -1354,22 +1415,13 @@ public:
 
 MP3Encoder::MP3Encoder(MP3EncoderType type)
 //-----------------------------------------
-#ifdef MPT_MP3ENCODER_LAME
-	: m_Lame(nullptr)
-#endif // MPT_MP3ENCODER_LAME
-#ifdef MPT_MP3ENCODER_BLADE
-	, m_Blade(nullptr)
-#endif // MPT_MP3ENCODER_BLADE
-#ifdef MPT_MP3ENCODER_ACM
-	, m_Acm(nullptr)
-#endif // MPT_MP3ENCODER_ACM
-	, m_Type(MP3EncoderDefault)
+	: m_Type(MP3EncoderDefault)
 {
 #ifdef MPT_MP3ENCODER_LAME
 	if(type == MP3EncoderDefault || type == MP3EncoderLame)
 	{
-		m_Lame = new LameDynBind();
-		if(*m_Lame)
+		m_Lame = MPT_GET_COMPONENT(ComponentLame);
+		if(IsComponentAvailable(m_Lame))
 		{
 			m_Type = MP3EncoderLame;
 			SetTraits(m_Lame->BuildTraits());
@@ -1380,8 +1432,8 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 #ifdef MPT_MP3ENCODER_BLADE
 	if(type == MP3EncoderDefault || type == MP3EncoderBlade)
 	{
-		m_Blade = new BladeDynBind();
-		if(*m_Blade)
+		m_Blade = MPT_GET_COMPONENT(ComponentBlade);
+		if(IsComponentAvailable(m_Blade))
 		{
 			m_Type = MP3EncoderBlade;
 			SetTraits(m_Blade->BuildTraits());
@@ -1392,8 +1444,8 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 #ifdef MPT_MP3ENCODER_ACM
 	if(type == MP3EncoderDefault || type == MP3EncoderACM)
 	{
-		m_Acm = new AcmDynBind();
-		if(*m_Acm)
+		m_Acm = MPT_GET_COMPONENT(ComponentAcmMP3);
+		if(IsComponentAvailable(m_Acm))
 		{
 			m_Type = MP3EncoderACM;
 			SetTraits(m_Acm->BuildTraits());
@@ -1409,13 +1461,13 @@ bool MP3Encoder::IsAvailable() const
 {
 	return false
 #ifdef MPT_MP3ENCODER_LAME
-		|| (m_Lame && *m_Lame)
+		|| IsComponentAvailable(m_Lame)
 #endif // MPT_MP3ENCODER_ACM
 #ifdef MPT_MP3ENCODER_BLADE
-		|| (m_Blade && *m_Blade)
+		|| IsComponentAvailable(m_Blade)
 #endif // MPT_MP3ENCODER_BLADE
 #ifdef MPT_MP3ENCODER_ACM
-		|| (m_Acm && *m_Acm)
+		|| IsComponentAvailable(m_Acm)
 #endif // MPT_MP3ENCODER_ACM
 		;
 }
@@ -1424,27 +1476,7 @@ bool MP3Encoder::IsAvailable() const
 MP3Encoder::~MP3Encoder()
 //-----------------------
 {
-#ifdef MPT_MP3ENCODER_ACM
-	if(m_Acm)
-	{
-		delete m_Acm;
-		m_Acm = nullptr;
-	}
-#endif // MPT_MP3ENCODER_ACM
-#ifdef MPT_MP3ENCODER_BLADE
-	if(m_Blade)
-	{
-		delete m_Blade;
-		m_Blade = nullptr;
-	}
-#endif // MPT_MP3ENCODER_BLADE
-#ifdef MPT_MP3ENCODER_LAME
-	if(m_Lame)
-	{
-		delete m_Lame;
-		m_Lame = nullptr;
-	}
-#endif // MPT_MP3ENCODER_LAME
+	return;
 }
 
 

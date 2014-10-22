@@ -266,6 +266,9 @@
     <ClInclude Include="..\common\mptIO.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\ComponentManager.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\AudioCriticalSection.cpp">
@@ -516,6 +519,9 @@
     </ClCompile>
     <ClCompile Include="..\test\TestToolsLib.cpp">
       <Filter>Source Files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\ComponentManager.cpp">
+      <Filter>Source Files\common</Filter>
     </ClCompile>
     <ClCompile Include="..\common\mptIO.cpp">
       <Filter>Source Files\common</Filter>

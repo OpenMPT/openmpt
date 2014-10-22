@@ -448,6 +448,12 @@ public:
 	Setting<bool> ExportDefaultToSoundcardSamplerate;
 	StreamEncoderSettings ExportStreamEncoderSettings;
 
+	// Components
+
+	Setting<bool> ComponentsLoadOnStartup;
+	Setting<bool> ComponentsKeepLoaded;
+	bool IsComponentBlocked(const std::string &name);
+
 	// Effects
 
 #ifndef NO_REVERB

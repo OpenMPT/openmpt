@@ -34,6 +34,7 @@
 #include <flac/include/FLAC/metadata.h>
 #include "SampleFormatConverters.h"
 #endif // !NO_FLAC
+#include "../common/ComponentManager.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -2260,31 +2261,30 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 
 #ifndef NO_MP3_SAMPLES
 
-namespace mpg123
+class ComponentMPG123 : public ComponentBase
 {
+public:
 	typedef struct {int foo;} mpg123_handle;
-	typedef int (*pfn_init )();
-	typedef mpg123_handle* (*pfn_new )(char*,int*);
-	typedef void (*pfn_delete )(mpg123_handle*);
-	typedef int (*pfn_open_handle )(mpg123_handle*, void*);
-	typedef int (*pfn_replace_reader_handle)(mpg123_handle*, 
+	int (*mpg123_init )(void);
+	mpg123_handle* (*mpg123_new )(char*,int*);
+	void (*mpg123_delete )(mpg123_handle*);
+	int (*mpg123_open_handle )(mpg123_handle*, void*);
+	int (*mpg123_replace_reader_handle)(mpg123_handle*, 
 		size_t(*)(void *, void *, size_t),
 		off_t(*)(void *, off_t, int),
 		void(*)(void *));
-	typedef int (*pfn_read )(mpg123_handle*, unsigned char*, size_t, size_t*);
-	typedef int (*pfn_getformat )(mpg123_handle*, long*, int*, int*);
-	typedef int (*pfn_scan )(mpg123_handle*);
-	typedef off_t (*pfn_length )(mpg123_handle*);
-
-	size_t FileReaderRead(void *fp, void *buf, size_t count)
+	int (*mpg123_read )(mpg123_handle*, unsigned char*, size_t, size_t*);
+	int (*mpg123_getformat )(mpg123_handle*, long*, int*, int*);
+	int (*mpg123_scan )(mpg123_handle*);
+	off_t (*mpg123_length )(mpg123_handle*);
+	static size_t FileReaderRead(void *fp, void *buf, size_t count)
 	{
 		FileReader &file = *static_cast<FileReader *>(fp);
 		size_t readBytes = std::min(count, static_cast<size_t>(file.BytesLeft()));
 		file.ReadRaw(static_cast<char *>(buf), readBytes);
 		return readBytes;
 	}
-
-	off_t FileReaderLSeek(void *fp, off_t offset, int whence)
+	static off_t FileReaderLSeek(void *fp, off_t offset, int whence)
 	{
 		FileReader &file = *static_cast<FileReader *>(fp);
 		if(whence == SEEK_CUR) file.Seek(file.GetPosition() + offset);
@@ -2292,12 +2292,40 @@ namespace mpg123
 		else file.Seek(offset);
 		return file.GetPosition();
 	}
-
 	enum mpg123_enc_enum
 	{
 		MPG123_ENC_16 = 0x040, MPG123_ENC_SIGNED = 0x080,
 	};
+public:
+	ComponentMPG123() : ComponentBase(ComponentTypeForeign) { }
+	std::string GetSettingsKey() const { return "Mpg123"; }
+	bool DoInitialize()
+	{
+		AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libmpg123-0")));
+		AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libmpg123")));
+		AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("mpg123-0")));
+		AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("mpg123")));
+		MPT_COMPONENT_BIND("mpg123", mpg123_init);
+		MPT_COMPONENT_BIND("mpg123", mpg123_new);
+		MPT_COMPONENT_BIND("mpg123", mpg123_delete);
+		MPT_COMPONENT_BIND("mpg123", mpg123_open_handle);
+		MPT_COMPONENT_BIND("mpg123", mpg123_replace_reader_handle);
+		MPT_COMPONENT_BIND("mpg123", mpg123_read);
+		MPT_COMPONENT_BIND("mpg123", mpg123_getformat);
+		MPT_COMPONENT_BIND("mpg123", mpg123_scan);
+		MPT_COMPONENT_BIND("mpg123", mpg123_length);
+		if(HasBindFailed())
+		{
+			return false;
+		}
+		if(mpg123_init() != 0)
+		{
+			return false;
+		}
+		return true;
+	}
 };
+MPT_REGISTERED_COMPONENT(ComponentMPG123)
 
 #endif // NO_MP3_SAMPLES
 
@@ -2351,48 +2379,30 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 		}
 	}
 
-	mpt::Library mp3lib;
+	MPT_SHARED_PTR<ComponentMPG123> mpg123 = MPT_GET_COMPONENT(ComponentMPG123);
+	if(!IsComponentAvailable(mpg123))
+	{
+		return false;
+	}
 
-	if(!mp3lib.IsValid()) mp3lib = mpt::Library(mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libmpg123-0")));
-	if(!mp3lib.IsValid()) mp3lib = mpt::Library(mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libmpg123")));
-	if(!mp3lib.IsValid()) mp3lib = mpt::Library(mpt::LibraryPath::AppFullName(MPT_PATHSTRING("mpg123-0")));
-	if(!mp3lib.IsValid()) mp3lib = mpt::Library(mpt::LibraryPath::AppFullName(MPT_PATHSTRING("mpg123")));
-	if(!mp3lib.IsValid()) return false;
-
-	#define MP3_DYNAMICBIND(f) mpg123::pfn_ ## f mpg123_ ## f = nullptr; if(!mp3lib.Bind( mpg123_ ## f , "mpg123_" #f )) return false
-
-	MP3_DYNAMICBIND(init);
-	MP3_DYNAMICBIND(new);
-	MP3_DYNAMICBIND(delete);
-	MP3_DYNAMICBIND(open_handle);
-	MP3_DYNAMICBIND(replace_reader_handle);
-	MP3_DYNAMICBIND(read);
-	MP3_DYNAMICBIND(getformat);
-	MP3_DYNAMICBIND(scan);
-	MP3_DYNAMICBIND(length);
-
-	#undef MP3_DYNAMICBIND
-
-	if(mpg123_init()) return false;
-
-	mpg123::mpg123_handle *mh;
+	ComponentMPG123::mpg123_handle *mh;
 	int err;
-	if((mh = mpg123_new(0, &err)) == nullptr) return false;
+	if((mh = mpg123->mpg123_new(0, &err)) == nullptr) return false;
 	file.Rewind();
 
 	long rate; int nchannels, encoding;
 	SmpLength length;
 
 	// Set up decoder...
-	if(mpg123_replace_reader_handle(mh, mpg123::FileReaderRead, mpg123::FileReaderLSeek, 0)
-		|| mpg123_open_handle(mh, &file)
-		|| mpg123_scan(mh)
-		|| mpg123_getformat(mh, &rate, &nchannels, &encoding)
+	if(mpg123->mpg123_replace_reader_handle(mh, ComponentMPG123::FileReaderRead, ComponentMPG123::FileReaderLSeek, 0)
+		|| mpg123->mpg123_open_handle(mh, &file)
+		|| mpg123->mpg123_scan(mh)
+		|| mpg123->mpg123_getformat(mh, &rate, &nchannels, &encoding)
 		|| !nchannels || nchannels > 2
-		|| (encoding & mpg123::MPG123_ENC_16 | mpg123::MPG123_ENC_SIGNED) == 0
-		|| (length = mpg123_length(mh)) == 0)
+		|| (encoding & ComponentMPG123::MPG123_ENC_16 | ComponentMPG123::MPG123_ENC_SIGNED) == 0
+		|| (length = mpg123->mpg123_length(mh)) == 0)
 	{
-		mpg123_delete(mh);
+		mpg123->mpg123_delete(mh);
 		return false;
 	}
 
@@ -2407,8 +2417,8 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 	Samples[sample].AllocateSample();
 
 	size_t ndecoded;
-	mpg123_read(mh, static_cast<unsigned char *>(Samples[sample].pSample), Samples[sample].GetSampleSizeInBytes(), &ndecoded);
-	mpg123_delete(mh);
+	mpg123->mpg123_read(mh, static_cast<unsigned char *>(Samples[sample].pSample), Samples[sample].GetSampleSizeInBytes(), &ndecoded);
+	mpg123->mpg123_delete(mh);
 
 	if(Samples[sample].pSample != nullptr)
 	{

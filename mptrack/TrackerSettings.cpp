@@ -22,6 +22,7 @@
 #include "TrackerSettings.h"
 #include "../common/misc_util.h"
 #include "PatternClipboard.h"
+#include "../common/ComponentManager.h"
 
 #include <algorithm>
 
@@ -219,6 +220,9 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Export
 	, ExportDefaultToSoundcardSamplerate(conf, "Export", "DefaultToSoundcardSamplerate", true)
 	, ExportStreamEncoderSettings(conf, "Export")
+	// Components
+	, ComponentsLoadOnStartup(conf, "Components", "LoadOnStartup", ComponentManagerSettingsDefault().LoadOnStartup())
+	, ComponentsKeepLoaded(conf, "Components", "KeepLoaded", ComponentManagerSettingsDefault().KeepLoaded())
 	// Default template
 	, defaultTemplateFile(conf, "Paths", "DefaultTemplate", mpt::PathString())
 	// MRU List
@@ -916,6 +920,13 @@ void TrackerSettings::SaveSettings()
 			conf.Remove("Recent File List", key);
 		}
 	}
+}
+
+
+bool TrackerSettings::IsComponentBlocked(const std::string &key)
+//---------------------------------------------------------------
+{
+	return Setting<bool>(conf, "Components", std::string("Block") + key, ComponentManagerSettingsDefault().IsBlocked(key));
 }
 
 

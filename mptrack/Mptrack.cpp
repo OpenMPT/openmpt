@@ -30,6 +30,7 @@
 #include "AutoSaver.h"
 #include "FileDialog.h"
 #include "PNG.h"
+#include "../common/ComponentManager.h"
 
 // rewbs.memLeak
 #define _CRTDBG_MAP_ALLOC
@@ -640,10 +641,10 @@ CTrackApp::CTrackApp()
 //--------------------
 	: m_GuiThreadId(0)
 	, m_pTrackerDirectories(nullptr)
-	, m_pUXThemeDLL(nullptr)
 	, m_pSettingsIniFile(nullptr)
 	, m_pSettings(nullptr)
 	, m_pTrackerSettings(nullptr)
+	, m_pComponentManagerSettings(nullptr)
 	, m_pPluginCache(nullptr)
 {
 	#if MPT_COMPILER_MSVC
@@ -710,6 +711,38 @@ void CTrackApp::RemoveMruItem(const mpt::PathString &path)
 
 /////////////////////////////////////////////////////////////////////////////
 // CTrackApp initialization
+
+
+//============================
+class ComponentManagerSettings
+//============================
+	: public IComponentManagerSettings
+{
+private:
+	mutable TrackerSettings &conf;
+public:
+	ComponentManagerSettings(TrackerSettings &conf)
+		: conf(conf)
+	{
+		return;
+	}
+	virtual bool LoadOnStartup() const
+	{
+		return conf.ComponentsLoadOnStartup;
+	}
+	virtual bool KeepLoaded() const
+	{
+		return conf.ComponentsKeepLoaded;
+	}
+	virtual bool IsBlocked(const std::string &key) const
+	{
+		return conf.IsComponentBlocked(key);
+	}
+};
+
+
+MPT_REGISTERED_COMPONENT(ComponentUXTheme)
+
 
 #ifdef WIN32	// Legacy stuff
 // Move a config file called sFileName from the App's directory (or one of its sub directories specified by sSubDir) to
@@ -889,10 +922,6 @@ BOOL CTrackApp::InitInstance()
 	// Set up paths to store configuration in
 	SetupPaths(cmdInfo.m_bPortable);
 
-	// Load UXTheme.DLL
-	m_pUXThemeDLL = new mpt::Library(mpt::LibraryPath::System(MPT_PATHSTRING("uxtheme")));
-	m_pUXThemeDLL->Bind(m_pEnableThemeDialogTexture, "EnableThemeDialogTexture");
-
 	// Construct auto saver instance, class TrackerSettings expects it being available.
 	CMainFrame::m_pAutoSaver = new CAutoSaver();
 
@@ -909,9 +938,17 @@ BOOL CTrackApp::InitInstance()
 	}
 	MPT_TRACE();
 
+	m_pComponentManagerSettings = new ComponentManagerSettings(TrackerSettings::Instance());
+
 	m_pPluginCache = new IniFileSettingsContainer(m_szPluginCacheFileName);
 
 	LoadStdProfileSettings(0);  // Load standard INI file options (without MRU)
+
+	// create component manager
+	ComponentManager::Init(*m_pComponentManagerSettings);
+
+	// load components
+	ComponentManager::Instance()->Startup();
 
 	// Register document templates
 	m_pModTemplate = new CModDocTemplate(
@@ -1021,17 +1058,18 @@ int CTrackApp::ExitInstance()
 	// Uninitialize Plugins
 	UninitializeDXPlugins();
 
+	ComponentManager::Release();
+	
 	delete m_pPluginCache;
 	m_pPluginCache = nullptr;
+	delete m_pComponentManagerSettings;
+	m_pComponentManagerSettings = nullptr;
 	delete m_pTrackerSettings;
 	m_pTrackerSettings = nullptr;
 	delete m_pSettings;
 	m_pSettings = nullptr;
 	delete m_pSettingsIniFile;
 	m_pSettingsIniFile = nullptr;
-	m_pEnableThemeDialogTexture = nullptr;
-	delete m_pUXThemeDLL;
-	m_pUXThemeDLL = nullptr;
 	delete m_pTrackerDirectories;
 	m_pTrackerDirectories = nullptr;
 

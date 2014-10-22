@@ -213,7 +213,7 @@
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <DelayLoadDLLs>OpenMPT_SoundTouch_f32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>uxtheme.dll;OpenMPT_SoundTouch_f32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
       <GenerateMapFile>true</GenerateMapFile>
@@ -316,7 +316,7 @@
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <DelayLoadDLLs>OpenMPT_SoundTouch_f32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>uxtheme.dll;OpenMPT_SoundTouch_f32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AssemblyDebug>true</AssemblyDebug>
       <GenerateMapFile>true</GenerateMapFile>
@@ -422,7 +422,7 @@
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <DelayLoadDLLs>OpenMPT_SoundTouch_f32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>uxtheme.dll;OpenMPT_SoundTouch_f32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -535,7 +535,7 @@
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <DelayLoadDLLs>OpenMPT_SoundTouch_f32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>uxtheme.dll;OpenMPT_SoundTouch_f32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -648,7 +648,7 @@
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <DelayLoadDLLs>OpenMPT_SoundTouch_f32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>uxtheme.dll;OpenMPT_SoundTouch_f32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -704,7 +704,7 @@
       <Version>5.0</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <DelayLoadDLLs>OpenMPT_SoundTouch_f32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>uxtheme.dll;OpenMPT_SoundTouch_f32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -725,6 +725,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\common\AudioCriticalSection.cpp" />
+    <ClCompile Include="..\common\ComponentManager.cpp" />
     <ClCompile Include="..\common\Logging.cpp" />
     <ClCompile Include="..\common\misc_util.cpp" />
     <ClCompile Include="..\common\mptIO.cpp" />
@@ -935,6 +936,7 @@
     <ClInclude Include="..\common\AudioCriticalSection.h" />
     <ClInclude Include="..\common\BuildSettings.h" />
     <ClInclude Include="..\common\CompilerDetect.h" />
+    <ClInclude Include="..\common\ComponentManager.h" />
     <ClInclude Include="..\common\Endianness.h" />
     <ClInclude Include="..\common\FlagSet.h" />
     <ClInclude Include="..\common\Logging.h" />

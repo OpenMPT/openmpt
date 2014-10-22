@@ -162,6 +162,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\common\ComponentManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\common\ComponentManager.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\common\Endianness.h"
 				>
 			</File>

@@ -526,6 +526,9 @@
     <ClCompile Include="..\common\mptIO.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\ComponentManager.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1027,6 +1030,9 @@
       <Filter>Header Files\common</Filter>
     </ClInclude>
     <ClInclude Include="..\common\mptIO.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\ComponentManager.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
   </ItemGroup>

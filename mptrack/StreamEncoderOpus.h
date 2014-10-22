@@ -16,14 +16,14 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-struct OpusDynBind;
+class ComponentOpus;
 
 class OggOpusEncoder : public EncoderFactoryBase
 {
 
 private:
 
-	OpusDynBind *m_Opus;
+	MPT_SHARED_PTR<ComponentOpus> m_Opus;
 
 public:
 

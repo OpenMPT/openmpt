@@ -86,7 +86,7 @@
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=""
-				DelayLoadDLLs="OpenMPT_SoundTouch_f32.dll"
+				DelayLoadDLLs="uxtheme.dll;OpenMPT_SoundTouch_f32.dll"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
 				GenerateMapFile="true"
@@ -184,7 +184,7 @@
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=""
-				DelayLoadDLLs="OpenMPT_SoundTouch_f32.dll"
+				DelayLoadDLLs="uxtheme.dll;OpenMPT_SoundTouch_f32.dll"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
 				GenerateMapFile="true"
@@ -284,7 +284,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=""
-				DelayLoadDLLs="OpenMPT_SoundTouch_f32.dll"
+				DelayLoadDLLs="uxtheme.dll;OpenMPT_SoundTouch_f32.dll"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				LargeAddressAware="2"
@@ -382,7 +382,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=""
-				DelayLoadDLLs="OpenMPT_SoundTouch_f32.dll"
+				DelayLoadDLLs="uxtheme.dll;OpenMPT_SoundTouch_f32.dll"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				LargeAddressAware="2"
@@ -1159,6 +1159,14 @@
 			</File>
 			<File
 				RelativePath="..\common\CompilerDetect.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\ComponentManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\common\ComponentManager.h"
 				>
 			</File>
 			<File

@@ -17,6 +17,7 @@
 #include "../mptrack/Reporting.h"
 #include "../soundlib/MIDIMacros.h"
 #include "../soundlib/modcommand.h"
+#include "../common/ComponentManager.h"
 #include <vector>
 
 OPENMPT_NAMESPACE_BEGIN
@@ -29,6 +30,8 @@ class Manager;
 class CDLSBank;
 class TrackerDirectories;
 class TrackerSettings;
+class ComponentManagerSettings;
+
 
 /////////////////////////////////////////////////////////////////////////////
 // 16-colors DIB
@@ -144,6 +147,13 @@ public:
 // See mptrack.cpp for the implementation of this class
 //
 
+class ComponentUXTheme : public ComponentSystemDLL
+{
+public:
+	ComponentUXTheme() : ComponentSystemDLL(MPT_PATHSTRING("uxtheme"), true) { }
+	std::string GetSettingsKey() const { return "UXTheme"; }
+};
+
 //=============================
 class CTrackApp: public CWinApp
 //=============================
@@ -193,12 +203,10 @@ protected:
 	DWORD m_GuiThreadId;
 
 	TrackerDirectories *m_pTrackerDirectories;
-	mpt::Library *m_pUXThemeDLL;
-	typedef HRESULT (WINAPI * pfEnableThemeDialogTexture)(HWND, DWORD);
-	pfEnableThemeDialogTexture m_pEnableThemeDialogTexture;
 	IniFileSettingsBackend *m_pSettingsIniFile;
 	SettingsContainer *m_pSettings;
 	TrackerSettings *m_pTrackerSettings;
+	ComponentManagerSettings *m_pComponentManagerSettings;
 	IniFileSettingsContainer *m_pPluginCache;
 	CModDocTemplate *m_pModTemplate;
 	CVstPluginManager *m_pPluginManager;
@@ -248,7 +256,6 @@ public:
 
 public:
 	bool InGuiThread() const { return GetCurrentThreadId() == m_GuiThreadId; }
-	HRESULT EnableThemeDialogTexture(HWND hwnd, DWORD dwFlags) { if(m_pEnableThemeDialogTexture) return m_pEnableThemeDialogTexture(hwnd, dwFlags); else return S_OK; }
 	CModDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }
 	SoundDevice::Manager *GetSoundDevicesManager() const { return m_pSoundDevicesManager; }
