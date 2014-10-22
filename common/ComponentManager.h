@@ -297,6 +297,9 @@ MPT_SHARED_PTR<type> GetComponent(const std::string &name)
 }
 
 
+#define MPT_GET_COMPONENT(name) GetComponent< name >( #name )
+
+
 #else // !MPT_COMPONENT_MANAGER
 
 
@@ -304,7 +307,7 @@ MPT_SHARED_PTR<type> GetComponent(const std::string &name)
 
 
 template <typename type>
-MPT_SHARED_PTR<type> GetComponent(const std::string &name)
+MPT_SHARED_PTR<type> GetComponent()
 {
 	MPT_SHARED_PTR<type> component = mpt::make_shared<type>();
 	if(!component)
@@ -316,10 +319,10 @@ MPT_SHARED_PTR<type> GetComponent(const std::string &name)
 }
 
 
+#define MPT_GET_COMPONENT(name) GetComponent< name >()
+
+
 #endif // MPT_COMPONENT_MANAGER
-
-
-#define MPT_GET_COMPONENT(name) GetComponent< name >( #name )
 
 
 template <typename T>
