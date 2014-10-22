@@ -428,6 +428,9 @@
 
 #endif
 
+#define __STDC_CONSTANT_MACROS
+#define __STDC_LIMIT_MACROS
+
 #ifndef _FILE_OFFSET_BITS
 #define _FILE_OFFSET_BITS 64
 #endif

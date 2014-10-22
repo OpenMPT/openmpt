@@ -323,9 +323,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#define __STDC_CONSTANT_MACROS
-#define __STDC_LIMIT_MACROS
-
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
 
 OPENMPT_NAMESPACE_END
@@ -363,6 +360,8 @@ typedef std::uint64_t uint64;
 OPENMPT_NAMESPACE_END
 #include <stdint.h>
 OPENMPT_NAMESPACE_BEGIN
+
+#if 0
 
 // Android NDK appears to provide a different (and incomplete) <stdint.h> when compiling C++.
 // Provide these macros ourselves if they are not defined by here.
@@ -405,6 +404,8 @@ OPENMPT_NAMESPACE_BEGIN
 #endif
 #ifndef UINT64_MAX
 #define UINT64_MAX ((18446744073709551615ull))
+#endif
+
 #endif
 
 #endif // ANDROID
