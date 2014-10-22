@@ -84,7 +84,7 @@ struct ToStringHelper<FlagSet<enum_t, store_t> >
 
 namespace Test {
 
-// We do not generally have type_traits from C++03-TR2
+// We do not generally have type_traits from C++03-TR1
 // and std::numeric_limits does not provide a is_integer which is useable as template argument.
 template <typename T> struct is_integer : public mpt::false_type { };
 template <> struct is_integer<signed short>     : public mpt::true_type { };
