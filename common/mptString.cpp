@@ -35,6 +35,7 @@
 #endif
 
 #if defined(MPT_CHARSET_ICONV)
+#include <errno.h>
 #include <iconv.h>
 #endif
 
