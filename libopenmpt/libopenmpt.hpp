@@ -13,10 +13,9 @@
 #include "libopenmpt_config.h"
 
 #include <exception>
+#include <iosfwd>
 #include <iostream>
-#include <istream>
 #include <map>
-#include <ostream>
 #include <string>
 #include <vector>
 

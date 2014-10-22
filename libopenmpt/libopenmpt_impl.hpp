@@ -13,8 +13,8 @@
 #include "libopenmpt_internal.h"
 #include "libopenmpt.hpp"
 
+#include <iosfwd>
 #include <memory>
-#include <ostream>
 
 // forward declarations
 namespace OpenMPT {

@@ -16,8 +16,10 @@
 
 #include <algorithm>
 #include <iostream>
+#include <istream>
 #include <iterator>
 #include <limits>
+#include <ostream>
 
 #include <cmath>
 #include <cstdlib>
