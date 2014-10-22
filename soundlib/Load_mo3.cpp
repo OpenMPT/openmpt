@@ -16,6 +16,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+#ifndef NO_MO3
+
 class ComponentUnMO3 : public ComponentBase
 {
 public:
@@ -61,6 +63,8 @@ public:
 };
 MPT_REGISTERED_COMPONENT(ComponentUnMO3)
 
+#endif // !NO_MO3
+
 
 bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
@@ -88,7 +92,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	AddToLog(GetStrI18N("The file appears to be a MO3 file, but this OpenMPT build does not support loading MO3 files."));
 	return false;
 
-#else
+#else // !NO_MO3
 
 	// Try to load unmo3 dynamically.
 	MPT_SHARED_PTR<ComponentUnMO3> unmo3 = MPT_GET_COMPONENT(ComponentUnMO3);
