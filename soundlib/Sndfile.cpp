@@ -1919,7 +1919,7 @@ UINT CSoundFile::GetTickDuration(UINT tempo, UINT speed, ROWINDEX rowsPerBeat)
 				bufferCount--;
 				m_PlayState.m_dBufferDiff++;
 			}
-			MPT_ASSERT(abs(m_PlayState.m_dBufferDiff) < 1);
+			MPT_ASSERT(fabs(m_PlayState.m_dBufferDiff) < 1);
 			retval = bufferCount;
 		}
 		break;
