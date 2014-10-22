@@ -16,14 +16,14 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-struct VorbisDynBind;
+class ComponentVorbis;
 
 class VorbisEncoder : public EncoderFactoryBase
 {
 
 private:
 
-	VorbisDynBind *m_Vorbis;
+	MPT_SHARED_PTR<ComponentVorbis> m_Vorbis;
 
 public:
 

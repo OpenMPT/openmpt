@@ -1518,7 +1518,13 @@ HBRUSH CViewGlobals::OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor)
 	switch(nCtlColor)
 	{
 	case CTLCOLOR_DLG:
-		theApp.EnableThemeDialogTexture(*pWnd, ETDT_ENABLETAB);
+		{
+			MPT_SHARED_PTR<ComponentUXTheme> uxtheme = MPT_GET_COMPONENT(ComponentUXTheme);
+			if(IsComponentAvailable(uxtheme))
+			{
+				EnableThemeDialogTexture(*pWnd, ETDT_ENABLETAB);
+			}
+		}
 		break;
 	}
 	return CFormView::OnCtlColor(pDC, pWnd, nCtlColor);

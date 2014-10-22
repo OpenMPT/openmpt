@@ -20,6 +20,7 @@ OPENMPT_NAMESPACE_BEGIN
 #pragma comment(lib, "rpcrt4.lib")
 #pragma comment(lib, "wininet.lib")
 #pragma comment(lib, "htmlhelp.lib")
+#pragma comment(lib, "uxtheme.lib")
 
 #pragma comment(lib, "dmoguids.lib")
 #pragma comment(lib, "strmiids.lib")

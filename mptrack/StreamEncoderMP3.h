@@ -22,13 +22,13 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 #ifdef MPT_MP3ENCODER_LAME
-struct LameDynBind;
+class ComponentLame;
 #endif
 #ifdef MPT_MP3ENCODER_BLADE
-struct BladeDynBind;
+class ComponentBlade;
 #endif
 #ifdef MPT_MP3ENCODER_ACM
-struct AcmDynBind;
+class ComponentAcmMP3;
 #endif
 
 enum MP3EncoderType
@@ -45,13 +45,13 @@ class MP3Encoder : public EncoderFactoryBase
 private:
 
 #ifdef MPT_MP3ENCODER_LAME
-	LameDynBind *m_Lame;
+	MPT_SHARED_PTR<ComponentLame> m_Lame;
 #endif
 #ifdef MPT_MP3ENCODER_BLADE
-	BladeDynBind *m_Blade;
+	MPT_SHARED_PTR<ComponentBlade> m_Blade;
 #endif
 #ifdef MPT_MP3ENCODER_ACM
-	AcmDynBind *m_Acm;
+	MPT_SHARED_PTR<ComponentAcmMP3> m_Acm;
 #endif
 
 	MP3EncoderType m_Type;

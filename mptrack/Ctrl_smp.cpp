@@ -31,6 +31,7 @@
 #include "../soundlib/FileReader.h"
 #include "../soundlib/SampleFormatConverters.h"
 #include "FileDialog.h"
+#include "../common/ComponentManager.h"
 #ifdef _DEBUG
 #include <math.h>
 #endif
@@ -1735,6 +1736,22 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 }
 
 
+//=======================
+class ComponentSoundTouch
+//=======================
+	: public ComponentDelayLoadedBundledDLL
+{
+public:
+	ComponentSoundTouch()
+		: ComponentDelayLoadedBundledDLL(MPT_PATHSTRING("OpenMPT_SoundTouch_f32"))
+	{
+		return;
+	}
+	std::string GetSettingsKey() const { return "SoundTouch"; }
+};
+MPT_REGISTERED_COMPONENT(ComponentSoundTouch)
+
+
 int CCtrlSamples::TimeStretch(float ratio)
 //----------------------------------------
 {
@@ -1753,12 +1770,13 @@ int CCtrlSamples::TimeStretch(float ratio)
 	if(pitch > 2.0f) return 2 + (2<<8);
 
 	// Check whether the DLL file exists.
-	mpt::Library libSoundTouch = mpt::Library(mpt::LibraryPath::AppFullName(MPT_PATHSTRING("OpenMPT_SoundTouch_f32")));
-	if(!libSoundTouch.IsValid())
+	MPT_SHARED_PTR<ComponentSoundTouch> soundTouch = MPT_GET_COMPONENT(ComponentSoundTouch);
+	if(!IsComponentAvailable(soundTouch))
 	{
 		MsgBox(IDS_SOUNDTOUCH_LOADFAILURE);
 		return -1;
 	}
+
 	HANDLE handleSt = soundtouch_createInstance();
 	if(handleSt == NULL)
 	{

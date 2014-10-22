@@ -15,8 +15,9 @@ LOCAL_CPPFLAGS := -std=c++11 -fvisibility=hidden -DLIBOPENMPT_BUILD -DMPT_WITH_Z
 LOCAL_LDLIBS := -lz
 
 LOCAL_SRC_FILES := \
-	common/AudioCriticalSection.cpp \
 	common/stdafx.cpp \
+	common/AudioCriticalSection.cpp \
+	common/ComponentManager.cpp \
 	common/Logging.cpp \
 	common/misc_util.cpp \
 	common/mptIO.cpp \
