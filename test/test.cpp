@@ -1707,7 +1707,7 @@ static mpt::PathString GetTempFilenameBase()
 	return MPT_PATHSTRING("./test.");	
 }
 
-typedef std::shared_ptr<CSoundFile> TSoundFileContainer;
+typedef MPT_SHARED_PTR<CSoundFile> TSoundFileContainer;
 
 static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
 {
@@ -1718,7 +1718,7 @@ static TSoundFileContainer CreateSoundFileContainer(const mpt::PathString &filen
 {
 	mpt::ifstream stream(filename, std::ios::binary);
 	FileReader file(&stream);
-	std::shared_ptr<CSoundFile> pSndFile(new CSoundFile());
+	MPT_SHARED_PTR<CSoundFile> pSndFile = mpt::make_shared<CSoundFile>();
 	pSndFile->Create(file, CSoundFile::loadCompleteModule);
 	return pSndFile;
 }
