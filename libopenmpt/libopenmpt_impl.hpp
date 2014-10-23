@@ -14,6 +14,11 @@
 #include "libopenmpt.hpp"
 
 #include <iosfwd>
+#ifdef LIBOPENMPT_ANCIENT_COMPILER
+#if defined(__GNUC__)
+#include <tr1/memory>
+#endif
+#endif
 #include <memory>
 
 // forward declarations
