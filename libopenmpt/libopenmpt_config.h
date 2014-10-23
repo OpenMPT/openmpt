@@ -101,7 +101,7 @@
 #endif
 #endif
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !defined(__clang__)
 #if (__GNUC__*10000 + __GNUC_MINOR__*100 + __GNUC_PATCHLEVEL__*1 < 40300)
 #define LIBOPENMPT_ANCIENT_COMPILER
 #endif
