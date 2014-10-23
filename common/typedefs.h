@@ -160,7 +160,13 @@ OPENMPT_NAMESPACE_END
 #include <memory>
 OPENMPT_NAMESPACE_BEGIN
 
-#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
+#if MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,3,0)
+OPENMPT_NAMESPACE_END
+#include <tr1/memory>
+OPENMPT_NAMESPACE_BEGIN
+#endif
+
+#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)) || (MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,3,0))
 
 #define MPT_SHARED_PTR std::tr1::shared_ptr
 #define MPT_CONST_POINTER_CAST std::tr1::const_pointer_cast
@@ -270,7 +276,12 @@ noinline void AssertHandler(const char *file, int line, const char *function, co
 
 
 // Compile time assert.
-#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
+#if (MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,3,0))
+	#define MPT_SA_CONCAT(x, y) x ## y
+	#define MPT_SA_HELPER(x) MPT_SA_CONCAT(OPENMPT_STATIC_ASSERT_, x)
+	#define OPENMPT_STATIC_ASSERT MPT_SA_HELPER(__LINE__)
+	#define static_assert(expr, msg) typedef char OPENMPT_STATIC_ASSERT[(expr)?1:-1]
+#elif (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0))
 	#define static_assert(expr, msg) typedef char OPENMPT_STATIC_ASSERT[(expr)?1:-1]
 #endif
 #define STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
@@ -297,7 +308,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
+#if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)) || (MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,3,0))
 
 OPENMPT_NAMESPACE_END
 #include "stdint.h"
