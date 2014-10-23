@@ -46,6 +46,7 @@
 #  OPTIMIZE=1       Build optimized binaries
 #  TEST=1           Include test suite in default target.
 #  ONLY_TEST=0      Only build the test suite.
+#  ANCIENT=0        Use a pre-C++0x compiler (i.e. GCC before 4.3)
 #
 #
 # Build flags for libopenmpt (provide on each `make` invocation)
@@ -127,6 +128,7 @@ DEBUG=0
 OPTIMIZE=1
 TEST=1
 ONLY_TEST=0
+ANCIENT=0
 SOSUFFIX=.so
 
 
