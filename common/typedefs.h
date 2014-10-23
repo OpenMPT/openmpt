@@ -22,32 +22,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#if MPT_COMPILER_MSVC
-#if MPT_MSVC_AT_LEAST(2010,0)
-#define MPT_COMPILER_HAS_RVALUE_REF 1
-#endif
-#elif MPT_COMPILER_GCC
-#if MPT_GCC_AT_LEAST(4,5,0)
-#define MPT_COMPILER_HAS_RVALUE_REF 1
-#endif
-#elif MPT_COMPILER_CLANG
-#if MPT_CLANG_AT_LEAST(3,0,0)
-#define MPT_COMPILER_HAS_RVALUE_REF 1
-#endif
-#endif
-
-#ifndef MPT_COMPILER_HAS_RVALUE_REF
-#define MPT_COMPILER_HAS_RVALUE_REF 0
-#endif
-
-
-
-#if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)
-#define HAS_TYPE_TRAITS
-#endif
-
-
-
 #if MPT_COMPILER_GCC || MPT_COMPILER_MSVC
 // Compiler supports type-punning through unions. This is not stricly standard-conforming.
 // For GCC, this is documented, for MSVC this is apparently not documented, but we assume it.
