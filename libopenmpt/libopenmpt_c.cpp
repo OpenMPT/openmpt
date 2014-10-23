@@ -265,7 +265,7 @@ void openmpt_log_func_silent( const char * /*message*/, void * /*user*/ ) {
 double openmpt_could_open_propability( openmpt_stream_callbacks stream_callbacks, void * stream, double effort, openmpt_log_func logfunc, void * user ) {
 	try {
 		openmpt::callbacks_istream istream( stream_callbacks, stream );
-#ifdef MPT_ANCIENT_VS2008
+#ifdef LIBOPENMPT_ANCIENT_COMPILER
 		return openmpt::module_impl::could_open_propability( istream, effort, std::tr1::shared_ptr<openmpt::logfunc_logger>( new openmpt::logfunc_logger( logfunc ? logfunc : openmpt_log_func_default, user ) ) );
 #else
 		return openmpt::module_impl::could_open_propability( istream, effort, std::make_shared<openmpt::logfunc_logger>( logfunc ? logfunc : openmpt_log_func_default, user ) );
@@ -295,7 +295,7 @@ openmpt_module * openmpt_module_create( openmpt_stream_callbacks stream_callback
 				}
 			}
 			openmpt::callbacks_istream istream( stream_callbacks, stream );
-#ifdef MPT_ANCIENT_VS2008
+#ifdef LIBOPENMPT_ANCIENT_COMPILER
 			mod->impl = new openmpt::module_impl( istream, std::tr1::shared_ptr<openmpt::logfunc_logger>( new openmpt::logfunc_logger( mod->logfunc, mod->user ) ), ctls_map );
 #else
 			mod->impl = new openmpt::module_impl( istream, std::make_shared<openmpt::logfunc_logger>( mod->logfunc, mod->user ), ctls_map );
@@ -330,7 +330,7 @@ openmpt_module * openmpt_module_create_from_memory( const void * filedata, size_
 					}
 				}
 			}
-#ifdef MPT_ANCIENT_VS2008
+#ifdef LIBOPENMPT_ANCIENT_COMPILER
 			mod->impl = new openmpt::module_impl( filedata, filesize, std::tr1::shared_ptr<openmpt::logfunc_logger>( new openmpt::logfunc_logger( mod->logfunc, mod->user ) ), ctls_map );
 #else
 			mod->impl = new openmpt::module_impl( filedata, filesize, std::make_shared<openmpt::logfunc_logger>( mod->logfunc, mod->user ), ctls_map );

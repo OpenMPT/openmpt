@@ -19,9 +19,7 @@
 #include <string>
 #include <vector>
 
-#ifdef MPT_ANCIENT_VS2008
-#include "cstdint.h"
-#else
+#ifndef LIBOPENMPT_ANCIENT_COMPILER
 #include <cstdint>
 #endif
 

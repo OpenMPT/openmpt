@@ -810,22 +810,6 @@
 				</Filter>
 			</Filter>
 		</Filter>
-		<Filter
-			Name="build"
-			>
-			<Filter
-				Name="vs2008"
-				>
-				<Filter
-					Name="libopenmt"
-					>
-					<File
-						RelativePath=".\cstdint.h"
-						>
-					</File>
-				</Filter>
-			</Filter>
-		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
