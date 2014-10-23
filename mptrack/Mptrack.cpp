@@ -326,13 +326,13 @@ class CMPTCommandLineInfo: public CCommandLineInfo
 {
 public:
 	bool m_bNoDls, m_bNoPlugins, m_bNoAssembly,
-		 m_bPortable, m_bNoSettingsOnNewVersion;
+		 m_bPortable;
 
 public:
 	CMPTCommandLineInfo()
 	{
 		m_bNoDls = m_bNoPlugins = m_bNoAssembly =
-		m_bPortable = m_bNoSettingsOnNewVersion = false;
+		m_bPortable = false;
 	}
 	virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 	{
@@ -342,7 +342,6 @@ public:
 			if (!lstrcmpi(lpszParam, _T("nodls"))) { m_bNoDls = true; return; }
 			if (!lstrcmpi(lpszParam, _T("noplugs"))) { m_bNoPlugins = true; return; }
 			if (!lstrcmpi(lpszParam, _T("portable"))) { m_bPortable = true; return; }
-			if (!lstrcmpi(lpszParam, _T("noSettingsOnNewVersion"))) { m_bNoSettingsOnNewVersion = true; return; }
 			if (!lstrcmpi(lpszParam, _T("fullMemDump"))) { ExceptionHandler::fullMemDump = true; return; }
 			if (!lstrcmpi(lpszParam, _T("noAssembly"))) { m_bNoAssembly = true; return; }
 		}
@@ -1021,7 +1020,7 @@ BOOL CTrackApp::InitInstance()
 	}
 
 	// Open settings if the previous execution was with an earlier version.
-	if(TrackerSettings::Instance().ShowSettingsOnNewVersion && !cmdInfo.m_bNoSettingsOnNewVersion && TrackerSettings::Instance().gcsPreviousVersion < MptVersion::num)
+	if(TrackerSettings::Instance().ShowSettingsOnNewVersion && TrackerSettings::Instance().gcsPreviousVersion < MptVersion::num)
 	{
 		StopSplashScreen();
 		m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
