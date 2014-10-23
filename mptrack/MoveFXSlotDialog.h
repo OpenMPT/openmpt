@@ -16,8 +16,7 @@ class CMoveFXSlotDialog : public CDialog
 {
 protected:
 	const std::vector<PLUGINDEX> &m_EmptySlots;
-	CString m_csPrompt, m_csTitle;
-	CEdit m_EditPrompt;
+	CString m_csPrompt, m_csTitle, m_csChain;
 	size_t m_nToSlot;
 	PLUGINDEX m_nDefaultSlot;
 	bool moveChain;

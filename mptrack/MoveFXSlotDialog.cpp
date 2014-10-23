@@ -21,7 +21,6 @@ void CMoveFXSlotDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO1, m_CbnEmptySlots);
-	DDX_Control(pDX, IDC_EDIT1, m_EditPrompt);
 }
 
 
@@ -35,10 +34,12 @@ CMoveFXSlotDialog::CMoveFXSlotDialog(CWnd *pParent, PLUGINDEX currentSlot, const
 	{
 		m_csPrompt.Format(_T("Clone plugin in slot %d to the following empty slot:"), currentSlot + 1);
 		m_csTitle = _T("Clone To Slot...");
+		m_csChain = _T("&Clone follow-up plugin chain if possible");
 	} else
 	{
 		m_csPrompt.Format(_T("Move plugin in slot %d to the following empty slot:"), currentSlot + 1);
 		m_csTitle = _T("Move To Slot...");
+		m_csChain = _T("&Move follow-up plugin chain if possible");
 	}
 }
 
@@ -47,7 +48,8 @@ BOOL CMoveFXSlotDialog::OnInitDialog()
 //------------------------------------
 {
 	CDialog::OnInitDialog();
-	m_EditPrompt.SetWindowText(m_csPrompt);
+	SetDlgItemText(IDC_STATIC1, m_csPrompt);
+	SetDlgItemText(IDC_CHECK1, m_csChain);
 	SetWindowText(m_csTitle);
 
 	if(m_EmptySlots.empty())
