@@ -10,11 +10,10 @@
 #include "BuildSettings.h"
 
 #include "libopenmpt_internal.h"
-#include "libopenmpt.hpp"
-#include "libopenmpt.h"
 
 #include "test/test.h"
 
+#include <iostream>
 #include <locale>
 
 #include <clocale>

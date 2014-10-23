@@ -398,7 +398,6 @@ SOUNDLIB_CXX_SOURCES += \
 
 LIBOPENMPT_CXX_SOURCES += \
  $(SOUNDLIB_CXX_SOURCES) \
- $(wildcard test/*.cpp) \
  libopenmpt/libopenmpt_c.cpp \
  libopenmpt/libopenmpt_cxx.cpp \
  libopenmpt/libopenmpt_impl.cpp \
@@ -442,9 +441,13 @@ ALL_DEPENDS += $(OPENMPT123_DEPENDS)
 
 LIBOPENMPTTEST_CXX_SOURCES += \
  libopenmpt/libopenmpt_test.cpp \
+ $(SOUNDLIB_CXX_SOURCES) \
+ $(wildcard test/*.cpp) \
  
-LIBOPENMPTTEST_CXX_SOURCES += $(LIBOPENMPT_CXX_SOURCES)
-LIBOPENMPTTEST_C_SOURCES += $(LIBOPENMPT_C_SOURCES)
+ifeq ($(NO_ZLIB),1)
+LIBOPENMPTTEST_C_SOURCES += include/miniz/miniz.c
+endif
+
 LIBOPENMPTTEST_OBJECTS = $(LIBOPENMPTTEST_CXX_SOURCES:.cpp=.test.o) $(LIBOPENMPTTEST_C_SOURCES:.c=.test.o)
 LIBOPENMPTTEST_DEPENDS = $(LIBOPENMPTTEST_CXX_SOURCES:.cpp=.test.d) $(LIBOPENMPTTEST_C_SOURCES:.c=.test.d)
 ALL_OBJECTS += $(LIBOPENMPTTEST_OBJECTS)
