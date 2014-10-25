@@ -781,7 +781,7 @@ template <typename TInputFile>
 FileReader GetFileReader(TInputFile &file)
 {
 	#if defined(MPT_FILEREADER_STD_ISTREAM)
-		typename InputFile::ContentsRef tmp = file.Get();
+		typename TInputFile::ContentsRef tmp = file.Get();
 		if(!tmp.first)
 		{
 			return FileReader();
@@ -796,7 +796,7 @@ FileReader GetFileReader(TInputFile &file)
 			return FileReader(tmp.first);
 		#endif
 	#else
-		typename InputFile::ContentsRef tmp = file.Get();
+		typename TInputFile::ContentsRef tmp = file.Get();
 		#ifdef MDPLUG_TRACKER
 			return FileReader(tmp.first.data, tmp.first.size, tmp.second);
 		#else
