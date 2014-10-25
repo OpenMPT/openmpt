@@ -20,6 +20,9 @@
 #include "ITTools.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/TrackerSettings.h"
+#if !defined(MPT_FILEREADER_STD_ISTREAM)
+#include "../mptrack/MemoryMappedFile.h"
+#endif
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFstream.h"
 #endif
@@ -260,7 +263,18 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		if(m_szInstrumentPath[ins].empty())
 			continue;
-		FileReader file(mpt::IO::Open(m_szInstrumentPath[ins]));
+#if defined(MPT_FILEREADER_STD_ISTREAM)
+		mpt::ifstream f(m_szInstrumentPath[ins], std::ios_base::binary);
+		if(!f.good())
+			continue;
+		FileReader file(&f, &m_szInstrumentPath[ins]);
+#else
+		CMappedFile f;
+		if(!f.Open(m_szInstrumentPath[ins]))
+			continue;
+		FileReader file = f.GetFile();
+#endif
+
 		if(file.IsValid())
 			ReadInstrumentFromFile(ins + 1, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
 	}

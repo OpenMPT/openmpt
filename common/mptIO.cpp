@@ -22,14 +22,6 @@
 
 #include <stdio.h>
 
-#ifdef MPT_WITH_PATHSTRING
-#include "../soundlib/FileReader.h"
-#ifdef MPT_FILEREADER_STD_ISTREAM
-#include "mptFstream.h"
-#else
-#include "../mptrack/MemoryMappedFile.h"
-#endif // MPT_FILEREADER_STD_ISTREAM
-#endif // MPT_WITH_PATHSTRING
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -38,29 +30,6 @@ namespace mpt {
 
 namespace IO {
 
-#ifdef MPT_WITH_PATHSTRING
-FileReader Open(const mpt::PathString &filename)
-{
-#ifdef MPT_FILEREADER_STD_ISTREAM
-	mpt::ifstream f(filename, std::ios_base::binary);
-	if(f.good())
-#ifdef MODPLUG_TRACKER
-		return FileReader(&f, &filename);
-#else
-		return FileReader(&f);
-#endif // MODPLUG_TRACKER
-	else
-		return FileReader();
-#else
-	CMappedFile f;
-	if(f.Open(filename))
-		return f.GetFile();
-	else
-		return FileReader();
-#endif // MPT_FILEREADER_STD_ISTREAM
-
-}
-#endif // MPT_WITH_PATHSTRING
 
 
 //STATIC_ASSERT(sizeof(std::streamoff) == 8); // Assert 64bit file support.
