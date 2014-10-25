@@ -11,7 +11,7 @@
 #include "stdafx.h"
 
 #include "Logging.h"
-#include "mptFstream.h"
+#include "mptFileIO.h"
 #if defined(MODPLUG_TRACKER)
 #include "mptAtomic.h"
 #endif

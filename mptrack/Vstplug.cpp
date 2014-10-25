@@ -23,9 +23,9 @@
 #include "../soundlib/MIDIEvents.h"
 #include "MIDIMappingDialog.h"
 #include "../common/StringFixer.h"
-#include "MemoryMappedFile.h"
+#include "../common/mptFileIO.h"
+#include "../soundlib/FileReader.h"
 #include "FileDialog.h"
-#include "../common/mptFstream.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -1044,9 +1044,9 @@ bool CVstPlugin::LoadProgram(mpt::PathString fileName)
 		fileName = dlg.GetFirstFile();
 	}
 
-	CMappedFile f;
 	const char *errorStr = nullptr;
-	if(f.Open(fileName))
+	InputFile f(fileName);
+	if(f.IsValid())
 	{
 		FileReader file = GetFileReader(f);
 		errorStr = VSTPresets::GetErrorMessage(VSTPresets::LoadFile(file, *this));

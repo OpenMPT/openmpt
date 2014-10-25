@@ -29,11 +29,7 @@
 #include "modsmp_ctrl.h"
 #include "CleanupSong.h"
 #include "../common/StringFixer.h"
-#if defined(MPT_FILEREADER_STD_ISTREAM)
-#include "../common/mptFstream.h"
-#else
-#include "MemoryMappedFile.h"
-#endif
+#include "../common/mptFileIO.h"
 #include "../soundlib/FileReader.h"
 #include <shlwapi.h>
 #include "FileDialog.h"

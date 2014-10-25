@@ -27,7 +27,7 @@
 #include "modsmp_ctrl.h"
 #include "Autotune.h"
 #include "../common/StringFixer.h"
-#include "MemoryMappedFile.h"
+#include "../common/mptFileIO.h"
 #include "../soundlib/FileReader.h"
 #include "../soundlib/SampleFormatConverters.h"
 #include "FileDialog.h"
@@ -778,9 +778,9 @@ void CCtrlSamples::SetModified(DWORD mask, bool updateAll)
 bool CCtrlSamples::OpenSample(const mpt::PathString &fileName)
 //------------------------------------------------------------
 {
-	CMappedFile f;
 	BeginWaitCursor();
-	if(!f.Open(fileName))
+	InputFile f(fileName);
+	if(!f.IsValid())
 	{
 		EndWaitCursor();
 		return false;

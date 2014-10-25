@@ -728,6 +728,7 @@
     <ClCompile Include="..\common\ComponentManager.cpp" />
     <ClCompile Include="..\common\Logging.cpp" />
     <ClCompile Include="..\common\misc_util.cpp" />
+    <ClCompile Include="..\common\mptFileIO.cpp" />
     <ClCompile Include="..\common\mptIO.cpp" />
     <ClCompile Include="..\common\mptPathString.cpp" />
     <ClCompile Include="..\common\mptString.cpp" />
@@ -791,6 +792,7 @@
     <ClCompile Include="..\soundlib\SoundFilePlayConfig.cpp" />
     <ClCompile Include="..\soundlib\Tables.cpp" />
     <ClCompile Include="..\soundlib\Tagging.cpp" />
+    <ClCompile Include="..\soundlib\UpgradeModule.cpp" />
     <ClCompile Include="..\soundlib\WAVTools.cpp" />
     <ClCompile Include="..\soundlib\WindowedFIR.cpp" />
     <ClCompile Include="..\soundlib\XMTools.cpp" />
@@ -832,7 +834,6 @@
     <ClCompile Include="KeyConfigDlg.cpp" />
     <ClCompile Include="Mainbar.cpp" />
     <ClCompile Include="MainFrm.cpp" />
-    <ClCompile Include="MemoryMappedFile.cpp" />
     <ClCompile Include="MIDIMacroDialog.cpp" />
     <ClCompile Include="MIDIMapping.cpp" />
     <ClCompile Include="MIDIMappingDialog.cpp" />
@@ -942,7 +943,7 @@
     <ClInclude Include="..\common\Logging.h" />
     <ClInclude Include="..\common\misc_util.h" />
     <ClInclude Include="..\common\mptAtomic.h" />
-    <ClInclude Include="..\common\mptFstream.h" />
+    <ClInclude Include="..\common\mptFileIO.h" />
     <ClInclude Include="..\common\mptIO.h" />
     <ClInclude Include="..\common\mptPathString.h" />
     <ClInclude Include="..\common\mptString.h" />
@@ -1045,7 +1046,6 @@
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Mainbar.h" />
     <ClInclude Include="Mainfrm.h" />
-    <ClInclude Include="MemoryMappedFile.h" />
     <ClInclude Include="MIDIMacroDialog.h" />
     <ClInclude Include="MIDIMapping.h" />
     <ClInclude Include="mod2midi.h" />

@@ -1,6 +1,6 @@
 /*
- * mptFstream.h
- * ------------
+ * mptFileIO.h
+ * -----------
  * Purpose: A wrapper around std::fstream, fixing VS2008 charset conversion braindamage, and enforcing usage of mpt::PathString.
  * Notes  : You should only ever use these wrappers instead of plain std::fstream classes.
  * Authors: OpenMPT Devs

@@ -18,7 +18,7 @@
 #include "Dlsbank.h"
 #include "dlg_misc.h"
 #include "vstplug.h"
-#include "MemoryMappedFile.h"
+#include "../common/mptFileIO.h"
 #include "../soundlib/FileReader.h"
 #include "FileDialog.h"
 #include "Globals.h"
@@ -360,9 +360,8 @@ bool CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::Path
 	if(!songName.empty() && mpt::PathString::CompareNoCase(m_SongFileName, songName))
 	{
 		// Load module for previewing its instruments
-		CMappedFile f;
-
-		if(f.Open(libPath + songName))
+		InputFile f(libPath + songName);
+		if(f.IsValid())
 		{
 			FileReader file = GetFileReader(f);
 			if(file.IsValid())

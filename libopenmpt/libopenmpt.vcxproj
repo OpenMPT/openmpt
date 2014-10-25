@@ -185,7 +185,7 @@
     <ClInclude Include="..\common\Logging.h" />
     <ClInclude Include="..\common\misc_util.h" />
     <ClInclude Include="..\common\mptAtomic.h" />
-    <ClInclude Include="..\common\mptFstream.h" />
+    <ClInclude Include="..\common\mptFileIO.h" />
     <ClInclude Include="..\common\mptIO.h" />
     <ClInclude Include="..\common\mptPathString.h" />
     <ClInclude Include="..\common\mptString.h" />
@@ -261,6 +261,7 @@
     <ClCompile Include="..\common\ComponentManager.cpp" />
     <ClCompile Include="..\common\Logging.cpp" />
     <ClCompile Include="..\common\misc_util.cpp" />
+    <ClCompile Include="..\common\mptFileIO.cpp" />
     <ClCompile Include="..\common\mptIO.cpp" />
     <ClCompile Include="..\common\mptPathString.cpp" />
     <ClCompile Include="..\common\mptString.cpp" />
@@ -333,6 +334,7 @@
     <ClCompile Include="..\soundlib\tuning.cpp" />
     <ClCompile Include="..\soundlib\tuningbase.cpp" />
     <ClCompile Include="..\soundlib\tuningCollection.cpp" />
+    <ClCompile Include="..\soundlib\UpgradeModule.cpp" />
     <ClCompile Include="..\soundlib\WAVTools.cpp" />
     <ClCompile Include="..\soundlib\WindowedFIR.cpp" />
     <ClCompile Include="..\soundlib\XMTools.cpp" />

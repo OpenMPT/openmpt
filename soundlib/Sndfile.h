@@ -663,7 +663,7 @@ public:
 	static std::string ModContainerTypeToTracker(MODCONTAINERTYPE containertype);
 
 	void UpgradeModFlags();
-	void UpgradeSong();
+	void UpgradeModule();
 
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE

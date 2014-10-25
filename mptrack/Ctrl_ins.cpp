@@ -23,7 +23,8 @@
 #include "../common/misc_util.h"
 #include "../common/StringFixer.h"
 #include "SelectPluginDialog.h"
-#include "MemoryMappedFile.h"
+#include "../common/mptFileIO.h"
+#include "../soundlib/FileReader.h"
 #include "FileDialog.h"
 
 
@@ -1422,11 +1423,11 @@ void CCtrlInstruments::UpdateFilterText()
 BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 //--------------------------------------------------------------------
 {
-	CMappedFile f;
 	BOOL bFirst, bOk;
 	
 	BeginWaitCursor();
-	if(!f.Open(fileName))
+	InputFile f(fileName);
+	if(!f.IsValid())
 	{
 		EndWaitCursor();
 		return FALSE;
