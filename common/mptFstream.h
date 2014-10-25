@@ -18,6 +18,7 @@
 #include "../common/mptPathString.h"
 #if defined(MPT_WITH_PATHSTRING)
 #include "../common/mptIO.h"
+#include <utility>
 #endif
 
 
@@ -487,6 +488,64 @@ public:
 
 
 } // namespace mpt
+
+
+
+#ifdef MODPLUG_TRACKER
+//===============
+class CMappedFile
+//===============
+{
+protected:
+	HANDLE m_hFile;
+	HANDLE m_hFMap;
+	void *m_pData;
+	mpt::PathString m_FileName;
+
+public:
+	CMappedFile() : m_hFile(nullptr), m_hFMap(nullptr), m_pData(nullptr) { }
+	~CMappedFile();
+
+public:
+	bool Open(const mpt::PathString &filename);
+	bool IsOpen() const { return m_hFile != NULL && m_hFile != INVALID_HANDLE_VALUE; }
+	const mpt::PathString * GetpFilename() const { return &m_FileName; }
+	void Close();
+	size_t GetLength();
+	const void *Lock();
+};
+#endif // MODPLUG_TRACKER
+
+
+//=============
+class InputFile
+//=============
+{
+private:
+	mpt::PathString m_Filename;
+	#ifdef MPT_FILEREADER_STD_ISTREAM
+		mpt::ifstream m_File;
+	#else
+		CMappedFile m_File;
+	#endif
+public:
+	InputFile();
+	InputFile(const mpt::PathString &filename);
+	~InputFile();
+	bool Open(const mpt::PathString &filename);
+	bool IsValid() const;
+#if defined(MPT_FILEREADER_STD_ISTREAM)
+	typedef std::pair<std::istream*, const mpt::PathString*> ContentsRef;
+#else
+	struct Data
+	{
+		const char *data;
+		std::size_t size;
+	};
+	typedef std::pair<InputFile::Data, const mpt::PathString*> ContentsRef;
+#endif
+	InputFile::ContentsRef Get();
+};
 
 
 #endif // MPT_WITH_PATHSTRING

@@ -1528,7 +1528,7 @@ BOOL CMainFrame::PlaySoundFile(const mpt::PathString &filename, ModCommand::NOTE
 
 			if(f.Open(filename))
 			{
-				FileReader file = f.GetFile();
+				FileReader file = GetFileReader(f);
 				if(file.IsValid())
 				{
 					InitPreview();

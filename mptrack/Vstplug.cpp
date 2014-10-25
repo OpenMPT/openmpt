@@ -1048,7 +1048,7 @@ bool CVstPlugin::LoadProgram(mpt::PathString fileName)
 	const char *errorStr = nullptr;
 	if(f.Open(fileName))
 	{
-		FileReader file = f.GetFile();
+		FileReader file = GetFileReader(f);
 		errorStr = VSTPresets::GetErrorMessage(VSTPresets::LoadFile(file, *this));
 	} else
 	{

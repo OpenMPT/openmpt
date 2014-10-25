@@ -1433,7 +1433,7 @@ BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 	}
 	bFirst = FALSE;
 
-	FileReader file = f.GetFile();
+	FileReader file = GetFileReader(f);
 
 	bOk = FALSE;
 	if (file.IsValid())

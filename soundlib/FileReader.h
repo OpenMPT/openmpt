@@ -58,7 +58,7 @@ private:
 	off_t streamPos;		// Cursor location in the file
 
 #if defined(MODPLUG_TRACKER)
-	mpt::PathString *fileName;  // Filename that corresponds to this FileReader. It is only set if this FileReader represents the whole contents of fileName. May be nullptr.
+	const mpt::PathString *fileName;  // Filename that corresponds to this FileReader. It is only set if this FileReader represents the whole contents of fileName. May be nullptr.
 	#define MPT_FILEREADER_INIT_FILENAME ,fileName(nullptr)
 #else
 	#define MPT_FILEREADER_INIT_FILENAME
@@ -76,15 +76,15 @@ public:
 	FileReader(const char *chardata, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(chardata, length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 	FileReader(const uint8 *uint8data, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(reinterpret_cast<const char *>(uint8data), length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 #if defined(MODPLUG_TRACKER)
-	FileReader(const void *voiddata, off_t length, mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(static_cast<const char *>(voiddata), length)), streamPos(0), fileName(filename) { }
-	FileReader(const char *chardata, off_t length, mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(chardata, length)), streamPos(0), fileName(filename) { }
-	FileReader(const uint8 *uint8data, off_t length, mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(reinterpret_cast<const char *>(uint8data), length)), streamPos(0), fileName(filename) { }
+	FileReader(const void *voiddata, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(static_cast<const char *>(voiddata), length)), streamPos(0), fileName(filename) { }
+	FileReader(const char *chardata, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(chardata, length)), streamPos(0), fileName(filename) { }
+	FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(reinterpret_cast<const char *>(uint8data), length)), streamPos(0), fileName(filename) { }
 #endif
 
 	// Initialize file reader object with a std::istream.
 	FileReader(std::istream *s) : data(mpt::make_shared<FileDataContainerStdStream>(s)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 #if defined(MODPLUG_TRACKER)
-	FileReader(std::istream *s, mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerStdStream>(s)), streamPos(0), fileName(filename) { }
+	FileReader(std::istream *s, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerStdStream>(s)), streamPos(0), fileName(filename) { }
 #endif
 
 	// Initialize file reader object based on an existing file reader object window.
@@ -107,9 +107,9 @@ public:
 	FileReader(const char *chardata, off_t length) : data(chardata, length), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 	FileReader(const uint8 *uint8data, off_t length) : data(reinterpret_cast<const char *>(uint8data), length), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 #if defined(MODPLUG_TRACKER)
-	FileReader(const void *voiddata, off_t length, mpt::PathString *filename) : data(static_cast<const char *>(voiddata), length), streamPos(0), fileName(filename) { }
-	FileReader(const char *chardata, off_t length, mpt::PathString *filename) : data(chardata, length), streamPos(0), fileName(filename) { }
-	FileReader(const uint8 *uint8data, off_t length, mpt::PathString *filename) : data(reinterpret_cast<const char *>(uint8data), length), streamPos(0), fileName(filename) { }
+	FileReader(const void *voiddata, off_t length, const mpt::PathString *filename) : data(static_cast<const char *>(voiddata), length), streamPos(0), fileName(filename) { }
+	FileReader(const char *chardata, off_t length, const mpt::PathString *filename) : data(chardata, length), streamPos(0), fileName(filename) { }
+	FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(reinterpret_cast<const char *>(uint8data), length), streamPos(0), fileName(filename) { }
 #endif
 
 	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
@@ -773,6 +773,16 @@ public:
 	}
 
 };
+
+
+#if defined(MPT_WITH_PATHSTRING)
+class InputFile;
+FileReader GetFileReader(InputFile &file);
+#ifdef MODPLUG_TRACKER
+class CMappedFile;
+FileReader GetFileReader(CMappedFile &file);
+#endif
+#endif // MPT_WITH_PATHSTRING
 
 
 OPENMPT_NAMESPACE_END

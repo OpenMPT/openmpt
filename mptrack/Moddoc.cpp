@@ -219,25 +219,16 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 	if(filename.empty()) return OnNewDocument();
 
 	BeginWaitCursor();
-	#if defined(MPT_FILEREADER_STD_ISTREAM)
-		mpt::ifstream f(filename, std::ios_base::binary);
-		m_SndFile.Create(FileReader(&f, &filename), CSoundFile::loadCompleteModule, this);
-	#else
-	{
-		CMappedFile f;
-		if (f.Open(filename))
-		{
-			FileReader file = f.GetFile();
-			if(file.IsValid())
-			{
-				ASSERT(GetPathNameMpt() == mpt::PathString());
-				SetPathName(filename, FALSE);	// Path is not set yet, but ITP loader needs this for relative paths.
 
-				m_SndFile.Create(file, CSoundFile::loadCompleteModule, this);
-			}
-		}
+	InputFile f(filename);
+	if(f.IsValid())
+	{
+		FileReader file = GetFileReader(f);
+		ASSERT(GetPathNameMpt() == mpt::PathString());
+		SetPathName(filename, FALSE);	// Path is not set yet, but ITP loader needs this for relative paths.
+		m_SndFile.Create(file, CSoundFile::loadCompleteModule, this);
 	}
-	#endif
+
 	EndWaitCursor();
 
 	logcapturer.ShowLog(std::wstring()
@@ -345,7 +336,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 
 					if(f.Open(pszMidiMapName))
 					{
-						FileReader file = f.GetFile();
+						FileReader file = GetFileReader(f);
 						if(file.IsValid())
 						{
 							m_SndFile.ReadInstrumentFromFile(nIns, file, false);
@@ -687,7 +678,7 @@ void CModDoc::OnAppendModule()
 	for(size_t counter = 0; counter < files.size(); counter++)
 	{
 		CMappedFile mappedFile;
-		if(mappedFile.Open(files[counter]) && source.Create(mappedFile.GetFile(), CSoundFile::loadCompleteModule))
+		if(mappedFile.Open(files[counter]) && source.Create(GetFileReader(mappedFile), CSoundFile::loadCompleteModule))
 		{
 			AppendModule(source);
 			source.Destroy();
