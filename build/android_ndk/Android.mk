@@ -20,6 +20,7 @@ LOCAL_SRC_FILES := \
 	common/ComponentManager.cpp \
 	common/Logging.cpp \
 	common/misc_util.cpp \
+	common/mptFileIO.cpp \
 	common/mptIO.cpp \
 	common/mptPathString.cpp \
 	common/mptString.cpp \
@@ -89,6 +90,7 @@ LOCAL_SRC_FILES := \
 	soundlib/Snd_fx.cpp \
 	soundlib/Sndmix.cpp \
 	soundlib/SoundFilePlayConfig.cpp \
+	soundlib/UpgradeModule.cpp \
 	soundlib/Tables.cpp \
 	soundlib/Tagging.cpp \
 	soundlib/tuningbase.cpp \
