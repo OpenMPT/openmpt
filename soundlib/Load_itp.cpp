@@ -42,8 +42,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Read variable-length ITP string.
 template<size_t destSize>
-bool ReadITPString(char (&destBuffer)[destSize], FileReader &file)
-//----------------------------------------------------------------
+static bool ReadITPString(char (&destBuffer)[destSize], FileReader &file)
+//-----------------------------------------------------------------------
 {
 	return file.ReadString<mpt::String::maybeNullTerminated>(destBuffer, file.ReadUint32LE());
 }
@@ -76,7 +76,8 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	// Check file ID
 	if(!file.CanRead(12 + 4 + 24 + 4)
 		|| file.ReadUint32LE() != ITP_FILE_ID				// Magic bytes
-		|| (version = file.ReadUint32LE()) > ITP_VERSION)	// Format version
+		|| (version = file.ReadUint32LE()) > ITP_VERSION	// Format version
+		|| version < 0x00000100)
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -99,8 +100,8 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_nDefaultGlobalVolume = file.ReadUint32LE();
 	m_nSamplePreAmp = file.ReadUint32LE();
-	m_nDefaultSpeed = file.ReadUint32LE();
-	m_nDefaultTempo = file.ReadUint32LE();
+	m_nDefaultSpeed = std::max(uint32(1), file.ReadUint32LE());
+	m_nDefaultTempo = std::max(uint32(32), file.ReadUint32LE());
 	m_nChannels = static_cast<CHANNELINDEX>(file.ReadUint32LE());
 	if(m_nChannels == 0 || m_nChannels > MAX_BASECHANNELS)
 	{
@@ -127,13 +128,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 
 	// MIDI Macro config
 	file.ReadStructPartial(m_MidiCfg, file.ReadUint32LE());
-	if(m_SongFlags[SONG_EMBEDMIDICFG])
-	{
-		m_MidiCfg.Sanitize();
-	} else
-	{
-		m_MidiCfg.Reset();
-	}
+	m_MidiCfg.Sanitize();
 
 	// Song Instruments
 	m_nInstruments = static_cast<INSTRUMENTINDEX>(file.ReadUint32LE());
@@ -179,7 +174,6 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	size_t patNameLen = file.ReadUint32LE();	// Size of each pattern name
 	FileReader pattNames = file.ReadChunk(numNamedPats * patNameLen);
 
-
 	// modcommand data length
 	size = file.ReadUint32LE();
 	if(size != 6)
@@ -218,6 +212,9 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 				STATIC_ASSERT(sizeof(MODCOMMAND_ORIGINAL) == 6);
 				MODCOMMAND_ORIGINAL data;
 				patternChunk.ReadStruct(data);
+				if(data.command >= MAX_EFFECTS) data.command = CMD_NONE;
+				if(data.volcmd >= MAX_VOLCMDS) data.volcmd = VOLCMD_NONE;
+				if(data.note > NOTE_MAX && data.note < NOTE_MIN_SPECIAL) data.note = NOTE_NONE;
 				*(target++) = data;
 			}
 		}
@@ -271,17 +268,17 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	uint32 code = file.ReadUint32LE();
 
 	// Embed instruments' header [v1.01]
-	if(version >= 0x00000101 && m_SongFlags[SONG_ITPEMBEDIH] && code == 'EBIH')
+	if(version >= 0x00000101 && m_SongFlags[SONG_ITPEMBEDIH] && code == MAGIC4BE('E', 'B', 'I', 'H'))
 	{
 		code = file.ReadUint32LE();
 
 		INSTRUMENTINDEX ins = 1;
 		while(ins <= GetNumInstruments() && file.AreBytesLeft())
 		{
-			if(code == 'MPTS')
+			if(code == MAGIC4BE('M', 'P', 'T', 'S'))
 			{
 				break;
-			} else if(code == 'SEP@' || code == 'MPTX')
+			} else if(code == MAGIC4BE('S', 'E', 'P', '@') || code == MAGIC4BE('M', 'P', 'T', 'X'))
 			{
 				// jump code - switch to next instrument
 				ins++;
@@ -295,8 +292,9 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Song extensions
-	if(code == 'MPTS')
+	if(code == MAGIC4BE('M', 'P', 'T', 'S'))
 	{
+		file.SkipBack(4);
 		LoadExtendedSongProperties(MOD_TYPE_IT, file);
 	}
 
@@ -305,6 +303,15 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 8;
 
 	UpgradeModFlags();
+
+	// Before OpenMPT 1.20.01.09, the MIDI macros were always read from the file, even if the "embed" flag was not set.
+	if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1,20,01,09) && !m_SongFlags[SONG_EMBEDMIDICFG])
+	{
+		m_MidiCfg.Reset();
+	} else if(!m_MidiCfg.IsMacroDefaultSetupUsed())
+	{
+		m_SongFlags.set(SONG_EMBEDMIDICFG);
+	}
 
 	madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
 
