@@ -31,8 +31,11 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+class FileReader;
 
 namespace mpt {
+
+class PathString;
 
 namespace IO {
 
@@ -47,7 +50,8 @@ inline bool OffsetFits(IO::Offset off)
 	return (static_cast<IO::Offset>(mpt::saturate_cast<Toff>(off)) == off);
 }
 
-
+// Open a file (either stream or memory-mapped, depending on program configuration) and immediately return FileReader for the file
+FileReader Open(const mpt::PathString &filename);
 
 bool IsValid(std::ostream & f);
 bool IsValid(std::istream & f);
@@ -194,7 +198,7 @@ inline bool ReadAdaptiveInt16LE(Tfile & f, uint16 & v)
 	{
 		byte = 0;
 		if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
-		v |= (static_cast<uint16>(byte) << (((i+1)*8) - 1));		
+		v |= (static_cast<uint16>(byte) << (((i+1)*8) - 1));
 	}
 	return result;
 }
@@ -214,7 +218,7 @@ inline bool ReadAdaptiveInt32LE(Tfile & f, uint32 & v)
 	{
 		byte = 0;
 		if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
-		v |= (static_cast<uint32>(byte) << (((i+1)*8) - 2));		
+		v |= (static_cast<uint32>(byte) << (((i+1)*8) - 2));
 	}
 	return result;
 }
@@ -234,7 +238,7 @@ inline bool ReadAdaptiveInt64LE(Tfile & f, uint64 & v)
 	{
 		byte = 0;
 		if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
-		v |= (static_cast<uint64>(byte) << (((i+1)*8) - 2));		
+		v |= (static_cast<uint64>(byte) << (((i+1)*8) - 2));
 	}
 	return result;
 }
@@ -262,7 +266,7 @@ inline bool ReadSizedStringLE(Tfile & f, std::string & str, Tsize maxSize = std:
 		}
 		str.push_back(c);
 	}
-	return true;	
+	return true;
 }
 
 
@@ -549,7 +553,7 @@ public:
 
 };
 
-#endif 
+#endif
 
 
 class FileDataContainerMemory
