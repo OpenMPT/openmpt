@@ -17,7 +17,7 @@
 #include "ITCompression.h"
 #include "../common/mptIO.h"
 #ifndef MODPLUG_NO_FILESAVE
-#include "../common/mptFstream.h"
+#include "../common/mptFileIO.h"
 #endif
 
 

@@ -13,7 +13,7 @@
 #include "Loaders.h"
 #ifdef MODPLUG_TRACKER
 // For loading external samples
-#include "../common/mptFstream.h"
+#include "../common/mptFileIO.h"
 #include "../mptrack/Moddoc.h"
 #endif
 

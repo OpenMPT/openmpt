@@ -13,7 +13,7 @@
 #include "Loaders.h"
 #include "Tables.h"
 #ifndef MODPLUG_NO_FILESAVE
-#include "../common/mptFstream.h"
+#include "../common/mptFileIO.h"
 #endif
 
 OPENMPT_NAMESPACE_BEGIN

@@ -16,7 +16,7 @@
 #include "../mptrack/Mptrack.h"
 #include "../mptrack/Vstplug.h"
 #include "../mptrack/ExceptionHandler.h"
-#include "../common/mptFstream.h"
+#include "../common/mptFileIO.h"
 #include "../common/thread.h"
 #include "../common/StringFixer.h"
 
