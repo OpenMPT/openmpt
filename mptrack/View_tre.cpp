@@ -364,7 +364,7 @@ bool CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::Path
 
 		if(f.Open(libPath + songName))
 		{
-			FileReader file = f.GetFile();
+			FileReader file = GetFileReader(f);
 			if(file.IsValid())
 			{
 				if(m_SongFile != nullptr)

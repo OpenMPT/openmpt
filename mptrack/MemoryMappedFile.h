@@ -11,32 +11,8 @@
 #pragma once
 
 #include "../soundlib/FileReader.h"
+#include "../common/mptFstream.h"
 
 OPENMPT_NAMESPACE_BEGIN
-
-//////////////////////////////////////////////////////////////////
-// File Mapping Class
-
-//===============
-class CMappedFile
-//===============
-{
-protected:
-	HANDLE m_hFile;
-	HANDLE m_hFMap;
-	void *m_pData;
-	mpt::PathString m_FileName;
-
-public:
-	CMappedFile() : m_hFile(nullptr), m_hFMap(nullptr), m_pData(nullptr) { }
-	~CMappedFile();
-
-public:
-	bool Open(const mpt::PathString &filename);
-	void Close();
-	size_t GetLength();
-	const void *Lock();
-	FileReader GetFile();
-};
 
 OPENMPT_NAMESPACE_END

@@ -786,7 +786,7 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName)
 		return false;
 	}
 
-	FileReader file = f.GetFile();
+	FileReader file = GetFileReader(f);
 	if(!file.IsValid())
 	{
 		EndWaitCursor();
