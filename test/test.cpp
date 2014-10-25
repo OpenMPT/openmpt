@@ -32,7 +32,7 @@
 #include "../mptrack/Settings.h"
 #endif // MODPLUG_TRACKER
 #ifndef MODPLUG_TRACKER
-#include "../common/mptFstream.h"
+#include "../common/mptFileIO.h"
 #endif // !MODPLUG_TRACKER
 #include <limits>
 #include <istream>
