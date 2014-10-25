@@ -567,7 +567,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 		if(ReadMP3Sample(0, chunk))
 		{
 			ModSample &srcSample = Samples[0];
-			const uint8 *smpData = static_cast<uint8 *>(srcSample.pSample);
+			const int8 *smpData = srcSample.pSample8;
 
 			for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 			{

@@ -803,7 +803,7 @@ size_t CopyMonoSample(ModSample &sample, const char *sourceBuffer, size_t source
 	size_t numFrames = countFrames;
 	SampleConversion sampleConv(conv);
 	const char * MPT_RESTRICT inBuf = sourceBuffer;
-	typename SampleConversion::output_t * MPT_RESTRICT outBuf = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample);
+	typename SampleConversion::output_t * MPT_RESTRICT outBuf = static_cast<typename SampleConversion::output_t *>(sample.pSample);
 	while(numFrames--)
 	{
 		*outBuf = sampleConv(inBuf);
@@ -828,7 +828,7 @@ size_t CopyStereoInterleavedSample(ModSample &sample, const char *sourceBuffer, 
 	SampleConversion sampleConvLeft(conv);
 	SampleConversion sampleConvRight(conv);
 	const char * MPT_RESTRICT inBuf = sourceBuffer;
-	typename SampleConversion::output_t * MPT_RESTRICT outBuf = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample);
+	typename SampleConversion::output_t * MPT_RESTRICT outBuf = static_cast<typename SampleConversion::output_t *>(sample.pSample);
 	while(numFrames--)
 	{
 		*outBuf = sampleConvLeft(inBuf);
@@ -859,7 +859,7 @@ size_t CopyStereoSplitSample(ModSample &sample, const char *sourceBuffer, size_t
 	size_t numSamplesLeft = countSamplesLeft;
 	SampleConversion sampleConvLeft(conv);
 	const char * MPT_RESTRICT inBufLeft = sourceBuffer;
-	typename SampleConversion::output_t * MPT_RESTRICT outBufLeft = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample);
+	typename SampleConversion::output_t * MPT_RESTRICT outBufLeft = static_cast<typename SampleConversion::output_t *>(sample.pSample);
 	while(numSamplesLeft--)
 	{
 		*outBufLeft = sampleConvLeft(inBufLeft);
@@ -870,7 +870,7 @@ size_t CopyStereoSplitSample(ModSample &sample, const char *sourceBuffer, size_t
 	size_t numSamplesRight = countSamplesRight;
 	SampleConversion sampleConvRight(conv);
 	const char * MPT_RESTRICT inBufRight = sourceBuffer + sample.nLength * SampleConversion::input_inc;
-	typename SampleConversion::output_t * MPT_RESTRICT outBufRight = reinterpret_cast<typename SampleConversion::output_t *>(sample.pSample) + 1;
+	typename SampleConversion::output_t * MPT_RESTRICT outBufRight = static_cast<typename SampleConversion::output_t *>(sample.pSample) + 1;
 	while(numSamplesRight--)
 	{
 		*outBufRight = sampleConvRight(inBufRight);

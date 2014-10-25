@@ -1589,7 +1589,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		fseek(f, smppos[nsmp - 1], SEEK_SET);
 		fwrite(&itss, 1, sizeof(ITSample), f);
 		fseek(f, dwPos, SEEK_SET);
-		if ((Samples[nsmp].pSample) && (Samples[nsmp].nLength))
+		if (Samples[nsmp].HasSampleData())
 		{
 			dwPos += itss.GetSampleFormat().WriteSample(f, Samples[nsmp]);
 		}
