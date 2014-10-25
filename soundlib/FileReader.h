@@ -790,14 +790,14 @@ FileReader GetFileReader(TInputFile &file)
 		{
 			return FileReader();
 		}
-		#ifdef MDPLUG_TRACKER
+		#ifdef MODPLUG_TRACKER
 			return FileReader(tmp.first, tmp.second);
 		#else
 			return FileReader(tmp.first);
 		#endif
 	#else
 		typename TInputFile::ContentsRef tmp = file.Get();
-		#ifdef MDPLUG_TRACKER
+		#ifdef MODPLUG_TRACKER
 			return FileReader(tmp.first.data, tmp.first.size, tmp.second);
 		#else
 			return FileReader(tmp.first.data, tmp.first.size);
