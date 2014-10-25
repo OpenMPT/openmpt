@@ -776,12 +776,34 @@ public:
 
 
 #if defined(MPT_WITH_PATHSTRING)
-class InputFile;
-FileReader GetFileReader(InputFile &file);
-#ifdef MODPLUG_TRACKER
-class CMappedFile;
-FileReader GetFileReader(CMappedFile &file);
-#endif
+// templated in order to reduce header inter-depoendencies
+template <typename TInputFile>
+FileReader GetFileReader(TInputFile &file)
+{
+	#if defined(MPT_FILEREADER_STD_ISTREAM)
+		typename InputFile::ContentsRef tmp = file.Get();
+		if(!tmp.first)
+		{
+			return FileReader();
+		}
+		if(!tmp.first->good())
+		{
+			return FileReader();
+		}
+		#ifdef MDPLUG_TRACKER
+			return FileReader(tmp.first, tmp.second);
+		#else
+			return FileReader(tmp.first);
+		#endif
+	#else
+		typename InputFile::ContentsRef tmp = file.Get();
+		#ifdef MDPLUG_TRACKER
+			return FileReader(tmp.first.data, tmp.first.size, tmp.second);
+		#else
+			return FileReader(tmp.first.data, tmp.first.size);
+		#endif
+	#endif
+}
 #endif // MPT_WITH_PATHSTRING
 
 

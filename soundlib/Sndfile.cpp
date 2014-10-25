@@ -24,7 +24,6 @@
 #include "tuningcollection.h"
 #include "../common/StringFixer.h"
 #include "FileReader.h"
-#include "../common/mptFileIO.h"
 #include <sstream>
 #include <time.h>
 
@@ -34,56 +33,6 @@
 
 
 OPENMPT_NAMESPACE_BEGIN
-
-
-
-// Note: Following code should be moved to FileReader.cpp
-
-#ifdef MPT_WITH_PATHSTRING
-
-FileReader GetFileReader(InputFile &file)
-{
-	#if defined(MPT_FILEREADER_STD_ISTREAM)
-		InputFile::ContentsRef tmp = file.Get();
-		if(!tmp.first)
-		{
-			return FileReader();
-		}
-		if(!tmp.first->good())
-		{
-			return FileReader();
-		}
-		#ifdef MDPLUG_TRACKER
-			return FileReader(tmp.first, tmp.second);
-		#else
-			return FileReader(tmp.first);
-		#endif
-	#else
-		InputFile::ContentsRef tmp = file.Get();
-		#ifdef MDPLUG_TRACKER
-			return FileReader(tmp.first.data, tmp.first.size, tmp.second);
-		#else
-			return FileReader(tmp.first.data, tmp.first.size);
-		#endif
-	#endif
-}
-
-#ifdef MODPLUG_TRACKER
-
-FileReader GetFileReader(CMappedFile &file)
-{
-	if(!file.IsOpen())
-	{
-		return FileReader();
-	}
-	return FileReader(file.Lock(), file.GetLength(), file.GetpFilename());
-}
-
-#endif
-
-#endif // MPT_WITH_PATHSTRING
-
-
 
 
 // -> CODE#0027
