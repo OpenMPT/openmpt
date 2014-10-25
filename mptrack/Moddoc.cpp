@@ -328,7 +328,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 				} else
 				{
 					// Load from Instrument or Sample file
-					CMappedFile f;
+					InputFile f;
 
 					if(f.Open(pszMidiMapName))
 					{
@@ -673,8 +673,8 @@ void CModDoc::OnAppendModule()
 
 	for(size_t counter = 0; counter < files.size(); counter++)
 	{
-		CMappedFile mappedFile;
-		if(mappedFile.Open(files[counter]) && source.Create(GetFileReader(mappedFile), CSoundFile::loadCompleteModule))
+		InputFile f;
+		if(f.Open(files[counter]) && source.Create(GetFileReader(f), CSoundFile::loadCompleteModule))
 		{
 			AppendModule(source);
 			source.Destroy();
