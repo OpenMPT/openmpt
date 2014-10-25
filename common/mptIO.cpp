@@ -41,7 +41,11 @@ FileReader Open(const mpt::PathString &filename)
 #ifdef MPT_FILEREADER_STD_ISTREAM
 	mpt::ifstream f(filename, std::ios_base::binary);
 	if(f.good())
-		return (&f, &filename);
+#ifdef MODPLUG_TRACKER
+		return FileReader(&f, &filename);
+#else
+		return FileReader(&f);
+#endif
 	else
 		return FileReader();
 #else
