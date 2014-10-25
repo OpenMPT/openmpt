@@ -50,8 +50,10 @@ inline bool OffsetFits(IO::Offset off)
 	return (static_cast<IO::Offset>(mpt::saturate_cast<Toff>(off)) == off);
 }
 
+#ifdef MPT_WITH_PATHSTRING
 // Open a file (either stream or memory-mapped, depending on program configuration) and immediately return FileReader for the file
 FileReader Open(const mpt::PathString &filename);
+#endif // MPT_WITH_PATHSTRING
 
 bool IsValid(std::ostream & f);
 bool IsValid(std::istream & f);
