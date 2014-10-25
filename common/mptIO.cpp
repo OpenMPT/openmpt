@@ -22,6 +22,10 @@
 
 #include <stdio.h>
 
+#include "../soundlib/FileReader.h"
+#ifndef MPT_FILEREADER_STD_ISTREAM
+#include "../mptrack/MemoryMappedFile.h"
+#endif
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -30,7 +34,23 @@ namespace mpt {
 
 namespace IO {
 
+FileReader Open(const mpt::PathString &filename)
+{
+#ifdef MPT_FILEREADER_STD_ISTREAM
+	mpt::ifstream f(filename, std::ios_base::binary);
+	if(f.good())
+		return (&f, &filename);
+	else
+		return FileReader();
+#else
+	CMappedFile f;
+	if(f.Open(filename))
+		return f.GetFile();
+	else
+		return FileReader();
+#endif
 
+}
 
 //STATIC_ASSERT(sizeof(std::streamoff) == 8); // Assert 64bit file support.
 bool IsValid(std::ostream & f) { return !f.fail(); }
