@@ -396,6 +396,8 @@ const void *CMappedFile::Lock()
 
 
 
+#if defined(MPT_WITH_PATHSTRING)
+
 InputFile::InputFile()
 {
 	return;
@@ -467,6 +469,8 @@ InputFile::ContentsRef InputFile::Get()
 }
 
 #endif
+
+#endif // MPT_WITH_PATHSTRING
 
 
 
