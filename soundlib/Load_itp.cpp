@@ -20,7 +20,7 @@
 #include "ITTools.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/TrackerSettings.h"
-#include "../common/mptFstream.h"
+#include "../common/mptFileIO.h"
 #include "../mptrack/Moddoc.h"
 #endif
 

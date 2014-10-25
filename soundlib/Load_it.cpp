@@ -19,7 +19,7 @@
 #include "../common/mptIO.h"
 #include "../common/serialization_utils.h"
 #ifndef MODPLUG_NO_FILESAVE
-#include "../common/mptFstream.h"
+#include "../common/mptFileIO.h"
 #endif
 #include <sstream>
 #include <list>

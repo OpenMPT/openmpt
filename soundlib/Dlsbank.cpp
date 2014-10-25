@@ -13,7 +13,7 @@
 #include "Sndfile.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/mptrack.h"
-#include "../common/mptFstream.h"
+#include "../common/mptFileIO.h"
 #endif
 #include "Dlsbank.h"
 #include "Wav.h"

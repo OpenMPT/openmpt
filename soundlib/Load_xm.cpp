@@ -16,7 +16,7 @@
 #include "../common/misc_util.h"
 #include "XMTools.h"
 #ifndef MODPLUG_NO_FILESAVE
-#include "../common/mptFstream.h"
+#include "../common/mptFileIO.h"
 #endif
 #include <algorithm>
 #ifdef MODPLUG_TRACKER

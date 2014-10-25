@@ -24,7 +24,7 @@
 #include "../soundlib/Dither.h"
 #include "../soundlib/AudioReadTarget.h"
 
-#include "../common/mptFstream.h"
+#include "../common/mptFileIO.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
