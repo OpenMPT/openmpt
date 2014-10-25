@@ -14,7 +14,7 @@
 #include "../common/serialization_utils.h"
 #include <algorithm>
 #include <bitset>
-#include "../common/mptFstream.h"
+#include "../common/mptFileIO.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

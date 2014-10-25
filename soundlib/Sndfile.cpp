@@ -24,7 +24,7 @@
 #include "tuningcollection.h"
 #include "../common/StringFixer.h"
 #include "FileReader.h"
-#include "../common/mptFstream.h"
+#include "../common/mptFileIO.h"
 #include <sstream>
 #include <time.h>
 
