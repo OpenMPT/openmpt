@@ -536,13 +536,12 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 
 // Check if the stereo channels of a sample contain identical data
 template<typename T>
-static bool ComapreStereoChannels(SmpLength length, const void *sampleData)
-//--------------------------------------------------------
+static bool ComapreStereoChannels(SmpLength length, const T *sampleData)
+//----------------------------------------------------------------------
 {
-	const T *data = static_cast<const T *>(sampleData);
-	for(SmpLength i = 0; i < length; i++, data += 2)
+	for(SmpLength i = 0; i < length; i++, sampleData += 2)
 	{
-		if(data[0] != data[1])
+		if(sampleData[0] != sampleData[1])
 		{
 			return false;
 		}
@@ -580,10 +579,10 @@ bool CModCleanupDlg::OptimizeSamples()
 			bool identicalChannels = false;
 			if(sample.GetElementarySampleSize() == 1)
 			{
-				identicalChannels = ComapreStereoChannels<int8>(loopLength, sample.pSample);
+				identicalChannels = ComapreStereoChannels(loopLength, sample.pSample8);
 			} else if(sample.GetElementarySampleSize() == 2)
 			{
-				identicalChannels = ComapreStereoChannels<int16>(loopLength, sample.pSample);
+				identicalChannels = ComapreStereoChannels(loopLength, sample.pSample16);
 			}
 			if(identicalChannels)
 			{

@@ -20,7 +20,12 @@ struct ModSample
 	SmpLength nLength;						// In samples, not bytes
 	SmpLength nLoopStart, nLoopEnd;			// Dito
 	SmpLength nSustainStart, nSustainEnd;	// Dito
-	void   *pSample;						// Pointer to sample data
+	union
+	{
+		void  *pSample;						// Pointer to sample data
+		int8  *pSample8;					// Pointer to 8-bit sample data
+		int16 *pSample16;					// Pointer to 16-bit sample data
+	};
 	uint32 nC5Speed;						// Frequency of middle-C, in Hz (for IT/S3M/MPTM)
 	uint16 nPan;							// Default sample panning (if pan flag is set), 0...256
 	uint16 nVolume;							// Default volume, 0...256
@@ -40,6 +45,8 @@ struct ModSample
 		pSample = nullptr;
 		Initialize(type);
 	}
+
+	bool HasSampleData() const { return pSample != nullptr && nLength != 0; }
 
 	// Return the size of one (elementary) sample in bytes.
 	uint8 GetElementarySampleSize() const { return (uFlags & CHN_16BIT) ? 2 : 1; }

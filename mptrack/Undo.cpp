@@ -380,7 +380,7 @@ bool CSampleUndo::PrepareBuffer(undobuf_t &buffer, const SAMPLEINDEX smp, sample
 
 			undo.samplePtr = ModSample::AllocateSample(changeLen, bytesPerSample);
 			if(undo.samplePtr == nullptr) return false;
-			memcpy(undo.samplePtr, static_cast<const char *>(oldSample.pSample) + changeStart * bytesPerSample, changeLen * bytesPerSample);
+			memcpy(undo.samplePtr, oldSample.pSample8 + changeStart * bytesPerSample, changeLen * bytesPerSample);
 
 #ifdef _DEBUG
 			char s[64];
@@ -442,8 +442,8 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 	PrepareBuffer(toBuf, smp, redoType, undo.description, undo.changeStart, undo.changeEnd);
 
 	ModSample &sample = sndFile.GetSample(smp);
-	char *pCurrentSample = static_cast<char *>(sample.pSample);
-	char *pNewSample = nullptr;	// a new sample is possibly going to be allocated, depending on what's going to be undone.
+	int8 *pCurrentSample = sample.pSample8;
+	int8 *pNewSample = nullptr;	// a new sample is possibly going to be allocated, depending on what's going to be undone.
 	bool replace = false;
 
 	uint8 bytesPerSample = undo.OldSample.GetBytesPerSample();
@@ -485,7 +485,7 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 
 	case sundo_delete:
 		// insert deleted data
-		pNewSample = static_cast<char *>(ModSample::AllocateSample(undo.OldSample.nLength, bytesPerSample));
+		pNewSample = static_cast<int8 *>(ModSample::AllocateSample(undo.OldSample.nLength, bytesPerSample));
 		if(pNewSample == nullptr) return false;
 		replace = true;
 		memcpy(pNewSample, pCurrentSample, undo.changeStart * bytesPerSample);
@@ -495,7 +495,7 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 
 	case sundo_replace:
 		// simply exchange sample pointer
-		pNewSample = static_cast<char *>(undo.samplePtr);
+		pNewSample = static_cast<int8 *>(undo.samplePtr);
 		undo.samplePtr = nullptr; // prevent sample from being deleted
 		replace = true;
 		break;

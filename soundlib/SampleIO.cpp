@@ -468,7 +468,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			LimitMax(readLength, file.BytesLeft());
 
 			const uint8 *inBuf = reinterpret_cast<const uint8*>(sourceBuf) + sizeof(compressionTable);
-			int8 *outBuf = static_cast<int8 *>(sample.pSample);
+			int8 *outBuf = sample.pSample8;
 			int8 delta = 0;
 
 			for(size_t i = readLength; i != 0; i--)
@@ -511,8 +511,6 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		{
 			uint32 bitBuf = file.ReadUint32LE(), bitNum = 32;
 
-			uint8 *outBuf8 = static_cast<uint8 *>(sample.pSample);
-			uint16 *outBuf16 = static_cast<uint16 *>(sample.pSample);
 			const uint8 *inBuf = reinterpret_cast<const uint8*>(sourceBuf) + 4;
 
 			uint8 dlt = 0, lowbyte = 0;
@@ -538,10 +536,10 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 				dlt += hibyte;
 				if(GetBitDepth() != 16)
 				{
-					outBuf8[j] = dlt;
+					sample.pSample8[j] = dlt;
 				} else
 				{
-					outBuf16[j] = lowbyte | (dlt << 8);
+					sample.pSample16[j] = lowbyte | (dlt << 8);
 				}
 			}
 
@@ -562,17 +560,15 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		// MT2 stereo samples (right channel is stored as a difference from the left channel)
 		if(GetBitDepth() == 8)
 		{
-			int8 *outBuf = static_cast<int8 *>(sample.pSample);
 			for(SmpLength i = 0; i <= sample.nLength * 2; i += 2)
 			{
-				outBuf[i + 1] += outBuf[i];
+				sample.pSample8[i + 1] += sample.pSample8[i];
 			}
 		} else
 		{
-			int16 *outBuf = static_cast<int16 *>(sample.pSample);
 			for(SmpLength i = 0; i <= sample.nLength * 2; i += 2)
 			{
-				outBuf[i + 1] += outBuf[i];
+				sample.pSample16[i + 1] += sample.pSample16[i];
 			}
 		}
 	}
@@ -600,13 +596,13 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 	size_t len = 0, bufcount = 0;
 	int8 buffer8[4096];
 	int16 buffer16[4096];
-	const void *const pSampleVoid = (const void *)sample.pSample;
-	const int8 *const pSample8 = (const int8 *)sample.pSample;
-	const int16 *const pSample16 = (const int16 *)sample.pSample;
+	const void *const pSampleVoid = sample.pSample;
+	const int8 *const pSample8 = sample.pSample8;
+	const int16 *const pSample16 = sample.pSample16;
 	SmpLength numSamples = sample.nLength;
 
 	if(maxSamples && numSamples > maxSamples) numSamples = maxSamples;
-	if(sample.pSample == nullptr || numSamples == 0) return 0;
+	if(!sample.HasSampleData()) return 0;
 
 	if(GetBitDepth() == 16 && GetChannelFormat() == mono && GetEndianness() == littleEndian &&
 		(GetEncoding() == signedPCM || GetEncoding() == unsignedPCM || GetEncoding() == deltaPCM))

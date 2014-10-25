@@ -376,7 +376,7 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 		{
 			return false;
 		}
-		IMAADPCMUnpack16((int16 *)sample.pSample, sample.nLength, FileReader(sampleChunk.GetRawData(), sampleChunk.BytesLeft()), wavFile.GetBlockAlign());
+		IMAADPCMUnpack16(sample.pSample16, sample.nLength, FileReader(sampleChunk.GetRawData(), sampleChunk.BytesLeft()), wavFile.GetBlockAlign());
 		sample.PrecomputeLoops(*this, false);
 	} else if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtMP3)
 	{
@@ -1948,8 +1948,8 @@ struct FLACDecoder
 		// Source bit depth
 		const unsigned int bps = frame->header.bits_per_sample;
 
-		int8 *sampleData8 = static_cast<int8 *>(sample.pSample) + offset;
-		int16 *sampleData16 = static_cast<int16 *>(sample.pSample) + offset;
+		int8 *sampleData8 = sample.pSample8 + offset;
+		int16 *sampleData16 = sample.pSample16 + offset;
 
 		MPT_ASSERT((bps <= 8 && sample.GetElementarySampleSize() == 1) || (bps > 8 && sample.GetElementarySampleSize() == 2));
 		MPT_ASSERT(modChannels <= FLAC__stream_decoder_get_channels(decoder));
@@ -2084,12 +2084,11 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 #ifndef NO_FLAC
 // Helper function for copying OpenMPT's sample data to FLAC's int32 buffer.
 template<typename T>
-inline static void SampleToFLAC32(FLAC__int32 *dst, const void *src, SmpLength numSamples)
+inline static void SampleToFLAC32(FLAC__int32 *dst, const T *src, SmpLength numSamples)
 {
-	const T *in = reinterpret_cast<const T *>(src);
 	for(SmpLength i = 0; i < numSamples; i++)
 	{
-		dst[i] = in[i];
+		dst[i] = src[i];
 	}
 };
 
@@ -2227,10 +2226,10 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 
 	if(sample.GetElementarySampleSize() == 1)
 	{
-		SampleToFLAC32<int8>(sampleData, sample.pSample, numSamples);
+		SampleToFLAC32(sampleData, sample.pSample8, numSamples);
 	} else if(sample.GetElementarySampleSize() == 2)
 	{
-		SampleToFLAC32<int16>(sampleData, sample.pSample, numSamples);
+		SampleToFLAC32(sampleData, sample.pSample16, numSamples);
 	} else
 	{
 		MPT_ASSERT(false);

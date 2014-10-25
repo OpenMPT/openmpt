@@ -1216,7 +1216,7 @@ void CCtrlSamples::OnNormalize()
 
 			if(sample.uFlags[CHN_16BIT])
 			{
-				int16 *p = (int16 *)sample.pSample;
+				int16 *p = sample.pSample16;
 				int max = 1;
 				for (SmpLength i = selStart; i < selEnd; i++)
 				{
@@ -1235,7 +1235,7 @@ void CCtrlSamples::OnNormalize()
 				}
 			} else
 			{
-				int8 *p = (int8 *)sample.pSample;
+				int8 *p = sample.pSample8;
 				int max = 1;
 				for (SmpLength i = selStart; i < selEnd; i++)
 				{
@@ -1272,20 +1272,20 @@ void CCtrlSamples::OnNormalize()
 
 
 template<typename T>
-void ApplyAmplifyImpl(void *pSample, SmpLength start, SmpLength end, int32 amp, bool fadeIn, bool fadeOut)
-//--------------------------------------------------------------------------------------------------------
+void ApplyAmplifyImpl(T *pSample, SmpLength start, SmpLength end, int32 amp, bool fadeIn, bool fadeOut)
+//-----------------------------------------------------------------------------------------------------
 {
-	T *p = static_cast<T *>(pSample) + start;
+	pSample += start;
 	SmpLength len = end - start;
 	int64 l64 = static_cast<int64>(len);
 
 	for(SmpLength i = 0; i < len; i++)
 	{
-		int32 l = (p[i] * amp) / 100;
+		int32 l = (pSample[i] * amp) / 100;
 		if(fadeIn) l = (int32)((l * (int64)i) / l64);
 		if(fadeOut) l = (int32)((l * (int64)(len - i)) / l64);
 		Limit(l, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
-		p[i] = static_cast<T>(l);
+		pSample[i] = static_cast<T>(l);
 	}
 }
 
@@ -1306,10 +1306,10 @@ void CCtrlSamples::ApplyAmplify(int32 lAmp, bool fadeIn, bool fadeOut)
 	if ((fadeIn) && (fadeOut)) lAmp *= 4;
 	if (sample.uFlags[CHN_16BIT])
 	{
-		ApplyAmplifyImpl<int16>(sample.pSample, selection.nStart, selection.nEnd, lAmp, fadeIn, fadeOut);
+		ApplyAmplifyImpl<int16>(sample.pSample16, selection.nStart, selection.nEnd, lAmp, fadeIn, fadeOut);
 	} else
 	{
-		ApplyAmplifyImpl<int8>(sample.pSample, selection.nStart, selection.nEnd, lAmp, fadeIn, fadeOut);
+		ApplyAmplifyImpl<int8>(sample.pSample8, selection.nStart, selection.nEnd, lAmp, fadeIn, fadeOut);
 	}
 	sample.PrecomputeLoops(m_sndFile, false);
 	SetModified(HINT_SAMPLEDATA, false);
@@ -1488,12 +1488,12 @@ void CCtrlSamples::OnResample()
 				switch(sample.GetElementarySampleSize())
 				{
 				case 1:
-					firstVal = SC::Convert<double, int8>()(static_cast<const int8 *>(sample.pSample)[readOffset]);
-					lastVal = SC::Convert<double, int8>()(static_cast<const int8 *>(sample.pSample)[readOffset + selLength - numChannels]);
+					firstVal = SC::Convert<double, int8>()(sample.pSample8[readOffset]);
+					lastVal = SC::Convert<double, int8>()(sample.pSample8[readOffset + selLength - numChannels]);
 					break;
 				case 2:
-					firstVal = SC::Convert<double, int16>()(static_cast<const int16 *>(sample.pSample)[readOffset]);
-					lastVal = SC::Convert<double, int16>()(static_cast<const int16 *>(sample.pSample)[readOffset + selLength - numChannels]);
+					firstVal = SC::Convert<double, int16>()(sample.pSample16[readOffset]);
+					lastVal = SC::Convert<double, int16>()(sample.pSample16[readOffset + selLength - numChannels]);
 					break;
 				default:
 					// When higher bit depth is added, feel free to also replace CDSPResampler16 by CDSPResampler24 above.
@@ -1520,10 +1520,10 @@ void CCtrlSamples::OnResample()
 					switch(sample.GetElementarySampleSize())
 					{
 					case 1:
-						CopySample<SC::ConversionChain<SC::Convert<double, int8>, SC::DecodeIdentity<int8> > >(&convBuffer[0], smpCount, 1, static_cast<const int8 *>(sample.pSample) + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
+						CopySample<SC::ConversionChain<SC::Convert<double, int8>, SC::DecodeIdentity<int8> > >(&convBuffer[0], smpCount, 1, sample.pSample8 + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
 						break;
 					case 2:
-						CopySample<SC::ConversionChain<SC::Convert<double, int16>, SC::DecodeIdentity<int16> > >(&convBuffer[0], smpCount, 1, static_cast<const int16 *>(sample.pSample) + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
+						CopySample<SC::ConversionChain<SC::Convert<double, int16>, SC::DecodeIdentity<int16> > >(&convBuffer[0], smpCount, 1, sample.pSample16 + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
 						break;
 					}
 					readOffset += smpCount * numChannels;
@@ -1933,10 +1933,10 @@ int CCtrlSamples::TimeStretch(float ratio)
 		switch(smpsize)
 		{
 		case 1:
-			CopyInterleavedSampleStreams(&(buffer[0]), static_cast<int8 *>(sample.pSample) + inPos * nChn, inChunkSize, nChn, conv8f32);
+			CopyInterleavedSampleStreams(&(buffer[0]), sample.pSample8 + inPos * nChn, inChunkSize, nChn, conv8f32);
 			break;
 		case 2:
-			CopyInterleavedSampleStreams(&(buffer[0]), static_cast<int16 *>(sample.pSample) + inPos * nChn, inChunkSize, nChn, convf32);
+			CopyInterleavedSampleStreams(&(buffer[0]), sample.pSample16 + inPos * nChn, inChunkSize, nChn, convf32);
 			break;
 		}
 		soundtouch_putSamples(handleSt, &(buffer[0]), inChunkSize);
@@ -2115,7 +2115,7 @@ int CCtrlSamples::PitchShift(float pitch)
 			}
 
 			// Convert current channel's data chunk to float
-			int8 *ptr = (int8 *)sample.pSample + pos * smpsize * nChn + i * smpsize;
+			int8 *ptr = sample.pSample8 + pos * smpsize * nChn + i * smpsize;
 
 			switch(smpsize)
 			{
@@ -2134,7 +2134,7 @@ int CCtrlSamples::PitchShift(float pitch)
 			smbPitchShift(pitch, static_cast<long>(len + finaloffset), fft, ovs, sampleRate, buffer, buffer);
 
 			// Restore pitched-shifted float sample into original sample buffer
-			ptr = (int8 *)sample.pSample + (pos - inneroffset) * smpsize * nChn + i * smpsize;
+			ptr = sample.pSample8 + (pos - inneroffset) * smpsize * nChn + i * smpsize;
 			const SmpLength copyLength = len + finaloffset - startoffset + 1;
 
 			switch(smpsize)
@@ -2251,12 +2251,11 @@ void CCtrlSamples::OnSilence()
 		if (sample.uFlags[CHN_STEREO])
 		{
 			int smplsize = sample.GetBytesPerSample();
-			signed char *p = ((signed char *)sample.pSample) + selection.nStart * smplsize;
-			memset(p, 0, len * smplsize);
+			memset(sample.pSample8 + selection.nStart * smplsize, 0, len * smplsize);
 		} else
 			if (sample.uFlags[CHN_16BIT])
 			{
-				short int *p = ((short int *)sample.pSample) + selection.nStart;
+				int16 *p = sample.pSample16 + selection.nStart;
 				int dest = (selection.nEnd < sample.nLength) ? p[len-1] : 0;
 				int base = (selection.nStart) ? p[0] : 0;
 				int delta = dest - base;
@@ -2267,7 +2266,7 @@ void CCtrlSamples::OnSilence()
 				}
 			} else
 			{
-				signed char *p = ((signed char *)sample.pSample) + selection.nStart;
+				int8 *p = sample.pSample8 + selection.nStart;
 				int dest = (selection.nEnd < sample.nLength) ? p[len-1] : 0;
 				int base = (selection.nStart) ? p[0] : 0;
 				int delta = dest - base;

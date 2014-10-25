@@ -75,9 +75,9 @@ ITCompression::ITCompression(const ModSample &sample, bool it215, std::ostream *
 			byteVal = 0;
 
 			if(mptSample.GetElementarySampleSize() > 1)
-				Compress<IT16BitParams>(static_cast<const int16 *>(sample.pSample) + chn, offset, remain);
+				Compress<IT16BitParams>(sample.pSample16 + chn, offset, remain);
 			else
-				Compress<IT8BitParams>(static_cast<const int8 *>(sample.pSample) + chn, offset, remain);
+				Compress<IT8BitParams>(sample.pSample8 + chn, offset, remain);
 
 			if(file) mpt::IO::WriteRaw(*file, &packedData[0], packedLength);
 			packedTotalLength += packedLength;
@@ -330,17 +330,17 @@ ITDecompression::ITDecompression(FileReader &file, ModSample &sample, bool it215
 			mem1 = mem2 = 0;
 
 			if(mptSample.GetElementarySampleSize() > 1)
-				Uncompress<IT16BitParams>(static_cast<int16 *>(mptSample.pSample) + chn);
+				Uncompress<IT16BitParams>(mptSample.pSample16 + chn);
 			else
-				Uncompress<IT8BitParams>(static_cast<int8 *>(mptSample.pSample) + chn);
+				Uncompress<IT8BitParams>(mptSample.pSample8 + chn);
 		}
 	}
 }
 
 
 template<typename Properties>
-void ITDecompression::Uncompress(void *target)
-//--------------------------------------------
+void ITDecompression::Uncompress(typename Properties::sample_t *target)
+//---------------------------------------------------------------------
 {
 	curLength = std::min(mptSample.nLength - writtenSamples, SmpLength(ITCompression::blockSize / sizeof(typename Properties::sample_t)));
 
@@ -422,14 +422,14 @@ int ITDecompression::ReadBits(int width)
 
 
 template<typename Properties>
-void ITDecompression::Write(int v, int topBit, void *target)
-//----------------------------------------------------------
+void ITDecompression::Write(int v, int topBit, typename Properties::sample_t *target)
+//-----------------------------------------------------------------------------------
 {
 	if(v & topBit)
 		v -= (topBit << 1);
 	mem1 += v;
 	mem2 += mem1;
-	static_cast<typename Properties::sample_t *>(target)[writePos] = static_cast<typename Properties::sample_t>(is215 ? (int)mem2 : (int)mem1);
+	target[writePos] = static_cast<typename Properties::sample_t>(is215 ? (int)mem2 : (int)mem1);
 	writtenSamples++;
 	writePos += mptSample.GetNumChannels();
 	curLength--;

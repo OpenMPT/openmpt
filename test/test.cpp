@@ -1094,14 +1094,13 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sample.nVibDepth, 5);
 
 	// Sample Data
-	const int8 *p8 = static_cast<const int8 *>(sample.pSample);
 	for(size_t i = 0; i < 6; i++)
 	{
-		VERIFY_EQUAL_NONCONT(p8[i], 18);
+		VERIFY_EQUAL_NONCONT(sample.pSample8[i], 18);
 	}
 	for(size_t i = 6; i < 16; i++)
 	{
-		VERIFY_EQUAL_NONCONT(p8[i], 0);
+		VERIFY_EQUAL_NONCONT(sample.pSample8[i], 0);
 	}
 
 	// Instruments
@@ -1307,14 +1306,13 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		VERIFY_EQUAL_NONCONT(sample.nVibDepth, 5);
 
 		// Sample Data
-		const int8 *p8 = static_cast<const int8 *>(sample.pSample);
 		for(size_t i = 0; i < 6; i++)
 		{
-			VERIFY_EQUAL_NONCONT(p8[i], 18);
+			VERIFY_EQUAL_NONCONT(sample.pSample8[i], 18);
 		}
 		for(size_t i = 6; i < 16; i++)
 		{
-			VERIFY_EQUAL_NONCONT(p8[i], 0);
+			VERIFY_EQUAL_NONCONT(sample.pSample8[i], 0);
 		}
 	}
 
@@ -1331,7 +1329,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		// Sample Data (Stereo Interleaved)
 		for(size_t i = 0; i < 7; i++)
 		{
-			VERIFY_EQUAL_NONCONT(static_cast<int16 *>(sample.pSample)[4 + i], int16(-32768));
+			VERIFY_EQUAL_NONCONT(sample.pSample16[4 + i], int16(-32768));
 		}
 	}
 
@@ -1530,14 +1528,13 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 		VERIFY_EQUAL_NONCONT(sample.nLoopEnd, 60);
 
 		// Sample Data
-		const int8 *p8 = static_cast<const int8 *>(sample.pSample);
 		for(size_t i = 0; i < 30; i++)
 		{
-			VERIFY_EQUAL_NONCONT(p8[i], 127);
+			VERIFY_EQUAL_NONCONT(sample.pSample8[i], 127);
 		}
 		for(size_t i = 31; i < 60; i++)
 		{
-			VERIFY_EQUAL_NONCONT(p8[i], -128);
+			VERIFY_EQUAL_NONCONT(sample.pSample8[i], -128);
 		}
 	}
 
@@ -1566,7 +1563,7 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 		// Sample Data (Stereo Interleaved)
 		for(size_t i = 0; i < 7; i++)
 		{
-			VERIFY_EQUAL_NONCONT(static_cast<int16 *>(sample.pSample)[4 + i], int16(-32768));
+			VERIFY_EQUAL_NONCONT(sample.pSample16[4 + i], int16(-32768));
 		}
 	}
 
@@ -2352,7 +2349,7 @@ static noinline void TestSampleConversion()
 
 		for(size_t i = 0; i < 65536; i++)
 		{
-			VERIFY_EQUAL_QUIET_NONCONT(static_cast<const int16 *>(sample.pSample)[i], static_cast<int16>(i));
+			VERIFY_EQUAL_QUIET_NONCONT(sample.pSample16[i], static_cast<int16>(i));
 			VERIFY_EQUAL_QUIET_NONCONT(truncated16[i], static_cast<int16>(i));
 		}
 	}
@@ -2380,7 +2377,7 @@ static noinline void TestSampleConversion()
 
 		for(size_t i = 0; i < 65536; i++)
 		{
-			VERIFY_EQUAL_QUIET_NONCONT(static_cast<const int16 *>(sample.pSample)[i], static_cast<int16>(i - 0x8000u));
+			VERIFY_EQUAL_QUIET_NONCONT(sample.pSample16[i], static_cast<int16>(i - 0x8000u));
 			if(abs(truncated16[i] - static_cast<int16>((i - 0x8000u) / 2)) > 1)
 			{
 				VERIFY_EQUAL_QUIET_NONCONT(true, false);

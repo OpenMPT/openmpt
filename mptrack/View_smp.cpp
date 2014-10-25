@@ -1129,7 +1129,7 @@ void CViewSample::OnDraw(CDC *pDC)
 			{
 				// Draw sample data in 1:1 ratio or higher (zoom in)
 				SmpLength len = sample.nLength - nSmpScrollPos;
-				signed char *psample = ((signed char *)sample.pSample) + nSmpScrollPos * smplsize;
+				int8 *psample = sample.pSample8 + nSmpScrollPos * smplsize;
 				if (sample.uFlags[CHN_STEREO])
 				{
 					DrawSampleData1(offScreenDC, ymed-yrange/2, rect.right, yrange, len, sample.uFlags, psample);
@@ -1148,7 +1148,7 @@ void CViewSample::OnDraw(CDC *pDC)
 					xscroll = nSmpScrollPos;
 					len -= nSmpScrollPos;
 				}
-				signed char *psample = ((signed char *)sample.pSample) + xscroll * smplsize;
+				int8 *psample = sample.pSample8 + xscroll * smplsize;
 				if (sample.uFlags[CHN_STEREO])
 				{
 					DrawSampleData2(offScreenDC, ymed-yrange/2, rect.right, yrange, len, sample.uFlags, psample);
@@ -2016,8 +2016,7 @@ void CViewSample::OnEditDelete()
 		const SmpLength smpEnd = sample.nLength * sample.GetBytesPerSample();
 		sample.nLength -= (m_dwEndSel - m_dwBeginSel);
 
-		int8 *p = static_cast<int8 *>(sample.pSample);
-		memmove(p + selStart, p + selEnd, smpEnd - selEnd);
+		memmove(sample.pSample8 + selStart, sample.pSample8 + selEnd, smpEnd - selEnd);
 
 		// adjust loop points
 		AdjustLoopPoints(sample.nLoopStart, sample.nLoopEnd, sample.nLength);
@@ -2110,7 +2109,7 @@ void CViewSample::OnEditCopy()
 		file.StartChunk(RIFFChunk::iddata);
 		
 		uint8 *sampleData = static_cast<uint8 *>(p) + file.GetPosition();
-		memcpy(sampleData, static_cast<const char *>(sample.pSample) + smpOffset, smpSize);
+		memcpy(sampleData, sample.pSample8 + smpOffset, smpSize);
 		if(sample.GetElementarySampleSize() == 1)
 		{
 			// 8-Bit samples have to be unsigned.
@@ -2222,7 +2221,7 @@ void CViewSample::On8BitConvert()
 
 			CriticalSection cs;
 
-			int8 *p = (int8 *)(sample.pSample);
+			int8 *p = sample.pSample8;
 			SmpLength len = (sample.nLength + 1) * sample.GetNumChannels();
 			for (SmpLength i=0; i<=len; i++)
 			{
@@ -2260,9 +2259,8 @@ void CViewSample::On16BitConvert()
 			int16 *newSample = static_cast<int16 *>(ModSample::AllocateSample(numSamples, 2));
 			if(newSample != nullptr)
 			{
-				const int8 *oldSample = static_cast<const int8 *>(sample.pSample);
 				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "16-Bit Conversion");
-				CopySample<SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8> > >(newSample, numSamples, 1, oldSample, sample.GetSampleSizeInBytes(), 1);
+				CopySample<SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8> > >(newSample, numSamples, 1, sample.pSample8, sample.GetSampleSizeInBytes(), 1);
 				sample.uFlags.set(CHN_16BIT);
 				ctrlSmp::ReplaceSample(sample, newSample, sample.nLength, sndFile);
 				sample.PrecomputeLoops(sndFile, false);
@@ -2377,8 +2375,7 @@ void CViewSample::OnSampleTrim()
 		CriticalSection cs;
 
 		// Note: Sample is overwritten in-place! Unused data is not deallocated!
-		int8 *p = static_cast<int8 *>(sample.pSample);
-		memmove(p, p + nStart * sample.GetBytesPerSample(), nEnd * sample.GetBytesPerSample());
+		memmove(sample.pSample8, sample.pSample8 + nStart * sample.GetBytesPerSample(), nEnd * sample.GetBytesPerSample());
 
 		if (sample.nLoopStart >= nStart) sample.nLoopStart -= nStart;
 		if (sample.nLoopEnd >= nStart) sample.nLoopEnd -= nStart;

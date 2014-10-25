@@ -1572,7 +1572,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns
 				SampleIO::signedPCM)
 				.ReadSample(sample, chunk);
 		}
-		bWaveForm = (sample.pSample) ? true : false;
+		bWaveForm = sample.pSample != nullptr;
 	} else
 	{
 		FileReader file(pWaveForm, dwLen);

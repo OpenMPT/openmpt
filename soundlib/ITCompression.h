@@ -93,12 +93,12 @@ protected:
 	bool is215;		// Use IT2.15 compression (double deltas)
 
 	template<typename Properties>
-	void Uncompress(void *target);
+	void Uncompress(typename Properties::sample_t *target);
 	static void ChangeWidth(int &curWidth, int width);
 	int ReadBits(int width);
 
 	template<typename Properties>
-	void Write(int v, int topbit, void *target);
+	void Write(int v, int topbit, typename Properties::sample_t *target);
 };
 
 
