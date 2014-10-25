@@ -23,7 +23,9 @@
 #include <stdio.h>
 
 #include "../soundlib/FileReader.h"
-#ifndef MPT_FILEREADER_STD_ISTREAM
+#ifdef MPT_FILEREADER_STD_ISTREAM
+#include "mptFstream.h"
+#else
 #include "../mptrack/MemoryMappedFile.h"
 #endif
 
