@@ -34,7 +34,7 @@
 #include "SelectPluginDialog.h"
 #include "ExceptionHandler.h"
 #include "PatternClipboard.h"
-#include "MemoryMappedFile.h"
+#include "../common/mptFileIO.h"
 #include "../soundlib/FileReader.h"
 #include "../common/Profiler.h"
 #include "FileDialog.h"
@@ -1524,9 +1524,8 @@ BOOL CMainFrame::PlaySoundFile(const mpt::PathString &filename, ModCommand::NOTE
 
 		if(!ok && !filename.empty())
 		{
-			CMappedFile f;
-
-			if(f.Open(filename))
+			InputFile f(filename);
+			if(f.IsValid())
 			{
 				FileReader file = GetFileReader(f);
 				if(file.IsValid())

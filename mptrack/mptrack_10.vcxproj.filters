@@ -442,9 +442,6 @@
     <ClCompile Include="..\soundlib\MixerLoops.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
-    <ClCompile Include="MemoryMappedFile.cpp">
-      <Filter>Source Files\mptrack</Filter>
-    </ClCompile>
     <ClCompile Include="..\sounddev\SoundDeviceASIO.cpp">
       <Filter>Source Files\sounddev</Filter>
     </ClCompile>
@@ -527,6 +524,12 @@
       <Filter>Source Files\common</Filter>
     </ClCompile>
     <ClCompile Include="..\common\ComponentManager.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\UpgradeModule.cpp">
+      <Filter>Header Files\soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\mptFileIO.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
   </ItemGroup>
@@ -921,9 +924,6 @@
     <ClInclude Include="..\soundlib\SampleFormat.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
-    <ClInclude Include="MemoryMappedFile.h">
-      <Filter>Header Files\mptrack</Filter>
-    </ClInclude>
     <ClInclude Include="..\sounddev\SoundDeviceASIO.h">
       <Filter>Header Files\sounddev</Filter>
     </ClInclude>
@@ -962,9 +962,6 @@
     </ClInclude>
     <ClInclude Include="Settings.h">
       <Filter>Header Files\mptrack</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\mptFstream.h">
-      <Filter>Header Files\common</Filter>
     </ClInclude>
     <ClInclude Include="..\common\mptPathString.h">
       <Filter>Header Files\common</Filter>
@@ -1033,6 +1030,9 @@
       <Filter>Header Files\common</Filter>
     </ClInclude>
     <ClInclude Include="..\common\ComponentManager.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\mptFileIO.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
   </ItemGroup>

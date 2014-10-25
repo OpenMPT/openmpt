@@ -224,9 +224,6 @@
     <ClInclude Include="libopenmpt_stream_callbacks_file.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\mptFstream.h">
-      <Filter>Header Files\common</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\mptPathString.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
@@ -267,6 +264,9 @@
       <Filter>Header Files\common</Filter>
     </ClInclude>
     <ClInclude Include="..\common\ComponentManager.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\mptFileIO.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
   </ItemGroup>
@@ -528,6 +528,12 @@
     </ClCompile>
     <ClCompile Include="..\common\mptIO.cpp">
       <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\mptFileIO.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\UpgradeModule.cpp">
+      <Filter>Source Files\soundlib</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

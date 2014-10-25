@@ -572,10 +572,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\MemoryMappedFile.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\soundlib\Message.cpp"
 				>
 			</File>
@@ -657,6 +653,10 @@
 			</File>
 			<File
 				RelativePath=".\mpt_midi.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\common\mptFileIO.cpp"
 				>
 			</File>
 			<File
@@ -865,6 +865,10 @@
 			</File>
 			<File
 				RelativePath=".\UpdateCheck.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\UpgradeModule.cpp"
 				>
 			</File>
 			<File
@@ -1270,10 +1274,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\MemoryMappedFile.h"
-				>
-			</File>
-			<File
 				RelativePath="..\soundlib\MIDIEvents.h"
 				>
 			</File>
@@ -1354,7 +1354,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\common\mptFstream.h"
+				RelativePath="..\common\mptFileIO.h"
 				>
 			</File>
 			<File
