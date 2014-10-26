@@ -178,7 +178,7 @@ namespace mpt { namespace String
 	{
 		STATIC_ASSERT(destSize > 0);
 
-		const size_t maxSize = MIN(destSize, srcSize);
+		const size_t maxSize = std::min(destSize, srcSize);
 		char *dst = destBuffer;
 		const char *src = srcBuffer;
 
@@ -204,7 +204,7 @@ namespace mpt { namespace String
 			} else
 			{
 				// Last character of source buffer may actually be a valid character.
-				destBuffer[MIN(destSize - 1, srcSize)] = '\0';
+				destBuffer[std::min(destSize - 1, srcSize)] = '\0';
 			}
 
 		} else if(mode == spacePadded || mode == spacePaddedNull)
@@ -272,7 +272,7 @@ namespace mpt { namespace String
 	{
 		MPT_ASSERT(destSize > 0);
 
-		const size_t maxSize = MIN(destSize, srcSize);
+		const size_t maxSize = std::min(destSize, srcSize);
 		char *dst = destBuffer;
 		const char *src = srcBuffer;
 
