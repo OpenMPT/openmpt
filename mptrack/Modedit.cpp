@@ -284,14 +284,6 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 
 	const SAMPLEINDEX oldNumSamples = m_SndFile.GetNumSamples(), newNumSamples = static_cast<SAMPLEINDEX>(newOrder.size());
 
-	for(SAMPLEINDEX i = 0; i < std::min(newNumSamples, oldNumSamples); i++)
-	{
-		if(newOrder[i] != i + 1)
-		{
-			GetSampleUndo().PrepareUndo(i + 1, sundo_replace, "Rearrange");
-		}
-	}
-
 	std::vector<int> sampleCount(oldNumSamples + 1, 0);
 	std::vector<ModSample> sampleHeaders(oldNumSamples + 1);
 	std::vector<SAMPLEINDEX> newIndex(oldNumSamples + 1, 0);	// One of the new indexes for the old sample
@@ -305,7 +297,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 		{
 			sampleCount[origSlot]++;
 			sampleHeaders[origSlot] = m_SndFile.GetSample(origSlot);
-			newIndex[origSlot] = i + 1;
+			if(!newIndex[origSlot]) newIndex[origSlot] = i + 1;
 		}
 	}
 
@@ -315,6 +307,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 		if(sampleCount[i] == 0)
 		{
 			m_SndFile.DestroySample(i);
+			GetSampleUndo().ClearUndo(i);
 		}
 		sampleNames[i] = m_SndFile.m_szNames[i];
 		samplePaths[i] = m_SndFile.GetSamplePath(i);
@@ -344,7 +337,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 				target.pSample = ModSample::AllocateSample(target.nLength, target.GetBytesPerSample());
 				if(target.pSample != nullptr)
 				{
-					memcpy(target.pSample, sampleHeaders[origSlot].pSample, target.GetBytesPerSample());
+					memcpy(target.pSample, sampleHeaders[origSlot].pSample, target.GetSampleSizeInBytes());
 					target.PrecomputeLoops(m_SndFile, false);
 				} else
 				{
@@ -362,6 +355,8 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 			m_SndFile.ResetSamplePath(i + 1);
 		}
 	}
+
+	GetSampleUndo().RearrangeSamples(newIndex);
 
 	for(CHANNELINDEX c = 0; c < CountOf(m_SndFile.m_PlayState.Chn); c++)
 	{
