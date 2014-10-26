@@ -23,10 +23,10 @@
 #endif
 #include <cstring>
 
-#if defined(MPT_WITH_PATHSTRING)
+#if defined(MPT_WITH_FILEIO)
 #include <cstdio>
 #include <stdio.h>
-#endif
+#endif // MPT_WITH_FILEIO
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -77,7 +77,7 @@ bool Flush(std::ostream & f);
 
 
 
-#if defined(MPT_WITH_PATHSTRING)
+#if defined(MPT_WITH_FILEIO)
 
 // FILE* only makes sense if we support filenames at all.
 
@@ -97,7 +97,7 @@ bool WriteRaw(FILE* & f, const void * data, std::size_t size);
 bool IsEof(FILE * & f);
 bool Flush(FILE* & f);
 
-#endif // MPT_WITH_PATHSTRING
+#endif // MPT_WITH_FILEIO
 
 
 
