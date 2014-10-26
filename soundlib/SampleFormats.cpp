@@ -47,6 +47,7 @@ static bool IsMPEG(const uint8 (&header)[3])
 {
 	return header[0] == 0xFF && (header[1] & 0xE0) == 0xE0 && (header[1] & 0x18) != 0x08 && (header[1] & 0x06) != 0x00 && (header[2] & 0xF0) != 0xF0;
 }
+
 static bool IsMPEG(FileReader file)
 //---------------------------------
 {
@@ -173,17 +174,6 @@ bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, deleteInstrumentSampl
 	{
 		RemoveInstrumentSamples(nInstr);
 	}
-
-#ifdef MODPLUG_TRACKER
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	m_szInstrumentPath[nInstr - 1] = mpt::PathString();
-	if(GetpModDoc())
-	{
-		GetpModDoc()->m_bsInstrumentModified.reset(nInstr - 1);
-	}
-// -! NEW_FEATURE#0023
-#endif // MODPLUG_TRACKER
 
 	CriticalSection cs;
 
@@ -332,6 +322,12 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 			memcpy(Samples[targetSample].pSample, sourceSmp.pSample, nSize);
 			Samples[targetSample].PrecomputeLoops(*this, false);
 		}
+		// Remember on-disk path (for MPTM files), but don't implicitely enable on-disk storage
+		// (we really don't want this for e.g. duplicating samples or splitting stereo samples)
+#ifdef MPT_EXTERNAL_SAMPLES
+		SetSamplePath(targetSample, srcSong.GetSamplePath(sourceSample));
+#endif
+		Samples[targetSample].uFlags.reset(SMP_KEEPONDISK);
 	}
 
 	return true;
@@ -1464,12 +1460,41 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 	}
 	DestroySampleThreadsafe(nSample);
 
-	file.Seek(sampleHeader.ConvertToMPT(Samples[nSample]));
+	ModSample &sample = Samples[nSample];
+	file.Seek(sampleHeader.ConvertToMPT(sample));
 	mpt::String::Read<mpt::String::spacePaddedNull>(m_szNames[nSample], sampleHeader.name);
-	Samples[nSample].Convert(MOD_TYPE_IT, GetType());
+	sample.Convert(MOD_TYPE_IT, GetType());
 
-	sampleHeader.GetSampleFormat().ReadSample(Samples[nSample], file);
-	Samples[nSample].PrecomputeLoops(*this, false);
+	if(!sample.uFlags[SMP_KEEPONDISK])
+	{
+		sampleHeader.GetSampleFormat().ReadSample(Samples[nSample], file);
+	} else
+	{
+#ifdef MPT_EXTERNAL_SAMPLES
+		// External sample
+		std::string filenameU8;
+		size_t strLen;
+		file.ReadVarInt(strLen);
+		file.ReadString<mpt::String::maybeNullTerminated>(filenameU8, strLen);
+		mpt::PathString filename = mpt::PathString::FromUTF8(filenameU8);
+
+		if(!filename.empty())
+		{
+			if(!file.GetFileName().empty())
+			{
+				filename = filename.RelativePathToAbsolute(file.GetFileName().GetPath());
+			}
+			if(!LoadExternalSample(nSample, filename))
+			{
+				AddToLog("Unable to load sample: " + filename.ToLocale());
+			}
+		} else
+		{
+			sample.uFlags.reset(SMP_KEEPONDISK);
+		}
+#endif // MPT_EXTERNAL_SAMPLES
+	}
+	sample.PrecomputeLoops(*this, false);
 	return true;
 }
 
@@ -1489,9 +1514,7 @@ bool CSoundFile::ReadITISample(SAMPLEINDEX nSample, FileReader &file)
 	file.Rewind();
 	ModInstrument dummy;
 	ITInstrToMPT(file, dummy, instrumentHeader.trkvers);
-	ReadITSSample(nSample, file, false);
-
-	return true;
+	return ReadITSSample(nSample, file, false);
 }
 
 
@@ -1563,8 +1586,8 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename, bool compress) const
-//--------------------------------------------------------------------------------------------------------------
+bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename, bool compress, bool allowExternal) const
+//----------------------------------------------------------------------------------------------------------------------------------
 {
 	ITInstrumentEx iti;
 	ModInstrument *pIns = Instruments[nInstr];
@@ -1608,7 +1631,8 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 	for(std::vector<SAMPLEINDEX>::iterator iter = smptable.begin(); iter != smptable.end(); iter++)
 	{
 		ITSample itss;
-		itss.ConvertToIT(Samples[*iter], GetType(), compress, compress);
+		itss.ConvertToIT(Samples[*iter], GetType(), compress, compress, allowExternal);
+		const bool isExternal = itss.cvt == ITSample::cvtExternalSample;
 
 		mpt::String::Write<mpt::String::nullTerminated>(itss.name, m_szNames[*iter]);
 
@@ -1619,7 +1643,22 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 		// Write sample
 		off_t curPos = ftell(f);
 		fseek(f, filePos, SEEK_SET);
-		filePos += mpt::saturate_cast<uint32>(itss.GetSampleFormat(0x0214).WriteSample(f, Samples[*iter]));
+		if(!isExternal)
+		{
+			filePos += mpt::saturate_cast<uint32>(itss.GetSampleFormat(0x0214).WriteSample(f, Samples[*iter]));
+		} else
+		{
+#ifdef MPT_EXTERNAL_SAMPLES
+			const std::string filenameU8 = GetSamplePath(*iter).AbsolutePathToRelative(filename.GetPath()).ToUTF8();
+			const size_t strSize = mpt::saturate_cast<uint16>(filenameU8.size());
+			size_t intBytes = 0;
+			if(mpt::IO::WriteVarInt(f, strSize, &intBytes))
+			{
+				filePos += intBytes + strSize;
+				mpt::IO::WriteRaw(f, &filenameU8[0], strSize);
+			}
+#endif // MPT_EXTERNAL_SAMPLES
+		}
 		fseek(f, curPos, SEEK_SET);
 	}
 

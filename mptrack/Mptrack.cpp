@@ -610,11 +610,6 @@ BOOL CTrackApp::AddDLSBank(const mpt::PathString &filename)
 
 MODTYPE CTrackApp::m_nDefaultDocType = MOD_TYPE_IT;
 
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-BOOL CTrackApp::m_nProject = FALSE;
-// -! NEW_FEATURE#0023
-
 BEGIN_MESSAGE_MAP(CTrackApp, CWinApp)
 	//{{AFX_MSG_MAP(CTrackApp)
 	ON_COMMAND(ID_FILE_NEW,		OnFileNew)
@@ -622,10 +617,6 @@ BEGIN_MESSAGE_MAP(CTrackApp, CWinApp)
 	ON_COMMAND(ID_FILE_NEWS3M,	OnFileNewS3M)
 	ON_COMMAND(ID_FILE_NEWXM,	OnFileNewXM)
 	ON_COMMAND(ID_FILE_NEWIT,	OnFileNewIT)
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	ON_COMMAND(ID_NEW_ITPROJECT,OnFileNewITProject)
-// -! NEW_FEATURE#0023
 	ON_COMMAND(ID_NEW_MPT,		OnFileNewMPT)
 	ON_COMMAND(ID_FILE_OPEN,	OnFileOpen)
 	ON_COMMAND(ID_FILE_CLOSEALL, OnFileCloseAll)
@@ -1104,18 +1095,16 @@ void CTrackApp::OnFileNew()
 
 
 	// Default module type
-	MODTYPE nNewType = TrackerSettings::Instance().defaultModType;
-	bool bIsProject = false;
+	MODTYPE newType = TrackerSettings::Instance().defaultModType;
 
 	// Get active document to make the new module of the same type
 	CModDoc *pModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
 	if(pModDoc != nullptr)
 	{
-		nNewType = pModDoc->GetrSoundFile().GetBestSaveFormat();
-		bIsProject = pModDoc->GetrSoundFile().m_SongFlags[SONG_ITPROJECT];
+		newType = pModDoc->GetrSoundFile().GetBestSaveFormat();
 	}
 
-	switch(nNewType)
+	switch(newType)
 	{
 	case MOD_TYPE_MOD:
 		OnFileNewMOD();
@@ -1127,10 +1116,7 @@ void CTrackApp::OnFileNew()
 		OnFileNewXM();
 		break;
 	case MOD_TYPE_IT:
-		if(bIsProject)
-			OnFileNewITProject();
-		else
-			OnFileNewIT();
+		OnFileNewIT();
 		break;
 	case MOD_TYPE_MPT:
 	default:
@@ -1143,11 +1129,6 @@ void CTrackApp::OnFileNew()
 void CTrackApp::OnFileNewMOD()
 //----------------------------
 {
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	SetAsProject(FALSE);
-// -! NEW_FEATURE#0023
-
 	SetDefaultDocType(MOD_TYPE_MOD);
 	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
 }
@@ -1156,11 +1137,6 @@ void CTrackApp::OnFileNewMOD()
 void CTrackApp::OnFileNewS3M()
 //----------------------------
 {
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	SetAsProject(FALSE);
-// -! NEW_FEATURE#0023
-
 	SetDefaultDocType(MOD_TYPE_S3M);
 	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
 }
@@ -1169,11 +1145,6 @@ void CTrackApp::OnFileNewS3M()
 void CTrackApp::OnFileNewXM()
 //---------------------------
 {
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	SetAsProject(FALSE);
-// -! NEW_FEATURE#0023
-
 	SetDefaultDocType(MOD_TYPE_XM);
 	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
 }
@@ -1182,11 +1153,6 @@ void CTrackApp::OnFileNewXM()
 void CTrackApp::OnFileNewIT()
 //---------------------------
 {
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	SetAsProject(FALSE);
-// -! NEW_FEATURE#0023
-
 	SetDefaultDocType(MOD_TYPE_IT);
 	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
 }
@@ -1194,23 +1160,9 @@ void CTrackApp::OnFileNewIT()
 void CTrackApp::OnFileNewMPT()
 //---------------------------
 {
-	SetAsProject(FALSE);
 	SetDefaultDocType(MOD_TYPE_MPT);
 	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
 }
-
-
-
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-void CTrackApp::OnFileNewITProject()
-//----------------------------------
-{
-	SetAsProject(TRUE);
-	SetDefaultDocType(MOD_TYPE_IT);
-	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(mpt::PathString());
-}
-// -! NEW_FEATURE#0023
 
 
 void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files)
@@ -1243,12 +1195,8 @@ void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files)
 		"ScreamTracker Modules (*.s3m,*.stm)|*.s3m;*.stm;*.s3z|"
 		"FastTracker Modules (*.xm)|*.xm;*.xmz|"
 		"Impulse Tracker Modules (*.it)|*.it;*.itz|"
-		// -> CODE#0023
-		// -> DESC="IT project files (.itp)"
-		"Impulse Tracker Projects (*.itp)|*.itp;*.itpz|"
-		// -! NEW_FEATURE#0023
 		"OpenMPT Modules (*.mptm)|*.mptm;*.mptmz|"
-		"Other Modules (mtm,okt,mdl,669,far,...)|*.mtm;*.669;*.ult;*.wow;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.med;*.ams;*.dbm;*.digi;*.dsm;*.umx;*.amf;*.psm;*.mt2;*.gdm;*.imf;*.j2b;*.ice;*.st26|"
+		"Other Modules (mtm,okt,mdl,669,far,...)|*.mtm;*.669;*.ult;*.wow;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.med;*.ams;*.dbm;*.digi;*.dsm;*.umx;*.amf;*.psm;*.mt2;*.gdm;*.imf;*.itp;*.j2b;*.ice;*.st26|"
 		"Wave Files (*.wav)|*.wav|"
 		"MIDI Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
 		"All Files (*.*)|*.*||")

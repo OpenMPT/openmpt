@@ -513,7 +513,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 
 	EndWaitCursor();
 
-	if(unusedInsSamples && !((sndFile.GetType() == MOD_TYPE_IT) && sndFile.m_SongFlags[SONG_ITPROJECT]))
+	if(unusedInsSamples)
 	{
 		// We don't remove an instrument's unused samples in an ITP.
 		wsprintf(s, "OpenMPT detected %d sample%s referenced by an instrument,\n"
@@ -696,15 +696,9 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 		return false;
 
 	deleteInstrumentSamples removeSamples = doNoDeleteAssociatedSamples;
-	if(!sndFile.m_SongFlags[SONG_ITPROJECT]) // Never remove an instrument's samples in ITP.
+	if(Reporting::Confirm("Remove samples associated with unused instruments?", "Removing unused instruments", false, false, this) == cnfYes)
 	{
-		if(Reporting::Confirm("Remove samples associated with unused instruments?", "Removing unused instruments", false, false, this) == cnfYes)
-		{
-			removeSamples = deleteAssociatedSamples;
-		}
-	} else
-	{
-		modDoc.AddToLog("Samples associated with an used instrument won't be removed in IT Project files.");
+		removeSamples = deleteAssociatedSamples;
 	}
 
 	BeginWaitCursor();

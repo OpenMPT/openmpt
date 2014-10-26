@@ -48,7 +48,6 @@ const TCHAR FileFilterMOD[]	= _T("ProTracker Modules (*.mod)|*.mod||");
 const TCHAR FileFilterXM[]	= _T("FastTracker Modules (*.xm)|*.xm||");
 const TCHAR FileFilterS3M[] = _T("ScreamTracker Modules (*.s3m)|*.s3m||");
 const TCHAR FileFilterIT[]	= _T("Impulse Tracker Modules (*.it)|*.it||");
-const TCHAR FileFilterITP[] = _T("Impulse Tracker Projects (*.itp)|*.itp||");
 const TCHAR FileFilterMPT[] = _T("OpenMPT Modules (*.mptm)|*.mptm||");
 const TCHAR FileFilterNone[] = _T("");
 
@@ -61,7 +60,7 @@ const TCHAR* ModTypeToFilter(const CSoundFile& sndFile)
 		case MOD_TYPE_MOD: return FileFilterMOD;
 		case MOD_TYPE_XM: return FileFilterXM;
 		case MOD_TYPE_S3M: return FileFilterS3M;
-		case MOD_TYPE_IT: return (sndFile.m_SongFlags[SONG_ITPROJECT] ? FileFilterITP : FileFilterIT);
+		case MOD_TYPE_IT: return FileFilterIT;
 		case MOD_TYPE_MPT: return FileFilterMPT;
 		default: return FileFilterNone;
 	}
@@ -143,8 +142,6 @@ CModDoc::CModDoc() : m_LogMode(LogModeInstantReporting), m_PatternUndo(*this), m
 	// Set the creation date of this file (or the load time if we're loading an existing file)
 	time(&m_creationTime);
 
-	m_bsInstrumentModified.reset();
-
 #ifdef _DEBUG
 	ModChannel *p = m_SndFile.m_PlayState.Chn;
 	if (((DWORD)p) & 7) Log("ModChannel struct is not aligned (0x%08X)\n", p);
@@ -184,11 +181,6 @@ BOOL CModDoc::OnNewDocument()
 
 	m_SndFile.Create(FileReader(), CSoundFile::loadCompleteModule, this);
 	m_SndFile.ChangeModTypeTo(CTrackApp::GetDefaultDocType());
-
-	if(CTrackApp::IsProject())
-	{
-		m_SndFile.m_SongFlags.set(SONG_ITPROJECT);
-	}
 
 	theApp.GetDefaultMidiMacro(m_SndFile.m_MidiCfg);
 	m_SndFile.m_SongFlags.set(SONG_LINEARSLIDES & m_SndFile.GetModSpecifications().songFlags);
@@ -423,7 +415,7 @@ BOOL CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool bTempla
 	case MOD_TYPE_MOD:	bOk = m_SndFile.SaveMod(filename); break;
 	case MOD_TYPE_S3M:	bOk = m_SndFile.SaveS3M(filename); break;
 	case MOD_TYPE_XM:	bOk = m_SndFile.SaveXM(filename); break;
-	case MOD_TYPE_IT:	bOk = (m_SndFile.m_SongFlags[SONG_ITPROJECT] ? m_SndFile.SaveITProject(filename) : m_SndFile.SaveIT(filename)); break;
+	case MOD_TYPE_IT:	bOk = m_SndFile.SaveIT(filename); break;
 	case MOD_TYPE_MPT:	bOk = m_SndFile.SaveIT(filename); break;
 	}
 	EndWaitCursor();
@@ -444,77 +436,75 @@ BOOL CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool bTempla
 		}
 	} else
 	{
-		if(type == MOD_TYPE_IT && m_SndFile.m_SongFlags[SONG_ITPROJECT]) 
-			Reporting::Error(_T("ITP projects need to have a path set for each instrument..."));
-		else 
-			ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
+		ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
 	}
 	return bOk;
 }
 
 
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
 BOOL CModDoc::SaveModified()
 //--------------------------
 {
-	if((m_SndFile.GetType() & MOD_TYPE_IT) && m_SndFile.m_SongFlags[SONG_ITPROJECT] && !m_SndFile.m_SongFlags[SONG_ITPEMBEDIH])
+	BOOL result = CDocument::SaveModified();
+	if(result && m_SndFile.GetType() == MOD_TYPE_MPT)
 	{
-		bool unsavedInstrument = false;
-
-		for(INSTRUMENTINDEX i = 0 ; i < m_SndFile.GetNumInstruments(); i++)
+		std::wstring prompt = L"The following external samples have been modified:\n";
+		bool modified = false;
+		for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
 		{
-			if(m_bsInstrumentModified[i])
+			if(m_SndFile.GetSample(i).uFlags.test_all(SMP_KEEPONDISK | SMP_MODIFIED))
 			{
-				unsavedInstrument = true;
-				break;
+				modified = true;
+				prompt += mpt::wfmt::dec0<2>(i) + L": " + m_SndFile.GetSamplePath(i).ToWide() + L"\n";
 			}
 		}
 
-		if(unsavedInstrument && Reporting::Confirm("Do you want to save modified instruments?") == cnfYes)
+		ConfirmAnswer ans = cnfYes;
+		if(modified && (ans = Reporting::Confirm(prompt + L"Do you want to save them?", L"External Samples", true)) == cnfYes)
 		{
-			for(INSTRUMENTINDEX i = 0; i < m_SndFile.GetNumInstruments(); i++)
+			for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
 			{
-				if(m_bsInstrumentModified[i])
+				if(m_SndFile.GetSample(i).uFlags.test_all(SMP_KEEPONDISK | SMP_MODIFIED))
 				{
-					SaveInstrument(i + 1);
+					SaveSample(i);
 				}
 			}
+		} else if(ans == cnfCancel)
+		{
+			result = FALSE;
 		}
 	}
 
-	return CDocument::SaveModified();
+	return result;
 }
 
 
-bool CModDoc::SaveInstrument(INSTRUMENTINDEX instr)
-//-------------------------------------------------
+bool CModDoc::SaveSample(SAMPLEINDEX smp)
+//---------------------------------------
 {
 	bool success = false;
-	if(instr > 0 && instr <= GetNumInstruments())
+	if(smp > 0 && smp <= GetNumSamples())
 	{
-		instr--;
-		if(!m_SndFile.m_szInstrumentPath[instr].empty())
+		const mpt::PathString filename = m_SndFile.GetSamplePath(smp);
+		if(!filename.empty())
 		{
-			const mpt::PathString dotExt = m_SndFile.m_szInstrumentPath[instr].GetFileExt();
-			const bool iti = !mpt::PathString::CompareNoCase(dotExt, MPT_PATHSTRING(".iti"));
-			const bool xi  = !mpt::PathString::CompareNoCase(dotExt, MPT_PATHSTRING(".xi"));
+			const mpt::PathString dotExt = filename.GetFileExt();
+			const bool wav = !mpt::PathString::CompareNoCase(dotExt, MPT_PATHSTRING(".wav"));
+			const bool flac  = !mpt::PathString::CompareNoCase(dotExt, MPT_PATHSTRING(".flac"));
 
-			if(iti || (!xi  && m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
-				success = m_SndFile.SaveITIInstrument(instr + 1, m_SndFile.m_szInstrumentPath[instr], false);
+			if(flac || (!wav && TrackerSettings::Instance().m_defaultSampleFormat != dfWAV))
+				success = m_SndFile.SaveFLACSample(smp, filename);
 			else
-				success = m_SndFile.SaveXIInstrument(instr + 1, m_SndFile.m_szInstrumentPath[instr]);
+				success = m_SndFile.SaveWAVSample(smp, filename);
 
 			if(success)
-				m_bsInstrumentModified.reset(instr);
+				m_SndFile.GetSample(smp).uFlags.reset(SMP_MODIFIED);
 			else
-				Reporting::Error(L"Error while saving\n" + m_SndFile.m_szInstrumentPath[instr].ToWide() + L"!");
+				Reporting::Error(L"Unable to save sample:\n" + filename.ToWide());
 		}
 	}
 	return success;
 }
-
-// -! NEW_FEATURE#0023
 
 
 void CModDoc::OnCloseDocument()
@@ -567,8 +557,7 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, BOOL)
 //---------------------------------------------------------
 {
 	const mpt::PathString docFileName = GetPathNameMpt();
-	
-	std::string defaultExtension = m_SndFile.GetModSpecifications().fileExtension;
+	const std::string defaultExtension = m_SndFile.GetModSpecifications().fileExtension;
 	
 	switch(m_SndFile.GetBestSaveFormat())
 	{
@@ -581,21 +570,7 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, BOOL)
 		MsgBoxHidable(XMCompatibilityExportTip);
 		break;
 	case MOD_TYPE_IT:
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-//		lpszDefExt = "it";
-//		lpszFilter = "Impulse Tracker Modules (*.it)|*.it||";
-//		strcpy(fext, ".it");
-		if(m_SndFile.m_SongFlags[SONG_ITPROJECT])
-		{
-			// Special case...
-			defaultExtension = "itp";
-		}
-		else
-		{
-			MsgBoxHidable(ItCompatibilityExportTip);
-		}
-// -! NEW_FEATURE#0023
+		MsgBoxHidable(ItCompatibilityExportTip);
 		break;
 	case MOD_TYPE_MPT:
 		break;
@@ -2649,25 +2624,11 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 			newPath += fname;
 		}
 
-		if(nNewType == MOD_TYPE_IT)
-		{
-			newPath += m_SndFile.m_SongFlags[SONG_ITPROJECT] ? MPT_PATHSTRING(".itp") : MPT_PATHSTRING(".it");
-		} else
-		{
-			newPath += MPT_PATHSTRING(".") + mpt::PathString::FromUTF8(CSoundFile::GetModSpecifications(nNewType).fileExtension);
-		}
-	
-		if(nNewType != MOD_TYPE_IT ||
-			(nNewType == MOD_TYPE_IT &&
-				(
-					(!mpt::PathString::CompareNoCase(fext, MPT_PATHSTRING(".it")) && m_SndFile.m_SongFlags[SONG_ITPROJECT]) ||
-					(!mpt::PathString::CompareNoCase(fext, MPT_PATHSTRING(".itp")) && !m_SndFile.m_SongFlags[SONG_ITPROJECT])
-				)
-			)
-		  )
-			m_ShowSavedialog = true;
-			//Forcing savedialog to appear after extension change - otherwise
-			//unnotified file overwriting may occur.
+		newPath += MPT_PATHSTRING(".") + mpt::PathString::FromUTF8(CSoundFile::GetModSpecifications(nNewType).fileExtension);
+
+		//Forcing savedialog to appear after extension change - otherwise
+		//unnotified file overwriting may occur.
+		m_ShowSavedialog = true;
 
 		SetPathName(newPath, FALSE);
 	}

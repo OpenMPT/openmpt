@@ -189,8 +189,6 @@ public:
 protected:
 	std::bitset<MAX_BASECHANNELS> m_bsMultiRecordMask;
 	std::bitset<MAX_BASECHANNELS> m_bsMultiSplitRecordMask;
-public:
-	std::bitset<MAX_INSTRUMENTS> m_bsInstrumentModified;	// which instruments have been modified? (for ITP functionality)
 
 protected: // create from serialization only
 	CModDoc();
@@ -410,11 +408,8 @@ protected:
 		return mpt::PathString::TunnelOutofCString(CDocument::GetPathName());
 	}
 
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
 	virtual BOOL SaveModified();
-	bool SaveInstrument(INSTRUMENTINDEX instr);
-// -! NEW_FEATURE#0023
+	bool SaveSample(SAMPLEINDEX smp);
 
 #ifndef UNICODE
 	// MFC checks for writeable filename in there and issues SaveAs dialog if not.

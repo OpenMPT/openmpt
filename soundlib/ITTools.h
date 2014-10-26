@@ -236,6 +236,7 @@ struct PACKED ITSample
 		enablePanning		= 0x80,
 
 		cvtSignedSample		= 0x01,
+		cvtExternalSample	= 0x80,		// Keep MPTM sample on disk
 		cvtADPCMSample		= 0xFF,		// MODPlugin :(
 
 		// ITTECH.TXT says these convert flags are "safe to ignore". IT doesn't ignore them, though, so why should we? :)
@@ -268,7 +269,7 @@ struct PACKED ITSample
 	void ConvertEndianness();
 
 	// Convert OpenMPT's internal sample representation to an ITSample.
-	void ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compress, bool compressIT215);
+	void ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compress, bool compressIT215, bool allowExternal);
 	// Convert an ITSample to OpenMPT's internal sample representation.
 	uint32 ConvertToMPT(ModSample &mptSmp) const;
 	// Retrieve the internal sample format flags for this instrument.

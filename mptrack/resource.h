@@ -1111,7 +1111,7 @@
 #define ID_EDIT_SPLITRECSELECT          33900
 #define ID_REARRANGE_SAMPLES            33901
 #define ID_CHANNEL_MANAGER              33905
-#define ID_NEW_ITPROJECT                33906
+#define ID_MODTREE_RELOADITEM           33906
 #define ID_FACTORYPRESET                33914
 #define ID_FACTORYPRESET_DEFAULT        33915
 #define ID_MODTREE_SETPATH              33916

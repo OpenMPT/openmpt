@@ -1,14 +1,13 @@
 /*
  * Load_itp.cpp
  * ------------
- * Purpose: Impulse Tracker Project (ITP) module loader / saver
+ * Purpose: Impulse Tracker Project (ITP) module loader
  * Notes  : Despite its name, ITP is not a format supported by Impulse Tracker.
  *          In fact, it's a format invented by the OpenMPT team to allow people to work
  *          with the IT format, but keeping the instrument files with big samples separate
  *          from the pattern data, to keep the work files small and handy.
- *          The current design of the format is quite flawed, though, so expect this to
- *          change in the (far?) future. Most likely, the new MPTM format will contain
- *          optional functionality to link samples and instruments instead of embedding them.
+ *          The design of the format is quite flawed, though, so it was superseded by
+ *          extra functionality in the MPTM format in OpenMPT 1.24.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -19,10 +18,13 @@
 #include "Loaders.h"
 #include "ITTools.h"
 #ifdef MODPLUG_TRACKER
-#include "../mptrack/TrackerSettings.h"
-#include "../common/mptFileIO.h"
+// For loading external instruments
 #include "../mptrack/Moddoc.h"
-#endif
+#include "../mptrack/TrackerSettings.h"
+#endif // MODPLUG_TRACKER
+#ifdef MPT_EXTERNAL_SAMPLES
+#include "../common/mptFileIO.h"
+#endif // MPT_EXTERNAL_SAMPLES
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -34,40 +36,28 @@ OPENMPT_NAMESPACE_BEGIN
 // v1.02: Explicitely updated format to use new instrument flags representation (rev. 483)
 // v1.01: Added option to embed instrument headers
 
-#define ITP_VERSION 0x00000103	// v1.03
-#define ITP_FILE_ID MAGIC4BE('.','i','t','p')	// .itp ASCII
-
-
-#ifdef MODPLUG_TRACKER
-
-// Read variable-length ITP string.
-template<size_t destSize>
-static bool ReadITPString(char (&destBuffer)[destSize], FileReader &file)
-//-----------------------------------------------------------------------
-{
-	return file.ReadString<mpt::String::maybeNullTerminated>(destBuffer, file.ReadUint32LE());
-}
-
-
-// Read variable-length ITP string.
-static inline bool ReadITPString(std::string &dest, FileReader &file)
-//-------------------------------------------------------------------
-{
-	return file.ReadString<mpt::String::maybeNullTerminated>(dest, file.ReadUint32LE());
-}
-
-#endif // MODPLUG_TRACKER
-
 
 bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------------
 {
-#ifndef MODPLUG_TRACKER
+#ifndef MPT_EXTERNAL_SAMPLES
+	// Doesn't really make sense to support this format when there's no support for external files...
 	MPT_UNREFERENCED_PARAMETER(file);
 	MPT_UNREFERENCED_PARAMETER(loadFlags);
 	return false;
-#else // MODPLUG_TRACKER
+#else // MPT_EXTERNAL_SAMPLES
 	
+	enum ITPSongFlags
+	{
+		ITP_EMBEDMIDICFG	= 0x00001,	// Embed macros in file
+		ITP_ITOLDEFFECTS	= 0x00004,	// Old Impulse Tracker effect implementations
+		ITP_ITCOMPATGXX		= 0x00008,	// IT "Compatible Gxx" (IT's flag to behave more like other trackers w/r/t portamento effects)
+		ITP_LINEARSLIDES	= 0x00010,	// Linear slides vs. Amiga slides
+		ITP_EXFILTERRANGE	= 0x08000,	// Cutoff Filter has double frequency range (up to ~10Khz)
+		ITP_ITPROJECT		= 0x20000,	// Is a project file
+		ITP_ITPEMBEDIH		= 0x40000,	// Embed instrument headers in project file
+	};
+
 	uint32 version;
 	FileReader::off_t size;
 
@@ -75,8 +65,8 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Check file ID
 	if(!file.CanRead(12 + 4 + 24 + 4)
-		|| file.ReadUint32LE() != ITP_FILE_ID				// Magic bytes
-		|| (version = file.ReadUint32LE()) > ITP_VERSION	// Format version
+		|| file.ReadUint32LE() != MAGIC4BE('.','i','t','p')	// Magic bytes
+		|| (version = file.ReadUint32LE()) > 0x00000103		// Format version
 		|| version < 0x00000100)
 	{
 		return false;
@@ -86,17 +76,22 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals();
-	ReadITPString(songName, file);
+	file.ReadString<mpt::String::maybeNullTerminated>(songName, file.ReadUint32LE());
 
 	// Song comments
 	songMessage.Read(file, file.ReadUint32LE(), SongMessage::leCR);
 
 	// Song global config
-	m_SongFlags = static_cast<SongFlags>(file.ReadUint32LE() & SONG_FILE_FLAGS);
-	if(!m_SongFlags[SONG_ITPROJECT])
+	const uint32 songFlags = file.ReadUint32LE();
+	if(!(songFlags & ITP_ITPROJECT))
 	{
 		return false;
 	}
+	if(songFlags & ITP_EMBEDMIDICFG)	m_SongFlags.set(SONG_EMBEDMIDICFG);
+	if(songFlags & ITP_ITOLDEFFECTS)	m_SongFlags.set(SONG_ITOLDEFFECTS);
+	if(songFlags & ITP_ITCOMPATGXX)		m_SongFlags.set(SONG_ITCOMPATGXX);
+	if(songFlags & ITP_LINEARSLIDES)	m_SongFlags.set(SONG_LINEARSLIDES);
+	if(songFlags & ITP_EXFILTERRANGE)	m_SongFlags.set(SONG_EXFILTERRANGE);
 
 	m_nDefaultGlobalVolume = file.ReadUint32LE();
 	m_nSamplePreAmp = file.ReadUint32LE();
@@ -142,6 +137,8 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		size = file.ReadUint32LE();	// path string length
 	}
+
+	std::vector<mpt::PathString> instrPaths(GetNumInstruments());
 	for(INSTRUMENTINDEX ins = 0; ins < GetNumInstruments(); ins++)
 	{
 		if(version > 0x00000102)
@@ -152,16 +149,10 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		file.ReadString<mpt::String::maybeNullTerminated>(path, size);
 		if(version <= 0x00000102)
 		{
-			path = mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetLocale, path);
-		}
-		m_szInstrumentPath[ins] = mpt::PathString::FromUTF8(path);
-
-		if(!file.GetFileName().empty())
+			instrPaths[ins] = mpt::PathString::FromLocale(path);
+		} else
 		{
-			m_szInstrumentPath[ins] = m_szInstrumentPath[ins].RelativePathToAbsolute(file.GetFileName().GetPath());
-		} else if(GetpModDoc() != nullptr)
-		{
-			m_szInstrumentPath[ins] = m_szInstrumentPath[ins].RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt().GetPath());
+			instrPaths[ins] = mpt::PathString::FromUTF8(path);
 		}
 	}
 
@@ -183,7 +174,6 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 
 	for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 	{
-		// Patterns[npat].GetNumRows()
 		const ROWINDEX numRows = file.ReadUint32LE();
 		FileReader patternChunk = file.ReadChunk(numRows * size * GetNumChannels());
 
@@ -237,7 +227,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		file.ReadConvertEndianness(sampleHeader);
 		size = file.ReadUint32LE();
 
-		if(realSample >= 1 && realSample < MAX_SAMPLES && !memcmp(sampleHeader.id, "IMPS", 4))
+		if(realSample >= 1 && realSample <= GetNumSamples() && !memcmp(sampleHeader.id, "IMPS", 4) && (loadFlags & loadSampleData))
 		{
 			sampleHeader.ConvertToMPT(Samples[realSample]);
 			mpt::String::Read<mpt::String::nullTerminated>(m_szNames[realSample], sampleHeader.name);
@@ -253,22 +243,36 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	// Load instruments
 	for(INSTRUMENTINDEX ins = 0; ins < GetNumInstruments(); ins++)
 	{
-		if(m_szInstrumentPath[ins].empty())
+		if(instrPaths[ins].empty())
 			continue;
-		InputFile f(m_szInstrumentPath[ins]);
-		if(!f.IsValid())
-			continue;
-		FileReader file = GetFileReader(f);
 
-		if(file.IsValid())
-			ReadInstrumentFromFile(ins + 1, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
+		if(!file.GetFileName().empty())
+		{
+			instrPaths[ins] = instrPaths[ins].RelativePathToAbsolute(file.GetFileName().GetPath());
+		}
+#ifdef MODPLUG_TRACKER
+		else if(GetpModDoc() != nullptr)
+		{
+			instrPaths[ins] = instrPaths[ins].RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt().GetPath());
+		}
+		const bool mayNormalize = TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad;
+#else
+		const bool mayNormalize = false;
+#endif // MODPLUG_TRACKER
+
+		InputFile f(instrPaths[ins]);
+		FileReader file = GetFileReader(f);
+		if(!ReadInstrumentFromFile(ins + 1, file, mayNormalize))
+		{
+			AddToLog("Unable to open instrument: " + instrPaths[ins].ToLocale());
+		}
 	}
 
 	// Extra info data
 	uint32 code = file.ReadUint32LE();
 
 	// Embed instruments' header [v1.01]
-	if(version >= 0x00000101 && m_SongFlags[SONG_ITPEMBEDIH] && code == MAGIC4BE('E', 'B', 'I', 'H'))
+	if(version >= 0x00000101 && (songFlags & ITP_ITPEMBEDIH) && code == MAGIC4BE('E', 'B', 'I', 'H'))
 	{
 		code = file.ReadUint32LE();
 
@@ -316,258 +320,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
 
 	return true;
-#endif
+#endif // MPT_EXTERNAL_SAMPLES
 }
-
-
-#ifndef MODPLUG_NO_FILESAVE
-
-bool CSoundFile::SaveITProject(const mpt::PathString &filename)
-//-------------------------------------------------------------
-{
-#ifndef MODPLUG_TRACKER
-	MPT_UNREFERENCED_PARAMETER(filename);
-	return false;
-#else // MODPLUG_TRACKER
-
-	// Check song type
-
-	if(!m_SongFlags[SONG_ITPROJECT]) return false;
-
-	UINT i,j = 0;
-	for(i = 0 ; i < m_nInstruments ; i++) { if(!m_szInstrumentPath[i].empty() || !Instruments[i+1]) j++; }
-	if(m_nInstruments && j != m_nInstruments) return false;
-
-	// Open file
-
-	FILE *f;
-
-	if(filename.empty() || ((f = mpt_fopen(filename, "wb")) == NULL)) return false;
-
-
-	// File ID
-
-	DWORD id = ITP_FILE_ID;
-	fwrite(&id, 1, sizeof(id), f);
-
-	id = ITP_VERSION;
-	fwrite(&id, 1, sizeof(id), f);
-
-	// Song name
-	std::vector<char> tempSongName(songName.length() + 1);
-	// name string length
-	id = tempSongName.size();
-	fwrite(&id, 1, sizeof(id), f);
-	// song name
-	mpt::String::Write<mpt::String::maybeNullTerminated>(tempSongName, songName);
-	fwrite(&tempSongName[0], 1, tempSongName.size(), f);
-
-	// Song comments
-
-	// comment string length
-	{
-		const size_t msgLength = songMessage.empty() ? 0 : songMessage.length() + 1;
-		id = msgLength;
-		fwrite(&id, 1, sizeof(id), f);
-
-		// comment string
-		if(msgLength) fwrite(songMessage.c_str(), 1, msgLength, f);
-	}
-
-	// Song global config
-
-	id = (m_SongFlags & SONG_FILE_FLAGS);
-	fwrite(&id, 1, sizeof(id), f);
-	id = m_nDefaultGlobalVolume;
-	fwrite(&id, 1, sizeof(id), f);
-	id = m_nSamplePreAmp;
-	fwrite(&id, 1, sizeof(id), f);
-	id = m_nDefaultSpeed;
-	fwrite(&id, 1, sizeof(id), f);
-	id = m_nDefaultTempo;
-	fwrite(&id, 1, sizeof(id), f);
-
-	// Song channels data
-
-	// number of channels
-	id = m_nChannels;
-	fwrite(&id, 1, sizeof(id), f);
-
-	// channel name string length
-	id = MAX_CHANNELNAME;
-	fwrite(&id, 1, sizeof(id), f);
-
-	// channel config data
-	for(i=0; i<m_nChannels; i++)
-	{
-		id = ChnSettings[i].nPan;
-		fwrite(&id, 1, sizeof(id), f);
-		id = ChnSettings[i].dwFlags;
-		fwrite(&id, 1, sizeof(id), f);
-		id = ChnSettings[i].nVolume;
-		fwrite(&id, 1, sizeof(id), f);
-		fwrite(&ChnSettings[i].szName[0], 1, MAX_CHANNELNAME, f);
-	}
-
-	// Song mix plugins
-
-	// mix plugins data length
-	id = SaveMixPlugins(NULL, true);
-	fwrite(&id, 1, sizeof(id), f);
-
-	// mix plugins data
-	SaveMixPlugins(f, false);
-
-	// Song midi config
-
-	// midi cfg data length
-	id = m_SongFlags[SONG_EMBEDMIDICFG] ? sizeof(MIDIMacroConfigData) : 0;
-	fwrite(&id, 1, sizeof(id), f);
-
-	// midi cfg
-	fwrite(&m_MidiCfg, 1, id, f);
-
-	// Song Instruments
-
-	// number of instruments
-	id = m_nInstruments;
-	fwrite(&id, 1, sizeof(id), f);
-
-	// instruments' path
-	for(i = 0; i < m_nInstruments; i++)
-	{
-		const std::string path = m_szInstrumentPath[i].AbsolutePathToRelative(filename.GetPath()).ToUTF8();
-		// path name string length
-		id = path.length();
-		fwrite(&id, 1, sizeof(id), f);
-		fwrite(path.c_str(), 1, path.length(), f);
-	}
-
-	// Song Orders
-
-	// order array size
-	id = Order.size();
-	fwrite(&id, 1, sizeof(id), f);
-
-	// order array
-	Order.WriteAsByte(f, static_cast<uint16>(id));
-
-	// Song Patterns
-
-	// number of patterns
-	id = MAX_PATTERNS;
-	fwrite(&id, 1, sizeof(id), f);
-
-	// number of pattern name strings
-	PATTERNINDEX numNamedPats = Patterns.GetNumNamedPatterns();
-	numNamedPats = MIN(numNamedPats, MAX_PATTERNS);
-	id = numNamedPats;
-	fwrite(&id, 1, sizeof(id), f);
-
-	// length of a pattern name string
-	id = MAX_PATTERNNAME;
-	fwrite(&id, 1, sizeof(id), f);
-	// pattern name string
-	for(PATTERNINDEX nPat = 0; nPat < numNamedPats; nPat++)
-	{
-		char name[MAX_PATTERNNAME];
-		MemsetZero(name);
-		Patterns[nPat].GetName(name);
-		fwrite(name, 1, MAX_PATTERNNAME, f);
-	}
-
-	// modcommand data length
-	id = sizeof(MODCOMMAND_ORIGINAL);
-	fwrite(&id, 1, sizeof(id), f);
-
-	// patterns data content
-	for(PATTERNINDEX npat = 0; npat < MAX_PATTERNS; npat++)
-	{
-		// pattern size (number of rows)
-		id = Patterns[npat] ? Patterns[npat].GetNumRows() : 0;
-		fwrite(&id, 1, sizeof(id), f);
-		// pattern data
-		if(Patterns[npat] && Patterns[npat].GetNumRows()) Patterns[npat].WriteITPdata(f);
-		//fwrite(Patterns[npat], 1, m_nChannels * Patterns[npat].GetNumRows() * sizeof(MODCOMMAND_ORIGINAL), f);
-	}
-
-	// Song lonely (instrument-less) samples
-
-	// Write original number of samples
-	id = m_nSamples;
-	fwrite(&id, 1, sizeof(id), f);
-
-	std::vector<bool> sampleUsed(GetNumSamples() + 1, false);
-
-	// Mark samples used in instruments
-	for(i = 0; i < m_nInstruments; i++)
-	{
-		if(Instruments[i + 1] != nullptr)
-		{
-			Instruments[i + 1]->GetSamples(sampleUsed);
-		}
-	}
-
-	// Count samples not used in any instrument
-	i = 0;
-	for(j = 1; j <= m_nSamples; j++)
-		if(!sampleUsed[j] && Samples[j].pSample) i++;
-
-	id = i;
-	fwrite(&id, 1, sizeof(id), f);
-
-	// Write samples not used in any instrument (help, this looks like duplicate code!)
-	for(UINT nsmp=1; nsmp<=m_nSamples; nsmp++)
-	{
-		if(!sampleUsed[nsmp] && Samples[nsmp].pSample)
-		{
-			ITSample itss;
-			itss.ConvertToIT(Samples[nsmp], GetType(), true, true);
-
-			mpt::String::Write<mpt::String::nullTerminated>(itss.name, m_szNames[nsmp]);
-
-			id = nsmp;
-			fwrite(&id, 1, sizeof(id), f);
-
-			itss.samplepointer = 0;
-			itss.ConvertEndianness();
-			fwrite(&itss, 1, sizeof(itss), f);
-
-			id = Samples[nsmp].GetSampleSizeInBytes();
-			fwrite(&id, 1, sizeof(id), f);
-			itss.GetSampleFormat().WriteSample(f, Samples[nsmp]);
-		}
-	}
-
-	// Embed instruments' header [v1.01]
-
-	if(m_SongFlags[SONG_ITPEMBEDIH])
-	{
-		// embeded instrument header tag
-		uint32 code = 'EBIH';
-		fwrite(&code, 1, sizeof(uint32), f);
-
-		// instruments' header
-		for(i=0; i<m_nInstruments; i++)
-		{
-			if(Instruments[i+1]) WriteInstrumentHeaderStructOrField(Instruments[i+1], f);
-			// write separator tag
-			code = 'SEP@';
-			fwrite(&code, 1, sizeof(uint32), f);
-		}
-	}
-
-	SaveExtendedSongProperties(f);
-
-	// Close file
-	fclose(f);
-	return true;
-	
-#endif // MODPLUG_TRACKER
-
-}
-
-#endif
-
 
 OPENMPT_NAMESPACE_END

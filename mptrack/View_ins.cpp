@@ -188,11 +188,7 @@ void CViewInstrument::SetModified(DWORD mask, bool updateAll)
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr) return;
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	pModDoc->m_bsInstrumentModified.set(m_nInstrument - 1, true);
-	pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSNAMES | mask, updateAll ? nullptr : this);
-// -! NEW_FEATURE#0023
+	pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | mask, updateAll ? nullptr : this);
 	pModDoc->SetModified();
 }
 

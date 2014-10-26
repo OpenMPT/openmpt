@@ -168,11 +168,19 @@ void CViewSample::OnInitialUpdate()
 
 
 // updateAll: Update all views including this one. Otherwise, only update update other views.
-void CViewSample::SetModified(DWORD mask, bool updateAll)
-//-------------------------------------------------------
+void CViewSample::SetModified(DWORD mask, bool updateAll, bool waveformModified)
+//------------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	pModDoc->SetModified();
+
+	if(waveformModified)
+	{
+		// Update on-disk sample status in tree
+		ModSample &sample = pModDoc->GetrSoundFile().GetSample(m_nSample);
+		if(sample.uFlags[SMP_KEEPONDISK] && !sample.uFlags[SMP_MODIFIED]) mask |= HINT_SMPNAMES;
+		sample.uFlags.set(SMP_MODIFIED);
+	}
 	pModDoc->UpdateAllViews(nullptr, mask | (m_nSample << HINT_SHIFT_SMP), updateAll ? nullptr : this);
 }
 
@@ -1624,7 +1632,7 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 				sndFile.GetSample(m_nSample).PrecomputeLoops(sndFile, false);
 
 				InvalidateSample();
-				SetModified(HINT_SAMPLEDATA, false);
+				SetModified(HINT_SAMPLEDATA, false, true);
 			}
 		}
 		else if (old != m_dwEndDrag)
@@ -1679,7 +1687,7 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 		sndFile.GetSample(m_nSample).PrecomputeLoops(sndFile, false);
 
 		InvalidateSample();
-		SetModified(HINT_SAMPLEDATA, false);
+		SetModified(HINT_SAMPLEDATA, false, true);
 	} else
 	{
 		// ctrl + click = play from cursor pos
@@ -1933,7 +1941,7 @@ void CViewSample::OnSetLoop()
 			if ((sample.nLoopStart != m_dwBeginSel) || (sample.nLoopEnd != m_dwEndSel))
 			{
 				sample.SetLoop(m_dwBeginSel, m_dwEndSel, true, sample.uFlags[CHN_PINGPONGLOOP], sndFile);
-				SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, true);
+				SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, true, false);
 			}
 		}
 	}
@@ -1953,7 +1961,7 @@ void CViewSample::OnSetSustainLoop()
 			if ((sample.nSustainStart != m_dwBeginSel) || (sample.nSustainEnd != m_dwEndSel))
 			{
 				sample.SetSustainLoop(m_dwBeginSel, m_dwEndSel, true, sample.uFlags[CHN_PINGPONGSUSTAIN], sndFile);
-				SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, true);
+				SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, true, false);
 			}
 		}
 	}
@@ -2035,7 +2043,7 @@ void CViewSample::OnEditDelete()
 		sample.PrecomputeLoops(sndFile);
 	}
 	SetCurSel(0, 0);
-	SetModified(dwUpdateFlags, true);
+	SetModified(dwUpdateFlags, true, true);
 }
 
 
@@ -2173,7 +2181,9 @@ void CViewSample::OnEditPaste()
 			GlobalUnlock(hCpy);
 			SetCurSel(0, 0);
 			sample.PrecomputeLoops(sndFile, true);
-			SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES, true);
+			SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES, true, false);
+
+			sndFile.ResetSamplePath(m_nSample);
 		}
 		CloseClipboard();
 	}
@@ -2188,7 +2198,7 @@ void CViewSample::OnEditUndo()
 	if(pModDoc == nullptr) return;
 	if(pModDoc->GetSampleUndo().Undo(m_nSample))
 	{
-		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES, true);
+		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES, true, true);
 	}
 }
 
@@ -2200,7 +2210,7 @@ void CViewSample::OnEditRedo()
 	if(pModDoc == nullptr) return;
 	if(pModDoc->GetSampleUndo().Redo(m_nSample))
 	{
-		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES, true);
+		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES, true, true);
 	}
 }
 
@@ -2236,7 +2246,7 @@ void CViewSample::On8BitConvert()
 			sample.PrecomputeLoops(sndFile, false);
 			cs.Leave();
 
-			SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true);
+			SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true, true);
 		}
 	}
 	EndWaitCursor();
@@ -2255,17 +2265,16 @@ void CViewSample::On16BitConvert()
 		if(!sample.uFlags[CHN_16BIT] && sample.pSample != nullptr && sample.nLength != 0)
 		{
 			ASSERT(sample.GetElementarySampleSize() == 1);
-			const SmpLength numSamples = sample.nLength * sample.GetNumChannels();
-			int16 *newSample = static_cast<int16 *>(ModSample::AllocateSample(numSamples, 2));
+			int16 *newSample = static_cast<int16 *>(ModSample::AllocateSample(sample.nLength, 2 * sample.GetNumChannels()));
 			if(newSample != nullptr)
 			{
 				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "16-Bit Conversion");
-				CopySample<SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8> > >(newSample, numSamples, 1, sample.pSample8, sample.GetSampleSizeInBytes(), 1);
+				CopySample<SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8> > >(newSample, sample.nLength * sample.GetNumChannels(), 1, sample.pSample8, sample.GetSampleSizeInBytes(), 1);
 				sample.uFlags.set(CHN_16BIT);
 				ctrlSmp::ReplaceSample(sample, newSample, sample.nLength, sndFile);
 				sample.PrecomputeLoops(sndFile, false);
 
-				SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true);
+				SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true, true);
 			}
 		}
 	}
@@ -2334,7 +2343,7 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 						right.nPan = 256;
 					}
 				}
-				SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true);
+				SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true, true);
 			} else
 			{
 				pModDoc->GetSampleUndo().RemoveLastUndoStep(m_nSample);
@@ -2388,7 +2397,7 @@ void CViewSample::OnSampleTrim()
 		cs.Leave();
 
 		SetCurSel(0, 0);
-		SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true);
+		SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true, true);
 	}
 	EndWaitCursor();
 }
@@ -2587,7 +2596,7 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 	}
 	if (bUpdate)
 	{
-		SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, true);
+		SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, true, false);
 	}
 	CMDIChildWnd *pMDIFrame = (CMDIChildWnd *)GetParentFrame();
 	if (pMDIFrame)
@@ -2654,7 +2663,7 @@ void CViewSample::OnSetLoopStart()
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Loop Start");
 			sample.SetLoop(m_dwMenuParam, sample.nLoopEnd, true, sample.uFlags[CHN_PINGPONGLOOP], sndFile);
-			SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true);
+			SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true, false);
 		}
 	}
 }
@@ -2672,7 +2681,7 @@ void CViewSample::OnSetLoopEnd()
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Loop End");
 			sample.SetLoop(sample.nLoopStart, m_dwMenuParam, true, sample.uFlags[CHN_PINGPONGLOOP], sndFile);
-			SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true);
+			SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true, false);
 		}
 	}
 }
@@ -2690,7 +2699,7 @@ void CViewSample::OnSetSustainStart()
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Sustain Start");
 			sample.SetSustainLoop(m_dwMenuParam, sample.nSustainEnd, true, sample.uFlags[CHN_PINGPONGSUSTAIN], sndFile);
-			SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true);
+			SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true, false);
 		}
 	}
 }
@@ -2708,7 +2717,7 @@ void CViewSample::OnSetSustainEnd()
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Sustain End");
 			sample.SetSustainLoop(sample.nSustainStart, m_dwMenuParam, true, sample.uFlags[CHN_PINGPONGSUSTAIN], sndFile);
-			SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true);
+			SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true, false);
 		}
 	}
 }
@@ -2776,7 +2785,11 @@ void CViewSample::OnAddSilence()
 	if(dlg.m_nEditOption == addsilence_resize)
 	{
 		// resize - dlg.m_nSamples = new size
-		if(dlg.m_nSamples != sample.nLength)
+		if(dlg.m_nSamples == 0)
+		{
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Delete Sample");
+			sndFile.DestroySampleThreadsafe(m_nSample);
+		} else if(dlg.m_nSamples != sample.nLength)
 		{
 			CriticalSection cs;
 
@@ -2804,7 +2817,7 @@ void CViewSample::OnAddSilence()
 	if(nOldLength != sample.nLength)
 	{
 		SetCurSel(0, 0);
-		SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, true);
+		SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, true, true);
 	}
 }
 

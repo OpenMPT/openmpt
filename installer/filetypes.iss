@@ -13,7 +13,6 @@ Name: "associate_common\mod";  Description: "ProTracker / Noise Tracker / etc. (
 Name: "associate_common\s3m";  Description: "Scream Tracker 3 (S3M)";
 Name: "associate_common\xm";   Description: "Fasttracker 2 (XM)";
 Name: "associate_common\it";   Description: "Impulse Tracker (IT)";
-Name: "associate_common\itp";  Description: "Impulse Tracker Project (ITP)";
 Name: "associate_common\mptm"; Description: "OpenMPT (MPTM)";
 ; same, but compressed
 Name: "associate_common\compressed"; Description: "Above when compressed (MDR, MDZ, S3Z, XMZ, ITZ, MPTMZ)";
@@ -30,6 +29,7 @@ Name: "associate_exotic\far"; Description: "Farandole Composer (FAR)";
 Name: "associate_exotic\gdm"; Description: "General Digital Music (GDM)";
 Name: "associate_exotic\imf"; Description: "Imago Orpheus (IMF)";
 Name: "associate_exotic\ice"; Description: "Ice Tracker (ICE)";
+Name: "associate_exotic\itp"; Description: "Impulse Tracker Project (ITP)";
 Name: "associate_exotic\j2b"; Description: "Jazz Jackrabbit 2 Music (J2B)";
 Name: "associate_exotic\m15"; Description: "Ultimate Soundtracker (M15)";
 Name: "associate_exotic\mdl"; Description: "DigiTrakker (MDL)";
@@ -51,7 +51,6 @@ Root: HKCR; Subkey: ".mod";  ValueType: string; ValueName: ""; ValueData: "OpenM
 Root: HKCR; Subkey: ".s3m";  ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_common\s3m
 Root: HKCR; Subkey: ".xm";   ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_common\xm
 Root: HKCR; Subkey: ".it";   ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_common\it
-Root: HKCR; Subkey: ".itp";  ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_common\itp
 Root: HKCR; Subkey: ".mptm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_common\mptm
 ; same, but compressed
 Root: HKCR; Subkey: ".mdr";   ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_common\compressed
@@ -72,6 +71,7 @@ Root: HKCR; Subkey: ".far"; ValueType: string; ValueName: ""; ValueData: "OpenMP
 Root: HKCR; Subkey: ".gdm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\gdm
 Root: HKCR; Subkey: ".imf"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\imf
 Root: HKCR; Subkey: ".ice"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\ice
+Root: HKCR; Subkey: ".itp"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\itp
 Root: HKCR; Subkey: ".j2b"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\j2b
 Root: HKCR; Subkey: ".m15"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\m15
 Root: HKCR; Subkey: ".mdl"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\mdl

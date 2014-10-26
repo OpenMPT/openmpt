@@ -466,8 +466,8 @@ void ITSample::ConvertEndianness()
 
 
 // Convert OpenMPT's internal sample representation to an ITSample.
-void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compress, bool compressIT215)
-//------------------------------------------------------------------------------------------------------
+void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compress, bool compressIT215, bool allowExternal)
+//--------------------------------------------------------------------------------------------------------------------------
 {
 	MemsetZero(*this);
 
@@ -537,6 +537,16 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 		// Sweep is upside down in XM
 		vir = 255 - vir;
 	}
+
+#ifdef MPT_EXTERNAL_SAMPLES
+	// Save external sample (filename at sample pointer)
+	if(allowExternal && mptSmp.uFlags[SMP_KEEPONDISK] && mptSmp.HasSampleData())
+	{
+		cvt = ITSample::cvtExternalSample;
+	}
+#else
+	MPT_UNREFERENCED_PARAMETER(allowExternal);
+#endif // MPT_EXTERNAL_SAMPLES
 }
 
 
@@ -586,6 +596,12 @@ uint32 ITSample::ConvertToMPT(ModSample &mptSmp) const
 	mptSmp.nVibRate = vis;
 	mptSmp.nVibDepth = vid & 0x7F;
 	mptSmp.nVibSweep = vir;
+
+	if(cvt == ITSample::cvtExternalSample)
+	{
+		// Read external sample (filename at sample pointer)
+		mptSmp.uFlags.set(SMP_KEEPONDISK);
+	}
 
 	return samplepointer;
 }

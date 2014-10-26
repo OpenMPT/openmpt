@@ -94,6 +94,12 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 	{
 		nVibType = VIB_SINE;
 	}
+
+	// No external samples in formats other than MPTM.
+	if(toType != MOD_TYPE_MPT)
+	{
+		uFlags.reset(SMP_KEEPONDISK);
+	}
 }
 
 
@@ -108,7 +114,7 @@ void ModSample::Initialize(MODTYPE type)
 	nPan = 128;
 	nVolume = 256;
 	nGlobalVol = 64;
-	uFlags.reset(CHN_PANNING | CHN_SUSTAINLOOP | CHN_LOOP | CHN_PINGPONGLOOP | CHN_PINGPONGSUSTAIN);
+	uFlags.reset(CHN_PANNING | CHN_SUSTAINLOOP | CHN_LOOP | CHN_PINGPONGLOOP | CHN_PINGPONGSUSTAIN | SMP_MODIFIED | SMP_KEEPONDISK);
 	if(type == MOD_TYPE_XM)
 	{
 		uFlags.set(CHN_PANNING);
@@ -154,6 +160,7 @@ size_t ModSample::AllocateSample()
 
 
 // Allocate sample memory. On sucess, a pointer to the silenced sample buffer is returned. On failure, nullptr is returned.
+// numSamples must contain the sample length, bytesPerSample the size of a sampling point multiplied with the number of channels.
 void *ModSample::AllocateSample(SmpLength numSamples, size_t bytesPerSample)
 //--------------------------------------------------------------------------
 {
@@ -302,6 +309,7 @@ void ModSample::TransposeToFrequency()
 }
 
 
+// Return tranpose.finetune as 25.7 fixed point value.
 int ModSample::FrequencyToTranspose(uint32 freq)
 //----------------------------------------------
 {

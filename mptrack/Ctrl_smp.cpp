@@ -87,6 +87,7 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_COMMAND(IDC_SAMPLE_XFADE,		OnXFade)
 	ON_COMMAND(IDC_SAMPLE_AUTOTUNE,		OnAutotune)
 	ON_COMMAND(IDC_CHECK1,				OnSetPanningChanged)
+	ON_COMMAND(IDC_CHECK2,				OnKeepSampleOnDisk)
 	ON_COMMAND(ID_PREVINSTRUMENT,		OnPrevInstrument)
 	ON_COMMAND(ID_NEXTINSTRUMENT,		OnNextInstrument)
 	ON_COMMAND(IDC_BUTTON1,				OnPitchShiftTimeStretch)
@@ -515,8 +516,8 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 }
 
 
-BOOL CCtrlSamples::GetToolTipText(UINT uId, LPSTR pszText)
-//--------------------------------------------------------
+BOOL CCtrlSamples::GetToolTipText(UINT uId, TCHAR *pszText)
+//---------------------------------------------------------
 {
 	if ((pszText) && (uId))
 	{
@@ -529,12 +530,15 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPSTR pszText)
 			{
 				const ModSample &sample = m_sndFile.GetSample(m_nSample);
 				UINT nFreqHz = ModSample::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
-				wsprintf(pszText, "%ldHz", nFreqHz);
+				wsprintf(pszText, _T("%luHz"), nFreqHz);
 				return TRUE;
 			}
 			break;
 		case IDC_EDIT_STRETCHPARAMS:
-			wsprintf(pszText, "SequenceMs SeekwindowMs OverlapMs");
+			_tcscpy(pszText, _T("SequenceMs SeekwindowMs OverlapMs"));
+			return TRUE;
+		case IDC_CHECK2:
+			_tcscpy(pszText, _T("Keep a reference to the original waveform instead of saving it in the module."));
 			return TRUE;
 		}
 	}
@@ -662,7 +666,7 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		DWORD d;
 
 		m_SpinSample.SetRange(1, m_sndFile.GetNumSamples());
-		
+
 		// Length / Type
 		wsprintf(s, "%u-bit %s, len: %u", sample.GetElementarySampleSize() * 8, sample.uFlags[CHN_STEREO] ? "stereo" : "mono", sample.nLength);
 		SetDlgItemText(IDC_TEXT5, s);
@@ -750,6 +754,11 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		wsprintf(s, "%lu", sample.nSustainEnd);
 		m_EditSustainEnd.SetWindowText(s);
 	}
+	if (dwHintMask & (HINT_MODTYPE | HINT_SAMPLEINFO | HINT_SMPNAMES))
+	{
+		CheckDlgButton(IDC_CHECK2, m_sndFile.GetSample(m_nSample).uFlags[SMP_KEEPONDISK] ? BST_CHECKED : BST_UNCHECKED);
+		GetDlgItem(IDC_CHECK2)->EnableWindow((m_sndFile.SampleHasPath(m_nSample) && m_sndFile.GetType() == MOD_TYPE_MPT) ? TRUE : FALSE);
+	}
 	if (!m_bInitialized)
 	{
 		// First update
@@ -766,10 +775,18 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 
 
 // updateAll: Update all views including this one. Otherwise, only update update other views.
-void CCtrlSamples::SetModified(DWORD mask, bool updateAll)
-//--------------------------------------------------------
+void CCtrlSamples::SetModified(DWORD mask, bool updateAll, bool waveformModified)
+//-------------------------------------------------------------------------------
 {
 	m_modDoc.SetModified();
+
+	if(waveformModified)
+	{
+		// Update on-disk sample status in tree
+		ModSample &sample = m_sndFile.GetSample(m_nSample);
+		if(sample.uFlags[SMP_KEEPONDISK] && !sample.uFlags[SMP_MODIFIED]) mask |= HINT_SMPNAMES;
+		sample.uFlags.set(SMP_MODIFIED);
+	}
 	m_modDoc.UpdateAllViews(nullptr, mask | (m_nSample << HINT_SHIFT_SMP), updateAll ? nullptr : this);
 }
 
@@ -856,6 +873,9 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName)
 		{
 			m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
 		}
+	} else
+	{
+		m_sndFile.SetSamplePath(m_nSample, fileName);
 	}
 
 	EndWaitCursor();
@@ -877,7 +897,8 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName)
 			sample.nPan = 128;
 			sample.uFlags.set(CHN_PANNING);
 		}
-		SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, true);
+		SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, true, false);
+		sample.uFlags.reset(SMP_MODIFIED | SMP_KEEPONDISK);
 	}
 	return true;
 }
@@ -892,16 +913,10 @@ bool CCtrlSamples::OpenSample(const CSoundFile &sndFile, SAMPLEINDEX nSample)
 
 	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
 	m_sndFile.ReadSampleFromSong(m_nSample, sndFile, nSample);
-	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	if((m_sndFile.GetType() & MOD_TYPE_XM) && (!sample.uFlags[CHN_PANNING]))
-	{
-		sample.nPan = 128;
-		sample.uFlags.set(CHN_PANNING);
-	}
 
 	EndWaitCursor();
 
-	SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, true);
+	SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, true, false);
 
 	return true;
 }
@@ -1128,6 +1143,27 @@ void CCtrlSamples::OnSampleSave()
 				ok = m_sndFile.SaveFLACSample(smp, fileName);
 			else
 				ok = m_sndFile.SaveWAVSample(smp, fileName);
+
+			if(ok && !doBatchSave)
+			{
+				m_sndFile.SetSamplePath(smp, fileName);
+				ModSample &sample = m_sndFile.GetSample(smp);
+				sample.uFlags.reset(SMP_MODIFIED);
+				UpdateView(HINT_SAMPLEINFO);
+
+				// Check if any other samples refer to the same file - that would be dangerous.
+				if(sample.uFlags[SMP_KEEPONDISK])
+				{
+					for(SAMPLEINDEX i = 1; i <= m_sndFile.GetNumSamples(); i++)
+					{
+						if(i != smp && m_sndFile.GetSample(i).uFlags[SMP_KEEPONDISK] && m_sndFile.GetSamplePath(i) == m_sndFile.GetSamplePath(smp))
+						{
+							m_sndFile.GetSample(i).uFlags.reset(SMP_KEEPONDISK);
+							m_modDoc.UpdateAllViews(nullptr, HINT_SMPNAMES | HINT_SAMPLEINFO | (i << HINT_SHIFT_SMP), this);
+						}
+					}
+				}
+			}
 		}
 	}
 	EndWaitCursor();
@@ -1264,7 +1300,7 @@ void CCtrlSamples::OnNormalize()
 
 	if(bModified)
 	{
-		SetModified(HINT_SAMPLEDATA, false);
+		SetModified(HINT_SAMPLEDATA, false, true);
 	}
 	EndWaitCursor();
 	SwitchToView();
@@ -1312,7 +1348,7 @@ void CCtrlSamples::ApplyAmplify(int32 lAmp, bool fadeIn, bool fadeOut)
 		ApplyAmplifyImpl<int8>(sample.pSample8, selection.nStart, selection.nEnd, lAmp, fadeIn, fadeOut);
 	}
 	sample.PrecomputeLoops(m_sndFile, false);
-	SetModified(HINT_SAMPLEDATA, false);
+	SetModified(HINT_SAMPLEDATA, false, true);
 	EndWaitCursor();
 	SwitchToView();
 }
@@ -1377,7 +1413,7 @@ void CCtrlSamples::OnRemoveDCOffset()
 	CString dcInfo;
 	if(numModified)
 	{
-		SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true);
+		SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true, true);
 		if(numModified == 1)
 		{
 			dcInfo.Format(GetStrI18N(TEXT("Removed DC offset (%.1f%%)")), fReportOffset * 100);
@@ -1459,7 +1495,7 @@ void CCtrlSamples::OnResample()
 	const SmpLength newTotalLength = sample.nLength - selLength + newSelLength;
 	const uint8 numChannels = sample.GetNumChannels();
 
-	void *newSample = ModSample::AllocateSample(newTotalLength * numChannels, sample.GetElementarySampleSize());
+	void *newSample = ModSample::AllocateSample(newTotalLength, sample.GetBytesPerSample());
 
 	if(newSample != nullptr)
 	{
@@ -1583,7 +1619,7 @@ void CCtrlSamples::OnResample()
 		{
 			SetSelectionPoints(selection.nStart, newSelEnd);
 		}
-		SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true);
+		SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true, true);
 	}
 
 	EndWaitCursor();
@@ -1732,7 +1768,7 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 	}
 
 	// Update sample view
-	SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true);
+	SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO, true, true);
 }
 
 
@@ -1854,7 +1890,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 	void *pNewSample = nullptr;
 	if(nNewSampleLength <= MAX_SAMPLE_LENGTH)
 	{
-		pNewSample = ModSample::AllocateSample(nNewSampleLength, nChn * smpsize);
+		pNewSample = ModSample::AllocateSample(nNewSampleLength, sample.GetBytesPerSample());
 	}
 	if(pNewSample == nullptr)
 	{
@@ -2179,7 +2215,7 @@ void CCtrlSamples::OnReverse()
 	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_reverse, "Reverse", selection.nStart, selection.nEnd);
 	if(ctrlSmp::ReverseSample(sample, selection.nStart, selection.nEnd, m_sndFile))
 	{
-		SetModified(HINT_SAMPLEDATA, false);
+		SetModified(HINT_SAMPLEDATA, false, true);
 	} else
 	{
 		m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
@@ -2199,7 +2235,7 @@ void CCtrlSamples::OnInvert()
 	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_invert, "Invert", selection.nStart, selection.nEnd);
 	if(ctrlSmp::InvertSample(sample, selection.nStart, selection.nEnd, m_sndFile) == true)
 	{
-		SetModified(HINT_SAMPLEDATA, false);
+		SetModified(HINT_SAMPLEDATA, false, true);
 	} else
 	{
 		m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
@@ -2224,7 +2260,7 @@ void CCtrlSamples::OnSignUnSign()
 	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_unsign, "Unsign", selection.nStart, selection.nEnd);
 	if(ctrlSmp::UnsignSample(sample, selection.nStart, selection.nEnd, m_sndFile) == true)
 	{
-		SetModified(HINT_SAMPLEDATA, false);
+		SetModified(HINT_SAMPLEDATA, false, true);
 	} else
 	{
 		m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
@@ -2277,7 +2313,7 @@ void CCtrlSamples::OnSilence()
 				}
 			}
 			sample.PrecomputeLoops(m_sndFile, false);
-			SetModified(HINT_SAMPLEDATA, false);
+			SetModified(HINT_SAMPLEDATA, false, true);
 	}
 
 	EndWaitCursor();
@@ -2315,7 +2351,7 @@ void CCtrlSamples::OnNameChanged()
 	if (_tcscmp(s, m_sndFile.m_szNames[m_nSample]))
 	{
 		mpt::String::Copy(m_sndFile.m_szNames[m_nSample], s);
-		SetModified(HINT_SMPNAMES | HINT_SAMPLEINFO, false);
+		SetModified(HINT_SMPNAMES | HINT_SAMPLEINFO, false, false);
 	}
 }
 
@@ -2331,7 +2367,7 @@ void CCtrlSamples::OnFileNameChanged()
 	if (_tcscmp(s, m_sndFile.GetSample(m_nSample).filename))
 	{
 		mpt::String::Copy(m_sndFile.GetSample(m_nSample).filename, s);
-		SetModified(HINT_SAMPLEINFO, false);
+		SetModified(HINT_SAMPLEINFO, false, false);
 	}
 }
 
@@ -2346,7 +2382,7 @@ void CCtrlSamples::OnVolumeChanged()
 	if (nVol != m_sndFile.GetSample(m_nSample).nVolume)
 	{
 		m_sndFile.GetSample(m_nSample).nVolume = (WORD)nVol;
-		SetModified(HINT_SAMPLEINFO, false);
+		SetModified(HINT_SAMPLEINFO, false, false);
 	}
 }
 
@@ -2360,7 +2396,7 @@ void CCtrlSamples::OnGlobalVolChanged()
 	if (nVol != m_sndFile.GetSample(m_nSample).nGlobalVol)
 	{
 		m_sndFile.GetSample(m_nSample).nGlobalVol = (uint16)nVol;
-		SetModified(HINT_SAMPLEINFO, false);
+		SetModified(HINT_SAMPLEINFO, false, false);
 	}
 }
 
@@ -2380,7 +2416,7 @@ void CCtrlSamples::OnSetPanningChanged()
 	if(b != sample.uFlags[CHN_PANNING])
 	{
 		sample.uFlags.set(CHN_PANNING, b);
-		SetModified(HINT_SAMPLEINFO, false);
+		SetModified(HINT_SAMPLEINFO, false, false);
 	}
 }
 
@@ -2404,7 +2440,7 @@ void CCtrlSamples::OnPanningChanged()
 	if (nPan != m_sndFile.GetSample(m_nSample).nPan)
 	{
 		m_sndFile.GetSample(m_nSample).nPan = (uint16)nPan;
-		SetModified(HINT_SAMPLEINFO, false);
+		SetModified(HINT_SAMPLEINFO, false, false);
 	}
 }
 
@@ -2431,7 +2467,7 @@ void CCtrlSamples::OnFineTuneChanged()
 				m_CbnBaseNote.SetCurSel(basenote);
 				UnlockControls();
 			}
-			SetModified(HINT_SAMPLEINFO, false);
+			SetModified(HINT_SAMPLEINFO, false, false);
 		}
 	} else
 	{
@@ -2440,7 +2476,7 @@ void CCtrlSamples::OnFineTuneChanged()
 		if ((n >= -128) && (n <= 127))
 		{
 			m_sndFile.GetSample(m_nSample).nFineTune = (signed char)n;
-			SetModified(HINT_SAMPLEINFO, false);
+			SetModified(HINT_SAMPLEINFO, false, false);
 		}
 
 	}
@@ -2468,14 +2504,14 @@ void CCtrlSamples::OnBaseNoteChanged()
 			LockControls();
 			m_EditFineTune.SetWindowText(s);
 			UnlockControls();
-			SetModified(HINT_SAMPLEINFO, false);
+			SetModified(HINT_SAMPLEINFO, false, false);
 		}
 	} else
 	{
 		if ((n >= -128) && (n < 128))
 		{
 			sample.RelativeTone = (int8)n;
-			SetModified(HINT_SAMPLEINFO, false);
+			SetModified(HINT_SAMPLEINFO, false, false);
 		}
 	}
 }
@@ -2491,7 +2527,7 @@ void CCtrlSamples::OnVibTypeChanged()
 		m_sndFile.GetSample(m_nSample).nVibType = static_cast<uint8>(m_ComboAutoVib.GetItemData(n));
 
 		PropagateAutoVibratoChanges();
-		SetModified(HINT_SAMPLEINFO, false);
+		SetModified(HINT_SAMPLEINFO, false, false);
 	}
 }
 
@@ -2508,7 +2544,7 @@ void CCtrlSamples::OnVibDepthChanged()
 		m_sndFile.GetSample(m_nSample).nVibDepth = static_cast<uint8>(n);
 
 		PropagateAutoVibratoChanges();
-		SetModified(HINT_SAMPLEINFO, false);
+		SetModified(HINT_SAMPLEINFO, false, false);
 	}
 }
 
@@ -2525,7 +2561,7 @@ void CCtrlSamples::OnVibSweepChanged()
 		m_sndFile.GetSample(m_nSample).nVibSweep = static_cast<uint8>(n);
 
 		PropagateAutoVibratoChanges();
-		SetModified(HINT_SAMPLEINFO, false);
+		SetModified(HINT_SAMPLEINFO, false, false);
 	}
 }
 
@@ -2542,7 +2578,7 @@ void CCtrlSamples::OnVibRateChanged()
 		m_sndFile.GetSample(m_nSample).nVibRate = static_cast<uint8>(n);
 
 		PropagateAutoVibratoChanges();
-		SetModified(HINT_SAMPLEINFO, false);
+		SetModified(HINT_SAMPLEINFO, false, false);
 	}
 }
 
@@ -2576,7 +2612,7 @@ void CCtrlSamples::OnLoopTypeChanged()
 		sample.PrecomputeLoops(m_sndFile);
 	}
 	ctrlSmp::UpdateLoopPoints(sample, m_sndFile);
-	SetModified(HINT_SAMPLEINFO, false);
+	SetModified(HINT_SAMPLEINFO, false, false);
 }
 
 
@@ -2589,7 +2625,7 @@ void CCtrlSamples::OnLoopStartChanged()
 	if ((n >= 0) && (n < sample.nLength) && ((n < sample.nLoopEnd) || !sample.uFlags[CHN_LOOP]))
 	{
 		sample.SetLoop(n, sample.nLoopEnd, sample.uFlags[CHN_LOOP], sample.uFlags[CHN_PINGPONGLOOP], m_sndFile);
-		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false);
+		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false, false);
 	}
 }
 
@@ -2603,7 +2639,7 @@ void CCtrlSamples::OnLoopEndChanged()
 	if ((n >= 0) && (n <= sample.nLength) && ((n > sample.nLoopStart) || !sample.uFlags[CHN_LOOP]))
 	{
 		sample.SetLoop(sample.nLoopStart, n, sample.uFlags[CHN_LOOP], sample.uFlags[CHN_PINGPONGLOOP], m_sndFile);
-		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false);
+		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false, false);
 	}
 }
 
@@ -2637,7 +2673,7 @@ void CCtrlSamples::OnSustainTypeChanged()
 		sample.PrecomputeLoops(m_sndFile);
 	}
 	ctrlSmp::UpdateLoopPoints(sample, m_sndFile);
-	SetModified(HINT_SAMPLEINFO, false);
+	SetModified(HINT_SAMPLEINFO, false, false);
 }
 
 
@@ -2651,7 +2687,7 @@ void CCtrlSamples::OnSustainStartChanged()
 	 && ((n < sample.nSustainEnd) || !sample.uFlags[CHN_SUSTAINLOOP]))
 	{
 		sample.SetSustainLoop(n, sample.nSustainEnd, sample.uFlags[CHN_SUSTAINLOOP], sample.uFlags[CHN_PINGPONGSUSTAIN], m_sndFile);
-		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false);
+		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false, false);
 	}
 }
 
@@ -2666,7 +2702,7 @@ void CCtrlSamples::OnSustainEndChanged()
 	 && ((n > sample.nSustainStart) || !sample.uFlags[CHN_SUSTAINLOOP]))
 	{
 		sample.SetSustainLoop(sample.nSustainStart, n, sample.uFlags[CHN_SUSTAINLOOP], sample.uFlags[CHN_PINGPONGSUSTAIN], m_sndFile);
-		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false);
+		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false, false);
 	}
 }
 
@@ -2956,7 +2992,7 @@ NoSample:
 	if(nCode == SB_ENDSCROLL) SwitchToView();
 	if(redraw)
 	{
-		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false);
+		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false, false);
 	}
 	UnlockControls();
 }
@@ -3111,7 +3147,7 @@ void CCtrlSamples::OnXFade()
 
 		if(ctrlSmp::XFadeSample(sample, fadeLength, m_sndFile))
 		{
-			SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, true);
+			SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, true, true);
 		} else
 		{
 			m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
@@ -3139,9 +3175,28 @@ void CCtrlSamples::OnAutotune()
 			BeginWaitCursor();
 			m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Automatic Sample Tuning");
 			at.Apply(static_cast<double>(dlg.GetPitchReference()), dlg.GetTargetNote());
-			SetModified(HINT_SAMPLEINFO, true);
+			SetModified(HINT_SAMPLEINFO, true, false);
 			EndWaitCursor();
 		}
+	}
+}
+
+
+void CCtrlSamples::OnKeepSampleOnDisk()
+//-------------------------------------
+{
+	SAMPLEINDEX first = m_nSample, last = m_nSample;
+	if(CMainFrame::GetInputHandler()->ShiftPressed())
+	{
+		first = 1;
+		last = m_sndFile.GetNumSamples();
+	}
+
+	const bool enable = IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED;
+	for(SAMPLEINDEX i = first; i <= last; i++)
+	{
+		m_sndFile.GetSample(i).uFlags.set(SMP_KEEPONDISK, enable && m_sndFile.SampleHasPath(i));
+		m_modDoc.UpdateAllViews(nullptr, HINT_SAMPLEINFO | (i << HINT_SHIFT_SMP), this);
 	}
 }
 

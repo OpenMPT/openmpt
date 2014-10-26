@@ -498,12 +498,19 @@ public:
 	std::vector<FileHistory> &GetFileHistory() { return m_FileHistory; }
 	const std::vector<FileHistory> &GetFileHistory() const { return m_FileHistory; }
 
-#ifdef MODPLUG_TRACKER
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	mpt::PathString m_szInstrumentPath[MAX_INSTRUMENTS];
-// -! NEW_FEATURE#0023
-#endif // MODPLUG_TRACKER
+#ifdef MPT_EXTERNAL_SAMPLES
+	// MPTM external on-disk sample paths
+protected:
+	std::vector<mpt::PathString> m_samplePaths;
+
+public:
+	void SetSamplePath(SAMPLEINDEX smp, const mpt::PathString &filename) { if(m_samplePaths.size() < smp) m_samplePaths.resize(smp); m_samplePaths[smp - 1] = filename; }
+	void ResetSamplePath(SAMPLEINDEX smp) { if(m_samplePaths.size() >= smp) m_samplePaths[smp - 1] = mpt::PathString(); Samples[smp].uFlags.reset(SMP_KEEPONDISK | SMP_MODIFIED);}
+	mpt::PathString GetSamplePath(SAMPLEINDEX smp) const { if(m_samplePaths.size() >= smp) return m_samplePaths[smp - 1]; else return mpt::PathString(); }
+	bool SampleHasPath(SAMPLEINDEX smp) const { if(m_samplePaths.size() >= smp) return !m_samplePaths[smp - 1].empty(); else return false; }
+
+	bool LoadExternalSample(SAMPLEINDEX smp, const mpt::PathString &filename);
+#endif // MPT_EXTERNAL_SAMPLES
 
 	bool m_bIsRendering;
 	TimingInfo m_TimingInfo; // only valid if !m_bIsRendering
@@ -671,7 +678,6 @@ public:
 	bool SaveS3M(const mpt::PathString &filename) const;
 	bool SaveMod(const mpt::PathString &filename) const;
 	bool SaveIT(const mpt::PathString &filename, bool compatibilityExport = false);
-	bool SaveITProject(const mpt::PathString &filename); // -> CODE#0023 -> DESC="IT project files (.itp)" -! NEW_FEATURE#0023
 	UINT SaveMixPlugins(FILE *f=NULL, bool bUpdate=true);
 	void WriteInstrumentPropertyForAllInstruments(uint32 code,  int16 size, FILE* f, UINT nInstruments) const;
 	void SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) const;
@@ -869,7 +875,7 @@ public:
 	bool ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file, bool mayNormalize=false);
 #ifndef MODPLUG_NO_FILESAVE
 	bool SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename) const;
-	bool SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename, bool compress) const;
+	bool SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename, bool compress, bool allowExternal) const;
 #endif
 
 	// I/O from another sound file

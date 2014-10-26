@@ -28,11 +28,6 @@ public:
 	MODTYPE m_nType;
 	bool initialized;
 
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	CButton m_CheckBox6;
-// -! NEW_FEATURE#0023
-
 public:
 	CModTypeDlg(CSoundFile &sf, CWnd *parent) : CDialog(IDD_MODDOC_MODTYPE, parent), sndFile(sf) { m_nType = MOD_TYPE_NONE; m_nChannels = 0; }
 	bool VerifyData();
