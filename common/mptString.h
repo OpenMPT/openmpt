@@ -111,7 +111,7 @@ static inline std::size_t strnlen(const char *str, std::size_t n)
 #if MPT_COMPILER_MSVC
 	return ::strnlen(str, n);
 #else
-	if(n >= SIZE_MAX)
+	if(n >= std::numeric_limits<std::size_t>::max())
 	{
 		return std::strlen(str);
 	}

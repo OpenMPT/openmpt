@@ -604,7 +604,7 @@ public:
 	}
 
 	// Read a null-terminated string into a std::string
-	bool ReadNullString(std::string &dest, const off_t maxLength = SIZE_MAX)
+	bool ReadNullString(std::string &dest, const off_t maxLength = std::numeric_limits<std::size_t>::max())
 	{
 		dest.clear();
 		char c;
