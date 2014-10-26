@@ -1470,11 +1470,11 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 		sampleHeader.GetSampleFormat().ReadSample(Samples[nSample], file);
 	} else
 	{
-#ifdef MPT_EXTERNAL_SAMPLES
 		// External sample
-		std::string filenameU8;
 		size_t strLen;
 		file.ReadVarInt(strLen);
+#ifdef MPT_EXTERNAL_SAMPLES
+		std::string filenameU8;
 		file.ReadString<mpt::String::maybeNullTerminated>(filenameU8, strLen);
 		mpt::PathString filename = mpt::PathString::FromUTF8(filenameU8);
 
@@ -1492,6 +1492,8 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 		{
 			sample.uFlags.reset(SMP_KEEPONDISK);
 		}
+#else
+		file.Skip(strLen);
 #endif // MPT_EXTERNAL_SAMPLES
 	}
 	sample.PrecomputeLoops(*this, false);

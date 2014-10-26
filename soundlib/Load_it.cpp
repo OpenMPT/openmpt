@@ -650,11 +650,11 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 						sampleHeader.GetSampleFormat(fileHeader.cwtv).ReadSample(sample, file);
 					} else
 					{
-#ifdef MPT_EXTERNAL_SAMPLES
 						// External sample in MPTM file
-						std::string filenameU8;
 						size_t strLen;
 						file.ReadVarInt(strLen);
+#ifdef MPT_EXTERNAL_SAMPLES
+						std::string filenameU8;
 						file.ReadString<mpt::String::maybeNullTerminated>(filenameU8, strLen);
 						mpt::PathString filename = mpt::PathString::FromUTF8(filenameU8);
 
@@ -675,6 +675,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 						{
 							sample.uFlags.reset(SMP_KEEPONDISK);
 						}
+#else
+						file.Skip(strLen);
 #endif // MPT_EXTERNAL_SAMPLES
 					}
 					lastSampleOffset = std::max(lastSampleOffset, file.GetPosition());
