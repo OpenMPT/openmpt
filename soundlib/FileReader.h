@@ -57,12 +57,12 @@ private:
 
 	off_t streamPos;		// Cursor location in the file
 
-#if defined(MODPLUG_TRACKER)
+#if defined(MPT_WITH_FILEIO)
 	const mpt::PathString *fileName;  // Filename that corresponds to this FileReader. It is only set if this FileReader represents the whole contents of fileName. May be nullptr.
 	#define MPT_FILEREADER_INIT_FILENAME ,fileName(nullptr)
-#else
+#else // !MPT_WITH_FILEIO
 	#define MPT_FILEREADER_INIT_FILENAME
-#endif
+#endif // MPT_WITH_FILEIO
 
 public:
 
@@ -75,29 +75,29 @@ public:
 	FileReader(const void *voiddata, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(static_cast<const char *>(voiddata), length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 	FileReader(const char *chardata, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(chardata, length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 	FileReader(const uint8 *uint8data, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(reinterpret_cast<const char *>(uint8data), length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
-#if defined(MODPLUG_TRACKER)
+#if defined(MPT_WITH_FILEIO)
 	FileReader(const void *voiddata, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(static_cast<const char *>(voiddata), length)), streamPos(0), fileName(filename) { }
 	FileReader(const char *chardata, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(chardata, length)), streamPos(0), fileName(filename) { }
 	FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(reinterpret_cast<const char *>(uint8data), length)), streamPos(0), fileName(filename) { }
-#endif
+#endif // MPT_WITH_FILEIO
 
 	// Initialize file reader object with a std::istream.
 	FileReader(std::istream *s) : data(mpt::make_shared<FileDataContainerStdStream>(s)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
-#if defined(MODPLUG_TRACKER)
+#if defined(MPT_WITH_FILEIO)
 	FileReader(std::istream *s, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerStdStream>(s)), streamPos(0), fileName(filename) { }
-#endif
+#endif // MPT_WITH_FILEIO
 
 	// Initialize file reader object based on an existing file reader object window.
 	FileReader(MPT_SHARED_PTR<IFileDataContainer> other) : data(other), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 
 	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
 	FileReader(const FileReader &other) : data(other.data), streamPos(other.streamPos)
-#if defined(MODPLUG_TRACKER)
+#if defined(MPT_WITH_FILEIO)
 		, fileName(other.fileName)
-#endif
+#endif // MPT_WITH_FILEIO
 	{ }
 
-#else
+#else // !MPT_FILEREADER_STD_ISTREAM
 
 	// Initialize invalid file reader object.
 	FileReader() : data(nullptr, 0), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
@@ -106,23 +106,23 @@ public:
 	FileReader(const void *voiddata, off_t length) : data(static_cast<const char *>(voiddata), length), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 	FileReader(const char *chardata, off_t length) : data(chardata, length), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 	FileReader(const uint8 *uint8data, off_t length) : data(reinterpret_cast<const char *>(uint8data), length), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
-#if defined(MODPLUG_TRACKER)
+#if defined(MPT_WITH_FILEIO)
 	FileReader(const void *voiddata, off_t length, const mpt::PathString *filename) : data(static_cast<const char *>(voiddata), length), streamPos(0), fileName(filename) { }
 	FileReader(const char *chardata, off_t length, const mpt::PathString *filename) : data(chardata, length), streamPos(0), fileName(filename) { }
 	FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(reinterpret_cast<const char *>(uint8data), length), streamPos(0), fileName(filename) { }
-#endif
+#endif // MPT_WITH_FILEIO
 
 	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
 	FileReader(const FileReader &other) : data(other.data), streamPos(other.streamPos)
-#if defined(MODPLUG_TRACKER)
+#if defined(MPT_WITH_FILEIO)
 		, fileName(other.fileName)
-#endif
+#endif // MPT_WITH_FILEIO
 	{ }
 
-#endif
+#endif // MPT_FILEREADER_STD_ISTREAM
 
 
-#if defined(MODPLUG_TRACKER)
+#if defined(MPT_WITH_FILEIO)
 	mpt::PathString GetFileName() const
 	{
 		if(!fileName)
@@ -131,7 +131,7 @@ public:
 		}
 		return *fileName;
 	}
-#endif
+#endif // MPT_WITH_FILEIO
 
 	// Returns true if the object points to a valid stream.
 	bool IsValid() const
@@ -775,7 +775,7 @@ public:
 };
 
 
-#if defined(MPT_WITH_PATHSTRING)
+#if defined(MPT_WITH_FILEIO)
 // templated in order to reduce header inter-depoendencies
 template <typename TInputFile>
 FileReader GetFileReader(TInputFile &file)
@@ -790,21 +790,21 @@ FileReader GetFileReader(TInputFile &file)
 		{
 			return FileReader();
 		}
-		#ifdef MODPLUG_TRACKER
+		#ifdef MPT_WITH_FILEIO
 			return FileReader(tmp.first, tmp.second);
 		#else
 			return FileReader(tmp.first);
 		#endif
 	#else
 		typename TInputFile::ContentsRef tmp = file.Get();
-		#ifdef MODPLUG_TRACKER
+		#ifdef MPT_WITH_FILEIO
 			return FileReader(tmp.first.data, tmp.first.size, tmp.second);
 		#else
 			return FileReader(tmp.first.data, tmp.first.size);
 		#endif
 	#endif
 }
-#endif // MPT_WITH_PATHSTRING
+#endif // MPT_WITH_FILEIO
 
 
 OPENMPT_NAMESPACE_END

@@ -317,11 +317,15 @@
 #endif
 
 #if defined(ENABLE_TESTS) && !defined(MPT_WITH_PATHSTRING)
-#define MPT_WITH_PATHSTRING // Test suite requires PathString for file loading.
+#define MPT_WITH_FILEIO // Test suite requires PathString for file loading.
 #endif
 
-#if defined(MODPLUG_TRACKER) && !defined(MPT_WITH_PATHSTRING)
-#define MPT_WITH_PATHSTRING // Tracker requires PathString
+#if defined(MODPLUG_TRACKER) && !defined(MPT_WITH_FILEIO)
+#define MPT_WITH_FILEIO // Tracker requires disk file io
+#endif
+
+#if defined(MPT_WITH_FILEIO) && !defined(MPT_WITH_PATHSTRING)
+#define MPT_WITH_PATHSTRING // disk file io requires PathString
 #endif
 
 #if defined(MPT_WITH_DYNBIND) && !defined(MPT_WITH_PATHSTRING)

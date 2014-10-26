@@ -61,7 +61,7 @@ bool Flush(std::ostream & f) { f.flush(); return !f.fail(); }
 
 
 
-#if defined(MPT_WITH_PATHSTRING)
+#if defined(MPT_WITH_FILEIO)
 
 bool IsValid(FILE* & f) { return f != NULL; }
 
@@ -105,7 +105,7 @@ bool WriteRaw(FILE* & f, const void * data, std::size_t size) { return fwrite(da
 bool IsEof(FILE * & f) { return feof(f) != 0; }
 bool Flush(FILE* & f) { return fflush(f) == 0; }
 
-#endif // MPT_WITH_PATHSTRING
+#endif // MPT_WITH_FILEIO
 
 
 

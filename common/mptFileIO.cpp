@@ -15,6 +15,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+#if defined(MPT_WITH_FILEIO)
+
 #ifdef MODPLUG_TRACKER
 
 CMappedFile::~CMappedFile()
@@ -146,8 +148,6 @@ const void *CMappedFile::Lock()
 
 
 
-#if defined(MPT_WITH_PATHSTRING)
-
 InputFile::InputFile()
 {
 	return;
@@ -220,7 +220,7 @@ InputFile::ContentsRef InputFile::Get()
 
 #endif
 
-#endif // MPT_WITH_PATHSTRING
+#endif // MPT_WITH_FILEIO
 
 
 OPENMPT_NAMESPACE_END
