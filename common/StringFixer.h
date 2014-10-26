@@ -11,10 +11,9 @@
 
 #pragma once
 
+#include <algorithm>
 #include <string>
 #include <vector>
-#include <cstring>
-#include <string.h>
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -196,7 +195,7 @@ namespace mpt { namespace String
 				}
 			}
 			// Fill rest of string with nulls.
-			memset(dst, '\0', destSize - maxSize + pos);
+			std::fill(dst, dst + destSize - maxSize + pos, '\0');
 			
 			if(mode == nullTerminated)
 			{
@@ -224,7 +223,7 @@ namespace mpt { namespace String
 				src++;
 			}
 			// Fill rest of string with nulls.
-			memset(dst, '\0', destSize - maxSize);
+			std::fill(dst, dst + destSize - maxSize, '\0');
 
 			if(mode == spacePaddedNull && srcSize <= destSize)
 			{
@@ -293,11 +292,11 @@ namespace mpt { namespace String
 		if(mode == nullTerminated || mode == maybeNullTerminated)
 		{
 			// Fill rest of string with nulls.
-			memset(dst, '\0', destSize - maxSize + pos);
+			std::fill(dst, dst + destSize - maxSize + pos, '\0');
 		} else if(mode == spacePadded || mode == spacePaddedNull)
 		{
 			// Fill the rest of the destination string with spaces.
-			memset(dst, ' ', destSize - maxSize + pos);
+			std::fill(dst, dst + destSize - maxSize + pos, ' ');
 		}
 
 		if(mode == nullTerminated || mode == spacePaddedNull)
