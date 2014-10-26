@@ -1760,7 +1760,7 @@ struct PACKED IFFChunk
 	size_t GetLength() const
 	{
 		if(length == 0)	// Broken files
-			return SIZE_MAX;
+			return std::numeric_limits<size_t>::max();
 		return SwapBytesReturnBE(length);
 	}
 

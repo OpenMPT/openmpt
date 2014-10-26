@@ -368,8 +368,8 @@ namespace mpt { namespace String
 
 	// Copy from a char array to a fixed size char array.
 	template <size_t destSize>
-	void CopyN(char (&destBuffer)[destSize], const char *srcBuffer, const size_t srcSize = SIZE_MAX)
-	//----------------------------------------------------------------------------------------------
+	void CopyN(char (&destBuffer)[destSize], const char *srcBuffer, const size_t srcSize = std::numeric_limits<size_t>::max())
+	//------------------------------------------------------------------------------------------------------------------------
 	{
 		const size_t copySize = std::min(destSize - 1u, srcSize);
 		std::strncpy(destBuffer, srcBuffer, copySize);
@@ -377,8 +377,8 @@ namespace mpt { namespace String
 	}
 
 	// Copy at most srcSize characters from srcBuffer to a std::string.
-	static inline void CopyN(std::string &dest, const char *srcBuffer, const size_t srcSize = SIZE_MAX)
-	//-------------------------------------------------------------------------------------------------
+	static inline void CopyN(std::string &dest, const char *srcBuffer, const size_t srcSize = std::numeric_limits<size_t>::max())
+	//---------------------------------------------------------------------------------------------------------------------------
 	{
 		dest.assign(srcBuffer, srcBuffer + mpt::strnlen(srcBuffer, srcSize));
 	}
