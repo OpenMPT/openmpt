@@ -97,7 +97,7 @@ void ReadItemString(std::istream& iStrm, std::string& str, const DataSize)
 	const uint8 nSizeBytes = (id & 12) >> 2; // 12 == 1100b
 	if (nSizeBytes > 0)
 	{
-		uint8 bytes = MIN(3, nSizeBytes);
+		uint8 bytes = std::min<uint8>(3, nSizeBytes);
 		uint8 v2 = 0;
 		uint8 v3 = 0;
 		uint8 v4 = 0;
@@ -108,7 +108,7 @@ void ReadItemString(std::istream& iStrm, std::string& str, const DataSize)
 		id |= (v2 << 8) | (v3 << 16) | (v4 << 24);
 	}
 	// Limit to 1 MB.
-	str.resize(MIN(id >> 4, 1000000));
+	str.resize(std::min<std::size_t>(id >> 4, 1000000));
 	for(size_t i = 0; i < str.size(); i++)
 		iStrm.read(&str[i], 1);
 
@@ -752,7 +752,7 @@ void SsbWrite::FinishWrite()
 	}
 
 	// Seek to end.
-	oStrm.seekp(MAX(posMapEnd, posDataEnd)); 
+	oStrm.seekp(std::max<Postype>(posMapEnd, posDataEnd)); 
 
 	SSB_LOG(mpt::String::Print<mpt::ustring>(tstrEndOfStream, oStrm.tellp() - m_posStart));
 }
