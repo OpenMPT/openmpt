@@ -148,6 +148,7 @@ protected:
 	bool SampleBufferExists(const undobuf_t &buffer, const SAMPLEINDEX smp) const;
 	void RestrictBufferSize(undobuf_t &buffer, size_t &capacity);
 	size_t GetBufferCapacity(const undobuf_t &buffer) const;
+	void RearrangeSamples(undobuf_t &buffer, const std::vector<SAMPLEINDEX> &newIndex);
 
 	bool PrepareBuffer(undobuf_t &buffer, const SAMPLEINDEX smp, sampleUndoTypes changeType, const char *description, SmpLength changeStart, SmpLength changeEnd);
 	bool Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX smp);
@@ -166,6 +167,7 @@ public:
 	const char *GetUndoName(const SAMPLEINDEX smp) const;
 	const char *GetRedoName(const SAMPLEINDEX smp) const;
 	void RestrictBufferSize();
+	void RearrangeSamples(const std::vector<SAMPLEINDEX> &newIndex) { RearrangeSamples(UndoBuffer, newIndex); RearrangeSamples(RedoBuffer, newIndex); }
 
 	CSampleUndo(CModDoc &parent) : modDoc(parent) { }
 

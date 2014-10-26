@@ -350,7 +350,7 @@ bool CSampleUndo::PrepareBuffer(undobuf_t &buffer, const SAMPLEINDEX smp, sample
 	if(changeStart > oldSample.nLength || changeStart > changeEnd)
 	{
 		// Something is surely screwed up.
-		ASSERT(false);
+		MPT_ASSERT(false);
 		return false;
 	}
 
@@ -393,7 +393,7 @@ bool CSampleUndo::PrepareBuffer(undobuf_t &buffer, const SAMPLEINDEX smp, sample
 		break;
 
 	default:
-		ASSERT(false); // whoops, what's this? someone forgot to implement it, some code is obviously missing here!
+		MPT_ASSERT(false); // whoops, what's this? someone forgot to implement it, some code is obviously missing here!
 		return false;
 	}
 
@@ -471,7 +471,7 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 
 	case sundo_insert:
 		// delete inserted data
-		ASSERT(changeLen == sample.nLength - undo.OldSample.nLength);
+		MPT_ASSERT(changeLen == sample.nLength - undo.OldSample.nLength);
 		memcpy(pCurrentSample + undo.changeStart * bytesPerSample, pCurrentSample + undo.changeEnd * bytesPerSample, (sample.nLength - undo.changeEnd) * bytesPerSample);
 		// also clean the sample end
 		memset(pCurrentSample + undo.OldSample.nLength * bytesPerSample, 0, (sample.nLength - undo.OldSample.nLength) * bytesPerSample);
@@ -501,7 +501,7 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 		break;
 
 	default:
-		ASSERT(false); // whoops, what's this? someone forgot to implement it, some code is obviously missing here!
+		MPT_ASSERT(false); // whoops, what's this? someone forgot to implement it, some code is obviously missing here!
 		return false;
 	}
 
@@ -579,6 +579,33 @@ void CSampleUndo::RestrictBufferSize(undobuf_t &buffer, size_t &capacity)
 			}
 		}
 	}
+}
+
+
+// Update undo buffer when using rearrange sample functionality
+void CSampleUndo::RearrangeSamples(undobuf_t &buffer, const std::vector<SAMPLEINDEX> &newIndex)
+//---------------------------------------------------------------------------------------------
+{
+	undobuf_t newBuf(modDoc.GetNumSamples());
+
+	for(SAMPLEINDEX smp = 1; smp < newIndex.size(); smp++)
+	{
+		MPT_ASSERT(newIndex[smp] <= modDoc.GetNumSamples());
+		if(newIndex[smp] > 0 && newIndex[smp] <= modDoc.GetNumSamples() && smp <= buffer.size())
+		{
+			newBuf[newIndex[smp] - 1] = buffer[smp - 1];
+		}
+	}
+#ifdef _DEBUG
+	for(size_t i = 0; i < buffer.size(); i++)
+	{
+		if(newIndex[i + 1] != 0)
+			MPT_ASSERT(newBuf[newIndex[i + 1] - 1].size() == buffer[i].size());
+		else
+			MPT_ASSERT(buffer[i].empty());
+	}
+#endif
+	buffer = newBuf;
 }
 
 
