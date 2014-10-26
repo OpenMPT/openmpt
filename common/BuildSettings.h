@@ -97,6 +97,9 @@
 // Enable std::istream support in class FileReader (this is generally not needed for the tracker, local files can easily be mmapped as they have been before introducing std::istream support)
 //#define MPT_FILEREADER_STD_ISTREAM
 
+// Support for externally linked samples e.g. in MPTM files
+#define MPT_EXTERNAL_SAMPLES
+
 // Disable unarchiving support
 //#define NO_ARCHIVE_SUPPORT
 
@@ -160,6 +163,7 @@
 //#define NO_ASSERTS
 //#define NO_LOGGING
 #define MPT_FILEREADER_STD_ISTREAM
+//#define MPT_EXTERNAL_SAMPLES
 #define NO_ARCHIVE_SUPPORT
 #define NO_REVERB
 #define NO_DSP
@@ -322,6 +326,10 @@
 
 #if defined(MODPLUG_TRACKER) && !defined(MPT_WITH_FILEIO)
 #define MPT_WITH_FILEIO // Tracker requires disk file io
+#endif
+
+#if defined(MPT_EXTERNAL_SAMPLES) && !defined(MPT_WITH_FILEIO)
+#define MPT_WITH_FILEIO // External samples require disk file io
 #endif
 
 #if defined(MPT_WITH_FILEIO) && !defined(MPT_WITH_PATHSTRING)

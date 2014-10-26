@@ -296,6 +296,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 	std::vector<ModSample> sampleHeaders(oldNumSamples + 1);
 	std::vector<SAMPLEINDEX> newIndex(oldNumSamples + 1, 0);	// One of the new indexes for the old sample
 	std::vector<std::string> sampleNames(oldNumSamples + 1);
+	std::vector<mpt::PathString> samplePaths(oldNumSamples + 1);
 
 	for(SAMPLEINDEX i = 0; i < newNumSamples; i++)
 	{
@@ -316,6 +317,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 			m_SndFile.DestroySample(i);
 		}
 		sampleNames[i] = m_SndFile.m_szNames[i];
+		samplePaths[i] = m_SndFile.GetSamplePath(i);
 	}
 
 	// Remove sample data references from now unused slots.
@@ -350,12 +352,14 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 				}
 			}
 			strcpy(m_SndFile.m_szNames[i + 1], sampleNames[origSlot].c_str());
+			m_SndFile.SetSamplePath(i + 1, samplePaths[origSlot]);
 		} else
 		{
 			// Invalid sample reference.
 			target.Initialize(m_SndFile.GetType());
 			target.pSample = nullptr;
 			strcpy(m_SndFile.m_szNames[i + 1], "");
+			m_SndFile.ResetSamplePath(i + 1);
 		}
 	}
 
@@ -694,6 +698,9 @@ SAMPLEINDEX CModDoc::InsertSample(bool bLimit)
 	if(newSlot || !m_SndFile.m_szNames[i][0]) strcpy(m_SndFile.m_szNames[i], "untitled");
 	if(newSlot) m_SndFile.m_nSamples = i;
 	m_SndFile.GetSample(i).Initialize(m_SndFile.GetType());
+	
+	m_SndFile.ResetSamplePath(i);
+
 	SetModified();
 	return i;
 }
@@ -782,11 +789,6 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 	if (pDup)
 	{
 		*pIns = *pDup;
-		// -> CODE#0023
-		// -> DESC="IT project files (.itp)"
-		m_SndFile.m_szInstrumentPath[newins - 1] = m_SndFile.m_szInstrumentPath[nDuplicate - 1];
-		m_bsInstrumentModified.reset(newins - 1);
-		// -! NEW_FEATURE#0023
 	}
 
 	SetModified();

@@ -11,11 +11,13 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
-#ifdef MODPLUG_TRACKER
+#ifdef MPT_EXTERNAL_SAMPLES
 // For loading external samples
 #include "../common/mptFileIO.h"
+#ifdef MODPLUG_TRACKER
 #include "../mptrack/Moddoc.h"
-#endif
+#endif // MODPLUG_TRACKER
+#endif // MPT_EXTERNAL_SAMPLES
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -1054,15 +1056,17 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			file.ReadString<mpt::String::maybeNullTerminated>(filename, filenameSize);
 			mpt::String::Copy(mptSmp.filename, filename);
 
-#ifdef MODPLUG_TRACKER
+#ifdef MPT_EXTERNAL_SAMPLES
 			mpt::PathString path(mpt::PathString::FromLocale(filename));
 			mpt::PathString mt2FileName;
 			if(!file.GetFileName().empty())
 			{
 				mt2FileName = file.GetFileName();
+#ifdef MODPLUG_TRACKER
 			} else if(GetpModDoc() != nullptr)
 			{
 				mt2FileName = GetpModDoc()->GetPathNameMpt();
+#endif // MODPLUG_TRACKER
 			}
 			if(!mt2FileName.empty())
 			{
@@ -1076,17 +1080,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				}
 				path = path.RelativePathToAbsolute(mt2FileName.GetPath());
 			}
-
-			InputFile f(path);
-			if(f.IsValid())
-			{
-				FileReader sampleFile = GetFileReader(f);
-				if(sampleFile.IsValid())
-				{
-					ReadSampleFromFile(i + 1, sampleFile, false);
-				}
-			}
-#endif
+			LoadExternalSample(i + 1, path);
+#endif // MPT_EXTERNAL_SAMPLES
 		}
 		mptSmp.nC5Speed = freq;
 		mptSmp.nFineTune = 0;

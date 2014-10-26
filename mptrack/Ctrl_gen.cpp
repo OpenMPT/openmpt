@@ -204,7 +204,6 @@ void CCtrlGeneral::OnTapTempo()
 void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 //---------------------------------------------------------
 {
-	CHAR s[256];
 	if (pHint == this) return;
 	if (dwHint & HINT_MODSEQUENCE)
 	{
@@ -216,20 +215,12 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		if (!m_bEditsLocked)
 		{
 			m_EditTitle.SetWindowText(m_sndFile.GetTitle().c_str());
-			wsprintf(s, "%d", m_sndFile.m_nDefaultTempo);
-			m_EditTempo.SetWindowText(s);
-			wsprintf(s, "%d", m_sndFile.m_nDefaultSpeed);
-			m_EditSpeed.SetWindowText(s);
-			wsprintf(s, "%d", m_sndFile.m_nDefaultGlobalVolume / GetGlobalVolumeFactor());
-			m_EditGlobalVol.SetWindowText(s);
-			wsprintf(s, "%d", m_sndFile.m_nRestartPos);
-			m_EditRestartPos.SetWindowText(s);
-			wsprintf(s, "%d", m_sndFile.m_nVSTiVolume);
-			m_EditVSTiVol.SetWindowText(s);
-			wsprintf(s, "%d", m_sndFile.m_nSamplePreAmp);
-			m_EditSamplePA.SetWindowText(s);
-			wsprintf(s, "%d", m_sndFile.m_nRestartPos);
-			m_EditRestartPos.SetWindowText(s);
+			SetDlgItemInt(IDC_EDIT_TEMPO, m_sndFile.m_nDefaultTempo, FALSE);
+			SetDlgItemInt(IDC_EDIT_SPEED, m_sndFile.m_nDefaultSpeed, FALSE);
+			SetDlgItemInt(IDC_EDIT_GLOBALVOL, m_sndFile.m_nDefaultGlobalVolume / GetGlobalVolumeFactor(), FALSE);
+			SetDlgItemInt(IDC_EDIT_RESTARTPOS, m_sndFile.m_nRestartPos, FALSE);
+			SetDlgItemInt(IDC_EDIT_VSTIVOL, m_sndFile.m_nVSTiVolume, FALSE);
+			SetDlgItemInt(IDC_EDIT_SAMPLEPA, m_sndFile.m_nSamplePreAmp, FALSE);
 		}
 
 		m_SliderGlobalVol.SetPos(MAX_SLIDER_GLOBAL_VOL-m_sndFile.m_nDefaultGlobalVolume);
@@ -270,20 +261,16 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		//on purpose(can be used to control play volume)
 
 		// MOD Type
-		LPCSTR pszModType = "MOD (ProTracker)";
+		TCHAR *modType = _T("MOD (ProTracker)");
 		switch(m_sndFile.GetType())
 		{
-		case MOD_TYPE_S3M:	pszModType = "S3M (ScreamTracker)"; break;
-		case MOD_TYPE_XM:	pszModType = "XM (FastTracker 2)"; break;
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-//		case MOD_TYPE_IT:	pszModType = "IT (Impulse Tracker)"; break;
-		case MOD_TYPE_IT:	pszModType = m_sndFile.m_SongFlags[SONG_ITPROJECT] ? "ITP (IT Project)" : "IT (Impulse Tracker)"; break;
-		case MOD_TYPE_MPT:	pszModType = "MPTM (OpenMPT)"; break;
-
-// -! NEW_FEATURE#0023
+		case MOD_TYPE_S3M:	modType = _T("S3M (ScreamTracker)"); break;
+		case MOD_TYPE_XM:	modType = _T("XM (FastTracker 2)"); break;
+		case MOD_TYPE_IT:	modType = _T("IT (Impulse Tracker)"); break;
+		case MOD_TYPE_MPT:	modType = _T("MPTM (OpenMPT)"); break;
 		}
-		wsprintf(s, "%s, %d channel%s", pszModType, m_sndFile.GetNumChannels(), (m_sndFile.GetNumChannels() != 1) ? "s" : "");
+		TCHAR s[256];
+		wsprintf(s, _T("%s, %d channel%s"), modType, m_sndFile.GetNumChannels(), (m_sndFile.GetNumChannels() != 1) ? _T("s") : _T(""));
 		m_EditModType.SetWindowText(s);
 	}
 	CheckDlgButton(IDC_CHECK_LOOPSONG,	(TrackerSettings::Instance().gbLoopSong) ? TRUE : FALSE);

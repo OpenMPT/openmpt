@@ -985,18 +985,7 @@ void CCtrlInstruments::RecalcLayout()
 void CCtrlInstruments::SetModified(DWORD mask, bool updateAll, bool modified)
 //---------------------------------------------------------------------------
 {
-	// -> CODE#0023
-	// -> DESC="IT project files (.itp)"
-	if(m_modDoc.GetrSoundFile().m_SongFlags[SONG_ITPROJECT])
-	{
-		if(m_modDoc.m_bsInstrumentModified[m_nInstrument - 1] != modified)
-		{
-			m_modDoc.m_bsInstrumentModified.set(m_nInstrument - 1, modified);
-			mask |= HINT_INSNAMES;
-		}
-	}
 	m_modDoc.UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | mask, updateAll ? nullptr : this);
-	// -! NEW_FEATURE#0023
 	if(modified) m_modDoc.SetModified();
 }
 
@@ -1449,7 +1438,6 @@ BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 		if (!m_nInstrument) m_nInstrument = 1;
 		if (m_sndFile.ReadInstrumentFromFile(m_nInstrument, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad))
 		{
-			m_sndFile.m_szInstrumentPath[m_nInstrument - 1] = fileName;
 			SetModified(HINT_SAMPLEINFO | HINT_MODTYPE, true, false);
 			bOk = TRUE;
 		}
@@ -1767,6 +1755,7 @@ void CCtrlInstruments::OnInstrumentSave()
 		"Compressed Impulse Tracker Instruments (*.iti)|*.iti||"
 		: "Impulse Tracker Instruments (*.iti)|*.iti|"
 		"Compressed Impulse Tracker Instruments (*.iti)|*.iti|"
+		"Impulse Tracker Instruments with external Samples (*.iti)|*.iti|"
 		"FastTracker II Instruments (*.xi)|*.xi||")
 		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_INSTRUMENTS))
 		.FilterIndex(&index);
@@ -1778,9 +1767,8 @@ void CCtrlInstruments::OnInstrumentSave()
 	if(!mpt::PathString::CompareNoCase(dlg.GetExtension(), MPT_PATHSTRING("xi")))
 		ok = m_sndFile.SaveXIInstrument(m_nInstrument, dlg.GetFirstFile());
 	else
-		ok = m_sndFile.SaveITIInstrument(m_nInstrument, dlg.GetFirstFile(), index == (m_sndFile.GetType() == MOD_TYPE_XM ? 3 : 2));
+		ok = m_sndFile.SaveITIInstrument(m_nInstrument, dlg.GetFirstFile(), index == (m_sndFile.GetType() == MOD_TYPE_XM ? 3 : 2), m_sndFile.GetType() != MOD_TYPE_XM && index == 3);
 
-	m_sndFile.m_szInstrumentPath[m_nInstrument - 1] = dlg.GetFirstFile();
 	SetModified(HINT_MODTYPE | HINT_INSNAMES, true, false);
 	m_modDoc.UpdateAllViews(nullptr, HINT_SMPNAMES, this);
 
@@ -2437,11 +2425,6 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 					}
 				}
 			}
-		
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-			m_modDoc.UpdateAllViews(NULL, HINT_INSNAMES, this);
-// -! NEW_FEATURE#0023
 		}
 	}
 	if ((nCode == SB_ENDSCROLL) || (nCode == SB_THUMBPOSITION))

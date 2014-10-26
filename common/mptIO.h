@@ -267,7 +267,7 @@ inline bool ReadSizedStringLE(Tfile & f, std::string & str, Tsize maxSize = std:
 
 
 template <typename T, typename Tfile>
-inline bool WriteIntLE(Tfile & f, const T & v)
+inline bool WriteIntLE(Tfile & f, const T v)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	const T val = SwapBytesReturnLE(v);
@@ -277,7 +277,7 @@ inline bool WriteIntLE(Tfile & f, const T & v)
 }
 
 template <typename T, typename Tfile>
-inline bool WriteIntBE(Tfile & f, const T & v)
+inline bool WriteIntBE(Tfile & f, const T v)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	const T val = SwapBytesReturnBE(v);
@@ -287,7 +287,7 @@ inline bool WriteIntBE(Tfile & f, const T & v)
 }
 
 template <typename Tfile>
-inline bool WriteAdaptiveInt16LE(Tfile & f, const uint16 & v, std::size_t minSize = 0, std::size_t maxSize = 0)
+inline bool WriteAdaptiveInt16LE(Tfile & f, const uint16 v, std::size_t minSize = 0, std::size_t maxSize = 0)
 {
 	MPT_ASSERT(minSize == 0 || minSize == 1 || minSize == 2);
 	MPT_ASSERT(maxSize == 0 || maxSize == 1 || maxSize == 2);
@@ -306,7 +306,7 @@ inline bool WriteAdaptiveInt16LE(Tfile & f, const uint16 & v, std::size_t minSiz
 }
 
 template <typename Tfile>
-inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 & v, std::size_t minSize = 0, std::size_t maxSize = 0)
+inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 v, std::size_t minSize = 0, std::size_t maxSize = 0)
 {
 	MPT_ASSERT(minSize == 0 || minSize == 1 || minSize == 2 || minSize == 3 || minSize == 4);
 	MPT_ASSERT(maxSize == 0 || maxSize == 1 || maxSize == 2 || maxSize == 3 || maxSize == 4);
@@ -336,7 +336,7 @@ inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 & v, std::size_t minSiz
 }
 
 template <typename Tfile>
-inline bool WriteAdaptiveInt64LE(Tfile & f, const uint64 & v, std::size_t minSize = 0, std::size_t maxSize = 0)
+inline bool WriteAdaptiveInt64LE(Tfile & f, const uint64 v, std::size_t minSize = 0, std::size_t maxSize = 0)
 {
 	MPT_ASSERT(minSize == 0 || minSize == 1 || minSize == 2 || minSize == 4 || minSize == 8);
 	MPT_ASSERT(maxSize == 0 || maxSize == 1 || maxSize == 2 || maxSize == 4 || maxSize == 8);
@@ -358,6 +358,25 @@ inline bool WriteAdaptiveInt64LE(Tfile & f, const uint64 & v, std::size_t minSiz
 		MPT_ASSERT(false);
 		return false;
 	}
+}
+
+// Write a variable-length integer, as found in MIDI files. The number of written bytes is placed in the bytesWritten parameter.
+template <typename Tfile, typename T>
+bool WriteVarInt(Tfile & f, const T v, size_t *bytesWritten = nullptr)
+{
+	uint8 out[(sizeof(T) * 8 + 6) / 7];
+	size_t numBytes = 0;
+	for(uint32 n = (sizeof(T) * 8) / 7; n > 0; n--)
+	{
+		if(v >= (1u << (n * 7u)))
+		{
+			out[numBytes++] = static_cast<uint8>(((v >> (n * 7u)) & 0x7F) | 0x80);
+		}
+	}
+	out[numBytes++] = static_cast<uint8>(v & 0x7F);
+	MPT_ASSERT(numBytes <= CountOf(out));
+	if(bytesWritten != nullptr) *bytesWritten = numBytes;
+	return mpt::IO::WriteRaw(f, out, numBytes);
 }
 
 template <typename Tsize, typename Tfile>

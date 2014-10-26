@@ -16,6 +16,9 @@
 #include "../mptrack/Moddoc.h"
 #include "../mptrack/Reporting.h"
 #endif // MODPLUG_TRACKER
+#ifdef MPT_EXTERNAL_SAMPLES
+#include "../common/mptFileIO.h"
+#endif // MPT_EXTERNAL_SAMPLES
 #include "../common/version.h"
 #include "../common/AudioCriticalSection.h"
 #include "../common/mptIO.h"
@@ -608,6 +611,7 @@ CSoundFile::CSoundFile() :
 #ifdef MODPLUG_TRACKER
 	m_lockOrderStart = m_lockOrderEnd = ORDERINDEX_INVALID;
 	m_pModDoc = nullptr;
+	m_bChannelMuteTogglePending.reset();
 
 	m_nDefaultRowsPerBeat = m_PlayState.m_nCurrentRowsPerBeat = (TrackerSettings::Instance().m_nRowHighlightBeats) ? TrackerSettings::Instance().m_nRowHighlightBeats : 4;
 	m_nDefaultRowsPerMeasure = m_PlayState.m_nCurrentRowsPerMeasure = (TrackerSettings::Instance().m_nRowHighlightMeasures >= m_nDefaultRowsPerBeat) ? TrackerSettings::Instance().m_nRowHighlightMeasures : m_nDefaultRowsPerBeat * 4;
@@ -618,9 +622,6 @@ CSoundFile::CSoundFile() :
 
 	m_dwLastSavedWithVersion=0;
 	m_dwCreatedWithVersion=0;
-#ifdef MODPLUG_TRACKER
-	m_bChannelMuteTogglePending.reset();
-#endif // MODPLUG_TRACKER
 
 	MemsetZero(m_PlayState.ChnMix);
 	MemsetZero(Instruments);
@@ -777,12 +778,9 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		DWORD dwMemLength = file.GetLength();
 
 		if(!ReadXM(file, loadFlags)
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-		 && !ReadITProject(file, loadFlags)
-// -! NEW_FEATURE#0023
 		 && !ReadIT(file, loadFlags)
 		 && !ReadS3M(file, loadFlags)
+		 && !ReadITProject(file, loadFlags)
 #ifdef MODPLUG_TRACKER
 		// this makes little sense for a module player library
 		 && !ReadWav(file, loadFlags)
@@ -1638,6 +1636,9 @@ bool CSoundFile::DestroySample(SAMPLEINDEX nSample)
 	sample.nLength = 0;
 	sample.uFlags.reset(CHN_16BIT | CHN_STEREO);
 
+#ifdef MODPLUG_TRACKER
+	ResetSamplePath(nSample);
+#endif
 	return true;
 }
 
@@ -2078,6 +2079,47 @@ void CSoundFile::PrecomputeSampleLoops(bool updateChannels)
 		Samples[i].PrecomputeLoops(*this, updateChannels);
 	}
 }
+
+
+#ifdef MPT_EXTERNAL_SAMPLES
+// Load external waveform, but keep sample properties like frequency, panning, etc...
+// Returns true if the file could be loaded.
+bool CSoundFile::LoadExternalSample(SAMPLEINDEX smp, const mpt::PathString &filename)
+//-----------------------------------------------------------------------------------
+{
+	bool ok = false;
+	InputFile f(filename);
+
+	if(f.IsValid())
+	{
+		const ModSample origSample = Samples[smp];
+		char origName[MAX_SAMPLENAME];
+		mpt::String::Copy(origName, m_szNames[smp]);
+
+		FileReader file = GetFileReader(f);
+		ok = ReadSampleFromFile(smp, file, false);
+		if(ok)
+		{
+			// Copy over old attributes, but keep new sample data
+			ModSample &sample = GetSample(smp);
+			SmpLength newLength = sample.nLength;
+			void *newData = sample.pSample;
+			FlagSet<ChannelFlags, uint16> newFlags = sample.uFlags;
+
+			sample = origSample;
+			sample.nLength = newLength;
+			sample.pSample = newData;
+			sample.uFlags.set(CHN_16BIT, newFlags[CHN_16BIT]);
+			sample.uFlags.set(CHN_STEREO, newFlags[CHN_STEREO]);
+			sample.uFlags.reset(SMP_MODIFIED);
+			sample.SanitizeLoops();
+		}
+		mpt::String::Copy(m_szNames[smp], origName);
+	}
+	SetSamplePath(smp, filename);
+	return ok;
+}
+#endif // MPT_EXTERNAL_SAMPLES
 
 
 // Set up channel panning and volume suitable for MOD + similar files. If the current mod type is not MOD, bForceSetup has to be set to true.

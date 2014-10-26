@@ -370,7 +370,7 @@ const CModSpecifications itEx =
 	true,										// Supports plugins
 	false,										// No custom pattern time signatures
 	true,										// Pattern names
-	SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG | SONG_ITPROJECT | SONG_ITPEMBEDIH,	// Supported song flags
+	SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
 };
 
 const CModSpecifications *Collection[] = { &mptm, &mod, &s3m, &s3mEx, &xm, &xmEx, &it, &itEx };
@@ -397,11 +397,6 @@ MODTYPE CModSpecifications::ExtensionToType(const std::string &ext_)
 		{
 			return ModSpecs::Collection[i]->internalType;
 		}
-	}
-	// Special case: ITP files...
-	if(ext == "itp")
-	{
-		return MOD_TYPE_IT;
 	}
 	return MOD_TYPE_NONE;
 }

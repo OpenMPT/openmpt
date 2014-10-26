@@ -62,7 +62,7 @@ public:
 	DECLARE_SERIAL(CViewSample)
 
 protected:
-	void SetModified(DWORD mask, bool updateAll);
+	void SetModified(DWORD mask, bool updateAll, bool waveformModified);
 	void UpdateScrollSize() { UpdateScrollSize(m_nZoom, true); }
 	void UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength centeredSample = SmpLength(-1));
 	BOOL SetCurrentSample(SAMPLEINDEX nSmp);

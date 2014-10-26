@@ -558,8 +558,8 @@ static noinline void TestMisc()
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType("xm"), MOD_TYPE_XM);
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType(".it"), MOD_TYPE_IT);
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType("it"), MOD_TYPE_IT);
-	VERIFY_EQUAL(CModSpecifications::ExtensionToType(".itp"), MOD_TYPE_IT);
-	VERIFY_EQUAL(CModSpecifications::ExtensionToType("itp"), MOD_TYPE_IT);
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType(".itp"), MOD_TYPE_NONE);
+	VERIFY_EQUAL(CModSpecifications::ExtensionToType("itp"), MOD_TYPE_NONE);
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType("mptm"), MOD_TYPE_MPT);
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType("invalidExtension"), MOD_TYPE_NONE);
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType("ita"), MOD_TYPE_NONE);
@@ -1282,7 +1282,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].dwFlags, ChannelFlags(0));
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].nMixPlugin, 1);
 	// Samples
-	VERIFY_EQUAL_NONCONT(sndFile.GetNumSamples(), 3);
+	VERIFY_EQUAL_NONCONT(sndFile.GetNumSamples(), 4);
 	{
 		const ModSample &sample = sndFile.GetSample(1);
 		VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
@@ -1331,6 +1331,42 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		{
 			VERIFY_EQUAL_NONCONT(sample.pSample16[4 + i], int16(-32768));
 		}
+	}
+
+	// External sample
+	{
+		const ModSample &sample = sndFile.GetSample(4);
+		VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[4], "Overridden Name"), 0);
+		VERIFY_EQUAL_NONCONT(strcmp(sample.filename, "External"), 0);
+#ifdef MPT_EXTERNAL_SAMPLES
+		VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
+		VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 1);
+		VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 1);
+		VERIFY_EQUAL_NONCONT(sample.GetSampleSizeInBytes(), 64);
+
+		VERIFY_EQUAL_NONCONT(sample.nLoopStart, 42);
+		VERIFY_EQUAL_NONCONT(sample.nLoopEnd, 55);
+		VERIFY_EQUAL_NONCONT(sample.nSustainStart, 42);
+		VERIFY_EQUAL_NONCONT(sample.nSustainEnd, 55);
+#endif // MPT_EXTERNAL_SAMPLES
+		VERIFY_EQUAL_NONCONT(sample.GetSampleRate(MOD_TYPE_MPT), 10101);
+		VERIFY_EQUAL_NONCONT(sample.nVolume, 26 * 4);
+		VERIFY_EQUAL_NONCONT(sample.nGlobalVol, 26);
+		VERIFY_EQUAL_NONCONT(sample.nPan, 26 * 4);
+		VERIFY_EQUAL_NONCONT(sample.uFlags, CHN_LOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN | SMP_KEEPONDISK);
+
+		VERIFY_EQUAL_NONCONT(sample.nVibType, VIB_SINE);
+		VERIFY_EQUAL_NONCONT(sample.nVibSweep, 37);
+		VERIFY_EQUAL_NONCONT(sample.nVibRate, 42);
+		VERIFY_EQUAL_NONCONT(sample.nVibDepth, 23);
+
+		// Sample Data
+#ifdef MPT_EXTERNAL_SAMPLES
+		for(size_t i = 0; i < 16; i++)
+		{
+			VERIFY_EQUAL_NONCONT(sample.pSample8[i], int8(45));
+		}
+#endif // MPT_EXTERNAL_SAMPLES
 	}
 
 	// Instruments
@@ -1847,6 +1883,27 @@ static noinline void TestLoadSaveFile()
 		RemoveFile(filenameBase + MPT_PATHSTRING("saved.s3m"));
 	}
 	#endif
+
+	// General file I/O tests
+	{
+		std::ostringstream f;
+		size_t bytesWritten;
+		mpt::IO::WriteVarInt(f, uint16(0), &bytesWritten);		VERIFY_EQUAL_NONCONT(bytesWritten, 1);
+		mpt::IO::WriteVarInt(f, uint16(127), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 1);
+		mpt::IO::WriteVarInt(f, uint16(128), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 2);
+		mpt::IO::WriteVarInt(f, uint16(16383), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 2);
+		mpt::IO::WriteVarInt(f, uint16(16384), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 3);
+		mpt::IO::WriteVarInt(f, uint16(65535), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 3);
+		std::string data = f.str();
+		FileReader file(&data[0], data.size());
+		uint16 v;
+		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 0);
+		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 127);
+		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 128);
+		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 16383);
+		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 16384);
+		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 65535);
+	}
 }
 
 

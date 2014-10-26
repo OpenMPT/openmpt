@@ -44,6 +44,7 @@ enum
 	SMPLIST_MIDDLEC,
 	SMPLIST_INSTR,
 	SMPLIST_FILENAME,
+	SMPLIST_PATH,
 	SMPLIST_COLUMNS
 };
 
@@ -56,10 +57,6 @@ enum
 	INSLIST_ENVELOPES,
 	INSLIST_FILENAME,
 	INSLIST_PLUGIN,
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	INSLIST_PATH,
-// -! NEW_FEATURE#0023
 	INSLIST_COLUMNS
 };
 
@@ -73,6 +70,7 @@ const LISTCOLHDR gSampleHeaders[SMPLIST_COLUMNS] =
 	{ _T("C-5 Freq"), 80},
 	{ _T("Instr"), 64},
 	{ _T("File Name"), 128},
+	{ _T("Path"), 128},
 };
 
 const LISTCOLHDR gInstrumentHeaders[INSLIST_COLUMNS] =
@@ -83,10 +81,6 @@ const LISTCOLHDR gInstrumentHeaders[INSLIST_COLUMNS] =
 	{ _T("Envelopes"), 128},
 	{ _T("File Name"), 128},
 	{ _T("Plugin"), 128},
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	{ _T("Path"), 128},
-// -! NEW_FEATURE#0023
 };
 
 
@@ -281,21 +275,21 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						mpt::String::Copy(s, sndFile.m_szNames[iSmp + 1]);
 						break;
 					case SMPLIST_SAMPLENO:
-						wsprintf(s, "%02d", iSmp + 1);
+						wsprintf(s, "%02u", iSmp + 1);
 						break;
 					case SMPLIST_SIZE:
 						if (sample.nLength)
 						{
 							if(sample.GetSampleSizeInBytes() >= 1024)
-								wsprintf(s, "%d KB", sample.GetSampleSizeInBytes() >> 10);
+								wsprintf(s, "%u KB", sample.GetSampleSizeInBytes() >> 10);
 							else
-								wsprintf(s, "%d B", sample.GetSampleSizeInBytes());
+								wsprintf(s, "%u B", sample.GetSampleSizeInBytes());
 						}
 						break;
 					case SMPLIST_TYPE:
 						if(sample.nLength)
 						{
-							wsprintf(s, "%d Bit", sample.GetElementarySampleSize() * 8);
+							wsprintf(s, "%u Bit", sample.GetElementarySampleSize() * 8);
 						}
 						break;
 					case SMPLIST_INSTR:
@@ -309,7 +303,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 									if (!first) strcat(s, ",");
 									first = false;
 
-									wsprintf(stmp, "%d", i);
+									wsprintf(stmp, "%u", i);
 									strcat(s, stmp);
 
 									if (strlen(s) > sizeof(s) - 10)
@@ -324,12 +318,15 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					case SMPLIST_MIDDLEC:
 						if (sample.nLength)
 						{
-							wsprintf(s, "%d Hz", sample.GetSampleRate(sndFile.GetType()));
+							wsprintf(s, "%u Hz", sample.GetSampleRate(sndFile.GetType()));
 						}
 						break;
 					case SMPLIST_FILENAME:
-						memcpy(s, sample.filename, sizeof(sample.filename));
+						mpt::String::Copy(s, sample.filename);
 						s[CountOf(sample.filename)] = 0;
+						break;
+					case SMPLIST_PATH:
+						mpt::String::Copy(s, sndFile.GetSamplePath(iSmp + 1).ToLocale());
 						break;
 					}
 					lvi.mask = LVIF_TEXT;
@@ -401,7 +398,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 									break;
 								}
 
-								wsprintf(s + l, "%d", *sample);
+								wsprintf(s + l, "%u", *sample);
 							}
 						}
 						break;
@@ -423,19 +420,9 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					case INSLIST_PLUGIN:
 						if (pIns != nullptr && pIns->nMixPlug > 0 && sndFile.m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin != nullptr)
 						{
-							wsprintf(s, "FX%02d: %s", pIns->nMixPlug, mpt::ToLocale(mpt::CharsetUTF8, sndFile.m_MixPlugins[pIns->nMixPlug - 1].GetLibraryName()).c_str());
+							wsprintf(s, "FX%02u: %s", pIns->nMixPlug, mpt::ToLocale(mpt::CharsetUTF8, sndFile.m_MixPlugins[pIns->nMixPlug - 1].GetLibraryName()).c_str());
 						}
 						break;
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-					case INSLIST_PATH:
-						if (pIns)
-						{
-							strncpy(s, sndFile.m_szInstrumentPath[iIns].ToLocale().c_str(), _MAX_PATH);
-							s[_MAX_PATH] = 0;
-						}
-						break;
-// -! NEW_FEATURE#0023
 					}
 					lvi.mask = LVIF_TEXT;
 					lvi.iItem = iIns;

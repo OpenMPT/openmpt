@@ -159,6 +159,10 @@ enum ChannelFlags
 	CHN_SOLO			= 0x2000000,	// solo channel -> CODE#0012 -> DESC="midi keyboard split" -! NEW_FEATURE#0012
 	CHN_NOFX			= 0x4000000,	// dry channel -> CODE#0015 -> DESC="channels management dlg" -! NEW_FEATURE#0015
 	CHN_SYNCMUTE		= 0x8000000,	// keep sample sync on mute
+
+	// Sample storage flags (also saved in ModSample::uFlags, but are not relevant to mixing)
+	SMP_MODIFIED		= 0x1000,	// Sample data has been edited in the tracker
+	SMP_KEEPONDISK		= 0x2000,	// Sample is not saved to file, data is restored from original sample file
 };
 DECLARE_FLAGSET(ChannelFlags)
 
@@ -246,7 +250,7 @@ enum enmEnvelopeTypes
 #define DNA_NOTEFADE	2
 
 
-// Module flags - note: these are written out as-is in ITP files!
+// Module flags - contains both song configuration and playback state... Use SONG_FILE_FLAGS and SONG_PLAY_FLAGS distinguish between the two.
 enum SongFlags
 {
 	SONG_EMBEDMIDICFG	= 0x0001,		// Embed macros in file
@@ -256,28 +260,25 @@ enum SongFlags
 	SONG_LINEARSLIDES	= 0x0010,		// Linear slides vs. Amiga slides
 	SONG_PATTERNLOOP	= 0x0020,		// Loop current pattern (pattern editor)
 	SONG_STEP			= 0x0040,		// Song is in "step" mode (pattern editor)
-	SONG_PAUSED			= 0x0080,		// Song is paused
+	SONG_PAUSED			= 0x0080,		// Song is paused (no tick processing, just rendering audio)
 	SONG_FADINGSONG		= 0x0100,		// Song is fading out
 	SONG_ENDREACHED		= 0x0200,		// Song is finished
-	//SONG_GLOBALFADE		= 0x0400,		// Song is fading out
+	//SONG_GLOBALFADE	= 0x0400,		// Song is fading out
 	//SONG_CPUVERYHIGH	= 0x0800,		// High CPU usage
 	SONG_FIRSTTICK		= 0x1000,		// Is set when the current tick is the first tick of the row
 	SONG_MPTFILTERMODE	= 0x2000,		// Local filter mode (reset filter on each note)
 	SONG_SURROUNDPAN	= 0x4000,		// Pan in the rear channels
 	SONG_EXFILTERRANGE	= 0x8000,		// Cutoff Filter has double frequency range (up to ~10Khz)
 	SONG_AMIGALIMITS	= 0x10000,		// Enforce amiga frequency limits
-	// -> CODE#0023
-	// -> DESC="IT project files (.itp)"
-	SONG_ITPROJECT		= 0x20000,		// Is a project file
-	SONG_ITPEMBEDIH		= 0x40000,		// Embed instrument headers in project file
-	// -! NEW_FEATURE#0023
+	//SONG_ITPROJECT	= 0x20000,		// Is a project file
+	//SONG_ITPEMBEDIH	= 0x40000,		// Embed instrument headers in project file
 	SONG_BREAKTOROW		= 0x80000,		// Break to row command encountered (internal flag, do not touch)
 	SONG_POSJUMP		= 0x100000,		// Position jump encountered (internal flag, do not touch)
-	SONG_PT1XMODE		= 0x200000,		// ProTracker 1.x playback mode
+	SONG_PT1XMODE		= 0x200000,		// ProTracker 1/2 playback mode
 };
 DECLARE_FLAGSET(SongFlags)
 
-#define SONG_FILE_FLAGS	(SONG_EMBEDMIDICFG|SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_ITPROJECT|SONG_ITPEMBEDIH|SONG_PT1XMODE)
+#define SONG_FILE_FLAGS	(SONG_EMBEDMIDICFG|SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_PT1XMODE)
 #define SONG_PLAY_FLAGS (~SONG_FILE_FLAGS)
 
 // Global Options (Renderer)

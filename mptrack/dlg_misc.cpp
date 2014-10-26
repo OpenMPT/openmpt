@@ -55,7 +55,6 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHECK3,		m_CheckBox3);
 	DDX_Control(pDX, IDC_CHECK4,		m_CheckBox4);
 	DDX_Control(pDX, IDC_CHECK5,		m_CheckBox5);
-	DDX_Control(pDX, IDC_CHECK6,		m_CheckBox6);
 	DDX_Control(pDX, IDC_CHECK_PT1X,	m_CheckBoxPT1x);
 	DDX_Control(pDX, IDC_CHECK_AMIGALIMITS,	m_CheckBoxAmigaLimits);
 
@@ -77,20 +76,13 @@ BOOL CModTypeDlg::OnInitDialog()
 	m_TypeBox.SetItemData(m_TypeBox.AddString("ScreamTracker S3M"), MOD_TYPE_S3M);
 	m_TypeBox.SetItemData(m_TypeBox.AddString("FastTracker XM"), MOD_TYPE_XM);
 	m_TypeBox.SetItemData(m_TypeBox.AddString("Impulse Tracker IT"), MOD_TYPE_IT);
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	m_TypeBox.SetItemData(m_TypeBox.AddString("Impulse Tracker Project ITP"), MOD_TYPE_IT);
-	// -! NEW_FEATURE#0023
 	m_TypeBox.SetItemData(m_TypeBox.AddString("OpenMPT MPTM"), MOD_TYPE_MPT);
 	switch(m_nType)
 	{
 	case MOD_TYPE_S3M:	m_TypeBox.SetCurSel(1); break;
 	case MOD_TYPE_XM:	m_TypeBox.SetCurSel(2); break;
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	case MOD_TYPE_IT:	m_TypeBox.SetCurSel(sndFile.m_SongFlags[SONG_ITPROJECT] ? 4 : 3); break;
-// -! NEW_FEATURE#0023
-	case MOD_TYPE_MPT:	m_TypeBox.SetCurSel(5); break;
+	case MOD_TYPE_IT:	m_TypeBox.SetCurSel(3); break;
+	case MOD_TYPE_MPT:	m_TypeBox.SetCurSel(4); break;
 	default:			m_TypeBox.SetCurSel(0); break;
 	}
 
@@ -170,11 +162,6 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBoxPT1x.SetCheck(sndFile.m_SongFlags[SONG_PT1XMODE] ? BST_CHECKED : BST_UNCHECKED);
 	m_CheckBoxAmigaLimits.SetCheck(sndFile.m_SongFlags[SONG_AMIGALIMITS] ? BST_CHECKED : BST_UNCHECKED);
 
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	m_CheckBox6.SetCheck(sndFile.m_SongFlags[SONG_ITPEMBEDIH] ? MF_CHECKED : 0);
-// -! NEW_FEATURE#0023
-
 	const FlagSet<SongFlags> allowedFlags(sndFile.GetModSpecifications(type).songFlags);
 	m_CheckBox1.EnableWindow(allowedFlags[SONG_LINEARSLIDES]);
 	m_CheckBox2.EnableWindow(allowedFlags[SONG_FASTVOLSLIDES]);
@@ -186,11 +173,6 @@ void CModTypeDlg::UpdateDialog()
 
 	m_CheckBoxPT1x.ShowWindow(type != MOD_TYPE_S3M ? SW_SHOW : SW_HIDE);
 	m_CheckBoxAmigaLimits.ShowWindow(type == MOD_TYPE_S3M ? SW_SHOW : SW_HIDE);
-
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	m_CheckBox6.EnableWindow(m_TypeBox.GetCurSel() == 4 ? TRUE : FALSE);
-// -! NEW_FEATURE#0023
 
 	const bool XMorITorMPT = (type & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0;
 	const bool ITorMPT = (type & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0;
@@ -219,13 +201,11 @@ void CModTypeDlg::UpdateDialog()
 	// Tempo modes
 	const tempoMode oldTempoMode = initialized ? static_cast<tempoMode>(m_TempoModeBox.GetItemData(m_TempoModeBox.GetCurSel())) : sndFile.m_nTempoMode;
 	m_TempoModeBox.ResetContent();
-	// Don't show new tempo modes for XM/IT, unless they are currently used
-	const bool showNewModes = (type == MOD_TYPE_MPT || (sndFile.m_SongFlags[SONG_ITPROJECT] != 0));
 
 	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Classic"), tempo_mode_classic);
-	if(showNewModes || sndFile.m_nTempoMode == tempo_mode_alternative)
+	if(type == MOD_TYPE_MPT || sndFile.m_nTempoMode == tempo_mode_alternative)
 		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Alternative"), tempo_mode_alternative);
-	if(showNewModes || sndFile.m_nTempoMode == tempo_mode_modern)
+	if(type == MOD_TYPE_MPT || sndFile.m_nTempoMode == tempo_mode_modern)
 		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Modern (accurate)"), tempo_mode_modern);
 	m_TempoModeBox.SetCurSel(0);
 	for(int i = m_TempoModeBox.GetCount(); i > 0; i--)
@@ -240,7 +220,7 @@ void CModTypeDlg::UpdateDialog()
 	// Mix levels
 	const mixLevels oldMixLevels = initialized ? static_cast<mixLevels>(m_PlugMixBox.GetItemData(m_PlugMixBox.GetCurSel())) : sndFile.GetMixLevels();
 	m_PlugMixBox.ResetContent();
-	if(showNewModes || sndFile.GetMixLevels() == mixLevels_117RC3)	// In XM/IT, this is only shown for backwards compatibility with existing tunes
+	if(type == MOD_TYPE_MPT || sndFile.GetMixLevels() == mixLevels_117RC3)	// In XM/IT, this is only shown for backwards compatibility with existing tunes
 		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC3"),	mixLevels_117RC3);
 	if(sndFile.GetMixLevels() == mixLevels_117RC2)	// Only shown for backwards compatibility with existing tunes
 		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),	mixLevels_117RC2);
@@ -340,14 +320,6 @@ void CModTypeDlg::OnOK()
 	if (sel >= 0)
 	{
 		m_nType = static_cast<MODTYPE>(m_TypeBox.GetItemData(sel));
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-		if(sndFile.m_SongFlags[SONG_ITPROJECT] && sel != 4)
-		{
-			sndFile.m_SongFlags.reset(SONG_ITPROJECT | SONG_ITPEMBEDIH);
-		}
-		if(sel == 4) sndFile.m_SongFlags.set(SONG_ITPROJECT);
-// -! NEW_FEATURE#0023
 	}
 
 	sndFile.m_SongFlags.set(SONG_LINEARSLIDES, m_CheckBox1.GetCheck() != BST_UNCHECKED);
@@ -355,7 +327,6 @@ void CModTypeDlg::OnOK()
 	sndFile.m_SongFlags.set(SONG_ITOLDEFFECTS, m_CheckBox3.GetCheck() != BST_UNCHECKED);
 	sndFile.m_SongFlags.set(SONG_ITCOMPATGXX, m_CheckBox4.GetCheck() != BST_UNCHECKED);
 	sndFile.m_SongFlags.set(SONG_EXFILTERRANGE, m_CheckBox5.GetCheck() != BST_UNCHECKED);
-	sndFile.m_SongFlags.set(SONG_ITPEMBEDIH, m_CheckBox6.GetCheck() != BST_UNCHECKED);
 	sndFile.m_SongFlags.set(SONG_PT1XMODE, m_CheckBoxPT1x.GetCheck() != BST_UNCHECKED);
 	sndFile.m_SongFlags.set(SONG_AMIGALIMITS, m_CheckBoxAmigaLimits.GetCheck() != BST_UNCHECKED);
 

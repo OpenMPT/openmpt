@@ -128,13 +128,7 @@ mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 	name += MPT_PATHSTRING(".AutoSave.");					//append backup tag
 	name += mpt::PathString::FromWide(timeStamp);			//append timestamp
 	name += MPT_PATHSTRING(".");							//append extension
-	if(modDoc.GetrSoundFile().m_SongFlags[SONG_ITPROJECT])
-	{
-		name += MPT_PATHSTRING("itp");
-	} else
-	{
-		name += mpt::PathString::FromUTF8(modDoc.GetrSoundFile().GetModSpecifications().fileExtension);
-	}
+	name += mpt::PathString::FromUTF8(modDoc.GetrSoundFile().GetModSpecifications().fileExtension);
 
 	return name;
 }
@@ -168,9 +162,7 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 		break;
 
 	case MOD_TYPE_IT:
-		success = sndFile.m_SongFlags[SONG_ITPROJECT] ? 
-			sndFile.SaveITProject(fileName) :
-			sndFile.SaveIT(fileName); 
+		success = sndFile.SaveIT(fileName);
 		break;
 
 	case MOD_TYPE_MPT:

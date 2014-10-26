@@ -80,7 +80,7 @@ public:
 	virtual void OnDeactivatePage();
 	virtual void UpdateView(DWORD dwHintMask=0, CObject *pObj=NULL);
 	virtual LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam);
-	virtual BOOL GetToolTipText(UINT uId, LPSTR pszText);
+	virtual BOOL GetToolTipText(UINT uId, TCHAR *pszText);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	//}}AFX_VIRTUAL
 protected:
@@ -122,6 +122,7 @@ protected:
 	afx_msg void OnVibSweepChanged();
 	afx_msg void OnVibRateChanged();
 	afx_msg void OnXFade();
+	afx_msg void OnKeepSampleOnDisk();
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 
@@ -129,7 +130,7 @@ protected:
 	afx_msg void OnEnableStretchToSize();
 	afx_msg void OnEstimateSampleSize();
 
-	void SetModified(DWORD mask, bool updateAll);
+	void SetModified(DWORD mask, bool updateAll, bool waveformModified);
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

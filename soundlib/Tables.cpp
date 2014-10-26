@@ -48,7 +48,7 @@ static const ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_S3M,		"ScreamTracker III",		"s3m" },
 	{ MOD_TYPE_XM,		"FastTracker II",			"xm" },
 	{ MOD_TYPE_IT,		"Impulse Tracker",			"it" },
-#ifdef MODPLUG_TRACKER
+#ifdef MPT_EXTERNAL_SAMPLES
 	{ MOD_TYPE_IT,		"Impulse Tracker Project",	"itp" },
 #endif
 	{ MOD_TYPE_MPT,		"OpenMPT",					"mptm" },

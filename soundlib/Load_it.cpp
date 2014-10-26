@@ -15,7 +15,10 @@
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/moddoc.h"
 #include "../mptrack/TrackerSettings.h"
-#endif
+#endif // MODPLUG_TRACKER
+#ifdef MPT_EXTERNAL_SAMPLES
+#include "../common/mptFileIO.h"
+#endif // MPT_EXTERNAL_SAMPLES
 #include "../common/mptIO.h"
 #include "../common/serialization_utils.h"
 #ifndef MODPLUG_NO_FILESAVE
@@ -26,6 +29,7 @@
 #include "../common/version.h"
 #include "ITTools.h"
 #include <time.h>
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -634,13 +638,45 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			if(!memcmp(sampleHeader.id, "IMPS", 4))
 			{
-				size_t sampleOffset = sampleHeader.ConvertToMPT(Samples[i + 1]);
+				ModSample &sample = Samples[i + 1];
+				size_t sampleOffset = sampleHeader.ConvertToMPT(sample);
 
 				mpt::String::Read<mpt::String::spacePadded>(m_szNames[i + 1], sampleHeader.name);
 
 				if((loadFlags & loadSampleData) && file.Seek(sampleOffset))
 				{
-					sampleHeader.GetSampleFormat(fileHeader.cwtv).ReadSample(Samples[i + 1], file);
+					if(!sample.uFlags[SMP_KEEPONDISK])
+					{
+						sampleHeader.GetSampleFormat(fileHeader.cwtv).ReadSample(sample, file);
+					} else
+					{
+#ifdef MPT_EXTERNAL_SAMPLES
+						// External sample in MPTM file
+						std::string filenameU8;
+						size_t strLen;
+						file.ReadVarInt(strLen);
+						file.ReadString<mpt::String::maybeNullTerminated>(filenameU8, strLen);
+						mpt::PathString filename = mpt::PathString::FromUTF8(filenameU8);
+
+						if(!filename.empty())
+						{
+							if(!file.GetFileName().empty())
+							{
+								filename = filename.RelativePathToAbsolute(file.GetFileName().GetPath());
+							} else if(GetpModDoc() != nullptr)
+							{
+								filename = filename.RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt().GetPath());
+							}
+							if(!LoadExternalSample(i + 1, filename))
+							{
+								AddToLog("Unable to load sample: " + filename.ToLocale());
+							}
+						} else
+						{
+							sample.uFlags.reset(SMP_KEEPONDISK);
+						}
+#endif // MPT_EXTERNAL_SAMPLES
+					}
 					lastSampleOffset = std::max(lastSampleOffset, file.GetPosition());
 				}
 			}
@@ -945,7 +981,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !(fileHeader.special & 3) && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
 			{
 				madeWithTracker = "CheeseTracker";
-			} else
+			} else if(fileHeader.cmwt < 0x0888)
 			{
 				if(fileHeader.cmwt > 0x0214)
 				{
@@ -966,11 +1002,14 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 					uint32 editTime;
 					memcpy(&editTime, fileHeader.reserved, 4);
 					SwapBytesLE(editTime);
-					editTime ^= 0x4954524B;	// 'ITRK'
-					editTime = (editTime >> 7) | (editTime << (32 - 7));
-					editTime = -(int32)editTime;
-					editTime = (editTime << 4) | (editTime >> (32 - 4));
-					editTime ^= 0x4A54484C;	// 'JTHL'
+					if(fileHeader.cwtv >= 0x0208)
+					{
+						editTime ^= 0x4954524B;	// 'ITRK'
+						editTime = (editTime >> 7) | (editTime << (32 - 7));
+						editTime = -(int32)editTime;
+						editTime = (editTime << 4) | (editTime >> (32 - 4));
+						editTime ^= 0x4A54484C;	// 'JTHL'
+					}
 
 					FileHistory hist;
 					MemsetZero(hist);
@@ -1375,9 +1414,9 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	// Writing sample headers
 	ITSample itss;
 	MemsetZero(itss);
-	for(SAMPLEINDEX hsmp = 0; hsmp < itHeader.smpnum; hsmp++)
+	for(SAMPLEINDEX smp = 0; smp < itHeader.smpnum; smp++)
 	{
-		smppos[hsmp] = dwPos;
+		smppos[smp] = dwPos;
 		dwPos += sizeof(ITSample);
 		fwrite(&itss, 1, sizeof(ITSample), f);
 	}
@@ -1569,29 +1608,42 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		fseek(f, dwPos, SEEK_SET);
 	}
 	// Writing Sample Data
-	for(SAMPLEINDEX nsmp = 1; nsmp <= itHeader.smpnum; nsmp++)
+	for(SAMPLEINDEX smp = 1; smp <= itHeader.smpnum; smp++)
 	{
 #ifdef MODPLUG_TRACKER
 		int type = GetType() == MOD_TYPE_IT ? 1 : 4;
 		if(compatibilityExport) type = 2;
-		bool compress = ((((Samples[nsmp].GetNumChannels() > 1) ? TrackerSettings::Instance().MiscITCompressionStereo : TrackerSettings::Instance().MiscITCompressionMono) & type) != 0);
+		bool compress = ((((Samples[smp].GetNumChannels() > 1) ? TrackerSettings::Instance().MiscITCompressionStereo : TrackerSettings::Instance().MiscITCompressionMono) & type) != 0);
 #else
 		bool compress = false;
 #endif // MODPLUG_TRACKER
 		// Old MPT, DUMB and probably other libraries will only consider the IT2.15 compression flag if the header version also indicates IT2.15.
 		// MilkyTracker <= 0.90.85 will only assume IT2.15 compression with cmwt == 0x215, ignoring the delta flag completely.
-		itss.ConvertToIT(Samples[nsmp], GetType(), compress, itHeader.cmwt >= 0x215);
+		itss.ConvertToIT(Samples[smp], GetType(), compress, itHeader.cmwt >= 0x215, GetType() == MOD_TYPE_MPT);
+		const bool isExternal = itss.cvt == ITSample::cvtExternalSample;
 
-		mpt::String::Write<mpt::String::nullTerminated>(itss.name, m_szNames[nsmp]);
+		mpt::String::Write<mpt::String::nullTerminated>(itss.name, m_szNames[smp]);
 
 		itss.samplepointer = dwPos;
 		itss.ConvertEndianness();
-		fseek(f, smppos[nsmp - 1], SEEK_SET);
+		fseek(f, smppos[smp - 1], SEEK_SET);
 		fwrite(&itss, 1, sizeof(ITSample), f);
 		fseek(f, dwPos, SEEK_SET);
-		if (Samples[nsmp].HasSampleData())
+		if(!isExternal)
 		{
-			dwPos += itss.GetSampleFormat().WriteSample(f, Samples[nsmp]);
+			dwPos += itss.GetSampleFormat().WriteSample(f, Samples[smp]);
+		} else
+		{
+#ifdef MPT_EXTERNAL_SAMPLES
+			const std::string filenameU8 = GetSamplePath(smp).AbsolutePathToRelative(filename.GetPath()).ToUTF8();
+			const size_t strSize = mpt::saturate_cast<uint16>(filenameU8.size());
+			size_t intBytes = 0;
+			if(mpt::IO::WriteVarInt(f, strSize, &intBytes))
+			{
+				dwPos += intBytes + strSize;
+				mpt::IO::WriteRaw(f, &filenameU8[0], strSize);
+			}
+#endif // MPT_EXTERNAL_SAMPLES
 		}
 	}
 
