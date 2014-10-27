@@ -9,16 +9,18 @@
 
 #pragma once
 
+#if defined(MPT_WITH_FILEIO)
+
+#include "../common/mptString.h"
+#include "../common/mptPathString.h"
+#include "../common/mptIO.h"
+
 #include <fstream>
 #include <ios>
 #include <ostream>
 #include <streambuf>
-
-#include "../common/mptString.h"
-#include "../common/mptPathString.h"
-#if defined(MPT_WITH_FILEIO)
-#include "../common/mptIO.h"
 #include <utility>
+
 #endif // MPT_WITH_FILEIO
 
 
