@@ -198,11 +198,19 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\common\mptFstream.h"
+				RelativePath="..\..\..\common\mptFileIO.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\common\mptFileIO.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\..\common\mptIO.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\common\mptIO.h"
 				>
 			</File>
 			<File
@@ -691,6 +699,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\soundlib\tuningcollection.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\soundlib\UpgradeModule.cpp"
 				>
 			</File>
 			<File
