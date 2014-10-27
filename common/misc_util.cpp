@@ -18,7 +18,7 @@
 
 #if defined(MPT_WITH_DYNBIND)
 #if !MPT_OS_WINDOWS
-#include <dlfcn.h>
+#include <ltdl.h>
 #endif
 #endif
 
@@ -912,39 +912,51 @@ class LibraryHandle
 
 private:
 
-	void * handle;
+	bool inited;
+	lt_dlhandle handle;
 
 public:
 
 	LibraryHandle(const mpt::LibraryPath &path)
-		: handle(NULL)
+		: inited(false)
+		, handle(0)
 	{
-		handle = dlopen(path.GetFileName().AsNative().c_str(), RTLD_NOW);
+		if(lt_dlinit() != 0)
+		{
+			return;
+		}
+		inited = true;
+		handle = lt_dlopenext(path.GetFileName().AsNative().c_str());
 	}
 
 	~LibraryHandle()
 	{
 		if(IsValid())
 		{
-			dlclose(handle);
+			lt_dlclose(handle);
 		}
-		handle = NULL;
+		handle = 0;
+		if(inited)
+		{
+			lt_dlexit();
+			inited = false;
+		}
 	}
 	
 public:
 
 	bool IsValid() const
 	{
-		return handle != NULL;
+		return handle != 0;
 	}
 
 	FuncPtr GetProcAddress(const std::string &symbol) const
 	{
 		if(!IsValid())
 		{
-			return NULL;
+			return nullptr;
 		}
-		return reinterpret_cast<FuncPtr>(dlsym(handle, symbol.c_str()));
+		return reinterpret_cast<FuncPtr>(lt_dlsym(handle, symbol.c_str()));
 	}
 
 };
@@ -979,26 +991,22 @@ mpt::PathString LibraryPath::GetFileName() const
 mpt::PathString LibraryPath::GetDefaultPrefix()
 //---------------------------------------------
 {
-#if MPT_OS_WINDOWS
-	return MPT_PATHSTRING("");
-#elif MPT_OS_MACOSX_OR_IOS
-	return MPT_PATHSTRING("lib");
-#else
-	return MPT_PATHSTRING("lib");
-#endif
+	#if MPT_OS_WINDOWS
+		return MPT_PATHSTRING("");
+	#else
+		return MPT_PATHSTRING("lib");
+	#endif
 }
 
 
 mpt::PathString LibraryPath::GetDefaultSuffix()
 //---------------------------------------------
 {
-#if MPT_OS_WINDOWS
-	return MPT_PATHSTRING(".dll");
-#elif MPT_OS_MACOSX_OR_IOS
-	return MPT_PATHSTRING(".dylib");
-#else
-	return MPT_PATHSTRING(".so");
-#endif
+	#if MPT_OS_WINDOWS
+		return MPT_PATHSTRING(".dll");
+	#else
+		return MPT_PATHSTRING("");  // handled by libltdl
+	#endif
 }
 
 

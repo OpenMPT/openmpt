@@ -12,6 +12,7 @@ Quick Start {#quickstart}
      -  **zlib**
      -  **doxygen >= 1.8**
  3. *Optional*:
+     -  **libltdl**
      -  **portaudio-v19**
      -  **libSDL == 1.2.x**
      -  **libFLAC**
@@ -43,6 +44,7 @@ Quick Start {#quickstart}
      -  **pkg-config**
  2. *Optional*:
      -  **zlib**
+     -  **libltdl**
      -  **portaudio-v19**
      -  **libSDL == 1.2.x**
      -  **doxygen >= 1.8**

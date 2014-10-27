@@ -26,6 +26,48 @@ AC_DEFINE([MPT_PACKAGE], [!!MPT_PACKAGE!!], [is package])
 # Required libopenmpt dependency: zlib
 PKG_CHECK_MODULES([ZLIB], [zlib], AC_DEFINE([MPT_WITH_ZLIB], [], [with libz]))
 
+# Optional libopenmpt dependency: libltdl
+AC_ARG_ENABLE([unmo3], AS_HELP_STRING([--enable-unmo3], [Enable the use of dynamically loaded libunmo3.]))
+AS_IF([test "x$enable_unmo3" = "xyes"],
+ [
+  AC_CHECK_HEADER([ltdl.h],
+   [
+    AC_CHECK_LIB([ltdl], [lt_dlinit],
+     [
+      have_ltdl=1
+     ],
+     [
+      have_ltdl=0
+     ]
+    )
+   ],
+   [
+    have_ltdl=0
+   ]
+  )
+  AS_IF([test "x$have_ltdl" = "x0"],
+   [
+    AC_MSG_ERROR([Unable to find libltdl.])
+   ]
+  )
+ ],
+ [
+  have_ltdl=0
+ ]
+)
+AS_IF([test "x$have_ltdl" = "x1"],
+ [
+  LTDL_CPPFLAGS=-DMPT_WITH_MO3
+  LTDL_LIBS=-lltdl
+ ],
+ [
+  LTDL_CPPFLAGS=
+  LTDL_LIBS=
+ ]
+)
+AC_SUBST([LTDL_CPPFLAGS])
+AC_SUBST([LTDL_LIBS])
+
 # Optional openmpt123 dependency: PortAudio, try SDL if PortAudio is unavailable
 PKG_CHECK_MODULES([PORTAUDIO], [portaudio-2.0],
  [

@@ -20,6 +20,9 @@ Dependencies
  *  **J2B** support requires an inflate (deflate decompression) implementation:
      *  **zlib**
      *  **miniz** can be used internally if no zlib is available.
+ *  **MO3** support requires:
+     *  closed-source **libunmo3** from un4seen
+     *  **libltdl** from libtool on Unix-like platforms
  *  Building on Unix-like systems requires:
      *  **GNU make**
      *  **pkg-config**
