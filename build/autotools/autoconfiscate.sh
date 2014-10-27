@@ -93,7 +93,7 @@ mkdir test-tarball
 cd test-tarball
 tar xvaf ../libopenmpt*.tar.gz
 cd libopenmpt*
-./configure
+./configure --enable-unmo3
 make
 make check
 cd ..

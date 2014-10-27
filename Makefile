@@ -277,7 +277,7 @@ endif
 
 ifeq ($(USE_MO3),1)
 CPPFLAGS_MO3 := -DMPT_WITH_MO3
-LDLIBS_MO3  := -ldl
+LDLIBS_MO3  := -lltdl
 else
 endif
 
