@@ -3132,8 +3132,11 @@ void CModTree::OnSetItemPath()
 		SAMPLEINDEX smpID = static_cast<SAMPLEINDEX>(modItem.val1);
 		const mpt::PathString path = pModDoc->GetrSoundFile().GetSamplePath(smpID);
 		FileDialog dlg = OpenFileDialog()
-			.ExtensionFilter("All Samples|*.wav;*.flac|All files(*.*)|*.*||")	// Only show samples that we actually can save as well.
-			.DefaultFilename(path.empty() ? TrackerDirectories::Instance().GetWorkingDirectory(DIR_SAMPLES) : path);
+			.ExtensionFilter("All Samples|*.wav;*.flac|All files(*.*)|*.*||");	// Only show samples that we actually can save as well.
+		if(path.empty())
+			dlg.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_SAMPLES));
+		else
+			dlg.DefaultFilename(path);
 		if(!dlg.Show()) return;
 		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_SAMPLES);
 

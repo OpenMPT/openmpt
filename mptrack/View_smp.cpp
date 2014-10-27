@@ -2198,7 +2198,7 @@ void CViewSample::OnEditUndo()
 	if(pModDoc == nullptr) return;
 	if(pModDoc->GetSampleUndo().Undo(m_nSample))
 	{
-		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES, true, true);
+		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES, true, false);
 	}
 }
 
@@ -2210,7 +2210,7 @@ void CViewSample::OnEditRedo()
 	if(pModDoc == nullptr) return;
 	if(pModDoc->GetSampleUndo().Redo(m_nSample))
 	{
-		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES, true, true);
+		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES, true, false);
 	}
 }
 
