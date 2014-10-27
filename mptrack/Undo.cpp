@@ -516,6 +516,11 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 	}
 	sample.PrecomputeLoops(sndFile, true);
 
+	if(undo.changeType != sundo_none)
+	{
+		sample.uFlags.set(SMP_MODIFIED);
+	}
+
 	fromBuf[smp - 1].push_back(undo);
 	DeleteStep(fromBuf, smp, fromBuf[smp - 1].size() - 1);
 
