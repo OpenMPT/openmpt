@@ -52,7 +52,9 @@ static const char * const license =
 #include <vector>
 
 #include <cmath>
+#if !defined(OPENMPT123_ANCIENT_COMPILER)
 #include <cstdint>
+#endif
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -169,7 +171,11 @@ public:
 		: impl(0)
 	{
 		if ( !flags.force_overwrite ) {
+#if defined(OPENMPT123_ANCIENT_COMPILER)
+			std::ifstream testfile( filename.c_str(), std::ios::binary );
+#else
 			std::ifstream testfile( filename, std::ios::binary );
+#endif
 			if ( testfile ) {
 				throw exception( "file already exists" );
 			}
@@ -1348,12 +1354,20 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 				file_stream.str( data );
 				filesize = data.length();
 			#elif defined(_MSC_VER) && defined(UNICODE)
+#if defined(OPENMPT123_ANCIENT_COMPILER)
+				file_stream.open( utf8_to_wstring( filename ).c_str(), std::ios::binary );
+#else
 				file_stream.open( utf8_to_wstring( filename ), std::ios::binary );
+#endif
 				file_stream.seekg( 0, std::ios::end );
 				filesize = file_stream.tellg();
 				file_stream.seekg( 0, std::ios::beg );
 			#else
+#if defined(OPENMPT123_ANCIENT_COMPILER)
+				file_stream.open( filename.c_str(), std::ios::binary );
+#else
 				file_stream.open( filename, std::ios::binary );
+#endif
 				file_stream.seekg( 0, std::ios::end );
 				filesize = file_stream.tellg();
 				file_stream.seekg( 0, std::ios::beg );
