@@ -248,6 +248,7 @@ endif
 ifeq ($(HOST),unix)
 
 ifeq ($(ANCIENT),1)
+else
 ifeq ($(shell help2man --version > /dev/null 2>&1 && echo yes ),yes)
 MPT_WITH_HELP2MAN := 1
 endif
