@@ -11,6 +11,11 @@ is just a high-level summary.
     .NET 4 to be installed.
  *  foo_openmpt: Settings are now accessable via foobar2000 advanced settings.
  *  Autotools based build now supports libunmo3. Specify --enable-unmo3.
+ *  Support for dynamic loading of libunmo3 on MacOS X.
+ *  Support for older compilers:
+     *  GCC 4.1.x to 4.3.x (use `make ANCIENT=1`)
+     *  Microsoft Visual Studio 2008 (with latest Service Pack)
+        (see `build/vs2008`)
 
  *  [Bug] The -autotools tarballs were not working at all.
 
