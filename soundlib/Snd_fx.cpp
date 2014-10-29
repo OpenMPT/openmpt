@@ -3312,7 +3312,7 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param)
 	{
 		//Behavior: Param tells number of finesteps(or 'fullsteps'(notes) with glissando)
 		//to slide per row(not per tick).
-		const long old_PortamentoTickSlide = (m_PlayState.m_nTickCount != 0) ? pChn->m_PortamentoTickSlide : 0;
+		const int32 old_PortamentoTickSlide = (m_PlayState.m_nTickCount != 0) ? pChn->m_PortamentoTickSlide : 0;
 
 		if(param)
 			pChn->nPortamentoSlide = param;
@@ -3333,9 +3333,9 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param)
 			//With glissando interpreting param as notes instead of finesteps.
 		}
 
-		const long slide = pChn->m_PortamentoTickSlide - old_PortamentoTickSlide;
+		const int32 slide = pChn->m_PortamentoTickSlide - old_PortamentoTickSlide;
 
-		if(abs(pChn->nPortamentoDest) <= abs(slide))
+		if(std::abs(pChn->nPortamentoDest) <= std::abs(slide))
 		{
 			if(pChn->nPortamentoDest != 0)
 			{
