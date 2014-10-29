@@ -1257,6 +1257,7 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 	if ( flags.show_details ) {
 		set_field( fields, "Filename" ).ostream() << get_filename( filename );
 		set_field( fields, "Size" ).ostream() << bytes_to_string( filesize );
+		set_field( fields, "Warnings" ).ostream() << mod.get_metadata( "warnings" );
 		if ( !mod.get_metadata( "container" ).empty() ) {
 			set_field( fields, "Container" ).ostream() << mod.get_metadata( "container" ) << " (" << mod.get_metadata( "container_long" ) << ")";
 		}
@@ -1326,6 +1327,8 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 
 	log.writeout();
 
+	std::ostringstream silentlog;
+
 	try {
 
 #if defined(WIN32) && defined(UNICODE) && !defined(_MSC_VER)
@@ -1379,7 +1382,8 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 		}
 
 		{
-			openmpt::module mod( data_stream );
+			openmpt::module mod( data_stream, silentlog );
+			silentlog.str( std::string() ); // clear, loader messages get stored to get_metadata( "warnings" ) by libopenmpt internally
 			render_mod_file( flags, filename, filesize, mod, log, audio_stream );
 		} 
 
@@ -1390,8 +1394,18 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 	} catch ( silent_exit_exception & ) {
 		throw;
 	} catch ( std::exception & e ) {
+		if ( !silentlog.str().empty() ) {
+			log << "errors loading '" << filename << "': " << silentlog.str() << std::endl;
+		} else {
+			log << "errors loading '" << filename << "'" << std::endl;
+		}
 		log << "error playing '" << filename << "': " << e.what() << std::endl;
 	} catch ( ... ) {
+		if ( !silentlog.str().empty() ) {
+			log << "errors loading '" << filename << "': " << silentlog.str() << std::endl;
+		} else {
+			log << "errors loading '" << filename << "'" << std::endl;
+		}
 		log << "unknown error playing '" << filename << "'" << std::endl;
 	}
 

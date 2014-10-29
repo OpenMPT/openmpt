@@ -1080,7 +1080,16 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				}
 				path = path.RelativePathToAbsolute(mt2FileName.GetPath());
 			}
-			LoadExternalSample(i + 1, path);
+			if(!LoadExternalSample(i + 1, path))
+			{
+				AddToLog(LogError, mpt::String::Print(MPT_USTRING("Unable to load sample %1: %2"), i, path.ToUnicode()));
+			}
+#else
+			#if defined(MPT_WITH_CHARSET_LOCALE)
+				AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."), i, mpt::ToUnicode(mpt::CharsetLocale, filename)));
+			#else
+				AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."), i, mpt::ToUnicode(mpt::CharsetWindows1252, filename)));
+			#endif
 #endif // MPT_EXTERNAL_SAMPLES
 		}
 		mptSmp.nC5Speed = freq;

@@ -653,9 +653,9 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 						// External sample in MPTM file
 						size_t strLen;
 						file.ReadVarInt(strLen);
-#ifdef MPT_EXTERNAL_SAMPLES
 						std::string filenameU8;
 						file.ReadString<mpt::String::maybeNullTerminated>(filenameU8, strLen);
+#ifdef MPT_EXTERNAL_SAMPLES
 						mpt::PathString filename = mpt::PathString::FromUTF8(filenameU8);
 
 						if(!filename.empty())
@@ -669,14 +669,14 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 							}
 							if(!LoadExternalSample(i + 1, filename))
 							{
-								AddToLog("Unable to load sample: " + filename.ToLocale());
+								AddToLog(LogError, mpt::String::Print(MPT_USTRING("Unable to load sample %1: %2"), i, filename.ToUnicode()));
 							}
 						} else
 						{
 							sample.uFlags.reset(SMP_KEEPONDISK);
 						}
 #else
-						file.Skip(strLen);
+						AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."), i, mpt::ToUnicode(mpt::CharsetUTF8, filenameU8)));
 #endif // MPT_EXTERNAL_SAMPLES
 					}
 					lastSampleOffset = std::max(lastSampleOffset, file.GetPosition());
