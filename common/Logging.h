@@ -39,8 +39,7 @@ inline mpt::ustring LogLevelToString(LogLevel level)
 class ILog
 {
 public:
-	virtual void AddToLog(const std::string &text) const { AddToLog(LogInformation, text); }
-	virtual	void AddToLog(LogLevel level, const std::string &text) const = 0;
+	virtual	void AddToLog(LogLevel level, const mpt::ustring &text) const = 0;
 };
 
 

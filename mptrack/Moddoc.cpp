@@ -853,8 +853,8 @@ ScopedLogCapturer::~ScopedLogCapturer()
 }
 
 
-void CModDoc::AddToLog(LogLevel level, const std::string &text) const
-//-------------------------------------------------------------------
+void CModDoc::AddToLog(LogLevel level, const mpt::ustring &text) const
+//--------------------------------------------------------------------
 {
 	if(m_LogMode == LogModeGather)
 	{
@@ -863,24 +863,24 @@ void CModDoc::AddToLog(LogLevel level, const std::string &text) const
 	{
 		switch(level)
 		{
-		case LogError:        Reporting::Error(text.c_str());        break;
-		case LogWarning:      Reporting::Warning(text.c_str());      break;
-		case LogInformation:  Reporting::Information(text.c_str());  break;
-		case LogNotification: Reporting::Notification(text.c_str()); break;
-		default:              Reporting::Information(text.c_str());  break;
+		case LogError:        Reporting::Error(mpt::ToWide(text));        break;
+		case LogWarning:      Reporting::Warning(mpt::ToWide(text));      break;
+		case LogInformation:  Reporting::Information(mpt::ToWide(text));  break;
+		case LogNotification: Reporting::Notification(mpt::ToWide(text)); break;
+		default:              Reporting::Information(mpt::ToWide(text));  break;
 		}
 	}
 }
 
 
-std::string CModDoc::GetLogString() const
+mpt::ustring CModDoc::GetLogString() const
 //---------------------------------------
 {
-	std::string ret;
+	mpt::ustring ret;
 	for(std::vector<LogEntry>::const_iterator i=m_Log.begin(); i!=m_Log.end(); ++i)
 	{
 		ret += (*i).message;
-		ret += "\r\n";
+		ret += MPT_USTRING("\r\n");
 	}
 	return ret;
 }
@@ -918,15 +918,15 @@ UINT CModDoc::ShowLog(const std::wstring &preamble, const std::wstring &title, C
 	if(!parent) parent = CMainFrame::GetMainFrame();
 	if(GetLog().size() > 0)
 	{
-		std::wstring text = preamble + mpt::ToWide(mpt::CharsetLocale, GetLogString());
+		std::wstring text = preamble + GetLogString();
 		std::wstring actualTitle = (title.length() == 0) ? MAINFRAME_TITLEW : title;
 		switch(GetMaxLogLevel())
 		{
-		case LogError:        Reporting::Error(text.c_str(), actualTitle.c_str(), parent); break;
-		case LogWarning:      Reporting::Warning(text.c_str(), actualTitle.c_str(), parent); break;
-		case LogInformation:  Reporting::Information(text.c_str(), actualTitle.c_str(), parent); break;
-		case LogNotification: Reporting::Notification(text.c_str(), actualTitle.c_str(), parent); break;
-		default:              Reporting::Information(text.c_str(), actualTitle.c_str(), parent); break;
+		case LogError:        Reporting::Error(text, actualTitle.c_str(), parent); break;
+		case LogWarning:      Reporting::Warning(text, actualTitle.c_str(), parent); break;
+		case LogInformation:  Reporting::Information(text, actualTitle.c_str(), parent); break;
+		case LogNotification: Reporting::Notification(text, actualTitle.c_str(), parent); break;
+		default:              Reporting::Information(text, actualTitle.c_str(), parent); break;
 		}
 		return IDOK;
 	}
