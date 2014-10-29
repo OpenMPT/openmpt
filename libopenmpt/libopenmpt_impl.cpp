@@ -191,8 +191,8 @@ public:
 		return;
 	}
 private:
-	void AddToLog( LogLevel level, const std::string & text ) const {
-		destination->log( mpt::ToCharset( mpt::CharsetUTF8, LogLevelToString( level ) ) + std::string(": ") + text );
+	void AddToLog( LogLevel level, const mpt::ustring & text ) const {
+		destination->log( mpt::ToCharset( mpt::CharsetUTF8, LogLevelToString( level ) + MPT_USTRING(": ") + text ) );
 	}
 }; // class log_forwarder
 
@@ -202,21 +202,21 @@ private:
 public:
 	std::vector<std::pair<LogLevel,std::string> > GetMessages() const;
 private:
-	void AddToLog( LogLevel level, const std::string & text ) const;
+	void AddToLog( LogLevel level, const mpt::ustring & text ) const;
 }; // class loader_log
 
 std::vector<std::pair<LogLevel,std::string> > loader_log::GetMessages() const {
 	return m_Messages;
 }
-void loader_log::AddToLog( LogLevel level, const std::string & text ) const {
-	m_Messages.push_back( std::make_pair( level, text ) );
+void loader_log::AddToLog( LogLevel level, const mpt::ustring & text ) const {
+	m_Messages.push_back( std::make_pair( level, mpt::ToCharset( mpt::CharsetUTF8, text ) ) );
 }
 
 void module_impl::PushToCSoundFileLog( const std::string & text ) const {
-	m_sndFile->AddToLog( LogError, text );
+	m_sndFile->AddToLog( LogError, mpt::ToUnicode( mpt::CharsetUTF8, text ) );
 }
 void module_impl::PushToCSoundFileLog( int loglevel, const std::string & text ) const {
-	m_sndFile->AddToLog( static_cast<LogLevel>( loglevel ), text );
+	m_sndFile->AddToLog( static_cast<LogLevel>( loglevel ), mpt::ToUnicode( mpt::CharsetUTF8, text ) );
 }
 
 static ResamplingMode filterlength_to_resamplingmode(std::int32_t length) {

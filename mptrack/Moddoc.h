@@ -131,9 +131,9 @@ enum InputTargetContext;
 struct LogEntry
 {
 	LogLevel level;
-	std::string message;
+	mpt::ustring message;
 	LogEntry() : level(LogInformation) {}
-	LogEntry(LogLevel l, const std::string &m) : level(l), message(m) {}
+	LogEntry(LogLevel l, const mpt::ustring &m) : level(l), message(m) {}
 };
 
 
@@ -211,11 +211,11 @@ public:
 	SAMPLEINDEX GetNumSamples() const { return m_SndFile.m_nSamples; }
 
 	// Logging for general progress and error events.
-	void AddToLog(LogLevel level, const std::string &text) const;
-	void AddToLog(const std::string &text) const { AddToLog(LogInformation, text); }
+	void AddToLog(LogLevel level, const mpt::ustring &text) const;
+	/*MPT_DEPRECATED*/ void AddToLog(const std::string &text) const { AddToLog(LogInformation, mpt::ToUnicode(mpt::CharsetLocale, text)); }
 
 	const std::vector<LogEntry> & GetLog() const { return m_Log; }
-	std::string GetLogString() const;
+	mpt::ustring GetLogString() const;
 	LogLevel GetMaxLogLevel() const;
 protected:
 	LogMode GetLogMode() const { return m_LogMode; }

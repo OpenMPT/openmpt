@@ -526,8 +526,12 @@ public:
 public:
 	// logging and user interaction
 	void SetCustomLog(ILog *pLog) { m_pCustomLog = pLog; }
-	void AddToLog(LogLevel level, const std::string &text) const;
-	void AddToLog(const std::string &text) const { AddToLog(LogInformation, text); }
+	void AddToLog(LogLevel level, const mpt::ustring &text) const;
+#if defined(MPT_WITH_CHARSET_LOCALE)
+	/*MPT_DEPRECATED*/ void AddToLog(const std::string &text) const { AddToLog(LogInformation, mpt::ToUnicode(mpt::CharsetLocale, text)); }
+#else
+	/*MPT_DEPRECATED*/ void AddToLog(const std::string &text) const { AddToLog(LogInformation, mpt::ToUnicode(mpt::CharsetUTF8, text)); }
+#endif
 
 public:
 

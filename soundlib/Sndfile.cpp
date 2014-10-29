@@ -651,8 +651,8 @@ CSoundFile::~CSoundFile()
 }
 
 
-void CSoundFile::AddToLog(LogLevel level, const std::string &text) const
-//----------------------------------------------------------------------
+void CSoundFile::AddToLog(LogLevel level, const mpt::ustring &text) const
+//-----------------------------------------------------------------------
 {
 	if(m_pCustomLog)
 	{
@@ -662,11 +662,7 @@ void CSoundFile::AddToLog(LogLevel level, const std::string &text) const
 		#ifdef MODPLUG_TRACKER
 			if(GetpModDoc()) GetpModDoc()->AddToLog(level, text);
 		#else
-			#ifdef MPT_WITH_CHARSET_LOCALE
-				Log(level, mpt::ToUnicode(mpt::CharsetLocale, text));
-			#else
-				Log(level, mpt::ToUnicode(mpt::CharsetUTF8, text));
-			#endif
+			Log(level, text);
 		#endif
 	}
 }
@@ -1667,7 +1663,7 @@ bool CSoundFile::SaveStaticTunings()
 {
 	if(s_pTuningsSharedLocal->Serialize() != CTuningCollection::SERIALIZATION_SUCCESS)
 	{
-		AddToLog(LogError, "Static tuning serialisation failed");
+		AddToLog(LogError, MPT_USTRING("Static tuning serialisation failed"));
 		return false;
 	}
 	return true;
