@@ -34,8 +34,8 @@ static char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING;
 #include <windows.h>
 
 #define UNICODE_INPUT_PLUGIN
-#include "winamp/IN2.H"
-#include "winamp/wa_ipc.h"
+#include "winamp/Winamp/IN2.H"
+#include "winamp/Winamp/wa_ipc.h"
 
 #include <algorithm>
 #include <fstream>
