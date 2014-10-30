@@ -1139,17 +1139,17 @@ std::string module_impl::highlight_pattern_row_channel( std::int32_t p, std::int
 
 std::vector<std::string> module_impl::get_ctls() const {
 	std::vector<std::string> retval;
-	retval.push_back( "load_skip_samples" );
-	retval.push_back( "load_skip_patterns" );
+	retval.push_back( "load.skip_samples" );
+	retval.push_back( "load.skip_patterns" );
 	retval.push_back( "dither" );
 	return retval;
 }
 std::string module_impl::ctl_get( const std::string & ctl ) const {
 	if ( ctl == "" ) {
 		throw openmpt::exception("unknown ctl");
-	} else if ( ctl == "load_skip_samples" ) {
+	} else if ( ctl == "load.skip_samples" || ctl == "load_skip_samples" ) {
 		return mpt::ToString( m_ctl_load_skip_samples );
-	} else if ( ctl == "load_skip_patterns" ) {
+	} else if ( ctl == "load.skip_patterns" || ctl == "load_skip_patterns" ) {
 		return mpt::ToString( m_ctl_load_skip_patterns );
 	} else if ( ctl == "dither" ) {
 		return mpt::ToString( static_cast<int>( m_Dither->GetMode() ) );
@@ -1160,9 +1160,9 @@ std::string module_impl::ctl_get( const std::string & ctl ) const {
 void module_impl::ctl_set( const std::string & ctl, const std::string & value ) {
 	if ( ctl == "" ) {
 		throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
-	} else if ( ctl == "load_skip_samples" ) {
+	} else if ( ctl == "load.skip_samples" || ctl == "load_skip_samples" ) {
 		m_ctl_load_skip_samples = ConvertStrTo<bool>( value );
-	} else if ( ctl == "load_skip_patterns" ) {
+	} else if ( ctl == "load.skip_patterns" || ctl == "load_skip_patterns" ) {
 		m_ctl_load_skip_patterns = ConvertStrTo<bool>( value );
 	} else if ( ctl == "dither" ) {
 		m_Dither->SetMode( static_cast<DitherMode>( ConvertStrTo<int>( value ) ) );
