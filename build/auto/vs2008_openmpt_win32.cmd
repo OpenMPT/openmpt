@@ -8,7 +8,7 @@ set MY_DIR=%CD%
 
 call build\auto\setup_vs2008.cmd
 
-call build\auto\prepare_win.cmd
+
 
 
 
