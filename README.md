@@ -77,8 +77,8 @@ How to compile
 
          -  Winamp 5 SDK:
 
-            To build libopenmpt as a winamp input plugin, copy the headers in
-            Winamp/ from `WA5.55_SDK.exe` to include/winamp/.
+            To build libopenmpt as a winamp input plugin, copy the contents of
+            `WA5.55_SDK.exe` to include/winamp/.
 
             Please visit
             [winamp.com](http://wiki.winamp.com/wiki/Plug-in_Developer) to
