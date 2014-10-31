@@ -36,45 +36,8 @@ static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outp
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	sndFile.ResetMixStat();
-	switch(sampleFormat.value)
-	{
-	case SampleFormatUnsigned8:
-		{
-			typedef SampleFormatToType<SampleFormatUnsigned8>::type Tsample;
-			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
-			return sndFile.Read(count, target);
-		}
-		break;
-	case SampleFormatInt16:
-		{
-			typedef SampleFormatToType<SampleFormatInt16>::type Tsample;
-			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
-			return sndFile.Read(count, target);
-		}
-		break;
-	case SampleFormatInt24:
-		{
-			typedef SampleFormatToType<SampleFormatInt24>::type Tsample;
-			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
-			return sndFile.Read(count, target);
-		}
-		break;
-	case SampleFormatInt32:
-		{
-			typedef SampleFormatToType<SampleFormatInt32>::type Tsample;
-			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
-			return sndFile.Read(count, target);
-		}
-		break;
-	case SampleFormatFloat32:
-		{
-			typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
-			AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(outputBuffer), nullptr);
-			return sndFile.Read(count, target);
-		}
-		break;
-	}
-	return 0;
+	AudioReadTargetBufferInterleavedDynamic target(sampleFormat, false, dither, outputBuffer);
+	return sndFile.Read(count, target);
 }
 
 
