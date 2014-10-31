@@ -687,71 +687,18 @@ void CMainFrame::FillAudioBufferLocked(SoundDevice::IFillAudioBuffer &callback)
 //==============================
 class StereoVuMeterTargetWrapper
 //==============================
-	: public IAudioReadTarget
+	: public AudioReadTargetBufferInterleavedDynamic
 {
-private:
-	const SampleFormat sampleFormat;
-	bool clipFloat;
-	Dither &dither;
-	void *buffer;
 public:
-	StereoVuMeterTargetWrapper(SampleFormat sampleFormat_, bool clipFloat_, Dither &dither_, void *buffer_)
-		: sampleFormat(sampleFormat_)
-		, clipFloat(clipFloat_)
-		, dither(dither_)
-		, buffer(buffer_)
+	StereoVuMeterTargetWrapper(SampleFormat sampleFormat, bool clipFloat, Dither &dither, void *buffer)
+		: AudioReadTargetBufferInterleavedDynamic(sampleFormat, clipFloat, dither, buffer)
 	{
-		MPT_ASSERT_ALWAYS(sampleFormat.IsValid());
+		return;
 	}
 	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
 	{
 		CMainFrame::CalcStereoVuMeters(MixSoundBuffer, countChunk, channels);
-		switch(sampleFormat.value)
-		{
-			case SampleFormatUnsigned8:
-				{
-					typedef SampleFormatToType<SampleFormatUnsigned8>::type Tsample;
-					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
-					target.DataCallback(MixSoundBuffer, channels, countChunk);
-				}
-				break;
-			case SampleFormatInt16:
-				{
-					typedef SampleFormatToType<SampleFormatInt16>::type Tsample;
-					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
-					target.DataCallback(MixSoundBuffer, channels, countChunk);
-				}
-				break;
-			case SampleFormatInt24:
-				{
-					typedef SampleFormatToType<SampleFormatInt24>::type Tsample;
-					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
-					target.DataCallback(MixSoundBuffer, channels, countChunk);
-				}
-				break;
-			case SampleFormatInt32:
-				{
-					typedef SampleFormatToType<SampleFormatInt32>::type Tsample;
-					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
-					target.DataCallback(MixSoundBuffer, channels, countChunk);
-				}
-				break;
-			case SampleFormatFloat32:
-				if(clipFloat)
-				{
-					typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
-					AudioReadTargetBuffer<Tsample, true> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
-					target.DataCallback(MixSoundBuffer, channels, countChunk);
-				} else
-				{
-					typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
-					AudioReadTargetBuffer<Tsample, false> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
-					target.DataCallback(MixSoundBuffer, channels, countChunk);
-				}
-				break;
-		}
-		// increment output buffer for potentially next callback
-		buffer = (char*)buffer + (sampleFormat.GetBitsPerSample()/8) * channels * countChunk;
+		AudioReadTargetBufferInterleavedDynamic::DataCallback(MixSoundBuffer, channels, countChunk);
 	}
 };
 
