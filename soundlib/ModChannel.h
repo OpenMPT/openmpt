@@ -14,12 +14,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 class CSoundFile;
 
-#if MPT_COMPILER_MSVC
-#pragma warning(disable:4324) //structure was padded due to __declspec(align())
-#endif
-
 // Mix Channel Struct
-struct ALIGN(32) ModChannel
+struct ModChannel
 {
 	// Envelope playback info
 	struct EnvInfo
@@ -194,7 +190,7 @@ struct ALIGN(32) ModChannel
 
 
 // Default pattern channel settings
-struct ALIGN(32) ModChannelSettings
+struct ModChannelSettings
 {
 	FlagSet<ChannelFlags> dwFlags;	// Channel flags
 	uint16 nPan;					// Initial pan (0...256)
@@ -216,9 +212,5 @@ struct ALIGN(32) ModChannelSettings
 		szName[0] = '\0';
 	}
 };
-
-#if MPT_COMPILER_MSVC
-#pragma warning(default:4324) //structure was padded due to __declspec(align())
-#endif
 
 OPENMPT_NAMESPACE_END
