@@ -112,11 +112,9 @@ protected:
 	afx_msg void OnFineTuneChanged();
 	afx_msg void OnBaseNoteChanged();
 	afx_msg void OnLoopTypeChanged();
-	afx_msg void OnLoopStartChanged();
-	afx_msg void OnLoopEndChanged();
+	afx_msg void OnLoopPointsChanged();
 	afx_msg void OnSustainTypeChanged();
-	afx_msg void OnSustainStartChanged();
-	afx_msg void OnSustainEndChanged();
+	afx_msg void OnSustainPointsChanged();
 	afx_msg void OnVibTypeChanged();
 	afx_msg void OnVibDepthChanged();
 	afx_msg void OnVibSweepChanged();
