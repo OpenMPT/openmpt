@@ -241,11 +241,6 @@ public:
 };
 
 
-#if MPT_COMPILER_MSVC
-#pragma warning(disable:4324) //structure was padded due to __declspec(align())
-#endif
-
-
 //==============
 class CSoundFile
 //==============
@@ -916,10 +911,6 @@ public:
 	uint8 GetBestMidiChannel(CHANNELINDEX nChn) const;
 
 };
-
-#if MPT_COMPILER_MSVC
-#pragma warning(default : 4324) //structure was padded due to __declspec(align())
-#endif
 
 
 extern const char szNoteNames[12][4];
