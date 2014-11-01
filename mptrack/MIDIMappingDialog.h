@@ -38,8 +38,7 @@ protected:
 	CComboBox m_PlugParamCBox;
 	CComboBox m_ChannelCBox;
 	CComboBox m_EventCBox;
-	CEdit m_EditValue;
-	CListBox m_List;
+	CListCtrl m_List;
 	CSpinButtonCtrl m_SpinMoveMapping;
 
 public:
@@ -50,15 +49,16 @@ protected:
 	void UpdateDialog();
 	void UpdateEvent();
 	void UpdateParameters();
-	void UpdateString();
-	CString CreateListString(const CMIDIMappingDirective& s);
+	int InsertItem(const CMIDIMappingDirective& m, int insertAt);
+	void SelectItem(int i);
 
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
 
-	afx_msg void OnLbnSelchangeList1();
+	afx_msg void OnSelectionChanged(NMHDR *pNMHDR = nullptr, LRESULT *pResult = nullptr);
+	afx_msg BOOL OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult);
 	
 	afx_msg void OnBnClickedCheckactive();
 	afx_msg void OnBnClickedCheckCapture();

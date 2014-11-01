@@ -96,10 +96,10 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_EN_CHANGE(IDC_SAMPLE_NAME,		OnNameChanged)
 	ON_EN_CHANGE(IDC_SAMPLE_FILENAME,	OnFileNameChanged)
 	ON_EN_CHANGE(IDC_EDIT_SAMPLE,		OnSampleChanged)
-	ON_EN_CHANGE(IDC_EDIT1,				OnLoopStartChanged)
-	ON_EN_CHANGE(IDC_EDIT2,				OnLoopEndChanged)
-	ON_EN_CHANGE(IDC_EDIT3,				OnSustainStartChanged)
-	ON_EN_CHANGE(IDC_EDIT4,				OnSustainEndChanged)
+	ON_EN_CHANGE(IDC_EDIT1,				OnLoopPointsChanged)
+	ON_EN_CHANGE(IDC_EDIT2,				OnLoopPointsChanged)
+	ON_EN_CHANGE(IDC_EDIT3,				OnSustainPointsChanged)
+	ON_EN_CHANGE(IDC_EDIT4,				OnSustainPointsChanged)
 	ON_EN_CHANGE(IDC_EDIT5,				OnFineTuneChanged)
 	ON_EN_CHANGE(IDC_EDIT7,				OnVolumeChanged)
 	ON_EN_CHANGE(IDC_EDIT8,				OnGlobalVolChanged)
@@ -2616,29 +2616,15 @@ void CCtrlSamples::OnLoopTypeChanged()
 }
 
 
-void CCtrlSamples::OnLoopStartChanged()
+void CCtrlSamples::OnLoopPointsChanged()
 //--------------------------------------
 {
 	if(IsLocked()) return;
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	SmpLength n = GetDlgItemInt(IDC_EDIT1);
-	if ((n >= 0) && (n < sample.nLength) && ((n < sample.nLoopEnd) || !sample.uFlags[CHN_LOOP]))
+	SmpLength start = GetDlgItemInt(IDC_EDIT1, NULL, FALSE), end = GetDlgItemInt(IDC_EDIT2, NULL, FALSE);
+	if(start < end || sample.uFlags[CHN_LOOP])
 	{
-		sample.SetLoop(n, sample.nLoopEnd, sample.uFlags[CHN_LOOP], sample.uFlags[CHN_PINGPONGLOOP], m_sndFile);
-		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false, false);
-	}
-}
-
-
-void CCtrlSamples::OnLoopEndChanged()
-//------------------------------------
-{
-	if(IsLocked()) return;
-	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	SmpLength n = GetDlgItemInt(IDC_EDIT2);
-	if ((n >= 0) && (n <= sample.nLength) && ((n > sample.nLoopStart) || !sample.uFlags[CHN_LOOP]))
-	{
-		sample.SetLoop(sample.nLoopStart, n, sample.uFlags[CHN_LOOP], sample.uFlags[CHN_PINGPONGLOOP], m_sndFile);
+		sample.SetLoop(start, end, sample.uFlags[CHN_LOOP], sample.uFlags[CHN_PINGPONGLOOP], m_sndFile);
 		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false, false);
 	}
 }
@@ -2677,31 +2663,15 @@ void CCtrlSamples::OnSustainTypeChanged()
 }
 
 
-void CCtrlSamples::OnSustainStartChanged()
-//----------------------------------------
+void CCtrlSamples::OnSustainPointsChanged()
+//-----------------------------------------
 {
 	if(IsLocked()) return;
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	SmpLength n = GetDlgItemInt(IDC_EDIT3);
-	if ((n >= 0) && (n <= sample.nLength)
-	 && ((n < sample.nSustainEnd) || !sample.uFlags[CHN_SUSTAINLOOP]))
+	SmpLength start = GetDlgItemInt(IDC_EDIT3, NULL, FALSE), end = GetDlgItemInt(IDC_EDIT4, NULL, FALSE);
+	if(start < end || !sample.uFlags[CHN_SUSTAINLOOP])
 	{
-		sample.SetSustainLoop(n, sample.nSustainEnd, sample.uFlags[CHN_SUSTAINLOOP], sample.uFlags[CHN_PINGPONGSUSTAIN], m_sndFile);
-		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false, false);
-	}
-}
-
-
-void CCtrlSamples::OnSustainEndChanged()
-//--------------------------------------
-{
-	if(IsLocked()) return;
-	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	SmpLength n = GetDlgItemInt(IDC_EDIT4);
-	if ((n >= 0) && (n <= sample.nLength)
-	 && ((n > sample.nSustainStart) || !sample.uFlags[CHN_SUSTAINLOOP]))
-	{
-		sample.SetSustainLoop(sample.nSustainStart, n, sample.uFlags[CHN_SUSTAINLOOP], sample.uFlags[CHN_PINGPONGSUSTAIN], m_sndFile);
+		sample.SetSustainLoop(start, end, sample.uFlags[CHN_SUSTAINLOOP], sample.uFlags[CHN_PINGPONGSUSTAIN], m_sndFile);
 		SetModified(HINT_SAMPLEINFO | HINT_SAMPLEDATA, false, false);
 	}
 }
