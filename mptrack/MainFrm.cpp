@@ -875,6 +875,20 @@ void VUMeter::ResetClipped()
 }
 
 
+static void SetVUMeter(uint32 *masterVU, const VUMeter &vumeter)
+//--------------------------------------------------------------
+{
+	for(std::size_t channel = 0; channel < VUMeter::maxChannels; ++channel)
+	{
+		masterVU[channel] = Clamp(vumeter[channel].peak >> 11, 0, 0x10000);
+		if(vumeter[channel].clipped)
+		{
+			masterVU[channel] |= Notification::ClipVU;
+		}
+	}
+}
+
+
 bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 //------------------------------------------------------------------------
 {
@@ -978,14 +992,7 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 
 	{
 		// Master VU meter
-		notification.masterVU[0] = Clamp(m_VUMeter[0].peak >> 11, 0, 0x10000);
-		notification.masterVU[1] = Clamp(m_VUMeter[1].peak >> 11, 0, 0x10000);
-		notification.masterVU[2] = Clamp(m_VUMeter[2].peak >> 11, 0, 0x10000);
-		notification.masterVU[3] = Clamp(m_VUMeter[3].peak >> 11, 0, 0x10000);
-		if(m_VUMeter[0].clipped) notification.masterVU[0] |= Notification::ClipVU;
-		if(m_VUMeter[1].clipped) notification.masterVU[1] |= Notification::ClipVU;
-		if(m_VUMeter[2].clipped) notification.masterVU[2] |= Notification::ClipVU;
-		if(m_VUMeter[3].clipped) notification.masterVU[3] |= Notification::ClipVU;
+		SetVUMeter(notification.masterVU, m_VUMeter);
 		m_VUMeter.Decay(dwSamplesRead, m_pSndFile->m_MixerSettings.gdwMixingFreq);
 
 	}
