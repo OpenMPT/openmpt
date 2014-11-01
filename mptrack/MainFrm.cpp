@@ -118,11 +118,6 @@ HHOOK CMainFrame::ghKbdHook = NULL;
 std::vector<mpt::PathString> CMainFrame::s_ExampleModulePaths;
 std::vector<mpt::PathString> CMainFrame::s_TemplateModulePaths;
 
-LONG CMainFrame::gnLVuMeter = 0;
-LONG CMainFrame::gnRVuMeter = 0;
-bool CMainFrame::gnClipLeft = false;
-bool CMainFrame::gnClipRight = false;
-
 // GDI
 HICON CMainFrame::m_hIcon = NULL;
 HFONT CMainFrame::m_hGUIFont = NULL;
@@ -689,15 +684,18 @@ class StereoVuMeterTargetWrapper
 //==============================
 	: public AudioReadTargetBufferInterleavedDynamic
 {
+private:
+	VUMeter &vumeter;
 public:
-	StereoVuMeterTargetWrapper(SampleFormat sampleFormat, bool clipFloat, Dither &dither, void *buffer)
+	StereoVuMeterTargetWrapper(SampleFormat sampleFormat, bool clipFloat, Dither &dither, void *buffer, VUMeter &vumeter)
 		: AudioReadTargetBufferInterleavedDynamic(sampleFormat, clipFloat, dither, buffer)
+		, vumeter(vumeter)
 	{
 		return;
 	}
 	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
 	{
-		CMainFrame::CalcStereoVuMeters(MixSoundBuffer, countChunk, channels);
+		vumeter.Process(MixSoundBuffer, channels, countChunk);
 		AudioReadTargetBufferInterleavedDynamic::DataCallback(MixSoundBuffer, channels, countChunk);
 	}
 };
@@ -716,7 +714,7 @@ void CMainFrame::AudioRead(const SoundDevice::Settings &settings, const SoundDev
 	timingInfo.Speed = timeInfo.Speed;
 	m_pSndFile->m_TimingInfo = timingInfo;
 	m_Dither.SetMode((DitherMode)settings.DitherType);
-	StereoVuMeterTargetWrapper target(settings.sampleFormat, flags.NeedsClippedFloat, m_Dither, buffer);
+	StereoVuMeterTargetWrapper target(settings.sampleFormat, flags.NeedsClippedFloat, m_Dither, buffer, m_VUMeter);
 	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(numFrames, target);
 	ASSERT(renderedFrames <= numFrames);
 	CSoundFile::samplecount_t remainingFrames = numFrames - renderedFrames;
@@ -833,36 +831,43 @@ void CMainFrame::audioCloseDevice()
 }
 
 
-void CMainFrame::CalcStereoVuMeters(int *pMix, unsigned long nSamples, unsigned long nChannels)
-//---------------------------------------------------------------------------------------------
+void VUMeter::Process(const int *mixbuffer, std::size_t numChannels, std::size_t numFrames)
+//-----------------------------------------------------------------------------------------
 {
-	const int * const p = pMix;
-	int lmax = gnLVuMeter, rmax = gnRVuMeter;
-	if (nChannels > 1)
+	for(std::size_t frame = 0; frame < numFrames; ++frame)
 	{
-		for (UINT i=0; i<nSamples; i++)
+		for(std::size_t channel = 0; channel < std::min(numChannels, maxChannels); ++channel)
 		{
-			int vl = p[i*nChannels];
-			int vr = p[i*nChannels+1];
-			if (vl < 0) vl = -vl;
-			if (vr < 0) vr = -vr;
-			if (vl > lmax) lmax = vl;
-			if (vr > rmax) rmax = vr;
+			Channel &c = channels[channel];
+			const int sample = mixbuffer[frame*numChannels + channel];
+			c.peak = std::max(c.peak, std::abs(sample));
+			if(sample < MIXING_CLIPMIN || MIXING_CLIPMAX < sample)
+			{
+				c.clipped = true;
+			}
 		}
-	} else
-	{
-		for (UINT i=0; i<nSamples; i++)
-		{
-			int vl = p[i*nChannels];
-			if (vl < 0) vl = -vl;
-			if (vl > lmax) lmax = vl;
-		}
-		rmax = lmax;
 	}
-	gnLVuMeter = lmax;
-	gnRVuMeter = rmax;
-	if(lmax > MIXING_CLIPMAX) gnClipLeft = true;
-	if(rmax > MIXING_CLIPMAX) gnClipRight = true;
+}
+
+
+void VUMeter::Decay(int32 secondsNum, int32 secondsDen)
+//-----------------------------------------------------
+{
+	int32 decay = Util::muldivr(120000 << 11, secondsNum, secondsDen);
+	for(std::size_t channel = 0; channel < maxChannels; ++channel)
+	{
+		channels[channel].peak = std::max(channels[channel].peak - decay, 0);
+	}
+}
+
+
+void VUMeter::ResetClipped()
+//--------------------------
+{
+	for(std::size_t channel = 0; channel < maxChannels; ++channel)
+	{
+		channels[channel].clipped = false;
+	}
 }
 
 
@@ -969,18 +974,13 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 
 	{
 		// Master VU meter
-		uint32 lVu = (gnLVuMeter >> 11);
-		uint32 rVu = (gnRVuMeter >> 11);
-		if(lVu > 0x10000) lVu = 0x10000;
-		if(rVu > 0x10000) rVu = 0x10000;
-		notification.masterVU[0] = lVu;
-		notification.masterVU[1] = rVu;
-		if(gnClipLeft) notification.masterVU[0] |= Notification::ClipVU;
-		if(gnClipRight) notification.masterVU[1] |= Notification::ClipVU;
-		uint32 dwVuDecay = Util::muldiv(dwSamplesRead, 120000, m_pSndFile->m_MixerSettings.gdwMixingFreq) + 1;
+		notification.masterVU[0] = Clamp(m_VUMeter[0].peak >> 11, 0, 0x10000);
+		notification.masterVU[1] = Clamp(m_VUMeter[1].peak >> 11, 0, 0x10000);
+		if(m_VUMeter[0].clipped) notification.masterVU[0] |= Notification::ClipVU;
+		if(m_VUMeter[1].clipped) notification.masterVU[1] |= Notification::ClipVU;
+		int32 us = Util::muldivr(dwSamplesRead, 1000000, m_pSndFile->m_MixerSettings.gdwMixingFreq);
+		m_VUMeter.Decay(dwSamplesRead, m_pSndFile->m_MixerSettings.gdwMixingFreq);
 
-		if (lVu >= dwVuDecay) gnLVuMeter = (lVu - dwVuDecay) << 11; else gnLVuMeter = 0;
-		if (rVu >= dwVuDecay) gnRVuMeter = (rVu - dwVuDecay) << 11; else gnRVuMeter = 0;
 	}
 
 	{
@@ -1325,8 +1325,7 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc)
 
 	m_wndToolBar.SetCurrentSong(m_pSndFile);
 
-	gnLVuMeter = gnRVuMeter = 0;
-	gnClipLeft = gnClipRight = false;
+	m_VUMeter = VUMeter();
 
 	if(!StartPlayback())
 	{
