@@ -43,10 +43,11 @@ struct Notification
 	ORDERINDEX order;				// dito
 	PATTERNINDEX pattern;			// dito
 	uint32 mixedChannels;			// dito
-	uint32 masterVU[2];				// dito
+	uint32 masterVU[4];				// dito
+	uint8 masterVUchannels;			// dito
 	SmpLength pos[MAX_CHANNELS];	// Sample / envelope pos for each channel if != PosInvalid, or pattern channel VUs
 
-	Notification(Type t = Default, Item i = 0, int64 s = 0, ROWINDEX r = 0, uint32 ti = 0, ORDERINDEX o = 0, PATTERNINDEX p = 0, uint32 x = 0) : timestampSamples(s), type(t), item(i), row(r), tick(ti), order(o), pattern(p), mixedChannels(x)
+	Notification(Type t = Default, Item i = 0, int64 s = 0, ROWINDEX r = 0, uint32 ti = 0, ORDERINDEX o = 0, PATTERNINDEX p = 0, uint32 x = 0, uint8 outChannels = 2) : timestampSamples(s), type(t), item(i), row(r), tick(ti), order(o), pattern(p), mixedChannels(x), masterVUchannels(outChannels)
 	{
 		MemsetZero(masterVU);
 	}

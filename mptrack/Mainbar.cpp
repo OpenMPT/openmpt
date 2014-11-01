@@ -1116,16 +1116,32 @@ void CStereoVU::OnPaint()
 }
 
 
-void CStereoVU::SetVuMeter(uint32 left, uint32 right, bool force)
-//---------------------------------------------------------------
+void CStereoVU::SetVuMeter(uint8 validChannels, const uint32 channels[4], bool force)
+//-----------------------------------------------------------------------------------
 {
-	if(left != vuMeter[0] || right != vuMeter[1])
+	bool changed = false;
+	if(validChannels != numChannels)
+	{
+		changed = true;
+		force = true;
+		numChannels = validChannels;
+	}
+	for(uint8 c = 0; c < validChannels; ++c)
+	{
+		if(vuMeter[c] != channels[c])
+		{
+			changed = true;
+		}
+	}
+	if(changed)
 	{
 		DWORD curTime = timeGetTime();
 		if(curTime - lastVuUpdateTime >= TrackerSettings::Instance().VuMeterUpdateInterval || force)
 		{
-			vuMeter[0] = left;
-			vuMeter[1] = right;
+			for(uint8 c = 0; c < validChannels; ++c)
+			{
+				vuMeter[c] = channels[c];
+			}
 			CClientDC dc(this);
 			DrawVuMeters(dc);
 			lastVuUpdateTime = curTime;
@@ -1140,24 +1156,24 @@ void CStereoVU::DrawVuMeters(CDC &dc, bool redraw)
 {
 	CRect rect;
 	GetClientRect(&rect);
-	CRect rectL = rect, rectR = rect;
 
-	if(horizontal)
+	for(uint8 channel = 0; channel < numChannels; ++channel)
 	{
-		const int mid = rect.top + rect.Height() / 2;
-		rectL.bottom = mid;
-
-		rectR.top = mid + 1;
-	} else
-	{
-		const int mid = rect.left + rect.Width() / 2;
-		rectL.right = mid;
-
-		rectR.left = mid + 1;
+		CRect chanrect = rect;
+		if(horizontal)
+		{
+			float height = rect.Height() / float(numChannels);
+			chanrect.top = Util::Round<int32>(rect.top + height * channel);
+			chanrect.bottom = Util::Round<int32>(chanrect.top + height) - 1;
+		} else
+		{
+			float width = rect.Width() / float(numChannels);
+			chanrect.left = Util::Round<int32>(rect.left + width * channel);
+			chanrect.right = Util::Round<int32>(chanrect.left + width) - 1;
+		}
+		DrawVuMeter(dc, chanrect, channel, redraw);
 	}
 
-	DrawVuMeter(dc, rectL, 0, redraw);
-	DrawVuMeter(dc, rectR, 1, redraw);
 }
 
 

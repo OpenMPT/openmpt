@@ -847,6 +847,10 @@ void VUMeter::Process(const int *mixbuffer, std::size_t numChannels, std::size_t
 			}
 		}
 	}
+	for(std::size_t channel = std::min(numChannels, maxChannels); channel < maxChannels; ++channel)
+	{
+		channels[channel] = Channel();
+	}
 }
 
 
@@ -889,7 +893,7 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 
 	// Add an entry to the notification history
 
-	Notification notification(notifyType, notifyItem, streamPosition, m_pSndFile->m_PlayState.m_nRow, m_pSndFile->m_PlayState.m_nTickCount, m_pSndFile->m_PlayState.m_nCurrentOrder, m_pSndFile->m_PlayState.m_nPattern, m_pSndFile->GetMixStat());
+	Notification notification(notifyType, notifyItem, streamPosition, m_pSndFile->m_PlayState.m_nRow, m_pSndFile->m_PlayState.m_nTickCount, m_pSndFile->m_PlayState.m_nCurrentOrder, m_pSndFile->m_PlayState.m_nPattern, m_pSndFile->GetMixStat(), static_cast<uint8>(m_pSndFile->m_MixerSettings.gnChannels));
 
 	m_pSndFile->ResetMixStat();
 
@@ -976,9 +980,12 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 		// Master VU meter
 		notification.masterVU[0] = Clamp(m_VUMeter[0].peak >> 11, 0, 0x10000);
 		notification.masterVU[1] = Clamp(m_VUMeter[1].peak >> 11, 0, 0x10000);
+		notification.masterVU[2] = Clamp(m_VUMeter[2].peak >> 11, 0, 0x10000);
+		notification.masterVU[3] = Clamp(m_VUMeter[3].peak >> 11, 0, 0x10000);
 		if(m_VUMeter[0].clipped) notification.masterVU[0] |= Notification::ClipVU;
 		if(m_VUMeter[1].clipped) notification.masterVU[1] |= Notification::ClipVU;
-		int32 us = Util::muldivr(dwSamplesRead, 1000000, m_pSndFile->m_MixerSettings.gdwMixingFreq);
+		if(m_VUMeter[2].clipped) notification.masterVU[2] |= Notification::ClipVU;
+		if(m_VUMeter[3].clipped) notification.masterVU[3] |= Notification::ClipVU;
 		m_VUMeter.Decay(dwSamplesRead, m_pSndFile->m_MixerSettings.gdwMixingFreq);
 
 	}
@@ -2280,7 +2287,7 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 				::SendMessage(GetFollowSong(), WM_MOD_UPDATEPOSITION, 0, lParam);
 		}
 		m_nMixChn = pnotify->mixedChannels;
-		m_wndToolBar.m_VuMeter.SetVuMeter(pnotify->masterVU[0], pnotify->masterVU[1], pnotify->type[Notification::Stop]);
+		m_wndToolBar.m_VuMeter.SetVuMeter(pnotify->masterVUchannels, pnotify->masterVU,  pnotify->type[Notification::Stop]);
 	}
 	return 0;
 }
