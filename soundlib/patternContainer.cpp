@@ -78,9 +78,9 @@ bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
 {
 	const CModSpecifications& specs = m_rSndFile.GetModSpecifications();
 	if(index >= specs.patternsMax || rows > MAX_PATTERN_ROWS || rows == 0)
-		return true;
+		return false;
 	if(index < m_Patterns.size() && m_Patterns[index])
-		return true;
+		return false;
 
 	if(index >= m_Patterns.size())
 	{
@@ -91,9 +91,9 @@ bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
 	m_Patterns[index].RemoveSignature();
 	m_Patterns[index].SetName("");
 
-	if(!m_Patterns[index]) return true;
+	if(!m_Patterns[index]) return false;
 
-	return false;
+	return true;
 }
 
 
