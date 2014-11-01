@@ -57,22 +57,20 @@ public:
 
 	bool IsDefault() const {return *this == CMIDIMappingDirective();}
 
-	bool operator==(const CMIDIMappingDirective &other) const { return memcmp(this, &other, sizeof(CMIDIMappingDirective)) == 0; }
+	bool operator==(const CMIDIMappingDirective &other) const { return memcmp(this, &other, sizeof(*this)) == 0; }
 	bool operator<(const CMIDIMappingDirective &other) const { return GetController() < other.GetController(); }
-
-	std::string ToString() const;
 
 	BYTE GetChnEvent() const {return m_ChnEvent;}
 
 private:
-	bool m_Active;
-	bool m_CaptureMIDI; //When true, MIDI data should not be processed beyond this directive
-	bool m_AllowPatternEdit; //When true, the mapping can be used for modifying pattern.
-	bool m_AnyChannel;
-	uint8 m_ChnEvent; //0-3 channel, 4-7 event
-	BYTE m_MIDIByte1;
-	PLUGINDEX m_PluginIndex;
 	uint32 m_Parameter;
+	PLUGINDEX m_PluginIndex;
+	BYTE m_MIDIByte1;
+	uint8 m_ChnEvent; //0-3 channel, 4-7 event
+	bool m_Active : 1;
+	bool m_CaptureMIDI : 1; //When true, MIDI data should not be processed beyond this directive
+	bool m_AllowPatternEdit : 1; //When true, the mapping can be used for modifying pattern.
+	bool m_AnyChannel : 1;
 };
 
 class CSoundFile;

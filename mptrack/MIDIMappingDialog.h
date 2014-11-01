@@ -46,7 +46,7 @@ public:
 	~CMIDIMappingDialog();
 
 protected:
-	void UpdateDialog();
+	void UpdateDialog(int selItem = -1);
 	void UpdateEvent();
 	void UpdateParameters();
 	int InsertItem(const CMIDIMappingDirective& m, int insertAt);

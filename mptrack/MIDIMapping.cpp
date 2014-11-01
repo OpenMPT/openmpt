@@ -18,17 +18,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-std::string CMIDIMappingDirective::ToString() const
-//-------------------------------------------------
-{
-	char flags[4] = "000";
-	if(m_Active) flags[0] = '1';
-	if(m_CaptureMIDI) flags[1] = '1';
-	if(m_AllowPatternEdit) flags[2] = '1';
-	return mpt::String::Print("%1:%2:%3:%4:%5:%6", flags, (int)GetChannel(), mpt::fmt::hex((int)GetEvent()), (int)GetController(), (int)m_PluginIndex, m_Parameter);
-}
-
-
 size_t CMIDIMapper::GetSerializationSize() const
 //----------------------------------------------
 {
