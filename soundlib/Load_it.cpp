@@ -787,7 +787,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		if(patPos[pat] == 0 || !file.Seek(patPos[pat]))
 		{
 			// Empty 64-row pattern
-			if(Patterns.Insert(pat, 64))
+			if(!Patterns.Insert(pat, 64))
 			{
 				AddToLog(mpt::String::Print("Allocating patterns failed starting from pattern %1", pat));
 				break;
@@ -803,7 +803,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		if(numRows < GetModSpecifications().patternRowsMin
 			|| numRows > GetModSpecifications().patternRowsMax
 			|| !file.Skip(4)
-			|| Patterns.Insert(pat, numRows))
+			|| !Patterns.Insert(pat, numRows))
 			continue;
 			
 		FileReader patternData = file.ReadChunk(len);

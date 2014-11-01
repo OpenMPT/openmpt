@@ -208,7 +208,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 		if(!memcmp(chunkHeader.magic, "PATT", 4) && (loadFlags & loadPatternData))
 		{
 			// Read pattern
-			if(Patterns.Insert(patNum, 64))
+			if(!Patterns.Insert(patNum, 64))
 			{
 				continue;
 			}

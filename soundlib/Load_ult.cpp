@@ -452,7 +452,7 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 
 	for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 	{
-		if(Patterns.Insert(pat, 64))
+		if(!Patterns.Insert(pat, 64))
 			return false;
 	}
 

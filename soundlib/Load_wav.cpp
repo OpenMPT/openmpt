@@ -62,7 +62,7 @@ bool CSoundFile::ReadWav(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals();
 	m_nChannels = std::max(wavFile.GetNumChannels(), uint16(2));
-	if(Patterns.Insert(0, 64) || Patterns.Insert(1, 64))
+	if(!Patterns.Insert(0, 64) || !Patterns.Insert(1, 64))
 	{
 		return false;
 	}

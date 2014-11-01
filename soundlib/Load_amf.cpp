@@ -149,7 +149,7 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 	// Read Patterns
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)
 	{
-		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64))
+		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))
 		{
 			file.Skip(64 * 4 * 8);
 			continue;
@@ -568,7 +568,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	// Create the patterns from the list of tracks
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numOrders; pat++)
 	{
-		if(Patterns.Insert(pat, patternLength[pat]))
+		if(!Patterns.Insert(pat, patternLength[pat]))
 		{
 			continue;
 		}

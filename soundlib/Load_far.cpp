@@ -221,7 +221,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 
 		// Calculate pattern length in rows (every event is 4 bytes, and we have 16 channels)
 		ROWINDEX numRows = (orderHeader.patternSize[pat] - 2) / (16 * 4);
-		if(!(loadFlags & loadPatternData) || !numRows || numRows > MAX_PATTERN_ROWS || Patterns.Insert(pat, numRows))
+		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, numRows))
 		{
 			continue;
 		}

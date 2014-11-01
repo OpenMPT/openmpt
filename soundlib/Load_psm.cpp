@@ -665,7 +665,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 		uint16 numRows = patternChunk.ReadUint16LE();
 
-		if(Patterns.Insert(pat, numRows))
+		if(!Patterns.Insert(pat, numRows))
 		{
 			break;
 		}
@@ -1225,7 +1225,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 			// Patterns are padded to 16 Bytes
 			FileReader patternChunk = file.ReadChunk(((patternHeader.size + 15) & ~15) - sizeof(PSM16PatternHeader));
 
-			if(Patterns.Insert(pat, patternHeader.numRows))
+			if(!Patterns.Insert(pat, patternHeader.numRows))
 			{
 				continue;
 			}

@@ -662,7 +662,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 				if((pat % 2u) == 0)
 				{
 					// Only create "even" patterns for FLT8 files
-					if(!(loadFlags & loadPatternData) || Patterns.Insert(pat / 2, 64))
+					if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat / 2, 64))
 					{
 						file.Skip(readChannels * 64 * 4);
 						continue;
@@ -671,7 +671,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 				actualPattern /= 2;
 			} else
 			{
-				if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64))
+				if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))
 				{
 					file.Skip(readChannels * 64 * 4);
 					continue;
@@ -986,7 +986,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	// Reading patterns
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
-		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64))
+		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))
 		{
 			file.Skip(64 * 4 * 4);
 			continue;
@@ -1203,7 +1203,7 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 	for(PATTERNINDEX pat = 0; pat < numOrders; pat++)
 	{
 		Order[pat] = pat;
-		if(Patterns.Insert(pat, 64))
+		if(!Patterns.Insert(pat, 64))
 			continue;
 
 		for(CHANNELINDEX chn = 0; chn < 4; chn++)

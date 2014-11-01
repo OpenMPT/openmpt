@@ -158,7 +158,7 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 			patternChunk = file.ReadChunk(4 * 64 * GetNumChannels());
 		}
 
-		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64))
+		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))
 		{
 			continue;
 		}

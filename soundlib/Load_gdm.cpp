@@ -305,7 +305,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		FileReader chunk = file.ReadChunk(patternLength - 2);
 
-		if(!(loadFlags & loadPatternData) || !chunk.IsValid() || Patterns.Insert(pat, 64))
+		if(!(loadFlags & loadPatternData) || !chunk.IsValid() || !Patterns.Insert(pat, 64))
 		{
 			continue;
 		}

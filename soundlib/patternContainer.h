@@ -49,7 +49,7 @@ public:
 	void DestroyPatterns();
 	
 	//Insert (default)pattern to given position. If pattern already exists at that position,
-	//ignoring request. Returns true on failure, false otherwise.
+	//ignoring request. Returns true on success, false otherwise.
 	bool Insert(const PATTERNINDEX index, const ROWINDEX rows);
 	
 	//Insert pattern to position with the lowest index, and return that index, PATTERNINDEX_INVALID

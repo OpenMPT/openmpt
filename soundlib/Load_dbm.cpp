@@ -429,7 +429,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 			uint32 packedSize = patternChunk.ReadUint32BE();
 			FileReader chunk = patternChunk.ReadChunk(packedSize);
 
-			if(Patterns.Insert(pat, numRows))
+			if(!Patterns.Insert(pat, numRows))
 			{
 				continue;
 			}

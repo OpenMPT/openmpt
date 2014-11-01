@@ -178,7 +178,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		FileReader patternChunk = file.ReadChunk(numRows * size * GetNumChannels());
 
 		// Allocate pattern
-		if(!(loadFlags & loadPatternData) || numRows == 0 || numRows > MAX_PATTERN_ROWS || Patterns.Insert(pat, numRows))
+		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, numRows))
 		{
 			pattNames.Skip(patNameLen);
 			continue;

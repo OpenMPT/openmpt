@@ -155,7 +155,7 @@ static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSo
 		file.Seek(curPos + headerSize);
 		FileReader patternChunk = file.ReadChunk(packedSize);
 
-		if(sndFile.Patterns.Insert(pat, numRows) || packedSize == 0)
+		if(!sndFile.Patterns.Insert(pat, numRows) || packedSize == 0)
 		{
 			continue;
 		}

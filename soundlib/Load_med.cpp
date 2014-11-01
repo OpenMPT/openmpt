@@ -864,7 +864,7 @@ bool CSoundFile::ReadMed(const uint8 *lpStream, const DWORD dwMemLength, ModLoad
 			lines = pmb->lines + 1;
 			tracks = pmb->numtracks;
 			if (!tracks) tracks = m_nChannels;
-			if(Patterns.Insert(iBlk, lines)) continue;
+			if(!Patterns.Insert(iBlk, lines)) continue;
 			ModCommand *p = Patterns[iBlk];
 			const uint8 * s = (const uint8 *)(lpStream + dwPos + 2);
 			UINT maxlen = tracks*lines*3;
