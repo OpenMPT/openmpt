@@ -307,7 +307,7 @@ void CMIDIMappingDialog::OnSelectionChanged(NMHDR *pNMHDR, LRESULT * /*pResult*/
 	}
 	if(i < 0 || (size_t)i >= m_rMIDIMapper.GetCount()) return;
 	m_Setting = m_rMIDIMapper.GetDirective(i);
-	UpdateDialog();
+	UpdateDialog(i);
 }
 
 
