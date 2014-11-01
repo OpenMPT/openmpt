@@ -71,6 +71,9 @@ public:
 };
 
 
+#if defined(MODPLUG_TRACKER)
+
+
 //===========================================
 class AudioReadTargetBufferInterleavedDynamic
 //===========================================
@@ -142,7 +145,8 @@ public:
 };
 
 
-#ifndef MODPLUG_TRACKER
+#else // !MODPLUG_TRACKER
+
 
 template<typename Tsample>
 void ApplyGainBeforeConversionIfAppropriate(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk, float gainFactor)
@@ -198,7 +202,8 @@ public:
 	}
 };
 
-#endif // !MODPLUG_TRACKER
+
+#endif // MODPLUG_TRACKER
 
 
 OPENMPT_NAMESPACE_END
