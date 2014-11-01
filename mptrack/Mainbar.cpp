@@ -1110,8 +1110,6 @@ void CStereoVU::OnPaint()
 {
 	CRect rect;
 	CPaintDC dc(this);
-	GetClientRect(&rect);
-	dc.FillSolidRect(rect.left, rect.top, rect.Width(), rect.Height(), RGB(0,0,0));
 	DrawVuMeters(dc, true);
 }
 
@@ -1120,11 +1118,16 @@ void CStereoVU::SetVuMeter(uint8 validChannels, const uint32 channels[4], bool f
 //-----------------------------------------------------------------------------------
 {
 	bool changed = false;
-	if(validChannels != numChannels)
+	if(validChannels == 0)
+	{
+		// reset
+		validChannels = numChannels;
+	} else if(validChannels != numChannels)
 	{
 		changed = true;
 		force = true;
 		numChannels = validChannels;
+		allowRightToLeft = (numChannels > 2);
 	}
 	for(uint8 c = 0; c < validChannels; ++c)
 	{
@@ -1143,7 +1146,7 @@ void CStereoVU::SetVuMeter(uint8 validChannels, const uint32 channels[4], bool f
 				vuMeter[c] = channels[c];
 			}
 			CClientDC dc(this);
-			DrawVuMeters(dc);
+			DrawVuMeters(dc, force);
 			lastVuUpdateTime = curTime;
 		}
 	}
@@ -1157,14 +1160,36 @@ void CStereoVU::DrawVuMeters(CDC &dc, bool redraw)
 	CRect rect;
 	GetClientRect(&rect);
 
+	if(redraw)
+	{
+		dc.FillSolidRect(rect.left, rect.top, rect.Width(), rect.Height(), RGB(0,0,0));
+	}
+
 	for(uint8 channel = 0; channel < numChannels; ++channel)
 	{
 		CRect chanrect = rect;
 		if(horizontal)
 		{
-			float height = rect.Height() / float(numChannels);
-			chanrect.top = Util::Round<int32>(rect.top + height * channel);
-			chanrect.bottom = Util::Round<int32>(chanrect.top + height) - 1;
+			if(allowRightToLeft)
+			{
+				const int col = channel % 2;
+				const int row = channel / 2;
+
+				float width = (rect.Width() - 2.0f) / 2.0f;
+				float height = rect.Height() / float(numChannels/2);
+
+				chanrect.top = Util::Round<int32>(rect.top + height * row);
+				chanrect.bottom = Util::Round<int32>(chanrect.top + height) - 1;
+				
+				chanrect.left = Util::Round<int32>(rect.left + width * col) + ((col == 1) ? 2 : 0);
+				chanrect.right = Util::Round<int32>(chanrect.left + width) - 1;
+
+			} else
+			{
+				float height = rect.Height() / float(numChannels);
+				chanrect.top = Util::Round<int32>(rect.top + height * channel);
+				chanrect.bottom = Util::Round<int32>(chanrect.top + height) - 1;
+			}
 		} else
 		{
 			float width = rect.Width() / float(numChannels);
@@ -1193,21 +1218,25 @@ void CStereoVU::DrawVuMeter(CDC &dc, const CRect &rect, int index, bool redraw)
 
 	if(horizontal)
 	{
+		const bool rtl = allowRightToLeft && ((index % 2) == 0);
+
 		const int cx = std::max(1, rect.Width());
 		int v = (vu * cx) >> 8;
 
-		for(int rx = rect.left; rx <= rect.right; rx += 2)
+		for(int x = 0; x <= cx; x += 2)
 		{
-			int pen = Clamp((rx * NUM_VUMETER_PENS) / cx, 0, NUM_VUMETER_PENS - 1);
-			const bool last = (rx == rect.right - 1);
+			int pen = Clamp((x * NUM_VUMETER_PENS) / cx, 0, NUM_VUMETER_PENS - 1);
+			const bool last = (x == (cx & ~0x1));
 
 			// Darken everything above volume, unless it's the clip indicator
-			if(v <= rx && (!last || !clip))
+			if(v <= x && (!last || !clip))
 				pen += NUM_VUMETER_PENS;
 
-			bool draw = redraw || (v < lastV[index] && v<=rx && rx<=lastV[index]) || (lastV[index] < v && lastV[index]<=rx && rx<=v);
+			bool draw = redraw || (v < lastV[index] && v<=x && x<=lastV[index]) || (lastV[index] < v && lastV[index]<=x && x<=v);
 			draw = draw || (last && clip != lastClip[index]);
-			if(draw) dc.FillSolidRect(rx, rect. top, 1, rect.Height(), CMainFrame::gcolrefVuMeter[pen]);
+			if(draw) dc.FillSolidRect(
+				((!rtl) ? (rect.left + x) : (rect.right - x)),
+				rect.top, 1, rect.Height(), CMainFrame::gcolrefVuMeter[pen]);
 			if(last) lastClip[index] = clip;
 		}
 		lastV[index] = v;

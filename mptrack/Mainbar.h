@@ -23,9 +23,10 @@ protected:
 	int lastV[4];
 	bool lastClip[4];
 	bool horizontal;
+	bool allowRightToLeft;
 
 public:
-	CStereoVU() { numChannels = 2; MemsetZero(vuMeter); lastVuUpdateTime = timeGetTime(); horizontal = true; MemsetZero(lastV); MemsetZero(lastClip); }
+	CStereoVU() { numChannels = 2; MemsetZero(vuMeter); lastVuUpdateTime = timeGetTime(); horizontal = true; MemsetZero(lastV); MemsetZero(lastClip); allowRightToLeft = false; }
 	void SetVuMeter(uint8 validChannels, const uint32 channels[4], bool force=false);
 	void SetOrientation(bool h) { horizontal = h; }
 
