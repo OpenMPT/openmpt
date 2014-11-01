@@ -66,7 +66,7 @@ PATTERNINDEX CPatternContainer::Insert(const ROWINDEX rows)
 	PATTERNINDEX i = 0;
 	for(i = 0; i < m_Patterns.size(); i++)
 		if(!m_Patterns[i]) break;
-	if(Insert(i, rows))
+	if(!Insert(i, rows))
 		return PATTERNINDEX_INVALID;
 	else return i;
 

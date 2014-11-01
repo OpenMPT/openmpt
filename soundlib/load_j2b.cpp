@@ -622,7 +622,7 @@ static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSou
 
 	ROWINDEX numRows = Clamp(static_cast<ROWINDEX>(chunk.ReadUint8()) + 1, ROWINDEX(1), MAX_PATTERN_ROWS);
 
-	if(sndFile.Patterns.Insert(pat, numRows))
+	if(!sndFile.Patterns.Insert(pat, numRows))
 		return false;
 
 	const CHANNELINDEX channels = sndFile.GetNumChannels();

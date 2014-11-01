@@ -124,7 +124,7 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile &snd
 
 	ROWINDEX rows = Clamp(static_cast<ROWINDEX>(chunk.ReadUint16BE()), ROWINDEX(1), MAX_PATTERN_ROWS);
 
-	if(sndFile.Patterns.Insert(nPat, rows))
+	if(!sndFile.Patterns.Insert(nPat, rows))
 	{
 		return;
 	}

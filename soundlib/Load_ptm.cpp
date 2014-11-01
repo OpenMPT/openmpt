@@ -204,7 +204,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)
 	{
-		if(Patterns.Insert(pat, 64)
+		if(!Patterns.Insert(pat, 64)
 			|| fileHeader.patOffsets[pat] == 0
 			|| !file.Seek(fileHeader.patOffsets[pat] << 4))
 		{

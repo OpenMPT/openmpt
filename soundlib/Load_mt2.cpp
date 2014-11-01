@@ -487,7 +487,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		LimitMax(numRows, MAX_PATTERN_ROWS);
 		if(!numRows
 			|| !(loadFlags & loadPatternData)
-			|| Patterns.Insert(pat, numRows))
+			|| !Patterns.Insert(pat, numRows))
 		{
 			continue;
 		}

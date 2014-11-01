@@ -204,7 +204,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		STMPatternData patternData;
 
-		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64) || !file.ReadConvertEndianness(patternData))
+		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64) || !file.ReadConvertEndianness(patternData))
 		{
 			file.Skip(sizeof(patternData));
 			continue;

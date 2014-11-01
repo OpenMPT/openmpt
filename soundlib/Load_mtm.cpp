@@ -152,7 +152,7 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 
 	for(PATTERNINDEX pat = 0; pat <= fileHeader.lastPattern; pat++)
 	{
-		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, rowsPerPat))
+		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, rowsPerPat))
 		{
 			break;
 		}

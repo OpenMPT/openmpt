@@ -616,7 +616,7 @@ bool CSoundFile::ReadMID(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFla
 	do
 	{
 		// Allocate current pattern if not allocated yet
-		if (!Patterns[pat] && Patterns.Insert(pat, importPatternLen))
+		if (!Patterns[pat] && !Patterns.Insert(pat, importPatternLen))
 		{
 			break;
 		}

@@ -645,7 +645,7 @@ bool CSoundFile::ReadMDL(const uint8 *lpStream, const DWORD dwMemLength, ModLoad
 	{
 		for (UINT ipat=0; ipat<npatterns; ipat++)
 		{
-			if(Patterns.Insert(ipat, patternLength[ipat]))
+			if(!Patterns.Insert(ipat, patternLength[ipat]))
 			{
 				break;
 			}

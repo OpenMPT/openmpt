@@ -442,7 +442,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 		char name[11];
 		ReadAMSString(name, file);
 		// Create pattern now, so name won't be reset later.
-		if(!Patterns.Insert(pat, 64))
+		if(Patterns.Insert(pat, 64))
 		{
 			Patterns[pat].SetName(name);
 		}
@@ -966,7 +966,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 			// We don't need to know the number of channels or commands.
 			patternChunk.Skip(1);
 
-			if(Patterns.Insert(pat, numRows))
+			if(!Patterns.Insert(pat, numRows))
 			{
 				continue;
 			}

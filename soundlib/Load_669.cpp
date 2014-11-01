@@ -155,7 +155,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	// Reading Patterns
 	for(PATTERNINDEX pat = 0; pat < fileHeader.patterns; pat++)
 	{
-		if(!(loadFlags & loadPatternData) || Patterns.Insert(pat, 64))
+		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))
 		{
 			file.Skip(64 * 8 * 3);
 			continue;
