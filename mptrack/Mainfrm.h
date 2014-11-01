@@ -296,6 +296,26 @@ template<> inline WINDOWPLACEMENT FromSettingValue(const SettingValue &val)
 }
 
 
+class VUMeter
+{
+public:
+	static const std::size_t maxChannels = 4;
+	struct Channel
+	{
+		int32 peak;
+		bool clipped;
+		Channel() : peak(0), clipped(false) { }
+	};
+private:
+	Channel channels[maxChannels];
+public:
+	const Channel & operator [] (std::size_t channel) const { return channels[channel]; }
+	void Process(const int *mixbuffer, std::size_t numChannels, std::size_t numFrames); // mixbuffer is interleaved
+	void Decay(int32 secondsNum, int32 secondsDen);
+	void ResetClipped();
+};
+
+
 //======================================================================================================
 class CMainFrame: public CMDIFrameWnd, public SoundDevice::ISource, public SoundDevice::IMessageReceiver
 //======================================================================================================
@@ -324,12 +344,10 @@ public:
 	SoundDevice::IBase *gpSoundDevice;
 	UINT_PTR m_NotifyTimer;
 	Dither m_Dither;
+	VUMeter m_VUMeter;
 
 	DWORD m_AudioThreadId;
 	bool m_InNotifyHandler;
-
-	static LONG gnLVuMeter, gnRVuMeter;
-	static bool gnClipLeft, gnClipRight;
 
 	// Midi Input
 public:
@@ -375,7 +393,6 @@ public:
 public:
 	static void UpdateDspEffects(CSoundFile &sndFile, bool reset=false);
 	static void UpdateAudioParameters(CSoundFile &sndFile, bool reset=false);
-	static void CalcStereoVuMeters(int *, unsigned long, unsigned long);
 
 	// from SoundDevice::ISource
 	void FillAudioBufferLocked(SoundDevice::IFillAudioBuffer &callback);

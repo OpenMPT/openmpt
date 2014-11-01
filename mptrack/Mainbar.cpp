@@ -1224,7 +1224,7 @@ void CStereoVU::OnLButtonDown(UINT, CPoint)
 //-----------------------------------------
 {
 	// Reset clip indicator.
-	CMainFrame::gnClipLeft = CMainFrame::gnClipRight = false;
+	CMainFrame::GetMainFrame()->m_VUMeter.ResetClipped();
 }
 
 
