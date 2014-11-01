@@ -17,15 +17,16 @@ class CStereoVU: public CStatic
 //=============================
 {
 protected:
-	uint32 vuMeter[2];
+	uint8 numChannels;
+	uint32 vuMeter[4];
 	DWORD lastVuUpdateTime;
-	int lastV[2];
-	bool lastClip[2];
+	int lastV[4];
+	bool lastClip[4];
 	bool horizontal;
 
 public:
-	CStereoVU() { vuMeter[0] = vuMeter[1] = 0; lastVuUpdateTime = timeGetTime(); horizontal = true; lastV[0] = lastV[1] = 0; lastClip[0] = lastClip[1] = false; }
-	void SetVuMeter(uint32 left, uint32 right, bool force=false);
+	CStereoVU() { numChannels = 2; MemsetZero(vuMeter); lastVuUpdateTime = timeGetTime(); horizontal = true; MemsetZero(lastV); MemsetZero(lastClip); }
+	void SetVuMeter(uint8 validChannels, const uint32 channels[4], bool force=false);
 	void SetOrientation(bool h) { horizontal = h; }
 
 protected:
