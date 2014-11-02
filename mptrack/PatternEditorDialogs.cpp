@@ -145,16 +145,16 @@ BOOL CFindReplaceTab::OnInitDialog()
 		CheckDlgButton(IDC_CHECK7, m_Flags[FindReplace::InChannels] ? MF_CHECKED : MF_UNCHECKED);
 		int nButton = IDC_RADIO1;
 		if(m_Flags[FindReplace::FullSearch])
-		{
 			nButton = IDC_RADIO2;
-		} else if(m_bPatSel)
-		{
+		else if(m_bPatSel)
 			nButton = IDC_RADIO3;
-		}
+		
 		CheckRadioButton(IDC_RADIO1, IDC_RADIO3, nButton);
 		GetDlgItem(IDC_RADIO3)->EnableWindow(m_bPatSel ? TRUE : FALSE);
 		SetDlgItemInt(IDC_EDIT1, m_nMinChannel + 1);
 		SetDlgItemInt(IDC_EDIT2, m_nMaxChannel + 1);
+		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1))->SetRange32(1, sndFile.GetNumChannels());
+		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN2))->SetRange32(1, sndFile.GetNumChannels());
 	}
 	// Note
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
@@ -350,8 +350,10 @@ void CFindReplaceTab::OnCheckChannelSearch()
 	if (!m_bReplace)
 	{
 		BOOL b = IsDlgButtonChecked(IDC_CHECK7);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT1), b);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), b);
+		GetDlgItem(IDC_EDIT1)->EnableWindow(b);
+		GetDlgItem(IDC_SPIN1)->EnableWindow(b);
+		GetDlgItem(IDC_EDIT2)->EnableWindow(b);
+		GetDlgItem(IDC_SPIN2)->EnableWindow(b);
 	}
 }
 
