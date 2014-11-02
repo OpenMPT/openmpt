@@ -239,7 +239,7 @@ struct PACKED WAVSampleLoop
 	}
 
 	// Apply WAV loop information to a mod sample.
-	void ApplyToSample(SmpLength &start, SmpLength &end, SmpLength sampleLength, FlagSet<ChannelFlags, uint16> &flags, ChannelFlags enableFlag, ChannelFlags bidiFlag, bool mptLoopFix) const;
+	void ApplyToSample(SmpLength &start, SmpLength &end, SmpLength sampleLength, SampleFlags &flags, ChannelFlags enableFlag, ChannelFlags bidiFlag, bool mptLoopFix) const;
 
 	// Convert internal loop information into a WAV loop.
 	void ConvertToWAV(SmpLength start, SmpLength end, bool bidi);

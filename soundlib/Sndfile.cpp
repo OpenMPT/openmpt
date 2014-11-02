@@ -2100,7 +2100,7 @@ bool CSoundFile::LoadExternalSample(SAMPLEINDEX smp, const mpt::PathString &file
 			ModSample &sample = GetSample(smp);
 			SmpLength newLength = sample.nLength;
 			void *newData = sample.pSample;
-			FlagSet<ChannelFlags, uint16> newFlags = sample.uFlags;
+			SampleFlags newFlags = sample.uFlags;
 
 			sample = origSample;
 			sample.nLength = newLength;
