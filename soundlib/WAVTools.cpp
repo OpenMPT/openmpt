@@ -207,8 +207,8 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 
 
 // Apply WAV loop information to a mod sample.
-void WAVSampleLoop::ApplyToSample(SmpLength &start, SmpLength &end, SmpLength sampleLength, FlagSet<ChannelFlags, uint16> &flags, ChannelFlags enableFlag, ChannelFlags bidiFlag, bool mptLoopFix) const
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void WAVSampleLoop::ApplyToSample(SmpLength &start, SmpLength &end, SmpLength sampleLength, SampleFlags &flags, ChannelFlags enableFlag, ChannelFlags bidiFlag, bool mptLoopFix) const
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(loopEnd == 0)
 	{

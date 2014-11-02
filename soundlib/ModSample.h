@@ -30,7 +30,7 @@ struct ModSample
 	uint16 nPan;							// Default sample panning (if pan flag is set), 0...256
 	uint16 nVolume;							// Default volume, 0...256
 	uint16 nGlobalVol;						// Global volume (sample volume is multiplied by this), 0...64
-	FlagSet<ChannelFlags, uint16> uFlags;	// Sample flags
+	SampleFlags uFlags;						// Sample flags (see ChannelFlags enum)
 	int8   RelativeTone;					// Relative note to middle c (for MOD/XM)
 	int8   nFineTune;						// Finetune period (for MOD/XM), -128...127
 	uint8  nVibType;						// Auto vibrato type, see VibratoType enum
