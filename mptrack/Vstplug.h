@@ -215,7 +215,7 @@ public:
 	bool GetParams(float* param, VstInt32 min, VstInt32 max);
 	void RandomizeParams(int amount);
 	// If true, the plugin produces an output even if silence is being fed into it.
-	bool ShouldProcessSilence() { return m_Effect.numInputs == 0 || ((m_Effect.flags & effFlagsNoSoundInStop) == 0 && Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f) != 1); }
+	bool ShouldProcessSilence() { return isInstrument() || ((m_Effect.flags & effFlagsNoSoundInStop) == 0 && Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f) != 1); }
 	void ResetSilence() { m_MixState.ResetSilence(); }
 #ifdef MODPLUG_TRACKER
 	forceinline CModDoc *GetModDoc();
