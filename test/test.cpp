@@ -98,7 +98,7 @@ void DoTests()
 	#if MPT_OS_WINDOWS
 
 		// prefix for test suite
-		std::wstring pathprefix = std::wstring(); 
+		std::wstring pathprefix = std::wstring();
 
 		// set path prefix for test files (if provided)
 		std::vector<WCHAR> buf(GetEnvironmentVariableW(L"srcdir", NULL, 0) + 1);
@@ -199,7 +199,7 @@ static noinline void TestVersion()
 	}
 
 #ifdef MODPLUG_TRACKER
-	//Verify that the version obtained from the executable file is the same as 
+	//Verify that the version obtained from the executable file is the same as
 	//defined in MptVersion.
 	{
 		char  szFullPath[MAX_PATH];
@@ -223,18 +223,19 @@ static noinline void TestVersion()
 
 		char* szVer = NULL;
 		UINT uVerLength;
-		if (!(::GetFileVersionInfo((LPTSTR)szFullPath, (DWORD)dwVerHnd, 
-								   (DWORD)dwVerInfoSize, (LPVOID)pVersionInfo))) {
+		if (!(::GetFileVersionInfo((LPTSTR)szFullPath, (DWORD)dwVerHnd,
+								   (DWORD)dwVerInfoSize, (LPVOID)pVersionInfo)))
+		{
 			delete[] pVersionInfo;
 			throw std::runtime_error("GetFileVersionInfo() returned false");
-		}   
-		if (!(::VerQueryValue(pVersionInfo, TEXT("\\StringFileInfo\\040904b0\\FileVersion"), 
+		}
+		if (!(::VerQueryValue(pVersionInfo, TEXT("\\StringFileInfo\\040904b0\\FileVersion"),
 							  (LPVOID*)&szVer, &uVerLength))) {
 			delete[] pVersionInfo;
 			throw std::runtime_error("VerQueryValue() returned false");
 		}
 
-		std::string version = szVer;	
+		std::string version = szVer;
 		delete[] pVersionInfo;
 
 		//version string should be like: 1,17,2,38  Change ',' to '.' to get format 1.17.2.38
@@ -602,7 +603,7 @@ static noinline void TestMisc()
 	VERIFY_EQUAL( mpt::saturate_cast<uint32>(std::numeric_limits<int32>::max()), (uint32)std::numeric_limits<int32>::max() );
 	VERIFY_EQUAL( mpt::saturate_cast<uint64>(std::numeric_limits<int64>::min()), std::numeric_limits<uint64>::min() );
 	VERIFY_EQUAL( mpt::saturate_cast<uint64>(std::numeric_limits<int64>::max()), (uint64)std::numeric_limits<int64>::max() );
-	
+
 	// overflow
 	VERIFY_EQUAL( mpt::saturate_cast<int16>(std::numeric_limits<int16>::min() - 1), std::numeric_limits<int16>::min() );
 	VERIFY_EQUAL( mpt::saturate_cast<int16>(std::numeric_limits<int16>::max() + 1), std::numeric_limits<int16>::max() );
@@ -629,7 +630,7 @@ static noinline void TestMisc()
 	//Util::Round<std::string>(1.0);
 	//Util::Round<int64>(1.0);
 	//Util::Round<uint64>(1.0);
-	
+
 	// This should trigger assert in Round.
 	//VERIFY_EQUAL( Util::Round<int8>(-129), 0 );
 
@@ -639,7 +640,7 @@ static noinline void TestMisc()
 		VERIFY_EQUAL(strlen(ModSpecs::Collection[i]->commands), (size_t)MAX_EFFECTS);
 		VERIFY_EQUAL(strlen(ModSpecs::Collection[i]->volcommands), (size_t)MAX_VOLCMDS);
 	}
-	
+
 	// UUID
 #ifdef MODPLUG_TRACKER
 	VERIFY_EQUAL(Util::IsValid(Util::CreateGUID()), true);
@@ -658,7 +659,7 @@ static noinline void TestMisc()
 static noinline void TestCharsets()
 //---------------------------------
 {
-	
+
 	// MPT_UTF8 version
 
 	// Charset conversions (basic sanity checks)
@@ -682,7 +683,7 @@ static noinline void TestCharsets()
 	VERIFY_EQUAL(mpt::ToLocale(MPT_UTF8("a")), "a");
 	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetLocale, "a"), MPT_UTF8("a"));
 #endif
-	
+
 	// Check that some character replacement is done (and not just empty strings or truncated strings are returned)
 	// We test german umlaut-a (U+00E4) (\xC3\xA4) and CJK U+5BB6 (\xE5\xAE\xB6)
 
@@ -744,7 +745,7 @@ static noinline void TestCharsets()
 	// cp437
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetCP437,MPT_UTF8("abc\xC3\xA4xyz")),"abc\x84xyz");
 	VERIFY_EQUAL(MPT_UTF8("abc\xC3\xA4xyz"),mpt::ToUnicode(mpt::CharsetCP437,"abc\x84xyz"));
-	
+
 	// iso8859
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetISO8859_1,MPT_UTF8("abc\xC3\xA4xyz")),"abc\xE4xyz");
 	VERIFY_EQUAL(MPT_UTF8("abc\xC3\xA4xyz"),mpt::ToUnicode(mpt::CharsetISO8859_1,"abc\xE4xyz"));
@@ -771,7 +772,7 @@ static noinline void TestCharsets()
 	VERIFY_EQUAL(mpt::ToLocale(L"a"), "a");
 	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetLocale, "a"), L"a");
 #endif
-	
+
 	// Check that some character replacement is done (and not just empty strings or truncated strings are returned)
 	// We test german umlaut-a (U+00E4) and CJK U+5BB6
 
@@ -833,7 +834,7 @@ static noinline void TestCharsets()
 	// cp437
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetCP437,L"abc\u00E4xyz"),"abc\x84xyz");
 	VERIFY_EQUAL(L"abc\u00E4xyz",mpt::ToWide(mpt::CharsetCP437,"abc\x84xyz"));
-	
+
 	// iso8859
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetISO8859_1,L"abc\u00E4xyz"),"abc\xE4xyz");
 	VERIFY_EQUAL(L"abc\u00E4xyz",mpt::ToWide(mpt::CharsetISO8859_1,"abc\xE4xyz"));
@@ -928,7 +929,7 @@ static noinline void TestSettings()
 
 	{
 		DefaultSettingsContainer conf;
-		
+
 		int32 foobar = conf.Read("Test", "bar", 123, "foobar");
 		VERIFY_EQUAL(foobar, 43);
 		conf.Write("Test", "bar", 88);
@@ -983,7 +984,7 @@ static noinline void TestMIDIEvents()
 //-----------------------------------
 {
 	uint32 midiEvent;
-	
+
 	midiEvent = MIDIEvents::CC(MIDIEvents::MIDICC_Balance_Coarse, 13, 40);
 	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(midiEvent), MIDIEvents::evControllerChange);
 	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(midiEvent), 13);
@@ -1244,7 +1245,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerMeasure, 12);
 	VERIFY_EQUAL_NONCONT(sndFile.m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
 	VERIFY_EQUAL_NONCONT(sndFile.m_nRestartPos, 1);
-	
+
 	// Edit history
 	VERIFY_EQUAL_NONCONT(sndFile.GetFileHistory().size() > 0, true);
 	const FileHistory &fh = sndFile.GetFileHistory().at(0);
@@ -1325,7 +1326,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		VERIFY_EQUAL_NONCONT(sample.GetSampleSizeInBytes(), 16 * 4);
 		VERIFY_EQUAL_NONCONT(sample.GetSampleRate(MOD_TYPE_MPT), 16000);
 		VERIFY_EQUAL_NONCONT(sample.uFlags, CHN_16BIT | CHN_STEREO | CHN_LOOP);
-		
+
 		// Sample Data (Stereo Interleaved)
 		for(size_t i = 0; i < 7; i++)
 		{
@@ -1691,6 +1692,7 @@ static CSoundFile &GetrSoundFile(TSoundFileContainer &sndFile)
 	return sndFile->GetrSoundFile();
 }
 
+
 static TSoundFileContainer CreateSoundFileContainer(const mpt::PathString &filename)
 {
 	CModDoc *pModDoc = (CModDoc *)theApp.OpenDocumentFile(filename, FALSE);
@@ -1732,12 +1734,12 @@ static bool ShouldRunTests()
 
 static mpt::PathString GetTestFilenameBase()
 {
-	return Test::GetPathPrefix() + MPT_PATHSTRING("./test/test.");	
+	return Test::GetPathPrefix() + MPT_PATHSTRING("./test/test.");
 }
 
 static mpt::PathString GetTempFilenameBase()
 {
-	return MPT_PATHSTRING("./test.");	
+	return MPT_PATHSTRING("./test.");
 }
 
 typedef MPT_SHARED_PTR<CSoundFile> TSoundFileContainer;
@@ -1815,9 +1817,9 @@ static noinline void TestLoadSaveFile()
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("saved.mptm"));
 
 		TestLoadMPTMFile(GetrSoundFile(sndFileContainer));
-		
+
 		DestroySoundFileContainer(sndFileContainer);
-		
+
 		RemoveFile(filenameBase + MPT_PATHSTRING("saved.mptm"));
 	}
 	#endif
@@ -1852,7 +1854,7 @@ static noinline void TestLoadSaveFile()
 		TestLoadXMFile(GetrSoundFile(sndFileContainer));
 
 		DestroySoundFileContainer(sndFileContainer);
-		
+
 		RemoveFile(filenameBase + MPT_PATHSTRING("saved.xm"));
 	}
 	#endif
@@ -1860,7 +1862,7 @@ static noinline void TestLoadSaveFile()
 	// Test S3M file loading
 	{
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + MPT_PATHSTRING("s3m"));
-		
+
 		TestLoadS3MFile(GetrSoundFile(sndFileContainer), false);
 
 		#ifndef MODPLUG_NO_FILESAVE
@@ -1879,7 +1881,7 @@ static noinline void TestLoadSaveFile()
 		TestLoadS3MFile(GetrSoundFile(sndFileContainer), true);
 
 		DestroySoundFileContainer(sndFileContainer);
-		
+
 		RemoveFile(filenameBase + MPT_PATHSTRING("saved.s3m"));
 	}
 	#endif
@@ -1894,15 +1896,17 @@ static noinline void TestLoadSaveFile()
 		mpt::IO::WriteVarInt(f, uint16(16383), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 2);
 		mpt::IO::WriteVarInt(f, uint16(16384), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 3);
 		mpt::IO::WriteVarInt(f, uint16(65535), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 3);
+		mpt::IO::WriteVarInt(f, uint64(0xFFFFFFFFFFFFFFFF), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 10);
 		std::string data = f.str();
 		FileReader file(&data[0], data.size());
-		uint16 v;
+		uint64 v;
 		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 0);
 		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 127);
 		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 128);
 		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 16383);
 		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 16384);
 		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 65535);
+		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 0xFFFFFFFFFFFFFFFF);
 	}
 }
 

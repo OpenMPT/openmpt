@@ -194,7 +194,7 @@ inline bool ReadAdaptiveInt16LE(Tfile & f, uint16 & v)
 	{
 		byte = 0;
 		if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
-		v |= (static_cast<uint16>(byte) << (((i+1)*8) - 1));		
+		v |= (static_cast<uint16>(byte) << (((i+1)*8) - 1));
 	}
 	return result;
 }
@@ -214,7 +214,7 @@ inline bool ReadAdaptiveInt32LE(Tfile & f, uint32 & v)
 	{
 		byte = 0;
 		if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
-		v |= (static_cast<uint32>(byte) << (((i+1)*8) - 2));		
+		v |= (static_cast<uint32>(byte) << (((i+1)*8) - 2));
 	}
 	return result;
 }
@@ -234,7 +234,7 @@ inline bool ReadAdaptiveInt64LE(Tfile & f, uint64 & v)
 	{
 		byte = 0;
 		if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
-		v |= (static_cast<uint64>(byte) << (((i+1)*8) - 2));		
+		v |= (static_cast<uint64>(byte) << (((i+1)*8) - 2));
 	}
 	return result;
 }
@@ -262,7 +262,7 @@ inline bool ReadSizedStringLE(Tfile & f, std::string & str, Tsize maxSize = std:
 		}
 		str.push_back(c);
 	}
-	return true;	
+	return true;
 }
 
 
@@ -364,11 +364,14 @@ inline bool WriteAdaptiveInt64LE(Tfile & f, const uint64 v, std::size_t minSize 
 template <typename Tfile, typename T>
 bool WriteVarInt(Tfile & f, const T v, size_t *bytesWritten = nullptr)
 {
+	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	STATIC_ASSERT(!std::numeric_limits<T>::is_signed);
+
 	uint8 out[(sizeof(T) * 8 + 6) / 7];
 	size_t numBytes = 0;
 	for(uint32 n = (sizeof(T) * 8) / 7; n > 0; n--)
 	{
-		if(v >= (1u << (n * 7u)))
+		if(v >= (static_cast<T>(1) << (n * 7u)))
 		{
 			out[numBytes++] = static_cast<uint8>(((v >> (n * 7u)) & 0x7F) | 0x80);
 		}
@@ -568,7 +571,7 @@ public:
 
 };
 
-#endif 
+#endif
 
 
 class FileDataContainerMemory
