@@ -1896,7 +1896,7 @@ static noinline void TestLoadSaveFile()
 		mpt::IO::WriteVarInt(f, uint16(16383), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 2);
 		mpt::IO::WriteVarInt(f, uint16(16384), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 3);
 		mpt::IO::WriteVarInt(f, uint16(65535), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 3);
-		mpt::IO::WriteVarInt(f, uint64(0xFFFFFFFFFFFFFFFF), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 10);
+		mpt::IO::WriteVarInt(f, uint64(0xFFFFFFFFFFFFFFFFull), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 10);
 		std::string data = f.str();
 		FileReader file(&data[0], data.size());
 		uint64 v;
@@ -1906,7 +1906,7 @@ static noinline void TestLoadSaveFile()
 		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 16383);
 		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 16384);
 		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 65535);
-		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 0xFFFFFFFFFFFFFFFF);
+		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 0xFFFFFFFFFFFFFFFFull);
 	}
 }
 
