@@ -491,7 +491,6 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
-	CHAR s[512];
 	std::vector<bool> samplesUsed(sndFile.GetNumSamples() + 1, true);
 
 	BeginWaitCursor();
@@ -503,7 +502,6 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 		if(!sndFile.IsSampleUsed(smp))
 		{
 			samplesUsed[smp] = false;
-			modDoc.GetSampleUndo().PrepareUndo(smp, sundo_delete, "Remove Unused Sample");
 		}
 	}
 
@@ -513,11 +511,12 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 
 	EndWaitCursor();
 
+	TCHAR s[512];
 	if(unusedInsSamples)
 	{
 		// We don't remove an instrument's unused samples in an ITP.
-		wsprintf(s, "OpenMPT detected %d sample%s referenced by an instrument,\n"
-			"but not used in the song. Do you want to remove them?", unusedInsSamples, (unusedInsSamples == 1) ? "" : "s");
+		wsprintf(s, _T("OpenMPT detected %u sample%s referenced by an instrument,\n")
+			_T("but not used in the song. Do you want to remove them?"), unusedInsSamples, (unusedInsSamples == 1) ? _T("") : _T("s"));
 		if(Reporting::Confirm(s, "Sample Cleanup", false, false, this) == cnfYes)
 		{
 			nRemoved += sndFile.RemoveSelectedSamples(samplesUsed);
@@ -526,7 +525,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 
 	if(nRemoved > 0)
 	{
-		wsprintf(s, "%d unused sample%s removed" , nRemoved, (nRemoved == 1) ? "" : "s");
+		wsprintf(s, _T("%u unused sample%s removed") , nRemoved, (nRemoved == 1) ? _T("") : _T("s"));
 		modDoc.AddToLog(s);
 	}
 
@@ -754,8 +753,8 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 
 		EndWaitCursor();
 
-		char s[64];
-		wsprintf(s, "%d unused instrument%s removed", numRemoved, (numRemoved == 1) ? "" : "s");
+		TCHAR s[64];
+		wsprintf(s, _T("%u unused instrument%s removed"), numRemoved, (numRemoved == 1) ? _T("") : _T("s"));
 		modDoc.AddToLog(s);
 		return true;
 	}
@@ -799,7 +798,7 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 			usedmap[nPlug] = true;
 
 		// All outputs of used plugins count as used
-		if(usedmap[nPlug] != false)
+		if(usedmap[nPlug])
 		{
 			if(!sndFile.m_MixPlugins[nPlug].IsOutputToMaster())
 			{
@@ -816,8 +815,8 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 	PLUGINDEX numRemoved = modDoc.RemovePlugs(usedmap);
 	if(numRemoved != 0)
 	{
-		char s[64];
-		wsprintf(s, "%d unused plugin%s removed", numRemoved, (numRemoved == 1) ? "" : "s");
+		TCHAR s[64];
+		wsprintf(s, _T("%u unused plugin%s removed"), numRemoved, (numRemoved == 1) ? _T("") : _T("s"));
 		modDoc.AddToLog(s);
 		return true;
 	}
