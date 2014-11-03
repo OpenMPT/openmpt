@@ -42,7 +42,7 @@ protected:
 	SoundDevice::Settings m_Settings;
 
 public:
-	COptionsSoundcard(std::wstring deviceIdentifier);
+	COptionsSoundcard(SoundDevice::Identifier deviceIdentifier);
 
 	void UpdateStatistics();
 
