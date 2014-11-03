@@ -474,11 +474,6 @@ public:
 	virtual SoundDevice::IMessageReceiver *GetMessageReceiver() const = 0;
 
 	virtual SoundDevice::Info GetDeviceInfo() const = 0;
-	virtual SoundDevice::ID GetDeviceID() const = 0;
-	virtual SoundDevice::Type GetDeviceType() const = 0;
-	virtual SoundDevice::Index GetDeviceIndex() const = 0;
-	virtual std::wstring GetDeviceInternalID() const = 0;
-	virtual SoundDevice::Identifier GetDeviceIdentifier() const = 0;
 
 	virtual SoundDevice::Caps GetDeviceCaps() const = 0;
 	virtual SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates) = 0;
@@ -559,6 +554,12 @@ private:
 
 protected:
 
+	SoundDevice::ID GetDeviceID() const { return m_Info.id; }
+	SoundDevice::Type GetDeviceType() const { return m_Info.id.GetType(); }
+	SoundDevice::Index GetDeviceIndex() const { return m_Info.id.GetIndex(); }
+	std::wstring GetDeviceInternalID() const { return m_Info.internalID; }
+	SoundDevice::Identifier GetDeviceIdentifier() const { return m_Info.GetIdentifier(); }
+
 	virtual void InternalFillAudioBuffer() = 0;
 
 	void FillAudioBuffer();
@@ -610,11 +611,6 @@ public:
 	SoundDevice::IMessageReceiver *GetMessageReceiver() const { return m_MessageReceiver; }
 
 	SoundDevice::Info GetDeviceInfo() const { return m_Info; }
-	SoundDevice::ID GetDeviceID() const { return m_Info.id; }
-	SoundDevice::Type GetDeviceType() const { return m_Info.id.GetType(); }
-	SoundDevice::Index GetDeviceIndex() const { return m_Info.id.GetIndex(); }
-	std::wstring GetDeviceInternalID() const { return m_Info.internalID; }
-	SoundDevice::Identifier GetDeviceIdentifier() const { return m_Info.GetIdentifier(); }
 
 	SoundDevice::Caps GetDeviceCaps() const { return m_Caps; }
 	virtual SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
