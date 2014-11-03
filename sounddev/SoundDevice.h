@@ -95,7 +95,7 @@ enum Type
 	TypeNUM_DEVTYPES
 };
 
-std::wstring TypeToString(SoundDevice::Type type);
+mpt::ustring TypeToString(SoundDevice::Type type);
 
 typedef uint8 Index;
 
@@ -154,7 +154,7 @@ public:
 };
 
 
-typedef std::wstring Identifier;
+typedef mpt::ustring Identifier;
 
 SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier);
 
@@ -162,12 +162,12 @@ SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier);
 struct Info
 {
 	SoundDevice::ID id;
-	std::wstring name;
-	std::wstring apiName;
-	std::wstring internalID;
+	mpt::ustring name;
+	mpt::ustring apiName;
+	mpt::ustring internalID;
 	bool isDefault;
 	Info() : id(TypeINVALID, 0), isDefault(false) { }
-	Info(SoundDevice::ID id, const std::wstring &name, const std::wstring &apiName, const std::wstring &internalID = std::wstring())
+	Info(SoundDevice::ID id, const mpt::ustring &name, const mpt::ustring &apiName, const mpt::ustring &internalID = mpt::ustring())
 		: id(id)
 		, name(name)
 		, apiName(apiName)
@@ -184,10 +184,10 @@ struct Info
 	{
 		if(!IsValid())
 		{
-			return std::wstring();
+			return mpt::ustring();
 		}
-		std::wstring result = apiName;
-		result += L"_";
+		mpt::ustring result = apiName;
+		result += MPT_USTRING("_");
 		if(!internalID.empty())
 		{
 			result += internalID; // safe to not contain special characters
@@ -196,11 +196,11 @@ struct Info
 			// UTF8-encode the name and convert the utf8 to hex.
 			// This ensures that no special characters are contained in the configuration key.
 			std::string utf8String = mpt::ToCharset(mpt::CharsetUTF8, name);
-			std::wstring hexString = Util::BinToHex(std::vector<char>(utf8String.begin(), utf8String.end()));
+			mpt::ustring hexString = mpt::ToUnicode(Util::BinToHex(std::vector<char>(utf8String.begin(), utf8String.end())));
 			result += hexString;
 		} else
 		{
-			result += mpt::ToWString(id.GetIndex());
+			result += mpt::ufmt::dec(id.GetIndex());
 		}
 		return result;
 	}
@@ -385,7 +385,7 @@ struct Caps
 	bool CanChannelMapping;
 	bool CanDriverPanel;
 	bool HasInternalDither;
-	std::wstring ExclusiveModeDescription;
+	mpt::ustring ExclusiveModeDescription;
 	double LatencyMin;
 	double LatencyMax;
 	double UpdateIntervalMin;
@@ -402,7 +402,7 @@ struct Caps
 		, CanChannelMapping(false)
 		, CanDriverPanel(false)
 		, HasInternalDither(false)
-		, ExclusiveModeDescription(L"Use device exclusively")
+		, ExclusiveModeDescription(MPT_USTRING("Use device exclusively"))
 		, LatencyMin(0.002) // 2ms
 		, LatencyMax(0.5) // 500ms
 		, UpdateIntervalMin(0.001) // 1ms
@@ -418,7 +418,7 @@ struct DynamicCaps
 	uint32 currentSampleRate;
 	std::vector<uint32> supportedSampleRates;
 	std::vector<uint32> supportedExclusiveSampleRates;
-	std::vector<std::wstring> channelNames;
+	std::vector<mpt::ustring> channelNames;
 	DynamicCaps()
 		: currentSampleRate(0)
 	{
@@ -557,7 +557,7 @@ protected:
 	SoundDevice::ID GetDeviceID() const { return m_Info.id; }
 	SoundDevice::Type GetDeviceType() const { return m_Info.id.GetType(); }
 	SoundDevice::Index GetDeviceIndex() const { return m_Info.id.GetIndex(); }
-	std::wstring GetDeviceInternalID() const { return m_Info.internalID; }
+	mpt::ustring GetDeviceInternalID() const { return m_Info.internalID; }
 	SoundDevice::Identifier GetDeviceIdentifier() const { return m_Info.GetIdentifier(); }
 
 	virtual void InternalFillAudioBuffer() = 0;

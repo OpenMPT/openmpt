@@ -77,7 +77,7 @@ public:
 		void *userData
 		);
 
-	static std::wstring HostApiToString(PaHostApiIndex hostapi);
+	static mpt::ustring HostApiToString(PaHostApiIndex hostapi);
 
 	static PaDeviceIndex HostApiOutputIndexToGlobalDeviceIndex(int hostapioutputdeviceindex, PaHostApiIndex hostapi);
 	static SoundDevice::Type HostApiToSndDevType(PaHostApiIndex hostapi);
