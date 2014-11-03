@@ -426,13 +426,13 @@ PaHostApiIndex CPortaudioDevice::SndDevTypeToHostApi(SoundDevice::Type snddevtyp
 }
 
 
-std::wstring CPortaudioDevice::HostApiToString(PaHostApiIndex hostapi)
+mpt::ustring CPortaudioDevice::HostApiToString(PaHostApiIndex hostapi)
 //--------------------------------------------------------------------
 {
 	SoundDevice::Type type = HostApiToSndDevType(hostapi);
 	if(type == TypeINVALID)
 	{
-		return L"PortAudio";
+		return MPT_USTRING("PortAudio");
 	}
 	return SoundDevice::TypeToString(type);
 }
@@ -448,7 +448,7 @@ bool CPortaudioDevice::EnumerateDevices(SoundDevice::Info &result, SoundDevice::
 	if(!Pa_GetDeviceInfo(dev))
 		return false;
 	result.id = SoundDevice::ID(HostApiToSndDevType(hostapi), index);
-	result.name = mpt::ToWide(mpt::CharsetUTF8, Pa_GetDeviceInfo(dev)->name);
+	result.name = mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetDeviceInfo(dev)->name);
 	result.apiName = HostApiToString(Pa_GetDeviceInfo(dev)->hostApi);
 	result.isDefault = (Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == (PaDeviceIndex)dev);
 	PALOG(mpt::String::Print("PortAudio: %1, %2, %3, %4", result.id.GetIdRaw(), mpt::ToLocale(result.name), mpt::ToLocale(result.apiName), result.isDefault));

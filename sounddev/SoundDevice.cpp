@@ -33,21 +33,21 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
-std::wstring TypeToString(SoundDevice::Type type)
+mpt::ustring TypeToString(SoundDevice::Type type)
 //-----------------------------------------------
 {
 	switch(type)
 	{
-	case TypeWAVEOUT: return L"WaveOut"; break;
-	case TypeDSOUND: return L"DirectSound"; break;
-	case TypeASIO: return L"ASIO"; break;
-	case TypePORTAUDIO_WASAPI: return L"WASAPI"; break;
-	case TypePORTAUDIO_WDMKS: return L"WDM-KS"; break;
-	case TypePORTAUDIO_WMME: return L"MME"; break;
-	case TypePORTAUDIO_DS: return L"DS"; break;
-	case TypePORTAUDIO_ASIO: return L"ASIO"; break;
+	case TypeWAVEOUT: return MPT_USTRING("WaveOut"); break;
+	case TypeDSOUND: return MPT_USTRING("DirectSound"); break;
+	case TypeASIO: return MPT_USTRING("ASIO"); break;
+	case TypePORTAUDIO_WASAPI: return MPT_USTRING("WASAPI"); break;
+	case TypePORTAUDIO_WDMKS: return MPT_USTRING("WDM-KS"); break;
+	case TypePORTAUDIO_WMME: return MPT_USTRING("MME"); break;
+	case TypePORTAUDIO_DS: return MPT_USTRING("DS"); break;
+	case TypePORTAUDIO_ASIO: return MPT_USTRING("ASIO"); break;
 	}
-	return std::wstring();
+	return mpt::ustring();
 }
 
 
@@ -551,7 +551,7 @@ SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier)
 {
 	for(int i = 0; i < TypeNUM_DEVTYPES; ++i)
 	{
-		const std::wstring api = SoundDevice::TypeToString(static_cast<SoundDevice::Type>(i));
+		const mpt::ustring api = SoundDevice::TypeToString(static_cast<SoundDevice::Type>(i));
 		if(identifier.find(api) == 0)
 		{
 			return static_cast<SoundDevice::Type>(i);

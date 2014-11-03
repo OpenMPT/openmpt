@@ -139,14 +139,14 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices()
 		WCHAR descriptionBuf[ASIO_MAXDRVNAMELEN];
 		DWORD datatype = REG_SZ;
 		DWORD datasize = sizeof(descriptionBuf);
-		std::wstring description;
+		mpt::ustring description;
 		if(ERROR_SUCCESS == RegQueryValueExW(hksub, L"Description", 0, &datatype, (LPBYTE)descriptionBuf, &datasize))
 		{
 			Log(mpt::String::Print("ASIO:   description='%1'", mpt::ToLocale(description)));
-			description = descriptionBuf;
+			description = mpt::ToUnicode(descriptionBuf);
 		} else
 		{
-			description = keyname;
+			description = mpt::ToUnicode(keyname);
 		}
 
 		WCHAR idBuf[256];
@@ -154,8 +154,8 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices()
 		datasize = sizeof(idBuf);
 		if(ERROR_SUCCESS == RegQueryValueExW(hksub, L"CLSID", 0, &datatype, (LPBYTE)idBuf, &datasize))
 		{
-			const std::wstring internalID = idBuf;
-			if(Util::IsCLSID(internalID))
+			const mpt::ustring internalID = mpt::ToUnicode(idBuf);
+			if(Util::IsCLSID(mpt::ToWide(internalID)))
 			{
 				Log(mpt::String::Print("ASIO:   clsid=%1", mpt::ToLocale(internalID)));
 				if(SoundDevice::IndexIsValid(devices.size()))
@@ -669,7 +669,7 @@ void CASIODevice::OpenDriver()
 	{
 		return;
 	}
-	CLSID clsid = Util::StringToCLSID(GetDeviceInternalID());
+	CLSID clsid = Util::StringToCLSID(mpt::ToWide(GetDeviceInternalID()));
 	try
 	{
 		if(CoCreateInstance(clsid,0,CLSCTX_INPROC_SERVER, clsid, (void **)&m_pAsioDrv) != S_OK)
@@ -1434,12 +1434,12 @@ SoundDevice::DynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uin
 			MemsetZero(channelInfo);
 			channelInfo.channel = i;
 			channelInfo.isInput = ASIOFalse;
-			std::wstring name = mpt::ToWString(i);
+			mpt::ustring name = mpt::ufmt::dec(i);
 			try
 			{
 				asioCall(getChannelInfo(&channelInfo));
 				mpt::String::SetNullTerminator(channelInfo.name);
-				name = mpt::ToWide(mpt::CharsetLocale, channelInfo.name);
+				name = mpt::ToUnicode(mpt::CharsetLocale, channelInfo.name);
 			} catch(...)
 			{
 				// continue

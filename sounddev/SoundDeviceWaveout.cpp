@@ -75,7 +75,7 @@ SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 	caps.CanChannelMapping = false;
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = false;
-	caps.ExclusiveModeDescription = L"Use direct mode";
+	caps.ExclusiveModeDescription = MPT_USTRING("Use direct mode");
 	if(mpt::Windows::Version::IsWine())
 	{
 		caps.DefaultSettings.sampleFormat = SampleFormatInt16;
@@ -327,17 +327,17 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices()
 		{
 			if(waveOutGetDevCapsW(WAVE_MAPPER, &woc, sizeof(woc)) == MMSYSERR_NOERROR)
 			{
-				info.name = woc.szPname;
+				info.name = mpt::ToUnicode(woc.szPname);
 			} else
 			{
-				info.name = L"Auto (Wave Mapper)";
+				info.name = MPT_USTRING("Auto (Wave Mapper)");
 			}
 			info.isDefault = true;
 		} else
 		{
 			if(waveOutGetDevCapsW(index-1, &woc, sizeof(woc)) == MMSYSERR_NOERROR)
 			{
-				info.name = woc.szPname;
+				info.name = mpt::ToUnicode(woc.szPname);
 			}
 		}
 		devices.push_back(info);
