@@ -333,6 +333,12 @@ int CPortaudioDevice::StreamCallback(
 	{
 		// PortAudio latency calculation appears to miss the current period or chunk for WASAPI. Compensate it.
 		m_CurrentRealLatency = timeInfo->outputBufferDacTime - timeInfo->currentTime + ((double)frameCount / (double)m_Settings.Samplerate);
+	} else if(Pa_GetHostApiInfo(m_HostApi)->type == paDirectSound)
+	{
+		// PortAudio latency calculation appears to miss the buffering latency.
+		// The current chunk, however, appears to be compensated for.
+		// Repair the confusion.
+		m_CurrentRealLatency = timeInfo->outputBufferDacTime - timeInfo->currentTime + m_StreamInfo->outputLatency - ((double)frameCount / (double)m_Settings.Samplerate);
 	} else
 	{
 		m_CurrentRealLatency = timeInfo->outputBufferDacTime - timeInfo->currentTime;
