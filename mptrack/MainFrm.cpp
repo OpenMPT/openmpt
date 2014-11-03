@@ -767,7 +767,7 @@ bool CMainFrame::audioOpenDevice()
 		return false;
 	}
 	const SoundDevice::Identifier deviceIdentifier = TrackerSettings::Instance().GetSoundDeviceIdentifier();
-	if(gpSoundDevice && (gpSoundDevice->GetDeviceIdentifier() != deviceIdentifier))
+	if(gpSoundDevice && (gpSoundDevice->GetDeviceInfo().GetIdentifier() != deviceIdentifier))
 	{
 		gpSoundDevice->Stop();
 		gpSoundDevice->Close();

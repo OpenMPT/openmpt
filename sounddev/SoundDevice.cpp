@@ -628,7 +628,7 @@ bool Manager::OpenDriverSettings(SoundDevice::Identifier identifier, SoundDevice
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	bool result = false;
-	if(currentSoundDevice && FindDeviceInfo(identifier).IsValid() && (currentSoundDevice->GetDeviceIdentifier() == identifier))
+	if(currentSoundDevice && FindDeviceInfo(identifier).IsValid() && (currentSoundDevice->GetDeviceInfo().GetIdentifier() == identifier))
 	{
 		result = currentSoundDevice->OpenDriverSettings();
 	} else
@@ -650,7 +650,7 @@ SoundDevice::Caps Manager::GetDeviceCaps(SoundDevice::Identifier identifier, Sou
 {
 	if(m_DeviceCaps.find(identifier) == m_DeviceCaps.end())
 	{
-		if(currentSoundDevice && FindDeviceInfo(identifier).IsValid() && (currentSoundDevice->GetDeviceIdentifier() == identifier))
+		if(currentSoundDevice && FindDeviceInfo(identifier).IsValid() && (currentSoundDevice->GetDeviceInfo().GetIdentifier() == identifier))
 		{
 			m_DeviceCaps[identifier] = currentSoundDevice->GetDeviceCaps();
 		} else
@@ -675,7 +675,7 @@ SoundDevice::DynamicCaps Manager::GetDeviceDynamicCaps(SoundDevice::Identifier i
 {
 	if((m_DeviceDynamicCaps.find(identifier) == m_DeviceDynamicCaps.end()) || update)
 	{
-		if(currentSoundDevice && FindDeviceInfo(identifier).IsValid() && (currentSoundDevice->GetDeviceIdentifier() == identifier))
+		if(currentSoundDevice && FindDeviceInfo(identifier).IsValid() && (currentSoundDevice->GetDeviceInfo().GetIdentifier() == identifier))
 		{
 			m_DeviceDynamicCaps[identifier] = currentSoundDevice->GetDeviceDynamicCaps(baseSampleRates);
 			if(!currentSoundDevice->IsAvailable())
