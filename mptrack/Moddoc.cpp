@@ -918,7 +918,7 @@ UINT CModDoc::ShowLog(const std::wstring &preamble, const std::wstring &title, C
 	if(!parent) parent = CMainFrame::GetMainFrame();
 	if(GetLog().size() > 0)
 	{
-		std::wstring text = preamble + GetLogString();
+		std::wstring text = preamble + mpt::ToWide(GetLogString());
 		std::wstring actualTitle = (title.length() == 0) ? MAINFRAME_TITLEW : title;
 		switch(GetMaxLogLevel())
 		{
