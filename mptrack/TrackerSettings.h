@@ -378,7 +378,7 @@ public:
 	SoundDevice::Settings m_SoundDeviceSettingsDefaults;
 	SoundDevice::Settings GetSoundDeviceSettingsDefaults() const;
 
-	Setting<std::wstring> m_SoundDeviceIdentifier;
+	Setting<SoundDevice::Identifier> m_SoundDeviceIdentifier;
 	Setting<bool> m_SoundDevicePreferSameTypeIfDeviceUnavailable;
 	SoundDevice::Identifier GetSoundDeviceIdentifier() const;
 	void SetSoundDeviceIdentifier(const SoundDevice::Identifier &identifier);

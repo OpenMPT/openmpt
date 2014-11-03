@@ -149,8 +149,8 @@ void COptionsSoundcard::DoDataExchange(CDataExchange* pDX)
 }
 
 
-COptionsSoundcard::COptionsSoundcard(std::wstring deviceIdentifier)
-//-----------------------------------------------------------------
+COptionsSoundcard::COptionsSoundcard(SoundDevice::Identifier deviceIdentifier)
+//----------------------------------------------------------------------------
 	: CPropertyPage(IDD_OPTIONS_SOUNDCARD)
 	, m_InitialDeviceIdentifier(deviceIdentifier)
 {
