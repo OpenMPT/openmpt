@@ -9,12 +9,12 @@
 
 
 #pragma once
-#include "moddoc.h"
 #include <vector>
-#include "afxwin.h"
-#include "afxcmn.h"
+#include "MIDIMapping.h"
 
 OPENMPT_NAMESPACE_BEGIN
+
+class CSoundFile;
 
 // CMIDIMappingDialog dialog
 
@@ -49,7 +49,7 @@ protected:
 	void UpdateDialog(int selItem = -1);
 	void UpdateEvent();
 	void UpdateParameters();
-	int InsertItem(const CMIDIMappingDirective& m, int insertAt);
+	int InsertItem(const CMIDIMappingDirective &m, int insertAt);
 	void SelectItem(int i);
 
 	virtual BOOL OnInitDialog();

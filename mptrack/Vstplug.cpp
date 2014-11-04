@@ -1248,10 +1248,10 @@ CString CVstPlugin::GetFormattedParamName(PlugParamIndex param)
 	CString name;
 	if(paramName.IsEmpty())
 	{
-		name.Format("%02d: Parameter %02d", param, param);
+		name.Format("%02u: Parameter %02u", param, param);
 	} else
 	{
-		name.Format("%02d: %s", param, paramName);
+		name.Format("%02u: %s", param, paramName);
 	}
 	return name;
 }
@@ -2373,7 +2373,7 @@ std::string SNDMIXPLUGIN::GetParamName(PlugParamIndex index) const
 	CVstPlugin *vstPlug = dynamic_cast<CVstPlugin *>(pMixPlugin);
 	if(vstPlug != nullptr)
 	{
-		return vstPlug->GetParamName(index).GetString();
+		return vstPlug->GetFormattedParamName(index).GetString();
 	} else
 	{
 		return std::string();
