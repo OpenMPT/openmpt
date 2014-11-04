@@ -9,12 +9,12 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
 #include "MIDIMappingDialog.h"
 #include "InputHandler.h"
 #include "../soundlib/MIDIEvents.h"
 #include "../common/StringFixer.h"
-#include "mainfrm.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -169,7 +169,7 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 }
 
 
-int CMIDIMappingDialog::InsertItem(const CMIDIMappingDirective& m, int insertAt)
+int CMIDIMappingDialog::InsertItem(const CMIDIMappingDirective &m, int insertAt)
 //------------------------------------------------------------------------------
 {
 	CString s;
@@ -204,8 +204,7 @@ int CMIDIMappingDialog::InsertItem(const CMIDIMappingDirective& m, int insertAt)
 		s.Format(_T("FX%u: "), plugindex);
 		s += m_rSndFile.m_MixPlugins[plugindex - 1].GetName();
 		m_List.SetItemText(insertAt, 2, s);
-		s.Format(_T("%02u: "), m.GetParamIndex());
-		s += m_rSndFile.m_MixPlugins[plugindex - 1].GetParamName(m.GetParamIndex()).c_str();
+		s = m_rSndFile.m_MixPlugins[plugindex - 1].GetParamName(m.GetParamIndex()).c_str();
 		m_List.SetItemText(insertAt, 3, s);
 	}
 	m_List.SetItemText(insertAt, 4, m.GetCaptureMIDI() ? _T("Capt") : _T(""));
@@ -294,7 +293,7 @@ void CMIDIMappingDialog::OnSelectionChanged(NMHDR *pNMHDR, LRESULT * /*pResult*/
 			if(m_rSndFile.GetpModDoc())
 				m_rSndFile.GetpModDoc()->SetModified();
 			if(nmlv->iItem == m_List.GetSelectionMark())
-				CheckDlgButton(IDC_CHECKACTIVE, nmlv->uNewState == 0x2000 ? BST_CHECKED :BST_UNCHECKED);
+				CheckDlgButton(IDC_CHECKACTIVE, nmlv->uNewState == 0x2000 ? BST_CHECKED : BST_UNCHECKED);
 		}
 
 		if(nmlv->uNewState & LVIS_SELECTED)

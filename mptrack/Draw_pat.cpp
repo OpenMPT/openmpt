@@ -1666,9 +1666,8 @@ void CViewPattern::UpdateIndicator()
 						// display plugin param name.
 						if(m->instr > 0 && m->instr <= MAX_MIXPLUGINS)
 						{
-							CHAR sztmp[128] = "";
-							mpt::String::CopyN(sztmp, pSndFile->m_MixPlugins[m->instr - 1].GetParamName(m->GetValueVolCol()).c_str());
-							if (sztmp[0]) wsprintf(s, "%d: %s", m->GetValueVolCol(), sztmp);
+							const std::string name = pSndFile->m_MixPlugins[m->instr - 1].GetParamName(m->GetValueVolCol());
+							mpt::String::Copy(s, name);
 						}
 					} else
 					{
