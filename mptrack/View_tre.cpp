@@ -1309,7 +1309,10 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 				BrowseForFolder dlg(m_InstrLibPath, TEXT("Select a new instrument library folder..."));
 				if(dlg.Show())
 				{
-					CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(dlg.GetDirectory() + MPT_PATHSTRING("\\"), false);
+					mpt::PathString dir = dlg.GetDirectory();
+					if(!dir.HasTrailingSlash())
+						dir += MPT_PATHSTRING("\\");
+					CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(dir, false);
 				}
 			}
 			return TRUE;
