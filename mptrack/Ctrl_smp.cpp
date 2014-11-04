@@ -66,8 +66,8 @@ static int PowerOf2Exponent()
 }
 
 
-#define	BASENOTE_MIN	(1*12)	// C-1
-#define	BASENOTE_MAX	(9*12)	// C-9
+#define	BASENOTE_MIN	(1*12)		// C-1
+#define	BASENOTE_MAX	(10*12+11)	// B-10
 
 BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlSamples)
@@ -240,11 +240,11 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_SpinVolume.SetRange(0, 64);
 	m_SpinGlobalVol.SetRange(0, 64);
 
-	for (UINT i = BASENOTE_MIN; i < BASENOTE_MAX; i++)
+	for (int i = BASENOTE_MIN; i <= BASENOTE_MAX; i++)
 	{
-		CHAR s[32];
+		CHAR s[16];
 		wsprintf(s, "%s%u", szNoteNames[i%12], i/12);
-		m_CbnBaseNote.AddString(s);
+		m_CbnBaseNote.SetItemData(m_CbnBaseNote.AddString(s), i - (NOTE_MIDDLEC - NOTE_MIN));
 	}
 
 
@@ -270,7 +270,8 @@ BOOL CCtrlSamples::OnInitDialog()
 	if(combo)
 	{
 		// Allow pitch from -12 (1 octave down) to +12 (1 octave up)
-		for(int i = -12 ; i <= 12 ; i++){
+		for(int i = -12 ; i <= 12 ; i++)
+		{
 			if(i == 0) wsprintf(str,"none");
 			else wsprintf(str,i < 0 ? " %d" : "+%d",i);
 			combo->SetItemData(combo->AddString(str), i+12);
@@ -706,8 +707,8 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 			SetDlgItemInt(IDC_EDIT5, ftune);
 			transp = (int)sample.RelativeTone;
 		}
-		int basenote = 60 - transp;
-		Limit(basenote, BASENOTE_MIN, BASENOTE_MAX - 1);
+		int basenote = (NOTE_MIDDLEC - NOTE_MIN) + transp;
+		Limit(basenote, BASENOTE_MIN, BASENOTE_MAX);
 		basenote -= BASENOTE_MIN;
 		if (basenote != m_CbnBaseNote.GetCurSel()) m_CbnBaseNote.SetCurSel(basenote);
 
@@ -2457,9 +2458,8 @@ void CCtrlSamples::OnFineTuneChanged()
 		{
 			m_sndFile.GetSample(m_nSample).nC5Speed = n;
 			int transp = ModSample::FrequencyToTranspose(n) >> 7;
-			int basenote = 60 - transp;
-			if (basenote < BASENOTE_MIN) basenote = BASENOTE_MIN;
-			if (basenote >= BASENOTE_MAX) basenote = BASENOTE_MAX-1;
+			int basenote = (NOTE_MIDDLEC - NOTE_MIN) + transp;
+			Clamp(basenote, BASENOTE_MIN, BASENOTE_MAX);
 			basenote -= BASENOTE_MIN;
 			if (basenote != m_CbnBaseNote.GetCurSel())
 			{
@@ -2487,7 +2487,7 @@ void CCtrlSamples::OnBaseNoteChanged()
 //-------------------------------------
 {
 	if (IsLocked()) return;
-	int n = (NOTE_MIDDLEC - NOTE_MIN) - (m_CbnBaseNote.GetCurSel() + BASENOTE_MIN);
+	int n = static_cast<int>(m_CbnBaseNote.GetItemData(m_CbnBaseNote.GetCurSel()));
 
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Transpose");
@@ -2933,9 +2933,8 @@ NoSample:
 			d += (pos * TrackerSettings::Instance().m_nFinetuneStep);
 			sample.nC5Speed = Clamp(d, 1u, 9999999u); // 9999999 is max. in Impulse Tracker
 			int transp = ModSample::FrequencyToTranspose(sample.nC5Speed) >> 7;
-			int basenote = 60 - transp;
-			if (basenote < BASENOTE_MIN) basenote = BASENOTE_MIN;
-			if (basenote >= BASENOTE_MAX) basenote = BASENOTE_MAX-1;
+			int basenote = (NOTE_MIDDLEC - NOTE_MIN) + transp;
+			Clamp(basenote, BASENOTE_MIN, BASENOTE_MAX);
 			basenote -= BASENOTE_MIN;
 			if (basenote != m_CbnBaseNote.GetCurSel()) m_CbnBaseNote.SetCurSel(basenote);
 			wsprintf(s, "%lu", sample.nC5Speed);
@@ -3019,7 +3018,7 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	{
 		if(m_CbnBaseNote.IsWindowEnabled())
 		{
-			int sel = Clamp(m_CbnBaseNote.GetCurSel() - transpose, 0, m_CbnBaseNote.GetCount() - 1);
+			int sel = Clamp(m_CbnBaseNote.GetCurSel() + transpose, 0, m_CbnBaseNote.GetCount() - 1);
 			if(sel != m_CbnBaseNote.GetCurSel())
 			{
 				m_CbnBaseNote.SetCurSel(sel);
