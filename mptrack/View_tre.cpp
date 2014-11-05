@@ -1733,7 +1733,7 @@ void CModTree::FillInstrumentLibrary()
 					{
 						ModTreeInsert(wfd.cFileName, IMAGE_FOLDERPARENT);
 					}
-				} else if (wfd.dwFileAttributes & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_OFFLINE | FILE_ATTRIBUTE_TEMPORARY | FILE_ATTRIBUTE_SYSTEM))
+				} else if (wfd.dwFileAttributes & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_OFFLINE | FILE_ATTRIBUTE_SYSTEM))
 				{
 					// Ignore these files
 					continue;
