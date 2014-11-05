@@ -220,6 +220,30 @@ INSTALL_DATA_DIR = $(INSTALL_DIR)
 INSTALL_MAKE_DIR += -m 0755
 
 CPPFLAGS += -Icommon -I. -Iinclude/modplug/include -Iinclude
+
+ifeq ($(MPT_COMPILER_GENERIC),1)
+
+CXXFLAGS += 
+CFLAGS   += 
+LDFLAGS  += 
+LDLIBS   += 
+ARFLAGS  += 
+
+ifeq ($(DEBUG),1)
+CXXFLAGS += -g
+CFLAGS   += -g
+else
+ifeq ($(OPTIMIZE),1)
+CXXFLAGS += -O
+CFLAGS   += -O
+endif
+endif
+
+CXXFLAGS += -W
+CFLAGS   += -W
+
+else
+
 CXXFLAGS += -fvisibility=hidden
 CFLAGS   += -fvisibility=hidden
 LDFLAGS  += 
@@ -238,6 +262,8 @@ endif
 
 CXXFLAGS += -Wall -Wextra -Wcast-align $(CXXFLAGS_WARNINGS)
 CFLAGS   += -Wall -Wextra -Wcast-align $(CFLAGS_WARNINGS)
+
+endif
 
 ifeq ($(DYNLINK),1)
 LDFLAGS_RPATH += -Wl,-rpath,./bin
