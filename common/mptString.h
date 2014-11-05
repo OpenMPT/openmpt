@@ -329,6 +329,7 @@ static inline mpt::ustring ToUnicode(const CStringW &str) { return ToWide(str); 
 #endif // !UNICODE
 #endif // MFC
 #else // !MPT_USTRING_MODE_WIDE
+static inline mpt::ustring ToUnicode(const mpt::ustring &str) { return str; }
 mpt::ustring ToUnicode(const std::wstring &str);
 mpt::ustring ToUnicode(Charset from, const std::string &str);
 #if defined(_MFC_VER)
