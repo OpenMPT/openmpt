@@ -1223,7 +1223,7 @@ void COptionsMixer::OnOK()
 
 	// soft pan
 	{
-		if(IsDlgButtonChecked(IDC_CHECK2))
+		if(IsDlgButtonChecked(IDC_CHECK_SOFTPAN))
 		{
 			TrackerSettings::Instance().MixerFlags = TrackerSettings::Instance().MixerFlags | SNDMIX_SOFTPANNING;
 		} else
