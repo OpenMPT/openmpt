@@ -16,7 +16,7 @@ OPENMPT_NAMESPACE_BEGIN
 struct MixerSettings
 {
 
-	UINT m_nStereoSeparation;
+	int32 m_nStereoSeparation;
 	UINT m_nMaxMixChannels;
 	DWORD DSPMask;
 	DWORD MixerFlags;

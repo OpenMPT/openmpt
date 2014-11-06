@@ -422,24 +422,44 @@ namespace Util
 
 namespace Util {
 
+	// Multiply two 32-bit integers, receive 64-bit result.
+	// MSVC generates unnecessarily complicated code for the unoptimized variant using _allmul.
+	inline int64 mul32to64(int32 a, int32 b)
+	{
+#if MPT_COMPILER_MSVC
+		return __emul(a, b);
+#else
+		return static_cast<int64>(a) * b;
+#endif
+	}
+
+	inline uint64 mul32to64_unsigned(uint32 a, uint32 b)
+	{
+#if MPT_COMPILER_MSVC
+		return __emulu(a, b);
+#else
+		return static_cast<uint64>(a) * b;
+#endif
+	}
+
 	inline int32 muldiv(int32 a, int32 b, int32 c)
 	{
-		return static_cast<int32>( ( static_cast<int64>(a) * b ) / c );
+		return static_cast<int32>( mul32to64( a, b ) / c );
 	}
 
 	inline int32 muldivr(int32 a, int32 b, int32 c)
 	{
-		return static_cast<int32>( ( static_cast<int64>(a) * b + ( c / 2 ) ) / c );
+		return static_cast<int32>( ( mul32to64( a, b ) + ( c / 2 ) ) / c );
 	}
 
 	// Do not use overloading because catching unsigned version by accident results in slower X86 code.
 	inline uint32 muldiv_unsigned(uint32 a, uint32 b, uint32 c)
 	{
-		return static_cast<uint32>( ( static_cast<uint64>(a) * b ) / c );
+		return static_cast<uint32>( mul32to64_unsigned( a, b ) / c );
 	}
 	inline uint32 muldivr_unsigned(uint32 a, uint32 b, uint32 c)
 	{
-		return static_cast<uint32>( ( static_cast<uint64>(a) * b + ( c / 2 ) ) / c );
+		return static_cast<uint32>( ( mul32to64_unsigned( a, b ) + ( c / 2 ) ) / c );
 	}
 
 	inline int32 muldivrfloor(int64 a, uint32 b, uint32 c)
@@ -448,6 +468,7 @@ namespace Util {
 		a += c / 2;
 		return (a >= 0) ? mpt::saturate_cast<int32>(a / c) : mpt::saturate_cast<int32>((a - (c - 1)) / c);
 	}
+
 
 	// Greatest Common Divisor. Always returns non-negative number.
 	template <class T>
