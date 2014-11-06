@@ -127,6 +127,34 @@ bool CSoundFile::FadeSong(UINT msec)
 }
 
 
+// Apply stereo separation factor on an interleaved stereo/quad stream.
+// count = Number of stereo sample pairs to process
+// separation = 0...128
+static void ApplyStereoSeparation(mixsample_t *mixBuf, CSoundFile::samplecount_t count, int32 separation)
+//-------------------------------------------------------------------------------------------------------
+{
+#ifdef MPT_INTMIXER
+	const mixsample_t fac1 = 64 + separation / 2, fac2 = 64 - separation / 2;
+	for(CSoundFile::samplecount_t i = 0; i < count; i++)
+	{
+		mixsample_t l = mixBuf[0], r = mixBuf[1];
+		mixBuf[0] = static_cast<mixsample_t>((Util::mul32to64(l, fac1) + Util::mul32to64(r, fac2)) >> 7);
+		mixBuf[1] = static_cast<mixsample_t>((Util::mul32to64(l, fac2) + Util::mul32to64(r, fac1)) >> 7);
+		mixBuf += 2;
+	}
+#else
+	const mixsample_t fac1 = static_cast<mixsample_t>(64 + separation / 2), fac2 = static_cast<mixsample_t>(64 - separation / 2);
+	for(CSoundFile::samplecount_t i = 0; i < count; i++)
+	{
+		mixsample_t l = mixBuf[0], r = mixBuf[1];
+		mixBuf[0] = (l * fac1 + r * fac2) / mixsample_t(128);
+		mixBuf[1] = (l * fac2 + r * fac1) / mixsample_t(128);
+		mixBuf += 2;
+	}
+#endif
+}
+
+
 CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget &target)
 //---------------------------------------------------------------------------------------
 {
@@ -234,6 +262,12 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 		if(m_MixerSettings.gnChannels == 4)
 		{
 			InterleaveFrontRear(MixSoundBuffer, MixRearBuffer, countChunk);
+		}
+
+		if(m_MixerSettings.m_nStereoSeparation < 128 && m_MixerSettings.gnChannels >= 2)
+		{
+			// Apply stereo separation
+			ApplyStereoSeparation(MixSoundBuffer, count * m_MixerSettings.gnChannels / 2, m_MixerSettings.m_nStereoSeparation);
 		}
 
 		target.DataCallback(MixSoundBuffer, m_MixerSettings.gnChannels, countChunk);
@@ -1984,10 +2018,7 @@ bool CSoundFile::ReadNote()
 			// Adjusting volumes
 			if (m_MixerSettings.gnChannels >= 2)
 			{
-				int pan = ((int)pChn->nRealPan) - 128;
-				pan *= (int)m_MixerSettings.m_nStereoSeparation;
-				pan /= 128;
-				pan += 128;
+				int32 pan = pChn->nRealPan;
 				Limit(pan, 0, 256);
 
 				LONG realvol;

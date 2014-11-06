@@ -1010,11 +1010,11 @@ BOOL COptionsMixer::OnInitDialog()
 
 	// Stereo Separation
 	{
-		m_SliderStereoSep.SetRange(0, 4);
-		m_SliderStereoSep.SetPos(2);
-		for (int n=0; n<=4; n++)
+		m_SliderStereoSep.SetRange(0, 16);
+		m_SliderStereoSep.SetPos(16);
+		for (int n = 0; n <= 16; n++)
 		{
-			if ((int)TrackerSettings::Instance().MixerStereoSeparation <= (int)(32 << n))
+			if ((int)TrackerSettings::Instance().MixerStereoSeparation <= 8 * n)
 			{
 				m_SliderStereoSep.SetPos(n);
 				break;
@@ -1126,10 +1126,11 @@ void COptionsMixer::OnScroll(UINT n, UINT pos, CScrollBar *p)
 {
 	MPT_UNREFERENCED_PARAMETER(n);
 	MPT_UNREFERENCED_PARAMETER(pos);
-	MPT_UNREFERENCED_PARAMETER(p);
 	// stereo sep
+	if(p == (CScrollBar *)&m_SliderStereoSep)
 	{
 		UpdateStereoSep();
+		OnSettingsChanged();
 	}
 }
 
@@ -1154,7 +1155,7 @@ void COptionsMixer::UpdateStereoSep()
 //-----------------------------------
 {
 	CString s;
-	s.Format("%d%%", ((32 << m_SliderStereoSep.GetPos()) * 100) / 128);
+	s.Format(_T("%d%%"), ((8 * m_SliderStereoSep.GetPos()) * 100) / 128);
 	SetDlgItemText(IDC_TEXT_STEREOSEP, s);
 }
 
@@ -1218,7 +1219,7 @@ void COptionsMixer::OnOK()
 
 	// stereo sep
 	{
-		TrackerSettings::Instance().MixerStereoSeparation = 32 << m_SliderStereoSep.GetPos();
+		TrackerSettings::Instance().MixerStereoSeparation = 8 * m_SliderStereoSep.GetPos();
 	}
 
 	// soft pan
