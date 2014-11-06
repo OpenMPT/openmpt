@@ -34,11 +34,7 @@ static inline FILE * mpt_fopen(const mpt::PathString &filename, const char *mode
 //-------------------------------------------------------------------------------
 {
 	#if MPT_OS_WINDOWS
-		#if defined(MPT_WITH_CHARSET_LOCALE)
-			return _wfopen(filename.AsNative().c_str(), mode ? mpt::ToWide(mpt::CharsetLocale, mode).c_str() : nullptr);
-		#else
-			return _wfopen(filename.AsNative().c_str(), mode ? mpt::ToWide(mpt::CharsetUTF8, mode).c_str() : nullptr);
-		#endif
+		return _wfopen(filename.AsNative().c_str(), mode ? mpt::ToWide(mpt::CharsetASCII, mode).c_str() : nullptr);
 	#else // !MPT_OS_WINDOWS
 		return fopen(filename.AsNative().c_str(), mode);
 	#endif // MPT_OS_WINDOWS
