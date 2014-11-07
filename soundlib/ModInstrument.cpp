@@ -49,7 +49,7 @@ void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 			if(Ticks[nLoopEnd] - 1 > Ticks[nLoopEnd - 1])
 			{
 				// Insert an interpolated point just before the loop point.
-				uint8 interpolatedValue = Util::Round<uint8>(GetValueFromPosition(Ticks[nLoopEnd] - 1) * 64.0f);
+				uint8 interpolatedValue = static_cast<uint8>(GetValueFromPosition(Ticks[nLoopEnd] - 1, 64));
 				
 
 				if(nNodes +  1 < MAX_ENVPOINTS)
@@ -77,10 +77,11 @@ void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 
 
 // Get envelope value at a given tick. Returns value in range [0.0, 1.0].
-float InstrumentEnvelope::GetValueFromPosition(int position, int range) const
-//---------------------------------------------------------------------------
+int32 InstrumentEnvelope::GetValueFromPosition(int position, int32 rangeOut, int32 rangeIn) const
+//-----------------------------------------------------------------------------------------------
 {
 	uint32 pt = nNodes - 1u;
+	const int32 ENV_PRECISION = 1 << 16;
 
 	// Checking where current 'tick' is relative to the envelope points.
 	for(uint32 i = 0; i < nNodes - 1u; i++)
@@ -93,12 +94,12 @@ float InstrumentEnvelope::GetValueFromPosition(int position, int range) const
 	}
 
 	int x2 = Ticks[pt];
-	float value = 0.0f;
+	int32 value = 0;
 
 	if(position >= x2)
 	{
 		// Case: current 'tick' is on a envelope point.
-		value = static_cast<float>(Values[pt]) / float(range);
+		value = Values[pt] * ENV_PRECISION / rangeIn;
 	} else
 	{
 		// Case: current 'tick' is between two envelope points.
@@ -107,7 +108,7 @@ float InstrumentEnvelope::GetValueFromPosition(int position, int range) const
 		if(pt)
 		{
 			// Get previous node's value and tick.
-			value = static_cast<float>(Values[pt - 1]) / float(range);
+			value = Values[pt - 1] * ENV_PRECISION / rangeIn;
 			x1 = Ticks[pt - 1];
 		}
 
@@ -115,11 +116,12 @@ float InstrumentEnvelope::GetValueFromPosition(int position, int range) const
 		{
 			// Linear approximation between the points;
 			// f(x + d) ~ f(x) + f'(x) * d, where f'(x) = (y2 - y1) / (x2 - x1)
-			value += ((position - x1) * (static_cast<float>(Values[pt]) / float(range) - value)) / (x2 - x1);
+			value += ((position - x1) * (Values[pt] * ENV_PRECISION / rangeIn - value)) / (x2 - x1);
 		}
 	}
 
-	return Clamp(value, 0.0f, 1.0f);
+	Limit(value, 0, ENV_PRECISION);
+	return (value * rangeOut + ENV_PRECISION / 2) / ENV_PRECISION;
 }
 
 

@@ -816,7 +816,7 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol) const
 		}
 		const int envpos = pChn->VolEnv.nEnvPosition - (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
 		// Get values in [0, 256]
-		int envval = Util::Round<int>(pIns->VolEnv.GetValueFromPosition(envpos) * 256.0f);
+		int envval = pIns->VolEnv.GetValueFromPosition(envpos, 256);
 
 		// if we are in the release portion of the envelope,
 		// rescale envelope factor so that it is proportional to the release point
@@ -858,7 +858,7 @@ void CSoundFile::ProcessPanningEnvelope(ModChannel *pChn) const
 
 		const int envpos = pChn->PanEnv.nEnvPosition - (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
 		// Get values in [-32, 32]
-		const int envval = Util::Round<int>((pIns->PanEnv.GetValueFromPosition(envpos) - 0.5f) * 64.0f);
+		const int envval = pIns->PanEnv.GetValueFromPosition(envpos, 64) - 32;
 
 		int pan = pChn->nRealPan;
 		if(pan >= 128)
@@ -890,15 +890,15 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period) const
 		const int envpos = pChn->PitchEnv.nEnvPosition - (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
 		// Get values in [-256, 256]
 #ifdef MODPLUG_TRACKER
-		const int range = ENVELOPE_MAX;
-		const float amp = 512.0f;
+		const int32 range = ENVELOPE_MAX;
+		const int32 amp = 512;
 #else
 		// TODO: AMS2 envelopes behave differently when linear slides are off - emulate with 15 * (-128...127) >> 6
 		// Copy over vibrato behaviour for that?
-		const int range = GetType() == MOD_TYPE_AMS2 ? uint8_max : ENVELOPE_MAX;
-		const float amp = GetType() == MOD_TYPE_AMS2 ? 64.0f : 512.0f;
+		const int32 range = GetType() == MOD_TYPE_AMS2 ? uint8_max : ENVELOPE_MAX;
+		const int32 amp = GetType() == MOD_TYPE_AMS2 ? 64 : 512;
 #endif
-		const int envval = Util::Round<int>((pIns->PitchEnv.GetValueFromPosition(envpos, range) - 0.5f) * amp);
+		const int envval = pIns->PitchEnv.GetValueFromPosition(envpos, amp, range) - amp / 2;
 
 		if(pChn->PitchEnv.flags[ENV_FILTER])
 		{
