@@ -44,8 +44,9 @@ struct InstrumentEnvelope
 	// Convert envelope data between various formats.
 	void Convert(MODTYPE fromType, MODTYPE toType);
 
-	// Get envelope value at a given tick. Returns value in range [0.0, 1.0].
-	float GetValueFromPosition(int position, int range = ENVELOPE_MAX) const;
+	// Get envelope value at a given tick. Assumes that the envelope data is in rage [0, rangeIn],
+	// returns value in range [0, rangeOut].
+	int32 GetValueFromPosition(int position, int32 rangeOut, int32 rangeIn = ENVELOPE_MAX) const;
 
 };
 
