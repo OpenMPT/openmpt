@@ -133,25 +133,19 @@ bool CSoundFile::FadeSong(UINT msec)
 static void ApplyStereoSeparation(mixsample_t *mixBuf, CSoundFile::samplecount_t count, int32 separation)
 //-------------------------------------------------------------------------------------------------------
 {
-#ifdef MPT_INTMIXER
-	const mixsample_t fac1 = 64 + separation / 2, fac2 = 64 - separation / 2;
-	for(CSoundFile::samplecount_t i = 0; i < count; i++)
-	{
-		mixsample_t l = mixBuf[0], r = mixBuf[1];
-		mixBuf[0] = static_cast<mixsample_t>((Util::mul32to64(l, fac1) + Util::mul32to64(r, fac2)) >> 7);
-		mixBuf[1] = static_cast<mixsample_t>((Util::mul32to64(l, fac2) + Util::mul32to64(r, fac1)) >> 7);
-		mixBuf += 2;
-	}
-#else
 	const mixsample_t fac1 = static_cast<mixsample_t>(64 + separation / 2), fac2 = static_cast<mixsample_t>(64 - separation / 2);
 	for(CSoundFile::samplecount_t i = 0; i < count; i++)
 	{
-		mixsample_t l = mixBuf[0], r = mixBuf[1];
+		const mixsample_t l = mixBuf[0], r = mixBuf[1];
+#ifdef MPT_INTMIXER
+		mixBuf[0] = static_cast<mixsample_t>((Util::mul32to64(l, fac1) + Util::mul32to64(r, fac2)) >> 7);
+		mixBuf[1] = static_cast<mixsample_t>((Util::mul32to64(l, fac2) + Util::mul32to64(r, fac1)) >> 7);
+#else
 		mixBuf[0] = (l * fac1 + r * fac2) / mixsample_t(128);
 		mixBuf[1] = (l * fac2 + r * fac1) / mixsample_t(128);
+#endif
 		mixBuf += 2;
 	}
-#endif
 }
 
 
@@ -539,7 +533,7 @@ bool CSoundFile::ProcessRow()
 
 			pChn->rightVol = pChn->newRightVol;
 			pChn->leftVol = pChn->newLeftVol;
-			pChn->dwFlags.reset(CHN_PORTAMENTO | CHN_VIBRATO | CHN_TREMOLO | CHN_PANBRELLO);
+			pChn->dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_PANBRELLO);
 			pChn->nCommand = CMD_NONE;
 			pChn->m_plugParamValueStep = 0;
 		}
@@ -1211,15 +1205,9 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 		{
 			switch(m_PlayState.m_nTickCount % 3)
 			{
-			case 0:
-				arpeggioSteps = 0;
-				break;
-			case 1:
-				arpeggioSteps = pChn->nArpeggio >> 4; // >> 4 <-> division by 16. This gives the first number in the parameter.
-				break;
-			case 2:
-				arpeggioSteps = pChn->nArpeggio & 0x0F; //Gives the latter number in the parameter.
-				break;
+			case 0: arpeggioSteps = 0; break;
+			case 1: arpeggioSteps = pChn->nArpeggio >> 4; break;
+			case 2: arpeggioSteps = pChn->nArpeggio & 0x0F; break;
 			}
 			pChn->m_CalculateFreq = true;
 			pChn->m_ReCalculateFreqOnFirstTick = true;
@@ -1867,8 +1855,8 @@ bool CSoundFile::ReadNote()
 			period = pChn->nPeriod;
 
 			// When glissando mode is set to semitones, clamp to the next halftone.
-			if((pChn->dwFlags[CHN_GLISSANDO] && IsCompatibleMode(TRK_ALLTRACKERS))
-				|| ((pChn->dwFlags & (CHN_GLISSANDO | CHN_PORTAMENTO)) == (CHN_GLISSANDO | CHN_PORTAMENTO) && !IsCompatibleMode(TRK_ALLTRACKERS)))
+			if((pChn->dwFlags & (CHN_GLISSANDO | CHN_PORTAMENTO)) == (CHN_GLISSANDO | CHN_PORTAMENTO)
+				&& (!m_SongFlags[SONG_PT1XMODE] || (pChn->rowCommand.IsPortamento() && !m_SongFlags[SONG_FIRSTTICK])))
 			{
 				if(period != pChn->cachedPeriod)
 				{

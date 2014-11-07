@@ -145,7 +145,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 			{
 				const ModCommand &m = *Patterns[seekPat].GetpModCommand(target.pos.row, i);
 				if(m.note == NOTE_NOTECUT || m.note == NOTE_KEYOFF || (m.note == NOTE_FADE && GetNumInstruments())
-					|| (m.IsNote() && m.command != CMD_TONEPORTAMENTO && m.command != CMD_TONEPORTAVOL && m.volcmd != VOLCMD_TONEPORTAMENTO))
+					|| (m.IsNote() && !m.IsPortamento()))
 				{
 					adjustSampleChn[i] = false;
 				}
@@ -1835,7 +1835,7 @@ bool CSoundFile::ProcessEffects()
 		UINT vol = pChn->rowCommand.vol;
 		UINT cmd = pChn->rowCommand.command;
 		UINT param = pChn->rowCommand.param;
-		bool bPorta = (cmd == CMD_TONEPORTAMENTO) || (cmd == CMD_TONEPORTAVOL) || (volcmd == VOLCMD_TONEPORTAMENTO);
+		bool bPorta = pChn->rowCommand.IsPortamento();
 
 		UINT nStartTick = 0;
 		pChn->isFirstTick = (m_PlayState.m_nTickCount == 0);
@@ -4943,6 +4943,11 @@ UINT CSoundFile::GetNoteFromPeriod(UINT period, int nFineTune, UINT nC5Speed) co
 //---------------------------------------------------------------------------------
 {
 	if (!period) return 0;
+	if(IsCompatibleMode(TRK_FASTTRACKER2))
+	{
+		// FT2's "RelocateTon" function actually rounds up and down, while GetNoteFromPeriod normally just truncates.
+		nFineTune += 64;
+	}
 	// This essentially implements std::lower_bound, with the difference that we don't need an iterable container.
 	uint32 minNote = NOTE_MIN, maxNote = NOTE_MAX, count = maxNote - minNote + 1;
 	const bool periodIsFreq = m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM;
