@@ -174,6 +174,8 @@ public:
 	// Returns true if and only if note is a valid musical note or the note entry is empty.
 	bool IsNoteOrEmpty() const { return note == NOTE_NONE || IsNote(); }
 	static bool IsNoteOrEmpty(NOTE note) { return note == NOTE_NONE || IsNote(note); }
+	// Returns true if any of the commands in this cell trigger a tone portamento.
+	bool IsPortamento() const { return command == CMD_TONEPORTAMENTO || command == CMD_TONEPORTAVOL || volcmd == VOLCMD_TONEPORTAMENTO; }
 
 	static EffectType GetEffectType(COMMAND cmd);
 	EffectType GetEffectType() const { return GetEffectType(command); }
