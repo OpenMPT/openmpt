@@ -196,6 +196,7 @@ public:
 		RENDER_VOLUMERAMPING_STRENGTH     = 4
 	};
 
+	//! Parameter index to use with get_pattern_row_channel_command, format_pattern_row_channel_command and highlight_pattern_row_channel_command
 	enum command_index {
 		command_note        = 0,
 		command_instrument  = 1,
@@ -508,11 +509,35 @@ public:
 	*/
 	std::string get_metadata( const std::string & key ) const;
 
+	//! Get the current speed
+	/*!
+	  \return The current speed in ticks per row.
+	*/
 	std::int32_t get_current_speed() const;
+	//! Get the current tempo
+	/*!
+	  \return The current tempo in tracker units. The exact meaning of this value depends on the tempo mode being used.
+	*/
 	std::int32_t get_current_tempo() const;
+	//! Get the current order
+	/*!
+	  \return The current order at which the module is being played back.
+	*/
 	std::int32_t get_current_order() const;
+	//! Get the current pattern
+	/*!
+	  \return The current pattern that is being played.
+	*/
 	std::int32_t get_current_pattern() const;
+	//! Get the current row
+	/*!
+	  \return The current row at which the current pattern is being played.
+	*/
 	std::int32_t get_current_row() const;
+	//! Get the current amount of playing channels.
+	/*!
+	  \return The amount of sample channels that are currently being rendered.
+	*/
 	std::int32_t get_current_playing_channels() const;
 
 	float get_current_channel_vu_mono( std::int32_t channel ) const;
@@ -521,11 +546,35 @@ public:
 	float get_current_channel_vu_rear_left( std::int32_t channel ) const;
 	float get_current_channel_vu_rear_right( std::int32_t channel ) const;
 
+	//! Get the number of subsongs
+	/*!
+	  \return The number of subsongs in the module. This includes any "hidden" songs (songs that share the same sequence, but start at different order indices) and "normal" subsongs or "sequences" (if the format supports them).
+	*/
 	std::int32_t get_num_subsongs() const;
+	//! Get the number of pattern channels
+	/*!
+	  \return The number of pattern channels in the module. Not all channels do necessarily contain data.
+	*/
 	std::int32_t get_num_channels() const;
+	//! Get the number of orders
+	/*!
+	  \return The number of orders in the current sequence of the module.
+	*/
 	std::int32_t get_num_orders() const;
+	//! Get the number of patterns
+	/*!
+	  \return The number of distinct patterns in the module.
+	*/
 	std::int32_t get_num_patterns() const;
+	//! Get the number of instruments
+	/*!
+	  \return The number of instrument slots in the module. Instruments are a layer on top of samples, and are not supported by all module formats.
+	*/
 	std::int32_t get_num_instruments() const;
+	//! Get the number of samples
+	/*!
+	  \return The number of sample slots in the module.
+	*/
 	std::int32_t get_num_samples() const;
 
 	std::vector<std::string> get_subsong_names() const;
@@ -535,21 +584,114 @@ public:
 	std::vector<std::string> get_instrument_names() const;
 	std::vector<std::string> get_sample_names() const;
 
+	//! Get pattern at order position
+	/*!
+	  \param order The order item whose pattern index should be retrieved.
+	  \return The pattern index found at the given order position of the current sequence.
+	*/
 	std::int32_t get_order_pattern( std::int32_t order ) const;
 
+	//! Get the number of rows in a pattern
+	/*!
+	  \param order The pattern whose row count should be retrieved.
+	  \return The number of rows in the given pattern. If the pattern does not exist, 0 is returned.
+	*/
 	std::int32_t get_pattern_num_rows( std::int32_t pattern ) const;
 
+	//! Get raw pattern content
+	/*!
+	  \param pattern The pattern whose data should be retrieved.
+	  \param row The row from which the data should be retrieved.
+	  \param channel The channel from which the data should be retrieved.
+	  \param command The cell index at which the data should be retrieved.
+	  \return The internal, raw pattern data at the given pattern position.
+	  \sa openmpt::module::command_index
+	*/
 	std::uint8_t get_pattern_row_channel_command( std::int32_t pattern, std::int32_t row, std::int32_t channel, int command ) const;
 
+	//! Get formatted (human-readable) pattern content
+	/*!
+	  \param pattern The pattern whose data should be retrieved.
+	  \param row The row from which the data should be retrieved.
+	  \param channel The channel from which the data should be retrieved.
+	  \param command The cell index at which the data should be retrieved.
+	  \return The formatted pattern data at the given pattern position.
+	  \sa openmpt::module::command_index
+	*/
 	std::string format_pattern_row_channel_command( std::int32_t pattern, std::int32_t row, std::int32_t channel, int command ) const;
+
+	//! Get highlighting information for formatted pattern content
+	/*!
+	  \param pattern The pattern whose data should be retrieved.
+	  \param row The row from which the data should be retrieved.
+	  \param channel The channel from which the data should be retrieved.
+	  \param command The cell index at which the data should be retrieved.
+	  \return The highlighting string for the formatted pattern data as retrived by openmpt::module::get_pattern_row_channel_command at the given pattern position.
+	  \remarks The returned string will map each character position of the string returned by openmpt::module::get_pattern_row_channel_command to a highlighting instruction.
+	           Possible highlighting characters are:
+	           - " " : empty/space
+	           - "." : empty/dot
+	           - "n" : generic note
+	           - "m" : special note
+	           - "i" : generic instrument
+	           - "u" : generic volume column effect
+	           - "v" : generic volume column parameter
+	           - "e" : generic effect column effect
+	           - "f" : generic effect column parameter
+	  \sa openmpt::module::command_index
+	*/
 	std::string highlight_pattern_row_channel_command( std::int32_t pattern, std::int32_t row, std::int32_t channel, int command ) const;
 
+	//! Get formatted (human-readable) pattern content
+	/*!
+	  \param pattern The pattern whose data should be retrieved.
+	  \param row The row from which the data should be retrieved.
+	  \param channel The channel from which the data should be retrieved.
+	  \param width The maximum number of characters the string should contain. 0 means no limit.
+	  \param pad If true, the string will be resized to the exact length provided in the width parameter.
+	  \return The formatted pattern data at the given pattern position.
+	*/
 	std::string format_pattern_row_channel( std::int32_t pattern, std::int32_t row, std::int32_t channel, std::size_t width = 0, bool pad = true ) const;
+	//! Get highlighting information for formatted pattern content
+	/*!
+	  \param pattern The pattern whose data should be retrieved.
+	  \param row The row from which the data should be retrieved.
+	  \param channel The channel from which the data should be retrieved.
+	  \param width The maximum number of characters the string should contain. 0 means no limit.
+	  \param pad If true, the string will be resized to the exact length provided in the width parameter.
+	  \return The highlighting string for the formatted pattern data as retrived by openmpt::module::format_pattern_row_channel at the given pattern position.
+	  \sa openmpt::module::format_pattern_row_channel_command
+	*/
 	std::string highlight_pattern_row_channel( std::int32_t pattern, std::int32_t row, std::int32_t channel, std::size_t width = 0, bool pad = true ) const;
 
+	//! Retrieve supported ctl keys
+	/*!
+	  \return A vector containing all supported ctl keys.
+	  \remarks Currently supported ctl values are:
+	           - load.skip_samples: Set to "1" to avoid loading samples into memory
+	           - load.skip_patterns: Set to "1" to avoid loading patterns into memory
+	           - seek.sync_samples: Set to "1" to sync sample playback when using openmpt::module::set_position_seconds or openmpt::module::set_position_order_row.
+	           - dither: Set the dither algorithm that is used for the 16 bit versions of openmpt::module::read. Supported values are:
+	                     - 0: No dithering.
+                         - 1: Default mode. Chosen by OpenMPT code, might change.
+                         - 2: Rectangular, 0.5 bit depth, no noise shaping (original ModPlug Tracker).
+                         - 3: Rectangular, 1 bit depth, simple 1st order noise shaping
+	*/
 	std::vector<std::string> get_ctls() const;
 
+	//! Get current ctl value
+	/*!
+	  \param ctl The ctl key whose value should be retrieved.
+	  \return The associated ctl value.
+	  \sa openmpt::module::get_ctls
+	*/
 	std::string ctl_get( const std::string & ctl ) const;
+	//! Set ctl value
+	/*!
+	  \param ctl The ctl key whose value should be set.
+	  \param The value that should be set.
+	  \sa openmpt::module::get_ctls
+	*/
 	void ctl_set( const std::string & ctl, const std::string & value );
 
 	// remember to add new functions to both C and C++ interfaces and to increase OPENMPT_API_VERSION_MINOR
