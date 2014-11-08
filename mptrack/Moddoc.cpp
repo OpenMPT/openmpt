@@ -2228,16 +2228,16 @@ void CModDoc::OnEstimateSongLength()
 	{
 		if(lengths.size() > 1)
 		{
-			s.AppendFormat(_T("\nSong %u, starting at order %u: "), i, lengths[i].startOrder);
+			s.AppendFormat(_T("\nSong %u, starting at order %u: "), i + 1, lengths[i].startOrder);
 		}
 		double songLength = lengths[i].duration;
 		if(songLength != std::numeric_limits<double>::infinity())
 		{
 			songLength = Util::Round(songLength);
-			s.AppendFormat("%.0fmn%02.0fs", std::floor(songLength / 60.0), std::fmod(songLength, 60.0));
+			s.AppendFormat(_T("%.0fmn%02.0fs"), std::floor(songLength / 60.0), std::fmod(songLength, 60.0));
 		} else
 		{
-			s += "Song too long!";
+			s += _T("Song too long!");
 		}
 	}
 	

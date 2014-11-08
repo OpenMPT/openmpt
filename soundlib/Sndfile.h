@@ -116,6 +116,10 @@ struct GetLengthType
 // Target seek mode for GetLength()
 struct GetLengthTarget
 {
+	ROWINDEX startRow;
+	ORDERINDEX startOrder;
+	SEQUENCEINDEX sequence;
+
 	union
 	{
 		double time;
@@ -138,12 +142,18 @@ struct GetLengthTarget
 	GetLengthTarget(bool allSongs = false)
 	{
 		mode = allSongs ? GetAllSubsongs : NoTarget;
+		sequence = SEQUENCEINDEX_INVALID;
+		startOrder = 0;
+		startRow = 0;
 	}
 
 	// Seek to given pattern position if position is valid.
 	GetLengthTarget(ORDERINDEX order, ROWINDEX row)
 	{
 		mode = NoTarget;
+		sequence = SEQUENCEINDEX_INVALID;
+		startOrder = 0;
+		startRow = 0;
 		if(order != ORDERINDEX_INVALID && row != ROWINDEX_INVALID)
 		{
 			mode = SeekPosition;
@@ -156,11 +166,23 @@ struct GetLengthTarget
 	GetLengthTarget(double t)
 	{
 		mode = NoTarget;
+		sequence = SEQUENCEINDEX_INVALID;
+		startOrder = 0;
+		startRow = 0;
 		if(t >= 0.0)
 		{
 			mode = SeekSeconds;
 			time = t;
 		}
+	}
+
+	// Set start position from which seeking should begin.
+	GetLengthTarget &StartPos(SEQUENCEINDEX seq, ORDERINDEX order, ROWINDEX row)
+	{
+		sequence = seq;
+		startOrder = order;
+		startRow = row;
+		return *this;
 	}
 };
 
