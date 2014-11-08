@@ -691,7 +691,7 @@ std::size_t module_impl::read_interleaved_quad( std::int32_t samplerate, std::si
 
 
 double module_impl::get_duration_seconds() const {
-	return m_sndFile->GetLength( eNoAdjust ).duration;
+	return m_sndFile->GetLength( eNoAdjust ).back().duration;
 }
 void module_impl::select_subsong( std::int32_t subsong ) {
 	if ( subsong < -1 || subsong >= m_sndFile->Order.GetNumSequences() ) {
@@ -714,12 +714,12 @@ double module_impl::get_position_seconds() const {
 	return m_currentPositionSeconds;
 }
 double module_impl::set_position_seconds( double seconds ) {
-	GetLengthType t = m_sndFile->GetLength( eNoAdjust, GetLengthTarget( seconds ) );
+	GetLengthType t = m_sndFile->GetLength( eNoAdjust, GetLengthTarget( seconds ) ).back();
 	m_sndFile->InitializeVisitedRows();
 	m_sndFile->m_PlayState.m_nCurrentOrder = t.lastOrder;
 	m_sndFile->SetCurrentOrder( t.lastOrder );
 	m_sndFile->m_PlayState.m_nNextRow = t.lastRow;
-	m_currentPositionSeconds = m_sndFile->GetLength( eAdjust, GetLengthTarget( t.lastOrder, t.lastRow ) ).duration;
+	m_currentPositionSeconds = m_sndFile->GetLength( eAdjust, GetLengthTarget( t.lastOrder, t.lastRow ) ).back().duration;
 	return m_currentPositionSeconds;
 }
 double module_impl::set_position_order_row( std::int32_t order, std::int32_t row ) {
@@ -738,7 +738,7 @@ double module_impl::set_position_order_row( std::int32_t order, std::int32_t row
 	m_sndFile->m_PlayState.m_nCurrentOrder = order;
 	m_sndFile->SetCurrentOrder( order );
 	m_sndFile->m_PlayState.m_nNextRow = row;
-	m_currentPositionSeconds = m_sndFile->GetLength( eAdjust, GetLengthTarget( order, row ) ).duration;
+	m_currentPositionSeconds = m_sndFile->GetLength( eAdjust, GetLengthTarget( order, row ) ).back().duration;
 	return m_currentPositionSeconds;
 }
 std::vector<std::string> module_impl::get_metadata_keys() const {

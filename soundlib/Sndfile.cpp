@@ -1848,7 +1848,7 @@ bool CSoundFile::SetTitle(const std::string &newTitle)
 double CSoundFile::GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool updateVars, bool updateSamplePos)
 //-------------------------------------------------------------------------------------------------------
 {
-	const GetLengthType t = GetLength(updateVars ? (updateSamplePos ? eAdjustSamplePositions : eAdjust) : eNoAdjust, GetLengthTarget(ord, row));
+	const GetLengthType t = GetLength(updateVars ? (updateSamplePos ? eAdjustSamplePositions : eAdjust) : eNoAdjust, GetLengthTarget(ord, row)).back();
 	if(t.targetReached) return t.duration;
 	else return -1; //Given position not found from play sequence.
 }

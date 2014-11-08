@@ -2222,16 +2222,25 @@ void CModDoc::OnInsertInstrument()
 void CModDoc::OnEstimateSongLength()
 //----------------------------------
 {
-	CString s;
-	double songLength = m_SndFile.GetSongTime();
-	if(songLength != std::numeric_limits<double>::infinity())
+	CString s = _T("Approximate song length: ");
+	std::vector<GetLengthType> lengths = m_SndFile.GetLength(eNoAdjust, GetLengthTarget(true));
+	for(size_t i = 0; i < lengths.size(); i++)
 	{
-		songLength = Util::Round(songLength);
-		s.Format("Approximate song length: %.0fmn%02.0fs", std::floor(songLength / 60.0), fmod(songLength, 60.0));
-	} else
-	{
-		s = "Song too long!";
+		if(lengths.size() > 1)
+		{
+			s.AppendFormat(_T("\nSong %u, starting at order %u: "), i, lengths[i].startOrder);
+		}
+		double songLength = lengths[i].duration;
+		if(songLength != std::numeric_limits<double>::infinity())
+		{
+			songLength = Util::Round(songLength);
+			s.AppendFormat("%.0fmn%02.0fs", std::floor(songLength / 60.0), std::fmod(songLength, 60.0));
+		} else
+		{
+			s += "Song too long!";
+		}
 	}
+	
 	Reporting::Information(s);
 }
 

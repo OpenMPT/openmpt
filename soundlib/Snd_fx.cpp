@@ -105,14 +105,11 @@ public:
 // [out] lastRow: last parsed row (dito)
 // [out] endOrder: last order before module loops (UNDEFINED if a target is specified)
 // [out] endRow: last row before module loops (dito)
-GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthTarget target)
-//-------------------------------------------------------------------------------------------
+std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthTarget target)
+//------------------------------------------------------------------------------------------------------------
 {
+	std::vector<GetLengthType> results;
 	GetLengthType retval;
-	retval.duration = 0.0;
-	retval.targetReached = false;
-	retval.lastOrder = retval.endOrder = ORDERINDEX_INVALID;
-	retval.lastRow = retval.endRow = ROWINDEX_INVALID;
 
 	// Are we trying to reach a certain pattern position?
 	const bool hasSearchTarget = target.mode != GetLengthTarget::NoTarget;
@@ -199,7 +196,12 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 				} else
 				{
 					// We haven't found the target row yet, but we found some other unplayed row... continue searching from here.
+					retval.duration = memory.elapsedTime;
+					results.push_back(retval);
+					retval.startRow = nNextRow;
+					retval.startOrder = nNextOrder;
 					memory.Reset();
+
 					nRow = nNextRow;
 					nCurrentOrder = nNextOrder;
 					nPattern = Order[nCurrentOrder];
@@ -220,6 +222,10 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 				} else
 				{
 					// We haven't found the target row yet, but we found some other unplayed row... continue searching from here.
+					retval.duration = memory.elapsedTime;
+					results.push_back(retval);
+					retval.startRow = nNextRow;
+					retval.startOrder = nNextOrder;
 					memory.Reset();
 					continue;
 				}
@@ -248,6 +254,10 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 			} else
 			{
 				// We haven't found the target row yet, but we found some other unplayed row... continue searching from here.
+				retval.duration = memory.elapsedTime;
+				results.push_back(retval);
+				retval.startRow = nNextRow;
+				retval.startOrder = nNextOrder;
 				memory.Reset();
 				continue;
 			}
@@ -814,6 +824,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 		retval.lastRow = nRow;
 	}
 	retval.duration = memory.elapsedTime;
+	results.push_back(retval);
 
 	// Store final variables
 	if((adjustMode & eAdjust))
@@ -852,7 +863,7 @@ GetLengthType CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthT
 		visitedSongRows.Set(visitedRows);
 	}
 
-	return retval;
+	return results;
 
 }
 
