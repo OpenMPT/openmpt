@@ -97,11 +97,19 @@ struct PatternCuePoint
 struct GetLengthType
 {
 	double duration;		// total time in seconds
-	ROWINDEX lastRow;		// last parsed row (dito)
-	ROWINDEX endRow;		// last row before module loops (dito)
+	ROWINDEX lastRow;		// last parsed row (see lastOrder remark)
+	ROWINDEX endRow;		// last row before module loops (see endOrder remark)
+	ROWINDEX startRow;		// first row of parsed subsong
 	ORDERINDEX lastOrder;	// last parsed order (if no target is specified, this is the first order that is parsed twice, i.e. not the *last* played order)
 	ORDERINDEX endOrder;	// last order before module loops (UNDEFINED if a target is specified)
+	ORDERINDEX startOrder;	// first order of parsed subsong
 	bool targetReached;		// true if the specified order/row combination has been reached while going through the module
+
+	GetLengthType()
+		: duration(0.0)
+		, lastRow(ROWINDEX_INVALID), endRow(ROWINDEX_INVALID), startRow(0)
+		, lastOrder(ORDERINDEX_INVALID), endOrder(ORDERINDEX_INVALID), startOrder(0)
+		, targetReached(false) { }
 };
 
 
@@ -120,15 +128,16 @@ struct GetLengthTarget
 
 	enum Mode
 	{
-		NoTarget,		// Don't seek, i.e. return complete module length.
+		NoTarget,		// Don't seek, i.e. return complete length of the first subsong.
+		GetAllSubsongs,	// Same as NoTarget (i.e. get complete length), but returns the length of all sub songs
 		SeekPosition,	// Seek to given pattern position.
 		SeekSeconds,	// Seek to given time.
 	} mode;
 
 	// Don't seek, i.e. return complete module length.
-	GetLengthTarget()
+	GetLengthTarget(bool allSongs = false)
 	{
-		mode = NoTarget;
+		mode = allSongs ? GetAllSubsongs : NoTarget;
 	}
 
 	// Seek to given pattern position if position is valid.
@@ -600,13 +609,13 @@ public:
 
 	//Get modlength in various cases: total length, length to
 	//specific order&row etc. Return value is in seconds.
-	GetLengthType GetLength(enmGetLengthResetMode adjustMode, GetLengthTarget target = GetLengthTarget());
+	std::vector<GetLengthType> GetLength(enmGetLengthResetMode adjustMode, GetLengthTarget target = GetLengthTarget());
 
 	void InitializeVisitedRows() { visitedSongRows.Initialize(true); }
 
 public:
 	//Returns song length in seconds.
-	double GetSongTime() { return GetLength(eNoAdjust).duration; }
+	double GetSongTime() { return GetLength(eNoAdjust).back().duration; }
 
 	void RecalculateSamplesPerTick();
 	double GetRowDuration(UINT tempo, UINT speed) const;

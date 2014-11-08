@@ -492,7 +492,7 @@ bool CSoundFile::ProcessRow()
 				// Let's check again if this really is the end of the song.
 				// The visited rows vector might have been screwed up while editing...
 				// This is of course not possible during rendering to WAV, so we ignore that case.
-				GetLengthType t = GetLength(eNoAdjust);
+				GetLengthType t = GetLength(eNoAdjust).back();
 				if(IsRenderingToDisc() || (t.lastOrder == m_PlayState.m_nCurrentOrder && t.lastRow == m_PlayState.m_nRow))
 #else
 				if(1)

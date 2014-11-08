@@ -1172,10 +1172,13 @@ bool CModDoc::RestartPosToPattern()
 //---------------------------------
 {
 	bool result = false;
-	GetLengthType length = m_SndFile.GetLength(eNoAdjust);
-	if(length.endOrder != ORDERINDEX_INVALID && length.endRow != ROWINDEX_INVALID)
+	std::vector<GetLengthType> length = m_SndFile.GetLength(eNoAdjust, GetLengthTarget(true));
+	for(size_t i = 0; i < length.size(); i++)
 	{
-		result = m_SndFile.Patterns[m_SndFile.Order[length.endOrder]].WriteEffect(EffectWriter(CMD_POSITIONJUMP, m_SndFile.m_nRestartPos).Row(length.endRow).Retry(EffectWriter::rmTryNextRow));
+		if(length[i].endOrder != ORDERINDEX_INVALID && length[i].endRow != ROWINDEX_INVALID)
+		{
+			result = m_SndFile.Patterns[m_SndFile.Order[length[i].endOrder]].WriteEffect(EffectWriter(CMD_POSITIONJUMP, m_SndFile.m_nRestartPos).Row(length[i].endRow).Retry(EffectWriter::rmTryNextRow));
+		}
 	}
 	m_SndFile.m_nRestartPos = 0;
 	return result;
