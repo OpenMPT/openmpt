@@ -739,7 +739,7 @@ double module_impl::set_position_order_row( std::int32_t order, std::int32_t row
 	m_sndFile->m_PlayState.m_nCurrentOrder = order;
 	m_sndFile->SetCurrentOrder( order );
 	m_sndFile->m_PlayState.m_nNextRow = row;
-	m_currentPositionSeconds = m_sndFile->GetLength( m_ctl_seek_sync_samples ? eAdjustSamplePositions : eAdjust, GetLengthTarget( order, row, SEQUENCEINDEX_INVALID ) ).back().duration;
+	m_currentPositionSeconds = m_sndFile->GetLength( m_ctl_seek_sync_samples ? eAdjustSamplePositions : eAdjust, GetLengthTarget( order, row ) ).back().duration;
 	return m_currentPositionSeconds;
 }
 std::vector<std::string> module_impl::get_metadata_keys() const {
