@@ -97,6 +97,7 @@ static void save_options();
 static void apply_and_save_options();
 
 struct self_xmplay_t {
+	std::vector<float> subsong_lengths;
 	std::size_t samplerate;
 	std::size_t num_channels;
 	openmpt::settings::settings settings;
@@ -159,6 +160,21 @@ static std::wstring StringDecode( const std::string & src, UINT codepage )
 	std::vector<WCHAR> decoded_string( required_size );
 	MultiByteToWideChar( codepage, 0, src.c_str(), -1, &decoded_string[0], decoded_string.size() );
 	return &decoded_string[0];
+}
+
+static std::string seconds_to_string( float time ) {
+	std::int64_t time_ms = static_cast<std::int64_t>( time * 1000 );
+	std::int64_t seconds = ( time_ms / 1000 ) % 60;
+	std::int64_t minutes = ( time_ms / ( 1000 * 60 ) ) % 60;
+	std::int64_t hours = ( time_ms / ( 1000 * 60 * 60 ) );
+	std::ostringstream str;
+	if ( hours > 0 ) {
+		str << hours << ":";
+	}
+	str << std::setfill('0') << std::setw(2) << minutes;
+	str << ":";
+	str << std::setfill('0') << std::setw(2) << seconds;
+	return str.str();
 }
 
 static void save_settings_to_map( std::map<std::string,int> & result, const openmpt::settings::settings & s ) {
@@ -763,7 +779,16 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 		apply_options();
 		self->samplerate = self->settings.samplerate;
 		self->num_channels = self->settings.channels;
-		xmpfin->SetLength( static_cast<float>( self->mod->get_duration_seconds() ), TRUE );
+
+		std::int32_t num_subsongs = self->mod->get_num_subsongs();
+		self->subsong_lengths.resize( num_subsongs );
+		for ( std::int32_t i = 0; i < num_subsongs; ++i ) {
+			self->mod->select_subsong( i );
+			self->subsong_lengths[i] = static_cast<float>( self->mod->get_duration_seconds() );
+		}
+		self->mod->select_subsong( -1 );
+
+		xmpfin->SetLength( self->subsong_lengths[0], TRUE );
 		return 2;
 	} catch ( ... ) {
 		self->delete_mod();
@@ -898,7 +923,17 @@ static void WINAPI openmpt_GetGeneralInfo( char * buf ) {
 		<< "Orders" << "\t" << self->mod->get_num_orders() << "\r"
 		<< "Patterns" << "\t" << self->mod->get_num_patterns() << "\r"
 		<< "Instruments" << "\t" << self->mod->get_num_instruments() << "\r"
-		<< "Samples" << "\t" << self->mod->get_num_samples() << "\r"
+		<< "Samples" << "\t" << self->mod->get_num_samples() << "\r";
+
+	if( self->subsong_lengths.size() > 1 ) {
+		std::vector<std::string> names = self->mod->get_subsong_names();
+
+		for ( std::size_t i = 0; i < self->subsong_lengths.size(); ++i ) {
+			str << ( i == 0 ? "Subsongs\t" : "\t" ) << (i + 1) << ". " << seconds_to_string( self->subsong_lengths[i]) << " " << names[i] << "\r";
+		}
+	}
+
+	str
 		<< "\r"
 		<< "Tracker" << "\t" << sanitize_xmplay_info_string( self->mod->get_metadata("tracker") ) << "\r"
 		<< "Player" << "\t" << "xmp-openmpt" << " version " << openmpt::string::get( openmpt::string::library_version ) << "\r"
@@ -927,6 +962,14 @@ static double WINAPI openmpt_SetPosition( DWORD pos ) {
 	if ( !self->mod ) {
 		return -1.0;
 	}
+
+	if ( pos & XMPIN_POS_SUBSONG ) {
+		self->mod->select_subsong( pos & 0xffff );
+		xmpfin->SetLength( self->subsong_lengths[pos & 0xffff], TRUE );
+		reset_timeinfos( 0 );
+		return 0.0;
+	}
+
 	double new_position = self->mod->set_position_seconds( static_cast<double>( pos ) * 0.001 );
 	reset_timeinfos( new_position );
 	return new_position;
@@ -1014,6 +1057,15 @@ static void WINAPI openmpt_GetSamples( char * buf ) {
 	add_names( str, "order", self->mod->get_order_names() );
 	add_names( str, "pattern", self->mod->get_pattern_names() );
 	write_xmplay_string( buf, str.str() );
+}
+
+static DWORD WINAPI openmpt_GetSubSongs( float * length ) {
+	*length = 0.0;
+	for ( std::size_t i = 0; i < self->subsong_lengths.size(); ++i ) {
+		*length += self->subsong_lengths[i];
+	}
+
+	return static_cast<DWORD>( self->subsong_lengths.size() );
 }
 
 #ifdef EXPERIMENTAL_VIS
@@ -1432,7 +1484,7 @@ static XMPIN xmpin = {
 	openmpt_Process,
 	NULL, // WriteFile
 	openmpt_GetSamples,
-	NULL, // GetSubSongs
+	openmpt_GetSubSongs, // GetSubSongs
 	NULL, // GetCues
 	NULL, // GetDownloaded
 

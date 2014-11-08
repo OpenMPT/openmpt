@@ -325,6 +325,8 @@ void module_impl::init( const std::map< std::string, std::string > & ctls ) {
 	m_ctl_load_skip_samples = false;
 	m_ctl_load_skip_patterns = false;
 	m_ctl_seek_sync_samples = false;
+	m_current_subsong = 0;
+	m_sndFile->Order.SetSequence( 0 );
 	for ( std::map< std::string, std::string >::const_iterator i = ctls.begin(); i != ctls.end(); ++i ) {
 		ctl_set( i->first, i->second );
 	}
@@ -692,18 +694,26 @@ std::size_t module_impl::read_interleaved_quad( std::int32_t samplerate, std::si
 
 
 double module_impl::get_duration_seconds() const {
+	cache_subsongs();
+	if ( m_current_subsong >= 0 && m_current_subsong < static_cast<std::int32_t>( m_subsongs.size() ) ) {
+		return m_subsongs[m_current_subsong].duration;
+	}
 	return m_sndFile->GetLength( eNoAdjust ).back().duration;
 }
 void module_impl::select_subsong( std::int32_t subsong ) {
-	if ( subsong < -1 || subsong >= m_sndFile->Order.GetNumSequences() ) {
+	cache_subsongs();
+	if ( subsong < -1 || subsong >= static_cast<std::int32_t>( m_subsongs.size() ) ) {
 		return;
 	}
 	if ( subsong == -1 ) {
 		// default subsong
-		m_sndFile->Order.SetSequence( 0 );
-		return;
+		subsong = 0;
 	}
-	m_sndFile->Order.SetSequence( subsong );
+
+	m_current_subsong = subsong;
+	m_sndFile->Order.SetSequence( static_cast<SEQUENCEINDEX>( m_subsongs[subsong].sequence ) );
+	set_position_order_row( m_subsongs[subsong].start_order, m_subsongs[subsong].start_row );
+
 }
 void module_impl::set_repeat_count( std::int32_t repeat_count ) {
 	m_sndFile->SetRepeatCount( repeat_count );
@@ -715,12 +725,13 @@ double module_impl::get_position_seconds() const {
 	return m_currentPositionSeconds;
 }
 double module_impl::set_position_seconds( double seconds ) {
-	GetLengthType t = m_sndFile->GetLength( eNoAdjust, GetLengthTarget( seconds ) ).back();
+	const subsong_data &subsong = m_subsongs[m_current_subsong];
+	GetLengthType t = m_sndFile->GetLength( eNoAdjust, GetLengthTarget( seconds ).StartPos( subsong.sequence, subsong.start_order, subsong.start_row ) ).back();
 	m_sndFile->InitializeVisitedRows();
 	m_sndFile->m_PlayState.m_nCurrentOrder = t.lastOrder;
 	m_sndFile->SetCurrentOrder( t.lastOrder );
 	m_sndFile->m_PlayState.m_nNextRow = t.lastRow;
-	m_currentPositionSeconds = m_sndFile->GetLength( m_ctl_seek_sync_samples ? eAdjustSamplePositions : eAdjust, GetLengthTarget( t.lastOrder, t.lastRow ) ).back().duration;
+	m_currentPositionSeconds = m_sndFile->GetLength( m_ctl_seek_sync_samples ? eAdjustSamplePositions : eAdjust, GetLengthTarget( t.lastOrder, t.lastRow ).StartPos( subsong.sequence, subsong.start_order, subsong.start_row ) ).back().duration;
 	return m_currentPositionSeconds;
 }
 double module_impl::set_position_order_row( std::int32_t order, std::int32_t row ) {
@@ -885,7 +896,8 @@ float module_impl::get_current_channel_vu_rear_right( std::int32_t channel ) con
 }
 
 std::int32_t module_impl::get_num_subsongs() const {
-	return m_sndFile->Order.GetNumSequences();
+	cache_subsongs();
+	return static_cast<std::int32_t>( m_subsongs.size() );
 }
 std::int32_t module_impl::get_num_channels() const {
 	return m_sndFile->GetNumChannels();
@@ -904,9 +916,10 @@ std::int32_t module_impl::get_num_samples() const {
 }
 
 std::vector<std::string> module_impl::get_subsong_names() const {
+	cache_subsongs();
 	std::vector<std::string> retval;
-	for ( SEQUENCEINDEX i = 0; i < m_sndFile->Order.GetNumSequences(); ++i ) {
-		retval.push_back( mod_string_to_utf8( m_sndFile->Order.GetSequence( i ).GetName() ) );
+	for ( std::size_t i = 0; i < m_subsongs.size(); ++i ) {
+		retval.push_back( mod_string_to_utf8( m_sndFile->Order.GetSequence( m_subsongs[i].sequence ).GetName() ) );
 	}
 	return retval;
 }
@@ -1174,6 +1187,21 @@ void module_impl::ctl_set( const std::string & ctl, const std::string & value ) 
 		m_Dither->SetMode( static_cast<DitherMode>( ConvertStrTo<int>( value ) ) );
 	} else {
 		throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
+	}
+}
+
+void module_impl::cache_subsongs() const {
+	if ( !m_subsongs.empty() ) {
+		return;
+	}
+
+	m_subsongs.reserve( m_sndFile->Order.GetNumSequences() );
+
+	for ( SEQUENCEINDEX seq = 0; seq < m_sndFile->Order.GetNumSequences(); ++seq ) {
+		const std::vector<GetLengthType> lengths = m_sndFile->GetLength( eNoAdjust, GetLengthTarget( true ).StartPos( seq, 0, 0 ) );
+		for ( std::vector<GetLengthType>::const_iterator l = lengths.begin(); l != lengths.end(); ++l ) {
+			m_subsongs.push_back( subsong_data( l->duration, l->startRow, l->startOrder, seq ) );
+		}
 	}
 }
 

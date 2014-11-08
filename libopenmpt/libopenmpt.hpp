@@ -196,7 +196,7 @@ public:
 		RENDER_VOLUMERAMPING_STRENGTH     = 4
 	};
 
-	//! Parameter index to use with get_pattern_row_channel_command, format_pattern_row_channel_command and highlight_pattern_row_channel_command
+	//! Parameter index to use with openmpt::module::get_pattern_row_channel_command, openmpt::module::format_pattern_row_channel_command and openmpt::module::highlight_pattern_row_channel_command
 	enum command_index {
 		command_note        = 0,
 		command_instrument  = 1,
@@ -317,7 +317,7 @@ public:
 
 	//! Get approximate song duration
 	/*!
-	  \return Approximate song duration in seconds.
+	  \return Approximate duration of current subsong in seconds.
 	*/
 	double get_duration_seconds() const;
 
@@ -328,9 +328,9 @@ public:
 	  \sa openmpt::module::get_position_seconds
 	*/
 	double set_position_seconds( double seconds );
-	//! Get approximate current song position
+	//! Get current song position
 	/*!
-	  \return Approximate current song position in seconds.
+	  \return Current song position in seconds.
 	  \sa openmpt::module::set_position_seconds
 	*/
 	double get_position_seconds() const;
@@ -593,7 +593,7 @@ public:
 
 	//! Get the number of rows in a pattern
 	/*!
-	  \param order The pattern whose row count should be retrieved.
+	  \param pattern The pattern whose row count should be retrieved.
 	  \return The number of rows in the given pattern. If the pattern does not exist, 0 is returned.
 	*/
 	std::int32_t get_pattern_num_rows( std::int32_t pattern ) const;
@@ -603,9 +603,8 @@ public:
 	  \param pattern The pattern whose data should be retrieved.
 	  \param row The row from which the data should be retrieved.
 	  \param channel The channel from which the data should be retrieved.
-	  \param command The cell index at which the data should be retrieved.
+	  \param command The cell index at which the data should be retrieved. See openmpt::module::command_index
 	  \return The internal, raw pattern data at the given pattern position.
-	  \sa openmpt::module::command_index
 	*/
 	std::uint8_t get_pattern_row_channel_command( std::int32_t pattern, std::int32_t row, std::int32_t channel, int command ) const;
 
@@ -615,8 +614,8 @@ public:
 	  \param row The row from which the data should be retrieved.
 	  \param channel The channel from which the data should be retrieved.
 	  \param command The cell index at which the data should be retrieved.
-	  \return The formatted pattern data at the given pattern position.
-	  \sa openmpt::module::command_index
+	  \return The formatted pattern data at the given pattern position. See openmpt::module::command_index
+	  \sa openmpt::module::highlight_pattern_row_channel_command
 	*/
 	std::string format_pattern_row_channel_command( std::int32_t pattern, std::int32_t row, std::int32_t channel, int command ) const;
 
@@ -625,7 +624,7 @@ public:
 	  \param pattern The pattern whose data should be retrieved.
 	  \param row The row from which the data should be retrieved.
 	  \param channel The channel from which the data should be retrieved.
-	  \param command The cell index at which the data should be retrieved.
+	  \param command The cell index at which the data should be retrieved. See openmpt::module::command_index
 	  \return The highlighting string for the formatted pattern data as retrived by openmpt::module::get_pattern_row_channel_command at the given pattern position.
 	  \remarks The returned string will map each character position of the string returned by openmpt::module::get_pattern_row_channel_command to a highlighting instruction.
 	           Possible highlighting characters are:
@@ -638,7 +637,7 @@ public:
 	           - "v" : generic volume column parameter
 	           - "e" : generic effect column effect
 	           - "f" : generic effect column parameter
-	  \sa openmpt::module::command_index
+	  \sa openmpt::module::get_pattern_row_channel_command
 	*/
 	std::string highlight_pattern_row_channel_command( std::int32_t pattern, std::int32_t row, std::int32_t channel, int command ) const;
 
@@ -650,6 +649,7 @@ public:
 	  \param width The maximum number of characters the string should contain. 0 means no limit.
 	  \param pad If true, the string will be resized to the exact length provided in the width parameter.
 	  \return The formatted pattern data at the given pattern position.
+	  \sa openmpt::module::highlight_pattern_row_channel
 	*/
 	std::string format_pattern_row_channel( std::int32_t pattern, std::int32_t row, std::int32_t channel, std::size_t width = 0, bool pad = true ) const;
 	//! Get highlighting information for formatted pattern content
@@ -660,7 +660,7 @@ public:
 	  \param width The maximum number of characters the string should contain. 0 means no limit.
 	  \param pad If true, the string will be resized to the exact length provided in the width parameter.
 	  \return The highlighting string for the formatted pattern data as retrived by openmpt::module::format_pattern_row_channel at the given pattern position.
-	  \sa openmpt::module::format_pattern_row_channel_command
+	  \sa openmpt::module::format_pattern_row_channel
 	*/
 	std::string highlight_pattern_row_channel( std::int32_t pattern, std::int32_t row, std::int32_t channel, std::size_t width = 0, bool pad = true ) const;
 
@@ -673,9 +673,9 @@ public:
 	           - seek.sync_samples: Set to "1" to sync sample playback when using openmpt::module::set_position_seconds or openmpt::module::set_position_order_row.
 	           - dither: Set the dither algorithm that is used for the 16 bit versions of openmpt::module::read. Supported values are:
 	                     - 0: No dithering.
-                         - 1: Default mode. Chosen by OpenMPT code, might change.
-                         - 2: Rectangular, 0.5 bit depth, no noise shaping (original ModPlug Tracker).
-                         - 3: Rectangular, 1 bit depth, simple 1st order noise shaping
+	                     - 1: Default mode. Chosen by OpenMPT code, might change.
+	                     - 2: Rectangular, 0.5 bit depth, no noise shaping (original ModPlug Tracker).
+	                     - 3: Rectangular, 1 bit depth, simple 1st order noise shaping
 	*/
 	std::vector<std::string> get_ctls() const;
 
@@ -689,7 +689,7 @@ public:
 	//! Set ctl value
 	/*!
 	  \param ctl The ctl key whose value should be set.
-	  \param The value that should be set.
+	  \param value The value that should be set.
 	  \sa openmpt::module::get_ctls
 	*/
 	void ctl_set( const std::string & ctl, const std::string & value );

@@ -57,6 +57,16 @@ public:
 
 class log_forwarder;
 
+class subsong_data {
+public:
+	double duration;
+	std::int32_t start_row;
+	std::int32_t start_order;
+	std::int32_t sequence;
+
+	subsong_data( double duration, std::int32_t start_row, std::int32_t start_order, std::int32_t sequence ) : duration(duration), start_row(start_row), start_order(start_order), sequence(sequence) { }
+};
+
 class module_impl {
 protected:
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
@@ -85,6 +95,8 @@ protected:
 	bool m_ctl_load_skip_patterns;
 	bool m_ctl_seek_sync_samples;
 	std::vector<std::string> m_loaderMessages;
+	mutable std::vector<subsong_data> m_subsongs;
+	std::int32_t m_current_subsong;
 public:
 	void PushToCSoundFileLog( const std::string & text ) const;
 	void PushToCSoundFileLog( int loglevel, const std::string & text ) const;
@@ -101,6 +113,7 @@ protected:
 	std::size_t read_interleaved_wrapper( std::size_t count, std::size_t channels, float * interleaved );
 	std::pair< std::string, std::string > format_and_highlight_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int command ) const;
 	std::pair< std::string, std::string > format_and_highlight_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const;
+	void cache_subsongs() const;
 public:
 	static std::vector<std::string> get_supported_extensions();
 	static bool is_extension_supported( const std::string & extension );

@@ -28,10 +28,15 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Resize / Clear the row vector.
 // If reset is true, the vector is not only resized to the required dimensions, but also completely cleared (i.e. all visited rows are unset).
-void RowVisitor::Initialize(bool reset)
-//-------------------------------------
+void RowVisitor::Initialize(bool reset, SEQUENCEINDEX sequence)
+//-------------------------------------------------------------
 {
-	const ORDERINDEX endOrder = sndFile.Order.GetLengthTailTrimmed();
+	if(sequence < sndFile.Order.GetNumSequences())
+		Order = &sndFile.Order.GetSequence(sequence);
+	else
+		Order = &sndFile.Order;
+
+	const ORDERINDEX endOrder = Order->GetLengthTailTrimmed();
 	visitedRows.resize(endOrder);
 	if(reset)
 	{
@@ -41,7 +46,7 @@ void RowVisitor::Initialize(bool reset)
 	for(ORDERINDEX order = 0; order < endOrder; order++)
 	{
 		VisitedRowsBaseType &row = visitedRows[order];
-		const size_t size = GetVisitedRowsVectorSize(sndFile.Order[order]);
+		const size_t size = GetVisitedRowsVectorSize(Order->At(order));
 		if(reset)
 		{
 			// If we want to reset the vectors completely, we overwrite existing items with false.
@@ -60,8 +65,8 @@ void RowVisitor::Initialize(bool reset)
 void RowVisitor::SetVisited(ORDERINDEX order, ROWINDEX row, bool visited)
 //-----------------------------------------------------------------------
 {
-	const ORDERINDEX endOrder = sndFile.Order.GetLengthTailTrimmed();
-	if(order >= endOrder || row >= GetVisitedRowsVectorSize(sndFile.Order[order]))
+	const ORDERINDEX endOrder = Order->GetLengthTailTrimmed();
+	if(order >= endOrder || row >= GetVisitedRowsVectorSize(Order->At(order)))
 	{
 		return;
 	}
@@ -86,7 +91,7 @@ void RowVisitor::SetVisited(ORDERINDEX order, ROWINDEX row, bool visited)
 bool RowVisitor::IsVisited(ORDERINDEX order, ROWINDEX row, bool autoSet)
 //----------------------------------------------------------------------
 {
-	const ORDERINDEX endOrder = sndFile.Order.GetLengthTailTrimmed();
+	const ORDERINDEX endOrder = Order->GetLengthTailTrimmed();
 	if(order >= endOrder)
 	{
 		return false;
@@ -138,10 +143,10 @@ size_t RowVisitor::GetVisitedRowsVectorSize(PATTERNINDEX pattern) const
 bool RowVisitor::GetFirstUnvisitedRow(ORDERINDEX &order, ROWINDEX &row, bool fastSearch) const
 //--------------------------------------------------------------------------------------------
 {
-	const ORDERINDEX endOrder = sndFile.Order.GetLengthTailTrimmed();
+	const ORDERINDEX endOrder = Order->GetLengthTailTrimmed();
 	for(order = 0; order < endOrder; order++)
 	{
-		const PATTERNINDEX pattern = sndFile.Order[order];
+		const PATTERNINDEX pattern = Order->At(order);
 		if(!sndFile.Patterns.IsValidPat(pattern))
 		{
 			continue;
@@ -197,7 +202,7 @@ void RowVisitor::AddVisitedRow(ORDERINDEX order, ROWINDEX row)
 	{
 		// We're in a new pattern! Forget about which rows we previously visited...
 		visitOrder.clear();
-		visitOrder.reserve(GetVisitedRowsVectorSize(sndFile.Order[order]));
+		visitOrder.reserve(GetVisitedRowsVectorSize(Order->At(order)));
 		currentOrder = order;
 	}
 	// And now add the played row to our memory.

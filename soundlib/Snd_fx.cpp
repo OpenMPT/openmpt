@@ -106,29 +106,35 @@ public:
 // [out] endOrder: last order before module loops (UNDEFINED if a target is specified)
 // [out] endRow: last row before module loops (dito)
 std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthTarget target)
-//------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------
 {
 	std::vector<GetLengthType> results;
 	GetLengthType retval;
+	retval.startOrder = target.startOrder;
+	retval.startRow = target.startRow;
 
 	// Are we trying to reach a certain pattern position?
 	const bool hasSearchTarget = target.mode != GetLengthTarget::NoTarget;
 	const bool adjustSamplePos = (adjustMode & eAdjustSamplePositions) == eAdjustSamplePositions;
 
-	ROWINDEX nRow = 0, nNextRow = 0;
+	ROWINDEX nRow = target.startRow, nNextRow = nRow;
 	ROWINDEX nNextPatStartRow = 0; // FT2 E60 bug
-	ORDERINDEX nCurrentOrder = 0, nNextOrder = 0;
+	ORDERINDEX nCurrentOrder = target.startOrder, nNextOrder = nCurrentOrder;
+
+	SEQUENCEINDEX sequence = target.sequence;
+	if(sequence > Order.GetNumSequences()) sequence = Order.GetCurrentSequenceIndex();
+	const ModSequence &orderList = Order.GetSequence(sequence);
 
 	GetLengthMemory memory(*this);
 	// Temporary visited rows vector (so that GetLength() won't interfere with the player code if the module is playing at the same time)
-	RowVisitor visitedRows(*this);
+	RowVisitor visitedRows(*this, sequence);
 
 	// Optimize away channels for which it's pointless to adjust sample positions
 	std::vector<bool> adjustSampleChn(GetNumChannels(), true);
 	if(adjustSamplePos && target.mode == GetLengthTarget::SeekPosition)
 	{
 		PATTERNINDEX seekPat = PATTERNINDEX_INVALID;
-		if(target.pos.order < Order.GetLength()) seekPat = Order[target.pos.order];
+		if(target.pos.order < orderList.GetLength()) seekPat = orderList[target.pos.order];
 		if(!Patterns.IsValidPat(seekPat) || !Patterns[seekPat].IsValidRow(target.pos.row)) seekPat = PATTERNINDEX_INVALID;
 
 		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
@@ -156,16 +162,16 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		nRow = nNextRow;
 		nCurrentOrder = nNextOrder;
 
-		if(nCurrentOrder >= Order.size())
+		if(nCurrentOrder >= orderList.size())
 			break;
 
 		// Check if pattern is valid
-		PATTERNINDEX nPattern = Order[nCurrentOrder];
+		PATTERNINDEX nPattern = orderList[nCurrentOrder];
 		bool positionJumpOnThisRow = false;
 		bool patternBreakOnThisRow = false;
 		bool patternLoopEndedOnThisRow = false, patternLoopStartedOnThisRow = false;
 
-		if(nPattern == Order.GetIgnoreIndex() && target.mode == GetLengthTarget::SeekPosition && nCurrentOrder == target.pos.order)
+		if(nPattern == orderList.GetIgnoreIndex() && target.mode == GetLengthTarget::SeekPosition && nCurrentOrder == target.pos.order)
 		{
 			// Early test: Target is inside +++ pattern
 			retval.targetReached = true;
@@ -175,7 +181,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		while(nPattern >= Patterns.Size())
 		{
 			// End of song?
-			if((nPattern == Order.GetInvalidPatIndex()) || (nCurrentOrder >= Order.size()))
+			if((nPattern == orderList.GetInvalidPatIndex()) || (nCurrentOrder >= orderList.size()))
 			{
 				if(nCurrentOrder == m_nRestartPos)
 					break;
@@ -185,7 +191,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			{
 				nCurrentOrder++;
 			}
-			nPattern = (nCurrentOrder < Order.size()) ? Order[nCurrentOrder] : Order.GetInvalidPatIndex();
+			nPattern = (nCurrentOrder < orderList.size()) ? orderList[nCurrentOrder] : orderList.GetInvalidPatIndex();
 			nNextOrder = nCurrentOrder;
 			if((!Patterns.IsValidPat(nPattern)) && visitedRows.IsVisited(nCurrentOrder, 0, true))
 			{
@@ -204,7 +210,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 					nRow = nNextRow;
 					nCurrentOrder = nNextOrder;
-					nPattern = Order[nCurrentOrder];
+					nPattern = orderList[nCurrentOrder];
 					break;
 				}
 			}
