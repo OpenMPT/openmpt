@@ -307,8 +307,8 @@ static std::string seconds_to_string( double time ) {
 	std::int64_t time_ms = static_cast<std::int64_t>( time * 1000 );
 	std::int64_t milliseconds = time_ms % 1000;
 	std::int64_t seconds = ( time_ms / 1000 ) % 60;
-	std::int64_t minutes = ( time_ms / ( 1000 * 60 ) ) % 24;
-	std::int64_t hours = ( time_ms / ( 1000 * 60 * 24 ) );
+	std::int64_t minutes = ( time_ms / ( 1000 * 60 ) ) % 60;
+	std::int64_t hours = ( time_ms / ( 1000 * 60 * 60 ) );
 	std::ostringstream str;
 	if ( hours > 0 ) {
 		str << hours << ":";
