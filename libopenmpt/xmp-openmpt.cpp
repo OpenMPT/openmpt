@@ -728,12 +728,14 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 	xmpopenmpt_lock guard;
 	reset_options();
 	try {
+		std::map< std::string, std::string > ctls;
+		ctls["seek.sync_samples"] = "1";
 		self->delete_mod();
 		#ifdef USE_XMPLAY_FILE_IO
 			#ifdef USE_XMPLAY_ISTREAM
 				switch ( xmpffile->GetType( file ) ) {
 					case XMPFILE_TYPE_MEMORY:
-						self->mod = new openmpt::module_ext( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) );
+						self->mod = new openmpt::module_ext( xmpffile->GetMemory( file ), xmpffile->GetSize( file ), std::clog, ctls );
 						break;
 					case XMPFILE_TYPE_FILE:
 					case XMPFILE_TYPE_NETFILE:
@@ -741,19 +743,19 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 					default:
 						{
 							xmplay_istream stream( file );
-							self->mod = new openmpt::module_ext( stream );
+							self->mod = new openmpt::module_ext( stream, std::clog, ctls );
 						}
 						break;
 				}
 			#else
 				if ( xmpffile->GetType( file ) == XMPFILE_TYPE_MEMORY ) {
-					self->mod = new openmpt::module_ext( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) );
+					self->mod = new openmpt::module_ext( xmpffile->GetMemory( file ), xmpffile->GetSize( file ), std::clog, ctls );
 				} else {
-					self->mod = new openmpt::module_ext( (read_XMPFILE( file )) );
+					self->mod = new openmpt::module_ext( (read_XMPFILE( file )), std::clog, ctls );
 				}
 			#endif
 		#else
-			self->mod = new openmpt::module_ext( std::ifstream( filename, std::ios_base::binary ) );
+			self->mod = new openmpt::module_ext( std::ifstream( filename, std::ios_base::binary ), std::clog, ctls );
 		#endif
 		self->on_new_mod();
 		clear_current_timeinfo();

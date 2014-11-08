@@ -208,7 +208,9 @@ static int play( const in_char * fn ) {
 	}
 	try {
 		std::ifstream s( fn, std::ios::binary );
-		self->mod = new openmpt::module( s );
+		std::map< std::string, std::string > ctls;
+		ctls["seek.sync_samples"] = "1";
+		self->mod = new openmpt::module( s, std::clog, ctls );
 		self->cached_filename = fn;
 		self->cached_title = StringDecode( self->mod->get_metadata( "title" ), CP_UTF8 );
 		self->cached_length = static_cast<int>( self->mod->get_duration_seconds() * 1000.0 );
