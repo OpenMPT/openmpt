@@ -83,6 +83,7 @@ protected:
 	float m_Gain;
 	bool m_ctl_load_skip_samples;
 	bool m_ctl_load_skip_patterns;
+	bool m_ctl_seek_sync_samples;
 	std::vector<std::string> m_loaderMessages;
 public:
 	void PushToCSoundFileLog( const std::string & text ) const;

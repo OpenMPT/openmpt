@@ -155,7 +155,9 @@ public:
 		std::vector<char> data( static_cast<std::size_t>( m_file->get_size( p_abort ) ) );
 		m_file->read( data.data(), data.size(), p_abort );
 		try {
-			mod = new openmpt::module( data );
+			std::map< std::string, std::string > ctls;
+			ctls["seek.sync_samples"] = "1";
+			mod = new openmpt::module( data, std::clog, ctls );
 		} catch ( std::exception & /*e*/ ) {
 			throw exception_io_data();
 		}
