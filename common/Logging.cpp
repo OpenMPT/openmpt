@@ -163,8 +163,8 @@ void Logger::operator () (LogLevel level, const mpt::ustring &text)
 	DoLog(context, LogLevelToString(level) + MPT_USTRING(": ") + text);
 }
 
-void Logger::operator () (const mpt::ustring &text)
-//-------------------------------------------------
+void Logger::operator () (const AnyStringLocale &text)
+//----------------------------------------------------
 {
 	DoLog(context, text);
 }
@@ -177,24 +177,6 @@ void Logger::operator () (const char *format, ...)
 	DoLog(context, format, va);
 	va_end(va);
 }
-
-void Logger::operator () (const std::string &text)
-//------------------------------------------------
-{
-#if defined(MPT_WITH_CHARSET_LOCALE)
-	DoLog(context, mpt::ToUnicode(mpt::CharsetLocale, text));
-#else
-	DoLog(context, mpt::ToUnicode(mpt::CharsetUTF8, text));
-#endif
-}
-
-#if MPT_WSTRING_CONVERT && !(MPT_USTRING_MODE_WIDE)
-void Logger::operator () (const std::wstring &text)
-//-------------------------------------------------
-{
-	DoLog(context, mpt::ToUnicode(text));
-}
-#endif
 
 
 #endif // !NO_LOGGING

@@ -150,6 +150,16 @@ enum Charset {
 };
 
 
+// Checks if the std::string represents an UTF8 string.
+// This is currently implemented as converting to std::wstring and back assuming UTF8 both ways,
+// and comparing the result to the original string.
+// Caveats:
+//  - can give false negatives because of possible unicode normalization during conversion
+//  - can give false positives if the 8bit encoding contains high-ascii only in valid utf8 groups
+//  - slow because of double conversion
+bool IsUTF8(const std::string &str);
+
+
 #define MPT_CHAR_TYPE    char
 #define MPT_CHAR(x)      x
 #define MPT_LITERAL(x)   x
@@ -199,6 +209,7 @@ typedef MPT_ENCODED_STRING_TYPE(mpt::CharsetUTF8) u8string;
 // If str does not contain any invalid characters, this conversion is lossless.
 // Invalid source bytes will be replaced by some replacement character or string.
 static inline std::wstring ToWide(const std::wstring &str) { return str; }
+static inline std::wstring ToWide(const wchar_t * str) { return (str ? std::wstring(str) : std::wstring()); }
 std::wstring ToWide(Charset from, const std::string &str);
 #endif
 
@@ -210,6 +221,7 @@ std::wstring ToWide(Charset from, const std::string &str);
 // destination charset will be replaced by some replacement character or string.
 #if MPT_WSTRING_CONVERT
 std::string ToCharset(Charset to, const std::wstring &str);
+static inline std::string ToCharset(Charset to, const wchar_t * str) { return ToCharset(to, str ? std::wstring(str) : std::wstring()); }
 #endif
 std::string ToCharset(Charset to, Charset from, const std::string &str);
 
@@ -224,6 +236,7 @@ std::string ToCharset(Charset to, Charset from, const std::string &str);
 // If UNICODE is defined, this is a completely lossless operation.
 static inline CString ToCString(const CString &str) { return str; }
 CString ToCString(const std::wstring &str);
+static inline CString ToCString(const wchar_t * str) { return ToCString(str ? std::wstring(str) : std::wstring()); }
 CString ToCString(Charset from, const std::string &str);
 
 // Convert from a MFC CString. The CString encoding depends on UNICODE.
@@ -231,11 +244,6 @@ CString ToCString(Charset from, const std::string &str);
 // If UNICODE is defined, this is a completely lossless operation.
 std::wstring ToWide(const CString &str);
 std::string ToCharset(Charset to, const CString &str);
-
-// Provide un-ambiguous conversion from wide string literal.
-static inline std::wstring ToWide(const wchar_t * str) { return ToWide(str ? std::wstring(str) : std::wstring()); }
-static inline std::string ToCharset(Charset to, const wchar_t * str) { return ToCharset(to, str ? std::wstring(str) : std::wstring()); }
-static inline CString ToCString(const wchar_t * str) { return ToCString(str ? std::wstring(str) : std::wstring()); }
 
 #ifdef UNICODE
 MPT_DEPRECATED static inline CString ToCStringW(const CString &str) { return ToCString(str); }
@@ -320,21 +328,23 @@ typedef mpt::u8string    ustring;
 #error "MPT_USTRING_MODE_WIDE depends on MPT_WSTRING_CONVERT)"
 #endif
 static inline mpt::ustring ToUnicode(const std::wstring &str) { return str; }
+static inline mpt::ustring ToUnicode(const wchar_t * str) { return (str ? std::wstring(str) : std::wstring()); }
 static inline mpt::ustring ToUnicode(Charset from, const std::string &str) { return ToWide(from, str); }
 #if defined(_MFC_VER)
 static inline mpt::ustring ToUnicode(const CString &str) { return ToWide(str); }
-static inline mpt::ustring ToUnicode(const wchar_t * str) { return ToUnicode(str ? std::wstring(str) : std::wstring()); }
 #ifndef UNICODE
 static inline mpt::ustring ToUnicode(const CStringW &str) { return ToWide(str); }
 #endif // !UNICODE
 #endif // MFC
 #else // !MPT_USTRING_MODE_WIDE
 static inline mpt::ustring ToUnicode(const mpt::ustring &str) { return str; }
+#if MPT_WSTRING_CONVERT
 mpt::ustring ToUnicode(const std::wstring &str);
+static inline mpt::ustring ToUnicode(const wchar_t * str) { return ToUnicode(str ? std::wstring(str) : std::wstring()); }
+#endif
 mpt::ustring ToUnicode(Charset from, const std::string &str);
 #if defined(_MFC_VER)
 mpt::ustring ToUnicode(const CString &str);
-static inline mpt::ustring ToUnicode(const wchar_t * str) { return ToUnicode(str ? std::wstring(str) : std::wstring()); }
 #ifndef UNICODE
 mpt::ustring ToUnicode(const CStringW &str);
 #endif // !UNICODE
@@ -369,6 +379,137 @@ static inline CStringW ToCStringW(const mpt::ustring &str) { return ToCStringW(T
 #define MPT_UTF8(x) mpt::ToUnicode(mpt::CharsetUTF8, x )
 
 } // namespace mpt
+
+
+
+
+
+// The AnyString types are meant to be used as function argument types only,
+// and only during the transition phase to all-unicode strings in the whole codebase.
+// Using an AnyString type as function argument avoids the need to overload a function for all the
+// different string types that we currently have.
+// Warning: These types will silently do charset conversions. Only use them when this can be tolerated.
+
+// BasicAnyString is convertable to mpt::ustring and constructable from any string at all.
+template <mpt::Charset charset = mpt::CharsetUTF8, bool tryUTF8 = true>
+class BasicAnyString : public mpt::ustring
+{
+
+private:
+	
+	static mpt::ustring From8bit(const std::string &str)
+	{
+		if(charset == mpt::CharsetUTF8)
+		{
+			return mpt::ToUnicode(mpt::CharsetUTF8, str);
+		}
+		// auto utf8 detection
+		if(tryUTF8 && mpt::IsUTF8(str))
+		{
+			return mpt::ToUnicode(mpt::CharsetUTF8, str);
+		} else
+		{
+			return mpt::ToUnicode(charset, str);
+		}
+	}
+
+public:
+
+	// 8 bit
+	BasicAnyString(const char *str) : mpt::ustring(str ? mpt::ToUnicode(charset, str) : mpt::ustring()) { }
+	BasicAnyString(const std::string str) : mpt::ustring(mpt::ToUnicode(charset, str)) { }
+
+	// unicode
+	BasicAnyString(const mpt::ustring &str) : mpt::ustring(str) { }
+#if MPT_COMPILER_HAS_RVALUE_REF
+	BasicAnyString(mpt::ustring &&str) : mpt::ustring(std::move(str)) { }
+#endif
+#if MPT_USTRING_MODE_UTF8 && MPT_WSTRING_CONVERT
+	BasicAnyString(const std::wstring &str) : mpt::ustring(mpt::ToUnicode(str)) { }
+#endif
+#if MPT_WSTRING_CONVERT
+	BasicAnyString(const wchar_t *str) : mpt::ustring(str ? mpt::ToUnicode(str) : mpt::ustring()) { }
+#endif
+
+	// mfc
+#if defined(_MFC_VER)
+	BasicAnyString(const CString &str) : mpt::ustring(mpt::ToUnicode(str)) { }
+#ifndef UNICODE
+	BasicAnyString(const CStringW &str) : mpt::ustring(mpt::ToUnicode(str)) { }
+#endif
+#endif
+
+	// fallback for custom string types
+	template <typename Tstring> BasicAnyString(const Tstring &str) : mpt::ustring(mpt::ToUnicode(str)) { }
+#if MPT_COMPILER_HAS_RVALUE_REF
+	template <typename Tstring> BasicAnyString(Tstring &&str) : mpt::ustring(mpt::ToUnicode(std::forward<Tstring>(str))) { }
+#endif
+
+};
+
+// AnyUnicodeString is convertable to mpt::ustring and constructable from any unicode string,
+class AnyUnicodeString : public mpt::ustring
+{
+
+public:
+
+	// unicode
+	AnyUnicodeString(const mpt::ustring &str) : mpt::ustring(str) { }
+#if MPT_COMPILER_HAS_RVALUE_REF
+	AnyUnicodeString(mpt::ustring &&str) : mpt::ustring(std::move(str)) { }
+#endif
+#if MPT_USTRING_MODE_UTF8 && MPT_WSTRING_CONVERT
+	AnyUnicodeString(const std::wstring &str) : mpt::ustring(mpt::ToUnicode(str)) { }
+#endif
+#if MPT_WSTRING_CONVERT
+	AnyUnicodeString(const wchar_t *str) : mpt::ustring(str ? mpt::ToUnicode(str) : mpt::ustring()) { }
+#endif
+
+	// mfc
+#if defined(_MFC_VER)
+	AnyUnicodeString(const CString &str) : mpt::ustring(mpt::ToUnicode(str)) { }
+#ifndef UNICODE
+	AnyUnicodeString(const CStringW &str) : mpt::ustring(mpt::ToUnicode(str)) { }
+#endif
+#endif
+
+	// fallback for custom string types
+	template <typename Tstring> AnyUnicodeString(const Tstring &str) : mpt::ustring(mpt::ToUnicode(str)) { }
+#if MPT_COMPILER_HAS_RVALUE_REF
+	template <typename Tstring> AnyUnicodeString(Tstring &&str) : mpt::ustring(mpt::ToUnicode(std::forward<Tstring>(str))) { }
+#endif
+
+};
+
+// AnyString
+// Try to do the smartest auto-magic we can do.
+#if defined(MPT_WITH_CHARSET_LOCALE)
+typedef BasicAnyString<mpt::CharsetLocale, true> AnyString;
+#elif MPT_OS_WINDOWS
+typedef BasicAnyString<mpt::CharsetWindows1252, true> AnyString;
+#else
+typedef BasicAnyString<mpt::CharsetISO8859_1, true> AnyString;
+#endif
+
+// AnyStringLocale
+// char-based strings are assumed to be in locale encoding.
+#if defined(MPT_WITH_CHARSET_LOCALE)
+typedef BasicAnyString<mpt::CharsetLocale, false> AnyStringLocale;
+#else
+typedef BasicAnyString<mpt::CharsetUTF8, false> AnyStringLocale;
+#endif
+
+// AnyStringUTF8orLocale
+// char-based strings are tried in UTF8 first, if this fails, locale is used.
+#if defined(MPT_WITH_CHARSET_LOCALE)
+typedef BasicAnyString<mpt::CharsetLocale, true> AnyStringUTF8orLocale;
+#else
+typedef BasicAnyString<mpt::CharsetUTF8, false> AnyStringUTF8orLocale;
+#endif
+
+// AnyStringUTF8
+// char-based strings are assumed to be in UTF8.
+typedef BasicAnyString<mpt::CharsetUTF8, false> AnyStringUTF8;
 
 
 

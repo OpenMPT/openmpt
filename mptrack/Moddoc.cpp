@@ -863,11 +863,11 @@ void CModDoc::AddToLog(LogLevel level, const mpt::ustring &text) const
 	{
 		switch(level)
 		{
-		case LogError:        Reporting::Error(mpt::ToWide(text));        break;
-		case LogWarning:      Reporting::Warning(mpt::ToWide(text));      break;
-		case LogInformation:  Reporting::Information(mpt::ToWide(text));  break;
-		case LogNotification: Reporting::Notification(mpt::ToWide(text)); break;
-		default:              Reporting::Information(mpt::ToWide(text));  break;
+		case LogError:        Reporting::Error(text);        break;
+		case LogWarning:      Reporting::Warning(text);      break;
+		case LogInformation:  Reporting::Information(text);  break;
+		case LogNotification: Reporting::Notification(text); break;
+		default:              Reporting::Information(text);  break;
 		}
 	}
 }
@@ -922,11 +922,11 @@ UINT CModDoc::ShowLog(const std::wstring &preamble, const std::wstring &title, C
 		std::wstring actualTitle = (title.length() == 0) ? MAINFRAME_TITLEW : title;
 		switch(GetMaxLogLevel())
 		{
-		case LogError:        Reporting::Error(text, actualTitle.c_str(), parent); break;
-		case LogWarning:      Reporting::Warning(text, actualTitle.c_str(), parent); break;
-		case LogInformation:  Reporting::Information(text, actualTitle.c_str(), parent); break;
-		case LogNotification: Reporting::Notification(text, actualTitle.c_str(), parent); break;
-		default:              Reporting::Information(text, actualTitle.c_str(), parent); break;
+		case LogError:        Reporting::Error(text, actualTitle, parent); break;
+		case LogWarning:      Reporting::Warning(text, actualTitle, parent); break;
+		case LogInformation:  Reporting::Information(text, actualTitle, parent); break;
+		case LogNotification: Reporting::Notification(text, actualTitle, parent); break;
+		default:              Reporting::Information(text, actualTitle, parent); break;
 		}
 		return IDOK;
 	}

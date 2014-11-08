@@ -1010,6 +1010,13 @@ Tdststring ConvertImpl(Charset to, Charset from, const Tsrcstring &src)
 } // namespace String
 
 
+bool IsUTF8(const std::string &str)
+//---------------------------------
+{
+	return (str == String::EncodeImpl<std::string>(mpt::CharsetUTF8, String::DecodeImpl<std::string>(mpt::CharsetUTF8, str)));
+}
+
+
 #if MPT_WSTRING_CONVERT
 std::wstring ToWide(Charset from, const std::string &str)
 {
@@ -1103,10 +1110,12 @@ CString ToCString(const CStringW &str)
 #if MPT_USTRING_MODE_WIDE
 // inline
 #else // !MPT_USTRING_MODE_WIDE
+#if MPT_WSTRING_CONVERT
 mpt::ustring ToUnicode(const std::wstring &str)
 {
 	return String::EncodeImpl<mpt::ustring>(mpt::CharsetUTF8, str);
 }
+#endif
 mpt::ustring ToUnicode(Charset from, const std::string &str)
 {
 	return String::ConvertImpl<mpt::ustring>(mpt::CharsetUTF8, from, str);
