@@ -1351,6 +1351,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 				pChn->proTrackerOffset = 0;
 			}
 			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (pSmp->uFlags & (CHN_SAMPLEFLAGS | CHN_SURROUND));
+			pChn->dwFlags.reset(CHN_PORTAMENTO);
 			if(pChn->dwFlags[CHN_SUSTAINLOOP])
 			{
 				pChn->nLoopStart = pSmp->nSustainStart;
@@ -4711,7 +4712,7 @@ void CSoundFile::NoteCut(CHANNELINDEX nChn, UINT nTick, bool cutSample)
 		// instro sends to a midi chan
 		if (pIns && pIns->HasValidMIDIChannel())
 		{
-			UINT nPlug = pIns->nMixPlug;
+			PLUGINDEX nPlug = pIns->nMixPlug;
 			if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
 			{
 				IMixPlugin *pPlug = (IMixPlugin*)m_MixPlugins[nPlug-1].pMixPlugin;
@@ -4942,7 +4943,7 @@ void CSoundFile::GlobalVolSlide(UINT param, UINT &nOldGlobalVolSlide)
 UINT CSoundFile::GetNoteFromPeriod(UINT period, int nFineTune, UINT nC5Speed) const
 //---------------------------------------------------------------------------------
 {
-	if (!period) return 0;
+	if(!period) return 0;
 	if(IsCompatibleMode(TRK_FASTTRACKER2))
 	{
 		// FT2's "RelocateTon" function actually rounds up and down, while GetNoteFromPeriod normally just truncates.
@@ -5132,7 +5133,7 @@ PLUGINDEX CSoundFile::GetBestPlugin(CHANNELINDEX nChn, PluginPriority priority, 
 
 
 PLUGINDEX CSoundFile::GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const
-//------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------
 {
 	const ModChannel &channel = m_PlayState.Chn[nChn];
 
