@@ -322,7 +322,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 	}
 
 	// Now, create new sample list.
-	m_SndFile.m_nSamples = newNumSamples;
+	m_SndFile.m_nSamples = std::max(m_SndFile.m_nSamples, newNumSamples);	// Avoid assertions when using GetSample()...
 	for(SAMPLEINDEX i = 0; i < newNumSamples; i++)
 	{
 		const SAMPLEINDEX origSlot = newOrder[i];
@@ -374,6 +374,8 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 			}
 		}
 	}
+
+	m_SndFile.m_nSamples = newNumSamples;
 
 	if(m_SndFile.GetNumInstruments())
 	{

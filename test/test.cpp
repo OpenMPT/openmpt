@@ -1929,8 +1929,7 @@ static void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFla
 	}
 
 	{
-		std::vector<char> fileData(data.begin(), data.end());
-		FileReader file(&fileData[0], fileData.size());
+		FileReader file(&data[0], data.length());
 
 		std::vector<int8> sampleDataNew(sampleData.size(), 0);
 		smp.pSample = &sampleDataNew[0];
@@ -1965,9 +1964,8 @@ static noinline void TestITCompression()
 
 
 static double Rand01() {return rand() / double(RAND_MAX);}
-
 template <class T>
-T Rand(const T& min, const T& max) {return Util::Round<T>(min + Rand01() * (max - min));}
+T Rand(const T min, const T max) {return Util::Round<T>(min + Rand01() * (max - min));}
 
 
 
@@ -1986,7 +1984,7 @@ static void GenerateCommands(CPattern& pat, const double dProbPcs, const double 
 			else
 				i->note = NOTE_PC;
 
-			i->instr = Rand<BYTE>(0, MAX_MIXPLUGINS);
+			i->instr = Rand<ModCommand::INSTR>(0, MAX_MIXPLUGINS);
 			i->SetValueVolCol(Rand<uint16>(0, ModCommand::maxColumnValue));
 			i->SetValueEffectCol(Rand<uint16>(0, ModCommand::maxColumnValue));
 		}

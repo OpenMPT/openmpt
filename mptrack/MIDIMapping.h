@@ -39,14 +39,14 @@ public:
 
 	//Note: In these functions, channel value is in range [1,16],
 	//GetChannel() returns 0 on 'any channel'.
-	void SetChannel(const int c){if(c < 1 || c > 16) m_AnyChannel = true; else {m_ChnEvent &= ~0xF; m_ChnEvent |= c-1; m_AnyChannel = false;}}
-	BYTE GetChannel() const {return (m_AnyChannel) ? 0 : (m_ChnEvent & 0xF) + 1;} 
+	void SetChannel(const int c){ if(c < 1 || c > 16) m_AnyChannel = true; else { m_ChnEvent &= ~0x0F; m_ChnEvent |= c - 1; m_AnyChannel = false; } }
+	uint8 GetChannel() const {return (m_AnyChannel) ? 0 : (m_ChnEvent & 0xF) + 1;} 
 
-	void SetEvent(BYTE e) {if(e > 15) e = 15; m_ChnEvent &= ~0xF0; m_ChnEvent |= (e << 4);}
-	BYTE GetEvent() const {return static_cast<BYTE>((m_ChnEvent >> 4) & 0xF);}
+	void SetEvent(uint8 e) {if(e > 15) e = 15; m_ChnEvent &= ~0xF0; m_ChnEvent |= (e << 4);}
+	uint8 GetEvent() const {return (m_ChnEvent >> 4) & 0x0F;}
 
-	void SetController(int controller) {if(controller > 127) controller = 127; m_MIDIByte1 = static_cast<BYTE>(controller);}
-	BYTE GetController() const {return m_MIDIByte1;}
+	void SetController(int controller) {if(controller > 127) controller = 127; m_MIDIByte1 = static_cast<uint8>(controller);}
+	uint8 GetController() const {return m_MIDIByte1;}
 
 	//Note: Plug index starts from 1.
 	void SetPlugIndex(const int i) {m_PluginIndex = static_cast<PLUGINDEX>(i);}
@@ -60,12 +60,12 @@ public:
 	bool operator==(const CMIDIMappingDirective &other) const { return memcmp(this, &other, sizeof(*this)) == 0; }
 	bool operator<(const CMIDIMappingDirective &other) const { return GetController() < other.GetController(); }
 
-	BYTE GetChnEvent() const {return m_ChnEvent;}
+	uint8 GetChnEvent() const {return m_ChnEvent;}
 
 private:
 	uint32 m_Parameter;
 	PLUGINDEX m_PluginIndex;
-	BYTE m_MIDIByte1;
+	uint8 m_MIDIByte1;
 	uint8 m_ChnEvent; //0-3 channel, 4-7 event
 	bool m_Active : 1;
 	bool m_CaptureMIDI : 1; //When true, MIDI data should not be processed beyond this directive

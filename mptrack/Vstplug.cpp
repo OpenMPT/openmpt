@@ -985,8 +985,8 @@ bool CVstPlugin::SaveProgram()
 
 	char rawname[MAX(kVstMaxProgNameLen + 1, 256)] = "";	// kVstMaxProgNameLen is 24...
 	Dispatch(effGetProgramName, 0, 0, rawname, 0);
-	SanitizeFilename(rawname);
 	mpt::String::SetNullTerminator(rawname);
+	SanitizeFilename(rawname);
 
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension("fxb")
@@ -1419,8 +1419,8 @@ void CVstPlugin::RecalculateGain()
 void CVstPlugin::SetDryRatio(UINT param)
 //--------------------------------------
 {
-	param = MIN(param, 127);
-	m_pMixStruct->fDryRatio = static_cast<float>(1.0-(static_cast<double>(param)/127.0));
+	param = std::min(param, UINT(127));
+	m_pMixStruct->fDryRatio = 1.0f - (param / 127.0f);
 }
 
 

@@ -129,7 +129,7 @@ bool CSoundFile::FadeSong(UINT msec)
 
 // Apply stereo separation factor on an interleaved stereo/quad stream.
 // count = Number of stereo sample pairs to process
-// separation = 0...128
+// separation = -128...128 (negative values = swap L/R, 0 = mono)
 static void ApplyStereoSeparation(mixsample_t *mixBuf, CSoundFile::samplecount_t count, int32 separation)
 //-------------------------------------------------------------------------------------------------------
 {
@@ -258,7 +258,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 			InterleaveFrontRear(MixSoundBuffer, MixRearBuffer, countChunk);
 		}
 
-		if(m_MixerSettings.m_nStereoSeparation < 128 && m_MixerSettings.gnChannels >= 2)
+		if(m_MixerSettings.m_nStereoSeparation >= -128 && m_MixerSettings.m_nStereoSeparation < 128 && m_MixerSettings.gnChannels >= 2)
 		{
 			// Apply stereo separation
 			ApplyStereoSeparation(MixSoundBuffer, count * m_MixerSettings.gnChannels / 2, m_MixerSettings.m_nStereoSeparation);

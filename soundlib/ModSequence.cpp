@@ -264,7 +264,7 @@ ORDERINDEX ModSequence::Insert(ORDERINDEX nPos, ORDERINDEX nCount, PATTERNINDEX 
 //------------------------------------------------------------------------------------
 {
 	if (nPos >= m_sndFile.GetModSpecifications().ordersMax || nCount == 0)
-		return (nCount = 0);
+		return 0;
 	const ORDERINDEX nLengthTt = GetLengthTailTrimmed();
 	// Limit number of orders to be inserted.
 	LimitMax(nCount, ORDERINDEX(m_sndFile.GetModSpecifications().ordersMax - nPos));

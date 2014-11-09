@@ -286,7 +286,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		TrackerDirectories::Instance().SetDefaultDirectory(path, static_cast<Directory>(i), false);
 	}
 	m_szKbdFile = conf.Read<mpt::PathString>("Paths", "Key_Config_File", mpt::PathString());
-
+	conf.Forget("Paths", "Key_Config_File");
 
 	// init old and messy stuff:
 
@@ -1041,7 +1041,7 @@ void TrackerDirectories::SetDirectory(const mpt::PathString &filenameFrom, Direc
 
 	if(stripFilename)
 	{
-		path = filenameFrom.GetDrive() + filenameFrom.GetDir();
+		path = filenameFrom.GetPath();
 	} else
 	{
 		path = filenameFrom;

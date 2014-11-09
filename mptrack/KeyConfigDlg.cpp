@@ -687,35 +687,6 @@ void COptionsKeyboard::OnChordWaitTimeChanged()
 //-----------------------------------------------------------
 
 
-void COptionsKeyboard::OnHotKeyChanged()
-//--------------------------------------
-{
-/*	if ((m_nCurKeyboard == KEYBOARD_CUSTOM) && (m_nCurHotKey >= 0) && (m_nCurHotKey < MAX_MPTHOTKEYS))
-	{
-		BOOL bChanged = FALSE;
-		WORD wVk=0, wMod=0;
-
-		m_HotKey.GetHotKey(wVk, wMod);
-		DWORD dwHk = ((DWORD)wVk) | (((DWORD)wMod) << 16);
-		for (UINT i = 0; i<MAX_MPTHOTKEYS; i++) if (i != (UINT)m_nCurHotKey)
-		{
-			if (CustomKeys[i] == dwHk)
-			{
-				CustomKeys[i] = 0;
-				bChanged = TRUE;
-			}
-		}
-		if (dwHk != CustomKeys[m_nCurHotKey])
-		{
-			CustomKeys[m_nCurHotKey] = dwHk;
-			bChanged = TRUE;
-		}
-		if (bChanged) OnSettingsChanged();
-	}
-	*/
-}
-
-
 void COptionsKeyboard::OnRestoreKeyChoice()
 //-----------------------------------------
 {
@@ -770,8 +741,7 @@ void COptionsKeyboard::OnSetKeyChoice()
 	CommandID cmd = (CommandID)m_nCurHotKey;
 	if (cmd<0)
 	{
-		CString error = "Invalid slot.";
-		Reporting::Warning(error, "Invalid key data", this);
+		Reporting::Warning("Invalid slot.", "Invalid key data", this);
 		return;
 	}
 
@@ -826,7 +796,6 @@ void COptionsKeyboard::OnSetKeyChoice()
 
 		//Update log
 		m_eReport.GetWindowText(reportHistory);
-		//reportHistory = reportHistory.Mid(6,reportHistory.GetLength()-1);
 		m_eReport.SetWindowText(report + reportHistory);
 		ForceUpdateGUI();
 	}
@@ -870,7 +839,6 @@ void COptionsKeyboard::OnLoad()
 	m_sFullPathName = dlg.GetFirstFile();
 	plocalCmdSet->LoadFile(m_sFullPathName);
 	ForceUpdateGUI();
-	//TentativeSetToDefaultFile(m_sFullPathName);
 }
 
 
@@ -886,7 +854,6 @@ void COptionsKeyboard::OnSave()
 
 	m_sFullPathName = dlg.GetFirstFile();
 	plocalCmdSet->SaveFile(m_sFullPathName);
-	//TentativeSetToDefaultFile(m_sFullPathName);
 }
 
 

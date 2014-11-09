@@ -378,10 +378,9 @@ const CModSpecifications *Collection[] = { &mptm, &mod, &s3m, &s3mEx, &xm, &xmEx
 } // namespace ModSpecs
 
 
-MODTYPE CModSpecifications::ExtensionToType(const std::string &ext_)
-//------------------------------------------------------------------
+MODTYPE CModSpecifications::ExtensionToType(std::string ext)
+//----------------------------------------------------------
 {
-	std::string ext = ext_;
 	if(ext == "")
 	{
 		return MOD_TYPE_NONE;

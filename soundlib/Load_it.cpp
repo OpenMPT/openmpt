@@ -383,11 +383,11 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				interpretModPlugMade = true;
 			} else if(fileHeader.cwtv == 0x0217 && fileHeader.cmwt == 0x0200 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4))
 			{
-				if(memchr(fileHeader.chnpan, 0xFF, sizeof(fileHeader.chnpan)) != NULL)
+				if(memchr(fileHeader.chnpan, 0xFF, sizeof(fileHeader.chnpan)) != nullptr)
 				{
 					// ModPlug Tracker 1.16 (semi-raped IT format)
 					m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
-					madeWithTracker = "ModPlug tracker 1.09 - 1.16";
+					madeWithTracker = "ModPlug Tracker 1.09 - 1.16";
 				} else
 				{
 					// OpenMPT 1.17 disguised as this in compatible mode,
@@ -400,7 +400,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				// ModPlug Tracker b3.3 - 1.09, instruments 557 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
-				madeWithTracker = "ModPlug tracker b3.3 - 1.09";
+				madeWithTracker = "ModPlug Tracker b3.3 - 1.09";
 				interpretModPlugMade = true;
 			}
 		} else // case: type == MOD_TYPE_MPT
@@ -477,26 +477,17 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	uint32 minPtr = Util::MaxValueOfType(minPtr);
 	for(uint16 n = 0; n < fileHeader.insnum; n++)
 	{
-		if(insPos[n] > 0)
-		{
-			minPtr = std::min(minPtr, insPos[n]);
-		}
+		if(insPos[n] > 0) minPtr = std::min(minPtr, insPos[n]);
 	}
 
 	for(uint16 n = 0; n < fileHeader.smpnum; n++)
 	{
-		if(smpPos[n] > 0)
-		{
-			minPtr = std::min(minPtr, smpPos[n]);
-		}
+		if(smpPos[n] > 0) minPtr = std::min(minPtr, smpPos[n]);
 	}
 
 	for(uint16 n = 0; n < fileHeader.patnum; n++)
 	{
-		if(patPos[n] > 0)
-		{
-			minPtr = std::min(minPtr, patPos[n]);
-		}
+		if(patPos[n] > 0) minPtr = std::min(minPtr, patPos[n]);
 	}
 
 	if(fileHeader.special & ITFileHeader::embedSongMessage)
@@ -508,7 +499,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	// This is only supposed to be present if bit 1 of the special flags is set.
 	// However, old versions of Schism and probably other trackers always set this bit
 	// even if they don't write the edit history count. So we have to filter this out...
-	// This is done by looking at the parapointers. If the history data end after
+	// This is done by looking at the parapointers. If the history data ends after
 	// the first parapointer, we assume that it's actually no history data.
 	if(fileHeader.special & ITFileHeader::embedEditHistory)
 	{
@@ -554,11 +545,6 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		MemsetZero(m_MidiCfg.szMidiSFXExt);
 		MemsetZero(m_MidiCfg.szMidiZXXExt);
 		m_SongFlags.set(SONG_EMBEDMIDICFG);
-	}
-
-	if(file.ReadMagic("MODU"))
-	{
-		madeWithTracker = "BeRoTracker";
 	}
 
 	// Read pattern names: "PNAM"
@@ -1946,6 +1932,9 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 				}
 				//end rewbs.modularPlugData
 			}
+		} else if(!memcmp(code, "MODU", 4))
+		{
+			madeWithTracker = "BeRoTracker";
 		} else if(!memcmp(code, "XTPM", 4))
 		{
 			// Read too far, chicken out...

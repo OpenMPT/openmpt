@@ -476,11 +476,11 @@ void MIDIMacroConfig::UpgradeMacros()
 }
 
 
-// Remove blanks and other unwanted characters from macro strings for internal usage.
+// Normalize by removing blanks and other unwanted characters from macro strings for internal usage.
 std::string MIDIMacroConfig::GetSafeMacro(const char *macro) const
 //----------------------------------------------------------------
 {
-	std::string sanitizedMacro = std::string(macro);
+	std::string sanitizedMacro = macro;
 
 	std::string::size_type pos;
 	while((pos = sanitizedMacro.find_first_not_of("0123456789ABCDEFabpcnuvxyz")) != std::string::npos)

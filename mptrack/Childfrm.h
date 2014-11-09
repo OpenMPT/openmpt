@@ -38,10 +38,10 @@ typedef struct PATTERNVIEWSTATE
 
 typedef struct SAMPLEVIEWSTATE
 {
-	DWORD dwScrollPos;
-	DWORD dwBeginSel;
-	DWORD dwEndSel;
-	UINT nSample;
+	SmpLength dwScrollPos;
+	SmpLength dwBeginSel;
+	SmpLength dwEndSel;
+	SAMPLEINDEX nSample;
 } SAMPLEVIEWSTATE;
 
 

@@ -123,10 +123,6 @@ STATIC_ASSERT(sizeof(STMPatternEntry) == 4);
 struct PACKED STMPatternData
 {
 	STMPatternEntry entry[64 * 4];
-	void ConvertEndianness()
-	{
-		// nothing
-	}
 };
 
 STATIC_ASSERT(sizeof(STMPatternData) == 4*64*4);
@@ -204,7 +200,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		STMPatternData patternData;
 
-		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64) || !file.ReadConvertEndianness(patternData))
+		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64) || !file.ReadStruct(patternData))
 		{
 			file.Skip(sizeof(patternData));
 			continue;
