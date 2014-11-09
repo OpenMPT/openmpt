@@ -148,7 +148,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 	HKEY hkEnum;
 	WCHAR keyname[128];
 
-	LONG cr = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "software\\classes\\DirectShow\\MediaObjects\\Categories\\f3602b3f-0592-48df-a4cd-674721e7ebeb", 0, KEY_READ, &hkEnum);
+	LONG cr = RegOpenKeyEx(HKEY_LOCAL_MACHINE, _T("software\\classes\\DirectShow\\MediaObjects\\Categories\\f3602b3f-0592-48df-a4cd-674721e7ebeb"), 0, KEY_READ, &hkEnum);
 	DWORD index = 0;
 	while (cr == ERROR_SUCCESS)
 	{
@@ -223,7 +223,9 @@ AEffect *CVstPluginManager::LoadPlugin(const VSTPluginLib &plugin, HINSTANCE &li
 			// If there was some error, don't try normal loading as well... unless the user really wants it.
 			if(isNative)
 			{
-				if(Reporting::Confirm((std::string(e.what()) + "\n\nDo you want to try to load the plugin natively?").c_str(), "OpenMPT Plugin Bridge", false, true) == cnfNo)
+				const std::wstring msg = L"The following error occured while trying to load\n" + plugin.dllPath.ToWide() + L"\n\n" + mpt::ToWide(mpt::CharsetLocale, e.what())
+					+ L"\n\nDo you want to try to load the plugin natively?";
+				if(Reporting::Confirm(msg, L"OpenMPT Plugin Bridge", false, true) == cnfNo)
 				{
 					return nullptr;
 				}
@@ -639,12 +641,6 @@ void CVstPluginManager::ReportPlugException(LPCSTR format,...)
 #ifdef VST_LOG
 	Log(cBuf);
 #endif
-
-	//Stop song - TODO: figure out why this causes a kernel hang from IASIO->release();
-/*
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm) pMainFrm->StopMod();
-*/
 	va_end(va);
 }
 

@@ -1464,7 +1464,7 @@ BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 			}
 
 			SetCurrentInstrument(m_nInstrument);
-			SetModified(HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES | HINT_SMPNAMES, true);
+			SetModified(HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES | HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA, true);
 		} else bOk = FALSE;
 	}
 	if (bFirst) m_modDoc.UpdateAllViews(NULL, HINT_MODTYPE | HINT_INSNAMES | HINT_SMPNAMES);
@@ -2100,7 +2100,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 				{
 					// No plugin in this slot yet: Ask user to add one.
 #ifndef NO_VST
-					CSelectPluginDlg dlg(&m_modDoc, nPlug - 1, this); 
+					CSelectPluginDlg dlg(&m_modDoc, nPlug - 1, this);
 					if (dlg.DoModal() == IDOK)
 					{
 						if(m_sndFile.GetModSpecifications().supportsPlugins)
@@ -2116,7 +2116,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 
 				if(plugin.pMixPlugin != nullptr)
 				{
-					::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSVIEWPLG), true);
+					GetDlgItem(IDC_INSVIEWPLG)->EnableWindow(true);
 					
 					if(active && plugin.pMixPlugin->isInstrument())
 					{
@@ -2179,12 +2179,13 @@ void CCtrlInstruments::OnPPSChanged()
 	}
 }
 
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
+
 void CCtrlInstruments::OnAttackChanged()
+//--------------------------------------
 {
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
-	if(!IsLocked() && pIns){
+	if(!IsLocked() && pIns)
+	{
 		int n = GetDlgItemInt(IDC_EDIT2);
 		if(n < 0) n = 0;
 		if(n > MAX_ATTACK_VALUE) n = MAX_ATTACK_VALUE;
@@ -2203,7 +2204,6 @@ void CCtrlInstruments::OnAttackChanged()
 		UnlockControls();
 	}
 }
-// -! NEW_FEATURE#0027
 
 
 void CCtrlInstruments::OnPPCChanged()
@@ -2414,9 +2414,9 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 			}
 			
 			// Update channels
-			if (filterChanger == true)
+			if (filterChanger)
 			{
-				for (UINT i=0; i<MAX_CHANNELS; i++)
+				for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 				{
 					if (m_sndFile.m_PlayState.Chn[i].pModInstrument == pIns)
 					{
@@ -2819,8 +2819,7 @@ void CCtrlInstruments::OnEnKillfocusEditFadeOut()
 void CCtrlInstruments::BuildTuningComboBox()
 //------------------------------------------
 {
-	while(m_ComboTuning.GetCount() > 0)
-		m_ComboTuning.DeleteString(0);
+	m_ComboTuning.ResetContent();
 
 	m_ComboTuning.AddString("OMPT IT behavior"); //<-> Instrument pTuning pointer == NULL
 	for(size_t i = 0; i<CSoundFile::GetBuiltInTunings().GetNumTunings(); i++)
