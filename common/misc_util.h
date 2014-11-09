@@ -113,7 +113,7 @@ inline T ConvertStrTo(const wchar_t *str)
 
 #if MPT_USTRING_MODE_UTF8
 template<typename T>
-inline ConvertStrTo(const mpt::ustring &str)
+inline T ConvertStrTo(const mpt::ustring &str)
 {
 	return ConvertStrTo<T>(mpt::ToCharset(mpt::CharsetUTF8, str));
 }
