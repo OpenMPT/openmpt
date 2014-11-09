@@ -221,6 +221,17 @@ public:
 	}
 };                                                                                                                
 
+static std::string ctls_to_string( const std::map<std::string, std::string> & ctls ) {
+	std::string result;
+	for ( std::map<std::string, std::string>::const_iterator it = ctls.begin(); it != ctls.end(); ++it ) {
+		if ( !result.empty() ) {
+			result += "; ";
+		}
+		result += it->first + "=" + it->second;
+	}
+	return result;
+}
+
 static std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) {
 	s << "Quiet: " << flags.quiet << std::endl;
 	s << "Verbose: " << flags.verbose << std::endl;
@@ -247,6 +258,7 @@ static std::ostream & operator << ( std::ostream & s, const commandlineflags & f
 	s << "Standard output: " << flags.use_stdout << std::endl;
 	s << "Output filename: " << flags.output_filename << std::endl;
 	s << "Force overwrite output file: " << flags.force_overwrite << std::endl;
+	s << "Ctls: " << ctls_to_string( flags.ctls ) << std::endl;
 	s << std::endl;
 	s << "Files: " << std::endl;
 	for ( std::vector<std::string>::const_iterator filename = flags.filenames.begin(); filename != flags.filenames.end(); ++filename ) {
@@ -480,6 +492,8 @@ static void show_help( textout & log, bool with_info = true, bool longhelp = fal
 		log << std::endl;
 		log << "     --repeat n             Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
 		log << "     --seek n               Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
+		log << std::endl;
+		log << "     --ctl c=v              Set libopenmpt ctl c to value v" << std::endl;
 		log << std::endl;
 		log << "     --driver n             Set output driver [default: " << get_driver_string( commandlineflags().driver ) << "]," << std::endl;
 		log << "     --device n             Set output device [default: " << get_device_string( commandlineflags().device ) << "]," << std::endl;
@@ -1382,7 +1396,7 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 		}
 
 		{
-			openmpt::module mod( data_stream, silentlog );
+			openmpt::module mod( data_stream, silentlog, flags.ctls );
 			silentlog.str( std::string() ); // clear, loader messages get stored to get_metadata( "warnings" ) by libopenmpt internally
 			render_mod_file( flags, filename, filesize, mod, log, audio_stream );
 		} 
@@ -1639,6 +1653,20 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 			} else if ( arg == "--repeat" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.repeatcount;
+				++i;
+			} else if ( arg == "--ctl" && nextarg != "" ) {
+				std::istringstream istr( nextarg );
+				std::string ctl_c_v;
+				istr >> ctl_c_v;
+				if ( ctl_c_v.find( "=" ) == std::string::npos ) {
+					throw args_error_exception();
+				}
+				std::string ctl = ctl_c_v.substr( 0, ctl_c_v.find( "=" ) );
+				std::string val = ctl_c_v.substr( ctl_c_v.find( "=" ) + std::string("=").length(), std::string::npos );
+				if ( ctl.empty() ) {
+					throw args_error_exception();
+				}
+				flags.ctls[ ctl ] = val;
 				++i;
 			} else if ( arg == "--seek" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
