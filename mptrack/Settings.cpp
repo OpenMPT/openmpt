@@ -26,55 +26,55 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-std::wstring SettingValue::FormatTypeAsString() const
+mpt::ustring SettingValue::FormatTypeAsString() const
 {
 	if(GetType() == SettingTypeNone)
 	{
-		return L"nil";
+		return MPT_USTRING("nil");
 	}
-	std::wstring result;
+	mpt::ustring result;
 	switch(GetType())
 	{
 		case SettingTypeBool:
-			result += L"bool";
+			result += MPT_USTRING("bool");
 			break;
 		case SettingTypeInt:
-			result += L"int";
+			result += MPT_USTRING("int");
 			break;
 		case SettingTypeFloat:
-			result += L"float";
+			result += MPT_USTRING("float");
 			break;
 		case SettingTypeString:
-			result += L"string";
+			result += MPT_USTRING("string");
 			break;
 		case SettingTypeBinary:
-			result += L"binary";
+			result += MPT_USTRING("binary");
 			break;
 		case SettingTypeNone:
 		default:
-			result += L"nil";
+			result += MPT_USTRING("nil");
 			break;
 	}
 	if(HasTypeTag() && !GetTypeTag().empty())
 	{
-		result += L":" + mpt::ToWide(mpt::CharsetASCII, GetTypeTag());
+		result += MPT_USTRING(":") + mpt::ToUnicode(mpt::CharsetASCII, GetTypeTag());
 	}
 	return result;
 }
 
 
-std::wstring SettingValue::FormatValueAsString() const
+mpt::ustring SettingValue::FormatValueAsString() const
 {
 	switch(GetType())
 	{
 		case SettingTypeBool:
-			return StringifyW(valueBool);
+			return mpt::ToUString(valueBool);
 			break;
 		case SettingTypeInt:
-			return StringifyW(valueInt);
+			return mpt::ToUString(valueInt);
 			break;
 		case SettingTypeFloat:
-			return StringifyW(valueFloat);
+			return mpt::ToUString(valueFloat);
 			break;
 		case SettingTypeString:
 			return valueString;
@@ -84,19 +84,19 @@ std::wstring SettingValue::FormatValueAsString() const
 			break;
 		case SettingTypeNone:
 		default:
-			return std::wstring();
+			return mpt::ustring();
 			break;
 	}
 }
 
 
-std::wstring SettingValue::FormatAsString() const
+mpt::ustring SettingValue::FormatAsString() const
 {
-	return L"(" + FormatTypeAsString() + L")" + FormatValueAsString();
+	return MPT_USTRING("(") + FormatTypeAsString() + MPT_USTRING(")") + FormatValueAsString();
 }
 
 
-void SettingValue::SetFromString(const std::wstring &newVal)
+void SettingValue::SetFromString(const AnyStringLocale &newVal)
 {
 	switch(GetType())
 	{
@@ -373,11 +373,11 @@ void IniFileSettingsBackend::RemoveSettingRaw(const SettingPath &path)
 
 std::wstring IniFileSettingsBackend::GetSection(const SettingPath &path)
 {
-	return path.GetSection();
+	return mpt::ToWide(path.GetSection());
 }
 std::wstring IniFileSettingsBackend::GetKey(const SettingPath &path)
 {
-	return path.GetKey();
+	return mpt::ToWide(path.GetKey());
 }
 
 

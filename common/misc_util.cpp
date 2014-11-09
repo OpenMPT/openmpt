@@ -560,33 +560,37 @@ namespace Util
 {
 
 	
-static const wchar_t EncodeNibble[16] = { L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9', L'A', L'B', L'C', L'D', L'E', L'F' };
+static const MPT_UCHAR_TYPE EncodeNibble[16] = {
+	MPT_UCHAR('0'), MPT_UCHAR('1'), MPT_UCHAR('2'), MPT_UCHAR('3'),
+	MPT_UCHAR('4'), MPT_UCHAR('5'), MPT_UCHAR('6'), MPT_UCHAR('7'),
+	MPT_UCHAR('8'), MPT_UCHAR('9'), MPT_UCHAR('A'), MPT_UCHAR('B'),
+	MPT_UCHAR('C'), MPT_UCHAR('D'), MPT_UCHAR('E'), MPT_UCHAR('F') };
 
-static inline bool DecodeByte(uint8 &byte, wchar_t c1, wchar_t c2)
+static inline bool DecodeByte(uint8 &byte, MPT_UCHAR_TYPE c1, MPT_UCHAR_TYPE c2)
 {
 	byte = 0;
-	if(L'0' <= c1 && c1 <= L'9')
+	if(MPT_UCHAR('0') <= c1 && c1 <= MPT_UCHAR('9'))
 	{
-		byte += static_cast<uint8>((c1 - L'0') << 4);
-	} else if(L'A' <= c1 && c1 <= L'F')
+		byte += static_cast<uint8>((c1 - MPT_UCHAR('0')) << 4);
+	} else if(MPT_UCHAR('A') <= c1 && c1 <= MPT_UCHAR('F'))
 	{
-		byte += static_cast<uint8>((c1 - L'A' + 10) << 4);
-	} else if(L'a' <= c1 && c1 <= L'f')
+		byte += static_cast<uint8>((c1 - MPT_UCHAR('A') + 10) << 4);
+	} else if(MPT_UCHAR('a') <= c1 && c1 <= MPT_UCHAR('f'))
 	{
-		byte += static_cast<uint8>((c1 - L'a' + 10) << 4);
+		byte += static_cast<uint8>((c1 - MPT_UCHAR('a') + 10) << 4);
 	} else
 	{
 		return false;
 	}
-	if(L'0' <= c2 && c2 <= L'9')
+	if(MPT_UCHAR('0') <= c2 && c2 <= MPT_UCHAR('9'))
 	{
-		byte += static_cast<uint8>(c2 - L'0');
-	} else if(L'A' <= c2 && c2 <= L'F')
+		byte += static_cast<uint8>(c2 - MPT_UCHAR('0'));
+	} else if(MPT_UCHAR('A') <= c2 && c2 <= MPT_UCHAR('F'))
 	{
-		byte += static_cast<uint8>(c2 - L'A' + 10);
-	} else if(L'a' <= c2 && c2 <= L'f')
+		byte += static_cast<uint8>(c2 - MPT_UCHAR('A') + 10);
+	} else if(MPT_UCHAR('a') <= c2 && c2 <= MPT_UCHAR('f'))
 	{
-		byte += static_cast<uint8>(c2 - L'a' + 10);
+		byte += static_cast<uint8>(c2 - MPT_UCHAR('a') + 10);
 	} else
 	{
 		return false;
@@ -594,9 +598,9 @@ static inline bool DecodeByte(uint8 &byte, wchar_t c1, wchar_t c2)
 	return true;
 }
 
-std::wstring BinToHex(const std::vector<char> &src)
+mpt::ustring BinToHex(const std::vector<char> &src)
 {
-	std::wstring result;
+	mpt::ustring result;
 	for(std::size_t i = 0; i < src.size(); ++i)
 	{
 		uint8 byte = src[i];
@@ -606,7 +610,7 @@ std::wstring BinToHex(const std::vector<char> &src)
 	return result;
 }
 
-std::vector<char> HexToBin(const std::wstring &src)
+std::vector<char> HexToBin(const mpt::ustring &src)
 {
 	std::vector<char> result;
 	for(std::size_t i = 0; i+1 < src.size(); i += 2)

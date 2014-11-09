@@ -912,7 +912,7 @@ static noinline void TestSettings()
 	{
 		DefaultSettingsContainer conf;
 
-		int32 foobar = conf.Read("Test", "bar", 23, "foobar");
+		int32 foobar = conf.Read("Test", "bar", 23, SettingMetadata("foobar"));
 		conf.Write("Test", "bar", 64);
 		conf.Write("Test", "bar", 42);
 		conf.Read("Test", "baz", 4711);
@@ -922,7 +922,7 @@ static noinline void TestSettings()
 	{
 		DefaultSettingsContainer conf;
 
-		int32 foobar = conf.Read("Test", "bar", 28, "foobar");
+		int32 foobar = conf.Read("Test", "bar", 28, SettingMetadata("foobar"));
 		VERIFY_EQUAL(foobar, 42);
 		conf.Write("Test", "bar", 43);
 	}
@@ -930,7 +930,7 @@ static noinline void TestSettings()
 	{
 		DefaultSettingsContainer conf;
 
-		int32 foobar = conf.Read("Test", "bar", 123, "foobar");
+		int32 foobar = conf.Read("Test", "bar", 123, SettingMetadata("foobar"));
 		VERIFY_EQUAL(foobar, 43);
 		conf.Write("Test", "bar", 88);
 	}
@@ -938,7 +938,7 @@ static noinline void TestSettings()
 	{
 		DefaultSettingsContainer conf;
 
-		Setting<int> foo(conf, "Test", "bar", 99, "something");
+		Setting<int> foo(conf, "Test", "bar", 99, SettingMetadata("something"));
 
 		VERIFY_EQUAL(foo, 88);
 
@@ -948,7 +948,7 @@ static noinline void TestSettings()
 
 	{
 		DefaultSettingsContainer conf;
-		Setting<int> foo(conf, "Test", "bar", 99, "something");
+		Setting<int> foo(conf, "Test", "bar", 99, SettingMetadata("something"));
 		VERIFY_EQUAL(foo, 7);
 	}
 
