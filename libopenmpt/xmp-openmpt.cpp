@@ -786,7 +786,7 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 			self->mod->select_subsong( i );
 			self->subsong_lengths[i] = static_cast<float>( self->mod->get_duration_seconds() );
 		}
-		self->mod->select_subsong( -1 );
+		self->mod->select_subsong( 0 );
 
 		xmpfin->SetLength( self->subsong_lengths[0], TRUE );
 		return 2;
@@ -964,7 +964,13 @@ static double WINAPI openmpt_SetPosition( DWORD pos ) {
 	}
 
 	if ( pos & XMPIN_POS_SUBSONG ) {
-		self->mod->select_subsong( pos & 0xffff );
+		try
+		{
+			self->mod->select_subsong( pos & 0xffff );
+		} catch ( ... )
+		{
+			return 0.0;
+		}
 		xmpfin->SetLength( self->subsong_lengths[pos & 0xffff], TRUE );
 		reset_timeinfos( 0 );
 		return 0.0;
