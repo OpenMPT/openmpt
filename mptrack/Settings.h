@@ -44,7 +44,7 @@ private:
 	bool valueBool;
 	int32 valueInt;
 	double valueFloat;
-	std::wstring valueString;
+	mpt::ustring valueString;
 	std::vector<char> valueBinary;
 	SettingType type;
 	std::string typeTag;
@@ -53,7 +53,7 @@ private:
 		valueBool = false;
 		valueInt = 0;
 		valueFloat = 0.0;
-		valueString = std::wstring();
+		valueString = mpt::ustring();
 		valueBinary.clear();
 		type = SettingTypeNone;
 		typeTag = std::string();
@@ -121,32 +121,32 @@ public:
 	{
 		Init();
 		type = SettingTypeString;
-		valueString = mpt::ToWide(mpt::CharsetLocale, val);
+		valueString = mpt::ToUnicode(mpt::CharsetLocale, val);
 	}
 	SettingValue(const std::string &val)
 	{
 		Init();
 		type = SettingTypeString;
-		valueString = mpt::ToWide(mpt::CharsetLocale, val);
+		valueString = mpt::ToUnicode(mpt::CharsetLocale, val);
 	}
 	SettingValue(const wchar_t *val)
 	{
 		Init();
 		type = SettingTypeString;
-		valueString = val;
+		valueString = mpt::ToUnicode(val);
 	}
 	SettingValue(const std::wstring &val)
 	{
 		Init();
 		type = SettingTypeString;
-		valueString = val;
+		valueString = mpt::ToUnicode(val);
 	}
 #if MPT_USTRING_MODE_UTF8
 	SettingValue(const mpt::ustring &val)
 	{
 		Init();
 		type = SettingTypeString;
-		valueString = mpt::ToWide(val);
+		valueString = val;
 	}
 #endif
 	SettingValue(const std::vector<char> &val)
@@ -181,28 +181,28 @@ public:
 		Init();
 		type = SettingTypeString;
 		typeTag = typeTag_;
-		valueString = mpt::ToWide(mpt::CharsetLocale, val);
+		valueString = mpt::ToUnicode(mpt::CharsetLocale, val);
 	}
 	SettingValue(const std::string &val, const std::string &typeTag_)
 	{
 		Init();
 		type = SettingTypeString;
 		typeTag = typeTag_;
-		valueString = mpt::ToWide(mpt::CharsetLocale, val);
+		valueString = mpt::ToUnicode(mpt::CharsetLocale, val);
 	}
 	SettingValue(const wchar_t *val, const std::string &typeTag_)
 	{
 		Init();
 		type = SettingTypeString;
 		typeTag = typeTag_;
-		valueString = val;
+		valueString = mpt::ToUnicode(val);
 	}
 	SettingValue(const std::wstring &val, const std::string &typeTag_)
 	{
 		Init();
 		type = SettingTypeString;
 		typeTag = typeTag_;
-		valueString = val;
+		valueString = mpt::ToUnicode(val);
 	}
 #if MPT_USTRING_MODE_UTF8
 	SettingValue(const mpt::ustring &val, const std::string &typeTag_)
@@ -210,7 +210,7 @@ public:
 		Init();
 		type = SettingTypeString;
 		typeTag = typeTag_;
-		valueString = mpt::ToWide(val);
+		valueString = val;
 	}
 #endif
 	SettingValue(const std::vector<char> &val, const std::string &typeTag_)
@@ -260,13 +260,13 @@ public:
 	operator std::wstring () const
 	{
 		ASSERT(type == SettingTypeString);
-		return valueString;
+		return mpt::ToWide(valueString);
 	}
 #if MPT_USTRING_MODE_UTF8
 	operator mpt::ustring () const
 	{
 		ASSERT(type == SettingTypeString);
-		return mpt::ToUnicode(valueString);
+		return valueString;
 	}
 #endif
 	operator std::vector<char> () const
@@ -274,10 +274,10 @@ public:
 		ASSERT(type == SettingTypeBinary);
 		return valueBinary;
 	}
-	std::wstring FormatTypeAsString() const;
-	std::wstring FormatValueAsString() const;
-	std::wstring FormatAsString() const;
-	void SetFromString(const std::wstring &newVal);
+	mpt::ustring FormatTypeAsString() const;
+	mpt::ustring FormatValueAsString() const;
+	mpt::ustring FormatAsString() const;
+	void SetFromString(const AnyStringLocale &newVal);
 };
 
 
@@ -411,30 +411,24 @@ public:
 class SettingPath
 {
 private:
-	std::wstring section;
-	std::wstring key;
+	mpt::ustring section;
+	mpt::ustring key;
 public:
 	SettingPath()
 	{
 		return;
 	}
-	SettingPath(const std::wstring &section_, const std::wstring &key_)
+	SettingPath(const AnyStringLocale &section_, const AnyStringLocale &key_)
 		: section(section_)
 		, key(key_)
 	{
 		return;
 	}
-	SettingPath(const std::string &section_, const std::string &key_)
-		: section(mpt::ToWide(mpt::CharsetLocale, section_))
-		, key(mpt::ToWide(mpt::CharsetLocale, key_))
-	{
-		return;
-	}
-	std::wstring GetSection() const
+	mpt::ustring GetSection() const
 	{
 		return section;
 	}
-	std::wstring GetKey() const
+	mpt::ustring GetKey() const
 	{
 		return key;
 	}
@@ -448,9 +442,9 @@ public:
 		int cmp_key = key.compare(other.key);
 		return cmp_key;
 	}
-	std::wstring FormatAsString() const
+	mpt::ustring FormatAsString() const
 	{
-		return section + L"." + key;
+		return section + MPT_USTRING(".") + key;
 	}
 };
 
@@ -473,10 +467,9 @@ public:
 
 struct SettingMetadata
 {
-	std::string description;
+	mpt::ustring description;
 	SettingMetadata() {}
-	template<typename T1>
-	SettingMetadata(const T1 &description)
+	SettingMetadata(const AnyStringLocale &description)
 		: description(description)
 	{
 		return;
@@ -546,12 +539,7 @@ public:
 		return FromSettingValue<T>(ReadSetting(path, ToSettingValue<T>(def), metadata));
 	}
 	template <typename T>
-	T Read(const std::wstring &section, const std::wstring &key, const T &def = T(), const SettingMetadata &metadata = SettingMetadata()) const
-	{
-		return FromSettingValue<T>(ReadSetting(SettingPath(section, key), ToSettingValue<T>(def), metadata));
-	}
-	template <typename T>
-	T Read(const std::string &section, const std::string &key, const T &def = T(), const SettingMetadata &metadata = SettingMetadata()) const
+	T Read(const AnyStringLocale &section, const AnyStringLocale &key, const T &def = T(), const SettingMetadata &metadata = SettingMetadata()) const
 	{
 		return FromSettingValue<T>(ReadSetting(SettingPath(section, key), ToSettingValue<T>(def), metadata));
 	}
@@ -561,12 +549,7 @@ public:
 		WriteSetting(path, ToSettingValue<T>(val), flushMode);
 	}
 	template <typename T>
-	void Write(const std::wstring &section, const std::wstring &key, const T &val, SettingFlushMode flushMode = SettingWriteBack)
-	{
-		WriteSetting(SettingPath(section, key), ToSettingValue<T>(val), flushMode);
-	}
-	template <typename T>
-	void Write(const std::string &section, const std::string &key, const T &val, SettingFlushMode flushMode = SettingWriteBack)
+	void Write(const AnyStringLocale &section, const AnyStringLocale &key, const T &val, SettingFlushMode flushMode = SettingWriteBack)
 	{
 		WriteSetting(SettingPath(section, key), ToSettingValue<T>(val), flushMode);
 	}
@@ -574,11 +557,7 @@ public:
 	{
 		ForgetSetting(path);
 	}
-	void Forget(const std::wstring &section, const std::wstring &key)
-	{
-		ForgetSetting(SettingPath(section, key));
-	}
-	void Forget(const std::string &section, const std::string &key)
+	void Forget(const AnyStringLocale &section, const AnyStringLocale &key)
 	{
 		ForgetSetting(SettingPath(section, key));
 	}
@@ -586,11 +565,7 @@ public:
 	{
 		RemoveSetting(path);
 	}
-	void Remove(const std::wstring &section, const std::wstring &key)
-	{
-		RemoveSetting(SettingPath(section, key));
-	}
-	void Remove(const std::string &section, const std::string &key)
+	void Remove(const AnyStringLocale &section, const AnyStringLocale &key)
 	{
 		RemoveSetting(SettingPath(section, key));
 	}
@@ -642,13 +617,7 @@ public:
 		return;
 	}
 public:
-	Setting(SettingsContainer &conf_, const std::string &section, const std::string &key, const T&def, const SettingMetadata &metadata = SettingMetadata())
-		: conf(conf_)
-		, path(section, key)
-	{
-		conf.Read(path, def, metadata); // set default value
-	}
-	Setting(SettingsContainer &conf_, const std::wstring &section, const std::wstring &key, const T&def, const SettingMetadata &metadata = SettingMetadata())
+	Setting(SettingsContainer &conf_, const AnyStringLocale &section, const AnyStringLocale &key, const T&def, const SettingMetadata &metadata = SettingMetadata())
 		: conf(conf_)
 		, path(section, key)
 	{
@@ -704,15 +673,7 @@ public:
 		conf.Register(this, path);
 	}
 public:
-	CachedSetting(SettingsContainer &conf_, const std::string &section, const std::string &key, const T&def, const SettingMetadata &metadata = SettingMetadata())
-		: value(def)
-		, conf(conf_)
-		, path(section, key)
-	{
-		value = conf.Read(path, def, metadata);
-		conf.Register(this, path);
-	}
-	CachedSetting(SettingsContainer &conf_, const std::wstring &section, const std::wstring &key, const T&def, const SettingMetadata &metadata = SettingMetadata())
+	CachedSetting(SettingsContainer &conf_, const AnyStringLocale &section, const AnyStringLocale &key, const T&def, const SettingMetadata &metadata = SettingMetadata())
 		: value(def)
 		, conf(conf_)
 		, path(section, key)
@@ -788,14 +749,7 @@ public:
 		return;
 	}
 public:
-	Setting(SettingsContainer &conf_, const std::string &section, const std::string &key, const T&def, const SettingMetadata &metadata = SettingMetadata())
-		: value(def)
-		, conf(conf_)
-		, path(section, key)
-	{
-		value = conf.Read(path, def, metadata);
-	}
-	Setting(SettingsContainer &conf_, const std::wstring &section, const std::wstring &key, const T&def, const SettingMetadata &metadata = SettingMetadata())
+	Setting(SettingsContainer &conf_, const AnyStringLocale &section, const AnyStringLocale &key, const T&def, const SettingMetadata &metadata = SettingMetadata())
 		: value(def)
 		, conf(conf_)
 		, path(section, key)

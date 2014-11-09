@@ -111,6 +111,14 @@ inline T ConvertStrTo(const wchar_t *str)
 }
 #endif
 
+#if MPT_USTRING_MODE_UTF8
+template<typename T>
+inline ConvertStrTo(const mpt::ustring &str)
+{
+	return ConvertStrTo<T>(mpt::ToCharset(mpt::CharsetUTF8, str));
+}
+#endif
+
 
 namespace mpt { namespace String {
 
@@ -703,8 +711,8 @@ mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix = mpt::
 namespace Util
 {
 
-std::wstring BinToHex(const std::vector<char> &src);
-std::vector<char> HexToBin(const std::wstring &src);
+mpt::ustring BinToHex(const std::vector<char> &src);
+std::vector<char> HexToBin(const mpt::ustring &src);
 
 } // namespace Util
 

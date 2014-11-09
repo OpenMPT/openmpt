@@ -828,7 +828,7 @@ void COptionsAdvanced::DoDataExchange(CDataExchange* pDX)
 static CString FormatSetting(const SettingPath &path, const SettingValue &val)
 //----------------------------------------------------------------------------
 {
-	return mpt::ToCString(path.FormatAsString() + L" = " + val.FormatAsString());
+	return mpt::ToCString(path.FormatAsString() + MPT_USTRING(" = ") + val.FormatAsString());
 }
 
 
@@ -918,7 +918,7 @@ void COptionsAdvanced::OnOptionDblClick()
 		{
 			return;
 		}
-		val.SetFromString(mpt::ToWide(inputDlg.resultString));
+		val.SetFromString(inputDlg.resultString);
 	}
 	theApp.GetSettings().Write(path, val);
 	m_List.DeleteString(index);
