@@ -253,6 +253,7 @@ struct commandlineflags {
 	std::int32_t ramping; // ramping strength : -1:default 0:off 1 2 3 4 5 // roughly milliseconds
 	std::int32_t dither;
 	std::int32_t repeatcount;
+	std::map<std::string, std::string> ctls;
 	double seek_target;
 	bool quiet;
 	bool verbose;
