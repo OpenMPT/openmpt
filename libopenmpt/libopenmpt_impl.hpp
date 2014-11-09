@@ -57,18 +57,17 @@ public:
 
 class log_forwarder;
 
-class subsong_data {
-public:
-	double duration;
-	std::int32_t start_row;
-	std::int32_t start_order;
-	std::int32_t sequence;
-
-	subsong_data( double duration, std::int32_t start_row, std::int32_t start_order, std::int32_t sequence ) : duration(duration), start_row(start_row), start_order(start_order), sequence(sequence) { }
-};
-
 class module_impl {
 protected:
+	struct subsong_data {
+		double duration;
+		std::int32_t start_row;
+		std::int32_t start_order;
+		std::int32_t sequence;
+		subsong_data( double duration, std::int32_t start_row, std::int32_t start_order, std::int32_t sequence );
+	}; // struct subsong_data
+	static const std::int32_t all_subsongs = -1;
+
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
 	std::tr1::shared_ptr<log_interface> m_Log;
 #else

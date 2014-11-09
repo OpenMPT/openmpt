@@ -219,6 +219,15 @@ void module_impl::PushToCSoundFileLog( int loglevel, const std::string & text ) 
 	m_sndFile->AddToLog( static_cast<LogLevel>( loglevel ), mpt::ToUnicode( mpt::CharsetUTF8, text ) );
 }
 
+module_impl::subsong_data::subsong_data( double duration, std::int32_t start_row, std::int32_t start_order, std::int32_t sequence )
+	: duration(duration)
+	, start_row(start_row)
+	, start_order(start_order)
+	, sequence(sequence)
+{
+	return;
+}
+
 static ResamplingMode filterlength_to_resamplingmode(std::int32_t length) {
 	if ( length == 0 ) {
 		return SRCMODE_POLYPHASE;
@@ -302,6 +311,7 @@ void module_impl::apply_mixer_settings( std::int32_t samplerate, int channels ) 
 }
 void module_impl::apply_libopenmpt_defaults() {
 	set_render_param( module::RENDER_STEREOSEPARATION_PERCENT, 100 );
+	m_sndFile->Order.SetSequence( 0 );
 }
 void module_impl::init( const std::map< std::string, std::string > & ctls ) {
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
@@ -326,7 +336,6 @@ void module_impl::init( const std::map< std::string, std::string > & ctls ) {
 	m_ctl_load_skip_patterns = false;
 	m_ctl_seek_sync_samples = false;
 	m_current_subsong = 0;
-	m_sndFile->Order.SetSequence( 0 );
 	for ( std::map< std::string, std::string >::const_iterator i = ctls.begin(); i != ctls.end(); ++i ) {
 		ctl_set( i->first, i->second );
 	}
@@ -697,22 +706,30 @@ double module_impl::get_duration_seconds() const {
 	cache_subsongs();
 	if ( m_current_subsong >= 0 && m_current_subsong < static_cast<std::int32_t>( m_subsongs.size() ) ) {
 		return m_subsongs[m_current_subsong].duration;
+	} else if ( m_current_subsong == all_subsongs ) {
+		// Play all subsongs consecutively.
+		double total_duration = 0.0;
+		for ( std::size_t i = 0; i < m_subsongs.size(); ++i ) {
+			total_duration += m_subsongs[i].duration;
+		}
+		return total_duration;
 	}
 	return m_sndFile->GetLength( eNoAdjust ).back().duration;
 }
 void module_impl::select_subsong( std::int32_t subsong ) {
 	cache_subsongs();
-	if ( subsong < -1 || subsong >= static_cast<std::int32_t>( m_subsongs.size() ) ) {
-		return;
+	if ( ( subsong < 0 || subsong >= static_cast<std::int32_t>( m_subsongs.size() ) ) && subsong != all_subsongs ) {
+		throw openmpt::exception("invalid subsong");
 	}
+	m_current_subsong = subsong;
+	m_sndFile->m_SongFlags.set( SONG_PLAYALLSONGS, subsong == all_subsongs );
 	if ( subsong == -1 ) {
-		// default subsong
 		subsong = 0;
 	}
 
-	m_current_subsong = subsong;
 	m_sndFile->Order.SetSequence( static_cast<SEQUENCEINDEX>( m_subsongs[subsong].sequence ) );
 	set_position_order_row( m_subsongs[subsong].start_order, m_subsongs[subsong].start_row );
+	m_currentPositionSeconds = 0.0;
 
 }
 void module_impl::set_repeat_count( std::int32_t repeat_count ) {
@@ -725,13 +742,28 @@ double module_impl::get_position_seconds() const {
 	return m_currentPositionSeconds;
 }
 double module_impl::set_position_seconds( double seconds ) {
-	const subsong_data &subsong = m_subsongs[m_current_subsong];
-	GetLengthType t = m_sndFile->GetLength( eNoAdjust, GetLengthTarget( seconds ).StartPos( subsong.sequence, subsong.start_order, subsong.start_row ) ).back();
-	m_sndFile->InitializeVisitedRows();
+	const subsong_data *subsong;
+	double base_seconds = 0.0;
+	if ( m_current_subsong == all_subsongs ) {
+		// When playing all subsongs, find out which subsong this time would belong to.
+		for ( std::size_t i = 0; i < m_subsongs.size(); ++i ) {
+			subsong = &m_subsongs[i];
+			if ( base_seconds + subsong->duration > seconds ) {
+				break;
+			}
+			base_seconds += subsong->duration;
+		}
+		seconds -= base_seconds;
+	} else
+	{
+		subsong = &m_subsongs[m_current_subsong];
+	}
+
+	GetLengthType t = m_sndFile->GetLength( eNoAdjust, GetLengthTarget( seconds ).StartPos( subsong->sequence, subsong->start_order, subsong->start_row ) ).back();
 	m_sndFile->m_PlayState.m_nCurrentOrder = t.lastOrder;
 	m_sndFile->SetCurrentOrder( t.lastOrder );
 	m_sndFile->m_PlayState.m_nNextRow = t.lastRow;
-	m_currentPositionSeconds = m_sndFile->GetLength( m_ctl_seek_sync_samples ? eAdjustSamplePositions : eAdjust, GetLengthTarget( t.lastOrder, t.lastRow ).StartPos( subsong.sequence, subsong.start_order, subsong.start_row ) ).back().duration;
+	m_currentPositionSeconds = base_seconds + m_sndFile->GetLength( m_ctl_seek_sync_samples ? eAdjustSamplePositions : eAdjust, GetLengthTarget( t.lastOrder, t.lastRow ).StartPos( subsong->sequence, subsong->start_order, subsong->start_row ) ).back().duration;
 	return m_currentPositionSeconds;
 }
 double module_impl::set_position_order_row( std::int32_t order, std::int32_t row ) {
@@ -746,7 +778,6 @@ double module_impl::set_position_order_row( std::int32_t order, std::int32_t row
 	} else {
 		row = 0;
 	}
-	m_sndFile->InitializeVisitedRows();
 	m_sndFile->m_PlayState.m_nCurrentOrder = order;
 	m_sndFile->SetCurrentOrder( order );
 	m_sndFile->m_PlayState.m_nNextRow = row;

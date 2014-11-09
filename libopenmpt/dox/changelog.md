@@ -20,6 +20,12 @@ is just a high-level summary.
  *  [Bug] The -autotools tarballs were not working at all.
 
  *  Vastly improved MT2 loader.
+ *  Support for "hidden" subsongs has been added.
+    They are accessible through the same interface as ordinary subsongs, i.e.
+    use openmpt::module::select_subsong to switch between any kind of subsongs.
+ *  All subsongs can now be played consecutively by passing -1 as the subsong
+    index in openmpt::module::select_subsong.
+ *  Added documentation for a couple of more functions.
 
 ### 2014-09-07 - libopenmpt 0.2-beta7
 

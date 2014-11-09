@@ -1397,6 +1397,7 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 
 		{
 			openmpt::module mod( data_stream, silentlog, flags.ctls );
+			mod.select_subsong( -1 ); // play all subsongs consecutively
 			silentlog.str( std::string() ); // clear, loader messages get stored to get_metadata( "warnings" ) by libopenmpt internally
 			render_mod_file( flags, filename, filesize, mod, log, audio_stream );
 		} 
