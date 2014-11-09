@@ -20,6 +20,8 @@ is just a high-level summary.
  *  [Bug] The -autotools tarballs were not working at all.
 
  *  Vastly improved MT2 loader.
+ *  Added possibility to sync sample playback when using
+    openmpt::module::set_position_* by setting the ctl value seek.sync_samples=1  
  *  Support for "hidden" subsongs has been added.
     They are accessible through the same interface as ordinary subsongs, i.e.
     use openmpt::module::select_subsong to switch between any kind of subsongs.

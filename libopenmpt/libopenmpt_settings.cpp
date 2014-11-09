@@ -190,10 +190,10 @@ protected:
 			m_ComboBoxRepeat.SelectString( 0, L"never" );
 		}
 
-		m_SliderCtrlStereoSeparation.SetRange( 0, 400 );
+		m_SliderCtrlStereoSeparation.SetRange( 0, 100 );
 		m_SliderCtrlStereoSeparation.SetTicFreq( 100 );
-		m_SliderCtrlStereoSeparation.SetPageSize( 100 );
-		m_SliderCtrlStereoSeparation.SetLineSize( 25 );
+		m_SliderCtrlStereoSeparation.SetPageSize( 25 );
+		m_SliderCtrlStereoSeparation.SetLineSize( 5 );
 		m_SliderCtrlStereoSeparation.SetPos( s->stereoseparation );
 
 		selected = false;
