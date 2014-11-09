@@ -158,6 +158,13 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 	for (;;)
 	{
+		// Time target reached.
+		if(target.mode == GetLengthTarget::SeekSeconds && memory.elapsedTime >= target.time)
+		{
+			retval.targetReached = true;
+			break;
+		}
+
 		uint32 rowDelay = 0, tickDelay = 0;
 		nRow = nNextRow;
 		nCurrentOrder = nNextOrder;
@@ -244,8 +251,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			nRow = 0;
 
 		// Check whether target was reached.
-		if((target.mode == GetLengthTarget::SeekPosition && nCurrentOrder == target.pos.order && nRow == target.pos.row)
-			|| (target.mode == GetLengthTarget::SeekSeconds && memory.elapsedTime >= target.time))
+		if(target.mode == GetLengthTarget::SeekPosition && nCurrentOrder == target.pos.order && nRow == target.pos.row)
 		{
 			retval.targetReached = true;
 			break;
@@ -866,6 +872,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			m_PlayState.m_nGlobalVolume = m_nDefaultGlobalVolume;
 		}
 		// When adjusting the playback status, we will also want to update the visited rows vector according to the current position.
+		if(sequence != Order.GetCurrentSequenceIndex())
+		{
+			Order.SetSequence(sequence);
+		}
 		visitedSongRows.Set(visitedRows);
 	}
 

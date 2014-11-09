@@ -221,7 +221,7 @@ public:
 	/*!
 	  \param stream Input stream from which the module is loaded. After the constructor has finished successfully, the input position of stream is set to the byte after the last byte that has been read. If the constructor fails, the state of the input position of stream is undefined.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
-	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
+	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
@@ -229,7 +229,7 @@ public:
 	/*!
 	  \param data Data to load the module from.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
-	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
+	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
@@ -238,7 +238,7 @@ public:
 	  \param beg Begin of data to load the module from.
 	  \param end End of data to load the module from.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
-	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
+	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
@@ -247,7 +247,7 @@ public:
 	  \param data Data to load the module from.
 	  \param size Amount of data available.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
-	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
+	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
@@ -255,7 +255,7 @@ public:
 	/*!
 	  \param data Data to load the module from.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
-	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
+	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
@@ -264,7 +264,7 @@ public:
 	  \param beg Begin of data to load the module from.
 	  \param end End of data to load the module from.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
-	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
+	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
@@ -273,7 +273,7 @@ public:
 	  \param data Data to load the module from.
 	  \param size Amount of data available.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
-	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
+	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
@@ -282,7 +282,7 @@ public:
 	  \param data Data to load the module from.
 	  \param size Amount of data available.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
-	  \param ctls A map of initial ctl values, see openmpt::modules::get_ctls.
+	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
@@ -292,8 +292,8 @@ public:
 
 	//! Select a subsong from a multi-song module
 	/*!
-	  \param subsong Index of the subsong.
-	  \return Throws an exception derived from openmpt::exception if subsong is not in range [0,openmpt::module::get_num_subsongs()]
+	  \param subsong Index of the subsong. -1 plays all subsongs consecutively.
+	  \return Throws an exception derived from openmpt::exception if subsong is not in range [-1,openmpt::module::get_num_subsongs()[
 	*/
 	void select_subsong( std::int32_t subsong );
 	//! Set Repeat Count

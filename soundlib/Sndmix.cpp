@@ -494,9 +494,6 @@ bool CSoundFile::ProcessRow()
 				// This is of course not possible during rendering to WAV, so we ignore that case.
 				GetLengthType t = GetLength(eNoAdjust).back();
 				if(IsRenderingToDisc() || (t.lastOrder == m_PlayState.m_nCurrentOrder && t.lastRow == m_PlayState.m_nRow))
-#else
-				if(1)
-#endif // MODPLUG_TRACKER
 				{
 					// This is really the song's end!
 					visitedSongRows.Initialize(true);
@@ -506,6 +503,44 @@ bool CSoundFile::ProcessRow()
 					// Ok, this is really dirty, but we have to update the visited rows vector...
 					GetLength(eAdjustOnSuccess, GetLengthTarget(m_PlayState.m_nCurrentOrder, m_PlayState.m_nRow));
 				}
+#else
+				if(m_SongFlags[SONG_PLAYALLSONGS])
+				{
+					// When playing all subsongs consecutively, first search for any hidden subsongs...
+					if(!visitedSongRows.GetFirstUnvisitedRow(m_PlayState.m_nCurrentOrder, m_PlayState.m_nRow, true))
+					{
+						// ...and then try the next sequence.
+						m_PlayState.m_nNextOrder = m_PlayState.m_nCurrentOrder = 0;
+						m_PlayState.m_nNextRow = m_PlayState.m_nRow = 0;
+						if(Order.GetCurrentSequenceIndex() >= Order.GetNumSequences() - 1)
+						{
+							Order.SetSequence(0);
+							visitedSongRows.Initialize(true);
+							return false;
+						}
+						Order.SetSequence(Order.GetCurrentSequenceIndex() + 1);
+						visitedSongRows.Initialize(true);
+					}
+					// When jumping to the next subsong, stop all playing notes from the previous song...
+					for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+						m_PlayState.Chn[i].Reset(ModChannel::resetSetPosFull, *this, i);
+					StopAllVsti();
+					// ...and the global playback information.
+					m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
+					m_PlayState.m_nMusicTempo = m_nDefaultTempo;
+					m_PlayState.m_nGlobalVolume = m_nDefaultGlobalVolume;
+
+					m_PlayState.m_nNextOrder = m_PlayState.m_nCurrentOrder;
+					m_PlayState.m_nNextRow = m_PlayState.m_nRow;
+					if(Order.size() > m_PlayState.m_nCurrentOrder)
+						m_PlayState.m_nPattern = Order[m_PlayState.m_nCurrentOrder];
+					visitedSongRows.Visit(m_PlayState.m_nCurrentOrder, m_PlayState.m_nRow);
+				} else
+				{
+					visitedSongRows.Initialize(true);
+					return false;
+				}
+#endif // MODPLUG_TRACKER
 			}
 		}
 

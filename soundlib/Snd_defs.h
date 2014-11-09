@@ -277,6 +277,7 @@ enum SongFlags
 	SONG_BREAKTOROW		= 0x80000,		// Break to row command encountered (internal flag, do not touch)
 	SONG_POSJUMP		= 0x100000,		// Position jump encountered (internal flag, do not touch)
 	SONG_PT1XMODE		= 0x200000,		// ProTracker 1/2 playback mode
+	SONG_PLAYALLSONGS	= 0x400000,		// Play all subsongs consecutively (libopenmpt)
 };
 DECLARE_FLAGSET(SongFlags)
 
