@@ -115,7 +115,6 @@ protected:
 	afx_msg void OnCategorySelChanged();
 	afx_msg void OnSearchTermChanged();
 	afx_msg void OnChordWaitTimeChanged(); //rewbs.autochord
-	afx_msg void OnHotKeyChanged();
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnCheck() { OnSetKeyChoice(); };
 	afx_msg void OnNotesRepeat();

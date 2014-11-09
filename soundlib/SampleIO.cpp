@@ -593,25 +593,29 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamples) const
 //----------------------------------------------------------------------------------------
 {
+	if(!sample.HasSampleData()) return 0;
+
 	size_t len = 0, bufcount = 0;
-	int8 buffer8[4096];
-	int16 buffer16[4096];
+	union
+	{
+		int8 buffer8[4096];
+		int16 buffer16[4096];
+	};
 	const void *const pSampleVoid = sample.pSample;
 	const int8 *const pSample8 = sample.pSample8;
 	const int16 *const pSample16 = sample.pSample16;
 	SmpLength numSamples = sample.nLength;
 
 	if(maxSamples && numSamples > maxSamples) numSamples = maxSamples;
-	if(!sample.HasSampleData()) return 0;
 
 	if(GetBitDepth() == 16 && GetChannelFormat() == mono && GetEndianness() == littleEndian &&
 		(GetEncoding() == signedPCM || GetEncoding() == unsignedPCM || GetEncoding() == deltaPCM))
 	{
 		// 16-bit little-endian mono samples
 		const int16 *p = pSample16;
-		int s_old = 0, s_ofs;
+		int s_old = 0;
 		len = numSamples * 2;
-		s_ofs = (GetEncoding() == unsignedPCM) ? 0x8000 : 0;
+		const int s_ofs = (GetEncoding() == unsignedPCM) ? 0x8000 : 0;
 		for(SmpLength j = 0; j < numSamples; j++)
 		{
 			int s_new = *p;
@@ -644,7 +648,7 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 		(GetEncoding() == signedPCM || GetEncoding() == unsignedPCM || GetEncoding() == deltaPCM))
 	{
 		// 8-bit Stereo samples (not interleaved)
-		int s_ofs = (GetEncoding() == unsignedPCM) ? 0x80 : 0;
+		const int s_ofs = (GetEncoding() == unsignedPCM) ? 0x80 : 0;
 		for (UINT iCh=0; iCh<2; iCh++)
 		{
 			const int8 *p = pSample8 + iCh;
@@ -678,14 +682,14 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 		(GetEncoding() == signedPCM || GetEncoding() == unsignedPCM || GetEncoding() == deltaPCM))
 	{
 		// 16-bit little-endian Stereo samples (not interleaved)
-		int s_ofs = (GetEncoding() == unsignedPCM) ? 0x8000 : 0;
+		const int s_ofs = (GetEncoding() == unsignedPCM) ? 0x8000 : 0;
 		for (UINT iCh=0; iCh<2; iCh++)
 		{
 			const int16 *p = pSample16 + iCh;
 			int s_old = 0;
 
 			bufcount = 0;
-			for (UINT j=0; j<numSamples; j++)
+			for (SmpLength j=0; j<numSamples; j++)
 			{
 				int s_new = *p;
 				p += 2;
@@ -711,7 +715,7 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 
 	else if((GetBitDepth() == 8 || (GetBitDepth() == 16 && GetEndianness() == littleEndian)) && GetChannelFormat() == stereoInterleaved && GetEncoding() == signedPCM)
 	{
-		//	Stereo signed interleaved
+		// Stereo signed interleaved
 		len = sample.GetSampleSizeInBytes();
 		if(f) fwrite(pSampleVoid, 1, len, f);
 	}
@@ -722,7 +726,7 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 		len = numSamples * 2;
 		for(SmpLength j = 0; j < len; j++)
 		{
-			buffer8[bufcount] = (int8)(uint8)((uint8)(pSample8[j]) + 0x80);
+			buffer8[bufcount] = (int8)((uint8)(pSample8[j]) + 0x80);
 			bufcount++;
 			if(bufcount >= CountOf(buffer8))
 			{
@@ -747,10 +751,11 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 		len = numSamples;
 		const int8 *p = pSample8;
 		int sinc = (sample.uFlags & CHN_16BIT) ? 2 : 1;
-		int s_old = 0, s_ofs = (GetEncoding() == unsignedPCM) ? 0x80 : 0;
+		int s_old = 0;
+		const int s_ofs = (GetEncoding() == unsignedPCM) ? 0x80 : 0;
 		if (sample.uFlags & CHN_16BIT) p++;
 
-		for (UINT j=0; j<len; j++)
+		for (SmpLength j=0; j<len; j++)
 		{
 			int s_new = (int8)(*p);
 			p += sinc;

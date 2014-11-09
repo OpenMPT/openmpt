@@ -55,7 +55,8 @@ How to compile
     this, uncomment `#define NO_DSOUND` in the file `common/BuildSettings.h`.
 
  -  To compile the project, open `mptrack/MPTRACK_08.SLN` (if you're using
-    VS2008) or `mptrack/MPTRACK_10.SLN` (VS2010) and hit the compile button! :)
+    VS2008) or `mptrack/MPTRACK_10.SLN` (VS2010 or later) and hit the compile
+    button! :)
 
 
 ### libopenmpt and openmpt123

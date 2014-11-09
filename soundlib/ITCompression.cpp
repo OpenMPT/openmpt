@@ -10,10 +10,11 @@
 
 
 #include <stdafx.h>
+#include <ostream>
 #include "ITCompression.h"
 #include "../common/misc_util.h"
-#include <ostream>
 #include "../common/mptIO.h"
+#include "ModSample.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

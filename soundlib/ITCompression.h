@@ -10,15 +10,15 @@
 
 #pragma once
 
-#include "Snd_defs.h"
 #include <vector>
-#include "ModSample.h"
-#include "FileReader.h"
 #include <iosfwd>
+#include "Snd_defs.h"
+#include "FileReader.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
 
+struct ModSample;
 
 //=================
 class ITCompression
@@ -34,7 +34,7 @@ public:
 protected:
 	std::vector<int> bwt;			// Bit width table
 	uint8 *packedData;				// Compressed data for current sample block
-	std::ostream *file;						// File to which compressed data will be written (can be nullptr if you only want to find out the sample size)
+	std::ostream *file;				// File to which compressed data will be written (can be nullptr if you only want to find out the sample size)
 	void *sampleData;				// Pre-processed sample data for currently compressed sample block
 	const ModSample &mptSample;		// Sample that is being processed
 	size_t packedLength;			// Size of currently compressed sample block

@@ -2498,11 +2498,9 @@ void CCtrlSamples::OnBaseNoteChanged()
 		const uint32 newTrans = Util::Round<uint32>(sample.nC5Speed * pow(2.0, (n - oldTransp) / 12.0));
 		if (newTrans > 0 && newTrans <= (m_sndFile.GetType() == MOD_TYPE_S3M ? 65535u : 9999999u) && newTrans != sample.nC5Speed)
 		{
-			CHAR s[32];
 			sample.nC5Speed = newTrans;
-			wsprintf(s, "%lu", newTrans);
 			LockControls();
-			m_EditFineTune.SetWindowText(s);
+			SetDlgItemInt(IDC_EDIT5, newTrans, FALSE);
 			UnlockControls();
 			SetModified(HINT_SAMPLEINFO, false, false);
 		}
@@ -2733,7 +2731,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 	UINT pinc = 1;
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	const uint8 *pSample = static_cast<const uint8 *>(sample.pSample);
-	short int pos;
+	int pos;
 	bool redraw = false;
 	
 	LockControls();
@@ -2745,7 +2743,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 	}
 	if (sample.uFlags[CHN_STEREO]) pinc *= 2;
 	// Loop Start
-	if ((pos = (short int)m_SpinLoopStart.GetPos()) != 0)
+	if ((pos = m_SpinLoopStart.GetPos32()) != 0)
 	{
 		bool bOk = false;
 		const uint8 *p = pSample + sample.nLoopStart * pinc;
@@ -2789,7 +2787,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 		m_SpinLoopStart.SetPos(0);
 	}
 	// Loop End
-	pos = (short int)m_SpinLoopEnd.GetPos();
+	pos = m_SpinLoopEnd.GetPos32();
 	if ((pos) && (sample.nLoopEnd))
 	{
 		bool bOk = false;
@@ -2833,7 +2831,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 		m_SpinLoopEnd.SetPos(0);
 	}
 	// Sustain Loop Start
-	pos = (short int)m_SpinSustainStart.GetPos();
+	pos = m_SpinSustainStart.GetPos32();
 	if ((pos) && (sample.nSustainEnd))
 	{
 		bool bOk = false;
@@ -2878,7 +2876,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 		m_SpinSustainStart.SetPos(0);
 	}
 	// Sustain Loop End
-	pos = (short int)m_SpinSustainEnd.GetPos();
+	pos = m_SpinSustainEnd.GetPos32();
 	if (pos)
 	{
 		bool bOk = false;
@@ -2923,7 +2921,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 	}
 NoSample:
 	// FineTune / C-5 Speed
-	if ((pos = (short int)m_SpinFineTune.GetPos()) != 0)
+	if ((pos = m_SpinFineTune.GetPos32()) != 0)
 	{
 		if (m_sndFile.m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
@@ -2937,8 +2935,7 @@ NoSample:
 			Clamp(basenote, BASENOTE_MIN, BASENOTE_MAX);
 			basenote -= BASENOTE_MIN;
 			if (basenote != m_CbnBaseNote.GetCurSel()) m_CbnBaseNote.SetCurSel(basenote);
-			wsprintf(s, "%lu", sample.nC5Speed);
-			m_EditFineTune.SetWindowText(s);
+			SetDlgItemInt(IDC_EDIT5, sample.nC5Speed, FALSE);
 		} else
 		{
 			int ftune = (int)sample.nFineTune;
@@ -2947,8 +2944,7 @@ NoSample:
 			{
 				ftune = Clamp((ftune >> 4) + pos, -8, 7);
 				sample.nFineTune = MOD2XMFineTune((signed char)ftune);
-			}
-			else
+			} else
 			{
 				ftune = Clamp(ftune + pos, -128, 127);
 				sample.nFineTune = (signed char)ftune;
@@ -3004,9 +3000,9 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	int transpose = 0;
 	switch(wParam)
 	{
-	case kcSampleLoad:		OnSampleOpen(); return wParam;
-	case kcSampleSave:		OnSampleSave(); return wParam;
-	case kcSampleNew:		OnSampleNew(); return wParam;
+	case kcSampleLoad:	OnSampleOpen(); return wParam;
+	case kcSampleSave:	OnSampleSave(); return wParam;
+	case kcSampleNew:	OnSampleNew(); return wParam;
 
 	case kcSampleTransposeUp: transpose = 1; break;
 	case kcSampleTransposeDown: transpose = -1; break;

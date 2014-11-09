@@ -48,7 +48,7 @@ struct PACKED DMFChunk
 		idPATT	= MAGIC4LE('P','A','T','T'),	// Patterns
 		idSMPI	= MAGIC4LE('S','M','P','I'),	// Sample headers
 		idSMPD	= MAGIC4LE('S','M','P','D'),	// Sample data
-		idSMPJ	= MAGIC4LE('S','M','P','J'),	// Sample jump table (XTrakcker 32 only)
+		idSMPJ	= MAGIC4LE('S','M','P','J'),	// Sample jump table (XTracker 32 only)
 		idENDE	= MAGIC4LE('E','N','D','E'),	// Last four bytes of DMF file
 		idSETT	= MAGIC4LE('S','E','T','T'),	// Probably contains GUI settings
 	};
@@ -222,7 +222,7 @@ struct DMFPatternSettings
 			noteBuffer = lastNote = NOTE_NONE;
 			vibratoType = 8;
 			tremoloType = 4;
-			highOffset = 0;
+			highOffset = 6;
 			playDir = false;
 		}
 	};

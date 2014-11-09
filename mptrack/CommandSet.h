@@ -1306,7 +1306,7 @@ public:
 	//Communication
 	KeyCombination GetKey(CommandID cmd, UINT key) const { return commands[cmd].kcList[key]; }
 	bool isHidden(UINT c) const { return commands[c].isHidden; }
-	int GetKeyListSize(CommandID cmd) const { return commands[cmd].kcList.size(); }
+	int GetKeyListSize(CommandID cmd) const { return (int)commands[cmd].kcList.size(); }
 	CString GetCommandText(CommandID cmd) const { return commands[cmd].Message; }
 	CString GetKeyTextFromCommand(CommandID c, UINT key);
 

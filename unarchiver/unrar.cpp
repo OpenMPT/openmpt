@@ -34,10 +34,10 @@ struct RARData
 	RARData(FileReader &file) : Arc(&Cmd), callbacks(ReadRaw, Seek, GetPosition, GetLength, &file) { }
 
 	// FileReader callbacks
-	static size_t CALLBACK ReadRaw(void *file, char *data, size_t size) { return reinterpret_cast<FileReader*>(file)->ReadRaw(data, size); };
-	static bool CALLBACK Seek(void *file, size_t offset) { return reinterpret_cast<FileReader*>(file)->Seek(offset); };
-	static size_t CALLBACK GetPosition(void *file) { return reinterpret_cast<FileReader*>(file)->GetPosition(); };
-	static size_t CALLBACK GetLength(void *file) { return reinterpret_cast<FileReader*>(file)->GetLength(); };
+	static size_t CALLBACK ReadRaw(void *file, char *data, size_t size) { return static_cast<FileReader *>(file)->ReadRaw(data, size); };
+	static bool CALLBACK Seek(void *file, size_t offset) { return static_cast<FileReader *>(file)->Seek(offset); };
+	static size_t CALLBACK GetPosition(void *file) { return static_cast<FileReader *>(file)->GetPosition(); };
+	static size_t CALLBACK GetLength(void *file) { return static_cast<FileReader *>(file)->GetLength(); };
 
 	static int CALLBACK RARCallback(unsigned int msg, LPARAM userData, LPARAM p1, LPARAM p2)
 	{

@@ -1069,16 +1069,16 @@ struct PACKED PSM16SampleHeader
 		mptSmp.uFlags.reset();
 		if(flags & PSM16SampleHeader::smp16Bit)
 		{
-			mptSmp.uFlags |= CHN_16BIT;
+			mptSmp.uFlags.set(CHN_16BIT);
 			mptSmp.nLength /= 2;
 		}
 		if(flags & PSM16SampleHeader::smpPingPong)
 		{
-			mptSmp.uFlags |= CHN_PINGPONGLOOP;
+			mptSmp.uFlags.set(CHN_PINGPONGLOOP);
 		}
 		if(flags & PSM16SampleHeader::smpLoop)
 		{
-			mptSmp.uFlags |= CHN_LOOP;
+			mptSmp.uFlags.set(CHN_LOOP);
 		}
 	}
 

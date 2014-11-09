@@ -713,7 +713,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 				fin.close();
 				if (pT)
 				{
-					if (m_TempTunings.AddTuning(pT) == true)
+					if (m_TempTunings.AddTuning(pT))
 					{
 						delete pT; pT = nullptr;
 						if (m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
@@ -722,16 +722,14 @@ void CTuningDialog::OnBnClickedButtonImport()
 						}
 						else // Case: Can't add tuning to tuning collection for unknown reason.
 						{
-							sLoadReport += L"-Unable to import file \"" + fileNameExt + L"\": unknown reason.\n";				
+							sLoadReport += L"-Unable to import file \"" + fileNameExt + L"\": unknown reason.\n";
 						}
 					}
-				}
-				else // pT == nullptr
+				} else // pT == nullptr
 				{
-					sLoadReport += L"-Unable to import file \"" + fileNameExt + L"\": unrecognized file.\n";				
+					sLoadReport += L"-Unable to import file \"" + fileNameExt + L"\": unrecognized file.\n";
 				}
-			}
-			else // scl import.
+			} else // scl import.
 			{
 				EnSclImport a = ImportScl(files[counter], fileName.ToCString());
 				if (a != enSclImportOk)
@@ -990,7 +988,7 @@ void CTuningDialog::OnTvnDeleteitemTreeTuning(NMHDR *pNMHDR, LRESULT *pResult)
 }
 
 void CTuningDialog::OnNMRclickTreeTuning(NMHDR *, LRESULT *pResult)
-//-----------------------------------------------------------------------
+//-----------------------------------------------------------------
 {
 	*pResult = 0;
 
@@ -1483,36 +1481,36 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(const mpt::PathString &filen
 CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, LPCTSTR pszName)
 //---------------------------------------------------------------------------------------
 {
-    std::string str;
-    SkipCommentLines(iStrm, str);
+	std::string str;
+	SkipCommentLines(iStrm, str);
 	// str should now contain comment line.
-    SkipCommentLines(iStrm, str);
+	SkipCommentLines(iStrm, str);
 	// str should now contain number of notes.
 	const size_t nNotes = 1 + ConvertStrTo<size_t>(str.c_str());
-    if (nNotes > s_nSclImportMaxNoteCount)
-        return enSclImportFailTooManyNotes;
+	if (nNotes > s_nSclImportMaxNoteCount)
+		return enSclImportFailTooManyNotes;
 
 	std::vector<CTuningRTI::RATIOTYPE> fRatios;
 	fRatios.reserve(nNotes);
-    fRatios.push_back(1);
+	fRatios.push_back(1);
 
-    char buffer[128];
+	char buffer[128];
 	MemsetZero(buffer);
 
-    while (iStrm.getline(buffer, sizeof(buffer)))
-    {
-        LPSTR psz = buffer;
-        LPSTR const pEnd = psz + strlen(buffer);
+	while (iStrm.getline(buffer, sizeof(buffer)))
+	{
+		LPSTR psz = buffer;
+		LPSTR const pEnd = psz + strlen(buffer);
 
-        // Skip tabs and spaces.
-        while(psz != pEnd && (*psz == ' ' || *psz == '\t'))
-            psz++;
+		// Skip tabs and spaces.
+		while(psz != pEnd && (*psz == ' ' || *psz == '\t'))
+			psz++;
 
-        // Skip empty lines, comment lines and non-text.
-        if (*psz == 0 || *psz == '!' || *psz < 32)
-            continue;
+		// Skip empty lines, comment lines and non-text.
+		if (*psz == 0 || *psz == '!' || *psz < 32)
+			continue;
 
-        char* pNonDigit = pEnd;
+		char* pNonDigit = pEnd;
 
 		// Check type of first non digit. This tells whether to read cent, ratio or plain number.
 		for (pNonDigit = psz; pNonDigit != pEnd; pNonDigit++)
@@ -1521,39 +1519,39 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, LPCTSTR
 				break;
 		}
 
-        if (*pNonDigit == '.') // Reading cents
-        { 
-            SclFloat fCent = ConvertStrTo<SclFloat>(psz);
+		if (*pNonDigit == '.') // Reading cents
+		{ 
+			SclFloat fCent = ConvertStrTo<SclFloat>(psz);
 			fRatios.push_back(static_cast<CTuningRTI::RATIOTYPE>(CentToRatio(fCent)));
-        }
-        else if (*pNonDigit == '/') // Reading ratios
-        { 
-            *pNonDigit = 0; // Replace '/' with null.
-            int64 nNum = ConvertStrTo<int64>(psz);
-            psz = pNonDigit + 1;
-            int64 nDenom = ConvertStrTo<int64>(psz);
+		}
+		else if (*pNonDigit == '/') // Reading ratios
+		{ 
+			*pNonDigit = 0; // Replace '/' with null.
+			int64 nNum = ConvertStrTo<int64>(psz);
+			psz = pNonDigit + 1;
+			int64 nDenom = ConvertStrTo<int64>(psz);
 
-            if (nNum > int32_max || nDenom > int32_max)
-                return enSclImportFailTooLargeNumDenomIntegers;
-            if (nDenom == 0)
-                return enSclImportFailZeroDenominator;
+			if (nNum > int32_max || nDenom > int32_max)
+				return enSclImportFailTooLargeNumDenomIntegers;
+			if (nDenom == 0)
+				return enSclImportFailZeroDenominator;
 
-            fRatios.push_back(static_cast<CTuningRTI::RATIOTYPE>((SclFloat)nNum / (SclFloat)nDenom));
-        }
-        else // Plain numbers.
+			fRatios.push_back(static_cast<CTuningRTI::RATIOTYPE>((SclFloat)nNum / (SclFloat)nDenom));
+		}
+		else // Plain numbers.
 			fRatios.push_back(static_cast<CTuningRTI::RATIOTYPE>(ConvertStrTo<int32>(psz)));
-    }
+	}
 
-    if (nNotes != fRatios.size())
-        return enSclImportLineCountMismatch;
+	if (nNotes != fRatios.size())
+		return enSclImportLineCountMismatch;
 
-    for(size_t i = 0; i < fRatios.size(); i++)
-    {
-        if (fRatios[i] < 0)
-            return enSclImportFailNegativeRatio;
-    }
+	for(size_t i = 0; i < fRatios.size(); i++)
+	{
+		if (fRatios[i] < 0)
+			return enSclImportFailNegativeRatio;
+	}
 
-    CTuning* pT = new CTuningRTI;
+	CTuning* pT = new CTuningRTI;
 	if (pT->CreateGroupGeometric(fRatios, 1, pT->GetValidityRange(), 0) != false)
 	{
 		delete pT;
@@ -1568,7 +1566,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, LPCTSTR
 
 	pT->SetName(pszName);
 
-    return enSclImportOk;
+	return enSclImportOk;
 }
 
 

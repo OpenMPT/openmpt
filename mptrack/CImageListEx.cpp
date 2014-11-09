@@ -89,7 +89,7 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 	{
 		// 32-bit image on modern system
 
-		// Make fully transparent pixels use the maks color. This should hopefully make the icons look "somewhat" okay
+		// Make fully transparent pixels use the mask color. This should hopefully make the icons look "somewhat" okay
 		// on system where the alpha channel is magically missing in 32-bit mode (http://bugs.openmpt.org/view.php?id=520)
 		PNG::Pixel *pixel = bitmap->GetPixels();
 		for(size_t i = bitmap->GetNumPixels(); i != 0; i--, pixel++)

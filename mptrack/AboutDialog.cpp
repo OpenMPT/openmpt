@@ -136,11 +136,11 @@ bool CRippleBitmap::Animate()
 {
 	// Were there any pixels being moved in the last frame?
 	if(!activity)
-		return FALSE;
+		return false;
 
 	DWORD now = timeGetTime();
 	if(now - lastFrame < 15)
-		return TRUE;
+		return true;
 	lastFrame = now;
 	activity = false;
 

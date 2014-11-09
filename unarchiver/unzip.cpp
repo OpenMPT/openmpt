@@ -143,11 +143,9 @@ CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
 	}
 
 	// read contents
-	unz_file_pos bestFile;
-	unz_file_info info;
-
+	unz_file_pos curFile;
 	int status = unzGoToFirstFile(zipFile);
-	unzGetFilePos(zipFile, &bestFile);
+	unzGetFilePos(zipFile, &curFile);
 
 	while(status == UNZ_OK)
 	{
@@ -155,14 +153,15 @@ CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
 
 		fileinfo.type = ArchiveFileNormal;
 		
+		unz_file_info info;
 		char name[256];
 		unzGetCurrentFileInfo(zipFile, &info, name, sizeof(name), nullptr, 0, nullptr, 0);
 		fileinfo.name = mpt::PathString::FromWide(mpt::ToWide(mpt::CharsetCP437, std::string(name)));
 		fileinfo.size = info.uncompressed_size;
 
-		unzGetFilePos(zipFile, &bestFile);
-		fileinfo.cookie1 = bestFile.pos_in_zip_directory;
-		fileinfo.cookie2 = bestFile.num_of_file;
+		unzGetFilePos(zipFile, &curFile);
+		fileinfo.cookie1 = curFile.pos_in_zip_directory;
+		fileinfo.cookie2 = curFile.num_of_file;
 
 		contents.push_back(fileinfo);
 
