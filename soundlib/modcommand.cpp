@@ -538,7 +538,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			}
 		}
 
-		if(command) switch(command)
+		if(command != CMD_NONE) switch(command)
 		{
 			case CMD_RETRIG: // MOD only has E9x
 				command = CMD_MODCMDEX;
@@ -550,7 +550,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 				break;
 		}
 
-		else switch(volcmd)
+		if(command == CMD_NONE) switch(volcmd)
 		{
 			case VOLCMD_VOLUME:
 				command = CMD_VOLUME;
@@ -621,7 +621,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 	// Convert anything to S3M - adjust volume column
 	if(newTypeIsS3M)
 	{
-		if(!command) switch(volcmd)
+		if(command == CMD_NONE) switch(volcmd)
 		{
 			case VOLCMD_VOLSLIDEDOWN:
 				command = CMD_VOLUMESLIDE;
@@ -723,27 +723,33 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			}
 		}
 
-		if(!command) switch(volcmd)
+		// Convert some commands which behave differently or don't exist
+		if(command == CMD_NONE) switch(volcmd)
 		{
 			case VOLCMD_PORTADOWN:
 				command = CMD_PORTAMENTODOWN;
 				param = vol << 2;
-				volcmd = CMD_NONE;
+				volcmd = VOLCMD_NONE;
 				break;
 
 			case VOLCMD_PORTAUP:
 				command = CMD_PORTAMENTOUP;
 				param = vol << 2;
-				volcmd = CMD_NONE;
+				volcmd = VOLCMD_NONE;
 				break;
-				// OpenMPT-specific commands
 
+			case VOLCMD_TONEPORTAMENTO:
+				command = CMD_TONEPORTAMENTO;
+				param = ImpulseTrackerPortaVolCmd[vol & 0x0F];
+				volcmd = VOLCMD_NONE;
+				break;
+
+				// OpenMPT-specific commands
 			case VOLCMD_OFFSET:
 				command = CMD_OFFSET;
 				param = vol << 3;
-				volcmd = CMD_NONE;
+				volcmd = VOLCMD_NONE;
 				break;
-
 		}
 	} // End if(newTypeIsXM)
 
@@ -751,39 +757,48 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 	// Convert anything to IT - adjust volume column
 	if(newTypeIsIT_MPT)
 	{
-		if(!command) switch(volcmd)
+		// Convert some commands which behave differently or don't exist
+		if(command == CMD_NONE) switch(volcmd)
 		{
-			case VOLCMD_VOLSLIDEDOWN:
-			case VOLCMD_VOLSLIDEUP:
-			case VOLCMD_FINEVOLDOWN:
-			case VOLCMD_FINEVOLUP:
-			case VOLCMD_PORTADOWN:
-			case VOLCMD_PORTAUP:
-			case VOLCMD_TONEPORTAMENTO:
-			case VOLCMD_VIBRATODEPTH:
-				// OpenMPT-specific commands
-			case VOLCMD_OFFSET:
-				vol = MIN(vol, 9);
-				break;
-
 			case VOLCMD_PANSLIDELEFT:
 				command = CMD_PANNINGSLIDE;
 				param = vol << 4;
-				volcmd = CMD_NONE;
+				volcmd = VOLCMD_NONE;
 				break;
 
 			case VOLCMD_PANSLIDERIGHT:
 				command = CMD_PANNINGSLIDE;
 				param = vol;
-				volcmd = CMD_NONE;
+				volcmd = VOLCMD_NONE;
 				break;
 
 			case VOLCMD_VIBRATOSPEED:
 				command = CMD_VIBRATO;
 				param = vol << 4;
-				volcmd = CMD_NONE;
+				volcmd = VOLCMD_NONE;
 				break;
 
+			case VOLCMD_TONEPORTAMENTO:
+				command = CMD_TONEPORTAMENTO;
+				param = vol << 4;
+				volcmd = VOLCMD_NONE;
+				break;
+		}
+
+		switch(volcmd)
+		{
+		case VOLCMD_VOLSLIDEDOWN:
+		case VOLCMD_VOLSLIDEUP:
+		case VOLCMD_FINEVOLDOWN:
+		case VOLCMD_FINEVOLUP:
+		case VOLCMD_PORTADOWN:
+		case VOLCMD_PORTAUP:
+		case VOLCMD_TONEPORTAMENTO:
+		case VOLCMD_VIBRATODEPTH:
+			// OpenMPT-specific commands
+		case VOLCMD_OFFSET:
+			vol = MIN(vol, 9);
+			break;
 		}
 	} // End if(newTypeIsIT_MPT)
 
@@ -1023,6 +1038,19 @@ bool ModCommand::CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &
 		{
 			eff1 = CMD_TONEPORTAVOL;
 		}
+		param1 = param2;
+		eff2 = CMD_NONE;
+		return true;
+	} else if(eff1 == CMD_OFFSET && eff2 == CMD_S3MCMDEX && param2 == 0x9F)
+	{
+		// Reverse offset
+		eff1 = CMD_REVERSEOFFSET;
+		eff2 = CMD_NONE;
+		return true;
+	} else if(eff1 == CMD_S3MCMDEX && param1 == 0x9F && eff2 == CMD_OFFSET)
+	{
+		// Reverse offset
+		eff1 = CMD_REVERSEOFFSET;
 		param1 = param2;
 		eff2 = CMD_NONE;
 		return true;
