@@ -40,15 +40,15 @@ public:
 	// Default extension to use if none is specified.
 	FileDialog &DefaultExtension(const mpt::PathString &ext) { defaultExtension = ext.ToWide(); return *this; }
 	FileDialog &DefaultExtension(const std::wstring &ext) { defaultExtension = ext; return *this; }
-	FileDialog &DefaultExtension(const std::string &ext) { defaultExtension = mpt::ToWide(mpt::CharsetLocale, ext); return *this; }
+	FileDialog &DefaultExtension(const AnyStringLocale &ext) { defaultExtension = mpt::ToWide(ext); return *this; }
 	// Default suggested filename.
 	FileDialog &DefaultFilename(const mpt::PathString &name) { defaultFilename = name.ToWide(); return *this; }
 	FileDialog &DefaultFilename(const std::wstring &name) { defaultFilename = name; return *this; }
-	FileDialog &DefaultFilename(const std::string &name) { defaultFilename = mpt::ToWide(mpt::CharsetLocale, name); return *this; }
+	FileDialog &DefaultFilename(const AnyStringLocale &name) { defaultFilename = mpt::ToWide(name); return *this; }
 	// List of possible extensions. Format: "description|extensions|...|description|extensions||"
 	FileDialog &ExtensionFilter(const mpt::PathString &filter) { extFilter = filter.ToWide(); return *this; }
 	FileDialog &ExtensionFilter(const std::wstring &filter) { extFilter = filter; return *this; }
-	FileDialog &ExtensionFilter(const std::string &filter) { extFilter = mpt::ToWide(mpt::CharsetLocale, filter); return *this; }
+	FileDialog &ExtensionFilter(const AnyStringLocale &filter) { extFilter = mpt::ToWide(filter); return *this; }
 	// Default directory of the dialog.
 	FileDialog &WorkingDirectory(const mpt::PathString &dir) { workingDirectory = dir; return *this; }
 	// Pointer to a variable holding the index of the last extension filter to use. Holds the selected filter after the dialog has been closed.
