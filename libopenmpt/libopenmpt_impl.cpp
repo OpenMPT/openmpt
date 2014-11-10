@@ -742,13 +742,15 @@ double module_impl::get_position_seconds() const {
 	return m_currentPositionSeconds;
 }
 double module_impl::set_position_seconds( double seconds ) {
+	cache_subsongs();
 	const subsong_data *subsong;
 	double base_seconds = 0.0;
 	if ( m_current_subsong == all_subsongs ) {
 		// When playing all subsongs, find out which subsong this time would belong to.
+		subsong = &m_subsongs.back();
 		for ( std::size_t i = 0; i < m_subsongs.size(); ++i ) {
-			subsong = &m_subsongs[i];
 			if ( base_seconds + subsong->duration > seconds ) {
+				subsong = &m_subsongs[i];
 				break;
 			}
 			base_seconds += subsong->duration;
