@@ -19,6 +19,39 @@
 
 #else // LIBOPENMPT_EXT_IS_EXPERIMENTAL
 
+/*!
+ * \page libopenmpt_ext_cpp_overview libopenmpt_ext C++ API
+ *
+ * \section libopenmpt-ext-cpp-experimental libopenmpt_ext is experimental
+ *
+ * libopenmpt_ext is currently experimental and still subject to change without
+ * further notice.
+ * 
+ * Only a C++ interface is provided.
+ *
+ * libopenmpt_ext is included in all builds by default.
+ *
+ * You need to `#define LIBOPENMPT_EXT_IS_EXPERIMENTAL` before including
+ * `libopenmpt_ext.hpp` in order to acknowledge the experimental state and
+ * potentially unstable API and ABI.
+ *
+ * When relying on libopenmpt_ext, it is currently recommended to either, bundle
+ * a copy of libopenmpt with your project and link it statically, or,
+ * explicitely state a dependency on a particular libopenmpt version, in order
+ * to get the exact required API semantics in libopenmpt_ext.
+ *
+ * \section libopenmpt-ext-cpp-detailed Detailed documentation
+ *
+ * \ref libopenmpt_ext_cpp
+ *
+ */
+
+/*! \defgroup libopenmpt_ext_cpp libopenmpt_ext C++ */
+
+/*! \addtogroup libopenmpt_ext_cpp
+  @{
+*/
+
 namespace openmpt {
 
 class module_ext_impl;
@@ -260,6 +293,10 @@ class interactive {
 } // namespace ext
 
 } // namespace openmpt
+
+/*!
+  @}
+*/
 
 #endif // LIBOPENMPT_EXT_IS_EXPERIMENTAL
 
