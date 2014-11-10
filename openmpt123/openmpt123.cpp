@@ -81,7 +81,9 @@ static const char * const license =
 #include <sys/types.h>
 #endif
 
+#define LIBOPENMPT_EXT_IS_EXPERIMENTAL
 #include <libopenmpt/libopenmpt.hpp>
+#include <libopenmpt/libopenmpt_ext.hpp>
 
 #include "openmpt123.hpp"
 
@@ -547,6 +549,8 @@ static void show_help_keyboard( textout & log ) {
 	log << " [j]     seek 1 seconds backward" << std::endl;
 	log << " [k]     seek 1 seconds forward" << std::endl;
 	log << " [l]     seek 10 seconds forward" << std::endl;
+	log << " [u]|[i] +/- tempo" << std::endl;
+	log << " [o]|[p] +/- pitch" << std::endl;
 	log << " [3]|[4] +/- gain" << std::endl;
 	log << " [5]|[6] +/- stereo separation" << std::endl;
 	log << " [7]|[8] +/- filter taps" << std::endl;
@@ -577,6 +581,7 @@ struct next_file { int count; next_file( int c ) : count(c) { } };
 
 template < typename Tmod >
 static bool handle_keypress( int c, commandlineflags & flags, Tmod & mod, write_buffers_interface & audio_stream ) {
+	openmpt::ext::interactive *interactive = static_cast<openmpt::ext::interactive*>( mod.get_interface( openmpt::ext::interactive_id ) );
 	switch ( c ) {
 		case 'q': throw silent_exit_exception(); break;
 		case 'N': throw prev_file(10); break;
@@ -592,6 +597,10 @@ static bool handle_keypress( int c, commandlineflags & flags, Tmod & mod, write_
 		case 'L': mod.set_position_order_row( mod.get_current_order() + 1, 0 ); break;
 		case 'm': throw next_file(1); break;
 		case 'M': throw next_file(10); break;
+		case 'u': interactive->set_tempo_factor( std::max( 0.00001, interactive->get_tempo_factor() * std::pow( 2.0, -1.0 / 24.0 ) ) ); break;
+		case 'i': interactive->set_tempo_factor( std::min( 4.0,     interactive->get_tempo_factor() * std::pow( 2.0,  1.0 / 24.0 ) ) ); break;
+		case 'o': interactive->set_pitch_factor( std::max( 0.00001, interactive->get_pitch_factor() * std::pow( 2.0, -1.0 / 24.0 ) ) ); break;
+		case 'p': interactive->set_pitch_factor( std::min( 4.0,     interactive->get_pitch_factor() * std::pow( 2.0,  1.0 / 24.0 ) ) ); break;
 		case '3': flags.gain       -=100; apply_mod_settings( flags, mod ); break;
 		case '4': flags.gain       +=100; apply_mod_settings( flags, mod ); break;
 		case '5': flags.separation -=  5; apply_mod_settings( flags, mod ); break;
@@ -1396,7 +1405,7 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 		}
 
 		{
-			openmpt::module mod( data_stream, silentlog, flags.ctls );
+			openmpt::module_ext mod( data_stream, silentlog, flags.ctls );
 			mod.select_subsong( -1 ); // play all subsongs consecutively
 			silentlog.str( std::string() ); // clear, loader messages get stored to get_metadata( "warnings" ) by libopenmpt internally
 			render_mod_file( flags, filename, filesize, mod, log, audio_stream );
