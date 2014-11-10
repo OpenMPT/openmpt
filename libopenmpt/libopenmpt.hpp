@@ -672,6 +672,8 @@ public:
 	           - load.skip_samples: Set to "1" to avoid loading samples into memory
 	           - load.skip_patterns: Set to "1" to avoid loading patterns into memory
 	           - seek.sync_samples: Set to "1" to sync sample playback when using openmpt::module::set_position_seconds or openmpt::module::set_position_order_row.
+	           - play.tempo_factor: Set a floating point tempo factor. "1.0" is the default tempo.
+	           - play.pitch_factor: Set a floating point pitch factor. "1.0" is the default pitch.
 	           - dither: Set the dither algorithm that is used for the 16 bit versions of openmpt::module::read. Supported values are:
 	                     - 0: No dithering.
 	                     - 1: Default mode. Chosen by OpenMPT code, might change.
