@@ -84,6 +84,7 @@ protected:
 #else
 	std::unique_ptr<OpenMPT::CSoundFile> m_sndFile;
 #endif
+	bool m_loaded;
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
 	std::tr1::shared_ptr<OpenMPT::Dither> m_Dither;
 #else
@@ -104,8 +105,8 @@ protected:
 	void apply_mixer_settings( std::int32_t samplerate, int channels );
 	void apply_libopenmpt_defaults();
 	void ctor( const std::map< std::string, std::string > & ctls );
-	void load( OpenMPT::CSoundFile & sndFile, const OpenMPT::FileReader & file );
-	void load( const OpenMPT::FileReader & file );
+	void load( const OpenMPT::FileReader & file, const std::map< std::string, std::string > & ctls );
+	bool is_loaded() const;
 	std::size_t read_wrapper( std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right );
 	std::size_t read_wrapper( std::size_t count, float * left, float * right, float * rear_left, float * rear_right );
 	std::size_t read_interleaved_wrapper( std::size_t count, std::size_t channels, std::int16_t * interleaved );
