@@ -319,6 +319,7 @@ void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
 #else
 	m_sndFile = std::unique_ptr<CSoundFile>(new CSoundFile());
 #endif
+	m_loaded = false;
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
 	m_Dither = std::tr1::shared_ptr<Dither>(new Dither());
 #else
@@ -336,32 +337,40 @@ void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
 	m_ctl_load_skip_patterns = false;
 	m_ctl_seek_sync_samples = false;
 	m_current_subsong = 0;
+	// init member variables that correspond to ctls
 	for ( std::map< std::string, std::string >::const_iterator i = ctls.begin(); i != ctls.end(); ++i ) {
 		ctl_set( i->first, i->second );
 	}
 }
-void module_impl::load( CSoundFile & sndFile, const FileReader & file ) {
-	int load_flags = CSoundFile::loadCompleteModule;
-	if ( m_ctl_load_skip_samples ) {
-		load_flags &= ~CSoundFile::loadSampleData;
-	}
-	if ( m_ctl_load_skip_patterns ) {
-		load_flags &= ~CSoundFile::loadPatternData;
-	}
-	if ( !sndFile.Create( file, static_cast<CSoundFile::ModLoadingFlags>( load_flags ) ) ) {
-		throw openmpt::exception("error loading file");
-	}
-}
-void module_impl::load( const FileReader & file ) {
+void module_impl::load( const FileReader & file, const std::map< std::string, std::string > & ctls ) {
 	loader_log loaderlog;
 	m_sndFile->SetCustomLog( &loaderlog );
-	load( *m_sndFile, file );
+	{
+		int load_flags = CSoundFile::loadCompleteModule;
+		if ( m_ctl_load_skip_samples ) {
+			load_flags &= ~CSoundFile::loadSampleData;
+		}
+		if ( m_ctl_load_skip_patterns ) {
+			load_flags &= ~CSoundFile::loadPatternData;
+		}
+		if ( !m_sndFile->Create( file, static_cast<CSoundFile::ModLoadingFlags>( load_flags ) ) ) {
+			throw openmpt::exception("error loading file");
+		}
+		m_loaded = true;
+	}
 	m_sndFile->SetCustomLog( m_LogForwarder.get() );
 	std::vector<std::pair<LogLevel,std::string> > loaderMessages = loaderlog.GetMessages();
 	for ( std::vector<std::pair<LogLevel,std::string> >::iterator i = loaderMessages.begin(); i != loaderMessages.end(); ++i ) {
 		PushToCSoundFileLog( i->first, i->second );
 		m_loaderMessages.push_back( mpt::ToCharset( mpt::CharsetUTF8, LogLevelToString( i->first ) ) + std::string(": ") + i->second );
 	}
+	// init CSoundFile state that corresponds to ctls
+	for ( std::map< std::string, std::string >::const_iterator i = ctls.begin(); i != ctls.end(); ++i ) {
+		ctl_set( i->first, i->second );
+	}
+}
+bool module_impl::is_loaded() const {
+	return m_loaded;
 }
 std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right ) {
 	m_sndFile->ResetMixStat();
@@ -499,7 +508,7 @@ module_impl::module_impl( std::istream & stream, std::tr1::shared_ptr<log_interf
 module_impl::module_impl( std::istream & stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 #endif
 	ctor( ctls );
-	load( FileReader( &stream ) );
+	load( FileReader( &stream ), ctls );
 	apply_libopenmpt_defaults();
 }
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
@@ -509,9 +518,9 @@ module_impl::module_impl( const std::vector<std::uint8_t> & data, std::shared_pt
 #endif
 	ctor( ctls );
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
-	load( FileReader( &(data[0]), data.size() ) );
+	load( FileReader( &(data[0]), data.size() ), ctls );
 #else
-	load( FileReader( data.data(), data.size() ) );
+	load( FileReader( data.data(), data.size() ), ctls );
 #endif
 	apply_libopenmpt_defaults();
 }
@@ -522,9 +531,9 @@ module_impl::module_impl( const std::vector<char> & data, std::shared_ptr<log_in
 #endif
 	ctor( ctls );
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
-	load( FileReader( &(data[0]), data.size() ) );
+	load( FileReader( &(data[0]), data.size() ), ctls );
 #else
-	load( FileReader( data.data(), data.size() ) );
+	load( FileReader( data.data(), data.size() ), ctls );
 #endif
 	apply_libopenmpt_defaults();
 }
@@ -534,7 +543,7 @@ module_impl::module_impl( const std::uint8_t * data, std::size_t size, std::tr1:
 module_impl::module_impl( const std::uint8_t * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 #endif
 	ctor( ctls );
-	load( FileReader( data, size ) );
+	load( FileReader( data, size ), ctls );
 	apply_libopenmpt_defaults();
 }
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
@@ -543,7 +552,7 @@ module_impl::module_impl( const char * data, std::size_t size, std::tr1::shared_
 module_impl::module_impl( const char * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 #endif
 	ctor( ctls );
-	load( FileReader( data, size ) );
+	load( FileReader( data, size ), ctls );
 	apply_libopenmpt_defaults();
 }
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
@@ -552,7 +561,7 @@ module_impl::module_impl( const void * data, std::size_t size, std::tr1::shared_
 module_impl::module_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 #endif
 	ctor( ctls );
-	load( FileReader( data, size ) );
+	load( FileReader( data, size ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::~module_impl() {
@@ -1204,8 +1213,14 @@ std::string module_impl::ctl_get( const std::string & ctl ) const {
 	} else if ( ctl == "seek.sync_samples" ) {
 		return mpt::ToString( m_ctl_seek_sync_samples );
 	} else if ( ctl == "play.tempo_factor" ) {
+		if ( !is_loaded() ) {
+			return "1.0";
+		}
 		return mpt::ToString( 65536.0 / m_sndFile->m_nTempoFactor );
 	} else if ( ctl == "play.pitch_factor" ) {
+		if ( !is_loaded() ) {
+			return "1.0";
+		}
 		return mpt::ToString( m_sndFile->m_nFreqFactor / 65536.0 );
 	} else if ( ctl == "dither" ) {
 		return mpt::ToString( static_cast<int>( m_Dither->GetMode() ) );
@@ -1223,6 +1238,9 @@ void module_impl::ctl_set( const std::string & ctl, const std::string & value ) 
 	} else if ( ctl == "seek.sync_samples" ) {
 		m_ctl_seek_sync_samples = ConvertStrTo<bool>( value );
 	} else if ( ctl == "play.tempo_factor" ) {
+		if ( !is_loaded() ) {
+			return;
+		}
 		double factor = ConvertStrTo<double>( value );
 		if ( factor <= 0.0 || factor > 4.0 ) {
 			throw openmpt::exception("invalid tempo factor");
@@ -1230,6 +1248,9 @@ void module_impl::ctl_set( const std::string & ctl, const std::string & value ) 
 		m_sndFile->m_nTempoFactor = Util::Round<uint32_t>( 65536.0 / factor );
 		m_sndFile->RecalculateSamplesPerTick();
 	} else if ( ctl == "play.pitch_factor" ) {
+		if ( !is_loaded() ) {
+			return;
+		}
 		double factor = ConvertStrTo<double>( value );
 		if ( factor <= 0.0 || factor > 4.0 ) {
 			throw openmpt::exception("invalid pitch factor");
