@@ -49,6 +49,10 @@
 #  ANCIENT=0        Use a pre-C++0x compiler (i.e. GCC before 4.3)
 #
 #
+# Experimental features (need to be enabled explicitely):
+#  EXPERIMENTAL_LIBOPENMPT_EXT=1 Include libopenmpt_ext interface.
+#
+#
 # Build flags for libopenmpt (provide on each `make` invocation)
 #  (defaults are 0):
 #
@@ -130,6 +134,8 @@ ONLY_TEST=0
 ANCIENT=0
 SOSUFFIX=.so
 OPENMPT123=1
+
+EXPERIMENTAL_LIBOPENMPT_EXT=0
 
 
 # get commandline or defaults
@@ -433,6 +439,9 @@ LIBOPENMPT_CXX_SOURCES += \
  libopenmpt/libopenmpt_cxx.cpp \
  libopenmpt/libopenmpt_impl.cpp \
  
+ifeq ($(EXPERIMENTAL_LIBOPENMPT_EXT),1)
+LIBOPENMPT_CXX_SOURCES += libopenmpt/libopenmpt_ext.cpp
+endif
 ifeq ($(NO_ZLIB),1)
 LIBOPENMPT_C_SOURCES += include/miniz/miniz.c
 endif
@@ -628,6 +637,9 @@ install: $(OUTPUTS)
 	$(INSTALL_DATA) libopenmpt/libopenmpt_stream_callbacks_fd.h $(DESTDIR)$(PREFIX)/include/libopenmpt/libopenmpt_stream_callbacks_fd.h
 	$(INSTALL_DATA) libopenmpt/libopenmpt_stream_callbacks_file.h $(DESTDIR)$(PREFIX)/include/libopenmpt/libopenmpt_stream_callbacks_file.h
 	$(INSTALL_DATA) libopenmpt/libopenmpt.hpp $(DESTDIR)$(PREFIX)/include/libopenmpt/libopenmpt.hpp
+ifeq ($(EXPERIMENTAL_LIBOPENMPT_EXT),1)
+	$(INSTALL_DATA) libopenmpt/libopenmpt_ext.hpp $(DESTDIR)$(PREFIX)/include/libopenmpt/libopenmpt_ext.hpp
+endif
 	$(INSTALL_MAKE_DIR) $(DESTDIR)$(PREFIX)/lib/pkgconfig
 	$(INSTALL_DATA) bin/libopenmpt.pc $(DESTDIR)$(PREFIX)/lib/pkgconfig/libopenmpt.pc
 ifeq ($(SHARED_LIB),1)
