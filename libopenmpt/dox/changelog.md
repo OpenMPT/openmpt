@@ -16,6 +16,8 @@ is just a high-level summary.
      *  GCC 4.1.x to 4.3.x (use `make ANCIENT=1`)
      *  Microsoft Visual Studio 2008 (with latest Service Pack)
         (see `build/vs2008`)
+ *  libopenmpt_ext.hpp is now distributed by default. The API is still
+    considered experimental and not guaranteed to stay API or ABI compatible.
 
  *  [Bug] The -autotools tarballs were not working at all.
 
