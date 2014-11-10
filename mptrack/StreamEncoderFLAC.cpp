@@ -255,16 +255,16 @@ FLACEncoder::FLACEncoder()
 //------------------------
 {
 	Encoder::Traits traits;
-	traits.fileExtension = "flac";
-	traits.fileShortDescription = "FLAC";
-	traits.fileDescription = "FLAC";
-	traits.encoderSettingsName = "FLAC";
-	traits.encoderName = "libFLAC";
-	traits.description = "";
-	traits.description += mpt::String::Print<std::string>("Free Lossless Audio Codec\n");
-	traits.description += mpt::String::Print<std::string>("Vendor: %1\n", FLAC__VENDOR_STRING);
-	traits.description += mpt::String::Print<std::string>("Version: %1\n", FLAC__VERSION_STRING);
-	traits.description += mpt::String::Print<std::string>("API: %1.%2.%3\n", FLAC_API_VERSION_CURRENT, FLAC_API_VERSION_REVISION, FLAC_API_VERSION_AGE);
+	traits.fileExtension = MPT_PATHSTRING("flac");
+	traits.fileShortDescription = MPT_USTRING("FLAC");
+	traits.fileDescription = MPT_USTRING("FLAC");
+	traits.encoderSettingsName = MPT_USTRING("FLAC");
+	traits.encoderName = MPT_USTRING("libFLAC");
+	traits.description = MPT_USTRING("");
+	traits.description += mpt::String::Print(MPT_USTRING("Free Lossless Audio Codec\n"));
+	traits.description += mpt::String::Print(MPT_USTRING("Vendor: %1\n"), mpt::ToUnicode(mpt::CharsetASCII, FLAC__VENDOR_STRING));
+	traits.description += mpt::String::Print(MPT_USTRING("Version: %1\n"), mpt::ToUnicode(mpt::CharsetASCII, FLAC__VERSION_STRING));
+	traits.description += mpt::String::Print(MPT_USTRING("API: %1.%2.%3\n"), FLAC_API_VERSION_CURRENT, FLAC_API_VERSION_REVISION, FLAC_API_VERSION_AGE);
 	traits.canTags = true;
 	traits.maxChannels = 4;
 	traits.samplerates = TrackerSettings::Instance().GetSampleRates();
@@ -280,7 +280,7 @@ FLACEncoder::FLACEncoder()
 				format.Samplerate = samplerate;
 				format.Channels = channels;
 				format.Sampleformat = (SampleFormat)(bytes * 8);
-				format.Description = mpt::String::Print("%1 Bit", bytes * 8);
+				format.Description = mpt::String::Print(MPT_USTRING("%1 Bit"), bytes * 8);
 				format.Bitrate = 0;
 				traits.formats.push_back(format);
 			}

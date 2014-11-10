@@ -66,7 +66,7 @@ namespace Encoder
 		SampleFormat Sampleformat;
 
 		int Bitrate;
-		std::string Description;
+		mpt::ustring Description;
 	};
 
 	enum Mode
@@ -85,23 +85,23 @@ template<> inline SettingValue ToSettingValue(const Encoder::Mode &val)
 {
 	switch(val)
 	{
-		case Encoder::ModeCBR: return SettingValue("CBR", "Encoder::Mode"); break;
-		case Encoder::ModeABR: return SettingValue("ABR", "Encoder::Mode"); break;
-		case Encoder::ModeVBR: return SettingValue("VBR", "Encoder::Mode"); break;
-		case Encoder::ModeQuality: return SettingValue("Quality", "Encoder::Mode"); break;
-		case Encoder::ModeEnumerated: return SettingValue("Enumerated", "Encoder::Mode"); break;
-		default: return SettingValue("Invalid", "Encoder::Mode"); break;
+		case Encoder::ModeCBR: return SettingValue(MPT_USTRING("CBR"), "Encoder::Mode"); break;
+		case Encoder::ModeABR: return SettingValue(MPT_USTRING("ABR"), "Encoder::Mode"); break;
+		case Encoder::ModeVBR: return SettingValue(MPT_USTRING("VBR"), "Encoder::Mode"); break;
+		case Encoder::ModeQuality: return SettingValue(MPT_USTRING("Quality"), "Encoder::Mode"); break;
+		case Encoder::ModeEnumerated: return SettingValue(MPT_USTRING("Enumerated"), "Encoder::Mode"); break;
+		default: return SettingValue(MPT_USTRING("Invalid"), "Encoder::Mode"); break;
 	}
 }
 template<> inline Encoder::Mode FromSettingValue(const SettingValue &val)
 {
 	ASSERT(val.GetTypeTag() == "Encoder::Mode");
-	if(val.as<std::string>() == "") { return Encoder::ModeInvalid; }
-	else if(val.as<std::string>() == "CBR") { return Encoder::ModeCBR; }
-	else if(val.as<std::string>() == "ABR") { return Encoder::ModeABR; }
-	else if(val.as<std::string>() == "VBR") { return Encoder::ModeVBR; }
-	else if(val.as<std::string>() == "Quality") { return Encoder::ModeQuality; }
-	else if(val.as<std::string>() == "Enumerated") { return Encoder::ModeEnumerated; }
+	if(val.as<mpt::ustring>() == MPT_USTRING("")) { return Encoder::ModeInvalid; }
+	else if(val.as<mpt::ustring>() == MPT_USTRING("CBR")) { return Encoder::ModeCBR; }
+	else if(val.as<mpt::ustring>() == MPT_USTRING("ABR")) { return Encoder::ModeABR; }
+	else if(val.as<mpt::ustring>() == MPT_USTRING("VBR")) { return Encoder::ModeVBR; }
+	else if(val.as<mpt::ustring>() == MPT_USTRING("Quality")) { return Encoder::ModeQuality; }
+	else if(val.as<mpt::ustring>() == MPT_USTRING("Enumerated")) { return Encoder::ModeEnumerated; }
 	else { return Encoder::ModeInvalid; }
 }
 
@@ -111,15 +111,15 @@ namespace Encoder
 	struct Traits
 	{
 		
-		std::string fileExtension;
-		std::string fileDescription;
-		std::string fileShortDescription;
-		std::string encoderSettingsName;
-		std::string encoderName;
-		std::string description;
+		mpt::PathString fileExtension;
+		mpt::ustring fileDescription;
+		mpt::ustring fileShortDescription;
+		mpt::ustring encoderSettingsName;
+		mpt::ustring encoderName;
+		mpt::ustring description;
 
 		bool canTags;
-		std::vector<std::string> genres;
+		std::vector<mpt::ustring> genres;
 		int modesWithFixedGenres;
 		
 		bool canCues;
@@ -174,16 +174,16 @@ namespace Encoder
 		Setting<int> Format;
 		Setting<int> Dither;
 		
-		Settings(SettingsContainer &conf, const std::string &encoderName, bool cues, bool tags, uint32 samplerate, uint16 channels, Encoder::Mode mode, int bitrate, float quality, int format, int dither)
-			: Cues(conf, "Export", encoderName + "_" + "Cues", cues)
-			, Tags(conf, "Export", encoderName + "_" + "Tags", tags)
-			, Samplerate(conf, "Export", encoderName + "_" + "Samplerate", samplerate)
-			, Channels(conf, "Export", encoderName + "_" + "Channels", channels)
-			, Mode(conf, "Export", encoderName + "_" + "Mode", mode)
-			, Bitrate(conf, "Export", encoderName + "_" + "Bitrate", bitrate)
-			, Quality(conf, "Export", encoderName + "_" + "Quality", quality)
-			, Format(conf, "Export", encoderName + "_" + "Format", format)
-			, Dither(conf, "Export", encoderName + "_" + "Dither", dither)
+		Settings(SettingsContainer &conf, const mpt::ustring &encoderName, bool cues, bool tags, uint32 samplerate, uint16 channels, Encoder::Mode mode, int bitrate, float quality, int format, int dither)
+			: Cues(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Cues"), cues)
+			, Tags(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Tags"), tags)
+			, Samplerate(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Samplerate"), samplerate)
+			, Channels(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Channels"), channels)
+			, Mode(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Mode"), mode)
+			, Bitrate(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Bitrate"), bitrate)
+			, Quality(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Quality"), quality)
+			, Format(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Format"), format)
+			, Dither(conf, "Export", encoderName + MPT_USTRING("_") + MPT_USTRING("Dither"), dither)
 		{
 			return;
 		}
@@ -201,7 +201,7 @@ struct StreamEncoderSettings
 	Setting<int32> MP3LameQuality;
 	Setting<bool> MP3ACMFast;
 	Setting<int32> OpusComplexity;
-	StreamEncoderSettings(SettingsContainer &conf, const std::string &section);
+	StreamEncoderSettings(SettingsContainer &conf, const mpt::ustring &section);
 	static StreamEncoderSettings &Instance();
 };
 
