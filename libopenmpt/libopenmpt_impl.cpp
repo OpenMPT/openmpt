@@ -313,7 +313,7 @@ void module_impl::apply_libopenmpt_defaults() {
 	set_render_param( module::RENDER_STEREOSEPARATION_PERCENT, 100 );
 	m_sndFile->Order.SetSequence( 0 );
 }
-void module_impl::init( const std::map< std::string, std::string > & ctls ) {
+void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
 	m_sndFile = std::tr1::shared_ptr<CSoundFile>(new CSoundFile());
 #else
@@ -498,7 +498,7 @@ module_impl::module_impl( std::istream & stream, std::tr1::shared_ptr<log_interf
 #else
 module_impl::module_impl( std::istream & stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 #endif
-	init( ctls );
+	ctor( ctls );
 	load( FileReader( &stream ) );
 	apply_libopenmpt_defaults();
 }
@@ -507,7 +507,7 @@ module_impl::module_impl( const std::vector<std::uint8_t> & data, std::tr1::shar
 #else
 module_impl::module_impl( const std::vector<std::uint8_t> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 #endif
-	init( ctls );
+	ctor( ctls );
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
 	load( FileReader( &(data[0]), data.size() ) );
 #else
@@ -520,7 +520,7 @@ module_impl::module_impl( const std::vector<char> & data, std::tr1::shared_ptr<l
 #else
 module_impl::module_impl( const std::vector<char> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 #endif
-	init( ctls );
+	ctor( ctls );
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
 	load( FileReader( &(data[0]), data.size() ) );
 #else
@@ -533,7 +533,7 @@ module_impl::module_impl( const std::uint8_t * data, std::size_t size, std::tr1:
 #else
 module_impl::module_impl( const std::uint8_t * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 #endif
-	init( ctls );
+	ctor( ctls );
 	load( FileReader( data, size ) );
 	apply_libopenmpt_defaults();
 }
@@ -542,7 +542,7 @@ module_impl::module_impl( const char * data, std::size_t size, std::tr1::shared_
 #else
 module_impl::module_impl( const char * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 #endif
-	init( ctls );
+	ctor( ctls );
 	load( FileReader( data, size ) );
 	apply_libopenmpt_defaults();
 }
@@ -551,7 +551,7 @@ module_impl::module_impl( const void * data, std::size_t size, std::tr1::shared_
 #else
 module_impl::module_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 #endif
-	init( ctls );
+	ctor( ctls );
 	load( FileReader( data, size ) );
 	apply_libopenmpt_defaults();
 }

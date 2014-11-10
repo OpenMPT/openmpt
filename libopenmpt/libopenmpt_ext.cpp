@@ -35,28 +35,28 @@ public:
 #else
 	module_ext_impl( std::istream & stream, std::ostream & log, const std::map< std::string, std::string > & ctls ) : module_impl( stream, std::make_shared<std_ostream_log>( log ), ctls ) {
 #endif
-		init();
+		ctor();
 	}
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
 	module_ext_impl( const std::vector<char> & data, std::ostream & log, const std::map< std::string, std::string > & ctls ) : module_impl( data, std::tr1::shared_ptr<std_ostream_log>( new std_ostream_log( log ) ), ctls ) {
 #else
 	module_ext_impl( const std::vector<char> & data, std::ostream & log, const std::map< std::string, std::string > & ctls ) : module_impl( data, std::make_shared<std_ostream_log>( log ), ctls ) {
 #endif
-		init();
+		ctor();
 	}
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
 	module_ext_impl( const char * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : module_impl( data, size, std::tr1::shared_ptr<std_ostream_log>( new std_ostream_log( log ) ), ctls ) {
 #else
 	module_ext_impl( const char * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : module_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls ) {
 #endif
-		init();
+		ctor();
 	}
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
 	module_ext_impl( const void * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : module_impl( data, size, std::tr1::shared_ptr<std_ostream_log>( new std_ostream_log( log ) ), ctls ) {
 #else
 	module_ext_impl( const void * data, std::size_t size, std::ostream & log, const std::map< std::string, std::string > & ctls ) : module_impl( data, size, std::make_shared<std_ostream_log>( log ), ctls ) {
 #endif
-		init();
+		ctor();
 	}
 
 private:
@@ -69,7 +69,7 @@ private:
 
 private:
 
-	void init() {
+	void ctor() {
 
 
 

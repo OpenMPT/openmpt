@@ -103,7 +103,7 @@ protected:
 	std::string mod_string_to_utf8( const std::string & encoded ) const;
 	void apply_mixer_settings( std::int32_t samplerate, int channels );
 	void apply_libopenmpt_defaults();
-	void init( const std::map< std::string, std::string > & ctls );
+	void ctor( const std::map< std::string, std::string > & ctls );
 	void load( OpenMPT::CSoundFile & sndFile, const OpenMPT::FileReader & file );
 	void load( const OpenMPT::FileReader & file );
 	std::size_t read_wrapper( std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right );
