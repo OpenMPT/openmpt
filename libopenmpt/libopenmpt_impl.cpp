@@ -1187,6 +1187,8 @@ std::vector<std::string> module_impl::get_ctls() const {
 	retval.push_back( "load.skip_samples" );
 	retval.push_back( "load.skip_patterns" );
 	retval.push_back( "seek.sync_samples" );
+	retval.push_back( "play.tempo_factor" );
+	retval.push_back( "play.pitch_factor" );
 	retval.push_back( "dither" );
 	return retval;
 }
@@ -1199,6 +1201,10 @@ std::string module_impl::ctl_get( const std::string & ctl ) const {
 		return mpt::ToString( m_ctl_load_skip_patterns );
 	} else if ( ctl == "seek.sync_samples" ) {
 		return mpt::ToString( m_ctl_seek_sync_samples );
+	} else if ( ctl == "play.tempo_factor" ) {
+		return mpt::ToString( 65536.0 / m_sndFile->m_nTempoFactor );
+	} else if ( ctl == "play.pitch_factor" ) {
+		return mpt::ToString( m_sndFile->m_nFreqFactor / 65536.0 );
 	} else if ( ctl == "dither" ) {
 		return mpt::ToString( static_cast<int>( m_Dither->GetMode() ) );
 	} else {
@@ -1214,6 +1220,20 @@ void module_impl::ctl_set( const std::string & ctl, const std::string & value ) 
 		m_ctl_load_skip_patterns = ConvertStrTo<bool>( value );
 	} else if ( ctl == "seek.sync_samples" ) {
 		m_ctl_seek_sync_samples = ConvertStrTo<bool>( value );
+	} else if ( ctl == "play.tempo_factor" ) {
+		double factor = ConvertStrTo<double>( value );
+		if ( factor <= 0.0 || factor > 4.0 ) {
+			throw openmpt::exception("invalid tempo factor");
+		}
+		m_sndFile->m_nTempoFactor = Util::Round<uint32_t>( 65536.0 / factor );
+		m_sndFile->RecalculateSamplesPerTick();
+	} else if ( ctl == "play.pitch_factor" ) {
+		double factor = ConvertStrTo<double>( value );
+		if ( factor <= 0.0 || factor > 4.0 ) {
+			throw openmpt::exception("invalid pitch factor");
+		}
+		m_sndFile->m_nFreqFactor = Util::Round<uint32_t>( 65536.0 * factor );
+		m_sndFile->RecalculateSamplesPerTick();
 	} else if ( ctl == "dither" ) {
 		m_Dither->SetMode( static_cast<DitherMode>( ConvertStrTo<int>( value ) ) );
 	} else {

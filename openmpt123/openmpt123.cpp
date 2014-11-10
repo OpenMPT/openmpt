@@ -81,9 +81,7 @@ static const char * const license =
 #include <sys/types.h>
 #endif
 
-#define LIBOPENMPT_EXT_IS_EXPERIMENTAL
 #include <libopenmpt/libopenmpt.hpp>
-#include <libopenmpt/libopenmpt_ext.hpp>
 
 #include "openmpt123.hpp"
 
@@ -234,6 +232,30 @@ static std::string ctls_to_string( const std::map<std::string, std::string> & ct
 	return result;
 }
 
+static double tempo_flag_to_double( std::int32_t tempo ) {
+	return std::pow( 2.0, tempo / 24.0 );
+}
+
+static double pitch_flag_to_double( std::int32_t pitch ) {
+	return std::pow( 2.0, pitch / 24.0 );
+}
+
+static double my_round( double val ) {
+	if ( val >= 0.0 ) {
+		return std::floor( val + 0.5 );
+	} else {
+		return std::ceil( val - 0.5 );
+	}
+}
+
+static std::int32_t double_to_tempo_flag( double factor ) {
+	return static_cast<std::int32_t>( my_round( std::log( factor ) / std::log( 2.0 ) * 24.0 ) );
+}
+
+static std::int32_t double_to_pitch_flag( double factor ) {
+	return static_cast<std::int32_t>( my_round( std::log( factor ) / std::log( 2.0 ) * 24.0 ) );
+}
+
 static std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) {
 	s << "Quiet: " << flags.quiet << std::endl;
 	s << "Verbose: " << flags.verbose << std::endl;
@@ -254,6 +276,8 @@ static std::ostream & operator << ( std::ostream & s, const commandlineflags & f
 	s << "Stereo separation: " << flags.separation << std::endl;
 	s << "Interpolation filter taps: " << flags.filtertaps << std::endl;
 	s << "Volume ramping strength: " << flags.ramping << std::endl;
+	s << "Tempo: " << tempo_flag_to_double( flags.tempo ) << std::endl;
+	s << "Pitch: " << pitch_flag_to_double( flags.pitch ) << std::endl;
 	s << "Output dithering: " << flags.dither << std::endl;
 	s << "Repeat count: " << flags.repeatcount << std::endl;
 	s << "Seek target: " << flags.seek_target << std::endl;
@@ -488,6 +512,8 @@ static void show_help( textout & log, bool with_info = true, bool longhelp = fal
 		log << "     --stereo n             Set stereo separation to n % [default: " << commandlineflags().separation << "]" << std::endl;
 		log << "     --filter n             Set interpolation filter taps to n [1,2,4,8] [default: " << commandlineflags().filtertaps << "]" << std::endl;
 		log << "     --ramping n            Set volume ramping strength n [0..5] [default: " << commandlineflags().ramping << "]" << std::endl;
+		log << "     --tempo f              Set tempo factor f [default: " << tempo_flag_to_double( commandlineflags().tempo ) << "]" << std::endl;
+		log << "     --pitch f              Set pitch factor f [default: " << pitch_flag_to_double( commandlineflags().pitch ) << "]" << std::endl;
 		log << "     --dither n             Dither type to use (if applicable for selected output format): [0=off,1=auto,2=0.5bit,3=1bit] [default: " << commandlineflags().dither << "]" << std::endl;
 		log << std::endl;
 		log << "     --[no-]shuffle         Shuffle playlist [default: " << commandlineflags().shuffle << "]" << std::endl;
@@ -559,6 +585,34 @@ static void show_help_keyboard( textout & log ) {
 	log.writeout();
 }
 
+
+template < typename T, typename Tmod >
+T ctl_get( Tmod & mod, const std::string & ctl ) {
+	T result = T();
+	try {
+		std::istringstream str;
+		str.imbue( std::locale::classic() );
+		str.str( mod.ctl_get( ctl ) );
+		str >> std::fixed >> std::setprecision(16) >> result;
+	} catch ( const openmpt::exception & ) {
+		// ignore
+	}
+	return result;
+}
+
+template < typename T, typename Tmod >
+void ctl_set( Tmod & mod, const std::string & ctl, const T & val ) {
+	try {
+		std::ostringstream str;
+		str.imbue( std::locale::classic() );
+		str << std::fixed << std::setprecision(16) << val;
+		mod.ctl_set( ctl, str.str() );
+	} catch ( const openmpt::exception & ) {
+		// ignore
+	}
+	return;
+}
+
 template < typename Tmod >
 static void apply_mod_settings( commandlineflags & flags, Tmod & mod ) {
 	flags.separation = std::max( flags.separation,  0 );
@@ -566,10 +620,16 @@ static void apply_mod_settings( commandlineflags & flags, Tmod & mod ) {
 	flags.filtertaps = std::min( flags.filtertaps,  8 );
 	flags.ramping    = std::max( flags.ramping,    -1 );
 	flags.ramping    = std::min( flags.ramping,    10 );
+	flags.tempo      = std::max( flags.tempo,     -48 );
+	flags.tempo      = std::min( flags.tempo,      48 );
+	flags.pitch      = std::max( flags.pitch,     -48 );
+	flags.pitch      = std::min( flags.pitch,      48 );
 	mod.set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, flags.gain );
 	mod.set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, flags.separation );
 	mod.set_render_param( openmpt::module::RENDER_INTERPOLATIONFILTER_LENGTH, flags.filtertaps );
 	mod.set_render_param( openmpt::module::RENDER_VOLUMERAMPING_STRENGTH, flags.ramping );
+	ctl_set( mod, "play.tempo_factor", tempo_flag_to_double( flags.tempo ) );
+	ctl_set( mod, "play.pitch_factor", pitch_flag_to_double( flags.pitch ) );
 	std::ostringstream dither_str;
 	dither_str.imbue( std::locale::classic() );
 	dither_str << flags.dither;
@@ -581,7 +641,6 @@ struct next_file { int count; next_file( int c ) : count(c) { } };
 
 template < typename Tmod >
 static bool handle_keypress( int c, commandlineflags & flags, Tmod & mod, write_buffers_interface & audio_stream ) {
-	openmpt::ext::interactive *interactive = static_cast<openmpt::ext::interactive*>( mod.get_interface( openmpt::ext::interactive_id ) );
 	switch ( c ) {
 		case 'q': throw silent_exit_exception(); break;
 		case 'N': throw prev_file(10); break;
@@ -597,10 +656,10 @@ static bool handle_keypress( int c, commandlineflags & flags, Tmod & mod, write_
 		case 'L': mod.set_position_order_row( mod.get_current_order() + 1, 0 ); break;
 		case 'm': throw next_file(1); break;
 		case 'M': throw next_file(10); break;
-		case 'u': interactive->set_tempo_factor( std::max( 0.00001, interactive->get_tempo_factor() * std::pow( 2.0, -1.0 / 24.0 ) ) ); break;
-		case 'i': interactive->set_tempo_factor( std::min( 4.0,     interactive->get_tempo_factor() * std::pow( 2.0,  1.0 / 24.0 ) ) ); break;
-		case 'o': interactive->set_pitch_factor( std::max( 0.00001, interactive->get_pitch_factor() * std::pow( 2.0, -1.0 / 24.0 ) ) ); break;
-		case 'p': interactive->set_pitch_factor( std::min( 4.0,     interactive->get_pitch_factor() * std::pow( 2.0,  1.0 / 24.0 ) ) ); break;
+		case 'u': flags.tempo -= 1; apply_mod_settings( flags, mod ); break;
+		case 'i': flags.tempo += 1; apply_mod_settings( flags, mod ); break;
+		case 'o': flags.pitch -= 1; apply_mod_settings( flags, mod ); break;
+		case 'p': flags.pitch += 1; apply_mod_settings( flags, mod ); break;
 		case '3': flags.gain       -=100; apply_mod_settings( flags, mod ); break;
 		case '4': flags.gain       +=100; apply_mod_settings( flags, mod ); break;
 		case '5': flags.separation -=  5; apply_mod_settings( flags, mod ); break;
@@ -1405,7 +1464,7 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 		}
 
 		{
-			openmpt::module_ext mod( data_stream, silentlog, flags.ctls );
+			openmpt::module mod( data_stream, silentlog, flags.ctls );
 			mod.select_subsong( -1 ); // play all subsongs consecutively
 			silentlog.str( std::string() ); // clear, loader messages get stored to get_metadata( "warnings" ) by libopenmpt internally
 			render_mod_file( flags, filename, filesize, mod, log, audio_stream );
@@ -1651,6 +1710,18 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 			} else if ( arg == "--ramping" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.ramping;
+				++i;
+			} else if ( arg == "--tempo" && nextarg != "" ) {
+				std::istringstream istr( nextarg );
+				double tmp = 1.0;
+				istr >> tmp;
+				flags.tempo = double_to_tempo_flag( tmp );
+				++i;
+			} else if ( arg == "--pitch" && nextarg != "" ) {
+				std::istringstream istr( nextarg );
+				double tmp = 1.0;
+				istr >> tmp;
+				flags.pitch = double_to_pitch_flag( tmp );
 				++i;
 			} else if ( arg == "--dither" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
