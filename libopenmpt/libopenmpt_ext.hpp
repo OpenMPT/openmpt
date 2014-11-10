@@ -92,6 +92,8 @@ namespace ext {
 /**/
 
 
+#define LIBOPENMPT_EXT_INTERFACE_PATTERN_VIS
+
 LIBOPENMPT_DECLARE_EXT_INTERFACE(pattern_vis)
 
 class pattern_vis {
@@ -132,6 +134,8 @@ class pattern_vis {
 
 }; // class pattern_vis
 
+
+#define LIBOPENMPT_EXT_INTERFACE_INTERACTIVE
 
 LIBOPENMPT_DECLARE_EXT_INTERFACE(interactive)
 
