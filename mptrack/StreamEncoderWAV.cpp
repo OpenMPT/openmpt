@@ -164,12 +164,12 @@ WAVEncoder::WAVEncoder()
 //----------------------
 {
 	Encoder::Traits traits;
-	traits.fileExtension = "wav";
-	traits.fileShortDescription = "Wave";
-	traits.fileDescription = "Wave";
-	traits.encoderSettingsName = "Wave";
-	traits.encoderName = "OpenMPT";
-	traits.description = "Microsoft RIFF WAVE";
+	traits.fileExtension = MPT_PATHSTRING("wav");
+	traits.fileShortDescription = MPT_USTRING("Wave");
+	traits.fileDescription = MPT_USTRING("Wave");
+	traits.encoderSettingsName = MPT_USTRING("Wave");
+	traits.encoderName = MPT_USTRING("OpenMPT");
+	traits.description = MPT_USTRING("Microsoft RIFF WAVE");
 	traits.canTags = true;
 	traits.canCues = true;
 	traits.maxChannels = 4;
@@ -188,11 +188,11 @@ WAVEncoder::WAVEncoder()
 				if(bytes == 5)
 				{
 					format.Sampleformat = SampleFormatFloat32;
-					format.Description = "Floating Point";
+					format.Description = MPT_USTRING("Floating Point");
 				} else
 				{
 					format.Sampleformat = (SampleFormat)(bytes * 8);
-					format.Description = mpt::String::Print("%1 Bit", bytes * 8);
+					format.Description = mpt::String::Print(MPT_USTRING("%1 Bit"), bytes * 8);
 				}
 				format.Bitrate = 0;
 				traits.formats.push_back(format);

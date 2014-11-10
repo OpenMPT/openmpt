@@ -28,8 +28,8 @@ StreamEncoderSettings &StreamEncoderSettings::Instance()
 }
 
 
-StreamEncoderSettings::StreamEncoderSettings(SettingsContainer &conf, const std::string &section)
-//-----------------------------------------------------------------------------------------------
+StreamEncoderSettings::StreamEncoderSettings(SettingsContainer &conf, const mpt::ustring &section)
+//------------------------------------------------------------------------------------------------
 	: FLACCompressionLevel(conf, section, "FLACCompressionLevel", 5)
 	, MP3LameQuality(conf, section, "MP3LameQuality", 3)
 	, MP3ACMFast(conf, section, "MP3ACMFast", false)

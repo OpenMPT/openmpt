@@ -41,7 +41,7 @@ struct CWaveConvertSettings
 	std::vector<EncoderFactoryBase*> EncoderFactories;
 	std::vector<MPT_SHARED_PTR<Encoder::Settings> > EncoderSettings;
 
-	Setting<std::string> EncoderName;
+	Setting<mpt::ustring> EncoderName;
 	std::size_t EncoderIndex;
 
 	SampleFormat FinalSampleFormat;
@@ -55,7 +55,7 @@ struct CWaveConvertSettings
 	bool Normalize;
 	bool SilencePlugBuffers;
 
-	std::size_t FindEncoder(const std::string &name) const;
+	std::size_t FindEncoder(const mpt::ustring &name) const;
 	void SelectEncoder(std::size_t index);
 	EncoderFactoryBase *GetEncoderFactory() const;
 	const Encoder::Traits *GetTraits() const;

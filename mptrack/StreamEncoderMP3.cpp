@@ -426,7 +426,7 @@ public:
 		Encoder::Traits &traits = *reinterpret_cast<Encoder::Traits*>(cookie);
 		if(name)
 		{
-			traits.genres.push_back(name);
+			traits.genres.push_back(mpt::ToUnicode(mpt::CharsetISO8859_1, name));
 		}
 	}
 	Encoder::Traits BuildTraits()
@@ -436,20 +436,20 @@ public:
 		{
 			return traits;
 		}
-		traits.fileExtension = "mp3";
-		traits.fileShortDescription = "MP3 (Lame)";
-		traits.fileDescription = "MPEG-1/2 Layer 3";
-		traits.encoderSettingsName = "MP3Lame";
-		traits.encoderName = "libMP3Lame";
-		traits.description += "Version: ";
-		traits.description += (get_lame_version()?get_lame_version():"");
-		traits.description += "\n";
-		traits.description += "Psycho acoustic model version: ";
-		traits.description += (get_psy_version()?get_psy_version():"");
-		traits.description += "\n";
-		traits.description += "URL: ";
-		traits.description += (get_lame_url()?get_lame_url():"");
-		traits.description += "\n";
+		traits.fileExtension = MPT_PATHSTRING("mp3");
+		traits.fileShortDescription = MPT_USTRING("MP3 (Lame)");
+		traits.fileDescription = MPT_USTRING("MPEG-1/2 Layer 3");
+		traits.encoderSettingsName = MPT_USTRING("MP3Lame");
+		traits.encoderName = MPT_USTRING("libMP3Lame");
+		traits.description += MPT_USTRING("Version: ");
+		traits.description += mpt::ToUnicode(mpt::CharsetASCII, get_lame_version()?get_lame_version():"");
+		traits.description += MPT_USTRING("\n");
+		traits.description += MPT_USTRING("Psycho acoustic model version: ");
+		traits.description += mpt::ToUnicode(mpt::CharsetASCII, get_psy_version()?get_psy_version():"");
+		traits.description += MPT_USTRING("\n");
+		traits.description += MPT_USTRING("URL: ");
+		traits.description += mpt::ToUnicode(mpt::CharsetASCII, get_lame_url()?get_lame_url():"");
+		traits.description += MPT_USTRING("\n");
 		traits.canTags = true;
 		traits.genres.clear();
 		id3tag_genre_list(&GenreEnumCallback, &traits);
@@ -724,23 +724,23 @@ public:
 		{
 			return traits;
 		}
-		traits.fileExtension = "mp3";
-		traits.fileShortDescription = std::string("MP3 ") + (lame ? "(Lame_enc)" : "(BladeEnc)");
-		traits.fileDescription = "MPEG-1 Layer 3";
-		traits.encoderSettingsName = "MP3Blade";
-		traits.encoderName = lame ? "Lame_enc.dll" : "BladeEnc.dll";
+		traits.fileExtension = MPT_PATHSTRING("mp3");
+		traits.fileShortDescription = MPT_USTRING("MP3 ") + (lame ? MPT_USTRING("(Lame_enc)") : MPT_USTRING("(BladeEnc)"));
+		traits.fileDescription = MPT_USTRING("MPEG-1 Layer 3");
+		traits.encoderSettingsName = MPT_USTRING("MP3Blade");
+		traits.encoderName = lame ? MPT_USTRING("Lame_enc.dll") : MPT_USTRING("BladeEnc.dll");
 		BE_VERSION ver;
 		MemsetZero(ver);
 		beVersion(&ver);
-		traits.description = "";
-		traits.description += mpt::String::Print<std::string>("DLL version: %1.%2\n", (int)ver.byDLLMajorVersion, (int)ver.byDLLMinorVersion);
-		traits.description += mpt::String::Print<std::string>("Engine version: %1.%2 %3-%4-%5\n"
+		traits.description = MPT_USTRING("");
+		traits.description += mpt::String::Print(MPT_USTRING("DLL version: %1.%2\n"), (int)ver.byDLLMajorVersion, (int)ver.byDLLMinorVersion);
+		traits.description += mpt::String::Print(MPT_USTRING("Engine version: %1.%2 %3-%4-%5\n")
 			, (int)ver.byMajorVersion, (int)ver.byMinorVersion
-			, mpt::fmt::dec0<4>((int)ver.wYear), mpt::fmt::dec0<2>((int)ver.byMonth), mpt::fmt::dec0<2>((int)ver.byDay)
+			, mpt::ufmt::dec0<4>((int)ver.wYear), mpt::ufmt::dec0<2>((int)ver.byMonth), mpt::ufmt::dec0<2>((int)ver.byDay)
 			);
 		std::string url;
 		mpt::String::Copy(url, ver.zHomepage);
-		traits.description += mpt::String::Print<std::string>("URL: \n", url);
+		traits.description += mpt::String::Print(MPT_USTRING("URL: %1\n"), mpt::ToUnicode(mpt::CharsetASCII, url));
 		traits.canTags = true;
 		traits.maxChannels = 2;
 		traits.samplerates = std::vector<uint32>(mpeg1layer3_samplerates, mpeg1layer3_samplerates + CountOf(mpeg1layer3_samplerates));;
@@ -1092,7 +1092,7 @@ private:
 					format.Channels = pafd->pwfx->nChannels;
 					format.Sampleformat = SampleFormatInvalid;
 					format.Bitrate = pafd->pwfx->nAvgBytesPerSec * 8 / 1000;
-					format.Description = formatName;
+					format.Description = mpt::ToUnicode(mpt::CharsetLocale, formatName);
 					formats.push_back(format);
 					formats_driverids.push_back(driver);
 					{
@@ -1178,21 +1178,21 @@ public:
 		{
 			return traits;
 		}
-		traits.fileExtension = "mp3";
-		traits.fileShortDescription = "MP3 (ACM)";
-		traits.fileDescription = "MPEG Layer 3";
+		traits.fileExtension = MPT_PATHSTRING("mp3");
+		traits.fileShortDescription = MPT_USTRING("MP3 (ACM)");
+		traits.fileDescription = MPT_USTRING("MPEG Layer 3");
 		DWORD ver = acmGetVersion();
 		if(ver & 0xffff)
 		{
-			traits.encoderName = mpt::String::Print<std::string>("%1 %2.%3.%4", "Microsoft Windows ACM", mpt::fmt::hex0<2>((ver>>24)&0xff), mpt::fmt::hex0<2>((ver>>16)&0xff), mpt::fmt::hex0<4>((ver>>0)&0xffff));
+			traits.encoderName = mpt::String::Print(MPT_USTRING("%1 %2.%3.%4"), MPT_USTRING("Microsoft Windows ACM"), mpt::ufmt::hex0<2>((ver>>24)&0xff), mpt::ufmt::hex0<2>((ver>>16)&0xff), mpt::ufmt::hex0<4>((ver>>0)&0xffff));
 		} else
 		{
-			traits.encoderName = mpt::String::Print<std::string>("%1 %2.%3", "Microsoft Windows ACM", mpt::fmt::hex0<2>((ver>>24)&0xff), mpt::fmt::hex0<2>((ver>>16)&0xff));
+			traits.encoderName = mpt::String::Print(MPT_USTRING("%1 %2.%3"), MPT_USTRING("Microsoft Windows ACM"), mpt::ufmt::hex0<2>((ver>>24)&0xff), mpt::ufmt::hex0<2>((ver>>16)&0xff));
 		}
-		traits.encoderSettingsName = "MP3ACM";
+		traits.encoderSettingsName = MPT_USTRING("MP3ACM");
 		for(std::set<std::string>::const_iterator i = drivers.begin(); i != drivers.end(); ++i)
 		{
-			traits.description += (*i);
+			traits.description += mpt::ToUnicode(mpt::CharsetLocale, (*i));
 		}
 		traits.canTags = true;
 		traits.maxChannels = 2;

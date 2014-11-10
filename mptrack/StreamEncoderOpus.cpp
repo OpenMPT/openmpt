@@ -157,14 +157,14 @@ public:
 		{
 			return traits;
 		}
-		traits.fileExtension = "opus";
-		traits.fileShortDescription = "Opus";
-		traits.fileDescription = "Opus";
-		traits.encoderSettingsName = "Opus";
-		traits.encoderName = "libOpus";
-		traits.description += "Version: ";
-		traits.description += (opus_get_version_string&&opus_get_version_string()?opus_get_version_string():"");
-		traits.description += "\n";
+		traits.fileExtension = MPT_PATHSTRING("opus");
+		traits.fileShortDescription = MPT_USTRING("Opus");
+		traits.fileDescription = MPT_USTRING("Opus");
+		traits.encoderSettingsName = MPT_USTRING("Opus");
+		traits.encoderName = MPT_USTRING("libOpus");
+		traits.description += MPT_USTRING("Version: ");
+		traits.description += mpt::ToUnicode(mpt::CharsetASCII, opus_get_version_string && opus_get_version_string() ? opus_get_version_string() : "");
+		traits.description += MPT_USTRING("\n");
 		traits.canTags = true;
 		traits.maxChannels = 4;
 		traits.samplerates = std::vector<uint32>(opus_samplerates, opus_samplerates + CountOf(opus_samplerates));

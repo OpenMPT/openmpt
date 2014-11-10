@@ -1664,12 +1664,12 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 
 	EncoderFactoryBase *encFactory = wsdlg.m_Settings.GetEncoderFactory();
 
-	const std::string extension = encFactory->GetTraits().fileExtension;
+	const mpt::PathString extension = encFactory->GetTraits().fileExtension;
 
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension(extension)
-		.DefaultFilename(GetPathNameMpt().GetFileName() + MPT_PATHSTRING(".") + mpt::PathString::FromUTF8(extension))
-		.ExtensionFilter(encFactory->GetTraits().fileDescription + " (*." + extension + ")|*." + extension + "||")
+		.DefaultFilename(GetPathNameMpt().GetFileName() + MPT_PATHSTRING(".") + extension)
+		.ExtensionFilter(encFactory->GetTraits().fileDescription + MPT_USTRING(" (*.") + extension.ToUnicode() + MPT_USTRING(")|*.") + extension.ToUnicode() + MPT_USTRING("||"))
 		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_EXPORT));
 	if(!dlg.Show()) return;
 

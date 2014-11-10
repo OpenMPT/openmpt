@@ -254,9 +254,9 @@ void CWaveConvert::FillTags()
 		m_EditGenre.Clear();
 		m_CbnGenre.ResetContent();
 		m_CbnGenre.AddString("");
-		for(std::vector<std::string>::const_iterator genre = encTraits->genres.begin(); genre != encTraits->genres.end(); ++genre)
+		for(std::vector<mpt::ustring>::const_iterator genre = encTraits->genres.begin(); genre != encTraits->genres.end(); ++genre)
 		{
-			m_CbnGenre.AddString((*genre).c_str());
+			m_CbnGenre.AddString(mpt::ToCString(*genre));
 		}
 	} else
 	{
@@ -272,15 +272,15 @@ void CWaveConvert::FillTags()
 void CWaveConvert::OnShowEncoderInfo()
 //------------------------------------
 {
-	std::string info;
-	info += "Format: ";
+	mpt::ustring info;
+	info += MPT_USTRING("Format: ");
 	info += encTraits->fileDescription;
-	info += "\r\n";
-	info += "Encoder: ";
+	info += MPT_USTRING("\r\n");
+	info += MPT_USTRING("Encoder: ");
 	info += encTraits->encoderName;
-	info += "\r\n";
-	info += mpt::String::Replace(encTraits->description, "\n", "\r\n");
-	Reporting::Information(info.c_str(), "Encoder Information");
+	info += MPT_USTRING("\r\n");
+	info += mpt::String::Replace(encTraits->description, MPT_USTRING("\n"), MPT_USTRING("\r\n"));
+	Reporting::Information(info, "Encoder Information");
 }
 
 
@@ -292,7 +292,7 @@ void CWaveConvert::FillFileTypes()
 	for(std::size_t i = 0; i < m_Settings.EncoderFactories.size(); ++i)
 	{
 		const Encoder::Traits &encTraits = m_Settings.EncoderFactories[i]->GetTraits();
-		int ndx = m_CbnFileType.AddString(encTraits.fileShortDescription.c_str());
+		int ndx = m_CbnFileType.AddString(mpt::ToCString(encTraits.fileShortDescription));
 		m_CbnFileType.SetItemData(ndx, i);
 		if(m_Settings.EncoderIndex == i)
 		{
@@ -431,7 +431,7 @@ void CWaveConvert::FillFormats()
 				// too may formats
 				break;
 			}
-			int ndx = m_CbnSampleFormat.AddString(format.Description.c_str());
+			int ndx = m_CbnSampleFormat.AddString(mpt::ToCString(format.Description));
 			m_CbnSampleFormat.SetItemData(ndx, i & 0xffff);
 			if(encSettings.Mode & Encoder::ModeEnumerated && (int)i == encSettings.Format)
 			{
@@ -789,8 +789,8 @@ void CWaveConvert::SaveEncoderSettings()
 }
 
 
-std::size_t CWaveConvertSettings::FindEncoder(const std::string &name) const
-//--------------------------------------------------------------------------
+std::size_t CWaveConvertSettings::FindEncoder(const mpt::ustring &name) const
+//---------------------------------------------------------------------------
 {
 	for(std::size_t i = 0; i < EncoderFactories.size(); ++i)
 	{
@@ -840,7 +840,7 @@ Encoder::Settings &CWaveConvertSettings::GetEncoderSettings() const
 CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::vector<EncoderFactoryBase*> &encFactories)
 //-----------------------------------------------------------------------------------------------------------------------
 	: EncoderFactories(encFactories)
-	, EncoderName(conf, "Export", encFactories.size() > 2 ? "LossyEncoder" : "LosslessEncoder", "")
+	, EncoderName(conf, "Export", encFactories.size() > 2 ? "LossyEncoder" : "LosslessEncoder", MPT_USTRING(""))
 	, EncoderIndex(FindEncoder(EncoderName))
 	, FinalSampleFormat(SampleFormatInt16)
 	, storedTags(conf)

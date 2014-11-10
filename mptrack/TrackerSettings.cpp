@@ -219,7 +219,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, previewInFileDialogs(conf, "Sample Editor", "PreviewInFileDialogs", false)
 	// Export
 	, ExportDefaultToSoundcardSamplerate(conf, "Export", "DefaultToSoundcardSamplerate", true)
-	, ExportStreamEncoderSettings(conf, "Export")
+	, ExportStreamEncoderSettings(conf, MPT_USTRING("Export"))
 	// Components
 	, ComponentsLoadOnStartup(conf, "Components", "LoadOnStartup", ComponentManagerSettingsDefault().LoadOnStartup())
 	, ComponentsKeepLoaded(conf, "Components", "KeepLoaded", ComponentManagerSettingsDefault().KeepLoaded())
