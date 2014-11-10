@@ -22,6 +22,9 @@
  * - libopenmpt C
  *   - \ref libopenmpt_c_overview "Overview"
  *   - \ref libopenmpt_c "Details"
+ * - libopenmpt_ext C++
+ *   - \ref libopenmpt_ext_cpp_overview "Overview"
+ *   - \ref libopenmpt_ext_cpp "Details"
  *
  * \section toc_website Website
  * http://lib.openmpt.org/
