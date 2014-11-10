@@ -103,12 +103,14 @@ struct self_xmplay_t {
 	openmpt::settings::settings settings;
 	openmpt::module_ext * mod;
 	openmpt::ext::pattern_vis * pattern_vis;
+	bool single_subsong_mode;
 	self_xmplay_t()
 		: samplerate(48000)
 		, num_channels(2)
 		, settings(TEXT(SHORT_TITLE), false)
 		, mod(nullptr)
 		, pattern_vis(nullptr)
+		, single_subsong_mode(false)
 	{
 		settings.changed = apply_and_save_options;
 		settings.load();
@@ -481,11 +483,13 @@ static char * build_xmplay_tags( const openmpt::module & mod ) {
 }
 
 static float * build_xmplay_length( const openmpt::module & mod ) {
-	float * result = static_cast<float*>( xmpfmisc->Alloc( sizeof( float ) ) );
+	float * result = static_cast<float*>( xmpfmisc->Alloc( sizeof( float ) * self->subsong_lengths.size() ) );
 	if ( !result ) {
 		return NULL;
 	}
-	*result = static_cast<float>( mod.get_duration_seconds() );
+	for ( std::size_t i = 0; i < self->subsong_lengths.size(); ++i ) {
+		result[i] = self->subsong_lengths[i];
+	}
 	return result;
 }
 
@@ -685,7 +689,7 @@ static DWORD WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, fl
 		if ( tags ) *tags = NULL;
 		return 0;
 	}
-	return 1;
+	return self->subsong_lengths.size() + XMPIN_INFO_NOSUBTAGS;
 }
 #else
 //tags: 0=title,1=artist,2=album,3=year,4=track,5=genre,6=comment,7=filetype
@@ -925,7 +929,7 @@ static void WINAPI openmpt_GetGeneralInfo( char * buf ) {
 		<< "Instruments" << "\t" << self->mod->get_num_instruments() << "\r"
 		<< "Samples" << "\t" << self->mod->get_num_samples() << "\r";
 
-	if( self->subsong_lengths.size() > 1 ) {
+	if( !self->single_subsong_mode && self->subsong_lengths.size() > 1 ) {
 		std::vector<std::string> names = self->mod->get_subsong_names();
 
 		for ( std::size_t i = 0; i < self->subsong_lengths.size(); ++i ) {
@@ -964,6 +968,9 @@ static double WINAPI openmpt_SetPosition( DWORD pos ) {
 	}
 
 	if ( pos & XMPIN_POS_SUBSONG ) {
+#ifdef XMPIN_POS_SUBSONG1
+		self->single_subsong_mode = ( pos & XMPIN_POS_SUBSONG1 ) != 0;
+#endif
 		try
 		{
 			self->mod->select_subsong( pos & 0xffff );
