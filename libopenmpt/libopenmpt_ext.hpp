@@ -65,6 +65,7 @@ class pattern_vis {
 
 	LIBOPENMPT_EXT_INTERFACE(pattern_vis)
 
+	//! Pattern command type
 	enum effect_type {
 
 		effect_unknown = 0,
@@ -76,12 +77,177 @@ class pattern_vis {
 
 	}; // enum effect_type
 
+	//! Get pattern command type for pattern highlighting
+	/*!
+	  \param pattern The pattern whose data should be retrieved.
+	  \param row The row from which the data should be retrieved.
+	  \param channel The channel from which the data should be retrieved.
+	  \return The command type in the effect column at the given pattern position (see openmpt::ext::pattern_vis::effect_type)
+	  \sa openmpt::ext::pattern_vis::get_pattern_row_channel_effect_type
+	*/
 	virtual effect_type get_pattern_row_channel_volume_effect_type( std::int32_t pattern, std::int32_t row, std::int32_t channel ) const = 0;
 
+	//! Get pattern command type for pattern highlighting
+	/*!
+	  \param pattern The pattern whose data should be retrieved.
+	  \param row The row from which the data should be retrieved.
+	  \param channel The channel from which the data should be retrieved.
+	  \return The command type in the volume column at the given pattern position (see openmpt::ext::pattern_vis::effect_type)
+	  \sa openmpt::ext::pattern_vis::get_pattern_row_channel_volume_effect_type
+	*/
 	virtual effect_type get_pattern_row_channel_effect_type( std::int32_t pattern, std::int32_t row, std::int32_t channel ) const = 0;
 
 }; // class pattern_vis
 
+
+LIBOPENMPT_DECLARE_EXT_INTERFACE(interactive)
+
+class interactive {
+
+	LIBOPENMPT_EXT_INTERFACE(interactive)
+
+	//! Set the current ticks per row (speed)
+	/*!
+	  \param speed The new tick count in range [1, 65535].
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the speed is outside the specified range.
+	  \remarks The tick count may be reset by pattern commands at any time.
+	  \sa openmpt::module::get_current_speed
+	*/
+	virtual void set_current_speed( std::int32_t speed ) = 0;
+
+	//! Set the current module tempo
+	/*!
+	  \param tempo The new tempo in range [32, 512]. The exact meaning of the value depends on the tempo mode used by the module.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the tempo is outside the specified range.
+	  \remarks The tempo may be reset by pattern commands at any time. Use openmpt::ext:interactive::set_tempo_factor to apply a tempo factor that is independent of pattern commands.
+	  \sa openmpt::module::get_current_tempo
+	*/
+	virtual void set_current_tempo( std::int32_t tempo ) = 0;
+
+	//! Set the current module tempo factor without affecting playback pitch
+	/*!
+	  \param factor The new tempo factor in range ]0.0, 4.0] - 1.0 means unmodified tempo.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the factor is outside the specified range.
+	  \remarks Modifying the tempo without applying the same pitch factor using openmpt::ext::interactive::set_pitch_factor may cause rhythmic samples (e.g. drum loops) to go out of sync.
+	  \sa openmpt::ext::interactive::get_tempo_factor
+	*/
+	virtual void set_tempo_factor( double factor ) = 0;
+
+	//! Gets the current module tempo factor
+	/*!
+	  \return The current tempo factor.
+	  \sa openmpt::ext::interactive::set_tempo_factor
+	*/
+	virtual double get_tempo_factor( ) const = 0;
+	
+	//! Set the current module pitch factor without affecting playback speed
+	/*!
+	  \param factor The new pitch factor in range ]0.0, 4.0] - 1.0 means unmodified pitch.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the factor is outside the specified range.
+	  \remarks Modifying the pitch without applying the the same tempo factor openmpt::ext::interactive::set_tempo_factor may cause rhythmic samples (e.g. drum loops) to go out of sync.
+	  \sa openmpt::ext::interactive::get_pitch_factor
+	*/
+	virtual void set_pitch_factor( double factor ) = 0;
+
+	//! Gets the current module pitch factor
+	/*!
+	  \return The current pitch factor.
+	  \sa openmpt::ext::interactive::set_pitch_factor
+	*/
+	virtual double get_pitch_factor( ) const = 0;
+
+	//! Set the current global volume
+	/*!
+	  \param volume The new global volume in range [0.0, 1.0]
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the volume is outside the specified range.
+	  \remarks The global volume may be reset by pattern commands at any time. Use openmpt::module:set_render_param to apply a global overall volume factor that is independent of pattern commands.
+	  \sa openmpt::ext::interactive::get_global_volume
+	*/
+	virtual void set_global_volume( double volume ) = 0;
+
+	//! Get the current global volume
+	/*!
+	  \return The current global volume in range [0.0, 1.0]
+	  \sa openmpt::ext::interactive::set_global_volume
+	*/
+	virtual double get_global_volume( ) const = 0;
+	
+	//! Set the current channel volume for a channel
+	/*!
+	  \param channel The channel whose volume should be set, in range [0, openmpt::module::get_num_channels()[
+	  \param volume The new channel volume in range [0.0, 1.0]
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel or volume is outside the specified range.
+	  \remarks The channel volume may be reset by pattern commands at any time.
+	  \sa openmpt::ext::interactive::get_channel_volume
+	*/
+	virtual void set_channel_volume( std::int32_t channel, double volume ) = 0;
+
+	//! Get the current channel volume for a channel
+	/*!
+	  \param channel The channel whose volume should be retrieved, in range [0, openmpt::module::get_num_channels()[
+	  \return The current channel volume in range [0.0, 1.0]
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel is outside the specified range.
+	  \sa openmpt::ext::interactive::set_channel_volume
+	*/
+	virtual double get_channel_volume( std::int32_t channel ) const = 0;
+
+	//! Set the current mute status for a channel
+	/*!
+	  \param channel The channel whose mute status should be set, in range [0, openmpt::module::get_num_channels()[
+	  \param mute The new mute status. true is muted, false is unmuted.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel is outside the specified range.
+	  \sa openmpt::ext::interactive::get_channel_mute_status
+	*/
+	virtual void set_channel_mute_status( std::int32_t channel, bool mute ) = 0;
+
+	//! Get the current mute status for a channel
+	/*!
+	  \param channel The channel whose mute status should be retrieved, in range [0, openmpt::module::get_num_channels()[
+	  \return The current channel mute status. true is muted, false is unmuted.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel is outside the specified range.
+	  \sa openmpt::ext::interactive::set_channel_mute_status
+	*/
+	virtual bool get_channel_mute_status( std::int32_t channel ) const = 0;
+	
+	//! Set the current mute status for an instrument
+	/*!
+	  \param instrument The instrument whose mute status should be set, in range [0, openmpt::module::get_num_instruments()[ if openmpt::module::get_num_instruments is not 0, otherwise in [0, openmpt::module::get_num_samples()[
+	  \param mute The new mute status. true is muted, false is unmuted.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the instrument is outside the specified range.
+	  \sa openmpt::ext::interactive::get_instrument_mute_status
+	*/
+	virtual void set_instrument_mute_status( std::int32_t instrument, bool mute ) = 0;
+
+	//! Get the current mute status for an instrument
+	/*!
+	  \param instrument The instrument whose mute status should be retrieved, in range [0, openmpt::module::get_num_instruments()[ if openmpt::module::get_num_instruments is not 0, otherwise in [0, openmpt::module::get_num_samples()[
+	  \return The current channel mute status. true is muted, false is unmuted.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the instrument is outside the specified range.
+	  \sa openmpt::ext::interactive::set_instrument_mute_status
+	*/
+	virtual bool get_instrument_mute_status( std::int32_t instrument ) const = 0;
+
+	//! Play a note using the specified instrument
+	/*!
+	  \param instrument The instrument that should be played, in range [0, openmpt::module::get_num_instruments()[ if openmpt::module::get_num_instruments is not 0, otherwise in [0, openmpt::module::get_num_samples()[
+	  \param note The note to play, in rage [0, 119]. 60 is the middle C.
+	  \param volume The volume at which the note should be triggered, in range [0.0, 1.0]
+	  \param panning The panning position at which the note should be triggered, in range [-1.0, 1.0], 0.0 is center.
+	  \return The channel on which the note is played. This can pe be passed to openmpt::ext::interactive::stop_note to stop the note.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the instrument or note is outside the specified range.
+	  \sa openmpt::ext::interactive::stop_note
+	*/
+	virtual std::int32_t play_note( std::int32_t instrument, std::int32_t note, double volume, double panning ) = 0;
+
+	//! Stop the note playing on the specified channel
+	/*!
+	  \param channel The channel on which the note should be stopped.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel index is invalid.
+	  \sa openmpt::ext::interactive::play_note
+	*/
+	virtual void stop_note( std::int32_t channel ) = 0;
+
+}; // class interactive
 
 
 /* add stuff here */

@@ -421,8 +421,8 @@ public:
 	UINT m_nSamplePreAmp, m_nVSTiVolume;
 	bool IsGlobalVolumeUnset() const { return IsFirstTick(); }
 #ifndef MODPLUG_TRACKER
-	UINT m_nFreqFactor; // Pitch shift factor (128 = no pitch shifting). Interesting ModPlug Player relict, but unused in OpenMPT.
-	UINT m_nTempoFactor; // Tempo factor (128 = no tempo adjustment). Interesting ModPlug Player relict, but unused in OpenMPT.
+	UINT m_nFreqFactor; // Pitch shift factor (65536 = no pitch shifting). Only used in libopenmpt (openmpt::ext::interactive::set_pitch_factor)
+	UINT m_nTempoFactor; // Tempo factor (65536 = no tempo adjustment). Only used in libopenmpt (openmpt::ext::interactive::set_tempo_factor)
 #endif
 	int32 m_nMinPeriod, m_nMaxPeriod;	// min period = highest possible frequency, max period = lowest possible frequency
 	int32 m_nRepeatCount;	// -1 means repeat infinitely.

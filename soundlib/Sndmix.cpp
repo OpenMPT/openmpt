@@ -1986,7 +1986,7 @@ bool CSoundFile::ReadNote()
 
 			uint32 ninc = GetChannelIncrement(pChn, period, nPeriodFrac);
 #ifndef MODPLUG_TRACKER
-			ninc = Util::muldivr(ninc, m_nFreqFactor, 128);
+			ninc = Util::muldivr(ninc, m_nFreqFactor, 65536);
 #endif // !MODPLUG_TRACKER
 			if(ninc == 0)
 			{

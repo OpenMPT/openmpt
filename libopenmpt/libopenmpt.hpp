@@ -222,7 +222,7 @@ public:
 	  \param stream Input stream from which the module is loaded. After the constructor has finished successfully, the input position of stream is set to the byte after the last byte that has been read. If the constructor fails, the state of the input position of stream is undefined.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
-	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
 	module( std::istream & stream, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
@@ -230,7 +230,7 @@ public:
 	  \param data Data to load the module from.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
-	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
 	module( const std::vector<std::uint8_t> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
@@ -239,7 +239,7 @@ public:
 	  \param end End of data to load the module from.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
-	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
 	module( const std::uint8_t * beg, const std::uint8_t * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
@@ -248,7 +248,7 @@ public:
 	  \param size Amount of data available.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
-	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
 	module( const std::uint8_t * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
@@ -256,7 +256,7 @@ public:
 	  \param data Data to load the module from.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
-	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
 	module( const std::vector<char> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
@@ -265,7 +265,7 @@ public:
 	  \param end End of data to load the module from.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
-	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
 	module( const char * beg, const char * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
@@ -274,7 +274,7 @@ public:
 	  \param size Amount of data available.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
-	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
 	module( const char * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
@@ -283,7 +283,7 @@ public:
 	  \param size Amount of data available.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
-	  \return Throw an exception derived from openmpt::exception in case the provided file cannot be opened.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
 	*/
 	module( const void * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
@@ -293,7 +293,7 @@ public:
 	//! Select a subsong from a multi-song module
 	/*!
 	  \param subsong Index of the subsong. -1 plays all subsongs consecutively.
-	  \return Throws an exception derived from openmpt::exception if subsong is not in range [-1,openmpt::module::get_num_subsongs()[
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if subsong is not in range [-1,openmpt::module::get_num_subsongs()[
 	*/
 	void select_subsong( std::int32_t subsong );
 	//! Set Repeat Count
@@ -349,7 +349,8 @@ public:
 	//! Get render parameter
 	/*!
 	  \param param Parameter to query. See openmpt::module::render_param.
-	  \return The current value of the parameter. Throws an exception derived from openmpt::exception if param is invalid.
+	  \return The current value of the parameter.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if param is invalid.
 	  \sa openmpt::module::render_param
 	  \sa openmpt::module::set_render_param
 	*/
@@ -358,7 +359,7 @@ public:
 	/*!
 	  \param param Parameter to set. See openmpt::module::render_param.
 	  \param value The value to set param to.
-	  \return Throws an exception derived from openmpt::exception if param is invalid or value is out of range.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if param is invalid or value is out of range.
 	  \sa openmpt::module::render_param
 	  \sa openmpt::module::get_render_param
 	*/
