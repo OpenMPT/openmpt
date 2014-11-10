@@ -598,7 +598,7 @@ CSoundFile::CSoundFile() :
 	m_nSamples = 0;
 	m_nInstruments = 0;
 #ifndef MODPLUG_TRACKER
-	m_nFreqFactor = m_nTempoFactor = 128;
+	m_nFreqFactor = m_nTempoFactor = 65536;
 #endif
 	m_nMinPeriod = MIN_PERIOD;
 	m_nMaxPeriod = 0x7FFF;
@@ -725,7 +725,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 
 	m_nMixChannels = 0;
 #ifndef MODPLUG_TRACKER
-	m_nFreqFactor = m_nTempoFactor = 128;
+	m_nFreqFactor = m_nTempoFactor = 65536;
 #endif
 	m_PlayState.m_nGlobalVolume = MAX_GLOBAL_VOLUME;
 
@@ -1877,7 +1877,7 @@ void CSoundFile::RecalculateSamplesPerTick()
 		break;
 	}
 #ifndef MODPLUG_TRACKER
-	m_PlayState.m_nSamplesPerTick = Util::muldivr(m_PlayState.m_nSamplesPerTick, m_nTempoFactor, 128);
+	m_PlayState.m_nSamplesPerTick = Util::muldivr(m_PlayState.m_nSamplesPerTick, m_nTempoFactor, 65536);
 #endif // !MODPLUG_TRACKER
 }
 
@@ -1923,7 +1923,7 @@ UINT CSoundFile::GetTickDuration(UINT tempo, UINT speed, ROWINDEX rowsPerBeat)
 	}
 #ifndef MODPLUG_TRACKER
 	// when the user modifies the tempo, we do not really care about accurate tempo error accumulation
-	retval = Util::muldivr(retval, m_nTempoFactor, 128);
+	retval = Util::muldivr(retval, m_nTempoFactor, 65536);
 #endif // !MODPLUG_TRACKER
 	return retval;
 }
