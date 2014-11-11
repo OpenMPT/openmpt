@@ -23,6 +23,7 @@
 
 #define NOMINMAX
 #include <windows.h>
+#include <WindowsX.h>
 
 #include "libopenmpt.hpp"
 #include "libopenmpt_ext.hpp"
@@ -503,6 +504,61 @@ static void write_xmplay_string( char * dst, std::string src ) {
 	std::strcpy( dst, src.c_str() );
 }
 
+static std::string extract_date( const openmpt::module & mod ) {
+	std::string result = mod.get_metadata("date");
+	if ( result.empty() ) {
+		// Search the sample, instrument and message texts for possible release years.
+		// We'll look for things that may vaguely resemble a release year, such as 4-digit numbers
+		// or 2-digit numbers with a leading apostrophe. Generally, only years between
+		// 1988 (release of Ultimate SoundTracker) and the current year + 1 (saftey margin) will
+		// be considered.
+		std::string s = " " + mod.get_metadata("message");
+		std::vector<std::string> names = mod.get_sample_names();
+		for ( std::vector<std::string>::const_iterator i = names.begin(); i != names.end(); ++i ) {
+			s += " " + *i;
+		}
+		names = mod.get_instrument_names();
+		for ( std::vector<std::string>::const_iterator i = names.begin(); i != names.end(); ++i ) {
+			s += " " + *i;
+		}
+		s += " ";
+
+		int32_t best_year = 0;
+
+		SYSTEMTIME time;
+		GetSystemTime( &time );
+		const int32_t current_year = time.wYear + 1;
+
+#define MPT_NUMERIC( x ) ( ( x >= '0' ) && ( x <= '9' ) )
+		for ( std::string::const_iterator i = s.begin(); i != s.end(); ++i ) {
+			if ( !MPT_NUMERIC( i[0] ) && MPT_NUMERIC( i[1] ) && MPT_NUMERIC( i[2] ) && MPT_NUMERIC( i[3] ) && MPT_NUMERIC( i[4] ) && !MPT_NUMERIC( i[5] ) ) {
+				// Four-digit year
+				const int32_t year = ( i[1] - '0' ) * 1000 + ( i[2] - '0' ) * 100 + ( i[3] - '0' ) * 10 + ( i[4] - '0' );
+				if ( year >= 1988 && year <= current_year ) {
+					best_year = std::max( year, best_year );
+				}
+			} else if ( i[0] == '\'' && MPT_NUMERIC( i[1] ) && MPT_NUMERIC( i[2] ) && !MPT_NUMERIC( i[3] ) ) {
+				// Apostrophe + two-digit year
+				const int32_t year = ( i[1] - '0' ) * 10 + ( i[2] - '0' );
+				if ( year >= 88 && year <= 99 ) {
+					best_year = std::max( 1900 + year, best_year );
+				} else if ( year >= 00 && ( 2000 + year ) <= current_year ) {
+					best_year = std::max( 2000 + year, best_year );
+				}
+			}
+		}
+#undef MPT_NUMERIC
+
+		if ( best_year != 0 ) {
+			std::ostringstream os;
+			os << best_year;
+			result = os.str();
+		}
+	}
+
+	return result;
+}
+
 #if XMPIN_FACE >= 4
 
 static void append_xmplay_tag( std::string & tags, const std::string & tag, const std::string & val ) {
@@ -524,7 +580,7 @@ static char * build_xmplay_tags( const openmpt::module & mod ) {
 	append_xmplay_tag( tags, "title", convert_to_native( mod.get_metadata("title") ) );
 	append_xmplay_tag( tags, "artist", convert_to_native( mod.get_metadata("artist") ) );
 	append_xmplay_tag( tags, "album", convert_to_native( mod.get_metadata("xmplay-album") ) ); // todo, libopenmpt does not support that
-	append_xmplay_tag( tags, "date", convert_to_native( mod.get_metadata("date") ) );
+	append_xmplay_tag( tags, "date", convert_to_native( extract_date( mod ) ) );
 	append_xmplay_tag( tags, "track", convert_to_native( mod.get_metadata("xmplay-tracknumber") ) ); // todo, libopenmpt does not support that
 	append_xmplay_tag( tags, "genre", convert_to_native( mod.get_metadata("xmplay-genre") ) ); // todo, libopenmpt does not support that
 	append_xmplay_tag( tags, "comment", convert_to_native( mod.get_metadata("message") ) );
@@ -584,7 +640,7 @@ static void write_xmplay_tags( char * tags[8], const openmpt::module & mod ) {
 	write_xmplay_tag( &tags[0], convert_to_native( mod.get_metadata("title") ) );
 	write_xmplay_tag( &tags[1], convert_to_native( mod.get_metadata("artist") ) );
 	write_xmplay_tag( &tags[2], convert_to_native( mod.get_metadata("xmplay-album") ) ); // todo, libopenmpt does not support that
-	write_xmplay_tag( &tags[3], convert_to_native( mod.get_metadata("date") ) );
+	write_xmplay_tag( &tags[3], convert_to_native( extract_date( mod ) ) );
 	write_xmplay_tag( &tags[4], convert_to_native( mod.get_metadata("xmplay-tracknumber") ) ); // todo, libopenmpt does not support that
 	write_xmplay_tag( &tags[5], convert_to_native( mod.get_metadata("xmplay-genre") ) ); // todo, libopenmpt does not support that
 	write_xmplay_tag( &tags[6], convert_to_native( mod.get_metadata("message") ) );
@@ -968,9 +1024,10 @@ static void WINAPI openmpt_GetGeneralInfo( char * buf ) {
 		metadatainfo = true;
 		str << "Artist" << "\t"  << sanitize_xmplay_info_string( self->mod->get_metadata("artist") ) << "\r";
 	}
-	if ( !self->mod->get_metadata("date").empty() ) {
+	const std::string date = extract_date( *self->mod );
+	if ( !date.empty() ) {
 		metadatainfo = true;
-		str << "Date" << "\t"  << sanitize_xmplay_info_string( self->mod->get_metadata("date") ) << "\r";
+		str << "Date" << "\t"  << sanitize_xmplay_info_string( date ) << "\r";
 	}
 	if ( metadatainfo ) {
 		str << "\r";
@@ -1298,7 +1355,7 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 		visfont = CreateFontIndirect( &logfont );
 	}
 	SIZE text_size;
-	SelectObject( dc, visfont );
+	SelectFont( dc, visfont );
 	if ( GetTextExtentPoint32( dc, TEXT("W"), 1, &text_size ) == FALSE ) {
 		return FALSE;
 	}
@@ -1361,17 +1418,17 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	int pattern_height = rows * text_size.cy;
 
 	if ( visDC == nullptr || last_pattern != pattern ) {
-		DeleteObject( visbitmap );
+		DeleteBitmap( visbitmap );
 		DeleteDC( visDC );
 
 		visDC = CreateCompatibleDC( dc );
 		visbitmap = CreateCompatibleBitmap( dc, pattern_width, pattern_height );
-		SelectObject( visDC, visbitmap );
+		SelectBitmap( visDC, visbitmap );
 
-		SelectObject( visDC, vispens[col_unknown] );
-		SelectObject( visDC, visbrushs[col_background] );
+		SelectBrush( visDC, vispens[col_unknown] );
+		SelectBrush( visDC, visbrushs[col_background] );
 
-		SelectObject( visDC, visfont );
+		SelectFont( visDC, visfont );
 
 		rect.top = 0;
 		rect.left = 0;
@@ -1522,8 +1579,9 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 
 	return TRUE;
 }
+
 static void WINAPI VisButton(DWORD x, DWORD y) {
-	xmpopenmpt_lock guard;
+	//xmpopenmpt_lock guard;
 }
 
 #endif
