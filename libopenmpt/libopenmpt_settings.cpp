@@ -190,7 +190,7 @@ protected:
 			m_ComboBoxRepeat.SelectString( 0, L"never" );
 		}
 
-		m_SliderCtrlStereoSeparation.SetRange( 0, 100 );
+		m_SliderCtrlStereoSeparation.SetRange( 0, 200 );
 		m_SliderCtrlStereoSeparation.SetTicFreq( 100 );
 		m_SliderCtrlStereoSeparation.SetPageSize( 25 );
 		m_SliderCtrlStereoSeparation.SetLineSize( 5 );

@@ -574,7 +574,7 @@ std::int32_t module_impl::get_render_param( int param ) const {
 			return static_cast<std::int32_t>( 1000.0f * 2.0f * std::log10( m_Gain ) );
 		} break;
 		case module::RENDER_STEREOSEPARATION_PERCENT: {
-			return m_sndFile->m_MixerSettings.m_nStereoSeparation * 100 / 128;
+			return m_sndFile->m_MixerSettings.m_nStereoSeparation * 100 / MixerSettings::StereoSeparationScale;
 		} break;
 		case module::RENDER_INTERPOLATIONFILTER_LENGTH: {
 			return resamplingmode_to_filterlength( m_sndFile->m_Resampler.m_Settings.SrcMode );
@@ -594,7 +594,7 @@ void module_impl::set_render_param( int param, std::int32_t value ) {
 			m_Gain = static_cast<float>( std::pow( 10.0f, value * 0.001f * 0.5f ) );
 		} break;
 		case module::RENDER_STEREOSEPARATION_PERCENT: {
-			std::int32_t newvalue = value * 128 / 100;
+			std::int32_t newvalue = value * MixerSettings::StereoSeparationScale / 100;
 			if ( newvalue != static_cast<std::int32_t>( m_sndFile->m_MixerSettings.m_nStereoSeparation ) ) {
 				MixerSettings settings = m_sndFile->m_MixerSettings;
 				settings.m_nStereoSeparation = newvalue;

@@ -1010,9 +1010,9 @@ BOOL COptionsMixer::OnInitDialog()
 
 	// Stereo Separation
 	{
-		m_SliderStereoSep.SetRange(0, 16);
+		m_SliderStereoSep.SetRange(0, 32);
 		m_SliderStereoSep.SetPos(16);
-		for (int n = 0; n <= 16; n++)
+		for (int n = 0; n <= 32; n++)
 		{
 			if ((int)TrackerSettings::Instance().MixerStereoSeparation <= 8 * n)
 			{

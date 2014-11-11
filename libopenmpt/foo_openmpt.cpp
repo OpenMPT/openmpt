@@ -63,10 +63,10 @@ static const GUID guid_openmpt_ramping =
 
 static advconfig_branch_factory g_advconfigBranch("OpenMPT Component", guid_openmpt_root, advconfig_branch::guid_branch_decoding, 0);
 
-static advconfig_integer_factory   cfg_samplerate("Samplerate [6000..48000] (Hz)"                                     , guid_openmpt_samplerate, guid_openmpt_root, 0, 48000, 6000, 96000);
+static advconfig_integer_factory   cfg_samplerate("Samplerate [6000..96000] (Hz)"                                     , guid_openmpt_samplerate, guid_openmpt_root, 0, 48000, 6000, 96000);
 static advconfig_integer_factory   cfg_channels  ("Channels [1=mono, 2=stereo, 4=quad]"                               , guid_openmpt_channels  , guid_openmpt_root, 0,     2,    1,     4);
 static advconfig_string_factory_MT cfg_gain      ("Gain [-12...12] (dB)"                                              , guid_openmpt_gain      , guid_openmpt_root, 0, "0.0");
-static advconfig_integer_factory   cfg_stereo    ("Stereo separation [0...400] (%)"                                   , guid_openmpt_stereo    , guid_openmpt_root, 0,   100,    0,   400);
+static advconfig_integer_factory   cfg_stereo    ("Stereo separation [0...200] (%)"                                   , guid_openmpt_stereo    , guid_openmpt_root, 0,   100,    0,   200);
 static advconfig_string_factory_MT cfg_repeat    ("Repeat [0=never, -1=forever, 1..] (#)"                             , guid_openmpt_repeat    , guid_openmpt_root, 0,   "0");
 static advconfig_integer_factory   cfg_filter    ("Interpolation filter length [1=nearest, 2=linear, 4=cubic, 8=sinc]", guid_openmpt_filter    , guid_openmpt_root, 0,     8,    1,     8);
 static advconfig_string_factory_MT cfg_ramping   ("Volume ramping [-1=default, 0=off, 1..10] (ms)"                    , guid_openmpt_ramping   , guid_openmpt_root, 0,  "-1");
