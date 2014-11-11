@@ -52,7 +52,7 @@ public:
 	settings( const std::wstring & subkey, bool no_default_format )
 		: subkey(subkey)
 	{
-		no_default_format = no_default_format;
+		libopenmpt_settings::no_default_format = no_default_format;
 		samplerate = 48000;
 		channels = 2;
 		mastergain_millibel = 0;

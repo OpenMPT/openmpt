@@ -1039,9 +1039,11 @@ static void WINAPI openmpt_GetGeneralInfo( char * buf ) {
 	str
 		<< "Channels" << "\t" << self->mod->get_num_channels() << "\r"
 		<< "Orders" << "\t" << self->mod->get_num_orders() << "\r"
-		<< "Patterns" << "\t" << self->mod->get_num_patterns() << "\r"
-		<< "Instruments" << "\t" << self->mod->get_num_instruments() << "\r"
-		<< "Samples" << "\t" << self->mod->get_num_samples() << "\r";
+		<< "Patterns" << "\t" << self->mod->get_num_patterns() << "\r";
+	if ( self->mod->get_num_instruments() != 0 ) {
+		str << "Instruments" << "\t" << self->mod->get_num_instruments() << "\r";
+	}
+	str << "Samples" << "\t" << self->mod->get_num_samples() << "\r";
 
 	if( !self->single_subsong_mode && self->subsong_lengths.size() > 1 ) {
 		std::vector<std::string> names = self->mod->get_subsong_names();
