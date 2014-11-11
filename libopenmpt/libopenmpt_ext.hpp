@@ -73,6 +73,16 @@ public:
 
 public:
 
+	//! Retrieve a libopenmpt extension.
+	/*! Example: Retrieving the interactive extension to change the tempo of a module:
+	  \code{.cpp}
+	  openmpt::module_ext *mod = new openmpt::module_ext( stream );
+	  openmpt::ext::interactive *interactive = static_cast<openmpt::ext::interactive *>( self->mod->get_interface( openmpt::ext::interactive_id ) );
+	  interactive->set_tempo_factor( 2.0 ); // play module at double speed
+	  \endcode
+	  \param interface_id The name of the extension interface to retrieve.
+	  \return The interface object. This may be a nullptr if the extension was not found.
+	*/
 	void * get_interface( const std::string & interface_id );
 
 }; // class module_ext
@@ -182,6 +192,7 @@ class interactive {
 	  \param factor The new pitch factor in range ]0.0, 4.0] - 1.0 means unmodified pitch.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the factor is outside the specified range.
 	  \remarks Modifying the pitch without applying the the same tempo factor openmpt::ext::interactive::set_tempo_factor may cause rhythmic samples (e.g. drum loops) to go out of sync.
+	  \remarks To shift the pich by `n` semitones, the parameter can be calculated as follows: `pow( 2.0, n / 12.0 )`
 	  \sa openmpt::ext::interactive::get_pitch_factor
 	*/
 	virtual void set_pitch_factor( double factor ) = 0;

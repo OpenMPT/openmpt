@@ -21,6 +21,9 @@
 
 #define LIBOPENMPT_EXT_IS_EXPERIMENTAL
 
+#define NOMINMAX
+#include <windows.h>
+
 #include "libopenmpt.hpp"
 #include "libopenmpt_ext.hpp"
 
@@ -41,9 +44,6 @@ static const char * xmp_openmpt_string = "OpenMPT (" OPENMPT_API_VERSION_STRING 
 
 #define USE_XMPLAY_ISTREAM
 
-#define NOMINMAX
-#include <windows.h>
-
 // For now, in order to stay compatible with XMPlay before 3.8,
 // force pre XMPIN_FACE==4 SDK version for newer xmpin.h.
 // Older xmpin.h just ignore this completely.
@@ -53,6 +53,18 @@ static const char * xmp_openmpt_string = "OpenMPT (" OPENMPT_API_VERSION_STRING 
 #ifndef XMPIN_FACE
 #define XMPIN_FACE 3 // older SDKs (pre XMPlay 3.8) do not define this
 #endif
+
+// Shortcut block assigned to the OpenMPT plugin by un4seen.
+enum {
+	openmpt_shortcut_first = 0x21000,
+	openmpt_shortcut_tempo_decrease = openmpt_shortcut_first,
+	openmpt_shortcut_tempo_increase,
+	openmpt_shortcut_pitch_decrease,
+	openmpt_shortcut_pitch_increase,
+	openmpt_shortcut_last = 0x21fff,
+
+	openmpt_shortcut_ex = 0x80000000,	// Use extended version of the shortcut callback
+};
 
 #include <algorithm>
 #include <fstream>
@@ -103,6 +115,7 @@ struct self_xmplay_t {
 	openmpt::settings::settings settings;
 	openmpt::module_ext * mod;
 	openmpt::ext::pattern_vis * pattern_vis;
+	std::int32_t tempo_factor, pitch_factor;
 	bool single_subsong_mode;
 	self_xmplay_t()
 		: samplerate(48000)
@@ -110,13 +123,15 @@ struct self_xmplay_t {
 		, settings(TEXT(SHORT_TITLE), false)
 		, mod(nullptr)
 		, pattern_vis(nullptr)
+		, tempo_factor(0)
+		, pitch_factor(0)
 		, single_subsong_mode(false)
 	{
 		settings.changed = apply_and_save_options;
 		settings.load();
 	}
 	void on_new_mod() {
-		self->pattern_vis = static_cast<openmpt::ext::pattern_vis*>( self->mod->get_interface( openmpt::ext::pattern_vis_id ) );
+		self->pattern_vis = static_cast<openmpt::ext::pattern_vis *>( self->mod->get_interface( openmpt::ext::pattern_vis_id ) );
 	}
 	void delete_mod() {
 		if ( mod ) {
@@ -274,6 +289,46 @@ static void WINAPI openmpt_SetConfig( void * config, DWORD size ) {
 	}
 }
 
+static void WINAPI ShortcutHandler( DWORD id ) {
+	if ( self->mod == nullptr ) {
+		return;
+	}
+
+	bool tempo_changed = false, pitch_changed = false;
+	switch ( id ) {
+	case openmpt_shortcut_tempo_decrease: self->tempo_factor--; tempo_changed = true; break;
+	case openmpt_shortcut_tempo_increase: self->tempo_factor++; tempo_changed = true; break;
+	case openmpt_shortcut_pitch_decrease: self->pitch_factor--; pitch_changed = true; break;
+	case openmpt_shortcut_pitch_increase: self->pitch_factor++; pitch_changed = true; break;
+	}
+	
+	self->tempo_factor = std::min ( 48, std::max( -48, self->tempo_factor ) );
+	self->pitch_factor = std::min ( 48, std::max( -48, self->pitch_factor ) );
+	const double tempo_factor = std::pow( 2.0, self->tempo_factor / 24.0 );
+	const double pitch_factor = std::pow( 2.0, self->pitch_factor / 24.0 );
+
+	if ( tempo_changed ) {
+		std::ostringstream s;
+		s << "Tempo: " << static_cast<std::int_fast32_t>( 100.0 * tempo_factor ) << "%";
+		xmpfmisc->ShowBubble( s.str().c_str(), 0 );
+	} else if ( pitch_changed) {
+		std::ostringstream s;
+		s << "Pitch: ";
+		if ( self->pitch_factor > 0 )
+			s << "+";
+		else if ( self->pitch_factor == 0 )
+			s << "+/-";
+		s << (self->pitch_factor * 0.5) << " semitones";
+		xmpfmisc->ShowBubble( s.str().c_str(), 0 );
+	}
+
+	openmpt::ext::interactive *interactive = static_cast<openmpt::ext::interactive *>( self->mod->get_interface( openmpt::ext::interactive_id ) );
+	interactive->set_tempo_factor( tempo_factor );
+	interactive->set_pitch_factor( pitch_factor );
+	xmpfin->SetLength( static_cast<float>( self->mod->get_duration_seconds() / tempo_factor ), TRUE );
+}
+
+
 #ifdef EXPERIMENTAL_VIS
 static double timeinfo_position = 0.0;
 struct timeinfo {
@@ -331,7 +386,7 @@ static void clear_current_timeinfo() {
 static void WINAPI openmpt_About( HWND win ) {
 	std::ostringstream about;
 	about << SHORT_TITLE << " version " << openmpt::string::get( openmpt::string::library_version ) << " " << "(built " << openmpt::string::get( openmpt::string::build ) << ")" << std::endl;
-	about << " Copyright (c) 2013 OpenMPT developers (http://openmpt.org/)" << std::endl;
+	about << " Copyright (c) 2013 - 2014 OpenMPT developers (http://openmpt.org/)" << std::endl;
 	about << " OpenMPT version " << openmpt::string::get( openmpt::string::core_version ) << std::endl;
 	about << std::endl;
 	about << openmpt::string::get( openmpt::string::contact ) << std::endl;
@@ -791,6 +846,8 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 			self->subsong_lengths[i] = static_cast<float>( self->mod->get_duration_seconds() );
 		}
 		self->mod->select_subsong( 0 );
+		self->tempo_factor = 0;
+		self->pitch_factor = 0;
 
 		xmpfin->SetLength( self->subsong_lengths[0], TRUE );
 		return 2;
@@ -978,7 +1035,8 @@ static double WINAPI openmpt_SetPosition( DWORD pos ) {
 		{
 			return 0.0;
 		}
-		xmpfin->SetLength( self->subsong_lengths[pos & 0xffff], TRUE );
+		openmpt::ext::interactive *interactive = static_cast<openmpt::ext::interactive *>( self->mod->get_interface( openmpt::ext::interactive_id ) );
+		xmpfin->SetLength( static_cast<float> ( self->subsong_lengths[pos & 0xffff] / interactive->get_tempo_factor() ), TRUE );
 		reset_timeinfos( 0 );
 		return 0.0;
 	}
@@ -1575,6 +1633,23 @@ static XMPIN * XMPIN_GetInterface_cxx( DWORD face, InterfaceProc faceproc ) {
 	xmpffile=(XMPFUNC_FILE*)faceproc(XMPFUNC_FILE_FACE);
 	xmpftext=(XMPFUNC_TEXT*)faceproc(XMPFUNC_TEXT_FACE);
 	xmpfstatus=(XMPFUNC_STATUS*)faceproc(XMPFUNC_STATUS_FACE);
+
+	// Register keyboard shortcuts
+	XMPSHORTCUT cut;
+	cut.procex = &ShortcutHandler;
+	cut.id = openmpt_shortcut_ex | openmpt_shortcut_tempo_decrease;
+	cut.text = "OpenMPT - Decrease Tempo";
+	xmpfmisc->RegisterShortcut( &cut );
+	cut.id = openmpt_shortcut_ex | openmpt_shortcut_tempo_increase;
+	cut.text = "OpenMPT - Increase Tempo";
+	xmpfmisc->RegisterShortcut( &cut );
+	cut.id = openmpt_shortcut_ex | openmpt_shortcut_pitch_decrease;
+	cut.text = "OpenMPT - Decrease Pitch";
+	xmpfmisc->RegisterShortcut( &cut );
+	cut.id = openmpt_shortcut_ex | openmpt_shortcut_pitch_increase;
+	cut.text = "OpenMPT - Increase Pitch";
+	xmpfmisc->RegisterShortcut( &cut );
+
 	return &xmpin;
 }
 
