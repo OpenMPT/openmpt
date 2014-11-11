@@ -10,6 +10,7 @@
 #ifndef LIBOPENMPT_SETTINGS_H
 #define LIBOPENMPT_SETTINGS_H
 
+#define NOMINMAX
 #include <windows.h>
 
 #ifdef __cplusplus

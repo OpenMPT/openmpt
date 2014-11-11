@@ -217,7 +217,7 @@ private:
 	module();
 	void set_impl( module_impl * i );
 public:
-	//! Construct a openmpt::module
+	//! Construct an openmpt::module
 	/*!
 	  \param stream Input stream from which the module is loaded. After the constructor has finished successfully, the input position of stream is set to the byte after the last byte that has been read. If the constructor fails, the state of the input position of stream is undefined.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
