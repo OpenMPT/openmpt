@@ -261,7 +261,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 		if(m_MixerSettings.m_nStereoSeparation >= -128 && m_MixerSettings.m_nStereoSeparation < 128 && m_MixerSettings.gnChannels >= 2)
 		{
 			// Apply stereo separation
-			ApplyStereoSeparation(MixSoundBuffer, count * m_MixerSettings.gnChannels / 2, m_MixerSettings.m_nStereoSeparation);
+			ApplyStereoSeparation(MixSoundBuffer, countChunk * m_MixerSettings.gnChannels / 2, m_MixerSettings.m_nStereoSeparation);
 		}
 
 		target.DataCallback(MixSoundBuffer, m_MixerSettings.gnChannels, countChunk);
