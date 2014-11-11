@@ -17,6 +17,8 @@ struct MixerSettings
 {
 
 	int32 m_nStereoSeparation;
+	static const int32 StereoSeparationScale = 128;
+	
 	UINT m_nMaxMixChannels;
 	DWORD DSPMask;
 	DWORD MixerFlags;

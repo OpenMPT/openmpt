@@ -129,21 +129,40 @@ bool CSoundFile::FadeSong(UINT msec)
 
 // Apply stereo separation factor on an interleaved stereo/quad stream.
 // count = Number of stereo sample pairs to process
-// separation = -128...128 (negative values = swap L/R, 0 = mono)
+// separation = -256...256 (negative values = swap L/R, 0 = mono, 128 = normal)
 static void ApplyStereoSeparation(mixsample_t *mixBuf, CSoundFile::samplecount_t count, int32 separation)
 //-------------------------------------------------------------------------------------------------------
 {
-	const mixsample_t fac1 = static_cast<mixsample_t>(64 + separation / 2), fac2 = static_cast<mixsample_t>(64 - separation / 2);
+#ifdef MPT_INTMIXER
+	const mixsample_t factor_num = separation; // 128 =^= 1.0f
+	const mixsample_t factor_den = MixerSettings::StereoSeparationScale; // 128
+	const mixsample_t normalize_den = 2; // mid/side pre/post normalization
+	const mixsample_t mid_den = normalize_den;
+	const mixsample_t side_num = factor_num;
+	const mixsample_t side_den = factor_den * normalize_den;
+#else
+	const float normalize_factor = 0.5f; // cumulative mid/side normalization factor (1/sqrt(2))*(1/sqrt(2))
+	const float factor = static_cast<float>(separation) / static_cast<float>(MixerSettings::StereoSeparationScale); // sep / 128
+	const float mid_factor = normalize_factor;
+	const float side_factor = factor * normalize_factor;
+#endif
 	for(CSoundFile::samplecount_t i = 0; i < count; i++)
 	{
-		const mixsample_t l = mixBuf[0], r = mixBuf[1];
+		mixsample_t l = mixBuf[0];
+		mixsample_t r = mixBuf[1];
+		mixsample_t m = l + r;
+		mixsample_t s = l - r;
 #ifdef MPT_INTMIXER
-		mixBuf[0] = static_cast<mixsample_t>((Util::mul32to64(l, fac1) + Util::mul32to64(r, fac2)) >> 7);
-		mixBuf[1] = static_cast<mixsample_t>((Util::mul32to64(l, fac2) + Util::mul32to64(r, fac1)) >> 7);
+		m /= mid_den;
+		s = Util::muldiv(s, side_num, side_den);
 #else
-		mixBuf[0] = (l * fac1 + r * fac2) / mixsample_t(128);
-		mixBuf[1] = (l * fac2 + r * fac1) / mixsample_t(128);
+		m *= mid_factor;
+		s *= side_factor;
 #endif
+		l = m + s;
+		r = m - s;
+		mixBuf[0] = l;
+		mixBuf[1] = r;
 		mixBuf += 2;
 	}
 }
@@ -152,7 +171,7 @@ static void ApplyStereoSeparation(mixsample_t *mixBuf, CSoundFile::samplecount_t
 static void ApplyStereoSeparation(mixsample_t *SoundFrontBuffer, mixsample_t *SoundRearBuffer, std::size_t channels, std::size_t countChunk, int32 separation)
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	if(separation == 128)
+	if(separation == MixerSettings::StereoSeparationScale)
 	{ // identity
 		return;
 	}
@@ -260,7 +279,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 			ApplyGlobalVolume(MixSoundBuffer, MixRearBuffer, countChunk);
 		}
 
-		if(m_MixerSettings.m_nStereoSeparation >= -128 && m_MixerSettings.m_nStereoSeparation < 128 && m_MixerSettings.gnChannels >= 2)
+		if(m_MixerSettings.m_nStereoSeparation != MixerSettings::StereoSeparationScale)
 		{
 			ApplyStereoSeparation(MixSoundBuffer, MixRearBuffer, m_MixerSettings.gnChannels, countChunk, m_MixerSettings.m_nStereoSeparation);
 		}
