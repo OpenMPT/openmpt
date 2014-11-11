@@ -149,6 +149,18 @@ static void ApplyStereoSeparation(mixsample_t *mixBuf, CSoundFile::samplecount_t
 }
 
 
+static void ApplyStereoSeparation(mixsample_t *SoundFrontBuffer, mixsample_t *SoundRearBuffer, std::size_t channels, std::size_t countChunk, int32 separation)
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	if(separation == 128)
+	{ // identity
+		return;
+	}
+	if(channels >= 2) ApplyStereoSeparation(SoundFrontBuffer, countChunk, separation);
+	if(channels >= 4) ApplyStereoSeparation(SoundRearBuffer , countChunk, separation);
+}
+
+
 CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget &target)
 //---------------------------------------------------------------------------------------
 {
@@ -248,6 +260,11 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 			ApplyGlobalVolume(MixSoundBuffer, MixRearBuffer, countChunk);
 		}
 
+		if(m_MixerSettings.m_nStereoSeparation >= -128 && m_MixerSettings.m_nStereoSeparation < 128 && m_MixerSettings.gnChannels >= 2)
+		{
+			ApplyStereoSeparation(MixSoundBuffer, MixRearBuffer, m_MixerSettings.gnChannels, countChunk, m_MixerSettings.m_nStereoSeparation);
+		}
+
 		if(m_MixerSettings.DSPMask)
 		{
 			ProcessDSP(countChunk);
@@ -256,12 +273,6 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 		if(m_MixerSettings.gnChannels == 4)
 		{
 			InterleaveFrontRear(MixSoundBuffer, MixRearBuffer, countChunk);
-		}
-
-		if(m_MixerSettings.m_nStereoSeparation >= -128 && m_MixerSettings.m_nStereoSeparation < 128 && m_MixerSettings.gnChannels >= 2)
-		{
-			// Apply stereo separation
-			ApplyStereoSeparation(MixSoundBuffer, countChunk * m_MixerSettings.gnChannels / 2, m_MixerSettings.m_nStereoSeparation);
 		}
 
 		target.DataCallback(MixSoundBuffer, m_MixerSettings.gnChannels, countChunk);
