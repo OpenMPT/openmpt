@@ -66,7 +66,7 @@ struct PATTERNFONT
 	int nAlphaAM_X,nAlphaAM_Y;	// Letters A-M +#
 	int nAlphaNZ_X,nAlphaNZ_Y;	// Letters N-Z +?
 	int nNoteX, nNoteY;			// Notes ..., C-, C#, ...
-	int nNoteWidth;				// NoteWidth
+	int nNoteWidth;				// Total width of note (C#)
 	int nOctaveWidth;			// Octave Width
 	int nVolX, nVolY;			// Volume Column Effects
 	int nVolCmdWidth;			// Width of volume effect
@@ -536,7 +536,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CHAR s[256];
-	HGDIOBJ oldpen;
+	HPEN oldpen;
 	CRect rcClient, rect, rc;
 	const CModDoc *pModDoc;
 	HDC hdc;
@@ -550,7 +550,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 	if ((pModDoc = GetDocument()) == nullptr) return;
 	GetClientRect(&rcClient);
 	hdc = pDC->m_hDC;
-	oldpen = ::SelectObject(hdc, CMainFrame::penDarkGray);
+	oldpen = SelectPen(hdc, CMainFrame::penDarkGray);
 	xofs = static_cast<CHANNELINDEX>(GetXScrollPos());
 	yofs = static_cast<ROWINDEX>(GetYScrollPos());
 	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
@@ -701,7 +701,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 
 	UINT nrows = sndFile.Patterns.IsValidPat(m_nPattern) ? sndFile.Patterns[m_nPattern].GetNumRows() : 0;
 	int ypatternend = ypaint + (nrows-yofs)*m_szCell.cy;
-	DrawPatternData(hdc, m_nPattern, TRUE, (pMainFrm->GetModPlaying() == pModDoc),
+	DrawPatternData(hdc, m_nPattern, true, (pMainFrm->GetModPlaying() == pModDoc),
 					yofs, nrows, xofs, rcClient, &ypaint);
 	// Display next pattern
 	if ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWPREVIOUS) && (ypaint < rcClient.bottom) && (ypaint == ypatternend))
@@ -750,7 +750,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 	{
 		DrawDragSel(hdc);
 	}
-	if (oldpen) ::SelectObject(hdc, oldpen);
+	if (oldpen) SelectPen(hdc, oldpen);
 
 	//rewbs.fxVis
 	if (m_pEffectVis)
@@ -1295,7 +1295,7 @@ void CViewPattern::UpdateScrollSize()
 //-----------------------------------
 {
 	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile && pSndFile->Patterns.IsValidIndex(m_nPattern))
+	if(pSndFile && pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
 		CRect rect;
 		SIZE sizeTotal, sizePage, sizeLine;
@@ -1479,7 +1479,7 @@ void CViewPattern::SetCurSel(const PatternCursor &beginSel, const PatternCursor 
 	// Get new selection area
 	m_Selection = PatternRect(beginSel, endSel);
 	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile != nullptr && pSndFile->Patterns.IsValidIndex(m_nPattern))
+	if(pSndFile != nullptr && pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
 		m_Selection.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
 	}
@@ -1530,7 +1530,7 @@ void CViewPattern::InvalidateRow(ROWINDEX n)
 //------------------------------------------
 {
 	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile && pSndFile->Patterns.IsValidIndex(m_nPattern))
+	if(pSndFile && pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
 		int yofs = GetYScrollPos() - m_nMidRow;
 		if (n == ROWINDEX_INVALID) n = GetCurrentRow();
@@ -1586,21 +1586,21 @@ void CViewPattern::UpdateIndicator()
 {
 	const CSoundFile *pSndFile = GetSoundFile();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if(pMainFrm != nullptr && pSndFile != nullptr)
+	if(pMainFrm != nullptr && pSndFile != nullptr && pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
 		EffectInfo effectInfo(*pSndFile);
 
-		CHAR s[128];
+		TCHAR s[128];
 		CHANNELINDEX nChn;
-		wsprintf(s, "Row %d, Col %d", GetCurrentRow(), GetCurrentChannel() + 1);
+		wsprintf(s, _T("Row %u, Col %u"), GetCurrentRow(), GetCurrentChannel() + 1);
 		pMainFrm->SetUserText(s);
 		if (::GetFocus() == m_hWnd)
 		{
 			nChn = m_Cursor.GetChannel();
 			s[0] = 0;
 			if(!m_Status[psKeyboardDragSelect]
-				&& (m_Selection.GetUpperLeft() == m_Selection.GetLowerRight()) && pSndFile->Patterns.IsValidIndex(m_nPattern)
-				&& (GetCurrentRow() < pSndFile->Patterns[m_nPattern].GetNumRows()) && (nChn < pSndFile->GetNumChannels()))
+				&& m_Selection.GetUpperLeft() == m_Selection.GetLowerRight()
+				&& GetCurrentRow() < pSndFile->Patterns[m_nPattern].GetNumRows() && nChn < pSndFile->GetNumChannels())
 			{
 				const ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(GetCurrentRow(), nChn);
 
@@ -1687,22 +1687,22 @@ void CViewPattern::UpdateIndicator()
 				}
 			}
 			pMainFrm->SetInfoText(s);
-			UpdateXInfoText();		//rewbs.xinfo
+			UpdateXInfoText();
 		}
 	}
-
 }
+
 
 //rewbs.xinfo
 void CViewPattern::UpdateXInfoText()
 //----------------------------------
 {
-	UINT nChn = GetCurrentChannel();
+	CHANNELINDEX nChn = GetCurrentChannel();
 	CString xtraInfo;
 
 	const CSoundFile *pSndFile = GetSoundFile();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if(pMainFrm != nullptr && pSndFile != nullptr && pSndFile->Patterns.IsValidIndex(m_nPattern))
+	if(pMainFrm != nullptr && pSndFile != nullptr)
 	{
 		//xtraInfo.Format("Chan: %d; macro: %X; cutoff: %X; reso: %X; pan: %X",
 		xtraInfo.Format("Chn:%d; Vol:%X; Mac:%X; Cut:%X%s; Res:%X; Pan:%X%s",
@@ -1728,25 +1728,19 @@ void CViewPattern::UpdateAllVUMeters(Notification *pnotify)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	const CModDoc *pModDoc = GetDocument();
-	const CSoundFile *pSndFile;
-	CRect rcClient;
-	HDC hdc;
-	BOOL bPlaying;
-	UINT nChn;
-	int x, xofs;
 	
 	if ((!pModDoc) || (!pMainFrm)) return;
+	CRect rcClient;
 	GetClientRect(&rcClient);
-	xofs = GetXScrollPos();
-	pSndFile = pModDoc->GetSoundFile();
-	hdc = ::GetDC(m_hWnd);
-	bPlaying = (pMainFrm->GetFollowSong(pModDoc) == m_hWnd) ? TRUE : FALSE;
-	x = m_szHeader.cx;
-	nChn = xofs;
-	while ((nChn < pSndFile->GetNumChannels()) && (x < rcClient.right))
+	int xofs = GetXScrollPos();
+	HDC hdc = ::GetDC(m_hWnd);
+	const bool isPlaying = (pMainFrm->GetFollowSong(pModDoc) == m_hWnd);
+	int x = m_szHeader.cx;
+	CHANNELINDEX nChn = static_cast<CHANNELINDEX>(xofs);
+	while ((nChn < pModDoc->GetNumChannels()) && (x < rcClient.right))
 	{
 		ChnVUMeters[nChn] = (WORD)pnotify->pos[nChn];
-		if ((!bPlaying) || pnotify->type[Notification::Stop]) ChnVUMeters[nChn] = 0;
+		if ((!isPlaying) || pnotify->type[Notification::Stop]) ChnVUMeters[nChn] = 0;
 		DrawChannelVUMeter(hdc, x + 1, rcClient.top + COLHDR_HEIGHT, nChn);
 		nChn++;
 		x += m_szCell.cx;
