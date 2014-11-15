@@ -713,7 +713,7 @@ BOOL CModDoc::InitializeMod()
 			m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 128;
 		}*/
 
-		if(m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_XM))
+		if(m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_XM | MOD_TYPE_S3M))
 		{
 			m_SndFile.SetModFlag(MSF_COMPATIBLE_PLAY, true);
 		}

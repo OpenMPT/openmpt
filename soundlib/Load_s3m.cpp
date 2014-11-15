@@ -223,6 +223,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		} else
 		{
 			trackerStr = "Scream Tracker";
+			SetModFlag(MSF_COMPATIBLE_PLAY, true);
 		}
 		break;
 	case S3MFileHeader::trkImagoOrpheus:
@@ -243,12 +244,15 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	case S3MFileHeader::trkOpenMPT:
 		trackerStr = "OpenMPT";
 		m_dwLastSavedWithVersion = (fileHeader.cwtv & S3MFileHeader::versionMask) << 16;
+		SetModFlag(MSF_COMPATIBLE_PLAY, true);
 		break; 
 	case S3MFileHeader::trkBeRoTracker:
 		madeWithTracker = "BeRoTracker";
+		SetModFlag(MSF_COMPATIBLE_PLAY, true);
 		break;
 	case S3MFileHeader::trkCreamTracker:
 		madeWithTracker = "CreamTracker";
+		SetModFlag(MSF_COMPATIBLE_PLAY, true);
 		break;
 	}
 	if(!trackerStr.empty())
@@ -561,6 +565,11 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	mpt::String::Write<mpt::String::nullTerminated>(fileHeader.name, songName);
 	fileHeader.dosEof = S3MFileHeader::idEOF;
 	fileHeader.fileType = S3MFileHeader::idS3MType;
+
+	if(!IsCompatibleMode(TRK_SCREAMTRACKER))
+	{
+		AddToLog("Compatible playback mode is currently disabled. This setting is not saved in S3M files and will be enabled automatically once the file is reloaded.");
+	}
 
 	// Orders
 	ORDERINDEX writeOrders = Order.GetLengthTailTrimmed();
