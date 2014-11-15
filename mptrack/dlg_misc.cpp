@@ -182,18 +182,19 @@ void CModTypeDlg::UpdateDialog()
 	if(ITorMPT)
 	{
 		GetDlgItem(IDC_CHK_COMPATPLAY)->SetWindowText(_T("More Impulse Tracker &compatible playback"));
-	} else
+	} else if(XM)
 	{
 		GetDlgItem(IDC_CHK_COMPATPLAY)->SetWindowText(_T("More Fasttracker 2 &compatible playback"));
+	} else
+	{
+		GetDlgItem(IDC_CHK_COMPATPLAY)->SetWindowText(_T("More ScreamTracker 3 &compatible playback"));
 	}
 
-	GetDlgItem(IDC_CHK_COMPATPLAY)->ShowWindow(XMorITorMPT);
-	GetDlgItem(IDC_CHK_MIDICCBUG)->ShowWindow(XMorITorMPT);
-	GetDlgItem(IDC_CHK_OLDRANDOM)->ShowWindow(ITorMPT);
-	GetDlgItem(IDC_CHK_OLDPITCH)->ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_CHK_OLDRANDOM)->ShowWindow(!XM);
 	GetDlgItem(IDC_CHK_FT2VOLRAMP)->ShowWindow(XM);
 
 	// Deprecated flags are greyed out if they are not being used.
+	GetDlgItem(IDC_CHK_COMPATPLAY)->EnableWindow(type != MOD_TYPE_MOD ? TRUE : FALSE);
 	GetDlgItem(IDC_CHK_MIDICCBUG)->EnableWindow(sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION) ? TRUE : FALSE);
 	GetDlgItem(IDC_CHK_OLDRANDOM)->EnableWindow((ITorMPT && sndFile.GetModFlag(MSF_OLDVOLSWING)) ? TRUE : FALSE);
 	GetDlgItem(IDC_CHK_OLDPITCH)->EnableWindow(sndFile.GetModFlag(MSF_OLD_MIDI_PITCHBENDS) ? TRUE : FALSE);
@@ -242,36 +243,17 @@ void CModTypeDlg::UpdateDialog()
 	}
 
 	// Mixmode Box
-	GetDlgItem(IDC_TEXT_MIXMODE)->ShowWindow(XMorITorMPT);
-	m_PlugMixBox.ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_TEXT_MIXMODE)->EnableWindow(XMorITorMPT);
+	m_PlugMixBox.EnableWindow(XMorITorMPT);
 	
 	// Tempo mode box
-	m_TempoModeBox.ShowWindow(XMorITorMPT);
-	GetDlgItem(IDC_ROWSPERBEAT)->ShowWindow(XMorITorMPT);
-	GetDlgItem(IDC_ROWSPERMEASURE)->ShowWindow(XMorITorMPT);
-	GetDlgItem(IDC_TEXT_ROWSPERBEAT)->ShowWindow(XMorITorMPT);
-	GetDlgItem(IDC_TEXT_ROWSPERMEASURE)->ShowWindow(XMorITorMPT);
-	GetDlgItem(IDC_TEXT_TEMPOMODE)->ShowWindow(XMorITorMPT);
-	GetDlgItem(IDC_FRAME_TEMPOMODE)->ShowWindow(XMorITorMPT);
-
-	// Version info
-	GetDlgItem(IDC_FRAME_MPTVERSION)->ShowWindow(XMorITorMPT);
-	GetDlgItem(IDC_TEXT_CREATEDWITH)->ShowWindow(XMorITorMPT);
-	GetDlgItem(IDC_TEXT_SAVEDWITH)->ShowWindow(XMorITorMPT);
-	GetDlgItem(IDC_EDIT_CREATEDWITH)->ShowWindow(XMorITorMPT);
-	GetDlgItem(IDC_EDIT_SAVEDWITH)->ShowWindow(XMorITorMPT);
-
-	// Window height - some parts of the dialog won't be visible for all formats
-	RECT rWindow;
-	GetWindowRect(&rWindow);
-	
-	UINT iHeight;
-	int nItemID = (XMorITorMPT) ? IDC_FRAME_MPTVERSION : IDC_FRAME_MODFLAGS;
-	RECT rFrame;
-	GetDlgItem(nItemID)->GetWindowRect(&rFrame);
-	iHeight = rFrame.bottom - rWindow.top + 12;
-	MoveWindow(rWindow.left, rWindow.top, rWindow.right - rWindow.left, iHeight);
-
+	m_TempoModeBox.EnableWindow(XMorITorMPT);
+	GetDlgItem(IDC_ROWSPERBEAT)->EnableWindow(XMorITorMPT);
+	GetDlgItem(IDC_ROWSPERMEASURE)->EnableWindow(XMorITorMPT);
+	GetDlgItem(IDC_TEXT_ROWSPERBEAT)->EnableWindow(XMorITorMPT);
+	GetDlgItem(IDC_TEXT_ROWSPERMEASURE)->EnableWindow(XMorITorMPT);
+	GetDlgItem(IDC_TEXT_TEMPOMODE)->EnableWindow(XMorITorMPT);
+	GetDlgItem(IDC_FRAME_TEMPOMODE)->EnableWindow(XMorITorMPT);
 }
 
 
@@ -298,7 +280,7 @@ bool CModTypeDlg::VerifyData()
 		CString error;
 		error.Format("Error: Maximum number of channels for this module type is %d.", maxChans);
 		Reporting::Warning(error);
-		return FALSE;
+		return false;
 	}
 
 	if(maxChans < sndFile.GetNumChannels())
@@ -348,10 +330,10 @@ void CModTypeDlg::OnOK()
 		sndFile.SetMixLevels(static_cast<mixLevels>(m_PlugMixBox.GetItemData(sel)));
 	}
 
+	sndFile.SetModFlags(0);
+	if(IsDlgButtonChecked(IDC_CHK_COMPATPLAY)) sndFile.SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	if(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))
 	{
-		sndFile.SetModFlags(0);
-		if(IsDlgButtonChecked(IDC_CHK_COMPATPLAY)) sndFile.SetModFlag(MSF_COMPATIBLE_PLAY, true);
 		if(IsDlgButtonChecked(IDC_CHK_MIDICCBUG)) sndFile.SetModFlag(MSF_MIDICC_BUGEMULATION, true);
 		if(IsDlgButtonChecked(IDC_CHK_OLDRANDOM)) sndFile.SetModFlag(MSF_OLDVOLSWING, true);
 		if(IsDlgButtonChecked(IDC_CHK_OLDPITCH)) sndFile.SetModFlag(MSF_OLD_MIDI_PITCHBENDS, true);

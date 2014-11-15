@@ -51,11 +51,11 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Trim envelopes and remove release nodes.
-void UpdateEnvelopes(InstrumentEnvelope &mptEnv, CSoundFile &sndFile, std::bitset<wNumWarnings> &warnings)
-//--------------------------------------------------------------------------------------------------------
+static void UpdateEnvelopes(InstrumentEnvelope &mptEnv, const CModSpecifications &specs, std::bitset<wNumWarnings> &warnings)
+//---------------------------------------------------------------------------------------------------------------------------
 {
 	// shorten instrument envelope if necessary (for mod conversion)
-	const uint8 envMax = sndFile.GetModSpecifications().envelopePointsMax;
+	const uint8 envMax = specs.envelopePointsMax;
 
 #define TRIMENV(envLen) if(envLen > envMax) { envLen = envMax; CHANGEMODTYPE_WARNING(wTrimmedEnvelopes); }
 
@@ -66,7 +66,7 @@ void UpdateEnvelopes(InstrumentEnvelope &mptEnv, CSoundFile &sndFile, std::bitse
 	TRIMENV(mptEnv.nSustainEnd);
 	if(mptEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET)
 	{
-		if(sndFile.GetModSpecifications().hasReleaseNode)
+		if(specs.hasReleaseNode)
 		{
 			TRIMENV(mptEnv.nReleaseNode);
 		} else
@@ -76,7 +76,7 @@ void UpdateEnvelopes(InstrumentEnvelope &mptEnv, CSoundFile &sndFile, std::bitse
 		}
 	}
 
-	#undef TRIMENV
+#undef TRIMENV
 }
 
 
@@ -462,7 +462,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	}
 
 	// Is the "restart position" value allowed in this format?
-	if(m_SndFile.m_nRestartPos > 0 && !CSoundFile::GetModSpecifications(nNewType).hasRestartPos)
+	if(m_SndFile.m_nRestartPos > 0 && !specs.hasRestartPos)
 	{
 		// Try to fix it by placing a pattern jump command in the pattern.
 		if(!RestartPosToPattern())
@@ -495,7 +495,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	}
 
 	// Check for patterns with custom time signatures (fixing will be applied in the pattern container)
-	if(!CSoundFile::GetModSpecifications(nNewType).hasPatternSignatures)
+	if(!specs.hasPatternSignatures)
 	{
 		for(PATTERNINDEX nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++)
 		{
@@ -525,12 +525,12 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	m_SndFile.PrecomputeSampleLoops(false);
 
 	// Song flags
-	if(!(CSoundFile::GetModSpecifications(nNewType).songFlags & SONG_LINEARSLIDES) && m_SndFile.m_SongFlags[SONG_LINEARSLIDES])
+	if(!(specs.songFlags & SONG_LINEARSLIDES) && m_SndFile.m_SongFlags[SONG_LINEARSLIDES])
 	{
 		CHANGEMODTYPE_WARNING(wLinearSlides);
 	}
 	if(oldTypeIsXM && newTypeIsIT_MPT) m_SndFile.m_SongFlags.set(SONG_ITCOMPATGXX);
-	m_SndFile.m_SongFlags &= (CSoundFile::GetModSpecifications(nNewType).songFlags | SONG_PLAY_FLAGS);
+	m_SndFile.m_SongFlags &= (specs.songFlags | SONG_PLAY_FLAGS);
 
 	// Adjust mix levels
 	if(newTypeIsMOD || newTypeIsS3M)
@@ -542,8 +542,8 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		CHANGEMODTYPE_WARNING(wMixmode);
 	}
 
-	// Automatically enable compatible mode when converting from MOD and S3M, since it's automatically enabled in those formats.
-	if((nOldType & (MOD_TYPE_MOD | MOD_TYPE_S3M)) && (nNewType & (MOD_TYPE_XM | MOD_TYPE_IT)))
+	// Automatically enable compatible mode when converting from MOD, since it's automatically enabled there and should be used in the other formats as well.
+	if((nOldType & MOD_TYPE_MOD) && (nNewType & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_S3M)))
 	{
 		m_SndFile.SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	}
@@ -561,9 +561,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	for(INSTRUMENTINDEX i = 1; i <= m_SndFile.GetNumInstruments(); i++) if(m_SndFile.Instruments[i] != nullptr)
 	{
-		UpdateEnvelopes(m_SndFile.Instruments[i]->VolEnv, m_SndFile, warnings);
-		UpdateEnvelopes(m_SndFile.Instruments[i]->PanEnv, m_SndFile, warnings);
-		UpdateEnvelopes(m_SndFile.Instruments[i]->PitchEnv, m_SndFile, warnings);
+		UpdateEnvelopes(m_SndFile.Instruments[i]->VolEnv, specs, warnings);
+		UpdateEnvelopes(m_SndFile.Instruments[i]->PanEnv, specs, warnings);
+		UpdateEnvelopes(m_SndFile.Instruments[i]->PitchEnv, specs, warnings);
 	}
 
 	// XM requires instruments, so we create them right away.

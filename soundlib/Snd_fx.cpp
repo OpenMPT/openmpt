@@ -292,7 +292,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		ModCommand *nextRow = nullptr;
 		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); p++, pChn++, nChn++) if(!p->IsEmpty())
 		{
-			if((GetType() == MOD_TYPE_S3M) && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
+			if(IsCompatibleMode(TRK_SCREAMTRACKER) && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
 				continue;
 			ModCommand::COMMAND command = p->command;
 			ModCommand::PARAM param = p->param;
@@ -1939,7 +1939,7 @@ bool CSoundFile::ProcessEffects()
 			//:xy --> note delay until tick x, note cut at tick x+y
 			nStartTick = (param & 0xF0) >> 4;
 			const UINT cutAtTick = nStartTick + (param & 0x0F);
-			NoteCut(nChn, cutAtTick, IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER));
+			NoteCut(nChn, cutAtTick, IsCompatibleMode(TRK_IMPULSETRACKER) || GetType() == MOD_TYPE_S3M);
 		} else if ((cmd == CMD_MODCMDEX) || (cmd == CMD_S3MCMDEX))
 		{
 			if ((!param) && (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) param = pChn->nOldCmdEx; else pChn->nOldCmdEx = param;
@@ -1978,7 +1978,7 @@ bool CSoundFile::ProcessEffects()
 				// Pattern Loop ?
 				if((((param & 0xF0) == 0x60 && cmd == CMD_MODCMDEX)
 					|| ((param & 0xF0) == 0xB0 && cmd == CMD_S3MCMDEX))
-					&& !(GetType() == MOD_TYPE_S3M && ChnSettings[nChn].dwFlags[CHN_MUTE]))	// not even effects are processed on muted S3M channels
+					&& !(IsCompatibleMode(TRK_SCREAMTRACKER) && ChnSettings[nChn].dwFlags[CHN_MUTE]))	// not even effects are processed on muted S3M channels
 				{
 					ROWINDEX nloop = PatternLoop(pChn, param & 0x0F);
 					if (nloop != ROWINDEX_INVALID)
@@ -2352,7 +2352,7 @@ bool CSoundFile::ProcessEffects()
 #endif // MODPLUG_TRACKER
 		}
 
-		if((GetType() == MOD_TYPE_S3M) && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
+		if(IsCompatibleMode(TRK_SCREAMTRACKER) && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
 			continue;
 
 		// Volume Column Effect (except volume & panning)
@@ -2613,7 +2613,7 @@ bool CSoundFile::ProcessEffects()
 			if(m_PlayState.m_nTickCount) break;
 			if((!pChn->nPeriod || !pChn->nNote)
 				&& (pChn->pModInstrument == nullptr || !pChn->pModInstrument->HasValidMIDIChannel())	// Plugin arpeggio
-				&& !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER)) break;
+				&& !IsCompatibleMode(TRK_IMPULSETRACKER) && GetType() != MOD_TYPE_S3M) break;
 			if (!param && (GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD))) break;	// Only important when editing MOD/XM files (000 effects are removed when loading files where this means "no effect")
 			pChn->nCommand = CMD_ARPEGGIO;
 			if (param) pChn->nArpeggio = param;
@@ -2746,7 +2746,7 @@ bool CSoundFile::ProcessEffects()
 
 		// S3M/IT Sxx Extended Commands
 		case CMD_S3MCMDEX:
-			if(GetType() == MOD_TYPE_S3M && param == 0)
+			if(IsCompatibleMode(TRK_SCREAMTRACKER) && param == 0)
 			{
 				param = pChn->nArpeggio;	// S00 uses the last non-zero effect parameter as memory, like other effects including Arpeggio, so we "borrow" our memory there.
 			}
@@ -2913,7 +2913,7 @@ bool CSoundFile::ProcessEffects()
 			break;
 		}
 
-		if(GetType() == MOD_TYPE_S3M && param != 0)
+		if(IsCompatibleMode(TRK_SCREAMTRACKER) && param != 0)
 		{
 			UpdateS3MEffectMemory(pChn, param);
 		}
@@ -3971,7 +3971,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 		}
 		// S3M/IT compatibility: Note Cut really cuts notes and does not just mute them (so that following volume commands could restore the sample)
 		// Test case: scx.it
-		NoteCut(nChn, param, IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER));
+		NoteCut(nChn, param, IsCompatibleMode(TRK_IMPULSETRACKER) || GetType() == MOD_TYPE_S3M);
 		break;
 	// SDx: Note Delay
 	// SEx: Pattern Delay for x rows
@@ -4879,7 +4879,7 @@ ROWINDEX CSoundFile::PatternLoop(ModChannel *pChn, UINT param)
 			{
 				// IT compatibility 10. Pattern loops (+ same fix for MOD / S3M files)
 				// When finishing a pattern loop, the next loop without a dedicated SB0 starts on the first row after the previous loop.
-				if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_PROTRACKER | TRK_SCREAMTRACKER))
+				if(IsCompatibleMode(TRK_IMPULSETRACKER) || (GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)))
 				{
 					pChn->nPatternLoop = m_PlayState.m_nRow + 1;
 				}
@@ -4891,7 +4891,7 @@ ROWINDEX CSoundFile::PatternLoop(ModChannel *pChn, UINT param)
 			// First time we get into the loop => Set loop count.
 
 			// IT compatibility 10. Pattern loops (+ same fix for XM / MOD / S3M files)
-			if(!IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2 | TRK_PROTRACKER | TRK_SCREAMTRACKER))
+			if(!IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2) && !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)))
 			{
 				ModChannel *p = m_PlayState.Chn;
 				for(CHANNELINDEX i = 0; i < GetNumChannels(); i++, p++) if (p != pChn)

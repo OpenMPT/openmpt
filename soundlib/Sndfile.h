@@ -295,8 +295,8 @@ public: //Misc
 	// Hint 2: Always returns true for MOD / S3M format (if that is the format of the current file)
 	bool IsCompatibleMode(MODTYPE type) const
 	{
-		if(GetType() & type & (MOD_TYPE_MOD | MOD_TYPE_S3M))
-			return true; // S3M and MOD format don't have compatibility flags, so we will always return true
+		if(GetType() & type & MOD_TYPE_MOD)
+			return true; // MOD format doesn't have compatibility flags, so we will always return true
 		return ((GetType() & type) && GetModFlag(MSF_COMPATIBLE_PLAY));
 	}
 
