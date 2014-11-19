@@ -79,7 +79,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="libopenmpt_settings.h" />
+    <ClInclude Include="libopenmpt_settings.hpp" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
