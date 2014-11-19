@@ -26,6 +26,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "foobar2000_component_client
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "foo_openmpt", "foo_openmpt.vcxproj", "{3F14BF17-016A-44C3-9B8D-C875C2EC8A18}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pugixml", "..\build\gen\pugixml.vcxproj", "{07B89124-7C71-42CC-81AB-62B09BB61F9B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -106,6 +108,12 @@ Global
 		{3F14BF17-016A-44C3-9B8D-C875C2EC8A18}.Release|Win32.ActiveCfg = Release|Win32
 		{3F14BF17-016A-44C3-9B8D-C875C2EC8A18}.Release|Win32.Build.0 = Release|Win32
 		{3F14BF17-016A-44C3-9B8D-C875C2EC8A18}.Release|x64.ActiveCfg = Release|Win32
+		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Debug|Win32.Build.0 = Debug|Win32
+		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Debug|x64.ActiveCfg = Debug|x64
+		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Release|Win32.ActiveCfg = Release|Win32
+		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Release|Win32.Build.0 = Release|Win32
+		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Release|x64.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
