@@ -2279,12 +2279,12 @@ void CCtrlSamples::OnSilence()
 	SampleSelectionPoints selection = GetSelectionPoints();
 
 	// never apply silence to a sample that has no selection
-	if(selection.selectionActive == true)
+	const SmpLength len = selection.nEnd - selection.nStart;
+	if(selection.selectionActive && len > 1)
 	{
 		ModSample &sample = m_sndFile.GetSample(m_nSample);
 		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_update, "Silence", selection.nStart, selection.nEnd);
 
-		SmpLength len = selection.nEnd - selection.nStart;
 		if (sample.uFlags[CHN_STEREO])
 		{
 			int smplsize = sample.GetBytesPerSample();
