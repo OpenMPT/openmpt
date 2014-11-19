@@ -168,7 +168,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 
 		otherPtrSize = binType;
 
-		// Command-line must be a modfiable string...
+		// Command-line must be a modifiable string...
 		wchar_t cmdLine[128];
 		swprintf(cmdLine, CountOf(cmdLine), L"%s %d", mapName.c_str(), procId);
 
