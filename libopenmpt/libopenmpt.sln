@@ -2,11 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt", "libopenmpt.vcxproj", "{812A654D-99BE-4D13-B97F-86332AD3E363}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B2B6EE07-F662-496D-980C-FCA7CA144DBC} = {B2B6EE07-F662-496D-980C-FCA7CA144DBC}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt_settings", "libopenmpt_settings.vcxproj", "{B2B6EE07-F662-496D-980C-FCA7CA144DBC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmptDLL", "libopenmptDLL.vcxproj", "{A1C5B6FA-F333-4999-8DF0-BE2F5FD4B882}"
 EndProject
@@ -44,12 +39,6 @@ Global
 		{812A654D-99BE-4D13-B97F-86332AD3E363}.Release|Win32.Build.0 = Release|Win32
 		{812A654D-99BE-4D13-B97F-86332AD3E363}.Release|x64.ActiveCfg = Release|x64
 		{812A654D-99BE-4D13-B97F-86332AD3E363}.Release|x64.Build.0 = Release|x64
-		{B2B6EE07-F662-496D-980C-FCA7CA144DBC}.Debug|Win32.ActiveCfg = Debug|Win32
-		{B2B6EE07-F662-496D-980C-FCA7CA144DBC}.Debug|Win32.Build.0 = Debug|Win32
-		{B2B6EE07-F662-496D-980C-FCA7CA144DBC}.Debug|x64.ActiveCfg = Debug|Win32
-		{B2B6EE07-F662-496D-980C-FCA7CA144DBC}.Release|Win32.ActiveCfg = Release|Win32
-		{B2B6EE07-F662-496D-980C-FCA7CA144DBC}.Release|Win32.Build.0 = Release|Win32
-		{B2B6EE07-F662-496D-980C-FCA7CA144DBC}.Release|x64.ActiveCfg = Release|Win32
 		{A1C5B6FA-F333-4999-8DF0-BE2F5FD4B882}.Debug|Win32.ActiveCfg = Debug|Win32
 		{A1C5B6FA-F333-4999-8DF0-BE2F5FD4B882}.Debug|Win32.Build.0 = Debug|Win32
 		{A1C5B6FA-F333-4999-8DF0-BE2F5FD4B882}.Debug|x64.ActiveCfg = Debug|x64

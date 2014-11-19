@@ -9,6 +9,19 @@
 
 #ifndef NO_XMPLAY
 
+#if defined(_MFC_VER) || 1
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0500 // _WIN32_WINNT_WIN2000
+#endif
+#define NOMINMAX
+#include <afxwin.h>
+#include <afxcmn.h>
+#include <windows.h>
+#endif // _MFC_VER
+
 #ifdef LIBOPENMPT_BUILD_DLL
 #undef LIBOPENMPT_BUILD_DLL
 #endif
@@ -21,7 +34,9 @@
 
 #define LIBOPENMPT_EXT_IS_EXPERIMENTAL
 
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <windows.h>
 #include <WindowsX.h>
 
@@ -1723,6 +1738,19 @@ XMPIN * WINAPI XMPIN_GetInterface( DWORD face, InterfaceProc faceproc ) {
 
 }; // extern "C"
 
+
+#ifdef _MFC_VER
+
+void PluginDllMainAttach() {
+	xmp_openmpt_on_dll_load();
+}
+
+void PluginDllMainDetach() {
+	xmp_openmpt_on_dll_unload();
+}
+
+#else
+
 BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved ) {
 	switch ( fdwReason ) {
 	case DLL_PROCESS_ATTACH:
@@ -1734,5 +1762,8 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved ) {
 	}
 	return TRUE;
 }
+
+#endif
+
 
 #endif // NO_XMPLAY

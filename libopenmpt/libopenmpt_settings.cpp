@@ -38,10 +38,12 @@ public:
 		{
 			return FALSE;
 		}
+		PluginDllMainAttach();
 		return TRUE;
 	}
 
 	virtual int ExitInstance() {
+		PluginDllMainDetach();
 		return CWinApp::ExitInstance();
 	}
 
