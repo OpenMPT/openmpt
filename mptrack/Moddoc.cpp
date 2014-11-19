@@ -2224,13 +2224,15 @@ void CModDoc::OnEstimateSongLength()
 {
 	CString s = _T("Approximate song length: ");
 	std::vector<GetLengthType> lengths = m_SndFile.GetLength(eNoAdjust, GetLengthTarget(true));
+	double totalLength = 0.0;
 	for(size_t i = 0; i < lengths.size(); i++)
 	{
+		double songLength = lengths[i].duration;
 		if(lengths.size() > 1)
 		{
-			s.AppendFormat(_T("\nSong %u, starting at order %u: "), i + 1, lengths[i].startOrder);
+			totalLength += songLength;
+			s.AppendFormat(_T("\nSong %u, starting at order %u:\t"), i + 1, lengths[i].startOrder);
 		}
-		double songLength = lengths[i].duration;
 		if(songLength != std::numeric_limits<double>::infinity())
 		{
 			songLength = Util::Round(songLength);
@@ -2239,6 +2241,10 @@ void CModDoc::OnEstimateSongLength()
 		{
 			s += _T("Song too long!");
 		}
+	}
+	if(lengths.size() > 1 && totalLength != std::numeric_limits<double>::infinity())
+	{
+		s.AppendFormat(_T("\n\nTotal length:\t%.0fmn%02.0fs"), std::floor(totalLength / 60.0), std::fmod(totalLength, 60.0));
 	}
 	
 	Reporting::Information(s);
@@ -2649,23 +2655,19 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 CHANNELINDEX CModDoc::FindAvailableChannel() const
 //------------------------------------------------
 {
-	CHANNELINDEX nStoppedChannel = CHANNELINDEX_INVALID;
+	CHANNELINDEX stoppedChannel = m_SndFile.GetNumChannels();
 	// Search for available channel
-	for(CHANNELINDEX j = MAX_CHANNELS - 1; j >= m_SndFile.m_nChannels; j--)
+	for(CHANNELINDEX i = MAX_CHANNELS - 1; i >= m_SndFile.GetNumChannels(); i--)
 	{
-		const ModChannel &chn = m_SndFile.m_PlayState.Chn[j];
+		const ModChannel &chn = m_SndFile.m_PlayState.Chn[i];
 		if(!chn.nLength)
-			return j;
+			return i;
 		else if(chn.dwFlags[CHN_NOTEFADE])
-			nStoppedChannel = j;
+			stoppedChannel = i;
 	}
 
-	// Nothing found: return one that's stopped
-	if(nStoppedChannel != CHANNELINDEX_INVALID)
-		return nStoppedChannel;
-	
-	//Last resort: go for first virtual channel.
-	return m_SndFile.m_nChannels;
+	// Nothing found: return one that's stopped, or as a last resort, the first virtual channel.
+	return stoppedChannel;
 }
 
 
