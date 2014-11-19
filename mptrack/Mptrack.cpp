@@ -327,12 +327,18 @@ class CMPTCommandLineInfo: public CCommandLineInfo
 public:
 	bool m_bNoDls, m_bNoPlugins, m_bNoAssembly,
 		 m_bPortable;
+#ifdef _DEBUG
+	bool m_bNoTests;
+#endif
 
 public:
 	CMPTCommandLineInfo()
 	{
 		m_bNoDls = m_bNoPlugins = m_bNoAssembly =
 		m_bPortable = false;
+#ifdef _DEBUG
+		m_bNoTests = false;
+#endif
 	}
 	virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 	{
@@ -344,6 +350,9 @@ public:
 			if (!lstrcmpi(lpszParam, _T("portable"))) { m_bPortable = true; return; }
 			if (!lstrcmpi(lpszParam, _T("fullMemDump"))) { ExceptionHandler::fullMemDump = true; return; }
 			if (!lstrcmpi(lpszParam, _T("noAssembly"))) { m_bNoAssembly = true; return; }
+#ifdef _DEBUG
+			if (!lstrcmpi(lpszParam, _T("noTests"))) { m_bNoTests = true; return; }
+#endif
 		}
 		CCommandLineInfo::ParseParam(lpszParam, bFlag, bLast);
 	}
@@ -1019,7 +1028,10 @@ BOOL CTrackApp::InitInstance()
 
 	EndWaitCursor();
 
-	Test::DoTests();
+#ifdef _DEBUG
+	if(!cmdInfo.m_bNoTests)
+		Test::DoTests();
+#endif
 
 	if(TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup)
 	{
@@ -1390,7 +1402,7 @@ BOOL CTrackApp::OnIdle(LONG lCount)
 	{
 		DWORD curTime = timeGetTime();
 		//rewbs.vstCompliance: call @ 50Hz
-		if (curTime - m_dwLastPluginIdleCall > 20) //20ms since last call?
+		if (curTime - m_dwLastPluginIdleCall > 20 || curTime < m_dwLastPluginIdleCall)
 		{
 			m_pPluginManager->OnIdle();
 			m_dwLastPluginIdleCall = curTime;

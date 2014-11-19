@@ -620,6 +620,7 @@ void CVstPluginManager::OnIdle()
 			if (editor && editor->m_hWnd)
 			{
 				editor->UpdateParamDisplays();
+				p->Dispatch(effEditIdle, 0, 0, nullptr, 0.0f);
 			}
 			//end rewbs. VSTCompliance:
 
