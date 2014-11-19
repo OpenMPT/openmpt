@@ -20,10 +20,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="libopenmpt_settings.h">
+    <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
+    <ClInclude Include="libopenmpt_settings.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

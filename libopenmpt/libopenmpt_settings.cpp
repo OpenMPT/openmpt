@@ -20,7 +20,7 @@
 
 #include "resource.h"
 
-#include "libopenmpt_settings.h"
+#include "libopenmpt_settings.hpp"
 
 
 class CSettingsApp : public CWinApp {
