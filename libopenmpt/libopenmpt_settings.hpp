@@ -46,6 +46,11 @@ void libopenmpt_settings_edit( libopenmpt_settings * s, HWND parent, const char 
 
 
 
+void PluginDllMainAttach();
+void PluginDllMainDetach();
+
+
+
 namespace openmpt { namespace settings {
 
 class settings : public libopenmpt_settings {
@@ -124,37 +129,26 @@ public:
 
 
 #define LIBOPENMPT_SETTINGS_DECLARE() \
-	static HMODULE settings_dll = NULL;
+	
 
 #define LIBOPENMPT_SETTINGS_IS_AVAILABLE() \
-	settings_dll
+	true
 
 #define LIBOPENMPT_SETTINGS_EDIT( settings, parent, title ) \
 	do { \
-		if ( (libopenmpt_settings_edit_func)GetProcAddress( settings_dll , "libopenmpt_settings_edit" ) ) { \
-			((libopenmpt_settings_edit_func)GetProcAddress( settings_dll, "libopenmpt_settings_edit" ))( settings , parent , title ); \
-		} \
+		libopenmpt_settings_edit( settings , parent , title ); \
 	} while(0)
 
 #define LIBOPENMPT_SETTINGS_UNAVAILABLE( parent, dll, title ) \
-	MessageBox( parent , TEXT("libopenmpt_settings.dll failed to load. Please check if it is in the same folder as ") dll TEXT("."), title , MB_ICONERROR )
+	do { \
+	} while(0)
 
 #define LIBOPENMPT_SETTINGS_LOAD() \
 	do { \
-		if ( !settings_dll ) { \
-			settings_dll = LoadLibrary( TEXT("libopenmpt_settings.dll") ); \
-		} \
-		if ( !settings_dll ) { \
-			settings_dll = LoadLibrary( TEXT("Plugins\\libopenmpt_settings.dll") ); \
-		} \
 	} while(0)
 
 #define LIBOPENMPT_SETTINGS_UNLOAD() \
 	do { \
-		if ( settings_dll ) { \
-			FreeLibrary( settings_dll ); \
-			settings_dll = NULL; \
-		} \
 	} while(0)
 
 

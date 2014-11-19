@@ -9,6 +9,19 @@
 
 #ifndef NO_WINAMP
 
+#if defined(_MFC_VER) || 1
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0500 // _WIN32_WINNT_WIN2000
+#endif
+#define NOMINMAX
+#include <afxwin.h>
+#include <afxcmn.h>
+#include <windows.h>
+#endif // _MFC_VER
+
 #ifdef LIBOPENMPT_BUILD_DLL
 #undef LIBOPENMPT_BUILD_DLL
 #endif
@@ -30,7 +43,9 @@ static char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING "." O
 static char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING;
 #endif
 
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <windows.h>
 
 #define UNICODE_INPUT_PLUGIN
@@ -445,5 +460,23 @@ In_Module inmod = {
 extern "C" __declspec(dllexport) In_Module * winampGetInModule2() {
 	return &inmod;
 }
+
+
+#ifdef _MFC_VER
+
+void PluginDllMainAttach() {
+	// nothing
+}
+
+void PluginDllMainDetach() {
+	// nothing
+}
+
+#else
+
+// nothing
+
+#endif
+
 
 #endif // NO_WINAMP
