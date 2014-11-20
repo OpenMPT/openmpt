@@ -448,34 +448,42 @@ BOOL CModDoc::SaveModified()
 	BOOL result = CDocument::SaveModified();
 	if(result && m_SndFile.GetType() == MOD_TYPE_MPT)
 	{
-		std::wstring prompt = L"The following external samples have been modified:\n";
-		bool modified = false;
+		result = SaveAllSamples() ? TRUE : FALSE;
+	}
+
+	return result;
+}
+
+
+bool CModDoc::SaveAllSamples()
+//----------------------------
+{
+	std::wstring prompt = L"The following external samples have been modified:\n";
+	bool modified = false;
+	for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
+	{
+		if(m_SndFile.GetSample(i).uFlags.test_all(SMP_KEEPONDISK | SMP_MODIFIED))
+		{
+			modified = true;
+			prompt += mpt::wfmt::dec0<2>(i) + L": " + m_SndFile.GetSamplePath(i).ToWide() + L"\n";
+		}
+	}
+
+	ConfirmAnswer ans = cnfYes;
+	if(modified && (ans = Reporting::Confirm(prompt + L"Do you want to save them?", L"External Samples", true)) == cnfYes)
+	{
 		for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
 		{
 			if(m_SndFile.GetSample(i).uFlags.test_all(SMP_KEEPONDISK | SMP_MODIFIED))
 			{
-				modified = true;
-				prompt += mpt::wfmt::dec0<2>(i) + L": " + m_SndFile.GetSamplePath(i).ToWide() + L"\n";
+				SaveSample(i);
 			}
 		}
-
-		ConfirmAnswer ans = cnfYes;
-		if(modified && (ans = Reporting::Confirm(prompt + L"Do you want to save them?", L"External Samples", true)) == cnfYes)
-		{
-			for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
-			{
-				if(m_SndFile.GetSample(i).uFlags.test_all(SMP_KEEPONDISK | SMP_MODIFIED))
-				{
-					SaveSample(i);
-				}
-			}
-		} else if(ans == cnfCancel)
-		{
-			result = FALSE;
-		}
+	} else if(ans == cnfCancel)
+	{
+		return false;
 	}
-
-	return result;
+	return true;
 }
 
 

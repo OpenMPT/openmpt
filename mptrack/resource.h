@@ -1112,6 +1112,8 @@
 #define ID_REARRANGE_SAMPLES            33901
 #define ID_CHANNEL_MANAGER              33905
 #define ID_MODTREE_RELOADITEM           33906
+#define ID_MODTREE_RELOADALL            33907
+#define ID_MODTREE_SAVEALL              33908
 #define ID_FACTORYPRESET                33914
 #define ID_FACTORYPRESET_DEFAULT        33915
 #define ID_MODTREE_SETPATH              33916
