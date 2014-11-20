@@ -3195,7 +3195,7 @@ void CModTree::OnSaveAll()
 	CModDoc *pModDoc = GetDocumentFromItem(GetSelectedItem());
 	if(pModDoc != nullptr)
 	{
-		pModDoc->SaveModified();
+		pModDoc->SaveAllSamples();
 		if(pModDoc) pModDoc->UpdateAllViews(NULL, HINT_SAMPLEINFO);
 		OnRefreshTree();
 	}
