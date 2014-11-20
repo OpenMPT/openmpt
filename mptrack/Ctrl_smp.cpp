@@ -1108,12 +1108,12 @@ void CCtrlSamples::OnSampleSave()
 	const mpt::PathString ext = dlg.GetExtension();
 
 	SAMPLEINDEX minSmp = m_nSample, maxSmp = m_nSample;
-	CString sNumberFormat;
+	CStringW sNumberFormat;
 	if(doBatchSave)
 	{
 		minSmp = 1;
 		maxSmp = m_sndFile.GetNumSamples();
-		sNumberFormat.Format("%s%d%s", "%.", ((int)log10((float)maxSmp)) + 1, "d");
+		sNumberFormat.Format(L"%s%d%s", L"%.", ((int)log10((float)maxSmp)) + 1, L"d");
 	}
 
 	bool ok = false;
@@ -1124,7 +1124,7 @@ void CCtrlSamples::OnSampleSave()
 			mpt::PathString fileName = dlg.GetFirstFile();
 			if(doBatchSave)
 			{
-				CString sSampleNumber;
+				CStringW sSampleNumber;
 				CString sSampleName;
 				CString sSampleFilename;
 				sSampleNumber.Format(sNumberFormat, smp);
@@ -1134,9 +1134,11 @@ void CCtrlSamples::OnSampleSave()
 				SanitizeFilename(sSampleName);
 				SanitizeFilename(sSampleFilename);
 
-				fileName = mpt::PathString::FromWide(mpt::String::Replace(fileName.ToWide(), L"%sample_number%", mpt::ToWide(sSampleNumber)));
-				fileName = mpt::PathString::FromWide(mpt::String::Replace(fileName.ToWide(), L"%sample_filename%", mpt::ToWide(sSampleFilename)));
-				fileName = mpt::PathString::FromWide(mpt::String::Replace(fileName.ToWide(), L"%sample_name%", mpt::ToWide(sSampleName)));
+				std::wstring fileNameW = fileName.ToWide();
+				fileNameW = mpt::String::Replace(fileNameW, L"%sample_number%", sSampleNumber);
+				fileNameW = mpt::String::Replace(fileNameW, L"%sample_filename%", mpt::ToWide(sSampleFilename));
+				fileNameW = mpt::String::Replace(fileNameW, L"%sample_name%", mpt::ToWide(sSampleName));
+				fileName = mpt::PathString::FromWide(fileNameW);
 			}
 			if(!mpt::PathString::CompareNoCase(ext, MPT_PATHSTRING("raw")))
 				ok = m_sndFile.SaveRAWSample(smp, fileName);
@@ -1145,7 +1147,7 @@ void CCtrlSamples::OnSampleSave()
 			else
 				ok = m_sndFile.SaveWAVSample(smp, fileName);
 
-			if(ok && !doBatchSave)
+			if(ok)
 			{
 				m_sndFile.SetSamplePath(smp, fileName);
 				ModSample &sample = m_sndFile.GetSample(smp);
