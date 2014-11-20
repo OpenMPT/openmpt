@@ -113,7 +113,9 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_COMMAND(ID_MODTREE_CLOSE,		OnCloseItem)
 	ON_COMMAND(ID_MODTREE_SETPATH,		OnSetItemPath)
 	ON_COMMAND(ID_MODTREE_SAVEITEM,		OnSaveItem)
+	ON_COMMAND(ID_MODTREE_SAVEALL,		OnSaveAll)
 	ON_COMMAND(ID_MODTREE_RELOADITEM,	OnReloadItem)
+	ON_COMMAND(ID_MODTREE_RELOADALL,	OnReloadAll)
 	ON_COMMAND(ID_ADD_SOUNDBANK,		OnAddDlsBank)
 	ON_COMMAND(ID_IMPORT_MIDILIB,		OnImportMidiLib)
 	ON_COMMAND(ID_EXPORT_MIDILIB,		OnExportMidiLib)
@@ -2566,10 +2568,26 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 						const bool hasPath = sndFile->SampleHasPath(smpID);
 						if((sample.HasSampleData() && sndFile->GetType() == MOD_TYPE_MPT) || hasPath)
 						{
+							bool anyPath = false, anyModified = false;
+							for(SAMPLEINDEX smp = 1; smp <= sndFile->GetNumSamples(); smp++)
+							{
+								if(sndFile->SampleHasPath(smp) && smp != smpID)
+								{
+									anyPath = true;
+									const ModSample &sample = sndFile->GetSample(smp);
+									if(sample.HasSampleData() && sample.uFlags[SMP_MODIFIED])
+									{
+										anyModified = true;
+									}
+									if(anyPath && anyModified) break;
+								}
+							}
 							AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
 							AppendMenu(hMenu, MF_STRING | (sndFile->GetType() == MOD_TYPE_MPT ? 0 : MF_GRAYED), ID_MODTREE_SETPATH, _T("Set P&ath"));
 							AppendMenu(hMenu, MF_STRING | ((hasPath && sample.HasSampleData() && sample.uFlags[SMP_MODIFIED]) ? 0 : MF_GRAYED), ID_MODTREE_SAVEITEM, _T("&Save"));
+							if(anyModified) AppendMenu(hMenu, MF_STRING, ID_MODTREE_SAVEALL, _T("&Save All"));
 							AppendMenu(hMenu, MF_STRING | (hasPath ? 0 : MF_GRAYED), ID_MODTREE_RELOADITEM, _T("&Reload"));
+							if(anyPath) AppendMenu(hMenu, MF_STRING, ID_MODTREE_RELOADALL, _T("&Reload All"));
 						}
 					}
 				}
@@ -3171,6 +3189,19 @@ void CModTree::OnSaveItem()
 }
 
 
+void CModTree::OnSaveAll()
+//-------------------------
+{
+	CModDoc *pModDoc = GetDocumentFromItem(GetSelectedItem());
+	if(pModDoc != nullptr)
+	{
+		pModDoc->SaveModified();
+		if(pModDoc) pModDoc->UpdateAllViews(NULL, HINT_SAMPLEINFO);
+		OnRefreshTree();
+	}
+}
+
+
 void CModTree::OnReloadItem()
 //---------------------------
 {
@@ -3197,6 +3228,34 @@ void CModTree::OnReloadItem()
 			pModDoc->UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_SMPNAMES | HINT_SAMPLEDATA | (smpID << HINT_SHIFT_SMP));
 		}
 
+		OnRefreshTree();
+	}
+}
+
+
+void CModTree::OnReloadAll()
+//--------------------------
+{
+	CModDoc *pModDoc = GetDocumentFromItem(GetSelectedItem());
+	if(pModDoc != nullptr)
+	{
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++)
+		{
+			pModDoc->GetSampleUndo().PrepareUndo(smp, sundo_replace, "Replace");
+			if(!sndFile.LoadExternalSample(smp, sndFile.GetSamplePath(smp)))
+			{
+				pModDoc->GetSampleUndo().RemoveLastUndoStep(smp);
+				Reporting::Error(L"Unable to load sample:\n" + sndFile.GetSamplePath(smp).ToWide());
+			} else
+			{
+				if(!sndFile.GetSample(smp).uFlags[SMP_KEEPONDISK])
+				{
+					pModDoc->SetModified();
+				}
+			}
+		}
+		pModDoc->UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_SMPNAMES | HINT_SAMPLEDATA);
 		OnRefreshTree();
 	}
 }

@@ -409,6 +409,7 @@ protected:
 	}
 
 	virtual BOOL SaveModified();
+	bool SaveAllSamples();
 	bool SaveSample(SAMPLEINDEX smp);
 
 #ifndef UNICODE
