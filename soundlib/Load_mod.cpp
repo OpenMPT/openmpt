@@ -719,7 +719,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 					{
 						instrWithoutNoteCount[chn] = 0;
 					}
-					if(m.note != NOTE_NONE && m.note < NOTE_MIDDLEC - 12 || m.note > NOTE_MIDDLEC + 23)
+					if(m.note != NOTE_NONE && (m.note < NOTE_MIDDLEC - 12 || m.note > NOTE_MIDDLEC + 23))
 					{
 						onlyAmigaNotes = false;
 					}
