@@ -30,7 +30,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(CModTypeDlg, CDialog)
 	//{{AFX_MSG_MAP(CModTypeDlg)
-	ON_CBN_SELCHANGE(IDC_COMBO1,UpdateDialog)
+	ON_CBN_SELCHANGE(IDC_COMBO1, UpdateDialog)
+	ON_COMMAND(IDC_CHECK_PT1X,   OnPTModeChanged)
 
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, &CModTypeDlg::OnToolTipNotify)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, &CModTypeDlg::OnToolTipNotify)
@@ -171,8 +172,10 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBoxPT1x.EnableWindow(allowedFlags[SONG_PT1XMODE]);
 	m_CheckBoxAmigaLimits.EnableWindow(allowedFlags[SONG_AMIGALIMITS]);
 
-	m_CheckBoxPT1x.ShowWindow(type != MOD_TYPE_S3M ? SW_SHOW : SW_HIDE);
-	m_CheckBoxAmigaLimits.ShowWindow(type == MOD_TYPE_S3M ? SW_SHOW : SW_HIDE);
+	// These two checkboxes are mutually exclusive and share the same screen space
+	m_CheckBoxPT1x.ShowWindow(type == MOD_TYPE_MOD ? SW_SHOW : SW_HIDE);
+	m_CheckBox5.ShowWindow(type != MOD_TYPE_MOD ? SW_SHOW : SW_HIDE);
+	OnPTModeChanged();
 
 	const bool XMorITorMPT = (type & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0;
 	const bool ITorMPT = (type & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0;
@@ -257,6 +260,16 @@ void CModTypeDlg::UpdateDialog()
 }
 
 
+void CModTypeDlg::OnPTModeChanged()
+//---------------------------------
+{
+	// PT1/2 mode enforces Amiga limits
+	const bool ptMode = IsDlgButtonChecked(IDC_CHECK_PT1X) != BST_UNCHECKED;
+	m_CheckBoxAmigaLimits.EnableWindow(!ptMode);
+	if(ptMode) m_CheckBoxAmigaLimits.SetCheck(BST_CHECKED);
+}
+
+
 bool CModTypeDlg::VerifyData()
 //----------------------------
 {
@@ -291,6 +304,7 @@ bool CModTypeDlg::VerifyData()
 
 	return true;
 }
+
 
 void CModTypeDlg::OnOK()
 //----------------------

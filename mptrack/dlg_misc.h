@@ -32,6 +32,7 @@ public:
 	CModTypeDlg(CSoundFile &sf, CWnd *parent) : CDialog(IDD_MODDOC_MODTYPE, parent), sndFile(sf) { m_nType = MOD_TYPE_NONE; m_nChannels = 0; }
 	bool VerifyData();
 	void UpdateDialog();
+	void OnPTModeChanged();
 
 protected:
 	void UpdateChannelCBox();

@@ -649,6 +649,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	if(isFLT8) numPatterns++; // as one logical pattern consists of two real patterns in FLT8 format, the highest pattern number has to be increased by one.
 	bool hasTempoCommands = false;	// for detecting VBlank MODs
 	bool leftPanning = false, extendedPanning = false;	// for detecting 800-880 panning
+	bool onlyAmigaNotes = true;
 
 	// Reading patterns
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
@@ -718,6 +719,10 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 					{
 						instrWithoutNoteCount[chn] = 0;
 					}
+					if(m.note != NOTE_NONE && m.note < NOTE_MIDDLEC - 12 || m.note > NOTE_MIDDLEC + 23)
+					{
+						onlyAmigaNotes = false;
+					}
 					if(m.instr != 0)
 					{
 						lastInstrument[chn] = m.instr;
@@ -725,6 +730,12 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 				}
 			}
 		}
+	}
+
+	if(onlyAmigaNotes && (!memcmp(magic, "M.K.", 4) || !memcmp(magic, "M!K!", 4)))
+	{
+		// M.K. files that don't exceed the Amiga note limit (fixes mod.mothergoose)
+		m_SongFlags.set(SONG_AMIGALIMITS);
 	}
 
 	// Reading samples

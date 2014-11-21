@@ -109,7 +109,7 @@ const CModSpecifications mod =
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
 	false,										// No pattern names
-	SONG_PT1XMODE,								// Supported song flags
+	SONG_PT1XMODE | SONG_AMIGALIMITS,			// Supported song flags
 };
 
 
