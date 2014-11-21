@@ -73,11 +73,11 @@ BOOL CModTypeDlg::OnInitDialog()
 
 	// Mod types
 
-	m_TypeBox.SetItemData(m_TypeBox.AddString("ProTracker MOD"), MOD_TYPE_MOD);
-	m_TypeBox.SetItemData(m_TypeBox.AddString("ScreamTracker S3M"), MOD_TYPE_S3M);
-	m_TypeBox.SetItemData(m_TypeBox.AddString("FastTracker XM"), MOD_TYPE_XM);
-	m_TypeBox.SetItemData(m_TypeBox.AddString("Impulse Tracker IT"), MOD_TYPE_IT);
-	m_TypeBox.SetItemData(m_TypeBox.AddString("OpenMPT MPTM"), MOD_TYPE_MPT);
+	m_TypeBox.SetItemData(m_TypeBox.AddString(_T("ProTracker MOD")), MOD_TYPE_MOD);
+	m_TypeBox.SetItemData(m_TypeBox.AddString(_T("ScreamTracker S3M")), MOD_TYPE_S3M);
+	m_TypeBox.SetItemData(m_TypeBox.AddString(_T("FastTracker XM")), MOD_TYPE_XM);
+	m_TypeBox.SetItemData(m_TypeBox.AddString(_T("Impulse Tracker IT")), MOD_TYPE_IT);
+	m_TypeBox.SetItemData(m_TypeBox.AddString(_T("OpenMPT MPTM")), MOD_TYPE_MPT);
 	switch(m_nType)
 	{
 	case MOD_TYPE_S3M:	m_TypeBox.SetCurSel(1); break;
@@ -102,7 +102,7 @@ BOOL CModTypeDlg::OnInitDialog()
 
 	// Version information
 
-	if(sndFile.m_dwCreatedWithVersion) SetDlgItemText(IDC_EDIT_CREATEDWITH, "OpenMPT " + FormatVersionNumber(sndFile.m_dwCreatedWithVersion));
+	if(sndFile.m_dwCreatedWithVersion) SetDlgItemText(IDC_EDIT_CREATEDWITH, _T("OpenMPT ") + FormatVersionNumber(sndFile.m_dwCreatedWithVersion));
 	SetDlgItemText(IDC_EDIT_SAVEDWITH, sndFile.madeWithTracker.c_str());
 	UpdateDialog();
 
@@ -138,7 +138,7 @@ void CModTypeDlg::UpdateChannelCBox()
 		CString s;
 		for(CHANNELINDEX i = minChans; i <= maxChans; i++)
 		{
-			s.Format("%d Channel%s", i, (i != 1) ? "s" : "");
+			s.Format(_T("%d Channel%s"), i, (i != 1) ? _T("s") : _T(""));
 			m_ChannelsBox.SetItemData(m_ChannelsBox.AddString(s), i);
 		}
 
@@ -175,7 +175,7 @@ void CModTypeDlg::UpdateDialog()
 	// These two checkboxes are mutually exclusive and share the same screen space
 	m_CheckBoxPT1x.ShowWindow(type == MOD_TYPE_MOD ? SW_SHOW : SW_HIDE);
 	m_CheckBox5.ShowWindow(type != MOD_TYPE_MOD ? SW_SHOW : SW_HIDE);
-	OnPTModeChanged();
+	if(allowedFlags[SONG_PT1XMODE]) OnPTModeChanged();
 
 	const bool XMorITorMPT = (type & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0;
 	const bool ITorMPT = (type & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0;
@@ -206,11 +206,11 @@ void CModTypeDlg::UpdateDialog()
 	const tempoMode oldTempoMode = initialized ? static_cast<tempoMode>(m_TempoModeBox.GetItemData(m_TempoModeBox.GetCurSel())) : sndFile.m_nTempoMode;
 	m_TempoModeBox.ResetContent();
 
-	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Classic"), tempo_mode_classic);
+	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Classic")), tempo_mode_classic);
 	if(type == MOD_TYPE_MPT || sndFile.m_nTempoMode == tempo_mode_alternative)
-		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Alternative"), tempo_mode_alternative);
+		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Alternative")), tempo_mode_alternative);
 	if(type == MOD_TYPE_MPT || sndFile.m_nTempoMode == tempo_mode_modern)
-		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Modern (accurate)"), tempo_mode_modern);
+		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Modern (accurate)")), tempo_mode_modern);
 	m_TempoModeBox.SetCurSel(0);
 	for(int i = m_TempoModeBox.GetCount(); i > 0; i--)
 	{
@@ -225,15 +225,15 @@ void CModTypeDlg::UpdateDialog()
 	const mixLevels oldMixLevels = initialized ? static_cast<mixLevels>(m_PlugMixBox.GetItemData(m_PlugMixBox.GetCurSel())) : sndFile.GetMixLevels();
 	m_PlugMixBox.ResetContent();
 	if(type == MOD_TYPE_MPT || sndFile.GetMixLevels() == mixLevels_117RC3)	// In XM/IT, this is only shown for backwards compatibility with existing tunes
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC3"),	mixLevels_117RC3);
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC3")),	mixLevels_117RC3);
 	if(sndFile.GetMixLevels() == mixLevels_117RC2)	// Only shown for backwards compatibility with existing tunes
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),	mixLevels_117RC2);
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC2")),	mixLevels_117RC2);
 	if(sndFile.GetMixLevels() == mixLevels_117RC1)	// Ditto
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC1"),	mixLevels_117RC1);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Original (MPT 1.16)"),	mixLevels_original);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Compatible"),			mixLevels_compatible);
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC1")),	mixLevels_117RC1);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Original (MPT 1.16)")),	mixLevels_original);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Compatible")),			mixLevels_compatible);
 	if(type == MOD_TYPE_XM)
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Compatible (FT2 Pan Law)"), mixLevels_compatible_FT2);
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Compatible (FT2 Pan Law)")), mixLevels_compatible_FT2);
 
 	m_PlugMixBox.SetCurSel(0);
 	for(int i = m_PlugMixBox.GetCount(); i > 0; i--)
@@ -291,7 +291,7 @@ bool CModTypeDlg::VerifyData()
 	if(sel > maxChans)
 	{
 		CString error;
-		error.Format("Error: Maximum number of channels for this module type is %d.", maxChans);
+		error.Format(_T("Error: Maximum number of channels for this module type is %u."), maxChans);
 		Reporting::Warning(error);
 		return false;
 	}
