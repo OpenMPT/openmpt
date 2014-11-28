@@ -12,15 +12,24 @@
    "../include/flac/src/libFLAC/cpu.c",
    "../include/flac/src/libFLAC/crc.c",
    "../include/flac/src/libFLAC/fixed.c",
+   "../include/flac/src/libFLAC/fixed_intrin_sse2.c",
+   "../include/flac/src/libFLAC/fixed_intrin_ssse3.c",
    "../include/flac/src/libFLAC/float.c",
    "../include/flac/src/libFLAC/format.c",
    "../include/flac/src/libFLAC/lpc.c",
+   "../include/flac/src/libFLAC/lpc_intrin_avx2.c",
+   "../include/flac/src/libFLAC/lpc_intrin_sse2.c",
+   "../include/flac/src/libFLAC/lpc_intrin_sse41.c",
+   "../include/flac/src/libFLAC/lpc_intrin_sse.c",
    "../include/flac/src/libFLAC/md5.c",
    "../include/flac/src/libFLAC/memory.c",
    "../include/flac/src/libFLAC/metadata_iterators.c",
    "../include/flac/src/libFLAC/metadata_object.c",
    "../include/flac/src/libFLAC/stream_decoder.c",
    "../include/flac/src/libFLAC/stream_encoder.c",
+   "../include/flac/src/libFLAC/stream_encoder_intrin_avx2.c",
+   "../include/flac/src/libFLAC/stream_encoder_intrin_sse2.c",
+   "../include/flac/src/libFLAC/stream_encoder_intrin_ssse3.c",
    "../include/flac/src/libFLAC/stream_encoder_framing.c",
    "../include/flac/src/libFLAC/window.c",
   }
@@ -41,6 +50,7 @@
    "../include/flac/src/libFLAC/include/private/md5.h",
    "../include/flac/src/libFLAC/include/private/memory.h",
    "../include/flac/src/libFLAC/include/private/metadata.h",
+   "../include/flac/src/libFLAC/include/private/stream_encoder.h",
    "../include/flac/src/libFLAC/include/private/stream_encoder_framing.h",
    "../include/flac/src/libFLAC/include/private/window.h",
    "../include/flac/src/libFLAC/include/protected/all.h",
@@ -62,8 +72,8 @@
   configuration "*Lib"
    defines { "FLAC__NO_DLL" }
   configuration "vs2010"
-   defines { "VERSION=\"1.3.0\"" }
+   defines { "VERSION=\"1.3.1\"" }
   configuration "vs2008"
-   defines { "VERSION=\\\"1.3.0\\\"" }
+   defines { "VERSION=\\\"1.3.1\\\"" }
   dofile "../build/premake4-defaults-LIB.lua"
   dofile "../build/premake4-defaults-static.lua"

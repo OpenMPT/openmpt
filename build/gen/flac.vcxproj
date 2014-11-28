@@ -114,7 +114,7 @@
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Disabled</Optimization>
 			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
 			<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -125,7 +125,7 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
@@ -142,7 +142,7 @@
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Disabled</Optimization>
 			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
 			<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -153,7 +153,7 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
@@ -170,7 +170,7 @@
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
 			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
 			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -182,7 +182,7 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
@@ -201,7 +201,7 @@
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
 			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
 			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -213,7 +213,7 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
@@ -232,7 +232,7 @@
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 /GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
 			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
 			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -244,7 +244,7 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
@@ -262,7 +262,7 @@
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 /GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
 			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
 			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -274,7 +274,7 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.0&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
@@ -301,6 +301,7 @@
 		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\md5.h" />
 		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\memory.h" />
 		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\metadata.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\stream_encoder.h" />
 		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\stream_encoder_framing.h" />
 		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\window.h" />
 		<ClInclude Include="..\..\include\flac\src\libFLAC\include\protected\all.h" />
@@ -329,11 +330,23 @@
 		</ClCompile>
 		<ClCompile Include="..\..\include\flac\src\libFLAC\fixed.c">
 		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\fixed_intrin_sse2.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\fixed_intrin_ssse3.c">
+		</ClCompile>
 		<ClCompile Include="..\..\include\flac\src\libFLAC\float.c">
 		</ClCompile>
 		<ClCompile Include="..\..\include\flac\src\libFLAC\format.c">
 		</ClCompile>
 		<ClCompile Include="..\..\include\flac\src\libFLAC\lpc.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\lpc_intrin_avx2.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\lpc_intrin_sse2.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\lpc_intrin_sse41.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\lpc_intrin_sse.c">
 		</ClCompile>
 		<ClCompile Include="..\..\include\flac\src\libFLAC\md5.c">
 		</ClCompile>
@@ -346,6 +359,12 @@
 		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_decoder.c">
 		</ClCompile>
 		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder_intrin_avx2.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder_intrin_sse2.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder_intrin_ssse3.c">
 		</ClCompile>
 		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder_framing.c">
 		</ClCompile>
