@@ -2,37 +2,37 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{B7001649-E6CA-EC40-B7E5-19B0A790498D}</UniqueIdentifier>
+			<UniqueIdentifier>{DBBF01E4-2752-914D-B523-37BC4141C557}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac">
-			<UniqueIdentifier>{2D5C8B77-DA1B-8641-9D6A-0694FBBAFAE0}</UniqueIdentifier>
+			<UniqueIdentifier>{12618FA6-0897-9443-87A7-B1FCF5E3CFDB}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src">
-			<UniqueIdentifier>{0E1A5C5B-57D3-8C41-8897-1A81CA416761}</UniqueIdentifier>
+			<UniqueIdentifier>{A3029C73-04B7-BC4F-884F-C49387619902}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC">
-			<UniqueIdentifier>{AA84FF48-7868-9C4C-A69B-BD8F82907385}</UniqueIdentifier>
+			<UniqueIdentifier>{E7CCF378-9A55-064D-8944-ECA731C1A85D}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC\include">
-			<UniqueIdentifier>{3233DEE2-52D3-8849-BCD1-71F195EA353B}</UniqueIdentifier>
+			<UniqueIdentifier>{3BEE864C-0550-4742-BFE2-455AF29F7508}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC\include\private">
-			<UniqueIdentifier>{018C5592-1164-ED4E-B88F-D84B74F76032}</UniqueIdentifier>
+			<UniqueIdentifier>{250AEE6E-8367-244B-AD10-53AA7E28A0DF}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC\include\protected">
-			<UniqueIdentifier>{BF28CD32-4AEA-5A44-8459-0121F306AD4A}</UniqueIdentifier>
+			<UniqueIdentifier>{EBB59549-AC23-594F-A7EC-67FB1DEE6F18}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\include">
-			<UniqueIdentifier>{C3075182-D8D9-6D4A-AC86-765B62BFF004}</UniqueIdentifier>
+			<UniqueIdentifier>{5AE8ED7A-8516-3E43-89BF-7EBAA82D8DF3}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\include\FLAC">
-			<UniqueIdentifier>{1A8CED26-238F-DB42-9890-043B71968D33}</UniqueIdentifier>
+			<UniqueIdentifier>{986FEA12-4E26-6545-BEF2-5D113998E167}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\share">
-			<UniqueIdentifier>{3F8A36E1-642E-8441-A1C4-97D268C871CB}</UniqueIdentifier>
+			<UniqueIdentifier>{7896B2AA-F5A0-964F-B58D-C7239691BEF8}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\share\win_utf8_io">
-			<UniqueIdentifier>{2D0A81D5-142A-A64A-861F-3E01CF7ADFC1}</UniqueIdentifier>
+			<UniqueIdentifier>{C9E9DF11-E837-8141-BF5D-18C634F0241A}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
@@ -73,6 +73,9 @@
 			<Filter>include\flac\src\libFLAC\include\private</Filter>
 		</ClInclude>
 		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\metadata.h">
+			<Filter>include\flac\src\libFLAC\include\private</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\stream_encoder.h">
 			<Filter>include\flac\src\libFLAC\include\private</Filter>
 		</ClInclude>
 		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\stream_encoder_framing.h">
@@ -137,6 +140,12 @@
 		<ClCompile Include="..\..\include\flac\src\libFLAC\fixed.c">
 			<Filter>include\flac\src\libFLAC</Filter>
 		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\fixed_intrin_sse2.c">
+			<Filter>include\flac\src\libFLAC</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\fixed_intrin_ssse3.c">
+			<Filter>include\flac\src\libFLAC</Filter>
+		</ClCompile>
 		<ClCompile Include="..\..\include\flac\src\libFLAC\float.c">
 			<Filter>include\flac\src\libFLAC</Filter>
 		</ClCompile>
@@ -144,6 +153,18 @@
 			<Filter>include\flac\src\libFLAC</Filter>
 		</ClCompile>
 		<ClCompile Include="..\..\include\flac\src\libFLAC\lpc.c">
+			<Filter>include\flac\src\libFLAC</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\lpc_intrin_avx2.c">
+			<Filter>include\flac\src\libFLAC</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\lpc_intrin_sse2.c">
+			<Filter>include\flac\src\libFLAC</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\lpc_intrin_sse41.c">
+			<Filter>include\flac\src\libFLAC</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\lpc_intrin_sse.c">
 			<Filter>include\flac\src\libFLAC</Filter>
 		</ClCompile>
 		<ClCompile Include="..\..\include\flac\src\libFLAC\md5.c">
@@ -162,6 +183,15 @@
 			<Filter>include\flac\src\libFLAC</Filter>
 		</ClCompile>
 		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder.c">
+			<Filter>include\flac\src\libFLAC</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder_intrin_avx2.c">
+			<Filter>include\flac\src\libFLAC</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder_intrin_sse2.c">
+			<Filter>include\flac\src\libFLAC</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder_intrin_ssse3.c">
 			<Filter>include\flac\src\libFLAC</Filter>
 		</ClCompile>
 		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder_framing.c">
