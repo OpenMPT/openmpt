@@ -648,7 +648,8 @@ class ComponentBlade
 
 public:
 
-	int lame;
+	bool isLame;
+	mpt::PathString encoderDLL;
 
 	VOID (*beVersion) (PBE_VERSION);
 	BE_ERR (*beInitStream) (PBE_CONFIG, PDWORD, PDWORD, PHBE_STREAM);
@@ -661,13 +662,15 @@ private:
 	void Reset()
 	{
 		ClearLibraries();
-		lame = 0;
+		isLame = false;
+		encoderDLL = mpt::PathString();
 	}
 
 public:
 
 	ComponentBlade()
 		: ComponentBase(ComponentTypeForeign, false)
+		, isLame(false)
 	{
 		return;
 	}
@@ -681,11 +684,18 @@ protected:
 		Reset();
 		if(TryLoad(MPT_PATHSTRING("lame_enc")))
 		{
-			lame = 1;
+			isLame = true;
+			encoderDLL = MPT_PATHSTRING("lame_enc");
+			return true;
+		} else if(TryLoad(MPT_PATHSTRING("BladeMP3EncDLL")))
+		{
+			isLame = true;
+			encoderDLL = MPT_PATHSTRING("BladeMP3EncDLL");
 			return true;
 		} else if(TryLoad(MPT_PATHSTRING("bladeenc")))
 		{
-			lame = 0;
+			isLame = false;
+			encoderDLL = MPT_PATHSTRING("bladeenc");
 			return true;
 		}
 		return false;
@@ -725,10 +735,10 @@ public:
 			return traits;
 		}
 		traits.fileExtension = MPT_PATHSTRING("mp3");
-		traits.fileShortDescription = MPT_USTRING("MP3 ") + (lame ? MPT_USTRING("(Lame_enc)") : MPT_USTRING("(BladeEnc)"));
+		traits.fileShortDescription = MPT_USTRING("MP3 ") + (isLame ? MPT_USTRING("(Lame_enc)") : MPT_USTRING("(BladeEnc)"));
 		traits.fileDescription = MPT_USTRING("MPEG-1 Layer 3");
 		traits.encoderSettingsName = MPT_USTRING("MP3Blade");
-		traits.encoderName = lame ? MPT_USTRING("Lame_enc.dll") : MPT_USTRING("BladeEnc.dll");
+		traits.encoderName = mpt::String::Print(MPT_USTRING("%1.dll\n"), encoderDLL.ToUnicode());
 		BE_VERSION ver;
 		MemsetZero(ver);
 		beVersion(&ver);
