@@ -99,7 +99,9 @@ protected:
 			{ "opus"     , "opus"       },
 			{ "libogg-0" , "libopus-0"  }, // official xiph.org builds
 			{ "libogg"   , "libopus"    },
-			{ "ogg"      , "opus"       }
+			{ "ogg"      , "opus"       },
+			{ "libogg"   , "opus"       },
+			{ "ogg"      , "libopus"    }
 		};
 		bool ok = false;
 		for(std::size_t i=0; i<CountOf(dll_names); ++i)
