@@ -149,6 +149,11 @@ bool CWaveDevice::InternalOpen()
 		InternalClose();
 		return false;
 	}
+	if(waveOutPause(m_hWaveOut) != MMSYSERR_NOERROR)
+	{
+		InternalClose();
+		return false;
+	}
 	m_nWaveBufferSize = Util::Round<int32>(m_Settings.UpdateInterval * pwfx->nAvgBytesPerSec);
 	m_nWaveBufferSize = Clamp(m_nWaveBufferSize, WAVEOUT_MINBUFFERSIZE, WAVEOUT_MAXBUFFERSIZE);
 	m_nWaveBufferSize = ((m_nWaveBufferSize + pwfx->nBlockAlign - 1) / pwfx->nBlockAlign) * pwfx->nBlockAlign;
@@ -161,13 +166,14 @@ bool CWaveDevice::InternalOpen()
 	{
 		MemsetZero(m_WaveBuffers[buf]);
 		m_WaveBuffersData[buf].resize(m_nWaveBufferSize);
-		m_WaveBuffers[buf].dwFlags = WHDR_DONE;
+		m_WaveBuffers[buf].dwFlags = 0;
 		m_WaveBuffers[buf].lpData = &m_WaveBuffersData[buf][0];
 		m_WaveBuffers[buf].dwBufferLength = m_nWaveBufferSize;
 		if(waveOutPrepareHeader(m_hWaveOut, &m_WaveBuffers[buf], sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
 		{
 			break;
 		}
+		m_WaveBuffers[buf].dwFlags |= WHDR_DONE;
 		m_nPreparedHeaders++;
 	}
 	if(!m_nPreparedHeaders)
