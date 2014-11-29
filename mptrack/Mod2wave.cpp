@@ -1010,8 +1010,7 @@ void CDoWaveConvert::OnButton1()
 	uint64 l = static_cast<uint64>(m_SndFile.GetSongTime() + 0.5) * samplerate * std::max<uint64>(1, 1 + m_SndFile.GetRepeatCount());
 
 	// Reset song position tracking
-	m_SndFile.InitializeVisitedRows();
-	m_SndFile.SetCurrentPos(0);
+	m_SndFile.ResetPlayPos();
 	m_SndFile.m_SongFlags.reset(SONG_PATTERNLOOP);
 	ORDERINDEX startOrder = 0;
 	if(m_Settings.minOrder != ORDERINDEX_INVALID && m_Settings.maxOrder != ORDERINDEX_INVALID)
