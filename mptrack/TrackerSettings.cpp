@@ -785,6 +785,10 @@ void TrackerSettings::GetDefaultColourScheme(COLORREF (&colours)[MAX_MODCOLORS])
 	colours[MODCOLOR_BLENDCOLOR] = GetSysColor(COLOR_BTNFACE);
 	// Dodgy commands
 	colours[MODCOLOR_DODGY_COMMANDS] = RGB(0xC0, 0x00, 0x00);
+	// Sample / instrument editor
+	colours[MODCOLOR_BACKSAMPLE] = RGB(0x00, 0x00, 0x00);
+	colours[MODCOLOR_SAMPLESELECTED] = RGB(0xFF, 0xFF, 0xFF);
+	colours[MODCOLOR_BACKENV] = RGB(0x00, 0x00, 0x00);
 }
 
 
