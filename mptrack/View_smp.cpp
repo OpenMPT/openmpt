@@ -26,8 +26,6 @@
 #include "../soundlib/FileReader.h"
 #include "../soundlib/SampleFormatConverters.h"
 
-#define new DEBUG_NEW
-
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -137,16 +135,14 @@ CViewSample::CViewSample()
 
 	m_lastDrawPoint.SetPoint(-1, -1);
 	noteChannel.assign(NOTE_MAX - NOTE_MIN + 1, CHANNELINDEX_INVALID);
-	offScreenDC = nullptr;
-	offScreenBitmap = nullptr;
 }
 
 
 CViewSample::~CViewSample()
 //-------------------------
 {
-	DeleteObject(offScreenBitmap);
-	DeleteDC(offScreenDC);
+	offScreenBitmap.DeleteObject();
+	offScreenDC.DeleteDC();
 }
 
 
@@ -1036,7 +1032,7 @@ void CViewSample::OnDraw(CDC *pDC)
 	CModDoc *pModDoc = GetDocument();
 	HGDIOBJ oldpen;
 
-	UINT nSmpScrollPos = ScrollPosToSamplePos();
+	const SmpLength nSmpScrollPos = ScrollPosToSamplePos();
 
 	if ((!pModDoc) || (!pDC)) return;
 
@@ -1044,15 +1040,14 @@ void CViewSample::OnDraw(CDC *pDC)
 	const ModSample &sample = sndFile.GetSample((m_nSample <= sndFile.GetNumSamples()) ? m_nSample : 0);
 	
 	// Create off-screen image
-	if(offScreenDC == nullptr)
+	if(offScreenDC.m_hDC == nullptr)
 	{
-		offScreenDC = CreateCompatibleDC(pDC->m_hDC);
-		offScreenBitmap = CreateCompatibleBitmap(pDC->m_hDC, m_rcClient.Width(), m_rcClient.Height());
-		SelectObject(offScreenDC, offScreenBitmap);
+		offScreenDC.CreateCompatibleDC(pDC);
+		offScreenBitmap.CreateCompatibleBitmap(pDC, m_rcClient.Width(), m_rcClient.Height());
+		offScreenDC.SelectObject(offScreenBitmap);
 	}
 
-	offScreenDC = offScreenDC;
-	oldpen = ::SelectObject(offScreenDC, CMainFrame::penBlack);
+	oldpen = offScreenDC.SelectObject(CMainFrame::penBlack);
 	rect = rcClient;
 	if ((rcClient.bottom > rcClient.top) && (rcClient.right > rcClient.left))
 	{
@@ -1067,32 +1062,32 @@ void CViewSample::OnDraw(CDC *pDC)
 			{
 				rc.right = SampleToScreen(m_dwBeginSel);
 				if (rc.right > rcClient.right) rc.right = rcClient.right;
-				if (rc.right > rc.left) ::FillRect(offScreenDC, &rc, CMainFrame::brushBlack);
+				if (rc.right > rc.left) offScreenDC.FillSolidRect(&rc, TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKSAMPLE]);
 				rc.left = rc.right;
 			}
 			if (rc.left < 0) rc.left = 0;
 			rc.right = SampleToScreen(m_dwEndSel) + 1;
 			if (rc.right > rcClient.right) rc.right = rcClient.right;
-			if (rc.right > rc.left) ::FillRect(offScreenDC, &rc, CMainFrame::brushWhite);
+			if (rc.right > rc.left) offScreenDC.FillSolidRect(&rc, TrackerSettings::Instance().rgbCustomColors[MODCOLOR_SAMPLESELECTED]);
 			rc.left = rc.right;
 			if (rc.left < 0) rc.left = 0;
 			rc.right = rcClient.right;
-			if (rc.right > rc.left) ::FillRect(offScreenDC, &rc, CMainFrame::brushBlack);
+			if (rc.right > rc.left) offScreenDC.FillSolidRect(&rc, TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKSAMPLE]);
 		} else
 		{
-			::FillRect(offScreenDC, &rcClient, CMainFrame::brushBlack);
+			offScreenDC.FillSolidRect(&rcClient, TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKSAMPLE]);
 		}
-		::SelectObject(offScreenDC, CMainFrame::penDarkGray);
+		offScreenDC.SelectObject(CMainFrame::penDarkGray);
 		if (sample.uFlags[CHN_STEREO])
 		{
-			::MoveToEx(offScreenDC, 0, ymed-yrange/2, NULL);
-			::LineTo(offScreenDC, rcClient.right, ymed-yrange/2);
-			::MoveToEx(offScreenDC, 0, ymed+yrange/2, NULL);
-			::LineTo(offScreenDC, rcClient.right, ymed+yrange/2);
+			offScreenDC.MoveTo(0, ymed - yrange / 2);
+			offScreenDC.LineTo(rcClient.right, ymed - yrange / 2);
+			offScreenDC.MoveTo(0, ymed + yrange / 2);
+			offScreenDC.LineTo(rcClient.right, ymed + yrange / 2);
 		} else
 		{
-			::MoveToEx(offScreenDC, 0, ymed, NULL);
-			::LineTo(offScreenDC, rcClient.right, ymed);
+			offScreenDC.MoveTo(0, ymed);
+			offScreenDC.LineTo(rcClient.right, ymed);
 		}
 		// Drawing sample
 		if ((sample.pSample) && (yrange) && (sample.nLength > 1) && (rect.right > 1))
@@ -1103,35 +1098,35 @@ void CViewSample::OnDraw(CDC *pDC)
 				int xl = SampleToScreen(sample.nLoopStart);
 				if ((xl >= 0) && (xl < rcClient.right))
 				{
-					::MoveToEx(offScreenDC, xl, rect.top, NULL);
-					::LineTo(offScreenDC, xl, rect.bottom);
+					offScreenDC.MoveTo(xl, rect.top);
+					offScreenDC.LineTo(xl, rect.bottom);
 				}
 				xl = SampleToScreen(sample.nLoopEnd);
 				if ((xl >= 0) && (xl < rcClient.right))
 				{
-					::MoveToEx(offScreenDC, xl, rect.top, NULL);
-					::LineTo(offScreenDC, xl, rect.bottom);
+					offScreenDC.MoveTo(xl, rect.top);
+					offScreenDC.LineTo(xl, rect.bottom);
 				}
 			}
 			// Sustain Loop Start/End
 			if ((sample.nSustainEnd > nSmpScrollPos) && (sample.nSustainEnd > sample.nSustainStart))
 			{
-				::SelectObject(offScreenDC, CMainFrame::penHalfDarkGray);
+				offScreenDC.SelectObject(CMainFrame::penHalfDarkGray);
 				int xl = SampleToScreen(sample.nSustainStart);
 				if ((xl >= 0) && (xl < rcClient.right))
 				{
-					::MoveToEx(offScreenDC, xl, rect.top, NULL);
-					::LineTo(offScreenDC, xl, rect.bottom);
+					offScreenDC.MoveTo(xl, rect.top);
+					offScreenDC.LineTo(xl, rect.bottom);
 				}
 				xl = SampleToScreen(sample.nSustainEnd);
 				if ((xl >= 0) && (xl < rcClient.right))
 				{
-					::MoveToEx(offScreenDC, xl, rect.top, NULL);
-					::LineTo(offScreenDC, xl, rect.bottom);
+					offScreenDC.MoveTo(xl, rect.top);
+					offScreenDC.LineTo(xl, rect.bottom);
 				}
 			}
 			// Drawing Sample Data
-			::SelectObject(offScreenDC, CMainFrame::penSample);
+			offScreenDC.SelectObject(CMainFrame::penSample);
 			int smplsize = sample.GetBytesPerSample();
 			if (m_nZoom == 1 || m_nZoom < 0 || ((!m_nZoom) && (sample.nLength <= (SmpLength)rect.Width())))
 			{
@@ -1172,14 +1167,14 @@ void CViewSample::OnDraw(CDC *pDC)
 	if(m_nGridSegments && m_nGridSegments < sample.nLength)
 	{
 		// Draw sample grid
-		::SelectObject(offScreenDC, CMainFrame::penHalfDarkGray);
+		offScreenDC.SelectObject(CMainFrame::penHalfDarkGray);
 		for(SmpLength i = 1; i < m_nGridSegments; i++)
 		{
 			int screenPos = SampleToScreen(sample.nLength * i / m_nGridSegments);
 			if(screenPos >= rect.left && screenPos <= rect.right)
 			{
-				::MoveToEx(offScreenDC, screenPos, rect.top, nullptr);
-				::LineTo(offScreenDC, screenPos, rect.bottom);
+				offScreenDC.MoveTo(screenPos, rect.top);
+				offScreenDC.LineTo(screenPos, rect.bottom);
 			}
 		}
 	}
@@ -1188,7 +1183,7 @@ void CViewSample::OnDraw(CDC *pDC)
 
 	BitBlt(pDC->m_hDC, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), offScreenDC, 0, 0, SRCCOPY);
 
-	if (oldpen) ::SelectObject(offScreenDC, oldpen);
+	if (oldpen) offScreenDC.SelectObject(oldpen);
 
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	bool activeDoc = pMainFrm ? pMainFrm->GetActiveDoc() == GetDocument() : false;
@@ -1212,7 +1207,7 @@ void CViewSample::DrawPositionMarks()
 		rect.left = SampleToScreen(m_dwNotifyPos[i]);
 		rect.right = rect.left + 1;
 		rect.bottom = m_rcClient.bottom + 1;
-		if ((rect.right >= 0) && (rect.right < m_rcClient.right)) InvertRect(offScreenDC, &rect);
+		if ((rect.right >= 0) && (rect.right < m_rcClient.right)) offScreenDC.InvertRect(&rect);
 	}
 }
 
@@ -1445,10 +1440,8 @@ void CViewSample::OnSize(UINT nType, int cx, int cy)
 {
 	CModScrollView::OnSize(nType, cx, cy);
 
-	DeleteObject(offScreenBitmap);
-	DeleteDC(offScreenDC);
-	offScreenBitmap = nullptr;
-	offScreenDC = nullptr;
+	offScreenBitmap.DeleteObject();
+	offScreenDC.DeleteDC();
 
 	if (((nType == SIZE_RESTORED) || (nType == SIZE_MAXIMIZED)) && (cx > 0) && (cy > 0))
 	{

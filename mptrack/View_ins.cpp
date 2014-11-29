@@ -832,7 +832,7 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 		}
 
 		// Paint it black!
-		m_dcGrid.FillSolidRect(&m_rcClient, 0);
+		m_dcGrid.FillSolidRect(&m_rcClient, TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKENV]);
 
 		for (int x = 3; x < width; x++)
 		{
@@ -900,7 +900,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	} else
 	{
 		// Paint it black!
-		m_dcMemMain.FillSolidRect(&m_rcClient, 0);
+		m_dcMemMain.FillSolidRect(&m_rcClient, TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKENV]);
 	}
 
 	// Middle line (half volume or pitch / panning center)

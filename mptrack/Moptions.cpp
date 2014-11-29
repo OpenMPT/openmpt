@@ -43,8 +43,8 @@ static const struct ColorDescriptions
 	{"Invalid Commands",0,	MODCOLOR_DODGY_COMMANDS, 0, 0, "Invalid Note:", NULL, NULL},
 	{"Channel Separator",0,	MODCOLOR_SEPHILITE, MODCOLOR_SEPFACE, MODCOLOR_SEPSHADOW, "Highlight:", "Face:", "Shadow:"},
 	{"Next/Prev Pattern",0,	MODCOLOR_BLENDCOLOR, 0, 0, "Blend Colour:", NULL, NULL},
-	{"Sample Editor",	1,	MODCOLOR_SAMPLE, 0, 0, "Sample Data:", NULL, NULL},
-	{"Instrument Editor",2,	MODCOLOR_ENVELOPES, 0, 0, "Envelopes:", NULL, NULL},
+	{"Sample Editor",	1,	MODCOLOR_SAMPLE, MODCOLOR_BACKSAMPLE, MODCOLOR_SAMPLESELECTED, "Sample Data:", "Background:", "Selection:"},
+	{"Instrument Editor",2,	MODCOLOR_ENVELOPES, MODCOLOR_BACKENV, 0, "Envelopes:", "Background:", NULL},
 	{"VU-Meters",		0,	MODCOLOR_VUMETER_HI, MODCOLOR_VUMETER_MED, MODCOLOR_VUMETER_LO, "Hi:", "Med:", "Lo:"}
 };
 
@@ -244,6 +244,15 @@ void COptionsColors::OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis)
 			p[8] = rgb2quad(CustomColors[MODCOLOR_TEXTPLAYCURSOR]);
 			p[11] = rgb2quad(CustomColors[MODCOLOR_BACKPLAYCURSOR]);
 			break;
+		// Sample Editor
+		case 9:
+			p[0] = rgb2quad(CustomColors[MODCOLOR_BACKSAMPLE]);
+			p[15] = rgb2quad(CustomColors[MODCOLOR_SAMPLESELECTED]);
+			break;
+		// Envelope Editor
+		case 10:
+			p[0] = rgb2quad(CustomColors[MODCOLOR_BACKENV]);
+			break;
 		}
 		HDC hdc = lpdis->hDC;
 		HPEN oldpen = (HPEN)::SelectObject(hdc, CMainFrame::penDarkGray);
@@ -420,6 +429,9 @@ void COptionsColors::OnPresetFT2()
 	CustomColors[MODCOLOR_SEPHILITE] = RGB(0x99, 0x99, 0xCC);
 	CustomColors[MODCOLOR_BLENDCOLOR] = RGB(0x2E, 0x2E, 0x5A);
 	CustomColors[MODCOLOR_DODGY_COMMANDS] = RGB(0xC0, 0x40, 0x40);
+	CustomColors[MODCOLOR_BACKSAMPLE] = RGB(0x00, 0x00, 0x00);
+	CustomColors[MODCOLOR_SAMPLESELECTED] = RGB(0xFF, 0xFF, 0xFF);
+	CustomColors[MODCOLOR_BACKENV] = RGB(0x00, 0x00, 0x00);
 	OnPreviewChanged();
 }
 
@@ -453,6 +465,9 @@ void COptionsColors::OnPresetIT()
 	CustomColors[MODCOLOR_SEPHILITE] = RGB(0x94, 0xBC, 0x94);
 	CustomColors[MODCOLOR_BLENDCOLOR] = RGB(0x00, 0x40, 0x00);
 	CustomColors[MODCOLOR_DODGY_COMMANDS] = RGB(0xFF, 0x80, 0x80);
+	CustomColors[MODCOLOR_BACKSAMPLE] = RGB(0x00, 0x00, 0x00);
+	CustomColors[MODCOLOR_SAMPLESELECTED] = RGB(0xFF, 0xFF, 0xFF);
+	CustomColors[MODCOLOR_BACKENV] = RGB(0x00, 0x00, 0x00);
 	OnPreviewChanged();
 }
 
@@ -485,6 +500,9 @@ void COptionsColors::OnPresetBuzz()
 	CustomColors[MODCOLOR_SEPHILITE] = RGB(0xEC, 0xE8, 0xE1);
 	CustomColors[MODCOLOR_BLENDCOLOR] = RGB(0xE1, 0xDB, 0xD0);
 	CustomColors[MODCOLOR_DODGY_COMMANDS] = RGB(0xC0, 0x00, 0x00);
+	CustomColors[MODCOLOR_BACKSAMPLE] = RGB(0x00, 0x00, 0x00);
+	CustomColors[MODCOLOR_SAMPLESELECTED] = RGB(0xFF, 0xFF, 0xFF);
+	CustomColors[MODCOLOR_BACKENV] = RGB(0x00, 0x00, 0x00);
 	OnPreviewChanged();
 }
 

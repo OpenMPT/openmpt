@@ -36,8 +36,8 @@ public:
 protected:
 	CImageList m_bmpEnvBar;
 	CRect m_rcClient;
-	HDC offScreenDC;
-	HGDIOBJ offScreenBitmap;
+	CDC offScreenDC;
+	CBitmap offScreenBitmap;
 	SIZE m_sizeTotal;
 	UINT m_nBtnMouseOver;
 	int m_nZoom;	// < 0: Zoom into sample (2^x:1 ratio), 0: Auto zoom, > 0: Zoom out (1:2^x ratio)
