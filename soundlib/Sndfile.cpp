@@ -897,36 +897,30 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 
 	if ((m_nRestartPos >= Order.size()) || (Order[m_nRestartPos] >= Patterns.Size())) m_nRestartPos = 0;
 
-	// When reading a file made with an older version of MPT, it might be necessary to upgrade some settings automatically.
-	if(m_dwLastSavedWithVersion)
-	{
-		UpgradeModule();
-	}
-
+#ifndef NO_VST
 	// plugin loader
 	std::string notFoundText;
-	std::vector<PLUGINDEX> notFoundIDs;
+	std::vector<SNDMIXPLUGININFO *> notFoundIDs;
 
-#ifndef NO_VST
 	if (gpMixPluginCreateProc && (loadFlags & loadPluginData))
 	{
-		for(PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
+		for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 		{
-			if(m_MixPlugins[iPlug].IsValidPlugin())
+			if(m_MixPlugins[plug].IsValidPlugin())
 			{
-				gpMixPluginCreateProc(m_MixPlugins[iPlug], *this);
-				if (m_MixPlugins[iPlug].pMixPlugin)
+				gpMixPluginCreateProc(m_MixPlugins[plug], *this);
+				if (m_MixPlugins[plug].pMixPlugin)
 				{
 					// plugin has been found
-					m_MixPlugins[iPlug].pMixPlugin->RestoreAllParameters(m_MixPlugins[iPlug].defaultProgram);
+					m_MixPlugins[plug].pMixPlugin->RestoreAllParameters(m_MixPlugins[plug].defaultProgram);
 				} else
 				{
 					// plugin not found - add to list
 					bool found = false;
-					for(std::vector<PLUGINDEX>::iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
+					for(std::vector<SNDMIXPLUGININFO *>::const_iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
 					{
-						if(m_MixPlugins[*i].Info.dwPluginId2 == m_MixPlugins[iPlug].Info.dwPluginId2
-							&& m_MixPlugins[*i].Info.dwPluginId1 == m_MixPlugins[iPlug].Info.dwPluginId1)
+						if((**i).dwPluginId2 == (**i).dwPluginId2
+							&& (**i).dwPluginId1 == (**i).dwPluginId1)
 						{
 							found = true;
 							break;
@@ -935,9 +929,9 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 
 					if(!found)
 					{
-						notFoundText.append(m_MixPlugins[iPlug].GetLibraryName());
+						notFoundText.append(m_MixPlugins[plug].GetLibraryName());
 						notFoundText.append("\n");
-						notFoundIDs.push_back(iPlug); // add this to the list of missing IDs so we will find the needed plugins later when calling KVRAudio
+						notFoundIDs.push_back(&m_MixPlugins[plug].Info); // add this to the list of missing IDs so we will find the needed plugins later when calling KVRAudio
 					}
 				}
 			}
@@ -951,21 +945,20 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		if(notFoundIDs.size() == 1)
 		{
 			notFoundText = "The following plugin has not been found:\n\n" + notFoundText + "\nDo you want to search for it online?";
-		}
-		else
+		} else
 		{
-			notFoundText =	"The following plugins have not been found:\n\n" + notFoundText + "\nDo you want to search for them online?";
+			notFoundText = "The following plugins have not been found:\n\n" + notFoundText + "\nDo you want to search for them online?";
 		}
 		if (Reporting::Confirm(mpt::ToWide(mpt::CharsetUTF8, notFoundText.c_str()), L"OpenMPT - Plugins missing", false, true) == cnfYes)
 		{
-			std::string sUrl = "http://resources.openmpt.org/plugins/search.php?p=";
-			for(std::vector<PLUGINDEX>::iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
+			std::string url = "http://resources.openmpt.org/plugins/search.php?p=";
+			for(std::vector<SNDMIXPLUGININFO *>::const_iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
 			{
-				sUrl += mpt::fmt::HEX0<8>(LittleEndian(m_MixPlugins[*i].Info.dwPluginId2));
-				sUrl += m_MixPlugins[*i].GetLibraryName();
-				sUrl += "%0a";
+				url += mpt::fmt::HEX0<8>(LittleEndian((**i).dwPluginId2));
+				url += (**i).szLibraryName;
+				url += "%0a";
 			}
-			CTrackApp::OpenURL(mpt::PathString::FromUTF8(sUrl));
+			CTrackApp::OpenURL(mpt::PathString::FromUTF8(url));
 		}
 	}
 #endif // NO_VST
@@ -973,17 +966,23 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	// Set up mix levels
 	SetMixLevels(m_nMixLevels);
 
-	if(GetType() != MOD_TYPE_NONE)
+	if(GetType() == MOD_TYPE_NONE)
 	{
-		SetModSpecsPointer(m_pModSpecs, GetBestSaveFormat());
-		const ORDERINDEX CacheSize = ModSequenceSet::s_nCacheSize; // workaround reference to static const member problem
-		const ORDERINDEX nMinLength = std::min(CacheSize, GetModSpecifications().ordersMax);
-		if (Order.GetLength() < nMinLength)
-			Order.resize(nMinLength);
-		return true;
+		return false;
 	}
 
-	return false;
+	SetModSpecsPointer(m_pModSpecs, GetBestSaveFormat());
+	const ORDERINDEX CacheSize = ModSequenceSet::s_nCacheSize; // workaround reference to static const member problem
+	const ORDERINDEX nMinLength = std::min(CacheSize, GetModSpecifications().ordersMax);
+	if (Order.GetLength() < nMinLength)
+		Order.resize(nMinLength);
+
+	// When reading a file made with an older version of MPT, it might be necessary to upgrade some settings automatically.
+	if(m_dwLastSavedWithVersion)
+	{
+		UpgradeModule();
+	}
+	return true;
 }
 
 
@@ -1059,27 +1058,19 @@ void CSoundFile::SetPreAmp(UINT nVol)
 }
 
 
-UINT CSoundFile::GetCurrentPos() const
-//------------------------------------
-{
-	UINT pos = 0;
-
-	for (UINT i=0; i<m_PlayState.m_nCurrentOrder; i++) if (Order[i] < Patterns.Size())
-		pos += Patterns[Order[i]].GetNumRows();
-	return pos + m_PlayState.m_nRow;
-}
-
 double CSoundFile::GetCurrentBPM() const
 //--------------------------------------
 {
 	double bpm;
 
-	if (m_nTempoMode == tempo_mode_modern)			// With modern mode, we trust that true bpm
-	{												// is close enough to what user chose.
+	if (m_nTempoMode == tempo_mode_modern)
+	{
+		// With modern mode, we trust that true bpm is close enough to what user chose.
 		bpm = static_cast<double>(m_PlayState.m_nMusicTempo);	// This avoids oscillation due to tick-to-tick corrections.
 	} else
-	{																	//with other modes, we calculate it:
-		double ticksPerBeat = m_PlayState.m_nMusicSpeed * m_PlayState.m_nCurrentRowsPerBeat;	//ticks/beat = ticks/row  * rows/beat
+	{
+		//with other modes, we calculate it:
+		double ticksPerBeat = m_PlayState.m_nMusicSpeed * m_PlayState.m_nCurrentRowsPerBeat;	//ticks/beat = ticks/row * rows/beat
 		double samplesPerBeat = m_PlayState.m_nSamplesPerTick * ticksPerBeat;		//samps/beat = samps/tick * ticks/beat
 		bpm =  m_MixerSettings.gdwMixingFreq/samplesPerBeat * 60;		//beats/sec  = samps/sec  / samps/beat
 	}																	//beats/min  =  beats/sec * 60
@@ -1087,73 +1078,28 @@ double CSoundFile::GetCurrentBPM() const
 	return bpm;
 }
 
-void CSoundFile::SetCurrentPos(UINT nPos)
-//---------------------------------------
+
+void CSoundFile::ResetPlayPos()
+//-----------------------------
 {
-	ORDERINDEX nPattern;
-	ModChannel::ResetFlags resetMask = (!nPos) ? ModChannel::resetSetPosFull : ModChannel::resetSetPosBasic;
+	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+		m_PlayState.Chn[i].Reset(ModChannel::resetSetPosFull, *this, i);
 
-	for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
-		m_PlayState.Chn[i].Reset(resetMask, *this, i);
-
-	if(nPos == 0)
-	{
-		m_PlayState.m_nGlobalVolume = m_nDefaultGlobalVolume;
-		m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
-		m_PlayState.m_nMusicTempo = m_nDefaultTempo;
-
-		// do not ramp global volume when starting playback
-		m_PlayState.m_lHighResRampingGlobalVolume = m_PlayState.m_nGlobalVolume<<VOLUMERAMPPRECISION;
-		m_PlayState.m_nGlobalVolumeDestination = m_PlayState.m_nGlobalVolume;
-		m_PlayState.m_nSamplesToGlobalVolRampDest = 0;
-		m_PlayState.m_nGlobalVolumeRampAmount = 0;
-
-		visitedSongRows.Initialize(true);
-	}
+	InitializeVisitedRows();
 	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
-	for (nPattern = 0; nPattern < Order.size(); nPattern++)
-	{
-		ORDERINDEX ord = Order[nPattern];
-		if(ord == Order.GetIgnoreIndex()) continue;
-		if (ord == Order.GetInvalidPatIndex()) break;
-		if (ord < Patterns.Size())
-		{
-			if (nPos < (UINT)Patterns[ord].GetNumRows()) break;
-			nPos -= Patterns[ord].GetNumRows();
-		}
-	}
-	// Buggy position ?
-	if ((nPattern >= Order.size())
-	 || (Order[nPattern] >= Patterns.Size())
-	 || (nPos >= Patterns[Order[nPattern]].GetNumRows()))
-	{
-		nPos = 0;
-		nPattern = 0;
-	}
-	UINT nRow = nPos;
-	if ((nRow) && (Order[nPattern] < Patterns.Size()))
-	{
-		ModCommand *p = Patterns[Order[nPattern]];
-		if ((p) && (nRow < Patterns[Order[nPattern]].GetNumRows()))
-		{
-			bool bOk = false;
-			while ((!bOk) && (nRow > 0))
-			{
-				UINT n = nRow * m_nChannels;
-				for (UINT k=0; k<m_nChannels; k++, n++)
-				{
-					if (p[n].note)
-					{
-						bOk = true;
-						break;
-					}
-				}
-				if (!bOk) nRow--;
-			}
-		}
-	}
-	m_PlayState.m_nNextOrder = nPattern;
-	m_PlayState.m_nNextRow = nRow;
+
+	m_PlayState.m_nGlobalVolume = m_nDefaultGlobalVolume;
+	m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
+	m_PlayState.m_nMusicTempo = m_nDefaultTempo;
+
+	// do not ramp global volume when starting playback
+	m_PlayState.m_lHighResRampingGlobalVolume = m_PlayState.m_nGlobalVolume<<VOLUMERAMPPRECISION;
+	m_PlayState.m_nGlobalVolumeDestination = m_PlayState.m_nGlobalVolume;
+	m_PlayState.m_nSamplesToGlobalVolRampDest = 0;
+	m_PlayState.m_nGlobalVolumeRampAmount = 0;
+
+	m_PlayState.m_nNextOrder = 0;
+	m_PlayState.m_nNextRow = 0;
 	m_PlayState.m_nTickCount = m_PlayState.m_nMusicSpeed;
 	m_PlayState.m_nBufferCount = 0;
 	m_PlayState.m_nPatternDelay = 0;
@@ -1194,7 +1140,7 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 
 	if (!nOrder)
 	{
-		SetCurrentPos(0);
+		ResetPlayPos();
 	} else
 	{
 		m_PlayState.m_nNextOrder = nOrder;
@@ -1276,7 +1222,7 @@ void CSoundFile::SetMixLevels(mixLevels levels)
 void CSoundFile::RecalculateGainForAllPlugs()
 //-------------------------------------------
 {
-	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
+	for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 	{
 		if (!m_MixPlugins[iPlug].pMixPlugin)
 			continue;  //most common branch
@@ -1288,6 +1234,7 @@ void CSoundFile::RecalculateGainForAllPlugs()
 		}
 	}
 }
+
 
 //end rewbs.VSTCompliance
 

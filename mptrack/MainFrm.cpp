@@ -1379,7 +1379,7 @@ bool CMainFrame::StopMod(CModDoc *pModDoc)
 	PausePlayback();
 	GenerateStopNotification();
 
-	m_pSndFile->SetCurrentPos(0);
+	m_pSndFile->ResetPlayPos();
 	m_pSndFile->ResetChannels();
 	UnsetPlaybackSoundFile();
 
@@ -1600,7 +1600,7 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note)
 {
 	m_WaveFile.m_SongFlags.reset(SONG_PAUSED);
 	m_WaveFile.SetRepeatCount(-1);
-	m_WaveFile.SetCurrentPos(0);
+	m_WaveFile.ResetPlayPos();
 
 	ModCommand *m = m_WaveFile.Patterns[0];
 	if(m)

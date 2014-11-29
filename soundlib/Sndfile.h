@@ -97,13 +97,13 @@ struct PatternCuePoint
 struct GetLengthType
 {
 	double duration;		// total time in seconds
-	ROWINDEX lastRow;		// last parsed row (see lastOrder remark)
-	ROWINDEX endRow;		// last row before module loops (see endOrder remark)
+	ROWINDEX lastRow;		// last parsed row (if no target is specified, this is the first row that is parsed twice, i.e. not the *last* played order)
+	ROWINDEX endRow;		// last row before module loops (UNDEFINED if a target is specified)
 	ROWINDEX startRow;		// first row of parsed subsong
-	ORDERINDEX lastOrder;	// last parsed order (if no target is specified, this is the first order that is parsed twice, i.e. not the *last* played order)
+	ORDERINDEX lastOrder;	// last parsed order (see lastRow remark)
 	ORDERINDEX endOrder;	// last order before module loops (UNDEFINED if a target is specified)
 	ORDERINDEX startOrder;	// first order of parsed subsong
-	bool targetReached;		// true if the specified order/row combination has been reached while going through the module
+	bool targetReached;		// true if the specified order/row combination or duration has been reached while going through the module
 
 	GetLengthType()
 		: duration(0.0)
@@ -601,7 +601,6 @@ public:
 
 	INSTRUMENTINDEX GetNumInstruments() const { return m_nInstruments; }
 	SAMPLEINDEX GetNumSamples() const { return m_nSamples; }
-	UINT GetCurrentPos() const;
 	PATTERNINDEX GetCurrentPattern() const { return m_PlayState.m_nPattern; }
 	ORDERINDEX GetCurrentOrder() const { return m_PlayState.m_nCurrentOrder; }
 	CHANNELINDEX GetNumChannels() const { return m_nChannels; }
@@ -619,7 +618,7 @@ public:
 	void DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);		//rewbs.playSongFromCursor
 	CHANNELINDEX GetMixStat() const { return m_nMixStat; }
 	void ResetMixStat() { m_nMixStat = 0; }
-	void SetCurrentPos(UINT nPos);
+	void ResetPlayPos();
 	void SetCurrentOrder(ORDERINDEX nOrder);
 	std::string GetTitle() const { return songName; }
 	bool SetTitle(const std::string &newTitle); // Return true if title was changed.

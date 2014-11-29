@@ -758,7 +758,7 @@ BOOL CModDoc::InitializeMod()
 			m_SndFile.m_SongFlags.set(SONG_LINEARSLIDES);
 		}
 	}
-	m_SndFile.SetCurrentPos(0);
+	m_SndFile.ResetPlayPos();
 
 	return TRUE;
 }
@@ -1689,7 +1689,8 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 	const mpt::PathString fileName = drive + dir + name;
 	const mpt::PathString fileExt = ext;
 
-	// Saving as wave file
+	const ORDERINDEX currentOrd = m_SndFile.m_PlayState.m_nCurrentOrder;
+	const ROWINDEX  currentRow = m_SndFile.m_PlayState.m_nRow;
 
 	int nRenderPasses = 1;
 	// Channel mode
@@ -1740,7 +1741,6 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		}
 	}
 
-	UINT pos = m_SndFile.GetCurrentPos();
 	pMainFrm->PauseMod();
 	int oldRepeat = m_SndFile.GetRepeatCount();
 
@@ -1756,7 +1756,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			if(i > 0) m_SndFile.ChnSettings[i - 1].dwFlags.set(CHN_MUTE);
 
 			// Was this channel actually muted? Don't process it then.
-			if(usedChannels[i] == false)
+			if(!usedChannels[i])
 				continue;
 			// Add channel number & name (if available) to path string
 			if(strcmp(m_SndFile.ChnSettings[i].szName, ""))
@@ -1842,7 +1842,9 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 	}
 
 	m_SndFile.SetRepeatCount(oldRepeat);
-	m_SndFile.SetCurrentPos(pos);
+	m_SndFile.GetLength(eAdjust, GetLengthTarget(currentOrd, currentRow));
+	m_SndFile.m_PlayState.m_nNextOrder = currentOrd;
+	m_SndFile.m_PlayState.m_nNextRow = currentRow;
 	CMainFrame::UpdateAudioParameters(m_SndFile, true);
 }
 
@@ -2092,7 +2094,7 @@ void CModDoc::OnPlayerPlayFromStart()
 		pMainFrm->PauseMod();
 		CriticalSection cs;
 		m_SndFile.m_SongFlags.reset(SONG_STEP | SONG_PATTERNLOOP);
-		m_SndFile.SetCurrentPos(0);
+		m_SndFile.ResetPlayPos();
 		//m_SndFile.visitedSongRows.Initialize(true);
 		m_SndFile.m_PlayState.m_lTotalSampleCount = 0;
 
