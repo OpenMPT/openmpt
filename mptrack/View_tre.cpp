@@ -2566,27 +2566,30 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 						SAMPLEINDEX smpID = static_cast<SAMPLEINDEX>(modItem.val1);
 						const ModSample &sample = sndFile->GetSample(smpID);
 						const bool hasPath = sndFile->SampleHasPath(smpID);
-						if((sample.HasSampleData() && sndFile->GetType() == MOD_TYPE_MPT) || hasPath)
+						const bool menuForThisSample = (sample.HasSampleData() && sndFile->GetType() == MOD_TYPE_MPT) || hasPath;
+
+						bool anyPath = false, anyModified = false;
+						for(SAMPLEINDEX smp = 1; smp <= sndFile->GetNumSamples(); smp++)
 						{
-							bool anyPath = false, anyModified = false;
-							for(SAMPLEINDEX smp = 1; smp <= sndFile->GetNumSamples(); smp++)
+							if(sndFile->SampleHasPath(smp) && smp != smpID)
 							{
-								if(sndFile->SampleHasPath(smp) && smp != smpID)
+								anyPath = true;
+								const ModSample &sample = sndFile->GetSample(smp);
+								if(sample.HasSampleData() && sample.uFlags[SMP_MODIFIED])
 								{
-									anyPath = true;
-									const ModSample &sample = sndFile->GetSample(smp);
-									if(sample.HasSampleData() && sample.uFlags[SMP_MODIFIED])
-									{
-										anyModified = true;
-									}
-									if(anyPath && anyModified) break;
+									anyModified = true;
 								}
+								if(anyPath && anyModified) break;
 							}
+						}
+
+						if(menuForThisSample || anyPath || anyModified)
+						{
 							AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
-							AppendMenu(hMenu, MF_STRING | (sndFile->GetType() == MOD_TYPE_MPT ? 0 : MF_GRAYED), ID_MODTREE_SETPATH, _T("Set P&ath"));
-							AppendMenu(hMenu, MF_STRING | ((hasPath && sample.HasSampleData() && sample.uFlags[SMP_MODIFIED]) ? 0 : MF_GRAYED), ID_MODTREE_SAVEITEM, _T("&Save"));
+							if(menuForThisSample) AppendMenu(hMenu, MF_STRING | (sndFile->GetType() == MOD_TYPE_MPT ? 0 : MF_GRAYED), ID_MODTREE_SETPATH, _T("Set P&ath"));
+							if(menuForThisSample) AppendMenu(hMenu, MF_STRING | ((hasPath && sample.HasSampleData() && sample.uFlags[SMP_MODIFIED]) ? 0 : MF_GRAYED), ID_MODTREE_SAVEITEM, _T("&Save"));
 							if(anyModified) AppendMenu(hMenu, MF_STRING, ID_MODTREE_SAVEALL, _T("&Save All"));
-							AppendMenu(hMenu, MF_STRING | (hasPath ? 0 : MF_GRAYED), ID_MODTREE_RELOADITEM, _T("&Reload"));
+							if(menuForThisSample) AppendMenu(hMenu, MF_STRING | (hasPath ? 0 : MF_GRAYED), ID_MODTREE_RELOADITEM, _T("&Reload"));
 							if(anyPath) AppendMenu(hMenu, MF_STRING, ID_MODTREE_RELOADALL, _T("&Reload All"));
 						}
 					}
