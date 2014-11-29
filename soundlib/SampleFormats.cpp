@@ -1463,7 +1463,6 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 	ModSample &sample = Samples[nSample];
 	file.Seek(sampleHeader.ConvertToMPT(sample));
 	mpt::String::Read<mpt::String::spacePaddedNull>(m_szNames[nSample], sampleHeader.name);
-	sample.Convert(MOD_TYPE_IT, GetType());
 
 	if(!sample.uFlags[SMP_KEEPONDISK])
 	{
@@ -1496,6 +1495,8 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 		file.Skip(strLen);
 #endif // MPT_EXTERNAL_SAMPLES
 	}
+
+	sample.Convert(MOD_TYPE_IT, GetType());
 	sample.PrecomputeLoops(*this, false);
 	return true;
 }
