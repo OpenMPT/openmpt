@@ -33,6 +33,7 @@
 #include "../soundlib/FileReader.h"
 #include <shlwapi.h>
 #include "FileDialog.h"
+#include "ExternalSamples.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -130,15 +131,16 @@ void CModDoc::Dump(CDumpContext& dc) const
 /////////////////////////////////////////////////////////////////////////////
 // CModDoc construction/destruction
 
-CModDoc::CModDoc() : m_LogMode(LogModeInstantReporting), m_PatternUndo(*this), m_SampleUndo(*this)
-//------------------------------------------------------------------------------------------------
+CModDoc::CModDoc()
+	: m_LogMode(LogModeInstantReporting)
+	, m_hWndFollow(nullptr)
+	, m_bHasValidPath(false)
+	, m_notifyType(Notification::Default)
+	, m_notifyItem(0)
+	, m_PatternUndo(*this)
+	, m_SampleUndo(*this)
+//---------------------------------------
 {
-	m_bHasValidPath = false;
-	m_hWndFollow = NULL;
-
-	m_notifyType = Notification::Default;
-	m_notifyItem = 0;
-
 	// Set the creation date of this file (or the load time if we're loading an existing file)
 	time(&m_creationTime);
 
@@ -386,6 +388,17 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 	SetModifiedFlag(FALSE); // (bModified);
 	m_bHasValidPath=true;
 
+	// Check if there are any missing samples, and if there are, show a dialog to relocate them.
+	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+	{
+		if(m_SndFile.IsExternalSampleMissing(smp))
+		{
+			ExternalSamplesDlg dlg(*this, CMainFrame::GetMainFrame());
+			dlg.DoModal();
+			break;
+		}
+	}
+
 	return TRUE;
 }
 
@@ -519,7 +532,7 @@ void CModDoc::OnCloseDocument()
 //-----------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (pMainFrm) pMainFrm->OnDocumentClosed(this);
+	if(pMainFrm) pMainFrm->OnDocumentClosed(this);
 	CDocument::OnCloseDocument();
 }
 

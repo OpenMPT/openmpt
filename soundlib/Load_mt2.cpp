@@ -198,7 +198,7 @@ STATIC_ASSERT(sizeof(MT2IEnvelope) == 72);
 
 
 // Note: The order of these fields differs a bit in MTIOModule_MT2.cpp - maybe just typos, I'm not sure.
-// This struct follows the safe format of MadTracker 2.6.1.
+// This struct follows the save format of MadTracker 2.6.1.
 struct PACKED MT2InstrSynth
 {
 	uint8  synthID;
@@ -926,7 +926,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read sample headers
-	std::vector<bool> sampleInterpolation(256, true);
+	std::bitset<256> sampleNoInterpolation;
 	for(SAMPLEINDEX i = 0; i < 256; i++)
 	{
 		char sampleName[32];
@@ -967,11 +967,11 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			if(sampleHeader.flags & 5)
 			{
 				// External sample
-				strcpy(mptSmp.filename, "Ext");
+				mptSmp.uFlags.set(SMP_KEEPONDISK);
 			}
 			if(sampleHeader.flags & 8)
 			{
-				sampleInterpolation[i] = false;
+				sampleNoInterpolation[i] = true;
 				for(INSTRUMENTINDEX drum = 0; drum < 8; drum++)
 				{
 					if(drumMap[drum] != 0 && Instruments[drumMap[drum]] != nullptr)
@@ -1018,7 +1018,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 							mptSmp.nVibRate = insHeader.vibrate;
 							mptSmp.nGlobalVol = uint16(group.vol) * 2;
 							mptSmp.nFineTune = group.pitch;
-							if(!sampleInterpolation[sample - 1])
+							if(sampleNoInterpolation[sample - 1])
 							{
 								mptIns->nResampling = SRCMODE_NEAREST;
 							}
@@ -1039,7 +1039,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		ModSample &mptSmp = Samples[i + 1];
 		const uint32 freq = Util::Round<uint32>(mptSmp.nC5Speed * std::pow(2.0, -(mptSmp.RelativeTone - 49 - (mptSmp.nFineTune / 128.0)) / 12.0));
 
-		if(strcmp(mptSmp.filename, "Ext"))
+		if(!mptSmp.uFlags[SMP_KEEPONDISK])
 		{
 			SampleIO(
 				mptSmp.uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,
@@ -1082,7 +1082,10 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			if(!LoadExternalSample(i + 1, path))
 			{
+#ifndef MODPLUG_TRACKER
+				// OpenMPT has its own way of reporting this error
 				AddToLog(LogError, mpt::String::Print(MPT_USTRING("Unable to load sample %1: %2"), i, path.ToUnicode()));
+#endif // MODPLUG_TRACKER
 			}
 #else
 			#if defined(MPT_WITH_CHARSET_LOCALE)

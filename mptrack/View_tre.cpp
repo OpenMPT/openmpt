@@ -22,7 +22,7 @@
 #include "../soundlib/FileReader.h"
 #include "FileDialog.h"
 #include "Globals.h"
-#include "FolderScanner.h"
+#include "ExternalSamples.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -2582,17 +2582,17 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 									anyModified = true;
 								}
 							}
-							if(sample.uFlags[SMP_KEEPONDISK] && sample.pSample == nullptr)
+							if(sndFile->IsExternalSampleMissing(smp))
 							{
 								anyMissing = true;
 							}
 							if(anyPath && anyModified && anyMissing) break;
 						}
 
-						if(menuForThisSample || anyPath || anyModified || anyMissing)
+						if(menuForThisSample || anyPath || anyModified)
 						{
 							AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
-							if(menuForThisSample) AppendMenu(hMenu, MF_STRING | (sndFile->GetType() == MOD_TYPE_MPT ? 0 : MF_GRAYED), ID_MODTREE_SETPATH, _T("Set P&ath"));
+							if(menuForThisSample) AppendMenu(hMenu, MF_STRING | ((sndFile->GetType() == MOD_TYPE_MPT || hasPath) ? 0 : MF_GRAYED), ID_MODTREE_SETPATH, _T("Set P&ath"));
 							if(menuForThisSample) AppendMenu(hMenu, MF_STRING | ((hasPath && sample.HasSampleData() && sample.uFlags[SMP_MODIFIED]) ? 0 : MF_GRAYED), ID_MODTREE_SAVEITEM, _T("&Save"));
 							if(anyModified) AppendMenu(hMenu, MF_STRING, ID_MODTREE_SAVEALL, _T("&Save All"));
 							if(menuForThisSample) AppendMenu(hMenu, MF_STRING | (hasPath ? 0 : MF_GRAYED), ID_MODTREE_RELOADITEM, _T("&Reload"));
@@ -3280,46 +3280,8 @@ void CModTree::OnFindMissing()
 	{
 		return;
 	}
-	BrowseForFolder dlg(TrackerDirectories::Instance().GetWorkingDirectory(DIR_SAMPLES), _T("Select a folder to search for missing samples..."));
-	int foundFiles = 0;
-	if(dlg.Show())
-	{
-		FolderScanner scan(dlg.GetDirectory(), true);
-		mpt::PathString fileName;
-		CSoundFile &sndFile = pModDoc->GetrSoundFile();
-
-		BeginWaitCursor();
-		while(scan.NextFile(fileName))
-		{
-			for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++)
-			{
-				ModSample &sample = sndFile.GetSample(smp);
-				if(sample.uFlags[SMP_KEEPONDISK] && sample.pSample == nullptr && !mpt::PathString::CompareNoCase(sndFile.GetSamplePath(smp).GetFullFileName(), fileName.GetFullFileName()))
-				{
-					pModDoc->GetSampleUndo().PrepareUndo(smp, sundo_replace, "Replace");
-					if(!sndFile.LoadExternalSample(smp, fileName))
-					{
-						pModDoc->GetSampleUndo().RemoveLastUndoStep(smp);
-					} else
-					{
-						pModDoc->SetModified();
-						foundFiles++;
-					}
-				}
-			}
-		}
-		EndWaitCursor();
-	}
-	pModDoc->UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_SMPNAMES | HINT_SAMPLEDATA);
-	OnRefreshTree();
-
-	if(foundFiles)
-	{
-		Reporting::Information(mpt::String::Print("%1 sample paths were relocated.", foundFiles));
-	} else
-	{
-		Reporting::Information("No matching sample names found.");
-	}
+	ExternalSamplesDlg dlg(*pModDoc, CMainFrame::GetMainFrame());
+	dlg.DoModal();
 }
 
 
