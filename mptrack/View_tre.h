@@ -279,6 +279,7 @@ protected:
 	afx_msg void OnSaveAll();
 	afx_msg void OnReloadItem();
 	afx_msg void OnReloadAll();
+	afx_msg void OnFindMissing();
 
 	afx_msg void OnAddDlsBank();
 	afx_msg void OnImportMidiLib();

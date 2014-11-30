@@ -19,6 +19,7 @@
 #include "Vstplug.h"
 #include "SelectPluginDialog.h"
 #include "../pluginBridge/BridgeWrapper.h"
+#include "FolderScanner.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -623,58 +624,36 @@ void CSelectPluginDlg::OnScanFolder()
 	pluginScanDlg.CenterWindow(this);
 	pluginScanDlg.ShowWindow(SW_SHOW);
 
-	std::vector<mpt::PathString> paths(1, dlg.GetDirectory());
+	FolderScanner scan(dlg.GetDirectory(), true);
+	mpt::PathString fileName;
 	int files = 0;
-	while(!paths.empty())
+	while(scan.NextFile(fileName))
 	{
-		HANDLE hFind;
-		WIN32_FIND_DATAW wfd;
-		MemsetZero(wfd);
-
-		mpt::PathString path = paths.back();
-		paths.pop_back();
-		if(!path.HasTrailingSlash()) path += MPT_PATHSTRING("\\");
-		if((hFind = FindFirstFileW((path + MPT_PATHSTRING("*.*")).AsNative().c_str(), &wfd)) != INVALID_HANDLE_VALUE)
+		if(!mpt::PathString::CompareNoCase(fileName.GetFileExt(), MPT_PATHSTRING(".dll")))
 		{
-			do
+			CWnd *text = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
+			std::wstring scanStr = L"Scanning Plugin...\n" + fileName.ToWide();
+			SetWindowTextW(text->m_hWnd, scanStr.c_str());
+			MSG msg;
+			while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 			{
-				mpt::PathString fileName = path + mpt::PathString::FromNative(wfd.cFileName);
-				if(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-				{
-					if(wcscmp(wfd.cFileName, L"..")
-						&& wcscmp(wfd.cFileName, L"."))
-					{
-						paths.push_back(fileName);
-					}
-					continue;
-				} else if(!mpt::PathString::CompareNoCase(fileName.GetFileExt(), MPT_PATHSTRING(".dll")))
-				{
-					CWnd *text = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
-					std::wstring scanStr = L"Scanning Plugin...\n" + fileName.ToWide();
-					SetWindowTextW(text->m_hWnd, scanStr.c_str());
-					MSG msg;
-					while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-					{
-						::TranslateMessage(&msg);
-						::DispatchMessage(&msg);
-					}
+				::TranslateMessage(&msg);
+				::DispatchMessage(&msg);
+			}
 
-					VSTPluginLib *lib = pManager->AddPlugin(fileName, false);
-					if(lib)
-					{
-						update = true;
-						if(!VerifyPlug(lib))
-						{
-							pManager->RemovePlugin(lib);
-						} else
-						{
-							plugLib = lib;
-							files++;
-						}
-					}
+			VSTPluginLib *lib = pManager->AddPlugin(fileName, false);
+			if(lib)
+			{
+				update = true;
+				if(!VerifyPlug(lib))
+				{
+					pManager->RemovePlugin(lib);
+				} else
+				{
+					plugLib = lib;
+					files++;
 				}
-			} while (FindNextFileW(hFind, &wfd));
-			FindClose(hFind);
+			}
 		}
 	}
 

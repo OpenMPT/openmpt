@@ -22,6 +22,7 @@
 #include "../soundlib/FileReader.h"
 #include "FileDialog.h"
 #include "Globals.h"
+#include "FolderScanner.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -116,6 +117,7 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_COMMAND(ID_MODTREE_SAVEALL,		OnSaveAll)
 	ON_COMMAND(ID_MODTREE_RELOADITEM,	OnReloadItem)
 	ON_COMMAND(ID_MODTREE_RELOADALL,	OnReloadAll)
+	ON_COMMAND(ID_MODTREE_FINDMISSING,	OnFindMissing)
 	ON_COMMAND(ID_ADD_SOUNDBANK,		OnAddDlsBank)
 	ON_COMMAND(ID_IMPORT_MIDILIB,		OnImportMidiLib)
 	ON_COMMAND(ID_EXPORT_MIDILIB,		OnExportMidiLib)
@@ -1308,7 +1310,7 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 		case MODITEM_HDR_INSTRUMENTLIB:
 			if(IsSampleBrowser())
 			{
-				BrowseForFolder dlg(m_InstrLibPath, TEXT("Select a new instrument library folder..."));
+				BrowseForFolder dlg(m_InstrLibPath, _T("Select a new instrument library folder..."));
 				if(dlg.Show())
 				{
 					mpt::PathString dir = dlg.GetDirectory();
@@ -2568,22 +2570,26 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 						const bool hasPath = sndFile->SampleHasPath(smpID);
 						const bool menuForThisSample = (sample.HasSampleData() && sndFile->GetType() == MOD_TYPE_MPT) || hasPath;
 
-						bool anyPath = false, anyModified = false;
+						bool anyPath = false, anyModified = false, anyMissing = false;
 						for(SAMPLEINDEX smp = 1; smp <= sndFile->GetNumSamples(); smp++)
 						{
+							const ModSample &sample = sndFile->GetSample(smp);
 							if(sndFile->SampleHasPath(smp) && smp != smpID)
 							{
 								anyPath = true;
-								const ModSample &sample = sndFile->GetSample(smp);
 								if(sample.HasSampleData() && sample.uFlags[SMP_MODIFIED])
 								{
 									anyModified = true;
 								}
-								if(anyPath && anyModified) break;
 							}
+							if(sample.uFlags[SMP_KEEPONDISK] && sample.pSample == nullptr)
+							{
+								anyMissing = true;
+							}
+							if(anyPath && anyModified && anyMissing) break;
 						}
 
-						if(menuForThisSample || anyPath || anyModified)
+						if(menuForThisSample || anyPath || anyModified || anyMissing)
 						{
 							AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
 							if(menuForThisSample) AppendMenu(hMenu, MF_STRING | (sndFile->GetType() == MOD_TYPE_MPT ? 0 : MF_GRAYED), ID_MODTREE_SETPATH, _T("Set P&ath"));
@@ -2591,6 +2597,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 							if(anyModified) AppendMenu(hMenu, MF_STRING, ID_MODTREE_SAVEALL, _T("&Save All"));
 							if(menuForThisSample) AppendMenu(hMenu, MF_STRING | (hasPath ? 0 : MF_GRAYED), ID_MODTREE_RELOADITEM, _T("&Reload"));
 							if(anyPath) AppendMenu(hMenu, MF_STRING, ID_MODTREE_RELOADALL, _T("&Reload All"));
+							if(anyMissing) AppendMenu(hMenu, MF_STRING, ID_MODTREE_FINDMISSING, _T("&Find Missing Samples"));
 						}
 					}
 				}
@@ -3260,6 +3267,58 @@ void CModTree::OnReloadAll()
 		}
 		pModDoc->UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_SMPNAMES | HINT_SAMPLEDATA);
 		OnRefreshTree();
+	}
+}
+
+
+// Find missing external samples
+void CModTree::OnFindMissing()
+//----------------------------
+{
+	CModDoc *pModDoc = GetDocumentFromItem(GetSelectedItem());
+	if(pModDoc == nullptr)
+	{
+		return;
+	}
+	BrowseForFolder dlg(TrackerDirectories::Instance().GetWorkingDirectory(DIR_SAMPLES), _T("Select a folder to search for missing samples..."));
+	int foundFiles = 0;
+	if(dlg.Show())
+	{
+		FolderScanner scan(dlg.GetDirectory(), true);
+		mpt::PathString fileName;
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+
+		BeginWaitCursor();
+		while(scan.NextFile(fileName))
+		{
+			for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++)
+			{
+				ModSample &sample = sndFile.GetSample(smp);
+				if(sample.uFlags[SMP_KEEPONDISK] && sample.pSample == nullptr && !mpt::PathString::CompareNoCase(sndFile.GetSamplePath(smp).GetFullFileName(), fileName.GetFullFileName()))
+				{
+					pModDoc->GetSampleUndo().PrepareUndo(smp, sundo_replace, "Replace");
+					if(!sndFile.LoadExternalSample(smp, fileName))
+					{
+						pModDoc->GetSampleUndo().RemoveLastUndoStep(smp);
+					} else
+					{
+						pModDoc->SetModified();
+						foundFiles++;
+					}
+				}
+			}
+		}
+		EndWaitCursor();
+	}
+	pModDoc->UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_SMPNAMES | HINT_SAMPLEDATA);
+	OnRefreshTree();
+
+	if(foundFiles)
+	{
+		Reporting::Information(mpt::String::Print("%1 sample paths were relocated.", foundFiles));
+	} else
+	{
+		Reporting::Information("No matching sample names found.");
 	}
 }
 

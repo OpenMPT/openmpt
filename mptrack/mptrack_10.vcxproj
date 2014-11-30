@@ -829,6 +829,7 @@
     <ClCompile Include="EffectVis.cpp" />
     <ClCompile Include="ExceptionHandler.cpp" />
     <ClCompile Include="FileDialog.cpp" />
+    <ClCompile Include="FolderScanner.cpp" />
     <ClCompile Include="Globals.cpp" />
     <ClCompile Include="InputHandler.cpp" />
     <ClCompile Include="KeyConfigDlg.cpp" />
@@ -1042,6 +1043,7 @@
     <ClInclude Include="EffectInfo.h" />
     <ClInclude Include="ExceptionHandler.h" />
     <ClInclude Include="FileDialog.h" />
+    <ClInclude Include="FolderScanner.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Mainbar.h" />
