@@ -655,7 +655,10 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 							}
 							if(!LoadExternalSample(i + 1, filename))
 							{
+#ifndef MODPLUG_TRACKER
+								// OpenMPT has its own way of reporting this error
 								AddToLog(LogError, mpt::String::Print(MPT_USTRING("Unable to load sample %1: %2"), i, filename.ToUnicode()));
+#endif // MODPLUG_TRACKER
 							}
 						} else
 						{

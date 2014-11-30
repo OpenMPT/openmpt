@@ -828,6 +828,7 @@
     <ClCompile Include="EffectInfo.cpp" />
     <ClCompile Include="EffectVis.cpp" />
     <ClCompile Include="ExceptionHandler.cpp" />
+    <ClCompile Include="ExternalSamples.cpp" />
     <ClCompile Include="FileDialog.cpp" />
     <ClCompile Include="FolderScanner.cpp" />
     <ClCompile Include="Globals.cpp" />
@@ -1030,6 +1031,7 @@
     <ClInclude Include="Childfrm.h" />
     <ClInclude Include="CImageListEx.h" />
     <ClInclude Include="CleanupSong.h" />
+    <ClInclude Include="CListCtrl.h" />
     <ClInclude Include="ColourEdit.h" />
     <ClInclude Include="CommandSet.h" />
     <ClInclude Include="CreditStatic.h" />
@@ -1042,6 +1044,7 @@
     <ClInclude Include="DefaultVstEditor.h" />
     <ClInclude Include="EffectInfo.h" />
     <ClInclude Include="ExceptionHandler.h" />
+    <ClInclude Include="ExternalSamples.h" />
     <ClInclude Include="FileDialog.h" />
     <ClInclude Include="FolderScanner.h" />
     <ClInclude Include="Globals.h" />

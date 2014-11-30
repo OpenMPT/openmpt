@@ -540,6 +540,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ExternalSamples.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\Fastmix.cpp"
 				>
 			</File>
@@ -1158,6 +1162,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CListCtrl.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ColourEdit.h"
 				>
 			</File>
@@ -1235,6 +1243,10 @@
 			</File>
 			<File
 				RelativePath=".\ExceptionHandler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ExternalSamples.h"
 				>
 			</File>
 			<File
