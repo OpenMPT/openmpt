@@ -548,6 +548,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FolderScanner.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\globals.cpp"
 				>
 			</File>
@@ -1235,6 +1239,10 @@
 			</File>
 			<File
 				RelativePath=".\FileDialog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FolderScanner.h"
 				>
 			</File>
 			<File

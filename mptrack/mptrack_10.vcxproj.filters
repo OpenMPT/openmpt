@@ -532,6 +532,9 @@
     <ClCompile Include="..\common\mptFileIO.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
+    <ClCompile Include="FolderScanner.cpp">
+      <Filter>Source Files\mptrack</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1034,6 +1037,9 @@
     </ClInclude>
     <ClInclude Include="..\common\mptFileIO.h">
       <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="FolderScanner.h">
+      <Filter>Header Files\mptrack</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
