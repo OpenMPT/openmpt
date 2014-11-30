@@ -6,20 +6,19 @@
 # The script also generates the appropriate files that can be fed into the
 # HTML Help Workshop to generate a CHM file.
 
-from urllib2 import urlopen
-from urllib import urlretrieve
+from urllib.request import urlopen, urlretrieve
 import re
 
 base_url = 'http://wiki.openmpt.org'
 
-style = urlopen(base_url + '/load.php?debug=false&lang=en&modules=mediawiki.legacy.common%2Cshared|mediawiki.ui.button|skins.vector.styles&only=styles&skin=vector&*').read()
+style = urlopen(base_url + '/load.php?debug=false&lang=en&modules=mediawiki.legacy.common%2Cshared|mediawiki.ui.button|skins.vector.styles&only=styles&skin=vector&*').read().decode('UTF-8')
 # Remove a few unused CSS classes
 style = re.sub(r'\}(\w+)?[\.#]vector([\w >]+)\{.+?\}', '}', style)
 style_file = open('html/style.css', 'w')
 style_file.write(style)
 style_file.close()
 
-toc_page = urlopen(base_url + '/index.php?title=Manual:_CHM_TOC&action=render').read()
+toc_page = urlopen(base_url + '/index.php?title=Manual:_CHM_TOC&action=render').read().decode('UTF-8')
 
 pages = re.findall('href="' + base_url + '/(.+?)"', toc_page)
 
@@ -77,7 +76,7 @@ external.png
 """)
 
 for p in pages:
-    content = urlopen(base_url + '/index.php?title=' + p + '&action=render').read()
+    content = urlopen(base_url + '/index.php?title=' + p + '&action=render').read().decode('UTF-8')
     # Download and replace image URLs
     content = re.sub(r'"/images/thumb/(\w+)/(\w+)/([^\/]+?)/([^\/]+?)"', replace_images, content)
     content = re.sub(r'"/images/(\w+)/(\w+)/([^\/]+?)"', replace_images, content)
@@ -109,15 +108,15 @@ for p in pages:
     <title>OpenMPT Manual - """ + title(p) + """</title>
     </head>
     <body>
-    <h1>""" + title(p) + '</h1><div id="content">' + content + '</div></body></html>'
+    <h1>""" + title(p) + '</h1><div id="content" class="mw-body">' + content + '</div></body></html>'
     
     saved = open('html/' + destname(p), 'wb')
     
-    saved.write(content)
+    saved.write(bytes(content, 'UTF-8'))
     saved.close()
     
     project.write(destname(p)+"\n")
-    print p
+    print(p)
     
 project.close()
 
