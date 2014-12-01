@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # OpenMPT help file scraper
 # by coda and Saga Musix
 # This script downloads the OpenMPT manual TOC and then downloads all pages
@@ -89,10 +89,6 @@ for p in pages:
     # Remove templates that shouldn't turn up in the manual
     content = re.sub(r'<div class="todo".+?</div>', '', content, flags = re.DOTALL);
     content = re.sub(r'<p class="newversion".+?</p>', '', content, flags = re.DOTALL);
-    # Remove edit links (MW 1.23 should make this superfluous)
-    content = re.sub(r'<span class="mw-editsection"><span class="mw-editsection-bracket">\[</span><a href=".+?">edit</a><span class="mw-editsection-bracket">\]</span></span>', '', content)
-    # Remove magnify links for images
-    content = content.replace('<img src="/skins/common/images/magnify-clip.png" width="15" height="11" alt="" />', '')
     
     section = re.match(r'(.+)/', title(p))
     section_str = ''

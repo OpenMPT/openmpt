@@ -4703,8 +4703,7 @@ void CViewPattern::TempEnterFX(int c, int v)
 	if(target.IsPcNote())
 	{
 		ENTER_PCNOTE_VALUE(c, ValueEffectCol);
-	}
-	else if(pSndFile->GetModSpecifications().HasCommand(c))
+	} else if(pSndFile->GetModSpecifications().HasCommand(c))
 	{
 
 		if (c)
@@ -5203,7 +5202,7 @@ void CViewPattern::TempEnterNote(int note, int vol, bool fromMidi)
 		{
 			if(newcmd.command == CMD_NONE)	//make sure we don't overwrite any existing commands.
 			{
-				newcmd.command = (sndFile.TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
+				newcmd.command = sndFile.GetModSpecifications().HasCommand(CMD_S3MCMDEX) ? CMD_S3MCMDEX : CMD_MODCMDEX;
 				UINT maxSpeed = 0x0F;
 				if(sndFile.m_PlayState.m_nMusicSpeed > 0) maxSpeed = MIN(0x0F, sndFile.m_PlayState.m_nMusicSpeed - 1);
 				newcmd.param = 0xD0 + MIN(maxSpeed, m_nPlayTick);
@@ -6114,16 +6113,16 @@ bool CViewPattern::BuildMiscCtxMenu(HMENU hMenu, CInputHandler *ih) const
 bool CViewPattern::BuildSelectionCtxMenu(HMENU hMenu, CInputHandler *ih) const
 //----------------------------------------------------------------------------
 {
-	AppendMenu(hMenu, MF_STRING, ID_EDIT_SELECTCOLUMN, "Select Column\t" + ih->GetKeyTextFromCommand(kcSelectColumn));
-	AppendMenu(hMenu, MF_STRING, ID_EDIT_SELECT_ALL, "Select Pattern\t" + ih->GetKeyTextFromCommand(kcEditSelectAll));
+	AppendMenu(hMenu, MF_STRING, ID_EDIT_SELECTCOLUMN, _T("Select &Column\t") + ih->GetKeyTextFromCommand(kcSelectColumn));
+	AppendMenu(hMenu, MF_STRING, ID_EDIT_SELECT_ALL, _T("Select &Pattern\t") + ih->GetKeyTextFromCommand(kcEditSelectAll));
 	return true;
 }
 
 bool CViewPattern::BuildGrowShrinkCtxMenu(HMENU hMenu, CInputHandler *ih) const
 //-----------------------------------------------------------------------------
 {
-	AppendMenu(hMenu, MF_STRING, ID_GROW_SELECTION, "Grow selection\t" + ih->GetKeyTextFromCommand(kcPatternGrowSelection));
-	AppendMenu(hMenu, MF_STRING, ID_SHRINK_SELECTION, "Shrink selection\t" + ih->GetKeyTextFromCommand(kcPatternShrinkSelection));
+	AppendMenu(hMenu, MF_STRING, ID_GROW_SELECTION, _T("&Grow selection\t") + ih->GetKeyTextFromCommand(kcPatternGrowSelection));
+	AppendMenu(hMenu, MF_STRING, ID_SHRINK_SELECTION, _T("&Shrink selection\t") + ih->GetKeyTextFromCommand(kcPatternShrinkSelection));
 	return true;
 }
 
@@ -6135,13 +6134,13 @@ bool CViewPattern::BuildInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih) con
 	const bool isPCNote = sndFile->Patterns.IsValidPat(m_nPattern) && sndFile->Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel())->IsPcNote();
 
 	HMENU subMenu = CreatePopupMenu();
-	bool possible = BuildInterpolationCtxMenu(subMenu, PatternCursor::noteColumn, CString("Note Column\t") + ih->GetKeyTextFromCommand(kcPatternInterpolateNote), ID_PATTERN_INTERPOLATE_NOTE)
-		| BuildInterpolationCtxMenu(subMenu, PatternCursor::instrColumn, (isPCNote ? CString("Plugin Column\t") : CString("Instrument Column\t")) + ih->GetKeyTextFromCommand(kcPatternInterpolateInstr), ID_PATTERN_INTERPOLATE_INSTR)
-		| BuildInterpolationCtxMenu(subMenu, PatternCursor::volumeColumn, (isPCNote ? CString("Parameter Column\t") : CString("Volume Column\t")) + ih->GetKeyTextFromCommand(kcPatternInterpolateVol), ID_PATTERN_INTERPOLATE_VOLUME)
-		| BuildInterpolationCtxMenu(subMenu, PatternCursor::effectColumn, (isPCNote ? CString("Value Column\t") : CString("Effect Column\t")) + ih->GetKeyTextFromCommand(kcPatternInterpolateEffect), ID_PATTERN_INTERPOLATE_EFFECT);
+	bool possible = BuildInterpolationCtxMenu(subMenu, PatternCursor::noteColumn, _T("&Note Column\t") + ih->GetKeyTextFromCommand(kcPatternInterpolateNote), ID_PATTERN_INTERPOLATE_NOTE)
+		| BuildInterpolationCtxMenu(subMenu, PatternCursor::instrColumn, (isPCNote ? _T("&Plugin Column\t") : _T("&Instrument Column\t")) + ih->GetKeyTextFromCommand(kcPatternInterpolateInstr), ID_PATTERN_INTERPOLATE_INSTR)
+		| BuildInterpolationCtxMenu(subMenu, PatternCursor::volumeColumn, (isPCNote ? _T("&Parameter Column\t") : _T("&Volume Column\t")) + ih->GetKeyTextFromCommand(kcPatternInterpolateVol), ID_PATTERN_INTERPOLATE_VOLUME)
+		| BuildInterpolationCtxMenu(subMenu, PatternCursor::effectColumn, (isPCNote ? _T("&Value Column\t") : _T("&Effect Column\t")) + ih->GetKeyTextFromCommand(kcPatternInterpolateEffect), ID_PATTERN_INTERPOLATE_EFFECT);
 	if(possible || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
-		AppendMenu(hMenu, MF_POPUP | (possible ? 0 : MF_GRAYED), reinterpret_cast<UINT_PTR>(subMenu), "Interpolate...");
+		AppendMenu(hMenu, MF_POPUP | (possible ? 0 : MF_GRAYED), reinterpret_cast<UINT_PTR>(subMenu), "I&nterpolate...");
 		return true;
 	}
 	return false;
@@ -6226,12 +6225,12 @@ bool CViewPattern::BuildTransposeCtxMenu(HMENU hMenu, CInputHandler *ih) const
 
 	if(!greyed || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
-		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_UP, "Transpose +1\t" + ih->GetKeyTextFromCommand(kcTransposeUp));
-		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_DOWN, "Transpose -1\t" + ih->GetKeyTextFromCommand(kcTransposeDown));
-		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_OCTUP, "Transpose +12\t" + ih->GetKeyTextFromCommand(kcTransposeOctUp));
-		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_OCTDOWN, "Transpose -12\t" + ih->GetKeyTextFromCommand(kcTransposeOctDown));
-		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_CUSTOM, "Custom...\t" + ih->GetKeyTextFromCommand(kcTransposeCustom));
-		AppendMenu(hMenu, MF_POPUP | greyed, reinterpret_cast<UINT_PTR>(transMenu), "Transpose...");
+		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_UP, _T("Transpose +&1\t") + ih->GetKeyTextFromCommand(kcTransposeUp));
+		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_DOWN, _T("Transpose -&1\t") + ih->GetKeyTextFromCommand(kcTransposeDown));
+		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_OCTUP, _T("Transpose +1&2\t") + ih->GetKeyTextFromCommand(kcTransposeOctUp));
+		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_OCTDOWN, _T("Transpose -1&2\t") + ih->GetKeyTextFromCommand(kcTransposeOctDown));
+		AppendMenu(transMenu, MF_STRING | greyed, ID_TRANSPOSE_CUSTOM, _T("&Custom...\t") + ih->GetKeyTextFromCommand(kcTransposeCustom));
+		AppendMenu(hMenu, MF_POPUP | greyed, reinterpret_cast<UINT_PTR>(transMenu), _T("&Transpose..."));
 		return true;
 	}
 	return false;
@@ -6336,8 +6335,8 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const
 			{
 				AppendMenu(instrumentChangeMenu, MF_SEPARATOR, 0, 0);
 			}
-			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT, "Remove instrument");
-			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT + GetCurrentInstrument(), "Set to current instrument");
+			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT, _T("&Remove instrument"));
+			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT + GetCurrentInstrument(), _T("&Set to current instrument"));
 		}
 		return BuildTogglePlugEditorCtxMenu(hMenu, ih);
 	}
@@ -6424,7 +6423,7 @@ bool CViewPattern::BuildTogglePlugEditorCtxMenu(HMENU hMenu, CInputHandler *ih) 
 
 	if(plug && plug <= MAX_MIXPLUGINS && sndFile->m_MixPlugins[plug - 1].pMixPlugin != nullptr)
 	{
-		AppendMenu(hMenu, MF_STRING, ID_PATTERN_EDIT_PCNOTE_PLUGIN, "Toggle Plugin Editor\t" + ih->GetKeyTextFromCommand(kcPatternEditPCNotePlugin));
+		AppendMenu(hMenu, MF_STRING, ID_PATTERN_EDIT_PCNOTE_PLUGIN, "Toggle Plugin &Editor\t" + ih->GetKeyTextFromCommand(kcPatternEditPCNotePlugin));
 		return true;
 	}
 	return false;
@@ -6437,7 +6436,7 @@ CHANNELINDEX CViewPattern::ListChansWhereColSelected(PatternCursor::Columns colT
 	CHANNELINDEX startChan = m_Selection.GetStartChannel();
 	CHANNELINDEX endChan   = m_Selection.GetEndChannel();
 	chans.clear();
-	chans.reserve(endChan - startChan);
+	chans.reserve(endChan - startChan + 1);
 
 	// Check in which channels this column is selected.
 	// Actually this check is only important for the first and last channel, but to keep things clean and simple, all channels are checked in the same manner.
@@ -6491,8 +6490,8 @@ bool CViewPattern::IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, C
 		return false;
 
 	bool result = false;
-	const ModCommand startRowMC = *sndFile->Patterns[m_nPattern].GetpModCommand(startRow, chan);
-	const ModCommand endRowMC = *sndFile->Patterns[m_nPattern].GetpModCommand(endRow, chan);
+	const ModCommand &startRowMC = *sndFile->Patterns[m_nPattern].GetpModCommand(startRow, chan);
+	const ModCommand &endRowMC = *sndFile->Patterns[m_nPattern].GetpModCommand(endRow, chan);
 	UINT startRowCmd, endRowCmd;
 
 	if(colType == PatternCursor::effectColumn && (startRowMC.IsPcNote() || endRowMC.IsPcNote()))
@@ -6524,6 +6523,7 @@ bool CViewPattern::IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, C
 			break;
 
 		case PatternCursor::effectColumn:
+		case PatternCursor::paramColumn:
 			startRowCmd = startRowMC.command;
 			endRowCmd = endRowMC.command;
 			result = (startRowCmd == endRowCmd && startRowCmd != CMD_NONE)		// Interpolate between two identical commands

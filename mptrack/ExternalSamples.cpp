@@ -186,16 +186,15 @@ void ExternalSamplesDlg::OnScanFolder()
 		EndWaitCursor();
 		GetDlgItem(IDOK)->EnableWindow(TRUE);
 		SetDlgItemText(IDC_BUTTON1, "&Scan Folder...");
-		SetDlgItemText(IDC_STATIC1, "");
 
 		modDoc.UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_SMPNAMES | HINT_SAMPLEDATA);
 
 		if(foundFiles)
 		{
-			Reporting::Information(mpt::String::Print("%1 sample paths were relocated.", foundFiles));
-		} else if(isScanning)
+			SetDlgItemText(IDC_STATIC1, mpt::String::Print("%1 sample paths were relocated.", foundFiles).c_str());
+		} else
 		{
-			Reporting::Information("No matching sample names found.");
+			SetDlgItemText(IDC_STATIC1, _T("No matching sample names found."));
 		}
 		isScanning = false;
 		GenerateList();
