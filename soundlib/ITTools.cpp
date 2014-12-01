@@ -538,15 +538,21 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 		vir = 255 - vir;
 	}
 
-#ifdef MPT_EXTERNAL_SAMPLES
-	// Save external sample (filename at sample pointer)
-	if(allowExternal && mptSmp.uFlags[SMP_KEEPONDISK] && mptSmp.HasSampleData())
+	if(mptSmp.uFlags[SMP_KEEPONDISK])
 	{
-		cvt = ITSample::cvtExternalSample;
-	}
+#ifndef MPT_EXTERNAL_SAMPLES
+		MPT_UNREFERENCED_PARAMETER(allowExternal);
 #else
-	MPT_UNREFERENCED_PARAMETER(allowExternal);
+		// Save external sample (filename at sample pointer)
+		if(allowExternal && mptSmp.HasSampleData())
+		{
+			cvt = ITSample::cvtExternalSample;
+		} else
 #endif // MPT_EXTERNAL_SAMPLES
+		{
+			length = loopbegin = loopend = susloopbegin = susloopend = 0;
+		}
+	}
 }
 
 
