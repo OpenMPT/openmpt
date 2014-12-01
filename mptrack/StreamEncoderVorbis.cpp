@@ -184,7 +184,7 @@ public:
 		traits.canTags = true;
 		traits.maxChannels = 4;
 		traits.samplerates = std::vector<uint32>(vorbis_samplerates, vorbis_samplerates + CountOf(vorbis_samplerates));
-		traits.modes = Encoder::ModeVBR | Encoder::ModeQuality;
+		traits.modes = Encoder::ModeABR | Encoder::ModeQuality;
 		traits.bitrates = std::vector<int>(vorbis_bitrates, vorbis_bitrates + CountOf(vorbis_bitrates));
 		traits.defaultSamplerate = 48000;
 		traits.defaultChannels = 2;
@@ -320,7 +320,8 @@ public:
 		if(settings.Mode == Encoder::ModeQuality)
 		{
 			vorbis.vorbis_encode_init_vbr(&vi, vorbis_channels, samplerate, settings.Quality);
-		} else {
+		} else
+		{
 			vorbis.vorbis_encode_init(&vi, vorbis_channels, samplerate, -1, settings.Bitrate * 1000, -1);
 		}
 
