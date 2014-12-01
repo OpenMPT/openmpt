@@ -850,26 +850,50 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		m_PlayState.Chn[ich].Reset(ModChannel::resetTotal, *this, ich);
 	}
 
-	// Checking samples
-	ModSample *pSmp = Samples;
-	for(SAMPLEINDEX nSmp = 0; nSmp < MAX_SAMPLES; nSmp++, pSmp++)
+	// Checking samples, load external samples
+	for(SAMPLEINDEX nSmp = 1; nSmp < MAX_SAMPLES; nSmp++)
 	{
 		// Adjust song / sample names
 		mpt::String::SetNullTerminator(m_szNames[nSmp]);
+		ModSample &sample = Samples[nSmp];
 
-		if(pSmp->pSample)
+#ifdef MPT_EXTERNAL_SAMPLES
+		if(SampleHasPath(nSmp))
 		{
-			pSmp->PrecomputeLoops(*this, false);
+			mpt::PathString filename = GetSamplePath(nSmp);
+			if(!file.GetFileName().empty())
+			{
+				filename = filename.RelativePathToAbsolute(file.GetFileName().GetPath());
+			} else if(GetpModDoc() != nullptr)
+			{
+				filename = filename.RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt().GetPath());
+			}
+			if(!LoadExternalSample(nSmp, filename))
+			{
+#ifndef MODPLUG_TRACKER
+				// OpenMPT has its own way of reporting this error in CModDoc.
+				AddToLog(LogError, mpt::String::Print(MPT_USTRING("Unable to load sample %1: %2"), i, filename.ToUnicode()));
+#endif // MODPLUG_TRACKER
+			}
 		} else
 		{
-			pSmp->nLength = 0;
-			pSmp->nLoopStart = 0;
-			pSmp->nLoopEnd = 0;
-			pSmp->nSustainStart = 0;
-			pSmp->nSustainEnd = 0;
-			pSmp->uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
+			sample.uFlags.reset(SMP_KEEPONDISK);
 		}
-		if(pSmp->nGlobalVol > 64) pSmp->nGlobalVol = 64;
+#endif // MPT_EXTERNAL_SAMPLES
+
+		if(sample.pSample)
+		{
+			sample.PrecomputeLoops(*this, false);
+		} else if(!sample.uFlags[SMP_KEEPONDISK])
+		{
+			sample.nLength = 0;
+			sample.nLoopStart = 0;
+			sample.nLoopEnd = 0;
+			sample.nSustainStart = 0;
+			sample.nSustainEnd = 0;
+			sample.uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
+		}
+		if(sample.nGlobalVol > 64) sample.nGlobalVol = 64;
 	}
 	// Check invalid instruments
 	while ((m_nInstruments > 0) && (!Instruments[m_nInstruments])) m_nInstruments--;

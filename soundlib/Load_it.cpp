@@ -17,7 +17,7 @@
 #include "../mptrack/TrackerSettings.h"
 #endif // MODPLUG_TRACKER
 #ifdef MPT_EXTERNAL_SAMPLES
-#include "../common/mptFileIO.h"
+#include "../common/mptPathString.h"
 #endif // MPT_EXTERNAL_SAMPLES
 #include "../common/mptIO.h"
 #include "../common/serialization_utils.h"
@@ -642,28 +642,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 						std::string filenameU8;
 						file.ReadString<mpt::String::maybeNullTerminated>(filenameU8, strLen);
 #ifdef MPT_EXTERNAL_SAMPLES
-						mpt::PathString filename = mpt::PathString::FromUTF8(filenameU8);
-
-						if(!filename.empty())
-						{
-							if(!file.GetFileName().empty())
-							{
-								filename = filename.RelativePathToAbsolute(file.GetFileName().GetPath());
-							} else if(GetpModDoc() != nullptr)
-							{
-								filename = filename.RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt().GetPath());
-							}
-							if(!LoadExternalSample(i + 1, filename))
-							{
-#ifndef MODPLUG_TRACKER
-								// OpenMPT has its own way of reporting this error
-								AddToLog(LogError, mpt::String::Print(MPT_USTRING("Unable to load sample %1: %2"), i, filename.ToUnicode()));
-#endif // MODPLUG_TRACKER
-							}
-						} else
-						{
-							sample.uFlags.reset(SMP_KEEPONDISK);
-						}
+						SetSamplePath(i + 1, mpt::PathString::FromUTF8(filenameU8));
 #else
 						AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."), i, mpt::ToUnicode(mpt::CharsetUTF8, filenameU8)));
 #endif // MPT_EXTERNAL_SAMPLES

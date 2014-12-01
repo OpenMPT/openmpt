@@ -13,10 +13,7 @@
 #include "Loaders.h"
 #ifdef MPT_EXTERNAL_SAMPLES
 // For loading external samples
-#include "../common/mptFileIO.h"
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/Moddoc.h"
-#endif // MODPLUG_TRACKER
+#include "../common/mptPathString.h"
 #endif // MPT_EXTERNAL_SAMPLES
 
 OPENMPT_NAMESPACE_BEGIN
@@ -1057,36 +1054,14 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			mpt::String::Copy(mptSmp.filename, filename);
 
 #ifdef MPT_EXTERNAL_SAMPLES
-			mpt::PathString path(mpt::PathString::FromLocale(filename));
-			mpt::PathString mt2FileName;
-			if(!file.GetFileName().empty())
+			if(filename.length() >= 2
+				&& filename.at(0) != '\\'	// Relative path on same drive
+				&& filename.at(1) != ':')	// Absolute path
 			{
-				mt2FileName = file.GetFileName();
-#ifdef MODPLUG_TRACKER
-			} else if(GetpModDoc() != nullptr)
-			{
-				mt2FileName = GetpModDoc()->GetPathNameMpt();
-#endif // MODPLUG_TRACKER
+				// Relative path in same folder or sub folder
+				filename = ".\\" + filename;
 			}
-			if(!mt2FileName.empty())
-			{
-				std::wstring pathStart = path.ToWide().substr(0, 2);
-				if(pathStart.length() >= 2
-					&& pathStart.at(0) != L'\\'
-					&& pathStart.at(1) != L':')
-				{
-					// Relative path in sub directory
-					path = MPT_PATHSTRING(".\\") + path;
-				}
-				path = path.RelativePathToAbsolute(mt2FileName.GetPath());
-			}
-			if(!LoadExternalSample(i + 1, path))
-			{
-#ifndef MODPLUG_TRACKER
-				// OpenMPT has its own way of reporting this error
-				AddToLog(LogError, mpt::String::Print(MPT_USTRING("Unable to load sample %1: %2"), i, path.ToUnicode()));
-#endif // MODPLUG_TRACKER
-			}
+			SetSamplePath(i + 1, mpt::PathString::FromLocale(filename));
 #else
 			#if defined(MPT_WITH_CHARSET_LOCALE)
 				AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."), i, mpt::ToUnicode(mpt::CharsetLocale, filename)));
