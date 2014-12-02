@@ -224,14 +224,15 @@ UINT CViewPattern::GetColumnOffset(PatternCursor::Columns column) const
 }
 
 
-void CViewPattern::UpdateView(DWORD dwHintMask, CObject *hint)
-//------------------------------------------------------------
+void CViewPattern::UpdateView(UpdateHint hint, CObject *pObj)
+//-----------------------------------------------------------
 {
-	if(hint == this)
+	if(pObj == this)
 	{
 		return;
 	}
-	if(dwHintMask & HINT_MPTOPTIONS)
+	HintType hintType = hint.GetType();
+	if(hintType & HINT_MPTOPTIONS)
 	{
 		UpdateColors();
 		UpdateSizes();
@@ -239,26 +240,26 @@ void CViewPattern::UpdateView(DWORD dwHintMask, CObject *hint)
 		InvalidatePattern(true);
 		return;
 	}
-	if(dwHintMask & HINT_MODCHANNELS)
+	if(hintType & HINT_MODCHANNELS)
 	{
 		InvalidateChannelsHeaders();
 		UpdateScrollSize();
 	}
 
-	const PATTERNINDEX updatePat = (dwHintMask >> HINT_SHIFT_PAT);
-	if(HintFlagPart(dwHintMask) == HINT_PATTERNDATA
+	const PATTERNINDEX updatePat = hint.GetData();
+	if(hintType == HINT_PATTERNDATA
 		&& m_nPattern != updatePat
 		&& updatePat != 0
 		&& updatePat != GetNextPattern()
 		&& updatePat != GetPrevPattern())
 		return;
 
-	if(dwHintMask & (HINT_MODTYPE|HINT_PATTERNDATA))
+	if(hintType & (HINT_MODTYPE|HINT_PATTERNDATA))
 	{
 		InvalidatePattern(false);
-	} else if(dwHintMask & HINT_PATTERNROW)
+	} else if(hintType & HINT_PATTERNROW)
 	{
-		InvalidateRow(dwHintMask >> HINT_SHIFT_ROW);
+		InvalidateRow(hint.GetData());
 	}
 
 }

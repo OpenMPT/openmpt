@@ -9,9 +9,9 @@
 
 
 #include "stdafx.h"
-#include "mainfrm.h"
-#include "moddoc.h"
-#include "view_gen.h"
+#include "Moddoc.h"
+#include "Mainfrm.h"
+#include "View_gen.h"
 #include "ChannelManagerDlg.h"
 
 
@@ -1104,7 +1104,7 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 						pModDoc->MuteChannel(n,!pModDoc->IsChannelMuted(n));
 					}
 					pModDoc->SetModified();
-					pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS | ((n/CHANNELS_IN_TAB) << HINT_SHIFT_CHNTAB));
+					pModDoc->UpdateAllViews(NULL, ChannelTabHint(HINT_MODCHANNELS, n / CHANNELS_IN_TAB));
 					break;
 				case 1:
 					BYTE rec;
@@ -1123,7 +1123,7 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 					if(button == CM_BT_LEFT) pModDoc->NoFxChannel(n, false);
 					else pModDoc->NoFxChannel(n, true);
 					pModDoc->SetModified();
-					pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS | ((n/CHANNELS_IN_TAB) << HINT_SHIFT_CHNTAB));
+					pModDoc->UpdateAllViews(NULL, ChannelTabHint(HINT_MODCHANNELS, n / CHANNELS_IN_TAB));
 					break;
 				case 3:
 					if(button == CM_BT_LEFT)

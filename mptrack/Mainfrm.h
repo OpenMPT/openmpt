@@ -11,6 +11,7 @@
 #pragma once
 
 #include "Mptrack.h"
+#include "UpdateHints.h"
 #include "../common/AudioCriticalSection.h"
 #include "../common/mutex.h"
 #include "../soundlib/Sndfile.h"
@@ -429,7 +430,7 @@ public:
 	static HFONT GetGUIFont() { return m_hGUIFont; }
 	static HFONT GetFixedFont() { return m_hFixedFont; }
 	static HFONT GetLargeFixedFont() { return m_hLargeFixedFont; }
-	static void UpdateAllViews(DWORD dwHint, CObject *pHint=NULL);
+	static void UpdateAllViews(UpdateHint hint, CObject *pHint=NULL);
 	static LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam);
 	static CInputHandler *m_InputHandler; 	//rewbs.customKeys
 	static CAutoSaver *m_pAutoSaver; 		//rewbs.customKeys
@@ -445,7 +446,7 @@ public:
 	CView *GetActiveView();  	//rewbs.customKeys
 	void OnDocumentCreated(CModDoc *pModDoc);
 	void OnDocumentClosed(CModDoc *pModDoc);
-	void UpdateTree(CModDoc *pModDoc, DWORD lHint=0, CObject *pHint=NULL);
+	void UpdateTree(CModDoc *pModDoc, UpdateHint hint, CObject *pHint=NULL);
 	static CInputHandler* GetInputHandler() { return m_InputHandler; }  	//rewbs.customKeys
 	bool m_bModTreeHasFocus;  	//rewbs.customKeys
 	CWnd *m_pNoteMapHasFocus;  	//rewbs.customKeys

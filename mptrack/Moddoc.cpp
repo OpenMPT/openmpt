@@ -1642,12 +1642,13 @@ void CModDoc::ActivateWindow()
 }
 
 
-void CModDoc::UpdateAllViews(CView *pSender, LPARAM lHint, CObject *pHint)
-//------------------------------------------------------------------------
+void CModDoc::UpdateAllViews(CView *pSender, UpdateHint hint, CObject *pHint)
+//---------------------------------------------------------------------------
 {
-	CDocument::UpdateAllViews(pSender, lHint, pHint);
+	// Tunnel our UpdateHint into an LPARAM
+	CDocument::UpdateAllViews(pSender, hint.AsLPARAM(), pHint);
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (pMainFrm) pMainFrm->UpdateTree(this, lHint, pHint);
+	if (pMainFrm) pMainFrm->UpdateTree(this, hint, pHint);
 }
 
 

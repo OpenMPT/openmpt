@@ -14,85 +14,12 @@
 #include "../common/misc_util.h"
 #include "Undo.h"
 #include "Notification.h"
+#include "UpdateHints.h"
 #include <time.h>
 
 OPENMPT_NAMESPACE_BEGIN
 
 class EncoderFactoryBase;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Bit Mask for updating view (hints of what changed)
-#define HINT_MODTYPE		0x00001
-#define HINT_MODCOMMENTS	0x00002
-#define HINT_MODGENERAL		0x00004
-#define HINT_MODSEQUENCE	0x00008
-#define HINT_MODCHANNELS	0x00010
-#define HINT_PATTERNDATA	0x00020
-#define HINT_PATTERNROW		0x00040
-#define HINT_PATNAMES		0x00080
-#define HINT_MPTOPTIONS		0x00100
-#define HINT_SAMPLEINFO		0x00400
-#define HINT_SAMPLEDATA		0x00800
-#define HINT_INSTRUMENT		0x01000
-#define HINT_ENVELOPE		0x02000
-#define HINT_SMPNAMES		0x04000
-#define HINT_INSNAMES		0x08000
-#define HINT_UNDO			0x10000
-#define HINT_MIXPLUGINS		0x20000
-#define HINT_SPEEDCHANGE	0x40000	//rewbs.envRowGrid
-#define HINT_SEQNAMES		0x80000
-#define HINT_MAXHINTFLAG	HINT_SEQNAMES
-//Bits 0-19 are reserved.
-#define HINT_MASK_FLAGS		(2*HINT_MAXHINTFLAG - 1) //When applied to hint parameter, should give the flag part.
-#define HINT_MASK_ITEM		(~HINT_MASK_FLAGS) //To nullify update hintbits from hint parameter.
-#define HintFlagPart(x)		((x) & HINT_MASK_FLAGS)
-
-//If fails, hint flagbits|itembits does not enable all bits; 
-//might be worthwhile to check the reason.
-STATIC_ASSERT( (HINT_MASK_ITEM | HINT_MASK_FLAGS) == -1 ); 
-
-//If fails, hint param flag and item parts overlap; might be a problem.
-STATIC_ASSERT( (HINT_MASK_ITEM & HINT_MASK_FLAGS) == 0 );
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// NOTE : be careful when adding new flags !!!
-// -------------------------------------------------------------------------------------------------------------------------
-// those flags are passed through a 32bits parameter which can also contain instrument/sample/pattern row... number :
-// HINT_SAMPLEINFO & HINT_SAMPLEDATA & HINT_SMPNAMES : can be used with a sample number 12bit coded (passed as bit 20 to 31)
-// HINT_PATTERNROW : is used with a row number 10bit coded (passed as bit 22 to 31)
-// HINT_INSTRUMENT & HINT_INSNAMES : can be used with an instrument number 8bit coded (passed as bit 24 to 31)
-// new flags can be added BUT be carefull that they will not be used in a case they should aliased with, ie, a sample number
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-//Updateview hints can, in addition to the actual hints, contain
-//addition data such as pattern or instrument index. The
-//values below define the number of bits used for these.
-#define HINT_BITS_PATTERN	12
-#define HINT_BITS_ROWS		10
-#define HINT_BITS_SAMPLE	12
-#define HINT_BITS_INST		8
-#define HINT_BITS_CHNTAB	8
-#define HINT_BITS_SEQUENCE	6
-
-//Defines bit shift values used for setting/retrieving the additional hint data to/from hint parameter.
-#define HINT_SHIFT_PAT		(32 - HINT_BITS_PATTERN)
-#define HINT_SHIFT_ROW		(32 - HINT_BITS_ROWS)
-#define HINT_SHIFT_SMP		(32 - HINT_BITS_SAMPLE)
-#define HINT_SHIFT_INS		(32 - HINT_BITS_INST)
-#define HINT_SHIFT_CHNTAB	(32 - HINT_BITS_CHNTAB)
-#define HINT_SHIFT_SEQUENCE	(32 - HINT_BITS_SEQUENCE)
-
-//Check that hint bit counts are not too large given the number of hint flags.
-STATIC_ASSERT( ((-1 << HINT_SHIFT_PAT) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT_PAT) ); 
-STATIC_ASSERT( ((-1 << HINT_SHIFT_ROW) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT_ROW) ); 
-STATIC_ASSERT( ((-1 << HINT_SHIFT_SMP) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT_SMP) ); 
-STATIC_ASSERT( ((-1 << HINT_SHIFT_INS) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT_INS) ); 
-STATIC_ASSERT( ((-1 << HINT_SHIFT_CHNTAB) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT_CHNTAB) ); 
-STATIC_ASSERT( ((-1 << HINT_SHIFT_SEQUENCE) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT_SEQUENCE) ); 
-
 
 /////////////////////////////////////////////////////////////////////////
 // Split Keyboard Settings (pattern editor)
@@ -321,7 +248,7 @@ public:
 	bool PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv);
 
 	LRESULT ActivateView(UINT nIdView, DWORD dwParam);
-	void UpdateAllViews(CView *pSender, LPARAM lHint=0L, CObject *pHint=NULL);
+	void UpdateAllViews(CView *pSender, UpdateHint hint, CObject *pHint=NULL);
 	HWND GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord);
 	LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	void TogglePluginEditor(UINT m_nCurrentPlugin);

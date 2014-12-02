@@ -159,8 +159,8 @@ BOOL CModTabCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 }
 
 
-BOOL CModTabCtrl::InsertItem(int nIndex, LPSTR pszText, LPARAM lParam, int iImage)
-//--------------------------------------------------------------------------------
+BOOL CModTabCtrl::InsertItem(int nIndex, LPTSTR pszText, LPARAM lParam, int iImage)
+//---------------------------------------------------------------------------------
 {
 	TC_ITEM tci;
 	tci.mask = TCIF_TEXT | TCIF_PARAM | TCIF_IMAGE;
@@ -276,7 +276,7 @@ void CModControlView::RecalcLayout()
 void CModControlView::OnUpdate(CView*, LPARAM lHint, CObject*pHint)
 //-----------------------------------------------------------------
 {
-	UpdateView(lHint, pHint);
+	UpdateView(UpdateHint(lHint), pHint);
 }
 
 
@@ -423,14 +423,14 @@ void CModControlView::OnDestroy()
 }
 
 
-void CModControlView::UpdateView(DWORD lHint, CObject *pObject)
-//-------------------------------------------------------------
+void CModControlView::UpdateView(UpdateHint lHint, CObject *pObject)
+//------------------------------------------------------------------
 {
 	CWnd *pActiveDlg = NULL;
 	CModDoc *pDoc = GetDocument();
 	if (!pDoc) return;
 	// Module type changed: update tabs
-	if (lHint & HINT_MODTYPE)
+	if (lHint.GetType() & HINT_MODTYPE)
 	{
 		UINT nCount = 4;
 		UINT mask = 1 | 2 | 4 | 16;
@@ -450,19 +450,19 @@ void CModControlView::UpdateView(DWORD lHint, CObject *pObject)
 				if (pActiveDlg) pActiveDlg->ShowWindow(SW_HIDE);
 			}
 			m_TabCtrl.DeleteAllItems();
-			if (mask & 1) m_TabCtrl.InsertItem(count++, "General", IDD_CONTROL_GLOBALS, IMAGE_GENERAL);
-			if (mask & 2) m_TabCtrl.InsertItem(count++, "Patterns", IDD_CONTROL_PATTERNS, IMAGE_PATTERNS);
-			if (mask & 4) m_TabCtrl.InsertItem(count++, "Samples", IDD_CONTROL_SAMPLES, IMAGE_SAMPLES);
-			if (mask & 8) m_TabCtrl.InsertItem(count++, "Instruments", IDD_CONTROL_INSTRUMENTS, IMAGE_INSTRUMENTS);
-			//if (mask & 32) m_TabCtrl.InsertItem(count++, "Graph", IDD_CONTROL_GRAPH, IMAGE_GRAPH); //rewbs.graph
-			if (mask & 16) m_TabCtrl.InsertItem(count++, "Comments", IDD_CONTROL_COMMENTS, IMAGE_COMMENTS);
+			if (mask & 1) m_TabCtrl.InsertItem(count++, _T("General"), IDD_CONTROL_GLOBALS, IMAGE_GENERAL);
+			if (mask & 2) m_TabCtrl.InsertItem(count++, _T("Patterns"), IDD_CONTROL_PATTERNS, IMAGE_PATTERNS);
+			if (mask & 4) m_TabCtrl.InsertItem(count++, _T("Samples"), IDD_CONTROL_SAMPLES, IMAGE_SAMPLES);
+			if (mask & 8) m_TabCtrl.InsertItem(count++, _T("Instruments"), IDD_CONTROL_INSTRUMENTS, IMAGE_INSTRUMENTS);
+			//if (mask & 32) m_TabCtrl.InsertItem(count++, _T("Graph"), IDD_CONTROL_GRAPH, IMAGE_GRAPH); //rewbs.graph
+			if (mask & 16) m_TabCtrl.InsertItem(count++, _T("Comments"), IDD_CONTROL_COMMENTS, IMAGE_COMMENTS);
 		}
 	}
 	// Update child dialogs
 	for (UINT nIndex=0; nIndex<MAX_PAGES; nIndex++)
 	{
 		CModControlDlg *pDlg = m_Pages[nIndex];
-		if ((pDlg) && (pObject != pDlg)) pDlg->UpdateView(lHint, pObject);
+		if ((pDlg) && (pObject != pDlg)) pDlg->UpdateView(UpdateHint(lHint), pObject);
 	}
 	// Restore the displayed child dialog
 	if (pActiveDlg) pActiveDlg->ShowWindow(SW_SHOW);
@@ -585,7 +585,7 @@ LRESULT CModScrollView::OnReceiveModViewMsg(WPARAM wParam, LPARAM lParam)
 void CModScrollView::OnUpdate(CView* pView, LPARAM lHint, CObject*pHint)
 //----------------------------------------------------------------------
 {
-	if (pView != this) UpdateView(lHint, pHint);
+	if (pView != this) UpdateView(UpdateHint(lHint), pHint);
 }
 
 

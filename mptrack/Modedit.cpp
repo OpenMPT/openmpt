@@ -947,7 +947,7 @@ BOOL CModDoc::ExpandPattern(PATTERNINDEX nPattern)
 	if(success)
 	{
 		SetModified();
-		UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << HINT_SHIFT_PAT), NULL);
+		UpdateAllViews(NULL, PatternHint(HINT_PATTERNDATA, nPattern), NULL);
 	} else
 	{
 		GetPatternUndo().RemoveLastUndoStep();
@@ -977,7 +977,7 @@ BOOL CModDoc::ShrinkPattern(PATTERNINDEX nPattern)
 	if(success)
 	{
 		SetModified();
-		UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << HINT_SHIFT_PAT), NULL);
+		UpdateAllViews(NULL, PatternHint(HINT_PATTERNDATA, nPattern), NULL);
 	} else
 	{
 		GetPatternUndo().RemoveLastUndoStep();
@@ -1056,6 +1056,7 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 	}
 	HGLOBAL hCpy = ::GetClipboardData(CF_TEXT);
 	LPCSTR p;
+	bool result = false;
 	if ((hCpy) && ((p = (LPSTR)GlobalLock(hCpy)) != NULL))
 	{
 		ModInstrument *pIns = m_SndFile.Instruments[nIns];
@@ -1115,11 +1116,10 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 		}
 		GlobalUnlock(hCpy);
 		CloseClipboard();
-		SetModified();
-		UpdateAllViews(NULL, (nIns << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+		result = true;
 	}
 	EndWaitCursor();
-	return true;
+	return result;
 }
 
 

@@ -107,10 +107,10 @@ void CCtrlComments::RecalcLayout()
 }
 
 
-void CCtrlComments::UpdateView(DWORD dwHint, CObject *pHint)
-//----------------------------------------------------------
+void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
+//-------------------------------------------------------------
 {
-	if ((pHint == this) || (!(dwHint & (HINT_MODCOMMENTS|HINT_MPTOPTIONS|HINT_MODTYPE)))) return;
+	if ((pHint == this) || (!(hint.GetType() & (HINT_MODCOMMENTS|HINT_MPTOPTIONS|HINT_MODTYPE)))) return;
 	if (m_nLockCount) return;
 	m_nLockCount++;
 	HFONT newfont;
@@ -156,7 +156,7 @@ void CCtrlComments::UpdateView(DWORD dwHint, CObject *pHint)
 		m_EditComments.SetSel(0, 0);
 		m_EditComments.SetModify(FALSE);
 	}
-	if (dwHint & HINT_MODTYPE)
+	if (hint.GetType() & HINT_MODTYPE)
 	{
 		m_EditComments.SetReadOnly(!m_sndFile.GetModSpecifications().hasComments);
 	}

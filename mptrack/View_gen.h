@@ -64,7 +64,7 @@ public:
 	//{{AFX_VIRTUAL(CViewGlobals)
 	virtual void OnInitialUpdate();
 	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual void UpdateView(DWORD dwHintMask=0, CObject *pObj=NULL);
+	virtual void UpdateView(UpdateHint hint = HINT_NONE, CObject *pObj = nullptr);
 	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
 	LRESULT OnMidiMsg(WPARAM midiData, LPARAM);

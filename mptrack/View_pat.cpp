@@ -394,7 +394,7 @@ void CViewPattern::SetModified(bool updateAllViews)
 	if(pModDoc != nullptr)
 	{
 		pModDoc->SetModified();
-		pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), updateAllViews ? nullptr : this);
+		pModDoc->UpdateAllViews(this, PatternHint(HINT_PATTERNDATA, m_nPattern), updateAllViews ? nullptr : this);
 	}
 }
 
@@ -1727,7 +1727,7 @@ void CViewPattern::OnMuteChannel(CHANNELINDEX chn)
 		}
 
 		InvalidateChannelsHeaders();
-		pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | ((chn / CHANNELS_IN_TAB) << HINT_SHIFT_CHNTAB));
+		pModDoc->UpdateAllViews(this, ChannelTabHint(HINT_MODCHANNELS, chn / CHANNELS_IN_TAB));
 	}
 }
 
@@ -1776,7 +1776,7 @@ void CViewPattern::OnSoloChannel(CHANNELINDEX chn)
 		pModDoc->SoloChannel(i, (i == chn));  //unsolo all chans except nChn, solo nChn
 	}
 	InvalidateChannelsHeaders();
-	pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | ((chn / CHANNELS_IN_TAB) << HINT_SHIFT_CHNTAB));
+	pModDoc->UpdateAllViews(this, ChannelTabHint(HINT_MODCHANNELS, chn / CHANNELS_IN_TAB));
 }
 
 
@@ -3897,7 +3897,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		if(!liveRecord)
 			InvalidateRow(editpos.row);
 		pMainFrm->ThreadSafeSetModified(pModDoc);
-		pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (editpos.pattern << HINT_SHIFT_PAT), this);
+		pModDoc->UpdateAllViews(this, PatternHint(HINT_PATTERNDATA, editpos.pattern), this);
 	}
 
 	if(captured)
@@ -3961,7 +3961,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 					m.command = CMD_SMOOTHMIDI;
 					m.param = nByte2;
 					pMainFrm->ThreadSafeSetModified(pModDoc);
-					pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (editpos.pattern << HINT_SHIFT_PAT), this);
+					pModDoc->UpdateAllViews(this, PatternHint(HINT_PATTERNDATA, editpos.pattern), this);
 
 					// Update GUI only if not recording live.
 					if(!liveRecord)
@@ -6939,7 +6939,7 @@ bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &past
 	{
 		SetCurSel(rect);
 		GetDocument()->SetModified();
-		GetDocument()->UpdateAllViews(NULL, HINT_MODSEQUENCE | HINT_PATTERNDATA | (pos.pattern << HINT_SHIFT_PAT), nullptr);
+		GetDocument()->UpdateAllViews(NULL, PatternHint(HINT_MODSEQUENCE | HINT_PATTERNDATA, pos.pattern), nullptr);
 	}
 
 	return result;

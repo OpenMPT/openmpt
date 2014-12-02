@@ -62,7 +62,7 @@ public:
 	DECLARE_SERIAL(CViewSample)
 
 protected:
-	void SetModified(DWORD mask, bool updateAll, bool waveformModified);
+	void SetModified(HintType mask, bool updateAll, bool waveformModified);
 	void UpdateScrollSize() { UpdateScrollSize(m_nZoom, true); }
 	void UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength centeredSample = SmpLength(-1));
 	BOOL SetCurrentSample(SAMPLEINDEX nSmp);
@@ -108,7 +108,7 @@ public:
 	//{{AFX_VIRTUAL(CViewSample)
 	virtual void OnDraw(CDC *);
 	virtual void OnInitialUpdate();
-	virtual void UpdateView(DWORD dwHintMask=0, CObject *pObj=NULL);
+	virtual void UpdateView(UpdateHint hint = HINT_NONE, CObject *pObj = nullptr);
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
 	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *);
 	virtual LRESULT OnPlayerNotify(Notification *);

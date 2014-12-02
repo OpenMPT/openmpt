@@ -202,16 +202,17 @@ void CCtrlGeneral::OnTapTempo()
 }
 
 
-void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
-//---------------------------------------------------------
+void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
+//------------------------------------------------------------
 {
 	if (pHint == this) return;
-	if (dwHint & HINT_MODSEQUENCE)
+	HintType hintType = hint.GetType();
+	if (hintType & HINT_MODSEQUENCE)
 	{
 		// Set max valid restart position
 		m_SpinRestartPos.SetRange32(0, m_sndFile.Order.GetLengthTailTrimmed() - 1);
 	}
-	if (dwHint & HINT_MODGENERAL)
+	if (hintType & HINT_MODGENERAL)
 	{
 		if (!m_bEditsLocked)
 		{
@@ -230,7 +231,7 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		m_SliderTempo.SetPos(m_sndFile.GetModSpecifications().tempoMax - m_sndFile.m_nDefaultTempo);
 	}
 
-	if (dwHint & HINT_MODTYPE)
+	if (hintType & HINT_MODTYPE)
 	{
 		CModSpecifications specs = m_sndFile.GetModSpecifications();
 		m_SpinTempo.SetRange(specs.tempoMin, specs.tempoMax);
@@ -275,7 +276,7 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		m_EditModType.SetWindowText(s);
 	}
 	CheckDlgButton(IDC_CHECK_LOOPSONG,	(TrackerSettings::Instance().gbLoopSong) ? TRUE : FALSE);
-	if (dwHint & HINT_MPTOPTIONS)
+	if (hintType & HINT_MPTOPTIONS)
 	{
 		m_VuMeterLeft.InvalidateRect(NULL, FALSE);
 		m_VuMeterRight.InvalidateRect(NULL, FALSE);
@@ -410,7 +411,8 @@ void CCtrlGeneral::OnSpeedChanged()
 				m_sndFile.m_nDefaultSpeed = n;
 				m_sndFile.m_PlayState.m_nMusicSpeed = n;
 				m_modDoc.SetModified();
-				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
+				// HINT_ENVELOPE: Update envelope grid view
+				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL | HINT_ENVELOPE, this);
 				m_bEditsLocked=false;
 			}
 		}

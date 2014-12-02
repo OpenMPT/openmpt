@@ -982,10 +982,10 @@ void CCtrlInstruments::RecalcLayout()
 
 // Set instrument (and moddoc) as modified.
 // updateAll: Update all views including this one. Otherwise, only update update other views.
-void CCtrlInstruments::SetModified(DWORD mask, bool updateAll, bool modified)
-//---------------------------------------------------------------------------
+void CCtrlInstruments::SetModified(HintType mask, bool updateAll, bool modified)
+//------------------------------------------------------------------------------
 {
-	m_modDoc.UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | mask, updateAll ? nullptr : this);
+	m_modDoc.UpdateAllViews(NULL, InstrumentHint(mask, m_nInstrument), updateAll ? nullptr : this);
 	if(modified) m_modDoc.SetModified();
 }
 
@@ -1000,7 +1000,7 @@ BOOL CCtrlInstruments::SetCurrentInstrument(UINT nIns, BOOL bUpdNum)
 	{
 		m_nInstrument = nIns;
 		m_NoteMap.SetCurrentInstrument(m_nInstrument);
-		UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_ENVELOPE, NULL);
+		UpdateView(InstrumentHint(HINT_INSTRUMENT | HINT_ENVELOPE, m_nInstrument), NULL);
 	} else
 	{
 		// Just in case
@@ -1046,7 +1046,7 @@ void CCtrlInstruments::OnActivatePage(LPARAM lParam)
 	SetCurrentInstrument((lParam > 0) ? lParam : m_nInstrument);
 
 	// Initial Update
-	if (!m_bInitialized) UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_MODTYPE, NULL);
+	if (!m_bInitialized) UpdateView(InstrumentHint(HINT_INSTRUMENT | HINT_ENVELOPE | HINT_MODTYPE, m_nInstrument), NULL);
 
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if (pFrame) PostViewMessage(VIEWMSG_LOADSTATE, (LPARAM)pFrame->GetInstrumentViewState());
@@ -1124,28 +1124,29 @@ LRESULT CCtrlInstruments::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 }
 
 
-void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
-//----------------------------------------------------------------
+void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
+//---------------------------------------------------------------
 {
 	if(pObj == this) return;
-	if (dwHintMask & HINT_MPTOPTIONS)
+	HintType hintType = hint.GetType();
+	if (hintType & HINT_MPTOPTIONS)
 	{
 		m_ToolBar.UpdateStyle();
 	}
 	LockControls();
-	if (dwHintMask & HINT_MIXPLUGINS) OnMixPlugChanged();
+	if (hintType & HINT_MIXPLUGINS) OnMixPlugChanged();
 	UnlockControls();
-	if(!(dwHintMask & (HINT_INSTRUMENT | HINT_ENVELOPE| HINT_MODTYPE))) return;
+	if(!(hintType & (HINT_INSTRUMENT | HINT_ENVELOPE| HINT_MODTYPE))) return;
 
-	const INSTRUMENTINDEX updateIns = (dwHintMask >> HINT_SHIFT_INS);
+	const INSTRUMENTINDEX updateIns = hint.GetData();
 
-	if(updateIns != m_nInstrument && updateIns != 0 && (dwHintMask & (HINT_INSTRUMENT | HINT_ENVELOPE)) && !(dwHintMask & HINT_MODTYPE)) return;
+	if(updateIns != m_nInstrument && updateIns != 0 && (hintType & (HINT_INSTRUMENT | HINT_ENVELOPE)) && !(hintType & HINT_MODTYPE)) return;
 	LockControls();
-	if (!m_bInitialized) dwHintMask |= HINT_MODTYPE;
+	if (!m_bInitialized) hintType |= HINT_MODTYPE;
 
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 
-	if (dwHintMask & HINT_MODTYPE)
+	if (hintType & HINT_MODTYPE)
 	{
 		const CModSpecifications *specs = &m_sndFile.GetModSpecifications();
 
@@ -1232,7 +1233,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			m_CbnMidiCh.SetItemData(m_CbnMidiCh.AddString(s), ich);
 		}
 	}
-	if (dwHintMask & (HINT_INSTRUMENT|HINT_MODTYPE))
+	if (hintType & (HINT_INSTRUMENT|HINT_MODTYPE))
 	{
 		// Backwards compatibility with IT modules that use now deprecated hack features.
 		m_SliderCutSwing.EnableWindow((pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nCutSwing != 0)) ? TRUE : FALSE);
@@ -1353,7 +1354,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		}
 		m_NoteMap.InvalidateRect(NULL, FALSE);
 	}
-	if(dwHintMask & (HINT_MIXPLUGINS|HINT_MODTYPE))
+	if(hintType & (HINT_MIXPLUGINS|HINT_MODTYPE))
 	{
 		UpdatePluginList();
 	}
@@ -1659,9 +1660,9 @@ void CCtrlInstruments::OnInstrumentNew()
 	if (ins != INSTRUMENTINDEX_INVALID)
 	{
 		SetCurrentInstrument(ins);
-		m_modDoc.UpdateAllViews(NULL, (ins << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE);
+		m_modDoc.UpdateAllViews(NULL, InstrumentHint(HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE, ins));
 	}
-	if (bFirst) m_modDoc.UpdateAllViews(NULL, (ins << HINT_SHIFT_INS) | HINT_MODTYPE | HINT_INSTRUMENT | HINT_INSNAMES);
+	if (bFirst) m_modDoc.UpdateAllViews(NULL, InstrumentHint(HINT_MODTYPE | HINT_INSTRUMENT | HINT_INSNAMES, ins));
 	m_parent.InstrumentChanged(m_nInstrument);
 	SwitchToView();
 }
@@ -1676,7 +1677,7 @@ void CCtrlInstruments::OnInstrumentDuplicate()
 		if(ins != INSTRUMENTINDEX_INVALID)
 		{
 			SetCurrentInstrument(ins);
-			m_modDoc.UpdateAllViews(NULL, (ins << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE);
+			m_modDoc.UpdateAllViews(NULL, InstrumentHint(HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE, ins));
 		}
 		m_parent.InstrumentChanged(m_nInstrument);
 	}
@@ -2125,7 +2126,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 							// If this plugin can recieve MIDI events and we have no MIDI channel
 							// selected for this instrument, automatically select MIDI channel 1.
 							pIns->nMidiChannel = MidiFirstChannel;
-							UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT, NULL);
+							UpdateView(InstrumentHint(HINT_INSTRUMENT, m_nInstrument), NULL);
 						}
 						if(pIns->midiPWD == 0)
 						{
@@ -2446,8 +2447,7 @@ void CCtrlInstruments::OnEditSampleMap()
 			CSampleMapDlg dlg(m_sndFile, m_nInstrument, this);
 			if (dlg.DoModal() == IDOK)
 			{
-				m_modDoc.SetModified();
-				m_modDoc.UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT, this);
+				SetModified(HINT_INSTRUMENT, true);
 				m_NoteMap.InvalidateRect(NULL, FALSE);
 			}
 		}
@@ -2530,7 +2530,7 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 		cs.Leave();
 
 		m_modDoc.SetModified();
-		UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT);
+		UpdateView(InstrumentHint(HINT_INSTRUMENT, m_nInstrument));
 		return;
 	}
 
@@ -2559,7 +2559,7 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 		cs.Leave();
 
 		m_modDoc.SetModified();
-		UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT);
+		UpdateView(InstrumentHint(HINT_INSTRUMENT, m_nInstrument));
 		return;
 	}
 
@@ -2585,7 +2585,7 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 	//new tuning(s) come visible.
 	BuildTuningComboBox();
 	
-	UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT);
+	UpdateView(InstrumentHint(HINT_INSTRUMENT, m_nInstrument));
 }
 
 

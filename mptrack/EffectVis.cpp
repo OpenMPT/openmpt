@@ -850,7 +850,7 @@ void CEffectVis::MakeChange(ROWINDEX row, int y)
 	}
 
 	m_pModDoc->SetModified();
-	m_pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), NULL);
+	m_pModDoc->UpdateAllViews(NULL, PatternHint(HINT_PATTERNDATA, m_nPattern), NULL);
 }
 
 void CEffectVis::SetPcNote(ROWINDEX row)

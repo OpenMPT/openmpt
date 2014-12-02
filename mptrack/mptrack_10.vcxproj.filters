@@ -1038,6 +1038,9 @@
     <ClInclude Include="..\common\ComponentManager.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
+    <ClInclude Include="UpdateHints.h">
+      <Filter>Header Files\mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\common\mptFileIO.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>

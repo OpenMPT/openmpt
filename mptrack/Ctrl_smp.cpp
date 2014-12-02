@@ -336,7 +336,7 @@ bool CCtrlSamples::SetCurrentSample(SAMPLEINDEX nSmp, LONG lZoom, bool bUpdNum)
 	if (m_nSample != nSmp)
 	{
 		m_nSample = nSmp;
-		UpdateView((m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO, NULL);
+		UpdateView(SampleHint(HINT_SAMPLEINFO, m_nSample), NULL);
 	}
 	if (bUpdNum)
 	{
@@ -402,7 +402,7 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 	SetCurrentSample((lParam > 0) ? ((SAMPLEINDEX)lParam) : m_nSample);
 
 	// Initial Update
-	if (!m_bInitialized) UpdateView((m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
+	if (!m_bInitialized) UpdateView(SampleHint(HINT_SAMPLEINFO | HINT_MODTYPE, m_nSample), NULL);
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if ((pFrame) && (m_hWndView)) PostViewMessage(VIEWMSG_LOADSTATE, (LPARAM)pFrame->GetSampleViewState());
 	SwitchToView();
@@ -547,24 +547,25 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, TCHAR *pszText)
 }
 
 
-void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
-//------------------------------------------------------------
+void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
+//-----------------------------------------------------------
 {
 	if(pObj == this) return;
-	if (dwHintMask & HINT_MPTOPTIONS)
+	HintType hintType = hint.GetType();
+	if (hintType & HINT_MPTOPTIONS)
 	{
 		m_ToolBar1.UpdateStyle();
 		m_ToolBar2.UpdateStyle();
 	}
-	if (!(dwHintMask & (HINT_SAMPLEINFO|HINT_MODTYPE))) return;
+	if (!(hintType & (HINT_SAMPLEINFO|HINT_MODTYPE))) return;
 
-	const SAMPLEINDEX updateSmp = (dwHintMask >> HINT_SHIFT_SMP);
+	const SAMPLEINDEX updateSmp = hint.GetData();
 
-	if(updateSmp != m_nSample && updateSmp != 0 && !(dwHintMask & HINT_MODTYPE)) return;
+	if(updateSmp != m_nSample && updateSmp != 0 && !(hintType & HINT_MODTYPE)) return;
 	LockControls();
-	if (!m_bInitialized) dwHintMask |= HINT_MODTYPE;
+	if (!m_bInitialized) hintType |= HINT_MODTYPE;
 	// Updating Ranges
-	if (dwHintMask & HINT_MODTYPE)
+	if (hintType & HINT_MODTYPE)
 	{
 		const CModSpecifications *specs = &m_sndFile.GetModSpecifications();
 
@@ -656,7 +657,7 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_CbnBaseNote.EnableWindow(b);
 	}
 	// Updating Values
-	if (dwHintMask & (HINT_MODTYPE|HINT_SAMPLEINFO))
+	if (hintType & (HINT_MODTYPE|HINT_SAMPLEINFO))
 	{
 		if(m_nSample > m_sndFile.GetNumSamples())
 		{
@@ -755,7 +756,7 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		wsprintf(s, "%lu", sample.nSustainEnd);
 		m_EditSustainEnd.SetWindowText(s);
 	}
-	if (dwHintMask & (HINT_MODTYPE | HINT_SAMPLEINFO | HINT_SMPNAMES))
+	if (hintType & (HINT_MODTYPE | HINT_SAMPLEINFO | HINT_SMPNAMES))
 	{
 		CheckDlgButton(IDC_CHECK2, m_sndFile.GetSample(m_nSample).uFlags[SMP_KEEPONDISK] ? BST_CHECKED : BST_UNCHECKED);
 		GetDlgItem(IDC_CHECK2)->EnableWindow((m_sndFile.SampleHasPath(m_nSample) && m_sndFile.GetType() == MOD_TYPE_MPT) ? TRUE : FALSE);
@@ -776,8 +777,8 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 
 
 // updateAll: Update all views including this one. Otherwise, only update update other views.
-void CCtrlSamples::SetModified(DWORD mask, bool updateAll, bool waveformModified)
-//-------------------------------------------------------------------------------
+void CCtrlSamples::SetModified(HintType mask, bool updateAll, bool waveformModified)
+//----------------------------------------------------------------------------------
 {
 	m_modDoc.SetModified();
 
@@ -788,7 +789,7 @@ void CCtrlSamples::SetModified(DWORD mask, bool updateAll, bool waveformModified
 		if(sample.uFlags[SMP_KEEPONDISK] && !sample.uFlags[SMP_MODIFIED]) mask |= HINT_SMPNAMES;
 		sample.uFlags.set(SMP_MODIFIED);
 	}
-	m_modDoc.UpdateAllViews(nullptr, mask | (m_nSample << HINT_SHIFT_SMP), updateAll ? nullptr : this);
+	m_modDoc.UpdateAllViews(nullptr, SampleHint(mask, m_nSample), updateAll ? nullptr : this);
 }
 
 
@@ -981,13 +982,13 @@ void CCtrlSamples::OnSampleNew()
 			sndFile.ReadSampleFromSong(smp, sndFile, nOldSmp);
 		}
 
-		m_modDoc.UpdateAllViews(NULL, (smp << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES);
+		m_modDoc.UpdateAllViews(NULL, SampleHint(HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES, smp));
 		if(m_modDoc.GetNumInstruments() > 0 && m_modDoc.FindSampleParent(smp) == INSTRUMENTINDEX_INVALID)
 		{
 			if(Reporting::Confirm("This sample is not used by any instrument. Do you want to create a new instrument using this sample?") == cnfYes)
 			{
 				INSTRUMENTINDEX nins = m_modDoc.InsertInstrument(smp);
-				m_modDoc.UpdateAllViews(NULL, (nins << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE);
+				m_modDoc.UpdateAllViews(NULL, InstrumentHint(HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE, nins));
 				m_parent.InstrumentChanged(nins);
 			}
 		}
@@ -1162,7 +1163,7 @@ void CCtrlSamples::OnSampleSave()
 						if(i != smp && m_sndFile.GetSample(i).uFlags[SMP_KEEPONDISK] && m_sndFile.GetSamplePath(i) == m_sndFile.GetSamplePath(smp))
 						{
 							m_sndFile.GetSample(i).uFlags.reset(SMP_KEEPONDISK);
-							m_modDoc.UpdateAllViews(nullptr, HINT_SMPNAMES | HINT_SAMPLEINFO | (i << HINT_SHIFT_SMP), this);
+							m_modDoc.UpdateAllViews(nullptr, SampleHint(HINT_SMPNAMES | HINT_SAMPLEINFO, i), this);
 						}
 					}
 				}
@@ -1296,7 +1297,7 @@ void CCtrlSamples::OnNormalize()
 			if (bOk)
 			{
 				sample.PrecomputeLoops(m_sndFile, false);
-				m_modDoc.UpdateAllViews(NULL, (iSmp << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
+				m_modDoc.UpdateAllViews(NULL, SampleHint(HINT_SAMPLEDATA, iSmp));
 			}
 		}
 	}
@@ -1405,7 +1406,7 @@ void CCtrlSamples::OnRemoveDCOffset()
 
 		fReportOffset += fOffset;
 		numModified++;
-		m_modDoc.UpdateAllViews(nullptr, (iSmp << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO);
+		m_modDoc.UpdateAllViews(nullptr, SampleHint(HINT_SAMPLEDATA | HINT_SAMPLEINFO, iSmp));
 	}
 
 	EndWaitCursor();
@@ -2606,7 +2607,7 @@ void CCtrlSamples::OnLoopTypeChanged()
 		{
 			sample.SetLoop(0, sample.nLength, true, n == 2, m_sndFile);
 		}
-		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA);
+		m_modDoc.UpdateAllViews(NULL, SampleHint(HINT_SAMPLEINFO | HINT_SAMPLEDATA, m_nSample));
 	} else
 	{
 		sample.PrecomputeLoops(m_sndFile);
@@ -2653,7 +2654,7 @@ void CCtrlSamples::OnSustainTypeChanged()
 		{
 			sample.SetSustainLoop(0, sample.nLength, true, n == 2, m_sndFile);
 		}
-		m_modDoc.UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA);
+		m_modDoc.UpdateAllViews(NULL, SampleHint(HINT_SAMPLEINFO | HINT_SAMPLEDATA, m_nSample));
 	} else
 	{
 		sample.PrecomputeLoops(m_sndFile);
@@ -3163,7 +3164,7 @@ void CCtrlSamples::OnKeepSampleOnDisk()
 	for(SAMPLEINDEX i = first; i <= last; i++)
 	{
 		m_sndFile.GetSample(i).uFlags.set(SMP_KEEPONDISK, enable && m_sndFile.SampleHasPath(i));
-		m_modDoc.UpdateAllViews(nullptr, HINT_SAMPLEINFO | (i << HINT_SHIFT_SMP), this);
+		m_modDoc.UpdateAllViews(nullptr, SampleHint(HINT_SAMPLEINFO, i), this);
 	}
 }
 
@@ -3192,7 +3193,7 @@ void CCtrlSamples::PropagateAutoVibratoChanges() const
 					m_sndFile.GetSample(*sample).nVibType = m_sndFile.GetSample(m_nSample).nVibType;
 					m_sndFile.GetSample(*sample).nVibRate = m_sndFile.GetSample(m_nSample).nVibRate;
 					m_sndFile.GetSample(*sample).nVibSweep = m_sndFile.GetSample(m_nSample).nVibSweep;
-					m_modDoc.UpdateAllViews(nullptr, HINT_SAMPLEINFO | ((*sample) << HINT_SHIFT_SMP), (CObject *)this);
+					m_modDoc.UpdateAllViews(nullptr, SampleHint(HINT_SAMPLEINFO, *sample), (CObject *)this);
 				}
 			}
 		}
