@@ -52,6 +52,7 @@ public:
 	virtual void HardAllNotesOff() = 0;		//rewbs.VSTCompliance
 	virtual void RecalculateGain() = 0;
 	virtual bool isPlaying(UINT note, UINT midiChn, UINT trackerChn) = 0; //rewbs.VSTiNNA
+	virtual PlugParamIndex GetNumParameters() = 0;
 	virtual void SetParameter(PlugParamIndex paramindex, PlugParamValue paramvalue) = 0;
 	virtual void SetZxxParameter(UINT nParam, UINT nValue) = 0;
 	virtual PlugParamValue GetParameter(PlugParamIndex nIndex) = 0;
@@ -102,7 +103,7 @@ struct SNDMIXPLUGINSTATE
 	float *pOutBufferR;
 	uint32 dwFlags;						// PluginStateFlags
 	uint32 inputSilenceCount;			// How much silence has been processed? (for plugin auto-turnoff)
-	mixsample_t nVolDecayL, nVolDecayR;	// Buffer click removal - I think these are *always* 0.
+	mixsample_t nVolDecayL, nVolDecayR;	// End of sample click removal
 
 	SNDMIXPLUGINSTATE() { memset(this, 0, sizeof(*this)); }
 

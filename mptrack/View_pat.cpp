@@ -2,7 +2,7 @@
  * view_pat.cpp
  * ------------
  * Purpose: Pattern tab, lower panel.
- * Notes  : (currently none)
+ * Notes  : Welcome to about 7000 lines of, err, very beautiful code.
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -16,10 +16,9 @@
 #include "Childfrm.h"
 #include "Moddoc.h"
 #include "SampleEditorDialogs.h" // For amplification dialog (which is re-used from sample editor)
-#include "globals.h"
-#include "view_pat.h"
-#include "ctrl_pat.h"
-#include "vstplug.h"	// for writing plug params to pattern
+#include "Globals.h"
+#include "View_pat.h"
+#include "Ctrl_pat.h"
 
 #include "EffectVis.h"		//rewbs.fxvis
 #include "PatternGotoDialog.h"
@@ -56,6 +55,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_WM_ERASEBKGND()
 	ON_WM_VSCROLL()
 	ON_WM_SIZE()
+	ON_WM_MOUSEWHEEL()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
@@ -1522,6 +1522,19 @@ void CViewPattern::OnRButtonUp(UINT nFlags, CPoint point)
 }
 
 
+BOOL CViewPattern::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+//-------------------------------------------------------------------
+{
+	// Ctrl + mouse wheel: Increment / decrement values
+	if(nFlags & MK_CONTROL)
+	{
+		DataEntry(zDelta > 0, (nFlags & MK_SHIFT) == MK_SHIFT);
+		return TRUE;
+	}
+	return CModScrollView::OnMouseWheel(nFlags, zDelta, pt);
+}
+
+
 void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
 //-------------------------------------------------------
 {
@@ -2946,7 +2959,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 	// Don't allow notes outside our supported note range.
 	const ModCommand::NOTE noteMin = pSndFile->GetModSpecifications().noteMin;
 	const ModCommand::NOTE noteMax = pSndFile->GetModSpecifications().noteMax;
-	const int instrMax = std::min(static_cast<int>(Util::MaxValueOfType(ModCommand::INSTR())), static_cast<int>(pSndFile->GetNumInstruments() ? pSndFile->GetModSpecifications().instrumentsMax : pSndFile->GetModSpecifications().samplesMax));
+	const int instrMax = std::min<int>(Util::MaxValueOfType(ModCommand::INSTR()), pSndFile->GetNumInstruments() ? pSndFile->GetNumInstruments() : pSndFile->GetNumSamples());
 	const EffectInfo effectInfo(*pSndFile);
 	const int offset = up ? 1 : -1;
 
@@ -3688,7 +3701,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 	// TODO: Is the right plugin active? Move to a chan with the right plug
 	// Probably won't do this - finish fluctuator implementation instead.
 
-	CVstPlugin *pPlug = (CVstPlugin*)pSndFile->m_MixPlugins[plugSlot].pMixPlugin;
+	IMixPlugin *pPlug = pSndFile->m_MixPlugins[plugSlot].pMixPlugin;
 	if (pPlug == nullptr) return 0;
 
 	if(pSndFile->GetType() == MOD_TYPE_MPT)
@@ -6376,20 +6389,19 @@ bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const
 
 	if(selStart.instr >= 1 && selStart.instr <= MAX_MIXPLUGINS)
 	{
-		CVstPlugin *plug = (CVstPlugin *)(sndFile->m_MixPlugins[selStart.instr - 1].pMixPlugin);
-
-		if(plug != nullptr)
+		const SNDMIXPLUGIN &plug = sndFile->m_MixPlugins[selStart.instr - 1];
+		if(plug.pMixPlugin != nullptr)
 		{
 
 			// Create sub menu for "change plugin param"
 			HMENU paramChangeMenu = ::CreatePopupMenu();
 			AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(paramChangeMenu), "Change Plugin Parameter\t");
 
-			const PlugParamIndex curParam = selStart.GetValueVolCol(), nParams = plug->GetNumParameters();
+			const PlugParamIndex curParam = selStart.GetValueVolCol(), nParams = plug.pMixPlugin->GetNumParameters();
 
 			for(PlugParamIndex i = 0; i < nParams; i++)
 			{
-				AppendMenu(paramChangeMenu, MF_STRING | (i == curParam) ? MF_CHECKED : 0, ID_CHANGE_PCNOTE_PARAM + i, plug->GetFormattedParamName(i));
+				AppendMenu(paramChangeMenu, MF_STRING | (i == curParam) ? MF_CHECKED : 0, ID_CHANGE_PCNOTE_PARAM + i, plug.GetParamName(i).c_str());
 			}
 		}
 	}
