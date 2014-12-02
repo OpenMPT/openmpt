@@ -1111,6 +1111,7 @@ void CViewSample::OnDraw(CDC *pDC)
 			// Sustain Loop Start/End
 			if ((sample.nSustainEnd > nSmpScrollPos) && (sample.nSustainEnd > sample.nSustainStart))
 			{
+				offScreenDC.SetBkColor(RGB(0xFF, 0xFF, 0xFF));
 				offScreenDC.SelectObject(CMainFrame::penHalfDarkGray);
 				int xl = SampleToScreen(sample.nSustainStart);
 				if ((xl >= 0) && (xl < rcClient.right))
@@ -1167,6 +1168,7 @@ void CViewSample::OnDraw(CDC *pDC)
 	if(m_nGridSegments && m_nGridSegments < sample.nLength)
 	{
 		// Draw sample grid
+		offScreenDC.SetBkColor(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKSAMPLE]);
 		offScreenDC.SelectObject(CMainFrame::penHalfDarkGray);
 		for(SmpLength i = 1; i < m_nGridSegments; i++)
 		{
