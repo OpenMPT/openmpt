@@ -183,12 +183,12 @@ void CViewInstrument::UpdateScrollSize()
 
 // Set instrument (and moddoc) as modified.
 // updateAll: Update all views including this one. Otherwise, only update update other views.
-void CViewInstrument::SetModified(DWORD mask, bool updateAll)
-//-----------------------------------------------------------
+void CViewInstrument::SetModified(HintType mask, bool updateAll)
+//--------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr) return;
-	pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | mask, updateAll ? nullptr : this);
+	pModDoc->UpdateAllViews(NULL, InstrumentHint(mask, m_nInstrument), updateAll ? nullptr : this);
 	pModDoc->SetModified();
 }
 
@@ -774,17 +774,17 @@ void CViewInstrument::UpdateNcButtonState()
 ////////////////////////////////////////////////////////////////////
 // CViewInstrument drawing
 
-void CViewInstrument::UpdateView(DWORD dwHintMask, CObject *hint)
-//---------------------------------------------------------------
+void CViewInstrument::UpdateView(UpdateHint hint, CObject *pObj)
+//--------------------------------------------------------------
 {
-	if(hint == this)
+	if(pObj == this)
 	{
 		return;
 	}
-	const INSTRUMENTINDEX updateIns = (dwHintMask >> HINT_SHIFT_INS);
-	if((dwHintMask & (HINT_MPTOPTIONS | HINT_MODTYPE))
-		|| ((dwHintMask & HINT_ENVELOPE) && (m_nInstrument == updateIns || updateIns == 0))
-		|| ((dwHintMask & HINT_SPEEDCHANGE))) //rewbs.envRowGrid
+	HintType hintType = hint.GetType();
+	const INSTRUMENTINDEX updateIns = hint.GetData();
+	if((hintType & (HINT_MPTOPTIONS | HINT_MODTYPE))
+		|| ((hintType & HINT_ENVELOPE) && (m_nInstrument == updateIns || updateIns == 0)))
 	{
 		UpdateScrollSize();
 		UpdateNcButtonState();
@@ -1869,7 +1869,7 @@ void CViewInstrument::OnEnvToggleGrid()
 		m_bGridForceRedraw = true;
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
-		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE);
+		pModDoc->UpdateAllViews(NULL, InstrumentHint(HINT_ENVELOPE, m_nInstrument));
 
 }
 //end rewbs.envRowGrid
@@ -1908,7 +1908,10 @@ void CViewInstrument::OnEditPaste()
 //---------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	if (pModDoc) pModDoc->PasteEnvelope(m_nInstrument, m_nEnv);
+	if (pModDoc && pModDoc->PasteEnvelope(m_nInstrument, m_nEnv))
+	{
+		SetModified(HINT_ENVELOPE, true);
+	}
 }
 
 static DWORD nLastNotePlayed = 0;
@@ -2377,7 +2380,7 @@ void CViewInstrument::EnvKbdSetLoopStart()
 	if(!EnvGetLoop())
 		EnvSetLoopStart(0);
 	EnvSetLoopStart(m_nDragItem - 1);
-	GetDocument()->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);	// sanity checks are done in GetEnvelopePtr() already
+	GetDocument()->UpdateAllViews(NULL, InstrumentHint(HINT_ENVELOPE, m_nInstrument), NULL);	// sanity checks are done in GetEnvelopePtr() already
 }
 
 
@@ -2392,7 +2395,7 @@ void CViewInstrument::EnvKbdSetLoopEnd()
 		EnvSetLoopStart(0);
 	}
 	EnvSetLoopEnd(m_nDragItem - 1);
-	GetDocument()->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);	// sanity checks are done in GetEnvelopePtr() already
+	GetDocument()->UpdateAllViews(NULL, InstrumentHint(HINT_ENVELOPE, m_nInstrument), NULL);	// sanity checks are done in GetEnvelopePtr() already
 }
 
 
@@ -2404,7 +2407,7 @@ void CViewInstrument::EnvKbdSetSustainStart()
 	if(!EnvGetSustain())
 		EnvSetSustain(true);
 	EnvSetSustainStart(m_nDragItem - 1);
-	GetDocument()->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);	// sanity checks are done in GetEnvelopePtr() already
+	GetDocument()->UpdateAllViews(NULL, InstrumentHint(HINT_ENVELOPE, m_nInstrument), NULL);	// sanity checks are done in GetEnvelopePtr() already
 }
 
 
@@ -2419,7 +2422,7 @@ void CViewInstrument::EnvKbdSetSustainEnd()
 		EnvSetSustainStart(0);
 	}
 	EnvSetSustainEnd(m_nDragItem - 1);
-	GetDocument()->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);	// sanity checks are done in GetEnvelopePtr() already
+	GetDocument()->UpdateAllViews(NULL, InstrumentHint(HINT_ENVELOPE, m_nInstrument), NULL);	// sanity checks are done in GetEnvelopePtr() already
 }
 
 

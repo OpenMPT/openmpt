@@ -149,7 +149,7 @@ public:
 	VOID OnOptionsChanged();
 	VOID OnDocumentCreated(CModDoc *pModDoc);
 	VOID OnDocumentClosed(CModDoc *pModDoc);
-	VOID OnUpdate(CModDoc *pModDoc, DWORD lHint=0, CObject *pHint=NULL);
+	VOID OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint=NULL);
 	VOID UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify);
 	HWND GetModTreeHWND(); //rewbs.customKeys
 	BOOL PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam); //rewbs.customKeys

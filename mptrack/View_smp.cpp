@@ -164,8 +164,8 @@ void CViewSample::OnInitialUpdate()
 
 
 // updateAll: Update all views including this one. Otherwise, only update update other views.
-void CViewSample::SetModified(DWORD mask, bool updateAll, bool waveformModified)
-//------------------------------------------------------------------------------
+void CViewSample::SetModified(HintType mask, bool updateAll, bool waveformModified)
+//---------------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	pModDoc->SetModified();
@@ -177,7 +177,7 @@ void CViewSample::SetModified(DWORD mask, bool updateAll, bool waveformModified)
 		if(sample.uFlags[SMP_KEEPONDISK] && !sample.uFlags[SMP_MODIFIED]) mask |= HINT_SMPNAMES;
 		sample.uFlags.set(SMP_MODIFIED);
 	}
-	pModDoc->UpdateAllViews(nullptr, mask | (m_nSample << HINT_SHIFT_SMP), updateAll ? nullptr : this);
+	pModDoc->UpdateAllViews(nullptr, SampleHint(mask, m_nSample), updateAll ? nullptr : this);
 }
 
 
@@ -514,16 +514,17 @@ LRESULT CViewSample::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 ///////////////////////////////////////////////////////////////
 // CViewSample drawing
 
-void CViewSample::UpdateView(DWORD dwHintMask, CObject *hint)
-//-----------------------------------------------------------
+void CViewSample::UpdateView(UpdateHint hint, CObject *pObj)
+//----------------------------------------------------------
 {
-	if(hint == this)
+	if(pObj == this)
 	{
 		return;
 	}
-	const SAMPLEINDEX updateSmp = (dwHintMask >> HINT_SHIFT_SMP);
-	if((dwHintMask & (HINT_MPTOPTIONS | HINT_MODTYPE))
-		|| ((dwHintMask & HINT_SAMPLEDATA) && (m_nSample == updateSmp || updateSmp == 0)))
+	HintType hintType = hint.GetType();
+	const SAMPLEINDEX updateSmp = hint.GetData();
+	if((hintType & (HINT_MPTOPTIONS | HINT_MODTYPE))
+		|| ((hintType & HINT_SAMPLEDATA) && (m_nSample == updateSmp || updateSmp == 0)))
 	{
 		UpdateScrollSize();
 		UpdateNcButtonState();
@@ -531,7 +532,7 @@ void CViewSample::UpdateView(DWORD dwHintMask, CObject *hint)
 	}
 
 	// sample drawing
-	if(dwHintMask & HINT_SAMPLEINFO)
+	if(hintType & HINT_SAMPLEINFO)
 	{
 		m_dwStatus.reset(SMPSTATUS_DRAWING);
 		UpdateNcButtonState();
@@ -1992,7 +1993,7 @@ void CViewSample::OnEditDelete()
 //------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	DWORD dwUpdateFlags = HINT_SAMPLEINFO | HINT_SAMPLEDATA;
+	HintType updateFlags = HINT_SAMPLEINFO | HINT_SAMPLEDATA;
 
 	if (!pModDoc) return;
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
@@ -2007,7 +2008,7 @@ void CViewSample::OnEditDelete()
 
 		sndFile.DestroySampleThreadsafe(m_nSample);
 
-		dwUpdateFlags |= HINT_SMPNAMES;
+		updateFlags |= HINT_SMPNAMES;
 	} else
 	{
 		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, "Delete Selection", m_dwBeginSel, m_dwEndSel);
@@ -2038,7 +2039,7 @@ void CViewSample::OnEditDelete()
 		sample.PrecomputeLoops(sndFile);
 	}
 	SetCurSel(0, 0);
-	SetModified(dwUpdateFlags, true, true);
+	SetModified(updateFlags, true, true);
 }
 
 

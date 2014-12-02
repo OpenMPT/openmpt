@@ -121,14 +121,9 @@ void CViewComments::OnInitialUpdate()
 
 		// For XM, set the instrument list as the default list
 		CModDoc *pModDoc = GetDocument();
-		CSoundFile *pSndFile;
-		if(pModDoc)
+		if(pModDoc && (pModDoc->GetModType() & MOD_TYPE_XM) && pModDoc->GetNumInstruments() > 0)
 		{
-			pSndFile= pModDoc->GetSoundFile();
-			if(pSndFile && (pSndFile->m_nType & MOD_TYPE_XM) && pSndFile->m_nInstruments > 0)
-			{
-				m_nListId = IDC_LIST_INSTRUMENTS;
-			}
+			m_nListId = IDC_LIST_INSTRUMENTS;
 		}
 	}
 
@@ -480,11 +475,10 @@ void CViewComments::UpdateButtonState()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		m_ToolBar.SetState(IDC_LIST_SAMPLES, ((m_nListId == IDC_LIST_SAMPLES) ? TBSTATE_CHECKED : 0)|TBSTATE_ENABLED);
 		m_ToolBar.SetState(IDC_LIST_INSTRUMENTS, ((m_nListId == IDC_LIST_INSTRUMENTS) ? TBSTATE_CHECKED : 0)|TBSTATE_ENABLED);
 		m_ToolBar.SetState(IDC_LIST_PATTERNS, ((m_nListId == IDC_LIST_PATTERNS) ? TBSTATE_CHECKED : 0)|TBSTATE_ENABLED);
-		m_ToolBar.EnableButton(IDC_LIST_INSTRUMENTS, (pSndFile->m_nInstruments) ? TRUE : FALSE);
+		m_ToolBar.EnableButton(IDC_LIST_INSTRUMENTS, (pModDoc->GetNumInstruments()) ? TRUE : FALSE);
 	}
 }
 
@@ -512,23 +506,23 @@ void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 	if(lvItem.pszText != nullptr && !lvItem.iSubItem && pModDoc)
 	{
 		UINT iItem = lvItem.iItem;
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 		if(m_nListId == IDC_LIST_SAMPLES)
 		{
-			if(iItem < pSndFile->GetNumSamples())
+			if(iItem < sndFile.GetNumSamples())
 			{
-				mpt::String::CopyN(pSndFile->m_szNames[iItem + 1], lvItem.pszText);
-				pModDoc->UpdateAllViews(this, ((iItem + 1) << HINT_SHIFT_SMP) | (HINT_SMPNAMES | HINT_SAMPLEINFO), this);
+				mpt::String::CopyN(sndFile.m_szNames[iItem + 1], lvItem.pszText);
+				pModDoc->UpdateAllViews(this, SampleHint(HINT_SMPNAMES | HINT_SAMPLEINFO, static_cast<SAMPLEINDEX>(iItem + 1)), this);
 				pModDoc->SetModified();
 			}
 		} else if(m_nListId == IDC_LIST_INSTRUMENTS)
 		{
-			if((iItem < pSndFile->GetNumInstruments()) && (pSndFile->Instruments[iItem + 1]))
+			if((iItem < sndFile.GetNumInstruments()) && (sndFile.Instruments[iItem + 1]))
 			{
-				ModInstrument *pIns = pSndFile->Instruments[iItem + 1];
+				ModInstrument *pIns = sndFile.Instruments[iItem + 1];
 				mpt::String::CopyN(pIns->name, lvItem.pszText);
-				pModDoc->UpdateAllViews(this, ((iItem + 1) << HINT_SHIFT_INS) | (HINT_INSNAMES | HINT_INSTRUMENT), this);
+				pModDoc->UpdateAllViews(this, InstrumentHint(HINT_INSNAMES | HINT_INSTRUMENT, static_cast<INSTRUMENTINDEX>(iItem + 1)), this);
 				pModDoc->SetModified();
 			}
 		} else
@@ -587,15 +581,11 @@ void CViewComments::OnShowInstruments()
 	if (m_nListId != IDC_LIST_INSTRUMENTS)
 	{
 		CModDoc *pModDoc = GetDocument();
-		if (pModDoc)
+		if (pModDoc && pModDoc->GetNumInstruments())
 		{
-			CSoundFile *pSndFile = pModDoc->GetSoundFile();
-			if (pSndFile->m_nInstruments)
-			{
-				m_nListId = IDC_LIST_INSTRUMENTS;
-				UpdateButtonState();
-				OnUpdate(NULL, HINT_MODTYPE, NULL);
-			}
+			m_nListId = IDC_LIST_INSTRUMENTS;
+			UpdateButtonState();
+			OnUpdate(NULL, HINT_MODTYPE, NULL);
 		}
 	}
 }

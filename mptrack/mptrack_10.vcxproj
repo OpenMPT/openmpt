@@ -1097,6 +1097,7 @@
     <ClInclude Include="..\soundlib\Loaders.h" />
     <ClInclude Include="Undo.h" />
     <ClInclude Include="UpdateCheck.h" />
+    <ClInclude Include="UpdateHints.h" />
     <ClInclude Include="view_com.h" />
     <ClInclude Include="View_gen.h" />
     <ClInclude Include="View_ins.h" />

@@ -208,8 +208,8 @@ public:
 	void OnOptionsChanged();
 	void AddDocument(CModDoc &modDoc);
 	void RemoveDocument(CModDoc &modDoc);
-	void UpdateView(ModTreeDocInfo &info, DWORD dwHint);
-	void OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint);
+	void UpdateView(ModTreeDocInfo &info, UpdateHint hint);
+	void OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint);
 	bool CanDrop(HTREEITEM hItem, bool bDoDrop);
 	void UpdatePlayPos(CModDoc &modDoc, Notification *pNotify);
 	bool IsItemExpanded(HTREEITEM hItem);

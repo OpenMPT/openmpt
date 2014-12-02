@@ -1582,6 +1582,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\UpdateHints.h"
+				>
+			</File>
+			<File
 				RelativePath="..\common\version.h"
 				>
 			</File>

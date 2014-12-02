@@ -83,7 +83,7 @@ protected:
 	virtual void OnOK() {}
 	virtual void OnCancel() {}
 	virtual void RecalcLayout() {}
-	virtual void UpdateView(DWORD, CObject *) {}
+	virtual void UpdateView(UpdateHint, CObject *) {}
 	virtual CRuntimeClass *GetAssociatedViewClass() { return NULL; }
 	virtual LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam);
 	virtual void OnActivatePage(LPARAM) {}
@@ -106,7 +106,7 @@ class CModTabCtrl: public CTabCtrl
 //================================
 {
 public:
-	BOOL InsertItem(int nIndex, LPSTR pszText, LPARAM lParam=0, int iImage=-1);
+	BOOL InsertItem(int nIndex, LPTSTR pszText, LPARAM lParam=0, int iImage=-1);
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
 	LPARAM GetItemData(int nIndex);
 };
@@ -140,7 +140,7 @@ public:
 
 protected:
 	void RecalcLayout();
-	void UpdateView(DWORD dwHintMask=0, CObject *pHint=NULL);
+	void UpdateView(UpdateHint hint = HINT_NONE, CObject *pHint=NULL);
 	BOOL SetActivePage(int nIndex=-1, LPARAM lParam=-1);
 	int GetActivePage();
 
@@ -204,7 +204,7 @@ public:
 	virtual void OnDraw(CDC *) {}
 	virtual void OnPrepareDC(CDC*, CPrintInfo*) {}
 	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
-	virtual void UpdateView(DWORD, CObject *) {}
+	virtual void UpdateView(UpdateHint, CObject *) {}
 	virtual LRESULT OnModViewMsg(WPARAM wParam, LPARAM lParam);
 	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *) { return FALSE; }
 	virtual LRESULT OnPlayerNotify(Notification *) { return 0; }

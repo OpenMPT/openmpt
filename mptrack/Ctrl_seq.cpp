@@ -596,10 +596,10 @@ void COrderList::OnEditCopy()
 }
 
 
-void COrderList::UpdateView(DWORD dwHintMask, CObject *pObj)
-//----------------------------------------------------------
+void COrderList::UpdateView(UpdateHint hint, CObject *pObj)
+//---------------------------------------------------------
 {
-	if(pObj != this && (dwHintMask & HINT_MODSEQUENCE))
+	if(pObj != this && (hint.GetType() & HINT_MODSEQUENCE))
 	{
 		InvalidateRect(NULL, FALSE);
 		UpdateInfoText();

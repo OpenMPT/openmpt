@@ -133,7 +133,7 @@ protected:
 	////////////////////////
 	// Misc stuff
 	void UpdateScrollSize();
-	void SetModified(DWORD mask, bool updateAll);
+	void SetModified(HintType mask, bool updateAll);
 	BOOL SetCurrentInstrument(INSTRUMENTINDEX nIns, enmEnvelopeTypes m_nEnv = ENV_VOLUME);
 	ModInstrument *GetInstrumentPtr() const;
 	InstrumentEnvelope *GetEnvelopePtr() const;
@@ -161,7 +161,7 @@ public:
 	//{{AFX_VIRTUAL(CViewInstrument)
 	virtual void OnDraw(CDC *);
 	virtual void OnInitialUpdate();
-	virtual void UpdateView(DWORD dwHintMask=0, CObject *pObj=NULL);
+	virtual void UpdateView(UpdateHint hint = HINT_NONE, CObject *pObj = nullptr);
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
 	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *);
 	virtual LRESULT OnPlayerNotify(Notification *);

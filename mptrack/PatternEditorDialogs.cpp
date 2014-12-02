@@ -944,7 +944,7 @@ void CEditCommand::OnNoteChanged()
 		m->note = newNote;
 		m->instr = newInstr;
 
-		modDoc->UpdateAllViews(NULL, (editPos.row << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
+		modDoc->UpdateAllViews(NULL, RowHint(HINT_PATTERNROW, editPos.row), NULL);
 
 		if(wasParamControl != m->IsPcNote())
 		{
@@ -989,7 +989,7 @@ void CEditCommand::OnVolCmdChanged()
 		m->volcmd = newVolCmd;
 		m->vol = newVol;
 
-		modDoc->UpdateAllViews(NULL, (editPos.row << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
+		modDoc->UpdateAllViews(NULL, RowHint(HINT_PATTERNROW, editPos.row), NULL);
 
 		if(volCmdChanged)
 		{
@@ -1050,7 +1050,7 @@ void CEditCommand::OnCommandChanged()
 		}
 		UpdateEffectRange(true);
 
-		modDoc->UpdateAllViews(NULL, (editPos.row << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
+		modDoc->UpdateAllViews(NULL, RowHint(HINT_PATTERNROW, editPos.row), NULL);
 	}
 }
 
@@ -1095,7 +1095,7 @@ void CEditCommand::UpdateEffectValue(bool set)
 				m->param = newParam;
 			}
 
-			modDoc->UpdateAllViews(NULL, (editPos.row << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
+			modDoc->UpdateAllViews(NULL, RowHint(HINT_PATTERNROW, editPos.row), NULL);
 		}
 	}
 }

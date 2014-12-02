@@ -119,7 +119,7 @@ void ExternalSamplesDlg::OnSetPath(NMHDR *, LRESULT *)
 	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_SAMPLES);
 
 	SetSample(smp, dlg.GetFirstFile());
-	modDoc.UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_SMPNAMES | HINT_SAMPLEDATA | (smp << HINT_SHIFT_SMP));
+	modDoc.UpdateAllViews(nullptr, SampleHint(HINT_SAMPLEINFO | HINT_SMPNAMES | HINT_SAMPLEDATA, smp));
 	GenerateList();
 }
 

@@ -1772,17 +1772,17 @@ BOOL CMainFrame::SetupMidi(DWORD d, LONG n)
 }
 
 
-void CMainFrame::UpdateAllViews(DWORD dwHint, CObject *pHint)
+void CMainFrame::UpdateAllViews(UpdateHint hint, CObject *pHint)
 //-----------------------------------------------------------
 {
 	CDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
 	if (pDocTmpl)
 	{
 		POSITION pos = pDocTmpl->GetFirstDocPosition();
-		CDocument *pDoc;
-		while ((pos != NULL) && ((pDoc = pDocTmpl->GetNextDoc(pos)) != NULL))
+		CModDoc *pDoc;
+		while ((pos != NULL) && ((pDoc = dynamic_cast<CModDoc *>(pDocTmpl->GetNextDoc(pos))) != nullptr))
 		{
-			pDoc->UpdateAllViews(NULL, dwHint, pHint);
+			pDoc->UpdateAllViews(NULL, hint, pHint);
 		}
 	}
 }
@@ -1848,10 +1848,10 @@ VOID CMainFrame::OnDocumentClosed(CModDoc *pModDoc)
 }
 
 
-VOID CMainFrame::UpdateTree(CModDoc *pModDoc, DWORD lHint, CObject *pHint)
-//------------------------------------------------------------------------
+VOID CMainFrame::UpdateTree(CModDoc *pModDoc, UpdateHint hint, CObject *pHint)
+//----------------------------------------------------------------------------
 {
-	m_wndTree.OnUpdate(pModDoc, lHint, pHint);
+	m_wndTree.OnUpdate(pModDoc, hint, pHint);
 }
 
 
@@ -2267,10 +2267,10 @@ void CMainFrame::OnUpdateMRUItem(CCmdUI *cmd)
 }
 
 
-LRESULT CMainFrame::OnInvalidatePatterns(WPARAM wParam, LPARAM)
-//-------------------------------------------------------------
+LRESULT CMainFrame::OnInvalidatePatterns(WPARAM, LPARAM)
+//------------------------------------------------------
 {
-	UpdateAllViews(wParam, NULL);
+	UpdateAllViews(UpdateHint(HINT_MPTOPTIONS, 0));
 	return TRUE;
 }
 

@@ -448,12 +448,12 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		int nSpeed = pSndFile->m_PlayState.m_nMusicSpeed;
 		if (nSpeed != nCurrentSpeed)
 		{
-			//rewbs.envRowGrid
-			CModDoc *pModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
-			if (pModDoc) {
-				pModDoc->UpdateAllViews(NULL, HINT_SPEEDCHANGE);
+			CModDoc *modDoc = pSndFile->GetpModDoc();
+			if(modDoc != nullptr)
+			{
+				// Update envelope views if speed has changed
+				modDoc->UpdateAllViews(nullptr, HINT_ENVELOPE);
 			}
-			//end rewbs.envRowGrid
 
 			if (nCurrentSpeed < 0) m_SpinSpeed.EnableWindow(TRUE);
 			nCurrentSpeed = nSpeed;
@@ -947,10 +947,10 @@ VOID CModTreeBar::OnDocumentClosed(CModDoc *pModDoc)
 }
 
 
-VOID CModTreeBar::OnUpdate(CModDoc *pModDoc, DWORD lHint, CObject *pHint)
-//-----------------------------------------------------------------------
+VOID CModTreeBar::OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint)
+//---------------------------------------------------------------------------
 {
-	if (m_pModTree) m_pModTree->OnUpdate(pModDoc, lHint, pHint);
+	if (m_pModTree) m_pModTree->OnUpdate(pModDoc, hint, pHint);
 }
 
 

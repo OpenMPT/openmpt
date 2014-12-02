@@ -239,24 +239,24 @@ void CCtrlPatterns::RecalcLayout()
 }
 
 
-void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
-//-------------------------------------------------------------
+void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
+//------------------------------------------------------------
 {
-	CHAR s[256];
-	m_OrderList.UpdateView(dwHintMask, pObj);
+	m_OrderList.UpdateView(hint, pObj);
+	HintType hintType = hint.GetType();
 
-	if(dwHintMask & HINT_MODSEQUENCE)
+	if(hintType & HINT_MODSEQUENCE)
 	{
 		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_sndFile.Order.GetName().c_str());
 	}
-	if(dwHintMask & (HINT_MODSEQUENCE|HINT_MODTYPE))
+	if(hintType & (HINT_MODSEQUENCE|HINT_MODTYPE))
 	{
 		m_SpinSequence.SetRange(0, m_sndFile.Order.GetNumSequences() - 1);
 		m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex());
 	}
 
 	//rewbs.instroVST
-	if(dwHintMask & (HINT_MIXPLUGINS|HINT_MODTYPE))
+	if(hintType & (HINT_MIXPLUGINS|HINT_MODTYPE))
 	{
 		if (HasValidPlug(m_nInstrument))
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), true);
@@ -276,7 +276,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 		GetDlgItem(IDC_EDIT_PATTERNNAME)->EnableWindow(isPatNameAvail);
 	}
 	//end rewbs.instroVST
-	if(dwHintMask & HINT_MPTOPTIONS)
+	if(hintType & HINT_MPTOPTIONS)
 	{
 		m_ToolBar.UpdateStyle();
 // -> CODE#0007
@@ -285,10 +285,11 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_ToolBar.SetState(ID_OVERFLOWPASTE, ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
 // -! BEHAVIOUR_CHANGE#0007
 	}
-	if(dwHintMask & (HINT_MODTYPE|HINT_INSNAMES|HINT_SMPNAMES|HINT_PATNAMES))
+	if(hintType & (HINT_MODTYPE|HINT_INSNAMES|HINT_SMPNAMES|HINT_PATNAMES))
 	{
 		LockControls();
-		if(dwHintMask & (HINT_MODTYPE|HINT_INSNAMES|HINT_SMPNAMES))
+		CHAR s[256];
+		if(hintType & (HINT_MODTYPE|HINT_INSNAMES|HINT_SMPNAMES))
 		{
 			static const TCHAR szSplitFormat[] = TEXT("%02u %s %02u: %s/%s");
 			UINT nPos = 0;
@@ -340,11 +341,11 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 			m_CbnInstrument.SetRedraw(TRUE);
 			m_CbnInstrument.Invalidate(FALSE);
 		}
-		if(dwHintMask & (HINT_MODTYPE|HINT_PATNAMES))
+		if(hintType & (HINT_MODTYPE|HINT_PATNAMES))
 		{
 			PATTERNINDEX nPat;
-			if(dwHintMask & HINT_PATNAMES)
-				nPat = (PATTERNINDEX)(dwHintMask >> HINT_SHIFT_PAT);
+			if(hintType & HINT_PATNAMES)
+				nPat = (PATTERNINDEX)hint.GetData();
 			else
 				nPat = (PATTERNINDEX)SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
 			if(m_sndFile.Patterns.IsValidIndex(nPat))
@@ -361,7 +362,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 		}
 		UnlockControls();
 	}
-	if (dwHintMask & (HINT_MODTYPE|HINT_UNDO))
+	if (hintType & (HINT_MODTYPE|HINT_UNDO))
 	{
 		m_ToolBar.EnableButton(ID_EDIT_UNDO, m_modDoc.GetPatternUndo().CanUndo());
 	}
@@ -387,7 +388,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		return m_OrderList.GetCurrentPattern();
 
 	case CTRLMSG_PATTERNCHANGED:
-		UpdateView((DWORD)(lParam << HINT_SHIFT_PAT) | HINT_PATNAMES, NULL);
+		UpdateView(PatternHint(HINT_PATNAMES, static_cast<PATTERNINDEX>(lParam)));
 		break;
 
 	case CTRLMSG_PAT_PREVINSTRUMENT:
@@ -1090,7 +1091,7 @@ void CCtrlPatterns::OnPatternNameChanged()
 			if(m_sndFile.Patterns[nPat].SetName(s))
 			{
 				if(m_sndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) m_modDoc.SetModified();
-				m_modDoc.UpdateAllViews(NULL, (nPat << HINT_SHIFT_PAT) | HINT_PATNAMES, this);
+				m_modDoc.UpdateAllViews(NULL, PatternHint(HINT_PATNAMES, nPat), this);
 			}
 		}
 	}
@@ -1106,7 +1107,7 @@ void CCtrlPatterns::OnSequenceNameChanged()
 	{
 		m_sndFile.Order.SetName(str.GetString());
 		m_modDoc.SetModified();
-		m_modDoc.UpdateAllViews(NULL, (m_sndFile.Order.GetCurrentSequenceIndex() << HINT_SHIFT_SEQUENCE) | HINT_SEQNAMES, this);
+		m_modDoc.UpdateAllViews(NULL, SequenceHint(HINT_SEQNAMES, m_sndFile.Order.GetCurrentSequenceIndex()), this);
 	}
 }
 
