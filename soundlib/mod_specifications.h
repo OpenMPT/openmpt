@@ -52,10 +52,10 @@ struct CModSpecifications
 	ROWINDEX patternRowsMin;
 	ROWINDEX patternRowsMax;
 	uint16 modNameLengthMax;			// Meaning 'usable letters', possible null character is not included.
-	uint16 sampleNameLengthMax;			// Dito
-	uint16 sampleFilenameLengthMax;		// Dito
-	uint16 instrNameLengthMax;			// Dito
-	uint16 instrFilenameLengthMax;		// Dito
+	uint16 sampleNameLengthMax;			// Ditto
+	uint16 sampleFilenameLengthMax;		// Ditto
+	uint16 instrNameLengthMax;			// Ditto
+	uint16 instrFilenameLengthMax;		// Ditto
 	SAMPLEINDEX samplesMax;				// Max number of samples == Highest possible sample index
 	INSTRUMENTINDEX instrumentsMax;		// Max number of instruments == Highest possible instrument index
 	mixLevels defaultMixLevels;			// Default mix levels that are used when creating a new file in this format
@@ -66,7 +66,7 @@ struct CModSpecifications
 	uint8 envelopePointsMax;			// Maximum number of points of each envelope
 	bool hasReleaseNode;				// Envelope release node
 	char commands[MAX_EFFECTS + 1];		// An array holding all commands this format supports; commands that are not supported are marked with "?"
-	char volcommands[MAX_VOLCMDS + 1];	// dito, but for volume column
+	char volcommands[MAX_VOLCMDS + 1];	// Ditto, but for volume column
 	bool hasIgnoreIndex;				// Does "+++" pattern exist?
 	bool hasStopIndex;					// Does "---" pattern exist?
 	bool hasRestartPos;					// Format has an automatic restart order position

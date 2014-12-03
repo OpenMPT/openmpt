@@ -102,9 +102,9 @@ public:
 // [out] duration: total time in seconds
 // [out] targetReached: true if the specified target has been reached while going through the module.
 // [out] lastOrder: last parsed order (if no target is specified, this is the first order that is parsed twice, i.e. not the *last* played order)
-// [out] lastRow: last parsed row (dito)
+// [out] lastRow: last parsed row (ditto)
 // [out] endOrder: last order before module loops (UNDEFINED if a target is specified)
-// [out] endRow: last row before module loops (dito)
+// [out] endRow: last row before module loops (ditto)
 std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthTarget target)
 //--------------------------------------------------------------------------------------------------------
 {

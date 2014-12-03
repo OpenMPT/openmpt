@@ -365,8 +365,8 @@ bool CSampleUndo::PrepareBuffer(undobuf_t &buffer, const SAMPLEINDEX smp, sample
 	{
 	case sundo_none:	// we are done, no sample changes here.
 	case sundo_invert:	// no action necessary, since those effects can be applied again to be undone.
-	case sundo_reverse:	// dito
-	case sundo_unsign:	// dito
+	case sundo_reverse:	// ditto
+	case sundo_unsign:	// ditto
 	case sundo_insert:	// no action necessary, we already have stored the variables that are necessary.
 		break;
 

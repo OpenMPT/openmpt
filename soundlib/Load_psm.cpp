@@ -683,7 +683,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			PatternRow rowBase = Patterns[pat].GetRow(row);
 			uint16 rowSize = patternChunk.ReadUint16LE();
-			if(rowSize < 2)
+			if(rowSize <= 2)
 			{
 				continue;
 			}
@@ -1024,7 +1024,7 @@ struct PACKED PSM16SampleHeader
 	};
 
 	char   filename[13];	// null-terminated
-	char   name[24];		// dito
+	char   name[24];		// ditto
 	uint32 offset;			// in file
 	uint32 memoffset;		// not used
 	uint16 sampleNumber;	// 1 ... 255
@@ -1249,7 +1249,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 					continue;
 				}
 
-				ModCommand &m = *Patterns[pat].GetpModCommand(curRow, MIN(chnFlag & channelMask, m_nChannels - 1));
+				ModCommand &m = *Patterns[pat].GetpModCommand(curRow, std::min<CHANNELINDEX>(chnFlag & channelMask, m_nChannels - 1));
 
 				if(chnFlag & noteFlag)
 				{

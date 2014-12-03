@@ -150,7 +150,7 @@ protected:
 	ModCommand* m_ModCommands;
 	ROWINDEX m_Rows;
 	ROWINDEX m_RowsPerBeat;		// patterns-specific time signature. if != 0, this is implicitely set.
-	ROWINDEX m_RowsPerMeasure;	// dito
+	ROWINDEX m_RowsPerMeasure;	// ditto
 	std::string m_PatternName;
 	CPatternContainer& m_rPatternContainer;
 //END: DATA
