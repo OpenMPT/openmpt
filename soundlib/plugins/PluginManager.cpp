@@ -42,8 +42,7 @@ typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
 
 AEffect *DmoToVst(VSTPluginLib &lib);
 
-static const char *const cacheSection = "PluginCache";
-static const wchar_t *const cacheSectionW = L"PluginCache";
+static const MPT_UCHAR_TYPE *const cacheSection = MPT_ULITERAL("PluginCache");
 
 
 uint8 VSTPluginLib::GetDllBits(bool fromCache) const
@@ -69,8 +68,8 @@ void VSTPluginLib::WriteToCache() const
 
 	const std::string libName = libraryName.ToUTF8();
 	const uint32 crc = crc32(0, reinterpret_cast<const Bytef *>(&libName[0]), libName.length());
-	const std::string IDs = mpt::fmt::HEX0<8>(SwapBytesReturnLE(pluginId1)) + mpt::fmt::HEX0<8>(SwapBytesReturnLE(pluginId2)) + mpt::fmt::HEX0<8>(SwapBytesReturnLE(crc));
-	const std::string flagsKey = IDs + ".Flags";
+	const mpt::ustring IDs = mpt::ufmt::HEX0<8>(SwapBytesReturnLE(pluginId1)) + mpt::ufmt::HEX0<8>(SwapBytesReturnLE(pluginId2)) + mpt::ufmt::HEX0<8>(SwapBytesReturnLE(crc));
+	const mpt::ustring flagsKey = IDs + MPT_USTRING(".Flags");
 
 	mpt::PathString writePath = dllPath;
 	if(theApp.IsPortableMode())
@@ -78,7 +77,7 @@ void VSTPluginLib::WriteToCache() const
 		writePath = theApp.AbsolutePathToRelative(writePath);
 	}
 
-	cacheFile.Write<std::string>(cacheSectionW, libraryName.ToWide(), IDs);
+	cacheFile.Write<mpt::ustring>(cacheSection, libraryName.ToUnicode(), IDs);
 	cacheFile.Write<mpt::PathString>(cacheSection, IDs, writePath);
 	cacheFile.Write<int32>(cacheSection, flagsKey, EncodeCacheFlags());
 }
@@ -331,7 +330,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	if(fromCache)
 	{
 		SettingsContainer & cacheFile = theApp.GetPluginCache();
-		const std::string IDs = cacheFile.Read<std::string>(cacheSectionW, fileName.ToWide(), "");
+		const mpt::ustring IDs = cacheFile.Read<mpt::ustring>(cacheSection, fileName.ToUnicode(), MPT_USTRING(""));
 
 		if(IDs.length() >= 16)
 		{
@@ -363,7 +362,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 					}
 				}
 
-				const std::string flagKey = IDs + ".Flags";
+				const mpt::ustring flagKey = IDs + MPT_USTRING(".Flags");
 				plug->DecodeCacheFlags(cacheFile.Read<int32>(cacheSection, flagKey, 0));
 
 #ifdef VST_LOG
@@ -380,7 +379,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	}
 
 	// If this key contains a file name on program launch, a plugin previously crashed OpenMPT.
-	theApp.GetSettings().Write<mpt::PathString>("VST Plugins", "FailedPlugin", dllPath, SettingWriteThrough);
+	theApp.GetSettings().Write<mpt::PathString>(MPT_USTRING("VST Plugins"), MPT_USTRING("FailedPlugin"), dllPath, SettingWriteThrough);
 
 	AEffect *pEffect;
 	HINSTANCE hLib;
@@ -428,7 +427,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	}
 
 	// Now it should be safe to assume that this plugin loaded properly. :)
-	theApp.GetSettings().Remove("VST Plugins", "FailedPlugin");
+	theApp.GetSettings().Remove(MPT_USTRING("VST Plugins"), MPT_USTRING("FailedPlugin"));
 
 	// If OK, write the information in PluginCache
 	if(validPlug)
@@ -537,7 +536,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		{
 			// Try plugin cache (search for library name)
 			SettingsContainer &cacheFile = theApp.GetPluginCache();
-			std::string IDs = cacheFile.Read<std::string>(cacheSectionW, mpt::ToWide(mpt::CharsetUTF8, mixPlugin.GetLibraryName()), "");
+			mpt::ustring IDs = cacheFile.Read<mpt::ustring>(cacheSection, mpt::ToUnicode(mpt::CharsetUTF8, mixPlugin.GetLibraryName()), MPT_USTRING(""));
 			if(IDs.length() >= 16)
 			{
 				fullPath = cacheFile.Read<mpt::PathString>(cacheSection, IDs, MPT_PATHSTRING(""));
