@@ -75,15 +75,15 @@ static void WriteAdaptive12String(std::ostream& oStrm, const std::string& str)
 }
 
 
-void WriteItemString(std::ostream& oStrm, const char* const pStr, const size_t nSize)
-//--------------------------------------------------------------------------------
+void WriteItemString(std::ostream& oStrm, const std::string &str)
+//---------------------------------------------------------------
 {
-	uint32 id = static_cast<uint32>(std::min<std::size_t>(nSize, (uint32_max >> 4))) << 4;
+	uint32 id = static_cast<uint32>(std::min<std::size_t>(str.size(), (uint32_max >> 4))) << 4;
 	id |= 12; // 12 == 1100b
 	Binarywrite<uint32>(oStrm, id);
 	id >>= 4;
 	if(id > 0)
-		oStrm.write(pStr, id);
+		oStrm.write(str.data(), id);
 }
 
 

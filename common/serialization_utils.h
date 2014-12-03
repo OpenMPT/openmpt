@@ -142,13 +142,10 @@ inline void WriteItem(std::ostream& oStrm, const T& data)
 	Binarywrite(oStrm, data);
 }
 
-void WriteItemString(std::ostream& oStrm, const char* const pStr, const size_t nSize);
+void WriteItemString(std::ostream& oStrm, const std::string &str);
 
 template <>
-inline void WriteItem<std::string>(std::ostream& oStrm, const std::string& str) {WriteItemString(oStrm, str.c_str(), str.length());}
-
-template <>
-inline void WriteItem<const char *>(std::ostream& oStrm, const char * const & psz) { WriteItemString(oStrm, psz, std::strlen(psz));}
+inline void WriteItem<std::string>(std::ostream& oStrm, const std::string& str) {WriteItemString(oStrm, str);}
 
 
 template<class T>

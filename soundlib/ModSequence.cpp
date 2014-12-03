@@ -816,7 +816,7 @@ void WriteModSequence(std::ostream& oStrm, const ModSequence& seq)
 {
 	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite(FileIdSequence, MptVersion::num);
-	ssb.WriteItem(seq.m_sName.c_str(), "n");
+	ssb.WriteItem(seq.m_sName, "n");
 	const uint16 nLength = seq.GetLengthTailTrimmed();
 	ssb.WriteItem<uint16>(nLength, "l");
 	ssb.WriteItem(seq.m_pArray, "a", srlztn::ArrayWriter<uint16>(nLength));
@@ -833,7 +833,7 @@ void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t)
 		return;
 	std::string str;
 	ssb.ReadItem(str, "n");
-	seq.m_sName = str.c_str();
+	seq.m_sName = str;
 	uint16 nSize = MAX_ORDERS;
 	ssb.ReadItem<uint16>(nSize, "l");
 	LimitMax(nSize, ModSpecs::mptm.ordersMax);
