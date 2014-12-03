@@ -122,7 +122,7 @@ enum MODCONTAINERTYPE
 #define TRK_FASTTRACKER2	(MOD_TYPE_XM)
 #define TRK_SCREAMTRACKER	(MOD_TYPE_S3M)
 #define TRK_PROTRACKER		(MOD_TYPE_MOD)
-#define TRK_ALLTRACKERS		(MODTYPE(~0))
+#define TRK_ALLTRACKERS		(~Enum<MODTYPE>::value_type())
 
 
 // Channel flags:

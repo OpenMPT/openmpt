@@ -2,7 +2,8 @@
  * FlagSet.h
  * ---------
  * Purpose: A flexible and typesafe flag set class.
- * Notes  : Mostly taken from http://stackoverflow.com/questions/4226960/type-safer-bitflags-in-c
+ * Notes  : Originally based on http://stackoverflow.com/questions/4226960/type-safer-bitflags-in-c .
+ *          Rewritten to be standard-conforming.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -14,165 +15,407 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-template <typename enum_t, typename store_t = enum_t>
+
+// Be aware of the required size when specializing this.
+// We cannot assert the minimum size because some compilers always allocate an 'int',
+// even for enums that would fit in smaller integral types.
+template <typename Tenum>
+struct enum_traits
+{
+	typedef typename mpt::make_unsigned<Tenum>::type store_type;
+};
+
+
+// Type-safe wrapper around an enum, that can represent all enum values and bitwise compositions thereof.
+// Conversions to and from plain integers as well as conversions to the base enum are always explicit.
+template <typename enum_t>
+class enum_value_type
+{
+public:
+	typedef enum_t enum_type;
+	typedef enum_value_type value_type;
+	typedef typename enum_traits<enum_t>::store_type store_type;
+private:
+	store_type bits;
+public:
+	forceinline enum_value_type() : bits(0) { }
+	forceinline enum_value_type(const enum_value_type &x) : bits(x.bits) { }
+	forceinline enum_value_type(enum_type x) : bits(static_cast<store_type>(x)) { }
+private:
+	explicit forceinline enum_value_type(store_type x) : bits(x) { } // private in order to prevent accidental conversions. use from_bits.
+	forceinline operator store_type () const { return bits; }  // private in order to prevent accidental conversions. use as_bits.
+public:
+	static forceinline enum_value_type from_bits(store_type bits) { return value_type(bits); }
+	forceinline enum_type as_enum() const { return static_cast<enum_t>(bits); }
+	forceinline store_type as_bits() const { return bits; }
+public:
+	forceinline operator bool () const { return bits != store_type(); }
+	forceinline bool operator ! () const { return bits == store_type(); }
+
+	forceinline const enum_value_type operator ~ () const { return enum_value_type(~bits); }
+
+	friend forceinline bool operator == (enum_value_type a, enum_value_type b) { return a.bits == b.bits; }
+	friend forceinline bool operator != (enum_value_type a, enum_value_type b) { return a.bits != b.bits; }
+	
+	friend forceinline bool operator == (enum_value_type a, enum_t b) { return a == enum_value_type(b); }
+	friend forceinline bool operator != (enum_value_type a, enum_t b) { return a != enum_value_type(b); }
+	
+	friend forceinline bool operator == (enum_t a, enum_value_type b) { return enum_value_type(a) == b; }
+	friend forceinline bool operator != (enum_t a, enum_value_type b) { return enum_value_type(a) != b; }
+	
+	friend forceinline const enum_value_type operator | (enum_value_type a, enum_value_type b) { return enum_value_type(a.bits | b.bits); }
+	friend forceinline const enum_value_type operator & (enum_value_type a, enum_value_type b) { return enum_value_type(a.bits & b.bits); }
+	friend forceinline const enum_value_type operator ^ (enum_value_type a, enum_value_type b) { return enum_value_type(a.bits ^ b.bits); }
+	
+	friend forceinline const enum_value_type operator | (enum_value_type a, enum_t b) { return a | enum_value_type(b); }
+	friend forceinline const enum_value_type operator & (enum_value_type a, enum_t b) { return a & enum_value_type(b); }
+	friend forceinline const enum_value_type operator ^ (enum_value_type a, enum_t b) { return a ^ enum_value_type(b); }
+	
+	friend forceinline const enum_value_type operator | (enum_t a, enum_value_type b) { return enum_value_type(a) | b; }
+	friend forceinline const enum_value_type operator & (enum_t a, enum_value_type b) { return enum_value_type(a) & b; }
+	friend forceinline const enum_value_type operator ^ (enum_t a, enum_value_type b) { return enum_value_type(a) ^ b; }
+	
+	forceinline enum_value_type &operator |= (enum_value_type b) { *this = *this | b; return *this; }
+	forceinline enum_value_type &operator &= (enum_value_type b) { *this = *this & b; return *this; }
+	forceinline enum_value_type &operator ^= (enum_value_type b) { *this = *this ^ b; return *this; }
+
+	forceinline enum_value_type &operator |= (enum_t b) { *this = *this | b; return *this; }
+	forceinline enum_value_type &operator &= (enum_t b) { *this = *this & b; return *this; }
+	forceinline enum_value_type &operator ^= (enum_t b) { *this = *this ^ b; return *this; }
+
+};
+
+
+// Type-safe enum wrapper that allows type-safe bitwise testing.
+template <typename enum_t>
+class Enum
+{
+public:
+	typedef Enum self_type;
+	typedef enum_t enum_type;
+	typedef enum_value_type<enum_t> value_type;
+	typedef typename value_type::store_type store_type;
+private:
+	enum_type value;
+public:
+	explicit forceinline Enum(enum_type val) : value(val) { }
+	forceinline operator enum_type () const { return value; }
+	forceinline Enum &operator = (enum_type val) { value = val; return *this; }
+public:
+	forceinline const value_type operator ~ () const { return ~value_type(value); }
+
+	friend forceinline bool operator == (self_type a, self_type b) { return value_type(a) == value_type(b); }
+	friend forceinline bool operator != (self_type a, self_type b) { return value_type(a) != value_type(b); }
+
+	friend forceinline bool operator == (self_type a, value_type b) { return value_type(a) == value_type(b); }
+	friend forceinline bool operator != (self_type a, value_type b) { return value_type(a) != value_type(b); }
+
+	friend forceinline bool operator == (value_type a, self_type b) { return value_type(a) == value_type(b); }
+	friend forceinline bool operator != (value_type a, self_type b) { return value_type(a) != value_type(b); }
+
+	friend forceinline bool operator == (self_type a, enum_type b) { return value_type(a) == value_type(b); }
+	friend forceinline bool operator != (self_type a, enum_type b) { return value_type(a) != value_type(b); }
+
+	friend forceinline bool operator == (enum_type a, self_type b) { return value_type(a) == value_type(b); }
+	friend forceinline bool operator != (enum_type a, self_type b) { return value_type(a) != value_type(b); }
+
+	friend forceinline const value_type operator | (self_type a, self_type b) { return value_type(a) | value_type(b); }
+	friend forceinline const value_type operator & (self_type a, self_type b) { return value_type(a) & value_type(b); }
+	friend forceinline const value_type operator ^ (self_type a, self_type b) { return value_type(a) ^ value_type(b); }
+
+	friend forceinline const value_type operator | (self_type a, value_type b) { return value_type(a) | value_type(b); }
+	friend forceinline const value_type operator & (self_type a, value_type b) { return value_type(a) & value_type(b); }
+	friend forceinline const value_type operator ^ (self_type a, value_type b) { return value_type(a) ^ value_type(b); }
+
+	friend forceinline const value_type operator | (value_type a, self_type b) { return value_type(a) | value_type(b); }
+	friend forceinline const value_type operator & (value_type a, self_type b) { return value_type(a) & value_type(b); }
+	friend forceinline const value_type operator ^ (value_type a, self_type b) { return value_type(a) ^ value_type(b); }
+
+	friend forceinline const value_type operator | (self_type a, enum_type b) { return value_type(a) | value_type(b); }
+	friend forceinline const value_type operator & (self_type a, enum_type b) { return value_type(a) & value_type(b); }
+	friend forceinline const value_type operator ^ (self_type a, enum_type b) { return value_type(a) ^ value_type(b); }
+
+	friend forceinline const value_type operator | (enum_type a, self_type b) { return value_type(a) | value_type(b); }
+	friend forceinline const value_type operator & (enum_type a, self_type b) { return value_type(a) & value_type(b); }
+	friend forceinline const value_type operator ^ (enum_type a, self_type b) { return value_type(a) ^ value_type(b); }
+
+};
+
+
+template <typename enum_t, typename store_t = typename enum_value_type<enum_t>::store_type >
 class FlagSet
 {
 public:
-	// Default constructor (no flags set)
-	FlagSet() : flags(store_t(0))
-	{
+	typedef FlagSet self_type;
+	typedef enum_t enum_type;
+	typedef enum_value_type<enum_t> value_type;
+	typedef store_t store_type;
+	
+private:
 
+	// support truncated store_type ... :
+	store_type bits_;
+	static forceinline store_type store_from_value(value_type bits) { return static_cast<store_type>(bits.as_bits()); }
+	static forceinline value_type value_from_store(store_type bits) { return value_type::from_bits(static_cast<typename value_type::store_type>(bits)); }
+
+	forceinline void store(value_type bits) { bits_ = store_from_value(bits); }
+	forceinline value_type load() const { return value_from_store(bits_); }
+
+public:
+
+	// Default constructor (no flags set)
+	forceinline FlagSet() : bits_(store_from_value(value_type()))
+	{
+		return;
 	}
 
 	// Value constructor
-	explicit FlagSet(enum_t value) : flags(static_cast<store_t>(value))
+	forceinline FlagSet(value_type flags) : bits_(store_from_value(value_type(flags)))
 	{
-
+		return;
 	}
 
-	// Explicit conversion operator
-	operator enum_t() const
+	forceinline FlagSet(enum_type flag) : bits_(store_from_value(value_type(flag)))
 	{
-		return static_cast<enum_t>(flags);
+		return;
 	}
 
-	operator std::string() const
+	explicit forceinline FlagSet(store_type flags) : bits_(store_from_value(value_type::from_bits(flags)))
 	{
-		return to_string();
+		return;
+	}
+	
+	forceinline operator bool () const
+	{
+		return load();
+	}
+	// In order to catch undesired conversions to bool in integer contexts,
+	// add a deprecated conversion operator to store_type.
+	// C++11 explicit conversion cast operators ('explicit operator bool ();')
+	// would solve this in a better way and always fail at compile-time instead of this
+	// solution which just warns in some cases.
+	// The macro-based extended instrument fields writer in Sndfile.cpp currently needs this conversion,
+	// so it is not marked deprecated (for now).
+	/*MPT_DEPRECATED*/ forceinline operator store_type () const
+	{
+		return load().as_bits();
+	}
+	
+	forceinline value_type value() const
+	{
+		return load();
+	}
+	
+	forceinline operator value_type () const
+	{
+		return load();
 	}
 
 	// Test if one or more flags are set. Returns true if at least one of the given flags is set.
-	bool operator[] (enum_t flag) const
+	forceinline bool operator[] (value_type flags) const
 	{
-		return test(flag);
+		return test(flags);
 	}
 
 	// String representation of flag set
 	std::string to_string() const
 	{
-		std::string str(size(), '0');
+		std::string str(size_bits(), '0');
 
-		for(size_t x = 0; x < size(); ++x)
+		for(size_t x = 0; x < size_bits(); ++x)
 		{
-			str[size() - x - 1] = (flags & (1 << x) ? '1' : '0');
+			str[size_bits() - x - 1] = (load() & (1 << x) ? '1' : '0');
 		}
 
 		return str;
 	}
 	
 	// Set one or more flags.
-	FlagSet &set(enum_t flag)
+	forceinline FlagSet &set(value_type flags)
 	{
-		flags = static_cast<store_t>(flags | flag);
+		store(load() | flags);
 		return *this;
 	}
 
 	// Set or clear one or more flags.
-	FlagSet &set(enum_t flag, bool val)
+	forceinline FlagSet &set(value_type flags, bool val)
 	{
-		flags = static_cast<store_t>(val ? (flags | flag) : (flags & ~flag));
+		store((val ? (load() | flags) : (load() & ~flags)));
 		return *this;
 	}
 
 	// Clear or flags.
-	FlagSet &reset()
+	forceinline FlagSet &reset()
 	{
-		flags = store_t(0);
+		store(value_type());
 		return *this;
 	}
 
 	// Clear one or more flags.
-	FlagSet &reset(enum_t flag)
+	forceinline FlagSet &reset(value_type flags)
 	{
-		flags = static_cast<store_t>(flags & ~flag);
+		store(load() & ~flags);
 		return *this;
 	}
 
 	// Toggle all flags.
-	FlagSet &flip()
+	forceinline FlagSet &flip()
 	{
-		flags = ~flags;
+		store(~load());
 		return *this;
 	}
 
 	// Toggle one or more flags.
-	FlagSet &flip(enum_t flag)
+	forceinline FlagSet &flip(value_type flags)
 	{
-		flags = static_cast<store_t>(flags ^ flag);
+		store(load() ^ flags);
 		return *this;
+	}
+
+	// Returns the size of the flag set in bytes
+	forceinline std::size_t size() const
+	{
+		return sizeof(store_type);
 	}
 
 	// Returns the size of the flag set in bits
-	size_t size() const
+	forceinline std::size_t size_bits() const
 	{
-		return sizeof(enum_t) * 8;
+		return size() * 8;
 	}
-
+	
 	// Test if one or more flags are set. Returns true if at least one of the given flags is set.
-	bool test(enum_t flag) const
+	forceinline bool test(value_type flags) const
 	{
-		return (flags & static_cast<store_t>(flag)) > 0;
+		return (load() & flags);
 	}
 
 	// Test if all specified flags are set.
-	bool test_all(enum_t flag) const
+	forceinline bool test_all(value_type flags) const
 	{
-		return (flags & static_cast<store_t>(flag)) == static_cast<store_t>(flag);
+		return (load() & flags) == flags;
 	}
 
 	// Test if any flag is set.
-	bool any() const
+	forceinline bool any() const
 	{
-		return flags > 0;
+		return load();
 	}
 
 	// Test if no flags are set.
-	bool none() const
+	forceinline bool none() const
 	{
-		return flags == 0;
+		return !load();
+	}
+	
+	forceinline store_type GetRaw() const
+	{
+		return bits_;
 	}
 
-	FlagSet<enum_t, store_t> &operator = (const enum_t other)
+	forceinline void SetRaw(store_type flags)
 	{
-		flags = static_cast<store_t>(other);
+		bits_ = flags;
+	}
+
+	forceinline FlagSet &operator = (value_type flags)
+	{
+		store(flags);
+		return *this;
+	}
+	
+	forceinline FlagSet &operator = (enum_type flag)
+	{
+		store(flag);
 		return *this;
 	}
 
-	FlagSet<enum_t, store_t> &operator &= (const enum_t other)
+	forceinline FlagSet &operator = (FlagSet flags)
 	{
-		flags &= static_cast<store_t>(other);
+		store(flags.load());
 		return *this;
 	}
 
-	FlagSet<enum_t, store_t> &operator |= (const enum_t other)
+	forceinline FlagSet &operator &= (value_type flags)
 	{
-		flags |= static_cast<store_t>(other);
+		store(load() & flags);
 		return *this;
 	}
 
-	store_t GetRaw() const
+	forceinline FlagSet &operator |= (value_type flags)
 	{
-		return flags;
+		store(load() | flags);
+		return *this;
 	}
 
-	void SetRaw(store_t flags_)
+	forceinline FlagSet &operator ^= (value_type flags)
 	{
-		flags = flags_;
+		store(load() ^ flags);
+		return *this;
 	}
+	
+	friend forceinline bool operator == (self_type a, self_type b) { return a.load() == b.load(); }
+	friend forceinline bool operator != (self_type a, self_type b) { return a.load() != b.load(); }
 
-private:
-	store_t flags;
+	friend forceinline bool operator == (self_type a, value_type b) { return a.load() == value_type(b); }
+	friend forceinline bool operator != (self_type a, value_type b) { return a.load() != value_type(b); }
+
+	friend forceinline bool operator == (value_type a, self_type b) { return value_type(a) == b.load(); }
+	friend forceinline bool operator != (value_type a, self_type b) { return value_type(a) != b.load(); }
+
+	friend forceinline bool operator == (self_type a, enum_type b) { return a.load() == value_type(b); }
+	friend forceinline bool operator != (self_type a, enum_type b) { return a.load() != value_type(b); }
+
+	friend forceinline bool operator == (enum_type a, self_type b) { return value_type(a) == b.load(); }
+	friend forceinline bool operator != (enum_type a, self_type b) { return value_type(a) != b.load(); }
+
+	friend forceinline bool operator == (self_type a, Enum<enum_type> b) { return a.load() == value_type(b); }
+	friend forceinline bool operator != (self_type a, Enum<enum_type> b) { return a.load() != value_type(b); }
+
+	friend forceinline bool operator == (Enum<enum_type> a, self_type b) { return value_type(a) == b.load(); }
+	friend forceinline bool operator != (Enum<enum_type> a, self_type b) { return value_type(a) != b.load(); }
+
+	friend forceinline const value_type operator | (self_type a, self_type b) { return a.load() | b.load(); }
+	friend forceinline const value_type operator & (self_type a, self_type b) { return a.load() & b.load(); }
+	friend forceinline const value_type operator ^ (self_type a, self_type b) { return a.load() ^ b.load(); }
+
+	friend forceinline const value_type operator | (self_type a, value_type b) { return a.load() | value_type(b); }
+	friend forceinline const value_type operator & (self_type a, value_type b) { return a.load() & value_type(b); }
+	friend forceinline const value_type operator ^ (self_type a, value_type b) { return a.load() ^ value_type(b); }
+
+	friend forceinline const value_type operator | (value_type a, self_type b) { return value_type(a) | b.load(); }
+	friend forceinline const value_type operator & (value_type a, self_type b) { return value_type(a) & b.load(); }
+	friend forceinline const value_type operator ^ (value_type a, self_type b) { return value_type(a) ^ b.load(); }
+
+	friend forceinline const value_type operator | (self_type a, enum_type b) { return a.load() | value_type(b); }
+	friend forceinline const value_type operator & (self_type a, enum_type b) { return a.load() & value_type(b); }
+	friend forceinline const value_type operator ^ (self_type a, enum_type b) { return a.load() ^ value_type(b); }
+
+	friend forceinline const value_type operator | (enum_type a, self_type b) { return value_type(a) | b.load(); }
+	friend forceinline const value_type operator & (enum_type a, self_type b) { return value_type(a) & b.load(); }
+	friend forceinline const value_type operator ^ (enum_type a, self_type b) { return value_type(a) ^ b.load(); }
+
+	friend forceinline const value_type operator | (self_type a, Enum<enum_type> b) { return a.load() | value_type(b); }
+	friend forceinline const value_type operator & (self_type a, Enum<enum_type> b) { return a.load() & value_type(b); }
+	friend forceinline const value_type operator ^ (self_type a, Enum<enum_type> b) { return a.load() ^ value_type(b); }
+
+	friend forceinline const value_type operator | (Enum<enum_type> a, self_type b) { return value_type(a) | b.load(); }
+	friend forceinline const value_type operator & (Enum<enum_type> a, self_type b) { return value_type(a) & b.load(); }
+	friend forceinline const value_type operator ^ (Enum<enum_type> a, self_type b) { return value_type(a) ^ b.load(); }
 
 };
 
 
-// Declare typesafe logical operators for flag set
-#define DECLARE_FLAGSET(enum_t) \
-	inline enum_t operator | (enum_t a, enum_t b) { return static_cast<enum_t>(+a | +b); } \
-	inline enum_t operator & (enum_t a, enum_t b) { return static_cast<enum_t>(+a & +b); } \
-	inline enum_t &operator &= (enum_t &a, enum_t b) { a = (a & b); return a; } \
-	inline enum_t &operator |= (enum_t &a, enum_t b) { a = (a | b); return a; } \
-	inline enum_t operator ~ (enum_t a) { return static_cast<enum_t>(~(+a)); }
+// Declare typesafe logical operators for enum_t
+#define MPT_DECLARE_ENUM(enum_t) \
+	forceinline enum_value_type<enum_t> operator | (enum_t a, enum_t b) { return enum_value_type<enum_t>(a) | enum_value_type<enum_t>(b); } \
+	forceinline enum_value_type<enum_t> operator & (enum_t a, enum_t b) { return enum_value_type<enum_t>(a) & enum_value_type<enum_t>(b); } \
+	forceinline enum_value_type<enum_t> operator ^ (enum_t a, enum_t b) { return enum_value_type<enum_t>(a) ^ enum_value_type<enum_t>(b); } \
+	forceinline enum_value_type<enum_t> operator ~ (enum_t a) { return ~enum_value_type<enum_t>(a); } \
+/**/
+
+// backwards compatibility
+#define DECLARE_FLAGSET MPT_DECLARE_ENUM
 
 
 OPENMPT_NAMESPACE_END

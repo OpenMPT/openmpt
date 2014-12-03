@@ -122,7 +122,7 @@ public:
 	virtual ~CCtrlInstruments();
 
 public:
-	void SetModified(HintType mask, bool updateAll, bool modified = true);
+	void SetModified(FlagSet<HintType> mask, bool updateAll, bool modified = true);
 	BOOL SetCurrentInstrument(UINT nIns, BOOL bUpdNum=TRUE);
 	BOOL OpenInstrument(const mpt::PathString &fileName);
 	BOOL OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr);

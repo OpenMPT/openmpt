@@ -530,7 +530,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		CHANGEMODTYPE_WARNING(wLinearSlides);
 	}
 	if(oldTypeIsXM && newTypeIsIT_MPT) m_SndFile.m_SongFlags.set(SONG_ITCOMPATGXX);
-	m_SndFile.m_SongFlags &= (specs.songFlags | SONG_PLAY_FLAGS);
+	m_SndFile.m_SongFlags &= (specs.GetSongFlags() | SONG_PLAY_FLAGS);
 
 	// Adjust mix levels
 	if(newTypeIsMOD || newTypeIsS3M)

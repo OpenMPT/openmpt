@@ -1911,8 +1911,8 @@ static noinline void TestLoadSaveFile()
 }
 
 
-static void RunITCompressionTest(const std::vector<int8> &sampleData, ChannelFlags smpFormat, bool it215)
-//-------------------------------------------------------------------------------------------------------
+static void RunITCompressionTest(const std::vector<int8> &sampleData, FlagSet<ChannelFlags> smpFormat, bool it215)
+//----------------------------------------------------------------------------------------------------------------
 {
 
 	ModSample smp;

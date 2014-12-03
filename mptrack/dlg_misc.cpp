@@ -177,9 +177,9 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox5.ShowWindow(type != MOD_TYPE_MOD ? SW_SHOW : SW_HIDE);
 	if(allowedFlags[SONG_PT1XMODE]) OnPTModeChanged();
 
-	const bool XMorITorMPT = (type & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0;
-	const bool ITorMPT = (type & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0;
-	const bool XM = (type & (MOD_TYPE_XM)) != 0;
+	const bool XMorITorMPT = (type & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT));
+	const bool ITorMPT = (type & (MOD_TYPE_IT | MOD_TYPE_MPT));
+	const bool XM = (type & (MOD_TYPE_XM));
 
 	// Misc Flags
 	if(ITorMPT)
@@ -344,7 +344,7 @@ void CModTypeDlg::OnOK()
 		sndFile.SetMixLevels(static_cast<mixLevels>(m_PlugMixBox.GetItemData(sel)));
 	}
 
-	sndFile.SetModFlags(0);
+	sndFile.SetModFlags(FlagSet<ModSpecificFlag>());
 	if(IsDlgButtonChecked(IDC_CHK_COMPATPLAY)) sndFile.SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	if(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))
 	{

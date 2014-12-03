@@ -308,7 +308,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *)
 
 	if (!pModDoc) return;
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
-	HintType hintType = hint.GetType();
+	FlagSet<HintType> hintType = hint.GetType();
 	if (!(hintType & (HINT_MODTYPE|HINT_MODCHANNELS|HINT_MIXPLUGINS))) return;
 	nTabCount = (sndFile.m_nChannels + 3) / 4;
 	if (nTabCount != m_TabCtrl.GetItemCount())

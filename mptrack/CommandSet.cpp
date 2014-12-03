@@ -1742,8 +1742,8 @@ CString KeyCombination::GetContextText(InputTargetContext ctx)
 };
 
 
-CString KeyCombination::GetKeyEventText(KeyEventType event)
-//---------------------------------------------------------
+CString KeyCombination::GetKeyEventText(FlagSet<KeyEventType> event)
+//------------------------------------------------------------------
 {
 	CString text="";
 
@@ -1989,7 +1989,7 @@ bool CCommandSet::KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2,
 {
 	bool modConflict      = (kc1.Modifier()==kc2.Modifier());
 	bool codeConflict     = (kc1.KeyCode()==kc2.KeyCode());
-	bool eventConflict    = ((kc1.EventType()&kc2.EventType())!=0);
+	bool eventConflict    = ((kc1.EventType()&kc2.EventType()));
 	bool ctxConflict      = (kc1.Context() == kc2.Context());
 	bool crossCxtConflict = IsCrossContextConflict(kc1, kc2);
 

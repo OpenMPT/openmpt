@@ -60,6 +60,7 @@ enum KeyEventType
 	kKeyEventRepeat	= 1 << 2,
 	kNumKeyEvents	= 1 << 3
 };
+template <> struct enum_traits<KeyEventType> { typedef uint8 store_type; };
 DECLARE_FLAGSET(KeyEventType)
 
 
@@ -1162,11 +1163,11 @@ protected:
 	STATIC_ASSERT(static_cast<uint8>(kNumKeyEvents - 1) == kNumKeyEvents - 1);
 
 public:
-	KeyCombination(InputTargetContext context = kCtxAllContexts, UINT modifier = 0, UINT key = 0, KeyEventType type = kKeyEventNone)
+	KeyCombination(InputTargetContext context = kCtxAllContexts, UINT modifier = 0, UINT key = 0, FlagSet<KeyEventType> type = kKeyEventNone)
 		: ctx(static_cast<uint8>(context))
 		, mod(static_cast<uint8>(modifier))
 		, code(static_cast<uint8>(key))
-		, event(static_cast<uint8>(type))
+		, event(type.GetRaw())
 	{ }
 
 	bool operator== (const KeyCombination &other) const
@@ -1197,8 +1198,8 @@ public:
 	void KeyCode(UINT key) { code = static_cast<uint8>(key); }
 	UINT KeyCode() const { return static_cast<UINT>(code); }
 
-	void EventType(KeyEventType type) { event = static_cast<uint8>(type); }
-	KeyEventType EventType() const { return static_cast<KeyEventType>(event); }
+	void EventType(FlagSet<KeyEventType> type) { event = type.GetRaw(); }
+	FlagSet<KeyEventType> EventType() const { FlagSet<KeyEventType> result; result.SetRaw(event); return result; }
 
 	// Key combination to string
 	static CString GetContextText(InputTargetContext ctx);
@@ -1210,7 +1211,7 @@ public:
 	static CString GetKeyText(UINT mod, UINT code);
 	CString GetKeyText() const { return GetKeyText(Modifier(), KeyCode()); }
 
-	static CString GetKeyEventText(KeyEventType event);
+	static CString GetKeyEventText(FlagSet<KeyEventType> event);
 	CString GetKeyEventText() const { return GetKeyEventText(EventType()); }
 
 	static bool IsExtended(UINT code);

@@ -432,6 +432,37 @@ struct false_type {
 
 #endif // HAS_TYPE_TRAITS
 
+namespace detail {
+
+template <std::size_t size> struct int_of_size { };
+template <> struct int_of_size<1> { typedef int8  type; };
+template <> struct int_of_size<2> { typedef int16 type; };
+template <> struct int_of_size<3> { typedef int32 type; };
+template <> struct int_of_size<4> { typedef int32 type; };
+template <> struct int_of_size<5> { typedef int64 type; };
+template <> struct int_of_size<6> { typedef int64 type; };
+template <> struct int_of_size<7> { typedef int64 type; };
+template <> struct int_of_size<8> { typedef int64 type; };
+
+template <std::size_t size> struct uint_of_size { };
+template <> struct uint_of_size<1> { typedef uint8  type; };
+template <> struct uint_of_size<2> { typedef uint16 type; };
+template <> struct uint_of_size<3> { typedef uint32 type; };
+template <> struct uint_of_size<4> { typedef uint32 type; };
+template <> struct uint_of_size<5> { typedef uint64 type; };
+template <> struct uint_of_size<6> { typedef uint64 type; };
+template <> struct uint_of_size<7> { typedef uint64 type; };
+template <> struct uint_of_size<8> { typedef uint64 type; };
+
+} // namespace detail
+
+// Simplified version of C++11 std::make_signed and std::make_unsigned:
+//  - we do not require a C++11 <type_traits> header
+//  - no support fr CV-qualifiers
+//  - does not error out on non-integral types
+template <typename T> struct make_signed { typedef typename mpt::detail::int_of_size<sizeof(T)>::type type; };
+template <typename T> struct make_unsigned { typedef typename mpt::detail::uint_of_size<sizeof(T)>::type type; };
+
 } // namespace mpt
 
 

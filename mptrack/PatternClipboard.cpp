@@ -444,7 +444,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 	const bool overflowPaste = ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && mode != pmPasteFlood && mode != pmPushForward) && !multiPaste;
 	const bool doITStyleMix = (mode == pmMixPasteIT);
 	const bool doMixPaste = (mode == pmMixPaste) || doITStyleMix;
-	const bool clipboardHasS3MCommands = (pasteFormat & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M)) != 0;
+	const bool clipboardHasS3MCommands = (pasteFormat & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M));
 
 	PatternCursor startPoint(startRow, startChan, PatternCursor::lastColumn), endPoint(startRow, startChan, PatternCursor::firstColumn);
 	ModCommand *patData = sndFile.Patterns[pattern].GetpModCommand(startRow, 0);

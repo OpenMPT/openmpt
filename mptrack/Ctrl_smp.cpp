@@ -551,7 +551,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 //-----------------------------------------------------------
 {
 	if(pObj == this) return;
-	HintType hintType = hint.GetType();
+	FlagSet<HintType> hintType = hint.GetType();
 	if (hintType & HINT_MPTOPTIONS)
 	{
 		m_ToolBar1.UpdateStyle();
@@ -777,8 +777,8 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 
 
 // updateAll: Update all views including this one. Otherwise, only update update other views.
-void CCtrlSamples::SetModified(HintType mask, bool updateAll, bool waveformModified)
-//----------------------------------------------------------------------------------
+void CCtrlSamples::SetModified(FlagSet<HintType> mask, bool updateAll, bool waveformModified)
+//-------------------------------------------------------------------------------------------
 {
 	m_modDoc.SetModified();
 

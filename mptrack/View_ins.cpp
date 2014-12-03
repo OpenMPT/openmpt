@@ -183,8 +183,8 @@ void CViewInstrument::UpdateScrollSize()
 
 // Set instrument (and moddoc) as modified.
 // updateAll: Update all views including this one. Otherwise, only update update other views.
-void CViewInstrument::SetModified(HintType mask, bool updateAll)
-//--------------------------------------------------------------
+void CViewInstrument::SetModified(FlagSet<HintType> mask, bool updateAll)
+//-----------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr) return;
@@ -570,7 +570,7 @@ bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile &sndFil
 {
 	InstrumentEnvelope &env = ins.GetEnvelope(envelope);
 
-	const EnvelopeFlags flags = (ENV_ENABLED | extraFlags);
+	const FlagSet<EnvelopeFlags> flags = (ENV_ENABLED | extraFlags);
 
 	env.dwFlags.set(flags, enable);
 	if(enable && !env.nNodes)
@@ -781,7 +781,7 @@ void CViewInstrument::UpdateView(UpdateHint hint, CObject *pObj)
 	{
 		return;
 	}
-	HintType hintType = hint.GetType();
+	FlagSet<HintType> hintType = hint.GetType();
 	const INSTRUMENTINDEX updateIns = hint.GetData();
 	if((hintType & (HINT_MPTOPTIONS | HINT_MODTYPE))
 		|| ((hintType & HINT_ENVELOPE) && (m_nInstrument == updateIns || updateIns == 0)))

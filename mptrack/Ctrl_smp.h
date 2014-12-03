@@ -128,7 +128,7 @@ protected:
 	afx_msg void OnEnableStretchToSize();
 	afx_msg void OnEstimateSampleSize();
 
-	void SetModified(HintType mask, bool updateAll, bool waveformModified);
+	void SetModified(FlagSet<HintType> mask, bool updateAll, bool waveformModified);
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

@@ -342,7 +342,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 				changedPos = true;
 			} else if(m_pParent.GetFollowSong())
 			{
-				SongFlags pausedFlags = sndFile.m_SongFlags & (SONG_PAUSED | SONG_STEP | SONG_PATTERNLOOP);
+				FlagSet<SongFlags> pausedFlags = sndFile.m_SongFlags & (SONG_PAUSED | SONG_STEP | SONG_PATTERNLOOP);
 
 				sndFile.m_PlayState.m_nCurrentOrder = m_nScrollPos;
 				sndFile.SetCurrentOrder(m_nScrollPos);

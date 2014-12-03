@@ -574,6 +574,7 @@ CTuningCollection* CSoundFile::s_pTuningsSharedLocal(0);
 CSoundFile::CSoundFile() :
 	m_pTuningsTuneSpecific(nullptr),
 	m_pModSpecs(&ModSpecs::itEx),
+	m_nType(MOD_TYPE_NONE),
 	Patterns(*this),
 	Order(*this),
 #ifdef MODPLUG_TRACKER
@@ -690,7 +691,7 @@ void CSoundFile::InitializeGlobals()
 	m_dwLastSavedWithVersion = m_dwCreatedWithVersion = 0;
 
 	SetMixLevels(mixLevels_compatible);
-	SetModFlags(0);
+	SetModFlags(FlagSet<ModSpecificFlag>());
 
 	Patterns.ClearPatterns();
 
@@ -1768,10 +1769,10 @@ void CSoundFile::SetModSpecsPointer(const CModSpecifications*& pModSpecs, const 
 }
 
 
-ModSpecificFlag CSoundFile::GetModFlagMask(MODTYPE oldtype, MODTYPE newtype) const
-//--------------------------------------------------------------------------------
+FlagSet<ModSpecificFlag> CSoundFile::GetModFlagMask(MODTYPE oldtype, MODTYPE newtype) const
+//-----------------------------------------------------------------------------------------
 {
-	const MODTYPE combined = oldtype | newtype;
+	const Enum<MODTYPE>::value_type combined = oldtype | newtype;
 
 	// XM <-> IT/MPT conversion.
 	if(combined == (MOD_TYPE_IT|MOD_TYPE_XM) || combined == (MOD_TYPE_MPT|MOD_TYPE_XM))
@@ -1779,7 +1780,7 @@ ModSpecificFlag CSoundFile::GetModFlagMask(MODTYPE oldtype, MODTYPE newtype) con
 
 	// IT <-> MPT conversion.
 	if(combined == (MOD_TYPE_IT|MOD_TYPE_MPT))
-		return ModSpecificFlag(uint16_max);
+		return FlagSet<ModSpecificFlag>().flip();
 
 	return MSF_COMPATIBLE_PLAY;
 }
@@ -2094,7 +2095,7 @@ void CSoundFile::SetupMODPanning(bool bForceSetup)
 //------------------------------------------------
 {
 	// Setup LRRL panning, max channel volume
-	if((GetType() & MOD_TYPE_MOD) == 0 && bForceSetup == false) return;
+	if(!(GetType() & MOD_TYPE_MOD) && bForceSetup == false) return;
 
 	for(CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
 	{

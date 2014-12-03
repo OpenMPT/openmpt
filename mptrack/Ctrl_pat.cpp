@@ -243,7 +243,7 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 //------------------------------------------------------------
 {
 	m_OrderList.UpdateView(hint, pObj);
-	HintType hintType = hint.GetType();
+	FlagSet<HintType> hintType = hint.GetType();
 
 	if(hintType & HINT_MODSEQUENCE)
 	{
@@ -431,7 +431,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case CTRLMSG_SETVIEWWND:
 		{
 			SendViewMessage(VIEWMSG_FOLLOWSONG, IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG));
-			SendViewMessage(VIEWMSG_PATTERNLOOP, (SONG_PATTERNLOOP & m_sndFile.m_SongFlags));
+			SendViewMessage(VIEWMSG_PATTERNLOOP, (m_sndFile.m_SongFlags & SONG_PATTERNLOOP) ? TRUE : FALSE);
 			OnSpacingChanged();
 			SendViewMessage(VIEWMSG_SETDETAIL, m_nDetailLevel);
 			SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);

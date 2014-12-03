@@ -73,7 +73,8 @@ struct CModSpecifications
 	bool supportsPlugins;				// Format can store plugins
 	bool hasPatternSignatures;			// Can patterns have a custom time signature?
 	bool hasPatternNames;				// Cat patterns have a name?
-	SongFlags songFlags;				// Supported song flags
+	FlagSet<SongFlags>::store_type songFlags;				// Supported song flags   NOTE: Do not use the overloaded operator | to set these flags because this results in dynamic initialization
+	FlagSet<SongFlags> GetSongFlags() const { return FlagSet<SongFlags>(songFlags); }
 };
 
 

@@ -62,7 +62,7 @@ public:
 	DECLARE_SERIAL(CViewSample)
 
 protected:
-	void SetModified(HintType mask, bool updateAll, bool waveformModified);
+	void SetModified(FlagSet<HintType> mask, bool updateAll, bool waveformModified);
 	void UpdateScrollSize() { UpdateScrollSize(m_nZoom, true); }
 	void UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength centeredSample = SmpLength(-1));
 	BOOL SetCurrentSample(SAMPLEINDEX nSmp);
@@ -75,8 +75,8 @@ protected:
 	void SetCurSel(SmpLength nBegin, SmpLength nEnd);
 	void ScrollToPosition(int x);
 	void DrawPositionMarks();
-	void DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength len, int uFlags, const void *pSampleData);
-	void DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength len, int uFlags, const void *pSampleData);
+	void DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength len, SampleFlags uFlags, const void *pSampleData);
+	void DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength len, SampleFlags uFlags, const void *pSampleData);
 	void DrawNcButton(CDC *pDC, UINT nBtn);
 	BOOL GetNcButtonRect(UINT nBtn, LPRECT lpRect);
 	void UpdateNcButtonState();
