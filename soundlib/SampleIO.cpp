@@ -325,10 +325,11 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		{
 			bytesRead = CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, bigEndian24> > >(sample, sourceBuf, fileSize, &srcPeak);
 		}
-		if(bytesRead)
+		if(bytesRead && srcPeak != uint32(1)<<31)
 		{
 			// Adjust sample volume so we do not affect relative volume of the sample. Normalizing is only done to increase precision.
 			sample.nGlobalVol = static_cast<uint16>(Clamp(Util::muldivr_unsigned(sample.nGlobalVol, srcPeak, uint32(1)<<31), uint32(1), uint32(64)));
+			sample.uFlags.set(SMP_MODIFIED);
 		}
 	}
 
@@ -345,10 +346,11 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		{
 			bytesRead = CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, bigEndian32> > >(sample, sourceBuf, fileSize, &srcPeak);
 		}
-		if(bytesRead)
+		if(bytesRead && srcPeak != uint32(1)<<31)
 		{
 			// Adjust sample volume so we do not affect relative volume of the sample. Normalizing is only done to increase precision.
 			sample.nGlobalVol = static_cast<uint16>(Clamp(Util::muldivr_unsigned(sample.nGlobalVol, srcPeak, uint32(1)<<31), uint32(1), uint32(64)));
+			sample.uFlags.set(SMP_MODIFIED);
 		}
 	}
 
@@ -365,10 +367,11 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		{
 			bytesRead = CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(sample, sourceBuf, fileSize, &srcPeak);
 		}
-		if(bytesRead)
+		if(bytesRead && srcPeak != uint32(1)<<31)
 		{
 			// Adjust sample volume so we do not affect relative volume of the sample. Normalizing is only done to increase precision.
 			sample.nGlobalVol = Util::Round<uint16>(Clamp(sample.nGlobalVol * srcPeak, 1.0f, 64.0f));
+			sample.uFlags.set(SMP_MODIFIED);
 		}
 	}
 

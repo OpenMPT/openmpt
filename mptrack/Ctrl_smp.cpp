@@ -861,7 +861,7 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName)
 				sample.nGlobalVol = 64;
 				sample.nVolume = 256;
 				sample.nPan = 128;
-				sample.uFlags.reset(CHN_LOOP | CHN_SUSTAINLOOP);
+				sample.uFlags.reset(CHN_LOOP | CHN_SUSTAINLOOP | SMP_MODIFIED);
 				sample.filename[0] = '\0';
 				m_sndFile.m_szNames[m_nSample][0] = '\0';
 				if(!sample.nC5Speed) sample.nC5Speed = 22050;
@@ -900,7 +900,7 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName)
 			sample.uFlags.set(CHN_PANNING);
 		}
 		SetModified(HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, true, false);
-		sample.uFlags.reset(SMP_MODIFIED | SMP_KEEPONDISK);
+		sample.uFlags.reset(SMP_KEEPONDISK);
 	}
 	return true;
 }
