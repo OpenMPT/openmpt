@@ -982,8 +982,8 @@ void CCtrlInstruments::RecalcLayout()
 
 // Set instrument (and moddoc) as modified.
 // updateAll: Update all views including this one. Otherwise, only update update other views.
-void CCtrlInstruments::SetModified(HintType mask, bool updateAll, bool modified)
-//------------------------------------------------------------------------------
+void CCtrlInstruments::SetModified(FlagSet<HintType> mask, bool updateAll, bool modified)
+//---------------------------------------------------------------------------------------
 {
 	m_modDoc.UpdateAllViews(NULL, InstrumentHint(mask, m_nInstrument), updateAll ? nullptr : this);
 	if(modified) m_modDoc.SetModified();
@@ -1128,7 +1128,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 //---------------------------------------------------------------
 {
 	if(pObj == this) return;
-	HintType hintType = hint.GetType();
+	FlagSet<HintType> hintType = hint.GetType();
 	if (hintType & HINT_MPTOPTIONS)
 	{
 		m_ToolBar.UpdateStyle();
@@ -1169,7 +1169,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 		m_SpinMidiPR.EnableWindow(bITandXM);
 		m_SpinMidiBK.EnableWindow(bITandXM);
 
-		const bool extendedFadeoutRange = (m_sndFile.GetType() & MOD_TYPE_XM) != 0;
+		const bool extendedFadeoutRange = (m_sndFile.GetType() & MOD_TYPE_XM);
 		m_SpinFadeOut.EnableWindow(bITandXM);
 		m_SpinFadeOut.SetRange(0, extendedFadeoutRange ? 32767 : 8192);
 		m_EditFadeOut.SetLimitText(extendedFadeoutRange ? 5 : 4);

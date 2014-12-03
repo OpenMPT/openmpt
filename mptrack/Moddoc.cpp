@@ -185,10 +185,10 @@ BOOL CModDoc::OnNewDocument()
 	m_SndFile.ChangeModTypeTo(CTrackApp::GetDefaultDocType());
 
 	theApp.GetDefaultMidiMacro(m_SndFile.m_MidiCfg);
-	m_SndFile.m_SongFlags.set(SONG_LINEARSLIDES & m_SndFile.GetModSpecifications().songFlags);
+	m_SndFile.m_SongFlags.set(SONG_LINEARSLIDES & m_SndFile.GetModSpecifications().GetSongFlags());
 	if(!m_SndFile.m_MidiCfg.IsMacroDefaultSetupUsed())
 	{
-		m_SndFile.m_SongFlags.set(SONG_EMBEDMIDICFG & m_SndFile.GetModSpecifications().songFlags);
+		m_SndFile.m_SongFlags.set(SONG_EMBEDMIDICFG & m_SndFile.GetModSpecifications().GetSongFlags());
 	}
 
 
@@ -1108,7 +1108,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 			chn.nC5Speed = sample.nC5Speed;
 			chn.nLoopStart = sample.nLoopStart;
 			chn.nLoopEnd = sample.nLoopEnd;
-			chn.dwFlags = static_cast<ChannelFlags>(sample.uFlags) & (CHN_SAMPLEFLAGS & ~CHN_MUTE);
+			chn.dwFlags = (sample.uFlags & (CHN_SAMPLEFLAGS & ~CHN_MUTE));
 			chn.nPan = 128;
 			if (sample.uFlags[CHN_PANNING]) chn.nPan = sample.nPan;
 			chn.nInsVol = sample.nGlobalVol;
@@ -1212,7 +1212,7 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 	}
 	//end rewbs.vstiLive
 
-	const ChannelFlags mask = (fade ? CHN_NOTEFADE : (CHN_NOTEFADE | CHN_KEYOFF));
+	const FlagSet<ChannelFlags> mask = (fade ? CHN_NOTEFADE : (CHN_NOTEFADE | CHN_KEYOFF));
 	ModChannel *pChn = &m_SndFile.m_PlayState.Chn[stopChn != CHANNELINDEX_INVALID ? stopChn : m_SndFile.m_nChannels];
 	for(CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++, pChn++)
 	{
@@ -1709,7 +1709,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 	int nRenderPasses = 1;
 	// Channel mode
 	std::vector<bool> usedChannels;
-	std::vector<ChannelFlags> channelFlags;
+	std::vector<FlagSet<ChannelFlags> > channelFlags;
 	// Instrument mode
 	std::vector<bool> instrMuteState;
 

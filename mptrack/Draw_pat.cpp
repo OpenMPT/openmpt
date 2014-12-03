@@ -231,7 +231,7 @@ void CViewPattern::UpdateView(UpdateHint hint, CObject *pObj)
 	{
 		return;
 	}
-	HintType hintType = hint.GetType();
+	FlagSet<HintType> hintType = hint.GetType();
 	if(hintType & HINT_MPTOPTIONS)
 	{
 		UpdateColors();

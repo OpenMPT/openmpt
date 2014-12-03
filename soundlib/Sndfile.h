@@ -219,6 +219,7 @@ enum ModSpecificFlag
 	MSF_OLD_MIDI_PITCHBENDS	= 8,		//IT/MPT/XM
 	MSF_VOLRAMP				= 16,		//XM(FT2)
 };
+template <> struct enum_traits<ModSpecificFlag> { typedef uint16 store_type; };
 DECLARE_FLAGSET(ModSpecificFlag)
 
 
@@ -285,15 +286,15 @@ public: //Misc
 	// If updateSamplePos is also true, the sample positions of samples still playing from previous patterns will be kept in sync.
 	double GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool updateVars, bool updateSamplePos);
 
-	uint16 GetModFlags() const {return static_cast<uint16>(m_ModFlags);}
-	void SetModFlags(const uint16 v) {m_ModFlags = static_cast<ModSpecificFlag>(v);}
+	FlagSet<ModSpecificFlag> GetModFlags() const { return m_ModFlags; }
+	void SetModFlags(FlagSet<ModSpecificFlag> v) { m_ModFlags = v;}
 	bool GetModFlag(ModSpecificFlag i) const { return m_ModFlags.test(i); }
 	void SetModFlag(ModSpecificFlag i, bool val) { m_ModFlags.set(i, val); }
 
 	// Is compatible mode for a specific tracker turned on?
 	// Hint 1: No need to poll for MOD_TYPE_MPT, as it will automatically be linked with MOD_TYPE_IT when using TRK_IMPULSETRACKER
 	// Hint 2: Always returns true for MOD / S3M format (if that is the format of the current file)
-	bool IsCompatibleMode(MODTYPE type) const
+	bool IsCompatibleMode(FlagSet<MODTYPE>::value_type type) const
 	{
 		if(GetType() & type & MOD_TYPE_MOD)
 			return true; // MOD format doesn't have compatibility flags, so we will always return true
@@ -349,7 +350,7 @@ private: //Effect functions
 
 private: //Misc private methods.
 	static void SetModSpecsPointer(const CModSpecifications*& pModSpecs, const MODTYPE type);
-	ModSpecificFlag GetModFlagMask(MODTYPE oldtype, MODTYPE newtype) const;
+	FlagSet<ModSpecificFlag> GetModFlagMask(MODTYPE oldtype, MODTYPE newtype) const;
 
 private: //'Controllers'
 
@@ -359,7 +360,7 @@ private: //'Controllers'
 
 private: //Misc data
 	const CModSpecifications *m_pModSpecs;
-	FlagSet<ModSpecificFlag, uint16> m_ModFlags;
+	FlagSet<ModSpecificFlag> m_ModFlags;
 
 private:
 	// Interleaved Front Mix Buffer (Also room for interleaved rear mix)
@@ -396,7 +397,7 @@ public:	// for Editing
 #ifdef MODPLUG_TRACKER
 	CModDoc *m_pModDoc;		// Can be a null pointer for example when previewing samples from the treeview.
 #endif // MODPLUG_TRACKER
-	FlagSet<MODTYPE> m_nType;
+	Enum<MODTYPE> m_nType;
 private:
 	MODCONTAINERTYPE m_ContainerType;
 public:
@@ -583,10 +584,10 @@ public:
 #endif // MODPLUG_TRACKER
 
 	bool Destroy();
-	MODTYPE GetType() const { return m_nType; }
-	bool TypeIsIT_MPT() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
-	bool TypeIsIT_MPT_XM() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)) != 0; }
-	bool TypeIsS3M_IT_MPT() const { return (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
+	Enum<MODTYPE> GetType() const { return m_nType; }
+	bool TypeIsIT_MPT() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)); }
+	bool TypeIsIT_MPT_XM() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)); }
+	bool TypeIsS3M_IT_MPT() const { return (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)); }
 
 	MODCONTAINERTYPE GetContainerType() const { return m_ContainerType; }
 

@@ -164,8 +164,8 @@ void CViewSample::OnInitialUpdate()
 
 
 // updateAll: Update all views including this one. Otherwise, only update update other views.
-void CViewSample::SetModified(HintType mask, bool updateAll, bool waveformModified)
-//---------------------------------------------------------------------------------
+void CViewSample::SetModified(FlagSet<HintType> mask, bool updateAll, bool waveformModified)
+//------------------------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	pModDoc->SetModified();
@@ -521,7 +521,7 @@ void CViewSample::UpdateView(UpdateHint hint, CObject *pObj)
 	{
 		return;
 	}
-	HintType hintType = hint.GetType();
+	FlagSet<HintType> hintType = hint.GetType();
 	const SAMPLEINDEX updateSmp = hint.GetData();
 	if((hintType & (HINT_MPTOPTIONS | HINT_MODTYPE))
 		|| ((hintType & HINT_SAMPLEDATA) && (m_nSample == updateSmp || updateSmp == 0)))
@@ -543,8 +543,8 @@ void CViewSample::UpdateView(UpdateHint hint, CObject *pObj)
 
 
 // Draw one channel of sample data, 1:1 ratio or higher (zoomed in)
-void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength len, int uFlags, const void *pSampleData)
-//----------------------------------------------------------------------------------------------------------------------
+void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength len, SampleFlags uFlags, const void *pSampleData)
+//------------------------------------------------------------------------------------------------------------------------------
 {
 	int smplsize;
 	int yrange = cy/2;
@@ -901,8 +901,8 @@ static void sse2_findminmax8(const void *p, SmpLength scanlen, int channels, int
 
 
 // Draw one channel of zoomed-out sample data
-void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength len, int uFlags, const void *pSampleData)
-//----------------------------------------------------------------------------------------------------------------------
+void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength len, SampleFlags uFlags, const void *pSampleData)
+//------------------------------------------------------------------------------------------------------------------------------
 {
 	int oldsmin, oldsmax;
 	int yrange = cy/2;
@@ -1993,7 +1993,7 @@ void CViewSample::OnEditDelete()
 //------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	HintType updateFlags = HINT_SAMPLEINFO | HINT_SAMPLEDATA;
+	FlagSet<HintType> updateFlags = HINT_SAMPLEINFO | HINT_SAMPLEDATA;
 
 	if (!pModDoc) return;
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();

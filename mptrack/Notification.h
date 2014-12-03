@@ -36,7 +36,7 @@ struct Notification
 	static const uint32 ClipVU = 0x80000000;			// Master VU clip indicator bit (sound output has previously clipped)
 
 	int64 timestampSamples;
-	FlagSet<Type, uint16> type;
+	FlagSet<Notification::Type> type;
 	Item item;						// Sample or instrument number, depending on type
 	ROWINDEX row;					// Always valid
 	uint32 tick;					// ditto
@@ -47,7 +47,7 @@ struct Notification
 	uint8 masterVUchannels;			// ditto
 	SmpLength pos[MAX_CHANNELS];	// Sample / envelope pos for each channel if != PosInvalid, or pattern channel VUs
 
-	Notification(Type t = Default, Item i = 0, int64 s = 0, ROWINDEX r = 0, uint32 ti = 0, ORDERINDEX o = 0, PATTERNINDEX p = 0, uint32 x = 0, uint8 outChannels = 0) : timestampSamples(s), type(t), item(i), row(r), tick(ti), order(o), pattern(p), mixedChannels(x), masterVUchannels(outChannels)
+	Notification(FlagSet<Notification::Type> t = Default, Item i = 0, int64 s = 0, ROWINDEX r = 0, uint32 ti = 0, ORDERINDEX o = 0, PATTERNINDEX p = 0, uint32 x = 0, uint8 outChannels = 0) : timestampSamples(s), type(t), item(i), row(r), tick(ti), order(o), pattern(p), mixedChannels(x), masterVUchannels(outChannels)
 	{
 		MemsetZero(masterVU);
 	}

@@ -744,7 +744,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	TCHAR s[256], stmp[256];
 	TV_ITEM tvi;
 	MemsetZero(tvi);
-	const HintType hintFlagPart = hint.GetType();
+	const FlagSet<HintType> hintFlagPart = hint.GetType();
 	if (IsSampleBrowser() || !hintFlagPart) return;
 
 	const CModDoc &modDoc = info.modDoc;
@@ -2313,7 +2313,7 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 		}
 	}
 	// what should be updated?
-	HintType hintFlags = (updateSamples ? HINT_SAMPLEINFO : HINT_NONE) | (updateInstruments ? HINT_INSTRUMENT : HINT_NONE);
+	FlagSet<HintType> hintFlags = (updateSamples ? HINT_SAMPLEINFO : HINT_NONE) | (updateInstruments ? HINT_INSTRUMENT : HINT_NONE);
 	if(hintFlags != HINT_NONE) UpdateView(*pInfo, hintFlags);
 }
 

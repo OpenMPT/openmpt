@@ -189,18 +189,19 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 	CModDoc *pModDoc = GetDocument();
 	LV_COLUMN lvc;
 	LV_ITEM lvi, lvi2;
+	FlagSet<HintType> hintType = UpdateHint(lHint).GetType();
 
 	if ((!pModDoc) || (pSender == this) || (!(m_ItemList.m_hWnd))) return;
-	if (lHint & HINT_MPTOPTIONS)
+	if (hintType & HINT_MPTOPTIONS)
 	{
 		m_ToolBar.UpdateStyle();
-		lHint &= ~HINT_MPTOPTIONS;
+		hintType &= ~HINT_MPTOPTIONS;
 	}
-	lHint &= (HINT_MODTYPE
+	hintType &= (HINT_MODTYPE
 		|HINT_SMPNAMES|HINT_SAMPLEINFO
 		|HINT_INSNAMES|HINT_INSTRUMENT
 		/*|HINT_PATNAMES|HINT_PATTERNROW*/); // pattern stuff currently unused
-	if (!lHint) return;
+	if (!hintType) return;
 
 	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
@@ -208,7 +209,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 
 	m_ItemList.SetRedraw(FALSE);
 	// Add sample headers
-	if ((m_nListId != m_nCurrentListId) || (lHint & HINT_MODTYPE))
+	if ((m_nListId != m_nCurrentListId) || (hintType & HINT_MODTYPE))
 	{
 		UINT ichk = 0;
 		m_ItemList.DeleteAllItems();
@@ -246,12 +247,12 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 				nCol++;
 			}
 		} else
-		lHint |= HINT_MODTYPE;
+		hintType |= HINT_MODTYPE;
 	}
 	// Add Items
 	UINT nCount = m_ItemList.GetItemCount();
 	// Add Samples
-	if ((m_nCurrentListId == IDC_LIST_SAMPLES) && (lHint & (HINT_MODTYPE|HINT_SMPNAMES|HINT_SAMPLEINFO)))
+	if ((m_nCurrentListId == IDC_LIST_SAMPLES) && (hintType & (HINT_MODTYPE|HINT_SMPNAMES|HINT_SAMPLEINFO)))
 	{
 		SAMPLEINDEX nMax = static_cast<SAMPLEINDEX>(nCount);
 		if (nMax < sndFile.GetNumSamples()) nMax = sndFile.GetNumSamples();
@@ -354,7 +355,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 		}
 	} else
 	// Add Instruments
-	if ((m_nCurrentListId == IDC_LIST_INSTRUMENTS) && (lHint & (HINT_MODTYPE|HINT_INSNAMES|HINT_INSTRUMENT)))
+	if ((m_nCurrentListId == IDC_LIST_INSTRUMENTS) && (hintType & (HINT_MODTYPE|HINT_INSNAMES|HINT_INSTRUMENT)))
 	{
 		INSTRUMENTINDEX nMax = static_cast<INSTRUMENTINDEX>(nCount);
 		if (nMax < sndFile.GetNumInstruments()) nMax = sndFile.GetNumInstruments();
@@ -449,7 +450,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 		}
 	} else
 	// Add Patterns
-	if ((m_nCurrentListId == IDC_LIST_PATTERNS) && (lHint & (HINT_MODTYPE|HINT_PATNAMES|HINT_PATTERNROW)))
+	if ((m_nCurrentListId == IDC_LIST_PATTERNS) && (hintType & (HINT_MODTYPE|HINT_PATNAMES|HINT_PATTERNROW)))
 	{
 	}
 	m_ItemList.SetRedraw(TRUE);

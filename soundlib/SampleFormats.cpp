@@ -1736,7 +1736,7 @@ void ReadExtendedInstrumentProperties(ModInstrument* pIns, FileReader &file)
 void ConvertReadExtendedFlags(ModInstrument *pIns)
 //------------------------------------------------
 {
-	const uint32 dwOldFlags = pIns->dwFlags;
+	const uint32 dwOldFlags = pIns->dwFlags.GetRaw();
 
 	pIns->VolEnv.dwFlags.set(ENV_ENABLED, (dwOldFlags & dFdd_VOLUME) != 0);
 	pIns->VolEnv.dwFlags.set(ENV_SUSTAIN, (dwOldFlags & dFdd_VOLSUSTAIN) != 0);

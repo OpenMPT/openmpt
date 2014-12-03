@@ -206,7 +206,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 //------------------------------------------------------------
 {
 	if (pHint == this) return;
-	HintType hintType = hint.GetType();
+	FlagSet<HintType> hintType = hint.GetType();
 	if (hintType & HINT_MODSEQUENCE)
 	{
 		// Set max valid restart position

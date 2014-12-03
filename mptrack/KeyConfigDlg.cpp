@@ -745,12 +745,12 @@ void COptionsKeyboard::OnSetKeyChoice()
 		return;
 	}
 
-	KeyEventType event = kKeyEventNone;
+	FlagSet<KeyEventType> event = kKeyEventNone;
 	if(m_bKeyDown.GetCheck()) event |= kKeyEventDown;
 	if(m_bKeyHold.GetCheck()) event |= kKeyEventRepeat;
 	if(m_bKeyUp.GetCheck()) event |= kKeyEventUp;
 
-	KeyCombination kc((commandCategories[m_nCurCategory]).id, m_eCustHotKey.mod, m_eCustHotKey.code, (KeyEventType)event);
+	KeyCombination kc((commandCategories[m_nCurCategory]).id, m_eCustHotKey.mod, m_eCustHotKey.code, event);
 	//detect invalid input
 	if (!kc.KeyCode())
 	{

@@ -27,18 +27,23 @@ struct MPTEFFECTINFO
 	ModCommand::PARAM paramMask;	// 0 = default
 	ModCommand::PARAM paramValue;	// 0 = default
 	ModCommand::PARAM paramLimit;	// Parameter Editor limit
-	MODTYPE supportedFormats;		// MOD_TYPE_XXX combo
+	FlagSet<MODTYPE>::store_type supportedFormats;		// MOD_TYPE_XXX combo
 	const char *name;				// e.g. "Tone Portamento"
+	FlagSet<MODTYPE> GetSupportedFormats() const { return FlagSet<MODTYPE>(supportedFormats); }
 };
 
-#define MOD_TYPE_MODXM		(MOD_TYPE_MOD | MOD_TYPE_XM)
-#define MOD_TYPE_S3MIT		(MOD_TYPE_S3M | MOD_TYPE_IT)
-#define MOD_TYPE_S3MITMPT	(MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)
-#define MOD_TYPE_NOMOD		(MOD_TYPE_S3M | MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)
-#define MOD_TYPE_XMIT		(MOD_TYPE_XM | MOD_TYPE_IT)
-#define MOD_TYPE_XMITMPT	(MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)
-#define MOD_TYPE_ITMPT		(MOD_TYPE_IT | MOD_TYPE_MPT)
-#define MOD_TYPE_ALL		((MODTYPE)~0)
+// Force built-in integer operations.
+// C++11 constexpr operations on the enum value_type would also solve this.
+#define ModType FlagSet<MODTYPE>::store_type
+
+#define MOD_TYPE_MODXM		(ModType(0) | MOD_TYPE_MOD | MOD_TYPE_XM)
+#define MOD_TYPE_S3MIT		(ModType(0) | MOD_TYPE_S3M | MOD_TYPE_IT)
+#define MOD_TYPE_S3MITMPT	(ModType(0) | MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)
+#define MOD_TYPE_NOMOD		(ModType(0) | MOD_TYPE_S3M | MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)
+#define MOD_TYPE_XMIT		(ModType(0) | MOD_TYPE_XM | MOD_TYPE_IT)
+#define MOD_TYPE_XMITMPT	(ModType(0) | MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)
+#define MOD_TYPE_ITMPT		(ModType(0) | MOD_TYPE_IT | MOD_TYPE_MPT)
+#define MOD_TYPE_ALL		(~ModType(0))
 
 
 const MPTEFFECTINFO gFXInfo[] =
@@ -118,8 +123,8 @@ const MPTEFFECTINFO gFXInfo[] =
 	// -> DESC="add extended parameter mechanism to pattern effects"
 	{CMD_XPARAM,		0,0,	0,	MOD_TYPE_XMITMPT,	"Parameter Extension"},
 	// -! NEW_FEATURE#0010
-	{CMD_NOTESLIDEUP,		0,0,	0,	MOD_TYPE_IMF | MOD_TYPE_PTM,	"Note Slide Up"}, // IMF / PTM effect
-	{CMD_NOTESLIDEDOWN,		0,0,	0,	MOD_TYPE_IMF | MOD_TYPE_PTM,	"Note Slide Down"}, // IMF / PTM effect
+	{CMD_NOTESLIDEUP,		0,0,	0,	ModType(0) | MOD_TYPE_IMF | MOD_TYPE_PTM,	"Note Slide Up"}, // IMF / PTM effect
+	{CMD_NOTESLIDEDOWN,		0,0,	0,	ModType(0) | MOD_TYPE_IMF | MOD_TYPE_PTM,	"Note Slide Down"}, // IMF / PTM effect
 	{CMD_NOTESLIDEUPRETRIG,	0,0,	0,	MOD_TYPE_PTM,	"Note Slide Up + Retrigger Note"}, // PTM effect
 	{CMD_NOTESLIDEDOWNRETRIG,0,0,	0,	MOD_TYPE_PTM,	"Note Slide Down + Retrigger Note"}, // PTM effect
 	{CMD_REVERSEOFFSET,		0,0,	0,	MOD_TYPE_PTM,	"Revert Sample + Offset"}, // PTM effect
@@ -155,12 +160,12 @@ bool EffectInfo::GetEffectName(LPSTR pszDescription, ModCommand::COMMAND command
 			// if format is compatible, everything is fine. if not, let's still search
 			// for another command. this fixes searching for the EFx command, which
 			// does different things in MOD format.
-			if((sndFile.GetType() & gFXInfo[i].supportedFormats) != 0)
+			if((sndFile.GetType() & gFXInfo[i].GetSupportedFormats()))
 				break;
 		}
 	}
 	if (fxndx == CountOf(gFXInfo)) return false;
-	bSupported = ((sndFile.GetType() & gFXInfo[fxndx].supportedFormats) != 0);
+	bSupported = ((sndFile.GetType() & gFXInfo[fxndx].GetSupportedFormats()));
 	if (gFXInfo[fxndx].name)
 	{
 		if ((bXX) && (bSupported))
@@ -228,7 +233,7 @@ LONG EffectInfo::GetIndexFromEffect(ModCommand::COMMAND command, ModCommand::PAR
 			&& ((param & gFXInfo[i].paramMask) == gFXInfo[i].paramValue)) // Value
 		{
 			ndx = i;
-			if((sndFile.GetType() & gFXInfo[i].supportedFormats) != 0)
+			if((sndFile.GetType() & gFXInfo[i].GetSupportedFormats()))
 				break; // found fitting format; this is correct for sure
 		}
 	}
@@ -296,7 +301,7 @@ bool EffectInfo::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, ModCommand::PARAM *p
 	if (s) s[0] = 0;
 	if (prangeMin) *prangeMin = 0;
 	if (prangeMax) *prangeMax = 0;
-	if ((ndx >= CountOf(gFXInfo)) || (!(sndFile.GetType() & gFXInfo[ndx].supportedFormats))) return FALSE;
+	if ((ndx >= CountOf(gFXInfo)) || (!(sndFile.GetType() & gFXInfo[ndx].GetSupportedFormats()))) return FALSE;
 	if (s) GetEffectName(s, gFXInfo[ndx].effect, gFXInfo[ndx].paramValue, bXX);
 	if ((prangeMin) && (prangeMax))
 	{
@@ -885,8 +890,9 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param) const
 struct MPTVOLCMDINFO
 {
 	ModCommand::VOLCMD volCmd;		// VOLCMD_XXXX
-	MODTYPE supportedFormats;		// MOD_TYPE_XXX combo
+	FlagSet<MODTYPE>::store_type supportedFormats;		// MOD_TYPE_XXX combo
 	const char *name;				// e.g. "Set Volume"
+	FlagSet<MODTYPE> GetSupportedFormats() const { return FlagSet<MODTYPE>(supportedFormats); }
 };
 
 const MPTVOLCMDINFO gVolCmdInfo[] =
@@ -960,7 +966,7 @@ bool EffectInfo::GetVolCmdInfo(UINT ndx, LPSTR s, ModCommand::VOL *prangeMin, Mo
 			*prangeMax = (sndFile.GetType() & MOD_TYPE_XM) ? 15 : 9;
 		}
 	}
-	return (gVolCmdInfo[ndx].supportedFormats & sndFile.GetType()) != 0;
+	return (sndFile.GetType() & gVolCmdInfo[ndx].GetSupportedFormats());
 }
 
 

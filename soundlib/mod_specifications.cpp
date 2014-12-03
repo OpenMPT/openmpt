@@ -18,6 +18,12 @@ OPENMPT_NAMESPACE_BEGIN
 namespace ModSpecs
 {
 
+
+// Force built-in integer operations.
+// C++11 constexpr operations on the enum value_type would also solve this.
+#define SongFlag FlagSet<SongFlags>::store_type
+
+
 const CModSpecifications mptm =
 {
 	/*
@@ -63,7 +69,7 @@ const CModSpecifications mptm =
 	true,										// Supports plugins
 	true,										// Custom pattern time signatures
 	true,										// Pattern names
-	SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
+	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
 };
 
 
@@ -109,7 +115,7 @@ const CModSpecifications mod =
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
 	false,										// No pattern names
-	SONG_PT1XMODE | SONG_AMIGALIMITS,			// Supported song flags
+	SongFlag(0) | SONG_PT1XMODE | SONG_AMIGALIMITS,								// Supported song flags
 };
 
 
@@ -153,7 +159,7 @@ const CModSpecifications xm =
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
 	false,										// No pattern names
-	SONG_LINEARSLIDES,							// Supported song flags
+	SongFlag(0) | SONG_LINEARSLIDES,							// Supported song flags
 };
 
 // XM with MPT extensions
@@ -197,7 +203,7 @@ const CModSpecifications xmEx =
 	true,										// Supports plugins
 	false,										// No custom pattern time signatures
 	true,										// Pattern names
-	SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_EMBEDMIDICFG,	// Supported song flags
+	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_EMBEDMIDICFG,	// Supported song flags
 };
 
 const CModSpecifications s3m =
@@ -240,7 +246,7 @@ const CModSpecifications s3m =
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
 	false,										// No pattern names
-	SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,		// Supported song flags
+	SongFlag(0) | SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,		// Supported song flags
 };
 
 // S3M with MPT extensions
@@ -284,7 +290,7 @@ const CModSpecifications s3mEx =
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
 	false,										// No pattern names
-	SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,		// Supported song flags
+	SongFlag(0) | SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,		// Supported song flags
 };
 
 const CModSpecifications it =
@@ -327,7 +333,7 @@ const CModSpecifications it =
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
 	false,										// No pattern names
-	SONG_LINEARSLIDES | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
+	SongFlag(0) | SONG_LINEARSLIDES | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
 };
 
 const CModSpecifications itEx =
@@ -370,7 +376,7 @@ const CModSpecifications itEx =
 	true,										// Supports plugins
 	false,										// No custom pattern time signatures
 	true,										// Pattern names
-	SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
+	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
 };
 
 const CModSpecifications *Collection[] = { &mptm, &mod, &s3m, &s3mEx, &xm, &xmEx, &it, &itEx };

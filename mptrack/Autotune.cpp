@@ -323,10 +323,10 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 
 	sample.nC5Speed = Util::Round<uint32>(sample.nC5Speed * pitchReference / newFundamentalFreq);
 
-	if((modType & (MOD_TYPE_XM | MOD_TYPE_MOD)) != 0)
+	if((modType & (MOD_TYPE_XM | MOD_TYPE_MOD)))
 	{
 		sample.FrequencyToTranspose();
-		if((modType & MOD_TYPE_MOD) != 0)
+		if((modType & MOD_TYPE_MOD))
 		{
 			sample.RelativeTone = 0;
 		}

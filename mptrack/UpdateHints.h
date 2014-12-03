@@ -62,12 +62,22 @@ protected:
 		else return 1 + PowerOf2Exponent<v / 2>();
 	}
 
-	void Set(HintType type, uint16_t item = 0)
+	void Set(FlagSet<HintType> type, uint16_t item = 0)
 	{
-		data = type | item << PowerOf2Exponent<HINT_MAXHINTFLAG>();
+		data = type.GetRaw() | item << PowerOf2Exponent<HINT_MAXHINTFLAG>();
 	}
 
 public:
+	UpdateHint(FlagSet<HintType>::value_type type, uint16_t item = 0)
+	{
+		Set(type, item);
+	}
+
+	UpdateHint(FlagSet<HintType> type, uint16_t item = 0)
+	{
+		Set(type, item);
+	}
+
 	UpdateHint(HintType type, uint16_t item = 0)
 	{
 		Set(type, item);
@@ -75,7 +85,7 @@ public:
 
 	explicit UpdateHint(LPARAM data) : data(static_cast<uint32_t>(data)) { }
 
-	HintType GetType() const { return static_cast<HintType>(data & (HINT_MAXHINTFLAG | (HINT_MAXHINTFLAG - 1))); }
+	FlagSet<HintType> GetType() const { return FlagSet<HintType>(static_cast<FlagSet<HintType>::store_type>(data & (HINT_MAXHINTFLAG | (HINT_MAXHINTFLAG - 1)))); }
 	uint16_t GetData() const { return static_cast<uint16_t>(data >> PowerOf2Exponent<HINT_MAXHINTFLAG>()); }
 
 	LPARAM AsLPARAM() const { return data; }
@@ -85,30 +95,30 @@ static_assert(sizeof(UpdateHint) <= sizeof(LPARAM), "Update hints are currently 
 
 struct SampleHint : public UpdateHint
 {
-	SampleHint(HintType type, SAMPLEINDEX item) : UpdateHint(type, item) { }
+	SampleHint(FlagSet<HintType> type, SAMPLEINDEX item) : UpdateHint(type, item) { }
 };
 
 struct InstrumentHint : public UpdateHint
 {
-	InstrumentHint(HintType type, INSTRUMENTINDEX item) : UpdateHint(type, item) { }
+	InstrumentHint(FlagSet<HintType> type, INSTRUMENTINDEX item) : UpdateHint(type, item) { }
 };
 
 struct PatternHint : public UpdateHint
 {
-	PatternHint(HintType type, PATTERNINDEX item) : UpdateHint(type, item) { }
+	PatternHint(FlagSet<HintType> type, PATTERNINDEX item) : UpdateHint(type, item) { }
 };
 
 struct RowHint : public UpdateHint
 {
-	RowHint(HintType type, ROWINDEX item) : UpdateHint(type, static_cast<uint16_t>(item)) { }
+	RowHint(FlagSet<HintType> type, ROWINDEX item) : UpdateHint(type, static_cast<uint16_t>(item)) { }
 };
 
 struct SequenceHint : public UpdateHint
 {
-	SequenceHint(HintType type, SEQUENCEINDEX item) : UpdateHint(type, item) { }
+	SequenceHint(FlagSet<HintType> type, SEQUENCEINDEX item) : UpdateHint(type, item) { }
 };
 
 struct ChannelTabHint : public UpdateHint
 {
-	ChannelTabHint(HintType type, int item) : UpdateHint(type, static_cast<uint16_t>(item)) { }
+	ChannelTabHint(FlagSet<HintType> type, int item) : UpdateHint(type, static_cast<uint16_t>(item)) { }
 };

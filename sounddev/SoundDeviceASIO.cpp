@@ -1194,7 +1194,7 @@ std::string CASIODevice::GetStatistics() const
 //--------------------------------------------
 {
 	MPT_TRACE();
-	const FlagSet<AsioFeatures> unsupported((AsioFeatures)(AsioFeatureNoDirectProcess | AsioFeatureOverload | AsioFeatureBufferSizeChange | AsioFeatureSampleRateChange));
+	const FlagSet<AsioFeatures> unsupported(AsioFeatureNoDirectProcess | AsioFeatureOverload | AsioFeatureBufferSizeChange | AsioFeatureSampleRateChange);
 	FlagSet<AsioFeatures> unsupportedFeatues = m_UsedFeatures;
 	unsupportedFeatues &= unsupported;
 	if(unsupportedFeatues.any())

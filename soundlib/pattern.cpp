@@ -304,7 +304,7 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 	// Ok, apparently there's no space. If we haven't tried already, try to map it to the volume column or effect column instead.
 	if(settings.retry)
 	{
-		const bool isS3M = (GetSoundFile().GetType() & MOD_TYPE_S3M) != 0;
+		const bool isS3M = (GetSoundFile().GetType() & MOD_TYPE_S3M);
 
 		// Move some effects that also work in the volume column, so there's place for our new effect.
 		if(!settings.isVolEffect)

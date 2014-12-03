@@ -34,7 +34,7 @@ OPENMPT_NAMESPACE_BEGIN
 #ifdef MODPLUG_TRACKER
 #define GLOBALVOL_7BIT_FORMATS_EXT (MOD_TYPE_MT2)
 #else
-#define GLOBALVOL_7BIT_FORMATS_EXT 0
+#define GLOBALVOL_7BIT_FORMATS_EXT Enum<MODTYPE>::value_type()
 #endif // MODPLUG_TRACKER
 #define GLOBALVOL_7BIT_FORMATS (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM | MOD_TYPE_PTM | GLOBALVOL_7BIT_FORMATS_EXT)
 
@@ -2132,7 +2132,7 @@ bool CSoundFile::ProcessEffects()
 			// Apparently, any note number in a pattern causes instruments to recall their original volume settings - no matter if there's a Note Off next to it or whatever.
 			// Test cases: keyoff+instr.xm, delay.xm
 			bool reloadSampleSettings = (IsCompatibleMode(TRK_FASTTRACKER2) && instr != 0);
-			bool keepInstr = (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) != 0;
+			bool keepInstr = (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT));
 
 			// Now it's time for some FT2 crap...
 			if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
@@ -2312,10 +2312,10 @@ bool CSoundFile::ProcessEffects()
 			{
 				if ((!instr) && (pChn->nNewIns) && (note < 0x80))
 				{
-					InstrumentChange(pChn, pChn->nNewIns, bPorta, false, (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) == 0);
+					InstrumentChange(pChn, pChn->nNewIns, bPorta, false, !(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)));
 					pChn->nNewIns = 0;
 				}
-				NoteChange(pChn, note, bPorta, (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) == 0);
+				NoteChange(pChn, note, bPorta, !(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)));
 				if ((bPorta) && (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (instr))
 				{
 					pChn->dwFlags.set(CHN_FASTVOLRAMP);

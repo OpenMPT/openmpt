@@ -133,7 +133,7 @@ protected:
 	////////////////////////
 	// Misc stuff
 	void UpdateScrollSize();
-	void SetModified(HintType mask, bool updateAll);
+	void SetModified(FlagSet<HintType> mask, bool updateAll);
 	BOOL SetCurrentInstrument(INSTRUMENTINDEX nIns, enmEnvelopeTypes m_nEnv = ENV_VOLUME);
 	ModInstrument *GetInstrumentPtr() const;
 	InstrumentEnvelope *GetEnvelopePtr() const;

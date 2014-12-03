@@ -641,7 +641,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 			{
 				ch += 8 - midCh;
 			}
-			if((ChnSettings[chn].dwFlags & CHN_MUTE) != 0)
+			if(ChnSettings[chn].dwFlags & CHN_MUTE)
 			{
 				ch |= 0x80;
 			}
