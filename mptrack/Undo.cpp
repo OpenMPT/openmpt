@@ -444,6 +444,7 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 	ModSample &sample = sndFile.GetSample(smp);
 	int8 *pCurrentSample = sample.pSample8;
 	int8 *pNewSample = nullptr;	// a new sample is possibly going to be allocated, depending on what's going to be undone.
+	bool keepOnDisk = sample.uFlags[SMP_KEEPONDISK];
 	bool replace = false;
 
 	uint8 bytesPerSample = undo.OldSample.GetBytesPerSample();
@@ -519,6 +520,12 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 	if(undo.changeType != sundo_none)
 	{
 		sample.uFlags.set(SMP_MODIFIED);
+	}
+	if(!keepOnDisk)
+	{
+		// Never re-enable the keep on disk flag after it was disabled.
+		// This can lead to quite some dangerous situations when replacing samples.
+		sample.uFlags.reset(SMP_KEEPONDISK);
 	}
 
 	fromBuf[smp - 1].push_back(undo);
