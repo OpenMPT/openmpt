@@ -133,7 +133,7 @@ struct PACKED DMFSampleHeader
 		smpCompMask = 0x0C,
 		smpComp1	= 0x04,	// Compression type 1
 		smpComp2	= 0x08,	// Compression type 2 (unused)
-		smpComp3	= 0x0C,	// Compression type 3 (dito)
+		smpComp3	= 0x0C,	// Compression type 3 (ditto)
 		smpLibrary	= 0x80,	// Sample is stored in a library
 	};
 

@@ -18,8 +18,8 @@ class CSoundFile;
 struct ModSample
 {
 	SmpLength nLength;						// In samples, not bytes
-	SmpLength nLoopStart, nLoopEnd;			// Dito
-	SmpLength nSustainStart, nSustainEnd;	// Dito
+	SmpLength nLoopStart, nLoopEnd;			// Ditto
+	SmpLength nSustainStart, nSustainEnd;	// Ditto
 	union
 	{
 		void  *pSample;						// Pointer to sample data

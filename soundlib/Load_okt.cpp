@@ -51,7 +51,7 @@ struct PACKED OktSample
 	char   name[20];
 	uint32 length;		// length in bytes
 	uint16 loopStart;	// *2 for real value
-	uint16 loopLength;	// dito
+	uint16 loopLength;	// ditto
 	uint16 volume;		// default volume
 	uint16 type;		// 7-/8-bit sample
 

@@ -227,7 +227,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		sample.nLoopStart = std::min<SmpLength>(gdmSample.loopBegin, sample.nLength);	// in samples
-		sample.nLoopEnd = std::min<SmpLength>(gdmSample.loopEnd - 1, sample.nLength);	// dito
+		sample.nLoopEnd = std::min<SmpLength>(gdmSample.loopEnd - 1, sample.nLength);	// ditto
 		sample.FrequencyToTranspose();	// set transpose + finetune for mod files
 
 		// Fix transpose + finetune for some rare cases where transpose is not C-5 (e.g. sample 4 in wander2.gdm)
@@ -249,7 +249,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		if(gdmSample.flags & GDMSampleHeader::smpVolume)
 		{
 			// Default volume is used... 0...64, 255 = no default volume
-			sample.nVolume = MIN(gdmSample.volume, 64) * 4;
+			sample.nVolume = std::min(gdmSample.volume, uint8(64)) * 4;
 		} else
 		{
 			sample.nVolume = 256;
@@ -260,7 +260,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 			// Default panning is used
 			sample.uFlags.set(CHN_PANNING);
 			// 0...15, 16 = surround (not supported), 255 = no default panning
-			sample.nPan = (gdmSample.panning > 15) ? 128 : MIN((gdmSample.panning * 16) + 8, 256);
+			sample.nPan = static_cast<uint16>((gdmSample.panning > 15) ? 128 : std::min((gdmSample.panning * 16) + 8, 256));
 			sample.uFlags.set(CHN_SURROUND, gdmSample.panning == 16);
 		} else
 		{
@@ -274,7 +274,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 		{
 			SampleIO(
-				(Samples[smp].uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
+				Samples[smp].uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,
 				SampleIO::mono,
 				SampleIO::littleEndian,
 				SampleIO::unsignedPCM)

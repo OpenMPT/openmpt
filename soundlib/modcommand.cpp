@@ -91,7 +91,7 @@ void ModCommand::ExtendedMODtoS3MEffect()
 	case 0xA0: if(param & 0x0F) { command = CMD_VOLUMESLIDE; param = (param << 4) | 0x0F; } else command = 0; break;
 	case 0xB0: if(param & 0x0F) { command = CMD_VOLUMESLIDE; param |= 0xF0; } else command = 0; break;
 	case 0xC0: if(param == 0xC0) { command = CMD_NONE; note = NOTE_NOTECUT; }	// this does different things in IT and ST3
-	case 0xD0: if(param == 0xD0) { command = CMD_NONE; }	// dito
+	case 0xD0: if(param == 0xD0) { command = CMD_NONE; }	// ditto
 	// rest are the same
 	}
 }

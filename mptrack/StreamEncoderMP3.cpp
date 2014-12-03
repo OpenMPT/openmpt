@@ -178,7 +178,7 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags)
 	tHeader.signature[1] = 'D';
 	tHeader.signature[2] = '3';
 	tHeader.version[0] = 0x04; // Version 2.4.0
-	tHeader.version[1] = 0x00; // Dito
+	tHeader.version[1] = 0x00; // Ditto
 	tHeader.flags = 0x00; // No flags
 	s.write(reinterpret_cast<const char*>(&tHeader), sizeof(tHeader));
 

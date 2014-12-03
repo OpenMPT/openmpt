@@ -143,7 +143,7 @@ public:
 				cuePoint.position = static_cast<uint32>(*iter);
 				cuePoint.riffChunkID = static_cast<uint32>(RIFFChunk::iddata);
 				cuePoint.chunkStart = 0;	// we use no Wave List Chunk (wavl) as we have only one data block, so this should be 0.
-				cuePoint.blockStart = 0;	// dito
+				cuePoint.blockStart = 0;	// ditto
 				cuePoint.offset = cuePoint.position;
 				cuePoint.ConvertEndianness();
 				fileWAV->Write(cuePoint);

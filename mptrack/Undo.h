@@ -113,8 +113,8 @@ enum sampleUndoTypes
 	sundo_update,	// silence, amplify, normalize, dc offset - update complete sample section
 	sundo_delete,	// delete part of the sample
 	sundo_invert,	// invert sample phase, apply again to undo
-	sundo_reverse,	// reverse sample, dito
-	sundo_unsign,	// unsign sample, dito
+	sundo_reverse,	// reverse sample, ditto
+	sundo_unsign,	// unsign sample, ditto
 	sundo_insert,	// insert data, delete inserted data to undo
 	sundo_replace,	// replace complete sample (16->8Bit, up/downsample, downmix to mono, pitch shifting / time stretching, trimming, pasting)
 };
