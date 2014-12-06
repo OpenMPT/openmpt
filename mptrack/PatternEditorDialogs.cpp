@@ -944,7 +944,7 @@ void CEditCommand::OnNoteChanged()
 		m->note = newNote;
 		m->instr = newInstr;
 
-		modDoc->UpdateAllViews(NULL, RowHint(HINT_PATTERNROW, editPos.row), NULL);
+		modDoc->UpdateAllViews(NULL, RowHint(editPos.row), NULL);
 
 		if(wasParamControl != m->IsPcNote())
 		{
@@ -989,7 +989,7 @@ void CEditCommand::OnVolCmdChanged()
 		m->volcmd = newVolCmd;
 		m->vol = newVol;
 
-		modDoc->UpdateAllViews(NULL, RowHint(HINT_PATTERNROW, editPos.row), NULL);
+		modDoc->UpdateAllViews(NULL, RowHint(editPos.row), NULL);
 
 		if(volCmdChanged)
 		{
@@ -1050,7 +1050,7 @@ void CEditCommand::OnCommandChanged()
 		}
 		UpdateEffectRange(true);
 
-		modDoc->UpdateAllViews(NULL, RowHint(HINT_PATTERNROW, editPos.row), NULL);
+		modDoc->UpdateAllViews(NULL, RowHint(editPos.row), NULL);
 	}
 }
 
@@ -1095,7 +1095,7 @@ void CEditCommand::UpdateEffectValue(bool set)
 				m->param = newParam;
 			}
 
-			modDoc->UpdateAllViews(NULL, RowHint(HINT_PATTERNROW, editPos.row), NULL);
+			modDoc->UpdateAllViews(NULL, RowHint(editPos.row), NULL);
 		}
 	}
 }
@@ -1607,7 +1607,7 @@ void QuickChannelProperties::OnVolChanged()
 		PrepareUndo();
 		document->SetChannelGlobalVolume(channel, volume);
 		volSlider.SetPos(volume);
-		document->UpdateAllViews(nullptr, HINT_MODCHANNELS);
+		document->UpdateAllViews(nullptr, GeneralHint(channel).Channels());
 	}
 }
 
@@ -1626,7 +1626,7 @@ void QuickChannelProperties::OnPanChanged()
 		PrepareUndo();
 		document->SetChannelDefaultPan(channel, panning);
 		panSlider.SetPos(panning / 4u);
-		document->UpdateAllViews(nullptr, HINT_MODCHANNELS);
+		document->UpdateAllViews(nullptr, GeneralHint(channel).Channels());
 	}
 }
 
@@ -1667,7 +1667,7 @@ void QuickChannelProperties::OnHScroll(UINT, UINT, CScrollBar *bar)
 
 	if(update)
 	{
-		document->UpdateAllViews(nullptr, HINT_MODCHANNELS);
+		document->UpdateAllViews(nullptr, GeneralHint(channel).Channels());
 	}
 }
 
@@ -1681,7 +1681,7 @@ void QuickChannelProperties::OnMuteChanged()
 	}
 
 	document->MuteChannel(channel, IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
-	document->UpdateAllViews(nullptr, HINT_MODCHANNELS);
+	document->UpdateAllViews(nullptr, GeneralHint(channel).Channels());
 }
 
 
@@ -1695,7 +1695,7 @@ void QuickChannelProperties::OnSurroundChanged()
 
 	PrepareUndo();
 	document->SurroundChannel(channel, IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED);
-	document->UpdateAllViews(nullptr, HINT_MODCHANNELS);
+	document->UpdateAllViews(nullptr, GeneralHint(channel).Channels());
 	UpdateDisplay();
 }
 
@@ -1717,7 +1717,7 @@ void QuickChannelProperties::OnNameChanged()
 		PrepareUndo();
 		strcpy(settings.szName, newName);
 		document->SetModified();
-		document->UpdateAllViews(nullptr, HINT_MODCHANNELS);
+		document->UpdateAllViews(nullptr, GeneralHint(channel).Channels());
 	}
 }
 

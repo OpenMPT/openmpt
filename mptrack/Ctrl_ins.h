@@ -122,7 +122,7 @@ public:
 	virtual ~CCtrlInstruments();
 
 public:
-	void SetModified(FlagSet<HintType> mask, bool updateAll, bool modified = true);
+	void SetModified(InstrumentHint hint, bool updateAll);
 	BOOL SetCurrentInstrument(UINT nIns, BOOL bUpdNum=TRUE);
 	BOOL OpenInstrument(const mpt::PathString &fileName);
 	BOOL OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr);
@@ -138,7 +138,7 @@ public:
 	virtual void RecalcLayout();
 	virtual void OnActivatePage(LPARAM);
 	virtual void OnDeactivatePage();
-	virtual void UpdateView(UpdateHint hint = HINT_NONE, CObject *pObj = nullptr);
+	virtual void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
 	virtual LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam);
 	virtual BOOL GetToolTipText(UINT uId, LPSTR pszText);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);

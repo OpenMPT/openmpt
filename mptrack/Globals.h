@@ -140,7 +140,7 @@ public:
 
 protected:
 	void RecalcLayout();
-	void UpdateView(UpdateHint hint = HINT_NONE, CObject *pHint=NULL);
+	void UpdateView(UpdateHint hint, CObject *pHint = nullptr);
 	BOOL SetActivePage(int nIndex=-1, LPARAM lParam=-1);
 	int GetActivePage();
 

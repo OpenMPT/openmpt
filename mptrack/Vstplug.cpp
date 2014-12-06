@@ -2018,9 +2018,8 @@ void CVstPlugin::AutomateParameter(PlugParamIndex param)
 			CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
 		}
 
-		// TODO: Could be used to update general tab in real time, but causes flickers in treeview
 		// Better idea: add an update hint just for plugin params?
-		//pModDoc->UpdateAllViews(nullptr, HINT_MIXPLUGINS, nullptr);
+		pModDoc->UpdateAllViews(nullptr, PluginHint(m_nSlot + 1).Parameter(), nullptr);
 
 		if (CMainFrame::GetInputHandler()->ShiftPressed())
 		{
@@ -2206,7 +2205,7 @@ void CVstPlugin::Bypass(bool bypass)
 
 #ifdef MODPLUG_TRACKER
 	if(m_SndFile.GetpModDoc())
-		m_SndFile.GetpModDoc()->UpdateAllViews(nullptr, HINT_MIXPLUGINS, nullptr);
+		m_SndFile.GetpModDoc()->UpdateAllViews(nullptr, PluginHint(m_nSlot).Info(), nullptr);
 #endif // MODPLUG_TRACKER
 }
 

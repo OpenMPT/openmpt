@@ -571,7 +571,7 @@ void COrderList::EnterPatternNum(int enterNum)
 	{
 		sndFile.Order[m_nScrollPos] = nCurNdx;
 		m_pModDoc.SetModified();
-		m_pModDoc.UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
+		m_pModDoc.UpdateAllViews(nullptr, SequenceHint().Data(), this);
 		InvalidateSelection();
 	}
 }
@@ -599,7 +599,7 @@ void COrderList::OnEditCopy()
 void COrderList::UpdateView(UpdateHint hint, CObject *pObj)
 //---------------------------------------------------------
 {
-	if(pObj != this && (hint.GetType() & HINT_MODSEQUENCE))
+	if(pObj != this && hint.ToType<SequenceHint>().GetType()[HINT_MODTYPE |HINT_MODSEQUENCE])
 	{
 		InvalidateRect(NULL, FALSE);
 		UpdateInfoText();
@@ -1175,7 +1175,7 @@ void COrderList::OnInsertOrder()
 
 	InvalidateRect(NULL, FALSE);
 	m_pModDoc.SetModified();
-	m_pModDoc.UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
+	m_pModDoc.UpdateAllViews(nullptr, SequenceHint().Data(), this);
 }
 
 
@@ -1218,7 +1218,7 @@ void COrderList::OnInsertSeparatorPattern()
 
 	InvalidateRect(NULL, FALSE);
 	m_pModDoc.SetModified();
-	m_pModDoc.UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
+	m_pModDoc.UpdateAllViews(nullptr, SequenceHint().Data(), this);
 }
 
 
@@ -1243,7 +1243,7 @@ void COrderList::OnDeleteOrder()
 
 	m_pModDoc.SetModified();
 	InvalidateRect(NULL, FALSE);
-	m_pModDoc.UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
+	m_pModDoc.UpdateAllViews(nullptr, SequenceHint().Data(), this);
 
 	Util::DeleteItem(selection.firstOrd, selection.lastOrd, sndFile.m_PlayState.m_nNextOrder);
 	if(sndFile.m_PlayState.m_nSeqOverride != ORDERINDEX_INVALID)
@@ -1368,7 +1368,7 @@ LRESULT COrderList::OnDragonDropping(WPARAM doDrop, LPARAM lParam)
 	{
 		InvalidateRect(NULL, FALSE);
 		m_pModDoc.SetModified();
-		m_pModDoc.UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
+		m_pModDoc.UpdateAllViews(nullptr, SequenceHint().Data(), this);
 		SetCurSel(posdest, true);
 	}
 	return canDrop;
@@ -1413,9 +1413,8 @@ void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 
 	cs.Leave();
 
-	UpdateView(HINT_MODSEQUENCE);
 	m_pModDoc.SetModified();
-	m_pModDoc.UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
+	m_pModDoc.UpdateAllViews(nullptr, SequenceHint().Data(), nullptr);
 }
 
 

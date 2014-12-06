@@ -394,7 +394,7 @@ void ErrorBox(UINT nStringID, CWnd*p=NULL);
 // Helper function declarations.
 struct SNDMIXPLUGIN;
 class CVstPlugin;
-void AddPluginNamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN* plugarray, const bool librarynames = false);
+void AddPluginNamesToCombobox(CComboBox& CBox, const SNDMIXPLUGIN *plugarray, const bool librarynames = false);
 void AddPluginParameternamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN& plugarray);
 void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug);
 

@@ -149,7 +149,7 @@ void CViewComments::OnInitialUpdate()
 	//m_ToolBar.AddButton(IDC_LIST_PATTERNS, TIMAGE_TAB_PATTERNS);
 	m_ToolBar.SetIndent(4);
 	UpdateButtonState();
-	OnUpdate(NULL, HINT_MODTYPE, NULL);
+	UpdateView(UpdateHint().ModType());
 }
 
 
@@ -181,35 +181,36 @@ LRESULT CViewComments::OnMidiMsg(WPARAM midiData, LPARAM)
 ///////////////////////////////////////////////////////////////
 // CViewComments drawing
 
-void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
-//-------------------------------------------------------------------
+void CViewComments::UpdateView(UpdateHint hint, CObject *)
+//--------------------------------------------------------
 {
-	//CHAR s[256], stmp[256];
-	CHAR s[512], stmp[256]; //rewbs.fix3082
 	CModDoc *pModDoc = GetDocument();
-	LV_COLUMN lvc;
-	LV_ITEM lvi, lvi2;
-	FlagSet<HintType> hintType = UpdateHint(lHint).GetType();
 
-	if ((!pModDoc) || (pSender == this) || (!(m_ItemList.m_hWnd))) return;
-	if (hintType & HINT_MPTOPTIONS)
+	if ((!pModDoc) || (!(m_ItemList.m_hWnd))) return;
+	const FlagSet<HintType> hintType = hint.GetType();
+	if (hintType[HINT_MPTOPTIONS])
 	{
 		m_ToolBar.UpdateStyle();
-		hintType &= ~HINT_MPTOPTIONS;
 	}
-	hintType &= (HINT_MODTYPE
-		|HINT_SMPNAMES|HINT_SAMPLEINFO
-		|HINT_INSNAMES|HINT_INSTRUMENT
-		/*|HINT_PATNAMES|HINT_PATTERNROW*/); // pattern stuff currently unused
-	if (!hintType) return;
+	const SampleHint sampleHint = hint.ToType<SampleHint>();
+	const InstrumentHint instrHint = hint.ToType<InstrumentHint>();
+	const bool updateSamples = sampleHint.GetType()[HINT_SMPNAMES | HINT_SAMPLEINFO];
+	const bool updateInstr = instrHint.GetType()[HINT_INSNAMES|HINT_INSTRUMENT];
+	bool updateAll = hintType[HINT_MODTYPE];
+
+	if(!updateSamples && !updateInstr && !updateAll) return;
 
 	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 	m_ToolBar.ChangeBitmap(IDC_LIST_INSTRUMENTS, sndFile.GetNumInstruments() ? IMAGE_INSTRUMENTS : IMAGE_INSTRMUTE);
 
+	TCHAR s[512], stmp[256];
+	LV_COLUMN lvc;
+	LV_ITEM lvi, lvi2;
+
 	m_ItemList.SetRedraw(FALSE);
 	// Add sample headers
-	if ((m_nListId != m_nCurrentListId) || (hintType & HINT_MODTYPE))
+	if (m_nListId != m_nCurrentListId || updateAll)
 	{
 		UINT ichk = 0;
 		m_ItemList.DeleteAllItems();
@@ -247,12 +248,12 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 				nCol++;
 			}
 		} else
-		hintType |= HINT_MODTYPE;
+		updateAll = true;
 	}
 	// Add Items
 	UINT nCount = m_ItemList.GetItemCount();
 	// Add Samples
-	if ((m_nCurrentListId == IDC_LIST_SAMPLES) && (hintType & (HINT_MODTYPE|HINT_SMPNAMES|HINT_SAMPLEINFO)))
+	if (m_nCurrentListId == IDC_LIST_SAMPLES && (updateAll || updateSamples))
 	{
 		SAMPLEINDEX nMax = static_cast<SAMPLEINDEX>(nCount);
 		if (nMax < sndFile.GetNumSamples()) nMax = sndFile.GetNumSamples();
@@ -355,7 +356,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 		}
 	} else
 	// Add Instruments
-	if ((m_nCurrentListId == IDC_LIST_INSTRUMENTS) && (hintType & (HINT_MODTYPE|HINT_INSNAMES|HINT_INSTRUMENT)))
+	if ((m_nCurrentListId == IDC_LIST_INSTRUMENTS) && (updateAll || updateInstr))
 	{
 		INSTRUMENTINDEX nMax = static_cast<INSTRUMENTINDEX>(nCount);
 		if (nMax < sndFile.GetNumInstruments()) nMax = sndFile.GetNumInstruments();
@@ -374,7 +375,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						if (pIns) mpt::String::Copy(s, pIns->name);
 						break;
 					case INSLIST_INSTRUMENTNO:
-						wsprintf(s, "%02d", iIns+1);
+						wsprintf(s, "%02u", iIns+1);
 						break;
 					case INSLIST_SAMPLES:
 						if (pIns)
@@ -450,7 +451,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 		}
 	} else
 	// Add Patterns
-	if ((m_nCurrentListId == IDC_LIST_PATTERNS) && (hintType & (HINT_MODTYPE|HINT_PATNAMES|HINT_PATTERNROW)))
+	//if ((m_nCurrentListId == IDC_LIST_PATTERNS) && (hintType & (HINT_MODTYPE|HINT_PATNAMES|HINT_PATTERNROW)))
 	{
 	}
 	m_ItemList.SetRedraw(TRUE);
@@ -514,7 +515,7 @@ void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 			if(iItem < sndFile.GetNumSamples())
 			{
 				mpt::String::CopyN(sndFile.m_szNames[iItem + 1], lvItem.pszText);
-				pModDoc->UpdateAllViews(this, SampleHint(HINT_SMPNAMES | HINT_SAMPLEINFO, static_cast<SAMPLEINDEX>(iItem + 1)), this);
+				pModDoc->UpdateAllViews(this, SampleHint(static_cast<SAMPLEINDEX>(iItem + 1)).Info().Names(), this);
 				pModDoc->SetModified();
 			}
 		} else if(m_nListId == IDC_LIST_INSTRUMENTS)
@@ -523,7 +524,7 @@ void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 			{
 				ModInstrument *pIns = sndFile.Instruments[iItem + 1];
 				mpt::String::CopyN(pIns->name, lvItem.pszText);
-				pModDoc->UpdateAllViews(this, InstrumentHint(HINT_INSNAMES | HINT_INSTRUMENT, static_cast<INSTRUMENTINDEX>(iItem + 1)), this);
+				pModDoc->UpdateAllViews(this, InstrumentHint(static_cast<INSTRUMENTINDEX>(iItem + 1)).Info().Names(), this);
 				pModDoc->SetModified();
 			}
 		} else
@@ -571,7 +572,7 @@ void CViewComments::OnShowSamples()
 	{
 		m_nListId = IDC_LIST_SAMPLES;
 		UpdateButtonState();
-		OnUpdate(NULL, HINT_MODTYPE, NULL);
+		UpdateView(UpdateHint().ModType());
 	}
 }
 
@@ -586,7 +587,7 @@ void CViewComments::OnShowInstruments()
 		{
 			m_nListId = IDC_LIST_INSTRUMENTS;
 			UpdateButtonState();
-			OnUpdate(NULL, HINT_MODTYPE, NULL);
+			UpdateView(UpdateHint().ModType());
 		}
 	}
 }
@@ -599,7 +600,7 @@ void CViewComments::OnShowPatterns()
 	{
 		//m_nListId = IDC_LIST_PATTERNS;
 		UpdateButtonState();
-		OnUpdate(NULL, HINT_MODTYPE, NULL);
+		UpdateView(UpdateHint().ModType());
 	}
 }
 

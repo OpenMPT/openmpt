@@ -183,13 +183,12 @@ void CViewInstrument::UpdateScrollSize()
 
 // Set instrument (and moddoc) as modified.
 // updateAll: Update all views including this one. Otherwise, only update update other views.
-void CViewInstrument::SetModified(FlagSet<HintType> mask, bool updateAll)
-//-----------------------------------------------------------------------
+void CViewInstrument::SetModified(InstrumentHint hint, bool updateAll)
+//--------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	if(pModDoc == nullptr) return;
-	pModDoc->UpdateAllViews(NULL, InstrumentHint(mask, m_nInstrument), updateAll ? nullptr : this);
 	pModDoc->SetModified();
+	pModDoc->UpdateAllViews(nullptr, hint.SetData(m_nInstrument), updateAll ? nullptr : this);
 }
 
 
@@ -781,10 +780,11 @@ void CViewInstrument::UpdateView(UpdateHint hint, CObject *pObj)
 	{
 		return;
 	}
-	FlagSet<HintType> hintType = hint.GetType();
-	const INSTRUMENTINDEX updateIns = hint.GetData();
-	if((hintType & (HINT_MPTOPTIONS | HINT_MODTYPE))
-		|| ((hintType & HINT_ENVELOPE) && (m_nInstrument == updateIns || updateIns == 0)))
+	const InstrumentHint instrHint = hint.ToType<InstrumentHint>();
+	FlagSet<HintType> hintType = instrHint.GetType();
+	const INSTRUMENTINDEX updateIns = instrHint.GetInstrument();
+	if(hintType[HINT_MPTOPTIONS | HINT_MODTYPE]
+		|| (hintType[HINT_ENVELOPE] && (m_nInstrument == updateIns || updateIns == 0)))
 	{
 		UpdateScrollSize();
 		UpdateNcButtonState();
@@ -1050,7 +1050,7 @@ bool CViewInstrument::EnvRemovePoint(UINT nPoint)
 				envelope->nReleaseNode = ENV_RELEASE_NODE_UNSET;
 			}
 
-			SetModified(HINT_ENVELOPE, true);
+			SetModified(InstrumentHint().Envelope(), true);
 			return true;
 		}
 	}
@@ -1124,7 +1124,7 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 				if (envelope->nSustainEnd >= i) envelope->nSustainEnd++;
 				if (envelope->nReleaseNode >= i && envelope->nReleaseNode != ENV_RELEASE_NODE_UNSET) envelope->nReleaseNode++;
 
-				SetModified(HINT_ENVELOPE, true);
+				SetModified(InstrumentHint().Envelope(), true);
 				return i + 1;
 			}
 		}
@@ -1521,7 +1521,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 			CModDoc *pModDoc = GetDocument();
 			if(pModDoc)
 			{
-				SetModified(HINT_ENVELOPE, true);
+				SetModified(InstrumentHint().Envelope(), true);
 			}
 			UpdateWindow(); //rewbs: TODO - optimisation here so we don't redraw whole view.
 		}
@@ -1779,7 +1779,7 @@ void CViewInstrument::OnEnvLoopChanged()
 			pEnv->nLoopStart = 0;
 			pEnv->nLoopEnd = static_cast<uint8>(pEnv->nNodes - 1);
 		}
-		SetModified(HINT_ENVELOPE, true);
+		SetModified(InstrumentHint().Envelope(), true);
 	}
 }
 
@@ -1796,7 +1796,7 @@ void CViewInstrument::OnEnvSustainChanged()
 			// Enabled sustain loop => set sustain loop points if no sustain loop has been specified yet.
 			pEnv->nSustainStart = pEnv->nSustainEnd = static_cast<uint8>(m_nDragItem - 1);
 		}
-		SetModified(HINT_ENVELOPE, true);
+		SetModified(InstrumentHint().Envelope(), true);
 	}
 }
 
@@ -1807,7 +1807,7 @@ void CViewInstrument::OnEnvCarryChanged()
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (EnvSetCarry(!EnvGetCarry())))
 	{
-		SetModified(HINT_ENVELOPE, false);
+		SetModified(InstrumentHint().Envelope(), false);
 	}
 }
 
@@ -1816,7 +1816,7 @@ void CViewInstrument::OnEnvToggleReleasNode()
 {
 	if(IsDragItemEnvPoint() && EnvToggleReleaseNode(m_nDragItem - 1))
 	{
-		SetModified(HINT_ENVELOPE, true);
+		SetModified(InstrumentHint().Envelope(), true);
 	}
 }
 
@@ -1826,7 +1826,7 @@ void CViewInstrument::OnEnvVolChanged()
 {
 	if (EnvSetVolEnv(!EnvGetVolEnv()))
 	{
-		SetModified(HINT_ENVELOPE, false);
+		SetModified(InstrumentHint().Envelope(), false);
 	}
 }
 
@@ -1836,7 +1836,7 @@ void CViewInstrument::OnEnvPanChanged()
 {
 	if (EnvSetPanEnv(!EnvGetPanEnv()))
 	{
-		SetModified(HINT_ENVELOPE, false);
+		SetModified(InstrumentHint().Envelope(), false);
 	}
 }
 
@@ -1846,7 +1846,7 @@ void CViewInstrument::OnEnvPitchChanged()
 {
 	if (EnvSetPitchEnv(!EnvGetPitchEnv()))
 	{
-		SetModified(HINT_ENVELOPE, false);
+		SetModified(InstrumentHint().Envelope(), false);
 	}
 }
 
@@ -1856,7 +1856,7 @@ void CViewInstrument::OnEnvFilterChanged()
 {
 	if (EnvSetFilterEnv(!EnvGetFilterEnv()))
 	{
-		SetModified(HINT_ENVELOPE, false);
+		SetModified(InstrumentHint().Envelope(), false);
 	}
 }
 
@@ -1869,7 +1869,7 @@ void CViewInstrument::OnEnvToggleGrid()
 		m_bGridForceRedraw = true;
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
-		pModDoc->UpdateAllViews(NULL, InstrumentHint(HINT_ENVELOPE, m_nInstrument));
+		pModDoc->UpdateAllViews(nullptr, InstrumentHint(m_nInstrument).Envelope());
 
 }
 //end rewbs.envRowGrid
@@ -1910,7 +1910,7 @@ void CViewInstrument::OnEditPaste()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc && pModDoc->PasteEnvelope(m_nInstrument, m_nEnv))
 	{
-		SetModified(HINT_ENVELOPE, true);
+		SetModified(InstrumentHint().Envelope(), true);
 	}
 }
 
@@ -2114,7 +2114,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 	}
 	if (bUpdate)
 	{
-		SetModified(HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES, true);
+		SetModified(InstrumentHint().Info().Envelope().Names(), true);
 	}
 	CMDIChildWnd *pMDIFrame = (CMDIChildWnd *)GetParentFrame();
 	if (pMDIFrame)
@@ -2243,7 +2243,7 @@ void CViewInstrument::OnEnvelopeScalepoints()
 		CScaleEnvPointsDlg dlg(this, *GetEnvelopePtr(), nOffset);
 		if(dlg.DoModal() == IDOK)
 		{
-			SetModified(HINT_ENVELOPE, true);
+			SetModified(InstrumentHint().Envelope(), true);
 		}
 	}
 }
@@ -2298,7 +2298,7 @@ void CViewInstrument::EnvKbdMovePointLeft()
 		return;
 	pEnv->Ticks[m_nDragItem - 1]--;
 
-	SetModified(HINT_ENVELOPE, true);
+	SetModified(InstrumentHint().Envelope(), true);
 }
 
 
@@ -2311,7 +2311,7 @@ void CViewInstrument::EnvKbdMovePointRight()
 		return;
 	pEnv->Ticks[m_nDragItem - 1]++;
 
-	SetModified(HINT_ENVELOPE, true);
+	SetModified(InstrumentHint().Envelope(), true);
 }
 
 
@@ -2325,7 +2325,7 @@ void CViewInstrument::EnvKbdMovePointUp(BYTE stepsize)
 	else
 		pEnv->Values[m_nDragItem - 1] = ENVELOPE_MAX;
 
-	SetModified(HINT_ENVELOPE, true);
+	SetModified(InstrumentHint().Envelope(), true);
 }
 
 
@@ -2339,7 +2339,7 @@ void CViewInstrument::EnvKbdMovePointDown(BYTE stepsize)
 	else
 		pEnv->Values[m_nDragItem - 1] = ENVELOPE_MIN;
 
-	SetModified(HINT_ENVELOPE, true);
+	SetModified(InstrumentHint().Envelope(), true);
 }
 
 void CViewInstrument::EnvKbdInsertPoint()
@@ -2380,7 +2380,7 @@ void CViewInstrument::EnvKbdSetLoopStart()
 	if(!EnvGetLoop())
 		EnvSetLoopStart(0);
 	EnvSetLoopStart(m_nDragItem - 1);
-	GetDocument()->UpdateAllViews(NULL, InstrumentHint(HINT_ENVELOPE, m_nInstrument), NULL);	// sanity checks are done in GetEnvelopePtr() already
+	SetModified(InstrumentHint(m_nInstrument).Envelope(), true);
 }
 
 
@@ -2395,7 +2395,7 @@ void CViewInstrument::EnvKbdSetLoopEnd()
 		EnvSetLoopStart(0);
 	}
 	EnvSetLoopEnd(m_nDragItem - 1);
-	GetDocument()->UpdateAllViews(NULL, InstrumentHint(HINT_ENVELOPE, m_nInstrument), NULL);	// sanity checks are done in GetEnvelopePtr() already
+	SetModified(InstrumentHint(m_nInstrument).Envelope(), true);
 }
 
 
@@ -2407,7 +2407,7 @@ void CViewInstrument::EnvKbdSetSustainStart()
 	if(!EnvGetSustain())
 		EnvSetSustain(true);
 	EnvSetSustainStart(m_nDragItem - 1);
-	GetDocument()->UpdateAllViews(NULL, InstrumentHint(HINT_ENVELOPE, m_nInstrument), NULL);	// sanity checks are done in GetEnvelopePtr() already
+	SetModified(InstrumentHint(m_nInstrument).Envelope(), true);
 }
 
 
@@ -2422,7 +2422,7 @@ void CViewInstrument::EnvKbdSetSustainEnd()
 		EnvSetSustainStart(0);
 	}
 	EnvSetSustainEnd(m_nDragItem - 1);
-	GetDocument()->UpdateAllViews(NULL, InstrumentHint(HINT_ENVELOPE, m_nInstrument), NULL);	// sanity checks are done in GetEnvelopePtr() already
+	SetModified(InstrumentHint(m_nInstrument).Envelope(), true);
 }
 
 
@@ -2433,7 +2433,7 @@ void CViewInstrument::EnvKbdToggleReleaseNode()
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(EnvToggleReleaseNode(m_nDragItem - 1))
 	{
-		SetModified(HINT_ENVELOPE, true);
+		SetModified(InstrumentHint().Envelope(), true);
 	}
 }
 

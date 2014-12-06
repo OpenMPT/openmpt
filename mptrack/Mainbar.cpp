@@ -452,7 +452,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 			if(modDoc != nullptr)
 			{
 				// Update envelope views if speed has changed
-				modDoc->UpdateAllViews(nullptr, HINT_ENVELOPE);
+				modDoc->UpdateAllViews(nullptr, InstrumentHint().Envelope());
 			}
 
 			if (nCurrentSpeed < 0) m_SpinSpeed.EnableWindow(TRUE);

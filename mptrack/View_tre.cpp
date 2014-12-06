@@ -431,7 +431,7 @@ void CModTree::AddDocument(CModDoc &modDoc)
 	}
 	DocInfo.push_back(pInfo);
 
-	UpdateView(*pInfo, HINT_MODTYPE);
+	UpdateView(*pInfo, UpdateHint().ModType());
 	if (pInfo->hSong)
 	{
 		Expand(pInfo->hSong, TVE_EXPAND);
@@ -744,15 +744,16 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	TCHAR s[256], stmp[256];
 	TV_ITEM tvi;
 	MemsetZero(tvi);
-	const FlagSet<HintType> hintFlagPart = hint.GetType();
-	if (IsSampleBrowser() || !hintFlagPart) return;
+	const FlagSet<HintType> hintType = hint.GetType();
+	if (IsSampleBrowser() || hintType == HINT_NONE) return;
 
 	const CModDoc &modDoc = info.modDoc;
 	const CSoundFile &sndFile = modDoc.GetrSoundFile();
 
 	// Create headers
 	s[0] = 0;
-	if((hintFlagPart & (HINT_MODGENERAL|HINT_MODTYPE)) || (!info.hSong))
+	const GeneralHint generalHint = hint.ToType<GeneralHint>();
+	if(generalHint.GetType()[HINT_MODTYPE | HINT_MODGENERAL] || (!info.hSong))
 	{
 		// Module folder + sub folders
 		std::wstring name = modDoc.GetPathNameMpt().GetFullFileName().ToWide();
@@ -764,7 +765,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 			info.hOrders = InsertItem(_T("Sequence"), IMAGE_FOLDER, IMAGE_FOLDER, info.hSong, TVI_LAST);
 			info.hPatterns = InsertItem(_T("Patterns"), IMAGE_FOLDER, IMAGE_FOLDER, info.hSong, TVI_LAST);
 			info.hSamples = InsertItem(_T("Samples"), IMAGE_FOLDER, IMAGE_FOLDER, info.hSong, TVI_LAST);
-		} else if(hintFlagPart & (HINT_MODGENERAL|HINT_MODTYPE))
+		} else if(generalHint.GetType()[HINT_MODGENERAL | HINT_MODTYPE])
 		{
 			if(name.c_str() != GetItemTextW(info.hSong))
 			{
@@ -786,10 +787,22 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	}
 	if (!info.hComments) info.hComments = InsertItem(_T("Comments"), IMAGE_COMMENTS, IMAGE_COMMENTS, info.hSong, TVI_LAST);
 	// Add effects
-	if (hintFlagPart & (HINT_MODGENERAL|HINT_MODTYPE|HINT_MODCHANNELS|HINT_MIXPLUGINS))
+	const PluginHint pluginHint = hint.ToType<PluginHint>();
+	if (pluginHint.GetType()[HINT_MODTYPE | HINT_PLUGINNAMES])
 	{
+		HTREEITEM hItem = info.hEffects ? GetChildItem(info.hEffects) : nullptr;
+		PLUGINDEX firstPlug = 0, lastPlug = MAX_MIXPLUGINS - 1;
+		if(pluginHint.GetPlugin() && hItem)
+		{
+			// Only update one specific plugin name
+			firstPlug = lastPlug = pluginHint.GetPlugin() - 1;
+			while(hItem && GetItemData(hItem) != firstPlug)
+			{
+				hItem = GetNextSiblingItem(hItem);
+			}
+		}
 		bool hasPlugs = false;
-		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+		for(PLUGINDEX i = firstPlug; i <= lastPlug; i++)
 		{
 			const SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[i];
 			if(plugin.IsValidPlugin())
@@ -798,16 +811,29 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				if(!info.hEffects)
 				{
 					info.hEffects = InsertItem(_T("Plugins"), IMAGE_FOLDER, IMAGE_FOLDER, info.hSong, info.hInstruments ? info.hInstruments : info.hSamples);
-				} else if(!hasPlugs)
-				{
-					// Delete previously existing items
-					DeleteChildren(info.hEffects);
 				}
 
 				wsprintf(s, "FX%u: %s", i + 1, plugin.GetName());
 				int nImage = IMAGE_NOPLUGIN;
 				if(plugin.pMixPlugin != nullptr) nImage = (plugin.pMixPlugin->isInstrument()) ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN;
-				InsertItem(TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, i, info.hEffects, TVI_LAST);
+				
+				if(hItem)
+				{
+					// Replace existing item
+					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
+					tvi.hItem = hItem;
+					tvi.pszText = stmp;
+					tvi.cchTextMax = CountOf(stmp);
+					GetItem(&tvi);
+					if(tvi.iImage != nImage || tvi.lParam != i || strcmp(s, tvi.pszText))
+					{
+						SetItem(hItem, TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, i);
+					}
+					hItem = GetNextSiblingItem(hItem);
+				} else
+				{
+					InsertItem(TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, i, info.hEffects, TVI_LAST);
+				}
 				hasPlugs = true;
 			}
 		}
@@ -815,12 +841,23 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		{
 			DeleteItem(info.hEffects);
 			info.hEffects = nullptr;
+		} else if(!pluginHint.GetPlugin())
+		{
+			// Delete superfluous tree items
+			while(hItem)
+			{
+				HTREEITEM nextItem = GetNextSiblingItem(hItem);
+				DeleteItem(hItem);
+				hItem = nextItem;
+			}
 		}
 	}
 	// Add Orders
-	if (info.hOrders && (hintFlagPart & (HINT_MODTYPE | HINT_MODSEQUENCE | HINT_SEQNAMES | HINT_PATNAMES)))
+	const PatternHint patternHint = hint.ToType<PatternHint>();
+	const SequenceHint seqHint = hint.ToType<SequenceHint>();
+	if (info.hOrders && (seqHint.GetType()[HINT_MODTYPE | HINT_MODSEQUENCE | HINT_SEQNAMES] || patternHint.GetType()[HINT_PATNAMES]))
 	{
-		const DWORD nPat = hint.GetData();
+		const PATTERNINDEX nPat = patternHint.GetPattern();
 		bool adjustParentNode = false;	// adjust sequence name of "Sequence" node?
 
 		// (only one seq remaining || previously only one sequence): update parent item
@@ -857,11 +894,11 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		HTREEITEM hAncestorNode = info.hOrders;
 
 		SEQUENCEINDEX nSeqMin = 0, nSeqMax = sndFile.Order.GetNumSequences() - 1;
-		SEQUENCEINDEX nHintParam = static_cast<SEQUENCEINDEX>(hint.GetData());
-		if ((hintFlagPart & HINT_SEQNAMES) && (nHintParam <= nSeqMax)) nSeqMin = nSeqMax = nHintParam;
+		SEQUENCEINDEX nHintParam = seqHint.GetSequence();
+		if (seqHint.GetType()[HINT_SEQNAMES] && (nHintParam <= nSeqMax)) nSeqMin = nSeqMax = nHintParam;
 
 		// Adjust caption of the "Sequence" node (if only one sequence exists, it should be labeled with the sequence name)
-		if(((hintFlagPart & HINT_SEQNAMES) && sndFile.Order.GetNumSequences() == 1) || adjustParentNode)
+		if((seqHint.GetType()[HINT_SEQNAMES] && sndFile.Order.GetNumSequences() == 1) || adjustParentNode)
 		{
 			CString seqName = sndFile.Order.GetSequence(0).GetName().c_str();
 			if(seqName.IsEmpty() || sndFile.Order.GetNumSequences() > 1)
@@ -912,7 +949,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 			}
 			if (info.tiOrders[nSeq].size() < sndFile.Order.GetSequence(nSeq).GetLengthTailTrimmed()) // Resize tiOrders if needed.
 				info.tiOrders[nSeq].resize(sndFile.Order.GetSequence(nSeq).GetLengthTailTrimmed(), nullptr);
-			const bool patNamesOnly = (hintFlagPart == HINT_PATNAMES);
+			const bool patNamesOnly = patternHint.GetType()[HINT_PATNAMES];
 
 			//if (hintFlagPart == HINT_PATNAMES) && (dwHintParam < sndFile.Order.size())) imin = imax = dwHintParam;
 			for (ORDERINDEX iOrd = 0; iOrd < sndFile.Order.GetSequence(nSeq).GetLengthTailTrimmed(); iOrd++)
@@ -966,12 +1003,12 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		}
 	}
 	// Add Patterns
-	if (info.hPatterns && (hintFlagPart & (HINT_MODTYPE | HINT_PATNAMES)) && sndFile.Patterns.Size() > 0)
+	if (info.hPatterns && patternHint.GetType()[HINT_MODTYPE | HINT_PATNAMES] && sndFile.Patterns.Size() > 0)
 	{
-		const PATTERNINDEX nPat = (PATTERNINDEX)hint.GetData();
+		const PATTERNINDEX nPat = patternHint.GetPattern();
 		info.tiPatterns.resize(sndFile.Patterns.Size(), NULL);
 		PATTERNINDEX imin = 0, imax = sndFile.Patterns.Size()-1;
-		if ((hintFlagPart == HINT_PATNAMES) && (nPat < sndFile.Patterns.Size())) imin = imax = nPat;
+		if (patternHint.GetType()[HINT_PATNAMES] && (nPat < sndFile.Patterns.Size())) imin = imax = nPat;
 		bool bDelPat = false;
 
 		ASSERT(info.tiPatterns.size() == sndFile.Patterns.Size());
@@ -1018,11 +1055,12 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		}
 	}
 	// Add Samples
-	if (info.hSamples && (hintFlagPart & (HINT_MODTYPE | HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA)))
+	const SampleHint sampleHint = hint.ToType<SampleHint>();
+	if (info.hSamples && sampleHint.GetType()[HINT_MODTYPE | HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA])
 	{
-		const SAMPLEINDEX nSmp = (SAMPLEINDEX)hint.GetData();
+		const SAMPLEINDEX nSmp = sampleHint.GetSample();
 		SAMPLEINDEX smin = 1, smax = MAX_SAMPLES - 1;
-		if ((hintFlagPart == HINT_SMPNAMES) && (nSmp) && (nSmp < MAX_SAMPLES))
+		if (sampleHint.GetType()[HINT_SMPNAMES] && (nSmp) && (nSmp < MAX_SAMPLES))
 		{
 			smin = smax = nSmp;
 		}
@@ -1078,11 +1116,12 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		}
 	}
 	// Add Instruments
-	if (info.hInstruments && (hintFlagPart & (HINT_MODTYPE | HINT_INSNAMES | HINT_INSTRUMENT)))
+	const InstrumentHint instrHint = hint.ToType<InstrumentHint>();
+	if (info.hInstruments && instrHint.GetType()[HINT_MODTYPE | HINT_INSNAMES | HINT_INSTRUMENT])
 	{
 		INSTRUMENTINDEX smin = 1, smax = MAX_INSTRUMENTS - 1;
-		const INSTRUMENTINDEX nIns = (INSTRUMENTINDEX)hint.GetData();
-		if ((hintFlagPart == HINT_INSNAMES) && (nIns) && (nIns < MAX_INSTRUMENTS))
+		const INSTRUMENTINDEX nIns = instrHint.GetInstrument();
+		if (instrHint.GetType()[HINT_INSNAMES] && (nIns) && (nIns < MAX_INSTRUMENTS))
 		{
 			smin = smax = nIns;
 		}
@@ -1496,14 +1535,14 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 		wsprintf(s, _T("Remove sequence %u?"), modItemID);
 		if(Reporting::Confirm(s, false, true) == cnfNo) break;
 		modDoc->GetrSoundFile().Order.RemoveSequence((SEQUENCEINDEX)(modItemID));
-		modDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
+		modDoc->UpdateAllViews(nullptr, SequenceHint().Data());
 		break;
 
 	case MODITEM_ORDER:
 		// might be slightly annoying to ask for confirmation here, and it's rather easy to restore the orderlist anyway.
 		if(modDoc->RemoveOrder((SEQUENCEINDEX)(modItem.val2), (ORDERINDEX)(modItem.val1)))
 		{
-			modDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
+			modDoc->UpdateAllViews(nullptr, SequenceHint().Data());
 		}
 		break;
 
@@ -1511,7 +1550,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 		wsprintf(s, _T("Remove pattern %u?"), modItemID);
 		if(Reporting::Confirm(s, false, true) == cnfYes  && modDoc->RemovePattern((PATTERNINDEX)modItemID))
 		{
-			modDoc->UpdateAllViews(NULL, PatternHint(HINT_PATTERNDATA | HINT_PATNAMES, (PATTERNINDEX)modItemID));
+			modDoc->UpdateAllViews(nullptr, PatternHint((PATTERNINDEX)modItemID).Data().Names());
 		}
 		break;
 
@@ -1523,7 +1562,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 			const SAMPLEINDEX oldNumSamples = modDoc->GetNumSamples();
 			if (modDoc->RemoveSample((SAMPLEINDEX)modItemID))
 			{
-				modDoc->UpdateAllViews(NULL, SampleHint(HINT_SMPNAMES | HINT_SAMPLEDATA | HINT_SAMPLEINFO, modDoc->GetNumSamples() != oldNumSamples ? 0 : (SAMPLEINDEX)modItemID));
+				modDoc->UpdateAllViews(nullptr, SampleHint(modDoc->GetNumSamples() != oldNumSamples ? 0 : (SAMPLEINDEX)modItemID).Info().Data().Names());
 			}
 		}
 		break;
@@ -1535,7 +1574,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 			const INSTRUMENTINDEX oldNumInstrs = modDoc->GetNumInstruments();
 			if(modDoc->RemoveInstrument((INSTRUMENTINDEX)modItemID))
 			{
-				modDoc->UpdateAllViews(NULL, InstrumentHint(HINT_MODTYPE | HINT_ENVELOPE| HINT_INSTRUMENT, modDoc->GetNumInstruments() != oldNumInstrs ? 0 : INSTRUMENTINDEX(modItemID)));
+				modDoc->UpdateAllViews(nullptr, InstrumentHint(modDoc->GetNumInstruments() != oldNumInstrs ? 0 : INSTRUMENTINDEX(modItemID)).Info().Envelope().ModType());
 			}
 		}
 		break;
@@ -2158,7 +2197,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 					else
 						pSndFile->Order[nOrd] = nOrigPat;
 				}
-				pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
+				pModDoc->UpdateAllViews(nullptr, SequenceHint().Data());
 				pModDoc->SetModified();
 			}
 			return true;
@@ -2190,7 +2229,9 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 					// Load sample into other module
 					pSndFile->ReadSampleFromSong(static_cast<SAMPLEINDEX>(modItemDropID), pInfoDrag->modDoc.GetrSoundFile(), static_cast<SAMPLEINDEX>(modItemDragID));
 				}
-				pModDoc->UpdateAllViews(NULL, HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_PATTERNDATA, NULL);
+				pModDoc->UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
+				pModDoc->UpdateAllViews(nullptr, PatternHint().Data());
+				pModDoc->UpdateAllViews(nullptr, InstrumentHint().Info());
 				pModDoc->SetModified();
 				SelectItem(hItem);
 			}
@@ -2223,7 +2264,8 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 					// Load instrument into other module
 					pSndFile->ReadInstrumentFromSong(static_cast<INSTRUMENTINDEX>(modItemDropID), pInfoDrag->modDoc.GetrSoundFile(), static_cast<INSTRUMENTINDEX>(modItemDragID));
 				}
-				pModDoc->UpdateAllViews(NULL, HINT_INSNAMES | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_PATTERNDATA, NULL);
+				pModDoc->UpdateAllViews(nullptr, InstrumentHint().Info().Envelope().Names());
+				pModDoc->UpdateAllViews(nullptr, PatternHint().Data());
 				pModDoc->SetModified();
 				SelectItem(hItem);
 			}
@@ -2264,7 +2306,7 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 	{
 		pInfo->nOrdSel = nNewOrd;
 		pInfo->nSeqSel = nNewSeq;
-		UpdateView(*pInfo, HINT_MODSEQUENCE);
+		UpdateView(*pInfo, SequenceHint().Data());
 	}
 
 	// Update sample / instrument playing status icons (will only detect instruments with samples, though)
@@ -2313,8 +2355,8 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 		}
 	}
 	// what should be updated?
-	FlagSet<HintType> hintFlags = (updateSamples ? HINT_SAMPLEINFO : HINT_NONE) | (updateInstruments ? HINT_INSTRUMENT : HINT_NONE);
-	if(hintFlags != HINT_NONE) UpdateView(*pInfo, hintFlags);
+	if(updateSamples) UpdateView(*pInfo, SampleHint().Info());
+	if(updateInstruments) UpdateView(*pInfo, InstrumentHint().Info());
 }
 
 
@@ -2326,7 +2368,6 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 void CModTree::OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint)
 //------------------------------------------------------------------------
 {
-	hint = UpdateHint(hint.GetType() & (HINT_PATNAMES|HINT_SMPNAMES|HINT_INSNAMES|HINT_MODTYPE|HINT_MODGENERAL|HINT_MODSEQUENCE|HINT_MIXPLUGINS|HINT_MPTOPTIONS|HINT_SEQNAMES), hint.GetData());
 	if (pHint != this)
 	{
 		std::vector<ModTreeDocInfo *>::iterator iter;
@@ -2933,7 +2974,7 @@ void CModTree::OnRefreshTree()
 	std::vector<ModTreeDocInfo *>::iterator iter;
 	for (iter = DocInfo.begin(); iter != DocInfo.end(); iter++)
 	{
-		UpdateView((**iter), HINT_MODTYPE);
+		UpdateView((**iter), UpdateHint().ModType());
 	}
 	RefreshMidiLibrary();
 	RefreshDlsBanks();
@@ -2985,12 +3026,12 @@ void CModTree::OnMuteTreeItem()
 		if ((modItem.type == MODITEM_SAMPLE) && !modDoc.GetNumInstruments())
 		{
 			modDoc.MuteSample((SAMPLEINDEX)modItemID, !modDoc.IsSampleMuted((SAMPLEINDEX)modItemID));
-			UpdateView(*info, SampleHint(HINT_SMPNAMES | HINT_SAMPLEINFO, (SAMPLEINDEX)modItemID));
+			UpdateView(*info, SampleHint((SAMPLEINDEX)modItemID).Info().Names());
 		} else
 		if ((modItem.type == MODITEM_INSTRUMENT) && modDoc.GetNumInstruments())
 		{
 			modDoc.MuteInstrument((INSTRUMENTINDEX)modItemID, !modDoc.IsInstrumentMuted((INSTRUMENTINDEX)modItemID));
-			UpdateView(*info, InstrumentHint(HINT_INSNAMES | HINT_INSTRUMENT, (INSTRUMENTINDEX)modItemID));
+			UpdateView(*info, InstrumentHint((INSTRUMENTINDEX)modItemID).Info().Names());
 		} else if ((modItem.type == MODITEM_EFFECT))
 		{
 			CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(modDoc.GetrSoundFile().m_MixPlugins[modItemID].pMixPlugin);
@@ -3023,14 +3064,14 @@ void CModTree::OnSoloTreeItem()
 			{
 				modDoc.MuteSample(nSmp, nSmp != modItemID);
 			}
-			UpdateView(*info, HINT_SMPNAMES | HINT_SAMPLEINFO);
+			UpdateView(*info, SampleHint().Info().Names());
 		} else if ((modItem.type == MODITEM_INSTRUMENT) && (nInstruments))
 		{
 			for (INSTRUMENTINDEX nIns = 1; nIns <= nInstruments; nIns++)
 			{
 				modDoc.MuteInstrument(nIns, nIns != modItemID);
 			}
-			UpdateView(*info, HINT_INSNAMES | HINT_INSTRUMENT);
+			UpdateView(*info, InstrumentHint().Info().Names());
 		}
 	}
 }
@@ -3053,12 +3094,12 @@ void CModTree::OnUnmuteAllTreeItem()
 			{
 				modDoc.MuteSample(nSmp, false);
 			}
-			UpdateView(*info, HINT_SMPNAMES | HINT_SAMPLEINFO);
+			UpdateView(*info, SampleHint().Info().Names());
 			for (INSTRUMENTINDEX nIns = 1; nIns <= modDoc.GetNumInstruments(); nIns++)
 			{
 				modDoc.MuteInstrument(nIns, false);
 			}
-			UpdateView(*info, HINT_INSNAMES | HINT_INSTRUMENT);
+			UpdateView(*info, InstrumentHint().Info().Names());
 		}
 	}
 }
@@ -3104,8 +3145,8 @@ void CModTree::InsertOrDupItem(bool insert)
 				sndFile.Order.AddSequence(true);
 			}
 			modDoc.SetModified();
-			UpdateView(*info, SequenceHint(HINT_SEQNAMES | HINT_MODSEQUENCE, MAX_SEQUENCES));
-			modDoc.UpdateAllViews(NULL, HINT_SEQNAMES|HINT_MODSEQUENCE);
+			UpdateView(*info, SequenceHint(MAX_SEQUENCES).Data().Names());
+			modDoc.UpdateAllViews(nullptr, SequenceHint().Data().Names());
 		} else if(modItem.type == MODITEM_SAMPLE)
 		{
 			// Duplicate / insert sample
@@ -3113,7 +3154,8 @@ void CModTree::InsertOrDupItem(bool insert)
 			if(modDoc.ReArrangeSamples(newOrder) != SAMPLEINDEX_INVALID)
 			{
 				modDoc.SetModified();
-				modDoc.UpdateAllViews(NULL, HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_PATTERNDATA);
+				modDoc.UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
+				modDoc.UpdateAllViews(nullptr, PatternHint());
 			} else
 			{
 				Reporting::Error("Maximum number of samples reached.");
@@ -3124,7 +3166,8 @@ void CModTree::InsertOrDupItem(bool insert)
 			std::vector<INSTRUMENTINDEX> newOrder = GenerateInsertVector<INSTRUMENTINDEX>(sndFile.GetNumInstruments(), modItemID, static_cast<INSTRUMENTINDEX>(insert ? 0 : modItemID));
 			if(modDoc.ReArrangeInstruments(newOrder) != INSTRUMENTINDEX_INVALID)
 			{
-				modDoc.UpdateAllViews(NULL, HINT_INSNAMES | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_PATTERNDATA);
+				modDoc.UpdateAllViews(NULL, InstrumentHint().Info().Envelope().Names());
+				modDoc.UpdateAllViews(nullptr, PatternHint());
 				modDoc.SetModified();
 			} else
 			{
@@ -3193,7 +3236,7 @@ void CModTree::OnSaveItem()
 	{
 		SAMPLEINDEX smpID = static_cast<SAMPLEINDEX>(modItem.val1);
 		pModDoc->SaveSample(smpID);
-		if(pModDoc) pModDoc->UpdateAllViews(NULL, SampleHint(HINT_SAMPLEINFO, smpID));
+		if(pModDoc) pModDoc->UpdateAllViews(NULL, SampleHint(smpID).Info());
 		OnRefreshTree();
 	}
 }
@@ -3206,7 +3249,7 @@ void CModTree::OnSaveAll()
 	if(pModDoc != nullptr)
 	{
 		pModDoc->SaveAllSamples();
-		if(pModDoc) pModDoc->UpdateAllViews(NULL, HINT_SAMPLEINFO);
+		if(pModDoc) pModDoc->UpdateAllViews(nullptr, SampleHint().Info());
 		OnRefreshTree();
 	}
 }
@@ -3235,7 +3278,7 @@ void CModTree::OnReloadItem()
 			{
 				pModDoc->SetModified();
 			}
-			pModDoc->UpdateAllViews(NULL, SampleHint(HINT_SAMPLEINFO | HINT_SMPNAMES | HINT_SAMPLEDATA, smpID));
+			pModDoc->UpdateAllViews(NULL, SampleHint(smpID).Info().Data().Names());
 		}
 
 		OnRefreshTree();
@@ -3265,7 +3308,7 @@ void CModTree::OnReloadAll()
 				}
 			}
 		}
-		pModDoc->UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_SMPNAMES | HINT_SAMPLEDATA);
+		pModDoc->UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
 		OnRefreshTree();
 	}
 }
@@ -3704,7 +3747,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 				{
 					target = pat;
 					modDoc->SetModified();
-					modDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
+					modDoc->UpdateAllViews(nullptr, SequenceHint().Data());
 				}
 			}
 			break;
@@ -3715,7 +3758,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			{
 				sndFile.Order.GetSequence(static_cast<SEQUENCEINDEX>(modItem.val1)).SetName(info->item.pszText);
 				modDoc->SetModified();
-				modDoc->UpdateAllViews(NULL, SequenceHint(HINT_SEQNAMES | HINT_MODSEQUENCE, (SEQUENCEINDEX)modItem.val1));
+				modDoc->UpdateAllViews(NULL, SequenceHint((SEQUENCEINDEX)modItem.val1).Data().Names());
 			}
 			break;
 
@@ -3724,7 +3767,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			{
 				sndFile.Patterns[modItem.val1].SetName(info->item.pszText);
 				modDoc->SetModified();
-				modDoc->UpdateAllViews(NULL, PatternHint(HINT_PATTERNDATA | HINT_PATNAMES, (PATTERNINDEX)modItem.val1));
+				modDoc->UpdateAllViews(NULL, PatternHint((PATTERNINDEX)modItem.val1).Data().Names());
 			}
 			break;
 
@@ -3733,7 +3776,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			{
 				mpt::String::CopyN(sndFile.m_szNames[modItem.val1], info->item.pszText, modSpecs.sampleNameLengthMax);
 				modDoc->SetModified();
-				modDoc->UpdateAllViews(NULL, SampleHint(HINT_SMPNAMES | HINT_SAMPLEDATA | HINT_SAMPLEINFO, (SAMPLEINDEX)modItem.val1));
+				modDoc->UpdateAllViews(NULL, SampleHint((SAMPLEINDEX)modItem.val1).Info().Names());
 			}
 			break;
 
@@ -3742,7 +3785,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			{
 				mpt::String::CopyN(sndFile.Instruments[modItem.val1]->name, info->item.pszText, modSpecs.instrNameLengthMax);
 				modDoc->SetModified();
-				modDoc->UpdateAllViews(NULL, InstrumentHint(HINT_INSNAMES | HINT_INSTRUMENT, (INSTRUMENTINDEX)modItem.val1));
+				modDoc->UpdateAllViews(NULL, InstrumentHint((INSTRUMENTINDEX)modItem.val1).Info().Names());
 			}
 			break;
 		}

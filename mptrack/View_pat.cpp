@@ -22,7 +22,6 @@
 
 #include "EffectVis.h"		//rewbs.fxvis
 #include "PatternGotoDialog.h"
-#include "View_gen.h"
 #include "MIDIMacros.h"
 #include "../common/misc_util.h"
 #include "../soundlib/MIDIEvents.h"
@@ -394,7 +393,7 @@ void CViewPattern::SetModified(bool updateAllViews)
 	if(pModDoc != nullptr)
 	{
 		pModDoc->SetModified();
-		pModDoc->UpdateAllViews(this, PatternHint(HINT_PATTERNDATA, m_nPattern), updateAllViews ? nullptr : this);
+		pModDoc->UpdateAllViews(this, PatternHint(m_nPattern).Data(), updateAllViews ? nullptr : this);
 	}
 }
 
@@ -1330,7 +1329,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 				if(duplicate)
 				{
 					// Number of channels changed: Update channel headers and other information.
-					pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | HINT_MODTYPE);
+					pModDoc->UpdateAllViews(this, GeneralHint().Channels().ModType());
 					SetCurrentPattern(m_nPattern);
 				}
 				InvalidatePattern(true);
@@ -1727,7 +1726,7 @@ void CViewPattern::OnMuteChannel(CHANNELINDEX chn)
 		}
 
 		InvalidateChannelsHeaders();
-		pModDoc->UpdateAllViews(this, ChannelTabHint(HINT_MODCHANNELS, chn / CHANNELS_IN_TAB));
+		pModDoc->UpdateAllViews(this, GeneralHint(chn).Channels());
 	}
 }
 
@@ -1776,7 +1775,7 @@ void CViewPattern::OnSoloChannel(CHANNELINDEX chn)
 		pModDoc->SoloChannel(i, (i == chn));  //unsolo all chans except nChn, solo nChn
 	}
 	InvalidateChannelsHeaders();
-	pModDoc->UpdateAllViews(this, ChannelTabHint(HINT_MODCHANNELS, chn / CHANNELS_IN_TAB));
+	pModDoc->UpdateAllViews(this, GeneralHint(chn).Channels());
 }
 
 
@@ -3238,8 +3237,7 @@ void CViewPattern::AddChannelBefore(CHANNELINDEX nBefore)
 	if (pModDoc->ReArrangeChannels(channels) != CHANNELINDEX_INVALID)
 	{
 		pModDoc->SetModified();
-		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS); //refresh channel headers
-		pModDoc->UpdateAllViews(NULL, HINT_MODTYPE); //updates(?) the channel number to general tab display
+		pModDoc->UpdateAllViews(NULL, GeneralHint().General().Channels().ModType()); //refresh channel headers
 		SetCurrentPattern(m_nPattern);
 	}
 	EndWaitCursor();
@@ -3276,8 +3274,7 @@ void CViewPattern::OnDuplicateChannel()
 	if(pModDoc->ReArrangeChannels(channels) != CHANNELINDEX_INVALID)
 	{
 		pModDoc->SetModified();
-		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS);
-		pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);
+		pModDoc->UpdateAllViews(NULL, GeneralHint().General().Channels().ModType()); //refresh channel headers
 		SetCurrentPattern(m_nPattern);
 	}
 	EndWaitCursor();
@@ -3897,7 +3894,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		if(!liveRecord)
 			InvalidateRow(editpos.row);
 		pMainFrm->ThreadSafeSetModified(pModDoc);
-		pModDoc->UpdateAllViews(this, PatternHint(HINT_PATTERNDATA, editpos.pattern), this);
+		pModDoc->UpdateAllViews(this, PatternHint(editpos.pattern).Data(), this);
 	}
 
 	if(captured)
@@ -3961,7 +3958,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 					m.command = CMD_SMOOTHMIDI;
 					m.param = nByte2;
 					pMainFrm->ThreadSafeSetModified(pModDoc);
-					pModDoc->UpdateAllViews(this, PatternHint(HINT_PATTERNDATA, editpos.pattern), this);
+					pModDoc->UpdateAllViews(this, PatternHint(editpos.pattern).Data(), this);
 
 					// Update GUI only if not recording live.
 					if(!liveRecord)
@@ -6696,7 +6693,10 @@ void CViewPattern::SetSplitKeyboardSettings()
 
 	CSplitKeyboadSettings dlg(CMainFrame::GetMainFrame(), pModDoc->GetrSoundFile(), pModDoc->GetSplitKeyboardSettings());
 	if (dlg.DoModal() == IDOK)
-		pModDoc->UpdateAllViews(NULL, HINT_INSNAMES | HINT_SMPNAMES);
+	{
+		// Update split keyboard settings in other pattern views
+		pModDoc->UpdateAllViews(NULL, SampleHint().Names());
+	}
 }
 
 
@@ -6939,7 +6939,8 @@ bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &past
 	{
 		SetCurSel(rect);
 		GetDocument()->SetModified();
-		GetDocument()->UpdateAllViews(NULL, PatternHint(HINT_MODSEQUENCE | HINT_PATTERNDATA, pos.pattern), nullptr);
+		GetDocument()->UpdateAllViews(NULL, PatternHint().Data(), nullptr);
+		GetDocument()->UpdateAllViews(NULL, SequenceHint(GetSoundFile()->Order.GetCurrentSequenceIndex()).Data(), nullptr);
 	}
 
 	return result;

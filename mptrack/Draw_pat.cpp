@@ -231,8 +231,7 @@ void CViewPattern::UpdateView(UpdateHint hint, CObject *pObj)
 	{
 		return;
 	}
-	FlagSet<HintType> hintType = hint.GetType();
-	if(hintType & HINT_MPTOPTIONS)
+	if(hint.GetType()[HINT_MPTOPTIONS])
 	{
 		UpdateColors();
 		UpdateSizes();
@@ -240,26 +239,27 @@ void CViewPattern::UpdateView(UpdateHint hint, CObject *pObj)
 		InvalidatePattern(true);
 		return;
 	}
-	if(hintType & HINT_MODCHANNELS)
+	if(hint.ToType<GeneralHint>().GetType()[HINT_MODTYPE | HINT_MODCHANNELS])
 	{
 		InvalidateChannelsHeaders();
 		UpdateScrollSize();
 	}
 
-	const PATTERNINDEX updatePat = hint.GetData();
-	if(hintType == HINT_PATTERNDATA
+	const PatternHint patternHint = hint.ToType<PatternHint>();
+	const PATTERNINDEX updatePat = patternHint.GetPattern();
+	if(hint.GetType() == HINT_PATTERNDATA
 		&& m_nPattern != updatePat
 		&& updatePat != 0
 		&& updatePat != GetNextPattern()
 		&& updatePat != GetPrevPattern())
 		return;
 
-	if(hintType & (HINT_MODTYPE|HINT_PATTERNDATA))
+	if(patternHint.GetType()[HINT_MODTYPE | HINT_PATTERNDATA])
 	{
 		InvalidatePattern(false);
-	} else if(hintType & HINT_PATTERNROW)
+	} else if(patternHint.GetType()[HINT_PATTERNROW])
 	{
-		InvalidateRow(hint.GetData());
+		InvalidateRow(static_cast<const RowHint &>(hint).GetRow());
 	}
 
 }

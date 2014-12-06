@@ -649,7 +649,7 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, BOOL)
 		SetModified(FALSE);
 		m_bHasValidPath=true;
 		m_ShowSavedialog = false;
-		CMainFrame::GetMainFrame()->UpdateTree(this, HINT_MODGENERAL); // Update treeview (e.g. filename might have changed).
+		CMainFrame::GetMainFrame()->UpdateTree(this, GeneralHint().General()); // Update treeview (e.g. filename might have changed).
 		return TRUE;
 	} else
 	{
@@ -680,7 +680,7 @@ void CModDoc::OnAppendModule()
 			AddToLog("Unable to open source file!");
 		}
 	}
-	UpdateAllViews(nullptr, HINT_MODTYPE | HINT_MODSEQUENCE);
+	UpdateAllViews(nullptr, SequenceHint().Data().ModType());
 }
 
 
@@ -1637,7 +1637,7 @@ void CModDoc::ActivateWindow()
 //----------------------------
 {
 	
-	CChildFrame *pChildFrm = (CChildFrame *)GetChildFrame();
+	CChildFrame *pChildFrm = GetChildFrame();
 	if(pChildFrm) pChildFrm->MDIActivate();
 }
 
@@ -2000,7 +2000,7 @@ void CModDoc::OnPlayerPlay()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm)
 	{
-		CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
+		CChildFrame *pChildFrm = GetChildFrame();
  		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
 		{
 			//User has sent play song command: set loop pattern checkbox to false.
@@ -2098,7 +2098,7 @@ void CModDoc::OnPlayerPlayFromStart()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm)
 	{
-		CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
+		CChildFrame *pChildFrm = GetChildFrame();
 		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
 		{
 			//User has sent play song command: set loop pattern checkbox to false.
@@ -2305,8 +2305,8 @@ void CModDoc::OnApproximateBPM()
 
 
 //rewbs.customKeys
-void* CModDoc::GetChildFrame()
-//----------------------------
+CChildFrame *CModDoc::GetChildFrame()
+//-----------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (!pMainFrm) return nullptr;
@@ -2315,14 +2315,14 @@ void* CModDoc::GetChildFrame()
 	{
 		CView *pView = pMDIActive->GetActiveView();
 		if ((pView) && (pView->GetDocument() == this))
-			return ((CChildFrame *)pMDIActive);
+			return static_cast<CChildFrame *>(pMDIActive);
 	}
 	POSITION pos = GetFirstViewPosition();
 	while (pos != NULL)
 	{
 		CView *pView = GetNextView(pos);
 		if ((pView) && (pView->GetDocument() == this))
-			return (CChildFrame *)pView->GetParentFrame();
+			return static_cast<CChildFrame *>(pView->GetParentFrame());
 	}
 
 	return nullptr;
@@ -2332,7 +2332,7 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 //------------------------------------------------------------------------------
 {
 	HWND followSonghWnd;
-	CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
+	CChildFrame *pChildFrm = GetChildFrame();
 
 	if(strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0) // dirty HACK
 	{
@@ -2391,7 +2391,7 @@ void CModDoc::OnPatternRestart(bool loop)
 //---------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
+	CChildFrame *pChildFrm = GetChildFrame();
 
 	if ((pMainFrm) && (pChildFrm))
 	{
@@ -2452,7 +2452,7 @@ void CModDoc::OnPatternPlay()
 //---------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
+	CChildFrame *pChildFrm = GetChildFrame();
 
 	if ((pMainFrm) && (pChildFrm))
 	{
@@ -2508,7 +2508,7 @@ void CModDoc::OnPatternPlayNoLoop()
 //---------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
+	CChildFrame *pChildFrm = GetChildFrame();
 
 	if ((pMainFrm) && (pChildFrm))
 	{
@@ -2672,7 +2672,7 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 		SetPathName(newPath, FALSE);
 	}
 
-	UpdateAllViews(NULL, HINT_MODTYPE);
+	UpdateAllViews(NULL, UpdateHint().ModType());
 }
 
 
@@ -2764,10 +2764,11 @@ void CModDoc::SongProperties()
 		{
 			const bool showCancelInRemoveDlg = m_SndFile.GetModSpecifications().channelsMax >= m_SndFile.GetNumChannels();
 			if(ChangeNumChannels(nNewChannels, showCancelInRemoveDlg)) bShowLog = true;
-		}
 
-		// Force update of pattern highlights / num channels
-		UpdateAllViews(NULL, HINT_PATTERNDATA | HINT_MODCHANNELS);
+			// Force update of pattern highlights / num channels
+			UpdateAllViews(nullptr, PatternHint().Data());
+			UpdateAllViews(nullptr, GeneralHint().Channels());
+		}
 
 		SetModified();
 	}

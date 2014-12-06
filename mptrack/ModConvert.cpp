@@ -618,7 +618,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	SetModified();
 	GetPatternUndo().ClearUndo();
-	UpdateAllViews(NULL, HINT_MODTYPE | HINT_MODGENERAL);
+	UpdateAllViews(NULL, GeneralHint().General().ModType());
 	EndWaitCursor();
 
 	//rewbs.customKeys: update effect key commands

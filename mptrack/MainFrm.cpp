@@ -1750,8 +1750,8 @@ BOOL CMainFrame::SetupMiscOptions()
 
 	m_wndToolBar.EnableFlatButtons(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS);
 
-	UpdateTree(NULL, HINT_MPTOPTIONS);
-	UpdateAllViews(HINT_MPTOPTIONS, NULL);
+	UpdateTree(nullptr, UpdateHint().MPTOptions());
+	UpdateAllViews(UpdateHint().MPTOptions());
 	return true;
 }
 
@@ -1937,7 +1937,7 @@ void CMainFrame::OnPluginManager()
 	{
 		pModDoc->SetModified();
 		//Refresh views
-		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS|HINT_MODTYPE);
+		pModDoc->UpdateAllViews(nullptr, PluginHint().Info().Names().ModType());
 		//Refresh Controls
 		CChildFrame *pActiveChild = (CChildFrame *)MDIGetActive();
 		pActiveChild->ForceRefresh();
@@ -2270,7 +2270,7 @@ void CMainFrame::OnUpdateMRUItem(CCmdUI *cmd)
 LRESULT CMainFrame::OnInvalidatePatterns(WPARAM, LPARAM)
 //------------------------------------------------------
 {
-	UpdateAllViews(UpdateHint(HINT_MPTOPTIONS, 0));
+	UpdateAllViews(UpdateHint().MPTOptions());
 	return TRUE;
 }
 
@@ -2828,8 +2828,8 @@ void CMainFrame::UpdateMRUList()
 //Misc helper functions
 /////////////////////////////////////////////
 
-void AddPluginNamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN* plugarray, const bool librarynames)
-//----------------------------------------------------------------------------------------------
+void AddPluginNamesToCombobox(CComboBox& CBox, const SNDMIXPLUGIN*plugarray, const bool librarynames)
+//---------------------------------------------------------------------------------------------------
 {
 	for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 	{

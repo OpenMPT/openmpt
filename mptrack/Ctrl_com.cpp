@@ -76,7 +76,7 @@ BOOL CCtrlComments::OnInitDialog()
 	// Initialize comments
 	m_hFont = NULL;
 	m_EditComments.SetMargins(4, 0);
-	UpdateView(HINT_MODTYPE|HINT_MODCOMMENTS|HINT_MPTOPTIONS, NULL);
+	UpdateView(CommentHint().ModType());
 	m_EditComments.SetFocus();
 	m_bInitialized = TRUE;
 	return FALSE;
@@ -110,7 +110,8 @@ void CCtrlComments::RecalcLayout()
 void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 //-------------------------------------------------------------
 {
-	if ((pHint == this) || (!(hint.GetType() & (HINT_MODCOMMENTS|HINT_MPTOPTIONS|HINT_MODTYPE)))) return;
+	CommentHint commentHint = hint.ToType<CommentHint>();
+	if (pHint == this || !commentHint.GetType()[HINT_MODCOMMENTS | HINT_MPTOPTIONS | HINT_MODTYPE]) return;
 	if (m_nLockCount) return;
 	m_nLockCount++;
 	HFONT newfont;
@@ -156,7 +157,7 @@ void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 		m_EditComments.SetSel(0, 0);
 		m_EditComments.SetModify(FALSE);
 	}
-	if (hint.GetType() & HINT_MODTYPE)
+	if (commentHint.GetType() & HINT_MODTYPE)
 	{
 		m_EditComments.SetReadOnly(!m_sndFile.GetModSpecifications().hasComments);
 	}
@@ -211,7 +212,7 @@ void CCtrlComments::OnCommentsChanged()
 		{
 			m_sndFile.songMessage.assign(p);
 			m_modDoc.SetModified();
-			m_modDoc.UpdateAllViews(NULL, HINT_MODCOMMENTS, this);
+			m_modDoc.UpdateAllViews(nullptr, CommentHint(), this);
 		}
 
 		delete[] p;
