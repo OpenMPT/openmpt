@@ -9,18 +9,17 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "mainfrm.h"
-#include "moddoc.h"
-#include "childfrm.h"
-#include "globals.h"
-#include "ctrl_gen.h"
-#include "ctrl_pat.h"
-#include "ctrl_smp.h"
-#include "ctrl_ins.h"
-#include "ctrl_com.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
+#include "Childfrm.h"
+#include "Globals.h"
+#include "Ctrl_gen.h"
+#include "Ctrl_pat.h"
+#include "Ctrl_smp.h"
+#include "Ctrl_ins.h"
+#include "Ctrl_com.h"
 //#include "ctrl_graph.h" //rewbs.graph
-#include "globals.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -234,7 +233,7 @@ void CModControlView::OnInitialUpdate() // called first time after construct
 	if (pParentFrame) m_hWndView = pParentFrame->GetHwndView();
 	GetClientRect(&rect);
 	m_TabCtrl.Create(WS_CHILD|WS_VISIBLE|TCS_FOCUSNEVER|TCS_FORCELABELLEFT, rect, this, IDC_TABCTRL1);
-	UpdateView(HINT_MODTYPE);
+	UpdateView(UpdateHint().ModType());
 	SetActivePage(0);
 }
 
@@ -276,7 +275,7 @@ void CModControlView::RecalcLayout()
 void CModControlView::OnUpdate(CView*, LPARAM lHint, CObject*pHint)
 //-----------------------------------------------------------------
 {
-	UpdateView(UpdateHint(lHint), pHint);
+	UpdateView(UpdateHint::FromLPARAM(lHint), pHint);
 }
 
 
@@ -585,7 +584,7 @@ LRESULT CModScrollView::OnReceiveModViewMsg(WPARAM wParam, LPARAM lParam)
 void CModScrollView::OnUpdate(CView* pView, LPARAM lHint, CObject*pHint)
 //----------------------------------------------------------------------
 {
-	if (pView != this) UpdateView(UpdateHint(lHint), pHint);
+	if (pView != this) UpdateView(UpdateHint::FromLPARAM(lHint), pHint);
 }
 
 

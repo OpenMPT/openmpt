@@ -153,7 +153,7 @@ CDocument* CModDocTemplate::OpenTemplateFile(const mpt::PathString &filename, bo
 			CMultiDocTemplate::SetDefaultTitle(modDoc);
 			m_nUntitledCount++;
 			// Name has changed...
-			CMainFrame::GetMainFrame()->UpdateTree(modDoc, HINT_MODGENERAL);
+			CMainFrame::GetMainFrame()->UpdateTree(modDoc, GeneralHint().General());
 
 			// Reset edit history for template files
 			modDoc->GetrSoundFile().GetFileHistory().clear();

@@ -119,7 +119,7 @@ void ExternalSamplesDlg::OnSetPath(NMHDR *, LRESULT *)
 	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_SAMPLES);
 
 	SetSample(smp, dlg.GetFirstFile());
-	modDoc.UpdateAllViews(nullptr, SampleHint(HINT_SAMPLEINFO | HINT_SMPNAMES | HINT_SAMPLEDATA, smp));
+	modDoc.UpdateAllViews(nullptr, SampleHint(smp).Info().Names().Data());
 	GenerateList();
 }
 
@@ -187,7 +187,7 @@ void ExternalSamplesDlg::OnScanFolder()
 		GetDlgItem(IDOK)->EnableWindow(TRUE);
 		SetDlgItemText(IDC_BUTTON1, "&Scan Folder...");
 
-		modDoc.UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_SMPNAMES | HINT_SAMPLEDATA);
+		modDoc.UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
 
 		if(foundFiles)
 		{

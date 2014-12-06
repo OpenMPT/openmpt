@@ -165,7 +165,7 @@ void CModCleanupDlg::OnOK()
 	if(m_bCheckBoxes[CU_RESET_VARIABLES]) bModified |= ResetVariables();
 
 	if(bModified) modDoc.SetModified();
-	modDoc.UpdateAllViews(NULL, HINT_MODTYPE | HINT_MODSEQUENCE | HINT_MODGENERAL | HINT_SMPNAMES | HINT_INSNAMES);
+	modDoc.UpdateAllViews(nullptr, UpdateHint().ModType());
 	logcapturer.ShowLog(true);
 	CDialog::OnOK();
 }

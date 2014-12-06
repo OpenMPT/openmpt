@@ -342,7 +342,7 @@ public:
 	virtual void OnInitialUpdate();
 	virtual BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll = TRUE);
 	virtual BOOL PreTranslateMessage(MSG *pMsg);
-	virtual void UpdateView(UpdateHint hint = HINT_NONE, CObject *pObj = nullptr);
+	virtual void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
 	virtual LRESULT OnPlayerNotify(Notification *);
 	//}}AFX_VIRTUAL

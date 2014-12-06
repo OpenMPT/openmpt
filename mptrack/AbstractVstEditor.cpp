@@ -920,7 +920,9 @@ bool CAbstractVstEditor::CreateInstrument()
 	//pIns->wMidiBank = (WORD)((m_pVstPlugin->GetCurrentProgram() >> 7) + 1);
 	//pIns->nMidiProgram = (BYTE)((m_pVstPlugin->GetCurrentProgram() & 0x7F) + 1);
 
-	pModDoc->UpdateAllViews(NULL, InstrumentHint(HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE | (first ? HINT_MODTYPE : HINT_NONE), nIns));
+	InstrumentHint hint = InstrumentHint(nIns).Info().Envelope().Names();
+	if(first) hint.ModType();
+	pModDoc->UpdateAllViews(nullptr, hint);
 	if(sndFile.GetModSpecifications().supportsPlugins)
 	{
 		pModDoc->SetModified();

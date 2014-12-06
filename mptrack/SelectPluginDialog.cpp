@@ -200,6 +200,10 @@ void CSelectPluginDlg::OnOK()
 	{
 		if(m_pPlugin->Info.dwPluginId2)
 			TrackerSettings::Instance().gnPlugWindowLast = m_pPlugin->Info.dwPluginId2;
+		if(m_pModDoc)
+		{
+			m_pModDoc->UpdateAllViews(nullptr, PluginHint(static_cast<PLUGINDEX>(m_nPlugSlot + 1)).Info().Names());
+		}
 		CDialog::OnOK();
 	} else
 	{
@@ -589,7 +593,7 @@ void CSelectPluginDlg::OnAddPlugin()
 						}
 						if(updateDoc)
 						{
-							doc.UpdateAllViews(nullptr, HINT_MIXPLUGINS);
+							doc.UpdateAllViews(nullptr, PluginHint().Info().Names());
 						}
 					}
 				}

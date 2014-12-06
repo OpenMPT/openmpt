@@ -44,7 +44,7 @@ public:
 	virtual void OnDraw(CDC *);
 // -! NEW_FEATURE#0015
 	virtual void OnInitialUpdate();
-	virtual void OnUpdate(CView *pSender, LPARAM lHint, CObject *pHint);
+	virtual void UpdateView(UpdateHint hint, CObject *pObject = nullptr);
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
 	LRESULT OnMidiMsg(WPARAM midiData, LPARAM);
 	//}}AFX_VIRTUAL

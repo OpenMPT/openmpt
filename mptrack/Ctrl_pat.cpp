@@ -200,7 +200,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 
 	m_OrderList.SetFocus(); 
 
-	UpdateView(HINT_MODTYPE|HINT_PATNAMES, NULL);
+	UpdateView(PatternHint().Names().ModType(), NULL);
 	RecalcLayout();
 
 	m_bInitialized = TRUE;
@@ -245,51 +245,53 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 	m_OrderList.UpdateView(hint, pObj);
 	FlagSet<HintType> hintType = hint.GetType();
 
-	if(hintType & HINT_MODSEQUENCE)
+	const bool updateAll = hintType[HINT_MODTYPE];
+	const bool updateSeq = hint.GetCategory() == HINTCAT_SEQUENCE && hintType[HINT_MODSEQUENCE];
+	const bool updatePlug = hint.GetCategory() == HINTCAT_PLUGINS && hintType[HINT_MIXPLUGINS];
+	const PatternHint patternHint = hint.ToType<PatternHint>();
+
+	if(updateAll || updateSeq)
 	{
 		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_sndFile.Order.GetName().c_str());
-	}
-	if(hintType & (HINT_MODSEQUENCE|HINT_MODTYPE))
-	{
+
 		m_SpinSequence.SetRange(0, m_sndFile.Order.GetNumSequences() - 1);
 		m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex());
-	}
-
-	//rewbs.instroVST
-	if(hintType & (HINT_MIXPLUGINS|HINT_MODTYPE))
-	{
-		if (HasValidPlug(m_nInstrument))
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), true);
-		else
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), false);
 
 		// Enable/disable multisequence controls according the current modtype.
-		BOOL isMultiSeqAvail = (m_sndFile.GetModSpecifications().sequencesMax > 1) ? TRUE : FALSE;
+		const BOOL isMultiSeqAvail = (m_sndFile.GetModSpecifications().sequencesMax > 1) ? TRUE : FALSE;
 		GetDlgItem(IDC_STATIC_SEQUENCE_NAME)->EnableWindow(isMultiSeqAvail);
 		GetDlgItem(IDC_EDIT_SEQUENCE_NAME)->EnableWindow(isMultiSeqAvail);
 		GetDlgItem(IDC_EDIT_SEQNUM)->EnableWindow(isMultiSeqAvail);
 		GetDlgItem(IDC_SPIN_SEQNUM)->EnableWindow(isMultiSeqAvail);
+	}
 
+	if(updateAll || updatePlug)
+	{
+		GetDlgItem(IDC_PATINSTROPLUGGUI)->EnableWindow(HasValidPlug(m_nInstrument));
+	}
+
+	if(updateAll)
+	{
 		// Enable/disable pattern names
-		BOOL isPatNameAvail = m_sndFile.GetModSpecifications().hasPatternNames ? TRUE : FALSE;
+		const BOOL isPatNameAvail = m_sndFile.GetModSpecifications().hasPatternNames ? TRUE : FALSE;
 		GetDlgItem(IDC_STATIC_PATTERNNAME)->EnableWindow(isPatNameAvail);
 		GetDlgItem(IDC_EDIT_PATTERNNAME)->EnableWindow(isPatNameAvail);
 	}
-	//end rewbs.instroVST
-	if(hintType & HINT_MPTOPTIONS)
+
+	if(hintType[HINT_MPTOPTIONS])
 	{
 		m_ToolBar.UpdateStyle();
-// -> CODE#0007
-// -> DESC="uncheck follow song checkbox by default"
-		//CheckDlgButton(IDC_PATTERN_FOLLOWSONG, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FOLLOWSONGOFF) ? MF_UNCHECKED : MF_CHECKED);
 		m_ToolBar.SetState(ID_OVERFLOWPASTE, ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
-// -! BEHAVIOUR_CHANGE#0007
 	}
-	if(hintType & (HINT_MODTYPE|HINT_INSNAMES|HINT_SMPNAMES|HINT_PATNAMES))
+
+	const bool updatePatNames = patternHint.GetType()[HINT_PATNAMES];
+	const bool updateSmpNames = hint.GetCategory() == HINTCAT_SAMPLES && hintType[HINT_SMPNAMES];
+	const bool updateInsNames = hint.GetCategory() == HINTCAT_INSTRUMENTS && hintType[HINT_INSNAMES];
+	if(updateAll || updatePatNames || updateSmpNames || updateInsNames)
 	{
 		LockControls();
 		CHAR s[256];
-		if(hintType & (HINT_MODTYPE|HINT_INSNAMES|HINT_SMPNAMES))
+		if(updateAll || updateSmpNames || updateInsNames)
 		{
 			static const TCHAR szSplitFormat[] = TEXT("%02u %s %02u: %s/%s");
 			UINT nPos = 0;
@@ -341,11 +343,11 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 			m_CbnInstrument.SetRedraw(TRUE);
 			m_CbnInstrument.Invalidate(FALSE);
 		}
-		if(hintType & (HINT_MODTYPE|HINT_PATNAMES))
+		if(updateAll || updatePatNames)
 		{
 			PATTERNINDEX nPat;
-			if(hintType & HINT_PATNAMES)
-				nPat = (PATTERNINDEX)hint.GetData();
+			if(patternHint.GetType()[HINT_PATNAMES])
+				nPat = patternHint.GetPattern();
 			else
 				nPat = (PATTERNINDEX)SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
 			if(m_sndFile.Patterns.IsValidIndex(nPat))
@@ -362,7 +364,7 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 		}
 		UnlockControls();
 	}
-	if (hintType & (HINT_MODTYPE|HINT_UNDO))
+	if (hintType[HINT_MODTYPE | HINT_UNDO])
 	{
 		m_ToolBar.EnableButton(ID_EDIT_UNDO, m_modDoc.GetPatternUndo().CanUndo());
 	}
@@ -388,7 +390,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		return m_OrderList.GetCurrentPattern();
 
 	case CTRLMSG_PATTERNCHANGED:
-		UpdateView(PatternHint(HINT_PATNAMES, static_cast<PATTERNINDEX>(lParam)));
+		UpdateView(PatternHint(static_cast<PATTERNINDEX>(lParam)).Names());
 		break;
 
 	case CTRLMSG_PAT_PREVINSTRUMENT:
@@ -824,7 +826,8 @@ void CCtrlPatterns::OnPatternNew()
 		m_OrderList.InvalidateRect(NULL, FALSE);
 		SetCurrentPattern(newPat);
 		m_modDoc.SetModified();
-		m_modDoc.UpdateAllViews(NULL, HINT_MODSEQUENCE|HINT_PATNAMES, this);
+		m_modDoc.UpdateAllViews(NULL, PatternHint().Names(), this);
+		m_modDoc.UpdateAllViews(NULL, SequenceHint().Data(), this);
 	}
 	SwitchToView();
 }
@@ -907,7 +910,8 @@ void CCtrlPatterns::OnPatternDuplicate()
 		SetCurrentPattern(m_sndFile.Order[showPattern]);
 
 		m_modDoc.SetModified();
-		m_modDoc.UpdateAllViews(NULL, HINT_MODSEQUENCE | HINT_PATNAMES, this);
+		m_modDoc.UpdateAllViews(NULL, SequenceHint().Data(), this);
+		m_modDoc.UpdateAllViews(NULL, PatternHint().Names(), this);
 		if(selection.lastOrd != selection.firstOrd) m_OrderList.m_nScrollPos2nd = insertWhere + insertCount;
 	}
 	SwitchToView();
@@ -1091,7 +1095,7 @@ void CCtrlPatterns::OnPatternNameChanged()
 			if(m_sndFile.Patterns[nPat].SetName(s))
 			{
 				if(m_sndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) m_modDoc.SetModified();
-				m_modDoc.UpdateAllViews(NULL, PatternHint(HINT_PATNAMES, nPat), this);
+				m_modDoc.UpdateAllViews(NULL, PatternHint(nPat).Names(), this);
 			}
 		}
 	}
@@ -1107,7 +1111,7 @@ void CCtrlPatterns::OnSequenceNameChanged()
 	{
 		m_sndFile.Order.SetName(str.GetString());
 		m_modDoc.SetModified();
-		m_modDoc.UpdateAllViews(NULL, SequenceHint(HINT_SEQNAMES, m_sndFile.Order.GetCurrentSequenceIndex()), this);
+		m_modDoc.UpdateAllViews(NULL, SequenceHint(m_sndFile.Order.GetCurrentSequenceIndex()).Names(), this);
 	}
 }
 
@@ -1199,7 +1203,7 @@ void CCtrlPatterns::OnToggleOverflowPaste()
 //-------------------------------------
 {
 	TrackerSettings::Instance().m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE;
-	UpdateView(HINT_MPTOPTIONS, NULL);
+	UpdateView(UpdateHint().MPTOptions());
 	SwitchToView();
 }
 

@@ -78,7 +78,7 @@ public:
 	virtual void RecalcLayout();
 	virtual void OnActivatePage(LPARAM);
 	virtual void OnDeactivatePage();
-	virtual void UpdateView(UpdateHint hint = HINT_NONE, CObject *pObj = nullptr);
+	virtual void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
 	virtual LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam);
 	virtual BOOL GetToolTipText(UINT uId, TCHAR *pszText);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -128,7 +128,7 @@ protected:
 	afx_msg void OnEnableStretchToSize();
 	afx_msg void OnEstimateSampleSize();
 
-	void SetModified(FlagSet<HintType> mask, bool updateAll, bool waveformModified);
+	noinline void SetModified(SampleHint hint, bool updateAll, bool waveformModified);
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

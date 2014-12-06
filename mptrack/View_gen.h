@@ -57,6 +57,7 @@ public:
 	void UnlockControls() { PostMessage(WM_MOD_UNLOCKCONTROLS); }
 	BOOL IsLocked() const { return (m_nLockCount > 0); }
 	int GetDlgItemIntEx(UINT nID);
+	void PopulateChannelPlugins();
 	void BuildEmptySlotList(std::vector<PLUGINDEX> &emptySlots);
 	bool MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat = AdjustPattern);
 
@@ -64,7 +65,7 @@ public:
 	//{{AFX_VIRTUAL(CViewGlobals)
 	virtual void OnInitialUpdate();
 	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual void UpdateView(UpdateHint hint = HINT_NONE, CObject *pObj = nullptr);
+	virtual void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
 	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
 	LRESULT OnMidiMsg(WPARAM midiData, LPARAM);
@@ -87,6 +88,7 @@ private:
 	CVstPlugin *GetCurrentPlugin() const;
 
 	void FillPluginProgramBox(VstInt32 firstProg, VstInt32 lastProg);
+	void SetPluginModified();
 
 protected:
 	//{{AFX_MSG(CViewGlobals)

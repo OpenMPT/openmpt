@@ -11,7 +11,6 @@
 #include "stdafx.h"
 #include "Moddoc.h"
 #include "Mainfrm.h"
-#include "View_gen.h"
 #include "ChannelManagerDlg.h"
 
 
@@ -227,7 +226,7 @@ void CChannelManagerDlg::OnApply()
 
 	// Update document & player
 	pModDoc->SetModified();
-	pModDoc->UpdateAllViews(NULL, HINT_MODTYPE | HINT_MODCHANNELS, NULL); //refresh channel headers
+	pModDoc->UpdateAllViews(nullptr, GeneralHint().Channels().ModType()); //refresh channel headers
 
 	// Redraw channel manager window
 	InvalidateRect(NULL,TRUE);
@@ -342,7 +341,7 @@ void CChannelManagerDlg::OnAction1()
 
 		ResetState();
 
-		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS, NULL);
+		pModDoc->UpdateAllViews(nullptr, GeneralHint().Channels());
 		InvalidateRect(NULL,FALSE);
 	}
 }
@@ -418,7 +417,7 @@ void CChannelManagerDlg::OnAction2()
 
 		if(currentTab != 3) ResetState();
 
-		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS, NULL);
+		pModDoc->UpdateAllViews(nullptr, GeneralHint().Channels());
 		InvalidateRect(NULL,FALSE);
 	}
 }
@@ -508,7 +507,7 @@ void CChannelManagerDlg::OnRestore(void)
 
 	if(currentTab != 3) ResetState();
 
-	pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS, NULL);
+	pModDoc->UpdateAllViews(nullptr, GeneralHint().Channels());
 	InvalidateRect(NULL,FALSE);
 }
 
@@ -1010,7 +1009,7 @@ void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 	for(CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS ; nChn++)
 		state[pattern[nChn]] = false;
 
-	if(pModDoc) pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS, NULL);
+	if(pModDoc) pModDoc->UpdateAllViews(nullptr, GeneralHint().Channels());
 }
 
 void CChannelManagerDlg::OnLButtonDown(UINT nFlags,CPoint point)
@@ -1034,7 +1033,7 @@ void CChannelManagerDlg::OnRButtonUp(UINT /*nFlags*/,CPoint /*point*/)
 	rightButton = false;
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = pMainFrm->GetActiveDoc();
-	if(pModDoc) pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS, NULL);
+	if(pModDoc) pModDoc->UpdateAllViews(nullptr, GeneralHint().Channels());
 }
 
 void CChannelManagerDlg::OnRButtonDown(UINT nFlags,CPoint point)
@@ -1104,7 +1103,7 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 						pModDoc->MuteChannel(n,!pModDoc->IsChannelMuted(n));
 					}
 					pModDoc->SetModified();
-					pModDoc->UpdateAllViews(NULL, ChannelTabHint(HINT_MODCHANNELS, n / CHANNELS_IN_TAB));
+					pModDoc->UpdateAllViews(nullptr, GeneralHint(n).Channels());
 					break;
 				case 1:
 					BYTE rec;
@@ -1123,7 +1122,7 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 					if(button == CM_BT_LEFT) pModDoc->NoFxChannel(n, false);
 					else pModDoc->NoFxChannel(n, true);
 					pModDoc->SetModified();
-					pModDoc->UpdateAllViews(NULL, ChannelTabHint(HINT_MODCHANNELS, n / CHANNELS_IN_TAB));
+					pModDoc->UpdateAllViews(nullptr, GeneralHint(n).Channels());
 					break;
 				case 3:
 					if(button == CM_BT_LEFT)

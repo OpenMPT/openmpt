@@ -106,7 +106,7 @@ bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNE
 
 	buffer.push_back(undo);
 
-	modDoc.UpdateAllViews(NULL, HINT_UNDO);
+	modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
 	return true;
 }
 
@@ -194,7 +194,7 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 
 	DeleteStep(fromBuf, fromBuf.size() - 1);
 
-	modDoc.UpdateAllViews(NULL, HINT_UNDO);
+	modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
 
 	if(linkToPrevious)
 	{
@@ -399,7 +399,7 @@ bool CSampleUndo::PrepareBuffer(undobuf_t &buffer, const SAMPLEINDEX smp, sample
 
 	buffer[smp - 1].push_back(undo);
 
-	modDoc.UpdateAllViews(NULL, HINT_UNDO);
+	modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
 
 	return true;
 }
@@ -531,7 +531,7 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 	fromBuf[smp - 1].push_back(undo);
 	DeleteStep(fromBuf, smp, fromBuf[smp - 1].size() - 1);
 
-	modDoc.UpdateAllViews(NULL, HINT_UNDO);
+	modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
 	modDoc.SetModified();
 
 	return true;
@@ -600,7 +600,9 @@ void CSampleUndo::RearrangeSamples(undobuf_t &buffer, const std::vector<SAMPLEIN
 {
 	undobuf_t newBuf(modDoc.GetNumSamples());
 
-	for(SAMPLEINDEX smp = 1; smp < newIndex.size(); smp++)
+	const SAMPLEINDEX newSize = static_cast<SAMPLEINDEX>(newIndex.size());
+	const SAMPLEINDEX oldSize = static_cast<SAMPLEINDEX>(buffer.size());
+	for(SAMPLEINDEX smp = 1; smp < newSize; smp++)
 	{
 		MPT_ASSERT(newIndex[smp] <= modDoc.GetNumSamples());
 		if(newIndex[smp] > 0 && newIndex[smp] <= modDoc.GetNumSamples() && smp <= buffer.size())
@@ -608,10 +610,15 @@ void CSampleUndo::RearrangeSamples(undobuf_t &buffer, const std::vector<SAMPLEIN
 			newBuf[newIndex[smp] - 1] = buffer[smp - 1];
 		}
 	}
-#ifdef _DEBUG
-	for(size_t i = 0; i < buffer.size(); i++)
+	// Remove now unused undo buffers
+	for(SAMPLEINDEX smp = newSize; smp <= oldSize; smp++)
 	{
-		if(newIndex[i + 1] != 0)
+		ClearUndo(smp);
+	}
+#ifdef _DEBUG
+	for(size_t i = 0; i < oldSize; i++)
+	{
+		if(i + 1 < newIndex.size() && newIndex[i + 1] != 0)
 			MPT_ASSERT(newBuf[newIndex[i + 1] - 1].size() == buffer[i].size());
 		else
 			MPT_ASSERT(buffer[i].empty());

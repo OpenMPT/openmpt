@@ -20,6 +20,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 class EncoderFactoryBase;
+class CChildFrame;
 
 /////////////////////////////////////////////////////////////////////////
 // Split Keyboard Settings (pattern editor)
@@ -285,7 +286,7 @@ public:
 protected:
 
 	BOOL InitializeMod();
-	void* GetChildFrame(); //rewbs.customKeys
+	CChildFrame *GetChildFrame(); //rewbs.customKeys
 
 // Overrides
 	// ClassWizard generated virtual function overrides

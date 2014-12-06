@@ -91,7 +91,7 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 		if(success)
 		{
 			SetModified();
-			UpdateAllViews(NULL, HINT_MODTYPE);
+			UpdateAllViews(nullptr, UpdateHint().ModType());
 		}
 		return success;
 	}
@@ -135,7 +135,7 @@ bool CModDoc::RemoveChannels(const std::vector<bool> &keepMask)
 	if(success)
 	{
 		SetModified();
-		UpdateAllViews(NULL, HINT_MODTYPE);
+		UpdateAllViews(nullptr, UpdateHint().ModType());
 	}
 	EndWaitCursor();
 	return success;
@@ -918,7 +918,7 @@ bool CModDoc::MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate
 
 	if (bUpdate)
 	{
-		UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
+		UpdateAllViews(nullptr, SequenceHint().Data());
 	}
 
 	m_SndFile.Order.SetSequence(nWorkingSeq);
@@ -947,7 +947,7 @@ BOOL CModDoc::ExpandPattern(PATTERNINDEX nPattern)
 	if(success)
 	{
 		SetModified();
-		UpdateAllViews(NULL, PatternHint(HINT_PATTERNDATA, nPattern), NULL);
+		UpdateAllViews(NULL, PatternHint(nPattern).Data(), NULL);
 	} else
 	{
 		GetPatternUndo().RemoveLastUndoStep();
@@ -977,7 +977,7 @@ BOOL CModDoc::ShrinkPattern(PATTERNINDEX nPattern)
 	if(success)
 	{
 		SetModified();
-		UpdateAllViews(NULL, PatternHint(HINT_PATTERNDATA, nPattern), NULL);
+		UpdateAllViews(NULL, PatternHint(nPattern).Data(), NULL);
 	} else
 	{
 		GetPatternUndo().RemoveLastUndoStep();

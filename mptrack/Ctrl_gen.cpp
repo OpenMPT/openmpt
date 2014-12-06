@@ -117,7 +117,7 @@ BOOL CCtrlGeneral::OnInitDialog()
 	m_SliderSamplePreAmp.SetRange(0, MAX_SLIDER_SAMPLE_VOL);
 	
 	m_bEditsLocked=false;
-	UpdateView(HINT_MODGENERAL|HINT_MODTYPE|HINT_MODSEQUENCE, NULL);
+	UpdateView(GeneralHint().ModType());
 	OnActivatePage(0);
 	m_bInitialized = TRUE;
 	
@@ -207,12 +207,13 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 {
 	if (pHint == this) return;
 	FlagSet<HintType> hintType = hint.GetType();
-	if (hintType & HINT_MODSEQUENCE)
+	const bool updateAll = hintType[HINT_MODTYPE];
+	if (updateAll || (hint.GetCategory() == HINTCAT_SEQUENCE && hintType[HINT_MODSEQUENCE]))
 	{
 		// Set max valid restart position
 		m_SpinRestartPos.SetRange32(0, m_sndFile.Order.GetLengthTailTrimmed() - 1);
 	}
-	if (hintType & HINT_MODGENERAL)
+	if (updateAll || (hint.GetCategory() == HINTCAT_GENERAL && hintType[HINT_MODGENERAL]))
 	{
 		if (!m_bEditsLocked)
 		{
@@ -231,7 +232,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_SliderTempo.SetPos(m_sndFile.GetModSpecifications().tempoMax - m_sndFile.m_nDefaultTempo);
 	}
 
-	if (hintType & HINT_MODTYPE)
+	if (updateAll)
 	{
 		CModSpecifications specs = m_sndFile.GetModSpecifications();
 		m_SpinTempo.SetRange(specs.tempoMin, specs.tempoMax);
@@ -276,7 +277,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_EditModType.SetWindowText(s);
 	}
 	CheckDlgButton(IDC_CHECK_LOOPSONG,	(TrackerSettings::Instance().gbLoopSong) ? TRUE : FALSE);
-	if (hintType & HINT_MPTOPTIONS)
+	if (hintType[HINT_MPTOPTIONS])
 	{
 		m_VuMeterLeft.InvalidateRect(NULL, FALSE);
 		m_VuMeterRight.InvalidateRect(NULL, FALSE);
@@ -304,7 +305,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 				m_sndFile.m_PlayState.m_nMusicTempo = tempo;
 				m_modDoc.SetModified();
 
-				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
+				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
 			}
 		}
 
@@ -317,7 +318,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 				m_sndFile.m_nDefaultGlobalVolume = gv;
 				m_modDoc.SetModified();
 
-				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
+				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
 			}
 		}
 
@@ -329,7 +330,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 				m_sndFile.m_nSamplePreAmp = spa;
 				if(m_sndFile.GetType() != MOD_TYPE_MOD)
 					m_modDoc.SetModified();
-				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
+				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
 			}
 		}
 
@@ -341,11 +342,11 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 				m_sndFile.m_nVSTiVolume = vv;
 				m_sndFile.RecalculateGainForAllPlugs();
 				m_modDoc.SetModified();
-				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
+				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
 			}
 		}
 
-		UpdateView(HINT_MODGENERAL, NULL);
+		UpdateView(GeneralHint().General());
 	}
 }
 
@@ -361,7 +362,7 @@ void CCtrlGeneral::OnTitleChanged()
 	{
 		m_EditTitle.SetModify(FALSE);
 		m_modDoc.SetModified();
-		m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
+		m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
 	}
 }
 
@@ -384,8 +385,8 @@ void CCtrlGeneral::OnTempoChanged()
 				m_sndFile.m_nDefaultTempo = n;
 				m_sndFile.m_PlayState.m_nMusicTempo = n;
 				m_modDoc.SetModified();
-				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
-				UpdateView(HINT_MODGENERAL, NULL);
+				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
+				UpdateView(GeneralHint().General());
 				m_bEditsLocked=false;
 			}
 		}
@@ -411,8 +412,9 @@ void CCtrlGeneral::OnSpeedChanged()
 				m_sndFile.m_nDefaultSpeed = n;
 				m_sndFile.m_PlayState.m_nMusicSpeed = n;
 				m_modDoc.SetModified();
-				// HINT_ENVELOPE: Update envelope grid view
-				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL | HINT_ENVELOPE, this);
+				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
+				// Update envelope grid view
+				m_modDoc.UpdateAllViews(nullptr, InstrumentHint().Envelope(), this);
 				m_bEditsLocked=false;
 			}
 		}
@@ -437,8 +439,8 @@ void CCtrlGeneral::OnVSTiVolChanged()
 				m_sndFile.m_nVSTiVolume = n;
 				m_sndFile.RecalculateGainForAllPlugs();
 				m_modDoc.SetModified();
-				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
-				UpdateView(HINT_MODGENERAL, NULL); 
+				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
+				UpdateView(GeneralHint().General());
 				m_bEditsLocked=false;
 			}
 		}
@@ -461,8 +463,8 @@ void CCtrlGeneral::OnSamplePAChanged()
 				m_bEditsLocked=true;
 				m_sndFile.m_nSamplePreAmp = n;
 				m_modDoc.SetModified();
-				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
-				UpdateView(HINT_MODGENERAL, NULL); 
+				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
+				UpdateView(GeneralHint().General());
 				m_bEditsLocked=false;
 			}
 		}
@@ -487,8 +489,8 @@ void CCtrlGeneral::OnGlobalVolChanged()
 				m_sndFile.m_nDefaultGlobalVolume = n;
 				m_sndFile.m_PlayState.m_nGlobalVolume = n;
 				m_modDoc.SetModified();
-				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
-				UpdateView(HINT_MODGENERAL, NULL);
+				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
+				UpdateView(GeneralHint().General());
 				m_bEditsLocked = false;
 			}
 		}
@@ -515,7 +517,7 @@ void CCtrlGeneral::OnRestartPosChanged()
 				m_EditRestartPos.SetModify(FALSE);
 				m_sndFile.m_nRestartPos = n;
 				m_modDoc.SetModified();
-				m_modDoc.UpdateAllViews(NULL, HINT_MODGENERAL, this);
+				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
 			}
 		}
 	}
