@@ -171,6 +171,9 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file
 		Instruments[nInstr] = pIns;
 
 		ReadSampleFromFile(nSample, file, mayNormalize);
+#if defined(MPT_WITH_FILEIO)
+		SetSamplePath(nSample, file.GetFileName());
+#endif
 		return true;
 	}
 	return false;
@@ -1824,7 +1827,7 @@ struct PACKED IFFChunk
 	}
 };
 
-STATIC_ASSERT(sizeof(AIFFChunk) == 8);
+STATIC_ASSERT(sizeof(IFFChunk) == 8);
 
 
 struct PACKED IFFSampleHeader
