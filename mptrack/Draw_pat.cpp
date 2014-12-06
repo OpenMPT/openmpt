@@ -1591,14 +1591,14 @@ void CViewPattern::UpdateIndicator()
 	{
 		EffectInfo effectInfo(*pSndFile);
 
-		TCHAR s[128];
+		CString s;
 		CHANNELINDEX nChn;
-		wsprintf(s, _T("Row %u, Col %u"), GetCurrentRow(), GetCurrentChannel() + 1);
+		s.Format(_T("Row %u, Col %u"), GetCurrentRow(), GetCurrentChannel() + 1);
 		pMainFrm->SetUserText(s);
 		if (::GetFocus() == m_hWnd)
 		{
 			nChn = m_Cursor.GetChannel();
-			s[0] = 0;
+			s.Empty();
 			if(!m_Status[psKeyboardDragSelect]
 				&& m_Selection.GetUpperLeft() == m_Selection.GetLowerRight()
 				&& GetCurrentRow() < pSndFile->Patterns[m_nPattern].GetNumRows() && nChn < pSndFile->GetNumChannels())
@@ -1610,14 +1610,19 @@ void CViewPattern::UpdateIndicator()
 				case PatternCursor::noteColumn:
 					// display note
 					if(m->IsSpecialNote())
-						strcpy(s, szSpecialNoteShortDesc[m->note - NOTE_MIN_SPECIAL]);
+					{
+						s = szSpecialNoteShortDesc[m->note - NOTE_MIN_SPECIAL];
+					} else if(m->IsNote())
+					{
+						s.Format(_T("%s%u"), szNoteNames[(m->note - NOTE_MIN) % 12], (m->note - NOTE_MIN) / 12);
+					}
 					break;
 
 				case PatternCursor::instrColumn:
 					// display instrument
 					if (m->instr)
 					{
-						CHAR sztmp[128] = "";
+						TCHAR sztmp[128] = "";
 						if(m->IsPcNote())
 						{
 							// display plugin name.
@@ -1646,17 +1651,14 @@ void CViewPattern::UpdateIndicator()
 										}
 									}
 								}
-							} else
+							} else if (m->instr <= pSndFile->GetNumSamples())
 							{
-								if (m->instr <= pSndFile->GetNumSamples())
-								{
-									mpt::String::Copy(sztmp, pSndFile->m_szNames[m->instr]);
-								}
+								mpt::String::Copy(sztmp, pSndFile->m_szNames[m->instr]);
 							}
 
 						}
 						mpt::String::SetNullTerminator(sztmp);
-						if (sztmp[0]) wsprintf(s, "%d: %s", m->instr, sztmp);
+						if (sztmp[0]) s.Format("%d: %s", m->instr, sztmp);
 					}
 					break;
 
@@ -1667,13 +1669,14 @@ void CViewPattern::UpdateIndicator()
 						// display plugin param name.
 						if(m->instr > 0 && m->instr <= MAX_MIXPLUGINS)
 						{
-							const std::string name = pSndFile->m_MixPlugins[m->instr - 1].GetParamName(m->GetValueVolCol());
-							mpt::String::Copy(s, name);
+							s = pSndFile->m_MixPlugins[m->instr - 1].GetParamName(m->GetValueVolCol()).c_str();
 						}
-					} else
+					} else if(m->volcmd != VOLCMD_NONE)
 					{
 						// "normal" volume command
-						effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m->volcmd), s);
+						TCHAR sztmp[64] = "";
+						effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m->volcmd), sztmp);
+						s.Format("%s (%u)", sztmp, m->vol);
 					}
 					break;
 
@@ -1682,7 +1685,17 @@ void CViewPattern::UpdateIndicator()
 					// display effect command
 					if(!m->IsPcNote())
 					{
-						effectInfo.GetEffectName(s, m->command, m->param, false, nChn);
+						TCHAR sztmp[64] = "";
+						/*LONG fxndx = effectInfo.GetIndexFromEffect(m->command, m->param);
+						if(fxndx >= 0)
+						{
+							effectInfo.GetEffectNameEx(sztmp, fxndx, m->param);
+						}*/
+						effectInfo.GetEffectName(sztmp, m->command, m->param, false, nChn);
+						s.Format(_T("%s (%02X)"), sztmp, m->param);
+					} else
+					{
+						s.Format(_T("Parameter value: %u"), m->GetValueEffectCol());
 					}
 					break;
 				}
