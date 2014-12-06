@@ -1806,6 +1806,9 @@ void CModTree::FillInstrumentLibrary()
 					// Instruments
 					if ((!strcmp(s, "xi"))
 						|| (!strcmp(s, "iti"))
+						|| (!strcmp(s, "sf2"))
+						|| (!strcmp(s, "sbk"))
+						|| (!strcmp(s, "dls"))
 						|| (!strcmp(s, "pat")) )
 					{
 						if (IsSampleBrowser())

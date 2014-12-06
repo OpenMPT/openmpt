@@ -139,6 +139,7 @@ public:
 
 public:
 	bool Open(const mpt::PathString &filename);
+	bool Open(FileReader file);
 	mpt::PathString GetFileName() const { return m_szFileName; }
 	UINT GetBankType() const { return m_nType; }
 	UINT GetBankInfo(SOUNDBANKINFO *pBankInfo=NULL) const { if (pBankInfo) *pBankInfo = m_BankInfo; return m_nType; }

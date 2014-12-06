@@ -1151,21 +1151,28 @@ bool CDLSBank::ConvertSF2ToDLS(void *pvsf2info)
 bool CDLSBank::Open(const mpt::PathString &filename)
 //--------------------------------------------------
 {
+	if(filename.empty()) return false;
+	m_szFileName = filename;
+	CMappedFile MapFile;
+	if (!MapFile.Open(filename)) return false;
+	return Open(FileReader(MapFile.Lock(), MapFile.GetLength(), &m_szFileName));
+}
+
+
+bool CDLSBank::Open(FileReader file)
+//----------------------------------
+{
 	SF2LOADERINFO sf2info;
 	const BYTE *lpMemFile;	// Pointer to memory-mapped file
 	RIFFCHUNKID *priff;
 	DWORD dwMemPos, dwMemLength;
 	UINT nInsDef;
 
-	if(filename.empty()) return false;
-	m_szFileName = filename;
-	lpMemFile = NULL;
-	// Memory-Mapped file
-	CMappedFile MapFile;
-	if (!MapFile.Open(filename)) return false;
-	dwMemLength = MapFile.GetLength();
-	if (dwMemLength >= 256) lpMemFile = (const BYTE *)MapFile.Lock();
-	if (!lpMemFile)
+	file.Rewind();
+	m_szFileName = file.GetFileName();
+	lpMemFile = reinterpret_cast<const BYTE *>(file.GetRawData());
+	dwMemLength = file.GetLength();
+	if (!lpMemFile || dwMemLength < 256)
 	{
 		return false;
 	}
