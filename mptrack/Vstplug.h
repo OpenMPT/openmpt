@@ -75,7 +75,7 @@ public:
 		libraryName(libraryName), dllPath(dllPath),
 		pluginId1(0), pluginId2(0),
 		category(catUnknown),
-		isInstrument(false), useBridge(false), shareBridgeInstance(false),
+		isInstrument(false), useBridge(false), shareBridgeInstance(true),
 		dllBits(0)
 	{
 	}
@@ -108,14 +108,8 @@ public:
 			isInstrument = true;
 			category = catSynth;
 		}
-		if(flags & 0x100)
-		{
-			useBridge = true;
-		}
-		if(flags & 0x200)
-		{
-			shareBridgeInstance = true;
-		}
+		useBridge = (flags & 0x100) != 0;
+		shareBridgeInstance = (flags & 0x200) != 0;
 		dllBits = ((flags >> 10) & 0x3F) * 8;
 	}
 };
