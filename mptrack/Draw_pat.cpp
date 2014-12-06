@@ -1683,7 +1683,10 @@ void CViewPattern::UpdateIndicator()
 				case PatternCursor::effectColumn:
 				case PatternCursor::paramColumn:
 					// display effect command
-					if(!m->IsPcNote())
+					if(m->IsPcNote())
+					{
+						s.Format(_T("Parameter value: %u"), m->GetValueEffectCol());
+					} else if(m->command != CMD_NONE)
 					{
 						TCHAR sztmp[64] = "";
 						/*LONG fxndx = effectInfo.GetIndexFromEffect(m->command, m->param);
@@ -1692,10 +1695,7 @@ void CViewPattern::UpdateIndicator()
 							effectInfo.GetEffectNameEx(sztmp, fxndx, m->param);
 						}*/
 						effectInfo.GetEffectName(sztmp, m->command, m->param, false, nChn);
-						s.Format(_T("%s (%02X)"), sztmp, m->param);
-					} else
-					{
-						s.Format(_T("Parameter value: %u"), m->GetValueEffectCol());
+						if(sztmp[0]) s.Format(_T("%s (%02X)"), sztmp, m->param);
 					}
 					break;
 				}
