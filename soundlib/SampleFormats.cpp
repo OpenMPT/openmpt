@@ -14,6 +14,7 @@
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Moddoc.h"
 #include "../mptrack/TrackerSettings.h"
+#include "Dlsbank.h"
 #endif //MODPLUG_TRACKER
 #include "../common/AudioCriticalSection.h"
 #ifndef MODPLUG_NO_FILESAVE
@@ -106,7 +107,18 @@ bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, FileReader &file
 		&& !ReadXIInstrument(nInstr, file)
 		&& !ReadITIInstrument(nInstr, file)
 		// Generic read
-		&& !ReadSampleAsInstrument(nInstr, file, mayNormalize)) return false;
+		&& !ReadSampleAsInstrument(nInstr, file, mayNormalize))
+	{
+		bool ok = false;
+#ifdef MODPLUG_TRACKER
+		CDLSBank bank;
+		if(bank.Open(file))
+		{
+			ok = bank.ExtractInstrument(*this, nInstr, 0, 0);
+		}
+#endif // MODPLUG_TRACKER
+		if(!ok) return false;
+	}
 
 	if(nInstr > GetNumInstruments()) m_nInstruments = nInstr;
 	return true;

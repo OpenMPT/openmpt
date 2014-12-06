@@ -1698,10 +1698,12 @@ void CCtrlInstruments::OnInstrumentOpen()
 		.AllowMultiSelect()
 		.EnableAudioPreview()
 		.ExtensionFilter(
-			"All Instruments|*.xi;*.pat;*.iti;*.flac;*.wav;*.aif;*.aiff|"
+			"All Instruments|*.xi;*.pat;*.iti;*.flac;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls|"
 			"FastTracker II Instruments (*.xi)|*.xi|"
 			"GF1 Patches (*.pat)|*.pat|"
 			"Impulse Tracker Instruments (*.iti)|*.iti|"
+			"SoundFont 2.0 Banks (*.sf2)|*.sf2;*.sbk|"
+			"DLS Sound Banks (*.dls)|*.dls|"
 			"All Files (*.*)|*.*||")
 		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_INSTRUMENTS))
 		.FilterIndex(&nLastIndex);
