@@ -48,7 +48,7 @@ struct ZipFileAbstraction
 	static uLong ZCALLBACK fread_mem(voidpf opaque, voidpf, void *buf, uLong size)
 	{
 		FileReader &file = *static_cast<FileReader *>(opaque);
-		if(size > file.BytesLeft())
+		if(!file.CanRead(size))
 		{
 			size = file.BytesLeft();
 		}
