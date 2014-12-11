@@ -1060,7 +1060,12 @@ void CViewGlobals::OnSetParameter()
 		GetDlgItemText(IDC_EDIT14, s, CountOf(s));
 		if ((m_nCurrentParam < nParams) && (s[0]))
 		{
-			float fValue = (float)_ttof(s);
+			// VS2008 doesn't have _ttof
+#ifdef UNICODE
+			float fValue = (float)_wtof(s);
+#else
+			float fValue = (float)atof(s);
+#endif
 			pVstPlugin->SetParameter(m_nCurrentParam, fValue);
 			OnParamChanged();
 			SetPluginModified();
