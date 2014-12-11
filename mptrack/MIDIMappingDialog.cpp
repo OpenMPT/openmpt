@@ -124,23 +124,16 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 	AddPluginNamesToCombobox(m_PluginCBox, m_rSndFile.m_MixPlugins);
 
 	// Initialize mapping table
-	const struct
+	const CListCtrlEx::Header headers[] =
 	{
-		const TCHAR *text;
-		int width;
-	} labels[] =
-	{
-		{ _T("Channel"),			58 },
-		{ _T("Event / Controller"),	176 },
-		{ _T("Plugin"),				120 },
-		{ _T("Parameter"),			120 },
-		{ _T("Capture"),			40 },
-		{ _T("Pattern Record"),		40 }
+		{ _T("Channel"),			58, LVCFMT_LEFT },
+		{ _T("Event / Controller"),	176, LVCFMT_LEFT },
+		{ _T("Plugin"),				120, LVCFMT_LEFT },
+		{ _T("Parameter"),			120, LVCFMT_LEFT },
+		{ _T("Capture"),			40, LVCFMT_LEFT },
+		{ _T("Pattern Record"),		40, LVCFMT_LEFT }
 	};
-	for(int i = 0; i < CountOf(labels); i++)
-	{
-		m_List.InsertColumn(i, labels[i].text, LVCFMT_LEFT, labels[i].width);
-	}
+	m_List.SetHeaders(headers);
 	m_List.SetExtendedStyle(m_List.GetExtendedStyle() | LVS_EX_CHECKBOXES | LVS_EX_FULLROWSELECT);
 
 	// Add directives to list

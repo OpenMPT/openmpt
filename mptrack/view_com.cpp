@@ -28,13 +28,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 #define DETAILS_TOOLBAR_CY	28
 
-struct LISTCOLHDR
-{
-	const TCHAR *pszName;
-	UINT cx;
-};
-
-
 enum
 {
 	SMPLIST_SAMPLENAME = 0,
@@ -61,26 +54,26 @@ enum
 };
 
 
-const LISTCOLHDR gSampleHeaders[SMPLIST_COLUMNS] =
+const CListCtrlEx::Header gSampleHeaders[SMPLIST_COLUMNS] =
 {
-	{ _T("Sample Name"), 192},
-	{ _T("Num"), 45},
-	{ _T("Size"), 72},
-	{ _T("Type"), 45},
-	{ _T("C-5 Freq"), 80},
-	{ _T("Instr"), 64},
-	{ _T("File Name"), 128},
-	{ _T("Path"), 128},
+	{ _T("Sample Name"),	192, LVCFMT_LEFT },
+	{ _T("Num"),			45, LVCFMT_RIGHT },
+	{ _T("Size"),			72, LVCFMT_RIGHT },
+	{ _T("Type"),			45, LVCFMT_RIGHT },
+	{ _T("C-5 Freq"),		80, LVCFMT_RIGHT },
+	{ _T("Instr"),			64, LVCFMT_RIGHT },
+	{ _T("File Name"),		128, LVCFMT_RIGHT },
+	{ _T("Path"),			256, LVCFMT_LEFT },
 };
 
-const LISTCOLHDR gInstrumentHeaders[INSLIST_COLUMNS] =
+const CListCtrlEx::Header gInstrumentHeaders[INSLIST_COLUMNS] =
 {
-	{ _T("Instrument Name"), 192},
-	{ _T("Num"), 45},
-	{ _T("Samples"), 64},
-	{ _T("Envelopes"), 128},
-	{ _T("File Name"), 128},
-	{ _T("Plugin"), 128},
+	{ _T("Instrument Name"),	192, LVCFMT_LEFT },
+	{ _T("Num"),				45, LVCFMT_RIGHT },
+	{ _T("Samples"),			64, LVCFMT_RIGHT },
+	{ _T("Envelopes"),			128, LVCFMT_RIGHT },
+	{ _T("File Name"),			128, LVCFMT_RIGHT },
+	{ _T("Plugin"),				128, LVCFMT_RIGHT },
 };
 
 
@@ -216,37 +209,14 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 		m_ItemList.DeleteAllItems();
 		while ((m_ItemList.DeleteColumn(0)) && (ichk < 25)) ichk++;
 		m_nCurrentListId = m_nListId;
-		// Add Sample Headers
 		if (m_nCurrentListId == IDC_LIST_SAMPLES)
 		{
-			UINT nCol = 0;
-			for (UINT iSmp=0; iSmp<SMPLIST_COLUMNS; iSmp++)
-			{
-				MemsetZero(lvc);
-				lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
-				lvc.fmt = (iSmp) ? LVCFMT_RIGHT : LVCFMT_LEFT;
-				lvc.pszText = (LPTSTR)gSampleHeaders[iSmp].pszName;
-				lvc.cx = gSampleHeaders[iSmp].cx;
-				lvc.iSubItem = iSmp;
-				m_ItemList.InsertColumn(nCol, &lvc);
-				nCol++;
-			}
-		} else
-		// Add Instrument Headers
-		if (m_nCurrentListId == IDC_LIST_INSTRUMENTS)
+			// Add Sample Headers
+			m_ItemList.SetHeaders(gSampleHeaders);
+		} else if (m_nCurrentListId == IDC_LIST_INSTRUMENTS)
 		{
-			UINT nCol = 0;
-			for (UINT i=0; i<INSLIST_COLUMNS; i++)
-			{
-				MemsetZero(lvc);
-				lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
-				lvc.fmt = (i) ? LVCFMT_RIGHT : LVCFMT_LEFT;
-				lvc.pszText = (LPTSTR)gInstrumentHeaders[i].pszName;
-				lvc.cx = gInstrumentHeaders[i].cx;
-				lvc.iSubItem = i;
-				m_ItemList.InsertColumn(nCol, &lvc);
-				nCol++;
-			}
+			// Add Instrument Headers
+			m_ItemList.SetHeaders(gInstrumentHeaders);
 		} else
 		updateAll = true;
 	}

@@ -594,7 +594,8 @@ void CSampleUndo::RestrictBufferSize(undobuf_t &buffer, size_t &capacity)
 }
 
 
-// Update undo buffer when using rearrange sample functionality
+// Update undo buffer when using rearrange sample functionality.
+// newIndex contains one new index for each old index. newIndex[1] represents the first sample.
 void CSampleUndo::RearrangeSamples(undobuf_t &buffer, const std::vector<SAMPLEINDEX> &newIndex)
 //---------------------------------------------------------------------------------------------
 {
@@ -602,18 +603,16 @@ void CSampleUndo::RearrangeSamples(undobuf_t &buffer, const std::vector<SAMPLEIN
 
 	const SAMPLEINDEX newSize = static_cast<SAMPLEINDEX>(newIndex.size());
 	const SAMPLEINDEX oldSize = static_cast<SAMPLEINDEX>(buffer.size());
-	for(SAMPLEINDEX smp = 1; smp < newSize; smp++)
+	for(SAMPLEINDEX smp = 1; smp <= oldSize; smp++)
 	{
-		MPT_ASSERT(newIndex[smp] <= modDoc.GetNumSamples());
-		if(newIndex[smp] > 0 && newIndex[smp] <= modDoc.GetNumSamples() && smp <= buffer.size())
+		MPT_ASSERT(smp >= newSize || newIndex[smp] <= modDoc.GetNumSamples());
+		if(smp < newSize && newIndex[smp] > 0 && newIndex[smp] <= modDoc.GetNumSamples())
 		{
 			newBuf[newIndex[smp] - 1] = buffer[smp - 1];
+		} else
+		{
+			ClearUndo(smp);
 		}
-	}
-	// Remove now unused undo buffers
-	for(SAMPLEINDEX smp = newSize; smp <= oldSize; smp++)
-	{
-		ClearUndo(smp);
 	}
 #ifdef _DEBUG
 	for(size_t i = 0; i < oldSize; i++)

@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "CListCtrl.h"
+
 OPENMPT_NAMESPACE_BEGIN
 
 enum
@@ -28,7 +30,7 @@ public:
 
 protected:
 	CModControlBar m_ToolBar;
-	CListCtrl m_ItemList;
+	CListCtrlEx m_ItemList;
 	UINT m_nCurrentListId, m_nListId;
 
 public:
