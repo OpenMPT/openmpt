@@ -11,6 +11,7 @@
 #pragma once
 #include <vector>
 #include "MIDIMapping.h"
+#include "CListCtrl.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -38,7 +39,7 @@ protected:
 	CComboBox m_PlugParamCBox;
 	CComboBox m_ChannelCBox;
 	CComboBox m_EventCBox;
-	CListCtrl m_List;
+	CListCtrlEx m_List;
 	CSpinButtonCtrl m_SpinMoveMapping;
 
 public:

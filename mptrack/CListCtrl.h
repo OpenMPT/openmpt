@@ -1,7 +1,7 @@
 /*
  * CListCtrl.h
  * -----------
- * Purpose: A class that extends MFC's CListCtrl to handle unicode strings in ANSI builds.
+ * Purpose: A class that extends MFC's CListCtrl with some more functionality and to handle unicode strings in ANSI builds.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -10,14 +10,27 @@
 
 #pragma once
 
-
 OPENMPT_NAMESPACE_BEGIN
 
-
-class CListCtrlW : public CListCtrl
+class CListCtrlEx : public CListCtrl
 {
 public:
+	struct Header
+	{
+		const TCHAR *text;
+		int width;
+		UINT mask;
+	};
+	template<size_t numItems>
+	void SetHeaders(const Header (&header)[numItems])
+	{
+		for(int i = 0; i < numItems; i++)
+		{
+			InsertColumn(i, header[i].text, header[i].mask, MulDiv(header[i].width, GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSX), 96));
+		}
+	}
 
+	// Unicode strings in ANSI builds
 #ifndef UNICODE
 	BOOL SetItemText(int nItem, int nSubItem, const WCHAR *lpszText)
 	{

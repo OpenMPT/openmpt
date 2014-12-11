@@ -48,19 +48,12 @@ BOOL ExternalSamplesDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	// Initialize table
-	const struct
+	const CListCtrlEx::Header headers[] =
 	{
-		const TCHAR *text;
-		int width;
-	} labels[] =
-	{
-		{ _T("Sample"),				128 },
-		{ _T("External Filename"),	308 },
+		{ _T("Sample"),				128, LVCFMT_LEFT },
+		{ _T("External Filename"),	308, LVCFMT_LEFT },
 	};
-	for(int i = 0; i < CountOf(labels); i++)
-	{
-		m_List.InsertColumn(i, labels[i].text, LVCFMT_LEFT, labels[i].width);
-	}
+	m_List.SetHeaders(headers);
 	m_List.SetExtendedStyle(m_List.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
 
 	GenerateList();

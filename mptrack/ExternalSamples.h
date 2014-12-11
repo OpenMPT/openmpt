@@ -8,6 +8,8 @@
  */
 
 
+#pragma once
+
 #include "CListCtrl.h"
 #include "../common/thread.h"
 
@@ -23,7 +25,7 @@ class ExternalSamplesDlg : public CDialog
 protected:
 	CModDoc &modDoc;
 	CSoundFile &sndFile;
-	CListCtrlW m_List;
+	CListCtrlEx m_List;
 	bool isScanning;
 
 public:
