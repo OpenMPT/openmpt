@@ -110,6 +110,7 @@ protected:
 	afx_msg void OnSetPanningChanged();
 	afx_msg void OnPanningChanged();
 	afx_msg void OnFineTuneChanged();
+	afx_msg void OnFineTuneChangedDone();
 	afx_msg void OnBaseNoteChanged();
 	afx_msg void OnLoopTypeChanged();
 	afx_msg void OnLoopPointsChanged();
