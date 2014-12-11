@@ -107,6 +107,7 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_EN_CHANGE(IDC_EDIT14,			OnVibSweepChanged)
 	ON_EN_CHANGE(IDC_EDIT15,			OnVibDepthChanged)
 	ON_EN_CHANGE(IDC_EDIT16,			OnVibRateChanged)
+	ON_EN_KILLFOCUS(IDC_EDIT5,			OnFineTuneChangedDone)
 	ON_CBN_SELCHANGE(IDC_COMBO_BASENOTE,OnBaseNoteChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO_ZOOM,	OnZoomChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO1,		OnLoopTypeChanged)
@@ -2457,11 +2458,12 @@ void CCtrlSamples::OnFineTuneChanged()
 	if (IsLocked()) return;
 	int n = GetDlgItemInt(IDC_EDIT5);
 	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Finetune");
+	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	if (m_sndFile.m_nType & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
 	{
 		if ((n > 0) && (n <= (m_sndFile.GetType() == MOD_TYPE_S3M ? 65535 : 9999999)) && (n != (int)m_sndFile.GetSample(m_nSample).nC5Speed))
 		{
-			m_sndFile.GetSample(m_nSample).nC5Speed = n;
+			sample.nC5Speed = n;
 			int transp = ModSample::FrequencyToTranspose(n) >> 7;
 			int basenote = (NOTE_MIDDLEC - NOTE_MIN) + transp;
 			Clamp(basenote, BASENOTE_MIN, BASENOTE_MAX);
@@ -2480,16 +2482,40 @@ void CCtrlSamples::OnFineTuneChanged()
 			n = MOD2XMFineTune(n);
 		if ((n >= -128) && (n <= 127))
 		{
-			m_sndFile.GetSample(m_nSample).nFineTune = (signed char)n;
+			sample.nFineTune = (signed char)n;
 			SetModified(SampleHint().Info(), false, false);
 		}
+	}
+}
 
+
+void CCtrlSamples::OnFineTuneChangedDone()
+//----------------------------------------
+{
+	// Update all playing channels
+	ModSample &sample = m_sndFile.GetSample(m_nSample);
+	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+	{
+		ModChannel &chn = m_sndFile.m_PlayState.Chn[i];
+		if(chn.pModSample == &m_sndFile.GetSample(m_nSample))
+		{
+			chn.nTranspose = sample.RelativeTone;
+			chn.nFineTune = sample.nFineTune;
+			if(chn.nC5Speed != 0 && sample.nC5Speed != 0)
+			{
+				if(m_sndFile.m_SongFlags[SONG_LINEARSLIDES] && (m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+					chn.nPeriod = Util::muldivr(chn.nPeriod, sample.nC5Speed, chn.nC5Speed);
+				else
+					chn.nPeriod = Util::muldivr(chn.nPeriod, chn.nC5Speed, sample.nC5Speed);
+			}
+			chn.nC5Speed = sample.nC5Speed;
+		}
 	}
 }
 
 
 void CCtrlSamples::OnBaseNoteChanged()
-//-------------------------------------
+//------------------------------------
 {
 	if (IsLocked()) return;
 	int n = static_cast<int>(m_CbnBaseNote.GetItemData(m_CbnBaseNote.GetCurSel()));
@@ -2506,6 +2532,7 @@ void CCtrlSamples::OnBaseNoteChanged()
 			sample.nC5Speed = newTrans;
 			LockControls();
 			SetDlgItemInt(IDC_EDIT5, newTrans, FALSE);
+			OnFineTuneChangedDone();
 			UnlockControls();
 			SetModified(SampleHint().Info(), false, false);
 		}
@@ -2514,6 +2541,7 @@ void CCtrlSamples::OnBaseNoteChanged()
 		if ((n >= -128) && (n < 128))
 		{
 			sample.RelativeTone = (int8)n;
+			OnFineTuneChangedDone();
 			SetModified(SampleHint().Info(), false, false);
 		}
 	}
@@ -2958,6 +2986,7 @@ NoSample:
 		}
 		redraw = true;
 		m_SpinFineTune.SetPos(0);
+		OnFineTuneChangedDone();
 	}
 	if(nCode == SB_ENDSCROLL) SwitchToView();
 	if(redraw)
