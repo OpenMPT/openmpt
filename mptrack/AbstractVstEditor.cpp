@@ -19,7 +19,7 @@
 #include "../common/StringFixer.h"
 #include "MIDIMacros.h"
 #include "VstPresets.h"
-#include "../soundlib/FileReader.h"
+#include "../common/FileReader.h"
 #include "InputHandler.h"
 #include "dlg_misc.h"
 

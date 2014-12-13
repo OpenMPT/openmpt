@@ -74,9 +74,6 @@
     <ClInclude Include="..\soundlib\Dlsbank.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
-    <ClInclude Include="..\soundlib\FileReader.h">
-      <Filter>Header Files\soundlib</Filter>
-    </ClInclude>
     <ClInclude Include="..\soundlib\ITCompression.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
@@ -267,6 +264,9 @@
       <Filter>Header Files\common</Filter>
     </ClInclude>
     <ClInclude Include="..\common\mptFileIO.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\FileReader.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
   </ItemGroup>

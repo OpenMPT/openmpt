@@ -9,7 +9,7 @@
 
 #include "stdafx.h"
 
-#include "../soundlib/FileReader.h"
+#include "../common/FileReader.h"
 #include "unzip.h"
 #include "../common/misc_util.h"
 #include <algorithm>

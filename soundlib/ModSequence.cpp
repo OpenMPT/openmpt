@@ -16,7 +16,7 @@
 #endif // MODPLUG_TRACKER
 #include "../common/version.h"
 #include "../common/serialization_utils.h"
-#include "FileReader.h"
+#include "../common/FileReader.h"
 #include <functional>
 
 #if defined(MODPLUG_TRACKER)

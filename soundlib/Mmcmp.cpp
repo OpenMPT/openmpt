@@ -11,7 +11,7 @@
 
 #include "stdafx.h"
 #include "Sndfile.h"
-#include "FileReader.h"
+#include "../common/FileReader.h"
 
 #include <stdexcept>
 

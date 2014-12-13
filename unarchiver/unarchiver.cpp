@@ -10,7 +10,7 @@
 #include "stdafx.h"
 
 #include "unarchiver.h"
-#include "../soundlib/FileReader.h"
+#include "../common/FileReader.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

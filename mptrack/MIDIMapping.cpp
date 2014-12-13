@@ -11,7 +11,7 @@
 #include "stdafx.h"
 #include "../soundlib/MIDIEvents.h"
 #include "Mainfrm.h"
-#include "../soundlib/FileReader.h"
+#include "../common/FileReader.h"
 #include "MIDIMapping.h"
 
 

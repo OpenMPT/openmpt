@@ -11,11 +11,11 @@
 #pragma once
 
 
-#include "../common/typedefs.h"
-#include "../common/StringFixer.h"
-#include "../common/misc_util.h"
-#include "../common/Endianness.h"
-#include "../common/mptIO.h"
+#include "typedefs.h"
+#include "StringFixer.h"
+#include "misc_util.h"
+#include "Endianness.h"
+#include "mptIO.h"
 #include <algorithm>
 #include <limits>
 #include <vector>

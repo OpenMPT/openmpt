@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "FileReader.h"
+#include "../common/FileReader.h"
 
 #include <vector>
 

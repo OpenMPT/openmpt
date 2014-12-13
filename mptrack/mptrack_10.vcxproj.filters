@@ -609,9 +609,6 @@
     <ClInclude Include="..\soundlib\ChunkReader.h">
       <Filter>Source Files\soundlib\Module Loaders</Filter>
     </ClInclude>
-    <ClInclude Include="..\soundlib\FileReader.h">
-      <Filter>Source Files\soundlib\Module Loaders</Filter>
-    </ClInclude>
     <ClInclude Include="..\soundlib\WAVTools.h">
       <Filter>Source Files\soundlib\Module Loaders</Filter>
     </ClInclude>
@@ -1052,6 +1049,9 @@
     </ClInclude>
     <ClInclude Include="CListCtrl.h">
       <Filter>Header Files\mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\FileReader.h">
+      <Filter>Header Files\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
