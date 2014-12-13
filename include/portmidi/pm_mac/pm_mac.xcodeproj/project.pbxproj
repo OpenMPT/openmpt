@@ -159,7 +159,7 @@
 		89D0F1390F3948A9007831A7 /* pmdefaults/make */ = {isa = PBXFileReference; lastKnownFileType = folder; path = pmdefaults/make; sourceTree = "<group>"; };
 		89D0F15D0F3A0FF7007831A7 /* pmdefaults.jar */ = {isa = PBXFileReference; lastKnownFileType = archive.jar; name = pmdefaults.jar; path = build/Release/pmdefaults.jar; sourceTree = SOURCE_ROOT; };
 		89D0F1860F3A2442007831A7 /* JavaVM.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaVM.framework; path = /System/Library/Frameworks/JavaVM.framework; sourceTree = "<absolute>"; };
-		8D1107320486CEB800E47090 /* PmDefaults.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PmDefaults.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* pmdefaults.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = pmdefaults.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -186,7 +186,7 @@
 			isa = PBXGroup;
 			children = (
 				89D0F15D0F3A0FF7007831A7 /* pmdefaults.jar */,
-				8D1107320486CEB800E47090 /* PmDefaults.app */,
+				8D1107320486CEB800E47090 /* pmdefaults.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -301,7 +301,7 @@
 			name = "Assemble Application";
 			productInstallPath = "$(HOME)/Applications";
 			productName = pmdefaults;
-			productReference = 8D1107320486CEB800E47090 /* PmDefaults.app */;
+			productReference = 8D1107320486CEB800E47090 /* pmdefaults.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
