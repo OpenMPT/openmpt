@@ -38,12 +38,14 @@ public:
 	CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent);
 	~CSelectPluginDlg();
 
+	static VSTPluginLib *ScanPlugins(const mpt::PathString &path, CWnd *parent);
+
 protected:
 	VSTPluginLib *GetSelectedPlugin() { return reinterpret_cast<VSTPluginLib *>(m_treePlugins.GetItemData(m_treePlugins.GetSelectedItem())); }
 
 	void DoClose();
 	void UpdatePluginsList(VstInt32 forceSelect = 0);
-	bool VerifyPlug(VSTPluginLib *plug);
+	static bool VerifyPlug(VSTPluginLib *plug, CWnd *parent);
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();

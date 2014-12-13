@@ -538,6 +538,9 @@
     <ClCompile Include="ExternalSamples.cpp">
       <Filter>Source Files\mptrack\Dialogs</Filter>
     </ClCompile>
+    <ClCompile Include="WelcomeDialog.cpp">
+      <Filter>Source Files\mptrack\Dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1052,6 +1055,9 @@
     </ClInclude>
     <ClInclude Include="..\common\FileReader.h">
       <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="WelcomeDialog.h">
+      <Filter>Header Files\mptrack\Dialogs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

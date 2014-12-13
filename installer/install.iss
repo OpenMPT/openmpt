@@ -49,9 +49,7 @@ Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription
 #ifdef DOWNLOAD_MO3
 Name: downloadmo3; Description: Download unmo3 (library needed for reading MO3 files, recommended); GroupDescription: Options:
 #endif
-Name: update_c; Description: Automatically check for updates; GroupDescription: Options:
 Name: portable; Description: Portable mode (use program folder for storing settings, no registry changes); GroupDescription: Options:; Flags: unchecked
-Name: vst_scan; Description: Scan for previously installed VST plugins; GroupDescription: Options:; Flags: unchecked
 ; file associations - put this below all other [tasks]!
 #include "filetypes.iss"
 
@@ -146,7 +144,6 @@ Type: files; Name: {app}\unmo3.dll; Tasks: downloadmo3
 #endif
 
 #include "utilities.iss"
-#include "vst_scan.iss"
 #include "plugins.iss"
 
 [Code]
@@ -191,15 +188,7 @@ begin
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
-var
-    INIFile: String;
-    keyboardFilepath: String;
-    baseLanguage: Integer;
-
 begin
-    // Get the right INI path.
-    INIFile := GetINIPath();
-
     case CurStep of
     ssPostInstall:
         begin
@@ -212,55 +201,6 @@ begin
 
             // Copy old config files from app's directory, if possible and necessary.
             CopyConfigsToAppDataDir();
-
-            // Find a suitable keyboard layout (might not be very precise sometimes, as it's based on the UI language)
-            // Check http://msdn.microsoft.com/en-us/library/ms776294%28VS.85%29.aspx for the correct language codes.
-            keyboardFilepath := '';
-            baseLanguage := (GetUILanguage and $3FF);
-            case baseLanguage of
-            $07:  // German
-                begin
-                    keyboardFilepath := 'DE_jojo';
-                end;
-            $0a:  // Spanish
-                begin
-                    // Spanish latin-american keymap, so we ignore Spain.
-                    if(GetUILanguage <> $0c0a) then
-                    begin
-                        keyboardFilepath := 'es-LA_mpt_(jmkz)';
-                    end;
-                end;
-            $0c:  // French
-                begin
-                    keyboardFilepath := 'FR_mpt_(legovitch)';
-                end;
-            $14:  // Norwegian
-                begin
-                    keyboardFilepath := 'NO_mpt_classic_(rakib)';
-                end;
-            end;
-
-            // Found an alternative keybinding.
-            if(keyboardFilepath <> '') then
-            begin
-                FileCopy(ExpandConstant('{app}\extraKeymaps\') + keyboardFilepath + '.mkb', ExtractFilePath(INIFile) + 'Keybindings.mkb', true);
-            end;
-
-            // Update check
-            if(not IsTaskSelected('update_c')) then
-            begin
-                SetIniString('Update', 'UpdateCheckPeriod', '0', INIFile);
-            end else
-            begin
-                SetIniString('Update', 'UpdateCheckPeriod', '7', INIFile);
-                //SetIniString('Update', 'LastUpdateCheck', GetDateTimeString('yyyy-mm-dd hh:nn', #0, #0), INIFile);
-            end;
-
-            // Scan for pre-installed VST plugins
-            if(IsTaskSelected('vst_scan')) then
-            begin
-                OnVSTScan(INIFile);
-            end;
         end;
     end;
 end;

@@ -920,6 +920,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WelcomeDialog.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\WindowedFIR.cpp"
 				>
 			</File>
@@ -1631,6 +1635,10 @@
 			</File>
 			<File
 				RelativePath=".\VstPresets.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WelcomeDialog.h"
 				>
 			</File>
 			<File

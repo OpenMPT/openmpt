@@ -271,6 +271,7 @@ public:
 		return *m_pTrackerSettings;
 	}
 	bool IsPortableMode() { return m_bPortableMode; }
+	void SetPortableMode(bool portable) { m_bPortableMode = portable; }
 	SettingsContainer & GetPluginCache()
 	{
 		ASSERT(m_pPluginCache);

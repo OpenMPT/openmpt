@@ -475,8 +475,8 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 }
 
 
-bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug)
-//---------------------------------------------------
+bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
+//-----------------------------------------------------------------
 {
 	// TODO: Keep these lists up-to-date.
 	static const struct
@@ -514,7 +514,7 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug)
 		{
 			CString s;
 			s.Format("WARNING: This plugin has been identified as %s,\nwhich is known to have the following problem with OpenMPT:\n\n%s\n\nWould you still like to add this plugin to the library?", problemPlugs[p].name, problemPlugs[p].problem);
-			if(Reporting::Confirm(s, false, false, this) == cnfNo)
+			if(Reporting::Confirm(s, false, false, parent) == cnfNo)
 			{
 				return false;
 			}
@@ -563,7 +563,7 @@ void CSelectPluginDlg::OnAddPlugin()
 			if(lib != nullptr)
 			{
 				update = true;
-				if(!VerifyPlug(lib))
+				if(!VerifyPlug(lib, this))
 				{
 					pManager->RemovePlugin(lib);
 				} else
@@ -618,20 +618,28 @@ void CSelectPluginDlg::OnScanFolder()
 	if(!dlg.Show(this)) return;
 
 	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetDirectory(), DIR_PLUGINS);
+	VSTPluginLib *plugLib = ScanPlugins(dlg.GetDirectory(), this);
+	UpdatePluginsList(plugLib ? plugLib->pluginId2 : 0);
+}
 
+
+VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *parent)
+//------------------------------------------------------------------------------------
+{
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	VSTPluginLib *plugLib = nullptr;
 	bool update = false;
 
 	CDialog pluginScanDlg;
-	pluginScanDlg.Create(IDD_SCANPLUGINS, this);
-	pluginScanDlg.CenterWindow(this);
+	pluginScanDlg.Create(IDD_SCANPLUGINS, parent);
+	pluginScanDlg.CenterWindow(parent);
+	pluginScanDlg.ModifyStyle(0, WS_SYSMENU, WS_SYSMENU);
 	pluginScanDlg.ShowWindow(SW_SHOW);
 
-	FolderScanner scan(dlg.GetDirectory(), true);
+	FolderScanner scan(path, true);
 	mpt::PathString fileName;
 	int files = 0;
-	while(scan.NextFile(fileName))
+	while(scan.NextFile(fileName) && pluginScanDlg.IsWindowVisible())
 	{
 		if(!mpt::PathString::CompareNoCase(fileName.GetFileExt(), MPT_PATHSTRING(".dll")))
 		{
@@ -649,7 +657,7 @@ void CSelectPluginDlg::OnScanFolder()
 			if(lib)
 			{
 				update = true;
-				if(!VerifyPlug(lib))
+				if(!VerifyPlug(lib, parent))
 				{
 					pManager->RemovePlugin(lib);
 				} else
@@ -664,11 +672,12 @@ void CSelectPluginDlg::OnScanFolder()
 	if(update)
 	{
 		// Force selection to last added plug.
-		Reporting::Information(mpt::String::Print("Found %1 plugins.", files).c_str(), this);
-		UpdatePluginsList(plugLib ? plugLib->pluginId2 : 0);
+		Reporting::Information(mpt::String::Print("Found %1 plugins.", files).c_str(), parent);
+		return plugLib;
 	} else
 	{
 		Reporting::Error("Could not find any valid VST plugins.");
+		return nullptr;
 	}
 }
 
