@@ -13,7 +13,7 @@
 #include <vector>
 #include <iosfwd>
 #include "Snd_defs.h"
-#include "FileReader.h"
+#include "../common/FileReader.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

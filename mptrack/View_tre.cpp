@@ -19,7 +19,7 @@
 #include "dlg_misc.h"
 #include "vstplug.h"
 #include "../common/mptFileIO.h"
-#include "../soundlib/FileReader.h"
+#include "../common/FileReader.h"
 #include "FileDialog.h"
 #include "Globals.h"
 #include "ExternalSamples.h"

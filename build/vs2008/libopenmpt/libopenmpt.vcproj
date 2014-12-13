@@ -174,6 +174,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\common\FileReader.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\common\FlagSet.h"
 				>
 			</File>
@@ -315,10 +319,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\soundlib\Fastmix.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\soundlib\FileReader.h"
 				>
 			</File>
 			<File

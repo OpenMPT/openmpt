@@ -20,7 +20,7 @@
 #include "../common/StringFixer.h"
 #include "../common/serialization_utils.h"
 #include "../soundlib/Sndfile.h"
-#include "../soundlib/FileReader.h"
+#include "../common/FileReader.h"
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/MIDIMacros.h"
 #include "../soundlib/SampleFormatConverters.h"

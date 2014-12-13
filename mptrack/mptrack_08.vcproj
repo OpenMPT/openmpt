@@ -1254,7 +1254,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\FolderScanner.h"
+				RelativePath="..\common\FileReader.h"
 				>
 			</File>
 			<File
@@ -1263,6 +1263,10 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\FloatMixer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FolderScanner.h"
 				>
 			</File>
 			<File
@@ -1767,10 +1771,6 @@
 			>
 			<File
 				RelativePath="..\soundlib\ChunkReader.h"
-				>
-			</File>
-			<File
-				RelativePath="..\soundlib\FileReader.h"
 				>
 			</File>
 			<File

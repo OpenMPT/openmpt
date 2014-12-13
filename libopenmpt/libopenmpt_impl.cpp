@@ -27,9 +27,9 @@
 
 #include "common/version.h"
 #include "common/misc_util.h"
+#include "common/FileReader.h"
 #include "soundlib/Sndfile.h"
 #include "soundlib/AudioReadTarget.h"
-#include "soundlib/FileReader.h"
 
 using namespace OpenMPT;
 

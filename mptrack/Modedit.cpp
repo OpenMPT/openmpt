@@ -20,7 +20,7 @@
 // VST cloning
 #include "Vstplug.h"
 #include "VstPresets.h"
-#include "../soundlib/FileReader.h"
+#include "../common/FileReader.h"
 #include <sstream>
 
 

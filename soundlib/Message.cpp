@@ -15,7 +15,7 @@
 
 #include "stdafx.h"
 #include "Message.h"
-#include "FileReader.h"
+#include "../common/FileReader.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

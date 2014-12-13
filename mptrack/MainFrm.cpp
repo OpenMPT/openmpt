@@ -35,7 +35,7 @@
 #include "ExceptionHandler.h"
 #include "PatternClipboard.h"
 #include "../common/mptFileIO.h"
-#include "../soundlib/FileReader.h"
+#include "../common/FileReader.h"
 #include "../common/Profiler.h"
 #include "FileDialog.h"
 #include <HtmlHelp.h>

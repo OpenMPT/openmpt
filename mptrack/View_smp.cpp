@@ -23,7 +23,7 @@
 #include "../soundlib/MIDIEvents.h"
 #include "SampleEditorDialogs.h"
 #include "../soundlib/WAVTools.h"
-#include "../soundlib/FileReader.h"
+#include "../common/FileReader.h"
 #include "../soundlib/SampleFormatConverters.h"
 
 

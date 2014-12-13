@@ -12,7 +12,7 @@
 #include "stdafx.h"
 #include "MPTrackUtil.h"
 #include "PNG.h"
-#include "../soundlib/FileReader.h"
+#include "../common/FileReader.h"
 #if !defined(NO_ZLIB)
 #include <zlib.h>
 #elif !defined(NO_MINIZ)

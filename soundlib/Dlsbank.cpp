@@ -18,7 +18,7 @@
 #include "Dlsbank.h"
 #include "Wav.h"
 #include "../common/StringFixer.h"
-#include "../soundlib/FileReader.h"
+#include "../common/FileReader.h"
 #include "../common/Endianness.h"
 #include "SampleIO.h"
 

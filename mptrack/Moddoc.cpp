@@ -30,7 +30,7 @@
 #include "CleanupSong.h"
 #include "../common/StringFixer.h"
 #include "../common/mptFileIO.h"
-#include "../soundlib/FileReader.h"
+#include "../common/FileReader.h"
 #include <shlwapi.h>
 #include "FileDialog.h"
 #include "ExternalSamples.h"

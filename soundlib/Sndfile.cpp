@@ -26,7 +26,7 @@
 #include "Sndfile.h"
 #include "tuningcollection.h"
 #include "../common/StringFixer.h"
-#include "FileReader.h"
+#include "../common/FileReader.h"
 #include <sstream>
 #include <time.h>
 

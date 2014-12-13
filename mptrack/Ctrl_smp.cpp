@@ -28,7 +28,7 @@
 #include "Autotune.h"
 #include "../common/StringFixer.h"
 #include "../common/mptFileIO.h"
-#include "../soundlib/FileReader.h"
+#include "../common/FileReader.h"
 #include "../soundlib/SampleFormatConverters.h"
 #include "FileDialog.h"
 #include "../common/ComponentManager.h"

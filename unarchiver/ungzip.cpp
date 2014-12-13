@@ -9,7 +9,7 @@
 
 #include "stdafx.h"
 
-#include "../soundlib/FileReader.h"
+#include "../common/FileReader.h"
 #include "ungzip.h"
 
 #if !defined(NO_ZLIB)

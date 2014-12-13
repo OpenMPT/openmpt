@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "../soundlib/FileReader.h"
+#include "../common/FileReader.h"
 #include <string>
 #include <vector>
 

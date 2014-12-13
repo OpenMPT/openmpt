@@ -10,7 +10,7 @@
 #pragma once
 
 #include "../common/misc_util.h"
-#include "FileReader.h"
+#include "../common/FileReader.h"
 #include "Sndfile.h"
 #include "SampleIO.h"
 

@@ -24,7 +24,7 @@
 #include "MIDIMappingDialog.h"
 #include "../common/StringFixer.h"
 #include "../common/mptFileIO.h"
-#include "../soundlib/FileReader.h"
+#include "../common/FileReader.h"
 #include "FileDialog.h"
 
 

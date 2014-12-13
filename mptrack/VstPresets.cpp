@@ -15,7 +15,7 @@
 #include "Vstplug.h"
 #include <vstsdk2.4/pluginterfaces/vst2.x/vstfxstore.h>
 #include "VstPresets.h"
-#include "../soundlib/FileReader.h"
+#include "../common/FileReader.h"
 #include <ostream>
 
 
