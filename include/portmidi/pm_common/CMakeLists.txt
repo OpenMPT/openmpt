@@ -22,9 +22,9 @@ else(APPLE OR WIN32)
 endif(APPLE OR WIN32)
 
 if(APPLE)
-  set(CMAKE_OSX_SYSROOT /Developer/SDKs/MacOSX10.5.sdk CACHE 
-      PATH "-isysroot parameter for compiler" FORCE)
-  set(CMAKE_C_FLAGS "-mmacosx-version-min=10.5" CACHE 
+  set(CMAKE_OSX_SYSROOT /Developer/SDKs/MacOSX10.6.sdk CACHE 
+      PATH "-isysroot parameter for compiler")
+  set(CMAKE_C_FLAGS "-mmacosx-version-min=10.6" CACHE 
       STRING "needed in conjunction with CMAKE_OSX_SYSROOT" FORCE)
 endif(APPLE)
 
