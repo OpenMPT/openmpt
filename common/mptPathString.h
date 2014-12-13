@@ -100,6 +100,12 @@ public:
 	
 	// Verify if this path represents a valid directory on the file system.
 	bool IsDirectory() const { return ::PathIsDirectoryW(path.c_str()) != FALSE; }
+	bool IsFile() const
+	{
+		DWORD dwAttrib = ::GetFileAttributesW(path.c_str());
+		return (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+	}
+	bool FileOrDirectoryExists() const { return ::PathFileExistsW(path.c_str()) != FALSE; }
 
 	// Return the same path string with a different (or appended) extension (including "."), e.g. "foo.bar",".txt" -> "foo.txt" or "C:\OpenMPT\foo",".txt" -> "C:\OpenMPT\foo.txt"
 	PathString ReplaceExt(const mpt::PathString &newExt) const;

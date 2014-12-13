@@ -931,6 +931,7 @@
     <ClCompile Include="VSTEditor.cpp" />
     <ClCompile Include="Vstplug.cpp" />
     <ClCompile Include="VstPresets.cpp" />
+    <ClCompile Include="WelcomeDialog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="mptrack.rc" />
@@ -1107,6 +1108,7 @@
     <ClInclude Include="VSTEditor.h" />
     <ClInclude Include="Vstplug.h" />
     <ClInclude Include="VstPresets.h" />
+    <ClInclude Include="WelcomeDialog.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\soundlib\Tunings\built-inTunings.tc" />

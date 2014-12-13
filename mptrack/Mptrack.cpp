@@ -31,6 +31,7 @@
 #include "FileDialog.h"
 #include "PNG.h"
 #include "../common/ComponentManager.h"
+#include "WelcomeDialog.h"
 
 // rewbs.memLeak
 #define _CRTDBG_MAP_ALLOC
@@ -119,7 +120,7 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 			{
 				CMainFrame::GetMainFrame()->UpdateMRUList();
 			}
-			if(PathFileExistsW(filename.AsNative().c_str()) == FALSE)
+			if(!filename.IsFile())
 			{
 				Reporting::Error(L"Unable to open \"" + filename.ToWide() + L"\": file does not exist.");
 			}
@@ -767,7 +768,7 @@ bool CTrackApp::MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDi
 		sNewPath += sFileName;
 	}
 
-	if(PathFileExistsW(sNewPath.AsNative().c_str()) == 0 && PathFileExistsW(sOldPath.AsNative().c_str()) != 0)
+	if(!sNewPath.IsFile() && sOldPath.IsFile())
 	{
 		return (MoveFileW(sOldPath.AsNative().c_str(), sNewPath.AsNative().c_str()) != 0);
 	}
@@ -1014,16 +1015,22 @@ BOOL CTrackApp::InitInstance()
 	m_dwTimeStarted = timeGetTime();
 	m_bInitialized = TRUE;
 
-	if(CUpdateCheck::GetUpdateCheckPeriod() != 0)
+	const bool firstRun = TrackerSettings::Instance().gcsPreviousVersion == 0;
+	if(CUpdateCheck::GetUpdateCheckPeriod() != 0 && !firstRun)
 	{
 		CUpdateCheck::DoUpdateCheck(true);
 	}
 
 	// Open settings if the previous execution was with an earlier version.
-	if(TrackerSettings::Instance().ShowSettingsOnNewVersion && TrackerSettings::Instance().gcsPreviousVersion < MptVersion::num)
+	if(TrackerSettings::Instance().ShowSettingsOnNewVersion && !firstRun && TrackerSettings::Instance().gcsPreviousVersion < MptVersion::num)
 	{
 		StopSplashScreen();
 		m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
+	}
+
+	if(firstRun)
+	{
+		new WelcomeDlg(m_pMainWnd);
 	}
 
 	EndWaitCursor();

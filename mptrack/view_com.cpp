@@ -198,7 +198,6 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 	m_ToolBar.ChangeBitmap(IDC_LIST_INSTRUMENTS, sndFile.GetNumInstruments() ? IMAGE_INSTRUMENTS : IMAGE_INSTRMUTE);
 
 	TCHAR s[512], stmp[256];
-	LV_COLUMN lvc;
 	LV_ITEM lvi, lvi2;
 
 	m_ItemList.SetRedraw(FALSE);

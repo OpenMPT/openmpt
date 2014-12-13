@@ -55,7 +55,7 @@ TrackerSettings &TrackerSettings::Instance()
 static MptVersion::VersionNum GetStoredVersion(const std::string &iniVersion)
 //---------------------------------------------------------------------------
 {
-	MptVersion::VersionNum result = MptVersion::num;
+	MptVersion::VersionNum result = 0;
 	if(!iniVersion.empty())
 	{
 		result = MptVersion::ToNum(iniVersion);
@@ -375,7 +375,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Fixups:
 	// -------
 
-	const MptVersion::VersionNum storedVersion = gcsPreviousVersion;
+	const MptVersion::VersionNum storedVersion = gcsPreviousVersion ? gcsPreviousVersion : MptVersion::num;
 
 	// Version
 	if(gcsInstallGUID.Get().empty())
