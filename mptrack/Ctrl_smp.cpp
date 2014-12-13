@@ -1484,8 +1484,17 @@ void CCtrlSamples::OnResample()
 	{
 		return;
 	}
+	ApplyResample(dlg.GetFrequency());
+}
 
+
+void CCtrlSamples::ApplyResample(uint32_t newRate)
+//------------------------------------------------
+{
 	BeginWaitCursor();
+
+	ModSample &sample = m_sndFile.GetSample(m_nSample);
+	if(sample.pSample == nullptr) return;
 
 	SampleSelectionPoints selection = GetSelectionPoints();
 	LimitMax(selection.nEnd, sample.nLength);
@@ -1495,7 +1504,7 @@ void CCtrlSamples::OnResample()
 		selection.nEnd = sample.nLength;
 	}
 
-	const uint32 newRate = dlg.GetFrequency();
+	const uint32_t oldRate = sample.GetSampleRate(m_sndFile.GetType());
 	const SmpLength selLength = (selection.nEnd - selection.nStart);
 	const SmpLength newSelLength = Util::muldivr_unsigned(selLength, newRate, oldRate);
 	const SmpLength newSelEnd = selection.nStart + newSelLength;
@@ -3042,6 +3051,17 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	case kcSampleTransposeDown: transpose = -1; break;
 	case kcSampleTransposeOctUp: transpose = 12; break;
 	case kcSampleTransposeOctDown: transpose = -12; break;
+
+	case kcSampleUpsample:
+	case kcSampleDownsample:
+		{
+			uint32_t oldRate = m_sndFile.GetSample(m_nSample).GetSampleRate(m_sndFile.GetType());
+			ApplyResample(wParam == kcSampleUpsample ? oldRate * 2 : oldRate / 2);
+		}
+		break;
+	case kcSampleResample:
+		OnResample();
+		break;
 	}
 
 	if(transpose)

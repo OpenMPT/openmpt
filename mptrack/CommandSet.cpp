@@ -667,6 +667,9 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleTransposeOctDown, 1910, _T("Transpose -12"));
 	DefineKeyCommand(kcPatternInterpolateInstr, 1911, _T("Interpolate Instrument"));
 	DefineKeyCommand(kcDummyShortcut, 1912, _T("Dummy Shortcut"));
+	DefineKeyCommand(kcSampleUpsample, 1913, _T("Upsample"));
+	DefineKeyCommand(kcSampleDownsample, 1914, _T("Downsample"));
+	DefineKeyCommand(kcSampleResample, 1915, _T("Resample"));
 
 	// Add new key commands here.
 

@@ -290,6 +290,7 @@ version:1
 8:1386:0:107:1		//Zoom Out: NUM PLUS (KeyDown)
 8:1387:0:109:1		//Zoom In: NUM SUB (KeyDown)
 8:1882:0:32:1		//Zoom into Selection: Space (KeyDown)
+8:1915:2:82:1		//Resample: Ctrl+R (KeyDown)
 8:1784:2:73:1		//Invert Sample Phase: Ctrl+I (KeyDown)
 8:1785:2:85:1		//Signed / Unsigned Conversion: Ctrl+U (KeyDown)
 8:1790:2:69:1		//Remove DC Offset: Ctrl+E (KeyDown)
