@@ -176,7 +176,7 @@ public:
 	{
 		CDocument* pDoc = CWinApp::OpenDocumentFile(filename.empty() ? NULL : mpt::PathString::TunnelIntoCString(filename).GetString());
 		if (pDoc && bAddToMRU != TRUE)
-			RemoveMruItem(0); // This doesn't result to the same behaviour as not adding to MRU 
+			RemoveMruItem(0); // This doesn't result to the same behaviour as not adding to MRU
 							  // (if the new item got added, it might have already dropped the last item out)
 		return pDoc;
 	}
@@ -205,6 +205,8 @@ protected:
 	IniFileSettingsBackend *m_pSettingsIniFile;
 	SettingsContainer *m_pSettings;
 	TrackerSettings *m_pTrackerSettings;
+	IniFileSettingsBackend *m_pSongSettingsIniFile;
+	SettingsContainer *m_pSongSettings;
 	ComponentManagerSettings *m_pComponentManagerSettings;
 	IniFileSettingsContainer *m_pPluginCache;
 	CModDocTemplate *m_pModTemplate;
@@ -276,6 +278,12 @@ public:
 	{
 		ASSERT(m_pPluginCache);
 		return *m_pPluginCache;
+	}
+
+	SettingsContainer & GetSongSettings()
+	{
+		ASSERT(m_pSongSettings);
+		return *m_pSongSettings;
 	}
 
 	/// Returns path to config folder including trailing '\'.
@@ -402,7 +410,7 @@ void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug);
 // Append note names in range [noteStart, noteEnd] to given combobox. Index starts from 0.
 void AppendNotesToControl(CComboBox& combobox, const ModCommand::NOTE noteStart, const ModCommand::NOTE noteEnd);
 
-// Append note names to combobox. If pSndFile != nullprt, appends only notes that are 
+// Append note names to combobox. If pSndFile != nullprt, appends only notes that are
 // available in the module type. If nInstr is given, instrument specific note names are used instead of
 // default note names.
 void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile &sndFile, const INSTRUMENTINDEX nInstr = MAX_INSTRUMENTS);

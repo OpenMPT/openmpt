@@ -108,7 +108,7 @@ CCtrlPatterns::CCtrlPatterns(CModControlView &parent, CModDoc &document) : CModC
 //---------------------------------------------------------------------------------------------------------------------------------------
 {
 	m_nInstrument = 0;
-	
+
 	m_bVUMeters = TrackerSettings::Instance().gbPatternVUMeters;
 	m_bPluginNames = TrackerSettings::Instance().gbPatternPluginNames;	 	//rewbs.patPlugNames
 	m_bRecord = TrackerSettings::Instance().gbPatternRecord;
@@ -198,7 +198,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex());
 	SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_sndFile.Order.GetName().c_str());
 
-	m_OrderList.SetFocus(); 
+	m_OrderList.SetFocus();
 
 	UpdateView(PatternHint().Names().ModType(), NULL);
 	RecalcLayout();
@@ -467,7 +467,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case CTRLMSG_PREVORDER:
 		m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).firstOrd - 1, true);
 		break;
-	
+
 	case CTRLMSG_NEXTORDER:
 		m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).firstOrd + 1, true);
 		break;
@@ -497,7 +497,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 			{
 				setLoop = (lParam != 0);
 			}
-				
+
 			if (setLoop)
 			{
 				m_sndFile.m_SongFlags.set(SONG_PATTERNLOOP);
@@ -505,7 +505,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 			} else
 			{
 				m_sndFile.m_SongFlags.reset(SONG_PATTERNLOOP);
-				CheckDlgButton(IDC_PATTERN_LOOP, BST_UNCHECKED);	
+				CheckDlgButton(IDC_PATTERN_LOOP, BST_UNCHECKED);
 			}
 
 			break;
@@ -595,7 +595,7 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 			}
 		}
 		SetCurrentPattern(nPat);
-	} 
+	}
 	else if ((lParam & 0x80000000))
 	{
 		// Order item
@@ -616,12 +616,18 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		OnSpacingChanged();
 		if (m_bRecord) SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 		CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
-		
+
 		//Restore all save pattern state, except pattern number which we might have just set.
-		PATTERNVIEWSTATE* patternViewState = pFrame->GetPatternViewState();
-		patternViewState->nPattern = static_cast<PATTERNINDEX>(SendViewMessage(VIEWMSG_GETCURRENTPATTERN));
-		if (pFrame) SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)patternViewState);
-		
+		PATTERNVIEWSTATE &patternViewState = pFrame->GetPatternViewState();
+		if(patternViewState.initialOrder != ORDERINDEX_INVALID)
+		{
+			m_OrderList.SetCurSel(patternViewState.initialOrder);
+			patternViewState.initialOrder = ORDERINDEX_INVALID;
+		}
+
+		patternViewState.nPattern = static_cast<PATTERNINDEX>(SendViewMessage(VIEWMSG_GETCURRENTPATTERN));
+		if (pFrame) SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&patternViewState);
+
 		SwitchToView();
 	}
 
@@ -634,7 +640,7 @@ void CCtrlPatterns::OnDeactivatePage()
 //------------------------------------
 {
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
-	if ((pFrame) && (m_hWndView)) SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)pFrame->GetPatternViewState());
+	if ((pFrame) && (m_hWndView)) SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&pFrame->GetPatternViewState());
 }
 
 
@@ -723,7 +729,7 @@ void CCtrlPatterns::OnSpacingChanged()
 	if ((m_EditSpacing.m_hWnd) && (m_EditSpacing.GetWindowTextLength() > 0))
 	{
 		TrackerSettings::Instance().gnPatternSpacing = GetDlgItemInt(IDC_EDIT_SPACING);
-		if (TrackerSettings::Instance().gnPatternSpacing > MAX_SPACING) 
+		if (TrackerSettings::Instance().gnPatternSpacing > MAX_SPACING)
 		{
 			TrackerSettings::Instance().gnPatternSpacing = MAX_SPACING;
 			SetDlgItemInt(IDC_EDIT_SPACING, TrackerSettings::Instance().gnPatternSpacing, FALSE);
@@ -1089,7 +1095,7 @@ void CCtrlPatterns::OnPatternNameChanged()
 		CHAR s[MAX_PATTERNNAME];
 		m_EditPatName.GetWindowText(s, CountOf(s));
 		mpt::String::SetNullTerminator(s);
-		
+
 		if(m_sndFile.Patterns[nPat].GetName() != s)
 		{
 			if(m_sndFile.Patterns[nPat].SetName(s))
@@ -1140,7 +1146,7 @@ void CCtrlPatterns::OnSetupZxxMacros()
 					m_sndFile.m_SongFlags.set(SONG_EMBEDMIDICFG);
 					m_modDoc.SetModified();
 				}
-			}	
+			}
 		}
 	}
 }
@@ -1238,7 +1244,7 @@ BOOL CCtrlPatterns::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	return CModControlDlg::OnMouseWheel(nFlags, zDelta, pt);
 }
 
-BOOL CCtrlPatterns::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/) 
+BOOL CCtrlPatterns::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 //---------------------------------------------------------------------
 {
     TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
@@ -1268,7 +1274,7 @@ void CCtrlPatterns::OnSequenceNumChanged()
 		// avoid reloading the order list and thus setting the document modified
 		if(newSeq == m_sndFile.Order.GetCurrentSequenceIndex())
 			return;
-		
+
 		if (newSeq >= MAX_SEQUENCES)
 		{
 			newSeq = MAX_SEQUENCES - 1;
@@ -1277,6 +1283,5 @@ void CCtrlPatterns::OnSequenceNumChanged()
 		m_OrderList.SelectSequence(newSeq);
 	}
 }
-
 
 OPENMPT_NAMESPACE_END

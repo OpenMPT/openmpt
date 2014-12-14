@@ -257,13 +257,13 @@ BOOL CCtrlSamples::OnInitDialog()
 	GetDlgItem(IDC_BUTTON1)->ShowWindow(SW_SHOW); // PitchShiftTimeStretch
 	GetDlgItem(IDC_BUTTON2)->ShowWindow(SW_SHOW); // EstimateSampleSize
 	GetDlgItem(IDC_CHECK3)->ShowWindow(SW_SHOW);  // EnableStretchToSize
-	GetDlgItem(IDC_EDIT6)->ShowWindow(SW_SHOW);   // 
+	GetDlgItem(IDC_EDIT6)->ShowWindow(SW_SHOW);   //
 	GetDlgItem(IDC_GROUPBOX_PITCH_TIME)->ShowWindow(SW_SHOW);  //
 	GetDlgItem(IDC_TEXT_PITCH)->ShowWindow(SW_SHOW);  //
 	GetDlgItem(IDC_TEXT_QUALITY)->ShowWindow(SW_SHOW);  //
 	GetDlgItem(IDC_TEXT_FFT)->ShowWindow(SW_SHOW);  //
 	GetDlgItem(IDC_GROUPBOX_PITCH_TIME)->ShowWindow(SW_SHOW);  //
-	
+
 	CHAR str[16];
 
 	// Pitch selection
@@ -400,12 +400,20 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 			m_parent.InstrumentChanged(lParam);
 		}
 	}
+
+	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
+	SAMPLEVIEWSTATE &sampleState = pFrame->GetSampleViewState();
+	if(sampleState.initialSample != 0)
+	{
+		m_nSample = sampleState.initialSample;
+		sampleState.initialSample = 0;
+	}
+
 	SetCurrentSample((lParam > 0) ? ((SAMPLEINDEX)lParam) : m_nSample);
 
 	// Initial Update
 	if (!m_bInitialized) UpdateView(SampleHint(m_nSample).Info().ModType(), NULL);
-	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
-	if ((pFrame) && (m_hWndView)) PostViewMessage(VIEWMSG_LOADSTATE, (LPARAM)pFrame->GetSampleViewState());
+	if ((pFrame) && (m_hWndView)) PostViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&sampleState);
 	SwitchToView();
 
 	// Combo boxes randomly disappear without this... why?
@@ -417,7 +425,7 @@ void CCtrlSamples::OnDeactivatePage()
 //-----------------------------------
 {
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
-	if ((pFrame) && (m_hWndView)) SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)pFrame->GetSampleViewState());
+	if ((pFrame) && (m_hWndView)) SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&pFrame->GetSampleViewState());
 	m_modDoc.NoteOff(0, true);
 }
 
@@ -427,6 +435,10 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 {
 	switch(wParam)
 	{
+	case CTRLMSG_GETCURRENTINSTRUMENT:
+		return m_nSample;
+		break;
+
 	case CTRLMSG_SMP_PREVINSTRUMENT:
 		OnPrevInstrument();
 		break;
@@ -505,7 +517,7 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case IDC_SAMPLE_SAVEAS:
 		OnSampleSave();
 		break;
-	
+
 	case IDC_SAMPLE_NEW:
 		OnSampleNew();
 		break;
@@ -814,7 +826,7 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName)
 		EndWaitCursor();
 		return false;
 	}
-	
+
 	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
 	bool bOk = m_sndFile.ReadSampleFromFile(m_nSample, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
@@ -834,7 +846,7 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName)
 			rememberRawFormat = dlg.GetRemeberFormat();
 
 			BeginWaitCursor();
-			
+
 			m_sndFile.DestroySampleThreadsafe(m_nSample);
 			sample.nLength = file.GetLength();
 
@@ -1235,7 +1247,7 @@ void CCtrlSamples::OnNormalize()
 		{
 			bool bOk = false;
 			ModSample &sample = m_sndFile.GetSample(iSmp);
-		
+
 			if(minSample != maxSample)
 			{
 				//if more than one sample is selected, always amplify the whole sample.
@@ -1589,7 +1601,7 @@ void CCtrlSamples::ApplyResample(uint32_t newRate)
 				SmpLength procCount = resampler.process(&convBuffer[0], smpCount, outBuffer);
 				const SmpLength procLatency = std::min(outLatency, procCount);
 				procCount = std::min(procCount- procLatency, writeCount);
-				
+
 				switch(sample.GetElementarySampleSize())
 				{
 				case 1:
@@ -1699,7 +1711,7 @@ void CCtrlSamples::OnEstimateSampleSize()
 	//Open dialog
 	CPSRatioCalc dlg(m_sndFile, m_nSample, m_dTimeStretchRatio, this);
 	if (dlg.DoModal() != IDOK) return;
-	
+
 	//Update ratio value&textbox
 	m_dTimeStretchRatio = dlg.m_dRatio;
 	UpdateData(FALSE);
@@ -1740,7 +1752,7 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 				sample.uFlags[CHN_PINGPONGSUSTAIN],
 				m_sndFile);
 		}
-		
+
 	}
 	// Pitch shifting
 	else
@@ -1855,7 +1867,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 	}
 
 	// Initialize soundtouch object.
-	{	
+	{
 		soundtouch_setSampleRate(handleSt, nSampleRate);
 		soundtouch_setChannels(handleSt, nChn);
 
@@ -2376,7 +2388,7 @@ void CCtrlSamples::OnFileNameChanged()
 //------------------------------------
 {
 	TCHAR s[MAX_SAMPLEFILENAME] = _T("");
-	
+
 	if(IsLocked()) return;
 	m_EditFileName.GetWindowText(s, CountOf(s));
 
@@ -2775,7 +2787,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 	const uint8 *pSample = static_cast<const uint8 *>(sample.pSample);
 	int pos;
 	bool redraw = false;
-	
+
 	LockControls();
 	if ((!sample.nLength) || (!pSample)) goto NoSample;
 	if (sample.uFlags[CHN_16BIT])
@@ -3013,24 +3025,24 @@ BOOL CCtrlSamples::PreTranslateMessage(MSG *pMsg)
 	if (pMsg)
 	{
 		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
-		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) || 
+		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
 			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 		{
 			CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
-			
+
 			//Translate message manually
 			UINT nChar = (UINT)pMsg->wParam;
 			UINT nRepCnt = LOWORD(pMsg->lParam);
 			UINT nFlags = HIWORD(pMsg->lParam);
 			KeyEventType kT = ih->GetKeyEventType(nFlags);
 			InputTargetContext ctx = (InputTargetContext)(kCtxViewSamples);
-			
+
 			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
 				return true; // Mapped to a command, no need to pass message on.
 		}
 
 	}
-	
+
 	return CModControlDlg::PreTranslateMessage(pMsg);
 }
 
@@ -3039,7 +3051,7 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 {
 	if (wParam == kcNull)
 		return NULL;
-	
+
 	int transpose = 0;
 	switch(wParam)
 	{
@@ -3077,7 +3089,7 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		}
 		return wParam;
 	}
-	
+
 	return 0;
 }
 //end rewbs.customKeys
@@ -3250,6 +3262,5 @@ void CCtrlSamples::PropagateAutoVibratoChanges() const
 		}
 	}
 }
-
 
 OPENMPT_NAMESPACE_END

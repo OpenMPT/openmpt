@@ -93,6 +93,7 @@ Source: ..\packageTemplate\ExtraKeymaps\*.*; DestDir: {app}\ExtraKeymaps; Flags:
 ; kind of auto-backup - handy!
 Source: {userappdata}\OpenMPT\Keybindings.mkb; DestDir: {userappdata}\OpenMPT; DestName: Keybindings.mkb.old; Flags: external skipifsourcedoesntexist; Tasks: not portable
 Source: {userappdata}\OpenMPT\mptrack.ini; DestDir: {userappdata}\OpenMPT; DestName: mptrack.ini.old; Flags: external skipifsourcedoesntexist; Tasks: not portable
+Source: {userappdata}\OpenMPT\SongSettings.ini; DestDir: {userappdata}\OpenMPT; DestName: SongSettings.ini.old; Flags: external skipifsourcedoesntexist; Tasks: not portable
 Source: {userappdata}\OpenMPT\plugin.cache; DestDir: {userappdata}\OpenMPT; DestName: plugin.cache.old; Flags: external skipifsourcedoesntexist; Tasks: not portable
 
 [Dirs]
@@ -105,8 +106,6 @@ Name: {app}\tunings; Tasks: portable
 [Icons]
 ; start menu
 Name: {group}\OpenMPT; Filename: {app}\mptrack.exe
-Name: {group}\{cm:UninstallProgram,OpenMPT}; Filename: {uninstallexe}
-Name: {group}\ModPlug Central; Filename: {app}\ModPlug Central.url
 
 ; app's directory and keymaps directory (for ease of use)
 Name: {app}\Configuration files; Filename: {userappdata}\OpenMPT\; Tasks: not portable
@@ -214,7 +213,7 @@ begin
     case CurUninstallStep of
     usUninstall:
         begin
-            if MsgBox('Do you want to keep your OpenMPT settings files (mptrack.ini, Keybindings.mkb, plugin.cache and local_tunings.tc)?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDNO then
+            if MsgBox('Do you want to keep your OpenMPT settings files (mptrack.ini, SongSettings.ini, Keybindings.mkb, plugin.cache and local_tunings.tc)?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDNO then
             begin
                 if(GetIniInt('Paths', 'UseAppDataDirectory', 1, 0, 0, ExpandConstant('{app}\mptrack.ini')) = 1) then
                 begin
@@ -224,6 +223,7 @@ begin
                 begin
                 end;
                 DeleteFile(filepath + 'mptrack.ini');
+                DeleteFile(filepath + 'SongSettings.ini');
                 DeleteFile(filepath + 'Keybindings.mkb');
                 DeleteFile(filepath + 'plugin.cache');
                 DeleteFile(filepath + 'tunings\local_tunings.tc');
