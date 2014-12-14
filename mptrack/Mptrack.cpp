@@ -58,8 +58,8 @@ const char *szSpecialNoteNamesMPT[] = {TEXT("PCs"), TEXT("PC"), TEXT("~~ (Note F
 const char *szSpecialNoteShortDesc[] = {TEXT("Param Control (Smooth)"), TEXT("Param Control"), TEXT("Note Fade"), TEXT("Note Cut"), TEXT("Note Off")};
 
 // Make sure that special note arrays include string for every note.
-STATIC_ASSERT(NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1 == CountOf(szSpecialNoteNamesMPT)); 
-STATIC_ASSERT(CountOf(szSpecialNoteShortDesc) == CountOf(szSpecialNoteNamesMPT)); 
+STATIC_ASSERT(NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1 == CountOf(szSpecialNoteNamesMPT));
+STATIC_ASSERT(CountOf(szSpecialNoteShortDesc) == CountOf(szSpecialNoteNamesMPT));
 
 const char *szHexChar = "0123456789ABCDEF";
 
@@ -642,6 +642,7 @@ CTrackApp::CTrackApp()
 	: m_GuiThreadId(0)
 	, m_pTrackerDirectories(nullptr)
 	, m_pSettingsIniFile(nullptr)
+	, m_pSongSettings(nullptr)
 	, m_pSettings(nullptr)
 	, m_pTrackerSettings(nullptr)
 	, m_pComponentManagerSettings(nullptr)
@@ -653,7 +654,7 @@ CTrackApp::CTrackApp()
 
 	m_GuiThreadId = GetCurrentThreadId();
 	mpt::log::Trace::SetThreadId(mpt::log::Trace::ThreadKindGUI, m_GuiThreadId);
-	
+
 	ExceptionHandler::Register();
 
 	m_bPortableMode = false;
@@ -926,10 +927,11 @@ BOOL CTrackApp::InitInstance()
 	CMainFrame::m_pAutoSaver = new CAutoSaver();
 
 	m_pSettingsIniFile = new IniFileSettingsBackend(m_szConfigFileName);
-	
 	m_pSettings = new SettingsContainer(m_pSettingsIniFile);
-
 	m_pTrackerSettings = new TrackerSettings(*m_pSettings);
+
+	m_pSongSettingsIniFile = new IniFileSettingsBackend(m_szConfigDirectory + MPT_PATHSTRING("SongSettings.ini"));
+	m_pSongSettings = new SettingsContainer(m_pSongSettingsIniFile);
 
 	// enable debug features (as early as possible after reading the settings)
 	if(TrackerSettings::Instance().DebugTraceEnable)
@@ -1068,7 +1070,7 @@ int CTrackApp::ExitInstance()
 	UninitializeDXPlugins();
 
 	ComponentManager::Release();
-	
+
 	delete m_pPluginCache;
 	m_pPluginCache = nullptr;
 	delete m_pComponentManagerSettings;
@@ -1079,6 +1081,10 @@ int CTrackApp::ExitInstance()
 	m_pSettings = nullptr;
 	delete m_pSettingsIniFile;
 	m_pSettingsIniFile = nullptr;
+	delete m_pSongSettings;
+	m_pSongSettings = nullptr;
+	delete m_pSongSettingsIniFile;
+	m_pSongSettingsIniFile = nullptr;
 	delete m_pTrackerDirectories;
 	m_pTrackerDirectories = nullptr;
 
@@ -1300,7 +1306,7 @@ void CSplashScreen::OnPaint()
 //---------------------------
 {
 	CPaintDC dc(this);
-	
+
 	CDC hdcMem;
 	hdcMem.CreateCompatibleDC(&dc);
 	CBitmap *oldBitmap = hdcMem.SelectObject(&m_Bitmap);
@@ -1842,6 +1848,5 @@ bool CTrackApp::OpenURL(const mpt::PathString &lpszURL)
 	}
 	return false;
 }
-
 
 OPENMPT_NAMESPACE_END

@@ -991,6 +991,9 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		case 1:
 			madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
 			break;
+		case 4:
+			madeWithTracker = mpt::String::Print("pyIT %1.%2", (fileHeader.cwtv & 0x0F00) >> 8, mpt::fmt::hex0<2>((fileHeader.cwtv & 0xFF)));
+			break;
 		case 6:
 			madeWithTracker = "BeRoTracker";
 			break;
@@ -1732,8 +1735,7 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 			}
 
 			uint32 MPTxPlugDataSize = 4 + sizeof(float32) +		// 4 for ID and size of dryRatio
-									 4 + sizeof(int32) +		// Default Program
-									 4 + 3 * sizeof(int32);		// Editor data
+									 4 + sizeof(int32);			// Default Program
 								// for each extra entity, add 4 for ID, plus 4 for size of entity, plus size of entity
 
 			nPluginSize += MPTxPlugDataSize + 4; //+4 is for size itself: sizeof(uint32) is 4
@@ -1772,17 +1774,6 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 				// PROG chunk does not include a size, so better make sure we always write 4 bytes here.
 				STATIC_ASSERT(sizeof(m_MixPlugins[i].defaultProgram) == sizeof(int32));
 				mpt::IO::WriteIntLE<int32>(f, m_MixPlugins[i].defaultProgram);
-
-				// Editor window parameters
-				memcpy(id, "EWND", 4);
-				fwrite(id, 1, 4, f);
-				uint32 size = 2 * sizeof(int32);
-				SwapBytesLE(size);
-				fwrite(&size, sizeof(uint32), 1, f);
-				int32 x = SwapBytesReturnLE(m_MixPlugins[i].editorX);
-				int32 y = SwapBytesReturnLE(m_MixPlugins[i].editorY);
-				fwrite(&x, sizeof(int32), 1, f);
-				fwrite(&y, sizeof(int32), 1, f);
 
 				// Please, if you add any more chunks here, don't repeat history (see above) and *do* add a size field for your chunk, mmmkay?
 			}
@@ -1904,10 +1895,6 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 						{
 							// Read plugin-specific macros
 							//dataChunk.ReadStructPartial(m_MixPlugins[plug].macros, dataChunk.GetLength());
-						} else if(!memcmp(code, "EWND", 4))
-						{
-							m_MixPlugins[plug].editorX = dataChunk.ReadInt32LE();
-							m_MixPlugins[plug].editorY = dataChunk.ReadInt32LE();
 						}
 					}
 
@@ -2019,16 +2006,16 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 //--------------------------------------------------------
 {
 	//Extra song data - Yet Another Hack.
-	const uint32 code = SwapBytesReturnLE(MAGIC4BE('M','P','T','S'));
-	fwrite(&code, 1, sizeof(uint32), f);
+	const uint32 code = MAGIC4BE('M','P','T','S');
+	mpt::IO::WriteIntLE(f, code);
 
 #define WRITEMODULARHEADER(c1, c2, c3, c4, fsize) \
 	{ \
 		const uint32 code = MAGIC4BE(c1, c2, c3, c4); \
 		mpt::IO::WriteIntLE<uint32>(f, code); \
 		MPT_ASSERT(fsize <= uint16_max); \
-		const uint16 size = fsize; \
-		mpt::IO::WriteIntLE<uint16>(f, size); \
+		const uint16 _size = fsize; \
+		mpt::IO::WriteIntLE<uint16>(f, _size); \
 	}
 #define WRITEMODULAR(c1, c2, c3, c4, field) \
 	{ \

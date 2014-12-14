@@ -1454,6 +1454,7 @@ Tstring PrintImplTemplate(const Tstring & format
 {
 	Tstring result;
 	const std::size_t len = format.length();
+	result.reserve(len);
 	for(std::size_t pos = 0; pos != len; ++pos)
 	{
 		typename Tstring::value_type c = format[pos];

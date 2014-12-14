@@ -272,32 +272,27 @@ void CModControlView::RecalcLayout()
 }
 
 
-void CModControlView::OnUpdate(CView*, LPARAM lHint, CObject*pHint)
-//-----------------------------------------------------------------
+void CModControlView::OnUpdate(CView *, LPARAM lHint, CObject *pHint)
+//-------------------------------------------------------------------
 {
 	UpdateView(UpdateHint::FromLPARAM(lHint), pHint);
 }
 
 
-void CModControlView::ForceRefresh() 
+void CModControlView::ForceRefresh()
 //---------------------------------
 {
 	SetActivePage(GetActivePage());
 }
 
-int  CModControlView::GetActivePage() 
-//-----------------------------------
-{
-	return m_nActiveDlg;
-}
 
 BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 //------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModControlDlg *pDlg = NULL;
-	
-	
+
+
 	if (nIndex == -1) nIndex = m_TabCtrl.GetCurSel();
 
 	const UINT nID = m_TabCtrl.GetItemData(nIndex);
@@ -398,7 +393,7 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 	pMainFrm->SetInfoText("");
 	pMainFrm->SetXInfoText(""); //rewbs.xinfo
 	pDlg->ShowWindow(SW_SHOW);
-	((CChildFrame *)GetParentFrame())->SetSplitterHeight(*(pDlg->GetSplitPosRef()));	//rewbs.varWindowSize	
+	((CChildFrame *)GetParentFrame())->SetSplitterHeight(*(pDlg->GetSplitPosRef()));	//rewbs.varWindowSize
 	if (m_hWndMDI) ::PostMessage(m_hWndMDI, WM_MOD_CHANGEVIEWCLASS, (WPARAM)lParam, (LPARAM)pDlg);
 	return TRUE;
 }
@@ -761,7 +756,7 @@ BOOL CModControlBar::AddButton(UINT nID, int iImage, UINT nStyle, UINT nState)
 	btn.iString = 0;
 	return AddButtons(1, &btn);
 }
-	
+
 
 void CModControlBar::UpdateStyle()
 //--------------------------------
@@ -795,6 +790,5 @@ LRESULT CModControlBar::OnHelpHitTest(WPARAM, LPARAM lParam)
 	}
 	return 0;
 }
-
 
 OPENMPT_NAMESPACE_END

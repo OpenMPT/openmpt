@@ -559,7 +559,7 @@ mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const 
 namespace Util
 {
 
-	
+
 static const MPT_UCHAR_TYPE EncodeNibble[16] = {
 	MPT_UCHAR('0'), MPT_UCHAR('1'), MPT_UCHAR('2'), MPT_UCHAR('3'),
 	MPT_UCHAR('4'), MPT_UCHAR('5'), MPT_UCHAR('6'), MPT_UCHAR('7'),
@@ -613,10 +613,10 @@ mpt::ustring BinToHex(const std::vector<char> &src)
 std::vector<char> HexToBin(const mpt::ustring &src)
 {
 	std::vector<char> result;
-	for(std::size_t i = 0; i+1 < src.size(); i += 2)
+	for(std::size_t i = 0; (i + 1) < src.size(); i += 2)
 	{
 		uint8 byte = 0;
-		if(!DecodeByte(byte, src[i*2+0], src[i*2+1]))
+		if(!DecodeByte(byte, src[i], src[i + 1]))
 		{
 			return result;
 		}
@@ -643,7 +643,7 @@ namespace Version
 
 #if defined(MODPLUG_TRACKER)
 
-	
+
 static bool SystemIsNT = true;
 
 // Initialize to used SDK version
@@ -840,7 +840,7 @@ public:
 					break;
 #if 0
 					// Using restricted search paths applies to potential DLL dependencies
-					// recursively. 
+					// recursively.
 					// This fails loading for e.g. Codec or Plugin DLLs in application
 					// directory if they depend on the MSVC C or C++ runtime (which is
 					// located in the system directory).
@@ -946,7 +946,7 @@ public:
 			inited = false;
 		}
 	}
-	
+
 public:
 
 	bool IsValid() const

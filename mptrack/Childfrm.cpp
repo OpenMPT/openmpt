@@ -10,13 +10,24 @@
 
 #include "stdafx.h"
 #include <afxpriv.h>
-#include "mptrack.h"
-#include "mainfrm.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
 #include "ChildFrm.h"
-#include "moddoc.h"
-#include "globals.h"
-#include "view_gen.h"
-#include ".\childfrm.h"
+#include "Moddoc.h"
+#include "Globals.h"
+#include "View_gen.h"
+#include "Ctrl_pat.h"
+#include "View_pat.h"
+#include "Ctrl_smp.h"
+#include "View_smp.h"
+#include "Ctrl_ins.h"
+#include "View_ins.h"
+#include "View_com.h"
+#include "Childfrm.h"
+
+#include "../common/FileReader.h"
+#include "../common/mptIO.h"
+#include <sstream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -29,7 +40,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 /////////////////////////////////////////////////////////////////////////////
-// 
+//
 
 IMPLEMENT_DYNAMIC(CViewExSplitWnd, CSplitterWnd)
 
@@ -69,7 +80,7 @@ BEGIN_MESSAGE_MAP(CChildFrame, CMDIChildWnd)
 	ON_WM_SETFOCUS() //rewbs.customKeysAutoEffects
 END_MESSAGE_MAP()
 
-LONG CChildFrame::glMdiOpenCount = 0;
+int CChildFrame::glMdiOpenCount = 0;
 
 /////////////////////////////////////////////////////////////////////////////
 // CChildFrame construction/destruction
@@ -87,6 +98,7 @@ CChildFrame::CChildFrame()
 	RtlZeroMemory(&m_ViewSamples, sizeof(m_ViewSamples));
 	RtlZeroMemory(&m_ViewInstruments, sizeof(m_ViewInstruments));
 	RtlZeroMemory(&m_ViewComments, sizeof(m_ViewComments));
+	m_ViewPatterns.initialOrder = ORDERINDEX_INVALID;
 }
 
 
@@ -110,10 +122,10 @@ BOOL CChildFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	int cy = TrackerSettings::Instance().glGeneralWindowHeight;	//rewbs.varWindowSize - default to general tab.
 	if (cy <= 1) cy = (lpcs->cy*2) / 3;
 	if (!m_wndSplitter.CreateView(0, 0, pContext->m_pNewViewClass, CSize(0, cy), pContext)) return FALSE;
-	
+
 	// Get 2nd window handle
 	CModControlView *pModView;
-	if ((pModView = (CModControlView *)m_wndSplitter.GetPane(0, 0)) != NULL)
+	if ((pModView = GetModControlView()) != NULL)
 	{
 		m_hWndCtrl = pModView->m_hWnd;
 		pModView->SetMDIParentFrame(m_hWnd);
@@ -235,7 +247,7 @@ void CChildFrame::ForceRefresh()
 //------------------------------
 {
 	CModControlView *pModView;
-	if ((pModView = (CModControlView *)m_wndSplitter.GetPane(0, 0)) != NULL)
+	if ((pModView = GetModControlView()) != nullptr)
 	{
 		pModView->ForceRefresh();
 	}
@@ -249,7 +261,7 @@ void CChildFrame::SavePosition(BOOL bForce)
 	if (m_hWnd)
 	{
 		CRect rect;
-		
+
 		m_bMaxWhenClosed = IsZoomed();
 		if (bForce) TrackerSettings::Instance().gbMdiMaximize = (m_bMaxWhenClosed != 0);
 		if (!IsIconic())
@@ -260,15 +272,15 @@ void CChildFrame::SavePosition(BOOL bForce)
 				pWnd->GetWindowRect(&rect);
 				LONG l = rect.Height();
 				//rewbs.varWindowSize - not the nicest piece of code, but we need to distinguish btw the views:
-				if (strcmp("CViewGlobals",m_szCurrentViewClassName) == 0)
+				if (strcmp(CViewGlobals::classCViewGlobals.m_lpszClassName, m_szCurrentViewClassName) == 0)
 					TrackerSettings::Instance().glGeneralWindowHeight = l;
-				else if (strcmp("CViewPattern", m_szCurrentViewClassName) == 0)
+				else if (strcmp(CViewPattern::classCViewPattern.m_lpszClassName, m_szCurrentViewClassName) == 0)
 					TrackerSettings::Instance().glPatternWindowHeight = l;
-				else if (strcmp("CViewSample", m_szCurrentViewClassName) == 0)
+				else if (strcmp(CViewSample::classCViewSample.m_lpszClassName, m_szCurrentViewClassName) == 0)
 					TrackerSettings::Instance().glSampleWindowHeight = l;
-				else if (strcmp("CViewInstrument", m_szCurrentViewClassName) == 0)
+				else if (strcmp(CViewInstrument::classCViewInstrument.m_lpszClassName, m_szCurrentViewClassName) == 0)
 					TrackerSettings::Instance().glInstrumentWindowHeight = l;
-				else if (strcmp("CViewComments", m_szCurrentViewClassName) == 0)
+				else if (strcmp(CViewComments::classCViewComments.m_lpszClassName, m_szCurrentViewClassName) == 0)
 					TrackerSettings::Instance().glCommentsWindowHeight = l;
 				//rewbs.graph
 				else if (strcmp("CViewGraph", m_szCurrentViewClassName) == 0)
@@ -293,7 +305,7 @@ int CChildFrame::GetSplitterHeight()
 		{
 			pWnd->GetWindowRect(&rect);
 			return rect.Height();
-		} 
+		}
 	}
 	return 15;	// tidy default
 };
@@ -455,5 +467,63 @@ void CChildFrame::OnSetFocus(CWnd* pOldWnd)
 }
 //end rewbs.customKeysAutoEffects
 
+
+std::ostringstream CChildFrame::SerializeView() const
+//---------------------------------------------------
+{
+	std::ostringstream f(std::ios::out | std::ios::binary);
+	// Version
+	mpt::IO::WriteVarInt(f, 0u);
+	// Current page
+	mpt::IO::WriteVarInt(f, static_cast<uint8_t>(GetModControlView()->GetActivePage()));
+
+	CModControlView *view = GetModControlView();
+	if (strcmp(CViewPattern::classCViewPattern.m_lpszClassName, m_szCurrentViewClassName) == 0)
+	{
+		mpt::IO::WriteVarInt(f, (uint32_t)view->SendMessage(WM_MOD_CTRLMSG, CTRLMSG_GETCURRENTORDER));	// Order number
+	} else if (strcmp(CViewSample::classCViewSample.m_lpszClassName, m_szCurrentViewClassName) == 0)
+	{
+		mpt::IO::WriteVarInt(f, (uint32_t)view->SendMessage(WM_MOD_CTRLMSG, CTRLMSG_GETCURRENTINSTRUMENT));	// Sample number
+	} else if (strcmp(CViewInstrument::classCViewInstrument.m_lpszClassName, m_szCurrentViewClassName) == 0)
+	{
+		mpt::IO::WriteVarInt(f, (uint32_t)view->SendMessage(WM_MOD_CTRLMSG, CTRLMSG_GETCURRENTINSTRUMENT));	// Instrument number
+	}
+	return f;
+}
+
+
+void CChildFrame::DeserializeView(FileReader &file)
+//-------------------------------------------------
+{
+	uint32_t version, page;
+	if(file.ReadVarInt(version) && version == 0 &&
+		file.ReadVarInt(page) && page >= 0 && page < CModControlView::MAX_PAGES)
+	{
+		UINT pageDlg = 0;
+		switch(page)
+		{
+		case CModControlView::VIEW_GLOBALS:
+			pageDlg = IDD_CONTROL_GLOBALS;
+			break;
+		case CModControlView::VIEW_PATTERNS:
+			pageDlg = IDD_CONTROL_PATTERNS;
+			file.ReadVarInt(m_ViewPatterns.initialOrder);
+			break;
+		case CModControlView::VIEW_SAMPLES:
+			pageDlg = IDD_CONTROL_SAMPLES;
+			file.ReadVarInt(m_ViewSamples.initialSample);
+			break;
+		case CModControlView::VIEW_INSTRUMENTS:
+			pageDlg = IDD_CONTROL_INSTRUMENTS;
+			file.ReadVarInt(m_ViewInstruments.initialInstrument);
+			break;
+		case CModControlView::VIEW_COMMENTS:
+			pageDlg = IDD_CONTROL_COMMENTS;
+			break;
+		}
+		GetModControlView()->PostMessage(WM_MOD_ACTIVATEVIEW, pageDlg);
+	}
+
+}
 
 OPENMPT_NAMESPACE_END

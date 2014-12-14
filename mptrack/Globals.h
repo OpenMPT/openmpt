@@ -116,8 +116,18 @@ public:
 class CModControlView: public CView
 //=================================
 {
-protected:
-	enum { MAX_PAGES=6 };		//rewbs.graph: 5 to 6
+public:
+	enum Views
+	{
+		VIEW_UNKNOWN = -1,
+		VIEW_GLOBALS = 0,
+		VIEW_PATTERNS,
+		VIEW_SAMPLES,
+		VIEW_INSTRUMENTS,
+		VIEW_COMMENTS,
+		VIEW_PLUGINS,
+		MAX_PAGES
+	};
 
 protected:
 	CModTabCtrl m_TabCtrl;
@@ -141,9 +151,11 @@ public:
 protected:
 	void RecalcLayout();
 	void UpdateView(UpdateHint hint, CObject *pHint = nullptr);
-	BOOL SetActivePage(int nIndex=-1, LPARAM lParam=-1);
-	int GetActivePage();
+	BOOL SetActivePage(int nIndex = -1, LPARAM lParam=-1);
+public:
+	int GetActivePage() const { return m_nActiveDlg; }
 
+protected:
 	//{{AFX_VIRTUAL(CModControlView)
 	public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);

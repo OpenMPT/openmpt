@@ -162,13 +162,13 @@ void CViewGlobals::OnInitialUpdate()
 
 	if (pFrame)
 	{
-		GENERALVIEWSTATE *pState = pFrame->GetGeneralViewState();
-		if (pState->cbStruct == sizeof(GENERALVIEWSTATE))
+		GENERALVIEWSTATE &generalState = pFrame->GetGeneralViewState();
+		if (generalState.cbStruct == sizeof(GENERALVIEWSTATE))
 		{
-			m_TabCtrl.SetCurSel(pState->nTab);
-			m_nActiveTab = pState->nTab;
-			m_nCurrentPlugin = pState->nPlugin;
-			m_nCurrentParam = pState->nParam;
+			m_TabCtrl.SetCurSel(generalState.nTab);
+			m_nActiveTab = generalState.nTab;
+			m_nCurrentPlugin = generalState.nPlugin;
+			m_nCurrentParam = generalState.nParam;
 		}
 	}
 	GetDeviceScrollSizes(nMapMode, sizeTotal, sizePage, sizeLine);
@@ -219,11 +219,11 @@ void CViewGlobals::OnDestroy()
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if (pFrame)
 	{
-		GENERALVIEWSTATE *pState = pFrame->GetGeneralViewState();
-		pState->cbStruct = sizeof(GENERALVIEWSTATE);
-		pState->nTab = m_nActiveTab;
-		pState->nPlugin = m_nCurrentPlugin;
-		pState->nParam = m_nCurrentParam;
+		GENERALVIEWSTATE &generalState = pFrame->GetGeneralViewState();
+		generalState.cbStruct = sizeof(GENERALVIEWSTATE);
+		generalState.nTab = m_nActiveTab;
+		generalState.nPlugin = m_nCurrentPlugin;
+		generalState.nParam = m_nCurrentParam;
 	}
 	CFormView::OnDestroy();
 }
@@ -368,10 +368,12 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 				// Volume
 				int vol = sndFile.ChnSettings[nChn].nVolume;
 				m_sbVolume[ichn].SetPos(vol);
+				m_sbVolume[ichn].Invalidate(FALSE);
 				SetDlgItemInt(IDC_EDIT1+ichn*2, vol);
 				// Pan
 				int pan = sndFile.ChnSettings[nChn].nPan;
 				m_sbPan[ichn].SetPos(pan/4);
+				m_sbPan[ichn].Invalidate(FALSE);
 				SetDlgItemInt(IDC_EDIT2+ichn*2, pan);
 
 				// Channel name

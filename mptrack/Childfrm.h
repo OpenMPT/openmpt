@@ -14,7 +14,9 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+class CModControlView;
 class CModControlDlg;
+class FileReader;
 class CChildFrame;
 
 typedef struct _GENERALVIEWSTATE
@@ -34,6 +36,7 @@ typedef struct PATTERNVIEWSTATE
 	PatternRect selection;
 	PatternCursor::Columns nDetailLevel;
 	ORDERINDEX nOrder;		//rewbs.playSongFromCursor
+	ORDERINDEX initialOrder;
 } PATTERNVIEWSTATE;
 
 typedef struct SAMPLEVIEWSTATE
@@ -42,6 +45,7 @@ typedef struct SAMPLEVIEWSTATE
 	SmpLength dwBeginSel;
 	SmpLength dwEndSel;
 	SAMPLEINDEX nSample;
+	SAMPLEINDEX initialSample;
 } SAMPLEVIEWSTATE;
 
 
@@ -49,6 +53,7 @@ typedef struct INSTRUMENTVIEWSTATE
 {
 	DWORD cbStruct;
 	enmEnvelopeTypes nEnv;
+	INSTRUMENTINDEX initialInstrument;
 	bool bGrid;
 } INSTRUMENTVIEWSTATE;
 
@@ -84,7 +89,7 @@ public:
 	CChildFrame();
 
 protected:
-	static LONG glMdiOpenCount;
+	static int glMdiOpenCount;
 
 // Attributes
 protected:
@@ -101,6 +106,7 @@ protected:
 
 // Operations
 public:
+	CModControlView *GetModControlView() const { return (CModControlView *)m_wndSplitter.GetPane(0, 0); }
 	BOOL ChangeViewClass(CRuntimeClass* pNewViewClass, CCreateContext* pContext=NULL);
 	void ForceRefresh();
 	void SavePosition(BOOL bExit=FALSE);
@@ -109,14 +115,17 @@ public:
 	LRESULT ActivateView(UINT nId, LPARAM lParam) { return ::SendMessage(m_hWndCtrl, WM_MOD_ACTIVATEVIEW, nId, lParam); }
 	HWND GetHwndCtrl() const { return m_hWndCtrl; }
 	HWND GetHwndView() const { return m_hWndView; }
-	GENERALVIEWSTATE *GetGeneralViewState() { return &m_ViewGeneral; }
-	PATTERNVIEWSTATE *GetPatternViewState() { return &m_ViewPatterns; }
-	SAMPLEVIEWSTATE *GetSampleViewState() { return &m_ViewSamples; }
-	INSTRUMENTVIEWSTATE *GetInstrumentViewState() { return &m_ViewInstruments; }
-	COMMENTVIEWSTATE *GetCommentViewState() { return &m_ViewComments; }
+	GENERALVIEWSTATE &GetGeneralViewState() { return m_ViewGeneral; }
+	PATTERNVIEWSTATE &GetPatternViewState() { return m_ViewPatterns; }
+	SAMPLEVIEWSTATE &GetSampleViewState() { return m_ViewSamples; }
+	INSTRUMENTVIEWSTATE &GetInstrumentViewState() { return m_ViewInstruments; }
+	COMMENTVIEWSTATE &GetCommentViewState() { return m_ViewComments; }
 
-	void SetSplitterHeight(int x);		//rewbs.varWindowSize
-	int GetSplitterHeight();	 	    //rewbs.varWindowSize
+	void SetSplitterHeight(int x);
+	int GetSplitterHeight();
+
+	std::ostringstream SerializeView() const;
+	void DeserializeView(FileReader &file);
 
 // Overrides
 	// ClassWizard generated virtual function overrides

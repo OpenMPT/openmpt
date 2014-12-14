@@ -125,10 +125,10 @@ void CViewComments::OnInitialUpdate()
 
 	if (pFrame)
 	{
-		COMMENTVIEWSTATE *pState = pFrame->GetCommentViewState();
-		if (pState->cbStruct == sizeof(COMMENTVIEWSTATE))
+		COMMENTVIEWSTATE &commentState = pFrame->GetCommentViewState();
+		if (commentState.cbStruct == sizeof(COMMENTVIEWSTATE))
 		{
-			m_nListId = pState->nId;
+			m_nListId = commentState.nId;
 		}
 	}
 	GetClientRect(&rect);
@@ -152,9 +152,9 @@ void CViewComments::OnDestroy()
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if (pFrame)
 	{
-		COMMENTVIEWSTATE *pState = pFrame->GetCommentViewState();
-		pState->cbStruct = sizeof(COMMENTVIEWSTATE);
-		pState->nId = m_nListId;
+		COMMENTVIEWSTATE &commentState = pFrame->GetCommentViewState();
+		commentState.cbStruct = sizeof(COMMENTVIEWSTATE);
+		commentState.nId = m_nListId;
 	}
 	CView::OnDestroy();
 }
@@ -607,6 +607,5 @@ LRESULT CViewComments::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			return CModScrollView::OnModViewMsg(wParam, lParam);
 //	}
 }
-
 
 OPENMPT_NAMESPACE_END

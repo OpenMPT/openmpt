@@ -177,7 +177,7 @@ public:
 	SplitKeyboardSettings &GetSplitKeyboardSettings() { return m_SplitKeyboardSettings; }
 
 	time_t GetCreationTime() const { return m_creationTime; }
-	
+
 // operations
 public:
 	bool ChangeModType(MODTYPE wType);
@@ -226,7 +226,7 @@ public:
 	bool IsChannelMuted(CHANNELINDEX nChn) const;
 	bool IsSampleMuted(SAMPLEINDEX nSample) const;
 	bool IsInstrumentMuted(INSTRUMENTINDEX nInstr) const;
-	
+
 	bool NoFxChannel(CHANNELINDEX nChn, bool bNoFx, bool updateMix = true);
 	bool IsChannelNoFx(CHANNELINDEX nChn) const;
 	bool IsChannelRecord1(CHANNELINDEX channel) const;
@@ -274,7 +274,7 @@ public:
 	void OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, const std::vector<EncoderFactoryBase*> &encFactories);
 
 	// Returns formatted ModInstrument name.
-	// [in] bEmptyInsteadOfNoName: In case of unnamed instrument string, "(no name)" is returned unless this 
+	// [in] bEmptyInsteadOfNoName: In case of unnamed instrument string, "(no name)" is returned unless this
 	//                             parameter is true is case which an empty name is returned.
 	// [in] bIncludeIndex: True to include instrument index in front of the instrument name, false otherwise.
 	CString GetPatternViewInstrumentName(INSTRUMENTINDEX nInstr, bool bEmptyInsteadOfNoName = false, bool bIncludeIndex = true) const;
@@ -357,6 +357,8 @@ protected:
 
 	uint8 GetPlaybackMidiChannel(const ModInstrument *pIns, CHANNELINDEX nChn) const;
 
+	void SerializeViews() const;
+	void DeserializeViews();
 
 // Implementation
 public:
