@@ -333,9 +333,7 @@ protected:
 	BOOL UninitializeDXPlugins();
 
 
-#ifdef WIN32	// Legacy stuff
 	bool MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDir = mpt::PathString(), mpt::PathString sNewFileName = mpt::PathString());
-#endif // WIN32
 
 };
 
