@@ -2969,7 +2969,7 @@ void CModDoc::PrepareUndoForAllPatterns(bool storeChannelInfo, const char *descr
 void CModDoc::SerializeViews() const
 //----------------------------------
 {
-	const mpt::PathString pathName = GetPathNameMpt();
+	const mpt::PathString pathName = theApp.IsPortableMode() ? GetPathNameMpt().AbsolutePathToRelative(theApp.GetAppDirPath()) : GetPathNameMpt();
 	if(pathName.empty())
 	{
 		return;
@@ -3035,17 +3035,23 @@ void CModDoc::SerializeViews() const
 void CModDoc::DeserializeViews()
 //------------------------------
 {
-	const mpt::PathString pathName = GetPathNameMpt();
+	mpt::PathString pathName = GetPathNameMpt();
 	if(pathName.empty()) return;
 
 	SettingsContainer &settings = theApp.GetSongSettings();
 	mpt::ustring s = settings.Read<mpt::ustring>("WindowSettings", pathName.ToWide());
 	if(s.size() < 2)
 	{
-		// Try searching for filename instead of full path name
-		const std::wstring altName = settings.Read<std::wstring>("WindowSettings", pathName.GetFullFileName().ToWide());
-		s = settings.Read<mpt::ustring>("WindowSettings", altName);
-		if(s.size() < 2) return;
+		// Try relative path
+		pathName = pathName.RelativePathToAbsolute(theApp.GetAppDirPath());
+		s = settings.Read<mpt::ustring>("WindowSettings", pathName.ToWide());
+		if(s.size() < 2)
+		{
+			// Try searching for filename instead of full path name
+			const std::wstring altName = settings.Read<std::wstring>("WindowSettings", pathName.GetFullFileName().ToWide());
+			s = settings.Read<mpt::ustring>("WindowSettings", altName);
+			if(s.size() < 2) return;
+		}
 	}
 	std::vector<char> data = Util::HexToBin(s);
 
