@@ -377,7 +377,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 	ReinitRecordState();
 // -! NEW_FEATURE#0015
 
-	DeserializeViews();
+	if(TrackerSettings::Instance().rememberSongWindows) DeserializeViews();
 
 	// Show warning if file was made with more recent version of OpenMPT except
 	if(MptVersion::RemoveBuildNumber(m_SndFile.m_dwLastSavedWithVersion) > MptVersion::num)
@@ -451,7 +451,7 @@ BOOL CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool bTempla
 			if (pMainFrame)
 				pMainFrame->CreateTemplateModulesMenu();
 		}
-		SerializeViews();
+		if(TrackerSettings::Instance().rememberSongWindows) SerializeViews();
 	} else
 	{
 		ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());

@@ -359,6 +359,8 @@ public:
 	Setting<uint32> GUIUpdateInterval;
 	CachedSetting<uint32> VuMeterUpdateInterval;
 
+	Setting<bool> rememberSongWindows;
+
 	// Misc
 
 	Setting<bool> ShowSettingsOnNewVersion;
