@@ -745,7 +745,6 @@ public:
 MPT_REGISTERED_COMPONENT(ComponentUXTheme)
 
 
-#ifdef WIN32	// Legacy stuff
 // Move a config file called sFileName from the App's directory (or one of its sub directories specified by sSubDir) to
 // %APPDATA%. If specified, it will be renamed to sNewFileName. Existing files are never overwritten.
 // Returns true on success.
@@ -775,70 +774,108 @@ bool CTrackApp::MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDi
 	}
 	return false;
 }
-#endif	// WIN32 Legacy Stuff
 
 
 // Set up paths were configuration data is written to. Set overridePortable to true if application's own directory should always be used.
 void CTrackApp::SetupPaths(bool overridePortable)
 //-----------------------------------------------
 {
-	m_szExePath = mpt::GetAppPath();
-	SetCurrentDirectoryW(m_szExePath.AsNative().c_str());
 
-	m_szConfigDirectory = mpt::PathString();
-	// Try to find a nice directory where we should store our settings (default: %APPDATA%)
-	bool bIsAppDir = overridePortable;
-	WCHAR tempConfigDirectory[MAX_PATH];
-	tempConfigDirectory[0] = 0;
-	if(SHGetFolderPathW(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, tempConfigDirectory) != S_OK)
+	// change to exe directory
+
+	SetCurrentDirectoryW(mpt::GetAppPath().AsNative().c_str());
+
+
+	// Determine paths, portable mode, first run. Do not yet update any state.
+
+	mpt::PathString configPathApp = mpt::GetAppPath(); // config path in portable mode
+	mpt::PathString configPathGlobal; // config path in default non-portable mode
 	{
-		if(SHGetFolderPathW(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, tempConfigDirectory) != S_OK)
+		// Try to find a nice directory where we should store our settings (default: %APPDATA%)
+		WCHAR tempConfigDirectory[MAX_PATH];
+		MemsetZero(tempConfigDirectory);
+		if((SHGetFolderPathW(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, tempConfigDirectory) == S_OK)
+			|| (SHGetFolderPathW(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, tempConfigDirectory) == S_OK))
 		{
-			bIsAppDir = true;
+			// Store our app settings in %APPDATA% or "My Files"
+			configPathGlobal = mpt::PathString::FromNative(tempConfigDirectory) + MPT_PATHSTRING("\\OpenMPT\\");
 		}
 	}
-	m_szConfigDirectory = mpt::PathString::FromNative(tempConfigDirectory);
+
+	bool portableMode = overridePortable;
+
+	if(configPathGlobal.empty())
+	{
+		// no usable global directory found
+		portableMode = true;
+	}
 
 	// Check if the user prefers to use the app's directory
-	m_szConfigFileName = GetAppDirPath(); // config file
-	m_szConfigFileName += MPT_PATHSTRING("mptrack.ini");
-	if(GetPrivateProfileIntW(L"Paths", L"UseAppDataDirectory", 1, m_szConfigFileName.AsNative().c_str()) == 0)
+	bool configAppPortable = (GetPrivateProfileIntW(L"Paths", L"UseAppDataDirectory", 1, (configPathApp + MPT_PATHSTRING("mptrack.ini")).AsNative().c_str()) == 0);
+	if(configAppPortable)
 	{
-		bIsAppDir = true;
+		portableMode = true;
 	}
 
-	if(!bIsAppDir)
-	{
-		// Store our app settings in %APPDATA% or "My Files"
-		m_szConfigDirectory += MPT_PATHSTRING("\\OpenMPT\\");
+	// chose config directory
+	mpt::PathString configPath = portableMode ? configPathApp : configPathGlobal;
 
-		// Path doesn't exist yet, so it has to be created
-		if(!m_szConfigDirectory.IsDirectory())
+	// check if this is the first run
+	bool firstRun = true;
+	{
+		WCHAR tempVersion[MAX_PATH];
+		MemsetZero(tempVersion);
+		GetPrivateProfileStringW(L"Version", L"Version", L"", tempVersion, CountOf(tempVersion), (configPathApp + MPT_PATHSTRING("mptrack.ini")).AsNative().c_str());
+		if(!std::wstring(tempVersion).empty())
 		{
-			CreateDirectoryW(m_szConfigDirectory.AsNative().c_str(), 0);
+			firstRun = false;
 		}
-
-		#ifdef WIN32	// Legacy stuff
-		// Move the config files if they're still in the old place.
-		MoveConfigFile(MPT_PATHSTRING("mptrack.ini"));
-		MoveConfigFile(MPT_PATHSTRING("plugin.cache"));
-		#endif	// WIN32 Legacy Stuff
-	} else
-	{
-		m_szConfigDirectory = GetAppDirPath();
 	}
 
-	// Create tunings dir
-	mpt::PathString sTuningPath = m_szConfigDirectory + MPT_PATHSTRING("tunings\\");
-	TrackerDirectories::Instance().SetDefaultDirectory(sTuningPath, DIR_TUNING);
 
+	// Update state.
+
+	// store exe path
+	m_szExePath = mpt::GetAppPath();
+
+	// store the config path
+	m_szConfigDirectory = configPath;
+
+	// Set up default file locations
+	m_szConfigFileName = m_szConfigDirectory + MPT_PATHSTRING("mptrack.ini"); // config file
+	m_szPluginCacheFileName = m_szConfigDirectory + MPT_PATHSTRING("plugin.cache"); // plugin cache
+	TrackerDirectories::Instance().SetDefaultDirectory(m_szConfigDirectory + MPT_PATHSTRING("tunings\\"), DIR_TUNING);
+	TrackerDirectories::Instance().SetDefaultDirectory(m_szConfigDirectory + MPT_PATHSTRING("TemplateModules\\"), DIR_TEMPLATE_FILES_USER);
+
+	// Force use of custom ini file rather than windowsDir\executableName.ini
+	if(m_pszProfileName)
+	{
+		free((void *)m_pszProfileName);
+	}
+	m_pszProfileName = _tcsdup(m_szConfigFileName.ToCString());
+
+	m_bPortableMode = portableMode;
+
+	// Create missing diretories
+	if(!m_szConfigDirectory.IsDirectory())
+	{
+		CreateDirectoryW(m_szConfigDirectory.AsNative().c_str(), 0);
+	}
 	if(!TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING).IsDirectory())
 	{
 		CreateDirectoryW(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING).AsNative().c_str(), 0);
 	}
 
-	if(!bIsAppDir)
+
+	// Handle updates from old versions.
+
+	if(!portableMode)
 	{
+
+		// Move the config files if they're still in the old place.
+		MoveConfigFile(MPT_PATHSTRING("mptrack.ini"));
+		MoveConfigFile(MPT_PATHSTRING("plugin.cache"));
+	
 		// Import old tunings
 		mpt::PathString sOldTunings;
 		sOldTunings = GetAppDirPath();
@@ -864,25 +901,6 @@ void CTrackApp::SetupPaths(bool overridePortable)
 		}
 	}
 
-	// Set up default file locations
-	m_szConfigFileName = m_szConfigDirectory; // config file
-	m_szConfigFileName += MPT_PATHSTRING("mptrack.ini");
-
-	m_szPluginCacheFileName = m_szConfigDirectory + MPT_PATHSTRING("plugin.cache"); // plugin cache
-
-	mpt::PathString szTemplatePath;
-	szTemplatePath = m_szConfigDirectory;
-	szTemplatePath += MPT_PATHSTRING("TemplateModules\\");
-	TrackerDirectories::Instance().SetDefaultDirectory(szTemplatePath, DIR_TEMPLATE_FILES_USER);
-
-	//Force use of custom ini file rather than windowsDir\executableName.ini
-	if(m_pszProfileName)
-	{
-		free((void *)m_pszProfileName);
-	}
-	m_pszProfileName = _tcsdup(m_szConfigFileName.ToCString());
-
-	m_bPortableMode = bIsAppDir;
 }
 
 BOOL CTrackApp::InitInstance()
