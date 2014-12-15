@@ -158,6 +158,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, gnMsgBoxVisiblityFlags(conf, "Display", "MDIGraphHeight", uint32_max)
 	, GUIUpdateInterval(conf, "Display", "GUIUpdateInterval", 0)
 	, VuMeterUpdateInterval(conf, "Display", "VuMeterUpdateInterval", 15)
+	, rememberSongWindows(conf, "Display", "RememberSongWindows", true)
 	// Misc
 	, ShowSettingsOnNewVersion(conf, "Misc", "ShowSettingsOnNewVersion", true)
 	, gbShowHackControls(conf, "Misc", "ShowHackControls", false)

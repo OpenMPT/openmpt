@@ -737,29 +737,31 @@ END
 
 IDD_OPTIONS_COLORS DIALOGEX 0, 0, 286, 282
 STYLE DS_SETFONT | DS_3DLOOK | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
-CAPTION "Colours"
+CAPTION "Display"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "",IDC_STATIC,6,6,276,217
+    GROUPBOX        "",IDC_STATIC,6,6,276,114
     CONTROL         "Use small &font",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,18,114,10
     CONTROL         "&Enable effect highlighting",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,36,114,10
     CONTROL         "&Primary highlight",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,54,84,10
     EDITTEXT        IDC_PRIMARYHILITE,102,54,24,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "Rows per measure (default)",IDC_STATIC,132,56,126,8
+    LTEXT           "Rows per measure (default)",IDC_STATIC,132,56,144,8
     CONTROL         "&Secondary highlight",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,72,80,10
     EDITTEXT        IDC_SECONDARYHILITE,102,72,24,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "Rows per beat (default)",IDC_STATIC,132,74,126,8
-    LTEXT           "Note: Songs' time signatures will override the default highlight values",IDC_STATIC,18,90,240,24
-    LTEXT           "Select &colour for:",IDC_STATIC,18,116,63,8
-    COMBOBOX        IDC_COMBO1,84,114,114,109,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "",IDC_BUTTON4,"Button",BS_OWNERDRAW | BS_FLAT,76,132,114,43
-    LTEXT           "Background:",IDC_TEXT1,36,185,60,8
-    CONTROL         "C&olour",IDC_BUTTON1,"Button",BS_OWNERDRAW,36,196,51,15
-    LTEXT           "Foreground:",IDC_TEXT2,109,185,62,8
-    CONTROL         "Colo&ur",IDC_BUTTON2,"Button",BS_OWNERDRAW,109,196,51,15
-    LTEXT           "Highlight:",IDC_TEXT3,180,188,61,8
-    CONTROL         "Colou&r",IDC_BUTTON3,"Button",BS_OWNERDRAW,179,196,51,15
-    GROUPBOX        "Colour Presets",IDC_STATIC,6,234,276,42
+    LTEXT           "Rows per beat (default)",IDC_STATIC,132,74,144,8
+    LTEXT           "Note: Songs' time signatures will override the default highlight values",IDC_STATIC,18,88,258,8
+    CONTROL         "Remember each song's &window positions",IDC_CHECK5,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,102,258,10
+    GROUPBOX        "Colours",IDC_STATIC,6,126,276,150
+    LTEXT           "Select &colour for:",IDC_STATIC,18,146,63,8
+    COMBOBOX        IDC_COMBO1,90,144,114,109,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_BUTTON4,"Button",BS_OWNERDRAW | BS_FLAT,89,162,114,43
+    LTEXT           "Background:",IDC_TEXT1,49,215,60,8
+    CONTROL         "Colour &1",IDC_BUTTON1,"Button",BS_OWNERDRAW,49,226,51,15
+    LTEXT           "Foreground:",IDC_TEXT2,122,215,62,8
+    CONTROL         "Colour &2",IDC_BUTTON2,"Button",BS_OWNERDRAW,122,226,51,15
+    LTEXT           "Highlight:",IDC_TEXT3,193,215,61,8
+    CONTROL         "Colour &3",IDC_BUTTON3,"Button",BS_OWNERDRAW,192,226,51,15
     PUSHBUTTON      "&Load...",IDC_LOAD_COLORSCHEME,18,252,42,15
     PUSHBUTTON      "S&ave...",IDC_SAVE_COLORSCHEME,66,252,42,15
     PUSHBUTTON      "&MPT",IDC_BUTTON5,132,252,30,15
