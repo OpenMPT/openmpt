@@ -3005,7 +3005,7 @@ void CModDoc::SerializeViews() const
 			mpt::IO::WriteIntLE<int32_t>(f, Util::muldivr(rect.Width(), 1 << 30, width));
 			mpt::IO::WriteIntLE<int32_t>(f, Util::muldivr(rect.Height(), 1 << 30, height));
 
-			std::string s = pChildFrm->SerializeView().str();
+			std::string s = pChildFrm->SerializeView();
 			mpt::IO::WriteVarInt(f, s.size());
 			f << s;
 		}
