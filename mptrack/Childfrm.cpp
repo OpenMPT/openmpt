@@ -468,8 +468,8 @@ void CChildFrame::OnSetFocus(CWnd* pOldWnd)
 //end rewbs.customKeysAutoEffects
 
 
-std::ostringstream CChildFrame::SerializeView() const
-//---------------------------------------------------
+std::string CChildFrame::SerializeView() const
+//--------------------------------------------
 {
 	std::ostringstream f(std::ios::out | std::ios::binary);
 	// Version
@@ -488,7 +488,7 @@ std::ostringstream CChildFrame::SerializeView() const
 	{
 		mpt::IO::WriteVarInt(f, (uint32_t)view->SendMessage(WM_MOD_CTRLMSG, CTRLMSG_GETCURRENTINSTRUMENT));	// Instrument number
 	}
-	return f;
+	return f.str();
 }
 
 

@@ -124,7 +124,7 @@ public:
 	void SetSplitterHeight(int x);
 	int GetSplitterHeight();
 
-	std::ostringstream SerializeView() const;
+	std::string SerializeView() const;
 	void DeserializeView(FileReader &file);
 
 // Overrides
