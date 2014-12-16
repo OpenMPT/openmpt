@@ -337,25 +337,23 @@ BEGIN
     PUSHBUTTON      "&Cancel",IDCANCEL,120,24,50,14
 END
 
-IDD_WECLOME DIALOGEX 0, 0, 256, 154
+IDD_WECLOME DIALOGEX 0, 0, 256, 137
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Welcome to OpenMPT!"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "&OK",IDOK,198,135,50,14
+    DEFPUSHBUTTON   "&OK",IDOK,198,116,50,14
     LTEXT           "Please review the following settings before using this software:",IDC_STATIC,6,6,246,8
     CONTROL         "&Automatically check for new versions of OpenMPT",IDC_CHECK1,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,24,246,10
-    CONTROL         "Store settings in installation directory (&portable mode)",IDC_CHECK3,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,42,246,10
     CONTROL         "&Use a big font in the pattern editor",IDC_CHECK2,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,60,246,10
-    LTEXT           "&Default keyboard scheme:",IDC_STATIC,6,81,108,8
-    COMBOBOX        IDC_COMBO1,114,79,132,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Scan for existing VST plugins in the following location:",IDC_STATIC,6,100,172,8
-    PUSHBUTTON      "&Scan",IDC_BUTTON2,198,97,50,14
-    EDITTEXT        IDC_EDIT1,6,113,240,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
-    PUSHBUTTON      "&More Settings",IDC_BUTTON1,6,135,60,14
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,42,246,10
+    LTEXT           "&Default keyboard scheme:",IDC_STATIC,6,63,108,8
+    COMBOBOX        IDC_COMBO1,114,60,132,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Scan for existing VST plugins in the following location:",IDC_STATIC,6,82,172,8
+    PUSHBUTTON      "&Scan",IDC_BUTTON2,198,79,50,14
+    EDITTEXT        IDC_EDIT1,6,95,240,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    PUSHBUTTON      "&More Settings",IDC_BUTTON1,6,116,60,14
 END
 
 
@@ -516,7 +514,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 249
         TOPMARGIN, 7
-        BOTTOMMARGIN, 147
+        BOTTOMMARGIN, 130
     END
 END
 #endif    // APSTUDIO_INVOKED
