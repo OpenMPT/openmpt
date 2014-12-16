@@ -121,8 +121,6 @@ BOOL WelcomeDlg::OnInitDialog()
 
 	CheckDlgButton(IDC_CHECK1, BST_CHECKED);
 	CheckDlgButton(IDC_CHECK2, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMALLFONT) ? BST_UNCHECKED : BST_CHECKED);
-	CheckDlgButton(IDC_CHECK3, theApp.IsPortableMode() ? BST_CHECKED : BST_UNCHECKED);
-	GetDlgItem(IDC_CHECK3)->EnableWindow(theApp.IsPortableMode() ? FALSE : TRUE);
 
 	ShowWindow(SW_SHOW);
 
@@ -156,7 +154,6 @@ void WelcomeDlg::OnOK()
 		TrackerSettings::Instance().m_dwPatternSetup &= ~PATTERN_SMALLFONT;
 	else
 		TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_SMALLFONT;
-	theApp.SetPortableMode(IsDlgButtonChecked(IDC_CHECK3) != BST_UNCHECKED);
 
 	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
 	const char *keyFile = static_cast<char *>(combo->GetItemDataPtr(combo->GetCurSel()));
