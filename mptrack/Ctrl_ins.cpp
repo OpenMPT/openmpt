@@ -1476,7 +1476,9 @@ BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 			}
 
 			SetCurrentInstrument(m_nInstrument);
-			SetModified(InstrumentHint().Info().Envelope().Names(), true);
+			InstrumentHint hint = InstrumentHint().Info().Envelope().Names();
+			if(bFirst) hint.ModType();
+			SetModified(hint, true);
 		} else bOk = FALSE;
 	}
 	SampleHint hint = SampleHint().Info().Data().Names();
@@ -1512,10 +1514,16 @@ BOOL CCtrlInstruments::OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInst
 
 	cs.Leave();
 
-	SetModified(InstrumentHint().Info().Envelope().Names(), true);
-	SampleHint hint = SampleHint().Info().Data().Names();
-	if (bFirst) hint.ModType();
-	m_modDoc.UpdateAllViews(nullptr, hint, this);
+	{
+		InstrumentHint hint = InstrumentHint().Info().Envelope().Names();
+		if (bFirst) hint.ModType();
+		SetModified(hint, true);
+	}
+	{
+		SampleHint hint = SampleHint().Info().Data().Names();
+		if (bFirst) hint.ModType();
+		m_modDoc.UpdateAllViews(nullptr, hint, this);
+	}
 	EndWaitCursor();
 	return TRUE;
 }
