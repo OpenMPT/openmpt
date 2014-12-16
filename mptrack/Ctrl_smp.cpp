@@ -2639,7 +2639,7 @@ void CCtrlSamples::OnLoopTypeChanged()
 //------------------------------------
 {
 	if(IsLocked()) return;
-	int n = m_ComboLoopType.GetCurSel();
+	const int n = m_ComboLoopType.GetCurSel();
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	bool wasDisabled = !sample.uFlags[CHN_LOOP];
 
@@ -2676,7 +2676,8 @@ void CCtrlSamples::OnLoopPointsChanged()
 	SmpLength start = GetDlgItemInt(IDC_EDIT1, NULL, FALSE), end = GetDlgItemInt(IDC_EDIT2, NULL, FALSE);
 	if(start < end || sample.uFlags[CHN_LOOP])
 	{
-		sample.SetLoop(start, end, sample.uFlags[CHN_LOOP], sample.uFlags[CHN_PINGPONGLOOP], m_sndFile);
+		const int n = m_ComboLoopType.GetCurSel();
+		sample.SetLoop(start, end, n > 0, n == 2, m_sndFile);
 		SetModified(SampleHint().Info().Data(), false, false);
 	}
 }
@@ -2686,7 +2687,7 @@ void CCtrlSamples::OnSustainTypeChanged()
 //---------------------------------------
 {
 	if(IsLocked()) return;
-	int n = m_ComboSustainType.GetCurSel();
+	const int n = m_ComboSustainType.GetCurSel();
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	bool wasDisabled = !sample.uFlags[CHN_SUSTAINLOOP];
 
@@ -2723,7 +2724,8 @@ void CCtrlSamples::OnSustainPointsChanged()
 	SmpLength start = GetDlgItemInt(IDC_EDIT3, NULL, FALSE), end = GetDlgItemInt(IDC_EDIT4, NULL, FALSE);
 	if(start < end || !sample.uFlags[CHN_SUSTAINLOOP])
 	{
-		sample.SetSustainLoop(start, end, sample.uFlags[CHN_SUSTAINLOOP], sample.uFlags[CHN_PINGPONGSUSTAIN], m_sndFile);
+		const int n = m_ComboSustainType.GetCurSel();
+		sample.SetSustainLoop(start, end, n > 0, n == 2, m_sndFile);
 		SetModified(SampleHint().Info().Data(), false, false);
 	}
 }
