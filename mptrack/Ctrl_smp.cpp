@@ -36,9 +36,7 @@
 #include <math.h>
 #endif
 
-#pragma warning(disable:4701)
 #include "../include/r8brain/CDSPResampler.h"
-#pragma warning(default:4701)
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

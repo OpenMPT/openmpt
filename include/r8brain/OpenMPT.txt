@@ -1,4 +1,4 @@
-r8brain-free resampling library from https://code.google.com/p/r8brain-free-src/ revision 71.
+r8brain-free resampling library from https://code.google.com/p/r8brain-free-src/ revision 72.
 The (non-functional) example program, DLL folder and logo file have been removed.
 No further local changes have been made.
 For building, premake4 is used to generate Visual Studio project files.
