@@ -294,7 +294,7 @@ public:
 				ilu = InputLen;
 			}
 
-			const int pil = PrevInputLen * sizeof( double );
+			const int pil = (int) ( PrevInputLen * sizeof( double ));
 			memcpy( &CurInput[ ilu ], PrevInput, pil );
 			memcpy( PrevInput, &CurInput[ ilu - PrevInputLen ], pil );
 

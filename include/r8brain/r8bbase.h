@@ -859,40 +859,54 @@ inline int getBitOccupancy( const int v )
 
 /**
  * Function calculates frequency response of the specified FIR filter at the
- * specified circular frequency.
+ * specified circular frequency. Phase can be calculated as atan2( im, re ).
  *
  * @param flt FIR filter's coefficients.
  * @param fltlen Number of coefficients (taps) in the filter.
  * @param th Circular frequency [0; pi].
  * @param[out] re0 Resulting real part of the complex frequency response.
  * @param[out] im0 Resulting imaginary part of the complex frequency response.
+ * @param fltlat Filter's latency in samples.
  */
 
 inline void calcFIRFilterResponse( const double* flt, int fltlen,
-	const double th, double& re0, double& im0 )
+	const double th, double& re0, double& im0, const int fltlat = 0 )
 {
-	double svalue1 = 0.0;
-	double svalue2 = sin( -th );
 	const double sincr = 2.0 * cos( th );
-	double cvalue1 = 1.0;
-	double cvalue2 = sin( M_PId2 - th );
+	double cvalue1;
+	double svalue1;
+
+	if( fltlat == 0 )
+	{
+		cvalue1 = 1.0;
+		svalue1 = 0.0;
+	}
+	else
+	{
+		cvalue1 = cos( -fltlat * th );
+		svalue1 = sin( -fltlat * th );
+	}
+
+	double cvalue2 = cos( -( fltlat + 1 ) * th );
+	double svalue2 = sin( -( fltlat + 1 ) * th );
+
 	double re = 0.0;
 	double im = 0.0;
 
 	while( fltlen > 0 )
 	{
-		re += svalue1 * flt[ 0 ];
-		im += cvalue1 * flt[ 0 ];
+		re += cvalue1 * flt[ 0 ];
+		im += svalue1 * flt[ 0 ];
 		flt++;
 		fltlen--;
 
-		double tmp = svalue1;
-		svalue1 = sincr * svalue1 - svalue2;
-		svalue2 = tmp;
-
-		tmp = cvalue1;
+		double tmp = cvalue1;
 		cvalue1 = sincr * cvalue1 - cvalue2;
 		cvalue2 = tmp;
+
+		tmp = svalue1;
+		svalue1 = sincr * svalue1 - svalue2;
+		svalue2 = tmp;
 	}
 
 	re0 = re;
