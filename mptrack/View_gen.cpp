@@ -52,23 +52,7 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_COMMAND(IDC_CHECK4,		OnSurround2)
 	ON_COMMAND(IDC_CHECK6,		OnSurround3)
 	ON_COMMAND(IDC_CHECK8,		OnSurround4)
-	ON_COMMAND(IDC_CHECK9,		OnMixModeChanged)
-	ON_COMMAND(IDC_CHECK10,		OnBypassChanged)
-	ON_COMMAND(IDC_CHECK11,		OnDryMixChanged)
-	ON_COMMAND(IDC_BUTTON1,		OnSelectPlugin)
-	ON_COMMAND(IDC_BUTTON2,		OnEditPlugin)
-	ON_COMMAND(IDC_BUTTON3,		OnSetParameter)
-	ON_COMMAND(IDC_BUTTON4,		OnNextPlugin)
-	ON_COMMAND(IDC_BUTTON5,		OnPrevPlugin)
-	ON_COMMAND(IDC_MOVEFXSLOT,	OnMovePlugToSlot)
-	ON_COMMAND(IDC_INSERTFXSLOT,OnInsertSlot)
-	ON_COMMAND(IDC_CLONEPLUG,	OnClonePlug)
 
-
-	ON_COMMAND(IDC_BUTTON6,		OnLoadParam)
-	ON_COMMAND(IDC_BUTTON8,		OnSaveParam)
-
-	ON_COMMAND(IDC_BUTTON7,		OnSetWetDry)
 	ON_EN_UPDATE(IDC_EDIT1,		OnEditVol1)
 	ON_EN_UPDATE(IDC_EDIT3,		OnEditVol2)
 	ON_EN_UPDATE(IDC_EDIT5,		OnEditVol3)
@@ -81,11 +65,33 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_EN_UPDATE(IDC_EDIT10,	OnEditName2)
 	ON_EN_UPDATE(IDC_EDIT11,	OnEditName3)
 	ON_EN_UPDATE(IDC_EDIT12,	OnEditName4)
-	ON_EN_UPDATE(IDC_EDIT13,	OnPluginNameChanged)
+
 	ON_CBN_SELCHANGE(IDC_COMBO1, OnFx1Changed)
 	ON_CBN_SELCHANGE(IDC_COMBO2, OnFx2Changed)
 	ON_CBN_SELCHANGE(IDC_COMBO3, OnFx3Changed)
 	ON_CBN_SELCHANGE(IDC_COMBO4, OnFx4Changed)
+
+	// Plugins
+	ON_COMMAND(IDC_CHECK9,		OnMixModeChanged)
+	ON_COMMAND(IDC_CHECK10,		OnBypassChanged)
+	ON_COMMAND(IDC_CHECK11,		OnDryMixChanged)
+	ON_COMMAND(IDC_BUTTON1,		OnSelectPlugin)
+	ON_COMMAND(IDC_BUTTON2,		OnEditPlugin)
+	ON_COMMAND(IDC_BUTTON3,		OnSetParameter)
+	ON_COMMAND(IDC_BUTTON4,		OnNextPlugin)
+	ON_COMMAND(IDC_BUTTON5,		OnPrevPlugin)
+	ON_COMMAND(IDC_MOVEFXSLOT,	OnMovePlugToSlot)
+	ON_COMMAND(IDC_INSERTFXSLOT,OnInsertSlot)
+	ON_COMMAND(IDC_CLONEPLUG,	OnClonePlug)
+
+	ON_COMMAND(IDC_BUTTON6,		OnLoadParam)
+	ON_COMMAND(IDC_BUTTON8,		OnSaveParam)
+
+	ON_COMMAND(IDC_BUTTON7,		OnSetWetDry)
+	ON_EN_UPDATE(IDC_EDIT13,	OnPluginNameChanged)
+	ON_EN_UPDATE(IDC_EDIT14,	OnSetParameter)
+	ON_EN_SETFOCUS(IDC_EDIT14,	OnFocusParam)
+	ON_EN_KILLFOCUS(IDC_EDIT14,	OnParamChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO5, OnPluginChanged)
 
 	ON_CBN_SELCHANGE(IDC_COMBO6, OnParamChanged)
@@ -972,20 +978,45 @@ void CViewGlobals::OnParamChanged()
 		if(cursel >= 0 && cursel < nParams) m_nCurrentParam = cursel;
 		if(m_nCurrentParam < nParams)
 		{
-			TCHAR s[32];
-			//wsprintf(s, _T("Value: %s"), pVstPlugin->GetFormattedParamValue(m_nCurrentParam));
-			//SetDlgItemText(IDC_TEXT5, s);
-			float fValue = pVstPlugin->GetParameter(m_nCurrentParam);
-			int nValue = (int)(fValue * 100.0f + 0.5f);
-			sprintf(s, _T("%f"), fValue); //wsprintf(s, "%d.%02d", nValue/100, nValue%100); // ericus 25/01/2005
-			SetDlgItemText(IDC_EDIT14, s);
+			int nValue = Util::Round<int>(pVstPlugin->GetParameter(m_nCurrentParam) * 100.0f);
+			LockControls();
+			if(GetFocus() != GetDlgItem(IDC_EDIT14))
+			{
+				CString s = pVstPlugin->GetFormattedParamValue(m_nCurrentParam).Trim();
+				if(s.IsEmpty())
+				{
+					s.Format(_T("%f"), pVstPlugin->GetParameter(m_nCurrentParam));
+				}
+				SetDlgItemText(IDC_EDIT14, s);
+			}
 			m_sbValue.SetPos(nValue);
+			UnlockControls();
 			return;
 		}
 	}
-	//SetDlgItemText(IDC_TEXT5, "Value:");
 	SetDlgItemText(IDC_EDIT14, "");
 	m_sbValue.SetPos(0);
+}
+
+
+// When focussing the parameter value, show its real value to edit
+void CViewGlobals::OnFocusParam()
+//-------------------------------
+{
+	IMixPlugin *pVstPlugin = GetCurrentPlugin();
+	if(pVstPlugin != nullptr)
+	{
+		const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
+		if(m_nCurrentParam < nParams)
+		{
+			TCHAR s[32];
+			float fValue = pVstPlugin->GetParameter(m_nCurrentParam);
+			sprintf(s, _T("%f"), fValue);
+			LockControls();
+			SetDlgItemText(IDC_EDIT14, s);
+			UnlockControls();
+		}
+	}
 }
 
 
@@ -1048,12 +1079,8 @@ void CViewGlobals::OnSaveParam()
 void CViewGlobals::OnSetParameter()
 //---------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
-
-	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
-	pSndFile = pModDoc->GetSoundFile();
-	CVstPlugin *pVstPlugin = GetCurrentPlugin();
+	if(m_nCurrentPlugin >= MAX_MIXPLUGINS || IsLocked()) return;
+	IMixPlugin *pVstPlugin = GetCurrentPlugin();
 
 	if(pVstPlugin != nullptr)
 	{
