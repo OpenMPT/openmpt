@@ -433,8 +433,7 @@ void MidiInOut::OpenDevice(PmDeviceID newDevice, bool asInputDevice)
 	if(device.index == noDevice)
 	{
 		// Dummy device
-		device.stream = nullptr;
-		device.name = "<none>";
+		device = MidiDevice();
 		return;
 	}
 

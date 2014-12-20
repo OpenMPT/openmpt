@@ -23,7 +23,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-	
+
 //==============
 class MidiDevice
 //==============
@@ -38,6 +38,7 @@ public:
 	{
 		index = -1;	// MidiInOut::noDevice
 		stream = nullptr;
+		name = "<none>";
 	}
 };
 
@@ -68,9 +69,9 @@ protected:
 	// I/O device settings
 	MidiDevice inputDevice;
 	MidiDevice outputDevice;
-	bool isProcessing;
-	bool isBypassed;
-	bool latencyCompensation;
+	bool isProcessing : 1;
+	bool isBypassed : 1;
+	bool latencyCompensation : 1;
 
 	char programName[kVstMaxProgNameLen + 1];
 	static int numInstances;

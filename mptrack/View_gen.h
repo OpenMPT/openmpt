@@ -120,20 +120,14 @@ protected:
 	afx_msg void OnPluginNameChanged();
 	afx_msg void OnFillParamCombo();
 	afx_msg void OnParamChanged();
-// -> CODE#0002
-// -> DESC="VST plugins presets"
+	afx_msg void OnFocusParam();
 	afx_msg void OnFillProgramCombo();
 	afx_msg void OnProgramChanged();
 	afx_msg void OnLoadParam();
 	afx_msg void OnSaveParam();
-// -! NEW_FEATURE#0002
 	afx_msg void OnSelectPlugin();
 	afx_msg void OnSetParameter();
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
 	afx_msg void OnSetWetDry();
-//	afx_msg void OnWetDryChanged();
-// -! NEW_FEATURE#0014
 	afx_msg void OnEditPlugin();
 	afx_msg void OnMixModeChanged();
 	afx_msg void OnBypassChanged();
@@ -142,11 +136,8 @@ protected:
 	afx_msg void OnInsertSlot();
 	afx_msg void OnClonePlug();
 
-// -> CODE#0028
-// -> DESC="effect plugin mixing mode combo"
 	afx_msg void OnWetDryExpandChanged();
 	afx_msg void OnSpecialMixProcessingChanged();
-// -! NEW_FEATURE#0028
 
 	afx_msg void OnOutputRoutingChanged();
 	afx_msg void OnPrevPlugin();
