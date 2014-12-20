@@ -521,7 +521,7 @@ void CChildFrame::DeserializeView(FileReader &file)
 			pageDlg = IDD_CONTROL_COMMENTS;
 			break;
 		}
-		GetModControlView()->PostMessage(WM_MOD_ACTIVATEVIEW, pageDlg);
+		GetModControlView()->PostMessage(WM_MOD_ACTIVATEVIEW, pageDlg, (LPARAM)-1);
 	}
 
 }
