@@ -7,7 +7,7 @@ set -e
 # This is meant to be run by the libopenmpt maintainers.
 #
 # WARNING: The script expects the be run from the root of an OpenMPT svn
-#    checkout. The invests no effort in verifying this precondition.
+#    checkout. It invests no effort in verifying this precondition.
 #
 
 # We want ccache
