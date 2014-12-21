@@ -5,11 +5,13 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt svn
+### 2014-12-21 - libopenmpt 0.2-beta8
 
  *  foo_openmpt: Settings are now accessable via foobar2000 advanced settings.
  *  Autotools based build now supports libunmo3. Specify --enable-unmo3.
  *  Support for dynamic loading of libunmo3 on MacOS X.
+ *  libopenmpt now uses libltld (from libtool) for dynamic loading of libunmo3
+    on all non-Windows platforms.
  *  Support for older compilers:
      *  GCC 4.1.x to 4.3.x (use `make ANCIENT=1`)
      *  Microsoft Visual Studio 2008 (with latest Service Pack)
@@ -22,6 +24,7 @@ is just a high-level summary.
  *  [Bug] The -autotools tarballs were not working at all.
 
  *  Vastly improved MT2 loader.
+ *  Improved S3M playback compatibility.
  *  Added openmpt::ext::interactive, an extension which adds a whole bunch of
     new functionality to change playback in some way or another.
  *  Added possibility to sync sample playback when using
