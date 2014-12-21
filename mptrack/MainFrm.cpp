@@ -158,8 +158,6 @@ HCURSOR CMainFrame::curVSplit = NULL;
 LPMODPLUGDIB CMainFrame::bmpPatterns = NULL;
 LPMODPLUGDIB CMainFrame::bmpNotes = NULL;
 LPMODPLUGDIB CMainFrame::bmpVUMeters = NULL;
-LPMODPLUGDIB CMainFrame::bmpVisNode = NULL;
-LPMODPLUGDIB CMainFrame::bmpVisPcNode = NULL;
 COLORREF CMainFrame::gcolrefVuMeter[NUM_VUMETER_PENS*2];
 
 CInputHandler *CMainFrame::m_InputHandler = nullptr;
@@ -343,8 +341,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	bmpPatterns = LoadDib(MAKEINTRESOURCE(IDB_PATTERNS));
 	bmpNotes = LoadDib(MAKEINTRESOURCE(IDB_PATTERNVIEW));
 	bmpVUMeters = LoadDib(MAKEINTRESOURCE(IDB_VUMETERS));
-	bmpVisNode = LoadDib(MAKEINTRESOURCE(IDB_VISNODE));
-	bmpVisPcNode = LoadDib(MAKEINTRESOURCE(IDB_VISPCNODE));
 	// Toolbars
 	EnableDocking(CBRS_ALIGN_ANY);
 	if (!m_wndToolBar.Create(this)) return -1;
@@ -412,16 +408,6 @@ BOOL CMainFrame::DestroyWindow()
 	{
 		delete bmpVUMeters;
 		bmpVUMeters = NULL;
-	}
-	if (bmpVisNode)
-	{
-		delete bmpVisNode;
-		bmpVisNode = NULL;
-	}
-	if (bmpVisPcNode)
-	{
-		delete bmpVisPcNode;
-		bmpVisPcNode = NULL;
 	}
 
 	// Kill GDI Objects

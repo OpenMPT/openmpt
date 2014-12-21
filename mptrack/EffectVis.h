@@ -62,6 +62,10 @@ protected:
 	int m_nRowToErase;
 	int m_nParamToErase;
 
+	int m_nodeSizeHalf;	// Half width of a node;
+	int m_marginBottom;
+	int m_innerBorder;
+
 	ROWINDEX m_nOldPlayPos;
 	ModCommand m_templatePCNote;
 

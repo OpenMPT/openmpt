@@ -2038,8 +2038,6 @@ END
 IDB_PATTERNVIEW         BITMAP                  "res\\view_pat.bmp"
 IDB_COLORSETUP          BITMAP                  "res\\colors.bmp"
 IDB_VUMETERS            BITMAP                  "res\\vumeters.bmp"
-IDB_VISNODE             BITMAP                  "res\\bitmap1.bmp"
-IDB_VISPCNODE           BITMAP                  "res\\vispcnode.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

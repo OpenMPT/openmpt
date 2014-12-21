@@ -95,11 +95,9 @@
 #define IDD_SELECTMIXPLUGIN             423
 #define IDD_PLUGINEDITOR                424
 #define IDD_EFFECTVISUALIZER            426
-#define IDB_VISNODE                     427
 #define IDB_SPLASHTEST                  432
 #define IDB_SPLASHNOFOLDFIN             435
 #define IDR_VSTMENU                     436
-#define IDB_VISPCNODE                   437
 #define IDD_DEFAULTPLUGINEDITOR         438
 #define IDD_CHANNELMANAGER              440
 #define IDD_PITCHSHIFT                  442
@@ -1248,6 +1246,7 @@
 #define ID_MRU_LIST_LAST                44642
 #define ID_FILE_APPENDMODULE            44643
 #define ID_SAMPLE_16BITCONVERT          44644
+
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
