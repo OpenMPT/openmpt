@@ -21,16 +21,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#define NODESIZE 7
-#define NODEHALF 3
-#define BOTTOMBORDER 20
-#define TOPBORDER 0
-#define LEFTBORDER 0
-#define RIGHTBORDER 0
-
-#define INNERLEFTBORDER 4
-#define INNERRIGHTBORDER 4
-
 // EffectVis dialog
 
 IMPLEMENT_DYNAMIC(CEffectVis, CDialog)
@@ -175,7 +165,7 @@ int CEffectVis::RowToScreenX(ROWINDEX row) const
 //----------------------------------------------
 {
 	if ((row >= m_startRow) || (row <= m_endRow))
-		return Util::Round<int>(m_rcDraw.left + INNERLEFTBORDER + (row - m_startRow) * m_pixelsPerRow);
+		return Util::Round<int>(m_rcDraw.left + m_innerBorder + (row - m_startRow) * m_pixelsPerRow);
 	return -1;
 }
 
@@ -251,7 +241,7 @@ ROWINDEX CEffectVis::ScreenXToRow(int x) const
 	if (x >= RowToScreenX(m_endRow))
 		return m_endRow;
 
-	return Util::Round<ROWINDEX>(m_startRow + (x - INNERLEFTBORDER) / m_pixelsPerRow);
+	return Util::Round<ROWINDEX>(m_startRow + (x - m_innerBorder) / m_pixelsPerRow);
 }
 
 CEffectVis::~CEffectVis()
@@ -306,8 +296,8 @@ void CEffectVis::DrawGrid()
 		m_dcGrid.SelectObject(CMainFrame::penScratch);
 
 		int y1 = m_rcDraw.bottom/numHorizontalLines * i;
-		m_dcGrid.MoveTo(m_rcDraw.left+INNERLEFTBORDER, y1);
-		m_dcGrid.LineTo(m_rcDraw.right-INNERRIGHTBORDER, y1);
+		m_dcGrid.MoveTo(m_rcDraw.left + m_innerBorder, y1);
+		m_dcGrid.LineTo(m_rcDraw.right - m_innerBorder, y1);
 	}
 
 }
@@ -424,7 +414,7 @@ void CEffectVis::ShowVisImage(CDC *pDC)
 		memDC.TransparentBlt(0, 0, m_rcDraw.Width(), m_rcDraw.Height(), &m_dcPlayPos, 0, 0, m_rcDraw.Width(), m_rcDraw.Height(), 0x00000000) ;
 
 		// copy the resulting bitmap to the destination
-		pDC->BitBlt(LEFTBORDER, TOPBORDER, m_rcDraw.Width()+LEFTBORDER, m_rcDraw.Height()+TOPBORDER, &memDC, 0, 0, SRCCOPY) ;
+		pDC->BitBlt(0, 0, m_rcDraw.Width(), m_rcDraw.Height(), &memDC, 0, 0, SRCCOPY) ;
 	}
 
 	memDC.SelectObject(oldBitmap);
@@ -435,24 +425,35 @@ void CEffectVis::ShowVisImage(CDC *pDC)
 void CEffectVis::DrawNodes()
 //--------------------------
 {
+	if(m_rcDraw.IsRectEmpty())
+		return;
+
+	//Draw
+	const int lineWidth = MulDiv(1, GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSX), 96);
+	const int nodeSizeHalf = m_nodeSizeHalf;
+	const int nodeSizeHalf2 = nodeSizeHalf - lineWidth + 1;
+	const int nodeSize = 2 * nodeSizeHalf + 1;
+
 	//erase
-	if ((UINT)m_nRowToErase<m_startRow ||  m_nParamToErase < 0)
+	if ((ROWINDEX)m_nRowToErase < m_startRow || m_nParamToErase < 0)
 	{
-		if(!m_rcDraw.IsRectEmpty())
-			m_dcNodes.FillSolidRect(&m_rcDraw, 0);
+		m_dcNodes.FillSolidRect(&m_rcDraw, 0);
 	} else
 	{
 		int x = RowToScreenX(m_nRowToErase);
-		CRect r(x - NODEHALF - 1, m_rcDraw.top, x - NODEHALF + NODESIZE + 1, m_rcDraw.bottom);
+		CRect r(x - nodeSizeHalf, m_rcDraw.top, x + nodeSizeHalf, m_rcDraw.bottom);
 		m_dcNodes.FillSolidRect(&r, 0);
 	}
 
-	//Draw
 	for (ROWINDEX row = m_startRow; row <= m_endRow; row++)
 	{
+		COLORREF col = IsPcNote(row) ? RGB(0xFF, 0xFF, 0x00) : RGB(0xD0, 0xFF, 0xFF);
 		int x = RowToScreenX(row);
 		int y = RowToScreenY(row);
-		DibBlt(m_dcNodes.m_hDC, x-NODEHALF, y-NODEHALF, NODESIZE, NODESIZE, 0, 0, IsPcNote(row) ? CMainFrame::bmpVisPcNode : CMainFrame::bmpVisNode);
+		m_dcNodes.FillSolidRect(x - nodeSizeHalf, y - nodeSizeHalf, nodeSize, lineWidth, col);	// Top
+		m_dcNodes.FillSolidRect(x + nodeSizeHalf2, y - nodeSizeHalf, lineWidth, nodeSize, col);	// Right
+		m_dcNodes.FillSolidRect(x - nodeSizeHalf, y + nodeSizeHalf2, nodeSize, lineWidth, col);	// Bottom
+		m_dcNodes.FillSolidRect(x - nodeSizeHalf, y - nodeSizeHalf, lineWidth, nodeSize, col);	// Left
 	}
 
 }
@@ -466,8 +467,8 @@ void CEffectVis::InvalidateRow(int row)
 	int x = RowToScreenX(row);
 	invalidated.bottom = m_rcDraw.bottom;
 	invalidated.top = m_rcDraw.top;
-	invalidated.left = x - NODEHALF*2;
-	invalidated.right = x + NODEHALF*2;
+	invalidated.left = x - m_nodeSizeHalf;
+	invalidated.right = x + m_nodeSizeHalf;
 	InvalidateRect(&invalidated, FALSE);
 
 	InvalidateRect(NULL, FALSE);
@@ -535,8 +536,8 @@ void CEffectVis::OnSize(UINT nType, int cx, int cy)
 	MPT_UNREFERENCED_PARAMETER(cx);
 	MPT_UNREFERENCED_PARAMETER(cy);
 	GetClientRect(&m_rcFullWin);
-	m_rcDraw.SetRect( m_rcFullWin.left  + LEFTBORDER,  m_rcFullWin.top    + TOPBORDER,
-				      m_rcFullWin.right - RIGHTBORDER, m_rcFullWin.bottom - BOTTOMBORDER);
+	m_rcDraw.SetRect( m_rcFullWin.left,  m_rcFullWin.top,
+				      m_rcFullWin.right, m_rcFullWin.bottom - m_marginBottom);
 
 #define INFOWIDTH 200
 #define ACTIONLISTWIDTH 150
@@ -551,7 +552,7 @@ void CEffectVis::OnSize(UINT nType, int cx, int cy)
 
 
 	if(m_nRows)
-		m_pixelsPerRow = (float)(m_rcDraw.Width()-INNERLEFTBORDER-INNERRIGHTBORDER)/(float)m_nRows;
+		m_pixelsPerRow = (float)(m_rcDraw.Width() - m_innerBorder * 2) / (float)m_nRows;
 	else
 		m_pixelsPerRow = 1;
 	m_pixelsPerFXParam = (float)(m_rcDraw.Height())/(float)0xFF;
@@ -608,7 +609,7 @@ void CEffectVis::UpdateSelection(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDE
 	}
 
 	if(m_nRows)
-		m_pixelsPerRow = (float)(m_rcDraw.Width()-INNERLEFTBORDER-INNERRIGHTBORDER) / (float)m_nRows;
+		m_pixelsPerRow = (float)(m_rcDraw.Width() - m_innerBorder * 2) / (float)m_nRows;
 	else
 		m_pixelsPerRow = 1;
 	m_pixelsPerFXParam = (float)(m_rcDraw.Height())/(float)0xFF;
@@ -633,7 +634,7 @@ void CEffectVis::OnRButtonDown(UINT nFlags, CPoint point)
 		{
 			int x = RowToScreenX(row);
 			int y = RowToScreenY(row);
-			rect.SetRect(x-NODEHALF, y-NODEHALF, x+NODEHALF+1, y+NODEHALF+1);
+			rect.SetRect(x - m_nodeSizeHalf, y - m_nodeSizeHalf, x + m_nodeSizeHalf + 1, y + m_nodeSizeHalf + 1);
 			if (rect.PtInRect(point))
 			{
 				m_pModDoc->GetPatternUndo().PrepareUndo(static_cast<PATTERNINDEX>(m_nPattern), m_nChan, row, m_nChan + 1, row + 1, "Parameter Editor entry");
@@ -751,6 +752,13 @@ BOOL CEffectVis::OnInitDialog()
 //-----------------------------
 {
 	CDialog::OnInitDialog();
+
+	int dpi = GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSX);
+	m_nodeSizeHalf = MulDiv(3, dpi, 96);
+	m_marginBottom = MulDiv(20, dpi, 96);
+	m_innerBorder = MulDiv(4, dpi, 96);
+
+
 	if (m_pModDoc->GetModType() == MOD_TYPE_MPT && IsPcNote(m_startRow))
 	{
 		// If first selected row is a PC Note, default to PC note overwrite mode
