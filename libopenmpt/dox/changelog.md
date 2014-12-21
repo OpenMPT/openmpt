@@ -5,6 +5,10 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### 2014-12-21 - libopenmpt 0.2-beta9
+
+ *  [Bug] libopenmpt_ext.hpp was missing from the Windows binary zip files.
+
 ### 2014-12-21 - libopenmpt 0.2-beta8
 
  *  foo_openmpt: Settings are now accessable via foobar2000 advanced settings.
