@@ -2,7 +2,7 @@
  * EffectVis.cpp
  * -------------
  * Purpose: Implementation of parameter visualisation dialog.
- * Notes  : (currently none)
+ * Notes  : TODO: Take DPI scaling into account.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -550,7 +550,10 @@ void CEffectVis::OnSize(UINT nType, int cx, int cy)
 		m_cmbEffectList.SetWindowPos(this,  m_rcFullWin.right-COMMANDLISTWIDTH, m_rcDraw.bottom, COMMANDLISTWIDTH, m_rcFullWin.bottom-m_rcDraw.bottom, SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_SHOWWINDOW|SWP_NOZORDER);
 
 
-	m_pixelsPerRow = (float)(m_rcDraw.Width()-INNERLEFTBORDER-INNERRIGHTBORDER)/(float)m_nRows;
+	if(m_nRows)
+		m_pixelsPerRow = (float)(m_rcDraw.Width()-INNERLEFTBORDER-INNERRIGHTBORDER)/(float)m_nRows;
+	else
+		m_pixelsPerRow = 1;
 	m_pixelsPerFXParam = (float)(m_rcDraw.Height())/(float)0xFF;
 	m_pixelsPerPCParam = (float)(m_rcDraw.Height())/(float)ModCommand::maxColumnValue;
 	m_boolForceRedraw = TRUE;
@@ -604,7 +607,10 @@ void CEffectVis::UpdateSelection(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDE
 		m_endRow = m_pSndFile->Patterns[m_nPattern].GetNumRows() - 1;
 	}
 
-	m_pixelsPerRow = (float)(m_rcDraw.Width()-INNERLEFTBORDER-INNERRIGHTBORDER) / (float)m_nRows;
+	if(m_nRows)
+		m_pixelsPerRow = (float)(m_rcDraw.Width()-INNERLEFTBORDER-INNERRIGHTBORDER) / (float)m_nRows;
+	else
+		m_pixelsPerRow = 1;
 	m_pixelsPerFXParam = (float)(m_rcDraw.Height())/(float)0xFF;
 	m_pixelsPerPCParam = (float)(m_rcDraw.Height())/(float)ModCommand::maxColumnValue;
 
