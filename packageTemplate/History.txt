@@ -4,7 +4,7 @@ OpenMPT - Full Version History
 [Fix]: bug fix
 [New]: new feature
 [Imp]: improvement
-[Reg]: known issue / regression
+[Reg]: known issue / regression / feature removal
 [Mod]: change
 [Var]: other
 (tx XYZ): thanks to XYZ for telling us about the bug / requesting the feature
@@ -23,6 +23,153 @@ Patch submitters:
    <cm>    kode54     / Chris Moeller
    <ih>    xaimus     / Imran Hameed
    <ks>    coda       / Ken Snyder
+
+
+v1.24.01.00 (21 December 2014, revision 4662)
+---------------------------------------------
+General tab
+   [Imp] <js> Clicking on the song type opens Song Properties dialog.
+   [Imp] <js> If available, show a descriptive parameter value for plugin parameters instead of its numerical representation.
+
+Pattern tab
+   [New] <js> Ctrl + (Shift +) Scroll wheel can now be used as a replacement for the "(Coarse) Data Entry" shortcuts (http://bugs.openmpt.org/view.php?id=613).
+   [Imp] <js> When previewing instruments with a fadeout value of 0, instantly stop them on key-up instead of letting them play forever.
+   [Fix] <js> "Continue song as soon as MIDI notes are being received" didn't work in some situations.
+   [Fix] <js> When using "Continue song as soon as MIDI notes are being received", the Edit Step setting was erroneously applied to the first note.
+   [Fix] <js> When dragging a selection in the order list one order to the right, the document was marked as modified even though there was no change.
+   [Fix] <js> Fixed crash when a module has no patterns at all.
+   [Fix] <js> When only one parameter column was selected, the interpolation context menu didn't offer to interpolate this column.
+
+Sample tab
+   [New] <js> Support resampling to any arbitrary sampling rate using r8brain-free. Includes new keyboard shortcuts for upsampling, downsampling and resampling.
+   [New] <js> As upsampling no longer automatically converts the sample to 16-bit, 16-bit conversion is now a separate option.
+   [New] <js> Custom background and selection colours can now be specified (http://bugs.openmpt.org/view.php?id=371).
+   [Imp] <js> Adjusting the sample frequency updates all playing notes' sample frequency (only works with IT and MPTM for now).
+   [Imp] <js> Improved sample loop point input behaviour so that a loop start value greater than the current loop end value can be entered without having to enter the new loop end first.
+   [Imp] <js> Finetune and transpose modifications are now undo-able.
+   [Imp] <js> Visually distinguish sustain loop and sample grid markers.
+   [Imp] <js> No longer show unsupported sample vibrato types in IT (Ramp Up) and XM (Random).
+   [Fix] <js> Ramp Up and Ramp Down labels in XM vibrato settings were swapped since forever.
+   [Fix] <js> When editing XM vibrato settings, the edit cursor always jumped back to the first character in the edit field.
+   [Fix] <js> Rearranging samples (e.g. through song cleanup or the tree view) no longer messes up the undo buffer history (http://bugs.openmpt.org/view.php?id=600).
+   [Fix] <js> The sample transpose dropdown was missing two complete octaves. The range has been extended and turned upside down (can now be understood intuitively as "C-5 is being played like note x").
+   [Fix] <js> Silencing a single sample point lead to a crash (http://bugs.openmpt.org/view.php?id=610).
+
+Instrument tab
+   [New] <js> ITI instrument files can now contain external samples (like MPTM files). Select "Impulse Tracker Instruments with external Samples" from the save dialog (http://forum.openmpt.org/index.php?topic=2515.0).
+   [New] <js> The first instrument of a soundfont can now be loaded directly without registering the soundfont in OpenMPT.
+   [New] <js> Custom background colour can now be specified.
+   [Imp] <js> Since Impulse Tracker's fade-out value is 32 times less precise than what is displayed in the editor, automatically round it when the user makes fade-out adjustments in IT files.
+   [Imp] <js> When previewing instruments with a fadeout value of 0, instantly stop them on key-up instead of letting them play forever.
+   [Fix] <js> When loading an instrument, force all sample views of the same module to be updated.
+   [Fix] <js> Modifying envelopes using the keyboard didn't mark the module as modified.
+   [Reg] <js> Disallow OpenMPT-only "attack" setting to be used in IT and XM files.
+
+Tree view
+   [New] <js> Dropping a module or folder on the sample browser opens this module or folder for browsing.
+   [New] <js> Dropping a soundfont file on the upper part of the tree view adds it to the list of soundfonts.
+   [New] <js> Due to the change from external instruments in the ITP format to external samples in MPTM, "Set Path" and "Save" have been moved to samples. External samples are marked with [external], missing external samples are marked with [missing].
+   [New] <js> Sample waveforms can now be reloaded from disk (e.g. after editing a sample in an external application) if OpenMPT knows the sample's original path, e.g. after loading or saving it, or using MPTM's external sample feature (http://bugs.openmpt.org/view.php?id=207).
+   [New] <js> The first instrument of a soundfont can now be previewed directly from the sample browser (without registering the soundfont in OpenMPT).
+   [Mod] <js> Apparently, some versions of Ableton Live mark exported WAV files as "temporary". Such files are no longer ignored in the sample browser.
+   [Fix] <js> Duplicating samples was broken in OpenMPT 1.23.
+   [Fix] <js> Previewing IMA ADPCM-compressed samples from the tree view was broken if the previously previewed sample was a stereo sample.
+
+Mod Conversion
+   [Imp] <js> When converting from IT / MPTM to XM, move volume column portamento to the effect column if possible, as it has a different meaning in XM.
+   [Fix] <js> When converting from XM to IT / MPTM, volume column effects were not always limited properly.
+
+VST / DMO Plugins
+   [Imp] <js> When adding a new plugin through the plugin manager that is missing from some open file, it is now automatically loaded and restored in that file.
+   [Imp] <js> "Randomize Parameters" now applies a customizable randomization factor - much more useful than completely random parameters.
+   [Fix] <js> Regularly send editor idle commands to plugins with open editors.
+
+VST::Plugin Bridge
+   [Imp] <js> The plugin bridge does now also create crash dumps automatically. OpenMPT's /fullMemDump command line switch also applies to these dumps.
+   [Mod] <js> By default, all instances of the same plugin do now share one bridge process, since a handful of plugins require this - and the loading performance is much better, too.
+   [Fix] <js> Catch potential crashes while loading the plugin, like in OpenMPT (fixes instant crashes with multiple instances of SideKick v3 in different processes).
+
+Playback
+   [New] <js> S70 / S71 / S72 commands do now also work with instrument plugins.
+   [Imp] <js> Smooth MIDI macros do now, to some extent, work with external MIDI messages. They interpolate from the previous Zxx or \xx parameter from the same channel to the new parameter.
+   [Mod] <js> In all mix modes since 1.17RC2, a way too long volume ramp (some times up to 100 times longer than the user-supplied ramp setup) was applied for extreme global volume changes. This is now disabled except for legacy 1.17RC2 mix mode.
+   [Mod] <js> Re-implemented stereo separation to be applied on the master mix. This means that it also works as expected with stereo samples and plugins now.
+   [Fix] <js> NNA / DCA settings were not applied properly to plugins assigned to sample-less instruments.
+   [Fix] <js> Instrument plugin arpeggio was executed on muted channels / instruments.
+   [Fix] <js> Linear frequency slide mode (in all formats except XM, which already worked as intended) has been re-implemented to fix some unwanted inaccuracies which can add up very quickly when using extra-fine slides.
+   [Fix] <js> Glissando should only affect tone portamento, not portamento up / down effects.
+
+MTPM
+   [New] <js> MPTM files can now contain external (on-disk) samples. When checking the "Keep sample on disk" checkbox in the sample editor, the sample data is not stored directly in the MPTM file but a relative link to the original sample file is kept (http://bugs.openmpt.org/view.php?id=368).
+
+IT
+   [Imp] <js> Added support for reading encrypted edit time in old IT files with no edit history present (discovered through Impulse Tracker source release, yay).
+
+XM
+   [Mod] <js> Revert XM compatibility export to always write out 256 order items.
+   [Fix] <js> Use "normal" compatible mix mode instead of FT2 panning mix mode for XM files that were compatibility-exported with OpenMPT 1.22 or older, and XM files made with other trackers that use linear panning.
+
+XM::Compatible Playback Mode
+   [Fix] <js> Make arpeggio after portamento effect behave even more like in Fasttracker 2.
+
+S3M::Compatible Playback Mode
+   [New] <js> Compatible playback mode for S3M: When enabled, OpenMPT emulates certain ScreamTracker quirks as it did until now (linked pattern effect memory and ignored effects on muted channels). Compatible mode is disabled automatically for files made with less compatible trackers. S3M files made with OpenMPT always have this mode enabled, and its state is not saved in S3M files.
+
+MOD
+   [Imp] <js> Amiga frequency limits can now also be enforced without activating ProTracker 1/2 mode.
+
+MOD::Loading and Saving
+   [Mod] <js> M.K. and M!K! files that only have Amiga-compatible notes in their patterns automatically enforce Amiga frequency limits now (http://bugs.openmpt.org/view.php?id=563).
+   [Fix] <js> Saving a sample loop with an odd length is now handled better (http://bugs.openmpt.org/view.php?id=590).
+   [Fix] <js> Any non-ASCII characters were accidentally removed when loading a MOD file (broke in OpenMPT 1.22).
+
+MOD::ProTracker 1/2 Mode
+   [Fix] <js> Glissando is only applied on rows with a portamento effects, and never on the first tick of these rows.
+
+Other formats
+   [New] <js> Added support for a MOD variant introduced by SoundTracker 2.6 and Ice Tracker (http://bugs.openmpt.org/view.php?id=597).
+   [Imp] <js> SoundTracker auto-slides are now imported using the volume column.
+   [Imp] <js> MT2: Completely rewrote loader. Some files that would previously not load properly do now load. Support for VST plugins, drum patterns and some extended MT2 pattern commands has been added.
+   [Fix] <js> ITP: Always load embedded MIDI macros for files made with OpenMPT 1.19 or older, since back then they were always read, no matter if the embed flag was checked or not.
+   [Fix] <js> ITP: Loading extended song properties was broken for a very long time, probably since OpenMPT 1.20.
+   [Reg] <js> ITP: Saving and editing ITP files is no longer supported. ITP files are now imported as normal IT files. ITP's functionality is superseded by MPTM's new external sample functionality.
+
+Module Export
+   [Fix] <js> F00 "stop song" abort detection for XM files didn't abort if there were samples playing with a global volume of 0.
+
+Module cleanup
+   [New] <js> "Remove unused sample data" now also finds samples with identical stereo channels and offers to optimize them to mono.
+   [Imp] <js> Give information about how many plugins were removed.
+   [Fix] <js> Removing unused samples no longer creates two undo points per sample.
+
+Audio I/O
+   [New] <jh> Support direct mode for WaveOut devices. This is mostly useful on Wine systems where it (for certain setups) prevents the Wine-internal resampler from kicking in.
+   [Imp] <jh> Increased latency and period precision to allow sub-millisecond latencies.
+   [Imp] <jh> Added per-device type default audio settings.
+   [Mod] <jh> Query PortAudio for the default latency of PortAudio sound devices.
+   [Mod] <jh> When changing between mono / stereo / quad channel configurations, always reset the channel mapping to default instead of basing the new one on the previous one.
+   [Mod] <jh> Add a hidden setting setting PreferSameTypeIfDeviceUnavailable in [Sound Settings] which optionally changes the algorithm for selecting the fallback device if the device selected by the user (or read from the configuration) is currently unavailable. When this setting is set, a device of the same type as the currently selected is preferred instead of just defaulting to wave mapper.
+   [Fix] <jh> If the soundcard is currently unavailable, some ASIO drivers allow opening the driver and report zero input and output channels in that case. Other drivers do not support loading the driver. In both cases, OpenMPT will now disallow selecting the driver in the setup dialog and hide it until restarting OpenMPT or the sound devices get rescanned.
+
+Misc
+   [New] <js> Dropping a folder that contains modules or VST plugins opens / registers them directly now (http://bugs.openmpt.org/view.php?id=510).
+   [New] <js> Remember window positions for each tune individually when it is being saved. Plugin window positions are now stored using the same mechanism instead of being embedded into the module files. (http://forum.openmpt.org/index.php?topic=3280.0).
+   [New] <js> Added a first-start dialog to set up some common settings. The corresponding settings have been removed from the installer.
+   [Imp] <js> Song length estimation: Slightly improve calculation of nested pattern loops (http://bugs.openmpt.org/view.php?id=591).
+   [Imp] <js> Song length estimation shows the length of all "hidden" subtunes in the current sequence.
+   [Imp] <js> Made the MIDI Mapping dialog's mapping list more human-readable.
+   [Imp] <jh> VU Meter: Rear channels are now also shown in quad mode.
+   [Mod] <js> When merging the default key map into a custom key map, event types are now completely ignored, so if e.g. the user has assigned a certain key on "key hold" but the default key map uses the same key on "key down" only, this version is no longer added.
+   [Mod] <js> Autosave: When "Use song's original directory" is enabled, but the song has not been saved so far, it is now saved in a sub folder called "Autosave" instead of the root of the settings directory. In this case, modules created from templates are now also autosaved into this folder instead of the template folder.
+   [Mod] <jh> Added setting LoadOnStartup in [Components] to optionally load all optional components (such as MP3 encoders, UNMO3, etc.) on startup rather than first use. KeepLoaded (also in [Components]) determines whether components stay in memory after they have been used (this is the default behaviour). 
+   [Mod] <js> Rename "Colours" settings tab to "Display".
+   [Mod] <jh> Update lhasa to version 2014-07-12 (adds support for lhx archives).
+   [Mod] <jh> Update FLAC to v1.3.1 (improved decoding and encoding efficiency, fixed two vulnerabilities when loading malicious FLAC files).
+   [Fix] <js> Soft Panning check box in Mixer settings didn't work (http://bugs.openmpt.org/view.php?id=602).
+   [Reg] <js> Removed noSettingsOnNewVersion command line switch. It's no longer necessary as there is also a hidden setting that does the same.
+
+Bundled plugins
+   [Mod] <js> Updated PortMidi to revision 228 (fixes potential 64-bit issues).
 
 
 v1.23.05.00 (6 September 2014, revision 4238)
@@ -55,6 +202,11 @@ VST / DMO Plugins
    [Fix] <js> Program names starting with non-ASCII characters were not formatted properly.
    [Reg] <js> Partly reverted the behaviour introduced in OpenMPT 1.23.03.00 to only re-send patch numbers if they're not bank 1 patch 1, to fix legacy module playback.
 
+Playback
+   [Mod] <js> When resuming paused (not stopped) playback, previously playing samples are continued.
+   [Fix] <js> "Maintain sample sync on seek" should now also work when playback was previously stopped.
+   [Fix] <js> Glissando in semitones mode didn't take finetune into account (http://bugs.openmpt.org/view.php?id=585).
+
 IT::Compatible Playback Mode
    [Fix] <js> Tone portamento target is now completely cleared with new notes, so that subsequent Gxx effects have no effect.
 
@@ -65,19 +217,14 @@ XM
 XM::Compatible Playback Mode
    [Fix] <js> Tentatively fix arpeggio after pitch slide behaviour (http://bugs.openmpt.org/view.php?id=542).
 
-MOD
-   [Fix] <js> ProTracker applies instrument changes on the first tick, even if there's a note delay. This is now emulated in ProTracker 1/2 mode. (http://bugs.openmpt.org/view.php?id=574).
-   [Fix] <js> Properly implemented ProTracker-style sample swapping in ProTracker 1/2 mode, which is only supposed to happend at the end of the sample and not instantly.
-   [Fix] <js> Correctly handle a few more edge cases of ProTracker-style 9xx offset handling in ProTracker 1/2 mode.
+MOD::ProTracker 1/2 Mode
+   [Fix] <js> ProTracker applies instrument changes on the first tick, even if there's a note delay (http://bugs.openmpt.org/view.php?id=574).
+   [Fix] <js> Properly implemented ProTracker-style sample swapping, which is only supposed to happend at the end of the sample and not instantly.
+   [Fix] <js> Correctly handle a few more edge cases of ProTracker-style 9xx offset handling.
 
-Playback
-   [Mod] <js> When resuming paused (not stopped) playback, previously playing samples are continued.
-   [Fix] <js> "Maintain sample sync on seek" should now also work when playback was previously stopped.
-   [Fix] <js> Glissando in semitones mode didn't take finetune into account (http://bugs.openmpt.org/view.php?id=585).
-
-Other
-   [New] <jh> Add hidden setting [Misc] ShowSettingsOnNewVersion (default true) which can permanently disable showing of the settings dialog on new versions, in addition to the one-time commandline switch /noSettingsOnNewVersion .
-   [Imp] <js> Add support for 64-bit vorbis library builds from mingw-w64 with slightly different file names.
+Misc
+   [New] <jh> Add hidden setting [Misc] ShowSettingsOnNewVersion (default true) which can permanently disable showing of the settings dialog on new versions, in addition to the one-time command line switch /noSettingsOnNewVersion.
+   [Imp] <js> Add support for 64-bit Vorbis library builds from mingw-w64 with slightly different file names.
    [Imp] <js> When adding a new shortcut that conflicts with an existing shortcut, do not automatically delete the existing shortcut but rather ask the user what to do.
    [Imp] <js> Add global dummy shortcut keybinding to prevent default keybindings from doing anything into if you don't like them (http://bugs.openmpt.org/view.php?id=550).
    [Imp] <js> Slightly improved icons for systems with 32-bit display mode but mysteriously missing alpha channel (http://bugs.openmpt.org/view.php?id=520).
@@ -173,7 +320,6 @@ Sample tab
 Tree view
    [New] <js> In the instrument library, Ctrl+Enter loads the selected instrument into the currently active sample / instrument editor window (http://bugs.openmpt.org/view.php?id=499).
    [Imp] <js> Ctrl+Enter starts label editing.
-   [Fix] <js> Duplicating samples allocated way too much memory in the previous version, which could result in crashes (http://bugs.openmpt.org/view.php?id=505).
 
 VST::Plugin Bridge
    [Fix] <js> Fixed KarmaFX EQ, a couple of VarietyOfSound plugins and possibly others that don't set any specific time flags, but still call audioMasterGetTime.
@@ -185,8 +331,8 @@ Playback
 IT::Compatible Playback Mode
    [Fix] <js> Sustained envelopes were released too early if the loop end was hit on exactly the same tick as the note-off event.
 
-MOD
-   [Imp] <js> Added ProTracker-style offset when note but no instrument number is specified in ProTracker 1/2 mode (fixes h0ffman's Revision 2014 tracked music entry).
+MOD::ProTracker 1/2 Mode
+   [Imp] <js> Added ProTracker-style offset when note but no instrument number is specified (fixes h0ffman's Revision 2014 tracked music entry).
 
 Module cleanup
    [Fix] <js> Rearranging samples broke in the previous version (http://bugs.openmpt.org/view.php?id=497).
@@ -196,7 +342,7 @@ Audio I/O
 
 Misc
    [Imp] <js> All parts of the Song Properties dialog are now updated instantly when switching between formats.
-   [Imp] <js> Made S3M amiga frequency limits option editable from the Song Properties dialog.
+   [Imp] <js> Made S3M Amiga frequency limits option editable from the Song Properties dialog.
    [Mod] <js> Changed manual format from PDF to CHM. When opening help from certain dialogs, the relevant manual page is automatically opened.
    [Fix] <js> SF2 sample frequency conversion was broken in 64-bit builds (http://bugs.openmpt.org/view.php?id=508).
    [Fix] <js> Modifying patterns, samples, etc. should now always update other views of the same type of the same module properly.
@@ -240,7 +386,7 @@ Sample tab
    [Mod] <js> Pitch shifting and time stretching does now also work for 8-bit samples without upsampling them first.
    [Fix] <js> Position marks do no longer flicker and disappear when desktop compositing (and thus, Aero) is turned on. The same fix is also applied to the envelope editor, where the problem was less pronounced (http://bugs.openmpt.org/view.php?id=372).
    [Fix] <js> When zooming into samples longer than 32767 sampling points, it was possible that the last few points were not visible (http://bugs.openmpt.org/view.php?id=162).
-   [Fix] <js> Tentative fix for samples not playing completely in sample preview while song is playing - this fixes the problem only partly (http://bugs.openmpt.org/view.php?id=209). 
+   [Fix] <js> Tentative fix for samples not playing completely in sample preview while song is playing - this fixes the problem only partly (http://bugs.openmpt.org/view.php?id=209).
    [Fix] <js> The zoomed-out sample display was not always accurate on CPUs with AMD MMX extensions or SSE.
    [Fix] <js> With sample selections > 1 second, the fractional part of the selection length was not displayed correctly.
 
@@ -287,7 +433,7 @@ VST / DMO Plugins
    [Fix] <js> Plugin editor keyboard focus was lost after loading or saving plugin presets (http://bugs.openmpt.org/view.php?id=456).
    [Fix] <js> Don't add no longer existing plugins used in a module file to the list of known plugins after they have been found in the cache (http://forum.openmpt.org/index.php?topic=2304.0).
    [Fix] <js> Presets > 1000 can now also be selected in the plugin editor.
-   [Reg] <js> Removed native jBridge support in favour of our own bridge. you can still use jBrdige using the default method of plugin stubs, of course.
+   [Reg] <js> Removed native jBridge support in favour of our own bridge. you can still use jBridge using the default method of plugin stubs, of course.
 
 VST::Specific Plugin Fixes
    [Fix] <js> Poise by One Small Clue should no longer crash if the editor is still open when unloading the plugin (tx coda).
@@ -354,7 +500,7 @@ Other formats
 Module Export
    [Imp] <jh> Default codec settings (per codec) and file tags are remembered.
    [Imp] <jh> Also show lossy codecs in pattern render to wave dialog.
-   [Imp] <js> Resulting file size is no longer limited to 2 GB. 
+   [Imp] <js> Resulting file size is no longer limited to 2 GB.
    [Fix] <js> Export no longer fails if song starts with separator (+++) patterns (http://forum.openmpt.org/index.php?topic=5170.0).
    [Fix] <jh> When switching focus to a different window and then back to OpenMPT, the window became unresponsive (http://bugs.openmpt.org/view.php?id=487).
 
@@ -369,7 +515,7 @@ Audio I/O
    [Fix] <jh> Insanely high latencies in WASAPI exclusive mode have been reduced.
    [Fix] <jh> Implement all driver to host messages that are required to be handled by the ASIO 2.1 specification.
    [Fix] <js> Fixed possible freeze during start on Windows XP during Kernel Streaming initialization (patch from http://sourceforge.net/p/audacity/mailman/message/31421748/, tx Tomoya).
-   
+
 Misc
    [New] <js> Added (experimental) feature to add existing modules to a currently open module. This copies over all pattern, samples, instruments, plugins, etc. as far as it's possible.
    [New] <js> Added hidden setting for loading a default template (DefaultTemplate in [Paths] section, can be either a full path or just a filename that can be found in the template folder, http://bugs.openmpt.org/view.php?id=476).
@@ -403,12 +549,12 @@ v1.22.07.00 (16 November 2013, revision 3235)
 ---------------------------------------------
 Tree view
    [Fix] <js> Space key couldn't be used when editing labels.
-   [Fix] <jh> The global VU meter didn't work properly when previewing instruments in OpenMPT 1.22.06.00. 
+   [Fix] <jh> The global VU meter didn't work properly when previewing instruments in OpenMPT 1.22.06.00.
 
 VST / DMO Plugins
    [Fix] <js> When rendering the full module (i.e. not a selection), the song position was not reset properly, so some plugins were not in sync.
 
-Misc
+Module Export
    [Fix] <jh> Module export to a directory or file name with non-ASCII characters could fail in OpenMPT 1.22.06.00 (http://forum.openmpt.org/index.php?topic=5158.0).
 
 
@@ -559,8 +705,10 @@ XM::Compatible Playback Mode
 MOD
    [Fix] <js> EEx + Dxx on the same row causes the target row of Dxx to be skipped in ProTracker (fixes condom_corruption by Travolta).
    [Fix] <js> When using EEx, there should be only one "first tick" event. Ticks that are multiples of the song speed are longer treated as first ticks.
-   [Fix] <js> Frequency limiting was not always correct in ProTracker 1.x mode (Fixes black_queen.mod).
    [Fix] <js> SoundTracker modules with "hidden" patterns in their order list didn't play properly anymore (probably since v1.22.03, affected e.g. Bad Dudes soundtrack).
+
+MOD::ProTracker 1/2 Mode
+   [Fix] <js> Frequency limiting was not always done correctly (Fixes black_queen.mod).
 
 Other formats
    [Imp] <js> AMS: Added support for reversed sample loops (starting at sample end).
@@ -585,7 +733,7 @@ Misc
    [Mod] <jh> Removed /nomp3 command line switch as MP3 support is now initialized on demand instead of when launching OpenMPT.
    [Mod] <jh> 24-/32-bit samples in DLS files are no longer normalized on load.
    [Fix] <js> Song Length Estimation handles some pattern loops more correctly now (http://bugs.openmpt.org/view.php?id=416).
-   [Fix] <js> Song Length Estimation doesn't break with some tempo slide down commands anymore (http://bugs.openmpt.org/view.php?id=416). 
+   [Fix] <js> Song Length Estimation doesn't break with some tempo slide down commands anymore (http://bugs.openmpt.org/view.php?id=416).
    [Reg] <jh> Enable MMX / 3DNow! / SSE acceleration is gone. This option is now always enabled when available.
    [Reg] <js> Removed hidden setting ITCompressionVerification (algorithm has been proven to be stable and verification is now part of the internal test suite).
 
@@ -728,7 +876,7 @@ Sample tab
    [Imp] <js> Sustain loop preview is now updated instantly (http://bugs.openmpt.org/view.php?id=108).
    [Mod] <js> 8-Bit/Mono conversion items are now also shown in the context menu if a selection has been made.
    [Fix] <js> Memory was leaked when loading a sample into an empty sample slot and undoing that action.
-   [Fix] <js> Inserting samples did not clear previously existing sample names since some time ago.
+   [Fix] <js> Inserting samples didn't clear previously existing sample names since some time ago.
    [Fix] <js> The sample filename wasn't imported properly when loading a FLAC sample with embedded RIFF chunks.
    [Fix] <js> Selection length display didn't show the correct length in seconds for long samples.
 
@@ -796,10 +944,10 @@ S3M::Loading and Saving
    [Imp] <js> Added support for loading SAx panning (as found in PANIC.S3M, automatically translated to S8x panning).
    [Mod] <js> The channel order is now written in a L1 L2 L3... R1 R2 R3... scheme, instead of L1 R1 L2 R2 L3 R3..., so that channels are evaluated in the same order in ST3 and OpenMPT (ST3 first evaluates "left" channels, then "right" channels - note that this change does not affect the actual panning, though).
 
-MOD
-   [Imp] <js> Vibrato and Tremolo are not applied on first tick anymore in ProTracker 1.x mode.
-   [Imp] <js> Added ProTracker arpeggio wrap-around emulation in ProTracker 1.x mode (fixes the snare sound in doh's "Jim is dead").
-   [Fix] <js> In ProTracker 1.x mode, the frequency range is now limited properly by taking the sample's finetune setting into account.
+MOD::ProTracker 1/2 Mode
+   [Imp] <js> Vibrato and Tremolo are not applied on first tick anymore..
+   [Imp] <js> Added ProTracker arpeggio wrap-around emulation (fixes the snare sound in doh's "Jim is dead").
+   [Fix] <js> The frequency range is now limited properly by taking the sample's finetune setting into account.
 
 MOD::Loading and Saving
    [Imp] <js> Drastically improved support for 15-sample (Ultimate Soundtracker and clones) modules. For example, original Ultimate Soundtracker effects are now handled much better (e.g. in sll7.mod).
@@ -1307,7 +1455,7 @@ XM::Loading and Saving
 S3M
    [Fix] <js> Some commands (Dxy, Exx, Fxx, Ixy, Jxy, Kxy, Lxy, Qxy, Rxy, Sxy) use the last non-zero effect parameter as memory. This fixes for example Satellite One by Purple Motion.
    [Fix] <js> Pattern loops have no per-channel memory in ST3 (tx GreaseMonkey).
-   [Fix] <js> Amiga limits are now enfored correctly if the "preserve amiga limits" flag is set.
+   [Fix] <js> Amiga limits are now enfored correctly if the "preserve Amiga limits" flag is set.
    [Fix] <js> If there are multiple row delay commands on the same row, only the leftmost command is considered.
    [Fix] <js> Delayed notes that are on the same row as a row delay effect are be retriggered.
    [Reg] <js> \xx command has been removed from S3M format (existing tracks are updated automatically to use the Zxx command instead).
@@ -1321,7 +1469,9 @@ S3M::Loading
 MOD
    [Imp] <js> Rewrote MOD magic parsing code a bit; can handle anything from 1 to 99 channel MODs now.
    [Mod] <js> Removed MOD compatibility export, it is now always applied (but only oneshot samples are modified, and they are not modified in memory anymore).
-   [Fix] <js> Amiga limits are now enfored correctly in ProTracker 1.x mode.
+
+MOD::ProTracker 1/2 Mode
+   [Fix] <js> Amiga limits are now enfored correctly.
 
 Other formats
    [Imp] <js> Added hack-ish support for 32-bit float data to the WAV loader (the one that loads WAVs as modules, not as samples).
@@ -1649,7 +1799,7 @@ Other formats
    [Mod] <js> Improved portamento import precision for DBM and ULT loaders (patch from Schism Tracker)
    [Mod] <js> Added a version check to the ITP loader (why was this not there in the first place?)
    [Fix] <js> As MTM files were converted to MOD automatically when being loaded, channel panning was lost. Now they're loaded as S3M instead.
-   [Fix] <js> Short loops in AMF / MED files are now ignored (http://bugs.openmpt.org/view.php?id=70) - probably caused by bad MOD conversions, at least in the AMF example?
+   [Fix] <js> Short loops in AMF / MED files are now ignored (http://bugs.openmpt.org/view.php?id=70).
    [Reg] <js> Disabled the Velvet Studio loader for now, since it either crashes on almost all AMS files or at least imports them completely wrong.
 
 Misc
@@ -1911,10 +2061,12 @@ XM::Compatible Playback Mode
 
 MOD
    [Imp] <js> Module creation: When creating a new .MOD, it has 31 sample slots by default.
-   [Imp] <js> Playback: When the ProTracker 1.x flag is activated, Amiga note range limits are automatically taken into account.
    [Fix] <js> Saving: Samples were shifted badly if the sample size was odd (wow, this is an OLD bug!).
    [Fix] <js> Saving: If a sample had loop points set, but loop disabled, they were still saved in the .MOD file, resulting in the loop being enabled automatically.
    [Fix] <js> Loading: Very short loops (4-8 bytes long) are not ignored anymore. This fixes "Crew Generation" by Necros.
+
+MOD::ProTracker 1/2 Mode
+   [Imp] <js> Amiga note range limits are automatically taken into account.
 
 S3M
    [Imp] <js> Loading: Display a message if an S3M file contains Adlib instruments (rare).
@@ -1932,7 +2084,7 @@ Other formats
    [Imp] <js> MT2 Loader (MadTracker): Make use of the "lines per beat" header field. Release node is not set anymore for each and every instrument envelope. MT2 files are now loaded as IT files by default (instead of XM) because of their extended instrument properties (NNAs, filters, etc) - I wonder what this breaks, but I don't bother much because MT2 support was already 100% broken before this. :) Some MT example tunes sound a bit better now at least.
    [Fix] <js> PTM Loader: Fixed an unhandled null pointer exception that occured when loading some unsupported RAR files.
    [Fix] <js> PSM16 Loader: Fix for note cut on tick 0 (warbot tune from Silverball).
-   [Fix] <js> Threw out the old ULT loader in favor of Storlek's loader from SchismTracker (used with permission from the author himself). This is a lot more accurate than MPT's old loader.
+   [Fix] <js> Threw out the old ULT loader in favour of Storlek's loader from SchismTracker (used with permission from the author himself). This is a lot more accurate than MPT's old loader.
    [Fix] <js> DBM Loader: Various fixes to increase import precision and an endianness fix.
    [Fix] <js> AMF DSM Loader: Made some changes to the pattern reader, which eliminate the strange "vC7" commands in the pattern. I have found no hints on whether my fix is correct or not, apart from the fact that those AMF files that I have play a lot better now. And it makes kind of sense...
    [Fix] <js> IMF Loader: Some fixes copied from Schism (copied from MikMod).
@@ -2563,7 +2715,7 @@ v1.17.02.52 (14 Apr 2008, revision 210)
 v1.17.02.51 (29 Mar 2008, revision 208) internal test build
 -----------------------------------------------------------
    [New] <al> Unmute all(on transition) shortcutkeys should now work in orderlist context.
-   [New] <al> Half/double pattern rownumber buttons to pattern properties dialog.
+   [New] <al> Half / double pattern row count buttons to pattern properties dialog.
    [New] <al> Channel status in status bar now show channel volume info.
    [Mod] <al> Modified flag is not set when sliding tempo/global volume slider for MOD file.
    [Mod] <al> When setting instrument pan, checking whether instrument samples have set pan enabled and optionally disabling them.
@@ -2571,7 +2723,7 @@ v1.17.02.51 (29 Mar 2008, revision 208) internal test build
    [Mod] <al> Show prev/next pattern now shows pattern over +++ orderlist items.
    [Mod] <al> Disabled setting channel pan for MOD/XM in general view.
    [Mod] <al> MIDI export won't anymore export muted channels (http://forum.openmpt.org/index.php?topic=2017.0).
-   [Mod] <al> When loading plug information at startup, checking whether the plug files exist (http://forum.openmpt.org/index.php?topic=1367.0).
+   [Mod] <al> When loading plugin information at startup, checking whether the plugin files exist (http://forum.openmpt.org/index.php?topic=1367.0).
    [Fix] <al> Fix to crash when loading plugins with long (> 32 characters) parameter names.
    [Fix] <al, ma> Fix to possible memory corruption problem on handling VST plugins with more than 30 outputs.
          - Plugins with more than 32 outputs might still be handled poorly.
@@ -2622,7 +2774,7 @@ v1.17.02.50 (26 Jan 2008, revision 198) internal test build
    [Fix] <al> Fix to faulty play with certain instruments without notes in IT compatible playmode (http://forum.openmpt.org/index.php?topic=2080.0).
    [Fix] <al> Pattern number box didn't open pattern properties when using MPTm (http://forum.openmpt.org/index.php?topic=2073.0).
    [Fix] <al> Fixed wrong MIDI CC names in macro editor.
-   [Fix/Mod] <al> Setting volume to 0(v00) in pattern didn't necessarily set volume to 0 when using volume random variation for instrument. All other random variation behaviors are changed as well; now the 'swing' is applied directly to channel values instead of using swing addition, and by default the swing effect is reset on new note (http://forum.openmpt.org/index.php?topic=2074.0).
+   [Fix/Mod] <al> Setting volume to 0(v00) in pattern didn't necessarily set volume to 0 when using volume random variation for instrument. All other random variation behaviours are changed as well; now the 'swing' is applied directly to channel values instead of using swing addition, and by default the swing effect is reset on new note (http://forum.openmpt.org/index.php?topic=2074.0).
 
 
 v1.17.02.49 (17 Nov 2007, revision 194) internal test build
@@ -2636,7 +2788,7 @@ v1.17.02.49 (17 Nov 2007, revision 194) internal test build
    [Mod] <al> Custom tuning related
          - file format changes
          - changed interpretation of finesteps: now zero finesteps means that finesteps are equal to notesteps, previously zero finesteps disabled portamentos etc)
-         - Pitch slide between notes with portamentos is now specialised also for other tuning types than just geometric(changes behavior). Previously behavior was 'geometric' for all types.
+         - Pitch slide between notes with portamentos is now specialised also for other tuning types than just geometric (changes behaviour). Previously behavior was 'geometric' for all types.
    [Fix] <al> Fixed wrong file version in IT compatibility save (http://forum.openmpt.org/index.php?topic=1723.0).
    [Fix] <al> Fixed possible unnotified overwriting of file occurring for example when dealing with a new file (http://forum.openmpt.org/index.php?topic=1813.0).
    [Fix] <al> Fixed broken note preview for certain type of instruments in instrument tab (http://forum.openmpt.org/index.php?topic=1996.0).
@@ -2662,7 +2814,7 @@ v1.17.02.48
 
 v1.17.02.47
 -----------
-   [Mod] <al> Pattern skipping behavior returned to that of .45
+   [Mod] <al> Pattern skipping behaviour returned to that of .45
    [Fix] <sp> Save pattern scrollbar position when switching to other tabs.
    [Fix] <sp> If the cursor is moved but it is not on screen, move both horizontal and vertical scrollbars to make it visible.
    [Fix] <rf> Fix saturation on old modules (introduced in 1.17.02.46). Loading tracks with no saved mixlevel setting defaults to 'original'.
@@ -2679,10 +2831,10 @@ v1.17.02.46
    [New] <al> User definable tuning modes for instruments:
          - Only available for MPTm
          - Ratio value as well as note name for every key can be assigned individually; gives rather free hands for experiments.
-         - Every instrument can have it's own tuning
+         - Every instrument can have its own tuning
          - Tunings can be saved to file and loaded from file.
-         - IMPORTANT: When using tunings, behavior of various modcommands such as portamento have been changed, and new behaviors are still to be decided.
-   [New] <al> In song properties, option to increase playback compatibility with original Impulse Tracker behavior. Is in no way complete; currently affects only a couple of differences. Many differences are still there.
+         - IMPORTANT: When using tunings, behaviour of various modcommands such as portamento have been changed, and new behaviours are still to be decided.
+   [New] <al> In song properties, option to increase playback compatibility with original Impulse Tracker behaviour. Is in no way complete; currently affects only a couple of differences. Many differences are still there.
    [New] <al> Ability to load multiple mods/samples/instruments from corresponding load dialogs.
          - Known issue: Intermittent failures.
    [New] <al> 32-bit float wav import
@@ -2694,7 +2846,7 @@ v1.17.02.46
    [New] <rf> New mixmode (called 1.17RC3): bypass global preamp, force soft panning, provide explicit dB value for sample attenuation. WARNING: this mixmode is subject to change.
    [New] <rf> Check for updates on startup. To disable, set CheckForUpdates=0 in mptrack.ini.
    [Mod] <al> Channel states resetting when jumping between orders from orderlist.
-         - NOTE: While this fixes a bug (behavior change) introduced in the tuning branch(?), it also changes quite prominent behavior so can annoy people - might need to be modified at some point.
+         - NOTE: While this fixes a bug (behaviour change) introduced in the tuning branch(?), it also changes quite prominent behaviour so can annoy people - might need to be modified at some point.
    [Mod] <al> Added version number to the mainframe title.
    [Mod] <al> Changed the 'order message' at the bottom bar of the screen "Position x of y" to "Position x of y (x in hex of y in hex)".
    [Mod] <al> Lots of smaller (internal) changes.
@@ -2703,7 +2855,7 @@ v1.17.02.46
    [Fix] <rf> Fix odd window position on very first startup (before mptrack.ini is created).
    [Fix] <al> When opening instruments, load dialog didn't remember its previous path.
    [Fix] <al> In general tab, it was possible to give longer modname than the fileformat could save.
-   [Fix] <al> Instruments associates with VSTis no longer also need to be associated to a sample in order to play.
+   [Fix] <al> Instruments associated with VSTis no longer also need to be associated to a sample in order to play.
    [Fix] <al> Trash characters to empty ITP comments should no longer appear.
    [Fix] <al> Channel state should now be updated correctly when e.g. moving channels through channel manager.
    [Fix] <al> It should no longer be possible to remove all channels from channel manager.
@@ -2963,7 +3115,7 @@ v1.17.02.20
          - Known issue: orderlist GUI is not refreshed so line remains.
    [Mod] <rf> Enabled XP themes.
    [Mod] <rf> Resolution of plugin default GUI parameter slider increased from 100 to 1000. I couldn't get the per-thousand symbol to display yet. :(
-   [Mod] <rf> Version number change - we no longer specify revision number explicitly. It is bad practice to make revision numbers external, as we have no real control over the way they change. The version number will always be in the CVS-commit comments fiel from now on.
+   [Mod] <rf> Version number change - we no longer specify revision number explicitly. It is bad practice to make revision numbers external, as we have no real control over the way they change. The version number will always be in the CVS-commit comments field from now on.
    [Mod] <rf> GUI now uses radiobuttons for path type selection.
    [Mod] <rf> Toggle (un)mute on pattern transition is now ctrl-left-click (not ctrl-right-click).
    [Mod] <rf> Song settings dialog cleanup. Minor instrument tab GUI cleanups. About dialog cleanups.

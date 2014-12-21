@@ -1,5 +1,5 @@
 ******************
-*  OpenMPT 1.23  *
+*  OpenMPT 1.24  *
 ******************
 
 
@@ -68,7 +68,7 @@ open_settings_folder.bat: Opens settings folder (%APPDATA\OpenMPT).
 OpenMPT_SoundTouch_f32.dll: SoundTouch library used in time stretching feature.
 readme.txt: This document
 unmo3.dll: Used in MO3-file import.
-OMPT_1.23_ReleaseNotes.html: Release notes for this version.
+OMPT_1.24_ReleaseNotes.html: Release notes for this version.
 
 
 License
