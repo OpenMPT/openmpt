@@ -109,7 +109,6 @@ protected:
 	virtual void OnOK();
 	virtual void OnCancel();
 	afx_msg void OnClose();
-	Setting<LONG>* GetSplitPosRef() {return NULL;} 	//rewbs.varWindowSize
 
 	CViewPattern *m_pViewPattern;
 

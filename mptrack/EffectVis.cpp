@@ -429,7 +429,7 @@ void CEffectVis::DrawNodes()
 		return;
 
 	//Draw
-	const int lineWidth = MulDiv(1, GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSX), 96);
+	const int lineWidth = Util::ScalePixels(1, GetDC());
 	const int nodeSizeHalf = m_nodeSizeHalf;
 	const int nodeSizeHalf2 = nodeSizeHalf - lineWidth + 1;
 	const int nodeSize = 2 * nodeSizeHalf + 1;

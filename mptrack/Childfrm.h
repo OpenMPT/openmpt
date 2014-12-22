@@ -35,7 +35,7 @@ typedef struct PATTERNVIEWSTATE
 	PatternCursor cursor;
 	PatternRect selection;
 	PatternCursor::Columns nDetailLevel;
-	ORDERINDEX nOrder;		//rewbs.playSongFromCursor
+	ORDERINDEX nOrder;
 	ORDERINDEX initialOrder;
 } PATTERNVIEWSTATE;
 
@@ -65,20 +65,6 @@ typedef struct COMMENTVIEWSTATE
 
 
 
-//========================================
-class CViewExSplitWnd: public CSplitterWnd
-//========================================
-{
-	DECLARE_DYNAMIC(CViewExSplitWnd)
-
-// Implementation
-public:
-	CViewExSplitWnd() {}
-	~CViewExSplitWnd() {}
-	//CWnd* GetActivePane(int* pRow = NULL, int* pCol = NULL);
-};
-
-
 //====================================
 class CChildFrame: public CMDIChildWnd
 //====================================
@@ -93,16 +79,16 @@ protected:
 
 // Attributes
 protected:
-	CViewExSplitWnd m_wndSplitter;
+	CSplitterWnd m_wndSplitter;
 	HWND m_hWndCtrl, m_hWndView;
-	BOOL m_bMaxWhenClosed;
 	GENERALVIEWSTATE m_ViewGeneral;
 	PATTERNVIEWSTATE m_ViewPatterns;
 	SAMPLEVIEWSTATE m_ViewSamples;
 	INSTRUMENTVIEWSTATE m_ViewInstruments;
 	COMMENTVIEWSTATE m_ViewComments;
 	CHAR m_szCurrentViewClassName[256];
-	bool m_bInitialActivation; //rewbs.fix3185
+	bool m_bMaxWhenClosed;
+	bool m_bInitialActivation;
 
 // Operations
 public:
@@ -110,7 +96,7 @@ public:
 	BOOL ChangeViewClass(CRuntimeClass* pNewViewClass, CCreateContext* pContext=NULL);
 	void ForceRefresh();
 	void SavePosition(BOOL bExit=FALSE);
-	CHAR* GetCurrentViewClassName();	//rewbs.varWindowSize
+	CHAR* GetCurrentViewClassName();
 	LRESULT SendViewMessage(UINT uMsg, LPARAM lParam=0) const;
 	LRESULT ActivateView(UINT nId, LPARAM lParam) { return ::SendMessage(m_hWndCtrl, WM_MOD_ACTIVATEVIEW, nId, lParam); }
 	HWND GetHwndCtrl() const { return m_hWndCtrl; }
@@ -148,7 +134,7 @@ public:
 // Generated message map functions
 protected:
 	//{{AFX_MSG(CChildFrame)
-	afx_msg void OnClose();
+	afx_msg void OnDestroy();
 	afx_msg BOOL OnNcActivate(BOOL bActivate);
 	afx_msg LRESULT OnChangeViewClass(WPARAM, LPARAM lParam);
 	afx_msg LRESULT OnInstrumentSelected(WPARAM, LPARAM lParam);

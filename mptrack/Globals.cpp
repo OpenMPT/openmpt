@@ -326,9 +326,8 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 
 	if ((nIndex < 0) || (nIndex >= MAX_PAGES) || (!pMainFrm)) return FALSE;
 
-	//rewbs.varWindowSize
 	if (m_Pages[m_nActiveDlg])
-		*(m_Pages[m_nActiveDlg]->GetSplitPosRef()) = ((CChildFrame *)GetParentFrame())->GetSplitterHeight();
+		m_Pages[m_nActiveDlg]->GetSplitPosRef() = ((CChildFrame *)GetParentFrame())->GetSplitterHeight();
 
 	if (nIndex == m_nActiveDlg)
 	{
@@ -393,7 +392,7 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 	pMainFrm->SetInfoText("");
 	pMainFrm->SetXInfoText(""); //rewbs.xinfo
 	pDlg->ShowWindow(SW_SHOW);
-	((CChildFrame *)GetParentFrame())->SetSplitterHeight(*(pDlg->GetSplitPosRef()));	//rewbs.varWindowSize
+	((CChildFrame *)GetParentFrame())->SetSplitterHeight(pDlg->GetSplitPosRef());
 	if (m_hWndMDI) ::PostMessage(m_hWndMDI, WM_MOD_CHANGEVIEWCLASS, (WPARAM)lParam, (LPARAM)pDlg);
 	return TRUE;
 }
@@ -433,7 +432,7 @@ void CModControlView::UpdateView(UpdateHint lHint, CObject *pObject)
 		{
 			mask |= 8;
 			//mask |= 32; //rewbs.graph
-			nCount ++;
+			nCount++;
 		}
 		if (nCount != (UINT)m_TabCtrl.GetItemCount())
 		{

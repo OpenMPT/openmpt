@@ -23,7 +23,7 @@ protected:
 
 public:
 	CCtrlComments(CModControlView &parent, CModDoc &document);
-	Setting<LONG>* GetSplitPosRef() {return &TrackerSettings::Instance().glCommentsWindowHeight;} 	//rewbs.varWindowSize
+	Setting<LONG> &GetSplitPosRef() {return TrackerSettings::Instance().glCommentsWindowHeight;} 	//rewbs.varWindowSize
 
 public:
 	//{{AFX_DATA(CCtrlComments)

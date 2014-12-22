@@ -95,6 +95,18 @@ namespace Util
 			fixEnd = delStart;
 		}
 	}
+
+	// Applies DPI scaling factor to some given size
+	forceinline int ScalePixels(int pixels, CDC *pDC)
+	{
+		return MulDiv(pixels, ::GetDeviceCaps(pDC->m_hDC, LOGPIXELSX), 96);
+	}
+
+	// Removes DPI scaling factor from some given size
+	forceinline int ScalePixelsInv(int pixels, CDC *pDC)
+	{
+		return MulDiv(pixels, 96, ::GetDeviceCaps(pDC->m_hDC, LOGPIXELSX));
+	}
 }
 
 
