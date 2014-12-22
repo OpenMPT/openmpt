@@ -63,7 +63,7 @@ public:
 	void LockControls() { m_nLockCount++; }
 	void UnlockControls() { PostMessage(WM_MOD_UNLOCKCONTROLS); }
 	bool IsLocked() const { return (m_nLockCount > 0); }
-	virtual Setting<LONG>* GetSplitPosRef() = 0; 	//rewbs.varWindowSize
+	virtual Setting<LONG> &GetSplitPosRef() = 0; 	//rewbs.varWindowSize
 
 protected:
 	//{{AFX_VIRTUAL(CModControlDlg)

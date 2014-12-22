@@ -130,7 +130,7 @@ void CToolBarEx::EnableFlatButtons(BOOL bFlat)
 /////////////////////////////////////////////////////////////////////
 // CMainToolBar
 
-#define SCALEWIDTH(x) (MulDiv(x, GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSX), 96))
+#define SCALEWIDTH(x) (Util::ScalePixels(x, GetDC()))
 
 // Play Command
 #define PLAYCMD_INDEX		10
@@ -640,7 +640,7 @@ LRESULT CModTreeBar::OnInitDialog(WPARAM wParam, LPARAM lParam)
 	m_pModTree = new CModTree(m_pModTreeData);
 	if (m_pModTree)	m_pModTree->SubclassDlgItem(IDC_TREEVIEW, this);
 	m_dwStatus = 0;
-	m_sizeDefault.cx = TrackerSettings::Instance().glTreeWindowWidth + 3;
+	m_sizeDefault.cx = Util::ScalePixels(TrackerSettings::Instance().glTreeWindowWidth, GetDC()) + 3;
 	m_sizeDefault.cy = 32767;
 	return l;
 }
@@ -718,10 +718,11 @@ VOID CModTreeBar::RecalcLayout()
 CSize CModTreeBar::CalcFixedLayout(BOOL, BOOL)
 //--------------------------------------------
 {
+	int width = Util::ScalePixels(TrackerSettings::Instance().glTreeWindowWidth, GetDC());
 	CSize sz;
-	m_sizeDefault.cx = TrackerSettings::Instance().glTreeWindowWidth;
+	m_sizeDefault.cx = width;
 	m_sizeDefault.cy = 32767;
-	sz.cx = TrackerSettings::Instance().glTreeWindowWidth + 3;
+	sz.cx = width + 3;
 	if (sz.cx < 4) sz.cx = 4;
 	sz.cy = 32767;
 	return sz;
@@ -869,7 +870,7 @@ VOID CModTreeBar::DoLButtonUp()
 			CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 			if ((m_nTrackPos != (UINT)rect.Width()) && (pMainFrm))
 			{
-				TrackerSettings::Instance().glTreeWindowWidth = m_nTrackPos - 3;
+				TrackerSettings::Instance().glTreeWindowWidth = Util::ScalePixelsInv(m_nTrackPos - 3, GetDC());
 				m_sizeDefault.cx = m_nTrackPos;
 				m_sizeDefault.cy = 32767;
 				pMainFrm->RecalcLayout();

@@ -40,36 +40,13 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 /////////////////////////////////////////////////////////////////////////////
-//
-
-IMPLEMENT_DYNAMIC(CViewExSplitWnd, CSplitterWnd)
-
-/*CWnd* CViewExSplitWnd::GetActivePane(int*, int*)	// pRow, pCol
-//----------------------------------------------
-{
-	// attempt to use active view of frame window
-	CWnd* pView = NULL;
- 	CFrameWnd* pFrameWnd = GetParentFrame();
-	ASSERT_VALID(pFrameWnd);
-	if (pFrameWnd) pView = pFrameWnd->GetActiveView();
-
-	// failing that, use the current focus
-	if (pView == NULL)
-		pView = GetFocus();
-
-	return pView;
-}*/
-
-
-
-/////////////////////////////////////////////////////////////////////////////
 // CChildFrame
 
 IMPLEMENT_DYNCREATE(CChildFrame, CMDIChildWnd)
 
 BEGIN_MESSAGE_MAP(CChildFrame, CMDIChildWnd)
 	//{{AFX_MSG_MAP(CChildFrame)
-	ON_WM_CLOSE()
+	ON_WM_DESTROY()
 	ON_WM_NCACTIVATE()
 	ON_MESSAGE(WM_MOD_CHANGEVIEWCLASS,	OnChangeViewClass)
 	ON_MESSAGE(WM_MOD_INSTRSELECTED,	OnInstrumentSelected)
@@ -91,7 +68,7 @@ CChildFrame::CChildFrame()
 	m_bInitialActivation=true; //rewbs.fix3185
 	m_szCurrentViewClassName[0] = 0;
 	m_hWndCtrl = m_hWndView = NULL;
-	m_bMaxWhenClosed = FALSE;
+	m_bMaxWhenClosed = false;
 	glMdiOpenCount++;
 	RtlZeroMemory(&m_ViewGeneral, sizeof(m_ViewGeneral));
 	RtlZeroMemory(&m_ViewPatterns, sizeof(m_ViewPatterns));
@@ -107,7 +84,7 @@ CChildFrame::~CChildFrame()
 {
 	if ((--glMdiOpenCount) == 0)
 	{
-		TrackerSettings::Instance().gbMdiMaximize = (m_bMaxWhenClosed != 0);
+		TrackerSettings::Instance().gbMdiMaximize = m_bMaxWhenClosed;
 	}
 }
 
@@ -137,13 +114,14 @@ BOOL CChildFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	return bStatus;
 }
 
-//rewbs.varWindowSize
+
 void CChildFrame::SetSplitterHeight(int cy)
+//------------------------------------------
 {
 	if (cy <= 1) cy = 188;	//default to 188? why not..
-	m_wndSplitter.SetRowInfo(0,cy,15);
+	m_wndSplitter.SetRowInfo(0, Util::ScalePixels(cy, GetDC()), 15);
 }
-//end rewbs.varWindowSize
+
 
 BOOL CChildFrame::PreCreateWindow(CREATESTRUCT& cs)
 //-------------------------------------------------
@@ -262,15 +240,15 @@ void CChildFrame::SavePosition(BOOL bForce)
 	{
 		CRect rect;
 
-		m_bMaxWhenClosed = IsZoomed();
-		if (bForce) TrackerSettings::Instance().gbMdiMaximize = (m_bMaxWhenClosed != 0);
+		m_bMaxWhenClosed = IsZoomed() != FALSE;
+		if (bForce) TrackerSettings::Instance().gbMdiMaximize = m_bMaxWhenClosed;
 		if (!IsIconic())
 		{
 			CWnd *pWnd = m_wndSplitter.GetPane(0, 0);
 			if (pWnd)
 			{
 				pWnd->GetWindowRect(&rect);
-				LONG l = rect.Height();
+				int l = Util::ScalePixelsInv(rect.Height(), GetDC());
 				//rewbs.varWindowSize - not the nicest piece of code, but we need to distinguish btw the views:
 				if (strcmp(CViewGlobals::classCViewGlobals.m_lpszClassName, m_szCurrentViewClassName) == 0)
 					TrackerSettings::Instance().glGeneralWindowHeight = l;
@@ -282,11 +260,6 @@ void CChildFrame::SavePosition(BOOL bForce)
 					TrackerSettings::Instance().glInstrumentWindowHeight = l;
 				else if (strcmp(CViewComments::classCViewComments.m_lpszClassName, m_szCurrentViewClassName) == 0)
 					TrackerSettings::Instance().glCommentsWindowHeight = l;
-				//rewbs.graph
-				else if (strcmp("CViewGraph", m_szCurrentViewClassName) == 0)
-					TrackerSettings::Instance().glGraphWindowHeight = l;
-				//end rewbs.graph
-
 			}
 		}
 	}
@@ -304,7 +277,7 @@ int CChildFrame::GetSplitterHeight()
 		if (pWnd)
 		{
 			pWnd->GetWindowRect(&rect);
-			return rect.Height();
+			return Util::ScalePixelsInv(rect.Height(), GetDC());
 		}
 	}
 	return 15;	// tidy default
@@ -363,11 +336,11 @@ void CChildFrame::Dump(CDumpContext& dc) const
 /////////////////////////////////////////////////////////////////////////////
 // CChildFrame message handlers
 
-void CChildFrame::OnClose()
-//-------------------------
+void CChildFrame::OnDestroy()
+//---------------------------
 {
 	SavePosition();
-	CMDIChildWnd::OnClose();
+	CMDIChildWnd::OnDestroy();
 }
 
 

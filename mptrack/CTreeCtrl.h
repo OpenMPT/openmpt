@@ -21,12 +21,12 @@ public:
 #ifndef UNICODE
 	BOOL GetItem(TVITEMW *pItem) const
 	{
-		return ::SendMessage(m_hWnd, TVM_GETITEMW, 0, (LPARAM)pItem);
+		return (BOOL) ::SendMessage(m_hWnd, TVM_GETITEMW, 0, (LPARAM)pItem);
 	}
 
 	BOOL SetItem(TVITEMW *pItem)
 	{
-		return ::SendMessage(m_hWnd, TVM_SETITEMW, 0, (LPARAM)pItem);
+		return (BOOL) ::SendMessage(m_hWnd, TVM_SETITEMW, 0, (LPARAM)pItem);
 	}
 	BOOL SetItem(HTREEITEM hItem, UINT nMask, const WCHAR *lpszItem, int nImage, int nSelectedImage, UINT nState, UINT nStateMask, LPARAM lParam)
 	{

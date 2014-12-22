@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "MPTrackUtil.h"
+
 OPENMPT_NAMESPACE_BEGIN
 
 class CListCtrlEx : public CListCtrl
@@ -26,7 +28,7 @@ public:
 	{
 		for(int i = 0; i < numItems; i++)
 		{
-			InsertColumn(i, header[i].text, header[i].mask, MulDiv(header[i].width, GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSX), 96));
+			InsertColumn(i, header[i].text, header[i].mask, Util::ScalePixels(header[i].width, GetDC()));
 		}
 	}
 
