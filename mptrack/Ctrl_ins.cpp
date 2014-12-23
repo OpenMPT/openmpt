@@ -1366,7 +1366,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 		}
 		m_NoteMap.InvalidateRect(NULL, FALSE);
 	}
-	if(hintType[HINT_MIXPLUGINS | HINT_MODTYPE])
+	if(hint.ToType<PluginHint>().GetType()[HINT_MIXPLUGINS | HINT_PLUGINNAMES | HINT_MODTYPE])
 	{
 		UpdatePluginList();
 	}
@@ -2863,6 +2863,7 @@ void CCtrlInstruments::BuildTuningComboBox()
 void CCtrlInstruments::UpdatePluginList()
 //---------------------------------------
 {
+	m_CbnMixPlug.SetRedraw(FALSE);
 	m_CbnMixPlug.Clear();
 	m_CbnMixPlug.ResetContent();
 	CHAR s[64];
@@ -2883,6 +2884,7 @@ void CCtrlInstruments::UpdatePluginList()
 
 		m_CbnMixPlug.SetItemData(m_CbnMixPlug.AddString(s), nPlug);
 	}
+	m_CbnMixPlug.SetRedraw(TRUE);
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if ((pIns) && (pIns->nMixPlug <= MAX_MIXPLUGINS)) m_CbnMixPlug.SetCurSel(pIns->nMixPlug);
 }

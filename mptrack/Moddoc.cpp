@@ -411,29 +411,21 @@ BOOL CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool bTempla
 //-------------------------------------------------------------------------------------
 {
 	ScopedLogCapturer logcapturer(*this);
-	static int greccount = 0;
 	BOOL bOk = FALSE;
 	m_SndFile.m_dwLastSavedWithVersion = MptVersion::num;
 	if(filename.empty())
 		return FALSE;
-	MODTYPE type = m_SndFile.GetType(); // CModSpecifications::ExtensionToType(fext);
 
-	if (type == MOD_TYPE_NONE && !greccount)
-	{
-		greccount++;
-		bOk = DoSave(mpt::PathString(), TRUE);
-		greccount--;
-		return bOk;
-	}
 	BeginWaitCursor();
 	FixNullStrings();
-	switch(type)
+	switch(m_SndFile.GetType())
 	{
 	case MOD_TYPE_MOD:	bOk = m_SndFile.SaveMod(filename); break;
 	case MOD_TYPE_S3M:	bOk = m_SndFile.SaveS3M(filename); break;
 	case MOD_TYPE_XM:	bOk = m_SndFile.SaveXM(filename); break;
 	case MOD_TYPE_IT:	bOk = m_SndFile.SaveIT(filename); break;
 	case MOD_TYPE_MPT:	bOk = m_SndFile.SaveIT(filename); break;
+	default:			ASSERT(false);
 	}
 	EndWaitCursor();
 	if (bOk)
@@ -2757,7 +2749,7 @@ void CModDoc::SongProperties()
 	{
 		ScopedLogCapturer logcapturer(*this, "Conversion Status");
 		bool bShowLog = false;
-		if(dlg.m_nType)
+		if(dlg.m_nType != GetModType())
 		{
 			if (!ChangeModType(dlg.m_nType)) return;
 			bShowLog = true;
@@ -2983,7 +2975,7 @@ void CModDoc::SerializeViews() const
 
 	// Document view positions and sizes
 	POSITION pos = GetFirstViewPosition();
-	while(pos != nullptr)
+	while(pos != nullptr && !mdiRect.IsRectEmpty())
 	{
 		CModControlView *pView = dynamic_cast<CModControlView *>(GetNextView(pos));
 		if(pView)
@@ -3112,7 +3104,10 @@ void CModDoc::DeserializeViews()
 				{
 					wnd.rcNormalPosition = CRect(rect.left, rect.top, rect.right, rect.bottom);
 				}
-				pChildFrm->SetWindowPlacement(&wnd);
+				if(!mdiRect.IsRectEmpty())
+				{
+					pChildFrm->SetWindowPlacement(&wnd);
+				}
 				pChildFrm->DeserializeView(data);
 				pChildFrm = nullptr;
 			}

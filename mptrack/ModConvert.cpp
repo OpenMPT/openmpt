@@ -89,15 +89,6 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	const MODTYPE nOldType = m_SndFile.GetType();
 	
-	if(nNewType == nOldType && nNewType == MOD_TYPE_IT)
-	{
-		// Even if m_nType doesn't change, we might need to change extension in itp<->it case.
-		// This is because ITP is a HACK and doesn't genuinely change m_nType,
-		// but uses flags instead.
-		ChangeFileExtension(nNewType);
-		return true;
-	}
-
 	if(nNewType == nOldType)
 		return true;
 
