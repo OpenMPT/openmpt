@@ -279,6 +279,8 @@ struct ComponentListEntry
 };
 		
 bool ComponentListPush(ComponentListEntry *entry);
+
+#define MPT_DECLARE_COMPONENT_MEMBERS public: static const char * const g_TypeName;
 		
 #define MPT_REGISTERED_COMPONENT(name) \
 	static void RegisterComponent ## name (ComponentManager *componentManager) \
@@ -286,22 +288,22 @@ bool ComponentListPush(ComponentListEntry *entry);
 		componentManager->Register(ComponentFactory< name >( #name )); \
 	} \
 	static ComponentListEntry Component ## name ## ListEntry = { nullptr, & RegisterComponent ## name }; \
-	static bool Component ## name ## Registered = ComponentListPush(& Component ## name ## ListEntry );
+	static bool Component ## name ## Registered = ComponentListPush(& Component ## name ## ListEntry ); \
+	const char * const name :: g_TypeName = #name ; \
 /**/
 
 
 template <typename type>
-MPT_SHARED_PTR<type> GetComponent(const std::string &name)
+MPT_SHARED_PTR<type> GetComponent()
 {
-	return MPT_DYNAMIC_POINTER_CAST<type>(ComponentManager::Instance()->GetComponent(ComponentFactory<type>(name)));
+	return MPT_DYNAMIC_POINTER_CAST<type>(ComponentManager::Instance()->GetComponent(ComponentFactory<type>(type::g_TypeName)));
 }
-
-
-#define MPT_GET_COMPONENT(name) GetComponent< name >( #name )
 
 
 #else // !MPT_COMPONENT_MANAGER
 
+
+#define MPT_DECLARE_COMPONENT_MEMBERS
 
 #define MPT_REGISTERED_COMPONENT(name)
 
@@ -317,9 +319,6 @@ MPT_SHARED_PTR<type> GetComponent()
 	component->Initialize();
 	return component;
 }
-
-
-#define MPT_GET_COMPONENT(name) GetComponent< name >()
 
 
 #endif // MPT_COMPONENT_MANAGER

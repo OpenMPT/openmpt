@@ -20,6 +20,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 class ComponentUnMO3 : public ComponentBase
 {
+	MPT_DECLARE_COMPONENT_MEMBERS
 public:
 	// Library loaded successfully.
 	#if MPT_OS_WINDOWS
@@ -95,7 +96,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 #else // !NO_MO3
 
 	// Try to load unmo3 dynamically.
-	MPT_SHARED_PTR<ComponentUnMO3> unmo3 = MPT_GET_COMPONENT(ComponentUnMO3);
+	MPT_SHARED_PTR<ComponentUnMO3> unmo3 = GetComponent<ComponentUnMO3>();
 	if(!IsComponentAvailable(unmo3))
 	{
 		// Didn't succeed.

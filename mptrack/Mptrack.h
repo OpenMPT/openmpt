@@ -149,6 +149,7 @@ public:
 
 class ComponentUXTheme : public ComponentSystemDLL
 {
+	MPT_DECLARE_COMPONENT_MEMBERS
 public:
 	ComponentUXTheme() : ComponentSystemDLL(MPT_PATHSTRING("uxtheme"), true) { }
 	std::string GetSettingsKey() const { return "UXTheme"; }
