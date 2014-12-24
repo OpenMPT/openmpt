@@ -458,8 +458,10 @@ void Manager::ReEnumerate()
 	m_DeviceDynamicCaps.clear();
 
 #ifndef NO_PORTAUDIO
-	SndDevPortaudioUnnitialize();
-	SndDevPortaudioInitialize();
+	if(IsComponentAvailable(m_PortAudio))
+	{
+		m_PortAudio->ReInit();
+	}
 #endif // NO_PORTAUDIO
 
 	{
@@ -473,10 +475,12 @@ void Manager::ReEnumerate()
 	}
 #endif // NO_ASIO
 #ifndef NO_PORTAUDIO
+	if(IsComponentAvailable(m_PortAudio))
 	{
 		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_WASAPI);
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
+	if(IsComponentAvailable(m_PortAudio))
 	{
 		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_WDMKS);
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
@@ -493,14 +497,17 @@ void Manager::ReEnumerate()
 
 	// duplicate devices, only used if [Sound Settings]MorePortaudio=1
 #ifndef NO_PORTAUDIO
+	if(IsComponentAvailable(m_PortAudio))
 	{
 		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_WMME);
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
+	if(IsComponentAvailable(m_PortAudio))
 	{
 		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_ASIO);
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
+	if(IsComponentAvailable(m_PortAudio))
 	{
 		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_DS);
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
@@ -728,7 +735,10 @@ SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifi
 	case TypePORTAUDIO_WMME:
 	case TypePORTAUDIO_DS:
 	case TypePORTAUDIO_ASIO:
-		result = SndDevPortaudioIsInitialized() ? new CPortaudioDevice(info) : nullptr;
+		if(IsComponentAvailable(m_PortAudio))
+		{
+			result = new CPortaudioDevice(info);
+		}
 		break;
 #endif // NO_PORTAUDIO
 	}
@@ -757,9 +767,7 @@ Manager::Manager()
 Manager::~Manager()
 //-----------------
 {
-#ifndef NO_PORTAUDIO
-	SndDevPortaudioUnnitialize();
-#endif // NO_PORTAUDIO
+	return;
 }
 
 

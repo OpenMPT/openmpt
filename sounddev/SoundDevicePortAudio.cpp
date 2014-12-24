@@ -462,10 +462,6 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::T
 //-----------------------------------------------------------------------------------
 {
 	std::vector<SoundDevice::Info> devices;
-	if(!SndDevPortaudioIsInitialized())
-	{
-		return devices;
-	}
 	for(SoundDevice::Index index = 0; ; ++index)
 	{
 		SoundDevice::Info info;
@@ -479,9 +475,6 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::T
 }
 
 
-static bool g_PortaudioInitialized = false;
-
-
 static void PortaudioLog(const char *text)
 //----------------------------------------
 {
@@ -492,28 +485,39 @@ static void PortaudioLog(const char *text)
 }
 
 
-void SndDevPortaudioInitialize()
-//------------------------------
+MPT_REGISTERED_COMPONENT(ComponentPortAudio)
+
+
+ComponentPortAudio::ComponentPortAudio()
+{
+	return;
+}
+
+
+bool ComponentPortAudio::DoInitialize()
 {
 	PaUtil_SetDebugPrintFunction(PortaudioLog);
-	if(Pa_Initialize() != paNoError) return;
-	g_PortaudioInitialized = true;
+	return (Pa_Initialize() == paNoError);
 }
 
 
-void SndDevPortaudioUnnitialize()
-//-------------------------------
+ComponentPortAudio::~ComponentPortAudio()
 {
-	if(!g_PortaudioInitialized) return;
+	if(IsAvailable())
+	{
+		Pa_Terminate();
+	}
+}
+
+
+bool ComponentPortAudio::ReInit()
+{
+	if(!IsAvailable())
+	{
+		return false;
+	}
 	Pa_Terminate();
-	g_PortaudioInitialized = false;
-}
-
-
-bool SndDevPortaudioIsInitialized()
-//---------------------------------
-{
-	return g_PortaudioInitialized;
+	return DoInitialize();
 }
 
 

@@ -30,6 +30,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 enum ComponentType
 {
+	ComponentTypeBuiltin,            // PortAudio
 	ComponentTypeSystem,             // uxtheme.dll, mf.dll
 	ComponentTypeSystemInstallable,  // acm mp3 codec
 	ComponentTypeBundled,            // libsoundtouch
@@ -140,6 +141,21 @@ protected:
 #define MPT_COMPONENT_BIND_OPTIONAL(libName, func) Bind( func , libName , #func )
 #define MPT_COMPONENT_BIND_SYMBOL(libName, symbol, func) do { if(!Bind( func , libName , symbol )) { SetBindFailed(); } } while(0)
 #define MPT_COMPONENT_BIND_SYMBOL_OPTIONAL(libName, symbol, func) Bind( func , libName , symbol )
+
+
+class ComponentBuiltin : public ComponentBase
+{
+public:
+	ComponentBuiltin()
+		: ComponentBase(ComponentTypeBuiltin)
+	{
+		return;
+	}
+	virtual bool DoInitialize()
+	{
+		return true;
+	}
+};
 
 
 class ComponentSystemDLL : public ComponentBase
