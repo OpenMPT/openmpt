@@ -461,9 +461,7 @@ public:
 public:
 
 	virtual void SetSource(SoundDevice::ISource *source) = 0;
-	virtual SoundDevice::ISource *GetSource() const = 0;
 	virtual void SetMessageReceiver(SoundDevice::IMessageReceiver *receiver) = 0;
-	virtual SoundDevice::IMessageReceiver *GetMessageReceiver() const = 0;
 
 	virtual SoundDevice::Info GetDeviceInfo() const = 0;
 
@@ -598,9 +596,7 @@ public:
 	virtual ~Base();
 
 	void SetSource(SoundDevice::ISource *source) { m_Source = source; }
-	SoundDevice::ISource *GetSource() const { return m_Source; }
 	void SetMessageReceiver(SoundDevice::IMessageReceiver *receiver) { m_MessageReceiver = receiver; }
-	SoundDevice::IMessageReceiver *GetMessageReceiver() const { return m_MessageReceiver; }
 
 	SoundDevice::Info GetDeviceInfo() const { return m_Info; }
 
