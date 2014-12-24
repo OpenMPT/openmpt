@@ -96,7 +96,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 #else // !NO_MO3
 
 	// Try to load unmo3 dynamically.
-	MPT_SHARED_PTR<ComponentUnMO3> unmo3 = GetComponent<ComponentUnMO3>();
+	ComponentHandle<ComponentUnMO3> unmo3;
 	if(!IsComponentAvailable(unmo3))
 	{
 		// Didn't succeed.

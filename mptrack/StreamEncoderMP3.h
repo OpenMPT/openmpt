@@ -12,6 +12,8 @@
 
 #include "StreamEncoder.h"
 
+#include "../common/ComponentManager.h"
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -45,13 +47,13 @@ class MP3Encoder : public EncoderFactoryBase
 private:
 
 #ifdef MPT_MP3ENCODER_LAME
-	MPT_SHARED_PTR<ComponentLame> m_Lame;
+	ComponentHandle<ComponentLame> m_Lame;
 #endif
 #ifdef MPT_MP3ENCODER_BLADE
-	MPT_SHARED_PTR<ComponentBlade> m_Blade;
+	ComponentHandle<ComponentBlade> m_Blade;
 #endif
 #ifdef MPT_MP3ENCODER_ACM
-	MPT_SHARED_PTR<ComponentAcmMP3> m_Acm;
+	ComponentHandle<ComponentAcmMP3> m_Acm;
 #endif
 
 	MP3EncoderType m_Type;

@@ -12,6 +12,8 @@
 
 #include "StreamEncoder.h"
 
+#include "../common/ComponentManager.h"
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -23,7 +25,7 @@ class VorbisEncoder : public EncoderFactoryBase
 
 private:
 
-	MPT_SHARED_PTR<ComponentVorbis> m_Vorbis;
+	ComponentHandle<ComponentVorbis> m_Vorbis;
 
 public:
 

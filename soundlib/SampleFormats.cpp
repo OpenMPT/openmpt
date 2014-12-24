@@ -2436,7 +2436,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 		}
 	}
 
-	MPT_SHARED_PTR<ComponentMPG123> mpg123 = GetComponent<ComponentMPG123>();
+	ComponentHandle<ComponentMPG123> mpg123;
 	if(!IsComponentAvailable(mpg123))
 	{
 		return false;

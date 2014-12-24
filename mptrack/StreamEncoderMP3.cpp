@@ -1436,7 +1436,6 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 #ifdef MPT_MP3ENCODER_LAME
 	if(type == MP3EncoderDefault || type == MP3EncoderLame)
 	{
-		m_Lame = GetComponent<ComponentLame>();
 		if(IsComponentAvailable(m_Lame))
 		{
 			m_Type = MP3EncoderLame;
@@ -1448,7 +1447,6 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 #ifdef MPT_MP3ENCODER_BLADE
 	if(type == MP3EncoderDefault || type == MP3EncoderBlade)
 	{
-		m_Blade = GetComponent<ComponentBlade>();
 		if(IsComponentAvailable(m_Blade))
 		{
 			m_Type = MP3EncoderBlade;
@@ -1460,7 +1458,6 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 #ifdef MPT_MP3ENCODER_ACM
 	if(type == MP3EncoderDefault || type == MP3EncoderACM)
 	{
-		m_Acm = GetComponent<ComponentAcmMP3>();
 		if(IsComponentAvailable(m_Acm))
 		{
 			m_Type = MP3EncoderACM;
