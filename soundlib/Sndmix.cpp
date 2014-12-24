@@ -1426,11 +1426,11 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 				{
 					l = -l;
 					vdelta = Util::muldiv(period, LinearSlideUpTable[l >> 2], 65536) - period;
-					if (l & 0x03) vdelta += Util::muldiv(period, FineLinearSlideDownTable[l & 0x03], 65536) - period;
+					if (l & 0x03) vdelta += Util::muldiv(period, FineLinearSlideUpTable[l & 0x03], 65536) - period;
 				} else
 				{
 					vdelta = Util::muldiv(period, LinearSlideDownTable[l >> 2], 65536) - period;
-					if (l & 0x03) vdelta += Util::muldiv(period, FineLinearSlideUpTable[l & 0x03], 65536) - period;
+					if (l & 0x03) vdelta += Util::muldiv(period, FineLinearSlideDownTable[l & 0x03], 65536) - period;
 				}
 			}
 			period += vdelta;
