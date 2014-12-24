@@ -2319,6 +2319,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 
 class ComponentMPG123 : public ComponentBase
 {
+	MPT_DECLARE_COMPONENT_MEMBERS
 public:
 	typedef struct {int foo;} mpg123_handle;
 	int (*mpg123_init )(void);
@@ -2435,7 +2436,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 		}
 	}
 
-	MPT_SHARED_PTR<ComponentMPG123> mpg123 = MPT_GET_COMPONENT(ComponentMPG123);
+	MPT_SHARED_PTR<ComponentMPG123> mpg123 = GetComponent<ComponentMPG123>();
 	if(!IsComponentAvailable(mpg123))
 	{
 		return false;

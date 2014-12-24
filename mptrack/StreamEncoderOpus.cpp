@@ -44,6 +44,8 @@ class ComponentOpus
 	: public ComponentBase
 {
 
+	MPT_DECLARE_COMPONENT_MEMBERS
+
 public:
 
 	// ogg
@@ -566,7 +568,7 @@ public:
 OggOpusEncoder::OggOpusEncoder()
 //------------------------------
 {
-	m_Opus = MPT_GET_COMPONENT(ComponentOpus);
+	m_Opus = GetComponent<ComponentOpus>();
 	if(IsComponentAvailable(m_Opus))
 	{
 		SetTraits(m_Opus->BuildTraits());

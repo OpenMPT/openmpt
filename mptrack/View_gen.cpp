@@ -1579,7 +1579,7 @@ HBRUSH CViewGlobals::OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor)
 	{
 	case CTLCOLOR_DLG:
 		{
-			MPT_SHARED_PTR<ComponentUXTheme> uxtheme = MPT_GET_COMPONENT(ComponentUXTheme);
+			MPT_SHARED_PTR<ComponentUXTheme> uxtheme = GetComponent<ComponentUXTheme>();
 			if(IsComponentAvailable(uxtheme))
 			{
 				EnableThemeDialogTexture(*pWnd, ETDT_ENABLETAB);

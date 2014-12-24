@@ -29,6 +29,8 @@ class ComponentVorbis
 	: public ComponentBase
 {
 
+	MPT_DECLARE_COMPONENT_MEMBERS
+
 public:
 
 	// ogg
@@ -397,7 +399,7 @@ public:
 VorbisEncoder::VorbisEncoder()
 //----------------------------
 {
-	m_Vorbis = MPT_GET_COMPONENT(ComponentVorbis);
+	m_Vorbis = GetComponent<ComponentVorbis>();
 	if(IsComponentAvailable(m_Vorbis))
 	{
 		SetTraits(m_Vorbis->BuildTraits());

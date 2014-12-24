@@ -1803,6 +1803,7 @@ class ComponentSoundTouch
 //=======================
 	: public ComponentDelayLoadedBundledDLL
 {
+	MPT_DECLARE_COMPONENT_MEMBERS
 public:
 	ComponentSoundTouch()
 		: ComponentDelayLoadedBundledDLL(MPT_PATHSTRING("OpenMPT_SoundTouch_f32"))
@@ -1832,7 +1833,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 	if(pitch > 2.0f) return 2 + (2<<8);
 
 	// Check whether the DLL file exists.
-	MPT_SHARED_PTR<ComponentSoundTouch> soundTouch = MPT_GET_COMPONENT(ComponentSoundTouch);
+	MPT_SHARED_PTR<ComponentSoundTouch> soundTouch = GetComponent<ComponentSoundTouch>();
 	if(!IsComponentAvailable(soundTouch))
 	{
 		MsgBox(IDS_SOUNDTOUCH_LOADFAILURE);
