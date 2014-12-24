@@ -285,14 +285,6 @@ public:
 };
 
 
-enum StopMode
-{
-	StopModeClosed  = 0,
-	StopModeStopped = 1,
-	StopModePlaying = 2,
-};
-
-
 struct Settings
 {
 	HWND hWnd;

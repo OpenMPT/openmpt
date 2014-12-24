@@ -310,13 +310,20 @@ template<> inline SampleEditorDefaultFormat FromSettingValue(const SettingValue 
 		return dfFLAC;
 }
 
-template<> inline SettingValue ToSettingValue(const SoundDevice::StopMode &val)
+enum SoundDeviceStopMode
+{
+	SoundDeviceStopModeClosed  = 0,
+	SoundDeviceStopModeStopped = 1,
+	SoundDeviceStopModePlaying = 2,
+};
+
+template<> inline SettingValue ToSettingValue(const SoundDeviceStopMode &val)
 {
 	return SettingValue(static_cast<int32>(val));
 }
-template<> inline SoundDevice::StopMode FromSettingValue(const SettingValue &val)
+template<> inline SoundDeviceStopMode FromSettingValue(const SettingValue &val)
 {
-	return static_cast<SoundDevice::StopMode>(static_cast<int32>(val));
+	return static_cast<SoundDeviceStopMode>(static_cast<int32>(val));
 }
 
 
@@ -376,7 +383,7 @@ public:
 	Setting<std::vector<uint32> > m_SoundSampleRates;
 	Setting<bool> m_MorePortaudio;
 	Setting<bool> m_SoundSettingsOpenDeviceAtStartup;
-	Setting<SoundDevice::StopMode> m_SoundSettingsStopMode;
+	Setting<SoundDeviceStopMode> m_SoundSettingsStopMode;
 
 	bool m_SoundDeviceSettingsUseOldDefaults;
 	SoundDevice::ID m_SoundDeviceID_DEPRECATED;

@@ -171,7 +171,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, m_SoundSampleRates(conf, "Sound Settings", "SampleRates", GetDefaultSampleRates())
 	, m_MorePortaudio(conf, "Sound Settings", "MorePortaudio", false)
 	, m_SoundSettingsOpenDeviceAtStartup(conf, "Sound Settings", "OpenDeviceAtStartup", false)
-	, m_SoundSettingsStopMode(conf, "Sound Settings", "StopMode", SoundDevice::StopModeClosed)
+	, m_SoundSettingsStopMode(conf, "Sound Settings", "StopMode", SoundDeviceStopModeClosed)
 	, m_SoundDeviceSettingsUseOldDefaults(false)
 	, m_SoundDeviceID_DEPRECATED(SoundDevice::ID())
 	, m_SoundDeviceIdentifier(conf, "Sound Settings", "Device", SoundDevice::Identifier())
@@ -390,10 +390,10 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	{
 		if(conf.Read<bool>("Sound Settings", "KeepDeviceOpen", false))
 		{
-			m_SoundSettingsStopMode = SoundDevice::StopModePlaying;
+			m_SoundSettingsStopMode = SoundDeviceStopModePlaying;
 		} else
 		{
-			m_SoundSettingsStopMode = SoundDevice::StopModeStopped;
+			m_SoundSettingsStopMode = SoundDeviceStopModeStopped;
 		}
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,04))

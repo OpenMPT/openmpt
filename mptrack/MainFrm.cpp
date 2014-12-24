@@ -1201,7 +1201,7 @@ void CMainFrame::StopPlayback()
 		m_NotifyTimer = 0;
 	}
 	ResetNotificationBuffer();
-	if(!gpSoundDevice->GetDeviceCaps().CanKeepDeviceRunning || TrackerSettings::Instance().m_SoundSettingsStopMode == SoundDevice::StopModeClosed)
+	if(!gpSoundDevice->GetDeviceCaps().CanKeepDeviceRunning || TrackerSettings::Instance().m_SoundSettingsStopMode == SoundDeviceStopModeClosed)
 	{
 		audioCloseDevice();
 	}
@@ -1649,8 +1649,8 @@ BOOL CMainFrame::ResetSoundCard()
 }
 
 
-BOOL CMainFrame::SetupSoundCard(SoundDevice::Settings deviceSettings, SoundDevice::Identifier deviceIdentifier, SoundDevice::StopMode stoppedMode, bool forceReset)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+BOOL CMainFrame::SetupSoundCard(SoundDevice::Settings deviceSettings, SoundDevice::Identifier deviceIdentifier, SoundDeviceStopMode stoppedMode, bool forceReset)
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	if(forceReset
@@ -1672,13 +1672,13 @@ BOOL CMainFrame::SetupSoundCard(SoundDevice::Settings deviceSettings, SoundDevic
 		TrackerSettings::Instance().m_SoundSettingsStopMode = stoppedMode;
 		switch(stoppedMode)
 		{
-			case SoundDevice::StopModeClosed:
+			case SoundDeviceStopModeClosed:
 				deviceSettings.KeepDeviceRunning = true;
 				break;
-			case SoundDevice::StopModeStopped:
+			case SoundDeviceStopModeStopped:
 				deviceSettings.KeepDeviceRunning = false;
 				break;
-			case SoundDevice::StopModePlaying:
+			case SoundDeviceStopModePlaying:
 				deviceSettings.KeepDeviceRunning = true;
 				break;
 		}
