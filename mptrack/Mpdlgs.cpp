@@ -870,7 +870,7 @@ void COptionsSoundcard::OnOK()
 			m_Settings.ChannelMapping = SoundDevice::ChannelMapping();
 		}
 	}
-	CMainFrame::GetMainFrame()->SetupSoundCard(m_Settings, m_CurrentDeviceInfo.GetIdentifier(), (SoundDevice::StopMode)m_CbnStoppedMode.GetCurSel());
+	CMainFrame::GetMainFrame()->SetupSoundCard(m_Settings, m_CurrentDeviceInfo.GetIdentifier(), (SoundDeviceStopMode)m_CbnStoppedMode.GetCurSel());
 	SetDevice(m_CurrentDeviceInfo.GetIdentifier(), true); // Poll changed ASIO sample format and channel names
 	UpdateDevice();
 	UpdateStatistics();
