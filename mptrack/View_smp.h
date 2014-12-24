@@ -96,6 +96,7 @@ protected:
 	int GetZoomLevel(SmpLength length) const;
 	void DoZoom(int direction, const CPoint &zoomPoint = CPoint(-1, -1));
 	bool CanZoomSelection() const;
+	void ScrollToSample(SmpLength centeredSample, bool refresh = true);
 
 	SmpLength ScrollPosToSamplePos() const {return ScrollPosToSamplePos(m_nZoom);}
 	inline SmpLength ScrollPosToSamplePos(int nZoom) const;

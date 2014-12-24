@@ -670,6 +670,11 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleUpsample, 1913, _T("Upsample"));
 	DefineKeyCommand(kcSampleDownsample, 1914, _T("Downsample"));
 	DefineKeyCommand(kcSampleResample, 1915, _T("Resample"));
+	DefineKeyCommand(kcSampleCenterLoopStart, 1916, _T("Center loop start in view"));
+	DefineKeyCommand(kcSampleCenterLoopEnd, 1917, _T("Center loop end in view"));
+	DefineKeyCommand(kcSampleCenterSustainStart, 1918, _T("Center sustain loop start in view"));
+	DefineKeyCommand(kcSampleCenterSustainEnd, 1919, _T("Center sustain loop end in view"));
+
 
 	// Add new key commands here.
 

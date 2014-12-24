@@ -227,12 +227,7 @@ void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength cen
 	{
 		if(centeredSample != SmpLength(-1))
 		{
-			// Center given sample in the view
-			int scrollToSample = centeredSample >> (std::max(1, newZoom) - 1);
-			scrollToSample -= (m_rcClient.Width() / 2) >> (-std::min(-1, newZoom) - 1);
-
-			Limit(scrollToSample, 0, GetScrollLimit(SB_HORZ));
-			SetScrollPos(SB_HORZ, scrollToSample);
+			ScrollToSample(centeredSample, false);
 		} else
 		{
 			const SmpLength nOldPos = ScrollPosToSamplePos(oldZoom);
@@ -240,6 +235,20 @@ void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength cen
 			SetScrollPos(SB_HORZ, static_cast<int>(fPosFraction * GetScrollLimit(SB_HORZ)));
 		}
 	}
+}
+
+
+// Center given sample in the view
+void CViewSample::ScrollToSample(SmpLength centeredSample, bool refresh)
+//----------------------------------------------------------------------
+{
+	int scrollToSample = centeredSample >> (std::max(1, m_nZoom) - 1);
+	scrollToSample -= (m_rcClient.Width() / 2) >> (-std::min(-1, m_nZoom) - 1);
+
+	Limit(scrollToSample, 0, GetScrollLimit(SB_HORZ));
+	SetScrollPos(SB_HORZ, scrollToSample);
+
+	if(refresh) InvalidateRect(nullptr, FALSE);
 }
 
 
@@ -2919,6 +2928,24 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcSampleZoomUp:	OnZoomUp(); return wParam;
 		case kcSampleZoomDown:	OnZoomDown(); return wParam;
 		case kcSampleZoomSelection: OnZoomOnSel(); return wParam;
+		case kcSampleCenterLoopStart:
+		case kcSampleCenterLoopEnd:
+		case kcSampleCenterSustainStart:
+		case kcSampleCenterSustainEnd:
+			if(m_nZoom)
+			{
+				SmpLength point;
+				ModSample &sample = sndFile.GetSample(m_nSample);
+				switch(wParam)
+				{
+				case kcSampleCenterLoopStart:		point = sample.nLoopStart; break;
+				case kcSampleCenterLoopEnd:			point = sample.nLoopEnd; break;
+				case kcSampleCenterSustainStart:	point = sample.nSustainStart; break;
+				case kcSampleCenterSustainEnd:		point = sample.nSustainEnd; break;
+				}
+				ScrollToSample(point);
+			}
+			return wParam;
 		case kcPrevInstrument:	OnPrevInstrument(); return wParam;
 		case kcNextInstrument:	OnNextInstrument(); return wParam;
 		case kcEditSelectAll:	OnEditSelectAll(); return wParam;
