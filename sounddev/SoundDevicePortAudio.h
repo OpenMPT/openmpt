@@ -12,6 +12,8 @@
 
 #include "SoundDevice.h"
 
+#include "../common/ComponentManager.h"
+
 #ifndef NO_PORTAUDIO
 #include "portaudio/include/portaudio.h"
 #include "portaudio/include/pa_win_wasapi.h"
@@ -90,10 +92,18 @@ private:
 
 };
 
-void SndDevPortaudioInitialize();
-void SndDevPortaudioUnnitialize();
 
-bool SndDevPortaudioIsInitialized();
+class ComponentPortAudio : public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS
+public:
+	ComponentPortAudio();
+	virtual ~ComponentPortAudio();
+	std::string GetSettingsKey() const { return "PortAudio"; }
+	virtual bool DoInitialize();
+	bool ReInit();
+};
+
 
 #endif // NO_PORTAUDIO
 

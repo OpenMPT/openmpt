@@ -14,6 +14,7 @@
 #include "../common/mutex.h"
 #include "../common/misc_util.h"
 #include "../common/mptAtomic.h"
+#include "../common/ComponentManager.h"
 #include "../soundlib/SampleFormat.h"
 
 #include <map>
@@ -636,11 +637,19 @@ public:
 };
 
 
+class ComponentPortAudio;
+
+
 //===========
 class Manager
 //===========
 {
 private:
+
+#ifndef NO_PORTAUDIO
+	ComponentHandle<ComponentPortAudio> m_PortAudio;
+#endif // NO_PORTAUDIO
+
 	std::vector<SoundDevice::Info> m_SoundDevices;
 	std::map<SoundDevice::Identifier, bool> m_DeviceUnavailable;
 	std::map<SoundDevice::Identifier, SoundDevice::Caps> m_DeviceCaps;
