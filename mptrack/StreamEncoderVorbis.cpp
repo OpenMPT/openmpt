@@ -399,7 +399,6 @@ public:
 VorbisEncoder::VorbisEncoder()
 //----------------------------
 {
-	m_Vorbis = GetComponent<ComponentVorbis>();
 	if(IsComponentAvailable(m_Vorbis))
 	{
 		SetTraits(m_Vorbis->BuildTraits());

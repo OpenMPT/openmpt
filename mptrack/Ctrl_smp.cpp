@@ -1833,7 +1833,7 @@ int CCtrlSamples::TimeStretch(float ratio)
 	if(pitch > 2.0f) return 2 + (2<<8);
 
 	// Check whether the DLL file exists.
-	MPT_SHARED_PTR<ComponentSoundTouch> soundTouch = GetComponent<ComponentSoundTouch>();
+	ComponentHandle<ComponentSoundTouch> soundTouch;
 	if(!IsComponentAvailable(soundTouch))
 	{
 		MsgBox(IDS_SOUNDTOUCH_LOADFAILURE);

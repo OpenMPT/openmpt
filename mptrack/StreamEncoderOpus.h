@@ -12,6 +12,8 @@
 
 #include "StreamEncoder.h"
 
+#include "../common/ComponentManager.h"
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -23,7 +25,7 @@ class OggOpusEncoder : public EncoderFactoryBase
 
 private:
 
-	MPT_SHARED_PTR<ComponentOpus> m_Opus;
+	ComponentHandle<ComponentOpus> m_Opus;
 
 public:
 

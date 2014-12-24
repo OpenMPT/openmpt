@@ -568,7 +568,6 @@ public:
 OggOpusEncoder::OggOpusEncoder()
 //------------------------------
 {
-	m_Opus = GetComponent<ComponentOpus>();
 	if(IsComponentAvailable(m_Opus))
 	{
 		SetTraits(m_Opus->BuildTraits());

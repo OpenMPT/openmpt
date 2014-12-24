@@ -324,10 +324,46 @@ MPT_SHARED_PTR<type> GetComponent()
 #endif // MPT_COMPONENT_MANAGER
 
 
+// Simple wrapper around MPT_SHARED_PTR<ComponentType> which automatically
+// gets a reference to the component (or constructs it) on initialization.
 template <typename T>
-bool IsComponentAvailable(MPT_SHARED_PTR<T> component)
+class ComponentHandle
 {
-	return component && component->IsAvailable();
+private:
+	MPT_SHARED_PTR<T> component;
+public:
+	ComponentHandle()
+		: component(GetComponent<T>())
+	{
+		return;
+	}
+	~ComponentHandle()
+	{
+		return;
+	}
+	bool IsAvailable() const
+	{
+		return component && component->IsAvailable();
+	}
+	T *get() const
+	{
+		return component.get();
+	}
+	T &operator*() const
+	{
+		return *component;
+	}
+	T *operator->() const
+	{
+		return &*component;
+	}
+};
+
+
+template <typename T>
+bool IsComponentAvailable(const ComponentHandle<T> &handle)
+{
+	return handle.IsAvailable();
 }
 
 
