@@ -159,6 +159,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 	// Note
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
+		combo->SetRedraw(FALSE);
 		combo->InitStorage(150, 6);
 		combo->SetItemData(combo->AddString(_T("...")), 0);
 		if (m_bReplace)
@@ -179,10 +180,12 @@ BOOL CFindReplaceTab::OnInitDialog()
 			combo->SetCurSel(i);
 			break;
 		}
+		combo->SetRedraw(TRUE);
 	}
 	// Instrument
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO2)) != NULL)
 	{
+		combo->SetRedraw(FALSE);
 		combo->SetItemData(combo->AddString(_T("..")), 0);
 		if (m_bReplace)
 		{
@@ -209,10 +212,12 @@ BOOL CFindReplaceTab::OnInitDialog()
 				break;
 			}
 		}
+		combo->SetRedraw(TRUE);
 	}
 	// Volume Command
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO3)) != NULL)
 	{
+		combo->SetRedraw(FALSE);
 		combo->InitStorage(effectInfo.GetNumVolCmds(), 15);
 		combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
 		UINT count = effectInfo.GetNumVolCmds();
@@ -230,10 +235,12 @@ BOOL CFindReplaceTab::OnInitDialog()
 			combo->SetCurSel(i);
 			break;
 		}
+		combo->SetRedraw(TRUE);
 	}
 	// Volume
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO4)) != NULL)
 	{
+		combo->SetRedraw(FALSE);
 		combo->InitStorage(64, 4);
 		for (UINT n=0; n<=64; n++)
 		{
@@ -246,10 +253,12 @@ BOOL CFindReplaceTab::OnInitDialog()
 			combo->SetCurSel(i);
 			break;
 		}
+		combo->SetRedraw(TRUE);
 	}
 	// Command
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO5)) != NULL)
 	{
+		combo->SetRedraw(FALSE);
 		combo->InitStorage(effectInfo.GetNumEffects(), 20);
 		combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
 		UINT count = effectInfo.GetNumEffects();
@@ -267,6 +276,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 			combo->SetCurSel(i);
 			break;
 		}
+		combo->SetRedraw(TRUE);
 	}
 	ChangeEffect();
 	ChangeVolCmd();
@@ -294,6 +304,7 @@ void CFindReplaceTab::ChangeEffect()
 			TCHAR s[16];
 			int newpos;
 			if (oldcount) newpos = combo->GetCurSel() % newcount; else newpos = m_Cmd.param % newcount;
+			combo->SetRedraw(FALSE);
 			combo->ResetContent();
 			combo->InitStorage(newcount, 4);
 			for (UINT i=0; i<newcount; i++)
@@ -302,6 +313,7 @@ void CFindReplaceTab::ChangeEffect()
 				combo->SetItemData(combo->AddString(s), i);
 			}
 			combo->SetCurSel(newpos);
+			combo->SetRedraw(TRUE);
 		}
 	}
 }
@@ -332,6 +344,7 @@ void CFindReplaceTab::ChangeVolCmd()
 			TCHAR s[16];
 			int newpos;
 			if (oldcount) newpos = combo->GetCurSel() % newcount; else newpos = m_Cmd.param % newcount;
+			combo->SetRedraw(FALSE);
 			combo->ResetContent();
 			for (UINT i = rangeMin; i <= rangeMax; i++)
 			{
@@ -339,6 +352,7 @@ void CFindReplaceTab::ChangeVolCmd()
 				combo->SetItemData(combo->AddString(s), i);
 			}
 			combo->SetCurSel(newpos);
+			combo->SetRedraw(TRUE);
 		}
 	}
 }
@@ -471,12 +485,14 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 		UINT nrows = sndFile.Patterns[m_nPattern].GetNumRows();
 
 		const CModSpecifications& specs = sndFile.GetModSpecifications();
+		combo->SetRedraw(FALSE);
 		for (UINT irow = specs.patternRowsMin; irow <= specs.patternRowsMax; irow++)
 		{
 			_stprintf(s, _T("%d"), irow);
 			combo->AddString(s);
 		}
 		combo->SetCurSel(nrows - specs.patternRowsMin);
+		combo->SetRedraw(TRUE);
 		_stprintf(s, _T("Pattern #%d: %d row%s (%dK)"),
 			m_nPattern,
 			sndFile.Patterns[m_nPattern].GetNumRows(),
