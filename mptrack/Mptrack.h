@@ -40,7 +40,7 @@ typedef struct MODPLUGDIB
 	BITMAPINFOHEADER bmiHeader;
 	RGBQUAD bmiColors[16];
 	LPBYTE lpDibBits;
-} MODPLUGDIB, *LPMODPLUGDIB;
+} MODPLUGDIB;
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -344,50 +344,48 @@ extern CTrackApp theApp;
 //////////////////////////////////////////////////////////////////
 // More Bitmap Helpers
 
-//#define FASTBMP_XSHIFT		12	// 4K pixels
-#define FASTBMP_XSHIFT			13	// 8K pixels
-#define FASTBMP_MAXWIDTH		(1 << FASTBMP_XSHIFT)
-#define FASTBMP_MAXHEIGHT		16
-
-struct MODPLUGFASTDIB
-{
-	BITMAPINFOHEADER bmiHeader;
-	RGBQUAD bmiColors[256];
-	BYTE DibBits[FASTBMP_MAXWIDTH*FASTBMP_MAXHEIGHT];
-};
-
 //===============
 class CFastBitmap
 //===============
 {
 protected:
+	struct MODPLUGFASTDIB
+	{
+		BITMAPINFOHEADER bmiHeader;
+		RGBQUAD bmiColors[256];
+		std::vector<uint8_t> DibBits;
+	};
+
 	MODPLUGFASTDIB m_Dib;
 	UINT m_nTextColor, m_nBkColor;
-	LPMODPLUGDIB m_pTextDib;
-	BYTE m_nBlendOffset;
-	BYTE m_n4BitPalette[16];
+	MODPLUGDIB *m_pTextDib;
+	uint8_t m_nBlendOffset;
+	uint8_t m_n4BitPalette[16];
+	uint8_t m_nXShiftFactor;
 
 public:
 	CFastBitmap() {}
 
 public:
-	void Init(LPMODPLUGDIB lpTextDib=NULL);
+	void Init(MODPLUGDIB *lpTextDib = nullptr);
 	void Blit(HDC hdc, int x, int y, int cx, int cy);
 	void Blit(HDC hdc, LPCRECT lprc) { Blit(hdc, lprc->left, lprc->top, lprc->right-lprc->left, lprc->bottom-lprc->top); }
 	void SetTextColor(int nText, int nBk=-1) { m_nTextColor = nText; if (nBk >= 0) m_nBkColor = nBk; }
 	void SetTextBkColor(UINT nBk) { m_nBkColor = nBk; }
 	void SetColor(UINT nIndex, COLORREF cr);
 	void SetAllColors(UINT nBaseIndex, UINT nColors, COLORREF *pcr);
-	void TextBlt(int x, int y, int cx, int cy, int srcx, int srcy, LPMODPLUGDIB lpdib=NULL);
+	void TextBlt(int x, int y, int cx, int cy, int srcx, int srcy, MODPLUGDIB *lpdib = nullptr);
 	void SetBlendMode(BYTE nBlendOfs) { m_nBlendOffset = nBlendOfs; }
 	void SetBlendColor(COLORREF cr);
+	void SetSize(int x, int y);
+	int GetWidth() const { return m_Dib.bmiHeader.biWidth; }
 };
 
 
 ///////////////////////////////////////////////////
 // 4-bit DIB Drawing functions
-void DibBlt(HDC hdc, int x, int y, int sizex, int sizey, int srcx, int srcy, LPMODPLUGDIB lpdib);
-LPMODPLUGDIB LoadDib(LPCSTR lpszName);
+void DibBlt(HDC hdc, int x, int y, int sizex, int sizey, int srcx, int srcy, MODPLUGDIB *lpdib);
+MODPLUGDIB *LoadDib(LPCSTR lpszName);
 RGBQUAD rgb2quad(COLORREF c);
 
 // Other bitmap functions

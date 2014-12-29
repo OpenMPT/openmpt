@@ -90,7 +90,7 @@ enum
 #define PATTERN_PLAYNEWNOTE			0x01		// play new notes while recording
 #define PATTERN_LARGECOMMENTS		0x02		// use large font in comments
 #define PATTERN_STDHIGHLIGHT		0x04		// enable primary highlight (measures)
-#define PATTERN_SMALLFONT			0x08		// use small font in pattern editor
+//#define PATTERN_SMALLFONT			0x08		// use small font in pattern editor
 #define PATTERN_CENTERROW			0x10		// always center active row
 #define PATTERN_WRAP				0x20		// wrap around cursor in editor
 #define PATTERN_EFFECTHILIGHT		0x40		// effect syntax highlighting
@@ -120,6 +120,8 @@ enum
 #define PATTERN_LIVEUPDATETREE		0x40000000	// update active sample / instr icons in treeview
 #define PATTERN_SYNCSAMPLEPOS		0x80000000	// sync sample positions when seeking
 
+#define PATTERNFONT_SMALL "@1"
+#define PATTERNFONT_LARGE "@2"
 
 // Midi Setup
 #define MIDISETUP_RECORDVELOCITY			0x01	// Record MIDI velocity
@@ -317,6 +319,12 @@ enum SoundDeviceStopMode
 	SoundDeviceStopModePlaying = 2,
 };
 
+enum FontFlags
+{
+	PatternFontBold = 1,
+	PatternFontItalic = 2,
+};
+
 template<> inline SettingValue ToSettingValue(const SoundDeviceStopMode &val)
 {
 	return SettingValue(static_cast<int32>(val));
@@ -443,6 +451,9 @@ public:
 	CachedSetting<UINT> gnAutoChordWaitTime;
 	CachedSetting<int32> orderlistMargins;
 	CachedSetting<int32> rowDisplayOffset;
+	Setting<std::string> patternFont;
+	Setting<int32_t> patternFontSize;
+	Setting<int32_t> patternFontFlags;
 
 	// Sample Editor
 

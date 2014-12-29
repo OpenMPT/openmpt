@@ -854,6 +854,7 @@
     <ClCompile Include="Mpt_midi.cpp" />
     <ClCompile Include="PatternClipboard.cpp" />
     <ClCompile Include="PatternEditorDialogs.cpp" />
+    <ClCompile Include="PatternFont.cpp" />
     <ClCompile Include="PatternGotoDialog.cpp" />
     <ClCompile Include="PNG.cpp" />
     <ClCompile Include="PSRatioCalc.cpp" />
@@ -1063,6 +1064,7 @@
     <ClInclude Include="Notification.h" />
     <ClInclude Include="PatternClipboard.h" />
     <ClInclude Include="PatternCursor.h" />
+    <ClInclude Include="PatternFont.h" />
     <ClInclude Include="PNG.h" />
     <ClInclude Include="Reporting.h" />
     <ClInclude Include="resource.h" />

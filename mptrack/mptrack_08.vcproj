@@ -999,6 +999,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\PatternFont.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\PatternGotoDialog.cpp"
 					>
 				</File>
@@ -1722,6 +1726,10 @@
 				</File>
 				<File
 					RelativePath=".\PatternEditorDialogs.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PatternFont.h"
 					>
 				</File>
 				<File

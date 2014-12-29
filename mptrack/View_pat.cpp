@@ -19,6 +19,7 @@
 #include "Globals.h"
 #include "View_pat.h"
 #include "Ctrl_pat.h"
+#include "PatternFont.h"
 
 #include "EffectVis.h"		//rewbs.fxvis
 #include "PatternGotoDialog.h"
@@ -152,7 +153,7 @@ CViewPattern::CViewPattern()
 //--------------------------
 {
 	m_pEffectVis = nullptr; //rewbs.fxvis
-	m_bLastNoteEntryBlocked=false;
+	m_bLastNoteEntryBlocked = false;
 
 	m_nPattern = 0;
 	m_nDetailLevel = PatternCursor::lastColumn;
@@ -188,6 +189,7 @@ void CViewPattern::OnInitialUpdate()
 	m_nSpacing = 0;
 	m_nAccelChar = 0;
 	CScrollView::OnInitialUpdate();
+	PatternFont::UpdateFont(GetDC());
 	UpdateSizes();
 	UpdateScrollSize();
 	SetCurrentPattern(0);
@@ -6208,7 +6210,7 @@ bool CViewPattern::BuildEditCtxMenu(HMENU hMenu, CInputHandler *ih, CModDoc* pMo
 bool CViewPattern::BuildVisFXCtxMenu(HMENU hMenu, CInputHandler *ih) const
 //------------------------------------------------------------------------
 {
-	DWORD greyed = IsColumnSelected(PatternCursor::effectColumn) ? FALSE : MF_GRAYED;
+	DWORD greyed = (IsColumnSelected(PatternCursor::effectColumn) || IsColumnSelected(PatternCursor::paramColumn)) ? FALSE : MF_GRAYED;
 
 	if (!greyed || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{

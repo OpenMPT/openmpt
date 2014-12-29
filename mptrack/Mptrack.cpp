@@ -1050,6 +1050,8 @@ BOOL CTrackApp::InitInstance()
 
 	if(firstRun)
 	{
+		// On high-DPI devices, automatically upscale pattern font
+		TrackerSettings::Instance().patternFontSize = Clamp(::GetDeviceCaps(m_pMainWnd->GetDC()->m_hDC, LOGPIXELSX) / 96 - 1, 0, 9);
 		new WelcomeDlg(m_pMainWnd);
 	}
 
@@ -1460,8 +1462,8 @@ RGBQUAD rgb2quad(COLORREF c)
 }
 
 
-void DibBlt(HDC hdc, int x, int y, int sizex, int sizey, int srcx, int srcy, LPMODPLUGDIB lpdib)
-//----------------------------------------------------------------------------------------------
+void DibBlt(HDC hdc, int x, int y, int sizex, int sizey, int srcx, int srcy, MODPLUGDIB *lpdib)
+//---------------------------------------------------------------------------------------------
 {
 	if (!lpdib) return;
 	SetDIBitsToDevice(	hdc,
@@ -1479,8 +1481,8 @@ void DibBlt(HDC hdc, int x, int y, int sizex, int sizey, int srcx, int srcy, LPM
 }
 
 
-LPMODPLUGDIB LoadDib(LPCSTR lpszName)
-//-----------------------------------
+MODPLUGDIB *LoadDib(LPCSTR lpszName)
+//----------------------------------
 {
 	HINSTANCE hInstance = AfxGetInstanceHandle();
 	HRSRC hrsrc = FindResource(hInstance, lpszName, RT_BITMAP);
@@ -1488,7 +1490,7 @@ LPMODPLUGDIB LoadDib(LPCSTR lpszName)
 	LPBITMAPINFO p = (LPBITMAPINFO)LockResource(hglb);
 	if (p)
 	{
-		LPMODPLUGDIB pmd = new MODPLUGDIB;
+		MODPLUGDIB *pmd = new MODPLUGDIB;
 		pmd->bmiHeader = p->bmiHeader;
 		for (int i=0; i<16; i++) pmd->bmiColors[i] = p->bmiColors[i];
 		LPBYTE lpDibBits = (LPBYTE)p;
@@ -1557,17 +1559,17 @@ void ErrorBox(UINT nStringID, CWnd *parent)
 // useful for lots of small blits with color mapping
 // combined in one big blit
 
-void CFastBitmap::Init(LPMODPLUGDIB lpTextDib)
-//--------------------------------------------
+void CFastBitmap::Init(MODPLUGDIB *lpTextDib)
+//-------------------------------------------
 {
 	m_nBlendOffset = 0;
 	m_pTextDib = lpTextDib;
-	MemsetZero(m_Dib);
+	MemsetZero(m_Dib.bmiHeader);
 	m_nTextColor = 0;
 	m_nBkColor = 1;
 	m_Dib.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-	m_Dib.bmiHeader.biWidth = FASTBMP_MAXWIDTH;
-	m_Dib.bmiHeader.biHeight = FASTBMP_MAXHEIGHT;
+	m_Dib.bmiHeader.biWidth = 0;	// Set later
+	m_Dib.bmiHeader.biHeight = 0;	// Ditto
 	m_Dib.bmiHeader.biPlanes = 1;
 	m_Dib.bmiHeader.biBitCount = 8;
 	m_Dib.bmiHeader.biCompression = BI_RGB;
@@ -1593,10 +1595,10 @@ void CFastBitmap::Blit(HDC hdc, int x, int y, int cx, int cy)
 						cx,
 						cy,
 						0,
-						FASTBMP_MAXHEIGHT - cy,
+						m_Dib.bmiHeader.biHeight - cy,
 						0,
-						FASTBMP_MAXHEIGHT,
-						m_Dib.DibBits,
+						m_Dib.bmiHeader.biHeight,
+						&m_Dib.DibBits[0],
 						(LPBITMAPINFO)&m_Dib,
 						DIB_RGB_COLORS);
 }
@@ -1643,10 +1645,10 @@ void CFastBitmap::SetBlendColor(COLORREF cr)
 
 
 // Monochrome 4-bit bitmap (0=text, !0 = back)
-void CFastBitmap::TextBlt(int x, int y, int cx, int cy, int srcx, int srcy, LPMODPLUGDIB lpdib)
-//---------------------------------------------------------------------------------------------
+void CFastBitmap::TextBlt(int x, int y, int cx, int cy, int srcx, int srcy, MODPLUGDIB *lpdib)
+//--------------------------------------------------------------------------------------------
 {
-	const BYTE *psrc;
+	const uint8_t *psrc;
 	BYTE *pdest;
 	UINT x1, x2;
 	int srcwidth, srcinc;
@@ -1663,9 +1665,9 @@ void CFastBitmap::TextBlt(int x, int y, int cx, int cy, int srcx, int srcy, LPMO
 		cy += y;
 		y = 0;
 	}
-	if ((x >= FASTBMP_MAXWIDTH) || (y >= FASTBMP_MAXHEIGHT)) return;
-	if (x+cx >= FASTBMP_MAXWIDTH) cx = FASTBMP_MAXWIDTH - x;
-	if (y+cy >= FASTBMP_MAXHEIGHT) cy = FASTBMP_MAXHEIGHT - y;
+	if ((x >= m_Dib.bmiHeader.biWidth) || (y >= m_Dib.bmiHeader.biHeight)) return;
+	if (x+cx >= m_Dib.bmiHeader.biWidth) cx = m_Dib.bmiHeader.biWidth - x;
+	if (y+cy >= m_Dib.bmiHeader.biHeight) cy = m_Dib.bmiHeader.biHeight - y;
 	if (!lpdib) lpdib = m_pTextDib;
 	if ((cx <= 0) || (cy <= 0) || (!lpdib)) return;
 	srcwidth = (lpdib->bmiHeader.biWidth+1) >> 1;
@@ -1677,11 +1679,11 @@ void CFastBitmap::TextBlt(int x, int y, int cx, int cy, int srcx, int srcy, LPMO
 	}
 	x1 = srcx & 1;
 	x2 = x1 + cx;
-	pdest = m_Dib.DibBits + ((FASTBMP_MAXHEIGHT - 1 - y) << FASTBMP_XSHIFT) + x;
+	pdest = &m_Dib.DibBits[((m_Dib.bmiHeader.biHeight - 1 - y) << m_nXShiftFactor) + x];
 	psrc = lpdib->lpDibBits + (srcx >> 1) + (srcy * srcwidth);
 	for (int iy=0; iy<cy; iy++)
 	{
-		LPBYTE p = pdest;
+		uint8_t *p = pdest;
 		UINT ix = x1;
 		if (ix&1)
 		{
@@ -1702,9 +1704,34 @@ void CFastBitmap::TextBlt(int x, int y, int cx, int cy, int srcx, int srcy, LPMO
 			UINT b = psrc[ix >> 1];
 			*p++ = m_n4BitPalette[b >> 4]+m_nBlendOffset;
 		}
-		pdest -= FASTBMP_MAXWIDTH;
+		pdest -= m_Dib.bmiHeader.biWidth;
 		psrc += srcinc;
 	}
+}
+
+
+void CFastBitmap::SetSize(int x, int y)
+//-------------------------------------
+{
+	if(x > 4)
+	{
+		// Compute the required shift factor for obtaining a power-of-two bitmap width
+		m_nXShiftFactor = 1;
+		x--;
+		while(x >>= 1)
+		{
+			m_nXShiftFactor++;
+		}
+	} else
+	{
+		// Bitmaps rows are aligned to 4 bytes, so let this bitmap be exactly 4 pixels wide.
+		m_nXShiftFactor = 2;
+	}
+
+	x = (1 << m_nXShiftFactor);
+	if(m_Dib.DibBits.size() != static_cast<size_t>(y << m_nXShiftFactor)) m_Dib.DibBits.resize(y << m_nXShiftFactor);
+	m_Dib.bmiHeader.biWidth = x;
+	m_Dib.bmiHeader.biHeight = y;
 }
 
 
