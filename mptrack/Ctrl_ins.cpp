@@ -1680,12 +1680,12 @@ void CCtrlInstruments::OnInstrumentNew()
 	}
 	bool bFirst = (m_sndFile.GetNumInstruments() == 0);
 	INSTRUMENTINDEX ins = m_modDoc.InsertInstrument();
+	if (bFirst) m_modDoc.UpdateAllViews(nullptr, InstrumentHint().Info().Names().ModType());
 	if (ins != INSTRUMENTINDEX_INVALID)
 	{
 		SetCurrentInstrument(ins);
 		m_modDoc.UpdateAllViews(nullptr, InstrumentHint(ins).Info().Envelope().Names());
 	}
-	if (bFirst) m_modDoc.UpdateAllViews(nullptr, InstrumentHint(ins).Info().Names().ModType());
 	m_parent.InstrumentChanged(m_nInstrument);
 	SwitchToView();
 }
