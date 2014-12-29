@@ -20,6 +20,7 @@ class CModDoc;
 class CEditCommand;
 class CEffectVis;	//rewbs.fxvis
 class CPatternGotoDialog;
+struct PATTERNFONT;
 
 // Drag & Drop info
 #define DRAGITEM_VALUEMASK		0x00FFFFFF

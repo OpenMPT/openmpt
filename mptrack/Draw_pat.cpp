@@ -21,6 +21,7 @@
 #include "../soundlib/tuningbase.h"
 #include "../common/StringFixer.h"
 #include "EffectInfo.h"
+#include "PatternFont.h"
 #include <string>
 
 
@@ -30,7 +31,6 @@ OPENMPT_NAMESPACE_BEGIN
 // Headers
 #define ROWHDR_WIDTH		32	// Row header
 #define COLHDR_HEIGHT		16	// Column header
-#define COLUMN_HEIGHT		13
 #define	VUMETERS_HEIGHT		13	// Height of vu-meters
 #define	PLUGNAME_HEIGHT		16	// Height of plugin names
 #define VUMETERS_BMPWIDTH		32
@@ -55,78 +55,7 @@ enum
 };
 
 
-struct PATTERNFONT
-{
-	int nWidth, nHeight;		// Column Width & Height, including 4-pixels border
-	int nClrX, nClrY;			// Clear (empty note) location
-	int nSpaceX, nSpaceY;		// White location (must be big enough)
-	UINT nEltWidths[5];			// Elements Sizes
-	int nNumX, nNumY;			// Vertically-oriented numbers 0x00-0x0F
-	int nNum10X, nNum10Y;		// Numbers 10-19
-	int nAlphaAM_X,nAlphaAM_Y;	// Letters A-M +#
-	int nAlphaNZ_X,nAlphaNZ_Y;	// Letters N-Z +?
-	int nNoteX, nNoteY;			// Notes ..., C-, C#, ...
-	int nNoteWidth;				// Total width of note (C#)
-	int nOctaveWidth;			// Octave Width
-	int nVolX, nVolY;			// Volume Column Effects
-	int nVolCmdWidth;			// Width of volume effect
-	int nVolHiWidth;			// Width of first character in volume parameter
-	int nCmdOfs;				// XOffset (-xxx) around the command letter
-	int nParamHiWidth;
-	int nInstrOfs, nInstr10Ofs, nInstrHiWidth;
-};
 
-typedef const PATTERNFONT * PCPATTERNFONT;
-
-//////////////////////////////////////////////
-// Font Definitions
-
-// Medium Font (Default)
-const PATTERNFONT gDefaultPatternFont = 
-{
-	92,13,	// Column Width & Height
-	0,0,	// Clear location
-	130,8,	// Space Location.
-	{20, 20, 24, 9, 15},		// Element Widths
-	20,13,	// Numbers 0-F (hex)
-	30,13,	// Numbers 10-19 (dec)
-	64,26,	// A-M#
-	78,26,	// N-Z?										// MEDIUM FONT !!!
-	0, 0,
-	12,8,	// Note & Octave Width
-	42,13,	// Volume Column Effects
-	8,8,
-	-1,
-	8,		// 8+7 = 15
-	-3, -1, 12,
-};
-
-
-//////////////////////////////////////////////////
-// Small Font
-
-const PATTERNFONT gSmallPatternFont = 
-{
-	70,11,	// Column Width & Height
-	92,0,	// Clear location
-	130,8,	// Space Location.
-	{16, 14, 18, 7, 11},		// Element Widths
-	108,13,	// Numbers 0-F (hex)
-	120,13,	// Numbers 10-19 (dec)
-	142,26,	// A-M#
-	150,26,	// N-Z?										// SMALL FONT !!!
-	92, 0,	// Notes
-	10,6,	// Note & Octave Width
-	132,13,	// Volume Column Effects
-	6,5,
-	-1,
-	6,		// 8+7 = 15
-	-3,	1, 9,	// InstrOfs + nInstrHiWidth
-};
-
-// NOTE: See also CViewPattern::DrawNote() when changing stuff here
-// or adding new fonts - The custom tuning note names might require
-// some additions there.
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -144,16 +73,8 @@ const int effectColors[] =
 
 STATIC_ASSERT(CountOf(effectColors) == MAX_EFFECT_TYPE);
 
-
 /////////////////////////////////////////////////////////////////////////////
 // CViewPattern Drawing Implementation
-
-inline PCPATTERNFONT GetCurrentPatternFont()
-//------------------------------------------
-{
-	return (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMALLFONT) ? &gSmallPatternFont : &gDefaultPatternFont;
-}
-
 
 static BYTE hilightcolor(int c0, int c1)
 //--------------------------------------
@@ -198,8 +119,8 @@ void CViewPattern::UpdateColors()
 bool CViewPattern::UpdateSizes()
 //------------------------------
 {
-	PCPATTERNFONT pfnt = GetCurrentPatternFont();
-	int oldx = m_szCell.cx;
+	const PATTERNFONT *pfnt = PatternFont::currentFont;
+	int oldx = m_szCell.cx, oldy = m_szCell.cy;
 	m_szHeader.cx = ROWHDR_WIDTH;
 	m_szHeader.cy = COLHDR_HEIGHT;
 	if(m_Status[psShowVUMeters]) m_szHeader.cy += VUMETERS_HEIGHT;
@@ -209,14 +130,20 @@ bool CViewPattern::UpdateSizes()
 	if (m_nDetailLevel >= PatternCursor::volumeColumn) m_szCell.cx += pfnt->nEltWidths[2];
 	if (m_nDetailLevel >= PatternCursor::effectColumn) m_szCell.cx += pfnt->nEltWidths[3] + pfnt->nEltWidths[4];
 	m_szCell.cy = pfnt->nHeight;
-	return (oldx != m_szCell.cx);
+
+	if(oldy != m_szCell.cy)
+	{
+		m_Dib.SetSize(m_Dib.GetWidth(), m_szCell.cy);
+	}
+
+	return (oldx != m_szCell.cx || oldy != m_szCell.cy);
 }
 
 
 UINT CViewPattern::GetColumnOffset(PatternCursor::Columns column) const
 //---------------------------------------------------------------------
 {
-	PCPATTERNFONT pfnt = GetCurrentPatternFont();
+	const PATTERNFONT *pfnt = PatternFont::currentFont;
 	LimitMax(column, PatternCursor::lastColumn);
 	UINT offset = 0;
 	for(int i = PatternCursor::firstColumn; i < column; i++) offset += pfnt->nEltWidths[i];
@@ -233,6 +160,7 @@ void CViewPattern::UpdateView(UpdateHint hint, CObject *pObj)
 	}
 	if(hint.GetType()[HINT_MPTOPTIONS])
 	{
+		PatternFont::UpdateFont(GetDC());
 		UpdateColors();
 		UpdateSizes();
 		UpdateScrollSize();
@@ -268,7 +196,7 @@ void CViewPattern::UpdateView(UpdateHint hint, CObject *pObj)
 POINT CViewPattern::GetPointFromPosition(PatternCursor cursor)
 //------------------------------------------------------------
 {
-	PCPATTERNFONT pfnt = GetCurrentPatternFont();
+	const PATTERNFONT *pfnt = PatternFont::currentFont;
 	POINT pt;
 	int xofs = GetXScrollPos();
 	int yofs = GetYScrollPos();
@@ -303,7 +231,7 @@ POINT CViewPattern::GetPointFromPosition(PatternCursor cursor)
 PatternCursor CViewPattern::GetPositionFromPoint(POINT pt)
 //--------------------------------------------------------
 {
-	PCPATTERNFONT pfnt = GetCurrentPatternFont();
+	const PATTERNFONT *pfnt = PatternFont::currentFont;
 	int xofs = GetXScrollPos();
 	int yofs = GetYScrollPos();
 	int x = xofs + (pt.x - m_szHeader.cx) / GetColumnWidth();
@@ -326,43 +254,43 @@ PatternCursor CViewPattern::GetPositionFromPoint(POINT pt)
 void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 //---------------------------------------------------------------------------
 {
-	PCPATTERNFONT pfnt = GetCurrentPatternFont();
+	const PATTERNFONT *pfnt = PatternFont::currentFont;
 	int srcx = pfnt->nSpaceX, srcy = pfnt->nSpaceY;
 
 	if ((letter >= '0') && (letter <= '9'))
 	{
 		srcx = pfnt->nNumX;
-		srcy = pfnt->nNumY + (letter - '0') * COLUMN_HEIGHT;
+		srcy = pfnt->nNumY + (letter - '0') * pfnt->spacingY;
 	} else
 	if ((letter >= 'A') && (letter < 'N'))
 	{
 		srcx = pfnt->nAlphaAM_X;
-		srcy = pfnt->nAlphaAM_Y + (letter - 'A') * COLUMN_HEIGHT;
+		srcy = pfnt->nAlphaAM_Y + (letter - 'A') * pfnt->spacingY;
 	} else
 	if ((letter >= 'N') && (letter <= 'Z'))
 	{
 		srcx = pfnt->nAlphaNZ_X;
-		srcy = pfnt->nAlphaNZ_Y + (letter - 'N') * COLUMN_HEIGHT;
+		srcy = pfnt->nAlphaNZ_Y + (letter - 'N') * pfnt->spacingY;
 	} else
 	switch(letter)
 	{
 	case '?':
 		srcx = pfnt->nAlphaNZ_X;
-		srcy = pfnt->nAlphaNZ_Y + 13 * COLUMN_HEIGHT;
+		srcy = pfnt->nAlphaNZ_Y + 13 * pfnt->spacingY;
 		break;
 	case '#':
 		srcx = pfnt->nAlphaAM_X;
-		srcy = pfnt->nAlphaAM_Y + 13 * COLUMN_HEIGHT;
+		srcy = pfnt->nAlphaAM_Y + 13 * pfnt->spacingY;
 		break;
 	//rewbs.smoothVST
 	case '\\':
 		srcx = pfnt->nAlphaNZ_X;
-		srcy = pfnt->nAlphaNZ_Y + 14 * COLUMN_HEIGHT;
+		srcy = pfnt->nAlphaNZ_Y + 14 * pfnt->spacingY;
 		break;
 	//end rewbs.smoothVST
 	case ':':
 		srcx = pfnt->nAlphaNZ_X;
-		srcy = pfnt->nAlphaNZ_Y + 15 * COLUMN_HEIGHT;
+		srcy = pfnt->nAlphaNZ_Y + 15 * pfnt->spacingY;
 		break;
 	case ' ':
 		srcx = pfnt->nSpaceX;
@@ -370,47 +298,53 @@ void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 		break;
 	case '-':
 		srcx = pfnt->nAlphaAM_X;
-		srcy = pfnt->nAlphaAM_Y + 15 * COLUMN_HEIGHT;
+		srcy = pfnt->nAlphaAM_Y + 15 * pfnt->spacingY;
 		break;
 	case 'b':
 		srcx = pfnt->nAlphaAM_X;
-		srcy = pfnt->nAlphaAM_Y + 14 * COLUMN_HEIGHT;
+		srcy = pfnt->nAlphaAM_Y + 14 * pfnt->spacingY;
 		break;
 
 	}
-	m_Dib.TextBlt(x, y, sizex, COLUMN_HEIGHT, srcx+ofsx, srcy);
+	m_Dib.TextBlt(x, y, sizex, pfnt->spacingY, srcx+ofsx, srcy, pfnt->dib);
 }
 
+
+forceinline static void DrawPadding(CFastBitmap &dib, const PATTERNFONT *pfnt, int x, int y, int col)
+{
+	if(pfnt->padding[col])
+		dib.TextBlt(x + pfnt->nEltWidths[col] - pfnt->padding[col], y, pfnt->padding[col], pfnt->spacingY, pfnt->nClrX + pfnt->nEltWidths[col] - pfnt->padding[col], pfnt->nClrY, pfnt->dib);
+}
 
 void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 //--------------------------------------------------------------------
 {
-	PCPATTERNFONT pfnt = GetCurrentPatternFont();
+	const PATTERNFONT *pfnt = PatternFont::currentFont;
 
 	UINT xsrc = pfnt->nNoteX, ysrc = pfnt->nNoteY, dx = pfnt->nEltWidths[0];
 	if (!note)
 	{
-		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc);
+		m_Dib.TextBlt(x, y, dx, pfnt->spacingY, xsrc, ysrc, pfnt->dib);
 	} else
 	if (note == NOTE_NOTECUT)
 	{
-		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc + 13*COLUMN_HEIGHT);
+		m_Dib.TextBlt(x, y, dx, pfnt->spacingY, xsrc, ysrc + 13*pfnt->spacingY, pfnt->dib);
 	} else
 	if (note == NOTE_KEYOFF)
 	{
-		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc + 14*COLUMN_HEIGHT);
+		m_Dib.TextBlt(x, y, dx, pfnt->spacingY, xsrc, ysrc + 14*pfnt->spacingY, pfnt->dib);
 	} else
 	if(note == NOTE_FADE)
 	{
-		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc + 17*COLUMN_HEIGHT);
+		m_Dib.TextBlt(x, y, dx, pfnt->spacingY, xsrc, ysrc + 17*pfnt->spacingY, pfnt->dib);
 	} else
 	if(note == NOTE_PC)
 	{
-		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc + 15*COLUMN_HEIGHT);
+		m_Dib.TextBlt(x, y, dx, pfnt->spacingY, xsrc, ysrc + 15*pfnt->spacingY, pfnt->dib);
 	} else
 	if(note == NOTE_PCS)
 	{
-		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc + 16*COLUMN_HEIGHT);
+		m_Dib.TextBlt(x, y, dx, pfnt->spacingY, xsrc, ysrc + 16*pfnt->spacingY, pfnt->dib);
 	} else
 	{
 		if(pTuning)
@@ -419,72 +353,65 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 			if(noteStr.size() < 3)
 				noteStr.resize(3, ' ');
 			
-			// Hack: Manual tweaking for default/small font displays.
-			if(pfnt == &gDefaultPatternFont)
-			{
-				DrawLetter(x, y, noteStr[0], 7, 0);
-				DrawLetter(x + 7, y, noteStr[1], 6, 0);
-			}
-			else
-			{
-				DrawLetter(x, y, noteStr[0], 5, 0);
-				DrawLetter(x + 5, y, noteStr[1], 5, 0);
-			}
+			DrawLetter(x, y, noteStr[0], pfnt->nNoteWidth / 2, 0);
+			DrawLetter(x + pfnt->nNoteWidth / 2, y, noteStr[1], pfnt->nNoteWidth / 2, 0);
 			DrawLetter(x + pfnt->nNoteWidth, y, noteStr[2], pfnt->nOctaveWidth, 0);
 		}
 		else //Original
 		{
 			UINT o = (note-1) / 12; //Octave
 			UINT n = (note-1) % 12; //Note
-			m_Dib.TextBlt(x, y, pfnt->nNoteWidth, COLUMN_HEIGHT, xsrc, ysrc+(n+1)*COLUMN_HEIGHT);
+			m_Dib.TextBlt(x, y, pfnt->nNoteWidth, pfnt->spacingY, xsrc, ysrc+(n+1)*pfnt->spacingY, pfnt->dib);
 			if(o <= 9)
-				m_Dib.TextBlt(x+pfnt->nNoteWidth, y, pfnt->nOctaveWidth, COLUMN_HEIGHT,
-								pfnt->nNumX, pfnt->nNumY+o*COLUMN_HEIGHT);
+				m_Dib.TextBlt(x+pfnt->nNoteWidth, y, pfnt->nOctaveWidth, pfnt->spacingY,
+								pfnt->nNumX, pfnt->nNumY+o*pfnt->spacingY, pfnt->dib);
 			else
 				DrawLetter(x+pfnt->nNoteWidth, y, '?', pfnt->nOctaveWidth);
 		}
 	}
+	DrawPadding(m_Dib, pfnt, x, y, 0);
 }
 
 
 void CViewPattern::DrawInstrument(int x, int y, UINT instr)
 //---------------------------------------------------------
 {
-	PCPATTERNFONT pfnt = GetCurrentPatternFont();
+	const PATTERNFONT *pfnt = PatternFont::currentFont;
 	if (instr)
 	{
 		UINT dx = pfnt->nInstrHiWidth;
 		if (instr < 100)
 		{
-			m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, pfnt->nNumX+pfnt->nInstrOfs, pfnt->nNumY+(instr / 10)*COLUMN_HEIGHT);
+			m_Dib.TextBlt(x, y, dx, pfnt->spacingY, pfnt->nNumX+pfnt->nInstrOfs, pfnt->nNumY+(instr / 10)*pfnt->spacingY, pfnt->dib);
 		} else
 		{
-			m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, pfnt->nNum10X+pfnt->nInstr10Ofs, pfnt->nNum10Y+((instr-100) / 10)*COLUMN_HEIGHT);
+			m_Dib.TextBlt(x, y, dx, pfnt->spacingY, pfnt->nNum10X+pfnt->nInstr10Ofs, pfnt->nNum10Y+((instr-100) / 10)*pfnt->spacingY, pfnt->dib);
 		}
-		m_Dib.TextBlt(x+dx, y, pfnt->nEltWidths[1]-dx, COLUMN_HEIGHT, pfnt->nNumX+1, pfnt->nNumY+(instr % 10)*COLUMN_HEIGHT);
+		m_Dib.TextBlt(x+dx, y, pfnt->nEltWidths[1]-dx, pfnt->spacingY, pfnt->nNumX+pfnt->paramLoMargin, pfnt->nNumY+(instr % 10)*pfnt->spacingY, pfnt->dib);
 	} else
 	{
-		m_Dib.TextBlt(x, y, pfnt->nEltWidths[1], COLUMN_HEIGHT, pfnt->nClrX+pfnt->nEltWidths[0], pfnt->nClrY);
+		m_Dib.TextBlt(x, y, pfnt->nEltWidths[1], pfnt->spacingY, pfnt->nClrX+pfnt->nEltWidths[0], pfnt->nClrY, pfnt->dib);
 	}
+	DrawPadding(m_Dib, pfnt, x, y, 1);
 }
 
 
 void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool drawDefaultVolume)
 //----------------------------------------------------------------------------------------------
 {
-	PCPATTERNFONT pfnt = GetCurrentPatternFont();
+	const PATTERNFONT *pfnt = PatternFont::currentFont;
 
 	if(mc.IsPcNote())
 	{	//If note is parameter control note, drawing volume command differently.
 		const int val = MIN(ModCommand::maxColumnValue, mc.GetValueVolCol());
 
-		m_Dib.TextBlt(x, y, 1, COLUMN_HEIGHT, pfnt->nClrX, pfnt->nClrY);
-		m_Dib.TextBlt(x + 1, y, pfnt->nVolCmdWidth, COLUMN_HEIGHT,
-							pfnt->nNumX, pfnt->nNumY+(val / 100)*COLUMN_HEIGHT);
-		m_Dib.TextBlt(x+pfnt->nVolCmdWidth, y, pfnt->nVolHiWidth, COLUMN_HEIGHT,
-							pfnt->nNumX, pfnt->nNumY+((val / 10)%10)*COLUMN_HEIGHT);
-		m_Dib.TextBlt(x+pfnt->nVolCmdWidth+pfnt->nVolHiWidth, y, pfnt->nEltWidths[2]-(pfnt->nVolCmdWidth+pfnt->nVolHiWidth), COLUMN_HEIGHT,
-							pfnt->nNumX, pfnt->nNumY+(val % 10)*COLUMN_HEIGHT);
+		if(pfnt->pcParamMargin) m_Dib.TextBlt(x, y, pfnt->pcParamMargin, pfnt->spacingY, pfnt->nClrX, pfnt->nClrY, pfnt->dib);
+		m_Dib.TextBlt(x + pfnt->pcParamMargin, y, pfnt->nVolCmdWidth, pfnt->spacingY,
+							pfnt->nNumX, pfnt->nNumY+(val / 100)*pfnt->spacingY, pfnt->dib);
+		m_Dib.TextBlt(x+pfnt->nVolCmdWidth, y, pfnt->nVolHiWidth, pfnt->spacingY,
+							pfnt->nNumX, pfnt->nNumY+((val / 10)%10)*pfnt->spacingY, pfnt->dib);
+		m_Dib.TextBlt(x+pfnt->nVolCmdWidth+pfnt->nVolHiWidth, y, pfnt->nEltWidths[2]-(pfnt->nVolCmdWidth+pfnt->nVolHiWidth), pfnt->spacingY,
+							pfnt->nNumX, pfnt->nNumY+(val % 10)*pfnt->spacingY, pfnt->dib);
 	} else
 	{
 		ModCommand::VOLCMD volcmd = std::min<ModCommand::VOLCMD>(mc.volcmd, MAX_VOLCMDS - 1);
@@ -517,18 +444,19 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool dr
 
 		if(volcmd != VOLCMD_NONE)
 		{
-			m_Dib.TextBlt(x, y, pfnt->nVolCmdWidth, COLUMN_HEIGHT,
-							pfnt->nVolX, pfnt->nVolY + volcmd * COLUMN_HEIGHT);
-			m_Dib.TextBlt(x+pfnt->nVolCmdWidth, y, pfnt->nVolHiWidth, COLUMN_HEIGHT,
-							pfnt->nNumX, pfnt->nNumY + (vol / 10) * COLUMN_HEIGHT);
-			m_Dib.TextBlt(x+pfnt->nVolCmdWidth + pfnt->nVolHiWidth, y, pfnt->nEltWidths[2] - (pfnt->nVolCmdWidth + pfnt->nVolHiWidth), COLUMN_HEIGHT,
-							pfnt->nNumX, pfnt->nNumY + (vol % 10) * COLUMN_HEIGHT);
+			m_Dib.TextBlt(x, y, pfnt->nVolCmdWidth, pfnt->spacingY,
+							pfnt->nVolX, pfnt->nVolY + volcmd * pfnt->spacingY, pfnt->dib);
+			m_Dib.TextBlt(x+pfnt->nVolCmdWidth, y, pfnt->nVolHiWidth, pfnt->spacingY,
+							pfnt->nNumX, pfnt->nNumY + (vol / 10) * pfnt->spacingY, pfnt->dib);
+			m_Dib.TextBlt(x+pfnt->nVolCmdWidth + pfnt->nVolHiWidth, y, pfnt->nEltWidths[2] - (pfnt->nVolCmdWidth + pfnt->nVolHiWidth), pfnt->spacingY,
+							pfnt->nNumX, pfnt->nNumY + (vol % 10) * pfnt->spacingY, pfnt->dib);
 		} else
 		{
 			int srcx = pfnt->nEltWidths[0] + pfnt->nEltWidths[1];
-			m_Dib.TextBlt(x, y, pfnt->nEltWidths[2], COLUMN_HEIGHT, pfnt->nClrX+srcx, pfnt->nClrY);
+			m_Dib.TextBlt(x, y, pfnt->nEltWidths[2], pfnt->spacingY, pfnt->nClrX+srcx, pfnt->nClrY, pfnt->dib);
 		}
 	}
+	DrawPadding(m_Dib, pfnt, x, y, 2);
 }
 
 
@@ -784,7 +712,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		return;
 	}
 
-	PCPATTERNFONT pfnt = GetCurrentPatternFont();
+	const PATTERNFONT *pfnt = PatternFont::currentFont;
 	const ModCommand m0 = ModCommand::Empty();
 	const ModCommand *pPattern = sndFile.Patterns[nPattern];
 	CHAR s[256];
@@ -810,11 +738,11 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 	{
 		UINT maxndx = sndFile.GetNumChannels() * m_szCell.cx;
 		UINT ibmp = 0;
-		if (maxndx > FASTBMP_MAXWIDTH) maxndx = FASTBMP_MAXWIDTH;
+		if (maxndx > (UINT)m_Dib.GetWidth()) maxndx = m_Dib.GetWidth();
 		do
 		{
 			ibmp += nColumnWidth;
-			m_Dib.TextBlt(ibmp-4, 0, 4, m_szCell.cy, pfnt->nClrX+pfnt->nWidth-4, pfnt->nClrY);
+			m_Dib.TextBlt(ibmp-4, 0, 4, m_szCell.cy, pfnt->nClrX+pfnt->nWidth-4, pfnt->nClrY, pfnt->dib);
 		} while (ibmp + nColumnWidth <= maxndx);
 	}
 	
@@ -951,7 +879,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			if (m->IsEmpty() && ((!col_sel) || (col_sel == COLUMN_BITS_ALLCOLUMNS)))
 			{
 				m_Dib.SetTextColor(tx_col, bk_col);
-				m_Dib.TextBlt(xbmp, 0, nColumnWidth-4, m_szCell.cy, pfnt->nClrX, pfnt->nClrY);
+				m_Dib.TextBlt(xbmp, 0, nColumnWidth-4, m_szCell.cy, pfnt->nClrX, pfnt->nClrY, pfnt->dib);
 				goto DoBlit;
 			}
 			x = 0;
@@ -1066,8 +994,8 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 					m_Dib.SetTextColor(tx_col, bk_col);
 					if(isPCnote)
 					{
-						m_Dib.TextBlt(xbmp + x, 0, 2, COLUMN_HEIGHT, pfnt->nClrX+x, pfnt->nClrY);
-						m_Dib.TextBlt(xbmp + x + 2, 0, pfnt->nEltWidths[3], m_szCell.cy, pfnt->nNumX, pfnt->nNumY+(val / 100)*COLUMN_HEIGHT);
+						m_Dib.TextBlt(xbmp + x, 0, 2, pfnt->spacingY, pfnt->nClrX+x, pfnt->nClrY, pfnt->dib);
+						m_Dib.TextBlt(xbmp + x + pfnt->pcValMargin, 0, pfnt->nEltWidths[3], m_szCell.cy, pfnt->nNumX, pfnt->nNumY+(val / 100)*pfnt->spacingY, pfnt->dib);
 					} else
 					{
 						if(m->command != CMD_NONE)
@@ -1077,9 +1005,10 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 							DrawLetter(xbmp+x, 0, n, pfnt->nEltWidths[3], pfnt->nCmdOfs);
 						} else
 						{
-							m_Dib.TextBlt(xbmp+x, 0, pfnt->nEltWidths[3], COLUMN_HEIGHT, pfnt->nClrX+x, pfnt->nClrY);
+							m_Dib.TextBlt(xbmp+x, 0, pfnt->nEltWidths[3], pfnt->spacingY, pfnt->nClrX+x, pfnt->nClrY, pfnt->dib);
 						}
 					}
+					DrawPadding(m_Dib, pfnt, xbmp + x, 0, 3);
 				}
 				x += pfnt->nEltWidths[3];
 				// Param
@@ -1097,27 +1026,28 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 					m_Dib.SetTextColor(tx_col, bk_col);
 					if(isPCnote)
 					{
-						m_Dib.TextBlt(xbmp + x, 0, pfnt->nParamHiWidth, m_szCell.cy, pfnt->nNumX, pfnt->nNumY+((val / 10) % 10)*COLUMN_HEIGHT);
-						m_Dib.TextBlt(xbmp + x + pfnt->nParamHiWidth, 0, pfnt->nEltWidths[4]-pfnt->nParamHiWidth, m_szCell.cy, pfnt->nNumX+1, pfnt->nNumY+(val % 10)*COLUMN_HEIGHT);
+						m_Dib.TextBlt(xbmp + x, 0, pfnt->nParamHiWidth, m_szCell.cy, pfnt->nNumX, pfnt->nNumY+((val / 10) % 10)*pfnt->spacingY, pfnt->dib);
+						m_Dib.TextBlt(xbmp + x + pfnt->nParamHiWidth, 0, pfnt->nEltWidths[4] - pfnt->padding[4] - pfnt->nParamHiWidth, m_szCell.cy, pfnt->nNumX+pfnt->paramLoMargin, pfnt->nNumY+(val % 10)*pfnt->spacingY, pfnt->dib);
 					}
 					else
 					{
 						if (m->command)
 						{
-							m_Dib.TextBlt(xbmp+x, 0, pfnt->nParamHiWidth, m_szCell.cy, pfnt->nNumX, pfnt->nNumY+(m->param >> 4)*COLUMN_HEIGHT);
-							m_Dib.TextBlt(xbmp+x+pfnt->nParamHiWidth, 0, pfnt->nEltWidths[4]-pfnt->nParamHiWidth, m_szCell.cy, pfnt->nNumX+1, pfnt->nNumY+(m->param & 0x0F)*COLUMN_HEIGHT);
+							m_Dib.TextBlt(xbmp + x, 0, pfnt->nParamHiWidth, m_szCell.cy, pfnt->nNumX, pfnt->nNumY+(m->param >> 4)*pfnt->spacingY, pfnt->dib);
+							m_Dib.TextBlt(xbmp + x + pfnt->nParamHiWidth, 0, pfnt->nEltWidths[4] - pfnt->padding[4] - pfnt->nParamHiWidth, m_szCell.cy, pfnt->nNumX+pfnt->paramLoMargin, pfnt->nNumY+(m->param & 0x0F)*pfnt->spacingY, pfnt->dib);
 						} else
 						{
-							m_Dib.TextBlt(xbmp+x, 0, pfnt->nEltWidths[4], m_szCell.cy, pfnt->nClrX+x, pfnt->nClrY);
+							m_Dib.TextBlt(xbmp+x, 0, pfnt->nEltWidths[4], m_szCell.cy, pfnt->nClrX+x, pfnt->nClrY, pfnt->dib);
 						}
 					}
+					DrawPadding(m_Dib, pfnt, xbmp + x, 0, 4);
 				}
 			}
 		DoBlit:
 			nbmp++;
 			xbmp += nColumnWidth;
 			xpaint += nColumnWidth;
-			if ((xbmp + nColumnWidth >= FASTBMP_MAXWIDTH) || (xpaint >= rcClient.right)) break;
+			if ((xbmp + nColumnWidth >= (UINT)m_Dib.GetWidth()) || (xpaint >= rcClient.right)) break;
 		} while (++col < maxcol);
 		m_Dib.Blit(hdc, xpaint-xbmp, ypaint, xbmp, m_szCell.cy);
 	SkipRow:
@@ -1445,6 +1375,7 @@ void CViewPattern::OnSize(UINT nType, int cx, int cy)
 		UpdateScrollSize();
 		UpdateScrollPos();
 		OnScroll(0,0,TRUE);
+		m_Dib.SetSize(cx + m_szCell.cx, m_szCell.cy);
 	}
 }
 

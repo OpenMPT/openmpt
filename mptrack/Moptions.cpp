@@ -18,6 +18,7 @@
 #include "Settings.h"
 #include "dlg_misc.h"
 #include "FileDialog.h"
+#include "../common/StringFixer.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -55,6 +56,7 @@ static const struct ColorDescriptions
 BEGIN_MESSAGE_MAP(COptionsColors, CPropertyPage)
 	ON_WM_DRAWITEM()
 	ON_CBN_SELCHANGE(IDC_COMBO1,		OnColorSelChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO2,		OnSettingsChanged)
 	ON_EN_CHANGE(IDC_PRIMARYHILITE,		OnSettingsChanged)
 	ON_EN_CHANGE(IDC_SECONDARYHILITE,	OnSettingsChanged)
 	ON_COMMAND(IDC_BUTTON1,				OnSelectColor1)
@@ -64,6 +66,7 @@ BEGIN_MESSAGE_MAP(COptionsColors, CPropertyPage)
 	ON_COMMAND(IDC_BUTTON6,				OnPresetFT2)
 	ON_COMMAND(IDC_BUTTON7,				OnPresetIT)
 	ON_COMMAND(IDC_BUTTON8,				OnPresetBuzz)
+	ON_COMMAND(IDC_BUTTON9,				OnChooseFont)
 	ON_COMMAND(IDC_LOAD_COLORSCHEME,	OnLoadColorScheme)
 	ON_COMMAND(IDC_SAVE_COLORSCHEME,	OnSaveColorScheme)
 	ON_COMMAND(IDC_CHECK1,				OnSettingsChanged)
@@ -79,6 +82,7 @@ void COptionsColors::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptionsColors)
 	DDX_Control(pDX, IDC_COMBO1,		m_ComboItem);
+	DDX_Control(pDX, IDC_COMBO2,		m_ComboFont);
 	DDX_Control(pDX, IDC_BUTTON1,		m_BtnColor1);
 	DDX_Control(pDX, IDC_BUTTON2,		m_BtnColor2);
 	DDX_Control(pDX, IDC_BUTTON3,		m_BtnColor3);
@@ -87,6 +91,13 @@ void COptionsColors::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TEXT2,			m_TxtColor2);
 	DDX_Control(pDX, IDC_TEXT3,			m_TxtColor3);
 	//}}AFX_DATA_MAP
+}
+
+
+static std::string FormatFontName(const std::string fontName, int32_t fontSize)
+//-----------------------------------------------------------------------------
+{
+	return fontName + ", " + mpt::ToString(fontSize / 10);
 }
 
 
@@ -104,11 +115,33 @@ BOOL COptionsColors::OnInitDialog()
 	m_BtnPreview.SetWindowPos(NULL, 0,0, PREVIEWBMP_WIDTH*2+2, PREVIEWBMP_HEIGHT*2+2, SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_STDHIGHLIGHT) CheckDlgButton(IDC_CHECK1, BST_CHECKED);
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_EFFECTHILIGHT) CheckDlgButton(IDC_CHECK2, BST_CHECKED);
-	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMALLFONT) CheckDlgButton(IDC_CHECK3, BST_CHECKED);
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_2NDHIGHLIGHT) CheckDlgButton(IDC_CHECK4, BST_CHECKED);
 	CheckDlgButton(IDC_CHECK5, TrackerSettings::Instance().rememberSongWindows ? BST_CHECKED : BST_UNCHECKED);
 	SetDlgItemInt(IDC_PRIMARYHILITE, TrackerSettings::Instance().m_nRowHighlightMeasures);
 	SetDlgItemInt(IDC_SECONDARYHILITE, TrackerSettings::Instance().m_nRowHighlightBeats);
+
+	fontName = TrackerSettings::Instance().patternFont;
+	fontSize = TrackerSettings::Instance().patternFontSize;
+	fontFlags = TrackerSettings::Instance().patternFontFlags;
+	m_ComboFont.AddString("Built-in (small)");
+	m_ComboFont.AddString("Built-in (large)");
+	m_ComboFont.AddString("Built-in (small, x2)");
+	m_ComboFont.AddString("Built-in (large, x2)");
+	m_ComboFont.AddString("Built-in (small, x3)");
+	m_ComboFont.AddString("Built-in (large, x3)");
+	int sel = 0;
+	if(fontName == PATTERNFONT_SMALL)
+	{
+		sel = fontSize * 2;
+	} else if(fontName == PATTERNFONT_LARGE)
+	{
+		sel = fontSize * 2 + 1;
+	} else
+	{
+		m_ComboFont.AddString(FormatFontName(fontName, fontSize).c_str());
+		sel = 6;
+	}
+	m_ComboFont.SetCurSel(sel);
 	
 	OnColorSelChanged();
 	return TRUE;
@@ -135,12 +168,36 @@ BOOL COptionsColors::OnKillActive()
 void COptionsColors::OnOK()
 //-------------------------
 {
-	TrackerSettings::Instance().m_dwPatternSetup &= ~(PATTERN_STDHIGHLIGHT|PATTERN_2NDHIGHLIGHT|PATTERN_EFFECTHILIGHT|PATTERN_SMALLFONT);
+	TrackerSettings::Instance().m_dwPatternSetup &= ~(PATTERN_STDHIGHLIGHT|PATTERN_2NDHIGHLIGHT|PATTERN_EFFECTHILIGHT);
 	if (IsDlgButtonChecked(IDC_CHECK1)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_STDHIGHLIGHT;
 	if (IsDlgButtonChecked(IDC_CHECK2)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_EFFECTHILIGHT;
-	if (IsDlgButtonChecked(IDC_CHECK3)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_SMALLFONT;
 	if (IsDlgButtonChecked(IDC_CHECK4)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_2NDHIGHLIGHT;
 	TrackerSettings::Instance().rememberSongWindows = IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED;
+
+	std::string newName = fontName;
+	int32_t newSize = fontSize;
+	const int fontSel = m_ComboFont.GetCurSel();
+	switch(fontSel)
+	{
+	case 0:
+	case 2:
+	case 4:
+	default:
+		newName = PATTERNFONT_SMALL;
+		newSize = fontSel / 2;
+		break;
+	case 1:
+	case 3:
+	case 5:
+		newName = PATTERNFONT_LARGE;
+		newSize = fontSel / 2;
+		break;
+	case 6:
+		break;
+	}
+	TrackerSettings::Instance().patternFont = newName;
+	TrackerSettings::Instance().patternFontSize = newSize;
+	TrackerSettings::Instance().patternFontFlags = fontFlags;
 
 	TrackerSettings::Instance().m_nRowHighlightMeasures = GetDlgItemInt(IDC_PRIMARYHILITE);
 	TrackerSettings::Instance().m_nRowHighlightBeats = GetDlgItemInt(IDC_SECONDARYHILITE);
@@ -158,6 +215,43 @@ BOOL COptionsColors::OnSetActive()
 {
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_COLORS;
 	return CPropertyPage::OnSetActive();
+}
+
+
+void COptionsColors::OnChooseFont()
+//---------------------------------
+{
+	LOGFONT lf;
+	MemsetZero(lf);
+	const int32_t size = fontSize < 10 ? 120 : fontSize;
+	// Point size to pixels
+	lf.lfHeight = -MulDiv(size, GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSY), 720);
+	lf.lfWeight = (fontFlags & PatternFontBold) ? FW_BOLD : FW_NORMAL;
+	lf.lfItalic = (fontFlags & PatternFontItalic) ? TRUE : FALSE;
+	mpt::String::Copy(lf.lfFaceName, fontName);
+	CFontDialog dlg(&lf);
+	dlg.m_cf.hwndOwner = m_hWnd;
+	if(fontName != PATTERNFONT_SMALL && fontName != PATTERNFONT_LARGE)
+	{
+		dlg.m_cf.lpLogFont = &lf;
+	}
+	dlg.m_cf.Flags &= ~CF_EFFECTS;
+	dlg.m_cf.Flags |= /*CF_FIXEDPITCHONLY | */CF_FORCEFONTEXIST | CF_NOSCRIPTSEL;
+	if(dlg.DoModal() == IDOK)
+	{
+		while(m_ComboFont.GetCount() > 6)
+		{
+			m_ComboFont.DeleteString(6);
+		}
+		fontName = dlg.GetFaceName();
+		fontSize = dlg.GetSize();
+		fontFlags = 0;
+		if(dlg.IsBold()) fontFlags |= PatternFontBold;
+		if(dlg.IsItalic()) fontFlags |= PatternFontItalic;
+		m_ComboFont.AddString(FormatFontName(fontName, fontSize).c_str());
+		m_ComboFont.SetCurSel(6);
+		OnSettingsChanged();
+	}
 }
 
 

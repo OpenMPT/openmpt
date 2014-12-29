@@ -34,6 +34,7 @@
 #include "SelectPluginDialog.h"
 #include "ExceptionHandler.h"
 #include "PatternClipboard.h"
+#include "PatternFont.h"
 #include "../common/mptFileIO.h"
 #include "../common/FileReader.h"
 #include "../common/Profiler.h"
@@ -155,9 +156,8 @@ HCURSOR CMainFrame::curArrow = NULL;
 HCURSOR CMainFrame::curNoDrop = NULL;
 HCURSOR CMainFrame::curNoDrop2 = NULL;
 HCURSOR CMainFrame::curVSplit = NULL;
-LPMODPLUGDIB CMainFrame::bmpPatterns = NULL;
-LPMODPLUGDIB CMainFrame::bmpNotes = NULL;
-LPMODPLUGDIB CMainFrame::bmpVUMeters = NULL;
+MODPLUGDIB *CMainFrame::bmpNotes = nullptr;
+MODPLUGDIB *CMainFrame::bmpVUMeters = nullptr;
 COLORREF CMainFrame::gcolrefVuMeter[NUM_VUMETER_PENS*2];
 
 CInputHandler *CMainFrame::m_InputHandler = nullptr;
@@ -338,7 +338,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	curNoDrop2 = theApp.LoadCursor(IDC_NODRAG);
 	curVSplit = theApp.LoadCursor(AFX_IDC_HSPLITBAR);
 	// bitmaps
-	bmpPatterns = LoadDib(MAKEINTRESOURCE(IDB_PATTERNS));
 	bmpNotes = LoadDib(MAKEINTRESOURCE(IDB_PATTERNVIEW));
 	bmpVUMeters = LoadDib(MAKEINTRESOURCE(IDB_VUMETERS));
 	// Toolbars
@@ -394,24 +393,21 @@ BOOL CMainFrame::DestroyWindow()
 	}
 	if (shMidiIn) midiCloseDevice();
 	// Delete bitmaps
-	if (bmpPatterns)
-	{
-		delete bmpPatterns;
-		bmpPatterns = NULL;
-	}
 	if (bmpNotes)
 	{
 		delete bmpNotes;
-		bmpNotes = NULL;
+		bmpNotes = nullptr;
 	}
 	if (bmpVUMeters)
 	{
 		delete bmpVUMeters;
-		bmpVUMeters = NULL;
+		bmpVUMeters = nullptr;
 	}
 
+	PatternFont::DeleteFontData();
+
 	// Kill GDI Objects
-#define DeleteGDIObject(h) if (h) { ::DeleteObject(h); h = NULL; }
+#define DeleteGDIObject(h) ::DeleteObject(h); h = NULL;
 	DeleteGDIObject(brushGray);
 	DeleteGDIObject(penLightGray);
 	DeleteGDIObject(penDarkGray);
@@ -429,7 +425,6 @@ BOOL CMainFrame::DestroyWindow()
 	DeleteGDIObject(penGray99);
 	DeleteGDIObject(penGraycc);
 	DeleteGDIObject(penGrayff);
-
 #undef DeleteGDIObject
 
 	return CMDIFrameWnd::DestroyWindow();
@@ -1054,10 +1049,6 @@ void CMainFrame::UpdateColors()
 //-----------------------------
 {
 	COLORREF (&colors)[MAX_MODCOLORS] = TrackerSettings::Instance().rgbCustomColors;
-	if (bmpPatterns)
-	{
-		bmpPatterns->bmiColors[7] = rgb2quad(GetSysColor(COLOR_BTNFACE));
-	}
 	if (bmpVUMeters)
 	{
 		bmpVUMeters->bmiColors[7] = rgb2quad(GetSysColor(COLOR_BTNFACE));

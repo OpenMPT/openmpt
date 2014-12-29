@@ -105,7 +105,7 @@ static uint32 GetDefaultPatternSetup()
 //------------------------------------
 {
 	return PATTERN_PLAYNEWNOTE | PATTERN_EFFECTHILIGHT
-		| PATTERN_SMALLFONT | PATTERN_CENTERROW | PATTERN_DRAGNDROPEDIT
+		| PATTERN_CENTERROW | PATTERN_DRAGNDROPEDIT
 		| PATTERN_FLATBUTTONS | PATTERN_NOEXTRALOUD | PATTERN_2NDHIGHLIGHT
 		| PATTERN_STDHIGHLIGHT | PATTERN_SHOWPREVIOUS | PATTERN_CONTSCROLL
 		| PATTERN_SYNCMUTE | PATTERN_AUTODELAY | PATTERN_NOTEFADE
@@ -209,6 +209,9 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, gnAutoChordWaitTime(conf, "Pattern Editor", "AutoChordWaitTime", 60)
 	, orderlistMargins(conf, "Pattern Editor", "DefaultSequenceMargins", 0)
 	, rowDisplayOffset(conf, "Pattern Editor", "RowDisplayOffset", 0)
+	, patternFont(conf, "Pattern Editor", "Font", PATTERNFONT_SMALL)
+	, patternFontSize(conf, "Pattern Editor", "Font Size", 0)
+	, patternFontFlags(conf, "Pattern Editor", "Font Flags", 0)
 	// Sample Editor
 	, m_SampleUndoBufferSize(conf, "Sample Editor", "UndoBufferSize", SampleUndoBufferSize())
 	, sampleEditorKeyBehaviour(conf, "Sample Editor", "KeyBehaviour", seNoteOffOnNewKey)
@@ -530,6 +533,14 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,20,00,39))
 	{
 		m_dwPatternSetup &= ~0x10000000;			// ditto
+	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,24,01,02))
+	{
+		if(m_dwPatternSetup & 0x08)
+			patternFont = PATTERNFONT_SMALL;
+		else
+			patternFont = PATTERNFONT_LARGE;
+		m_dwPatternSetup &= ~0x08;
 	}
 
 	// Effects
