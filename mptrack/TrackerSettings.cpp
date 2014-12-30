@@ -23,6 +23,7 @@
 #include "../common/misc_util.h"
 #include "PatternClipboard.h"
 #include "../common/ComponentManager.h"
+#include "ExceptionHandler.h"
 
 #include <algorithm>
 
@@ -235,7 +236,14 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, bridgeAllPlugins(conf, "VST Plugins", "BridgeAllPlugins", false)
 	, DebugTraceEnable(conf, "Debug", "TraceEnable", false)
 	, DebugTraceSize(conf, "Debug", "TraceSize", 1000000)
+	, DebugTraceAlwaysDump(conf, "Debug", "TraceAlwaysDump", false)
+	, DebugStopSoundDeviceOnCrash(conf, "Debug", "StopSoundDeviceOnCrash", true)
 {
+
+	// Debug
+	// Duplicate state for debug stffu in order to avoid calling into settings fremwork from crash conetxt.
+	ExceptionHandler::stopSoundDeviceOnCrash = DebugStopSoundDeviceOnCrash;
+
 	// Effects
 #ifndef NO_DSP
 	m_DSPSettings.m_nXBassDepth = conf.Read<int32>("Effects", "XBassDepth", m_DSPSettings.m_nXBassDepth);

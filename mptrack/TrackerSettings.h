@@ -517,6 +517,9 @@ public:
 
 	Setting<bool> DebugTraceEnable;
 	Setting<uint32> DebugTraceSize;
+	Setting<bool> DebugTraceAlwaysDump;
+
+	Setting<bool> DebugStopSoundDeviceOnCrash;
 
 public:
 

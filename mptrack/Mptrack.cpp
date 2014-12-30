@@ -1091,6 +1091,11 @@ int CTrackApp::ExitInstance()
 
 	ComponentManager::Release();
 
+	if(TrackerSettings::Instance().DebugTraceAlwaysDump)
+	{
+		DebugTraceDump();
+	}
+
 	delete m_pPluginCache;
 	m_pPluginCache = nullptr;
 	delete m_pComponentManagerSettings;

@@ -23,66 +23,105 @@ OPENMPT_NAMESPACE_BEGIN
 
 bool ExceptionHandler::fullMemDump = false;
 
+bool ExceptionHandler::stopSoundDeviceOnCrash = true;
+
+
 enum DumpMode
 {
-	DumpModeCrash   = 0,
-	DumpModeWarning = 1,
+	DumpModeCrash   = 0,  // crash
+	DumpModeWarning = 1,  // assert
+	DumpModeDebug   = 2,  // debug output (e.g. trace log)
 };
 
 
-static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionInfo=NULL, DumpMode mode=DumpModeCrash)
-//--------------------------------------------------------------------------------------------------------------------
+struct CrashOutputDirectory
 {
-
-	// seal the trace log as early as possible
-	mpt::log::Trace::Seal();
-
-	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
-
-	const mpt::PathString timestampDir = mpt::PathString::FromCStringSilent((CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\"));
-	mpt::PathString baseRescuePath;
+	bool valid;
+	mpt::PathString path;
+	CrashOutputDirectory()
+		: valid(true)
 	{
+		const mpt::PathString timestampDir = mpt::PathString::FromCStringSilent((CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\"));
 		// Create a crash directory
-		baseRescuePath = Util::GetTempDirectory() + MPT_PATHSTRING("OpenMPT Crash Files\\");
-		if(!baseRescuePath.IsDirectory())
+		path = Util::GetTempDirectory() + MPT_PATHSTRING("OpenMPT Crash Files\\");
+		if(!path.IsDirectory())
 		{
-			CreateDirectoryW(baseRescuePath.AsNative().c_str(), nullptr);
+			CreateDirectoryW(path.AsNative().c_str(), nullptr);
 		}
-		baseRescuePath += timestampDir;
-		if(!baseRescuePath.IsDirectory() && !CreateDirectoryW(baseRescuePath.AsNative().c_str(), nullptr))
+		path += timestampDir;
+		if(!path.IsDirectory())
 		{
-			errorMessage += "\n\nCould not create the following directory for saving debug information and modified files to:\n"
-				+ mpt::ToCString(baseRescuePath.ToWide());
+			if(!CreateDirectoryW(path.AsNative().c_str(), nullptr))
+			{
+				valid = false;
+			}
 		}
 	}
+};
 
-	bool hasWrittenDebug = false;
 
-	// Create minidump...
+class DebugReporter
+{
+private:
+	bool stateFrozen;
+	const DumpMode mode;
+	const CrashOutputDirectory crashDirectory;
+	bool writtenMiniDump;
+	bool writtenTraceLog;
+	int rescuedFiles;
+private:
+	static bool FreezeState(DumpMode mode);
+	bool GenerateDump(_EXCEPTION_POINTERS *pExceptionInfo);
+	bool GenerateTraceLog();
+	int RescueFiles();
+	bool HasWrittenDebug() const { return writtenMiniDump || writtenTraceLog; }
+public:
+	DebugReporter(DumpMode mode, _EXCEPTION_POINTERS *pExceptionInfo);
+	void ReportError(CString errorMessage);
+};
+
+
+DebugReporter::DebugReporter(DumpMode mode, _EXCEPTION_POINTERS *pExceptionInfo)
+//------------------------------------------------------------------------------
+	: stateFrozen(FreezeState(mode))
+	, mode(mode)
+	, writtenMiniDump(false)
+	, writtenTraceLog(false)
+	, rescuedFiles(0)
+{
+	if(mode == DumpModeCrash || mode == DumpModeWarning)
 	{
-		const mpt::PathString filename = baseRescuePath + MPT_PATHSTRING("crash.dmp");
-		if(WriteMemoryDump(pExceptionInfo, filename.AsNative().c_str(), ExceptionHandler::fullMemDump))
-		{
-			hasWrittenDebug = true;
-		}
+		writtenMiniDump = GenerateDump(pExceptionInfo);
 	}
-
-	// Create trace log...
+	if(mode == DumpModeCrash || mode == DumpModeWarning || mode == DumpModeDebug)
 	{
-		const mpt::PathString filename = baseRescuePath + MPT_PATHSTRING("trace.log");
-		if(mpt::log::Trace::Dump(filename))
-		{
-			hasWrittenDebug = true;
-		}
+		writtenTraceLog = GenerateTraceLog();
 	}
-
-	if(hasWrittenDebug)
+	if(mode == DumpModeCrash || mode == DumpModeWarning)
 	{
-		errorMessage += "\n\nDebug information has been saved to\n"
-			+ mpt::ToCString(baseRescuePath.ToWide());
+		rescuedFiles = RescueFiles();
 	}
+}
 
-	// Rescue modified files...
+
+bool DebugReporter::GenerateDump(_EXCEPTION_POINTERS *pExceptionInfo)
+//-------------------------------------------------------------------
+{
+	return WriteMemoryDump(pExceptionInfo, (crashDirectory.path + MPT_PATHSTRING("crash.dmp")).AsNative().c_str(), ExceptionHandler::fullMemDump);
+}
+
+
+bool DebugReporter::GenerateTraceLog()
+//------------------------------------
+{
+	return mpt::log::Trace::Dump(crashDirectory.path + MPT_PATHSTRING("trace.log"));
+}
+
+
+// Rescue modified files...
+int DebugReporter::RescueFiles()
+//------------------------------
+{
 	int numFiles = 0;
 	std::vector<CModDoc *> documents = theApp.GetOpenDocuments();
 	for(std::vector<CModDoc *>::iterator doc = documents.begin(); doc != documents.end(); doc++)
@@ -93,11 +132,11 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 			if(numFiles == 0)
 			{
 				// Show the rescue directory in Explorer...
-				CTrackApp::OpenDirectory(baseRescuePath);
+				CTrackApp::OpenDirectory(crashDirectory.path);
 			}
 
 			mpt::PathString filename;
-			filename += baseRescuePath;
+			filename += crashDirectory.path;
 			filename += mpt::PathString::FromWide(mpt::ToWString(++numFiles));
 			filename += MPT_PATHSTRING("_");
 			filename += mpt::PathString::FromCStringSilent(pModDoc->GetTitle()).SanitizeComponent();
@@ -113,59 +152,91 @@ static void GenerateDump(CString &errorMessage, _EXCEPTION_POINTERS *pExceptionI
 			}
 		}
 	}
+	return numFiles;
+}
 
-	if(numFiles > 0)
+
+void DebugReporter::ReportError(CString errorMessage)
+//---------------------------------------------------
+{
+
+	if(!crashDirectory.valid)
 	{
-		errorMessage.AppendFormat("\n\n%d modified file%s been rescued, but it cannot be guaranteed that %s still intact.", numFiles, (numFiles == 1 ? " has" : "s have"), (numFiles == 1 ? "it is" : "they are"));
+		errorMessage += "\n\nCould not create the following directory for saving debug information and modified files to:\n"
+			+ mpt::ToCString(crashDirectory.path.ToWide());
 	}
-	
+
+	if(HasWrittenDebug())
+	{
+		errorMessage += "\n\nDebug information has been saved to\n"
+			+ mpt::ToCString(crashDirectory.path.ToWide());
+	}
+
+	if(rescuedFiles > 0)
+	{
+		errorMessage.AppendFormat("\n\n%d modified file%s been rescued, but it cannot be guaranteed that %s still intact.", rescuedFiles, (rescuedFiles == 1 ? " has" : "s have"), (rescuedFiles == 1 ? "it is" : "they are"));
+	}
+
 	errorMessage.AppendFormat("\n\nOpenMPT %s (%s)\n",
 		MptVersion::GetVersionStringExtended().c_str(),
 		MptVersion::GetVersionUrlString().c_str()
 		);
 
-	if(mode == DumpModeWarning)
-	{
-		Reporting::Error(errorMessage, "OpenMPT Warning", pMainFrame);
-	} else
-	{
-		Reporting::Error(errorMessage, "OpenMPT Crash", pMainFrame);
-	}
+	Reporting::Error(errorMessage, (mode == DumpModeWarning) ? "OpenMPT Warning" : "OpenMPT Crash", CMainFrame::GetMainFrame());
+
 }
 
 
-// Try to close the audio device and rescue unsaved work if an unhandled exception occurs...
-LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo)
-//----------------------------------------------------------------------------------
+// Freezes the state as much aspossible in order to avoid further confusion by
+// other (possibly still running) threads
+bool DebugReporter::FreezeState(DumpMode mode)
+//--------------------------------------------
 {
-
 	// seal the trace log as early as possible
 	mpt::log::Trace::Seal();
 
-	// Shut down audio device...
-	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
-	if(pMainFrame)
+	if(mode == DumpModeCrash || mode == DumpModeWarning)
 	{
-		try
+		// Shut down audio device...
+		if(ExceptionHandler::stopSoundDeviceOnCrash)
 		{
-			if(pMainFrame->gpSoundDevice)
+			CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
+			if(pMainFrame)
 			{
-				pMainFrame->gpSoundDevice->Close();
+				try
+				{
+					if(pMainFrame->gpSoundDevice)
+					{
+						pMainFrame->gpSoundDevice->Close();
+					}
+					if(pMainFrame->m_NotifyTimer)
+					{
+						pMainFrame->KillTimer(pMainFrame->m_NotifyTimer);
+						pMainFrame->m_NotifyTimer = 0;
+					}
+				} catch(...)
+				{
+				}
 			}
-			if(pMainFrame->m_NotifyTimer)
-			{
-				pMainFrame->KillTimer(pMainFrame->m_NotifyTimer);
-				pMainFrame->m_NotifyTimer = 0;
-			}
-		} catch(...)
-		{
 		}
 	}
 
+	return true;
+}
+
+
+
+// Different entry points for different situations in which we want to dump some information
+
+
+LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo)
+//----------------------------------------------------------------------------------
+{
+	DebugReporter report(DumpModeCrash, pExceptionInfo);
+
 	CString errorMessage;
 	errorMessage.Format("Unhandled exception 0x%X at address %p occurred.", pExceptionInfo->ExceptionRecord->ExceptionCode, pExceptionInfo->ExceptionRecord->ExceptionAddress);
-
-	GenerateDump(errorMessage, pExceptionInfo);
+	report.ReportError(errorMessage);
 
 	// Let Windows handle the exception...
 	return EXCEPTION_CONTINUE_SEARCH;
@@ -177,33 +248,35 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 noinline void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
 //--------------------------------------------------------------------------------------------------------------
 {
-	// seal the trace log as early as possible
-	mpt::log::Trace::Seal();
-
+	DebugReporter report(msg ? DumpModeWarning : DumpModeCrash, nullptr);
 	if(IsDebuggerPresent())
 	{
-		mpt::log::Trace::Dump(MPT_PATHSTRING("mptrack.trace.log"));
 		OutputDebugString("ASSERT(");
 		OutputDebugString(expr);
 		OutputDebugString(") failed\n");
 		DebugBreak();
 	} else
 	{
+		CString errorMessage;
 		if(msg)
 		{
-			CString errorMessage;
 			errorMessage.Format("Internal state inconsistency detected at %s(%d). This is just a warning that could potentially lead to a crash later on: %s [%s].", file, line, msg, function);
-			GenerateDump(errorMessage, NULL, DumpModeWarning);
 		} else
 		{
-			CString errorMessage;
 			errorMessage.Format("Internal error occured at %s(%d): ASSERT(%s) failed in [%s].", file, line, expr, function);
-			GenerateDump(errorMessage);
 		}
+		report.ReportError(errorMessage);
 	}
 }
 
 #endif MPT_ASSERT_HANDLER_NEEDED
+
+
+void DebugTraceDump()
+//-------------------
+{
+	DebugReporter report(DumpModeDebug, nullptr);
+}
 
 
 OPENMPT_NAMESPACE_END
