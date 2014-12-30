@@ -18,6 +18,7 @@ class ExceptionHandler
 {
 public:
 	static bool fullMemDump;
+	static bool stopSoundDeviceOnCrash;
 
 	// Call this to activate unhandled exception filtering.
 	static void Register() { ::SetUnhandledExceptionFilter(UnhandledExceptionFilter); };
@@ -27,5 +28,7 @@ protected:
 	static LONG WINAPI UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo);
 
 };
+
+void DebugTraceDump();
 
 OPENMPT_NAMESPACE_END
