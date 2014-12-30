@@ -262,6 +262,7 @@ DWORD WINAPI CAudioThread::AudioThreadWrapper(LPVOID user)
 DWORD CAudioThread::AudioThread()
 //-------------------------------
 {
+	MPT_TRACE();
 
 	bool terminate = false;
 	while(!terminate)
@@ -336,6 +337,7 @@ DWORD CAudioThread::AudioThread()
 void CAudioThread::SetWakeupEvent(HANDLE ev)
 //------------------------------------------
 {
+	MPT_TRACE();
 	m_hHardwareWakeupEvent = ev;
 }
 
@@ -343,6 +345,7 @@ void CAudioThread::SetWakeupEvent(HANDLE ev)
 void CAudioThread::SetWakeupInterval(double seconds)
 //--------------------------------------------------
 {
+	MPT_TRACE();
 	m_WakeupInterval = seconds;
 }
 
@@ -350,6 +353,7 @@ void CAudioThread::SetWakeupInterval(double seconds)
 void CAudioThread::Activate()
 //---------------------------
 {
+	MPT_TRACE();
 	if(InterlockedExchangeAdd(&m_AudioThreadActive, 0))
 	{
 		MPT_ASSERT_ALWAYS(false);
@@ -364,6 +368,7 @@ void CAudioThread::Activate()
 void CAudioThread::Deactivate()
 //-----------------------------
 {
+	MPT_TRACE();
 	if(!InterlockedExchangeAdd(&m_AudioThreadActive, 0))
 	{
 		MPT_ASSERT_ALWAYS(false);
@@ -377,6 +382,7 @@ void CAudioThread::Deactivate()
 void CSoundDeviceWithThread::FillAudioBufferLocked()
 //--------------------------------------------------
 {
+	MPT_TRACE();
 	SourceFillAudioBufferLocked();
 }
 
@@ -384,6 +390,7 @@ void CSoundDeviceWithThread::FillAudioBufferLocked()
 void CSoundDeviceWithThread::SetWakeupEvent(HANDLE ev)
 //----------------------------------------------------
 {
+	MPT_TRACE();
 	m_AudioThread.SetWakeupEvent(ev);
 }
 
@@ -391,6 +398,7 @@ void CSoundDeviceWithThread::SetWakeupEvent(HANDLE ev)
 void CSoundDeviceWithThread::SetWakeupInterval(double seconds)
 //------------------------------------------------------------
 {
+	MPT_TRACE();
 	m_AudioThread.SetWakeupInterval(seconds);
 }
 
@@ -398,6 +406,7 @@ void CSoundDeviceWithThread::SetWakeupInterval(double seconds)
 bool CSoundDeviceWithThread::InternalStart()
 //------------------------------------------
 {
+	MPT_TRACE();
 	m_AudioThread.Activate();
 	return true;
 }
@@ -406,6 +415,7 @@ bool CSoundDeviceWithThread::InternalStart()
 void CSoundDeviceWithThread::InternalStop()
 //-----------------------------------------
 {
+	MPT_TRACE();
 	m_AudioThread.Deactivate();
 }
 

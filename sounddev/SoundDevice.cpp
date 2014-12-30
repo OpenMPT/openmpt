@@ -146,6 +146,7 @@ Base::Base(SoundDevice::Info info)
 	, m_MessageReceiver(nullptr)
 	, m_Info(info)
 {
+	MPT_TRACE();
 
 	m_DeviceUnavailableOnOpen = false;
 
@@ -165,6 +166,7 @@ Base::Base(SoundDevice::Info info)
 Base::~Base()
 //-----------
 {
+	MPT_TRACE();
 	return;
 }
 
@@ -172,6 +174,7 @@ Base::~Base()
 SoundDevice::DynamicCaps Base::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
 //---------------------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	SoundDevice::DynamicCaps result;
 	result.supportedSampleRates = baseSampleRates;
 	return result;
@@ -214,6 +217,7 @@ bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevic
 void Base::UpdateBufferAttributes(SoundDevice::BufferAttributes attributes)
 //-------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	m_BufferAttributes = attributes;
 }
 
@@ -221,6 +225,7 @@ void Base::UpdateBufferAttributes(SoundDevice::BufferAttributes attributes)
 void Base::UpdateTimeInfo(SoundDevice::TimeInfo timeInfo)
 //-------------------------------------------------------
 {
+	MPT_TRACE();
 	m_TimeInfo = timeInfo;
 }
 
@@ -228,6 +233,7 @@ void Base::UpdateTimeInfo(SoundDevice::TimeInfo timeInfo)
 bool Base::Init()
 //---------------
 {
+	MPT_TRACE();
 	if(IsInited())
 	{
 		return true;
@@ -240,6 +246,7 @@ bool Base::Init()
 bool Base::Open(const SoundDevice::Settings &settings)
 //----------------------------------------------------
 {
+	MPT_TRACE();
 	if(IsOpen())
 	{
 		Close();
@@ -277,6 +284,7 @@ bool Base::Open(const SoundDevice::Settings &settings)
 bool Base::Close()
 //----------------
 {
+	MPT_TRACE();
 	if(!IsOpen()) return true;
 	Stop();
 	bool result = InternalClose();
@@ -288,6 +296,7 @@ bool Base::Close()
 void Base::FillAudioBuffer()
 //--------------------------
 {
+	MPT_TRACE();
 	InternalFillAudioBuffer();
 }
 
@@ -295,6 +304,7 @@ void Base::FillAudioBuffer()
 void Base::SourceFillAudioBufferLocked()
 //--------------------------------------
 {
+	MPT_TRACE();
 	if(m_Source)
 	{
 		m_Source->FillAudioBufferLocked(*this);
@@ -305,6 +315,7 @@ void Base::SourceFillAudioBufferLocked()
 void Base::SourceAudioPreRead(std::size_t numFrames)
 //--------------------------------------------------
 {
+	MPT_TRACE();
 	if(!InternalHasTimeInfo())
 	{
 		if(InternalHasGetStreamPosition())
@@ -343,6 +354,7 @@ void Base::SourceAudioRead(void *buffer, std::size_t numFrames)
 void Base::SourceAudioDone(std::size_t numFrames, int32 framesLatency)
 //--------------------------------------------------------------------
 {
+	MPT_TRACE();
 	if(numFrames <= 0)
 	{
 		return;
@@ -362,6 +374,7 @@ void Base::SourceAudioDone(std::size_t numFrames, int32 framesLatency)
 void Base::AudioSendMessage(const std::string &str)
 //-------------------------------------------------
 {
+	MPT_TRACE();
 	if(m_MessageReceiver)
 	{
 		m_MessageReceiver->AudioMessage(str);
@@ -372,6 +385,7 @@ void Base::AudioSendMessage(const std::string &str)
 bool Base::Start()
 //----------------
 {
+	MPT_TRACE();
 	if(!IsOpen()) return false; 
 	if(!IsPlaying())
 	{
@@ -397,6 +411,7 @@ bool Base::Start()
 void Base::Stop(bool force)
 //-------------------------
 {
+	MPT_TRACE();
 	if(!IsOpen()) return;
 	if(IsPlaying())
 	{
@@ -423,6 +438,7 @@ void Base::Stop(bool force)
 double Base::GetCurrentUpdateInterval() const
 //-------------------------------------------
 {
+	MPT_TRACE();
 	Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
 	return m_CurrentUpdateInterval;
 }
@@ -431,6 +447,7 @@ double Base::GetCurrentUpdateInterval() const
 int64 Base::GetStreamPositionFrames() const
 //-----------------------------------------
 {
+	MPT_TRACE();
 	if(!IsOpen()) return 0;
 	if(InternalHasGetStreamPosition())
 	{
