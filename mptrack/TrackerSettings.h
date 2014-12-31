@@ -88,7 +88,7 @@ enum
 // Feel free to replace the deprecated flags by new flags, but be sure to
 // update TrackerSettings::TrackerSettings() as well.
 #define PATTERN_PLAYNEWNOTE			0x01		// play new notes while recording
-#define PATTERN_LARGECOMMENTS		0x02		// use large font in comments
+//#define PATTERN_LARGECOMMENTS		0x02		// use large font in comments
 #define PATTERN_STDHIGHLIGHT		0x04		// enable primary highlight (measures)
 //#define PATTERN_SMALLFONT			0x08		// use small font in pattern editor
 #define PATTERN_CENTERROW			0x10		// always center active row
@@ -319,12 +319,6 @@ enum SoundDeviceStopMode
 	SoundDeviceStopModePlaying = 2,
 };
 
-enum FontFlags
-{
-	PatternFontBold = 1,
-	PatternFontItalic = 2,
-};
-
 template<> inline SettingValue ToSettingValue(const SoundDeviceStopMode &val)
 {
 	return SettingValue(static_cast<int32>(val));
@@ -334,6 +328,55 @@ template<> inline SoundDeviceStopMode FromSettingValue(const SettingValue &val)
 	return static_cast<SoundDeviceStopMode>(static_cast<int32>(val));
 }
 
+struct FontSetting
+{
+	enum FontFlags
+	{
+		None = 0,
+		Bold = 1,
+		Italic = 2,
+	};
+
+	std::string name;
+	int32_t size;
+	FlagSet<FontFlags> flags;
+
+	FontSetting(const std::string &name = "", int32_t size = 120, FontFlags flags = None) : name(name), size(size), flags(flags) { }
+
+	bool operator== (const FontSetting &other) const
+	{
+		return name == other.name && size == other.size && flags == other.flags;
+	}
+
+	bool operator!= (const FontSetting &other) const
+	{
+		return !(*this == other);
+	}
+};
+
+MPT_DECLARE_ENUM(FontSetting::FontFlags)
+
+template<> inline SettingValue ToSettingValue(const FontSetting &val)
+{
+	return SettingValue(val.name + "," + mpt::ToString(val.size) + "|" + mpt::ToString(val.flags.GetRaw()));
+}
+template<> inline FontSetting FromSettingValue(const SettingValue &val)
+{
+	FontSetting setting(val.as<std::string>());
+	size_t sizeStart = setting.name.rfind(',');
+	if(sizeStart != std::string::npos)
+	{
+		setting.size = atoi(&setting.name[sizeStart + 1]);
+		size_t flagsStart = setting.name.find(' ', sizeStart + 1);
+		if(flagsStart != std::string::npos)
+		{
+			setting.flags = static_cast<FontSetting::FontFlags>(atoi(&setting.name[flagsStart + 1]));
+		}
+		setting.name.resize(sizeStart);
+	}
+
+	return setting;
+}
 
 //===================
 class TrackerSettings
@@ -375,6 +418,9 @@ public:
 	CachedSetting<uint32> VuMeterUpdateInterval;
 
 	Setting<bool> rememberSongWindows;
+
+	Setting<FontSetting> commentsFont;
+
 
 	// Misc
 
@@ -451,9 +497,7 @@ public:
 	CachedSetting<UINT> gnAutoChordWaitTime;
 	CachedSetting<int32> orderlistMargins;
 	CachedSetting<int32> rowDisplayOffset;
-	Setting<std::string> patternFont;
-	Setting<int32_t> patternFontSize;
-	Setting<int32_t> patternFontFlags;
+	Setting<FontSetting> patternFont;
 
 	// Sample Editor
 

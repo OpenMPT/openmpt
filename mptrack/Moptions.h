@@ -86,8 +86,7 @@ protected:
 	CButton m_BtnColor1, m_BtnColor2, m_BtnColor3, m_BtnPreview;
 	CStatic m_TxtColor1, m_TxtColor2, m_TxtColor3;
 	MODPLUGDIB *m_pPreviewDib;
-	std::string fontName;
-	int32_t fontSize, fontFlags;
+	FontSetting patternFont, commentFont;
 
 public:
 	COptionsColors():CPropertyPage(IDD_OPTIONS_COLORS) { m_nColorItem = 0; m_pPreviewDib = NULL; }
@@ -100,7 +99,8 @@ protected:
 	virtual void OnOK();
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnSetActive();
-	afx_msg void OnChooseFont();
+	afx_msg void OnChoosePatternFont();
+	afx_msg void OnChooseCommentFont();
 	afx_msg void OnUpdateDialog();
 	afx_msg void OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis);
 	afx_msg void OnColorSelChanged();

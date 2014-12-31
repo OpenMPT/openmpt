@@ -110,7 +110,7 @@ static uint32 GetDefaultPatternSetup()
 		| PATTERN_FLATBUTTONS | PATTERN_NOEXTRALOUD | PATTERN_2NDHIGHLIGHT
 		| PATTERN_STDHIGHLIGHT | PATTERN_SHOWPREVIOUS | PATTERN_CONTSCROLL
 		| PATTERN_SYNCMUTE | PATTERN_AUTODELAY | PATTERN_NOTEFADE
-		| PATTERN_LARGECOMMENTS | PATTERN_SHOWDEFAULTVOLUME;
+		| PATTERN_SHOWDEFAULTVOLUME;
 }
 
 
@@ -160,6 +160,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, GUIUpdateInterval(conf, "Display", "GUIUpdateInterval", 0)
 	, VuMeterUpdateInterval(conf, "Display", "VuMeterUpdateInterval", 15)
 	, rememberSongWindows(conf, "Display", "RememberSongWindows", true)
+	, commentsFont(conf, "Display", "Comments Font", FontSetting("Courier New", 120))
 	// Misc
 	, ShowSettingsOnNewVersion(conf, "Misc", "ShowSettingsOnNewVersion", true)
 	, gbShowHackControls(conf, "Misc", "ShowHackControls", false)
@@ -210,9 +211,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, gnAutoChordWaitTime(conf, "Pattern Editor", "AutoChordWaitTime", 60)
 	, orderlistMargins(conf, "Pattern Editor", "DefaultSequenceMargins", 0)
 	, rowDisplayOffset(conf, "Pattern Editor", "RowDisplayOffset", 0)
-	, patternFont(conf, "Pattern Editor", "Font", PATTERNFONT_SMALL)
-	, patternFontSize(conf, "Pattern Editor", "Font Size", 0)
-	, patternFontFlags(conf, "Pattern Editor", "Font Flags", 0)
+	, patternFont(conf, "Pattern Editor", "Font", FontSetting(PATTERNFONT_SMALL, 0))
 	// Sample Editor
 	, m_SampleUndoBufferSize(conf, "Sample Editor", "UndoBufferSize", SampleUndoBufferSize())
 	, sampleEditorKeyBehaviour(conf, "Sample Editor", "KeyBehaviour", seNoteOffOnNewKey)
@@ -542,13 +541,17 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	{
 		m_dwPatternSetup &= ~0x10000000;			// ditto
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,24,01,02))
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,24,01,04))
 	{
-		if(m_dwPatternSetup & 0x08)
-			patternFont = PATTERNFONT_SMALL;
+		if(m_dwPatternSetup & 0x02)
+			patternFont = FontSetting("Courier New", 120);
 		else
-			patternFont = PATTERNFONT_LARGE;
-		m_dwPatternSetup &= ~0x08;
+			patternFont = FontSetting("Courier New", 90);
+		if(m_dwPatternSetup & 0x08)
+			patternFont = FontSetting(PATTERNFONT_SMALL, 0);
+		else
+			patternFont = FontSetting(PATTERNFONT_LARGE, 0);
+		m_dwPatternSetup &= ~(0x08 | 0x02);
 	}
 
 	// Effects

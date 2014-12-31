@@ -120,7 +120,7 @@ BOOL WelcomeDlg::OnInitDialog()
 	combo->SetItemDataPtr(combo->AddString(_T("FastTracker 2")), "US_mpt-it2_classic");
 
 	CheckDlgButton(IDC_CHECK1, BST_CHECKED);
-	CheckDlgButton(IDC_CHECK2, (TrackerSettings::Instance().patternFont.Get() == PATTERNFONT_LARGE) ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK2, (TrackerSettings::Instance().patternFont.Get().name == PATTERNFONT_LARGE) ? BST_CHECKED : BST_UNCHECKED);
 
 	ShowWindow(SW_SHOW);
 
@@ -151,7 +151,11 @@ void WelcomeDlg::OnOK()
 	bool runUpdates = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
 	CUpdateCheck::SetUpdateSettings(0, runUpdates ? 7 : 0, CUpdateCheck::GetUpdateURL(), CUpdateCheck::GetSendGUID(), CUpdateCheck::GetShowUpdateHint());
 	if(IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED)
-		TrackerSettings::Instance().patternFont = std::string(PATTERNFONT_LARGE);
+	{
+		FontSetting font = TrackerSettings::Instance().patternFont;
+		font.name = PATTERNFONT_LARGE;
+		TrackerSettings::Instance().patternFont = font;
+	}
 
 	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
 	const char *keyFile = static_cast<char *>(combo->GetItemDataPtr(combo->GetCurSel()));
