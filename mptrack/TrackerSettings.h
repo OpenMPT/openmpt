@@ -451,6 +451,8 @@ public:
 	SoundDevice::Settings GetSoundDeviceSettings(const SoundDevice::Identifier &device) const;
 	void SetSoundDeviceSettings(const SoundDevice::Identifier &device, const SoundDevice::Settings &settings);
 
+	SoundDevice::TypesSet GetEnabledSoundDeviceTypes() const;
+
 	Setting<uint32> MixerMaxChannels;
 	Setting<uint32> MixerDSPMask;
 	Setting<uint32> MixerFlags;

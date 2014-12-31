@@ -17,6 +17,7 @@
 #include "../common/ComponentManager.h"
 #include "../soundlib/SampleFormat.h"
 
+#include <bitset>
 #include <map>
 #include <vector>
 
@@ -95,8 +96,10 @@ enum Type
 	TypePORTAUDIO_ASIO   = 7,
 	TypeNUM_DEVTYPES
 };
+typedef std::bitset<TypeNUM_DEVTYPES> TypesSet;
 
-mpt::ustring TypeToString(SoundDevice::Type type);
+
+mpt::ustring TypeToString(SoundDevice::Type type, bool verbose = false);
 
 typedef uint8 Index;
 
@@ -656,12 +659,12 @@ private:
 	std::map<SoundDevice::Identifier, SoundDevice::DynamicCaps> m_DeviceDynamicCaps;
 
 public:
-	Manager();
+	Manager(SoundDevice::TypesSet enabledTypes);
 	~Manager();
 
 public:
 
-	void ReEnumerate();
+	void ReEnumerate(SoundDevice::TypesSet enabledTypes);
 
 	std::vector<SoundDevice::Info>::const_iterator begin() const { return m_SoundDevices.begin(); }
 	std::vector<SoundDevice::Info>::const_iterator end() const { return m_SoundDevices.end(); }

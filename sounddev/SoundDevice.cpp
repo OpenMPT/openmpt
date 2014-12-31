@@ -33,19 +33,19 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
-mpt::ustring TypeToString(SoundDevice::Type type)
-//-----------------------------------------------
+mpt::ustring TypeToString(SoundDevice::Type type, bool verbose)
+//-------------------------------------------------------------
 {
 	switch(type)
 	{
 	case TypeWAVEOUT: return MPT_USTRING("WaveOut"); break;
 	case TypeDSOUND: return MPT_USTRING("DirectSound"); break;
 	case TypeASIO: return MPT_USTRING("ASIO"); break;
-	case TypePORTAUDIO_WASAPI: return MPT_USTRING("WASAPI"); break;
-	case TypePORTAUDIO_WDMKS: return MPT_USTRING("WDM-KS"); break;
-	case TypePORTAUDIO_WMME: return MPT_USTRING("MME"); break;
-	case TypePORTAUDIO_DS: return MPT_USTRING("DS"); break;
-	case TypePORTAUDIO_ASIO: return MPT_USTRING("ASIO"); break;
+	case TypePORTAUDIO_WASAPI: return (verbose ? MPT_USTRING("PortAudio") : MPT_USTRING("")) + MPT_USTRING("WASAPI"); break;
+	case TypePORTAUDIO_WDMKS: return (verbose ? MPT_USTRING("PortAudio") : MPT_USTRING("")) + MPT_USTRING("WDM-KS"); break;
+	case TypePORTAUDIO_WMME: return (verbose ? MPT_USTRING("PortAudio") : MPT_USTRING("")) + MPT_USTRING("MME"); break;
+	case TypePORTAUDIO_DS: return (verbose ? MPT_USTRING("PortAudio") : MPT_USTRING("")) + MPT_USTRING("DS"); break;
+	case TypePORTAUDIO_ASIO: return (verbose ? MPT_USTRING("PortAudio") : MPT_USTRING("")) + MPT_USTRING("ASIO"); break;
 	}
 	return mpt::ustring();
 }
@@ -466,8 +466,8 @@ int64 Base::GetStreamPositionFrames() const
 //
 
 
-void Manager::ReEnumerate()
-//-------------------------
+void Manager::ReEnumerate(SoundDevice::TypesSet enabledTypes)
+//-----------------------------------------------------------
 {
 	m_SoundDevices.clear();
 	m_DeviceUnavailable.clear();
@@ -481,23 +481,25 @@ void Manager::ReEnumerate()
 	}
 #endif // NO_PORTAUDIO
 
+	if(enabledTypes[SoundDevice::TypeWAVEOUT])
 	{
 		const std::vector<SoundDevice::Info> infos = CWaveDevice::EnumerateDevices();
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
 #ifndef NO_ASIO
+	if(enabledTypes[SoundDevice::TypeASIO])
 	{
 		const std::vector<SoundDevice::Info> infos = CASIODevice::EnumerateDevices();
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
 #endif // NO_ASIO
 #ifndef NO_PORTAUDIO
-	if(IsComponentAvailable(m_PortAudio))
+	if(IsComponentAvailable(m_PortAudio) && enabledTypes[SoundDevice::TypePORTAUDIO_WASAPI])
 	{
 		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_WASAPI);
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
-	if(IsComponentAvailable(m_PortAudio))
+	if(IsComponentAvailable(m_PortAudio) && enabledTypes[SoundDevice::TypePORTAUDIO_WDMKS])
 	{
 		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_WDMKS);
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
@@ -506,6 +508,7 @@ void Manager::ReEnumerate()
 
 	// kind of deprecated by now
 #ifndef NO_DSOUND
+	if(enabledTypes[SoundDevice::TypeDSOUND])
 	{
 		const std::vector<SoundDevice::Info> infos = CDSoundDevice::EnumerateDevices();
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
@@ -514,17 +517,17 @@ void Manager::ReEnumerate()
 
 	// duplicate devices, only used if [Sound Settings]MorePortaudio=1
 #ifndef NO_PORTAUDIO
-	if(IsComponentAvailable(m_PortAudio))
+	if(IsComponentAvailable(m_PortAudio) && enabledTypes[SoundDevice::TypePORTAUDIO_WMME])
 	{
 		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_WMME);
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
-	if(IsComponentAvailable(m_PortAudio))
+	if(IsComponentAvailable(m_PortAudio) && enabledTypes[SoundDevice::TypePORTAUDIO_ASIO])
 	{
 		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_ASIO);
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
 	}
-	if(IsComponentAvailable(m_PortAudio))
+	if(IsComponentAvailable(m_PortAudio) && enabledTypes[SoundDevice::TypePORTAUDIO_DS])
 	{
 		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_DS);
 		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
@@ -774,10 +777,10 @@ SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifi
 }
 
 
-Manager::Manager()
-//----------------
+Manager::Manager(SoundDevice::TypesSet enabledTypes)
+//--------------------------------------------------
 {
-	ReEnumerate();
+	ReEnumerate(enabledTypes);
 }
 
 
