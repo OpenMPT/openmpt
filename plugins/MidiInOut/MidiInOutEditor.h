@@ -30,7 +30,7 @@ class MidiInOutEditor : public AEffEditor, public Window
 //======================================================
 {
 protected:
-	ERect editRect;
+	ERect editRect, editRectDPI;
 
 	Label inputLabel, outputLabel;
 	ComboBox inputCombo, outputCombo;
