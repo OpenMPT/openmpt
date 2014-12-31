@@ -16,6 +16,10 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+#define CM_BT_LEFT		1
+#define CM_BT_RIGHT		2
+#define CM_NB_COLS		8
+#define CM_BT_HEIGHT	22
 
 ///////////////////////////////////////////////////////////
 // CChannelManagerDlg
@@ -109,6 +113,7 @@ BOOL CChannelManagerDlg::Hide(void)
 	return show;
 }
 
+
 CChannelManagerDlg::CChannelManagerDlg(void)
 {
 	mouseTracking = false;
@@ -139,13 +144,13 @@ BOOL CChannelManagerDlg::OnInitDialog()
 	TCITEM tie;
 	tie.mask = TCIF_TEXT | TCIF_IMAGE;
 	tie.iImage = -1;
-	tie.pszText = "Solo/Mute";
+	tie.pszText = _T("Solo/Mute");
 	TabCtrl_InsertItem(menu, 0, &tie);
-	tie.pszText = "Record select";
+	tie.pszText = _T("Record select");
 	TabCtrl_InsertItem(menu, 1, &tie);
-	tie.pszText = "Fx plugins";
+	tie.pszText = _T("Plugins");
 	TabCtrl_InsertItem(menu, 2, &tie);
-	tie.pszText = "Reorder/Remove";
+	tie.pszText = _T("Reorder/Remove");
 	TabCtrl_InsertItem(menu, 3, &tie);
 	currentTab = 0;
 
@@ -169,11 +174,9 @@ BOOL CChannelManagerDlg::OnInitDialog()
 void CChannelManagerDlg::OnApply()
 {
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : NULL;
+	CModDoc *pModDoc = pMainFrm ? pMainFrm->GetActiveDoc() : nullptr;
 
 	if(!pModDoc) return;
-
-	CriticalSection cs;
 
 	CHANNELINDEX nChannels, newpat[MAX_BASECHANNELS], newMemory[4][MAX_BASECHANNELS];
 
@@ -194,6 +197,7 @@ void CChannelManagerDlg::OnApply()
 
 	//Creating new order-vector for ReArrangeChannels.
 	std::vector<CHANNELINDEX> newChnOrder(newpat, newpat + nChannels);
+	CriticalSection cs;
 	if(pModDoc->ReArrangeChannels(newChnOrder) != nChannels)
 	{
 		cs.Leave();
@@ -535,8 +539,8 @@ void CChannelManagerDlg::OnTabSelchange(NMHDR* /*header*/, LRESULT* /*pResult*/)
 			::ShowWindow(::GetDlgItem(m_hWnd, IDC_BUTTON1),SW_HIDE);
 			break;
 		case 2:
-			SetDlgItemText(IDC_BUTTON5, "Enable fx");
-			SetDlgItemText(IDC_BUTTON6, "Disable fx");
+			SetDlgItemText(IDC_BUTTON5, "Enable FX");
+			SetDlgItemText(IDC_BUTTON6, "Disable FX");
 			::ShowWindow(::GetDlgItem(m_hWnd, IDC_BUTTON5),SW_SHOW);
 			::ShowWindow(::GetDlgItem(m_hWnd, IDC_BUTTON6),SW_SHOW);
 			::ShowWindow(::GetDlgItem(m_hWnd, IDC_BUTTON1),SW_HIDE);
@@ -607,6 +611,9 @@ void CChannelManagerDlg::OnSize(UINT nType,int cx,int cy)
 	CRect wnd;
 	GetClientRect(&wnd);
 
+	const int dpiX = ::GetDeviceCaps(::GetDC(m_hWnd), LOGPIXELSX);
+	const int dpiY = ::GetDeviceCaps(::GetDC(m_hWnd), LOGPIXELSY);
+
 	// Move butttons to bottom of the window
 	static const int buttons[] = { IDC_BUTTON1, IDC_BUTTON2, IDC_BUTTON3, IDC_BUTTON4, IDC_BUTTON5, IDC_BUTTON6 };
 	for(size_t i = 0; i < CountOf(buttons); i++)
@@ -617,11 +624,14 @@ void CChannelManagerDlg::OnSize(UINT nType,int cx,int cy)
 			CRect btn;
 			button->GetClientRect(&btn);
 			button->MapWindowPoints(this, &btn);
-			button->SetWindowPos(nullptr, btn.left, wnd.Height() - btn.Height() - 3, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+			button->SetWindowPos(nullptr, btn.left, wnd.Height() - btn.Height() - MulDiv(3, dpiY, 96), 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 		}
 	}
 
-	wnd.DeflateRect(10, 38, 8, 30);
+	wnd.DeflateRect(MulDiv(10, dpiX, 96), MulDiv(38, dpiY, 96), MulDiv(8, dpiX, 96), MulDiv(30, dpiY, 96));
+	m_drawableArea = wnd;
+	buttonHeight = MulDiv(CM_BT_HEIGHT, dpiY, 96);
+
 	if(bkgnd) DeleteObject(bkgnd);
 	bkgnd = ::CreateCompatibleBitmap(::GetDC(m_hWnd), wnd.Width(), wnd.Height());
 	if(!moveRect && bkgnd)
@@ -672,6 +682,9 @@ void CChannelManagerDlg::OnPaint()
 	PAINTSTRUCT pDC;
 	::BeginPaint(m_hWnd,&pDC);
 
+	const int dpiX = ::GetDeviceCaps(pDC.hdc, LOGPIXELSX);
+	const int dpiY = ::GetDeviceCaps(pDC.hdc, LOGPIXELSY);
+
 	CHAR s[256];
 	UINT c=0,l=0;
 	CHANNELINDEX nChannels = pModDoc->GetNumChannels();
@@ -679,22 +692,21 @@ void CChannelManagerDlg::OnPaint()
 	CRect client,btn;
 
 	GetWindowRect(&btn);
-	GetClientRect(&client);
-	client.SetRect(client.left + 10,client.top + 38,client.right - 8,client.bottom - 30);
+	client = m_drawableArea;
 
-	UINT chnSizeX = (client.right - client.left) / CM_NB_COLS;
-	UINT chnSizeY = (client.bottom - client.top) / (int)nLines;
+	int chnSizeX = client.Width() / CM_NB_COLS;
+	int chnSizeY = client.Height() / (int)nLines;
 
-	if(chnSizeY != CM_BT_HEIGHT)
+	if(chnSizeY != buttonHeight)
 	{
 		// Window height is not sufficient => resize window
 		::EndPaint(m_hWnd,&pDC);
 		cs.Leave();
-		CWnd::SetWindowPos(NULL, 0, 0, btn.Width(), btn.Height() + (CM_BT_HEIGHT - chnSizeY) * nLines, SWP_NOMOVE | SWP_NOZORDER);
+		CWnd::SetWindowPos(NULL, 0, 0, btn.Width(), btn.Height() + (buttonHeight - chnSizeY) * nLines, SWP_NOMOVE | SWP_NOZORDER);
 		return;
 	}
 
-	chnSizeY = CM_BT_HEIGHT;
+	chnSizeY = buttonHeight;
 
 	if(currentTab == 3 && moveRect && bkgnd)
 	{
@@ -704,25 +716,7 @@ void CChannelManagerDlg::OnPaint()
 		::BitBlt(pDC.hdc,client.left,client.top,client.Width(),client.Height(),bdc,0,0,SRCCOPY);
 		::SelectObject(bdc,(HBITMAP)NULL);
 		::DeleteDC(bdc);
-/*
-		UINT n;
-		POINT p;
-		CRect r;
-		p.x = mx;
-		p.y = my;
-		BOOL hit = ButtonHit(p,&n,&r);
-		if(hit && !select[n]){
-			r.top += 3;
-			r.left += 3;
-			FrameRect(pDC.hdc,&r,CMainFrame::brushBlack);
-			r.top += 3;
-			r.left += 3;
-			r.bottom -= 3;
-			r.right = r.left + chnSizeX / 7 - 6;
-			FillRect(pDC.hdc,&r,CMainFrame::brushWhite);
-			FrameRect(pDC.hdc,&r,CMainFrame::brushBlack);
-		}
-*/
+
 		for(CHANNELINDEX nChn = 0; nChn < nChannels; nChn++)
 		{
 			CHANNELINDEX nThisChn = pattern[nChn];
@@ -741,7 +735,7 @@ void CChannelManagerDlg::OnPaint()
 	}
 
 	GetClientRect(&client);
-	client.SetRect(client.left + 2,client.top + 32,client.right - 2,client.bottom - 24);
+	client.SetRect(client.left + MulDiv(2, dpiX, 96), client.top + MulDiv(32, dpiY, 96), client.right - MulDiv(2, dpiX, 96), client.bottom - MulDiv(24, dpiY, 96));
 
 	CRect intersection;
 	BOOL ok = intersection.IntersectRect(&pDC.rcPaint,&client);
@@ -768,17 +762,18 @@ void CChannelManagerDlg::OnPaint()
 		else
 			wsprintf(s, "Channel %d", nThisChn + 1);
 
-		btn.left = client.left + c * chnSizeX + 3;
-		btn.right = btn.left + chnSizeX - 3;
-		btn.top = client.top + l * chnSizeY + 3;
-		btn.bottom = btn.top + chnSizeY - 3;
+		const int borderX = MulDiv(3, dpiX, 96), borderY = MulDiv(3, dpiY, 96);
+		btn.left = client.left + c * chnSizeX + borderX;
+		btn.right = btn.left + chnSizeX - borderX;
+		btn.top = client.top + l * chnSizeY + borderY;
+		btn.bottom = btn.top + chnSizeY - borderY;
 
 		ok = intersection.IntersectRect(&pDC.rcPaint, &client);
 		if(ok) DrawChannelButton(pDC.hdc, &btn, s, select[nThisChn], removed[nThisChn] ? FALSE : TRUE, DT_RIGHT | DT_VCENTER, NULL);
 
 		btn.right = btn.left + chnSizeX / 7;
 
-		btn.DeflateRect(3, 3, 3, 3);
+		btn.DeflateRect(borderX, borderY, borderX, borderY);
 
 		switch(currentTab)
 		{
@@ -818,8 +813,8 @@ void CChannelManagerDlg::OnPaint()
 		if(c >= CM_NB_COLS) { c = 0; l++; }
 	}
 
-	DeleteObject((HBRUSH)green);
-	DeleteObject((HBRUSH)red);
+	DeleteBrush(green);
+	DeleteBrush(red);
 
 	::EndPaint(m_hWnd,&pDC);
 }
@@ -832,9 +827,7 @@ void CChannelManagerDlg::OnMove(int x, int y)
 
 bool CChannelManagerDlg::ButtonHit( CPoint point, CHANNELINDEX * id, CRect * invalidate )
 {
-	CRect client;
-	GetClientRect(&client);
-	client.SetRect(client.left + 10,client.top + 38,client.right - 8,client.bottom - 30);
+	const CRect &client = m_drawableArea;
 
 	if(!PtInRect(client,point)) return false;
 
@@ -850,8 +843,8 @@ bool CChannelManagerDlg::ButtonHit( CPoint point, CHANNELINDEX * id, CRect * inv
 		int x = point.x - client.left;
 		int y = point.y - client.top;
 
-		int dx = (client.right - client.left) / (int)nColns;
-		int dy = CM_BT_HEIGHT;
+		int dx = client.Width() / (int)nColns;
+		int dy = buttonHeight;
 
 		x = x / dx;
 		y = y / dy;
@@ -1089,12 +1082,10 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 					{
 						if(!pModDoc->IsChannelSolo(n) || pModDoc->IsChannelMuted(n))
 						{
-							GetClientRect(&client);
 							pModDoc->MuteChannel(n, false);
 							pModDoc->SoloChannel(n, true);
 							for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels(); nChn++) if(nChn != n) pModDoc->MuteChannel(nChn, true);
-							client.SetRect(client.left + 10,client.top + 38,client.right - 8,client.bottom - 30);
-							invalidate = client;
+							invalidate = client = m_drawableArea;
 						}
 						else pModDoc->SoloChannel(n, false);
 					} else
@@ -1138,8 +1129,7 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 
 					if(select[n] || button == 0)
 					{
-						GetClientRect(&client);
-						client.SetRect(client.left + 10,client.top + 38,client.right - 8,client.bottom - 30);
+						invalidate = client = m_drawableArea;
 						if(!bkgnd) bkgnd = ::CreateCompatibleBitmap(::GetDC(m_hWnd),client.Width(),client.Height());
 						if(!moveRect && bkgnd){
 							HDC bdc = ::CreateCompatibleDC(::GetDC(m_hWnd));
@@ -1148,7 +1138,6 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 							::SelectObject(bdc,(HBITMAP)NULL);
 							::DeleteDC(bdc);
 						}
-						invalidate = client;
 						moveRect = true;
 					}
 					break;
@@ -1159,9 +1148,7 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 		InvalidateRect(&invalidate, FALSE);
 	} else
 	{
-		GetClientRect(&client);
-		client.SetRect(client.left + 10,client.top + 38,client.right - 8,client.bottom - 30);
-		InvalidateRect(&client, FALSE);
+		InvalidateRect(&m_drawableArea, FALSE);
 	}
 }
 

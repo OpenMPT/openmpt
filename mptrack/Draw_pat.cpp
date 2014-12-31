@@ -468,8 +468,11 @@ void CViewPattern::OnDraw(CDC *pDC)
 	UpdateSizes();
 	if ((pModDoc = GetDocument()) == nullptr) return;
 	
+	const int dpiX = ::GetDeviceCaps(pDC->m_hDC, LOGPIXELSX);
 	const int dpiY = ::GetDeviceCaps(pDC->m_hDC, LOGPIXELSY);
 	const int vuHeight = MulDiv(VUMETERS_HEIGHT, dpiY, 96);
+	const int colHeight = MulDiv(COLHDR_HEIGHT, dpiY, 96);
+	const int recordInsX = MulDiv(3, dpiY, 96);
 
 	GetClientRect(&rcClient);
 	hdc = pDC->m_hDC;
@@ -522,10 +525,10 @@ void CViewPattern::OnDraw(CDC *pDC)
 					::FillRect(hdc, &r, CMainFrame::brushText);
 				}
 
-				rect.bottom = rect.top + MulDiv(COLHDR_HEIGHT, dpiY, 96);
+				rect.bottom = rect.top + colHeight;
 
 				CRect insRect;
-				insRect.SetRect(xpaint, ypaint, xpaint+nColumnWidth / 8 + 3, ypaint + 16);
+				insRect.SetRect(xpaint, ypaint, xpaint + nColumnWidth / 8 + recordInsX, ypaint + colHeight);
 				if (pModDoc->IsChannelRecord1(static_cast<CHANNELINDEX>(ncolhdr)))
 				{
 					FrameRect(hdc,&rect,CMainFrame::brushGray);
