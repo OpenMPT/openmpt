@@ -24,6 +24,10 @@ MidiInOutEditor::MidiInOutEditor(AudioEffect *effect) : AEffEditor(effect)
 	editRect.top = editRect.left = 0;
 	editRect.bottom = 130;
 	editRect.right = 350;
+
+	editRectDPI.top = editRectDPI.left = 0;
+	editRectDPI.bottom = WindowBase::ScaleY(NULL, editRect.bottom);
+	editRectDPI.right = WindowBase::ScaleX(NULL, editRect.right);
 }
 
 
@@ -36,7 +40,7 @@ bool MidiInOutEditor::getRect(ERect **rect)
 		return false;
 	}
 
-	*rect = &editRect;
+	*rect = &editRectDPI;
 	return true;
 }
 
@@ -178,7 +182,10 @@ intptr_t MidiInOutEditor::WindowCallback(int message, void *param1, void *param2
 
 				// Update device ID and notify plugin.
 				PmDeviceID newDevice = reinterpret_cast<PmDeviceID>(combo.GetSelectionData());
-				realEffect->setParameterAutomated(isInputBox ? MidiInOut::inputParameter : MidiInOut::outputParameter, realEffect->DeviceIDToParameter(newDevice));
+				VstInt32 paramID = isInputBox ? MidiInOut::inputParameter : MidiInOut::outputParameter;
+				realEffect->beginEdit(paramID);
+				realEffect->setParameterAutomated(paramID, realEffect->DeviceIDToParameter(newDevice));
+				realEffect->endEdit(paramID);
 			}
 			return 0;
 

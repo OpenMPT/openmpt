@@ -46,7 +46,7 @@ public:
 		windowClass.hIconSm = NULL;
 		RegisterClassEx(&windowClass);
 
-		hwnd = CreateWindow(className, nullptr, WS_VISIBLE | WS_CHILD, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, parent, NULL, windowClass.hInstance, NULL);
+		hwnd = CreateWindow(className, nullptr, WS_VISIBLE | WS_CHILD, ScaleX(parent, rect.left), ScaleY(parent, rect.top), ScaleX(parent, rect.right - rect.left), ScaleY(parent, rect.bottom - rect.top), parent, NULL, windowClass.hInstance, NULL);
 
 		// Store pointer to the window object in the window's user data, so we have access to the custom callback function and original window processing function later.
 		SetPropA(hwnd, "ptr", reinterpret_cast<HANDLE>(this));
