@@ -997,7 +997,7 @@ BOOL CTrackApp::InitInstance()
 	m_pMainWnd->DragAcceptFiles();
 
 	// Load sound APIs
-	m_pSoundDevicesManager = new SoundDevice::Manager();
+	m_pSoundDevicesManager = new SoundDevice::Manager(TrackerSettings::Instance().GetEnabledSoundDeviceTypes());
 	if(TrackerSettings::Instance().m_SoundDeviceSettingsUseOldDefaults)
 	{
 		// get the old default device
