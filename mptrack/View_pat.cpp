@@ -32,8 +32,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#define	PLUGNAME_HEIGHT	16	//rewbs.patPlugName
-
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 FindReplace CViewPattern::m_findReplace =
@@ -495,7 +493,7 @@ DWORD CViewPattern::GetDragItem(CPoint point, LPRECT lpRect)
 	xofs = GetXScrollPos();
 	yofs = GetYScrollPos();
 	rect.SetRect(m_szHeader.cx, 0, m_szHeader.cx + GetColumnWidth() /*- 2*/, m_szHeader.cy);
-	plugRect.SetRect(m_szHeader.cx, m_szHeader.cy-PLUGNAME_HEIGHT, m_szHeader.cx + GetColumnWidth() - 2, m_szHeader.cy);	//rewbs.patPlugNames
+	plugRect.SetRect(m_szHeader.cx, m_szHeader.cy - m_szPluginHeader.cy, m_szHeader.cx + GetColumnWidth() - 2, m_szHeader.cy);	//rewbs.patPlugNames
 
 	const CHANNELINDEX nmax = pSndFile->GetNumChannels();
 	// Checking channel headers
@@ -707,7 +705,7 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 		{
 			// Open quick channel properties dialog if we're middle-clicking a channel header.
 			CPoint point(GET_X_LPARAM(pMsg->lParam), GET_Y_LPARAM(pMsg->lParam));
-			if(point.y < m_szHeader.cy - (m_Status[psShowPluginNames] ? PLUGNAME_HEIGHT : 0))
+			if(point.y < m_szHeader.cy - m_szPluginHeader.cy)
 			{
 				PatternCursor cursor = GetPositionFromPoint(point);
 				if(cursor.GetChannel() < GetDocument()->GetNumChannels())
@@ -1138,7 +1136,7 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 	PatternCursor pointCursor(GetPositionFromPoint(point));
 
 	SetCapture();
-	if(point.x >= m_szHeader.cx && point.y <= m_szHeader.cy - (m_Status[psShowPluginNames] ? PLUGNAME_HEIGHT : 0))
+	if(point.x >= m_szHeader.cx && point.y <= m_szHeader.cy - m_szPluginHeader.cy)
 	{
 		// Click on channel header
 		if (nFlags & MK_CONTROL)
@@ -1435,7 +1433,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 
 		//------ Plugin Header Menu --------- :
 		if(m_Status[psShowPluginNames] &&
-			(pt.y > m_szHeader.cy-PLUGNAME_HEIGHT) && (pt.y < m_szHeader.cy))
+			(pt.y > m_szHeader.cy - m_szPluginHeader.cy) && (pt.y < m_szHeader.cy))
 		{
 			BuildPluginCtxMenu(hMenu, nChn, pSndFile);
 		}

@@ -123,13 +123,21 @@ bool CViewPattern::UpdateSizes()
 	int oldx = m_szCell.cx, oldy = m_szCell.cy;
 	m_szHeader.cx = ROWHDR_WIDTH;
 	m_szHeader.cy = COLHDR_HEIGHT;
+	m_szPluginHeader.cx = 0;
+	m_szPluginHeader.cy = m_Status[psShowPluginNames] ? PLUGNAME_HEIGHT : 0;
 	if(m_Status[psShowVUMeters]) m_szHeader.cy += VUMETERS_HEIGHT;
-	if(m_Status[psShowPluginNames]) m_szHeader.cy += PLUGNAME_HEIGHT;
 	m_szCell.cx = 4 + pfnt->nEltWidths[0];
 	if (m_nDetailLevel >= PatternCursor::instrColumn) m_szCell.cx += pfnt->nEltWidths[1];
 	if (m_nDetailLevel >= PatternCursor::volumeColumn) m_szCell.cx += pfnt->nEltWidths[2];
 	if (m_nDetailLevel >= PatternCursor::effectColumn) m_szCell.cx += pfnt->nEltWidths[3] + pfnt->nEltWidths[4];
 	m_szCell.cy = pfnt->nHeight;
+
+	const int dpiX = ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSX);
+	const int dpiY = ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSY);
+	m_szHeader.cx = MulDiv(m_szHeader.cx, dpiX, 96);
+	m_szHeader.cy = MulDiv(m_szHeader.cy, dpiY, 96);
+	m_szPluginHeader.cy = MulDiv(m_szPluginHeader.cy, dpiY, 96);
+	m_szHeader.cy += m_szPluginHeader.cy;
 
 	if(oldy != m_szCell.cy)
 	{
@@ -218,7 +226,7 @@ POINT CViewPattern::GetPointFromPosition(PatternCursor cursor)
 	}
 
 	if (pt.x < 0) pt.x = 0;
-	pt.x += ROWHDR_WIDTH;
+	pt.x += Util::ScalePixels(ROWHDR_WIDTH, GetDC());
 	pt.y = (cursor.GetRow() - yofs + m_nMidRow) * m_szCell.cy;
 
 	if (pt.y < 0) pt.y = 0;
@@ -459,6 +467,10 @@ void CViewPattern::OnDraw(CDC *pDC)
 	ASSERT(pDC);
 	UpdateSizes();
 	if ((pModDoc = GetDocument()) == nullptr) return;
+	
+	const int dpiY = ::GetDeviceCaps(pDC->m_hDC, LOGPIXELSY);
+	const int vuHeight = MulDiv(VUMETERS_HEIGHT, dpiY, 96);
+
 	GetClientRect(&rcClient);
 	hdc = pDC->m_hDC;
 	oldpen = SelectPen(hdc, CMainFrame::penDarkGray);
@@ -510,7 +522,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 					::FillRect(hdc, &r, CMainFrame::brushText);
 				}
 
-				rect.bottom = rect.top + COLHDR_HEIGHT;
+				rect.bottom = rect.top + MulDiv(COLHDR_HEIGHT, dpiY, 96);
 
 				CRect insRect;
 				insRect.SetRect(xpaint, ypaint, xpaint+nColumnWidth / 8 + 3, ypaint + 16);
@@ -536,13 +548,13 @@ void CViewPattern::OnDraw(CDC *pDC)
 				{
 					OldVUMeters[ncolhdr] = 0;
 					DrawChannelVUMeter(hdc, rect.left + 1, rect.bottom, ncolhdr);
-					rect.top+=VUMETERS_HEIGHT;
-					rect.bottom+=VUMETERS_HEIGHT;
+					rect.top += vuHeight;
+					rect.bottom += vuHeight;
 				}
 				if(m_Status[psShowPluginNames])
 				{
-					rect.top+=PLUGNAME_HEIGHT;
-					rect.bottom+=PLUGNAME_HEIGHT;
+					rect.top += m_szPluginHeader.cy;
+					rect.bottom += m_szPluginHeader.cy;
 					mixPlug = sndFile.ChnSettings[ncolhdr].nMixPlugin;
 					if (mixPlug)
 						wsprintf(s, "%d: %s", mixPlug, (sndFile.m_MixPlugins[mixPlug - 1]).pMixPlugin ? (sndFile.m_MixPlugins[mixPlug - 1]).GetName() : "[empty]");
@@ -1664,11 +1676,12 @@ void CViewPattern::UpdateAllVUMeters(Notification *pnotify)
 	const bool isPlaying = (pMainFrm->GetFollowSong(pModDoc) == m_hWnd);
 	int x = m_szHeader.cx;
 	CHANNELINDEX nChn = static_cast<CHANNELINDEX>(xofs);
+	const int yPos = rcClient.top + MulDiv(COLHDR_HEIGHT, ::GetDeviceCaps(hdc, LOGPIXELSY), 96);
 	while ((nChn < pModDoc->GetNumChannels()) && (x < rcClient.right))
 	{
 		ChnVUMeters[nChn] = (WORD)pnotify->pos[nChn];
 		if ((!isPlaying) || pnotify->type[Notification::Stop]) ChnVUMeters[nChn] = 0;
-		DrawChannelVUMeter(hdc, x + 1, rcClient.top + COLHDR_HEIGHT, nChn);
+		DrawChannelVUMeter(hdc, x + 1, rcClient.top + yPos, nChn);
 		nChn++;
 		x += m_szCell.cx;
 	}
