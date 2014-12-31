@@ -18,7 +18,7 @@ class CCtrlComments: public CModControlDlg
 //========================================
 {
 protected:
-	HFONT m_hFont;
+	int charWidth;
 	UINT m_nLockCount;
 
 public:

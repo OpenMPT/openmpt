@@ -110,19 +110,17 @@ static void DrawString(HDC hDC, const char_t *text, int len, int x, int y, int w
 void PatternFont::UpdateFont(CDC *dc)
 //-----------------------------------
 {
-	const std::string name = TrackerSettings::Instance().patternFont;
-	int32_t fontSize = TrackerSettings::Instance().patternFontSize;
-	int32_t flags = TrackerSettings::Instance().patternFontFlags;
+	FontSetting font = TrackerSettings::Instance().patternFont;
 	const PATTERNFONT *builtinFont = nullptr;
-	if(name == PATTERNFONT_SMALL || name.empty())
+	if(font.name == PATTERNFONT_SMALL || font.name.empty())
 	{
 		builtinFont = &gSmallPatternFont;
-	} else if(name == PATTERNFONT_LARGE)
+	} else if(font.name == PATTERNFONT_LARGE)
 	{
 		builtinFont = &gDefaultPatternFont;
 	}
 
-	if(builtinFont != nullptr && fontSize < 1)
+	if(builtinFont != nullptr && font.size < 1)
 	{
 		currentFont = builtinFont;
 		return;
@@ -131,16 +129,13 @@ void PatternFont::UpdateFont(CDC *dc)
 	static PATTERNFONT pf = { 0 };
 	currentFont = &pf;
 
-	static std::string previousFont;
-	static int32_t previousSize, previousFlags;
-	if(previousFont == name && previousSize == fontSize && previousFlags == flags)
+	static FontSetting previousFont;
+	if(previousFont == font)
 	{
 		// Nothing to do
 		return;
 	}
-	previousFont = name;
-	previousSize = fontSize;
-	previousFlags = flags;
+	previousFont = font;
 	DeleteFontData();
 	pf.dib = &customFontBitmap;
 
@@ -148,18 +143,18 @@ void PatternFont::UpdateFont(CDC *dc)
 	if(builtinFont != nullptr)
 	{
 		// Copy and scale original 4-bit bitmap
-		LimitMax(fontSize, 10);
-		fontSize++;
+		LimitMax(font.size, 10);
+		font.size++;
 		MemCopy(customFontBitmap.bmiHeader, CMainFrame::bmpNotes->bmiHeader);
-		customFontBitmap.bmiHeader.biWidth *= fontSize;
-		customFontBitmap.bmiHeader.biHeight *= fontSize;
+		customFontBitmap.bmiHeader.biWidth *= font.size;
+		customFontBitmap.bmiHeader.biHeight *= font.size;
 		customFontBitmap.bmiHeader.biSizeImage = customFontBitmap.bmiHeader.biWidth * customFontBitmap.bmiHeader.biHeight / 2;
 		customFontBitmap.lpDibBits = new uint8_t[customFontBitmap.bmiHeader.biSizeImage];
 
 		// Upscale the image (ugly code ahead)
 		const uint8_t *origPixels = CMainFrame::bmpNotes->lpDibBits;
 		uint8_t *scaledPixels = customFontBitmap.lpDibBits;
-		const int bytesPerLine = customFontBitmap.bmiHeader.biWidth / 2, scaleBytes = bytesPerLine * fontSize;
+		const int bytesPerLine = customFontBitmap.bmiHeader.biWidth / 2, scaleBytes = bytesPerLine * font.size;
 		bool outPos = false;
 		for(int y = 0; y < CMainFrame::bmpNotes->bmiHeader.biHeight; y++, scaledPixels += scaleBytes - bytesPerLine)
 		{
@@ -174,7 +169,7 @@ void PatternFont::UpdateFont(CDC *dc)
 					pixel &= 0x0F;
 					origPixels++;
 				}
-				for(int scaleX = 0; scaleX < fontSize; scaleX++)
+				for(int scaleX = 0; scaleX < font.size; scaleX++)
 				{
 					if(!outPos)
 					{
@@ -194,42 +189,42 @@ void PatternFont::UpdateFont(CDC *dc)
 				}
 			}
 		}
-		pf.nWidth = (builtinFont->nWidth - 4) * fontSize + 4;
-		pf.nHeight = builtinFont->nHeight * fontSize;
-		pf.nClrX = builtinFont->nClrX * fontSize;
-		pf.nClrY = builtinFont->nClrY * fontSize;
-		pf.nSpaceX = builtinFont->nSpaceX * fontSize;
-		pf.nSpaceY = builtinFont->nSpaceY * fontSize;
+		pf.nWidth = (builtinFont->nWidth - 4) * font.size + 4;
+		pf.nHeight = builtinFont->nHeight * font.size;
+		pf.nClrX = builtinFont->nClrX * font.size;
+		pf.nClrY = builtinFont->nClrY * font.size;
+		pf.nSpaceX = builtinFont->nSpaceX * font.size;
+		pf.nSpaceY = builtinFont->nSpaceY * font.size;
 		for(size_t i = 0; i < CountOf(pf.nEltWidths); i++)
 		{
-			pf.nEltWidths[i] = builtinFont->nEltWidths[i] * fontSize;
-			pf.padding[i] = builtinFont->padding[i] * fontSize;
+			pf.nEltWidths[i] = builtinFont->nEltWidths[i] * font.size;
+			pf.padding[i] = builtinFont->padding[i] * font.size;
 		}
-		pf.nNumX = builtinFont->nNumX * fontSize;
-		pf.nNumY = builtinFont->nNumY * fontSize;
-		pf.nNum10X = builtinFont->nNum10X * fontSize;
-		pf.nNum10Y = builtinFont->nNum10Y * fontSize;
-		pf.nAlphaAM_X = builtinFont->nAlphaAM_X * fontSize;
-		pf.nAlphaAM_Y = builtinFont->nAlphaAM_Y * fontSize;
-		pf.nAlphaNZ_X = builtinFont->nAlphaNZ_X * fontSize;
-		pf.nAlphaNZ_Y = builtinFont->nAlphaNZ_Y * fontSize;
-		pf.nNoteX = builtinFont->nNoteX * fontSize;
-		pf.nNoteY = builtinFont->nNoteY * fontSize;
-		pf.nNoteWidth = builtinFont->nNoteWidth * fontSize;
-		pf.nOctaveWidth = builtinFont->nOctaveWidth * fontSize;
-		pf.nVolX = builtinFont->nVolX * fontSize;
-		pf.nVolY = builtinFont->nVolY * fontSize;
-		pf.nVolCmdWidth = builtinFont->nVolCmdWidth * fontSize;
-		pf.nVolHiWidth = builtinFont->nVolHiWidth * fontSize;
-		pf.nCmdOfs = builtinFont->nCmdOfs * fontSize;
-		pf.nParamHiWidth = builtinFont->nParamHiWidth * fontSize;
-		pf.nInstrOfs = builtinFont->nInstrOfs * fontSize;
-		pf.nInstr10Ofs = builtinFont->nInstr10Ofs * fontSize;
-		pf.nInstrHiWidth = builtinFont->nInstrHiWidth * fontSize;
-		pf.pcParamMargin = builtinFont->pcParamMargin * fontSize;
-		pf.pcValMargin = builtinFont->pcValMargin * fontSize;
-		pf.paramLoMargin = builtinFont->paramLoMargin * fontSize;
-		pf.spacingY = builtinFont->spacingY * fontSize;
+		pf.nNumX = builtinFont->nNumX * font.size;
+		pf.nNumY = builtinFont->nNumY * font.size;
+		pf.nNum10X = builtinFont->nNum10X * font.size;
+		pf.nNum10Y = builtinFont->nNum10Y * font.size;
+		pf.nAlphaAM_X = builtinFont->nAlphaAM_X * font.size;
+		pf.nAlphaAM_Y = builtinFont->nAlphaAM_Y * font.size;
+		pf.nAlphaNZ_X = builtinFont->nAlphaNZ_X * font.size;
+		pf.nAlphaNZ_Y = builtinFont->nAlphaNZ_Y * font.size;
+		pf.nNoteX = builtinFont->nNoteX * font.size;
+		pf.nNoteY = builtinFont->nNoteY * font.size;
+		pf.nNoteWidth = builtinFont->nNoteWidth * font.size;
+		pf.nOctaveWidth = builtinFont->nOctaveWidth * font.size;
+		pf.nVolX = builtinFont->nVolX * font.size;
+		pf.nVolY = builtinFont->nVolY * font.size;
+		pf.nVolCmdWidth = builtinFont->nVolCmdWidth * font.size;
+		pf.nVolHiWidth = builtinFont->nVolHiWidth * font.size;
+		pf.nCmdOfs = builtinFont->nCmdOfs * font.size;
+		pf.nParamHiWidth = builtinFont->nParamHiWidth * font.size;
+		pf.nInstrOfs = builtinFont->nInstrOfs * font.size;
+		pf.nInstr10Ofs = builtinFont->nInstr10Ofs * font.size;
+		pf.nInstrHiWidth = builtinFont->nInstrHiWidth * font.size;
+		pf.pcParamMargin = builtinFont->pcParamMargin * font.size;
+		pf.pcValMargin = builtinFont->pcValMargin * font.size;
+		pf.paramLoMargin = builtinFont->paramLoMargin * font.size;
+		pf.spacingY = builtinFont->spacingY * font.size;
 
 		// Create 4-pixel border
 		const int bmWidth2 = pf.dib->bmiHeader.biWidth / 2;
@@ -244,14 +239,14 @@ void PatternFont::UpdateFont(CDC *dc)
 
 	// Create our own font!
 	// Point size to pixels
-	fontSize = -MulDiv(fontSize, GetDeviceCaps(dc->m_hDC, LOGPIXELSY), 720);
+	font.size = -MulDiv(font.size, ::GetDeviceCaps(dc->m_hDC, LOGPIXELSY), 720);
 
 	CDC hDC;
 	hDC.CreateCompatibleDC(dc);
 
-	CFont font;
-	font.CreateFont(fontSize, 0, 0, 0, (flags & PatternFontBold) ? FW_BOLD : FW_NORMAL, (flags & PatternFontItalic) ? TRUE : FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_RASTER_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, FIXED_PITCH | FF_DONTCARE, name.c_str());
-	CFont *oldFont = hDC.SelectObject(&font);
+	CFont gdiFont;
+	gdiFont.CreateFont(font.size, 0, 0, 0, font.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL, font.flags[FontSetting::Italic] ? TRUE : FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_RASTER_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, FIXED_PITCH | FF_DONTCARE, font.name.c_str());
+	CFont *oldFont = hDC.SelectObject(&gdiFont);
 
 	CPoint pt = hDC.GetTextExtent(_T("W"));
 	const int charWidth = pt.x, charHeight = pt.y;
@@ -315,7 +310,7 @@ void PatternFont::UpdateFont(CDC *dc)
 	if(data == nullptr)
 	{
 		hDC.SelectObject(oldFont);
-		font.DeleteObject();
+		gdiFont.DeleteObject();
 		hDC.DeleteDC();
 		currentFont = &gDefaultPatternFont;
 		return;
@@ -400,7 +395,7 @@ void PatternFont::UpdateFont(CDC *dc)
 
 	hDC.SelectObject(oldBitmap);
 	hDC.SelectObject(oldFont);
-	font.DeleteObject();
+	gdiFont.DeleteObject();
 	DeleteBitmap(bitmap);
 	hDC.DeleteDC();
 }

@@ -66,7 +66,8 @@ BEGIN_MESSAGE_MAP(COptionsColors, CPropertyPage)
 	ON_COMMAND(IDC_BUTTON6,				OnPresetFT2)
 	ON_COMMAND(IDC_BUTTON7,				OnPresetIT)
 	ON_COMMAND(IDC_BUTTON8,				OnPresetBuzz)
-	ON_COMMAND(IDC_BUTTON9,				OnChooseFont)
+	ON_COMMAND(IDC_BUTTON9,				OnChoosePatternFont)
+	ON_COMMAND(IDC_BUTTON10,			OnChooseCommentFont)
 	ON_COMMAND(IDC_LOAD_COLORSCHEME,	OnLoadColorScheme)
 	ON_COMMAND(IDC_SAVE_COLORSCHEME,	OnSaveColorScheme)
 	ON_COMMAND(IDC_CHECK1,				OnSettingsChanged)
@@ -94,10 +95,10 @@ void COptionsColors::DoDataExchange(CDataExchange* pDX)
 }
 
 
-static std::string FormatFontName(const std::string fontName, int32_t fontSize)
-//-----------------------------------------------------------------------------
+static std::string FormatFontName(const FontSetting &font)
+//--------------------------------------------------------
 {
-	return fontName + ", " + mpt::ToString(fontSize / 10);
+	return font.name + ", " + mpt::ToString(font.size / 10);
 }
 
 
@@ -120,9 +121,7 @@ BOOL COptionsColors::OnInitDialog()
 	SetDlgItemInt(IDC_PRIMARYHILITE, TrackerSettings::Instance().m_nRowHighlightMeasures);
 	SetDlgItemInt(IDC_SECONDARYHILITE, TrackerSettings::Instance().m_nRowHighlightBeats);
 
-	fontName = TrackerSettings::Instance().patternFont;
-	fontSize = TrackerSettings::Instance().patternFontSize;
-	fontFlags = TrackerSettings::Instance().patternFontFlags;
+	patternFont = TrackerSettings::Instance().patternFont;
 	m_ComboFont.AddString("Built-in (small)");
 	m_ComboFont.AddString("Built-in (large)");
 	m_ComboFont.AddString("Built-in (small, x2)");
@@ -130,18 +129,21 @@ BOOL COptionsColors::OnInitDialog()
 	m_ComboFont.AddString("Built-in (small, x3)");
 	m_ComboFont.AddString("Built-in (large, x3)");
 	int sel = 0;
-	if(fontName == PATTERNFONT_SMALL)
+	if(patternFont.name == PATTERNFONT_SMALL)
 	{
-		sel = fontSize * 2;
-	} else if(fontName == PATTERNFONT_LARGE)
+		sel = patternFont.size * 2;
+	} else if(patternFont.name == PATTERNFONT_LARGE)
 	{
-		sel = fontSize * 2 + 1;
+		sel = patternFont.size * 2 + 1;
 	} else
 	{
-		m_ComboFont.AddString(FormatFontName(fontName, fontSize).c_str());
+		m_ComboFont.AddString(FormatFontName(patternFont).c_str());
 		sel = 6;
 	}
 	m_ComboFont.SetCurSel(sel);
+
+	commentFont = TrackerSettings::Instance().commentsFont;
+	SetDlgItemText(IDC_BUTTON10, FormatFontName(commentFont).c_str());
 	
 	OnColorSelChanged();
 	return TRUE;
@@ -174,8 +176,7 @@ void COptionsColors::OnOK()
 	if (IsDlgButtonChecked(IDC_CHECK4)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_2NDHIGHLIGHT;
 	TrackerSettings::Instance().rememberSongWindows = IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED;
 
-	std::string newName = fontName;
-	int32_t newSize = fontSize;
+	FontSetting newPatternFont = patternFont;
 	const int fontSel = m_ComboFont.GetCurSel();
 	switch(fontSel)
 	{
@@ -183,21 +184,20 @@ void COptionsColors::OnOK()
 	case 2:
 	case 4:
 	default:
-		newName = PATTERNFONT_SMALL;
-		newSize = fontSel / 2;
+		newPatternFont.name = PATTERNFONT_SMALL;
+		newPatternFont.size = fontSel / 2;
 		break;
 	case 1:
 	case 3:
 	case 5:
-		newName = PATTERNFONT_LARGE;
-		newSize = fontSel / 2;
+		newPatternFont.name = PATTERNFONT_LARGE;
+		newPatternFont.size = fontSel / 2;
 		break;
 	case 6:
 		break;
 	}
-	TrackerSettings::Instance().patternFont = newName;
-	TrackerSettings::Instance().patternFontSize = newSize;
-	TrackerSettings::Instance().patternFontFlags = fontFlags;
+	TrackerSettings::Instance().patternFont = newPatternFont;
+	TrackerSettings::Instance().commentsFont = commentFont;
 
 	TrackerSettings::Instance().m_nRowHighlightMeasures = GetDlgItemInt(IDC_PRIMARYHILITE);
 	TrackerSettings::Instance().m_nRowHighlightBeats = GetDlgItemInt(IDC_SECONDARYHILITE);
@@ -218,20 +218,20 @@ BOOL COptionsColors::OnSetActive()
 }
 
 
-void COptionsColors::OnChooseFont()
-//---------------------------------
+void COptionsColors::OnChoosePatternFont()
+//----------------------------------------
 {
 	LOGFONT lf;
 	MemsetZero(lf);
-	const int32_t size = fontSize < 10 ? 120 : fontSize;
+	const int32_t size = patternFont.size < 10 ? 120 : patternFont.size;
 	// Point size to pixels
 	lf.lfHeight = -MulDiv(size, GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSY), 720);
-	lf.lfWeight = (fontFlags & PatternFontBold) ? FW_BOLD : FW_NORMAL;
-	lf.lfItalic = (fontFlags & PatternFontItalic) ? TRUE : FALSE;
-	mpt::String::Copy(lf.lfFaceName, fontName);
+	lf.lfWeight = patternFont.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL;
+	lf.lfItalic = patternFont.flags[FontSetting::Italic] ? TRUE : FALSE;
+	mpt::String::Copy(lf.lfFaceName, patternFont.name);
 	CFontDialog dlg(&lf);
 	dlg.m_cf.hwndOwner = m_hWnd;
-	if(fontName != PATTERNFONT_SMALL && fontName != PATTERNFONT_LARGE)
+	if(patternFont.name != PATTERNFONT_SMALL && patternFont.name != PATTERNFONT_LARGE)
 	{
 		dlg.m_cf.lpLogFont = &lf;
 	}
@@ -243,13 +243,41 @@ void COptionsColors::OnChooseFont()
 		{
 			m_ComboFont.DeleteString(6);
 		}
-		fontName = dlg.GetFaceName();
-		fontSize = dlg.GetSize();
-		fontFlags = 0;
-		if(dlg.IsBold()) fontFlags |= PatternFontBold;
-		if(dlg.IsItalic()) fontFlags |= PatternFontItalic;
-		m_ComboFont.AddString(FormatFontName(fontName, fontSize).c_str());
+		patternFont.name = dlg.GetFaceName();
+		patternFont.size = dlg.GetSize();
+		patternFont.flags = FontSetting::None;
+		if(dlg.IsBold()) patternFont.flags |= FontSetting::Bold;
+		if(dlg.IsItalic()) patternFont.flags |= FontSetting::Italic;
+		m_ComboFont.AddString(FormatFontName(patternFont).c_str());
 		m_ComboFont.SetCurSel(6);
+		OnSettingsChanged();
+	}
+}
+
+
+void COptionsColors::OnChooseCommentFont()
+//----------------------------------------
+{
+	LOGFONT lf;
+	MemsetZero(lf);
+	// Point size to pixels
+	lf.lfHeight = -MulDiv(commentFont.size, GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSY), 720);
+	lf.lfWeight = commentFont.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL;
+	lf.lfItalic = commentFont.flags[FontSetting::Italic] ? TRUE : FALSE;
+	mpt::String::Copy(lf.lfFaceName, commentFont.name);
+	CFontDialog dlg(&lf);
+	dlg.m_cf.hwndOwner = m_hWnd;
+	dlg.m_cf.lpLogFont = &lf;
+	dlg.m_cf.Flags &= ~CF_EFFECTS;
+	dlg.m_cf.Flags |= CF_FORCEFONTEXIST | CF_NOSCRIPTSEL;
+	if(dlg.DoModal() == IDOK)
+	{
+		commentFont.name = dlg.GetFaceName();
+		commentFont.size = dlg.GetSize();
+		commentFont.flags = FontSetting::None;
+		if(dlg.IsBold()) commentFont.flags |= FontSetting::Bold;
+		if(dlg.IsItalic()) commentFont.flags |= FontSetting::Italic;
+		SetDlgItemText(IDC_BUTTON10, FormatFontName(commentFont).c_str());
 		OnSettingsChanged();
 	}
 }
@@ -673,7 +701,6 @@ static const struct GeneralOptionsDescriptions
 	{PATTERN_PLAYNEWNOTE,	"Play new notes while recording",	"When this option is enabled, notes entered in the pattern editor will always be played (If not checked, notes won't be played in record mode)."},
 	{PATTERN_PLAYEDITROW,	"Play whole row while recording",	"When this option is enabled, all notes on the current row are played when entering notes in the pattern editor."},
 	{PATTERN_CENTERROW,		"Always center active row",			"Turn on this option to have the active row always centered in the pattern editor."},
-	{PATTERN_LARGECOMMENTS,	"Use large font for comments",		"With this option enabled, the song message editor will use a larger font."},
 	{PATTERN_HEXDISPLAY,	"Display rows in hex",				"With this option enabled, row numbers and sequence numbers will be displayed in hexadecimal."},
 	{PATTERN_WRAP,			"Cursor wrap in pattern editor",	"When this option is active, going past the end of a pattern row or channel will move the cursor to the beginning. When \"Continuous scroll\"-option is enabled, row wrap is disabled."},
 	{PATTERN_CREATEBACKUP,	"Create backup files (*.bak)",		"When this option is active, saving a file will create a backup copy of the original."},

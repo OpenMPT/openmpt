@@ -81,6 +81,7 @@ enum
 	CTRLMSG_PREVORDER,
 	CTRLMSG_NEXTORDER,
 	CTRLMSG_SETRECORD,
+	CTRLMSG_PAT_DUPPATTERN,
 	// Sample-Specific
 	CTRLMSG_SMP_PREVINSTRUMENT,
 	CTRLMSG_SMP_NEXTINSTRUMENT,
@@ -95,7 +96,6 @@ enum
 	CTRLMSG_INS_NEWINSTRUMENT,
 	CTRLMSG_INS_SONGDROP,
 	CTRLMSG_INS_SAMPLEMAP,
-	CTRLMSG_PAT_DUPPATTERN,
 };
 
 enum
@@ -331,7 +331,7 @@ public:
 
 	// GDI
 	static HICON m_hIcon;
-	static HFONT m_hGUIFont, m_hFixedFont, m_hLargeFixedFont;
+	static HFONT m_hGUIFont, m_hFixedFont;
 	static HBRUSH brushGray, brushBlack, brushWhite, brushText, brushHighLight, brushHighLightRed, brushWindow, brushYellow;
 //	static CBrush *pbrushBlack, *pbrushWhite;
 	static HPEN penBlack, penDarkGray, penLightGray, penWhite, penHalfDarkGray, penSample, penEnvelope, penEnvelopeHighlight, penSeparator, penScratch, penGray00, penGray33, penGray40, penGray55, penGray80, penGray99, penGraycc, penGrayff;
@@ -428,8 +428,7 @@ public:
 	static void UpdateColors();
 	static HICON GetModIcon() { return m_hIcon; }
 	static HFONT GetGUIFont() { return m_hGUIFont; }
-	static HFONT GetFixedFont() { return m_hFixedFont; }
-	static HFONT GetLargeFixedFont() { return m_hLargeFixedFont; }
+	static HFONT &GetCommentsFont() { return m_hFixedFont; }
 	static void UpdateAllViews(UpdateHint hint, CObject *pHint=NULL);
 	static LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam);
 	static CInputHandler *m_InputHandler; 	//rewbs.customKeys

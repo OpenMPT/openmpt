@@ -1051,7 +1051,9 @@ BOOL CTrackApp::InitInstance()
 	if(firstRun)
 	{
 		// On high-DPI devices, automatically upscale pattern font
-		TrackerSettings::Instance().patternFontSize = Clamp(::GetDeviceCaps(m_pMainWnd->GetDC()->m_hDC, LOGPIXELSX) / 96 - 1, 0, 9);
+		FontSetting font = TrackerSettings::Instance().patternFont;
+		font.size = Clamp(::GetDeviceCaps(m_pMainWnd->GetDC()->m_hDC, LOGPIXELSX) / 96 - 1, 0, 9);
+		TrackerSettings::Instance().patternFont = font;
 		new WelcomeDlg(m_pMainWnd);
 	}
 

@@ -42,7 +42,7 @@ CCtrlComments::CCtrlComments(CModControlView &parent, CModDoc &document) : CModC
 //---------------------------------------------------------------------------------------------------------
 {
 	m_nLockCount = 0;
-	m_hFont = NULL;
+	charWidth = 0;
 }
 
 
@@ -74,7 +74,6 @@ BOOL CCtrlComments::OnInitDialog()
 {
 	CModControlDlg::OnInitDialog();
 	// Initialize comments
-	m_hFont = NULL;
 	m_EditComments.SetMargins(4, 0);
 	UpdateView(CommentHint().ModType());
 	m_EditComments.SetFocus();
@@ -99,9 +98,9 @@ void CCtrlComments::RecalcLayout()
 	rect.right = rcClient.right - rect.left;
 	if ((rect.right > rect.left) && (rect.bottom > rect.top))
 	{
-		int cxmax = (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_LARGECOMMENTS) ? 80*8 : 80*6;
+		int cxmax = 80 * charWidth;
 		int cx = rect.Width(), cy = rect.Height();
-		if (cx > cxmax) cx = cxmax;
+		if (cx > cxmax && cxmax != 0) cx = cxmax;
 		if ((cx != cx0) || (cy != cy0)) m_EditComments.SetWindowPos(NULL, 0,0, cx, cy, SWP_NOMOVE|SWP_NOZORDER|SWP_DRAWFRAME);
 	}
 }
@@ -114,17 +113,24 @@ void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 	if (pHint == this || !commentHint.GetType()[HINT_MODCOMMENTS | HINT_MPTOPTIONS | HINT_MODTYPE]) return;
 	if (m_nLockCount) return;
 	m_nLockCount++;
-	HFONT newfont;
-	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_LARGECOMMENTS)
-		newfont = CMainFrame::GetLargeFixedFont();
-	else
-		newfont = CMainFrame::GetFixedFont();
-	if (newfont != m_hFont)
+
+	static FontSetting previousFont;
+	FontSetting font = TrackerSettings::Instance().commentsFont;
+	// Point size to pixels
+	int32_t fontSize = -MulDiv(font.size, ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSY), 720);
+	charWidth = (-fontSize + 1) / 2;
+	if(previousFont != font)
 	{
-		m_hFont = newfont;
-		m_EditComments.SendMessage(WM_SETFONT, (WPARAM)newfont);
-		RecalcLayout();
+		previousFont = font;
+		CMainFrame::GetCommentsFont() = ::CreateFont(fontSize, charWidth, 0, 0, font.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL,
+			font.flags[FontSetting::Italic] ? TRUE :FALSE, FALSE, FALSE,
+			DEFAULT_CHARSET, OUT_RASTER_PRECIS,
+			CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+			FIXED_PITCH | FF_MODERN, font.name.c_str());
 	}
+	m_EditComments.SendMessage(WM_SETFONT, (WPARAM)CMainFrame::GetCommentsFont());
+	RecalcLayout();
+
 	m_EditComments.SetRedraw(FALSE);
 	m_EditComments.SetSel(0, -1, TRUE);
 	m_EditComments.ReplaceSel("");

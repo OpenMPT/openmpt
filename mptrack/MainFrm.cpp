@@ -123,7 +123,6 @@ std::vector<mpt::PathString> CMainFrame::s_TemplateModulePaths;
 HICON CMainFrame::m_hIcon = NULL;
 HFONT CMainFrame::m_hGUIFont = NULL;
 HFONT CMainFrame::m_hFixedFont = NULL;
-HFONT CMainFrame::m_hLargeFixedFont = NULL;
 HPEN CMainFrame::penDarkGray = NULL;
 HPEN CMainFrame::penScratch = NULL;
 HPEN CMainFrame::penGray00 = NULL;
@@ -298,16 +297,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_SampleIcons.Create(IDB_SMPTOOLBAR, 20, 18, SAMPLEIMG_NUMIMAGES, 1, GetDC());
 
 	m_hGUIFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
-	m_hFixedFont = ::CreateFont(12,5, 0,0, 300,
-							FALSE, FALSE, FALSE,
-							OEM_CHARSET, OUT_RASTER_PRECIS,
-							CLIP_DEFAULT_PRECIS, DRAFT_QUALITY,
-							FIXED_PITCH | FF_MODERN, "");
-	m_hLargeFixedFont = ::CreateFont(18,8, 0,0, 400,
-							FALSE, FALSE, FALSE,
-							OEM_CHARSET, OUT_RASTER_PRECIS,
-							CLIP_DEFAULT_PRECIS, DRAFT_QUALITY,
-							FIXED_PITCH | FF_MODERN, "");
 	if (m_hGUIFont == NULL) m_hGUIFont = (HFONT)GetStockObject(ANSI_VAR_FONT);
 	brushBlack = (HBRUSH)::GetStockObject(BLACK_BRUSH);
 	brushWhite = (HBRUSH)::GetStockObject(WHITE_BRUSH);
@@ -415,7 +404,6 @@ BOOL CMainFrame::DestroyWindow()
 	DeleteGDIObject(penEnvelope);
 	DeleteGDIObject(penEnvelopeHighlight);
 	DeleteGDIObject(m_hFixedFont);
-	DeleteGDIObject(m_hLargeFixedFont);
 	DeleteGDIObject(penScratch);
 	DeleteGDIObject(penGray00);
 	DeleteGDIObject(penGray33);

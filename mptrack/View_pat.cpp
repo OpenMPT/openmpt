@@ -3024,6 +3024,11 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 				} else
 				{
 					int vol = m[chn].vol + offset * (coarse ? 10 : 1);
+					if(m[chn].volcmd == VOLCMD_NONE && m[chn].IsNote() && m[chn].instr)
+					{
+						m[chn].volcmd = VOLCMD_VOLUME;
+						vol = GetDefaultVolume(m[chn]);
+					}
 					ModCommand::VOL minValue = 0, maxValue = 64;
 					effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m[chn].volcmd), nullptr, &minValue, &maxValue);
 					Limit(vol, (int)minValue, (int)maxValue);
@@ -3053,6 +3058,32 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 	SetModified(false);
 	InvalidatePattern();
 	return true;
+}
+
+
+// Get the velocity at which a given note would be played
+int CViewPattern::GetDefaultVolume(const ModCommand &m) const
+//-----------------------------------------------------------
+{
+	const CSoundFile *pSndFile = GetSoundFile();
+	SAMPLEINDEX sample = m.instr;
+	if(pSndFile->GetNumInstruments())
+	{
+		if(m.instr <= pSndFile->GetNumInstruments() && pSndFile->Instruments[m.instr])
+		{
+			sample = pSndFile->Instruments[m.instr]->Keyboard[m.note - NOTE_MIN];
+		} else
+		{
+			sample = 0;
+		}
+	}
+	if(sample && sample <= pSndFile->GetNumSamples())
+	{
+		return pSndFile->GetSample(sample).nVolume / 4;
+	} else
+	{
+		return 64;
+	}
 }
 
 

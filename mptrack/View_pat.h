@@ -20,7 +20,6 @@ class CModDoc;
 class CEditCommand;
 class CEffectVis;	//rewbs.fxvis
 class CPatternGotoDialog;
-struct PATTERNFONT;
 
 // Drag & Drop info
 #define DRAGITEM_VALUEMASK		0x00FFFFFF
@@ -315,6 +314,8 @@ public:
 	void TempEnterFX(int c, int v = -1);
 	void TempEnterFXparam(int v);
 	void EnterAftertouch(int note, int atValue);
+
+	int GetDefaultVolume(const ModCommand &m) const;
 
 	// Construct a chord from the chord presets. Returns number of notes in chord.
 	int ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord::notesPerChord], ModCommand::NOTE baseNote);

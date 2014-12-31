@@ -420,26 +420,8 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool dr
 		if(drawDefaultVolume)
 		{
 			// Displaying sample default volume if there is no volume command.
-			const CSoundFile *pSndFile = GetSoundFile();
-			SAMPLEINDEX sample = mc.instr;
-			if(pSndFile->GetNumInstruments())
-			{
-				if(mc.instr <= pSndFile->GetNumInstruments() && pSndFile->Instruments[mc.instr])
-				{
-					sample = pSndFile->Instruments[mc.instr]->Keyboard[mc.note - NOTE_MIN];
-				} else
-				{
-					sample = 0;
-				}
-			}
 			volcmd = VOLCMD_VOLUME;
-			if(sample && sample <= pSndFile->GetNumSamples())
-			{
-				vol = pSndFile->GetSample(sample).nVolume / 4;
-			} else
-			{
-				vol = 64;
-			}
+			vol = GetDefaultVolume(mc);
 		}
 
 		if(volcmd != VOLCMD_NONE)
