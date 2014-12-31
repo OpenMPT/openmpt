@@ -1516,7 +1516,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 				if (!commands[cmd].isHidden)
 				{
 					fprintf(outStream, "%d:%d:%d:%d:%d\t\t//%s: %s (%s)\n",
-							ctx, commands[cmd].UID,	kc.Modifier(), kc.KeyCode(), kc.EventType(),
+							ctx, commands[cmd].UID,	kc.Modifier(), kc.KeyCode(), kc.EventType().GetRaw(),
 							GetCommandText((CommandID)cmd), kc.GetKeyText(), kc.GetKeyEventText());
 				}
 
