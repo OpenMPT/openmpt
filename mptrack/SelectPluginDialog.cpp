@@ -105,10 +105,12 @@ BOOL CSelectPluginDlg::OnInitDialog()
 		::EnableWindow(::GetDlgItem(m_hWnd, IDOK), FALSE);
 	}
 
-	MoveWindow(TrackerSettings::Instance().gnPlugWindowX,
-		TrackerSettings::Instance().gnPlugWindowY,
-		TrackerSettings::Instance().gnPlugWindowWidth,
-		TrackerSettings::Instance().gnPlugWindowHeight);
+	const int dpiX = ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSX);
+	const int dpiY = ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSY);
+	MoveWindow(MulDiv(TrackerSettings::Instance().gnPlugWindowX, dpiX, 96),
+		MulDiv(TrackerSettings::Instance().gnPlugWindowY, dpiY, 96),
+		MulDiv(TrackerSettings::Instance().gnPlugWindowWidth, dpiX, 96),
+		MulDiv(TrackerSettings::Instance().gnPlugWindowHeight, dpiY, 96));
 
 	UpdatePluginsList();
 	OnSelChanged(NULL, NULL);
@@ -189,12 +191,7 @@ void CSelectPluginDlg::OnOK()
 	}
 
 	//remember window size:
-	RECT rect;
-	GetWindowRect(&rect);
-	TrackerSettings::Instance().gnPlugWindowX = rect.left;
-	TrackerSettings::Instance().gnPlugWindowY = rect.top;
-	TrackerSettings::Instance().gnPlugWindowWidth  = rect.right - rect.left;
-	TrackerSettings::Instance().gnPlugWindowHeight = rect.bottom - rect.top;
+	SaveWindowPos();
 
 	if(changed)
 	{
@@ -216,14 +213,22 @@ void CSelectPluginDlg::OnCancel()
 //-------------------------------
 {
 	//remember window size:
-	RECT rect;
-	GetWindowRect(&rect);
-	TrackerSettings::Instance().gnPlugWindowX = rect.left;
-	TrackerSettings::Instance().gnPlugWindowY = rect.top;
-	TrackerSettings::Instance().gnPlugWindowWidth  = rect.right - rect.left;
-	TrackerSettings::Instance().gnPlugWindowHeight = rect.bottom - rect.top;
-
+	SaveWindowPos();
 	CDialog::OnCancel();
+}
+
+
+void CSelectPluginDlg::SaveWindowPos() const
+//------------------------------------------
+{
+	CRect rect;
+	GetWindowRect(&rect);
+	const int dpiX = ::GetDeviceCaps(::GetDC(m_hWnd), LOGPIXELSX);
+	const int dpiY = ::GetDeviceCaps(::GetDC(m_hWnd), LOGPIXELSY);
+	TrackerSettings::Instance().gnPlugWindowX = MulDiv(rect.left, 96, dpiX);
+	TrackerSettings::Instance().gnPlugWindowY = MulDiv(rect.top, 96, dpiY);
+	TrackerSettings::Instance().gnPlugWindowWidth  = MulDiv(rect.Width(), 96, dpiY);
+	TrackerSettings::Instance().gnPlugWindowHeight = MulDiv(rect.Height(), 96, dpiX);
 }
 
 
@@ -723,21 +728,26 @@ void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialog::OnSize(nType, cx, cy);
 
+	const int dpiX = ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSX);
+	const int dpiY = ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSY);
+
 	if (m_treePlugins)
 	{
-		m_treePlugins.MoveWindow(8, 36, cx - 109, cy - 88, FALSE);
+		m_treePlugins.MoveWindow(MulDiv(8, dpiX, 96), MulDiv(36, dpiY, 96), cx - MulDiv(109, dpiX, 96), cy - MulDiv(88, dpiY, 96), FALSE);
 
-		GetDlgItem(IDC_STATIC_VSTNAMEFILTER)->MoveWindow(8, 11, 40, 21, FALSE);
-		GetDlgItem(IDC_NAMEFILTER)->MoveWindow(40, 8, cx - 141, 21, FALSE);
-		GetDlgItem(IDC_TEXT_CURRENT_VSTPLUG)->MoveWindow(8, cy - 45, cx - 22, 20, FALSE);
-		m_chkBridge.MoveWindow(8, cy - 25, 110, 20, FALSE);
-		m_chkShare.MoveWindow(120, cy - 25, cx - 128, 20, FALSE);
-		const int rightOff = cx - 90;	// Offset of right button column
-		GetDlgItem(IDOK)->MoveWindow(		rightOff,	8,			80, 23, FALSE);
-		GetDlgItem(IDCANCEL)->MoveWindow(	rightOff,	39,			80, 23, FALSE);
-		GetDlgItem(IDC_BUTTON1)->MoveWindow(rightOff,	cy - 133,	80, 23, FALSE);
-		GetDlgItem(IDC_BUTTON3)->MoveWindow(rightOff,	cy - 105,	80, 23, FALSE);
-		GetDlgItem(IDC_BUTTON2)->MoveWindow(rightOff,	cy - 77,	80, 23, FALSE);
+		GetDlgItem(IDC_STATIC_VSTNAMEFILTER)->MoveWindow(MulDiv(8, dpiX, 96), MulDiv(11, dpiY, 96), MulDiv(40, dpiX, 96), MulDiv(21, dpiY, 96), FALSE);
+		GetDlgItem(IDC_NAMEFILTER)->MoveWindow(MulDiv(40, dpiX, 96), MulDiv(8, dpiY, 96), cx - MulDiv(141, dpiX, 96), MulDiv(21, dpiY, 96), FALSE);
+		GetDlgItem(IDC_TEXT_CURRENT_VSTPLUG)->MoveWindow(MulDiv(8, dpiX, 96), cy - MulDiv(45, dpiY, 96), cx - MulDiv(22, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
+		m_chkBridge.MoveWindow(MulDiv(8, dpiX, 96), cy - MulDiv(25, dpiY, 96), MulDiv(110, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
+		m_chkShare.MoveWindow(MulDiv(120, dpiX, 96), cy - MulDiv(25, dpiY, 96), cx - MulDiv(128, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
+
+		const int rightOff = cx - MulDiv(90, dpiX, 96);	// Offset of right button column
+		const int buttonWidth = MulDiv(80, dpiX, 96), buttonHeight = MulDiv(23, dpiY, 96);
+		GetDlgItem(IDOK)->MoveWindow(		rightOff,	MulDiv(8, dpiY, 96),		buttonWidth, buttonHeight, FALSE);
+		GetDlgItem(IDCANCEL)->MoveWindow(	rightOff,	MulDiv(39, dpiY, 96),		buttonWidth, buttonHeight, FALSE);
+		GetDlgItem(IDC_BUTTON1)->MoveWindow(rightOff,	cy - MulDiv(133, dpiY, 96),	buttonWidth, buttonHeight, FALSE);
+		GetDlgItem(IDC_BUTTON3)->MoveWindow(rightOff,	cy - MulDiv(105, dpiY, 96),	buttonWidth, buttonHeight, FALSE);
+		GetDlgItem(IDC_BUTTON2)->MoveWindow(rightOff,	cy - MulDiv(77, dpiY, 96),	buttonWidth, buttonHeight, FALSE);
 		Invalidate();
 	}
 }
@@ -745,8 +755,8 @@ void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 void CSelectPluginDlg::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 //-------------------------------------------------------
 {
-	lpMMI->ptMinTrackSize.x = 350;
-	lpMMI->ptMinTrackSize.y = 270;
+	lpMMI->ptMinTrackSize.x = MulDiv(350, ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSX), 96);
+	lpMMI->ptMinTrackSize.y = MulDiv(270, ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSY), 96);
 	CDialog::OnGetMinMaxInfo(lpMMI);
 }
 
