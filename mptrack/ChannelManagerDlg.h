@@ -12,11 +12,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#define CM_BT_LEFT		1
-#define CM_BT_RIGHT		2
-#define CM_NB_COLS		8
-#define CM_BT_HEIGHT	22
-
 //======================================
 class CChannelManagerDlg: public CDialog
 //======================================
@@ -47,6 +42,7 @@ protected:
 	bool select[MAX_BASECHANNELS];
 	bool state[MAX_BASECHANNELS];
 	CRect move[MAX_BASECHANNELS];
+	CRect m_drawableArea;
 	void * parentCtrl;
 	bool mouseTracking;
 	CHANNELINDEX nChannelsOld;
@@ -58,6 +54,7 @@ protected:
 	int omx,omy;
 	bool show;
 	int mx,my;
+	int buttonHeight;
 
 	bool ButtonHit(CPoint point, CHANNELINDEX * id, CRect * invalidate);
 	void MouseEvent(UINT nFlags,CPoint point, BYTE button);
