@@ -159,7 +159,7 @@ protected:
 	CFastBitmap m_Dib;
 	CEditCommand *m_pEditWnd;
 	CPatternGotoDialog *m_pGotoWnd;
-	SIZE m_szHeader, m_szCell;
+	CSize m_szHeader, m_szPluginHeader, m_szCell;
 	UINT m_nMidRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
 	FlagSet<PatternStatus> m_Status;
 	ROWINDEX m_nPlayRow;
