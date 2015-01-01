@@ -105,8 +105,8 @@ BOOL CSelectPluginDlg::OnInitDialog()
 		::EnableWindow(::GetDlgItem(m_hWnd, IDOK), FALSE);
 	}
 
-	const int dpiX = ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSX);
-	const int dpiY = ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSY);
+	const int dpiX = Util::GetDPIx(m_hWnd);
+	const int dpiY = Util::GetDPIy(m_hWnd);
 	MoveWindow(MulDiv(TrackerSettings::Instance().gnPlugWindowX, dpiX, 96),
 		MulDiv(TrackerSettings::Instance().gnPlugWindowY, dpiY, 96),
 		MulDiv(TrackerSettings::Instance().gnPlugWindowWidth, dpiX, 96),
@@ -223,8 +223,8 @@ void CSelectPluginDlg::SaveWindowPos() const
 {
 	CRect rect;
 	GetWindowRect(&rect);
-	const int dpiX = ::GetDeviceCaps(::GetDC(m_hWnd), LOGPIXELSX);
-	const int dpiY = ::GetDeviceCaps(::GetDC(m_hWnd), LOGPIXELSY);
+	const int dpiX = Util::GetDPIx(m_hWnd);
+	const int dpiY = Util::GetDPIy(m_hWnd);
 	TrackerSettings::Instance().gnPlugWindowX = MulDiv(rect.left, 96, dpiX);
 	TrackerSettings::Instance().gnPlugWindowY = MulDiv(rect.top, 96, dpiY);
 	TrackerSettings::Instance().gnPlugWindowWidth  = MulDiv(rect.Width(), 96, dpiY);
@@ -728,8 +728,8 @@ void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialog::OnSize(nType, cx, cy);
 
-	const int dpiX = ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSX);
-	const int dpiY = ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSY);
+	const int dpiX = Util::GetDPIx(m_hWnd);
+	const int dpiY = Util::GetDPIy(m_hWnd);
 
 	if (m_treePlugins)
 	{
@@ -755,8 +755,8 @@ void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 void CSelectPluginDlg::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 //-------------------------------------------------------
 {
-	lpMMI->ptMinTrackSize.x = MulDiv(350, ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSX), 96);
-	lpMMI->ptMinTrackSize.y = MulDiv(270, ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSY), 96);
+	lpMMI->ptMinTrackSize.x = MulDiv(350, Util::GetDPIx(m_hWnd), 96);
+	lpMMI->ptMinTrackSize.y = MulDiv(270, Util::GetDPIy(m_hWnd), 96);
 	CDialog::OnGetMinMaxInfo(lpMMI);
 }
 

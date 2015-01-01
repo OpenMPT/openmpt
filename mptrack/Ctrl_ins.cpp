@@ -890,6 +890,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 {
 	CModControlDlg::OnInitDialog();
 	m_bInitialized = FALSE;
+	SetRedraw(FALSE);
 
 	m_ToolBar.Init(CMainFrame::GetMainFrame()->m_PatternIcons,CMainFrame::GetMainFrame()->m_PatternIconsDisabled);
 	m_ToolBar.AddButton(IDC_INSTRUMENT_NEW, TIMAGE_INSTR_NEW);
@@ -970,6 +971,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, MF_UNCHECKED);
 	m_EditPitchTempoLock.SetLimitText(4);
 
+	SetRedraw(TRUE);
 	return FALSE;
 }
 

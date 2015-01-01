@@ -28,7 +28,7 @@ public:
 	{
 		for(int i = 0; i < numItems; i++)
 		{
-			InsertColumn(i, header[i].text, header[i].mask, Util::ScalePixels(header[i].width, GetDC()));
+			InsertColumn(i, header[i].text, header[i].mask, Util::ScalePixels(header[i].width, m_hWnd));
 		}
 	}
 

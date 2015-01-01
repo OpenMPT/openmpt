@@ -56,9 +56,21 @@ public:
 	}
 	
 	// Scale X coordinate for DPI-awareness
-	static int ScaleX(HWND hwnd, int x) { return MulDiv(x, ::GetDeviceCaps(::GetDC(hwnd), LOGPIXELSX), 96); }
+	static int ScaleX(HWND hwnd, int x)
+	{
+		HDC dc = ::GetDC(hwnd);
+		int dpi = MulDiv(x, ::GetDeviceCaps(dc, LOGPIXELSX), 96);
+		::ReleaseDC(hwnd, dc);
+		return dpi;
+	}
 	// Scale Y coordinate for DPI-awareness
-	static int ScaleY(HWND hwnd, int y) { return MulDiv(y, ::GetDeviceCaps(::GetDC(hwnd), LOGPIXELSY), 96); }
+	static int ScaleY(HWND hwnd, int y)
+	{
+		HDC dc = ::GetDC(hwnd);
+		int dpi = MulDiv(y, ::GetDeviceCaps(dc, LOGPIXELSY), 96);
+		::ReleaseDC(hwnd, dc);
+		return dpi;
+	}
 };
 
 

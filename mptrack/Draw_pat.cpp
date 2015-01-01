@@ -132,11 +132,9 @@ bool CViewPattern::UpdateSizes()
 	if (m_nDetailLevel >= PatternCursor::effectColumn) m_szCell.cx += pfnt->nEltWidths[3] + pfnt->nEltWidths[4];
 	m_szCell.cy = pfnt->nHeight;
 
-	const int dpiX = ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSX);
-	const int dpiY = ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSY);
-	m_szHeader.cx = MulDiv(m_szHeader.cx, dpiX, 96);
-	m_szHeader.cy = MulDiv(m_szHeader.cy, dpiY, 96);
-	m_szPluginHeader.cy = MulDiv(m_szPluginHeader.cy, dpiY, 96);
+	m_szHeader.cx = MulDiv(m_szHeader.cx, m_nDPIx, 96);
+	m_szHeader.cy = MulDiv(m_szHeader.cy, m_nDPIy, 96);
+	m_szPluginHeader.cy = MulDiv(m_szPluginHeader.cy, m_nDPIy, 96);
 	m_szHeader.cy += m_szPluginHeader.cy;
 
 	if(oldy != m_szCell.cy)
@@ -168,7 +166,7 @@ void CViewPattern::UpdateView(UpdateHint hint, CObject *pObj)
 	}
 	if(hint.GetType()[HINT_MPTOPTIONS])
 	{
-		PatternFont::UpdateFont(GetDC());
+		PatternFont::UpdateFont(m_hWnd);
 		UpdateColors();
 		UpdateSizes();
 		UpdateScrollSize();
@@ -226,7 +224,7 @@ POINT CViewPattern::GetPointFromPosition(PatternCursor cursor)
 	}
 
 	if (pt.x < 0) pt.x = 0;
-	pt.x += Util::ScalePixels(ROWHDR_WIDTH, GetDC());
+	pt.x += Util::ScalePixels(ROWHDR_WIDTH, m_hWnd);
 	pt.y = (cursor.GetRow() - yofs + m_nMidRow) * m_szCell.cy;
 
 	if (pt.y < 0) pt.y = 0;
@@ -468,11 +466,9 @@ void CViewPattern::OnDraw(CDC *pDC)
 	UpdateSizes();
 	if ((pModDoc = GetDocument()) == nullptr) return;
 	
-	const int dpiX = ::GetDeviceCaps(pDC->m_hDC, LOGPIXELSX);
-	const int dpiY = ::GetDeviceCaps(pDC->m_hDC, LOGPIXELSY);
-	const int vuHeight = MulDiv(VUMETERS_HEIGHT, dpiY, 96);
-	const int colHeight = MulDiv(COLHDR_HEIGHT, dpiY, 96);
-	const int recordInsX = MulDiv(3, dpiY, 96);
+	const int vuHeight = MulDiv(VUMETERS_HEIGHT, m_nDPIy, 96);
+	const int colHeight = MulDiv(COLHDR_HEIGHT, m_nDPIy, 96);
+	const int recordInsX = MulDiv(3, m_nDPIy, 96);
 
 	GetClientRect(&rcClient);
 	hdc = pDC->m_hDC;
@@ -1679,7 +1675,7 @@ void CViewPattern::UpdateAllVUMeters(Notification *pnotify)
 	const bool isPlaying = (pMainFrm->GetFollowSong(pModDoc) == m_hWnd);
 	int x = m_szHeader.cx;
 	CHANNELINDEX nChn = static_cast<CHANNELINDEX>(xofs);
-	const int yPos = rcClient.top + MulDiv(COLHDR_HEIGHT, ::GetDeviceCaps(hdc, LOGPIXELSY), 96);
+	const int yPos = rcClient.top + MulDiv(COLHDR_HEIGHT, m_nDPIy, 96);
 	while ((nChn < pModDoc->GetNumChannels()) && (x < rcClient.right))
 	{
 		ChnVUMeters[nChn] = (WORD)pnotify->pos[nChn];

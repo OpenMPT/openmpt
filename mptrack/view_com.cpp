@@ -108,6 +108,7 @@ CViewComments::CViewComments()
 void CViewComments::OnInitialUpdate()
 //-----------------------------------
 {
+	CModScrollView::OnInitialUpdate();
 	if(m_nListId == 0)
 	{
 		m_nListId = IDC_LIST_SAMPLES;

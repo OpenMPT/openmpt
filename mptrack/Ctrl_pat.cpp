@@ -125,6 +125,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	CModControlDlg::OnInitDialog();
 
 	if(!pMainFrm) return TRUE;
+	SetRedraw(FALSE);
 	LockControls();
 	// Order List
 	m_BtnNext.GetWindowRect(&rect);
@@ -206,6 +207,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_bInitialized = TRUE;
 	UnlockControls();
 
+	SetRedraw(TRUE);
 	return FALSE;
 }
 

@@ -149,10 +149,10 @@ CViewSample::~CViewSample()
 void CViewSample::OnInitialUpdate()
 //---------------------------------
 {
+	CModScrollView::OnInitialUpdate();
 	m_dwBeginSel = m_dwEndSel = 0;
 	m_dwStatus.reset(SMPSTATUS_DRAWING);
 	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
-	CModScrollView::OnInitialUpdate();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm)
 	{

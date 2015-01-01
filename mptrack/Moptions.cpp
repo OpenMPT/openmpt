@@ -225,7 +225,7 @@ void COptionsColors::OnChoosePatternFont()
 	MemsetZero(lf);
 	const int32_t size = patternFont.size < 10 ? 120 : patternFont.size;
 	// Point size to pixels
-	lf.lfHeight = -MulDiv(size, GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSY), 720);
+	lf.lfHeight = -MulDiv(size, Util::GetDPIy(m_hWnd), 720);
 	lf.lfWeight = patternFont.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL;
 	lf.lfItalic = patternFont.flags[FontSetting::Italic] ? TRUE : FALSE;
 	mpt::String::Copy(lf.lfFaceName, patternFont.name);
@@ -261,7 +261,7 @@ void COptionsColors::OnChooseCommentFont()
 	LOGFONT lf;
 	MemsetZero(lf);
 	// Point size to pixels
-	lf.lfHeight = -MulDiv(commentFont.size, GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSY), 720);
+	lf.lfHeight = -MulDiv(commentFont.size, Util::GetDPIy(m_hWnd), 720);
 	lf.lfWeight = commentFont.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL;
 	lf.lfItalic = commentFont.flags[FontSetting::Italic] ? TRUE : FALSE;
 	mpt::String::Copy(lf.lfFaceName, commentFont.name);

@@ -168,6 +168,7 @@ CViewPattern::CViewPattern()
 void CViewPattern::OnInitialUpdate()
 //----------------------------------
 {
+	CModScrollView::OnInitialUpdate();
 	MemsetZero(ChnVUMeters);
 	MemsetZero(OldVUMeters);
 // -> CODE#0012
@@ -186,8 +187,7 @@ void CViewPattern::OnInitialUpdate()
 	m_nPattern = 0;
 	m_nSpacing = 0;
 	m_nAccelChar = 0;
-	CScrollView::OnInitialUpdate();
-	PatternFont::UpdateFont(GetDC());
+	PatternFont::UpdateFont(m_hWnd);
 	UpdateSizes();
 	UpdateScrollSize();
 	SetCurrentPattern(0);

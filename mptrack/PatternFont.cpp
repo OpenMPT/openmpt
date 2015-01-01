@@ -107,8 +107,8 @@ static void DrawString(HDC hDC, const char_t *text, int len, int x, int y, int w
 	}
 }
 
-void PatternFont::UpdateFont(CDC *dc)
-//-----------------------------------
+void PatternFont::UpdateFont(HWND hwnd)
+//-------------------------------------
 {
 	FontSetting font = TrackerSettings::Instance().patternFont;
 	const PATTERNFONT *builtinFont = nullptr;
@@ -238,11 +238,11 @@ void PatternFont::UpdateFont(CDC *dc)
 	}
 
 	// Create our own font!
-	// Point size to pixels
-	font.size = -MulDiv(font.size, ::GetDeviceCaps(dc->m_hDC, LOGPIXELSY), 720);
 
 	CDC hDC;
-	hDC.CreateCompatibleDC(dc);
+	hDC.CreateCompatibleDC(CDC::FromHandle(::GetDC(hwnd)));
+	// Point size to pixels
+	font.size = -MulDiv(font.size, Util::GetDPIy(hwnd), 720);
 
 	CFont gdiFont;
 	gdiFont.CreateFont(font.size, 0, 0, 0, font.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL, font.flags[FontSetting::Italic] ? TRUE : FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_RASTER_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, FIXED_PITCH | FF_DONTCARE, font.name.c_str());

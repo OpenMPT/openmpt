@@ -429,7 +429,7 @@ void CEffectVis::DrawNodes()
 		return;
 
 	//Draw
-	const int lineWidth = Util::ScalePixels(1, GetDC());
+	const int lineWidth = Util::ScalePixels(1, m_hWnd);
 	const int nodeSizeHalf = m_nodeSizeHalf;
 	const int nodeSizeHalf2 = nodeSizeHalf - lineWidth + 1;
 	const int nodeSize = 2 * nodeSizeHalf + 1;
@@ -753,7 +753,7 @@ BOOL CEffectVis::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	int dpi = GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSX);
+	int dpi = Util::GetDPIx(m_hWnd);
 	m_nodeSizeHalf = MulDiv(3, dpi, 96);
 	m_marginBottom = MulDiv(20, dpi, 96);
 	m_innerBorder = MulDiv(4, dpi, 96);
