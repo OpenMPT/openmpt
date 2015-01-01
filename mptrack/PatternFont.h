@@ -46,7 +46,7 @@ class PatternFont
 public:
 	static const PATTERNFONT *currentFont;
 
-	static void UpdateFont(CDC *dc);
+	static void UpdateFont(HWND hwnd);
 	static void DeleteFontData();
 };
 

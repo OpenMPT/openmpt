@@ -119,7 +119,7 @@ void CChildFrame::SetSplitterHeight(int cy)
 //------------------------------------------
 {
 	if (cy <= 1) cy = 188;	//default to 188? why not..
-	m_wndSplitter.SetRowInfo(0, Util::ScalePixels(cy, GetDC()), 15);
+	m_wndSplitter.SetRowInfo(0, Util::ScalePixels(cy, m_hWnd), 15);
 }
 
 
@@ -248,7 +248,7 @@ void CChildFrame::SavePosition(BOOL bForce)
 			if (pWnd)
 			{
 				pWnd->GetWindowRect(&rect);
-				int l = Util::ScalePixelsInv(rect.Height(), GetDC());
+				int l = Util::ScalePixelsInv(rect.Height(), m_hWnd);
 				//rewbs.varWindowSize - not the nicest piece of code, but we need to distinguish btw the views:
 				if (strcmp(CViewGlobals::classCViewGlobals.m_lpszClassName, m_szCurrentViewClassName) == 0)
 					TrackerSettings::Instance().glGeneralWindowHeight = l;
@@ -277,7 +277,7 @@ int CChildFrame::GetSplitterHeight()
 		if (pWnd)
 		{
 			pWnd->GetWindowRect(&rect);
-			return Util::ScalePixelsInv(rect.Height(), GetDC());
+			return Util::ScalePixelsInv(rect.Height(), m_hWnd);
 		}
 	}
 	return 15;	// tidy default

@@ -117,7 +117,7 @@ void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 	static FontSetting previousFont;
 	FontSetting font = TrackerSettings::Instance().commentsFont;
 	// Point size to pixels
-	int32_t fontSize = -MulDiv(font.size, ::GetDeviceCaps(GetDC()->m_hDC, LOGPIXELSY), 720);
+	int32_t fontSize = -MulDiv(font.size, m_nDPIy, 720);
 	charWidth = (-fontSize + 1) / 2;
 	if(previousFont != font)
 	{

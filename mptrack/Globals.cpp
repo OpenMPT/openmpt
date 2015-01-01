@@ -37,6 +37,11 @@ OPENMPT_NAMESPACE_BEGIN
 BEGIN_MESSAGE_MAP(CModControlDlg, CDialog)
 	//{{AFX_MSG_MAP(CModControlDlg)
 	ON_WM_SIZE()
+#ifdef WM_DPICHANGED
+	ON_MESSAGE(WM_DPICHANGED, OnDPIChanged)
+#else
+	ON_MESSAGE(0x02E0, OnDPIChanged)
+#endif
 	ON_MESSAGE(WM_MOD_UNLOCKCONTROLS,		OnUnlockControls)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipText)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipText)
@@ -64,8 +69,19 @@ BOOL CModControlDlg::OnInitDialog()
 //---------------------------------
 {
 	CDialog::OnInitDialog();
+	m_nDPIx = Util::GetDPIx(m_hWnd);
+	m_nDPIy = Util::GetDPIy(m_hWnd);
 	EnableToolTips(TRUE);
 	return TRUE;
+}
+
+
+LRESULT CModControlDlg::OnDPIChanged(WPARAM wParam, LPARAM)
+//---------------------------------------------------------
+{
+	m_nDPIx = LOWORD(wParam);
+	m_nDPIy = HIWORD(wParam);
+	return 0;
 }
 
 
@@ -227,6 +243,7 @@ BOOL CModControlView::PreCreateWindow(CREATESTRUCT& cs)
 void CModControlView::OnInitialUpdate() // called first time after construct
 //-------------------------------------
 {
+	CView::OnInitialUpdate();
 	CRect rect;
 
 	CChildFrame *pParentFrame = (CChildFrame *)GetParentFrame();
@@ -545,6 +562,11 @@ BEGIN_MESSAGE_MAP(CModScrollView, CScrollView)
 	//{{AFX_MSG_MAP(CModScrollView)
 	ON_WM_DESTROY()
 	ON_WM_MOUSEWHEEL()
+#ifdef WM_DPICHANGED
+	ON_MESSAGE(WM_DPICHANGED, OnDPIChanged)
+#else
+	ON_MESSAGE(0x02E0, OnDPIChanged)
+#endif
 	ON_MESSAGE(WM_MOD_VIEWMSG,			OnReceiveModViewMsg)
 	ON_MESSAGE(WM_MOD_DRAGONDROPPING,	OnDragonDropping)
 	ON_MESSAGE(WM_MOD_UPDATEPOSITION,	OnUpdatePosition)
@@ -597,6 +619,24 @@ LRESULT CModScrollView::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		SetFocus();
 		break;
 	}
+	return 0;
+}
+
+
+void CModScrollView::OnInitialUpdate()
+//------------------------------------
+{
+	CScrollView::OnInitialUpdate();
+	m_nDPIx = Util::GetDPIx(m_hWnd);
+	m_nDPIy = Util::GetDPIy(m_hWnd);
+}
+
+
+LRESULT CModScrollView::OnDPIChanged(WPARAM wParam, LPARAM)
+//---------------------------------------------------------
+{
+	m_nDPIx = LOWORD(wParam);
+	m_nDPIy = HIWORD(wParam);
 	return 0;
 }
 

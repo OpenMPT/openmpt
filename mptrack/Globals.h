@@ -48,6 +48,7 @@ protected:
 	CModControlView &m_parent;
 	HWND m_hWndView;
 	LONG m_nLockCount;
+	int m_nDPIx, m_nDPIy;	// Cached DPI settings
 	BOOL m_bInitialized;
 
 public:
@@ -96,6 +97,7 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnUnlockControls(WPARAM, LPARAM) { if (m_nLockCount > 0) m_nLockCount--; return 0; }
 	afx_msg BOOL OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg LRESULT OnDPIChanged(WPARAM = 0, LPARAM = 0);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
@@ -199,6 +201,7 @@ class CModScrollView: public CScrollView
 protected:
 	HWND m_hWndCtrl;
 	int m_nScrollPosX, m_nScrollPosY;
+	int m_nDPIx, m_nDPIy;	// Cached DPI settings
 
 public:
 	DECLARE_SERIAL(CModScrollView)
@@ -213,6 +216,7 @@ public:
 
 public:
 	//{{AFX_VIRTUAL(CModScrollView)
+	virtual void OnInitialUpdate();
 	virtual void OnDraw(CDC *) {}
 	virtual void OnPrepareDC(CDC*, CPrintInfo*) {}
 	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
@@ -230,7 +234,8 @@ protected:
 	afx_msg LRESULT OnReceiveModViewMsg(WPARAM wParam, LPARAM lParam);
 	afx_msg BOOL OnMouseWheel(UINT fFlags, short zDelta, CPoint point);
 	afx_msg LRESULT OnDragonDropping(WPARAM bDoDrop, LPARAM lParam) { return OnDragonDrop((BOOL)bDoDrop, (const DRAGONDROP *)lParam); }
-	LRESULT OnUpdatePosition(WPARAM, LPARAM);
+	afx_msg LRESULT OnUpdatePosition(WPARAM, LPARAM);
+	afx_msg LRESULT OnDPIChanged(WPARAM = 0, LPARAM = 0);
 
 	// Fixes for 16-bit limitation in MFC's CScrollView
 	virtual BOOL OnScroll(UINT nScrollCode, UINT nPos, BOOL bDoScroll = TRUE);

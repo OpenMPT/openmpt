@@ -153,8 +153,8 @@ CViewInstrument::CViewInstrument()
 void CViewInstrument::OnInitialUpdate()
 //-------------------------------------
 {
-	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
 	CModScrollView::OnInitialUpdate();
+	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
 	UpdateScrollSize();
 }
 

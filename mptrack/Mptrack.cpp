@@ -1052,7 +1052,7 @@ BOOL CTrackApp::InitInstance()
 	{
 		// On high-DPI devices, automatically upscale pattern font
 		FontSetting font = TrackerSettings::Instance().patternFont;
-		font.size = Clamp(::GetDeviceCaps(m_pMainWnd->GetDC()->m_hDC, LOGPIXELSX) / 96 - 1, 0, 9);
+		font.size = Clamp(Util::GetDPIy(m_pMainWnd->m_hWnd) / 96 - 1, 0, 9);
 		TrackerSettings::Instance().patternFont = font;
 		new WelcomeDlg(m_pMainWnd);
 	}
@@ -1348,7 +1348,9 @@ void CSplashScreen::OnPaint()
 BOOL CSplashScreen::OnInitDialog()
 //--------------------------------
 {
-	bitmap->ToDIB(m_Bitmap, GetDC());
+	CDC *dc = GetDC();
+	bitmap->ToDIB(m_Bitmap, dc);
+	ReleaseDC(dc);
 
 	CRect rect;
 	int cx, cy, newcx, newcy;

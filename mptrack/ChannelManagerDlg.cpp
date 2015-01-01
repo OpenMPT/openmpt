@@ -611,8 +611,8 @@ void CChannelManagerDlg::OnSize(UINT nType,int cx,int cy)
 	CRect wnd;
 	GetClientRect(&wnd);
 
-	const int dpiX = ::GetDeviceCaps(::GetDC(m_hWnd), LOGPIXELSX);
-	const int dpiY = ::GetDeviceCaps(::GetDC(m_hWnd), LOGPIXELSY);
+	const int dpiX = Util::GetDPIx(m_hWnd);
+	const int dpiY = Util::GetDPIy(m_hWnd);
 
 	// Move butttons to bottom of the window
 	static const int buttons[] = { IDC_BUTTON1, IDC_BUTTON2, IDC_BUTTON3, IDC_BUTTON4, IDC_BUTTON5, IDC_BUTTON6 };
@@ -633,15 +633,17 @@ void CChannelManagerDlg::OnSize(UINT nType,int cx,int cy)
 	buttonHeight = MulDiv(CM_BT_HEIGHT, dpiY, 96);
 
 	if(bkgnd) DeleteObject(bkgnd);
-	bkgnd = ::CreateCompatibleBitmap(::GetDC(m_hWnd), wnd.Width(), wnd.Height());
+	HDC dc = ::GetDC(m_hWnd);
+	bkgnd = ::CreateCompatibleBitmap(dc, wnd.Width(), wnd.Height());
 	if(!moveRect && bkgnd)
 	{
-		HDC bdc = ::CreateCompatibleDC(::GetDC(m_hWnd));
+		HDC bdc = ::CreateCompatibleDC(dc);
 		::SelectObject(bdc,bkgnd);
-		::BitBlt(bdc,0,0,wnd.Width(),wnd.Height(),::GetDC(m_hWnd),wnd.left,wnd.top,SRCCOPY);
+		::BitBlt(bdc,0,0,wnd.Width(),wnd.Height(), dc,wnd.left,wnd.top,SRCCOPY);
 		::SelectObject(bdc,(HBITMAP)NULL);
 		::DeleteDC(bdc);
 	}
+	::ReleaseDC(m_hWnd, dc);
 
 	nChannelsOld = 0;
 	InvalidateRect(NULL, FALSE);
@@ -682,8 +684,8 @@ void CChannelManagerDlg::OnPaint()
 	PAINTSTRUCT pDC;
 	::BeginPaint(m_hWnd,&pDC);
 
-	const int dpiX = ::GetDeviceCaps(pDC.hdc, LOGPIXELSX);
-	const int dpiY = ::GetDeviceCaps(pDC.hdc, LOGPIXELSY);
+	const int dpiX = Util::GetDPIx(m_hWnd);
+	const int dpiY = Util::GetDPIy(m_hWnd);
 
 	CHAR s[256];
 	UINT c=0,l=0;
@@ -1130,14 +1132,16 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 					if(select[n] || button == 0)
 					{
 						invalidate = client = m_drawableArea;
-						if(!bkgnd) bkgnd = ::CreateCompatibleBitmap(::GetDC(m_hWnd),client.Width(),client.Height());
+						HDC dc = ::GetDC(m_hWnd);
+						if(!bkgnd) bkgnd = ::CreateCompatibleBitmap(dc,client.Width(),client.Height());
 						if(!moveRect && bkgnd){
-							HDC bdc = ::CreateCompatibleDC(::GetDC(m_hWnd));
+							HDC bdc = ::CreateCompatibleDC(dc);
 							::SelectObject(bdc,bkgnd);
-							::BitBlt(bdc,0,0,client.Width(),client.Height(),::GetDC(m_hWnd),client.left,client.top,SRCCOPY);
+							::BitBlt(bdc,0,0,client.Width(),client.Height(), dc,client.left,client.top,SRCCOPY);
 							::SelectObject(bdc,(HBITMAP)NULL);
 							::DeleteDC(bdc);
 						}
+						::ReleaseDC(m_hWnd, dc);
 						moveRect = true;
 					}
 					break;

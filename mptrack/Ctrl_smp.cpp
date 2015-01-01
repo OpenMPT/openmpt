@@ -199,6 +199,7 @@ BOOL CCtrlSamples::OnInitDialog()
 {
 	CModControlDlg::OnInitDialog();
 	m_bInitialized = FALSE;
+	SetRedraw(FALSE);
 
 	// Zoom Selection
 	m_ComboZoom.SetItemData(m_ComboZoom.AddString("Auto"), 0);
@@ -315,6 +316,7 @@ BOOL CCtrlSamples::OnInitDialog()
 	// Stretch to size check box
 	OnEnableStretchToSize();
 
+	SetRedraw(TRUE);
 	return TRUE;
 }
 

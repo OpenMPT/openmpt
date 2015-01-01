@@ -1131,7 +1131,9 @@ BOOL CInputDlg::OnInitDialog()
 
 	// Find out how big our label shall be
 	CSize size;
-	GetTextExtentPoint32(GetDC()->GetSafeHdc(), description, strlen(description), &size);
+	HDC dc = ::GetDC(m_hWnd);
+	GetTextExtentPoint32(dc, description, strlen(description), &size);
+	::ReleaseDC(m_hWnd, dc);
 	if(size.cx < 320) size.cx = 320;
 	const int windowWidth = windowRect.Width() - labelRect.Width() + size.cx;
 	const int windowHeight = windowRect.Height() - labelRect.Height() + size.cy;
