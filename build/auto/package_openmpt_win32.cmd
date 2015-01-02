@@ -19,8 +19,10 @@ del /f /q openmpt-win32.tar
 del /f /q openmpt-win32-%GOT_REVISION%.7z
 copy /y ..\..\LICENSE .\ || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 openmpt-win32-%GOT_REVISION%.7z mptrack.exe OpenMPT_SoundTouch_f32.dll "MIDI Input Output.dll" PluginBridge32.exe PluginBridge64.exe LICENSE || goto error
-"C:\Program Files\7-Zip\7z.exe" a -ttar openmpt-win32.tar openmpt-win32-%GOT_REVISION%.7z || goto error
+"C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 openmpt-win32-%GOT_REVISION%-symbols.7z mptrack.pdb || goto error
+"C:\Program Files\7-Zip\7z.exe" a -ttar openmpt-win32.tar openmpt-win32-%GOT_REVISION%.7z openmpt-win32-%GOT_REVISION%-symbols.7z || goto error
 del /f /q openmpt-win32-%GOT_REVISION%.7z
+del /f /q openmpt-win32-%GOT_REVISION%-symbols.7z
 cd ..\.. || goto error
 
 
