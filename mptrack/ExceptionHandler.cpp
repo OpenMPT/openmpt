@@ -16,6 +16,7 @@
 #include "ExceptionHandler.h"
 #include "../common/WriteMemoryDump.h"
 #include "../common/version.h"
+#include "../common/mptFileIO.h"
 
 #include <WinIoCtl.h>
 
@@ -200,6 +201,12 @@ void DebugReporter::ReportError(CString errorMessage)
 		MptVersion::GetVersionStringExtended().c_str(),
 		MptVersion::GetVersionUrlString().c_str()
 		);
+
+	{
+		mpt::ofstream f(crashDirectory.path + MPT_PATHSTRING("error.txt"), std::ios::binary);
+		f.imbue(std::locale::classic());
+		f << mpt::String::Replace(mpt::ToCharset(mpt::CharsetUTF8, errorMessage), "\n", "\r\n");
+	}
 
 	Reporting::Error(errorMessage, (mode == DumpModeWarning) ? "OpenMPT Warning" : "OpenMPT Crash", CMainFrame::GetMainFrame());
 
