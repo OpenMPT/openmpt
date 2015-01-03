@@ -397,12 +397,12 @@ std::string GetFullCreditsString()
 #else
 		"libopenmpt (based on OpenMPT / ModPlug Tracker)\n"
 #endif
-		"Copyright \xC2\xA9 2004-2014 Contributors\n"
+		"Copyright \xC2\xA9 2004-2015 Contributors\n"
 		"Copyright \xC2\xA9 1997-2003 Olivier Lapicque\n"
 		"\n"
 		"Contributors:\n"
-		"Johannes Schultz (2008-2014)\n"
-		"Joern Heusipp (2012-2014)\n"
+		"Johannes Schultz (2008-2015)\n"
+		"Joern Heusipp (2012-2015)\n"
 		"Ahti Lepp\xC3\xA4nen (2005-2011)\n"
 		"Robin Fernandes (2004-2007)\n"
 		"Sergiy Pylypenko (2007)\n"

@@ -492,16 +492,15 @@ DWORD CViewPattern::GetDragItem(CPoint point, LPRECT lpRect)
 	GetClientRect(&rcClient);
 	xofs = GetXScrollPos();
 	yofs = GetYScrollPos();
-	rect.SetRect(m_szHeader.cx, 0, m_szHeader.cx + GetColumnWidth() /*- 2*/, m_szHeader.cy);
-	plugRect.SetRect(m_szHeader.cx, m_szHeader.cy - m_szPluginHeader.cy, m_szHeader.cx + GetColumnWidth() - 2, m_szHeader.cy);	//rewbs.patPlugNames
+	rect.SetRect(m_szHeader.cx, 0, m_szHeader.cx + GetColumnWidth(), m_szHeader.cy);
+	plugRect.SetRect(m_szHeader.cx, m_szHeader.cy - m_szPluginHeader.cy, m_szHeader.cx + GetColumnWidth(), m_szHeader.cy);	//rewbs.patPlugNames
 
 	const CHANNELINDEX nmax = pSndFile->GetNumChannels();
 	// Checking channel headers
-	//rewbs.patPlugNames
 	if (m_Status[psShowPluginNames])
 	{
 		n = xofs;
-		for(UINT ihdr=0; n<nmax; ihdr++, n++)
+		for(CHANNELINDEX ihdr = 0; n < nmax; ihdr++, n++)
 		{
 			if (plugRect.PtInRect(point))
 			{
@@ -511,9 +510,8 @@ DWORD CViewPattern::GetDragItem(CPoint point, LPRECT lpRect)
 			plugRect.OffsetRect(GetColumnWidth(), 0);
 		}
 	}
-	//end rewbs.patPlugNames
 	n = xofs;
-	for (UINT ihdr=0; n<nmax; ihdr++, n++)
+	for (CHANNELINDEX ihdr=0; n<nmax; ihdr++, n++)
 	{
 		if (rect.PtInRect(point))
 		{
