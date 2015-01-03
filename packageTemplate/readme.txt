@@ -76,7 +76,7 @@ License
 
 OpenMPT is partially under the following license:
 
-> Copyright (c) 2004-2014, OpenMPT contributors
+> Copyright (c) 2004-2015, OpenMPT contributors
 > Copyright (c) 1997-2003, Olivier Lapicque
 > All rights reserved.
 >
