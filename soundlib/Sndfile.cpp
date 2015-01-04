@@ -852,7 +852,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	}
 
 	// Checking samples, load external samples
-	for(SAMPLEINDEX nSmp = 1; nSmp < MAX_SAMPLES; nSmp++)
+	for(SAMPLEINDEX nSmp = 1; nSmp <= m_nSamples; nSmp++)
 	{
 		// Adjust song / sample names
 		mpt::String::SetNullTerminator(m_szNames[nSmp]);
