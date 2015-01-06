@@ -29,7 +29,7 @@ struct PACKED STMSampleHeader
 	char   filename[12];	// Can't have long comments - just filename comments :)
 	uint8  zero;
 	uint8  disk;			// A blast from the past
-	uint8  offset[2];		// ISA in memory when in ST 2
+	uint16  offset;			// ISA in memory when in ST 2
 	uint16 length;			// Sample length
 	uint16 loopStart;		// Loop start point
 	uint16 loopEnd;			// Loop end point
@@ -69,6 +69,7 @@ struct PACKED STMSampleHeader
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
 	{
+		SwapBytesLE(offset);
 		SwapBytesLE(length);
 		SwapBytesLE(loopStart);
 		SwapBytesLE(loopEnd);
@@ -318,11 +319,11 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 			ModSample &sample = Samples[smp];
 			if(sample.nLength)
 			{
-				//size_t sampleOffset = fileHeader.samples[smp - 1].offset << 4;
-				//if(sampleOffset > sizeof(STMPatternEntry) && sampleOffset < file.GetLength())
-				//{
-				//	file.Seek(sampleOffset);
-				//} else
+				FileReader::off_t sampleOffset = fileHeader.samples[smp - 1].offset << 4;
+				if(sampleOffset > sizeof(STMPatternEntry) && sampleOffset < file.GetLength())
+				{
+					file.Seek(sampleOffset);
+				} else
 				{
 					file.Seek((file.GetPosition() + 15) & (~15));
 				}
