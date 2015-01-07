@@ -13,6 +13,7 @@
 
 #include "../common/mutex.h"
 #include "../common/misc_util.h"
+#include "../common/FlagSet.h"
 #include "../common/mptAtomic.h"
 #include "../common/ComponentManager.h"
 #include "../soundlib/SampleFormat.h"
@@ -438,6 +439,18 @@ struct BufferAttributes
 };
 
 
+enum RequestFlags
+{
+	RequestFlagClose   = 1<<0,
+	RequestFlagReset   = 1<<1,
+	RequestFlagRestart = 1<<2,
+};
+} // namespace SoundDevice
+template <> struct enum_traits<SoundDevice::RequestFlags> { typedef uint32 store_type; };
+namespace SoundDevice {
+MPT_DECLARE_ENUM(RequestFlags)
+
+
 //=========
 class IBase
 //=========
@@ -458,12 +471,6 @@ protected:
 
 public:
 
-	static const uint32 RequestFlagClose = 1<<0;
-	static const uint32 RequestFlagReset = 1<<1;
-	static const uint32 RequestFlagRestart = 1<<2;
-
-public:
-
 	virtual void SetSource(SoundDevice::ISource *source) = 0;
 	virtual void SetMessageReceiver(SoundDevice::IMessageReceiver *receiver) = 0;
 
@@ -478,7 +485,7 @@ public:
 	virtual bool Start() = 0;
 	virtual void Stop(bool force = false) = 0;
 
-	virtual uint32 GetRequestFlags() const = 0;
+	virtual FlagSet<RequestFlags> GetRequestFlags() const = 0;
 
 	virtual bool IsInited() const = 0;
 	virtual bool IsOpen() const = 0;
@@ -613,7 +620,7 @@ public:
 	bool Start();
 	void Stop(bool force = false);
 
-	uint32 GetRequestFlags() const { return m_RequestFlags.load(); }
+	FlagSet<RequestFlags> GetRequestFlags() const { return FlagSet<RequestFlags>(m_RequestFlags.load()); }
 
 	bool IsInited() const { return m_Caps.Available; }
 	bool IsOpen() const { return IsInited() && InternalIsOpen(); }

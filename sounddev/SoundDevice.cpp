@@ -396,7 +396,7 @@ bool Base::Start()
 			m_StreamPositionOutputFrames = 0;
 		}
 		m_Clock.SetResolution(1);
-		m_RequestFlags.fetch_and(~RequestFlagRestart);
+		m_RequestFlags.fetch_and((~RequestFlagRestart).as_bits());
 		if(!InternalStart())
 		{
 			m_Clock.SetResolution(0);
@@ -422,7 +422,7 @@ void Base::Stop(bool force)
 		{
 			InternalStop();
 		}
-		m_RequestFlags.fetch_and(~RequestFlagRestart);
+		m_RequestFlags.fetch_and((~RequestFlagRestart).as_bits());
 		m_Clock.SetResolution(0);
 		m_IsPlaying = false;
 		{
