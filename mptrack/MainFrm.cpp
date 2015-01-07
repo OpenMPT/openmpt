@@ -1603,15 +1603,15 @@ void CMainFrame::IdleHandlerSounddevice()
 	MPT_TRACE();
 	if(gpSoundDevice)
 	{
-		const LONG requestFlags = gpSoundDevice->GetRequestFlags();
-		if(requestFlags & SoundDevice::IBase::RequestFlagClose)
+		const FlagSet<SoundDevice::RequestFlags> requestFlags = gpSoundDevice->GetRequestFlags();
+		if(requestFlags[SoundDevice::RequestFlagClose])
 		{
 			StopPlayback();
 			audioCloseDevice();
-		} else if(requestFlags & SoundDevice::IBase::RequestFlagReset)
+		} else if(requestFlags[SoundDevice::RequestFlagReset])
 		{
 			ResetSoundCard();
-		} else if(requestFlags & SoundDevice::IBase::RequestFlagRestart)
+		} else if(requestFlags[SoundDevice::RequestFlagRestart])
 		{
 			RestartPlayback();
 		} else
