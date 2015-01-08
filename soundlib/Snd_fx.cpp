@@ -156,6 +156,23 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		}
 	}
 
+	// Initalize fast LUTs for commands that are too weird / complicated / whatever to emulate in sample position adjust mode.
+	std::bitset<MAX_EFFECTS> forbiddenCommands;
+	std::bitset<MAX_VOLCMDS> forbiddenVolCommands;
+	if(adjustSamplePos)
+	{
+		forbiddenCommands.set(CMD_ARPEGGIO);             forbiddenCommands.set(CMD_PORTAMENTOUP);
+		forbiddenCommands.set(CMD_PORTAMENTODOWN);       forbiddenCommands.set(CMD_VIBRATOVOL);
+		forbiddenCommands.set(CMD_TONEPORTAVOL);         forbiddenCommands.set(CMD_VOLUMESLIDE);
+		forbiddenCommands.set(CMD_XFINEPORTAUPDOWN);     forbiddenCommands.set(CMD_NOTESLIDEUP);
+		forbiddenCommands.set(CMD_NOTESLIDEUPRETRIG);    forbiddenCommands.set(CMD_NOTESLIDEDOWN);
+		forbiddenCommands.set(CMD_NOTESLIDEDOWNRETRIG);
+		forbiddenVolCommands.set(VOLCMD_PORTAUP);        forbiddenVolCommands.set(VOLCMD_PORTADOWN);
+		forbiddenVolCommands.set(VOLCMD_TONEPORTAMENTO); forbiddenVolCommands.set(VOLCMD_VOLSLIDEUP);
+		forbiddenVolCommands.set(VOLCMD_VOLSLIDEDOWN);   forbiddenVolCommands.set(VOLCMD_FINEVOLUP);
+		forbiddenVolCommands.set(VOLCMD_FINEVOLDOWN);
+	}
+
 	for (;;)
 	{
 		// Time target reached.
@@ -603,9 +620,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		if(adjustSamplePos)
 		{
 			// Super experimental and dirty sample seeking
-			const ModCommand::COMMAND forbiddenCommands[] = { CMD_ARPEGGIO, CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_VOLUMESLIDE, CMD_VIBRATOVOL, CMD_TONEPORTAVOL, CMD_XFINEPORTAUPDOWN, CMD_NOTESLIDEUP, CMD_NOTESLIDEUPRETRIG, CMD_NOTESLIDEDOWN, CMD_NOTESLIDEDOWNRETRIG };
-			const ModCommand::VOLCMD forbiddenVolCommands[] = { VOLCMD_PORTAUP, VOLCMD_PORTADOWN, VOLCMD_TONEPORTAMENTO, VOLCMD_VOLSLIDEUP, VOLCMD_VOLSLIDEDOWN, VOLCMD_FINEVOLUP, VOLCMD_FINEVOLDOWN };
-
 			pChn = memory.state.Chn;
 			p = Patterns[nPattern].GetRow(nRow);
 			for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); p++, pChn++, nChn++)
@@ -690,15 +704,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				if(pChn->nInc != 0 && pChn->pModSample && !stopNote)
 				{
 					// Check if we don't want to emulate some effect and thus stop processing.
-					if(p->command != CMD_NONE)
+					if(p->command < MAX_EFFECTS)
 					{
-						for(size_t i = 0; i < CountOf(forbiddenCommands); i++)
+						if(forbiddenCommands[p->command])
 						{
-							if(p->command == forbiddenCommands[i])
-							{
-								stopNote = true;
-								break;
-							}
+							stopNote = true;
+							break;
 						}
 						// Special case: Slides using extended commands
 						if(p->command == CMD_MODCMDEX)
@@ -714,17 +725,11 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							}
 						}
 					}
-					
-					if(!stopNote && p->volcmd != VOLCMD_NONE)
+
+					if(p->volcmd < MAX_VOLCMDS && forbiddenVolCommands[p->volcmd])
 					{
-						for(size_t i = 0; i < CountOf(forbiddenVolCommands); i++)
-						{
-							if(p->volcmd == forbiddenVolCommands[i])
-							{
-								stopNote = true;
-								break;
-							}
-						}
+						stopNote = true;
+						break;
 					}
 				}
 
