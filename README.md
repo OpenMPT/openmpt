@@ -238,7 +238,8 @@ conventions. Using common sense is recommended.
     functionaly (especially iostream), always imbue the
     `std::locale::classic()` locale.
  -  Prefer kernel_style_names over CamelCaseNames.
- -  Indentation:
+ -  If a folder (or one of its parent folders) contains .clang-format,
+    use clang-format v3.5 for indenting C++ and C files, otherwise:
      -  `{` are placed at the end of the opening line.
      -  Enclose even single statements in curly braces.
      -  Avoid placing single statements on the same line as the `if`.

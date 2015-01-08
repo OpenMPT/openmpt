@@ -16,7 +16,7 @@
 
 #include <portaudio.h>
 
-int main( int /*argc*/, char * argv [] ) {
+int main( int /*argc*/, char * argv[] ) {
 	const std::size_t buffersize = 480;
 	const std::int32_t samplerate = 48000;
 	std::vector<float> left( buffersize );
@@ -26,7 +26,7 @@ int main( int /*argc*/, char * argv [] ) {
 	Pa_Initialize();
 	PaStream * stream = 0;
 	PaStreamParameters streamparameters;
-	std::memset( &streamparameters, 0, sizeof(PaStreamParameters) );
+	std::memset( &streamparameters, 0, sizeof( PaStreamParameters ) );
 	streamparameters.device = Pa_GetDefaultOutputDevice();
 	streamparameters.channelCount = 2;
 	streamparameters.sampleFormat = paFloat32 | paNonInterleaved;
@@ -38,7 +38,7 @@ int main( int /*argc*/, char * argv [] ) {
 		if ( count == 0 ) {
 			break;
 		}
-		const float * const buffers [2] = { left.data(), right.data() };
+		const float * const buffers[2] = { left.data(), right.data() };
 		Pa_WriteStream( stream, buffers, count );
 	}
 	Pa_StopStream( stream );

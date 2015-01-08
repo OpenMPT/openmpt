@@ -31,13 +31,13 @@
 #define BUFFERSIZE 480
 #define SAMPLERATE 48000
 
-static ssize_t xwrite(int fd, const void* buffer, size_t size){
+static ssize_t xwrite( int fd, const void * buffer, size_t size ) {
 	size_t written = 0;
 	ssize_t retval = 0;
-	while(written<size){
-		retval = write(fd,(const char*)buffer+written,size-written);
-		if(retval<0){
-			if(errno!=EINTR){
+	while ( written < size ) {
+		retval = write( fd, (const char *)buffer + written, size - written );
+		if ( retval < 0 ) {
+			if ( errno != EINTR ) {
 				break;
 			}
 			retval = 0;
@@ -47,24 +47,23 @@ static ssize_t xwrite(int fd, const void* buffer, size_t size){
 	return written;
 }
 
-static int16_t buffer[BUFFERSIZE*2];
+static int16_t buffer[BUFFERSIZE * 2];
 
-int main(int argc,char* argv[]){
-	FILE* file = 0;
-	openmpt_module* mod = 0;
+int main( int argc, char * argv[] ) {
+	FILE * file = 0;
+	openmpt_module * mod = 0;
 	size_t count = 0;
 	(void)argc;
-	file = fopen(argv[1],"rb");
-	mod = openmpt_module_create(openmpt_stream_get_file_callbacks(),file,NULL,NULL,NULL);
-	fclose(file);
-	while(1){
-		count = openmpt_module_read_interleaved_stereo(mod,SAMPLERATE,BUFFERSIZE,buffer);
-		if(count==0){
+	file = fopen( argv[1], "rb" );
+	mod = openmpt_module_create( openmpt_stream_get_file_callbacks(), file, NULL, NULL, NULL );
+	fclose( file );
+	while ( 1 ) {
+		count = openmpt_module_read_interleaved_stereo( mod, SAMPLERATE, BUFFERSIZE, buffer );
+		if ( count == 0 ) {
 			break;
 		}
-		xwrite(STDOUT_FILENO,buffer,count*2*sizeof(int16_t));
+		xwrite( STDOUT_FILENO, buffer, count * 2 * sizeof( int16_t ) );
 	}
-	openmpt_module_destroy(mod);
+	openmpt_module_destroy( mod );
 	return 0;
 }
-
