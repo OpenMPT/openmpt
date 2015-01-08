@@ -228,7 +228,7 @@ void PatternFont::UpdateFont(HWND hwnd)
 
 		// Create 4-pixel border
 		const int bmWidth2 = pf.dib->bmiHeader.biWidth / 2;
-		for(int y = 0, x = pf.nClrY * bmWidth2 + (pf.nClrX + pf.nWidth - 4) / 2; y < pf.nHeight; y++, x += bmWidth2)
+		for(int y = 0, x = (customFontBitmap.bmiHeader.biHeight - pf.nClrY - pf.nHeight) * bmWidth2 + (pf.nClrX + pf.nWidth - 4) / 2; y < pf.nHeight; y++, x += bmWidth2)
 		{
 			pf.dib->lpDibBits[x] = 0xEC;
 			pf.dib->lpDibBits[x + 1] = 0xC4;
@@ -329,7 +329,7 @@ void PatternFont::UpdateFont(HWND hwnd)
 		uint8_t dot = dots[cell];
 		for(int i = 0; dot != 0; i++)
 		{
-			if(dot & 1) DrawChar(hDC, L'\u00B7', pf.nClrX + offset + i * charWidth, pf.nClrY, charWidth, charHeight);
+			if(dot & 1) DrawChar(hDC, '.', pf.nClrX + offset + i * charWidth, pf.nClrY, charWidth, charHeight);
 			dot >>= 1;
 		}
 		offset += pf.nEltWidths[cell];
