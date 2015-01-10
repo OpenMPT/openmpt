@@ -1,3 +1,7 @@
-To generate the manual, run wiki.py. This will download all required files into the "html"
-sub directory and prepare all files needed for HTML Help Workshop.
-Place HTML Help Workshop in the sub directory "htmlhelp" and execute run.cmd.
+Prerequisites:
+- HTML Help Workshop must be placed in the sub directory "htmlhelp"
+- Python 3 must be in the path
+
+Once these prerequisites are fulfilled, launch run.cmd.
+This will download all required files into the "html" sub directory and prepare
+all files needed for HTML Help Workshop and spit out a CHM file.
