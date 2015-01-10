@@ -29,8 +29,8 @@ OPENMPT_NAMESPACE_BEGIN
 // Construction/Destruction
 ///////////////////////////
 
-CAutoSaver::CAutoSaver(bool enabled, int saveInterval, int backupHistory, bool useOriginalPath, mpt::PathString path)
-//-------------------------------------------------------------------------------------------------------------------
+CAutoSaver::CAutoSaver(bool enabled, uint32_t saveInterval, uint32_t backupHistory, bool useOriginalPath, mpt::PathString path)
+//-----------------------------------------------------------------------------------------------------------------------------
 	: m_bSaveInProgress(false)
 	, m_nLastSave(timeGetTime())
 	, m_bEnabled(enabled)
@@ -71,7 +71,7 @@ bool CAutoSaver::DoSave(DWORD curTime)
 				} else
 				{
 					m_bEnabled = false;
-					Reporting::Warning("Warning: Autosave failed and has been disabled. Please:\n- Review your autosave paths\n- Check available diskspace & filesystem access rights\n- If you are using the ITP format, ensure all instruments exist as independant .iti files");
+					Reporting::Warning("Warning: Auto Save failed and has been disabled. Please:\n- Review your Auto Save paths\n- Check available disk space and filesystem access rights");
 					success = false;
 				}
 			}
@@ -91,10 +91,10 @@ bool CAutoSaver::DoSave(DWORD curTime)
 ///////////////////////////
 
 
-bool CAutoSaver::CheckTimer(DWORD curTime) 
+bool CAutoSaver::CheckTimer(DWORD curTime)
 //----------------------------------------
 {
-	DWORD curInterval = curTime-m_nLastSave;
+	DWORD curInterval = curTime - m_nLastSave;
 	return (curInterval >= m_nSaveInterval);
 }
 
@@ -102,7 +102,6 @@ bool CAutoSaver::CheckTimer(DWORD curTime)
 mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 //--------------------------------------------------------
 {
-	std::wstring timeStamp = mpt::ToWide((CTime::GetCurrentTime()).Format("%Y%m%d.%H%M%S"));
 	mpt::PathString name;
 	
 	if(m_bUseOriginalPath)
@@ -125,9 +124,8 @@ mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 		name = m_csPath + mpt::PathString::FromCStringSilent(modDoc.GetTitle()).SanitizeComponent();
 	}
 	
-	name += MPT_PATHSTRING(".AutoSave.");					//append backup tag
-	name += mpt::PathString::FromWide(timeStamp);			//append timestamp
-	name += MPT_PATHSTRING(".");							//append extension
+	const CString timeStamp = (CTime::GetCurrentTime()).Format(_T(".AutoSave.%Y%m%d.%H%M%S."));
+	name += mpt::PathString::FromCString(timeStamp);			//append backtup tag + timestamp
 	name += mpt::PathString::FromUTF8(modDoc.GetrSoundFile().GetModSpecifications().fileExtension);
 
 	return name;
@@ -147,7 +145,7 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 	ScopedLogCapturer logcapturer(modDoc, "", nullptr, false);
 
 	bool success = false;
-	switch(modDoc.GetModType())
+	switch(modDoc.GetrSoundFile().GetBestSaveFormat())
 	{
 	case MOD_TYPE_MOD:
 		success = sndFile.SaveMod(fileName);
@@ -175,8 +173,8 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 }
 
 
-void CAutoSaver::CleanUpBackups(CModDoc &modDoc)
-//----------------------------------------------
+void CAutoSaver::CleanUpBackups(const CModDoc &modDoc)
+//----------------------------------------------------
 {
 	mpt::PathString path;
 	
@@ -216,7 +214,7 @@ void CAutoSaver::CleanUpBackups(CModDoc &modDoc)
 	}
 	std::sort(foundfiles.begin(), foundfiles.end());
 	
-	while(foundfiles.size() > m_nBackupHistory)
+	while(foundfiles.size() > (size_t)m_nBackupHistory)
 	{
 		DeleteFileW(foundfiles[0].AsNative().c_str());
 		foundfiles.erase(foundfiles.begin());

@@ -20,8 +20,8 @@ class CAutoSaver
 {
 public:
 //Cons/Destr
-	CAutoSaver(bool enabled=true, int saveInterval=10, int backupHistory=3,
-			   bool useOriginalPath=true, mpt::PathString path=mpt::PathString());
+	CAutoSaver(bool enabled = true, uint32_t saveInterval = 10, uint32_t backupHistory = 3,
+			   bool useOriginalPath = true, mpt::PathString path = mpt::PathString());
 	
 //Work
 	bool DoSave(DWORD curTime);
@@ -33,19 +33,19 @@ public:
 	bool GetUseOriginalPath() const { return m_bUseOriginalPath; }
 	void SetPath(const mpt::PathString &path) { m_csPath = path; }
 	mpt::PathString GetPath() const { return m_csPath; }
-	void SetHistoryDepth(int history) { m_nBackupHistory = Clamp(history, 1, 1000); }
-	int GetHistoryDepth() const { return m_nBackupHistory; }
-	void SetSaveInterval(int minutes)
+	void SetHistoryDepth(uint32_t history) { m_nBackupHistory = Clamp(history, 1u, 1000u); }
+	uint32_t GetHistoryDepth() const { return m_nBackupHistory; }
+	void SetSaveInterval(uint32_t minutes)
 	{
-		m_nSaveInterval = Clamp(minutes, 1, 10000) * 60 * 1000; //minutes to milliseconds
+		m_nSaveInterval = Clamp(minutes, 1u, 10000u) * 60u * 1000u; //minutes to milliseconds
 	}
-	int GetSaveInterval() const { return m_nSaveInterval / 60 / 1000; }
+	uint32_t GetSaveInterval() const { return m_nSaveInterval / 60u / 1000u; }
 
 //internal implementation
 private: 
 	bool SaveSingleFile(CModDoc &modDoc);
 	mpt::PathString BuildFileName(CModDoc &modDoc);
-	void CleanUpBackups(CModDoc &modDoc);
+	void CleanUpBackups(const CModDoc &modDoc);
 	bool CheckTimer(DWORD curTime);
 	
 //internal implementation members
@@ -56,8 +56,8 @@ private:
 
 	bool m_bEnabled;
 	DWORD m_nLastSave;
-	DWORD m_nSaveInterval;
-	size_t m_nBackupHistory;
+	uint32_t m_nSaveInterval;
+	uint32_t m_nBackupHistory;
 	bool m_bUseOriginalPath;
 	mpt::PathString m_csPath;
 
