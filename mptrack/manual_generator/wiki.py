@@ -7,9 +7,11 @@
 # HTML Help Workshop to generate a CHM file.
 
 from urllib.request import urlopen, urlretrieve
-import re
+import re, os
 
 base_url = 'http://wiki.openmpt.org'
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 style = urlopen(base_url + '/load.php?debug=false&lang=en&modules=mediawiki.legacy.common%2Cshared|mediawiki.ui.button|skins.vector.styles&only=styles&skin=vector&*').read().decode('UTF-8')
 # Remove a few unused CSS classes
