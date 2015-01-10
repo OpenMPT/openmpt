@@ -145,8 +145,8 @@ bool EffectInfo::IsExtendedEffect(UINT ndx) const
 }
 
 
-bool EffectInfo::GetEffectName(LPSTR pszDescription, ModCommand::COMMAND command, UINT param, bool bXX, CHANNELINDEX nChn) const
-//------------------------------------------------------------------------------------------------------------------------------
+bool EffectInfo::GetEffectName(LPSTR pszDescription, ModCommand::COMMAND command, UINT param, bool bXX) const
+//-----------------------------------------------------------------------------------------------------------
 {
 	bool bSupported;
 	UINT fxndx = CountOf(gFXInfo);
@@ -176,48 +176,6 @@ bool EffectInfo::GetEffectName(LPSTR pszDescription, ModCommand::COMMAND command
 			if ((gFXInfo[fxndx].paramMask & 0x0F) == 0x0F) pszDescription[2] = szHexChar[gFXInfo[fxndx].paramValue & 0x0F];
 		}
 		strcat(pszDescription, gFXInfo[fxndx].name);
-		//Get channel specific info
-		if (nChn < sndFile.GetNumChannels())
-		{
-			CString chanSpec = "";
-			size_t macroIndex = size_t(-1);
-
-			switch (command)
-			{
-			case CMD_MODCMDEX:
-			case CMD_S3MCMDEX:
-				if ((param & 0xF0) == 0xF0 && !(sndFile.GetType() & MOD_TYPE_MOD))	//Set Macro
-				{
-					macroIndex = (param & 0x0F);
-					chanSpec.Format(" to %d: ", param & 0x0F);
-				}
-				break;
-
-			case CMD_MIDI:
-			case CMD_SMOOTHMIDI:
-				if (param < 0x80 && nChn != CHANNELINDEX_INVALID)
-				{
-					macroIndex = sndFile.m_PlayState.Chn[nChn].nActiveMacro;
-					chanSpec.Format(": currently %d: ", sndFile.m_PlayState.Chn[nChn].nActiveMacro);
-				}
-				else
-				{
-					chanSpec = " (Fixed)";
-				}
-				break;
-			}
-
-			if(macroIndex != size_t(-1))
-			{
-				const PLUGINDEX plugin = sndFile.GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted) - 1;
-				chanSpec.Append(sndFile.m_MidiCfg.GetParameteredMacroName(macroIndex, plugin, sndFile));
-			}
-			if (!chanSpec.IsEmpty())
-			{
-				strcat(pszDescription, chanSpec);
-			}
-
-		}
 	}
 	return bSupported;
 }
@@ -466,10 +424,10 @@ UINT EffectInfo::MapPosToValue(UINT ndx, UINT pos) const
 }
 
 
-bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param) const
-//-------------------------------------------------------------------------
+bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELINDEX chn) const
+//-------------------------------------------------------------------------------------------
 {
-	char s[64];
+	char s[128];
 	char szContinueOrIgnore[16];
 
 	if (pszName) pszName[0] = 0;
@@ -670,7 +628,15 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param) const
 	case CMD_SMOOTHMIDI:
 		if (param < 0x80)
 		{
-			wsprintf(pszName, "SFx macro: z=%02X (%d)", param, param);
+			if(chn != CHANNELINDEX_INVALID)
+			{
+				const uint8 macroIndex = sndFile.m_PlayState.Chn[chn].nActiveMacro;
+				const PLUGINDEX plugin = sndFile.GetBestPlugin(chn, PrioritiseChannel, EvenIfMuted) - 1;
+				wsprintf(pszName, "SFx MIDI Macro z=%d (SF%X: %s)", param, macroIndex, sndFile.m_MidiCfg.GetParameteredMacroName(macroIndex, plugin, sndFile));
+			} else
+			{
+				wsprintf(pszName, "SFx macro: z=%02X (%d)", param, param);
+			}
 		} else
 		{
 			wsprintf(pszName, "Fixed Macro Z%02X", param);
@@ -791,8 +757,7 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param) const
 							strcat(s, " rows");
 							break;
 						case 0xF0: // macro
-							if(sndFile.GetType() != MOD_TYPE_MOD)
-								wsprintf(s, "SF%X", param & 0x0F);
+							strcpy(s, sndFile.m_MidiCfg.GetParameteredMacroName(param & 0x0F, PLUGINDEX_INVALID, sndFile));
 							break;
 						default:
 							break;
@@ -861,11 +826,11 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param) const
 								if((param & 0x0F) == 0)
 									strcpy(s, "Stop");
 								else
-									wsprintf(s, "Speed %d", param & 0x0F); 
+									wsprintf(s, "Speed %d", param & 0x0F);
 							} else
 							{
 								// macro
-								wsprintf(s, "SF%X", param & 0x0F);
+								strcpy(s, sndFile.m_MidiCfg.GetParameteredMacroName(param & 0x0F, PLUGINDEX_INVALID, sndFile));
 							}
 							break;
 						default:

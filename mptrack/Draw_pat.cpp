@@ -124,7 +124,7 @@ bool CViewPattern::UpdateSizes()
 	m_szHeader.cx = ROWHDR_WIDTH;
 	m_szHeader.cy = COLHDR_HEIGHT;
 	m_szPluginHeader.cx = 0;
-	m_szPluginHeader.cy = m_Status[psShowPluginNames] ? PLUGNAME_HEIGHT : 0;
+	m_szPluginHeader.cy = m_Status[psShowPluginNames] ? MulDiv(PLUGNAME_HEIGHT, m_nDPIy, 96) : 0;
 	if(m_Status[psShowVUMeters]) m_szHeader.cy += VUMETERS_HEIGHT;
 	m_szCell.cx = 4 + pfnt->nEltWidths[0];
 	if (m_nDetailLevel >= PatternCursor::instrColumn) m_szCell.cx += pfnt->nEltWidths[1];
@@ -134,7 +134,6 @@ bool CViewPattern::UpdateSizes()
 
 	m_szHeader.cx = MulDiv(m_szHeader.cx, m_nDPIx, 96);
 	m_szHeader.cy = MulDiv(m_szHeader.cy, m_nDPIy, 96);
-	m_szPluginHeader.cy = MulDiv(m_szPluginHeader.cy, m_nDPIy, 96);
 	m_szHeader.cy += m_szPluginHeader.cy;
 
 	if(oldy != m_szCell.cy)
@@ -468,7 +467,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 	
 	const int vuHeight = MulDiv(VUMETERS_HEIGHT, m_nDPIy, 96);
 	const int colHeight = MulDiv(COLHDR_HEIGHT, m_nDPIy, 96);
-	const int recordInsX = MulDiv(3, m_nDPIy, 96);
+	const int recordInsX = MulDiv(3, m_nDPIx, 96);
 
 	GetClientRect(&rcClient);
 	hdc = pDC->m_hDC;
@@ -1612,14 +1611,14 @@ void CViewPattern::UpdateIndicator()
 						s.Format(_T("Parameter value: %u"), m->GetValueEffectCol());
 					} else if(m->command != CMD_NONE)
 					{
-						TCHAR sztmp[64] = "";
-						/*LONG fxndx = effectInfo.GetIndexFromEffect(m->command, m->param);
+						TCHAR sztmp[128] = "";
+						LONG fxndx = effectInfo.GetIndexFromEffect(m->command, m->param);
 						if(fxndx >= 0)
 						{
-							effectInfo.GetEffectNameEx(sztmp, fxndx, m->param);
-						}*/
-						effectInfo.GetEffectName(sztmp, m->command, m->param, false, nChn);
-						if(sztmp[0]) s.Format(_T("%s (%02X)"), sztmp, m->param);
+							effectInfo.GetEffectNameEx(sztmp, fxndx, m->param, nChn);
+						}
+						//effectInfo.GetEffectName(sztmp, m->command, m->param, false, nChn);
+						if(sztmp[0]) s.Format(_T("%c%02X: %s"), pSndFile->GetModSpecifications().GetEffectLetter(m->command), m->param, sztmp);
 					}
 					break;
 				}
