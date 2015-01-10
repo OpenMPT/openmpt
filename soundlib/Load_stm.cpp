@@ -250,6 +250,11 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 
 			switch(m->command)
 			{
+			case CMD_VOLUMESLIDE:
+				if(m->param & 0x0F) m->param &= 0x0F;
+				else m->param &= 0xF0;
+				break;
+
 			case CMD_PATTERNBREAK:
 				m->param = (m->param & 0xF0) * 10 + (m->param & 0x0F);
 				if(breakRow > m->param)
