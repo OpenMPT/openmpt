@@ -160,7 +160,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 				param = 0x91;
 			} else
 			{
-				param = MIN(param << 1, 0xFF);
+				param = std::min<PARAM>(param << 1, 0xFF);
 			}
 		}
 	} // End if(command == CMD_PANNING8)
@@ -187,7 +187,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 				}
 			}
 
-			param = (BYTE)(MIN(maxColumnValue, GetValueEffectCol()) * 0x7F / maxColumnValue);
+			param = (PARAM)(std::min<uint16>(maxColumnValue, GetValueEffectCol()) * 0x7F / maxColumnValue);
 			command = newCmd; // might be removed later
 			volcmd = VOLCMD_NONE;
 			note = NOTE_NONE;
@@ -283,10 +283,10 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			// swap L/R, convert to fine slide
 			if(param & 0xF0)
 			{
-				param = 0xF0 | MIN(0x0E, (param >> 4));
+				param = 0xF0 | std::min<PARAM>(0x0E, (param >> 4));
 			} else
 			{
-				param = 0x0F | (MIN(0x0E, param & 0x0F) << 4);
+				param = 0x0F | (std::min<PARAM>(0x0E, param & 0x0F) << 4);
 			}
 
 		default:
@@ -374,7 +374,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			break;
 
 		case CMD_SPEED:
-			param = MIN(param, (toType == MOD_TYPE_XM) ? 0x1F : 0x20);
+			param = std::min<PARAM>(param, (toType == MOD_TYPE_XM) ? 0x1F : 0x20);
 			break;
 
 		case CMD_TEMPO:
@@ -444,7 +444,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			break;
 
 		case CMD_GLOBALVOLUME:
-			param = (MIN(0x80, param) + 1) / 2;
+			param = (std::min<PARAM>(0x80, param) + 1) / 2u;
 			break;
 
 		default:
@@ -458,8 +458,12 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 	{
 		switch(command)
 		{
+		case CMD_VIBRATO:
+			// With linear slides, strength is roughly doubled.
+			param = (param & 0xF0) | (((param & 0x0F) + 1) / 2u);
+			break;
 		case CMD_GLOBALVOLUME:
-			param = (MIN(0x80, param) + 1) / 2;
+			param = (std::min<PARAM>(0x80, param) + 1) / 2u;
 			break;
 		}
 	} // End if(oldTypeIsIT_MPT && newTypeIsXM)
@@ -470,8 +474,12 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 	{
 		switch(command)
 		{
+		case CMD_VIBRATO:
+			// With linear slides, strength is roughly halved.
+			param = (param & 0xF0) | std::min<PARAM>((param & 0x0F) * 2u, 15);
+			break;
 		case CMD_GLOBALVOLUME:
-			param = MIN(0x80, param * 2);
+			param = std::min<PARAM>(0x80, param * 2u);
 			break;
 		}
 	} // End if(oldTypeIsIT_MPT && newTypeIsXM)
@@ -483,7 +491,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 		switch(command)
 		{
 		case CMD_SPEED:
-			param = MIN(param, 0x1F);
+			param = std::min<PARAM>(param, 0x1F);
 			break;
 		}
 	} else if(oldTypeIsXM && newTypeIsMOD)
@@ -491,7 +499,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 		switch(command)
 		{
 		case CMD_TEMPO:
-			param = MAX(param, 0x21);
+			param = std::min<PARAM>(param, 0x21);
 			break;
 		}
 	}
@@ -559,7 +567,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 
 			case VOLCMD_PANNING:
 				command = CMD_PANNING8;
-				param = mpt::saturate_cast<uint8>(vol << 2);
+				param = vol < 64 ? vol << 2 : 255;
 				break;
 
 			case VOLCMD_VOLSLIDEDOWN:
