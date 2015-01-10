@@ -222,35 +222,33 @@ CString MIDIMacroConfig::GetParameteredMacroName(size_t macroIndex, PLUGINDEX pl
 	case sfx_plug:
 		{
 			const int param = MacroToPlugParam(macroIndex);
-			CString paramName;
-
+			CString formattedName;
+			formattedName.Format(_T("Param %u"), param);
 #ifndef NO_VST
 			if(plugin < MAX_MIXPLUGINS)
 			{
 				CVstPlugin *pPlug = dynamic_cast<CVstPlugin *>(sndFile.m_MixPlugins[plugin].pMixPlugin);
 				if(pPlug)
 				{
+					CString paramName;
 					paramName = pPlug->GetParamName(param);
+					if(!paramName.IsEmpty())
+					{
+						formattedName.AppendFormat(_T(" (%s)"), paramName);
+					}
 				}
-				if (paramName.IsEmpty())
-				{
-					return TEXT("N/A");
-				}
-
-				CString formattedName;
-				formattedName.Format(TEXT("Param %d (%s)"), param, paramName);
-				return formattedName;
 			} else
 #endif // NO_VST
 			{
-				return TEXT("N/A - No Plugin");
+				formattedName += _T(" (N/A)");
 			}
+			return formattedName;
 		}
 
 	case sfx_cc:
 		{
 			CString formattedCC;
-			formattedCC.Format(TEXT("MIDI CC %d"), MacroToMidiCC(macroIndex));
+			formattedCC.Format(_T("MIDI CC %u"), MacroToMidiCC(macroIndex));
 			return formattedCC;
 		}
 
@@ -267,26 +265,26 @@ CString MIDIMacroConfig::GetParameteredMacroName(parameteredMacroType macroType)
 	switch(macroType)
 	{
 	case sfx_unused:
-		return TEXT("Unused");
+		return _T("Unused");
 	case sfx_cutoff:
-		return TEXT("Set Filter Cutoff");
+		return _T("Set Filter Cutoff");
 	case sfx_reso:
-		return TEXT("Set Filter Resonance");
+		return _T("Set Filter Resonance");
 	case sfx_mode:
-		return TEXT("Set Filter Mode");
+		return _T("Set Filter Mode");
 	case sfx_drywet:
-		return TEXT("Set Plugin Dry/Wet Ratio");
+		return _T("Set Plugin Dry/Wet Ratio");
 	case sfx_plug:
-		return TEXT("Control Plugin Parameter...");
+		return _T("Control Plugin Parameter...");
 	case sfx_cc:
-		return TEXT("MIDI CC...");
+		return _T("MIDI CC...");
 	case sfx_channelAT:
-		return TEXT("Channel Aftertouch");
+		return _T("Channel Aftertouch");
 	case sfx_polyAT:
-		return TEXT("Polyphonic Aftertouch");
+		return _T("Polyphonic Aftertouch");
 	case sfx_custom:
 	default:
-		return TEXT("Custom");
+		return _T("Custom");
 	}
 }
 
@@ -298,24 +296,24 @@ CString MIDIMacroConfig::GetFixedMacroName(fixedMacroType macroType) const
 	switch(macroType)
 	{
 	case zxx_unused:
-		return TEXT("Unused");
+		return _T("Unused");
 	case zxx_reso4Bit:
-		return TEXT("Z80 - Z8F controls Resonant Filter Resonance");
+		return _T("Z80 - Z8F controls Resonant Filter Resonance");
 	case zxx_reso7Bit:
-		return TEXT("Z80 - ZFF controls Resonant Filter Resonance");
+		return _T("Z80 - ZFF controls Resonant Filter Resonance");
 	case zxx_cutoff:
-		return TEXT("Z80 - ZFF controls Resonant Filter Cutoff");
+		return _T("Z80 - ZFF controls Resonant Filter Cutoff");
 	case zxx_mode:
-		return TEXT("Z80 - ZFF controls Resonant Filter Mode");
+		return _T("Z80 - ZFF controls Resonant Filter Mode");
 	case zxx_resomode:
-		return TEXT("Z80 - Z9F controls Resonance + Filter Mode");
+		return _T("Z80 - Z9F controls Resonance + Filter Mode");
 	case zxx_channelAT:
-		return TEXT("Z80 - ZFF controls Channel Aftertouch");
+		return _T("Z80 - ZFF controls Channel Aftertouch");
 	case zxx_polyAT:
-		return TEXT("Z80 - ZFF controls Polyphonic Aftertouch");
+		return _T("Z80 - ZFF controls Polyphonic Aftertouch");
 	case zxx_custom:
 	default:
-		return TEXT("Custom");
+		return _T("Custom");
 	}
 }
 
