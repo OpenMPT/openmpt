@@ -149,7 +149,7 @@ enum ChannelFlags
 	CHN_VOLUMERAMP		= 0x8000,		// Apply volume ramping
 	CHN_VIBRATO			= 0x10000,		// Apply vibrato
 	CHN_TREMOLO			= 0x20000,		// Apply tremolo
-	CHN_PANBRELLO		= 0x40000,		// Apply panbrello
+	//CHN_PANBRELLO		= 0x40000,		// Apply panbrello
 	CHN_PORTAMENTO		= 0x80000,		// Apply portamento
 	CHN_GLISSANDO		= 0x100000,		// Glissando mode
 	CHN_FASTVOLRAMP		= 0x200000,		// Force usage of global ramping settings instead of ramping over the complete render buffer length

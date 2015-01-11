@@ -97,7 +97,7 @@ struct ModChannel
 	uint8 nVibratoType, nVibratoSpeed, nVibratoDepth;
 	uint8 nTremoloType, nTremoloSpeed, nTremoloDepth;
 	uint8 nPanbrelloType, nPanbrelloSpeed, nPanbrelloDepth;
-	int8  nPanbrelloRandomMemory;
+	int8  nPanbrelloOffset, nPanbrelloRandomMemory;
 	uint8 nOldCmdEx, nOldVolParam, nOldTempo;
 	uint8 nOldOffset, nOldHiOffset;
 	uint8 nCutOff, nResonance;

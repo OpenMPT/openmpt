@@ -2349,7 +2349,7 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 						right.nPan = 256;
 					}
 				}
-				SetModified(SampleHint().Info().Data(), true, true);
+				SetModified(SampleHint().Info().Data().Names(), true, true);
 			} else
 			{
 				pModDoc->GetSampleUndo().RemoveLastUndoStep(m_nSample);
@@ -2934,7 +2934,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcSampleCenterSustainEnd:
 			if(m_nZoom)
 			{
-				SmpLength point;
+				SmpLength point = 0;
 				ModSample &sample = sndFile.GetSample(m_nSample);
 				switch(wParam)
 				{
