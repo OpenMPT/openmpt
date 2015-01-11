@@ -598,7 +598,8 @@ bool CSoundFile::ProcessRow()
 
 			pChn->rightVol = pChn->newRightVol;
 			pChn->leftVol = pChn->newLeftVol;
-			pChn->dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_PANBRELLO);
+			pChn->dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO);
+			if(!IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPanbrelloOffset = 0;
 			pChn->nCommand = CMD_NONE;
 			pChn->m_plugParamValueStep = 0;
 		}
@@ -1174,7 +1175,8 @@ void CSoundFile::ProcessPitchPanSeparation(ModChannel *pChn) const
 void CSoundFile::ProcessPanbrello(ModChannel *pChn) const
 //-------------------------------------------------------
 {
-	if(pChn->dwFlags[CHN_PANBRELLO])
+	int pdelta = pChn->nPanbrelloOffset;
+	if(pChn->rowCommand.command == CMD_PANBRELLO)
 	{
 		uint32 panpos;
 		// IT compatibility: IT has its own, more precise tables
@@ -1183,7 +1185,7 @@ void CSoundFile::ProcessPanbrello(ModChannel *pChn) const
 		else
 			panpos = ((pChn->nPanbrelloPos + 0x10) >> 2) & 0x3F;
 
-		int pdelta = GetVibratoDelta(pChn->nPanbrelloType, panpos);
+		pdelta = GetVibratoDelta(pChn->nPanbrelloType, panpos);
 
 		// IT compatibility: Sample-and-hold style random panbrello (tremolo and vibrato don't use this mechanism in IT)
 		// Test case: RandomWaveform.it
@@ -1200,12 +1202,18 @@ void CSoundFile::ProcessPanbrello(ModChannel *pChn) const
 		{
 			pChn->nPanbrelloPos += pChn->nPanbrelloSpeed;
 		}
-
+		// IT compatibility: Panbrello effect is active until next note or panning command.
+		// Test case: PanbrelloHold.it
+		if(IsCompatibleMode(TRK_IMPULSETRACKER))
+		{
+			pChn->nPanbrelloOffset = static_cast<int8>(pdelta);
+		}
+	}
+	if(pdelta)
+	{
 		pdelta = ((pdelta * (int)pChn->nPanbrelloDepth) + 2) >> 3;
 		pdelta += pChn->nRealPan;
-
 		pChn->nRealPan = Clamp(pdelta, 0, 256);
-		//if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPan = pChn->nRealPan; // TODO
 	}
 }
 

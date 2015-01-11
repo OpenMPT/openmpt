@@ -98,13 +98,8 @@ public:
 
 // Get mod length in various cases. Parameters:
 // [in]  adjustMode: See enmGetLengthResetMode for possible adjust modes.
-// [in]  target: Time or position target which should be reached, or no target to get length of the first sub song.
-// [out] duration: total time in seconds
-// [out] targetReached: true if the specified target has been reached while going through the module.
-// [out] lastOrder: last parsed order (if no target is specified, this is the first order that is parsed twice, i.e. not the *last* played order)
-// [out] lastRow: last parsed row (ditto)
-// [out] endOrder: last order before module loops (UNDEFINED if a target is specified)
-// [out] endRow: last row before module loops (ditto)
+// [in]  target: Time or position target which should be reached, or no target to get length of the first sub song. Use GetLengthTarget::StartPos to also specify a position from where the seeking should begin.
+// [out] See definition of type GetLengthType for the returned values.
 std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMode, GetLengthTarget target)
 //--------------------------------------------------------------------------------------------------------
 {
@@ -1158,8 +1153,6 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 			if(pIns->IsCutoffEnabled()) pChn->nCutOff = pIns->GetCutoff();
 			if(pIns->IsResonanceEnabled()) pChn->nResonance = pIns->GetResonance();
 		}
-		pChn->nVolSwing = pChn->nPanSwing = 0;
-		pChn->nResSwing = pChn->nCutSwing = 0;
 	}
 
 	if(pSmp == nullptr)
@@ -1349,6 +1342,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 		pChn->nNewIns = 0;
 
 	UINT period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
+	pChn->nPanbrelloOffset = 0;
 
 	if(!pSmp) return;
 	if(period)
@@ -1627,7 +1621,8 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 		ModChannel &chn = m_PlayState.Chn[n];
 		// Copy Channel
 		chn = *pChn;
-		chn.dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_PANBRELLO | CHN_MUTE | CHN_PORTAMENTO);
+		chn.dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_MUTE | CHN_PORTAMENTO);
+		chn.nPanbrelloOffset = 0;
 		chn.nMasterChn = nChn + 1;
 		chn.nCommand = CMD_NONE;
 		chn.rowCommand.Clear();
@@ -1792,7 +1787,8 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 			ModChannel *p = &m_PlayState.Chn[n];
 			// Copy Channel
 			*p = *pChn;
-			p->dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_PANBRELLO | CHN_MUTE | CHN_PORTAMENTO);
+			p->dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_MUTE | CHN_PORTAMENTO);
+			p->nPanbrelloOffset = 0;
 
 			//rewbs: Copy mute and FX status from master chan.
 			//I'd like to copy other flags too, but this would change playback behaviour.
@@ -2349,7 +2345,10 @@ bool CSoundFile::ProcessEffects()
 				pChn->nRestorePanOnNewNote = 0;
 				//IT compatibility 20. Set pan overrides random pan
 				if(IsCompatibleMode(TRK_IMPULSETRACKER))
+				{
 					pChn->nPanSwing = 0;
+					pChn->nPanbrelloOffset = 0;
+				}
 			}
 
 #ifdef MODPLUG_TRACKER
@@ -3453,7 +3452,6 @@ void CSoundFile::Panbrello(ModChannel *p, UINT param) const
 {
 	if (param & 0x0F) p->nPanbrelloDepth = param & 0x0F;
 	if (param & 0xF0) p->nPanbrelloSpeed = (param >> 4) & 0x0F;
-	p->dwFlags.set(CHN_PANBRELLO);
 }
 
 
@@ -3484,7 +3482,10 @@ void CSoundFile::Panning(ModChannel *pChn, UINT param) const
 	pChn->nRestorePanOnNewNote = 0;
 	//IT compatibility 20. Set pan overrides random pan
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))
+	{
 		pChn->nPanSwing = 0;
+		pChn->nPanbrelloOffset = 0;
+	}
 }
 
 
@@ -3946,6 +3947,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 					if(IsCompatibleMode(TRK_IMPULSETRACKER))
 					{
 						pChn->nPanSwing = 0;
+						pChn->nPanbrelloOffset = 0;
 					}
 				}
 				break;
