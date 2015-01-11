@@ -775,6 +775,7 @@ public:
 	void CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut);
 	void NoteChange(ModChannel *pChn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false) const;
 	void InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true) const;
+	void ApplyInstrumentPanning(ModChannel *pChn, const ModInstrument *instr, const ModSample *smp) const;
 
 	// Channel Effects
 	void KeyOff(ModChannel *pChn) const;

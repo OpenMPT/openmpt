@@ -1003,46 +1003,28 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	if (pIns && ((!IsCompatibleMode(TRK_IMPULSETRACKER) && pSmp) || pIns->nMixPlug))
 		pChn->nNNA = pIns->nNNA;
 
-	if (pSmp)
-	{
-		if (pIns)
-		{
-			pChn->nInsVol = (pSmp->nGlobalVol * pIns->nGlobalVol) >> 6;
-			// Default instrument panning
-			if(pIns->dwFlags[INS_SETPANNING])
-			{
-				pChn->nPan = pIns->nPan;
-				// IT compatibility: Sample and instrument panning overrides channel surround status.
-				// Test case: SmpInsPanSurround.it
-				if(IsCompatibleMode(TRK_IMPULSETRACKER) && !m_SongFlags[SONG_SURROUNDPAN])
-				{
-					pChn->dwFlags.reset(CHN_SURROUND);
-				}
-			}
-		} else
-		{
-			pChn->nInsVol = pSmp->nGlobalVol;
-		}
-
-		// Default sample panning
-		if(pSmp->uFlags[CHN_PANNING] && (bUpdVol || !(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))))
-		{
-			// FT2 compatibility: Only reset panning on instrument numbers, not notes (bUpdVol condition)
-			// Test case: PanMemory.xm
-			pChn->nPan = pSmp->nPan;
-
-			// IT compatibility: Sample and instrument panning overrides channel surround status.
-			// Test case: SmpInsPanSurround.it
-			if(IsCompatibleMode(TRK_IMPULSETRACKER) && !m_SongFlags[SONG_SURROUNDPAN])
-			{
-				pChn->dwFlags.reset(CHN_SURROUND);
-			}
-		}
-	} else if(pIns && pIns->HasValidMIDIChannel())
+	// Update volume
+	if (pIns)
 	{
 		pChn->nInsVol = pIns->nGlobalVol;
+		if(pSmp != nullptr)
+		{
+			pChn->nInsVol = (pSmp->nGlobalVol * pChn->nInsVol) >> 6;
+		}
+	} else if (pSmp != nullptr)
+	{
+		pChn->nInsVol = pSmp->nGlobalVol;
 	}
 
+	// Update panning
+	// FT2 compatibility: Only reset panning on instrument numbers, not notes (bUpdVol condition)
+	// Test case: PanMemory.xm
+	// IT compatibility: Sample and instrument panning is only applied on note change, not instrument change
+	// Test case: PanReset.it
+	if((bUpdVol || !(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))) && !IsCompatibleMode(TRK_IMPULSETRACKER))
+	{
+		ApplyInstrumentPanning(pChn, pIns, pSmp);
+	}
 
 	// Reset envelopes
 	if(bResetEnv)
@@ -1344,6 +1326,10 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 	UINT period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
 	pChn->nPanbrelloOffset = 0;
 
+	// IT compatibility: Sample and instrument panning is only applied on note change, not instrument change
+	// Test case: PanReset.it
+	if(IsCompatibleMode(TRK_IMPULSETRACKER)) ApplyInstrumentPanning(pChn, pIns, pSmp);
+
 	if(!pSmp) return;
 	if(period)
 	{
@@ -1562,7 +1548,38 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 	{
 		if (!bManual) pChn->nPeriod = 0;
 	}
+}
 
+
+// Apply sample or instrumernt panning
+void CSoundFile::ApplyInstrumentPanning(ModChannel *pChn, const ModInstrument *instr, const ModSample *smp) const
+//---------------------------------------------------------------------------------------------------------------
+{
+	int32_t newPan = int32_min;
+	if(instr != nullptr)
+	{
+		// Default instrument panning
+		if(instr->dwFlags[INS_SETPANNING])
+		{
+			newPan = instr->nPan;
+		}
+	}
+
+	// Default sample panning
+	if(smp != nullptr && smp->uFlags[CHN_PANNING])
+	{
+		newPan = smp->nPan;
+	}
+	if(newPan != int32_min)
+	{
+		pChn->nPan = newPan;
+		// IT compatibility: Sample and instrument panning overrides channel surround status.
+		// Test case: SmpInsPanSurround.it
+		if(IsCompatibleMode(TRK_IMPULSETRACKER) && !m_SongFlags[SONG_SURROUNDPAN])
+		{
+			pChn->dwFlags.reset(CHN_SURROUND);
+		}
+	}
 }
 
 
