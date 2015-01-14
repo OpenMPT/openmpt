@@ -31,7 +31,7 @@ namespace SoundDevice {
 CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(SoundDevice)
 //------------------------------------------------------------------------------------------
 {
-
+	MPT_TRACE();
 	m_WakeupInterval = 0.0;
 	m_hPlayThread = NULL;
 	m_dwPlayThreadId = 0;
@@ -50,6 +50,7 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(
 CAudioThread::~CAudioThread()
 //---------------------------
 {
+	MPT_TRACE();
 	if(m_hPlayThread != NULL)
 	{
 		SetEvent(m_hAudioThreadTerminateRequest);
@@ -84,6 +85,8 @@ CPriorityBooster::CPriorityBooster(bool boostPriority)
 	, task_idx(0)
 	, hTask(NULL)
 {
+
+	MPT_TRACE();
 
 	m_HasVista = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
 
@@ -128,6 +131,8 @@ CPriorityBooster::~CPriorityBooster()
 //-----------------------------------
 {
 
+	MPT_TRACE();
+
 	if(m_BoostPriority)
 	{
 		if(m_HasVista)
@@ -168,6 +173,8 @@ public:
 	CPeriodicWaker(CAudioThread &self_, double sleepSeconds_) : self(self_), sleepSeconds(sleepSeconds_)
 	//--------------------------------------------------------------------------------------------------
 	{
+
+		MPT_TRACE();
 
 		sleepMilliseconds = static_cast<long>(sleepSeconds * 1000.0);
 		sleep100Nanoseconds = static_cast<int64>(sleepSeconds * 10000000.0);
@@ -215,6 +222,7 @@ public:
 	void Retrigger()
 	//--------------
 	{
+		MPT_TRACE();
 		if(mpt::Windows::Version::IsNT())
 		{
 			if(!periodic_nt_timer)
@@ -232,6 +240,7 @@ public:
 	CPeriodicWaker::~CPeriodicWaker()
 	//-------------------------------
 	{
+		MPT_TRACE();
 		if(mpt::Windows::Version::IsNT())
 		{
 			if(periodic_nt_timer)
