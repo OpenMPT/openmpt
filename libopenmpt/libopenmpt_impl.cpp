@@ -339,7 +339,7 @@ void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
 	m_current_subsong = 0;
 	// init member variables that correspond to ctls
 	for ( std::map< std::string, std::string >::const_iterator i = ctls.begin(); i != ctls.end(); ++i ) {
-		ctl_set( i->first, i->second );
+		ctl_set( i->first, i->second, false );
 	}
 }
 void module_impl::load( const FileReader & file, const std::map< std::string, std::string > & ctls ) {
@@ -366,7 +366,7 @@ void module_impl::load( const FileReader & file, const std::map< std::string, st
 	}
 	// init CSoundFile state that corresponds to ctls
 	for ( std::map< std::string, std::string >::const_iterator i = ctls.begin(); i != ctls.end(); ++i ) {
-		ctl_set( i->first, i->second );
+		ctl_set( i->first, i->second, false );
 	}
 }
 bool module_impl::is_loaded() const {
@@ -1203,9 +1203,20 @@ std::vector<std::string> module_impl::get_ctls() const {
 	retval.push_back( "dither" );
 	return retval;
 }
-std::string module_impl::ctl_get( const std::string & ctl ) const {
+std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const {
+	if ( !ctl.empty() ) {
+		std::string rightmost = ctl.substr( ctl.length() - 1, 1 );
+		if ( rightmost == "!" || rightmost == "?" ) {
+			if ( rightmost == "!" ) {
+				throw_if_unknown = true;
+			} else if ( rightmost == "?" ) {
+				throw_if_unknown = false;
+			}
+			ctl = ctl.substr( 0, ctl.length() - 1 );
+		}
+	}
 	if ( ctl == "" ) {
-		throw openmpt::exception("unknown ctl");
+		throw openmpt::exception("empty ctl");
 	} else if ( ctl == "load.skip_samples" || ctl == "load_skip_samples" ) {
 		return mpt::ToString( m_ctl_load_skip_samples );
 	} else if ( ctl == "load.skip_patterns" || ctl == "load_skip_patterns" ) {
@@ -1225,12 +1236,27 @@ std::string module_impl::ctl_get( const std::string & ctl ) const {
 	} else if ( ctl == "dither" ) {
 		return mpt::ToString( static_cast<int>( m_Dither->GetMode() ) );
 	} else {
-		throw openmpt::exception("unknown ctl");
+		if ( throw_if_unknown ) {
+			throw openmpt::exception("unknown ctl: " + ctl);
+		} else {
+			return std::string();
+		}
 	}
 }
-void module_impl::ctl_set( const std::string & ctl, const std::string & value ) {
+void module_impl::ctl_set( std::string ctl, const std::string & value, bool throw_if_unknown ) {
+	if ( !ctl.empty() ) {
+		std::string rightmost = ctl.substr( ctl.length() - 1, 1 );
+		if ( rightmost == "!" || rightmost == "?" ) {
+			if ( rightmost == "!" ) {
+				throw_if_unknown = true;
+			} else if ( rightmost == "?" ) {
+				throw_if_unknown = false;
+			}
+			ctl = ctl.substr( 0, ctl.length() - 1 );
+		}
+	}
 	if ( ctl == "" ) {
-		throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
+		throw openmpt::exception("empty ctl: := " + value);
 	} else if ( ctl == "load.skip_samples" || ctl == "load_skip_samples" ) {
 		m_ctl_load_skip_samples = ConvertStrTo<bool>( value );
 	} else if ( ctl == "load.skip_patterns" || ctl == "load_skip_patterns" ) {
@@ -1260,7 +1286,11 @@ void module_impl::ctl_set( const std::string & ctl, const std::string & value ) 
 	} else if ( ctl == "dither" ) {
 		m_Dither->SetMode( static_cast<DitherMode>( ConvertStrTo<int>( value ) ) );
 	} else {
-		throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
+		if ( throw_if_unknown ) {
+			throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
+		} else {
+			// ignore
+		}
 	}
 }
 
