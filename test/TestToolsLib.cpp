@@ -63,7 +63,7 @@ Testcase::Testcase(Fatality fatality, Verbosity verbosity, const char * const de
 
 std::string Testcase::AsString() const
 {
-	return mpt::String::Print("Test: %1(%2): %3", context.file, context.line, remove_newlines(desc));
+	return mpt::String::Print("%1(%2): %3", context.file, context.line, remove_newlines(desc));
 }
 
 
@@ -74,8 +74,10 @@ void Testcase::ShowStart() const
 		case VerbosityQuiet:
 			break;
 		case VerbosityNormal:
+			std::cout << "TEST..: " << AsString() << ": " << std::endl;
+			break;
 		case VerbosityVerbose:
-			std::cout << AsString() << ": " << std::endl;
+			std::cout << "TEST..: " << AsString() << ": " << std::endl;
 			break;
 	}
 }
@@ -88,8 +90,9 @@ void Testcase::ShowProgress(const char * text) const
 		case VerbosityQuiet:
 			break;
 		case VerbosityNormal:
+			break;
 		case VerbosityVerbose:
-			std::cout << AsString() << ": " << text << std::endl;
+			std::cout << "TEST..: " << AsString() << ": " << text << std::endl;
 			break;
 	}
 }
@@ -102,8 +105,10 @@ void Testcase::ShowPass() const
 		case VerbosityQuiet:
 			break;
 		case VerbosityNormal:
+			std::cout << "RESULT: PASS" << std::endl;
+			break;
 		case VerbosityVerbose:
-			std::cout << AsString() << ": PASS" << std::endl;
+			std::cout << "PASS..: " << AsString() << std::endl;
 			break;
 	}
 }
@@ -111,7 +116,17 @@ void Testcase::ShowPass() const
 
 void Testcase::ShowFail(bool exception, const char * const text) const
 {
-	std::cout << AsString() << ": FAIL" << std::endl;
+	switch(verbosity)
+	{
+		case VerbosityQuiet:
+			break;
+		case VerbosityNormal:
+			std::cout << "RESULT: FAIL" << std::endl;
+			break;
+		case VerbosityVerbose:
+			std::cout << "FAIL..: " << AsString() << std::endl;
+			break;
+	}
 	std::cout.flush();
 	if(!exception)
 	{
