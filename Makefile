@@ -44,6 +44,7 @@
 #  SHARED_SONAME=1  Set SONAME of shared library
 #  DEBUG=0          Build debug binaries without optimization and with symbols
 #  OPTIMIZE=1       Build optimized binaries
+#  OPTIMIZE_SIZE=0  Build size-optimized binaries
 #  TEST=1           Include test suite in default target.
 #  ONLY_TEST=0      Only build the test suite.
 #  ANCIENT=0        Use a pre-C++0x compiler (i.e. GCC before 4.3)
@@ -125,6 +126,7 @@ EXAMPLES=1
 SHARED_SONAME=1
 DEBUG=0
 OPTIMIZE=1
+OPTIMIZE_SIZE=0
 TEST=1
 ONLY_TEST=0
 ANCIENT=0
@@ -254,9 +256,15 @@ ifeq ($(DEBUG),1)
 CXXFLAGS += -O0 -g
 CFLAGS   += -O0 -g
 else
+ifeq ($(OPTIMIZE_SIZE),1)
+CXXFLAGS += -ffunction-sections -fdata-sections -Os -ffast-math
+CFLAGS   += -ffunction-sections -fdata-sections -Os -ffast-math -fno-strict-aliasing
+LDFLAGS  += -Wl,--gc-sections
+else
 ifeq ($(OPTIMIZE),1)
 CXXFLAGS += -O3 -ffast-math
 CFLAGS   += -O3 -ffast-math -fno-strict-aliasing
+endif
 endif
 endif
 
