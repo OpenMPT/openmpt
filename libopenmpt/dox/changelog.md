@@ -5,6 +5,11 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt-svn
+
+ *  Vibrato effect was too weak in beta8 and beta9 in IT linear slide mode.
+ *  Tiny IT playback compatibility improvements.
+
 ### 2014-12-21 - libopenmpt 0.2-beta9
 
  *  [Bug] libopenmpt_ext.hpp was missing from the Windows binary zip files.
