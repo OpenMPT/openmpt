@@ -41,8 +41,6 @@ static const uint32 opus_samplerates [] = {
 	12000,            8000
 };
 static const uint32 vorbis_samplerates [] = {
-	192000, 176400, 128000,
-	 96000,  88200,  64000,
 	 48000,  44100,  32000,
 	 24000,  22050,  16000,
 	 12000,  11025,   8000
