@@ -188,9 +188,9 @@ public:
 		}
 	}
 
-	#define VERIFY_EQUAL(x,y)	Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
-	#define VERIFY_EQUAL_NONCONT(x,y)	Test::Testcase(Test::FatalityStop, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
-	#define VERIFY_EQUAL_QUIET_NONCONT(x,y)	Test::Testcase(Test::FatalityStop, Test::VerbosityQuiet, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
+	#define VERIFY_EQUAL(x,y)               Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
+	#define VERIFY_EQUAL_NONCONT(x,y)       Test::Testcase(Test::FatalityStop    , Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
+	#define VERIFY_EQUAL_QUIET_NONCONT(x,y) Test::Testcase(Test::FatalityStop    , Test::VerbosityQuiet , #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
 
 #else
 
@@ -214,9 +214,9 @@ public:
 		}
 	}
 
-	#define VERIFY_EQUAL(x,y)	Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
-	#define VERIFY_EQUAL_NONCONT(x,y)	Test::Testcase(Test::FatalityStop, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
-	#define VERIFY_EQUAL_QUIET_NONCONT(x,y)	Test::Testcase(Test::FatalityStop, Test::VerbosityQuiet, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
+	#define VERIFY_EQUAL(x,y)               Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
+	#define VERIFY_EQUAL_NONCONT(x,y)       Test::Testcase(Test::FatalityStop    , Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
+	#define VERIFY_EQUAL_QUIET_NONCONT(x,y) Test::Testcase(Test::FatalityStop    , Test::VerbosityQuiet , #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
 
 #endif
 
@@ -225,7 +225,7 @@ public:
 
 #define DO_TEST(func) \
 do{ \
-	Test::Testcase test(Test::FatalityStop, Test::VerbosityNormal, #func , MPT_TEST_CONTEXT_CURRENT() ); \
+	Test::Testcase test(Test::FatalityStop, Test::VerbosityVerbose, #func , MPT_TEST_CONTEXT_CURRENT() ); \
 	try { \
 		test.ShowStart(); \
 		fail_count = 0; \
