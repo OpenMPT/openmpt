@@ -206,8 +206,8 @@ public:
 	std::string format_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const;
 	std::string highlight_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const;
 	std::vector<std::string> get_ctls() const;
-	std::string ctl_get( const std::string & ctl ) const;
-	void ctl_set( const std::string & ctl, const std::string & value );
+	std::string ctl_get( std::string ctl, bool throw_if_unknown = true ) const;
+	void ctl_set( std::string ctl, const std::string & value, bool throw_if_unknown = true );
 }; // class module_impl
 
 } // namespace openmpt
