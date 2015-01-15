@@ -1474,13 +1474,13 @@ bool MP3Encoder::IsAvailable() const
 {
 	return false
 #ifdef MPT_MP3ENCODER_LAME
-		|| IsComponentAvailable(m_Lame)
+		|| ((m_Type == MP3EncoderLame) && IsComponentAvailable(m_Lame))
 #endif // MPT_MP3ENCODER_ACM
 #ifdef MPT_MP3ENCODER_BLADE
-		|| IsComponentAvailable(m_Blade)
+		|| ((m_Type == MP3EncoderBlade) && IsComponentAvailable(m_Blade))
 #endif // MPT_MP3ENCODER_BLADE
 #ifdef MPT_MP3ENCODER_ACM
-		|| IsComponentAvailable(m_Acm)
+		|| ((m_Type == MP3EncoderACM) && IsComponentAvailable(m_Acm))
 #endif // MPT_MP3ENCODER_ACM
 		;
 }
