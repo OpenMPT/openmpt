@@ -155,12 +155,12 @@ How to compile
         node.js. Version 0.10.25 or greater has been tested. Earlier versions
         might or might not work. Depending on how your distribution calls the
         `node.js` binary, you might have to edit
-        `build/make/Makefile.config.emscripten`.
+        `build/make/config-emscripten.mk`.
 
     The `Makefile` supports some customizations. You might want to read the top
     which should get you some possible make settings, like e.g.
     `make DYNLINK=0` or similar. Cross compiling or different compiler would
-    best be implemented via new `Makefile.config.*` files.
+    best be implemented via new `config-*.mk` files.
 
     The `Makefile` also supports building doxygen documentation by using
 
