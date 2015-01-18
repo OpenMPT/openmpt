@@ -204,11 +204,11 @@ endif
 
 ifeq ($(CONFIG)x,x)
 
-include build/make/Makefile.config.defaults
+include build/make/config-defaults.mk
 
 else
 
-include build/make/Makefile.config.$(CONFIG)
+include build/make/config-$(CONFIG).mk
 
 endif
 

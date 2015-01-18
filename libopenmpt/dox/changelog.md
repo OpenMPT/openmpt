@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt-svn
 
+ *  Makefile configuration filenames changed from
+    `build/make/Makefile.config.*` to `build/make/config-*.mk`.
+
  *  Vibrato effect was too weak in beta8 and beta9 in IT linear slide mode.
  *  Tiny IT playback compatibility improvements.
 
