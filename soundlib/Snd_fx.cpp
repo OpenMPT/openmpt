@@ -704,7 +704,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						if(forbiddenCommands[p->command])
 						{
 							stopNote = true;
-							break;
 						}
 						// Special case: Slides using extended commands
 						if(p->command == CMD_MODCMDEX)
@@ -716,7 +715,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							case 0xA0:
 							case 0xB0:
 								stopNote = true;
-								break;
 							}
 						}
 					}
@@ -724,7 +722,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					if(p->volcmd < MAX_VOLCMDS && forbiddenVolCommands[p->volcmd])
 					{
 						stopNote = true;
-						break;
 					}
 				}
 
@@ -1556,20 +1553,13 @@ void CSoundFile::ApplyInstrumentPanning(ModChannel *pChn, const ModInstrument *i
 //---------------------------------------------------------------------------------------------------------------
 {
 	int32_t newPan = int32_min;
-	if(instr != nullptr)
-	{
-		// Default instrument panning
-		if(instr->dwFlags[INS_SETPANNING])
-		{
-			newPan = instr->nPan;
-		}
-	}
-
+	// Default instrument panning
+	if(instr != nullptr && instr->dwFlags[INS_SETPANNING])
+		newPan = instr->nPan;
 	// Default sample panning
 	if(smp != nullptr && smp->uFlags[CHN_PANNING])
-	{
 		newPan = smp->nPan;
-	}
+
 	if(newPan != int32_min)
 	{
 		pChn->nPan = newPan;
