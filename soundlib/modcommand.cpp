@@ -144,6 +144,8 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 		newTypeIsS3M_IT_MPT = (newTypeIsS3M || newTypeIsIT || newTypeIsMPT),
 		newTypeIsIT_MPT = (newTypeIsIT || newTypeIsMPT);
 
+	const CModSpecifications &newSpecs = CSoundFile::GetModSpecifications(toType);
+
 	//////////////////////////
 	// Convert 8-bit Panning
 	if(command == CMD_PANNING8)
@@ -166,7 +168,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 	} // End if(command == CMD_PANNING8)
 
 	// Re-map \xx to Zxx if the new format only knows the latter command.
-	if(command == CMD_SMOOTHMIDI && !CSoundFile::GetModSpecifications(toType).HasCommand(CMD_SMOOTHMIDI) && CSoundFile::GetModSpecifications(toType).HasCommand(CMD_MIDI))
+	if(command == CMD_SMOOTHMIDI && !newSpecs.HasCommand(CMD_SMOOTHMIDI) && newSpecs.HasCommand(CMD_MIDI))
 	{
 		command = CMD_MIDI;
 	}
@@ -178,10 +180,10 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 		if(IsPcNote())
 		{
 			COMMAND newCmd = static_cast<COMMAND>(note == NOTE_PC ? CMD_MIDI : CMD_SMOOTHMIDI);
-			if(!CSoundFile::GetModSpecifications(toType).HasCommand(newCmd))
+			if(!newSpecs.HasCommand(newCmd))
 			{
 				newCmd = CMD_MIDI;	// assuming that this was CMD_SMOOTHMIDI
-				if(!CSoundFile::GetModSpecifications(toType).HasCommand(newCmd))
+				if(!newSpecs.HasCommand(newCmd))
 				{
 					newCmd = CMD_NONE;
 				}
@@ -696,14 +698,6 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 				param = vol;
 				volcmd = CMD_NONE;
 				break;
-				// OpenMPT-specific commands
-
-			case VOLCMD_OFFSET:
-				command = CMD_OFFSET;
-				param = vol << 3;
-				volcmd = CMD_NONE;
-				break;
-
 		}
 	} // End if(newTypeIsS3M)
 
@@ -749,13 +743,6 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			case VOLCMD_TONEPORTAMENTO:
 				command = CMD_TONEPORTAMENTO;
 				param = ImpulseTrackerPortaVolCmd[vol & 0x0F];
-				volcmd = VOLCMD_NONE;
-				break;
-
-				// OpenMPT-specific commands
-			case VOLCMD_OFFSET:
-				command = CMD_OFFSET;
-				param = vol << 3;
 				volcmd = VOLCMD_NONE;
 				break;
 		}
@@ -805,18 +792,26 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 		case VOLCMD_VIBRATODEPTH:
 			// OpenMPT-specific commands
 		case VOLCMD_OFFSET:
-			vol = MIN(vol, 9);
+			vol = std::min<PARAM>(vol, 9);
 			break;
 		}
 	} // End if(newTypeIsIT_MPT)
 
-	if(!CSoundFile::GetModSpecifications(toType).HasNote(note))
+	// Fix volume column offset for formats that don't have it.
+	if(volcmd == VOLCMD_OFFSET && !newSpecs.HasVolCommand(VOLCMD_OFFSET) && (command == CMD_NONE || !newSpecs.HasCommand(command)))
+	{
+		command = CMD_OFFSET;
+		param = vol << 3;
+		volcmd = VOLCMD_NONE;
+	}
+
+	if(!newSpecs.HasNote(note))
 		note = NOTE_NONE;
 
 	// ensure the commands really exist in this format
-	if(!CSoundFile::GetModSpecifications(toType).HasCommand(command))
+	if(!newSpecs.HasCommand(command))
 		command = CMD_NONE;
-	if(!CSoundFile::GetModSpecifications(toType).HasVolCommand(volcmd))
+	if(!newSpecs.HasVolCommand(volcmd))
 		volcmd = VOLCMD_NONE;
 
 }
@@ -899,20 +894,20 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 		return true;
 	case CMD_VOLUME:
 		effect = VOLCMD_VOLUME;
-		param = MIN(param, 64);
+		param = std::min<PARAM>(param, 64);
 		break;
 	case CMD_PORTAMENTOUP:
 		// if not force, reject when dividing causes loss of data in LSB, or if the final value is too
 		// large to fit. (volume column Ex/Fx are four times stronger than effect column)
 		if(!force && ((param & 3) || param > 9 * 4 + 3))
 			return false;
-		param = MIN(param / 4, 9);
+		param = std::min<PARAM>(param / 4, 9);
 		effect = VOLCMD_PORTAUP;
 		break;
 	case CMD_PORTAMENTODOWN:
 		if(!force && ((param & 3) || param > 9 * 4 + 3))
 			return false;
-		param = MIN(param / 4, 9);
+		param = std::min<PARAM>(param / 4, 9);
 		effect = VOLCMD_PORTADOWN;
 		break;
 	case CMD_TONEPORTAMENTO:
@@ -937,7 +932,7 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 		return false;
 	case CMD_VIBRATO:
 		if(force)
-			param = MIN(param & 0x0F, 9);
+			param = std::min<PARAM>(param & 0x0F, 9);
 		else if((param & 0x0F) > 9 || (param & 0xF0) != 0)
 			return false;
 		param &= 0x0F;
@@ -951,7 +946,7 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 		effect = VOLCMD_VIBRATODEPTH;
 		break;
 	case CMD_PANNING8:
-		param = MIN(64, param * 64 / 255);
+		param = std::min<PARAM>(64, param * 64 / 255);
 		effect = VOLCMD_PANNING;
 		break;
 	case CMD_VOLUMESLIDE:
@@ -960,7 +955,7 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 		if((param & 0xF) == 0)	// Dx0 / Cx
 		{
 			if(force)
-				param = MIN(param >> 4, 9);
+				param = std::min<PARAM>(param >> 4, 9);
 			else if((param >> 4) > 9)
 				return false;
 			else
@@ -969,14 +964,14 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 		} else if((param & 0xF0) == 0)	// D0x / Dx
 		{
 			if(force)
-				param = MIN(param, 9);
+				param = std::min<PARAM>(param, 9);
 			else if(param > 9)
 				return false;
 			effect = VOLCMD_VOLSLIDEDOWN;
 		} else if((param & 0xF) == 0xF)	// DxF / Ax
 		{
 			if(force)
-				param = MIN(param >> 4, 9);
+				param = std::min<PARAM>(param >> 4, 9);
 			else if((param >> 4) > 9)
 				return false;
 			else
@@ -985,7 +980,7 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 		} else if((param & 0xf0) == 0xf0)	// DFx / Bx
 		{
 			if(force)
-				param = MIN(param, 9);
+				param = std::min<PARAM>(param, 9);
 			else if((param & 0xF) > 9)
 				return false;
 			else
