@@ -196,7 +196,7 @@ const CModSpecifications xmEx =
 	12,											// Envelope point count
 	false,										// No envelope release node
 	" 0123456789ABCDRFFTE???GHK?YXPLZ\\?#?????",	// Supported Effects
-	" vpcdabuhlrgfe?o",							// Supported Volume Column commands
+	" vpcdabuhlrgfe??",							// Supported Volume Column commands
 	false,										// Doesn't have "+++" pattern
 	false,										// Doesn't have "---" pattern
 	true,										// Has restart position (order)
@@ -369,7 +369,7 @@ const CModSpecifications itEx =
 	25,											// Envelope point count
 	false,										// No envelope release node
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\?#?????",	// Supported Effects
-	" vpcdab?h??gfe?o",							// Supported Volume Column commands
+	" vpcdab?h??gfe??",							// Supported Volume Column commands
 	true,										// Has "+++" pattern
 	true,										// Has "---" pattern
 	false,										// Doesn't have restart position (order)

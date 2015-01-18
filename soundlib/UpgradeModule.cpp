@@ -201,6 +201,14 @@ struct UpgradePatternData
 			}
 		}
 
+		// Volume column offset in IT/XM is bad, mkay?
+		if(sndFile.GetType() != MOD_TYPE_MPT && m.volcmd == VOLCMD_OFFSET && m.command == CMD_NONE)
+		{
+			m.command = CMD_OFFSET;
+			m.param = m.vol << 3;
+			m.volcmd = VOLCMD_NONE;
+		}
+
 	}
 
 	CSoundFile &sndFile;
