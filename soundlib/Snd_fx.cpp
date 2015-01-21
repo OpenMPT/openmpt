@@ -704,10 +704,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						if(forbiddenCommands[p->command])
 						{
 							stopNote = true;
-						}
-						// Special case: Slides using extended commands
-						if(p->command == CMD_MODCMDEX)
+						} else if(p->command == CMD_MODCMDEX)
 						{
+							// Special case: Slides using extended commands
 							switch(p->param & 0xF0)
 							{
 							case 0x10:
@@ -1175,7 +1174,9 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 
 	// FT2 compatibility: Don't reset portamento target with new instrument numbers.
 	// Test case: Porta-Pickup.xm
-	if(!IsCompatibleMode(TRK_FASTTRACKER2))
+	// ProTracker does the same.
+	// Test case: PortaTarget.mod
+	if(!IsCompatibleMode(TRK_FASTTRACKER2) && GetType() != MOD_TYPE_MOD)
 	{
 		pChn->nPortamentoDest = 0;
 	}
@@ -1335,9 +1336,11 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 		{
 			// FT2 compatibility: Don't reset portamento target with new notes.
 			// Test case: Porta-Pickup.xm
+			// ProTracker does the same.
+			// Test case: PortaTarget.mod
 			// IT compatibility: Portamento target is completely cleared with new notes.
 			// Test case: PortaReset.it
-			if(bPorta || !(IsCompatibleMode(TRK_FASTTRACKER2) || IsCompatibleMode(TRK_IMPULSETRACKER)))
+			if(bPorta || !(IsCompatibleMode(TRK_FASTTRACKER2) || IsCompatibleMode(TRK_IMPULSETRACKER) || GetType() == MOD_TYPE_MOD))
 			{
 				pChn->nPortamentoDest = period;
 			}
@@ -3425,8 +3428,10 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param)
 		}
 	}
 
-	//IT compatibility 23. Portamento with no note
-	if(pChn->nPeriod == pChn->nPortamentoDest && IsCompatibleMode(TRK_IMPULSETRACKER))
+	// IT compatibility 23. Portamento with no note
+	// ProTracker also disables portamento once the target is reached.
+	// Test case: PortaTarget.mod
+	if(pChn->nPeriod == pChn->nPortamentoDest && (IsCompatibleMode(TRK_IMPULSETRACKER) || GetType() == MOD_TYPE_MOD))
 		pChn->nPortamentoDest = 0;
 
 }
