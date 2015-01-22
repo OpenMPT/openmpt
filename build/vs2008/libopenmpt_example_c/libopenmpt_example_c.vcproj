@@ -161,7 +161,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\..\libopenmpt\examples\libopenmpt_example_c.c"
+			RelativePath="..\..\..\examples\libopenmpt_example_c.c"
 			>
 		</File>
 	</Files>

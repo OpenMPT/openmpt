@@ -5,6 +5,6 @@ set -e
 # clang-format-3.5 -i *.h *.c *.hpp *.cpp
 #cd ..
 
-cd libopenmpt/examples
+cd examples
  clang-format-3.5 -i *.c *.cpp
-cd ../..
+cd ..
