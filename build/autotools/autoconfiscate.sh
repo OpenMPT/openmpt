@@ -32,6 +32,7 @@ svn export ./common          bin/dist-autotools/common
 svn export ./soundlib        bin/dist-autotools/soundlib
 svn export ./test            bin/dist-autotools/test
 svn export ./libopenmpt      bin/dist-autotools/libopenmpt
+svn export ./examples        bin/dist-autotools/examples
 mkdir bin/dist-autotools/src
 svn export ./openmpt123      bin/dist-autotools/src/openmpt123
 #svn export ./openmpt123      bin/dist-autotools/openmpt123

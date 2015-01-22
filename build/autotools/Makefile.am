@@ -16,16 +16,18 @@ EXTRA_DIST += test/test.xm
 EXTRA_DIST += test/test.s3m
 EXTRA_DIST += test/test.mptm
 EXTRA_DIST += man/openmpt123.1
+EXTRA_DIST += examples/.clang-format
 MOSTLYCLEANFILES = 
 
 dist_doc_DATA = 
 dist_doc_DATA += LICENSE
 dist_doc_DATA += README.md
 dist_doc_DATA += TODO
-dist_doc_DATA += libopenmpt/examples/libopenmpt_example_cxx.cpp
-dist_doc_DATA += libopenmpt/examples/libopenmpt_example_c_mem.c
-dist_doc_DATA += libopenmpt/examples/libopenmpt_example_c.c
-dist_doc_DATA += libopenmpt/examples/libopenmpt_example_c_stdout.c
+nobase_dist_doc_DATA = 
+nobase_dist_doc_DATA += examples/libopenmpt_example_cxx.cpp
+nobase_dist_doc_DATA += examples/libopenmpt_example_c_mem.c
+nobase_dist_doc_DATA += examples/libopenmpt_example_c.c
+nobase_dist_doc_DATA += examples/libopenmpt_example_c_stdout.c
 
 bin_PROGRAMS = 
 check_PROGRAMS = 
@@ -39,11 +41,11 @@ check_PROGRAMS += libopenmpt_example_c_mem
 check_PROGRAMS += libopenmpt_example_cxx
 endif
 
-libopenmpt_example_c_stdout_SOURCES = libopenmpt/examples/libopenmpt_example_c_stdout.c
+libopenmpt_example_c_stdout_SOURCES = examples/libopenmpt_example_c_stdout.c
 if HAVE_PORTAUDIO
-libopenmpt_example_c_SOURCES = libopenmpt/examples/libopenmpt_example_c.c
-libopenmpt_example_c_mem_SOURCES = libopenmpt/examples/libopenmpt_example_c_mem.c
-libopenmpt_example_cxx_SOURCES = libopenmpt/examples/libopenmpt_example_cxx.cpp
+libopenmpt_example_c_SOURCES = examples/libopenmpt_example_c.c
+libopenmpt_example_c_mem_SOURCES = examples/libopenmpt_example_c_mem.c
+libopenmpt_example_cxx_SOURCES = examples/libopenmpt_example_cxx.cpp
 endif
 
 libopenmpt_example_c_stdout_CPPFLAGS = 
