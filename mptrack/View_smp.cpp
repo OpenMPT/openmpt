@@ -2932,7 +2932,6 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcSampleCenterLoopEnd:
 		case kcSampleCenterSustainStart:
 		case kcSampleCenterSustainEnd:
-			if(m_nZoom)
 			{
 				SmpLength point = 0;
 				ModSample &sample = sndFile.GetSample(m_nSample);
@@ -2943,7 +2942,10 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				case kcSampleCenterSustainStart:	point = sample.nSustainStart; break;
 				case kcSampleCenterSustainEnd:		point = sample.nSustainEnd; break;
 				}
-				ScrollToSample(point);
+				if(!m_nZoom)
+					SetZoom(1, point);
+				else
+					ScrollToSample(point);
 			}
 			return wParam;
 		case kcPrevInstrument:	OnPrevInstrument(); return wParam;
