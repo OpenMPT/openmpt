@@ -1339,7 +1339,9 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 	if ( flags.show_details ) {
 		set_field( fields, "Filename" ).ostream() << get_filename( filename );
 		set_field( fields, "Size" ).ostream() << bytes_to_string( filesize );
-		set_field( fields, "Warnings" ).ostream() << mod.get_metadata( "warnings" );
+		if ( !mod.get_metadata( "warnings" ).empty() ) {
+			set_field( fields, "Warnings" ).ostream() << mod.get_metadata( "warnings" );
+		}
 		if ( !mod.get_metadata( "container" ).empty() ) {
 			set_field( fields, "Container" ).ostream() << mod.get_metadata( "container" ) << " (" << mod.get_metadata( "container_long" ) << ")";
 		}
@@ -1666,6 +1668,10 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 			} else if ( arg == "--buffer" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.buffer;
+				++i;
+			} else if ( arg == "--period" && nextarg != "" ) {
+				std::istringstream istr( nextarg );
+				istr >> flags.period;
 				++i;
 			} else if ( arg == "--update" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
