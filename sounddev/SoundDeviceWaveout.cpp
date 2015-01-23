@@ -46,6 +46,7 @@ CWaveDevice::CWaveDevice(SoundDevice::Info info)
 //----------------------------------------------
 	: CSoundDeviceWithThread(info)
 {
+	MPT_TRACE();
 	m_ThreadWakeupEvent;
 	m_hWaveOut = NULL;
 	m_nWaveBufferSize = 0;
@@ -57,6 +58,7 @@ CWaveDevice::CWaveDevice(SoundDevice::Info info)
 CWaveDevice::~CWaveDevice()
 //-------------------------
 {
+	MPT_TRACE();
 	Close();
 }
 
@@ -64,6 +66,7 @@ CWaveDevice::~CWaveDevice()
 SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 //--------------------------------------------------
 {
+	MPT_TRACE();
 	SoundDevice::Caps caps;
 	caps.Available = true;
 	caps.CanUpdateInterval = true;
@@ -93,6 +96,7 @@ SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uint32> & /*baseSampleRates*/ )
 //--------------------------------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	SoundDevice::DynamicCaps caps;
 	WAVEOUTCAPSW woc;
 	MemsetZero(woc);
@@ -129,6 +133,7 @@ SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uin
 bool CWaveDevice::InternalOpen()
 //------------------------------
 {
+	MPT_TRACE();
 	WAVEFORMATEXTENSIBLE wfext;
 	if(!FillWaveFormatExtensible(wfext, m_Settings))
 	{
@@ -198,6 +203,7 @@ bool CWaveDevice::InternalOpen()
 bool CWaveDevice::InternalClose()
 //-------------------------------
 {
+	MPT_TRACE();
 	if(m_hWaveOut)
 	{
 		waveOutReset(m_hWaveOut);
@@ -225,6 +231,7 @@ bool CWaveDevice::InternalClose()
 void CWaveDevice::StartFromSoundThread()
 //--------------------------------------
 {
+	MPT_TRACE();
 	if(m_hWaveOut)
 	{
 		m_JustStarted = true;
@@ -236,6 +243,7 @@ void CWaveDevice::StartFromSoundThread()
 void CWaveDevice::StopFromSoundThread()
 //-------------------------------------
 {
+	MPT_TRACE();
 	if(m_hWaveOut)
 	{
 		waveOutPause(m_hWaveOut);
@@ -247,6 +255,7 @@ void CWaveDevice::StopFromSoundThread()
 void CWaveDevice::InternalFillAudioBuffer()
 //-----------------------------------------
 {
+	MPT_TRACE();
 	if(!m_hWaveOut)
 	{
 		return;
@@ -301,14 +310,23 @@ int64 CWaveDevice::InternalGetStreamPositionFrames() const
 }
 
 
+void CWaveDevice::HandleWaveoutDone()
+//-----------------------------------
+{
+	MPT_TRACE();
+	InterlockedDecrement(&m_nBuffersPending);
+	SetEvent(m_ThreadWakeupEvent);
+}
+
+
 void CWaveDevice::WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR, DWORD_PTR)
 //--------------------------------------------------------------------------------------------
 {
-	if ((uMsg == MM_WOM_DONE) && (dwUser))
+	MPT_TRACE();
+	if((uMsg == MM_WOM_DONE) && (dwUser))
 	{
 		CWaveDevice *that = (CWaveDevice *)dwUser;
-		InterlockedDecrement(&that->m_nBuffersPending);
-		SetEvent(that->m_ThreadWakeupEvent);
+		that->HandleWaveoutDone();
 	}
 }
 
@@ -316,6 +334,7 @@ void CWaveDevice::WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR dwUser, DWORD_P
 std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices()
 //----------------------------------------------------------
 {
+	MPT_TRACE();
 	std::vector<SoundDevice::Info> devices;
 	UINT numDevs = waveOutGetNumDevs();
 	for(UINT index = 0; index <= numDevs; ++index)

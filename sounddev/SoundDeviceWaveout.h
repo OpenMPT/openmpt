@@ -61,6 +61,9 @@ public:
 	SoundDevice::Caps InternalGetDeviceCaps();
 	SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 
+private:
+	void HandleWaveoutDone();
+
 public:
 	static void CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
 	static std::vector<SoundDevice::Info> EnumerateDevices();
