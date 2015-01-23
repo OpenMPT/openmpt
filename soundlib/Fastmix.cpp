@@ -271,6 +271,34 @@ static forceinline int32 GetSampleCount(ModChannel &chn, int32 nSamples, bool IT
 	return nSmpCount;
 }
 
+
+// Calculate offset of loop wrap-around buffer for this sample.
+static inline void UpdateLookaheadPointers(const int8* &samplePointer, const int8* &lookaheadPointer, SmpLength &lookaheadStart, const ModChannel &chn, const MixFuncTable::ResamplingIndex resamplingMode)
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	samplePointer = static_cast<const int8 *>(chn.pCurrentSample);
+	lookaheadStart = chn.nLoopEnd - InterpolationMaxLookahead;
+	// We only need to apply the loop wrap-around logic if the sample is actually looping and if interpolation is applied.
+	// If there is no interpolation happening, there is no lookahead happening the sample read-out is exact.
+	if(chn.dwFlags[CHN_LOOP] && resamplingMode != MixFuncTable::ndxNoInterpolation)
+	{
+		const bool loopEndsAtSampleEnd = chn.pModSample->uFlags[CHN_LOOP] && chn.pModSample->nLoopEnd == chn.pModSample->nLength;
+		const bool inSustainLoop = chn.InSustainLoop();
+
+		// Do not enable wraparound magic if we're previewing a custom loop!
+		if(inSustainLoop || chn.nLoopEnd == chn.pModSample->nLoopEnd)
+		{
+			SmpLength lookaheadOffset = (loopEndsAtSampleEnd ? 0 : (3 * InterpolationMaxLookahead)) + chn.pModSample->nLength - chn.nLoopEnd;
+			if(inSustainLoop)
+			{
+				lookaheadOffset += 4 * InterpolationMaxLookahead;
+			}
+			lookaheadPointer = samplePointer + lookaheadOffset * chn.pModSample->GetBytesPerSample();
+		}
+	}
+}
+
+
 // Render count * number of channels samples
 void CSoundFile::CreateStereoMix(int count)
 //-----------------------------------------
@@ -342,28 +370,11 @@ void CSoundFile::CreateStereoMix(int count)
 			}
 		}
 
-		// Calculate offset of loop wrap-around buffer for this sample.
-		const int8 * const samplePointer = static_cast<const int8 *>(chn.pCurrentSample);
+		const int8 * samplePointer = nullptr;
 		const int8 * lookaheadPointer = nullptr;
-		const SmpLength lookaheadStart = chn.nLoopEnd - InterpolationMaxLookahead;
-		// We only need to apply the loop wrap-around logic if the sample is actually looping and if interpolation is applied.
-		// If there is no interpolation happening, there is no lookahead happening the sample read-out is exact.
-		if(chn.dwFlags[CHN_LOOP] && resamplingMode != MixFuncTable::ndxNoInterpolation)
-		{
-			const bool loopEndsAtSampleEnd = chn.pModSample->uFlags[CHN_LOOP] && chn.pModSample->nLoopEnd == chn.pModSample->nLength;
-			const bool inSustainLoop = chn.InSustainLoop();
+		SmpLength lookaheadStart = 0;
 
-			// Do not enable wraparound magic if we're previewing a custom loop!
-			if(inSustainLoop || chn.nLoopEnd == chn.pModSample->nLoopEnd)
-			{
-				SmpLength lookaheadOffset = (loopEndsAtSampleEnd ? 0 : (3 * InterpolationMaxLookahead)) + chn.pModSample->nLength - chn.nLoopEnd;
-				if(inSustainLoop)
-				{
-					lookaheadOffset += 4 * InterpolationMaxLookahead;
-				}
-				lookaheadPointer = samplePointer + lookaheadOffset * chn.pModSample->GetBytesPerSample();
-			}
-		}
+		UpdateLookaheadPointers(samplePointer, lookaheadPointer, lookaheadStart, chn, resamplingMode);
 
 		////////////////////////////////////////////////////
 		CHANNELINDEX naddmix = 0;
@@ -482,6 +493,7 @@ void CSoundFile::CreateStereoMix(int count)
 				chn.nLoopEnd = smp.nLoopEnd;
 				chn.nLength = smp.uFlags[CHN_LOOP] ? smp.nLoopEnd : smp.nLength;
 				chn.nPos = chn.nLoopStart;
+				UpdateLookaheadPointers(samplePointer, lookaheadPointer, lookaheadStart, chn, resamplingMode);
 				if(!chn.pCurrentSample)
 				{
 					break;
