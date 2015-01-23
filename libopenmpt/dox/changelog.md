@@ -10,6 +10,9 @@ is just a high-level summary.
  *  Makefile configuration filenames changed from
     `build/make/Makefile.config.*` to `build/make/config-*.mk`.
 
+ *  [Bug] Fix out-of-bounds read in mixer code for ProTracker-compatible MOD
+    files was introduced back in r4223 / beta6.
+
  *  Vibrato effect was too weak in beta8 and beta9 in IT linear slide mode.
  *  Tiny IT playback compatibility improvements.
 
