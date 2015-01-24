@@ -899,7 +899,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	// Check invalid instruments
 	while ((m_nInstruments > 0) && (!Instruments[m_nInstruments])) m_nInstruments--;
 	// Set default values
-	if (m_nDefaultTempo < 32) m_nDefaultTempo = 125;
+	if (!m_nDefaultTempo) m_nDefaultTempo = 125;
 	if (!m_nDefaultSpeed) m_nDefaultSpeed = 6;
 	m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
 	m_PlayState.m_nMusicTempo = m_nDefaultTempo;

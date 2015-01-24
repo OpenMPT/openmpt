@@ -4712,7 +4712,7 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, LONG nFreqSlide) const
 			{
 				if (n > 255) n = 255;
 				pChn->nPeriod = Util::muldivr(pChn->nPeriod, LinearSlideUpTable[n], 65536);
-				if (pChn->nPeriod == nOldPeriod) pChn->nPeriod = nOldPeriod-1;
+				if (pChn->nPeriod == nOldPeriod) pChn->nPeriod = nOldPeriod + 1;
 			}
 		} else
 		{
@@ -4721,22 +4721,14 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, LONG nFreqSlide) const
 			{
 				if (n > 255) n = 255;
 				pChn->nPeriod = Util::muldivr(pChn->nPeriod, LinearSlideDownTable[n], 65536);
-				if (pChn->nPeriod == nOldPeriod) pChn->nPeriod = nOldPeriod+1;
+				if (pChn->nPeriod == nOldPeriod) pChn->nPeriod = nOldPeriod - 1;
 			}
 		}
 	} else
 	{
 		pChn->nPeriod += nFreqSlide;
 	}
-	if(pChn->nPeriod < 1)
-	{
-		pChn->nPeriod = 1;
-		if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
-		{
-			pChn->dwFlags.set(CHN_NOTEFADE);
-			pChn->nFadeOutVol = 0;
-		}
-	}
+	if(pChn->nPeriod < 1) pChn->nPeriod = 1;
 }
 
 

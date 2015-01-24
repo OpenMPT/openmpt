@@ -431,7 +431,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultGlobalVolume = fileHeader.globalvol << 1;
 	if(m_nDefaultGlobalVolume > MAX_GLOBAL_VOLUME) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	if(fileHeader.speed) m_nDefaultSpeed = fileHeader.speed;
-	m_nDefaultTempo = std::max(uint8(32), fileHeader.tempo); // Tempo 31 is possible. due to conflicts with the rest of the engine, let's just clamp it to 32.
+	m_nDefaultTempo = std::max(uint8(31), fileHeader.tempo);
 	m_nSamplePreAmp = std::min(fileHeader.mv, uint8(128));
 
 	// Reading Channels Pan Positions
