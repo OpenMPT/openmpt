@@ -1743,14 +1743,6 @@ uint32 CSoundFile::GetChannelIncrement(ModChannel *pChn, uint32 period, int peri
 		freq = Util::muldivr(freq, m_PlayState.m_nMusicTempo, pIns->wPitchToTempoLock);
 	}
 
-	if ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (freq < 256))
-	{
-		pChn->nFadeOutVol = 0;
-		pChn->dwFlags.set(CHN_NOTEFADE);
-		pChn->nRealVolume = 0;
-		pChn->nCalcVolume = 0;
-	}
-
 	return Util::muldivr(freq, 0x10000, m_MixerSettings.gdwMixingFreq << FREQ_FRACBITS);
 }
 
