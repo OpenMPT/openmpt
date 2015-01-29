@@ -155,12 +155,20 @@
 #include "config.h"
 #endif // HAVE_CONFIG_H
 
+#if (defined(_DEBUG) || defined(DEBUG)) && !defined(MPT_BUILD_DEBUG)
+#define MPT_BUILD_DEBUG
+#endif
+
 #if defined(LIBOPENMPT_BUILD_TEST)
 #define ENABLE_TESTS
 #else
 #define MODPLUG_NO_FILESAVE
 #endif
-//#define NO_ASSERTS
+#if defined(MPT_BUILD_CHECKED) || defined(ENABLE_TESTS)
+// enable asserts
+#else
+#define NO_ASSERTS
+#endif
 //#define NO_LOGGING
 #define MPT_FILEREADER_STD_ISTREAM
 //#define MPT_EXTERNAL_SAMPLES
