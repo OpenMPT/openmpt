@@ -236,6 +236,7 @@ LDLIBS   +=
 ARFLAGS  += 
 
 ifeq ($(DEBUG),1)
+CPPFLAGS += -DMPT_BUILD_DEBUG
 CXXFLAGS += -g
 CFLAGS   += -g
 else
@@ -263,6 +264,7 @@ LDLIBS   +=
 ARFLAGS  += 
 
 ifeq ($(DEBUG),1)
+CPPFLAGS += -DMPT_BUILD_DEBUG
 CXXFLAGS += -O0 -g
 CFLAGS   += -O0 -g
 else
