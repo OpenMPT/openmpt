@@ -14,4 +14,14 @@ ARFLAGS  := rcs
 CXXFLAGS_WARNINGS += -Wmissing-prototypes
 CFLAGS_WARNINGS   += -Wmissing-prototypes
 
+ifeq ($(CHECKED_ADDRESS),1)
+CXXFLAGS += -fsanitize=address
+CFLAGS   += -fsanitize=address
+endif
+
+ifeq ($(CHECKED_UNDEFINED),1)
+CXXFLAGS += -fsanitize=undefined
+CFLAGS   += -fsanitize=undefined
+endif
+
 EXESUFFIX=
