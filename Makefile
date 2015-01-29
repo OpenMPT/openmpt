@@ -133,6 +133,10 @@ ANCIENT=0
 SOSUFFIX=.so
 OPENMPT123=1
 
+CHECKED=0
+CHECKED_ADDRESS=0
+CHECKED_UNDEFINED=0
+
 
 # get commandline or defaults
 
@@ -241,6 +245,12 @@ CFLAGS   += -O
 endif
 endif
 
+ifeq ($(CHECKED),1)
+CPPFLAGS += -DMPT_BUILD_CHECKED
+CXXFLAGS += -g
+CFLAGS   += -g
+endif
+
 CXXFLAGS += -W
 CFLAGS   += -W
 
@@ -266,6 +276,12 @@ CXXFLAGS += -O3 -ffast-math
 CFLAGS   += -O3 -ffast-math -fno-strict-aliasing
 endif
 endif
+endif
+
+ifeq ($(CHECKED),1)
+CPPFLAGS += -DMPT_BUILD_CHECKED
+CXXFLAGS += -g
+CFLAGS   += -g
 endif
 
 CXXFLAGS += -Wall -Wextra -Wcast-align $(CXXFLAGS_WARNINGS)
