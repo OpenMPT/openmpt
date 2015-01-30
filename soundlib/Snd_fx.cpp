@@ -3187,10 +3187,7 @@ void CSoundFile::FinePortamentoUp(ModChannel *pChn, UINT param)
 			{
 				int oldPeriod = pChn->nPeriod;
 				pChn->nPeriod = Util::muldivr(pChn->nPeriod, LinearSlideUpTable[param & 0x0F], 65536);
-				if(oldPeriod == pChn->nPeriod)
-				{
-					pChn->nPeriod--;
-				}
+				if(oldPeriod == pChn->nPeriod) pChn->nPeriod++;
 			} else
 			{
 				pChn->nPeriod -= (int)(param * 4);
@@ -3222,10 +3219,7 @@ void CSoundFile::FinePortamentoDown(ModChannel *pChn, UINT param)
 			{
 				int oldPeriod = pChn->nPeriod;
 				pChn->nPeriod = Util::muldivr(pChn->nPeriod, LinearSlideDownTable[param & 0x0F], 65536);
-				if(oldPeriod == pChn->nPeriod)
-				{
-					pChn->nPeriod--;
-				}
+				if(oldPeriod == pChn->nPeriod) pChn->nPeriod--;
 			} else
 			{
 				pChn->nPeriod += (int)(param * 4);
@@ -3257,10 +3251,7 @@ void CSoundFile::ExtraFinePortamentoUp(ModChannel *pChn, UINT param)
 			{
 				int oldPeriod = pChn->nPeriod;
 				pChn->nPeriod = Util::muldivr(pChn->nPeriod, FineLinearSlideUpTable[param & 0x0F], 65536);
-				if(oldPeriod == pChn->nPeriod)
-				{
-					pChn->nPeriod++;
-				}
+				if(oldPeriod == pChn->nPeriod) pChn->nPeriod++;
 			} else
 			{
 				pChn->nPeriod -= (int)(param);
@@ -3292,10 +3283,7 @@ void CSoundFile::ExtraFinePortamentoDown(ModChannel *pChn, UINT param)
 			{
 				int oldPeriod = pChn->nPeriod;
 				pChn->nPeriod = Util::muldivr(pChn->nPeriod, FineLinearSlideDownTable[param & 0x0F], 65536);
-				if(oldPeriod == pChn->nPeriod)
-				{
-					pChn->nPeriod--;
-				}
+				if(oldPeriod == pChn->nPeriod) pChn->nPeriod--;
 			} else
 			{
 				pChn->nPeriod += (int)(param);
@@ -4700,11 +4688,11 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 void CSoundFile::DoFreqSlide(ModChannel *pChn, LONG nFreqSlide) const
 //-------------------------------------------------------------------
 {
-	// IT Linear slides
 	if (!pChn->nPeriod) return;
 	if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 	{
-		int32 nOldPeriod = pChn->nPeriod;
+		// IT Linear slides
+		const int32_t nOldPeriod = pChn->nPeriod;
 		if (nFreqSlide < 0)
 		{
 			UINT n = (-nFreqSlide) / 4;
@@ -4712,7 +4700,7 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, LONG nFreqSlide) const
 			{
 				if (n > 255) n = 255;
 				pChn->nPeriod = Util::muldivr(pChn->nPeriod, LinearSlideUpTable[n], 65536);
-				if (pChn->nPeriod == nOldPeriod) pChn->nPeriod = nOldPeriod + 1;
+				if (pChn->nPeriod == nOldPeriod) pChn->nPeriod++;
 			}
 		} else
 		{
@@ -4721,7 +4709,7 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, LONG nFreqSlide) const
 			{
 				if (n > 255) n = 255;
 				pChn->nPeriod = Util::muldivr(pChn->nPeriod, LinearSlideDownTable[n], 65536);
-				if (pChn->nPeriod == nOldPeriod) pChn->nPeriod = nOldPeriod - 1;
+				if (pChn->nPeriod == nOldPeriod) pChn->nPeriod--;
 			}
 		}
 	} else
