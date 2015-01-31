@@ -230,6 +230,18 @@ public:
 		return DataContainer().CanRead(streamPos, amount);
 	}
 
+	// Check if file size is at least size, without potentially caching the whole file to query the exact file length.
+	bool LengthIsAtLeast(off_t size) const
+	{
+		return DataContaqiner().CanRead(0, size);
+	}
+
+	// Check if file size is exactly size, without potentially caching the whole file if it is larger.
+	bool LengthIs(off_t size) const
+	{
+		return DataContainer().CanRead(0, size) && !DataContainer().CanRead(size, 1);
+	}
+
 	// Create a new FileReader object for parsing a sub chunk at a given position with a given length.
 	// The file cursor is not modified.
 	FileReader GetChunk(off_t position, off_t length) const
