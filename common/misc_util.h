@@ -125,17 +125,17 @@ namespace mpt { namespace String {
 // Combine a vector of values into a string, separated with the given separator.
 // No escaping is performed.
 template<typename T>
-std::string Combine(const std::vector<T> &vals, const std::string &sep=",")
-//-------------------------------------------------------------------------
+mpt::ustring Combine(const std::vector<T> &vals, const mpt::ustring &sep=MPT_USTRING(","))
+//----------------------------------------------------------------------------------------
 {
-	std::string str;
+	mpt::ustring str;
 	for(std::size_t i = 0; i < vals.size(); ++i)
 	{
 		if(i > 0)
 		{
 			str += sep;
 		}
-		str += mpt::ToString(vals[i]);
+		str += mpt::ToUString(vals[i]);
 	}
 	return str;
 }
@@ -144,8 +144,8 @@ std::string Combine(const std::vector<T> &vals, const std::string &sep=",")
 // An empty string results in an empty vector.
 // Leading or trailing separators result in a default-constructed element being inserted before or after the other elements.
 template<typename T>
-std::vector<T> Split(const std::string &str, const std::string &sep=",")
-//----------------------------------------------------------------------
+std::vector<T> Split(const mpt::ustring &str, const mpt::ustring &sep=MPT_USTRING(","))
+//-------------------------------------------------------------------------------------
 {
 	std::vector<T> vals;
 	std::size_t pos = 0;
