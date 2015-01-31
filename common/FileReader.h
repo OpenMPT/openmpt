@@ -233,7 +233,7 @@ public:
 	// Check if file size is at least size, without potentially caching the whole file to query the exact file length.
 	bool LengthIsAtLeast(off_t size) const
 	{
-		return DataContaqiner().CanRead(0, size);
+		return DataContainer().CanRead(0, size);
 	}
 
 	// Check if file size is exactly size, without potentially caching the whole file if it is larger.
