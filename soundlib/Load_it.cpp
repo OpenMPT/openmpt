@@ -1860,7 +1860,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 					if(m_MixPlugins[plug].pPluginData)
 					{
 						m_MixPlugins[plug].nPluginDataSize = pluginDataChunkSize;
-						memcpy(m_MixPlugins[plug].pPluginData, pluginDataChunk.GetRawData(), pluginDataChunkSize);
+						pluginDataChunk.ReadRaw(m_MixPlugins[plug].pPluginData, pluginDataChunkSize);
 					}
 				}
 
