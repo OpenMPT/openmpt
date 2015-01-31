@@ -629,11 +629,11 @@ void CMainFrame::OnTimerNotify()
 }
 
 
-void CMainFrame::AudioMessage(const std::string &str)
-//---------------------------------------------------
+void CMainFrame::AudioMessage(const mpt::ustring &str)
+//----------------------------------------------------
 {
 	MPT_TRACE();
-	Reporting::Notification(str.c_str());
+	Reporting::Notification(str);
 }
 
 

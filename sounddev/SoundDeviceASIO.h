@@ -117,7 +117,7 @@ public:
 
 	bool OpenDriverSettings();
 
-	std::string GetStatistics() const;
+	mpt::ustring GetStatistics() const;
 
 public:
 	static std::vector<SoundDevice::Info> EnumerateDevices();
