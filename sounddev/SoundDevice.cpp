@@ -124,14 +124,14 @@ bool ChannelMapping::IsValid(const std::vector<int32> &mapping)
 mpt::ustring ChannelMapping::ToString() const
 //-------------------------------------------
 {
-	return mpt::ToUnicode(mpt::CharsetUTF8, mpt::String::Combine<int32>(ChannelToDeviceChannel));
+	return mpt::String::Combine<int32>(ChannelToDeviceChannel);
 }
 
 
 ChannelMapping ChannelMapping::FromString(const mpt::ustring &str)
 //----------------------------------------------------------------
 {
-	return SoundDevice::ChannelMapping(mpt::String::Split<int32>(mpt::ToCharset(mpt::CharsetUTF8, str)));
+	return SoundDevice::ChannelMapping(mpt::String::Split<int32>(str));
 }
 
 
