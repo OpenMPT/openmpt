@@ -401,7 +401,7 @@ public:
 	void AudioDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, int64 streamPosition);
 	
 	// from SoundDevice::IMessageReceiver
-	void AudioMessage(const std::string &str);
+	void AudioMessage(const mpt::ustring &str);
 
 	bool InGuiThread() const { return theApp.InGuiThread(); }
 	bool InAudioThread() const { return GetCurrentThreadId() == m_AudioThreadId; }

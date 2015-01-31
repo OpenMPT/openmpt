@@ -1174,24 +1174,24 @@ void CASIODevice::SampleRateDidChange(ASIOSampleRate sRate)
 }
 
 
-static std::string AsioFeaturesToString(FlagSet<AsioFeatures> features)
-//---------------------------------------------------------------------
+static mpt::ustring AsioFeaturesToString(FlagSet<AsioFeatures> features)
+//----------------------------------------------------------------------
 {
-	std::string result;
+	mpt::ustring result;
 	bool first = true;
-	if(features[AsioFeatureResetRequest]) { if(!first) { result += ","; } first = false; result += "reset"; }
-	if(features[AsioFeatureResyncRequest]) { if(!first) { result += ","; } first = false; result += "resync"; }
-	if(features[AsioFeatureLatenciesChanged]) { if(!first) { result += ","; } first = false; result += "latency"; }
-	if(features[AsioFeatureBufferSizeChange]) { if(!first) { result += ","; } first = false; result += "buffer"; }
-	if(features[AsioFeatureOverload]) { if(!first) { result += ","; } first = false; result += "load"; }
-	if(features[AsioFeatureNoDirectProcess]) { if(!first) { result += ","; } first = false; result += "nodirect"; }
-	if(features[AsioFeatureSampleRateChange]) { if(!first) { result += ","; } first = false; result += "srate"; }
+	if(features[AsioFeatureResetRequest]) { if(!first) { result += MPT_USTRING(","); } first = false; result += MPT_USTRING("reset"); }
+	if(features[AsioFeatureResyncRequest]) { if(!first) { result += MPT_USTRING(","); } first = false; result += MPT_USTRING("resync"); }
+	if(features[AsioFeatureLatenciesChanged]) { if(!first) { result += MPT_USTRING(","); } first = false; result += MPT_USTRING("latency"); }
+	if(features[AsioFeatureBufferSizeChange]) { if(!first) { result += MPT_USTRING(","); } first = false; result += MPT_USTRING("buffer"); }
+	if(features[AsioFeatureOverload]) { if(!first) { result += MPT_USTRING(","); } first = false; result += MPT_USTRING("load"); }
+	if(features[AsioFeatureNoDirectProcess]) { if(!first) { result += MPT_USTRING(","); } first = false; result += MPT_USTRING("nodirect"); }
+	if(features[AsioFeatureSampleRateChange]) { if(!first) { result += MPT_USTRING(","); } first = false; result += MPT_USTRING("srate"); }
 	return result;
 }
 
 
-std::string CASIODevice::GetStatistics() const
-//--------------------------------------------
+mpt::ustring CASIODevice::GetStatistics() const
+//---------------------------------------------
 {
 	MPT_TRACE();
 	const FlagSet<AsioFeatures> unsupported(AsioFeatureNoDirectProcess | AsioFeatureOverload | AsioFeatureBufferSizeChange | AsioFeatureSampleRateChange);
@@ -1199,15 +1199,15 @@ std::string CASIODevice::GetStatistics() const
 	unsupportedFeatues &= unsupported;
 	if(unsupportedFeatues.any())
 	{
-		return mpt::String::Print("WARNING: unsupported features: %1", AsioFeaturesToString(unsupportedFeatues));
+		return mpt::String::Print(MPT_USTRING("WARNING: unsupported features: %1"), AsioFeaturesToString(unsupportedFeatues));
 	} else if(m_UsedFeatures.any())
 	{
-		return mpt::String::Print("OK, features used: %1", AsioFeaturesToString(m_UsedFeatures));
+		return mpt::String::Print(MPT_USTRING("OK, features used: %1"), AsioFeaturesToString(m_UsedFeatures));
 	} else if(m_QueriedFeatures.any())
 	{
-		return mpt::String::Print("OK, features queried: %1", AsioFeaturesToString(m_QueriedFeatures));
+		return mpt::String::Print(MPT_USTRING("OK, features queried: %1"), AsioFeaturesToString(m_QueriedFeatures));
 	}
-	return std::string("OK.");
+	return MPT_USTRING("OK.");
 }
 
 
@@ -1346,7 +1346,7 @@ void CASIODevice::ReportASIOException(const std::string &str)
 //-----------------------------------------------------------
 {
 	MPT_TRACE();
-	AudioSendMessage(str);
+	AudioSendMessage(mpt::ToUnicode(mpt::CharsetLocale, str));
 	Log("%s", str.c_str());
 }
 

@@ -121,17 +121,17 @@ bool ChannelMapping::IsValid(const std::vector<int32> &mapping)
 }
 
 
-std::string ChannelMapping::ToString() const
-//------------------------------------------
+mpt::ustring ChannelMapping::ToString() const
+//-------------------------------------------
 {
-	return mpt::String::Combine<int32>(ChannelToDeviceChannel);
+	return mpt::ToUnicode(mpt::CharsetUTF8, mpt::String::Combine<int32>(ChannelToDeviceChannel));
 }
 
 
-ChannelMapping ChannelMapping::FromString(const std::string &str)
-//---------------------------------------------------------------
+ChannelMapping ChannelMapping::FromString(const mpt::ustring &str)
+//----------------------------------------------------------------
 {
-	return SoundDevice::ChannelMapping(mpt::String::Split<int32>(str));
+	return SoundDevice::ChannelMapping(mpt::String::Split<int32>(mpt::ToCharset(mpt::CharsetUTF8, str)));
 }
 
 
@@ -371,8 +371,8 @@ void Base::SourceAudioDone(std::size_t numFrames, int32 framesLatency)
 }
 
 
-void Base::AudioSendMessage(const std::string &str)
-//-------------------------------------------------
+void Base::AudioSendMessage(const mpt::ustring &str)
+//--------------------------------------------------
 {
 	MPT_TRACE();
 	if(m_MessageReceiver)

@@ -43,7 +43,7 @@ class IMessageReceiver
 //====================
 {
 public:
-	virtual void AudioMessage(const std::string &str) = 0;
+	virtual void AudioMessage(const mpt::ustring &str) = 0;
 };
 
 
@@ -283,9 +283,9 @@ public:
 		return ChannelToDeviceChannel[channel];
 	}
 
-	std::string ToString() const;
+	mpt::ustring ToString() const;
 
-	static SoundDevice::ChannelMapping FromString(const std::string &str);
+	static SoundDevice::ChannelMapping FromString(const mpt::ustring &str);
 
 };
 
@@ -507,7 +507,7 @@ public:
 
 	virtual int64 GetStreamPositionFrames() const = 0;
 
-	virtual std::string GetStatistics() const = 0;
+	virtual mpt::ustring GetStatistics() const = 0;
 
 	virtual bool OpenDriverSettings() = 0;
 
@@ -574,7 +574,7 @@ protected:
 	void RequestReset() { m_RequestFlags.fetch_or(RequestFlagReset); }
 	void RequestRestart() { m_RequestFlags.fetch_or(RequestFlagRestart); }
 
-	void AudioSendMessage(const std::string &str);
+	void AudioSendMessage(const mpt::ustring &str);
 
 protected:
 
@@ -640,7 +640,7 @@ public:
 
 	int64 GetStreamPositionFrames() const;
 
-	virtual std::string GetStatistics() const { return std::string(); }
+	virtual mpt::ustring GetStatistics() const { return mpt::ustring(); }
 
 	virtual bool OpenDriverSettings() { return false; };
 
