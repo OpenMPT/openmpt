@@ -207,7 +207,7 @@ bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file, uint1
 		32767, 0
 	};
 
-	if((sampleLen < 4) || (!target) || (blockAlign < 5) || (blockAlign > file.GetLength()))
+	if((sampleLen < 4) || (!target) || (blockAlign < 5) || !file.LengthIsAtLeast(blockAlign))
 		return false;
 
 	SmpLength nPos = 0;
