@@ -828,7 +828,7 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 		if ( m_sndFile->GetFileHistory().empty() ) {
 			return std::string();
 		}
-		return mod_string_to_utf8( m_sndFile->GetFileHistory()[m_sndFile->GetFileHistory().size() - 1].AsISO8601() );
+		return mpt::ToCharset(mpt::CharsetUTF8, m_sndFile->GetFileHistory()[m_sndFile->GetFileHistory().size() - 1].AsISO8601() );
 	} else if ( key == std::string("message") ) {
 		std::string retval = m_sndFile->songMessage.GetFormatted( SongMessage::leLF );
 		if ( retval.empty() ) {

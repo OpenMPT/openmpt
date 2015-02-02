@@ -36,66 +36,7 @@ namespace log
 static const std::size_t LOGBUF_SIZE = 1024;
 
 
-#if defined(MODPLUG_TRACKER)
-
-static uint64 GetTime100ns()
-//--------------------------
-{
-	FILETIME filetime;
-	GetSystemTimeAsFileTime(&filetime);
-	return ((uint64)filetime.dwHighDateTime << 32 | filetime.dwLowDateTime);
-}
-
-
-static std::string TimeAsString(uint64 time100ns)
-//-------------------------------------------------
-{
-
-	FILETIME filetime;
-	SYSTEMTIME systime;
-	filetime.dwHighDateTime = (DWORD)(((uint64)time100ns) >> 32);
-	filetime.dwLowDateTime = (DWORD)((uint64)time100ns);
-	FileTimeToSystemTime(&filetime, &systime);
-
-	std::string result;
-	TCHAR buf[LOGBUF_SIZE];
-
-	GetDateFormat(LOCALE_SYSTEM_DEFAULT, 0, &systime, "yyyy-MM-dd ", buf, LOGBUF_SIZE);
-	result.append(buf);
-
-	GetTimeFormat(LOCALE_SYSTEM_DEFAULT, TIME_FORCE24HOURFORMAT, &systime, "HH:mm:ss.", buf, LOGBUF_SIZE);
-	result.append(buf);
-
-	sprintf(buf, "%03u", (unsigned)systime.wMilliseconds);
-	result.append(buf);
-
-	return result;
-}
-
-#endif // MODPLUG_TRACKER
-
-
 #ifndef NO_LOGGING
-
-
-#if defined(MODPLUG_TRACKER)
-
-
-static std::string TimeDiffAsString(uint64 ms)
-//--------------------------------------------
-{
-	return mpt::fmt::dec<6>(ms);
-}
-
-
-static std::wstring TimeDiffAsStringW(uint64 ms)
-//----------------------------------------------
-{
-	return mpt::wfmt::dec<6>(ms);
-}
-
-
-#endif // MODPLUG_TRACKER
 
 
 static noinline void DoLog(const mpt::log::Context &context, mpt::ustring message)
@@ -105,7 +46,7 @@ static noinline void DoLog(const mpt::log::Context &context, mpt::ustring messag
 	message = mpt::String::RTrim(message, MPT_USTRING("\r\n"));
 	#if defined(MODPLUG_TRACKER)
 		static uint64_t s_lastlogtime = 0;
-		uint64 cur = GetTime100ns();
+		uint64 cur = mpt::Date::ANSI::Now();
 		uint64 diff = cur/10000 - s_lastlogtime;
 		s_lastlogtime = cur/10000;
 		#ifdef LOG_TO_FILE
@@ -117,13 +58,26 @@ static noinline void DoLog(const mpt::log::Context &context, mpt::ustring messag
 			}
 			if(s_logfile)
 			{
-				fprintf(s_logfile, "%s+%s %s(%i): %s [%s]\n", TimeAsString(cur).c_str(), TimeDiffAsString(diff).c_str(), context.file, context.line, mpt::ToCharset(mpt::CharsetUTF8, message).c_str(), context.function);
+				fprintf(s_logfile, mpt::ToCharset(mpt::CharsetUTF8, mpt::String::Print(MPT_USTRING("%1+%2 %3(%4): %5 [%6]\n"
+					, mpt::Date::ANSI::ToString(cur)
+					, mpt::ufmt::dec<6>(diff)
+					, mpt::ToUnicode(mpt::CharsetASCII, context.file)
+					, context.line
+					, message
+					, mpt::ToUnicode(mpt::CharsetASCII, context.function)
+					))).c_str());
 				fflush(s_logfile);
 			}
 		}
 		#endif // LOG_TO_FILE
 		{
-			OutputDebugStringW(mpt::String::PrintW(L"%1(%2): +%3 %4 [%5]\n", mpt::ToWide(mpt::CharsetASCII, context.file), context.line, TimeDiffAsStringW(diff), message, mpt::ToWide(mpt::CharsetASCII, context.function)).c_str());
+			OutputDebugStringW(mpt::String::PrintW(L"%1(%2): +%3 %4 [%5]\n"
+				, mpt::ToWide(mpt::CharsetASCII, context.file)
+				, context.line
+				, mpt::wfmt::dec<6>(diff)
+				, message
+				, mpt::ToWide(mpt::CharsetASCII, context.function)
+				).c_str());
 		}
 	#else // !MODPLUG_TRACKER
 		std::clog
@@ -297,7 +251,7 @@ bool Dump(const mpt::PathString &filename)
 	LARGE_INTEGER qpcNow;
 	qpcNow.QuadPart = 0;
 	QueryPerformanceCounter(&qpcNow);
-	uint64 ftNow = GetTime100ns();
+	uint64 ftNow = mpt::Date::ANSI::Now();
 
 	// sort according to index in case of overflows
 	std::stable_sort(Entries.begin(), Entries.end());
@@ -316,7 +270,7 @@ bool Dump(const mpt::PathString &filename)
 		qpcValid = true;
 	}
 
-	f << "Dump: " << TimeAsString(ftNow) << std::endl;
+	f << "Dump: " << mpt::ToCharset(mpt::CharsetUTF8, mpt::Date::ANSI::ToString(ftNow)) << std::endl;
 	f << "Captured events: " << Entries.size() << std::endl;
 	if(qpcValid && (Entries.size() > 0))
 	{
@@ -334,7 +288,7 @@ bool Dump(const mpt::PathString &filename)
 		std::string time;
 		if(qpcValid)
 		{
-			time = TimeAsString( ftNow - static_cast<int64>( static_cast<double>(qpcNow.QuadPart - entry.Timestamp) * (10000000.0 / static_cast<double>(qpcFreq.QuadPart) ) ) );
+			time = mpt::ToCharset(mpt::CharsetUTF8, mpt::Date::ANSI::ToString( ftNow - static_cast<int64>( static_cast<double>(qpcNow.QuadPart - entry.Timestamp) * (10000000.0 / static_cast<double>(qpcFreq.QuadPart) ) ) ) );
 		} else
 		{
 			time = mpt::String::Print<std::string>("0x%1", mpt::fmt::hex0<16>(entry.Timestamp));
