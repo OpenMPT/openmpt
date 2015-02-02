@@ -492,8 +492,8 @@ return false;
 // -! NEW_FEATURE#0027
 
 
-std::string FileHistory::AsISO8601() const
-//----------------------------------------
+mpt::ustring FileHistory::AsISO8601() const
+//-----------------------------------------
 {
 	tm date = loadDate;
 	if(openTime > 0)
@@ -501,7 +501,7 @@ std::string FileHistory::AsISO8601() const
 		// Calculate the date when editing finished.
 		double openSeconds = (double)openTime / (double)HISTORY_TIMER_PRECISION;
 		tm tmpLoadDate = loadDate;
-		time_t loadDateSinceEpoch = Util::MakeGmTime(&tmpLoadDate);
+		time_t loadDateSinceEpoch = mpt::Date::Unix::FromUTC(&tmpLoadDate);
 		double timeScaleFactor = difftime(2, 1);
 		time_t saveDateSinceEpoch = loadDateSinceEpoch + Util::Round<time_t>(openSeconds / timeScaleFactor);
 		const tm * tmpSaveDate = gmtime(&saveDateSinceEpoch);
@@ -512,51 +512,7 @@ std::string FileHistory::AsISO8601() const
 	}
 	// We assume date in UTC here.
 	// This is not 100% correct because FileHistory does not contain complete timezone information.
-	// There are too many differences in supported format specifiers in strftime()
-	// and strftime does not support reduced precision ISO8601 at all.
-	// Just do the formatting ourselves.
-	std::string result;
-	std::string timezone = std::string("Z");
-	if(date.tm_year == 0)
-	{
-		return result;
-	}
-	result += mpt::fmt::dec0<4>(date.tm_year + 1900);
-	if(date.tm_mon < 0 || date.tm_mon > 11)
-	{
-		return result;
-	}
-	result += std::string("-") + mpt::fmt::dec0<2>(date.tm_mon + 1);
-	if(date.tm_mday < 1 || date.tm_mday > 31)
-	{
-		return result;
-	}
-	result += std::string("-") + mpt::fmt::dec0<2>(date.tm_mday);
-	if(date.tm_hour == 0 && date.tm_min == 0 && date.tm_sec == 0)
-	{
-		return result;
-	}
-	if(date.tm_hour < 0 || date.tm_hour > 23)
-	{
-		return result;
-	}
-	if(date.tm_min < 0 || date.tm_min > 59)
-	{
-		return result;
-	}
-	result += std::string("T");
-	if(date.tm_isdst > 0)
-	{
-		timezone = std::string("+01:00");
-	}
-	result += mpt::fmt::dec0<2>(date.tm_hour) + std::string(":") + mpt::fmt::dec0<2>(date.tm_min);
-	if(date.tm_sec < 0 || date.tm_sec > 61)
-	{
-		return result + timezone;
-	}
-	result += std::string(":") + mpt::fmt::dec0<2>(date.tm_sec);
-	result += timezone;
-	return result;
+	return mpt::Date::ToShortenedISO8601(date);
 }
 
 

@@ -374,10 +374,43 @@ size_t ConvertInt2MIDI(uint8 *result, size_t maxLength, TIn value)
 }
 
 
-namespace Util
+
+namespace mpt
+{
+namespace Date
 {
 
-	time_t MakeGmTime(tm *timeUtc);
+#if defined(MODPLUG_TRACKER)
+
+namespace ANSI
+{
+// uint64 counts 100ns since 1601-01-01T00:00Z
+
+uint64 Now();
+
+mpt::ustring ToString(uint64 time100ns); // i.e. 2015-01-15 18:32:01.718
+
+} // namespacee ANSI
+
+#endif // MODPLUG_TRACKER
+
+namespace Unix
+{
+// time_t counts 1s since 1970-01-01T00:00Z
+
+time_t FromUTC(tm *timeUtc);
+
+} // namespace Unix
+
+mpt::ustring ToShortenedISO8601(tm date); // i.e. 2015-01-15T18:32:01Z
+
+} // namespace Date
+} // namespace mpt
+
+
+
+namespace Util
+{
 
 	// Minimum of 3 values
 	template <class T> inline const T& Min(const T& a, const T& b, const T& c) {return std::min(std::min(a, b), c);}

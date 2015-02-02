@@ -101,11 +101,64 @@ long double ConvertStrToLongDouble(const std::wstring &str) { return ConvertStrT
 #endif
 
 
-namespace Util
+namespace mpt
+{
+namespace Date
 {
 
-time_t MakeGmTime(tm *timeUtc)
-//----------------------------
+#if defined(MODPLUG_TRACKER)
+
+namespace ANSI
+{
+
+uint64 Now()
+//----------
+{
+	FILETIME filetime;
+	GetSystemTimeAsFileTime(&filetime);
+	return ((uint64)filetime.dwHighDateTime << 32 | filetime.dwLowDateTime);
+}
+
+mpt::ustring ToString(uint64 time100ns)
+//-------------------------------------
+{
+	static const std::size_t bufsize = 256;
+
+	mpt::ustring result;
+
+	FILETIME filetime;
+	SYSTEMTIME systime;
+	filetime.dwHighDateTime = (DWORD)(((uint64)time100ns) >> 32);
+	filetime.dwLowDateTime = (DWORD)((uint64)time100ns);
+	FileTimeToSystemTime(&filetime, &systime);
+
+	WCHAR buf[bufsize];
+
+	GetDateFormatW(LOCALE_SYSTEM_DEFAULT, 0, &systime, L"yyyy-MM-dd", buf, bufsize);
+	result.append(mpt::ToUnicode(buf));
+
+	result.append(MPT_USTRING(" "));
+
+	GetTimeFormatW(LOCALE_SYSTEM_DEFAULT, TIME_FORCE24HOURFORMAT, &systime, L"HH:mm:ss", buf, bufsize);
+	result.append(mpt::ToUnicode(buf));
+
+	result.append(MPT_USTRING("."));
+
+	result.append(mpt::ufmt::dec0<3>((unsigned)systime.wMilliseconds));
+
+	return result;
+
+}
+
+} // namespace ANSI
+
+#endif // MODPLUG_TRACKER
+
+namespace Unix
+{
+
+time_t FromUTC(tm *timeUtc)
+//-------------------------
 {
 	#if MPT_COMPILER_MSVC
 		return _mkgmtime(timeUtc);
@@ -139,7 +192,62 @@ time_t MakeGmTime(tm *timeUtc)
 	#endif // MPT_COMPILER_MSVC
 }
 
-} // namespace Util
+} // namespace Unix
+
+mpt::ustring ToShortenedISO8601(tm date)
+//--------------------------------------
+{
+	// We assume date in UTC here.
+	// There are too many differences in supported format specifiers in strftime()
+	// and strftime does not support reduced precision ISO8601 at all.
+	// Just do the formatting ourselves.
+	mpt::ustring result;
+	mpt::ustring timezone = MPT_USTRING("Z");
+	if(date.tm_year == 0)
+	{
+		return result;
+	}
+	result += mpt::ufmt::dec0<4>(date.tm_year + 1900);
+	if(date.tm_mon < 0 || date.tm_mon > 11)
+	{
+		return result;
+	}
+	result += MPT_USTRING("-") + mpt::ufmt::dec0<2>(date.tm_mon + 1);
+	if(date.tm_mday < 1 || date.tm_mday > 31)
+	{
+		return result;
+	}
+	result += MPT_USTRING("-") + mpt::ufmt::dec0<2>(date.tm_mday);
+	if(date.tm_hour == 0 && date.tm_min == 0 && date.tm_sec == 0)
+	{
+		return result;
+	}
+	if(date.tm_hour < 0 || date.tm_hour > 23)
+	{
+		return result;
+	}
+	if(date.tm_min < 0 || date.tm_min > 59)
+	{
+		return result;
+	}
+	result += MPT_USTRING("T");
+	if(date.tm_isdst > 0)
+	{
+		timezone = MPT_USTRING("+01:00");
+	}
+	result += mpt::ufmt::dec0<2>(date.tm_hour) + MPT_USTRING(":") + mpt::ufmt::dec0<2>(date.tm_min);
+	if(date.tm_sec < 0 || date.tm_sec > 61)
+	{
+		return result + timezone;
+	}
+	result += MPT_USTRING(":") + mpt::ufmt::dec0<2>(date.tm_sec);
+	result += timezone;
+	return result;
+}
+
+} // namespace Date
+} // namespace mpt
+
 
 
 #ifdef MODPLUG_TRACKER
