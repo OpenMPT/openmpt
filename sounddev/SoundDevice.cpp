@@ -22,7 +22,6 @@
 #include "SoundDeviceWaveout.h"
 
 #include <algorithm>
-#include <iterator>
 
 #include <mmreg.h>
 
@@ -484,25 +483,25 @@ void Manager::ReEnumerate(SoundDevice::TypesSet enabledTypes)
 	if(enabledTypes[SoundDevice::TypeWAVEOUT])
 	{
 		const std::vector<SoundDevice::Info> infos = CWaveDevice::EnumerateDevices();
-		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
+		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
 	}
 #ifndef NO_ASIO
 	if(enabledTypes[SoundDevice::TypeASIO])
 	{
 		const std::vector<SoundDevice::Info> infos = CASIODevice::EnumerateDevices();
-		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
+		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
 	}
 #endif // NO_ASIO
 #ifndef NO_PORTAUDIO
 	if(IsComponentAvailable(m_PortAudio) && enabledTypes[SoundDevice::TypePORTAUDIO_WASAPI])
 	{
 		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_WASAPI);
-		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
+		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
 	}
 	if(IsComponentAvailable(m_PortAudio) && enabledTypes[SoundDevice::TypePORTAUDIO_WDMKS])
 	{
 		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_WDMKS);
-		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
+		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
 	}
 #endif // NO_PORTAUDIO
 
@@ -511,7 +510,7 @@ void Manager::ReEnumerate(SoundDevice::TypesSet enabledTypes)
 	if(enabledTypes[SoundDevice::TypeDSOUND])
 	{
 		const std::vector<SoundDevice::Info> infos = CDSoundDevice::EnumerateDevices();
-		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
+		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
 	}
 #endif // NO_DSOUND
 
@@ -520,17 +519,17 @@ void Manager::ReEnumerate(SoundDevice::TypesSet enabledTypes)
 	if(IsComponentAvailable(m_PortAudio) && enabledTypes[SoundDevice::TypePORTAUDIO_WMME])
 	{
 		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_WMME);
-		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
+		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
 	}
 	if(IsComponentAvailable(m_PortAudio) && enabledTypes[SoundDevice::TypePORTAUDIO_ASIO])
 	{
 		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_ASIO);
-		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
+		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
 	}
 	if(IsComponentAvailable(m_PortAudio) && enabledTypes[SoundDevice::TypePORTAUDIO_DS])
 	{
 		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_DS);
-		std::copy(infos.begin(), infos.end(), std::back_inserter(m_SoundDevices));
+		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
 	}
 #endif // NO_PORTAUDIO
 

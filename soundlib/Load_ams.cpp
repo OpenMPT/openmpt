@@ -18,8 +18,6 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
-#include <iterator>
-
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -467,8 +465,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 
-		std::string str;
-		std::copy(textOut.begin(), textOut.end(), std::back_inserter(str));
+		std::string str(textOut.begin(), textOut.end());
 		str = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS, str);
 
 		// Packed text doesn't include any line breaks!
@@ -936,8 +933,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 				textOut[writeLen++] = c;
 			}
 		}
-		std::string str;
-		std::copy(textOut.begin(), textOut.begin() + descriptionHeader.unpackedLen, std::back_inserter(str));
+		std::string str(textOut.begin(), textOut.begin() + descriptionHeader.unpackedLen);
 		str = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS2, str);
 		// Packed text doesn't include any line breaks!
 		songMessage.ReadFixedLineLength(str.c_str(), str.length(), 74, 0);
