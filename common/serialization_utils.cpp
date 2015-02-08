@@ -13,7 +13,6 @@
 #include "serialization_utils.h"
 
 #include <istream>
-#include <iterator> // for back_inserter
 #include <ostream>
 #include <sstream>
 

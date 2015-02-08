@@ -17,7 +17,6 @@
 #include <cstdlib>
 #endif
 #include <iomanip>
-#include <iterator>
 #include <locale>
 #include <sstream>
 #include <string>
@@ -770,9 +769,7 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 		std::string out;
 		if(charset == CharsetCP437AMS ) out = String::To8bit(src, CharsetTableCP437AMS );
 		if(charset == CharsetCP437AMS2) out = String::To8bit(src, CharsetTableCP437AMS2);
-		Tdststring result;
-		std::copy(out.begin(), out.end(), std::back_inserter(result));
-		return result;
+		return Tdststring(out.begin(), out.end());
 	}
 #if defined(MPT_WITH_CHARSET_LOCALE)
 	#if defined(MPT_LOCALE_ASSUME_CHARSET)
@@ -845,9 +842,7 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 			case CharsetCP437AMS2:   out = String::To8bit(src, CharsetTableCP437AMS2); break;
 			case CharsetWindows1252: out = String::To8bit(src, CharsetTableWindows1252); break;
 		}
-		Tdststring result;
-		std::copy(out.begin(), out.end(), std::back_inserter(result));
-		return result;
+		return Tdststring(out.begin(), out.end());
 	#endif
 }
 
@@ -859,8 +854,7 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 	STATIC_ASSERT(sizeof(typename Tsrcstring::value_type) == sizeof(char));
 	if(charset == CharsetCP437AMS || charset == CharsetCP437AMS2)
 	{
-		std::string in;
-		std::copy(src.begin(), src.end(), std::back_inserter(in));
+		std::string in(src.begin(), src.end());
 		std::wstring out;
 		if(charset == CharsetCP437AMS ) out = String::From8bit(in, CharsetTableCP437AMS );
 		if(charset == CharsetCP437AMS2) out = String::From8bit(in, CharsetTableCP437AMS2);
@@ -926,8 +920,7 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 		conv = iconv_t();
 		return &wide_string[0];
 	#else
-		std::string in;
-		std::copy(src.begin(), src.end(), std::back_inserter(in));
+		std::string in(src.begin(), src.end());
 		std::wstring out;
 		switch(charset)
 		{

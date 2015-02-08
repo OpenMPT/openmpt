@@ -17,7 +17,6 @@
 #include "../common/misc_util.h"
 
 #include <algorithm>
-#include <iterator>
 
 #include <mmsystem.h>
 

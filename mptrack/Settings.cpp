@@ -20,7 +20,6 @@
 
 #include <algorithm>
 #include "../common/mptFileIO.h"
-#include <iterator>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -402,7 +401,7 @@ static std::vector<char> ReadFile(const mpt::PathString &filename)
 		char buf[4096];
 		s.read(buf, 4096);
 		std::streamsize count = s.gcount();
-		std::copy(buf, buf + count, std::back_inserter(result));
+		result.insert(result.end(), buf, buf + count);
 	}
 	return result;
 }
