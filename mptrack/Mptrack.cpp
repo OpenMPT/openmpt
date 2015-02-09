@@ -32,6 +32,7 @@
 #include "PNG.h"
 #include "../common/ComponentManager.h"
 #include "WelcomeDialog.h"
+#include "../sounddev/SoundDeviceManager.h"
 
 // rewbs.memLeak
 #define _CRTDBG_MAP_ALLOC

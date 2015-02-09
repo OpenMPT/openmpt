@@ -768,6 +768,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\sounddev\SoundDeviceManager.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\sounddev\SoundDeviceASIO.cpp"
 				>
 			</File>
@@ -1507,6 +1511,10 @@
 			</File>
 			<File
 				RelativePath="..\sounddev\SoundDevice.h"
+				>
+			</File>
+			<File
+				RelativePath="..\sounddev\SoundDeviceManager.h"
 				>
 			</File>
 			<File

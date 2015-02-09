@@ -12,6 +12,7 @@
 #include "mptrack.h"
 #include "MainFrm.h"
 #include "../sounddev/SoundDevice.h"
+#include "../sounddev/SoundDeviceManager.h"
 #include "../soundlib/AudioReadTarget.h"
 #include "moddoc.h"
 #include "childfrm.h"
