@@ -16,9 +16,10 @@
 #include "mpdlgs.h"
 #include "moptions.h"
 #include "moddoc.h"
-#include "../sounddev/SoundDevice.h"
 #include "mpdlgs.h"
 #include "../common/StringFixer.h"
+#include "../sounddev/SoundDevice.h"
+#include "../sounddev/SoundDeviceManager.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
