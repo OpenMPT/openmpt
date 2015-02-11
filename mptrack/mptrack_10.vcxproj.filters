@@ -493,9 +493,6 @@
     <ClCompile Include="..\test\TestToolsLib.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="..\sounddev\SoundDeviceThread.cpp">
-      <Filter>Source Files\sounddev</Filter>
-    </ClCompile>
     <ClCompile Include="..\pluginBridge\BridgeWrapper.cpp">
       <Filter>Source Files\pluginBridgeWrapper</Filter>
     </ClCompile>
@@ -545,6 +542,9 @@
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\sounddev\SoundDeviceManager.cpp">
+      <Filter>Source Files\sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sounddev\SoundDeviceUtilities.cpp">
       <Filter>Source Files\sounddev</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1005,9 +1005,6 @@
     <ClInclude Include="..\test\TestTools.h">
       <Filter>test</Filter>
     </ClInclude>
-    <ClInclude Include="..\sounddev\SoundDeviceThread.h">
-      <Filter>Header Files\sounddev</Filter>
-    </ClInclude>
     <ClInclude Include="..\pluginBridge\AEffectWrapper.h">
       <Filter>Header Files\pluginBridgeWrapper</Filter>
     </ClInclude>
@@ -1069,6 +1066,9 @@
       <Filter>Header Files\mptrack</Filter>
     </ClInclude>
     <ClInclude Include="..\sounddev\SoundDeviceManager.h">
+      <Filter>Header Files\sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sounddev\SoundDeviceUtilities.h">
       <Filter>Header Files\sounddev</Filter>
     </ClInclude>
   </ItemGroup>

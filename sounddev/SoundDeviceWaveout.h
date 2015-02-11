@@ -12,7 +12,7 @@
 #pragma once
 
 #include "SoundDevice.h"
-#include "SoundDeviceThread.h"
+#include "SoundDeviceUtilities.h"
 
 #include <MMSystem.h>
 
