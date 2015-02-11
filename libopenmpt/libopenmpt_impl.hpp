@@ -66,8 +66,8 @@ protected:
 		std::int32_t sequence;
 		subsong_data( double duration, std::int32_t start_row, std::int32_t start_order, std::int32_t sequence );
 	}; // struct subsong_data
+	typedef std::vector<subsong_data> subsongs_type;
 	static const std::int32_t all_subsongs = -1;
-
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
 	std::tr1::shared_ptr<log_interface> m_Log;
 #else
@@ -78,6 +78,7 @@ protected:
 #else
 	std::unique_ptr<log_forwarder> m_LogForwarder;
 #endif
+	std::int32_t m_current_subsong;
 	double m_currentPositionSeconds;
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
 	std::tr1::shared_ptr<OpenMPT::CSoundFile> m_sndFile;
@@ -90,13 +91,13 @@ protected:
 #else
 	std::unique_ptr<OpenMPT::Dither> m_Dither;
 #endif
+	subsongs_type m_subsongs;
 	float m_Gain;
 	bool m_ctl_load_skip_samples;
 	bool m_ctl_load_skip_patterns;
+	bool m_ctl_load_skip_subsongs_init;
 	bool m_ctl_seek_sync_samples;
 	std::vector<std::string> m_loaderMessages;
-	mutable std::vector<subsong_data> m_subsongs;
-	std::int32_t m_current_subsong;
 public:
 	void PushToCSoundFileLog( const std::string & text ) const;
 	void PushToCSoundFileLog( int loglevel, const std::string & text ) const;
@@ -104,6 +105,9 @@ protected:
 	std::string mod_string_to_utf8( const std::string & encoded ) const;
 	void apply_mixer_settings( std::int32_t samplerate, int channels );
 	void apply_libopenmpt_defaults();
+	subsongs_type get_subsongs() const;
+	void init_subsongs( subsongs_type & subsongs ) const;
+	bool has_subsongs_inited() const;
 	void ctor( const std::map< std::string, std::string > & ctls );
 	void load( const OpenMPT::FileReader & file, const std::map< std::string, std::string > & ctls );
 	bool is_loaded() const;
@@ -113,7 +117,6 @@ protected:
 	std::size_t read_interleaved_wrapper( std::size_t count, std::size_t channels, float * interleaved );
 	std::pair< std::string, std::string > format_and_highlight_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int command ) const;
 	std::pair< std::string, std::string > format_and_highlight_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const;
-	void cache_subsongs() const;
 public:
 	static std::vector<std::string> get_supported_extensions();
 	static bool is_extension_supported( const std::string & extension );

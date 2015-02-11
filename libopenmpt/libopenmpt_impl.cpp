@@ -313,6 +313,25 @@ void module_impl::apply_libopenmpt_defaults() {
 	set_render_param( module::RENDER_STEREOSEPARATION_PERCENT, 100 );
 	m_sndFile->Order.SetSequence( 0 );
 }
+module_impl::subsongs_type module_impl::get_subsongs() const {
+	std::vector<subsong_data> subsongs;
+	if ( m_sndFile->Order.GetNumSequences() == 0 ) {
+		throw openmpt::exception("module contains no songs");
+	}
+	for ( SEQUENCEINDEX seq = 0; seq < m_sndFile->Order.GetNumSequences(); ++seq ) {
+		const std::vector<GetLengthType> lengths = m_sndFile->GetLength( eNoAdjust, GetLengthTarget( true ).StartPos( seq, 0, 0 ) );
+		for ( std::vector<GetLengthType>::const_iterator l = lengths.begin(); l != lengths.end(); ++l ) {
+			subsongs.push_back( subsong_data( l->duration, l->startRow, l->startOrder, seq ) );
+		}
+	}
+	return subsongs;
+}
+void module_impl::init_subsongs( subsongs_type & subsongs ) const {
+	subsongs = get_subsongs();
+}
+bool module_impl::has_subsongs_inited() const {
+	return !m_subsongs.empty();
+}
 void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
 	m_sndFile = std::tr1::shared_ptr<CSoundFile>(new CSoundFile());
@@ -331,12 +350,13 @@ void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
 	m_LogForwarder = std::unique_ptr<log_forwarder>(new log_forwarder(m_Log));
 #endif
 	m_sndFile->SetCustomLog( m_LogForwarder.get() );
+	m_current_subsong = 0;
 	m_currentPositionSeconds = 0.0;
 	m_Gain = 1.0f;
 	m_ctl_load_skip_samples = false;
 	m_ctl_load_skip_patterns = false;
+	m_ctl_load_skip_subsongs_init = false;
 	m_ctl_seek_sync_samples = false;
-	m_current_subsong = 0;
 	// init member variables that correspond to ctls
 	for ( std::map< std::string, std::string >::const_iterator i = ctls.begin(); i != ctls.end(); ++i ) {
 		ctl_set( i->first, i->second, false );
@@ -355,6 +375,9 @@ void module_impl::load( const FileReader & file, const std::map< std::string, st
 		}
 		if ( !m_sndFile->Create( file, static_cast<CSoundFile::ModLoadingFlags>( load_flags ) ) ) {
 			throw openmpt::exception("error loading file");
+		}
+		if ( !m_ctl_load_skip_subsongs_init ) {
+			init_subsongs( m_subsongs );
 		}
 		m_loaded = true;
 	}
@@ -712,34 +735,40 @@ std::size_t module_impl::read_interleaved_quad( std::int32_t samplerate, std::si
 
 
 double module_impl::get_duration_seconds() const {
-	cache_subsongs();
-	if ( m_current_subsong >= 0 && m_current_subsong < static_cast<std::int32_t>( m_subsongs.size() ) ) {
-		return m_subsongs[m_current_subsong].duration;
-	} else if ( m_current_subsong == all_subsongs ) {
+#ifdef LIBOPENMPT_ANCIENT_COMPILER
+	std::tr1::shared_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ? std::tr1::shared_ptr<subsongs_type>() : std::tr1::shared_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
+#else
+	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::unique_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
+#endif
+	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
+	if ( m_current_subsong == all_subsongs ) {
 		// Play all subsongs consecutively.
 		double total_duration = 0.0;
-		for ( std::size_t i = 0; i < m_subsongs.size(); ++i ) {
-			total_duration += m_subsongs[i].duration;
+		for ( std::size_t i = 0; i < subsongs.size(); ++i ) {
+			total_duration += subsongs[i].duration;
 		}
 		return total_duration;
 	}
-	return m_sndFile->GetLength( eNoAdjust ).back().duration;
+	return subsongs[m_current_subsong].duration;
 }
 void module_impl::select_subsong( std::int32_t subsong ) {
-	cache_subsongs();
-	if ( ( subsong < 0 || subsong >= static_cast<std::int32_t>( m_subsongs.size() ) ) && subsong != all_subsongs ) {
+#ifdef LIBOPENMPT_ANCIENT_COMPILER
+	std::tr1::shared_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ? std::tr1::shared_ptr<subsongs_type>() : std::tr1::shared_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
+#else
+	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::unique_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
+#endif
+	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
+	if ( subsong != all_subsongs && ( subsong < 0 || subsong >= static_cast<std::int32_t>( subsongs.size() ) ) ) {
 		throw openmpt::exception("invalid subsong");
 	}
 	m_current_subsong = subsong;
 	m_sndFile->m_SongFlags.set( SONG_PLAYALLSONGS, subsong == all_subsongs );
-	if ( subsong == -1 ) {
+	if ( subsong == all_subsongs ) {
 		subsong = 0;
 	}
-
-	m_sndFile->Order.SetSequence( static_cast<SEQUENCEINDEX>( m_subsongs[subsong].sequence ) );
-	set_position_order_row( m_subsongs[subsong].start_order, m_subsongs[subsong].start_row );
+	m_sndFile->Order.SetSequence( static_cast<SEQUENCEINDEX>( subsongs[subsong].sequence ) );
+	set_position_order_row( subsongs[subsong].start_order, subsongs[subsong].start_row );
 	m_currentPositionSeconds = 0.0;
-
 }
 void module_impl::set_repeat_count( std::int32_t repeat_count ) {
 	m_sndFile->SetRepeatCount( repeat_count );
@@ -751,25 +780,28 @@ double module_impl::get_position_seconds() const {
 	return m_currentPositionSeconds;
 }
 double module_impl::set_position_seconds( double seconds ) {
-	cache_subsongs();
-	const subsong_data *subsong;
+#ifdef LIBOPENMPT_ANCIENT_COMPILER
+	std::tr1::shared_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ? std::tr1::shared_ptr<subsongs_type>() : std::tr1::shared_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
+#else
+	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::unique_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
+#endif
+	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
+	const subsong_data * subsong = 0;
 	double base_seconds = 0.0;
 	if ( m_current_subsong == all_subsongs ) {
 		// When playing all subsongs, find out which subsong this time would belong to.
-		subsong = &m_subsongs.back();
+		subsong = &subsongs.back();
 		for ( std::size_t i = 0; i < m_subsongs.size(); ++i ) {
 			if ( base_seconds + subsong->duration > seconds ) {
-				subsong = &m_subsongs[i];
+				subsong = &subsongs[i];
 				break;
 			}
 			base_seconds += subsong->duration;
 		}
 		seconds -= base_seconds;
-	} else
-	{
-		subsong = &m_subsongs[m_current_subsong];
+	} else {
+		subsong = &subsongs[m_current_subsong];
 	}
-
 	GetLengthType t = m_sndFile->GetLength( eNoAdjust, GetLengthTarget( seconds ).StartPos( subsong->sequence, subsong->start_order, subsong->start_row ) ).back();
 	m_sndFile->m_PlayState.m_nCurrentOrder = t.lastOrder;
 	m_sndFile->SetCurrentOrder( t.lastOrder );
@@ -938,8 +970,13 @@ float module_impl::get_current_channel_vu_rear_right( std::int32_t channel ) con
 }
 
 std::int32_t module_impl::get_num_subsongs() const {
-	cache_subsongs();
-	return static_cast<std::int32_t>( m_subsongs.size() );
+#ifdef LIBOPENMPT_ANCIENT_COMPILER
+	std::tr1::shared_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ? std::tr1::shared_ptr<subsongs_type>() : std::tr1::shared_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
+#else
+	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::unique_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
+#endif
+	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
+	return static_cast<std::int32_t>( subsongs.size() );
 }
 std::int32_t module_impl::get_num_channels() const {
 	return m_sndFile->GetNumChannels();
@@ -958,10 +995,15 @@ std::int32_t module_impl::get_num_samples() const {
 }
 
 std::vector<std::string> module_impl::get_subsong_names() const {
-	cache_subsongs();
 	std::vector<std::string> retval;
-	for ( std::size_t i = 0; i < m_subsongs.size(); ++i ) {
-		retval.push_back( mod_string_to_utf8( m_sndFile->Order.GetSequence( m_subsongs[i].sequence ).GetName() ) );
+#ifdef LIBOPENMPT_ANCIENT_COMPILER
+	std::tr1::shared_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ? std::tr1::shared_ptr<subsongs_type>() : std::tr1::shared_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
+#else
+	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::unique_ptr<subsongs_type>( new subsongs_type( get_subsongs() ) );
+#endif
+	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
+	for ( std::size_t i = 0; i < subsongs.size(); ++i ) {
+		retval.push_back( mod_string_to_utf8( m_sndFile->Order.GetSequence( subsongs[i].sequence ).GetName() ) );
 	}
 	return retval;
 }
@@ -1197,6 +1239,7 @@ std::vector<std::string> module_impl::get_ctls() const {
 	std::vector<std::string> retval;
 	retval.push_back( "load.skip_samples" );
 	retval.push_back( "load.skip_patterns" );
+	retval.push_back( "load.skip_subsongs_init" );
 	retval.push_back( "seek.sync_samples" );
 	retval.push_back( "play.tempo_factor" );
 	retval.push_back( "play.pitch_factor" );
@@ -1221,6 +1264,8 @@ std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const
 		return mpt::ToString( m_ctl_load_skip_samples );
 	} else if ( ctl == "load.skip_patterns" || ctl == "load_skip_patterns" ) {
 		return mpt::ToString( m_ctl_load_skip_patterns );
+	} else if ( ctl == "load.skip_subsongs_init" ) {
+		return mpt::ToString( m_ctl_load_skip_subsongs_init );
 	} else if ( ctl == "seek.sync_samples" ) {
 		return mpt::ToString( m_ctl_seek_sync_samples );
 	} else if ( ctl == "play.tempo_factor" ) {
@@ -1261,6 +1306,8 @@ void module_impl::ctl_set( std::string ctl, const std::string & value, bool thro
 		m_ctl_load_skip_samples = ConvertStrTo<bool>( value );
 	} else if ( ctl == "load.skip_patterns" || ctl == "load_skip_patterns" ) {
 		m_ctl_load_skip_patterns = ConvertStrTo<bool>( value );
+	} else if ( ctl == "load.skip_subsongs_init" ) {
+		m_ctl_load_skip_subsongs_init = ConvertStrTo<bool>( value );
 	} else if ( ctl == "seek.sync_samples" ) {
 		m_ctl_seek_sync_samples = ConvertStrTo<bool>( value );
 	} else if ( ctl == "play.tempo_factor" ) {
@@ -1290,21 +1337,6 @@ void module_impl::ctl_set( std::string ctl, const std::string & value, bool thro
 			throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
 		} else {
 			// ignore
-		}
-	}
-}
-
-void module_impl::cache_subsongs() const {
-	if ( !m_subsongs.empty() ) {
-		return;
-	}
-
-	m_subsongs.reserve( m_sndFile->Order.GetNumSequences() );
-
-	for ( SEQUENCEINDEX seq = 0; seq < m_sndFile->Order.GetNumSequences(); ++seq ) {
-		const std::vector<GetLengthType> lengths = m_sndFile->GetLength( eNoAdjust, GetLengthTarget( true ).StartPos( seq, 0, 0 ) );
-		for ( std::vector<GetLengthType>::const_iterator l = lengths.begin(); l != lengths.end(); ++l ) {
-			m_subsongs.push_back( subsong_data( l->duration, l->startRow, l->startOrder, seq ) );
 		}
 	}
 }
