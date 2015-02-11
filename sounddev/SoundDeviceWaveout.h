@@ -54,9 +54,11 @@ public:
 	void StartFromSoundThread();
 	void StopFromSoundThread();
 	bool InternalIsOpen() const { return (m_hWaveOut != NULL); }
-	double GetCurrentLatency() const { return InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond(); }
 	bool InternalHasGetStreamPosition() const { return true; }
 	int64 InternalGetStreamPositionFrames() const;
+	SoundDevice::BufferAttributes InternalGetEffectiveBufferAttributes() const;
+
+	SoundDevice::Statistics GetStatistics() const;
 
 	SoundDevice::Caps InternalGetDeviceCaps();
 	SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);

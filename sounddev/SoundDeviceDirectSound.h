@@ -53,7 +53,8 @@ public:
 	void StartFromSoundThread();
 	void StopFromSoundThread();
 	bool InternalIsOpen() const { return (m_pMixBuffer != NULL); }
-	double GetCurrentLatency() const { return 1.0 * m_dwLatency / m_Settings.GetBytesPerSecond(); }
+	SoundDevice::BufferAttributes InternalGetEffectiveBufferAttributes() const;
+	SoundDevice::Statistics GetStatistics() const;
 	SoundDevice::Caps InternalGetDeviceCaps();
 	SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 

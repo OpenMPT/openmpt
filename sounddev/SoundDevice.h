@@ -450,6 +450,20 @@ namespace SoundDevice {
 MPT_DECLARE_ENUM(RequestFlags)
 
 
+struct Statistics
+{
+	double InstantaneousLatency;
+	double LastUpdateInterval;
+	mpt::ustring text;
+	Statistics()
+		: InstantaneousLatency(0.0)
+		, LastUpdateInterval(0.0)
+	{
+		return;
+	}
+};
+
+
 //=========
 class IBase
 //=========
@@ -495,18 +509,14 @@ public:
 
 	virtual SoundDevice::Settings GetSettings() const = 0;
 	virtual SampleFormat GetActualSampleFormat() const = 0;
+	virtual SoundDevice::BufferAttributes GetEffectiveBufferAttributes() const = 0;
 
-	virtual SoundDevice::BufferAttributes GetBufferAttributes() const = 0;
 	virtual SoundDevice::TimeInfo GetTimeInfo() const = 0;
+	virtual int64 GetStreamPositionFrames() const = 0;
 
 	// Informational only, do not use for timing.
 	// Use GetStreamPositionFrames() for timing
-	virtual double GetCurrentLatency() const = 0;
-	virtual double GetCurrentUpdateInterval() const = 0;
-
-	virtual int64 GetStreamPositionFrames() const = 0;
-
-	virtual mpt::ustring GetStatistics() const = 0;
+	virtual SoundDevice::Statistics GetStatistics() const = 0;
 
 	virtual bool OpenDriverSettings() = 0;
 
@@ -537,8 +547,6 @@ protected:
 	bool m_DeviceUnavailableOnOpen;
 
 private:
-
-	SoundDevice::BufferAttributes m_BufferAttributes;
 
 	bool m_IsPlaying;
 
@@ -579,7 +587,6 @@ protected:
 
 	const Util::MultimediaClock & Clock() const { return m_Clock; }
 
-	void UpdateBufferAttributes(SoundDevice::BufferAttributes attributes);
 	void UpdateTimeInfo(SoundDevice::TimeInfo timeInfo);
 
 	virtual bool InternalHasTimeInfo() const { return false; }
@@ -596,6 +603,10 @@ protected:
 	virtual bool InternalClose() = 0;
 
 	virtual SoundDevice::Caps InternalGetDeviceCaps() = 0;
+
+	virtual SoundDevice::BufferAttributes InternalGetEffectiveBufferAttributes() const = 0;
+
+	double GetLastUpdateInterval() const;
 
 protected:
 
@@ -630,16 +641,12 @@ public:
 
 	SoundDevice::Settings GetSettings() const { return m_Settings; }
 	SampleFormat GetActualSampleFormat() const { return IsOpen() ? m_Settings.sampleFormat : SampleFormatInvalid; }
+	SoundDevice::BufferAttributes GetEffectiveBufferAttributes() const { return (IsOpen() && IsPlaying()) ? InternalGetEffectiveBufferAttributes() : SoundDevice::BufferAttributes(); }
 
-	SoundDevice::BufferAttributes GetBufferAttributes() const { return m_BufferAttributes; }
 	SoundDevice::TimeInfo GetTimeInfo() const { return m_TimeInfo; }
-
-	virtual double GetCurrentLatency() const { return m_BufferAttributes.Latency; }
-	double GetCurrentUpdateInterval() const;
-
 	int64 GetStreamPositionFrames() const;
 
-	virtual mpt::ustring GetStatistics() const { return mpt::ustring(); }
+	virtual SoundDevice::Statistics GetStatistics() const;
 
 	virtual bool OpenDriverSettings() { return false; };
 

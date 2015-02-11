@@ -56,9 +56,10 @@ public:
 	bool InternalStart();
 	void InternalStop();
 	bool InternalIsOpen() const { return m_Stream ? true : false; }
-	double GetCurrentLatency() const;
 	bool InternalHasGetStreamPosition() const { return false; }
 	int64 InternalGetStreamPositionFrames() const;
+	SoundDevice::BufferAttributes InternalGetEffectiveBufferAttributes() const;
+	SoundDevice::Statistics GetStatistics() const;
 	SoundDevice::Caps InternalGetDeviceCaps();
 	SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 	bool OpenDriverSettings();

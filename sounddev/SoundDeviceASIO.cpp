@@ -198,6 +198,7 @@ void CASIODevice::InitMembers()
 	MPT_TRACE();
 	m_pAsioDrv = nullptr;
 
+	m_BufferLatency = 0.0;
 	m_nAsioBufferLen = 0;
 	m_BufferInfo.clear();
 	MemsetZero(m_Callbacks);
@@ -475,7 +476,6 @@ void CASIODevice::UpdateLatency()
 //-------------------------------
 {
 	MPT_TRACE();
-	SoundDevice::BufferAttributes bufferAttributes;
 	long inputLatency = 0;
 	long outputLatency = 0;
 	try
@@ -489,15 +489,12 @@ void CASIODevice::UpdateLatency()
 	}
 	if(outputLatency >= (long)m_nAsioBufferLen)
 	{
-		bufferAttributes.Latency = (double)(outputLatency + m_nAsioBufferLen) / (double)m_Settings.Samplerate; // ASIO and OpenMPT semantics of 'latency' differ by one chunk/buffer
+		m_BufferLatency = (double)(outputLatency + m_nAsioBufferLen) / (double)m_Settings.Samplerate; // ASIO and OpenMPT semantics of 'latency' differ by one chunk/buffer
 	} else
 	{
 		// pointless value returned from asio driver, use a sane estimate
-		bufferAttributes.Latency = 2.0 * (double)m_nAsioBufferLen / (double)m_Settings.Samplerate;
+		m_BufferLatency = 2.0 * (double)m_nAsioBufferLen / (double)m_Settings.Samplerate;
 	}
-	bufferAttributes.UpdateInterval = (double)m_nAsioBufferLen / (double)m_Settings.Samplerate;
-	bufferAttributes.NumBuffers = 2;
-	UpdateBufferAttributes(bufferAttributes);
 }
 
 
@@ -654,6 +651,7 @@ bool CASIODevice::InternalClose()
 	MemsetZero(m_Callbacks);
 	m_BufferInfo.clear();
 	m_nAsioBufferLen = 0;
+	m_BufferLatency = 0.0;
 
 	CloseDriver();
 
@@ -1044,6 +1042,17 @@ int64 CASIODevice::InternalGetStreamPositionFrames() const
 }
 
 
+SoundDevice::BufferAttributes CASIODevice::InternalGetEffectiveBufferAttributes() const
+//-------------------------------------------------------------------------------------
+{
+	SoundDevice::BufferAttributes bufferAttributes;
+	bufferAttributes.Latency = m_BufferLatency;
+	bufferAttributes.UpdateInterval = static_cast<double>(m_nAsioBufferLen) / static_cast<double>(m_Settings.Samplerate);
+	bufferAttributes.NumBuffers = 2;
+	return bufferAttributes;
+}
+
+
 void CASIODevice::UpdateTimeInfo(AsioTimeInfo asioTimeInfo)
 //---------------------------------------------------------
 {
@@ -1070,7 +1079,7 @@ void CASIODevice::UpdateTimeInfo(AsioTimeInfo asioTimeInfo)
 			const uint64 asioNow = Clock().NowNanoseconds();
 			SoundDevice::TimeInfo timeInfo;
 			timeInfo.StreamFrames = m_TotalFramesWritten + m_nAsioBufferLen - m_StreamPositionOffset;
-			timeInfo.SystemTimestamp = asioNow + Util::Round<int64>(GetBufferAttributes().Latency * 1000.0 * 1000.0 * 1000.0);
+			timeInfo.SystemTimestamp = asioNow + Util::Round<int64>(m_BufferLatency * 1000.0 * 1000.0 * 1000.0);
 			timeInfo.Speed = 1.0;
 			SoundDevice::Base::UpdateTimeInfo(timeInfo);
 		}
@@ -1190,24 +1199,31 @@ static mpt::ustring AsioFeaturesToString(FlagSet<AsioFeatures> features)
 }
 
 
-mpt::ustring CASIODevice::GetStatistics() const
-//---------------------------------------------
+SoundDevice::Statistics CASIODevice::GetStatistics() const
+//--------------------------------------------------------
 {
 	MPT_TRACE();
+	SoundDevice::Statistics result;
+	result.InstantaneousLatency = m_BufferLatency;
+	result.LastUpdateInterval = static_cast<double>(m_nAsioBufferLen) / static_cast<double>(m_Settings.Samplerate);
+	result.text = mpt::ustring();
 	const FlagSet<AsioFeatures> unsupported(AsioFeatureNoDirectProcess | AsioFeatureOverload | AsioFeatureBufferSizeChange | AsioFeatureSampleRateChange);
 	FlagSet<AsioFeatures> unsupportedFeatues = m_UsedFeatures;
 	unsupportedFeatues &= unsupported;
 	if(unsupportedFeatues.any())
 	{
-		return mpt::String::Print(MPT_USTRING("WARNING: unsupported features: %1"), AsioFeaturesToString(unsupportedFeatues));
+		result.text = mpt::String::Print(MPT_USTRING("WARNING: unsupported features: %1"), AsioFeaturesToString(unsupportedFeatues));
 	} else if(m_UsedFeatures.any())
 	{
-		return mpt::String::Print(MPT_USTRING("OK, features used: %1"), AsioFeaturesToString(m_UsedFeatures));
+		result.text = mpt::String::Print(MPT_USTRING("OK, features used: %1"), AsioFeaturesToString(m_UsedFeatures));
 	} else if(m_QueriedFeatures.any())
 	{
-		return mpt::String::Print(MPT_USTRING("OK, features queried: %1"), AsioFeaturesToString(m_QueriedFeatures));
+		result.text = mpt::String::Print(MPT_USTRING("OK, features queried: %1"), AsioFeaturesToString(m_QueriedFeatures));
+	} else
+	{
+		result.text = MPT_USTRING("OK.");
 	}
-	return MPT_USTRING("OK.");
+	return result;
 }
 
 

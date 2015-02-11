@@ -191,11 +191,6 @@ bool CWaveDevice::InternalOpen()
 	SetWakeupEvent(m_ThreadWakeupEvent);
 	SetWakeupInterval(m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond());
 	m_Flags.NeedsClippedFloat = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
-	SoundDevice::BufferAttributes bufferAttributes;
-	bufferAttributes.Latency = m_nWaveBufferSize * m_nPreparedHeaders * 1.0 / m_Settings.GetBytesPerSecond();
-	bufferAttributes.UpdateInterval = m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond();
-	bufferAttributes.NumBuffers = m_nPreparedHeaders;
-	UpdateBufferAttributes(bufferAttributes);
 	return true;
 }
 
@@ -328,6 +323,29 @@ void CWaveDevice::WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR dwUser, DWORD_P
 		CWaveDevice *that = (CWaveDevice *)dwUser;
 		that->HandleWaveoutDone();
 	}
+}
+
+
+SoundDevice::BufferAttributes CWaveDevice::InternalGetEffectiveBufferAttributes() const
+//-------------------------------------------------------------------------------------
+{
+	SoundDevice::BufferAttributes bufferAttributes;
+	bufferAttributes.Latency = m_nWaveBufferSize * m_nPreparedHeaders * 1.0 / m_Settings.GetBytesPerSecond();
+	bufferAttributes.UpdateInterval = m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond();
+	bufferAttributes.NumBuffers = m_nPreparedHeaders;
+	return bufferAttributes;
+}
+
+
+SoundDevice::Statistics CWaveDevice::GetStatistics() const
+//--------------------------------------------------------
+{
+	MPT_TRACE();
+	SoundDevice::Statistics result;
+	result.InstantaneousLatency = InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond();
+	result.LastUpdateInterval = GetLastUpdateInterval();
+	result.text = mpt::ustring();
+	return result;
 }
 
 

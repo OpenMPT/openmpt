@@ -131,11 +131,6 @@ bool CPortaudioDevice::InternalOpen()
 		m_Stream = 0;
 		return false;
 	}
-	SoundDevice::BufferAttributes bufferAttributes;
-	bufferAttributes.Latency = m_StreamInfo->outputLatency;
-	bufferAttributes.UpdateInterval = m_Settings.UpdateInterval;
-	bufferAttributes.NumBuffers = 1;
-	UpdateBufferAttributes(bufferAttributes);
 	return true;
 }
 
@@ -145,11 +140,12 @@ bool CPortaudioDevice::InternalClose()
 {
 	if(m_Stream)
 	{
+		const SoundDevice::BufferAttributes bufferAttributes = GetEffectiveBufferAttributes();
 		Pa_AbortStream(m_Stream);
 		Pa_CloseStream(m_Stream);
 		if(Pa_GetDeviceInfo(m_StreamParameters.device)->hostApi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS))
 		{
-			Pa_Sleep(Util::Round<long>(GetBufferAttributes().Latency * 2.0 * 1000.0 + 0.5)); // wait for broken wdm drivers not closing the stream immediatly
+			Pa_Sleep(Util::Round<long>(bufferAttributes.Latency * 2.0 * 1000.0 + 0.5)); // wait for broken wdm drivers not closing the stream immediatly
 		}
 		MemsetZero(m_StreamParameters);
 		m_StreamInfo = 0;
@@ -193,10 +189,26 @@ int64 CPortaudioDevice::InternalGetStreamPositionFrames() const
 }
 
 
-double CPortaudioDevice::GetCurrentLatency() const
-//------------------------------------------------
+SoundDevice::BufferAttributes CPortaudioDevice::InternalGetEffectiveBufferAttributes() const
+//------------------------------------------------------------------------------------------
 {
-	return m_CurrentRealLatency;
+	SoundDevice::BufferAttributes bufferAttributes;
+	bufferAttributes.Latency = m_StreamInfo->outputLatency;
+	bufferAttributes.UpdateInterval = m_Settings.UpdateInterval;
+	bufferAttributes.NumBuffers = 1;
+	return bufferAttributes;
+}
+
+
+SoundDevice::Statistics CPortaudioDevice::GetStatistics() const
+//-------------------------------------------------------------
+{
+	MPT_TRACE();
+	SoundDevice::Statistics result;
+	result.InstantaneousLatency = m_CurrentRealLatency;
+	result.LastUpdateInterval = GetLastUpdateInterval();
+	result.text = mpt::ustring();
+	return result;
 }
 
 
