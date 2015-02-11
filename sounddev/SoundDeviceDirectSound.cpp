@@ -301,11 +301,6 @@ bool CDSoundDevice::InternalOpen()
 	m_dwWritePos = 0xFFFFFFFF;
 	SetWakeupInterval(std::min(m_Settings.UpdateInterval, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond())));
 	m_Flags.NeedsClippedFloat = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
-	SoundDevice::BufferAttributes bufferAttributes;
-	bufferAttributes.Latency = m_nDSoundBufferSize * 1.0 / m_Settings.GetBytesPerSecond();
-	bufferAttributes.UpdateInterval = std::min(m_Settings.UpdateInterval, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond()));
-	bufferAttributes.NumBuffers = 1;
-	UpdateBufferAttributes(bufferAttributes);
 	return true;
 }
 
@@ -483,6 +478,29 @@ void CDSoundDevice::InternalFillAudioBuffer()
 
 	}
 
+}
+
+
+SoundDevice::BufferAttributes CDSoundDevice::InternalGetEffectiveBufferAttributes() const
+//---------------------------------------------------------------------------------------
+{
+	SoundDevice::BufferAttributes bufferAttributes;
+	bufferAttributes.Latency = m_nDSoundBufferSize * 1.0 / m_Settings.GetBytesPerSecond();
+	bufferAttributes.UpdateInterval = std::min(m_Settings.UpdateInterval, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond()));
+	bufferAttributes.NumBuffers = 1;
+	return bufferAttributes;
+}
+
+
+SoundDevice::Statistics CDSoundDevice::GetStatistics() const
+//----------------------------------------------------------
+{
+	MPT_TRACE();
+	SoundDevice::Statistics result;
+	result.InstantaneousLatency = 1.0 * m_dwLatency / m_Settings.GetBytesPerSecond();
+	result.LastUpdateInterval = GetLastUpdateInterval();
+	result.text = mpt::ustring();
+	return result;
 }
 
 

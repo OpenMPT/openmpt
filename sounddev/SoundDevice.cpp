@@ -142,10 +142,6 @@ Base::Base(SoundDevice::Info info)
 
 	m_DeviceUnavailableOnOpen = false;
 
-	m_BufferAttributes.Latency = m_Settings.Latency;
-	m_BufferAttributes.UpdateInterval = m_Settings.UpdateInterval;
-	m_BufferAttributes.NumBuffers = 0;
-
 	m_IsPlaying = false;
 	m_CurrentUpdateInterval = 0.0;
 	m_StreamPositionRenderFrames = 0;
@@ -206,14 +202,6 @@ bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevic
 }
 
 
-void Base::UpdateBufferAttributes(SoundDevice::BufferAttributes attributes)
-//-------------------------------------------------------------------------
-{
-	MPT_TRACE();
-	m_BufferAttributes = attributes;
-}
-
-
 void Base::UpdateTimeInfo(SoundDevice::TimeInfo timeInfo)
 //-------------------------------------------------------
 {
@@ -265,9 +253,6 @@ bool Base::Open(const SoundDevice::Settings &settings)
 	}
 	m_Flags = SoundDevice::Flags();
 	m_DeviceUnavailableOnOpen = false;
-	m_BufferAttributes.Latency = m_Settings.Latency;
-	m_BufferAttributes.UpdateInterval = m_Settings.UpdateInterval;
-	m_BufferAttributes.NumBuffers = 0;
 	m_RequestFlags.store(0);
 	return InternalOpen();
 }
@@ -324,7 +309,7 @@ void Base::SourceAudioPreRead(std::size_t numFrames)
 				Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
 				timeInfo.StreamFrames = m_StreamPositionRenderFrames + numFrames;
 			}
-			timeInfo.SystemTimestamp = Clock().NowNanoseconds() + Util::Round<int64>(m_BufferAttributes.Latency * 1000000000.0);
+			timeInfo.SystemTimestamp = Clock().NowNanoseconds() + Util::Round<int64>(GetEffectiveBufferAttributes().Latency * 1000000000.0);
 			timeInfo.Speed = 1.0;
 			UpdateTimeInfo(timeInfo);
 		}
@@ -339,7 +324,7 @@ void Base::SourceAudioRead(void *buffer, std::size_t numFrames)
 	{
 		return;
 	}
-	m_Source->AudioRead(m_Settings, m_Flags, m_BufferAttributes, m_TimeInfo, numFrames, buffer);
+	m_Source->AudioRead(m_Settings, m_Flags, GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, buffer);
 }
 
 
@@ -359,7 +344,7 @@ void Base::SourceAudioDone(std::size_t numFrames, int32 framesLatency)
 		m_StreamPositionOutputFrames = m_StreamPositionRenderFrames - framesLatency;
 		framesRendered = m_StreamPositionRenderFrames;
 	}
-	m_Source->AudioDone(m_Settings, m_Flags, m_BufferAttributes, m_TimeInfo, numFrames, framesRendered);
+	m_Source->AudioDone(m_Settings, m_Flags, GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, framesRendered);
 }
 
 
@@ -427,8 +412,8 @@ void Base::Stop(bool force)
 }
 
 
-double Base::GetCurrentUpdateInterval() const
-//-------------------------------------------
+double Base::GetLastUpdateInterval() const
+//----------------------------------------
 {
 	MPT_TRACE();
 	Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
@@ -449,6 +434,18 @@ int64 Base::GetStreamPositionFrames() const
 		Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
 		return m_StreamPositionOutputFrames;
 	}
+}
+
+
+SoundDevice::Statistics Base::GetStatistics() const
+//-------------------------------------------------
+{
+	MPT_TRACE();
+	SoundDevice::Statistics result;
+	result.InstantaneousLatency = m_Settings.Latency;
+	result.LastUpdateInterval = GetLastUpdateInterval();
+	result.text = mpt::ustring();
+	return result;
 }
 
 

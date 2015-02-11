@@ -894,21 +894,20 @@ void COptionsSoundcard::UpdateStatistics()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if(pMainFrm->gpSoundDevice && pMainFrm->IsPlaying())
 	{
-		const SoundDevice::BufferAttributes bufferAttributes = pMainFrm->gpSoundDevice->GetBufferAttributes();
-		const double currentLatency = pMainFrm->gpSoundDevice->GetCurrentLatency();
-		const double currentUpdateInterval = pMainFrm->gpSoundDevice->GetCurrentUpdateInterval();
+		const SoundDevice::BufferAttributes bufferAttributes = pMainFrm->gpSoundDevice->GetEffectiveBufferAttributes();
+		const SoundDevice::Statistics stats = pMainFrm->gpSoundDevice->GetStatistics();
 		const uint32 samplerate = pMainFrm->gpSoundDevice->GetSettings().Samplerate;
 		mpt::ustring s;
 		if(bufferAttributes.NumBuffers > 2)
 		{
-			s += mpt::String::Print(MPT_USTRING("Buffer: %1%% (%2/%3)\r\n"), (bufferAttributes.Latency > 0.0) ? Util::Round<int64>(currentLatency / bufferAttributes.Latency * 100.0) : 0, (currentUpdateInterval > 0.0) ? Util::Round<int64>(bufferAttributes.Latency / currentUpdateInterval) : 0, bufferAttributes.NumBuffers);
+			s += mpt::String::Print(MPT_USTRING("Buffer: %1%% (%2/%3)\r\n"), (bufferAttributes.Latency > 0.0) ? Util::Round<int64>(stats.InstantaneousLatency / bufferAttributes.Latency * 100.0) : 0, (stats.LastUpdateInterval > 0.0) ? Util::Round<int64>(bufferAttributes.Latency / stats.LastUpdateInterval) : 0, bufferAttributes.NumBuffers);
 		} else
 		{
-			s += mpt::String::Print(MPT_USTRING("Buffer: %1%%\r\n"), (bufferAttributes.Latency > 0.0) ? Util::Round<int64>(currentLatency / bufferAttributes.Latency * 100.0) : 0);
+			s += mpt::String::Print(MPT_USTRING("Buffer: %1%%\r\n"), (bufferAttributes.Latency > 0.0) ? Util::Round<int64>(stats.InstantaneousLatency / bufferAttributes.Latency * 100.0) : 0);
 		}
-		s += mpt::String::Print(MPT_USTRING("Latency: %1 ms (current: %2 ms, %3 frames)\r\n"), mpt::ufmt::f("%4.1f", bufferAttributes.Latency * 1000.0), mpt::ufmt::f("%4.1f", currentLatency * 1000.0), Util::Round<int64>(currentLatency * samplerate));
-		s += mpt::String::Print(MPT_USTRING("Period: %1 ms (current: %2 ms, %3 frames)\r\n"), mpt::ufmt::f("%4.1f", bufferAttributes.UpdateInterval * 1000.0), mpt::ufmt::f("%4.1f", currentUpdateInterval * 1000.0), Util::Round<int64>(currentUpdateInterval * samplerate));
-		s += pMainFrm->gpSoundDevice->GetStatistics();
+		s += mpt::String::Print(MPT_USTRING("Latency: %1 ms (current: %2 ms, %3 frames)\r\n"), mpt::ufmt::f("%4.1f", bufferAttributes.Latency * 1000.0), mpt::ufmt::f("%4.1f", stats.InstantaneousLatency * 1000.0), Util::Round<int64>(stats.InstantaneousLatency * samplerate));
+		s += mpt::String::Print(MPT_USTRING("Period: %1 ms (current: %2 ms, %3 frames)\r\n"), mpt::ufmt::f("%4.1f", bufferAttributes.UpdateInterval * 1000.0), mpt::ufmt::f("%4.1f", stats.LastUpdateInterval * 1000.0), Util::Round<int64>(stats.LastUpdateInterval * samplerate));
+		s += stats.text;
 		m_EditStatistics.SetWindowText(mpt::ToCString(s));
 	}	else
 	{

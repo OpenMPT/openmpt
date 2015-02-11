@@ -53,6 +53,7 @@ protected:
 
 	IASIO *m_pAsioDrv;
 
+	double m_BufferLatency;
 	long m_nAsioBufferLen;
 	std::vector<ASIOBufferInfo> m_BufferInfo;
 	ASIOCallbacks m_Callbacks;
@@ -117,7 +118,7 @@ public:
 
 	bool OpenDriverSettings();
 
-	mpt::ustring GetStatistics() const;
+	SoundDevice::Statistics GetStatistics() const;
 
 public:
 	static std::vector<SoundDevice::Info> EnumerateDevices();
@@ -130,6 +131,8 @@ protected:
 	bool InternalHasTimeInfo() const;
 	bool InternalHasGetStreamPosition() const;
 	int64 InternalGetStreamPositionFrames() const;
+
+	SoundDevice::BufferAttributes InternalGetEffectiveBufferAttributes() const;
 
 protected:
 	long AsioMessage(long selector, long value, void* message, double* opt);

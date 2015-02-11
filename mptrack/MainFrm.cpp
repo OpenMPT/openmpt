@@ -1164,7 +1164,7 @@ bool CMainFrame::StartPlayback()
 			m_NotifyTimer = SetTimer(TIMERID_NOTIFY, TrackerSettings::Instance().GUIUpdateInterval, NULL);
 		} else
 		{
-			m_NotifyTimer = SetTimer(TIMERID_NOTIFY, std::max<int>(1, Util::Round<int>(gpSoundDevice->GetBufferAttributes().UpdateInterval * 1000.0)), NULL);
+			m_NotifyTimer = SetTimer(TIMERID_NOTIFY, std::max<int>(1, Util::Round<int>(gpSoundDevice->GetEffectiveBufferAttributes().UpdateInterval * 1000.0)), NULL);
 		}
 	}
 	return true;
