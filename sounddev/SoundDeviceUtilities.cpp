@@ -1,7 +1,7 @@
 /*
- * SoundDeviceThread.cpp
- * ---------------------
- * Purpose: Sound device threading driver helpers.
+ * SoundDeviceUtilities.cpp
+ * ------------------------
+ * Purpose: Sound device utilities.
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
@@ -12,7 +12,7 @@
 #include "stdafx.h"
 
 #include "SoundDevice.h"
-#include "SoundDeviceThread.h"
+#include "SoundDeviceUtilities.h"
 
 #include "../common/misc_util.h"
 

@@ -12,7 +12,7 @@
 #pragma once
 
 #include "SoundDevice.h"
-#include "SoundDeviceThread.h"
+#include "SoundDeviceUtilities.h"
 
 #ifndef NO_DSOUND
 #include <dsound.h>

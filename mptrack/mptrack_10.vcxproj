@@ -742,7 +742,7 @@
     <ClCompile Include="..\sounddev\SoundDeviceDirectSound.cpp" />
     <ClCompile Include="..\sounddev\SoundDeviceManager.cpp" />
     <ClCompile Include="..\sounddev\SoundDevicePortAudio.cpp" />
-    <ClCompile Include="..\sounddev\SoundDeviceThread.cpp" />
+    <ClCompile Include="..\sounddev\SoundDeviceUtilities.cpp" />
     <ClCompile Include="..\sounddev\SoundDeviceWaveout.cpp" />
     <ClCompile Include="..\sounddsp\AGC.cpp" />
     <ClCompile Include="..\sounddsp\DSP.cpp" />
@@ -970,7 +970,7 @@
     <ClInclude Include="..\sounddev\SoundDeviceDirectSound.h" />
     <ClInclude Include="..\sounddev\SoundDeviceManager.h" />
     <ClInclude Include="..\sounddev\SoundDevicePortAudio.h" />
-    <ClInclude Include="..\sounddev\SoundDeviceThread.h" />
+    <ClInclude Include="..\sounddev\SoundDeviceUtilities.h" />
     <ClInclude Include="..\sounddev\SoundDeviceWaveout.h" />
     <ClInclude Include="..\sounddsp\AGC.h" />
     <ClInclude Include="..\sounddsp\DSP.h" />

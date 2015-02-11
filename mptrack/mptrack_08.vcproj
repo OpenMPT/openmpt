@@ -784,7 +784,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\sounddev\SoundDeviceThread.cpp"
+				RelativePath="..\sounddev\SoundDeviceUtilities.cpp"
 				>
 			</File>
 			<File
@@ -1530,7 +1530,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\sounddev\SoundDeviceThread.h"
+				RelativePath="..\sounddev\SoundDeviceUtilities.h"
 				>
 			</File>
 			<File
