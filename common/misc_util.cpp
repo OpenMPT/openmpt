@@ -17,7 +17,11 @@
 #include <time.h>
 
 #if defined(MPT_WITH_DYNBIND)
-#if !MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS
+#include <windows.h>
+#elif MPT_OS_ANDROID
+#include <dlfcn.h>
+#else
 #include <ltdl.h>
 #endif
 #endif
@@ -1016,7 +1020,47 @@ public:
 };
 
 
-#else
+#elif MPT_OS_ANDROID
+
+
+// Fake implementation.
+// Load shared objects from the JAVA side of things.
+class LibraryHandle
+{
+
+public:
+
+	LibraryHandle(const mpt::LibraryPath &path)
+	{
+		return;
+	}
+
+	~LibraryHandle()
+	{
+		return;
+	}
+
+public:
+
+	bool IsValid() const
+	{
+		return true;
+	}
+
+	FuncPtr GetProcAddress(const std::string &symbol) const
+	{
+		if(!IsValid())
+		{
+			return nullptr;
+		}
+		return reinterpret_cast<FuncPtr>(dlsym(0, symbol.c_str()));
+	}
+
+};
+
+
+
+#else // MPT_OS
 
 
 class LibraryHandle
@@ -1074,7 +1118,7 @@ public:
 };
 
 
-#endif
+#endif // MPT_OS
 
 
 LibraryPath::LibraryPath(mpt::LibrarySearchPath searchPath, class mpt::PathString const &fileName)
