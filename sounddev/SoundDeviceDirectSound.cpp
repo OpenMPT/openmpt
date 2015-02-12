@@ -19,16 +19,11 @@
 #include "../common/misc_util.h"
 #include "../common/StringFixer.h"
 
-#include <mmreg.h>
-
 
 OPENMPT_NAMESPACE_BEGIN
 
 
 namespace SoundDevice {
-
-
-bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevice::Settings &m_Settings);
 
 
 ////////////////////////////////////////////////////////////////////////////////////
