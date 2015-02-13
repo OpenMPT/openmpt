@@ -9,6 +9,8 @@ is just a high-level summary.
 
  *  Makefile configuration filenames changed from
     `build/make/Makefile.config.*` to `build/make/config-*.mk`.
+ *  libopenmpt for Android now supports unmo3 from un4seen. See
+    `build/android_ndk/README.AndroidNDK.txt` for details.
 
  *  [Bug] Fix out-of-bounds read in mixer code for ProTracker-compatible MOD
     files was introduced back in r4223 / beta6.
