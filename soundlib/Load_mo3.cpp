@@ -22,9 +22,9 @@
 
 #ifdef MPT_LINKED_UNMO3
 extern "C" {
-uint32 UNMO3_API UNMO3_GetVersion(void);
+OPENMPT_NAMESPACE::uint32 UNMO3_API UNMO3_GetVersion(void);
 void UNMO3_API UNMO3_Free(const void *data);
-int32 UNMO3_API UNMO3_Decode(const void **data, uint32 *len, uint32 flags);
+OPENMPT_NAMESPACE::int32 UNMO3_API UNMO3_Decode(const void **data, OPENMPT_NAMESPACE::uint32 *len, OPENMPT_NAMESPACE::uint32 flags);
 };
 #endif // MPT_LINKED_UNMO3
 
