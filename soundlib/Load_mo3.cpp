@@ -12,6 +12,24 @@
 #include "Loaders.h"
 #include "../common/ComponentManager.h"
 
+#ifndef NO_MO3
+
+#if MPT_OS_WINDOWS
+	#define UNMO3_API __stdcall
+#else
+	#define UNMO3_API 
+#endif
+
+#ifdef MPT_LINKED_UNMO3
+extern "C" {
+uint32 UNMO3_API UNMO3_GetVersion(void);
+void UNMO3_API UNMO3_Free(const void *data);
+int32 UNMO3_API UNMO3_Decode(const void **data, uint32 *len, uint32 flags);
+};
+#endif // MPT_LINKED_UNMO3
+
+#endif // !NO_MO3
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -22,12 +40,6 @@ class ComponentUnMO3 : public ComponentBase
 {
 	MPT_DECLARE_COMPONENT_MEMBERS
 public:
-	// Library loaded successfully.
-	#if MPT_OS_WINDOWS
-		#define UNMO3_API __stdcall
-	#else
-		#define UNMO3_API 
-	#endif
 	uint32 (UNMO3_API * UNMO3_GetVersion)();
 	// Decode a MO3 file (returns the same "exit codes" as UNMO3.EXE, eg. 0=success)
 	// IN: data/len = MO3 data/len
@@ -47,6 +59,13 @@ public:
 	std::string GetSettingsKey() const { return "UnMO3"; }
 	bool DoInitialize()
 	{
+#ifdef MPT_LINKED_UNMO3
+		UNMO3_GetVersion = &(::UNMO3_GetVersion);
+		UNMO3_Free = &(::UNMO3_Free);
+		UNMO3_Decode_Old = nullptr;
+		UNMO3_Decode_New = &(::UNMO3_Decode);
+		return true;
+#else
 		AddLibrary("unmo3", mpt::LibraryPath::App(MPT_PATHSTRING("unmo3")));
 		MPT_COMPONENT_BIND("unmo3", UNMO3_Free);
 		if(MPT_COMPONENT_BIND_OPTIONAL("unmo3", UNMO3_GetVersion))
@@ -60,6 +79,7 @@ public:
 			MPT_COMPONENT_BIND_SYMBOL("unmo3", "UNMO3_Decode", UNMO3_Decode_Old);
 		}
 		return !HasBindFailed();
+#endif
 	}
 };
 MPT_REGISTERED_COMPONENT(ComponentUnMO3)
