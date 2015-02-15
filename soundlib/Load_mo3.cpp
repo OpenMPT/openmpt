@@ -13,21 +13,19 @@
 #include "../common/ComponentManager.h"
 
 #ifndef NO_MO3
-
+// unmo3.h
 #if MPT_OS_WINDOWS
-	#define UNMO3_API __stdcall
+#define UNMO3_API __stdcall
 #else
-	#define UNMO3_API 
+#define UNMO3_API 
 #endif
-
 #ifdef MPT_LINKED_UNMO3
 extern "C" {
 OPENMPT_NAMESPACE::uint32 UNMO3_API UNMO3_GetVersion(void);
 void UNMO3_API UNMO3_Free(const void *data);
 OPENMPT_NAMESPACE::int32 UNMO3_API UNMO3_Decode(const void **data, OPENMPT_NAMESPACE::uint32 *len, OPENMPT_NAMESPACE::uint32 flags);
-};
+}
 #endif // MPT_LINKED_UNMO3
-
 #endif // !NO_MO3
 
 
@@ -53,7 +51,6 @@ public:
 	{
 		return (UNMO3_Decode_New ? UNMO3_Decode_New(data, len, flags) : UNMO3_Decode_Old(data, len));
 	}
-	#undef UNMO3_API
 public:
 	ComponentUnMO3() : ComponentBase(ComponentTypeForeign) { }
 	std::string GetSettingsKey() const { return "UnMO3"; }
