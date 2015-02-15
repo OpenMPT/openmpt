@@ -201,6 +201,7 @@ protected:
 	WORD ChnVUMeters[MAX_BASECHANNELS];
 	WORD OldVUMeters[MAX_BASECHANNELS];
 
+	ModCommand::NOTE previousNote[MAX_BASECHANNELS];
 	BYTE activeNoteChannel[NOTE_MAX + NOTE_MIN];
 	BYTE splitActiveNoteChannel[NOTE_MAX + NOTE_MIN];
 

@@ -173,6 +173,7 @@ void CViewPattern::OnInitialUpdate()
 	MemsetZero(OldVUMeters);
 // -> CODE#0012
 // -> DESC="midi keyboard split"
+	memset(previousNote, NOTE_NONE, sizeof(previousNote));
 	memset(splitActiveNoteChannel, 0xFF, sizeof(splitActiveNoteChannel));
 	memset(activeNoteChannel, 0xFF, sizeof(activeNoteChannel));
 	m_nPlayPat = PATTERNINDEX_INVALID;
@@ -4854,6 +4855,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	const CHANNELINDEX nChn = bChordMode ? chordPatternChannels[0] : (activeNoteMap[note] < sndFile.GetNumChannels() ? activeNoteMap[note] : nChnCursor);
 
 	CHANNELINDEX noteChannels[MPTChord::notesPerChord] = { nChn };
+	ModCommand::NOTE notes[MPTChord::notesPerChord] = { note };
 	int numNotes = 1;
 
 	if(pModDoc)
@@ -4875,7 +4877,6 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 		{
 			m_Status.reset(psChordPlaying);
 
-			ModCommand::NOTE notes[4];
 			numNotes = ConstructChord(note, notes, prevChordBaseNote);
 			if(!numNotes)
 			{
@@ -4944,6 +4945,11 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 
 	for(int i = 0; i < numNotes; i++)
 	{
+		if(previousNote[noteChannels[i]] != notes[i])
+		{
+			// This might be a note-off from a past note, but since we already hit a new note on this channel, we ignore it.
+			continue;
+		}
 		ModCommand *pTarget = sndFile.Patterns[editPos.pattern].GetpModCommand(editPos.row, noteChannels[i]);
 
 		// -- write sdx if playing live
@@ -5300,6 +5306,11 @@ void CViewPattern::TempEnterNote(int note, int vol, bool fromMidi)
 		}
 	}
 
+	if(newcmd.IsNote())
+	{
+		previousNote[nChn] = note;
+	}
+
 	// -- if recording, handle post note entry behaviour (move cursor etc..)
 	if(recordEnabled)
 	{
@@ -5485,7 +5496,7 @@ void CViewPattern::TempEnterChord(int note)
 		chordPatternChannels[i] = curChn;
 		
 		ModCommand &m = newRow[curChn];
-		m.note = chordNotes[i];
+		previousNote[curChn] = m.note = chordNotes[i];
 		if(newRow[chn].instr)
 		{
 			m.instr = newRow[chn].instr;
