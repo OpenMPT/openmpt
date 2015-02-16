@@ -7,11 +7,14 @@
 # HTML Help Workshop to generate a CHM file.
 
 from urllib.request import urlopen, urlretrieve
-import re, os
+import re, os, shutil, subprocess
 
 base_url = 'http://wiki.openmpt.org'
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+shutil.rmtree('html', ignore_errors=True)
+shutil.copytree('source', 'html')
 
 style = urlopen(base_url + '/load.php?debug=false&lang=en&modules=mediawiki.legacy.common%2Cshared|mediawiki.ui.button|skins.vector.styles&only=styles&skin=vector&*').read().decode('UTF-8')
 # Remove a few unused CSS classes
@@ -154,3 +157,10 @@ toc.write("""
 </BODY></HTML>
 """)
 toc.close()
+
+subprocess.call(['htmlhelp/hhc.exe', '"html/OpenMPT Manual.hhp"'])
+try:
+    os.remove('../../packageTemplate/html/OpenMPT Manual.chm')
+except OSError:
+    pass
+shutil.copy2('html/OpenMPT Manual.chm', '../../packageTemplate/')

@@ -25,6 +25,65 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.24.02.00 (16 February 2014, revision 4761)
+---------------------------------------------
+Pattern tab
+   [New] <js> Added suppport for custom pattern fonts as well as upscaled variants of the built-in fonts for High-DPI devices.
+   [Imp] <js> Data entry shortcuts / scroll wheel do now take the default volume into consideration, i.e. when making a data entry in an empty volume column field next to a note, a volume command is inserted (http://forum.openmpt.org/index.php?topic=5411.0).
+   [Imp] <js> Show verbose effect descriptions in the status bar instead of the short versions (http://bugs.openmpt.org/view.php?id=51).
+   [Imp] <js> Note-offs from past notes are no longer written when recording notes into patterns (http://bugs.openmpt.org/view.php?id=645).
+   [Mod] <js> In IT and XM, the o command (Offset) can no longer be entered into the volume column, as it's an OpenMPT-specific command. Old files using this command will still play as intended. 
+   [Fix] <js> The Parameter Editor refused to work under random conditions.
+
+Sample tab
+   [New] <js> Added new shortcuts to center waveform around loop points.
+   [Fix] <js> Splitting a stereo sample into mono samples didn't update the sample list in other tabs.
+
+Instrument tab
+   [Fix] <js> Plugin list was updated on every instrument change, leading to a small but noticeable performance drop.
+
+Comments tab
+   [New] <js> It is now possible to use a custom font for displaying module comments.
+
+Tree view
+   [Fix] <js> When converting samples to instruments, the instrument folder in the tree view was not updated properly (tx eightbitbubsy).
+   [Fix] <js> OpenMPT 1.24 introduced a perceivable delay when loading samples for preview.
+
+Mod Conversion
+   [Imp] <js> Properly convert between IT / MPTM Hxx and XM 4xx vibrato depth.
+
+Playback
+   [Fix] <js> Vibrato was too weak in IT / MPTM with linear frequency slides since the previous version (http://bugs.openmpt.org/view.php?id=623).
+   [Fix] <js> Fine portamento was sometimes too weak in IT / MPTM with linear frequency slides since the previous version.
+
+IT
+   [Mod] <js> Allow loading IT files with tempo 31 normally.
+
+IT::Compatible Playback Mode
+   [Fix] <js> Default sample and instrument panning is only reset by notes, not instrument numbers.
+   [Fix] <js> Panbrello is not reset until the next note or panning command.
+
+MOD
+   [Mod] <js> To match ProTracker, the portamento target is no longer reset when a new note is encountered (like in FT2), but it is reset when the target is reached (like in IT). Fixes the intro in nuhanenatanssi.mod.
+   [Fix] <jh> Fixed random crash in ProTracker 1/2 mode when using on-the-fly sample swapping (http://bugs.openmpt.org/view.php?id=626).
+
+Other formats
+   [Fix] <js> STM: Samples were not loaded correctly in some files, e.g. fracture in space" by Purple Motion (tx deus-ex, http://www.un4seen.com/forum/?topic=15448.msg113496#msg113496)
+   [Fix] <js> STM: Volume slide nibbles are now prioritized correctly (fixes "fracture in space" by Purple Motion).
+
+Module Export
+   [Mod] <jh> Remove >48 KHz support for vorbis export. Even though vorbis supports these sampling rates, it's not tuned for them, and using >48 KHz for any lossy codec generally does not make any sense at all.
+   [Fix] <jh> Detection of available MP3 encoders was sometimes broken in the previous version.
+
+Audio I/O
+   [New] <jh> Added hidden options EnableWaveOut, EnableDirectSound, EnableASIO, EnablePortAudioWASAPI, EnablePortudioWDM-KS, EnablePortAudioDS, EnablePortAudioASIO in [Sound Settings] to disable certain types of audio drivers, if required for debugging.
+
+Misc
+   [New] <jh> Added hidden settings StopSoundDeviceOnCrash (default true) and TraceAlwaysDump (default false) in [Debug], which can be useful to debug sound device related problems that do not manifest in a crash.
+   [Imp] <js> Various parts of the program are now DPI-aware: Parameter editor, pattern editor, channel manager, plugin manager, splitter positions, MIDI Input/Output Plugin
+   [Fix] <js> When using the Song Properties dialog to change some properties of an IT file, re-saving the file always popped up the Save As dialog.
+
+
 v1.24.01.00 (21 December 2014, revision 4662)
 ---------------------------------------------
 General tab
@@ -61,9 +120,9 @@ Instrument tab
    [New] <js> Custom background colour can now be specified.
    [Imp] <js> Since Impulse Tracker's fade-out value is 32 times less precise than what is displayed in the editor, automatically round it when the user makes fade-out adjustments in IT files.
    [Imp] <js> When previewing instruments with a fadeout value of 0, instantly stop them on key-up instead of letting them play forever.
+   [Mod] <js> Disallow OpenMPT-only "attack" setting to be used in IT and XM files. Old files using this setting still play as intended.
    [Fix] <js> When loading an instrument, force all sample views of the same module to be updated.
    [Fix] <js> Modifying envelopes using the keyboard didn't mark the module as modified.
-   [Reg] <js> Disallow OpenMPT-only "attack" setting to be used in IT and XM files.
 
 Tree view
    [New] <js> Dropping a module or folder on the sample browser opens this module or folder for browsing.
@@ -124,14 +183,14 @@ MOD::Loading and Saving
    [Fix] <js> Any non-ASCII characters were accidentally removed when loading a MOD file (broke in OpenMPT 1.22).
 
 MOD::ProTracker 1/2 Mode
-   [Fix] <js> Glissando is only applied on rows with a portamento effects, and never on the first tick of these rows.
+   [Fix] <js> Glissando is only applied on rows with a portamento effect, and never on the first tick of these rows.
 
 Other formats
    [New] <js> Added support for a MOD variant introduced by SoundTracker 2.6 and Ice Tracker (http://bugs.openmpt.org/view.php?id=597).
    [Imp] <js> SoundTracker auto-slides are now imported using the volume column.
    [Imp] <js> MT2: Completely rewrote loader. Some files that would previously not load properly do now load. Support for VST plugins, drum patterns and some extended MT2 pattern commands has been added.
-   [Fix] <js> ITP: Always load embedded MIDI macros for files made with OpenMPT 1.19 or older, since back then they were always read, no matter if the embed flag was checked or not.
-   [Fix] <js> ITP: Loading extended song properties was broken for a very long time, probably since OpenMPT 1.20.
+   [Fix] <js> ITP: Always load embedded MIDI macros for files made with OpenMPT 1.19 or older, since back then they were always read, no matter if the embed flag was set or not.
+   [Fix] <js> ITP: Loading extended song properties was broken since OpenMPT 1.21.
    [Reg] <js> ITP: Saving and editing ITP files is no longer supported. ITP files are now imported as normal IT files. ITP's functionality is superseded by MPTM's new external sample functionality.
 
 Module Export
@@ -1202,7 +1261,7 @@ Playback
    [Fix] <js> Removed portamento speed A01 "fix". At speed 1, use fine pitch slides instead of normal ones (they behave identically to what OpenMPT did previously at speed 1).
 
 IT
-   [Reg] <js> Random filter variation settings are not supported anymore when editing IT files. Please use the MPTM format instead. Importing old files with random filter settings does still work.
+   [Mod] <js> Random filter variation settings are not supported anymore when editing IT files. Please use the MPTM format instead. Importing old files with random filter settings does still work.
 
 IT::Compatible Playback Mode
    [Fix] <js> Combinations of Qxy (retrigger) with a pattern delay at Speed y should now work as intended.
@@ -1392,6 +1451,7 @@ Playback
 IT
    [Mod] <js> Newly created IT files have compatible playback mode enabled by default.
    [Mod] <js> Saving: Files with filter envelopes use a different file version (IT 2.16 instead of IT 2.17) now.
+   [Mod] <js> Removed restart position and Pitch/Tempo Lock from IT extensions. They can still be edited when loading an old IT file with restart position set or Pitch/Tempo Lock enabled, but for all other files, they are not available.
    [Fix] <js> Fixed volume and pan drifting when using Volume Swing / Pan Swing in compatible mode (tx Teasy).
    [Fix] <js> Volume Swing range was 0 to 64 while it should be a percentage from 0 to 100 (old files are fixed automatically).
    [Fix] <js> Multiple fine pattern delays on the same row weren't added up.
@@ -1399,7 +1459,6 @@ IT
    [Fix] <js> Tone Portamento is now ignored if no note was previously playing.
    [Fix] <js> If there are multiple row delay commands on the same row, only the leftmost command is considered.
    [Fix] <js> Delayed notes that are on the same row as a row delay effect are be retriggered.
-   [Reg] <js> Removed restart position and Pitch/Tempo Lock from IT extensions. They can still be edited when loading an old IT file with restart position set or Pitch/Tempo Lock enabled, but for all other files, they are not available.
 
 IT::Compatible Playback Mode
    [Fix] <js> New filter mode which pretty much sounds like Impulse Tracker's resonant filter (http://bugs.openmpt.org/view.php?id=8). The new filter mode is used iff "More IT compatible playback" is turned on and extended filter range is turned off.
@@ -1453,12 +1512,12 @@ XM::Loading and Saving
    [Fix] <js> Saving: When saving an XM with no instruments, garbage instrument settings were written.
 
 S3M
+   [Mod] <js> \xx command has been removed from S3M format (existing tracks are updated automatically to use the Zxx command instead).
    [Fix] <js> Some commands (Dxy, Exx, Fxx, Ixy, Jxy, Kxy, Lxy, Qxy, Rxy, Sxy) use the last non-zero effect parameter as memory. This fixes for example Satellite One by Purple Motion.
    [Fix] <js> Pattern loops have no per-channel memory in ST3 (tx GreaseMonkey).
    [Fix] <js> Amiga limits are now enfored correctly if the "preserve Amiga limits" flag is set.
    [Fix] <js> If there are multiple row delay commands on the same row, only the leftmost command is considered.
    [Fix] <js> Delayed notes that are on the same row as a row delay effect are be retriggered.
-   [Reg] <js> \xx command has been removed from S3M format (existing tracks are updated automatically to use the Zxx command instead).
 
 S3M::Loading
    [Imp] <js> Default channel panning is now scalled better when loading and saving, for a full 0...256 range.
@@ -1667,6 +1726,7 @@ Pattern tab
    [New] <js> Experimental feature: Play the whole pattern row when entering notes and chords into the pattern editor. This can be enabled from the setup screen.
    [Mod] <js> Using the Goto Dialog updates channel parameters and sets the elapsed time now (http://bugs.openmpt.org/view.php?id=28).
    [Mod] <js> Undo steps have been increased from 100 to 1000.
+   [Mod] <js> The "Position aware timer" option is gone. The position aware timer is now automatically used. It was optional in the first place because of some buggy code, which is now fixed.
    [Fix] <js> Shrink selection is more consistent with Shrink pattern now: Entries on odd rows are not ignored anymore if there is no entry in the even rows. Also, cleaning of the pattern after shrinking the selection has been fixed - it cleaned whole commands instead of just the selected parts of a command (http://bugs.openmpt.org/view.php?id=89).
    [Fix] <js> Cursor paste was possible even when editing was disabled.
    [Fix] <js> Using Right-Click -> Change Plugin on Parameter Control Events did not work for plugin numbers that were higher than the highest instrument number.
@@ -1679,7 +1739,6 @@ Pattern tab
    [Fix] <js> Entering a note-off event in the MOD format created an unnecessary undo event.
    [Fix] <js> Automation data is not written to the pattern if the current module format does not support smooth MIDI macros.
    [Fix] <js> Selections were not clamped properly to the end of the pattern sometimes.
-   [Reg] <js> The "Position aware timer" option is gone. The position aware timer is now automatically used. It was optional in the first place because of some buggy code, which is now fixed.
 
 Pattern tab::Note properties
    [Fix] <js> Explanation of Q0x was wrong for IT / S3M.
@@ -1868,7 +1927,7 @@ Instrument tab
    [Imp] <js> Panning ranges from 0 to 256 again for MPTM, and from 0 to 64 for IT files (previously, it ranged from 0 to 255).
    [Imp] <js> Sample Map accepts various new shortcuts now.
    [Imp] <js> When pasting an envelope with a release node, it's now ignored in formats that don't support it.
-   [Reg] <js> Envelope release nodes cannot be enabled for IT files anymore, but they are still played for compatibility (One has to start removing the crap from the old formats at some point...).
+   [Mod] <js> Envelope release nodes cannot be enabled for IT files anymore, but they are still played for compatibility (One has to start removing the crap from the old formats at some point...).
 
 Tree view
    [Imp] <js> Ask for confirmation when deleting patterns, samples, instruments, sequences.
