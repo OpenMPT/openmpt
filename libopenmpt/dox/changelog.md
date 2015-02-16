@@ -13,9 +13,10 @@ is just a high-level summary.
     `build/android_ndk/README.AndroidNDK.txt` for details.
 
  *  [Bug] Fix out-of-bounds read in mixer code for ProTracker-compatible MOD
-    files was introduced back in r4223 / beta6.
+    files which was introduced back in r4223 / beta6.
 
  *  Vibrato effect was too weak in beta8 and beta9 in IT linear slide mode.
+ *  Very small fine portamento was wrong.
  *  Tiny IT playback compatibility improvements.
 
 ### 2014-12-21 - libopenmpt 0.2-beta9
