@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt-svn
+### 2015-02-17 - libopenmpt 0.2-beta10
 
  *  Makefile configuration filenames changed from
     `build/make/Makefile.config.*` to `build/make/config-*.mk`.
