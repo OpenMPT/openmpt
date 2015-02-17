@@ -16,8 +16,10 @@ is just a high-level summary.
     files which was introduced back in r4223 / beta6.
 
  *  Vibrato effect was too weak in beta8 and beta9 in IT linear slide mode.
- *  Very small fine portamento was wrong.
+ *  Very small fine portamento was wrong in beta8 and beta9 in IT linear slide
+    mode.
  *  Tiny IT playback compatibility improvements.
+ *  STM playback improvements.
 
 ### 2014-12-21 - libopenmpt 0.2-beta9
 
