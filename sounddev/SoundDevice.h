@@ -251,7 +251,7 @@ public:
 	
 	uint32 GetNumHostChannels() const
 	{
-		return ChannelToDeviceChannel.size();
+		return static_cast<uint32>(ChannelToDeviceChannel.size());
 	}
 	
 	// Get the number of required device channels for this mapping. Derived from the maximum mapped-to channel number.
