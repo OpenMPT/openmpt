@@ -575,7 +575,7 @@ protected:
 	void SourceFillAudioBufferLocked();
 	void SourceAudioPreRead(std::size_t numFrames);
 	void SourceAudioRead(void *buffer, std::size_t numFrames);
-	void SourceAudioDone(std::size_t numFrames, int32 framesLatency);
+	void SourceAudioDone(std::size_t numFrames, std::size_t framesLatency);
 
 	void RequestClose() { m_RequestFlags.fetch_or(RequestFlagClose); }
 	void RequestReset() { m_RequestFlags.fetch_or(RequestFlagReset); }

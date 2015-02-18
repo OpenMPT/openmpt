@@ -294,8 +294,8 @@ void Base::SourceAudioRead(void *buffer, std::size_t numFrames)
 }
 
 
-void Base::SourceAudioDone(std::size_t numFrames, int32 framesLatency)
-//--------------------------------------------------------------------
+void Base::SourceAudioDone(std::size_t numFrames, std::size_t framesLatency)
+//--------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	if(numFrames <= 0)
