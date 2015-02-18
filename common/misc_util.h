@@ -510,6 +510,17 @@ namespace Util {
 		return (a >= 0) ? mpt::saturate_cast<int32>(a / c) : mpt::saturate_cast<int32>((a - (c - 1)) / c);
 	}
 
+	// rounds x up to multiples of target
+	forceinline uint32 AlignUp(uint32 x, uint32 target)
+	{
+		return ((x + (target - 1)) / target) * target;
+	}
+
+	// rounds x down to multiples of target
+	forceinline uint32 AlignDown(uint32 x, uint32 target)
+	{
+		return (x / target) * target;
+	}
 
 	// Greatest Common Divisor. Always returns non-negative number.
 	template <class T>

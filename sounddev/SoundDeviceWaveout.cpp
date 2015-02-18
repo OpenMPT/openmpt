@@ -32,9 +32,9 @@ namespace SoundDevice {
 
 
 static const std::size_t WAVEOUT_MINBUFFERS = 3;
-static const std::size_t WAVEOUT_MAXBUFFERS = 256;
-static const std::size_t WAVEOUT_MINBUFFERSIZE = 1024;
-static const std::size_t WAVEOUT_MAXBUFFERSIZE = 65536;
+static const std::size_t WAVEOUT_MAXBUFFERS = 4096;
+static const std::size_t WAVEOUT_MINBUFFERFRAMECOUNT = 8;
+static const std::size_t WAVEOUT_MAXBUFFERSIZE = 16384; // fits in int16
 
 
 CWaveDevice::CWaveDevice(SoundDevice::Info info)
@@ -155,8 +155,8 @@ bool CWaveDevice::InternalOpen()
 		return false;
 	}
 	m_nWaveBufferSize = Util::Round<int32>(m_Settings.UpdateInterval * pwfx->nAvgBytesPerSec);
-	m_nWaveBufferSize = Clamp(m_nWaveBufferSize, WAVEOUT_MINBUFFERSIZE, WAVEOUT_MAXBUFFERSIZE);
-	m_nWaveBufferSize = ((m_nWaveBufferSize + pwfx->nBlockAlign - 1) / pwfx->nBlockAlign) * pwfx->nBlockAlign;
+	m_nWaveBufferSize = Util::AlignUp(m_nWaveBufferSize, pwfx->nBlockAlign);
+	m_nWaveBufferSize = Clamp(m_nWaveBufferSize, WAVEOUT_MINBUFFERFRAMECOUNT * pwfx->nBlockAlign, Util::AlignDown(WAVEOUT_MAXBUFFERSIZE, pwfx->nBlockAlign));
 	std::size_t numBuffers = Util::Round<int32>(m_Settings.Latency * pwfx->nAvgBytesPerSec / m_nWaveBufferSize);
 	numBuffers = Clamp(numBuffers, WAVEOUT_MINBUFFERS, WAVEOUT_MAXBUFFERS);
 	m_nPreparedHeaders = 0;
