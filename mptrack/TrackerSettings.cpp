@@ -709,7 +709,6 @@ SoundDevice::Settings TrackerSettings::GetSoundDeviceSettings(const SoundDevice:
 	}
 	const SoundDevice::Caps deviceCaps = theApp.GetSoundDevicesManager()->GetDeviceCaps(device, CMainFrame::GetMainFrame()->gpSoundDevice);
 	SoundDevice::Settings settings = StoredSoundDeviceSettings(conf, deviceInfo, deviceCaps.DefaultSettings);
-	settings.hWnd = CMainFrame::GetMainFrame()->m_hWnd;
 	return settings;
 }
 

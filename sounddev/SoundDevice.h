@@ -289,9 +289,26 @@ public:
 };
 
 
+struct AppInfo
+{
+	mpt::ustring Name;
+	uintptr_t UIHandle; // HWND on Windows
+	AppInfo()
+		: UIHandle(0)
+	{
+		return;
+	}
+	AppInfo &SetName(const mpt::ustring &name) { Name = name; return *this; }
+	mpt::ustring GetName() const { return Name; }
+#if MPT_OS_WINDOWS
+	AppInfo &SetHWND(HWND hwnd) { UIHandle = reinterpret_cast<uintptr_t>(hwnd); return *this; }
+	HWND GetHWND() const { return reinterpret_cast<HWND>(UIHandle); }
+#endif // MPT_OS_WINDOWS
+};
+
+
 struct Settings
 {
-	HWND hWnd;
 	double Latency; // seconds
 	double UpdateInterval; // seconds
 	uint32 Samplerate;
@@ -304,8 +321,7 @@ struct Settings
 	int DitherType;
 	SoundDevice::ChannelMapping ChannelMapping;
 	Settings()
-		: hWnd(NULL)
-		, Latency(0.1)
+		: Latency(0.1)
 		, UpdateInterval(0.005)
 		, Samplerate(48000)
 		, Channels(2)
@@ -321,7 +337,6 @@ struct Settings
 	bool operator == (const SoundDevice::Settings &cmp) const
 	{
 		return true
-			&& hWnd == cmp.hWnd
 			&& Util::Round<int64>(Latency * 1000000000.0) == Util::Round<int64>(cmp.Latency * 1000000000.0) // compare in nanoseconds
 			&& Util::Round<int64>(UpdateInterval * 1000000000.0) == Util::Round<int64>(cmp.UpdateInterval * 1000000000.0) // compare in nanoseconds
 			&& Samplerate == cmp.Samplerate
@@ -492,7 +507,7 @@ public:
 	virtual SoundDevice::Caps GetDeviceCaps() const = 0;
 	virtual SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates) = 0;
 
-	virtual bool Init() = 0;
+	virtual bool Init(const SoundDevice::AppInfo &appInfo) = 0;
 	virtual bool Open(const SoundDevice::Settings &settings) = 0;
 	virtual bool Close() = 0;
 	virtual bool Start() = 0;
@@ -542,6 +557,7 @@ private:
 
 protected:
 
+	SoundDevice::AppInfo m_AppInfo;
 	SoundDevice::Settings m_Settings;
 	SoundDevice::Flags m_Flags;
 	bool m_DeviceUnavailableOnOpen;
@@ -624,7 +640,7 @@ public:
 	SoundDevice::Caps GetDeviceCaps() const { return m_Caps; }
 	virtual SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 
-	bool Init();
+	bool Init(const SoundDevice::AppInfo &appInfo);
 	bool Open(const SoundDevice::Settings &settings);
 	bool Close();
 	bool Start();

@@ -684,7 +684,7 @@ void CASIODevice::OpenDriver()
 	}
 	try
 	{
-		if(m_pAsioDrv->init((void *)m_Settings.hWnd) != ASIOTrue)
+		if(m_pAsioDrv->init((void *)m_AppInfo.GetHWND()) != ASIOTrue)
 		{
 			Log("ASIO: init() failed!");
 			CloseDriver();

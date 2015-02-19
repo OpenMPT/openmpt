@@ -176,14 +176,15 @@ void Base::UpdateTimeInfo(SoundDevice::TimeInfo timeInfo)
 }
 
 
-bool Base::Init()
-//---------------
+bool Base::Init(const SoundDevice::AppInfo &appInfo)
+//--------------------------------------------------
 {
 	MPT_TRACE();
 	if(IsInited())
 	{
 		return true;
 	}
+	m_AppInfo = appInfo;
 	m_Caps = InternalGetDeviceCaps();
 	return m_Caps.Available;
 }
