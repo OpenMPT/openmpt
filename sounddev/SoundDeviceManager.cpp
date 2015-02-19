@@ -332,7 +332,7 @@ SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifi
 	{
 		return nullptr;
 	}
-	if(!result->Init())
+	if(!result->Init(m_AppInfo))
 	{
 		delete result;
 		result = nullptr;
@@ -343,8 +343,9 @@ SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifi
 }
 
 
-Manager::Manager(SoundDevice::TypesSet enabledTypes)
-//--------------------------------------------------
+Manager::Manager(SoundDevice::AppInfo appInfo, SoundDevice::TypesSet enabledTypes)
+//--------------------------------------------------------------------------------
+	: m_AppInfo(appInfo)
 {
 	ReEnumerate(enabledTypes);
 }

@@ -31,6 +31,8 @@ class Manager
 {
 private:
 
+	const SoundDevice::AppInfo m_AppInfo;
+
 #ifndef NO_PORTAUDIO
 	ComponentHandle<ComponentPortAudio> m_PortAudio;
 #endif // NO_PORTAUDIO
@@ -41,7 +43,7 @@ private:
 	std::map<SoundDevice::Identifier, SoundDevice::DynamicCaps> m_DeviceDynamicCaps;
 
 public:
-	Manager(SoundDevice::TypesSet enabledTypes);
+	Manager(SoundDevice::AppInfo appInfo, SoundDevice::TypesSet enabledTypes);
 	~Manager();
 
 public:

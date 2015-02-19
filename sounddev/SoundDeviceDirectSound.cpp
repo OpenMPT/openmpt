@@ -213,7 +213,7 @@ bool CDSoundDevice::InternalOpen()
 	GUID guid = internalID.empty() ? GUID() : Util::StringToGUID(mpt::ToWide(internalID));
 	if(DirectSoundCreate(internalID.empty() ? NULL : &guid, &m_piDS, NULL) != DS_OK) return false;
 	if(!m_piDS) return false;
-	if(m_piDS->SetCooperativeLevel(m_Settings.hWnd, m_Settings.ExclusiveMode ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY) != DS_OK)
+	if(m_piDS->SetCooperativeLevel(m_AppInfo.GetHWND(), m_Settings.ExclusiveMode ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY) != DS_OK)
 	{
 		Close();
 		return false;
