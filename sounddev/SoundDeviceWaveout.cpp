@@ -135,7 +135,7 @@ bool CWaveDevice::InternalOpen()
 		return false;
 	}
 	WAVEFORMATEX *pwfx = &wfext.Format;
-	UINT_PTR nWaveDev = GetDeviceIndex();
+	UINT nWaveDev = GetDeviceIndex();
 	nWaveDev = (nWaveDev > 0) ? nWaveDev - 1 : WAVE_MAPPER;
 	m_ThreadWakeupEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	if(m_ThreadWakeupEvent == INVALID_HANDLE_VALUE)
