@@ -848,7 +848,15 @@ void CASIODevice::InternalFillAudioBuffer()
 //-----------------------------------------
 {
 	MPT_TRACE();
-	const bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
+	FillAsioBuffer();
+}
+
+
+void CASIODevice::FillAsioBuffer(bool useSource)
+//----------------------------------------------
+{
+	MPT_TRACE();
+	const bool rendersilence = !useSource;
 	const int channels = m_Settings.Channels;
 	const std::size_t countChunk = m_nAsioBufferLen;
 	if(rendersilence)
@@ -1153,7 +1161,7 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 	if(rendersilence)
 	{
 		m_StreamPositionOffset += m_nAsioBufferLen;
-		FillAudioBuffer();
+		FillAsioBuffer(false);
 	} else
 	{
 		SourceFillAudioBufferLocked();

@@ -135,6 +135,8 @@ protected:
 	SoundDevice::BufferAttributes InternalGetEffectiveBufferAttributes() const;
 
 protected:
+	void FillAsioBuffer(bool useSource = true);
+
 	long AsioMessage(long selector, long value, void* message, double* opt);
 	void SampleRateDidChange(ASIOSampleRate sRate);
 	void BufferSwitch(long doubleBufferIndex, ASIOBool directProcess);
