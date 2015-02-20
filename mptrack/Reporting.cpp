@@ -149,6 +149,18 @@ void Reporting::Error(const AnyStringLocale &text, const AnyStringLocale &captio
 }
 
 
+void Reporting::Message(LogLevel level, const AnyStringLocale &text, const CWnd *parent)
+//--------------------------------------------------------------------------------------
+{
+	ShowNotificationImpl(mpt::ToWide(text), FillEmptyCaption(std::wstring(), level), LogLevelToFlags(level), parent);
+}
+void Reporting::Message(LogLevel level, const AnyStringLocale &text, const AnyStringLocale &caption, const CWnd *parent)
+//----------------------------------------------------------------------------------------------------------------------
+{
+	ShowNotificationImpl(mpt::ToWide(text), FillEmptyCaption(mpt::ToWide(caption), level), LogLevelToFlags(level), parent);
+}
+
+
 ConfirmAnswer Reporting::Confirm(const AnyStringLocale &text, bool showCancel, bool defaultNo, const CWnd *parent)
 //----------------------------------------------------------------------------------------------------------------
 {

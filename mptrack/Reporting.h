@@ -55,6 +55,10 @@ public:
 	static void Error(const AnyStringLocale &text, const CWnd *parent = nullptr);
 	static void Error(const AnyStringLocale &text, const AnyStringLocale &caption, const CWnd *parent = nullptr);
 
+	// Simplified version of the above
+	static void Message(LogLevel level, const AnyStringLocale &text, const CWnd *parent = nullptr);
+	static void Message(LogLevel level, const AnyStringLocale &text, const AnyStringLocale &caption, const CWnd *parent = nullptr);
+
 	// Show a confirmation dialog.
 	static ConfirmAnswer Confirm(const AnyStringLocale &text, bool showCancel = false, bool defaultNo = false, const CWnd *parent = nullptr);
 	static ConfirmAnswer Confirm(const AnyStringLocale &text, const AnyStringLocale &caption, bool showCancel = false, bool defaultNo = false, const CWnd *parent = nullptr);

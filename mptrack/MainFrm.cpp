@@ -630,11 +630,11 @@ void CMainFrame::OnTimerNotify()
 }
 
 
-void CMainFrame::AudioMessage(const mpt::ustring &str)
-//----------------------------------------------------
+void CMainFrame::SoundDeviceMessage(LogLevel level, const mpt::ustring &str)
+//--------------------------------------------------------------------------
 {
 	MPT_TRACE();
-	Reporting::Notification(str);
+	Reporting::Message(level, str);
 }
 
 

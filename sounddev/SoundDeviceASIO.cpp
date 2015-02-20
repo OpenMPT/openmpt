@@ -1362,8 +1362,7 @@ void CASIODevice::ReportASIOException(const std::string &str)
 //-----------------------------------------------------------
 {
 	MPT_TRACE();
-	AudioSendMessage(mpt::ToUnicode(mpt::CharsetLocale, str));
-	Log("%s", str.c_str());
+	SendDeviceMessage(LogError, mpt::ToUnicode(mpt::CharsetLocale, str));
 }
 
 
