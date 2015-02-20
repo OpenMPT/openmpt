@@ -1027,7 +1027,7 @@ int64 CASIODevice::InternalGetStreamPositionFrames() const
 	MPT_TRACE();
 	if(m_Settings.UseHardwareTiming)
 	{
-		const uint64 asioNow = Clock().NowNanoseconds();
+		const uint64 asioNow = SourceGetReferenceClockNowNanoseconds();
 		SoundDevice::TimeInfo timeInfo = GetTimeInfo();
 		int64 currentStreamPositionFrames =
 			Util::Round<int64>(
@@ -1076,7 +1076,7 @@ void CASIODevice::UpdateTimeInfo(AsioTimeInfo asioTimeInfo)
 			SoundDevice::Base::UpdateTimeInfo(timeInfo);
 		} else
 		{ // spec violation or nothing provided at all, better to estimate this stuff ourselves
-			const uint64 asioNow = Clock().NowNanoseconds();
+			const uint64 asioNow = SourceGetReferenceClockNowNanoseconds();
 			SoundDevice::TimeInfo timeInfo;
 			timeInfo.StreamFrames = m_TotalFramesWritten + m_nAsioBufferLen - m_StreamPositionOffset;
 			timeInfo.SystemTimestamp = asioNow + Util::Round<int64>(m_BufferLatency * 1000.0 * 1000.0 * 1000.0);

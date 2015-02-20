@@ -638,6 +638,30 @@ void CMainFrame::SoundDeviceMessage(LogLevel level, const mpt::ustring &str)
 }
 
 
+void CMainFrame::SoundSourcePreStartCallback()
+//--------------------------------------------
+{
+	MPT_TRACE();
+	m_SoundDeviceClock.SetResolution(1);
+}
+
+
+void CMainFrame::SoundSourcePostStopCallback()
+//--------------------------------------------
+{
+	MPT_TRACE();
+	m_SoundDeviceClock.SetResolution(0);
+}
+
+
+uint64 CMainFrame::SoundSourceGetReferenceClockNowNanoseconds() const
+//-------------------------------------------------------------------
+{
+	MPT_TRACE();
+	return m_SoundDeviceClock.NowNanoseconds();
+}
+
+
 void CMainFrame::FillAudioBufferLocked(SoundDevice::IFillAudioBuffer &callback)
 //-----------------------------------------------------------------------------
 {

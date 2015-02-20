@@ -342,6 +342,7 @@ public:
 public:
 
 	// Low-Level Audio
+	Util::MultimediaClock m_SoundDeviceClock;
 	SoundDevice::IBase *gpSoundDevice;
 	UINT_PTR m_NotifyTimer;
 	Dither m_Dither;
@@ -396,6 +397,9 @@ public:
 	static void UpdateAudioParameters(CSoundFile &sndFile, bool reset=false);
 
 	// from SoundDevice::ISource
+	uint64 SoundSourceGetReferenceClockNowNanoseconds() const;
+	void SoundSourcePreStartCallback();
+	void SoundSourcePostStopCallback();
 	void FillAudioBufferLocked(SoundDevice::IFillAudioBuffer &callback);
 	void AudioRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer);
 	void AudioDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, int64 streamPosition);
