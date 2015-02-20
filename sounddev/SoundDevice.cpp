@@ -245,6 +245,40 @@ void Base::FillAudioBuffer()
 }
 
 
+uint64 Base::SourceGetReferenceClockNowNanoseconds() const
+//--------------------------------------------------------
+{
+	MPT_TRACE();
+	if(!m_Source)
+	{
+		return 0;
+	}
+	return m_Source->SoundSourceGetReferenceClockNowNanoseconds();
+}
+
+
+void Base::SourceNotifyPreStart()
+//-------------------------------
+{
+	MPT_TRACE();
+	if(m_Source)
+	{
+		m_Source->SoundSourcePreStartCallback();
+	}
+}
+
+
+void Base::SourceNotifyPostStop()
+//-------------------------------
+{
+	MPT_TRACE();
+	if(m_Source)
+	{
+		m_Source->SoundSourcePostStopCallback();
+	}
+}
+
+
 void Base::SourceFillAudioBufferLocked()
 //--------------------------------------
 {
@@ -266,7 +300,7 @@ void Base::SourceAudioPreRead(std::size_t numFrames)
 		{
 			SoundDevice::TimeInfo timeInfo;
 			timeInfo.StreamFrames = InternalHasGetStreamPosition();
-			timeInfo.SystemTimestamp = Clock().NowNanoseconds();
+			timeInfo.SystemTimestamp = SourceGetReferenceClockNowNanoseconds();
 			timeInfo.Speed = 1.0;
 			UpdateTimeInfo(timeInfo);
 		} else
@@ -276,7 +310,7 @@ void Base::SourceAudioPreRead(std::size_t numFrames)
 				Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
 				timeInfo.StreamFrames = m_StreamPositionRenderFrames + numFrames;
 			}
-			timeInfo.SystemTimestamp = Clock().NowNanoseconds() + Util::Round<int64>(GetEffectiveBufferAttributes().Latency * 1000000000.0);
+			timeInfo.SystemTimestamp = SourceGetReferenceClockNowNanoseconds() + Util::Round<int64>(GetEffectiveBufferAttributes().Latency * 1000000000.0);
 			timeInfo.Speed = 1.0;
 			UpdateTimeInfo(timeInfo);
 		}
@@ -340,11 +374,11 @@ bool Base::Start()
 			m_StreamPositionRenderFrames = 0;
 			m_StreamPositionOutputFrames = 0;
 		}
-		m_Clock.SetResolution(1);
+		SourceNotifyPreStart();
 		m_RequestFlags.fetch_and((~RequestFlagRestart).as_bits());
 		if(!InternalStart())
 		{
-			m_Clock.SetResolution(0);
+			SourceNotifyPostStop();
 			return false;
 		}
 		m_IsPlaying = true;
@@ -368,7 +402,7 @@ void Base::Stop(bool force)
 			InternalStop();
 		}
 		m_RequestFlags.fetch_and((~RequestFlagRestart).as_bits());
-		m_Clock.SetResolution(0);
+		SourceNotifyPostStop();
 		m_IsPlaying = false;
 		{
 			Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
