@@ -315,13 +315,14 @@ void Base::SourceAudioDone(std::size_t numFrames, std::size_t framesLatency)
 }
 
 
-void Base::AudioSendMessage(const mpt::ustring &str)
-//--------------------------------------------------
+void Base::SendDeviceMessage(LogLevel level, const mpt::ustring &str)
+//-------------------------------------------------------------------
 {
 	MPT_TRACE();
+	Log(level, str);
 	if(m_MessageReceiver)
 	{
-		m_MessageReceiver->AudioMessage(str);
+		m_MessageReceiver->SoundDeviceMessage(level, str);
 	}
 }
 

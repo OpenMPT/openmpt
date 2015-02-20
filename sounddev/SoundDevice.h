@@ -42,7 +42,7 @@ class IMessageReceiver
 //====================
 {
 public:
-	virtual void AudioMessage(const mpt::ustring &str) = 0;
+	virtual void SoundDeviceMessage(LogLevel level, const mpt::ustring &str) = 0;
 };
 
 
@@ -597,7 +597,7 @@ protected:
 	void RequestReset() { m_RequestFlags.fetch_or(RequestFlagReset); }
 	void RequestRestart() { m_RequestFlags.fetch_or(RequestFlagRestart); }
 
-	void AudioSendMessage(const mpt::ustring &str);
+	void SendDeviceMessage(LogLevel level, const mpt::ustring &str);
 
 protected:
 
