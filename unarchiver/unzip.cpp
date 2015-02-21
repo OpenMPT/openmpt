@@ -32,7 +32,7 @@ OPENMPT_NAMESPACE_BEGIN
 // Low-level file abstractions for in-memory file handling
 struct ZipFileAbstraction
 {
-	static voidpf ZCALLBACK fopen_mem(voidpf opaque, const char *, int mode)
+	static voidpf ZCALLBACK fopen64_mem(voidpf opaque, const void *, int mode)
 	{
 		FileReader &file = *static_cast<FileReader *>(opaque);
 		if((mode & ZLIB_FILEFUNC_MODE_READWRITEFILTER) == ZLIB_FILEFUNC_MODE_WRITE)
@@ -48,13 +48,7 @@ struct ZipFileAbstraction
 	static uLong ZCALLBACK fread_mem(voidpf opaque, voidpf, void *buf, uLong size)
 	{
 		FileReader &file = *static_cast<FileReader *>(opaque);
-		if(!file.CanRead(size))
-		{
-			size = file.BytesLeft();
-		}
-		memcpy(buf, file.GetRawData(), size);
-		file.Skip(size);
-		return size;
+		return mpt::saturate_cast<uLong>(file.ReadRaw(buf, size));
 	}
 
 	static uLong ZCALLBACK fwrite_mem(voidpf, voidpf, const void *, uLong)
@@ -62,30 +56,31 @@ struct ZipFileAbstraction
 		return 0;
 	}
 
-	static long ZCALLBACK ftell_mem(voidpf opaque, voidpf)
+	static ZPOS64_T ZCALLBACK ftell64_mem(voidpf opaque, voidpf)
 	{
 		FileReader &file = *static_cast<FileReader *>(opaque);
 		return file.GetPosition();
 	}
 
-	static long ZCALLBACK fseek_mem(voidpf opaque, voidpf, uLong offset, int origin)
+	static long ZCALLBACK fseek64_mem(voidpf opaque, voidpf, ZPOS64_T offset, int origin)
 	{
 		FileReader &file = *static_cast<FileReader *>(opaque);
-
+		FileReader::off_t destination = 0;
 		switch(origin)
 		{
 		case ZLIB_FILEFUNC_SEEK_CUR:
-			offset += file.GetPosition();
+			destination = static_cast<ZPOS64_T>(file.GetPosition()) + offset;
 			break;
 		case ZLIB_FILEFUNC_SEEK_END:
-			offset += file.GetLength();
+			destination = static_cast<ZPOS64_T>(file.GetLength()) + offset;
 			break;
 		case ZLIB_FILEFUNC_SEEK_SET:
+			destination = offset;
 			break;
 		default:
 			return -1;
 		}
-		return (file.Seek(offset) ? 0 : 1);
+		return (file.Seek(destination) ? 0 : 1);
 	}
 
 	static int ZCALLBACK fclose_mem(voidpf, voidpf)
@@ -100,21 +95,24 @@ struct ZipFileAbstraction
 };
 
 
-CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
-//------------------------------------------------------------
+CZipArchive::CZipArchive(FileReader &file)
+//----------------------------------------
+	: ArchiveBase(file)
+	, zipFile(nullptr)
 {
-	zlib_filefunc_def functions =
+	zlib_filefunc64_def functions =
 	{
-		ZipFileAbstraction::fopen_mem,
+		ZipFileAbstraction::fopen64_mem,
 		ZipFileAbstraction::fread_mem,
 		ZipFileAbstraction::fwrite_mem,
-		ZipFileAbstraction::ftell_mem,
-		ZipFileAbstraction::fseek_mem,
+		ZipFileAbstraction::ftell64_mem,
+		ZipFileAbstraction::fseek64_mem,
 		ZipFileAbstraction::fclose_mem,
 		ZipFileAbstraction::ferror_mem,
 		&inFile
 	};
-	zipFile = unzOpen2(nullptr, &functions);
+
+	zipFile = unzOpen2_64(nullptr, &functions);
 
 	if(zipFile == nullptr)
 	{
