@@ -7,9 +7,9 @@
 ; win32.iss - For generating the standard Win32 setup.
 ; win64.iss - For generating the standard Win64 setup.
 ; install-unmo3-free-itd.iss - For generating the unmo3-free setup with InnoTools Downloader.
-; install-unmo3-free.iss - For generating the unmo3-free setup with ISTool downloader.
+; install-unmo3-free.iss - For generating the unmo3-free setup with Inno Download Plugin.
 
-#define GetAppVersion StringChange(GetFileProductVersion("..\bin\Win32\mptrack.exe"), ",", ".")
+#define GetAppVersion StringChange(GetFileProductVersion("..\bin\" + PlatformFolder + "\mptrack.exe"), ",", ".")
 #define GetAppVersionShort Copy(GetAppVersion, 1, 4)
 
 #ifndef PlatformName

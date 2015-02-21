@@ -3,7 +3,7 @@
 # http://openmpt.org/
 # Requires pywin32 (https://sourceforge.net/projects/pywin32/)
 
-from win32api import GetFileVersionInfo, LOWORD, HIWORD
+from win32api import GetFileVersionInfo
 from subprocess import Popen
 from sys import executable
 import os, shutil, hashlib
@@ -70,6 +70,8 @@ copy_other(openmpt_zip_32bit_path, openmpt_version_short)
 copy_other(openmpt_zip_64bit_path, openmpt_version_short)
 
 pManual.communicate()
+if(pManual.returncode != 0):
+    raise Exception("Something went wrong during manual creation!")
 
 print("Creating zip files and installers...")
 p7z32 = Popen(["C:\\Program Files\\7-Zip\\7z.exe", "a", "-tzip", "-mx=9", "../" + openmpt_version_name + ".zip", openmpt_version_name + "/"], cwd=openmpt_zip_32bit_basepath)
@@ -82,7 +84,7 @@ pInno32.communicate()
 pInno64.communicate()
 
 if(p7z32.returncode != 0 or p7z64.returncode != 0 or pInno32.returncode != 0 or pInno64.returncode != 0):
-    raise error("Something went wrong during packaging!")
+    raise Exception("Something went wrong during packaging!")
 
 def hash_file(filename):
     md5 = hashlib.md5()
