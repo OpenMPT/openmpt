@@ -281,6 +281,14 @@ public:
 		streamPos += result;
 		return result;
 	}
+	std::size_t ReadRaw(void *dst, std::size_t count)
+	{
+		return ReadRaw(reinterpret_cast<char*>(dst), count);
+	}
+	std::size_t ReadRaw(uint8 *dst, std::size_t count)
+	{
+		return ReadRaw(reinterpret_cast<char*>(dst), count);
+	}
 	
 protected:
 

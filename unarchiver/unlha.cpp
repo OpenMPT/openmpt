@@ -18,7 +18,8 @@ OPENMPT_NAMESPACE_BEGIN
 static int LHAreadFileReader(void *handle, void *buf, size_t buf_len)
 {
 	FileReader *f = reinterpret_cast<FileReader*>(handle);
-	int result = f->ReadRaw((char*)buf, buf_len);
+	int read_len = mpt::saturate_cast<int>(buf_len);
+	int result = mpt::saturate_cast<int>(f->ReadRaw(buf, read_len));
 	if(result == 0)
 	{
 		return -1;
@@ -39,6 +40,7 @@ static int LHAskipFileReader(void *handle, size_t bytes)
 
 static void LHAcloseFileReader(void * /*handle*/)
 {
+	return;
 }
 
 static LHAInputStreamType vtable =
