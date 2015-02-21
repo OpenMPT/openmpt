@@ -106,7 +106,7 @@ bool CGzipArchive::ExtractFile(std::size_t index)
 	strm.zalloc = Z_NULL;
 	strm.zfree = Z_NULL;
 	strm.opaque = Z_NULL;
-	strm.avail_in = inFile.BytesLeft() - sizeof(GZtrailer);
+	strm.avail_in = mpt::saturate_cast<uInt>(inFile.BytesLeft() - sizeof(GZtrailer));
 	strm.next_in = (Bytef *)(inFile.GetRawData());
 	if(inflateInit2(&strm, -15) != Z_OK)
 	{
