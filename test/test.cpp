@@ -614,7 +614,36 @@ static noinline void TestMisc()
 	VERIFY_EQUAL( mpt::saturate_cast<uint16>(std::numeric_limits<int16>::max() + 1), (uint16)std::numeric_limits<int16>::max() + 1 );
 	VERIFY_EQUAL( mpt::saturate_cast<uint32>(std::numeric_limits<int32>::min() - int64(1)), std::numeric_limits<uint32>::min() );
 	VERIFY_EQUAL( mpt::saturate_cast<uint32>(std::numeric_limits<int32>::max() + int64(1)), (uint32)std::numeric_limits<int32>::max() + 1 );
+	
+	VERIFY_EQUAL( mpt::saturate_cast<int8>( int16(32000) ), 127 );
+	VERIFY_EQUAL( mpt::saturate_cast<int8>( int16(-32000) ), -128 );
+	VERIFY_EQUAL( mpt::saturate_cast<int8>( uint16(32000) ), 127 );
+	VERIFY_EQUAL( mpt::saturate_cast<int8>( uint16(64000) ), 127 );
+	VERIFY_EQUAL( mpt::saturate_cast<uint8>( int16(32000) ), 255 );
+	VERIFY_EQUAL( mpt::saturate_cast<uint8>( int16(-32000) ), 0 );
+	VERIFY_EQUAL( mpt::saturate_cast<uint8>( uint16(32000) ), 255 );
+	VERIFY_EQUAL( mpt::saturate_cast<uint8>( uint16(64000) ), 255 );
+	VERIFY_EQUAL( mpt::saturate_cast<int16>( int16(32000) ), 32000 );
+	VERIFY_EQUAL( mpt::saturate_cast<int16>( int16(-32000) ), -32000 );
+	VERIFY_EQUAL( mpt::saturate_cast<int16>( uint16(32000) ), 32000 );
+	VERIFY_EQUAL( mpt::saturate_cast<int16>( uint16(64000) ), 32767 );
+	VERIFY_EQUAL( mpt::saturate_cast<uint16>( int16(32000) ), 32000 );
+	VERIFY_EQUAL( mpt::saturate_cast<uint16>( int16(-32000) ), 0 );
+	VERIFY_EQUAL( mpt::saturate_cast<uint16>( uint16(32000) ), 32000 );
+	VERIFY_EQUAL( mpt::saturate_cast<uint16>( uint16(64000) ), 64000 );
+	VERIFY_EQUAL( mpt::saturate_cast<int32>( int16(32000) ), 32000 );
+	VERIFY_EQUAL( mpt::saturate_cast<int32>( int16(-32000) ), -32000 );
+	VERIFY_EQUAL( mpt::saturate_cast<int32>( uint16(32000) ), 32000 );
+	VERIFY_EQUAL( mpt::saturate_cast<int32>( uint16(64000) ), 64000 );
+	VERIFY_EQUAL( mpt::saturate_cast<uint32>( int16(32000) ), 32000 );
+	VERIFY_EQUAL( mpt::saturate_cast<uint32>( int16(-32000) ), 0 );
+	VERIFY_EQUAL( mpt::saturate_cast<uint32>( uint16(32000) ), 32000 );
+	VERIFY_EQUAL( mpt::saturate_cast<uint32>( uint16(64000) ), 64000 );
+	
+	VERIFY_EQUAL( mpt::saturate_cast<uint32>(std::numeric_limits<int64>::max() - 1), std::numeric_limits<uint32>::max() );
 
+	VERIFY_EQUAL( mpt::saturate_cast<int32>(std::numeric_limits<uint64>::max() - 1), std::numeric_limits<int32>::max() );
+	
 	VERIFY_EQUAL( mpt::saturate_cast<uint32>(static_cast<double>(std::numeric_limits<int64>::max())), std::numeric_limits<uint32>::max() );
 
 	VERIFY_EQUAL( mpt::String::LTrim(std::string(" ")), "" );
