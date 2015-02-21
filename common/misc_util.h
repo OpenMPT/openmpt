@@ -206,14 +206,14 @@ inline Tdst saturate_cast(Tsrc src)
 		{
 			return static_cast<Tdst>(src);
 		}
-		return static_cast<Tdst>(std::max<Tsrc>(std::numeric_limits<Tdst>::min(), std::min<Tsrc>(src, std::numeric_limits<Tdst>::max())));
+		return static_cast<Tdst>(std::max<Tsrc>(static_cast<Tsrc>(std::numeric_limits<Tdst>::min()), std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max()))));
 	} else if(!std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed)
 	{
 		if(sizeof(Tdst) >= sizeof(Tsrc))
 		{
 			return static_cast<Tdst>(src);
 		}
-		return static_cast<Tdst>(std::min<Tsrc>(src, std::numeric_limits<Tdst>::max()));
+		return static_cast<Tdst>(std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
 	} else if(std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed)
 	{
 		if(sizeof(Tdst) > sizeof(Tsrc))
@@ -231,7 +231,7 @@ inline Tdst saturate_cast(Tsrc src)
 		{
 			return static_cast<Tdst>(std::max<Tsrc>(0, src));
 		}
-		return static_cast<Tdst>(std::max<Tsrc>(0, std::min<Tsrc>(src, std::numeric_limits<Tdst>::max())));
+		return static_cast<Tdst>(std::max<Tsrc>(0, std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max()))));
 	}
 }
 
