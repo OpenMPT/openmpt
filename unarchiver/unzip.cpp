@@ -65,7 +65,7 @@ struct ZipFileAbstraction
 	static long ZCALLBACK fseek64_mem(voidpf opaque, voidpf, ZPOS64_T offset, int origin)
 	{
 		FileReader &file = *static_cast<FileReader *>(opaque);
-		FileReader::off_t destination = 0;
+		ZPOS64_T destination = 0;
 		switch(origin)
 		{
 		case ZLIB_FILEFUNC_SEEK_CUR:
@@ -80,7 +80,11 @@ struct ZipFileAbstraction
 		default:
 			return -1;
 		}
-		return (file.Seek(destination) ? 0 : 1);
+		if(!Util::TypeCanHoldValue<FileReader::off_t>(destination))
+		{
+			return 1;
+		}
+		return (file.Seek(static_cast<FileReader::off_t>(destination)) ? 0 : 1);
 	}
 
 	static int ZCALLBACK fclose_mem(voidpf, voidpf)

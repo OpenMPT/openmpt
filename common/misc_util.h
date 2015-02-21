@@ -268,6 +268,20 @@ inline Tdst saturate_cast(float src)
 } // namespace mpt
 
 
+namespace Util
+{
+
+// Returns true iff Tdst can represent the value val.
+// Use as if(Util::TypeCanHold<uin8>(-1)).
+template <typename Tdst, typename Tsrc>
+inline bool TypeCanHoldValue(Tsrc val)
+{
+	return (static_cast<Tsrc>(mpt::saturate_cast<Tdst>(val)) == val);
+}
+
+} //namespace Util
+
+
 // Limits 'val' to given range. If 'val' is less than 'lowerLimit', 'val' is set to value 'lowerLimit'.
 // Similarly if 'val' is greater than 'upperLimit', 'val' is set to value 'upperLimit'.
 // If 'lowerLimit' > 'upperLimit', 'val' won't be modified.
