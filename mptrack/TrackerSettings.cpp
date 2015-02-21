@@ -544,14 +544,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,24,01,04))
 	{
-		if(m_dwPatternSetup & 0x02)
-			commentsFont = FontSetting("Courier New", 120);
-		else
-			commentsFont = FontSetting("Courier New", 90);
-		if(m_dwPatternSetup & 0x08)
-			patternFont = FontSetting(PATTERNFONT_SMALL, 0);
-		else
-			patternFont = FontSetting(PATTERNFONT_LARGE, 0);
+		commentsFont = FontSetting("Courier New", (m_dwPatternSetup & 0x02) ? 120 : 90);
+		patternFont = FontSetting((m_dwPatternSetup & 0x08) ? PATTERNFONT_SMALL : PATTERNFONT_LARGE, 0);
 		m_dwPatternSetup &= ~(0x08 | 0x02);
 	}
 

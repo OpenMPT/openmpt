@@ -341,6 +341,7 @@ struct FontSetting
 	int32_t size;
 	FlagSet<FontFlags> flags;
 
+	FontSetting(const FontSetting &other) : name(other.name), size(other.size), flags(other.flags) { }
 	FontSetting(const std::string &name = "", int32_t size = 120, FontFlags flags = None) : name(name), size(size), flags(flags) { }
 
 	bool operator== (const FontSetting &other) const
@@ -367,7 +368,7 @@ template<> inline FontSetting FromSettingValue(const SettingValue &val)
 	if(sizeStart != std::string::npos)
 	{
 		setting.size = atoi(&setting.name[sizeStart + 1]);
-		size_t flagsStart = setting.name.find(' ', sizeStart + 1);
+		size_t flagsStart = setting.name.find('|', sizeStart + 1);
 		if(flagsStart != std::string::npos)
 		{
 			setting.flags = static_cast<FontSetting::FontFlags>(atoi(&setting.name[flagsStart + 1]));
