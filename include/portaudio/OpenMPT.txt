@@ -1,4 +1,4 @@
- - Portaudio version svn-r1910 as of 2013-09-07.
+ - Portaudio version stable_v19_20140130
  - A small modification to portaudio code has been made in src/hostapi/wdmks/pa_win_wdmks.c
    to facilitate linking against strmiids.lib . Look for "OpenMPT" there.
  - Portaudio can freeze on Windows XP when intializing Kernel Streaming and the sound setup
