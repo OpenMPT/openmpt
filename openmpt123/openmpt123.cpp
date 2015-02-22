@@ -383,9 +383,6 @@ static void show_info( std::ostream & log, bool verbose ) {
 	}
 	log << "  libopenmpt Features: " << openmpt::string::get( openmpt::string::library_features ) << std::endl;
 	log << "  libopenmpt Build: " << openmpt::string::get( openmpt::string::build ) << std::endl;
-#ifdef MPT_WITH_PORTAUDIO
-	log << " " << Pa_GetVersionText() << " (" << Pa_GetVersion() << ") <http://portaudio.com/>" << std::endl;
-#endif
 #ifdef MPT_WITH_SDL
 	const SDL_version * linked_sdlver = SDL_Linked_Version();
 	log << " libSDL ";
@@ -397,6 +394,9 @@ static void show_info( std::ostream & log, bool verbose ) {
 	SDL_VERSION( &sdlver );
 	log << "(API: " << static_cast<int>( sdlver.major ) << "." << static_cast<int>( sdlver.minor ) << "." << static_cast<int>( sdlver.patch ) << ")";
 	log << " <https://libsdl.org/>" << std::endl;
+#endif
+#ifdef MPT_WITH_PORTAUDIO
+	log << " " << Pa_GetVersionText() << " (" << Pa_GetVersion() << ") <http://portaudio.com/>" << std::endl;
 #endif
 #ifdef MPT_WITH_FLAC
 	log << " FLAC " << FLAC__VERSION_STRING << ", " << FLAC__VENDOR_STRING << ", API " << FLAC_API_VERSION_CURRENT << "." << FLAC_API_VERSION_REVISION << "." << FLAC_API_VERSION_AGE << " <https://xiph.org/flac/>" << std::endl;
@@ -1470,7 +1470,7 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 			mod.select_subsong( -1 ); // play all subsongs consecutively
 			silentlog.str( std::string() ); // clear, loader messages get stored to get_metadata( "warnings" ) by libopenmpt internally
 			render_mod_file( flags, filename, filesize, mod, log, audio_stream );
-		} 
+		}
 
 	} catch ( prev_file & ) {
 		throw;
@@ -1628,11 +1628,11 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 					std::ostringstream drivers;
 					drivers << " Available drivers:" << std::endl;
 					drivers << "    " << "default" << std::endl;
-#if defined( MPT_WITH_PORTAUDIO )
-					drivers << "    " << "portaudio" << std::endl;
-#endif
 #if defined( MPT_WITH_SDL )
 					drivers << "    " << "sdl" << std::endl;
+#endif
+#if defined( MPT_WITH_PORTAUDIO )
+					drivers << "    " << "portaudio" << std::endl;
 #endif
 #if defined( WIN32 )
 					drivers << "    " << "waveout" << std::endl;
@@ -1935,20 +1935,18 @@ static int main( int argc, char * argv [] ) {
 					flags.apply_default_buffer_sizes();
 					file_audio_stream_raii file_audio_stream( flags, flags.output_filename, log );
 					render_files( flags, log, file_audio_stream );
+#if defined( MPT_WITH_SDL )
+				} else if ( flags.driver == "sdl" || flags.driver.empty() ) {
+					sdl_stream_raii sdl_stream( flags, log );
+					render_files( flags, log, sdl_stream );
+#endif
 #if defined( MPT_WITH_PORTAUDIO )
 				} else if ( flags.driver == "portaudio" || flags.driver.empty() ) {
 					portaudio_stream_raii portaudio_stream( flags, log );
 					render_files( flags, log, portaudio_stream );
 #endif
-#if defined( MPT_WITH_SDL )
-				} else if ( flags.driver == "sdl" || flags.driver.empty() ) {
-					flags.apply_default_buffer_sizes();
-					sdl_stream_raii sdl_stream( flags );
-					render_files( flags, log, sdl_stream );
-#endif
 #if defined( WIN32 )
 				} else if ( flags.driver == "waveout" || flags.driver.empty() ) {
-					flags.apply_default_buffer_sizes();
 					waveout_stream_raii waveout_stream( flags );
 					render_files( flags, log, waveout_stream );
 #endif

@@ -5,6 +5,12 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt svn
+
+ *  openmpt123: When both, SDL1.2 and PortAudio, are available, SDL is now the
+    preferred backend because SDL is more widespread and better tested on all
+    kinds of different platforms, and in generel, SDL is just more reliable.
+
 ### 2015-02-17 - libopenmpt 0.2-beta10
 
  *  Makefile configuration filenames changed from

@@ -32,13 +32,24 @@ private:
 	std::vector<std::vector<char> > wavebuffers;
 	std::deque<char> byte_queue;
 public:
-	waveout_stream_raii( const commandlineflags & flags )
+	waveout_stream_raii( commandlineflags & flags )
 		: waveout(NULL)
 		, num_channels(0)
 		, num_chunks(0)
 		, frames_per_chunk(0)
 		, bytes_per_chunk(0)
 	{
+		if ( flags.buffer == default_high ) {
+			flags.buffer = 150;
+		} else if ( flags.buffer == default_low ) {
+			flags.buffer = 50;
+		}
+		if ( flags.period == default_high ) {
+			flags.period = 30;
+		} else if ( flags.period == default_low ) {
+			flags.period = 10;
+		}
+		flags.apply_default_buffer_sizes();
 		WAVEFORMATEX wfx;
 		ZeroMemory( &wfx, sizeof( wfx ) );
 		wfx.wFormatTag = flags.use_float ? WAVE_FORMAT_IEEE_FLOAT : WAVE_FORMAT_PCM;
