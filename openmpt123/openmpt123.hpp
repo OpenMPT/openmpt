@@ -279,7 +279,7 @@ struct commandlineflags {
 	bool paused;
 	void apply_default_buffer_sizes() {
 		if ( ui_redraw_interval == default_high ) {
-			ui_redraw_interval = 40;
+			ui_redraw_interval = 50;
 		} else if ( ui_redraw_interval == default_low ) {
 			ui_redraw_interval = 10;
 		}
@@ -296,11 +296,11 @@ struct commandlineflags {
 	}
 	commandlineflags() {
 		mode = ModeUI;
-		ui_redraw_interval = default_high; // 50 ... (-2 == 10)
+		ui_redraw_interval = default_high;
 		driver = "";
 		device = -1;
-		buffer = default_high; // 250 ... (-2 == 50)
-		period = default_high; // 50 ... (-2 == 10)
+		buffer = default_high;
+		period = default_high;
 		samplerate = 48000;
 		channels = 2;
 		use_float = true;

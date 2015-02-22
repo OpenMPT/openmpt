@@ -16,8 +16,12 @@
 #if defined(MPT_WITH_SDL)
 
 #include <SDL.h>
+#ifdef main
 #undef main
+#endif
+#ifdef SDL_main
 #undef SDL_main
+#endif
 
 namespace openmpt123 {
 
@@ -27,6 +31,7 @@ struct sdl_exception : public exception {
 
 class sdl_stream_raii : public write_buffers_blocking_wrapper {
 private:
+	std::ostream & log;
 	std::size_t channels;
 protected:
 	void check_sdl_error( int e ) {
@@ -35,12 +40,31 @@ protected:
 			return;
 		}
 	}
+	std::uint32_t round_up_power2(std::uint32_t x)
+	{
+		std::uint32_t result = 1;
+		while ( result < x ) {
+			result *= 2;
+		}
+		return result;
+	}
 public:
-	sdl_stream_raii( const commandlineflags & flags )
+	sdl_stream_raii( commandlineflags & flags, std::ostream & log )
 		: write_buffers_blocking_wrapper(flags)
+		, log(log)
 		, channels(flags.channels)
 	{
-		double bufferSeconds = flags.buffer * 0.001;
+		if ( flags.buffer == default_high ) {
+			flags.buffer = 160;
+		} else if ( flags.buffer == default_low ) {
+			flags.buffer = 80;
+		}
+		if ( flags.period == default_high ) {
+			flags.period = 20;
+		} else if ( flags.period == default_low ) {
+			flags.period = 10;
+		}
+		flags.apply_default_buffer_sizes();
 		check_sdl_error( SDL_Init( SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO ) );
 		SDL_AudioSpec audiospec;
 		std::memset( &audiospec, 0, sizeof( SDL_AudioSpec ) );
@@ -48,12 +72,17 @@ public:
 		audiospec.format = AUDIO_S16SYS;
 		audiospec.channels = flags.channels;
 		audiospec.silence = 0;
-		audiospec.samples = bufferSeconds * 0.5 * flags.samplerate;
+		audiospec.samples = round_up_power2( ( flags.buffer * flags.samplerate ) / ( 1000 * 2 ) );
 		audiospec.size = audiospec.samples * audiospec.channels * sizeof( std::int16_t );
 		audiospec.callback = &sdl_callback_wrapper;
 		audiospec.userdata = this;
+		if ( flags.verbose ) {
+			log << "SDL:" << std::endl;
+			log << " latency: " << ( audiospec.samples * 2.0 / flags.samplerate ) << " (2 * " << audiospec.samples << ")" << std::endl;
+			log << std::endl;
+		}
+		set_queue_size_frames( round_up_power2( ( flags.buffer * flags.samplerate ) / ( 1000 * 2 ) ) );
 		check_sdl_error( SDL_OpenAudio( &audiospec, NULL ) );
-		set_queue_size_frames( static_cast<std::size_t>( bufferSeconds * 0.5 * flags.samplerate ) );
 		SDL_PauseAudio( 0 );
 	}
 	~sdl_stream_raii() {
