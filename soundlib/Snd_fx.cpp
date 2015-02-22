@@ -519,10 +519,13 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 // 				}
 
 				if(!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
-				// IT compatibility 16. FT2, ST3 and IT ignore out-of-range values
+				// IT compatibility 16. ST3 and IT ignore out-of-range values
 				if(param <= 128)
 				{
 					memory.state.m_nGlobalVolume = param << 1;
+				} else if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M)))
+				{
+					memory.state.m_nGlobalVolume = 256;
 				}
 				break;
 			// Global Volume Slide
@@ -2711,11 +2714,14 @@ bool CSoundFile::ProcessEffects()
 
 			if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param *= 2;
 
-			// IT compatibility 16. FT2, ST3 and IT ignore out-of-range values.
+			// IT compatibility 16. ST3 and IT ignore out-of-range values.
 			// Test case: globalvol-invalid.it
-			if (param <= 128)
+			if(param <= 128)
 			{
 				m_PlayState.m_nGlobalVolume = param * 2;
+			} else if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M)))
+			{
+				m_PlayState.m_nGlobalVolume = 256;
 			}
 			break;
 
