@@ -1060,8 +1060,6 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 		{
 			CriticalSection cs;
 
-			//OnPlayerPause();					// pause song - pausing VSTis is too slow
-
 			// All notes off
 			for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 			{
@@ -1140,14 +1138,12 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 				chn.nLength = chn.nLoopEnd = chn.pModSample->nLength;
 		}
 
-		//rewbs.vstiLive
+		// VSTi preview
 		if (nins <= m_SndFile.GetNumInstruments())
 		{
 			const ModInstrument *pIns = m_SndFile.Instruments[nins];
 			if (pIns && pIns->HasValidMIDIChannel()) // instro sends to a midi chan
 			{
-				// UINT nPlugin = m_SndFile.GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, EVEN_IF_MUTED);
-
 				PLUGINDEX nPlugin = 0;
 				if (chn.pModInstrument)
 					nPlugin = chn.pModInstrument->nMixPlug;					// First try instrument plugin
@@ -1165,8 +1161,6 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 				}
 			}
 		}
-		//end rewbs.vstiLive
-
 	} else
 	{
 		CriticalSection cs;

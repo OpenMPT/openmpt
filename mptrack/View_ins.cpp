@@ -15,13 +15,12 @@
 #include "InputHandler.h"
 #include "Childfrm.h"
 #include "Moddoc.h"
-#include "globals.h"
-#include "ctrl_ins.h"
-#include "view_ins.h"
+#include "Globals.h"
+#include "Ctrl_ins.h"
+#include "View_ins.h"
 #include "Dlsbank.h"
 #include "channelManagerDlg.h"
 #include "ScaleEnvPointsDlg.h"
-#include "view_ins.h"
 #include "../soundlib/MIDIEvents.h"
 #include "../common/StringFixer.h"
 
@@ -1933,28 +1932,56 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 		} else
 		if (m_nInstrument && !m_baPlayingNote[note])
 		{
-			//rewbs.instViewNNA
-		/*	CSoundFile *pSoundFile = pModDoc->GetSoundFile();
-			if (pSoundFile && m_baPlayingNote>0 && m_nPlayingChannel>=0)
-			{
-				ModChannel *pChn = &(pSoundFile->Chn[m_nPlayingChannel]); //Get pointer to channel playing last note.
-				if (pChn->pHeader)	//is it valid?
-				{
-					DWORD tempflags = pChn->dwFlags;
-					pChn->dwFlags = 0;
-					pModDoc->GetSoundFile()->CheckNNA(m_nPlayingChannel, m_nInstrument, note, FALSE); //if so, apply NNA
-					pChn->dwFlags = tempflags;
-				}
-			}
-		*/
-			ModInstrument *pIns = pModDoc->GetrSoundFile().Instruments[m_nInstrument];
+			CSoundFile &sndFile = pModDoc->GetrSoundFile();
+			ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
 			if ((!pIns) || (!pIns->Keyboard[note - NOTE_MIN] && !pIns->nMixPlug)) return;
-			m_baPlayingNote[note] = true;											//rewbs.instViewNNA
-			pModDoc->PlayNote(note, m_nInstrument, 0, false); //rewbs.instViewNNA
+
+			{
+				if (pMainFrm->GetModPlaying() != pModDoc)
+				{
+					sndFile.m_SongFlags.set(SONG_PAUSED);
+					pMainFrm->PlayMod(pModDoc);
+				}
+				CriticalSection cs;
+				// Apply NNA/DNA
+				for(CHANNELINDEX chn = sndFile.GetNumChannels(); chn < MAX_CHANNELS; chn++)
+				{
+					const ModChannel &channel = sndFile.m_PlayState.Chn[chn];
+					if(channel.pModInstrument == pIns && channel.nMasterChn == 0 && ModCommand::IsNote(channel.nNote)
+						&& (channel.nLength || pIns->HasValidMIDIChannel()) && !m_baPlayingNote[channel.nNote])
+					{
+						CHANNELINDEX nnaChn = sndFile.CheckNNA(chn, m_nInstrument, note, false);
+						// We need to update this mix channel immediately since new notes may be triggered between ticks, in which case
+						// ChnMix may not contain the moved channel yet and the past note will stop playing for the rest of this tick!
+						if(nnaChn != CHANNELINDEX_INVALID)
+						{
+							CHANNELINDEX origChnPos = CHANNELINDEX_INVALID;
+							for(CHANNELINDEX i = 0; i < sndFile.m_nMixChannels; i++)
+							{
+								if(sndFile.m_PlayState.ChnMix[i] == nnaChn)
+								{
+									// Nothing to do
+									origChnPos = CHANNELINDEX_INVALID;
+									break;
+								} else if(sndFile.m_PlayState.ChnMix[i] == chn)
+								{
+									origChnPos = i;
+								}
+							}
+							if(origChnPos != CHANNELINDEX_INVALID)
+							{
+								sndFile.m_PlayState.ChnMix[origChnPos] = nnaChn;
+							}
+						}
+					}
+				}
+				m_baPlayingNote[note] = true;
+				pModDoc->PlayNote(note, m_nInstrument, 0, false);
+			}
 			s[0] = 0;
 			if ((note) && (note <= NOTE_MAX))
 			{
-				const std::string temp = pModDoc->GetrSoundFile().GetNoteName(note, m_nInstrument);
+				const std::string temp = sndFile.GetNoteName(note, m_nInstrument);
 				mpt::String::Copy(s, temp.c_str());
 			}
 			pMainFrm->SetInfoText(s);

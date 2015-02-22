@@ -1589,13 +1589,13 @@ CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 	if (!pChn->nFadeOutVol) return 0;
 	// All channels are used: check for lowest volume
 	CHANNELINDEX result = 0;
-	DWORD vol = 64*65536;	// 25%
-	DWORD envpos = 0xFFFFFF;
+	uint32_t vol = 64*65536;	// 25%
+	uint32_t envpos = int32_max;
 	const ModChannel *pj = &m_PlayState.Chn[m_nChannels];
 	for (CHANNELINDEX j=m_nChannels; j<MAX_CHANNELS; j++, pj++)
 	{
 		if (!pj->nFadeOutVol) return j;
-		DWORD v = pj->nVolume;
+		uint32_t v = pj->nVolume;
 		if(pj->dwFlags[CHN_NOTEFADE])
 			v = v * pj->nFadeOutVol;
 		else
@@ -1612,26 +1612,27 @@ CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 }
 
 
-void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut)
-//-------------------------------------------------------------------------------
+CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut)
+//---------------------------------------------------------------------------------------
 {
+	CHANNELINDEX nnaChn = CHANNELINDEX_INVALID;
 	ModChannel *pChn = &m_PlayState.Chn[nChn];
 	const ModInstrument *pIns = nullptr;
 	if(!ModCommand::IsNote(note))
 	{
-		return;
+		return nnaChn;
 	}
 	// Always NNA cut - using
 	if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_MT2)) || !m_nInstruments || forceCut)
 	{
 		if(!pChn->nLength || pChn->dwFlags[CHN_MUTE] || !(pChn->rightVol | pChn->leftVol))
 		{
-			return;
+			return CHANNELINDEX_INVALID;
 		}
 
-		CHANNELINDEX n = GetNNAChannel(nChn);
-		if(!n) return;
-		ModChannel &chn = m_PlayState.Chn[n];
+		nnaChn = GetNNAChannel(nChn);
+		if(!nnaChn) return CHANNELINDEX_INVALID;
+		ModChannel &chn = m_PlayState.Chn[nnaChn];
 		// Copy Channel
 		chn = *pChn;
 		chn.dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_MUTE | CHN_PORTAMENTO);
@@ -1646,7 +1647,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 		pChn->nLength = pChn->nPos = pChn->nPosLo = 0;
 		pChn->nROfs = pChn->nLOfs = 0;
 		pChn->rightVol = pChn->leftVol = 0;
-		return;
+		return nnaChn;
 	}
 	if(instr >= MAX_INSTRUMENTS) instr = 0;
 	const ModSample *pSample = pChn->pModSample;
@@ -1669,14 +1670,14 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 					// Impulse Tracker ignores empty slots.
 					// We won't ignore them if a plugin is assigned to this slot, so that VSTis still work as intended.
 					// Test case: emptyslot.it, PortaInsNum.it, gxsmp.it, gxsmp2.it
-					return;
+					return CHANNELINDEX_INVALID;
 				}
 			}
 		} else pSample = nullptr;
 	}
 	ModChannel *p = pChn;
 	//if (!pIns) return;
-	if (pChn->dwFlags[CHN_MUTE]) return;
+	if (pChn->dwFlags[CHN_MUTE]) return CHANNELINDEX_INVALID;
 
 	bool applyDNAtoPlug;	//rewbs.VSTiNNA
 
@@ -1794,20 +1795,16 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 	//if ((pChn->nVolume) && (pChn->nLength))
 	if((pChn->nVolume != 0 && pChn->nLength != 0) || applyNNAtoPlug) //rewbs.VSTiNNA
 	{
-		CHANNELINDEX n = GetNNAChannel(nChn);
-		if(n != 0)
+		nnaChn = GetNNAChannel(nChn);
+		if(nnaChn != 0)
 		{
-			ModChannel *p = &m_PlayState.Chn[n];
+			ModChannel *p = &m_PlayState.Chn[nnaChn];
 			// Copy Channel
 			*p = *pChn;
-			p->dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_MUTE | CHN_PORTAMENTO);
+			p->dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_PORTAMENTO);
 			p->nPanbrelloOffset = 0;
 
-			//rewbs: Copy mute and FX status from master chan.
-			//I'd like to copy other flags too, but this would change playback behaviour.
-			p->dwFlags.set(pChn->dwFlags & (CHN_MUTE | CHN_NOFX));
-
-			p->nMasterChn = nChn + 1;
+			p->nMasterChn = nChn < GetNumChannels() ? nChn + 1 : 0;
 			p->nCommand = CMD_NONE;
 			//rewbs.VSTiNNA
 			if(applyNNAtoPlug && pPlugin)
@@ -1849,6 +1846,7 @@ void CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut
 			pChn->nROfs = pChn->nLOfs = 0;
 		}
 	}
+	return nnaChn;
 }
 
 
