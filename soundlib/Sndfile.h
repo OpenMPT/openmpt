@@ -486,9 +486,8 @@ public:
 	public:
 		bool m_bPositionChanged;		// Report to plugins that we jumped around in the module
 
-	protected:
-		CHANNELINDEX ChnMix[MAX_CHANNELS];					// Channels to be mixed
 	public:
+		CHANNELINDEX ChnMix[MAX_CHANNELS];					// Channels to be mixed
 		ModChannel Chn[MAX_CHANNELS];						// Mixing channels... First m_nChannel channels are master channels (i.e. they are never NNA channels)!
 
 	protected:
@@ -772,7 +771,7 @@ public:
 	bool ProcessRow();
 	bool ProcessEffects();
 	CHANNELINDEX GetNNAChannel(CHANNELINDEX nChn) const;
-	void CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut);
+	CHANNELINDEX CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut);
 	void NoteChange(ModChannel *pChn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false) const;
 	void InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true) const;
 	void ApplyInstrumentPanning(ModChannel *pChn, const ModInstrument *instr, const ModSample *smp) const;
