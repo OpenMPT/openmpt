@@ -70,32 +70,44 @@ struct UpgradePatternData
 			return;
 		}
 
-		if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02) ||
-			(!sndFile.IsCompatibleMode(TRK_ALLTRACKERS) && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+		if(sndFile.GetType() == MOD_TYPE_S3M)
 		{
-			if(m.command == CMD_GLOBALVOLUME)
+			// Out-of-range global volume commands should be ignored in S3M. Fixed in OpenMPT 1.19 (r831).
+			// So for tracks made with older versions of OpenMPT, we limit invalid global volume commands.
+			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 19, 00, 00) && m.command == CMD_GLOBALVOLUME)
 			{
-				// Out-of-range global volume commands should be ignored.
-				// OpenMPT 1.17.03.02 fixed this in compatible mode, OpenMPT 1.20 fixes it in normal mode as well.
-				// So for tracks made with older versions than OpenMPT 1.17.03.02 or tracks made with 1.17.03.02 <= version < 1.20, we limit invalid global volume commands.
-				LimitMax(m.param, ModCommand::PARAM((sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? 128: 64));
-			} else if(m.command == CMD_S3MCMDEX && (sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
-			{
-				// SC0 and SD0 should be interpreted as SC1 and SD1 in IT files.
-				// OpenMPT 1.17.03.02 fixed this in compatible mode, OpenMPT 1.20 fixes it in normal mode as well.
-				if(m.param == 0xC0)
-				{
-					m.command = CMD_NONE;
-					m.note = NOTE_NOTECUT;
-				} else if(m.param == 0xD0)
-				{
-					m.command = CMD_NONE;
-				}
+				LimitMax(m.param, ModCommand::PARAM(64));
 			}
 		}
 
-		if((sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+		else if((sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 		{
+			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02) ||
+				(!sndFile.IsCompatibleMode(TRK_IMPULSETRACKER) && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+			{
+				if(m.command == CMD_GLOBALVOLUME)
+				{
+					// Out-of-range global volume commands should be ignored in IT.
+					// OpenMPT 1.17.03.02 fixed this in compatible mode, OpenMPT 1.20 fixes it in normal mode as well.
+					// So for tracks made with older versions than OpenMPT 1.17.03.02 or tracks made with 1.17.03.02 <= version < 1.20, we limit invalid global volume commands.
+					LimitMax(m.param, ModCommand::PARAM(128));
+				}
+
+				// SC0 and SD0 should be interpreted as SC1 and SD1 in IT files.
+				// OpenMPT 1.17.03.02 fixed this in compatible mode, OpenMPT 1.20 fixes it in normal mode as well.
+				else if(m.command == CMD_S3MCMDEX)
+				{
+					if(m.param == 0xC0)
+					{
+						m.command = CMD_NONE;
+						m.note = NOTE_NOTECUT;
+					} else if(m.param == 0xD0)
+					{
+						m.command = CMD_NONE;
+					}
+				}
+			}
+
 			// In the IT format, slide commands with both nibbles set should be ignored.
 			// For note volume slides, OpenMPT 1.18 fixes this in compatible mode, OpenMPT 1.20 fixes this in normal mode as well.
 			const bool noteVolSlide =
@@ -126,6 +138,50 @@ struct UpgradePatternData
 					m.volcmd = VOLCMD_VOLUME;
 					m.vol = 0;
 				}
+			}
+		}
+
+		else if(sndFile.GetType() == MOD_TYPE_XM)
+		{
+			// Something made be believe that out-of-range global volume commands are ignored in XM
+			// just like they are ignored in IT, but apparently they are not. Aaaaaargh!
+			if(((sndFile.m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 03, 02) && sndFile.IsCompatibleMode(TRK_FASTTRACKER2)) || (sndFile.m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+				&& sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 24, 02, 02)
+				&& m.command == CMD_GLOBALVOLUME
+				&& m.param > 64)
+			{
+				m.command = CMD_NONE;
+			}
+
+			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 19, 00, 00)
+				|| (!sndFile.IsCompatibleMode(TRK_FASTTRACKER2) && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+			{
+				if(m.command == CMD_OFFSET && m.volcmd == VOLCMD_TONEPORTAMENTO)
+				{
+					// If there are both a portamento and an offset effect, the portamento should be preferred in XM files.
+					// OpenMPT 1.19 fixed this in compatible mode, OpenMPT 1.20 fixes it in normal mode as well.
+					m.command = CMD_NONE;
+				}
+			}
+
+			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 01, 10)
+				&& sndFile.m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 20, 00, 00)	// Ignore compatibility export
+				&& m.volcmd == VOLCMD_TONEPORTAMENTO && m.command == CMD_TONEPORTAMENTO
+				&& (m.vol != 0 || sndFile.IsCompatibleMode(TRK_FASTTRACKER2)) && m.param != 0)
+			{
+				// Mx and 3xx on the same row does weird things in FT2: 3xx is completely ignored and the Mx parameter is doubled. Fixed in revision 1312 / OpenMPT 1.20.01.10
+				// Previously the values were just added up, so let's fix this!
+				m.volcmd = VOLCMD_NONE;
+				const uint16 param = static_cast<uint16>(m.param) + static_cast<uint16>(m.vol << 4);
+				m.param = mpt::saturate_cast<ModCommand::PARAM>(param);
+			}
+
+			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 07, 09)
+				&& sndFile.m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 22, 00, 00)	// Ignore compatibility export
+				&& m.command == CMD_SPEED && m.param == 0)
+			{
+				// OpenMPT can emulate FT2's F00 behaviour now.
+				m.command = CMD_NONE;
 			}
 		}
 
@@ -164,40 +220,6 @@ struct UpgradePatternData
 						fixCmd->command = CMD_NONE;
 					}
 				}
-			}
-		}
-
-		if(sndFile.GetType() == MOD_TYPE_XM)
-		{
-			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 19, 00, 00)
-				|| (!sndFile.IsCompatibleMode(TRK_FASTTRACKER2) && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
-			{
-				if(m.command == CMD_OFFSET && m.volcmd == VOLCMD_TONEPORTAMENTO)
-				{
-					// If there are both a portamento and an offset effect, the portamento should be preferred in XM files.
-					// OpenMPT 1.19 fixed this in compatible mode, OpenMPT 1.20 fixes it in normal mode as well.
-					m.command = CMD_NONE;
-				}
-			}
-
-			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 01, 10)
-				&& sndFile.m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 20, 00, 00)	// Ignore compatibility export
-				&& m.volcmd == VOLCMD_TONEPORTAMENTO && m.command == CMD_TONEPORTAMENTO
-				&& (m.vol != 0 || sndFile.IsCompatibleMode(TRK_FASTTRACKER2)) && m.param != 0)
-			{
-				// Mx and 3xx on the same row does weird things in FT2: 3xx is completely ignored and the Mx parameter is doubled. Fixed in revision 1312 / OpenMPT 1.20.01.10
-				// Previously the values were just added up, so let's fix this!
-				m.volcmd = VOLCMD_NONE;
-				const uint16 param = static_cast<uint16>(m.param) + static_cast<uint16>(m.vol << 4);
-				m.param = mpt::saturate_cast<ModCommand::PARAM>(param);
-			}
-
-			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 07, 09)
-				&& sndFile.m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 22, 00, 00)	// Ignore compatibility export
-				&& m.command == CMD_SPEED && m.param == 0)
-			{
-				// OpenMPT can emulate FT2's F00 behaviour now.
-				m.command = CMD_NONE;
 			}
 		}
 
