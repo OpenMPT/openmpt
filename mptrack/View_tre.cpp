@@ -3296,13 +3296,17 @@ void CModTree::OnReloadAll()
 	if(pModDoc != nullptr)
 	{
 		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		bool anyMissing = false;
 		for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++)
 		{
+			const mpt::PathString &path = sndFile.GetSamplePath(smp);
+			if(path.empty()) continue;
+
 			pModDoc->GetSampleUndo().PrepareUndo(smp, sundo_replace, "Replace");
-			if(!sndFile.LoadExternalSample(smp, sndFile.GetSamplePath(smp)))
+			if(!sndFile.LoadExternalSample(smp, path))
 			{
 				pModDoc->GetSampleUndo().RemoveLastUndoStep(smp);
-				Reporting::Error(L"Unable to load sample:\n" + sndFile.GetSamplePath(smp).ToWide());
+				anyMissing = true;
 			} else
 			{
 				if(!sndFile.GetSample(smp).uFlags[SMP_KEEPONDISK])
@@ -3313,6 +3317,10 @@ void CModTree::OnReloadAll()
 		}
 		pModDoc->UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
 		OnRefreshTree();
+		if(anyMissing)
+		{
+			OnFindMissing();
+		}
 	}
 }
 
