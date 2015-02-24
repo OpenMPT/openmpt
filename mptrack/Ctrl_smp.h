@@ -43,7 +43,8 @@ protected:
 	uint32 m_nSeekWindowMs;
 	uint32 m_nOverlapMs;
 	SampleIO m_nPreviousRawFormat;
-	bool rememberRawFormat;
+	bool finetuneBoxActive : 1;
+	bool rememberRawFormat : 1;
 
 	CComboBox m_ComboPitch, m_ComboQuality, m_ComboFFT;
 
@@ -60,7 +61,7 @@ protected:
 	SampleSelectionPoints GetSelectionPoints();
 	void SetSelectionPoints(SmpLength nStart, SmpLength nEnd);
 
-	void PropagateAutoVibratoChanges() const;
+	void PropagateAutoVibratoChanges();
 
 public:
 	CCtrlSamples(CModControlView &parent, CModDoc &document);

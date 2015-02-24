@@ -33,7 +33,7 @@
 #include "FileDialog.h"
 #include "../common/ComponentManager.h"
 #ifdef _DEBUG
-#include <math.h>
+#include <cmath>
 #endif
 
 #include "../include/r8brain/CDSPResampler.h"
@@ -49,19 +49,15 @@ OPENMPT_NAMESPACE_BEGIN
 // Round floating point value to "digit" number of digits
 static float Round(const float value, const int digit)
 {
-	float v = 0.1f * (value * powf(10.0f, (float)(digit + 1)) + (value < 0.0f ? -5.0f : 5.0f));
-	modff(v, &v);
-	return v / powf(10.0f, (float)digit);
+	float v = 0.1f * (value * std::pow(10.0f, (float)(digit + 1)) + (value < 0.0f ? -5.0f : 5.0f));
+	std::modf(v, &v);
+	return v / std::pow(10.0f, (float)digit);
 }
 
-template<int v>
-static int PowerOf2Exponent()
-{
-	if(v <= 1)
-		return 0;
-	else
-		return 1 + PowerOf2Exponent<v / 2>();
-}
+template<unsigned int v>
+struct PowerOf2Exponent { enum { value = 1 + PowerOf2Exponent<v / 2>::value }; };
+template<>
+struct PowerOf2Exponent<1> { enum { value = 0 }; };
 
 
 #define	BASENOTE_MIN	(1*12)		// C-1
@@ -199,6 +195,7 @@ BOOL CCtrlSamples::OnInitDialog()
 {
 	CModControlDlg::OnInitDialog();
 	m_bInitialized = FALSE;
+	finetuneBoxActive = false;
 	SetRedraw(FALSE);
 
 	// Zoom Selection
@@ -299,7 +296,7 @@ BOOL CCtrlSamples::OnInitDialog()
 	if(combo)
 	{
 		// Deduce exponent from equation : MAX_FRAME_LENGTH = 2^exponent
-		const int exponent = PowerOf2Exponent<MAX_FRAME_LENGTH>();
+		const int exponent = PowerOf2Exponent<MAX_FRAME_LENGTH>::value;
 		// Allow FFT size from 2^8 (256) to 2^exponent (MAX_FRAME_LENGTH)
 		for(int i = 8 ; i <= exponent ; i++)
 		{
@@ -337,7 +334,7 @@ bool CCtrlSamples::SetCurrentSample(SAMPLEINDEX nSmp, LONG lZoom, bool bUpdNum)
 	if (m_nSample != nSmp)
 	{
 		m_nSample = nSmp;
-		UpdateView(SampleHint(m_nSample).Info(), NULL);
+		UpdateView(SampleHint(m_nSample).Info());
 	}
 	if (bUpdNum)
 	{
@@ -2479,7 +2476,11 @@ void CCtrlSamples::OnFineTuneChanged()
 {
 	if (IsLocked()) return;
 	int n = GetDlgItemInt(IDC_EDIT5);
-	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Finetune");
+	if(!finetuneBoxActive)
+	{
+		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Finetune");
+		finetuneBoxActive = true;
+	}
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	if (m_sndFile.m_nType & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
 	{
@@ -2514,6 +2515,7 @@ void CCtrlSamples::OnFineTuneChanged()
 void CCtrlSamples::OnFineTuneChangedDone()
 //----------------------------------------
 {
+	finetuneBoxActive = false;
 	// Update all playing channels
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
@@ -3236,8 +3238,8 @@ void CCtrlSamples::OnKeepSampleOnDisk()
 
 
 // When changing auto vibrato properties, propagate them to other samples of the same instrument in XM edit mode.
-void CCtrlSamples::PropagateAutoVibratoChanges() const
-//----------------------------------------------------
+void CCtrlSamples::PropagateAutoVibratoChanges()
+//----------------------------------------------
 {
 	if(!(m_sndFile.GetType() & MOD_TYPE_XM))
 	{
@@ -3259,7 +3261,7 @@ void CCtrlSamples::PropagateAutoVibratoChanges() const
 					m_sndFile.GetSample(*sample).nVibType = m_sndFile.GetSample(m_nSample).nVibType;
 					m_sndFile.GetSample(*sample).nVibRate = m_sndFile.GetSample(m_nSample).nVibRate;
 					m_sndFile.GetSample(*sample).nVibSweep = m_sndFile.GetSample(m_nSample).nVibSweep;
-					m_modDoc.UpdateAllViews(nullptr, SampleHint(*sample).Info(), (CObject *)this);
+					m_modDoc.UpdateAllViews(nullptr, SampleHint(*sample).Info(), this);
 				}
 			}
 		}
