@@ -1,14 +1,10 @@
- - Portaudio version stable_v19_20140130
+ - Portaudio SVN revision 1948
  - A small modification to portaudio code has been made in src/hostapi/wdmks/pa_win_wdmks.c
    to facilitate linking against strmiids.lib . Look for "OpenMPT" there.
- - Portaudio can freeze on Windows XP when intializing Kernel Streaming and the sound setup
-   topology doesn't meet some assumptions Portaudio seems to make. There is no official fix
-   for this yet, but a fix has been posted on the Audacity mailing list
-   (http://sourceforge.net/p/audacity/mailman/message/31421748/). Modifications
-   have been applied to src/hostapi/wdmks/pa_win_wdmks.c to fix this problem,
-   look for the LASSESB_GCP_LOOP_DETECTION.
  - For building, premake4 is used to generate Visual Studio project files.
    See ../premake4.lua for details.
+ - A couple of unnecessary folders have been omitted in SVN:
+   bindings, build, cmake_support, doc, examples, pablio, test, testcvs
 
    NOTE: Various versions of the Windows SDK (such as the one provided with the VS2008 x64 compiler) 
    do not provide ksguid.lib. To simplify the build configuration, PA_WDMKS_NO_KSGUID_LIB
