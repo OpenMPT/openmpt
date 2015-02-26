@@ -487,7 +487,6 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			m_sbValue.EnableWindow(TRUE);
 			m_sbDryRatio.EnableWindow(TRUE);
 			GetDlgItem(IDC_EDIT14)->EnableWindow(TRUE);
-			GetDlgItem(IDC_BUTTON3)->EnableWindow(TRUE);
 		} else
 		{
 			s[0] = 0;
@@ -504,7 +503,6 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			m_sbValue.EnableWindow(FALSE);
 			m_sbDryRatio.EnableWindow(FALSE);
 			GetDlgItem(IDC_EDIT14)->EnableWindow(FALSE);
-			GetDlgItem(IDC_BUTTON3)->EnableWindow(FALSE);
 		}
 		SetDlgItemText(IDC_TEXT6, s);
 		int outputsel = 0;
