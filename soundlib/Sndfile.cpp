@@ -1,5 +1,4 @@
-in_p
-	/*
+/*
  * Sndfile.cpp
  * -----------
  * Purpose: Core class of the playback engine. Every song is represented by a CSoundFile object.
