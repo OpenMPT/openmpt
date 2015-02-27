@@ -425,7 +425,12 @@ public:
 	UINT m_nFreqFactor; // Pitch shift factor (65536 = no pitch shifting). Only used in libopenmpt (openmpt::ext::interactive::set_pitch_factor)
 	UINT m_nTempoFactor; // Tempo factor (65536 = no tempo adjustment). Only used in libopenmpt (openmpt::ext::interactive::set_tempo_factor)
 #endif
-	int32 m_nMinPeriod, m_nMaxPeriod;	// min period = highest possible frequency, max period = lowest possible frequency
+
+	// Min Period = highest possible frequency, Max Period = lowest possible frequency for current format
+	// Note: Period is an Amiga metric that is inverse to frequency.
+	// Periods in MPT are 4 times as fine as Amiga periods because of extra fine frequency slides (introduced in the S3M format).
+	int32 m_nMinPeriod, m_nMaxPeriod;
+
 	int32 m_nRepeatCount;	// -1 means repeat infinitely.
 	ORDERINDEX m_nMaxOrderPosition;
 	ModChannelSettings ChnSettings[MAX_BASECHANNELS];	// Initial channels settings

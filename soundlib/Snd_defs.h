@@ -56,9 +56,6 @@ const SEQUENCEINDEX MAX_SEQUENCES		= 50;
 const CHANNELINDEX MAX_BASECHANNELS		= 127;	// Max pattern channels.
 const CHANNELINDEX MAX_CHANNELS			= 256;	//200 // Maximum number of mixing channels.
 
-#define MIN_PERIOD			0x0020	// Note: Period is an Amiga metric that is inverse to frequency.
-#define MAX_PERIOD			0xFFFF	// Periods in MPT are 4 times as fine as Amiga periods because of extra fine frequency slides.
-
 #define FREQ_FRACBITS		4		// Number of fractional bits in return value of CSoundFile::GetFreqFromPeriod()
 
 // String lengths (including trailing null char)

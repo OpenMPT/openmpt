@@ -316,7 +316,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Bit 8 = Stereo (we always use stereo)
-	m_nSamplePreAmp = Clamp(fileHeader.masterVolume & 0x7F, 0x10, 0x7F);
+	m_nSamplePreAmp = std::max(fileHeader.masterVolume & 0x7F, 0x10);
 
 	// Channel setup
 	m_nChannels = 4;
@@ -324,21 +324,17 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		ChnSettings[i].Reset();
 
-		if(fileHeader.channels[i] == 0xFF)
-		{
-			ChnSettings[i].nPan = 128;
-			ChnSettings[i].dwFlags = CHN_MUTE;
-		} else
+		if(fileHeader.channels[i] != 0xFF)
 		{
 			m_nChannels = i + 1;
 			ChnSettings[i].nPan = (fileHeader.channels[i] & 8) ? 0xCC : 0x33;	// 200 : 56
-			if(fileHeader.channels[i] & 0x80)
-			{
-				ChnSettings[i].dwFlags = CHN_MUTE;
-				// Detect Adlib channels here (except for OpenMPT 1.19 and older, which would write wrong channel types for PCM channels 16-32):
-				// c = channels[i] ^ 0x80;
-				// if(c >= 16 && c < 32) adlibChannel = true;
-			}
+		}
+		if(fileHeader.channels[i] & 0x80)
+		{
+			ChnSettings[i].dwFlags = CHN_MUTE;
+			// Detect Adlib channels here (except for OpenMPT 1.19 and older, which would write wrong channel types for PCM channels 16-32):
+			// c = channels[i] ^ 0x80;
+			// if(c >= 16 && c < 32) adlibChannel = true;
 		}
 	}
 	if(m_nChannels < 1)

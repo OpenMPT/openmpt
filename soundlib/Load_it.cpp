@@ -654,8 +654,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	m_nSamples = std::max(SAMPLEINDEX(1), GetNumSamples());
 
-	m_nMinPeriod = 8;
-	m_nMaxPeriod = 0xF000;
+	m_nMinPeriod = 0;
+	m_nMaxPeriod = int32_max;
 
 	PATTERNINDEX numPats = std::min(static_cast<PATTERNINDEX>(patPos.size()), GetModSpecifications().patternsMax);
 
