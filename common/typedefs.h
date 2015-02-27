@@ -569,6 +569,8 @@ template <typename T> inline uint8 * GetRawBytes(T & v)
 #define MPT_UNREFERENCED_PARAMETER(x) (void)(x)
 #endif
 
+#define MPT_UNUSED_VARIABLE(x) MPT_UNREFERENCED_PARAMETER(x)
+
 
 
 OPENMPT_NAMESPACE_END
