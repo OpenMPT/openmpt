@@ -1,4 +1,5 @@
-/*
+in_p
+	/*
  * Sndfile.cpp
  * -----------
  * Purpose: Core class of the playback engine. Every song is represented by a CSoundFile object.
@@ -557,7 +558,7 @@ CSoundFile::CSoundFile() :
 #ifndef MODPLUG_TRACKER
 	m_nFreqFactor = m_nTempoFactor = 65536;
 #endif
-	m_nMinPeriod = MIN_PERIOD;
+	m_nMinPeriod = 32;
 	m_nMaxPeriod = 0x7FFF;
 	m_nRepeatCount = 0;
 	m_PlayState.m_nSeqOverride = ORDERINDEX_INVALID;

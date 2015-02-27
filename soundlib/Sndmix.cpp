@@ -1915,7 +1915,9 @@ bool CSoundFile::ReadNote()
 
 			pChn->nCalcVolume = vol;	// Update calculated volume for MIDI macros
 
-			if (pChn->nPeriod < m_nMinPeriod) pChn->nPeriod = m_nMinPeriod;
+			// ST3 only clamps the final output period, but never the channel's internal period.
+			// Test case: PeriodLimit.s3m
+			if (pChn->nPeriod < m_nMinPeriod && GetType() != MOD_TYPE_S3M) pChn->nPeriod = m_nMinPeriod;
 			if(IsCompatibleMode(TRK_FASTTRACKER2)) Clamp(pChn->nPeriod, 1, 31999);
 			period = pChn->nPeriod;
 
@@ -1980,25 +1982,12 @@ bool CSoundFile::ReadNote()
 			ProcessSampleAutoVibrato(pChn, period, vibratoFactor, nPeriodFrac);
 
 			// Final Period
+			// ST3 only clamps the final output period, but never the channel's internal period.
+			// Test case: PeriodLimit.s3m
 			if (period <= m_nMinPeriod)
 			{
-				// ST3 simply stops playback if frequency is too high.
-				// Test case: FreqLimits.s3m
-				if (GetType() & MOD_TYPE_S3M) pChn->nLength = 0;
 				period = m_nMinPeriod;
 			}
-			//rewbs: temporarily commenting out block to allow notes below A-0.
-			/*if (period > m_nMaxPeriod)
-			{
-				if ((m_nType & MOD_TYPE_IT) || (period >= 0x100000))
-				{
-					pChn->nFadeOutVol = 0;
-					pChn->dwFlags |= CHN_NOTEFADE;
-					pChn->nRealVolume = 0;
-				}
-				period = m_nMaxPeriod;
-				nPeriodFrac = 0;
-			}*/
 
 			if(GetType() == MOD_TYPE_MPT && pIns != nullptr && pIns->pTuning != nullptr)
 			{

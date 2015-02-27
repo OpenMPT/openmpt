@@ -3195,7 +3195,15 @@ void CSoundFile::FinePortamentoUp(ModChannel *pChn, UINT param)
 			} else
 			{
 				pChn->nPeriod -= (int)(param * 4);
-				if (pChn->nPeriod < 1) pChn->nPeriod = 1;
+				if (pChn->nPeriod < 1)
+				{
+					pChn->nPeriod = 1;
+					if(GetType() == MOD_TYPE_S3M)
+					{
+						pChn->nFadeOutVol = 0;
+						pChn->dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
+					}
+				}
 			}
 		}
 	}
@@ -3259,7 +3267,15 @@ void CSoundFile::ExtraFinePortamentoUp(ModChannel *pChn, UINT param)
 			} else
 			{
 				pChn->nPeriod -= (int)(param);
-				if (pChn->nPeriod < 1) pChn->nPeriod = 1;
+				if (pChn->nPeriod < 1)
+				{
+					pChn->nPeriod = 1;
+					if(GetType() == MOD_TYPE_S3M)
+					{
+						pChn->nFadeOutVol = 0;
+						pChn->dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
+					}
+				}
 			}
 		}
 	}
@@ -4720,7 +4736,15 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, LONG nFreqSlide) const
 	{
 		pChn->nPeriod += nFreqSlide;
 	}
-	if(pChn->nPeriod < 1) pChn->nPeriod = 1;
+	if (pChn->nPeriod < 1)
+	{
+		pChn->nPeriod = 1;
+		if(GetType() == MOD_TYPE_S3M)
+		{
+			pChn->nFadeOutVol = 0;
+			pChn->dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
+		}
+	}
 }
 
 
