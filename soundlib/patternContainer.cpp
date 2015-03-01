@@ -91,19 +91,14 @@ bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
 	m_Patterns[index].RemoveSignature();
 	m_Patterns[index].SetName("");
 
-	if(!m_Patterns[index]) return false;
-
-	return true;
+	return m_Patterns[index] != nullptr;
 }
 
 
-bool CPatternContainer::Remove(const PATTERNINDEX ipat)
+void CPatternContainer::Remove(const PATTERNINDEX ipat)
 //-----------------------------------------------------
 {
-	if(ipat >= m_Patterns.size())
-		return true;
-	m_Patterns[ipat].Deallocate();
-	return false;
+	if(ipat < m_Patterns.size()) m_Patterns[ipat].Deallocate();
 }
 
 
@@ -114,23 +109,12 @@ bool CPatternContainer::IsPatternEmpty(const PATTERNINDEX nPat) const
 		return false;
 	
 	const ModCommand *m = m_Patterns[nPat].m_ModCommands;
-	for(size_t i = m_Patterns[nPat].GetNumChannels() * m_Patterns[nPat].GetNumRows(); i > 0; i--, m++)
+	for(const ModCommand *mEnd = m + m_Patterns[nPat].GetNumChannels() * m_Patterns[nPat].GetNumRows(); m != mEnd; m++)
 	{
 		if(!m->IsEmpty(true))
 			return false;
 	}
 	return true;
-}
-
-
-PATTERNINDEX CPatternContainer::GetIndex(const MODPATTERN* const pPat) const
-//--------------------------------------------------------------------------
-{
-	const PATTERNINDEX endI = static_cast<PATTERNINDEX>(m_Patterns.size());
-	for(PATTERNINDEX i = 0; i<endI; i++)
-		if(&m_Patterns[i] == pPat) return i;
-
-	return endI;
 }
 
 
@@ -246,7 +230,7 @@ void ReadModPatterns(std::istream& iStrm, CPatternContainer& patc, const size_t)
 		nPatterns = nCount;
 	LimitMax(nPatterns, ModSpecs::mptm.patternsMax);
 	if (nPatterns > patc.Size())
-		patc.ResizeArray(nPatterns);	
+		patc.ResizeArray(nPatterns);
 	for(uint16 i = 0; i < nPatterns; i++)
 	{
 		ssb.ReadItem(patc[i], srlztn::ID::FromInt<uint16>(i), &ReadModPattern);

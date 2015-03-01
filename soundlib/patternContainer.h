@@ -61,7 +61,7 @@ public:
 
 	//Remove pattern from given position. Currently it actually makes the pattern
 	//'invisible' - the pattern data is cleared but the actual pattern object won't get removed.
-	bool Remove(const PATTERNINDEX index);
+	void Remove(const PATTERNINDEX index);
 
 	// Applies function object for modcommands in patterns in given range.
 	// Return: Copy of the function object.
@@ -74,9 +74,6 @@ public:
 
 	CSoundFile& GetSoundFile() {return m_rSndFile;}
 	const CSoundFile& GetSoundFile() const {return m_rSndFile;}
-
-	//Returns the index of given pattern, Size() if not found.
-	PATTERNINDEX GetIndex(const MODPATTERN* const pPat) const;
 
 	// Return true if pattern can be accessed with operator[](iPat), false otherwise.
 	bool IsValidIndex(const PATTERNINDEX iPat) const {return (iPat < Size());}

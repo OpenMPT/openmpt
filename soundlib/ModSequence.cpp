@@ -492,7 +492,7 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 {
 #ifdef MODPLUG_TRACKER
 	// Allow conversion only if there's only one sequence.
-	if(GetNumSequences() != 1 || m_sndFile.GetType() != MOD_TYPE_MPT)
+	if(GetNumSequences() != 1 || m_sndFile.GetModSpecifications().sequencesMax <= 1)
 		return false;
 
 	bool hasSepPatterns = false;
@@ -554,7 +554,7 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 						{
 							if(m->command == CMD_POSITIONJUMP && m->param >= startOrd)
 							{
-								m->param = static_cast<BYTE>(m->param - startOrd);
+								m->param = static_cast<ModCommand::PARAM>(m->param - startOrd);
 							}
 						}
 					}
@@ -639,7 +639,7 @@ bool ModSequenceSet::MergeSequences()
 							m_sndFile.AddToLog(mpt::String::Print("CONFLICT: Pattern break commands in Pattern %1 might be broken since it has been used in several sequences!", nPat));
 						}
 					}
-					m->param  = static_cast<BYTE>(m->param + nFirstOrder);
+					m->param  = static_cast<ModCommand::PARAM>(m->param + nFirstOrder);
 					patternsFixed[nPat] = removedSequences;
 				}
 			}
