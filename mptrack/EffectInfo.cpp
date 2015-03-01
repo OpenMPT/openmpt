@@ -46,7 +46,7 @@ struct MPTEFFECTINFO
 #define MOD_TYPE_ALL		(~ModType(0))
 
 
-const MPTEFFECTINFO gFXInfo[] =
+static const MPTEFFECTINFO gFXInfo[] =
 {
 	{CMD_ARPEGGIO,		0,0,		0,	MOD_TYPE_ALL,	"Arpeggio"},
 	{CMD_PORTAMENTOUP,	0,0,		0,	MOD_TYPE_ALL,	"Portamento Up"},
@@ -860,7 +860,7 @@ struct MPTVOLCMDINFO
 	FlagSet<MODTYPE> GetSupportedFormats() const { return FlagSet<MODTYPE>(supportedFormats); }
 };
 
-const MPTVOLCMDINFO gVolCmdInfo[] =
+static const MPTVOLCMDINFO gVolCmdInfo[] =
 {
 	{VOLCMD_VOLUME,			MOD_TYPE_NOMOD,		"Set Volume"},
 	{VOLCMD_PANNING,		MOD_TYPE_NOMOD,		"Set Panning"},
@@ -876,7 +876,7 @@ const MPTVOLCMDINFO gVolCmdInfo[] =
 	{VOLCMD_PORTAUP,		MOD_TYPE_ITMPT,		"Portamento up"},
 	{VOLCMD_PORTADOWN,		MOD_TYPE_ITMPT,		"Portamento down"},
 	{VOLCMD_DELAYCUT,		MOD_TYPE_NONE,		""},
-	{VOLCMD_OFFSET,			MOD_TYPE_ITMPT,		"Offset"},
+	{VOLCMD_OFFSET,			MOD_TYPE_MPT,		"Offset"},
 };
 
 STATIC_ASSERT(CountOf(gVolCmdInfo) == (MAX_VOLCMDS - 1));
