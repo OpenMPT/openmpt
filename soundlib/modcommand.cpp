@@ -375,10 +375,6 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 			}
 			break;
 
-		case CMD_SPEED:
-			param = std::min<PARAM>(param, (toType == MOD_TYPE_XM) ? 0x1F : 0x20);
-			break;
-
 		case CMD_TEMPO:
 			if(param < 0x20) command = CMD_NONE; // no tempo slides
 			break;
@@ -487,25 +483,20 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 	} // End if(oldTypeIsIT_MPT && newTypeIsXM)
 
 	///////////////////////////////////
-	// MOD <-> XM: Speed/Tempo update
-	if(oldTypeIsMOD && newTypeIsXM)
+	// MOD / XM Speed/Tempo limits
+	if(newTypeIsMOD_XM)
 	{
 		switch(command)
 		{
 		case CMD_SPEED:
-			param = std::min<PARAM>(param, 0x1F);
+			param = std::min<PARAM>(param, (toType == MOD_TYPE_XM) ? 0x1F : 0x20);
 			break;
-		}
-	} else if(oldTypeIsXM && newTypeIsMOD)
-	{
-		switch(command)
-		{
+			break;
 		case CMD_TEMPO:
-			param = std::max<PARAM>(param, 0x21);
+			param = std::max<PARAM>(param, (toType == MOD_TYPE_XM) ? 0x20 : 0x21);
 			break;
 		}
 	}
-
 
 	///////////////////////////////////////////////////////////////////////
 	// Convert MOD to anything - adjust effect memory, remove Invert Loop
