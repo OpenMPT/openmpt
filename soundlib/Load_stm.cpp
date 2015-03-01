@@ -14,10 +14,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#if MPT_COMPILER_MSVC
-#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
-#endif
-
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
@@ -29,14 +25,14 @@ struct PACKED STMSampleHeader
 	char   filename[12];	// Can't have long comments - just filename comments :)
 	uint8  zero;
 	uint8  disk;			// A blast from the past
-	uint16  offset;			// ISA in memory when in ST 2
+	uint16 offset;			// 20-bit offset in file (lower 4 bits are zero)
 	uint16 length;			// Sample length
 	uint16 loopStart;		// Loop start point
 	uint16 loopEnd;			// Loop end point
 	uint8  volume;			// Volume
 	uint8  reserved2;
 	uint16 sampleRate;
-	uint8  reserved3[6];	// Yet more of PSi's reserved crap
+	uint8  reserved3[6];
 
 	// Convert an STM sample header to OpenMPT's internal sample header.
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -50,12 +46,7 @@ struct PACKED STMSampleHeader
 		mptSmp.nLoopStart = loopStart;
 		mptSmp.nLoopEnd = loopEnd;
 
-		if(mptSmp.nLength < 2 || volume == 0)
-		{
-			// As WTF as the above condition might sound, it seems to make sense.
-			// The zero-volume samples in acidlamb.stm shouldn't be loaded, but they have an actual sample length.
-			mptSmp.nLength = 0;
-		}
+		if(mptSmp.nLength < 2) mptSmp.nLength = 0;
 
 		if(mptSmp.nLoopStart < mptSmp.nLength
 			&& mptSmp.nLoopEnd > mptSmp.nLoopStart
@@ -87,12 +78,12 @@ struct PACKED STMFileHeader
 	char  trackername[8];			// !SCREAM! for ST 2.xx
 	uint8 dosEof;					// 0x1A
 	uint8 filetype;					// 1=song, 2=module (only 2 is supported, of course) :)
-	uint8 verMajor;					// Like 2
-	uint8 verMinor;					// "ditto"
-	uint8 initTempo;				// initspeed= stm inittempo>>4
+	uint8 verMajor;
+	uint8 verMinor;
+	uint8 initTempo;				// Ticks per row. Keep in mind that effects are only updated on every 16th tick.
 	uint8 numPatterns;				// number of patterns
-	uint8 globalVolume;				// <- WoW! a RiGHT TRiANGLE =8*)
-	uint8 reserved[13];				// More of PSi's internal crap
+	uint8 globalVolume;
+	uint8 reserved[13];
 	STMSampleHeader samples[31];	// Sample headers
 	uint8 order[128];				// Order list
 
@@ -251,6 +242,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 			switch(m->command)
 			{
 			case CMD_VOLUMESLIDE:
+				// Lower nibble always has precedence, and there are no fine slides.
 				if(m->param & 0x0F) m->param &= 0x0F;
 				else m->param &= 0xF0;
 				break;
@@ -306,7 +298,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(breakPos != ORDERINDEX_INVALID)
 		{
-			Patterns[pat].WriteEffect(EffectWriter(CMD_POSITIONJUMP, breakPos).Row(breakRow).Retry(EffectWriter::rmTryPreviousRow));
+			Patterns[pat].WriteEffect(EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(breakPos)).Row(breakRow).Retry(EffectWriter::rmTryPreviousRow));
 		}
 	}
 
@@ -328,9 +320,6 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 				if(sampleOffset > sizeof(STMPatternEntry) && sampleOffset < file.GetLength())
 				{
 					file.Seek(sampleOffset);
-				} else
-				{
-					file.Seek((file.GetPosition() + 15) & (~15));
 				}
 				sampleIO.ReadSample(sample, file);
 			}
