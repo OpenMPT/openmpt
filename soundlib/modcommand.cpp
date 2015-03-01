@@ -501,7 +501,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 		switch(command)
 		{
 		case CMD_TEMPO:
-			param = std::min<PARAM>(param, 0x21);
+			param = std::max<PARAM>(param, 0x21);
 			break;
 		}
 	}
