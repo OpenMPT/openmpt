@@ -350,6 +350,7 @@ libopenmpttest_SOURCES += soundlib/Load_mod.cpp
 libopenmpttest_SOURCES += soundlib/Load_mt2.cpp
 libopenmpttest_SOURCES += soundlib/Load_mtm.cpp
 libopenmpttest_SOURCES += soundlib/Load_okt.cpp
+libopenmpttest_SOURCES += soundlib/Load_plm.cpp
 libopenmpttest_SOURCES += soundlib/Load_psm.cpp
 libopenmpttest_SOURCES += soundlib/Load_ptm.cpp
 libopenmpttest_SOURCES += soundlib/Load_s3m.cpp
