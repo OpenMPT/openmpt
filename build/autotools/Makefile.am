@@ -147,6 +147,7 @@ libopenmpt_la_SOURCES += soundlib/Load_mod.cpp
 libopenmpt_la_SOURCES += soundlib/Load_mt2.cpp
 libopenmpt_la_SOURCES += soundlib/Load_mtm.cpp
 libopenmpt_la_SOURCES += soundlib/Load_okt.cpp
+libopenmpt_la_SOURCES += soundlib/Load_plm.cpp
 libopenmpt_la_SOURCES += soundlib/Load_psm.cpp
 libopenmpt_la_SOURCES += soundlib/Load_ptm.cpp
 libopenmpt_la_SOURCES += soundlib/Load_s3m.cpp
