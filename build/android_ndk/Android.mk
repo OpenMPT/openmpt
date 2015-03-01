@@ -59,6 +59,7 @@ LOCAL_SRC_FILES := \
 	soundlib/Load_mt2.cpp \
 	soundlib/Load_mtm.cpp \
 	soundlib/Load_okt.cpp \
+	soundlib/Load_plm.cpp \
 	soundlib/Load_psm.cpp \
 	soundlib/Load_ptm.cpp \
 	soundlib/Load_s3m.cpp \
