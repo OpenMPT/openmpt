@@ -547,6 +547,9 @@
     <ClCompile Include="..\sounddev\SoundDeviceUtilities.cpp">
       <Filter>Source Files\sounddev</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\Load_plm.cpp">
+      <Filter>Source Files\soundlib\Module Loaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">

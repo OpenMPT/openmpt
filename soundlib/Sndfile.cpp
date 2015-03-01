@@ -764,6 +764,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		 && !ReadGDM(file, loadFlags)
 		 && !ReadIMF(file, loadFlags)
 		 && !ReadDIGI(file, loadFlags)
+		 && !ReadPLM(file, loadFlags)
 		 && !ReadAM(file, loadFlags)
 		 && !ReadJ2B(file, loadFlags)
 		 && !ReadMO3(file, loadFlags)
@@ -1813,8 +1814,8 @@ void CSoundFile::RecalculateSamplesPerTick()
 // Get length of a tick in sample, with tick-to-tick tempo correction in modern tempo mode.
 // This has to be called exactly once per tick because otherwise the error accumulation
 // goes wrong.
-UINT CSoundFile::GetTickDuration(UINT tempo, UINT speed, ROWINDEX rowsPerBeat)
-//----------------------------------------------------------------------------
+uint32_t CSoundFile::GetTickDuration(uint32_t tempo, uint32_t speed, ROWINDEX rowsPerBeat)
+//----------------------------------------------------------------------------------------
 {
 	UINT retval = 0;
 	switch(m_nTempoMode)
