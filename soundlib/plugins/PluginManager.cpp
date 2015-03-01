@@ -224,7 +224,7 @@ AEffect *CVstPluginManager::LoadPlugin(const VSTPluginLib &plugin, HINSTANCE &li
 			{
 				const std::wstring msg = L"The following error occured while trying to load\n" + plugin.dllPath.ToWide() + L"\n\n" + mpt::ToWide(mpt::CharsetLocale, e.what())
 					+ L"\n\nDo you want to try to load the plugin natively?";
-				if(Reporting::Confirm(msg, L"OpenMPT Plugin Bridge", false, true) == cnfNo)
+				if(Reporting::Confirm(msg, L"OpenMPT Plugin Bridge") == cnfNo)
 				{
 					return nullptr;
 				}
@@ -311,7 +311,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 {
 	const mpt::PathString fileName = dllPath.GetFileName();
 
-	if(checkFileExistence && (PathFileExistsW(dllPath.AsNative().c_str()) == FALSE))
+	if(checkFileExistence && !dllPath.IsFile())
 	{
 		if(errStr)
 		{
@@ -543,7 +543,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 				if(!fullPath.empty())
 				{
 					fullPath = theApp.RelativePathToAbsolute(fullPath);
-					if(PathFileExistsW(fullPath.AsNative().c_str()))
+					if(fullPath.IsFile())
 					{
 						pFound = AddPlugin(fullPath);
 					}
