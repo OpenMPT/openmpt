@@ -1894,6 +1894,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\load_plm.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\load_ptm.cpp"
 				>
 			</File>

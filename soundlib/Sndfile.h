@@ -646,7 +646,7 @@ public:
 
 	void RecalculateSamplesPerTick();
 	double GetRowDuration(UINT tempo, UINT speed) const;
-	UINT GetTickDuration(UINT tempo, UINT speed, ROWINDEX rowsPerBeat);
+	uint32_t GetTickDuration(uint32_t tempo, uint32_t speed, ROWINDEX rowsPerBeat);
 
 	// A repeat count value of -1 means infinite loop
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }
@@ -695,6 +695,7 @@ public:
 	bool ReadAM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadJ2B(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDIGI(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadPLM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadMID(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFlags loadFlags = loadCompleteModule);
 
 	static std::vector<const char *> GetSupportedExtensions(bool otherFormats);

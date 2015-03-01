@@ -45,14 +45,14 @@ struct ModFormatInfo
 static const ModFormatInfo modFormatInfo[] =
 {
 	{ MOD_TYPE_MOD,		"ProTracker",				"mod" },
-	{ MOD_TYPE_S3M,		"ScreamTracker III",		"s3m" },
+	{ MOD_TYPE_S3M,		"ScreamTracker 3",			"s3m" },
 	{ MOD_TYPE_XM,		"FastTracker II",			"xm" },
 	{ MOD_TYPE_IT,		"Impulse Tracker",			"it" },
 #ifdef MPT_EXTERNAL_SAMPLES
 	{ MOD_TYPE_IT,		"Impulse Tracker Project",	"itp" },
 #endif
 	{ MOD_TYPE_MPT,		"OpenMPT",					"mptm" },
-	{ MOD_TYPE_STM,		"ScreamTracker II",			"stm" },
+	{ MOD_TYPE_STM,		"ScreamTracker 2",			"stm" },
 	{ MOD_TYPE_MOD,		"NoiseTracker",				"nst" },
 	{ MOD_TYPE_MOD,		"Soundtracker",				"m15" },
 	{ MOD_TYPE_MOD,		"Soundtracker",				"stk" },
@@ -79,12 +79,13 @@ static const ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_DIGI,	"DigiBooster",				"digi" },
 	{ MOD_TYPE_IMF,		"Imago Orpheus",			"imf" },
 	{ MOD_TYPE_J2B,		"Galaxy Sound System",		"j2b" },
+	{ MOD_TYPE_PLM,		"Disorder Tracker 2",		"plm" },
 
 #ifndef NO_ARCHIVE_SUPPORT
 	// Compressed modules
 	{ MOD_TYPE_MOD,		"ProTracker",				"mdz" },
 	{ MOD_TYPE_MOD,		"ProTracker",				"mdr" },
-	{ MOD_TYPE_S3M,		"ScreamTracker III",		"s3z" },
+	{ MOD_TYPE_S3M,		"ScreamTracker 3",			"s3z" },
 	{ MOD_TYPE_XM,		"FastTracker II",			"xmz" },
 	{ MOD_TYPE_IT,		"Impulse Tracker",			"itz" },
 	{ MOD_TYPE_MPT,		"OpenMPT",					"mptmz" },

@@ -314,6 +314,7 @@ DECLARE_FILE_TYPE("OpenMPT compatible module files",
 	"*.digi" ";"
 	"*.imf" ";"
 	"*.j2b" ";"
+	"*.plm" ";"
 	"*.gdm" ";"
 	"*.umx" ";"
 	"*.mo3" ";"

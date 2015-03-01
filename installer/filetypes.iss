@@ -38,6 +38,7 @@ Name: "associate_exotic\mo3"; Description: "MO3 compressed modules (MO3)";
 Name: "associate_exotic\mt2"; Description: "MadTracker 2 (MT2)";
 Name: "associate_exotic\mtm"; Description: "MultiTracker Modules (MTM)";
 Name: "associate_exotic\okt"; Description: "Oktalyzer (OKT)";
+Name: "associate_exotic\plm"; Description: "Disorder Tracker 2 (PLM)";
 Name: "associate_exotic\psm"; Description: "Epic Megagames MASI (PSM)";
 Name: "associate_exotic\ptm"; Description: "PolyTracker (PTM)";
 Name: "associate_exotic\stm"; Description: "Scream Tracker 2 (STM)";
@@ -80,6 +81,7 @@ Root: HKCR; Subkey: ".mo3"; ValueType: string; ValueName: ""; ValueData: "OpenMP
 Root: HKCR; Subkey: ".mt2"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\mt2
 Root: HKCR; Subkey: ".mtm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\mtm
 Root: HKCR; Subkey: ".okt"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\okt
+Root: HKCR; Subkey: ".plm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\plm
 Root: HKCR; Subkey: ".psm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\psm
 Root: HKCR; Subkey: ".ptm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\ptm
 Root: HKCR; Subkey: ".stm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\stm
