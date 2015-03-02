@@ -138,6 +138,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals();
 	InitializeChannels();
+	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	m_nType = MOD_TYPE_PLM;
 	madeWithTracker = "Disorder Tracker 2";
 	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, fileHeader.songName);
