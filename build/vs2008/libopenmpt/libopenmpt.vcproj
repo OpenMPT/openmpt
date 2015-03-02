@@ -430,6 +430,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\soundlib\Load_plm.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\soundlib\Load_psm.cpp"
 				>
 			</File>
