@@ -185,6 +185,14 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		sample.nLoopStart = sampleHeader.loopStart;
 		sample.nLoopEnd = sampleHeader.loopEnd;
 		sample.nLength = sampleHeader.length;
+		if(sampleHeader.flags & PLMSampleHeader::smp16Bit)
+		{
+			sample.nLoopStart /= 2;
+			sample.nLoopEnd /= 2;
+			sample.nLength /= 2;
+			// Apparently there is a bug in DT2 which adds an extra byte before the sample data.
+			sampleHeader.headerSize++;
+		}
 		if(sample.nLoopEnd > sample.nLoopStart) sample.uFlags.set(CHN_LOOP);
 		sample.SanitizeLoops();
 		file.Seek(samplePos[smp] + sampleHeader.headerSize);
