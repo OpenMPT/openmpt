@@ -195,18 +195,28 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		if(sample.nLoopEnd > sample.nLoopStart) sample.uFlags.set(CHN_LOOP);
 		sample.SanitizeLoops();
-		file.Seek(samplePos[smp] + sampleHeader.headerSize);
-		SampleIO(
-			(sampleHeader.flags & PLMSampleHeader::smp16Bit) ? SampleIO::_16bit : SampleIO::_8bit,
-			SampleIO::mono,
-			SampleIO::bigEndian,
-			SampleIO::unsignedPCM)
-			.ReadSample(sample, file);
+		
+		if(loadFlags & loadSampleData)
+		{
+			file.Seek(samplePos[smp] + sampleHeader.headerSize);
+			SampleIO(
+				(sampleHeader.flags & PLMSampleHeader::smp16Bit) ? SampleIO::_16bit : SampleIO::_8bit,
+				SampleIO::mono,
+				SampleIO::bigEndian,
+				SampleIO::unsignedPCM)
+				.ReadSample(sample, file);
+		}
 	}
 
 	Order.clear();
+	if(!(loadFlags & loadPatternData))
+	{
+		return true;
+	}
+
 	// PLM is basically one huge continuous pattern, so we split it up into smaller patterns.
 	const ROWINDEX rowsPerPat = 64;
+	uint32 maxPos = 0;
 
 	static const ModCommand::COMMAND effTrans[] =
 	{
@@ -246,6 +256,8 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		ORDERINDEX curOrd = ord.x / rowsPerPat;
 		ROWINDEX curRow = ord.x % rowsPerPat;
 		const CHANNELINDEX numChannels = std::min<CHANNELINDEX>(patHeader.numChannels, fileHeader.numChannels - ord.y);
+		const uint32 patternEnd = ord.x + patHeader.numRows;
+		maxPos = std::max(maxPos, patternEnd);
 
 		for(ROWINDEX r = 0; r < patHeader.numRows; r++, curRow++)
 		{
@@ -304,11 +316,10 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 					case 0x0C:	// Jump to end of order
 						{
-							uint16 target = ord.x + patHeader.numRows;
-							m->param = static_cast<ModCommand::PARAM>(target / rowsPerPat);
+							m->param = static_cast<ModCommand::PARAM>(patternEnd / rowsPerPat);
 							ModCommand *mBreak = Patterns[pat].GetpModCommand(curRow, m_nChannels - 1);
 							mBreak->command = CMD_PATTERNBREAK;
-							mBreak->param = static_cast<ModCommand::PARAM>(target % rowsPerPat);
+							mBreak->param = static_cast<ModCommand::PARAM>(patternEnd % rowsPerPat);
 						}
 						break;
 					case 0x0E:	// GUS Panning
@@ -339,6 +350,16 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				file.Skip(5 * (patHeader.numChannels - numChannels));
 			}
+		}
+	}
+	// Module ends with the last row of the last order item
+	ROWINDEX endPatSize = maxPos % rowsPerPat;
+	if(endPatSize > 0)
+	{
+		PATTERNINDEX endPat = Order[maxPos / rowsPerPat];
+		if(Patterns.IsValidPat(endPat))
+		{
+			Patterns[endPat].Resize(endPatSize);
 		}
 	}
 
