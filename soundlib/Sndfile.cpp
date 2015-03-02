@@ -1331,7 +1331,6 @@ MODTYPE CSoundFile::GetBestSaveFormat() const
 	case MOD_TYPE_DSM:
 	case MOD_TYPE_AMF:
 	case MOD_TYPE_MTM:
-	case MOD_TYPE_PLM:
 		return MOD_TYPE_S3M;
 	case MOD_TYPE_AMS:
 	case MOD_TYPE_AMS2:
