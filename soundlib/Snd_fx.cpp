@@ -951,7 +951,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		// Special XM hack (also applies to MOD / S3M)
 		// Test case: PortaSmpChange.mod, PortaSmpChange.s3m
 		if((!instrumentChanged && (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)) && pIns)
-			|| (GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)))
+			|| (GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M | MOD_TYPE_PLM)))
 		{
 			// FT2 doesn't change the sample in this case,
 			// but still uses the sample info from the old one (bug?)
@@ -3351,8 +3351,8 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param)
 {
 	pChn->dwFlags.set(CHN_PORTAMENTO);
 
-	//IT compatibility 03
-	if(!m_SongFlags[SONG_ITCOMPATGXX] && IsCompatibleMode(TRK_IMPULSETRACKER))
+	//IT compatibility 03: Share effect memory with portamento up/down
+	if((!m_SongFlags[SONG_ITCOMPATGXX] && IsCompatibleMode(TRK_IMPULSETRACKER)) || GetType() == MOD_TYPE_PLM)
 	{
 		if(param == 0) param = pChn->nOldPortaUpDown;
 		pChn->nOldPortaUpDown = param;
