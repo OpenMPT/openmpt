@@ -674,6 +674,9 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleCenterLoopEnd, 1917, _T("Center loop end in view"));
 	DefineKeyCommand(kcSampleCenterSustainStart, 1918, _T("Center sustain loop start in view"));
 	DefineKeyCommand(kcSampleCenterSustainEnd, 1919, _T("Center sustain loop end in view"));
+	DefineKeyCommand(kcInstrumentEnvelopeLoad, 1920, _T("Load Envelope"));
+	DefineKeyCommand(kcInstrumentEnvelopeSave, 1921, _T("Save Envelope"));
+
 
 
 	// Add new key commands here.

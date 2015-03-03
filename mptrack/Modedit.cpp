@@ -17,6 +17,7 @@
 #include "modsmp_ctrl.h"
 #include "../common/misc_util.h"
 #include "../common/StringFixer.h"
+#include "../common/mptFileIO.h"
 // VST cloning
 #include "Vstplug.h"
 #include "VstPresets.h"
@@ -225,6 +226,10 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 		{
 			m_SndFile.ChnSettings[nChn] = settings[newOrder[nChn]];
 			m_SndFile.m_PlayState.Chn[nChn] = chns[newOrder[nChn]];
+			if(chns[newOrder[nChn]].nMasterChn > 0 && chns[newOrder[nChn]].nMasterChn <= nRemainingChannels)
+			{
+				m_SndFile.m_PlayState.Chn[nChn].nMasterChn = newOrder[chns[newOrder[nChn]].nMasterChn - 1] + 1;
+			}
 			if(recordStates[newOrder[nChn]] == 1) Record1Channel(nChn, true);
 			if(recordStates[newOrder[nChn]] == 2) Record2Channel(nChn, true);
 			m_SndFile.m_bChannelMuteTogglePending[nChn] = chnMutePendings[newOrder[nChn]];
@@ -989,50 +994,119 @@ BOOL CModDoc::ShrinkPattern(PATTERNINDEX nPattern)
 /////////////////////////////////////////////////////////////////////////////////////////
 // Copy/Paste envelope
 
-static LPCSTR pszEnvHdr = "Modplug Tracker Envelope\r\n";
-static LPCSTR pszEnvFmt = "%d,%d,%d,%d,%d,%d,%d,%d\r\n";
+static const CHAR *pszEnvHdr = "ModPlug Tracker Envelope\r\n";
+static const CHAR *pszEnvFmt = "%d,%d,%d,%d,%d,%d,%d,%d\r\n";
 
-bool CModDoc::CopyEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
-//----------------------------------------------------------
+static bool EnvelopeToString(CStringA &s, const InstrumentEnvelope &env)
+//----------------------------------------------------------------------
 {
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	HANDLE hCpy;
-	CHAR s[4096];
-	ModInstrument *pIns;
-	DWORD dwMemSize;
-
-	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nIns]) || (!pMainFrm)) return false;
-	BeginWaitCursor();
-	pIns = m_SndFile.Instruments[nIns];
-	if(pIns == nullptr) return false;
-	
-	const InstrumentEnvelope &env = pIns->GetEnvelope(nEnv);
-
 	// We don't want to copy empty envelopes
 	if(env.nNodes == 0)
 	{
 		return false;
 	}
 
-	strcpy(s, pszEnvHdr);
-	wsprintf(s + strlen(s), pszEnvFmt, env.nNodes, env.nSustainStart, env.nSustainEnd, env.nLoopStart, env.nLoopEnd,
+	s.Preallocate(2048);
+	s = pszEnvHdr;
+	s.AppendFormat(pszEnvFmt, env.nNodes, env.nSustainStart, env.nSustainEnd, env.nLoopStart, env.nLoopEnd,
 		env.dwFlags[ENV_SUSTAIN] ? 1 : 0, env.dwFlags[ENV_LOOP] ? 1 : 0, env.dwFlags[ENV_CARRY] ? 1 : 0);
-	for (UINT i = 0; i < env.nNodes; i++)
+	for(uint32 i = 0; i < env.nNodes; i++)
 	{
-		if (strlen(s) >= sizeof(s)-32) break;
-		wsprintf(s+strlen(s), "%d,%d\r\n", env.Ticks[i], env.Values[i]);
+		s.AppendFormat("%d,%d\r\n", env.Ticks[i], env.Values[i]);
 	}
 
-	//Writing release node
-	if(strlen(s) < sizeof(s) - 32)
-		wsprintf(s+strlen(s), "%u\r\n", env.nReleaseNode);
+	// Writing release node
+	s.AppendFormat("%u\r\n", env.nReleaseNode);
+	return true;
+}
 
-	dwMemSize = strlen(s)+1;
+
+static bool StringToEnvelope(const std::string &s, InstrumentEnvelope &env, const CModSpecifications &specs)
+//----------------------------------------------------------------------------------------------------------
+{
+	uint32 susBegin = 0, susEnd = 0, loopBegin = 0, loopEnd = 0, bSus = 0, bLoop = 0, bCarry = 0, nPoints = 0, releaseNode = ENV_RELEASE_NODE_UNSET;
+	size_t length = s.size(), pos = strlen(pszEnvHdr);
+	if (length <= pos || mpt::strnicmp(s.c_str(), pszEnvHdr, pos - 2))
+	{
+		return false;
+	}
+	sscanf(&s[pos], pszEnvFmt, &nPoints, &susBegin, &susEnd, &loopBegin, &loopEnd, &bSus, &bLoop, &bCarry);
+	while (pos < length && s[pos] != '\r' && s[pos] != '\n') pos++;
+
+	nPoints = MIN(nPoints, specs.envelopePointsMax);
+	if (susEnd >= nPoints) susEnd = 0;
+	if (susBegin > susEnd) susBegin = susEnd;
+	if (loopEnd >= nPoints) loopEnd = 0;
+	if (loopBegin > loopEnd) loopBegin = loopEnd;
+
+	env.nNodes = nPoints;
+	env.nSustainStart = susBegin;
+	env.nSustainEnd = susEnd;
+	env.nLoopStart = loopBegin;
+	env.nLoopEnd = loopEnd;
+	env.nReleaseNode = releaseNode;
+	env.dwFlags.set(ENV_LOOP, bLoop != 0);
+	env.dwFlags.set(ENV_SUSTAIN, bSus != 0);
+	env.dwFlags.set(ENV_CARRY, bCarry != 0);
+	env.dwFlags.set(ENV_ENABLED, nPoints > 0);
+
+	int oldn = 0;
+	for (uint32 i = 0; i < nPoints; i++)
+	{
+		while (pos < length && (s[pos] < '0' || s[pos] > '9')) pos++;
+		if (pos >= length) break;
+		int n1 = atoi(&s[pos]);
+		while (pos < length && s[pos] != ',') pos++;
+		while (pos < length && (s[pos] < '0' || s[pos] > '9')) pos++;
+		if (pos >= length) break;
+		int n2 = atoi(&s[pos]);
+		if (n1 < oldn) n1 = oldn + 1;
+		Limit(n2, ENVELOPE_MIN, ENVELOPE_MAX);
+		env.Ticks[i] = (uint16)n1;
+		env.Values[i] = (uint8)n2;
+		oldn = n1;
+		while (pos < length && s[pos] != '\r' && s[pos] != '\n') pos++;
+		if (pos >= length) break;
+	}
+	env.Ticks[0] = 0;
+
+	// Read release node information.
+	env.nReleaseNode = ENV_RELEASE_NODE_UNSET;
+	if(pos < length)
+	{
+		uint8 r = static_cast<uint8>(atoi(&s[pos]));
+		if(r == 0 || r >= nPoints || !specs.hasReleaseNode)
+			r = ENV_RELEASE_NODE_UNSET;
+		env.nReleaseNode = r;
+	}
+	return true;
+}
+
+
+bool CModDoc::CopyEnvelope(INSTRUMENTINDEX nIns, enmEnvelopeTypes nEnv)
+//---------------------------------------------------------------------
+{
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	HANDLE hCpy;
+	DWORD dwMemSize;
+
+	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nIns]) || (!pMainFrm)) return false;
+	BeginWaitCursor();
+	const ModInstrument *pIns = m_SndFile.Instruments[nIns];
+	if(pIns == nullptr) return false;
+	
+	CStringA s;
+	EnvelopeToString(s, pIns->GetEnvelope(nEnv));
+
+	dwMemSize = s.GetLength() + 1;
 	if ((pMainFrm->OpenClipboard()) && ((hCpy = GlobalAlloc(GMEM_MOVEABLE|GMEM_DDESHARE, dwMemSize))!=NULL))
 	{
 		EmptyClipboard();
 		LPBYTE p = (LPBYTE)GlobalLock(hCpy);
-		memcpy(p, s, dwMemSize);
+		if(p != nullptr)
+		{
+			memcpy(p, s.GetString(), dwMemSize);
+		}
 		GlobalUnlock(hCpy);
 		SetClipboardData (CF_TEXT, (HANDLE)hCpy);
 		CloseClipboard();
@@ -1042,12 +1116,35 @@ bool CModDoc::CopyEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 }
 
 
-bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
-//-----------------------------------------------------------
+bool CModDoc::SaveEnvelope(INSTRUMENTINDEX nIns, enmEnvelopeTypes nEnv, const mpt::PathString &fileName)
+//------------------------------------------------------------------------------------------------------
+{
+	if (nIns < 1 || nIns > m_SndFile.m_nInstruments || !m_SndFile.Instruments[nIns]) return false;
+	BeginWaitCursor();
+	const ModInstrument *pIns = m_SndFile.Instruments[nIns];
+	if(pIns == nullptr) return false;
+	
+	CStringA s;
+	EnvelopeToString(s, pIns->GetEnvelope(nEnv));
+
+	FILE *f = mpt_fopen(fileName, "wb");
+	if(f == nullptr)
+	{
+		EndWaitCursor();
+		return false;
+	}
+	fwrite(s.GetString(), s.GetLength(), 1, f);
+	fclose(f);
+	EndWaitCursor();
+	return true;
+}
+
+
+bool CModDoc::PasteEnvelope(INSTRUMENTINDEX nIns, enmEnvelopeTypes nEnv)
+//----------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-
-	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nIns]) || (!pMainFrm)) return false;
+	if (nIns < 1 || nIns > m_SndFile.m_nInstruments || !m_SndFile.Instruments[nIns] || !pMainFrm) return false;
 	BeginWaitCursor();
 	if (!pMainFrm->OpenClipboard())
 	{
@@ -1057,67 +1154,29 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 	HGLOBAL hCpy = ::GetClipboardData(CF_TEXT);
 	LPCSTR p;
 	bool result = false;
-	if ((hCpy) && ((p = (LPSTR)GlobalLock(hCpy)) != NULL))
+	if ((hCpy) && ((p = (LPSTR)GlobalLock(hCpy)) != nullptr))
 	{
-		ModInstrument *pIns = m_SndFile.Instruments[nIns];
-
-		UINT susBegin = 0, susEnd = 0, loopBegin = 0, loopEnd = 0, bSus = 0, bLoop = 0, bCarry = 0, nPoints = 0, releaseNode = ENV_RELEASE_NODE_UNSET;
-		DWORD dwMemSize = GlobalSize(hCpy), dwPos = strlen(pszEnvHdr);
-		if ((dwMemSize > dwPos) && (!mpt::strnicmp(p, pszEnvHdr, dwPos - 2)))
-		{
-			sscanf(p + dwPos, pszEnvFmt, &nPoints, &susBegin, &susEnd, &loopBegin, &loopEnd, &bSus, &bLoop, &bCarry);
-			while ((dwPos < dwMemSize) && (p[dwPos] != '\r') && (p[dwPos] != '\n')) dwPos++;
-
-			nPoints = MIN(nPoints, m_SndFile.GetModSpecifications().envelopePointsMax);
-			if (susEnd >= nPoints) susEnd = 0;
-			if (susBegin > susEnd) susBegin = susEnd;
-			if (loopEnd >= nPoints) loopEnd = 0;
-			if (loopBegin > loopEnd) loopBegin = loopEnd;
-
-			InstrumentEnvelope &env = pIns->GetEnvelope(nEnv);
-
-			env.nNodes = nPoints;
-			env.nSustainStart = susBegin;
-			env.nSustainEnd = susEnd;
-			env.nLoopStart = loopBegin;
-			env.nLoopEnd = loopEnd;
-			env.nReleaseNode = releaseNode;
-			env.dwFlags.set(ENV_LOOP, bLoop != 0);
-			env.dwFlags.set(ENV_SUSTAIN, bSus != 0);
-			env.dwFlags.set(ENV_CARRY, bCarry != 0);
-			env.dwFlags.set(ENV_ENABLED, nPoints > 0);
-
-			int oldn = 0;
-			for (UINT i=0; i<nPoints; i++)
-			{
-				while ((dwPos < dwMemSize) && ((p[dwPos] < '0') || (p[dwPos] > '9'))) dwPos++;
-				if (dwPos >= dwMemSize) break;
-				int n1 = atoi(p+dwPos);
-				while ((dwPos < dwMemSize) && (p[dwPos] != ',')) dwPos++;
-				while ((dwPos < dwMemSize) && ((p[dwPos] < '0') || (p[dwPos] > '9'))) dwPos++;
-				if (dwPos >= dwMemSize) break;
-				int n2 = atoi(p+dwPos);
-				if (n1 < oldn) n1 = oldn + 1;
-				env.Ticks[i] = (WORD)n1;
-				env.Values[i] = (BYTE)n2;
-				oldn = n1;
-				while ((dwPos < dwMemSize) && (p[dwPos] != '\r') && (p[dwPos] != '\n')) dwPos++;
-				if (dwPos >= dwMemSize) break;
-			}
-
-			//Read releasenode information.
-			if(dwPos < dwMemSize)
-			{
-				BYTE r = static_cast<BYTE>(atoi(p + dwPos));
-				if(r == 0 || r >= nPoints || !m_SndFile.GetModSpecifications().hasReleaseNode)
-					r = ENV_RELEASE_NODE_UNSET;
-				env.nReleaseNode = r;
-			}
-		}
+		std::string data(p, p + GlobalSize(hCpy));
 		GlobalUnlock(hCpy);
 		CloseClipboard();
-		result = true;
+
+		result = StringToEnvelope(data, m_SndFile.Instruments[nIns]->GetEnvelope(nEnv), m_SndFile.GetModSpecifications());
 	}
+	EndWaitCursor();
+	return result;
+}
+
+
+bool CModDoc::LoadEnvelope(INSTRUMENTINDEX nIns, enmEnvelopeTypes nEnv, const mpt::PathString &fileName)
+//------------------------------------------------------------------------------------------------------
+{
+	InputFile f(fileName);
+	if (nIns < 1 || nIns > m_SndFile.m_nInstruments || !m_SndFile.Instruments[nIns] || !f.IsValid()) return false;
+	BeginWaitCursor();
+	FileReader file = GetFileReader(f);
+	std::string data;
+	file.ReadNullString(data, 1 << 20);
+	bool result = StringToEnvelope(data, m_SndFile.Instruments[nIns]->GetEnvelope(nEnv), m_SndFile.GetModSpecifications());
 	EndWaitCursor();
 	return result;
 }
