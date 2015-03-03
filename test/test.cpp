@@ -102,7 +102,7 @@ void DoTests()
 
 		// set path prefix for test files (if provided)
 		std::vector<WCHAR> buf(GetEnvironmentVariableW(L"srcdir", NULL, 0) + 1);
-		if(GetEnvironmentVariableW(L"srcdir", &buf[0], buf.size()) > 0)
+		if(GetEnvironmentVariableW(L"srcdir", &buf[0], static_cast<DWORD>(buf.size())) > 0)
 		{
 			pathprefix = &buf[0];
 		}
