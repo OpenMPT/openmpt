@@ -1500,7 +1500,7 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 			}
 			if(!LoadExternalSample(nSample, filename))
 			{
-				AddToLog("Unable to load sample: " + filename.ToLocale());
+				AddToLog(LogWarning, MPT_USTRING("Unable to load sample: ") + filename.ToUnicode());
 			}
 		} else
 		{
