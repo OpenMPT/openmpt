@@ -272,7 +272,7 @@ namespace Util
 {
 
 // Returns true iff Tdst can represent the value val.
-// Use as if(Util::TypeCanHold<uin8>(-1)).
+// Use as if(Util::TypeCanHoldValue<uint8>(-1)).
 template <typename Tdst, typename Tsrc>
 inline bool TypeCanHoldValue(Tsrc val)
 {
