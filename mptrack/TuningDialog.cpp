@@ -731,7 +731,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 				}
 			} else // scl import.
 			{
-				EnSclImport a = ImportScl(files[counter], fileName.ToCString());
+				EnSclImport a = ImportScl(files[counter], fileName.ToUnicode());
 				if (a != enSclImportOk)
 				{
 					if (a == enSclImportAddTuningFailure && m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
@@ -1466,20 +1466,20 @@ static inline SclFloat CentToRatio(const SclFloat& val)
 }
 
 
-CTuningDialog::EnSclImport CTuningDialog::ImportScl(const mpt::PathString &filename, LPCTSTR pszName)
-//---------------------------------------------------------------------------------------------------
+CTuningDialog::EnSclImport CTuningDialog::ImportScl(const mpt::PathString &filename, const mpt::ustring &name)
+//------------------------------------------------------------------------------------------------------------
 {
 	mpt::ifstream iStrm(filename, std::ios::in | std::ios::binary);
 	if(!iStrm)
 	{
 		return enSclImportFailUnableToOpenFile;
 	}
-	return ImportScl(iStrm, pszName);
+	return ImportScl(iStrm, name);
 }
 
 
-CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, LPCTSTR pszName)
-//---------------------------------------------------------------------------------------
+CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const mpt::ustring &name)
+//------------------------------------------------------------------------------------------------
 {
 	std::string str;
 	SkipCommentLines(iStrm, str);
@@ -1564,7 +1564,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, LPCTSTR
 		return enSclImportAddTuningFailure;
 	}
 
-	pT->SetName(pszName);
+	pT->SetName(mpt::ToLocale(name));
 
 	return enSclImportOk;
 }
