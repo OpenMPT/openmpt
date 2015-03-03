@@ -42,6 +42,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4244 /wd4267"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
@@ -120,6 +121,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4244 /wd4267"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
@@ -197,7 +199,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP"
+				AdditionalOptions="/wd4244 /wd4267 /MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
@@ -276,7 +278,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP"
+				AdditionalOptions="/wd4244 /wd4267 /MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
@@ -354,7 +356,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/GL- /MP"
+				AdditionalOptions="/wd4244 /wd4267 /GL- /MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
@@ -433,7 +435,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/GL- /MP"
+				AdditionalOptions="/wd4244 /wd4267 /GL- /MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
