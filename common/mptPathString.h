@@ -152,6 +152,7 @@ public:
 	mpt::ustring ToUnicode() const { return mpt::ToUnicode(path); }
 #if defined(MPT_WITH_CHARSET_LOCALE)
 	MPT_DEPRECATED_PATH static PathString FromLocale(const std::string &path) { return PathString(mpt::ToWide(mpt::CharsetLocale, path)); }
+	static PathString FromLocaleSilent(const std::string &path) { return PathString(mpt::ToWide(mpt::CharsetLocale, path)); }
 #endif
 	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToWide(mpt::CharsetUTF8, path)); }
 	static PathString FromWide(const std::wstring &path) { return PathString(path); }
@@ -189,6 +190,7 @@ public:
 #endif
 	mpt::ustring ToUnicode() const { return mpt::ToUnicode(mpt::CharsetLocale, path); }
 	static PathString FromLocale(const std::string &path) { return PathString(path); }
+	static PathString FromLocaleSilent(const std::string &path) { return PathString(path); }
 	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, path)); }
 #if MPT_WSTRING_CONVERT
 	static PathString FromWide(const std::wstring &path) { return PathString(mpt::ToCharset(mpt::CharsetLocale, path)); }

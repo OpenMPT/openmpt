@@ -1061,7 +1061,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				// Relative path in same folder or sub folder
 				filename = ".\\" + filename;
 			}
-			SetSamplePath(i + 1, mpt::PathString::FromLocale(filename));
+			SetSamplePath(i + 1, mpt::PathString::FromLocaleSilent(filename));
 #else
 			#if defined(MPT_WITH_CHARSET_LOCALE)
 				AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."), i, mpt::ToUnicode(mpt::CharsetLocale, filename)));

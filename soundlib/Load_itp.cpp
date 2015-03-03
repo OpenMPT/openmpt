@@ -149,7 +149,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		file.ReadString<mpt::String::maybeNullTerminated>(path, size);
 		if(version <= 0x00000102)
 		{
-			instrPaths[ins] = mpt::PathString::FromLocale(path);
+			instrPaths[ins] = mpt::PathString::FromLocaleSilent(path);
 		} else
 		{
 			instrPaths[ins] = mpt::PathString::FromUTF8(path);
@@ -264,7 +264,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		FileReader file = GetFileReader(f);
 		if(!ReadInstrumentFromFile(ins + 1, file, mayNormalize))
 		{
-			AddToLog("Unable to open instrument: " + instrPaths[ins].ToLocale());
+			AddToLog(LogWarning, MPT_USTRING("Unable to open instrument: ") + instrPaths[ins].ToUnicode());
 		}
 	}
 
