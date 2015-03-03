@@ -245,8 +245,10 @@ public:
 	BOOL ExpandPattern(PATTERNINDEX nPattern);
 	BOOL ShrinkPattern(PATTERNINDEX nPattern);
 
-	bool CopyEnvelope(UINT nIns, enmEnvelopeTypes nEnv);
-	bool PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv);
+	bool CopyEnvelope(INSTRUMENTINDEX nIns, enmEnvelopeTypes nEnv);
+	bool SaveEnvelope(INSTRUMENTINDEX nIns, enmEnvelopeTypes nEnv, const mpt::PathString &fileName);
+	bool PasteEnvelope(INSTRUMENTINDEX nIns, enmEnvelopeTypes nEnv);
+	bool LoadEnvelope(INSTRUMENTINDEX nIns, enmEnvelopeTypes nEnv, const mpt::PathString &fileName);
 
 	LRESULT ActivateView(UINT nIdView, DWORD dwParam);
 	void UpdateAllViews(CView *pSender, UpdateHint hint, CObject *pHint=NULL);

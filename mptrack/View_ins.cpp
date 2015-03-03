@@ -23,6 +23,7 @@
 #include "ScaleEnvPointsDlg.h"
 #include "../soundlib/MIDIEvents.h"
 #include "../common/StringFixer.h"
+#include "FileDialog.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -44,7 +45,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define ENV_LEFTBAR_CYBTN		22
 
 
-const UINT cLeftBarButtons[ENV_LEFTBAR_BUTTONS] =
+static const UINT cLeftBarButtons[ENV_LEFTBAR_BUTTONS] =
 {
 	ID_ENVSEL_VOLUME,
 	ID_ENVSEL_PANNING,
@@ -65,6 +66,9 @@ const UINT cLeftBarButtons[ENV_LEFTBAR_BUTTONS] =
 		ID_SEPARATOR,
 	ID_ENVELOPE_ZOOM_IN,
 	ID_ENVELOPE_ZOOM_OUT,
+		ID_SEPARATOR,
+	ID_ENVELOPE_LOAD,
+	ID_ENVELOPE_SAVE,
 };
 
 
@@ -103,6 +107,8 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_COMMAND(ID_ENVELOPE_VIEWGRID,		OnEnvToggleGrid) //rewbs.envRowGrid
 	ON_COMMAND(ID_ENVELOPE_ZOOM_IN,			OnEnvZoomIn)
 	ON_COMMAND(ID_ENVELOPE_ZOOM_OUT,		OnEnvZoomOut)
+	ON_COMMAND(ID_ENVELOPE_LOAD,			OnEnvLoad)
+	ON_COMMAND(ID_ENVELOPE_SAVE,			OnEnvSave)
 	ON_COMMAND(ID_ENVSEL_VOLUME,			OnSelectVolumeEnv)
 	ON_COMMAND(ID_ENVSEL_PANNING,			OnSelectPanningEnv)
 	ON_COMMAND(ID_ENVSEL_PITCH,				OnSelectPitchEnv)
@@ -155,6 +161,7 @@ void CViewInstrument::OnInitialUpdate()
 	CModScrollView::OnInitialUpdate();
 	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
 	UpdateScrollSize();
+	UpdateNcButtonState();
 }
 
 
@@ -752,6 +759,8 @@ void CViewInstrument::UpdateNcButtonState()
 		case ID_ENVELOPE_VIEWGRID:	if (m_bGrid) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_ZOOM_IN:	if (m_fZoom >= ENV_MAX_ZOOM) dwStyle |= NCBTNS_DISABLED; break;
 		case ID_ENVELOPE_ZOOM_OUT:	if (m_fZoom <= ENV_MIN_ZOOM) dwStyle |= NCBTNS_DISABLED; break;
+		case ID_ENVELOPE_LOAD:
+		case ID_ENVELOPE_SAVE:		if (GetInstrumentPtr() == nullptr) dwStyle |= NCBTNS_DISABLED; break;
 		}
 		if (m_nBtnMouseOver == i)
 		{
@@ -1261,6 +1270,8 @@ void CViewInstrument::DrawNcButton(CDC *pDC, UINT nBtn)
 		case ID_ENVELOPE_VIEWGRID:	nImage = IIMAGE_GRID; break;
 		case ID_ENVELOPE_ZOOM_IN:	nImage = (dwStyle & NCBTNS_DISABLED) ? IIMAGE_NOZOOMIN : IIMAGE_ZOOMIN; break;
 		case ID_ENVELOPE_ZOOM_OUT:	nImage = (dwStyle & NCBTNS_DISABLED) ? IIMAGE_NOZOOMOUT : IIMAGE_ZOOMOUT; break;
+		case ID_ENVELOPE_LOAD:		nImage = IIMAGE_LOAD; break;
+		case ID_ENVELOPE_SAVE:		nImage = IIMAGE_SAVE; break;
 		}
 		pDC->Draw3dRect(rect.left-1, rect.top-1, ENV_LEFTBAR_CXBTN+2, ENV_LEFTBAR_CYBTN+2, c3, c4);
 		pDC->Draw3dRect(rect.left, rect.top, ENV_LEFTBAR_CXBTN, ENV_LEFTBAR_CYBTN, c1, c2);
@@ -2219,6 +2230,8 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		case kcInstrumentNew:	SendCtrlMessage(IDC_INSTRUMENT_NEW); return wParam;
 
 		// envelope editor
+		case kcInstrumentEnvelopeLoad:					OnEnvLoad(); return wParam;
+		case kcInstrumentEnvelopeSave:					OnEnvSave(); return wParam;
 		case kcInstrumentEnvelopeZoomIn:				OnEnvZoomIn(); return wParam;
 		case kcInstrumentEnvelopeZoomOut:				OnEnvZoomOut(); return wParam;
 		case kcInstrumentEnvelopePointPrev:				EnvKbdSelectPrevPoint(); return wParam;
@@ -2525,6 +2538,49 @@ BOOL CViewInstrument::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	}
 
 	return CModScrollView::OnMouseWheel(nFlags, zDelta, pt);
+}
+
+
+void CViewInstrument::OnEnvLoad()
+//-------------------------------
+{
+	if(GetInstrumentPtr() == nullptr) return;
+
+	FileDialog dlg = OpenFileDialog()
+		.DefaultExtension("envelope")
+		.ExtensionFilter("Instrument Envelopes (*.envelope)|*.envelope||")
+		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_INSTRUMENTS));
+	if(!dlg.Show(this)) return;
+	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_INSTRUMENTS);
+
+	if(GetDocument()->LoadEnvelope(m_nInstrument, m_nEnv, dlg.GetFirstFile()))
+	{
+		SetModified(InstrumentHint(m_nInstrument).Envelope(), true);
+	}
+}
+
+
+void CViewInstrument::OnEnvSave()
+//-------------------------------
+{
+	InstrumentEnvelope *env = GetEnvelopePtr();
+	if(env == nullptr || env->nNodes == 0)
+	{
+		MessageBeep(MB_ICONWARNING);
+		return;
+	}
+
+	FileDialog dlg = SaveFileDialog()
+		.DefaultExtension("envelope")
+		.ExtensionFilter("Instrument Envelopes (*.envelope)|*.envelope||")
+		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_INSTRUMENTS));
+	if(!dlg.Show(this)) return;
+	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_INSTRUMENTS);
+
+	if(!GetDocument()->SaveEnvelope(m_nInstrument, m_nEnv, dlg.GetFirstFile()))
+	{
+		Reporting::Error(L"Unable to save file " + dlg.GetFirstFile().ToWide(), L"OpenMPT", this);
+	}
 }
 
 

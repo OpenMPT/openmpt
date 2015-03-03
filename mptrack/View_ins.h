@@ -18,7 +18,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define INSSTATUS_SPLITCURSOR	0x04
 
 // Non-Client toolbar buttons
-#define ENV_LEFTBAR_BUTTONS		19
+#define ENV_LEFTBAR_BUTTONS		22
 
 //==========================================
 class CViewInstrument: public CModScrollView
@@ -204,7 +204,9 @@ protected:
 	afx_msg void OnEnvPanChanged();
 	afx_msg void OnEnvPitchChanged();
 	afx_msg void OnEnvFilterChanged();
-	afx_msg void OnEnvToggleGrid(); //rewbs.envRowGrid
+	afx_msg void OnEnvToggleGrid();
+	afx_msg void OnEnvLoad();
+	afx_msg void OnEnvSave();
 	afx_msg void OnEditCopy();
 	afx_msg void OnEditPaste();
 	afx_msg void OnEditSampleMap();
