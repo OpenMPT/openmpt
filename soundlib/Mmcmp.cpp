@@ -837,6 +837,7 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
 	file.Rewind();
 	unpackedData.clear();
 
+	if(!Util::TypeCanHoldValue<uint32>(file.GetLength())) return false;
 	if(!file.CanRead(PP20_PACKED_SIZE_MIN)) return false;
 	if(!file.ReadMagic("PP20")) return false;
 	file.Seek(file.GetLength() - 4);
@@ -847,7 +848,7 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
 	if(dstLen == 0) return false;
 	unpackedData.resize(dstLen);
 	file.Seek(4);
-	bool result = PP20_DoUnpack(reinterpret_cast<const uint8 *>(file.GetRawData()), file.GetLength() - 4, reinterpret_cast<uint8 *>(&(unpackedData[0])), dstLen);
+	bool result = PP20_DoUnpack(reinterpret_cast<const uint8 *>(file.GetRawData()), static_cast<uint32>(file.GetLength() - 4), reinterpret_cast<uint8 *>(&(unpackedData[0])), dstLen);
 
 	return result;
 }
