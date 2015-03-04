@@ -365,7 +365,15 @@ void File::Write(const void *Data,size_t Size)
 
 int File::Read(void *Data,size_t Size)
 {
-  return hFile->ReadRaw(hFile->file, static_cast<char *>(Data), Size);	// OPENMPT ADDITION
+	if(sizeof(size_t) >= sizeof(int)) // OPENMPT ADDITION
+	{ // OPENMPT ADDITION
+		const size_t maxReadSize = (1<<((sizeof(int)*8)-2))-1; // 30 bit // OPENMPT ADDITION
+		if(Size >= maxReadSize) // OPENMPT ADDITION
+		{ // OPENMPT ADDITION
+			Size = maxReadSize; // OPENMPT ADDITION
+		} // OPENMPT ADDITION
+	} // OPENMPT ADDITION
+  return static_cast<int>(hFile->ReadRaw(hFile->file, reinterpret_cast<char *>(Data), Size)); // OPENMPT ADDITION
   /*	// OPENMPT ADDITION
   int64 FilePos=0; // Initialized only to suppress some compilers warning.
 
