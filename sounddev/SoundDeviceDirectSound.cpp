@@ -203,7 +203,7 @@ bool CDSoundDevice::InternalOpen()
 	if(!FillWaveFormatExtensible(wfext, m_Settings)) return false;
 	WAVEFORMATEX *pwfx = &wfext.Format;
 
-	const std::size_t bytesPerFrame = m_Settings.GetBytesPerFrame();
+	const uint32 bytesPerFrame = static_cast<uint32>(m_Settings.GetBytesPerFrame());
 
 	DSBUFFERDESC dsbd;
 	DSBCAPS dsc;
@@ -359,7 +359,7 @@ void CDSoundDevice::InternalFillAudioBuffer()
 	{
 		// Refill the buffer at most twice so we actually sleep some time when CPU is overloaded.
 		
-		const std::size_t bytesPerFrame = m_Settings.GetBytesPerFrame();
+		const uint32 bytesPerFrame = static_cast<uint32>(m_Settings.GetBytesPerFrame());
 
 		DWORD dwPlay = 0;
 		DWORD dwWrite = 0;
@@ -381,7 +381,7 @@ void CDSoundDevice::InternalFillAudioBuffer()
 			m_dwLatency = (m_dwWritePos - dwPlay + m_nDSoundBufferSize) % m_nDSoundBufferSize;
 			m_dwLatency = (m_dwLatency + m_nDSoundBufferSize - 1) % m_nDSoundBufferSize + 1;
 			dwBytes = (dwPlay - m_dwWritePos + m_nDSoundBufferSize) % m_nDSoundBufferSize;
-			dwBytes = Clamp(dwBytes, (DWORD)0u, m_nDSoundBufferSize/2); // limit refill amount to half the buffer size
+			dwBytes = Clamp(dwBytes, DWORD(0), m_nDSoundBufferSize/2); // limit refill amount to half the buffer size
 		}
 		dwBytes = dwBytes / bytesPerFrame * bytesPerFrame; // truncate to full frame
 		if(dwBytes < bytesPerFrame)
