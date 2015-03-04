@@ -36,10 +36,10 @@ OPENMPT_NAMESPACE_BEGIN
 
 PatternClipboard PatternClipboard::instance;
 
-CString PatternClipboard::GetFileExtension(const char *ext)
-//---------------------------------------------------------
+CStringA PatternClipboard::GetFileExtension(const char *ext)
+//----------------------------------------------------------
 {
-	CString format(ext);
+	CStringA format(ext);
 	if(format.GetLength() > 3)
 	{
 		format.Truncate(3);
@@ -61,8 +61,8 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 	LimitMax(last, sndFile.Order.GetLength());
 
 	// Set up clipboard header.
-	CString data = "ModPlug Tracker " + GetFileExtension(sndFile.GetModSpecifications().fileExtension) + "\r\nOrders: ";
-	CString patternData;
+	CStringA data = "ModPlug Tracker " + GetFileExtension(sndFile.GetModSpecifications().fileExtension) + "\r\nOrders: ";
+	CStringA patternData;
 
 	// Pattern => Order list assignment
 	std::vector<PATTERNINDEX> patList(sndFile.Patterns.Size(), PATTERNINDEX_INVALID);
@@ -91,7 +91,7 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 				patList[pattern] = insertedPats++;
 
 				patternData.AppendFormat("Rows: %u\r\n", sndFile.Patterns[pattern].GetNumRows());
-				CString name = sndFile.Patterns[pattern].GetName().c_str();
+				CStringA name = sndFile.Patterns[pattern].GetName().c_str();
 				if(!name.IsEmpty())
 				{
 					patternData.Append("Name: " + name + "\r\n");
@@ -111,7 +111,7 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 	if(instance.activeClipboard < instance.clipboards.size())
 	{
 		// Copy to internal clipboard
-		CString desc;
+		CStringA desc;
 		desc.Format("%u Patterns (%u to %u)", last - first + 1, first, last);
 		instance.clipboards[instance.activeClipboard] = PatternClipboardElement(data, desc);
 	}
@@ -124,7 +124,7 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 bool PatternClipboard::Copy(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection)
 //-------------------------------------------------------------------------------------------
 {
-	CString data = CreateClipboardString(sndFile, pattern, selection);
+	CStringA data = CreateClipboardString(sndFile, pattern, selection);
 	if(data.IsEmpty())
 	{
 		return false;
@@ -136,7 +136,7 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRe
 	if(instance.activeClipboard < instance.clipboards.size())
 	{
 		// Copy to internal clipboard
-		CString desc;
+		CStringA desc;
 		desc.Format("%u rows, %u channels (pattern %u)", selection.GetNumRows(), selection.GetNumChannels(), pattern);
 		instance.clipboards[instance.activeClipboard] = PatternClipboardElement(data, desc);
 	}
@@ -146,8 +146,8 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRe
 
 
 // Create the clipboard text for a pattern selection
-CString PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection)
-//---------------------------------------------------------------------------------------------------------------
+CStringA PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection)
+//----------------------------------------------------------------------------------------------------------------
 {
 	if(!sndFile.Patterns.IsValidPat(pattern))
 	{
@@ -165,7 +165,7 @@ CString PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNINDE
 	const ROWINDEX startRow = selection.GetStartRow(), numRows = selection.GetNumRows();
 	const CHANNELINDEX startChan = selection.GetStartChannel(), numChans = selection.GetNumChannels();
 
-	CString data;
+	CStringA data;
 	data.Preallocate(numRows * (numChans * 12 + 2));
 
 	for(ROWINDEX row = 0; row < numRows; row++)
@@ -277,7 +277,7 @@ CString PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNINDE
 bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, PatternRect &pasteRect)
 //--------------------------------------------------------------------------------------------------------------------------------------
 {
-	CString data;
+	CStringA data;
 	if(!FromSystemClipboard(data) || !HandlePaste(sndFile, pastePos, mode, data, curOrder, pasteRect))
 	{
 		// Fall back to internal clipboard if there's no valid pattern data in the system clipboard.
@@ -300,8 +300,8 @@ bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, Paste
 
 
 // Parse clipboard string and perform the pasting operation.
-bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const CString &data, ORDERINDEX curOrder, PatternRect &pasteRect)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const CStringA &data, ORDERINDEX curOrder, PatternRect &pasteRect)
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	PATTERNINDEX pattern = pastePos.pattern;
 	if(sndFile.GetpModDoc() == nullptr)
@@ -324,11 +324,11 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 	{
 		startPos += 16;
 		// Check paste format
-		const CString format = data.Mid(startPos, 3);
+		const CStringA format = data.Mid(startPos, 3);
 
 		for(size_t i = 0; i < CountOf(ModSpecs::Collection); i++)
 		{
-			const CString ext = GetFileExtension(ModSpecs::Collection[i]->fileExtension);
+			const CStringA ext = GetFileExtension(ModSpecs::Collection[i]->fileExtension);
 			if(format == ext)
 			{
 				pasteFormat = ModSpecs::Collection[i]->internalType;
@@ -856,8 +856,8 @@ bool PatternClipboard::CanPaste()
 
 
 // System-specific clipboard functions
-bool PatternClipboard::ToSystemClipboard(const CString &data)
-//-----------------------------------------------------------
+bool PatternClipboard::ToSystemClipboard(const CStringA &data)
+//------------------------------------------------------------
 {
 	CMainFrame *mainFrame = CMainFrame::GetMainFrame();
 	if(mainFrame == nullptr || !mainFrame->OpenClipboard())
@@ -889,8 +889,8 @@ bool PatternClipboard::ToSystemClipboard(const CString &data)
 
 
 // System-specific clipboard functions
-bool PatternClipboard::FromSystemClipboard(CString &data)
-//-------------------------------------------------------
+bool PatternClipboard::FromSystemClipboard(CStringA &data)
+//--------------------------------------------------------
 {
 	CMainFrame *mainFrame = CMainFrame::GetMainFrame();
 	if(mainFrame == nullptr || !mainFrame->OpenClipboard())
@@ -1084,7 +1084,7 @@ void PatternClipboardDialog::OnEndEdit(bool apply)
 			return;
 		}
 
-		CString newName;
+		CStringA newName;
 		editNameBox.GetWindowText(newName);
 
 		PatternClipboard::instance.clipboards[sel].description = newName;

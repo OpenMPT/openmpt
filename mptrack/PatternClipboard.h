@@ -24,13 +24,13 @@ class PatternClipboardElement
 {
 public:
 	
-	CString content;
-	CString description;
+	CStringA content;
+	CStringA description;
 
 public:
 
 	PatternClipboardElement() { };
-	PatternClipboardElement(const CString &data, const CString &desc) : content(data), description(desc) { };
+	PatternClipboardElement(const CStringA &data, const CStringA &desc) : content(data), description(desc) { };
 };
 
 
@@ -91,18 +91,18 @@ protected:
 
 	PatternClipboard() : activeClipboard(0) { SetClipboardSize(1); };
 
-	static CString GetFileExtension(const char *ext);
+	static CStringA GetFileExtension(const char *ext);
 
 	// Create the clipboard text for a pattern selection
-	static CString CreateClipboardString(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
+	static CStringA CreateClipboardString(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
 
 	// Parse clipboard string and perform the pasting operation.
-	static bool HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const CString &data, ORDERINDEX curOrder, PatternRect &pasteRect);
+	static bool HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const CStringA &data, ORDERINDEX curOrder, PatternRect &pasteRect);
 
 	// System-specific clipboard functions
 	static bool ToSystemClipboard(const PatternClipboardElement &clipboard) { return ToSystemClipboard(clipboard.content); };
-	static bool ToSystemClipboard(const CString &data);
-	static bool FromSystemClipboard(CString &data);
+	static bool ToSystemClipboard(const CStringA &data);
+	static bool FromSystemClipboard(CStringA &data);
 };
 
 
