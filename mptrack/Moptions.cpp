@@ -463,7 +463,7 @@ void COptionsColors::OnColorSelChanged()
 	int sel = m_ComboItem.GetCurSel();
 	if (sel >= 0)
 	{
-		m_nColorItem = m_ComboItem.GetItemData(sel);
+		m_nColorItem = static_cast<uint32>(m_ComboItem.GetItemData(sel));
 		OnUpdateDialog();
 	}
 }
@@ -743,7 +743,7 @@ BOOL COptionsGeneral::OnInitDialog()
 {
 
 	CPropertyPage::OnInitDialog();
-	for(size_t i = 0; i < CountOf(generalOptionsList); i++)
+	for(int i = 0; i < CountOf(generalOptionsList); i++)
 	{
 		m_CheckList.AddString(generalOptionsList[i].name);
 		const int check = (TrackerSettings::Instance().m_dwPatternSetup & generalOptionsList[i].flag) != 0 ? BST_CHECKED : BST_UNCHECKED;
@@ -774,7 +774,7 @@ void COptionsGeneral::OnOK()
 	::GetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTS, szVstDir, MAX_PATH);
 	::GetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTPRESETS, szPresetDir, MAX_PATH);
 
-	for(size_t i = 0; i < CountOf(generalOptionsList); i++)
+	for(int i = 0; i < CountOf(generalOptionsList); i++)
 	{
 		const bool check = (m_CheckList.GetCheck(i) != BST_UNCHECKED);
 
