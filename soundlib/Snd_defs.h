@@ -40,7 +40,6 @@ typedef uint8 SEQUENCEINDEX;
 typedef uintptr_t SmpLength;
 
 
-#define MOD_AMIGAC2			0x1AB					// Period of Amiga middle-c
 const SmpLength MAX_SAMPLE_LENGTH	= 0x10000000;	// Sample length in *samples*
 													// Note: Sample size in bytes can be more than this (= 256 MB).
 
@@ -53,8 +52,8 @@ const PLUGINDEX MAX_MIXPLUGINS			= 250;
 
 const SEQUENCEINDEX MAX_SEQUENCES		= 50;
 
-const CHANNELINDEX MAX_BASECHANNELS		= 127;	// Max pattern channels.
-const CHANNELINDEX MAX_CHANNELS			= 256;	//200 // Maximum number of mixing channels.
+const CHANNELINDEX MAX_BASECHANNELS		= 127;	// Maximum pattern channels.
+const CHANNELINDEX MAX_CHANNELS			= 256;	// Maximum number of mixing channels.
 
 #define FREQ_FRACBITS		4		// Number of fractional bits in return value of CSoundFile::GetFreqFromPeriod()
 
@@ -276,10 +275,11 @@ enum SongFlags
 	SONG_POSJUMP		= 0x100000,		// Position jump encountered (internal flag, do not touch)
 	SONG_PT1XMODE		= 0x200000,		// ProTracker 1/2 playback mode
 	SONG_PLAYALLSONGS	= 0x400000,		// Play all subsongs consecutively (libopenmpt)
+	SONG_VBLANK_TIMING	= 0x800000,		// Use MOD VBlank timing (F21 and higher set speed instead of tempo)
 };
 DECLARE_FLAGSET(SongFlags)
 
-#define SONG_FILE_FLAGS	(SONG_EMBEDMIDICFG|SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_PT1XMODE)
+#define SONG_FILE_FLAGS	(SONG_EMBEDMIDICFG|SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_PT1XMODE|SONG_VBLANK_TIMING)
 #define SONG_PLAY_FLAGS (~SONG_FILE_FLAGS)
 
 // Global Options (Renderer)
@@ -361,14 +361,6 @@ enum PLUGVOLUMEHANDLING
 	PLUGIN_VOLUMEHANDLING_CUSTOM,
 	PLUGIN_VOLUMEHANDLING_MAX,
 };
-
-// filtermodes
-/*enum {
-	INST_FILTERMODE_DEFAULT=0,
-	INST_FILTERMODE_HIGHPASS,
-	INST_FILTERMODE_LOWPASS,
-	INST_NUMFILTERMODES
-};*/
 
 enum MidiChannel
 {
