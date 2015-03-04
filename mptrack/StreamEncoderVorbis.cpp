@@ -361,29 +361,35 @@ public:
 			StartStream();
 		}
 		ASSERT(inited && started);
-		float **buffer = vorbis.vorbis_analysis_buffer(&vd, count);
-		for(size_t frame = 0; frame < count; ++frame)
+		size_t countTotal = count;
+		while(countTotal > 0)
 		{
-			for(int channel = 0; channel < vorbis_channels; ++channel)
+			int countChunk = mpt::saturate_cast<int>(countTotal);
+			countTotal -= countChunk;
+			float **buffer = vorbis.vorbis_analysis_buffer(&vd, countChunk);
+			for(int frame = 0; frame < countChunk; ++frame)
 			{
-				buffer[channel][frame] = interleaved[frame*vorbis_channels+channel];
-			}
-		}
-		vorbis.vorbis_analysis_wrote(&vd, count);
-    while(vorbis.vorbis_analysis_blockout(&vd, &vb) == 1)
-		{
-      vorbis.vorbis_analysis(&vb, NULL);
-      vorbis.vorbis_bitrate_addblock(&vb);
-      while(vorbis.vorbis_bitrate_flushpacket(&vd, &op))
-			{
-        vorbis.ogg_stream_packetin(&os, &op);
-				while(true)
+				for(int channel = 0; channel < vorbis_channels; ++channel)
 				{
-					int gotPage = vorbis.ogg_stream_pageout(&os, &og);
-					if(!gotPage) break;
-					WritePage();
+					buffer[channel][frame] = interleaved[frame*vorbis_channels+channel];
 				}
-      }
+			}
+			vorbis.vorbis_analysis_wrote(&vd, countChunk);
+			while(vorbis.vorbis_analysis_blockout(&vd, &vb) == 1)
+			{
+				vorbis.vorbis_analysis(&vb, NULL);
+				vorbis.vorbis_bitrate_addblock(&vb);
+				while(vorbis.vorbis_bitrate_flushpacket(&vd, &op))
+				{
+					vorbis.ogg_stream_packetin(&os, &op);
+					while(true)
+					{
+						int gotPage = vorbis.ogg_stream_pageout(&os, &og);
+						if(!gotPage) break;
+						WritePage();
+					}
+				}
+			}
     }
 	}
 	virtual void Finalize()
