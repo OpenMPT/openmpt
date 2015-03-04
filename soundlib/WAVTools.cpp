@@ -257,29 +257,9 @@ void WAVSampleLoop::ConvertToWAV(SmpLength start, SmpLength end, bool bidi)
 // WAV Writing
 
 
-// Output to file: Initialize with filename.
-WAVWriter::WAVWriter(const mpt::PathString &filename) : f(nullptr), fileOwned(false), s(nullptr), memory(nullptr), memSize(0)
-//---------------------------------------------------------------------------------------------------------------------------
-{
-	f = mpt_fopen(filename, "w+b");
-	fileOwned = true;
-	Init();
-}
-
-
-// Output to file: Initialize with FILE*.
-WAVWriter::WAVWriter(FILE *file) : f(nullptr), fileOwned(false), s(nullptr), memory(nullptr), memSize(0)
-//------------------------------------------------------------------------------------------------------
-{
-	f = file;
-	fileOwned = false;
-	Init();
-}
-
-
 // Output to stream: Initialize with std::ostream*.
-WAVWriter::WAVWriter(std::ostream *stream) : f(nullptr), fileOwned(false), s(nullptr), memory(nullptr), memSize(0)
-//----------------------------------------------------------------------------------------------------------------
+WAVWriter::WAVWriter(std::ostream *stream) : s(nullptr), memory(nullptr), memSize(0)
+//----------------------------------------------------------------------------------
 {
 	s = stream;
 	Init();
@@ -287,8 +267,8 @@ WAVWriter::WAVWriter(std::ostream *stream) : f(nullptr), fileOwned(false), s(nul
 
 
 // Output to clipboard: Initialize with pointer to memory and size of reserved memory.
-WAVWriter::WAVWriter(void *mem, size_t size) : f(nullptr), fileOwned(false), s(nullptr), memory(static_cast<uint8 *>(mem)), memSize(size)
-//---------------------------------------------------------------------------------------------------------------------------------------
+WAVWriter::WAVWriter(void *mem, size_t size) : s(nullptr), memory(static_cast<uint8 *>(mem)), memSize(size)
+//----------------------------------------------------------------------------------------------------------
 {
 	Init();
 }
@@ -329,21 +309,6 @@ size_t WAVWriter::Finalize()
 	Seek(0);
 	Write(fileHeader);
 
-	if(f != nullptr)
-	{
-#ifdef _DEBUG
-		fseek(f, 0, SEEK_END);
-		size_t realSize = static_cast<size_t>(ftell(f));
-		MPT_ASSERT(totalSize == realSize);
-#endif
-		if(fileOwned)
-		{
-			fclose(f);
-			fileOwned = false;
-		}
-	}
-
-	f = nullptr;
 	s = nullptr;
 	memory = nullptr;
 
@@ -397,10 +362,7 @@ void WAVWriter::Seek(size_t pos)
 	position = pos;
 	totalSize = std::max(totalSize, position);
 
-	if(f != nullptr)
-	{
-		fseek(f, position, SEEK_SET);
-	} else if(s != nullptr)
+	if(s != nullptr)
 	{
 		s->seekp(position);
 	}
@@ -411,10 +373,7 @@ void WAVWriter::Seek(size_t pos)
 void WAVWriter::Write(const void *data, size_t numBytes)
 //------------------------------------------------------
 {
-	if(f != nullptr)
-	{
-		fwrite(data, numBytes, 1, f);
-	} else if(s != nullptr)
+	if(s != nullptr)
 	{
 		s->write(static_cast<const char*>(data), numBytes);
 	} else if(memory != nullptr)

@@ -463,7 +463,13 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const
 //----------------------------------------------------------------------------------------
 {
-	WAVWriter file(filename);
+	mpt::ofstream f(filename, std::ios::binary);
+	if(!f)
+	{
+		return false;
+	}
+
+	WAVWriter file(&f);
 
 	if(!file.IsValid())
 	{
@@ -480,7 +486,7 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filen
 		sample.uFlags[CHN_STEREO] ? SampleIO::stereoInterleaved : SampleIO::mono,
 		SampleIO::littleEndian,
 		sample.uFlags[CHN_16BIT] ? SampleIO::signedPCM : SampleIO::unsignedPCM)
-		.WriteSample(file.GetFile(), sample));
+		.WriteSample(f, sample));
 
 	file.WriteLoopInformation(sample);
 	file.WriteExtraInformation(sample, GetType());
@@ -504,8 +510,11 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filen
 bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const
 //----------------------------------------------------------------------------------------
 {
-	FILE *f;
-	if((f = mpt_fopen(filename, "wb")) == NULL) return false;
+	mpt::ofstream f(filename, std::ios::binary);
+	if(!f)
+	{
+		return false;
+	}
 
 	const ModSample &sample = Samples[nSample];
 	SampleIO(
@@ -515,7 +524,6 @@ bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, const mpt::PathString &filen
 		SampleIO::signedPCM)
 		.WriteSample(f, sample);
 
-	fclose(f);
 	return true;
 }
 

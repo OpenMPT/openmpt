@@ -169,6 +169,10 @@ public:
 	size_t ReadSample(ModSample &sample, FileReader &file) const;
 
 #ifndef MODPLUG_NO_FILESAVE
+	// Optionally write a sample to file
+	size_t WriteSample(std::ostream *f, const ModSample &sample, SmpLength maxSamples = 0) const;
+	// Write a sample to file
+	size_t WriteSample(std::ostream &f, const ModSample &sample, SmpLength maxSamples = 0) const;
 	// Write a sample to file
 	size_t WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamples = 0) const;
 #endif // MODPLUG_NO_FILESAVE
