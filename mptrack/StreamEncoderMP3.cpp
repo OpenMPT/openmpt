@@ -872,7 +872,7 @@ public:
 			}
 			DWORD size = 0;
 			buf.resize(blade_outputbytes);
-			blade.beEncodeChunk(bestream, samples.size(), &samples[0], (PBYTE)&buf[0], &size);
+			blade.beEncodeChunk(bestream, static_cast<DWORD>(samples.size()), &samples[0], (PBYTE)&buf[0], &size);
 			ASSERT(size <= buf.size());
 			buf.resize(size);
 			WriteBuffer();
@@ -891,7 +891,7 @@ public:
 			blade_sampleBuf.clear();
 			DWORD size = 0;
 			buf.resize(blade_outputbytes);
-			blade.beEncodeChunk(bestream, samples.size(), &samples[0], (PBYTE)&buf[0], &size);
+			blade.beEncodeChunk(bestream, static_cast<DWORD>(samples.size()), &samples[0], (PBYTE)&buf[0], &size);
 			ASSERT(size <= buf.size());
 			buf.resize(size);
 			WriteBuffer();
@@ -1366,9 +1366,9 @@ public:
 				acm_sampleBuf.pop_front();
 			}
 			std::memcpy(&acmSrcBuf[0], &samples[0], acmSrcBuf.size());
-			acmHeader.cbSrcLength = acmSrcBuf.size();
+			acmHeader.cbSrcLength = static_cast<DWORD>(acmSrcBuf.size());
 			acmHeader.cbSrcLengthUsed = 0;
-			acmHeader.cbDstLength = acmDstBuf.size();
+			acmHeader.cbDstLength = static_cast<DWORD>(acmDstBuf.size());
 			acmHeader.cbDstLengthUsed = 0;
 			acmStreamConvert(acmStream, &acmHeader, ACM_STREAMCONVERTF_BLOCKALIGN);
 			if(acmHeader.cbDstLengthUsed)
@@ -1405,9 +1405,9 @@ public:
 			}
 			std::memcpy(&acmSrcBuf[0], &samples[0], samples.size() * sizeof(int16));
 		}
-		acmHeader.cbSrcLength = samples.size() * sizeof(int16);
+		acmHeader.cbSrcLength = static_cast<DWORD>(samples.size() * sizeof(int16));
 		acmHeader.cbSrcLengthUsed = 0;
-		acmHeader.cbDstLength = acmDstBuf.size();
+		acmHeader.cbDstLength = static_cast<DWORD>(acmDstBuf.size());
 		acmHeader.cbDstLengthUsed = 0;
 		acmStreamConvert(acmStream, &acmHeader, ACM_STREAMCONVERTF_END);
 		if(acmHeader.cbDstLengthUsed)

@@ -233,7 +233,7 @@ private:
 		const char *version_string = opus.opus_get_version_string ? opus.opus_get_version_string() : nullptr;
 		if(version_string)
 		{
-			PushUint32LE(opus_comments_buf, std::strlen(version_string));
+			PushUint32LE(opus_comments_buf, mpt::saturate_cast<uint32>(std::strlen(version_string)));
 			for(/*nothing*/; *version_string; ++version_string)
 			{
 				opus_comments_buf.push_back(*version_string);
@@ -242,17 +242,17 @@ private:
 		{
 			PushUint32LE(opus_comments_buf, 0);
 		}
-		PushUint32LE(opus_comments_buf, opus_comments.size());
+		PushUint32LE(opus_comments_buf, mpt::saturate_cast<uint32>(opus_comments.size()));
 		for(std::vector<std::string>::const_iterator it = opus_comments.begin(); it != opus_comments.end(); ++it)
 		{
-			PushUint32LE(opus_comments_buf, it->length());
+			PushUint32LE(opus_comments_buf, mpt::saturate_cast<uint32>(it->length()));
 			for(std::size_t i = 0; i < it->length(); ++i)
 			{
 				opus_comments_buf.push_back((*it)[i]);
 			}
 		}
 		op.packet = &opus_comments_buf[0];
-		op.bytes = opus_comments_buf.size();
+		op.bytes = mpt::saturate_cast<long>(opus_comments_buf.size());
 		op.b_o_s = 0;
 		op.e_o_s = 0;
 		op.granulepos = 0;
@@ -284,7 +284,7 @@ private:
 			WriteInterleaved(opus_extrasamples, &extraBuf[0]);
 
 			int cur_frame_size = 960 * opus_samplerate / 48000;
-			int last_frame_size = (opus_sampleBuf.size() / opus_channels) * opus_samplerate / 48000;
+			int last_frame_size = (static_cast<int>(opus_sampleBuf.size()) / opus_channels) * opus_samplerate / 48000;
 
 			opus_frameBuf.resize(opus_channels * cur_frame_size);
 			for(size_t sample = 0; sample < opus_frameBuf.size(); ++sample)
@@ -299,7 +299,7 @@ private:
 			opus_sampleBuf.clear();
 
 			opus_frameData.resize(65536);
-			opus_frameData.resize(opus.opus_multistream_encode_float(st, &opus_frameBuf[0], cur_frame_size, &opus_frameData[0], opus_frameData.size()));
+			opus_frameData.resize(opus.opus_multistream_encode_float(st, &opus_frameBuf[0], cur_frame_size, &opus_frameData[0], static_cast<opus_int32>(opus_frameData.size())));
 			enc_granulepos += last_frame_size * 48000 / opus_samplerate;
 
 			op.b_o_s = 0;
@@ -307,7 +307,7 @@ private:
 			op.granulepos = enc_granulepos;
 			op.packetno = packetno;
 			op.packet = &opus_frameData[0];
-			op.bytes = opus_frameData.size();
+			op.bytes = static_cast<long>(opus_frameData.size());
 			opus.ogg_stream_packetin(&os, &op);
 
 			packetno++;
@@ -535,7 +535,7 @@ public:
 			}
 
 			opus_frameData.resize(65536);
-			opus_frameData.resize(opus.opus_multistream_encode_float(st, &opus_frameBuf[0], cur_frame_size, &opus_frameData[0], opus_frameData.size()));
+			opus_frameData.resize(opus.opus_multistream_encode_float(st, &opus_frameBuf[0], cur_frame_size, &opus_frameData[0], static_cast<opus_int32>(opus_frameData.size())));
 			enc_granulepos += cur_frame_size * 48000 / opus_samplerate;
 
 			op.b_o_s = 0;
@@ -543,7 +543,7 @@ public:
 			op.granulepos = enc_granulepos;
 			op.packetno = packetno;
 			op.packet = &opus_frameData[0];
-			op.bytes = opus_frameData.size();
+			op.bytes = static_cast<long>(opus_frameData.size());
 			opus.ogg_stream_packetin(&os, &op);
 
 			packetno++;

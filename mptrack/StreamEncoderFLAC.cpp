@@ -239,7 +239,12 @@ public:
 			}
 			break;
 		}
-		FLAC__stream_encoder_process_interleaved(encoder, &sampleBuf[0], frameCount);
+		while(frameCount > 0)
+		{
+			unsigned int frameCountChunk = mpt::saturate_cast<unsigned int>(frameCount);
+			FLAC__stream_encoder_process_interleaved(encoder, &sampleBuf[0], frameCountChunk);
+			frameCount -= frameCountChunk;
+		}
 	}
 	virtual void Finalize()
 	{
