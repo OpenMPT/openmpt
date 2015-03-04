@@ -329,7 +329,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 
 	// load old and messy stuff:
 
-	PatternClipboard::SetClipboardSize(conf.Read<int32>("Pattern Editor", "NumClipboards", PatternClipboard::GetClipboardSize()));
+	PatternClipboard::SetClipboardSize(conf.Read<int32>("Pattern Editor", "NumClipboards", mpt::saturate_cast<int32>(PatternClipboard::GetClipboardSize())));
 
 	// Update
 	{
@@ -845,7 +845,7 @@ void TrackerSettings::SaveSettings()
 	CMainFrame::GetMainFrame()->GetWindowPlacement(&wpl);
 	conf.Write<WINDOWPLACEMENT>("Display", "WindowPlacement", wpl);
 
-	conf.Write<uint32>("Pattern Editor", "NumClipboards", PatternClipboard::GetClipboardSize());
+	conf.Write<int32>("Pattern Editor", "NumClipboards", mpt::saturate_cast<int32>(PatternClipboard::GetClipboardSize()));
 
 	// Internet Update
 	{

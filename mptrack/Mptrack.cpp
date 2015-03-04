@@ -214,7 +214,7 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 	if ((lpszCommand) && (*lpszCommand) && (theApp.m_pMainWnd))
 	{
 		CHAR s[_MAX_PATH], *pszCmd, *pszData;
-		int len;
+		std::size_t len;
 
 		mpt::String::CopyN(s, lpszCommand);
 		len = strlen(s) - 1;
