@@ -386,9 +386,6 @@ class WAVWriter
 //=============
 {
 protected:
-	// When writing to file: File handle
-	FILE *f;
-	bool fileOwned;
 	// When writing to a stream: Stream pointer
 	std::ostream *s;
 	// When writing to memory: Memory address + length
@@ -405,10 +402,6 @@ protected:
 	RIFFChunk chunkHeader;
 
 public:
-	// Output to file: Initialize with filename. The created FILE* is owned by this instance.
-	WAVWriter(const mpt::PathString &filename);
-	// Output to file: Initialize with FILE*.
-	WAVWriter(FILE *file);
 	// Output to stream: Initialize with std::ostream*.
 	WAVWriter(std::ostream *stream);
 	// Output to clipboard: Initialize with pointer to memory and size of reserved memory.
@@ -417,7 +410,7 @@ public:
 	~WAVWriter();
 
 	// Check if anything can be written to the file.
-	bool IsValid() const { return f != nullptr || s != nullptr || memory != nullptr; }
+	bool IsValid() const { return s != nullptr || memory != nullptr; }
 
 	// Finalize the file by closing the last open chunk and updating the file header. Returns total size of file.
 	size_t Finalize();
@@ -426,8 +419,6 @@ public:
 
 	// Skip some bytes... For example after writing sample data.
 	void Skip(size_t numBytes) { Seek(position + numBytes); }
-	// Get file handle
-	FILE *GetFile() { return f; }
 	// Get position in file (not counting any changes done to the file from outside this class, i.e. through GetFile())
 	size_t GetPosition() const { return position; }
 

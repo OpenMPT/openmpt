@@ -592,9 +592,10 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 
 #ifndef MODPLUG_NO_FILESAVE
 
+
 // Write a sample to file
-size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamples) const
-//----------------------------------------------------------------------------------------
+size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength maxSamples) const
+//------------------------------------------------------------------------------------------------
 {
 	if(!sample.HasSampleData()) return 0;
 
@@ -640,11 +641,11 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 			bufcount++;
 			if(bufcount >= CountOf(buffer16))
 			{
-				if(f) fwrite(buffer16, 1, bufcount * 2, f);
+				if(f) mpt::IO::WriteRaw(*f, buffer16, bufcount * 2);
 				bufcount = 0;
 			}
 		}
-		if (bufcount) if(f) fwrite(buffer16, 1, bufcount * 2, f);
+		if (bufcount) if(f) mpt::IO::WriteRaw(*f, buffer16, bufcount * 2);
 	}
 
 	else if(GetBitDepth() == 8 && GetChannelFormat() == stereoSplit &&
@@ -672,11 +673,11 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 				}
 				if(bufcount >= CountOf(buffer8))
 				{
-					if(f) fwrite(buffer8, 1, bufcount, f);
+					if(f) mpt::IO::WriteRaw(*f, buffer8, bufcount);
 					bufcount = 0;
 				}
 			}
-			if (bufcount) if(f) fwrite(buffer8, 1, bufcount, f);
+			if (bufcount) if(f) mpt::IO::WriteRaw(*f, buffer8, bufcount);
 		}
 		len = numSamples * 2;
 	}
@@ -707,11 +708,11 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 				bufcount++;
 				if(bufcount >= CountOf(buffer16))
 				{
-					if(f) fwrite(buffer16, 1, bufcount * 2, f);
+					if(f) mpt::IO::WriteRaw(*f, buffer16, bufcount * 2);
 					bufcount = 0;
 				}
 			}
-			if (bufcount) if(f) fwrite(buffer16, 1, bufcount * 2, f);
+			if (bufcount) if(f) mpt::IO::WriteRaw(*f, buffer16, bufcount * 2);
 		}
 		len = numSamples * 4;
 	}
@@ -720,7 +721,7 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 	{
 		// Stereo signed interleaved
 		len = sample.GetSampleSizeInBytes();
-		if(f) fwrite(pSampleVoid, 1, len, f);
+		if(f) mpt::IO::WriteRaw(*f, pSampleVoid, len);
 	}
 
 	else if(GetBitDepth() == 8 && GetChannelFormat() == stereoInterleaved && GetEncoding() == unsignedPCM)
@@ -733,18 +734,17 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 			bufcount++;
 			if(bufcount >= CountOf(buffer8))
 			{
-				if(f) fwrite(buffer8, 1, bufcount, f);
+				if(f) mpt::IO::WriteRaw(*f, buffer8, bufcount);
 				bufcount = 0;
 			}
 		}
-		if (bufcount) if(f) fwrite(buffer8, 1, bufcount, f);
+		if (bufcount) if(f) mpt::IO::WriteRaw(*f, buffer8, bufcount);
 	}
 
 	else if(GetEncoding() == IT214 || GetEncoding() == IT215)
 	{
 		// IT2.14-encoded samples
-		mpt::FILE_ostream s(f);
-		ITCompression its(sample, GetEncoding() == IT215, f ? &s : nullptr);
+		ITCompression its(sample, GetEncoding() == IT215, f);
 		len = its.GetCompressedSize();
 	}
 
@@ -777,14 +777,32 @@ size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamp
 			}
 			if(bufcount >= CountOf(buffer8))
 			{
-				if(f) fwrite(buffer8, 1, bufcount, f);
+				if(f) mpt::IO::WriteRaw(*f, buffer8, bufcount);
 				bufcount = 0;
 			}
 		}
-		if (bufcount) if(f) fwrite(buffer8, 1, bufcount, f);
+		if (bufcount) if(f) mpt::IO::WriteRaw(*f, buffer8, bufcount);
 	}
 	return len;
 }
+
+
+// Write a sample to file
+size_t SampleIO::WriteSample(std::ostream &f, const ModSample &sample, SmpLength maxSamples) const
+//------------------------------------------------------------------------------------------------
+{
+	return WriteSample(&f, sample, maxSamples);
+}
+
+
+// Write a sample to file
+size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamples) const
+//----------------------------------------------------------------------------------------
+{
+	mpt::FILE_ostream s(f);
+	return WriteSample(f ? &s : nullptr, sample, maxSamples);
+}
+
 
 #endif // MODPLUG_NO_FILESAVE
 
