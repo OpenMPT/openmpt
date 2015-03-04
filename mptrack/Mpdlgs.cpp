@@ -443,7 +443,7 @@ void COptionsSoundcard::UpdateChannels()
 		m_CbnChannels.EnableWindow(TRUE);
 	}
 	m_CbnChannels.ResetContent();
-	UINT maxChannels = 0;
+	std::size_t maxChannels = 0;
 	if(m_CurrentDeviceDynamicCaps.channelNames.size() > 0)
 	{
 		maxChannels = std::min<std::size_t>(4, m_CurrentDeviceDynamicCaps.channelNames.size());
@@ -452,7 +452,7 @@ void COptionsSoundcard::UpdateChannels()
 		maxChannels = 4;
 	}
 	int sel = 0;
-	for(UINT channels = maxChannels; channels >= 1; channels /= 2)
+	for(std::size_t channels = maxChannels; channels >= 1; channels /= 2)
 	{
 		int ndx = m_CbnChannels.AddString(gszChnCfgNames[(channels+2)/2-1]);
 		m_CbnChannels.SetItemData(ndx, channels);
@@ -567,7 +567,7 @@ void COptionsSoundcard::UpdateChannelMapping()
 			combo->EnableWindow(TRUE);
 		}
 	}
-	int usedChannels = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
+	int usedChannels = static_cast<int>(m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel()));
 	if(m_Settings.ChannelMapping.GetNumHostChannels() != static_cast<uint32>(usedChannels))
 	{
 		// If the channel mapping is not valid for the selected number of channels, reset it to default identity mapping.
@@ -657,7 +657,7 @@ void COptionsSoundcard::OnChannelChanged(int channel)
 //---------------------------------------------------
 {
 	CComboBox *combo = &m_CbnChannelMapping[channel];
-	const int newChn = combo->GetItemData(combo->GetCurSel());
+	const LONG_PTR newChn = combo->GetItemData(combo->GetCurSel());
 	if(newChn == -1)
 	{
 		return;
@@ -672,13 +672,13 @@ void COptionsSoundcard::OnChannelChanged(int channel)
 			{
 				// find an unused channel
 				bool found = false;
-				std::size_t deviceChannel = 0;
-				for(; deviceChannel < m_CurrentDeviceDynamicCaps.channelNames.size(); ++deviceChannel)
+				int deviceChannel = 0;
+				for(; deviceChannel < static_cast<int>(m_CurrentDeviceDynamicCaps.channelNames.size()); ++deviceChannel)
 				{
 					bool used = false;
 					for(int hostChannel = 0; hostChannel < NUM_CHANNELCOMBOBOXES; ++hostChannel)
 					{
-						if((int)m_CbnChannelMapping[hostChannel].GetItemData(m_CbnChannelMapping[hostChannel].GetCurSel()) == (int)deviceChannel)
+						if(static_cast<int>(m_CbnChannelMapping[hostChannel].GetItemData(m_CbnChannelMapping[hostChannel].GetCurSel())) == deviceChannel)
 						{
 							used = true;
 							break;
@@ -813,11 +813,11 @@ void COptionsSoundcard::OnOK()
 	m_Settings.UseHardwareTiming = IsDlgButtonChecked(IDC_CHECK9) ? true : false;
 	// Mixing Freq
 	{
-		m_Settings.Samplerate = m_CbnMixingFreq.GetItemData(m_CbnMixingFreq.GetCurSel());
+		m_Settings.Samplerate = static_cast<uint32>(m_CbnMixingFreq.GetItemData(m_CbnMixingFreq.GetCurSel()));
 	}
 	// Channels
 	{
-		UINT n = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
+		DWORD_PTR n = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
 		m_Settings.Channels = static_cast<uint8>(n);
 		if((m_Settings.Channels != 1) && (m_Settings.Channels != 4))
 		{
@@ -826,8 +826,8 @@ void COptionsSoundcard::OnOK()
 	}
 	// SampleFormat
 	{
-		UINT n = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
-		m_Settings.sampleFormat = (SampleFormat)(n & 0xFF);
+		DWORD_PTR n = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
+		m_Settings.sampleFormat = static_cast<SampleFormat>(static_cast<int>(n & 0xFF));
 	}
 	// Dither
 	{
@@ -863,7 +863,7 @@ void COptionsSoundcard::OnOK()
 			for(int mch = 0; mch < numChannels; mch++)	// Host channels
 			{
 				CComboBox *combo = &m_CbnChannelMapping[mch];
-				channels[mch] = combo->GetItemData(combo->GetCurSel());
+				channels[mch] = static_cast<int32>(combo->GetItemData(combo->GetCurSel()));
 			}
 			m_Settings.ChannelMapping = SoundDevice::ChannelMapping(channels);
 		} else
@@ -998,7 +998,7 @@ BOOL COptionsMixer::OnInitDialog()
 	// Max Mixing Channels
 	{
 		m_CbnPolyphony.ResetContent();
-		for(std::size_t n = 0; n < CountOf(PolyphonyChannels); ++n)
+		for(int n = 0; n < CountOf(PolyphonyChannels); ++n)
 		{
 			m_CbnPolyphony.AddString(mpt::String::Print("%1 (%2)", PolyphonyChannels[n], PolyphonyNames[n]).c_str());
 			if(TrackerSettings::Instance().MixerMaxChannels == PolyphonyChannels[n])
@@ -1666,7 +1666,7 @@ void COptionsPlayer::UpdateDialog()
 		if (n != (m_Sliders[i].GetPos() & 0xFFFF)) m_Sliders[i].SetPos(n);
 		f2s(m_EQPreset.Freqs[i], s);
 		SetDlgItemText(IDC_TEXT1 + i, s);
-		for(size_t i = 0; i < CountOf(TrackerSettings::Instance().m_EqUserPresets); i++)
+		for(int i = 0; i < CountOf(TrackerSettings::Instance().m_EqUserPresets); i++)
 		{
 			SetDlgItemText(IDC_BUTTON1 + i,	TrackerSettings::Instance().m_EqUserPresets[i].szName);
 		}
@@ -1794,7 +1794,7 @@ BOOL CMidiSetupDlg::OnInitDialog()
 		{ "Record as MIDI Macros", atRecordAsMacro },
 	};
 
-	for(size_t i = 0; i < CountOf(aftertouchOptions); i++)
+	for(int i = 0; i < CountOf(aftertouchOptions); i++)
 	{
 		int item = m_ATBehaviour.AddString(aftertouchOptions[i].text);
 		m_ATBehaviour.SetItemData(item, aftertouchOptions[i].option);
@@ -1838,7 +1838,7 @@ void CMidiSetupDlg::OnOK()
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
 		int n = combo->GetCurSel();
-		if (n >= 0) m_nMidiDevice = combo->GetItemData(n);
+		if (n >= 0) m_nMidiDevice = static_cast<LONG>(combo->GetItemData(n));
 	}
 
 	TrackerSettings::Instance().aftertouchBehaviour = static_cast<RecordAftertouchOptions>(m_ATBehaviour.GetItemData(m_ATBehaviour.GetCurSel()));
