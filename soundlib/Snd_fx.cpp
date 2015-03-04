@@ -379,14 +379,19 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				}
 #endif	// MODPLUG_TRACKER
 				if (!param) break;
-				// Allow high speed values here for VBlank MODs. (Maybe it would be better to have a "VBlank MOD" flag somewhere? Is it worth the effort?)
-				if ((param <= GetModSpecifications().speedMax) || GetType() == MOD_TYPE_MOD)
+				if (param <= GetModSpecifications().speedMax)
 				{
 					memory.state.m_nMusicSpeed = param;
 				}
 				break;
 			// Set Tempo
 			case CMD_TEMPO:
+				if(m_SongFlags[SONG_VBLANK_TIMING])
+				{
+					// ProTracker MODs with VBlank timing: All Fxx parameters set the tick count.
+					if(param != 0) memory.state.m_nMusicSpeed = param;
+					break;
+				}
 				if ((adjustMode & eAdjust) && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
 				{
 					if (param) pChn->nOldTempo = param; else param = pChn->nOldTempo;
@@ -2229,7 +2234,7 @@ bool CSoundFile::ProcessEffects()
 			if(retrigEnv) //Case: instrument with no note data.
 			{
 				//IT compatibility: Instrument with no note.
-				if(IsCompatibleMode(TRK_IMPULSETRACKER))
+				if(IsCompatibleMode(TRK_IMPULSETRACKER) || GetType() == MOD_TYPE_PLM)
 				{
 					if(GetNumInstruments())
 					{
@@ -2586,28 +2591,34 @@ bool CSoundFile::ProcessEffects()
 
 		// Set Tempo
 		case CMD_TEMPO:
+			if(m_SongFlags[SONG_VBLANK_TIMING])
+			{
+				// ProTracker MODs with VBlank timing: All Fxx parameters set the tick count.
+				if(m_SongFlags[SONG_FIRSTTICK] && param != 0) SetSpeed(param);
+				break;
+			}
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
-				m = nullptr;
-				if (m_PlayState.m_nRow < Patterns[m_PlayState.m_nPattern].GetNumRows()-1)
+			m = nullptr;
+			if (m_PlayState.m_nRow < Patterns[m_PlayState.m_nPattern].GetNumRows()-1)
+			{
+				m = Patterns[m_PlayState.m_nPattern].GetpModCommand(m_PlayState.m_nRow + 1, nChn);
+			}
+			if (m && m->command == CMD_XPARAM)
+			{
+				if ((GetType() & MOD_TYPE_XM))
 				{
-					m = Patterns[m_PlayState.m_nPattern].GetpModCommand(m_PlayState.m_nRow + 1, nChn);
+					param -= 0x20; //with XM, 0x20 is the lowest tempo. Anything below changes ticks per row.
 				}
-				if (m && m->command == CMD_XPARAM)
-				{
-					if ((GetType() & MOD_TYPE_XM))
-					{
-						param -= 0x20; //with XM, 0x20 is the lowest tempo. Anything below changes ticks per row.
-					}
-					param = (param << 8) + m->param;
-				}
+				param = (param << 8) + m->param;
+			}
 // -! NEW_FEATURE#0010
-				if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
-				{
-					if (param) pChn->nOldTempo = param; else param = pChn->nOldTempo;
-				}
-				if (param > GetModSpecifications().tempoMax) param = GetModSpecifications().tempoMax; // rewbs.merge: added check to avoid hyperspaced tempo!
-				SetTempo(param);
+			if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+			{
+				if (param) pChn->nOldTempo = param; else param = pChn->nOldTempo;
+			}
+			if (param > GetModSpecifications().tempoMax) param = GetModSpecifications().tempoMax; // rewbs.merge: added check to avoid hyperspaced tempo!
+			SetTempo(param);
 			break;
 
 		// Set Offset

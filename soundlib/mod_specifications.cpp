@@ -115,7 +115,7 @@ const CModSpecifications mod =
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
 	false,										// No pattern names
-	SongFlag(0) | SONG_PT1XMODE | SONG_AMIGALIMITS,								// Supported song flags
+	SongFlag(0) | SONG_PT1XMODE | SONG_AMIGALIMITS | SONG_VBLANK_TIMING,	// Supported song flags
 };
 
 
@@ -159,7 +159,7 @@ const CModSpecifications xm =
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
 	false,										// No pattern names
-	SongFlag(0) | SONG_LINEARSLIDES,							// Supported song flags
+	SongFlag(0) | SONG_LINEARSLIDES,			// Supported song flags
 };
 
 // XM with MPT extensions
@@ -246,7 +246,7 @@ const CModSpecifications s3m =
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
 	false,										// No pattern names
-	SongFlag(0) | SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,		// Supported song flags
+	SongFlag(0) | SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,	// Supported song flags
 };
 
 // S3M with MPT extensions
@@ -290,7 +290,7 @@ const CModSpecifications s3mEx =
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
 	false,										// No pattern names
-	SongFlag(0) | SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,		// Supported song flags
+	SongFlag(0) | SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,	// Supported song flags
 };
 
 const CModSpecifications it =

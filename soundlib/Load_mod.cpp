@@ -338,22 +338,12 @@ STATIC_ASSERT(sizeof(MODSampleHeader) == 30);
 
 
 // Functor for fixing VBlank MODs and MODs with 7-bit panning
-struct FixMODPatterns
+struct Fix7BitPanning
 //===================
 {
-	FixMODPatterns(bool fixVBlank, bool fixPanning)
-	{
-		this->fixVBlank = fixVBlank;
-		this->fixPanning = fixPanning;
-	}
-
 	void operator()(ModCommand &m)
 	{
-		if(m.command == CMD_TEMPO && this->fixVBlank)
-		{
-			// Fix VBlank MODs
-			m.command = CMD_SPEED;
-		} else if(m.command == CMD_PANNING8 && this->fixPanning)
+		if(m.command == CMD_PANNING8)
 		{
 			// Fix MODs with 7-bit + surround panning
 			if(m.param == 0xA4)
@@ -366,8 +356,6 @@ struct FixMODPatterns
 			}
 		}
 	}
-
-	bool fixVBlank, fixPanning;
 };
 
 
@@ -762,11 +750,26 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	// In the pattern loader above, a second condition is used: Only tempo commands
 	// below 100 BPM are taken into account. Furthermore, only M.K. (ProTracker)
 	// modules are checked.
-	const bool fixVBlank = isMdKd && hasTempoCommands && GetSongTime() >= 600.0;
-	const bool fix7BitPanning = leftPanning && !extendedPanning;
-	if(fixVBlank || fix7BitPanning)
+	if(isMdKd && hasTempoCommands)
 	{
-		Patterns.ForEachModCommand(FixMODPatterns(fixVBlank, fix7BitPanning));
+		const double songTime = GetSongTime();
+		if(songTime >= 600.0)
+		{
+			m_SongFlags.set(SONG_VBLANK_TIMING);
+			if(GetLength(eNoAdjust, GetLengthTarget(songTime)).front().targetReached)
+			{
+				// This just makes things worse, song is at least as long asi n CIA mode (e.g. in "Stary Hallway" by Neurodancer)
+				// Obviously we should keep using CIA timing then...
+				m_SongFlags.reset(SONG_VBLANK_TIMING);
+			} else
+			{
+				madeWithTracker = "ProTracker (VBlank)";
+			}
+		}
+	}
+	if(leftPanning && !extendedPanning)
+	{
+		Patterns.ForEachModCommand(Fix7BitPanning());
 	}
 
 	return true;
