@@ -884,17 +884,19 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 				{
 					tx_col = MODCOLOR_NOTE;
 
-					if(sndFile.m_SongFlags[SONG_PT1XMODE] && (m->note < NOTE_MIDDLEC - 12 || m->note >= NOTE_MIDDLEC + 2 * 12))
+					if(sndFile.m_SongFlags[SONG_AMIGALIMITS | SONG_PT1XMODE])
 					{
-						// MOD "ProTracker 1.x" flag: Highlight notes that are not supported by Amiga trackers.
-						tx_col = MODCOLOR_DODGY_COMMANDS;
-					} else if(sndFile.m_SongFlags[SONG_AMIGALIMITS] && m->instr != 0 && m->instr <= sndFile.GetNumSamples())
-					{
-						// S3M "Force Amiga Limits": Highlight notes that exceed the Amiga's frequency range.
-						UINT period = sndFile.GetPeriodFromNote(m->note, 0, sndFile.GetSample(m->instr).nC5Speed);
-						if(period < 113 * 4 || period > 856 * 4)
+						// Highlight notes that exceed the Amiga's frequency range.
+						if(sndFile.GetType() == MOD_TYPE_MOD && (m->note < NOTE_MIDDLEC - 12 || m->note >= NOTE_MIDDLEC + 2 * 12))
 						{
 							tx_col = MODCOLOR_DODGY_COMMANDS;
+						} else if(sndFile.GetType() == MOD_TYPE_S3M && m->instr != 0 && m->instr <= sndFile.GetNumSamples())
+						{
+							uint32 period = sndFile.GetPeriodFromNote(m->note, 0, sndFile.GetSample(m->instr).nC5Speed);
+							if(period < 113 * 4 || period > 856 * 4)
+							{
+								tx_col = MODCOLOR_DODGY_COMMANDS;
+							}
 						}
 					}
 				}
