@@ -2026,7 +2026,10 @@ void CViewInstrument::OnDropFiles(HDROP hDropInfo)
 		if(::DragQueryFileW(hDropInfo, f, fileName, CountOf(fileName)))
 		{
 			const mpt::PathString file = mpt::PathString::FromNative(fileName);
-			if(SendCtrlMessage(CTRLMSG_INS_OPENFILE, (LPARAM)&file) && f < nFiles - 1)
+			if(GetDocument()->LoadEnvelope(m_nInstrument, m_nEnv, file))
+			{
+				SetModified(InstrumentHint(m_nInstrument).Envelope(), true);
+			} else if(SendCtrlMessage(CTRLMSG_INS_OPENFILE, (LPARAM)&file) && f < nFiles - 1)
 			{
 				// Insert more instrument slots
 				SendCtrlMessage(IDC_INSTRUMENT_NEW);
