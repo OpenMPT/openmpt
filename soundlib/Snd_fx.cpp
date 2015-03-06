@@ -3051,6 +3051,10 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, UINT param, const bool doFinePo
 		else
 			PortamentoMPT(pChn, param);
 		return;
+	} else if(GetType() == MOD_TYPE_PLM)
+	{
+		// A normal portamento up or down makes a follow-up tone portamento go the same direction.
+		pChn->nPortamentoDest = 1;
 	}
 
 	if (doFineSlides && param >= 0xE0)
@@ -3104,6 +3108,10 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFine
 		else
 			PortamentoMPT(pChn, -static_cast<int>(param));
 		return;
+	} else if(GetType() == MOD_TYPE_PLM)
+	{
+		// A normal portamento up or down makes a follow-up tone portamento go the same direction.
+		pChn->nPortamentoDest = 65535;
 	}
 
 	if(doFineSlides && param >= 0xE0)
@@ -3414,8 +3422,16 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param)
 		return;
 	} //End candidate MPT behavior.
 
+	bool doPorta = !pChn->isFirstTick || GetType() == MOD_TYPE_DBM;
+	if(GetType() == MOD_TYPE_PLM && param >= 0xF0)
+	{
+		param -= 0xF0;
+		doPorta = pChn->isFirstTick;
+	}
+
 	if(param) pChn->nPortamentoSlide = param * 4;
-	if(pChn->nPeriod && pChn->nPortamentoDest && (!pChn->isFirstTick || GetType() == MOD_TYPE_DBM))
+
+	if(pChn->nPeriod && pChn->nPortamentoDest && doPorta)
 	{
 		if (pChn->nPeriod < pChn->nPortamentoDest)
 		{
@@ -4542,8 +4558,7 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, UINT param)
 						pChn->nPos = pChn->nLength; // Old FX: Clip to end of sample
 					else
 						pChn->nPos = 0; // Reset to beginning of sample
-				}
-				else
+				} else
 				{
 					pChn->nPos = pChn->nLoopStart;
 					if(m_SongFlags[SONG_ITOLDEFFECTS] && pChn->nLength > 4)
@@ -4719,7 +4734,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, UINT offset)	//rewbs.V
 void CSoundFile::DoFreqSlide(ModChannel *pChn, LONG nFreqSlide) const
 //-------------------------------------------------------------------
 {
-	if (!pChn->nPeriod) return;
+	if(!pChn->nPeriod) return;
 	if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 	{
 		// IT Linear slides
