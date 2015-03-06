@@ -50,6 +50,7 @@ struct PACKED PLMSampleHeader
 	enum SampleFlags
 	{
 		smp16Bit = 1,
+		smpPingPong = 2,
 	};
 
 	char   magic[4];		// "PLS\x1A"
@@ -140,8 +141,10 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeChannels();
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	m_nType = MOD_TYPE_PLM;
+	m_SongFlags = SONG_ITOLDEFFECTS;
 	madeWithTracker = "Disorder Tracker 2";
-	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, fileHeader.songName);
+	// Some PLMs use ASCIIZ, some space-padding strings...weird. Oh, and the file browser stops at 0 bytes in the name, the main GUI doesn't.
+	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songName);
 	m_nChannels = fileHeader.numChannels + 1;	// Additional channel for writing pattern breaks
 	m_nSamplePreAmp = fileHeader.amplify;
 	m_nDefaultTempo = fileHeader.tempo;
@@ -194,7 +197,11 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 			// Apparently there is a bug in DT2 which adds an extra byte before the sample data.
 			sampleHeader.headerSize++;
 		}
-		if(sample.nLoopEnd > sample.nLoopStart) sample.uFlags.set(CHN_LOOP);
+		if(sample.nLoopEnd > sample.nLoopStart)
+		{
+			sample.uFlags.set(CHN_LOOP);
+			if(sampleHeader.flags & PLMSampleHeader::smpPingPong) sample.uFlags.set(CHN_PINGPONGLOOP);
+		}
 		sample.SanitizeLoops();
 		
 		if(loadFlags & loadSampleData)
@@ -242,7 +249,8 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		CMD_S3MCMDEX,		// Pattern Delay
 		CMD_FINEVIBRATO,
 		CMD_VIBRATOVOL,
-		CMD_TONEPORTAVOL
+		CMD_TONEPORTAVOL,
+		CMD_OFFSET,			// Percentage offset
 	};
 
 	for(uint16 i = 0; i < fileHeader.numOrders; i++)
@@ -256,7 +264,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		
 		ORDERINDEX curOrd = ord.x / rowsPerPat;
 		ROWINDEX curRow = ord.x % rowsPerPat;
-		const CHANNELINDEX numChannels = std::min<CHANNELINDEX>(patHeader.numChannels, fileHeader.numChannels - ord.y);
+		const CHANNELINDEX numChannels = std::min<uint8>(patHeader.numChannels, fileHeader.numChannels - ord.y);
 		const uint32 patternEnd = ord.x + patHeader.numRows;
 		maxPos = std::max(maxPos, patternEnd);
 
@@ -333,7 +341,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 						m->param = 0xC0 | std::min<ModCommand::PARAM>(m->param, 0x0F);
 						break;
 					case 0x12:	// Pattern Delay
-						m->param = 0x60 | std::min<ModCommand::PARAM>(m->param, 0x0F);
+						m->param = 0xE0 | std::min<ModCommand::PARAM>(m->param, 0x0F);
 						break;
 					case 0x04:	// Volume Slide
 					case 0x14:	// Vibrato + Volume Slide
@@ -344,6 +352,11 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 							m->param |= 0x0F;
 						}
 						break;
+					case 0x16:	// Percentage offset
+						if(m->instr > 0 && m->instr <= m_nSamples)
+						{
+							m->param = mpt::saturate_cast<ModCommand::PARAM>(((m->param * Samples[m->instr].nLength) / 255) >> 8);
+						}
 					}
 				}
 			}
@@ -361,6 +374,19 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		if(Patterns.IsValidPat(endPat))
 		{
 			Patterns[endPat].Resize(endPatSize);
+		}
+	}
+	// If there are still any non-existent patterns in our order list, insert some blank patterns.
+	PATTERNINDEX blankPat = PATTERNINDEX_INVALID;
+	for(ORDERINDEX i = 0; i < Order.size(); i++)
+	{
+		if(Order[i] == Order.GetInvalidPatIndex())
+		{
+			if(blankPat == PATTERNINDEX_INVALID)
+			{
+				blankPat = Patterns.Insert(rowsPerPat);
+			}
+			Order[i] = blankPat;
 		}
 	}
 
