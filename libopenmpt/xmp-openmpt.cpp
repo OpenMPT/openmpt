@@ -54,8 +54,6 @@ static const char * xmp_openmpt_string = "OpenMPT (" OPENMPT_API_VERSION_STRING 
 
 #define EXPERIMENTAL_VIS
 
-#define FAST_CHECKFILE
-
 #define USE_XMPLAY_FILE_IO
 
 #define USE_XMPLAY_ISTREAM
@@ -431,7 +429,7 @@ static void WINAPI openmpt_Config( HWND win ) {
 
 #ifdef USE_XMPLAY_FILE_IO
 
-#ifdef USE_XMPLAY_ISTREAM 
+#ifdef USE_XMPLAY_ISTREAM
 
 class xmplay_streambuf : public std::streambuf {
 public:
@@ -485,6 +483,22 @@ public:
 		return;
 	}
 }; // class xmplay_istream
+
+// Stream for memory-based files (required for could_open_propability)
+struct xmplay_membuf : std::streambuf {
+	xmplay_membuf( const char * base, size_t size ) {
+		char* p( const_cast<char *>( base ) );
+		setg(p, p, p + size);
+	}
+};
+
+struct xmplay_imemstream : virtual xmplay_membuf, std::istream {
+	xmplay_imemstream( const char * base, size_t size )
+		: xmplay_membuf( base, size )
+		, std::istream( static_cast<std::streambuf *>(this)) {
+			return;
+	}
+};
 
 #else // !USE_XMPLAY_ISTREAM
 
@@ -712,41 +726,33 @@ static std::string sanitize_xmplay_multiline_string( const std::string & str ) {
 // check if a file is playable by this plugin
 // more thorough checks can be saved for the GetFileInfo and Open functions
 static BOOL WINAPI openmpt_CheckFile( const char * filename, XMPFILE file ) {
-	#ifdef FAST_CHECKFILE
-		std::string fn = filename;
-		std::size_t dotpos = fn.find_last_of( '.' );
-		std::string ext;
-		if ( dotpos != std::string::npos ) {
-			ext = fn.substr( dotpos + 1 );
-		}
-		std::transform( ext.begin(), ext.end(), ext.begin(), tolower );
-		return openmpt::is_extension_supported( ext ) ? TRUE : FALSE;
-	#else // !FAST_CHECKFILE
-		const double threshold = 0.1;
-		#ifdef USE_XMPLAY_FILE_IO
-			#ifdef USE_XMPLAY_ISTREAM
-				switch ( xmpffile->GetType( file ) ) {
-					case XMPFILE_TYPE_MEMORY:
-						return openmpt::module::could_open_propability( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) ) > threshold;
-						break;
-					case XMPFILE_TYPE_FILE:
-					case XMPFILE_TYPE_NETFILE:
-					case XMPFILE_TYPE_NETSTREAM:
-					default:
-						return openmpt::module::could_open_propability( (xmplay_istream( file )) ) > threshold;
-						break;
-				}
-			#else
-				if ( xmpffile->GetType( file ) == XMPFILE_TYPE_MEMORY ) {
-					return openmpt::module::could_open_propability( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) ) > threshold;
-				} else {
-					return openmpt::module::could_open_propability( (read_XMPFILE( file )) ) > threshold;
-				}
-			#endif
+	const double threshold = 0.1;
+	#ifdef USE_XMPLAY_FILE_IO
+		#ifdef USE_XMPLAY_ISTREAM
+			switch ( xmpffile->GetType( file ) ) {
+				case XMPFILE_TYPE_MEMORY:
+					{
+						xmplay_imemstream s( static_cast<const char *>( xmpffile->GetMemory( file ) ), xmpffile->GetSize( file ) );
+						return openmpt::could_open_propability( s ) > threshold;
+					}
+					break;
+				case XMPFILE_TYPE_FILE:
+				case XMPFILE_TYPE_NETFILE:
+				case XMPFILE_TYPE_NETSTREAM:
+				default:
+					return openmpt::could_open_propability( (xmplay_istream( file )) ) > threshold;
+					break;
+			}
 		#else
-			return openmpt::module::could_open_propability( std::ifstream( filename, std::ios_base::binary ) ) > threshold;
+			if ( xmpffile->GetType( file ) == XMPFILE_TYPE_MEMORY ) {
+				return openmpt::could_open_propability( xmpffile->GetMemory( file ), xmpffile->GetSize( file ) ) > threshold;
+			} else {
+				return openmpt::could_open_propability( (read_XMPFILE( file )) ) > threshold;
+			}
 		#endif
-	#endif // FAST_CHECKFILE
+	#else
+		return openmpt::could_open_propability( std::ifstream( filename, std::ios_base::binary ) ) > threshold;
+	#endif
 }
 
 #if XMPIN_FACE >= 4
@@ -1337,12 +1343,12 @@ static void WINAPI VisClose() {
 	xmpopenmpt_lock guard;
 
 	for( int i = 0; i < col_max; ++i ) {
-		DeleteObject( vispens[i] );
-		DeleteObject( visbrushs[i] );
+		DeletePen( vispens[i] );
+		DeleteBrush( visbrushs[i] );
 	}
 
-	DeleteObject( visfont );
-	DeleteObject( visbitmap );
+	DeleteFont( visfont );
+	DeleteBitmap( visbitmap );
 	DeleteDC( visDC );
 }
 static void WINAPI VisSize(HDC dc, SIZE *size) {
