@@ -288,11 +288,27 @@ static void UnpackMDLTrack(ModCommand *pat, UINT nChannels, UINT nRows, UINT nTr
 
 
 
-bool CSoundFile::ReadMDL(const uint8 *lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
+	file.Rewind();
+	MDLFileHeader pmsh;
+	if(!file.ReadStruct(pmsh)
+		|| !file.CanRead(1024)
+		|| pmsh.id != LittleEndian(0x4C444D44)
+		|| (pmsh.version & 0xF0) > 0x10)
+	{
+		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
+	}
+
+	file.Rewind();
+	const FileReader::off_t dwMemLength = file.GetLength();
+	const uint8 *lpStream = reinterpret_cast<const uint8 *>(file.GetRawData());
+
 	DWORD dwMemPos, dwPos, blocklen, dwTrackPos;
-	const MDLFileHeader *pmsh = (const MDLFileHeader *)lpStream;
 	MDLInfoBlock *pmib;
 	UINT i,j, norders = 0, npatterns = 0, ntracks = 0;
 	UINT ninstruments = 0, nsamples = 0;
@@ -305,11 +321,8 @@ bool CSoundFile::ReadMDL(const uint8 *lpStream, const DWORD dwMemLength, ModLoad
 	UINT nvolenv, npanenv, npitchenv;
 	std::vector<ROWINDEX> patternLength;
 
-	if ((!lpStream) || (dwMemLength < 1024)) return false;
-	if ((pmsh->id != 0x4C444D44) || ((pmsh->version & 0xF0) > 0x10)) return false;
-	else if(loadFlags == onlyVerifyHeader) return true;
 #ifdef MDL_LOG
-	Log("MDL v%d.%d\n", pmsh->version>>4, pmsh->version&0x0f);
+	Log("MDL v%d.%d\n", pmsh.version>>4, pmsh.version&0x0f);
 #endif
 	MemsetZero(patterntracks);
 	MemsetZero(smpinfo);
@@ -388,7 +401,7 @@ bool CSoundFile::ReadMDL(const uint8 *lpStream, const DWORD dwMemLength, ModLoad
 				UINT ch;
 
 				if (dwPos+18 >= dwMemLength) break;
-				if (pmsh->version > 0)
+				if (pmsh.version > 0)
 				{
 					const MDLPatternHeader *pmpd = (const MDLPatternHeader *)(lpStream + dwPos);
 					if (pmpd->channels > 32) break;
@@ -520,7 +533,7 @@ bool CSoundFile::ReadMDL(const uint8 *lpStream, const DWORD dwMemLength, ModLoad
 		#endif
 			nsamples = lpStream[dwMemPos];
 			dwPos = dwMemPos + 1;
-			for (i = 0; i < nsamples; i++, dwPos += (pmsh->version > 0) ? sizeof(MDLSampleHeader) : sizeof(MDLSampleHeaderv0))
+			for (i = 0; i < nsamples; i++, dwPos += (pmsh.version > 0) ? sizeof(MDLSampleHeader) : sizeof(MDLSampleHeaderv0))
 			{
 				const MDLSampleHeaderCommon *info = reinterpret_cast<const MDLSampleHeaderCommon *>(lpStream + dwPos);
 				if(!IsInRange(info->sampleIndex, 1, MAX_SAMPLES-1))
@@ -537,7 +550,7 @@ bool CSoundFile::ReadMDL(const uint8 *lpStream, const DWORD dwMemLength, ModLoad
 				mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[info->sampleIndex], info->name);
 				mpt::String::Read<mpt::String::maybeNullTerminated>(sample.filename, info->filename);
 
-				if(pmsh->version > 0)
+				if(pmsh.version > 0)
 				{
 					const MDLSampleHeader *sampleHeader = reinterpret_cast<const MDLSampleHeader *>(lpStream + dwPos);
 
