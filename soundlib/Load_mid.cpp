@@ -39,7 +39,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 typedef struct PACKED MIDIFILEHEADER
 {
-	DWORD id;		// "MThd" = 0x6468544D
+	char  id[4];		// "MThd" = 0x6468544D
 	DWORD len;		// 6
 	WORD w1;		// 1?
 	WORD wTrks;		// 2?
@@ -468,15 +468,56 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 #define MIDIGLOBAL_XGSYSTEMON		0x0200
 
 
-bool CSoundFile::ReadMID(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------------------------------
+bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
+//-------------------------------------------------------------------
 {
-	const MIDIFILEHEADER *pmfh = (const MIDIFILEHEADER *)lpStream;
+	file.Rewind();
+	
+	// Microsoft MIDI files
+	if(file.ReadMagic("RIFF"))
+	{
+		file.Skip(4);
+		if(!file.ReadMagic("RMID"))
+		{
+			return false;
+		} else if(loadFlags == onlyVerifyHeader)
+		{
+			return true;
+		}
+		do
+		{
+			uint32 id = file.ReadUint32LE();
+			uint32 length = file.ReadUint32LE();
+			if(memcmp(&id, "data", 4))
+			{
+				file.Skip(length);
+			} else
+			{
+				break;
+			}
+		} while(file.BytesLeft());
+	}
+
+	MIDIFILEHEADER pmfh;
+	if(!file.ReadStruct(pmfh)
+		|| memcmp(pmfh.id, "MThd", 4)
+		|| !file.Seek(8 + BigEndian(pmfh.len)))
+	{
+		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
+	}
+
+	const FileReader::off_t dwMemLength = file.BytesLeft();
+	const uint8 *lpStream = reinterpret_cast<const uint8 *>(file.GetRawData());
+
 	const MIDITRACKHEADER *pmth;
 	MODCHANNELSTATE chnstate[MAX_BASECHANNELS];
 	MIDICHANNELSTATE midichstate[16];
 	std::vector<MIDITRACK> miditracks;
-	DWORD dwMemPos, dwGlobalFlags, tracks, tempo;
+	FileReader::off_t dwMemPos = 0;
+	DWORD dwGlobalFlags, tracks, tempo;
 	UINT row, pat, midimastervol;
 	short int division;
 	int midi_clock, nTempoUsec, nPPQN, nTickMultiplier;
@@ -493,36 +534,8 @@ bool CSoundFile::ReadMID(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFla
 	Limit(importSpeed, 2, 6);
 	Limit(importPatternLen, ROWINDEX(1), MAX_PATTERN_ROWS);
 
-	// Detect RMI files
-	if ((dwMemLength > 12)
-	 && (*(DWORD *)(lpStream) == IFFID_RIFF)
-	 && (*(DWORD *)(lpStream+8) == 0x44494D52))
-	{
-		lpStream += 12;
-		dwMemLength -= 12;
-		while (dwMemLength > 8)
-		{
-			DWORD id = *(DWORD *)lpStream;
-			DWORD len = *(DWORD *)(lpStream+4);
-			lpStream += 8;
-			dwMemLength -= 8;
-			if ((id == IFFID_data) && (len < dwMemLength))
-			{
-				dwMemLength = len;
-				pmfh = (const MIDIFILEHEADER *)lpStream;
-				break;
-			}
-			if (len >= dwMemLength) return false;
-			lpStream += len;
-			dwMemLength -= len;
-		}
-	}
-	// MIDI File Header
-	if ((dwMemLength < sizeof(MIDIFILEHEADER)+8) || (pmfh->id != 0x6468544D)) return false;
-	dwMemPos = 8 + BigEndian(pmfh->len);
-	if (dwMemPos >= dwMemLength - 8) return false;
 	pmth = (MIDITRACKHEADER *)(lpStream+dwMemPos);
-	tracks = BigEndianW(pmfh->wTrks);
+	tracks = BigEndianW(pmfh.wTrks);
 	if ((pmth->id != 0x6B72544D) || (!tracks)) return false;
 	else if(loadFlags == onlyVerifyHeader) return true;
 	miditracks.resize(tracks);
@@ -535,7 +548,7 @@ bool CSoundFile::ReadMID(const uint8 *lpStream, DWORD dwMemLength, ModLoadingFla
 	songName = "";
 
 	// MIDI->MOD Tempo Conversion
-	division = BigEndianW(pmfh->wDivision);
+	division = BigEndianW(pmfh.wDivision);
 	if (division < 0)
 	{
 		int nFrames = -(division>>8);

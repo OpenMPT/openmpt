@@ -66,7 +66,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 typedef struct PACKED tagMEDMODULEHEADER
 {
-	DWORD id;		// MMD1-MMD3
+	char  id[4];	// MMD1-MMD3
 	DWORD modlen;	// Size of file
 	DWORD song;		// Position in file for this song
 	WORD psecnum;
@@ -502,47 +502,57 @@ static void MedConvert(ModCommand *p, const MMD0SONGHEADER *pmsh)
 }
 
 
-bool CSoundFile::ReadMed(const uint8 *lpStream, const DWORD dwMemLength, ModLoadingFlags loadFlags)
-//-------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
+//------------------------------------------------------------------
 {
-	const MEDMODULEHEADER *pmmh;
+	file.Rewind();
+	MEDMODULEHEADER pmmh;
+	DWORD dwSong;
+	if(!file.CanRead(512)
+		|| !file.ReadStruct(pmmh)
+		|| memcmp(pmmh.id, "MMD", 3)
+		|| pmmh.id[3] < '0' || pmmh.id[3] > '3'
+		|| (dwSong = BigEndian(pmmh.song)) == 0
+		|| !file.LengthIsAtLeast(dwSong)
+		|| !file.LengthIsAtLeast(dwSong + sizeof(MMD0SONGHEADER)))
+	{
+		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
+	}
+
+	file.Rewind();
+	const FileReader::off_t dwMemLength = file.GetLength();
+	const uint8 *lpStream = reinterpret_cast<const uint8 *>(file.GetRawData());
 	const MMD0SONGHEADER *pmsh;
 	const MMD2SONGHEADER *pmsh2;
 	const MMD0EXP *pmex;
 	DWORD dwBlockArr, dwSmplArr, dwExpData, wNumBlocks;
 	const_unaligned_ptr_le<DWORD> pdwTable;
-	int8 version;
+	int8 version = pmmh.id[3];
 	UINT deftempo;
 	int playtransp = 0;
 
-	if ((!lpStream) || (dwMemLength < 0x200)) return false;
-	pmmh = (MEDMODULEHEADER *)lpStream;
-	if (((pmmh->id & 0x00FFFFFF) != 0x444D4D) || (!pmmh->song)) return false;
-	// Check for 'MMDx'
-	DWORD dwSong = BigEndian(pmmh->song);
-	if ((dwSong >= dwMemLength) || (dwSong + sizeof(MMD0SONGHEADER) >= dwMemLength)) return false;
-	version = (signed char)((pmmh->id >> 24) & 0xFF);
-	if ((version < '0') || (version > '3')) return false;
-	else if(loadFlags == onlyVerifyHeader) return true;
 #ifdef MED_LOG
-	Log("\nLoading MMD%c module (flags=0x%02X)...\n", version, BigEndian(pmmh->mmdflags));
-	Log("  modlen   = %d\n", BigEndian(pmmh->modlen));
-	Log("  song     = 0x%08X\n", BigEndian(pmmh->song));
-	Log("  psecnum  = %d\n", BigEndianW(pmmh->psecnum));
-	Log("  pseq     = %d\n", BigEndianW(pmmh->pseq));
-	Log("  blockarr = 0x%08X\n", BigEndian(pmmh->blockarr));
-	Log("  mmdflags = 0x%08X\n", BigEndian(pmmh->mmdflags));
-	Log("  smplarr  = 0x%08X\n", BigEndian(pmmh->smplarr));
-	Log("  reserved = 0x%08X\n", BigEndian(pmmh->reserved));
-	Log("  expdata  = 0x%08X\n", BigEndian(pmmh->expdata));
-	Log("  reserved2= 0x%08X\n", BigEndian(pmmh->reserved2));
-	Log("  pstate   = %d\n", BigEndianW(pmmh->pstate));
-	Log("  pblock   = %d\n", BigEndianW(pmmh->pblock));
-	Log("  pline    = %d\n", BigEndianW(pmmh->pline));
-	Log("  pseqnum  = %d\n", BigEndianW(pmmh->pseqnum));
-	Log("  actplayline=%d\n", BigEndianW(pmmh->actplayline));
-	Log("  counter  = %d\n", pmmh->counter);
-	Log("  extra_songs = %d\n", pmmh->extra_songs);
+	Log("\nLoading MMD%c module (flags=0x%02X)...\n", version, BigEndian(pmmh.mmdflags));
+	Log("  modlen   = %d\n", BigEndian(pmmh.modlen));
+	Log("  song     = 0x%08X\n", BigEndian(pmmh.song));
+	Log("  psecnum  = %d\n", BigEndianW(pmmh.psecnum));
+	Log("  pseq     = %d\n", BigEndianW(pmmh.pseq));
+	Log("  blockarr = 0x%08X\n", BigEndian(pmmh.blockarr));
+	Log("  mmdflags = 0x%08X\n", BigEndian(pmmh.mmdflags));
+	Log("  smplarr  = 0x%08X\n", BigEndian(pmmh.smplarr));
+	Log("  reserved = 0x%08X\n", BigEndian(pmmh.reserved));
+	Log("  expdata  = 0x%08X\n", BigEndian(pmmh.expdata));
+	Log("  reserved2= 0x%08X\n", BigEndian(pmmh.reserved2));
+	Log("  pstate   = %d\n", BigEndianW(pmmh.pstate));
+	Log("  pblock   = %d\n", BigEndianW(pmmh.pblock));
+	Log("  pline    = %d\n", BigEndianW(pmmh.pline));
+	Log("  pseqnum  = %d\n", BigEndianW(pmmh.pseqnum));
+	Log("  actplayline=%d\n", BigEndianW(pmmh.actplayline));
+	Log("  counter  = %d\n", pmmh.counter);
+	Log("  extra_songs = %d\n", pmmh.extra_songs);
 	Log("\n");
 #endif
 
@@ -554,9 +564,9 @@ bool CSoundFile::ReadMed(const uint8 *lpStream, const DWORD dwMemLength, ModLoad
 
 	m_nType = MOD_TYPE_MED;
 	m_nSamplePreAmp = 32;
-	dwBlockArr = BigEndian(pmmh->blockarr);
-	dwSmplArr = BigEndian(pmmh->smplarr);
-	dwExpData = BigEndian(pmmh->expdata);
+	dwBlockArr = BigEndian(pmmh.blockarr);
+	dwSmplArr = BigEndian(pmmh.smplarr);
+	dwExpData = BigEndian(pmmh.expdata);
 	if ((dwExpData) && (dwExpData < dwMemLength - sizeof(MMD0EXP)))
 		pmex = (MMD0EXP *)(lpStream+dwExpData);
 	else
