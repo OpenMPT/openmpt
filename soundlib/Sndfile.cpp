@@ -726,10 +726,6 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			file = FileReader(&(unpackedData[0]), unpackedData.size());
 		}
 
-		file.Rewind();
-		const uint8 *lpStream = reinterpret_cast<const unsigned char*>(file.GetRawData());
-		DWORD dwMemLength = file.GetLength();
-
 		if(!ReadXM(file, loadFlags)
 		 && !ReadIT(file, loadFlags)
 		 && !ReadS3M(file, loadFlags)
