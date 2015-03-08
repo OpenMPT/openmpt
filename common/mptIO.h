@@ -539,6 +539,7 @@ class FileDataContainerStdStream : public IFileDataContainer {
 private:
 
 	mutable std::vector<char> cache;
+	mutable std::size_t cachesize;
 	mutable bool streamFullyCached;
 
 	std::istream *stream;
@@ -550,8 +551,10 @@ public:
 
 private:
 
-	static const std::size_t buffer_size = 65536;
+	static const std::size_t QUANTUM_SIZE = 4096;
+	static const std::size_t BUFFER_SIZE = 65536;
 
+	void EnsureCacheBuffer(std::size_t requiredbuffersize) const;
 	void CacheStream() const;
 	void CacheStreamUpTo(std::streampos pos) const;
 

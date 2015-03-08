@@ -279,6 +279,29 @@ inline bool TypeCanHoldValue(Tsrc val)
 	return (static_cast<Tsrc>(mpt::saturate_cast<Tdst>(val)) == val);
 }
 
+// Grows x with an exponential factor suitable for increasing buffer sizes.
+// Clamps the result at limit.
+// And avoids integer overflows while doing its business.
+// The growth factor is 1.5, rounding down, execpt for the initial x==1 case.
+template <typename T, typename Tlimit>
+inline T ExponentialGrow(const T &x, const Tlimit &limit)
+{
+	MPT_ASSERT(x > 0);
+	MPT_ASSERT(limit > 0);
+	if(x == 1)
+	{
+		return 2;
+	}
+	T add = std::min<T>(x >> 1, std::numeric_limits<T>::max() - x);
+	return std::min<T>(x + add, mpt::saturate_cast<T>(limit));
+}
+									
+template <typename T>
+inline T ExponentialGrow(const T &x)
+{
+	return Util::ExponentialGrow(x, std::numeric_limits<T>::max());
+}
+									
 } //namespace Util
 
 
@@ -530,14 +553,14 @@ namespace Util {
 
 	// rounds x up to multiples of target
 	template <typename T>
-	T AlignUp(T x, T target)
+	inline T AlignUp(T x, T target)
 	{
 		return ((x + (target - 1)) / target) * target;
 	}
 
 	// rounds x down to multiples of target
 	template <typename T>
-	T AlignDown(T x, T target)
+	inline T AlignDown(T x, T target)
 	{
 		return (x / target) * target;
 	}
