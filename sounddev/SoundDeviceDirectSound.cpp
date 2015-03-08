@@ -220,8 +220,8 @@ bool CDSoundDevice::InternalOpen()
 	}
 	m_bMixRunning = FALSE;
 	m_nDSoundBufferSize = Util::Round<int32>(m_Settings.Latency * pwfx->nAvgBytesPerSec);
-	m_nDSoundBufferSize = Util::AlignUp(m_nDSoundBufferSize, bytesPerFrame);
-	m_nDSoundBufferSize = Clamp(m_nDSoundBufferSize, Util::AlignUp(DSBSIZE_MIN, bytesPerFrame), Util::AlignDown(DSBSIZE_MAX, bytesPerFrame));
+	m_nDSoundBufferSize = Util::AlignUp<uint32>(m_nDSoundBufferSize, bytesPerFrame);
+	m_nDSoundBufferSize = Clamp(m_nDSoundBufferSize, Util::AlignUp<uint32>(DSBSIZE_MIN, bytesPerFrame), Util::AlignDown<uint32>(DSBSIZE_MAX, bytesPerFrame));
 	if(!m_Settings.ExclusiveMode)
 	{
 		// Set the format of the primary buffer

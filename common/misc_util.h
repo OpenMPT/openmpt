@@ -529,13 +529,15 @@ namespace Util {
 	}
 
 	// rounds x up to multiples of target
-	forceinline uint32 AlignUp(uint32 x, uint32 target)
+	template <typename T>
+	T AlignUp(T x, T target)
 	{
 		return ((x + (target - 1)) / target) * target;
 	}
 
 	// rounds x down to multiples of target
-	forceinline uint32 AlignDown(uint32 x, uint32 target)
+	template <typename T>
+	T AlignDown(T x, T target)
 	{
 		return (x / target) * target;
 	}
