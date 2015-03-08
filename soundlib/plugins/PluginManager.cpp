@@ -33,7 +33,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 char CVstPluginManager::s_szHostProductString[64] = "OpenMPT";
 char CVstPluginManager::s_szHostVendorString[64] = "OpenMPT project";
-VstIntPtr CVstPluginManager::s_nHostVendorVersion = MptVersion::num;
+VstInt32 CVstPluginManager::s_nHostVendorVersion = MptVersion::num;
 
 typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
 

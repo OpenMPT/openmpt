@@ -394,7 +394,7 @@ protected:
 public:
 	static char s_szHostProductString[64];
 	static char s_szHostVendorString[64];
-	static VstIntPtr s_nHostVendorVersion;
+	static VstInt32 s_nHostVendorVersion;
 
 #else // NO_VST
 public:
