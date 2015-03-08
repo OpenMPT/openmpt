@@ -43,6 +43,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_WM_ACTIVATE()
 	ON_WM_DROPFILES()
 	ON_WM_MOVE()
+	ON_WM_SYSCOMMAND()
 	ON_COMMAND(ID_EDIT_COPY,			OnCopyParameters)
 	ON_COMMAND(ID_EDIT_PASTE,			OnPasteParameters)
 	ON_COMMAND(ID_PRESET_LOAD,			OnLoadPreset)
@@ -99,6 +100,43 @@ CAbstractVstEditor::~CAbstractVstEditor()
 	m_pPresetMenuGroup.clear();
 
 	m_VstPlugin.m_pEditor = nullptr;
+}
+
+
+void CAbstractVstEditor::OnSysCommand(UINT nID, LPARAM lParam)
+//------------------------------------------------------------
+{
+	const UINT nID_ = nID & 0xFFF0;
+	if(nID_ == SC_MINIMIZE || nID_ == SC_MAXIMIZE)
+	{
+		// Override minimize and maximize buttons to reduce plugin windows to their non-client area
+		LONG style = GetWindowLong(m_hWnd, GWL_STYLE);
+		CRect rcWnd, rcClient;
+		GetWindowRect(&rcWnd);
+		if(nID_ == SC_MINIMIZE)
+		{
+			// When minimizing, remove the client area
+			GetClientRect(&rcClient);
+			clientHeight = rcClient.Height();
+
+			style &= ~WS_MINIMIZEBOX;
+			style |= WS_MAXIMIZEBOX;
+		} else
+		{
+			style |= WS_MINIMIZEBOX;
+			style &= ~WS_MAXIMIZEBOX;
+		}
+		clientHeight = -clientHeight;
+		int rcHeight = rcWnd.Height() + clientHeight;
+
+		SetWindowLong(m_hWnd, GWL_STYLE, style);
+		SetWindowPos(NULL, 0, 0,
+			rcWnd.Width(), rcHeight,
+			SWP_NOZORDER | SWP_NOMOVE);
+	} else
+	{
+		CDialog::OnSysCommand(nID, lParam);
+	}
 }
 
 
