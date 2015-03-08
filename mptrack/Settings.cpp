@@ -291,16 +291,24 @@ SettingsContainer::SettingsContainer(ISettingsBackend *backend)
 std::vector<char> IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, const std::vector<char> &def) const
 {
 	std::vector<char> result = def;
-	::GetPrivateProfileStructW(GetSection(path).c_str(), GetKey(path).c_str(), &result[0], result.size(), filename.AsNative().c_str());
+	if(!Util::TypeCanHoldValue<UINT>(result.size()))
+	{
+		return result;
+	}
+	::GetPrivateProfileStructW(GetSection(path).c_str(), GetKey(path).c_str(), &result[0], static_cast<UINT>(result.size()), filename.AsNative().c_str());
 	return result;
 }
 
 std::wstring IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, const std::wstring &def) const
 {
 	std::vector<WCHAR> buf(128);
-	while(::GetPrivateProfileStringW(GetSection(path).c_str(), GetKey(path).c_str(), def.c_str(), &buf[0], buf.size(), filename.AsNative().c_str()) == buf.size() - 1)
+	while(::GetPrivateProfileStringW(GetSection(path).c_str(), GetKey(path).c_str(), def.c_str(), &buf[0], static_cast<DWORD>(buf.size()), filename.AsNative().c_str()) == buf.size() - 1)
 	{
-		buf.resize(buf.size() * 2);
+		if(buf.size() == std::numeric_limits<DWORD>::max())
+		{
+			return def;
+		}
+		buf.resize(Util::ExponentialGrow(buf.size(), std::numeric_limits<DWORD>::max()));
 	}
 	return &buf[0];
 }
@@ -308,9 +316,13 @@ std::wstring IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, con
 double IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, double def) const
 {
 	std::vector<WCHAR> buf(128);
-	while(::GetPrivateProfileStringW(GetSection(path).c_str(), GetKey(path).c_str(), StringifyW(def).c_str(), &buf[0], buf.size(), filename.AsNative().c_str()) == buf.size() - 1)
+	while(::GetPrivateProfileStringW(GetSection(path).c_str(), GetKey(path).c_str(), StringifyW(def).c_str(), &buf[0], static_cast<DWORD>(buf.size()), filename.AsNative().c_str()) == buf.size() - 1)
 	{
-		buf.resize(buf.size() * 2);
+		if(buf.size() == std::numeric_limits<DWORD>::max())
+		{
+			return def;
+		}
+		buf.resize(Util::ExponentialGrow(buf.size(), std::numeric_limits<DWORD>::max()));
 	}
 	return ConvertStrTo<double>(std::wstring(&buf[0]));
 }
@@ -328,7 +340,8 @@ bool IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, bool def) c
 
 void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const std::vector<char> &val)
 {
-	::WritePrivateProfileStructW(GetSection(path).c_str(), GetKey(path).c_str(), (LPVOID)&val[0], val.size(), filename.AsNative().c_str());
+	MPT_ASSERT(Util::TypeCanHoldValue<UINT>(val.size()));
+	::WritePrivateProfileStructW(GetSection(path).c_str(), GetKey(path).c_str(), (LPVOID)&val[0], static_cast<UINT>(val.size()), filename.AsNative().c_str());
 }
 
 void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const std::wstring &val)
@@ -425,7 +438,7 @@ void IniFileSettingsBackend::ConvertToUnicode(const std::wstring &backupTag)
 	// This is backwards compatible because even ANSI WINAPI behaves the
 	// same way in this case.
 	const std::vector<char> data = ReadFile(filename);
-	if(!data.empty() && IsTextUnicode(&data[0], data.size(), NULL))
+	if(!data.empty() && IsTextUnicode(&data[0], mpt::saturate_cast<int>(data.size()), NULL))
 	{
 		return;
 	}
