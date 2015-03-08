@@ -31,7 +31,8 @@ protected:
 	CMenu m_OptionsMenu;
 	static UINT clipboardFormat;
 	int32 currentPresetMenu;
-	bool updateDisplay;
+	int32 clientHeight;
+	bool updateDisplay : 1;
 
 public:
 	CVstPlugin &m_VstPlugin;
@@ -48,6 +49,7 @@ public:
 	void UpdatePresetField();
 	bool CreateInstrument();
 
+	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnLoadPreset();
 	afx_msg void OnSavePreset();
 	afx_msg void OnCopyParameters();
