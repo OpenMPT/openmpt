@@ -22,13 +22,13 @@ class CAGC
 {
 private:
 	UINT m_nAGC;
-	DWORD m_nAGCRecoverCount;
+	std::size_t m_nAGCRecoverCount;
 	UINT m_Timeout;
 public:
 	CAGC();
 	void Initialize(bool bReset, DWORD MixingFreq);
 public:
-	void Process(int *MixSoundBuffer, int *RearSoundBuffer, int count, UINT nChannels);
+	void Process(int *MixSoundBuffer, int *RearSoundBuffer, std::size_t count, std::size_t nChannels);
 	void Adjust(UINT oldVol, UINT newVol);
 };
 
