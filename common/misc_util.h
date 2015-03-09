@@ -123,7 +123,7 @@ inline T ConvertStrTo(const mpt::ustring &str)
 	return ConvertStrTo<T>(mpt::ToCharset(mpt::CharsetUTF8, str));
 }
 template<> inline mpt::ustring ConvertStrTo(const mpt::ustring &str) { return str; }
-#if MPT_WSTRING_FORMAT
+#if MPT_WSTRING_CONVERT
 template<> inline std::wstring ConvertStrTo(const mpt::ustring &str) { return mpt::ToWide(str); }
 #endif
 #endif
