@@ -42,6 +42,7 @@ float ConvertStrToFloat(const std::string &str);
 double ConvertStrToDouble(const std::string &str);
 long double ConvertStrToLongDouble(const std::string &str);
 template<typename T> inline T ConvertStrTo(const std::string &str); // not defined, generates compiler error for non-specialized types
+template<> inline std::string ConvertStrTo(const std::string &str) { return str; }
 template<> inline bool ConvertStrTo(const std::string &str) { return ConvertStrToBool(str); }
 template<> inline signed char ConvertStrTo(const std::string &str) { return ConvertStrToSignedChar(str); }
 template<> inline unsigned char ConvertStrTo(const std::string &str) { return ConvertStrToUnsignedChar(str); }
@@ -73,6 +74,7 @@ float ConvertStrToFloat(const std::wstring &str);
 double ConvertStrToDouble(const std::wstring &str);
 long double ConvertStrToLongDouble(const std::wstring &str);
 template<typename T> inline T ConvertStrTo(const std::wstring &str); // not defined, generates compiler error for non-specialized types
+template<> inline std::wstring ConvertStrTo(const std::wstring &str) { return str; }
 template<> inline bool ConvertStrTo(const std::wstring &str) { return ConvertStrToBool(str); }
 template<> inline signed char ConvertStrTo(const std::wstring &str) { return ConvertStrToSignedChar(str); }
 template<> inline unsigned char ConvertStrTo(const std::wstring &str) { return ConvertStrToUnsignedChar(str); }
@@ -109,6 +111,9 @@ inline T ConvertStrTo(const wchar_t *str)
 	}
 	return ConvertStrTo<T>(std::wstring(str));
 }
+#if MPT_USTRING_MODE_UTF8
+template<> inline mpt::ustring ConvertStrTo(const std::wstring &str) { return mpt::ToUnicode(str); }
+#endif
 #endif
 
 #if MPT_USTRING_MODE_UTF8
@@ -117,6 +122,8 @@ inline T ConvertStrTo(const mpt::ustring &str)
 {
 	return ConvertStrTo<T>(mpt::ToCharset(mpt::CharsetUTF8, str));
 }
+template<> inline mpt::ustring ConvertStrTo(const mpt::ustring &str) { return str; }
+template<> inline std::wstring ConvertStrTo(const mpt::ustring &str) { return mpt::ToWide(str); }
 #endif
 
 
