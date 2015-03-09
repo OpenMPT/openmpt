@@ -151,7 +151,7 @@ std::vector<T> Split(const mpt::ustring &str, const mpt::ustring &sep=MPT_USTRIN
 	std::size_t pos = 0;
 	while(str.find(sep, pos) != std::string::npos)
 	{
-		vals.push_back(ConvertStrTo<int>(str.substr(pos, str.find(sep, pos) - pos)));
+		vals.push_back(ConvertStrTo<T>(str.substr(pos, str.find(sep, pos) - pos)));
 		pos = str.find(sep, pos) + sep.length();
 	}
 	if(!vals.empty() || (str.substr(pos).length() > 0))
