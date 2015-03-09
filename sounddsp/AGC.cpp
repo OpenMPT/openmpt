@@ -30,8 +30,8 @@ OPENMPT_NAMESPACE_BEGIN
 #define MIXING_LIMITMIN		(-MIXING_LIMITMAX)
 
 
-static UINT ProcessAGC(int *pBuffer, int *pRearBuffer, UINT nSamples, UINT nChannels, int nAGC)
-//---------------------------------------------------------------------------------------------
+static UINT ProcessAGC(int *pBuffer, int *pRearBuffer, std::size_t nSamples, std::size_t nChannels, int nAGC)
+//-----------------------------------------------------------------------------------------------------------
 {
 	if(nChannels == 1)
 	{
@@ -92,8 +92,8 @@ CAGC::CAGC()
 }
 
 
-void CAGC::Process(int *MixSoundBuffer, int *RearSoundBuffer, int count, UINT nChannels)
-//--------------------------------------------------------------------------------------
+void CAGC::Process(int *MixSoundBuffer, int *RearSoundBuffer, std::size_t count, std::size_t nChannels)
+//-----------------------------------------------------------------------------------------------------
 {
 	UINT agc = ProcessAGC(MixSoundBuffer, RearSoundBuffer, count, nChannels, m_nAGC);
 	// Some kind custom law, so that the AGC stays quite stable, but slowly
