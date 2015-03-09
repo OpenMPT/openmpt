@@ -1389,6 +1389,7 @@ void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 
 	CMainFrame::GetMainFrame()->ResetNotificationBuffer();
 	CSoundFile &sndFile = m_pModDoc.GetrSoundFile();
+	const bool editSequence = nSeq >= sndFile.Order.GetNumSequences();
 	if(nSeq == MAX_SEQUENCES + 2)
 	{
 		std::wstring str = L"Delete sequence " + StringifyW(sndFile.Order.GetCurrentSequenceIndex()) + L": " + mpt::ToWide(mpt::CharsetLocale, sndFile.Order.GetName()) + L"?";
@@ -1413,7 +1414,8 @@ void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 
 	cs.Leave();
 
-	m_pModDoc.SetModified();
+	if(editSequence)
+		m_pModDoc.SetModified();
 	m_pModDoc.UpdateAllViews(nullptr, SequenceHint().Data(), nullptr);
 }
 
