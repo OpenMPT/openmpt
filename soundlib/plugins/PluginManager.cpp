@@ -630,20 +630,6 @@ void CVstPluginManager::OnIdle()
 }
 
 
-void CVstPluginManager::ReportPlugException(LPCSTR format,...)
-//------------------------------------------------------------
-{
-	CHAR cBuf[1024];
-	va_list va;
-	va_start(va, format);
-	wvsprintf(cBuf, format, va);
-	Reporting::Notification(cBuf);
-#ifdef VST_LOG
-	Log(cBuf);
-#endif
-	va_end(va);
-}
-
 void CVstPluginManager::ReportPlugException(const std::string &msg)
 {
 	Reporting::Notification(msg.c_str());
