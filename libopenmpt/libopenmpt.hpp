@@ -680,7 +680,8 @@ public:
 	                     - 1: Default mode. Chosen by OpenMPT code, might change.
 	                     - 2: Rectangular, 0.5 bit depth, no noise shaping (original ModPlug Tracker).
 	                     - 3: Rectangular, 1 bit depth, simple 1st order noise shaping
-	           An exclamation mark ("!") mark or a question mark ("?") can be appended to any ctl key in order to influece the behaviour in case of an unknown ctl key. "!" causes an exception to be thrown; "?" causes the ctl to be silently ignored. In case neither is appended to the key name, unknown init_ctls are ignored by default and other ctls throw an exception by default.
+
+	           An exclamation mark ("!") or a question mark ("?") can be appended to any ctl key in order to influece the behaviour in case of an unknown ctl key. "!" causes an exception to be thrown; "?" causes the ctl to be silently ignored. In case neither is appended to the key name, unknown init_ctls are ignored by default and other ctls throw an exception by default.
 	*/
 	std::vector<std::string> get_ctls() const;
 
