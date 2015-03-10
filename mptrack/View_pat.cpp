@@ -2894,7 +2894,7 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 void CViewPattern::OnTransposeChannel()
 //-------------------------------------
 {
-	CInputDlg dlg(this, "Enter transpose amount:", -(NOTE_MAX - NOTE_MIN), (NOTE_MAX - NOTE_MIN), m_nTransposeAmount);
+	CInputDlg dlg(this, "Enter transpose amount (affects all patterns):", -(NOTE_MAX - NOTE_MIN), (NOTE_MAX - NOTE_MIN), m_nTransposeAmount);
 	if(dlg.DoModal() == IDOK)
 	{
 		m_nTransposeAmount = dlg.resultNumber;
@@ -4540,6 +4540,8 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 				quickChannelProperties.Show(GetDocument(), m_Cursor.GetChannel(), m_nPattern, CPoint(windowPos.left + windowPos.Width() / 2, windowPos.top + windowPos.Height() / 2));
 				return wParam;
 			}
+		case kcChannelTranspose: m_MenuCursor = m_Cursor; OnTransposeChannel(); return wParam;
+		case kcChannelDuplicate: m_MenuCursor = m_Cursor; OnDuplicateChannel(); return wParam;
 
 		case kcDecreaseSpacing:
 			if(m_nSpacing > 0) SetSpacing(m_nSpacing - 1);

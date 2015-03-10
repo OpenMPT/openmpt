@@ -287,6 +287,8 @@ enum CommandID
 	kcChannelRecordSelect,
 	kcChannelSplitRecordSelect,
 	kcChannelReset,
+	kcChannelTranspose,
+	kcChannelDuplicate,
 	kcChannelSettings,
 	kcEndChannelKeys = kcChannelSettings,
 	kcCopyAndLoseSelection,
