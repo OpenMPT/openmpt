@@ -676,6 +676,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleCenterSustainEnd, 1919, _T("Center sustain loop end in view"));
 	DefineKeyCommand(kcInstrumentEnvelopeLoad, 1920, _T("Load Envelope"));
 	DefineKeyCommand(kcInstrumentEnvelopeSave, 1921, _T("Save Envelope"));
+	DefineKeyCommand(kcChannelTranspose, 1922, _T("Transpose Channel"));
+	DefineKeyCommand(kcChannelDuplicate, 1923, _T("Duplicate Channel"));
 
 
 
