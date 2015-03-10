@@ -628,10 +628,17 @@ template <class T>
 void XFadeSampleImpl(T *pStart, const SmpLength nOffset, SmpLength nFadeLength)
 //-----------------------------------------------------------------------------
 {
+	const double length = 1.0 / static_cast<double>(nFadeLength);
 	for(SmpLength i = 0; i < nFadeLength; i++)
 	{
-		double dPercentage = sqrt((double)i / (double)nFadeLength); // linear fades are boring
-		pStart[nOffset + i] = (T)(((double)pStart[nOffset + i]) * (1 - dPercentage) + ((double)pStart[i]) * dPercentage);
+		// Constant-power crossfade
+		double fact1 = std::sqrt(i * length);
+		double fact2 = std::sqrt((nFadeLength - i) * length);
+		int32 val = static_cast<int32>(
+			static_cast<double>(pStart[nOffset + i]) * fact2 +
+			static_cast<double>(pStart[i]) * fact1);
+		Limit(val, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+		pStart[nOffset + i] = static_cast<T>(val);
 	}
 }
 
@@ -643,16 +650,16 @@ bool XFadeSample(ModSample &smp, SmpLength iFadeLength, CSoundFile &sndFile)
 	if(smp.nLoopEnd <= smp.nLoopStart || smp.nLoopEnd > smp.nLength) return false;
 	if(smp.nLoopStart < iFadeLength) return false;
 
-	SmpLength iStart = smp.nLoopStart - iFadeLength;
-	SmpLength iEnd = smp.nLoopEnd - iFadeLength;
-	iStart *= smp.GetNumChannels();
-	iEnd *= smp.GetNumChannels();
+	SmpLength start = smp.nLoopStart - iFadeLength;
+	SmpLength end = smp.nLoopEnd - iFadeLength;
+	start *= smp.GetNumChannels();
+	end *= smp.GetNumChannels();
 	iFadeLength *= smp.GetNumChannels();
 
 	if(smp.GetElementarySampleSize() == 2)
-		XFadeSampleImpl(smp.pSample16 + iStart, iEnd - iStart, iFadeLength);
+		XFadeSampleImpl(smp.pSample16 + start, end - start, iFadeLength);
 	else if(smp.GetElementarySampleSize() == 1)
-		XFadeSampleImpl(smp.pSample8 + iStart, iEnd - iStart, iFadeLength);
+		XFadeSampleImpl(smp.pSample8 + start, end - start, iFadeLength);
 	else
 		return false;
 
