@@ -140,7 +140,7 @@ LIBOPENMPT_API int openmpt_is_extension_supported( const char * extension );
  * \param dst Target where to copy data.
  * \param bytes Number of bytes to read.
  * \return Number of bytes actually read and written to dst.
- * \retval 0 End fo stream or error.
+ * \retval 0 End of stream or error.
  */
 typedef size_t (*openmpt_stream_read_func)( void * stream, void * dst, size_t bytes );
 
@@ -152,7 +152,7 @@ typedef size_t (*openmpt_stream_read_func)( void * stream, void * dst, size_t by
  * \param whence SEEK_SET, SEEK_CUR, SEEK_END. See C89 documentation.
  * \return Returns 0 on success.
  * \retval 0 Success.
- * \retval -1 Failure. Position gets not updated.
+ * \retval -1 Failure. Position does not get updated.
  */
 typedef int (*openmpt_stream_seek_func)( void * stream, int64_t offset, int whence );
 
@@ -161,7 +161,7 @@ typedef int (*openmpt_stream_seek_func)( void * stream, int64_t offset, int when
  * Tell position of stream.
  * \param stream Stream to operate on.
  * \return Current position in stream.
- * \retval -1 Failure. Position gets not updated.
+ * \retval -1 Failure. Position does not get updated.
  */
 typedef int64_t (*openmpt_stream_tell_func)( void * stream );
 
@@ -216,7 +216,7 @@ LIBOPENMPT_API void openmpt_log_func_silent( const char * message, void * user )
  *
  * \param stream_callbacks Input stream callback operations.
  * \param stream Input stream to scan.
- * \param effort Effort to make when validating stream. Effort 0.0 does not even look at stream at all and effort 1.0 completely loads the file from stream. A lower effort requires less dat to be loaded but only gives a rough estimate answer.
+ * \param effort Effort to make when validating stream. Effort 0.0 does not even look at stream at all and effort 1.0 completely loads the file from stream. A lower effort requires less data to be loaded but only gives a rough estimate answer.
  * \param logfunc Logging function where warning and errors are written.
  * \param user Logging function user context.
  * \return Propability between 0.0 and 1.0.
