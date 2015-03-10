@@ -140,7 +140,7 @@ void SettingsContainer::BackendsRemoveSetting(const SettingPath &path)
 	backend->RemoveSetting(path);
 }
 
-SettingValue SettingsContainer::ReadSetting(const SettingPath &path, const SettingValue &def, const SettingMetadata &metadata) const
+SettingValue SettingsContainer::ReadSetting(const SettingPath &path, const SettingValue &def) const
 {
 	ASSERT(theApp.InGuiThread());
 	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
@@ -148,7 +148,6 @@ SettingValue SettingsContainer::ReadSetting(const SettingPath &path, const Setti
 	if(entry == map.end())
 	{
 		entry = map.insert(map.begin(), std::make_pair(path, SettingState(def).assign(BackendsReadSetting(path, def), false)));
-		mapMetadata[path] = metadata;
 	}
 	return entry->second;
 }
@@ -250,7 +249,7 @@ SettingsContainer::~SettingsContainer()
 
 #else // !MPT_SETTINGS_CACHE
 
-SettingValue SettingsContainer::ReadSetting(const SettingPath &path, const SettingValue &def, const SettingMetadata & /*metadata*/ ) const
+SettingValue SettingsContainer::ReadSetting(const SettingPath &path, const SettingValue &def) const
 {
 	return backend->ReadSetting(path, def);
 }
