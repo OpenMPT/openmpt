@@ -460,7 +460,7 @@ private:
 
 	CHANNELINDEX FindGroupRecordChannel(BYTE recordGroup, bool forceFreeChannel, CHANNELINDEX startChannel = 0) const;
 
-	bool BuildChannelControlCtxMenu(HMENU hMenu) const;
+	bool BuildChannelControlCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile *pSndFile) const;
 	bool BuildRecordCtxMenu(HMENU hMenu, CInputHandler *ih, CHANNELINDEX nChn, CModDoc *pModDoc) const;
 	bool BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nChn, CSoundFile *pSndFile) const;
