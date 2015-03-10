@@ -1451,7 +1451,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 				if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
 					AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 				BuildRecordCtxMenu(hMenu, ih, nChn, pModDoc);
-				BuildChannelControlCtxMenu(hMenu);
+				BuildChannelControlCtxMenu(hMenu, ih);
 			}
 		}
 		
@@ -6356,13 +6356,13 @@ bool CViewPattern::BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler *ih) const
 }
 
 
-bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu) const
-//--------------------------------------------------------------
+bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu, CInputHandler *ih) const
+//---------------------------------------------------------------------------------
 {
 	AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 
-	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSPOSECHANNEL, "&Transpose Channel");
-	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DUPLICATECHANNEL, "&Duplicate Channel");
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSPOSECHANNEL, "&Transpose Channel\t" + ih->GetKeyTextFromCommand(kcChannelTranspose));
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DUPLICATECHANNEL, "&Duplicate Channel\t" + ih->GetKeyTextFromCommand(kcChannelDuplicate));
 
 	HMENU addChannelMenu = ::CreatePopupMenu();
 	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(addChannelMenu), "&Add Channel\t");
