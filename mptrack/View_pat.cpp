@@ -122,6 +122,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_PATTERN_SETINSTRUMENT,		OnSetSelInstrument)
 	ON_COMMAND(ID_PATTERN_ADDCHANNEL_FRONT,		OnAddChannelFront)
 	ON_COMMAND(ID_PATTERN_ADDCHANNEL_AFTER,		OnAddChannelAfter)
+	ON_COMMAND(ID_PATTERN_TRANSPOSECHANNEL,		OnTransposeChannel)
 	ON_COMMAND(ID_PATTERN_DUPLICATECHANNEL,		OnDuplicateChannel)
 	ON_COMMAND(ID_PATTERN_REMOVECHANNEL,		OnRemoveChannel)
 	ON_COMMAND(ID_PATTERN_REMOVECHANNELDIALOG,	OnRemoveChannelDialog)
@@ -153,6 +154,7 @@ CViewPattern::CViewPattern()
 	m_pEffectVis = nullptr; //rewbs.fxvis
 	m_bLastNoteEntryBlocked = false;
 
+	m_nTransposeAmount = 1;
 	m_nPattern = 0;
 	m_nDetailLevel = PatternCursor::lastColumn;
 	m_pEditWnd = NULL;
@@ -2888,14 +2890,60 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 }
 
 
+void CViewPattern::OnTransposeChannel()
+//-------------------------------------
+{
+	CInputDlg dlg(this, "Enter transpose amount:", -(NOTE_MAX - NOTE_MIN), (NOTE_MAX - NOTE_MIN), m_nTransposeAmount);
+	if(dlg.DoModal() == IDOK)
+	{
+		m_nTransposeAmount = dlg.resultNumber;
+
+		CSoundFile &sndFile = *GetSoundFile();
+		bool changed = false;
+		// Don't allow notes outside our supported note range.
+		const ModCommand::NOTE noteMin = sndFile.GetModSpecifications().noteMin;
+		const ModCommand::NOTE noteMax = sndFile.GetModSpecifications().noteMax;
+
+		for(PATTERNINDEX pat = 0; pat < sndFile.Patterns.Size(); pat++)
+		{
+			bool changedThisPat = false;
+			if(sndFile.Patterns.IsValidPat(pat))
+			{
+				ModCommand *m = sndFile.Patterns[pat].GetpModCommand(0, m_MenuCursor.GetChannel());
+				const ROWINDEX numRows = sndFile.Patterns[pat].GetNumRows();
+				for(ROWINDEX row = 0; row < numRows; row++)
+				{
+					if(m->IsNote())
+					{
+						if(!changedThisPat)
+						{
+							GetDocument()->GetPatternUndo().PrepareUndo(pat, m_MenuCursor.GetChannel(), 0, 1, numRows, "Transpose Channel", changed);
+							changed = changedThisPat = true;
+						}
+						int note = m->note + m_nTransposeAmount;
+						Limit(note, noteMin, noteMax);
+						m->note = static_cast<ModCommand::NOTE>(note);
+					}
+					m += sndFile.Patterns[pat].GetNumChannels();
+				}
+			}
+		}
+		if(changed)
+		{
+			SetModified(true);
+			InvalidatePattern(false);
+		}
+	}
+}
+
+
 void CViewPattern::OnTransposeCustom()
 //------------------------------------
 {
-	static int32 tranpose = 1;
-	CInputDlg dlg(this, "Enter transpose amount:", -(NOTE_MAX - NOTE_MIN), (NOTE_MAX - NOTE_MIN), tranpose);
+	CInputDlg dlg(this, "Enter transpose amount:", -(NOTE_MAX - NOTE_MIN), (NOTE_MAX - NOTE_MIN), m_nTransposeAmount);
 	if(dlg.DoModal() == IDOK)
 	{
-		tranpose = dlg.resultNumber;
+		m_nTransposeAmount = dlg.resultNumber;
 		TransposeSelection(dlg.resultNumber);
 	}
 }
@@ -2930,7 +2978,7 @@ bool CViewPattern::TransposeSelection(int transp)
 			{
 				int note = m[chn].note + transp;
 				Limit(note, noteMin, noteMax);
-				m[chn].note = (ModCommand::NOTE)note;
+				m[chn].note = static_cast<ModCommand::NOTE>(note);
 			}
 		}
 	}
@@ -3309,6 +3357,7 @@ void CViewPattern::OnDuplicateChannel()
 	}
 	EndWaitCursor();
 }
+
 
 void CViewPattern::OnRunScript()
 //------------------------------
@@ -6306,7 +6355,8 @@ bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu) const
 {
 	AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 
-	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DUPLICATECHANNEL, "&Duplicate this channel");
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSPOSECHANNEL, "&Transpose channel");
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DUPLICATECHANNEL, "&Duplicate channel");
 
 	HMENU addChannelMenu = ::CreatePopupMenu();
 	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(addChannelMenu), "&Add channel\t");

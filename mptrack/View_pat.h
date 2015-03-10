@@ -165,6 +165,7 @@ protected:
 	ROWINDEX m_nPlayRow;
 	UINT m_nPlayTick;
 	PATTERNINDEX m_nPattern, m_nPlayPat;
+	int32 m_nTransposeAmount;
 
 	int m_nXScroll, m_nYScroll;
 	PatternCursor::Columns m_nDetailLevel;	// Visible Columns
@@ -183,8 +184,8 @@ protected:
 
 	UINT m_nFoundInstrument;
 	DWORD m_dwLastNoteEntryTime; //rewbs.customkeys
-	bool m_bLastNoteEntryBlocked;
-	bool m_bContinueSearch, m_bWholePatternFitsOnScreen;
+	bool m_bLastNoteEntryBlocked : 1;
+	bool m_bContinueSearch : 1, m_bWholePatternFitsOnScreen : 1;
 
 	ModCommand m_PCNoteEditMemory;		// PC Note edit memory
 	static ModCommand m_cmdOld;			// Quick cursor copy/paste data
@@ -419,6 +420,7 @@ protected:
 	afx_msg void OnAddChannelFront() { AddChannelBefore(m_MenuCursor.GetChannel()); }
 	afx_msg void OnAddChannelAfter() { AddChannelBefore(m_MenuCursor.GetChannel() + 1); };
 	afx_msg void OnDuplicateChannel();
+	afx_msg void OnTransposeChannel();
 	afx_msg void OnRemoveChannel();
 	afx_msg void OnRemoveChannelDialog();
 	afx_msg void OnPatternProperties();
