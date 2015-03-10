@@ -2187,7 +2187,7 @@ BEGIN
         MENUITEM "&Copy envelope",              ID_EDIT_COPY
         MENUITEM "&Paste envelope",             ID_EDIT_PASTE
         MENUITEM SEPARATOR
-        MENUITEM "Scale Envelope Points...",    ID_ENVELOPE_SCALEPOINTS
+        MENUITEM "Scale &Envelope Points...",   ID_ENVELOPE_SCALEPOINTS
     END
 END
 
