@@ -374,7 +374,6 @@ public:
 	bool RemovePlugin(VSTPluginLib *);
 	bool CreateMixPlugin(SNDMIXPLUGIN &, CSoundFile &);
 	void OnIdle();
-	static void ReportPlugException(LPCSTR format,...);
 	static void ReportPlugException(const std::wstring &msg);
 	static void ReportPlugException(const std::string &msg);
 
