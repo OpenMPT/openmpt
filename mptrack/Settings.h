@@ -469,27 +469,6 @@ public:
 };
 
 
-#if defined(MPT_SETTINGS_CACHE)
-
-struct SettingMetadata
-{
-	mpt::ustring description;
-	SettingMetadata() {}
-	SettingMetadata(const AnyStringLocale &description)
-		: description(description)
-	{
-		return;
-	}
-};
-
-#else // !MPT_SETTINGS_CACHE
-
-struct SettingMetadata
-{
-};
-
-#endif // MPT_SETTINGS_CACHE
-
 class ISettingChanged
 {
 public:
@@ -511,11 +490,9 @@ class SettingsContainer
 
 		public:
 			typedef std::map<SettingPath,SettingState> SettingsMap;
-			typedef std::map<SettingPath,SettingMetadata> SettingsMetaMap;
 			typedef std::map<SettingPath,std::set<ISettingChanged*> > SettingsListenerMap;
 		private:
 			mutable SettingsMap map;
-			mutable SettingsMetaMap mapMetadata;
 			mutable SettingsListenerMap mapListeners;
 			void WriteSettings();
 
@@ -529,7 +506,7 @@ private:
 	void BackendsWriteSetting(const SettingPath &path, const SettingValue &val);
 	void BackendsRemoveSetting(const SettingPath &path);
 	void NotifyListeners(const SettingPath &path);
-	SettingValue ReadSetting(const SettingPath &path, const SettingValue &def, const SettingMetadata &metadata) const;
+	SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const;
 	void WriteSetting(const SettingPath &path, const SettingValue &val, SettingFlushMode flushMode);
 	void ForgetSetting(const SettingPath &path);
 	void RemoveSetting(const SettingPath &path);
@@ -540,14 +517,14 @@ public:
 	SettingsContainer(ISettingsBackend *backend);
 	void SetImmediateFlush(bool newImmediateFlush);
 	template <typename T>
-	T Read(const SettingPath &path, const T &def = T(), const SettingMetadata &metadata = SettingMetadata()) const
+	T Read(const SettingPath &path, const T &def = T()) const
 	{
-		return FromSettingValue<T>(ReadSetting(path, ToSettingValue<T>(def), metadata));
+		return FromSettingValue<T>(ReadSetting(path, ToSettingValue<T>(def)));
 	}
 	template <typename T>
-	T Read(const AnyStringLocale &section, const AnyStringLocale &key, const T &def = T(), const SettingMetadata &metadata = SettingMetadata()) const
+	T Read(const AnyStringLocale &section, const AnyStringLocale &key, const T &def = T()) const
 	{
-		return FromSettingValue<T>(ReadSetting(SettingPath(section, key), ToSettingValue<T>(def), metadata));
+		return FromSettingValue<T>(ReadSetting(SettingPath(section, key), ToSettingValue<T>(def)));
 	}
 	template <typename T>
 	void Write(const SettingPath &path, const T &val, SettingFlushMode flushMode = SettingWriteBack)
@@ -623,17 +600,17 @@ public:
 		return;
 	}
 public:
-	Setting(SettingsContainer &conf_, const AnyStringLocale &section, const AnyStringLocale &key, const T&def, const SettingMetadata &metadata = SettingMetadata())
+	Setting(SettingsContainer &conf_, const AnyStringLocale &section, const AnyStringLocale &key, const T&def)
 		: conf(conf_)
 		, path(section, key)
 	{
-		conf.Read(path, def, metadata); // set default value
+		conf.Read(path, def); // set default value
 	}
-	Setting(SettingsContainer &conf_, const SettingPath &path_, const T&def, const SettingMetadata &metadata = SettingMetadata())
+	Setting(SettingsContainer &conf_, const SettingPath &path_, const T&def)
 		: conf(conf_)
 		, path(path_)
 	{
-		conf.Read(path, def, metadata); // set default value
+		conf.Read(path, def); // set default value
 	}
 	SettingPath GetPath() const
 	{
@@ -679,20 +656,20 @@ public:
 		conf.Register(this, path);
 	}
 public:
-	CachedSetting(SettingsContainer &conf_, const AnyStringLocale &section, const AnyStringLocale &key, const T&def, const SettingMetadata &metadata = SettingMetadata())
+	CachedSetting(SettingsContainer &conf_, const AnyStringLocale &section, const AnyStringLocale &key, const T&def)
 		: value(def)
 		, conf(conf_)
 		, path(section, key)
 	{
-		value = conf.Read(path, def, metadata);
+		value = conf.Read(path, def);
 		conf.Register(this, path);
 	}
-	CachedSetting(SettingsContainer &conf_, const SettingPath &path_, const T&def, const SettingMetadata &metadata = SettingMetadata())
+	CachedSetting(SettingsContainer &conf_, const SettingPath &path_, const T&def)
 		: value(def)
 		, conf(conf_)
 		, path(path_)
 	{
-		value = conf.Read(path, def, metadata);
+		value = conf.Read(path, def);
 		conf.Register(this, path);
 	}
 	~CachedSetting()
@@ -755,19 +732,19 @@ public:
 		return;
 	}
 public:
-	Setting(SettingsContainer &conf_, const AnyStringLocale &section, const AnyStringLocale &key, const T&def, const SettingMetadata &metadata = SettingMetadata())
+	Setting(SettingsContainer &conf_, const AnyStringLocale &section, const AnyStringLocale &key, const T&def)
 		: value(def)
 		, conf(conf_)
 		, path(section, key)
 	{
-		value = conf.Read(path, def, metadata);
+		value = conf.Read(path, def);
 	}
-	Setting(SettingsContainer &conf_, const SettingPath &path_, const T&def, const SettingMetadata &metadata = SettingMetadata())
+	Setting(SettingsContainer &conf_, const SettingPath &path_, const T&def)
 		: value(def)
 		, conf(conf_)
 		, path(path_)
 	{
-		value = conf.Read(path, def, metadata);
+		value = conf.Read(path, def);
 	}
 	~Setting()
 	{
