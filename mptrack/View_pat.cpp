@@ -330,12 +330,13 @@ bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalS
 		}
 	}
 
-	//rewbs.fix3168
-	if(static_cast<int>(row) < 0 && !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
-		row = 0;
-	if(row >= pSndFile->Patterns[m_nPattern].GetNumRows() && !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
-		row = pSndFile->Patterns[m_nPattern].GetNumRows() - 1;
-	//end rewbs.fix3168
+	if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
+	{
+		if(static_cast<int>(row) < 0)
+			row = 0;
+		if(row >= pSndFile->Patterns[m_nPattern].GetNumRows())
+			row = pSndFile->Patterns[m_nPattern].GetNumRows() - 1;
+	}
 
 	if ((row >= pSndFile->Patterns[m_nPattern].GetNumRows()) || (!m_szCell.cy)) return false;
 	// Fix: If cursor isn't on screen move both scrollbars to make it visible
@@ -5638,8 +5639,11 @@ void CViewPattern::TempEnterChord(int note)
 	if(recordEnabled && !liveRecord)
 	{
 		if(m_nSpacing > 0 && m_nSpacing <= MAX_SPACING)
-			SetCurrentRow(GetCurrentRow() + m_nSpacing);
-
+		{
+			// Shift from entering chord may have triggered this flag, which will prevent us from wrapping to the next pattern.
+			m_Status.reset(psKeyboardDragSelect);
+			SetCurrentRow(GetCurrentRow() + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) != 0);
+		}
 		SetSelToCursor();
 	}
 }
@@ -6355,16 +6359,16 @@ bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu) const
 {
 	AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 
-	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSPOSECHANNEL, "&Transpose channel");
-	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DUPLICATECHANNEL, "&Duplicate channel");
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSPOSECHANNEL, "&Transpose Channel");
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DUPLICATECHANNEL, "&Duplicate Channel");
 
 	HMENU addChannelMenu = ::CreatePopupMenu();
-	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(addChannelMenu), "&Add channel\t");
+	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(addChannelMenu), "&Add Channel\t");
 	AppendMenu(addChannelMenu, MF_STRING, ID_PATTERN_ADDCHANNEL_FRONT, "&Before this channel");
 	AppendMenu(addChannelMenu, MF_STRING, ID_PATTERN_ADDCHANNEL_AFTER, "&After this channel");
 	
 	HMENU removeChannelMenu = ::CreatePopupMenu();
-	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(removeChannelMenu), "Remo&ve channel\t");
+	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(removeChannelMenu), "Remo&ve Channel\t");
 	AppendMenu(removeChannelMenu, MF_STRING, ID_PATTERN_REMOVECHANNEL, "&Remove this channel\t");
 	AppendMenu(removeChannelMenu, MF_STRING, ID_PATTERN_REMOVECHANNELDIALOG, "&Choose channels to remove...\t");
 
