@@ -99,28 +99,28 @@ void EncoderFactoryBase::SetTraits(const Encoder::Traits &traits_)
 }
 
 
-std::string EncoderFactoryBase::DescribeQuality(float quality) const
-//------------------------------------------------------------------
-{
-	return mpt::String::Print("VBR %1%%", static_cast<int>(quality * 100.0f));
-}
-
-std::string EncoderFactoryBase::DescribeBitrateVBR(int bitrate) const
+mpt::ustring EncoderFactoryBase::DescribeQuality(float quality) const
 //-------------------------------------------------------------------
 {
-	return mpt::String::Print("VBR %1 kbit", bitrate);
+	return mpt::String::Print(MPT_USTRING("VBR %1%%"), static_cast<int>(quality * 100.0f));
 }
 
-std::string EncoderFactoryBase::DescribeBitrateABR(int bitrate) const
-//-------------------------------------------------------------------
+mpt::ustring EncoderFactoryBase::DescribeBitrateVBR(int bitrate) const
+//--------------------------------------------------------------------
 {
-	return mpt::String::Print("ABR %1 kbit", bitrate);
+	return mpt::String::Print(MPT_USTRING("VBR %1 kbit"), bitrate);
 }
 
-std::string EncoderFactoryBase::DescribeBitrateCBR(int bitrate) const
-//-------------------------------------------------------------------
+mpt::ustring EncoderFactoryBase::DescribeBitrateABR(int bitrate) const
+//--------------------------------------------------------------------
 {
-	return mpt::String::Print("CBR %1 kbit", bitrate);
+	return mpt::String::Print(MPT_USTRING("ABR %1 kbit"), bitrate);
+}
+
+mpt::ustring EncoderFactoryBase::DescribeBitrateCBR(int bitrate) const
+//--------------------------------------------------------------------
+{
+	return mpt::String::Print(MPT_USTRING("CBR %1 kbit"), bitrate);
 }
 
 

@@ -30,7 +30,7 @@ private:
 public:
 
 	IAudioStreamEncoder *ConstructStreamEncoder(std::ostream &file) const;
-	std::string DescribeQuality(float quality) const;
+	mpt::ustring DescribeQuality(float quality) const;
 	bool IsAvailable() const;
 
 public:
