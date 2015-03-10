@@ -263,10 +263,10 @@ public:
 	{
 		return traits;
 	}
-	virtual std::string DescribeQuality(float quality) const;
-	virtual std::string DescribeBitrateVBR(int bitrate) const;
-	virtual std::string DescribeBitrateABR(int bitrate) const;
-	virtual std::string DescribeBitrateCBR(int bitrate) const;
+	virtual mpt::ustring DescribeQuality(float quality) const;
+	virtual mpt::ustring DescribeBitrateVBR(int bitrate) const;
+	virtual mpt::ustring DescribeBitrateABR(int bitrate) const;
+	virtual mpt::ustring DescribeBitrateCBR(int bitrate) const;
 	virtual bool IsAvailable() const = 0;
 };
 

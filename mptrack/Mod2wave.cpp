@@ -373,7 +373,7 @@ void CWaveConvert::FillFormats()
 	{
 		for(int quality = 100; quality >= 0; quality -= 10)
 		{
-			int ndx = m_CbnSampleFormat.AddString(m_Settings.GetEncoderFactory()->DescribeQuality(quality * 0.01f).c_str());
+			int ndx = m_CbnSampleFormat.AddString(mpt::ToCString(m_Settings.GetEncoderFactory()->DescribeQuality(quality * 0.01f)));
 			m_CbnSampleFormat.SetItemData(ndx, (Encoder::ModeQuality<<24) | (quality<<0));
 			if(encSettings.Mode == Encoder::ModeQuality && Util::Round<int>(encSettings.Quality*100.0f) == quality)
 			{
@@ -385,7 +385,7 @@ void CWaveConvert::FillFormats()
 	{
 		for(std::size_t bitrate = encTraits->bitrates.size()-1; bitrate >= 0; --bitrate)
 		{
-			int ndx = m_CbnSampleFormat.AddString(m_Settings.GetEncoderFactory()->DescribeBitrateVBR(encTraits->bitrates[bitrate]).c_str());
+			int ndx = m_CbnSampleFormat.AddString(mpt::ToCString(m_Settings.GetEncoderFactory()->DescribeBitrateVBR(encTraits->bitrates[bitrate])));
 			m_CbnSampleFormat.SetItemData(ndx, (Encoder::ModeVBR<<24) | (encTraits->bitrates[bitrate]<<0));
 			if(encSettings.Mode == Encoder::ModeVBR && static_cast<int>(encSettings.Bitrate) == encTraits->bitrates[bitrate])
 			{
@@ -397,7 +397,7 @@ void CWaveConvert::FillFormats()
 	{
 		for(std::size_t bitrate = encTraits->bitrates.size()-1; bitrate >= 0; --bitrate)
 		{
-			int ndx = m_CbnSampleFormat.AddString(m_Settings.GetEncoderFactory()->DescribeBitrateABR(encTraits->bitrates[bitrate]).c_str());
+			int ndx = m_CbnSampleFormat.AddString(mpt::ToCString(m_Settings.GetEncoderFactory()->DescribeBitrateABR(encTraits->bitrates[bitrate])));
 			m_CbnSampleFormat.SetItemData(ndx, (Encoder::ModeABR<<24) | (encTraits->bitrates[bitrate]<<0));
 			if(encSettings.Mode == Encoder::ModeABR && static_cast<int>(encSettings.Bitrate) == encTraits->bitrates[bitrate])
 			{
@@ -409,7 +409,7 @@ void CWaveConvert::FillFormats()
 	{
 		for(std::size_t bitrate = encTraits->bitrates.size()-1; bitrate >= 0; --bitrate)
 		{
-			int ndx = m_CbnSampleFormat.AddString(m_Settings.GetEncoderFactory()->DescribeBitrateCBR(encTraits->bitrates[bitrate]).c_str());
+			int ndx = m_CbnSampleFormat.AddString(mpt::ToCString(m_Settings.GetEncoderFactory()->DescribeBitrateCBR(encTraits->bitrates[bitrate])));
 			m_CbnSampleFormat.SetItemData(ndx, (Encoder::ModeCBR<<24) | (encTraits->bitrates[bitrate]<<0));
 			if(encSettings.Mode == Encoder::ModeCBR && static_cast<int>(encSettings.Bitrate) == encTraits->bitrates[bitrate])
 			{

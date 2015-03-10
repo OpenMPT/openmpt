@@ -1520,8 +1520,8 @@ IAudioStreamEncoder *MP3Encoder::ConstructStreamEncoder(std::ostream &file) cons
 }
 
 
-std::string MP3Encoder::DescribeQuality(float quality) const
-//----------------------------------------------------------
+mpt::ustring MP3Encoder::DescribeQuality(float quality) const
+//-----------------------------------------------------------
 {
 #ifdef MPT_MP3ENCODER_LAME
 	if(m_Type == MP3EncoderLame)
@@ -1531,23 +1531,23 @@ std::string MP3Encoder::DescribeQuality(float quality) const
 		if(q < 0) q = 0;
 		if(q >= 10)
 		{
-			return mpt::String::Print("VBR -V%1 (~%2 kbit)", "9.999", q_table[q]);
+			return mpt::String::Print(MPT_USTRING("VBR -V%1 (~%2 kbit)"), MPT_USTRING("9.999"), q_table[q]);
 		} else
 		{
-			return mpt::String::Print("VBR -V%1 (~%2 kbit)", Util::Round<int>((1.0f - quality) * 10.0f), q_table[q]);
+			return mpt::String::Print(MPT_USTRING("VBR -V%1 (~%2 kbit)"), Util::Round<int>((1.0f - quality) * 10.0f), q_table[q]);
 		}
 	}
 #endif // MPT_MP3ENCODER_LAME
 	return EncoderFactoryBase::DescribeQuality(quality);
 }
 
-std::string MP3Encoder::DescribeBitrateABR(int bitrate) const
-//-----------------------------------------------------------
+mpt::ustring MP3Encoder::DescribeBitrateABR(int bitrate) const
+//------------------------------------------------------------
 {
 #ifdef MPT_MP3ENCODER_BLADE
 	if(m_Type == MP3EncoderBlade)
 	{
-		return mpt::String::Print("%1 kbit", bitrate);
+		return mpt::String::Print(MPT_USTRING("%1 kbit"), bitrate);
 	}
 #endif // MPT_MP3ENCODER_BLADE
 	return EncoderFactoryBase::DescribeBitrateABR(bitrate);
