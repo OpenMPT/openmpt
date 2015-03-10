@@ -61,9 +61,17 @@ void CScaleEnvPointsDlg::OnOK()
 
 	if(m_fFactorY != 1)
 	{
+		float factor = m_fFactorY;
+		bool invert = false;
+		if(m_fFactorY < 0)
+		{
+			invert = true;
+			factor = -factor;
+		}
 		for(uint32 i = 0; i < m_Env.nNodes; i++)
 		{
-			m_Env.Values[i] = Clamp(static_cast<uint8>((m_fFactorY * ((int)m_Env.Values[i] - m_nCenter)) + m_nCenter), uint8(ENVELOPE_MIN), uint8(ENVELOPE_MAX));
+			if(invert) m_Env.Values[i] = ENVELOPE_MAX - m_Env.Values[i];
+			m_Env.Values[i] = Clamp(static_cast<uint8>((factor * ((int)m_Env.Values[i] - m_nCenter)) + m_nCenter), uint8(ENVELOPE_MIN), uint8(ENVELOPE_MAX));
 		}
 	}
 
