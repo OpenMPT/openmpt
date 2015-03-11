@@ -781,7 +781,7 @@ public:
 	void NoteChange(ModChannel *pChn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false) const;
 	void InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true) const;
 	void ApplyInstrumentPanning(ModChannel *pChn, const ModInstrument *instr, const ModSample *smp) const;
-	uint32_t CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX chn) const;
+	uint32_t CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX chn, bool *isExtended = nullptr) const;
 
 	// Channel Effects
 	void KeyOff(ModChannel *pChn) const;

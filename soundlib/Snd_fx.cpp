@@ -378,34 +378,13 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					if(param != 0) memory.state.m_nMusicSpeed = param;
 					break;
 				}
+				param = CalculateXParam(memory.state.m_nPattern, memory.state.m_nRow, nChn);
 				if ((adjustMode & eAdjust) && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
 				{
 					if (param) pChn->nOldTempo = param; else param = pChn->nOldTempo;
 				}
-				if (param >= 0x20) memory.state.m_nMusicTempo = param; else
-				{
-					// Tempo Slide
-					uint32 tempoDiff = (param & 0x0F) * (memory.state.m_nMusicSpeed - 1);
-					if ((param & 0xF0) == 0x10)
-					{
-						memory.state.m_nMusicTempo += tempoDiff;
-					} else
-					{
-						if(tempoDiff < memory.state.m_nMusicTempo)
-							memory.state.m_nMusicTempo -= tempoDiff;
-						else
-							memory.state.m_nMusicTempo = 32;
-					}
-				}
-// -> CODE#0010
-// -> DESC="add extended parameter mechanism to pattern effects"
-				if(IsCompatibleMode(TRK_ALLTRACKERS))	// clamp tempo correctly in compatible mode
-					memory.state.m_nMusicTempo = Clamp(memory.state.m_nMusicTempo, 32u, 255u);
-				else
-					memory.state.m_nMusicTempo = Clamp(memory.state.m_nMusicTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
-// -! NEW_FEATURE#0010
+				SetTempo(param);
 				break;
-
 			case CMD_S3MCMDEX:
 				if((param & 0xF0) == 0x60)
 				{
@@ -641,8 +620,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 					if(p->command == CMD_OFFSET)
 					{
-						SmpLength offset = CalculateXParam(memory.state.m_nPattern, memory.state.m_nRow, nChn);
-						if(offset < 256)
+						bool isExtended = false;
+						SmpLength offset = CalculateXParam(memory.state.m_nPattern, memory.state.m_nRow, nChn, &isExtended);
+						if(!isExtended)
 						{
 							offset <<= 8;
 							if(offset == 0) offset = pChn->oldOffset;
@@ -2600,27 +2580,12 @@ bool CSoundFile::ProcessEffects()
 				if(m_SongFlags[SONG_FIRSTTICK] && param != 0) SetSpeed(param);
 				break;
 			}
-// -> CODE#0010
-// -> DESC="add extended parameter mechanism to pattern effects"
-			m = nullptr;
-			if (m_PlayState.m_nRow < Patterns[m_PlayState.m_nPattern].GetNumRows()-1)
-			{
-				m = Patterns[m_PlayState.m_nPattern].GetpModCommand(m_PlayState.m_nRow + 1, nChn);
-			}
-			if (m && m->command == CMD_XPARAM)
-			{
-				if ((GetType() & MOD_TYPE_XM))
-				{
-					param -= 0x20; //with XM, 0x20 is the lowest tempo. Anything below changes ticks per row.
-				}
-				param = (param << 8) + m->param;
-			}
-// -! NEW_FEATURE#0010
+
+			param = CalculateXParam(m_PlayState.m_nPattern, m_PlayState.m_nRow, nChn);
 			if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 			{
 				if (param) pChn->nOldTempo = param; else param = pChn->nOldTempo;
 			}
-			if (param > GetModSpecifications().tempoMax) param = GetModSpecifications().tempoMax; // rewbs.merge: added check to avoid hyperspaced tempo!
 			SetTempo(param);
 			break;
 
@@ -2634,8 +2599,9 @@ bool CSoundFile::ProcessEffects()
 				{
 					break;
 				}
-				SmpLength offset = CalculateXParam(m_PlayState.m_nPattern, m_PlayState.m_nRow, nChn);
-				if(offset < 256)
+				bool isExtended = false;
+				SmpLength offset = CalculateXParam(m_PlayState.m_nPattern, m_PlayState.m_nRow, nChn, &isExtended);
+				if(!isExtended)
 				{
 					// No X-param (normal behaviour)
 					offset <<= 8;
@@ -3020,9 +2986,11 @@ void CSoundFile::UpdateS3MEffectMemory(ModChannel *pChn, UINT param) const
 
 // Calculate full parameter for effects that support parameter extension at the given pattern location.
 // maxCommands sets the maximum number of XParam commands to look at for this effect
-uint32_t CSoundFile::CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX chn) const
-//------------------------------------------------------------------------------------------
+// isExtended returns if the command is actually using any XParam extensions.
+uint32_t CSoundFile::CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX chn, bool *isExtended) const
+//------------------------------------------------------------------------------------------------------------
 {
+	if(isExtended != nullptr) *isExtended = false;
 	ROWINDEX maxCommands = 4;
 	const ModCommand *m = Patterns[pat].GetpModCommand(chn, row);
 	uint32_t val = m->param;
@@ -3042,6 +3010,7 @@ uint32_t CSoundFile::CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDE
 		return val;
 	}
 
+	const bool xmTempoFix = m->command == CMD_TEMPO && GetType() == MOD_TYPE_XM;
 	ROWINDEX numRows = std::min(Patterns[pat].GetNumRows() - row - 1, maxCommands);
 	while(numRows > 0)
 	{
@@ -3050,8 +3019,14 @@ uint32_t CSoundFile::CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDE
 		{
 			break;
 		}
+		if(xmTempoFix && val < 256)
+		{
+			// With XM, 0x20 is the lowest tempo. Anything below changes ticks per row.
+			val -= 0x20;
+		}
 		val = (val << 8) | m->param;
 		numRows--;
+		if(isExtended != nullptr) *isExtended = true;
 	}
 	return val;
 }
@@ -4916,22 +4891,19 @@ void CSoundFile::SetTempo(UINT param, bool setAsNonModcommand)
 		if (param >= 0x20 && m_SongFlags[SONG_FIRSTTICK]) //rewbs.tempoSlideFix: only set if not (T0x or T1x) and tick is 0
 		{
 			m_PlayState.m_nMusicTempo = param;
-		}
-		// Tempo Slide
-		else if (param < 0x20 && !m_SongFlags[SONG_FIRSTTICK]) //rewbs.tempoSlideFix: only slide if (T0x or T1x) and tick is not 0
+			if (param > GetModSpecifications().tempoMax) param = GetModSpecifications().tempoMax;
+		} else if (param < 0x20 && !m_SongFlags[SONG_FIRSTTICK]) //rewbs.tempoSlideFix: only slide if (T0x or T1x) and tick is not 0
 		{
+			// Tempo Slide
 			if ((param & 0xF0) == 0x10)
 				m_PlayState.m_nMusicTempo += (param & 0x0F); //rewbs.tempoSlideFix: no *2
 			else
 				m_PlayState.m_nMusicTempo -= (param & 0x0F); //rewbs.tempoSlideFix: no *2
 
-		// -> CODE#0016
-		// -> DESC="default tempo update"
 			if(IsCompatibleMode(TRK_ALLTRACKERS))	// clamp tempo correctly in compatible mode
 				m_PlayState.m_nMusicTempo = Clamp(m_PlayState.m_nMusicTempo, 32u, 255u);
 			else
 				m_PlayState.m_nMusicTempo = Clamp(m_PlayState.m_nMusicTempo, specs.tempoMin, specs.tempoMax);
-		// -! BEHAVIOUR_CHANGE#0016
 		}
 	}
 }
