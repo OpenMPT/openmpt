@@ -1039,7 +1039,7 @@ std::string IgnoredCCsToString(const std::bitset<128> &midiIgnoreCCs)
 			{
 				cc += ",";
 			}
-			cc += Stringify(i);
+			cc += mpt::ToString(i);
 			first = false;
 		}
 	}

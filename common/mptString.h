@@ -929,13 +929,6 @@ typedef fmtT<mpt::ustring> ufmt;
 
 } // namespace mpt
 
-#ifdef MODPLUG_TRACKER
-#define Stringify(x) mpt::ToString(x)
-#if MPT_WSTRING_FORMAT
-#define StringifyW(x) mpt::ToWString(x)
-#endif
-#endif
-
 namespace mpt { namespace String {
 
 namespace detail

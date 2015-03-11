@@ -252,7 +252,7 @@ void CTuningDialog::UpdateView(const int updateMask)
 		m_EditTuningCollectionName.SetWindowText(m_pActiveTuningCollection->GetName().c_str());
 		m_EditTuningCollectionVersion.SetWindowText(m_pActiveTuningCollection->GetVersionString().c_str());
 		m_EditTuningCollectionEditMask.SetWindowText(m_pActiveTuningCollection->GetEditMaskString().c_str());
-		m_EditTuningCollectionItemNum.SetWindowText(Stringify(m_pActiveTuningCollection->GetNumTunings()).c_str());
+		m_EditTuningCollectionItemNum.SetWindowText(mpt::ToString(m_pActiveTuningCollection->GetNumTunings()).c_str());
 		::SetWindowTextW(m_EditTuningCollectionPath.m_hWnd, m_pActiveTuningCollection->GetSaveFilePath().ToWide().c_str());
 	}
 	//<-- Updating tuning collection part
@@ -266,7 +266,7 @@ void CTuningDialog::UpdateView(const int updateMask)
 		m_EditName.Invalidate();
 
 		//Finetunesteps-edit
-		m_EditFineTuneSteps.SetWindowText(Stringify(m_pActiveTuning->GetFineStepCount()).c_str());
+		m_EditFineTuneSteps.SetWindowText(mpt::ToString(m_pActiveTuning->GetFineStepCount()).c_str());
 		m_EditFineTuneSteps.Invalidate();
 
 		//Making sure that ratiomap window is showing and
@@ -282,10 +282,10 @@ void CTuningDialog::UpdateView(const int updateMask)
 		if(period > 0)
 		{
 			m_EditSteps.EnableWindow();
-			m_EditSteps.SetWindowText(Stringify(period).c_str());
+			m_EditSteps.SetWindowText(mpt::ToString(period).c_str());
 
 			m_EditRatioPeriod.EnableWindow();
-			m_EditRatioPeriod.SetWindowText(Stringify(GroupRatio).c_str());
+			m_EditRatioPeriod.SetWindowText(mpt::ToString(GroupRatio).c_str());
 		}
 		else //case: m_pActiveTuning is of type general.
 		{
@@ -607,7 +607,7 @@ void CTuningDialog::UpdateRatioMapEdits(const NOTEINDEXTYPE& note)
 		return;
 
 	m_RatioEditApply = false;
-	m_EditRatio.SetWindowText(Stringify(m_pActiveTuning->GetRatio(note)).c_str());
+	m_EditRatio.SetWindowText(mpt::ToString(m_pActiveTuning->GetRatio(note)).c_str());
 	m_NoteEditApply = false;
 	m_EditNotename.SetWindowText(m_pActiveTuning->GetNoteName(note).c_str());
 
@@ -718,7 +718,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 						delete pT; pT = nullptr;
 						if (m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
 						{
-							sLoadReport += L"-Failed to load file " + fileNameExt + L": maximum number(" + StringifyW(CTuningCollection::s_nMaxTuningCount) + L") of temporary tunings is already open.\n";
+							sLoadReport += L"-Failed to load file " + fileNameExt + L": maximum number(" + mpt::ToWString(CTuningCollection::s_nMaxTuningCount) + L") of temporary tunings is already open.\n";
 						}
 						else // Case: Can't add tuning to tuning collection for unknown reason.
 						{
@@ -736,7 +736,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 				{
 					if (a == enSclImportAddTuningFailure && m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
 					{
-						sLoadReport += L"-Failed to load file " + fileNameExt + L": maximum number(" + StringifyW(CTuningCollection::s_nMaxTuningCount) + L") of temporary tunings is already open.\n";
+						sLoadReport += L"-Failed to load file " + fileNameExt + L": maximum number(" + mpt::ToWString(CTuningCollection::s_nMaxTuningCount) + L") of temporary tunings is already open.\n";
 					}
 					else
 					{
@@ -797,7 +797,7 @@ void CTuningDialog::OnEnKillfocusEditFinetunesteps()
 		const BYTE BS = 5;
 		char buffer[BS];
 		m_EditFineTuneSteps.GetWindowText(buffer, BS);
-		m_EditFineTuneSteps.SetWindowText(Stringify(m_pActiveTuning->SetFineStepCount(ConvertStrTo<CTuning::USTEPINDEXTYPE>(buffer))).c_str());
+		m_EditFineTuneSteps.SetWindowText(mpt::ToString(m_pActiveTuning->SetFineStepCount(ConvertStrTo<CTuning::USTEPINDEXTYPE>(buffer))).c_str());
 		m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 		m_EditFineTuneSteps.Invalidate();
 	}
@@ -1407,7 +1407,7 @@ CString CTuningDialog::GetSclImportFailureMsg(EnSclImport id)
     switch(id)
     {
         case enSclImportFailTooManyNotes:
-			AfxFormatString1(sMsg, IDS_SCL_IMPORT_FAIL_8, Stringify(s_nSclImportMaxNoteCount).c_str());
+			AfxFormatString1(sMsg, IDS_SCL_IMPORT_FAIL_8, mpt::ToString(s_nSclImportMaxNoteCount).c_str());
 			return sMsg;
             
         case enSclImportFailTooLargeNumDenomIntegers:
