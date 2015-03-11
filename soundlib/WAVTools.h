@@ -327,7 +327,7 @@ struct PACKED WAVCuePoint
 	}
 
 	// Set up sample information
-	void ConvertToWAV(uint32_t id_, SmpLength offset_)
+	void ConvertToWAV(uint32 id_, SmpLength offset_)
 	{
 		id = id_;
 		position = offset_;

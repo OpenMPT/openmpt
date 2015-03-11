@@ -187,9 +187,9 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 	// Read cue points
 	if(cueChunk.IsValid())
 	{
-		uint32_t numPoints = cueChunk.ReadUint32LE();
+		uint32 numPoints = cueChunk.ReadUint32LE();
 		LimitMax(numPoints, CountOf(sample.cues));
-		for(uint32_t i = 0; i < numPoints; i++)
+		for(uint32 i = 0; i < numPoints; i++)
 		{
 			WAVCuePoint cuePoint;
 			cueChunk.ReadConvertEndianness(cuePoint);
@@ -559,10 +559,10 @@ void WAVWriter::WriteCueInformation(const ModSample &sample)
 {
 	StartChunk(RIFFChunk::idcue_);
 	{
-		const uint32_t numPoints = SwapBytesLE_(CountOf(sample.cues));
+		const uint32 numPoints = SwapBytesLE_(CountOf(sample.cues));
 		Write(numPoints);
 	}
-	for(uint32_t i = 0; i < CountOf(sample.cues); i++)
+	for(uint32 i = 0; i < CountOf(sample.cues); i++)
 	{
 		WAVCuePoint cuePoint;
 		cuePoint.ConvertToWAV(i, sample.cues[i]);

@@ -646,7 +646,7 @@ public:
 
 	void RecalculateSamplesPerTick();
 	double GetRowDuration(UINT tempo, UINT speed) const;
-	uint32_t GetTickDuration(uint32_t tempo, uint32_t speed, ROWINDEX rowsPerBeat);
+	uint32 GetTickDuration(uint32 tempo, uint32 speed, ROWINDEX rowsPerBeat);
 
 	// A repeat count value of -1 means infinite loop
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }
@@ -781,7 +781,7 @@ public:
 	void NoteChange(ModChannel *pChn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false) const;
 	void InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true) const;
 	void ApplyInstrumentPanning(ModChannel *pChn, const ModInstrument *instr, const ModSample *smp) const;
-	uint32_t CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX chn, bool *isExtended = nullptr) const;
+	uint32 CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX chn, bool *isExtended = nullptr) const;
 
 	// Channel Effects
 	void KeyOff(ModChannel *pChn) const;
@@ -850,7 +850,7 @@ protected:
 	void ExtendedChannelEffect(ModChannel *, UINT param);
 	void InvertLoop(ModChannel* pChn);
 	ROWINDEX PatternBreak(PlayState &state, CHANNELINDEX chn, uint8 param) const;
-	void GlobalVolSlide(ModCommand::PARAM param, uint8_t &nOldGlobalVolSlide);
+	void GlobalVolSlide(ModCommand::PARAM param, uint8 &nOldGlobalVolSlide);
 
 	void ProcessMacroOnChannel(CHANNELINDEX nChn);
 	void ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro, uint8 param = 0, PLUGINDEX plugin = 0);

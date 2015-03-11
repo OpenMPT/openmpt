@@ -705,7 +705,7 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 				if(plugin.IsAutoSuspendable() && pState->inputSilenceCount >= m_MixerSettings.gdwMixingFreq * 4)
 				{
 					bool isSilent = true;
-					for(uint32_t i = 0; i < nCount; i++)
+					for(uint32 i = 0; i < nCount; i++)
 					{
 						if(pOutL[i] > FLT_EPSILON || pOutL[i] < -FLT_EPSILON
 							|| pOutR[i] > FLT_EPSILON || pOutR[i] < -FLT_EPSILON)

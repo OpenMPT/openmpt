@@ -2090,10 +2090,10 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 				// Rationale: chunks are limited to 65536 bytes, which can easily be reached
 				// with the amount of samples that OpenMPT supports.
 				WRITEMODULARHEADER('S','E','U','C', 2 + CountOf(sample.cues) * 4);
-				mpt::IO::WriteIntLE<uint16_t>(f, smp);
+				mpt::IO::WriteIntLE<uint16>(f, smp);
 				for(std::size_t i = 0; i < CountOf(sample.cues); i++)
 				{
-					mpt::IO::WriteIntLE<uint32_t>(f, sample.cues[i]);
+					mpt::IO::WriteIntLE<uint32>(f, sample.cues[i]);
 				}
 			}
 		}

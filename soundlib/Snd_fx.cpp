@@ -374,17 +374,17 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					break;
 				}
 				{
-					uint32_t tempo = CalculateXParam(memory.state.m_nPattern, memory.state.m_nRow, nChn);
+					uint32 tempo = CalculateXParam(memory.state.m_nPattern, memory.state.m_nRow, nChn);
 					if ((adjustMode & eAdjust) && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
 					{
-						if (tempo) pChn->nOldTempo = static_cast<uint8_t>(tempo); else tempo = pChn->nOldTempo;
+						if (tempo) pChn->nOldTempo = static_cast<uint8>(tempo); else tempo = pChn->nOldTempo;
 					}
 
 					if (tempo >= 0x20) memory.state.m_nMusicTempo = tempo;
 					else
 					{
 						// Tempo Slide
-						uint32_t tempoDiff = (tempo & 0x0F) * (memory.state.m_nMusicSpeed - 1);
+						uint32 tempoDiff = (tempo & 0x0F) * (memory.state.m_nMusicSpeed - 1);
 						if ((tempo & 0xF0) == 0x10)
 						{
 							memory.state.m_nMusicTempo += tempoDiff;
@@ -560,7 +560,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			case CMD_CHANNELVOLSLIDE:
 				{
 					if (param) pChn->nOldChnVolSlide = param; else param = pChn->nOldChnVolSlide;
-					int32_t volume = pChn->nGlobalVol;
+					int32 volume = pChn->nGlobalVol;
 					if((param & 0x0F) == 0x0F && (param & 0xF0))
 						volume += (param >> 4);		// Fine Up
 					else if((param & 0xF0) == 0xF0 && (param & 0x0F))
@@ -1554,7 +1554,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 void CSoundFile::ApplyInstrumentPanning(ModChannel *pChn, const ModInstrument *instr, const ModSample *smp) const
 //---------------------------------------------------------------------------------------------------------------
 {
-	int32_t newPan = int32_min;
+	int32 newPan = int32_min;
 	// Default instrument panning
 	if(instr != nullptr && instr->dwFlags[INS_SETPANNING])
 		newPan = instr->nPan;
@@ -1585,13 +1585,13 @@ CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 	if (!pChn->nFadeOutVol) return 0;
 	// All channels are used: check for lowest volume
 	CHANNELINDEX result = 0;
-	uint32_t vol = 64*65536;	// 25%
-	uint32_t envpos = int32_max;
+	uint32 vol = 64*65536;	// 25%
+	uint32 envpos = int32_max;
 	const ModChannel *pj = &m_PlayState.Chn[m_nChannels];
 	for (CHANNELINDEX j=m_nChannels; j<MAX_CHANNELS; j++, pj++)
 	{
 		if (!pj->nFadeOutVol) return j;
-		uint32_t v = pj->nVolume;
+		uint32 v = pj->nVolume;
 		if(pj->dwFlags[CHN_NOTEFADE])
 			v = v * pj->nFadeOutVol;
 		else
@@ -3002,13 +3002,13 @@ void CSoundFile::UpdateS3MEffectMemory(ModChannel *pChn, ModCommand::PARAM param
 // Calculate full parameter for effects that support parameter extension at the given pattern location.
 // maxCommands sets the maximum number of XParam commands to look at for this effect
 // isExtended returns if the command is actually using any XParam extensions.
-uint32_t CSoundFile::CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX chn, bool *isExtended) const
+uint32 CSoundFile::CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX chn, bool *isExtended) const
 //------------------------------------------------------------------------------------------------------------
 {
 	if(isExtended != nullptr) *isExtended = false;
 	ROWINDEX maxCommands = 4;
 	const ModCommand *m = Patterns[pat].GetpModCommand(row, chn);
-	uint32_t val = m->param;
+	uint32 val = m->param;
 
 	switch(m->command)
 	{
@@ -3408,7 +3408,7 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param) const
 	if((!m_SongFlags[SONG_ITCOMPATGXX] && IsCompatibleMode(TRK_IMPULSETRACKER)) || GetType() == MOD_TYPE_PLM)
 	{
 		if(param == 0) param = pChn->nOldPortaUpDown;
-		pChn->nOldPortaUpDown = static_cast<uint8_t>(param);
+		pChn->nOldPortaUpDown = static_cast<uint8>(param);
 	}
 
 	if(GetType() == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
@@ -3428,7 +3428,7 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param) const
 			(pChn->nPortamentoDest < 0 && pChn->nPortamentoSlide > 0))
 			pChn->nPortamentoSlide = -pChn->nPortamentoSlide;
 
-		pChn->m_PortamentoTickSlide = static_cast<int32_t>((m_PlayState.m_nTickCount + 1.0) * pChn->nPortamentoSlide / m_PlayState.m_nMusicSpeed);
+		pChn->m_PortamentoTickSlide = static_cast<int32>((m_PlayState.m_nTickCount + 1.0) * pChn->nPortamentoSlide / m_PlayState.m_nMusicSpeed);
 
 		if(pChn->dwFlags[CHN_GLISSANDO])
 		{
@@ -3821,7 +3821,7 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 //------------------------------------------------------------------------------
 {
 	ModChannel *pChn = &m_PlayState.Chn[nChn];
-	uint8_t command = param & 0xF0;
+	uint8 command = param & 0xF0;
 	param &= 0x0F;
 	switch(command)
 	{
@@ -3894,7 +3894,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 //------------------------------------------------------------------------------
 {
 	ModChannel *pChn = &m_PlayState.Chn[nChn];
-	uint8_t command = param & 0xF0;
+	uint8 command = param & 0xF0;
 	param &= 0x0F;
 	switch(command)
 	{
@@ -4038,7 +4038,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 	// SAx: Set 64k Offset
 	case 0xA0:	if(m_SongFlags[SONG_FIRSTTICK])
 				{
-					pChn->nOldHiOffset = static_cast<uint8_t>(param);
+					pChn->nOldHiOffset = static_cast<uint8>(param);
 					if (!IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->rowCommand.IsNote())
 					{
 						SmpLength pos = param << 16;
@@ -4068,7 +4068,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 	case 0xF0:
 		if(GetType() != MOD_TYPE_S3M)
 		{
-			pChn->nActiveMacro = static_cast<uint8_t>(param);
+			pChn->nActiveMacro = static_cast<uint8>(param);
 		}
 		break;
 	}
@@ -4747,7 +4747,7 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, LONG nFreqSlide) const
 	if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 	{
 		// IT Linear slides
-		const int32_t nOldPeriod = pChn->nPeriod;
+		const int32 nOldPeriod = pChn->nPeriod;
 		if (nFreqSlide < 0)
 		{
 			UINT n = (-nFreqSlide) / 4;
@@ -4955,7 +4955,7 @@ ROWINDEX CSoundFile::PatternLoop(ModChannel *pChn, UINT param)
 					if(p->nPatternLoopCount) return ROWINDEX_INVALID;
 				}
 			}
-			pChn->nPatternLoopCount = static_cast<uint8_t>(param);
+			pChn->nPatternLoopCount = static_cast<uint8>(param);
 		}
 		m_PlayState.m_nNextPatStartRow = pChn->nPatternLoop; // Nasty FT2 E60 bug emulation!
 		return pChn->nPatternLoop;
@@ -4968,10 +4968,10 @@ ROWINDEX CSoundFile::PatternLoop(ModChannel *pChn, UINT param)
 }
 
 
-void CSoundFile::GlobalVolSlide(ModCommand::PARAM param, uint8_t &nOldGlobalVolSlide)
+void CSoundFile::GlobalVolSlide(ModCommand::PARAM param, uint8 &nOldGlobalVolSlide)
 //-----------------------------------------------------------------------------------
 {
-	int32_t nGlbSlide = 0;
+	int32 nGlbSlide = 0;
 	if (param) nOldGlobalVolSlide = param; else param = nOldGlobalVolSlide;
 
 	if((GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)))
@@ -5394,9 +5394,9 @@ void CSoundFile::PortamentoFineMPT(ModChannel* pChn, int param)
 	const int tickParam = static_cast<int>((m_PlayState.m_nTickCount + 1.0) * param / m_PlayState.m_nMusicSpeed);
 	pChn->m_PortamentoFineSteps += (param >= 0) ? tickParam - pChn->nOldFinePortaUpDown : tickParam + pChn->nOldFinePortaUpDown;
 	if(m_PlayState.m_nTickCount + 1 == m_PlayState.m_nMusicSpeed)
-		pChn->nOldFinePortaUpDown = static_cast<int8_t>(std::abs(param));
+		pChn->nOldFinePortaUpDown = static_cast<int8>(std::abs(param));
 	else
-		pChn->nOldFinePortaUpDown = static_cast<int8_t>(std::abs(tickParam));
+		pChn->nOldFinePortaUpDown = static_cast<int8>(std::abs(tickParam));
 
 	pChn->m_CalculateFreq = true;
 }

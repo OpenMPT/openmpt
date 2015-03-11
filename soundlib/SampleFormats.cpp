@@ -2279,20 +2279,20 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		struct
 		{
 			RIFFChunk header;
-			uint32_t numPoints;
+			uint32 numPoints;
 			WAVCuePoint cues[CountOf(sample.cues)];
 		} chunk;
 
 		chunk.header.id = RIFFChunk::idcue_;
 		chunk.header.length = 4 + sizeof(chunk.cues);
 
-		for(uint32_t i = 0; i < CountOf(sample.cues); i++)
+		for(uint32 i = 0; i < CountOf(sample.cues); i++)
 		{
 			chunk.cues[i].ConvertToWAV(i, sample.cues[i]);
 			chunk.cues[i].ConvertEndianness();
 		}
 
-		const uint32_t length = sizeof(RIFFChunk) + chunk.header.length;
+		const uint32 length = sizeof(RIFFChunk) + chunk.header.length;
 		chunk.header.ConvertEndianness();
 
 		FLAC__metadata_object_application_set_data(metadata[numBlocks], reinterpret_cast<FLAC__byte *>(&chunk), length, true);

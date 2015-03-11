@@ -1810,8 +1810,8 @@ void CSoundFile::RecalculateSamplesPerTick()
 // Get length of a tick in sample, with tick-to-tick tempo correction in modern tempo mode.
 // This has to be called exactly once per tick because otherwise the error accumulation
 // goes wrong.
-uint32_t CSoundFile::GetTickDuration(uint32_t tempo, uint32_t speed, ROWINDEX rowsPerBeat)
-//----------------------------------------------------------------------------------------
+uint32 CSoundFile::GetTickDuration(uint32 tempo, uint32 speed, ROWINDEX rowsPerBeat)
+//----------------------------------------------------------------------------------
 {
 	UINT retval = 0;
 	switch(m_nTempoMode)
