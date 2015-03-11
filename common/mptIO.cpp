@@ -134,7 +134,10 @@ void FileDataContainerStdStream::EnsureCacheBuffer(std::size_t requiredbuffersiz
 	{
 		return;
 	}
-	if(Util::ExponentialGrow(cache.size()) < cachesize + requiredbuffersize)
+	if(cache.size() == 0)
+	{
+		cache.resize(Util::AlignUp<std::size_t>(cachesize + requiredbuffersize, BUFFER_SIZE));
+	} else if(Util::ExponentialGrow(cache.size()) < cachesize + requiredbuffersize)
 	{
 		cache.resize(Util::AlignUp<std::size_t>(cachesize + requiredbuffersize, BUFFER_SIZE));
 	} else
