@@ -73,7 +73,7 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const Sm
 		// Update loop points if necessary.
 		if(smp.nLoopStart >= nStartFrom) smp.nLoopStart += nSilenceLength;
 		if(smp.nLoopEnd >= nStartFrom) smp.nLoopEnd += nSilenceLength;
-		for(int i = 0; i < CountOf(smp.cues); i++)
+		for(std::size_t i = 0; i < CountOf(smp.cues); i++)
 		{
 			if(smp.cues[i] >= nStartFrom) smp.cues[i] += nSilenceLength;
 		}
@@ -126,7 +126,7 @@ SmpLength RemoveRange(ModSample &smp, SmpLength selStart, SmpLength selEnd, CSou
 	if(smp.nLoopEnd == 0) smp.uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP);
 	if(smp.nSustainEnd == 0) smp.uFlags.reset(CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
 
-	for(int i = 0; i < CountOf(smp.cues); i++)
+	for(std::size_t i = 0; i < CountOf(smp.cues); i++)
 	{
 		Util::DeleteItem(selStart, selEnd - 1, smp.cues[i]);
 	}

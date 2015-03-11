@@ -2091,7 +2091,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 				// with the amount of samples that OpenMPT supports.
 				WRITEMODULARHEADER('S','E','U','C', 2 + CountOf(sample.cues) * 4);
 				mpt::IO::WriteIntLE<uint16_t>(f, smp);
-				for(int i = 0; i < CountOf(sample.cues); i++)
+				for(std::size_t i = 0; i < CountOf(sample.cues); i++)
 				{
 					mpt::IO::WriteIntLE<uint32_t>(f, sample.cues[i]);
 				}
@@ -2266,7 +2266,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 					if(smp > 0 && smp <= GetNumSamples())
 					{
 						ModSample &sample = Samples[smp];
-						for(int i = 0; i < CountOf(sample.cues); i++)
+						for(std::size_t i = 0; i < CountOf(sample.cues); i++)
 						{
 							sample.cues[i] = chunk.ReadUint32LE();
 						}
