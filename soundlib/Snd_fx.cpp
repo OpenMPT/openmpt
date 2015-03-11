@@ -4711,7 +4711,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 			chn.nLength = chn.pModSample->nLength;
 			offset--;
 			if(offset == 0) offset = chn.oldOffset;
-			else if(offset <= CountOf(chn.pModSample->cues)) offset = chn.oldOffset = chn.pModSample->cues[offset - 1];
+			else if(offset <= static_cast<int>(CountOf(chn.pModSample->cues))) offset = chn.oldOffset = chn.pModSample->cues[offset - 1];
 			SampleOffset(nChn, offset);
 		}
 	}
