@@ -45,7 +45,7 @@ static noinline void DoLog(const mpt::log::Context &context, mpt::ustring messag
 	// remove eol if already present
 	message = mpt::String::RTrim(message, MPT_USTRING("\r\n"));
 	#if defined(MODPLUG_TRACKER)
-		static uint64_t s_lastlogtime = 0;
+		static uint64 s_lastlogtime = 0;
 		uint64 cur = mpt::Date::ANSI::Now();
 		uint64 diff = cur/10000 - s_lastlogtime;
 		s_lastlogtime = cur/10000;

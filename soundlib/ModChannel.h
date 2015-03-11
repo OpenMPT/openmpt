@@ -21,8 +21,8 @@ struct ModChannel
 	struct EnvInfo
 	{
 		FlagSet<EnvelopeFlags> flags;
-		uint32_t nEnvPosition;
-		int32_t nEnvValueAtReleaseJump;
+		uint32 nEnvPosition;
+		int32 nEnvValueAtReleaseJump;
 
 		void Reset()
 		{
@@ -34,16 +34,16 @@ struct ModChannel
 	// Information used in the mixer (should be kept tight for better caching)
 	// Byte sizes are for 32-bit builds and 32-bit integer / float mixer
 	const void *pCurrentSample;	// Currently playing sample (nullptr if no sample is playing)
-	uint32_t nPos;			// Current play position
-	uint32_t nPosLo;			// 16-bit fractional part of play position
-	int32_t nInc;				// 16.16 fixed point sample speed relative to mixing frequency (0x10000 = one sample per output sample, 0x20000 = two samples per output sample, etc...)
-	int32_t leftVol;			// 0...4096 (12 bits, since 16 bits + 12 bits = 28 bits = 0dB in integer mixer, see MIXING_ATTENUATION)
-	int32_t rightVol;			// Ditto
-	int32_t leftRamp;			// Ramping delta, 20.12 fixed point (see VOLUMERAMPPRECISION)
-	int32_t rightRamp;		// Ditto
+	uint32 nPos;			// Current play position
+	uint32 nPosLo;			// 16-bit fractional part of play position
+	int32 nInc;				// 16.16 fixed point sample speed relative to mixing frequency (0x10000 = one sample per output sample, 0x20000 = two samples per output sample, etc...)
+	int32 leftVol;			// 0...4096 (12 bits, since 16 bits + 12 bits = 28 bits = 0dB in integer mixer, see MIXING_ATTENUATION)
+	int32 rightVol;			// Ditto
+	int32 leftRamp;			// Ramping delta, 20.12 fixed point (see VOLUMERAMPPRECISION)
+	int32 rightRamp;		// Ditto
 	// Up to here: 32 bytes
-	int32_t rampLeftVol;		// Current ramping volume, 20.12 fixed point (see VOLUMERAMPPRECISION)
-	int32_t rampRightVol;		// Ditto
+	int32 rampLeftVol;		// Current ramping volume, 20.12 fixed point (see VOLUMERAMPPRECISION)
+	int32 rampRightVol;		// Ditto
 	mixsample_t nFilter_Y[2][2];					// Filter memory - two history items per sample channel
 	mixsample_t nFilter_A0, nFilter_B0, nFilter_B1;	// Filter coeffs
 	mixsample_t nFilter_HP;
@@ -54,7 +54,7 @@ struct ModChannel
 	SmpLength nLoopEnd;
 	FlagSet<ChannelFlags> dwFlags;
 	mixsample_t nROfs, nLOfs;
-	uint32_t nRampLength;
+	uint32 nRampLength;
 	// Up to here: 100 bytes
 
 	const ModSample *pModSample;			// Currently assigned sample slot (can already be stopped)
@@ -64,52 +64,52 @@ struct ModChannel
 	SmpLength proTrackerOffset;				// Offset for instrument-less notes in ProTracker mode
 	SmpLength oldOffset;
 	FlagSet<ChannelFlags> dwOldFlags;		// Flags from previous tick
-	int32_t newLeftVol, newRightVol;
-	int32_t nRealVolume, nRealPan;
-	int32_t nVolume, nPan, nFadeOutVol;
-	int32_t nPeriod, nC5Speed, nPortamentoDest;
-	int32_t cachedPeriod, glissandoPeriod;
-	int32_t nCalcVolume;								// Calculated channel volume, 14-Bit (without global volume, pre-amp etc applied) - for MIDI macros
+	int32 newLeftVol, newRightVol;
+	int32 nRealVolume, nRealPan;
+	int32 nVolume, nPan, nFadeOutVol;
+	int32 nPeriod, nC5Speed, nPortamentoDest;
+	int32 cachedPeriod, glissandoPeriod;
+	int32 nCalcVolume;								// Calculated channel volume, 14-Bit (without global volume, pre-amp etc applied) - for MIDI macros
 	EnvInfo VolEnv, PanEnv, PitchEnv;				// Envelope playback info
-	int32_t nGlobalVol;	// Channel volume (CV in ITTECH.TXT)
-	int32_t nInsVol;		// Sample / Instrument volume (SV * IV in ITTECH.TXT)
-	int32_t nFineTune, nTranspose;
-	int32_t nPortamentoSlide, nAutoVibDepth;
-	uint32_t nAutoVibPos, nVibratoPos, nTremoloPos, nPanbrelloPos;
-	int32_t nVolSwing, nPanSwing;
-	int32_t nCutSwing, nResSwing;
-	int32_t nRestorePanOnNewNote; //If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from panswing.
-	uint32_t nEFxOffset; // offset memory for Invert Loop (EFx, .MOD only)
-	int32_t nRetrigCount, nRetrigParam;
+	int32 nGlobalVol;	// Channel volume (CV in ITTECH.TXT)
+	int32 nInsVol;		// Sample / Instrument volume (SV * IV in ITTECH.TXT)
+	int32 nFineTune, nTranspose;
+	int32 nPortamentoSlide, nAutoVibDepth;
+	uint32 nAutoVibPos, nVibratoPos, nTremoloPos, nPanbrelloPos;
+	int32 nVolSwing, nPanSwing;
+	int32 nCutSwing, nResSwing;
+	int32 nRestorePanOnNewNote; //If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from panswing.
+	uint32 nEFxOffset; // offset memory for Invert Loop (EFx, .MOD only)
+	int32 nRetrigCount, nRetrigParam;
 	ROWINDEX nPatternLoop;
 	CHANNELINDEX nMasterChn;
 	ModCommand rowCommand;
 	// 8-bit members
-	uint8_t resamplingMode;
-	uint8_t nRestoreResonanceOnNewNote;	// See nRestorePanOnNewNote
-	uint8_t nRestoreCutoffOnNewNote;		// ditto
-	uint8_t nNote, nNNA;
-	uint8_t nLastNote;				// Last note, ignoring note offs and cuts - for MIDI macros
-	uint8_t nArpeggioLastNote, nArpeggioBaseNote;	// For plugin arpeggio
-	uint8_t nNewNote, nNewIns, nOldIns, nCommand, nArpeggio;
-	uint8_t nOldVolumeSlide, nOldFineVolUpDown;
-	uint8_t nOldPortaUpDown, nOldFinePortaUpDown, nOldExtraFinePortaUpDown;
-	uint8_t nOldPanSlide, nOldChnVolSlide;
-	uint8_t nOldGlobalVolSlide;
-	uint8_t nVibratoType, nVibratoSpeed, nVibratoDepth;
-	uint8_t nTremoloType, nTremoloSpeed, nTremoloDepth;
-	uint8_t nPanbrelloType, nPanbrelloSpeed, nPanbrelloDepth;
-	int8_t  nPanbrelloOffset, nPanbrelloRandomMemory;
-	uint8_t nOldCmdEx, nOldVolParam, nOldTempo;
-	uint8_t nOldHiOffset;
-	uint8_t nCutOff, nResonance;
-	uint8_t nTremorCount, nTremorParam;
-	uint8_t nPatternLoopCount;
-	uint8_t nLeftVU, nRightVU;
-	uint8_t nActiveMacro, nFilterMode;
-	uint8_t nEFxSpeed, nEFxDelay;		// memory for Invert Loop (EFx, .MOD only)
-	uint8_t nNoteSlideCounter, nNoteSlideSpeed, nNoteSlideStep;	// IMF / PTM Note Slide
-	uint8_t lastZxxParam;	// Memory for \xx slides
+	uint8 resamplingMode;
+	uint8 nRestoreResonanceOnNewNote;	// See nRestorePanOnNewNote
+	uint8 nRestoreCutoffOnNewNote;		// ditto
+	uint8 nNote, nNNA;
+	uint8 nLastNote;				// Last note, ignoring note offs and cuts - for MIDI macros
+	uint8 nArpeggioLastNote, nArpeggioBaseNote;	// For plugin arpeggio
+	uint8 nNewNote, nNewIns, nOldIns, nCommand, nArpeggio;
+	uint8 nOldVolumeSlide, nOldFineVolUpDown;
+	uint8 nOldPortaUpDown, nOldFinePortaUpDown, nOldExtraFinePortaUpDown;
+	uint8 nOldPanSlide, nOldChnVolSlide;
+	uint8 nOldGlobalVolSlide;
+	uint8 nVibratoType, nVibratoSpeed, nVibratoDepth;
+	uint8 nTremoloType, nTremoloSpeed, nTremoloDepth;
+	uint8 nPanbrelloType, nPanbrelloSpeed, nPanbrelloDepth;
+	int8  nPanbrelloOffset, nPanbrelloRandomMemory;
+	uint8 nOldCmdEx, nOldVolParam, nOldTempo;
+	uint8 nOldHiOffset;
+	uint8 nCutOff, nResonance;
+	uint8 nTremorCount, nTremorParam;
+	uint8 nPatternLoopCount;
+	uint8 nLeftVU, nRightVU;
+	uint8 nActiveMacro, nFilterMode;
+	uint8 nEFxSpeed, nEFxDelay;		// memory for Invert Loop (EFx, .MOD only)
+	uint8 nNoteSlideCounter, nNoteSlideSpeed, nNoteSlideStep;	// IMF / PTM Note Slide
+	uint8 lastZxxParam;	// Memory for \xx slides
 	bool isFirstTick : 1;
 
 	//-->Variables used to make user-definable tuning modes work with pattern effects.
@@ -121,15 +121,15 @@ struct ModChannel
 	//To tell whether to calculate frequency.
 	bool m_CalculateFreq : 1;
 
-	int32_t m_PortamentoFineSteps, m_PortamentoTickSlide;
+	int32 m_PortamentoFineSteps, m_PortamentoTickSlide;
 
-	uint32_t m_Freq;
+	uint32 m_Freq;
 	float m_VibratoDepth;
 	//<----
 
 	//NOTE_PCs memory.
 	float m_plugParamValueStep, m_plugParamTargetValue;
-	uint16_t m_RowPlugParam;
+	uint16 m_RowPlugParam;
 	PLUGINDEX m_RowPlug;
 
 	void ClearRowCmd() { rowCommand = ModCommand::Empty(); }
@@ -172,7 +172,7 @@ struct ModChannel
 
 	void Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELINDEX sourceChannel);
 
-	typedef uint32_t volume_t;
+	typedef uint32 volume_t;
 	volume_t GetVSTVolume() { return (pModInstrument) ? pModInstrument->nGlobalVol * 4 : nVolume; }
 
 	// Check if the channel has a valid MIDI output. This function guarantees that pModInstrument != nullptr.
@@ -193,8 +193,8 @@ struct ModChannel
 struct ModChannelSettings
 {
 	FlagSet<ChannelFlags> dwFlags;	// Channel flags
-	uint16_t nPan;					// Initial pan (0...256)
-	uint16_t nVolume;					// Initial channel volume (0...64)
+	uint16 nPan;					// Initial pan (0...256)
+	uint16 nVolume;					// Initial channel volume (0...64)
 	PLUGINDEX nMixPlugin;			// Assigned plugin
 	char szName[MAX_CHANNELNAME];	// Channel name
 
