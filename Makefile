@@ -48,6 +48,7 @@
 #  TEST=1           Include test suite in default target.
 #  ONLY_TEST=0      Only build the test suite.
 #  ANCIENT=0        Use a pre-C++0x compiler (i.e. GCC before 4.3)
+#  STRICT=0         Treat warnings as errors.
 #  CHECKED=0        Enable run-time assertions.
 #  CHECKED_ADDRESS=0   Enable address sanitizer
 #  CHECKED_UNDEFINED=0 Enable undefined behaviour sanitizer
@@ -135,6 +136,7 @@ ONLY_TEST=0
 ANCIENT=0
 SOSUFFIX=.so
 OPENMPT123=1
+STRICT=0
 
 CHECKED=0
 CHECKED_ADDRESS=0
@@ -292,6 +294,11 @@ endif
 CXXFLAGS += -Wall -Wextra -Wcast-align $(CXXFLAGS_WARNINGS)
 CFLAGS   += -Wall -Wextra -Wcast-align $(CFLAGS_WARNINGS)
 
+endif
+
+ifeq ($(STRICT),1)
+CXXFLAGS += -Werror
+CFLAGS   += -Werror
 endif
 
 ifeq ($(DYNLINK),1)
