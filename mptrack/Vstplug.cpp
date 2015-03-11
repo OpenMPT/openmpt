@@ -1088,7 +1088,7 @@ VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 		}
 	} catch (...)
 	{
-		ReportPlugException(mpt::String::PrintW(L"Exception in Dispatch(%1)!", opCode));
+		ReportPlugException(mpt::String::Print(L"Exception in Dispatch(%1)!", opCode));
 	}
 
 	return result;
@@ -1208,7 +1208,7 @@ void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
 		ResetSilence();
 	} catch (...)
 	{
-		ReportPlugException(mpt::String::PrintW(L"Exception in SetParameter(%1, %2)!", nIndex, fValue));
+		ReportPlugException(mpt::String::Print(L"Exception in SetParameter(%1, %2)!", nIndex, fValue));
 	}
 }
 
@@ -1348,7 +1348,7 @@ void CVstPlugin::ProcessVSTEvents()
 			ResetSilence();
 		} catch (...)
 		{
-			ReportPlugException(mpt::String::PrintW(L"Exception in ProcessVSTEvents(numEvents:%1)!",
+			ReportPlugException(mpt::String::Print(L"Exception in ProcessVSTEvents(numEvents:%1)!",
 				vstEvents.GetNumEvents()));
 		}
 	}
@@ -1499,7 +1499,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 		{
 			Bypass();
 			const wchar_t *processMethod = (m_Effect.flags & effFlagsCanReplacing) ? L"processReplacing" : L"process";
-			ReportPlugException(mpt::String::PrintW(L"The plugin threw an exception in %1. It has automatically been set to \"Bypass\".", processMethod));
+			ReportPlugException(mpt::String::Print(L"The plugin threw an exception in %1. It has automatically been set to \"Bypass\".", processMethod));
 		}
 
 		ASSERT(outputBuffers != nullptr);

@@ -177,7 +177,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 							plug->pluginId2 = clsid.Data1;
 							plug->category = VSTPluginLib::catDMO;
 #ifdef DMO_LOG
-							Log(mpt::String::PrintW(L"Found \"%1\" clsid=%2\n", plug->libraryName, plug->dllPath));
+							Log(mpt::String::Print(L"Found \"%1\" clsid=%2\n", plug->libraryName, plug->dllPath));
 #endif
 						}
 					}
@@ -261,7 +261,7 @@ AEffect *CVstPluginManager::LoadPlugin(const VSTPluginLib &plugin, HINSTANCE &li
 		}
 	} catch(...)
 	{
-		CVstPluginManager::ReportPlugException(mpt::String::PrintW(L"Exception caught in LoadLibrary (%1)", pluginPath));
+		CVstPluginManager::ReportPlugException(mpt::String::Print(L"Exception caught in LoadLibrary (%1)", pluginPath));
 	}
 
 	if(library != nullptr && library != INVALID_HANDLE_VALUE)
@@ -423,7 +423,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 		FreeLibrary(hLib);
 	} catch(...)
 	{
-		CVstPluginManager::ReportPlugException(mpt::String::PrintW(L"Exception while trying to load plugin \"%1\"!\n", plug->libraryName));
+		CVstPluginManager::ReportPlugException(mpt::String::Print(L"Exception while trying to load plugin \"%1\"!\n", plug->libraryName));
 	}
 
 	// Now it should be safe to assume that this plugin loaded properly. :)
@@ -465,7 +465,7 @@ bool CVstPluginManager::RemovePlugin(VSTPluginLib *pFactory)
 				delete plug;
 			} catch (...)
 			{
-				CVstPluginManager::ReportPlugException(mpt::String::PrintW(L"Exception while trying to release plugin \"%1\"!\n", pFactory->libraryName));
+				CVstPluginManager::ReportPlugException(mpt::String::Print(L"Exception while trying to release plugin \"%1\"!\n", pFactory->libraryName));
 			}
 
 			return true;
@@ -584,7 +584,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 			}
 		} catch(...)
 		{
-			CVstPluginManager::ReportPlugException(mpt::String::PrintW(L"Exception while trying to create plugin \"%1\"!\n", pFound->libraryName));
+			CVstPluginManager::ReportPlugException(mpt::String::Print(L"Exception while trying to create plugin \"%1\"!\n", pFound->libraryName));
 		}
 
 		return validPlugin;
