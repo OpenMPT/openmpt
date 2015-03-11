@@ -821,23 +821,23 @@ protected:
 
 protected:
 	// Channel Effects
-	void UpdateS3MEffectMemory(ModChannel *pChn, UINT param) const;
-	void PortamentoUp(CHANNELINDEX nChn, UINT param, const bool doFinePortamentoAsRegular = false);
-	void PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFinePortamentoAsRegular = false);
+	void UpdateS3MEffectMemory(ModChannel *pChn, ModCommand::PARAM param) const;
+	void PortamentoUp(CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular = false);
+	void PortamentoDown(CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular = false);
 	void MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides);
-	void FinePortamentoUp(ModChannel *pChn, UINT param);
-	void FinePortamentoDown(ModChannel *pChn, UINT param);
-	void ExtraFinePortamentoUp(ModChannel *pChn, UINT param);
-	void ExtraFinePortamentoDown(ModChannel *pChn, UINT param);
-	void NoteSlide(ModChannel *pChn, UINT param, bool slideUp, bool retrig);
-	void TonePortamento(ModChannel *pChn, UINT param);
+	void FinePortamentoUp(ModChannel *pChn, ModCommand::PARAM param) const;
+	void FinePortamentoDown(ModChannel *pChn, ModCommand::PARAM param) const;
+	void ExtraFinePortamentoUp(ModChannel *pChn, ModCommand::PARAM param) const;
+	void ExtraFinePortamentoDown(ModChannel *pChn, ModCommand::PARAM param) const;
+	void NoteSlide(ModChannel *pChn, UINT param, bool slideUp, bool retrig) const;
+	void TonePortamento(ModChannel *pChn, UINT param) const;
 	void Vibrato(ModChannel *pChn, UINT param) const;
 	void FineVibrato(ModChannel *pChn, UINT param) const;
-	void VolumeSlide(ModChannel *pChn, UINT param);
-	void PanningSlide(ModChannel *pChn, UINT param, bool memory = true);
-	void ChannelVolSlide(ModChannel *pChn, UINT param);
-	void FineVolumeUp(ModChannel *pChn, UINT param, bool volCol);
-	void FineVolumeDown(ModChannel *pChn, UINT param, bool volCol);
+	void VolumeSlide(ModChannel *pChn, ModCommand::PARAM param);
+	void PanningSlide(ModChannel *pChn, ModCommand::PARAM param, bool memory = true);
+	void ChannelVolSlide(ModChannel *pChn, ModCommand::PARAM param) const;
+	void FineVolumeUp(ModChannel *pChn, ModCommand::PARAM param, bool volCol) const;
+	void FineVolumeDown(ModChannel *pChn, ModCommand::PARAM param, bool volCol) const;
 	void Tremolo(ModChannel *pChn, UINT param) const;
 	void Panbrello(ModChannel *pChn, UINT param) const;
 	void Panning(ModChannel *pChn, UINT param) const;
@@ -845,11 +845,12 @@ protected:
 	void SampleOffset(CHANNELINDEX nChn, SmpLength param);
 	void NoteCut(CHANNELINDEX nChn, UINT nTick, bool cutSample);
 	ROWINDEX PatternLoop(ModChannel *, UINT param);
-	void ExtendedMODCommands(CHANNELINDEX nChn, UINT param);
-	void ExtendedS3MCommands(CHANNELINDEX nChn, UINT param);
+	void ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param);
+	void ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param);
 	void ExtendedChannelEffect(ModChannel *, UINT param);
 	void InvertLoop(ModChannel* pChn);
 	ROWINDEX PatternBreak(PlayState &state, CHANNELINDEX chn, uint8 param) const;
+	void GlobalVolSlide(ModCommand::PARAM param, uint8_t &nOldGlobalVolSlide);
 
 	void ProcessMacroOnChannel(CHANNELINDEX nChn);
 	void ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro, uint8 param = 0, PLUGINDEX plugin = 0);
@@ -859,7 +860,6 @@ protected:
 	void SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modifier = 256) const;
 	// Low-Level effect processing
 	void DoFreqSlide(ModChannel *pChn, LONG nFreqSlide) const;
-	void GlobalVolSlide(UINT param, UINT &nOldGlobalVolSlide);
 	void UpdateTimeSignature();
 
 	UINT GetNumTicksOnCurrentRow() const
