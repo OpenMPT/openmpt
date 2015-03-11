@@ -79,15 +79,15 @@ static std::string get_library_version_string() {
 	std::string str;
 	std::uint32_t version = get_library_version();
 	if ( ( version & 0xffff ) == 0 ) {
-		str += Stringify((version>>24) & 0xff);
+		str += mpt::ToString((version>>24) & 0xff);
 		str += ".";
-		str += Stringify((version>>16) & 0xff);
+		str += mpt::ToString((version>>16) & 0xff);
 	} else {
-		str += Stringify((version>>24) & 0xff);
+		str += mpt::ToString((version>>24) & 0xff);
 		str += ".";
-		str += Stringify((version>>16) & 0xff);
+		str += mpt::ToString((version>>16) & 0xff);
 		str += ".";
-		str += Stringify((version>>0) & 0xffff);
+		str += mpt::ToString((version>>0) & 0xffff);
 	}
 	if ( MptVersion::IsDirty() ) {
 		str += ".2-modified";
