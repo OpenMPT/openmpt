@@ -17,10 +17,10 @@ export PATH="/usr/lib/ccache:$PATH"
 make clean-dist
 
 # Check the build
-make clean
-make
-make check
-make clean
+make STRICT=1 clean
+make STRICT=1
+make STRICT=1 check
+make STRICT=1 clean
 
 # Build Unix-like tarball, Windows zipfile and docs tarball
 make dist
