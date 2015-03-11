@@ -48,6 +48,9 @@
 #  TEST=1           Include test suite in default target.
 #  ONLY_TEST=0      Only build the test suite.
 #  ANCIENT=0        Use a pre-C++0x compiler (i.e. GCC before 4.3)
+#  CHECKED=0        Enable run-time assertions.
+#  CHECKED_ADDRESS=0   Enable address sanitizer
+#  CHECKED_UNDEFINED=0 Enable undefined behaviour sanitizer
 #
 #
 # Build flags for libopenmpt (provide on each `make` invocation)
