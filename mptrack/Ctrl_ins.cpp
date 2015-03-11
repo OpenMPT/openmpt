@@ -1344,7 +1344,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 			m_EditPitchTempoLock.EnableWindow(pIns->wPitchToTempoLock > 0 ? TRUE : FALSE);
 			if(pIns->wPitchToTempoLock > 0)
 			{
-				m_EditPitchTempoLock.SetWindowText(Stringify(pIns->wPitchToTempoLock).c_str());
+				m_EditPitchTempoLock.SetWindowText(mpt::ToString(pIns->wPitchToTempoLock).c_str());
 			}
 
 			// Pitch Wheel Depth
@@ -1561,7 +1561,7 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 			// Pitch/Tempo lock
 			{
 				const CModSpecifications& specs = m_sndFile.GetModSpecifications();
-				std::string str = std::string("Tempo range: ") + Stringify(specs.tempoMin) + std::string(" - ") + Stringify(specs.tempoMax);
+				std::string str = std::string("Tempo range: ") + mpt::ToString(specs.tempoMin) + std::string(" - ") + mpt::ToString(specs.tempoMax);
 				if(str.size() >= 250) str.resize(250);
 				strcpy(pszText, str.c_str());
 				return TRUE;
@@ -2755,7 +2755,7 @@ void CCtrlInstruments::OnBnClickedCheckPitchtempolock()
 		{
 			ptl = m_sndFile.m_nDefaultTempo;
 		}
-		m_EditPitchTempoLock.SetWindowText(Stringify(ptl).c_str());
+		m_EditPitchTempoLock.SetWindowText(mpt::ToString(ptl).c_str());
 
 		for(INSTRUMENTINDEX i = firstIns; i <= lastIns; i++)
 		{
@@ -2818,7 +2818,7 @@ void CCtrlInstruments::OnEnKillfocusEditPitchtempolock()
 		changed = true;
 
 	}
-	if(changed) m_EditPitchTempoLock.SetWindowText(Stringify(ptlTempo).c_str());
+	if(changed) m_EditPitchTempoLock.SetWindowText(mpt::ToString(ptlTempo).c_str());
 }
 
 
