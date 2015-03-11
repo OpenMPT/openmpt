@@ -383,7 +383,28 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				{
 					if (param) pChn->nOldTempo = param; else param = pChn->nOldTempo;
 				}
-				SetTempo(param);
+				
+				if (param >= 0x20) memory.state.m_nMusicTempo = param;
+				else
+				{
+					// Tempo Slide
+					uint32_t tempoDiff = (param & 0x0F) * (memory.state.m_nMusicSpeed - 1);
+					if ((param & 0xF0) == 0x10)
+					{
+						memory.state.m_nMusicTempo += tempoDiff;
+					} else
+					{
+						if(tempoDiff < memory.state.m_nMusicTempo)
+							memory.state.m_nMusicTempo -= tempoDiff;
+						else
+							memory.state.m_nMusicTempo = 0;
+					}
+				}
+				if(IsCompatibleMode(TRK_ALLTRACKERS))	// clamp tempo correctly in compatible mode
+					memory.state.m_nMusicTempo = Clamp(memory.state.m_nMusicTempo, 32u, 255u);
+				else
+					memory.state.m_nMusicTempo = Clamp(memory.state.m_nMusicTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
+
 				break;
 			case CMD_S3MCMDEX:
 				if((param & 0xF0) == 0x60)
@@ -4885,26 +4906,22 @@ void CSoundFile::SetTempo(UINT param, bool setAsNonModcommand)
 	{
 		// Set tempo from UI - ignore slide commands and such.
 		m_PlayState.m_nMusicTempo = Clamp(param, specs.tempoMin, specs.tempoMax);
-	}
-	else
+	} else if (param >= 0x20 && m_SongFlags[SONG_FIRSTTICK])
 	{
-		if (param >= 0x20 && m_SongFlags[SONG_FIRSTTICK]) //rewbs.tempoSlideFix: only set if not (T0x or T1x) and tick is 0
-		{
-			m_PlayState.m_nMusicTempo = param;
-			if (param > GetModSpecifications().tempoMax) param = GetModSpecifications().tempoMax;
-		} else if (param < 0x20 && !m_SongFlags[SONG_FIRSTTICK]) //rewbs.tempoSlideFix: only slide if (T0x or T1x) and tick is not 0
-		{
-			// Tempo Slide
-			if ((param & 0xF0) == 0x10)
-				m_PlayState.m_nMusicTempo += (param & 0x0F); //rewbs.tempoSlideFix: no *2
-			else
-				m_PlayState.m_nMusicTempo -= (param & 0x0F); //rewbs.tempoSlideFix: no *2
+		m_PlayState.m_nMusicTempo = param;
+		if (param > GetModSpecifications().tempoMax) param = GetModSpecifications().tempoMax;
+	} else if (param < 0x20 && !m_SongFlags[SONG_FIRSTTICK])
+	{
+		// Tempo Slide
+		if ((param & 0xF0) == 0x10)
+			m_PlayState.m_nMusicTempo += (param & 0x0F);
+		else
+			m_PlayState.m_nMusicTempo -= (param & 0x0F);
 
-			if(IsCompatibleMode(TRK_ALLTRACKERS))	// clamp tempo correctly in compatible mode
-				m_PlayState.m_nMusicTempo = Clamp(m_PlayState.m_nMusicTempo, 32u, 255u);
-			else
-				m_PlayState.m_nMusicTempo = Clamp(m_PlayState.m_nMusicTempo, specs.tempoMin, specs.tempoMax);
-		}
+		if(IsCompatibleMode(TRK_ALLTRACKERS))	// clamp tempo correctly in compatible mode
+			m_PlayState.m_nMusicTempo = Clamp(m_PlayState.m_nMusicTempo, 32u, 255u);
+		else
+			m_PlayState.m_nMusicTempo = Clamp(m_PlayState.m_nMusicTempo, specs.tempoMin, specs.tempoMax);
 	}
 }
 
