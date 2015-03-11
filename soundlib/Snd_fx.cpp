@@ -25,11 +25,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#if MPT_COMPILER_MSVC
-#pragma warning(disable:4244)
-#endif
-
-
 // Formats which have 7-bit (0...128) instead of 6-bit (0...64) global volume commands, or which are imported to this range (mostly formats which are converted to IT internally)
 #ifdef MODPLUG_TRACKER
 #define GLOBALVOL_7BIT_FORMATS_EXT (MOD_TYPE_MT2)
@@ -382,7 +377,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					uint32_t tempo = CalculateXParam(memory.state.m_nPattern, memory.state.m_nRow, nChn);
 					if ((adjustMode & eAdjust) && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
 					{
-						if (tempo) pChn->nOldTempo = tempo; else tempo = pChn->nOldTempo;
+						if (tempo) pChn->nOldTempo = static_cast<uint8_t>(tempo); else tempo = pChn->nOldTempo;
 					}
 
 					if (tempo >= 0x20) memory.state.m_nMusicTempo = tempo;
@@ -563,23 +558,20 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				if (param <= 64) pChn->nGlobalVol = param;
 				break;
 			case CMD_CHANNELVOLSLIDE:
-				if (param) pChn->nOldChnVolSlide = param; else param = pChn->nOldChnVolSlide;
-				if (((param & 0x0F) == 0x0F) && (param & 0xF0))
 				{
-					param = (param >> 4) + pChn->nGlobalVol;
-				} else
-				if (((param & 0xF0) == 0xF0) && (param & 0x0F))
-				{
-					if (pChn->nGlobalVol > (param & 0x0F)) param = pChn->nGlobalVol - (param & 0x0F);
-					else param = 0;
-				} else
-				if (param & 0x0F)
-				{
-					param = (param & 0x0F) * (memory.state.m_nMusicSpeed - 1);
-					param = (pChn->nGlobalVol > param) ? pChn->nGlobalVol - param : 0;
-				} else param = ((param & 0xF0) >> 4) * (memory.state.m_nMusicSpeed - 1) + pChn->nGlobalVol;
-				param = MIN(param, 64);
-				pChn->nGlobalVol = param;
+					if (param) pChn->nOldChnVolSlide = param; else param = pChn->nOldChnVolSlide;
+					int32_t volume = pChn->nGlobalVol;
+					if((param & 0x0F) == 0x0F && (param & 0xF0))
+						volume += (param >> 4);		// Fine Up
+					else if((param & 0xF0) == 0xF0 && (param & 0x0F))
+						volume -= (param & 0x0F);	// Fine Down
+					else if(param & 0x0F)			// Down
+						volume -= (param & 0x0F) * (memory.state.m_nMusicSpeed - 1);
+					else							// Up
+						volume += ((param & 0xF0) >> 4) * (memory.state.m_nMusicSpeed - 1);
+					Limit(volume, 0, 64);
+					pChn->nGlobalVol = volume;
+				}
 				break;
 			}
 		}
@@ -897,7 +889,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	if(instr >= MAX_INSTRUMENTS) return;
 	const ModInstrument *pIns = (instr < MAX_INSTRUMENTS) ? Instruments[instr] : nullptr;
 	const ModSample *pSmp = &Samples[instr];
-	UINT note = pChn->nNewNote;
+	ModCommand::NOTE note = pChn->nNewNote;
 
 	if(note == NOTE_NONE && IsCompatibleMode(TRK_IMPULSETRACKER)) return;
 
@@ -1272,7 +1264,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 			pChn->nPortamentoDest = 0;
 		else
 		{
-			pChn->nPortamentoDest = pIns->pTuning->GetStepDistance(pChn->nNote, pChn->m_PortamentoFineSteps, note, 0);
+			pChn->nPortamentoDest = pIns->pTuning->GetStepDistance(pChn->nNote, pChn->m_PortamentoFineSteps, static_cast<CTuningBase::NOTEINDEXTYPE>(note), 0);
 			//Here pChn->nPortamentoDest means 'steps to slide'.
 			pChn->m_PortamentoFineSteps = -pChn->nPortamentoDest;
 		}
@@ -1318,10 +1310,10 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))
 	{
 		// need to memorize the original note for various effects (e.g. PPS)
-		pChn->nNote = Clamp(realnote, NOTE_MIN, NOTE_MAX);
+		pChn->nNote = static_cast<ModCommand::NOTE>(Clamp(realnote, NOTE_MIN, NOTE_MAX));
 	} else
 	{
-		pChn->nNote = note;
+		pChn->nNote = static_cast<ModCommand::NOTE>(note);
 	}
 	pChn->m_CalculateFreq = true;
 
@@ -1622,7 +1614,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool 
 	CHANNELINDEX nnaChn = CHANNELINDEX_INVALID;
 	ModChannel *pChn = &m_PlayState.Chn[nChn];
 	const ModInstrument *pIns = nullptr;
-	if(!ModCommand::IsNote(note))
+	if(!ModCommand::IsNote(static_cast<ModCommand::NOTE>(note)))
 	{
 		return nnaChn;
 	}
@@ -1954,7 +1946,11 @@ bool CSoundFile::ProcessEffects()
 			NoteCut(nChn, cutAtTick, IsCompatibleMode(TRK_IMPULSETRACKER) || GetType() == MOD_TYPE_S3M);
 		} else if ((cmd == CMD_MODCMDEX) || (cmd == CMD_S3MCMDEX))
 		{
-			if ((!param) && (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) param = pChn->nOldCmdEx; else pChn->nOldCmdEx = param;
+			if ((!param) && (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
+				param = pChn->nOldCmdEx;
+			else
+				pChn->nOldCmdEx = static_cast<ModCommand::PARAM>(param);
+
 			// Note Delay ?
 			if ((param & 0xF0) == 0xD0)
 			{
@@ -2084,8 +2080,8 @@ bool CSoundFile::ProcessEffects()
 		// Handles note/instrument/volume changes
 		if(triggerNote)
 		{
-			UINT note = pChn->rowCommand.note;
-			if(instr) pChn->nNewIns = instr;
+			ModCommand::NOTE note = pChn->rowCommand.note;
+			if(instr) pChn->nNewIns = static_cast<ModCommand::INSTR>(instr);
 
 			if(ModCommand::IsNote(note) && IsCompatibleMode(TRK_FASTTRACKER2))
 			{
@@ -2107,7 +2103,7 @@ bool CSoundFile::ProcessEffects()
 					} else
 					{
 						// Sample mode
-						sample = instr;
+						sample = static_cast<SAMPLEINDEX>(instr);
 					}
 					if(sample <= GetNumSamples())
 					{
@@ -2120,11 +2116,11 @@ bool CSoundFile::ProcessEffects()
 				{
 					note = NOTE_NONE;
 				}
-			} else if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetNumInstruments() != 0 && ModCommand::IsNoteOrEmpty(note))
+			} else if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetNumInstruments() != 0 && ModCommand::IsNoteOrEmpty(static_cast<ModCommand::NOTE>(note)))
 			{
 				// IT compatibility: Invalid instrument numbers do nothing, but they are remembered for upcoming notes and do not trigger a note in that case.
 				// Test case: InstrumentNumberChange.it
-				INSTRUMENTINDEX instrToCheck = (instr != 0 ? instr : pChn->nOldIns);
+				INSTRUMENTINDEX instrToCheck = static_cast<INSTRUMENTINDEX>((instr != 0) ? instr : pChn->nOldIns);
 				if(instrToCheck != 0 && (instrToCheck > GetNumInstruments() || Instruments[instrToCheck] == nullptr))
 				{
 					note = NOTE_NONE;
@@ -2176,7 +2172,7 @@ bool CSoundFile::ProcessEffects()
 					{
 						// If there's a note delay but no real note, retrig the last note.
 						// Test case: delay2.xm, delay3.xm
-						note = pChn->nNote - pChn->nTranspose;
+						note = static_cast<ModCommand::NOTE>(pChn->nNote - pChn->nTranspose);
 					} else if(note >= NOTE_MIN_SPECIAL)
 					{
 						// Gah! Even Note Off + Note Delay will cause envelopes to *retrigger*! How stupid is that?
@@ -2446,7 +2442,7 @@ bool CSoundFile::ProcessEffects()
 				{
 					// IT Compatibility: Effects in the volume column don't have an unified memory.
 					// Test case: VolColMemory.it
-					if(vol) pChn->nOldVolParam = vol; else vol = pChn->nOldVolParam;
+					if(vol) pChn->nOldVolParam = static_cast<ModCommand::PARAM>(vol); else vol = pChn->nOldVolParam;
 				}
 
 				switch(volcmd)
@@ -2462,9 +2458,9 @@ bool CSoundFile::ProcessEffects()
 							break;
 					} else
 					{
-						pChn->nOldVolParam = vol;
+						pChn->nOldVolParam = static_cast<ModCommand::PARAM>(vol);
 					}
-					VolumeSlide(pChn, volcmd == VOLCMD_VOLSLIDEUP ? (vol << 4) : vol);
+					VolumeSlide(pChn, static_cast<ModCommand::PARAM>(volcmd == VOLCMD_VOLSLIDEUP ? (vol << 4) : vol));
 					break;
 
 				case VOLCMD_FINEVOLUP:
@@ -2474,7 +2470,7 @@ bool CSoundFile::ProcessEffects()
 					{
 						// IT Compatibility: Volume column volume slides have their own memory
 						// Test case: VolColMemory.it
-						FineVolumeUp(pChn, vol, IsCompatibleMode(TRK_IMPULSETRACKER));
+						FineVolumeUp(pChn, static_cast<ModCommand::PARAM>(vol), IsCompatibleMode(TRK_IMPULSETRACKER));
 					}
 					break;
 
@@ -2485,7 +2481,7 @@ bool CSoundFile::ProcessEffects()
 					{
 						// IT Compatibility: Volume column volume slides have their own memory
 						// Test case: VolColMemory.it
-						FineVolumeDown(pChn, vol, IsCompatibleMode(TRK_IMPULSETRACKER));
+						FineVolumeDown(pChn, static_cast<ModCommand::PARAM>(vol), IsCompatibleMode(TRK_IMPULSETRACKER));
 					}
 					break;
 
@@ -2502,21 +2498,21 @@ bool CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_PANSLIDELEFT:
-					PanningSlide(pChn, vol, !IsCompatibleMode(TRK_FASTTRACKER2));
+					PanningSlide(pChn, static_cast<ModCommand::PARAM>(vol), !IsCompatibleMode(TRK_FASTTRACKER2));
 					break;
 
 				case VOLCMD_PANSLIDERIGHT:
-					PanningSlide(pChn, vol << 4, !IsCompatibleMode(TRK_FASTTRACKER2));
+					PanningSlide(pChn, static_cast<ModCommand::PARAM>(vol << 4), !IsCompatibleMode(TRK_FASTTRACKER2));
 					break;
 
 				case VOLCMD_PORTAUP:
 					// IT compatibility (one of the first testcases - link effect memory)
-					PortamentoUp(nChn, vol << 2, IsCompatibleMode(TRK_IMPULSETRACKER));
+					PortamentoUp(nChn, static_cast<ModCommand::PARAM>(vol << 2), IsCompatibleMode(TRK_IMPULSETRACKER));
 					break;
 
 				case VOLCMD_PORTADOWN:
 					// IT compatibility (one of the first testcases - link effect memory)
-					PortamentoDown(nChn, vol << 2, IsCompatibleMode(TRK_IMPULSETRACKER));
+					PortamentoDown(nChn, static_cast<ModCommand::PARAM>(vol << 2), IsCompatibleMode(TRK_IMPULSETRACKER));
 					break;
 
 				case VOLCMD_OFFSET:
@@ -2549,18 +2545,18 @@ bool CSoundFile::ProcessEffects()
 		// Portamento Up
 		case CMD_PORTAMENTOUP:
 			if ((!param) && (GetType() & MOD_TYPE_MOD)) break;
-			PortamentoUp(nChn, param);
+			PortamentoUp(nChn, static_cast<ModCommand::PARAM>(param));
 			break;
 
 		// Portamento Down
 		case CMD_PORTAMENTODOWN:
 			if ((!param) && (GetType() & MOD_TYPE_MOD)) break;
-			PortamentoDown(nChn, param);
+			PortamentoDown(nChn, static_cast<ModCommand::PARAM>(param));
 			break;
 
 		// Volume Slide
 		case CMD_VOLUMESLIDE:
-			if ((param) || (GetType() != MOD_TYPE_MOD)) VolumeSlide(pChn, param);
+			if ((param) || (GetType() != MOD_TYPE_MOD)) VolumeSlide(pChn, static_cast<ModCommand::PARAM>(param));
 			break;
 
 		// Tone-Portamento
@@ -2570,7 +2566,7 @@ bool CSoundFile::ProcessEffects()
 
 		// Tone-Portamento + Volume Slide
 		case CMD_TONEPORTAVOL:
-			if ((param) || (GetType() != MOD_TYPE_MOD)) VolumeSlide(pChn, param);
+			if ((param) || (GetType() != MOD_TYPE_MOD)) VolumeSlide(pChn, static_cast<ModCommand::PARAM>(param));
 			TonePortamento(pChn, 0);
 			break;
 
@@ -2581,7 +2577,7 @@ bool CSoundFile::ProcessEffects()
 
 		// Vibrato + Volume Slide
 		case CMD_VIBRATOVOL:
-			if ((param) || (GetType() != MOD_TYPE_MOD)) VolumeSlide(pChn, param);
+			if ((param) || (GetType() != MOD_TYPE_MOD)) VolumeSlide(pChn, static_cast<ModCommand::PARAM>(param));
 			Vibrato(pChn, 0);
 			break;
 
@@ -2603,7 +2599,7 @@ bool CSoundFile::ProcessEffects()
 			param = CalculateXParam(m_PlayState.m_nPattern, m_PlayState.m_nRow, nChn);
 			if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 			{
-				if (param) pChn->nOldTempo = param; else param = pChn->nOldTempo;
+				if (param) pChn->nOldTempo = static_cast<ModCommand::PARAM>(param); else param = pChn->nOldTempo;
 			}
 			SetTempo(param);
 			break;
@@ -2640,7 +2636,7 @@ bool CSoundFile::ProcessEffects()
 				&& !IsCompatibleMode(TRK_IMPULSETRACKER) && GetType() != MOD_TYPE_S3M) break;
 			if (!param && (GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD))) break;	// Only important when editing MOD/XM files (000 effects are removed when loading files where this means "no effect")
 			pChn->nCommand = CMD_ARPEGGIO;
-			if (param) pChn->nArpeggio = param;
+			if (param) pChn->nArpeggio = static_cast<ModCommand::PARAM>(param);
 			break;
 
 		// Retrig
@@ -2688,7 +2684,7 @@ bool CSoundFile::ProcessEffects()
 			}
 
 			pChn->nCommand = CMD_TREMOR;
-			if (param) pChn->nTremorParam = param;
+			if (param) pChn->nTremorParam = static_cast<ModCommand::PARAM>(param);
 
 			break;
 
@@ -2727,9 +2723,9 @@ bool CSoundFile::ProcessEffects()
 		case CMD_GLOBALVOLSLIDE:
 			//IT compatibility 16. Saving last global volume slide param per channel (FT2/IT)
 			if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
-				GlobalVolSlide(param, pChn->nOldGlobalVolSlide);
+				GlobalVolSlide(static_cast<ModCommand::PARAM>(param), pChn->nOldGlobalVolSlide);
 			else
-				GlobalVolSlide(param, m_PlayState.Chn[0].nOldGlobalVolSlide);
+				GlobalVolSlide(static_cast<ModCommand::PARAM>(param), m_PlayState.Chn[0].nOldGlobalVolSlide);
 			break;
 
 		// Set 8-bit Panning
@@ -2744,7 +2740,7 @@ bool CSoundFile::ProcessEffects()
 
 		// Panning Slide
 		case CMD_PANNINGSLIDE:
-			PanningSlide(pChn, param);
+			PanningSlide(pChn, static_cast<ModCommand::PARAM>(param));
 			break;
 
 		// Tremolo
@@ -2759,7 +2755,7 @@ bool CSoundFile::ProcessEffects()
 
 		// MOD/XM Exx Extended Commands
 		case CMD_MODCMDEX:
-			ExtendedMODCommands(nChn, param);
+			ExtendedMODCommands(nChn, static_cast<ModCommand::PARAM>(param));
 			break;
 
 		// S3M/IT Sxx Extended Commands
@@ -2768,7 +2764,7 @@ bool CSoundFile::ProcessEffects()
 			{
 				param = pChn->nArpeggio;	// S00 uses the last non-zero effect parameter as memory, like other effects including Arpeggio, so we "borrow" our memory there.
 			}
-			ExtendedS3MCommands(nChn, param);
+			ExtendedS3MCommands(nChn, static_cast<ModCommand::PARAM>(param));
 			break;
 
 		// Key Off
@@ -2814,7 +2810,7 @@ bool CSoundFile::ProcessEffects()
 			case 0x70:
 			case 0x90:
 			case 0xA0:
-				if(!IsCompatibleMode(TRK_FASTTRACKER2)) ExtendedS3MCommands(nChn, param);
+				if(!IsCompatibleMode(TRK_FASTTRACKER2)) ExtendedS3MCommands(nChn, static_cast<ModCommand::PARAM>(param));
 				break;
 			}
 			break;
@@ -2831,7 +2827,7 @@ bool CSoundFile::ProcessEffects()
 
 		// Channel volume slide
 		case CMD_CHANNELVOLSLIDE:
-			ChannelVolSlide(pChn, param);
+			ChannelVolSlide(pChn, static_cast<ModCommand::PARAM>(param));
 			break;
 
 		// Panbrello (IT)
@@ -2859,10 +2855,10 @@ bool CSoundFile::ProcessEffects()
 		// Position Jump
 		case CMD_POSITIONJUMP:
 			m_PlayState.m_nNextPatStartRow = 0; // FT2 E60 bug
-			nPosJump = param;
+			nPosJump = static_cast<ORDERINDEX>(param);
 			if(m_SongFlags[SONG_PATTERNLOOP] && m_PlayState.m_nSeqOverride == ORDERINDEX_INVALID)
 			{
-				m_PlayState.m_nSeqOverride = param;
+				m_PlayState.m_nSeqOverride = static_cast<ORDERINDEX>(param);
 				//Releasing pattern loop after position jump could cause
 				//instant jumps - modifying behavior so that now position jumps
 				//occurs also when pattern loop is enabled.
@@ -2879,7 +2875,7 @@ bool CSoundFile::ProcessEffects()
 		// Pattern Break
 		case CMD_PATTERNBREAK:
 			{
-				ROWINDEX row = PatternBreak(m_PlayState, nChn, param);
+				ROWINDEX row = PatternBreak(m_PlayState, nChn, static_cast<ModCommand::PARAM>(param));
 				if(row != ROWINDEX_INVALID)
 				{
 					nBreakRow = row;
@@ -2919,7 +2915,7 @@ bool CSoundFile::ProcessEffects()
 
 		if(IsCompatibleMode(TRK_SCREAMTRACKER) && param != 0)
 		{
-			UpdateS3MEffectMemory(pChn, param);
+			UpdateS3MEffectMemory(pChn, static_cast<ModCommand::PARAM>(param));
 		}
 
 		if(pChn->rowCommand.instr)
@@ -2989,8 +2985,8 @@ bool CSoundFile::ProcessEffects()
 
 // Update the effect memory of all S3M effects that use the last non-zero effect parameter as memory (Dxy, Exx, Fxx, Ixy, Jxy, Kxy, Lxy, Qxy, Rxy, Sxy)
 // Test case: ParamMemory.s3m
-void CSoundFile::UpdateS3MEffectMemory(ModChannel *pChn, UINT param) const
-//------------------------------------------------------------------------
+void CSoundFile::UpdateS3MEffectMemory(ModChannel *pChn, ModCommand::PARAM param) const
+//-------------------------------------------------------------------------------------
 {
 	pChn->nOldVolumeSlide = param;	// Dxy / Kxy / Lxy
 	pChn->nOldPortaUpDown = param;	// Exx / Fxx
@@ -3066,8 +3062,8 @@ ROWINDEX CSoundFile::PatternBreak(PlayState &state, CHANNELINDEX chn, uint8 para
 }
 
 
-void CSoundFile::PortamentoUp(CHANNELINDEX nChn, UINT param, const bool doFinePortamentoAsRegular)
-//------------------------------------------------------------------------------------------------
+void CSoundFile::PortamentoUp(CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular)
+//-------------------------------------------------------------------------------------------------------------
 {
 	ModChannel *pChn = &m_PlayState.Chn[nChn];
 
@@ -3123,8 +3119,8 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, UINT param, const bool doFinePo
 }
 
 
-void CSoundFile::PortamentoDown(CHANNELINDEX nChn, UINT param, const bool doFinePortamentoAsRegular)
-//--------------------------------------------------------------------------------------------------
+void CSoundFile::PortamentoDown(CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular)
+//---------------------------------------------------------------------------------------------------------------
 {
 	ModChannel *pChn = &m_PlayState.Chn[nChn];
 
@@ -3227,8 +3223,8 @@ void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides)
 }
 
 
-void CSoundFile::FinePortamentoUp(ModChannel *pChn, UINT param)
-//-------------------------------------------------------------
+void CSoundFile::FinePortamentoUp(ModChannel *pChn, ModCommand::PARAM param) const
+//--------------------------------------------------------------------------------
 {
 	if(GetType() == MOD_TYPE_XM)
 	{
@@ -3267,8 +3263,8 @@ void CSoundFile::FinePortamentoUp(ModChannel *pChn, UINT param)
 }
 
 
-void CSoundFile::FinePortamentoDown(ModChannel *pChn, UINT param)
-//---------------------------------------------------------------
+void CSoundFile::FinePortamentoDown(ModChannel *pChn, ModCommand::PARAM param) const
+//----------------------------------------------------------------------------------
 {
 	if(GetType() == MOD_TYPE_XM)
 	{
@@ -3299,8 +3295,8 @@ void CSoundFile::FinePortamentoDown(ModChannel *pChn, UINT param)
 }
 
 
-void CSoundFile::ExtraFinePortamentoUp(ModChannel *pChn, UINT param)
-//------------------------------------------------------------------
+void CSoundFile::ExtraFinePortamentoUp(ModChannel *pChn, ModCommand::PARAM param) const
+//-------------------------------------------------------------------------------------
 {
 	if(GetType() == MOD_TYPE_XM)
 	{
@@ -3339,8 +3335,8 @@ void CSoundFile::ExtraFinePortamentoUp(ModChannel *pChn, UINT param)
 }
 
 
-void CSoundFile::ExtraFinePortamentoDown(ModChannel *pChn, UINT param)
-//--------------------------------------------------------------------
+void CSoundFile::ExtraFinePortamentoDown(ModChannel *pChn, ModCommand::PARAM param) const
+//---------------------------------------------------------------------------------------
 {
 	if(GetType() == MOD_TYPE_XM)
 	{
@@ -3372,8 +3368,8 @@ void CSoundFile::ExtraFinePortamentoDown(ModChannel *pChn, UINT param)
 
 // Implemented for IMF compatibility, can't actually save this in any formats
 // Slide up / down every x ticks by y semitones
-void CSoundFile::NoteSlide(ModChannel *pChn, UINT param, bool slideUp, bool retrig)
-//---------------------------------------------------------------------------------
+void CSoundFile::NoteSlide(ModChannel *pChn, UINT param, bool slideUp, bool retrig) const
+//---------------------------------------------------------------------------------------
 {
 	uint8 x, y;
 	if(m_SongFlags[SONG_FIRSTTICK])
@@ -3403,8 +3399,8 @@ void CSoundFile::NoteSlide(ModChannel *pChn, UINT param, bool slideUp, bool retr
 }
 
 // Portamento Slide
-void CSoundFile::TonePortamento(ModChannel *pChn, UINT param)
-//-----------------------------------------------------------
+void CSoundFile::TonePortamento(ModChannel *pChn, UINT param) const
+//-----------------------------------------------------------------
 {
 	pChn->dwFlags.set(CHN_PORTAMENTO);
 
@@ -3412,7 +3408,7 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param)
 	if((!m_SongFlags[SONG_ITCOMPATGXX] && IsCompatibleMode(TRK_IMPULSETRACKER)) || GetType() == MOD_TYPE_PLM)
 	{
 		if(param == 0) param = pChn->nOldPortaUpDown;
-		pChn->nOldPortaUpDown = param;
+		pChn->nOldPortaUpDown = static_cast<uint8_t>(param);
 	}
 
 	if(GetType() == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
@@ -3432,7 +3428,7 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param)
 			(pChn->nPortamentoDest < 0 && pChn->nPortamentoSlide > 0))
 			pChn->nPortamentoSlide = -pChn->nPortamentoSlide;
 
-		pChn->m_PortamentoTickSlide = (m_PlayState.m_nTickCount + 1.0) * pChn->nPortamentoSlide / m_PlayState.m_nMusicSpeed;
+		pChn->m_PortamentoTickSlide = static_cast<int32_t>((m_PlayState.m_nTickCount + 1.0) * pChn->nPortamentoSlide / m_PlayState.m_nMusicSpeed);
 
 		if(pChn->dwFlags[CHN_GLISSANDO])
 		{
@@ -3575,8 +3571,8 @@ void CSoundFile::Panning(ModChannel *pChn, UINT param) const
 }
 
 
-void CSoundFile::VolumeSlide(ModChannel *pChn, UINT param)
-//--------------------------------------------------------
+void CSoundFile::VolumeSlide(ModChannel *pChn, ModCommand::PARAM param)
+//---------------------------------------------------------------------
 {
 	if (param)
 		pChn->nOldVolumeSlide = param;
@@ -3647,8 +3643,8 @@ void CSoundFile::VolumeSlide(ModChannel *pChn, UINT param)
 }
 
 
-void CSoundFile::PanningSlide(ModChannel *pChn, UINT param, bool memory)
-//----------------------------------------------------------------------
+void CSoundFile::PanningSlide(ModChannel *pChn, ModCommand::PARAM param, bool memory)
+//-----------------------------------------------------------------------------------
 {
 	if(memory)
 	{
@@ -3727,8 +3723,8 @@ void CSoundFile::PanningSlide(ModChannel *pChn, UINT param, bool memory)
 }
 
 
-void CSoundFile::FineVolumeUp(ModChannel *pChn, UINT param, bool volCol)
-//----------------------------------------------------------------------
+void CSoundFile::FineVolumeUp(ModChannel *pChn, ModCommand::PARAM param, bool volCol) const
+//-----------------------------------------------------------------------------------------
 {
 	if(GetType() == MOD_TYPE_XM)
 	{
@@ -3752,8 +3748,8 @@ void CSoundFile::FineVolumeUp(ModChannel *pChn, UINT param, bool volCol)
 }
 
 
-void CSoundFile::FineVolumeDown(ModChannel *pChn, UINT param, bool volCol)
-//------------------------------------------------------------------------
+void CSoundFile::FineVolumeDown(ModChannel *pChn, ModCommand::PARAM param, bool volCol) const
+//-------------------------------------------------------------------------------------------
 {
 	if(GetType() == MOD_TYPE_XM)
 	{
@@ -3786,8 +3782,8 @@ void CSoundFile::Tremolo(ModChannel *pChn, UINT param) const
 }
 
 
-void CSoundFile::ChannelVolSlide(ModChannel *pChn, UINT param)
-//------------------------------------------------------------
+void CSoundFile::ChannelVolSlide(ModChannel *pChn, ModCommand::PARAM param) const
+//-------------------------------------------------------------------------------
 {
 	LONG nChnSlide = 0;
 	if (param) pChn->nOldChnVolSlide = param; else param = pChn->nOldChnVolSlide;
@@ -3821,11 +3817,11 @@ void CSoundFile::ChannelVolSlide(ModChannel *pChn, UINT param)
 }
 
 
-void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, UINT param)
-//-----------------------------------------------------------------
+void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
+//------------------------------------------------------------------------------
 {
 	ModChannel *pChn = &m_PlayState.Chn[nChn];
-	UINT command = param & 0xF0;
+	uint8_t command = param & 0xF0;
 	param &= 0x0F;
 	switch(command)
 	{
@@ -3894,11 +3890,11 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, UINT param)
 }
 
 
-void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
-//-----------------------------------------------------------------
+void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
+//------------------------------------------------------------------------------
 {
 	ModChannel *pChn = &m_PlayState.Chn[nChn];
-	UINT command = param & 0xF0;
+	uint8_t command = param & 0xF0;
 	param &= 0x0F;
 	switch(command)
 	{
@@ -4042,7 +4038,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 	// SAx: Set 64k Offset
 	case 0xA0:	if(m_SongFlags[SONG_FIRSTTICK])
 				{
-					pChn->nOldHiOffset = param;
+					pChn->nOldHiOffset = static_cast<uint8_t>(param);
 					if (!IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->rowCommand.IsNote())
 					{
 						SmpLength pos = param << 16;
@@ -4072,7 +4068,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, UINT param)
 	case 0xF0:
 		if(GetType() != MOD_TYPE_S3M)
 		{
-			pChn->nActiveMacro = param;
+			pChn->nActiveMacro = static_cast<uint8_t>(param);
 		}
 		break;
 	}
@@ -4715,7 +4711,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 		NoteChange(&chn, note, IsCompatibleMode(TRK_IMPULSETRACKER), resetEnv);
 		if(m_nInstruments)
 		{
-			chn.rowCommand.note = note;	// No retrig without note...
+			chn.rowCommand.note = static_cast<ModCommand::NOTE>(note);	// No retrig without note...
 #ifdef MODPLUG_TRACKER
 			ProcessMidiOut(nChn);	//Send retrig to Midi
 #endif // MODPLUG_TRACKER
@@ -4959,7 +4955,7 @@ ROWINDEX CSoundFile::PatternLoop(ModChannel *pChn, UINT param)
 					if(p->nPatternLoopCount) return ROWINDEX_INVALID;
 				}
 			}
-			pChn->nPatternLoopCount = param;
+			pChn->nPatternLoopCount = static_cast<uint8_t>(param);
 		}
 		m_PlayState.m_nNextPatStartRow = pChn->nPatternLoop; // Nasty FT2 E60 bug emulation!
 		return pChn->nPatternLoop;
@@ -4972,10 +4968,10 @@ ROWINDEX CSoundFile::PatternLoop(ModChannel *pChn, UINT param)
 }
 
 
-void CSoundFile::GlobalVolSlide(UINT param, UINT &nOldGlobalVolSlide)
-//--------------------------------------------------------------------
+void CSoundFile::GlobalVolSlide(ModCommand::PARAM param, uint8_t &nOldGlobalVolSlide)
+//-----------------------------------------------------------------------------------
 {
-	LONG nGlbSlide = 0;
+	int32_t nGlbSlide = 0;
 	if (param) nOldGlobalVolSlide = param; else param = nOldGlobalVolSlide;
 
 	if((GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)))
@@ -5398,9 +5394,9 @@ void CSoundFile::PortamentoFineMPT(ModChannel* pChn, int param)
 	const int tickParam = static_cast<int>((m_PlayState.m_nTickCount + 1.0) * param / m_PlayState.m_nMusicSpeed);
 	pChn->m_PortamentoFineSteps += (param >= 0) ? tickParam - pChn->nOldFinePortaUpDown : tickParam + pChn->nOldFinePortaUpDown;
 	if(m_PlayState.m_nTickCount + 1 == m_PlayState.m_nMusicSpeed)
-		pChn->nOldFinePortaUpDown = abs(param);
+		pChn->nOldFinePortaUpDown = static_cast<int8_t>(std::abs(param));
 	else
-		pChn->nOldFinePortaUpDown = abs(tickParam);
+		pChn->nOldFinePortaUpDown = static_cast<int8_t>(std::abs(tickParam));
 
 	pChn->m_CalculateFreq = true;
 }
