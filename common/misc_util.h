@@ -578,7 +578,7 @@ namespace Util {
 	template<typename T>
 	void InsertItem(const T insStart, const T insEnd, T &fix)
 	{
-		ASSERT(insEnd >= insStart);
+		MPT_ASSERT(insEnd >= insStart);
 		if(fix >= insStart)
 		{
 			fix += (insEnd - insStart + 1);
@@ -589,7 +589,7 @@ namespace Util {
 	template<typename T>
 	void InsertRange(const T insStart, const T insEnd, T &fixStart, T &fixEnd)
 	{
-		ASSERT(insEnd >= insStart);
+		MPT_ASSERT(insEnd >= insStart);
 		const T insLength = insEnd - insStart + 1;
 		if(fixStart >= insEnd)
 		{
@@ -605,7 +605,7 @@ namespace Util {
 	template<typename T>
 	void DeleteItem(const T delStart, const T delEnd, T &fix)
 	{
-		ASSERT(delEnd >= delStart);
+		MPT_ASSERT(delEnd >= delStart);
 		if(fix > delEnd)
 		{
 			fix -= (delEnd - delStart + 1);
@@ -616,7 +616,7 @@ namespace Util {
 	template<typename T>
 	void DeleteRange(const T delStart, const T delEnd, T &fixStart, T &fixEnd)
 	{
-		ASSERT(delEnd >= delStart);
+		MPT_ASSERT(delEnd >= delStart);
 		const T delLength = delEnd - delStart + 1;
 		if(delStart < fixStart  && delEnd < fixStart)
 		{
