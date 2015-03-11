@@ -1386,8 +1386,6 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 	);
 }
 
-#define PrintW Print
-
 } } // namespace mpt::String
 
 OPENMPT_NAMESPACE_END

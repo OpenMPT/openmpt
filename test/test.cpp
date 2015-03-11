@@ -491,7 +491,6 @@ static noinline void TestStringFormatting()
 #if MPT_WSTRING_FORMAT
 	VERIFY_EQUAL(mpt::String::Print(std::wstring(L"%1%2%3"),1,2,3), L"123");
 	VERIFY_EQUAL(mpt::String::Print(L"%1%2%3",1,2,3), L"123");
-	VERIFY_EQUAL(mpt::String::PrintW(L"%1%2%3",1,2,3), L"123");
 #endif
 
 	// escaping and error behviour of '%'

@@ -71,7 +71,7 @@ static noinline void DoLog(const mpt::log::Context &context, mpt::ustring messag
 		}
 		#endif // LOG_TO_FILE
 		{
-			OutputDebugStringW(mpt::String::PrintW(L"%1(%2): +%3 %4 [%5]\n"
+			OutputDebugStringW(mpt::String::Print(L"%1(%2): +%3 %4 [%5]\n"
 				, mpt::ToWide(mpt::CharsetASCII, context.file)
 				, context.line
 				, mpt::wfmt::dec<6>(diff)
