@@ -1868,7 +1868,6 @@ bool CSoundFile::ProcessEffects()
 
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
-	ModCommand *m = nullptr;
 // -! NEW_FEATURE#0010
 	for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, pChn++)
 	{
