@@ -35,7 +35,12 @@ enum ResetFlag
 // Return: Length of the new sample.
 SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile &sndFile);
 
-// Change sample size. 
+// Remove part of a sample [selStart, selEnd[.
+// Note: Removed memory is not freed.
+// Return: Length of the new sample.
+SmpLength RemoveRange(ModSample &smp, SmpLength selStart, SmpLength selEnd, CSoundFile &sndFile);
+
+// Change sample size.
 // Note: If resized sample is bigger, silence will be added to the sample's tail.
 // Return: Length of the new sample.
 SmpLength ResizeSample(ModSample &smp, const SmpLength nNewLength, CSoundFile &sndFile);

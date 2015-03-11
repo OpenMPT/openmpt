@@ -325,6 +325,17 @@ struct PACKED WAVCuePoint
 		SwapBytesLE(blockStart);
 		SwapBytesLE(offset);
 	}
+
+	// Set up sample information
+	void ConvertToWAV(uint32_t id_, SmpLength offset_)
+	{
+		id = id_;
+		position = offset_;
+		riffChunkID = static_cast<uint32>(RIFFChunk::iddata);
+		chunkStart = 0;	// we use no Wave List Chunk (wavl) as we have only one data block, so this should be 0.
+		blockStart = 0;	// ditto
+		offset = offset_;
+	}
 };
 
 STATIC_ASSERT(sizeof(WAVCuePoint) == 24);
@@ -341,7 +352,7 @@ class WAVReader
 {
 protected:
 	ChunkReader file;
-	FileReader sampleData, smplChunk, xtraChunk, wsmpChunk;
+	FileReader sampleData, smplChunk, xtraChunk, wsmpChunk, cueChunk;
 	ChunkReader::ChunkList<RIFFChunk> infoChunk;
 
 	FileReader::off_t sampleLength;
@@ -451,6 +462,8 @@ public:
 	void WriteMetatags(const FileTags &tags);
 	// Write a sample loop information chunk to the file.
 	void WriteLoopInformation(const ModSample &sample);
+	// Write a sample's cue points to the file.
+	void WriteCueInformation(const ModSample &sample);
 	// Write MPT's sample information chunk to the file.
 	void WriteExtraInformation(const ModSample &sample, MODTYPE modType, const char *sampleName = nullptr);
 

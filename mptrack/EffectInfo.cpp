@@ -876,7 +876,7 @@ static const MPTVOLCMDINFO gVolCmdInfo[] =
 	{VOLCMD_PORTAUP,		MOD_TYPE_ITMPT,		"Portamento up"},
 	{VOLCMD_PORTADOWN,		MOD_TYPE_ITMPT,		"Portamento down"},
 	{VOLCMD_DELAYCUT,		MOD_TYPE_NONE,		""},
-	{VOLCMD_OFFSET,			MOD_TYPE_MPT,		"Offset"},
+	{VOLCMD_OFFSET,			MOD_TYPE_MPT,		"Sample Cue"},
 };
 
 STATIC_ASSERT(CountOf(gVolCmdInfo) == (MAX_VOLCMDS - 1));
@@ -932,6 +932,82 @@ bool EffectInfo::GetVolCmdInfo(UINT ndx, LPSTR s, ModCommand::VOL *prangeMin, Mo
 		}
 	}
 	return (sndFile.GetType() & gVolCmdInfo[ndx].GetSupportedFormats());
+}
+
+
+bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, LPSTR s) const
+//---------------------------------------------------------------------
+{
+	if(s == nullptr) return false;
+	s[0] = 0;
+
+	switch(m.volcmd)
+	{
+	case VOLCMD_VOLSLIDEUP:
+	case VOLCMD_VOLSLIDEDOWN:
+	case VOLCMD_FINEVOLUP:
+	case VOLCMD_FINEVOLDOWN:
+		if(m.vol > 0 || sndFile.GetType() == MOD_TYPE_XM)
+		{
+			sprintf(s, "%c%u",
+				(m.volcmd == VOLCMD_VOLSLIDEUP || m.volcmd == VOLCMD_FINEVOLUP) ? '+' : '-',
+				m.vol);
+		} else
+		{
+			strcpy(s, "continue");
+		}
+		break;
+
+	case VOLCMD_PORTAUP:
+	case VOLCMD_PORTADOWN:
+	case VOLCMD_TONEPORTAMENTO:
+		if(m.vol > 0)
+		{
+			ModCommand::PARAM param = m.vol << 2;
+			ModCommand::COMMAND cmd = CMD_PORTAMENTOUP;
+			if(m.volcmd == VOLCMD_PORTADOWN)
+			{
+				cmd = CMD_PORTAMENTODOWN;
+			} else if(m.volcmd == VOLCMD_TONEPORTAMENTO)
+			{
+				cmd = CMD_TONEPORTAMENTO;
+				if(sndFile.GetType() != MOD_TYPE_XM) param = ImpulseTrackerPortaVolCmd[m.vol & 0x0F];
+			}
+			sprintf(s, "%u (%c%02X)",
+				m.vol,
+				sndFile.GetModSpecifications().GetEffectLetter(static_cast<ModCommand::COMMAND>(m.volcmd == VOLCMD_PORTAUP ? CMD_PORTAMENTOUP : CMD_PORTAMENTODOWN)),
+				m.vol << 2);
+		} else
+		{
+			strcpy(s, "continue");
+		}
+		break;
+
+	case VOLCMD_OFFSET:
+		if(m.vol)
+		{
+			SmpLength param;
+			SAMPLEINDEX smp = m.instr;
+			if(smp > 0 && smp <= sndFile.GetNumInstruments() && m.IsNote() && sndFile.Instruments[smp] != nullptr)
+			{
+				smp = sndFile.Instruments[smp]->Keyboard[m.note - NOTE_MIN];
+			}
+			if(smp > 0 && smp <= sndFile.GetNumSamples() && m.vol > 0 && m.vol <= CountOf(sndFile.GetSample(smp).cues))
+				param = sndFile.GetSample(smp).cues[m.vol - 1];
+			else
+				param = m.vol << 11;
+			sprintf(s, "Cue %u: %u", m.vol, param);
+		} else
+		{
+			strcpy(s, "continue");
+		}
+		break;
+
+	default:
+		sprintf(s, "%u", m.vol);
+		break;
+	}
+	return true;
 }
 
 

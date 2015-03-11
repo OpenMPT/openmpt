@@ -186,7 +186,7 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 				if(cmd != 0 || param != 0)
 				{
 					ConvertModCommand(*m);
-					m->Convert(MOD_TYPE_MOD, MOD_TYPE_S3M);
+					m->Convert(MOD_TYPE_MOD, MOD_TYPE_S3M, *this);
 				}
 			}
 		}

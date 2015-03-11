@@ -62,6 +62,7 @@ struct ModChannel
 	// Information not used in the mixer
 	const ModInstrument *pModInstrument;	// Currently assigned instrument slot
 	SmpLength proTrackerOffset;				// Offset for instrument-less notes in ProTracker mode
+	SmpLength oldOffset;
 	FlagSet<ChannelFlags> dwOldFlags;		// Flags from previous tick
 	int32 newLeftVol, newRightVol;
 	int32 nRealVolume, nRealPan;
@@ -83,10 +84,11 @@ struct ModChannel
 	int32 nRetrigCount, nRetrigParam;
 	ROWINDEX nPatternLoop;
 	CHANNELINDEX nMasterChn;
+	ModCommand rowCommand;
 	// 8-bit members
 	uint8 resamplingMode;
-	uint8 nRestoreResonanceOnNewNote; //Like above
-	uint8 nRestoreCutoffOnNewNote; //Like above
+	uint8 nRestoreResonanceOnNewNote;	// See nRestorePanOnNewNote
+	uint8 nRestoreCutoffOnNewNote;		// ditto
 	uint8 nNote, nNNA;
 	uint8 nLastNote;				// Last note, ignoring note offs and cuts - for MIDI macros
 	uint8 nArpeggioLastNote, nArpeggioBaseNote;	// For plugin arpeggio
@@ -99,7 +101,7 @@ struct ModChannel
 	uint8 nPanbrelloType, nPanbrelloSpeed, nPanbrelloDepth;
 	int8  nPanbrelloOffset, nPanbrelloRandomMemory;
 	uint8 nOldCmdEx, nOldVolParam, nOldTempo;
-	uint8 nOldOffset, nOldHiOffset;
+	uint8 nOldHiOffset;
 	uint8 nCutOff, nResonance;
 	uint8 nTremorCount, nTremorParam;
 	uint8 nPatternLoopCount;
@@ -108,29 +110,27 @@ struct ModChannel
 	uint8 nEFxSpeed, nEFxDelay;		// memory for Invert Loop (EFx, .MOD only)
 	uint8 nNoteSlideCounter, nNoteSlideSpeed, nNoteSlideStep;	// IMF / PTM Note Slide
 	uint8 lastZxxParam;	// Memory for \xx slides
-	bool isFirstTick;
+	bool isFirstTick : 1;
 
-	ModCommand rowCommand;
+	//-->Variables used to make user-definable tuning modes work with pattern effects.
+	//If true, freq should be recalculated in ReadNote() on first tick.
+	//Currently used only for vibrato things - using in other context might be 
+	//problematic.
+	bool m_ReCalculateFreqOnFirstTick : 1;
+
+	//To tell whether to calculate frequency.
+	bool m_CalculateFreq : 1;
+
+	int32 m_PortamentoFineSteps, m_PortamentoTickSlide;
+
+	uint32 m_Freq;
+	float m_VibratoDepth;
+	//<----
 
 	//NOTE_PCs memory.
 	float m_plugParamValueStep, m_plugParamTargetValue;
 	uint16 m_RowPlugParam;
 	PLUGINDEX m_RowPlug;
-
-	//-->Variables used to make user-definable tuning modes work with pattern effects.
-	int32 m_PortamentoFineSteps, m_PortamentoTickSlide;
-
-	uint32 m_Freq;
-	float m_VibratoDepth;
-
-	//If true, freq should be recalculated in ReadNote() on first tick.
-	//Currently used only for vibrato things - using in other context might be 
-	//problematic.
-	bool m_ReCalculateFreqOnFirstTick;
-
-	//To tell whether to calculate frequency.
-	bool m_CalculateFreq;
-	//<----
 
 	void ClearRowCmd() { rowCommand = ModCommand::Empty(); }
 

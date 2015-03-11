@@ -39,6 +39,7 @@ struct ModSample
 	uint8  nVibRate;						// Auto vibrato rate (speed)
 	//char name[MAX_SAMPLENAME];			// Maybe it would be nicer to have sample names here, but that would require some refactoring. Also, the current structure size is 64 Bytes - would adding the sample name here slow down the mixer (cache misses)?
 	char filename [MAX_SAMPLEFILENAME];
+	SmpLength cues[9];
 
 	ModSample(MODTYPE type = MOD_TYPE_NONE)
 	{
@@ -96,6 +97,9 @@ struct ModSample
 	void TransposeToFrequency();
 	static int FrequencyToTranspose(uint32 freq);
 	void FrequencyToTranspose();
+
+	// Check if the sample's cue points are the default cue point set.
+	bool HasCustomCuePoints() const;
 };
 
 OPENMPT_NAMESPACE_END

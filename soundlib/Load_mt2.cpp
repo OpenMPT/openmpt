@@ -341,7 +341,7 @@ static void ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 			m.param = p.fxparam1;
 			that->ConvertModCommand(m);
 #ifdef MODPLUG_TRACKER
-			m.Convert(MOD_TYPE_XM, MOD_TYPE_IT);
+			m.Convert(MOD_TYPE_XM, MOD_TYPE_IT, *that);
 #endif // MODPLUG_TRACKER
 		} else
 		{

@@ -123,8 +123,8 @@ void ModCommand::ExtendedS3MtoMODEffect()
 
 
 // Convert a mod command from one format to another.
-void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
-//--------------------------------------------------------
+void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &sndFile)
+//-----------------------------------------------------------------------------------
 {
 	if(fromType == toType)
 	{
@@ -607,13 +607,6 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 				command = CMD_VIBRATO;
 				param = vol << 4;
 				break;
-				// OpenMPT-specific commands
-
-			case VOLCMD_OFFSET:
-				command = CMD_OFFSET;
-				param = vol << 3;
-				break;
-
 		}
 		volcmd = CMD_NONE;
 	} // End if(newTypeIsMOD)
@@ -792,8 +785,15 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType)
 	if(volcmd == VOLCMD_OFFSET && !newSpecs.HasVolCommand(VOLCMD_OFFSET) && (command == CMD_NONE || !newSpecs.HasCommand(command)))
 	{
 		command = CMD_OFFSET;
-		param = vol << 3;
 		volcmd = VOLCMD_NONE;
+		SAMPLEINDEX smp = instr;
+		if(smp > 0 && smp <= sndFile.GetNumInstruments() && IsNote() && sndFile.Instruments[smp] != nullptr)
+			smp = sndFile.Instruments[smp]->Keyboard[note - NOTE_MIN];
+
+		if(smp > 0 && smp <= sndFile.GetNumSamples() && vol > 0 && vol <= CountOf(sndFile.GetSample(smp).cues))
+			param = mpt::saturate_cast<ModCommand::PARAM>((sndFile.GetSample(smp).cues[vol - 1] + 128) >> 8);
+		else
+			param = vol << 3;
 	}
 
 	if(!newSpecs.HasNote(note))

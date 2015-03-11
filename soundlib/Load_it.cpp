@@ -2078,6 +2078,27 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		WRITEMODULAR('R','P','.','.', m_nRestartPos);
 	}
 
+	// Sample cues
+	if(GetType() == MOD_TYPE_MPT)
+	{
+		for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+		{
+			const ModSample &sample = Samples[smp];
+			if(sample.nLength && sample.HasCustomCuePoints())
+			{
+				// Write one chunk for every sample.
+				// Rationale: chunks are limited to 65536 bytes, which can easily be reached
+				// with the amount of samples that OpenMPT supports.
+				WRITEMODULARHEADER('S','E','U','C', 2 + CountOf(sample.cues) * 4);
+				mpt::IO::WriteIntLE<uint16_t>(f, smp);
+				for(int i = 0; i < CountOf(sample.cues); i++)
+				{
+					mpt::IO::WriteIntLE<uint32_t>(f, sample.cues[i]);
+				}
+			}
+		}
+	}
+
 	//Additional flags for XM/IT/MPTM
 	if(m_ModFlags)
 	{
@@ -2235,8 +2256,23 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 						}
 					}
 				}
+				break;
 
-			break;
+			case MAGIC4LE('C','U','E','S'):
+				// Sample cues
+				if(size > 2)
+				{
+					SAMPLEINDEX smp = chunk.ReadUint16LE();
+					if(smp > 0 && smp <= GetNumSamples())
+					{
+						ModSample &sample = Samples[smp];
+						for(int i = 0; i < CountOf(sample.cues); i++)
+						{
+							sample.cues[i] = chunk.ReadUint32LE();
+						}
+					}
+				}
+				break;
 		}
 
 	}

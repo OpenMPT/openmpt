@@ -759,7 +759,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				// of the old modcommand would falsely be interpreted being of type
 				// origFormat and ConvertCommand could change them.
 				if(pasteFormat != sndFile.GetType() && (!doMixPaste || origModCmd.IsEmpty(false)))
-					m.Convert(pasteFormat, sndFile.GetType());
+					m.Convert(pasteFormat, sndFile.GetType(), sndFile);
 
 				// Adjust pattern selection
 				if(col == startChan) startPoint.SetColumn(startChan, firstCol);

@@ -471,7 +471,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleZoomUp, 1386, _T("Zoom Out"));
 	DefineKeyCommand(kcSampleZoomDown, 1387, _T("Zoom In"));
 	//time saving HACK:
-	for(size_t j = kcSampStartNotes; j <= kcInsNoteMapEndNoteStops; j++)
+	for(int j = kcSampStartNotes; j <= kcInsNoteMapEndNoteStops; j++)
 	{
 		DefineKeyCommand((CommandID)j, 1388 + j - kcSampStartNotes, _T("Auto Note in some context"), kcHidden, kcNoDummy);
 	}
@@ -511,7 +511,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcPrevDocument, 1693, _T("Previous Document"));
 	DefineKeyCommand(kcNextDocument, 1694, _T("Next Document"));
 	//time saving HACK:
-	for(size_t j = kcVSTGUIStartNotes; j <= kcVSTGUIEndNoteStops; j++)
+	for(int j = kcVSTGUIStartNotes; j <= kcVSTGUIEndNoteStops; j++)
 	{
 		DefineKeyCommand((CommandID)j, 1695 + j - kcVSTGUIStartNotes, _T("Auto Note in some context"), kcHidden, kcNoDummy);
 	}
@@ -678,6 +678,12 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcInstrumentEnvelopeSave, 1921, _T("Save Envelope"));
 	DefineKeyCommand(kcChannelTranspose, 1922, _T("Transpose Channel"));
 	DefineKeyCommand(kcChannelDuplicate, 1923, _T("Duplicate Channel"));
+	for(int j = kcStartSampleCues; j <= kcEndSampleCues; j++)
+	{
+		TCHAR s[32];
+		wsprintf(s, "Preview Sample Cue %u", j - kcStartSampleCues + 1);
+		DefineKeyCommand((CommandID)j, 1924 + j - kcStartSampleCues, s);
+	}
 
 
 

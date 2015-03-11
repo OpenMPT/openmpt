@@ -304,6 +304,15 @@ version:1
 8:1908:2:65:1		//Transpose -1 (Note Map): Ctrl+A (KeyDown)
 8:1909:3:81:1		//Transpose +12 (Note Map): Shift+Ctrl+Q (KeyDown)
 8:1910:3:65:1		//Transpose -12 (Note Map): Shift+Ctrl+A (KeyDown)
+8:1924:1:49:1		//Preview Sample Cue 1: Shift+1 (KeyDown)
+8:1925:1:50:1		//Preview Sample Cue 2: Shift+2 (KeyDown)
+8:1926:1:51:1		//Preview Sample Cue 3: Shift+3 (KeyDown)
+8:1927:1:52:1		//Preview Sample Cue 4: Shift+4 (KeyDown)
+8:1928:1:53:1		//Preview Sample Cue 5: Shift+5 (KeyDown)
+8:1929:1:54:1		//Preview Sample Cue 6: Shift+6 (KeyDown)
+8:1930:1:55:1		//Preview Sample Cue 7: Shift+7 (KeyDown)
+8:1931:1:56:1		//Preview Sample Cue 8: Shift+8 (KeyDown)
+8:1932:1:57:1		//Preview Sample Cue 9: Shift+9 (KeyDown)
 
 //----( Instrument Context [bottom] (9) )------------
 9:1837:0:107:5		//Zoom In: NUM PLUS (KeyDown|KeyHold)

@@ -108,6 +108,7 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_ADDSILENCE,		OnAddSilence)
 	ON_COMMAND(ID_SAMPLE_GRID,				OnChangeGridSize)
 	ON_COMMAND(ID_SAMPLE_QUICKFADE,			OnQuickFade)
+	ON_COMMAND_RANGE(ID_SAMPLE_CUE_1, ID_SAMPLE_CUE_9, OnSetCuePoint)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO,		OnUpdateUndo)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO,		OnUpdateRedo)
 	ON_MESSAGE(WM_MOD_MIDIMSG,				OnMidiMsg)
@@ -160,6 +161,7 @@ void CViewSample::OnInitialUpdate()
 		pMainFrm->SetXInfoText("");
 	}
 	UpdateScrollSize();
+	UpdateNcButtonState();
 }
 
 
@@ -1734,8 +1736,8 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		const ModSample &sample = pSndFile->GetSample(m_nSample);
+		const CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		const ModSample &sample = sndFile.GetSample(m_nSample);
 		HMENU hMenu = ::CreatePopupMenu();
 		CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
 		if (!hMenu)	return;
@@ -1745,12 +1747,12 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			{
 				::AppendMenu(hMenu, MF_STRING | (CanZoomSelection() ? 0 : MF_GRAYED), ID_SAMPLE_ZOOMONSEL, _T("Zoom\t") + ih->GetKeyTextFromCommand(kcSampleZoomSelection));
 				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETLOOP, _T("Set As Loop"));
-				if (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
+				if (sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 					::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETSUSTAINLOOP, _T("Set As Sustain Loop"));
 				::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			} else
 			{
-				CHAR s[256];
+				TCHAR s[256];
 				SmpLength dwPos = ScreenToSample(pt.x);
 				if (dwPos <= sample.nLength)
 				{
@@ -1762,7 +1764,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 					::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nLoopStart + 4 ? 0 : MF_GRAYED),
 						ID_SAMPLE_SETLOOPEND, s);
 
-					if (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
+					if (sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 					{
 						//Set sustain loop points
 						::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
@@ -1773,6 +1775,20 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 						::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nSustainStart + 4 ? 0 : MF_GRAYED),
 							ID_SAMPLE_SETSUSTAINEND, s);
 					}
+
+					if(sndFile.GetModSpecifications().HasVolCommand(VOLCMD_OFFSET))
+					{
+						::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
+						HMENU hCueMenu = ::CreatePopupMenu();
+						for(int i = 0; i < 9; i++)
+						{
+							wsprintf(s, _T("Cue &%c: %u"), '1' + i, sndFile.GetSample(m_nSample).cues[i]);
+							::AppendMenu(hCueMenu, MF_STRING, ID_SAMPLE_CUE_1 + i, s);
+						}
+						wsprintf(s, _T("Set Sample Cu&e to:\t%u"), dwPos);
+						::AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hCueMenu), s);
+					}
+
 					::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 					m_dwMenuParam = dwPos;
 				}
@@ -1985,19 +2001,6 @@ void CViewSample::OnEditSelectAll()
 }
 
 
-// Update loop points after deleting a sample selection
-void CViewSample::AdjustLoopPoints(SmpLength &loopStart, SmpLength &loopEnd, SmpLength length) const
-//--------------------------------------------------------------------------------------------------
-{
-	Util::DeleteRange(m_dwBeginSel, m_dwEndSel - 1, loopStart, loopEnd);
-	LimitMax(loopEnd, length);
-	if(loopStart + 4 >= loopEnd)
-	{
-		loopStart = loopEnd = 0;
-	}
-}
-
-
 void CViewSample::OnEditDelete()
 //------------------------------
 {
@@ -2024,29 +2027,7 @@ void CViewSample::OnEditDelete()
 		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, "Delete Selection", m_dwBeginSel, m_dwEndSel);
 
 		CriticalSection cs;
-
-		const SmpLength selStart = m_dwBeginSel * sample.GetBytesPerSample();
-		const SmpLength selEnd = m_dwEndSel * sample.GetBytesPerSample();
-		const SmpLength smpEnd = sample.nLength * sample.GetBytesPerSample();
-		sample.nLength -= (m_dwEndSel - m_dwBeginSel);
-
-		memmove(sample.pSample8 + selStart, sample.pSample8 + selEnd, smpEnd - selEnd);
-
-		// adjust loop points
-		AdjustLoopPoints(sample.nLoopStart, sample.nLoopEnd, sample.nLength);
-		AdjustLoopPoints(sample.nSustainStart, sample.nSustainEnd, sample.nLength);
-
-		if(sample.nLoopEnd == 0)
-		{
-			sample.uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP);
-		}
-
-		if(sample.nSustainEnd == 0)
-		{
-			sample.uFlags.reset(CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
-		}
-
-		sample.PrecomputeLoops(sndFile);
+		ctrlSmp::RemoveRange(sample, m_dwBeginSel, m_dwEndSel, sndFile);
 	}
 	SetCurSel(0, 0);
 	SetModified(updateHint, true, true);
@@ -2103,6 +2084,8 @@ void CViewSample::OnEditCopy()
 	{
 		// We want to store some loop metadata as well.
 		memSize += sizeof(RIFFChunk) + sizeof(WAVSampleInfoChunk) + 2 * sizeof(WAVSampleLoop);
+		// ...and cue points, too.
+		memSize += sizeof(RIFFChunk) + sizeof(uint32_t) + CountOf(sample.cues) * sizeof(WAVCuePoint);
 	}
 
 	ASSERT((memSize % 2u) == 0);
@@ -2138,6 +2121,7 @@ void CViewSample::OnEditCopy()
 		if(addLoopInfo)
 		{
 			file.WriteLoopInformation(sample);
+			file.WriteCueInformation(sample);
 		}
 		file.WriteExtraInformation(sample, sndFile.GetType(), sndFile.GetSampleName(m_nSample));
 
@@ -2729,6 +2713,23 @@ void CViewSample::OnSetSustainEnd()
 }
 
 
+void CViewSample::OnSetCuePoint(UINT nID)
+//---------------------------------------
+{
+	nID -= ID_SAMPLE_CUE_1;
+	CModDoc *pModDoc = GetDocument();
+	if (pModDoc)
+	{
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		ModSample &sample = sndFile.GetSample(m_nSample);
+
+		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Cue Point");
+		sample.cues[nID] = m_dwMenuParam;
+		SetModified(SampleHint().Info().Data(), true, false);
+	}
+}
+
+
 void CViewSample::OnZoomUp()
 //--------------------------
 {
@@ -3015,7 +3016,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				if(noteChannel[note - NOTE_MIN] != CHANNELINDEX_INVALID)
 				{
 					// Release sustain loop on key up
-					pModDoc->GetrSoundFile().KeyOff(&GetDocument()->GetrSoundFile().m_PlayState.Chn[noteChannel[note - NOTE_MIN]]);
+					sndFile.KeyOff(&sndFile.m_PlayState.Chn[noteChannel[note - NOTE_MIN]]);
 				}
 				break;
 			case seNoteOffOnKeyUp:
@@ -3027,6 +3028,11 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			}
 			return wParam;
 		}
+	} else if(wParam >= kcStartSampleCues && wParam <= kcEndSampleCues)
+	{
+		const ModSample &sample = sndFile.GetSample(m_nSample);
+		SmpLength offset = sample.cues[wParam - kcStartSampleCues];
+		if(offset < sample.nLength) PlayNote(NOTE_MIDDLEC, offset);
 	}
 
 	// Pass on to ctrl_smp

@@ -699,6 +699,9 @@ enum CommandID
 	kcSampleAutotune,
 	kcEndSampleEditing=kcSampleAutotune,
 
+	kcStartSampleCues,
+	kcEndSampleCues = kcStartSampleCues + 8,
+
 	//kcSampStartNotes to kcInsNoteMapEndNoteStops must be contiguous.
 	kcSampStartNotes,
 	kcSampNoteC_0=kcSampStartNotes,

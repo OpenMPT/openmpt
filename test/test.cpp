@@ -1344,6 +1344,9 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		{
 			VERIFY_EQUAL_NONCONT(sample.pSample8[i], 0);
 		}
+
+		VERIFY_EQUAL_NONCONT(sample.cues[0], 2);
+		VERIFY_EQUAL_NONCONT(sample.cues[8], 9);
 	}
 
 	{
@@ -1361,6 +1364,9 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		{
 			VERIFY_EQUAL_NONCONT(sample.pSample16[4 + i], int16(-32768));
 		}
+
+		VERIFY_EQUAL_NONCONT(sample.cues[0], 3);
+		VERIFY_EQUAL_NONCONT(sample.cues[8], 14);
 	}
 
 	// External sample
@@ -1397,6 +1403,9 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 			VERIFY_EQUAL_NONCONT(sample.pSample8[i], int8(45));
 		}
 #endif // MPT_EXTERNAL_SAMPLES
+
+		VERIFY_EQUAL_NONCONT(sample.cues[0], 10);
+		VERIFY_EQUAL_NONCONT(sample.cues[8], 50);
 	}
 
 	// Instruments
