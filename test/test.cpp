@@ -396,15 +396,15 @@ static noinline void TestStringFormatting()
 //-----------------------------------------
 {
 
-	VERIFY_EQUAL(Stringify(1.5f), "1.5");
-	VERIFY_EQUAL(Stringify(true), "1");
-	VERIFY_EQUAL(Stringify(false), "0");
-	//VERIFY_EQUAL(Stringify('A'), "A"); // deprecated
-	//VERIFY_EQUAL(Stringify(L'A'), "A"); // deprecated
+	VERIFY_EQUAL(mpt::ToString(1.5f), "1.5");
+	VERIFY_EQUAL(mpt::ToString(true), "1");
+	VERIFY_EQUAL(mpt::ToString(false), "0");
+	//VERIFY_EQUAL(mpt::ToString('A'), "A"); // deprecated
+	//VERIFY_EQUAL(mpt::ToString(L'A'), "A"); // deprecated
 
-	VERIFY_EQUAL(Stringify(0), "0");
-	VERIFY_EQUAL(Stringify(-23), "-23");
-	VERIFY_EQUAL(Stringify(42), "42");
+	VERIFY_EQUAL(mpt::ToString(0), "0");
+	VERIFY_EQUAL(mpt::ToString(-23), "-23");
+	VERIFY_EQUAL(mpt::ToString(42), "42");
 
 	VERIFY_EQUAL(mpt::fmt::hex<3>((int32)-1), "ffffffff");
 	VERIFY_EQUAL(mpt::fmt::hex(0x123e), "123e");
@@ -418,15 +418,15 @@ static noinline void TestStringFormatting()
 	VERIFY_EQUAL(mpt::wfmt::hex0<2>(0x123e), L"123e");
 #endif
 
-	VERIFY_EQUAL(Stringify(-87.0f), "-87");
-	if(Stringify(-0.5e-6) != "-5e-007"
-		&& Stringify(-0.5e-6) != "-5e-07"
-		&& Stringify(-0.5e-6) != "-5e-7"
+	VERIFY_EQUAL(mpt::ToString(-87.0f), "-87");
+	if(mpt::ToString(-0.5e-6) != "-5e-007"
+		&& mpt::ToString(-0.5e-6) != "-5e-07"
+		&& mpt::ToString(-0.5e-6) != "-5e-7"
 		)
 	{
 		VERIFY_EQUAL(true, false);
 	}
-	VERIFY_EQUAL(Stringify(58.65403492763), "58.654");
+	VERIFY_EQUAL(mpt::ToString(58.65403492763), "58.654");
 	VERIFY_EQUAL(mpt::Format("%3.1f").ToString(23.42), "23.4");
 
 	VERIFY_EQUAL(ConvertStrTo<uint32>("586"), 586u);
@@ -445,8 +445,8 @@ static noinline void TestStringFormatting()
 	VERIFY_EQUAL(ConvertStrTo<double>("-0.5e-6"), -0.5e-6);
 	VERIFY_EQUAL(ConvertStrTo<double>("58.65403492763"), 58.65403492763);
 
-	VERIFY_EQUAL(ConvertStrTo<float>(Stringify(-87.0)), -87.0);
-	VERIFY_EQUAL(ConvertStrTo<double>(Stringify(-0.5e-6)), -0.5e-6);
+	VERIFY_EQUAL(ConvertStrTo<float>(mpt::ToString(-87.0)), -87.0);
+	VERIFY_EQUAL(ConvertStrTo<double>(mpt::ToString(-0.5e-6)), -0.5e-6);
 
 	TestFloatFormats(0.0f);
 	TestFloatFormats(1.0f);
@@ -922,7 +922,7 @@ inline Test::CustomSettingsTestType FromSettingValue(const SettingValue &val)
 template <>
 inline SettingValue ToSettingValue(const Test::CustomSettingsTestType &val)
 {
-	return SettingValue(Stringify(val.x) + "|" + Stringify(val.y), "myType");
+	return SettingValue(mpt::ToString(val.x) + "|" + mpt::ToString(val.y), "myType");
 }
 
 namespace Test {
