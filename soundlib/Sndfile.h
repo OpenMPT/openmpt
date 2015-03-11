@@ -781,6 +781,7 @@ public:
 	void NoteChange(ModChannel *pChn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false) const;
 	void InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true) const;
 	void ApplyInstrumentPanning(ModChannel *pChn, const ModInstrument *instr, const ModSample *smp) const;
+	uint32_t CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX chn) const;
 
 	// Channel Effects
 	void KeyOff(ModChannel *pChn) const;
@@ -840,14 +841,15 @@ protected:
 	void Tremolo(ModChannel *pChn, UINT param) const;
 	void Panbrello(ModChannel *pChn, UINT param) const;
 	void Panning(ModChannel *pChn, UINT param) const;
-	void RetrigNote(CHANNELINDEX nChn, int param, UINT offset=0);  //rewbs.volOffset: added last param
-	void SampleOffset(CHANNELINDEX nChn, UINT param);
+	void RetrigNote(CHANNELINDEX nChn, int param, int offset = 0);
+	void SampleOffset(CHANNELINDEX nChn, SmpLength param);
 	void NoteCut(CHANNELINDEX nChn, UINT nTick, bool cutSample);
 	ROWINDEX PatternLoop(ModChannel *, UINT param);
 	void ExtendedMODCommands(CHANNELINDEX nChn, UINT param);
 	void ExtendedS3MCommands(CHANNELINDEX nChn, UINT param);
 	void ExtendedChannelEffect(ModChannel *, UINT param);
 	void InvertLoop(ModChannel* pChn);
+	ROWINDEX PatternBreak(PlayState &state, CHANNELINDEX chn, uint8 param) const;
 
 	void ProcessMacroOnChannel(CHANNELINDEX nChn);
 	void ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro, uint8 param = 0, PLUGINDEX plugin = 0);

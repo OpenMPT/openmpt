@@ -358,6 +358,9 @@ void COptionsKeyboard::DefineCommandCategories()
 		newCat.separators.push_back(kcEndSampleEditing);			//--------------------------------------
 		for(int c = kcStartSampleMisc; c <= kcEndSampleMisc; c++)
 			newCat.commands.push_back(c);
+		newCat.separators.push_back(kcEndSampleMisc);			//--------------------------------------
+		for(int c = kcStartSampleCues; c <= kcEndSampleCues; c++)
+			newCat.commands.push_back(c);
 
 		commandCategories.push_back(newCat);
 	}

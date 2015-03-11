@@ -4730,14 +4730,14 @@ void CViewPattern::TempEnterVol(int v)
 			case kcSetVolumeVolSlideDown:	volcmd = VOLCMD_VOLSLIDEDOWN; break;
 			case kcSetVolumeFineVolUp:		volcmd = VOLCMD_FINEVOLUP; break;
 			case kcSetVolumeFineVolDown:	volcmd = VOLCMD_FINEVOLDOWN; break;
-			case kcSetVolumeVibratoSpd:		if (pSndFile->GetType() & MOD_TYPE_XM) volcmd = VOLCMD_VIBRATOSPEED; break;
+			case kcSetVolumeVibratoSpd:		volcmd = VOLCMD_VIBRATOSPEED; break;
 			case kcSetVolumeVibrato:		volcmd = VOLCMD_VIBRATODEPTH; break;
-			case kcSetVolumeXMPanLeft:		if (pSndFile->GetType() & MOD_TYPE_XM) volcmd = VOLCMD_PANSLIDELEFT; break;
-			case kcSetVolumeXMPanRight:		if (pSndFile->GetType() & MOD_TYPE_XM) volcmd = VOLCMD_PANSLIDERIGHT; break;
+			case kcSetVolumeXMPanLeft:		volcmd = VOLCMD_PANSLIDELEFT; break;
+			case kcSetVolumeXMPanRight:		volcmd = VOLCMD_PANSLIDERIGHT; break;
 			case kcSetVolumePortamento:		volcmd = VOLCMD_TONEPORTAMENTO; break;
-			case kcSetVolumeITPortaUp:		if (pSndFile->GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_PORTAUP; break;
-			case kcSetVolumeITPortaDown:	if (pSndFile->GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_PORTADOWN; break;
-			case kcSetVolumeITOffset:		if (pSndFile->GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_OFFSET; break;		//rewbs.volOff
+			case kcSetVolumeITPortaUp:		volcmd = VOLCMD_PORTAUP; break;
+			case kcSetVolumeITPortaDown:	volcmd = VOLCMD_PORTADOWN; break;
+			case kcSetVolumeITOffset:		volcmd = VOLCMD_OFFSET; break;
 		}
 
 		UINT max = 64;

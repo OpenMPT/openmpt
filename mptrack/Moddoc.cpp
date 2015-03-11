@@ -2417,7 +2417,6 @@ void CModDoc::OnPatternRestart(bool loop)
 			m_SndFile.LoopPattern(nPat);
 		else
 			m_SndFile.LoopPattern(PATTERNINDEX_INVALID);
-		m_SndFile.m_PlayState.m_nNextRow = 0;
 
 		// set playback timer in the status bar (and update channel status)
 		SetElapsedTime(nOrd, 0, true);
@@ -2472,7 +2471,6 @@ void CModDoc::OnPatternPlay()
 		if ((nOrd < m_SndFile.Order.size()) && (m_SndFile.Order[nOrd] == nPat)) m_SndFile.m_PlayState.m_nCurrentOrder = m_SndFile.m_PlayState.m_nNextOrder = nOrd;
 		m_SndFile.m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
 		m_SndFile.LoopPattern(nPat);
-		m_SndFile.m_PlayState.m_nNextRow = nRow;
 
 		// set playback timer in the status bar (and update channel status)
 		SetElapsedTime(nOrd, nRow, true);
@@ -2530,7 +2528,6 @@ void CModDoc::OnPatternPlayNoLoop()
 			m_SndFile.DontLoopPattern(nPat, nRow);
 		else
 			m_SndFile.LoopPattern(nPat);
-		m_SndFile.m_PlayState.m_nNextRow = nRow;
 
 		// set playback timer in the status bar (and update channel status)
 		SetElapsedTime(nOrd, nRow, true);

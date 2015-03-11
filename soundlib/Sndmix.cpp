@@ -441,7 +441,7 @@ bool CSoundFile::ProcessRow()
 								m_PlayState.Chn[i].nPanSwing = m_PlayState.Chn[i].nVolSwing = 0;
 								m_PlayState.Chn[i].nCutSwing = m_PlayState.Chn[i].nResSwing = 0;
 								m_PlayState.Chn[i].nOldVolParam = 0;
-								m_PlayState.Chn[i].nOldOffset = 0;
+								m_PlayState.Chn[i].oldOffset = 0;
 								m_PlayState.Chn[i].nOldHiOffset = 0;
 								m_PlayState.Chn[i].nPortamentoDest = 0;
 

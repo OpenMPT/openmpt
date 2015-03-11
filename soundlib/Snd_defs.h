@@ -166,7 +166,7 @@ DECLARE_FLAGSET(ChannelFlags)
 #define CHN_SAMPLEFLAGS (CHN_16BIT | CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN | CHN_PANNING | CHN_STEREO | CHN_PINGPONGFLAG | CHN_REVERSE)
 #define CHN_CHANNELFLAGS (~CHN_SAMPLEFLAGS)
 
-// Sample flags fit into the first 16 bits, and with the current memory layout, storing them as a 16-bit integer gives struct ModSample a nice cacheable 64 bytes size in 32-bit builds.
+// Sample flags fit into the first 16 bits, and with the current memory layout, storing them as a 16-bit integer packs struct ModSample nicely.
 typedef FlagSet<ChannelFlags, uint16> SampleFlags;
 
 

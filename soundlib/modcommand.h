@@ -18,6 +18,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+class CSoundFile;
+
 // Note definitions
 #define NOTE_NONE			(ModCommand::NOTE(0))
 #define NOTE_MIN			(ModCommand::NOTE(1))
@@ -50,7 +52,7 @@ enum VolumeCommands
 	VOLCMD_PORTAUP			= 12,
 	VOLCMD_PORTADOWN		= 13,
 	VOLCMD_DELAYCUT			= 14, //currently unused
-	VOLCMD_OFFSET			= 15, //rewbs.volOff
+	VOLCMD_OFFSET			= 15,
 	MAX_VOLCMDS				= 16
 };
 
@@ -183,7 +185,7 @@ public:
 	EffectType GetVolumeEffectType() const { return GetVolumeEffectType(volcmd); }
 
 	// Convert a complete ModCommand item from one format to another
-	void Convert(MODTYPE fromType, MODTYPE toType);
+	void Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &sndFile);
 	// Convert MOD/XM Exx to S3M/IT Sxx
 	void ExtendedMODtoS3MEffect();
 	// Convert S3M/IT Sxx to MOD/XM Exx

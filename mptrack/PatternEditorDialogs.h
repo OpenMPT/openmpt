@@ -143,6 +143,7 @@ protected:
 	void InitEffect();
 
 	void UpdateVolCmdRange();
+	void UpdateVolCmdValue();
 	void UpdateEffectRange(bool set);
 	void UpdateEffectValue(bool set);
 

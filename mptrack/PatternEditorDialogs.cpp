@@ -896,6 +896,7 @@ void CEditCommand::UpdateVolCmdRange()
 		sldVolParam.SetPos(0);
 		sldVolParam.EnableWindow(FALSE);
 	}
+	UpdateVolCmdValue();
 }
 
 
@@ -1008,9 +1009,9 @@ void CEditCommand::OnVolCmdChanged()
 		modDoc->UpdateAllViews(NULL, RowHint(editPos.row), NULL);
 
 		if(volCmdChanged)
-		{
 			UpdateVolCmdRange();
-		}
+		else
+			UpdateVolCmdValue();
 	}
 }
 
@@ -1068,6 +1069,24 @@ void CEditCommand::OnCommandChanged()
 
 		modDoc->UpdateAllViews(NULL, RowHint(editPos.row), NULL);
 	}
+}
+
+
+void CEditCommand::UpdateVolCmdValue()
+//------------------------------------
+{
+	CHAR s[64] = "";
+	if(m->IsPcNote())
+	{
+		// plugin param control note
+		uint16 plugParam = static_cast<uint16>(sldVolParam.GetPos());
+		wsprintf(s, "Value: %u", plugParam);
+	} else
+	{
+		// process as effect
+		effectInfo.GetVolCmdParamInfo(*m, s);
+	}
+	SetDlgItemText(IDC_TEXT2, s);
 }
 
 

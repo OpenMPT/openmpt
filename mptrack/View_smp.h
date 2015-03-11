@@ -43,7 +43,7 @@ protected:
 	int m_nZoom;	// < 0: Zoom into sample (2^x:1 ratio), 0: Auto zoom, > 0: Zoom out (1:2^x ratio)
 	FlagSet<Flags> m_dwStatus;
 	SmpLength m_dwBeginSel, m_dwEndSel, m_dwBeginDrag, m_dwEndDrag;
-	DWORD m_dwMenuParam;
+	SmpLength m_dwMenuParam;
 	SmpLength m_nGridSegments;
 	SAMPLEINDEX m_nSample;
 
@@ -100,8 +100,6 @@ protected:
 
 	SmpLength ScrollPosToSamplePos() const {return ScrollPosToSamplePos(m_nZoom);}
 	inline SmpLength ScrollPosToSamplePos(int nZoom) const;
-
-	void AdjustLoopPoints(SmpLength &loopStart, SmpLength &loopEnd, SmpLength length) const;
 
 	void OnMonoConvert(ctrlSmp::StereoToMonoMode convert);
 
@@ -162,6 +160,7 @@ protected:
 	afx_msg void OnSetLoopEnd();
 	afx_msg void OnSetSustainStart();
 	afx_msg void OnSetSustainEnd();
+	afx_msg void OnSetCuePoint(UINT nID);
 	afx_msg void OnZoomUp();
 	afx_msg void OnZoomDown();
 	afx_msg void OnDrawingToggle();

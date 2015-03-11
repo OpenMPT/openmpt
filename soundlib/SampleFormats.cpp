@@ -490,6 +490,10 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filen
 
 	file.WriteLoopInformation(sample);
 	file.WriteExtraInformation(sample, GetType());
+	if(sample.HasCustomCuePoints())
+	{
+		file.WriteCueInformation(sample);
+	}
 	
 	FileTags tags;
 	tags.title = mpt::ToUnicode(mpt::CharsetLocale, m_szNames[nSample]);
@@ -2193,11 +2197,12 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 	FLAC__StreamMetadata *metadata[] =
 	{
 		FLAC__metadata_object_new(FLAC__METADATA_TYPE_VORBIS_COMMENT),
-		FLAC__metadata_object_new(FLAC__METADATA_TYPE_APPLICATION),
-		FLAC__metadata_object_new(FLAC__METADATA_TYPE_APPLICATION),
+		FLAC__metadata_object_new(FLAC__METADATA_TYPE_APPLICATION),	// MPT sample information
+		FLAC__metadata_object_new(FLAC__METADATA_TYPE_APPLICATION),	// Loop points
+		FLAC__metadata_object_new(FLAC__METADATA_TYPE_APPLICATION),	// Cue points
 	};
 
-	const bool writeLoopData = sample.uFlags[CHN_LOOP | CHN_SUSTAINLOOP];
+	unsigned numBlocks = 2;
 	if(metadata[0])
 	{
 		// Store sample name
@@ -2229,10 +2234,10 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 
 		FLAC__metadata_object_application_set_data(metadata[1], reinterpret_cast<FLAC__byte *>(&chunk), length, true);
 	}
-	if(metadata[2] && writeLoopData)
+	if(metadata[numBlocks] && sample.uFlags[CHN_LOOP | CHN_SUSTAINLOOP])
 	{
 		// Store loop points
-		memcpy(metadata[2]->data.application.id, "riff", 4);
+		memcpy(metadata[numBlocks]->data.application.id, "riff", 4);
 
 		struct
 		{
@@ -2263,14 +2268,42 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		chunk.loops[0].ConvertEndianness();
 		chunk.loops[1].ConvertEndianness();
 		
-		FLAC__metadata_object_application_set_data(metadata[2], reinterpret_cast<FLAC__byte *>(&chunk), length, true);
+		FLAC__metadata_object_application_set_data(metadata[numBlocks], reinterpret_cast<FLAC__byte *>(&chunk), length, true);
+		numBlocks++;
+	}
+	if(metadata[numBlocks] && sample.HasCustomCuePoints())
+	{
+		// Store cue points
+		memcpy(metadata[numBlocks]->data.application.id, "riff", 4);
+
+		struct
+		{
+			RIFFChunk header;
+			uint32_t numPoints;
+			WAVCuePoint cues[CountOf(sample.cues)];
+		} chunk;
+
+		chunk.header.id = RIFFChunk::idcue_;
+		chunk.header.length = 4 + sizeof(chunk.cues);
+
+		for(uint32_t i = 0; i < CountOf(sample.cues); i++)
+		{
+			chunk.cues[i].ConvertToWAV(i, sample.cues[i]);
+			chunk.cues[i].ConvertEndianness();
+		}
+
+		const uint32_t length = sizeof(RIFFChunk) + chunk.header.length;
+		chunk.header.ConvertEndianness();
+
+		FLAC__metadata_object_application_set_data(metadata[numBlocks], reinterpret_cast<FLAC__byte *>(&chunk), length, true);
+		numBlocks++;
 	}
 
 	FLAC__stream_encoder_set_channels(encoder, sample.GetNumChannels());
 	FLAC__stream_encoder_set_bits_per_sample(encoder, sample.GetElementarySampleSize() * 8);
 	FLAC__stream_encoder_set_sample_rate(encoder, sample.GetSampleRate(GetType()));
 	FLAC__stream_encoder_set_total_samples_estimate(encoder, sample.nLength);
-	FLAC__stream_encoder_set_metadata(encoder, metadata, writeLoopData ? 3 : 2);
+	FLAC__stream_encoder_set_metadata(encoder, metadata, numBlocks);
 #ifdef MODPLUG_TRACKER
 	FLAC__stream_encoder_set_compression_level(encoder, TrackerSettings::Instance().m_FLACCompressionLevel);
 #endif // MODPLUG_TRACKER

@@ -126,6 +126,12 @@ void ModSample::Initialize(MODTYPE type)
 	nVibDepth = 0;
 	nVibRate = 0;
 	filename[0] = '\0';
+
+	// Default cues compatible with old-style volume column offset
+	for(int i = 0; i < 9; i++)
+	{
+		cues[i] = (i + 1) << 11;
+	}
 }
 
 
@@ -336,6 +342,18 @@ void ModSample::FrequencyToTranspose()
 	Limit(transpose, -127, 127);
 	RelativeTone = static_cast<int8>(transpose);
 	nFineTune = static_cast<int8>(finetune);
+}
+
+
+// Check if the sample's cue points are the default cue point set.
+bool ModSample::HasCustomCuePoints() const
+//----------------------------------------
+{
+	for(SmpLength i = 0; i < CountOf(cues); i++)
+	{
+		if(cues[i] != (i + 1) << 11) return true;
+	}
+	return false;
 }
 
 

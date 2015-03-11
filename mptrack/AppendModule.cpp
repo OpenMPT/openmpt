@@ -272,7 +272,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 			for(CHANNELINDEX chn = 0; chn < copyChannels; chn++, src++, m++)
 			{
 				*m = *src;
-				m->Convert(source.GetType(), m_SndFile.GetType());
+				m->Convert(source.GetType(), m_SndFile.GetType(), source);
 				if(m->IsPcNote())
 				{
 					if(m->instr && m->instr < pluginMapping.size()) m->instr = static_cast<ModCommand::INSTR>(pluginMapping[m->instr]);

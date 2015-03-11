@@ -132,6 +132,9 @@ void WAVReader::FindMetadataChunks(ChunkReader::ChunkList<RIFFChunk> &chunks)
 	// Read sample loop points
 	smplChunk = chunks.GetChunk(RIFFChunk::idsmpl);
 
+	// Read sample cues
+	cueChunk = chunks.GetChunk(RIFFChunk::idcue_);
+
 	// Read text chunks
 	ChunkReader listChunk = chunks.GetChunk(RIFFChunk::idLIST);
 	if(listChunk.ReadMagic("INFO"))
@@ -179,6 +182,19 @@ void WAVReader::ApplySampleSettings(ModSample &sample, char (&sampleName)[MAX_SA
 			loopData.ApplyToSample(sample.nLoopStart, sample.nLoopEnd, sample.nLength, sample.uFlags, CHN_LOOP, CHN_PINGPONGLOOP, isOldMPT);
 		}
 		sample.SanitizeLoops();
+	}
+
+	// Read cue points
+	if(cueChunk.IsValid())
+	{
+		uint32_t numPoints = cueChunk.ReadUint32LE();
+		LimitMax(numPoints, CountOf(sample.cues));
+		for(uint32_t i = 0; i < numPoints; i++)
+		{
+			WAVCuePoint cuePoint;
+			cueChunk.ReadConvertEndianness(cuePoint);
+			sample.cues[i] = cuePoint.position;
+		}
 	}
 
 	// Read MPT extra info
@@ -533,6 +549,25 @@ void WAVWriter::WriteLoopInformation(const ModSample &sample)
 	{
 		loops[i].ConvertEndianness();
 		Write(loops[i]);
+	}
+}
+
+
+// Write a sample's cue points to the file.
+void WAVWriter::WriteCueInformation(const ModSample &sample)
+//----------------------------------------------------------
+{
+	StartChunk(RIFFChunk::idcue_);
+	{
+		const uint32_t numPoints = SwapBytesLE_(CountOf(sample.cues));
+		Write(numPoints);
+	}
+	for(uint32_t i = 0; i < CountOf(sample.cues); i++)
+	{
+		WAVCuePoint cuePoint;
+		cuePoint.ConvertToWAV(i, sample.cues[i]);
+		cuePoint.ConvertEndianness();
+		Write(cuePoint);
 	}
 }
 

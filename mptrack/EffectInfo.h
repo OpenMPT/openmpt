@@ -60,6 +60,8 @@ public:
 	ModCommand::VOLCMD GetVolCmdFromIndex(UINT ndx) const;
 	// Get range information, effect name, etc... from a given effect.
 	bool GetVolCmdInfo(UINT ndx, LPSTR s, ModCommand::VOL *prangeMin = nullptr, ModCommand::VOL *prangeMax = nullptr) const;
+	// Get effect name and parameter description
+	bool GetVolCmdParamInfo(const ModCommand &m, LPSTR s) const;
 };
 
 OPENMPT_NAMESPACE_END

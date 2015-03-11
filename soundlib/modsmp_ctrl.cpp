@@ -73,6 +73,10 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const Sm
 		// Update loop points if necessary.
 		if(smp.nLoopStart >= nStartFrom) smp.nLoopStart += nSilenceLength;
 		if(smp.nLoopEnd >= nStartFrom) smp.nLoopEnd += nSilenceLength;
+		for(int i = 0; i < CountOf(smp.cues); i++)
+		{
+			if(smp.cues[i] >= nStartFrom) smp.cues[i] += nSilenceLength;
+		}
 	} else
 	{
 		// Set loop points automatically
@@ -84,6 +88,50 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength nSilenceLength, const Sm
 	ReplaceSample(smp, pNewSmp, newLength, sndFile);
 	PrecomputeLoops(smp, sndFile, true);
 
+	return smp.nLength;
+}
+
+
+namespace
+{
+	// Update loop points and cues after deleting a sample selection
+	static void AdjustLoopPoints(SmpLength selStart, SmpLength selEnd, SmpLength &loopStart, SmpLength &loopEnd, SmpLength length)
+	{
+		Util::DeleteRange(selStart, selEnd - 1, loopStart, loopEnd);
+
+		LimitMax(loopEnd, length);
+		if(loopStart + 2 >= loopEnd)
+		{
+			loopStart = loopEnd = 0;
+		}
+	}
+}
+
+SmpLength RemoveRange(ModSample &smp, SmpLength selStart, SmpLength selEnd, CSoundFile &sndFile)
+//----------------------------------------------------------------------------------------------
+{
+	LimitMax(selEnd, smp.nLength);
+	if(selEnd <= selStart)
+	{
+		return smp.nLength;
+	}
+	const uint8 bps = smp.GetBytesPerSample();
+	memmove(smp.pSample8 + selStart * bps, smp.pSample8 + selEnd * bps, (smp.nLength - selEnd) * bps);
+	smp.nLength -= (selEnd - selStart);
+
+	// Did loops or cue points cover the deleted selection?
+	AdjustLoopPoints(selStart, selEnd, smp.nLoopStart, smp.nLoopEnd, smp.nLength);
+	AdjustLoopPoints(selStart, selEnd, smp.nSustainStart, smp.nSustainEnd, smp.nLength);
+
+	if(smp.nLoopEnd == 0) smp.uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP);
+	if(smp.nSustainEnd == 0) smp.uFlags.reset(CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
+
+	for(int i = 0; i < CountOf(smp.cues); i++)
+	{
+		Util::DeleteItem(selStart, selEnd - 1, smp.cues[i]);
+	}
+
+	smp.PrecomputeLoops(sndFile);
 	return smp.nLength;
 }
 

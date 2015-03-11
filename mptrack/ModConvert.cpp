@@ -263,7 +263,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				}
 			}
 
-			m->Convert(nOldType, nNewType);
+			m->Convert(nOldType, nNewType, m_SndFile);
 
 			// When converting to XM, avoid the E60 bug.
 			if(newTypeIsXM)

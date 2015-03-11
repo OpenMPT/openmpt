@@ -1601,7 +1601,9 @@ void CViewPattern::UpdateIndicator()
 						// "normal" volume command
 						TCHAR sztmp[64] = "";
 						effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m->volcmd), sztmp);
-						s.Format("%s (%u)", sztmp, m->vol);
+						_tcscat(sztmp, _T(": "));
+						effectInfo.GetVolCmdParamInfo(*m, sztmp + strlen(sztmp));
+						s = sztmp;
 					}
 					break;
 
