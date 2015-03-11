@@ -165,7 +165,7 @@ CTuningRTI::NOTESTR CTuningRTI::ProGetNoteName(const NOTEINDEXTYPE& x) const
 		if(nmi != m_NoteNameMap.end())
 		{
 			rValue = nmi->second;
-			(x >= 0) ? rValue += Stringify(middlePeriodNumber + x/m_GroupSize) : rValue += Stringify(middlePeriodNumber + (x+1)/m_GroupSize - 1);
+			(x >= 0) ? rValue += mpt::ToString(middlePeriodNumber + x/m_GroupSize) : rValue += mpt::ToString(middlePeriodNumber + (x+1)/m_GroupSize - 1);
 		}
 		else
 		{
@@ -176,7 +176,7 @@ CTuningRTI::NOTESTR CTuningRTI::ProGetNoteName(const NOTEINDEXTYPE& x) const
 
 			rValue += ":";
 
-			(x >= 0) ? rValue += Stringify(middlePeriodNumber + x/m_GroupSize) : rValue += Stringify(middlePeriodNumber + (x+1)/m_GroupSize - 1);
+			(x >= 0) ? rValue += mpt::ToString(middlePeriodNumber + x/m_GroupSize) : rValue += mpt::ToString(middlePeriodNumber + (x+1)/m_GroupSize - 1);
 		}
 		return rValue;
 	}

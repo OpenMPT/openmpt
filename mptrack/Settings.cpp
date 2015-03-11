@@ -315,7 +315,7 @@ std::wstring IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, con
 double IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, double def) const
 {
 	std::vector<WCHAR> buf(128);
-	while(::GetPrivateProfileStringW(GetSection(path).c_str(), GetKey(path).c_str(), StringifyW(def).c_str(), &buf[0], static_cast<DWORD>(buf.size()), filename.AsNative().c_str()) == buf.size() - 1)
+	while(::GetPrivateProfileStringW(GetSection(path).c_str(), GetKey(path).c_str(), mpt::ToWString(def).c_str(), &buf[0], static_cast<DWORD>(buf.size()), filename.AsNative().c_str()) == buf.size() - 1)
 	{
 		if(buf.size() == std::numeric_limits<DWORD>::max())
 		{
@@ -363,17 +363,17 @@ void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const std:
 
 void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, double val)
 {
-	::WritePrivateProfileStringW(GetSection(path).c_str(), GetKey(path).c_str(), StringifyW(val).c_str(), filename.AsNative().c_str());
+	::WritePrivateProfileStringW(GetSection(path).c_str(), GetKey(path).c_str(), mpt::ToWString(val).c_str(), filename.AsNative().c_str());
 }
 
 void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, int32 val)
 {
-	::WritePrivateProfileStringW(GetSection(path).c_str(), GetKey(path).c_str(), StringifyW(val).c_str(), filename.AsNative().c_str());
+	::WritePrivateProfileStringW(GetSection(path).c_str(), GetKey(path).c_str(), mpt::ToWString(val).c_str(), filename.AsNative().c_str());
 }
 
 void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, bool val)
 {
-	::WritePrivateProfileStringW(GetSection(path).c_str(), GetKey(path).c_str(), StringifyW(val).c_str(), filename.AsNative().c_str());
+	::WritePrivateProfileStringW(GetSection(path).c_str(), GetKey(path).c_str(), mpt::ToWString(val).c_str(), filename.AsNative().c_str());
 }
 
 void IniFileSettingsBackend::RemoveSettingRaw(const SettingPath &path)
