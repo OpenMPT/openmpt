@@ -1306,7 +1306,7 @@ inline std::wstring FormatValWHelper(const T & x, const Format & f)
 
 // Parses a useful subset of standard sprintf syntax for specifying floating point formatting.
 template<typename Tchar>
-inline Format ParseFormatStringFloat(const Tchar * str)
+static inline Format ParseFormatStringFloat(const Tchar * str)
 {
 	MPT_ASSERT(str);
 	FormatFlags f = FormatFlags();
