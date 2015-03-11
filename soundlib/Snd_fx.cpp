@@ -378,26 +378,28 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					if(param != 0) memory.state.m_nMusicSpeed = param;
 					break;
 				}
-				param = CalculateXParam(memory.state.m_nPattern, memory.state.m_nRow, nChn);
-				if ((adjustMode & eAdjust) && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
 				{
-					if (param) pChn->nOldTempo = param; else param = pChn->nOldTempo;
-				}
-				
-				if (param >= 0x20) memory.state.m_nMusicTempo = param;
-				else
-				{
-					// Tempo Slide
-					uint32_t tempoDiff = (param & 0x0F) * (memory.state.m_nMusicSpeed - 1);
-					if ((param & 0xF0) == 0x10)
+					uint32_t tempo = CalculateXParam(memory.state.m_nPattern, memory.state.m_nRow, nChn);
+					if ((adjustMode & eAdjust) && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
 					{
-						memory.state.m_nMusicTempo += tempoDiff;
-					} else
+						if (tempo) pChn->nOldTempo = tempo; else tempo = pChn->nOldTempo;
+					}
+
+					if (tempo >= 0x20) memory.state.m_nMusicTempo = tempo;
+					else
 					{
-						if(tempoDiff < memory.state.m_nMusicTempo)
-							memory.state.m_nMusicTempo -= tempoDiff;
-						else
-							memory.state.m_nMusicTempo = 0;
+						// Tempo Slide
+						uint32_t tempoDiff = (tempo & 0x0F) * (memory.state.m_nMusicSpeed - 1);
+						if ((tempo & 0xF0) == 0x10)
+						{
+							memory.state.m_nMusicTempo += tempoDiff;
+						} else
+						{
+							if(tempoDiff < memory.state.m_nMusicTempo)
+								memory.state.m_nMusicTempo -= tempoDiff;
+							else
+								memory.state.m_nMusicTempo = 0;
+						}
 					}
 				}
 				if(IsCompatibleMode(TRK_ALLTRACKERS))	// clamp tempo correctly in compatible mode
@@ -1866,9 +1868,6 @@ bool CSoundFile::ProcessEffects()
 		return true;
 	}
 
-// -> CODE#0010
-// -> DESC="add extended parameter mechanism to pattern effects"
-// -! NEW_FEATURE#0010
 	for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, pChn++)
 	{
 		UINT instr = pChn->rowCommand.instr;
@@ -3012,7 +3011,7 @@ uint32_t CSoundFile::CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDE
 {
 	if(isExtended != nullptr) *isExtended = false;
 	ROWINDEX maxCommands = 4;
-	const ModCommand *m = Patterns[pat].GetpModCommand(chn, row);
+	const ModCommand *m = Patterns[pat].GetpModCommand(row, chn);
 	uint32_t val = m->param;
 
 	switch(m->command)
