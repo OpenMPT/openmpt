@@ -218,6 +218,8 @@ void DebugReporter::ReportError(CString errorMessage)
 bool DebugReporter::FreezeState(DumpMode mode)
 //--------------------------------------------
 {
+	MPT_TRACE();
+
 	// seal the trace log as early as possible
 	mpt::log::Trace::Seal();
 
