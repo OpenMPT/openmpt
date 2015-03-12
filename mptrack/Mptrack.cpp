@@ -924,8 +924,6 @@ BOOL CTrackApp::InitInstance()
 	ASSERT(nullptr == m_pDocManager);
 	m_pDocManager = new CModDocManager();
 
-	ASSERT((sizeof(ModChannel) & 7) == 0);
-
 	// Parse command line for standard shell commands, DDE, file open
 	CMPTCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
