@@ -133,6 +133,10 @@ LIBOPENMPT_API const char * openmpt_get_supported_extensions(void);
  */
 LIBOPENMPT_API int openmpt_is_extension_supported( const char * extension );
 
+#define OPENMPT_STREAM_SEEK_SET 0
+#define OPENMPT_STREAM_SEEK_CUR 1
+#define OPENMPT_STREAM_SEEK_END 2
+
 /*! \brief Read bytes from stream
  *
  * Read bytes data from stream to dst.
@@ -149,7 +153,7 @@ typedef size_t (*openmpt_stream_read_func)( void * stream, void * dst, size_t by
  * Seek to stream position offset at whence.
  * \param stream Stream to operate on.
  * \param offset Offset to seek to.
- * \param whence SEEK_SET, SEEK_CUR, SEEK_END. See C89 documentation.
+ * \param whence OPENMPT_STREAM_SEEK_SET, OPENMPT_STREAM_SEEK_CUR, OPENMPT_STREAM_SEEK_END. See C89 documentation.
  * \return Returns 0 on success.
  * \retval 0 Success.
  * \retval -1 Failure. Position does not get updated.

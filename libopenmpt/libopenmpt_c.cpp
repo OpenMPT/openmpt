@@ -35,9 +35,47 @@ static const char * strdup( const char * src ) {
 	return dst;
 }
 
+static bool is_callback_stream_seekable( openmpt_stream_callbacks callbacks, void * stream ) {
+	if ( !stream ) {
+		return false;
+	}
+	if ( !callbacks.seek ) {
+		return false;
+	}
+	if ( !callbacks.tell ) {
+		return false;
+	}
+	std::int64_t oldpos = callbacks.tell( stream );
+	if ( oldpos < 0 ) {
+		return false;
+	}
+	if ( callbacks.seek( stream, 0, OPENMPT_STREAM_SEEK_SET ) < 0 ) {
+		callbacks.seek( stream, oldpos, OPENMPT_STREAM_SEEK_SET );
+		return false;
+	}
+	if ( callbacks.seek( stream, 0, OPENMPT_STREAM_SEEK_END ) < 0 ) {
+		callbacks.seek( stream, oldpos, OPENMPT_STREAM_SEEK_SET );
+		return false;
+	}
+	std::int64_t length = callbacks.tell( stream );
+	if ( length < 0 ) {
+		callbacks.seek( stream, oldpos, OPENMPT_STREAM_SEEK_SET );
+		return false;
+	}
+	callbacks.seek( stream, oldpos, OPENMPT_STREAM_SEEK_SET );
+	return true;
+}
+
 class callbacks_streambuf : public std::streambuf {
 public:
-	callbacks_streambuf( openmpt_stream_callbacks callbacks_, void * stream_ ) : callbacks(callbacks_), stream(stream_), put_back(4096), buf_size(65536), buffer(buf_size) {
+	callbacks_streambuf( openmpt_stream_callbacks callbacks_, void * stream_ )
+		: callbacks(callbacks_)
+		, stream(stream_)
+		, seekable(is_callback_stream_seekable( callbacks, stream ))
+		, put_back(4096)
+		, buf_size(65536)
+		, buffer(buf_size)
+	{
 		return;
 	}
 private:
@@ -62,11 +100,58 @@ private:
 		setg( base, start, start + n );
 		return traits_type::to_int_type( *gptr() );
 	}
+	pos_type seekpos( pos_type pos, std::ios_base::openmode which ) {
+		if ( !seekable ) {
+			return std::streambuf::seekpos( pos, which );
+		}
+		return seekoff( pos, std::ios_base::beg, which );
+	}
+	pos_type seekoff( off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which ) {
+		if ( !seekable ) {
+			return std::streambuf::seekoff( off, dir, which );
+		}
+		if ( which & std::ios_base::out ) {
+			return pos_type( off_type( -1 ) );
+		}
+		if ( !( which & std::ios_base::in ) ) {
+			return pos_type( off_type( -1 ) );
+		}
+		std::int64_t oldpos = callbacks.tell( stream );
+		if ( oldpos < 0 ) {
+			return pos_type( off_type( -1 ) );
+		}
+		if ( dir == std::ios_base::beg ) {
+			if ( callbacks.seek( stream, off, OPENMPT_STREAM_SEEK_SET ) < 0 ) {
+				callbacks.seek( stream, oldpos, OPENMPT_STREAM_SEEK_SET );
+				return pos_type( off_type( -1 ) );
+			}
+		} else if ( dir == std::ios_base::cur ) {
+			if ( callbacks.seek( stream, off, OPENMPT_STREAM_SEEK_CUR ) < 0 ) {
+				callbacks.seek( stream, oldpos, OPENMPT_STREAM_SEEK_SET );
+				return pos_type( off_type( -1 ) );
+			}
+		} else if ( dir == std::ios_base::end ) {
+			if ( callbacks.seek( stream, off, OPENMPT_STREAM_SEEK_END ) < 0 ) {
+				callbacks.seek( stream, oldpos, OPENMPT_STREAM_SEEK_SET );
+				return pos_type( off_type( -1 ) );
+			}
+		} else {
+			return pos_type( off_type( -1 ) );
+		}
+		std::int64_t newpos = callbacks.tell( stream );
+		if ( newpos < 0 ) {
+			callbacks.seek( stream, oldpos, OPENMPT_STREAM_SEEK_SET );
+			return pos_type( off_type( -1 ) );
+		}
+		setg( eback(), egptr(), egptr() );
+		return pos_type( static_cast<off_type>( newpos ) );
+	}
 	callbacks_streambuf( const callbacks_streambuf & );
 	callbacks_streambuf & operator = ( const callbacks_streambuf & );
 private:
 	openmpt_stream_callbacks callbacks;
 	void * stream;
+	bool seekable;
 	const std::size_t put_back;
 	const std::size_t buf_size;
 	std::vector<char> buffer;

@@ -7,6 +7,14 @@ is just a high-level summary.
 
 ### libopenmpt svn
 
+ *  openmpt_stream_seek_func() now gets called with OPENMPT_STREAM_SEEK_SET,
+    OPENMPT_STREAM_SEEK_CUR and OPENMPT_STREAM_SEEK_END whence parameter
+    instead of SEEK_SET, SEEK_CUR and SEEK_END. These are defined to 0, 1 and
+    2 respectively which corresponds to the definition in all common C
+    libraries. If your C library uses different constants, this theoretically
+    breaks binary compatibility. The old libopenmpt code, however, never
+    actually called the seek funtion, thus, there will be no problem in
+    practice.
  *  openmpt123: When both, SDL1.2 and PortAudio, are available, SDL is now the
     preferred backend because SDL is more widespread and better tested on all
     kinds of different platforms, and in generel, SDL is just more reliable.
