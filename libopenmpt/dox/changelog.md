@@ -19,7 +19,7 @@ is just a high-level summary.
     preferred backend because SDL is more widespread and better tested on all
     kinds of different platforms, and in generel, SDL is just more reliable.
 
-### 2015-02-17 - libopenmpt 0.2-beta10
+### libopenmpt 0.2-beta10 (2015-02-17)
 
  *  Makefile configuration filenames changed from
     `build/make/Makefile.config.*` to `build/make/config-*.mk`.
@@ -35,11 +35,11 @@ is just a high-level summary.
  *  Tiny IT playback compatibility improvements.
  *  STM playback improvements.
 
-### 2014-12-21 - libopenmpt 0.2-beta9
+### libopenmpt 0.2-beta9 (2014-12-21)
 
  *  [Bug] libopenmpt_ext.hpp was missing from the Windows binary zip files.
 
-### 2014-12-21 - libopenmpt 0.2-beta8
+### libopenmpt 0.2-beta8 (2014-12-21)
 
  *  foo_openmpt: Settings are now accessable via foobar2000 advanced settings.
  *  Autotools based build now supports libunmo3. Specify --enable-unmo3.
@@ -70,7 +70,7 @@ is just a high-level summary.
     index in openmpt::module::select_subsong.
  *  Added documentation for a couple of more functions.
 
-### 2014-09-07 - libopenmpt 0.2-beta7
+### libopenmpt 0.2-beta7 (2014-09-07)
 
  *  libopenmpt now has an GNU Autotools based build system (in addition to all
     previously supported ways of building libopenmpt). Autotools support is
@@ -88,7 +88,7 @@ is just a high-level summary.
         uncompressed lossless WAV files which can then be encoded to whatever
         format the user desires with other tools.
 
-### 2014-09-06 - libopenmpt 0.2-beta6
+### libopenmpt 0.2-beta6 (2014-09-06)
 
  *  openmpt123: SDL is now also used by default if availble, in addition to
     PortAudio.
@@ -99,7 +99,7 @@ is just a high-level summary.
     memory access.
  *  [Bug] openmpt123: Effect column was always missing in pattern display.
 
-### 2014-06-15 - libopenmpt 0.2-beta5
+### libopenmpt 0.2-beta5 (2014-06-15)
 
  *  Add unmo3 support for non-Windows builds.
  *  Namespace all internal functions in order to allow statically linking
@@ -120,11 +120,11 @@ is just a high-level summary.
 
  *  Various smaller playback accuracy improvements.
 
-### 2014-02-25 - libopenmpt 0.2-beta4
+### libopenmpt 0.2-beta4 (2014-02-25)
 
  *  [Bug] Makefile: Dependency tracking for the test suite did not work.
 
-### 2014-02-21 - libopenmpt 0.2-beta3
+### libopenmpt 0.2-beta3 (2014-02-21)
 
  *  [Change] The test suite is now built by default with Makefile based builds.
     Use `TEST=0` to skip building the tests. `make check` runs the test suite.
@@ -148,7 +148,7 @@ is just a high-level summary.
  *  Various XM playback improvements.
  *  Improved and switchable dithering when using 16bit integer API.
 
-### 2014-01-12 - libopenmpt 0.2-beta2
+### libopenmpt 0.2-beta2 (2014-01-12)
 
  *  [Bug] MT2 loader crash.
  *  [Bug] Saving settings in in_openmpt and xmp-openmpt did not work.
@@ -157,7 +157,7 @@ is just a high-level summary.
 
  *  DBM playback improvements.
 
-### 2013-12-31 - libopenmpt 0.2-beta1
+### libopenmpt 0.2-beta1 (2013-12-31)
 
  *  First release.
 
