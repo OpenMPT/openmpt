@@ -36,6 +36,8 @@ static const char * strdup( const char * src ) {
 }
 
 static bool is_callback_stream_seekable( openmpt_stream_callbacks callbacks, void * stream ) {
+	return false; /* seeking is still broken */
+/*
 	if ( !stream ) {
 		return false;
 	}
@@ -64,6 +66,7 @@ static bool is_callback_stream_seekable( openmpt_stream_callbacks callbacks, voi
 	}
 	callbacks.seek( stream, oldpos, OPENMPT_STREAM_SEEK_SET );
 	return true;
+*/
 }
 
 class callbacks_streambuf : public std::streambuf {
