@@ -329,16 +329,6 @@ IFileDataContainer::off_t FileDataContainerStdStream::Read(char *dst, IFileDataC
 	return cache_avail;
 }
 
-const char *FileDataContainerStdStream::GetPartialRawData(IFileDataContainer::off_t pos, IFileDataContainer::off_t length) const
-{
-	CacheStreamUpTo(pos + length);
-	if(pos + length > IFileDataContainer::off_t(cachesize))
-	{
-		return nullptr;
-	}
-	return &cache[pos];
-}
-
 bool FileDataContainerStdStream::CanRead(IFileDataContainer::off_t pos, IFileDataContainer::off_t length) const
 {
 	CacheStreamUpTo(pos + length);
