@@ -534,6 +534,40 @@ public:
 };
 
 
+class FileDataContainerStdStreamSeekable : public IFileDataContainer {
+
+private:
+
+	std::istream *stream;
+
+	off_t streamLength;
+
+	mutable bool cached;
+	mutable std::vector<char> cache;
+
+public:
+
+	FileDataContainerStdStreamSeekable(std::istream *s);
+	virtual ~FileDataContainerStdStreamSeekable();
+
+	static bool IsSeekable(std::istream *stream);
+	static off_t GetLength(std::istream *stream);
+
+private:
+	
+	void CacheLength();
+	void CacheStream() const;
+
+public:
+
+	bool IsValid() const;
+	const char *GetRawData() const;
+	off_t GetLength() const;
+	off_t Read(char *dst, off_t pos, off_t count) const;
+
+};
+
+
 class FileDataContainerStdStream : public IFileDataContainer {
 
 private:

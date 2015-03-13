@@ -82,9 +82,35 @@ public:
 #endif // MPT_WITH_FILEIO
 
 	// Initialize file reader object with a std::istream.
-	FileReader(std::istream *s) : data(mpt::make_shared<FileDataContainerStdStream>(s)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(std::istream *s)
+		: data(
+#if defined(MPT_FILEREADER_STD_ISTREAM_SEEKABLE)
+				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
+					MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerStdStreamSeekable>(s))
+				:
+#endif // MPT_FILEREADER_STD_ISTREAM_SEEKABLE
+					MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerStdStream>(s))
+			)
+		, streamPos(0)
+		MPT_FILEREADER_INIT_FILENAME
+	{
+		return;
+	}
 #if defined(MPT_WITH_FILEIO)
-	FileReader(std::istream *s, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerStdStream>(s)), streamPos(0), fileName(filename) { }
+	FileReader(std::istream *s, const mpt::PathString *filename)
+		: data(
+#if defined(MPT_FILEREADER_STD_ISTREAM_SEEKABLE)
+				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
+					MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerStdStreamSeekable>(s))
+				:
+#endif // MPT_FILEREADER_STD_ISTREAM_SEEKABLE
+					MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerStdStream>(s))
+			)
+		, streamPos(0)
+		, fileName(filename)
+	{
+		return;
+	}
 #endif // MPT_WITH_FILEIO
 
 	// Initialize file reader object based on an existing file reader object window.

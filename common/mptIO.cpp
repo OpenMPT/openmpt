@@ -117,6 +117,115 @@ bool Flush(FILE* & f) { return fflush(f) == 0; }
 
 #if defined(MPT_FILEREADER_STD_ISTREAM)
 
+FileDataContainerStdStreamSeekable::FileDataContainerStdStreamSeekable(std::istream *s)
+	: stream(s)
+	, streamLength(0)
+	, cached(false)
+{
+	CacheLength();
+}
+
+FileDataContainerStdStreamSeekable::~FileDataContainerStdStreamSeekable()
+{
+	return;
+}
+
+bool FileDataContainerStdStreamSeekable::IsSeekable(std::istream *stream)
+{
+	stream->clear();
+	std::streampos oldpos = stream->tellg();
+	if(stream->fail() || oldpos == std::streampos(-1))
+	{
+		stream->clear();
+		return false;
+	}
+	stream->seekg(0, std::ios::beg);
+	if(stream->fail())
+	{
+		stream->clear();
+		stream->seekg(oldpos);
+		stream->clear();
+		return false;
+	}
+	stream->seekg(0, std::ios::end);
+	if(stream->fail())
+	{
+		stream->clear();
+		stream->seekg(oldpos);
+		stream->clear();
+		return false;
+	}
+	std::streampos length = stream->tellg();
+	if(stream->fail() || length == std::streampos(-1))
+	{
+		stream->clear();
+		stream->seekg(oldpos);
+		stream->clear();
+		return false;
+	}
+	stream->seekg(oldpos);
+	stream->clear();
+	return true;
+}
+
+void FileDataContainerStdStreamSeekable::CacheLength()
+{
+	stream->clear();
+	std::streampos oldpos = stream->tellg();
+	stream->seekg(0, std::ios::end);
+	std::streampos length = stream->tellg();
+	stream->seekg(oldpos);
+	streamLength = mpt::saturate_cast<IFileDataContainer::off_t>(static_cast<int64>(length));
+}
+
+void FileDataContainerStdStreamSeekable::CacheStream() const
+{
+	if(cached)
+	{
+		return;
+	}
+	cache.resize(streamLength);
+	stream->seekg(0);
+	stream->read(&cache[0], cache.size());
+	cached = true;
+}
+
+bool FileDataContainerStdStreamSeekable::IsValid() const
+{
+	return true;
+}
+
+const char *FileDataContainerStdStreamSeekable::GetRawData() const
+{
+	CacheStream();
+	return &cache[0];
+}
+
+IFileDataContainer::off_t FileDataContainerStdStreamSeekable::GetLength() const
+{
+	return streamLength;
+}
+
+IFileDataContainer::off_t FileDataContainerStdStreamSeekable::Read(char *dst, IFileDataContainer::off_t pos, IFileDataContainer::off_t count) const
+{
+	if(cached)
+	{
+		IFileDataContainer::off_t cache_avail = std::min<IFileDataContainer::off_t>(IFileDataContainer::off_t(cache.size()) - pos, count);
+		std::copy(cache.begin() + pos, cache.begin() + pos + cache_avail, dst);
+		return cache_avail;
+	} else
+	{
+		std::streampos currentpos = stream->tellg();
+		if(currentpos == std::streampos(-1) || static_cast<int64>(pos) != currentpos)
+		{ // inefficient istream implementations might invalidate their buffer when seeking, even when seeking to the current position
+			stream->seekg(pos);
+		}
+		stream->read(dst, count);
+		return static_cast<IFileDataContainer::off_t>(stream->gcount());
+	}
+}
+
+
 FileDataContainerStdStream::FileDataContainerStdStream(std::istream *s)
 	: cachesize(0), streamFullyCached(false), stream(s)
 {
@@ -204,34 +313,8 @@ const char *FileDataContainerStdStream::GetRawData() const
 
 IFileDataContainer::off_t FileDataContainerStdStream::GetLength() const
 {
-	if(streamFullyCached)
-	{
-		return cachesize;
-	} else
-	{
-		stream->clear();
-		std::streampos oldpos = stream->tellg();
-		if(!stream->fail() && oldpos != std::streampos(-1))
-		{
-			stream->seekg(0, std::ios::end);
-			if(!stream->fail())
-			{
-				std::streampos length = stream->tellg();
-				if(!stream->fail() && length != std::streampos(-1))
-				{
-					stream->seekg(oldpos);
-					stream->clear();
-					return static_cast<IFileDataContainer::off_t>(length);
-				}
-			}
-			stream->clear();
-			stream->seekg(oldpos);
-		}
-		// not seekable
-		stream->clear();
-		CacheStream();
-		return cachesize;
-	}
+	CacheStream();
+	return cachesize;
 }
 
 IFileDataContainer::off_t FileDataContainerStdStream::Read(char *dst, IFileDataContainer::off_t pos, IFileDataContainer::off_t count) const

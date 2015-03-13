@@ -97,6 +97,9 @@
 // Enable std::istream support in class FileReader (this is generally not needed for the tracker, local files can easily be mmapped as they have been before introducing std::istream support)
 //#define MPT_FILEREADER_STD_ISTREAM
 
+// Enable performance optimizations for seekable std::istream. Note that these probably will only payoff once FileReader::GetRawData() usage gets further reduced.
+//#define MPT_FILEREADER_STD_ISTREAM_SEEKABLE
+
 // Support for externally linked samples e.g. in MPTM files
 #define MPT_EXTERNAL_SAMPLES
 
@@ -171,6 +174,7 @@
 #endif
 //#define NO_LOGGING
 #define MPT_FILEREADER_STD_ISTREAM
+#define MPT_FILEREADER_STD_ISTREAM_SEEKABLE
 //#define MPT_EXTERNAL_SAMPLES
 #define NO_ARCHIVE_SUPPORT
 #define NO_REVERB
