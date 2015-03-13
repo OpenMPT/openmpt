@@ -265,6 +265,10 @@ bool FileDataContainerStdStream::CanRead(IFileDataContainer::off_t pos, IFileDat
 IFileDataContainer::off_t FileDataContainerStdStream::GetReadableLength(IFileDataContainer::off_t pos, IFileDataContainer::off_t length) const
 {
 	CacheStreamUpTo(pos + length);
+	if(pos >= cachesize)
+	{
+		return 0;
+	}
 	return std::min<IFileDataContainer::off_t>(cachesize - pos, length);
 }
 
