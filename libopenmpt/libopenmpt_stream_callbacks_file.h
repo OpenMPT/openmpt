@@ -48,16 +48,37 @@ static size_t openmpt_stream_file_read_func( void * stream, void * dst, size_t b
 
 static int openmpt_stream_file_seek_func( void * stream, int64_t offset, int whence ) {
 	FILE * f = 0;
+	int fwhence = 0;
 	f = (FILE*)stream;
 	if ( !f ) {
 		return -1;
 	}
+	switch ( whence ) {
+#if defined(SEEK_SET)
+		case OPENMPT_STREAM_SEEK_SET:
+			fwhence = SEEK_SET;
+			break;
+#endif
+#if defined(SEEK_CUR)
+		case OPENMPT_STREAM_SEEK_CUR:
+			fwhence = SEEK_CUR;
+			break;
+#endif
+#if defined(SEEK_END)
+		case OPENMPT_STREAM_SEEK_END:
+			fwhence = SEEK_END;
+			break;
+#endif
+		default:
+			return -1;
+			break;
+	}
 	#if defined(_MSC_VER)
-		return _fseeki64( f, offset, whence ) ? -1 : 0;
+		return _fseeki64( f, offset, fwhence ) ? -1 : 0;
 	#elif defined(_POSIX_SOURCE) && (_POSIX_SOURCE == 1) 
-		return fseeko( f, offset, whence ) ? -1 : 0;
+		return fseeko( f, offset, fwhence ) ? -1 : 0;
 	#else
-		return fseek( f, offset, whence ) ? -1 : 0;
+		return fseek( f, offset, fwhence ) ? -1 : 0;
 	#endif
 }
 
