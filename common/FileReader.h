@@ -624,7 +624,9 @@ public:
 	{
 		if(CanRead(srcSize))
 		{
-			mpt::String::Read<mode, destSize>(destBuffer, DataContainer().GetPartialRawData(streamPos, srcSize), srcSize);
+			std::vector<char> tmp(srcSize);
+			DataContainer().Read(&tmp[0], streamPos, srcSize);
+			mpt::String::Read<mode, destSize>(destBuffer, &tmp[0], srcSize);
 			streamPos += srcSize;
 			return true;
 		} else
@@ -640,7 +642,9 @@ public:
 	{
 		if(CanRead(srcSize))
 		{
-			mpt::String::Read<mode>(dest, DataContainer().GetPartialRawData(streamPos, srcSize), srcSize);
+			std::vector<char> tmp(srcSize);
+			DataContainer().Read(&tmp[0], streamPos, srcSize);
+			mpt::String::Read<mode>(dest, &tmp[0], srcSize);
 			streamPos += srcSize;
 			return true;
 		} else
@@ -750,10 +754,21 @@ public:
 	// Returns false if the string could not be found. The file cursor is not advanced in this case.
 	bool ReadMagic(const char *const magic)
 	{
-		const off_t magicLength = strlen(magic);
+		const off_t magicLength = std::strlen(magic);
 		if(CanRead(magicLength))
 		{
-			if(!memcmp(DataContainer().GetPartialRawData(streamPos, magicLength), magic, magicLength))
+			bool identical = true;
+			for(std::size_t i = 0; i < magicLength; ++i)
+			{
+				char c = '\0';
+				DataContainer().Read(&c, streamPos + i, 1);
+				if(c != magic[i])
+				{
+					identical = false;
+					break;
+				}
+			}
+			if(identical)
 			{
 				streamPos += magicLength;
 				return true;

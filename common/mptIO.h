@@ -433,15 +433,6 @@ public:
 	virtual off_t GetLength() const = 0;
 	virtual off_t Read(char *dst, off_t pos, off_t count) const = 0;
 
-	virtual const char *GetPartialRawData(off_t pos, off_t length) const // DO NOT USE!!! this is just for ReadMagic ... the pointer returned may be invalid after the next Read()
-	{
-		if(pos + length > GetLength())
-		{
-			return nullptr;
-		}
-		return GetRawData() + pos;
-	}
-
 	virtual bool CanRead(off_t pos, off_t length) const
 	{
 		return pos + length <= GetLength();
@@ -511,14 +502,6 @@ public:
 			return 0;
 		}
 		return data->Read(dst, dataOffset + pos, std::min(count, dataLength - pos));
-	}
-	const char *GetPartialRawData(off_t pos, off_t length) const
-	{
-		if(pos + length > dataLength)
-		{
-			return nullptr;
-		}
-		return data->GetPartialRawData(dataOffset + pos, length);
 	}
 	bool CanRead(off_t pos, off_t length) const {
 		return (pos + length <= dataLength);
@@ -602,7 +585,6 @@ public:
 	const char *GetRawData() const;
 	off_t GetLength() const;
 	off_t Read(char *dst, off_t pos, off_t count) const;
-	const char *GetPartialRawData(off_t pos, off_t length) const;
 	bool CanRead(off_t pos, off_t length) const;
 	off_t GetReadableLength(off_t pos, off_t length) const;
 
@@ -661,15 +643,6 @@ public:
 		off_t avail = std::min<off_t>(streamLength - pos, count);
 		std::copy(streamData + pos, streamData + pos + avail, dst);
 		return avail;
-	}
-
-	const char *GetPartialRawData(off_t pos, off_t length) const
-	{
-		if(pos + length > streamLength)
-		{
-			return nullptr;
-		}
-		return streamData + pos;
 	}
 
 	bool CanRead(off_t pos, off_t length) const
