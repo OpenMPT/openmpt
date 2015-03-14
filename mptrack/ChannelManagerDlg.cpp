@@ -166,6 +166,7 @@ BOOL CChannelManagerDlg::OnInitDialog()
 		memory[3][nChn] = nChn;
 	}
 
+	buttonHeight = MulDiv(CM_BT_HEIGHT, Util::GetDPIy(m_hWnd), 96);
 	::ShowWindow(::GetDlgItem(m_hWnd, IDC_BUTTON1),SW_HIDE);
 
 	return TRUE;
