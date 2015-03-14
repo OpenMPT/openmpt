@@ -139,19 +139,35 @@ class CSampleXFadeDlg: public CDialog
 //===================================
 {
 public:
-	SmpLength m_nSamples, m_nMaxSamples;
+	static uint32 m_fadeLength;
+	static uint32 m_fadeLaw;
+	static bool m_afterloopFade;
+	SmpLength m_loopLength, m_maxLength;
 
 protected:
+	CSliderCtrl m_SliderLength, m_SliderFadeLaw;
 	CEdit m_EditSamples;
 	CSpinButtonCtrl m_SpinSamples;
+	bool m_editLocked : 1;
 
 public:
-	CSampleXFadeDlg(CWnd *parent, SmpLength nSamples, UINT nMaxSamples) : CDialog(IDD_SAMPLE_XFADE, parent), m_nSamples(nSamples), m_nMaxSamples(nMaxSamples) { };
+	CSampleXFadeDlg(CWnd *parent, SmpLength loopLength, SmpLength maxLength)
+		: CDialog(IDD_SAMPLE_XFADE, parent)
+		, m_loopLength(loopLength)
+		, m_maxLength(maxLength)
+		, m_editLocked(true) { };
+
+	SmpLength PercentToSamples(uint32 percent) const { return Util::muldivr_unsigned(percent, m_loopLength, 100000); }
+	uint32 SamplesToPercent(SmpLength samples) const { return Util::muldivr_unsigned(samples, 100000, m_loopLength); }
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
+	afx_msg void OnFadeLengthChanged();
+	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
+	afx_msg BOOL OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult);
+	DECLARE_MESSAGE_MAP()
 };
 
 

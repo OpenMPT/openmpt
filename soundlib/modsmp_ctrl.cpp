@@ -566,8 +566,8 @@ float RemoveDCOffset(ModSample &smp,
 
 
 template <class T>
-void ReverseSampleImpl(T *pStart, const SmpLength nLength)
-//--------------------------------------------------------
+static void ReverseSampleImpl(T *pStart, const SmpLength nLength)
+//---------------------------------------------------------------
 {
 	for(SmpLength i = 0; i < nLength / 2; i++)
 	{
@@ -604,8 +604,8 @@ bool ReverseSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile 
 
 
 template <class T>
-void UnsignSampleImpl(T *pStart, const SmpLength nLength)
-//-------------------------------------------------------
+static void UnsignSampleImpl(T *pStart, const SmpLength nLength)
+//--------------------------------------------------------------
 {
 	const T offset = (std::numeric_limits<T>::min)();
 	for(SmpLength i = 0; i < nLength; i++)
@@ -639,8 +639,8 @@ bool UnsignSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &
 
 
 template <class T>
-void InvertSampleImpl(T *pStart, const SmpLength nLength)
-//-------------------------------------------------------
+static void InvertSampleImpl(T *pStart, const SmpLength nLength)
+//--------------------------------------------------------------
 {
 	for(SmpLength i = 0; i < nLength; i++)
 	{
@@ -673,42 +673,49 @@ bool InvertSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &
 
 
 template <class T>
-void XFadeSampleImpl(T *pStart, const SmpLength nOffset, SmpLength nFadeLength)
-//-----------------------------------------------------------------------------
+static void XFadeSampleImpl(const T *srcIn, const T *srcOut, T *output, const SmpLength fadeLength, double e)
+//-----------------------------------------------------------------------------------------------------------
 {
-	const double length = 1.0 / static_cast<double>(nFadeLength);
-	for(SmpLength i = 0; i < nFadeLength; i++)
+	const double length = 1.0 / static_cast<double>(fadeLength);
+	for(SmpLength i = 0; i < fadeLength; i++, srcIn++, srcOut++, output++)
 	{
-		// Constant-power crossfade
-		double fact1 = std::sqrt(i * length);
-		double fact2 = std::sqrt((nFadeLength - i) * length);
+		double fact1 = std::pow(i * length, e);
+		double fact2 = std::pow((fadeLength - i) * length, e);
 		int32 val = static_cast<int32>(
-			static_cast<double>(pStart[nOffset + i]) * fact2 +
-			static_cast<double>(pStart[i]) * fact1);
+			static_cast<double>(*srcIn) * fact1 +
+			static_cast<double>(*srcOut) * fact2);
 		Limit(val, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
-		pStart[nOffset + i] = static_cast<T>(val);
+		*output = static_cast<T>(val);
 	}
 }
 
 // X-Fade sample data to create smooth loop transitions
-bool XFadeSample(ModSample &smp, SmpLength iFadeLength, CSoundFile &sndFile)
-//--------------------------------------------------------------------------
+bool XFadeSample(ModSample &smp, SmpLength iFadeLength, int fadeLaw, bool afterloopFade, CSoundFile &sndFile)
+//-----------------------------------------------------------------------------------------------------------
 {
 	if(!smp.HasSampleData()) return false;
 	if(smp.nLoopEnd <= smp.nLoopStart || smp.nLoopEnd > smp.nLength) return false;
 	if(smp.nLoopStart < iFadeLength) return false;
 
-	SmpLength start = smp.nLoopStart - iFadeLength;
-	SmpLength end = smp.nLoopEnd - iFadeLength;
-	start *= smp.GetNumChannels();
-	end *= smp.GetNumChannels();
+	const SmpLength start = (smp.nLoopStart - iFadeLength) * smp.GetNumChannels();
+	const SmpLength end = (smp.nLoopEnd - iFadeLength) * smp.GetNumChannels();
+	const SmpLength afterloopStart = smp.nLoopStart * smp.GetNumChannels();
+	const SmpLength afterloopEnd = smp.nLoopEnd * smp.GetNumChannels();
+	const SmpLength afterLoopLength = std::min(smp.nLength - smp.nLoopEnd, iFadeLength) * smp.GetNumChannels();
 	iFadeLength *= smp.GetNumChannels();
 
+	// e=0.5: constant power crossfade (for uncorrelated samples), e=1.0: constant volume crossfade (for perfectly correlated samples)
+	const double e = 1.0 - fadeLaw / 200000.0;
+
 	if(smp.GetElementarySampleSize() == 2)
-		XFadeSampleImpl(smp.pSample16 + start, end - start, iFadeLength);
-	else if(smp.GetElementarySampleSize() == 1)
-		XFadeSampleImpl(smp.pSample8 + start, end - start, iFadeLength);
-	else
+	{
+		XFadeSampleImpl(smp.pSample16 + start, smp.pSample16 + end, smp.pSample16 + end, iFadeLength, e);
+		if(afterloopFade) XFadeSampleImpl(smp.pSample16 + afterloopEnd, smp.pSample16 + afterloopStart, smp.pSample16 + afterloopEnd, afterLoopLength, e);
+	} else if(smp.GetElementarySampleSize() == 1)
+	{
+		XFadeSampleImpl(smp.pSample8 + start, smp.pSample8 + end, smp.pSample8 + end, iFadeLength, e);
+		if(afterloopFade) XFadeSampleImpl(smp.pSample8 + afterloopEnd, smp.pSample8 + afterloopStart, smp.pSample8 + afterloopEnd, afterLoopLength, e);
+	} else
 		return false;
 
 	PrecomputeLoops(smp, sndFile, true);
@@ -717,8 +724,8 @@ bool XFadeSample(ModSample &smp, SmpLength iFadeLength, CSoundFile &sndFile)
 
 
 template <class T>
-void ConvertStereoToMonoMixImpl(T *pDest, const SmpLength length)
-//---------------------------------------------------------------
+static void ConvertStereoToMonoMixImpl(T *pDest, const SmpLength length)
+//----------------------------------------------------------------------
 {
 	const T *pEnd = pDest + length;
 	for(T *pSource = pDest; pDest != pEnd; pDest++, pSource += 2)
@@ -729,8 +736,8 @@ void ConvertStereoToMonoMixImpl(T *pDest, const SmpLength length)
 
 
 template <class T>
-void ConvertStereoToMonoOneChannelImpl(T *pDest, const SmpLength length)
-//----------------------------------------------------------------------
+static void ConvertStereoToMonoOneChannelImpl(T *pDest, const SmpLength length)
+//-----------------------------------------------------------------------------
 {
 	const T *pEnd = pDest + length;
 	for(T *pSource = pDest; pDest != pEnd; pDest++, pSource += 2)
