@@ -2182,10 +2182,10 @@ int CCtrlSamples::PitchShift(float pitch)
 			switch(smpsize)
 			{
 			case 1:
-				CopySample<SC::ConversionChain<SC::Convert<float, int8>, SC::DecodeIdentity<int8> > >(buffer, len, 1, ptr, sizeof(int8) * len, nChn);
+				CopySample<SC::ConversionChain<SC::Convert<float, int8>, SC::DecodeIdentity<int8> > >(buffer, len, 1, ptr, sizeof(int8) * len * nChn, nChn);
 				break;
 			case 2:
-				CopySample<SC::ConversionChain<SC::Convert<float, int16>, SC::DecodeIdentity<int16> > >(buffer, len, 1, (int16 *)ptr, sizeof(int16) * len, nChn);
+				CopySample<SC::ConversionChain<SC::Convert<float, int16>, SC::DecodeIdentity<int16> > >(buffer, len, 1, (int16 *)ptr, sizeof(int16) * len * nChn, nChn);
 				break;
 			}
 
@@ -3149,7 +3149,7 @@ void CCtrlSamples::SetSelectionPoints(SmpLength nStart, SmpLength nEnd)
 // Crossfade loop to create smooth loop transitions
 #define DEFAULT_XFADE_LENGTH 16384 //4096
 
-SmpLength LimitXFadeLength(SmpLength len, const ModSample &sample)
+static SmpLength LimitXFadeLength(SmpLength len, const ModSample &sample)
 {
 	return Util::Min(len, sample.nLoopEnd - sample.nLoopStart, sample.nLoopEnd / 2);
 }

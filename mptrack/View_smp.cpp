@@ -2944,9 +2944,13 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				case kcSampleCenterSustainEnd:		point = sample.nSustainEnd; break;
 				}
 				if(!m_nZoom)
+				{
+					SendCtrlMessage(CTRLMSG_SMP_SETZOOM, 1);
 					SetZoom(1, point);
-				else
+				} else
+				{
 					ScrollToSample(point);
+				}
 			}
 			return wParam;
 		case kcPrevInstrument:	OnPrevInstrument(); return wParam;
