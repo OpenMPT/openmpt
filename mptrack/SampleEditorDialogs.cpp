@@ -220,6 +220,17 @@ void CSampleGridDlg::OnOK()
 /////////////////////////////////////////////////////////////////////////
 // Sample cross-fade dialog
 
+uint32 CSampleXFadeDlg::m_fadeLength  = 20000;
+uint32 CSampleXFadeDlg::m_fadeLaw = 50000;
+bool CSampleXFadeDlg::m_afterloopFade = true;
+
+BEGIN_MESSAGE_MAP(CSampleXFadeDlg, CDialog)
+	ON_WM_HSCROLL()
+	ON_EN_CHANGE(IDC_EDIT1,	OnFadeLengthChanged)
+	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipText)
+END_MESSAGE_MAP()
+
+
 void CSampleXFadeDlg::DoDataExchange(CDataExchange* pDX)
 //------------------------------------------------------
 {
@@ -227,6 +238,8 @@ void CSampleXFadeDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CSampleGridDlg)
 	DDX_Control(pDX, IDC_EDIT1,			m_EditSamples);
 	DDX_Control(pDX, IDC_SPIN1,			m_SpinSamples);
+	DDX_Control(pDX, IDC_SLIDER1,		m_SliderLength);
+	DDX_Control(pDX, IDC_SLIDER2,		m_SliderFadeLaw);
 	//}}AFX_DATA_MAP
 }
 
@@ -235,10 +248,21 @@ BOOL CSampleXFadeDlg::OnInitDialog()
 //----------------------------------
 {
 	CDialog::OnInitDialog();
-	m_SpinSamples.SetRange32(0, m_nMaxSamples);
-	m_SpinSamples.SetPos(m_nSamples);
-	SetDlgItemInt(IDC_EDIT1, m_nSamples, FALSE);
+	m_editLocked = true;
+	m_SpinSamples.SetRange32(0, std::min(m_loopLength, m_maxLength));
 	GetDlgItem(IDC_EDIT1)->SetFocus();
+	m_SliderLength.SetRange(0, 100000);
+	m_SliderLength.SetPos(m_fadeLength);
+	m_SliderFadeLaw.SetRange(0, 100000);
+	m_SliderFadeLaw.SetPos(m_fadeLaw);
+	CheckDlgButton(IDC_CHECK1, m_afterloopFade ? BST_CHECKED : BST_UNCHECKED);
+
+	SmpLength numSamples = PercentToSamples(m_SliderLength.GetPos());
+	numSamples = Util::Min(numSamples, m_loopLength, m_maxLength);
+	m_SpinSamples.SetPos(numSamples);
+	SetDlgItemInt(IDC_EDIT1, numSamples, FALSE);
+
+	m_editLocked = false;
 	return TRUE;
 }
 
@@ -246,9 +270,73 @@ BOOL CSampleXFadeDlg::OnInitDialog()
 void CSampleXFadeDlg::OnOK()
 //--------------------------
 {
-	m_nSamples = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
-	LimitMax(m_nSamples, m_nMaxSamples);
+	m_fadeLength = m_SliderLength.GetPos();
+	m_fadeLaw = m_SliderFadeLaw.GetPos();
+	m_afterloopFade = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
+	Limit(m_fadeLength, uint32(0), uint32(100000));
 	CDialog::OnOK();
+}
+
+
+void CSampleXFadeDlg::OnFadeLengthChanged()
+//-----------------------------------------
+{
+	if(m_editLocked) return;
+	SmpLength numSamples = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
+	numSamples = Util::Min(numSamples, m_loopLength, m_maxLength);
+	m_SliderLength.SetPos(SamplesToPercent(numSamples));
+}
+
+
+void CSampleXFadeDlg::OnHScroll(UINT, UINT, CScrollBar *sb)
+//---------------------------------------------------------
+{
+	if(sb == (CScrollBar *)(&m_SliderLength))
+	{
+		m_editLocked = true;
+		SmpLength numSamples = PercentToSamples(m_SliderLength.GetPos());
+		if(numSamples > m_maxLength)
+		{
+			numSamples = m_maxLength;
+			m_SliderLength.SetPos(SamplesToPercent(numSamples));
+		}
+		m_SpinSamples.SetPos(numSamples);
+		SetDlgItemInt(IDC_EDIT1, numSamples, FALSE);
+		m_editLocked = false;
+	}
+}
+
+
+BOOL CSampleXFadeDlg::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
+//------------------------------------------------------------------------
+{
+	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
+	UINT_PTR nID = pNMHDR->idFrom;
+	if(pTTT->uFlags & TTF_IDISHWND)
+	{
+		// idFrom is actually the HWND of the tool
+		nID = (UINT_PTR)::GetDlgCtrlID((HWND)nID);
+	}
+	switch(nID)
+	{
+	case IDC_SLIDER1:
+		{
+			uint32 percent = m_SliderLength.GetPos();
+			wsprintf(pTTT->szText, _T("%u.%03u%% of the loop (%u samples)"), percent / 1000, percent % 1000, PercentToSamples(percent));
+		}
+		break;
+	case IDC_SLIDER2:
+		_tcscpy(pTTT->szText, _T("Slide towards constant power for fixing badly looped samples."));
+		break;
+	default:
+		return FALSE;
+	}
+	*pResult = 0;
+
+	// bring the tooltip window above other popup windows
+	::SetWindowPos(pNMHDR->hwndFrom, HWND_TOP, 0, 0, 0, 0,
+		SWP_NOACTIVATE|SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+	return TRUE;
 }
 
 

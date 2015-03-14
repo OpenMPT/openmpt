@@ -3147,41 +3147,31 @@ void CCtrlSamples::SetSelectionPoints(SmpLength nStart, SmpLength nEnd)
 
 
 // Crossfade loop to create smooth loop transitions
-#define DEFAULT_XFADE_LENGTH 16384 //4096
-
-static SmpLength LimitXFadeLength(SmpLength len, const ModSample &sample)
-{
-	return Util::Min(len, sample.nLoopEnd - sample.nLoopStart, sample.nLoopEnd / 2);
-}
-
 void CCtrlSamples::OnXFade()
 //--------------------------
 {
-	static SmpLength fadeLength = DEFAULT_XFADE_LENGTH;
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
-	if(sample.pSample == nullptr) return;
-	if(sample.nLoopEnd <= sample.nLoopStart || sample.nLoopEnd > sample.nLength) return;
-	// Case 1: The loop start is preceeded by > XFADE_LENGTH samples. Nothing has to be adjusted.
-	// Case 2: The actual loop is shorter than XFADE_LENGTH samples.
-	// Case 3: There is not enough sample material before the loop start. Move the loop start.
-	fadeLength = LimitXFadeLength(fadeLength, sample);
+	if(sample.pSample == nullptr
+		|| sample.nLoopEnd <= sample.nLoopStart || sample.nLoopEnd > sample.nLength)
+	{
+		MessageBeep(MB_ICONWARNING);
+		return;
+	}
+	const SmpLength maxSamples = Util::Min(sample.nLength, sample.nLoopStart, sample.nLoopEnd / 2);
 
-	CSampleXFadeDlg dlg(this, fadeLength, LimitXFadeLength(sample.nLength, sample));
+	CSampleXFadeDlg dlg(this, sample.nLoopEnd - sample.nLoopStart, maxSamples);
 	if(dlg.DoModal() == IDOK)
 	{
-		fadeLength = dlg.m_nSamples;
+		SmpLength fadeSamples = dlg.PercentToSamples(dlg.m_fadeLength);
+		LimitMax(fadeSamples, maxSamples);
+		if(fadeSamples < 2) return;
 
-		if(fadeLength < 4) return;
+		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_update, "Crossfade",
+			sample.nLoopEnd - fadeSamples,
+			sample.nLoopEnd + (dlg.m_afterloopFade ? std::min(sample.nLength - sample.nLoopEnd, fadeSamples) : 0));
 
-		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_update, "Crossfade", sample.nLoopEnd - fadeLength, sample.nLoopEnd);
-		// If we want to fade nFadeLength bytes, we need as much sample material before the loop point. nFadeLength has been adjusted above.
-		if(sample.nLoopStart < fadeLength)
-		{
-			sample.nLoopStart = fadeLength;
-		}
-
-		if(ctrlSmp::XFadeSample(sample, fadeLength, m_sndFile))
+		if(ctrlSmp::XFadeSample(sample, fadeSamples, dlg.m_fadeLaw, dlg.m_afterloopFade, m_sndFile))
 		{
 			SetModified(SampleHint().Info().Data(), true, true);
 		} else
