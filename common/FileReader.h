@@ -81,6 +81,41 @@ public:
 	FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(reinterpret_cast<const char *>(uint8data), length)), streamPos(0), fileName(filename) { }
 #endif // MPT_WITH_FILEIO
 
+#if defined(MPT_FILEREADER_CALLBACK_STREAM)
+		// Initialize file reader object with a CallbackStream.
+	FileReader(CallbackStream s)
+		: data(
+#if defined(MPT_FILEREADER_STD_ISTREAM_SEEKABLE)
+				FileDataContainerCallbackStreamSeekable::IsSeekable(s) ?
+					MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerCallbackStreamSeekable>(s))
+				:
+#endif // MPT_FILEREADER_STD_ISTREAM_SEEKABLE
+					MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerCallbackStream>(s))
+			)
+		, streamPos(0)
+		MPT_FILEREADER_INIT_FILENAME
+	{
+		return;
+	}
+#if defined(MPT_WITH_FILEIO)
+	FileReader(CallbackStream s, const mpt::PathString *filename)
+		: data(
+#if defined(MPT_FILEREADER_STD_ISTREAM_SEEKABLE)
+				FileDataContainerCallbackStreamSeekable::IsSeekable(s) ?
+					MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerCallbackStreamSeekable>(s))
+				:
+#endif // MPT_FILEREADER_STD_ISTREAM_SEEKABLE
+					MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerCallbackStream>(s))
+			)
+		, streamPos(0)
+		, fileName(filename)
+	{
+		return;
+	}
+#endif // MPT_WITH_FILEIO
+#endif // MPT_FILEREADER_CALLBACK_STREAM
+
+
 	// Initialize file reader object with a std::istream.
 	FileReader(std::istream *s)
 		: data(

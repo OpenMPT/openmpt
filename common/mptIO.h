@@ -633,6 +633,51 @@ private:
 };
 
 
+#if defined(MPT_FILEREADER_CALLBACK_STREAM)
+
+
+struct CallbackStream
+{
+	static const int SeekSet = 0;
+	static const int SeekCur = 1;
+	static const int SeekEnd = 2;
+	void *stream;
+	std::size_t (*read)( void * stream, void * dst, std::size_t bytes );
+	int (*seek)( void * stream, int64 offset, int whence );
+	int64 (*tell)( void * stream );
+};
+
+
+class FileDataContainerCallbackStreamSeekable : public FileDataContainerSeekable
+{
+private:
+	CallbackStream stream;
+public:
+	static bool IsSeekable(CallbackStream stream);
+	static off_t GetLength(CallbackStream stream);
+	FileDataContainerCallbackStreamSeekable(CallbackStream s);
+	virtual ~FileDataContainerCallbackStreamSeekable();
+private:
+	off_t InternalRead(char *dst, off_t pos, off_t count) const;
+};
+
+
+class FileDataContainerCallbackStream : public FileDataContainerUnseekable
+{
+private:
+	CallbackStream stream;
+	mutable bool eof_reached;
+public:
+	FileDataContainerCallbackStream(CallbackStream s);
+	virtual ~FileDataContainerCallbackStream();
+private:
+	bool InternalEof() const;
+	off_t InternalRead(char *dst, off_t count) const;
+};
+
+
+#endif // MPT_FILEREADER_CALLBACK_STREAM
+
 
 #endif
 
