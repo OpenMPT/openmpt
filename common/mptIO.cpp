@@ -117,18 +117,60 @@ bool Flush(FILE* & f) { return fflush(f) == 0; }
 
 #if defined(MPT_FILEREADER_STD_ISTREAM)
 
-FileDataContainerStdStreamSeekable::FileDataContainerStdStreamSeekable(std::istream *s)
-	: stream(s)
-	, streamLength(0)
-	, cached(false)
-{
-	CacheLength();
-}
 
-FileDataContainerStdStreamSeekable::~FileDataContainerStdStreamSeekable()
+
+FileDataContainerSeekable::FileDataContainerSeekable(off_t streamLength)
+	: streamLength(streamLength)
+	, cached(false)
 {
 	return;
 }
+
+FileDataContainerSeekable::~FileDataContainerSeekable()
+{
+	return;
+}
+void FileDataContainerSeekable::CacheStream() const
+{
+	if(cached)
+	{
+		return;
+	}
+	cache.resize(streamLength);
+	InternalRead(&cache[0], 0, streamLength);
+	cached = true;
+}
+
+bool FileDataContainerSeekable::IsValid() const
+{
+	return true;
+}
+
+const char *FileDataContainerSeekable::GetRawData() const
+{
+	CacheStream();
+	return &cache[0];
+}
+
+IFileDataContainer::off_t FileDataContainerSeekable::GetLength() const
+{
+	return streamLength;
+}
+
+IFileDataContainer::off_t FileDataContainerSeekable::Read(char *dst, IFileDataContainer::off_t pos, IFileDataContainer::off_t count) const
+{
+	if(cached)
+	{
+		IFileDataContainer::off_t cache_avail = std::min<IFileDataContainer::off_t>(IFileDataContainer::off_t(cache.size()) - pos, count);
+		std::copy(cache.begin() + pos, cache.begin() + pos + cache_avail, dst);
+		return cache_avail;
+	} else
+	{
+		return InternalRead(dst, pos, count);
+	}
+}
+
+
 
 bool FileDataContainerStdStreamSeekable::IsSeekable(std::istream *stream)
 {
@@ -168,77 +210,53 @@ bool FileDataContainerStdStreamSeekable::IsSeekable(std::istream *stream)
 	return true;
 }
 
-void FileDataContainerStdStreamSeekable::CacheLength()
+IFileDataContainer::off_t FileDataContainerStdStreamSeekable::GetLength(std::istream *stream)
 {
 	stream->clear();
 	std::streampos oldpos = stream->tellg();
 	stream->seekg(0, std::ios::end);
 	std::streampos length = stream->tellg();
 	stream->seekg(oldpos);
-	streamLength = mpt::saturate_cast<IFileDataContainer::off_t>(static_cast<int64>(length));
+	return mpt::saturate_cast<IFileDataContainer::off_t>(static_cast<int64>(length));
 }
 
-void FileDataContainerStdStreamSeekable::CacheStream() const
-{
-	if(cached)
-	{
-		return;
-	}
-	cache.resize(streamLength);
-	stream->seekg(0);
-	stream->read(&cache[0], cache.size());
-	cached = true;
-}
-
-bool FileDataContainerStdStreamSeekable::IsValid() const
-{
-	return true;
-}
-
-const char *FileDataContainerStdStreamSeekable::GetRawData() const
-{
-	CacheStream();
-	return &cache[0];
-}
-
-IFileDataContainer::off_t FileDataContainerStdStreamSeekable::GetLength() const
-{
-	return streamLength;
-}
-
-IFileDataContainer::off_t FileDataContainerStdStreamSeekable::Read(char *dst, IFileDataContainer::off_t pos, IFileDataContainer::off_t count) const
-{
-	if(cached)
-	{
-		IFileDataContainer::off_t cache_avail = std::min<IFileDataContainer::off_t>(IFileDataContainer::off_t(cache.size()) - pos, count);
-		std::copy(cache.begin() + pos, cache.begin() + pos + cache_avail, dst);
-		return cache_avail;
-	} else
-	{
-		stream->clear(); // tellg needs eof and fail bits unset
-		std::streampos currentpos = stream->tellg();
-		if(currentpos == std::streampos(-1) || static_cast<int64>(pos) != currentpos)
-		{ // inefficient istream implementations might invalidate their buffer when seeking, even when seeking to the current position
-			stream->seekg(pos);
-		}
-		stream->read(dst, count);
-		return static_cast<IFileDataContainer::off_t>(stream->gcount());
-	}
-}
-
-
-FileDataContainerStdStream::FileDataContainerStdStream(std::istream *s)
-	: cachesize(0), streamFullyCached(false), stream(s)
+FileDataContainerStdStreamSeekable::FileDataContainerStdStreamSeekable(std::istream *s)
+	: FileDataContainerSeekable(GetLength(s))
+	, stream(s)
 {
 	return;
 }
 
-FileDataContainerStdStream::~FileDataContainerStdStream()
+FileDataContainerStdStreamSeekable::~FileDataContainerStdStreamSeekable()
 {
 	return;
 }
 
-void FileDataContainerStdStream::EnsureCacheBuffer(std::size_t requiredbuffersize) const
+IFileDataContainer::off_t FileDataContainerStdStreamSeekable::InternalRead(char *dst, off_t pos, off_t count) const
+{
+	stream->clear(); // tellg needs eof and fail bits unset
+	std::streampos currentpos = stream->tellg();
+	if(currentpos == std::streampos(-1) || static_cast<int64>(pos) != currentpos)
+	{ // inefficient istream implementations might invalidate their buffer when seeking, even when seeking to the current position
+		stream->seekg(pos);
+	}
+	stream->read(dst, count);
+	return static_cast<IFileDataContainer::off_t>(stream->gcount());
+}
+
+
+FileDataContainerUnseekable::FileDataContainerUnseekable()
+	: cachesize(0), streamFullyCached(false)
+{
+	return;
+}
+
+FileDataContainerUnseekable::~FileDataContainerUnseekable()
+{
+	return;
+}
+
+void FileDataContainerUnseekable::EnsureCacheBuffer(std::size_t requiredbuffersize) const
 {
 	if(cache.size() >= cachesize + requiredbuffersize)
 	{
@@ -256,23 +274,22 @@ void FileDataContainerStdStream::EnsureCacheBuffer(std::size_t requiredbuffersiz
 	}
 }
 
-void FileDataContainerStdStream::CacheStream() const
+void FileDataContainerUnseekable::CacheStream() const
 {
 	if(streamFullyCached)
 	{
 		return;
 	}
-	while(*stream)
+	while(!InternalEof())
 	{
 		EnsureCacheBuffer(BUFFER_SIZE);
-		stream->read(&cache[cachesize], BUFFER_SIZE);
-		std::size_t readcount = static_cast<std::size_t>(stream->gcount());
+		std::size_t readcount = InternalRead(&cache[cachesize], BUFFER_SIZE);
 		cachesize += readcount;
 	}
 	streamFullyCached = true;
 }
 
-void FileDataContainerStdStream::CacheStreamUpTo(std::streampos pos) const
+void FileDataContainerUnseekable::CacheStreamUpTo(std::streampos pos) const
 {
 	if(streamFullyCached)
 	{
@@ -285,10 +302,9 @@ void FileDataContainerStdStream::CacheStreamUpTo(std::streampos pos) const
 	std::size_t alignedpos = Util::AlignUp<std::size_t>(static_cast<std::size_t>(pos), QUANTUM_SIZE);
 	std::size_t needcount = alignedpos - cachesize;
 	EnsureCacheBuffer(needcount);
-	stream->read(&cache[cachesize], alignedpos - cachesize);
-	std::size_t readcount = static_cast<std::size_t>(stream->gcount());
+	std::size_t readcount = InternalRead(&cache[cachesize], alignedpos - cachesize);
 	cachesize += readcount;
-	if(*stream)
+	if(!InternalEof())
 	{
 		// can read further
 		return;
@@ -296,29 +312,29 @@ void FileDataContainerStdStream::CacheStreamUpTo(std::streampos pos) const
 	streamFullyCached = true;
 }
 
-void FileDataContainerStdStream::ReadCached(char *dst, IFileDataContainer::off_t pos, IFileDataContainer::off_t count) const
+void FileDataContainerUnseekable::ReadCached(char *dst, IFileDataContainer::off_t pos, IFileDataContainer::off_t count) const
 {
 	std::copy(cache.begin() + pos, cache.begin() + pos + count, dst);
 }
 
-bool FileDataContainerStdStream::IsValid() const
+bool FileDataContainerUnseekable::IsValid() const
 {
 	return true;
 }
 
-const char *FileDataContainerStdStream::GetRawData() const
+const char *FileDataContainerUnseekable::GetRawData() const
 {
 	CacheStream();
 	return &cache[0];
 }
 
-IFileDataContainer::off_t FileDataContainerStdStream::GetLength() const
+IFileDataContainer::off_t FileDataContainerUnseekable::GetLength() const
 {
 	CacheStream();
 	return cachesize;
 }
 
-IFileDataContainer::off_t FileDataContainerStdStream::Read(char *dst, IFileDataContainer::off_t pos, IFileDataContainer::off_t count) const
+IFileDataContainer::off_t FileDataContainerUnseekable::Read(char *dst, IFileDataContainer::off_t pos, IFileDataContainer::off_t count) const
 {
 	CacheStreamUpTo(pos + count);
 	if(pos >= IFileDataContainer::off_t(cachesize))
@@ -330,13 +346,13 @@ IFileDataContainer::off_t FileDataContainerStdStream::Read(char *dst, IFileDataC
 	return cache_avail;
 }
 
-bool FileDataContainerStdStream::CanRead(IFileDataContainer::off_t pos, IFileDataContainer::off_t length) const
+bool FileDataContainerUnseekable::CanRead(IFileDataContainer::off_t pos, IFileDataContainer::off_t length) const
 {
 	CacheStreamUpTo(pos + length);
 	return pos + length <= IFileDataContainer::off_t(cachesize);
 }
 
-IFileDataContainer::off_t FileDataContainerStdStream::GetReadableLength(IFileDataContainer::off_t pos, IFileDataContainer::off_t length) const
+IFileDataContainer::off_t FileDataContainerUnseekable::GetReadableLength(IFileDataContainer::off_t pos, IFileDataContainer::off_t length) const
 {
 	CacheStreamUpTo(pos + length);
 	if(pos >= cachesize)
@@ -345,6 +361,38 @@ IFileDataContainer::off_t FileDataContainerStdStream::GetReadableLength(IFileDat
 	}
 	return std::min<IFileDataContainer::off_t>(cachesize - pos, length);
 }
+
+
+
+FileDataContainerStdStream::FileDataContainerStdStream(std::istream *s)
+	: stream(s)
+{
+	return;
+}
+
+FileDataContainerStdStream::~FileDataContainerStdStream()
+{
+	return;
+}
+
+bool FileDataContainerStdStream::InternalEof() const
+{
+	if(*stream)
+	{
+		return false;
+	} else
+	{
+		return true;
+	}
+}
+
+IFileDataContainer::off_t FileDataContainerStdStream::InternalRead(char *dst, off_t count) const
+{
+	stream->read(dst, count);
+	return static_cast<std::size_t>(stream->gcount());
+}
+
+
 
 #endif
 
