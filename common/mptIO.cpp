@@ -215,6 +215,7 @@ IFileDataContainer::off_t FileDataContainerStdStreamSeekable::Read(char *dst, IF
 		return cache_avail;
 	} else
 	{
+		stream->clear(); // tellg needs eof and fail bits unset
 		std::streampos currentpos = stream->tellg();
 		if(currentpos == std::streampos(-1) || static_cast<int64>(pos) != currentpos)
 		{ // inefficient istream implementations might invalidate their buffer when seeking, even when seeking to the current position
