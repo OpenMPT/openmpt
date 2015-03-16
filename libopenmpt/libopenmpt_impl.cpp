@@ -479,9 +479,9 @@ bool module_impl::is_extension_supported( const std::string & extension ) {
 	return std::find( extensions.begin(), extensions.end(), lowercase_ext ) != extensions.end();
 }
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
-double module_impl::could_open_propability( std::istream & stream, double effort, std::tr1::shared_ptr<log_interface> log ) {
+double module_impl::could_open_propability( const OpenMPT::FileReader & file, double effort, std::tr1::shared_ptr<log_interface> log ) {
 #else
-double module_impl::could_open_propability( std::istream & stream, double effort, std::shared_ptr<log_interface> log ) {
+double module_impl::could_open_propability( const OpenMPT::FileReader & file, double effort, std::shared_ptr<log_interface> log ) {
 #endif
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
 	std::tr1::shared_ptr<CSoundFile> sndFile( new CSoundFile() );
@@ -498,19 +498,19 @@ double module_impl::could_open_propability( std::istream & stream, double effort
 	try {
 
 		if ( effort >= 0.8 ) {
-			if ( !sndFile->Create( FileReader( &stream ), CSoundFile::loadCompleteModule ) ) {
+			if ( !sndFile->Create( file, CSoundFile::loadCompleteModule ) ) {
 				return 0.0;
 			}
 			sndFile->Destroy();
 			return 1.0;
 		} else if ( effort >= 0.6 ) {
-			if ( !sndFile->Create( FileReader( &stream ), CSoundFile::loadNoPatternOrPluginData ) ) {
+			if ( !sndFile->Create( file, CSoundFile::loadNoPatternOrPluginData ) ) {
 				return 0.0;
 			}
 			sndFile->Destroy();
 			return 0.8;
 		} else if ( effort >= 0.2 ) {
-			if ( !sndFile->Create( FileReader( &stream ), CSoundFile::onlyVerifyHeader ) ) {
+			if ( !sndFile->Create( file, CSoundFile::onlyVerifyHeader ) ) {
 				return 0.0;
 			}
 			sndFile->Destroy();
@@ -524,7 +524,40 @@ double module_impl::could_open_propability( std::istream & stream, double effort
 	}
 
 }
+#ifdef LIBOPENMPT_ANCIENT_COMPILER
+double module_impl::could_open_propability( callback_stream_wrapper stream, double effort, std::tr1::shared_ptr<log_interface> log ) {
+#else
+double module_impl::could_open_propability( callback_stream_wrapper stream, double effort, std::shared_ptr<log_interface> log ) {
+#endif
+	CallbackStream fstream;
+	fstream.stream = stream.stream;
+	fstream.read = stream.read;
+	fstream.seek = stream.seek;
+	fstream.tell = stream.tell;
+	return could_open_propability( FileReader( fstream ), effort, log );
+}
+#ifdef LIBOPENMPT_ANCIENT_COMPILER
+double module_impl::could_open_propability( std::istream & stream, double effort, std::tr1::shared_ptr<log_interface> log ) {
+#else
+double module_impl::could_open_propability( std::istream & stream, double effort, std::shared_ptr<log_interface> log ) {
+#endif
+	return could_open_propability( FileReader( &stream ), effort, log );
+}
 
+#ifdef LIBOPENMPT_ANCIENT_COMPILER
+module_impl::module_impl( callback_stream_wrapper stream, std::tr1::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+#else
+module_impl::module_impl( callback_stream_wrapper stream, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
+#endif
+	ctor( ctls );
+	CallbackStream fstream;
+	fstream.stream = stream.stream;
+	fstream.read = stream.read;
+	fstream.seek = stream.seek;
+	fstream.tell = stream.tell;
+	load( FileReader( fstream ), ctls );
+	apply_libopenmpt_defaults();
+}
 #ifdef LIBOPENMPT_ANCIENT_COMPILER
 module_impl::module_impl( std::istream & stream, std::tr1::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 #else
