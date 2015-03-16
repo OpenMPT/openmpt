@@ -517,24 +517,19 @@ public:
 };
 
 
-class FileDataContainerStdStreamSeekable : public IFileDataContainer {
+class FileDataContainerSeekable : public IFileDataContainer {
 
 private:
-
-	std::istream *stream;
 
 	off_t streamLength;
 
 	mutable bool cached;
 	mutable std::vector<char> cache;
 
-public:
+protected:
 
-	FileDataContainerStdStreamSeekable(std::istream *s);
-	virtual ~FileDataContainerStdStreamSeekable();
-
-	static bool IsSeekable(std::istream *stream);
-	static off_t GetLength(std::istream *stream);
+	FileDataContainerSeekable(off_t length);
+	virtual ~FileDataContainerSeekable();
 
 private:
 	
@@ -548,10 +543,35 @@ public:
 	off_t GetLength() const;
 	off_t Read(char *dst, off_t pos, off_t count) const;
 
+private:
+
+	virtual off_t InternalRead(char *dst, off_t pos, off_t count) const = 0;
+
 };
 
 
-class FileDataContainerStdStream : public IFileDataContainer {
+class FileDataContainerStdStreamSeekable : public FileDataContainerSeekable {
+
+private:
+
+	std::istream *stream;
+
+public:
+
+	FileDataContainerStdStreamSeekable(std::istream *s);
+	virtual ~FileDataContainerStdStreamSeekable();
+
+	static bool IsSeekable(std::istream *stream);
+	static off_t GetLength(std::istream *stream);
+
+private:
+
+	off_t InternalRead(char *dst, off_t pos, off_t count) const;
+
+};
+
+
+class FileDataContainerUnseekable : public IFileDataContainer {
 
 private:
 
@@ -559,12 +579,10 @@ private:
 	mutable std::size_t cachesize;
 	mutable bool streamFullyCached;
 
-	std::istream *stream;
+protected:
 
-public:
-
-	FileDataContainerStdStream(std::istream *s);
-	virtual ~FileDataContainerStdStream();
+	FileDataContainerUnseekable();
+	virtual ~FileDataContainerUnseekable();
 
 private:
 
@@ -588,7 +606,33 @@ public:
 	bool CanRead(off_t pos, off_t length) const;
 	off_t GetReadableLength(off_t pos, off_t length) const;
 
+private:
+
+	virtual bool InternalEof() const = 0;
+	virtual off_t InternalRead(char *dst, off_t count) const = 0;
+
 };
+
+
+class FileDataContainerStdStream : public FileDataContainerUnseekable {
+
+private:
+
+	std::istream *stream;
+
+public:
+
+	FileDataContainerStdStream(std::istream *s);
+	virtual ~FileDataContainerStdStream();
+
+private:
+
+	bool InternalEof() const;
+	off_t InternalRead(char *dst, off_t count) const;
+
+};
+
+
 
 #endif
 
