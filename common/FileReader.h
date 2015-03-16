@@ -624,7 +624,7 @@ public:
 	{
 		if(CanRead(srcSize))
 		{
-			std::vector<char> tmp(srcSize);
+			std::vector<char> tmp(srcSize + 1); // +1 because tmp[0] does not work with srcSize==0 otherwise
 			DataContainer().Read(&tmp[0], streamPos, srcSize);
 			mpt::String::Read<mode, destSize>(destBuffer, &tmp[0], srcSize);
 			streamPos += srcSize;
@@ -642,7 +642,7 @@ public:
 	{
 		if(CanRead(srcSize))
 		{
-			std::vector<char> tmp(srcSize);
+			std::vector<char> tmp(srcSize + 1); // +1 because tmp[0] does not work with srcSize==0 otherwise
 			DataContainer().Read(&tmp[0], streamPos, srcSize);
 			mpt::String::Read<mode>(dest, &tmp[0], srcSize);
 			streamPos += srcSize;
