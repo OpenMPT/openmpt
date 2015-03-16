@@ -394,6 +394,175 @@ IFileDataContainer::off_t FileDataContainerStdStream::InternalRead(char *dst, of
 
 
 
+#if defined(MPT_FILEREADER_CALLBACK_STREAM)
+
+
+bool FileDataContainerCallbackStreamSeekable::IsSeekable(CallbackStream stream)
+{
+	if(!stream.stream)
+	{
+		return false;
+	}
+	if(!stream.seek)
+	{
+		return false;
+	}
+	if(!stream.tell)
+	{
+		return false;
+	}
+	int64 oldpos = stream.tell(stream.stream);
+	if(oldpos < 0)
+	{
+		return false;
+	}
+	if(stream.seek(stream.stream, 0, CallbackStream::SeekSet) < 0)
+	{
+		stream.seek(stream.stream, oldpos, CallbackStream::SeekSet);
+		return false;
+	}
+	if(stream.seek(stream.stream, 0, CallbackStream::SeekEnd) < 0)
+	{
+		stream.seek(stream.stream, oldpos, CallbackStream::SeekSet);
+		return false;
+	}
+	int64 length = stream.tell(stream.stream);
+	if(length < 0)
+	{
+		stream.seek(stream.stream, oldpos, CallbackStream::SeekSet);
+		return false;
+	}
+	stream.seek(stream.stream, oldpos, CallbackStream::SeekSet);
+	return true;
+}
+
+IFileDataContainer::off_t FileDataContainerCallbackStreamSeekable::GetLength(CallbackStream stream)
+{
+	if(!stream.stream)
+	{
+		return 0;
+	}
+	if(!stream.seek)
+	{
+		return false;
+	}
+	if(!stream.tell)
+	{
+		return false;
+	}
+	int64 oldpos = stream.tell(stream.stream);
+	if(oldpos < 0)
+	{
+		return 0;
+	}
+	if(stream.seek(stream.stream, 0, CallbackStream::SeekSet) < 0)
+	{
+		stream.seek(stream.stream, oldpos, CallbackStream::SeekSet);
+		return 0;
+	}
+	if(stream.seek(stream.stream, 0, CallbackStream::SeekEnd) < 0)
+	{
+		stream.seek(stream.stream, oldpos, CallbackStream::SeekSet);
+		return 0;
+	}
+	int64 length = stream.tell(stream.stream);
+	if(length < 0)
+	{
+		stream.seek(stream.stream, oldpos, CallbackStream::SeekSet);
+		return 0;
+	}
+	stream.seek(stream.stream, oldpos, CallbackStream::SeekSet);
+	return mpt::saturate_cast<IFileDataContainer::off_t>(length);
+}
+
+FileDataContainerCallbackStreamSeekable::FileDataContainerCallbackStreamSeekable(CallbackStream s)
+	: FileDataContainerSeekable(GetLength(s))
+	, stream(s)
+{
+	return;
+}
+
+FileDataContainerCallbackStreamSeekable::~FileDataContainerCallbackStreamSeekable()
+{
+	return;
+}
+
+IFileDataContainer::off_t FileDataContainerCallbackStreamSeekable::InternalRead(char *dst, off_t pos, off_t count) const
+{
+	if(!stream.read)
+	{
+		return 0;
+	}
+	if(stream.seek(stream.stream, pos, CallbackStream::SeekSet) < 0)
+	{
+		return 0;
+	}
+	int64 totalread = 0;
+	while(count > 0)
+	{
+		int64 readcount = stream.read(stream.stream, dst, count);
+		if(readcount <= 0)
+		{
+			break;
+		}
+		dst += static_cast<std::size_t>(readcount);
+		count -= static_cast<IFileDataContainer::off_t>(readcount);
+		totalread += readcount;
+	}
+	return static_cast<IFileDataContainer::off_t>(totalread);
+}
+
+
+
+FileDataContainerCallbackStream::FileDataContainerCallbackStream(CallbackStream s)
+	: FileDataContainerUnseekable()
+	, stream(s)
+	, eof_reached(false)
+{
+	return;
+}
+
+FileDataContainerCallbackStream::~FileDataContainerCallbackStream()
+{
+	return;
+}
+
+bool FileDataContainerCallbackStream::InternalEof() const
+{
+	return eof_reached;
+}
+
+IFileDataContainer::off_t FileDataContainerCallbackStream::InternalRead(char *dst, off_t count) const
+{
+	if(eof_reached)
+	{
+		return 0;
+	}
+	if(!stream.read)
+	{
+		eof_reached = true;
+		return 0;
+	}
+	int64 totalread = 0;
+	while(count > 0)
+	{
+		int64 readcount = stream.read(stream.stream, dst, count);
+		if(readcount <= 0)
+		{
+			eof_reached = true;
+			break;
+		}
+		dst += static_cast<std::size_t>(readcount);
+		count -= static_cast<IFileDataContainer::off_t>(readcount);
+		totalread += readcount;
+	}
+	return static_cast<IFileDataContainer::off_t>(totalread);
+}
+
+
+#endif // MPT_FILEREADER_CALLBACK_STREAM
+
+
 #endif
 
 
