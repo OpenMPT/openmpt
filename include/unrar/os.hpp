@@ -79,6 +79,7 @@
 #include <time.h>
 #include <signal.h>
 
+
 #define SAVE_LINKS
 
 #define ENABLE_ACCESS
@@ -154,8 +155,14 @@
 #include <utime.h>
 #include <locale.h>
 
+
 #ifdef  S_IFLNK
 #define SAVE_LINKS
+#endif
+
+#if defined(__linux) && !defined (_ANDROID) || defined(__FreeBSD__)
+#include <sys/time.h>
+#define USE_LUTIMES
 #endif
 
 #define ENABLE_ACCESS
