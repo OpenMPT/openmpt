@@ -1862,6 +1862,7 @@ bool CSoundFile::ProcessEffects()
 
 	for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, pChn++)
 	{
+		const uint32 tickCount = m_PlayState.m_nTickCount % (m_PlayState.m_nMusicSpeed + m_PlayState.m_nFrameDelay);
 		UINT instr = pChn->rowCommand.instr;
 		UINT volcmd = pChn->rowCommand.volcmd;
 		UINT vol = pChn->rowCommand.vol;
@@ -1870,7 +1871,7 @@ bool CSoundFile::ProcessEffects()
 		bool bPorta = pChn->rowCommand.IsPortamento();
 
 		UINT nStartTick = 0;
-		pChn->isFirstTick = (m_PlayState.m_nTickCount == 0);
+		pChn->isFirstTick = m_SongFlags[SONG_FIRSTTICK];
 
 		pChn->dwFlags.reset(CHN_FASTVOLRAMP);
 
@@ -2037,7 +2038,7 @@ bool CSoundFile::ProcessEffects()
 		}
 
 		bool triggerNote = (m_PlayState.m_nTickCount == nStartTick);	// Can be delayed by a note delay effect
-		if((GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) && nStartTick > 0 && (m_PlayState.m_nTickCount % (m_PlayState.m_nMusicSpeed + m_PlayState.m_nFrameDelay)) == nStartTick)
+		if((GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) && nStartTick > 0 && tickCount == nStartTick)
 		{
 			// IT compatibility: Delayed notes (using SDx) that are on the same row as a Row Delay effect are retriggered. Scream Tracker 3 does the same.
 			// Test case: PatternDelay-NoteDelay.it
@@ -2054,7 +2055,7 @@ bool CSoundFile::ProcessEffects()
 		// Test case: SlideDelay.it
 		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
-			pChn->isFirstTick = triggerNote;
+			pChn->isFirstTick = tickCount == nStartTick;
 		}
 
 		// FT2 compatibility: Note + portamento + note delay = no portamento
@@ -4886,9 +4887,7 @@ void CSoundFile::SetSpeed(UINT param)
 		m_PlayState.m_nMusicSpeed = uint16_max;
 	}
 #endif	// MODPLUG_TRACKER
-
-	// Allow high speed values here for VBlank MODs. (Maybe it would be better to have a "VBlank MOD" flag somewhere? Is it worth the effort?)
-	if ((param) && (param <= GetModSpecifications().speedMax || (GetType() & MOD_TYPE_MOD))) m_PlayState.m_nMusicSpeed = param;
+	if(param > 0) m_PlayState.m_nMusicSpeed = param;
 }
 
 
