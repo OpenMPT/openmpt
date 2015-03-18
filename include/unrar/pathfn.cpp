@@ -30,7 +30,7 @@ wchar* ConvertPath(const wchar *SrcPath,wchar *DestPath)
   while (*DestPtr!=0)
   {
     const wchar *s=DestPtr;
-    if (s[0] && IsDriveDiv(s[1]))
+    if (s[0]!=0 && IsDriveDiv(s[1]))
       s+=2;
     if (s[0]=='\\' && s[1]=='\\')
     {
@@ -197,7 +197,7 @@ void RemoveNameFromPath(wchar *Path)
 
 
 #if defined(_WIN_ALL) && !defined(SFX_MODULE)
-static void GetAppDataPath(wchar *Path,size_t MaxSize,bool Create)
+bool GetAppDataPath(wchar *Path,size_t MaxSize,bool Create)
 {
   LPMALLOC g_pMalloc;
   SHGetMalloc(&g_pMalloc);
@@ -213,12 +213,8 @@ static void GetAppDataPath(wchar *Path,size_t MaxSize,bool Create)
     if (!Success && Create)
       Success=MakeDir(Path,false,0)==MKDIR_SUCCESS;
   }
-  if (!Success)
-  {
-    GetModuleFileName(NULL,Path,(DWORD)MaxSize);
-    RemoveNameFromPath(Path);
-  }
   g_pMalloc->Free(ppidl);
+  return Success;
 }
 #endif
 
@@ -238,7 +234,11 @@ void GetRarDataPath(wchar *Path,size_t MaxSize,bool Create)
   }
 
   if (*Path==0 || !FileExist(Path))
-    GetAppDataPath(Path,MaxSize,Create);
+    if (!GetAppDataPath(Path,MaxSize,Create))
+    {
+      GetModuleFileName(NULL,Path,(DWORD)MaxSize);
+      RemoveNameFromPath(Path);
+    }
 }
 #endif
 
@@ -437,9 +437,12 @@ void MakeNameUsable(wchar *Name,bool Extended)
 #ifndef _UNIX
     if (s-Name>1 && *s==':')
       *s='_';
+#if 0  // We already can create such files.
     // Remove ' ' and '.' before path separator, but allow .\ and ..\.
-    if ((*s==' ' || *s=='.' && s>Name && !IsPathDiv(s[-1]) && s[-1]!='.') && IsPathDiv(s[1]))
+    if (IsPathDiv(s[1]) && (*s==' ' || *s=='.' && s>Name &&
+        !IsPathDiv(s[-1]) && (s[-1]!='.' || s>Name+1 && !IsPathDiv(s[-2]))))
       *s='_';
+#endif
 #endif
   }
 }
@@ -536,6 +539,12 @@ bool IsFullPath(const wchar *Path)
 #else
   return IsPathDiv(Path[0]);
 #endif
+}
+
+
+bool IsFullRootPath(const wchar *Path)
+{
+  return IsFullPath(Path) || IsPathDiv(Path[0]);
 }
 
 
@@ -644,7 +653,7 @@ wchar* VolNameToFirstName(const wchar *VolName,wchar *FirstName,size_t MaxSize,b
 
 
 #ifndef SFX_MODULE
-static void GenArcName(wchar *ArcName,wchar *GenerateMask,uint ArcNumber,bool &ArcNumPresent)
+static void GenArcName(wchar *ArcName,const wchar *GenerateMask,uint ArcNumber,bool &ArcNumPresent)
 {
   bool Prefix=false;
   if (*GenerateMask=='+')
@@ -810,7 +819,7 @@ static void GenArcName(wchar *ArcName,wchar *GenerateMask,uint ArcNumber,bool &A
 }
 
 
-void GenerateArchiveName(wchar *ArcName,size_t MaxSize,wchar *GenerateMask,bool Archiving)
+void GenerateArchiveName(wchar *ArcName,size_t MaxSize,const wchar *GenerateMask,bool Archiving)
 {
   // Must be enough space for archive name plus all stuff in mask plus
   // extra overhead produced by mask 'N' (archive number) characters.
