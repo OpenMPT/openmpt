@@ -277,6 +277,7 @@ public:
 class CSoundFile
 //==============
 {
+	friend class GetLengthMemory;
 
 public: //Misc
 	void ChangeModTypeTo(const MODTYPE& newType);

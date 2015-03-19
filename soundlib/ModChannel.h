@@ -57,7 +57,7 @@ struct ModChannel
 	uint32 nRampLength;
 	// Up to here: 100 bytes
 
-	const ModSample *pModSample;			// Currently assigned sample slot (can already be stopped)
+	const ModSample *pModSample;			// Currently assigned sample slot (may already be stopped)
 
 	// Information not used in the mixer
 	const ModInstrument *pModInstrument;	// Currently assigned instrument slot
@@ -171,6 +171,7 @@ struct ModChannel
 	};
 
 	void Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELINDEX sourceChannel);
+	void Stop();
 
 	typedef uint32 volume_t;
 	volume_t GetVSTVolume() { return (pModInstrument) ? pModInstrument->nGlobalVol * 4 : nVolume; }

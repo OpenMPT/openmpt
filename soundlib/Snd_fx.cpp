@@ -48,9 +48,11 @@ public:
 	{
 		double patLoop;
 		ROWINDEX patLoopStart;
+		uint32 ticksToRender;	// When using sample sync, we still need to render this many ticks
+		bool incChanged;		// When using sample sync, note frequency has changed
 		BYTE vol;
 
-		ChnSettings()
+		void Reset()
 		{
 			patLoop = 0.0;
 			patLoopStart = 0;
@@ -60,17 +62,20 @@ public:
 
 	std::vector<ChnSettings> chnSettings;
 	double elapsedTime;
+	static const uint32 IGNORE_CHANNEL = uint32_max;
 
 protected:
 	const CSoundFile &sndFile;
 
 public:
 
-	GetLengthMemory(const CSoundFile &sf) : sndFile(sf)
+	GetLengthMemory(const CSoundFile &sf)
+		: sndFile(sf)
+		, chnSettings(sf.GetNumChannels())
+		, state(sf.m_PlayState)
 	{
-		state = sf.m_PlayState;
 		Reset();
-	};
+	}
 
 	void Reset()
 	{
@@ -79,14 +84,99 @@ public:
 		state.m_nMusicSpeed = sndFile.m_nDefaultSpeed;
 		state.m_nMusicTempo = sndFile.m_nDefaultTempo;
 		state.m_nGlobalVolume = sndFile.m_nDefaultGlobalVolume;
-		chnSettings.assign(sndFile.GetNumChannels(), ChnSettings());
 		for(CHANNELINDEX chn = 0; chn < sndFile.GetNumChannels(); chn++)
 		{
+			chnSettings[chn].Reset();
 			state.Chn[chn].Reset(ModChannel::resetTotal, sndFile, chn);
 			state.Chn[chn].nOldGlobalVolSlide = 0;
 			state.Chn[chn].nOldChnVolSlide = 0;
 			state.Chn[chn].nNote = state.Chn[chn].nNewNote = state.Chn[chn].nLastNote = NOTE_NONE;
 		}
+	}
+
+	// Increment playback position of sample and envelopes on a channel
+	void RenderChannel(CHANNELINDEX channel, uint32 tickDuration, uint32 portaStart = 0)
+	{
+		ModChannel &chn = state.Chn[channel];
+		uint32 numTicks = chnSettings[channel].ticksToRender;
+		if(numTicks == IGNORE_CHANNEL || numTicks == 0 || (chn.nInc == 0 && !chnSettings[channel].incChanged) || chn.pModSample == nullptr)
+		{
+			return;
+		}
+
+		bool stopNote = false;
+		for(uint32 i = 0; i < numTicks; i++)
+		{
+			bool updateInc = (chn.PitchEnv.flags & (ENV_ENABLED | ENV_FILTER)) == ENV_ENABLED;
+			if(i >= portaStart)
+			{
+				const ModCommand *p = sndFile.Patterns[state.m_nPattern].GetpModCommand(state.m_nRow, channel);
+				if(p->command == CMD_TONEPORTAMENTO) sndFile.TonePortamento(&chn, p->param);
+				//else if(p->command == CMD_TONEPORTAVOL) TonePortamento(pChn, 0);
+				if(p->volcmd == VOLCMD_TONEPORTAMENTO)
+				{
+					uint32 param = p->vol;
+					if(sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DMF | MOD_TYPE_DBM | MOD_TYPE_IMF | MOD_TYPE_PSM | MOD_TYPE_J2B | MOD_TYPE_ULT | MOD_TYPE_OKT | MOD_TYPE_MT2 | MOD_TYPE_MDL))
+					{
+						param = ImpulseTrackerPortaVolCmd[param & 0x0F];
+					} else
+					{
+						// Close enough. Do not bother with idiosyncratic FT2 behaviour here.
+						param <<= 4;
+					}
+					sndFile.TonePortamento(&chn, param);
+				}
+				updateInc = true;
+			}
+
+			sndFile.IncrementEnvelopePositions(&chn);
+			int vol = 0;
+			sndFile.ProcessInstrumentFade(&chn, vol);
+
+			if(updateInc || chnSettings[channel].incChanged)
+			{
+				chn.nInc = sndFile.GetChannelIncrement(&chn, chn.nPeriod, 0);
+				chnSettings[channel].incChanged = false;
+			}
+
+			int32 inc = chn.nInc;
+			if(chn.dwFlags[CHN_PINGPONGFLAG]) inc = -inc;
+			chn.nPosLo += inc * tickDuration;
+			chn.nPos += ((int32)chn.nPosLo >> 16);
+			chn.nPosLo &= 0xFFFF;
+		}
+		if(chn.pModSample->uFlags[CHN_SUSTAINLOOP | CHN_LOOP])
+		{
+			// Check if we exceeded the sample loop.
+			if(chn.dwFlags[CHN_PINGPONGLOOP] && chn.nPos >= chn.nLoopEnd)
+			{
+				// Ping-pong loops are not supported for now.
+				stopNote = true;
+			} else
+			{
+				const SmpLength loopLength = chn.nLoopEnd - chn.nLoopStart;
+				if(chn.nPos >= chn.nLoopEnd + loopLength)
+				{
+					const SmpLength overshoot = chn.nPos - chn.nLoopEnd;
+					chn.nPos -= (overshoot / loopLength) * loopLength;
+				}
+				while(chn.nPos >= chn.nLoopEnd)
+				{
+					chn.nPos -= loopLength;
+				}
+			}
+		} else if(chn.nPos >= chn.nLength)
+		{
+			// Past sample end.
+			stopNote = true;
+		}
+
+		if(stopNote)
+		{
+			// Stop channel.
+			chn.Stop();
+		}
+		chnSettings[channel].ticksToRender = 0;
 	}
 };
 
@@ -119,7 +209,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 	memory.state.m_nNextOrder = memory.state.m_nCurrentOrder = target.startOrder;
 
 	// Optimize away channels for which it's pointless to adjust sample positions
-	std::vector<bool> adjustSampleChn(GetNumChannels(), true);
 	if(adjustSamplePos && target.mode == GetLengthTarget::SeekPosition)
 	{
 		PATTERNINDEX seekPat = PATTERNINDEX_INVALID;
@@ -130,7 +219,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		{
 			if(ChnSettings[i].dwFlags[CHN_MUTE])
 			{
-				adjustSampleChn[i] = false;
+				memory.chnSettings[i].ticksToRender = GetLengthMemory::IGNORE_CHANNEL;
 				continue;
 			}
 			if(seekPat != PATTERNINDEX_INVALID)
@@ -139,7 +228,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				if(m.note == NOTE_NOTECUT || m.note == NOTE_KEYOFF || (m.note == NOTE_FADE && GetNumInstruments())
 					|| (m.IsNote() && !m.IsPortamento()))
 				{
-					adjustSampleChn[i] = false;
+					memory.chnSettings[i].ticksToRender = GetLengthMemory::IGNORE_CHANNEL;
 				}
 			}
 		}
@@ -157,10 +246,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		forbiddenCommands.set(CMD_NOTESLIDEUPRETRIG);    forbiddenCommands.set(CMD_NOTESLIDEDOWN);
 		forbiddenCommands.set(CMD_NOTESLIDEDOWNRETRIG);
 		forbiddenVolCommands.set(VOLCMD_PORTAUP);        forbiddenVolCommands.set(VOLCMD_PORTADOWN);
-		forbiddenVolCommands.set(VOLCMD_TONEPORTAMENTO); forbiddenVolCommands.set(VOLCMD_VOLSLIDEUP);
-		forbiddenVolCommands.set(VOLCMD_VOLSLIDEDOWN);   forbiddenVolCommands.set(VOLCMD_FINEVOLUP);
-		forbiddenVolCommands.set(VOLCMD_FINEVOLDOWN);
+		forbiddenVolCommands.set(VOLCMD_VOLSLIDEUP);     forbiddenVolCommands.set(VOLCMD_VOLSLIDEDOWN);
+		forbiddenVolCommands.set(VOLCMD_FINEVOLUP);      forbiddenVolCommands.set(VOLCMD_FINEVOLDOWN);
 	}
+
+	// If samples are being synced , force them to resync if tick duration changes
+	uint32 oldTickDuration = 0;
 
 	for (;;)
 	{
@@ -294,7 +385,25 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		}
 
 		ModChannel *pChn = memory.state.Chn;
-		ModCommand *p = Patterns[memory.state.m_nPattern].GetRow(memory.state.m_nRow);
+		const ModCommand *p = Patterns[memory.state.m_nPattern].GetRow(memory.state.m_nRow);
+		
+		// For various effects, we need to know first how many ticks there are in this row.
+		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
+		{
+			if(p[nChn].command == CMD_SPEED)
+			{
+#ifdef MODPLUG_TRACKER
+				// FT2 appears to be decrementing the tick count before checking for zero,
+				// so it effectively counts down 65536 ticks with speed = 0 (song speed is a 16-bit variable in FT2)
+				if(GetType() == MOD_TYPE_XM && !p[nChn].param)
+				{
+					memory.state.m_nMusicSpeed = uint16_max;
+				}
+#endif	// MODPLUG_TRACKER
+				if(p[nChn].param > 0) memory.state.m_nMusicSpeed = p[nChn].param;
+			}
+		}
+
 		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); p++, pChn++, nChn++) if(!p->IsEmpty())
 		{
 			if(IsCompatibleMode(TRK_SCREAMTRACKER) && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
@@ -349,22 +458,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					}
 				}
 				break;
-			// Set Speed
-			case CMD_SPEED:
-#ifdef MODPLUG_TRACKER
-				// FT2 appears to be decrementing the tick count before checking for zero,
-				// so it effectively counts down 65536 ticks with speed = 0 (song speed is a 16-bit variable in FT2)
-				if(GetType() == MOD_TYPE_XM && !param)
-				{
-					memory.state.m_nMusicSpeed = uint16_max;
-				}
-#endif	// MODPLUG_TRACKER
-				if (!param) break;
-				if (param <= GetModSpecifications().speedMax)
-				{
-					memory.state.m_nMusicSpeed = param;
-				}
-				break;
 			// Set Tempo
 			case CMD_TEMPO:
 				if(m_SongFlags[SONG_VBLANK_TIMING])
@@ -401,7 +494,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					memory.state.m_nMusicTempo = Clamp(memory.state.m_nMusicTempo, 32u, 255u);
 				else
 					memory.state.m_nMusicTempo = Clamp(memory.state.m_nMusicTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
-
 				break;
 			case CMD_S3MCMDEX:
 				if((param & 0xF0) == 0x60)
@@ -533,14 +625,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					param >>= 4;
 					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
 					memory.state.m_nGlobalVolume += param << 1;
-				} else
-				if (((param & 0xF0) == 0xF0) && (param & 0x0F))
+				} else if (((param & 0xF0) == 0xF0) && (param & 0x0F))
 				{
 					param = (param & 0x0F) << 1;
 					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
 					memory.state.m_nGlobalVolume -= param;
-				} else
-				if (param & 0xF0)
+				} else if (param & 0xF0)
 				{
 					param >>= 4;
 					param <<= 1;
@@ -552,7 +642,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
 					memory.state.m_nGlobalVolume -= param * (memory.state.m_nMusicSpeed - 1);
 				}
-				memory.state.m_nGlobalVolume = Clamp(memory.state.m_nGlobalVolume, 0, 256);
+				Limit(memory.state.m_nGlobalVolume, 0, 256);
 				break;
 			case CMD_CHANNELVOLUME:
 				if (param <= 64) pChn->nGlobalVol = param;
@@ -609,12 +699,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			p = Patterns[memory.state.m_nPattern].GetRow(memory.state.m_nRow);
 			for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); p++, pChn++, nChn++)
 			{
-				if(!adjustSampleChn[nChn])
+				if(memory.chnSettings[nChn].ticksToRender == GetLengthMemory::IGNORE_CHANNEL)
 					continue;
 
 				uint32 startTick = 0;
 				uint32 paramHi = p->param >> 4, paramLo = p->param & 0x0F;
-				bool porta = p->command == CMD_TONEPORTAMENTO /*|| p->command CMD_TONEPORTAVOL || p->volcmd == VOLCMD_TONEPORTAMENTO*/; // Volume column tone portamento can be crazy, and CMD_TONEPORTAVOL requires volume slides which we don't emulate right now.
+				bool porta = p->command == CMD_TONEPORTAMENTO /*|| p->command CMD_TONEPORTAVOL*/ || p->volcmd == VOLCMD_TONEPORTAMENTO; // CMD_TONEPORTAVOL requires volume slides which we don't emulate right now.
 				bool stopNote = patternLoopStartedOnThisRow;	// It's too much trouble to keep those pattern loops in sync...
 
 				if(p->instr) pChn->proTrackerOffset = 0;
@@ -623,7 +713,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					pChn->nNewNote = pChn->nLastNote;
 					if(pChn->nNewIns != 0) InstrumentChange(pChn, pChn->nNewIns, porta);
 					NoteChange(pChn, p->note, porta);
-					pChn->nInc = GetChannelIncrement(pChn, pChn->nPeriod, 0);
+					memory.chnSettings[nChn].incChanged = true;
 
 					if((p->command == CMD_MODCMDEX || p->command == CMD_S3MCMDEX) && (p->param & 0xF0) == 0xD0 && paramLo < numTicks)
 					{
@@ -632,6 +722,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					{
 						startTick = paramHi;
 					}
+					if(!porta) memory.chnSettings[nChn].ticksToRender = 0;
 
 					if(p->command == CMD_OFFSET)
 					{
@@ -682,25 +773,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				{
 					pChn->nPan = p->vol * 4;
 				}
-				if(p->command == CMD_S3MCMDEX)
-				{
-					if(p->param == 0x9E)
-					{
-						// Play forward
-						pChn->dwFlags.reset(CHN_PINGPONGFLAG);
-					} else if(p->param == 0x9F)
-					{
-						// Reverse
-						pChn->dwFlags.set(CHN_PINGPONGFLAG);
-						if(!pChn->nPos && pChn->nLength && (p->IsNote() || !pChn->dwFlags[CHN_LOOP]))
-						{
-							pChn->nPos = pChn->nLength - 1;
-							pChn->nPosLo = 0xFFFF;
-						}
-					}
-				}
-
-				if(pChn->nInc != 0 && pChn->pModSample && !stopNote)
+				
+				if(pChn->pModSample && !stopNote)
 				{
 					// Check if we don't want to emulate some effect and thus stop processing.
 					if(p->command < MAX_EFFECTS)
@@ -728,71 +802,51 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					}
 				}
 
-				if(pChn->nInc != 0 && pChn->pModSample && !stopNote)
-				{
-					// Increment playback position of sample and envelopes
-					for(uint32 i = 0; i < (numTicks - startTick); i++)
-					{
-						bool updateInc = (pChn->PitchEnv.flags & (ENV_ENABLED | ENV_FILTER)) == ENV_ENABLED;
-						if(porta && i != startTick)
-						{
-							if(p->command == CMD_TONEPORTAMENTO) TonePortamento(pChn, p->param);
-							//else if(p->command == CMD_TONEPORTAVOL) TonePortamento(pChn, 0);
-							updateInc = true;
-						}
-
-						IncrementEnvelopePositions(pChn);
-						int vol = 0;
-						ProcessInstrumentFade(pChn, vol);
-
-						if(updateInc) pChn->nInc = GetChannelIncrement(pChn, pChn->nPeriod, 0);
-
-						int32 inc = pChn->nInc;
-						if(pChn->dwFlags[CHN_PINGPONGFLAG]) inc = -inc;
-						pChn->nPosLo += inc * tickDuration;
-						pChn->nPos += ((int32)pChn->nPosLo >> 16);
-						pChn->nPosLo &= 0xFFFF;
-					}
-					if(pChn->pModSample->uFlags[CHN_SUSTAINLOOP | CHN_LOOP])
-					{
-						// Check if we exceeded the sample loop.
-						if(pChn->dwFlags[CHN_PINGPONGLOOP] && pChn->nPos >= pChn->nLoopEnd)
-						{
-							// Ping-pong loops are not supported for now.
-							stopNote = true;
-						} else
-						{
-							const SmpLength loopLength = pChn->nLoopEnd - pChn->nLoopStart;
-							if(pChn->nPos >= pChn->nLoopEnd + loopLength)
-							{
-								const SmpLength overshoot = pChn->nPos - pChn->nLoopEnd;
-								pChn->nPos -= (overshoot / loopLength) * loopLength;
-							}
-							while(pChn->nPos >= pChn->nLoopEnd)
-							{
-								pChn->nPos -= loopLength;
-							}
-						}
-					} else if(pChn->nPos >= pChn->nLength)
-					{
-						// Past sample end.
-						stopNote = true;
-					}
-				}
-
 				if(stopNote)
 				{
-					// Stop channel.
-					pChn->nPeriod = 0;
-					pChn->nInc = 0;
-					pChn->nPos = pChn->nPosLo = 0;
-					pChn->nLeftVU = pChn->nRightVU = 0;
-					pChn->nVolume = 0;
-					pChn->pCurrentSample = nullptr;
-					pChn->nInc = 0;
+					pChn->Stop();
+					memory.chnSettings[nChn].ticksToRender = 0;
+				} else
+				{
+					if(oldTickDuration != tickDuration && oldTickDuration != 0)
+					{
+						memory.RenderChannel(nChn, oldTickDuration);	// Re-sync what we've got so far
+					}
+
+					if(p->command == CMD_S3MCMDEX)
+					{
+						if(p->param == 0x9E)
+						{
+							// Play forward
+							memory.RenderChannel(nChn, oldTickDuration);	// Re-sync what we've got so far
+							pChn->dwFlags.reset(CHN_PINGPONGFLAG);
+						} else if(p->param == 0x9F)
+						{
+							// Reverse
+							memory.RenderChannel(nChn, oldTickDuration);	// Re-sync what we've got so far
+							pChn->dwFlags.set(CHN_PINGPONGFLAG);
+							if(!pChn->nPos && pChn->nLength && (p->IsNote() || !pChn->dwFlags[CHN_LOOP]))
+							{
+								pChn->nPos = pChn->nLength - 1;
+								pChn->nPosLo = 0xFFFF;
+							}
+						}
+					}
+
+					if(porta)
+					{
+						// Portamento needs immediate syncing
+						uint32 portaTick = memory.chnSettings[nChn].ticksToRender + startTick + 1;
+						memory.chnSettings[nChn].ticksToRender += numTicks;
+						memory.RenderChannel(nChn, tickDuration, portaTick);
+					} else
+					{
+						memory.chnSettings[nChn].ticksToRender += (numTicks - startTick);
+					}
 				}
 			}
 		}
+		oldTickDuration = tickDuration;
 
 		if(patternLoopEndedOnThisRow)
 		{
@@ -826,6 +880,19 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						memory.chnSettings[nChn].patLoop = memory.elapsedTime;
 					}
 				}
+			}
+		}
+	}
+
+	// Now advance the sample positions for sample seeking on channels that are still playing
+	if(adjustSamplePos)
+	{
+		ModCommand *p = Patterns[memory.state.m_nPattern].GetRow(memory.state.m_nRow);
+		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, p++)
+		{
+			if(memory.chnSettings[nChn].ticksToRender != GetLengthMemory::IGNORE_CHANNEL)
+			{
+				memory.RenderChannel(nChn, oldTickDuration);
 			}
 		}
 	}
