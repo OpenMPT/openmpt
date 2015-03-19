@@ -101,6 +101,8 @@ public:
 			return;
 		}
 
+		const SmpLength sampleEnd = chn.dwFlags[CHN_LOOP] ? chn.nLoopEnd : chn.nLength;
+		const SmpLength loopLength = chn.nLoopEnd - chn.nLoopStart;
 		bool stopNote = false;
 		for(uint32 i = 0; i < numTicks; i++)
 		{
@@ -141,36 +143,40 @@ public:
 			chn.nPosLo += inc * tickDuration;
 			chn.nPos += ((int32)chn.nPosLo >> 16);
 			chn.nPosLo &= 0xFFFF;
-		}
-		if(chn.pModSample->uFlags[CHN_SUSTAINLOOP | CHN_LOOP])
-		{
-			// Check if we exceeded the sample loop.
-			if(chn.dwFlags[CHN_PINGPONGLOOP] && chn.nPos >= chn.nLoopEnd)
+
+			if(chn.nPos >= sampleEnd)
 			{
-				// Ping-pong loops are not supported for now.
-				stopNote = true;
-			} else
-			{
-				const SmpLength loopLength = chn.nLoopEnd - chn.nLoopStart;
-				if(chn.nPos >= chn.nLoopEnd + loopLength)
+				if(chn.dwFlags[CHN_LOOP])
 				{
-					const SmpLength overshoot = chn.nPos - chn.nLoopEnd;
-					chn.nPos -= (overshoot / loopLength) * loopLength;
-				}
-				while(chn.nPos >= chn.nLoopEnd)
+					// We exceeded the sample loop, go back to loop start.
+					if(chn.dwFlags[CHN_PINGPONGLOOP])
+					{
+						// Ping-pong loops are not supported for now.
+						stopNote = true;
+						break;
+					} else
+					{
+						if(chn.nPos >= chn.nLoopEnd + loopLength)
+						{
+							const SmpLength overshoot = chn.nPos - chn.nLoopEnd;
+							chn.nPos -= (overshoot / loopLength) * loopLength;
+						}
+						while(chn.nPos >= chn.nLoopEnd)
+						{
+							chn.nPos -= loopLength;
+						}
+					}
+				} else
 				{
-					chn.nPos -= loopLength;
+					// Past sample end.
+					stopNote = true;
+					break;
 				}
 			}
-		} else if(chn.nPos >= chn.nLength)
-		{
-			// Past sample end.
-			stopNote = true;
 		}
 
 		if(stopNote)
 		{
-			// Stop channel.
 			chn.Stop();
 		}
 		chnSettings[channel].ticksToRender = 0;
@@ -206,26 +212,26 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 	memory.state.m_nNextOrder = memory.state.m_nCurrentOrder = target.startOrder;
 
 	// Optimize away channels for which it's pointless to adjust sample positions
-	if(adjustSamplePos && target.mode == GetLengthTarget::SeekPosition)
+	if(adjustSamplePos)
 	{
-		PATTERNINDEX seekPat = PATTERNINDEX_INVALID;
-		if(target.pos.order < orderList.GetLength()) seekPat = orderList[target.pos.order];
-		if(!Patterns.IsValidPat(seekPat) || !Patterns[seekPat].IsValidRow(target.pos.row)) seekPat = PATTERNINDEX_INVALID;
-
 		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
 		{
-			if(ChnSettings[i].dwFlags[CHN_MUTE])
+			if(ChnSettings[i].dwFlags[CHN_MUTE]) memory.chnSettings[i].ticksToRender = GetLengthMemory::IGNORE_CHANNEL;
+		}
+		if(target.mode == GetLengthTarget::SeekPosition && target.pos.order < orderList.GetLength())
+		{
+			// If we know where to seek, we can directly rule out any channels on which a new note would be triggered right at the start.
+			const PATTERNINDEX seekPat = orderList[target.pos.order];
+			if(Patterns.IsValidPat(seekPat) && Patterns[seekPat].IsValidRow(target.pos.row))
 			{
-				memory.chnSettings[i].ticksToRender = GetLengthMemory::IGNORE_CHANNEL;
-				continue;
-			}
-			if(seekPat != PATTERNINDEX_INVALID)
-			{
-				const ModCommand &m = *Patterns[seekPat].GetpModCommand(target.pos.row, i);
-				if(m.note == NOTE_NOTECUT || m.note == NOTE_KEYOFF || (m.note == NOTE_FADE && GetNumInstruments())
-					|| (m.IsNote() && !m.IsPortamento()))
+				const ModCommand *m = Patterns[seekPat].GetRow(target.pos.row);
+				for(CHANNELINDEX i = 0; i < GetNumChannels(); i++, m++)
 				{
-					memory.chnSettings[i].ticksToRender = GetLengthMemory::IGNORE_CHANNEL;
+					if(m->note == NOTE_NOTECUT || m->note == NOTE_KEYOFF || (m->note == NOTE_FADE && GetNumInstruments())
+						|| (m->IsNote() && !m->IsPortamento()))
+					{
+						memory.chnSettings[i].ticksToRender = GetLengthMemory::IGNORE_CHANNEL;
+					}
 				}
 			}
 		}
