@@ -94,4 +94,17 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 }
 
 
+void ModChannel::Stop()
+//---------------------
+{
+	nPeriod = 0;
+	nInc = 0;
+	nPos = nPosLo = 0;
+	nLeftVU = nRightVU = 0;
+	nVolume = 0;
+	pCurrentSample = nullptr;
+	nInc = 0;
+}
+
+
 OPENMPT_NAMESPACE_END
