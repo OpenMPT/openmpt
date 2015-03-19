@@ -41,8 +41,10 @@ OPENMPT_NAMESPACE_BEGIN
 // Memory class for GetLength() code
 class GetLengthMemory
 {
-public:
+protected:
+	const CSoundFile &sndFile;
 
+public:
 	CSoundFile::PlayState state;
 	struct ChnSettings
 	{
@@ -64,15 +66,10 @@ public:
 	double elapsedTime;
 	static const uint32 IGNORE_CHANNEL = uint32_max;
 
-protected:
-	const CSoundFile &sndFile;
-
-public:
-
 	GetLengthMemory(const CSoundFile &sf)
 		: sndFile(sf)
-		, chnSettings(sf.GetNumChannels())
 		, state(sf.m_PlayState)
+		, chnSettings(sf.GetNumChannels())
 	{
 		Reset();
 	}
