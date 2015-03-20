@@ -821,6 +821,13 @@ protected:
 	uint32 GetChannelIncrement(ModChannel *pChn, uint32 period, int periodFrac) const;
 
 protected:
+	// Type of panning command
+	enum PanningType
+	{
+		_4bit = 4,
+		_6bit = 6,
+		_8bit = 8,
+	};
 	// Channel Effects
 	void UpdateS3MEffectMemory(ModChannel *pChn, ModCommand::PARAM param) const;
 	void PortamentoUp(CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular = false);
@@ -841,7 +848,7 @@ protected:
 	void FineVolumeDown(ModChannel *pChn, ModCommand::PARAM param, bool volCol) const;
 	void Tremolo(ModChannel *pChn, UINT param) const;
 	void Panbrello(ModChannel *pChn, UINT param) const;
-	void Panning(ModChannel *pChn, UINT param) const;
+	void Panning(ModChannel *pChn, uint32 param, PanningType panBits) const;
 	void RetrigNote(CHANNELINDEX nChn, int param, int offset = 0);
 	void SampleOffset(CHANNELINDEX nChn, SmpLength param);
 	void NoteCut(CHANNELINDEX nChn, UINT nTick, bool cutSample);
