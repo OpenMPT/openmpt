@@ -52,7 +52,7 @@ public:
 		ROWINDEX patLoopStart;
 		uint32 ticksToRender;	// When using sample sync, we still need to render this many ticks
 		bool incChanged;		// When using sample sync, note frequency has changed
-		BYTE vol;
+		uint8 vol;
 
 		void Reset()
 		{
@@ -104,6 +104,10 @@ public:
 		const SmpLength sampleEnd = chn.dwFlags[CHN_LOOP] ? chn.nLoopEnd : chn.nLength;
 		const SmpLength loopLength = chn.nLoopEnd - chn.nLoopStart;
 		bool stopNote = false;
+
+		int32 inc = chn.nInc * tickDuration;
+		if(chn.dwFlags[CHN_PINGPONGFLAG]) inc = -inc;
+
 		for(uint32 i = 0; i < numTicks; i++)
 		{
 			bool updateInc = (chn.PitchEnv.flags & (ENV_ENABLED | ENV_FILTER)) == ENV_ENABLED;
@@ -136,11 +140,11 @@ public:
 			{
 				chn.nInc = sndFile.GetChannelIncrement(&chn, chn.nPeriod, 0);
 				chnSettings[channel].incChanged = false;
+				inc = chn.nInc * tickDuration;
+				if(chn.dwFlags[CHN_PINGPONGFLAG]) inc = -inc;
 			}
 
-			int32 inc = chn.nInc;
-			if(chn.dwFlags[CHN_PINGPONGFLAG]) inc = -inc;
-			chn.nPosLo += inc * tickDuration;
+			chn.nPosLo += inc;
 			chn.nPos += ((int32)chn.nPosLo >> 16);
 			chn.nPosLo &= 0xFFFF;
 
@@ -211,9 +215,23 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 	memory.state.m_nNextRow = memory.state.m_nRow = target.startRow;
 	memory.state.m_nNextOrder = memory.state.m_nCurrentOrder = target.startOrder;
 
-	// Optimize away channels for which it's pointless to adjust sample positions
+	// Fast LUTs for commands that are too weird / complicated / whatever to emulate in sample position adjust mode.
+	std::bitset<MAX_EFFECTS> forbiddenCommands;
+	std::bitset<MAX_VOLCMDS> forbiddenVolCommands;
+
 	if(adjustSamplePos)
 	{
+		forbiddenCommands.set(CMD_ARPEGGIO);             forbiddenCommands.set(CMD_PORTAMENTOUP);
+		forbiddenCommands.set(CMD_PORTAMENTODOWN);       forbiddenCommands.set(CMD_VIBRATOVOL);
+		forbiddenCommands.set(CMD_TONEPORTAVOL);         forbiddenCommands.set(CMD_VOLUMESLIDE);
+		forbiddenCommands.set(CMD_XFINEPORTAUPDOWN);     forbiddenCommands.set(CMD_NOTESLIDEUP);
+		forbiddenCommands.set(CMD_NOTESLIDEUPRETRIG);    forbiddenCommands.set(CMD_NOTESLIDEDOWN);
+		forbiddenCommands.set(CMD_NOTESLIDEDOWNRETRIG);
+		forbiddenVolCommands.set(VOLCMD_PORTAUP);        forbiddenVolCommands.set(VOLCMD_PORTADOWN);
+		forbiddenVolCommands.set(VOLCMD_VOLSLIDEUP);     forbiddenVolCommands.set(VOLCMD_VOLSLIDEDOWN);
+		forbiddenVolCommands.set(VOLCMD_FINEVOLUP);      forbiddenVolCommands.set(VOLCMD_FINEVOLDOWN);
+
+		// Optimize away channels for which it's pointless to adjust sample positions
 		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
 		{
 			if(ChnSettings[i].dwFlags[CHN_MUTE]) memory.chnSettings[i].ticksToRender = GetLengthMemory::IGNORE_CHANNEL;
@@ -235,22 +253,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				}
 			}
 		}
-	}
-
-	// Initalize fast LUTs for commands that are too weird / complicated / whatever to emulate in sample position adjust mode.
-	std::bitset<MAX_EFFECTS> forbiddenCommands;
-	std::bitset<MAX_VOLCMDS> forbiddenVolCommands;
-	if(adjustSamplePos)
-	{
-		forbiddenCommands.set(CMD_ARPEGGIO);             forbiddenCommands.set(CMD_PORTAMENTOUP);
-		forbiddenCommands.set(CMD_PORTAMENTODOWN);       forbiddenCommands.set(CMD_VIBRATOVOL);
-		forbiddenCommands.set(CMD_TONEPORTAVOL);         forbiddenCommands.set(CMD_VOLUMESLIDE);
-		forbiddenCommands.set(CMD_XFINEPORTAUPDOWN);     forbiddenCommands.set(CMD_NOTESLIDEUP);
-		forbiddenCommands.set(CMD_NOTESLIDEUPRETRIG);    forbiddenCommands.set(CMD_NOTESLIDEDOWN);
-		forbiddenCommands.set(CMD_NOTESLIDEDOWNRETRIG);
-		forbiddenVolCommands.set(VOLCMD_PORTAUP);        forbiddenVolCommands.set(VOLCMD_PORTADOWN);
-		forbiddenVolCommands.set(VOLCMD_VOLSLIDEUP);     forbiddenVolCommands.set(VOLCMD_VOLSLIDEDOWN);
-		forbiddenVolCommands.set(VOLCMD_FINEVOLUP);      forbiddenVolCommands.set(VOLCMD_FINEVOLDOWN);
 	}
 
 	// If samples are being synced , force them to resync if tick duration changes
@@ -391,22 +393,63 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		const ModCommand *p = Patterns[memory.state.m_nPattern].GetRow(memory.state.m_nRow);
 		
 		// For various effects, we need to know first how many ticks there are in this row.
-		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
+		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, p++)
 		{
-			if(p[nChn].command == CMD_SPEED)
+			if(IsCompatibleMode(TRK_SCREAMTRACKER) && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
+				continue;
+			switch(p->command)
 			{
+			case CMD_SPEED:
 #ifdef MODPLUG_TRACKER
 				// FT2 appears to be decrementing the tick count before checking for zero,
 				// so it effectively counts down 65536 ticks with speed = 0 (song speed is a 16-bit variable in FT2)
-				if(GetType() == MOD_TYPE_XM && !p[nChn].param)
+				if(GetType() == MOD_TYPE_XM && !p->param)
 				{
 					memory.state.m_nMusicSpeed = uint16_max;
 				}
 #endif	// MODPLUG_TRACKER
-				if(p[nChn].param > 0) memory.state.m_nMusicSpeed = p[nChn].param;
+				if(p->param > 0) memory.state.m_nMusicSpeed = p->param;
+				break;
+
+			case CMD_TEMPO:
+				if(m_SongFlags[SONG_VBLANK_TIMING])
+				{
+					// ProTracker MODs with VBlank timing: All Fxx parameters set the tick count.
+					if(p->param != 0) memory.state.m_nMusicSpeed = p->param;
+				}
+				break;
+
+			case CMD_S3MCMDEX:
+				if((p->param & 0xF0) == 0x60)
+				{
+					// Fine Pattern Delay
+					tickDelay += (p->param & 0x0F);
+				} if((p->param & 0xF0) == 0xE0 && !rowDelay)
+				{
+					// Pattern Delay
+					if(!(GetType() & MOD_TYPE_S3M) || (p->param & 0x0F) != 0)
+					{
+						// While Impulse Tracker *does* count S60 as a valid row delay (and thus ignores any other row delay commands on the right),
+						// Scream Tracker 3 simply ignores such commands.
+						rowDelay = 1 + (p->param & 0x0F);
+					}
+				}
+				break;
+
+			case CMD_MODCMDEX:
+				if((p->param & 0xF0) == 0xE0)
+				{
+					// Pattern Delay
+					rowDelay = 1 + (p->param & 0x0F);
+				}
+				break;
 			}
 		}
+		if(rowDelay == 0) rowDelay = 1;
+		const uint32 numTicks = (memory.state.m_nMusicSpeed + tickDelay) * rowDelay;
+		const uint32 nonRowTicks = numTicks - rowDelay;
 
+		p = Patterns[memory.state.m_nPattern].GetRow(memory.state.m_nRow);
 		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); p++, pChn++, nChn++) if(!p->IsEmpty())
 		{
 			if(IsCompatibleMode(TRK_SCREAMTRACKER) && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
@@ -414,6 +457,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			ModCommand::COMMAND command = p->command;
 			ModCommand::PARAM param = p->param;
 			ModCommand::NOTE note = p->note;
+
 			if (p->instr)
 			{
 				pChn->nNewIns = p->instr;
@@ -463,12 +507,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				break;
 			// Set Tempo
 			case CMD_TEMPO:
-				if(m_SongFlags[SONG_VBLANK_TIMING])
-				{
-					// ProTracker MODs with VBlank timing: All Fxx parameters set the tick count.
-					if(param != 0) memory.state.m_nMusicSpeed = param;
-					break;
-				}
+				if(!m_SongFlags[SONG_VBLANK_TIMING])
 				{
 					uint32 tempo = CalculateXParam(memory.state.m_nPattern, memory.state.m_nRow, nChn);
 					if ((adjustMode & eAdjust) && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
@@ -480,7 +519,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					else
 					{
 						// Tempo Slide
-						uint32 tempoDiff = (tempo & 0x0F) * (memory.state.m_nMusicSpeed - 1);
+						uint32 tempoDiff = (tempo & 0x0F) * nonRowTicks;
 						if ((tempo & 0xF0) == 0x10)
 						{
 							memory.state.m_nMusicTempo += tempoDiff;
@@ -498,26 +537,23 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				else
 					memory.state.m_nMusicTempo = Clamp(memory.state.m_nMusicTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
 				break;
+
 			case CMD_S3MCMDEX:
-				if((param & 0xF0) == 0x60)
+				switch(param & 0xF0)
 				{
-					// Fine Pattern Delay
-					tickDelay += (param & 0x0F);
-				} else if((param & 0xF0) == 0xE0 && !rowDelay)
-				{
-					// Pattern Delay
-					if(!(GetType() & MOD_TYPE_S3M) || (param & 0x0F) != 0)
+				case 0x90:
+					if(param <= 0x91)
 					{
-						// While Impulse Tracker *does* count S60 as a valid row delay (and thus ignores any other row delay commands on the right),
-						// Scream Tracker 3 simply ignores such commands.
-						rowDelay = 1 + (param & 0x0F);
+						pChn->dwFlags.set(CHN_SURROUND, param == 0x91);
 					}
-				} else if((param & 0xF0) == 0xA0)
-				{
+					break;
+
+				case 0xA0:
 					// High sample offset
 					pChn->nOldHiOffset = param & 0x0F;
-				} else if((param & 0xF0) == 0xB0)
-				{
+					break;
+				
+				case 0xB0:
 					// Pattern Loop
 					if (param & 0x0F)
 					{
@@ -538,15 +574,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						}
 						patternLoopStartedOnThisRow = true;
 					}
+					break;
 				}
 				break;
 
 			case CMD_MODCMDEX:
-				if((param & 0xF0) == 0xE0)
-				{
-					// Pattern Delay
-					rowDelay = 1 + (param & 0x0F);
-				} else if ((param & 0xF0) == 0x60)
+				if ((param & 0xF0) == 0x60)
 				{
 					// Pattern Loop
 					if (param & 0x0F)
@@ -638,12 +671,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					param >>= 4;
 					param <<= 1;
 					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
-					memory.state.m_nGlobalVolume += param * (memory.state.m_nMusicSpeed - 1);
+					memory.state.m_nGlobalVolume += param * nonRowTicks;
 				} else
 				{
 					param = (param & 0x0F) << 1;
 					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
-					memory.state.m_nGlobalVolume -= param * (memory.state.m_nMusicSpeed - 1);
+					memory.state.m_nGlobalVolume -= param * nonRowTicks;
 				}
 				Limit(memory.state.m_nGlobalVolume, 0, 256);
 				break;
@@ -659,13 +692,27 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					else if((param & 0xF0) == 0xF0 && (param & 0x0F))
 						volume -= (param & 0x0F);	// Fine Down
 					else if(param & 0x0F)			// Down
-						volume -= (param & 0x0F) * (memory.state.m_nMusicSpeed - 1);
+						volume -= (param & 0x0F) * nonRowTicks;
 					else							// Up
-						volume += ((param & 0xF0) >> 4) * (memory.state.m_nMusicSpeed - 1);
+						volume += ((param & 0xF0) >> 4) * nonRowTicks;
 					Limit(volume, 0, 64);
 					pChn->nGlobalVol = volume;
 				}
 				break;
+			case CMD_PANNING8:
+				Panning(pChn, p->param, _8bit);
+				break;
+			case CMD_MODCMDEX:
+			case CMD_S3MCMDEX:
+				if((p->param & 0xF0) == 0x80)
+				{
+					Panning(pChn, (p->param & 0x0F), _4bit);
+				}
+				break;
+			}
+			if(p->volcmd == VOLCMD_PANNING)
+			{
+				Panning(pChn, p->vol, _6bit);
 			}
 		}
 
@@ -690,7 +737,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		}
 
 		const uint32 tickDuration = GetTickDuration(memory.state.m_nMusicTempo, memory.state.m_nMusicSpeed, rowsPerBeat);
-		const uint32 numTicks = (memory.state.m_nMusicSpeed + tickDelay) * MAX(rowDelay, 1);
 		const uint32 rowDuration = tickDuration * numTicks;
 		memory.elapsedTime += static_cast<double>(rowDuration) / static_cast<double>(m_MixerSettings.gdwMixingFreq);
 		memory.state.m_lTotalSampleCount += rowDuration;
@@ -713,6 +759,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				if(p->instr) pChn->proTrackerOffset = 0;
 				if(p->IsNote())
 				{
+					int32 setPan = pChn->nPan;
 					pChn->nNewNote = pChn->nLastNote;
 					if(pChn->nNewIns != 0) InstrumentChange(pChn, pChn->nNewIns, porta);
 					NoteChange(pChn, p->note, porta);
@@ -726,6 +773,14 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						startTick = paramHi;
 					}
 					if(!porta) memory.chnSettings[nChn].ticksToRender = 0;
+
+					// Panning commands have to be re-applied after a note change with potential pan change.
+					if(p->command == CMD_PANNING8
+						|| ((p->command == CMD_MODCMDEX || p->command == CMD_S3MCMDEX) && paramHi == 0x8)
+						|| p->volcmd == VOLCMD_PANNING)
+					{
+						pChn->nPan = setPan;
+					}
 
 					if(p->command == CMD_OFFSET)
 					{
@@ -765,16 +820,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				} else if(p->volcmd == VOLCMD_VOLUME)
 				{
 					pChn->nVolume = p->vol * 4;
-				}
-				if(p->command == CMD_PANNING8)
-				{
-					Panning(pChn, p->param);
-				} else if(((p->command == CMD_MODCMDEX) || (p->command == CMD_S3MCMDEX)) && (p->param & 0xF0) == 0x80)
-				{
-					Panning(pChn, ((p->param & 0x0F) * 256 + 8) / 15);
-				} else if(p->volcmd == VOLCMD_PANNING)
-				{
-					pChn->nPan = p->vol * 4;
 				}
 				
 				if(pChn->pModSample && !stopNote)
@@ -2806,7 +2851,7 @@ bool CSoundFile::ProcessEffects()
 			{
 				break;
 			}
-			Panning(pChn, param);
+			Panning(pChn, param, _8bit);
 			break;
 
 		// Panning Slide
@@ -3607,27 +3652,39 @@ void CSoundFile::Panbrello(ModChannel *p, UINT param) const
 }
 
 
-void CSoundFile::Panning(ModChannel *pChn, UINT param) const
-//----------------------------------------------------------
+void CSoundFile::Panning(ModChannel *pChn, uint32 param, PanningType panBits) const
+//---------------------------------------------------------------------------------
 {
-	if (!m_SongFlags[SONG_SURROUNDPAN])
+	if (!m_SongFlags[SONG_SURROUNDPAN] && (panBits == 8 || IsCompatibleMode(TRK_ALLTRACKERS)))
 	{
 		pChn->dwFlags.reset(CHN_SURROUND);
 	}
-	if(!(GetType() & (MOD_TYPE_S3M | MOD_TYPE_DSM | MOD_TYPE_AMF | MOD_TYPE_MTM)))
+	if(panBits == _4bit)
 	{
-		// Real 8-bit panning
-		pChn->nPan = param;
+		// 0...15 panning
+		pChn->nPan = (param * 256 + 8) / 15;
+	} else if(panBits == _6bit)
+	{
+		// 0...64 panning
+		if(param > 64) param = 64;
+		pChn->nPan = param * 4;
 	} else
 	{
-		// 7-bit panning + surround
-		if(param <= 0x80)
+		if(!(GetType() & (MOD_TYPE_S3M | MOD_TYPE_DSM | MOD_TYPE_AMF | MOD_TYPE_MTM)))
 		{
-			pChn->nPan = param << 1;
-		} else if(param == 0xA4)
+			// Real 8-bit panning
+			pChn->nPan = param;
+		} else
 		{
-			pChn->dwFlags.set(CHN_SURROUND);
-			pChn->nPan = 0x80;
+			// 7-bit panning + surround
+			if(param <= 0x80)
+			{
+				pChn->nPan = param << 1;
+			} else if(param == 0xA4)
+			{
+				pChn->dwFlags.set(CHN_SURROUND);
+				pChn->nPan = 0x80;
+			}
 		}
 	}
 
@@ -3925,18 +3982,12 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 	// E7x: Set Tremolo WaveForm
 	case 0x70:	pChn->nTremoloType = param & 0x07; break;
 	// E8x: Set 4-bit Panning
-	case 0x80:	if(m_SongFlags[SONG_FIRSTTICK] && !m_SongFlags[SONG_PT1XMODE])
-				{
-					//IT compatibility 20. (Panning always resets surround state)
-					if(IsCompatibleMode(TRK_ALLTRACKERS) && !m_SongFlags[SONG_SURROUNDPAN])
-					{
-						pChn->dwFlags.reset(CHN_SURROUND);
-					}
-					//pChn->nPan = (param << 4) + 8;
-					pChn->nPan = (param * 256 + 8) / 15;
-					pChn->dwFlags.set(CHN_FASTVOLRAMP);
-				}
-				break;
+	case 0x80:
+		if(m_SongFlags[SONG_FIRSTTICK] && !m_SongFlags[SONG_PT1XMODE])
+		{
+			Panning(pChn, param, _4bit);
+		}
+		break;
 	// E9x: Retrig
 	case 0x90:	RetrigNote(nChn, param); break;
 	// EAx: Fine Volume Up
@@ -4085,25 +4136,12 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 				}
 				break;
 	// S8x: Set 4-bit Panning
-	case 0x80:	if(m_SongFlags[SONG_FIRSTTICK])
-				{
-					// IT Compatibility (and other trackers as well): panning disables surround (unless panning in rear channels is enabled, which is not supported by the original trackers anyway)
-					if(IsCompatibleMode(TRK_ALLTRACKERS) && !m_SongFlags[SONG_SURROUNDPAN])
-					{
-						pChn->dwFlags.reset(CHN_SURROUND);
-					}
-					//pChn->nPan = (param << 4) + 8;
-					pChn->nPan = (param * 256 + 8) / 15;
-					pChn->dwFlags.set(CHN_FASTVOLRAMP);
-
-					//IT compatibility 20. Set pan overrides random pan
-					if(IsCompatibleMode(TRK_IMPULSETRACKER))
-					{
-						pChn->nPanSwing = 0;
-						pChn->nPanbrelloOffset = 0;
-					}
-				}
-				break;
+	case 0x80:
+		if(m_SongFlags[SONG_FIRSTTICK])
+		{
+			Panning(pChn, param, _4bit);
+		}
+		break;
 	// S9x: Sound Control
 	case 0x90:	ExtendedChannelEffect(pChn, param); break;
 	// SAx: Set 64k Offset
