@@ -428,7 +428,7 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 //-------------------------------------------------------------------------------------------
 {
 	char s[128];
-	char szContinueOrIgnore[16];
+	const char *continueOrIgnore;
 
 	if (pszName) pszName[0] = 0;
 	if ((!pszName) || (ndx >= CountOf(gFXInfo)) || (!gFXInfo[ndx].name)) return false;
@@ -437,9 +437,9 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 
 	// for effects that don't have effect memory in MOD format.
 	if(sndFile.GetType() == MOD_TYPE_MOD)
-		strcpy(szContinueOrIgnore, "ignore");
+		continueOrIgnore = "ignore";
 	else
-		strcpy(szContinueOrIgnore, "continue");
+		continueOrIgnore = "continue";
 
 	std::string sPlusChar = "+", sMinusChar = "-";
 
@@ -447,12 +447,12 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 	{
 	case CMD_ARPEGGIO:
 		if(sndFile.GetType() == MOD_TYPE_XM)	// XM also ignores this!
-			strcpy(szContinueOrIgnore, "ignore");
+			continueOrIgnore = "ignore";
 
 		if (param)
 			wsprintf(s, "note+%d note+%d", param >> 4, param & 0x0F);
 		else
-			strcpy(s, szContinueOrIgnore);
+			strcpy(s, continueOrIgnore);
 		break;
 
 	case CMD_PORTAMENTOUP:
@@ -470,7 +470,7 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 		}
 		else
 		{
-			strcpy(s, szContinueOrIgnore);
+			strcpy(s, continueOrIgnore);
 		}
 		break;
 
@@ -635,7 +635,7 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 				wsprintf(pszName, "SFx MIDI Macro z=%d (SF%X: %s)", param, macroIndex, sndFile.m_MidiCfg.GetParameteredMacroName(macroIndex, plugin, sndFile));
 			} else
 			{
-				wsprintf(pszName, "SFx macro: z=%02X (%d)", param, param);
+				wsprintf(pszName, "SFx MIDI Macro z=%02X (%d)", param, param);
 			}
 		} else
 		{
@@ -975,8 +975,8 @@ bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, LPSTR s) const
 			}
 			sprintf(s, "%u (%c%02X)",
 				m.vol,
-				sndFile.GetModSpecifications().GetEffectLetter(static_cast<ModCommand::COMMAND>(m.volcmd == VOLCMD_PORTAUP ? CMD_PORTAMENTOUP : CMD_PORTAMENTODOWN)),
-				m.vol << 2);
+				sndFile.GetModSpecifications().GetEffectLetter(cmd),
+				param);
 		} else
 		{
 			strcpy(s, "continue");
