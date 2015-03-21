@@ -850,7 +850,7 @@ protected:
 	void Panbrello(ModChannel *pChn, UINT param) const;
 	void Panning(ModChannel *pChn, uint32 param, PanningType panBits) const;
 	void RetrigNote(CHANNELINDEX nChn, int param, int offset = 0);
-	void SampleOffset(CHANNELINDEX nChn, SmpLength param);
+	void SampleOffset(ModChannel &chn, SmpLength param) const;
 	void NoteCut(CHANNELINDEX nChn, UINT nTick, bool cutSample);
 	ROWINDEX PatternLoop(ModChannel *, UINT param);
 	void ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param);

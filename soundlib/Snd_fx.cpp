@@ -17,7 +17,7 @@
 #include "stdafx.h"
 #include "Sndfile.h"
 #ifdef MODPLUG_TRACKER
-#include "../mptrack/moddoc.h"
+#include "../mptrack/Moddoc.h"
 #endif // MODPLUG_TRACKER
 #include "tuning.h"
 #include "Tables.h"
@@ -792,7 +792,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							if(offset == 0) offset = pChn->oldOffset;
 							offset += static_cast<SmpLength>(pChn->nOldHiOffset) << 16;
 						}
-						SampleOffset(nChn, offset);
+						SampleOffset(*pChn, offset);
 					} else if(p->volcmd == VOLCMD_OFFSET)
 					{
 						if(p->vol <= CountOf(pChn->pModSample->cues) && pChn->pModSample != nullptr)
@@ -802,7 +802,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 								offset = pChn->oldOffset;
 							else
 								offset = pChn->oldOffset = pChn->pModSample->cues[p->vol - 1];
-							SampleOffset(nChn, offset);
+							SampleOffset(*pChn, offset);
 						}
 					}
 				}
@@ -2639,7 +2639,7 @@ bool CSoundFile::ProcessEffects()
 							offset = pChn->oldOffset;
 						else
 							offset = pChn->oldOffset = pChn->pModSample->cues[vol - 1];
-						SampleOffset(nChn, offset);
+						SampleOffset(*pChn, offset);
 					}
 					break;
 				}
@@ -2739,7 +2739,7 @@ bool CSoundFile::ProcessEffects()
 					if (offset) pChn->oldOffset = offset; else offset = pChn->oldOffset;
 					offset += static_cast<SmpLength>(pChn->nOldHiOffset) << 16;
 				}
-				SampleOffset(nChn, offset);
+				SampleOffset(*pChn, offset);
 			}
 			break;
 
@@ -4641,28 +4641,26 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 }
 
 
-void CSoundFile::SampleOffset(CHANNELINDEX nChn, SmpLength param)
-//---------------------------------------------------------------
+void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
+//-------------------------------------------------------------------
 {
+	chn.proTrackerOffset += param;
 
-	ModChannel *pChn = &m_PlayState.Chn[nChn];
-	pChn->proTrackerOffset += param;
-
-	if(pChn->rowCommand.IsNote())
+	if(chn.rowCommand.IsNote())
 	{
 		if(m_SongFlags[SONG_PT1XMODE])
 		{
 			// ProTracker compatbility: PT1/2-style funky 9xx offset command
 			// Test case: ptoffset.mod
-			pChn->nPos = pChn->proTrackerOffset;
-			pChn->proTrackerOffset += param;
+			chn.nPos = chn.proTrackerOffset;
+			chn.proTrackerOffset += param;
 		} else
 		{
-			pChn->nPos = param;
+			chn.nPos = param;
 		}
-		pChn->nPosLo = 0;
+		chn.nPosLo = 0;
 
-		if (pChn->nPos >= pChn->nLength || (pChn->dwFlags[CHN_LOOP] && pChn->nPos >= pChn->nLoopEnd))
+		if (chn.nPos >= chn.nLength || (chn.dwFlags[CHN_LOOP] && chn.nPos >= chn.nLoopEnd))
 		{
 			// Offset beyond sample size
 			if (!(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MOD)))
@@ -4671,30 +4669,30 @@ void CSoundFile::SampleOffset(CHANNELINDEX nChn, SmpLength param)
 				if(IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
 					if(m_SongFlags[SONG_ITOLDEFFECTS])
-						pChn->nPos = pChn->nLength; // Old FX: Clip to end of sample
+						chn.nPos = chn.nLength; // Old FX: Clip to end of sample
 					else
-						pChn->nPos = 0; // Reset to beginning of sample
+						chn.nPos = 0; // Reset to beginning of sample
 				} else
 				{
-					pChn->nPos = pChn->nLoopStart;
-					if(m_SongFlags[SONG_ITOLDEFFECTS] && pChn->nLength > 4)
+					chn.nPos = chn.nLoopStart;
+					if(m_SongFlags[SONG_ITOLDEFFECTS] && chn.nLength > 4)
 					{
-						pChn->nPos = pChn->nLength - 2;
+						chn.nPos = chn.nLength - 2;
 					}
 				}
 			} else if(IsCompatibleMode(TRK_FASTTRACKER2))
 			{
 				// FT2 Compatibility: Don't play note if offset is beyond sample length
 				// Test case: 3xx-no-old-samp.xm
-				pChn->dwFlags.set(CHN_FASTVOLRAMP);
-				pChn->nVolume = pChn->nPeriod = 0;
+				chn.dwFlags.set(CHN_FASTVOLRAMP);
+				chn.nVolume = chn.nPeriod = 0;
 			}
 		}
-	} else if ((param < pChn->nLength) && (GetType() & (MOD_TYPE_MTM | MOD_TYPE_DMF | MOD_TYPE_MDL | MOD_TYPE_PLM)))
+	} else if ((param < chn.nLength) && (GetType() & (MOD_TYPE_MTM | MOD_TYPE_DMF | MOD_TYPE_MDL | MOD_TYPE_PLM)))
 	{
 		// Some trackers can also call offset effects without notes next to them...
-		pChn->nPos = param;
-		pChn->nPosLo = 0;
+		chn.nPos = param;
+		chn.nPosLo = 0;
 	}
 }
 
@@ -4836,7 +4834,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 			offset--;
 			if(offset == 0) offset = chn.oldOffset;
 			else if(offset <= static_cast<int>(CountOf(chn.pModSample->cues))) offset = chn.oldOffset = chn.pModSample->cues[offset - 1];
-			SampleOffset(nChn, offset);
+			SampleOffset(chn, offset);
 		}
 	}
 
