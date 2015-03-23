@@ -440,7 +440,7 @@ void CModControlView::UpdateView(UpdateHint lHint, CObject *pObject)
 	CModDoc *pDoc = GetDocument();
 	if (!pDoc) return;
 	// Module type changed: update tabs
-	if (lHint.GetType() & HINT_MODTYPE)
+	if (lHint.GetType()[HINT_MODTYPE])
 	{
 		UINT nCount = 4;
 		UINT mask = 1 | 2 | 4 | 16;
@@ -490,6 +490,12 @@ void CModControlView::OnTabSelchange(NMHDR*, LRESULT* pResult)
 LRESULT CModControlView::OnActivateModView(WPARAM nIndex, LPARAM lParam)
 //----------------------------------------------------------------------
 {
+	if(::GetActiveWindow() != CMainFrame::GetMainFrame()->m_hWnd)
+	{
+		// If we are in a dialog (e.g. Amplify Sample), do not allow to switch to a different tab. Otherwise, watch the tracker crash!
+		return 0;
+	}
+
 	if (m_TabCtrl.m_hWnd)
 	{
 		if (nIndex < 100)
