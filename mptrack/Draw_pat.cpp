@@ -1361,15 +1361,16 @@ BOOL CViewPattern::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
 void CViewPattern::OnSize(UINT nType, int cx, int cy)
 //---------------------------------------------------
 {
-	// TODO: Switching between modules (when MDI childs are maximized) first calls this with the windowed size, then with the maximized size, which makes the scrollbars move. Eww!
+	// Note: Switching between modules (when MDI childs are maximized) first calls this with the windowed size, then with the maximized size.
+	// Watch out for this odd behaviour when debugging this function.
 	CScrollView::OnSize(nType, cx, cy);
 	if (((nType == SIZE_RESTORED) || (nType == SIZE_MAXIMIZED)) && (cx > 0) && (cy > 0))
 	{
 		UpdateSizes();
 		UpdateScrollSize();
 		UpdateScrollPos();
-		OnScroll(0,0,TRUE);
 		m_Dib.SetSize(cx + m_szCell.cx, m_szCell.cy);
+		InvalidatePattern();
 	}
 }
 
