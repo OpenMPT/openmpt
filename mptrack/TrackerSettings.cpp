@@ -160,6 +160,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, gnMsgBoxVisiblityFlags(conf, "Display", "MDIGraphHeight", uint32_max)
 	, GUIUpdateInterval(conf, "Display", "GUIUpdateInterval", 0)
 	, VuMeterUpdateInterval(conf, "Display", "VuMeterUpdateInterval", 15)
+	, VuMeterDecaySpeedDecibelPerSecond(conf, "Display", "VuMeterDecaySpeedDecibelPerSecond", 88.0f)
 	, rememberSongWindows(conf, "Display", "RememberSongWindows", true)
 	, commentsFont(conf, "Display", "Comments Font", FontSetting("Courier New", 120))
 	// Misc
