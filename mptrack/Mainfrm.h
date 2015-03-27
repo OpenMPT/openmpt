@@ -303,6 +303,7 @@ class VUMeter
 {
 public:
 	static const std::size_t maxChannels = 4;
+	static const float dynamicRange; // corresponds to the current implementation of the UI widget diplaying the result
 	struct Channel
 	{
 		int32 peak;
@@ -311,6 +312,10 @@ public:
 	};
 private:
 	Channel channels[maxChannels];
+	int32 decayParam;
+public:
+	VUMeter() : decayParam(0) { SetDecaySpeedDecibelPerSecond(88.0f); }
+	void SetDecaySpeedDecibelPerSecond(float decibelPerSecond);
 public:
 	const Channel & operator [] (std::size_t channel) const { return channels[channel]; }
 	void Process(const int *mixbuffer, std::size_t numChannels, std::size_t numFrames); // mixbuffer is interleaved

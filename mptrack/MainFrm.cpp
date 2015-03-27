@@ -850,10 +850,21 @@ void VUMeter::Process(const int *mixbuffer, std::size_t numChannels, std::size_t
 }
 
 
+const float VUMeter::dynamicRange = 48.0f; // corresponds to the current implementation of the UI widget displaying the result
+
+
+void VUMeter::SetDecaySpeedDecibelPerSecond(float decibelPerSecond)
+//-----------------------------------------------------------------
+{
+	float linearDecayRate = decibelPerSecond / dynamicRange;
+	decayParam = Util::Round<int32>(linearDecayRate * MIXING_CLIPMAX);
+}
+
+
 void VUMeter::Decay(int32 secondsNum, int32 secondsDen)
 //-----------------------------------------------------
 {
-	int32 decay = Util::muldivr(120000 << 11, secondsNum, secondsDen);
+	int32 decay = Util::muldivr(decayParam, secondsNum, secondsDen);
 	for(std::size_t channel = 0; channel < maxChannels; ++channel)
 	{
 		channels[channel].peak = std::max(channels[channel].peak - decay, 0);
@@ -2271,6 +2282,7 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 //---------------------------------------------------------
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::GUI);
+	m_VUMeter.SetDecaySpeedDecibelPerSecond(TrackerSettings::Instance().VuMeterDecaySpeedDecibelPerSecond); // update in notification update in order to avoid querying the settings framework from inside audio thread
 	Notification *pnotify = (Notification *)lParam;
 	if (pnotify)
 	{
