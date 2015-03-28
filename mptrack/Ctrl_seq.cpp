@@ -173,16 +173,7 @@ BOOL COrderList::UpdateScrollInfo()
 		SCROLLINFO info;
 		UINT nPage;
 
-		int nMax = 0;
-		if(!sndFile.GetModSpecifications().hasStopIndex)
-		{
-			// With MOD / XM, cut shown sequence to first '---' item...
-			nMax = sndFile.Order.GetLengthFirstEmpty();
-		} else
-		{
-			// ...for S3M/IT/MPT, show sequence until the last used item.
-			nMax = sndFile.Order.GetLengthTailTrimmed();
-		}
+		int nMax = sndFile.Order.GetLengthTailTrimmed();
 
 		GetScrollInfo(SB_HORZ, &info, SIF_PAGE|SIF_RANGE);
 		info.fMask = SIF_PAGE|SIF_RANGE;
@@ -377,7 +368,6 @@ UINT COrderList::GetCurrentPattern() const
 BOOL COrderList::PreTranslateMessage(MSG *pMsg)
 //---------------------------------------------
 {
-	//rewbs.customKeys: 
 	//handle Patterns View context keys that we want to take effect in the orderlist.
 	if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) || 
 		(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
@@ -390,19 +380,16 @@ BOOL COrderList::PreTranslateMessage(MSG *pMsg)
 		UINT nFlags = HIWORD(pMsg->lParam);
 		KeyEventType kT = ih->GetKeyEventType(nFlags);
 
-		InputTargetContext ctx = (InputTargetContext)(kCtxCtrlOrderlist);
-		if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+		if (ih->KeyEvent(kCtxCtrlOrderlist, nChar, nRepCnt, nFlags, kT) != kcNull)
 			return true; // Mapped to a command, no need to pass message on.
 
 		//HACK: masquerade as kCtxViewPatternsNote context until we implement appropriate
 		//      command propagation to kCtxCtrlOrderlist context.
 
-		ctx = (InputTargetContext)(kCtxViewPatternsNote);
-		if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+		if (ih->KeyEvent(kCtxViewPatternsNote, nChar, nRepCnt, nFlags, kT) != kcNull)
 			return true; // Mapped to a command, no need to pass message on.
 
 	}
-	//end rewbs.customKeys 
 
 	return CWnd::PreTranslateMessage(pMsg);
 }
@@ -617,8 +604,7 @@ void COrderList::UpdateInfoText()
 		CHAR s[128];
 		strcpy(s, "");
 
-		// MOD orderlist always ends after first empty pattern
-		const ORDERINDEX nLength = (sndFile.GetType() & MOD_TYPE_MOD) ? sndFile.Order.GetLengthFirstEmpty() : sndFile.Order.GetLengthTailTrimmed();
+		const ORDERINDEX nLength = sndFile.Order.GetLengthTailTrimmed();
 
 		if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY)
 		{
@@ -805,10 +791,10 @@ void COrderList::OnLButtonDown(UINT nFlags, CPoint pt)
 			}
 			m_bDragging = !IsOrderInMargins(m_nScrollPos, oldXScroll) || !IsOrderInMargins(m_nScrollPos2nd, oldXScroll);
 
+			m_nMouseDownPos = nOrder;
 			if(m_bDragging)
 			{
-				m_nDragOrder = GetCurSel(true).firstOrd;
-				m_nDropPos = m_nDragOrder;
+				m_nDragOrder = m_nDropPos = GetCurSel(true).firstOrd;
 				SetCapture();
 			}
 		}
@@ -835,7 +821,7 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 		if (rect.PtInRect(pt))
 		{
 			ORDERINDEX n = GetOrderFromPoint(rect, pt);
-			if ((n != ORDERINDEX_INVALID) && (n == m_nDropPos))
+			if (n != ORDERINDEX_INVALID && n == m_nDropPos && n != m_nMouseDownPos)
 			{
 				// drag multiple orders (not quite as easy...)
 				OrdSelection selection = GetCurSel(false);
@@ -880,16 +866,12 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 				}
 			} else
 			{
-				ORDERINDEX nOrder = GetOrderFromPoint(rect, pt);
-				OrdSelection selection = GetCurSel(false);
-
-				// this should actually have equal signs but that breaks multiselect: nOrder >= selection.nOrdLo && nOrder <= section.nOrdHi
-				if(pt.y < rect.bottom && m_nScrollPos2nd != ORDERINDEX_INVALID && nOrder > selection.firstOrd && nOrder < selection.lastOrd)
+				if(pt.y < rect.bottom && n == m_nMouseDownPos && !copyOrders)
 				{
 					// Remove selection if we didn't drag anything but multiselect was active
 					m_nScrollPos2nd = ORDERINDEX_INVALID;
 					SetFocus();
-					SetCurSel(GetOrderFromPoint(rect, pt));
+					SetCurSel(n);
 				}
 			}
 		}
@@ -920,6 +902,7 @@ void COrderList::OnMouseMove(UINT nFlags, CPoint pt)
 		{
 			if (n != ORDERINDEX_INVALID)
 			{
+				m_nMouseDownPos = ORDERINDEX_INVALID;
 				m_nDropPos = n;
 				InvalidateRect(NULL, FALSE);
 				SetCursor(CMainFrame::curDragging);
