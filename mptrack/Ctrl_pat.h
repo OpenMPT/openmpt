@@ -39,7 +39,7 @@ protected:
 	//m_nScrollPos: The same as order
 	//m_nScrollPos2nd: 2nd selection point if multiple orders are selected
 	//	               (not neccessarily the higher order - GetCurSel() is taking care of that.)
-	ORDERINDEX m_nXScroll, m_nScrollPos, m_nScrollPos2nd, m_nDropPos;
+	ORDERINDEX m_nXScroll, m_nScrollPos, m_nScrollPos2nd, m_nDropPos, m_nMouseDownPos;
 	ORDERINDEX m_nDragOrder;
 	//To tell how many orders('orderboxes') to show at least
 	//on both sides of current order(when updating orderslist position).
