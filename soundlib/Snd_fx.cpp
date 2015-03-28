@@ -390,13 +390,14 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		}
 
 		ModChannel *pChn = memory.state.Chn;
-		const ModCommand *p = Patterns[memory.state.m_nPattern].GetRow(memory.state.m_nRow);
 		
 		// For various effects, we need to know first how many ticks there are in this row.
+		const ModCommand *p = Patterns[memory.state.m_nPattern].GetRow(memory.state.m_nRow);
 		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, p++)
 		{
 			if(IsCompatibleMode(TRK_SCREAMTRACKER) && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
 				continue;
+			pChn[nChn].rowCommand = *p;
 			switch(p->command)
 			{
 			case CMD_SPEED:
@@ -449,23 +450,22 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		const uint32 numTicks = (memory.state.m_nMusicSpeed + tickDelay) * rowDelay;
 		const uint32 nonRowTicks = numTicks - rowDelay;
 
-		p = Patterns[memory.state.m_nPattern].GetRow(memory.state.m_nRow);
-		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); p++, pChn++, nChn++) if(!p->IsEmpty())
+		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); pChn++, nChn++) if(!pChn->rowCommand.IsEmpty())
 		{
 			if(IsCompatibleMode(TRK_SCREAMTRACKER) && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
 				continue;
-			ModCommand::COMMAND command = p->command;
-			ModCommand::PARAM param = p->param;
-			ModCommand::NOTE note = p->note;
+			ModCommand::COMMAND command = pChn->rowCommand.command;
+			ModCommand::PARAM param = pChn->rowCommand.param;
+			ModCommand::NOTE note = pChn->rowCommand.note;
 
-			if (p->instr)
+			if (pChn->rowCommand.instr)
 			{
-				pChn->nNewIns = p->instr;
+				pChn->nNewIns = pChn->rowCommand.instr;
 				pChn->nLastNote = NOTE_NONE;
 				memory.chnSettings[nChn].vol = 0xFF;
 			}
-			if (p->IsNote()) pChn->nLastNote = note;
-			if (p->volcmd == VOLCMD_VOLUME)	{ memory.chnSettings[nChn].vol = p->vol; }
+			if (pChn->rowCommand.IsNote()) pChn->nLastNote = note;
+			if (pChn->rowCommand.volcmd == VOLCMD_VOLUME)	{ memory.chnSettings[nChn].vol = pChn->rowCommand.vol; }
 			switch(command)
 			{
 			// Position Jump
@@ -478,7 +478,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				if(!patternBreakOnThisRow || (GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)))
 					memory.state.m_nNextRow = 0;
 
-				if ((adjustMode & eAdjust))
+				if (adjustMode & eAdjust)
 				{
 					pChn->nPatternLoopCount = 0;
 					pChn->nPatternLoop = 0;
@@ -602,7 +602,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			}
 
 			// The following calculations are not interesting if we just want to get the song length.
-			if ((adjustMode & eAdjust) == 0) continue;
+			if (!(adjustMode & eAdjust)) continue;
 			switch(command)
 			{
 			// Portamento Up/Down
@@ -700,19 +700,19 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				}
 				break;
 			case CMD_PANNING8:
-				Panning(pChn, p->param, _8bit);
+				Panning(pChn, param, _8bit);
 				break;
 			case CMD_MODCMDEX:
 			case CMD_S3MCMDEX:
-				if((p->param & 0xF0) == 0x80)
+				if((param & 0xF0) == 0x80)
 				{
-					Panning(pChn, (p->param & 0x0F), _4bit);
+					Panning(pChn, (param & 0x0F), _4bit);
 				}
 				break;
 			}
-			if(p->volcmd == VOLCMD_PANNING)
+			if(pChn->rowCommand.volcmd == VOLCMD_PANNING)
 			{
-				Panning(pChn, p->vol, _6bit);
+				Panning(pChn, pChn->rowCommand.vol, _6bit);
 			}
 		}
 
@@ -745,44 +745,44 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		{
 			// Super experimental and dirty sample seeking
 			pChn = memory.state.Chn;
-			p = Patterns[memory.state.m_nPattern].GetRow(memory.state.m_nRow);
-			for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); p++, pChn++, nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); pChn++, nChn++)
 			{
 				if(memory.chnSettings[nChn].ticksToRender == GetLengthMemory::IGNORE_CHANNEL)
 					continue;
 
 				uint32 startTick = 0;
-				uint32 paramHi = p->param >> 4, paramLo = p->param & 0x0F;
-				bool porta = p->command == CMD_TONEPORTAMENTO /*|| p->command CMD_TONEPORTAVOL*/ || p->volcmd == VOLCMD_TONEPORTAMENTO; // CMD_TONEPORTAVOL requires volume slides which we don't emulate right now.
+				const ModCommand &m = pChn->rowCommand;
+				uint32 paramHi = m.param >> 4, paramLo = m.param & 0x0F;
+				bool porta = m.command == CMD_TONEPORTAMENTO /*|| m.command CMD_TONEPORTAVOL*/ || m.volcmd == VOLCMD_TONEPORTAMENTO; // CMD_TONEPORTAVOL requires volume slides which we don't emulate right now.
 				bool stopNote = patternLoopStartedOnThisRow;	// It's too much trouble to keep those pattern loops in sync...
 
-				if(p->instr) pChn->proTrackerOffset = 0;
-				if(p->IsNote())
+				if(m.instr) pChn->proTrackerOffset = 0;
+				if(m.IsNote())
 				{
 					int32 setPan = pChn->nPan;
 					pChn->nNewNote = pChn->nLastNote;
 					if(pChn->nNewIns != 0) InstrumentChange(pChn, pChn->nNewIns, porta);
-					NoteChange(pChn, p->note, porta);
+					NoteChange(pChn, m.note, porta);
 					memory.chnSettings[nChn].incChanged = true;
 
-					if((p->command == CMD_MODCMDEX || p->command == CMD_S3MCMDEX) && (p->param & 0xF0) == 0xD0 && paramLo < numTicks)
+					if((m.command == CMD_MODCMDEX || m.command == CMD_S3MCMDEX) && (m.param & 0xF0) == 0xD0 && paramLo < numTicks)
 					{
 						startTick = paramLo;
-					} else if(p->command == CMD_DELAYCUT && paramHi < numTicks)
+					} else if(m.command == CMD_DELAYCUT && paramHi < numTicks)
 					{
 						startTick = paramHi;
 					}
 					if(!porta) memory.chnSettings[nChn].ticksToRender = 0;
 
 					// Panning commands have to be re-applied after a note change with potential pan change.
-					if(p->command == CMD_PANNING8
-						|| ((p->command == CMD_MODCMDEX || p->command == CMD_S3MCMDEX) && paramHi == 0x8)
-						|| p->volcmd == VOLCMD_PANNING)
+					if(m.command == CMD_PANNING8
+						|| ((m.command == CMD_MODCMDEX || m.command == CMD_S3MCMDEX) && paramHi == 0x8)
+						|| m.volcmd == VOLCMD_PANNING)
 					{
 						pChn->nPan = setPan;
 					}
 
-					if(p->command == CMD_OFFSET)
+					if(m.command == CMD_OFFSET)
 					{
 						bool isExtended = false;
 						SmpLength offset = CalculateXParam(memory.state.m_nPattern, memory.state.m_nRow, nChn, &isExtended);
@@ -793,47 +793,47 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							offset += static_cast<SmpLength>(pChn->nOldHiOffset) << 16;
 						}
 						SampleOffset(*pChn, offset);
-					} else if(p->volcmd == VOLCMD_OFFSET)
+					} else if(m.volcmd == VOLCMD_OFFSET)
 					{
-						if(p->vol <= CountOf(pChn->pModSample->cues) && pChn->pModSample != nullptr)
+						if(m.vol <= CountOf(pChn->pModSample->cues) && pChn->pModSample != nullptr)
 						{
 							SmpLength offset;
-							if(p->vol == 0)
+							if(m.vol == 0)
 								offset = pChn->oldOffset;
 							else
-								offset = pChn->oldOffset = pChn->pModSample->cues[p->vol - 1];
+								offset = pChn->oldOffset = pChn->pModSample->cues[m.vol - 1];
 							SampleOffset(*pChn, offset);
 						}
 					}
 				}
 
-				if(p->note == NOTE_KEYOFF || p->note == NOTE_NOTECUT || (p->note == NOTE_FADE && GetNumInstruments())
-					|| ((p->command == CMD_MODCMDEX || p->command == CMD_S3MCMDEX) && (p->param & 0xF0) == 0xC0 && paramLo < numTicks)
-					|| (p->command == CMD_DELAYCUT && paramLo != 0 && startTick + paramLo < numTicks))
+				if(m.note == NOTE_KEYOFF || m.note == NOTE_NOTECUT || (m.note == NOTE_FADE && GetNumInstruments())
+					|| ((m.command == CMD_MODCMDEX || m.command == CMD_S3MCMDEX) && (m.param & 0xF0) == 0xC0 && paramLo < numTicks)
+					|| (m.command == CMD_DELAYCUT && paramLo != 0 && startTick + paramLo < numTicks))
 				{
 					stopNote = true;
 				}
 
-				if(p->command == CMD_VOLUME)
+				if(m.command == CMD_VOLUME)
 				{
-					pChn->nVolume = p->param * 4;
-				} else if(p->volcmd == VOLCMD_VOLUME)
+					pChn->nVolume = m.param * 4;
+				} else if(m.volcmd == VOLCMD_VOLUME)
 				{
-					pChn->nVolume = p->vol * 4;
+					pChn->nVolume = m.vol * 4;
 				}
 				
 				if(pChn->pModSample && !stopNote)
 				{
 					// Check if we don't want to emulate some effect and thus stop processing.
-					if(p->command < MAX_EFFECTS)
+					if(m.command < MAX_EFFECTS)
 					{
-						if(forbiddenCommands[p->command])
+						if(forbiddenCommands[m.command])
 						{
 							stopNote = true;
-						} else if(p->command == CMD_MODCMDEX)
+						} else if(m.command == CMD_MODCMDEX)
 						{
 							// Special case: Slides using extended commands
-							switch(p->param & 0xF0)
+							switch(m.param & 0xF0)
 							{
 							case 0x10:
 							case 0x20:
@@ -844,7 +844,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						}
 					}
 
-					if(p->volcmd < MAX_VOLCMDS && forbiddenVolCommands[p->volcmd])
+					if(m.volcmd < MAX_VOLCMDS && forbiddenVolCommands[m.volcmd])
 					{
 						stopNote = true;
 					}
@@ -861,19 +861,19 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						memory.RenderChannel(nChn, oldTickDuration);	// Re-sync what we've got so far
 					}
 
-					if(p->command == CMD_S3MCMDEX)
+					if(m.command == CMD_S3MCMDEX)
 					{
-						if(p->param == 0x9E)
+						if(m.param == 0x9E)
 						{
 							// Play forward
 							memory.RenderChannel(nChn, oldTickDuration);	// Re-sync what we've got so far
 							pChn->dwFlags.reset(CHN_PINGPONGFLAG);
-						} else if(p->param == 0x9F)
+						} else if(m.param == 0x9F)
 						{
 							// Reverse
 							memory.RenderChannel(nChn, oldTickDuration);	// Re-sync what we've got so far
 							pChn->dwFlags.set(CHN_PINGPONGFLAG);
-							if(!pChn->nPos && pChn->nLength && (p->IsNote() || !pChn->dwFlags[CHN_LOOP]))
+							if(!pChn->nPos && pChn->nLength && (m.IsNote() || !pChn->dwFlags[CHN_LOOP]))
 							{
 								pChn->nPos = pChn->nLength - 1;
 								pChn->nPosLo = 0xFFFF;
@@ -898,19 +898,20 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 		if(patternLoopEndedOnThisRow)
 		{
-			p = Patterns[memory.state.m_nPattern].GetRow(memory.state.m_nRow);
 			std::map<double, int> startTimes;
 			// This is really just a simple estimation for nested pattern loops. It should handle cases correctly where all parallel loops start and end on the same row.
 			// If one of them starts or ends "in between", it will most likely calculate a wrong duration.
 			// For S3M files, it's also way off.
-			for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); p++, nChn++)
+			for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
 			{
-				if((p->command == CMD_S3MCMDEX && p->param >= 0xB1 && p->param <= 0xBF)
-					|| (p->command == CMD_MODCMDEX && p->param >= 0x61 && p->param <= 0x6F))
+				ModCommand::COMMAND command = pChn->rowCommand.command;
+				ModCommand::PARAM param = pChn->rowCommand.param;
+				if((command == CMD_S3MCMDEX && param >= 0xB1 && param <= 0xBF)
+					|| (command == CMD_MODCMDEX && param >= 0x61 && param <= 0x6F))
 				{
 					const double start = memory.chnSettings[nChn].patLoop;
 					if(!startTimes[start]) startTimes[start] = 1;
-					startTimes[start] = Util::lcm<int>(startTimes[start], 1 + (p->param & 0x0F));
+					startTimes[start] = Util::lcm<int>(startTimes[start], 1 + (param & 0x0F));
 				}
 			}
 			for(std::map<double, int>::iterator i = startTimes.begin(); i != startTimes.end(); i++)
@@ -920,10 +921,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			if(GetType() == MOD_TYPE_IT)
 			{
 				// IT pattern loop start row update - at the end of a pattern loop, set pattern loop start to next row (for upcoming pattern loops with missing SB0)
-				p = Patterns[memory.state.m_nPattern].GetRow(memory.state.m_nRow);
-				for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); p++, nChn++)
+				for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
 				{
-					if((p->command == CMD_S3MCMDEX && p->param >= 0xB1 && p->param <= 0xBF))
+					if((pChn->rowCommand.command == CMD_S3MCMDEX && pChn->rowCommand.param >= 0xB1 && pChn->rowCommand.param <= 0xBF))
 					{
 						memory.chnSettings[nChn].patLoop = memory.elapsedTime;
 					}
@@ -935,8 +935,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 	// Now advance the sample positions for sample seeking on channels that are still playing
 	if(adjustSamplePos)
 	{
-		ModCommand *p = Patterns[memory.state.m_nPattern].GetRow(memory.state.m_nRow);
-		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, p++)
+		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
 		{
 			if(memory.chnSettings[nChn].ticksToRender != GetLengthMemory::IGNORE_CHANNEL)
 			{
