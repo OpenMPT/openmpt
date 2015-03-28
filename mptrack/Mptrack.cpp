@@ -158,9 +158,11 @@ CDocument* CModDocTemplate::OpenTemplateFile(const mpt::PathString &filename, bo
 			CMainFrame::GetMainFrame()->UpdateTree(modDoc, GeneralHint().General());
 
 			// Reset edit history for template files
-			modDoc->GetrSoundFile().GetFileHistory().clear();
-			modDoc->GetrSoundFile().m_dwCreatedWithVersion = MptVersion::num;
-			modDoc->GetrSoundFile().m_dwLastSavedWithVersion = 0;
+			CSoundFile &sndFile = modDoc->GetrSoundFile();
+			sndFile.GetFileHistory().clear();
+			sndFile.m_dwCreatedWithVersion = MptVersion::num;
+			sndFile.m_dwLastSavedWithVersion = 0;
+			sndFile.madeWithTracker.clear();
 		} else
 		{
 			// Remove extension from title, so that saving the file will not suggest a filename like e.g. "example.it.it".
@@ -1803,7 +1805,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 
 		if(!dialogShown && GetTickCount() >= scanStart + 2000)
 		{
-			// If this is taking too long, show the user what he's waiting for.
+			// If this is taking too long, show the user what they're waiting for.
 			dialogShown = true;
 			pluginScanDlg.Create(IDD_SCANPLUGINS, gpSplashScreen);
 			pluginScanDlg.ShowWindow(SW_SHOW);

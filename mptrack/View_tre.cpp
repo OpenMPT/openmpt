@@ -1547,10 +1547,27 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 		break;
 
 	case MODITEM_PATTERN:
-		wsprintf(s, _T("Remove pattern %u?"), modItemID);
-		if(Reporting::Confirm(s, false, true) == cnfYes  && modDoc->RemovePattern((PATTERNINDEX)modItemID))
 		{
-			modDoc->UpdateAllViews(nullptr, PatternHint((PATTERNINDEX)modItemID).Data().Names());
+			CSoundFile &sndFile = modDoc->GetrSoundFile();
+			bool isUsed = false;
+			// First, find all used patterns in all sequences.
+			for(SEQUENCEINDEX seq = 0; seq < sndFile.Order.GetNumSequences(); seq++)
+			{
+				const ORDERINDEX ordLength = sndFile.Order.GetSequence(seq).GetLength();
+				for(ORDERINDEX ord = 0; ord < ordLength; ord++)
+				{
+					if(sndFile.Order.GetSequence(seq)[ord] == modItemID)
+					{
+						isUsed = true;
+						break;
+					}
+				}
+			}
+			wsprintf(s, _T("Remove pattern %u?\nThis pattern is currently%s used."), modItemID, isUsed ? _T("") : _T(" not"));
+			if(Reporting::Confirm(s, false, isUsed) == cnfYes && modDoc->RemovePattern((PATTERNINDEX)modItemID))
+			{
+				modDoc->UpdateAllViews(nullptr, PatternHint((PATTERNINDEX)modItemID).Data().Names());
+			}
 		}
 		break;
 
