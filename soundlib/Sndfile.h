@@ -824,9 +824,9 @@ protected:
 	// Type of panning command
 	enum PanningType
 	{
-		_4bit = 4,
-		_6bit = 6,
-		_8bit = 8,
+		Pan4bit = 4,
+		Pan6bit = 6,
+		Pan8bit = 8,
 	};
 	// Channel Effects
 	void UpdateS3MEffectMemory(ModChannel *pChn, ModCommand::PARAM param) const;
@@ -861,16 +861,16 @@ protected:
 	void GlobalVolSlide(ModCommand::PARAM param, uint8 &nOldGlobalVolSlide);
 
 	void ProcessMacroOnChannel(CHANNELINDEX nChn);
-	void ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro, uint8 param = 0, PLUGINDEX plugin = 0);
+	void ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *macro, uint8 param = 0, PLUGINDEX plugin = 0);
 	float CalculateSmoothParamChange(float currentValue, float param) const;
-	size_t SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned char *macro, size_t macroLen, PLUGINDEX plugin);
+	uint32 SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned char *macro, uint32 macroLen, PLUGINDEX plugin);
 
 	void SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modifier = 256) const;
 	// Low-Level effect processing
 	void DoFreqSlide(ModChannel *pChn, LONG nFreqSlide) const;
 	void UpdateTimeSignature();
 
-	UINT GetNumTicksOnCurrentRow() const
+	uint32 GetNumTicksOnCurrentRow() const
 	{
 		return (m_PlayState.m_nMusicSpeed  + m_PlayState.m_nFrameDelay) * MAX(m_PlayState.m_nPatternDelay, 1);
 	}
