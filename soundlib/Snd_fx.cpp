@@ -5234,7 +5234,7 @@ UINT CSoundFile::GetFreqFromPeriod(UINT period, int nPeriodFrac) const
 //--------------------------------------------------------------------
 {
 	if (!period) return 0;
-	if (GetType() & (MOD_TYPE_MED|MOD_TYPE_MOD|MOD_TYPE_DIGI|MOD_TYPE_MTM|MOD_TYPE_669|MOD_TYPE_AMF0))
+	if (GetType() & (MOD_TYPE_MED|MOD_TYPE_MOD|MOD_TYPE_DIGI|MOD_TYPE_MTM|MOD_TYPE_AMF0))
 	{
 		return ((3546895L * 4) << FREQ_FRACBITS) / period;
 	} else if (GetType() == MOD_TYPE_XM)
