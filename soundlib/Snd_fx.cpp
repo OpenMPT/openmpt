@@ -397,6 +397,11 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		{
 			if(IsCompatibleMode(TRK_SCREAMTRACKER) && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
 				continue;
+			if(p->IsPcNote())
+			{
+				pChn[nChn].rowCommand.Clear();
+				continue;
+			}
 			pChn[nChn].rowCommand = *p;
 			switch(p->command)
 			{
@@ -700,19 +705,19 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				}
 				break;
 			case CMD_PANNING8:
-				Panning(pChn, param, _8bit);
+				Panning(pChn, param, Pan8bit);
 				break;
 			case CMD_MODCMDEX:
 			case CMD_S3MCMDEX:
 				if((param & 0xF0) == 0x80)
 				{
-					Panning(pChn, (param & 0x0F), _4bit);
+					Panning(pChn, (param & 0x0F), Pan4bit);
 				}
 				break;
 			}
 			if(pChn->rowCommand.volcmd == VOLCMD_PANNING)
 			{
-				Panning(pChn, pChn->rowCommand.vol, _6bit);
+				Panning(pChn, pChn->rowCommand.vol, Pan6bit);
 			}
 		}
 
@@ -2850,7 +2855,7 @@ bool CSoundFile::ProcessEffects()
 			{
 				break;
 			}
-			Panning(pChn, param, _8bit);
+			Panning(pChn, param, Pan8bit);
 			break;
 
 		// Panning Slide
@@ -3658,11 +3663,11 @@ void CSoundFile::Panning(ModChannel *pChn, uint32 param, PanningType panBits) co
 	{
 		pChn->dwFlags.reset(CHN_SURROUND);
 	}
-	if(panBits == _4bit)
+	if(panBits == Pan4bit)
 	{
 		// 0...15 panning
 		pChn->nPan = (param * 256 + 8) / 15;
-	} else if(panBits == _6bit)
+	} else if(panBits == Pan6bit)
 	{
 		// 0...64 panning
 		if(param > 64) param = 64;
@@ -3984,7 +3989,7 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 	case 0x80:
 		if(m_SongFlags[SONG_FIRSTTICK] && !m_SongFlags[SONG_PT1XMODE])
 		{
-			Panning(pChn, param, _4bit);
+			Panning(pChn, param, Pan4bit);
 		}
 		break;
 	// E9x: Retrig
@@ -4138,7 +4143,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 	case 0x80:
 		if(m_SongFlags[SONG_FIRSTTICK])
 		{
-			Panning(pChn, param, _4bit);
+			Panning(pChn, param, Pan4bit);
 		}
 		break;
 	// S9x: Sound Control
@@ -4272,18 +4277,18 @@ void CSoundFile::InvertLoop(ModChannel *pChn)
 // [in] macro: Actual MIDI Macro string
 // [in] param: Parameter for parametric macros (Z00 - Z7F)
 // [in] plugin: Plugin to send MIDI message to (if not specified but needed, it is autodetected)
-void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro, uint8 param, PLUGINDEX plugin)
-//-------------------------------------------------------------------------------------------------------------
+void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *macro, uint8 param, PLUGINDEX plugin)
+//-------------------------------------------------------------------------------------------------------------------
 {
-	ModChannel *pChn = &m_PlayState.Chn[nChn];
-	const ModInstrument *pIns = GetNumInstruments() ? pChn->pModInstrument : nullptr;
+	ModChannel &chn = m_PlayState.Chn[nChn];
+	const ModInstrument *pIns = GetNumInstruments() ? chn.pModInstrument : nullptr;
 
 	unsigned char out[MACRO_LENGTH];
-	size_t outPos = 0;	// output buffer position, which also equals the number of complete bytes
-	const uint8 lastZxxParam = pChn->lastZxxParam;
+	uint32 outPos = 0;	// output buffer position, which also equals the number of complete bytes
+	const uint8 lastZxxParam = chn.lastZxxParam;
 	bool firstNibble = true;
 
-	for(size_t pos = 0; pos < (MACRO_LENGTH - 1) && macro[pos]; pos++)
+	for(uint32 pos = 0; pos < (MACRO_LENGTH - 1) && macro[pos]; pos++)
 	{
 		bool isNibble = false;		// did we parse a nibble or a byte value?
 		unsigned char data = 0;		// data that has just been parsed
@@ -4304,29 +4309,29 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro,
 			data = (unsigned char)GetBestMidiChannel(nChn);
 		} else if(macro[pos] == 'n')		// n: note value (last triggered note)
 		{
-			if(ModCommand::IsNote(pChn->nLastNote))
+			if(ModCommand::IsNote(chn.nLastNote))
 			{
-				data = (unsigned char)(pChn->nLastNote - NOTE_MIN);
+				data = (unsigned char)(chn.nLastNote - NOTE_MIN);
 			}
 		} else if(macro[pos] == 'v')		// v: velocity
 		{
 			// This is "almost" how IT does it - apparently, IT seems to lag one row behind on global volume or channel volume changes.
-			const int swing = (IsCompatibleMode(TRK_IMPULSETRACKER) || GetModFlag(MSF_OLDVOLSWING)) ? pChn->nVolSwing : 0;
-			const int vol = Util::muldiv((pChn->nVolume + swing) * m_PlayState.m_nGlobalVolume, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
+			const int swing = (IsCompatibleMode(TRK_IMPULSETRACKER) || GetModFlag(MSF_OLDVOLSWING)) ? chn.nVolSwing : 0;
+			const int vol = Util::muldiv((chn.nVolume + swing) * m_PlayState.m_nGlobalVolume, chn.nGlobalVol * chn.nInsVol, 1 << 20);
 			data = (unsigned char)Clamp(vol / 2, 1, 127);
-			//data = (unsigned char)MIN((pChn->nVolume * pChn->nGlobalVol * m_nGlobalVolume) >> (1 + 6 + 8), 127);
+			//data = (unsigned char)MIN((chn.nVolume * chn.nGlobalVol * m_nGlobalVolume) >> (1 + 6 + 8), 127);
 		} else if(macro[pos] == 'u')		// u: volume (calculated)
 		{
 			// Same note as with velocity applies here, but apparently also for instrument / sample volumes?
-			const int vol = Util::muldiv(pChn->nCalcVolume * m_PlayState.m_nGlobalVolume, pChn->nGlobalVol * pChn->nInsVol, 1 << 26);
+			const int vol = Util::muldiv(chn.nCalcVolume * m_PlayState.m_nGlobalVolume, chn.nGlobalVol * chn.nInsVol, 1 << 26);
 			data = (unsigned char)Clamp(vol / 2, 1, 127);
-			//data = (unsigned char)MIN((pChn->nCalcVolume * pChn->nGlobalVol * m_nGlobalVolume) >> (7 + 6 + 8), 127);
+			//data = (unsigned char)MIN((chn.nCalcVolume * chn.nGlobalVol * m_nGlobalVolume) >> (7 + 6 + 8), 127);
 		} else if(macro[pos] == 'x')		// x: pan set
 		{
-			data = (unsigned char)std::min(pChn->nPan / 2, 127);
+			data = (unsigned char)std::min(chn.nPan / 2, 127);
 		} else if(macro[pos] == 'y')		// y: calculated pan
 		{
-			data = (unsigned char)std::min(pChn->nRealPan / 2, 127);
+			data = (unsigned char)std::min(chn.nRealPan / 2, 127);
 		} else if(macro[pos] == 'a')		// a: high byte of bank select
 		{
 			if(pIns && pIns->wMidiBank)
@@ -4348,14 +4353,14 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro,
 		} else if(macro[pos] == 'z')		// z: macro data
 		{
 			data = param & 0x7F;
-			if(isSmooth && pChn->lastZxxParam < 0x80
+			if(isSmooth && chn.lastZxxParam < 0x80
 				&& (outPos < 3 || out[outPos - 3] != 0xF0 || out[outPos - 2] < 0xF0))
 			{
 				// Interpolation for external MIDI messages - interpolation for internal messages
 				// is handled separately to allow for more than 7-bit granularity where it's possible
 				data = (uint8)CalculateSmoothParamChange((float)lastZxxParam, (float)data);
 			}
-			pChn->lastZxxParam = data;
+			chn.lastZxxParam = data;
 		} else								// unrecognized byte (e.g. space char)
 		{
 			continue;
@@ -4396,10 +4401,10 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro,
 	}
 
 	// Macro string has been parsed and translated, now send the message(s)...
-	size_t sendPos = 0;
+	uint32 sendPos = 0;
 	while(sendPos < outPos)
 	{
-		size_t sendLen = 0;
+		uint32 sendLen = 0;
 		if(out[sendPos] == 0xF0)
 		{
 			// SysEx start
@@ -4410,7 +4415,7 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro,
 			} else
 			{
 				// SysEx message, find end of message
-				for(size_t i = sendPos + 1; i < outPos; i++)
+				for(uint32 i = sendPos + 1; i < outPos; i++)
 				{
 					if(out[i] == 0xF7)
 					{
@@ -4444,7 +4449,7 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro,
 			break;
 		}
 
-		size_t bytesSent = SendMIDIData(nChn, isSmooth, out + sendPos, sendLen, plugin);
+		uint32 bytesSent = SendMIDIData(nChn, isSmooth, out + sendPos, sendLen, plugin);
 		// Ideally (if there's no error in the macro data), we should have sendLen == bytesSent.
 		if(bytesSent > 0)
 		{
@@ -4453,9 +4458,7 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, char *macro,
 		{
 			sendPos += sendLen;
 		}
-
 	}
-
 }
 
 
@@ -4479,7 +4482,7 @@ float CSoundFile::CalculateSmoothParamChange(float currentValue, float param) co
 
 
 // Process MIDI macro data parsed by ProcessMIDIMacro... return bytes sent on success, 0 on (parse) failure.
-size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned char *macro, size_t macroLen, PLUGINDEX plugin)
+uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned char *macro, uint32 macroLen, PLUGINDEX plugin)
 //------------------------------------------------------------------------------------------------------------------------------
 {
 	if(macroLen < 1)
@@ -4620,10 +4623,10 @@ size_t CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 						pPlugin->MidiSysexSend(reinterpret_cast<const char *>(macro), macroLen);
 					} else
 					{
-						for(size_t pos = 0; pos < macroLen; pos += 3)
+						for(uint32 pos = 0; pos < macroLen; pos += 3)
 						{
 							uint32 curData = 0;
-							memcpy(&curData, macro + pos, std::min<size_t>(3, macroLen - pos));
+							memcpy(&curData, macro + pos, std::min<uint32>(3, macroLen - pos));
 							pPlugin->MidiSend(curData);
 						}
 					}
