@@ -27,10 +27,10 @@ protected:
 	bool inSection;
 public:
 	CriticalSection()
+		: inSection(false)
 	{
-		inSection = false;
 		Enter();
-	};
+	}
 	void Enter()
 	{
 		if(!inSection)
@@ -39,7 +39,7 @@ public:
 			EnterCriticalSection(&g_csAudio);
 			g_csAudioLockCount++;
 		}
-	};
+	}
 	void Leave()
 	{
 		if(inSection)
@@ -48,11 +48,11 @@ public:
 			g_csAudioLockCount--;
 			LeaveCriticalSection(&g_csAudio);
 		}
-	};
+	}
 	~CriticalSection()
 	{
 		Leave();
-	};
+	}
 	static bool IsLocked() // DEBUGGING only
 	{
 		bool islocked = false;
