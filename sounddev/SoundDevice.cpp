@@ -279,6 +279,18 @@ void Base::SourceNotifyPostStop()
 }
 
 
+bool Base::SourceIsLockedByCurrentThread() const
+//----------------------------------------------
+{
+	MPT_TRACE();
+	if(!m_Source)
+	{
+		return false;
+	}
+	return m_Source->SoundSourceIsLockedByCurrentThread();
+}
+
+
 void Base::SourceFillAudioBufferLocked()
 //--------------------------------------
 {

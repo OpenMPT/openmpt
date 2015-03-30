@@ -74,6 +74,7 @@ public:
 	virtual uint64 SoundSourceGetReferenceClockNowNanoseconds() const = 0; // timeGetTime()*1000000 on Windows
 	virtual void SoundSourcePreStartCallback() = 0;
 	virtual void SoundSourcePostStopCallback() = 0;
+	virtual bool SoundSourceIsLockedByCurrentThread() const = 0;
 	virtual void FillAudioBufferLocked(SoundDevice::IFillAudioBuffer &callback) = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
 	virtual void AudioRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer) = 0;
 	virtual void AudioDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, int64 streamPosition) = 0; // in sample frames
@@ -593,6 +594,7 @@ protected:
 	uint64 SourceGetReferenceClockNowNanoseconds() const;
 	void SourceNotifyPreStart();
 	void SourceNotifyPostStop();
+	bool SourceIsLockedByCurrentThread() const;
 	void SourceFillAudioBufferLocked();
 	void SourceAudioPreRead(std::size_t numFrames);
 	void SourceAudioRead(void *buffer, std::size_t numFrames);
