@@ -19,9 +19,6 @@
 #include "../common/StringFixer.h"
 #include "../soundlib/SampleFormatConverters.h"
 
-// DEBUG:
-#include "../common/AudioCriticalSection.h"
-
 #include <algorithm>
 
 
@@ -514,7 +511,7 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 		{
 			if(silence)
 			{
-				if(CriticalSection::IsLocked())
+				if(SourceIsLockedByCurrentThread())
 				{
 					MPT_ASSERT_MSG(false, "AudioCriticalSection locked while stopping ASIO");
 				} else
@@ -523,7 +520,7 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 				}
 			} else
 			{
-				if(CriticalSection::IsLocked())
+				if(SourceIsLockedByCurrentThread())
 				{
 					MPT_ASSERT_MSG(false, "AudioCriticalSection locked while starting ASIO");
 				} else
@@ -542,7 +539,7 @@ bool CASIODevice::InternalStart()
 //-------------------------------
 {
 	MPT_TRACE();
-	MPT_ASSERT_ALWAYS_MSG(!CriticalSection::IsLocked(), "AudioCriticalSection locked while starting ASIO");
+	MPT_ASSERT_ALWAYS_MSG(!SourceIsLockedByCurrentThread(), "AudioCriticalSection locked while starting ASIO");
 
 	if(m_Settings.KeepDeviceRunning)
 	{
@@ -586,7 +583,7 @@ void CASIODevice::InternalStopImpl(bool force)
 //--------------------------------------------
 {
 	MPT_TRACE();
-	MPT_ASSERT_ALWAYS_MSG(!CriticalSection::IsLocked(), "AudioCriticalSection locked while stopping ASIO");
+	MPT_ASSERT_ALWAYS_MSG(!SourceIsLockedByCurrentThread(), "AudioCriticalSection locked while stopping ASIO");
 
 	if(m_Settings.KeepDeviceRunning && !force)
 	{

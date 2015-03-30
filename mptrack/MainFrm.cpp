@@ -662,6 +662,14 @@ uint64 CMainFrame::SoundSourceGetReferenceClockNowNanoseconds() const
 }
 
 
+bool CMainFrame::SoundSourceIsLockedByCurrentThread() const
+//---------------------------------------------------------
+{
+	MPT_TRACE();
+	return CriticalSection::IsLocked();
+}
+
+
 void CMainFrame::FillAudioBufferLocked(SoundDevice::IFillAudioBuffer &callback)
 //-----------------------------------------------------------------------------
 {

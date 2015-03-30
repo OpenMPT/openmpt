@@ -407,6 +407,7 @@ public:
 	uint64 SoundSourceGetReferenceClockNowNanoseconds() const;
 	void SoundSourcePreStartCallback();
 	void SoundSourcePostStopCallback();
+	bool SoundSourceIsLockedByCurrentThread() const;
 	void FillAudioBufferLocked(SoundDevice::IFillAudioBuffer &callback);
 	void AudioRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer);
 	void AudioDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, int64 streamPosition);
