@@ -905,7 +905,7 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 		conv = iconv_t();
 		return reinterpret_cast<const typename Tdststring::value_type*>(&encoded_string[0]);
 	#else
-		return EncodeImplFallback<Tdststring<(charset, src);
+		return EncodeImplFallback<Tdststring>(charset, src);
 	#endif
 }
 
