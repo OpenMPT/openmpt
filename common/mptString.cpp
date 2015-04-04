@@ -13,7 +13,7 @@
 #if defined(MPT_CHARSET_CODECVTUTF8)
 #include <codecvt>
 #endif
-#if defined(MPT_CHARSET_INTERNAL)
+#if defined(MPT_CHARSET_INTERNAL) || defined(MPT_CHARSET_WIN32)
 #include <cstdlib>
 #endif
 #include <iomanip>
@@ -85,7 +85,7 @@ static const uint32 CharsetTableISO8859_1[256] = {
 };
 */
 
-#if defined(MPT_CHARSET_CODECVTUTF8) || defined(MPT_CHARSET_INTERNAL)
+#if defined(MPT_CHARSET_CODECVTUTF8) || defined(MPT_CHARSET_INTERNAL) || defined(MPT_CHARSET_WIN32)
 
 static const uint32 CharsetTableISO8859_15[256] = {
 	0x0000,0x0001,0x0002,0x0003,0x0004,0x0005,0x0006,0x0007,0x0008,0x0009,0x000a,0x000b,0x000c,0x000d,0x000e,0x000f,
@@ -144,7 +144,7 @@ static const uint32 CharsetTableCP437[256] = {
 	0x2261,0x00b1,0x2265,0x2264,0x2320,0x2321,0x00f7,0x2248,0x00b0,0x2219,0x00b7,0x221a,0x207f,0x00b2,0x25a0,0x00a0
 };
 
-#endif // MPT_CHARSET_CODECVTUTF8 || MPT_CHARSET_INTERNAL
+#endif // MPT_CHARSET_CODECVTUTF8 || MPT_CHARSET_INTERNAL || MPT_CHARSET_WIN32
 
 
 #define C(x) (static_cast<uint8>((x)))
@@ -255,7 +255,7 @@ static std::string To8bit(const std::wstring &str, const uint32 (&table)[256], c
 	return res;
 }
 
-#if defined(MPT_CHARSET_CODECVTUTF8) || defined(MPT_CHARSET_INTERNAL)
+#if defined(MPT_CHARSET_CODECVTUTF8) || defined(MPT_CHARSET_INTERNAL) || defined(MPT_CHARSET_WIN32)
 
 static std::wstring FromAscii(const std::string &str, wchar_t replacement = L'\uFFFD')
 //------------------------------------------------------------------------------------
@@ -341,8 +341,8 @@ static std::wstring LocaleDecode(const std::string &str, const std::locale & loc
 	const char * in_begin = str.data();
 	const char * in_end = in_begin + str.size();
 	out.resize((in_end - in_begin) * (facet.max_length() + 1));
-	wchar_t * out_begin = out.data();
-	wchar_t * out_end = out.data() + out.size();
+	wchar_t * out_begin = &(out[0]);
+	wchar_t * out_end = &(out[0]) + out.size();
 	const char * in_next = nullptr;
 	wchar_t * out_next = nullptr;
 	do
@@ -354,8 +354,8 @@ static std::wstring LocaleDecode(const std::string &str, const std::locale & loc
 		{
 			out.resize(out.size() * 2);
 			in_begin = in_next;
-			out_begin = out.data() + (out_next - out_begin);
-			out_end = out.data() + out.size();
+			out_begin = &(out[0]) + (out_next - out_begin);
+			out_end = &(out[0]) + out.size();
 			continue;
 		}
 		if(result == codecvt_type::error)
@@ -367,7 +367,7 @@ static std::wstring LocaleDecode(const std::string &str, const std::locale & loc
 		in_begin = in_next;
 		out_begin = out_next;
 	} while(result == codecvt_type::error && in_next < in_end && out_next < out_end);
-	return std::wstring(out.data(), out_next);
+	return std::wstring(&(out[0]), out_next);
 }
 
 static std::string LocaleEncode(const std::wstring &str, const std::locale & locale, char replacement = '?')
@@ -385,8 +385,8 @@ static std::string LocaleEncode(const std::wstring &str, const std::locale & loc
 	const wchar_t * in_begin = str.data();
 	const wchar_t * in_end = in_begin + str.size();
 	out.resize((in_end - in_begin) * (facet.max_length() + 1));
-	char * out_begin = out.data();
-	char * out_end = out.data() + out.size();
+	char * out_begin = &(out[0]);
+	char * out_end = &(out[0]) + out.size();
 	const wchar_t * in_next = nullptr;
 	char * out_next = nullptr;
 	do
@@ -398,8 +398,8 @@ static std::string LocaleEncode(const std::wstring &str, const std::locale & loc
 		{
 			out.resize(out.size() * 2);
 			in_begin = in_next;
-			out_begin = out.data() + (out_next - out_begin);
-			out_end = out.data() + out.size();
+			out_begin = &(out[0]) + (out_next - out_begin);
+			out_end = &(out[0]) + out.size();
 			continue;
 		}
 		if(result == codecvt_type::error)
@@ -411,7 +411,7 @@ static std::string LocaleEncode(const std::wstring &str, const std::locale & loc
 		in_begin = in_next;
 		out_begin = out_next;
 	} while(result == codecvt_type::error && in_next < in_end && out_next < out_end);
-	return std::string(out.data(), out_next);
+	return std::string(&(out[0]), out_next);
 }
 
 static std::wstring FromLocale(const std::string &str, wchar_t replacement = L'\uFFFD')
@@ -478,7 +478,7 @@ static std::string ToLocale(const std::wstring &str, char replacement = '?')
 
 #endif
 
-#endif // MPT_CHARSET_CODECVTUTF8 || MPT_CHARSET_INTERNAL
+#endif // MPT_CHARSET_CODECVTUTF8 || MPT_CHARSET_INTERNAL || MPT_CHARSET_WIN32
 
 #if defined(MPT_CHARSET_CODECVTUTF8)
 
@@ -500,7 +500,7 @@ static std::string ToUTF8(const std::wstring &str, char replacement = '?')
 
 #endif // MPT_CHARSET_CODECVTUTF8
 
-#if defined(MPT_CHARSET_INTERNAL)
+#if defined(MPT_CHARSET_INTERNAL) || defined(MPT_CHARSET_WIN32)
 
 static std::wstring FromUTF8(const std::string &str, wchar_t replacement = L'\uFFFD')
 //-----------------------------------------------------------------------------------
@@ -659,7 +659,76 @@ static std::string ToUTF8(const std::wstring &str, char replacement = '?')
 
 }
 
-#endif // MPT_CHARSET_INTERNAL
+#endif // MPT_CHARSET_INTERNAL || MPT_CHARSET_WIN32
+
+#if defined(MPT_CHARSET_WIN32)
+
+static bool TestCodePage(UINT cp)
+{
+	CPINFOEX cpinfo;
+	MemsetZero(cpinfo);
+	return GetCPInfoEx(cp, 0, &cpinfo) ? true : false;
+}
+
+#ifdef MODPLUG_TRACKER
+
+static bool HasCharsetUTF8 = true;
+static bool HasCharsetASCII = true;
+static bool HasCharsetISO8859_1 = true;
+static bool HasCharsetISO8859_15 = true;
+static bool HasCharsetCP437 = true;
+static bool HasCharsetWindows1252 = true;
+
+void InitCharsets()
+{
+	HasCharsetUTF8 = TestCodePage(CP_UTF8);
+	HasCharsetASCII = TestCodePage(20127);
+	HasCharsetISO8859_1 = TestCodePage(28591);
+	HasCharsetISO8859_15 = TestCodePage(28605);
+	HasCharsetCP437 = TestCodePage(437);
+	HasCharsetWindows1252 = TestCodePage(1252);
+}
+
+static bool HasCharset(Charset charset)
+{
+	switch(charset)
+	{
+		case CharsetUTF8:        return HasCharsetUTF8;        break;
+		case CharsetASCII:       return HasCharsetASCII;       break;
+		case CharsetISO8859_1:   return HasCharsetISO8859_1;   break;
+		case CharsetISO8859_15:  return HasCharsetISO8859_15;  break;
+		case CharsetCP437:       return HasCharsetCP437;       break;
+		case CharsetWindows1252: return HasCharsetWindows1252; break;
+	}
+	return false;
+}
+
+#else // !MODPLUG_TRACKER
+
+static bool HasCharset(Charset charset)
+{
+	switch(charset)
+	{
+	case CharsetUTF8:        return TestCodePage(CP_UTF8); break;
+	case CharsetASCII:       return TestCodePage(20127);   break;
+	case CharsetISO8859_1:   return TestCodePage(28591);   break;
+	case CharsetISO8859_15:  return TestCodePage(28605);   break;
+	case CharsetCP437:       return TestCodePage(437);     break;
+	case CharsetWindows1252: return TestCodePage(1252);    break;
+	}
+	return false;
+}
+
+#endif // MODPLUG_TRACKER
+
+#else // !MPT_CHARSET_WIN32
+
+void InitCharsets()
+{
+	return;
+}
+
+#endif // MPT_CHARSET_WIN32
 
 #if defined(MPT_CHARSET_WIN32)
 
@@ -759,6 +828,11 @@ static const char * Charset_wchar_t()
 #endif // MPT_CHARSET_ICONV
 
 
+#if !defined(MPT_CHARSET_ICONV)
+template<typename Tdststring>
+Tdststring EncodeImplFallback(Charset charset, const std::wstring &src);
+#endif // !MPT_CHARSET_ICONV
+
 // templated on 8bit strings because of type-safe variants
 template<typename Tdststring>
 Tdststring EncodeImpl(Charset charset, const std::wstring &src)
@@ -780,6 +854,10 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 	#endif
 #endif
 	#if defined(MPT_CHARSET_WIN32)
+		if(!HasCharset(charset))
+		{
+			return EncodeImplFallback<Tdststring>(charset, src);
+		}
 		const UINT codepage = CharsetToCodepage(charset);
 		int required_size = WideCharToMultiByte(codepage, 0, src.c_str(), -1, nullptr, 0, nullptr, nullptr);
 		if(required_size <= 0)
@@ -827,6 +905,15 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 		conv = iconv_t();
 		return reinterpret_cast<const typename Tdststring::value_type*>(&encoded_string[0]);
 	#else
+		return EncodeImplFallback<Tdststring<(charset, src);
+	#endif
+}
+
+
+#if !defined(MPT_CHARSET_ICONV)
+template<typename Tdststring>
+Tdststring EncodeImplFallback(Charset charset, const std::wstring &src)
+{
 		std::string out;
 		switch(charset)
 		{
@@ -843,9 +930,14 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 			case CharsetWindows1252: out = String::To8bit(src, CharsetTableWindows1252); break;
 		}
 		return Tdststring(out.begin(), out.end());
-	#endif
 }
+#endif // !MPT_CHARSET_ICONV
 
+
+#if !defined(MPT_CHARSET_ICONV)
+template<typename Tsrcstring>
+std::wstring DecodeImplFallback(Charset charset, const Tsrcstring &src);
+#endif // !MPT_CHARSET_ICONV
 
 // templated on 8bit strings because of type-safe variants
 template<typename Tsrcstring>
@@ -869,6 +961,10 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 	#endif
 #endif
 	#if defined(MPT_CHARSET_WIN32)
+		if(!HasCharset(charset))
+		{
+			return DecodeImplFallback<Tsrcstring>(charset, src);
+		}
 		const UINT codepage = CharsetToCodepage(charset);
 		int required_size = MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.c_str()), -1, nullptr, 0);
 		if(required_size <= 0)
@@ -920,6 +1016,14 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 		conv = iconv_t();
 		return &wide_string[0];
 	#else
+		return DecodeImplFallback<Tsrcstring>(charset, src);
+	#endif
+}
+
+#if !defined(MPT_CHARSET_ICONV)
+template<typename Tsrcstring>
+std::wstring DecodeImplFallback(Charset charset, const Tsrcstring &src)
+{
 		std::string in(src.begin(), src.end());
 		std::wstring out;
 		switch(charset)
@@ -937,8 +1041,8 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 			case CharsetWindows1252: out = String::From8bit(in, CharsetTableWindows1252); break;
 		}
 		return out;
-	#endif
 }
+#endif // !MPT_CHARSET_ICONV
 
 
 // templated on 8bit strings because of type-safe variants

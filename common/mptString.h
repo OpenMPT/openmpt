@@ -30,6 +30,11 @@ namespace String
 {
 
 
+#ifdef MODPLUG_TRACKER
+void InitCharsets();
+#endif // MODPLUG_TRACKER
+
+
 template <typename Tstring> struct Traits {
 	static const char * GetDefaultWhitespace() { return " \n\r\t"; }
 };
