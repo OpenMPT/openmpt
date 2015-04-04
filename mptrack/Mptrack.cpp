@@ -920,6 +920,7 @@ BOOL CTrackApp::InitInstance()
 	BeginWaitCursor();
 
 	mpt::Windows::Version::Init();
+	mpt::String::InitCharsets();
 
 	Log("OpenMPT Start");
 
