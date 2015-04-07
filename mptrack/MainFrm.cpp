@@ -1603,6 +1603,7 @@ void CMainFrame::InitPreview()
 	m_WaveFile.Order.resize(1);
 	m_WaveFile.Order[0] = 0;
 	m_WaveFile.Patterns.Insert(0, 80);
+	m_WaveFile.m_SongFlags = SONG_LINEARSLIDES;
 }
 
 
