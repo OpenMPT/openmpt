@@ -1584,7 +1584,7 @@ void CViewPattern::UpdateIndicator()
 
 						}
 						mpt::String::SetNullTerminator(sztmp);
-						if (sztmp[0]) s.Format("%d: %s", m->instr, sztmp);
+						s.Format("%d: %s", m->instr, sztmp);
 					}
 					break;
 

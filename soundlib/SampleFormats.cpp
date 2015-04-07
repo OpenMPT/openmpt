@@ -55,7 +55,7 @@ static bool IsMPEG(FileReader file)
 	uint8 header[3];
 	if(!file.CanRead(3))
 		return false;
-	file.ReadArrayLE(header);
+	file.ReadArray(header);
 	file.SkipBack(3);
 	return IsMPEG(header);
 }
@@ -749,7 +749,7 @@ bool CSoundFile::ReadPATSample(SAMPLEINDEX nSample, FileReader &file)
 		|| memcmp(fileHeader.id, "ID#000002\0", 10)
 		|| !fileHeader.numInstr || !fileHeader.numSamples
 		|| !file.ReadConvertEndianness(instrHeader)
-		|| !instrHeader.layers
+		//|| !instrHeader.layers	// DOO.PAT has 0 layers
 		|| !file.ReadConvertEndianness(layerHeader)
 		|| !layerHeader.samples)
 	{
