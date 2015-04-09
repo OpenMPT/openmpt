@@ -190,7 +190,7 @@ enum RecordAftertouchOptions
 // Sample editor preview behaviour
 enum SampleEditorKeyBehaviour
 {
-	seNoteOffOnNewKey,
+	seNoteOffOnNewKey = 0,
 	seNoteOffOnKeyUp,
 	seNoteOffOnKeyRestrike,
 };
@@ -508,7 +508,7 @@ public:
 	Setting<SampleUndoBufferSize> m_SampleUndoBufferSize;
 	Setting<SampleEditorKeyBehaviour> sampleEditorKeyBehaviour;
 	Setting<SampleEditorDefaultFormat> m_defaultSampleFormat;
-	Setting<uint32> m_nFinetuneStep;	// Increment finetune by x when using spin control. Default = 25
+	Setting<int32> m_nFinetuneStep;	// Increment finetune by x when using spin control. Default = 25 cents
 	Setting<int32> m_FLACCompressionLevel;	// FLAC compression level for saving (0...8)
 	Setting<bool> compressITI;
 	Setting<bool> m_MayNormalizeSamplesOnLoad;

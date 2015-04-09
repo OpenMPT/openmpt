@@ -218,7 +218,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, m_SampleUndoBufferSize(conf, "Sample Editor", "UndoBufferSize", SampleUndoBufferSize())
 	, sampleEditorKeyBehaviour(conf, "Sample Editor", "KeyBehaviour", seNoteOffOnNewKey)
 	, m_defaultSampleFormat(conf, "Sample Editor", "DefaultFormat", dfFLAC)
-	, m_nFinetuneStep(conf, "Sample Editor", "FinetuneStep", 25)
+	, m_nFinetuneStep(conf, "Sample Editor", "FinetuneStep", 10)
 	, m_FLACCompressionLevel(conf, "Sample Editor", "FLACCompressionLevel", 5)
 	, compressITI(conf, "Sample Editor", "CompressITI", true)
 	, m_MayNormalizeSamplesOnLoad(conf, "Sample Editor", "MayNormalizeSamplesOnLoad", true)
@@ -445,6 +445,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 					m_LatencyMS = m_BufferLength_DEPRECATED * 3;
 					m_UpdateIntervalMS = m_BufferLength_DEPRECATED / 8;
 				}
+				if(!m_UpdateIntervalMS) m_UpdateIntervalMS = static_cast<uint32>(SoundDevice::Settings().UpdateInterval * 1000.0);
 			}
 			conf.Remove(m_BufferLength_DEPRECATED.GetPath());
 		}
