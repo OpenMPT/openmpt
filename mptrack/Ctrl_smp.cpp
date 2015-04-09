@@ -540,8 +540,8 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, TCHAR *pszText)
 			if ((m_sndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) && (m_nSample))
 			{
 				const ModSample &sample = m_sndFile.GetSample(m_nSample);
-				UINT nFreqHz = ModSample::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
-				wsprintf(pszText, _T("%luHz"), nFreqHz);
+				uint32 freqHz = ModSample::TransposeToFrequency(sample.RelativeTone, sample.nFineTune);
+				wsprintf(pszText, _T("%luHz"), freqHz);
 				return TRUE;
 			}
 			break;
@@ -629,7 +629,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 
 		// Finetune / C-5 Speed / BaseNote
 		b = (m_sndFile.GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
-		SetDlgItemText(IDC_TEXT7, (b) ? "Freq. (Hz)" : "Finetune");
+		SetDlgItemText(IDC_TEXT7, (b) ? _T("Freq. (Hz)") : _T("Finetune"));
 		m_SpinFineTune.SetRange(-1, 1);
 		m_EditFileName.EnableWindow(b);
 
@@ -676,13 +676,13 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 			SetCurrentSample(m_sndFile.GetNumSamples());
 		}
 		const ModSample &sample = m_sndFile.GetSample(m_nSample);
-		CHAR s[128];
+		TCHAR s[128];
 		DWORD d;
 
 		m_SpinSample.SetRange(1, m_sndFile.GetNumSamples());
 
 		// Length / Type
-		wsprintf(s, "%u-bit %s, len: %u", sample.GetElementarySampleSize() * 8, sample.uFlags[CHN_STEREO] ? "stereo" : "mono", sample.nLength);
+		wsprintf(s, _T("%u-bit %s, len: %u"), sample.GetElementarySampleSize() * 8, sample.uFlags[CHN_STEREO] ? _T("stereo") : _T("mono"), sample.nLength);
 		SetDlgItemText(IDC_TEXT5, s);
 		// Name
 		mpt::String::Copy(s, m_sndFile.m_szNames[m_nSample]);
@@ -708,7 +708,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		int transp = 0;
 		if (m_sndFile.GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT))
 		{
-			wsprintf(s, "%lu", sample.nC5Speed);
+			wsprintf(s, _T("%lu"), sample.nC5Speed);
 			m_EditFineTune.SetWindowText(s);
 			if(sample.nC5Speed != 0)
 				transp = ModSample::FrequencyToTranspose(sample.nC5Speed) >> 7;
@@ -755,17 +755,17 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		if (sample.uFlags[CHN_LOOP]) d = sample.uFlags[CHN_PINGPONGLOOP] ? 2 : 1;
 		if (sample.uFlags[CHN_REVERSE]) d |= 4;
 		m_ComboLoopType.SetCurSel(d);
-		wsprintf(s, "%lu", sample.nLoopStart);
+		wsprintf(s, _T("%lu"), sample.nLoopStart);
 		m_EditLoopStart.SetWindowText(s);
-		wsprintf(s, "%lu", sample.nLoopEnd);
+		wsprintf(s, _T("%lu"), sample.nLoopEnd);
 		m_EditLoopEnd.SetWindowText(s);
 		// Sustain Loop
 		d = 0;
 		if (sample.uFlags[CHN_SUSTAINLOOP]) d = sample.uFlags[CHN_PINGPONGSUSTAIN] ? 2 : 1;
 		m_ComboSustainType.SetCurSel(d);
-		wsprintf(s, "%lu", sample.nSustainStart);
+		wsprintf(s, _T("%lu"), sample.nSustainStart);
 		m_EditSustainStart.SetWindowText(s);
-		wsprintf(s, "%lu", sample.nSustainEnd);
+		wsprintf(s, _T("%lu"), sample.nSustainEnd);
 		m_EditSustainEnd.SetWindowText(s);
 	}
 	if (hintType[HINT_MODTYPE | HINT_SAMPLEINFO | HINT_SMPNAMES])
@@ -2986,8 +2986,7 @@ NoSample:
 		{
 			uint32 d = sample.nC5Speed;
 			if (d < 1) d = 8363;
-			if(d < TrackerSettings::Instance().m_nFinetuneStep) d = TrackerSettings::Instance().m_nFinetuneStep;
-			d += (pos * TrackerSettings::Instance().m_nFinetuneStep);
+			d = Util::Round<uint32>(d * std::pow(2.0, (pos * TrackerSettings::Instance().m_nFinetuneStep) / 1200.0));
 			sample.nC5Speed = Clamp(d, 1u, 9999999u); // 9999999 is max. in Impulse Tracker
 			int transp = ModSample::FrequencyToTranspose(sample.nC5Speed) >> 7;
 			int basenote = (NOTE_MIDDLEC - NOTE_MIN) + transp;
