@@ -332,10 +332,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 			{
 				FlagSet<SongFlags> pausedFlags = sndFile.m_SongFlags & (SONG_PAUSED | SONG_STEP | SONG_PATTERNLOOP);
 				// update channel parameters and play time
-#ifndef NO_VST
-				// Stop hanging notes from VST instruments as well
-				sndFile.StopAllVsti();
-#endif // NO_VST
+				sndFile.SetCurrentOrder(m_nScrollPos);
 				m_pModDoc.SetElapsedTime(m_nScrollPos, 0, !sndFile.m_SongFlags[SONG_PAUSED | SONG_STEP]);
 				sndFile.m_SongFlags.set(pausedFlags);
 
