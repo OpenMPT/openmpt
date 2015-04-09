@@ -147,7 +147,7 @@ BEGIN
     LTEXT           "%",IDC_UNDOSIZE,162,20,114,16
     LTEXT           "Frequency Finetune Steps:",IDC_STATIC,12,38,114,8
     EDITTEXT        IDC_EDIT_FINETUNE,114,36,42,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "Hz",IDC_STATIC,162,38,30,8
+    LTEXT           "Cents",IDC_STATIC,162,38,20,8
     LTEXT           "Default Sample Format:",IDC_STATIC,12,56,102,8
     COMBOBOX        IDC_DEFAULT_FORMAT,114,54,42,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "FLAC Compression Level:",IDC_STATIC,12,74,90,8
@@ -2557,6 +2557,10 @@ BEGIN
     ID_VIEW_EDITHISTORY     "View the edit history of this module"
     ID_SAMPLE_GRID          "Configure Sample Grid"
     ID_FILE_SAVEASTEMPLATE  "Save the active document as template module\nSave as Template"
+END
+
+STRINGTABLE
+BEGIN
     ID_ENVELOPE_LOAD        "Load instrument envelope from file"
     ID_ENVELOPE_SAVE        "Save instrument envelope to file"
 END
