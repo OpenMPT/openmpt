@@ -723,10 +723,14 @@ static bool HasCharset(Charset charset)
 
 #else // !MPT_CHARSET_WIN32
 
+#ifdef MODPLUG_TRACKER
+
 void InitCharsets()
 {
 	return;
 }
+
+#endif // MODPLUG_TRACKER
 
 #endif // MPT_CHARSET_WIN32
 
