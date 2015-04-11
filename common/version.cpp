@@ -423,7 +423,7 @@ std::string GetFullCreditsString()
 		"Stephan M. Bernsee for pitch shifting source code\n"
 		"http://www.dspdimension.com/\n"
 		"Aleksey Vaneev of Voxengo for r8brain sample rate converter\n"
-		"https://code.google.com/p/r8brain-free-src/\n"
+		"https://github.com/avaneev/r8brain-free-src\n"
 		"Olli Parviainen for SoundTouch Library (time stretching)\n"
 		"http://www.surina.net/soundtouch/\n"
 #endif
@@ -438,7 +438,7 @@ std::string GetFullCreditsString()
 		"Ben \"GreaseMonkey\" Russell for IT sample compression code\n"
 		"https://github.com/iamgreaser/it2everything/\n"
 		"Alexander Chemeris for msinttypes\n"
-		"https://code.google.com/p/msinttypes/\n"
+		"https://github.com/chemeris/msinttypes\n"
 #ifndef NO_ZLIB
 		"Jean-loup Gailly and Mark Adler for zlib\n"
 		"http://zlib.net/\n"
