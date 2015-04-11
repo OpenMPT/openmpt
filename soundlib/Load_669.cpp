@@ -209,7 +209,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 
 				m->param = effect[chn] & 0x0F;
 
-				if((effect[chn] >> 4) < CountOf(effTrans))
+				if((effect[chn] >> 4) < static_cast<uint8>(CountOf(effTrans)))
 				{
 					m->command = effTrans[effect[chn] >> 4];
 				} else
