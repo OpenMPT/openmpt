@@ -672,6 +672,7 @@ static bool TestCodePage(UINT cp)
 
 #ifdef MODPLUG_TRACKER
 
+static bool CharsetsInitialized = false;
 static bool HasCharsetUTF8 = true;
 static bool HasCharsetASCII = true;
 static bool HasCharsetISO8859_1 = true;
@@ -687,10 +688,12 @@ void InitCharsets()
 	HasCharsetISO8859_15 = TestCodePage(28605);
 	HasCharsetCP437 = TestCodePage(437);
 	HasCharsetWindows1252 = TestCodePage(1252);
+	CharsetsInitialized = true;
 }
 
 static bool HasCharset(Charset charset)
 {
+	MPT_ASSERT(CharsetsInitialized);
 	switch(charset)
 	{
 		case CharsetUTF8:        return HasCharsetUTF8;        break;
