@@ -66,6 +66,7 @@ struct PACKED _669Sample
 	{
 		mptSmp.Initialize();
 
+		mptSmp.nC5Speed = 8363;
 		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;
 		mptSmp.nLoopEnd = loopEnd;
@@ -161,7 +162,13 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
-		std::vector<uint8> effect(8, 0xFF);
+		const ModCommand::COMMAND effTrans[] =
+		{
+			CMD_PORTAMENTOUP,	CMD_PORTAMENTODOWN,	CMD_TONEPORTAMENTO,	CMD_PORTAMENTOUP,
+			CMD_ARPEGGIO,		CMD_SPEED,			CMD_PANNINGSLIDE,	CMD_RETRIG,
+		};
+
+		uint8 effect[8] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 		for(ROWINDEX row = 0; row < 64; row++)
 		{
 			PatternRow m = Patterns[pat].GetRow(row);
@@ -202,13 +209,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 
 				m->param = effect[chn] & 0x0F;
 
-				static const ModCommand::COMMAND effTrans[] =
-				{
-					CMD_PORTAMENTOUP,	CMD_PORTAMENTODOWN,	CMD_TONEPORTAMENTO,	CMD_PORTAMENTOUP,
-					CMD_ARPEGGIO,		CMD_SPEED,			CMD_PANNINGSLIDE,	CMD_RETRIG,
-				};
-
-				if(static_cast<uint8>(effect[chn] >> 4) < CountOf(effTrans))
+				if((effect[chn] >> 4) < CountOf(effTrans))
 				{
 					m->command = effTrans[effect[chn] >> 4];
 				} else
@@ -242,7 +243,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 
 				case 5:
 					// F - set tempo
-					// TODO: param 0 is a "super fast tempo" in extended mode (?) 
+					// TODO: param 0 is a "super fast tempo" in extended mode (?)
 					effect[chn] = 0xFF;
 					break;
 

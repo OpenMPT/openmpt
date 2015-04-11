@@ -268,6 +268,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		const uint32 patternEnd = ord.x + patHeader.numRows;
 		maxPos = std::max(maxPos, patternEnd);
 
+		ModCommand::NOTE lastNote[32]= { 0 };
 		for(ROWINDEX r = 0; r < patHeader.numRows; r++, curRow++)
 		{
 			if(curRow >= rowsPerPat)
@@ -290,7 +291,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 				uint8 data[5];
 				file.ReadArray(data);
 				if(data[0])
-					m->note = (data[0] >> 4) * 12 + (data[0] & 0x0F) + 12 + NOTE_MIN;
+					lastNote[c] = m->note = (data[0] >> 4) * 12 + (data[0] & 0x0F) + 12 + NOTE_MIN;
 				else
 					m->note = NOTE_NONE;
 				m->instr = data[1];
@@ -357,6 +358,10 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 						{
 							m->param = mpt::saturate_cast<ModCommand::PARAM>(((m->param * Samples[m->instr].nLength) / 255) >> 8);
 						}
+					}
+					if((data[3] == 0x13 || data[3] == 0x16) && m->note == NOTE_NONE)
+					{
+						m->note = lastNote[c];
 					}
 				}
 			}
