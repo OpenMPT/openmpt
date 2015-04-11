@@ -255,7 +255,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		}
 	}
 
-	// If samples are being synced , force them to resync if tick duration changes
+	// If samples are being synced, force them to resync if tick duration changes
 	uint32 oldTickDuration = 0;
 
 	for (;;)
@@ -1262,6 +1262,8 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	pChn->nLength = pSmp->nLength;
 	pChn->nLoopStart = pSmp->nLoopStart;
 	pChn->nLoopEnd = pSmp->nLoopEnd;
+	// ProTracker "oneshot" loops (if loop start is 0, play the whole sample once and then repeat until loop end)
+	if(m_SongFlags[SONG_PT1XMODE] && pChn->nLoopStart == 0) pChn->nLoopEnd = pSmp->nLength;
 	pChn->dwFlags |= (pSmp->uFlags & (CHN_SAMPLEFLAGS | CHN_SURROUND));
 
 	// IT Compatibility: Autovibrato reset
@@ -1495,6 +1497,8 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 				pChn->nLoopEnd = pSmp->nLoopEnd;
 				if (pChn->nLength > pChn->nLoopEnd) pChn->nLength = pChn->nLoopEnd;
 			}
+			// ProTracker "oneshot" loops (if loop start is 0, play the whole sample once and then repeat until loop end)
+			if(m_SongFlags[SONG_PT1XMODE] && pChn->nLoopStart == 0) pChn->nLoopEnd = pChn->nLength = pSmp->nLength;
 
 			if(pChn->dwFlags[CHN_REVERSE])
 			{

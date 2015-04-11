@@ -481,22 +481,31 @@ void CSoundFile::CreateStereoMix(int count)
 				}
 			}
 
-			// ProTracker compatibility: Instrument changes without a note do not happen instantly, but rather when the sample loop has finished playing.
-			// Test case: PTInstrSwap.mod
-			if(m_SongFlags[SONG_PT1XMODE] && chn.nPos >= chn.nLoopEnd && chn.dwFlags[CHN_LOOP] && chn.nNewIns && chn.nNewIns <= GetNumSamples() && chn.pModSample != &Samples[chn.nNewIns])
+			if(m_SongFlags[SONG_PT1XMODE] && chn.nPos >= chn.nLoopEnd && chn.dwFlags[CHN_LOOP])
 			{
-				const ModSample &smp = Samples[chn.nNewIns];
-				chn.pModSample = &smp;
-				chn.pCurrentSample = smp.pSample;
-				chn.dwFlags = (chn.dwFlags & CHN_CHANNELFLAGS) | smp.uFlags;
-				chn.nLoopStart = smp.nLoopStart;
-				chn.nLoopEnd = smp.nLoopEnd;
-				chn.nLength = smp.uFlags[CHN_LOOP] ? smp.nLoopEnd : smp.nLength;
-				chn.nPos = chn.nLoopStart;
-				UpdateLookaheadPointers(samplePointer, lookaheadPointer, lookaheadStart, chn, resamplingMode);
-				if(!chn.pCurrentSample)
+				if(chn.nNewIns && chn.nNewIns <= GetNumSamples() && chn.pModSample != &Samples[chn.nNewIns])
 				{
-					break;
+					// ProTracker compatibility: Instrument changes without a note do not happen instantly, but rather when the sample loop has finished playing.
+					// Test case: PTInstrSwap.mod
+					const ModSample &smp = Samples[chn.nNewIns];
+					chn.pModSample = &smp;
+					chn.pCurrentSample = smp.pSample;
+					chn.dwFlags = (chn.dwFlags & CHN_CHANNELFLAGS) | smp.uFlags;
+					chn.nLength = smp.uFlags[CHN_LOOP] ? smp.nLoopEnd : smp.nLength;
+					chn.nLoopStart = smp.nLoopStart;
+					chn.nLoopEnd = smp.nLoopEnd;
+					chn.nPos = chn.nLoopStart;
+					UpdateLookaheadPointers(samplePointer, lookaheadPointer, lookaheadStart, chn, resamplingMode);
+					if(!chn.pCurrentSample)
+					{
+						break;
+					}
+				} else if(chn.nLoopStart == 0)
+				{
+					// ProTracker "oneshot" loops (if loop start is 0, play the whole sample once and then repeat until loop end)
+					chn.nPos = 0;
+					chn.nPosLo = 0;
+					chn.nLoopEnd = chn.nLength = chn.pModSample->nLoopEnd;
 				}
 			}
 		} while(nsamples > 0);
