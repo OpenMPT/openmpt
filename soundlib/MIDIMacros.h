@@ -10,6 +10,12 @@
 
 #pragma once
 
+enum
+{
+	NUM_MACROS = 16,	// number of parametered macros
+	MACRO_LENGTH = 32,	// max number of chars per macro
+};
+
 #ifdef MODPLUG_TRACKER
 OPENMPT_NAMESPACE_BEGIN
 class CSoundFile;
@@ -69,9 +75,6 @@ enum
 	MIDIOUT_PROGRAM,
 };
 
-
-#define NUM_MACROS 16	// number of parametered macros
-#define MACRO_LENGTH 32	// max number of chars per macro
 
 
 #ifdef NEEDS_PRAGMA_PACK

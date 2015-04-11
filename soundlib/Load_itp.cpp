@@ -110,7 +110,10 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
 		ChnSettings[chn].nPan = static_cast<uint16>(file.ReadUint32LE());
-		ChnSettings[chn].dwFlags = static_cast<ChannelFlags>(file.ReadUint32LE());
+		ChnSettings[chn].dwFlags.reset();
+		uint32 flags = file.ReadUint32LE();
+		if(flags & 0x100) ChnSettings[chn].dwFlags.set(CHN_MUTE);
+		if(flags & 0x800) ChnSettings[chn].dwFlags.set(CHN_SURROUND);
 		ChnSettings[chn].nVolume = static_cast<uint16>(file.ReadUint32LE());
 		file.ReadString<mpt::String::maybeNullTerminated>(ChnSettings[chn].szName, size);
 	}
@@ -186,7 +189,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(pat < numNamedPats)
 		{
-			char patName[MAX_PATTERNNAME];
+			char patName[32];
 			pattNames.ReadString<mpt::String::maybeNullTerminated>(patName, patNameLen);
 			Patterns[pat].SetName(patName);
 		}
@@ -210,13 +213,13 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	// Load embeded samples
+	// Load embedded samples
 
 	// Read original number of samples
 	m_nSamples = static_cast<SAMPLEINDEX>(file.ReadUint32LE());
 	LimitMax(m_nSamples, SAMPLEINDEX(MAX_SAMPLES - 1));
 
-	// Read number of embeded samples
+	// Read number of embedded samples
 	uint32 embeddedSamples = file.ReadUint32LE();
 
 	// Read samples

@@ -943,7 +943,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				// ModPlug Tracker 1.00a5, instruments 560 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
-				madeWithTracker = "ModPlug tracker 1.00a5";
+				madeWithTracker = "ModPlug Tracker 1.00a5";
 				interpretModPlugMade = true;
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !memcmp(fileHeader.reserved, "CHBI", 4))
 			{
@@ -999,6 +999,9 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 		case 7:
 			madeWithTracker = mpt::String::Print("ITMCK %1.%2.%3", (fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
+			break;
+		case 0xD:
+			madeWithTracker = "spc2it";
 			break;
 		}
 	}
@@ -1957,24 +1960,28 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 
 	if(GetType() & MOD_TYPE_MPT)
 	{
-		uint32 maxNodes = 0;
+		uint32 maxNodes[3] = { 0 };
 		for(INSTRUMENTINDEX nIns = 1; nIns <= m_nInstruments; nIns++) if(Instruments[nIns] != nullptr)
 		{
-			maxNodes = std::max(maxNodes, Instruments[nIns]->VolEnv.nNodes);
-			maxNodes = std::max(maxNodes, Instruments[nIns]->PanEnv.nNodes);
-			maxNodes = std::max(maxNodes, Instruments[nIns]->PitchEnv.nNodes);
+			maxNodes[0] = std::max(maxNodes[0], Instruments[nIns]->VolEnv.nNodes);
+			maxNodes[1] = std::max(maxNodes[1], Instruments[nIns]->PanEnv.nNodes);
+			maxNodes[2] = std::max(maxNodes[2], Instruments[nIns]->PitchEnv.nNodes);
 		}
 		// write full envelope information for MPTM files (more env points)
-		if(maxNodes > 25)
+		if(maxNodes[0] > 25)
 		{
 			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','E','.','.'), sizeof(ModInstrument().VolEnv.nNodes), f, nInstruments);
 			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','P','[','.'), sizeof(ModInstrument().VolEnv.Ticks),  f, nInstruments);
 			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','E','[','.'), sizeof(ModInstrument().VolEnv.Values), f, nInstruments);
-
+		}
+		if(maxNodes[1] > 25)
+		{
 			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','E','.','.'), sizeof(ModInstrument().PanEnv.nNodes), f, nInstruments);
 			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','P','[','.'), sizeof(ModInstrument().PanEnv.Ticks),  f, nInstruments);
 			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','E','[','.'), sizeof(ModInstrument().PanEnv.Values), f, nInstruments);
-
+		}
+		if(maxNodes[2] > 25)
+		{
 			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','E','.'), sizeof(ModInstrument().PitchEnv.nNodes), f, nInstruments);
 			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','P','['), sizeof(ModInstrument().PitchEnv.Ticks),  f, nInstruments);
 			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','E','['), sizeof(ModInstrument().PitchEnv.Values), f, nInstruments);
