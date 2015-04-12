@@ -190,7 +190,6 @@ void RowVisitor::ResetPatternLoop(ORDERINDEX order, ROWINDEX startRow)
 		row = *(iter++);
 		Unvisit(order, row);
 	}
-	visitOrder.clear();
 }
 
 
