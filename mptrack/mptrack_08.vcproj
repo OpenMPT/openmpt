@@ -1262,6 +1262,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FadeLaws.h"
+				>
+			</File>
+			<File
 				RelativePath=".\FileDialog.h"
 				>
 			</File>

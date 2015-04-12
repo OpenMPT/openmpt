@@ -1050,6 +1050,7 @@
     <ClInclude Include="EffectInfo.h" />
     <ClInclude Include="ExceptionHandler.h" />
     <ClInclude Include="ExternalSamples.h" />
+    <ClInclude Include="FadeLaws.h" />
     <ClInclude Include="FileDialog.h" />
     <ClInclude Include="FolderScanner.h" />
     <ClInclude Include="Globals.h" />

@@ -12,6 +12,7 @@
 #pragma once
 
 #include "../soundlib/SampleIO.h"
+#include "FadeLaws.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -55,7 +56,7 @@ protected:
 
 	// Applies amplification to sample. Negative values
 	// can be used to invert phase.
-	void ApplyAmplify(int32 nAmp, bool fadeIn = false, bool fadeOut = false);
+	void ApplyAmplify(int32 nAmp, bool fadeIn, bool fadeOut, Fade::Law fadeLaw);
 	void ApplyResample(uint32_t newRate);
 
 	SampleSelectionPoints GetSelectionPoints();

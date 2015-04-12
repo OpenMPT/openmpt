@@ -3137,14 +3137,12 @@ void CViewPattern::OnDropSelection()
 //----------------------------------
 {
 	CModDoc *pModDoc;
-	CSoundFile *pSndFile;
-
 	if((pModDoc = GetDocument()) == nullptr || !IsEditingEnabled_bmsg())
 	{
 		return;
 	}
-	pSndFile = pModDoc->GetSoundFile();
-	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern))
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	if(!sndFile.Patterns.IsValidPat(m_nPattern))
 	{
 		return;
 	}
@@ -3158,7 +3156,7 @@ void CViewPattern::OnDropSelection()
 	}
 
 	// Allocate replacement pattern
-	ModCommand *pNewPattern = CPattern::AllocatePattern(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
+	ModCommand *pNewPattern = CPattern::AllocatePattern(sndFile.Patterns[m_nPattern].GetNumRows(), sndFile.GetNumChannels());
 	if(pNewPattern == nullptr)
 	{
 		return;
@@ -3166,7 +3164,7 @@ void CViewPattern::OnDropSelection()
 	// Compute destination rect
 	PatternCursor begin(m_Selection.GetUpperLeft()), end(m_Selection.GetLowerRight());
 	begin.Move(dy, dx, 0);
-	if(begin.GetChannel() >= pSndFile->GetNumChannels())
+	if(begin.GetChannel() >= sndFile.GetNumChannels())
 	{
 		// Moved outside pattern range.
 		return;
@@ -3177,19 +3175,19 @@ void CViewPattern::OnDropSelection()
 		// Extend to parameter column
 		end.Move(0, 0, 1);
 	}
-	begin.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
-	end.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
+	begin.Sanitize(sndFile.Patterns[m_nPattern].GetNumRows(), sndFile.GetNumChannels());
+	end.Sanitize(sndFile.Patterns[m_nPattern].GetNumRows(), sndFile.GetNumChannels());
 	PatternRect destination(begin, end);
 
 	const bool moveSelection = !m_Status[psKeyboardDragSelect | psCtrlDragSelect];
 
 	BeginWaitCursor();
-	pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, pSndFile->GetNumChannels(), pSndFile->Patterns[m_nPattern].GetNumRows(), moveSelection ? "Move Selection" : "Copy Selection");
+	pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, sndFile.GetNumChannels(), sndFile.Patterns[m_nPattern].GetNumRows(), moveSelection ? "Move Selection" : "Copy Selection");
 
 	ModCommand *p = pNewPattern;
-	for(ROWINDEX row = 0; row < pSndFile->Patterns[m_nPattern].GetNumRows(); row++)
+	for(ROWINDEX row = 0; row < sndFile.Patterns[m_nPattern].GetNumRows(); row++)
 	{
-		for(CHANNELINDEX chn = 0; chn < pSndFile->GetNumChannels(); chn++, p++)
+		for(CHANNELINDEX chn = 0; chn < sndFile.GetNumChannels(); chn++, p++)
 		{
 			for (int c = PatternCursor::firstColumn; c <= PatternCursor::lastColumn; c++)
 			{
@@ -3210,10 +3208,10 @@ void CViewPattern::OnDropSelection()
 					}
 				}
 
-				if(xsrc >= 0 && xsrc < (int)pSndFile->GetNumChannels() && ysrc >= 0 && ysrc < (int)pSndFile->Patterns[m_nPattern].GetNumRows())
+				if(xsrc >= 0 && xsrc < (int)sndFile.GetNumChannels() && ysrc >= 0 && ysrc < (int)sndFile.Patterns[m_nPattern].GetNumRows())
 				{
 					// Copy the data
-					const ModCommand &src = *pSndFile->Patterns[m_nPattern].GetpModCommand(ysrc, xsrc);
+					const ModCommand &src = *sndFile.Patterns[m_nPattern].GetpModCommand(ysrc, xsrc);
 					switch(c)
 					{
 					case PatternCursor::noteColumn:
@@ -3237,8 +3235,8 @@ void CViewPattern::OnDropSelection()
 	}
 	
 	CriticalSection cs;
-	CPattern::FreePattern(pSndFile->Patterns[m_nPattern]);
-	pSndFile->Patterns[m_nPattern] = pNewPattern;
+	CPattern::FreePattern(sndFile.Patterns[m_nPattern]);
+	sndFile.Patterns[m_nPattern] = pNewPattern;
 	cs.Leave();
 
 	// Fix: Horizontal scrollbar pos screwed when selecting with mouse
@@ -3458,11 +3456,36 @@ void CViewPattern::UndoRedo(bool undo)
 }
 
 
+// Apply amplification and fade function to volume
+static void AmplifyFade(int &vol, int amp, ROWINDEX row, ROWINDEX numRows, bool fadeIn, bool fadeOut, Fade::Func &fadeFunc)
+//-------------------------------------------------------------------------------------------------------------------------
+{
+	vol *= amp;
+	if(fadeIn && fadeOut)
+	{
+		ROWINDEX numRows2 = numRows / 2;
+		if(row < numRows2)
+			vol = fadeFunc(vol, row + 1, numRows2);
+		else
+			vol = fadeFunc(vol, numRows - row, numRows - numRows2);
+	} else if(fadeIn)
+	{
+		vol = fadeFunc(vol, row + 1, numRows);
+	} else if(fadeOut)
+	{
+		vol = fadeFunc(vol, numRows - row, numRows);
+	}
+	vol = (vol + 50) / 100;
+	LimitMax(vol, 64);
+}
+
+
 void CViewPattern::OnPatternAmplify()
 //-----------------------------------
 {
-	static int16 snOldAmp = 100;
-	CAmpDlg dlg(this, snOldAmp, 0);
+	static int16 oldAmp = 100;
+	static Fade::Law fadeLaw = Fade::kLinear;
+	CAmpDlg dlg(this, oldAmp, fadeLaw, 0);
 	if(dlg.DoModal() != IDOK)
 	{
 		return;
@@ -3474,7 +3497,9 @@ void CViewPattern::OnPatternAmplify()
 
 	BeginWaitCursor();
 	PrepareUndo(m_Selection, "Amplify");
-	snOldAmp = dlg.m_nFactor;
+	oldAmp = dlg.m_nFactor;
+	fadeLaw = dlg.m_fadeLaw;
+	Fade::Func fadeFunc = GetFadeFunc(fadeLaw);
 
 	if(pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
@@ -3553,10 +3578,11 @@ void CViewPattern::OnPatternAmplify()
 					}
 					if(nSmp > 0 && nSmp <= pSndFile->GetNumSamples())
 					{
-						chvol[nChn] = (BYTE)(pSndFile->GetSample(nSmp).nVolume / 4);
+						chvol[nChn] = (uint8)(pSndFile->GetSample(nSmp).nVolume / 4);
 						break;
 					} else
-					{	//nonexistant sample and no volume present in patten? assume volume=64.
+					{
+						//nonexistant sample and no volume present in patten? assume volume=64.
 						if(useVolCol)
 						{
 							m->volcmd = VOLCMD_VOLUME;
@@ -3631,24 +3657,18 @@ void CViewPattern::OnPatternAmplify()
 
 				if(m->volcmd == VOLCMD_VOLUME)
 				{
-					int vol = m->vol * dlg.m_nFactor;
-					if(dlg.m_bFadeIn) vol = (vol * (nRow+1-firstRow)) / cy;
-					if(dlg.m_bFadeOut) vol = (vol * (cy+firstRow-nRow)) / cy;
-					vol = (vol + 50) / 100;
-					LimitMax(vol, 64);
-					m->vol = (BYTE)vol;
+					int vol = m->vol;
+					AmplifyFade(vol, dlg.m_nFactor, nRow - firstRow, cy, dlg.m_bFadeIn, dlg.m_bFadeOut, fadeFunc);
+					m->vol = static_cast<ModCommand::VOL>(vol);
 				}
 
 				if(m_Selection.ContainsHorizontal(PatternCursor(0, nChn, PatternCursor::effectColumn)) || m_Selection.ContainsHorizontal(PatternCursor(0, nChn, PatternCursor::paramColumn)))
 				{
 					if(m->command == CMD_VOLUME && m->param <= 64)
 					{
-						int vol = m->param * dlg.m_nFactor;
-						if(dlg.m_bFadeIn) vol = (vol * (nRow + 1 - firstRow)) / cy;
-						if(dlg.m_bFadeOut) vol = (vol * (cy + firstRow - nRow)) / cy;
-						vol = (vol + 50) / 100;
-						LimitMax(vol, 64);
-						m->param = (BYTE)vol;
+						int vol = m->param;
+						AmplifyFade(vol, dlg.m_nFactor, nRow - firstRow, cy, dlg.m_bFadeIn, dlg.m_bFadeOut, fadeFunc);
+						m->param = static_cast<ModCommand::PARAM>(vol);
 					}
 				}
 			}
