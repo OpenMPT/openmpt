@@ -28,9 +28,17 @@ public:
 	int16 m_nFactor, m_nFactorMin, m_nFactorMax;
 	bool m_bFadeIn, m_bFadeOut;
 
+protected:
+	CComboBoxEx m_fadeBox;
+	CImageList m_list;
+
 public:
 	CAmpDlg(CWnd *parent, int16 factor, Fade::Law fadeLaw, int16 factorMin = int16_min, int16 factorMax = int16_max);
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
+	virtual void OnDestroy();
 	virtual void OnOK();
 };
 

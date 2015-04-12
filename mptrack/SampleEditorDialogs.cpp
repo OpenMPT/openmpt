@@ -12,6 +12,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "Reporting.h"
+#include "MPTrackUtil.h"
 #include "../common/misc_util.h"
 #include "../soundlib/Snd_defs.h"
 #include "../soundlib/ModSample.h"
@@ -23,6 +24,15 @@ OPENMPT_NAMESPACE_BEGIN
 
 //////////////////////////////////////////////////////////////////////////
 // Sample amplification dialog
+
+void CAmpDlg::DoDataExchange(CDataExchange* pDX)
+//----------------------------------------------
+{
+	CDialog::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CSampleGridDlg)
+	DDX_Control(pDX, IDC_COMBO1,	m_fadeBox);
+	//}}AFX_DATA_MAP
+}
 
 CAmpDlg::CAmpDlg(CWnd *parent, int16 factor, Fade::Law fadeLaw, int16 factorMin, int16 factorMax)
 //-----------------------------------------------------------------------------------------------
@@ -47,12 +57,11 @@ BOOL CAmpDlg::OnInitDialog()
 	}
 	SetDlgItemInt(IDC_EDIT1, m_nFactor);
 
-	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
 	const struct
 	{
-		const TCHAR *name;
+		TCHAR *name;
 		Fade::Law id;
-	} fadeLaws[] = 
+	} fadeLaws[] =
 	{
 		{ _T("Linear"),       Fade::kLinear },
 		{ _T("Exponential"),  Fade::kPow },
@@ -61,16 +70,56 @@ BOOL CAmpDlg::OnInitDialog()
 		{ _T("Quarter Sine"), Fade::kQuarterSine },
 		{ _T("Half Sine"),    Fade::kHalfSine },
 	};
+	// Create icons for fade laws
+	const int cx = Util::ScalePixels(16, m_hWnd);
+	const int cy = Util::ScalePixels(16, m_hWnd);
+	m_list.Create(cx, cy, ILC_COLOR32 | ILC_MASK, 0, 1);
+	std::vector<COLORREF> bits;
+	const COLORREF col = GetSysColor(COLOR_WINDOWTEXT);
 	for(size_t i = 0; i < CountOf(fadeLaws); i++)
 	{
-		int id = combo->AddString(fadeLaws[i].name);
-		combo->SetItemData(id, fadeLaws[i].id);
-		if(fadeLaws[i].id == m_fadeLaw) combo->SetCurSel(id);
+		bits.assign(cx * cy, RGB(255, 0, 255));
+		Fade::Func fadeFunc = Fade::GetFadeFunc(static_cast<Fade::Law>(i));
+		for(int x = 0; x < cx; x++)
+		{
+			int32 val = cy - fadeFunc(cy, x, cx) - 1;
+			Limit(val, 0, cy - 1);
+			bits[x + val * cx] = col;
+			// Draw another pixel for fake interpolation
+			val = cy - fadeFunc(cy, x * 2 + 1, cx * 2) - 1;
+			Limit(val, 0, cy - 1);
+			bits[x + val * cx] = col;
+		}
+		CBitmap bitmap;
+		bitmap.CreateBitmap(cx, cy, 1, 32, &bits[0]);
+		m_list.Add(&bitmap, RGB(255, 0, 255));
+		bitmap.DeleteObject();
+	}
+	m_fadeBox.SetImageList(&m_list);
+
+	// Add fade laws to list
+	COMBOBOXEXITEM cbi;
+	MemsetZero(cbi);
+	cbi.mask = CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_TEXT | CBEIF_LPARAM;
+	for(size_t i = 0; i < CountOf(fadeLaws); i++)
+	{
+		cbi.iItem = i;
+		cbi.pszText = fadeLaws[i].name;
+		cbi.iImage = cbi.iSelectedImage = i;
+		cbi.lParam = fadeLaws[i].id;
+		m_fadeBox.InsertItem(&cbi);
+		if(fadeLaws[i].id == m_fadeLaw) m_fadeBox.SetCurSel(i);
 	}
 
 	return TRUE;
 }
 
+
+void CAmpDlg::OnDestroy()
+//-----------------------
+{
+	m_list.DeleteImageList();
+}
 
 void CAmpDlg::OnOK()
 //------------------
@@ -85,8 +134,7 @@ void CAmpDlg::OnOK()
 	m_nFactor = static_cast<int16>(nVal);
 	m_bFadeIn = (IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
 	m_bFadeOut = (IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED);
-	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
-	m_fadeLaw = static_cast<Fade::Law>(combo->GetItemData(combo->GetCurSel()));
+	m_fadeLaw = static_cast<Fade::Law>(m_fadeBox.GetItemData(m_fadeBox.GetCurSel()));
 	CDialog::OnOK();
 }
 
