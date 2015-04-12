@@ -12,6 +12,7 @@
 #pragma once
 
 #include "../soundlib/SampleIO.h"
+#include "FadeLaws.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -23,11 +24,12 @@ class CAmpDlg: public CDialog
 //===========================
 {
 public:
+	Fade::Law m_fadeLaw;
 	int16 m_nFactor, m_nFactorMin, m_nFactorMax;
 	bool m_bFadeIn, m_bFadeOut;
 
 public:
-	CAmpDlg(CWnd *parent, int16 nFactor=100, int16 nFactorMin = int16_min, int16 nFactorMax = int16_max);
+	CAmpDlg(CWnd *parent, int16 factor, Fade::Law fadeLaw, int16 factorMin = int16_min, int16 factorMax = int16_max);
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 };

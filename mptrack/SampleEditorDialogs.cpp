@@ -24,11 +24,15 @@ OPENMPT_NAMESPACE_BEGIN
 //////////////////////////////////////////////////////////////////////////
 // Sample amplification dialog
 
-CAmpDlg::CAmpDlg(CWnd *parent, int16 nFactor, int16 nFactorMin, int16 nFactorMax) 
-//-------------------------------------------------------------------------------
-: CDialog(IDD_SAMPLE_AMPLIFY, parent), m_nFactor(nFactor),
-m_nFactorMin(nFactorMin), m_nFactorMax(nFactorMax),
-m_bFadeIn(FALSE), m_bFadeOut(FALSE)
+CAmpDlg::CAmpDlg(CWnd *parent, int16 factor, Fade::Law fadeLaw, int16 factorMin, int16 factorMax)
+//-----------------------------------------------------------------------------------------------
+	: CDialog(IDD_SAMPLE_AMPLIFY, parent)
+	, m_nFactor(factor)
+	, m_nFactorMin(factorMin)
+	, m_nFactorMax(factorMax)
+	, m_bFadeIn(FALSE)
+	, m_bFadeOut(FALSE)
+	, m_fadeLaw(fadeLaw)
 {}
 
 BOOL CAmpDlg::OnInitDialog()
@@ -42,6 +46,28 @@ BOOL CAmpDlg::OnInitDialog()
 		spin->SetPos32(m_nFactor);
 	}
 	SetDlgItemInt(IDC_EDIT1, m_nFactor);
+
+	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
+	const struct
+	{
+		const TCHAR *name;
+		Fade::Law id;
+	} fadeLaws[] = 
+	{
+		{ _T("Linear"),       Fade::kLinear },
+		{ _T("Exponential"),  Fade::kPow },
+		{ _T("Square Root"),  Fade::kSqrt },
+		{ _T("Logarithmic"),  Fade::kLog },
+		{ _T("Quarter Sine"), Fade::kQuarterSine },
+		{ _T("Half Sine"),    Fade::kHalfSine },
+	};
+	for(size_t i = 0; i < CountOf(fadeLaws); i++)
+	{
+		int id = combo->AddString(fadeLaws[i].name);
+		combo->SetItemData(id, fadeLaws[i].id);
+		if(fadeLaws[i].id == m_fadeLaw) combo->SetCurSel(id);
+	}
+
 	return TRUE;
 }
 
@@ -52,13 +78,15 @@ void CAmpDlg::OnOK()
 	const int nVal = static_cast<int>(GetDlgItemInt(IDC_EDIT1));
 	if(nVal < m_nFactorMin || nVal > m_nFactorMax)
 	{
-		CString str; str.Format(GetStrI18N(__TEXT("Value should be within [%d, %d]")), m_nFactorMin, m_nFactorMax);
+		CString str; str.Format(GetStrI18N(_T("Value should be within [%d, %d]")), m_nFactorMin, m_nFactorMax);
 		Reporting::Information(str);
 		return;
 	}
 	m_nFactor = static_cast<int16>(nVal);
-	m_bFadeIn = (IsDlgButtonChecked(IDC_CHECK1) != 0);
-	m_bFadeOut = (IsDlgButtonChecked(IDC_CHECK2) != 0);
+	m_bFadeIn = (IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
+	m_bFadeOut = (IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED);
+	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
+	m_fadeLaw = static_cast<Fade::Law>(combo->GetItemData(combo->GetCurSel()));
 	CDialog::OnOK();
 }
 

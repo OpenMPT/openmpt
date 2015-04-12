@@ -1074,6 +1074,9 @@
     <ClInclude Include="..\sounddev\SoundDeviceUtilities.h">
       <Filter>Header Files\sounddev</Filter>
     </ClInclude>
+    <ClInclude Include="FadeLaws.h">
+      <Filter>Header Files\mptrack</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">

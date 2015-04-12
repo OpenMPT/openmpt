@@ -1323,53 +1323,6 @@ void CCtrlSamples::OnNormalize()
 }
 
 
-template<typename T>
-void ApplyAmplifyImpl(T *pSample, SmpLength start, SmpLength end, int32 amp, bool fadeIn, bool fadeOut)
-//-----------------------------------------------------------------------------------------------------
-{
-	pSample += start;
-	SmpLength len = end - start;
-	int64 l64 = static_cast<int64>(len);
-
-	for(SmpLength i = 0; i < len; i++)
-	{
-		int32 l = (pSample[i] * amp) / 100;
-		if(fadeIn) l = (int32)((l * (int64)i) / l64);
-		if(fadeOut) l = (int32)((l * (int64)(len - i)) / l64);
-		Limit(l, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
-		pSample[i] = static_cast<T>(l);
-	}
-}
-
-
-void CCtrlSamples::ApplyAmplify(int32 lAmp, bool fadeIn, bool fadeOut)
-//--------------------------------------------------------------------
-{
-	if((!m_sndFile.GetSample(m_nSample).pSample)) return;
-
-	BeginWaitCursor();
-	ModSample &sample = m_sndFile.GetSample(m_nSample);
-
-	SampleSelectionPoints selection = GetSelectionPoints();
-
-	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_update, "Amplify", selection.nStart, selection.nEnd);
-
-	if (sample.uFlags[CHN_STEREO]) { selection.nStart *= 2; selection.nEnd *= 2; }
-	if ((fadeIn) && (fadeOut)) lAmp *= 4;
-	if (sample.uFlags[CHN_16BIT])
-	{
-		ApplyAmplifyImpl<int16>(sample.pSample16, selection.nStart, selection.nEnd, lAmp, fadeIn, fadeOut);
-	} else
-	{
-		ApplyAmplifyImpl<int8>(sample.pSample8, selection.nStart, selection.nEnd, lAmp, fadeIn, fadeOut);
-	}
-	sample.PrecomputeLoops(m_sndFile, false);
-	SetModified(SampleHint().Data(), false, true);
-	EndWaitCursor();
-	SwitchToView();
-}
-
-
 void CCtrlSamples::OnRemoveDCOffset()
 //-----------------------------------
 {
@@ -1450,14 +1403,74 @@ void CCtrlSamples::OnRemoveDCOffset()
 }
 
 
+template<typename T>
+static void ApplyAmplifyImpl(T * MPT_RESTRICT pSample, SmpLength start, SmpLength end, int32 amp, bool fadeIn, bool fadeOut, Fade::Law fadeLaw)
+//---------------------------------------------------------------------------------------------------------------------------------------------
+{
+	pSample += start;
+	SmpLength len = end - start, len2 = len / 2;
+	Fade::Func fadeFunc = Fade::GetFadeFunc(fadeLaw);
+
+	for(SmpLength i = 0; i < len; i++)
+	{
+		int32 l = (pSample[i] * amp) / 100;
+		if(fadeIn && fadeOut)
+		{
+			if(i < len2)
+				l = fadeFunc(l, i, len2);
+			else
+				l = fadeFunc(l, len - i, len - len2);
+		} else if(fadeIn)
+		{
+			l = fadeFunc(l, i, len);
+		} else if(fadeOut)
+		{
+			l = fadeFunc(l, len - i, len);
+		}
+		Limit(l, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
+		pSample[i] = static_cast<T>(l);
+	}
+}
+
+
+void CCtrlSamples::ApplyAmplify(int32 lAmp, bool fadeIn, bool fadeOut, Fade::Law fadeLaw)
+//---------------------------------------------------------------------------------------
+{
+	if((!m_sndFile.GetSample(m_nSample).pSample)) return;
+
+	BeginWaitCursor();
+	ModSample &sample = m_sndFile.GetSample(m_nSample);
+
+	SampleSelectionPoints selection = GetSelectionPoints();
+
+	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_update, "Amplify", selection.nStart, selection.nEnd);
+
+	selection.nStart *= sample.GetNumChannels();
+	selection.nEnd *= sample.GetNumChannels();
+	if (sample.uFlags[CHN_16BIT])
+	{
+		ApplyAmplifyImpl(sample.pSample16, selection.nStart, selection.nEnd, lAmp, fadeIn, fadeOut, fadeLaw);
+	} else
+	{
+		ApplyAmplifyImpl(sample.pSample8, selection.nStart, selection.nEnd, lAmp, fadeIn, fadeOut, fadeLaw);
+	}
+	sample.PrecomputeLoops(m_sndFile, false);
+	SetModified(SampleHint().Data(), false, true);
+	EndWaitCursor();
+	SwitchToView();
+}
+
+
 void CCtrlSamples::OnAmplify()
 //----------------------------
 {
-	static int16 snOldAmp = 100;
-	CAmpDlg dlg(this, snOldAmp);
+	static int16 oldAmp = 100;
+	static Fade::Law fadeLaw = Fade::kLinear;
+	CAmpDlg dlg(this, oldAmp, fadeLaw);
 	if (dlg.DoModal() != IDOK) return;
-	snOldAmp = dlg.m_nFactor;
-	ApplyAmplify(dlg.m_nFactor, dlg.m_bFadeIn, dlg.m_bFadeOut);
+	oldAmp = dlg.m_nFactor;
+	fadeLaw = dlg.m_fadeLaw;
+	ApplyAmplify(dlg.m_nFactor, dlg.m_bFadeIn, dlg.m_bFadeOut, dlg.m_fadeLaw);
 }
 
 
@@ -1472,7 +1485,7 @@ void CCtrlSamples::OnQuickFade()
 	SampleSelectionPoints sel = GetSelectionPoints();
 	if(sel.selectionActive && (sel.nStart == 0 || sel.nEnd == m_sndFile.GetSample(m_nSample).nLength))
 	{
-		ApplyAmplify(100, (sel.nStart == 0), (sel.nEnd == m_sndFile.GetSample(m_nSample).nLength));
+		ApplyAmplify(100, (sel.nStart == 0), (sel.nEnd == m_sndFile.GetSample(m_nSample).nLength), Fade::kLinear);
 	} else
 	{
 		// Can't apply quick fade as no appropriate selection has been made, so ask the user to amplify the whole sample instead.
