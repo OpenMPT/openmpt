@@ -564,7 +564,7 @@ static std::wstring FromUTF8(const std::string &str, wchar_t replacement = L'\uF
 						out.push_back( lo_sur );
 					}
 				} else {
-					out.push_back( ucs4 );
+					out.push_back( static_cast<wchar_t>( ucs4 ) );
 				}
 				ucs4 = 0;
 			}
