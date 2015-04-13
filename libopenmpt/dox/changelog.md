@@ -19,6 +19,11 @@ is just a high-level summary.
     preferred backend because SDL is more widespread and better tested on all
     kinds of different platforms, and in generel, SDL is just more reliable.
 
+ *  libopenmpt now supports PLM (Disorder Tracker 2) files.
+
+ *  Various playback improvements and fixes for IT, S3M, XM, MOD, PTM and 669
+    files.
+
 ### libopenmpt 0.2-beta10 (2015-02-17)
 
  *  Makefile configuration filenames changed from
@@ -62,7 +67,8 @@ is just a high-level summary.
  *  Added openmpt::ext::interactive, an extension which adds a whole bunch of
     new functionality to change playback in some way or another.
  *  Added possibility to sync sample playback when using
-    openmpt::module::set_position_* by setting the ctl value seek.sync_samples=1  
+    openmpt::module::set_position_* by setting the ctl value
+    seek.sync_samples=1  
  *  Support for "hidden" subsongs has been added.
     They are accessible through the same interface as ordinary subsongs, i.e.
     use openmpt::module::select_subsong to switch between any kind of subsongs.
