@@ -66,12 +66,16 @@
 #if defined(_MSC_VER)
 #if (_MSC_VER >= 1500) && (_MSC_VER < 1600)
 #define OPENMPT123_ANCIENT_COMPILER
+#define OPENMPT123_ANCIENT_COMPILER_FSTREAM
 #endif
 #endif
 
 #if defined(__GNUC__) && !defined(__clang__)
 #if (__GNUC__*10000 + __GNUC_MINOR__*100 + __GNUC_PATCHLEVEL__*1 < 40300)
 #define OPENMPT123_ANCIENT_COMPILER
+#endif
+#if (__GNUC__*10000 + __GNUC_MINOR__*100 + __GNUC_PATCHLEVEL__*1 < 40400)
+#define OPENMPT123_ANCIENT_COMPILER_FSTREAM
 #endif
 #endif
 

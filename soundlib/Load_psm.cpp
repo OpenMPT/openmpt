@@ -526,7 +526,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						chunkCount++;
 					}
 					// separate subsongs by "---" patterns
-					orderOffsets.push_back(nullptr);
+					orderOffsets.push_back(static_cast<FileReader*>(nullptr)); // GCC 4.3 does not like .push_back(nullptr) here
 					Order.Append();
 				}
 			case PSMChunk::idPPAN: // PPAN - Channel panning table (used in Sinaria)

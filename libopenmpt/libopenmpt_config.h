@@ -98,12 +98,19 @@
 #if defined(_MSC_VER)
 #if (_MSC_VER >= 1500) && (_MSC_VER < 1600)
 #define LIBOPENMPT_ANCIENT_COMPILER
+#define LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
+#define LIBOPENMPT_SHARE_PTR std::tr1::shared_ptr
 #endif
 #endif
 
 #if defined(__GNUC__) && !defined(__clang__)
 #if (__GNUC__*10000 + __GNUC_MINOR__*100 + __GNUC_PATCHLEVEL__*1 < 40300)
 #define LIBOPENMPT_ANCIENT_COMPILER
+#define LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
+#define LIBOPENMPT_SHARED_PTR std::tr1::shared_ptr
+#elif (__GNUC__*10000 + __GNUC_MINOR__*100 + __GNUC_PATCHLEVEL__*1 < 40400)
+#define LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
+#define LIBOPENMPT_SHARED_PTR std::shared_ptr
 #endif
 #endif
 
