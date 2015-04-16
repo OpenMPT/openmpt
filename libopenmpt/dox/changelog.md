@@ -19,7 +19,7 @@ is just a high-level summary.
     preferred backend because SDL is more widespread and better tested on all
     kinds of different platforms, and in generel, SDL is just more reliable.
 
- *  libopenmpt now also supports GCC 4.3.
+ *  [Bug] libopenmpt now also compiles with GCC 4.3.
 
  *  libopenmpt now supports PLM (Disorder Tracker 2) files.
 
