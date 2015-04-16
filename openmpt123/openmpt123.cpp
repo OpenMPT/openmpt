@@ -171,7 +171,7 @@ public:
 		: impl(0)
 	{
 		if ( !flags.force_overwrite ) {
-#if defined(OPENMPT123_ANCIENT_COMPILER)
+#if defined(OPENMPT123_ANCIENT_COMPILER_FSTREAM)
 			std::ifstream testfile( filename.c_str(), std::ios::binary );
 #else
 			std::ifstream testfile( filename, std::ios::binary );
@@ -1441,7 +1441,7 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 				file_stream.str( data );
 				filesize = data.length();
 			#elif defined(_MSC_VER) && defined(UNICODE)
-#if defined(OPENMPT123_ANCIENT_COMPILER)
+#if defined(OPENMPT123_ANCIENT_COMPILER_FSTREAM)
 				file_stream.open( utf8_to_wstring( filename ).c_str(), std::ios::binary );
 #else
 				file_stream.open( utf8_to_wstring( filename ), std::ios::binary );
@@ -1450,7 +1450,7 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 				filesize = file_stream.tellg();
 				file_stream.seekg( 0, std::ios::beg );
 			#else
-#if defined(OPENMPT123_ANCIENT_COMPILER)
+#if defined(OPENMPT123_ANCIENT_COMPILER_FSTREAM)
 				file_stream.open( filename.c_str(), std::ios::binary );
 #else
 				file_stream.open( filename, std::ios::binary );

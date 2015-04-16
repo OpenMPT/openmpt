@@ -47,7 +47,7 @@
 #  OPTIMIZE_SIZE=0  Build size-optimized binaries
 #  TEST=1           Include test suite in default target.
 #  ONLY_TEST=0      Only build the test suite.
-#  ANCIENT=0        Use a pre-C++0x compiler (i.e. GCC before 4.3)
+#  ANCIENT=0        Use a pre-C++0x compiler (i.e. GCC before 4.3.0)
 #  STRICT=0         Treat warnings as errors.
 #  CHECKED=0        Enable run-time assertions.
 #  CHECKED_ADDRESS=0   Enable address sanitizer
