@@ -34,8 +34,8 @@ goto noerror
 
 :error
 cd "%MY_DIR%"
-exit 1
+exit /B 1
 
 :noerror
 cd "%MY_DIR%"
-exit 0
+exit /B 0
