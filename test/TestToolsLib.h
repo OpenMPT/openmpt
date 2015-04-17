@@ -158,7 +158,7 @@ public:
 private:
 
 	template <typename Tx, typename Ty>
-	noinline void TypeCompareHelper(const Tx &x, const Ty &y)
+	MPT_NOINLINE void TypeCompareHelper(const Tx &x, const Ty &y)
 	{
 		if(!IsEqual(x, y, is_integer<Tx>(), is_integer<Ty>()))
 		{
@@ -170,7 +170,7 @@ private:
 public:
 
 	template <typename Tfx, typename Tfy>
-	noinline void operator () (const Tfx &fx, const Tfy &fy)
+	MPT_NOINLINE void operator () (const Tfx &fx, const Tfy &fy)
 	{
 		ShowStart();
 		try
@@ -197,7 +197,7 @@ public:
 public:
 
 	template <typename Tx, typename Ty>
-	noinline void operator () (const Tx &x, const Ty &y)
+	MPT_NOINLINE void operator () (const Tx &x, const Ty &y)
 	{
 		ShowStart();
 		try

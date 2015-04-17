@@ -99,13 +99,13 @@ OPENMPT_NAMESPACE_BEGIN
 // Advanced inline attributes
 #if MPT_COMPILER_MSVC
 #define forceinline __forceinline
-#define noinline __declspec(noinline)
+#define MPT_NOINLINE __declspec(noinline)
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define forceinline __attribute__((always_inline)) inline
-#define noinline __attribute__((noinline))
+#define MPT_NOINLINE __attribute__((noinline))
 #else
 #define forceinline inline
-#define noinline
+#define MPT_NOINLINE
 #endif
 
 
@@ -271,7 +271,7 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 
 #if defined(MPT_ASSERT_HANDLER_NEEDED)
 // custom assert handler needed
-noinline void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg=nullptr);
+MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg=nullptr);
 #endif // MPT_ASSERT_HANDLER_NEEDED
 
 

@@ -39,8 +39,8 @@ static const std::size_t LOGBUF_SIZE = 1024;
 #ifndef NO_LOGGING
 
 
-static noinline void DoLog(const mpt::log::Context &context, mpt::ustring message)
-//--------------------------------------------------------------------------------
+static MPT_NOINLINE void DoLog(const mpt::log::Context &context, mpt::ustring message)
+//------------------------------------------------------------------------------------
 {
 	// remove eol if already present
 	message = mpt::String::RTrim(message, MPT_USTRING("\r\n"));
@@ -94,8 +94,8 @@ static noinline void DoLog(const mpt::log::Context &context, mpt::ustring messag
 }
 
 
-static noinline void DoLog(const mpt::log::Context &context, const char *format, va_list args)
-//--------------------------------------------------------------------------------------------
+static MPT_NOINLINE void DoLog(const mpt::log::Context &context, const char *format, va_list args)
+//------------------------------------------------------------------------------------------------
 {
 	char message[LOGBUF_SIZE];
 	va_list va;
@@ -201,7 +201,7 @@ void Disable()
 	g_Enabled = false;
 }
 
-noinline void Trace(const mpt::log::Context & context)
+MPT_NOINLINE void Trace(const mpt::log::Context & context)
 {
 	// This will get called in realtime contexts and hot paths.
 	// No blocking allowed here.

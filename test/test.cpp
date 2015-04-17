@@ -61,18 +61,18 @@ namespace Test {
 
 
 
-static noinline void TestVersion();
-static noinline void TestTypes();
-static noinline void TestMisc();
-static noinline void TestCharsets();
-static noinline void TestStringFormatting();
-static noinline void TestSettings();
-static noinline void TestStringIO();
-static noinline void TestMIDIEvents();
-static noinline void TestSampleConversion();
-static noinline void TestITCompression();
-static noinline void TestPCnoteSerialization();
-static noinline void TestLoadSaveFile();
+static MPT_NOINLINE void TestVersion();
+static MPT_NOINLINE void TestTypes();
+static MPT_NOINLINE void TestMisc();
+static MPT_NOINLINE void TestCharsets();
+static MPT_NOINLINE void TestStringFormatting();
+static MPT_NOINLINE void TestSettings();
+static MPT_NOINLINE void TestStringIO();
+static MPT_NOINLINE void TestMIDIEvents();
+static MPT_NOINLINE void TestSampleConversion();
+static MPT_NOINLINE void TestITCompression();
+static MPT_NOINLINE void TestPCnoteSerialization();
+static MPT_NOINLINE void TestLoadSaveFile();
 
 
 
@@ -164,8 +164,8 @@ static void RemoveFile(const mpt::PathString &filename)
 
 
 // Test if functions related to program version data work
-static noinline void TestVersion()
-//--------------------------------
+static MPT_NOINLINE void TestVersion()
+//------------------------------------
 {
 	//Verify that macros and functions work.
 	{
@@ -249,8 +249,8 @@ static noinline void TestVersion()
 
 
 // Test if data types are interpreted correctly
-static noinline void TestTypes()
-//------------------------------
+static MPT_NOINLINE void TestTypes()
+//----------------------------------
 {
 	VERIFY_EQUAL(int8_min, (std::numeric_limits<int8>::min)());
 	VERIFY_EQUAL(int8_max, (std::numeric_limits<int8>::max)());
@@ -392,8 +392,8 @@ static bool IsEqualUUID(const UUID &lhs, const UUID &rhs)
 #endif
 
 
-static noinline void TestStringFormatting()
-//-----------------------------------------
+static MPT_NOINLINE void TestStringFormatting()
+//---------------------------------------------
 {
 
 	VERIFY_EQUAL(mpt::ToString(1.5f), "1.5");
@@ -508,8 +508,8 @@ static noinline void TestStringFormatting()
 }
 
 
-static noinline void TestMisc()
-//-----------------------------
+static MPT_NOINLINE void TestMisc()
+//---------------------------------
 {
 
 	VERIFY_EQUAL(EncodeIEEE754binary32(1.0f), 0x3f800000u);
@@ -684,8 +684,8 @@ static noinline void TestMisc()
 }
 
 
-static noinline void TestCharsets()
-//---------------------------------
+static MPT_NOINLINE void TestCharsets()
+//-------------------------------------
 {
 
 	// MPT_UTF8 version
@@ -928,8 +928,8 @@ namespace Test {
 
 #endif // MODPLUG_TRACKER
 
-static noinline void TestSettings()
-//---------------------------------
+static MPT_NOINLINE void TestSettings()
+//-------------------------------------
 {
 
 #ifdef MODPLUG_TRACKER
@@ -1008,8 +1008,8 @@ static noinline void TestSettings()
 
 
 // Test MIDI Event generating / reading
-static noinline void TestMIDIEvents()
-//-----------------------------------
+static MPT_NOINLINE void TestMIDIEvents()
+//---------------------------------------
 {
 	uint32 midiEvent;
 
@@ -1824,8 +1824,8 @@ static void SaveS3M(const TSoundFileContainer &sndFile, const mpt::PathString &f
 
 
 // Test file loading and saving
-static noinline void TestLoadSaveFile()
-//-------------------------------------
+static MPT_NOINLINE void TestLoadSaveFile()
+//-----------------------------------------
 {
 	if(!ShouldRunTests())
 	{
@@ -1977,8 +1977,8 @@ static void RunITCompressionTest(const std::vector<int8> &sampleData, FlagSet<Ch
 }
 
 
-static noinline void TestITCompression()
-//--------------------------------------
+static MPT_NOINLINE void TestITCompression()
+//------------------------------------------
 {
 	// Test loading / saving of IT-compressed samples
 	const int sampleDataSize = 65536;
@@ -2032,8 +2032,8 @@ static void GenerateCommands(CPattern& pat, const double dProbPcs, const double 
 
 
 // Test PC note serialization
-static noinline void TestPCnoteSerialization()
-//--------------------------------------------
+static MPT_NOINLINE void TestPCnoteSerialization()
+//------------------------------------------------
 {
 	FileReader file;
 	MPT_SHARED_PTR<CSoundFile> pSndFile = mpt::make_shared<CSoundFile>();
@@ -2099,8 +2099,8 @@ static noinline void TestPCnoteSerialization()
 
 
 // Test String I/O functionality
-static noinline void TestStringIO()
-//---------------------------------
+static MPT_NOINLINE void TestStringIO()
+//-------------------------------------
 {
 	char src0[4] = { '\0', 'X', ' ', 'X' };		// Weird empty buffer
 	char src1[4] = { 'X', ' ', '\0', 'X' };		// Weird buffer (hello Impulse Tracker)
@@ -2338,8 +2338,8 @@ static noinline void TestStringIO()
 }
 
 
-static noinline void TestSampleConversion()
-//-----------------------------------------
+static MPT_NOINLINE void TestSampleConversion()
+//---------------------------------------------
 {
 	uint8 *sourceBuf = new uint8[65536 * 4];
 	void *targetBuf = new uint8[65536 * 6];

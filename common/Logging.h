@@ -119,7 +119,7 @@ namespace Trace {
 extern bool volatile g_Enabled;
 static inline bool IsEnabled() { return g_Enabled; }
 
-noinline void Trace(const mpt::log::Context & contexxt);
+MPT_NOINLINE void Trace(const mpt::log::Context & contexxt);
 
 enum ThreadKind {
 	ThreadKindGUI,
