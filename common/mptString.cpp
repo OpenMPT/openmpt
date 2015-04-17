@@ -23,8 +23,6 @@
 #include <stdexcept>
 #include <vector>
 
-#include <cstdarg>
-
 #if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #include <strings.h> // for strncasecmp
 #endif
