@@ -10,13 +10,13 @@
 
 #pragma once
 
+#include <algorithm>
 #include <limits>
 #include <string>
 #if defined(HAS_TYPE_TRAITS)
 #include <type_traits>
 #endif
 #include <vector>
-#include <algorithm>
 
 #include <cmath>
 #include <cstring>
@@ -1026,7 +1026,6 @@ public:
 			#if (MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2013,0)) || !MPT_COMPILER_MSVC
 				// MSVC std::is_function is always false for non __cdecl functions.
 				// See https://connect.microsoft.com/VisualStudio/feedback/details/774720/stl-is-function-bug .
-				// Revisit with VS2013.
 				STATIC_ASSERT(std::is_function<Tfunc>::value);
 			#endif
 		#endif
