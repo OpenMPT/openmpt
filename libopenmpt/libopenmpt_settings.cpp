@@ -13,7 +13,7 @@
 #endif
 #endif // _MSC_VER
 
-#define _WIN32_WINNT 0x0500 // _WIN32_WINNT_WIN2000
+#define _WIN32_WINNT 0x0501 // _WIN32_WINNT_WINXP
 
 #include <afxwin.h>
 #include <afxcmn.h>

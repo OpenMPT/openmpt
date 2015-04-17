@@ -14,7 +14,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 #ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0500 // _WIN32_WINNT_WIN2000
+#define _WIN32_WINNT 0x0501 // _WIN32_WINNT_WINXP
 #endif
 #define NOMINMAX
 #include <afxwin.h>
