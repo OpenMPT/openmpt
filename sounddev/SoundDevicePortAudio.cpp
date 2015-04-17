@@ -307,11 +307,7 @@ bool CPortaudioDevice::OpenDriverSettings()
 	{
 		return false;
 	}
-	OSVERSIONINFO versioninfo;
-	MemsetZero(versioninfo);
-	versioninfo.dwOSVersionInfoSize = sizeof(versioninfo);
-	GetVersionEx(&versioninfo);
-	const bool hasVista = (versioninfo.dwMajorVersion >= 6);
+	bool hasVista = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
 	mpt::PathString controlEXE;
 	WCHAR systemDir[MAX_PATH];
 	MemsetZero(systemDir);
