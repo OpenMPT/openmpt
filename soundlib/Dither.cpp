@@ -165,8 +165,8 @@ static forceinline int fastrandbits(uint32 &state, int bits)
 template<int targetbits, int channels, int ditherdepth = 1, bool triangular = false, bool shaped = true>
 struct Dither_SimpleTemplate
 {
-noinline void operator () (int *mixbuffer, std::size_t count, DitherSimpleState &state)
-//-------------------------------------------------------------------------------------
+MPT_NOINLINE void operator () (int *mixbuffer, std::size_t count, DitherSimpleState &state)
+//-----------------------------------------------------------------------------------------
 {
 	STATIC_ASSERT(sizeof(int) == 4);
 	STATIC_ASSERT(FASTRAND_BITS * 3 >= (32-targetbits) - MIXING_ATTENUATION);

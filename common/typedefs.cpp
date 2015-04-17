@@ -18,8 +18,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if !defined(MODPLUG_TRACKER) && defined(MPT_ASSERT_HANDLER_NEEDED)
 
-noinline void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
-//--------------------------------------------------------------------------------------------------------------
+MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
+//------------------------------------------------------------------------------------------------------------------
 {
 	if(msg)
 	{

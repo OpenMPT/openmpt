@@ -132,7 +132,7 @@ protected:
 	afx_msg void OnEnableStretchToSize();
 	afx_msg void OnEstimateSampleSize();
 
-	noinline void SetModified(SampleHint hint, bool updateAll, bool waveformModified);
+	MPT_NOINLINE void SetModified(SampleHint hint, bool updateAll, bool waveformModified);
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

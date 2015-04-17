@@ -273,8 +273,8 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 
 #if defined(MPT_ASSERT_HANDLER_NEEDED)
 
-noinline void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
-//--------------------------------------------------------------------------------------------------------------
+MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
+//------------------------------------------------------------------------------------------------------------------
 {
 	DebugReporter report(msg ? DumpModeWarning : DumpModeCrash, nullptr);
 	if(IsDebuggerPresent())
