@@ -94,8 +94,8 @@ For more information about SoundTouch, see folder SoundTouch.
 
 PortAudio / PortMidi
 --------------------
-OpenMPT uses PortAudio for WASAPI output. OpenMPT's MIDI plugins make use of the
-PortMidi library, which are both released under the MIT license.
+OpenMPT uses PortAudio for WASAPI and WDM-KS output. OpenMPT's MIDI plugins make
+use of the PortMidi library, which are both released under the MIT license.
 Visit http://www.portaudio.com/ and http://portmedia.sourceforge.net/ for more
 information.
 
