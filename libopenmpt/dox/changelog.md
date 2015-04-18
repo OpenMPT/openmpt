@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt svn
+### libopenmpt 0.2-beta11 (2015-04-18)
 
  *  openmpt_stream_seek_func() now gets called with OPENMPT_STREAM_SEEK_SET,
     OPENMPT_STREAM_SEEK_CUR and OPENMPT_STREAM_SEEK_END whence parameter
@@ -22,7 +22,6 @@ is just a high-level summary.
  *  [Bug] libopenmpt now also compiles with GCC 4.3.
 
  *  libopenmpt now supports PLM (Disorder Tracker 2) files.
-
  *  Various playback improvements and fixes for IT, S3M, XM, MOD, PTM and 669
     files.
 
