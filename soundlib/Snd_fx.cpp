@@ -764,6 +764,11 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				if(m.instr) pChn->proTrackerOffset = 0;
 				if(m.IsNote())
 				{
+					if(porta && memory.chnSettings[nChn].incChanged)
+					{
+						// If there's a portamento, the current channel increment needs to be known in NoteChange()
+						pChn->nInc = GetChannelIncrement(pChn, pChn->nPeriod, 0);
+					}
 					int32 setPan = pChn->nPan;
 					pChn->nNewNote = pChn->nLastNote;
 					if(pChn->nNewIns != 0) InstrumentChange(pChn, pChn->nNewIns, porta);
@@ -888,7 +893,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 					if(porta)
 					{
-						// Portamento needs immediate syncing
+						// Portamento needs immediate syncing, as the pitch changes on each tick
 						uint32 portaTick = memory.chnSettings[nChn].ticksToRender + startTick + 1;
 						memory.chnSettings[nChn].ticksToRender += numTicks;
 						memory.RenderChannel(nChn, tickDuration, portaTick);
