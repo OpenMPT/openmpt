@@ -694,6 +694,9 @@ static bool HasCharset(Charset charset)
 	MPT_ASSERT(CharsetsInitialized);
 	switch(charset)
 	{
+#if defined(MPT_WITH_CHARSET_LOCALE)
+		case CharsetLocale:      return true; break;
+#endif
 		case CharsetUTF8:        return HasCharsetUTF8;        break;
 		case CharsetASCII:       return HasCharsetASCII;       break;
 		case CharsetISO8859_1:   return HasCharsetISO8859_1;   break;
@@ -710,6 +713,9 @@ static bool HasCharset(Charset charset)
 {
 	switch(charset)
 	{
+#if defined(MPT_WITH_CHARSET_LOCALE)
+	case CharsetLocale:      return true; break;
+#endif
 	case CharsetUTF8:        return TestCodePage(CP_UTF8); break;
 	case CharsetASCII:       return TestCodePage(20127);   break;
 	case CharsetISO8859_1:   return TestCodePage(28591);   break;
