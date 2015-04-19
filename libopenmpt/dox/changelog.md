@@ -9,8 +9,8 @@ is just a high-level summary.
 
  *  Playback fix when row delay effect is used together with offset command.
  *  A couple of fixes for the seek.sync_samples=1 case.
- *  IT compatibility fix fot IT note delay.
- *  ProTracker MOD placback compatibility improvement.
+ *  IT compatibility fix for IT note delay.
+ *  ProTracker MOD playback compatibility improvement.
 
 ### libopenmpt 0.2-beta11 (2015-04-18)
 
