@@ -2273,7 +2273,9 @@ bool CSoundFile::ProcessEffects()
 			// Apparently, any note number in a pattern causes instruments to recall their original volume settings - no matter if there's a Note Off next to it or whatever.
 			// Test cases: keyoff+instr.xm, delay.xm
 			bool reloadSampleSettings = (IsCompatibleMode(TRK_FASTTRACKER2) && instr != 0);
-			bool keepInstr = (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT));
+			// ProTracker Compatibility: If a sample was stopped before, lone instrument numbers can retrigger it
+			// Test case: PTSwapEmpty.mod
+			bool keepInstr = (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (m_SongFlags[SONG_PT1XMODE] && pChn->nInc == 0);
 
 			// Now it's time for some FT2 crap...
 			if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
@@ -2438,14 +2440,15 @@ bool CSoundFile::ProcessEffects()
 						//const bool newInstrument = oldInstrument != pChn->pModInstrument && pChn->pModInstrument->Keyboard[pChn->nNewNote - NOTE_MIN] != 0;
 						pChn->nPos = pChn->nPosLo = 0;
 					}
-				} else
+				} else if ((GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT) && oldSample != pChn->pModSample && ModCommand::IsNote(note)))
 				{
 					// Special IT case: portamento+note causes sample change -> ignore portamento
-					if ((GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT))
-						&& oldSample != pChn->pModSample && ModCommand::IsNote(note))
-					{
-						bPorta = false;
-					}
+					bPorta = false;
+				} else if(m_SongFlags[SONG_PT1XMODE] && pChn->nInc == 0)
+				{
+					// If channel was paused and is resurrected by a lone instrument number, reset the sample position.
+					// Test case: PTSwapEmpty.mod
+					pChn->nPos = pChn->nPosLo = 0;
 				}
 			}
 			// New Note ?
