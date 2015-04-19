@@ -9,12 +9,12 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "mainfrm.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
 #include "InputHandler.h"
-#include "moddoc.h"
-#include "childfrm.h"
-#include "mpdlgs.h"
+#include "Moddoc.h"
+#include "Childfrm.h"
+#include "Mpdlgs.h"
 #include "dlg_misc.h"
 #include "Dlsbank.h"
 #include "mod2wave.h"
@@ -24,14 +24,13 @@
 #include "StreamEncoderVorbis.h"
 #include "StreamEncoderWAV.h"
 #include "mod2midi.h"
-#include "vstplug.h"
+#include "Vstplug.h"
 #include "../common/version.h"
 #include "modsmp_ctrl.h"
 #include "CleanupSong.h"
 #include "../common/StringFixer.h"
 #include "../common/mptFileIO.h"
 #include "../common/FileReader.h"
-#include <shlwapi.h>
 #include "FileDialog.h"
 #include "ExternalSamples.h"
 #include "Globals.h"
@@ -480,20 +479,24 @@ bool CModDoc::SaveAllSamples()
 	}
 
 	ConfirmAnswer ans = cnfYes;
+	bool success = true;
 	if(modified && (ans = Reporting::Confirm(prompt + L"Do you want to save them?", L"External Samples", true)) == cnfYes)
 	{
 		for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
 		{
 			if(m_SndFile.GetSample(i).uFlags.test_all(SMP_KEEPONDISK | SMP_MODIFIED))
 			{
-				SaveSample(i);
+				if(!SaveSample(i))
+				{
+					success = false;
+				}
 			}
 		}
 	} else if(ans == cnfCancel)
 	{
 		return false;
 	}
-	return true;
+	return success;
 }
 
 
@@ -3078,25 +3081,25 @@ void CModDoc::DeserializeViews()
 			}
 			if(pChildFrm != nullptr)
 			{
-				WINDOWPLACEMENT wnd;
-				wnd.length = sizeof(wnd);
-				pChildFrm->GetWindowPlacement(&wnd);
-				wnd.showCmd = SW_SHOWNOACTIVATE;
-				if(windowState == 1 || anyMaximized)
-				{
-					// Once a window has been maximized, all following windows have to be marked as maximized as well.
-					wnd.showCmd = SW_MAXIMIZE;
-					anyMaximized = true;
-				} else if(windowState == 2)
-				{
-					wnd.showCmd = SW_MINIMIZE;
-				}
-				if(rect.left < width && rect.right > 0 && rect.top < height && rect.bottom > 0)
-				{
-					wnd.rcNormalPosition = CRect(rect.left, rect.top, rect.right, rect.bottom);
-				}
 				if(!mdiRect.IsRectEmpty())
 				{
+					WINDOWPLACEMENT wnd;
+					wnd.length = sizeof(wnd);
+					pChildFrm->GetWindowPlacement(&wnd);
+					wnd.showCmd = SW_SHOWNOACTIVATE;
+					if(windowState == 1 || anyMaximized)
+					{
+						// Once a window has been maximized, all following windows have to be marked as maximized as well.
+						wnd.showCmd = SW_MAXIMIZE;
+						anyMaximized = true;
+					} else if(windowState == 2)
+					{
+						wnd.showCmd = SW_MINIMIZE;
+					}
+					if(rect.left < width && rect.right > 0 && rect.top < height && rect.bottom > 0)
+					{
+						wnd.rcNormalPosition = CRect(rect.left, rect.top, rect.right, rect.bottom);
+					}
 					pChildFrm->SetWindowPlacement(&wnd);
 				}
 				pChildFrm->DeserializeView(data);
