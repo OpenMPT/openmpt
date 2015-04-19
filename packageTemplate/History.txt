@@ -25,6 +25,24 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.24.04.00 (19 April 2014, revision 4951)
+------------------------------------------
+Pattern tab
+   [Fix] <js> Seeking with sample sync didn't apply portamento and note delay + row delay combinations accurately in some cases.
+
+Playback
+   [Fix] <js> On rows with a row delay effect, offset commands were executed on every row repetition in the previous version.
+
+IT::Compatible Playback Mode
+   [Fix] <js> Note delays are capped by the ticks per row + fine pattern delay tick count, not taking row delay into account.
+
+MOD::ProTracker 1/2 Mode
+   [Fix] <js> Instrument swapping is also applied if there was an empty sample slot "playing" (fixes arpeggios in "mr gang !!!." by arios).
+
+Other
+   [Fix] <jh> There was a major performance regression in the previous version, mostly noticeable on Wine.
+
+
 v1.24.03.00 (18 April 2014, revision 4941)
 ------------------------------------------
 General tab
@@ -40,7 +58,7 @@ Pattern tab
    [Fix] <js> When only enabling Amiga limits for MOD but not ProTracker 1/2 mode, invalid notes were not coloured as such.
    [Fix] <js> When switching between modules or resizing the window, it was possible for the pattern display to show garbage (http://bugs.openmpt.org/view.php?id=665).
    [Fix] <js> Clicking on the first and last item of an order selection loses the selection, like clicking any other item.
-   [Fix] <js> Seeking (with sample sync) could misbehave when encountering PC events.
+   [Fix] <js> Seeking with sample sync could misbehave when encountering PC events.
 
 Sample tab
    [New] <js> The MPTM volume column offset command has been revamped: 9 custom cue points can be selected for each sample in the waveform's context menu, which can then be triggered using o01...o09 (http://bugs.openmpt.org/view.php?id=91).
