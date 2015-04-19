@@ -766,7 +766,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				{
 					if(porta && memory.chnSettings[nChn].incChanged)
 					{
-						// If there's a portamento, the current channel increment needs to be known in NoteChange()
+						// If there's a portamento, the current channel increment mustn't be 0 in NoteChange()
 						pChn->nInc = GetChannelIncrement(pChn, pChn->nPeriod, 0);
 					}
 					int32 setPan = pChn->nPan;
@@ -2645,7 +2645,7 @@ bool CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_OFFSET:
-					if (pChn->isFirstTick && pChn->pModSample && vol <= CountOf(pChn->pModSample->cues))
+					if (triggerNote && pChn->pModSample && vol <= CountOf(pChn->pModSample->cues))
 					{
 						SmpLength offset;
 						if(vol == 0)
@@ -2735,7 +2735,7 @@ bool CSoundFile::ProcessEffects()
 
 		// Set Offset
 		case CMD_OFFSET:
-			if (pChn->isFirstTick)
+			if (triggerNote)
 			{
 				// FT2 compatibility: Portamento + Offset = Ignore offset
 				// Test case: porta-offset.xm
