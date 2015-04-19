@@ -782,6 +782,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					{
 						startTick = paramHi;
 					}
+					if(rowDelay > 1 && startTick != 0 && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT))
+					{
+						startTick += (memory.state.m_nMusicSpeed + tickDelay) * (rowDelay - 1);
+					}
 					if(!porta) memory.chnSettings[nChn].ticksToRender = 0;
 
 					// Panning commands have to be re-applied after a note change with potential pan change.
@@ -2092,7 +2096,7 @@ bool CSoundFile::ProcessEffects()
 					//ST3 ignores notes with SD0 completely
 					else if(GetType() == MOD_TYPE_S3M)
 						continue;
-				} else if(nStartTick >= GetNumTicksOnCurrentRow() && IsCompatibleMode(TRK_IMPULSETRACKER))
+				} else if(nStartTick >= (m_PlayState.m_nMusicSpeed + m_PlayState.m_nFrameDelay) && IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
 					// IT compatibility 08. Handling of out-of-range delay command.
 					// Additional test case: tickdelay.it
