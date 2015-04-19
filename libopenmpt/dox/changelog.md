@@ -5,6 +5,13 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.2-beta12 (2015-04-19)
+
+ *  Playback fix when row delay effect is used together with offset command.
+ *  A couple of fixes for the seek.sync_samples=1 case.
+ *  IT compatibility fix fot IT note delay.
+ *  ProTracker MOD placback compatibility improvement.
+
 ### libopenmpt 0.2-beta11 (2015-04-18)
 
  *  openmpt_stream_seek_func() now gets called with OPENMPT_STREAM_SEEK_SET,
