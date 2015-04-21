@@ -413,8 +413,8 @@ protected:
 	afx_msg void OnVisualizeEffect();		//rewbs.fxvis
 	afx_msg void OnTransposeUp() { TransposeSelection(1); }
 	afx_msg void OnTransposeDown() { TransposeSelection(-1); }
-	afx_msg void OnTransposeOctUp() { TransposeSelection(12); }
-	afx_msg void OnTransposeOctDown() { TransposeSelection(-12); }
+	afx_msg void OnTransposeOctUp() { TransposeSelection(12000); }
+	afx_msg void OnTransposeOctDown() { TransposeSelection(-12000); }
 	afx_msg void OnTransposeCustom();
 	afx_msg void OnSetSelInstrument();
 	afx_msg void OnAddChannelFront() { AddChannelBefore(m_MenuCursor.GetChannel()); }

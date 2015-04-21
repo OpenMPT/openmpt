@@ -2970,6 +2970,7 @@ bool CViewPattern::TransposeSelection(int transp)
 
 	PrepareUndo(m_Selection, "Transpose");
 
+	std::vector<int> lastGroupSize(pSndFile->GetNumChannels(), 12);
 	for(ROWINDEX row = startRow; row <= endRow; row++)
 	{
 		PatternRow m = pSndFile->Patterns[m_nPattern].GetRow(row);
@@ -2977,7 +2978,21 @@ bool CViewPattern::TransposeSelection(int transp)
 		{
 			if (m[chn].IsNote())
 			{
-				int note = m[chn].note + transp;
+				if(m[chn].instr > 0 && m[chn].instr <= pSndFile->GetNumInstruments())
+				{
+					const ModInstrument *pIns = pSndFile->Instruments[m[chn].instr];
+					if(pIns != nullptr && pIns->pTuning != nullptr)
+					{
+						lastGroupSize[chn] = pIns->pTuning->GetGroupSize();
+					}
+				}
+				int transpose = transp;
+				if(transpose == 12000 || transpose == -12000)
+				{
+					// Transpose one octave
+					transpose = lastGroupSize[chn] * sgn(transpose);
+				}
+				int note = m[chn].note + transpose;
 				Limit(note, noteMin, noteMax);
 				m[chn].note = static_cast<ModCommand::NOTE>(note);
 			}
@@ -3012,6 +3027,8 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 
 	PrepareUndo(m_Selection, "Data Entry");
 
+	// Notes per octave for non-TET12 tunings and coarse note steps
+	std::vector<int> lastGroupSize(pSndFile->GetNumChannels(), 12);
 	for(ROWINDEX row = startRow; row <= endRow; row++)
 	{
 		PatternRow m = pSndFile->Patterns[m_nPattern].GetRow(row);
@@ -3022,7 +3039,15 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 				// Increase / decrease note
 				if(m[chn].IsNote())
 				{
-					int note = m[chn].note + offset * (coarse ? 12 : 1);
+					if(m[chn].instr > 0 && m[chn].instr <= pSndFile->GetNumInstruments())
+					{
+						const ModInstrument *pIns = pSndFile->Instruments[m[chn].instr];
+						if(pIns != nullptr && pIns->pTuning != nullptr)
+						{
+							lastGroupSize[chn] = pIns->pTuning->GetGroupSize();
+						}
+					}
+					int note = m[chn].note + offset * (coarse ? lastGroupSize[chn] : 1);
 					Limit(note, noteMin, noteMax);
 					m[chn].note = (ModCommand::NOTE)note;
 				} else if(m[chn].IsSpecialNote())
@@ -5094,8 +5119,20 @@ void CViewPattern::TempEnterOctave(int val)
 	const ModCommand &target = GetCursorCommand();
 	if(target.IsNote())
 	{
+		int groupSize = 12;
+		if(target.instr > 0 && target.instr <= pSndFile->GetNumInstruments())
+		{
+			const ModInstrument *pIns = pSndFile->Instruments[target.instr];
+			if(pIns != nullptr && pIns->pTuning != nullptr)
+			{
+				groupSize = pIns->pTuning->GetGroupSize();
+			}
+		}
+
 		PrepareUndo(m_Cursor, m_Cursor, "Octave Entry");
-		TempEnterNote(((target.note - NOTE_MIN) % 12) + val * 12 + NOTE_MIN);
+		// The following might look a bit convoluted... This is mostly because the "middle-C" in
+		// custom tunings always has octave 5, no matter how many octaves the tuning actually has.
+		TempEnterNote(((target.note - NOTE_MIDDLEC) % groupSize) + (val - 5) * groupSize + NOTE_MIDDLEC);
 		// Memorize note for key-up
 		ASSERT(size_t(val) < octaveKeyMemory.size());
 		octaveKeyMemory[val] = target.note;
