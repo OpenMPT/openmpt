@@ -470,6 +470,12 @@ void CNoteMapWnd::MapTranspose(int nAmount)
 	if(nAmount == 0) return;
 
 	ModInstrument *pIns = m_modDoc.GetrSoundFile().Instruments[m_nInstrument];
+	if((nAmount == 12 || nAmount == -12) && pIns->pTuning != nullptr)
+	{
+		// Special case for instrument-specific tunings
+		nAmount = pIns->pTuning->GetGroupSize() * sgn(nAmount);
+	}
+
 	if (pIns)
 	{
 		bool bModified = false;

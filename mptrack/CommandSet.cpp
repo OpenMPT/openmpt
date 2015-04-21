@@ -85,12 +85,12 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcPatternPlayRow, 1002, _T("Play Row"));
 	DefineKeyCommand(kcCursorCopy, 1003, _T("Quick Copy"));
 	DefineKeyCommand(kcCursorPaste, 1004, _T("Quick Paste"));
-	DefineKeyCommand(kcChannelMute, 1005, _T("Mute current Channel"));
-	DefineKeyCommand(kcChannelSolo, 1006, _T("Solo current Channel"));
+	DefineKeyCommand(kcChannelMute, 1005, _T("Mute Current Channel"));
+	DefineKeyCommand(kcChannelSolo, 1006, _T("Solo Current Channel"));
 	DefineKeyCommand(kcTransposeUp, 1007, _T("Transpose +1"));
 	DefineKeyCommand(kcTransposeDown, 1008, _T("Transpose -1"));
-	DefineKeyCommand(kcTransposeOctUp, 1009, _T("Transpose +12"));
-	DefineKeyCommand(kcTransposeOctDown, 1010, _T("Transpose -12"));
+	DefineKeyCommand(kcTransposeOctUp, 1009, _T("Transpose +1 Octave"));
+	DefineKeyCommand(kcTransposeOctDown, 1010, _T("Transpose -1 Octave"));
 	DefineKeyCommand(kcSelectColumn, 1011, _T("Select channel / Select all"));
 	DefineKeyCommand(kcPatternAmplify, 1012, _T("Amplify selection"));
 	DefineKeyCommand(kcPatternSetInstrument, 1013, _T("Apply current instrument"));
@@ -598,8 +598,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcVSTGUIBypassPlug, 1841, _T("Bypass Plugin"));
 	DefineKeyCommand(kcInsNoteMapTransposeDown, 1842, _T("Transpose -1 (Note Map)"));
 	DefineKeyCommand(kcInsNoteMapTransposeUp, 1843, _T("Transpose +1 (Note Map)"));
-	DefineKeyCommand(kcInsNoteMapTransposeOctDown, 1844, _T("Transpose -12 (Note Map)"));
-	DefineKeyCommand(kcInsNoteMapTransposeOctUp, 1845, _T("Transpose +12 (Note Map)"));
+	DefineKeyCommand(kcInsNoteMapTransposeOctDown, 1844, _T("Transpose -1 Octave (Note Map)"));
+	DefineKeyCommand(kcInsNoteMapTransposeOctUp, 1845, _T("Transpose +1 Octave (Note Map)"));
 	DefineKeyCommand(kcInsNoteMapCopyCurrentNote, 1846, _T("Map all notes to selected note"));
 	DefineKeyCommand(kcInsNoteMapCopyCurrentSample, 1847, _T("Map all notes to selected sample"));
 	DefineKeyCommand(kcInsNoteMapReset, 1848, _T("Reset Note Mapping"));
@@ -663,8 +663,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcFileAppend, 1906, _T("File/Append Module"));
 	DefineKeyCommand(kcSampleTransposeUp, 1907, _T("Transpose +1"));
 	DefineKeyCommand(kcSampleTransposeDown, 1908, _T("Transpose -1"));
-	DefineKeyCommand(kcSampleTransposeOctUp, 1909, _T("Transpose +12"));
-	DefineKeyCommand(kcSampleTransposeOctDown, 1910, _T("Transpose -12"));
+	DefineKeyCommand(kcSampleTransposeOctUp, 1909, _T("Transpose +1 Octave"));
+	DefineKeyCommand(kcSampleTransposeOctDown, 1910, _T("Transpose -1 Octave"));
 	DefineKeyCommand(kcPatternInterpolateInstr, 1911, _T("Interpolate Instrument"));
 	DefineKeyCommand(kcDummyShortcut, 1912, _T("Dummy Shortcut"));
 	DefineKeyCommand(kcSampleUpsample, 1913, _T("Upsample"));
@@ -681,7 +681,7 @@ void CCommandSet::SetupCommands()
 	for(int j = kcStartSampleCues; j <= kcEndSampleCues; j++)
 	{
 		TCHAR s[32];
-		wsprintf(s, "Preview Sample Cue %u", j - kcStartSampleCues + 1);
+		wsprintf(s, _T("Preview Sample Cue %u"), j - kcStartSampleCues + 1);
 		DefineKeyCommand((CommandID)j, 1924 + j - kcStartSampleCues, s);
 	}
 
@@ -843,7 +843,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	//Needs refactoring. Maybe make lots of Rule subclasses, each with their own Enforce() method?
 	KeyCombination curKc;	// for looping through key combinations
 	KeyCombination newKc;	// for adding new key combinations
-	CString report="";
+	CString report;
 
 	if(enforceRule[krAllowNavigationWithSelection])
 	{
@@ -1022,9 +1022,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	if (enforceRule[krAutoSelectOff])
 	{
 		KeyCombination newKcDeSel;
-		bool ruleApplies = true;
 		CommandID cmdOff = kcNull;
-
 		switch (inCmd)
 		{
 			case kcSelect:					cmdOff = kcSelectOff;				break;
@@ -1033,11 +1031,9 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			case kcCopySelectWithNav:		cmdOff = kcCopySelectOffWithNav;	break;
 			case kcSelectWithCopySelect:	cmdOff = kcSelectOffWithCopySelect; break;
 			case kcCopySelectWithSelect:	cmdOff = kcCopySelectOffWithSelect; break;
-
-			default: ruleApplies = false;
 		}
 
-		if(ruleApplies)
+		if(cmdOff != kcNull)
 		{
 			newKcDeSel = inKc;
 			newKcDeSel.EventType(kKeyEventUp);
@@ -1511,7 +1507,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 	fprintf(outStream, "//----------------------------------------------------------------------\n");
 	fprintf(outStream, "version:%u\n", KEYMAP_VERSION);
 
-	for (int ctx=0; ctx<kCtxMaxInputContexts; ctx++)
+	for (int ctx = 0; ctx < kCtxMaxInputContexts; ctx++)
 	{
 		fprintf(outStream, "\n//----( %s (%d) )------------\n", KeyCombination::GetContextText((InputTargetContext)ctx), ctx);
 
@@ -1545,7 +1541,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 //---------------------------------------------------------------------------------------------------------------
 {
 	KeyCombination kc;
-	CommandID cmd=kcNumCommands;
+	CommandID cmd = kcNumCommands;
 	char s[1024];
 	CString curLine, token;
 	int commentStart;
@@ -1915,10 +1911,9 @@ bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 			if(codeNmod != -1)
 			{
 				kc.KeyCode(LOBYTE(codeNmod));
-				kc.Modifier(0);
 				// Don't add modifier keys, since on French keyboards, numbers are input using Shift.
 				// We don't really want that behaviour here, and I'm sure we don't want that in other cases on other layouts as well.
-				//kc.Modifier(HIBYTE(codeNmod) & 0x07);	//We're only interest in the bottom 3 bits.
+				kc.Modifier(0);
 				Add(kc, cmd, true);
 			}
 
@@ -2024,8 +2019,6 @@ bool CCommandSet::IsCrossContextConflict(KeyCombination kc1, KeyCombination kc2)
 {
 	return m_isParentContext[kc1.Context()][kc2.Context()] || m_isParentContext[kc2.Context()][kc1.Context()];
 }
-
-//end rewbs.customKeys
 
 
 OPENMPT_NAMESPACE_END
