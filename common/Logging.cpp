@@ -18,13 +18,24 @@
 #include "version.h"
 
 #include <iostream>
+
+#include <cstdarg>
 #include <cstring>
+
+#include <stdarg.h>
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
 //#define LOG_TO_FILE
+
+
+#if MPT_COMPILER_MSVC || (MPT_COMPILER_GCC && MPT_GCC_AT_LEAST(4,3,0) && MPT_GCC_BEFORE(4,4,0))
+#ifndef va_copy
+#define va_copy(dst, src) do { (dst) = (src); } while (0)
+#endif
+#endif
 
 
 namespace mpt
