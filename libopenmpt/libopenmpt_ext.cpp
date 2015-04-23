@@ -11,6 +11,10 @@
 
 #include "soundlib/Sndfile.h"
 
+#if defined(_MSC_VER)
+#pragma warning(disable:4702) // unreachable code
+#endif
+
 using namespace OpenMPT;
 
 #ifndef NO_LIBOPENMPT_CXX

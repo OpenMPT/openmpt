@@ -22,6 +22,10 @@
 #include <cstdlib>
 #include <cstring>
 
+#if defined(_MSC_VER)
+#pragma warning(disable:4702) /* unreachable code */
+#endif
+
 #ifndef NO_LIBOPENMPT_C
 
 namespace openmpt {

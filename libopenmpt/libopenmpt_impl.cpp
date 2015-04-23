@@ -229,20 +229,21 @@ module_impl::subsong_data::subsong_data( double duration, std::int32_t start_row
 }
 
 static ResamplingMode filterlength_to_resamplingmode(std::int32_t length) {
+	ResamplingMode result = SRCMODE_POLYPHASE;
 	if ( length == 0 ) {
-		return SRCMODE_POLYPHASE;
+		result = SRCMODE_POLYPHASE;
 	} else if ( length >= 8 ) {
-		return SRCMODE_POLYPHASE;
+		result = SRCMODE_POLYPHASE;
 	} else if ( length >= 3 ) {
-		return SRCMODE_SPLINE;
+		result = SRCMODE_SPLINE;
 	} else if ( length >= 2 ) {
-		return SRCMODE_LINEAR;
+		result = SRCMODE_LINEAR;
 	} else if ( length >= 1 ) {
-		return SRCMODE_NEAREST;
+		result = SRCMODE_NEAREST;
 	} else {
 		throw openmpt::exception("negative filter length");
-		return SRCMODE_POLYPHASE;
 	}
+	return result;
 }
 static std::int32_t resamplingmode_to_filterlength(ResamplingMode mode) {
 	switch ( mode ) {
@@ -279,10 +280,7 @@ static void ramping_to_mixersettings( MixerSettings & settings, int ramping ) {
 }
 static void mixersettings_to_ramping( int & ramping, const MixerSettings & settings ) {
 	std::int32_t ramp_us = std::max<std::int32_t>( settings.GetVolumeRampUpMicroseconds(), settings.GetVolumeRampDownMicroseconds() );
-	if ( true
-	     && settings.GetVolumeRampUpMicroseconds() == MixerSettings().GetVolumeRampUpMicroseconds()
-	     && settings.GetVolumeRampDownMicroseconds() == MixerSettings().GetVolumeRampDownMicroseconds()
-	   ) {
+	if ( ( settings.GetVolumeRampUpMicroseconds() == MixerSettings().GetVolumeRampUpMicroseconds() ) && ( settings.GetVolumeRampDownMicroseconds() == MixerSettings().GetVolumeRampDownMicroseconds() ) ) {
 		ramping = -1;
 	} else if ( ramp_us <= 0 ) {
 		ramping = 0;
@@ -835,18 +833,18 @@ double module_impl::set_position_seconds( double seconds ) {
 	} else {
 		subsong = &subsongs[m_current_subsong];
 	}
-	GetLengthType t = m_sndFile->GetLength( eNoAdjust, GetLengthTarget( seconds ).StartPos( subsong->sequence, subsong->start_order, subsong->start_row ) ).back();
+	GetLengthType t = m_sndFile->GetLength( eNoAdjust, GetLengthTarget( seconds ).StartPos( static_cast<SEQUENCEINDEX>( subsong->sequence ), static_cast<ORDERINDEX>( subsong->start_order ), static_cast<ROWINDEX>( subsong->start_row ) ) ).back();
 	m_sndFile->m_PlayState.m_nCurrentOrder = t.lastOrder;
 	m_sndFile->SetCurrentOrder( t.lastOrder );
 	m_sndFile->m_PlayState.m_nNextRow = t.lastRow;
-	m_currentPositionSeconds = base_seconds + m_sndFile->GetLength( m_ctl_seek_sync_samples ? eAdjustSamplePositions : eAdjust, GetLengthTarget( t.lastOrder, t.lastRow ).StartPos( subsong->sequence, subsong->start_order, subsong->start_row ) ).back().duration;
+	m_currentPositionSeconds = base_seconds + m_sndFile->GetLength( m_ctl_seek_sync_samples ? eAdjustSamplePositions : eAdjust, GetLengthTarget( t.lastOrder, t.lastRow ).StartPos( static_cast<SEQUENCEINDEX>( subsong->sequence ), static_cast<ORDERINDEX>( subsong->start_order ), static_cast<ROWINDEX>( subsong->start_row ) ) ).back().duration;
 	return m_currentPositionSeconds;
 }
 double module_impl::set_position_order_row( std::int32_t order, std::int32_t row ) {
 	if ( order < 0 || order >= m_sndFile->Order.GetLengthTailTrimmed() ) {
 		return m_currentPositionSeconds;
 	}
-	std::int32_t pattern = m_sndFile->Order[order];
+	PATTERNINDEX pattern = m_sndFile->Order[order];
 	if ( m_sndFile->Patterns.IsValidIndex( pattern ) ) {
 		if ( row < 0 || row >= static_cast<std::int32_t>( m_sndFile->Patterns[pattern].GetNumRows() ) ) {
 			return m_currentPositionSeconds;
@@ -854,10 +852,10 @@ double module_impl::set_position_order_row( std::int32_t order, std::int32_t row
 	} else {
 		row = 0;
 	}
-	m_sndFile->m_PlayState.m_nCurrentOrder = order;
-	m_sndFile->SetCurrentOrder( order );
-	m_sndFile->m_PlayState.m_nNextRow = row;
-	m_currentPositionSeconds = m_sndFile->GetLength( m_ctl_seek_sync_samples ? eAdjustSamplePositions : eAdjust, GetLengthTarget( order, row ) ).back().duration;
+	m_sndFile->m_PlayState.m_nCurrentOrder = static_cast<ORDERINDEX>( order );
+	m_sndFile->SetCurrentOrder( static_cast<ORDERINDEX>( order ) );
+	m_sndFile->m_PlayState.m_nNextRow = static_cast<ROWINDEX>( row );
+	m_currentPositionSeconds = m_sndFile->GetLength( m_ctl_seek_sync_samples ? eAdjustSamplePositions : eAdjust, GetLengthTarget( static_cast<ORDERINDEX>( order ), static_cast<ROWINDEX>( row ) ) ).back().duration;
 	return m_currentPositionSeconds;
 }
 std::vector<std::string> module_impl::get_metadata_keys() const {
@@ -957,7 +955,7 @@ std::int32_t module_impl::get_current_pattern() const {
 		return m_sndFile->GetCurrentPattern();
 	}
 	std::int32_t pattern = m_sndFile->Order[order];
-	if ( !m_sndFile->Patterns.IsValidIndex( pattern ) ) {
+	if ( !m_sndFile->Patterns.IsValidIndex( static_cast<PATTERNINDEX>( pattern ) ) ) {
 		return -1;
 	}
 	return pattern;
@@ -1036,7 +1034,7 @@ std::vector<std::string> module_impl::get_subsong_names() const {
 #endif
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	for ( std::size_t i = 0; i < subsongs.size(); ++i ) {
-		retval.push_back( mod_string_to_utf8( m_sndFile->Order.GetSequence( subsongs[i].sequence ).GetName() ) );
+		retval.push_back( mod_string_to_utf8( m_sndFile->Order.GetSequence( static_cast<SEQUENCEINDEX>( subsongs[i].sequence ) ).GetName() ) );
 	}
 	return retval;
 }
