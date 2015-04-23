@@ -27,6 +27,7 @@ OPENMPT_NAMESPACE_BEGIN
 bool ExceptionHandler::fullMemDump = false;
 
 bool ExceptionHandler::stopSoundDeviceOnCrash = true;
+bool ExceptionHandler::stopSoundDeviceBeforeDump = false;
 
 
 enum DumpMode
@@ -91,12 +92,15 @@ private:
 	int rescuedFiles;
 private:
 	static bool FreezeState(DumpMode mode);
+	static bool Cleanup(DumpMode mode);
 	bool GenerateDump(_EXCEPTION_POINTERS *pExceptionInfo);
 	bool GenerateTraceLog();
 	int RescueFiles();
 	bool HasWrittenDebug() const { return writtenMiniDump || writtenTraceLog; }
+	static void StopSoundDevice();
 public:
 	DebugReporter(DumpMode mode, _EXCEPTION_POINTERS *pExceptionInfo);
+	~DebugReporter();
 	void ReportError(CString errorMessage);
 };
 
@@ -121,6 +125,13 @@ DebugReporter::DebugReporter(DumpMode mode, _EXCEPTION_POINTERS *pExceptionInfo)
 	{
 		rescuedFiles = RescueFiles();
 	}
+}
+
+
+DebugReporter::~DebugReporter()
+//-----------------------------
+{
+	Cleanup(mode);
 }
 
 
@@ -225,26 +236,18 @@ bool DebugReporter::FreezeState(DumpMode mode)
 
 	if(mode == DumpModeCrash || mode == DumpModeWarning)
 	{
-		// Shut down audio device...
-		if(ExceptionHandler::stopSoundDeviceOnCrash)
+		if(CMainFrame::GetMainFrame() && CMainFrame::GetMainFrame()->gpSoundDevice && CMainFrame::GetMainFrame()->gpSoundDevice->DebugIsFragileDevice())
 		{
-			CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
-			if(pMainFrame)
+			// For fragile devices, always stop the device. Stop before the dumping if not in realtime context.
+			if(!CMainFrame::GetMainFrame()->gpSoundDevice->DebugInRealtimeCallback())
 			{
-				try
-				{
-					if(pMainFrame->gpSoundDevice)
-					{
-						pMainFrame->gpSoundDevice->Close();
-					}
-					if(pMainFrame->m_NotifyTimer)
-					{
-						pMainFrame->KillTimer(pMainFrame->m_NotifyTimer);
-						pMainFrame->m_NotifyTimer = 0;
-					}
-				} catch(...)
-				{
-				}
+				StopSoundDevice();
+			}
+		} else
+		{
+			if(ExceptionHandler::stopSoundDeviceOnCrash && ExceptionHandler::stopSoundDeviceBeforeDump)
+			{
+				StopSoundDevice();
 			}
 		}
 	}
@@ -252,6 +255,56 @@ bool DebugReporter::FreezeState(DumpMode mode)
 	return true;
 }
 
+
+void DebugReporter::StopSoundDevice()
+//-----------------------------------
+{
+	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
+	if(pMainFrame)
+	{
+		try
+		{
+			if(pMainFrame->gpSoundDevice)
+			{
+				pMainFrame->gpSoundDevice->Close();
+			}
+			if(pMainFrame->m_NotifyTimer)
+			{
+				pMainFrame->KillTimer(pMainFrame->m_NotifyTimer);
+				pMainFrame->m_NotifyTimer = 0;
+			}
+		} catch(...)
+		{
+		}
+	}
+}
+
+
+bool DebugReporter::Cleanup(DumpMode mode)
+//----------------------------------------
+{
+	MPT_TRACE();
+
+	if(mode == DumpModeCrash || mode == DumpModeWarning)
+	{
+		if(CMainFrame::GetMainFrame() && CMainFrame::GetMainFrame()->gpSoundDevice && CMainFrame::GetMainFrame()->gpSoundDevice->DebugIsFragileDevice())
+		{
+			// For fragile devices, always stop the device. Stop after the dumping if in realtime context.
+			if(CMainFrame::GetMainFrame()->gpSoundDevice->DebugInRealtimeCallback())
+			{
+				StopSoundDevice();
+			}
+		} else
+		{
+			if(ExceptionHandler::stopSoundDeviceOnCrash && !ExceptionHandler::stopSoundDeviceBeforeDump)
+			{
+				StopSoundDevice();
+			}
+		}
+	}
+
+	return true;
+}
 
 
 // Different entry points for different situations in which we want to dump some information

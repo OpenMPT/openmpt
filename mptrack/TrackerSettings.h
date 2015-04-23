@@ -568,6 +568,7 @@ public:
 	Setting<bool> DebugTraceAlwaysDump;
 
 	Setting<bool> DebugStopSoundDeviceOnCrash;
+	Setting<bool> DebugStopSoundDeviceBeforeDump;
 
 public:
 

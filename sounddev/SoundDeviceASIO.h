@@ -80,6 +80,8 @@ protected:
 	FlagSet<AsioFeatures> m_QueriedFeatures;
 	FlagSet<AsioFeatures> m_UsedFeatures;
 
+	mutable mpt::atomic_uint32_t m_DebugRealtimeThreadID;
+
 private:
 	void UpdateTimeInfo(AsioTimeInfo asioTimeInfo);
 
@@ -117,6 +119,9 @@ public:
 	SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 
 	bool OpenDriverSettings();
+
+	bool DebugIsFragileDevice() const;
+	bool DebugInRealtimeCallback() const;
 
 	SoundDevice::Statistics GetStatistics() const;
 

@@ -239,11 +239,13 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, DebugTraceSize(conf, "Debug", "TraceSize", 1000000)
 	, DebugTraceAlwaysDump(conf, "Debug", "TraceAlwaysDump", false)
 	, DebugStopSoundDeviceOnCrash(conf, "Debug", "StopSoundDeviceOnCrash", true)
+	, DebugStopSoundDeviceBeforeDump(conf, "Debug", "StopSoundDeviceBeforeDump", false)
 {
 
 	// Debug
-	// Duplicate state for debug stffu in order to avoid calling into settings fremwork from crash conetxt.
+	// Duplicate state for debug stuff in order to avoid calling into settings framework from crash context.
 	ExceptionHandler::stopSoundDeviceOnCrash = DebugStopSoundDeviceOnCrash;
+	ExceptionHandler::stopSoundDeviceBeforeDump = DebugStopSoundDeviceBeforeDump;
 
 	// Effects
 #ifndef NO_DSP

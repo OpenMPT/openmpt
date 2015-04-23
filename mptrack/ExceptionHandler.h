@@ -19,6 +19,7 @@ class ExceptionHandler
 public:
 	static bool fullMemDump;
 	static bool stopSoundDeviceOnCrash;
+	static bool stopSoundDeviceBeforeDump;
 
 	// Call this to activate unhandled exception filtering.
 	static void Register() { ::SetUnhandledExceptionFilter(UnhandledExceptionFilter); };
