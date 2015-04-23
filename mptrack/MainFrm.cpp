@@ -596,7 +596,7 @@ void CMainFrame::OnTimerNotify()
 	int64 currenttotalsamples = 0;
 	if(gpSoundDevice)
 	{
-		currenttotalsamples = gpSoundDevice->GetStreamPositionFrames(); 
+		currenttotalsamples = gpSoundDevice->GetStreamPosition().Frames; 
 	}
 	{
 		// advance to the newest notification, drop the obsolete ones
@@ -747,8 +747,8 @@ void CMainFrame::SoundSourceRead(const SoundDevice::Settings &settings, const So
 }
 
 
-void CMainFrame::SoundSourceDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, int64 streamPosition)
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CMainFrame::SoundSourceDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, SoundDevice::StreamPosition streamPosition)
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	MPT_UNREFERENCED_PARAMETER(settings);
@@ -757,7 +757,7 @@ void CMainFrame::SoundSourceDone(const SoundDevice::Settings &settings, const So
 	MPT_UNREFERENCED_PARAMETER(timeInfo);
 	ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);
-	DoNotification(numFrames, streamPosition);
+	DoNotification(numFrames, streamPosition.Frames);
 	//m_pSndFile->m_TimingInfo = TimingInfo(); // reset
 }
 

@@ -350,7 +350,7 @@ void Base::SourceAudioDone(std::size_t numFrames, std::size_t framesLatency)
 		m_StreamPositionOutputFrames = m_StreamPositionRenderFrames - framesLatency;
 		framesRendered = m_StreamPositionRenderFrames;
 	}
-	m_Source->SoundSourceDone(m_Settings, m_Flags, GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, framesRendered);
+	m_Source->SoundSourceDone(m_Settings, m_Flags, GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, StreamPosition(framesRendered, StreamPositionFramesToSeconds(framesRendered)));
 }
 
 
@@ -428,19 +428,28 @@ double Base::GetLastUpdateInterval() const
 }
 
 
-int64 Base::GetStreamPositionFrames() const
-//-----------------------------------------
+SoundDevice::StreamPosition Base::GetStreamPosition() const
+//---------------------------------------------------------
 {
 	MPT_TRACE();
-	if(!IsOpen()) return 0;
+	if(!IsOpen())
+	{
+		return StreamPosition();
+	}
+	if(m_Settings.Samplerate <= 0)
+	{
+		return StreamPosition();
+	}
+	int64 frames = 0;
 	if(InternalHasGetStreamPosition())
 	{
-		return InternalGetStreamPositionFrames();
+		frames = InternalGetStreamPositionFrames();
 	} else
 	{
 		Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
-		return m_StreamPositionOutputFrames;
+		frames = m_StreamPositionOutputFrames;
 	}
+	return StreamPosition(frames, StreamPositionFramesToSeconds(frames));
 }
 
 
