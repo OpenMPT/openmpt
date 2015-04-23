@@ -237,14 +237,6 @@ bool Base::Close()
 }
 
 
-void Base::FillAudioBuffer()
-//--------------------------
-{
-	MPT_TRACE();
-	InternalFillAudioBuffer();
-}
-
-
 uint64 Base::SourceGetReferenceClockNowNanoseconds() const
 //--------------------------------------------------------
 {
@@ -297,7 +289,8 @@ void Base::SourceFillAudioBufferLocked()
 	MPT_TRACE();
 	if(m_Source)
 	{
-		m_Source->FillAudioBufferLocked(*this);
+		ISource::Guard lock(*m_Source);
+		InternalFillAudioBuffer();
 	}
 }
 
@@ -337,7 +330,7 @@ void Base::SourceAudioRead(void *buffer, std::size_t numFrames)
 	{
 		return;
 	}
-	m_Source->AudioRead(m_Settings, m_Flags, GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, buffer);
+	m_Source->SoundSourceRead(m_Settings, m_Flags, GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, buffer);
 }
 
 
@@ -357,7 +350,7 @@ void Base::SourceAudioDone(std::size_t numFrames, std::size_t framesLatency)
 		m_StreamPositionOutputFrames = m_StreamPositionRenderFrames - framesLatency;
 		framesRendered = m_StreamPositionRenderFrames;
 	}
-	m_Source->AudioDone(m_Settings, m_Flags, GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, framesRendered);
+	m_Source->SoundSourceDone(m_Settings, m_Flags, GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, framesRendered);
 }
 
 

@@ -349,6 +349,7 @@ public:
 public:
 
 	// Low-Level Audio
+	CriticalSection m_SoundDeviceFillBufferCriticalSection;
 	Util::MultimediaClock m_SoundDeviceClock;
 	SoundDevice::IBase *gpSoundDevice;
 	UINT_PTR m_NotifyTimer;
@@ -408,10 +409,11 @@ public:
 	void SoundSourcePreStartCallback();
 	void SoundSourcePostStopCallback();
 	bool SoundSourceIsLockedByCurrentThread() const;
-	void FillAudioBufferLocked(SoundDevice::IFillAudioBuffer &callback);
-	void AudioRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer);
-	void AudioDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, int64 streamPosition);
-	
+	void SoundSourceLock();
+	void SoundSourceRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer);
+	void SoundSourceDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, int64 streamPosition);
+	void SoundSourceUnlock();
+
 	// from SoundDevice::IMessageReceiver
 	void SoundDeviceMessage(LogLevel level, const mpt::ustring &str);
 

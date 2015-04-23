@@ -177,6 +177,7 @@ static UINT indicators[] =
 // CMainFrame construction/destruction
 CMainFrame::CMainFrame()
 //----------------------
+	: m_SoundDeviceFillBufferCriticalSection(CriticalSection::InitialUnlocked)
 {
 	m_NotifyTimer = 0;
 	gpSoundDevice = NULL;
@@ -670,16 +671,24 @@ bool CMainFrame::SoundSourceIsLockedByCurrentThread() const
 }
 
 
-void CMainFrame::FillAudioBufferLocked(SoundDevice::IFillAudioBuffer &callback)
-//-----------------------------------------------------------------------------
+void CMainFrame::SoundSourceLock()
+//--------------------------------
 {
 	MPT_TRACE();
-	CriticalSection cs;
+	m_SoundDeviceFillBufferCriticalSection.Enter();
 	MPT_ASSERT_ALWAYS(m_pSndFile != nullptr);
 	m_AudioThreadId = GetCurrentThreadId();
 	mpt::log::Trace::SetThreadId(mpt::log::Trace::ThreadKindAudio, m_AudioThreadId);
-	callback.FillAudioBuffer();
+}
+
+
+void CMainFrame::SoundSourceUnlock()
+//----------------------------------
+{
+	MPT_TRACE();
+	MPT_ASSERT_ALWAYS(m_pSndFile != nullptr);
 	m_AudioThreadId = 0;
+	m_SoundDeviceFillBufferCriticalSection.Leave();
 }
 
 
@@ -705,8 +714,8 @@ public:
 };
 
 
-void CMainFrame::AudioRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CMainFrame::SoundSourceRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer)
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	ASSERT(InAudioThread());
@@ -738,8 +747,8 @@ void CMainFrame::AudioRead(const SoundDevice::Settings &settings, const SoundDev
 }
 
 
-void CMainFrame::AudioDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, int64 streamPosition)
-//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CMainFrame::SoundSourceDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, int64 streamPosition)
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	MPT_UNREFERENCED_PARAMETER(settings);
