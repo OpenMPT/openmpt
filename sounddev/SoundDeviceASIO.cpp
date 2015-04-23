@@ -214,6 +214,9 @@ void CASIODevice::InitMembers()
 	InterlockedExchange(&m_RenderingSilence, 0);
 
 	InterlockedExchange(&m_AsioRequestFlags, 0);
+
+	m_DebugRealtimeThreadID.store(0);
+
 }
 
 
@@ -1104,6 +1107,20 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 //-----------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
+	struct DebugRealtimeThreadIdGuard
+	{
+		mpt::atomic_uint32_t & ThreadID;
+		DebugRealtimeThreadIdGuard(mpt::atomic_uint32_t & ThreadID)
+			: ThreadID(ThreadID)
+		{
+			ThreadID.store(GetCurrentThreadId());
+		}
+		~DebugRealtimeThreadIdGuard()
+		{
+			ThreadID.store(0);
+		}
+	};
+	DebugRealtimeThreadIdGuard debugThreadIdGuard(m_DebugRealtimeThreadID);
 	MPT_ASSERT(directProcess); // !directProcess is not handled correctly in OpenMPT, would require a separate thread and potentially additional buffering
 	if(!directProcess)
 	{
@@ -1201,6 +1218,20 @@ static mpt::ustring AsioFeaturesToString(FlagSet<AsioFeatures> features)
 	if(features[AsioFeatureNoDirectProcess]) { if(!first) { result += MPT_USTRING(","); } first = false; result += MPT_USTRING("nodirect"); }
 	if(features[AsioFeatureSampleRateChange]) { if(!first) { result += MPT_USTRING(","); } first = false; result += MPT_USTRING("srate"); }
 	return result;
+}
+
+
+bool CASIODevice::DebugIsFragileDevice() const
+//--------------------------------------------
+{
+	return true;
+}
+
+
+bool CASIODevice::DebugInRealtimeCallback() const
+//-----------------------------------------------
+{
+	return GetCurrentThreadId() == m_DebugRealtimeThreadID.load();
 }
 
 

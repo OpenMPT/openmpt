@@ -533,6 +533,10 @@ public:
 	virtual SoundDevice::TimeInfo GetTimeInfo() const = 0;
 	virtual int64 GetStreamPositionFrames() const = 0;
 
+	// Debugging aids in case of a crash
+	virtual bool DebugIsFragileDevice() const = 0;
+	virtual bool DebugInRealtimeCallback() const = 0;
+
 	// Informational only, do not use for timing.
 	// Use GetStreamPositionFrames() for timing
 	virtual SoundDevice::Statistics GetStatistics() const = 0;
@@ -666,6 +670,9 @@ public:
 
 	SoundDevice::TimeInfo GetTimeInfo() const { return m_TimeInfo; }
 	int64 GetStreamPositionFrames() const;
+
+	virtual bool DebugIsFragileDevice() const { return false; }
+	virtual bool DebugInRealtimeCallback() const { return false; }
 
 	virtual SoundDevice::Statistics GetStatistics() const;
 
