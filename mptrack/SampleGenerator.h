@@ -10,6 +10,8 @@
 
 #pragma once
 
+#ifdef MPT_DISABLED_CODE
+
 #include "mptrack.h"
 #include "Mainfrm.h"
 #include "Sndfile.h"
@@ -208,3 +210,5 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 };
+
+#endif // MPT_DISABLED_CODE

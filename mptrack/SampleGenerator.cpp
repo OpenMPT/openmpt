@@ -9,6 +9,9 @@
 
 
 #include "stdafx.h"
+
+#if MPT_DISABLED_CODE
+
 #include "SampleGenerator.h"
 #include "modsmp_ctrl.h"
 
@@ -774,3 +777,5 @@ void CSmpGenPresetDlg::RefreshList()
 	if(currentItem != 0) clist->SetCurSel(currentItem - 1);
 	OnListSelChange();
 }
+
+#endif // MPT_DISABLED_CODE
