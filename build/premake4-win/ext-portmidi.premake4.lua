@@ -20,5 +20,5 @@
    "../../include/portmidi/pm_common/portmidi.h",
    "../../include/portmidi/pm_win/pmwinmm.h",
   }
-  dofile "../../build/premake4-defaults-LIB.lua"
-  dofile "../../build/premake4-defaults-static.lua"
+  dofile "../../build/premake4-win/premake4-defaults-LIB.lua"
+  dofile "../../build/premake4-win/premake4-defaults-static.lua"
