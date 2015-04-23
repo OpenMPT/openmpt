@@ -13,26 +13,18 @@
 #include "StreamEncoder.h"
 #include "StreamEncoderOpus.h"
 
+#include "../common/mptIO.h"
+
 #include "../common/ComponentManager.h"
 
 #include "Mptrack.h"
 
 #include <deque>
+#include <sstream>
 
+#include <ogg/ogg.h>
 #include <opus/opus.h>
 #include <opus/opus_multistream.h>
-
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4244)
-#endif // MPT_COMPILER_MSVC
-
-#include <opus/opus_header.h>
-#include <opus/opus_header.c>
-
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif // MPT_COMPILER_MSVC
 
 
 
@@ -441,30 +433,6 @@ public:
 			opus.opus_multistream_encoder_ctl(st, OPUS_SET_COMPLEXITY(complexity));
 		}
 
-		OpusHeader header;
-		MemsetZero(header);
-		header.version = 0;
-		header.channels = opus_channels;
-		header.preskip = ctl_lookahead * (48000/samplerate);
-		header.input_sample_rate = samplerate;
-		header.gain = 0;
-		header.channel_mapping = (opus_channels > 2) ? 1 : 0;
-		if(header.channel_mapping == 0)
-		{
-			header.nb_streams = 0;
-			header.nb_coupled = 0;
-			MemsetZero(header.stream_map);
-		} else if(header.channel_mapping == 1)
-		{
-			header.nb_streams = num_streams;
-			header.nb_coupled = num_coupled;
-			MemsetZero(header.stream_map);
-			for(int channel=0; channel<opus_channels; ++channel)
-			{
-				header.stream_map[channel] = mapping[channel];
-			}
-		}
-
 		opus_extrasamples = ctl_lookahead;
 
 		opus_comments.clear();
@@ -473,10 +441,33 @@ public:
 
 		inited = true;
 
-		unsigned char header_data[1024];
-		int packet_size = opus_header_to_packet(&header, header_data, 1024);
-		op.packet = header_data;
-		op.bytes = packet_size;
+		std::ostringstream buf(std::ios::binary);
+		buf.imbue(std::locale::classic());
+
+		mpt::IO::WriteRaw(buf, "Opus", 4);
+		mpt::IO::WriteRaw(buf, "Head", 4);
+		mpt::IO::WriteIntLE<uint8>(buf, 1); // version
+		mpt::IO::WriteIntLE<uint8>(buf, static_cast<uint8>(opus_channels)); // channels
+		mpt::IO::WriteIntLE<uint16>(buf, static_cast<uint16>(ctl_lookahead * (48000/samplerate))); // preskip
+		mpt::IO::WriteIntLE<uint32>(buf, samplerate); // samplerate
+		mpt::IO::WriteIntLE<uint16>(buf, 0); // gain
+		mpt::IO::WriteIntLE<uint8>(buf, (opus_channels > 2) ? 1 : 0); //chanmap
+
+		if(opus_channels > 2)
+		{
+			mpt::IO::WriteIntLE<uint8>(buf, static_cast<uint8>(num_streams));
+			mpt::IO::WriteIntLE<uint8>(buf, static_cast<uint8>(num_coupled));
+			for(int channel=0; channel<opus_channels; ++channel)
+			{
+				mpt::IO::WriteIntLE<uint8>(buf, mapping[channel]);
+			}
+		}
+
+		std::string header_str = buf.str();
+		std::vector<unsigned char> header_buf(header_str.data(), header_str.data() + header_str.size());
+
+		op.packet = &(header_buf[0]);
+		op.bytes = header_buf.size();
 		op.b_o_s = 1;
 		op.e_o_s = 0;
 		op.granulepos = 0;
