@@ -1,3 +1,15 @@
+v0.3.0 (2015-??-??):
+
+     * PMarc -pm1- archives that contain truncated compressed data (the
+       decompressed length is longer than what can be read from the
+       compressed data) now decompress as intended. Certain archives
+       in the wild make the assumption that this can be done.
+     * LArc -lz5- archives that make use of the initial history buffer
+       now decompress correctly.
+     * The tests no longer use predictable temporary paths (thanks Jon
+       Dowland).
+     * Tests were fixed under OS X.
+
 v0.2.0 (2013-08-04):
 
      * Decompression of archives using the -lhx- file format supported by

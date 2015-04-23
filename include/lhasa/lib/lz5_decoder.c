@@ -54,12 +54,52 @@ typedef struct {
 	void *callback_data;
 } LHALZ5Decoder;
 
+static void fill_initial(LHALZ5Decoder *decoder)
+{
+	unsigned int i, j;
+	uint8_t *p;
+
+	p = decoder->ringbuf;
+
+	// For each byte value, the history buffer includes a run of 13
+	// bytes all with that value. This is useful eg. for text files
+	// that include a long run like this (eg. ===========).
+	for (i = 0; i < 256; ++i) {
+		for (j = 0; j < 13; ++j) {
+			*p++ = (uint8_t) i;
+		}
+	}
+
+	// Next we include all byte values ascending and descending.
+	for (i = 0; i < 256; ++i) {
+		*p++ = (uint8_t) i;
+	}
+	for (i = 0; i < 256; ++i) {
+		*p++ = (uint8_t) (255 - i);
+	}
+
+	// Block of zeros, and then ASCII space characters. I think these are
+	// towards the end of the range because they're most likely to be
+	// useful and therefore last to get overwritten?
+	for (i = 0; i < 128; ++i) {
+		*p++ = 0;
+	}
+	for (i = 0; i < 110; ++i) {
+		*p++ = ' ';
+	}
+
+	// Final 18 characters are all zeros, probably because of START_OFFSET.
+	for (i = 0; i < 18; ++i) {
+		*p++ = 0;
+	}
+}
+
 static int lha_lz5_init(void *data, LHADecoderCallback callback,
                         void *callback_data)
 {
 	LHALZ5Decoder *decoder = data;
 
-	memset(decoder->ringbuf, ' ', RING_BUFFER_SIZE);
+	fill_initial(decoder);
 	decoder->ringbuf_pos = RING_BUFFER_SIZE - START_OFFSET;
 	decoder->callback = callback;
 	decoder->callback_data = callback_data;
