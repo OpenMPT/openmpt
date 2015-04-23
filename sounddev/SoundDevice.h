@@ -52,6 +52,15 @@ struct TimeInfo
 };
 
 
+struct StreamPosition
+{
+	int64 Frames; // relative to Start()
+	double Seconds; // relative to Start()
+	StreamPosition() : Frames(0), Seconds(0.0) { }
+	StreamPosition(int64 frames, double seconds) : Frames(frames), Seconds(seconds) { }
+};
+
+
 struct Settings;
 struct Flags;
 struct BufferAttributes;
@@ -68,7 +77,7 @@ public:
 	virtual bool SoundSourceIsLockedByCurrentThread() const = 0;
 	virtual void SoundSourceLock() = 0;
 	virtual void SoundSourceRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer) = 0;
-	virtual void SoundSourceDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, int64 streamPosition) = 0; // in sample frames
+	virtual void SoundSourceDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, SoundDevice::StreamPosition streamPosition) = 0;
 	virtual void SoundSourceUnlock() = 0;
 public:
 	class Guard
@@ -534,7 +543,7 @@ public:
 	virtual SoundDevice::BufferAttributes GetEffectiveBufferAttributes() const = 0;
 
 	virtual SoundDevice::TimeInfo GetTimeInfo() const = 0;
-	virtual int64 GetStreamPositionFrames() const = 0;
+	virtual SoundDevice::StreamPosition GetStreamPosition() const = 0;
 
 	// Debugging aids in case of a crash
 	virtual bool DebugIsFragileDevice() const = 0;
@@ -615,6 +624,8 @@ protected:
 
 	void UpdateTimeInfo(SoundDevice::TimeInfo timeInfo);
 
+	double StreamPositionFramesToSeconds(int64 frames) const { return static_cast<double>(frames) / static_cast<double>(m_Settings.Samplerate); }
+
 	virtual bool InternalHasTimeInfo() const { return false; }
 
 	virtual bool InternalHasGetStreamPosition() const { return false; }
@@ -670,7 +681,7 @@ public:
 	SoundDevice::BufferAttributes GetEffectiveBufferAttributes() const { return (IsOpen() && IsPlaying()) ? InternalGetEffectiveBufferAttributes() : SoundDevice::BufferAttributes(); }
 
 	SoundDevice::TimeInfo GetTimeInfo() const { return m_TimeInfo; }
-	int64 GetStreamPositionFrames() const;
+	SoundDevice::StreamPosition GetStreamPosition() const;
 
 	virtual bool DebugIsFragileDevice() const { return false; }
 	virtual bool DebugInRealtimeCallback() const { return false; }
