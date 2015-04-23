@@ -12,8 +12,41 @@ How to compile
 
 ### OpenMPT
 
- -  Visual Studio 2008/2010 is required. Express versions won't work as they
-    don't include MFC.
+ -  Supported Visual Studio versions:
+
+     -  Visual Studio 2008 Service Pack 1 Standard/Professional/Team Edition
+        (Express Edition is not supported as it does not include MFC).
+
+        You need the DirectX SDK 2010-June to enable DirectSound output. If you
+        don't want this, uncomment `#define NO_DSOUND` in the file
+        `common/BuildSettings.h`.
+
+        To compile the project, open `mptrack/MPTRACK_08.sln` and hit the
+        compile button.
+
+     -  Visual Studio 2010 Service Pack 1 Professional/Premium/Ultimate (Express
+        version is not supported as it does not include MFC).
+
+        You need the DirectX SDK 2010-June to enable DirectSound output. If you
+        don't want this, uncomment `#define NO_DSOUND` in the file
+        `common/BuildSettings.h`.
+
+        To compile the project, open `mptrack/MPTRACK_10.sln` and hit the
+        compile button.
+
+     -  Visual Studio 2012 Update 4 Professional/Premium/Ultimate (Express
+        version is not supported as it does not include MFC).
+
+        To compile the project, open `mptrack/MPTRACK_10.sln`, confirm the
+        project files upgrade and hit the compile button.
+
+     -  Visual Studio 2013 Update 4 Community/Professional/Premium/Ultimate
+        Edition with MBCS MFC Add-On (available at
+        [microsoft.com](https://www.microsoft.com/en-us/download/details.aspx?id=40770)
+        ).
+
+        To compile the project, open `mptrack/MPTRACK_10.sln`, confirm the
+        project files upgrade and hit the compile button.
 
  -  The VST 2.4 and ASIO SDKs are needed for compiling with VST and ASIO
     support.
@@ -50,13 +83,6 @@ How to compile
 
     If you need further help with the VST and ASIO SDKs, get in touch with the
     main developers. 
-
- -  You need the DirectX SDK to enable DirectSound output. If you don't want
-    this, uncomment `#define NO_DSOUND` in the file `common/BuildSettings.h`.
-
- -  To compile the project, open `mptrack/MPTRACK_08.SLN` (if you're using
-    VS2008) or `mptrack/MPTRACK_10.SLN` (VS2010 or later) and hit the compile
-    button! :)
 
 
 ### libopenmpt and openmpt123
