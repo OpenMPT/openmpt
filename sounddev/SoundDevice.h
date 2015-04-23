@@ -29,15 +29,6 @@ namespace SoundDevice {
 
 
 //====================
-class IFillAudioBuffer
-//====================
-{
-public:
-	virtual void FillAudioBuffer() = 0;
-};
-
-
-//====================
 class IMessageReceiver
 //====================
 {
@@ -75,9 +66,26 @@ public:
 	virtual void SoundSourcePreStartCallback() = 0;
 	virtual void SoundSourcePostStopCallback() = 0;
 	virtual bool SoundSourceIsLockedByCurrentThread() const = 0;
-	virtual void FillAudioBufferLocked(SoundDevice::IFillAudioBuffer &callback) = 0; // take any locks needed while rendering audio and then call FillAudioBuffer
-	virtual void AudioRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer) = 0;
-	virtual void AudioDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, int64 streamPosition) = 0; // in sample frames
+	virtual void SoundSourceLock() = 0;
+	virtual void SoundSourceRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer) = 0;
+	virtual void SoundSourceDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, int64 streamPosition) = 0; // in sample frames
+	virtual void SoundSourceUnlock() = 0;
+public:
+	class Guard
+	{
+	private:
+		ISource &m_Source;
+	public:
+		Guard(ISource &source)
+			: m_Source(source)
+		{
+			m_Source.SoundSourceLock();
+		}
+		~Guard()
+		{
+			m_Source.SoundSourceUnlock();
+		}
+	};
 };
 
 
@@ -486,7 +494,6 @@ struct Statistics
 //=========
 class IBase
 //=========
-	: protected IFillAudioBuffer
 {
 
 protected:
@@ -496,10 +503,6 @@ protected:
 public:
 
 	virtual ~IBase() { }
-
-protected:
-
-	virtual void FillAudioBuffer() = 0;
 
 public:
 
@@ -592,8 +595,6 @@ protected:
 	SoundDevice::Identifier GetDeviceIdentifier() const { return m_Info.GetIdentifier(); }
 
 	virtual void InternalFillAudioBuffer() = 0;
-
-	void FillAudioBuffer();
 
 	uint64 SourceGetReferenceClockNowNanoseconds() const;
 	void SourceNotifyPreStart();
