@@ -17,8 +17,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 //Version definitions. The only thing that needs to be changed when changing version number.
 #define VER_MAJORMAJOR          1
-#define VER_MAJOR               24
-#define VER_MINOR               04
+#define VER_MAJOR               25
+#define VER_MINOR               00
 #define VER_MINORMINOR          01
 
 //Version string. For example "1.17.02.28"
