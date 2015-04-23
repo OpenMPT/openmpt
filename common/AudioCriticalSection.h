@@ -26,10 +26,24 @@ class CriticalSection
 protected:
 	bool inSection;
 public:
+	enum InitialState
+	{
+		InitialLocked = 0,
+		InitialUnlocked = 1
+	};
+public:
 	CriticalSection()
 		: inSection(false)
 	{
 		Enter();
+	}
+	explicit CriticalSection(InitialState state)
+		: inSection(false)
+	{
+		if(state == InitialLocked)
+		{
+			Enter();
+		}
 	}
 	void Enter()
 	{
