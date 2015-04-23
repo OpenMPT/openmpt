@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <limits>
 #include <string>
 #if defined(HAS_TYPE_TRAITS)
@@ -382,6 +383,89 @@ static inline CStringW ToCStringW(const mpt::ustring &str) { return ToCStringW(T
 // Use explicit UTF8 encoding,
 // i.e. U+00FC (LATIN SMALL LETTER U WITH DIAERESIS) would be written as "\xC3\xBC".
 #define MPT_UTF8(x) mpt::ToUnicode(mpt::CharsetUTF8, x )
+
+
+
+
+
+#ifdef MODPLUG_TRACKER
+
+#if defined(MPT_OS_WINDOWS)
+
+namespace String { namespace detail
+{
+
+	template <mpt::Charset charset, std::size_t size>
+	inline mpt::ustring StringFromBuffer(const char (&buf)[size])
+	{
+		STATIC_ASSERT(size > 0);
+		std::size_t len = std::find(buf, buf + size, '\0') - buf; // terminate at \0
+		return mpt::ToUnicode(charset, std::string(buf, buf + len));
+	}
+
+	template <mpt::Charset charset, std::size_t size>
+	inline mpt::ustring StringFromBuffer(const wchar_t (&buf)[size])
+	{
+		STATIC_ASSERT(size > 0);
+		std::size_t len = std::find(buf, buf + size, L'\0') - buf; // terminate at \0
+		return mpt::ToUnicode(std::wstring(buf, buf + len));
+	}
+
+	template <mpt::Charset charset, std::size_t size>
+	inline bool StringToBuffer(char (&buf)[size], const mpt::ustring &str)
+	{
+		STATIC_ASSERT(size > 0);
+		MemsetZero(buf);
+		std::string encoded = mpt::ToCharset(charset, str);
+		std::copy(encoded.data(), std::min(encoded.length(), size - 1), buf);
+		buf[size - 1] = '\0';
+		return (encoded.length() <= size - 1);
+	}
+
+	template <mpt::Charset charset, std::size_t size>
+	inline bool StringToBuffer(wchar_t (&buf)[size], const mpt::ustring &str)
+	{
+		STATIC_ASSERT(size > 0);
+		MemsetZero(buf);
+		std::wstring encoded = mpt::ToWide(str);
+		std::copy(encoded.data(), std::min(encoded.length(), size - 1), buf);
+		buf[size - 1] = L'\0';
+		return (encoded.length() <= size - 1);
+	}
+
+} } // namespace String::detail
+
+// mpt::FromTcharBuf
+// A lot of expecially older WinAPI functions return strings by filling in
+// fixed-width TCHAR arrays inside some struct.
+// mpt::FromTcharBuf converts these string to mpt::ustring regardless of whether
+// in ANSI or UNICODE build and properly handles potentially missing NULL
+// termination.
+
+template <typename Tchar, std::size_t size>
+inline mpt::ustring FromTcharBuf(const Tchar (&buf)[size])
+{
+	return mpt::String::detail::StringFromBuffer<mpt::CharsetLocale>(buf);
+}
+
+// mpt::ToTcharBuf
+// The inverse of mpt::FromTcharBuf.
+// Always NULL-terminates the buffer.
+// Return false if the string has been truncated to fit.
+
+template <typename Tchar, std::size_t size>
+inline bool ToTcharBuf(Tchar (&buf)[size], const mpt::ustring &str)
+{
+	return mpt::String::detail::StringToBuffer<mpt::CharsetLocale>(buf, str);
+}
+
+#endif // MPT_OS_WINDOWS
+
+#endif // MODPLUG_TRACKER
+
+
+
+
 
 } // namespace mpt
 

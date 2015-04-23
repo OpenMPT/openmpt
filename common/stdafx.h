@@ -53,6 +53,7 @@
 // <stdint.h>
 
 #include "../common/mptString.h"
+// <algorithm>
 // <limits>
 // <string>
 // <type_traits>
@@ -63,6 +64,7 @@
 #include "../common/Logging.h"
 
 #include "../common/misc_util.h"
+// <algorithm>
 // <limits>
 // <string>
 // <type_traits>
