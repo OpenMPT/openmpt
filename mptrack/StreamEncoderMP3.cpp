@@ -930,7 +930,7 @@ public:
 	std::vector<Encoder::Format> formats;
 	std::vector<HACMDRIVERID> formats_driverids;
 	std::vector<std::vector<char> > formats_waveformats;
-	std::set<std::string> drivers;
+	std::set<mpt::ustring> drivers;
 
 private:
 
@@ -967,14 +967,11 @@ private:
 	{
 		return reinterpret_cast<ComponentAcmMP3*>(inst)->AcmFormatEnumCB(driver, pafd, fdwSupport);
 	}
-	template<size_t size>
-	static void AppendField(std::string &s, const std::string &field, const CHAR(&val)[size])
+	static void AppendField(mpt::ustring &s, const mpt::ustring &field, const mpt::ustring &val)
 	{
-		std::string tmp;
-		mpt::String::Copy(tmp, val);
-		if(!tmp.empty())
+		if(!val.empty())
 		{
-			s += field + std::string(": ") + tmp + std::string("\n");
+			s += field + MPT_USTRING(": ") + val + MPT_USTRING("\n");
 		}
 	}
 	BOOL AcmFormatEnumCB(HACMDRIVERID driver, LPACMFORMATDETAILS pafd, DWORD fdwSupport)
@@ -989,9 +986,7 @@ private:
 			ACMLOG(mpt::String::Print("  dwFormatIndex = %1", pafd->dwFormatIndex));
 			ACMLOG(mpt::String::Print("  dwFormatTag = %1", pafd->dwFormatTag));
 			ACMLOG(mpt::String::Print("  fdwSupport = 0x%1", mpt::fmt::hex0<8>(pafd->fdwSupport)));
-			std::string str;
-			mpt::String::Read<mpt::String::maybeNullTerminated>(str, pafd->szFormat);
-			ACMLOG(mpt::String::Print("  Format = %1", str));
+			ACMLOG(mpt::String::Print("  Format = %1", mpt::FromTcharBuf(pafd->szFormat)));
 		} else
 		{
 			ACMLOG(" ACMFORMATDETAILS = NULL");
@@ -1023,17 +1018,11 @@ private:
 				ACMLOG(mpt::String::Print("  fdwSupport = %1", mpt::fmt::hex0<8>(add.fdwSupport)));
 				ACMLOG(mpt::String::Print("  cFormatTags = %1", add.cFormatTags));
 				ACMLOG(mpt::String::Print("  cFilterTags = %1", add.cFilterTags));
-				std::string str;
-				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szShortName);
-				ACMLOG(mpt::String::Print("  ShortName = %1", str));
-				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szLongName);
-				ACMLOG(mpt::String::Print("  LongName = %1", str));
-				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szCopyright);
-				ACMLOG(mpt::String::Print("  Copyright = %1", str));
-				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szLicensing);
-				ACMLOG(mpt::String::Print("  Licensing = %1", str));
-				mpt::String::Read<mpt::String::maybeNullTerminated>(str, add.szFeatures);
-				ACMLOG(mpt::String::Print("  Features = %1", str));
+				ACMLOG(mpt::String::Print("  ShortName = %1", mpt::FromTcharBuf(add.szShortName)));
+				ACMLOG(mpt::String::Print("  LongName = %1", mpt::FromTcharBuf(add.szLongName)));
+				ACMLOG(mpt::String::Print("  Copyright = %1", mpt::FromTcharBuf(add.szCopyright)));
+				ACMLOG(mpt::String::Print("  Licensing = %1", mpt::FromTcharBuf(add.szLicensing)));
+				ACMLOG(mpt::String::Print("  Features = %1", mpt::FromTcharBuf(add.szFeatures)));
 			} catch(...)
 			{
 				ACMLOG(" acmDriverDetails = EXCEPTION");
@@ -1041,24 +1030,24 @@ private:
 				return TRUE;
 			}
 
-			std::string driverNameLong;
-			std::string driverNameShort;
-			std::string driverNameCombined;
-			std::string driverDescription;
+			mpt::ustring driverNameLong;
+			mpt::ustring driverNameShort;
+			mpt::ustring driverNameCombined;
+			mpt::ustring driverDescription;
 
 			if(add.szLongName[0])
 			{
-				mpt::String::Copy(driverNameLong, add.szLongName);
+				driverNameLong = mpt::FromTcharBuf(add.szLongName);
 			}
 			if(add.szShortName[0])
 			{
-				mpt::String::Copy(driverNameShort, add.szShortName);
+				driverNameShort = mpt::FromTcharBuf(add.szShortName);
 			}
 			if(driverNameShort.empty())
 			{
 				if(driverNameLong.empty())
 				{
-					driverNameCombined = "";
+					driverNameCombined = MPT_USTRING("");
 				} else
 				{
 					driverNameCombined = driverNameLong;
@@ -1074,30 +1063,30 @@ private:
 				}
 			}
 
-			AppendField(driverDescription, "Driver", add.szShortName);
-			AppendField(driverDescription, "Description", add.szLongName);
-			AppendField(driverDescription, "Copyright", add.szCopyright);
-			AppendField(driverDescription, "Licensing", add.szLicensing);
-			AppendField(driverDescription, "Features", add.szFeatures);
+			AppendField(driverDescription, MPT_USTRING("Driver"), mpt::FromTcharBuf(add.szShortName));
+			AppendField(driverDescription, MPT_USTRING("Description"), mpt::FromTcharBuf(add.szLongName));
+			AppendField(driverDescription, MPT_USTRING("Copyright"), mpt::FromTcharBuf(add.szCopyright));
+			AppendField(driverDescription, MPT_USTRING("Licensing"), mpt::FromTcharBuf(add.szLicensing));
+			AppendField(driverDescription, MPT_USTRING("Features"), mpt::FromTcharBuf(add.szFeatures));
 
 			for(int i = 0; i < CountOf(layer3_samplerates); ++i)
 			{
 				if(layer3_samplerates[i] == (int)pafd->pwfx->nSamplesPerSec)
 				{
 
-					std::string formatName;
+					mpt::ustring formatName;
 
-					formatName = pafd->szFormat;
+					formatName = mpt::FromTcharBuf(pafd->szFormat);
 					
 					if(!driverNameCombined.empty())
 					{
-						formatName += " (";
+						formatName += MPT_USTRING(" (");
 						formatName += driverNameCombined;
-						formatName += ")";
+						formatName += MPT_USTRING(")");
 					}
 
 					// Blacklist Wine MP3 Decoder because it can only decode.
-					if(driverNameShort == "WINE-MPEG3" && driverNameLong == "Wine MPEG3 decoder")
+					if(driverNameShort == MPT_USTRING("WINE-MPEG3") && driverNameLong == MPT_USTRING("Wine MPEG3 decoder"))
 					{
 						continue;
 					}
@@ -1108,7 +1097,7 @@ private:
 					format.Channels = pafd->pwfx->nChannels;
 					format.Sampleformat = SampleFormatInvalid;
 					format.Bitrate = pafd->pwfx->nAvgBytesPerSec * 8 / 1000;
-					format.Description = mpt::ToUnicode(mpt::CharsetLocale, formatName);
+					format.Description = formatName;
 					formats.push_back(format);
 					formats_driverids.push_back(driver);
 					{
@@ -1206,9 +1195,9 @@ public:
 			traits.encoderName = mpt::String::Print(MPT_USTRING("%1 %2.%3"), MPT_USTRING("Microsoft Windows ACM"), mpt::ufmt::hex0<2>((ver>>24)&0xff), mpt::ufmt::hex0<2>((ver>>16)&0xff));
 		}
 		traits.encoderSettingsName = MPT_USTRING("MP3ACM");
-		for(std::set<std::string>::const_iterator i = drivers.begin(); i != drivers.end(); ++i)
+		for(std::set<mpt::ustring>::const_iterator i = drivers.begin(); i != drivers.end(); ++i)
 		{
-			traits.description += mpt::ToUnicode(mpt::CharsetLocale, (*i));
+			traits.description += (*i);
 		}
 		traits.canTags = true;
 		traits.maxChannels = 2;
