@@ -12,5 +12,5 @@
    "../../include/pugixml/src/pugiconfig.hpp",
    "../../include/pugixml/src/pugixml.hpp",
   }
-  dofile "../../build/premake4-defaults-LIB.lua"
-  dofile "../../build/premake4-defaults-static.lua"
+  dofile "../../build/premake4-win/premake4-defaults-LIB.lua"
+  dofile "../../build/premake4-win/premake4-defaults-static.lua"

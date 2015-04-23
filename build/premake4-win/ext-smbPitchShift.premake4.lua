@@ -11,5 +11,5 @@
   files {
    "../../include/smbPitchShift/smbPitchShift.h",
   }
-  dofile "../../build/premake4-defaults-LIB.lua"
-  dofile "../../build/premake4-defaults-static.lua"
+  dofile "../../build/premake4-win/premake4-defaults-LIB.lua"
+  dofile "../../build/premake4-win/premake4-defaults-static.lua"

@@ -21,6 +21,6 @@
    "../../include/r8brain/r8bconf.h",
    "../../include/r8brain/r8butil.h",
   }
-  dofile "../../build/premake4-defaults-LIB.lua"
-  dofile "../../build/premake4-defaults-static.lua"
+  dofile "../../build/premake4-win/premake4-defaults-LIB.lua"
+  dofile "../../build/premake4-win/premake4-defaults-static.lua"
  
