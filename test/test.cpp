@@ -282,30 +282,19 @@ static MPT_NOINLINE void TestTypes()
 //  4. Formatting of floating point values depends on the currently set C locale.
 //     A library is not allowed to mock with that and thus cannot influence the behavior in this case.
 
-static std::string MPT_PRINTF_FUNC(1,2) StringFormat(const char * format, ...);
-
-static std::string StringFormat(const char *format, ...)
+template <typename T>
+static std::string StringFormat(const char *format, T x)
 {
 	#if MPT_COMPILER_MSVC
-		va_list argList;
-		va_start(argList, format);
-
 		// Count the needed array size.
-		const size_t nCount = _vscprintf(format, argList); // null character not included.
+		const size_t nCount = _scprintf(format, x); // null character not included.
 		std::vector<char> buf(nCount + 1); // + 1 is for null terminator.
-		vsprintf_s(&(buf[0]), buf.size(), format, argList);
-
-		va_end(argList);
+		sprintf_s(&(buf[0]), buf.size(), format, x);
 		return &(buf[0]);
 	#else
-		va_list argList;
-		va_start(argList, format);
-		int size = vsnprintf(NULL, 0, format, argList); // get required size, requires c99 compliant vsnprintf which msvc does not have
-		va_end(argList);
+		int size = snprintf(NULL, 0, format, x); // get required size, requires c99 compliant snprintf which msvc does not have
 		std::vector<char> temp(size + 1);
-		va_start(argList, format);
-		vsnprintf(&(temp[0]), size + 1, format, argList);
-		va_end(argList);
+		snprintf(&(temp[0]), size + 1, format, x);
 		return &(temp[0]);
 	#endif
 }

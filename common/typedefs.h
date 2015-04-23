@@ -297,17 +297,6 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 #endif
 
 
-OPENMPT_NAMESPACE_END
-#include <cstdarg>
-#include <stdarg.h>
-OPENMPT_NAMESPACE_BEGIN
-#if MPT_COMPILER_MSVC || (MPT_COMPILER_GCC && MPT_GCC_AT_LEAST(4,3,0) && MPT_GCC_BEFORE(4,4,0))
-#ifndef va_copy
-#define va_copy(dst, src) do { (dst) = (src); } while (0)
-#endif
-#endif
-
-
 
 #if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)) || (MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,3,0))
 
