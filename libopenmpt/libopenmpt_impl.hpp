@@ -21,6 +21,11 @@
 #endif
 #include <memory>
 
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:4512) // assignment operator could not be generated
+#endif
+
 // forward declarations
 namespace OpenMPT {
 class FileReader;
@@ -236,5 +241,9 @@ public:
 }; // class module_impl
 
 } // namespace openmpt
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 #endif // LIBOPENMPT_IMPL_HPP
