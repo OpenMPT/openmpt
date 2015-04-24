@@ -1323,24 +1323,24 @@ bool CDLSBank::Open(FileReader file)
 						switch(psublist->id)
 						{
 						case IFFID_INAM:
-							lstrcpyn(m_BankInfo.szBankName, pszInfo, len);
+							lstrcpynA(m_BankInfo.szBankName, pszInfo, len);
 							break;
 						case IFFID_IENG:
-							lstrcpyn(m_BankInfo.szEngineer, pszInfo, len);
+							lstrcpynA(m_BankInfo.szEngineer, pszInfo, len);
 							break;
 						case IFFID_ICOP:
-							lstrcpyn(m_BankInfo.szCopyRight, pszInfo, len);
+							lstrcpynA(m_BankInfo.szCopyRight, pszInfo, len);
 							break;
 						case IFFID_ICMT:
 							len = psublist->len;
 							if (len > sizeof(m_BankInfo.szComments)-1) len = sizeof(m_BankInfo.szComments)-1;
-							lstrcpyn(m_BankInfo.szComments, pszInfo, len);
+							lstrcpynA(m_BankInfo.szComments, pszInfo, len);
 							break;
 						case IFFID_ISFT:
-							lstrcpyn(m_BankInfo.szSoftware, pszInfo, len);
+							lstrcpynA(m_BankInfo.szSoftware, pszInfo, len);
 							break;
 						case IFFID_ISBJ:
-							lstrcpyn(m_BankInfo.szDescription, pszInfo, len);
+							lstrcpynA(m_BankInfo.szDescription, pszInfo, len);
 							break;
 						}
 					} else
@@ -1732,7 +1732,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, UI
 	{
 		char s[64] = "";
 		UINT key = pDlsIns->Regions[nDrumRgn].uKeyMin;
-		if ((key >= 24) && (key <= 84)) lstrcpy(s, szMidiPercussionNames[key-24]);
+		if ((key >= 24) && (key <= 84)) lstrcpyA(s, szMidiPercussionNames[key-24]);
 		if (pDlsIns->szName[0])
 		{
 			sprintf(&s[strlen(s)], " (%s", pDlsIns->szName);
@@ -1742,7 +1742,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, UI
 				n--;
 				s[n] = 0;
 			}
-			lstrcat(s, ")");
+			lstrcatA(s, ")");
 		}
 		mpt::String::Copy(pIns->name, s);
 	} else
