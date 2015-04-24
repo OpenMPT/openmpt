@@ -218,7 +218,7 @@ VstIntPtr CDmo2Vst::Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 								int nValue = (int)(md * 100.0f + 0.5f);
 								bool bNeg = false;
 								if (nValue < 0) { bNeg = true; nValue = -nValue; }
-								wsprintf(pszName, (bNeg) ? "-%d.%02d" : "%d.%02d", nValue/100, nValue%100);
+								wsprintfA(pszName, (bNeg) ? "-%d.%02d" : "%d.%02d", nValue/100, nValue%100);
 							}
 							break;
 
@@ -243,7 +243,7 @@ VstIntPtr CDmo2Vst::Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 
 						case MPT_INT:
 						default:
-							wsprintf(pszName, "%d", (int)md);
+							wsprintfA(pszName, "%d", (int)md);
 							break;
 						}
 					}
