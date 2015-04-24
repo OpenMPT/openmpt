@@ -234,10 +234,10 @@ BOOL CAboutDlg::OnInitDialog()
 
 	m_bmp.SubclassDlgItem(IDC_BITMAP1, this);
 
-	SetDlgItemText(IDC_EDIT2, CString("Build Date: ") + MptVersion::GetBuildDateString().c_str());
-	SetDlgItemText(IDC_EDIT3, CString("OpenMPT ") + MptVersion::GetVersionStringExtended().c_str());
-	m_static.SubclassDlgItem(IDC_CREDITS,this);
-	m_static.SetCredits((mpt::String::Replace(mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, MptVersion::GetFullCreditsString()), "\n", "|") + "|" + mpt::String::Replace(MptVersion::GetContactString(), "\n", "|" ) + "||||||").c_str());
+	SetDlgItemText(IDC_EDIT2, mpt::ToCString(mpt::CharsetASCII, std::string("Build Date: ") + MptVersion::GetBuildDateString()));
+	SetDlgItemText(IDC_EDIT3, mpt::ToCString(mpt::CharsetASCII, std::string("OpenMPT ") + MptVersion::GetVersionStringExtended()));
+	m_static.SubclassDlgItem(IDC_CREDITS, this);
+	m_static.SetCredits(mpt::ToCString(mpt::CharsetUTF8, mpt::String::Replace(MptVersion::GetFullCreditsString(), "\n", "|") + "|" + mpt::String::Replace(MptVersion::GetContactString(), "\n", "|" ) + "||||||"));
 	m_static.SetSpeed(DISPLAY_SLOW);
 	m_static.SetColor(BACKGROUND_COLOR, RGB(138, 165, 219)); // Background Colour
 	m_static.SetTransparent(); // Set parts of bitmaps with RGB(192,192,192) transparent
