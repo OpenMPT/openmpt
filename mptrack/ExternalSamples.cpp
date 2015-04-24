@@ -57,7 +57,7 @@ BOOL ExternalSamplesDlg::OnInitDialog()
 	m_List.SetExtendedStyle(m_List.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
 
 	GenerateList();
-	SetWindowTextW(m_hWnd, (L"Missing External Samples - " + modDoc.GetPathNameMpt().GetFullFileName().AsNative()).c_str());
+	::SetWindowTextW(m_hWnd, (L"Missing External Samples - " + modDoc.GetPathNameMpt().GetFullFileName().AsNative()).c_str());
 
 	return TRUE;
 }
@@ -73,7 +73,7 @@ void ExternalSamplesDlg::GenerateList()
 	{
 		if(sndFile.IsExternalSampleMissing(smp))
 		{
-			s.Format("%02u: ", smp);
+			s.Format(_T("%02u: "), smp);
 			s += sndFile.GetSampleName(smp);
 			int insertAt = m_List.InsertItem(m_List.GetItemCount(), s);
 			if(insertAt == -1)
@@ -135,7 +135,7 @@ void ExternalSamplesDlg::OnScanFolder()
 		mpt::PathString fileName;
 
 		isScanning = true;
-		SetDlgItemText(IDC_BUTTON1, "&Cancel");
+		SetDlgItemText(IDC_BUTTON1, _T("&Cancel"));
 		GetDlgItem(IDOK)->EnableWindow(FALSE);
 		BeginWaitCursor();
 
@@ -178,13 +178,13 @@ void ExternalSamplesDlg::OnScanFolder()
 		}
 		EndWaitCursor();
 		GetDlgItem(IDOK)->EnableWindow(TRUE);
-		SetDlgItemText(IDC_BUTTON1, "&Scan Folder...");
+		SetDlgItemText(IDC_BUTTON1, _T("&Scan Folder..."));
 
 		modDoc.UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
 
 		if(foundFiles)
 		{
-			SetDlgItemText(IDC_STATIC1, mpt::String::Print("%1 sample paths were relocated.", foundFiles).c_str());
+			SetDlgItemText(IDC_STATIC1, mpt::ToCString(mpt::String::Print(MPT_USTRING("%1 sample paths were relocated."), foundFiles)));
 		} else
 		{
 			SetDlgItemText(IDC_STATIC1, _T("No matching sample names found."));
