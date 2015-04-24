@@ -77,7 +77,8 @@ CDSoundDevice::CDSoundDevice(SoundDevice::Info info)
 	, m_nDSoundBufferSize(0)
 	, m_bMixRunning(FALSE)
 	, m_dwWritePos(0)
-	, m_dwLatency(0)
+	, m_StatisticLatencyFrames(0)
+	, m_StatisticPeriodFrames(0)
 {
 	return;
 }
@@ -240,7 +241,6 @@ bool CDSoundDevice::InternalOpen()
 			Close();
 			return false;
 		}
-		///////////////////////////////////////////////////
 		// Create the secondary buffer
 		dsbd.dwSize = sizeof(dsbd);
 		dsbd.dwFlags = DSBCAPS_GLOBALFOCUS | DSBCAPS_GETCURRENTPOSITION2;
@@ -355,6 +355,8 @@ void CDSoundDevice::InternalFillAudioBuffer()
 		return;
 	}
 
+	DWORD dwLatency = 0;
+
 	for(int refillCount = 0; refillCount < 2; ++refillCount)
 	{
 		// Refill the buffer at most twice so we actually sleep some time when CPU is overloaded.
@@ -374,12 +376,12 @@ void CDSoundDevice::InternalFillAudioBuffer()
 		{
 			// startup
 			m_dwWritePos = dwWrite;
-			m_dwLatency = 0;
+			dwLatency = 0;
 		} else
 		{
 			// running
-			m_dwLatency = (m_dwWritePos - dwPlay + m_nDSoundBufferSize) % m_nDSoundBufferSize;
-			m_dwLatency = (m_dwLatency + m_nDSoundBufferSize - 1) % m_nDSoundBufferSize + 1;
+			dwLatency = (m_dwWritePos - dwPlay + m_nDSoundBufferSize) % m_nDSoundBufferSize;
+			dwLatency = (dwLatency + m_nDSoundBufferSize - 1) % m_nDSoundBufferSize + 1;
 			dwBytes = (dwPlay - m_dwWritePos + m_nDSoundBufferSize) % m_nDSoundBufferSize;
 			dwBytes = Clamp(dwBytes, DWORD(0), m_nDSoundBufferSize/2); // limit refill amount to half the buffer size
 		}
@@ -414,7 +416,7 @@ void CDSoundDevice::InternalFillAudioBuffer()
 			return;
 		}
 
-		SourceAudioPreRead(dwSize1/bytesPerFrame + dwSize2/bytesPerFrame);
+		SourceAudioPreRead(dwSize1/bytesPerFrame + dwSize2/bytesPerFrame, dwLatency/bytesPerFrame);
 
 		SourceAudioRead(buf1, dwSize1/bytesPerFrame);
 		SourceAudioRead(buf2, dwSize2/bytesPerFrame);
@@ -462,7 +464,9 @@ void CDSoundDevice::InternalFillAudioBuffer()
 			m_bMixRunning = TRUE; 
 		}
 
-		SourceAudioDone(dwSize1/bytesPerFrame + dwSize2/bytesPerFrame, m_dwLatency/bytesPerFrame);
+		m_StatisticLatencyFrames.store(dwLatency/bytesPerFrame);
+		m_StatisticPeriodFrames.store(dwSize1/bytesPerFrame + dwSize2/bytesPerFrame);
+		SourceAudioDone();
 
 		if(dwBytes < m_nDSoundBufferSize/2)
 		{
@@ -492,8 +496,8 @@ SoundDevice::Statistics CDSoundDevice::GetStatistics() const
 {
 	MPT_TRACE();
 	SoundDevice::Statistics result;
-	result.InstantaneousLatency = 1.0 * m_dwLatency / m_Settings.GetBytesPerSecond();
-	result.LastUpdateInterval = GetLastUpdateInterval();
+	result.InstantaneousLatency = 1.0 * m_StatisticLatencyFrames.load() / m_Settings.Samplerate;
+	result.LastUpdateInterval = 1.0 * m_StatisticPeriodFrames.load() / m_Settings.Samplerate;
 	result.text = mpt::ustring();
 	return result;
 }

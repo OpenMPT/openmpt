@@ -40,7 +40,9 @@ protected:
 	DWORD m_nDSoundBufferSize;
 	BOOL m_bMixRunning;
 	DWORD m_dwWritePos;
-	DWORD m_dwLatency;
+
+	mpt::atomic_uint32_t m_StatisticLatencyFrames;
+	mpt::atomic_uint32_t m_StatisticPeriodFrames;
 
 public:
 	CDSoundDevice(SoundDevice::Info info);

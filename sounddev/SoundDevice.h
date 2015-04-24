@@ -37,27 +37,34 @@ public:
 };
 
 
-struct TimeInfo
-{
-	int64 StreamFrames; // can actually be negative (e.g. when starting the stream)
-	uint64 SystemTimestamp;
-	double Speed;
-	TimeInfo()
-		: StreamFrames(0)
-		, SystemTimestamp(0)
-		, Speed(1.0)
-	{
-		return;
-	}
-};
-
-
 struct StreamPosition
 {
 	int64 Frames; // relative to Start()
 	double Seconds; // relative to Start()
 	StreamPosition() : Frames(0), Seconds(0.0) { }
 	StreamPosition(int64 frames, double seconds) : Frames(frames), Seconds(seconds) { }
+};
+
+
+struct TimeInfo
+{
+	
+	int64 SyncPointStreamFrames;
+	uint64 SyncPointSystemTimestamp;
+	double Speed;
+
+	SoundDevice::StreamPosition RenderStreamPositionBefore;
+	SoundDevice::StreamPosition RenderStreamPositionAfter;
+	// int64 chunkSize = After - Before
+	
+	TimeInfo()
+		: SyncPointStreamFrames(0)
+		, SyncPointSystemTimestamp(0)
+		, Speed(1.0)
+	{
+		return;
+	}
+
 };
 
 
@@ -77,7 +84,7 @@ public:
 	virtual bool SoundSourceIsLockedByCurrentThread() const = 0;
 	virtual void SoundSourceLock() = 0;
 	virtual void SoundSourceRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer) = 0;
-	virtual void SoundSourceDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, SoundDevice::StreamPosition streamPosition) = 0;
+	virtual void SoundSourceDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo) = 0;
 	virtual void SoundSourceUnlock() = 0;
 public:
 	class Guard
@@ -588,9 +595,9 @@ private:
 
 	SoundDevice::TimeInfo m_TimeInfo;
 
+	int64 m_StreamPositionRenderFrames; // only updated or read in audio CALLBACK or when device is stopped. requires no further locking
+
 	mutable Util::mutex m_StreamPositionMutex;
-	double m_CurrentUpdateInterval;
-	int64 m_StreamPositionRenderFrames;
 	int64 m_StreamPositionOutputFrames;
 
 	mpt::atomic_uint32_t m_RequestFlags;
@@ -610,9 +617,9 @@ protected:
 	void SourceNotifyPostStop();
 	bool SourceIsLockedByCurrentThread() const;
 	void SourceFillAudioBufferLocked();
-	void SourceAudioPreRead(std::size_t numFrames);
+	void SourceAudioPreRead(std::size_t numFrames, std::size_t framesLatency);
 	void SourceAudioRead(void *buffer, std::size_t numFrames);
-	void SourceAudioDone(std::size_t numFrames, std::size_t framesLatency);
+	void SourceAudioDone();
 
 	void RequestClose() { m_RequestFlags.fetch_or(RequestFlagClose); }
 	void RequestReset() { m_RequestFlags.fetch_or(RequestFlagReset); }
@@ -622,9 +629,9 @@ protected:
 
 protected:
 
-	void UpdateTimeInfo(SoundDevice::TimeInfo timeInfo);
+	void SetTimeInfo(SoundDevice::TimeInfo timeInfo) { m_TimeInfo = timeInfo; }
 
-	double StreamPositionFramesToSeconds(int64 frames) const { return static_cast<double>(frames) / static_cast<double>(m_Settings.Samplerate); }
+	SoundDevice::StreamPosition StreamPositionFromFrames(int64 frames) const { return SoundDevice::StreamPosition(frames, static_cast<double>(frames) / static_cast<double>(m_Settings.Samplerate)); }
 
 	virtual bool InternalHasTimeInfo() const { return false; }
 
@@ -642,8 +649,6 @@ protected:
 	virtual SoundDevice::Caps InternalGetDeviceCaps() = 0;
 
 	virtual SoundDevice::BufferAttributes InternalGetEffectiveBufferAttributes() const = 0;
-
-	double GetLastUpdateInterval() const;
 
 protected:
 

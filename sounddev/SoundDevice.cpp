@@ -142,7 +142,6 @@ Base::Base(SoundDevice::Info info)
 	m_DeviceUnavailableOnOpen = false;
 
 	m_IsPlaying = false;
-	m_CurrentUpdateInterval = 0.0;
 	m_StreamPositionRenderFrames = 0;
 	m_StreamPositionOutputFrames = 0;
 
@@ -165,14 +164,6 @@ SoundDevice::DynamicCaps Base::GetDeviceDynamicCaps(const std::vector<uint32> &b
 	SoundDevice::DynamicCaps result;
 	result.supportedSampleRates = baseSampleRates;
 	return result;
-}
-
-
-void Base::UpdateTimeInfo(SoundDevice::TimeInfo timeInfo)
-//-------------------------------------------------------
-{
-	MPT_TRACE();
-	m_TimeInfo = timeInfo;
 }
 
 
@@ -295,30 +286,37 @@ void Base::SourceFillAudioBufferLocked()
 }
 
 
-void Base::SourceAudioPreRead(std::size_t numFrames)
-//--------------------------------------------------
+void Base::SourceAudioPreRead(std::size_t numFrames, std::size_t framesLatency)
+//-----------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	if(!InternalHasTimeInfo())
 	{
+		SoundDevice::TimeInfo timeInfo;
 		if(InternalHasGetStreamPosition())
 		{
-			SoundDevice::TimeInfo timeInfo;
-			timeInfo.StreamFrames = InternalHasGetStreamPosition();
-			timeInfo.SystemTimestamp = SourceGetReferenceClockNowNanoseconds();
+			timeInfo.SyncPointStreamFrames = InternalHasGetStreamPosition();
+			timeInfo.SyncPointSystemTimestamp = SourceGetReferenceClockNowNanoseconds();
 			timeInfo.Speed = 1.0;
-			UpdateTimeInfo(timeInfo);
 		} else
 		{
-			SoundDevice::TimeInfo timeInfo;
-			{
-				Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
-				timeInfo.StreamFrames = m_StreamPositionRenderFrames + numFrames;
-			}
-			timeInfo.SystemTimestamp = SourceGetReferenceClockNowNanoseconds() + Util::Round<int64>(GetEffectiveBufferAttributes().Latency * 1000000000.0);
+			timeInfo.SyncPointStreamFrames = m_StreamPositionRenderFrames + numFrames;
+			timeInfo.SyncPointSystemTimestamp = SourceGetReferenceClockNowNanoseconds() + Util::Round<int64>(GetEffectiveBufferAttributes().Latency * 1000000000.0);
 			timeInfo.Speed = 1.0;
-			UpdateTimeInfo(timeInfo);
 		}
+		timeInfo.RenderStreamPositionBefore = StreamPositionFromFrames(m_StreamPositionRenderFrames);
+		timeInfo.RenderStreamPositionAfter = StreamPositionFromFrames(m_StreamPositionRenderFrames + numFrames);
+		SetTimeInfo(timeInfo);
+	}
+	m_StreamPositionRenderFrames += numFrames;
+	if(!InternalHasGetStreamPosition() && !InternalHasTimeInfo())
+	{
+		Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
+		m_StreamPositionOutputFrames = m_StreamPositionRenderFrames - framesLatency;
+	} else
+	{
+		// unused, no locking
+		m_StreamPositionOutputFrames = 0;
 	}
 }
 
@@ -326,6 +324,7 @@ void Base::SourceAudioPreRead(std::size_t numFrames)
 void Base::SourceAudioRead(void *buffer, std::size_t numFrames)
 //-------------------------------------------------------------
 {
+	MPT_TRACE();
 	if(numFrames <= 0)
 	{
 		return;
@@ -334,23 +333,11 @@ void Base::SourceAudioRead(void *buffer, std::size_t numFrames)
 }
 
 
-void Base::SourceAudioDone(std::size_t numFrames, std::size_t framesLatency)
-//--------------------------------------------------------------------------
+void Base::SourceAudioDone()
+//--------------------------
 {
 	MPT_TRACE();
-	if(numFrames <= 0)
-	{
-		return;
-	}
-	int64 framesRendered = 0;
-	{
-		Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
-		m_CurrentUpdateInterval = (double)numFrames / (double)m_Settings.Samplerate;
-		m_StreamPositionRenderFrames += numFrames;
-		m_StreamPositionOutputFrames = m_StreamPositionRenderFrames - framesLatency;
-		framesRendered = m_StreamPositionRenderFrames;
-	}
-	m_Source->SoundSourceDone(m_Settings, m_Flags, GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, StreamPosition(framesRendered, StreamPositionFramesToSeconds(framesRendered)));
+	m_Source->SoundSourceDone(m_Settings, m_Flags, GetEffectiveBufferAttributes(), m_TimeInfo);
 }
 
 
@@ -373,10 +360,9 @@ bool Base::Start()
 	if(!IsOpen()) return false; 
 	if(!IsPlaying())
 	{
+		m_StreamPositionRenderFrames = 0;
 		{
 			Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
-			m_CurrentUpdateInterval = 0.0;
-			m_StreamPositionRenderFrames = 0;
 			m_StreamPositionOutputFrames = 0;
 		}
 		SourceNotifyPreStart();
@@ -411,20 +397,10 @@ void Base::Stop(bool force)
 		m_IsPlaying = false;
 		{
 			Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
-			m_CurrentUpdateInterval = 0.0;
-			m_StreamPositionRenderFrames = 0;
 			m_StreamPositionOutputFrames = 0;
 		}
+		m_StreamPositionRenderFrames = 0;
 	}
-}
-
-
-double Base::GetLastUpdateInterval() const
-//----------------------------------------
-{
-	MPT_TRACE();
-	Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
-	return m_CurrentUpdateInterval;
 }
 
 
@@ -436,20 +412,25 @@ SoundDevice::StreamPosition Base::GetStreamPosition() const
 	{
 		return StreamPosition();
 	}
-	if(m_Settings.Samplerate <= 0)
-	{
-		return StreamPosition();
-	}
 	int64 frames = 0;
 	if(InternalHasGetStreamPosition())
 	{
 		frames = InternalGetStreamPositionFrames();
+	} else if(InternalHasTimeInfo())
+	{
+		const uint64 now = SourceGetReferenceClockNowNanoseconds();
+		const SoundDevice::TimeInfo timeInfo = GetTimeInfo();
+		frames = Util::Round<int64>(
+				timeInfo.SyncPointStreamFrames + (
+					static_cast<double>(static_cast<int64>(now - timeInfo.SyncPointSystemTimestamp)) * timeInfo.Speed * m_Settings.Samplerate * (1.0 / (1000.0 * 1000.0))
+				)
+			);
 	} else
 	{
 		Util::lock_guard<Util::mutex> lock(m_StreamPositionMutex);
 		frames = m_StreamPositionOutputFrames;
 	}
-	return StreamPosition(frames, StreamPositionFramesToSeconds(frames));
+	return StreamPositionFromFrames(frames);
 }
 
 
@@ -459,7 +440,7 @@ SoundDevice::Statistics Base::GetStatistics() const
 	MPT_TRACE();
 	SoundDevice::Statistics result;
 	result.InstantaneousLatency = m_Settings.Latency;
-	result.LastUpdateInterval = GetLastUpdateInterval();
+	result.LastUpdateInterval = m_Settings.UpdateInterval;
 	result.text = mpt::ustring();
 	return result;
 }

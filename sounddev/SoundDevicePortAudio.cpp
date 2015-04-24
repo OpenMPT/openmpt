@@ -40,6 +40,7 @@ namespace SoundDevice {
 CPortaudioDevice::CPortaudioDevice(SoundDevice::Info info)
 //--------------------------------------------------------
 	: SoundDevice::Base(info)
+	, m_StatisticPeriodFrames(0)
 {
 	m_HostApi = SndDevTypeToHostApi(info.id.GetType());
 	MemsetZero(m_StreamParameters);
@@ -175,9 +176,10 @@ void CPortaudioDevice::InternalFillAudioBuffer()
 //----------------------------------------------
 {
 	if(m_CurrentFrameCount == 0) return;
-	SourceAudioPreRead(m_CurrentFrameCount);
+	SourceAudioPreRead(m_CurrentFrameCount, Util::Round<std::size_t>(m_CurrentRealLatency * m_StreamInfo->sampleRate));
 	SourceAudioRead(m_CurrentFrameBuffer, m_CurrentFrameCount);
-	SourceAudioDone(m_CurrentFrameCount, Util::Round<std::size_t>(m_CurrentRealLatency * m_StreamInfo->sampleRate));
+	m_StatisticPeriodFrames.store(m_CurrentFrameCount);
+	SourceAudioDone();
 }
 
 
@@ -206,7 +208,7 @@ SoundDevice::Statistics CPortaudioDevice::GetStatistics() const
 	MPT_TRACE();
 	SoundDevice::Statistics result;
 	result.InstantaneousLatency = m_CurrentRealLatency;
-	result.LastUpdateInterval = GetLastUpdateInterval();
+	result.LastUpdateInterval = 1.0 * m_StatisticPeriodFrames / m_Settings.Samplerate;
 	result.text = mpt::ustring();
 	return result;
 }
