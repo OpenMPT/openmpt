@@ -62,7 +62,7 @@ uint64 BridgeWrapper::GetFileVersion(const WCHAR *exePath)
 		{
 			UINT size = 0;
 			BYTE *lpBuffer = nullptr;
-			if(VerQueryValue(verData, "\\", (void **)&lpBuffer, &size) && size != 0)
+			if(VerQueryValue(verData, _T("\\"), (void **)&lpBuffer, &size) && size != 0)
 			{
 				VS_FIXEDFILEINFO *verInfo = (VS_FIXEDFILEINFO *)lpBuffer;
 				if (verInfo->dwSignature == 0xfeef04bd)
