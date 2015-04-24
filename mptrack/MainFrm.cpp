@@ -718,12 +718,12 @@ void CMainFrame::SoundSourceRead(const SoundDevice::Settings &settings, const So
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
-	ASSERT(InAudioThread());
+	MPT_ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
 	TimingInfo timingInfo;
 	timingInfo.OutputLatency = bufferAttributes.Latency;
-	timingInfo.StreamFrames = timeInfo.StreamFrames;
-	timingInfo.SystemTimestamp = timeInfo.SystemTimestamp;
+	timingInfo.StreamFrames = timeInfo.SyncPointStreamFrames;
+	timingInfo.SystemTimestamp = timeInfo.SyncPointSystemTimestamp;
 	timingInfo.Speed = timeInfo.Speed;
 	m_pSndFile->m_TimingInfo = timingInfo;
 	m_Dither.SetMode((DitherMode)settings.DitherType);
@@ -747,17 +747,18 @@ void CMainFrame::SoundSourceRead(const SoundDevice::Settings &settings, const So
 }
 
 
-void CMainFrame::SoundSourceDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, SoundDevice::StreamPosition streamPosition)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CMainFrame::SoundSourceDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo)
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	MPT_UNREFERENCED_PARAMETER(settings);
 	MPT_UNREFERENCED_PARAMETER(flags);
 	MPT_UNREFERENCED_PARAMETER(bufferAttributes);
-	MPT_UNREFERENCED_PARAMETER(timeInfo);
-	ASSERT(InAudioThread());
+	MPT_ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);
-	DoNotification(numFrames, streamPosition.Frames);
+	std::size_t numFrames = static_cast<std::size_t>(timeInfo.RenderStreamPositionAfter.Frames - timeInfo.RenderStreamPositionBefore.Frames);
+	int64 streamPosition = timeInfo.RenderStreamPositionAfter.Frames;
+	DoNotification(numFrames, streamPosition);
 	//m_pSndFile->m_TimingInfo = TimingInfo(); // reset
 }
 

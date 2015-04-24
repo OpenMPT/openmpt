@@ -879,7 +879,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 		}
 	} else
 	{
-		SourceAudioPreRead(countChunk);
+		SourceAudioPreRead(countChunk, m_nAsioBufferLen);
 		if(m_Settings.sampleFormat == SampleFormatFloat32)
 		{
 			SourceAudioRead(&m_SampleBufferFloat[0], countChunk);
@@ -1008,7 +1008,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 	}
 	if(!rendersilence)
 	{
-		SourceAudioDone(countChunk, m_nAsioBufferLen);
+		SourceAudioDone();
 	}
 }
 
@@ -1018,35 +1018,6 @@ bool CASIODevice::InternalHasTimeInfo() const
 {
 	MPT_TRACE();
 	return m_Settings.UseHardwareTiming;
-}
-
-
-bool CASIODevice::InternalHasGetStreamPosition() const
-//----------------------------------------------------
-{
-	MPT_TRACE();
-	return m_Settings.UseHardwareTiming;
-}
-
-
-int64 CASIODevice::InternalGetStreamPositionFrames() const
-//--------------------------------------------------------
-{
-	MPT_TRACE();
-	if(m_Settings.UseHardwareTiming)
-	{
-		const uint64 asioNow = SourceGetReferenceClockNowNanoseconds();
-		SoundDevice::TimeInfo timeInfo = GetTimeInfo();
-		int64 currentStreamPositionFrames =
-			Util::Round<int64>(
-			timeInfo.StreamFrames + ((double)((int64)(asioNow - timeInfo.SystemTimestamp)) * timeInfo.Speed * m_Settings.Samplerate / (1000.0 * 1000.0))
-			)
-			;
-		return currentStreamPositionFrames;
-	} else
-	{
-		return SoundDevice::Base::InternalGetStreamPositionFrames();
-	}
 }
 
 
@@ -1061,12 +1032,13 @@ SoundDevice::BufferAttributes CASIODevice::InternalGetEffectiveBufferAttributes(
 }
 
 
-void CASIODevice::UpdateTimeInfo(AsioTimeInfo asioTimeInfo)
-//---------------------------------------------------------
+void CASIODevice::ApplyAsioTimeInfo(AsioTimeInfo asioTimeInfo)
+//------------------------------------------------------------
 {
 	MPT_TRACE();
 	if(m_Settings.UseHardwareTiming)
 	{
+		SoundDevice::TimeInfo timeInfo;
 		if((asioTimeInfo.flags & kSamplePositionValid) && (asioTimeInfo.flags & kSystemTimeValid))
 		{
 			double speed = 1.0;
@@ -1077,20 +1049,19 @@ void CASIODevice::UpdateTimeInfo(AsioTimeInfo asioTimeInfo)
 			{
 				speed *= asioTimeInfo.sampleRate / m_Settings.Samplerate;
 			}
-			SoundDevice::TimeInfo timeInfo;
-			timeInfo.StreamFrames = ((((uint64)asioTimeInfo.samplePosition.hi) << 32) | asioTimeInfo.samplePosition.lo) - m_StreamPositionOffset;
-			timeInfo.SystemTimestamp = (((uint64)asioTimeInfo.systemTime.hi) << 32) | asioTimeInfo.systemTime.lo;
+			timeInfo.SyncPointStreamFrames = ((((uint64)asioTimeInfo.samplePosition.hi) << 32) | asioTimeInfo.samplePosition.lo) - m_StreamPositionOffset;
+			timeInfo.SyncPointSystemTimestamp = (((uint64)asioTimeInfo.systemTime.hi) << 32) | asioTimeInfo.systemTime.lo;
 			timeInfo.Speed = speed;
-			SoundDevice::Base::UpdateTimeInfo(timeInfo);
 		} else
 		{ // spec violation or nothing provided at all, better to estimate this stuff ourselves
 			const uint64 asioNow = SourceGetReferenceClockNowNanoseconds();
-			SoundDevice::TimeInfo timeInfo;
-			timeInfo.StreamFrames = m_TotalFramesWritten + m_nAsioBufferLen - m_StreamPositionOffset;
-			timeInfo.SystemTimestamp = asioNow + Util::Round<int64>(m_BufferLatency * 1000.0 * 1000.0 * 1000.0);
+			timeInfo.SyncPointStreamFrames = m_TotalFramesWritten + m_nAsioBufferLen - m_StreamPositionOffset;
+			timeInfo.SyncPointSystemTimestamp = asioNow + Util::Round<int64>(m_BufferLatency * 1000.0 * 1000.0 * 1000.0);
 			timeInfo.Speed = 1.0;
-			SoundDevice::Base::UpdateTimeInfo(timeInfo);
 		}
+		timeInfo.RenderStreamPositionBefore = StreamPositionFromFrames(m_TotalFramesWritten - m_StreamPositionOffset);
+		timeInfo.RenderStreamPositionAfter = StreamPositionFromFrames(m_TotalFramesWritten - m_StreamPositionOffset + m_nAsioBufferLen);
+		SetTimeInfo(timeInfo);
 	}
 }
 
@@ -1128,14 +1099,13 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 	}
 	if(m_Settings.UseHardwareTiming)
 	{
+		AsioTimeInfo asioTimeInfo;
+		MemsetZero(asioTimeInfo);
 		if(params)
 		{
-			UpdateTimeInfo(params->timeInfo);
+			asioTimeInfo = params->timeInfo;
 		} else
 		{
-			AsioTimeInfo asioTimeInfo;
-			MemsetZero(asioTimeInfo);
-			UpdateTimeInfo(asioTimeInfo);
 			try
 			{
 				ASIOSamples samplePosition;
@@ -1166,8 +1136,8 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 			{
 				// continue
 			}
-			UpdateTimeInfo(asioTimeInfo);
 		}
+		ApplyAsioTimeInfo(asioTimeInfo);
 	}
 	m_BufferIndex = doubleBufferIndex;
 	bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);

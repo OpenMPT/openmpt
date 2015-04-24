@@ -259,9 +259,9 @@ void CWaveDevice::InternalFillAudioBuffer()
 	ULONG nBytesWritten = 0;
 	while(oldBuffersPending < m_nPreparedHeaders)
 	{
-		SourceAudioPreRead(m_nWaveBufferSize / bytesPerFrame);
-		SourceAudioRead(m_WaveBuffers[m_nWriteBuffer].lpData, m_nWaveBufferSize / bytesPerFrame);
 		nLatency += m_nWaveBufferSize;
+		SourceAudioPreRead(m_nWaveBufferSize / bytesPerFrame, nLatency / bytesPerFrame);
+		SourceAudioRead(m_WaveBuffers[m_nWriteBuffer].lpData, m_nWaveBufferSize / bytesPerFrame);
 		nBytesWritten += m_nWaveBufferSize;
 		m_WaveBuffers[m_nWriteBuffer].dwBufferLength = m_nWaveBufferSize;
 		InterlockedIncrement(&m_nBuffersPending);
@@ -269,7 +269,7 @@ void CWaveDevice::InternalFillAudioBuffer()
 		waveOutWrite(m_hWaveOut, &m_WaveBuffers[m_nWriteBuffer], sizeof(WAVEHDR));
 		m_nWriteBuffer++;
 		m_nWriteBuffer %= m_nPreparedHeaders;
-		SourceAudioDone(m_nWaveBufferSize / bytesPerFrame, nLatency / bytesPerFrame);
+		SourceAudioDone();
 	}
 
 	if(m_JustStarted)
@@ -338,7 +338,7 @@ SoundDevice::Statistics CWaveDevice::GetStatistics() const
 	MPT_TRACE();
 	SoundDevice::Statistics result;
 	result.InstantaneousLatency = InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond();
-	result.LastUpdateInterval = GetLastUpdateInterval();
+	result.LastUpdateInterval = 1.0 * m_nWaveBufferSize / m_Settings.GetBytesPerSecond();
 	result.text = mpt::ustring();
 	return result;
 }

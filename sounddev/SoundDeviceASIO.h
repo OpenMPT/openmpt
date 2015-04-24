@@ -83,7 +83,7 @@ protected:
 	mutable mpt::atomic_uint32_t m_DebugRealtimeThreadID;
 
 private:
-	void UpdateTimeInfo(AsioTimeInfo asioTimeInfo);
+	void ApplyAsioTimeInfo(AsioTimeInfo asioTimeInfo);
 
 	static bool IsSampleTypeFloat(ASIOSampleType sampleType);
 	static bool IsSampleTypeInt16(ASIOSampleType sampleType);
@@ -134,8 +134,6 @@ protected:
 	bool IsDriverOpen() const { return (m_pAsioDrv != nullptr); }
 
 	bool InternalHasTimeInfo() const;
-	bool InternalHasGetStreamPosition() const;
-	int64 InternalGetStreamPositionFrames() const;
 
 	SoundDevice::BufferAttributes InternalGetEffectiveBufferAttributes() const;
 
