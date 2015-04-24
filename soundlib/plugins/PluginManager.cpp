@@ -247,9 +247,11 @@ AEffect *CVstPluginManager::LoadPlugin(const VSTPluginLib &plugin, HINSTANCE &li
 #ifdef _DEBUG
 			if(error != ERROR_MOD_NOT_FOUND)	// "File not found errors" are annoying.
 			{
-				TCHAR szBuf[256];
-				wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %x: %s", error, GetErrorMessage(error).c_str());
-				Reporting::Error(szBuf, "DEBUG: Error when loading plugin dll");
+				mpt::ustring buf = mpt::String::Print(MPT_USTRING("Warning: encountered problem when loading plugin dll. Error %1: %2")
+					, mpt::ufmt::hex(error)
+					, mpt::ToUnicode(GetErrorMessage(error))
+					);
+				Reporting::Error(buf, "DEBUG: Error when loading plugin dll");
 			}
 #endif //_DEBUG
 
