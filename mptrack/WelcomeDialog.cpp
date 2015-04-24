@@ -67,7 +67,7 @@ BOOL WelcomeDlg::OnInitDialog()
 	}
 	if(!vstPath.empty())
 	{
-		SetDlgItemTextW(m_hWnd, IDC_EDIT1, vstPath.AsNative().c_str());
+		::SetDlgItemTextW(m_hWnd, IDC_EDIT1, vstPath.AsNative().c_str());
 		if(TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINS).empty())
 		{
 			TrackerDirectories::Instance().SetDefaultDirectory(vstPath, DIR_PLUGINS);
