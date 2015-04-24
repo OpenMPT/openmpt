@@ -1137,7 +1137,7 @@ void CTrackApp::OnFileNew()
 		const mpt::PathString dirs[] = { GetConfigPath() + MPT_PATHSTRING("TemplateModules\\"), GetAppDirPath() + MPT_PATHSTRING("TemplateModules\\"), mpt::PathString() };
 		for(size_t i = 0; i < CountOf(dirs); i++)
 		{
-			if(Util::sdOs::IsPathFileAvailable(dirs[i] + templateFile, Util::sdOs::FileModeExists))
+			if((dirs[i] + templateFile).IsFile())
 			{
 				if(m_pModTemplate->OpenTemplateFile(dirs[i] + templateFile) != nullptr)
 				{

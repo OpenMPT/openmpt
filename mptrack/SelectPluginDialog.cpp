@@ -62,8 +62,8 @@ CSelectPluginDlg::CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent
 	m_pModDoc = pModDoc;
 	m_nPlugSlot = nPlugSlot;
 
-	hasBridge32 = Util::sdOs::IsPathFileAvailable(theApp.GetAppDirPath() + MPT_PATHSTRING("PluginBridge32.exe"), Util::sdOs::FileModeExists);
-	hasBridge64 = Util::sdOs::IsPathFileAvailable(theApp.GetAppDirPath() + MPT_PATHSTRING("PluginBridge64.exe"), Util::sdOs::FileModeExists);
+	hasBridge32 = (theApp.GetAppDirPath() + MPT_PATHSTRING("PluginBridge32.exe")).IsFile();
+	hasBridge64 = (theApp.GetAppDirPath() + MPT_PATHSTRING("PluginBridge64.exe")).IsFile();
 
 	if(m_pModDoc)
 	{

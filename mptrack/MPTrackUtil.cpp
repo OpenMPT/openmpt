@@ -69,10 +69,4 @@ std::string GetErrorMessage(DWORD nErrorCode)
 }
 
 
-bool Util::sdOs::IsPathFileAvailable(const mpt::PathString &pszFilePath, FileMode fm)
-{
-	return (_waccess(pszFilePath.AsNative().c_str(), fm) == 0);
-}
-
-
 OPENMPT_NAMESPACE_END
