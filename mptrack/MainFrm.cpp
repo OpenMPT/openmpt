@@ -2245,13 +2245,14 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
 	if (nIndex < vecFilePaths.size())
 	{
 		const mpt::PathString& sPath = vecFilePaths[nIndex];
-		const bool bAvailable = Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeRead);
-		if (bAvailable)
+		const bool bExists = sPath.IsFile();
+		CDocument *pDoc = nullptr;
+		if(bExists)
 		{
-			theApp.GetModDocTemplate()->OpenTemplateFile(sPath, !bTemplateFile);
-		} else
+			pDoc = theApp.GetModDocTemplate()->OpenTemplateFile(sPath, !bTemplateFile);
+		}
+		if(!pDoc)
 		{
-			const bool bExists = Util::sdOs::IsPathFileAvailable(sPath, Util::sdOs::FileModeExists);
 			Reporting::Notification(L"The file '" + sPath.ToWide() + L"' " + (bExists ? L"exists but can't be read" : L"does not exist"));
 		}
 	}
@@ -2694,7 +2695,7 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathSt
 			mpt::PathString basePath;
 			basePath = (i == 0) ? theApp.GetAppDirPath() : theApp.GetConfigPath();
 			basePath += pszFolderName;
-			if (Util::sdOs::IsPathFileAvailable(basePath, Util::sdOs::FileModeExists) == false)
+			if(!basePath.IsDirectory())
 				continue;
 			mpt::PathString sPath = basePath + MPT_PATHSTRING("*");
 			

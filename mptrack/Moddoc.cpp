@@ -2909,7 +2909,7 @@ void CModDoc::OnSaveTemplateModule()
 	{
 		sName += MPT_PATHSTRING("newTemplate") + mpt::PathString::FromWide(mpt::ToWString(i));
 		sName += MPT_PATHSTRING(".") + mpt::PathString::FromUTF8(m_SndFile.GetModSpecifications().fileExtension);
-		if (!Util::sdOs::IsPathFileAvailable(templateFolder + sName, Util::sdOs::FileModeExists))
+		if (!(templateFolder + sName).FileOrDirectoryExists())
 			break;
 	}
 
