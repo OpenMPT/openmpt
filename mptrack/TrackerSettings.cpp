@@ -295,8 +295,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		{
 			continue;
 		}
-		const std::string settingKey = TrackerDirectories::Instance().m_szDirectoryToSettingsName[i];
-		mpt::PathString path = conf.Read<mpt::PathString>("Paths", settingKey, TrackerDirectories::Instance().GetDefaultDirectory(static_cast<Directory>(i)));
+		const CString settingKey = TrackerDirectories::Instance().m_szDirectoryToSettingsName[i];
+		mpt::PathString path = conf.Read<mpt::PathString>(MPT_USTRING("Paths"), mpt::ToUnicode(settingKey), TrackerDirectories::Instance().GetDefaultDirectory(static_cast<Directory>(i)));
 		path = theApp.RelativePathToAbsolute(path);
 		TrackerDirectories::Instance().SetDefaultDirectory(path, static_cast<Directory>(i), false);
 	}
@@ -338,8 +338,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	{
 		tm lastUpdate;
 		MemsetZero(lastUpdate);
-		CString s = conf.Read<CString>("Update", "LastUpdateCheck", "1970-01-01 00:00");
-		if(sscanf(s, "%04d-%02d-%02d %02d:%02d", &lastUpdate.tm_year, &lastUpdate.tm_mon, &lastUpdate.tm_mday, &lastUpdate.tm_hour, &lastUpdate.tm_min) == 5)
+		std::string s = conf.Read<std::string>("Update", "LastUpdateCheck", "1970-01-01 00:00");
+		if(sscanf(s.c_str(), "%04d-%02d-%02d %02d:%02d", &lastUpdate.tm_year, &lastUpdate.tm_mon, &lastUpdate.tm_mday, &lastUpdate.tm_hour, &lastUpdate.tm_min) == 5)
 		{
 			lastUpdate.tm_year -= 1900;
 			lastUpdate.tm_mon--;
@@ -858,7 +858,7 @@ void TrackerSettings::SaveSettings()
 		const tm* const lastUpdate = gmtime(&t);
 		if(lastUpdate != nullptr)
 		{
-			outDate.Format("%04d-%02d-%02d %02d:%02d", lastUpdate->tm_year + 1900, lastUpdate->tm_mon + 1, lastUpdate->tm_mday, lastUpdate->tm_hour, lastUpdate->tm_min);
+			outDate.Format(_T("%04d-%02d-%02d %02d:%02d"), lastUpdate->tm_year + 1900, lastUpdate->tm_mon + 1, lastUpdate->tm_mday, lastUpdate->tm_hour, lastUpdate->tm_min);
 		}
 		conf.Write<CString>("Update", "LastUpdateCheck", outDate);
 		conf.Write<int32>("Update", "UpdateCheckPeriod", CUpdateCheck::GetUpdateCheckPeriod());

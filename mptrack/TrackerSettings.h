@@ -140,7 +140,7 @@ enum
 #endif
 struct PACKED EQPreset
 {
-	char szName[12];
+	char szName[12]; // locale encoding
 	UINT Gains[MAX_EQ_BANDS];
 	UINT Freqs[MAX_EQ_BANDS];
 };
