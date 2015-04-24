@@ -214,6 +214,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, orderlistMargins(conf, "Pattern Editor", "DefaultSequenceMargins", 0)
 	, rowDisplayOffset(conf, "Pattern Editor", "RowDisplayOffset", 0)
 	, patternFont(conf, "Pattern Editor", "Font", FontSetting(PATTERNFONT_SMALL, 0))
+	, effectVisWidth(conf, "Pattern Editor", "EffectVisWidth", -1)
+	, effectVisHeight(conf, "Pattern Editor", "EffectVisHeight", -1)
 	// Sample Editor
 	, m_SampleUndoBufferSize(conf, "Sample Editor", "UndoBufferSize", SampleUndoBufferSize())
 	, sampleEditorKeyBehaviour(conf, "Sample Editor", "KeyBehaviour", seNoteOffOnNewKey)

@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include "afxwin.h"
 #include "EffectInfo.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -28,7 +27,7 @@ class CEffectVis : public CDialog
 public:
 	enum
 	{
-		kAction_OverwriteFX=0,
+		kAction_OverwriteFX,
 		kAction_FillFX,
 		kAction_OverwritePC,
 		kAction_FillPC,
@@ -54,7 +53,6 @@ protected:
 
 	void ShowVis(CDC * pDC, CRect rectBorder);
 	void ShowVisImage(CDC *pDC);
-	BOOL m_boolForceRedraw, m_boolUseBitmaps;
 	RECT invalidated;
 
 	ROWINDEX m_nLastDrawnRow; // for interpolation
@@ -82,6 +80,8 @@ protected:
 	DWORD m_dwStatus;
 
 	float m_pixelsPerRow, m_pixelsPerFXParam, m_pixelsPerPCParam;
+
+	bool m_forceRedraw : 1;
 
 	void InvalidateRow(int row);
 	int RowToScreenX(ROWINDEX row) const;

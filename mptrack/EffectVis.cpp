@@ -2,19 +2,19 @@
  * EffectVis.cpp
  * -------------
  * Purpose: Implementation of parameter visualisation dialog.
- * Notes  : TODO: Take DPI scaling into account.
+ * Notes  : (currenlty none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "mainfrm.h"
-#include "childfrm.h"
-#include "moddoc.h"
-#include "globals.h"
-#include "view_pat.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
+#include "Childfrm.h"
+#include "Moddoc.h"
+#include "Globals.h"
+#include "View_pat.h"
 #include "EffectVis.h"
 
 
@@ -24,23 +24,25 @@ OPENMPT_NAMESPACE_BEGIN
 // EffectVis dialog
 
 IMPLEMENT_DYNAMIC(CEffectVis, CDialog)
-CEffectVis::CEffectVis(CViewPattern *pViewPattern, ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX nchn, CModDoc *pModDoc, PATTERNINDEX pat) : effectInfo(pModDoc->GetrSoundFile())
+CEffectVis::CEffectVis(CViewPattern *pViewPattern, ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX nchn, CModDoc *pModDoc, PATTERNINDEX pat)
+	: effectInfo(pModDoc->GetrSoundFile())
+	, m_pViewPattern(pViewPattern)
+	, m_dwStatus(0)
+	, m_nDragItem(-1)
+	, m_forceRedraw(true)
+	, m_pModDoc(pModDoc)
+	, m_nRowToErase(-1)
+	, m_nParamToErase(-1)
+	, m_nLastDrawnRow(ROWINDEX_INVALID)
+	, m_nLastDrawnY(-1)
+	, m_nOldPlayPos(ROWINDEX_INVALID)
+	, m_nAction(kAction_OverwriteFX)
+	, m_pixelsPerRow(1)
+	, m_pixelsPerFXParam(1)
+	, m_pixelsPerPCParam(1)
 {
-	m_pViewPattern = pViewPattern;
-	m_dwStatus = 0x00;
-	m_nDragItem = -1;
-	m_boolForceRedraw = TRUE;
-	m_pModDoc = pModDoc;
-
-	m_nRowToErase = -1;
-	m_nParamToErase = -1;
-	m_nLastDrawnRow = ROWINDEX_INVALID;
-	m_nLastDrawnY = -1;
-	m_nOldPlayPos = ROWINDEX_INVALID;
 	m_nFillEffect = effectInfo.GetIndexFromEffect(CMD_SMOOTHMIDI, 0);
-	m_nAction=kAction_OverwriteFX;
 	m_templatePCNote.Set(NOTE_PCS, 1, 0, 0);
-
 	UpdateSelection(startRow, endRow, nchn, pModDoc, pat);
 }
 
@@ -333,9 +335,9 @@ void CEffectVis::ShowVis(CDC * pDC, CRect rectBorder)
 //---------------------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(rectBorder);
-	if (m_boolForceRedraw)
+	if (m_forceRedraw)
 	{
-		m_boolForceRedraw = FALSE ;
+		m_forceRedraw = false;
 
 		// if we already have a memory dc, destroy it (this occurs for a re-size)
 		if (m_dcGrid.GetSafeHdc())
@@ -479,7 +481,16 @@ BOOL CEffectVis::OpenEditor(CWnd *parent)
 //---------------------------------------
 {
 	Create(IDD_EFFECTVISUALIZER, parent);
-	m_boolForceRedraw = TRUE;
+	m_forceRedraw = true;
+
+	if(TrackerSettings::Instance().effectVisWidth > 0 && TrackerSettings::Instance().effectVisHeight > 0)
+	{
+		SetWindowPos(nullptr,
+			0, 0,
+			MulDiv(TrackerSettings::Instance().effectVisWidth, Util::GetDPIx(m_hWnd), 96), MulDiv(TrackerSettings::Instance().effectVisHeight, Util::GetDPIy(m_hWnd), 96),
+			SWP_NOZORDER | SWP_NOMOVE);
+	}
+
 	ShowWindow(SW_SHOW);
 	return TRUE;
 }
@@ -509,6 +520,11 @@ void CEffectVis::OnCancel()
 void CEffectVis::DoClose()
 //------------------------
 {
+	CRect rect;
+	GetWindowRect(rect);
+	TrackerSettings::Instance().effectVisWidth = MulDiv(rect.Width(), 96, Util::GetDPIx(m_hWnd));
+	TrackerSettings::Instance().effectVisHeight = MulDiv(rect.Height(), 96, Util::GetDPIy(m_hWnd));
+
 	m_dcGrid.SelectObject(m_pbOldGrid);
 	m_dcGrid.DeleteDC();
 	m_dcNodes.SelectObject(m_pbOldNodes);
@@ -557,7 +573,7 @@ void CEffectVis::OnSize(UINT nType, int cx, int cy)
 		m_pixelsPerRow = 1;
 	m_pixelsPerFXParam = (float)(m_rcDraw.Height())/(float)0xFF;
 	m_pixelsPerPCParam = (float)(m_rcDraw.Height())/(float)ModCommand::maxColumnValue;
-	m_boolForceRedraw = TRUE;
+	m_forceRedraw = true;
 	InvalidateRect(NULL, FALSE);	 //redraw everything
 }
 
@@ -615,7 +631,7 @@ void CEffectVis::UpdateSelection(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDE
 	m_pixelsPerFXParam = (float)(m_rcDraw.Height())/(float)0xFF;
 	m_pixelsPerPCParam = (float)(m_rcDraw.Height())/(float)ModCommand::maxColumnValue;
 
-	m_boolForceRedraw = TRUE;
+	m_forceRedraw = true;
 	Update();
 
 }
