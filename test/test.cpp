@@ -793,6 +793,11 @@ static MPT_NOINLINE void TestCharsets()
 	// Check that some character replacement is done (and not just empty strings or truncated strings are returned)
 	// We test german umlaut-a (U+00E4) and CJK U+5BB6
 
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4428) // universal-character-name encountered in source
+#endif
+
 	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::CharsetASCII,L"abc\u00E4xyz"),"xyz"),true);
 	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::CharsetISO8859_1,L"abc\u00E4xyz"),"xyz"),true);
 	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::CharsetCP437,L"abc\u00E4xyz"),"xyz"),true);
@@ -861,6 +866,10 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(L"abc\u00E4xyz",mpt::ToWide(mpt::CharsetUTF8,"abc\xC3\xA4xyz"));
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetUTF8,L"abc\u5BB6xyz"),"abc\xE5\xAE\xB6xyz");
 	VERIFY_EQUAL(L"abc\u5BB6xyz",mpt::ToWide(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"));
+
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #endif
 
