@@ -502,6 +502,8 @@ public:
 	CachedSetting<int32> orderlistMargins;
 	CachedSetting<int32> rowDisplayOffset;
 	Setting<FontSetting> patternFont;
+	Setting<int32> effectVisWidth;
+	Setting<int32> effectVisHeight;
 
 	// Sample Editor
 
