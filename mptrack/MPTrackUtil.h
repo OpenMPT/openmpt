@@ -19,7 +19,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 LPCCH LoadResource(LPCTSTR lpName, LPCTSTR lpType, LPCCH& pData, size_t& nSize, HGLOBAL& hglob);
 
-std::string GetErrorMessage(DWORD nErrorCode);
+CString GetErrorMessage(DWORD nErrorCode);
 
 namespace Util
 {
