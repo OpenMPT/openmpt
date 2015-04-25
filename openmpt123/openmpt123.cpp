@@ -1789,6 +1789,34 @@ public:
 	}
 };
 
+class FD_binary_raii {
+private:
+	FILE * file;
+	bool set_binary;
+	int old_mode;
+public:
+	FD_binary_raii(FILE * file, bool set_binary)
+		: file(file)
+		, set_binary(set_binary)
+		, old_mode(-1)
+	{
+		if ( set_binary ) {
+			fflush( file );
+			old_mode = _setmode( _fileno( file ), _O_BINARY );
+			if ( old_mode == -1 ) {
+				throw exception( "failed to set binary mode on file descriptor" );
+			}
+		}
+	}
+	~FD_binary_raii()
+	{
+		if ( old_mode != -1 ) {
+			fflush( file );
+			old_mode = _setmode( _fileno( file ), old_mode );
+		}
+	}
+};
+
 #endif
 
 #if defined(WIN32) && defined(UNICODE)
@@ -1886,18 +1914,14 @@ static int main( int argc, char * argv [] ) {
 		}
 
 		// set stdin binary
-		#if defined(WIN32)
-			if ( !stdin_can_ui ) {
-				_setmode( _fileno( stdin ), _O_BINARY );
-			}
-		#endif
+#if defined(WIN32)
+		FD_binary_raii stdin_guard( stdin, !stdin_can_ui );
+#endif
 
 		// set stdout binary
-		#if defined(WIN32)
-			if ( !stdout_can_ui ) {
-				_setmode( _fileno( stdout ), _O_BINARY );
-			}
-		#endif
+#if defined(WIN32)
+		FD_binary_raii stdout_guard( stdout, !stdout_can_ui );
+#endif
 
 		// setup terminal
 		#if !defined(WIN32)
