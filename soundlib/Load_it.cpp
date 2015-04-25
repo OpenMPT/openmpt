@@ -2013,8 +2013,10 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 //--------------------------------------------------------
 {
 	//Extra song data - Yet Another Hack.
-	const uint32 code = MAGIC4BE('M','P','T','S');
-	mpt::IO::WriteIntLE(f, code);
+	{
+		const uint32 code = MAGIC4BE('M','P','T','S');
+		mpt::IO::WriteIntLE(f, code);
+	}
 
 #define WRITEMODULARHEADER(c1, c2, c3, c4, fsize) \
 	{ \
