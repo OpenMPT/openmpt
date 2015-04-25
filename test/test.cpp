@@ -2339,9 +2339,11 @@ static MPT_NOINLINE void TestStringIO()
 static MPT_NOINLINE void TestSampleConversion()
 //---------------------------------------------
 {
-	uint8 *sourceBuf = new uint8[65536 * 4];
-	void *targetBuf = new uint8[65536 * 6];
+	std::vector<uint8> sourceBufContainer(65536 * 4);
+	std::vector<uint8> targetBufContainer(65536 * 6);
 
+	uint8 *sourceBuf = &(sourceBufContainer[0]);
+	void *targetBuf = &(targetBufContainer[0]);
 
 	// Signed 8-Bit Integer PCM
 	// Unsigned 8-Bit Integer PCM
@@ -2491,8 +2493,6 @@ static MPT_NOINLINE void TestSampleConversion()
 		VERIFY_EQUAL_NONCONT(signed8[3], 0);
 	}
 
-	delete[] sourceBuf;
-	delete[] static_cast<uint8*>(targetBuf);
 }
 
 
