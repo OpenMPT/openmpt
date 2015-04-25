@@ -465,7 +465,7 @@ bool CASIODevice::InternalOpen()
 		Log(mpt::String::Print("ASIO: Error opening device: %1!", e.what() ? e.what() : ""));
 	} catch(...)
 	{
-		Log("ASIO: Unknown error opening device!");
+		Log(mpt::String::Print("ASIO: Unknown error opening device!"));
 	}
 	InternalClose();
 	return false;
@@ -672,13 +672,13 @@ void CASIODevice::OpenDriver()
 	{
 		if(CoCreateInstance(clsid,0,CLSCTX_INPROC_SERVER, clsid, (void **)&m_pAsioDrv) != S_OK)
 		{
-			Log("ASIO: CoCreateInstance failed!");
+			Log(mpt::String::Print("ASIO: CoCreateInstance failed!"));
 			m_pAsioDrv = nullptr;
 			return;
 		}
 	} catch(...)
 	{
-		Log("ASIO: CoCreateInstance crashed!");
+		Log(mpt::String::Print("ASIO: CoCreateInstance crashed!"));
 		m_pAsioDrv = nullptr;
 		return;
 	}
@@ -686,13 +686,13 @@ void CASIODevice::OpenDriver()
 	{
 		if(m_pAsioDrv->init((void *)m_AppInfo.GetHWND()) != ASIOTrue)
 		{
-			Log("ASIO: init() failed!");
+			Log(mpt::String::Print("ASIO: init() failed!"));
 			CloseDriver();
 			return;
 		}
 	} catch(...)
 	{
-		Log("ASIO: init() crashed!");
+		Log(mpt::String::Print("ASIO: init() crashed!"));
 		CloseDriver();
 		return;
 	}

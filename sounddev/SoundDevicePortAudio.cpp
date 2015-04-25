@@ -31,7 +31,7 @@ namespace SoundDevice {
 
 #ifndef NO_PORTAUDIO
 
-#define PALOG(x, ...)
+#define PALOG(x, ...) do { } while(0)
 //#define PALOG Log
 
 #include "../include/portaudio/src/common/pa_debugprint.h"
@@ -490,7 +490,7 @@ static void PortaudioLog(const char *text)
 {
 	if(text)
 	{
-		PALOG("PortAudio: %s", text);
+		PALOG(mpt::String::Print("PortAudio: %1", text));
 	}
 }
 
