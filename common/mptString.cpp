@@ -201,7 +201,7 @@ static std::wstring From8bit(const std::string &str, const uint32 (&table)[256],
 	for(std::size_t i = 0; i < str.length(); ++i)
 	{
 		uint32 c = static_cast<uint32>(static_cast<uint8>(str[i]));
-		if(c <= CountOf(table))
+		if(c < CountOf(table))
 		{
 			res.push_back(static_cast<wchar_t>(static_cast<uint32>(table[c])));
 		} else
