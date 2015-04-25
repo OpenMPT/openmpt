@@ -5132,7 +5132,7 @@ void CViewPattern::TempEnterOctave(int val)
 		PrepareUndo(m_Cursor, m_Cursor, "Octave Entry");
 		// The following might look a bit convoluted... This is mostly because the "middle-C" in
 		// custom tunings always has octave 5, no matter how many octaves the tuning actually has.
-		TempEnterNote(((target.note - NOTE_MIDDLEC) % groupSize) + (val - 5) * groupSize + NOTE_MIDDLEC);
+		TempEnterNote(((target.note - NOTE_MIN) % groupSize) + (val - 5) * groupSize + NOTE_MIDDLEC);
 		// Memorize note for key-up
 		ASSERT(size_t(val) < octaveKeyMemory.size());
 		octaveKeyMemory[val] = target.note;
