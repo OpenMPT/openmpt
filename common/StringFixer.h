@@ -104,53 +104,50 @@ namespace mpt { namespace String
 	};
 
 
+	namespace detail
+	{
+		static inline char NullToSpace(const char &c)
+		{
+			return (c != '\0') ? c : ' ';
+		}
+	}
+
+
 	// Copy a string from srcBuffer to destBuffer using a given read mode.
 	// Used for reading strings from files.
 	// Only use this version of the function if the size of the source buffer is variable.
 	template <ReadWriteMode mode>
-	void Read(std::string &dest, const char *srcBuffer, const size_t srcSize)
-	//-----------------------------------------------------------------------
+	void Read(std::string &dest, const char *srcBuffer, size_t srcSize)
+	//-----------------------------------------------------------------
 	{
+
+		const char *src = srcBuffer;
+
 		dest.clear();
+
+		if(mode == nullTerminated || mode == spacePaddedNull)
+		{
+			// We assume that the last character of the source buffer is null.
+			if(srcSize > 0)
+			{
+				srcSize -= 1;
+			}
+		}
 
 		if(mode == nullTerminated || mode == maybeNullTerminated)
 		{
-			// Copy null-terminated string
-			// We cannot use std::string::assign(const char*, size_t) because that would not stop at \0s in the middle of the buffer.
-			for(const char *src = srcBuffer; src != srcBuffer + srcSize && *src; ++src)
-			{
-				dest.push_back(*src);
-			}
 
-			if(mode == nullTerminated)
-			{
-				// We assume that the last character of the source buffer is null.
-				if(dest.length() == srcSize)
-				{
-					dest.resize(dest.length() - 1);
-				}
-			}
+			// Copy null-terminated string, stopping at null.
+			dest.assign(src, std::find(src, src + srcSize, '\0'));
 
 		} else if(mode == spacePadded || mode == spacePaddedNull)
 		{
-			// Copy string over, but convert null characters to spaces.
-			for(const char *src = srcBuffer; src != srcBuffer + srcSize; ++src)
-			{
-				char c = *src;
-				if(c == '\0')
-				{
-					c = ' ';
-				}
-				dest.push_back(c);
-			}
 
-			if(mode == spacePaddedNull)
-			{
-				if(dest.length() == srcSize)
-				{
-					dest.resize(dest.length() - 1);
-				}
-			}
+			// Copy string over.
+			dest.assign(src, src + srcSize);
+
+			// Convert null characters to spaces.
+			std::transform(dest.begin(), dest.end(), dest.begin(), detail::NullToSpace);
 
 			// Trim trailing spaces.
 			dest = mpt::String::RTrim(dest);
@@ -173,82 +170,53 @@ namespace mpt { namespace String
 	// Used for reading strings from files.
 	// Only use this version of the function if the size of the source buffer is variable.
 	template <ReadWriteMode mode, size_t destSize>
-	void Read(char (&destBuffer)[destSize], const char *srcBuffer, const size_t srcSize)
-	//----------------------------------------------------------------------------------
+	void Read(char (&destBuffer)[destSize], const char *srcBuffer, size_t srcSize)
+	//----------------------------------------------------------------------------
 	{
 		STATIC_ASSERT(destSize > 0);
 
-		const size_t maxSize = std::min(destSize, srcSize);
 		char *dst = destBuffer;
 		const char *src = srcBuffer;
 
+		if(mode == nullTerminated || mode == spacePaddedNull)
+		{
+			// We assume that the last character of the source buffer is null.
+			if(srcSize > 0)
+			{
+				srcSize -= 1;
+			}
+		}
+
 		if(mode == nullTerminated || mode == maybeNullTerminated)
 		{
-			// Copy null-terminated string and make sure that destination is null-terminated.
-			size_t pos = maxSize;
-			while(pos > 0)
-			{
-				pos--;
-				if((*dst++ = *src++) == '\0')
-				{
-					break;
-				}
-			}
-			// Fill rest of string with nulls.
-			std::fill(dst, dst + destSize - maxSize + pos, '\0');
-			
-			if(mode == nullTerminated)
-			{
-				// We assume that the last character of the source buffer is null.
-				destBuffer[maxSize - 1] = '\0';
-			} else
-			{
-				// Last character of source buffer may actually be a valid character.
-				destBuffer[std::min(destSize - 1, srcSize)] = '\0';
-			}
 
+			// Copy string and leave one character space in the destination buffer for null.
+			dst = std::copy(src, std::find(src, src + std::min(srcSize, destSize - 1), '\0'), dst);
+	
 		} else if(mode == spacePadded || mode == spacePaddedNull)
 		{
-			// Copy string over, but convert null characters to spaces.
-			size_t pos = maxSize;
-			while(pos > 0)
-			{
-				*dst = *src;
-				if(*dst == '\0')
-				{
-					*dst = ' ';
-				}
-				pos--;
-				dst++;
-				src++;
-			}
-			// Fill rest of string with nulls.
-			std::fill(dst, dst + destSize - maxSize, '\0');
 
-			if(mode == spacePaddedNull && srcSize <= destSize)
-			{
-				// We assumed that the last character of the source buffer should be ignored, so make sure it's really null.
-				destBuffer[srcSize - 1] = '\0';
-			}
+			// Copy string and leave one character space in the destination buffer for null.
+			// Convert nulls to spaces while copying.
+			dst = std::replace_copy(src, src + std::min(srcSize, destSize - 1), dst, '\0', ' ');
 
-			// Trim trailing spaces.
-			pos = maxSize;
-			dst = destBuffer + pos - 1;
-			while(pos > 0)
+			// Rewind dst to the first of any trailing spaces.
+			while(dst - destBuffer > 0)
 			{
-				if(*dst == ' ')
+				dst--;
+				char c = *dst;
+				if(c != ' ')
 				{
-					*dst = '\0';
-				} else if(*dst != '\0')
-				{
+					dst++;
 					break;
 				}
-				pos--;
-				dst--;
 			}
 
-			SetNullTerminator(destBuffer);
 		}
+
+		// Fill rest of string with nulls.
+		std::fill(dst, destBuffer + destSize, '\0');
+
 	}
 
 	// Used for reading strings from files.
