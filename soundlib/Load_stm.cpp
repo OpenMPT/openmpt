@@ -90,7 +90,7 @@ struct PACKED STMFileHeader
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
 	{
-		for(std::size_t i = 0; i < 32; ++i)
+		for(std::size_t i = 0; i < 31; ++i)
 		{
 			samples[i].ConvertEndianness();
 		}

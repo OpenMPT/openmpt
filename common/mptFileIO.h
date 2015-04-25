@@ -34,7 +34,7 @@ static inline FILE * mpt_fopen(const mpt::PathString &filename, const char *mode
 //-------------------------------------------------------------------------------
 {
 	#if MPT_OS_WINDOWS
-		return _wfopen(filename.AsNative().c_str(), mode ? mpt::ToWide(mpt::CharsetASCII, mode).c_str() : nullptr);
+		return _wfopen(filename.AsNative().c_str(), mode ? mpt::ToWide(mpt::CharsetASCII, mode).c_str() : L"");
 	#else // !MPT_OS_WINDOWS
 		return fopen(filename.AsNative().c_str(), mode);
 	#endif // MPT_OS_WINDOWS

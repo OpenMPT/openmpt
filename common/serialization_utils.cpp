@@ -54,7 +54,7 @@ bool ID::IsPrintable() const
 {
 	for(std::size_t i = 0; i < m_ID.length(); ++i)
 	{
-		if(m_ID[i] <= 0 || isprint(m_ID[i]) == 0)
+		if(m_ID[i] <= 0 || isprint(static_cast<unsigned char>(m_ID[i])) == 0)
 		{
 			return false;
 		}

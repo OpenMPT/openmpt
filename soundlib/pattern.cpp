@@ -619,7 +619,7 @@ void ReadData(std::istream& iStrm, CPattern& pat, const size_t)
 			mpt::IO::ReadIntLE<uint8>(iStrm, diffmask);
 		uint8 temp = 0;
 
-		ModCommand dummy;
+		ModCommand dummy = ModCommand::Empty();
 		ModCommand& m = (ch < chns) ? *pat.GetpModCommand(row, ch) : dummy;
 
 		READITEM(noteBit, note);
