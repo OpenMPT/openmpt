@@ -2106,6 +2106,11 @@ static MPT_NOINLINE void TestStringIO()
 	char src3[4] = { 'X', 'Y', 'Z', '!' };		// Full buffer, last character non-space
 	char dst1[6];	// Destination buffer, larger than source buffer
 	char dst2[3];	// Destination buffer, smaller than source buffer
+	std::string dststring;
+
+#define ReadTestString(mode, src, expectedResult) \
+	mpt::String::Read<mpt::String:: mode >(dststring, src); \
+	VERIFY_EQUAL_NONCONT(dststring, std::string(expectedResult));
 
 #define ReadTest(mode, dst, src, expectedResult) \
 	mpt::String::Read<mpt::String:: mode >(dst, src); \
@@ -2118,6 +2123,30 @@ static MPT_NOINLINE void TestStringIO()
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, CountOf(dst)), 0);  /* Ensure that the strings are identical */ \
 	for(size_t i = mpt::strnlen(dst, CountOf(dst)); i < CountOf(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */
+
+	// Check reading of null-terminated string into std::string
+	ReadTestString(nullTerminated, src0, "");
+	ReadTestString(nullTerminated, src1, "X ");
+	ReadTestString(nullTerminated, src2, "XYZ");
+	ReadTestString(nullTerminated, src3, "XYZ");
+
+	// Check reading of string that should be null-terminated, but is maybe too long to still hold the null character.
+	ReadTestString(maybeNullTerminated, src0, "");
+	ReadTestString(maybeNullTerminated, src1, "X ");
+	ReadTestString(maybeNullTerminated, src2, "XYZ ");
+	ReadTestString(maybeNullTerminated, src3, "XYZ!");
+
+	// Check reading of space-padded strings with ignored last character
+	ReadTestString(spacePaddedNull, src0, " X");
+	ReadTestString(spacePaddedNull, src1, "X");
+	ReadTestString(spacePaddedNull, src2, "XYZ");
+	ReadTestString(spacePaddedNull, src3, "XYZ");
+
+	// Check reading of space-padded strings
+	ReadTestString(spacePadded, src0, " X X");
+	ReadTestString(spacePadded, src1, "X  X");
+	ReadTestString(spacePadded, src2, "XYZ");
+	ReadTestString(spacePadded, src3, "XYZ!");
 
 	// Check reading of null-terminated string into larger buffer
 	ReadTest(nullTerminated, dst1, src0, "");
