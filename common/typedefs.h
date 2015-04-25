@@ -198,6 +198,22 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 
 
 
+// Static code checkers might need to get the knowledge of our assertions tranferred to them.
+#define MPT_CHECKER_ASSUME_ASSERTIONS 1
+//#define MPT_CHECKER_ASSUME_ASSERTIONS 0
+
+#if MPT_COMPILER_MSVC
+#ifdef _PREFAST_
+#define MPT_CHECKER_ASSUME(x) __analysis_assume(!!(x))
+#endif
+#endif
+
+#ifndef MPT_CHECKER_ASSUME
+#define MPT_CHECKER_ASSUME(x) do { } while(0)
+#endif
+
+
+
 #if defined(_MFC_VER)
 
 #if !defined(ASSERT)
@@ -239,8 +255,8 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 #define MPT_ASSERT_ALWAYS(expr)          ASSERT((expr))
 #define MPT_ASSERT_ALWAYS_MSG(expr, msg) ASSERT((expr) && (msg))
 #else
-#define MPT_ASSERT_ALWAYS(expr)          do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
-#define MPT_ASSERT_ALWAYS_MSG(expr, msg) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } } while(0)
+#define MPT_ASSERT_ALWAYS(expr)          do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } MPT_CHECKER_ASSUME(expr); } while(0)
+#define MPT_ASSERT_ALWAYS_MSG(expr, msg) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } MPT_CHECKER_ASSUME(expr); } while(0)
 #ifndef MPT_ASSERT_HANDLER_NEEDED
 #define MPT_ASSERT_HANDLER_NEEDED
 #endif
@@ -248,20 +264,20 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 
 #elif defined(NO_ASSERTS)
 
-#define MPT_ASSERT(expr)                 do { } while(0)
-#define MPT_ASSERT_MSG(expr, msg)        do { } while(0)
-#define MPT_ASSERT_ALWAYS(expr)          do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
-#define MPT_ASSERT_ALWAYS_MSG(expr, msg) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } } while(0)
+#define MPT_ASSERT(expr)                 MPT_CHECKER_ASSUME(expr)
+#define MPT_ASSERT_MSG(expr, msg)        MPT_CHECKER_ASSUME(expr)
+#define MPT_ASSERT_ALWAYS(expr)          do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } MPT_CHECKER_ASSUME(expr); } while(0)
+#define MPT_ASSERT_ALWAYS_MSG(expr, msg) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } MPT_CHECKER_ASSUME(expr); } while(0)
 #ifndef MPT_ASSERT_HANDLER_NEEDED
 #define MPT_ASSERT_HANDLER_NEEDED
 #endif
 
 #else // !NO_ASSERTS
 
-#define MPT_ASSERT(expr)                 do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
-#define MPT_ASSERT_MSG(expr, msg)        do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } } while(0)
-#define MPT_ASSERT_ALWAYS(expr)          do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } } while(0)
-#define MPT_ASSERT_ALWAYS_MSG(expr, msg) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } } while(0)
+#define MPT_ASSERT(expr)                 do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } MPT_CHECKER_ASSUME(expr); } while(0)
+#define MPT_ASSERT_MSG(expr, msg)        do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } MPT_CHECKER_ASSUME(expr); } while(0)
+#define MPT_ASSERT_ALWAYS(expr)          do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } MPT_CHECKER_ASSUME(expr); } while(0)
+#define MPT_ASSERT_ALWAYS_MSG(expr, msg) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } MPT_CHECKER_ASSUME(expr); } while(0)
 #ifndef MPT_ASSERT_HANDLER_NEEDED
 #define MPT_ASSERT_HANDLER_NEEDED
 #endif
