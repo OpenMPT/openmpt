@@ -417,24 +417,20 @@ public:
 			return 0;
 		}
 		uint8 buf[sizeof(T)];
+		bool negative = false;
 		for(std::size_t i = 0; i < sizeof(T); ++i)
 		{
+			uint8 byte = 0;
 			if(i < size)
 			{
-				Read(buf[i]);
+				Read(byte);
+				negative = std::numeric_limits<T>::is_signed && ((byte & 0x80) != 0x00);
 			} else
 			{
-				if(std::numeric_limits<T>::is_signed)
-				{
-					// sign extend
-					const bool negative = (i > 0) && ((buf[i-1] & 0x80) != 0x00);
-					buf[i] = negative ? 0xff : 0x00;
-				} else
-				{
-					// zero extend
-					buf[i] = 0x00;
-				}
+				// sign or zero extend
+				byte = negative ? 0xff : 0x00;
 			}
+			buf[i] = byte;
 		}
 		T target;
 		std::memcpy(&target, buf, sizeof(T));
