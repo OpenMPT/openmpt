@@ -206,7 +206,7 @@ mpt::ustring ToShortenedISO8601(tm date)
 	// and strftime does not support reduced precision ISO8601 at all.
 	// Just do the formatting ourselves.
 	mpt::ustring result;
-	mpt::ustring timezone = MPT_USTRING("Z");
+	mpt::ustring tz = MPT_USTRING("Z");
 	if(date.tm_year == 0)
 	{
 		return result;
@@ -237,15 +237,15 @@ mpt::ustring ToShortenedISO8601(tm date)
 	result += MPT_USTRING("T");
 	if(date.tm_isdst > 0)
 	{
-		timezone = MPT_USTRING("+01:00");
+		tz = MPT_USTRING("+01:00");
 	}
 	result += mpt::ufmt::dec0<2>(date.tm_hour) + MPT_USTRING(":") + mpt::ufmt::dec0<2>(date.tm_min);
 	if(date.tm_sec < 0 || date.tm_sec > 61)
 	{
-		return result + timezone;
+		return result + tz;
 	}
 	result += MPT_USTRING(":") + mpt::ufmt::dec0<2>(date.tm_sec);
-	result += timezone;
+	result += tz;
 	return result;
 }
 
