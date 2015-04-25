@@ -906,7 +906,7 @@ size_t CopyAndNormalizeSample(ModSample &sample, const char *sourceBuffer, size_
 	// If buffer is silent (maximum is 0), don't bother normalizing the sample - just keep the already silent buffer.
 	if(!sampleConv.IsSilent())
 	{
-		const char * inBuf = sourceBuffer;
+		inBuf = sourceBuffer;
 		// Copying buffer.
 		typename SampleConversion::output_t *outBuf = static_cast<typename SampleConversion::output_t *>(sample.pSample);
 
