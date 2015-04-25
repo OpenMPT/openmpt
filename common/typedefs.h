@@ -198,13 +198,15 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 
 
 
-// Static code checkers might need to get the knowledge of our assertions tranferred to them.
+// Static code checkers might need to get the knowledge of our assertions transferred to them.
 #define MPT_CHECKER_ASSUME_ASSERTIONS 1
 //#define MPT_CHECKER_ASSUME_ASSERTIONS 0
 
 #if MPT_COMPILER_MSVC
 #ifdef _PREFAST_
+#if MPT_CHECKER_ASSUME_ASSERTIONS
 #define MPT_CHECKER_ASSUME(x) __analysis_assume(!!(x))
+#endif
 #endif
 #endif
 
