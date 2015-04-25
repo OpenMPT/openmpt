@@ -326,6 +326,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 		{
 			MMCMPBITBUFFER bb;
 			uint32 subblk = 0;
+			if(!psubblk) return false;
 			if(!MMCMP_IsDstBlockValid(unpackedData, psubblk[subblk])) return false;
 			char *pDest = &(unpackedData[psubblk[subblk].unpk_pos]);
 			uint32 dwSize = psubblk[subblk].unpk_size;
