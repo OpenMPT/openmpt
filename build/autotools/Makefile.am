@@ -475,7 +475,6 @@ openmpt123_SOURCES += src/openmpt123/openmpt123_waveout.hpp
 
 man1_MANS = man/openmpt123.1
 
-#$(man3_MANS): doxygen-doc
 MOSTLYCLEANFILES += $(DX_CLEANFILES)
 
 if DX_COND_doc
@@ -491,7 +490,6 @@ install-data-local:
 
 clean-local:
 	$(RM) -r html
-	$(RM) -r man
 	$(RM) @DX_DOCDIR@/@PACKAGE@.tag
 
 uninstall-local:
@@ -500,10 +498,6 @@ uninstall-local:
 if DX_COND_html
 DX_CLEAN_HTML = @DX_DOCDIR@/html
 endif DX_COND_html
-
-if DX_COND_man
-DX_CLEAN_MAN = @DX_DOCDIR@/man
-endif DX_COND_man
 
 .PHONY: doxygen-run doxygen-doc
 
@@ -518,7 +512,7 @@ doxygen-doc: doxygen-run
 	$(DX_ENV) $(DX_DOXYGEN) $(DX_CONFIG)
 	touch $@
 
-DX_CLEANFILES = @DX_DOCDIR@/@PACKAGE@.tag -r $(DX_CLEAN_HTML) $(DX_CLEAN_MAN) 
+DX_CLEANFILES = @DX_DOCDIR@/@PACKAGE@.tag -r $(DX_CLEAN_HTML) 
 
 endif DX_COND_doc
 
