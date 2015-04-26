@@ -2,7 +2,7 @@
  project "portmidi"
   uuid "2512E2CA-578A-4F10-9363-4BFC9A5EF960"
   language "C"
-  location "../../build/gen"
+  location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/portmidi"
   includedirs { "../../include/portmidi/porttime", "../../include/portmidi/pm_common", "../../include/portmidi/pm_win" }
   files {

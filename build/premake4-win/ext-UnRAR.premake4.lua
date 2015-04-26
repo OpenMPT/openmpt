@@ -2,7 +2,7 @@
  project "UnRAR"
   uuid "95CC809B-03FC-4EDB-BB20-FD07A698C05F"
   language "C++"
-  location "../../build/gen"
+  location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/unrar"
   includedirs { "../../include/unrar" }
   files {

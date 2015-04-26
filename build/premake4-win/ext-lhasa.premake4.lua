@@ -2,7 +2,7 @@
  project "lhasa"
   uuid "6B11F6A8-B131-4D2B-80EF-5731A9016436"
   language "C"
-  location "../../build/gen"
+  location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/lhasa"
   includedirs { "../../include/msinttypes/inttypes" }
   files {

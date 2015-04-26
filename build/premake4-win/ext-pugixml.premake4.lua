@@ -2,7 +2,7 @@
  project "pugixml"
   uuid "07B89124-7C71-42cc-81AB-62B09BB61F9B"
   language "C++"
-  location "../../build/gen"
+  location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/pugixml"
   includedirs { }
   files {

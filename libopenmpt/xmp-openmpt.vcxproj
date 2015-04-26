@@ -87,7 +87,7 @@
     <ClCompile Include="xmp-openmpt.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\build\gen\pugixml.vcxproj">
+    <ProjectReference Include="..\build\vs2010-ext\pugixml.vcxproj">
       <Project>{07b89124-7c71-42cc-81ab-62b09bb61f9b}</Project>
     </ProjectReference>
     <ProjectReference Include="libopenmpt.vcxproj">

@@ -1144,31 +1144,31 @@
     <None Include="VTune\mptrack.vpj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\build\gen\flac.vcxproj">
+    <ProjectReference Include="..\build\vs2010-ext\flac.vcxproj">
       <Project>{e599f5aa-f9a3-46cc-8db0-c8defceb90c5}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\gen\lhasa.vcxproj">
+    <ProjectReference Include="..\build\vs2010-ext\lhasa.vcxproj">
       <Project>{6b11f6a8-b131-4d2b-80ef-5731a9016436}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\gen\portaudio.vcxproj">
+    <ProjectReference Include="..\build\vs2010-ext\portaudio.vcxproj">
       <Project>{189b867f-ff4b-45a1-b741-a97492ee69af}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\gen\r8brain.vcxproj">
+    <ProjectReference Include="..\build\vs2010-ext\r8brain.vcxproj">
       <Project>{bc116b29-9958-4389-b294-7529bb7c7d37}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\gen\smbPitchShift.vcxproj">
+    <ProjectReference Include="..\build\vs2010-ext\smbPitchShift.vcxproj">
       <Project>{89af16dd-32cc-4a7e-b219-5f117d761f9f}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\gen\soundtouch.vcxproj">
+    <ProjectReference Include="..\build\vs2010-ext\soundtouch.vcxproj">
       <Project>{f5f8f6de-84cf-4e9d-91ea-d9b5e2aa36cd}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\gen\UnRAR.vcxproj">
+    <ProjectReference Include="..\build\vs2010-ext\UnRAR.vcxproj">
       <Project>{95cc809b-03fc-4edb-bb20-fd07a698c05f}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\gen\minizip.vcxproj">
+    <ProjectReference Include="..\build\vs2010-ext\minizip.vcxproj">
       <Project>{63af9025-a6ce-4147-a05d-6e2ccfd3a0d7}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\gen\zlib.vcxproj">
+    <ProjectReference Include="..\build\vs2010-ext\zlib.vcxproj">
       <Project>{1654fb18-fde6-406f-9d84-ba12bfbd67b2}</Project>
     </ProjectReference>
   </ItemGroup>
