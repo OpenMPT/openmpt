@@ -2,7 +2,7 @@
  project "portaudio"
   uuid "189B867F-FF4B-45A1-B741-A97492EE69AF"
   language "C"
-  location "../../build/gen"
+  location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/portaudio"
   includedirs { "../../include/portaudio/include", "../../include/portaudio/src/common", "../../include/portaudio/src/os/win" }
   defines {

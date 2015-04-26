@@ -2,10 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{50A0CB9A-E943-1041-8162-5106A9BC81BE}</UniqueIdentifier>
+			<UniqueIdentifier>{44E5B88B-84D6-1B48-84CD-25A5BAE3018C}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\r8brain">
-			<UniqueIdentifier>{32431A0D-396E-9643-AE4D-180AA97B39DB}</UniqueIdentifier>
+			<UniqueIdentifier>{7F7E8F57-64A8-AF49-AF27-52AD5ACAEEC2}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>

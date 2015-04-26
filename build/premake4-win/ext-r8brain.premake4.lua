@@ -2,7 +2,7 @@
  project "r8brain"
   uuid "BC116B29-9958-4389-B294-7529BB7C7D37"
   language "C++"
-  location "../../build/gen"
+  location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/r8brain"
   includedirs { "../../include/r8brain" }
   files {

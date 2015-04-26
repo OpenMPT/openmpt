@@ -2,7 +2,7 @@
  project "flac"
   uuid "E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5"
   language "C"
-  location "../../build/gen"
+  location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/flac"
   includedirs { "../../include/flac/include", "../../include/flac/src/libFLAC/include" }
   files {

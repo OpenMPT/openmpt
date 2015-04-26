@@ -2,7 +2,7 @@
  project "soundtouch"
   uuid "F5F8F6DE-84CF-4E9D-91EA-D9B5E2AA36CD"
   language "C++"
-  location "../../build/gen"
+  location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/soundtouch"
   targetname "OpenMPT_SoundTouch_f32"
   includedirs { "../../include/soundtouch/include" }

@@ -2,13 +2,13 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{54E9DEE4-5EFB-A046-A9A1-658A92A98DD1}</UniqueIdentifier>
+			<UniqueIdentifier>{09F95A4F-35EC-D747-BBF5-D7D8E92C5D07}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\pugixml">
-			<UniqueIdentifier>{CE9EA013-C061-3B4E-92E0-5A6BFAECC13F}</UniqueIdentifier>
+			<UniqueIdentifier>{98D63180-14F1-734A-802A-88A23047BA2F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\pugixml\src">
-			<UniqueIdentifier>{8ACD3917-0E40-CD47-95F6-4837494A3357}</UniqueIdentifier>
+			<UniqueIdentifier>{2C441390-9923-3847-A4FC-3EFE3ED9FE8C}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
