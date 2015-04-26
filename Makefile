@@ -706,8 +706,6 @@ install-doc: bin/made.docs
 ifeq ($(MPT_WITH_DOXYGEN),1)
 	$(INSTALL_MAKE_DIR) $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/html/
 	$(INSTALL_DATA_DIR) bin/docs/html $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/html
-	$(INSTALL_MAKE_DIR) $(DESTDIR)$(PREFIX)/share/doc/man/
-	#$(INSTALL_DATA_DIR) bin/docs/man $(DESTDIR)$(PREFIX)/share/man
 endif
 
 .PHONY: install-openmpt-modplug
