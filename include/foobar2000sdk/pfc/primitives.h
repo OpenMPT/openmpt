@@ -15,9 +15,13 @@
 #define TEMPLATE_CONSTRUCTOR_FORWARD_FLOOD(THISCLASS,MEMBER) TEMPLATE_CONSTRUCTOR_FORWARD_FLOOD_WITH_INITIALIZER(THISCLASS,MEMBER,{})
 
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 
-//Bah. I noticed the fact that std::exception carrying a custom message is MS-specific *after* making exception classes a part of ABI. To be nuked next time fb2k component backwards compatibility is axed.
+#ifndef _MSC_VER
+#error MSVC expected
+#endif
+
+// MSVC specific - part of fb2k ABI - cannot ever change on MSVC/Windows
 
 #define PFC_DECLARE_EXCEPTION(NAME,BASECLASS,DEFAULTMSG)	\
 class NAME : public BASECLASS {	\
@@ -70,7 +74,7 @@ namespace pfc {
 		}
 		char * m_message;
 	};
-	PFC_NORETURN template<typename t_exception> void throw_exception_with_message(const char * p_message) {
+	template<typename t_exception> PFC_NORETURN void throw_exception_with_message(const char * p_message) {
 		throw __exception_with_message_t<t_exception>(p_message);
 	}
 }
@@ -83,24 +87,21 @@ namespace pfc {
 
 	template<typename p_type1,typename p_type2>
 	class is_same_type { public: enum {value = false}; };
-
 	template<typename p_type>
 	class is_same_type<p_type,p_type> { public: enum {value = true}; };
-
-//	template<bool val> class static_assert;
-//	template<> class static_assert<true> {};
 
 	template<bool val> class static_assert_t;
 	template<> class static_assert_t<true> {};
 
-#define PFC_STATIC_ASSERT(X) { pfc::static_assert_t<(X)>(); }
+#define PFC_STATIC_ASSERT(X) { ::pfc::static_assert_t<(X)>(); }
 
 	template<typename t_type>
 	void assert_raw_type() {static_assert_t< !traits_t<t_type>::needs_constructor && !traits_t<t_type>::needs_destructor >();}
 
 	template<typename t_type> class assert_byte_type;
-	template<> class assert_byte_type<t_uint8> {};
-	template<> class assert_byte_type<t_int8> {};
+	template<> class assert_byte_type<char> {};
+	template<> class assert_byte_type<unsigned char> {};
+	template<> class assert_byte_type<signed char> {};
 
 
 	template<typename t_type> void __unsafe__memcpy_t(t_type * p_dst,const t_type * p_src,t_size p_count) {
@@ -115,6 +116,7 @@ namespace pfc {
 		if (traits_t<t_type>::needs_constructor) {
 			t_type * ret = new(&p_item) t_type;
 			PFC_ASSERT(ret == &p_item);
+            (void) ret; // suppress warning
 		}
 	}
 
@@ -148,6 +150,7 @@ namespace pfc {
 		if (traits_t<t_type>::needs_constructor) {
 			t_type * ret = new(&p_item) t_type(p_copyfrom);
 			PFC_ASSERT(ret == &p_item);
+            (void) ret; // suppress warning
 		} else {
 			p_item = p_copyfrom;
 		}
@@ -283,9 +286,9 @@ namespace pfc {
 		if (traits_t<T>::realloc_safe) {
 			__unsafe__swap_raw_t<sizeof(T)>( reinterpret_cast<void*>( &p_item1 ), reinterpret_cast<void*>( &p_item2 ) );
 		} else {
-			T temp(p_item2);
-			p_item2 = p_item1;
-			p_item1 = temp;
+			T temp( std::move(p_item2) );
+			p_item2 = std::move(p_item1);
+			p_item1 = std::move(temp);
 		}
 	}
 
@@ -296,9 +299,9 @@ namespace pfc {
 		typedef traits_t<T> t;
 		if (t::needs_constructor || t::needs_destructor) {
 			if (t::realloc_safe) swap_t(p_item1, p_item2);
-			else p_item1 = p_item2;
+			else p_item1 = std::move( p_item2 );
 		} else {
-			p_item1 = p_item2;
+			p_item1 = std::move( p_item2 );
 		}
 	}
 
@@ -503,7 +506,37 @@ namespace pfc {
 		p_array[p_index] = p_item;
 		return p_index;
 	}
+	template<typename array1_t, typename array2_t>
+	void insert_array_t( array1_t & outArray, size_t insertAt, array2_t const & inArray, size_t inArraySize) {
+		const size_t oldSize = outArray.get_size();
+		if (insertAt > oldSize) insertAt = oldSize;
+		const size_t newSize = oldSize + inArraySize;
+		outArray.set_size( newSize );
+		for(size_t m = oldSize; m != insertAt; --m) {
+			move_t( outArray[ m - 1 + inArraySize], outArray[m - 1] );
+		}
+		for(size_t w = 0; w < inArraySize; ++w) {
+			outArray[ insertAt + w ]  = inArray[ w ];
+		}
+	}
 
+	template<typename t_array,typename in_array_t>
+	inline t_size insert_multi_t(t_array & p_array,const in_array_t & p_items, size_t p_itemCount, t_size p_index) {
+		const t_size old_count = p_array.get_size();
+		const size_t new_count = old_count + p_itemCount;
+		if (p_index > old_count) p_index = old_count;
+		p_array.set_size(new_count);
+		size_t toMove = old_count - p_index;
+		for(size_t w = 0; w < toMove; ++w) {
+			move_t( p_array[new_count - 1 - w], p_array[old_count - 1 - w] );
+		}
+		
+		for(size_t w = 0; w < p_itemCount; ++w) {
+			p_array[p_index+w] = p_items[w];
+		}
+
+		return p_index;
+	}
 	template<typename t_array,typename T>
 	inline t_size insert_swap_t(t_array & p_array,T & p_item,t_size p_index) {
 		t_size old_count = p_array.get_size();
@@ -654,7 +687,7 @@ namespace pfc {
 	template<typename t_type>
 	t_type replace_null_t(t_type & p_var) {
 		t_type ret = p_var;
-		p_var = NULL;
+		p_var = 0;
 		return ret;
 	}
 
@@ -814,12 +847,36 @@ namespace pfc {
 		t_val & v;
 	};
 
+	inline unsigned countBits32(uint32_t i) {
+		const uint32_t mask = 0x11111111;
+		uint32_t acc = i & mask;
+		acc += (i >> 1) & mask;
+		acc += (i >> 2) & mask;
+		acc += (i >> 3) & mask;
+
+		const uint32_t mask2 = 0x0F0F0F0F;
+		uint32_t acc2 = acc & mask2;
+		acc2 += (acc >> 4) & mask2;
+	
+		const uint32_t mask3 = 0x00FF00FF;
+		uint32_t acc3 = acc2 & mask3;
+		acc3 += (acc2 >> 8) & mask3;
+
+		return (acc3 & 0xFFFF) + ((acc3 >> 16) & 0xFFFF);
+	}
+
+    // Forward declarations
+    template<typename t_to,typename t_from>
+	void copy_array_t(t_to & p_to,const t_from & p_from);
+
+	template<typename t_array,typename t_value>
+	void fill_array_t(t_array & p_array,const t_value & p_value);
 };
 
 
 #define PFC_CLASS_NOT_COPYABLE(THISCLASSNAME,THISTYPE) \
 	private:	\
-	THISCLASSNAME(const THISTYPE&) {throw pfc::exception_bug_check();}	\
-	const THISTYPE & operator=(const THISTYPE &) {throw pfc::exception_bug_check();}
+	THISCLASSNAME(const THISTYPE&); \
+	const THISTYPE & operator=(const THISTYPE &);
 
 #define PFC_CLASS_NOT_COPYABLE_EX(THISTYPE) PFC_CLASS_NOT_COPYABLE(THISTYPE,THISTYPE)

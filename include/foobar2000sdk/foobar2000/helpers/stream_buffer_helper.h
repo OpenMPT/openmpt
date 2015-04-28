@@ -6,7 +6,8 @@ public:
 private:
 	stream_reader * m_base;
 	pfc::array_t<char> m_buffer;
-	t_size m_buffer_ptr, m_buffer_max;
+	const char * m_bufferPtr;
+	size_t m_bufferRemaining;
 };
 
 class stream_writer_buffered : public stream_writer

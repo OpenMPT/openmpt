@@ -82,4 +82,4 @@ public:
 	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(config_object_notify);
 };
 
-#endif _CONFIG_OBJECT_H_
+#endif // _CONFIG_OBJECT_H_

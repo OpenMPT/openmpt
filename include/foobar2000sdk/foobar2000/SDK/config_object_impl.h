@@ -137,7 +137,6 @@ template<class T,bool isConst = false>
 class config_object_int_factory_t : public config_object_fixed_factory_t<sizeof(T),isConst>
 {
 private:
-	template<class T>
 	struct t_initval
 	{
 		T m_initval;
@@ -146,7 +145,7 @@ private:
 	};
 public:
 	config_object_int_factory_t(const GUID & p_guid,T p_initval)
-		: config_object_fixed_factory_t<sizeof(T)>(p_guid,t_initval<T>(p_initval).get_ptr() )
+		: config_object_fixed_factory_t<sizeof(T)>(p_guid,t_initval(p_initval).get_ptr() )
 	{}
 };
 
@@ -171,4 +170,4 @@ private:
 
 typedef service_factory_single_transparent_t<config_object_notify_impl_simple> config_object_notify_simple_factory;
 
-#endif _CONFIG_OBJECT_IMPL_H_
+#endif //_CONFIG_OBJECT_IMPL_H_

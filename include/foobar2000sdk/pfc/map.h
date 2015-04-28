@@ -92,7 +92,7 @@ namespace pfc {
 
 		template<bool inclusive,bool above,typename _t_key>
 		const t_storage_value * query_nearest_ptr(_t_key & p_key) const {
-			const t_storage * storage = m_data.find_nearest_item<inclusive,above>(t_search_query<_t_key>(p_key));
+			const t_storage * storage = m_data.template find_nearest_item<inclusive,above>(t_search_query<_t_key>(p_key));
 			if (storage == NULL) return NULL;
 			p_key = storage->m_key;
 			return &storage->m_value;
@@ -100,7 +100,7 @@ namespace pfc {
 
 		template<bool inclusive,bool above,typename _t_key>
 		t_storage_value * query_nearest_ptr(_t_key & p_key) {
-			t_storage * storage = m_data.find_nearest_item<inclusive,above>(t_search_query<_t_key>(p_key));
+			t_storage * storage = m_data.template find_nearest_item<inclusive,above>(t_search_query<_t_key>(p_key));
 			if (storage == NULL) return NULL;
 			p_key = storage->m_key;
 			return &storage->m_value;
@@ -108,7 +108,7 @@ namespace pfc {
 
 		template<bool inclusive,bool above,typename _t_key,typename _t_value>
 		bool query_nearest(_t_key & p_key,_t_value & p_value) const {
-			const t_storage * storage = m_data.find_nearest_item<inclusive,above>(t_search_query<_t_key>(p_key));
+			const t_storage * storage = m_data.template find_nearest_item<inclusive,above>(t_search_query<_t_key>(p_key));
 			if (storage == NULL) return false;
 			p_key = storage->m_key;
 			p_value = storage->m_value;
@@ -123,12 +123,14 @@ namespace pfc {
 
 		template<typename t_callback>
 		void enumerate(t_callback & p_callback) const {
-			m_data.enumerate(enumeration_wrapper<t_callback>(p_callback));
+            enumeration_wrapper<t_callback> cb(p_callback);
+			m_data.enumerate(cb);
 		}
 
 		template<typename t_callback>
 		void enumerate(t_callback & p_callback) {
-			m_data._enumerate_var(enumeration_wrapper_var<t_callback>(p_callback));
+            enumeration_wrapper_var<t_callback> cb(p_callback);
+			m_data._enumerate_var(cb);
 		}
 
 

@@ -72,6 +72,9 @@ class component_installation_validator : public service_base {
 public:
 	virtual bool is_installed_correctly() = 0;
 
+	static bool test_my_name(const char * fn);
+	static bool have_other_file(const char * fn);
+
 	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(component_installation_validator)
 };
 
@@ -80,11 +83,7 @@ class component_installation_validator_filename : public component_installation_
 public:
 	component_installation_validator_filename(const char * dllName) : m_dllName(dllName) {}
 	bool is_installed_correctly() {
-		const char * path = core_api::get_my_full_path();
-		path += pfc::scan_filename(path);
-		bool retVal = ( strcmp(path, m_dllName) == 0 );
-		PFC_ASSERT( retVal );
-		return retVal;
+		return test_my_name(m_dllName);
 	}
 private:
 	const char * const m_dllName;

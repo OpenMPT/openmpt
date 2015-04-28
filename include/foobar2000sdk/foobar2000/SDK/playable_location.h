@@ -21,6 +21,7 @@ public:
 	}
 
 	static int g_compare(const playable_location & p_item1,const playable_location & p_item2);
+    static bool g_equals( const playable_location & p_item1, const playable_location & p_item2);
 
 	const playable_location & operator=(const playable_location & src) {copy(src);return *this;}	
 
@@ -31,6 +32,10 @@ public:
 	inline void reset() {set_path("");set_subsong(0);}
 	inline t_uint32 get_subsong_index() const {return get_subsong();}
 	inline void set_subsong_index(t_uint32 v) {set_subsong(v);}
+
+	bool is_empty() const { return * get_path() == 0; }
+	bool is_valid() const { return !is_empty(); }
+
 
 	class comparator {
 	public:
@@ -68,7 +73,7 @@ private:
 	t_uint32 m_subsong;
 };
 
-// usage: something( make_playable_location("file://c:\blah.ogg",0) );
+// usage: somefunction( make_playable_location("file://c:\blah.ogg",0) );
 // only for use as a parameter to a function taking const playable_location &
 class make_playable_location : public playable_location
 {

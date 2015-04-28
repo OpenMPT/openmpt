@@ -1,5 +1,9 @@
 #include "stdafx.h"
 
+#ifndef _MSC_VER
+#define _strdup strdup
+#endif
+
 static void file_list_remove_duplicates(pfc::ptr_list_t<char> & out)
 {
 	t_size n, m = out.get_count();

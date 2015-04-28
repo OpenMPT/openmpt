@@ -1,5 +1,9 @@
 #include "stdafx.h"
 
+#ifndef _MSC_VER
+#define sprintf_s sprintf
+#endif
+
 bool t_cuesheet_index_list::is_valid() const {
 	if (m_positions[1] < m_positions[0]) return false;
 	for(t_size n = 2; n < count && m_positions[n] > 0; n++) {

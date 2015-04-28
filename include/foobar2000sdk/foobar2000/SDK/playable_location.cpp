@@ -6,6 +6,10 @@ int playable_location::g_compare(const playable_location & p_item1,const playabl
 	return pfc::compare_t(p_item1.get_subsong(),p_item2.get_subsong());
 }
 
+bool playable_location::g_equals( const playable_location & p_item1, const playable_location & p_item2) {
+    return g_compare(p_item1, p_item2) == 0;
+}
+
 pfc::string_base & operator<<(pfc::string_base & p_fmt,const playable_location & p_location)
 {
 	p_fmt << "\"" << file_path_display(p_location.get_path()) << "\"";

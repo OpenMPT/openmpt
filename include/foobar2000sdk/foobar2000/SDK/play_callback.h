@@ -147,3 +147,10 @@ private:
 	void on_playback_time(double p_time) {on_playback_event();}
 	void on_volume_change(float p_new_val) {on_playback_event();}
 };
+
+class playback_volume_notify : private play_callback_impl_base {
+public:	
+	playback_volume_notify() : play_callback_impl_base(flag_on_volume_change) {}
+	// override me
+	void on_volume_change(float p_new_val) {}
+};

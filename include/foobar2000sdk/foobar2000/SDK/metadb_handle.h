@@ -1,5 +1,15 @@
 class titleformat_hook;
 class titleformat_text_filter;
+class titleformat_object;
+
+
+class metadb_info_container : public service_base {
+	FB2K_MAKE_SERVICE_INTERFACE(metadb_info_container, service_base);
+public:
+	virtual file_info const & info() = 0;
+	virtual t_filestats const & stats() = 0;
+	virtual bool isInfoPartial() = 0;
+};
 
 //! A metadb_handle object represents interface to reference-counted file_info cache entry for the specified location.\n
 //! To obtain a metadb_handle to specific location, use metadb::handle_create(). To obtain a list of metadb_handle objects corresponding to specific path (directory, playlist, multitrack file, etc), use relevant playlist_incoming_item_filter methods (recommended), or call playlist_loader methods directly.\n
@@ -19,15 +29,13 @@ public:
 	//! @param p_script Titleformat script to use. Use titleformat_compiler service to create one.
 	//! @param p_filter Optional callback object allowing input to be filtered according to context (i.e. removal of linebreak characters present in tags when rendering playlist lines). Set to NULL when not used.
 	//! @returns true on success, false when dummy file_info instance was used because actual info is was not (yet) known.
-	virtual bool format_title(titleformat_hook * p_hook,pfc::string_base & p_out,const service_ptr_t<class titleformat_object> & p_script,titleformat_text_filter * p_filter) = 0;
+	virtual bool format_title(titleformat_hook * p_hook,pfc::string_base & p_out,const service_ptr_t<titleformat_object> & p_script,titleformat_text_filter * p_filter) = 0;
 
-	//! Locks metadb to prevent other threads from modifying it while you're working with some of its contents. Some functions (metadb_handle::get_info_locked(), metadb_handle::get_info_async_locked()) can be called only from inside metadb lock section.
-	//! Same as metadb::database_lock().
-	virtual void metadb_lock() = 0;
-	//! Unlocks metadb after metadb_lock(). Some functions (metadb_handle::get_info_locked(), metadb_handle::get_info_async_locked()) can be called only from inside metadb lock section.
-	//! Same as metadb::database_unlock().
-	virtual void metadb_unlock() = 0;
-
+	//! OBSOLETE, DO NOT CALL
+	__declspec(deprecated) virtual void metadb_lock() = 0;
+	//! OBSOLETE, DO NOT CALL
+	__declspec(deprecated) virtual void metadb_unlock() = 0;
+	
 	//! Returns last seen file stats, filestats_invalid if unknown.
 	virtual t_filestats get_filestats() const = 0;
 
@@ -37,11 +45,9 @@ public:
 	//! Queries cached info about item referenced by this metadb_handle object. Returns true on success, false when info is not yet known. Note that this function causes the metadb to be temporarily locked; you can not use it in context that where locking is forbidden. \n
 	//! Note that state of cached info changes only inside main thread, so you can safely assume that it doesn't change while some block of your code inside main thread is being executed.
 	virtual bool get_info(file_info & p_info) const = 0;
-	//! Queries cached info about item referenced by this metadb_handle object. Returns true on success, false when info is not yet known. This is more efficient than get_info() since no data is copied.\n
-	//! You must lock the metadb before calling this function, and unlock it after you are done working with the returned pointer, to ensure multithread safety.\n
-	//! Note that state of cached info changes only inside main thread, so you can safely assume that it doesn't change while some block of your code inside main thread is being executed.
-	//! @param p_info On success, receives a pointer to metadb's file_info object. The pointer is for temporary use only, and becomes invalid when metadb is unlocked.
-	virtual bool get_info_locked(const file_info * & p_info) const = 0;
+
+	//! OBSOLETE, DO NOT CALL
+	__declspec(deprecated) virtual bool get_info_locked(const file_info * & p_info) const = 0;
 	
 	//! Queries whether cached info about item referenced by this metadb_handle object is already available.\n
 	//! This is intended for use in special cases when you need to immediately retrieve info sent by metadb_io hint from another thread; state of returned data can be altered by any thread, as opposed to non-async methods.
@@ -49,30 +55,62 @@ public:
 	//! Queries cached info about item referenced by this metadb_handle object. Returns true on success, false when info is not yet known. Note that this function causes the metadb to be temporarily locked; you can not use it in context that where locking is forbidden.\n
 	//! This is intended for use in special cases when you need to immediately retrieve info sent by metadb_io hint from another thread; state of returned data can be altered by any thread, as opposed to non-async methods.
 	virtual bool get_info_async(file_info & p_info) const = 0;	
-	//! Queries cached info about item referenced by this metadb_handle object. Returns true on success, false when info is not yet known. This is more efficient than get_info() since no data is copied.\n
-	//! You must lock the metadb before calling this function, and unlock it after you are done working with the returned pointer, to ensure multithread safety.\n
-	//! This is intended for use in special cases when you need to immediately retrieve info sent by metadb_io hint from another thread; state of returned data can be altered by any thread, as opposed to non-async methods.
-	//! @param p_info On success, receives a pointer to metadb's file_info object. The pointer is for temporary use only, and becomes invalid when metadb is unlocked.
-	virtual bool get_info_async_locked(const file_info * & p_info) const = 0;
 
+	//! OBSOLETE, DO NOT CALL
+	__declspec(deprecated) virtual bool get_info_async_locked(const file_info * & p_info) const = 0;
 
 	//! Renders information about item referenced by this metadb_handle object, using external file_info data.
-	virtual void format_title_from_external_info(const file_info & p_info,titleformat_hook * p_hook,pfc::string_base & p_out,const service_ptr_t<class titleformat_object> & p_script,titleformat_text_filter * p_filter) = 0;
+	virtual void format_title_from_external_info(const file_info & p_info,titleformat_hook * p_hook,pfc::string_base & p_out,const service_ptr_t<titleformat_object> & p_script,titleformat_text_filter * p_filter) = 0;
 
+	//! OBSOLETE, DO NOT CALL
+	__declspec(deprecated) virtual bool format_title_nonlocking(titleformat_hook * p_hook,pfc::string_base & p_out,const service_ptr_t<titleformat_object> & p_script,titleformat_text_filter * p_filter) = 0;
+	//! OBSOLETE, DO NOT CALL
+	__declspec(deprecated) virtual void format_title_from_external_info_nonlocking(const file_info & p_info,titleformat_hook * p_hook,pfc::string_base & p_out,const service_ptr_t<titleformat_object> & p_script,titleformat_text_filter * p_filter) = 0;
 
-	//! New in 0.9.5.
-	virtual bool format_title_nonlocking(titleformat_hook * p_hook,pfc::string_base & p_out,const service_ptr_t<class titleformat_object> & p_script,titleformat_text_filter * p_filter) = 0;
-
-	//! New in 0.9.5.
-	virtual void format_title_from_external_info_nonlocking(const file_info & p_info,titleformat_hook * p_hook,pfc::string_base & p_out,const service_ptr_t<class titleformat_object> & p_script,titleformat_text_filter * p_filter) = 0;
-	
 #if FOOBAR2000_TARGET_VERSION >= 76
 	//! New in 1.0
 	virtual bool get_browse_info(file_info & info, t_filetimestamp & ts) const = 0;
 
-	//! New in 1.0
-	virtual bool get_browse_info_locked(const file_info * & p_info, t_filetimestamp & ts) const = 0;
+	//! OBSOLETE, DO NOT CALL
+	__declspec(deprecated) virtual bool get_browse_info_locked(const file_info * & p_info, t_filetimestamp & ts) const = 0;
 #endif
+#if FOOBAR2000_TARGET_VERSION >= 78
+	//! \since 1.3
+	//! Retrieve a reference to the primary info. \n
+	//! You can hold the reference to the info as long as you like, call the method in any context you like with no lock semantics involved. The info held by the returned reference will remain constant even if the metadb content changes.
+	//! Returns true and sets outInfo to a reference to this item's primary info on success, returns false on failure (no info known at this time).
+	virtual bool get_info_ref(metadb_info_container::ptr & outInfo) const = 0;
+
+	//! \since 1.3
+	//! Retrieve a reference to the async info (pending info update). If async info isn't set, a reference to the primary info is returned.\n
+	//! You can hold the reference to the info as long as you like, call the method in any context you like with no lock semantics involved. The info held by the returned reference will remain constant even if the metadb content changes.
+	//! Returns true and sets outInfo to a reference to this item's async or primary info on success, returns false on failure (no info known at this time).
+	virtual bool get_async_info_ref(metadb_info_container::ptr & outInfo) const = 0;
+
+	//! \since 1.3
+	//! Retrieve references to the item's primary and browse infos. If no info is set, NULL pointers are returned. For most local files, browse info is not available and you get a NULL for it.\n
+	//! Since browse info is usually used along with the primary info (as a fallback for missing metas), you can get the two with one call for better performance.
+	//! You can hold the reference to the info as long as you like, call the method in any context you like with no lock semantics involved. The info held by the returned reference will remain constant even if the metadb content changes.
+	virtual void get_browse_info_ref(metadb_info_container::ptr & outInfo, metadb_info_container::ptr & outBrowse) const = 0;
+
+	//! Simplified method, always returns non-null, dummy info if nothing to return
+	virtual metadb_info_container::ptr get_info_ref() const = 0; 
+	//! Simplified method, always returns non-null, dummy info if nothing to return
+	virtual metadb_info_container::ptr get_async_info_ref() const = 0;  
+
+	//! \since 1.3
+	//! Retrieve full info using available means - read actual file if not cached. \n
+	//! Throws exceptions on failure.
+	metadb_info_container::ptr get_full_info_ref( abort_callback & aborter ) const;
+#endif
+
+	//! \since 1.3
+	//! Helper using get_browse_info_ref()
+	//! Retrieves primary info + browse info merged together.
+	//! Returns true on success, false if neither info is available.
+	//! If neither info is avaialble, output data structure is emptied.
+	bool get_browse_info_merged(file_info & infoMerged) const;
+
 
 	static bool g_should_reload(const t_filestats & p_old_stats,const t_filestats & p_new_stats,bool p_fresh);
 	bool should_reload(const t_filestats & p_new_stats,bool p_fresh) const;
@@ -167,9 +205,12 @@ public:
 
 	const t_self & operator=(const t_self & p_source) {remove_all(); add_items(p_source);return *this;}
 	const t_self & operator=(const t_interface & p_source) {remove_all(); add_items(p_source);return *this;}
+	const t_self & operator=(t_self && p_source) {move_from(p_source); return *this; }
 	metadb_handle_list_t(const t_self & p_source) {add_items(p_source);}
 	metadb_handle_list_t(const t_interface & p_source) {add_items(p_source);}
 	metadb_handle_list_t() {}
+
+	metadb_handle_list_t(t_self && p_source) {move_from(p_source);}
 
 	t_self & operator+=(const t_interface & source) {add_items(source); return *this;}
 	t_self & operator+=(const metadb_handle_ptr & source) {add_item(source); return *this;}
@@ -183,17 +224,6 @@ namespace metadb_handle_list_helper {
 	void sorted_by_pointer_extract_difference(metadb_handle_list const & p_list_1,metadb_handle_list const & p_list_2,metadb_handle_list & p_list_1_specific,metadb_handle_list & p_list_2_specific);
 };
 
-class metadb_handle_lock
-{
-	metadb_handle_ptr m_ptr;
-public:
-	inline metadb_handle_lock(const metadb_handle_ptr & param)
-	{
-		m_ptr = param;
-		m_ptr->metadb_lock();
-	}	
-	inline ~metadb_handle_lock() {m_ptr->metadb_unlock();}
-};
 
 inline pfc::string_base & operator<<(pfc::string_base & p_fmt,const metadb_handle_ptr & p_location) {
 	if (p_location.is_valid()) 

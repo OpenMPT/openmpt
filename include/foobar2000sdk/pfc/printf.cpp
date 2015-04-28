@@ -1,6 +1,13 @@
 #include "pfc.h"
 
+#include <stdarg.h>
+
 //implementations of deprecated string_printf methods, with a pragma to disable warnings when they reference other deprecated methods.
+
+#ifndef _MSC_VER
+#define _itoa_s itoa
+#define _ultoa_s ultoa
+#endif
 
 #pragma warning(disable:4996)
 
@@ -50,10 +57,9 @@ void string_printf::g_run(string_base & out,const char * fmt,va_list list)
 				}
 				else if (*fmt=='i' || *fmt=='I' || *fmt=='d' || *fmt=='D')
 				{
-					char temp[8*sizeof(int)];
 					int val = va_arg(list,int);
 					if (force_sign && val>0) out.add_char('+');
-					_itoa_s(val,temp,10);
+                    pfc::format_int temp( val );
 					t_size len = strlen(temp);
 					if (pad>len) out.add_chars(padchar,pad-len);
 					out.add_string(temp);
@@ -61,10 +67,9 @@ void string_printf::g_run(string_base & out,const char * fmt,va_list list)
 				}
 				else if (*fmt=='u' || *fmt=='U')
 				{
-					char temp[8*sizeof(int)];
 					int val = va_arg(list,int);
 					if (force_sign && val>0) out.add_char('+');
-					_ultoa_s(val,temp,10);
+                    pfc::format_uint temp(val);
 					t_size len = strlen(temp);
 					if (pad>len) out.add_chars(padchar,pad-len);
 					out.add_string(temp);
@@ -72,13 +77,12 @@ void string_printf::g_run(string_base & out,const char * fmt,va_list list)
 				}
 				else if (*fmt=='x' || *fmt=='X')
 				{
-					char temp[8*sizeof(int)];
 					int val = va_arg(list,int);
 					if (force_sign && val>0) out.add_char('+');
-					_ultoa_s(val,temp,16);
+                    pfc::format_uint temp(val, 0, 16);
 					if (*fmt=='X')
 					{
-						char * t = temp;
+						char * t = const_cast< char* > ( temp.get_ptr() );
 						while(*t)
 						{
 							if (*t>='a' && *t<='z')
@@ -93,7 +97,7 @@ void string_printf::g_run(string_base & out,const char * fmt,va_list list)
 				}
 				else if (*fmt=='c' || *fmt=='C')
 				{
-					out.add_char(va_arg(list,char));
+					out.add_char(va_arg(list,int));
 					fmt++;
 				}
 			}

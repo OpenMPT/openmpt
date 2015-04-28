@@ -18,7 +18,15 @@ public:
 	//! @param p_items Items to look up.
 	//! @param p_notify Callback to notify caller when the operation has completed. Call on_completion with status code 0 to signal failure/abort, or with code 1 to signal success / new infos in metadb.
 	//! @param p_parent Parent window for the lookup dialog. Caller will typically disable the window while lookup is in progress and enable it back when completion is signaled.
-	virtual void lookup(const pfc::list_base_const_t<metadb_handle_ptr> & p_items,completion_notify_ptr p_notify,HWND p_parent) = 0;
+	virtual void lookup(metadb_handle_list_cref items,completion_notify::ptr notify,HWND parent) = 0;
  
 	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(info_lookup_handler);
+};
+
+
+class NOVTABLE info_lookup_handler_v2 : public info_lookup_handler {
+	FB2K_MAKE_SERVICE_INTERFACE(info_lookup_handler_v2, info_lookup_handler);
+public:
+	virtual double merit() {return 0;}
+	virtual void lookup_noninteractive(metadb_handle_list_cref items, completion_notify::ptr notify, HWND parent) = 0;
 };

@@ -49,6 +49,9 @@ public:
 		m_start = current;
 		return ret;
 	}
+	pfc::string8 queryString(unsigned precision = 6) {
+		return pfc::format_time_ex( query(), precision ).get_ptr();
+	}
 private:
 	double _query(t_uint64 p_val) const {
 		return (double)( p_val - m_start ) / (double) g_query_freq();
@@ -81,6 +84,9 @@ public:
 		_start(time);
 		return ret;
 	}
+	pfc::string8 queryString(unsigned precision = 3) {
+		return pfc::format_time_ex( query(), precision ).get_ptr();
+	}
 private:
 	void _start(t_uint32 p_time) {m_last_seen = m_start = p_time;}
 	double _query(t_uint32 p_time) const {
@@ -94,7 +100,36 @@ private:
 };
 }
 #else 
-//PORTME
+
+namespace pfc {
+    
+class hires_timer {
+public:
+    void start();
+    double query() const;
+    double query_reset();
+	pfc::string8 queryString(unsigned precision = 3);
+private:
+    double m_start;
+};
+
+typedef hires_timer lores_timer;
+
+}
+
 #endif
+
+#ifndef _WIN32
+struct timespec;
+#endif
+
+namespace pfc {
+	uint64_t fileTimeWtoU(uint64_t ft);
+	uint64_t fileTimeUtoW(uint64_t ft);
+#ifndef _WIN32
+    uint64_t fileTimeUtoW( timespec const & ts );
+#endif
+	uint64_t fileTimeNow();
+}
 
 #endif

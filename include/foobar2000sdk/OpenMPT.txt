@@ -1,4 +1,1 @@
-This directory contains the contents of the foobar2000 SDK 1.1. (SDK-2011-03-11.zip).
-The following modifications have been made for OpenMPT:
-- Compiler options "/wd4995 /wd4996" were added in foobar2000/SDK/foobar2000_SDK.vcxproj
-  to make the SDK build free of warnings (which we do not care about for external source code).
+This directory contains the contents of the foobar2000 SDK 1.3. (SDK-2015-01-14.zip).

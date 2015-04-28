@@ -4,8 +4,10 @@
 class foobar2000_component_globals {
 public:
 	foobar2000_component_globals() {
+#ifdef _MSC_VER
 #ifndef _DEBUG
 		::OverrideCrtAbort();
+#endif
 #endif
 	}
 };

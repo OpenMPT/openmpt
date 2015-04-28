@@ -9,9 +9,16 @@ void abort_callback::sleep(double p_timeout_seconds) const {
 }
 
 bool abort_callback::sleep_ex(double p_timeout_seconds) const {
-#ifdef _WIN32
-	return !win32_event::g_wait_for(get_abort_event(),p_timeout_seconds);
-#else
-#error PORTME
-#endif
+	// return true IF NOT SET (timeout), false if set
+	return !pfc::event::g_wait_for(get_abort_event(),p_timeout_seconds);
+}
+
+bool abort_callback::waitForEvent( pfc::eventHandle_t evtHandle, double timeOut ) {
+    int status = pfc::event::g_twoEventWait( this->get_abort_event(), evtHandle, timeOut );
+    switch(status) {
+        case 1: throw exception_aborted();
+        case 2: return true;
+        case 0: return false;
+        default: uBugCheck();
+    }
 }

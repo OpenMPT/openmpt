@@ -15,11 +15,11 @@ void console::print_location(const metadb_handle_ptr & src)
 
 void console::print_location(const playable_location & src)
 {
-	formatter() << src;
+    FB2K_console_formatter() << src;
 }
 
 void console::complain(const char * what, const char * msg) {
-	formatter() << what << ": " << msg;
+	FB2K_console_formatter() << what << ": " << msg;
 }
 void console::complain(const char * what, std::exception const & e) {
 	complain(what, e.what());

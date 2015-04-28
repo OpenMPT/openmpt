@@ -146,5 +146,9 @@ private:
 
 static void RunDSPConfigPopup(const dsp_preset & p_data,HWND p_parent,dsp_preset_edit_callback & p_callback) {
 	CMyDSPPopup popup(p_data, p_callback);
-	if (popup.DoModal(p_parent) != IDOK) p_callback.on_preset_changed(p_data);
+	if (popup.DoModal(p_parent) != IDOK) {
+		// If the dialog exited with something else than IDOK,k 
+		// tell host that the editing has been cancelled by sending it old preset data that we got initialized with
+		p_callback.on_preset_changed(p_data);
+	}
 }

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pfc.h"
 
 static bool test_recur(const char * fn,const char * rm,bool b_sep)
 {
@@ -15,7 +15,7 @@ static bool test_recur(const char * fn,const char * rm,bool b_sep)
 			return false;
 		}
 		else if (*fn==0) return false;
-		else if (*rm!='?' && uCharLower(pfc::utf8_get_char(fn))!=uCharLower(pfc::utf8_get_char(rm))) return false;
+		else if (*rm!='?' && pfc::charLower(pfc::utf8_get_char(fn))!=pfc::charLower(pfc::utf8_get_char(rm))) return false;
 		
 		fn = pfc::utf8_char_next(fn); rm = pfc::utf8_char_next(rm);
 	}

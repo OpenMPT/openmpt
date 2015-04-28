@@ -245,6 +245,12 @@
     <ClInclude Include="progress_meter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="album_art_helpers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="output.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="abort_callback.cpp">
@@ -395,6 +401,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ui_element.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="componentversion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="search_tools.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="file_cached_impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main_thread_callback.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="output.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

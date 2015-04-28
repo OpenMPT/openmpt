@@ -25,6 +25,9 @@ namespace core_api {
 	bool is_initializing();
 	//! Returns filesystem path to directory with user settings, e.g. file://c:\documents_and_settings\username\blah\foobar2000
 	const char * get_profile_path();
+	
+	//! Returns a path to <file name> in fb2k profile folder.
+	inline pfc::string8 pathInProfile(const char * fileName) { pfc::string8 p( core_api::get_profile_path() ); p.add_filename( fileName ); return std::move(p); }
 
 	//! Returns whether foobar2000 has been installed in "portable" mode.
 	bool is_portable_mode_enabled();

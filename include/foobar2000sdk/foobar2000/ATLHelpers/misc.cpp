@@ -8,13 +8,14 @@ void PaintSeparatorControl(CWindow wnd) {
 	CRect contentRect;
 	WIN32_OP_D( wnd.GetClientRect(contentRect) );
 
+	dc.SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
+	dc.SetBkMode(TRANSPARENT);
+
 	{
 		CBrushHandle brush = (HBRUSH) wnd.GetParent().SendMessage(WM_CTLCOLORSTATIC, (WPARAM) (HDC) dc, (LPARAM) wnd.m_hWnd);
 		if (brush != NULL) dc.FillRect(contentRect, brush);
 	}
 	SelectObjectScope scopeFont(dc, wnd.GetFont());
-	dc.SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
-	dc.SetBkMode(TRANSPARENT);
 		
 	if (txLen > 0) {
 		CRect rcText(contentRect);

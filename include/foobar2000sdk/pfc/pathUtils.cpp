@@ -2,7 +2,11 @@
 
 namespace pfc { namespace io { namespace path {
 
+#ifdef _WINDOWS
 static const string g_pathSeparators ("\\/|");
+#else
+static const string g_pathSeparators ("/");
+#endif
 
 string getFileName(string path) {
 	t_size split = path.lastIndexOfAnyChar(g_pathSeparators);
@@ -121,31 +125,32 @@ char getDefaultSeparator() {
 #ifdef _WINDOWS
 	return '\\';
 #else
-#error PORTME
+    return '/';
 #endif
 }
 
-static const string g_illegalNameChars(g_pathSeparators +
+static const string g_illegalNameChars(g_pathSeparators
 #ifdef _WINDOWS
-									   ":<>*?\""
+									   + ":<>*?\""
 #else
-#error PORTME
+                                       + "*?"
 #endif
 									   );
-static const string g_illegalNameChars_noWC(g_pathSeparators +
+    
+static const string g_illegalNameChars_noWC(g_pathSeparators
 #ifdef _WINDOWS
-									   ":<>?\""
-#else
-#error PORTME
+									   + ":<>?\""
 #endif
 									   );
 string getIllegalNameChars(bool allowWC) {
 	return allowWC ? g_illegalNameChars_noWC : g_illegalNameChars;
 }
 
+#ifdef _WINDOWS
 static bool isIllegalTrailingChar(char c) {
 	return c == ' ' || c == '.';
 }
+#endif
 
 string validateFileName(string name, bool allowWC) {
 	for(t_size walk = 0; name[walk];) {

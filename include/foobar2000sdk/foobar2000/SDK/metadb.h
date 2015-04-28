@@ -75,6 +75,7 @@ public:
 
 //! Advanced interface for passing infos read from files to metadb backend. Use metadb_io_v2::create_hint_list() to instantiate.
 class NOVTABLE metadb_hint_list : public service_base {
+	FB2K_MAKE_SERVICE_INTERFACE(metadb_hint_list,service_base);
 public:
 	//! Adds a hint to the list.
 	//! @param p_location Location of the item the hint applies to.
@@ -86,16 +87,27 @@ public:
 	virtual void add_hint_reader(const char * p_path,service_ptr_t<input_info_reader> const & p_reader,abort_callback & p_abort) = 0;
 	//! Call this when you're done working with this metadb_hint_list instance, to apply hints and dispatch callbacks. If you don't call this, all added hints will be ignored.
 	virtual void on_done() = 0;
-
-	FB2K_MAKE_SERVICE_INTERFACE(metadb_hint_list,service_base);
 };
+
 //! \since 1.0
 class NOVTABLE metadb_hint_list_v2 : public metadb_hint_list {
+	FB2K_MAKE_SERVICE_INTERFACE(metadb_hint_list_v2, metadb_hint_list);
 public:
 	virtual void add_hint_browse(metadb_handle_ptr const & p_location,const file_info & p_info, t_filetimestamp browseTS) = 0;
-
-	FB2K_MAKE_SERVICE_INTERFACE(metadb_hint_list_v2, metadb_hint_list);
 };
+
+//! \since 1.3
+class NOVTABLE metadb_hint_list_v3 : public metadb_hint_list_v2 {
+	FB2K_MAKE_SERVICE_INTERFACE(metadb_hint_list_v3, metadb_hint_list_v2);
+public:
+	virtual void add_hint_v3(metadb_handle_ptr const & p_location, metadb_info_container::ptr info,bool p_freshflag) = 0;
+	virtual void add_hint_browse_v3(metadb_handle_ptr const & p_location,metadb_info_container::ptr info) = 0;
+
+	virtual void add_hint_forced(metadb_handle_ptr const & p_location, const file_info & p_info,const t_filestats & p_stats,bool p_freshflag) = 0;
+	virtual void add_hint_forced_v3(metadb_handle_ptr const & p_location, metadb_info_container::ptr info,bool p_freshflag) = 0;
+	virtual void add_hint_forced_reader(const char * p_path,service_ptr_t<input_info_reader> const & p_reader,abort_callback & p_abort) = 0;
+};
+
 
 //! New in 0.9.3. Extends metadb_io functionality with nonblocking versions of tag read/write functions, and some other utility features.
 class NOVTABLE metadb_io_v2 : public metadb_io {
@@ -108,6 +120,11 @@ public:
 		op_flag_background		= 1 << 1,
 		//! Set this flag to delay the progress dialog becoming visible, so it does not appear at all during short operations. Also implies op_flag_background effect.
 		op_flag_delay_ui		= 1 << 2,
+
+		//! \since 1.3
+		//! Indicates that the caller is aware of the metadb partial info feature introduced at v1.3.
+		//! When not specified, affected info will be quietly preserved when updating tags.
+		op_flag_partial_info_aware = 1 << 3,
 	};
 
 	//! Preloads information from the specified tracks.
@@ -198,11 +215,12 @@ public:
 //! Use static_api_ptr_t template to access it, e.g. static_api_ptr_t<metadb>()->handle_create(myhandle,mylocation);
 class NOVTABLE metadb : public service_base
 {
-public:
-	//! Locks metadb to prevent other threads from modifying it while you're working with some of its contents. Some functions (metadb_handle::get_info_locked(), metadb_handle::get_info_async_locked()) can be called only from inside metadb lock section.
+protected:	
+	//! OBSOLETE, DO NOT CALL
 	virtual void database_lock()=0;
-	//! Unlocks metadb after database_lock(). Some functions (metadb_handle::get_info_locked(), metadb_handle::get_info_async_locked()) can be called only from inside metadb lock section.
+	//! OBSOLETE, DO NOT CALL
 	virtual void database_unlock()=0;
+public:
 	
 	//! Returns a metadb_handle object referencing the specified location. If one doesn't exist yet a new one is created. There can be only one metadb_handle object referencing specific location. \n
 	//! This function should never fail unless there's something critically wrong (can't allocate memory for the new object, etc). \n
@@ -223,41 +241,14 @@ public:
 	typedef pfc::comparator_strcmp path_comparator;
 
 	inline static int path_compare_ex(const char * p1,t_size len1,const char * p2,t_size len2) {return case_sensitive ? pfc::strcmp_ex(p1,len1,p2,len2) : stricmp_utf8_ex(p1,len1,p2,len2);}
+	inline static int path_compare_nc(const char * p1, size_t len1, const char * p2, size_t len2) {return case_sensitive ? pfc::strcmp_nc(p1,len1,p2,len2) : stricmp_utf8_ex(p1,len1,p2,len2);}
 	inline static int path_compare(const char * p1,const char * p2) {return case_sensitive ? strcmp(p1,p2) : stricmp_utf8(p1,p2);}
 	inline static int path_compare_metadb_handle(const metadb_handle_ptr & p1,const metadb_handle_ptr & p2) {return path_compare(p1->get_path(),p2->get_path());}
 
+	metadb_handle_ptr handle_create(playable_location const & l) {metadb_handle_ptr temp; handle_create(temp, l); return temp;}
+	metadb_handle_ptr handle_create(const char * path, uint32_t subsong) {return handle_create(make_playable_location(path, subsong));}
+
 	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(metadb);
-};
-
-//! Metadb lock sync helper. For use around metadb_handle "locked" methods.
-class in_metadb_sync {
-public:
-	in_metadb_sync() {
-		m_api->database_lock();
-	}
-	~in_metadb_sync() {
-		m_api->database_unlock();
-	}
-private:
-	static_api_ptr_t<metadb> m_api;
-};
-
-//! Metadb lock sync helper. For use around metadb_handle "locked" methods.
-class in_metadb_sync_fromptr {
-public:
-	in_metadb_sync_fromptr(const service_ptr_t<metadb> & p_api) : m_api(p_api) {m_api->database_lock();}
-	~in_metadb_sync_fromptr() {m_api->database_unlock();}
-private:
-	service_ptr_t<metadb> m_api;
-};
-
-//! Metadb lock sync helper. For use around metadb_handle "locked" methods.
-class in_metadb_sync_fromhandle {
-public:
-	in_metadb_sync_fromhandle(const service_ptr_t<metadb_handle> & p_api) : m_api(p_api) {m_api->metadb_lock();}
-	~in_metadb_sync_fromhandle() {m_api->metadb_unlock();}
-private:
-	service_ptr_t<metadb_handle> m_api;
 };
 
 class titleformat_text_out;
@@ -302,7 +293,7 @@ public:
 class file_info_filter_impl : public file_info_filter {
 public:
 	file_info_filter_impl(const pfc::list_base_const_t<metadb_handle_ptr> & p_list,const pfc::list_base_const_t<const file_info*> & p_new_info) {
-		pfc::dynamic_assert(p_list.get_count() == p_new_info.get_count());
+		FB2K_DYNAMIC_ASSERT(p_list.get_count() == p_new_info.get_count());
 		pfc::array_t<t_size> order;
 		order.set_size(p_list.get_count());
 		order_helper::g_fill(order.get_ptr(),order.get_size());
@@ -341,10 +332,10 @@ class NOVTABLE metadb_index_client : public service_base {
 public:
 	virtual metadb_index_hash transform(const file_info & info, const playable_location & location) = 0;
 
-	bool hashHandleLocked(metadb_handle_ptr const & h, metadb_index_hash & out) {
-		const file_info * i;
-		if (!h->get_info_locked(i)) return false;
-		out = transform(*i, h->get_location());
+	bool hashHandle(metadb_handle_ptr const & h, metadb_index_hash & out) {
+		metadb_info_container::ptr info;
+		if (!h->get_info_ref(info)) return false;
+		out = transform(info->info(), h->get_location());
 		return true;
 	}
 

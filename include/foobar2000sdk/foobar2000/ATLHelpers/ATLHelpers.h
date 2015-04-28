@@ -15,6 +15,7 @@
 #include "../SDK/foobar2000.h"
 #include "../helpers/helpers.h"
 
+#include "WTL-PP.h"
 #include "misc.h"
 #include "GDIUtils.h"
 

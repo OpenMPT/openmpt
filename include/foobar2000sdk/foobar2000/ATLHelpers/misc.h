@@ -1,34 +1,3 @@
-class NoRedrawScope {
-public:
-	NoRedrawScope(HWND p_wnd) throw() : m_wnd(p_wnd) {
-		m_wnd.SetRedraw(FALSE);
-	}
-	~NoRedrawScope() throw() {
-		m_wnd.SetRedraw(TRUE);
-	}
-private:
-	CWindow m_wnd;
-};
-
-class NoRedrawScopeEx {
-public:
-	NoRedrawScopeEx(HWND p_wnd) throw() : m_wnd(p_wnd), m_active() {
-		if (m_wnd.IsWindowVisible()) {
-			m_active = true;
-			m_wnd.SetRedraw(FALSE);
-		}
-	}
-	~NoRedrawScopeEx() throw() {
-		if (m_active) {
-			m_wnd.SetRedraw(TRUE);
-			m_wnd.RedrawWindow(NULL,NULL,RDW_INVALIDATE|RDW_ERASE|RDW_ALLCHILDREN);
-		}
-	}
-private:
-	bool m_active;
-	CWindow m_wnd;
-};
-
 class CMenuSelectionReceiver : public CWindowImpl<CMenuSelectionReceiver> {
 public:
 	CMenuSelectionReceiver(HWND p_parent) {
@@ -115,16 +84,6 @@ inline pfc::string_base & operator<<(pfc::string_base & p_fmt,const CPoint & p_p
 inline pfc::string_base & operator<<(pfc::string_base & p_fmt,const CRect & p_rect) {
 	return p_fmt << "(" << p_rect.left << "," << p_rect.top << "," << p_rect.right << "," << p_rect.bottom << ")";
 }
-
-//BOOL ProcessWindowMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& lResult, DWORD dwMsgMapID)
-#define END_MSG_MAP_HOOK() \
-			break; \
-		default: \
-			return __super::ProcessWindowMessage(hWnd, uMsg, wParam, lParam, lResult, dwMsgMapID); \
-		} \
-		return FALSE; \
-	}
-
 
 template<typename TClass>
 class CAddDummyMessageMap : public TClass {
@@ -332,50 +291,6 @@ private:
 };
 
 
-class CImageListContainer : public CImageList {
-public:
-	CImageListContainer() {}
-	~CImageListContainer() {Destroy();}
-private:
-	const CImageListContainer & operator=(const CImageListContainer&);
-	CImageListContainer(const CImageListContainer&);
-};
-
-
-
-
-#define MSG_WM_TIMER_EX(timerId, func) \
-	if (uMsg == WM_TIMER && (UINT_PTR)wParam == timerId) \
-	{ \
-		SetMsgHandled(TRUE); \
-		func(); \
-		lResult = 0; \
-		if(IsMsgHandled()) \
-			return TRUE; \
-	}
-
-#define MESSAGE_HANDLER_SIMPLE(msg, func) \
-	if(uMsg == msg) \
-	{ \
-		SetMsgHandled(TRUE); \
-		func(); \
-		lResult = 0; \
-		if(IsMsgHandled()) \
-			return TRUE; \
-	}
-
-// void OnSysCommandHelp()
-#define MSG_WM_SYSCOMMAND_HELP(func) \
-	if (uMsg == WM_SYSCOMMAND && wParam == SC_CONTEXTHELP) \
-	{ \
-		SetMsgHandled(TRUE); \
-		func(); \
-		lResult = 0; \
-		if(IsMsgHandled()) \
-			return TRUE; \
-	}
-
-
 template<typename TBase> class CContainedWindowSimpleT : public CContainedWindowT<TBase>, public CMessageMap {
 public:
 	CContainedWindowSimpleT() : CContainedWindowT<TBase>(this) {}
@@ -445,7 +360,7 @@ public:
 
 class CPopupTooltipMessage {
 public:
-	CPopupTooltipMessage() : m_toolinfo(), m_shutDown() {}
+	CPopupTooltipMessage(DWORD style = TTS_BALLOON | TTS_NOPREFIX) : m_style(style | WS_POPUP), m_toolinfo(), m_shutDown() {}
 	void ShowFocus(const TCHAR * message, CWindow wndParent) {
 		Show(message, wndParent); wndParent.SetFocus();
 	}
@@ -491,7 +406,7 @@ private:
 		m_toolinfo.hwnd = wndParent;
 		m_toolinfo.uId = 0;
 		m_toolinfo.lpszText = const_cast<TCHAR*>(message);
-		m_toolinfo.hinst = core_api::get_my_instance();
+		m_toolinfo.hinst = NULL; //core_api::get_my_instance();
 		if (m_tooltip.AddTool(&m_toolinfo)) {
 			m_tooltip.TrackPosition(rect.CenterPoint().x,rect.bottom);
 			m_tooltip.TrackActivate(&m_toolinfo,TRUE);
@@ -499,11 +414,12 @@ private:
 	}
 	void Initialize() {
 		if (m_tooltip.m_hWnd == NULL) {
-			WIN32_OP( m_tooltip.Create( NULL , NULL, NULL, TTS_BALLOON | TTS_NOPREFIX | WS_POPUP) );
+			WIN32_OP( m_tooltip.Create( NULL , NULL, NULL, m_style) );
 		}
 	}
 	CContainedWindowSimpleT<CToolTipCtrl> m_tooltip;
 	TOOLINFO m_toolinfo;
+	const DWORD m_style;
 	bool m_shutDown;
 };
 
@@ -564,33 +480,6 @@ static void ListView_FixContextMenuPoint(CListViewCtrl list,CPoint & coords) {
 }
 
 
-template<bool managed> class CThemeT {
-public:
-	CThemeT(HTHEME source = NULL) : m_theme(source) {}
-
-	~CThemeT() {
-		Release();
-	}
-
-	HTHEME OpenThemeData(HWND wnd,LPCWSTR classList) {
-		Release();
-		return m_theme = ::OpenThemeData(wnd, classList);
-	}
-
-	void Release() {
-		HTHEME releaseme = pfc::replace_null_t(m_theme);
-		if (managed && releaseme != NULL) CloseThemeData(releaseme);
-	}
-
-	operator HTHEME() const {return m_theme;}
-	HTHEME m_theme;
-};
-typedef CThemeT<false> CThemeHandle;
-typedef CThemeT<true> CTheme;
-
-
-
-
 template<typename TDialog> class preferences_page_instance_impl : public TDialog {
 public:
 	preferences_page_instance_impl(HWND parent, preferences_page_callback::ptr callback) : TDialog(callback) {WIN32_OP(this->Create(parent) != NULL);}
@@ -604,16 +493,6 @@ public:
 	}
 };
 
-class CCheckBox : public CButton {
-public:
-	void ToggleCheck(bool state) {SetCheck(state ? BST_CHECKED : BST_UNCHECKED);}
-	bool IsChecked() const {return GetCheck() == BST_CHECKED;}
-
-	CCheckBox(HWND hWnd = NULL) : CButton(hWnd) { }
-	CCheckBox & operator=(HWND wnd) {m_hWnd = wnd; return *this; }
-};
-
-
 class CEmbeddedDialog : public CDialogImpl<CEmbeddedDialog> {
 public:
 	CEmbeddedDialog(CMessageMap * owner, DWORD msgMapID, UINT dialogID) : m_owner(*owner), IDD(dialogID), m_msgMapID(msgMapID) {}
@@ -625,64 +504,6 @@ public:
 	const DWORD m_msgMapID;
 	const UINT IDD;
 	CMessageMap & m_owner;
-};
-
-
-class CEditNoEscSteal : public CContainedWindowT<CEdit>, private CMessageMap {
-public:
-	CEditNoEscSteal() : CContainedWindowT<CEdit>(this, 0) {}
-	BEGIN_MSG_MAP_EX(CEditNoEscSteal)
-		MSG_WM_GETDLGCODE(OnEditGetDlgCode)
-	END_MSG_MAP()
-private:
-	UINT OnEditGetDlgCode(LPMSG lpMsg) {
-		if (lpMsg == NULL) {
-			SetMsgHandled(FALSE); return 0;
-		} else {
-			switch(lpMsg->message) {
-				case WM_KEYDOWN:
-				case WM_SYSKEYDOWN:
-					switch(lpMsg->wParam) {
-						case VK_ESCAPE:
-							return 0;
-						default:
-							SetMsgHandled(FALSE); return 0;
-					}
-				default:
-					SetMsgHandled(FALSE); return 0;
-
-			}
-		}
-	}
-};
-
-class CEditNoEnterEscSteal : public CContainedWindowT<CEdit>, private CMessageMap {
-public:
-	CEditNoEnterEscSteal() : CContainedWindowT<CEdit>(this, 0) {}
-	BEGIN_MSG_MAP_EX(CEditNoEscSteal)
-		MSG_WM_GETDLGCODE(OnEditGetDlgCode)
-	END_MSG_MAP()
-private:
-	UINT OnEditGetDlgCode(LPMSG lpMsg) {
-		if (lpMsg == NULL) {
-			SetMsgHandled(FALSE); return 0;
-		} else {
-			switch(lpMsg->message) {
-				case WM_KEYDOWN:
-				case WM_SYSKEYDOWN:
-					switch(lpMsg->wParam) {
-						case VK_ESCAPE:
-						case VK_RETURN:
-							return 0;
-						default:
-							SetMsgHandled(FALSE); return 0;
-					}
-				default:
-					SetMsgHandled(FALSE); return 0;
-
-			}
-		}
-	}
 };
 
 
@@ -706,68 +527,6 @@ private:
 	}
 };
 
-class CWindowClassUnregisterScope {
-public:
-	CWindowClassUnregisterScope() : name() {}
-	const TCHAR * name;
-	void Set(const TCHAR * n) {PFC_ASSERT( name == NULL ); name = n; }
-	bool IsActive() const {return name != NULL;}
-	void CleanUp() {
-		const TCHAR * n = name; name = NULL;
-		if (n != NULL) WIN32_OP_D( UnregisterClass(n, (HINSTANCE)&__ImageBase) );
-	}
-	~CWindowClassUnregisterScope() {CleanUp();}
-};
-
-template<typename TClass, typename TBaseClass = CWindow>
-class CWindowRegisteredT : public TBaseClass {
-public:
-	static UINT GetClassStyle() {
-		return CS_VREDRAW | CS_HREDRAW;
-	}
-	static HCURSOR GetCursor() {
-		return ::LoadCursor(NULL, IDC_ARROW);
-	}
-
-	BEGIN_MSG_MAP_EX(CWindowRegisteredT)
-	END_MSG_MAP()
-
-
-	static void Register() {
-		static CWindowClassUnregisterScope scope;
-		if (!scope.IsActive()) {
-			WNDCLASS wc = {};
-			wc.style = TClass::GetClassStyle();
-			wc.cbWndExtra = sizeof(void*);
-			wc.lpszClassName = TClass::GetClassName();
-			wc.lpfnWndProc = myWindowProc;
-			wc.hInstance = (HINSTANCE)&__ImageBase;
-			wc.hCursor = TClass::GetCursor();
-			WIN32_OP( RegisterClass(&wc) != 0 );
-			scope.Set(wc.lpszClassName);
-		}
-	}
-protected:
-	virtual ~CWindowRegisteredT() {}
-private:
-	static LRESULT CALLBACK myWindowProc(HWND wnd, UINT msg, WPARAM wp, LPARAM lp) {
-		TClass * i = NULL;
-		if (msg == WM_NCCREATE) {
-			TClass * i = new TClass;
-			i->Attach(wnd);
-			::SetWindowLongPtr(wnd, 0, reinterpret_cast<LONG_PTR>(i));
-		} else {
-			i = reinterpret_cast<TClass*>( ::GetWindowLongPtr(wnd, 0) );
-		}
-		LRESULT r;
-		if (i == NULL || !i->ProcessWindowMessage(wnd, msg, wp, lp, r)) r = ::DefWindowProc(wnd, msg, wp, lp);
-		if (msg == WM_NCDESTROY) {
-			::SetWindowLongPtr(wnd, 0, 0);
-			delete i;
-		}
-		return r;
-	}
-};
 
 
 template<typename TClass>
@@ -905,3 +664,4 @@ private:
 		PaintSeparatorControl(*this);
 	}
 };
+

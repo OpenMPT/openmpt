@@ -41,13 +41,17 @@ namespace pfc {
 	template<typename t_container>
 	void reorder_t(t_container & p_data,const t_size * p_order,t_size p_count)
 	{
-		reorder(reorder_callback_impl_t<t_container>(p_data),p_order,p_count);
+        reorder_callback_impl_t<t_container> cb(p_data);
+		reorder(cb,p_order,p_count);
 	}
 
 	template<typename t_container>
 	void reorder_partial_t(t_container & p_data,t_size p_base,const t_size * p_order,t_size p_count)
 	{
-		reorder(reorder_callback_impl_delta(reorder_callback_impl_t<t_container>(p_data),p_base),p_order,p_count);
+        reorder_callback_impl_t<t_container> cb1(p_data);
+        reorder_callback_impl_delta cb2( cb1, p_base );
+		reorder(cb2,p_order,p_count);
+//		reorder(reorder_callback_impl_delta(reorder_callback_impl_t<t_container>(p_data),p_base),p_order,p_count);
 	}
 	
 	template<typename T>
@@ -157,25 +161,29 @@ namespace pfc {
 	template<typename t_container,typename t_compare>
 	static void sort_t(t_container & p_data,t_compare p_compare,t_size p_count)
 	{
-		sort(sort_callback_impl_simple_wrap_t<t_container,t_compare>(p_data,p_compare),p_count);
+        sort_callback_impl_simple_wrap_t<t_container,t_compare> cb(p_data,p_compare);
+		sort(cb,p_count);
 	}
 
 	template<typename t_container,typename t_compare>
 	static void sort_stable_t(t_container & p_data,t_compare p_compare,t_size p_count)
 	{
-		sort_stable(sort_callback_impl_simple_wrap_t<t_container,t_compare>(p_data,p_compare),p_count);
+        sort_callback_impl_simple_wrap_t<t_container,t_compare> cb(p_data,p_compare);
+		sort_stable(cb,p_count);
 	}
 
 	template<typename t_container,typename t_compare,typename t_permutation>
 	static void sort_get_permutation_t(const t_container & p_data,t_compare p_compare,t_size p_count,t_permutation const & p_permutation)
 	{
-		sort(sort_callback_impl_permutation_wrap_t<t_container,t_compare,t_permutation>(p_data,p_compare,p_permutation),p_count);
+        sort_callback_impl_permutation_wrap_t<t_container,t_compare,t_permutation> cb(p_data,p_compare,p_permutation);
+		sort(cb,p_count);
 	}
 
 	template<typename t_container,typename t_compare,typename t_permutation>
 	static void sort_stable_get_permutation_t(const t_container & p_data,t_compare p_compare,t_size p_count,t_permutation const & p_permutation)
 	{
-		sort_stable(sort_callback_impl_permutation_wrap_t<t_container,t_compare,t_permutation>(p_data,p_compare,p_permutation),p_count);
+        sort_callback_impl_permutation_wrap_t<t_container,t_compare,t_permutation> cb(p_data,p_compare,p_permutation);
+		sort_stable(cb,p_count);
 	}
 
 }

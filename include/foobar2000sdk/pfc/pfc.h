@@ -1,6 +1,11 @@
 #ifndef ___PFC_H___
 #define ___PFC_H___
 
+// Global flag - whether it's OK to leak static objects as they'll be released anyway by process death
+#ifndef PFC_LEAK_STATIC_OBJECTS
+#define PFC_LEAK_STATIC_OBJECTS 1
+#endif
+
 #if !defined(_WINDOWS) && (defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64) || defined(_WIN32_WCE))
 #define _WINDOWS
 #endif
@@ -40,8 +45,10 @@ inline bool operator!=(REFGUID guidOne, REFGUID guidOther) {return !__InlineIsEq
 
 #include <tchar.h>
 
-#elif defined(__GNUC__) && (defined __unix__ || defined __POSIX__)
+#else
+
 #include <stdint.h>
+#include <stdlib.h>
 #include <memory.h>
 typedef struct {
         uint32_t Data1;
@@ -58,10 +65,6 @@ inline bool operator!=(const GUID & p_item1,const GUID & p_item2) {
 	return memcmp(&p_item1,&p_item2,sizeof(GUID)) != 0;
 }
 
-#else
-
-#error Only win32 or unix target supported.
-
 #endif
 
 
@@ -77,8 +80,6 @@ inline bool operator!=(const GUID & p_item1,const GUID & p_item2) {
 #include <stdexcept>
 #include <new>
 
-#include <malloc.h>
-
 #include <stdio.h>
 
 #include <assert.h>
@@ -89,7 +90,13 @@ inline bool operator!=(const GUID & p_item1,const GUID & p_item2) {
 #define _PFC_WIDESTRING(_String) L ## _String
 #define PFC_WIDESTRING(_String) _PFC_WIDESTRING(_String)
 
-#ifndef _DEBUG
+#if defined(_DEBUG) || defined(DEBUG)
+#define PFC_DEBUG 1
+#else
+#define PFC_DEBUG 0
+#endif
+
+#if ! PFC_DEBUG
 #define PFC_ASSERT(_Expression)     ((void)0)
 #define PFC_ASSERT_SUCCESS(_Expression) (void)( (_Expression), 0)
 #define PFC_ASSERT_NO_EXCEPTION(_Expression) { _Expression; }
@@ -109,13 +116,13 @@ namespace pfc { void myassert(const wchar_t * _Message, const wchar_t *_File, un
 
 #ifdef _MSC_VER
 
-#ifdef _DEBUG
+#if PFC_DEBUG
 #define NOVTABLE
 #else
 #define NOVTABLE _declspec(novtable)
 #endif
 
-#ifdef _DEBUG
+#if PFC_DEBUG
 #define ASSUME(X) PFC_ASSERT(X)
 #else
 #define ASSUME(X) __assume(X)
@@ -129,7 +136,7 @@ namespace pfc { void myassert(const wchar_t * _Message, const wchar_t *_File, un
 #define NOVTABLE
 #define ASSUME(X) PFC_ASSERT(X)
 #define PFC_DEPRECATE(X)
-#define PFC_NORETURN
+#define PFC_NORETURN __attribute__ ((noreturn))
 #define PFC_NOINLINE
 
 #endif
@@ -148,14 +155,14 @@ namespace pfc { void myassert(const wchar_t * _Message, const wchar_t *_File, un
 #include "order_helper.h"
 #include "list.h"
 #include "ptr_list.h"
-#include "string.h"
+#include "string_base.h"
 #include "string_list.h"
 #include "ref_counter.h"
 #include "iterators.h"
 #include "avltree.h"
 #include "map.h"
 #include "bit_array_impl_part2.h"
-#include "profiler.h"
+#include "timers.h"
 #include "guid.h"
 #include "byte_order_helper.h"
 #include "other.h"
@@ -168,5 +175,30 @@ namespace pfc { void myassert(const wchar_t * _Message, const wchar_t *_File, un
 #include "instance_tracker.h"
 #include "threads.h"
 #include "base64.h"
+#include "primitives_part2.h"
+#include "cpuid.h"
+#include "memalign.h"
+
+#ifdef _WIN32
+#include "synchro_win.h"
+#else
+#include "synchro_nix.h"
+#endif
+
+#include "syncd_storage.h"
+
+#ifdef _WIN32
+#include "win-objects.h"
+#else
+#include "nix-objects.h"
+#endif
+
+#include "event.h"
+
+#include "audio_sample.h"
+#include "wildcard.h"
+#include "filehandle.h"
+
+#define PFC_INCLUDED 1
 
 #endif //___PFC_H___

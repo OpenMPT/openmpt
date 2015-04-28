@@ -18,6 +18,8 @@ namespace console
 	public:
 		~formatter() {if (!is_empty()) console::print(get_ptr());}
 	};
+#define FB2K_console_formatter() ::console::formatter()._formatter()
+    
 	void complain(const char * what, const char * msg);
 	void complain(const char * what, std::exception const & e);
 
@@ -26,7 +28,7 @@ namespace console
 		timer_scope(const char * name) : m_name(name) {m_timer.start();}
 		~timer_scope() {
 			try {
-				console::formatter() << m_name << ": " << pfc::format_time_ex(m_timer.query(), 6);
+				FB2K_console_formatter() << m_name << ": " << pfc::format_time_ex(m_timer.query(), 6);
 			} catch(...) {}
 		}
 	private:

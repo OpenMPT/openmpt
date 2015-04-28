@@ -34,7 +34,8 @@ public:
 
 		channel_config_mono = channel_front_center,
 		channel_config_stereo = channel_front_left | channel_front_right,
-		channel_config_5point1 = channel_front_left | channel_front_right | channel_back_left | channel_back_right | channel_front_center | channel_lfe,
+		channel_config_5point1 = channel_front_left | channel_front_right | channel_front_center | channel_lfe | channel_back_left | channel_back_right,
+		channel_config_5point1_side = channel_front_left | channel_front_right | channel_front_center | channel_lfe | channel_side_left | channel_side_right,
 		channel_config_7point1 = channel_config_5point1 | channel_side_left | channel_side_right,
 
 		defined_channel_count = 18,
@@ -45,12 +46,10 @@ public:
 	//! Helper function; determines channel map for the specified channel count according to Xiph specs. Throws exception_io_data on failure.
 	static unsigned g_guess_channel_config_xiph(unsigned count);
 
-#ifdef _WIN32
 	//! Helper function; translates audio_chunk channel map to WAVEFORMATEXTENSIBLE channel map.
-	static DWORD g_channel_config_to_wfx(unsigned p_config);
+	static uint32_t g_channel_config_to_wfx(unsigned p_config);
 	//! Helper function; translates WAVEFORMATEXTENSIBLE channel map to audio_chunk channel map.
-	static unsigned g_channel_config_from_wfx(DWORD p_wfx);
-#endif
+	static unsigned g_channel_config_from_wfx(uint32_t p_wfx);
 
 	//! Extracts flag describing Nth channel from specified map. Usable to figure what specific channel in a stream means.
 	static unsigned g_extract_channel_flag(unsigned p_config,unsigned p_index);
@@ -58,6 +57,11 @@ public:
 	static unsigned g_count_channels(unsigned p_config);
 	//! Calculates index of a channel specified by p_flag in a stream where channel map is described by p_config.
 	static unsigned g_channel_index_from_flag(unsigned p_config,unsigned p_flag);
+
+	static const char * g_channel_name(unsigned p_flag);
+	static const char * g_channel_name_byidx(unsigned p_index);
+	static unsigned g_find_channel_idx(unsigned p_flag);
+	static void g_formatChannelMaskDesc(unsigned flags, pfc::string_base & out);
 
 	
 
@@ -71,6 +75,8 @@ public:
 	virtual t_size get_data_size() const = 0;
 	//! Resizes audio data buffer to specified size. Throws std::bad_alloc on failure.
 	virtual void set_data_size(t_size p_new_size) = 0;
+	//! Sanity helper, same as set_data_size.
+	void allocate(size_t size) { set_data_size( size ); }
 	
 	//! Retrieves sample rate of contained audio data.
 	virtual unsigned get_srate() const = 0;
@@ -120,9 +126,15 @@ public:
 	
 	//! Returns whether the chunk contents are valid (for bug check purposes).
 	bool is_valid() const;
+    
+    //! Returns whether the chunk contains valid sample rate & channel info (but allows an empty chunk).
+    bool is_spec_valid() const;
 
 	//! Returns actual amount of audio data contained in the buffer (sample count * channel count). Must not be greater than data size (see get_data_size()).
-	inline t_size get_data_length() const {return get_sample_count() * get_channels();}
+	size_t get_used_size() const {return get_sample_count() * get_channels();}
+	//! Same as get_used_size(); old confusingly named version.
+	size_t get_data_length() const {return get_sample_count() * get_channels();}
+#pragma deprecated( get_data_length )
 
 	//! Resets all audio_chunk data.
 	inline void reset() {
@@ -137,19 +149,15 @@ public:
 	
 	//! Helper, sets chunk data to contents of specified buffer, with specified number of channels / sample rate, using default channel map for specified channel count.
 	inline void set_data(const audio_sample * src,t_size samples,unsigned nch,unsigned srate) {set_data(src,samples,nch,srate,g_guess_channel_config(nch));}
+
+	void set_data_int16(const int16_t * src,t_size samples,unsigned nch,unsigned srate,unsigned channel_config);
 	
 	//! Helper, sets chunk data to contents of specified buffer, using default win32/wav conventions for signed/unsigned switch.
 	inline void set_data_fixedpoint(const void * ptr,t_size bytes,unsigned srate,unsigned nch,unsigned bps,unsigned channel_config) {
-		set_data_fixedpoint_ex(ptr,bytes,srate,nch,bps,(bps==8 ? FLAG_UNSIGNED : FLAG_SIGNED) | flags_autoendian(), channel_config);
+		this->set_data_fixedpoint_ms(ptr, bytes, srate, nch, bps, channel_config);
 	}
 
-	inline void set_data_fixedpoint_unsigned(const void * ptr,t_size bytes,unsigned srate,unsigned nch,unsigned bps,unsigned channel_config) {
-		return set_data_fixedpoint_ex(ptr,bytes,srate,nch,bps,FLAG_UNSIGNED | flags_autoendian(), channel_config);
-	}
-
-	inline void set_data_fixedpoint_signed(const void * ptr,t_size bytes,unsigned srate,unsigned nch,unsigned bps,unsigned channel_config) {
-		return set_data_fixedpoint_ex(ptr,bytes,srate,nch,bps,FLAG_SIGNED | flags_autoendian(), channel_config);
-	}
+	void set_data_fixedpoint_signed(const void * ptr,t_size bytes,unsigned srate,unsigned nch,unsigned bps,unsigned channel_config);
 
 	enum
 	{
@@ -165,6 +173,8 @@ public:
 
 	void set_data_fixedpoint_ex(const void * ptr,t_size bytes,unsigned p_sample_rate,unsigned p_channels,unsigned p_bits_per_sample,unsigned p_flags,unsigned p_channel_config);//p_flags - see FLAG_* above
 
+	void set_data_fixedpoint_ms(const void * ptr, size_t bytes, unsigned sampleRate, unsigned channels, unsigned bps, unsigned channelConfig);
+
 	void set_data_floatingpoint_ex(const void * ptr,t_size bytes,unsigned p_sample_rate,unsigned p_channels,unsigned p_bits_per_sample,unsigned p_flags,unsigned p_channel_config);//signed/unsigned flags dont apply
 
 	inline void set_data_32(const float * src,t_size samples,unsigned nch,unsigned srate) {return set_data(src,samples,nch,srate);}
@@ -174,12 +184,21 @@ public:
 	void insert_silence_fromstart(t_size samples);
 	t_size skip_first_samples(t_size samples);
 	void set_silence(t_size samples);
+	void set_silence_seconds( double seconds );
 
 	bool process_skip(double & skipDuration);
 
 	//! Simple function to get original PCM stream back. Assumes host's endianness, integers are signed - including the 8bit mode; 32bit mode assumed to be float.
 	//! @returns false when the conversion could not be performed because of unsupported bit depth etc.
-	bool to_raw_data(class mem_block_container & out, t_uint32 bps) const;
+	bool to_raw_data(class mem_block_container & out, t_uint32 bps, bool useUpperBits = true, float scale = 1.0) const;
+
+	//! Convert audio_chunk contents to fixed-point PCM format.
+	//! @param useUpperBits relevant if bps != bpsValid, signals whether upper or lower bits of each sample should be used.
+	bool toFixedPoint(class mem_block_container & out, uint32_t bps, uint32_t bpsValid, bool useUpperBits = true, float scale = 1.0) const;
+
+	//! Convert a buffer of audio_samples to fixed-point PCM format.
+	//! @param useUpperBits relevant if bps != bpsValid, signals whether upper or lower bits of each sample should be used.
+	static bool g_toFixedPoint(const audio_sample * in, void * out, size_t count, uint32_t bps, uint32_t bpsValid, bool useUpperBits = true, float scale = 1.0);
 
 
 	//! Helper, calculates peak value of data in the chunk. The optional parameter specifies initial peak value, to simplify calling code.
@@ -198,16 +217,31 @@ public:
 		copy(p_source);
 		return *this;
 	}
+
+	struct spec_t {
+		uint32_t sampleRate;
+		uint32_t chanCount, chanMask;
+		
+		static bool equals( const spec_t & v1, const spec_t & v2 );
+		bool operator==(const spec_t & other) const { return equals(*this, other);}
+		bool operator!=(const spec_t & other) const { return !equals(*this, other);}
+		bool is_valid() const;
+	};
+	static spec_t makeSpec(uint32_t rate, uint32_t channels);
+	static spec_t makeSpec(uint32_t rate, uint32_t channels, uint32_t chanMask);
+
+	spec_t get_spec() const;
+	void set_spec(const spec_t &);
 protected:
 	audio_chunk() {}
 	~audio_chunk() {}	
 };
 
 //! Implementation of audio_chunk. Takes pfc allocator template as template parameter.
-template<template<typename> class t_alloc = pfc::alloc_standard>
+template<typename container_t = pfc::mem_block_aligned_t<audio_sample, 16> >
 class audio_chunk_impl_t : public audio_chunk {
-	typedef audio_chunk_impl_t<t_alloc> t_self;
-	pfc::array_t<audio_sample,t_alloc> m_data;
+	typedef audio_chunk_impl_t<container_t> t_self;
+	container_t m_data;
 	unsigned m_srate,m_nch,m_setup;
 	t_size m_samples;
 public:
@@ -237,13 +271,12 @@ public:
 };
 
 typedef audio_chunk_impl_t<> audio_chunk_impl;
-typedef audio_chunk_impl_t<pfc::alloc_fast_aggressive> audio_chunk_impl_temporary;
-typedef audio_chunk_impl audio_chunk_i;//for compatibility
+typedef audio_chunk_impl_t<pfc::mem_block_aligned_incremental_t<audio_sample, 16> > audio_chunk_fast_impl;
 
 //! Implements const methods of audio_chunk only, referring to an external buffer. For temporary use only (does not maintain own storage), e.g.: somefunc( audio_chunk_temp_impl(mybuffer,....) );
-class audio_chunk_temp_impl : public audio_chunk {
+class audio_chunk_memref_impl : public audio_chunk {
 public:
-	audio_chunk_temp_impl(const audio_sample * p_data,t_size p_samples,t_uint32 p_sample_rate,t_uint32 p_channels,t_uint32 p_channel_config) :
+	audio_chunk_memref_impl(const audio_sample * p_data,t_size p_samples,t_uint32 p_sample_rate,t_uint32 p_channels,t_uint32 p_channel_config) :
 	m_data(p_data), m_samples(p_samples), m_sample_rate(p_sample_rate), m_channels(p_channels), m_channel_config(p_channel_config)
 	{
 		PFC_ASSERT(is_valid());
@@ -271,6 +304,10 @@ private:
 };
 
 
+// Compatibility typedefs.
+typedef audio_chunk_fast_impl audio_chunk_impl_temporary;
+typedef audio_chunk_impl audio_chunk_i;
+typedef audio_chunk_memref_impl audio_chunk_temp_impl;
 
 //! Duration counter class - accumulates duration using sample values, without any kind of rounding error accumulation.
 class duration_counter {
@@ -288,13 +325,9 @@ public:
 	void add(double v) {m_offset += v;}
 	void subtract(double v) {m_offset -= v;}
 
-	double query() const {
-		double acc = m_offset;
-		for(t_map::const_iterator walk = m_sampleCounts.first(); walk.is_valid(); ++walk) {
-			acc += audio_math::samples_to_time(walk->m_value, walk->m_key);
-		}
-		return acc;
-	}
+	double query() const;
+	uint64_t queryAsSampleCount( uint32_t rate );
+
 	void add(const audio_chunk & c) {
 		add(c.get_sample_count(), c.get_sample_rate());
 	}

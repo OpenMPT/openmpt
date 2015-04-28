@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "dropdown_helper.h"
 
+#ifdef _WIN32
 
 void _cfg_dropdown_history_base::build_list(pfc::ptr_list_t<char> & out)
 {
@@ -158,3 +159,5 @@ bool _cfg_dropdown_history_base::on_context(HWND wnd,LPARAM coords) {
 	} catch(...) {}
 	return false;
 }
+
+#endif // _WIN32

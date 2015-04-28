@@ -35,17 +35,21 @@ void CDialogResizeHelper::OnSize(UINT, CSize newSize)
 		for(t_size n = 0; n < m_table.get_size(); ++n) {
 			CRect rc;
 			if (_EvalRect(n, newSize, rc)) {
-				DeferWindowPos(hWinPosInfo, m_thisWnd.GetDlgItem(m_table[n].id), 0, rc.left,rc.top,rc.Width(),rc.Height(),SWP_NOZORDER);
+				hWinPosInfo = DeferWindowPos(hWinPosInfo, m_thisWnd.GetDlgItem(m_table[n].id), 0, rc.left,rc.top,rc.Width(),rc.Height(),SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_NOCOPYBITS);
 			}
 		}
 		if (m_sizeGrip != NULL)
 		{
 			RECT rc, rc_grip;
 			if (m_thisWnd.GetClientRect(&rc) && m_sizeGrip.GetWindowRect(&rc_grip)) {
-				DeferWindowPos(hWinPosInfo, m_sizeGrip, NULL, rc.right - (rc_grip.right - rc_grip.left), rc.bottom - (rc_grip.bottom - rc_grip.top), 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+				DWORD flags = SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOCOPYBITS;
+				if (IsZoomed(m_thisWnd)) flags |= SWP_HIDEWINDOW;
+				else flags |= SWP_SHOWWINDOW;
+				hWinPosInfo = DeferWindowPos(hWinPosInfo, m_sizeGrip, NULL, rc.right - (rc_grip.right - rc_grip.left), rc.bottom - (rc_grip.bottom - rc_grip.top), 0, 0, flags );
 			}
 		}
 		EndDeferWindowPos(hWinPosInfo);
+		//RedrawWindow(m_thisWnd, NULL, NULL, RDW_UPDATENOW | RDW_ALLCHILDREN);
 	}
 	SetMsgHandled(FALSE);
 }

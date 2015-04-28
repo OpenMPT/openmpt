@@ -1,3 +1,5 @@
+#ifdef _WIN32
+
 #ifndef _DROPDOWN_HELPER_H_
 #define _DROPDOWN_HELPER_H_
 
@@ -52,3 +54,5 @@ private:
 	}
 
 #endif //_DROPDOWN_HELPER_H_
+
+#endif // _WIN32

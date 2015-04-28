@@ -1,5 +1,5 @@
 namespace ProfileCache {
-	static file::ptr FetchFile(const char * context, const char * name, const char * webURL, t_filetimestamp acceptableAge, abort_callback & abort) {
+	inline file::ptr FetchFile(const char * context, const char * name, const char * webURL, t_filetimestamp acceptableAge, abort_callback & abort) {
 		const double timeoutVal = 5;
 
 		pfc::string_formatter path ( core_api::get_profile_path() );

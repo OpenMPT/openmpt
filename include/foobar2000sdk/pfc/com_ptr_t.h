@@ -44,7 +44,7 @@ namespace pfc {
 		}
 
 
-		inline T* operator->() const throw() {assert(m_ptr);return m_ptr;}
+		inline T* operator->() const throw() {PFC_ASSERT(m_ptr);return m_ptr;}
 
 		inline T* get_ptr() const throw() {return m_ptr;}
 		
@@ -71,6 +71,7 @@ namespace pfc {
 		}
 
 		inline T** receive_ptr() throw() {release();return &m_ptr;}
+		inline void** receive_void_ptr() throw() {return (void**) receive_ptr();}
 
 		inline t_self & operator<<(t_self & p_source) throw() {attach(p_source.detach());return *this;}
 		inline t_self & operator>>(t_self & p_dest) throw() {p_dest.attach(detach());return *this;}

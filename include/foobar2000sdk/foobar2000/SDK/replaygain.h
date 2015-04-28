@@ -17,6 +17,7 @@ struct t_replaygain_config
 	void reset();
 	audio_sample query_scale(const file_info & info) const;
 	audio_sample query_scale(const metadb_handle_ptr & info) const;
+	audio_sample query_scale(const replaygain_info & info) const;
 
 	void format_name(pfc::string_base & p_out) const;
 	bool is_active() const;

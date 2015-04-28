@@ -9,6 +9,10 @@ public:
 	//! Merges ReplayGain scan results from different tracks. Merge results from all tracks in an album to get album gain/peak values. \n
 	//! This function returns a newly created replaygain_result object. Existing replaygain_result objects remain unaltered.
 	virtual replaygain_result::ptr merge(replaygain_result::ptr other) = 0;
+
+	replaygain_info make_track_info() {
+		replaygain_info ret = replaygain_info_invalid; ret.m_track_gain = this->get_gain(); ret.m_track_peak = this->get_peak(); return ret;
+	}
 };
 
 //! Instance of a ReplayGain scanner. \n

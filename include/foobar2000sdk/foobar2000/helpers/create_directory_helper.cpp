@@ -50,14 +50,16 @@ namespace create_directory_helper
 			while(p_path[walk] == '\\') walk++;
 			create_path_internal(p_path,walk,p_abort);
 		} else {
-			throw exception_io("Could not create directory structure; unknown path format");
+            pfc::throw_exception_with_message< exception_io > ("Could not create directory structure; unknown path format");
 		}
 	}
 
+#ifdef _WIN32
 	static bool is_bad_dirchar(char c)
 	{
 		return c==' ' || c=='.';
 	}
+#endif
 
 	void make_path(const char * parent,const char * filename,const char * extension,bool allow_new_dirs,pfc::string8 & out,bool really_create_dirs,abort_callback & p_abort)
 	{
@@ -132,7 +134,8 @@ pfc::string create_directory_helper::sanitize_formatted_path(pfc::stringp format
 
 void create_directory_helper::format_filename_ex(const metadb_handle_ptr & handle,titleformat_hook * p_hook,titleformat_object::ptr spec,const char * suffix, pfc::string_base & out) {
 	pfc::string_formatter formatted;
-	handle->format_title(p_hook,formatted,spec,&titleformat_text_filter_myimpl());
+    titleformat_text_filter_myimpl filter;
+	handle->format_title(p_hook,formatted,spec,&filter);
 	formatted << suffix;
 	out = sanitize_formatted_path(formatted).ptr();
 }

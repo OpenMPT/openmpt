@@ -119,8 +119,15 @@ namespace file_info_record_helper {
 			p_info.reset();
 			p_info.set_length(m_length);
 			p_info.set_replaygain(m_replaygain);
-			m_info.enumerate(__file_info_record__info__enumerator(p_info));
-			m_meta.enumerate(__file_info_record__meta__enumerator(p_info));
+            
+            {
+                __file_info_record__info__enumerator e(p_info);
+                m_info.enumerate( e );
+            }
+            {
+                __file_info_record__meta__enumerator e(p_info);
+                m_meta.enumerate( e );
+            }
 		}
 
 		template<typename t_callback> void enumerate_meta(t_callback & p_callback) const {m_meta.enumerate(p_callback);}
@@ -185,53 +192,6 @@ namespace cue_parser
 
 
 
-
-	class _decoder_wrapper {
-	public:
-		virtual bool run(audio_chunk & p_chunk,abort_callback & p_abort) = 0;
-		virtual void seek(double p_seconds,abort_callback & p_abort) = 0;
-		virtual bool get_dynamic_info(file_info & p_out, double & p_timestamp_delta) = 0;
-		virtual bool get_dynamic_info_track(file_info & p_out, double & p_timestamp_delta) = 0;
-		virtual void on_idle(abort_callback & p_abort) = 0;
-		virtual bool run_raw(audio_chunk & p_chunk, mem_block_container & p_raw, abort_callback & p_abort) = 0;
-		virtual void set_logger(event_logger::ptr ptr) = 0;
-		virtual ~_decoder_wrapper() {}
-	};
-
-	template<typename t_input>
-	class _decoder_wrapper_simple : public _decoder_wrapper {
-	public:
-		void initialize(service_ptr_t<file> p_filehint,const char * p_path,unsigned p_flags,abort_callback & p_abort) {
-			m_input.open(p_filehint,p_path,input_open_decode,p_abort);
-			m_input.decode_initialize(p_flags,p_abort);
-		}
-		bool run(audio_chunk & p_chunk,abort_callback & p_abort) {return m_input.decode_run(p_chunk,p_abort);}
-		void seek(double p_seconds,abort_callback & p_abort) {m_input.decode_seek(p_seconds,p_abort);}
-		bool get_dynamic_info(file_info & p_out, double & p_timestamp_delta) {return m_input.decode_get_dynamic_info(p_out,p_timestamp_delta);}
-		bool get_dynamic_info_track(file_info & p_out, double & p_timestamp_delta) {return m_input.decode_get_dynamic_info_track(p_out,p_timestamp_delta);}
-		void on_idle(abort_callback & p_abort) {m_input.decode_on_idle(p_abort);}
-		bool run_raw(audio_chunk & p_chunk, mem_block_container & p_raw, abort_callback & p_abort) {return m_input.decode_run_raw(p_chunk, p_raw, p_abort);}
-		void set_logger(event_logger::ptr ptr) {m_input.set_logger(ptr);}
-	private:
-		t_input m_input;
-	};
-
-	class _decoder_wrapper_cue : public _decoder_wrapper {
-	public:
-		void open(service_ptr_t<file> p_filehint,const playable_location & p_location,unsigned p_flags,abort_callback & p_abort,double p_start,double p_length) {
-			m_input.open(p_filehint,p_location,p_flags,p_abort,p_start,p_length);
-		}
-		bool run(audio_chunk & p_chunk,abort_callback & p_abort) {return m_input.run(p_chunk,p_abort);}
-		void seek(double p_seconds,abort_callback & p_abort) {m_input.seek(p_seconds,p_abort);}
-		bool get_dynamic_info(file_info & p_out, double & p_timestamp_delta) {return m_input.get_dynamic_info(p_out,p_timestamp_delta);}
-		bool get_dynamic_info_track(file_info & p_out, double & p_timestamp_delta) {return m_input.get_dynamic_info_track(p_out,p_timestamp_delta);}
-		void on_idle(abort_callback & p_abort) {m_input.on_idle(p_abort);}
-		bool run_raw(audio_chunk & p_chunk, mem_block_container & p_raw, abort_callback & p_abort) {return m_input.run_raw(p_chunk, p_raw, p_abort);}
-		void set_logger(event_logger::ptr ptr) {m_input.set_logger(ptr);}
-	private:
-		input_helper_cue m_input;
-	};
-
 	template<typename t_base>
 	class input_wrapper_cue_t {
 	public:
@@ -239,22 +199,14 @@ namespace cue_parser
 		~input_wrapper_cue_t() {}
 
 		void open(service_ptr_t<file> p_filehint,const char * p_path,t_input_open_reason p_reason,abort_callback & p_abort) {
-			m_path = p_path;
-
-			m_file = p_filehint;
-			input_open_file_helper(m_file,p_path,p_reason,p_abort);
-
-			{
-				file_info_impl info;
-				t_base instance;
-				instance.open(m_file,p_path,p_reason,p_abort);
-				instance.get_info(info,p_abort);
-				m_meta.set_tag(info);
-			}
+			m_impl.open( p_filehint, p_path, p_reason, p_abort );
+			file_info_impl info;
+			m_impl.get_info(info,p_abort);
+			m_meta.set_tag(info);
 		}
 
 		t_uint32 get_subsong_count() {
-			return m_meta.have_cuesheet() ? m_meta.get_cue_track_count() : 1;
+			return m_meta.have_cuesheet() ? (uint32_t) m_meta.get_cue_track_count() : 1;
 		}
 
 		t_uint32 get_subsong(t_uint32 p_index) {
@@ -269,61 +221,55 @@ namespace cue_parser
 			}
 		}
 
-		t_filestats get_file_stats(abort_callback & p_abort) {return m_file->get_stats(p_abort);}
+		t_filestats get_file_stats(abort_callback & p_abort) {return m_impl.get_file_stats(p_abort);}
 
 		void decode_initialize(t_uint32 p_subsong,unsigned p_flags,abort_callback & p_abort) {
-			m_decoder.release();
 			if (p_subsong == 0) {
-				pfc::rcptr_t<_decoder_wrapper_simple<t_base> > temp;
-				temp.new_t();
-				m_file->reopen(p_abort);
-				temp->initialize(m_file,m_path,p_flags,p_abort);
-				m_decoder = temp;
+				m_impl.decode_initialize(p_flags, p_abort);
+				m_decodeFrom = 0; m_decodeLength = -1; m_decodePos = 0;
 			} else {
-				double start,length;
+				double start, length;
 				m_meta.query_track_offsets(p_subsong,start,length);
-
-				pfc::rcptr_t<_decoder_wrapper_cue> temp;
-				temp.new_t();
-				m_file->reopen(p_abort);
-				temp->open(m_file,make_playable_location(m_path,0),p_flags & ~input_flag_no_seeking,p_abort,start,length);
-				m_decoder = temp;
+				unsigned flags2 = p_flags;
+				if (start > 0) flags2 &= ~input_flag_no_seeking;
+				m_impl.decode_initialize(flags2, p_abort);
+				m_impl.decode_seek(start, p_abort);
+				m_decodeFrom = start; m_decodeLength = length; m_decodePos = 0;
 			}
-			if (m_logger.is_valid()) m_decoder->set_logger(m_logger);
 		}
 
 		bool decode_run(audio_chunk & p_chunk,abort_callback & p_abort) {
-			return m_decoder->run(p_chunk,p_abort);
+			return _run(p_chunk, NULL, p_abort);
 		}
 		
 		void decode_seek(double p_seconds,abort_callback & p_abort) {
-			m_decoder->seek(p_seconds,p_abort);
+			if (this->m_decodeLength >= 0 && p_seconds > m_decodeLength) p_seconds = m_decodeLength;
+			m_impl.decode_seek(m_decodeFrom + p_seconds,p_abort);
+			m_decodePos = p_seconds;
 		}
 		
-		bool decode_can_seek() {return true;}
+		bool decode_can_seek() {return m_impl.decode_can_seek();}
 		
 		bool decode_run_raw(audio_chunk & p_chunk, mem_block_container & p_raw, abort_callback & p_abort) {
-			return m_decoder->run_raw(p_chunk, p_raw, p_abort);
+			return _run(p_chunk, &p_raw, p_abort);
 		}
 		void set_logger(event_logger::ptr ptr) {
-			m_logger = ptr;
-			if (m_decoder.is_valid()) m_decoder->set_logger(ptr);
+			m_impl.set_logger(ptr);
 		}
 
 		bool decode_get_dynamic_info(file_info & p_out, double & p_timestamp_delta) {
-			return m_decoder->get_dynamic_info(p_out,p_timestamp_delta);
+			return m_impl.decode_get_dynamic_info(p_out, p_timestamp_delta);
 		}
 
 		bool decode_get_dynamic_info_track(file_info & p_out, double & p_timestamp_delta) {
-			return m_decoder->get_dynamic_info_track(p_out,p_timestamp_delta);
+			return m_impl.decode_get_dynamic_info_track(p_out, p_timestamp_delta);
 		}
 
 		void decode_on_idle(abort_callback & p_abort) {
-			m_decoder->on_idle(p_abort);
+			m_impl.decode_on_idle(p_abort);
 		}
 
 		void retag_set_info(t_uint32 p_subsong,const file_info & p_info,abort_callback & p_abort) {
-			pfc::dynamic_assert(m_decoder.is_empty());
 			if (p_subsong == 0) {
 				m_meta.set_tag(p_info);
 			} else {
@@ -332,36 +278,55 @@ namespace cue_parser
 		}
 
 		void retag_commit(abort_callback & p_abort) {
-			pfc::dynamic_assert(m_decoder.is_empty());
-
 			file_info_impl info;
 			m_meta.get_tag(info);
-			
-			{
-				t_base instance;
-				m_file->reopen(p_abort);
-				instance.open(m_file,m_path,input_open_info_write,p_abort);
-				instance.retag(pfc::implicit_cast<const file_info&>(info),p_abort);
-				info.reset();
-				instance.get_info(info,p_abort);
-				m_meta.set_tag(info);
-			}
+			m_impl.retag(pfc::implicit_cast<const file_info&>(info), p_abort);
+			info.reset();
+			m_impl.get_info(info, p_abort);
+			m_meta.set_tag( info );
 		}
 
 		inline static bool g_is_our_content_type(const char * p_content_type) {return t_base::g_is_our_content_type(p_content_type);}
 		inline static bool g_is_our_path(const char * p_path,const char * p_extension) {return t_base::g_is_our_path(p_path,p_extension);}
 
 	private:
-		pfc::rcptr_t<_decoder_wrapper> m_decoder;
+		bool _run(audio_chunk & chunk, mem_block_container * raw, abort_callback & aborter) {
+			if (m_decodeLength >= 0 && m_decodePos >= m_decodeLength) return false;
+			if (raw == NULL) {
+				if (!m_impl.decode_run(chunk, aborter)) return false;
+			} else {
+				if (!m_impl.decode_run_raw(chunk, *raw, aborter)) return false;
+			}
 
-		file_info_impl m_info;
-		pfc::string8 m_path;
-		service_ptr_t<file> m_file;
+			if (m_decodeLength >= 0) {
+				const uint64_t remaining = audio_math::time_to_samples( m_decodeLength - m_decodePos, chunk.get_sample_rate() );
+				const size_t samplesGot = chunk.get_sample_count();
+				if (remaining < samplesGot) {
+					m_decodePos = m_decodeLength;
+					if (remaining == 0) { // rare but possible as a result of rounding SNAFU - we're EOF but we didn't notice earlier
+						return false;
+					}
+					
+					chunk.set_sample_count( (size_t) remaining );
+					if (raw != NULL) {
+						const t_size rawSize = raw->get_size();
+						PFC_ASSERT( rawSize % samplesGot == 0 );
+						raw->set_size( (t_size) ( (t_uint64) rawSize * remaining / samplesGot ) );
+					}
+				} else {
+					m_decodePos += chunk.get_duration();
+				}
+			} else {
+				m_decodePos += chunk.get_duration();
+			}
+			return true;
+		}
+		t_base m_impl;
+		double m_decodeFrom, m_decodeLength, m_decodePos;
 
 		embeddedcue_metadata_manager m_meta;
-		event_logger::ptr m_logger;
 	};
-
+#ifndef APP_IS_BOOM
 	template<typename I>
 	class chapterizer_impl_t : public chapterizer
 	{
@@ -406,7 +371,7 @@ namespace cue_parser
 			}
 			//stamp per-chapter infos
 			for(t_size walk = 0, total = p_list.get_chapter_count(); walk < total; ++walk) {
-				instance.retag_set_info(walk + 1, p_list.get_info(walk),p_abort);
+				instance.retag_set_info( (uint32_t)( walk + 1 ), p_list.get_info(walk),p_abort);
 			}
 
 			instance.retag_commit(p_abort);
@@ -430,7 +395,7 @@ namespace cue_parser
 			return true;
 		}
 	};
-
+#endif
 };
 
 //! Wrapper template for generating embedded cuesheet enabled inputs.
@@ -440,5 +405,7 @@ template<typename t_input_impl, unsigned t_flags = 0>
 class input_cuesheet_factory_t {
 public:
 	input_factory_ex_t<cue_parser::input_wrapper_cue_t<t_input_impl>,t_flags,input_decoder_v2> m_input_factory;
+#ifndef APP_IS_BOOM
 	service_factory_single_t<cue_parser::chapterizer_impl_t<t_input_impl> > m_chapterizer_factory;	
+#endif
 };

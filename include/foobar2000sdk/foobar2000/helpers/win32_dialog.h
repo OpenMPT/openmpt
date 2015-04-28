@@ -1,3 +1,5 @@
+#ifdef _WIN32
+
 #ifndef _FOOBAR2000_HELPERS_WIN32_DIALOG_H_
 #define _FOOBAR2000_HELPERS_WIN32_DIALOG_H_
 
@@ -119,3 +121,6 @@ int uDialogBox(UINT id,HWND parent,DLGPROC proc,LPARAM param = 0);
 
 
 #endif
+
+
+#endif // _WIN32

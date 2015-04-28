@@ -1,3 +1,5 @@
+#ifdef _WIN32
+
 namespace listview_helper
 {
 	unsigned insert_item(HWND p_listview,unsigned p_index,const char * p_name,LPARAM p_param);//returns index of new item on success, infinite on failure
@@ -15,6 +17,10 @@ namespace listview_helper
 	bool ensure_visible(HWND p_listview,unsigned p_index);
 
 	void get_item_text(HWND p_listview,unsigned p_index,unsigned p_column,pfc::string_base & p_out);
+
+	unsigned insert_item2(HWND p_listview, unsigned p_index, const char * col0, const char * col1, LPARAM p_param = 0);
+	unsigned insert_item3(HWND p_listview, unsigned p_index, const char * col0, const char * col1, const char * col2, LPARAM p_param = 0);
+
 
 };
 
@@ -39,3 +45,5 @@ void ListView_GetContextMenuPoint(HWND p_list,LPARAM p_coords,POINT & p_point,in
 void ListView_GetContextMenuPoint(HWND p_list,POINT p_coords,POINT & p_point,int & p_selection);
 
 int ListView_GetColumnCount(HWND listView);
+
+#endif
