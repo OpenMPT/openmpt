@@ -2,37 +2,37 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{8C9C2685-6A31-1C42-948F-65A653377786}</UniqueIdentifier>
+			<UniqueIdentifier>{477C8603-F00B-2548-A767-80645328275F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac">
-			<UniqueIdentifier>{AC2B4E0E-C5F4-8545-AD6A-3C83D0C5A64A}</UniqueIdentifier>
+			<UniqueIdentifier>{FB8083B0-F94E-BC42-9611-97668E17BB3F}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src">
-			<UniqueIdentifier>{53CFE5A9-4B69-4A4E-A9A1-76841B2E740A}</UniqueIdentifier>
+			<UniqueIdentifier>{A78D6E10-3207-DE4C-ABF4-20FEA738D089}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC">
-			<UniqueIdentifier>{926F9CD2-B231-5045-B1E3-471CB27B5E47}</UniqueIdentifier>
+			<UniqueIdentifier>{F344F723-2860-1B47-96CF-BED27AB2FAA8}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC\include">
-			<UniqueIdentifier>{B726D036-AAFE-C44F-AA18-894C10C984D1}</UniqueIdentifier>
+			<UniqueIdentifier>{8F36D088-C9F7-E341-90AA-19E71FC3C951}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC\include\private">
-			<UniqueIdentifier>{32093E33-8A79-7443-8A99-6FAAC50310BE}</UniqueIdentifier>
+			<UniqueIdentifier>{3BB747A3-CD90-2B46-907B-473C1459D681}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\libFLAC\include\protected">
-			<UniqueIdentifier>{E7343C40-18D2-8C41-9C8A-222A12B62534}</UniqueIdentifier>
+			<UniqueIdentifier>{02E621ED-7A70-104A-9D42-AB256A5BFAC2}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\include">
-			<UniqueIdentifier>{22DA67A9-CCCF-1E4A-94CE-432C23CBB1AD}</UniqueIdentifier>
+			<UniqueIdentifier>{44D88C36-692F-1B49-BD6A-0DB1570A6EDD}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\include\FLAC">
-			<UniqueIdentifier>{6764D8C0-23A5-A643-A22B-A3E073F00F9F}</UniqueIdentifier>
+			<UniqueIdentifier>{8026CF0C-4EEF-FF4B-A3F7-2BE4A5E84820}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\share">
-			<UniqueIdentifier>{D50ECE32-EA95-1140-B5A0-74748BF89495}</UniqueIdentifier>
+			<UniqueIdentifier>{4F49EEEE-0FD6-A34D-A515-E76D63A4EA2B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\flac\src\share\win_utf8_io">
-			<UniqueIdentifier>{6183E28B-74C2-EE43-8882-2AE4F419FB26}</UniqueIdentifier>
+			<UniqueIdentifier>{CFB3088D-B183-524C-ADF1-F9E113A3E7D2}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
