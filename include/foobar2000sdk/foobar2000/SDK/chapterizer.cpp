@@ -55,10 +55,10 @@ unsigned cuesheet_parse_index_time_ticks_e(const char * p_string,t_size p_length
 	{
 		if (p_string[ptr] == ':')
 		{
-			if (splitptr >= 2) throw std::exception("invalid INDEX time syntax",0);
+			if (splitptr >= 2) throw std::runtime_error("invalid INDEX time syntax");
 			splitmarks[splitptr++] = ptr;
 		}
-		else if (!pfc::char_is_numeric(p_string[ptr])) throw std::exception("invalid INDEX time syntax",0);
+		else if (!pfc::char_is_numeric(p_string[ptr])) throw std::runtime_error("invalid INDEX time syntax");
 	}
 	
 	t_size minutes_base = 0, minutes_length = 0, seconds_base = 0, seconds_length = 0, frames_base = 0, frames_length = 0;

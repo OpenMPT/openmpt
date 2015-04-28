@@ -77,12 +77,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;PFC_DLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pfc.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -164,6 +164,7 @@
   <ItemGroup>
     <ClInclude Include="alloc.h" />
     <ClInclude Include="array.h" />
+    <ClInclude Include="audio_sample.h" />
     <ClInclude Include="avltree.h" />
     <ClInclude Include="base64.h" />
     <ClInclude Include="binary_search.h" />
@@ -175,32 +176,43 @@
     <ClInclude Include="byte_order_helper.h" />
     <ClInclude Include="chain_list_v2.h" />
     <ClInclude Include="com_ptr_t.h" />
+    <ClInclude Include="cpuid.h" />
+    <ClInclude Include="filehandle.h" />
     <ClInclude Include="guid.h" />
     <ClInclude Include="instance_tracker.h" />
     <ClInclude Include="int_types.h" />
     <ClInclude Include="iterators.h" />
     <ClInclude Include="list.h" />
     <ClInclude Include="map.h" />
+    <ClInclude Include="memalign.h" />
     <ClInclude Include="order_helper.h" />
     <ClInclude Include="other.h" />
     <ClInclude Include="pathUtils.h" />
     <ClInclude Include="pfc.h" />
     <ClInclude Include="primitives.h" />
-    <ClInclude Include="profiler.h" />
+    <ClInclude Include="primitives_part2.h" />
     <ClInclude Include="ptr_list.h" />
     <ClInclude Include="rcptr.h" />
     <ClInclude Include="ref_counter.h" />
     <ClInclude Include="sort.h" />
-    <ClInclude Include="string.h" />
     <ClInclude Include="string8_impl.h" />
+    <ClInclude Include="string_base.h" />
     <ClInclude Include="string_conv.h" />
     <ClInclude Include="string_list.h" />
     <ClInclude Include="stringNew.h" />
+    <ClInclude Include="syncd_storage.h" />
+    <ClInclude Include="synchro_win.h" />
     <ClInclude Include="threads.h" />
+    <ClInclude Include="timers.h" />
     <ClInclude Include="traits.h" />
+    <ClInclude Include="wildcard.h" />
+    <ClInclude Include="win-objects.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="audio_math.cpp" />
+    <ClCompile Include="audio_sample.cpp" />
     <ClCompile Include="base64.cpp" />
+    <ClCompile Include="bit_array.cpp" />
     <ClCompile Include="bsearch.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -213,6 +225,8 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="cpuid.cpp" />
+    <ClCompile Include="filehandle.cpp" />
     <ClCompile Include="guid.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -239,18 +253,6 @@
     </ClCompile>
     <ClCompile Include="pathUtils.cpp" />
     <ClCompile Include="printf.cpp" />
-    <ClCompile Include="profiler.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EnableFastChecks</BasicRuntimeChecks>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
     <ClCompile Include="selftest.cpp" />
     <ClCompile Include="sort.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
@@ -280,21 +282,11 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="string.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EnableFastChecks</BasicRuntimeChecks>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="string_base.cpp" />
     <ClCompile Include="string_conv.cpp" />
     <ClCompile Include="stringNew.cpp" />
     <ClCompile Include="threads.cpp" />
+    <ClCompile Include="timers.cpp" />
     <ClCompile Include="utf8.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -307,6 +299,12 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="wildcard.cpp" />
+    <ClCompile Include="win-objects.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="pfc-license.txt" />
+    <None Include="pfc-readme.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

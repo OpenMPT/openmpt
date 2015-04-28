@@ -193,6 +193,12 @@ public:
 	}
 
 	bit_array_bittable(t_size p_count) : m_count(0) {resize(p_count);}
+	bit_array_bittable(const pfc::bit_array & in, size_t inSize) : m_count() {
+		resize(inSize);
+		for(size_t w = in.find_first(true, 0, inSize); w < inSize; w = in.find_next(true, w, inSize) ) {
+			set( w, true );
+		}
+	}
 	bit_array_bittable() : m_count() {}
 		
 	void set(t_size n,bool val)

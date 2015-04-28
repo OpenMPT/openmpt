@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#ifdef _WIN32
+
 static bool g_is_enabled()
 {
 	return standard_config_objects::query_remember_window_positions();
@@ -41,8 +43,15 @@ bool cfg_window_placement::read_from_window(HWND window)
 	WINDOWPLACEMENT wp = {};
 	if (g_is_enabled()) {
 		wp.length = sizeof(wp);
-		if (!GetWindowPlacement(window,&wp))
+		if (!GetWindowPlacement(window,&wp)) {
+			PFC_ASSERT(!"GetWindowPlacement fail!");
 			memset(&wp,0,sizeof(wp));
+		} else {
+			// bad, breaks with taskbar on top
+			/*if (wp.showCmd == SW_SHOWNORMAL) {
+				GetWindowRect(window, &wp.rcNormalPosition);
+			}*/
+		}
 		/*else
 		{
 			if (!IsWindowVisible(window)) wp.showCmd = SW_HIDE;
@@ -204,3 +213,4 @@ void cfg_window_size::set_data_raw(stream_reader * p_stream,t_size p_sizehint,ab
 
 	m_width = width; m_height = height;
 }
+#endif // _WIN32

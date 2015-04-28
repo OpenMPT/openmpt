@@ -122,12 +122,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_WIN32_WINNT=0x501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -162,6 +162,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="clipboard.cpp" />
+    <ClCompile Include="CPowerRequest.cpp" />
     <ClCompile Include="create_directory_helper.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
@@ -208,13 +209,8 @@
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <ClCompile Include="file_move_helper.cpp" />
-    <ClCompile Include="file_wrapper_simple.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
-      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
-      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EnableFastChecks</BasicRuntimeChecks>
-    </ClCompile>
     <ClCompile Include="filetimetools.cpp" />
+    <ClCompile Include="file_win32_wrapper.cpp" />
     <ClCompile Include="IDataObjectUtils.cpp" />
     <ClCompile Include="input_helpers.cpp" />
     <ClCompile Include="listview_helper.cpp">
@@ -249,12 +245,6 @@
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <ClCompile Include="VisUtils.cpp" />
-    <ClCompile Include="wildcard.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
-      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
-      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EnableFastChecks</BasicRuntimeChecks>
-    </ClCompile>
     <ClCompile Include="win32_dialog.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
@@ -268,9 +258,12 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
+    <ClCompile Include="writer_wav.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="album_art_helpers.h" />
+    <ClInclude Include="CPowerRequest.h" />
+    <ClInclude Include="fb2k_threads.h" />
+    <ClInclude Include="fullFileBuffer.h" />
     <ClInclude Include="bitreader_helper.h" />
     <ClInclude Include="CallForwarder.h" />
     <ClInclude Include="cfg_guidlist.h" />
@@ -288,7 +281,6 @@
     <ClInclude Include="file_list_helper.h" />
     <ClInclude Include="file_move_helper.h" />
     <ClInclude Include="file_win32_wrapper.h" />
-    <ClInclude Include="file_wrapper_simple.h" />
     <ClInclude Include="filetimetools.h" />
     <ClInclude Include="helpers.h" />
     <ClInclude Include="icon_remapping_wildcard.h" />
@@ -299,6 +291,7 @@
     <ClInclude Include="metadb_io_hintlist.h" />
     <ClInclude Include="mp3_utils.h" />
     <ClInclude Include="playlist_position_reference_tracker.h" />
+    <ClInclude Include="ProcessUtils.h" />
     <ClInclude Include="ProfileCache.h" />
     <ClInclude Include="seekabilizer.h" />
     <ClInclude Include="StdAfx.h" />
@@ -307,10 +300,10 @@
     <ClInclude Include="text_file_loader.h" />
     <ClInclude Include="ThreadUtils.h" />
     <ClInclude Include="VisUtils.h" />
-    <ClInclude Include="wildcard.h" />
     <ClInclude Include="win32_dialog.h" />
     <ClInclude Include="win32_misc.h" />
     <ClInclude Include="window_placement_helper.h" />
+    <ClInclude Include="writer_wav.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

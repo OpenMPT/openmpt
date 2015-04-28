@@ -1,3 +1,4 @@
+#ifdef _WIN32
 #include <shlobj.h>
 
 namespace IDataObjectUtils {
@@ -178,3 +179,5 @@ namespace IDataObjectUtils {
 		t_entries m_entries;
 	};
 }
+
+#endif // _WIN32

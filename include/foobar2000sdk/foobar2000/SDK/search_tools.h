@@ -3,8 +3,10 @@
 //! Use search_filter_manager API to instantiate search_filter objects.
 class search_filter : public service_base {
 public:
+protected:
 	//! For backwards compatibility with older (0.9.5 alpha) revisions of this API. Do not call.
 	virtual bool test_locked(const metadb_handle_ptr & p_item,const file_info * p_info) = 0;
+public:
 
 	//! Use this to run this filter on a group of items.
 	//! @param data Items to test.
@@ -21,6 +23,9 @@ public:
 
 	//! Abortable version of test_multi(). If the abort_callback object becomes signaled while the operation is being performed, contents of the output buffer are undefined and the operation will fail with exception_aborted.
 	virtual void test_multi_ex(metadb_handle_list_cref data, bool * out, abort_callback & abort) = 0;
+
+	//! Helper; removes non-matching items from the list.
+	void test_multi_here(metadb_handle_list & ref, abort_callback & abort);
 
 	FB2K_MAKE_SERVICE_INTERFACE(search_filter_v2, search_filter)
 };
@@ -43,11 +48,8 @@ public:
 	//! Retrieves the search expression manual string. See also: show_manual().
 	virtual void get_manual(pfc::string_base & p_out) = 0;
 
-	void show_manual() {
-		pfc::string8 temp;
-		get_manual(temp);
-		popup_message::g_show(temp,"Search Expression Reference");
-	}
+	void show_manual();
+
 	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(search_filter_manager);
 };
 

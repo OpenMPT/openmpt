@@ -3,11 +3,11 @@
 
 t_size dsp_chunk_list_impl::get_count() const {return m_data.get_count();}
 
-audio_chunk * dsp_chunk_list_impl::get_item(t_size n) const {return n>=0 && n<m_data.get_count() ? &*m_data[n] : 0;}
+audio_chunk * dsp_chunk_list_impl::get_item(t_size n) const {return n<m_data.get_count() ? &*m_data[n] : 0;}
 
 void dsp_chunk_list_impl::remove_by_idx(t_size idx)
 {
-	if (idx>=0 && idx<m_data.get_count())
+	if (idx<m_data.get_count())
 		m_recycled.add_item(m_data.remove_by_idx(idx));
 }
 
@@ -23,8 +23,7 @@ void dsp_chunk_list_impl::remove_mask(const bit_array & mask)
 audio_chunk * dsp_chunk_list_impl::insert_item(t_size idx,t_size hint_size)
 {
 	t_size max = get_count();
-	if (idx<0) idx=0;
-	else if (idx>max) idx = max;
+	if (idx>max) idx = max;
 	pfc::rcptr_t<audio_chunk> ret;
 	if (m_recycled.get_count()>0)
 	{
@@ -395,7 +394,11 @@ namespace {
 bool dsp_entry_v2::show_config_popup(dsp_preset & p_data,HWND p_parent) {
 	PFC_ASSERT(p_data.get_owner() == get_guid());
 	dsp_preset_impl temp(p_data);
-	show_config_popup_v2(p_data,p_parent,dsp_preset_edit_callback_impl(temp));
+    
+    {
+        dsp_preset_edit_callback_impl cb(temp);
+        show_config_popup_v2(p_data,p_parent,cb);
+    }
 	PFC_ASSERT(temp.get_owner() == get_guid());
 	if (temp == p_data) return false;
 	p_data = temp;

@@ -120,7 +120,8 @@ void sort_void_ex (
     int (*comp)(const void *, const void *),
 	void (*swap)(void *, void *, t_size) )
 {
-	sort(sort_callback_impl_legacy(base,width,comp,swap),num);
+    sort_callback_impl_legacy cb(base,width,comp,swap);
+	sort(cb,num);
 }
 
 static void squaresort(pfc::sort_callback & p_callback,t_size const p_base,t_size const p_count) {
@@ -141,20 +142,23 @@ inline static void __sort_2elem_helper(pfc::sort_callback & p_callback,t_size & 
 #ifdef PFC_HAVE_RDTSC
 static inline t_uint64 uniqueVal() {return __rdtsc();}
 #else
+static counter uniqueValCounter;
 static counter::t_val uniqueVal() {
-	static counter c; return ++c;
+    return ++uniqueValCounter;
 }
 #endif
 
 static t_size myrand(t_size count) {
-	PFC_STATIC_ASSERT( RAND_MAX == 0x7FFF );
-
-	t_uint64 val;
-	val = (t_uint64) rand() | (t_uint64)( (t_uint32)rand() << 16 );
-
-	val ^= uniqueVal();
-
-	return (t_size)(val % count);
+    const uint64_t rm = RAND_MAX + 1;
+    uint64_t m = 1;
+    uint64_t v = 0;
+    for(;;) {
+        v += rand() * m;
+        m *= rm;
+        if (m >= count) break;
+    }
+    v ^= uniqueVal();
+	return (t_size)(v % count);
 }
 
 inline static t_size __pivot_helper(pfc::sort_callback & p_callback,t_size const p_base,t_size const p_count) {
@@ -256,7 +260,8 @@ void sort_callback_stabilizer::swap(t_size p_index1, t_size p_index2)
 
 void sort_stable(sort_callback & p_callback,t_size p_count)
 {
-	sort(sort_callback_stabilizer(p_callback,p_count),p_count);
+    sort_callback_stabilizer cb(p_callback,p_count);
+	sort(cb,p_count);
 }
 
 }

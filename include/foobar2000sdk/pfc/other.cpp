@@ -1,6 +1,10 @@
 #include "pfc.h"
-
+#ifdef _MSC_VER
 #include <intrin.h>
+#endif
+#ifndef _MSC_VER
+#include <signal.h>
+#endif
 
 namespace pfc {
 	bool permutation_is_valid(t_size const * order, t_size count) {
@@ -102,7 +106,7 @@ void pfc::crash() {
 #ifdef _MSC_VER
 	__debugbreak();
 #else
-	*(char*)NULL = 0;
+    raise(SIGINT);
 #endif
 }
 
@@ -134,4 +138,36 @@ t_uint64 pfc::pow_int(t_uint64 base, t_uint64 exp) {
 		mask <<= 1;
 	}
 	return val;
+}
+
+double pfc::exp_int( const double base, const int expS ) {
+    //    return pow(base, (double)v);
+    
+    bool neg;
+    unsigned exp;
+    if (expS < 0) {
+        neg = true;
+        exp = (unsigned) -expS;
+    } else {
+        neg = false;
+        exp = (unsigned) expS;
+    }
+    double v = 1.0;
+    if (true) {
+        if (exp) {
+            double mul = base;
+            for(;;) {
+                if (exp & 1) v *= mul;
+                exp >>= 1;
+                if (exp == 0) break;
+                mul *= mul;
+            }
+        }
+    } else {
+        for(unsigned i = 0; i < exp; ++i) {
+            v *= base;
+        }
+    }
+    if (neg) v = 1.0 / v;
+    return v;
 }

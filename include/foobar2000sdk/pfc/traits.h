@@ -54,12 +54,13 @@ namespace pfc {
 	};
 
 	template<typename type1, typename type2>
-	class traits_combined : public combine_traits<pfc::traits_t<type1>,pfc::traits_t<type2> > {};
+	class traits_combined : public combine_traits<traits_t<type1>,traits_t<type2> > {};
 
 	template<typename T> class traits_t<T*> : public traits_rawobject {};
 
 	template<> class traits_t<char> : public traits_rawobject {};
 	template<> class traits_t<unsigned char> : public traits_rawobject {};
+	template<> class traits_t<signed char> : public traits_rawobject {};
 	template<> class traits_t<wchar_t> : public traits_rawobject {};
 	template<> class traits_t<short> : public traits_rawobject {};
 	template<> class traits_t<unsigned short> : public traits_rawobject {};
@@ -78,4 +79,5 @@ namespace pfc {
 
 	template<typename T,t_size p_count>
 	class traits_t<T[p_count]> : public traits_t<T> {};
+
 }

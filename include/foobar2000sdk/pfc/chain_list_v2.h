@@ -44,7 +44,7 @@ namespace pfc {
 			remove_all(); _add(in);
 		}
 		template<typename t_in> void _add(const t_in & in) {
-			for(auto iter = in.first(); iter.is_valid(); ++in) add_item(*iter);
+			for(typename t_in::const_iterator iter = in.first(); iter.is_valid(); ++in) add_item(*iter);
 		}
 		template<typename t_in> t_self & operator=(const t_in & in) {_set(in); return *this;}
 

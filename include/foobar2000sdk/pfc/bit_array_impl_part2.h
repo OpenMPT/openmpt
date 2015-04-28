@@ -3,30 +3,41 @@ namespace pfc {
 	//! Not very efficient to handle lots of items set to true but offers fast searches for true values and accepts arbitrary indexes, contrary to bit_array_bittable. Note that searches for false values are relatively inefficient.
 	class bit_array_var_impl : public bit_array_var {
 	public:
-		bool get(t_size n) const {
-			return m_data.have_item(n);
-		}
-		t_size find(bool val,t_size start,t_ssize count) const {
-			if (!val) {
-				return bit_array::find(false, start, count); //optimizeme.
-			} else if (count > 0) {
-				const t_size * v = m_data.find_nearest_item<true, true>(start);
-				if (v == NULL || *v > start+count) return start + count;
-				return *v;
-			} else if (count < 0) {
-				const t_size * v = m_data.find_nearest_item<true, false>(start);
-				if (v == NULL || *v < start+count) return start + count;
-				return *v;
-			} else return start;
-		}
-		void set(t_size n,bool val) {
-			if (val) m_data += n;
-			else m_data -= n;
-		}
+		bit_array_var_impl( ) {}
+		bit_array_var_impl( const bit_array & source, size_t sourceCount);
+		bool get(t_size n) const;
+		t_size find(bool val,t_size start,t_ssize count) const;
+		void set(t_size n,bool val);
 		void set(t_size n) {m_data += n;}
 		void unset(t_size n) {m_data -= n;}
 		t_size get_true_count() const {return m_data.get_count();}
+		void clear() {m_data.remove_all();}
 	private:
 		avltree_t<t_size> m_data;
+	};
+
+
+	//! Specialized implementation of bit_array. \n
+	//! Indended for scenarios where fast searching for true values in a large list is needed, combined with low footprint regardless of the amount of items.
+	//! Call add() repeatedly with the true val indexes. If the indexes were not added in increasing order, call presort() when done with adding.
+	class bit_array_flatIndexList : public bit_array {
+	public:
+		bit_array_flatIndexList();
+
+		void add( size_t n );
+
+		bool get(t_size n) const;
+		t_size find(bool val,t_size start,t_ssize count) const;
+
+		void presort();
+
+	private:
+		bool _findNearestUp( size_t val, size_t & outIdx ) const;
+		bool _findNearestDown( size_t val, size_t & outIdx ) const;
+		bool _find( size_t val, size_t & outIdx ) const {
+			return pfc::bsearch_simple_inline_t( m_content, m_content.get_size(), val, outIdx);
+		}
+
+		pfc::array_t< size_t, pfc::alloc_fast > m_content;
 	};
 }

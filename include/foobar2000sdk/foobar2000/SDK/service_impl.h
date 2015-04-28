@@ -4,16 +4,36 @@ template<typename T>
 class service_impl_t : public T
 {
 public:
-	int FB2KAPI service_release() throw() {
-		int ret = --m_counter; 
+	int service_release() throw() {
+		int ret = (int) --m_counter;
 		if (ret == 0) {
 			PFC_ASSERT_NO_EXCEPTION( delete this );
 		}
 		return ret;
 	}
-	int FB2KAPI service_add_ref() throw() {return ++m_counter;}
+	int service_add_ref() throw() {return (int) ++m_counter;}
 
 	TEMPLATE_CONSTRUCTOR_FORWARD_FLOOD(service_impl_t,T)
+private:
+	pfc::refcounter m_counter;
+};
+
+//! Alternate version of service_impl_t<> - calls this->service_shutdown() instead of delete this. \n
+//! For special cases where selfdestruct on zero refcount is undesired.
+template<typename class_t>
+class service_impl_explicitshutdown_t : public class_t {
+public:
+	int service_release() throw() {
+		int ret = --m_counter;
+		if (ret == 0) {
+			this->service_shutdown();
+		} else {
+			return ret;
+		}
+	}
+	int service_add_ref() throw() {return ++m_counter;}
+
+	TEMPLATE_CONSTRUCTOR_FORWARD_FLOOD(service_impl_explicitshutdown_t,class_t)
 private:
 	pfc::refcounter m_counter;
 };
@@ -24,8 +44,8 @@ template<typename T>
 class service_impl_single_t : public T
 {
 public:
-	int FB2KAPI service_release() throw() {return 1;}
-	int FB2KAPI service_add_ref() throw() {return 1;}
+	int service_release() throw() {return 1;}
+	int service_add_ref() throw() {return 1;}
 
 	TEMPLATE_CONSTRUCTOR_FORWARD_FLOOD(service_impl_single_t,T)
 };

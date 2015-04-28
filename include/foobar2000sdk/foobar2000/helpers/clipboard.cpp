@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#ifdef _WIN32
+
 #ifdef UNICODE
 #define CF_TCHAR CF_UNICODETEXT
 #else
@@ -35,3 +37,5 @@ namespace ClipboardHelper {
 		return IsClipboardFormatAvailable(CF_TCHAR) == TRUE;
 	}
 }
+
+#endif // _WIN32

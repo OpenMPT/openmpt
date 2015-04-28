@@ -2,10 +2,11 @@
 //! All methods provided by this interface work from main app thread only. Calling from another thread will do nothing or trigger an exception. If you need to trigger one of playback_control methods from another thread, see main_thread_callback.
 //! Do not call playback_control methods from inside any kind of global callback (e.g. playlist callback), otherwise race conditions may occur.
 //! Use static_api_ptr_t to instantiate. See static_api_ptr_t documentation for more info.
-class NOVTABLE playback_control : public service_base
-{
+class NOVTABLE playback_control : public service_base {
+	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(playback_control);
 public:
 
+	// Playback stop reason enum.
 	enum t_stop_reason {
 		stop_reason_user = 0,
 		stop_reason_eof,
@@ -13,7 +14,7 @@ public:
 		stop_reason_shutting_down,
 	};
 
-
+	// Playback start mode enum.
 	enum t_track_command {
 		track_command_default = 0,
 		track_command_play,
@@ -113,6 +114,8 @@ public:
 	
 	//! Helper; retrieves length of currently playing item.
 	double playback_get_length();
+	// Extended version: queries dynamic track info for the rare cases where that is different from static info.
+	double playback_get_length_ex();
 
 	//! Toggles stop-after-current state.
 	void toggle_stop_after_current() {set_stop_after_current(!get_stop_after_current());}
@@ -121,22 +124,53 @@ public:
 
 	//! Starts playback if playback is inactive, otherwise toggles pause.
 	void play_or_pause() {if (is_playing()) toggle_pause(); else start();}
+    void play_or_unpause() { if (is_playing()) pause(false); else start();}
 
+    void previous() { start(track_command_prev); }
+    void next() { start(track_command_next); }
+    
 	//deprecated
 	inline void play_start(t_track_command p_command = track_command_play,bool p_paused = false) {start(p_command,p_paused);}
 	//deprecated
 	inline void play_stop() {stop();}
 
-	static const int volume_mute = -100;
+	bool is_muted() {return get_volume() == volume_mute;}
 
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(playback_control);
+	static const int volume_mute = -100;
 };
 
 class playback_control_v2 : public playback_control {
-public:
-	virtual float get_volume_step() = 0;
-
 	FB2K_MAKE_SERVICE_INTERFACE(playback_control_v2,playback_control);
+public:
+	//! Returns user-specified the step dB value for volume decrement/increment.
+	virtual float get_volume_step() = 0;
+};
+
+//! \since 1.2
+class playback_control_v3 : public playback_control_v2 {
+	FB2K_MAKE_SERVICE_INTERFACE(playback_control_v3, playback_control_v2);
+public:
+	//! Custom volume API - for use with specific output devices only. \n
+	//! Note that custom volume SHOULD NOT EVER be presented as a slider where the user can immediately go to the maximum value. \n
+	//! Custom volume mode dispatches on_volume_changed callbacks on change, though the passed value is meaningless; \n
+	//! the components should query the current value from playback_control_v3. \n
+	//! Note that custom volume mode makes set_volume() / get_volume() meaningless, \n
+	//! but volume_up() / volume_down() / volume_mute_toggle() still work like they should (increment/decrement by one unit).
+	//! @returns whether custom volume mode is active.
+	virtual bool custom_volume_is_active() = 0;
+	//! Retrieves the current volume value for the custom volume mode. \n
+	//! The volume units are arbitrary and specified by the device maker; see also: custom_volume_min(), custom_volume_max().
+	virtual int custom_volume_get() = 0;	
+	//! Sets the current volume value for the custom volume mode. \n
+	//! The volume units are arbitrary and specified by the device maker; see also: custom_volume_min(), custom_volume_max().
+	//! CAUTION: you should NOT allow the user to easily go immediately to any value, it might blow their speakers out!
+	virtual void custom_volume_set(int val) = 0;
+	//! Returns the minimum custom volume value for the current output device.
+	virtual int custom_volume_min() = 0;
+	//! Returns the maximum custom volume value for the current output device.
+	virtual int custom_volume_max() = 0;
+
+	virtual void restart() = 0;
 };
 
 //for compatibility with old code

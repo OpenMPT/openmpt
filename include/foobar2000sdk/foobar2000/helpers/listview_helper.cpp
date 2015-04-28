@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#ifdef _WIN32
 
 
 namespace listview_helper {
@@ -21,7 +22,22 @@ namespace listview_helper {
 		else return (unsigned) ret;
 	}
 
+	unsigned insert_item2(HWND p_listview, unsigned p_index, const char * col0, const char * col1, LPARAM p_param) {
+		unsigned i = insert_item( p_listview, p_index, col0, p_param );
+		if (i != ~0) {
+			set_item_text( p_listview, i, 1, col1 );
+		}
+		return i;
+	}
 
+	unsigned insert_item3(HWND p_listview, unsigned p_index, const char * col0, const char * col1, const char * col2, LPARAM p_param) {
+		unsigned i = insert_item( p_listview, p_index, col0, p_param );
+		if (i != ~0) {
+			set_item_text( p_listview, i, 1, col1 );
+			set_item_text( p_listview, i, 2, col2 );
+		}
+		return i;
+	}
 
 	unsigned insert_column(HWND p_listview,unsigned p_index,const char * p_name,unsigned p_width_dlu)
 	{
@@ -171,3 +187,5 @@ int ListView_GetColumnCount(HWND listView) {
 	return Header_GetItemCount(header);
 }
 #endif
+
+#endif // _WIN32

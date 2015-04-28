@@ -1,5 +1,10 @@
 #include "foobar2000.h"
 
+#ifndef _MSC_VER
+#define strcat_s strcat
+#define _atoi64 atoll
+#endif
+
 t_size file_info::meta_find_ex(const char * p_name,t_size p_name_length) const
 {
 	t_size n, m = meta_get_count();
@@ -228,8 +233,8 @@ void file_info::info_set_float(const char * name,double value,unsigned precision
 	temp[63] = 0;
 	if (unit)
 	{
-		strcat(temp," ");
-		strcat(temp,unit);
+		strcat_s(temp," ");
+		strcat_s(temp,unit);
 	}
 	info_set(name,temp);
 }
@@ -389,7 +394,7 @@ bool file_info::meta_format(const char * p_name,pfc::string_base & p_out, const 
 
 void file_info::info_calculate_bitrate(t_filesize p_filesize,double p_length)
 {
-	info_set_bitrate((unsigned)floor((double)p_filesize * 8 / (p_length * 1000) + 0.5));
+	if (p_filesize > 0 && p_length > 0) info_set_bitrate((unsigned)floor((double)p_filesize * 8 / (p_length * 1000) + 0.5));
 }
 
 bool file_info::is_encoding_lossy() const {
@@ -435,6 +440,37 @@ bool file_info::g_is_meta_equal(const file_info & p_item1,const file_info & p_it
 	return true;
 }
 
+bool file_info::g_is_meta_equal_debug(const file_info & p_item1,const file_info & p_item2) {
+	const t_size count = p_item1.meta_get_count();
+	if (count != p_item2.meta_get_count()) {
+		FB2K_DebugLog() << "meta count mismatch";
+		return false;
+	}
+	pfc::map_t<const char*,t_size,field_name_comparator> item2_meta_map;
+	for(t_size n=0; n<count; n++) {
+		item2_meta_map.set(p_item2.meta_enum_name(n),n);
+	}
+	for(t_size n1=0; n1<count; n1++) {
+		t_size n2;
+		if (!item2_meta_map.query(p_item1.meta_enum_name(n1),n2)) {
+			FB2K_DebugLog() << "item2 doesn't have " << p_item1.meta_enum_name(n1);
+			return false;
+		}
+		t_size value_count = p_item1.meta_enum_value_count(n1);
+		if (value_count != p_item2.meta_enum_value_count(n2)) {
+			FB2K_DebugLog() << "meta value count mismatch: " << p_item1.meta_enum_name(n1) << " : " << (uint32_t)value_count << " vs " << (uint32_t)p_item2.meta_enum_value_count(n2);
+			return false;
+		}
+		for(t_size v = 0; v < value_count; v++) {
+			if (strcmp(p_item1.meta_enum_value(n1,v),p_item2.meta_enum_value(n2,v)) != 0) {
+				FB2K_DebugLog() << "meta mismatch: " << p_item1.meta_enum_name(n1) << " : " << p_item1.meta_enum_value(n1,v) << " vs " << p_item2.meta_enum_value(n2,v);
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 bool file_info::g_is_info_equal(const file_info & p_item1,const file_info & p_item2) {
 	t_size count = p_item1.info_get_count();
 	if (count != p_item2.info_get_count()) {
@@ -467,15 +503,223 @@ bool file_info::g_is_valid_field_name(const char * p_name,t_size p_length) {
 	return walk > 0;
 }
 
-void file_info::to_console() const {
-	console::formatter() << "File info dump:";
-	if (get_length() > 0) console::formatter() << "Duration: " << pfc::format_time_ex(get_length(), 6);
+void file_info::to_formatter(pfc::string_formatter& out) const {
+	out << "File info dump:\n";
+	if (get_length() > 0) out<< "Duration: " << pfc::format_time_ex(get_length(), 6) << "\n";
 	pfc::string_formatter temp;
 	for(t_size metaWalk = 0; metaWalk < meta_get_count(); ++metaWalk) {
 		meta_format_entry(metaWalk, temp);
-		console::formatter() << "Meta: " << meta_enum_name(metaWalk) << " = " << temp;
+		out << "Meta: " << meta_enum_name(metaWalk) << " = " << temp << "\n";
 	}
 	for(t_size infoWalk = 0; infoWalk < info_get_count(); ++infoWalk) {
-		console::formatter() << "Info: " << info_enum_name(infoWalk) << " = " << info_enum_value(infoWalk);
+		out << "Info: " << info_enum_name(infoWalk) << " = " << info_enum_value(infoWalk) << "\n";
 	}
+}
+
+void file_info::to_console() const {
+	FB2K_console_formatter() << "File info dump:";
+	if (get_length() > 0) FB2K_console_formatter() << "Duration: " << pfc::format_time_ex(get_length(), 6);
+	pfc::string_formatter temp;
+	for(t_size metaWalk = 0; metaWalk < meta_get_count(); ++metaWalk) {
+		meta_format_entry(metaWalk, temp);
+		FB2K_console_formatter() << "Meta: " << meta_enum_name(metaWalk) << " = " << temp;
+	}
+	for(t_size infoWalk = 0; infoWalk < info_get_count(); ++infoWalk) {
+		FB2K_console_formatter() << "Info: " << info_enum_name(infoWalk) << " = " << info_enum_value(infoWalk);
+	}
+}
+
+void file_info::info_set_wfx_chanMask(uint32_t val) {
+	switch(val) {
+	case 0:
+	case 4:
+	case 3:
+		break;
+	default:
+		info_set ("WAVEFORMATEXTENSIBLE_CHANNEL_MASK", PFC_string_formatter() << "0x" << pfc::format_hex(val) );
+		break;
+	}
+}
+
+uint32_t file_info::info_get_wfx_chanMask() const {
+	const char * str = this->info_get("WAVEFORMATEXTENSIBLE_CHANNEL_MASK");
+	if (str == NULL) return 0;
+	if (pfc::strcmp_partial( str, "0x") != 0) return 0;
+	try {
+		return pfc::atohex<uint32_t>( str + 2, strlen(str+2) );
+	} catch(...) { return 0;}
+}
+
+bool file_info::field_is_person(const char * fieldName) {
+	return field_name_equals(fieldName, "artist") ||
+		field_name_equals(fieldName, "album artist") || 
+		field_name_equals(fieldName, "composer") || 
+		field_name_equals(fieldName, "performer") ||
+		field_name_equals(fieldName, "conductor") ||
+		field_name_equals(fieldName, "orchestra") ||
+		field_name_equals(fieldName, "ensemble") ||
+		field_name_equals(fieldName, "engineer");
+}
+
+bool file_info::field_is_title(const char * fieldName) {
+	return field_name_equals(fieldName, "title") || field_name_equals(fieldName, "album");
+}
+
+
+void file_info::to_stream( stream_writer * stream, abort_callback & abort ) const {
+	stream_writer_formatter<> out(* stream, abort );
+	
+	out << this->get_length();
+	
+	{
+		const auto rg = this->get_replaygain();
+		out << rg.m_track_gain << rg.m_album_gain << rg.m_track_peak << rg.m_album_peak;
+	}
+
+	
+	{
+		const uint32_t metaCount = pfc::downcast_guarded<uint32_t>( this->meta_get_count() );
+		for(uint32_t metaWalk = 0; metaWalk < metaCount; ++metaWalk) {
+			const char * name = this->meta_enum_name( metaWalk );
+			if (*name) {
+				out.write_string_nullterm( this->meta_enum_name( metaWalk ) );
+				const size_t valCount = this->meta_enum_value_count( metaWalk );
+				for(size_t valWalk = 0; valWalk < valCount; ++valWalk) {
+					const char * value = this->meta_enum_value( metaWalk, valWalk );
+					if (*value) {
+						out.write_string_nullterm( value );
+					}
+				}
+				out.write_int<char>(0);
+			}
+		}
+		out.write_int<char>(0);
+	}
+
+	{
+		const uint32_t infoCount = pfc::downcast_guarded<uint32_t>( this->info_get_count() );
+		for(uint32_t infoWalk = 0; infoWalk < infoCount; ++infoWalk) {
+			const char * name = this->info_enum_name( infoWalk );
+			const char * value = this->info_enum_value( infoWalk );
+			if (*name && *value) {
+				out.write_string_nullterm(name); out.write_string_nullterm(value);
+			}
+		}
+		out.write_int<char>(0);
+	}
+}
+
+void file_info::from_stream( stream_reader * stream, abort_callback & abort ) {
+	stream_reader_formatter<> in( *stream, abort );
+	pfc::string_formatter tempName, tempValue;
+	{
+		double len; in >> len; this->set_length( len );
+	}
+	{
+		replaygain_info rg;
+		in >> rg.m_track_gain >> rg.m_album_gain >> rg.m_track_peak >> rg.m_album_peak;
+	}
+
+	{
+		this->meta_remove_all();
+		for(;;) {
+			in.read_string_nullterm( tempName );
+			if (tempName.length() == 0) break;
+			size_t metaIndex = pfc_infinite;
+			for(;;) {
+				in.read_string_nullterm( tempValue );
+				if (tempValue.length() == 0) break;
+				if (metaIndex == pfc_infinite) metaIndex = this->meta_add( tempName, tempValue );
+				else this->meta_add_value( metaIndex, tempValue );
+			}
+		}
+	}
+	{
+		this->info_remove_all();
+		for(;;) {
+			in.read_string_nullterm( tempName );
+			if (tempName.length() == 0) break;
+			in.read_string_nullterm( tempValue );
+			this->info_set( tempName, tempValue );
+		}
+	}
+}
+
+static const char * _readString( const uint8_t * & ptr, size_t & remaining ) {
+	const char * rv = (const char*)ptr;
+	for(;;) {
+		if (remaining == 0) throw exception_io_data();
+		uint8_t byte = *ptr++; --remaining;
+		if (byte == 0) break;
+	}
+	return rv;
+}
+
+template<typename int_t> void _readInt( int_t & out, const uint8_t * &ptr, size_t & remaining) {
+	if (remaining < sizeof(out)) throw exception_io_data();
+	pfc::decode_little_endian( out, ptr ); ptr += sizeof(out); remaining -= sizeof(out);
+}
+
+template<typename float_t> static void _readFloat(float_t & out, const uint8_t * &ptr, size_t & remaining) {
+	union {
+		typename pfc::sized_int_t<sizeof(float_t)>::t_unsigned i;
+		float_t f;
+	} u;
+	_readInt(u.i, ptr, remaining);
+	out = u.f;
+}
+
+void file_info::from_mem( const void * memPtr, size_t memSize ) {
+	size_t remaining = memSize;
+	const uint8_t * walk = (const uint8_t*) memPtr;
+
+	{
+		double len; _readFloat(len, walk, remaining);
+		this->set_length( len );
+	}
+
+	{
+		replaygain_info rg;
+		_readFloat(rg.m_track_gain, walk, remaining ); 
+		_readFloat(rg.m_album_gain, walk, remaining );
+		_readFloat(rg.m_track_peak, walk, remaining );
+		_readFloat(rg.m_album_peak, walk, remaining );
+		this->set_replaygain( rg );
+	}
+
+	{
+		this->meta_remove_all();
+		for(;;) {
+			const char * metaName = _readString( walk, remaining );
+			if (*metaName == 0) break;
+			size_t metaIndex = pfc_infinite;
+			for(;;) {
+				const char * metaValue = _readString( walk, remaining );
+				if (*metaValue == 0) break;
+				if (metaIndex == pfc_infinite) metaIndex = this->meta_add( metaName, metaValue );
+				else this->meta_add_value( metaIndex, metaName );
+			}
+		}
+	}
+	{
+		this->info_remove_all();
+		for(;;) {
+			const char * infoName = _readString( walk, remaining );
+			if (*infoName == 0) break;
+			const char * infoValue = _readString( walk, remaining );
+			this->info_set( infoName, infoValue );
+		}
+	}
+}
+
+audio_chunk::spec_t file_info::audio_chunk_spec() const 
+{
+	audio_chunk::spec_t rv = {};
+	rv.sampleRate = (uint32_t)this->info_get_int("samplerate");
+	rv.chanCount = (uint32_t)this->info_get_int("channels");
+	rv.chanMask = (uint32_t)this->info_get_wfx_chanMask();
+	if (audio_chunk::g_count_channels( rv.chanMask ) != rv.chanCount ) {
+		rv.chanMask = audio_chunk::g_guess_channel_config( rv.chanCount );
+	}
+	return rv;
 }

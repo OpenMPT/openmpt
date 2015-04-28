@@ -23,7 +23,7 @@ public:
 	virtual file::ptr run_ex(const char * url, abort_callback & abort) = 0;
 
 	void add_header(const char * name, const char * value) {
-		add_header(pfc::string_formatter() << name << ": " << value);
+		add_header(PFC_string_formatter() << name << ": " << value);
 	}
 };
 

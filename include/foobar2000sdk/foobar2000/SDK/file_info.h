@@ -42,7 +42,25 @@ struct replaygain_info
 
 	static bool g_equal(const replaygain_info & item1,const replaygain_info & item2);
 
-	void reset();	
+	void reset();
+};
+
+class format_rg_gain {
+public:
+	format_rg_gain(float val) {replaygain_info::g_format_gain(val, m_buffer);}
+
+	operator const char * () const {return m_buffer;}
+private:
+	replaygain_info::t_text_buffer m_buffer;
+};
+
+class format_rg_peak {
+public:
+	format_rg_peak(float val) {replaygain_info::g_format_peak(val, m_buffer);}
+
+	operator const char * () const {return m_buffer;}
+private:
+	replaygain_info::t_text_buffer m_buffer;
 };
 
 inline bool operator==(const replaygain_info & item1,const replaygain_info & item2) {return replaygain_info::g_equal(item1,item2);}
@@ -186,13 +204,23 @@ public:
 	inline void info_set_bitrate_vbr(t_int64 val) {info_set_int("bitrate_dynamic",val);}
 	inline t_int64 info_get_bitrate() const {return info_get_int("bitrate");}
 	inline void info_set_bitrate(t_int64 val) {info_set_int("bitrate",val);}
+
+	void info_set_wfx_chanMask(uint32_t val);
+	uint32_t info_get_wfx_chanMask() const;
+
 	bool is_encoding_lossy() const;
+
 
 	void info_calculate_bitrate(t_filesize p_filesize,double p_length);
 
 	unsigned info_get_decoded_bps() const;//what bps the stream originally was (before converting to audio_sample), 0 if unknown
 
+private:
 	void merge(const pfc::list_base_const_t<const file_info*> & p_sources);
+public:
+
+	void _set_tag(const file_info & tag);
+	void _add_tag(const file_info & otherTag);
 
 	void merge_fallback(const file_info & fallback);
 
@@ -201,6 +229,7 @@ public:
 	inline const file_info & operator=(const file_info & p_source) {copy(p_source);return *this;}
 
 	static bool g_is_meta_equal(const file_info & p_item1,const file_info & p_item2);
+	static bool g_is_meta_equal_debug(const file_info & p_item1,const file_info & p_item2);
 	static bool g_is_info_equal(const file_info & p_item1,const file_info & p_item2);
 
 	//! Unsafe - does not check whether the field already exists and will result in duplicates if it does - call only when appropriate checks have been applied externally.
@@ -219,7 +248,20 @@ public:
 	//typedef pfc::comparator_stricmp_ascii field_name_comparator;
 	typedef pfc::string::comparatorCaseInsensitiveASCII field_name_comparator;
 
+	static bool field_name_equals(const char * n1, const char * n2) {return field_name_comparator::compare(n1, n2) == 0;}
+
 	void to_console() const;
+	void to_formatter(pfc::string_formatter&) const;
+	static bool field_is_person(const char * fieldName);
+	static bool field_is_title(const char * fieldName);
+
+	void to_stream( stream_writer * stream, abort_callback & abort ) const;
+	void from_stream( stream_reader * stream, abort_callback & abort );
+	void from_mem( const void * memPtr, size_t memSize);
+	
+	//! Returns ESTIMATED audio chunk spec from what has been put in the file_info. \n
+	//! Provided for convenience. Do not rely on it for processing decoded data.
+	audio_chunk::spec_t audio_chunk_spec() const; 
 protected:
 	file_info() {}
 	~file_info() {}

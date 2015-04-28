@@ -34,3 +34,13 @@ bool threaded_process::g_run_modeless(service_ptr_t<threaded_process_callback> p
 {
 	return static_api_ptr_t<threaded_process>()->run_modeless(p_callback,p_flags,p_parent,p_title,p_title_len);
 }
+
+bool threaded_process::g_query_preventStandby() {
+	static const GUID guid_preventStandby = { 0x7aafeffb, 0x5f11, 0x483f, { 0xac, 0x65, 0x61, 0xec, 0x9c, 0x70, 0x37, 0x4e } };
+	advconfig_entry_checkbox::ptr obj;
+	if (advconfig_entry::g_find_t(obj, guid_preventStandby)) {
+		return obj->get_state();
+	} else {
+		return false;
+	}
+}

@@ -2,7 +2,7 @@
 //! In 1.0 and newer you should always derive from preferences_page_v3 rather than from preferences_page directly.
 class NOVTABLE preferences_page : public service_base {
 public:
-	//! Creates preferences page dialog window. It is safe to assume that two dialog instances will never coexist. Caller is responsible for embedding it into preferences dialog itself.
+	//! Obsolete.
 	virtual HWND create(HWND p_parent) = 0;
 	//! Retrieves name of the prefernces page to be displayed in preferences tree (static string).
 	virtual const char * get_name() = 0;

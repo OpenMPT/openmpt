@@ -9,7 +9,11 @@
 
 // #define FOOBAR2000_TARGET_VERSION 75 // 0.9.6
 // #define FOOBAR2000_TARGET_VERSION 76 // 1.0
-#define FOOBAR2000_TARGET_VERSION 77 // 1.1
+//#define FOOBAR2000_TARGET_VERSION 77 // 1.1
+#define FOOBAR2000_TARGET_VERSION 78 // 1.3
+
+#define FOOBAR2000_DESKTOP
+#define FOOBAR2000_DESKTOP_WINDOWS
 
 #include "../../pfc/pfc.h"
 
@@ -91,6 +95,7 @@ typedef const char * pcchar;
 #include "track_property.h"
 
 #include "album_art.h"
+#include "album_art_helpers.h"
 #include "icon_remap.h"
 #include "ui_element.h"
 #include "ole_interaction.h"
@@ -105,5 +110,7 @@ typedef const char * pcchar;
 #include "exceptions.h"
 
 #include "progress_meter.h"
+
+#include "output.h"
 
 #endif //_FOOBAR2000_H_

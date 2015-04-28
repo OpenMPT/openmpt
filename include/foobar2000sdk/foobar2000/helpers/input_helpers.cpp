@@ -1,29 +1,28 @@
 #include "stdafx.h"
 
+static void _input_helper_io_filter_fullbuffer(service_ptr_t<file> & p_file,const char * p_path, t_filesize arg,abort_callback & p_abort) {
+	if (arg > 0 && !filesystem::g_is_remote_or_unrecognized(p_path)) {
+		fullFileBuffer a;
+		p_file = a.open(p_path, p_abort, p_file, arg);
+	}
+}
+
+static void _input_helper_io_filter_blockbuffer(service_ptr_t<file> & p_file,const char * p_path, t_filesize arg,abort_callback & p_abort) {
+	if (arg > 0 && !filesystem::g_is_remote_or_unrecognized(p_path)) {
+		if (p_file.is_empty()) filesystem::g_open_read( p_file, p_path, p_abort );
+		if (!p_file->is_in_memory() && !p_file->is_remote() && p_file->can_seek()) {
+			file_cached::g_create( p_file, p_file, p_abort, (size_t) arg );
+		}
+	}
+}
+
 void input_helper::open(service_ptr_t<file> p_filehint,metadb_handle_ptr p_location,unsigned p_flags,abort_callback & p_abort,bool p_from_redirect,bool p_skip_hints)
 {
 	open(p_filehint,p_location->get_location(),p_flags,p_abort,p_from_redirect,p_skip_hints);
 }
 
-static void process_fullbuffer(service_ptr_t<file> & p_file,const char * p_path,t_filesize p_fullbuffer,abort_callback & p_abort) {
-	if (p_fullbuffer > 0) {
-		if (p_file.is_empty()) {
-			service_ptr_t<filesystem> fs;
-			if (filesystem::g_get_interface(fs,p_path)) {
-				fs->open(p_file,p_path,filesystem::open_mode_read,p_abort);
-			}
-		}
-
-		if (p_file.is_valid()) {
-			t_filesize size = p_file->get_size(p_abort);
-			if (size != filesize_invalid && size <= p_fullbuffer) {
-				service_ptr_t<file> l_file_buffered;
-				if (reader_membuffer_mirror::g_create(l_file_buffered,p_file,p_abort)) {
-					p_file = l_file_buffered;
-				}
-			}
-		}
-	}
+void input_helper::process_fullbuffer(service_ptr_t<file> & p_file,const char * p_path,abort_callback & p_abort) {
+	if (m_ioFilter != NULL) m_ioFilter(p_file, p_path, m_ioFilterArg, p_abort);
 }
 
 bool input_helper::need_file_reopen(const char * newPath) const {
@@ -37,7 +36,7 @@ bool input_helper::open_path(file::ptr p_filehint,const char * path,abort_callba
 	m_input.release();
 
 	service_ptr_t<file> l_file = p_filehint;
-	process_fullbuffer(l_file,path,m_fullbuffer,p_abort);
+	process_fullbuffer(l_file,path,p_abort);
 
 	TRACK_CODE("input_entry::g_open_for_decoding",
 		input_entry::g_open_for_decoding(m_input,l_file,path,p_abort,p_from_redirect)
@@ -65,10 +64,21 @@ void input_helper::open_decoding(t_uint32 subsong, t_uint32 flags, abort_callbac
 	TRACK_CODE("input_decoder::initialize",m_input->initialize(subsong,flags,p_abort));
 }
 
-void input_helper::open(service_ptr_t<file> p_filehint,const playable_location & p_location,unsigned p_flags,abort_callback & p_abort,bool p_from_redirect,bool p_skip_hints) {
-	open_path(p_filehint, p_location.get_path(), p_abort, p_from_redirect, p_skip_hints);
+void input_helper::open(const playable_location & location, abort_callback & abort, decodeOpen_t const & other) {
+	open_path(other.m_hint, location.get_path(), abort, other.m_from_redirect, other.m_skip_hints);
 
-	open_decoding(p_location.get_subsong(), p_flags, p_abort);
+	set_logger( other.m_logger );
+
+	open_decoding(location.get_subsong(), other.m_flags, abort);
+}
+
+void input_helper::open(service_ptr_t<file> p_filehint,const playable_location & p_location,unsigned p_flags,abort_callback & p_abort,bool p_from_redirect,bool p_skip_hints) {
+	decodeOpen_t o;
+	o.m_hint = p_filehint;
+	o.m_flags = p_flags;
+	o.m_from_redirect = p_from_redirect;
+	o.m_skip_hints = p_skip_hints;
+	this->open( p_location, p_abort, o );
 }
 
 
@@ -115,8 +125,15 @@ bool input_helper::can_seek() {
 }
 
 void input_helper::set_full_buffer(t_filesize val) {
-	m_fullbuffer = val;
+	m_ioFilter = _input_helper_io_filter_fullbuffer;
+	m_ioFilterArg = val;
 }
+
+void input_helper::set_block_buffer(size_t val) {
+	m_ioFilter = _input_helper_io_filter_blockbuffer;
+	m_ioFilterArg = val;
+}
+
 void input_helper::on_idle(abort_callback & p_abort) {
 	if (m_input.is_valid()) {
 		TRACK_CODE("input_decoder::on_idle",m_input->on_idle(p_abort));
@@ -140,7 +157,7 @@ const char * input_helper::get_path() const {
 }
 
 
-input_helper::input_helper() : m_fullbuffer(0)
+input_helper::input_helper() : m_ioFilter(), m_ioFilterArg()
 {
 }
 
@@ -359,6 +376,7 @@ void input_helper_cue::seek(double p_seconds,abort_callback & p_abort)
 }
 
 bool input_helper_cue::can_seek() {return true;}
+
 void input_helper_cue::set_full_buffer(t_filesize val) {m_input.set_full_buffer(val);}
 
 void input_helper_cue::on_idle(abort_callback & p_abort) {m_input.on_idle(p_abort);}
@@ -386,3 +404,196 @@ const char * input_helper_cue::get_path() const {return m_input.get_path();}
 void input_helper_cue::get_info(t_uint32 p_subsong,file_info & p_info,abort_callback & p_abort) {m_input.get_info(p_subsong,p_info,p_abort);}
 
 
+
+
+
+
+// openAudioData code
+
+namespace {
+
+	class file_decodedaudio : public file_readonly {
+	public:
+		void init(const playable_location & loc, bool bSeekable, file::ptr fileHint, abort_callback & aborter) {
+			m_length = -1; m_lengthKnown = false;
+			m_subsong = loc.get_subsong();
+			input_entry::g_open_for_decoding(m_decoder, fileHint, loc.get_path(), aborter);
+			m_seekable = bSeekable && m_decoder->can_seek();
+			reopenDecoder(aborter);
+			readChunk(aborter, true);
+		}
+
+		void reopen(abort_callback & aborter) {
+
+			// Have valid chunk and it is the first chunk in the stream? Reset read pointers and bail, no need to reopen
+			if (m_chunk.get_sample_count() > 0 && m_chunkBytesPtr == m_currentPosition) {
+				m_currentPosition = 0;
+				m_chunkBytesPtr = 0;
+				m_eof = false;
+				return;
+			}
+
+			reopenDecoder(aborter);
+			readChunk(aborter);
+		}
+
+		bool is_remote() {
+			return false;
+		}
+#if FOOBAR2000_TARGET_VERSION >= 2000
+		t_filestats get_stats(abort_callback & aborter) {
+			t_filestats fs = m_decoder->get_file_stats(aborter);
+			fs.m_size = get_size(aborter);
+			return fs;
+		}
+#else
+		t_filetimestamp get_timestamp(abort_callback & p_abort) {
+			return m_decoder->get_file_stats(p_abort).m_timestamp;
+		}
+#endif
+		void on_idle(abort_callback & p_abort) {
+			m_decoder->on_idle(p_abort);
+		}
+		bool get_content_type(pfc::string_base & p_out) {
+			return false;
+		}
+		bool can_seek() {
+			return m_seekable;
+		}
+		void seek(t_filesize p_position, abort_callback & p_abort) {
+			if (!m_seekable) throw exception_io_object_not_seekable();
+
+
+			{
+				t_filesize chunkBegin = m_currentPosition - m_chunkBytesPtr;
+				t_filesize chunkEnd = chunkBegin + curChunkBytes();
+				if (p_position >= chunkBegin && p_position < chunkEnd) {
+					m_chunkBytesPtr = (size_t)(p_position - chunkBegin);
+					m_currentPosition = p_position;
+					m_eof = false;
+					return;
+				}
+			}
+
+			{
+				t_filesize s = get_size(p_abort);
+				if (s != filesize_invalid) {
+					if (p_position > s) throw exception_io_seek_out_of_range();
+					if (p_position == s) {
+						m_chunk.reset();
+						m_chunkBytesPtr = 0;
+						m_currentPosition = p_position;
+						m_eof = true;
+						return;
+					}
+				}
+			}
+
+
+			
+			const size_t row = m_spec.chanCount * sizeof(audio_sample);
+			t_filesize samples = p_position / row;
+			const double seekTime = audio_math::samples_to_time(samples, m_spec.sampleRate);
+			m_decoder->seek(seekTime, p_abort);
+			m_eof = false; // do this before readChunk
+			if (!this->readChunk(p_abort)) {
+				throw std::runtime_error(PFC_string_formatter() << "Premature EOF in referenced audio file at " << pfc::format_time_ex(seekTime, 6) << " out of " << pfc::format_time_ex(length(p_abort), 6));
+			}
+			m_chunkBytesPtr = p_position % row;
+			if (m_chunkBytesPtr > curChunkBytes()) {
+				// Should not ever happen
+				m_chunkBytesPtr = 0;
+				throw std::runtime_error("Decoder returned invalid data");
+			}
+
+			m_currentPosition = p_position;
+			m_eof = false;
+		}
+
+		t_filesize get_size(abort_callback & aborter) {
+			const double l = length(aborter);
+			if (l <= 0) return filesize_invalid;
+			return audio_math::time_to_samples(l, m_spec.sampleRate) * m_spec.chanCount * sizeof(audio_sample);
+		}
+		t_filesize get_position(abort_callback & p_abort) {
+			return m_currentPosition;
+		}
+		t_size read(void * p_buffer, t_size p_bytes, abort_callback & p_abort) {
+			size_t done = 0;
+			for (;;) {
+				p_abort.check();
+				{
+					const size_t inChunk = curChunkBytes();
+					const size_t inChunkRemaining = inChunk - m_chunkBytesPtr;
+					const size_t delta = pfc::min_t<size_t>(inChunkRemaining, (p_bytes - done));
+					memcpy((uint8_t*)p_buffer + done, (const uint8_t*)m_chunk.get_data() + m_chunkBytesPtr, delta);
+					m_chunkBytesPtr += delta;
+					done += delta;
+					m_currentPosition += delta;
+
+					if (done == p_bytes) break;
+				}
+				if (!readChunk(p_abort)) break;
+			}
+			return done;
+		}
+		audio_chunk::spec_t const & get_spec() const { return m_spec; }
+	private:
+		void reopenDecoder(abort_callback & aborter) {
+			uint32_t flags = input_flag_no_looping;
+			if (!m_seekable) flags |= input_flag_no_seeking;
+			m_decoder->initialize(m_subsong, flags, aborter);
+			m_eof = false;
+			m_currentPosition = 0;
+		}
+		size_t curChunkBytes() const {
+			return m_chunk.get_used_size() * sizeof(audio_sample);
+		}
+		bool readChunk(abort_callback & aborter, bool initial = false) {
+			m_chunkBytesPtr = 0;
+			for (;;) {
+				if (m_eof || !m_decoder->run(m_chunk, aborter)) {
+					if (initial) throw std::runtime_error("Decoder produced no data");
+					m_eof = true;
+					m_chunk.reset();
+					return false;
+				}
+				if (m_chunk.is_valid()) break;
+			}
+			audio_chunk::spec_t spec = m_chunk.get_spec();
+			if (initial) m_spec = spec;
+			else if (m_spec != spec) throw std::runtime_error("Sample format change in mid stream");
+			return true;
+		}
+		double length(abort_callback & aborter) {
+			if (!m_lengthKnown) {
+				file_info_impl temp;
+				m_decoder->get_info(m_subsong, temp, aborter);
+				m_length = temp.get_length();
+				m_lengthKnown = true;
+			}
+			return m_length;
+		}
+		audio_chunk_fast_impl m_chunk;
+		size_t m_chunkBytesPtr;
+		audio_chunk::spec_t m_spec;
+		double m_length;
+		bool m_lengthKnown;
+		bool m_seekable;
+		uint32_t m_subsong;
+		input_decoder::ptr m_decoder;
+		bool m_eof;
+		t_filesize m_currentPosition;
+	};
+
+}
+
+openAudioData_t openAudioData(playable_location const & loc, bool bSeekable, file::ptr fileHint, abort_callback & aborter) {
+	service_ptr_t<file_decodedaudio> f; f = new service_impl_t < file_decodedaudio > ;
+	f->init(loc, bSeekable, fileHint, aborter);
+
+	openAudioData_t oad = {};
+	oad.audioData = f;
+	oad.audioSpec = f->get_spec();
+	return oad;
+}

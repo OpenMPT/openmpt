@@ -1,31 +1,15 @@
 namespace file_win32_helpers {
-	static t_filesize get_size(HANDLE p_handle) {
-		union {
-			t_uint64 val64;
-			t_uint32 val32[2];
-		} u;
-
-		u.val64 = 0;
-		SetLastError(NO_ERROR);
-		u.val32[0] = GetFileSize(p_handle,reinterpret_cast<DWORD*>(&u.val32[1]));
-		if (GetLastError()!=NO_ERROR) exception_io_from_win32(GetLastError());
-		return u.val64;
-	}
-	static void seek(HANDLE p_handle,t_sfilesize p_position,file::t_seek_mode p_mode) {
-		union  {
-			t_int64 temp64;
-			struct {
-				DWORD temp_lo;
-				LONG temp_hi;
-			};
-		};
-
-		temp64 = p_position;
-		SetLastError(ERROR_SUCCESS);		
-		temp_lo = SetFilePointer(p_handle,temp_lo,&temp_hi,(DWORD)p_mode);
-		if (GetLastError() != ERROR_SUCCESS) exception_io_from_win32(GetLastError());
-	}
-}
+	t_filesize get_size(HANDLE p_handle);
+	void seek(HANDLE p_handle,t_sfilesize p_position,file::t_seek_mode p_mode);
+	void fillOverlapped(OVERLAPPED & ol, HANDLE myEvent, t_filesize s);
+	void writeOverlappedPass(HANDLE handle, HANDLE myEvent, t_filesize position, const void * in,DWORD inBytes, abort_callback & abort);
+	void writeOverlapped(HANDLE handle, HANDLE myEvent, t_filesize & position, const void * in, size_t inBytes, abort_callback & abort);
+	void writeStreamOverlapped(HANDLE handle, HANDLE myEvent, const void * in, size_t inBytes, abort_callback & abort);
+	DWORD readOverlappedPass(HANDLE handle, HANDLE myEvent, t_filesize position, void * out, DWORD outBytes, abort_callback & abort);
+	size_t readOverlapped(HANDLE handle, HANDLE myEvent, t_filesize & position, void * out, size_t outBytes, abort_callback & abort);
+	size_t readStreamOverlapped(HANDLE handle, HANDLE myEvent, void * out, size_t outBytes, abort_callback & abort);
+	HANDLE createFile(LPCTSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile, abort_callback & abort);
+};
 
 template<bool p_seekable,bool p_writeable>
 class file_win32_wrapper_t : public file {
@@ -34,10 +18,14 @@ public:
 	{
 	}
 
-	static service_ptr_t<file> g_CreateFile(const char * p_path,DWORD p_access,DWORD p_sharemode,LPSECURITY_ATTRIBUTES p_security_attributes,DWORD p_createmode,DWORD p_flags,HANDLE p_template) {
+	static file::ptr g_CreateFile(const char * p_path,DWORD p_access,DWORD p_sharemode,LPSECURITY_ATTRIBUTES p_security_attributes,DWORD p_createmode,DWORD p_flags,HANDLE p_template) {
 		SetLastError(NO_ERROR);
 		HANDLE handle = uCreateFile(p_path,p_access,p_sharemode,p_security_attributes,p_createmode,p_flags,p_template);
-		if (handle == INVALID_HANDLE_VALUE) exception_io_from_win32(GetLastError());
+		if (handle == INVALID_HANDLE_VALUE) {
+			const DWORD code = GetLastError();
+			if (p_access & GENERIC_WRITE) win32_file_write_failure(code, p_path);
+			else exception_io_from_win32(code);
+		}
 		try {
 			return g_create_from_handle(handle);
 		} catch(...) {CloseHandle(handle); throw;}
@@ -132,15 +120,6 @@ public:
 		if (m_position != p_size) file_win32_helpers::seek(m_handle,m_position,file::seek_from_beginning);
 	}
 
-#if 0
-	void set_eof(abort_callback & p_abort) {
-		if (!p_writeable) throw exception_io_denied();
-		p_abort.check_e();
-
-		SetLastError(ERROR_SUCCESS);
-		if (!SetEndOfFile(m_handle)) exception_io_from_win32(GetLastError());
-	}
-#endif
 
 	void seek(t_filesize p_position,abort_callback & p_abort) {
 		if (!p_seekable) throw exception_io_object_not_seekable();
@@ -148,18 +127,7 @@ public:
 		if (p_position > file_win32_helpers::get_size(m_handle)) throw exception_io_seek_out_of_range();
 		file_win32_helpers::seek(m_handle,p_position,file::seek_from_beginning);
 		m_position = p_position;
-		//return seek_ex((t_sfilesize)p_position,file::seek_from_beginning,p_abort);
 	}
-#if 0
-	void seek_ex(t_sfilesize p_position,file::t_seek_mode p_mode,abort_callback & p_abort) {
-		if (!p_seekable) throw exception_io_object_not_seekable();
-		p_abort.check_e();
-
-		file_win32_helpers::seek(m_handle,p_position,p_mode);
-
-        m_position = (t_filesize) temp64;
-	}
-#endif
 
 	bool can_seek() {return p_seekable;}
 	bool get_content_type(pfc::string_base & out) {return false;}
@@ -177,7 +145,95 @@ public:
 
 	bool is_remote() {return false;}
 	~file_win32_wrapper_t() {CloseHandle(m_handle);}
-private:
+protected:
 	HANDLE m_handle;
+	t_filesize m_position;
+};
+
+template<bool p_writeable>
+class file_win32_wrapper_overlapped_t : public file {
+public:
+	file_win32_wrapper_overlapped_t(HANDLE file) : m_handle(file), m_position() {
+		WIN32_OP( (m_event = CreateEvent(NULL, TRUE, FALSE, NULL)) != NULL );
+	}
+	~file_win32_wrapper_overlapped_t() {CloseHandle(m_event); CloseHandle(m_handle);}
+	void write(const void * p_buffer,t_size p_bytes,abort_callback & p_abort) {
+		if (!p_writeable) throw exception_io_denied();
+		return file_win32_helpers::writeOverlapped(m_handle, m_event, m_position, p_buffer, p_bytes, p_abort);
+	}
+	t_size read(void * p_buffer,t_size p_bytes,abort_callback & p_abort) {
+		return file_win32_helpers::readOverlapped(m_handle, m_event, m_position, p_buffer, p_bytes, p_abort);
+	}
+
+	void reopen(abort_callback & p_abort) {seek(0,p_abort);}
+
+
+	t_filesize get_size(abort_callback & p_abort) {
+		p_abort.check_e();
+		return file_win32_helpers::get_size(m_handle);
+	}
+
+	t_filesize get_position(abort_callback & p_abort) {
+		p_abort.check_e();
+		return m_position;
+	}
+	
+	void resize(t_filesize p_size,abort_callback & p_abort) {
+		if (!p_writeable) throw exception_io_denied();
+		p_abort.check_e();
+		file_win32_helpers::seek(m_handle,p_size,file::seek_from_beginning);
+		SetLastError(ERROR_SUCCESS);
+		if (!SetEndOfFile(m_handle)) {
+			DWORD code = GetLastError();
+			exception_io_from_win32(code);
+		}
+		if (m_position > p_size) m_position = p_size;
+	}
+
+
+	void seek(t_filesize p_position,abort_callback & p_abort) {
+		p_abort.check_e();
+		if (p_position > file_win32_helpers::get_size(m_handle)) throw exception_io_seek_out_of_range();
+		// file_win32_helpers::seek(m_handle,p_position,file::seek_from_beginning);
+		m_position = p_position;
+	}
+
+	bool can_seek() {return true;}
+	bool get_content_type(pfc::string_base & out) {return false;}
+	bool is_in_memory() {return false;}
+	void on_idle(abort_callback & p_abort) {p_abort.check_e();}
+	
+	t_filetimestamp get_timestamp(abort_callback & p_abort) {
+		p_abort.check_e();
+		FlushFileBuffers(m_handle);
+		SetLastError(ERROR_SUCCESS);
+		t_filetimestamp temp;
+		if (!GetFileTime(m_handle,0,0,(FILETIME*)&temp)) exception_io_from_win32(GetLastError());
+		return temp;
+	}
+
+	bool is_remote() {return false;}
+	
+
+	static file::ptr g_CreateFile(const char * p_path,DWORD p_access,DWORD p_sharemode,LPSECURITY_ATTRIBUTES p_security_attributes,DWORD p_createmode,DWORD p_flags,HANDLE p_template) {
+		p_flags |= FILE_FLAG_OVERLAPPED;
+		SetLastError(NO_ERROR);
+		HANDLE handle = uCreateFile(p_path,p_access,p_sharemode,p_security_attributes,p_createmode,p_flags,p_template);
+		if (handle == INVALID_HANDLE_VALUE) {
+			const DWORD code = GetLastError();
+			if (p_access & GENERIC_WRITE) win32_file_write_failure(code, p_path);
+			else exception_io_from_win32(code);
+		}
+		try {
+			return g_create_from_handle(handle);
+		} catch(...) {CloseHandle(handle); throw;}
+	}
+
+	static file::ptr g_create_from_handle(HANDLE p_handle) {
+		return new service_impl_t<file_win32_wrapper_overlapped_t<p_writeable> >(p_handle);
+	}
+
+protected:
+	HANDLE m_event, m_handle;
 	t_filesize m_position;
 };

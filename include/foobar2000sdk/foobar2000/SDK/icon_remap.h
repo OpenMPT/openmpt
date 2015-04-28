@@ -15,7 +15,7 @@ class icon_remapping_impl : public icon_remapping {
 public:
 	icon_remapping_impl(const char * p_extension,const char * p_iconname) : m_extension(p_extension), m_iconname(p_iconname) {}
 	bool query(const char * p_extension,pfc::string_base & p_iconname) {
-		if (stricmp_utf8(p_extension,m_extension) == 0) {
+		if (pfc::stricmp_ascii(p_extension,m_extension) == 0) {
 			p_iconname = m_iconname; return true;
 		} else {
 			return false;

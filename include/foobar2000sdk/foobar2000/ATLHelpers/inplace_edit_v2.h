@@ -1,6 +1,6 @@
 namespace InPlaceEdit {
 	class NOVTABLE CTableEditHelperV2 : protected completion_notify_receiver {
-	protected:	
+	public:
 		virtual RECT TableEdit_GetItemRect(t_size item, t_size subItem) const = 0;
 		virtual void TableEdit_GetField(t_size item, t_size subItem, pfc::string_base & out, t_size & lineCount) = 0;
 		virtual void TableEdit_SetField(t_size item, t_size subItem, const char * value) = 0;
@@ -17,7 +17,7 @@ namespace InPlaceEdit {
 		void TableEdit_Start(t_size item, t_size subItem);
 		void TableEdit_Abort(bool forwardContent);
 		bool TableEdit_IsActive() const {return have_task(KTaskID);}
-
+	protected:
 		void on_task_completion(unsigned p_id,unsigned p_status);
 	private:
 		t_size ColumnToPosition(t_size col) const;

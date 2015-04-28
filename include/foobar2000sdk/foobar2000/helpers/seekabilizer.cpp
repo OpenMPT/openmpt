@@ -96,6 +96,7 @@ t_size seekabilizer::read(void * p_buffer,t_size p_bytes,abort_callback & p_abor
 	p_abort.check_e();
 
 	if (m_position > m_position_base + pfc::max_t<t_size>(m_buffer.get_max_depth(),backread_on_seek) && m_file->can_seek()) {
+		m_buffer.reset();
 		t_filesize target = m_position;
 		if (target < backread_on_seek) target = 0;
 		else target -= backread_on_seek;

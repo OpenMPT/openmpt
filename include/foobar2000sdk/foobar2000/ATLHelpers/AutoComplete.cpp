@@ -144,6 +144,15 @@ pfc::com_ptr_t<IUnknown> CreateACList(pfc::const_iterator<pfc::string> valueEnum
 	}
 	return acl;
 }
+
+pfc::com_ptr_t<IUnknown> CreateACList() {
+	return new CEnumString::TImpl();
+}
+
+void CreateACList_AddItem(IUnknown * theList, const char * item) {
+	static_cast<CEnumString*>(theList)->AddStringU( item );
+}
+
 HRESULT InitializeEditAC(HWND edit, pfc::const_iterator<pfc::string8> valueEnum, DWORD opts) {
 	pfc::com_ptr_t<IUnknown> acl = CreateACList(valueEnum);
 	return InitializeSimpleAC(edit, acl.get_ptr(), opts);

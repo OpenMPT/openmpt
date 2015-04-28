@@ -1,8 +1,14 @@
 #include "foobar2000.h"
 
+#ifdef _MSC_VER
+#define RG_FPU() fpu_control_roundnearest bah;
+#else
+#define RG_FPU()
+#endif
+
 bool replaygain_info::g_format_gain(float p_value,char p_buffer[text_buffer_size])
 {
-	fpu_control_roundnearest bah;
+	RG_FPU();
 	if (p_value == gain_invalid)
 	{
 		p_buffer[0] = 0;
@@ -18,7 +24,7 @@ bool replaygain_info::g_format_gain(float p_value,char p_buffer[text_buffer_size
 
 bool replaygain_info::g_format_peak(float p_value,char p_buffer[text_buffer_size])
 {
-	fpu_control_roundnearest bah;
+	RG_FPU();
 	if (p_value == peak_invalid)
 	{
 		p_buffer[0] = 0;
@@ -52,7 +58,7 @@ bool replaygain_info::g_is_meta_replaygain(const char * p_name,t_size p_name_len
 
 bool replaygain_info::set_from_meta_ex(const char * p_name,t_size p_name_len,const char * p_value,t_size p_value_len)
 {
-	fpu_control_roundnearest bah;
+	RG_FPU();
 	if (stricmp_utf8_ex(p_name,p_name_len,meta_album_gain,~0) == 0)
 	{
 		m_album_gain = (float)pfc::string_to_float(p_value,p_value_len);
@@ -91,7 +97,7 @@ t_size replaygain_info::get_value_count()
 
 void replaygain_info::set_album_gain_text(const char * p_text,t_size p_text_len)
 {
-	fpu_control_roundnearest bah;
+	RG_FPU();
 	if (p_text != 0 && p_text_len > 0 && *p_text != 0)
 		m_album_gain = (float)pfc::string_to_float(p_text,p_text_len);
 	else
@@ -100,7 +106,7 @@ void replaygain_info::set_album_gain_text(const char * p_text,t_size p_text_len)
 
 void replaygain_info::set_track_gain_text(const char * p_text,t_size p_text_len)
 {
-	fpu_control_roundnearest bah;
+	RG_FPU();
 	if (p_text != 0 && p_text_len > 0 && *p_text != 0)
 		m_track_gain = (float)pfc::string_to_float(p_text,p_text_len);
 	else
@@ -109,7 +115,7 @@ void replaygain_info::set_track_gain_text(const char * p_text,t_size p_text_len)
 
 void replaygain_info::set_album_peak_text(const char * p_text,t_size p_text_len)
 {
-	fpu_control_roundnearest bah;
+	RG_FPU();
 	if (p_text != 0 && p_text_len > 0 && *p_text != 0)
 		m_album_peak = (float)pfc::string_to_float(p_text,p_text_len);
 	else
@@ -118,7 +124,7 @@ void replaygain_info::set_album_peak_text(const char * p_text,t_size p_text_len)
 
 void replaygain_info::set_track_peak_text(const char * p_text,t_size p_text_len)
 {
-	fpu_control_roundnearest bah;
+	RG_FPU();
 	if (p_text != 0 && p_text_len > 0 && *p_text != 0)
 		m_track_peak = (float)pfc::string_to_float(p_text,p_text_len);
 	else

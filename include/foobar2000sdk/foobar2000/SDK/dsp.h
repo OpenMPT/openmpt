@@ -19,7 +19,7 @@ public:
 	}
 
 	void add_chunk(const audio_chunk * chunk) {
-		audio_chunk * dst = insert_item(get_count(),chunk->get_data_length());
+		audio_chunk * dst = insert_item(get_count(),chunk->get_used_size());
 		if (dst) dst->copy(*chunk);
 	}
 
@@ -119,6 +119,11 @@ protected:
 		PFC_ASSERT(m_list != NULL);
 		return m_list->insert_item(m_chunk_ptr++,p_hint_size);
 	}
+	audio_chunk * insert_chunk( const audio_chunk & sourceCopy ) {
+		audio_chunk * c = insert_chunk( sourceCopy.get_used_size() );
+		c->copy( sourceCopy );
+		return c;
+	}
 
 
 	//! To be overridden by a DSP implementation.\n
@@ -153,8 +158,8 @@ public:
 	//! Signaling this may interfere with gapless playback in certain scenarios (forces flush of DSPs placed before you) so don't use it unless you have reasons to.
 	virtual bool need_track_change_mark() = 0;
 private:
-	dsp_impl_base_t(const t_self&) {throw pfc::exception_bug_check_v2();}
-	const t_self & operator=(const t_self &) {throw pfc::exception_bug_check_v2();}
+	dsp_impl_base_t(const t_self&);
+	const t_self & operator=(const t_self &);
 };
 
 template<class t_baseclass>
@@ -168,9 +173,9 @@ void dsp_impl_base_t<t_baseclass>::run_v2(dsp_chunk_list * p_list,const metadb_h
 			m_list->remove_by_idx(m_chunk_ptr--);
 	}
 
-	if (p_flags & FLUSH) {
+	if (p_flags & dsp::FLUSH) {
 		on_endofplayback(p_abort);
-	} else if (p_flags & END_OF_TRACK) {
+	} else if (p_flags & dsp::END_OF_TRACK) {
 		if (need_track_change_mark()) on_endoftrack(p_abort);
 	}
 }

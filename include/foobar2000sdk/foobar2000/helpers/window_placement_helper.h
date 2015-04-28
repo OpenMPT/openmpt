@@ -1,3 +1,5 @@
+#ifdef _WIN32
+
 #ifndef _WINDOW_PLACEMENT_HELPER_H_
 #define _WINDOW_PLACEMENT_HELPER_H_
 
@@ -32,3 +34,5 @@ private:
 
 
 #endif //_WINDOW_PLACEMENT_HELPER_H_
+
+#endif // _WIN32

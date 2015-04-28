@@ -13,7 +13,7 @@ void registerclass_scope_delayed::toggle_on(UINT p_style,WNDPROC p_wndproc,int p
 	wc.hbrBackground = p_background;
 	wc.lpszMenuName = p_menu_name;
 	wc.lpszClassName = p_class_name;
-	WIN32_OP( (m_class = RegisterClass(&wc)) != 0);
+	WIN32_OP_CRITICAL("RegisterClass", (m_class = RegisterClass(&wc)) != 0);
 }
 
 void registerclass_scope_delayed::toggle_off() {
@@ -52,8 +52,14 @@ bool IsMenuNonEmpty(HMENU menu) {
 PFC_NORETURN PFC_NOINLINE void WIN32_OP_FAIL() {
 	const DWORD code = GetLastError();
 	PFC_ASSERT( code != NO_ERROR );
-	pfc::string_fixed_t<32> debugMsg; debugMsg << "Win32 error #" << (t_uint32)code;
-	TRACK_CODE( debugMsg, throw exception_win32(code) );
+	throw exception_win32(code);
+}
+
+PFC_NORETURN PFC_NOINLINE void WIN32_OP_FAIL_CRITICAL(const char * what) {
+	const DWORD code = GetLastError();
+	PFC_ASSERT( code != NO_ERROR );
+	pfc::string_formatter msg; msg << what << " failure #" << (uint32_t)code;
+	TRACK_CODE(msg.get_ptr(), uBugCheck());
 }
 
 #ifdef _DEBUG
@@ -131,4 +137,152 @@ void SetDefaultMenuItem(HMENU p_menu,unsigned p_id) {
 	GetMenuItemInfo(p_menu,p_id,FALSE,&info);
 	info.fState |= MFS_DEFAULT;
 	SetMenuItemInfo(p_menu,p_id,FALSE,&info);
+}
+
+
+bool SetClipboardDataBlock(UINT p_format,const void * p_block,t_size p_block_size) {
+	bool success = false;
+	if (OpenClipboard(NULL)) {
+		EmptyClipboard();
+		HANDLE handle = GlobalAlloc(GMEM_MOVEABLE,p_block_size);
+		if (handle == NULL) {
+			CloseClipboard();
+			throw std::bad_alloc();
+		}
+		{CGlobalLock lock(handle);memcpy(lock.GetPtr(),p_block,p_block_size);}
+		if (SetClipboardData(p_format,handle) == NULL) {
+			GlobalFree(handle);//todo?
+		} else {
+			success = true;
+		}
+		CloseClipboard();
+	}
+	return success;
+}
+
+mutexScope::mutexScope(HANDLE hMutex_, abort_callback & abort) : hMutex(hMutex_) {
+	HANDLE h[2] = {hMutex, abort.get_abort_event()};
+	switch( WaitForMultipleObjects(2, h, FALSE, INFINITE) ) {
+	case WAIT_OBJECT_0:
+		break; // and enter
+	case WAIT_OBJECT_0+1:
+		throw exception_aborted();
+	default:
+		uBugCheck();			
+	}
+}
+mutexScope::~mutexScope() {
+	ReleaseMutex(hMutex);
+}
+
+
+
+void winLocalFileScope::open( const char * inPath, file::ptr inReader, abort_callback & aborter) {
+	close();
+	if (inPath != NULL) {
+		if (_extract_native_path_ptr( inPath ) ) {
+			pfc::string8 prefixed;
+			pfc::winPrefixPath( prefixed, inPath  );
+			m_path = pfc::stringcvt::string_wide_from_utf8( prefixed );
+			m_isTemp = false;
+			return;
+		}
+	}
+
+	pfc::string8 tempPath;
+	if (!uGetTempPath( tempPath )) uBugCheck();
+	tempPath.add_filename( PFC_string_formatter() << pfc::print_guid( pfc::createGUID() ) << ".rar" );
+
+	m_path = pfc::stringcvt::string_wide_from_utf8( tempPath );
+
+	if (inReader.is_empty()) {
+		if (inPath == NULL) uBugCheck();
+		inReader = fileOpenReadExisting( inPath, aborter, 1.0 );
+	}
+
+	file::ptr writer = fileOpenWriteNew( PFC_string_formatter() << "file://" << tempPath, aborter, 1.0 );
+	file::g_transfer_file( inReader , writer, aborter );
+	m_isTemp = true;
+}
+void winLocalFileScope::close() {
+	if (m_isTemp && m_path.length() > 0) {
+		pfc::lores_timer timer;
+		timer.start();
+		for(;;) {
+			if (DeleteFile( m_path.c_str() )) break;
+			if (timer.query() > 1.0) break;
+			Sleep(10);
+		}
+	}
+	m_path.clear();
+}
+
+CMutex::CMutex(const TCHAR * name) {
+	WIN32_OP_CRITICAL( "CreateMutex", m_hMutex = CreateMutex(NULL, FALSE, name) );
+}
+CMutex::~CMutex() {
+	CloseHandle(m_hMutex);
+}
+
+void CMutex::AcquireByHandle( HANDLE hMutex, abort_callback & aborter ) {
+	SetLastError(0);
+	HANDLE hWait[2] = {hMutex, aborter.get_abort_event()};
+	switch(WaitForMultipleObjects( 2, hWait, FALSE, INFINITE ) ) {
+	case WAIT_FAILED:
+		WIN32_OP_FAIL_CRITICAL("WaitForSingleObject");
+	case WAIT_OBJECT_0:
+		return;
+	case WAIT_OBJECT_0 + 1:
+		PFC_ASSERT( aborter.is_aborting() );
+		throw exception_aborted();
+	default:
+		uBugCheck();
+	}
+}
+
+void CMutex::Acquire( abort_callback& aborter ) {
+	AcquireByHandle( Handle(), aborter );
+}
+
+void CMutex::Release() {
+	ReleaseMutex( Handle() );
+}
+
+
+CMutexScope::CMutexScope(CMutex & mutex, DWORD timeOutMS, const char * timeOutBugMsg) : m_mutex(mutex) {
+	SetLastError(0);
+	const unsigned div = 4;
+	for(unsigned walk = 0; walk < div; ++walk) {
+		switch(WaitForSingleObject( m_mutex.Handle(), timeOutMS/div ) ) {
+		case WAIT_FAILED:
+			WIN32_OP_FAIL_CRITICAL("WaitForSingleObject");
+		case WAIT_OBJECT_0:
+			return;
+		case WAIT_TIMEOUT:
+			break;
+		default:
+			uBugCheck();
+		}
+	}
+	TRACK_CODE(timeOutBugMsg, uBugCheck());
+}
+
+CMutexScope::CMutexScope(CMutex & mutex) : m_mutex(mutex) {
+	SetLastError(0);
+	switch(WaitForSingleObject( m_mutex.Handle(), INFINITE ) ) {
+	case WAIT_FAILED:
+		WIN32_OP_FAIL_CRITICAL("WaitForSingleObject");
+	case WAIT_OBJECT_0:
+		return;
+	default:
+		uBugCheck();
+	}
+}
+
+CMutexScope::CMutexScope(CMutex & mutex, abort_callback & aborter) : m_mutex(mutex) {
+	mutex.Acquire( aborter );
+}
+
+CMutexScope::~CMutexScope() {
+	ReleaseMutex(m_mutex.Handle());
 }

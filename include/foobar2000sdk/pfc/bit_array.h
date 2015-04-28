@@ -64,4 +64,8 @@ private:
 	const t_size m_size;
 };
 
+
+#define PFC_FOR_EACH_INDEX( bitArray, var, count ) \
+for( size_t var = (bitArray).find_first( true, 0, (count) ); var < (count); var = (bitArray).find_next( true, var, (count) ) )
+
 #endif

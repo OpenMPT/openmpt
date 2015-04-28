@@ -1,3 +1,4 @@
+#ifdef _WIN32
 namespace ClipboardHelper {
 
 	class OpenScope {
@@ -38,3 +39,4 @@ namespace ClipboardHelper {
 	}
 	bool IsTextAvailable();
 };
+#endif // _WIN32

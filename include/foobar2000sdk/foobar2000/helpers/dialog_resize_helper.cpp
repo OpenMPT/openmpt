@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "dialog_resize_helper.h"
 
+#ifdef _WIN32
+
 BOOL GetChildWindowRect(HWND wnd,UINT id,RECT* child)
 {
 	RECT temp;
@@ -56,7 +58,7 @@ void dialog_resize_helper::on_wm_size()
 				else if (e.flags & Y_SIZE)
 					dest_cy += delta_y;
 				
-				DeferWindowPos(hWinPosInfo, wnd,0,dest_x,dest_y,dest_cx,dest_cy,SWP_NOZORDER);
+				hWinPosInfo = DeferWindowPos(hWinPosInfo, wnd,0,dest_x,dest_y,dest_cx,dest_cy,SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE);
 			}
 		}
 		if (sizegrip != 0)
@@ -64,7 +66,7 @@ void dialog_resize_helper::on_wm_size()
 			RECT rc, rc_grip;
 			GetClientRect(parent, &rc);
 			GetWindowRect(sizegrip, &rc_grip);
-			DeferWindowPos(hWinPosInfo, sizegrip, NULL, rc.right - (rc_grip.right - rc_grip.left), rc.bottom - (rc_grip.bottom - rc_grip.top), 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+			hWinPosInfo = DeferWindowPos(hWinPosInfo, sizegrip, NULL, rc.right - (rc_grip.right - rc_grip.left), rc.bottom - (rc_grip.bottom - rc_grip.top), 0, 0, SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
 		}
 		EndDeferWindowPos(hWinPosInfo);
 		//RedrawWindow(parent,0,0,RDW_INVALIDATE);
@@ -158,3 +160,5 @@ dialog_resize_helper::dialog_resize_helper(const param * src,unsigned count,unsi
 dialog_resize_helper::~dialog_resize_helper()
 {
 }
+
+#endif // _WIN32

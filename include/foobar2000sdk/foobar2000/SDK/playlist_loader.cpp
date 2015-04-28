@@ -20,8 +20,7 @@ namespace {
 	};
 }
 
-void playlist_loader::g_load_playlist_filehint(file::ptr fileHint,const char * p_path,playlist_loader_callback::ptr p_callback, abort_callback & p_abort) {
-	TRACK_CALL_TEXT("playlist_loader::g_load_playlist_filehint");
+bool playlist_loader::g_try_load_playlist(file::ptr fileHint,const char * p_path,playlist_loader_callback::ptr p_callback, abort_callback & p_abort) {
 	pfc::string8 filepath;
 
 	filesystem::g_get_canonical_path(p_path,filepath);
@@ -50,7 +49,7 @@ void playlist_loader::g_load_playlist_filehint(file::ptr fileHint,const char * p
 					if (l->is_our_content_type(content_type)) {
 						try {
 							TRACK_CODE("playlist_loader::open",l->open(filepath,l_file,p_callback, p_abort));
-							return;
+							return true;
 						} catch(exception_io_unsupported_format) {
 							l_file->reopen(p_abort);
 						}
@@ -66,7 +65,7 @@ void playlist_loader::g_load_playlist_filehint(file::ptr fileHint,const char * p
 					if (l_file.is_empty()) filesystem::g_open_read(l_file,filepath,p_abort);
 					try {
 						TRACK_CODE("playlist_loader::open",l->open(filepath,l_file,p_callback,p_abort));
-						return;
+						return true;
 					} catch(exception_io_unsupported_format) {
 						l_file->reopen(p_abort);
 					}
@@ -75,8 +74,13 @@ void playlist_loader::g_load_playlist_filehint(file::ptr fileHint,const char * p
 		}
 	}
 
-	throw exception_io_unsupported_format();
+	return false;
 }
+
+void playlist_loader::g_load_playlist_filehint(file::ptr fileHint,const char * p_path,playlist_loader_callback::ptr p_callback, abort_callback & p_abort) {
+	if (!g_try_load_playlist(fileHint, p_path, p_callback, p_abort)) throw exception_io_unsupported_format();
+}
+
 void playlist_loader::g_load_playlist(const char * p_path,playlist_loader_callback::ptr callback, abort_callback & abort) {
 	g_load_playlist_filehint(NULL,p_path,callback,abort);
 }
@@ -99,6 +103,7 @@ static void index_tracks_helper(const char * p_path,const service_ptr_t<file> & 
 		t_filestats stats = instance->get_file_stats(p_abort);
 
 		t_uint32 subsong,subsong_count = instance->get_subsong_count();
+		bool bInfoGetError = false;
 		for(subsong=0;subsong<subsong_count;subsong++)
 		{
 			TRACK_CALL_TEXT("subsong-loop");
@@ -108,10 +113,14 @@ static void index_tracks_helper(const char * p_path,const service_ptr_t<file> & 
 			p_callback->handle_create(handle,make_playable_location(p_path,index));
 
 			p_got_input = true;
-			if (p_callback->want_info(handle,p_type,stats,true))
+			if (! bInfoGetError && p_callback->want_info(handle,p_type,stats,true) )
 			{
 				file_info_impl info;
-				TRACK_CODE("get_info",instance->get_info(index,info,p_abort));
+				try {
+					TRACK_CODE("get_info",instance->get_info(index,info,p_abort));
+				} catch(...) {
+					bInfoGetError = true;
+				}
 				p_callback->on_entry_info(handle,p_type,stats,info,true);
 			}
 			else
@@ -121,7 +130,6 @@ static void index_tracks_helper(const char * p_path,const service_ptr_t<file> & 
 		}
 	}
 }
-
 
 static void track_indexer__g_get_tracks_wrap(const char * p_path,const service_ptr_t<file> & p_reader,const t_filestats & p_stats,playlist_loader_callback::t_entry_type p_type,playlist_loader_callback::ptr p_callback, abort_callback & p_abort) {
 	bool got_input = false;
@@ -148,6 +156,44 @@ static void track_indexer__g_get_tracks_wrap(const char * p_path,const service_p
 	}
 }
 
+namespace {
+	// SPECIAL HACK
+	// filesystem service does not present file hidden attrib but we want to weed files/folders out
+	// so check separately on all native paths (inefficient but meh)
+	class directory_callback_impl2 : public directory_callback_impl
+	{
+	public:
+		bool on_entry(filesystem * owner,abort_callback & p_abort,const char * url,bool is_subdirectory,const t_filestats & p_stats) {
+			p_abort.check();
+
+			if (!m_addHidden) {
+				const char * n = url;
+				if (_extract_native_path_ptr(n)) {
+					DWORD att = uGetFileAttributes(n);
+					if (att == ~0 || (att & FILE_ATTRIBUTE_HIDDEN) != 0) return true;
+				}
+			}
+
+			return directory_callback_impl::on_entry(owner, p_abort, url, is_subdirectory, p_stats);
+		}
+
+		directory_callback_impl2(bool p_recur) : directory_callback_impl(p_recur), m_addHidden(queryAddHidden()) {}
+	private:
+		static bool queryAddHidden() {
+			// {2F9F4956-363F-4045-9531-603B1BF39BA8}
+			static const GUID guid_cfg_addhidden =  
+			{ 0x2f9f4956, 0x363f, 0x4045, { 0x95, 0x31, 0x60, 0x3b, 0x1b, 0xf3, 0x9b, 0xa8 } };
+
+			advconfig_entry_checkbox::ptr ptr;
+			if (advconfig_entry::g_find_t(ptr, guid_cfg_addhidden)) {
+				return ptr->get_state();
+			}
+			return false;
+		}
+		const bool m_addHidden;
+	};
+}
+
 
 static void process_path_internal(const char * p_path,const service_ptr_t<file> & p_reader,playlist_loader_callback::ptr callback, abort_callback & abort,playlist_loader_callback::t_entry_type type,const t_filestats & p_stats)
 {
@@ -159,8 +205,8 @@ static void process_path_internal(const char * p_path,const service_ptr_t<file> 
 
 	
 	{
-		if (p_reader.is_empty()) {
-			directory_callback_impl directory_results(true);
+		if (p_reader.is_empty() && type != playlist_loader_callback::entry_directory_enumerated) {
+			directory_callback_impl2 directory_results(true);
 			try {
 				filesystem::g_list_directory(p_path,directory_results,abort);
 				for(t_size n=0;n<directory_results.get_count();n++) {
@@ -261,13 +307,10 @@ void playlist_loader::g_save_playlist(const char * p_filename,const pfc::list_ba
 
 bool playlist_loader::g_process_path_ex(const char * filename,playlist_loader_callback::ptr callback, abort_callback & abort,playlist_loader_callback::t_entry_type type)
 {
-	try {
-		g_load_playlist(filename,callback, abort);
-		return true;
-	} catch(exception_io_unsupported_format) {//not a playlist format
-		g_process_path(filename,callback,abort,type);
-		return false;
-	}
+	if (g_try_load_playlist(NULL, filename, callback, abort)) return true;
+	//not a playlist format
+	g_process_path(filename,callback,abort,type);
+	return false;
 }
 
 #endif

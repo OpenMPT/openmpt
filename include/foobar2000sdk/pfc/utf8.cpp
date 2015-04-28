@@ -9,8 +9,6 @@ static const t_uint8 val_tab[6]={0,0xC0,0xE0,0xF0,0xF8,0xFC};
 
 t_size utf8_char_len_from_header(char p_c) throw()
 {
-	t_uint8 c = (t_uint8)p_c;
-
 	t_size cnt = 0;
 	for(;;)
 	{
@@ -164,24 +162,24 @@ t_size utf8_encode_char(unsigned wide,char * target) throw()
 	return count;
 }
 
-t_size utf16_encode_char(unsigned cur_wchar,wchar_t * out) throw()
+t_size utf16_encode_char(unsigned cur_wchar,char16_t * out) throw()
 {
 	if (cur_wchar < 0x10000) {
-		*out = (wchar_t) cur_wchar; return 1;
+		*out = (char16_t) cur_wchar; return 1;
 	} else if (cur_wchar < (1 << 20)) {
 		unsigned c = cur_wchar - 0x10000;
 		//MSDN:
 		//The first (high) surrogate is a 16-bit code value in the range U+D800 to U+DBFF. The second (low) surrogate is a 16-bit code value in the range U+DC00 to U+DFFF. Using surrogates, Unicode can support over one million characters. For more details about surrogates, refer to The Unicode Standard, version 2.0.
-		out[0] = (wchar_t)(0xD800 | (0x3FF & (c>>10)) );
-		out[1] = (wchar_t)(0xDC00 | (0x3FF & c) ) ;
+		out[0] = (char16_t)(0xD800 | (0x3FF & (c>>10)) );
+		out[1] = (char16_t)(0xDC00 | (0x3FF & c) ) ;
 		return 2;
 	} else {
 		*out = '?'; return 1;
 	}
 }
 
-t_size utf16_decode_char(const wchar_t * p_source,unsigned * p_out,t_size p_source_length) throw() {
-	if (p_source_length == 0) return 0;
+t_size utf16_decode_char(const char16_t * p_source,unsigned * p_out,t_size p_source_length) throw() {
+	if (p_source_length == 0) {*p_out = 0; return 0; }
 	else if (p_source_length == 1) {
 		*p_out = p_source[0];
 		return 1;
@@ -205,6 +203,36 @@ t_size utf16_decode_char(const wchar_t * p_source,unsigned * p_out,t_size p_sour
 		return retval;
 	}
 }
+#ifdef _MSC_VER
+    t_size utf16_decode_char(const wchar_t * p_source,unsigned * p_out,t_size p_source_length) throw() {
+        PFC_STATIC_ASSERT( sizeof(wchar_t) == sizeof(char16_t) );
+        return wide_decode_char( p_source, p_out, p_source_length );
+    }
+    t_size utf16_encode_char(unsigned c,wchar_t * out) throw() {
+        PFC_STATIC_ASSERT( sizeof(wchar_t) == sizeof(char16_t) );
+        return wide_encode_char( c, out );
+    }
+#endif
+
+    t_size wide_decode_char(const wchar_t * p_source,unsigned * p_out,t_size p_source_length) throw() {
+        PFC_STATIC_ASSERT( sizeof( wchar_t ) == sizeof( char16_t ) || sizeof( wchar_t ) == sizeof( unsigned ) );
+        if (sizeof( wchar_t ) == sizeof( char16_t ) ) {
+            return utf16_decode_char( reinterpret_cast< const char16_t *>(p_source), p_out, p_source_length );
+        } else {
+            if (p_source_length == 0) { * p_out = 0; return 0; }
+            * p_out = p_source [ 0 ];
+            return 1;
+        }
+    }
+	t_size wide_encode_char(unsigned c,wchar_t * out) throw() {
+        PFC_STATIC_ASSERT( sizeof( wchar_t ) == sizeof( char16_t ) || sizeof( wchar_t ) == sizeof( unsigned ) );
+        if (sizeof( wchar_t ) == sizeof( char16_t ) ) {
+            return utf16_encode_char( c, reinterpret_cast< char16_t * >(out) );
+        } else {
+            * out = (wchar_t) c;
+            return 1;
+        }
+    }
 
 
 unsigned utf8_get_char(const char * src)
@@ -261,10 +289,7 @@ bool is_lower_ascii(const char * param)
 
 static bool check_end_of_string(const char * ptr)
 {
-	__try {
-		return !*ptr;
-	}
-	__except(1) {return true;}
+	return !*ptr;
 }
 
 unsigned strcpy_utf8_truncate(const char * src,char * out,unsigned maxbytes)
@@ -275,14 +300,12 @@ unsigned strcpy_utf8_truncate(const char * src,char * out,unsigned maxbytes)
 		maxbytes--;//for null
 		while(!check_end_of_string(src) && maxbytes>0)
 		{
-			__try {
-				t_size delta = utf8_char_len(src);
-				if (delta>maxbytes || delta==0) break;
-				do 
-				{
-					out[ptr++] = *(src++);
-				} while(--delta);
-			} __except(1) { break; }
+            t_size delta = utf8_char_len(src);
+            if (delta>maxbytes || delta==0) break;
+            do 
+            {
+                out[ptr++] = *(src++);
+            } while(--delta);
 			rv = ptr;
 		}
 		out[rv]=0;

@@ -12,7 +12,7 @@ void string_receiver::add_char(t_uint32 p_char)
 void string_base::skip_trailing_char(unsigned skip)
 {
 	const char * str = get_ptr();
-	t_size ptr,trunc;
+	t_size ptr,trunc = 0;
 	bool need_trunc = false;
 	for(ptr=0;str[ptr];)
 	{
@@ -66,7 +66,7 @@ bool is_path_bad_char(unsigned c)
 #ifdef _WINDOWS
 	return c=='\\' || c=='/' || c=='|' || c==':' || c=='*' || c=='?' || c=='\"' || c=='>' || c=='<';
 #else
-#error portme
+	return c=='/' || c=='*' || c=='?';
 #endif
 }
 
@@ -201,6 +201,8 @@ void float_to_string(char * out,t_size out_max,double val,unsigned precision,boo
 	out[outptr] = 0;
 }
 
+
+    
 static double pfc_string_to_float_internal(const char * src)
 {
 	bool neg = false;
@@ -237,7 +239,7 @@ static double pfc_string_to_float_internal(const char * src)
 		else break;
 	}
 	if (neg) val = -val;
-	return (double) val * pow(10.0,(double)div);
+    return (double) val * exp_int(10, div);
 }
 
 double string_to_float(const char * src,t_size max) {
@@ -311,10 +313,8 @@ unsigned atoui_ex(const char * p_string,t_size p_string_len)
 	return ret;
 }
 
-int strcmp_ex(const char* p1,t_size n1,const char* p2,t_size n2)
-{
+int strcmp_nc(const char* p1, size_t n1, const char * p2, size_t n2) throw() {
 	t_size idx = 0;
-	n1 = strlen_max(p1,n1); n2 = strlen_max(p2,n2);
 	for(;;)
 	{
 		if (idx == n1 && idx == n2) return 0;
@@ -327,6 +327,12 @@ int strcmp_ex(const char* p1,t_size n1,const char* p2,t_size n2)
 		
 		idx++;
 	}
+}
+
+int strcmp_ex(const char* p1,t_size n1,const char* p2,t_size n2) throw()
+{
+	n1 = strlen_max(p1,n1); n2 = strlen_max(p2,n2);
+	return strcmp_nc(p1, n1, p2, n2);
 }
 
 t_uint64 atoui64_ex(const char * src,t_size len) {
@@ -382,6 +388,20 @@ t_int64 atoi64_ex(const char * src,t_size len)
 	return neg ? -ret : ret;
 }
 
+int stricmp_ascii_partial( const char * str, const char * substr) throw() {
+    size_t walk = 0;
+    for(;;) {
+        char c1 = str[walk];
+        char c2 = substr[walk];
+        c1 = ascii_tolower(c1); c2 = ascii_tolower(c2);
+        if (c2 == 0) return 0; // substr terminated = ret0 regardless of str content
+        if (c1<c2) return -1; // ret -1 early
+        else if (c1>c2) return 1; // ret 1 early
+        // else c1 == c2 and c2 != 0 so c1 != 0 either
+        ++walk; // go on
+    }
+}
+
 int stricmp_ascii_ex(const char * const s1,t_size const len1,const char * const s2,t_size const len2) throw() {
 	t_size walk1 = 0, walk2 = 0;
 	for(;;) {
@@ -398,14 +418,86 @@ int stricmp_ascii_ex(const char * const s1,t_size const len1,const char * const 
 }
 int stricmp_ascii(const char * s1,const char * s2) throw() {
 	for(;;) {
-		char c1 = ascii_tolower(*s1), c2 = ascii_tolower(*s2);
+		char c1 = *s1, c2 = *s2;
+
+		if (c1 > 0 && c2 > 0) {
+			c1 = ascii_tolower_lookup(c1);
+			c2 = ascii_tolower_lookup(c2);
+		} else {
+			if (c1 == 0 && c2 == 0) return 0;
+		}
 		if (c1<c2) return -1;
 		else if (c1>c2) return 1;
 		else if (c1 == 0) return 0;
+
 		s1++;
 		s2++;
 	}
 }
+
+static int naturalSortCompareInternal( const char * s1, const char * s2, bool insensitive) throw() {
+    for( ;; ) {
+        unsigned c1, c2;
+        size_t d1 = utf8_decode_char( s1, c1 );
+        size_t d2 = utf8_decode_char( s2, c2 );
+        if (d1 == 0 && d2 == 0) {
+            return 0;
+        }
+        if (char_is_numeric( c1 ) && char_is_numeric( c2 ) ) {
+            // Numeric block in both strings, do natural sort magic here
+            size_t l1 = 1, l2 = 1;
+            while( char_is_numeric( s1[l1] ) ) ++l1;
+            while( char_is_numeric( s2[l2] ) ) ++l2;
+            
+            size_t l = max_t(l1, l2);
+            for(size_t w = 0; w < l; ++w) {
+                char digit1, digit2;
+                
+                t_ssize off;
+                
+                off = w + l1 - l;
+                if (off >= 0) {
+                    digit1 = s1[w - l + l1];
+                } else {
+                    digit1 = 0;
+                }
+                off = w + l2 - l;
+                if (off >= 0) {
+                    digit2 = s2[w - l + l2];
+                } else {
+                    digit2 = 0;
+                }
+                if (digit1 < digit2) return -1;
+                if (digit1 > digit2) return 1;
+            }
+            
+            s1 += l1; s2 += l2;
+            continue;
+        }
+        
+
+        if (insensitive) {
+            c1 = charLower( c1 );
+            c2 = charLower( c2 );
+        }
+        if (c1 < c2) return -1;
+        if (c1 > c2) return 1;
+        
+        s1 += d1; s2 += d2;
+    }
+}
+int naturalSortCompare( const char * s1, const char * s2) throw() {
+    int v = naturalSortCompareInternal( s1, s2, true );
+    if (v) return v;
+    v = naturalSortCompareInternal( s1, s2, false );
+    if (v) return v;
+    return strcmp(s1, s2);
+}
+
+int naturalSortCompareI( const char * s1, const char * s2) throw() {
+    return naturalSortCompareInternal( s1, s2, true );
+}
+
 
 format_float::format_float(double p_val,unsigned p_width,unsigned p_prec)
 {
@@ -685,15 +777,35 @@ bool string_is_numeric(const char * p_string,t_size p_length) throw() {
 }
 
 
-void string_base::fix_dir_separator(char p_char) {
-	t_size length = get_length();
+void string_base::end_with(char p_char) {
 	if (!ends_with(p_char)) add_byte(p_char);
 }
-bool string_base::ends_with(char c) {
+bool string_base::ends_with(char c) const {
 	t_size length = get_length();
 	return length > 0 && get_ptr()[length-1] == c;
 }
 
+void string_base::end_with_slash() {
+	end_with( io::path::getDefaultSeparator() );
+}
+
+char string_base::last_char() const {
+    size_t l = this->length();
+    if (l == 0) return 0;
+    return this->get_ptr()[l-1];
+}
+void string_base::truncate_last_char() {
+    size_t l = this->length();
+    if (l > 0) this->truncate( l - 1 );
+}
+    
+void string_base::truncate_number_suffix() {
+    size_t l = this->length();
+    const char * const p = this->get_ptr();
+    while( l > 0 && char_is_numeric( p[l-1] ) ) --l;
+    truncate( l );
+}
+    
 bool is_multiline(const char * p_string,t_size p_len) {
 	for(t_size n = 0; n < p_len && p_string[n]; n++) {
 		switch(p_string[n]) {
@@ -711,6 +823,63 @@ static t_uint64 pow10_helper(unsigned p_extra) {
 	return ret;
 }
 
+static uint64_t safeMulAdd(uint64_t prev, unsigned scale, uint64_t add) {
+	if (add >= scale || scale == 0) throw pfc::exception_invalid_params();
+	uint64_t v = prev * scale + add;
+	if (v / scale != prev) throw pfc::exception_invalid_params();
+	return v;
+}
+
+static size_t parseNumber(const char * in, uint64_t & outNumber) {
+	size_t walk = 0;
+	uint64_t total = 0;
+	for (;;) {
+		char c = in[walk];
+		if (!pfc::char_is_numeric(c)) break;
+		unsigned v = (unsigned)(c - '0');
+		uint64_t newVal = total * 10 + v;
+		if (newVal / 10 != total) throw pfc::exception_overflow();
+		total = newVal;
+		++walk;
+	}
+	outNumber = total;
+	return walk;
+}
+
+double parse_timecode(const char * in) {
+	char separator = 0;
+	uint64_t seconds = 0;
+	unsigned colons = 0;
+	for (;;) {
+		uint64_t number = 0;
+		size_t digits = parseNumber(in, number);
+		if (digits == 0) throw pfc::exception_invalid_params();
+		in += digits;
+		char nextSeparator = *in;
+		switch (separator) { // *previous* separator
+		case '.':
+			if (nextSeparator != 0) throw pfc::exception_bug_check();
+			return (double)seconds + (double)pfc::exp_int(10, -(int)digits) * number;
+		case 0: // is first number in the string
+			seconds = number;
+			break;
+		case ':':
+			if (colons == 2) throw pfc::exception_invalid_params();
+			++colons;
+			seconds = safeMulAdd(seconds, 60, number);
+			break;
+		}
+
+		if (nextSeparator == 0) {
+			// end of string
+			return (double)seconds;
+		}
+
+		++in;
+		separator = nextSeparator;
+	}
+}
+
 format_time_ex::format_time_ex(double p_seconds,unsigned p_extra) {
 	t_uint64 pow10 = pow10_helper(p_extra);
 	t_uint64 ticks = pfc::rint64(pow10 * p_seconds);
@@ -719,62 +888,6 @@ format_time_ex::format_time_ex(double p_seconds,unsigned p_extra) {
 	if (p_extra>0) {
 		m_buffer << "." << pfc::format_uint(ticks % pow10, p_extra);
 	}
-}
-
-t_uint32 charLower(t_uint32 param)
-{
-	if (param<128)
-	{
-		if (param>='A' && param<='Z') param += 'a' - 'A';
-		return param;
-	}
-#ifdef WIN32
-	else if (param<0x10000)
-	{
-		unsigned ret;
-#ifdef UNICODE
-		ret = (unsigned)CharLowerW((WCHAR*)param);
-#else
-#error Nein! Verboten!
-#endif
-		return ret;
-	}
-	else return param;
-#else
-	else
-	{
-		setlocale(LC_CTYPE,"");
-		return towlower(param);
-	}
-#endif
-}
-
-t_uint32 charUpper(t_uint32 param)
-{
-	if (param<128)
-	{
-		if (param>='a' && param<='z') param += 'A' - 'a';
-		return param;
-	}
-#ifdef WIN32
-	else if (param<0x10000)
-	{
-		unsigned ret;
-#ifdef UNICODE
-		ret = (unsigned)CharUpperW((WCHAR*)param);
-#else
-#error Nein! Verboten!
-#endif
-		return ret;
-	}
-	else return param;
-#else
-	else
-	{
-		setlocale(LC_CTYPE,"");
-		return towupper(param);
-	}
-#endif
 }
 
 void stringToUpperAppend(string_base & out, const char * src, t_size len) {
@@ -853,7 +966,7 @@ format_file_size_short::format_file_size_short(t_uint64 size) {
 			*this << "." << format_uint(remaining, (t_uint32)digits);
 		}
 	}
-	*this << unit;
+	*this << " " << unit;
 	m_scale = scale;
 }
 
@@ -893,6 +1006,54 @@ bool string_base::limit_length(t_size length_in_chars,const char * append)
 	return rv;
 }
 
+void string_base::truncate_to_parent_path() {
+	size_t at = scan_filename();
+#ifdef _WIN32
+	while(at > 0 && (*this)[at-1] == '\\') --at;
+	if (at > 0 && (*this)[at-1] == ':' && (*this)[at] == '\\') ++at;
+#else
+	// Strip trailing /
+	while(at > 0 && (*this)[at-1] == '/') --at;
+
+	// Hit empty? Bring root / back to life
+	if (at == 0 && (*this)[0] == '/') ++at;
+
+	// Deal with proto://
+	if (at > 0 && (*this)[at-1] == ':') {
+		while((*this)[at] == '/') ++at;
+	}
+#endif
+	this->truncate( at );
+}
+
+t_size string_base::replace_string ( const char * replace, const char * replaceWith, t_size start) {
+    string_formatter temp;
+    size_t srcDone = 0, walk = start;
+    size_t occurances = 0;
+    const char * const source = this->get_ptr();
+    
+    const size_t replaceLen = strlen( replace );
+    for(;;) {
+        const char * ptr = strstr( source + walk, replace );
+        if (ptr == NULL) {
+            // end
+            if (srcDone == 0) {
+                return 0; // string not altered
+            }
+            temp.add_string( source + srcDone );
+            break;
+        }
+        ++occurances;
+        walk = ptr - source;
+        temp.add_string( source + srcDone, walk - srcDone );
+        temp.add_string( replaceWith );
+        walk += replaceLen;
+        srcDone = walk;
+    }
+    this->set_string( temp );
+    return occurances;
+    
+}
 void urlEncodeAppendRaw(pfc::string_base & out, const char * in, t_size inSize) {
 	for(t_size walk = 0; walk < inSize; ++walk) {
 		const char c = in[walk];
@@ -926,5 +1087,126 @@ unsigned char_to_hex(char c) {
 	else throw exception_invalid_params();
 }
 
+
+static const t_uint8 ascii_tolower_table[128] = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x28,0x29,0x2A,0x2B,0x2C,0x2D,0x2E,0x2F,0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x3A,0x3B,0x3C,0x3D,0x3E,0x3F,0x40,0x61,0x62,0x63,0x64,0x65,0x66,0x67,0x68,0x69,0x6A,0x6B,0x6C,0x6D,0x6E,0x6F,0x70,0x71,0x72,0x73,0x74,0x75,0x76,0x77,0x78,0x79,0x7A,0x5B,0x5C,0x5D,0x5E,0x5F,0x60,0x61,0x62,0x63,0x64,0x65,0x66,0x67,0x68,0x69,0x6A,0x6B,0x6C,0x6D,0x6E,0x6F,0x70,0x71,0x72,0x73,0x74,0x75,0x76,0x77,0x78,0x79,0x7A,0x7B,0x7C,0x7D,0x7E,0x7F};
+
+uint32_t charLower(uint32_t param)
+{
+	if (param<128) {
+		return ascii_tolower_table[param];
+	}
+#ifdef _WIN32
+	else if (param<0x10000) {
+		return (unsigned)CharLowerW((WCHAR*)param);
+	}
+#endif
+	else return param;
+}
+
+uint32_t charUpper(uint32_t param)
+{
+	if (param<128) {
+		if (param>='a' && param<='z') param += 'A' - 'a';
+		return param;
+	}
+#ifdef _WIN32
+	else if (param<0x10000) {
+		return (unsigned)CharUpperW((WCHAR*)param);
+	}
+#endif
+	else return param;
+}
+
+
+bool stringEqualsI_ascii(const char * p1,const char * p2) throw() {
+	for(;;)
+	{
+		char c1 = *p1;
+		char c2 = *p2;
+		if (c1 > 0 && c2 > 0) {
+			if (ascii_tolower_table[c1] != ascii_tolower_table[c2]) return false;
+		} else {
+			if (c1 == 0 && c2 == 0) return true;
+			if (c1 == 0 || c2 == 0) return false;
+			if (c1 != c2) return false;
+		}
+		++p1; ++p2;
+	}
+}
+
+bool stringEqualsI_utf8(const char * p1,const char * p2) throw()
+{
+	for(;;)
+	{
+		char c1 = *p1;
+		char c2 = *p2;
+		if (c1 > 0 && c2 > 0) {
+			if (ascii_tolower_table[c1] != ascii_tolower_table[c2]) return false;
+			++p1; ++p2;
+		} else {
+			if (c1 == 0 && c2 == 0) return true;
+			if (c1 == 0 || c2 == 0) return false;
+			unsigned w1,w2; t_size d1,d2;
+			d1 = utf8_decode_char(p1,w1);
+			d2 = utf8_decode_char(p2,w2);
+			if (d1 == 0 || d2 == 0) return false; // bad UTF-8, bail
+			if (w1 != w2) {
+				if (charLower(w1) != charLower(w2)) return false;
+			}
+			p1 += d1;
+			p2 += d2;
+		}
+	}
+}
+
+char ascii_tolower_lookup(char c) {
+	PFC_ASSERT( c >= 0);
+	return (char)ascii_tolower_table[c];
+}
+
+void string_base::fix_dir_separator(char c) {
+#ifdef _WIN32
+    end_with(c);
+#else
+    end_with_slash();
+#endif
+}
+    
+
+    bool string_has_prefix( const char * string, const char * prefix ) {
+        for(size_t w = 0; ; ++w ) {
+            char c = prefix[w];
+            if (c == 0) return true;
+            if (string[w] != c) return false;
+        }
+    }
+    bool string_has_prefix_i( const char * string, const char * prefix ) {
+        const char * p1 = string; const char * p2 = prefix;
+        for(;;) {
+            unsigned w1, w2; size_t d1, d2;
+            d1 = utf8_decode_char(p1, w1);
+            d2 = utf8_decode_char(p2, w2);
+            if (d2 == 0) return true;
+            if (d1 == 0) return false;
+            if (w1 != w2) {
+                if (charLower(w1) != charLower(w2)) return false;
+            }
+            p1 += d1; p2 += d2;
+        }
+    }
+    bool string_has_suffix( const char * string, const char * suffix ) {
+        size_t len = strlen( string );
+        size_t suffixLen = strlen( suffix );
+        if (suffixLen > len) return false;
+        size_t base = len - suffixLen;
+        return memcmp( string + base, suffix, suffixLen * sizeof(char)) == 0;
+    }
+    bool string_has_suffix_i( const char * string, const char * suffix ) {
+        for(;;) {
+            if (*string == 0) return false;
+            if (stringEqualsI_utf8( string, suffix )) return true;
+            if (!utf8_advance(string)) return false;
+        }
+    }
 
 } //namespace pfc

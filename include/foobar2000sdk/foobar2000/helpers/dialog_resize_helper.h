@@ -1,3 +1,5 @@
+#ifdef _WIN32
+
 #ifndef _DIALOG_RESIZE_HELPER_H_
 #define _DIALOG_RESIZE_HELPER_H_
 
@@ -45,4 +47,6 @@ public:
 	PFC_CLASS_NOT_COPYABLE_EX(dialog_resize_helper);
 };
 
-#endif
+#endif // _DIALOG_RESIZE_HELPER_H_
+
+#endif // _WIN32

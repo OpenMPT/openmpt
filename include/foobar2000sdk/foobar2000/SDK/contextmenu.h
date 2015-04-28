@@ -279,7 +279,7 @@ public:
 
 class contextmenu_groups {
 public:
-	static const GUID root, utilities, tagging, replaygain, fileoperations, playbackstatistics, properties, convert, legacy;
+	static const GUID root, utilities, tagging, tagging_pictures, replaygain, fileoperations, playbackstatistics, properties, convert, legacy;
 };
 
 class contextmenu_group_impl : public contextmenu_group {
@@ -320,6 +320,7 @@ namespace contextmenu_priorities {
 		root_playbackstatistics,
 		root_legacy = 99,
 		root_properties = 100,
+		tagging_pictures = 100,
 	};
 };
 

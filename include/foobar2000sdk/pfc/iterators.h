@@ -34,6 +34,11 @@ namespace pfc {
 		const_iterator() {}
 		const_iterator(t_node* source) : m_content(source) {}
 		const_iterator(t_nodeptr const & source) : m_content(source) {}
+		const_iterator(t_self const & other) : m_content(other.m_content) {}
+		const_iterator(t_self && other) : m_content(std::move(other.m_content)) {}
+
+		t_self const & operator=(t_self const & other) {m_content = other.m_content; return *this;}
+		t_self const & operator=(t_self && other) {m_content = std::move(other.m_content); return *this;}
 
 		const t_item& operator*() const throw() {return m_content->m_content;}
 		const t_item* operator->() const throw() {return &m_content->m_content;}
@@ -45,10 +50,6 @@ namespace pfc {
 
 		bool operator==(const t_self & other) const throw() {return this->m_content == other.m_content;}
 		bool operator!=(const t_self & other) const throw() {return this->m_content != other.m_content;}
-		bool operator> (const t_self & other) const throw() {return this->m_content >  other.m_content;}
-		bool operator< (const t_self & other) const throw() {return this->m_content <  other.m_content;}
-		bool operator>=(const t_self & other) const throw() {return this->m_content >= other.m_content;}
-		bool operator<=(const t_self & other) const throw() {return this->m_content <= other.m_content;}
 	protected:
 		t_nodeptr m_content;
 	};
@@ -62,6 +63,11 @@ namespace pfc {
 		iterator() {}
 		iterator(t_node* source) : t_selfConst(source) {}
 		iterator(t_nodeptr const & source) : t_selfConst(source) {}
+		iterator(t_self const & other) : t_selfConst(other) {}
+		iterator(t_self && other) : t_selfConst(std::move(other)) {}
+
+		t_self const & operator=(t_self const & other) {this->m_content = other.m_content; return *this;}
+		t_self const & operator=(t_self && other) {this->m_content = std::move(other.m_content); return *this;}
 
 		t_item& operator*() const throw() {return this->m_content->m_content;}
 		t_item* operator->() const throw() {return &this->m_content->m_content;}
@@ -73,10 +79,6 @@ namespace pfc {
 
 		bool operator==(const t_self & other) const throw() {return this->m_content == other.m_content;}
 		bool operator!=(const t_self & other) const throw() {return this->m_content != other.m_content;}
-		bool operator> (const t_self & other) const throw() {return this->m_content >  other.m_content;}
-		bool operator< (const t_self & other) const throw() {return this->m_content <  other.m_content;}
-		bool operator>=(const t_self & other) const throw() {return this->m_content >= other.m_content;}
-		bool operator<=(const t_self & other) const throw() {return this->m_content <= other.m_content;}
 	};
 
 	template<typename t_comparator = comparator_default>

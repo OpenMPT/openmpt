@@ -24,8 +24,9 @@ double dsp_manager::run(dsp_chunk_list * p_list,const metadb_handle_ptr & p_cur_
 	TRACK_CALL_TEXT("dsp_manager::run");
 
 	try {
+#if defined(_MSC_VER) && defined(_M_IX86)
 		fpu_control_default l_fpu_control;
-
+#endif
 		double latency=0;
 		bool done = false;
 
@@ -86,7 +87,7 @@ double dsp_manager::run(dsp_chunk_list * p_list,const metadb_handle_ptr & p_cur_
 
 			for(t_dsp_chain::iterator iter = newchain.first(); iter.is_valid(); ++iter) {
 				if (iter->m_dsp.is_empty()) {
-					if (!dsp_entry::g_instantiate(iter->m_dsp,iter->m_preset)) throw pfc::exception_bug_check_v2();
+					if (!dsp_entry::g_instantiate(iter->m_dsp,iter->m_preset)) uBugCheck();
 				}
 			}
 

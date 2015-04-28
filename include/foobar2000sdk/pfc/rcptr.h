@@ -36,8 +36,8 @@ namespace pfc {
 		typedef rc_container_base t_container;
 		typedef rc_container_t<t_object> t_container_impl;
 	public:
-		rcptr_t(t_rcptr_null) throw() {__init();}
-		rcptr_t() throw() {__init();}
+		rcptr_t(t_rcptr_null) throw() {_clear();}
+		rcptr_t() throw() {_clear();}
 		rcptr_t(const t_self & p_source) throw() {__init(p_source);}
 		t_self const & operator=(const t_self & p_source) throw() {__copy(p_source); return *this;}
 
@@ -45,6 +45,9 @@ namespace pfc {
 		rcptr_t(const rcptr_t<t_source> & p_source) throw() {__init(p_source);}
 		template<typename t_source>
 		const t_self & operator=(const rcptr_t<t_source> & p_source) throw() {__copy(p_source); return *this;}
+
+		rcptr_t(t_self && p_source) throw() {_move(p_source);}
+		const t_self & operator=(t_self && p_source) throw() {release(); _move(p_source); return *this;}
 
 		const t_self & operator=(t_rcptr_null) throw() {release(); return *this;}
 
@@ -176,14 +179,22 @@ namespace pfc {
 
 
 		t_container * __container() const throw() {return m_container;}
+
+		// FOR INTERNAL USE ONLY
+		void _clear() throw() {m_container = NULL; m_ptr = NULL;}
 	private:
-		void __init() throw() {m_container = NULL; m_ptr = NULL;}
 
 		template<typename t_source>
 		void __init(const rcptr_t<t_source> & p_source) throw() {
 			m_container = p_source.__container();
 			m_ptr = &*p_source;
 			if (m_container != NULL) m_container->add_ref();
+		}
+		template<typename t_source>
+		void _move(rcptr_t<t_source> & p_source) throw() {
+			m_container = p_source.__container();
+			m_ptr = &*p_source;
+			p_source._clear();
 		}
 		template<typename t_source>
 		void __copy(const rcptr_t<t_source> & p_source) throw() {

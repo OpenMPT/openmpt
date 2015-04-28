@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="base64.cpp" />
+    <ClCompile Include="bit_array.cpp" />
+    <ClCompile Include="bsearch.cpp" />
+    <ClCompile Include="cpuid.cpp" />
+    <ClCompile Include="guid.cpp" />
+    <ClCompile Include="other.cpp" />
+    <ClCompile Include="pathUtils.cpp" />
+    <ClCompile Include="printf.cpp" />
+    <ClCompile Include="selftest.cpp" />
+    <ClCompile Include="sort.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="string_conv.cpp" />
+    <ClCompile Include="stringNew.cpp" />
+    <ClCompile Include="threads.cpp" />
+    <ClCompile Include="utf8.cpp" />
+    <ClCompile Include="win-objects.cpp" />
+    <ClCompile Include="string_base.cpp" />
+    <ClCompile Include="audio_sample.cpp" />
+    <ClCompile Include="timers.cpp" />
+    <ClCompile Include="audio_math.cpp" />
+    <ClCompile Include="wildcard.cpp" />
+    <ClCompile Include="filehandle.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="alloc.h" />
+    <ClInclude Include="array.h" />
+    <ClInclude Include="avltree.h" />
+    <ClInclude Include="base64.h" />
+    <ClInclude Include="binary_search.h" />
+    <ClInclude Include="bit_array.h" />
+    <ClInclude Include="bit_array_impl.h" />
+    <ClInclude Include="bit_array_impl_part2.h" />
+    <ClInclude Include="bsearch.h" />
+    <ClInclude Include="bsearch_inline.h" />
+    <ClInclude Include="byte_order_helper.h" />
+    <ClInclude Include="chain_list_v2.h" />
+    <ClInclude Include="com_ptr_t.h" />
+    <ClInclude Include="cpuid.h" />
+    <ClInclude Include="guid.h" />
+    <ClInclude Include="instance_tracker.h" />
+    <ClInclude Include="int_types.h" />
+    <ClInclude Include="iterators.h" />
+    <ClInclude Include="list.h" />
+    <ClInclude Include="map.h" />
+    <ClInclude Include="memalign.h" />
+    <ClInclude Include="order_helper.h" />
+    <ClInclude Include="other.h" />
+    <ClInclude Include="pathUtils.h" />
+    <ClInclude Include="pfc.h" />
+    <ClInclude Include="primitives.h" />
+    <ClInclude Include="primitives_part2.h" />
+    <ClInclude Include="ptr_list.h" />
+    <ClInclude Include="rcptr.h" />
+    <ClInclude Include="ref_counter.h" />
+    <ClInclude Include="sort.h" />
+    <ClInclude Include="string8_impl.h" />
+    <ClInclude Include="string_conv.h" />
+    <ClInclude Include="string_list.h" />
+    <ClInclude Include="stringNew.h" />
+    <ClInclude Include="synchro_win.h" />
+    <ClInclude Include="threads.h" />
+    <ClInclude Include="traits.h" />
+    <ClInclude Include="syncd_storage.h" />
+    <ClInclude Include="win-objects.h" />
+    <ClInclude Include="string_base.h" />
+    <ClInclude Include="audio_sample.h" />
+    <ClInclude Include="timers.h" />
+    <ClInclude Include="wildcard.h" />
+    <ClInclude Include="filehandle.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="pfc-license.txt">
+      <Filter>Doc</Filter>
+    </None>
+    <None Include="pfc-readme.txt">
+      <Filter>Doc</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Doc">
+      <UniqueIdentifier>{70b1137d-0c8f-4bb0-8adb-d406ad38bdd0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

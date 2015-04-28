@@ -6,6 +6,8 @@ struct hasher_md5_result {
 	char m_data[16];
 
 	t_uint64 xorHalve() const;
+
+	static hasher_md5_result null() {hasher_md5_result h = {}; return h;}
 };
 
 inline bool operator==(const hasher_md5_result & p_item1,const hasher_md5_result & p_item2) {return memcmp(&p_item1,&p_item2,sizeof(hasher_md5_result)) == 0;}
@@ -33,6 +35,7 @@ public:
 	static GUID guid_from_result(const hasher_md5_result & param);
 
 	hasher_md5_result process_single(const void * p_buffer,t_size p_bytes);
+	hasher_md5_result process_single_string(const char * str) {return process_single(str, strlen(str));}
 	GUID process_single_guid(const void * p_buffer,t_size p_bytes);
 	GUID get_result_guid(const hasher_md5_state & p_state) {return guid_from_result(get_result(p_state));}
 

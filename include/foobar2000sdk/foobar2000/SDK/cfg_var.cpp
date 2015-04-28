@@ -36,7 +36,10 @@ void cfg_var_writer::config_write_file(stream_writer * p_stream,abort_callback &
 	pfc::array_t<t_uint8,pfc::alloc_fast_aggressive> temp;
 	for(ptr = g_list; ptr; ptr = ptr->m_next) {
 		temp.set_size(0);
-		ptr->get_data_raw(&stream_writer_buffer_append_ref_t<pfc::array_t<t_uint8,pfc::alloc_fast_aggressive> >(temp),p_abort);
+        {
+            stream_writer_buffer_append_ref_t<pfc::array_t<t_uint8,pfc::alloc_fast_aggressive> > stream(temp);
+            ptr->get_data_raw(&stream,p_abort);
+        }
 		p_stream->write_lendian_t(ptr->m_guid,p_abort);
 		p_stream->write_lendian_t(pfc::downcast_guarded<t_uint32>(temp.get_size()),p_abort);
 		if (temp.get_size() > 0) {

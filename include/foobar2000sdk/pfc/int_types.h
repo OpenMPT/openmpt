@@ -1,4 +1,3 @@
-#if !defined(_MSC_VER) && !defined(_EVC_VER)
 #include <stdint.h>
 typedef int64_t t_int64;
 typedef uint64_t t_uint64;
@@ -8,16 +7,6 @@ typedef int16_t t_int16;
 typedef uint16_t t_uint16;
 typedef int8_t t_int8;
 typedef uint8_t t_uint8;
-#else
-typedef __int64 t_int64;
-typedef unsigned __int64 t_uint64;
-typedef __int32 t_int32;
-typedef unsigned __int32 t_uint32;
-typedef __int16 t_int16;
-typedef unsigned __int16 t_uint16;
-typedef __int8 t_int8;
-typedef unsigned __int8 t_uint8;
-#endif
 
 typedef int t_int;
 typedef unsigned int t_uint;
@@ -25,13 +14,6 @@ typedef unsigned int t_uint;
 typedef float t_float32;
 typedef double t_float64;
 
-
-
-#if defined(_WIN32) && !defined(_WIN64)
-#define __PFC_WP64 __w64
-#else
-#define __PFC_WP64
-#endif
 
 
 namespace pfc {
@@ -63,20 +45,11 @@ namespace pfc {
 	};
 }
 
-
-typedef pfc::sized_int_t<sizeof(void*)>::t_unsigned __PFC_WP64 t_size;
-typedef pfc::sized_int_t<sizeof(void*)>::t_signed __PFC_WP64 t_ssize;
-
+typedef size_t t_size;
+typedef pfc::sized_int_t< sizeof(size_t) >::t_signed t_ssize;
 
 
-
-#if defined(_WIN32) && !defined(_WIN64)
 inline t_size MulDiv_Size(t_size x,t_size y,t_size z) {return (t_size) ( ((t_uint64)x * (t_uint64)y) / (t_uint64)z );}
-#elif defined(_WIN64)
-inline t_size MulDiv_Size(t_size x,t_size y,t_size z) {return (x*y)/z;}
-#else
-#error portme
-#endif
 
 #define pfc_infinite (~0)
 

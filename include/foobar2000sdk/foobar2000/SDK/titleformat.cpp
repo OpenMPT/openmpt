@@ -156,8 +156,7 @@ void titleformat_compiler::run(titleformat_hook * p_source,pfc::string_base & p_
 void titleformat_compiler::compile_safe(service_ptr_t<titleformat_object> & p_out,const char * p_spec)
 {
 	if (!compile(p_out,p_spec)) {
-		if (!compile(p_out,"%filename%"))
-			throw pfc::exception_bug_check_v2();
+		compile_force(p_out,"%filename%");
 	}
 }
 

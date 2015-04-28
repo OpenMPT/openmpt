@@ -136,6 +136,14 @@ public:
 	FB2K_MAKE_SERVICE_INTERFACE(input_info_writer,input_info_reader);
 };
 
+class NOVTABLE input_info_writer_v2 : public input_info_writer {
+public:
+	//! Removes all tags from this file. Cancels any set_info() requests on this object. Does not require a commit() afterwards.
+	virtual void remove_tags(abort_callback & abort) = 0;
+
+	FB2K_MAKE_SERVICE_INTERFACE(input_info_writer_v2, input_info_writer);
+};
+
 class NOVTABLE input_entry : public service_base
 {
 public:
@@ -185,6 +193,7 @@ public:
 	inline bool are_parallel_reads_slow() {return (get_flags() & flag_parallel_reads_slow) != 0;}
 
 	static bool g_find_service_by_path(service_ptr_t<input_entry> & p_out,const char * p_path);
+    static bool g_find_service_by_path(service_ptr_t<input_entry> & p_out,const char * p_path, const char * p_ext);
 	static bool g_find_service_by_content_type(service_ptr_t<input_entry> & p_out,const char * p_content_type);
 	static void g_open_for_decoding(service_ptr_t<input_decoder> & p_instance,service_ptr_t<file> p_filehint,const char * p_path,abort_callback & p_abort,bool p_from_redirect = false);
 	static void g_open_for_info_read(service_ptr_t<input_info_reader> & p_instance,service_ptr_t<file> p_filehint,const char * p_path,abort_callback & p_abort,bool p_from_redirect = false);

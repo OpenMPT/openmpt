@@ -100,11 +100,11 @@ public:
 	//! Helper invoking run_modeless().
 	static bool g_run_modeless(service_ptr_t<threaded_process_callback> p_callback,unsigned p_flags,HWND p_parent,const char * p_title,t_size p_title_len = ~0);
 
+	//! Queries user settings; returns whether various timeconsuming tasks should be blocking machine standby.
+	static bool g_query_preventStandby();
 
 	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(threaded_process);
 };
-
-
 
 
 //! Helper - forward threaded_process_callback calls to a service object that for whatever reason cannot publish threaded_process_callback API by itself.

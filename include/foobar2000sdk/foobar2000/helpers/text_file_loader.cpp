@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 
+// FIX ME non working on non Windows due to ANSI nonsense
+
 static const unsigned char utf8_header[3] = {0xEF,0xBB,0xBF};
 
 namespace text_file_loader
@@ -15,8 +17,12 @@ namespace text_file_loader
 		}
 		else
 		{
+#ifdef _WIN32
 			pfc::stringcvt::string_ansi_from_utf8 bah(p_string);
 			p_file->write_object(bah,bah.length(),p_abort);
+#else
+            throw exception_io_data();
+#endif
 		}
 	}
 

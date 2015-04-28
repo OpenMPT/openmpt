@@ -41,6 +41,33 @@ private:
 
 typedef mem_block_container_impl_t<> mem_block_container_impl;
 
+template<unsigned alignBytes = 16> class mem_block_container_aligned_impl : public mem_block_container {
+public:
+	const void * get_ptr() const {return m_data.get_ptr();}
+	void * get_ptr() {return m_data.get_ptr();}
+	t_size get_size() const {return m_data.get_size();}
+	void set_size(t_size p_size) {m_data.set_size(p_size);}
+private:
+	pfc::mem_block_aligned<16> m_data;
+};
+
+template<unsigned alignBytes = 16> class mem_block_container_aligned_incremental_impl : public mem_block_container {
+public:
+	mem_block_container_aligned_incremental_impl() : m_size() {}
+	const void * get_ptr() const {return m_data.get_ptr();}
+	void * get_ptr() {return m_data.get_ptr();}
+	t_size get_size() const {return m_size;}
+	void set_size(t_size p_size) {
+		if (m_data.size() < p_size) {
+			m_data.resize( pfc::multiply_guarded<size_t>(p_size, 3) / 2 );
+		}
+		m_size = p_size;
+	}
+private:
+	pfc::mem_block_aligned<16> m_data;
+	size_t m_size;
+};
+
 class mem_block_container_temp_impl : public mem_block_container {
 public:
 	mem_block_container_temp_impl(void * p_buffer,t_size p_size) : m_buffer(p_buffer), m_buffer_size(p_size), m_size(0) {}

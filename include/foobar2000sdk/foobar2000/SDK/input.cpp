@@ -1,14 +1,18 @@
 #include "foobar2000.h"
 
-
 bool input_entry::g_find_service_by_path(service_ptr_t<input_entry> & p_out,const char * p_path)
+{
+    pfc::string_extension ext(p_path);
+    return g_find_service_by_path(p_out, p_path, ext );
+}
+
+bool input_entry::g_find_service_by_path(service_ptr_t<input_entry> & p_out,const char * p_path, const char * p_ext)
 {
 	service_ptr_t<input_entry> ptr;
 	service_enum_t<input_entry> e;
-	pfc::string_extension ext(p_path);
 	while(e.next(ptr))
 	{
-		if (ptr->is_our_path(p_path,ext))
+		if (ptr->is_our_path(p_path,p_ext))
 		{
 			p_out = ptr;
 			return true;
@@ -33,7 +37,7 @@ bool input_entry::g_find_service_by_content_type(service_ptr_t<input_entry> & p_
 }
 
 
-
+#if 0
 static void prepare_for_open(service_ptr_t<input_entry> & p_service,service_ptr_t<file> & p_file,const char * p_path,filesystem::t_open_mode p_open_mode,abort_callback & p_abort,bool p_from_redirect)
 {
 	if (p_file.is_empty())
@@ -64,6 +68,7 @@ static void prepare_for_open(service_ptr_t<input_entry> & p_service,service_ptr_
 
 	throw exception_io_unsupported_format();
 }
+#endif
 
 namespace {
 
@@ -97,26 +102,21 @@ namespace {
 		if (count == 1) {
 			p_list[0]->open(p_instance,p_filehint,p_path,p_abort);
 		} else {
-			bool got_bad_data = false, got_bad_data_multi = false;
-			bool done = false;
+			unsigned bad_data_count = 0;
 			pfc::string8 bad_data_message;
-			for(t_size n=0;n<count && !done;n++) {
+			for(t_size n=0;n<count;n++) {
 				try {
 					p_list[n]->open(p_instance,p_filehint,p_path,p_abort);
-					done = true;
+					return;
 				} catch(exception_io_unsupported_format) {
 					//do nothing, skip over
 				} catch(exception_io_data const & e) {
-					if (!got_bad_data) bad_data_message = e.what();
-					else got_bad_data_multi = true;
-					got_bad_data = true;
+					if (bad_data_count ++ == 0) bad_data_message = e.what();
 				}
 			}
-			if (!done) {
-				if (got_bad_data_multi) throw exception_io_data();
-				else if (got_bad_data) throw exception_io_data(bad_data_message);
-				else throw exception_io_unsupported_format();
-			}
+			if (bad_data_count > 1) throw exception_io_data();
+			else if (bad_data_count == 0) pfc::throw_exception_with_message<exception_io_data>(bad_data_message);
+			else throw exception_io_unsupported_format();
 		}
 	}
 
