@@ -2,11 +2,14 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="libopenmpt">
-			<UniqueIdentifier>{DBA25818-159D-934C-8A61-253A9DFD953D}</UniqueIdentifier>
+			<UniqueIdentifier>{5114EA42-0377-4F4C-998B-2AADDFEE89DF}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
 		<ClCompile Include="..\..\libopenmpt\libopenmpt_modplug.c">
+			<Filter>libopenmpt</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\libopenmpt\libopenmpt_modplug_cpp.cpp">
 			<Filter>libopenmpt</Filter>
 		</ClCompile>
 	</ItemGroup>

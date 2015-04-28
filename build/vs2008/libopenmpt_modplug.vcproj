@@ -54,7 +54,6 @@
 				WarningLevel="3"
 				ProgramDataBaseFileName="$(OutDir)\libmodplug.pdb"
 				DebugInformationFormat="4"
-				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -141,7 +140,6 @@
 				WarningLevel="3"
 				ProgramDataBaseFileName="$(OutDir)\libmodplug.pdb"
 				DebugInformationFormat="3"
-				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -228,7 +226,6 @@
 				WarningLevel="3"
 				ProgramDataBaseFileName="$(OutDir)\libmodplug.pdb"
 				DebugInformationFormat="3"
-				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -318,7 +315,6 @@
 				WarningLevel="3"
 				ProgramDataBaseFileName="$(OutDir)\libmodplug.pdb"
 				DebugInformationFormat="3"
-				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -380,6 +376,10 @@
 			>
 			<File
 				RelativePath="..\..\libopenmpt\libopenmpt_modplug.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libopenmpt\libopenmpt_modplug_cpp.cpp"
 				>
 			</File>
 		</Filter>

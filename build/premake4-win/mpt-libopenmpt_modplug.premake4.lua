@@ -1,7 +1,7 @@
 
  project "libopenmpt_modplug"
   uuid "F1397660-35F6-4734-837E-88DCE80E4837"
-  language "C"
+  language "C++"
   location ( "../../build/" .. _ACTION )
   targetname "libmodplug"
   objdir "../../build/obj/libopenmpt_modplug"
@@ -13,6 +13,7 @@
   }
   files {
    "../../libopenmpt/libopenmpt_modplug.c",
+   "../../libopenmpt/libopenmpt_modplug_cpp.cpp",
   }
   flags { "Unicode" }
   links { "libopenmpt", "miniz" }
