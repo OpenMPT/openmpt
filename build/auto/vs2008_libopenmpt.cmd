@@ -14,7 +14,9 @@ call build\auto\setup_vs2008.cmd
 
 cd build\vs2008 || goto error
  devenv libopenmpt.sln /clean "Release|Win32" || goto error
+ devenv openmpt123.sln /clean "Release|Win32" || goto error
  devenv libopenmpt.sln /build "Release|Win32" || goto error
+ devenv openmpt123.sln /build "Release|Win32" || goto error
 cd ..\.. || goto error
 
 

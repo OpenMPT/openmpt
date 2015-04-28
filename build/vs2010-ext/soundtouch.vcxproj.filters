@@ -2,22 +2,22 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="include">
-			<UniqueIdentifier>{FF2BAAFF-4AD6-3242-B87A-E1A75294F70D}</UniqueIdentifier>
+			<UniqueIdentifier>{05706549-67CB-144A-9920-DD627850BCCD}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\soundtouch">
-			<UniqueIdentifier>{0F979757-0B48-004F-A863-E8A9F2C0FFB0}</UniqueIdentifier>
+			<UniqueIdentifier>{DFB009DE-2FCF-C248-8FD3-FCA8C92546A2}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\soundtouch\include">
-			<UniqueIdentifier>{E9DC8ED3-1A62-0A42-B192-38CBBD60127B}</UniqueIdentifier>
+			<UniqueIdentifier>{377F3380-D5FE-3243-948C-85B2B71E5999}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\soundtouch\source">
-			<UniqueIdentifier>{D1140925-0D9D-6F49-AD18-AC8B7294AAC4}</UniqueIdentifier>
+			<UniqueIdentifier>{48DA2F3E-7E97-6B4C-8EDE-7EB83C2E6784}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\soundtouch\source\SoundTouch">
-			<UniqueIdentifier>{8FA1F246-C71F-8A4A-96AF-81DE9992742B}</UniqueIdentifier>
+			<UniqueIdentifier>{33717618-8772-5F46-84C1-37CDAFB84DA4}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="include\soundtouch\source\SoundTouchDLL">
-			<UniqueIdentifier>{887B7912-DCB3-184B-83D9-7BF8DE9DD709}</UniqueIdentifier>
+			<UniqueIdentifier>{A3AE6FB1-205C-AB40-B45B-FA963449A2BC}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>

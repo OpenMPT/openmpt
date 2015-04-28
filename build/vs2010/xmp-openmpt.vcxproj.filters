@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="libopenmpt">
+			<UniqueIdentifier>{1CF16943-3C4F-1C45-BBEE-3AF5704F18B1}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\libopenmpt\libopenmpt_settings.hpp">
+			<Filter>libopenmpt</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\libopenmpt\resource.h">
+			<Filter>libopenmpt</Filter>
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\libopenmpt\xmp-openmpt.cpp">
+			<Filter>libopenmpt</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\libopenmpt\libopenmpt_settings.cpp">
+			<Filter>libopenmpt</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ResourceCompile Include="..\..\libopenmpt\libopenmpt_settings.rc">
+			<Filter>libopenmpt</Filter>
+		</ResourceCompile>
+	</ItemGroup>
+</Project>

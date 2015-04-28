@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="libopenmpt">
+			<UniqueIdentifier>{DBA25818-159D-934C-8A61-253A9DFD953D}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\libopenmpt\libopenmpt_modplug.c">
+			<Filter>libopenmpt</Filter>
+		</ClCompile>
+	</ItemGroup>
+</Project>
