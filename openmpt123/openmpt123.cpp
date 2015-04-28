@@ -52,7 +52,7 @@ static const char * const license =
 #include <vector>
 
 #include <cmath>
-#if !defined(OPENMPT123_ANCIENT_COMPILER)
+#if !defined(OPENMPT123_ANCIENT_COMPILER_STDINT)
 #include <cstdint>
 #endif
 #include <cstdio>
@@ -921,10 +921,17 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 	std::vector<Tsample> rear_left( bufsize );
 	std::vector<Tsample> rear_right( bufsize );
 	std::vector<Tsample*> buffers( 4 ) ;
+#if defined(OPENMPT123_ANCIENT_COMPILER_VECTOR)
+	buffers[0] = &left[0];
+	buffers[1] = &right[0];
+	buffers[2] = &rear_left[0];
+	buffers[3] = &rear_right[0];
+#else
 	buffers[0] = left.data();
 	buffers[1] = right.data();
 	buffers[2] = rear_left.data();
 	buffers[3] = rear_right.data();
+#endif
 	buffers.resize( flags.channels );
 	
 	meter_type meter;
@@ -1039,9 +1046,15 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 		std::size_t count = 0;
 
 		switch ( flags.channels ) {
+#if defined(OPENMPT123_ANCIENT_COMPILER_VECTOR)
+			case 1: count = mod.read( flags.samplerate, bufsize, &left[0] ); break;
+			case 2: count = mod.read( flags.samplerate, bufsize, &left[0], &right[0] ); break;
+			case 4: count = mod.read( flags.samplerate, bufsize, &left[0], &right[0], &rear_left[0], &rear_right[0] ); break;
+#else
 			case 1: count = mod.read( flags.samplerate, bufsize, left.data() ); break;
 			case 2: count = mod.read( flags.samplerate, bufsize, left.data(), right.data() ); break;
 			case 4: count = mod.read( flags.samplerate, bufsize, left.data(), right.data(), rear_left.data(), rear_right.data() ); break;
+#endif
 		}
 		
 		char cpu_str[64] = "";
@@ -1058,7 +1071,11 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 		}
 
 		if ( flags.show_meters ) {
+#if defined(OPENMPT123_ANCIENT_COMPILER_VECTOR)
+			update_meter( meter, flags, count, &buffers[0] );
+#else
 			update_meter( meter, flags, count, buffers.data() );
+#endif
 		}
 
 		if ( count > 0 ) {
