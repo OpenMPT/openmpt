@@ -121,7 +121,7 @@ end
 
 if _OPTIONS["group"] == "in_openmpt" then
 
-solution "libopenmpt"
+solution "in_openmpt"
  location ( "../build/" .. _ACTION )
  configurations { "Debug", "Release" }
  platforms { "x32" }
@@ -135,7 +135,7 @@ end
 
 if _OPTIONS["group"] == "xmp-openmpt" then
 
-solution "libopenmpt"
+solution "xmp-openmpt"
  location ( "../build/" .. _ACTION )
  configurations { "Debug", "Release" }
  platforms { "x32" }
@@ -159,12 +159,9 @@ solution "libopenmpt"
  dofile "../build/premake4-win/mpt-libopenmpt_examples.premake4.lua"
  dofile "../build/premake4-win/mpt-libopenmptDLL.premake4.lua"
  dofile "../build/premake4-win/mpt-libopenmpt_modplug.premake4.lua"
- dofile "../build/premake4-win/mpt-in_openmpt.premake4.lua"
- dofile "../build/premake4-win/mpt-xmp-openmpt.premake4.lua"
  dofile "../build/premake4-win/ext-miniz.premake4.lua"
  dofile "../build/premake4-win/ext-miniz-shared.premake4.lua"
  dofile "../build/premake4-win/ext-portaudio.premake4.lua"
- dofile "../build/premake4-win/ext-pugixml.premake4.lua"
 
 end
 
