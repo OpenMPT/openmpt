@@ -63,11 +63,11 @@ newaction {
  description = "OpenMPT postprocess the project files to mitigate premake problems",
  execute     = function ()
   postprocess_vs2008_main("build/vs2008/libopenmpt_test.vcproj")
-	postprocess_vs2008_main("build/vs2010/openmpt123.vcxproj")
+  postprocess_vs2008_main("build/vs2008/openmpt123.vcproj")
   postprocess_vs2010_main("build/vs2010/libopenmpt_test.vcxproj")
-	postprocess_vs2010_main("build/vs2010/openmpt123.vcxproj")
-	postprocess_vs2010_mfc("build/vs2010/in_openmpt.vcxproj")
-	postprocess_vs2010_mfc("build/vs2010/xmp-openmpt.vcxproj")
+  postprocess_vs2010_main("build/vs2010/openmpt123.vcxproj")
+  postprocess_vs2010_mfc("build/vs2010/in_openmpt.vcxproj")
+  postprocess_vs2010_mfc("build/vs2010/xmp-openmpt.vcxproj")
  end
 }
 
