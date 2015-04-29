@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="libopenmpt">
-			<UniqueIdentifier>{AA83ABEA-B32A-4440-8504-31CB87CB34E1}</UniqueIdentifier>
+			<UniqueIdentifier>{99F77A5E-75B6-BF46-9E22-76BE39483B5E}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>
