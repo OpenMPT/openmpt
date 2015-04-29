@@ -23,7 +23,7 @@
 			OutputDirectory="..\..\bin\Win32-Debug"
 			IntermediateDirectory="..\obj\libopenmpt_modplug\x32\Debug"
 			ConfigurationType="2"
-			CharacterSet="1"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -48,7 +48,7 @@
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -68,7 +68,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="..\lib\x32\Debug\libopenmpt.lib ..\lib\x32\Debug\miniz.lib"
+				AdditionalDependencies="..\..\bin\Win32-Debug\libopenmpt.lib ..\lib\x32\Debug\miniz-shared.lib"
 				OutputFile="$(OutDir)\libmodplug.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
@@ -108,7 +108,7 @@
 			OutputDirectory="..\..\bin\x64-Debug"
 			IntermediateDirectory="..\obj\libopenmpt_modplug\x64\Debug"
 			ConfigurationType="2"
-			CharacterSet="1"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -134,7 +134,7 @@
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -154,7 +154,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="..\lib\x64\Debug\libopenmpt.lib ..\lib\x64\Debug\miniz.lib"
+				AdditionalDependencies="..\..\bin\x64-Debug\libopenmpt.lib ..\lib\x64\Debug\miniz-shared.lib"
 				OutputFile="$(OutDir)\libmodplug.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
@@ -194,7 +194,7 @@
 			OutputDirectory="..\..\bin\Win32"
 			IntermediateDirectory="..\obj\libopenmpt_modplug\x32\Release"
 			ConfigurationType="2"
-			CharacterSet="1"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -219,7 +219,7 @@
 				AdditionalIncludeDirectories="..\..;..\..\include\modplug\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
@@ -240,7 +240,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="..\lib\x32\Release\libopenmpt.lib ..\lib\x32\Release\miniz.lib"
+				AdditionalDependencies="..\..\bin\Win32\libopenmpt.lib ..\lib\x32\Release\miniz-shared.lib"
 				OutputFile="$(OutDir)\libmodplug.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
@@ -282,7 +282,7 @@
 			OutputDirectory="..\..\bin\x64"
 			IntermediateDirectory="..\obj\libopenmpt_modplug\x64\Release"
 			ConfigurationType="2"
-			CharacterSet="1"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -308,7 +308,7 @@
 				AdditionalIncludeDirectories="..\..;..\..\include\modplug\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
@@ -329,7 +329,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="..\lib\x64\Release\libopenmpt.lib ..\lib\x64\Release\miniz.lib"
+				AdditionalDependencies="..\..\bin\x64\libopenmpt.lib ..\lib\x64\Release\miniz-shared.lib"
 				OutputFile="$(OutDir)\libmodplug.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
