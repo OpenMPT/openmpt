@@ -12,10 +12,10 @@ call build\auto\setup_vs2010.cmd
 
 
 
-cd libopenmpt || goto error
+cd build\vs2010 || goto error
  devenv libopenmpt_test.sln /clean "Release|Win32" || goto error
  devenv libopenmpt_test.sln /build "Release|Win32" || goto error
-cd .. || goto error
+cd ..\.. || goto error
 
 
 
