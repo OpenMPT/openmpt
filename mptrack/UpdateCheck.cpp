@@ -70,7 +70,7 @@ void CUpdateCheck::UpdateThread()
 		{
 			CUpdateCheck::showUpdateHint = false;
 			CString msg;
-			msg.Format("OpenMPT would like to check for updates now, proceed?\n\nNote: In the future, OpenMPT will check for updates every %d days. If you do not want this, you can disable update checks in the setup.", CUpdateCheck::updateCheckPeriod);
+			msg.Format(_T("OpenMPT would like to check for updates now, proceed?\n\nNote: In the future, OpenMPT will check for updates every %d days. If you do not want this, you can disable update checks in the setup."), CUpdateCheck::updateCheckPeriod);
 			if(Reporting::Confirm(msg, "OpenMPT Internet Update") == cnfNo)
 			{
 				CUpdateCheck::lastUpdateCheck = now;
@@ -83,18 +83,18 @@ void CUpdateCheck::UpdateThread()
 	CUpdateCheck::showUpdateHint = false;
 
 	// Prepare UA / URL strings...
-	const CString userAgent = CString("OpenMPT ") + MptVersion::str;
+	const CString userAgent = CString(_T("OpenMPT ")) + MptVersion::str;
 	CString updateURL = CUpdateCheck::updateBaseURL;
 	CString versionStr = MptVersion::str;
 #ifdef _WIN64
-	versionStr.Append("-win64");
+	versionStr.Append(_T("-win64"));
 #elif defined(_WIN32)
-	versionStr.Append("-win32");
+	versionStr.Append(_T("-win32"));
 #else
 #error "Platform-specific identifier missing"
 #endif
-	updateURL.Replace("$VERSION", versionStr);
-	updateURL.Replace("$GUID", GetSendGUID() ? mpt::ToCString(TrackerSettings::Instance().gcsInstallGUID.Get()) : "anonymous");
+	updateURL.Replace(_T("$VERSION"), versionStr);
+	updateURL.Replace(_T("$GUID"), GetSendGUID() ? mpt::ToCString(TrackerSettings::Instance().gcsInstallGUID.Get()) : _T("anonymous"));
 
 	// Establish a connection.
 	internetHandle = InternetOpen(userAgent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
@@ -121,13 +121,13 @@ void CUpdateCheck::UpdateThread()
 	if(statusCodeHTTP >= 400)
 	{
 		CString error;
-		error.Format("Version information could not be found on the server (HTTP status code %d). Maybe your version of OpenMPT is too old!", statusCodeHTTP);
+		error.Format(_T("Version information could not be found on the server (HTTP status code %d). Maybe your version of OpenMPT is too old!"), statusCodeHTTP);
 		Die(error);
 		return;
 	}
 
 	// Download data.
-	CString resultData = "";
+	std::string resultBuffer = "";
 	char *downloadBuffer = new char[DOWNLOAD_BUFFER_SIZE];
 	DWORD availableSize, bytesRead;
 	do
@@ -150,14 +150,15 @@ void CUpdateCheck::UpdateThread()
 			return;
 		}
 
-		resultData.Append(downloadBuffer, availableSize);
+		resultBuffer.append(downloadBuffer, downloadBuffer + availableSize);
 		Sleep(1);
 
 	} while(bytesRead != 0);
 	delete[] downloadBuffer;
 	
+	CString resultData = mpt::ToCString(mpt::CharsetUTF8, resultBuffer);
 	// Now, evaluate the downloaded data.
-	if(!resultData.CompareNoCase("noupdate"))
+	if(!resultData.CompareNoCase(_T("noupdate")))
 	{
 		if(!isAutoUpdate)
 		{
@@ -168,13 +169,13 @@ void CUpdateCheck::UpdateThread()
 		CString releaseVersion, releaseDate, releaseURL;
 		CString token;
 		int parseStep = 0, parsePos = 0;
-		while((token = resultData.Tokenize("\n", parsePos)) != "")
+		while((token = resultData.Tokenize(_T("\n"), parsePos)) != "")
 		{
 			token.Trim();
 			switch(parseStep++)
 			{
 			case 0:
-				if(token.CompareNoCase("update") != 0)
+				if(token.CompareNoCase(_T("update")) != 0)
 				{
 					Die("Could not understand server response. Maybe your version of OpenMPT is too old!");
 					return;
@@ -193,7 +194,7 @@ void CUpdateCheck::UpdateThread()
 		}
 		if(parseStep >= 4)
 		{
-			resultData.Format("A new version is available!\nOpenMPT %s has been released on %s. Would you like to visit %s for more information?", releaseVersion, releaseDate, releaseURL);
+			resultData.Format(_T("A new version is available!\nOpenMPT %s has been released on %s. Would you like to visit %s for more information?"), releaseVersion, releaseDate, releaseURL);
 			if(Reporting::Confirm(resultData, "OpenMPT Internet Update") == cnfYes)
 			{
 				CTrackApp::OpenURL(releaseURL);
@@ -297,7 +298,7 @@ BOOL CUpdateSetupDlg::OnInitDialog()
 		const tm* const lastUpdate = localtime(&t);
 		if(lastUpdate != nullptr)
 		{
-			updateText.Format("The last successful update check was run on %04d-%02d-%02d, %02d:%02d.", lastUpdate->tm_year + 1900, lastUpdate->tm_mon + 1, lastUpdate->tm_mday, lastUpdate->tm_hour, lastUpdate->tm_min);
+			updateText.Format(_T("The last successful update check was run on %04d-%02d-%02d, %02d:%02d."), lastUpdate->tm_year + 1900, lastUpdate->tm_mon + 1, lastUpdate->tm_mday, lastUpdate->tm_hour, lastUpdate->tm_min);
 			SetDlgItemText(IDC_LASTUPDATE, updateText);
 		}
 	}
