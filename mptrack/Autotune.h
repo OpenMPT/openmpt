@@ -53,7 +53,7 @@ protected:
 
 	bool PrepareSample(SmpLength maxShift);
 
-	static DWORD WINAPI AutotuneThread(void *i);
+	static DWORD WINAPI AutotuneThread(void *info);
 };
 
 

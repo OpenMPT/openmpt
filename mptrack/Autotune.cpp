@@ -162,10 +162,10 @@ struct AutotuneThreadData
 };
 
 
-DWORD WINAPI Autotune::AutotuneThread(void *i)
-//--------------------------------------------
+DWORD WINAPI Autotune::AutotuneThread(void *info_)
+//------------------------------------------------
 {
-	AutotuneThreadData &info = *static_cast<AutotuneThreadData *>(i);
+	AutotuneThreadData &info = *static_cast<AutotuneThreadData *>(info_);
 	info.histogram.resize(HISTORY_BINS, 0);
 #ifdef ENABLE_SSE2
 	const bool useSSE = (GetProcSupport() & PROCSUPPORT_SSE2) != 0;
@@ -360,7 +360,7 @@ BOOL CAutotuneDlg::OnInitDialog()
 	m_CbnNoteBox.ResetContent();
 	for(int note = 0; note < 12; note++)
 	{
-		const int item = m_CbnNoteBox.AddString(szNoteNames[note]);
+		const int item = m_CbnNoteBox.AddString(mpt::ToCString(mpt::CharsetASCII, szNoteNames[note]));
 		m_CbnNoteBox.SetItemData(item, note);
 		if(note == targetNote)
 		{
