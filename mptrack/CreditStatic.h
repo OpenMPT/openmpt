@@ -79,12 +79,12 @@ public:
 public:
 	BOOL StartScrolling();
 	void EndScrolling();
-	void SetCredits(LPCTSTR credits, char delimiter = '|');
-	void SetCredits(UINT nID, char delimiter = '|');
+	void SetCredits(LPCTSTR credits, TCHAR delimiter = _T('|'));
+	void SetCredits(UINT nID, TCHAR delimiter = _T('|'));
 	void SetSpeed(UINT index, int speed = 0);
 	void SetColor(UINT index, COLORREF col);
 	void SetTextHeight(UINT index, int height);
-	void SetEscape(UINT index, char escape);
+	void SetEscape(UINT index, TCHAR escape);
 	void SetGradient(UINT value = GRADIENT_RIGHT_DARK);
 	BOOL SetBkImage(UINT nIDResource);
 	BOOL SetBkImage(LPCTSTR lpszResourceName);

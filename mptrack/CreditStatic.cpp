@@ -10,12 +10,6 @@
 #include "stdafx.h"
 #include "CreditStatic.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -117,9 +111,9 @@ void CCreditStatic::EndScrolling()
 	}
 }
 
-void CCreditStatic::SetCredits(LPCTSTR credits,char delimiter)
+void CCreditStatic::SetCredits(LPCTSTR credits,TCHAR delimiter)
 {
-	char *str,*ptr1,*ptr2;
+	TCHAR *str,*ptr1,*ptr2;
     
 	ASSERT(credits);
 
@@ -146,7 +140,7 @@ void CCreditStatic::SetCredits(LPCTSTR credits,char delimiter)
 	m_bDrawText = FALSE;
 }
 
-void CCreditStatic::SetCredits(UINT nID,char delimiter)
+void CCreditStatic::SetCredits(UINT nID,TCHAR delimiter)
 {
 	CString credits;
 	if(!credits.LoadString(nID))
@@ -179,7 +173,7 @@ void CCreditStatic::SetTextHeight(UINT index, int height)
 	m_TextHeights[index] = height;
 }
 
-void CCreditStatic::SetEscape(UINT index, char escape)
+void CCreditStatic::SetEscape(UINT index, TCHAR escape)
 {
 	ASSERT(index <= DISPLAY_BITMAP);
 
@@ -555,7 +549,7 @@ void CCreditStatic::MoveCredit(CDC* pDC, CRect& m_ScrollRect, CRect& m_ClientRec
     int rmcode = 0;
 
 	if (!m_szWork.IsEmpty()) {
-		char c = m_szWork[m_szWork.GetLength()-1];
+		TCHAR c = m_szWork[m_szWork.GetLength()-1];
 		if(c == m_Escapes[TOP_LEVEL_GROUP]) {
 			rmcode = 1;
 			bItalic = FALSE;
@@ -568,7 +562,7 @@ void CCreditStatic::MoveCredit(CDC* pDC, CRect& m_ScrollRect, CRect& m_ClientRec
                    	CLIP_DEFAULT_PRECIS,
                    	ANTIALIASED_QUALITY,
                    	VARIABLE_PITCH | 0x04 | FF_DONTCARE,
-                   	(LPSTR)"Arial");
+                   	_T("Arial"));
 			memDC.SetTextColor(m_Colors[TOP_LEVEL_GROUP_COLOR]);
 			if (pOldFont != NULL) memDC.SelectObject(pOldFont);
 			pOldFont = memDC.SelectObject(&m_fntArial);
@@ -586,7 +580,7 @@ void CCreditStatic::MoveCredit(CDC* pDC, CRect& m_ScrollRect, CRect& m_ClientRec
                    	CLIP_DEFAULT_PRECIS,
                    	ANTIALIASED_QUALITY,
                    	VARIABLE_PITCH | 0x04 | FF_DONTCARE,
-                   	(LPSTR)"Arial");
+                   	_T("Arial"));
 			memDC.SetTextColor(m_Colors[GROUP_TITLE_COLOR]);
 			if (pOldFont != NULL) memDC.SelectObject(pOldFont);
 			pOldFont = memDC.SelectObject(&m_fntArial);
@@ -604,7 +598,7 @@ void CCreditStatic::MoveCredit(CDC* pDC, CRect& m_ScrollRect, CRect& m_ClientRec
 	               	CLIP_DEFAULT_PRECIS,
 	               	ANTIALIASED_QUALITY,
 	               	VARIABLE_PITCH | 0x04 | FF_DONTCARE,
-	               	(LPSTR)"Arial");
+	               	_T("Arial"));
 			memDC.SetTextColor(m_Colors[TOP_LEVEL_TITLE_COLOR]);
 			if (pOldFont != NULL) memDC.SelectObject(pOldFont);
 			pOldFont = memDC.SelectObject(&m_fntArial);
@@ -613,7 +607,7 @@ void CCreditStatic::MoveCredit(CDC* pDC, CRect& m_ScrollRect, CRect& m_ClientRec
 			if (!m_bProcessingBitmap)
 			{
 				CString szBitmap = m_szWork.Left(m_szWork.GetLength()-1);
-				if(m_bmpWork.LoadBitmap((const char *)szBitmap)) {
+				if(m_bmpWork.LoadBitmap(szBitmap)) {
 					BITMAP 		m_bmpInfo;
 
 	   				m_bmpWork.GetObject(sizeof(BITMAP), &m_bmpInfo);
@@ -648,7 +642,7 @@ void CCreditStatic::MoveCredit(CDC* pDC, CRect& m_ScrollRect, CRect& m_ClientRec
                    	CLIP_DEFAULT_PRECIS,
                    	ANTIALIASED_QUALITY,
                    	VARIABLE_PITCH | 0x04 | FF_DONTCARE,
-                   	(LPSTR)"Arial");
+                   	_T("Arial"));
 			memDC.SetTextColor(m_Colors[NORMAL_TEXT_COLOR]);
 			if (pOldFont != NULL) memDC.SelectObject(pOldFont);
 			pOldFont = memDC.SelectObject(&m_fntArial);
@@ -679,7 +673,7 @@ void CCreditStatic::MoveCredit(CDC* pDC, CRect& m_ScrollRect, CRect& m_ClientRec
 		}
 		CRect r(m_ClientRect);
 		r.top = r.bottom-m_nClip;
-		memDC.DrawText((const char *)m_szWork,m_szWork.GetLength()-rmcode,&r,DT_TOP|DT_CENTER|
+		memDC.DrawText(m_szWork,m_szWork.GetLength()-rmcode,&r,DT_TOP|DT_CENTER|
 					DT_NOPREFIX | DT_SINGLELINE);	
 		m_bDrawText=FALSE;
 	}
@@ -754,7 +748,7 @@ void CCreditStatic::DrawCredit(CDC* pDC, CRect& m_ScrollRect)
         CBitmap bitmap;
 
 		if (!m_szWork.IsEmpty()) {
-			char c = m_szWork[m_szWork.GetLength()-1];
+			TCHAR c = m_szWork[m_szWork.GetLength()-1];
 			if(c == m_Escapes[TOP_LEVEL_GROUP]) {
 				rmcode = 1;
 				bItalic = FALSE;
@@ -767,7 +761,7 @@ void CCreditStatic::DrawCredit(CDC* pDC, CRect& m_ScrollRect)
                    	CLIP_DEFAULT_PRECIS,
                    	PROOF_QUALITY,
                    	VARIABLE_PITCH | 0x04 | FF_DONTCARE,
-                   	(LPSTR)"Arial");
+                   	_T("Arial"));
 				memDC.SetTextColor(m_Colors[TOP_LEVEL_GROUP_COLOR]);
 				pOldFont = memDC.SelectObject(&m_fntArial);
 		
@@ -784,7 +778,7 @@ void CCreditStatic::DrawCredit(CDC* pDC, CRect& m_ScrollRect)
                    	CLIP_DEFAULT_PRECIS,
                    	PROOF_QUALITY,
                    	VARIABLE_PITCH | 0x04 | FF_DONTCARE,
-                   	(LPSTR)"Arial");
+                   	_T("Arial"));
 				memDC.SetTextColor(m_Colors[GROUP_TITLE_COLOR]);
 				pOldFont = memDC.SelectObject(&m_fntArial);
 			}
@@ -801,13 +795,13 @@ void CCreditStatic::DrawCredit(CDC* pDC, CRect& m_ScrollRect)
 	               	CLIP_DEFAULT_PRECIS,
 	               	PROOF_QUALITY,
 	               	VARIABLE_PITCH | 0x04 | FF_DONTCARE,
-	               	(LPSTR)"Arial");
+	               	_T("Arial"));
 				memDC.SetTextColor(m_Colors[TOP_LEVEL_TITLE_COLOR]);
 				pOldFont = memDC.SelectObject(&m_fntArial);
 			}
 			else if(c == m_Escapes[DISPLAY_BITMAP]) {
 				CString szBitmap = m_szWork.Left(m_szWork.GetLength()-1);
-				if(bitmap.LoadBitmap((const char *)szBitmap)) {
+				if(bitmap.LoadBitmap(szBitmap)) {
 					BITMAP 		m_bmpInfo;
 
 	   				bitmap.GetObject(sizeof(BITMAP), &m_bmpInfo);
@@ -835,7 +829,7 @@ void CCreditStatic::DrawCredit(CDC* pDC, CRect& m_ScrollRect)
                    	CLIP_DEFAULT_PRECIS,
                    	PROOF_QUALITY,
                    	VARIABLE_PITCH | 0x04 | FF_DONTCARE,
-                   	(LPSTR)"Arial");
+                   	_T("Arial"));
 				memDC.SetTextColor(m_Colors[NORMAL_TEXT_COLOR]);
 				pOldFont = memDC.SelectObject(&m_fntArial);
 			}
@@ -850,7 +844,7 @@ void CCreditStatic::DrawCredit(CDC* pDC, CRect& m_ScrollRect)
 			CSize size;
 			if(m_szWork.GetLength()-rmcode != 0) 
 			{
-				memDC.DrawText((const char *)m_szWork,m_szWork.GetLength()-rmcode,&r,DT_TOP|DT_CENTER|
+				memDC.DrawText(m_szWork,m_szWork.GetLength()-rmcode,&r,DT_TOP|DT_CENTER|
 						DT_NOPREFIX | DT_SINGLELINE);	
 				size = memDC.GetTextExtent((LPCTSTR)m_szWork,m_szWork.GetLength()-rmcode);
 			}
