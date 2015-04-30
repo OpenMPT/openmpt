@@ -39,6 +39,9 @@
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
+#if MPT_COMPILER_MSVC
+#include <tchar.h>
+#endif
 #if MPT_OS_WINDOWS
 #include <windows.h>
 #endif
@@ -886,6 +889,104 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\path\\file").AbsolutePathToRelative(exePath), MPT_PATHSTRING("\\\\server\\path\\file"));
 	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\path\\file").RelativePathToAbsolute(exePath), MPT_PATHSTRING("\\\\server\\path\\file"));
 #endif
+
+
+
+#ifdef MODPLUG_TRACKER
+#if MPT_COMPILER_MSVC
+
+	// Tracker code currently relies on BROKEN MSVC behaviour with respect to %s
+	// handling in printf functions when the target is a wide string.
+	// Ensure that Microsoft KEEPS this BROKEN behavour (it conflicts with C99 and
+	// C++11 demanded semantics.
+	// Additionally, the tracker code makes use of %hs and %ls which are the only
+	// way to unconditionally expect narrow or wide string parameters
+	// respectively; %ls is standard conforming, %hs is a Microsoft extension.
+	// We check all possible combinations and expect Microsoft-style behaviour
+	// here.
+
+	char src_char[256];
+	wchar_t src_wchar[256];
+	TCHAR src_tchar[256];
+
+	char dst_char[256];
+	wchar_t dst_wchar[256];
+	TCHAR dst_tchar[256];
+
+	MemsetZero(src_char);
+	MemsetZero(src_wchar);
+	MemsetZero(src_tchar);
+
+	strcpy(src_char, "ab");
+	wcscpy(src_wchar, L"ab");
+	_tcscpy(src_tchar, _T("ab"));
+
+#define MPT_TEST_PRINTF(dst_type, function, format, src_type) \
+	do { \
+		MemsetZero(dst_ ## dst_type); \
+		function(dst_ ## dst_type, format, src_ ## src_type); \
+		VERIFY_EQUAL(std::memcmp(dst_ ## dst_type, src_ ## dst_type, 256), 0); \
+	} while(0) \
+/**/
+
+#define MPT_TEST_PRINTF_N(dst_type, function, format, src_type) \
+	do { \
+		MemsetZero(dst_ ## dst_type); \
+		function(dst_ ## dst_type, 255, format, src_ ## src_type); \
+		VERIFY_EQUAL(std::memcmp(dst_ ## dst_type, src_ ## dst_type, 256), 0); \
+	} while(0) \
+/**/
+
+	// CRT narrow
+	MPT_TEST_PRINTF(char, sprintf, "%s", char);
+	MPT_TEST_PRINTF(char, sprintf, "%S", wchar);
+	MPT_TEST_PRINTF(char, sprintf, "%hs", char);
+	MPT_TEST_PRINTF(char, sprintf, "%hS", char);
+	MPT_TEST_PRINTF(char, sprintf, "%ls", wchar);
+	MPT_TEST_PRINTF(char, sprintf, "%lS", wchar);
+	MPT_TEST_PRINTF(char, sprintf, "%ws", wchar);
+	MPT_TEST_PRINTF(char, sprintf, "%wS", wchar);
+
+	// CRT wide
+	MPT_TEST_PRINTF_N(wchar, swprintf, L"%s", wchar);
+	MPT_TEST_PRINTF_N(wchar, swprintf, L"%S", char);
+	MPT_TEST_PRINTF_N(wchar, swprintf, L"%hs", char);
+	MPT_TEST_PRINTF_N(wchar, swprintf, L"%hS", char);
+	MPT_TEST_PRINTF_N(wchar, swprintf, L"%ls", wchar);
+	MPT_TEST_PRINTF_N(wchar, swprintf, L"%lS", wchar);
+	MPT_TEST_PRINTF_N(wchar, swprintf, L"%ws", wchar);
+	MPT_TEST_PRINTF_N(wchar, swprintf, L"%wS", wchar);
+
+	// WinAPI TCHAR
+	MPT_TEST_PRINTF(tchar, wsprintf, _T("%s"), tchar);
+	MPT_TEST_PRINTF(tchar, wsprintf, _T("%hs"), char);
+	MPT_TEST_PRINTF(tchar, wsprintf, _T("%hS"), char);
+	MPT_TEST_PRINTF(tchar, wsprintf, _T("%ls"), wchar);
+	MPT_TEST_PRINTF(tchar, wsprintf, _T("%lS"), wchar);
+
+	// WinAPI CHAR
+	MPT_TEST_PRINTF(char, wsprintfA, "%s", char);
+	MPT_TEST_PRINTF(char, wsprintfA, "%S", wchar);
+	MPT_TEST_PRINTF(char, wsprintfA, "%hs", char);
+	MPT_TEST_PRINTF(char, wsprintfA, "%hS", char);
+	MPT_TEST_PRINTF(char, wsprintfA, "%ls", wchar);
+	MPT_TEST_PRINTF(char, wsprintfA, "%lS", wchar);
+
+	// WinAPI WCHAR
+	MPT_TEST_PRINTF(wchar, wsprintfW, L"%s", wchar);
+	MPT_TEST_PRINTF(wchar, wsprintfW, L"%S", char);
+	MPT_TEST_PRINTF(wchar, wsprintfW, L"%hs", char);
+	MPT_TEST_PRINTF(wchar, wsprintfW, L"%hS", char);
+	MPT_TEST_PRINTF(wchar, wsprintfW, L"%ls", wchar);
+	MPT_TEST_PRINTF(wchar, wsprintfW, L"%lS", wchar);
+
+#undef MPT_TEST_PRINTF
+#undef MPT_TEST_PRINTF_n
+
+#endif
+#endif
+
+
 
 }
 
