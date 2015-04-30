@@ -47,6 +47,7 @@ static std::wstring FillEmptyCaption(const std::wstring &caption, LogLevel level
 		result = GetTitle() + std::wstring(L" - ");
 		switch(level)
 		{
+		case LogDebug: result += L"Debug"; break;
 		case LogNotification: result += L"Notification"; break;
 		case LogInformation: result += L"Information"; break;
 		case LogWarning: result += L"Warning"; break;

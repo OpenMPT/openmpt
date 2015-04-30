@@ -882,7 +882,10 @@ void CModDoc::AddToLog(LogLevel level, const mpt::ustring &text) const
 		m_Log.push_back(LogEntry(level, text));
 	} else
 	{
-		Reporting::Message(level, text);
+		if(level < LogDebug)
+		{
+			Reporting::Message(level, text);
+		}
 	}
 }
 
@@ -904,9 +907,10 @@ LogLevel CModDoc::GetMaxLogLevel() const
 //--------------------------------------
 {
 	LogLevel retval = LogNotification;
+	// find the most severe loglevel
 	for(std::vector<LogEntry>::const_iterator i=m_Log.begin(); i!=m_Log.end(); ++i)
 	{
-		retval = std::max(retval, i->level);
+		retval = std::min(retval, i->level);
 	}
 	return retval;
 }
@@ -932,10 +936,14 @@ UINT CModDoc::ShowLog(const std::wstring &preamble, const std::wstring &title, C
 	if(!parent) parent = CMainFrame::GetMainFrame();
 	if(GetLog().size() > 0)
 	{
-		std::wstring text = preamble + mpt::ToWide(GetLogString());
-		std::wstring actualTitle = (title.length() == 0) ? MAINFRAME_TITLEW : title;
-		Reporting::Message(GetMaxLogLevel(), text, actualTitle, parent);
-		return IDOK;
+		LogLevel level = GetMaxLogLevel();
+		if(level < LogDebug)
+		{
+			std::wstring text = preamble + mpt::ToWide(GetLogString());
+			std::wstring actualTitle = (title.length() == 0) ? MAINFRAME_TITLEW : title;
+			Reporting::Message(level, text, actualTitle, parent);
+			return IDOK;
+		}
 	}
 	return IDCANCEL;
 }

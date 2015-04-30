@@ -15,11 +15,11 @@ OPENMPT_NAMESPACE_BEGIN
 
 enum LogLevel
 {
-	/*LogDebug        = 1,*/
-	LogNotification = 2,
+	LogDebug        = 5,
+	LogNotification = 4,
 	LogInformation  = 3,
-	LogWarning      = 4,
-	LogError        = 5
+	LogWarning      = 2,
+	LogError        = 1
 };
 
 
@@ -31,6 +31,7 @@ inline mpt::ustring LogLevelToString(LogLevel level)
 	case LogWarning:      return MPT_USTRING("warning"); break;
 	case LogInformation:  return MPT_USTRING("info");    break;
 	case LogNotification: return MPT_USTRING("notify");  break;
+	case LogDebug:        return MPT_USTRING("debug");   break;
 	}
 	return MPT_USTRING("unknown");
 }
@@ -82,9 +83,9 @@ private:
 	const Context &context;
 public:
 	Logger(const Context &context) : context(context) {}
-	void MPT_PRINTF_FUNC(2,3) operator () (const char *format, ...);
+	MPT_DEPRECATED void MPT_PRINTF_FUNC(2,3) operator () (const char *format, ...); // migrate to type-safe version below, preferably to the one with loglevel
+	/* MPT_DEPRECATED */ void operator () (const AnyStringLocale &text);
 	void operator () (LogLevel level, const mpt::ustring &text);
-	void operator () (const AnyStringLocale &text);
 };
 
 #define Log mpt::log::Logger(MPT_LOG_CURRENTCONTEXT())
@@ -95,8 +96,8 @@ class Logger
 {
 public:
 	inline void MPT_PRINTF_FUNC(2,3) operator () (const char * /*format*/, ...) {}
-	inline void operator () (LogLevel /*level*/ , const mpt::ustring & /*text*/ ) {}
 	inline void operator () (const AnyStringLocale & /*text*/ ) {}
+	inline void operator () (LogLevel /*level*/ , const mpt::ustring & /*text*/ ) {}
 };
 
 #define Log if(true) {} else mpt::log::Logger() // completely compile out arguments to Log() so that they do not even get evaluated

@@ -297,7 +297,7 @@ VstIntPtr CDmo2Vst::Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 				|| FAILED(m_pMediaObject->SetOutputType(0, &mt, 0)))
 			{
 #ifdef DMO_LOG
-				Log("DMO: Failed to set I/O media type\n");
+				Log(MPT_USTRING("DMO: Failed to set I/O media type"));
 #endif
 				return -1;
 			}
@@ -543,11 +543,11 @@ AEffect *DmoToVst(VSTPluginLib &lib)
 				return (p) ? p->GetEffect() : nullptr;
 			}
 #ifdef DMO_LOG
-			Log("%s: Unable to use this DMO\n", lib.libraryName);
+			Log(lib.libraryName.ToUnicode() + MPT_USTRING(": Unable to use this DMO"));
 #endif
 		}
 #ifdef DMO_LOG
-		else Log("%s: Failed to get IMediaObject & IMediaObjectInPlace interfaces\n", lib.libraryName);
+		else Log(lib.libraryName.ToUnicode() + MPT_USTRING(": Failed to get IMediaObject & IMediaObjectInPlace interfaces"));
 #endif
 		if (pMO) pMO->Release();
 		if (pMOIP) pMOIP->Release();

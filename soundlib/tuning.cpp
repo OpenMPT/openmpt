@@ -406,12 +406,10 @@ CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
 		if (pTuning->ProProcessUnserializationdata())
 		{
 #ifdef MODPLUG_TRACKER
-			Reporting::Error(
+			Reporting::Error(("Processing loaded data for tuning \"" + pTuning->GetName() + "\" failed.").c_str(), "Tuning load failure");
 #else
-			Log("%s (%s)\n",
+			Log(LogError, MPT_USTRING("Processing loaded data for tuning \"") + mpt::ToUnicode(mpt::CharsetISO8859_1, pTuning->GetName()) + MPT_USTRING("\" failed."));
 #endif
-				("Processing loaded data for tuning \"" + pTuning->GetName() + "\" failed.").c_str(), "Tuning load failure"
-				);
 			delete pTuning; pTuning = nullptr;
 		}
 		else

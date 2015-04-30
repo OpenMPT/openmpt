@@ -23,10 +23,14 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 {
 	if(msg)
 	{
-		mpt::log::Logger(mpt::log::Context(file, line, function))("ASSERTION FAILED: %s (%s)", msg, expr);
+		mpt::log::Logger(mpt::log::Context(file, line, function))(LogError,
+			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetASCII, msg) + MPT_USTRING(" (") + mpt::ToUnicode(mpt::CharsetASCII, expr) + MPT_USTRING(")")
+			);
 	} else
 	{
-		mpt::log::Logger(mpt::log::Context(file, line, function))("ASSERTION FAILED: %s", expr);
+		mpt::log::Logger(mpt::log::Context(file, line, function))(LogError,
+			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetASCII, expr)
+			);
 	}
 }
 
