@@ -385,7 +385,7 @@ public:
 ///////////////////////////////////////////////////
 // 4-bit DIB Drawing functions
 void DibBlt(HDC hdc, int x, int y, int sizex, int sizey, int srcx, int srcy, MODPLUGDIB *lpdib);
-MODPLUGDIB *LoadDib(LPCSTR lpszName);
+MODPLUGDIB *LoadDib(LPCTSTR lpszName);
 RGBQUAD rgb2quad(COLORREF c);
 
 // Other bitmap functions
@@ -414,8 +414,8 @@ void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile &sndFile, cons
 ///////////////////////////////////////////////////
 // Tables
 
-extern const char *szSpecialNoteNamesMPT[];
-extern const char *szSpecialNoteShortDesc[];
+extern const TCHAR *szSpecialNoteNamesMPT[];
+extern const TCHAR *szSpecialNoteShortDesc[];
 extern const char *szHexChar;
 
 // Defined in load_mid.cpp

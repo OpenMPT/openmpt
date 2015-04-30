@@ -55,8 +55,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 CTrackApp theApp;
 
-const char *szSpecialNoteNamesMPT[] = {TEXT("PCs"), TEXT("PC"), TEXT("~~ (Note Fade)"), TEXT("^^ (Note Cut)"), TEXT("== (Note Off)")};
-const char *szSpecialNoteShortDesc[] = {TEXT("Param Control (Smooth)"), TEXT("Param Control"), TEXT("Note Fade"), TEXT("Note Cut"), TEXT("Note Off")};
+const TCHAR *szSpecialNoteNamesMPT[] = {_T("PCs"), _T("PC"), _T("~~ (Note Fade)"), _T("^^ (Note Cut)"), _T("== (Note Off)")};
+const TCHAR *szSpecialNoteShortDesc[] = {_T("Param Control (Smooth)"), _T("Param Control"), _T("Note Fade"), _T("Note Cut"), _T("Note Off")};
 
 // Make sure that special note arrays include string for every note.
 STATIC_ASSERT(NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1 == CountOf(szSpecialNoteNamesMPT));
@@ -433,7 +433,7 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 		if(filename.empty())
 		{
 			const char *pszSection = (iMidi < 128) ? "Melodic Patches" : "Drum Patches";
-			sprintf(section, _T("%d"), iMidi & 0x7f);
+			sprintf(section, "%d", iMidi & 0x7f);
 			filename = file.Read<mpt::PathString>(pszSection, section, mpt::PathString());
 			if(forgetSettings) file.Forget(pszSection, section);
 			if(filename.empty())
@@ -490,9 +490,9 @@ BOOL CTrackApp::ExportMidiConfig(SettingsContainer &file)
 
 			char s[16];
 			if (iMidi < 128)
-				sprintf(s, _T("Midi%d"), iMidi);
+				sprintf(s, "Midi%d", iMidi);
 			else
-				sprintf(s, _T("Perc%d"), iMidi & 0x7F);
+				sprintf(s, "Perc%d", iMidi & 0x7F);
 
 			file.Write<mpt::PathString>("Midi Library", s, szFileName);
 		}
@@ -516,7 +516,7 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 	for(size_t i = 0; i < numBanks; i++)
 	{
 		char s[16];
-		sprintf(s, _T("Bank%d"), i + 1);
+		sprintf(s, "Bank%d", i + 1);
 		mpt::PathString path = theApp.GetSettings().Read<mpt::PathString>("DLS Banks", s, mpt::PathString());
 		path = theApp.RelativePathToAbsolute(path);
 		AddDLSBank(path);
@@ -575,7 +575,7 @@ BOOL CTrackApp::SaveDefaultDLSBanks()
 		}
 
 		char s[16];
-		sprintf(s, _T("Bank%d"), nBanks + 1);
+		sprintf(s, "Bank%d", nBanks + 1);
 		theApp.GetSettings().Write<mpt::PathString>("DLS Banks", s, path);
 		nBanks++;
 
@@ -1492,8 +1492,8 @@ void DibBlt(HDC hdc, int x, int y, int sizex, int sizey, int srcx, int srcy, MOD
 }
 
 
-MODPLUGDIB *LoadDib(LPCSTR lpszName)
-//----------------------------------
+MODPLUGDIB *LoadDib(LPCTSTR lpszName)
+//-----------------------------------
 {
 	HINSTANCE hInstance = AfxGetInstanceHandle();
 	HRSRC hrsrc = FindResource(hInstance, lpszName, RT_BITMAP);
