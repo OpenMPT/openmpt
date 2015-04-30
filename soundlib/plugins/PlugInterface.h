@@ -37,6 +37,8 @@ typedef float PlugParamValue;
 class IMixPlugin
 //==============
 {
+protected:
+	virtual ~IMixPlugin() {}
 public:
 	virtual void Release() = 0;
 	virtual void SaveAllParameters() = 0;
