@@ -234,7 +234,7 @@ CString MIDIMacroConfig::GetParameteredMacroName(size_t macroIndex, PLUGINDEX pl
 					paramName = pPlug->GetParamName(param);
 					if(!paramName.IsEmpty())
 					{
-						formattedName.AppendFormat(_T(" (%s)"), paramName);
+						formattedName += _T(" (") + paramName + _T(")");
 					}
 				}
 			} else
