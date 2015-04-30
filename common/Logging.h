@@ -39,6 +39,8 @@ inline mpt::ustring LogLevelToString(LogLevel level)
 
 class ILog
 {
+protected:
+	virtual ~ILog() { }
 public:
 	virtual	void AddToLog(LogLevel level, const mpt::ustring &text) const = 0;
 };
