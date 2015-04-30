@@ -268,6 +268,8 @@ struct TimingInfo
 
 class IAudioReadTarget
 {
+protected:
+	virtual ~IAudioReadTarget() { }
 public:
 	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk) = 0;
 };
