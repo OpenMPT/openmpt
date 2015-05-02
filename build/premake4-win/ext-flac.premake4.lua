@@ -69,8 +69,7 @@
    "../../include/flac/include/FLAC/stream_encoder.h",
   }
   buildoptions { "/wd4244", "/wd4267", "/wd4334" }
-  configuration "*Lib"
-   defines { "FLAC__NO_DLL" }
+  defines { "FLAC__NO_DLL" }
   configuration "vs2010"
    defines { "VERSION=\"1.3.1\"" }
   configuration "vs2008"
