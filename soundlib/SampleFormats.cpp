@@ -2128,6 +2128,7 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 	FLAC__StreamDecoderInitStatus initStatus = FLAC__stream_decoder_init_stream(decoder, FLACDecoder::read_cb, FLACDecoder::seek_cb, FLACDecoder::tell_cb, FLACDecoder::length_cb, FLACDecoder::eof_cb, FLACDecoder::write_cb, FLACDecoder::metadata_cb, FLACDecoder::error_cb, &client);
 	if(initStatus != FLAC__STREAM_DECODER_INIT_STATUS_OK)
 	{
+		FLAC__stream_decoder_delete(decoder);
 		return false;
 	}
 
