@@ -35,7 +35,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 class ComponentOpus
-	: public ComponentBase
+	: public ComponentLibrary
 {
 
 	MPT_DECLARE_COMPONENT_MEMBERS
@@ -65,7 +65,7 @@ private:
 public:
 
 	ComponentOpus()
-		: ComponentBase(ComponentTypeForeign)
+		: ComponentLibrary(ComponentTypeForeign)
 	{
 		return;
 	}

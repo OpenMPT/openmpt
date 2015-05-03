@@ -70,8 +70,6 @@ public:
 
 	virtual void Initialize() = 0;  // try to load the component
 	
-	virtual mpt::Library GetLibrary(const std::string &libName) const = 0;
-
 };
 
 
@@ -80,15 +78,12 @@ class ComponentBase
 {
 
 private:
+
 	std::string m_Name;
 	ComponentType m_Type;
-	
+
 	bool m_Initialized;
 	bool m_Available;
-	typedef std::map<std::string, mpt::Library> TLibraryMap;
-	TLibraryMap m_Libraries;
-	
-	bool m_BindFailed;
 
 protected:
 
@@ -103,11 +98,6 @@ protected:
 	void SetName(const std::string &name);
 	void SetInitialized();
 	void SetAvailable();
-	bool AddLibrary(const std::string &libName, const mpt::LibraryPath &libPath);
-	void ClearLibraries();
-	void SetBindFailed();
-	void ClearBindFailed();
-	bool HasBindFailed() const;
 
 public:
 
@@ -115,13 +105,51 @@ public:
 	virtual ComponentType GetType() const;
 	virtual bool IsInitialized() const;
 	virtual bool IsAvailable() const;
-	
+
 	virtual mpt::ustring GetVersion() const;
+
+public:
+
+	virtual void Initialize();
+
+protected:
+
+	virtual bool DoInitialize() = 0;
+
+};
+
+
+class ComponentLibrary
+	: public ComponentBase
+{
+
+private:
+	
+	typedef std::map<std::string, mpt::Library> TLibraryMap;
+	TLibraryMap m_Libraries;
+	
+	bool m_BindFailed;
+
+protected:
+
+	ComponentLibrary(ComponentType type);
+
+public:
+
+	virtual ~ComponentLibrary();
+
+protected:
+
+	bool AddLibrary(const std::string &libName, const mpt::LibraryPath &libPath);
+	void ClearLibraries();
+	void SetBindFailed();
+	void ClearBindFailed();
+	bool HasBindFailed() const;
+
+public:
 	
 	virtual mpt::Library GetLibrary(const std::string &libName) const;
 	
-	virtual void Initialize();
-
 	template <typename Tfunc>
 	bool Bind(Tfunc * & f, const std::string &libName, const std::string &symbol) const
 	{
@@ -133,6 +161,7 @@ protected:
 	virtual bool DoInitialize() = 0;
 
 };
+
 
 #define MPT_COMPONENT_BIND(libName, func) do { if(!Bind( func , libName , #func )) { SetBindFailed(); } } while(0)
 #define MPT_COMPONENT_BIND_OPTIONAL(libName, func) Bind( func , libName , #func )
@@ -155,13 +184,13 @@ public:
 };
 
 
-class ComponentSystemDLL : public ComponentBase
+class ComponentSystemDLL : public ComponentLibrary
 {
 private:
 	mpt::PathString m_BaseName;
 public:
 	ComponentSystemDLL(const mpt::PathString &baseName)
-		: ComponentBase(ComponentTypeSystem)
+		: ComponentLibrary(ComponentTypeSystem)
 		, m_BaseName(baseName)
 	{
 		return;
@@ -174,13 +203,13 @@ public:
 };
 
 
-class ComponentBundledDLL : public ComponentBase
+class ComponentBundledDLL : public ComponentLibrary
 {
 private:
 	mpt::PathString m_FullName;
 public:
 	ComponentBundledDLL(const mpt::PathString &fullName)
-		: ComponentBase(ComponentTypeBundled)
+		: ComponentLibrary(ComponentTypeBundled)
 		, m_FullName(fullName)
 	{
 		return;

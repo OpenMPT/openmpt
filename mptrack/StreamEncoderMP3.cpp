@@ -255,7 +255,7 @@ typedef struct lame_global_struct lame_global_flags;
 typedef lame_global_flags *lame_t;
 
 class ComponentLame
-	: public ComponentBase
+	: public ComponentLibrary
 {
 
 	MPT_DECLARE_COMPONENT_MEMBERS
@@ -329,7 +329,7 @@ private:
 public:
 
 	ComponentLame()
-		: ComponentBase(ComponentTypeForeign)
+		: ComponentLibrary(ComponentTypeForeign)
 	{
 		return;
 	}
@@ -645,7 +645,7 @@ public:
 #ifdef MPT_MP3ENCODER_BLADE
 
 class ComponentBlade
-	: public ComponentBase
+	: public ComponentLibrary
 {
 
 	MPT_DECLARE_COMPONENT_MEMBERS
@@ -673,7 +673,7 @@ private:
 public:
 
 	ComponentBlade()
-		: ComponentBase(ComponentTypeForeign)
+		: ComponentLibrary(ComponentTypeForeign)
 		, isLame(false)
 	{
 		return;

@@ -29,7 +29,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 class ComponentVorbis
-	: public ComponentBase
+	: public ComponentLibrary
 {
 
 	MPT_DECLARE_COMPONENT_MEMBERS
@@ -69,7 +69,7 @@ private:
 public:
 
 	ComponentVorbis()
-		: ComponentBase(ComponentTypeForeign)
+		: ComponentLibrary(ComponentTypeForeign)
 	{
 		return;
 	}
