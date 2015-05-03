@@ -65,7 +65,7 @@ private:
 public:
 
 	ComponentOpus()
-		: ComponentBase(ComponentTypeForeign, false)
+		: ComponentBase(ComponentTypeForeign)
 	{
 		return;
 	}

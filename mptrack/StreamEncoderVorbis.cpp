@@ -69,7 +69,7 @@ private:
 public:
 
 	ComponentVorbis()
-		: ComponentBase(ComponentTypeForeign, false)
+		: ComponentBase(ComponentTypeForeign)
 	{
 		return;
 	}

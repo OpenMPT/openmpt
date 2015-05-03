@@ -1813,12 +1813,12 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 //=======================
 class ComponentSoundTouch
 //=======================
-	: public ComponentDelayLoadedBundledDLL
+	: public ComponentBundledDLL
 {
 	MPT_DECLARE_COMPONENT_MEMBERS
 public:
 	ComponentSoundTouch()
-		: ComponentDelayLoadedBundledDLL(MPT_PATHSTRING("OpenMPT_SoundTouch_f32"))
+		: ComponentBundledDLL(MPT_PATHSTRING("OpenMPT_SoundTouch_f32"))
 	{
 		return;
 	}
