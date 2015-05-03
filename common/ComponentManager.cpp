@@ -19,10 +19,9 @@ OPENMPT_NAMESPACE_BEGIN
 #if defined(MPT_WITH_DYNBIND)
 
 
-ComponentBase::ComponentBase(ComponentType type, bool delayLoaded)
-//----------------------------------------------------------------
+ComponentBase::ComponentBase(ComponentType type)
+//----------------------------------------------
 	: m_Type(type)
-	, m_DelayLoaded(delayLoaded)
 	, m_Initialized(false)
 	, m_Available(false)
 	, m_BindFailed(false)
@@ -116,13 +115,6 @@ ComponentType ComponentBase::GetType() const
 //------------------------------------------
 {
 	return m_Type;
-}
-
-
-bool ComponentBase::IsDelayLoaded() const
-//---------------------------------------
-{
-	return m_DelayLoaded;
 }
 
 

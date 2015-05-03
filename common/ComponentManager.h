@@ -63,7 +63,6 @@ public:
 	virtual std::string GetName() const = 0;
 	virtual std::string GetSettingsKey() const = 0;
 	virtual ComponentType GetType() const = 0;
-	virtual bool IsDelayLoaded() const = 0;  // openmpt is linked against the component dlls which get delay loaded
 	
 	virtual bool IsInitialized() const = 0;  // Initialize() has been called
 	virtual bool IsAvailable() const = 0;  // Initialize() has been successfull
@@ -83,7 +82,6 @@ class ComponentBase
 private:
 	std::string m_Name;
 	ComponentType m_Type;
-	bool m_DelayLoaded;
 	
 	bool m_Initialized;
 	bool m_Available;
@@ -91,10 +89,10 @@ private:
 	TLibraryMap m_Libraries;
 	
 	bool m_BindFailed;
-				
+
 protected:
 
-	ComponentBase(ComponentType type, bool delayLoaded = false);
+	ComponentBase(ComponentType type);
 
 public:
 
@@ -115,7 +113,6 @@ public:
 
 	virtual std::string GetName() const;
 	virtual ComponentType GetType() const;
-	virtual bool IsDelayLoaded() const;
 	virtual bool IsInitialized() const;
 	virtual bool IsAvailable() const;
 	
@@ -163,8 +160,8 @@ class ComponentSystemDLL : public ComponentBase
 private:
 	mpt::PathString m_BaseName;
 public:
-	ComponentSystemDLL(const mpt::PathString &baseName, bool delayLoaded = false)
-		: ComponentBase(ComponentTypeSystem, delayLoaded)
+	ComponentSystemDLL(const mpt::PathString &baseName)
+		: ComponentBase(ComponentTypeSystem)
 		, m_BaseName(baseName)
 	{
 		return;
@@ -177,13 +174,13 @@ public:
 };
 
 
-class ComponentDelayLoadedBundledDLL : public ComponentBase
+class ComponentBundledDLL : public ComponentBase
 {
 private:
 	mpt::PathString m_FullName;
 public:
-	ComponentDelayLoadedBundledDLL(const mpt::PathString &fullName)
-		: ComponentBase(ComponentTypeBundled, true)
+	ComponentBundledDLL(const mpt::PathString &fullName)
+		: ComponentBase(ComponentTypeBundled)
 		, m_FullName(fullName)
 	{
 		return;

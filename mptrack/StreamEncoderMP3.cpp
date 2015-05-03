@@ -329,7 +329,7 @@ private:
 public:
 
 	ComponentLame()
-		: ComponentBase(ComponentTypeForeign, false)
+		: ComponentBase(ComponentTypeForeign)
 	{
 		return;
 	}
@@ -673,7 +673,7 @@ private:
 public:
 
 	ComponentBlade()
-		: ComponentBase(ComponentTypeForeign, false)
+		: ComponentBase(ComponentTypeForeign)
 		, isLame(false)
 	{
 		return;
@@ -946,7 +946,7 @@ private:
 public:
 
 	ComponentAcmMP3()
-		: ComponentBase(ComponentTypeSystemInstallable, false)
+		: ComponentBase(ComponentTypeSystemInstallable)
 	{
 		return;
 	}
