@@ -1725,7 +1725,7 @@ void CCtrlInstruments::OnInstrumentOpen()
 		.AllowMultiSelect()
 		.EnableAudioPreview()
 		.ExtensionFilter(
-			"All Instruments|*.xi;*.pat;*.iti;*.flac;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls|"
+			"All Instruments|*.xi;*.pat;*.iti;*.flac;*.oga;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls|"
 			"FastTracker II Instruments (*.xi)|*.xi|"
 			"GF1 Patches (*.pat)|*.pat|"
 			"Impulse Tracker Instruments (*.iti)|*.iti|"

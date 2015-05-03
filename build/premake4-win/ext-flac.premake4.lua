@@ -4,7 +4,7 @@
   language "C"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/flac"
-  includedirs { "../../include/flac/include", "../../include/flac/src/libFLAC/include" }
+  includedirs { "../../include/flac/include", "../../include/flac/src/libFLAC/include", "../../include/ogg/include" }
   files {
    "../../include/flac/src/libFLAC/bitmath.c",
    "../../include/flac/src/libFLAC/bitreader.c",
@@ -25,6 +25,10 @@
    "../../include/flac/src/libFLAC/memory.c",
    "../../include/flac/src/libFLAC/metadata_iterators.c",
    "../../include/flac/src/libFLAC/metadata_object.c",
+   "../../include/flac/src/libFLAC/ogg_decoder_aspect.c",
+   "../../include/flac/src/libFLAC/ogg_encoder_aspect.c",
+   "../../include/flac/src/libFLAC/ogg_helper.c",
+   "../../include/flac/src/libFLAC/ogg_mapping.c",
    "../../include/flac/src/libFLAC/stream_decoder.c",
    "../../include/flac/src/libFLAC/stream_encoder.c",
    "../../include/flac/src/libFLAC/stream_encoder_intrin_avx2.c",
@@ -50,6 +54,10 @@
    "../../include/flac/src/libFLAC/include/private/md5.h",
    "../../include/flac/src/libFLAC/include/private/memory.h",
    "../../include/flac/src/libFLAC/include/private/metadata.h",
+   "../../include/flac/src/libFLAC/include/private/ogg_decoder_aspect.h",
+   "../../include/flac/src/libFLAC/include/private/ogg_encoder_aspect.h",
+   "../../include/flac/src/libFLAC/include/private/ogg_helper.h",
+   "../../include/flac/src/libFLAC/include/private/ogg_mapping.h",
    "../../include/flac/src/libFLAC/include/private/stream_encoder.h",
    "../../include/flac/src/libFLAC/include/private/stream_encoder_framing.h",
    "../../include/flac/src/libFLAC/include/private/window.h",
@@ -69,7 +77,7 @@
    "../../include/flac/include/FLAC/stream_encoder.h",
   }
   buildoptions { "/wd4244", "/wd4267", "/wd4334" }
-  defines { "FLAC__NO_DLL" }
+  defines { "FLAC__NO_DLL", "FLAC__HAS_OGG=1" }
   configuration "vs2010"
    defines { "VERSION=\"1.3.1\"" }
   configuration "vs2008"

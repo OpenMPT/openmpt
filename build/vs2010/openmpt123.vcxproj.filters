@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Filter Include="openmpt123">
-			<UniqueIdentifier>{36BC9D47-3BB6-D647-8302-CDBA8C0F4B23}</UniqueIdentifier>
+			<UniqueIdentifier>{CF1D4909-84D9-DB4E-A32B-526855292C75}</UniqueIdentifier>
 		</Filter>
 	</ItemGroup>
 	<ItemGroup>

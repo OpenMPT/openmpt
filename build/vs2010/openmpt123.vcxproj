@@ -99,7 +99,7 @@
 			<AdditionalIncludeDirectories>..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 		<Link>
-			<AdditionalDependencies>..\lib\x32\Debug\libopenmpt.lib;..\lib\x32\Debug\miniz.lib;..\lib\x32\Debug\flac.lib;..\lib\x32\Debug\portaudio.lib;ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalDependencies>..\lib\x32\Debug\libopenmpt.lib;..\lib\x32\Debug\miniz.lib;..\lib\x32\Debug\flac.lib;..\lib\x32\Debug\ogg.lib;..\lib\x32\Debug\portaudio.lib;ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<OutputFile>$(OutDir)openmpt123.exe</OutputFile>
 			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
 			<SubSystem>Console</SubSystem>
@@ -130,7 +130,7 @@
 			<AdditionalIncludeDirectories>..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 		<Link>
-			<AdditionalDependencies>..\lib\x64\Debug\libopenmpt.lib;..\lib\x64\Debug\miniz.lib;..\lib\x64\Debug\flac.lib;..\lib\x64\Debug\portaudio.lib;ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalDependencies>..\lib\x64\Debug\libopenmpt.lib;..\lib\x64\Debug\miniz.lib;..\lib\x64\Debug\flac.lib;..\lib\x64\Debug\ogg.lib;..\lib\x64\Debug\portaudio.lib;ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<OutputFile>$(OutDir)openmpt123.exe</OutputFile>
 			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
 			<SubSystem>Console</SubSystem>
@@ -163,7 +163,7 @@
 			<AdditionalIncludeDirectories>..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 		<Link>
-			<AdditionalDependencies>..\lib\x32\Release\libopenmpt.lib;..\lib\x32\Release\miniz.lib;..\lib\x32\Release\flac.lib;..\lib\x32\Release\portaudio.lib;ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalDependencies>..\lib\x32\Release\libopenmpt.lib;..\lib\x32\Release\miniz.lib;..\lib\x32\Release\flac.lib;..\lib\x32\Release\ogg.lib;..\lib\x32\Release\portaudio.lib;ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<OutputFile>$(OutDir)openmpt123.exe</OutputFile>
 			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
 			<SubSystem>Console</SubSystem>
@@ -198,7 +198,7 @@
 			<AdditionalIncludeDirectories>..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 		<Link>
-			<AdditionalDependencies>..\lib\x64\Release\libopenmpt.lib;..\lib\x64\Release\miniz.lib;..\lib\x64\Release\flac.lib;..\lib\x64\Release\portaudio.lib;ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalDependencies>..\lib\x64\Release\libopenmpt.lib;..\lib\x64\Release\miniz.lib;..\lib\x64\Release\flac.lib;..\lib\x64\Release\ogg.lib;..\lib\x64\Release\portaudio.lib;ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<OutputFile>$(OutDir)openmpt123.exe</OutputFile>
 			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
 			<SubSystem>Console</SubSystem>
