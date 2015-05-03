@@ -52,7 +52,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\zlib;..\;&quot;$(IntDir)\svn_version&quot;;..\build\svn_version"
+				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\ogg\include;..\include\zlib;..\;&quot;$(IntDir)\svn_version&quot;;..\build\svn_version"
 				PreprocessorDefinitions="_DEBUG,WIN32,_WINDOWS,MODPLUG_TRACKER"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -151,7 +151,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\zlib;..\;&quot;$(IntDir)\svn_version&quot;;..\build\svn_version"
+				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\ogg\include;..\include\zlib;..\;&quot;$(IntDir)\svn_version&quot;;..\build\svn_version"
 				PreprocessorDefinitions="_DEBUG,WIN32,_WINDOWS,MODPLUG_TRACKER"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -252,7 +252,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\zlib;..\;&quot;$(IntDir)\svn_version&quot;;..\build\svn_version"
+				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\ogg\include;..\include\zlib;..\;&quot;$(IntDir)\svn_version&quot;;..\build\svn_version"
 				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,MODPLUG_TRACKER"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -351,7 +351,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\zlib;..\;&quot;$(IntDir)\svn_version&quot;;..\build\svn_version"
+				AdditionalIncludeDirectories="..\common;..\soundlib;..\include\msinttypes\stdint;..\include\msinttypes\inttypes;..\include;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\ogg\include;..\include\zlib;..\;&quot;$(IntDir)\svn_version&quot;;..\build\svn_version"
 				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,MODPLUG_TRACKER"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -768,15 +768,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\sounddev\SoundDeviceManager.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\sounddev\SoundDeviceASIO.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\sounddev\SoundDeviceDirectSound.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\sounddev\SoundDeviceManager.cpp"
 				>
 			</File>
 			<File
@@ -1518,15 +1518,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\sounddev\SoundDeviceManager.h"
-				>
-			</File>
-			<File
 				RelativePath="..\sounddev\SoundDeviceASIO.h"
 				>
 			</File>
 			<File
 				RelativePath="..\sounddev\SoundDeviceDirectSound.h"
+				>
+			</File>
+			<File
+				RelativePath="..\sounddev\SoundDeviceManager.h"
 				>
 			</File>
 			<File
@@ -1894,11 +1894,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Soundlib\load_psm.cpp"
+				RelativePath="..\soundlib\load_plm.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\load_plm.cpp"
+				RelativePath="..\Soundlib\load_psm.cpp"
 				>
 			</File>
 			<File
