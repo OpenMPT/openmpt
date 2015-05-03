@@ -465,6 +465,10 @@ std::string GetFullCreditsString()
 		"The mpg123 project for libmpg123\n"
 		"http://mpg123.de/\n"
 #endif
+#ifndef NO_OGG
+		"Xiph.Org Foundation for libogg\n"
+		"https://xiph.org/ogg/\n"
+#endif
 		"Storlek for all the IT compatibility hints and testcases\n"
 		"as well as the IMF, OKT and ULT loaders\n"
 		"http://schismtracker.org/\n"

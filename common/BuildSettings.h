@@ -136,6 +136,9 @@
 // Define to build without DirectSound support.
 //#define NO_DSOUND
 
+// Define to build without OGG support
+//#define NO_OGG
+
 // Define to build without FLAC support
 //#define NO_FLAC
 
@@ -194,6 +197,7 @@
 #endif
 #endif
 #define NO_DSOUND
+#define NO_OGG
 #define NO_FLAC
 #if !defined(MPT_WITH_ZLIB)
 #ifndef NO_ZLIB

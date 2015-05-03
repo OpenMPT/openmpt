@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="openmpt123"
-	ProjectGUID="{2879F62E-9E2F-4EAB-AE7D-F60C194DD5CB}"
-	RootNamespace="openmpt123"
+	Name="ogg"
+	ProjectGUID="{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}"
+	RootNamespace="ogg"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -20,14 +20,13 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\bin\Win32-Debug"
-			IntermediateDirectory="..\obj\openmpt123\x32\Debug"
-			ConfigurationType="1"
-			CharacterSet="1"
+			OutputDirectory="..\lib\x32\Debug"
+			IntermediateDirectory="..\obj\ogg\x32\Debug"
+			ConfigurationType="4"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -44,7 +43,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\ogg\include"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -52,8 +51,9 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\openmpt123.pdb"
+				ProgramDataBaseFileName="$(OutDir)\ogg.pdb"
 				DebugInformationFormat="4"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -61,21 +61,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\ogg\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="..\lib\x32\Debug\libopenmpt.lib ..\lib\x32\Debug\miniz.lib ..\lib\x32\Debug\flac.lib ..\lib\x32\Debug\ogg.lib ..\lib\x32\Debug\portaudio.lib ksuser.lib winmm.lib"
-				OutputFile="$(OutDir)\openmpt123.exe"
-				LinkIncremental="2"
-				AdditionalLibraryDirectories=""
-				GenerateDebugInformation="true"
-				ProgramDataBaseFileName="$(OutDir)\openmpt123.pdb"
-				SubSystem="1"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\ogg.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -104,14 +97,13 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\..\bin\x64-Debug"
-			IntermediateDirectory="..\obj\openmpt123\x64\Debug"
-			ConfigurationType="1"
-			CharacterSet="1"
+			OutputDirectory="..\lib\x64\Debug"
+			IntermediateDirectory="..\obj\ogg\x64\Debug"
+			ConfigurationType="4"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -129,7 +121,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\ogg\include"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -137,8 +129,9 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\openmpt123.pdb"
+				ProgramDataBaseFileName="$(OutDir)\ogg.pdb"
 				DebugInformationFormat="3"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -146,21 +139,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\ogg\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="..\lib\x64\Debug\libopenmpt.lib ..\lib\x64\Debug\miniz.lib ..\lib\x64\Debug\flac.lib ..\lib\x64\Debug\ogg.lib ..\lib\x64\Debug\portaudio.lib ksuser.lib winmm.lib"
-				OutputFile="$(OutDir)\openmpt123.exe"
-				LinkIncremental="2"
-				AdditionalLibraryDirectories=""
-				GenerateDebugInformation="true"
-				ProgramDataBaseFileName="$(OutDir)\openmpt123.pdb"
-				SubSystem="1"
-				TargetMachine="17"
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\ogg.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -189,14 +175,13 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\bin\Win32"
-			IntermediateDirectory="..\obj\openmpt123\x32\Release"
-			ConfigurationType="1"
-			CharacterSet="1"
+			OutputDirectory="..\lib\x32\Release"
+			IntermediateDirectory="..\obj\ogg\x32\Release"
+			ConfigurationType="4"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -214,7 +199,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\ogg\include"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -222,8 +207,9 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\openmpt123.pdb"
+				ProgramDataBaseFileName="$(OutDir)\ogg.pdb"
 				DebugInformationFormat="3"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -231,23 +217,14 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\ogg\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="..\lib\x32\Release\libopenmpt.lib ..\lib\x32\Release\miniz.lib ..\lib\x32\Release\flac.lib ..\lib\x32\Release\ogg.lib ..\lib\x32\Release\portaudio.lib ksuser.lib winmm.lib"
-				OutputFile="$(OutDir)\openmpt123.exe"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories=""
-				GenerateDebugInformation="true"
-				ProgramDataBaseFileName="$(OutDir)\openmpt123.pdb"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\ogg.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -276,14 +253,13 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\..\bin\x64"
-			IntermediateDirectory="..\obj\openmpt123\x64\Release"
-			ConfigurationType="1"
-			CharacterSet="1"
+			OutputDirectory="..\lib\x64\Release"
+			IntermediateDirectory="..\obj\ogg\x64\Release"
+			ConfigurationType="4"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -302,7 +278,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\ogg\include"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -310,8 +286,9 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\openmpt123.pdb"
+				ProgramDataBaseFileName="$(OutDir)\ogg.pdb"
 				DebugInformationFormat="3"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -319,23 +296,171 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..;..\..\openmpt123;..\..\include\flac\include;..\..\include\portaudio\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\ogg\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="..\lib\x64\Release\libopenmpt.lib ..\lib\x64\Release\miniz.lib ..\lib\x64\Release\flac.lib ..\lib\x64\Release\ogg.lib ..\lib\x64\Release\portaudio.lib ksuser.lib winmm.lib"
-				OutputFile="$(OutDir)\openmpt123.exe"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories=""
-				GenerateDebugInformation="true"
-				ProgramDataBaseFileName="$(OutDir)\openmpt123.pdb"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="17"
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\ogg.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseNoLTCG|Win32"
+			OutputDirectory="..\lib\x32\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\ogg\x32\ReleaseNoLTCG"
+			ConfigurationType="4"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/GL- /MP"
+				Optimization="3"
+				AdditionalIncludeDirectories="..\..\include\ogg\include"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				ProgramDataBaseFileName="$(OutDir)\ogg.pdb"
+				DebugInformationFormat="0"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\ogg\include"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\ogg.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseNoLTCG|x64"
+			OutputDirectory="..\lib\x64\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\ogg\x64\ReleaseNoLTCG"
+			ConfigurationType="4"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/GL- /MP"
+				Optimization="3"
+				AdditionalIncludeDirectories="..\..\include\ogg\include"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				ProgramDataBaseFileName="$(OutDir)\ogg.pdb"
+				DebugInformationFormat="0"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\ogg\include"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\ogg.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -367,53 +492,45 @@
 	</References>
 	<Files>
 		<Filter
-			Name="openmpt123"
+			Name="include"
 			Filter=""
 			>
-			<File
-				RelativePath="..\..\openmpt123\openmpt123.cpp"
+			<Filter
+				Name="ogg"
+				Filter=""
 				>
-			</File>
-			<File
-				RelativePath="..\..\openmpt123\openmpt123.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\openmpt123\openmpt123_config.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\openmpt123\openmpt123_flac.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\openmpt123\openmpt123_mmio.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\openmpt123\openmpt123_portaudio.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\openmpt123\openmpt123_raw.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\openmpt123\openmpt123_sdl.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\openmpt123\openmpt123_sndfile.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\openmpt123\openmpt123_stdout.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\openmpt123\openmpt123_waveout.hpp"
-				>
-			</File>
+				<Filter
+					Name="include"
+					Filter=""
+					>
+					<Filter
+						Name="ogg"
+						Filter=""
+						>
+						<File
+							RelativePath="..\..\include\ogg\include\ogg\ogg.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\ogg\include\ogg\os_types.h"
+							>
+						</File>
+					</Filter>
+				</Filter>
+				<Filter
+					Name="src"
+					Filter=""
+					>
+					<File
+						RelativePath="..\..\include\ogg\src\bitwise.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\ogg\src\framing.c"
+						>
+					</File>
+				</Filter>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

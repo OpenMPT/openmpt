@@ -1016,10 +1016,10 @@ void CCtrlSamples::OnSampleOpen()
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
 		.EnableAudioPreview()
-		.ExtensionFilter("All Samples|*.wav;*.flac;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.iff;*.8sv;*.8svx;*.svx;*.pcm;*.mp1;*.mp2;*.mp3|"
+		.ExtensionFilter("All Samples|*.wav;*.flac;*.oga;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.iff;*.8sv;*.8svx;*.svx;*.pcm;*.mp1;*.mp2;*.mp3|"
 			"Wave Files (*.wav)|*.wav|"
 	#ifndef NO_FLAC
-			"FLAC Files (*.flac)|*.flac|"
+			"FLAC Files (*.flac,*.oga)|*.flac;*.oga|"
 	#endif // NO_FLAC
 	#ifndef NO_MP3_SAMPLES
 			"MPEG Files (*.mp1,*.mp2,*.mp3)|*.mp1;*.mp2;*.mp3|"

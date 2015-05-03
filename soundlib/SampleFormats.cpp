@@ -28,6 +28,9 @@
 #include "WAVTools.h"
 #include "../common/version.h"
 #include "ChunkReader.h"
+#ifndef NO_OGG
+#include <ogg/ogg.h>
+#endif
 #ifndef NO_FLAC
 #define FLAC__NO_DLL
 #include <flac/include/FLAC/stream_decoder.h>
@@ -2104,10 +2107,171 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 //-------------------------------------------------------------------
 {
 #ifndef NO_FLAC
-	// Check if we're dealing with FLAC in an OGG container.
-	// <del>We won't check for the "fLaC" signature but let libFLAC decide whether a file is valid or not, as some FLAC files might have e.g. leading ID3v2 data.</del> Apparently we do that now.
 	file.Rewind();
-	if(!file.ReadMagic("fLaC"))
+	bool isOgg = false;
+#ifndef NO_OGG
+	uint32 oggFlacBitstreamSerial = 0;
+#endif
+	// Check whether we are dealing with native FLAC, OggFlac or no FLAC at all.
+	if(file.ReadMagic("fLaC"))
+	{ // ok
+		isOgg = false;
+#ifndef NO_OGG
+	} else if(file.ReadMagic("OggS"))
+	{ // use libogg to find the first OggFlac stream header
+		file.Rewind();
+		bool oggOK = false;
+		bool needMoreData = true;
+		static const long bufsize = 65536;
+		std::size_t readSize = 0;
+		char *buf = nullptr;
+		ogg_sync_state oy;
+		MemsetZero(oy);
+		ogg_page og;
+		MemsetZero(og);
+		std::map<uint32, ogg_stream_state*> oggStreams;
+		ogg_packet op;
+		MemsetZero(op);
+		if(ogg_sync_init(&oy) != 0)
+		{
+			return false;
+		}
+		while(needMoreData)
+		{
+			if(!file.AreBytesLeft())
+			{ // stop at EOF
+				oggOK = false;
+				needMoreData = false;
+				break;
+			}
+			buf = ogg_sync_buffer(&oy, bufsize);
+			if(!buf)
+			{
+				oggOK = false;
+				needMoreData = false;
+				break;
+			}
+			readSize = file.ReadRaw(buf, bufsize);
+			if(ogg_sync_wrote(&oy, static_cast<long>(readSize)) != 0)
+			{
+				oggOK = false;
+				needMoreData = false;
+				break;
+			}
+			while(ogg_sync_pageout(&oy, &og) == 1)
+			{
+				if(!ogg_page_bos(&og))
+				{ // we stop scanning when seeing the first noo-begin-of-stream page
+					oggOK = false;
+					needMoreData = false;
+					break;
+				}
+				uint32 serial = ogg_page_serialno(&og);
+				if(!oggStreams[serial])
+				{ // previously unseen stream serial
+					oggStreams[serial] = new ogg_stream_state();
+					MemsetZero(*(oggStreams[serial]));
+					if(ogg_stream_init(oggStreams[serial], serial) != 0)
+					{
+						delete oggStreams[serial];
+						oggStreams.erase(serial);
+						oggOK = false;
+						needMoreData = false;
+						break;
+					}
+				}
+				if(ogg_stream_pagein(oggStreams[serial], &og) != 0)
+				{ // invalid page
+					oggOK = false;
+					needMoreData = false;
+					break;
+				}
+				if(ogg_stream_packetout(oggStreams[serial], &op) != 1)
+				{ // partial or broken packet, continue with more data
+					continue;
+				}
+				if(op.packetno != 0)
+				{ // non-begin-of-stream packet.
+					// This should not appear on first page for any known ogg codec,
+					// but deal gracefully with badly mused streams in that regard.
+					continue;
+				}
+				FileReader packet(op.packet, op.bytes);
+				if(packet.ReadIntLE<uint8>() == 0x7f && packet.ReadMagic("FLAC"))
+				{ // looks like OggFlac
+					oggOK = true;
+					oggFlacBitstreamSerial = serial;
+					needMoreData = false;
+					break;
+				}
+			}
+		}
+		while(oggStreams.size() > 0)
+		{
+			uint32 serial = oggStreams.begin()->first;
+			ogg_stream_clear(oggStreams[serial]);
+			delete oggStreams[serial];
+			oggStreams.erase(serial);
+		}
+		ogg_sync_clear(&oy);
+		if(!oggOK)
+		{
+			return false;
+		}
+		isOgg = true;
+#else // NO_OGG
+	} else if(file.CanRead(78) && file.ReadMagic("OggS"))
+	{ // first OggFlac page is exactly 78 bytes long
+		// only support plain OggFlac here with the FLAC logical bitstream being the first one
+		uint8 oggPageVersion = file.ReadIntLE<uint8>();
+		uint8 oggPageHeaderType = file.ReadIntLE<uint8>();
+		uint64 oggPageGranulePosition = file.ReadIntLE<uint64>();
+		uint32 oggPageBitstreamSerialNumber = file.ReadIntLE<uint32>();
+		uint32 oggPageSequenceNumber = file.ReadIntLE<uint32>();
+		uint32 oggPageChecksum = file.ReadIntLE<uint32>();
+		uint8 oggPageSegments = file.ReadIntLE<uint8>();
+		uint8 oggPageSegmentLength = file.ReadIntLE<uint8>();
+		if(oggPageVersion != 0)
+		{ // unknown Ogg version
+			return false;
+		}
+		if(!(oggPageHeaderType & 0x02) || (oggPageHeaderType& 0x01))
+		{ // not BOS or continuation
+			return false;
+		}
+		if(oggPageGranulePosition != 0)
+		{ // not starting position
+			return false;
+		}
+		if(oggPageSequenceNumber != 0)
+		{ // not first page
+			return false;
+		}
+		// skip CRC check for now
+		if(oggPageSegments != 1)
+		{ // first OggFlac page msut contain exactly 1 segment
+			return false;
+		}
+		if(oggPageSegmentLength != 51)
+		{ // segment length must be 51 bytes in OggFlac mapping
+			return false;
+		}
+		if(file.ReadIntLE<uint8>() != 0x7f)
+		{ // OggFlac mapping demands 0x7f packet type
+			return false;
+		}
+		if(!file.ReadMagic("FLAC"))
+		{ // OggFlac magic
+			return false;
+		}
+		if(file.ReadIntLE<uint8>() != 0x01)
+		{ // OggFlac major version
+			return false;
+		}
+		// by now, we are pretty confident that we are not parsing random junk
+		isOgg = true;
+#endif // !NO_OGG
+	} else
 	{
 		return false;
 	}
@@ -2119,13 +2283,29 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 		return false;
 	}
 
+#ifndef NO_OGG
+	if(isOgg)
+	{
+		// force flac decoding of the logical bitstream that actually is OggFlac
+		if(!FLAC__stream_decoder_set_ogg_serial_number(decoder, oggFlacBitstreamSerial))
+		{
+			FLAC__stream_decoder_delete(decoder);
+			return false;
+		}
+	}
+#endif
+
 	// Give me all the metadata!
 	FLAC__stream_decoder_set_metadata_respond_all(decoder);
 
 	FLACDecoder client(file, *this, sample);
 
 	// Init decoder
-	FLAC__StreamDecoderInitStatus initStatus = FLAC__stream_decoder_init_stream(decoder, FLACDecoder::read_cb, FLACDecoder::seek_cb, FLACDecoder::tell_cb, FLACDecoder::length_cb, FLACDecoder::eof_cb, FLACDecoder::write_cb, FLACDecoder::metadata_cb, FLACDecoder::error_cb, &client);
+	FLAC__StreamDecoderInitStatus initStatus = isOgg ?
+		FLAC__stream_decoder_init_ogg_stream(decoder, FLACDecoder::read_cb, FLACDecoder::seek_cb, FLACDecoder::tell_cb, FLACDecoder::length_cb, FLACDecoder::eof_cb, FLACDecoder::write_cb, FLACDecoder::metadata_cb, FLACDecoder::error_cb, &client)
+		:
+		FLAC__stream_decoder_init_stream(decoder, FLACDecoder::read_cb, FLACDecoder::seek_cb, FLACDecoder::tell_cb, FLACDecoder::length_cb, FLACDecoder::eof_cb, FLACDecoder::write_cb, FLACDecoder::metadata_cb, FLACDecoder::error_cb, &client)
+		;
 	if(initStatus != FLAC__STREAM_DECODER_INIT_STATUS_OK)
 	{
 		FLAC__stream_decoder_delete(decoder);

@@ -22,7 +22,9 @@
 #include <deque>
 #include <sstream>
 
+#ifndef NO_OGG
 #include <ogg/ogg.h>
+#endif
 #include <opus/opus.h>
 #include <opus/opus_multistream.h>
 
@@ -39,13 +41,6 @@ class ComponentOpus
 	MPT_DECLARE_COMPONENT_MEMBERS
 
 public:
-
-	// ogg
-	int      (*ogg_stream_init)(ogg_stream_state *os,int serialno);
-	int      (*ogg_stream_packetin)(ogg_stream_state *os, ogg_packet *op);
-	int      (*ogg_stream_flush)(ogg_stream_state *os, ogg_page *og);
-	int      (*ogg_stream_pageout)(ogg_stream_state *os, ogg_page *og);
-	int      (*ogg_stream_clear)(ogg_stream_state *os);
 
 	// opus
 	const char * (*opus_get_version_string)();
@@ -83,24 +78,18 @@ protected:
 	{
 		Reset();
 		struct dll_names_t {
-			const char *ogg;
 			const char *opus;
 		};
 		// start with trying all symbols from a single dll first
 		static const dll_names_t dll_names[] = {
-			{ "libopus-0", "libopus-0"  },
-			{ "libopus"  , "libopus"    },
-			{ "opus"     , "opus"       },
-			{ "libogg-0" , "libopus-0"  }, // official xiph.org builds
-			{ "libogg"   , "libopus"    },
-			{ "ogg"      , "opus"       },
-			{ "libogg"   , "opus"       },
-			{ "ogg"      , "libopus"    }
+			{ "libopus-0"  }, // official xiph.org builds
+			{ "libopus"    },
+			{ "opus"       }
 		};
 		bool ok = false;
 		for(std::size_t i=0; i<CountOf(dll_names); ++i)
 		{
-			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].ogg), mpt::PathString::FromUTF8(dll_names[i].opus)))
+			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].opus)))
 			{
 				ok = true;
 				break;
@@ -111,25 +100,15 @@ protected:
 
 private:
 
-	bool TryLoad(const mpt::PathString &Ogg_fn, const mpt::PathString &Opus_fn)
+	bool TryLoad(const mpt::PathString &Opus_fn)
 	{
 		Reset();
 		ClearBindFailed();
-		if(!AddLibrary("ogg", mpt::LibraryPath::AppFullName(Ogg_fn)))
-		{
-			Reset();
-			return false;
-		}
 		if(!AddLibrary("opus", mpt::LibraryPath::AppFullName(Opus_fn)))
 		{
 			Reset();
 			return false;
 		}
-		MPT_COMPONENT_BIND("ogg", ogg_stream_init);
-		MPT_COMPONENT_BIND("ogg", ogg_stream_packetin);
-		MPT_COMPONENT_BIND("ogg", ogg_stream_flush);
-		MPT_COMPONENT_BIND("ogg", ogg_stream_pageout);
-		MPT_COMPONENT_BIND("ogg", ogg_stream_clear);
 		MPT_COMPONENT_BIND_OPTIONAL("opus", opus_get_version_string);
 		MPT_COMPONENT_BIND("opus", opus_multistream_encoder_ctl);
 		MPT_COMPONENT_BIND("opus", opus_multistream_encode_float);
@@ -141,7 +120,11 @@ private:
 			Reset();
 			return false;
 		}
+#ifndef NO_OGG
 		return true;
+#else
+		return false;
+#endif
 	}
 
 public:
@@ -177,6 +160,8 @@ public:
 MPT_REGISTERED_COMPONENT(ComponentOpus)
 
 
+
+#ifndef NO_OGG
 
 class OpusStreamWriter : public StreamWriterBase
 {
@@ -249,8 +234,8 @@ private:
 		op.e_o_s = 0;
 		op.granulepos = 0;
 		op.packetno = 1;
-		opus.ogg_stream_packetin(&os, &op);
-		while(opus.ogg_stream_flush(&os, &og))
+		ogg_stream_packetin(&os, &op);
+		while(ogg_stream_flush(&os, &og))
 		{
 			WritePage();
 		}
@@ -300,16 +285,16 @@ private:
 			op.packetno = packetno;
 			op.packet = &opus_frameData[0];
 			op.bytes = static_cast<long>(opus_frameData.size());
-			opus.ogg_stream_packetin(&os, &op);
+			ogg_stream_packetin(&os, &op);
 
 			packetno++;
 
-			while(opus.ogg_stream_flush(&os, &og))
+			while(ogg_stream_flush(&os, &og))
 			{
 				WritePage();
 			}
 
-			opus.ogg_stream_clear(&os);
+			ogg_stream_clear(&os);
 
 			started = false;
 			inited = false;
@@ -437,7 +422,7 @@ public:
 
 		opus_comments.clear();
 
-		opus.ogg_stream_init(&os, std::rand());
+		ogg_stream_init(&os, std::rand());
 
 		inited = true;
 
@@ -472,9 +457,9 @@ public:
 		op.e_o_s = 0;
 		op.granulepos = 0;
 		op.packetno = 0;
-		opus.ogg_stream_packetin(&os, &op);
+		ogg_stream_packetin(&os, &op);
 
-		while(opus.ogg_stream_flush(&os, &og))
+		while(ogg_stream_flush(&os, &og))
 		{
 			WritePage();
 		}
@@ -535,11 +520,11 @@ public:
 			op.packetno = packetno;
 			op.packet = &opus_frameData[0];
 			op.bytes = static_cast<long>(opus_frameData.size());
-			opus.ogg_stream_packetin(&os, &op);
+			ogg_stream_packetin(&os, &op);
 
 			packetno++;
 
-			while(opus.ogg_stream_pageout(&os, &og))
+			while(ogg_stream_pageout(&os, &og))
 			{
 				WritePage();
 			}
@@ -553,6 +538,8 @@ public:
 		ASSERT(!inited && !started);
 	}
 };
+
+#endif // !NO_OGG
 
 
 
@@ -587,7 +574,11 @@ IAudioStreamEncoder *OggOpusEncoder::ConstructStreamEncoder(std::ostream &file) 
 	{
 		return nullptr;
 	}
+#ifndef NO_OGG
 	return new OpusStreamWriter(*m_Opus, file);
+#else
+	return nullptr;
+#endif
 }
 
 

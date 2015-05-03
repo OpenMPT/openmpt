@@ -113,8 +113,8 @@
 		<ClCompile>
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Disabled</Optimization>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
 			<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -125,8 +125,8 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
 		<OutputFile>$(OutDir)flac.lib</OutputFile>
@@ -141,8 +141,8 @@
 		<ClCompile>
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Disabled</Optimization>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>true</MinimalRebuild>
 			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
 			<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -153,8 +153,8 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
 		<OutputFile>$(OutDir)flac.lib</OutputFile>
@@ -169,8 +169,8 @@
 		<ClCompile>
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
 			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -182,8 +182,8 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
 		<OutputFile>$(OutDir)flac.lib</OutputFile>
@@ -200,8 +200,8 @@
 		<ClCompile>
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
 			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -213,8 +213,8 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
 		<OutputFile>$(OutDir)flac.lib</OutputFile>
@@ -231,8 +231,8 @@
 		<ClCompile>
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 /GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
 			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -244,8 +244,8 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
 		<OutputFile>$(OutDir)flac.lib</OutputFile>
@@ -261,8 +261,8 @@
 		<ClCompile>
 			<AdditionalOptions>/wd4244 /wd4267 /wd4334 /GL- /MP %(AdditionalOptions)</AdditionalOptions>
 			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<MinimalRebuild>false</MinimalRebuild>
 			<StringPooling>true</StringPooling>
 			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -274,8 +274,8 @@
 			<CompileAs>CompileAsC</CompileAs>
 		</ClCompile>
 		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 		</ResourceCompile>
 	<Lib>
 		<OutputFile>$(OutDir)flac.lib</OutputFile>
@@ -301,6 +301,10 @@
 		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\md5.h" />
 		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\memory.h" />
 		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\metadata.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\ogg_decoder_aspect.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\ogg_encoder_aspect.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\ogg_helper.h" />
+		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\ogg_mapping.h" />
 		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\stream_encoder.h" />
 		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\stream_encoder_framing.h" />
 		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\window.h" />
@@ -355,6 +359,14 @@
 		<ClCompile Include="..\..\include\flac\src\libFLAC\metadata_iterators.c">
 		</ClCompile>
 		<ClCompile Include="..\..\include\flac\src\libFLAC\metadata_object.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\ogg_decoder_aspect.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\ogg_encoder_aspect.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\ogg_helper.c">
+		</ClCompile>
+		<ClCompile Include="..\..\include\flac\src\libFLAC\ogg_mapping.c">
 		</ClCompile>
 		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_decoder.c">
 		</ClCompile>

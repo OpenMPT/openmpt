@@ -22,6 +22,7 @@
    "libopenmpt",
    "miniz",
    "flac",
+   "ogg",
    "portaudio",
    "ksuser",
    "winmm",

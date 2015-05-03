@@ -17,6 +17,9 @@
 
 #include "Mptrack.h"
 
+#ifndef NO_OGG
+#include <ogg/ogg.h>
+#endif
 #include <vorbis/vorbisenc.h>
 
 
@@ -32,14 +35,6 @@ class ComponentVorbis
 	MPT_DECLARE_COMPONENT_MEMBERS
 
 public:
-
-	// ogg
-	int      (*ogg_stream_init)(ogg_stream_state *os,int serialno);
-	int      (*ogg_stream_packetin)(ogg_stream_state *os, ogg_packet *op);
-	int      (*ogg_stream_flush)(ogg_stream_state *os, ogg_page *og);
-	int      (*ogg_stream_pageout)(ogg_stream_state *os, ogg_page *og);
-	int      (*ogg_page_eos)(const ogg_page *og);
-	int      (*ogg_stream_clear)(ogg_stream_state *os);
 
 	// vorbis
 	const char *(*vorbis_version_string)(void);
@@ -87,42 +82,38 @@ protected:
 	{
 		Reset();
 		struct dll_names_t {
-			const char *ogg;
 			const char *vorbis;
 			const char *vorbisenc;
 		};
 		// start with trying all symbols from a single dll first
 		static const dll_names_t dll_names[] = {
-			{ "libvorbis", "libvorbis"  , "libvorbis"     },
-			{ "vorbis"   , "vorbis"     , "vorbis"        },
-			{ "libogg"   , "libvorbis"  , "libvorbis"     }, // official xiph.org builds
-			{ "ogg"      , "vorbis"     , "vorbis"        },
-			{ "libogg-0" , "libvorbis-0", "libvorbis-0"   }, // mingw builds
-			{ "libogg"   , "libvorbis"  , "libvorbisenc"  },
-			{ "ogg"      , "vorbis"     , "vorbisenc"     },
-			{ "libogg-0" , "libvorbis-0", "libvorbisenc-0"}, // mingw builds
-			{ "libogg-0" , "libvorbis-0", "libvorbisenc-2"}  // mingw 64-bit builds
+			{ "libvorbis"  , "libvorbis"     }, // official xiph.org builds
+			{ "vorbis"     , "vorbis"        },
+			{ "libvorbis-0", "libvorbis-0"   }, // mingw builds
+			{ "libvorbis"  , "libvorbisenc"  },
+			{ "vorbis"     , "vorbisenc"     },
+			{ "libvorbis-0", "libvorbisenc-0"}, // mingw builds
+			{ "libvorbis-0", "libvorbisenc-2"}  // mingw 64-bit builds
 		};
 		bool ok = false;
 		for(std::size_t i=0; i<CountOf(dll_names); ++i)
 		{
-			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].ogg), mpt::PathString::FromUTF8(dll_names[i].vorbis), mpt::PathString::FromUTF8(dll_names[i].vorbisenc)))
+			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].vorbis), mpt::PathString::FromUTF8(dll_names[i].vorbisenc)))
 			{
 				ok = true;
 				break;
 			}
 		}
+#ifndef NO_OGG
 		return ok;
+#else
+		return false;
+#endif
 	}
-	bool TryLoad(const mpt::PathString &Ogg_fn, const mpt::PathString &Vorbis_fn, const mpt::PathString &VorbisEnc_fn)
+	bool TryLoad(const mpt::PathString &Vorbis_fn, const mpt::PathString &VorbisEnc_fn)
 	{
 		Reset();
 		ClearBindFailed();
-		if(!AddLibrary("ogg", mpt::LibraryPath::AppFullName(Ogg_fn)))
-		{
-			Reset();
-			return false;
-		}
 		if(!AddLibrary("vorbis", mpt::LibraryPath::AppFullName(Vorbis_fn)))
 		{
 			Reset();
@@ -133,12 +124,6 @@ protected:
 			Reset();
 			return false;
 		}
-		MPT_COMPONENT_BIND("ogg",ogg_stream_init);
-		MPT_COMPONENT_BIND("ogg",ogg_stream_packetin);
-		MPT_COMPONENT_BIND("ogg",ogg_stream_flush);
-		MPT_COMPONENT_BIND("ogg",ogg_stream_pageout);
-		MPT_COMPONENT_BIND("ogg",ogg_page_eos);
-		MPT_COMPONENT_BIND("ogg",ogg_stream_clear);
 		MPT_COMPONENT_BIND_OPTIONAL("vorbis",vorbis_version_string);
 		MPT_COMPONENT_BIND("vorbis",vorbis_info_init);
 		MPT_COMPONENT_BIND("vorbis",vorbis_comment_init);
@@ -198,6 +183,8 @@ public:
 };
 MPT_REGISTERED_COMPONENT(ComponentVorbis)
 
+#ifndef NO_OGG
+
 class VorbisStreamWriter : public StreamWriterBase
 {
 private:
@@ -222,12 +209,12 @@ private:
 		ogg_packet header_comm;
 		ogg_packet header_code;
 		vorbis.vorbis_analysis_headerout(&vd, &vc, &header, &header_comm, &header_code);
-		vorbis.ogg_stream_packetin(&os, &header);
-		vorbis.ogg_stream_packetin(&os, &header_comm);
-		vorbis.ogg_stream_packetin(&os, &header_code);
+		ogg_stream_packetin(&os, &header);
+		ogg_stream_packetin(&os, &header_comm);
+		ogg_stream_packetin(&os, &header_code);
 		while(true)
 		{
-			int gotPage = vorbis.ogg_stream_flush(&os, &og);
+			int gotPage = ogg_stream_flush(&os, &og);
 			if(!gotPage) break;
 			WritePage();
 		}
@@ -250,18 +237,18 @@ private:
 				vorbis.vorbis_bitrate_addblock(&vb);
 				while(vorbis.vorbis_bitrate_flushpacket(&vd, &op))
 				{
-					vorbis.ogg_stream_packetin(&os, &op);
+					ogg_stream_packetin(&os, &op);
 					while(true)
 					{
-						int gotPage = vorbis.ogg_stream_flush(&os, &og);
+						int gotPage = ogg_stream_flush(&os, &og);
 						if(!gotPage) break;
 						WritePage();
-						if(vorbis.ogg_page_eos(&og))
+						if(ogg_page_eos(&og))
 							break;
 					}
 				}
 			}
-			vorbis.ogg_stream_clear(&os);
+			ogg_stream_clear(&os);
 			vorbis.vorbis_block_clear(&vb);
 			vorbis.vorbis_dsp_clear(&vd);
 			vorbis.vorbis_comment_clear(&vc);
@@ -329,7 +316,7 @@ public:
 
 		vorbis.vorbis_analysis_init(&vd, &vi);
 		vorbis.vorbis_block_init(&vd, &vb);
-		vorbis.ogg_stream_init(&os, std::rand());
+		ogg_stream_init(&os, std::rand());
 
 		inited = true;
 
@@ -381,10 +368,10 @@ public:
 				vorbis.vorbis_bitrate_addblock(&vb);
 				while(vorbis.vorbis_bitrate_flushpacket(&vd, &op))
 				{
-					vorbis.ogg_stream_packetin(&os, &op);
+					ogg_stream_packetin(&os, &op);
 					while(true)
 					{
-						int gotPage = vorbis.ogg_stream_pageout(&os, &og);
+						int gotPage = ogg_stream_pageout(&os, &og);
 						if(!gotPage) break;
 						WritePage();
 					}
@@ -399,6 +386,8 @@ public:
 		ASSERT(!inited && !started);
 	}
 };
+
+#endif // !NO_OGG
 
 
 
@@ -433,7 +422,11 @@ IAudioStreamEncoder *VorbisEncoder::ConstructStreamEncoder(std::ostream &file) c
 	{
 		return nullptr;
 	}
+#ifndef NO_OGG
 	return new VorbisStreamWriter(*m_Vorbis, file);
+#else
+	return nullptr;
+#endif
 }
 
 
