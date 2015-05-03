@@ -2539,7 +2539,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 
 #ifndef NO_MP3_SAMPLES
 
-class ComponentMPG123 : public ComponentBase
+class ComponentMPG123 : public ComponentLibrary
 {
 	MPT_DECLARE_COMPONENT_MEMBERS
 public:
@@ -2576,7 +2576,7 @@ public:
 		MPG123_ENC_16 = 0x040, MPG123_ENC_SIGNED = 0x080,
 	};
 public:
-	ComponentMPG123() : ComponentBase(ComponentTypeForeign) { }
+	ComponentMPG123() : ComponentLibrary(ComponentTypeForeign) { }
 	std::string GetSettingsKey() const { return "Mpg123"; }
 	bool DoInitialize()
 	{

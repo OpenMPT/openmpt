@@ -34,7 +34,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #ifndef NO_MO3
 
-class ComponentUnMO3 : public ComponentBase
+class ComponentUnMO3 : public ComponentLibrary
 {
 	MPT_DECLARE_COMPONENT_MEMBERS
 public:
@@ -52,7 +52,7 @@ public:
 		return (UNMO3_Decode_New ? UNMO3_Decode_New(data, len, flags) : UNMO3_Decode_Old(data, len));
 	}
 public:
-	ComponentUnMO3() : ComponentBase(ComponentTypeForeign) { }
+	ComponentUnMO3() : ComponentLibrary(ComponentTypeForeign) { }
 	std::string GetSettingsKey() const { return "UnMO3"; }
 	bool DoInitialize()
 	{

@@ -24,7 +24,6 @@ ComponentBase::ComponentBase(ComponentType type)
 	: m_Type(type)
 	, m_Initialized(false)
 	, m_Available(false)
-	, m_BindFailed(false)
 {
 	return;
 }
@@ -32,6 +31,22 @@ ComponentBase::ComponentBase(ComponentType type)
 
 ComponentBase::~ComponentBase()
 //-----------------------------
+{
+	return;
+}
+
+
+ComponentLibrary::ComponentLibrary(ComponentType type)
+//----------------------------------------------------
+	: ComponentBase(type)
+	, m_BindFailed(false)
+{
+	return;
+}
+
+
+ComponentLibrary::~ComponentLibrary()
+//-----------------------------------
 {
 	return;
 }
@@ -58,8 +73,8 @@ void ComponentBase::SetAvailable()
 }
 
 
-bool ComponentBase::AddLibrary(const std::string &libName, const mpt::LibraryPath &libPath)
-//-----------------------------------------------------------------------------------------
+bool ComponentLibrary::AddLibrary(const std::string &libName, const mpt::LibraryPath &libPath)
+//--------------------------------------------------------------------------------------------
 {
 	if(m_Libraries[libName].IsValid())
 	{
@@ -76,29 +91,29 @@ bool ComponentBase::AddLibrary(const std::string &libName, const mpt::LibraryPat
 }
 
 
-void ComponentBase::ClearLibraries()
-//----------------------------------
+void ComponentLibrary::ClearLibraries()
+//-------------------------------------
 {
 	m_Libraries.clear();
 }
 
 
-void ComponentBase::SetBindFailed()
-//---------------------------------
+void ComponentLibrary::SetBindFailed()
+//------------------------------------
 {
 	m_BindFailed = true;
 }
 
 
-void ComponentBase::ClearBindFailed()
-//-----------------------------------
+void ComponentLibrary::ClearBindFailed()
+//--------------------------------------
 {
 	m_BindFailed = false;
 }
 
 
-bool ComponentBase::HasBindFailed() const
-//---------------------------------------
+bool ComponentLibrary::HasBindFailed() const
+//------------------------------------------
 {
 	return m_BindFailed;
 }
@@ -139,8 +154,8 @@ mpt::ustring ComponentBase::GetVersion() const
 }
 
 
-mpt::Library ComponentBase::GetLibrary(const std::string &libName) const
-//----------------------------------------------------------------------
+mpt::Library ComponentLibrary::GetLibrary(const std::string &libName) const
+//-------------------------------------------------------------------------
 {
 	TLibraryMap::const_iterator it = m_Libraries.find(libName);
 	if(it == m_Libraries.end())
