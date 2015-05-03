@@ -78,9 +78,9 @@
   }
   buildoptions { "/wd4244", "/wd4267", "/wd4334" }
   defines { "FLAC__NO_DLL", "FLAC__HAS_OGG=1" }
-  configuration "vs2010"
-   defines { "VERSION=\"1.3.1\"" }
   configuration "vs2008"
    defines { "VERSION=\\\"1.3.1\\\"" }
+  configuration "not vs2008"
+   defines { "VERSION=\"1.3.1\"" }
   dofile "../../build/premake4-win/premake4-defaults-LIB.lua"
   dofile "../../build/premake4-win/premake4-defaults-static.lua"
