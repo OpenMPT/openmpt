@@ -486,6 +486,10 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	{
 		m_SoundDeviceDirectSoundOldDefaultIdentifier = true;
 	}
+	if(MixerSamplerate == 0)
+	{
+		MixerSamplerate = MixerSettings().gdwMixingFreq;
+	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,21,01,26))
 	{
 		MixerFlags &= ~OLD_SOUNDSETUP_REVERSESTEREO;

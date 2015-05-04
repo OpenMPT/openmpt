@@ -244,17 +244,6 @@ void CMainFrame::Initialize()
 		dev = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(dev, TrackerSettings::Instance().m_SoundDevicePreferSameTypeIfDeviceUnavailable).GetIdentifier();
 		TrackerSettings::Instance().SetSoundDeviceIdentifier(dev);
 	}
-	if(TrackerSettings::Instance().MixerSamplerate == 0)
-	{
-		TrackerSettings::Instance().MixerSamplerate = MixerSettings().gdwMixingFreq;
-		#ifndef NO_ASIO
-			// If no mixing rate is specified and we're using ASIO, get a mixing rate supported by the device.
-			if(SoundDevice::ParseType(dev) == SoundDevice::TypeASIO)
-			{
-				TrackerSettings::Instance().MixerSamplerate = theApp.GetSoundDevicesManager()->GetDeviceDynamicCaps(dev, TrackerSettings::Instance().GetSampleRates(), CMainFrame::GetMainFrame(), CMainFrame::GetMainFrame()->gpSoundDevice).currentSampleRate;
-			}
-		#endif // NO_ASIO
-	}
 
 	// Setup timer
 	OnUpdateUser(NULL);
