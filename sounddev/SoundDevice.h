@@ -698,6 +698,13 @@ public:
 };
 
 
+namespace Legacy
+{
+mpt::ustring GetDirectSoundDefaultDeviceIdentifierPre_1_25_00_04();
+mpt::ustring GetDirectSoundDefaultDeviceIdentifier_1_25_00_04();
+}
+
+
 } // namespace SoundDevice
 
 

@@ -178,6 +178,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, m_SoundSettingsStopMode(conf, "Sound Settings", "StopMode", SoundDeviceStopModeClosed)
 	, m_SoundDeviceSettingsUseOldDefaults(false)
 	, m_SoundDeviceID_DEPRECATED(SoundDevice::ID())
+	, m_SoundDeviceDirectSoundOldDefaultIdentifier(false)
 	, m_SoundDeviceIdentifier(conf, "Sound Settings", "Device", SoundDevice::Identifier())
 	, m_SoundDevicePreferSameTypeIfDeviceUnavailable(conf, "Sound Settings", "PreferSameTypeIfDeviceUnavailable", false)
 	, MixerMaxChannels(conf, "Sound Settings", "MixChannels", MixerSettings().m_nMaxMixChannels)
@@ -480,6 +481,10 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 			m_SoundDeviceSettingsDefaults.ChannelMapping = SoundDevice::ChannelMapping(m_SoundDeviceSettingsDefaults.Channels);
 		}
 		m_SoundDeviceSettingsUseOldDefaults = true;
+	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,25,00,04))
+	{
+		m_SoundDeviceDirectSoundOldDefaultIdentifier = true;
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,21,01,26))
 	{

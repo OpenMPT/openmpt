@@ -1010,6 +1010,46 @@ BOOL CTrackApp::InitInstance()
 			TrackerSettings::Instance().SetSoundDeviceSettings(it->GetIdentifier(), TrackerSettings::Instance().GetSoundDeviceSettingsDefaults());
 		}
 	}
+	if(TrackerSettings::Instance().m_SoundDeviceDirectSoundOldDefaultIdentifier)
+	{
+		mpt::ustring oldIdentifier = SoundDevice::Legacy::GetDirectSoundDefaultDeviceIdentifierPre_1_25_00_04();
+		mpt::ustring newIdentifier = SoundDevice::Legacy::GetDirectSoundDefaultDeviceIdentifier_1_25_00_04();
+		if(!oldIdentifier.empty())
+		{
+			SoundDevice::Info info = m_pSoundDevicesManager->FindDeviceInfo(newIdentifier);
+			if(info.IsValid())
+			{
+				SoundDevice::Settings defaults =
+					TrackerSettings::Instance().m_SoundDeviceSettingsUseOldDefaults ?
+						TrackerSettings::Instance().GetSoundDeviceSettingsDefaults()
+					:
+						m_pSoundDevicesManager->GetDeviceCaps(newIdentifier).DefaultSettings
+					;
+				m_pSettings->Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"Latency",
+					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"Latency", Util::Round<int32>(defaults.Latency * 1000000.0)));
+				m_pSettings->Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"UpdateInterval",
+					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"UpdateInterval", Util::Round<int32>(defaults.UpdateInterval * 1000000.0)));
+				m_pSettings->Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"SampleRate",
+					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"SampleRate", defaults.Samplerate));
+				m_pSettings->Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"Channels",
+					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"Channels", defaults.Channels));
+				m_pSettings->Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"SampleFormat",
+					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"SampleFormat", defaults.sampleFormat));
+				m_pSettings->Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"ExclusiveMode",
+					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"ExclusiveMode", defaults.ExclusiveMode));
+				m_pSettings->Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"BoostThreadPriority",
+					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"BoostThreadPriority", defaults.BoostThreadPriority));
+				m_pSettings->Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"KeepDeviceRunning",
+					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"KeepDeviceRunning", defaults.KeepDeviceRunning));
+				m_pSettings->Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"UseHardwareTiming",
+					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"UseHardwareTiming", defaults.UseHardwareTiming));
+				m_pSettings->Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"DitherType",
+					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"DitherType", defaults.DitherType));
+				m_pSettings->Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"ChannelMapping",
+					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"ChannelMapping", defaults.ChannelMapping));
+			}
+		}
+	}
 
 	// Load DLS Banks
 	if (!cmdInfo.m_bNoDls) LoadDefaultDLSBanks();
