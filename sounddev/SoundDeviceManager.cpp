@@ -102,6 +102,16 @@ void Manager::ReEnumerate()
 	}
 #endif // NO_PORTAUDIO
 
+	Log(LogDebug, MPT_USTRING("Sound Devices enumerated:"));
+	for(std::size_t i = 0; i < m_SoundDevices.size(); ++i)
+	{
+		Log(LogDebug, mpt::String::Print(MPT_USTRING(" Identifier : %1")   , m_SoundDevices[i].GetIdentifier()));
+		Log(LogDebug, mpt::String::Print(MPT_USTRING("  ID        : %1.%2"), static_cast<uint32>(m_SoundDevices[i].id.GetType()), m_SoundDevices[i].id.GetIndex()));
+		Log(LogDebug, mpt::String::Print(MPT_USTRING("  InternalID: %1")   , m_SoundDevices[i].internalID));
+		Log(LogDebug, mpt::String::Print(MPT_USTRING("  API Name  : %1")   , m_SoundDevices[i].apiName));
+		Log(LogDebug, mpt::String::Print(MPT_USTRING("  Name      : %1")   , m_SoundDevices[i].name));
+	}
+	
 }
 
 
