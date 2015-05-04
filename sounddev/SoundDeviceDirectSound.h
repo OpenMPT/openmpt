@@ -14,6 +14,8 @@
 #include "SoundDevice.h"
 #include "SoundDeviceUtilities.h"
 
+#include "../common/ComponentManager.h"
+
 #ifndef NO_DSOUND
 #include <dsound.h>
 #endif
@@ -28,6 +30,16 @@ namespace SoundDevice {
 //
 
 #ifndef NO_DSOUND
+
+class ComponentDirectSound : public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS
+public:
+	ComponentDirectSound() { }
+	virtual ~ComponentDirectSound() { }
+	std::string GetSettingsKey() const { return "DirectSound"; }
+	virtual bool DoInitialize() { return true; }
+};
 
 //================================================
 class CDSoundDevice: public CSoundDeviceWithThread

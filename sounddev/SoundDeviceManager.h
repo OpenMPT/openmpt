@@ -22,6 +22,9 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
+class ComponentWaveOut;
+class ComponentDirectSound;
+class ComponentASIO;
 class ComponentPortAudio;
 
 
@@ -33,6 +36,13 @@ private:
 
 	const SoundDevice::AppInfo m_AppInfo;
 
+	ComponentHandle<ComponentWaveOut> m_WaveOut;
+#ifndef NO_DSOUND
+	ComponentHandle<ComponentDirectSound> m_DirectSound;
+#endif // NO_DSOUND
+#ifndef NO_ASIO
+	ComponentHandle<ComponentASIO> m_ASIO;
+#endif // NO_ASIO
 #ifndef NO_PORTAUDIO
 	ComponentHandle<ComponentPortAudio> m_PortAudio;
 #endif // NO_PORTAUDIO
@@ -43,12 +53,12 @@ private:
 	std::map<SoundDevice::Identifier, SoundDevice::DynamicCaps> m_DeviceDynamicCaps;
 
 public:
-	Manager(SoundDevice::AppInfo appInfo, SoundDevice::TypesSet enabledTypes);
+	Manager(SoundDevice::AppInfo appInfo);
 	~Manager();
 
 public:
 
-	void ReEnumerate(SoundDevice::TypesSet enabledTypes);
+	void ReEnumerate();
 
 	std::vector<SoundDevice::Info>::const_iterator begin() const { return m_SoundDevices.begin(); }
 	std::vector<SoundDevice::Info>::const_iterator end() const { return m_SoundDevices.end(); }

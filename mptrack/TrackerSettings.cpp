@@ -725,19 +725,6 @@ void TrackerSettings::SetSoundDeviceSettings(const SoundDevice::Identifier &devi
 }
 
 
-SoundDevice::TypesSet TrackerSettings::GetEnabledSoundDeviceTypes() const
-//-----------------------------------------------------------------------
-{
-	SoundDevice::TypesSet result;
-	for(int i = 0; i < SoundDevice::TypeNUM_DEVTYPES; ++i)
-	{
-		SoundDevice::Type type = static_cast<SoundDevice::Type>(i);
-		result[i] = conf.Read<bool>(MPT_USTRING("Sound Settings"), MPT_USTRING("Enable") + SoundDevice::TypeToString(type, true), true);
-	}
-	return result;
-}
-
-
 MixerSettings TrackerSettings::GetMixerSettings() const
 //-----------------------------------------------------
 {

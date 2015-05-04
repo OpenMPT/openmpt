@@ -14,6 +14,8 @@
 #include "SoundDevice.h"
 #include "SoundDeviceUtilities.h"
 
+#include "../common/ComponentManager.h"
+
 #include <MMSystem.h>
 
 
@@ -27,6 +29,18 @@ namespace SoundDevice {
 //
 // MMSYSTEM WaveOut device
 //
+
+
+class ComponentWaveOut : public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS
+public:
+	ComponentWaveOut() { }
+	virtual ~ComponentWaveOut() { }
+	std::string GetSettingsKey() const { return "WaveOut"; }
+	virtual bool DoInitialize() { return true; }
+};
+
 
 //==============================================
 class CWaveDevice: public CSoundDeviceWithThread

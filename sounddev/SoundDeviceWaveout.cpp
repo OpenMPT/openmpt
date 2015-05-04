@@ -24,11 +24,14 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace SoundDevice {
 
-	
+
 ///////////////////////////////////////////////////////////////////////////////////////
 //
 // MMSYSTEM WaveOut Device
 //
+
+
+MPT_REGISTERED_COMPONENT(ComponentWaveOut)
 
 
 static const std::size_t WAVEOUT_MINBUFFERS = 3;
