@@ -37,6 +37,46 @@ namespace SoundDevice {
 MPT_REGISTERED_COMPONENT(ComponentDirectSound)
 
 
+
+namespace Legacy
+{
+static BOOL WINAPI DSEnumCallbackGetDefaultName(GUID * lpGuid, LPCWSTR lpstrDescription, LPCWSTR, LPVOID lpContext)
+{
+	mpt::ustring & name = *reinterpret_cast<mpt::ustring*>(lpContext);
+	if(!lpGuid)
+	{
+		if(lpstrDescription)
+		{
+			name = mpt::ToUnicode(std::wstring(lpstrDescription));
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+mpt::ustring GetDirectSoundDefaultDeviceIdentifierPre_1_25_00_04()
+{
+	mpt::ustring name = mpt::ustring();
+	ComponentHandle<ComponentDirectSound> drectSound;
+	if(!IsComponentAvailable(drectSound))
+	{
+		return name;
+	}
+	DirectSoundEnumerateW(DSEnumCallbackGetDefaultName, &name);
+	if(name.empty())
+	{
+		return name;
+	}
+	std::string utf8String = mpt::ToCharset(mpt::CharsetUTF8, name);
+	mpt::ustring hexString = Util::BinToHex(std::vector<char>(utf8String.begin(), utf8String.end()));
+	return MPT_USTRING("DirectSound") + MPT_USTRING("_") + hexString;
+}
+mpt::ustring GetDirectSoundDefaultDeviceIdentifier_1_25_00_04()
+{
+	return MPT_USTRING("DirectSound_{00000000-0000-0000-0000-000000000000}");
+}
+}
+
+
 static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCWSTR, LPVOID lpContext)
 //----------------------------------------------------------------------------------------------------
 {
@@ -56,6 +96,9 @@ static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCW
 	if(lpGuid)
 	{
 		info.internalID = mpt::ToUnicode(Util::GUIDToString(*lpGuid));
+	} else
+	{
+		info.internalID = mpt::ToUnicode(Util::GUIDToString(GUID()));
 	}
 	devices.push_back(info);
 	return TRUE;
@@ -115,9 +158,8 @@ SoundDevice::Caps CDSoundDevice::InternalGetDeviceCaps()
 		ds = m_piDS;
 	} else
 	{
-		const mpt::ustring internalID = GetDeviceInternalID();
-		GUID guid = internalID.empty() ? GUID() : Util::StringToGUID(mpt::ToWide(internalID));
-		if(DirectSoundCreate(internalID.empty() ? NULL : &guid, &dummy, NULL) != DS_OK)
+		GUID guid = Util::StringToGUID(mpt::ToWide(GetDeviceInternalID()));
+		if(DirectSoundCreate(Util::IsValid(guid) ? &guid : NULL, &dummy, NULL) != DS_OK)
 		{
 			return caps;
 		}
@@ -158,9 +200,8 @@ SoundDevice::DynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<u
 		ds = m_piDS;
 	} else
 	{
-		const mpt::ustring internalID = GetDeviceInternalID();
-		GUID guid = internalID.empty() ? GUID() : Util::StringToGUID(mpt::ToWide(internalID));
-		if(DirectSoundCreate(internalID.empty() ? NULL : &guid, &dummy, NULL) != DS_OK)
+		GUID guid = Util::StringToGUID(mpt::ToWide(GetDeviceInternalID()));
+		if(DirectSoundCreate(Util::IsValid(guid) ? &guid : NULL, &dummy, NULL) != DS_OK)
 		{
 			return caps;
 		}
@@ -213,9 +254,8 @@ bool CDSoundDevice::InternalOpen()
 	DSBCAPS dsc;
 
 	if(m_piDS) return true;
-	const mpt::ustring internalID = GetDeviceInternalID();
-	GUID guid = internalID.empty() ? GUID() : Util::StringToGUID(mpt::ToWide(internalID));
-	if(DirectSoundCreate(internalID.empty() ? NULL : &guid, &m_piDS, NULL) != DS_OK) return false;
+	GUID guid = Util::StringToGUID(mpt::ToWide(GetDeviceInternalID()));
+	if(DirectSoundCreate(Util::IsValid(guid) ? &guid : NULL, &m_piDS, NULL) != DS_OK) return false;
 	if(!m_piDS) return false;
 	if(m_piDS->SetCooperativeLevel(m_AppInfo.GetHWND(), m_Settings.ExclusiveMode ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY) != DS_OK)
 	{
