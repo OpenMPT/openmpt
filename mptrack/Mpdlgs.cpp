@@ -201,7 +201,7 @@ void COptionsSoundcard::OnSoundCardRescan()
 		delete CMainFrame::GetMainFrame()->gpSoundDevice;
 		CMainFrame::GetMainFrame()->gpSoundDevice = nullptr;
 	}
-	theApp.GetSoundDevicesManager()->ReEnumerate(TrackerSettings::Instance().GetEnabledSoundDeviceTypes());
+	theApp.GetSoundDevicesManager()->ReEnumerate();
 	SetDevice(m_CurrentDeviceInfo.GetIdentifier(), true);
 	UpdateEverything();
 }

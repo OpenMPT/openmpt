@@ -34,6 +34,9 @@ namespace SoundDevice {
 #ifndef NO_DSOUND
 
 
+MPT_REGISTERED_COMPONENT(ComponentDirectSound)
+
+
 static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCWSTR, LPVOID lpContext)
 //----------------------------------------------------------------------------------------------------
 {

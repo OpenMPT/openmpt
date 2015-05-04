@@ -13,6 +13,8 @@
 
 #include "SoundDevice.h"
 
+#include "../common/ComponentManager.h"
+
 #include "../common/FlagSet.h"
 
 #ifndef NO_ASIO
@@ -29,6 +31,16 @@ namespace SoundDevice {
 //
 
 #ifndef NO_ASIO
+
+class ComponentASIO : public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS
+public:
+	ComponentASIO() { }
+	virtual ~ComponentASIO() { }
+	std::string GetSettingsKey() const { return "ASIO"; }
+	virtual bool DoInitialize() { return true; }
+};
 
 enum AsioFeatures
 {
