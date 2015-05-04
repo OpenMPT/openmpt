@@ -78,7 +78,7 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_EN_CHANGE(IDC_EDIT_SEQNUM,			OnSequenceNumChanged)
 	ON_EN_KILLFOCUS(IDC_EDIT_ORDERLIST_MARGINS, OnOrderListMarginsChanged)
 	ON_UPDATE_COMMAND_UI(IDC_PATTERN_RECORD,OnUpdateRecord)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipText)
+	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipText)
 	//}}AFX_MSG_MAP
 	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
@@ -295,7 +295,7 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 		CHAR s[256];
 		if(updateAll || updateSmpNames || updateInsNames)
 		{
-			static const TCHAR szSplitFormat[] = TEXT("%02u %s %02u: %s/%s");
+			static const TCHAR szSplitFormat[] = _T("%02u %s %02u: %s/%s");
 			UINT nPos = 0;
 			m_CbnInstrument.SetRedraw(FALSE);
 			m_CbnInstrument.ResetContent();
@@ -688,10 +688,12 @@ void CCtrlPatterns::OnSequenceNext()
 void CCtrlPatterns::OnChannelManager()
 //------------------------------------
 {
-	if(CChannelManagerDlg::sharedInstance()){
+	if(CChannelManagerDlg::sharedInstance())
+	{
 		if(CChannelManagerDlg::sharedInstance()->IsDisplayed())
 			CChannelManagerDlg::sharedInstance()->Hide();
-		else{
+		else
+		{
 			CChannelManagerDlg::sharedInstance()->SetDocument(NULL);
 			CChannelManagerDlg::sharedInstance()->Show();
 		}
@@ -919,7 +921,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 
 		m_modDoc.SetModified();
 		m_modDoc.UpdateAllViews(NULL, SequenceHint().Data(), this);
-		m_modDoc.UpdateAllViews(NULL, PatternHint().Names(), this);
+		m_modDoc.UpdateAllViews(NULL, PatternHint(PATTERNINDEX_INVALID).Names(), this);
 		if(selection.lastOrd != selection.firstOrd) m_OrderList.m_nScrollPos2nd = insertWhere + insertCount;
 	}
 	SwitchToView();
@@ -1249,19 +1251,19 @@ BOOL CCtrlPatterns::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 BOOL CCtrlPatterns::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 //---------------------------------------------------------------------
 {
-    TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
-    UINT_PTR nID = pNMHDR->idFrom;
-    if (pTTT->uFlags & TTF_IDISHWND)
-    {
-        // idFrom is actually the HWND of the tool
-        nID = ::GetDlgCtrlID((HWND)nID);
-        if(nID)
-        {
-            pTTT->lpszText = MAKEINTRESOURCE(nID);
-            pTTT->hinst = AfxGetResourceHandle();
-            return(TRUE);
-        }
-    }
+	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
+	UINT_PTR nID = pNMHDR->idFrom;
+	if (pTTT->uFlags & TTF_IDISHWND)
+	{
+		// idFrom is actually the HWND of the tool
+		nID = ::GetDlgCtrlID((HWND)nID);
+		if(nID)
+		{
+			pTTT->lpszText = MAKEINTRESOURCE(nID);
+			pTTT->hinst = AfxGetResourceHandle();
+			return(TRUE);
+		}
+	}
 
 	return FALSE;
 }
