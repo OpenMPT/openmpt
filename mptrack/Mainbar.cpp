@@ -257,36 +257,36 @@ BOOL CMainToolBar::Create(CWnd *parent)
 
 	// Octave Edit Box
 	rect.SetRect(-EDITOCTAVE_WIDTH, -EDITOCTAVE_HEIGHT, 0, 0);
-	if (!m_EditOctave.Create("", WS_CHILD|WS_BORDER|SS_LEFT|SS_CENTERIMAGE, rect, this, IDC_EDIT_BASEOCTAVE)) return FALSE;
+	if (!m_EditOctave.Create(_T(""), WS_CHILD|WS_BORDER|SS_LEFT|SS_CENTERIMAGE, rect, this, IDC_EDIT_BASEOCTAVE)) return FALSE;
 	rect.SetRect(-SPINOCTAVE_WIDTH, -SPINOCTAVE_HEIGHT, 0, 0);
 	m_SpinOctave.Create(WS_CHILD|UDS_ALIGNRIGHT, rect, this, IDC_SPIN_BASEOCTAVE);
 
 	// Tempo Text
 	rect.SetRect(-TEMPOTEXT_WIDTH, -TEMPOTEXT_HEIGHT, 0, 0);
-	if (!m_StaticTempo.Create("Tempo:", WS_CHILD|SS_CENTER|SS_CENTERIMAGE, rect, this, IDC_TEXT_CURRENTTEMPO)) return FALSE;
+	if (!m_StaticTempo.Create(_T("Tempo:"), WS_CHILD|SS_CENTER|SS_CENTERIMAGE, rect, this, IDC_TEXT_CURRENTTEMPO)) return FALSE;
 	// Tempo EditBox
 	rect.SetRect(-EDITTEMPO_WIDTH, -EDITTEMPO_HEIGHT, 0, 0);
-	if (!m_EditTempo.Create("---", WS_CHILD|WS_BORDER|SS_LEFT|SS_CENTERIMAGE , rect, this, IDC_EDIT_CURRENTTEMPO)) return FALSE;
+	if (!m_EditTempo.Create(_T("---"), WS_CHILD|WS_BORDER|SS_LEFT|SS_CENTERIMAGE , rect, this, IDC_EDIT_CURRENTTEMPO)) return FALSE;
 	// Tempo Spin
 	rect.SetRect(-SPINTEMPO_WIDTH, -SPINTEMPO_HEIGHT, 0, 0);
 	m_SpinTempo.Create(WS_CHILD|UDS_ALIGNRIGHT, rect, this, IDC_SPIN_CURRENTTEMPO);
 
 	// Speed Text
 	rect.SetRect(-SPEEDTEXT_WIDTH, -SPEEDTEXT_HEIGHT, 0, 0);
-	if (!m_StaticSpeed.Create("Ticks/Row:", WS_CHILD|SS_CENTER|SS_CENTERIMAGE, rect, this, IDC_TEXT_CURRENTSPEED)) return FALSE;
+	if (!m_StaticSpeed.Create(_T("Ticks/Row:"), WS_CHILD|SS_CENTER|SS_CENTERIMAGE, rect, this, IDC_TEXT_CURRENTSPEED)) return FALSE;
 	// Speed EditBox
 	rect.SetRect(-EDITSPEED_WIDTH, -EDITSPEED_HEIGHT, 0, 0);
-	if (!m_EditSpeed.Create("---", WS_CHILD|WS_BORDER|SS_LEFT|SS_CENTERIMAGE , rect, this, IDC_EDIT_CURRENTSPEED)) return FALSE;
+	if (!m_EditSpeed.Create(_T("---"), WS_CHILD|WS_BORDER|SS_LEFT|SS_CENTERIMAGE , rect, this, IDC_EDIT_CURRENTSPEED)) return FALSE;
 	// Speed Spin
 	rect.SetRect(-SPINSPEED_WIDTH, -SPINSPEED_HEIGHT, 0, 0);
 	m_SpinSpeed.Create(WS_CHILD|UDS_ALIGNRIGHT, rect, this, IDC_SPIN_CURRENTSPEED);
 
 	// Rows per Beat Text
 	rect.SetRect(-RPBTEXT_WIDTH, -RPBTEXT_HEIGHT, 0, 0);
-	if (!m_StaticRowsPerBeat.Create("Rows/Beat:", WS_CHILD|SS_CENTER|SS_CENTERIMAGE, rect, this, IDC_TEXT_RPB)) return FALSE;
+	if (!m_StaticRowsPerBeat.Create(_T("Rows/Beat:"), WS_CHILD|SS_CENTER|SS_CENTERIMAGE, rect, this, IDC_TEXT_RPB)) return FALSE;
 	// Rows per Beat EditBox
 	rect.SetRect(-EDITRPB_WIDTH, -EDITRPB_HEIGHT, 0, 0);
-	if (!m_EditRowsPerBeat.Create("---", WS_CHILD|WS_BORDER|SS_LEFT|SS_CENTERIMAGE , rect, this, IDC_EDIT_RPB)) return FALSE;
+	if (!m_EditRowsPerBeat.Create(_T("---"), WS_CHILD|WS_BORDER|SS_LEFT|SS_CENTERIMAGE , rect, this, IDC_EDIT_RPB)) return FALSE;
 	// Rows per Beat Spin
 	rect.SetRect(-SPINRPB_WIDTH, -SPINRPB_HEIGHT, 0, 0);
 	m_SpinRowsPerBeat.Create(WS_CHILD|UDS_ALIGNRIGHT, rect, this, IDC_SPIN_RPB);
@@ -294,7 +294,7 @@ BOOL CMainToolBar::Create(CWnd *parent)
 	// VU Meter
 	rect.SetRect(-VUMETER_WIDTH, -VUMETER_HEIGHT, 0, 0);
 	//m_VuMeter.CreateEx(WS_EX_STATICEDGE, "STATIC", "", WS_CHILD | WS_BORDER | SS_NOTIFY, rect, this, IDC_VUMETER);
-	m_VuMeter.Create("", WS_CHILD | WS_BORDER | SS_NOTIFY, rect, this, IDC_VUMETER);
+	m_VuMeter.Create(_T(""), WS_CHILD | WS_BORDER | SS_NOTIFY, rect, this, IDC_VUMETER);
 
 	// Adjust control styles
 	HFONT hFont = CMainFrame::GetGUIFont();
@@ -423,13 +423,13 @@ UINT CMainToolBar::GetBaseOctave() const
 BOOL CMainToolBar::SetBaseOctave(UINT nOctave)
 //--------------------------------------------
 {
-	CHAR s[64];
+	TCHAR s[64];
 
 	if ((nOctave < MIN_BASEOCTAVE) || (nOctave > MAX_BASEOCTAVE)) return FALSE;
 	if (nOctave != (UINT)nCurrentOctave)
 	{
 		nCurrentOctave = nOctave;
-		wsprintf(s, " Octave %d", nOctave);
+		wsprintf(s, _T(" Octave %d"), nOctave);
 		m_EditOctave.SetWindowText(s);
 		m_SpinOctave.SetPos(nOctave);
 	}
@@ -443,7 +443,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 	// Update Info
 	if (pSndFile)
 	{
-		CHAR s[256];
+		TCHAR s[256];
 		// Update play/pause button
 		if (nCurrentTempo == -1) SetButtonInfo(PLAYCMD_INDEX, ID_PLAYER_PAUSE, TBBS_BUTTON, TOOLBAR_IMAGE_PAUSE);
 		// Update Speed
@@ -459,7 +459,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 
 			if (nCurrentSpeed < 0) m_SpinSpeed.EnableWindow(TRUE);
 			nCurrentSpeed = nSpeed;
-			wsprintf(s, "%d", nCurrentSpeed);
+			wsprintf(s, _T("%d"), nCurrentSpeed);
 			m_EditSpeed.SetWindowText(s);
 		}
 		int nTempo = pSndFile->m_PlayState.m_nMusicTempo;
@@ -467,7 +467,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		{
 			if (nCurrentTempo < 0) m_SpinTempo.EnableWindow(TRUE);
 			nCurrentTempo = nTempo;
-			wsprintf(s, "%d", nCurrentTempo);
+			wsprintf(s, _T("%d"), nCurrentTempo);
 			m_EditTempo.SetWindowText(s);
 		}
 		int nRowsPerBeat = pSndFile->m_PlayState.m_nCurrentRowsPerBeat;
@@ -475,7 +475,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		{
 			if (nCurrentRowsPerBeat < 0) m_SpinRowsPerBeat.EnableWindow(TRUE);
 			nCurrentRowsPerBeat = nRowsPerBeat;
-			wsprintf(s, "%d", nCurrentRowsPerBeat);
+			wsprintf(s, _T("%d"), nCurrentRowsPerBeat);
 			m_EditRowsPerBeat.SetWindowText(s);
 		}
 	} else
@@ -483,20 +483,20 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		if (nCurrentTempo != -1)
 		{
 			nCurrentTempo = -1;
-			m_EditTempo.SetWindowText("---");
+			m_EditTempo.SetWindowText(_T("---"));
 			m_SpinTempo.EnableWindow(FALSE);
 			SetButtonInfo(PLAYCMD_INDEX, ID_PLAYER_PLAY, TBBS_BUTTON, TOOLBAR_IMAGE_PLAY);
 		}
 		if (nCurrentSpeed != -1)
 		{
 			nCurrentSpeed = -1;
-			m_EditSpeed.SetWindowText("---");
+			m_EditSpeed.SetWindowText(_T("---"));
 			m_SpinSpeed.EnableWindow(FALSE);
 		}
 		if (nCurrentRowsPerBeat != -1)
 		{
 			nCurrentRowsPerBeat = -1;
-			m_EditRowsPerBeat.SetWindowText("---");
+			m_EditRowsPerBeat.SetWindowText(_T("---"));
 			m_SpinRowsPerBeat.EnableWindow(FALSE);
 		}
 	}
