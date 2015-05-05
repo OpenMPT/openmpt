@@ -42,7 +42,8 @@ CPortaudioDevice::CPortaudioDevice(SoundDevice::Info info)
 	: SoundDevice::Base(info)
 	, m_StatisticPeriodFrames(0)
 {
-	m_HostApi = SndDevTypeToHostApi(info.id.GetType());
+	m_DeviceIndex = ConvertStrTo<PaDeviceIndex>(GetDeviceInternalID());
+	m_HostApiType = Pa_GetHostApiInfo(Pa_GetDeviceInfo(m_DeviceIndex)->hostApi)->type;
 	MemsetZero(m_StreamParameters);
 	m_Stream = 0;
 	m_StreamInfo = 0;
@@ -66,7 +67,7 @@ bool CPortaudioDevice::InternalOpen()
 	m_StreamInfo = 0;
 	m_CurrentFrameBuffer = 0;
 	m_CurrentFrameCount = 0;
-	m_StreamParameters.device = HostApiOutputIndexToGlobalDeviceIndex(GetDeviceIndex(), m_HostApi);
+	m_StreamParameters.device = m_DeviceIndex;
 	if(m_StreamParameters.device == -1) return false;
 	m_StreamParameters.channelCount = m_Settings.Channels;
 	if(m_Settings.sampleFormat.IsFloat())
@@ -87,7 +88,7 @@ bool CPortaudioDevice::InternalOpen()
 	m_StreamParameters.suggestedLatency = m_Settings.Latency;
 	m_StreamParameters.hostApiSpecificStreamInfo = NULL;
 	unsigned long framesPerBuffer = static_cast<long>(m_Settings.UpdateInterval * m_Settings.Samplerate);
-	if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI))
+	if(m_HostApiType == paWASAPI)
 	{
 		if(m_Settings.ExclusiveMode)
 		{
@@ -104,14 +105,14 @@ bool CPortaudioDevice::InternalOpen()
 		{
 			m_Flags.NeedsClippedFloat = true;
 		}
-	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS))
+	} else if(m_HostApiType == paWDMKS)
 	{
 		m_Flags.NeedsClippedFloat = false;
 		framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
-	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paMME))
+	} else if(m_HostApiType == paMME)
 	{
 		m_Flags.NeedsClippedFloat = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
-	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paDirectSound))
+	} else if(m_HostApiType == paDirectSound)
 	{
 		m_Flags.NeedsClippedFloat = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
 	} else
@@ -227,25 +228,25 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 	caps.CanChannelMapping = false;
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = true;
-	const PaDeviceInfo *deviceInfo = Pa_GetDeviceInfo(m_StreamParameters.device = HostApiOutputIndexToGlobalDeviceIndex(GetDeviceIndex(), m_HostApi));
+	const PaDeviceInfo *deviceInfo = Pa_GetDeviceInfo(m_StreamParameters.device = m_DeviceIndex);
 	if(deviceInfo)
 	{
 		caps.DefaultSettings.Latency = deviceInfo->defaultLowOutputLatency;
 	}
 	caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
-	if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI))
+	if(m_HostApiType == paWASAPI)
 	{
 		caps.CanExclusiveMode = true;
 		caps.CanDriverPanel = true;
 		caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
-	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS))
+	} else if(m_HostApiType == paWDMKS)
 	{
 		caps.CanUpdateInterval = false;
 		caps.DefaultSettings.sampleFormat = SampleFormatInt32;
-	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paDirectSound))
+	} else if(m_HostApiType == paDirectSound)
 	{
 		caps.DefaultSettings.sampleFormat = SampleFormatInt16;
-	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paMME))
+	} else if(m_HostApiType == paMME)
 	{
 		if(mpt::Windows::Version::IsWine())
 		{
@@ -257,7 +258,7 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 		{
 			caps.DefaultSettings.sampleFormat = SampleFormatInt16;
 		}
-	} else if(m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paASIO))
+	} else if(m_HostApiType == paASIO)
 	{
 		caps.DefaultSettings.sampleFormat = SampleFormatInt32;
 	}
@@ -269,7 +270,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 //-------------------------------------------------------------------------------------------------------
 {
 	SoundDevice::DynamicCaps caps;
-	PaDeviceIndex device = HostApiOutputIndexToGlobalDeviceIndex(GetDeviceIndex(), m_HostApi);
+	PaDeviceIndex device = m_DeviceIndex;
 	if(device == -1)
 	{
 		return caps;
@@ -283,7 +284,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 		StreamParameters.sampleFormat = paInt16;
 		StreamParameters.suggestedLatency = 0.0;
 		StreamParameters.hostApiSpecificStreamInfo = NULL;
-		if((m_HostApi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI)) && m_Settings.ExclusiveMode)
+		if((m_HostApiType == paWASAPI) && m_Settings.ExclusiveMode)
 		{
 			MemsetZero(m_WasapiStreamInfo);
 			m_WasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
@@ -305,7 +306,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 bool CPortaudioDevice::OpenDriverSettings()
 //-----------------------------------------
 {
-	if(m_HostApi != Pa_HostApiTypeIdToHostApiIndex(paWASAPI))
+	if(m_HostApiType != paWASAPI)
 	{
 		return false;
 	}
@@ -334,16 +335,16 @@ int CPortaudioDevice::StreamCallback(
 	MPT_UNREFERENCED_PARAMETER(input);
 	MPT_UNREFERENCED_PARAMETER(statusFlags);
 	if(!output) return paAbort;
-	if(Pa_GetHostApiInfo(m_HostApi)->type == paWDMKS)
+	if(m_HostApiType == paWDMKS)
 	{
 		// For WDM-KS, timeInfo->outputBufferDacTime seems to contain bogus values.
 		// Work-around it by using the slightly less accurate per-stream latency estimation.
 		m_CurrentRealLatency = m_StreamInfo->outputLatency;
-	} else if(Pa_GetHostApiInfo(m_HostApi)->type == paWASAPI)
+	} else if(m_HostApiType == paWASAPI)
 	{
 		// PortAudio latency calculation appears to miss the current period or chunk for WASAPI. Compensate it.
 		m_CurrentRealLatency = timeInfo->outputBufferDacTime - timeInfo->currentTime + ((double)frameCount / (double)m_Settings.Samplerate);
-	} else if(Pa_GetHostApiInfo(m_HostApi)->type == paDirectSound)
+	} else if(m_HostApiType == paDirectSound)
 	{
 		// PortAudio latency calculation appears to miss the buffering latency.
 		// The current chunk, however, appears to be compensated for.
@@ -375,111 +376,82 @@ int CPortaudioDevice::StreamCallbackWrapper(
 }
 
 
-PaDeviceIndex CPortaudioDevice::HostApiOutputIndexToGlobalDeviceIndex(int hostapioutputdeviceindex, PaHostApiIndex hostapi)
-//-------------------------------------------------------------------------------------------------------------------
-{
-	if(hostapi < 0)
-		return -1;
-	if(hostapi >= Pa_GetHostApiCount())
-		return -1;
-	if(!Pa_GetHostApiInfo(hostapi))
-		return -1;
-	if(hostapioutputdeviceindex < 0)
-		return -1;
-	if(hostapioutputdeviceindex >= Pa_GetHostApiInfo(hostapi)->deviceCount)
-		return -1;
-	int dev = hostapioutputdeviceindex;
-	for(int hostapideviceindex=0; hostapideviceindex<Pa_GetHostApiInfo(hostapi)->deviceCount; hostapideviceindex++)
-	{
-		if(!Pa_GetDeviceInfo(Pa_HostApiDeviceIndexToDeviceIndex(hostapi, hostapideviceindex)))
-		{
-			dev++; // skip this device
-			continue;
-		}
-		if(Pa_GetDeviceInfo(Pa_HostApiDeviceIndexToDeviceIndex(hostapi, hostapideviceindex))->maxOutputChannels == 0)
-		{
-			dev++; // skip this device
-			continue;
-		}
-		if(dev == hostapideviceindex)
-		{
-			break;
-		}
-	}
-	if(dev >= Pa_GetHostApiInfo(hostapi)->deviceCount)
-		return -1;
-	return Pa_HostApiDeviceIndexToDeviceIndex(hostapi, dev);
-}
-
-
-SoundDevice::Type CPortaudioDevice::HostApiToSndDevType(PaHostApiIndex hostapi)
-//---------------------------------------------------------------------------
-{
-	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paWASAPI)) return TypePORTAUDIO_WASAPI;
-	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS)) return TypePORTAUDIO_WDMKS;
-	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paMME)) return TypePORTAUDIO_WMME;
-	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paDirectSound)) return TypePORTAUDIO_DS;
-	if(hostapi == Pa_HostApiTypeIdToHostApiIndex(paASIO)) return TypePORTAUDIO_ASIO;
-	return TypeINVALID;
-}
-
-
-PaHostApiIndex CPortaudioDevice::SndDevTypeToHostApi(SoundDevice::Type snddevtype)
-//------------------------------------------------------------------------------
-{
-	if(snddevtype == TypePORTAUDIO_WASAPI) return Pa_HostApiTypeIdToHostApiIndex(paWASAPI);
-	if(snddevtype == TypePORTAUDIO_WDMKS) return Pa_HostApiTypeIdToHostApiIndex(paWDMKS);
-	if(snddevtype == TypePORTAUDIO_WMME) return Pa_HostApiTypeIdToHostApiIndex(paMME);
-	if(snddevtype == TypePORTAUDIO_DS) return Pa_HostApiTypeIdToHostApiIndex(paDirectSound);
-	if(snddevtype == TypePORTAUDIO_ASIO) return Pa_HostApiTypeIdToHostApiIndex(paASIO);
-	return paInDevelopment;
-}
-
-
-mpt::ustring CPortaudioDevice::HostApiToString(PaHostApiIndex hostapi)
-//--------------------------------------------------------------------
-{
-	SoundDevice::Type type = HostApiToSndDevType(hostapi);
-	if(type == TypeINVALID)
-	{
-		return MPT_USTRING("PortAudio");
-	}
-	return SoundDevice::TypeToString(type);
-}
-
-
-bool CPortaudioDevice::EnumerateDevices(SoundDevice::Info &result, SoundDevice::Index index, PaHostApiIndex hostapi)
-//--------------------------------------------------------------------------------------------------------------
-{
-	result = SoundDevice::Info();
-	PaDeviceIndex dev = HostApiOutputIndexToGlobalDeviceIndex(index, hostapi);
-	if(dev == -1)
-		return false;
-	if(!Pa_GetDeviceInfo(dev))
-		return false;
-	result.id = SoundDevice::ID(HostApiToSndDevType(hostapi), index);
-	result.name = mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetDeviceInfo(dev)->name);
-	result.apiName = HostApiToString(Pa_GetDeviceInfo(dev)->hostApi);
-	result.isDefault = (Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == (PaDeviceIndex)dev);
-	PALOG(mpt::String::Print("PortAudio: %1, %2, %3, %4", result.id.GetIdRaw(), mpt::ToLocale(result.name), mpt::ToLocale(result.apiName), result.isDefault));
-	PALOG(mpt::String::Print(" low  : %1", Pa_GetDeviceInfo(dev)->defaultLowOutputLatency));
-	PALOG(mpt::String::Print(" high : %1", Pa_GetDeviceInfo(dev)->defaultHighOutputLatency));
-	return true;
-}
-
-
-std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::Type type)
-//-----------------------------------------------------------------------------------
+std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices()
+//-----------------------------------------------------------------
 {
 	std::vector<SoundDevice::Info> devices;
-	for(SoundDevice::Index index = 0; ; ++index)
+	for(PaDeviceIndex dev = 0; dev < Pa_GetDeviceCount(); ++dev)
 	{
-		SoundDevice::Info info;
-		if(!EnumerateDevices(info, index, CPortaudioDevice::SndDevTypeToHostApi(type)))
+		if(!Pa_GetDeviceInfo(dev))
 		{
-			break;
+			continue;
 		}
-		devices.push_back(info);
+		if(Pa_GetDeviceInfo(dev)->hostApi < 0)
+		{
+			continue;
+		}
+		if(!Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi))
+		{
+			continue;
+		}
+		if(!Pa_GetDeviceInfo(dev)->name)
+		{
+			continue;
+		}
+		if(!Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name)
+		{
+			continue;
+		}
+		if(Pa_GetDeviceInfo(dev)->maxOutputChannels <= 0)
+		{
+			continue;
+		}
+		SoundDevice::Info result = SoundDevice::Info();
+		switch((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type))
+		{
+			case paWASAPI:
+				result.type = TypePORTAUDIO_WASAPI;
+				break;
+			case paWDMKS:
+				result.type = TypePORTAUDIO_WDMKS;
+				break;
+			case paMME:
+				result.type = TypePORTAUDIO_WMME;
+				break;
+			case paDirectSound:
+				result.type = TypePORTAUDIO_DS;
+				break;
+			default:
+				result.type = MPT_USTRING("PortAudio") + MPT_USTRING("-") + mpt::ufmt::dec(static_cast<int>(Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type));
+				break;
+		}
+		result.internalID = mpt::ufmt::dec(dev);
+		result.name = mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetDeviceInfo(dev)->name);
+		switch(Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type)
+		{
+			case paWASAPI:
+				result.apiName = MPT_USTRING("WASAPI");
+				break;
+			case paWDMKS:
+				if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
+				{
+					result.apiName = MPT_USTRING("WaveRT");
+				} else
+				{
+					result.apiName = MPT_USTRING("WDM-KS");
+				}
+				break;
+			default:
+				result.apiName = mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
+				break;
+		}
+		result.apiPath.push_back(MPT_USTRING("PortAudio"));
+		result.isDefault = (Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == (PaDeviceIndex)dev);
+		result.useNameAsIdentifier = true;
+		PALOG(mpt::String::Print("PortAudio: %1, %2, %3, %4", result.id.GetIdRaw(), mpt::ToLocale(result.name), mpt::ToLocale(result.apiName), result.isDefault));
+		PALOG(mpt::String::Print(" low  : %1", Pa_GetDeviceInfo(dev)->defaultLowOutputLatency));
+		PALOG(mpt::String::Print(" high : %1", Pa_GetDeviceInfo(dev)->defaultHighOutputLatency));
+		devices.push_back(result);
 	}
 	return devices;
 }

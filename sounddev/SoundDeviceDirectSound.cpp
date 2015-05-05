@@ -85,21 +85,20 @@ static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCW
 	{
 		return TRUE;
 	}
-	if(!SoundDevice::IndexIsValid(devices.size()))
-	{
-		return FALSE;
-	}
 	SoundDevice::Info info;
-	info.id = SoundDevice::ID(TypeDSOUND, static_cast<SoundDevice::Index>(devices.size()));
-	info.name = mpt::ToUnicode(lpstrDescription);
-	info.apiName = SoundDevice::TypeToString(TypeDSOUND);
-	if(lpGuid)
+	info.type = TypeDSOUND;
+	if(!lpGuid)
 	{
-		info.internalID = mpt::ToUnicode(Util::GUIDToString(*lpGuid));
+		info.isDefault = true;
+		info.internalID = mpt::ToUnicode(Util::GUIDToString(GUID()));
 	} else
 	{
-		info.internalID = mpt::ToUnicode(Util::GUIDToString(GUID()));
+		info.isDefault = false;
+		info.internalID = mpt::ToUnicode(Util::GUIDToString(*lpGuid));
 	}
+	info.name = mpt::ToUnicode(lpstrDescription);
+	info.apiName = MPT_USTRING("DirectSound");
+	info.useNameAsIdentifier = false;
 	devices.push_back(info);
 	return TRUE;
 }

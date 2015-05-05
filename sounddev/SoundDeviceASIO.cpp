@@ -158,11 +158,14 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices()
 			if(Util::IsCLSID(mpt::ToWide(internalID)))
 			{
 				Log(mpt::String::Print("ASIO:   clsid=%1", mpt::ToLocale(internalID)));
-				if(SoundDevice::IndexIsValid(devices.size()))
-				{
-					// everything ok
-					devices.push_back(SoundDevice::Info(SoundDevice::ID(TypeASIO, static_cast<SoundDevice::Index>(devices.size())), description, SoundDevice::TypeToString(TypeASIO), internalID));
-				}
+				SoundDevice::Info info;
+				info.type = TypeASIO;
+				info.internalID = internalID;
+				info.apiName = MPT_USTRING("ASIO");
+				info.name = description;
+				info.useNameAsIdentifier = false;
+				info.isDefault = false;
+				devices.push_back(info);
 			}
 		}
 
@@ -255,8 +258,7 @@ bool CASIODevice::InternalOpen()
 
 	InitMembers();
 
-	Log(mpt::String::Print("ASIO: Open(%1:'%2'): %3-bit, %4 channels, %5Hz, hw-timing=%6"
-		, GetDeviceIndex()
+	Log(mpt::String::Print("ASIO: Open('%1'): %2-bit, %3 channels, %4Hz, hw-timing=%5"
 		, mpt::ToLocale(GetDeviceInternalID())
 		, m_Settings.sampleFormat.GetBitsPerSample()
 		, m_Settings.Channels

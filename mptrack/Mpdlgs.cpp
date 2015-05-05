@@ -344,7 +344,6 @@ void COptionsSoundcard::UpdateEverything()
 		m_CbnDevice.ResetContent();
 		m_CbnDevice.SetImageList(&CMainFrame::GetMainFrame()->m_MiscIcons);
 
-		COMBOBOXEXITEM cbi;
 		UINT iItem = 0;
 
 		for(std::vector<SoundDevice::Info>::const_iterator it = theApp.GetSoundDevicesManager()->begin(); it != theApp.GetSoundDevicesManager()->end(); ++it)
@@ -352,7 +351,7 @@ void COptionsSoundcard::UpdateEverything()
 
 			if(!TrackerSettings::Instance().m_MorePortaudio)
 			{
-				if(it->id.GetType() == SoundDevice::TypePORTAUDIO_ASIO || it->id.GetType() == SoundDevice::TypePORTAUDIO_DS || it->id.GetType() == SoundDevice::TypePORTAUDIO_WMME)
+				if(it->type == SoundDevice::TypePORTAUDIO_DS || it->type == SoundDevice::TypePORTAUDIO_WMME)
 				{
 					// skip those portaudio apis that are already implemented via our own SoundDevice class
 					// can be overwritten via [Sound Settings]MorePortaudio=1
@@ -361,53 +360,60 @@ void COptionsSoundcard::UpdateEverything()
 			}
 
 			{
+				COMBOBOXEXITEM cbi;
+				MemsetZero(cbi);
 				CString name = mpt::ToCString(it->name);
-				cbi.mask = CBEIF_IMAGE | CBEIF_LPARAM | CBEIF_TEXT | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
+				cbi.mask = CBEIF_LPARAM | CBEIF_TEXT | CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 				cbi.iItem = iItem;
 				cbi.cchTextMax = 0;
-				switch(it->id.GetType())
+				if(it->type == SoundDevice::TypeWAVEOUT)
 				{
-				case SoundDevice::TypeWAVEOUT:
-				case SoundDevice::TypePORTAUDIO_WMME:
 					cbi.iImage = IMAGE_WAVEOUT;
-					break;
-				case SoundDevice::TypeDSOUND:
-				case SoundDevice::TypePORTAUDIO_DS:
+				} else if(it->type == SoundDevice::TypePORTAUDIO_WMME)
+				{
+					cbi.iImage = IMAGE_WAVEOUT;
+				} else if(it->type == SoundDevice::TypeDSOUND)
+				{
 					cbi.iImage = IMAGE_DIRECTX;
-					break;
-				case SoundDevice::TypeASIO:
-				case SoundDevice::TypePORTAUDIO_ASIO:
+				} else if(it->type == SoundDevice::TypePORTAUDIO_DS)
+				{
+					cbi.iImage = IMAGE_DIRECTX;
+				} else if(it->type == SoundDevice::TypeASIO)
+				{
 					cbi.iImage = IMAGE_ASIO;
-					break;
-				case SoundDevice::TypePORTAUDIO_WASAPI:
+				} else if(it->type == SoundDevice::TypePORTAUDIO_WASAPI)
+				{
 					// No real image available for now,
 					// prepend API name to name and misuse another icon
 					cbi.iImage = IMAGE_SAMPLEMUTE;
-					name = mpt::ToCString(it->apiName) + TEXT(" - ") + name;
-					break;
-				case SoundDevice::TypePORTAUDIO_WDMKS:
+					name = mpt::ToCString(it->apiName) + _T(" - ") + name;
+				} else if(it->type == SoundDevice::TypePORTAUDIO_WDMKS)
+				{
 					// No real image available for now,
 					// prepend API name to name and misuse another icon.
 					cbi.iImage = IMAGE_CHIP;
-					name = mpt::ToCString(it->apiName) + TEXT(" - ") + name;
-					break;
-				default:
-					cbi.iImage = IMAGE_WAVEOUT;
-					break;
+					name = mpt::ToCString(it->apiName) + _T(" - ") + name;
+				} else
+				{
+					cbi.mask &= ~(CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY);
+					std::vector<mpt::ustring> api = it->apiPath;
+					api.push_back(it->apiName);
+					name = mpt::ToCString(mpt::String::Combine(api, MPT_USTRING(" - "))) + _T(" - ") + name;
 				}
 				if(it->isDefault)
 				{
-					name += " (Default)";
+					name += _T(" (Default)");
 				}
 				cbi.iSelectedImage = cbi.iImage;
 				cbi.iOverlay = cbi.iImage;
 				cbi.iIndent = 0;
-				cbi.lParam = it->id.GetIdRaw();
-				TCHAR tmp[256];
-				_tcscpy(tmp, name);
+				cbi.lParam = theApp.GetSoundDevicesManager()->GetGlobalID(it->GetIdentifier());
+				TCHAR tmp[1024];
+				MemsetZero(tmp);
+				lstrcpyn(tmp, name, 1023);
 				cbi.pszText = tmp;
 				int pos = m_CbnDevice.InsertItem(&cbi);
-				if(cbi.lParam == m_CurrentDeviceInfo.id.GetIdRaw())
+				if(static_cast<SoundDevice::Manager::GlobalID>(cbi.lParam) == theApp.GetSoundDevicesManager()->GetGlobalID(m_CurrentDeviceInfo.GetIdentifier()))
 				{
 					m_CbnDevice.SetCurSel(pos);
 				}
@@ -619,7 +625,7 @@ void COptionsSoundcard::OnDeviceChanged()
 	int n = m_CbnDevice.GetCurSel();
 	if(n >= 0)
 	{
-		SetDevice(theApp.GetSoundDevicesManager()->FindDeviceInfo(SoundDevice::ID::FromIdRaw(m_CbnDevice.GetItemData(n))).GetIdentifier());
+		SetDevice(theApp.GetSoundDevicesManager()->FindDeviceInfo(static_cast<SoundDevice::Manager::GlobalID>(m_CbnDevice.GetItemData(n))).GetIdentifier());
 		UpdateDevice();
 		OnSettingsChanged();
 	}
@@ -646,7 +652,7 @@ void COptionsSoundcard::OnSoundCardDriverPanel()
 //----------------------------------------------
 {
 	theApp.GetSoundDevicesManager()->OpenDriverSettings(
-		theApp.GetSoundDevicesManager()->FindDeviceInfo(SoundDevice::ID::FromIdRaw(m_CbnDevice.GetItemData(m_CbnDevice.GetCurSel()))).GetIdentifier(),
+		theApp.GetSoundDevicesManager()->FindDeviceInfo(static_cast<SoundDevice::Manager::GlobalID>(m_CbnDevice.GetItemData(m_CbnDevice.GetCurSel()))).GetIdentifier(),
 		CMainFrame::GetMainFrame(),
 		CMainFrame::GetMainFrame()->gpSoundDevice
 		);

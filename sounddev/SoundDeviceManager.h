@@ -15,6 +15,9 @@
 
 #include "../common/ComponentManager.h"
 
+#include <map>
+#include <vector>
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -32,6 +35,11 @@ class ComponentPortAudio;
 class Manager
 //===========
 {
+
+public:
+
+	typedef std::size_t GlobalID;
+
 private:
 
 	const SoundDevice::AppInfo m_AppInfo;
@@ -64,7 +72,9 @@ public:
 	std::vector<SoundDevice::Info>::const_iterator end() const { return m_SoundDevices.end(); }
 	const std::vector<SoundDevice::Info> & GetDeviceInfos() const { return m_SoundDevices; }
 
-	SoundDevice::Info FindDeviceInfo(SoundDevice::ID id) const;
+	SoundDevice::Manager::GlobalID GetGlobalID(SoundDevice::Identifier identifier) const;
+
+	SoundDevice::Info FindDeviceInfo(SoundDevice::Manager::GlobalID id) const;
 	SoundDevice::Info FindDeviceInfo(SoundDevice::Identifier identifier) const;
 	SoundDevice::Info FindDeviceInfoBestMatch(SoundDevice::Identifier identifier, bool preferSameType);
 
@@ -79,6 +89,12 @@ public:
 	SoundDevice::IBase * CreateSoundDevice(SoundDevice::Identifier identifier);
 
 };
+
+
+namespace Legacy
+{
+SoundDevice::Info FindDeviceInfo(SoundDevice::Manager &manager, SoundDevice::Legacy::ID id);
+}
 
 
 } // namespace SoundDevice
