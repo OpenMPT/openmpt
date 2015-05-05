@@ -1003,7 +1003,7 @@ BOOL CTrackApp::InitInstance()
 	if(TrackerSettings::Instance().m_SoundDeviceSettingsUseOldDefaults)
 	{
 		// get the old default device
-		TrackerSettings::Instance().SetSoundDeviceIdentifier(m_pSoundDevicesManager->FindDeviceInfo(TrackerSettings::Instance().m_SoundDeviceID_DEPRECATED).GetIdentifier());
+		TrackerSettings::Instance().SetSoundDeviceIdentifier(SoundDevice::Legacy::FindDeviceInfo(*m_pSoundDevicesManager, TrackerSettings::Instance().m_SoundDeviceID_DEPRECATED).GetIdentifier());
 		// apply old global sound device settings to each found device
 		for(std::vector<SoundDevice::Info>::const_iterator it = m_pSoundDevicesManager->begin(); it != m_pSoundDevicesManager->end(); ++it)
 		{

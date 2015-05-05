@@ -35,7 +35,8 @@ class CPortaudioDevice: public SoundDevice::Base
 //=========================================
 {
 protected:
-	PaHostApiIndex m_HostApi;
+	PaDeviceIndex m_DeviceIndex;
+	PaHostApiTypeId m_HostApiType;
 	PaStreamParameters m_StreamParameters;
 	PaWasapiStreamInfo m_WasapiStreamInfo;
 	PaStream * m_Stream;
@@ -81,16 +82,7 @@ public:
 		void *userData
 		);
 
-	static mpt::ustring HostApiToString(PaHostApiIndex hostapi);
-
-	static PaDeviceIndex HostApiOutputIndexToGlobalDeviceIndex(int hostapioutputdeviceindex, PaHostApiIndex hostapi);
-	static SoundDevice::Type HostApiToSndDevType(PaHostApiIndex hostapi);
-	static PaHostApiIndex SndDevTypeToHostApi(SoundDevice::Type snddevtype);
-
-	static std::vector<SoundDevice::Info> EnumerateDevices(SoundDevice::Type type);
-
-private:
-	static bool EnumerateDevices(SoundDevice::Info &result, SoundDevice::Index index, PaHostApiIndex hostapi);
+	static std::vector<SoundDevice::Info> EnumerateDevices();
 
 };
 

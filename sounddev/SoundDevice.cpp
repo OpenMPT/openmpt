@@ -16,30 +16,13 @@
 #include "../common/misc_util.h"
 #include "../common/StringFixer.h"
 
+#include <map>
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
 namespace SoundDevice {
-
-
-mpt::ustring TypeToString(SoundDevice::Type type, bool verbose)
-//-------------------------------------------------------------
-{
-	switch(type)
-	{
-	case TypeWAVEOUT: return MPT_USTRING("WaveOut"); break;
-	case TypeDSOUND: return MPT_USTRING("DirectSound"); break;
-	case TypeASIO: return MPT_USTRING("ASIO"); break;
-	case TypePORTAUDIO_WASAPI: return (verbose ? MPT_USTRING("PortAudio") : MPT_USTRING("")) + MPT_USTRING("WASAPI"); break;
-	case TypePORTAUDIO_WDMKS: return (verbose ? MPT_USTRING("PortAudio") : MPT_USTRING("")) + MPT_USTRING("WDM-KS"); break;
-	case TypePORTAUDIO_WMME: return (verbose ? MPT_USTRING("PortAudio") : MPT_USTRING("")) + MPT_USTRING("MME"); break;
-	case TypePORTAUDIO_DS: return (verbose ? MPT_USTRING("PortAudio") : MPT_USTRING("")) + MPT_USTRING("DS"); break;
-	case TypePORTAUDIO_ASIO: return (verbose ? MPT_USTRING("PortAudio") : MPT_USTRING("")) + MPT_USTRING("ASIO"); break;
-	}
-	return mpt::ustring();
-}
 
 
 ChannelMapping::ChannelMapping()

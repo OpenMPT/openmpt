@@ -177,7 +177,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, m_SoundSettingsOpenDeviceAtStartup(conf, "Sound Settings", "OpenDeviceAtStartup", false)
 	, m_SoundSettingsStopMode(conf, "Sound Settings", "StopMode", SoundDeviceStopModeClosed)
 	, m_SoundDeviceSettingsUseOldDefaults(false)
-	, m_SoundDeviceID_DEPRECATED(SoundDevice::ID())
+	, m_SoundDeviceID_DEPRECATED(SoundDevice::Legacy::ID())
 	, m_SoundDeviceDirectSoundOldDefaultIdentifier(false)
 	, m_SoundDeviceIdentifier(conf, "Sound Settings", "Device", SoundDevice::Identifier())
 	, m_SoundDevicePreferSameTypeIfDeviceUnavailable(conf, "Sound Settings", "PreferSameTypeIfDeviceUnavailable", false)
@@ -426,7 +426,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,04))
 	{
-		m_SoundDeviceID_DEPRECATED = conf.Read<SoundDevice::ID>("Sound Settings", "WaveDevice", SoundDevice::ID());
+		m_SoundDeviceID_DEPRECATED = conf.Read<SoundDevice::Legacy::ID>("Sound Settings", "WaveDevice", SoundDevice::Legacy::ID());
 		Setting<uint32> m_BufferLength_DEPRECATED(conf, "Sound Settings", "BufferLength", 50);
 		Setting<uint32> m_LatencyMS(conf, "Sound Settings", "Latency", Util::Round<int32>(SoundDevice::Settings().Latency * 1000.0));
 		Setting<uint32> m_UpdateIntervalMS(conf, "Sound Settings", "UpdateInterval", Util::Round<int32>(SoundDevice::Settings().UpdateInterval * 1000.0));
@@ -441,7 +441,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 			{
 				if(m_BufferLength_DEPRECATED < 1) m_BufferLength_DEPRECATED = 1; // 1ms
 				if(m_BufferLength_DEPRECATED > 1000) m_BufferLength_DEPRECATED = 1000; // 1sec
-				if(m_SoundDeviceID_DEPRECATED.GetType() == SoundDevice::TypeASIO)
+				if((m_SoundDeviceID_DEPRECATED & SoundDevice::Legacy::MaskType) == SoundDevice::Legacy::TypeASIO)
 				{
 					m_LatencyMS = m_BufferLength_DEPRECATED;
 					m_UpdateIntervalMS = m_BufferLength_DEPRECATED / 8;
@@ -649,7 +649,7 @@ public:
 			ChannelMapping = SoundDevice::ChannelMapping(Channels);
 		}
 		// store informational data (not read back, just to allow the user to mock with the raw ini file)
-		conf.Write(L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"ID", deviceInfo.id);
+		conf.Write(L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"Type", deviceInfo.type);
 		conf.Write(L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"InternalID", deviceInfo.internalID);
 		conf.Write(L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"API", deviceInfo.apiName);
 		conf.Write(L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"Name", deviceInfo.name);

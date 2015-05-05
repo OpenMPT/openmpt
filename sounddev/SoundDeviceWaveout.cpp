@@ -61,6 +61,13 @@ CWaveDevice::~CWaveDevice()
 }
 
 
+int CWaveDevice::GetDeviceIndex() const
+//-------------------------------------
+{
+	return ConvertStrTo<int>(GetDeviceInternalID());
+}
+
+
 SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 //--------------------------------------------------
 {
@@ -355,13 +362,11 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices()
 	UINT numDevs = waveOutGetNumDevs();
 	for(UINT index = 0; index <= numDevs; ++index)
 	{
-		if(!SoundDevice::IndexIsValid(index))
-		{
-			break;
-		}
 		SoundDevice::Info info;
-		info.id = SoundDevice::ID(TypeWAVEOUT, static_cast<SoundDevice::Index>(index));
-		info.apiName = SoundDevice::TypeToString(TypeWAVEOUT);
+		info.type = TypeWAVEOUT;
+		info.internalID = mpt::ufmt::dec(index);
+		info.apiName = MPT_USTRING("WaveOut");
+		info.useNameAsIdentifier = true;
 		WAVEOUTCAPSW woc;
 		MemsetZero(woc);
 		if(index == 0)

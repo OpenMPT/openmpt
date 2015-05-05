@@ -32,6 +32,20 @@ namespace SoundDevice {
 //
 
 
+	struct CompareType
+	{
+		std::map<SoundDevice::Type, int> ordering;
+		CompareType(const std::map<SoundDevice::Type, int> &ordering)
+			: ordering(ordering)
+		{
+			return;
+		}
+		bool operator () (const SoundDevice::Info &x, const SoundDevice::Info &y)
+		{
+			return (ordering[x.type] > ordering[y.type]);
+		}
+	};
+
 void Manager::ReEnumerate()
 //-------------------------
 {
@@ -52,6 +66,14 @@ void Manager::ReEnumerate()
 		const std::vector<SoundDevice::Info> infos = CWaveDevice::EnumerateDevices();
 		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
 	}
+	// kind of deprecated by now
+#ifndef NO_DSOUND
+	if(IsComponentAvailable(m_DirectSound))
+	{
+		const std::vector<SoundDevice::Info> infos = CDSoundDevice::EnumerateDevices();
+		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
+	}
+#endif // NO_DSOUND
 
 #ifndef NO_ASIO
 	if(IsComponentAvailable(m_ASIO))
@@ -64,49 +86,56 @@ void Manager::ReEnumerate()
 #ifndef NO_PORTAUDIO
 	if(IsComponentAvailable(m_PortAudio))
 	{
-		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_WASAPI);
-		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
-	}
-	if(IsComponentAvailable(m_PortAudio))
-	{
-		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_WDMKS);
+		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices();
 		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
 	}
 #endif // NO_PORTAUDIO
 
-	// kind of deprecated by now
-#ifndef NO_DSOUND
-	if(IsComponentAvailable(m_DirectSound))
-	{
-		const std::vector<SoundDevice::Info> infos = CDSoundDevice::EnumerateDevices();
-		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
+	std::map<SoundDevice::Type, int> typePriorities;
+	if(mpt::Windows::Version::IsWine())
+	{ // Wine
+		typePriorities[SoundDevice::TypeDSOUND] = 29;
+		typePriorities[SoundDevice::TypeWAVEOUT] = 28;
+		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = 21;
+		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
+		typePriorities[SoundDevice::TypePORTAUDIO_DS] = 18;
+		typePriorities[SoundDevice::TypeASIO] = 10;
+		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = -1;
+	} else if(!mpt::Windows::Version::IsNT())
+	{ // Win9x
+		typePriorities[SoundDevice::TypeWAVEOUT] = 29;
+		typePriorities[SoundDevice::TypeDSOUND] = 28;
+		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
+		typePriorities[SoundDevice::TypePORTAUDIO_DS] = 18;
+		typePriorities[SoundDevice::TypeASIO] = 1;
+		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = -1;
+		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = -2;
+	} else if(!mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
+	{ // WinXP
+		typePriorities[SoundDevice::TypeWAVEOUT] = 29;
+		typePriorities[SoundDevice::TypeASIO] = 28;
+		typePriorities[SoundDevice::TypeDSOUND] = 27;
+		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = 26;
+		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
+		typePriorities[SoundDevice::TypePORTAUDIO_DS] = 17;
+		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = -1;
+	} else
+	{ // >=Vista
+		typePriorities[SoundDevice::TypeWAVEOUT] = 29;
+		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = 28;
+		typePriorities[SoundDevice::TypeASIO] = 27;
+		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = 26;
+		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
+		typePriorities[SoundDevice::TypeDSOUND] = -1;
+		typePriorities[SoundDevice::TypePORTAUDIO_DS] = -2;
 	}
-#endif // NO_DSOUND
-
-	// duplicate devices, only used if [Sound Settings]MorePortaudio=1
-#ifndef NO_PORTAUDIO
-	if(IsComponentAvailable(m_PortAudio))
-	{
-		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_WMME);
-		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
-	}
-	if(IsComponentAvailable(m_PortAudio))
-	{
-		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_ASIO);
-		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
-	}
-	if(IsComponentAvailable(m_PortAudio))
-	{
-		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices(TypePORTAUDIO_DS);
-		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
-	}
-#endif // NO_PORTAUDIO
+	std::stable_sort(m_SoundDevices.begin(), m_SoundDevices.end(), CompareType(typePriorities));
 
 	Log(LogDebug, MPT_USTRING("Sound Devices enumerated:"));
 	for(std::size_t i = 0; i < m_SoundDevices.size(); ++i)
 	{
 		Log(LogDebug, mpt::String::Print(MPT_USTRING(" Identifier : %1")   , m_SoundDevices[i].GetIdentifier()));
-		Log(LogDebug, mpt::String::Print(MPT_USTRING("  ID        : %1.%2"), static_cast<uint32>(m_SoundDevices[i].id.GetType()), m_SoundDevices[i].id.GetIndex()));
+		Log(LogDebug, mpt::String::Print(MPT_USTRING("  Type      : %1")   , m_SoundDevices[i].type));
 		Log(LogDebug, mpt::String::Print(MPT_USTRING("  InternalID: %1")   , m_SoundDevices[i].internalID));
 		Log(LogDebug, mpt::String::Print(MPT_USTRING("  API Name  : %1")   , m_SoundDevices[i].apiName));
 		Log(LogDebug, mpt::String::Print(MPT_USTRING("  Name      : %1")   , m_SoundDevices[i].name));
@@ -115,17 +144,28 @@ void Manager::ReEnumerate()
 }
 
 
-SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::ID id) const
-//-----------------------------------------------------------------
+SoundDevice::Manager::GlobalID Manager::GetGlobalID(SoundDevice::Identifier identifier) const
+//-------------------------------------------------------------------------------------------
 {
-	for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
+	for(std::size_t i = 0; i < m_SoundDevices.size(); ++i)
 	{
-		if(it->id == id)
+		if(m_SoundDevices[i].GetIdentifier() == identifier)
 		{
-			return *it;
+			return i;
 		}
 	}
-	return SoundDevice::Info();
+	return ~SoundDevice::Manager::GlobalID();
+}
+
+
+SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::Manager::GlobalID id) const
+//--------------------------------------------------------------------------------
+{
+	if(id > m_SoundDevices.size())
+	{
+		return SoundDevice::Info();
+	}
+	return m_SoundDevices[id];
 }
 
 
@@ -154,15 +194,12 @@ SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::Identifier identifier) co
 SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier)
 //--------------------------------------------------------------------
 {
-	for(int i = 0; i < TypeNUM_DEVTYPES; ++i)
+	std::vector<mpt::ustring> tmp = mpt::String::Split<mpt::ustring>(identifier, MPT_USTRING("_"));
+	if(tmp.size() == 0)
 	{
-		const mpt::ustring api = SoundDevice::TypeToString(static_cast<SoundDevice::Type>(i));
-		if(identifier.find(api) == 0)
-		{
-			return static_cast<SoundDevice::Type>(i);
-		}
+		return SoundDevice::Type();
 	}
-	return TypeINVALID;
+	return tmp[0];
 }
 
 
@@ -185,47 +222,31 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(SoundDevice::Identifier ident
 		}
 	}
 	const SoundDevice::Type type = ParseType(identifier);
-	switch(type)
+	if(type == TypePORTAUDIO_WASAPI)
 	{
-		case TypePORTAUDIO_WASAPI:
-			// WASAPI devices might change names if a different connector jack is used.
-			// In order to avoid defaulting to wave mapper in that case,
-			// just find the first WASAPI device.
-			for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
+		// WASAPI devices might change names if a different connector jack is used.
+		// In order to avoid defaulting to wave mapper in that case,
+		// just find the first WASAPI device.
+		for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
+		{
+			if((it->type == TypePORTAUDIO_WASAPI) && !IsDeviceUnavailable(it->GetIdentifier()))
 			{
-				if((it->id.GetType() == TypePORTAUDIO_WASAPI) && !IsDeviceUnavailable(it->GetIdentifier()))
-				{
-					return *it;
-				}
+				return *it;
 			}
-			// default to first device
-			return *begin();
-			break;
-		case TypeWAVEOUT:
-		case TypeDSOUND:
-		case TypePORTAUDIO_WMME:
-		case TypePORTAUDIO_DS:
-		case TypeASIO:
-		case TypePORTAUDIO_WDMKS:
-		case TypePORTAUDIO_ASIO:
-			if(preferSameType)
-			{
-				for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
-				{
-					if((it->id.GetType() == type) && !IsDeviceUnavailable(it->GetIdentifier()))
-					{
-						return *it;
-					}
-				}
-			} else
-			{
-				// default to first device
-				return *begin();
-			}
-			break;
+		}
 	}
-	// invalid
-	return SoundDevice::Info();
+	if(preferSameType)
+	{
+		for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
+		{
+			if((it->type == type) && !IsDeviceUnavailable(it->GetIdentifier()))
+			{
+				return *it;
+			}
+		}
+	}
+	// default to first device
+	return *begin();
 }
 
 
@@ -318,28 +339,23 @@ SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifi
 		return nullptr;
 	}
 	SoundDevice::IBase *result = nullptr;
-	switch(info.id.GetType())
-	{
-	case TypeWAVEOUT: result = new CWaveDevice(info); break;
+	if(info.type.empty()) { result = nullptr; }
+	if(info.type == TypeWAVEOUT) { result = new CWaveDevice(info); }
 #ifndef NO_DSOUND
-	case TypeDSOUND: result = new CDSoundDevice(info); break;
+	if(info.type == TypeDSOUND) { result = new CDSoundDevice(info); }
 #endif // NO_DSOUND
 #ifndef NO_ASIO
-	case TypeASIO: result = new CASIODevice(info); break;
+	if(info.type == TypeASIO) { result = new CASIODevice(info); }
 #endif // NO_ASIO
 #ifndef NO_PORTAUDIO
-	case TypePORTAUDIO_WASAPI:
-	case TypePORTAUDIO_WDMKS:
-	case TypePORTAUDIO_WMME:
-	case TypePORTAUDIO_DS:
-	case TypePORTAUDIO_ASIO:
-		if(IsComponentAvailable(m_PortAudio))
-		{
-			result = new CPortaudioDevice(info);
-		}
-		break;
-#endif // NO_PORTAUDIO
+	if(IsComponentAvailable(m_PortAudio))
+	{
+		if(info.type == TypePORTAUDIO_WASAPI) { result = new CPortaudioDevice(info); }
+		if(info.type == TypePORTAUDIO_WDMKS) { result = new CPortaudioDevice(info); }
+		if(info.type == TypePORTAUDIO_WMME) { result = new CPortaudioDevice(info); }
+		if(info.type == TypePORTAUDIO_DS) { result = new CPortaudioDevice(info); }
 	}
+#endif // NO_PORTAUDIO
 	if(!result)
 	{
 		return nullptr;
@@ -367,6 +383,66 @@ Manager::~Manager()
 //-----------------
 {
 	return;
+}
+
+
+namespace Legacy
+{
+SoundDevice::Info FindDeviceInfo(SoundDevice::Manager &manager, SoundDevice::Legacy::ID id)
+{
+	if(manager.GetDeviceInfos().empty())
+	{
+		return SoundDevice::Info();
+	}
+	SoundDevice::Type type = SoundDevice::Type();
+	switch(id & SoundDevice::Legacy::MaskType)
+	{
+		case SoundDevice::Legacy::TypeWAVEOUT:
+			type = SoundDevice::TypeWAVEOUT;
+			break;
+		case SoundDevice::Legacy::TypeDSOUND:
+			type = SoundDevice::TypeDSOUND;
+			break;
+		case SoundDevice::Legacy::TypeASIO:
+			type = SoundDevice::TypeASIO;
+			break;
+		case SoundDevice::Legacy::TypePORTAUDIO_WASAPI:
+			type = SoundDevice::TypePORTAUDIO_WASAPI;
+			break;
+		case SoundDevice::Legacy::TypePORTAUDIO_WDMKS:
+			type = SoundDevice::TypePORTAUDIO_WDMKS;
+			break;
+		case SoundDevice::Legacy::TypePORTAUDIO_WMME:
+			type = SoundDevice::TypePORTAUDIO_WMME;
+			break;
+		case SoundDevice::Legacy::TypePORTAUDIO_DS:
+			type = SoundDevice::TypePORTAUDIO_DS;
+			break;
+	}
+	if(type.empty())
+	{	// fallback to first device
+		return *manager.begin();
+	}
+	std::size_t index = static_cast<uint8>(id & SoundDevice::Legacy::MaskIndex);
+	std::size_t seenDevicesOfDesiredType = 0;
+	for(std::vector<SoundDevice::Info>::const_iterator it = manager.begin(); it != manager.end(); ++it)
+	{
+		if(it->type == type)
+		{
+			if(seenDevicesOfDesiredType == index)
+			{
+				if(!it->IsValid())
+				{	// fallback to first device
+					return *manager.begin();
+				}
+				return *it;
+			}
+			seenDevicesOfDesiredType++;
+		}
+	}
+	// default to first device
+	return *manager.begin();
+}
 }
 
 

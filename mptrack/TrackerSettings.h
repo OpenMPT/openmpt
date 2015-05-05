@@ -261,9 +261,6 @@ template<> inline PLUGVOLUMEHANDLING FromSettingValue(const SettingValue &val)
 template<> inline SettingValue ToSettingValue(const std::vector<uint32> &val) { return mpt::String::Combine(val); }
 template<> inline std::vector<uint32> FromSettingValue(const SettingValue &val) { return mpt::String::Split<uint32>(val); }
 
-template<> inline SettingValue ToSettingValue(const SoundDevice::ID &val) { return SettingValue(int32(val.GetIdRaw())); }
-template<> inline SoundDevice::ID FromSettingValue(const SettingValue &val) { return SoundDevice::ID::FromIdRaw(val.as<int32>()); }
-
 template<> inline SettingValue ToSettingValue(const SampleFormat &val) { return SettingValue(int32(val.value)); }
 template<> inline SampleFormat FromSettingValue(const SettingValue &val) { return SampleFormatEnum(val.as<int32>()); }
 
@@ -442,7 +439,7 @@ public:
 	Setting<SoundDeviceStopMode> m_SoundSettingsStopMode;
 
 	bool m_SoundDeviceSettingsUseOldDefaults;
-	SoundDevice::ID m_SoundDeviceID_DEPRECATED;
+	SoundDevice::Legacy::ID m_SoundDeviceID_DEPRECATED;
 	SoundDevice::Settings m_SoundDeviceSettingsDefaults;
 	SoundDevice::Settings GetSoundDeviceSettingsDefaults() const;
 	bool m_SoundDeviceDirectSoundOldDefaultIdentifier;

@@ -17,8 +17,6 @@
 #include "../common/mptAtomic.h"
 #include "../soundlib/SampleFormat.h"
 
-#include <bitset>
-#include <map>
 #include <vector>
 
 
@@ -110,107 +108,35 @@ public:
 // SoundDevice::Base Interface
 //
 
-enum Type
-{
-	// do not change old values, these get saved to the ini
-	TypeINVALID          =-1,
-	TypeWAVEOUT          = 0,
-	TypeDSOUND           = 1,
-	TypeASIO             = 2,
-	TypePORTAUDIO_WASAPI = 3,
-	TypePORTAUDIO_WDMKS  = 4,
-	TypePORTAUDIO_WMME   = 5,
-	TypePORTAUDIO_DS     = 6,
-	TypePORTAUDIO_ASIO   = 7,
-	TypeNUM_DEVTYPES
-};
-typedef std::bitset<TypeNUM_DEVTYPES> TypesSet;
 
+static const MPT_UCHAR_TYPE TypeWAVEOUT          [] = MPT_ULITERAL("WaveOut");
+static const MPT_UCHAR_TYPE TypeDSOUND           [] = MPT_ULITERAL("DirectSound");
+static const MPT_UCHAR_TYPE TypeASIO             [] = MPT_ULITERAL("ASIO");
+static const MPT_UCHAR_TYPE TypePORTAUDIO_WASAPI [] = MPT_ULITERAL("WASAPI");
+static const MPT_UCHAR_TYPE TypePORTAUDIO_WDMKS  [] = MPT_ULITERAL("WDM-KS");
+static const MPT_UCHAR_TYPE TypePORTAUDIO_WMME   [] = MPT_ULITERAL("MME");
+static const MPT_UCHAR_TYPE TypePORTAUDIO_DS     [] = MPT_ULITERAL("DS");
 
-mpt::ustring TypeToString(SoundDevice::Type type, bool verbose = false);
-
-typedef uint8 Index;
-
-template<typename T>
-bool IndexIsValid(const T & x)
-{
-	return 0 <= x && x <= std::numeric_limits<Index>::max();
-}
-
-//======
-class ID
-//======
-{
-private:
-	SoundDevice::Type type;
-	SoundDevice::Index index;
-public:
-	ID() : type(TypeWAVEOUT), index(0) {}
-	ID(SoundDevice::Type type, SoundDevice::Index index)
-		: type(type)
-		, index(index)
-	{
-		return;
-	}
-	bool IsValid() const
-	{
-		return (type > TypeINVALID);
-	}
-	SoundDevice::Type GetType() const { return type; }
-	SoundDevice::Index GetIndex() const { return index; }
-	bool operator == (const SoundDevice::ID &cmp) const
-	{
-		return (type == cmp.type) && (index == cmp.index);
-	}
-
-	bool operator != (const SoundDevice::ID &cmp) const
-	{
-		return (type != cmp.type) || (index != cmp.index);
-	}
-	bool operator < (const SoundDevice::ID &cmp) const
-	{
-		return (type < cmp.type) || (type == cmp.type && index < cmp.index);
-	}
-public:
-	// Do not change these. These functions are used to manipulate the value that gets stored in the settings.
-	template<typename T>
-	static SoundDevice::ID FromIdRaw(T id_)
-	{
-		uint16 id = static_cast<uint16>(id_);
-		return SoundDevice::ID((SoundDevice::Type)((id>>8)&0xff), (id>>0)&0xff);
-	}
-	uint16 GetIdRaw() const
-	{
-		return static_cast<uint16>(((int)type<<8) | (index<<0));
-	}
-};
+typedef mpt::ustring Type;
 
 
 typedef mpt::ustring Identifier;
 
 SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier);
 
-
 struct Info
 {
-	SoundDevice::ID id;
-	mpt::ustring name;
-	mpt::ustring apiName;
+	SoundDevice::Type type;
 	mpt::ustring internalID;
+	mpt::ustring name; // user visible
+	mpt::ustring apiName; // user visible
+	std::vector<mpt::ustring> apiPath; // i.e. Wine-support, PortAudio
 	bool isDefault;
-	Info() : id(TypeINVALID, 0), isDefault(false) { }
-	Info(SoundDevice::ID id, const mpt::ustring &name, const mpt::ustring &apiName, const mpt::ustring &internalID = mpt::ustring())
-		: id(id)
-		, name(name)
-		, apiName(apiName)
-		, internalID(internalID)
-		, isDefault(false)
-	{
-		return;
-	}
+	bool useNameAsIdentifier;
+	Info() : isDefault(false), useNameAsIdentifier(false) { }
 	bool IsValid() const
 	{
-		return id.IsValid();
+		return !type.empty() && !internalID.empty();
 	}
 	SoundDevice::Identifier GetIdentifier() const
 	{
@@ -218,12 +144,10 @@ struct Info
 		{
 			return mpt::ustring();
 		}
-		mpt::ustring result = apiName;
+		mpt::ustring result = mpt::ustring();
+		result += type;
 		result += MPT_USTRING("_");
-		if(!internalID.empty())
-		{
-			result += internalID; // safe to not contain special characters
-		} else if(!name.empty())
+		if(useNameAsIdentifier)
 		{
 			// UTF8-encode the name and convert the utf8 to hex.
 			// This ensures that no special characters are contained in the configuration key.
@@ -232,7 +156,7 @@ struct Info
 			result += hexString;
 		} else
 		{
-			result += mpt::ufmt::dec(id.GetIndex());
+			result += internalID; // safe to not contain special characters
 		}
 		return result;
 	}
@@ -604,9 +528,7 @@ private:
 
 protected:
 
-	SoundDevice::ID GetDeviceID() const { return m_Info.id; }
-	SoundDevice::Type GetDeviceType() const { return m_Info.id.GetType(); }
-	SoundDevice::Index GetDeviceIndex() const { return m_Info.id.GetIndex(); }
+	SoundDevice::Type GetDeviceType() const { return m_Info.type; }
 	mpt::ustring GetDeviceInternalID() const { return m_Info.internalID; }
 	SoundDevice::Identifier GetDeviceIdentifier() const { return m_Info.GetIdentifier(); }
 
@@ -700,6 +622,16 @@ public:
 
 namespace Legacy
 {
+typedef uint16 ID;
+static const SoundDevice::Legacy::ID MaskType = 0xff00;
+static const SoundDevice::Legacy::ID MaskIndex = 0x00ff;
+static const SoundDevice::Legacy::ID TypeWAVEOUT          = 0;
+static const SoundDevice::Legacy::ID TypeDSOUND           = 1;
+static const SoundDevice::Legacy::ID TypeASIO             = 2;
+static const SoundDevice::Legacy::ID TypePORTAUDIO_WASAPI = 3;
+static const SoundDevice::Legacy::ID TypePORTAUDIO_WDMKS  = 4;
+static const SoundDevice::Legacy::ID TypePORTAUDIO_WMME   = 5;
+static const SoundDevice::Legacy::ID TypePORTAUDIO_DS     = 6;
 mpt::ustring GetDirectSoundDefaultDeviceIdentifierPre_1_25_00_04();
 mpt::ustring GetDirectSoundDefaultDeviceIdentifier_1_25_00_04();
 }
