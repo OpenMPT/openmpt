@@ -30,7 +30,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-extern const char *gszChnCfgNames[3];
+extern const TCHAR *gszChnCfgNames[3];
 
 static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outputBuffer, CSoundFile::samplecount_t count, SampleFormat sampleFormat, Dither &dither)
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -253,7 +253,7 @@ void CWaveConvert::FillTags()
 		m_CbnGenre.ShowWindow(SW_SHOW);
 		m_EditGenre.Clear();
 		m_CbnGenre.ResetContent();
-		m_CbnGenre.AddString("");
+		m_CbnGenre.AddString(_T(""));
 		for(std::vector<mpt::ustring>::const_iterator genre = encTraits->genres.begin(); genre != encTraits->genres.end(); ++genre)
 		{
 			m_CbnGenre.AddString(mpt::ToCString(*genre));
@@ -323,7 +323,7 @@ void CWaveConvert::FillSamplerates()
 	for(std::vector<uint32>::const_iterator it = encTraits->samplerates.begin(); it != encTraits->samplerates.end(); ++it)
 	{
 		uint32 samplerate = *it;
-		int ndx = m_CbnSampleRate.AddString(mpt::String::Print("%1 Hz", samplerate).c_str());
+		int ndx = m_CbnSampleRate.AddString(mpt::ToCString(mpt::String::Print(MPT_USTRING("%1 Hz"), samplerate)));
 		m_CbnSampleRate.SetItemData(ndx, samplerate);
 		if(samplerate == encSettings.Samplerate)
 		{
@@ -599,7 +599,7 @@ void CWaveConvert::OnCheck1()
 		if (!m_dwFileLimit)
 		{
 			m_dwFileLimit = 1000;
-			SetDlgItemText(IDC_EDIT1, "1000");
+			SetDlgItemText(IDC_EDIT1, _T("1000"));
 		}
 	} else m_dwFileLimit = 0;
 	UpdateDialog();
@@ -609,7 +609,7 @@ void CWaveConvert::OnCheck1()
 void CWaveConvert::OnPlayerOptions()
 //----------------------------------
 {
-	CPropertySheet dlg("Mixer Settings", this);
+	CPropertySheet dlg(_T("Mixer Settings"), this);
 	COptionsMixer mixerpage;
 	dlg.AddPage(&mixerpage);
 #if !defined(NO_REVERB) || !defined(NO_DSP) || !defined(NO_EQ) || !defined(NO_AGC) || !defined(NO_EQ)
@@ -629,7 +629,7 @@ void CWaveConvert::OnCheck2()
 		if (!m_dwSongLimit)
 		{
 			m_dwSongLimit = 600;
-			SetDlgItemText(IDC_EDIT2, "600");
+			SetDlgItemText(IDC_EDIT2, _T("600"));
 		}
 	} else m_dwSongLimit = 0;
 	UpdateDialog();
@@ -937,7 +937,7 @@ void CDoWaveConvert::OnButton1()
 	// Silence mix buffer of plugins, for plugins that don't clear their reverb buffers and similar stuff when they are reset
 	if(m_Settings.SilencePlugBuffers)
 	{
-		SetDlgItemText(IDC_TEXT1, "Clearing plugin buffers");
+		SetDlgItemText(IDC_TEXT1, _T("Clearing plugin buffers"));
 		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 		{
 			if(m_SndFile.m_MixPlugins[i].pMixPlugin != nullptr)
