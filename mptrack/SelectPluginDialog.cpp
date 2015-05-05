@@ -97,7 +97,7 @@ BOOL CSelectPluginDlg::OnInitDialog()
 	if (m_pPlugin)
 	{
 		CString targetSlot;
-		targetSlot.Format("&Put in FX%02d", m_nPlugSlot + 1);
+		targetSlot.Format(_T("&Put in FX%02d"), m_nPlugSlot + 1);
 		SetDlgItemText(IDOK, targetSlot);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDOK), TRUE);
 	} else
@@ -266,11 +266,11 @@ void CSelectPluginDlg::OnNameFilterChanged()
 {
 	// Update name filter text
 	HWND hwnd = GetDlgItem(IDC_NAMEFILTER)->m_hWnd;
-	int len = GetWindowTextLengthW(hwnd);
+	int len = ::GetWindowTextLengthW(hwnd);
 	m_nameFilter.resize(len);
 	if(len)
 	{
-		GetWindowTextW(hwnd, &m_nameFilter[0], len + 1);
+		::GetWindowTextW(hwnd, &m_nameFilter[0], len + 1);
 		for(int i = 0; i < len; i++) m_nameFilter[i] = ::towlower(m_nameFilter[i]);
 	}
 
@@ -449,7 +449,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 	int showBoxes = SW_HIDE;
 	if ((pManager) && (pManager->IsValidPlugin(pPlug)))
 	{
-		SetDlgItemTextW(m_hWnd, IDC_TEXT_CURRENT_VSTPLUG, pPlug->dllPath.ToWide().c_str());
+		::SetDlgItemTextW(m_hWnd, IDC_TEXT_CURRENT_VSTPLUG, pPlug->dllPath.ToWide().c_str());
 		if(pPlug->pluginId1 == kEffectMagic)
 		{
 			bool isBridgeAvailable = (hasBridge32 && pPlug->GetDllBits() == 32) || (hasBridge64 && pPlug->GetDllBits() == 64);
@@ -472,7 +472,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 		}
 	} else
 	{
-		SetDlgItemText(IDC_TEXT_CURRENT_VSTPLUG, "");
+		SetDlgItemText(IDC_TEXT_CURRENT_VSTPLUG, _T(""));
 	}
 	m_chkBridge.ShowWindow(showBoxes);
 	m_chkShare.ShowWindow(showBoxes);
@@ -517,8 +517,7 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 	{
 		if(problemPlugs[p].id2 == plug->pluginId2 && problemPlugs[p].id1 == plug->pluginId1)
 		{
-			CString s;
-			s.Format("WARNING: This plugin has been identified as %s,\nwhich is known to have the following problem with OpenMPT:\n\n%s\n\nWould you still like to add this plugin to the library?", problemPlugs[p].name, problemPlugs[p].problem);
+			std::string s = mpt::String::Print("WARNING: This plugin has been identified as %1,\nwhich is known to have the following problem with OpenMPT:\n\n%2\n\nWould you still like to add this plugin to the library?", problemPlugs[p].name, problemPlugs[p].problem);
 			if(Reporting::Confirm(s, false, false, parent) == cnfNo)
 			{
 				return false;
@@ -650,7 +649,7 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 		{
 			CWnd *text = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
 			std::wstring scanStr = L"Scanning Plugin...\n" + fileName.ToWide();
-			SetWindowTextW(text->m_hWnd, scanStr.c_str());
+			::SetWindowTextW(text->m_hWnd, scanStr.c_str());
 			MSG msg;
 			while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 			{
