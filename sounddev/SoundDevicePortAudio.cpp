@@ -228,7 +228,7 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 	caps.CanChannelMapping = false;
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = true;
-	const PaDeviceInfo *deviceInfo = Pa_GetDeviceInfo(m_StreamParameters.device = m_DeviceIndex);
+	const PaDeviceInfo *deviceInfo = Pa_GetDeviceInfo(m_DeviceIndex);
 	if(deviceInfo)
 	{
 		caps.DefaultSettings.Latency = deviceInfo->defaultLowOutputLatency;
