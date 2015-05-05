@@ -25,16 +25,16 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-static const char * const PolyphonyNames[] =
+static const TCHAR * const PolyphonyNames[] =
 {
-	"133MHz",
-	"166MHz",
-	"200MHz",
-	"233MHz",
-	"266MHz",
-	"300MHz",
-	"333MHz",
-	"400+MHz"
+	_T("133MHz"),
+	_T("166MHz"),
+	_T("200MHz"),
+	_T("233MHz"),
+	_T("266MHz"),
+	_T("300MHz"),
+	_T("333MHz"),
+	_T("400+MHz")
 };
 
 static const CHANNELINDEX PolyphonyChannels[] =
@@ -52,11 +52,11 @@ static const CHANNELINDEX PolyphonyChannels[] =
 STATIC_ASSERT(CountOf(PolyphonyNames) == CountOf(PolyphonyChannels));
 
 
-const char *gszChnCfgNames[3] =
+const TCHAR *gszChnCfgNames[3] =
 {
-	"Mono",
-	"Stereo",
-	"Quad"
+	_T("Mono"),
+	_T("Stereo"),
+	_T("Quad")
 };
 
 
@@ -312,17 +312,17 @@ void COptionsSoundcard::UpdateGeneral()
 		{
 			m_CbnStoppedMode.EnableWindow(TRUE);
 			m_CbnStoppedMode.ResetContent();
-			m_CbnStoppedMode.AddString("Close driver");
-			m_CbnStoppedMode.AddString("Pause driver");
-			m_CbnStoppedMode.AddString("Play silence");
+			m_CbnStoppedMode.AddString(_T("Close driver"));
+			m_CbnStoppedMode.AddString(_T("Pause driver"));
+			m_CbnStoppedMode.AddString(_T("Play silence"));
 			m_CbnStoppedMode.SetCurSel(TrackerSettings::Instance().m_SoundSettingsStopMode);
 		} else
 		{
 			m_CbnStoppedMode.EnableWindow(FALSE);
 			m_CbnStoppedMode.ResetContent();
-			m_CbnStoppedMode.AddString("Close driver");
-			m_CbnStoppedMode.AddString("Close driver");
-			m_CbnStoppedMode.AddString("Close driver");
+			m_CbnStoppedMode.AddString(_T("Close driver"));
+			m_CbnStoppedMode.AddString(_T("Close driver"));
+			m_CbnStoppedMode.AddString(_T("Close driver"));
 			m_CbnStoppedMode.SetCurSel(TrackerSettings::Instance().m_SoundSettingsStopMode);
 		}
 		CheckDlgButton(IDC_CHECK7, TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup ? BST_CHECKED : BST_UNCHECKED);
@@ -490,7 +490,7 @@ void COptionsSoundcard::UpdateSampleFormat()
 		{
 			if(m_CurrentDeviceCaps.CanSampleFormat || (SampleFormatFloat32 == m_Settings.sampleFormat))
 			{
-				UINT ndx = m_CbnSampleFormat.AddString("Float");
+				UINT ndx = m_CbnSampleFormat.AddString(_T("Float"));
 				m_CbnSampleFormat.SetItemData(ndx, (32+128));
 				if(SampleFormatFloat32 == m_Settings.sampleFormat)
 				{
@@ -501,7 +501,7 @@ void COptionsSoundcard::UpdateSampleFormat()
 		{
 			if(m_CurrentDeviceCaps.CanSampleFormat || ((SampleFormat)bits == m_Settings.sampleFormat))
 			{
-				UINT ndx = m_CbnSampleFormat.AddString(mpt::String::Print("%1 Bit", bits).c_str());
+				UINT ndx = m_CbnSampleFormat.AddString(mpt::ToCString(mpt::String::Print(MPT_USTRING("%1 Bit"), bits)));
 				m_CbnSampleFormat.SetItemData(ndx, bits);
 				if((SampleFormat)bits == m_Settings.sampleFormat)
 				{
@@ -589,7 +589,7 @@ void COptionsSoundcard::UpdateChannelMapping()
 		combo->ResetContent();
 		if(m_CurrentDeviceCaps.CanChannelMapping)
 		{
-			combo->SetItemData(combo->AddString("Unassigned"), (DWORD_PTR)-1);
+			combo->SetItemData(combo->AddString(_T("Unassigned")), (DWORD_PTR)-1);
 			combo->SetCurSel(0);
 			if(mch < usedChannels)
 			{
@@ -741,9 +741,7 @@ void COptionsSoundcard::UpdateSampleRates()
 	int n = 0;
 	for(size_t i = 0; i < samplerates.size(); i++)
 	{
-		CHAR s[16];
-		wsprintf(s, "%i Hz", samplerates[i]);
-		int pos = m_CbnMixingFreq.AddString(s);
+		int pos = m_CbnMixingFreq.AddString(mpt::ToCString(mpt::String::Print(MPT_USTRING("%1 Hz"), samplerates[i])));
 		m_CbnMixingFreq.SetItemData(pos, samplerates[i]);
 		if(m_Settings.Samplerate == samplerates[i])
 		{
@@ -919,10 +917,10 @@ void COptionsSoundcard::UpdateStatistics()
 	{
 		if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
 		{
-			m_EditStatistics.SetWindowText("Device currently unavailable.");
+			m_EditStatistics.SetWindowText(_T("Device currently unavailable."));
 		} else
 		{
-			m_EditStatistics.SetWindowText("");
+			m_EditStatistics.SetWindowText(_T(""));
 		}
 	}
 }
@@ -971,17 +969,17 @@ BOOL COptionsMixer::OnInitDialog()
 
 	// Resampling type
 	{
-		m_CbnResampling.AddString("No Interpolation (1 tap)");
-		m_CbnResampling.AddString("Linear (2 tap)");
-		m_CbnResampling.AddString("Cubic spline (4 tap)");
-		m_CbnResampling.AddString("Polyphase (8 tap)");
-		m_CbnResampling.AddString("XMMS-ModPlug (8 tap)");
+		m_CbnResampling.AddString(_T("No Interpolation (1 tap)"));
+		m_CbnResampling.AddString(_T("Linear (2 tap)"));
+		m_CbnResampling.AddString(_T("Cubic spline (4 tap)"));
+		m_CbnResampling.AddString(_T("Polyphase (8 tap)"));
+		m_CbnResampling.AddString(_T("XMMS-ModPlug (8 tap)"));
 		m_CbnResampling.SetCurSel(TrackerSettings::Instance().ResamplerMode);
 	}
 
 	// Resampler bandwidth
 	{
-		m_CEditWFIRCutoff.SetWindowText(mpt::ToString(TrackerSettings::Instance().ResamplerCutoffPercent).c_str());
+		m_CEditWFIRCutoff.SetWindowText(mpt::ToCString(mpt::ToUString(TrackerSettings::Instance().ResamplerCutoffPercent)));
 	}
 
 	// Resampler filter window
@@ -991,13 +989,8 @@ BOOL COptionsMixer::OnInitDialog()
 
 	// volume ramping
 	{
-#if 0
-		m_CEditRampUp.SetWindowText(mpt::ToString(TrackerSettings::Instance().MixerVolumeRampUpSamples).c_str());
-		m_CEditRampDown.SetWindowText(mpt::ToString(TrackerSettings::Instance().MixerVolumeRampDownSamples).c_str());
-#else
-		m_CEditRampUp.SetWindowText(mpt::ToString(TrackerSettings::Instance().GetMixerSettings().GetVolumeRampUpMicroseconds()).c_str());
-		m_CEditRampDown.SetWindowText(mpt::ToString(TrackerSettings::Instance().GetMixerSettings().GetVolumeRampDownMicroseconds()).c_str());
-#endif
+		m_CEditRampUp.SetWindowText(mpt::ToCString(mpt::ToUString(TrackerSettings::Instance().GetMixerSettings().GetVolumeRampUpMicroseconds())));
+		m_CEditRampDown.SetWindowText(mpt::ToCString(mpt::ToUString(TrackerSettings::Instance().GetMixerSettings().GetVolumeRampDownMicroseconds())));
 		UpdateRamping();
 	}
 
@@ -1006,7 +999,7 @@ BOOL COptionsMixer::OnInitDialog()
 		m_CbnPolyphony.ResetContent();
 		for(int n = 0; n < CountOf(PolyphonyChannels); ++n)
 		{
-			m_CbnPolyphony.AddString(mpt::String::Print("%1 (%2)", PolyphonyChannels[n], PolyphonyNames[n]).c_str());
+			m_CbnPolyphony.AddString(mpt::ToCString(mpt::String::Print(MPT_USTRING("%1 (%2)"), PolyphonyChannels[n], mpt::ToUnicode(CString(PolyphonyNames[n])))));
 			if(TrackerSettings::Instance().MixerMaxChannels == PolyphonyChannels[n])
 			{
 				m_CbnPolyphony.SetCurSel(n);
@@ -1065,38 +1058,38 @@ void COptionsMixer::OnResamplerChanged()
 	{
 		case SRCMODE_FIRFILTER:
 			m_CbnWFIRType.ResetContent();
-			m_CbnWFIRType.AddString("Hann");
-			m_CbnWFIRType.AddString("Hamming");
-			m_CbnWFIRType.AddString("Blackman Exact");
-			m_CbnWFIRType.AddString("Blackman 3 Tap 61");
-			m_CbnWFIRType.AddString("Blackman 3 Tap 67");
-			m_CbnWFIRType.AddString("Blackman Harris");
-			m_CbnWFIRType.AddString("Blackman 4 Tap 74");
-			m_CbnWFIRType.AddString("Kaiser a=7.5");
+			m_CbnWFIRType.AddString(_T("Hann"));
+			m_CbnWFIRType.AddString(_T("Hamming"));
+			m_CbnWFIRType.AddString(_T("Blackman Exact"));
+			m_CbnWFIRType.AddString(_T("Blackman 3 Tap 61"));
+			m_CbnWFIRType.AddString(_T("Blackman 3 Tap 67"));
+			m_CbnWFIRType.AddString(_T("Blackman Harris"));
+			m_CbnWFIRType.AddString(_T("Blackman 4 Tap 74"));
+			m_CbnWFIRType.AddString(_T("Kaiser a=7.5"));
 			m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().ResamplerSubMode);
 			break;
 		case SRCMODE_POLYPHASE:
 			m_CbnWFIRType.ResetContent();
-			m_CbnWFIRType.AddString("Auto");
-			m_CbnWFIRType.AddString("Auto");
-			m_CbnWFIRType.AddString("Auto");
-			m_CbnWFIRType.AddString("Auto");
-			m_CbnWFIRType.AddString("Auto");
-			m_CbnWFIRType.AddString("Auto");
-			m_CbnWFIRType.AddString("Auto");
-			m_CbnWFIRType.AddString("Auto");
+			m_CbnWFIRType.AddString(_T("Auto"));
+			m_CbnWFIRType.AddString(_T("Auto"));
+			m_CbnWFIRType.AddString(_T("Auto"));
+			m_CbnWFIRType.AddString(_T("Auto"));
+			m_CbnWFIRType.AddString(_T("Auto"));
+			m_CbnWFIRType.AddString(_T("Auto"));
+			m_CbnWFIRType.AddString(_T("Auto"));
+			m_CbnWFIRType.AddString(_T("Auto"));
 			m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().ResamplerSubMode);
 			break;
 		default:
 			m_CbnWFIRType.ResetContent();
-			m_CbnWFIRType.AddString("none");
-			m_CbnWFIRType.AddString("none");
-			m_CbnWFIRType.AddString("none");
-			m_CbnWFIRType.AddString("none");
-			m_CbnWFIRType.AddString("none");
-			m_CbnWFIRType.AddString("none");
-			m_CbnWFIRType.AddString("none");
-			m_CbnWFIRType.AddString("none");
+			m_CbnWFIRType.AddString(_T("none"));
+			m_CbnWFIRType.AddString(_T("none"));
+			m_CbnWFIRType.AddString(_T("none"));
+			m_CbnWFIRType.AddString(_T("none"));
+			m_CbnWFIRType.AddString(_T("none"));
+			m_CbnWFIRType.AddString(_T("none"));
+			m_CbnWFIRType.AddString(_T("none"));
+			m_CbnWFIRType.AddString(_T("none"));
 			m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().ResamplerSubMode);
 			break;
 	}
@@ -1147,12 +1140,12 @@ void COptionsMixer::UpdateRamping()
 	MixerSettings settings = TrackerSettings::Instance().GetMixerSettings();
 	CString s;
 	m_CEditRampUp.GetWindowText(s);
-	settings.SetVolumeRampUpMicroseconds(atol(s));
+	settings.SetVolumeRampUpMicroseconds(ConvertStrTo<int32>(s));
 	m_CEditRampDown.GetWindowText(s);
-	settings.SetVolumeRampDownMicroseconds(atol(s));
-	s.Format("%i samples at %i Hz", (int)settings.GetVolumeRampUpSamples(), (int)settings.gdwMixingFreq);
+	settings.SetVolumeRampDownMicroseconds(ConvertStrTo<int32>(s));
+	s.Format(_T("%i samples at %i Hz"), (int)settings.GetVolumeRampUpSamples(), (int)settings.gdwMixingFreq);
 	m_CInfoRampUp.SetWindowText(s);
-	s.Format("%i samples at %i Hz", (int)settings.GetVolumeRampDownSamples(), (int)settings.gdwMixingFreq);
+	s.Format(_T("%i samples at %i Hz"), (int)settings.GetVolumeRampDownSamples(), (int)settings.gdwMixingFreq);
 	m_CInfoRampDown.SetWindowText(s);
 }
 
@@ -1180,12 +1173,12 @@ void COptionsMixer::OnOK()
 		m_CEditWFIRCutoff.GetWindowText(s);
 		if(s != "")
 		{
-			int newCutoff = atoi(s);
+			int newCutoff = ConvertStrTo<int>(s);
 			Limit(newCutoff, 0, 100);
 			TrackerSettings::Instance().ResamplerCutoffPercent = newCutoff;
 		}
 		{
-			s.Format("%d", TrackerSettings::Instance().ResamplerCutoffPercent.Get());
+			s.Format(_T("%d"), TrackerSettings::Instance().ResamplerCutoffPercent.Get());
 			m_CEditWFIRCutoff.SetWindowText(s);
 		}
 	}
@@ -1197,21 +1190,13 @@ void COptionsMixer::OnOK()
 
 	// volume ramping
 	{
-#if 0
-		CString s;
-		m_CEditRampUp.GetWindowText(s);
-		TrackerSettings::Instance().MixerVolumeRampUpSamples = atol(s);
-		m_CEditRampDown.GetWindowText(s);
-		TrackerSettings::Instance().MixerVolumeRampDownSamples = atol(s);
-#else
 		MixerSettings settings = TrackerSettings::Instance().GetMixerSettings();
 		CString s;
 		m_CEditRampUp.GetWindowText(s);
-		settings.SetVolumeRampUpMicroseconds(atol(s));
+		settings.SetVolumeRampUpMicroseconds(ConvertStrTo<int>(s));
 		m_CEditRampDown.GetWindowText(s);
-		settings.SetVolumeRampDownMicroseconds(atol(s));
+		settings.SetVolumeRampDownMicroseconds(ConvertStrTo<int>(s));
 		TrackerSettings::Instance().SetMixerSettings(settings);
-#endif
 	}
 
 	// Polyphony
@@ -1284,13 +1269,13 @@ BOOL CEQSavePresetDlg::OnInitDialog()
 		int ndx = 0;
 		for (UINT i=0; i<4; i++)
 		{
-			int n = pCombo->AddString(TrackerSettings::Instance().m_EqUserPresets[i].szName);
+			int n = pCombo->AddString(mpt::ToCString(mpt::CharsetLocale, TrackerSettings::Instance().m_EqUserPresets[i].szName));
 			pCombo->SetItemData( n, i);
-			if (!lstrcmpi(TrackerSettings::Instance().m_EqUserPresets[i].szName, m_EQ.szName)) ndx = n;
+			if (!lstrcmpiA(TrackerSettings::Instance().m_EqUserPresets[i].szName, m_EQ.szName)) ndx = n;
 		}
 		pCombo->SetCurSel(ndx);
 	}
-	SetDlgItemText(IDC_EDIT1, m_EQ.szName);
+	SetDlgItemText(IDC_EDIT1, mpt::ToCString(mpt::CharsetLocale, m_EQ.szName));
 	return TRUE;
 }
 
@@ -1303,7 +1288,9 @@ void CEQSavePresetDlg::OnOK()
 	{
 		int n = pCombo->GetCurSel();
 		if ((n < 0) || (n >= 4)) n = 0;
-		GetDlgItemText(IDC_EDIT1, m_EQ.szName, CountOf(m_EQ.szName));
+		CString s;
+		GetDlgItemText(IDC_EDIT1, s);
+		mpt::String::Copy(m_EQ.szName, mpt::ToLocale(s));
 		mpt::String::SetNullTerminator(m_EQ.szName);
 		TrackerSettings::Instance().m_EqUserPresets[n] = m_EQ;
 	}
@@ -1453,7 +1440,7 @@ BOOL COptionsPlayer::OnInitDialog()
 		LPCSTR pszName = GetReverbPresetName(iRvb);
 		if (pszName)
 		{
-			UINT n = m_CbnReverbPreset.AddString(pszName);
+			UINT n = m_CbnReverbPreset.AddString(mpt::ToCString(mpt::CharsetASCII, pszName));
 			m_CbnReverbPreset.SetItemData(n, iRvb);
 			if (iRvb == TrackerSettings::Instance().m_ReverbSettings.m_nReverbType) nSel = n;
 		}
@@ -1500,11 +1487,11 @@ BOOL COptionsPlayer::OnSetActive()
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_PLAYER;
 
 	SetDlgItemText(IDC_EQ_WARNING,
-		"Note: This EQ is applied to any and all of the modules "
-		"that you load in OpenMPT; its settings are stored globally, "
-		"rather than in each file. This means that you should avoid "
-		"using it as part of your production process, and instead only "
-		"use it to correct deficiencies in your audio hardware.");
+		_T("Note: This EQ is applied to any and all of the modules ")
+		_T("that you load in OpenMPT; its settings are stored globally, ")
+		_T("rather than in each file. This means that you should avoid ")
+		_T("using it as part of your production process, and instead only ")
+		_T("use it to correct deficiencies in your audio hardware."));
 
 	return CPropertyPage::OnSetActive();
 }
