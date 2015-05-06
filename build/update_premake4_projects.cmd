@@ -11,6 +11,8 @@ echo dofile "build/premake4.lua" > premake4.lua || goto err
 build\premake4.exe --group=libopenmpt_test vs2008 || goto err
 build\premake4.exe --group=libopenmpt vs2008 || goto err
 build\premake4.exe --group=openmpt123 vs2008 || goto err
+build\premake4.exe --group=PluginBridge vs2008 || goto err
+build\premake4.exe --group=OpenMPT vs2008 || goto err
 build\premake4.exe --group=all-externals vs2008 || goto err
 
 build\premake4.exe --group=libopenmpt_test vs2010 || goto err
@@ -18,6 +20,8 @@ build\premake4.exe --group=in_openmpt vs2010 || goto err
 build\premake4.exe --group=xmp-openmpt vs2010 || goto err
 build\premake4.exe --group=libopenmpt vs2010 || goto err
 build\premake4.exe --group=openmpt123 vs2010 || goto err
+build\premake4.exe --group=PluginBridge vs2010 || goto err
+build\premake4.exe --group=OpenMPT vs2010 || goto err
 build\premake4.exe --group=all-externals vs2010 || goto err
 
 build\premake4.exe postprocess || goto err
