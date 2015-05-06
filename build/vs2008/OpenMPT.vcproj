@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="MODPLUG_TRACKER;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				ExceptionHandling="2"
@@ -64,13 +64,15 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="MODPLUG_TRACKER;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				LargeAddressAware="2"
+				DataExecutionPrevention="1"
 				AdditionalOptions="/DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				AdditionalDependencies="..\lib\x32\Debug\UnRAR.lib ..\lib\x32\Debug\zlib.lib ..\lib\x32\Debug\minizip.lib ..\lib\x32\Debug\smbPitchShift.lib ..\lib\x32\Debug\lhasa.lib ..\lib\x32\Debug\flac.lib ..\lib\x32\Debug\ogg.lib ..\lib\x32\Debug\portaudio.lib ..\lib\x32\Debug\r8brain.lib ..\..\bin\Win32-Debug\OpenMPT_SoundTouch_f32.lib"
 				OutputFile="$(OutDir)\OpenMPT.exe"
@@ -134,7 +136,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="MODPLUG_TRACKER;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				ExceptionHandling="2"
@@ -153,13 +155,15 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="MODPLUG_TRACKER;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				LargeAddressAware="2"
+				DataExecutionPrevention="1"
 				AdditionalOptions="/DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				AdditionalDependencies="..\lib\x64\Debug\UnRAR.lib ..\lib\x64\Debug\zlib.lib ..\lib\x64\Debug\minizip.lib ..\lib\x64\Debug\smbPitchShift.lib ..\lib\x64\Debug\lhasa.lib ..\lib\x64\Debug\flac.lib ..\lib\x64\Debug\ogg.lib ..\lib\x64\Debug\portaudio.lib ..\lib\x64\Debug\r8brain.lib ..\..\bin\x64-Debug\OpenMPT_SoundTouch_f32.lib"
 				OutputFile="$(OutDir)\OpenMPT.exe"
@@ -223,7 +227,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="MODPLUG_TRACKER;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				ExceptionHandling="2"
 				StringPooling="true"
@@ -242,13 +246,15 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="MODPLUG_TRACKER;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				LargeAddressAware="2"
+				DataExecutionPrevention="1"
 				AdditionalOptions="/DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				AdditionalDependencies="..\lib\x32\Release\UnRAR.lib ..\lib\x32\Release\zlib.lib ..\lib\x32\Release\minizip.lib ..\lib\x32\Release\smbPitchShift.lib ..\lib\x32\Release\lhasa.lib ..\lib\x32\Release\flac.lib ..\lib\x32\Release\ogg.lib ..\lib\x32\Release\portaudio.lib ..\lib\x32\Release\r8brain.lib ..\..\bin\Win32\OpenMPT_SoundTouch_f32.lib"
 				OutputFile="$(OutDir)\OpenMPT.exe"
@@ -259,6 +265,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="2"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -315,7 +322,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="MODPLUG_TRACKER;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				ExceptionHandling="2"
 				StringPooling="true"
@@ -334,13 +341,15 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="MODPLUG_TRACKER;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				LargeAddressAware="2"
+				DataExecutionPrevention="1"
 				AdditionalOptions="/DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				AdditionalDependencies="..\lib\x64\Release\UnRAR.lib ..\lib\x64\Release\zlib.lib ..\lib\x64\Release\minizip.lib ..\lib\x64\Release\smbPitchShift.lib ..\lib\x64\Release\lhasa.lib ..\lib\x64\Release\flac.lib ..\lib\x64\Release\ogg.lib ..\lib\x64\Release\portaudio.lib ..\lib\x64\Release\r8brain.lib ..\..\bin\x64\OpenMPT_SoundTouch_f32.lib"
 				OutputFile="$(OutDir)\OpenMPT.exe"
@@ -351,6 +360,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="2"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -406,7 +416,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GL- /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="MODPLUG_TRACKER;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				ExceptionHandling="2"
 				StringPooling="true"
@@ -425,13 +435,15 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="MODPLUG_TRACKER;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				LargeAddressAware="2"
+				DataExecutionPrevention="1"
 				AdditionalOptions="/DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				AdditionalDependencies="..\lib\x32\ReleaseNoLTCG\UnRAR.lib ..\lib\x32\ReleaseNoLTCG\zlib.lib ..\lib\x32\ReleaseNoLTCG\minizip.lib ..\lib\x32\ReleaseNoLTCG\smbPitchShift.lib ..\lib\x32\ReleaseNoLTCG\lhasa.lib ..\lib\x32\ReleaseNoLTCG\flac.lib ..\lib\x32\ReleaseNoLTCG\ogg.lib ..\lib\x32\ReleaseNoLTCG\portaudio.lib ..\lib\x32\ReleaseNoLTCG\r8brain.lib ..\..\bin\Win32\OpenMPT_SoundTouch_f32.lib"
 				OutputFile="$(OutDir)\OpenMPT.exe"
@@ -441,6 +453,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="2"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -497,7 +510,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GL- /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="MODPLUG_TRACKER;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				ExceptionHandling="2"
 				StringPooling="true"
@@ -516,13 +529,15 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="MODPLUG_TRACKER;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				LargeAddressAware="2"
+				DataExecutionPrevention="1"
 				AdditionalOptions="/DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				AdditionalDependencies="..\lib\x64\ReleaseNoLTCG\UnRAR.lib ..\lib\x64\ReleaseNoLTCG\zlib.lib ..\lib\x64\ReleaseNoLTCG\minizip.lib ..\lib\x64\ReleaseNoLTCG\smbPitchShift.lib ..\lib\x64\ReleaseNoLTCG\lhasa.lib ..\lib\x64\ReleaseNoLTCG\flac.lib ..\lib\x64\ReleaseNoLTCG\ogg.lib ..\lib\x64\ReleaseNoLTCG\portaudio.lib ..\lib\x64\ReleaseNoLTCG\r8brain.lib ..\..\bin\x64\OpenMPT_SoundTouch_f32.lib"
 				OutputFile="$(OutDir)\OpenMPT.exe"
@@ -532,6 +547,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="2"
 				TargetMachine="17"
 			/>
 			<Tool

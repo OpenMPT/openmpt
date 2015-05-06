@@ -42,6 +42,18 @@ function postprocess_vs2008_main (filename)
 	replace_in_file(filename, "\t\t\t\tEntryPointSymbol=\"mainCRTStartup\"\n", "")
 end
 
+function postprocess_vs2008_dynamicbase (filename)
+	replace_in_file(filename, "\t\t\t\tEnableCOMDATFolding=\"2\"", "\t\t\t\tEnableCOMDATFolding=\"2\"\n\t\t\t\tRandomizedBaseAddress=\"2\"")
+end
+
+function postprocess_vs2008_nonxcompat (filename)
+	replace_in_file(filename, "\t\t\t<Tool\n\t\t\t\tName=\"VCLinkerTool\"\n", "\t\t\t<Tool\n\t\t\t\tName=\"VCLinkerTool\"\n\t\t\t\t\DataExecutionPrevention=\"1\"\n")
+end
+
+function postprocess_vs2008_largeaddress (filename)
+	replace_in_file(filename, "\t\t\t<Tool\n\t\t\t\tName=\"VCLinkerTool\"\n", "\t\t\t<Tool\n\t\t\t\tName=\"VCLinkerTool\"\n\t\t\t\t\LargeAddressAware=\"2\"\n")
+end
+
 function postprocess_vs2010_mfc (filename)
 	replace_in_file(filename, "<UseOfMfc>Dynamic</UseOfMfc>", "<UseOfMfc>Static</UseOfMfc>")
 end
@@ -72,10 +84,16 @@ newaction {
  execute     = function ()
   postprocess_vs2008_main("build/vs2008/libopenmpt_test.vcproj")
   postprocess_vs2008_main("build/vs2008/openmpt123.vcproj")
+  postprocess_vs2008_mfc("build/vs2008/OpenMPT.vcproj")
+  postprocess_vs2008_dynamicbase("build/vs2008/OpenMPT.vcproj")
+  postprocess_vs2008_nonxcompat("build/vs2008/OpenMPT.vcproj")
+  postprocess_vs2008_largeaddress("build/vs2008/OpenMPT.vcproj")
+  postprocess_vs2008_dynamicbase("build/vs2008/PluginBridge.vcproj")
+  postprocess_vs2008_nonxcompat("build/vs2008/PluginBridge.vcproj")
+  postprocess_vs2008_largeaddress("build/vs2008/PluginBridge.vcproj")
   postprocess_vs2010_main("build/vs2010/libopenmpt_test.vcxproj")
   postprocess_vs2010_main("build/vs2010/openmpt123.vcxproj")
   postprocess_vs2010_main("build/vs2010/OpenMPT.vcxproj")
-  postprocess_vs2008_mfc("build/vs2008/OpenMPT.vcproj")
   postprocess_vs2010_mfc("build/vs2010/in_openmpt.vcxproj")
   postprocess_vs2010_mfc("build/vs2010/xmp-openmpt.vcxproj")
   postprocess_vs2010_mfc("build/vs2010/OpenMPT.vcxproj")
