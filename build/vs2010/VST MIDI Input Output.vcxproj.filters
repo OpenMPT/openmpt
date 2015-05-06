@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="plugins">
+			<UniqueIdentifier>{E59441E7-7ED9-5048-AB71-C92FEC6946F4}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="plugins\MidiInOut">
+			<UniqueIdentifier>{C78E9906-7B9E-FB4C-A7A5-D32B75AEE039}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="plugins\common">
+			<UniqueIdentifier>{908BE72A-73CD-A64E-B2B1-4FC2DF522E45}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include">
+			<UniqueIdentifier>{53162EFC-FF0A-4B42-BE61-D80C351B1982}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\vstsdk2.4">
+			<UniqueIdentifier>{B01DD495-87BC-3C4F-B93C-A13AC7A6FDE1}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\vstsdk2.4\pluginterfaces">
+			<UniqueIdentifier>{2AF71089-FAEC-8C4F-A67F-37CABA574D3C}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\vstsdk2.4\pluginterfaces\vst2.x">
+			<UniqueIdentifier>{E6040574-63D4-5D47-8035-AD96F0A8DC99}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\vstsdk2.4\public.sdk">
+			<UniqueIdentifier>{A459018E-C7EA-B048-AE7A-3C02B55F699B}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\vstsdk2.4\public.sdk\source">
+			<UniqueIdentifier>{771F91CB-A3A2-A343-A438-3F972AB3D8FD}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="include\vstsdk2.4\public.sdk\source\vst2.x">
+			<UniqueIdentifier>{BB7577A5-B8B8-2C41-B251-F8975130D2C2}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\plugins\MidiInOut\MidiInOut.h">
+			<Filter>plugins\MidiInOut</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\plugins\MidiInOut\MidiInOutEditor.h">
+			<Filter>plugins\MidiInOut</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\plugins\common\Button.h">
+			<Filter>plugins\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\plugins\common\CheckBox.h">
+			<Filter>plugins\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\plugins\common\ComboBox.h">
+			<Filter>plugins\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\plugins\common\EditBox.h">
+			<Filter>plugins\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\plugins\common\Label.h">
+			<Filter>plugins\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\plugins\common\Window.h">
+			<Filter>plugins\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\plugins\common\WindowBase.h">
+			<Filter>plugins\common</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\vstsdk2.4\pluginterfaces\vst2.x\aeffect.h">
+			<Filter>include\vstsdk2.4\pluginterfaces\vst2.x</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\vstsdk2.4\pluginterfaces\vst2.x\aeffectx.h">
+			<Filter>include\vstsdk2.4\pluginterfaces\vst2.x</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\vstsdk2.4\pluginterfaces\vst2.x\vstfxstore.h">
+			<Filter>include\vstsdk2.4\pluginterfaces\vst2.x</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\vstsdk2.4\public.sdk\source\vst2.x\aeffeditor.h">
+			<Filter>include\vstsdk2.4\public.sdk\source\vst2.x</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\vstsdk2.4\public.sdk\source\vst2.x\audioeffect.h">
+			<Filter>include\vstsdk2.4\public.sdk\source\vst2.x</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\include\vstsdk2.4\public.sdk\source\vst2.x\audioeffectx.h">
+			<Filter>include\vstsdk2.4\public.sdk\source\vst2.x</Filter>
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\plugins\MidiInOut\MidiInOut.cpp">
+			<Filter>plugins\MidiInOut</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\plugins\MidiInOut\MidiInOutEditor.cpp">
+			<Filter>plugins\MidiInOut</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\vstsdk2.4\public.sdk\source\vst2.x\audioeffect.cpp">
+			<Filter>include\vstsdk2.4\public.sdk\source\vst2.x</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\vstsdk2.4\public.sdk\source\vst2.x\audioeffectx.cpp">
+			<Filter>include\vstsdk2.4\public.sdk\source\vst2.x</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\include\vstsdk2.4\public.sdk\source\vst2.x\vstplugmain.cpp">
+			<Filter>include\vstsdk2.4\public.sdk\source\vst2.x</Filter>
+		</ClCompile>
+	</ItemGroup>
+</Project>

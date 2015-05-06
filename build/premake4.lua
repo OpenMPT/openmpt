@@ -15,47 +15,55 @@ newoption {
   { "in_openmpt", "in_openmpt" },
   { "xmp-openmpt", "xmp-openmpt" },
   { "openmpt123", "openmpt123" },
+  { "PluginBridge", "PluginBridge" },
+  { "OpenMPT", "OpenMPT" },
   { "all-externals", "all-externals" }
  }
 }
 
-function postprocess_vs2008_main (filename)
+function replace_in_file (filename, from, to)
 	local text
 	local infile
 	local outfile
 	infile = io.open(filename, "r")
 	text = infile:read("*all")
 	infile:close()
-	text = string.gsub(text, "\t\t\t\tEntryPointSymbol=\"mainCRTStartup\"\n", "")
+	text = string.gsub(text, from, to)
 	outfile = io.open(filename, "w")
 	outfile:write(text)
 	outfile:close()
+end
+
+function postprocess_vs2008_mfc (filename)
+	replace_in_file(filename, "UseOfMFC=\"2\"", "UseOfMFC=\"1\"")
+end
+
+function postprocess_vs2008_main (filename)
+	replace_in_file(filename, "\t\t\t\tEntryPointSymbol=\"mainCRTStartup\"\n", "")
 end
 
 function postprocess_vs2010_mfc (filename)
-	local text
-	local infile
-	local outfile
-	infile = io.open(filename, "r")
-	text = infile:read("*all")
-	infile:close()
-	text = string.gsub(text, "<UseOfMfc>Dynamic</UseOfMfc>", "<UseOfMfc>Static</UseOfMfc>")
-	outfile = io.open(filename, "w")
-	outfile:write(text)
-	outfile:close()
+	replace_in_file(filename, "<UseOfMfc>Dynamic</UseOfMfc>", "<UseOfMfc>Static</UseOfMfc>")
 end
 
 function postprocess_vs2010_main (filename)
-	local text
-	local infile
-	local outfile
-	infile = io.open(filename, "r")
-	text = infile:read("*all")
-	infile:close()
-	text = string.gsub(text, "<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>", "")
-	outfile = io.open(filename, "w")
-	outfile:write(text)
-	outfile:close()
+	replace_in_file(filename, "<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>", "")
+end
+
+function postprocess_vs2010_dynamicbase (filename)
+	replace_in_file(filename, "<EnableCOMDATFolding>true</EnableCOMDATFolding>", "<EnableCOMDATFolding>true</EnableCOMDATFolding>\n\t\t\t<RandomizedBaseAddress>true</RandomizedBaseAddress>")
+end
+
+function postprocess_vs2010_nonxcompat (filename)
+	replace_in_file(filename, "\t\t</Link>\n", "\t\t\t<DataExecutionPrevention>false</DataExecutionPrevention>\n\t\t</Link>\n")
+end
+
+function postprocess_vs2010_largeaddress (filename)
+	replace_in_file(filename, "\t\t</Link>\n", "\t\t\t<LargeAddressAware>true</LargeAddressAware>\n\t\t</Link>\n")
+end
+
+function fixbug_vs2010_pch (filename)
+	replace_in_file(filename, "</PrecompiledHeader>\n\t\t</ClCompile>", "</PrecompiledHeader>")
 end
 
 newaction {
@@ -66,8 +74,18 @@ newaction {
   postprocess_vs2008_main("build/vs2008/openmpt123.vcproj")
   postprocess_vs2010_main("build/vs2010/libopenmpt_test.vcxproj")
   postprocess_vs2010_main("build/vs2010/openmpt123.vcxproj")
+  postprocess_vs2010_main("build/vs2010/OpenMPT.vcxproj")
+  postprocess_vs2008_mfc("build/vs2008/OpenMPT.vcproj")
   postprocess_vs2010_mfc("build/vs2010/in_openmpt.vcxproj")
   postprocess_vs2010_mfc("build/vs2010/xmp-openmpt.vcxproj")
+  postprocess_vs2010_mfc("build/vs2010/OpenMPT.vcxproj")
+  postprocess_vs2010_dynamicbase("build/vs2010/OpenMPT.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2010/OpenMPT.vcxproj")
+  postprocess_vs2010_largeaddress("build/vs2010/OpenMPT.vcxproj")
+  postprocess_vs2010_dynamicbase("build/vs2010/PluginBridge.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2010/PluginBridge.vcxproj")
+  postprocess_vs2010_largeaddress("build/vs2010/PluginBridge.vcxproj")
+  fixbug_vs2010_pch("build/vs2010/OpenMPT.vcxproj")
  end
 }
 
@@ -178,6 +196,41 @@ solution "openmpt123"
  dofile "../build/premake4-win/ext-miniz.premake4.lua"
  dofile "../build/premake4-win/ext-ogg.premake4.lua"
  dofile "../build/premake4-win/ext-portaudio.premake4.lua"
+
+end
+
+if _OPTIONS["group"] == "PluginBridge" then
+
+solution "PluginBridge"
+ location ( "../build/" .. _ACTION )
+ configurations { "Debug", "Release", "ReleaseNoLTCG" }
+ platforms { "x32", "x64" }
+
+ dofile "../build/premake4-win/mpt-PluginBridge.premake4.lua"
+
+end
+
+
+if _OPTIONS["group"] == "OpenMPT" then
+
+solution "OpenMPT"
+ location ( "../build/" .. _ACTION )
+ configurations { "Debug", "Release", "ReleaseNoLTCG" }
+ platforms { "x32", "x64" }
+
+ dofile "../build/premake4-win/mpt-OpenMPT.premake4.lua"
+ dofile "../build/premake4-win/mpt-PluginBridge.premake4.lua"
+ dofile "../build/premake4-win/ext-flac.premake4.lua"
+ dofile "../build/premake4-win/ext-lhasa.premake4.lua"
+ dofile "../build/premake4-win/ext-minizip.premake4.lua"
+ dofile "../build/premake4-win/ext-ogg.premake4.lua"
+ dofile "../build/premake4-win/ext-portaudio.premake4.lua"
+ dofile "../build/premake4-win/ext-portmidi.premake4.lua"
+ dofile "../build/premake4-win/ext-r8brain.premake4.lua"
+ dofile "../build/premake4-win/ext-smbPitchShift.premake4.lua"
+ dofile "../build/premake4-win/ext-soundtouch.premake4.lua"
+ dofile "../build/premake4-win/ext-UnRAR.premake4.lua"
+ dofile "../build/premake4-win/ext-zlib.premake4.lua"
 
 end
 
