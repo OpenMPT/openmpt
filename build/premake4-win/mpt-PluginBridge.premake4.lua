@@ -24,6 +24,8 @@
    targetsuffix "32"
   configuration { "x64" }
    targetsuffix "64"
+  configuration "vs2008"
+   includedirs { "../../include/msinttypes/stdint" }
   dofile "../../build/premake4-win/premake4-defaults-EXEGUI.lua"
   dofile "../../build/premake4-win/premake4-defaults-static.lua"
 

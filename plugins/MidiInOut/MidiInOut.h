@@ -10,10 +10,6 @@
 
 #pragma once
 
-#define MODPLUG_TRACKER
-#define OPENMPT_NAMESPACE
-#define OPENMPT_NAMESPACE_BEGIN
-#define OPENMPT_NAMESPACE_END
 #include "../common/mutex.h"
 #include <vstsdk2.4/public.sdk/source/vst2.x/audioeffectx.h>
 #include <portmidi/pm_common/portmidi.h>

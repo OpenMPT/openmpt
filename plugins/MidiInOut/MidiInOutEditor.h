@@ -10,10 +10,6 @@
 
 #pragma once
 
-#define MODPLUG_TRACKER
-#define OPENMPT_NAMESPACE
-#define OPENMPT_NAMESPACE_BEGIN
-#define OPENMPT_NAMESPACE_END
 #include <vstsdk2.4/public.sdk/source/vst2.x/aeffeditor.h>
 #include <portmidi/pm_common/portmidi.h>
 #include "../common/Window.h"

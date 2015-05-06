@@ -7,11 +7,20 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
+#define MODPLUG_TRACKER
+#define OPENMPT_NAMESPACE
+#define OPENMPT_NAMESPACE_BEGIN
+#define OPENMPT_NAMESPACE_END
+#define VC_EXTRALEAN
+#define NOMINMAX
+#ifdef _MSC_VER
+#if (_MSC_VER < 1600)
+#define nullptr 0
+#endif
+#endif
 
 #include "MidiInOutEditor.h"
 #include "MidiInOut.h"
-#define VC_EXTRALEAN
-#define NOMINMAX
 #include "windows.h"
 
 
