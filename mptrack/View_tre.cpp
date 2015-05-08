@@ -914,20 +914,20 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 			if(sndFile.Order.GetNumSequences() > 1)
 			{
 				// more than one sequence -> add folder
-				CString sSeqName;
+				CString seqName;
 				if(sndFile.Order.GetSequence(nSeq).GetName().empty())
-					sSeqName.Format("Sequence %u", nSeq);
+					seqName.Format(_T("Sequence %u"), nSeq);
 				else
-					sSeqName.Format("%u: %s", nSeq, sndFile.Order.GetSequence(nSeq).GetName().c_str());
+					seqName.Format("%u: %s", nSeq, sndFile.Order.GetSequence(nSeq).GetName().c_str());
 
 				UINT state = (nSeq == sndFile.Order.GetCurrentSequenceIndex()) ? TVIS_BOLD : 0;
 
 				if(info.tiSequences[nSeq] == NULL)
 				{
-					info.tiSequences[nSeq] = InsertItem(sSeqName, IMAGE_FOLDER, IMAGE_FOLDER, info.hOrders, TVI_LAST);
+					info.tiSequences[nSeq] = InsertItem(seqName, IMAGE_FOLDER, IMAGE_FOLDER, info.hOrders, TVI_LAST);
 				}
 				// Update bold item
-				strcpy(stmp, sSeqName);
+				strcpy(stmp, seqName);
 				tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_STATE | TVIF_PARAM;
 				tvi.state = 0;
 				tvi.stateMask = TVIS_BOLD;
@@ -936,8 +936,8 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				tvi.cchTextMax = CountOf(stmp);
 				LPARAM param = (nSeq << SEQU_SHIFT) | ORDERINDEX_INVALID;
 				GetItem(&tvi);
-				if(tvi.state != state || tvi.pszText != sSeqName || tvi.lParam != param)
-					SetItem(info.tiSequences[nSeq], TVIF_TEXT | TVIF_STATE | TVIF_PARAM, sSeqName, 0, 0, state, TVIS_BOLD, param);
+				if(tvi.state != state || tvi.pszText != seqName || tvi.lParam != param)
+					SetItem(info.tiSequences[nSeq], TVIF_TEXT | TVIF_STATE | TVIF_PARAM, seqName, 0, 0, state, TVIS_BOLD, param);
 
 				hAncestorNode = info.tiSequences[nSeq];
 			}
@@ -967,7 +967,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 							iOrd, sndFile.Order.GetSequence(nSeq)[iOrd], stmp);
 					} else
 					{
-						wsprintf(s, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] Pattern %u" : "[%02u] Pattern %u",
+						wsprintf(s, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? _T("[%02Xh] Pattern %u") : _T("[%02u] Pattern %u"),
 							iOrd, sndFile.Order.GetSequence(nSeq)[iOrd]);
 					}
 				} else
@@ -975,11 +975,11 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					if(sndFile.Order.GetSequence(nSeq)[iOrd] == sndFile.Order.GetIgnoreIndex())
 					{
 						// +++ Item
-						wsprintf(s, "[%02u] Skip", iOrd);
+						wsprintf(s, _T("[%02u] Skip"), iOrd);
 					} else
 					{
 						// --- Item
-						wsprintf(s, "[%02u] Stop", iOrd);
+						wsprintf(s, _T("[%02u] Stop"), iOrd);
 					}
 				}
 
@@ -1025,10 +1025,10 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				sndFile.Patterns[iPat].GetName(stmp);
 				if (stmp[0])
 				{
-					wsprintf(s, "%u: %s", iPat, stmp);
+					wsprintf(s, _T("%u: %s"), iPat, stmp);
 				} else
 				{
-					wsprintf(s, "%u", iPat);
+					wsprintf(s, _T("%u"), iPat);
 				}
 				if (info.tiPatterns[iPat])
 				{
@@ -1131,7 +1131,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 			HTREEITEM hNextChild = GetNextSiblingItem(hChild);
 			if (nIns <= sndFile.GetNumInstruments())
 			{
-				wsprintf(s, "%3u: %s", nIns, sndFile.GetInstrumentName(nIns));
+				wsprintf(s, _T("%3u: %s"), nIns, sndFile.GetInstrumentName(nIns));
 
 				int nImage = IMAGE_INSTRUMENTS;
 				if(info.instrumentsPlaying[nIns]) nImage = IMAGE_INSTRACTIVE;
@@ -3456,6 +3456,15 @@ BOOL CModTree::OnDrop(COleDataObject* pDataObject, DROPEFFECT, CPoint)
 			}
 		}
 	}
+	// After dropping some file on the MIDI library, we will need to do this or you
+	// won't be able to select a new item until you started a new (internal) dragondrop.
+	if(m_hItemDrag)
+	{
+		OnBeginDrag(m_hItemDrag, true, nullptr);
+		OnEndDrag(TREESTATUS_DRAGGING);
+	}
+	m_itemDrag = ModItem(MODITEM_NULL);
+	m_hItemDrag = NULL;
 	::DragFinish(hDropInfo);
 	return bOk;
 }
