@@ -105,7 +105,7 @@
 			<SubSystem>Console</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<ProgramDataBaseFileName>$(OutDir)libopenmpt_example_cxx.pdb</ProgramDataBaseFileName>
-			<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+			
 			<TargetMachine>MachineX86</TargetMachine>
 		</Link>
 	</ItemDefinitionGroup>
@@ -133,7 +133,7 @@
 			<SubSystem>Console</SubSystem>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<ProgramDataBaseFileName>$(OutDir)libopenmpt_example_cxx.pdb</ProgramDataBaseFileName>
-			<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+			
 			<TargetMachine>MachineX64</TargetMachine>
 		</Link>
 	</ItemDefinitionGroup>
@@ -165,7 +165,7 @@
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
 			<ProgramDataBaseFileName>$(OutDir)libopenmpt_example_cxx.pdb</ProgramDataBaseFileName>
-			<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+			
 			<TargetMachine>MachineX86</TargetMachine>
 		</Link>
 	</ItemDefinitionGroup>
@@ -197,7 +197,7 @@
 			<OptimizeReferences>true</OptimizeReferences>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
 			<ProgramDataBaseFileName>$(OutDir)libopenmpt_example_cxx.pdb</ProgramDataBaseFileName>
-			<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+			
 			<TargetMachine>MachineX64</TargetMachine>
 		</Link>
 	</ItemDefinitionGroup>
