@@ -78,10 +78,19 @@
   }
   buildoptions { "/wd4244", "/wd4267", "/wd4334" }
   defines { "FLAC__NO_DLL", "FLAC__HAS_OGG=1" }
+if MPT_PREMAKE_VERSION == "5.0" then
+  filter { "action:vs2008" }
+   defines { "VERSION=\\\"1.3.1\\\"" }
+  filter { "action:not vs2008" }
+   defines { "VERSION=\"1.3.1\"" }
+  filter {}
+else
   configuration "vs2008"
    defines { "VERSION=\\\"1.3.1\\\"" }
   configuration "not vs2008"
    defines { "VERSION=\"1.3.1\"" }
+  configuration "*"
+end
   dofile "../../build/premake4-win/premake4-defaults-LIB.lua"
   dofile "../../build/premake4-win/premake4-defaults.lua"
   flags { "StaticRuntime" }

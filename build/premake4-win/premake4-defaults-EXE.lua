@@ -1,4 +1,11 @@
 
+if MPT_PREMAKE_VERSION == "5.0" then
+
+  filter {}
+   kind "ConsoleApp"
+
+else
+
   configuration { "Debug", "x32" }
    targetdir "../../bin/Win32-Debug"
   
@@ -16,6 +23,8 @@
   
   configuration { "ReleaseNoLTCG", "x64" }
    targetdir "../../bin/x64"
-  
+
   configuration "*"
    kind "ConsoleApp"
+
+end

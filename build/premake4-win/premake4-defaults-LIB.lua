@@ -1,4 +1,11 @@
 
+if MPT_PREMAKE_VERSION == "5.0" then
+
+  filter {}
+   kind "StaticLib"
+
+else
+
   configuration { "Debug", "x32" }
    targetdir "../../build/lib/x32/Debug"
   
@@ -16,6 +23,8 @@
   
   configuration { "ReleaseNoLTCG", "x64" }
    targetdir "../../build/lib/x64/ReleaseNoLTCG"
-  
+
   configuration "*"
    kind "StaticLib"
+
+end
