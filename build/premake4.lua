@@ -10,8 +10,10 @@ if _PREMAKE_VERSION == "4.3" then
  MPT_PREMAKE_VERSION = "4.3"
 elseif _PREMAKE_VERSION == "4.4-beta5" then
  MPT_PREMAKE_VERSION = "4.4"
+elseif _PREMAKE_VERSION == "5.0-alpha3" then
+ MPT_PREMAKE_VERSION = "5.0"
 else
- print "Premake 4.3 or 4.4-beta5 required"
+ print "Premake 4.3 or 4.4-beta5 or 5.0-alpha3 required"
  os.exit(1)
 end
 
@@ -52,7 +54,11 @@ end
 end
 
 function postprocess_vs2008_main (filename)
+if MPT_PREMAKE_VERSION == "4.3" then
 	replace_in_file(filename, "\t\t\t\tEntryPointSymbol=\"mainCRTStartup\"\n", "")
+elseif MPT_PREMAKE_VERSION == "4.4" then
+	replace_in_file(filename, "\t\t\t\tEntryPointSymbol=\"mainCRTStartup\"\n", "")
+end
 end
 
 function postprocess_vs2008_dynamicbase (filename)
@@ -74,13 +80,19 @@ end
 end
 
 function postprocess_vs2010_main (filename)
+if MPT_PREMAKE_VERSION == "4.3" then
 	replace_in_file(filename, "<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>", "")
+elseif MPT_PREMAKE_VERSION == "4.4" then
+	replace_in_file(filename, "<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>", "")
+end
 end
 
 function postprocess_vs2010_dynamicbase (filename)
 if MPT_PREMAKE_VERSION == "4.3" then
 	replace_in_file(filename, "<EnableCOMDATFolding>true</EnableCOMDATFolding>", "<EnableCOMDATFolding>true</EnableCOMDATFolding>\n\t\t\t<RandomizedBaseAddress>true</RandomizedBaseAddress>")
 elseif MPT_PREMAKE_VERSION == "4.4" then
+	replace_in_file(filename, "<EnableCOMDATFolding>true</EnableCOMDATFolding>", "<EnableCOMDATFolding>true</EnableCOMDATFolding>\n      <RandomizedBaseAddress>true</RandomizedBaseAddress>")
+elseif MPT_PREMAKE_VERSION == "5.0" then
 	replace_in_file(filename, "<EnableCOMDATFolding>true</EnableCOMDATFolding>", "<EnableCOMDATFolding>true</EnableCOMDATFolding>\n      <RandomizedBaseAddress>true</RandomizedBaseAddress>")
 end
 end
@@ -90,6 +102,8 @@ if MPT_PREMAKE_VERSION == "4.3" then
 	replace_in_file(filename, "\t\t</Link>\n", "\t\t\t<DataExecutionPrevention>false</DataExecutionPrevention>\n\t\t</Link>\n")
 elseif MPT_PREMAKE_VERSION == "4.4" then
 	replace_in_file(filename, "    </Link>\n", "      <DataExecutionPrevention>false</DataExecutionPrevention>\n    </Link>\n")
+elseif MPT_PREMAKE_VERSION == "5.0" then
+	replace_in_file(filename, "    </Link>\n", "      <DataExecutionPrevention>false</DataExecutionPrevention>\n    </Link>\n")
 end
 end
 
@@ -97,6 +111,8 @@ function postprocess_vs2010_largeaddress (filename)
 if MPT_PREMAKE_VERSION == "4.3" then
 	replace_in_file(filename, "\t\t</Link>\n", "\t\t\t<LargeAddressAware>true</LargeAddressAware>\n\t\t</Link>\n")
 elseif MPT_PREMAKE_VERSION == "4.4" then
+	replace_in_file(filename, "    </Link>\n", "      <LargeAddressAware>true</LargeAddressAware>\n    </Link>\n")
+elseif MPT_PREMAKE_VERSION == "5.0" then
 	replace_in_file(filename, "    </Link>\n", "      <LargeAddressAware>true</LargeAddressAware>\n    </Link>\n")
 end
 end
