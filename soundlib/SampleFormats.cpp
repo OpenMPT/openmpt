@@ -135,19 +135,20 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file
 
 	if(!file.CanRead(80))
 		return false;
-	uint32 psig[20];
-	file.ReadArrayLE(psig);
+	char psig[80];
+	file.ReadArray(psig);
 	file.SkipBack(80);
-	if(    (!memcmp(&psig[0], "RIFF", 4) && !memcmp(&psig[2], "WAVE", 4))	// RIFF....WAVE signature
-		|| (!memcmp(&psig[0], "LIST", 4) && !memcmp(&psig[2], "wave", 4))	// LIST....wave
-		||  !memcmp(&psig[76 / 4], "SCRS", 4)								// S3I signature
+	if(    (!memcmp(&psig[0], "RIFF", 4) && !memcmp(&psig[8], "WAVE", 4))	// RIFF....WAVE signature
+		|| (!memcmp(&psig[0], "LIST", 4) && !memcmp(&psig[8], "wave", 4))	// LIST....wave
+		||  !memcmp(&psig[76], "SCRS", 4)									// S3I signature
 		|| (!memcmp(&psig[0], "FORM", 4) &&
-			  (!memcmp(&psig[2], "AIFF", 4)									// AIFF signature
-			|| !memcmp(&psig[2], "AIFC", 4)									// AIFF-C signature
-			|| !memcmp(&psig[2], "8SVX", 4)))								// 8SVX signature
-		|| psig[0] == LittleEndian(ITSample::magic)							// ITS signature
+			  (!memcmp(&psig[8], "AIFF", 4)									// AIFF signature
+			|| !memcmp(&psig[8], "AIFC", 4)									// AIFF-C signature
+			|| !memcmp(&psig[8], "8SVX", 4)))								// 8SVX signature
+		|| reinterpret_cast<uint32 *>(psig)[0] == LittleEndian(ITSample::magic)	// ITS signature
 #ifndef NO_FLAC
 		|| !memcmp(&psig[0], "fLaC", 4)										// FLAC signature
+		|| (!memcmp(&psig[0], "OggS", 4) && !memcmp(&psig[29], "FLAC", 4))	// FLAC in OGG signature
 #endif // NO_FLAC
 #ifndef NO_MP3_SAMPLES
 		|| IsMPEG(file)														// MPEG signature
