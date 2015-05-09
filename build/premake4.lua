@@ -4,6 +4,17 @@
 -- intermediate objects directory in that case. work-around using multiple
 -- invocations of premake and a custom option to distinguish them.
 
+MPT_PREMAKE_VERSION = ""
+
+if _PREMAKE_VERSION == "4.3" then
+ MPT_PREMAKE_VERSION = "4.3"
+elseif _PREMAKE_VERSION == "4.4-beta5" then
+ MPT_PREMAKE_VERSION = "4.4"
+else
+ print "Premake 4.3 or 4.4-beta5 required"
+ os.exit(1)
+end
+
 newoption {
  trigger     = "group",
  value       = "PROJECTS",
@@ -35,7 +46,9 @@ function replace_in_file (filename, from, to)
 end
 
 function postprocess_vs2008_mfc (filename)
+if MPT_PREMAKE_VERSION == "4.3" then
 	replace_in_file(filename, "UseOfMFC=\"2\"", "UseOfMFC=\"1\"")
+end
 end
 
 function postprocess_vs2008_main (filename)
@@ -55,7 +68,9 @@ function postprocess_vs2008_largeaddress (filename)
 end
 
 function postprocess_vs2010_mfc (filename)
+if MPT_PREMAKE_VERSION == "4.3" then
 	replace_in_file(filename, "<UseOfMfc>Dynamic</UseOfMfc>", "<UseOfMfc>Static</UseOfMfc>")
+end
 end
 
 function postprocess_vs2010_main (filename)
@@ -63,19 +78,33 @@ function postprocess_vs2010_main (filename)
 end
 
 function postprocess_vs2010_dynamicbase (filename)
+if MPT_PREMAKE_VERSION == "4.3" then
 	replace_in_file(filename, "<EnableCOMDATFolding>true</EnableCOMDATFolding>", "<EnableCOMDATFolding>true</EnableCOMDATFolding>\n\t\t\t<RandomizedBaseAddress>true</RandomizedBaseAddress>")
+elseif MPT_PREMAKE_VERSION == "4.4" then
+	replace_in_file(filename, "<EnableCOMDATFolding>true</EnableCOMDATFolding>", "<EnableCOMDATFolding>true</EnableCOMDATFolding>\n      <RandomizedBaseAddress>true</RandomizedBaseAddress>")
+end
 end
 
 function postprocess_vs2010_nonxcompat (filename)
+if MPT_PREMAKE_VERSION == "4.3" then
 	replace_in_file(filename, "\t\t</Link>\n", "\t\t\t<DataExecutionPrevention>false</DataExecutionPrevention>\n\t\t</Link>\n")
+elseif MPT_PREMAKE_VERSION == "4.4" then
+	replace_in_file(filename, "    </Link>\n", "      <DataExecutionPrevention>false</DataExecutionPrevention>\n    </Link>\n")
+end
 end
 
 function postprocess_vs2010_largeaddress (filename)
+if MPT_PREMAKE_VERSION == "4.3" then
 	replace_in_file(filename, "\t\t</Link>\n", "\t\t\t<LargeAddressAware>true</LargeAddressAware>\n\t\t</Link>\n")
+elseif MPT_PREMAKE_VERSION == "4.4" then
+	replace_in_file(filename, "    </Link>\n", "      <LargeAddressAware>true</LargeAddressAware>\n    </Link>\n")
+end
 end
 
 function fixbug_vs2010_pch (filename)
+if MPT_PREMAKE_VERSION == "4.3" then
 	replace_in_file(filename, "</PrecompiledHeader>\n\t\t</ClCompile>", "</PrecompiledHeader>")
+end
 end
 
 newaction {
@@ -106,21 +135,6 @@ newaction {
   fixbug_vs2010_pch("build/vs2010/OpenMPT.vcxproj")
  end
 }
-
-if _ACTION == "vs2008" and _PREMAKE_VERSION ~= "4.3" then
- print "Premake 4.3 required"
- os.exit(1)
-end
-
-if _ACTION == "vs2010" and _PREMAKE_VERSION ~= "4.3" then
- print "Premake 4.3 required"
- os.exit(1)
-end
-
-if _ACTION == "postprocess" and _PREMAKE_VERSION ~= "4.3" then
- print "Premake 4.3 required"
- os.exit(1)
-end
 
 if _OPTIONS["group"] == "libopenmpt-all" then
 
