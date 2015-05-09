@@ -83,4 +83,5 @@
   configuration "not vs2008"
    defines { "VERSION=\"1.3.1\"" }
   dofile "../../build/premake4-win/premake4-defaults-LIB.lua"
-  dofile "../../build/premake4-win/premake4-defaults-static.lua"
+  dofile "../../build/premake4-win/premake4-defaults.lua"
+  flags { "StaticRuntime" }

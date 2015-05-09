@@ -45,7 +45,6 @@
    "../../include/lhasa/lib/public/lhasa.h",
   }
   buildoptions { "/wd4244", "/wd4267" }
-  configuration "vs2008"
-   includedirs { "../../include/msinttypes/stdint" }
   dofile "../../build/premake4-win/premake4-defaults-LIB.lua"
-  dofile "../../build/premake4-win/premake4-defaults-static.lua"
+  dofile "../../build/premake4-win/premake4-defaults.lua"
+  flags { "StaticRuntime" }

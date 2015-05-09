@@ -1,7 +1,11 @@
 
+  configuration "*"
+
+  configuration "vs2008"
+   includedirs { "../../include/msinttypes/stdint" }
+
   configuration "Debug"
    defines { "DEBUG" }
-   defines { "WIN32", "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_DEPRECATE", "_CRT_SECURE_NO_DEPRECATE", "_CRT_NONSTDC_NO_WARNINGS" }
 if MPT_PREMAKE_VERSION == "4.3" then
    flags { "Symbols" }
 elseif MPT_PREMAKE_VERSION == "4.4" then
@@ -14,7 +18,6 @@ end
 
   configuration "Release"
    defines { "NDEBUG" }
-   defines { "WIN32", "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_DEPRECATE", "_CRT_SECURE_NO_DEPRECATE", "_CRT_NONSTDC_NO_WARNINGS" }
 if MPT_PREMAKE_VERSION == "4.3" then
    flags { "Symbols", "Optimize", "FloatFast" }
    buildoptions { "/MP" }
@@ -30,7 +33,6 @@ end
 
   configuration "ReleaseNoLTCG"
    defines { "NDEBUG" }
-   defines { "WIN32", "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_DEPRECATE", "_CRT_SECURE_NO_DEPRECATE", "_CRT_NONSTDC_NO_WARNINGS" }
 if MPT_PREMAKE_VERSION == "4.3" then
    flags { "Optimize", "FloatFast" }
    buildoptions { "/GL- /MP" }
@@ -42,3 +44,8 @@ elseif MPT_PREMAKE_VERSION == "5.0" then
    optimize "Full"
    floatingpoint "Fast"
 end
+
+  configuration "*"
+   defines { "WIN32", "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_DEPRECATE", "_CRT_SECURE_NO_DEPRECATE", "_CRT_NONSTDC_NO_WARNINGS" }
+
+  configuration "*"
