@@ -75,7 +75,6 @@
 				GenerateDebugInformation="true"
 				ProgramDataBaseFileName="$(OutDir)\libopenmpt_example_c.pdb"
 				SubSystem="1"
-				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -161,7 +160,6 @@
 				GenerateDebugInformation="true"
 				ProgramDataBaseFileName="$(OutDir)\libopenmpt_example_c.pdb"
 				SubSystem="1"
-				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -249,7 +247,6 @@
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -338,7 +335,6 @@
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="17"
 			/>
 			<Tool
