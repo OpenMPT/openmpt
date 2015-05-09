@@ -43,7 +43,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -121,7 +121,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -139,7 +139,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -199,7 +199,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -217,7 +217,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -278,7 +278,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -296,7 +296,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -356,7 +356,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GL- /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -374,7 +374,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -435,7 +435,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GL- /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip;..\..\include\msinttypes\stdint"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -453,7 +453,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\zlib\contrib\minizip;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"

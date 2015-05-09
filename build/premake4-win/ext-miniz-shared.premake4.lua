@@ -8,4 +8,4 @@
    "../../include/miniz/miniz.c",
   }
   dofile "../../build/premake4-win/premake4-defaults-LIB.lua"
-  dofile "../../build/premake4-win/premake4-defaults-shared.lua"
+  dofile "../../build/premake4-win/premake4-defaults.lua"

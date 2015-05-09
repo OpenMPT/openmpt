@@ -22,9 +22,8 @@ if _ACTION ~= "vs2008" then
   flags { "MFC", "Unicode" }
   links { "libopenmpt", "miniz" }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
-  configuration "vs2008"
-   includedirs { "../../include/msinttypes/stdint" }
   dofile "../../build/premake4-win/premake4-defaults-DLL.lua"
-  dofile "../../build/premake4-win/premake4-defaults-static.lua"
+  dofile "../../build/premake4-win/premake4-defaults.lua"
+  flags { "StaticRuntime" }
 
 end
