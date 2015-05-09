@@ -58,6 +58,8 @@ if MPT_PREMAKE_VERSION == "4.3" then
 	replace_in_file(filename, "\t\t\t\tEntryPointSymbol=\"mainCRTStartup\"\n", "")
 elseif MPT_PREMAKE_VERSION == "4.4" then
 	replace_in_file(filename, "\t\t\t\tEntryPointSymbol=\"mainCRTStartup\"\n", "")
+elseif MPT_PREMAKE_VERSION == "5.0" then
+	replace_in_file(filename, "\t\t\t\tEntryPointSymbol=\"mainCRTStartup\"\n", "")
 end
 end
 
@@ -83,6 +85,8 @@ function postprocess_vs2010_main (filename)
 if MPT_PREMAKE_VERSION == "4.3" then
 	replace_in_file(filename, "<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>", "")
 elseif MPT_PREMAKE_VERSION == "4.4" then
+	replace_in_file(filename, "<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>", "")
+elseif MPT_PREMAKE_VERSION == "5.0" then
 	replace_in_file(filename, "<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>", "")
 end
 end
