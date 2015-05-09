@@ -69,8 +69,15 @@
    "../../include/portaudio/include/portaudio.h",
   }
   buildoptions { "/wd4018", "/wd4267" }
-  configuration "Debug*"
+if MPT_PREMAKE_VERSION == "5.0" then
+  filter { "configurations:Debug" }
    defines { "PA_ENABLE_DEBUG_OUTPUT" }
+  filter {}
+else
+  configuration "Debug"
+   defines { "PA_ENABLE_DEBUG_OUTPUT" }
+  configuration "*"
+end
   dofile "../../build/premake4-win/premake4-defaults-LIB.lua"
   dofile "../../build/premake4-win/premake4-defaults.lua"
   flags { "StaticRuntime" }

@@ -1,4 +1,12 @@
 
+if MPT_PREMAKE_VERSION == "5.0" then
+
+  filter {}
+   kind "WindowedApp"
+   flags { "WinMain" }
+
+else
+
   configuration { "Debug", "x32" }
    targetdir "../../bin/Win32-Debug"
   
@@ -16,7 +24,9 @@
   
   configuration { "ReleaseNoLTCG", "x64" }
    targetdir "../../bin/x64"
-  
+
   configuration "*"
    kind "WindowedApp"
    flags { "WinMain" }
+
+end
