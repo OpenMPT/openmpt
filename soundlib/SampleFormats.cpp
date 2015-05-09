@@ -145,7 +145,7 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file
 			  (!memcmp(&psig[8], "AIFF", 4)									// AIFF signature
 			|| !memcmp(&psig[8], "AIFC", 4)									// AIFF-C signature
 			|| !memcmp(&psig[8], "8SVX", 4)))								// 8SVX signature
-		|| reinterpret_cast<uint32 *>(psig)[0] == LittleEndian(ITSample::magic)	// ITS signature
+		|| !memcmp(&psig[0], "IMPS", 4)										// ITS signature
 #ifndef NO_FLAC
 		|| !memcmp(&psig[0], "fLaC", 4)										// FLAC signature
 		|| (!memcmp(&psig[0], "OggS", 4) && !memcmp(&psig[29], "FLAC", 4))	// FLAC in OGG signature
