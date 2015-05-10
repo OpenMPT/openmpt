@@ -165,7 +165,7 @@ newaction {
 if _OPTIONS["group"] == "libopenmpt-all" then
 
 solution "libopenmpt-all"
- location ( "../build/" .. _ACTION )
+ location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release" }
 if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86", "x86_64" }
@@ -173,25 +173,25 @@ else
  platforms { "x32", "x64" }
 end
 
- dofile "../build/premake4-win/mpt-libopenmpt_test.premake4.lua"
- dofile "../build/premake4-win/mpt-libopenmpt.premake4.lua"
- dofile "../build/premake4-win/mpt-libopenmpt_examples.premake4.lua"
- dofile "../build/premake4-win/mpt-libopenmptDLL.premake4.lua"
- dofile "../build/premake4-win/mpt-libopenmpt_modplug.premake4.lua"
- dofile "../build/premake4-win/mpt-foo_openmpt.premake4.lua"
- dofile "../build/premake4-win/mpt-in_openmpt.premake4.lua"
- dofile "../build/premake4-win/mpt-xmp-openmpt.premake4.lua"
- dofile "../build/premake4-win/mpt-openmpt123.premake4.lua"
- dofile "../build/premake4-win/ext-flac.premake4.lua"
- dofile "../build/premake4-win/ext-miniz.premake4.lua"
- dofile "../build/premake4-win/ext-portaudio.premake4.lua"
+ dofile "../../build/premake4-win/mpt-libopenmpt_test.premake4.lua"
+ dofile "../../build/premake4-win/mpt-libopenmpt.premake4.lua"
+ dofile "../../build/premake4-win/mpt-libopenmpt_examples.premake4.lua"
+ dofile "../../build/premake4-win/mpt-libopenmptDLL.premake4.lua"
+ dofile "../../build/premake4-win/mpt-libopenmpt_modplug.premake4.lua"
+ dofile "../../build/premake4-win/mpt-foo_openmpt.premake4.lua"
+ dofile "../../build/premake4-win/mpt-in_openmpt.premake4.lua"
+ dofile "../../build/premake4-win/mpt-xmp-openmpt.premake4.lua"
+ dofile "../../build/premake4-win/mpt-openmpt123.premake4.lua"
+ dofile "../../build/premake4-win/ext-flac.premake4.lua"
+ dofile "../../build/premake4-win/ext-miniz.premake4.lua"
+ dofile "../../build/premake4-win/ext-portaudio.premake4.lua"
 
 end
 
 if _OPTIONS["group"] == "libopenmpt_test" then
 
 solution "libopenmpt_test"
- location ( "../build/" .. _ACTION )
+ location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release" }
 if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86", "x86_64" }
@@ -199,15 +199,15 @@ else
  platforms { "x32", "x64" }
 end
 
- dofile "../build/premake4-win/mpt-libopenmpt_test.premake4.lua"
- dofile "../build/premake4-win/ext-miniz.premake4.lua"
+ dofile "../../build/premake4-win/mpt-libopenmpt_test.premake4.lua"
+ dofile "../../build/premake4-win/ext-miniz.premake4.lua"
 
 end
 
 if _OPTIONS["group"] == "foo_openmpt" then
 
 solution "foo_openmpt"
- location ( "../build/" .. _ACTION )
+ location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release" }
 if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86" }
@@ -215,16 +215,16 @@ else
  platforms { "x32" }
 end
 
- dofile "../build/premake4-win/mpt-foo_openmpt.premake4.lua"
- dofile "../build/premake4-win/mpt-libopenmpt.premake4.lua"
- dofile "../build/premake4-win/ext-miniz.premake4.lua"
+ dofile "../../build/premake4-win/mpt-foo_openmpt.premake4.lua"
+ dofile "../../build/premake4-win/mpt-libopenmpt.premake4.lua"
+ dofile "../../build/premake4-win/ext-miniz.premake4.lua"
 
 end
 
 if _OPTIONS["group"] == "in_openmpt" then
 
 solution "in_openmpt"
- location ( "../build/" .. _ACTION )
+ location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release" }
 if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86" }
@@ -232,16 +232,16 @@ else
  platforms { "x32" }
 end
 
- dofile "../build/premake4-win/mpt-in_openmpt.premake4.lua"
- dofile "../build/premake4-win/mpt-libopenmpt.premake4.lua"
- dofile "../build/premake4-win/ext-miniz.premake4.lua"
+ dofile "../../build/premake4-win/mpt-in_openmpt.premake4.lua"
+ dofile "../../build/premake4-win/mpt-libopenmpt.premake4.lua"
+ dofile "../../build/premake4-win/ext-miniz.premake4.lua"
 
 end
 
 if _OPTIONS["group"] == "xmp-openmpt" then
 
 solution "xmp-openmpt"
- location ( "../build/" .. _ACTION )
+ location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release" }
 if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86" }
@@ -249,10 +249,10 @@ else
  platforms { "x32" }
 end
 
- dofile "../build/premake4-win/mpt-xmp-openmpt.premake4.lua"
- dofile "../build/premake4-win/mpt-libopenmpt.premake4.lua"
- dofile "../build/premake4-win/ext-miniz.premake4.lua"
- dofile "../build/premake4-win/ext-pugixml.premake4.lua"
+ dofile "../../build/premake4-win/mpt-xmp-openmpt.premake4.lua"
+ dofile "../../build/premake4-win/mpt-libopenmpt.premake4.lua"
+ dofile "../../build/premake4-win/ext-miniz.premake4.lua"
+ dofile "../../build/premake4-win/ext-pugixml.premake4.lua"
 
 end
 
@@ -260,7 +260,7 @@ end
 if _OPTIONS["group"] == "libopenmpt" then
 
 solution "libopenmpt"
- location ( "../build/" .. _ACTION )
+ location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release" }
 if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86", "x86_64" }
@@ -268,20 +268,20 @@ else
  platforms { "x32", "x64" }
 end
 
- dofile "../build/premake4-win/mpt-libopenmpt.premake4.lua"
- dofile "../build/premake4-win/mpt-libopenmpt_examples.premake4.lua"
- dofile "../build/premake4-win/mpt-libopenmptDLL.premake4.lua"
- dofile "../build/premake4-win/mpt-libopenmpt_modplug.premake4.lua"
- dofile "../build/premake4-win/ext-miniz.premake4.lua"
- dofile "../build/premake4-win/ext-miniz-shared.premake4.lua"
- dofile "../build/premake4-win/ext-portaudio.premake4.lua"
+ dofile "../../build/premake4-win/mpt-libopenmpt.premake4.lua"
+ dofile "../../build/premake4-win/mpt-libopenmpt_examples.premake4.lua"
+ dofile "../../build/premake4-win/mpt-libopenmptDLL.premake4.lua"
+ dofile "../../build/premake4-win/mpt-libopenmpt_modplug.premake4.lua"
+ dofile "../../build/premake4-win/ext-miniz.premake4.lua"
+ dofile "../../build/premake4-win/ext-miniz-shared.premake4.lua"
+ dofile "../../build/premake4-win/ext-portaudio.premake4.lua"
 
 end
 
 if _OPTIONS["group"] == "openmpt123" then
 
 solution "openmpt123"
- location ( "../build/" .. _ACTION )
+ location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release" }
 if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86", "x86_64" }
@@ -289,19 +289,19 @@ else
  platforms { "x32", "x64" }
 end
 
- dofile "../build/premake4-win/mpt-openmpt123.premake4.lua"
- dofile "../build/premake4-win/mpt-libopenmpt.premake4.lua"
- dofile "../build/premake4-win/ext-flac.premake4.lua"
- dofile "../build/premake4-win/ext-miniz.premake4.lua"
- dofile "../build/premake4-win/ext-ogg.premake4.lua"
- dofile "../build/premake4-win/ext-portaudio.premake4.lua"
+ dofile "../../build/premake4-win/mpt-openmpt123.premake4.lua"
+ dofile "../../build/premake4-win/mpt-libopenmpt.premake4.lua"
+ dofile "../../build/premake4-win/ext-flac.premake4.lua"
+ dofile "../../build/premake4-win/ext-miniz.premake4.lua"
+ dofile "../../build/premake4-win/ext-ogg.premake4.lua"
+ dofile "../../build/premake4-win/ext-portaudio.premake4.lua"
 
 end
 
 if _OPTIONS["group"] == "PluginBridge" then
 
 solution "PluginBridge"
- location ( "../build/" .. _ACTION )
+ location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release", "ReleaseNoLTCG" }
 if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86", "x86_64" }
@@ -309,7 +309,7 @@ else
  platforms { "x32", "x64" }
 end
 
- dofile "../build/premake4-win/mpt-PluginBridge.premake4.lua"
+ dofile "../../build/premake4-win/mpt-PluginBridge.premake4.lua"
 
 end
 
@@ -317,7 +317,7 @@ end
 if _OPTIONS["group"] == "OpenMPT" then
 
 solution "OpenMPT"
- location ( "../build/" .. _ACTION )
+ location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release", "ReleaseNoLTCG" }
 if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86", "x86_64" }
@@ -325,19 +325,19 @@ else
  platforms { "x32", "x64" }
 end
  
- dofile "../build/premake4-win/mpt-OpenMPT.premake4.lua"
- dofile "../build/premake4-win/mpt-PluginBridge.premake4.lua"
- dofile "../build/premake4-win/ext-flac.premake4.lua"
- dofile "../build/premake4-win/ext-lhasa.premake4.lua"
- dofile "../build/premake4-win/ext-minizip.premake4.lua"
- dofile "../build/premake4-win/ext-ogg.premake4.lua"
- dofile "../build/premake4-win/ext-portaudio.premake4.lua"
- dofile "../build/premake4-win/ext-portmidi.premake4.lua"
- dofile "../build/premake4-win/ext-r8brain.premake4.lua"
- dofile "../build/premake4-win/ext-smbPitchShift.premake4.lua"
- dofile "../build/premake4-win/ext-soundtouch.premake4.lua"
- dofile "../build/premake4-win/ext-UnRAR.premake4.lua"
- dofile "../build/premake4-win/ext-zlib.premake4.lua"
+ dofile "../../build/premake4-win/mpt-OpenMPT.premake4.lua"
+ dofile "../../build/premake4-win/mpt-PluginBridge.premake4.lua"
+ dofile "../../build/premake4-win/ext-flac.premake4.lua"
+ dofile "../../build/premake4-win/ext-lhasa.premake4.lua"
+ dofile "../../build/premake4-win/ext-minizip.premake4.lua"
+ dofile "../../build/premake4-win/ext-ogg.premake4.lua"
+ dofile "../../build/premake4-win/ext-portaudio.premake4.lua"
+ dofile "../../build/premake4-win/ext-portmidi.premake4.lua"
+ dofile "../../build/premake4-win/ext-r8brain.premake4.lua"
+ dofile "../../build/premake4-win/ext-smbPitchShift.premake4.lua"
+ dofile "../../build/premake4-win/ext-soundtouch.premake4.lua"
+ dofile "../../build/premake4-win/ext-UnRAR.premake4.lua"
+ dofile "../../build/premake4-win/ext-zlib.premake4.lua"
 
 end
 
@@ -345,6 +345,7 @@ end
 if _OPTIONS["group"] == "all-externals" then
 
 solution "all-externals"
+ location ( "../../build/" .. _ACTION .. "-ext" )
  configurations { "Debug", "Release", "ReleaseNoLTCG" }
 if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86", "x86_64" }
@@ -352,19 +353,19 @@ else
  platforms { "x32", "x64" }
 end
 
- dofile "../build/premake4-win/ext-flac.premake4.lua"
- dofile "../build/premake4-win/ext-lhasa.premake4.lua"
- dofile "../build/premake4-win/ext-miniz.premake4.lua"
- dofile "../build/premake4-win/ext-miniz-shared.premake4.lua"
- dofile "../build/premake4-win/ext-minizip.premake4.lua"
- dofile "../build/premake4-win/ext-ogg.premake4.lua"
- dofile "../build/premake4-win/ext-portaudio.premake4.lua"
- dofile "../build/premake4-win/ext-portmidi.premake4.lua"
- dofile "../build/premake4-win/ext-pugixml.premake4.lua"
- dofile "../build/premake4-win/ext-r8brain.premake4.lua"
- dofile "../build/premake4-win/ext-smbPitchShift.premake4.lua"
- dofile "../build/premake4-win/ext-soundtouch.premake4.lua"
- dofile "../build/premake4-win/ext-UnRAR.premake4.lua"
- dofile "../build/premake4-win/ext-zlib.premake4.lua"
+ dofile "../../build/premake4-win/ext-flac.premake4.lua"
+ dofile "../../build/premake4-win/ext-lhasa.premake4.lua"
+ dofile "../../build/premake4-win/ext-miniz.premake4.lua"
+ dofile "../../build/premake4-win/ext-miniz-shared.premake4.lua"
+ dofile "../../build/premake4-win/ext-minizip.premake4.lua"
+ dofile "../../build/premake4-win/ext-ogg.premake4.lua"
+ dofile "../../build/premake4-win/ext-portaudio.premake4.lua"
+ dofile "../../build/premake4-win/ext-portmidi.premake4.lua"
+ dofile "../../build/premake4-win/ext-pugixml.premake4.lua"
+ dofile "../../build/premake4-win/ext-r8brain.premake4.lua"
+ dofile "../../build/premake4-win/ext-smbPitchShift.premake4.lua"
+ dofile "../../build/premake4-win/ext-soundtouch.premake4.lua"
+ dofile "../../build/premake4-win/ext-UnRAR.premake4.lua"
+ dofile "../../build/premake4-win/ext-zlib.premake4.lua"
 
 end
