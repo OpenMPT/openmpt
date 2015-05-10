@@ -58,6 +58,7 @@
    "soundtouch",
   }
   linkoptions {
+   "/DELAYLOAD:uxtheme.dll",
    "/DELAYLOAD:OpenMPT_SoundTouch_f32.dll",
   }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
