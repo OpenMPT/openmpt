@@ -916,7 +916,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			// This is really just a simple estimation for nested pattern loops. It should handle cases correctly where all parallel loops start and end on the same row.
 			// If one of them starts or ends "in between", it will most likely calculate a wrong duration.
 			// For S3M files, it's also way off.
-			for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
+			pChn = memory.state.Chn;
+			for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, pChn++)
 			{
 				ModCommand::COMMAND command = pChn->rowCommand.command;
 				ModCommand::PARAM param = pChn->rowCommand.param;
