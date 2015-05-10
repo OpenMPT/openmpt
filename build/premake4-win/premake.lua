@@ -39,10 +39,18 @@ function replace_in_file (filename, from, to)
 	local text
 	local infile
 	local outfile
+	local oldtext
+	local newtext
 	infile = io.open(filename, "r")
 	text = infile:read("*all")
 	infile:close()
-	text = string.gsub(text, from, to)
+	oldtext = text
+	newtext = string.gsub(oldtext, from, to)
+	text = newtext
+	if newtext == oldtext then
+   print("Failed to postprocess '" .. filename .. "': " .. from .. " -> " .. to)
+   os.exit(1)
+	end
 	outfile = io.open(filename, "w")
 	outfile:write(text)
 	outfile:close()
@@ -132,6 +140,7 @@ newaction {
  trigger     = "postprocess",
  description = "OpenMPT postprocess the project files to mitigate premake problems",
  execute     = function ()
+
   postprocess_vs2008_main("build/vs2008/libopenmpt_test.vcproj")
   postprocess_vs2008_main("build/vs2008/openmpt123.vcproj")
   postprocess_vs2008_main("build/vs2008/libopenmpt_example_c.vcproj")
@@ -143,9 +152,9 @@ newaction {
   postprocess_vs2008_dynamicbase("build/vs2008/PluginBridge.vcproj")
   postprocess_vs2008_nonxcompat("build/vs2008/PluginBridge.vcproj")
   postprocess_vs2008_largeaddress("build/vs2008/PluginBridge.vcproj")
+
   postprocess_vs2010_main("build/vs2010/libopenmpt_test.vcxproj")
   postprocess_vs2010_main("build/vs2010/openmpt123.vcxproj")
-  postprocess_vs2010_main("build/vs2010/OpenMPT.vcxproj")
   postprocess_vs2010_main("build/vs2010/libopenmpt_example_c.vcxproj")
   postprocess_vs2010_main("build/vs2010/libopenmpt_example_c_mem.vcxproj")
   postprocess_vs2010_main("build/vs2010/libopenmpt_example_cxx.vcxproj")
@@ -159,6 +168,50 @@ newaction {
   postprocess_vs2010_nonxcompat("build/vs2010/PluginBridge.vcxproj")
   postprocess_vs2010_largeaddress("build/vs2010/PluginBridge.vcxproj")
   fixbug_vs2010_pch("build/vs2010/OpenMPT.vcxproj")
+
+if MPT_PREMAKE_VERSION == "5.0" then
+  
+	postprocess_vs2010_main("build/vs2012/libopenmpt_test.vcxproj")
+  postprocess_vs2010_main("build/vs2012/openmpt123.vcxproj")
+  postprocess_vs2010_main("build/vs2012/libopenmpt_example_c.vcxproj")
+  postprocess_vs2010_main("build/vs2012/libopenmpt_example_c_mem.vcxproj")
+  postprocess_vs2010_main("build/vs2012/libopenmpt_example_cxx.vcxproj")
+  postprocess_vs2010_mfc("build/vs2012/OpenMPT.vcxproj")
+  postprocess_vs2010_dynamicbase("build/vs2012/OpenMPT.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2012/OpenMPT.vcxproj")
+  postprocess_vs2010_largeaddress("build/vs2012/OpenMPT.vcxproj")
+  postprocess_vs2010_dynamicbase("build/vs2012/PluginBridge.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2012/PluginBridge.vcxproj")
+  postprocess_vs2010_largeaddress("build/vs2012/PluginBridge.vcxproj")
+	
+  postprocess_vs2010_main("build/vs2013/libopenmpt_test.vcxproj")
+  postprocess_vs2010_main("build/vs2013/openmpt123.vcxproj")
+  postprocess_vs2010_main("build/vs2013/libopenmpt_example_c.vcxproj")
+  postprocess_vs2010_main("build/vs2013/libopenmpt_example_c_mem.vcxproj")
+  postprocess_vs2010_main("build/vs2013/libopenmpt_example_cxx.vcxproj")
+  postprocess_vs2010_mfc("build/vs2013/OpenMPT.vcxproj")
+  postprocess_vs2010_dynamicbase("build/vs2013/OpenMPT.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2013/OpenMPT.vcxproj")
+  postprocess_vs2010_largeaddress("build/vs2013/OpenMPT.vcxproj")
+  postprocess_vs2010_dynamicbase("build/vs2013/PluginBridge.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2013/PluginBridge.vcxproj")
+  postprocess_vs2010_largeaddress("build/vs2013/PluginBridge.vcxproj")
+
+  postprocess_vs2010_main("build/vs2015/libopenmpt_test.vcxproj")
+  postprocess_vs2010_main("build/vs2015/openmpt123.vcxproj")
+  postprocess_vs2010_main("build/vs2015/libopenmpt_example_c.vcxproj")
+  postprocess_vs2010_main("build/vs2015/libopenmpt_example_c_mem.vcxproj")
+  postprocess_vs2010_main("build/vs2015/libopenmpt_example_cxx.vcxproj")
+  postprocess_vs2010_mfc("build/vs2015/OpenMPT.vcxproj")
+  postprocess_vs2010_dynamicbase("build/vs2015/OpenMPT.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2015/OpenMPT.vcxproj")
+  postprocess_vs2010_largeaddress("build/vs2015/OpenMPT.vcxproj")
+  postprocess_vs2010_dynamicbase("build/vs2015/PluginBridge.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2015/PluginBridge.vcxproj")
+  postprocess_vs2010_largeaddress("build/vs2015/PluginBridge.vcxproj")
+
+end
+
  end
 }
 
