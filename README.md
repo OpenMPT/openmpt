@@ -96,10 +96,23 @@ How to compile
         make check
         sudo make install
 
- -  Visual Studio 2010 (express version should work, but this is not tested):
+ -  Visual Studio:
 
-     -  The libopenmpt solution is in `libopenmpt/libopenmpt.sln`.
-        You will need the Winamp 5 SDK and the xmplay SDK if you want to
+     -  You will find solutions for Visual Studio 2008 to 2015 in the
+        corresponding `build/vsVERSION/` folder.
+        Most projects are supported with any of the mentioned Visual Studio
+        verions, with the following exceptions:
+
+         -  libopenmpt_example_cxx: Requires VS2010 because it makes use of
+            C++11 features that VS2008 does not support..
+
+         -  foo_openmpt: Requires VS2010 because the foobar2000 SDK uses VS2010.
+
+         -  in_openmpt: Requires VS2010 or later with MFC.
+
+         -  xmp-openmpt: Requires VS2010 or later with MFC.
+
+     -  You will need the Winamp 5 SDK and the xmplay SDK if you want to
         compile the plugins for these 2 players:
 
          -  Winamp 5 SDK:
@@ -120,8 +133,6 @@ How to compile
             Please visit [un4seen.com](http://www.un4seen.com/xmplay.html) to
             download to SDK.
             You can disable xmp-openmpt in the solution configuration.
-
-     -  The openmpt123 solution is in `openmpt123/openmpt123.sln`.
 
  -  Makefile
 

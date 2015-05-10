@@ -5,6 +5,11 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt svn
+
+ *  [**Change**] The MSVC build system has been redone. Solutions are now
+    located in `build/vsVERSION/`.
+
 ### libopenmpt 0.2-beta12 (2015-04-19)
 
  *  Playback fix when row delay effect is used together with offset command.
