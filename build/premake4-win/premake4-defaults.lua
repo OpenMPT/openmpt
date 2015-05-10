@@ -37,7 +37,6 @@ if MPT_PREMAKE_VERSION == "5.0" then
    defines { "DEBUG" }
    flags { "Symbols" }
    optimize "Debug"
-   floatingpoint "Default"
 
   filter { "configurations:Release" }
   configuration "Release"

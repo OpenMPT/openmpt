@@ -137,7 +137,6 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <FloatingPointModel>Default</FloatingPointModel>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
@@ -153,7 +152,6 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <FloatingPointModel>Default</FloatingPointModel>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
