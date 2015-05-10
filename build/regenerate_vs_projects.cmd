@@ -57,6 +57,27 @@ include\premake\premake5.exe --group=PluginBridge vs2010 || goto err
 include\premake\premake5.exe --group=OpenMPT vs2010 || goto err
 include\premake\premake5.exe --group=all-externals vs2010 || goto err
 
+include\premake\premake5.exe --group=libopenmpt_test vs2012 || goto err
+include\premake\premake5.exe --group=libopenmpt vs2012 || goto err
+include\premake\premake5.exe --group=openmpt123 vs2012 || goto err
+include\premake\premake5.exe --group=PluginBridge vs2012 || goto err
+include\premake\premake5.exe --group=OpenMPT vs2012 || goto err
+include\premake\premake5.exe --group=all-externals vs2012 || goto err
+
+include\premake\premake5.exe --group=libopenmpt_test vs2013 || goto err
+include\premake\premake5.exe --group=libopenmpt vs2013 || goto err
+include\premake\premake5.exe --group=openmpt123 vs2013 || goto err
+include\premake\premake5.exe --group=PluginBridge vs2013 || goto err
+include\premake\premake5.exe --group=OpenMPT vs2013 || goto err
+include\premake\premake5.exe --group=all-externals vs2013 || goto err
+
+include\premake\premake5.exe --group=libopenmpt_test vs2015 || goto err
+include\premake\premake5.exe --group=libopenmpt vs2015 || goto err
+include\premake\premake5.exe --group=openmpt123 vs2015 || goto err
+include\premake\premake5.exe --group=PluginBridge vs2015 || goto err
+include\premake\premake5.exe --group=OpenMPT vs2015 || goto err
+include\premake\premake5.exe --group=all-externals vs2015 || goto err
+
 include\premake\premake5.exe postprocess || goto err
 
 del premake5.lua || goto err
