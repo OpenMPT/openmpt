@@ -32,9 +32,9 @@ Quick Start {#quickstart}
      -  **Winamp SDK**
      -  **XMPlay SDK**
  3. Checkout `http://svn.code.sf.net/p/modplug/code/trunk/OpenMPT/` .
- 4. Open `openmpt123\openmpt123.sln` or `libopenmpt\libopenmpt.sln` in *Microsoft Visual Studio 2010*.
+ 4. Open `build\vs2010\openmpt123.sln` or `build\vs2010\libopenmpt.sln` or `build\vs2010\xmp-openmpt.sln` or `build\vs2010\in_openmpt.sln` or `build\vs2010\foo_openmpt.sln` in *Microsoft Visual Studio 2010*.
  5. Select appropriate configuration and build. Binaries are generated in `bin\`
- 6. Drag a module onto `openmpt123.exe` or copy the player plugin DLLs (`in_openmpt.dll`, `xmp-openmpt.dll` or `foo_openmpt.dll`) and `libopenmpt_settings.dll` into the respective player directory.
+ 6. Drag a module onto `openmpt123.exe` or copy the player plugin DLLs (`in_openmpt.dll`, `xmp-openmpt.dll` or `foo_openmpt.dll`) into the respective player directory.
 
 ### Unix-like
 
