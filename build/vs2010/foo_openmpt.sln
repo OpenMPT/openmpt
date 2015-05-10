@@ -1,14 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "foo_openmpt", "foo_openmpt.vcxproj", "{3F14BF17-016A-44C3-9B8D-C875C2EC8A18}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt", "libopenmpt.vcxproj", "{9C5101EF-3E20-4558-809B-277FDD50E878}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "foo_openmpt", "foo_openmpt.vcxproj", "{749102D3-B183-420C-A7D7-D8FF343C1A0C}"
 	ProjectSection(ProjectDependencies) = postProject
+		{9C5101EF-3E20-4558-809B-277FDD50E878} = {9C5101EF-3E20-4558-809B-277FDD50E878}
 		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C} = {B5E0C06B-8121-426A-8FFB-4293ECAAE29C}
+		{EBFFFB4E-261D-44D3-B89C-957B31A0BF9C} = {EBFFFB4E-261D-44D3-B89C-957B31A0BF9C}
+		{E8091321-D79D-4575-86EF-064EA1A4A20D} = {E8091321-D79D-4575-86EF-064EA1A4A20D}
+		{EE47764E-A202-4F85-A767-ABDAB4AFF35F} = {EE47764E-A202-4F85-A767-ABDAB4AFF35F}
+		{71AD2674-065B-48F5-B8B0-E1F9D3892081} = {71AD2674-065B-48F5-B8B0-E1F9D3892081}
 	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "miniz", "..\vs2010-ext\miniz.vcxproj", "{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pfc", "..\..\include\foobar2000sdk\pfc\pfc.vcxproj", "{EBFFFB4E-261D-44D3-B89C-957B31A0BF9C}"
 EndProject
@@ -18,24 +19,23 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "foobar2000_sdk_helpers", ".
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "foobar2000_component_client", "..\..\include\foobar2000sdk\foobar2000\foobar2000_component_client\foobar2000_component_client.vcxproj", "{71AD2674-065B-48F5-B8B0-E1F9D3892081}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt", "libopenmpt.vcxproj", "{9C5101EF-3E20-4558-809B-277FDD50E878}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C} = {B5E0C06B-8121-426A-8FFB-4293ECAAE29C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "miniz", "..\vs2010-ext\miniz.vcxproj", "{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Debug|Win32.ActiveCfg = Debug|Win32
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Debug|Win32.Build.0 = Debug|Win32
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Release|Win32.ActiveCfg = Release|Win32
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Release|Win32.Build.0 = Release|Win32
-		{3F14BF17-016A-44C3-9B8D-C875C2EC8A18}.Debug|Win32.ActiveCfg = Debug|Win32
-		{3F14BF17-016A-44C3-9B8D-C875C2EC8A18}.Debug|Win32.Build.0 = Debug|Win32
-		{3F14BF17-016A-44C3-9B8D-C875C2EC8A18}.Release|Win32.ActiveCfg = Release|Win32
-		{3F14BF17-016A-44C3-9B8D-C875C2EC8A18}.Release|Win32.Build.0 = Release|Win32
-		{9C5101EF-3E20-4558-809B-277FDD50E878}.Debug|Win32.ActiveCfg = Debug|Win32
-		{9C5101EF-3E20-4558-809B-277FDD50E878}.Debug|Win32.Build.0 = Debug|Win32
-		{9C5101EF-3E20-4558-809B-277FDD50E878}.Release|Win32.ActiveCfg = Release|Win32
-		{9C5101EF-3E20-4558-809B-277FDD50E878}.Release|Win32.Build.0 = Release|Win32
+		{749102D3-B183-420C-A7D7-D8FF343C1A0C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{749102D3-B183-420C-A7D7-D8FF343C1A0C}.Debug|Win32.Build.0 = Debug|Win32
+		{749102D3-B183-420C-A7D7-D8FF343C1A0C}.Release|Win32.ActiveCfg = Release|Win32
+		{749102D3-B183-420C-A7D7-D8FF343C1A0C}.Release|Win32.Build.0 = Release|Win32
 		{EBFFFB4E-261D-44D3-B89C-957B31A0BF9C}.Debug|Win32.ActiveCfg = Debug|Win32
 		{EBFFFB4E-261D-44D3-B89C-957B31A0BF9C}.Debug|Win32.Build.0 = Debug|Win32
 		{EBFFFB4E-261D-44D3-B89C-957B31A0BF9C}.Release|Win32.ActiveCfg = Release|Win32
@@ -52,6 +52,14 @@ Global
 		{71AD2674-065B-48F5-B8B0-E1F9D3892081}.Debug|Win32.Build.0 = Debug|Win32
 		{71AD2674-065B-48F5-B8B0-E1F9D3892081}.Release|Win32.ActiveCfg = Release|Win32
 		{71AD2674-065B-48F5-B8B0-E1F9D3892081}.Release|Win32.Build.0 = Release|Win32
+		{9C5101EF-3E20-4558-809B-277FDD50E878}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9C5101EF-3E20-4558-809B-277FDD50E878}.Debug|Win32.Build.0 = Debug|Win32
+		{9C5101EF-3E20-4558-809B-277FDD50E878}.Release|Win32.ActiveCfg = Release|Win32
+		{9C5101EF-3E20-4558-809B-277FDD50E878}.Release|Win32.Build.0 = Release|Win32
+		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Debug|Win32.Build.0 = Debug|Win32
+		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Release|Win32.ActiveCfg = Release|Win32
+		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

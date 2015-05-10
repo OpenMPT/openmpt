@@ -6,6 +6,7 @@
 	ProjectGUID="{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
 	RootNamespace="zlib"
 	Keyword="Win32Proj"
+	TargetFrameworkVersion="0"
 	>
 	<Platforms>
 		<Platform
@@ -20,8 +21,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\lib\x32\Debug"
-			IntermediateDirectory="..\obj\zlib\x32\Debug"
+			OutputDirectory="..\lib\x86\Debug"
+			IntermediateDirectory="..\obj\zlib\x86\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -51,7 +52,6 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\zlib.pdb"
 				DebugInformationFormat="4"
 				CompileAs="1"
 			/>
@@ -74,9 +74,6 @@
 				Name="VCALinkTool"
 			/>
 			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
 				Name="VCXDCMakeTool"
 			/>
 			<Tool
@@ -86,19 +83,13 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\lib\x64\Debug"
-			IntermediateDirectory="..\obj\zlib\x64\Debug"
+			OutputDirectory="..\lib\x86_64\Debug"
+			IntermediateDirectory="..\obj\zlib\x86_64\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -129,7 +120,6 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\zlib.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -152,9 +142,6 @@
 				Name="VCALinkTool"
 			/>
 			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
 				Name="VCXDCMakeTool"
 			/>
 			<Tool
@@ -162,12 +149,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -175,8 +156,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\lib\x32\Release"
-			IntermediateDirectory="..\obj\zlib\x32\Release"
+			OutputDirectory="..\lib\x86\Release"
+			IntermediateDirectory="..\obj\zlib\x86\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -200,6 +181,7 @@
 				AdditionalOptions="/MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\msinttypes\stdint"
+				WholeProgramOptimization="true"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -207,7 +189,6 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\zlib.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -230,9 +211,6 @@
 				Name="VCALinkTool"
 			/>
 			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
 				Name="VCXDCMakeTool"
 			/>
 			<Tool
@@ -240,12 +218,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -253,8 +225,146 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\lib\x64\Release"
-			IntermediateDirectory="..\obj\zlib\x64\Release"
+			OutputDirectory="..\lib\x86_64\Release"
+			IntermediateDirectory="..\obj\zlib\x86_64\Release"
+			ConfigurationType="4"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
+				Optimization="3"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\msinttypes\stdint"
+				WholeProgramOptimization="true"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\msinttypes\stdint"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\zlib.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseNoLTCG|Win32"
+			OutputDirectory="..\lib\x86\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\zlib\x86\ReleaseNoLTCG"
+			ConfigurationType="4"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
+				Optimization="3"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\msinttypes\stdint"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="0"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\msinttypes\stdint"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\zlib.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseNoLTCG|x64"
+			OutputDirectory="..\lib\x86_64\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\zlib\x86_64\ReleaseNoLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -286,85 +396,6 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\zlib.pdb"
-				DebugInformationFormat="3"
-				CompileAs="1"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\msinttypes\stdint"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\zlib.lib"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="ReleaseNoLTCG|Win32"
-			OutputDirectory="..\lib\x32\ReleaseNoLTCG"
-			IntermediateDirectory="..\obj\zlib\x32\ReleaseNoLTCG"
-			ConfigurationType="4"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/GL- /MP"
-				Optimization="3"
-				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				StringPooling="true"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="true"
-				FloatingPointModel="2"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\zlib.pdb"
 				DebugInformationFormat="0"
 				CompileAs="1"
 			/>
@@ -387,9 +418,6 @@
 				Name="VCALinkTool"
 			/>
 			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
 				Name="VCXDCMakeTool"
 			/>
 			<Tool
@@ -397,91 +425,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="ReleaseNoLTCG|x64"
-			OutputDirectory="..\lib\x64\ReleaseNoLTCG"
-			IntermediateDirectory="..\obj\zlib\x64\ReleaseNoLTCG"
-			ConfigurationType="4"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/GL- /MP"
-				Optimization="3"
-				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				StringPooling="true"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="true"
-				FloatingPointModel="2"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\zlib.pdb"
-				DebugInformationFormat="0"
-				CompileAs="1"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\zlib;..\..\include\msinttypes\stdint"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\zlib.lib"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -491,120 +434,110 @@
 	<References>
 	</References>
 	<Files>
-		<Filter
-			Name="include"
-			Filter=""
+		<File
+			RelativePath="..\..\include\zlib\adler32.c"
 			>
-			<Filter
-				Name="zlib"
-				Filter=""
-				>
-				<File
-					RelativePath="..\..\include\zlib\adler32.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\compress.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\crc32.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\deflate.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\gzclose.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\gzlib.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\gzread.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\gzwrite.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\infback.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\inffast.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\inflate.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\inftrees.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\trees.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\uncompr.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\zutil.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\crc32.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\deflate.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\gzguts.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\inffast.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\inffixed.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\inflate.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\inftrees.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\trees.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\zconf.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\zlib.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\zlib\zutil.h"
-					>
-				</File>
-			</Filter>
-		</Filter>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\compress.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\crc32.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\crc32.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\deflate.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\deflate.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\gzclose.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\gzguts.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\gzlib.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\gzread.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\gzwrite.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\infback.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\inffast.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\inffast.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\inffixed.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\inflate.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\inflate.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\inftrees.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\inftrees.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\trees.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\trees.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\uncompr.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\zconf.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\zlib.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\zutil.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\zlib\zutil.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

@@ -6,6 +6,7 @@
 	ProjectGUID="{9C5101EF-3E20-4558-809B-277FDD50E878}"
 	RootNamespace="libopenmpt"
 	Keyword="Win32Proj"
+	TargetFrameworkVersion="0"
 	>
 	<Platforms>
 		<Platform
@@ -20,8 +21,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\lib\x32\Debug"
-			IntermediateDirectory="..\obj\libopenmpt\x32\Debug"
+			OutputDirectory="..\lib\x86\Debug"
+			IntermediateDirectory="..\obj\libopenmpt\x86\Debug"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -52,7 +53,6 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\libopenmpt.pdb"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -68,14 +68,10 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="..\lib\x32\Debug\miniz.lib"
 				OutputFile="$(OutDir)\libopenmpt.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -87,19 +83,13 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\lib\x64\Debug"
-			IntermediateDirectory="..\obj\libopenmpt\x64\Debug"
+			OutputDirectory="..\lib\x86_64\Debug"
+			IntermediateDirectory="..\obj\libopenmpt\x86_64\Debug"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -131,7 +121,6 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\libopenmpt.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -147,14 +136,10 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="..\lib\x64\Debug\miniz.lib"
 				OutputFile="$(OutDir)\libopenmpt.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -166,19 +151,13 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\lib\x32\Release"
-			IntermediateDirectory="..\obj\libopenmpt\x32\Release"
+			OutputDirectory="..\lib\x86\Release"
+			IntermediateDirectory="..\obj\libopenmpt\x86\Release"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -203,6 +182,7 @@
 				AdditionalOptions="/MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				WholeProgramOptimization="true"
 				PreprocessorDefinitions="LIBOPENMPT_BUILD;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -210,7 +190,6 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\libopenmpt.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -226,14 +205,10 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="..\lib\x32\Release\miniz.lib"
 				OutputFile="$(OutDir)\libopenmpt.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -245,19 +220,13 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\lib\x64\Release"
-			IntermediateDirectory="..\obj\libopenmpt\x64\Release"
+			OutputDirectory="..\lib\x86_64\Release"
+			IntermediateDirectory="..\obj\libopenmpt\x86_64\Release"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -283,6 +252,7 @@
 				AdditionalOptions="/MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				WholeProgramOptimization="true"
 				PreprocessorDefinitions="LIBOPENMPT_BUILD;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -290,7 +260,6 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\libopenmpt.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -306,14 +275,10 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="..\lib\x64\Release\miniz.lib"
 				OutputFile="$(OutDir)\libopenmpt.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -325,73 +290,22 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 	</Configurations>
 	<References>
+		<ProjectReference
+			ReferencedProjectIdentifier="{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}"
+			RelativePathToProject="..\vs2008-ext\miniz.vcproj"
+		/>
 	</References>
 	<Files>
 		<Filter
 			Name="common"
-			Filter=""
 			>
 			<File
 				RelativePath="..\..\common\AudioCriticalSection.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\common\ComponentManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\common\Logging.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\common\misc_util.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\common\mptFileIO.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\common\mptIO.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\common\mptPathString.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\common\mptString.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\common\Profiler.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\common\serialization_utils.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\common\stdafx.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\common\typedefs.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\common\version.cpp"
 				>
 			</File>
 			<File
@@ -404,6 +318,10 @@
 			</File>
 			<File
 				RelativePath="..\..\common\CompilerDetect.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\ComponentManager.cpp"
 				>
 			</File>
 			<File
@@ -423,7 +341,31 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\common\Logging.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\Logging.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\Profiler.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\Profiler.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\StringFixer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\WriteMemoryDump.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\misc_util.cpp"
 				>
 			</File>
 			<File
@@ -435,7 +377,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\common\mptFileIO.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\mptFileIO.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\mptIO.cpp"
 				>
 			</File>
 			<File
@@ -443,7 +393,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\common\mptPathString.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\mptPathString.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\mptString.cpp"
 				>
 			</File>
 			<File
@@ -455,7 +413,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\common\Profiler.h"
+				RelativePath="..\..\common\serialization_utils.cpp"
 				>
 			</File>
 			<File
@@ -463,11 +421,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\common\stdafx.h"
+				RelativePath="..\..\common\stdafx.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\common\StringFixer.h"
+				RelativePath="..\..\common\stdafx.h"
 				>
 			</File>
 			<File
@@ -475,7 +433,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\common\typedefs.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\typedefs.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\version.cpp"
 				>
 			</File>
 			<File
@@ -486,17 +452,80 @@
 				RelativePath="..\..\common\versionNumber.h"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="libopenmpt"
+			>
 			<File
-				RelativePath="..\..\common\WriteMemoryDump.h"
+				RelativePath="..\..\libopenmpt\libopenmpt.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libopenmpt\libopenmpt.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libopenmpt\libopenmpt_c.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libopenmpt\libopenmpt_config.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libopenmpt\libopenmpt_cxx.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libopenmpt\libopenmpt_ext.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libopenmpt\libopenmpt_ext.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libopenmpt\libopenmpt_impl.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libopenmpt\libopenmpt_impl.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libopenmpt\libopenmpt_internal.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libopenmpt\libopenmpt_stream_callbacks_fd.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libopenmpt\libopenmpt_stream_callbacks_file.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libopenmpt\libopenmpt_version.h"
 				>
 			</File>
 		</Filter>
 		<Filter
 			Name="soundlib"
-			Filter=""
 			>
 			<File
+				RelativePath="..\..\soundlib\AudioReadTarget.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\ChunkReader.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\soundlib\Dither.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\Dither.h"
 				>
 			</File>
 			<File
@@ -504,7 +533,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\soundlib\Dlsbank.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\soundlib\Fastmix.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\FloatMixer.h"
 				>
 			</File>
 			<File
@@ -512,7 +549,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\soundlib\ITCompression.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\soundlib\ITTools.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\ITTools.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\IntMixer.h"
 				>
 			</File>
 			<File
@@ -561,10 +610,6 @@
 			</File>
 			<File
 				RelativePath="..\..\soundlib\Load_itp.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\load_j2b.cpp"
 				>
 			</File>
 			<File
@@ -636,7 +681,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\soundlib\Message.cpp"
+				RelativePath="..\..\soundlib\Loaders.h"
 				>
 			</File>
 			<File
@@ -644,175 +689,23 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\soundlib\MIDIMacros.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\MixerLoops.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\MixerSettings.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\Mmcmp.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\ModChannel.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\modcommand.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\ModInstrument.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\ModSample.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\ModSequence.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\modsmp_ctrl.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\mod_specifications.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\pattern.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\patternContainer.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\RowVisitor.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\S3MTools.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\SampleFormats.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\SampleIO.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\Sndfile.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\Sndmix.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\Snd_flt.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\Snd_fx.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\SoundFilePlayConfig.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\Tables.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\Tagging.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\tuning.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\tuningbase.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\tuningCollection.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\UpgradeModule.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\WAVTools.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\WindowedFIR.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\XMTools.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\AudioReadTarget.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\ChunkReader.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\Dither.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\Dlsbank.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\FloatMixer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\IntMixer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\ITCompression.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\ITTools.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\Loaders.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\Message.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\soundlib\MIDIEvents.h"
 				>
 			</File>
 			<File
+				RelativePath="..\..\soundlib\MIDIMacros.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\soundlib\MIDIMacros.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\Message.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\Message.h"
 				>
 			</File>
 			<File
@@ -824,7 +717,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\soundlib\MixerLoops.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\soundlib\MixerLoops.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\MixerSettings.cpp"
 				>
 			</File>
 			<File
@@ -832,11 +733,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\soundlib\Mmcmp.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\ModChannel.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\soundlib\ModChannel.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\soundlib\modcommand.h"
+				RelativePath="..\..\soundlib\ModInstrument.cpp"
 				>
 			</File>
 			<File
@@ -844,7 +753,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\soundlib\ModSample.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\soundlib\ModSample.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\ModSequence.cpp"
 				>
 			</File>
 			<File
@@ -852,27 +769,19 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\soundlib\modsmp_ctrl.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\mod_specifications.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\pattern.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\patternContainer.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\soundlib\Resampler.h"
 				>
 			</File>
 			<File
+				RelativePath="..\..\soundlib\RowVisitor.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\soundlib\RowVisitor.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\S3MTools.cpp"
 				>
 			</File>
 			<File
@@ -888,11 +797,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\soundlib\SampleIO.h"
+				RelativePath="..\..\soundlib\SampleFormats.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\soundlib\Sndfile.h"
+				RelativePath="..\..\soundlib\SampleIO.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\SampleIO.h"
 				>
 			</File>
 			<File
@@ -900,7 +813,35 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\soundlib\Snd_flt.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\Snd_fx.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\Sndfile.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\Sndfile.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\Sndmix.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\SoundFilePlayConfig.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\soundlib\SoundFilePlayConfig.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\Tables.cpp"
 				>
 			</File>
 			<File
@@ -908,11 +849,103 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\soundlib\Tagging.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\soundlib\Tagging.h"
 				>
 			</File>
 			<File
+				RelativePath="..\..\soundlib\UpgradeModule.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\WAVTools.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\WAVTools.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\Wav.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\WindowedFIR.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\WindowedFIR.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\XMTools.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\XMTools.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\load_j2b.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\mod_specifications.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\mod_specifications.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\modcommand.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\modcommand.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\modsmp_ctrl.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\modsmp_ctrl.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\pattern.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\pattern.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\patternContainer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\patternContainer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\tuning.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\soundlib\tuning.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\tuningCollection.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\tuningbase.cpp"
 				>
 			</File>
 			<File
@@ -921,79 +954,6 @@
 			</File>
 			<File
 				RelativePath="..\..\soundlib\tuningcollection.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\Wav.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\WAVTools.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\WindowedFIR.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\soundlib\XMTools.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="libopenmpt"
-			Filter=""
-			>
-			<File
-				RelativePath="..\..\libopenmpt\libopenmpt.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libopenmpt\libopenmpt.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libopenmpt\libopenmpt_config.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libopenmpt\libopenmpt_ext.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libopenmpt\libopenmpt_impl.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libopenmpt\libopenmpt_internal.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libopenmpt\libopenmpt_stream_callbacks_fd.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libopenmpt\libopenmpt_stream_callbacks_file.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libopenmpt\libopenmpt_version.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libopenmpt\libopenmpt_c.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libopenmpt\libopenmpt_cxx.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libopenmpt\libopenmpt_ext.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libopenmpt\libopenmpt_impl.cpp"
 				>
 			</File>
 		</Filter>

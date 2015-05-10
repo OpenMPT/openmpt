@@ -1,391 +1,329 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<ItemGroup Label="ProjectConfigurations">
-		<ProjectConfiguration Include="Debug|Win32">
-			<Configuration>Debug</Configuration>
-			<Platform>Win32</Platform>
-		</ProjectConfiguration>
-		<ProjectConfiguration Include="Debug|x64">
-			<Configuration>Debug</Configuration>
-			<Platform>x64</Platform>
-		</ProjectConfiguration>
-		<ProjectConfiguration Include="Release|Win32">
-			<Configuration>Release</Configuration>
-			<Platform>Win32</Platform>
-		</ProjectConfiguration>
-		<ProjectConfiguration Include="Release|x64">
-			<Configuration>Release</Configuration>
-			<Platform>x64</Platform>
-		</ProjectConfiguration>
-		<ProjectConfiguration Include="ReleaseNoLTCG|Win32">
-			<Configuration>ReleaseNoLTCG</Configuration>
-			<Platform>Win32</Platform>
-		</ProjectConfiguration>
-		<ProjectConfiguration Include="ReleaseNoLTCG|x64">
-			<Configuration>ReleaseNoLTCG</Configuration>
-			<Platform>x64</Platform>
-		</ProjectConfiguration>
-	</ItemGroup>
-	<PropertyGroup Label="Globals">
-		<ProjectGuid>{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}</ProjectGuid>
-		<RootNamespace>flac</RootNamespace>
-		<Keyword>Win32Proj</Keyword>
-	</PropertyGroup>
-	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-		<ConfigurationType>StaticLibrary</ConfigurationType>
-		<CharacterSet>MultiByte</CharacterSet>
-		<UseDebugLibraries>true</UseDebugLibraries>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-		<ConfigurationType>StaticLibrary</ConfigurationType>
-		<CharacterSet>MultiByte</CharacterSet>
-		<UseDebugLibraries>true</UseDebugLibraries>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-		<ConfigurationType>StaticLibrary</ConfigurationType>
-		<CharacterSet>MultiByte</CharacterSet>
-		<WholeProgramOptimization>true</WholeProgramOptimization>
-		<UseDebugLibraries>false</UseDebugLibraries>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-		<ConfigurationType>StaticLibrary</ConfigurationType>
-		<CharacterSet>MultiByte</CharacterSet>
-		<WholeProgramOptimization>true</WholeProgramOptimization>
-		<UseDebugLibraries>false</UseDebugLibraries>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'" Label="Configuration">
-		<ConfigurationType>StaticLibrary</ConfigurationType>
-		<CharacterSet>MultiByte</CharacterSet>
-		<WholeProgramOptimization>true</WholeProgramOptimization>
-		<UseDebugLibraries>false</UseDebugLibraries>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'" Label="Configuration">
-		<ConfigurationType>StaticLibrary</ConfigurationType>
-		<CharacterSet>MultiByte</CharacterSet>
-		<WholeProgramOptimization>true</WholeProgramOptimization>
-		<UseDebugLibraries>false</UseDebugLibraries>
-	</PropertyGroup>
-	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-	<ImportGroup Label="ExtensionSettings">
-	</ImportGroup>
-	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
-		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-	</ImportGroup>
-	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
-		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-	</ImportGroup>
-	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
-		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-	</ImportGroup>
-	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
-		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-	</ImportGroup>
-	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'" Label="PropertySheets">
-		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-	</ImportGroup>
-	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'" Label="PropertySheets">
-		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-	</ImportGroup>
-	<PropertyGroup Label="UserMacros" />
-	<PropertyGroup>
-		<_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\lib\x32\Debug\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\obj\flac\x32\Debug\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">flac</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\lib\x64\Debug\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\obj\flac\x64\Debug\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">flac</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\lib\x32\Release\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\obj\flac\x32\Release\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">flac</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\lib\x64\Release\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\obj\flac\x64\Release\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">flac</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">..\lib\x32\ReleaseNoLTCG\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">..\obj\flac\x32\ReleaseNoLTCG\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">flac</TargetName>
-		<OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">..\lib\x64\ReleaseNoLTCG\</OutDir>
-		<IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">..\obj\flac\x64\ReleaseNoLTCG\</IntDir>
-		<TargetName Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">flac</TargetName>
-	</PropertyGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-		<ClCompile>
-			<AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
-			<Optimization>Disabled</Optimization>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<MinimalRebuild>true</MinimalRebuild>
-			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-			<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-			<FunctionLevelLinking>true</FunctionLevelLinking>
-			<PrecompiledHeader></PrecompiledHeader>
-			<WarningLevel>Level3</WarningLevel>
-			<DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
-		</ClCompile>
-		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-		</ResourceCompile>
-	<Lib>
-		<OutputFile>$(OutDir)flac.lib</OutputFile>
-	</Lib>
-		<Link>
-			<SubSystem>Windows</SubSystem>
-			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)flac.pdb</ProgramDataBaseFileName>
-		</Link>
-	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-		<ClCompile>
-			<AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
-			<Optimization>Disabled</Optimization>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<MinimalRebuild>true</MinimalRebuild>
-			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-			<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-			<FunctionLevelLinking>true</FunctionLevelLinking>
-			<PrecompiledHeader></PrecompiledHeader>
-			<WarningLevel>Level3</WarningLevel>
-			<DebugInformationFormat>OldStyle</DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
-		</ClCompile>
-		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-		</ResourceCompile>
-	<Lib>
-		<OutputFile>$(OutDir)flac.lib</OutputFile>
-	</Lib>
-		<Link>
-			<SubSystem>Windows</SubSystem>
-			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<ProgramDataBaseFileName>$(OutDir)flac.pdb</ProgramDataBaseFileName>
-		</Link>
-	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-		<ClCompile>
-			<AdditionalOptions>/wd4244 /wd4267 /wd4334 /MP %(AdditionalOptions)</AdditionalOptions>
-			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<MinimalRebuild>false</MinimalRebuild>
-			<StringPooling>true</StringPooling>
-			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-			<FunctionLevelLinking>true</FunctionLevelLinking>
-			<PrecompiledHeader></PrecompiledHeader>
-			<WarningLevel>Level3</WarningLevel>
-			<FloatingPointModel>Fast</FloatingPointModel>
-			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
-		</ClCompile>
-		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-		</ResourceCompile>
-	<Lib>
-		<OutputFile>$(OutDir)flac.lib</OutputFile>
-	</Lib>
-		<Link>
-			<SubSystem>Windows</SubSystem>
-			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<OptimizeReferences>true</OptimizeReferences>
-			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)flac.pdb</ProgramDataBaseFileName>
-		</Link>
-	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-		<ClCompile>
-			<AdditionalOptions>/wd4244 /wd4267 /wd4334 /MP %(AdditionalOptions)</AdditionalOptions>
-			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<MinimalRebuild>false</MinimalRebuild>
-			<StringPooling>true</StringPooling>
-			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-			<FunctionLevelLinking>true</FunctionLevelLinking>
-			<PrecompiledHeader></PrecompiledHeader>
-			<WarningLevel>Level3</WarningLevel>
-			<FloatingPointModel>Fast</FloatingPointModel>
-			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
-		</ClCompile>
-		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-		</ResourceCompile>
-	<Lib>
-		<OutputFile>$(OutDir)flac.lib</OutputFile>
-	</Lib>
-		<Link>
-			<SubSystem>Windows</SubSystem>
-			<GenerateDebugInformation>true</GenerateDebugInformation>
-			<OptimizeReferences>true</OptimizeReferences>
-			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-			<ProgramDataBaseFileName>$(OutDir)flac.pdb</ProgramDataBaseFileName>
-		</Link>
-	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">
-		<ClCompile>
-			<AdditionalOptions>/wd4244 /wd4267 /wd4334 /GL- /MP %(AdditionalOptions)</AdditionalOptions>
-			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<MinimalRebuild>false</MinimalRebuild>
-			<StringPooling>true</StringPooling>
-			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-			<FunctionLevelLinking>true</FunctionLevelLinking>
-			<PrecompiledHeader></PrecompiledHeader>
-			<WarningLevel>Level3</WarningLevel>
-			<FloatingPointModel>Fast</FloatingPointModel>
-			<DebugInformationFormat></DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
-		</ClCompile>
-		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-		</ResourceCompile>
-	<Lib>
-		<OutputFile>$(OutDir)flac.lib</OutputFile>
-	</Lib>
-		<Link>
-			<SubSystem>Windows</SubSystem>
-			<GenerateDebugInformation>false</GenerateDebugInformation>
-			<OptimizeReferences>true</OptimizeReferences>
-			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-		</Link>
-	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">
-		<ClCompile>
-			<AdditionalOptions>/wd4244 /wd4267 /wd4334 /GL- /MP %(AdditionalOptions)</AdditionalOptions>
-			<Optimization>Full</Optimization>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<MinimalRebuild>false</MinimalRebuild>
-			<StringPooling>true</StringPooling>
-			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-			<FunctionLevelLinking>true</FunctionLevelLinking>
-			<PrecompiledHeader></PrecompiledHeader>
-			<WarningLevel>Level3</WarningLevel>
-			<FloatingPointModel>Fast</FloatingPointModel>
-			<DebugInformationFormat></DebugInformationFormat>
-			<CompileAs>CompileAsC</CompileAs>
-		</ClCompile>
-		<ResourceCompile>
-			<PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=&quot;1.3.1&quot;;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-		</ResourceCompile>
-	<Lib>
-		<OutputFile>$(OutDir)flac.lib</OutputFile>
-	</Lib>
-		<Link>
-			<SubSystem>Windows</SubSystem>
-			<GenerateDebugInformation>false</GenerateDebugInformation>
-			<OptimizeReferences>true</OptimizeReferences>
-			<EnableCOMDATFolding>true</EnableCOMDATFolding>
-		</Link>
-	</ItemDefinitionGroup>
-	<ItemGroup>
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\all.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\bitmath.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\bitreader.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\bitwriter.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\cpu.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\crc.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\fixed.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\float.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\format.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\lpc.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\md5.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\memory.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\metadata.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\ogg_decoder_aspect.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\ogg_encoder_aspect.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\ogg_helper.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\ogg_mapping.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\stream_encoder.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\stream_encoder_framing.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\private\window.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\protected\all.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\protected\stream_decoder.h" />
-		<ClInclude Include="..\..\include\flac\src\libFLAC\include\protected\stream_encoder.h" />
-		<ClInclude Include="..\..\include\flac\include\FLAC\all.h" />
-		<ClInclude Include="..\..\include\flac\include\FLAC\assert.h" />
-		<ClInclude Include="..\..\include\flac\include\FLAC\callback.h" />
-		<ClInclude Include="..\..\include\flac\include\FLAC\export.h" />
-		<ClInclude Include="..\..\include\flac\include\FLAC\format.h" />
-		<ClInclude Include="..\..\include\flac\include\FLAC\metadata.h" />
-		<ClInclude Include="..\..\include\flac\include\FLAC\ordinals.h" />
-		<ClInclude Include="..\..\include\flac\include\FLAC\stream_decoder.h" />
-		<ClInclude Include="..\..\include\flac\include\FLAC\stream_encoder.h" />
-	</ItemGroup>
-	<ItemGroup>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\bitmath.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\bitreader.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\bitwriter.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\cpu.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\crc.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\fixed.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\fixed_intrin_sse2.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\fixed_intrin_ssse3.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\float.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\format.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\lpc.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\lpc_intrin_avx2.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\lpc_intrin_sse2.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\lpc_intrin_sse41.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\lpc_intrin_sse.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\md5.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\memory.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\metadata_iterators.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\metadata_object.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\ogg_decoder_aspect.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\ogg_encoder_aspect.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\ogg_helper.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\ogg_mapping.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_decoder.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder_intrin_avx2.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder_intrin_sse2.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder_intrin_ssse3.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder_framing.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\libFLAC\window.c">
-		</ClCompile>
-		<ClCompile Include="..\..\include\flac\src\share\win_utf8_io\win_utf8_io.c">
-		</ClCompile>
-	</ItemGroup>
-	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-	<ImportGroup Label="ExtensionTargets">
-	</ImportGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseNoLTCG|Win32">
+      <Configuration>ReleaseNoLTCG</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseNoLTCG|x64">
+      <Configuration>ReleaseNoLTCG</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>flac</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\lib\x86\Debug\</OutDir>
+    <IntDir>..\obj\flac\x86\Debug\</IntDir>
+    <TargetName>flac</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\lib\x86_64\Debug\</OutDir>
+    <IntDir>..\obj\flac\x86_64\Debug\</IntDir>
+    <TargetName>flac</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\lib\x86\Release\</OutDir>
+    <IntDir>..\obj\flac\x86\Release\</IntDir>
+    <TargetName>flac</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>..\lib\x86_64\Release\</OutDir>
+    <IntDir>..\obj\flac\x86_64\Release\</IntDir>
+    <TargetName>flac</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">
+    <OutDir>..\lib\x86\ReleaseNoLTCG\</OutDir>
+    <IntDir>..\obj\flac\x86\ReleaseNoLTCG\</IntDir>
+    <TargetName>flac</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">
+    <OutDir>..\lib\x86_64\ReleaseNoLTCG\</OutDir>
+    <IntDir>..\obj\flac\x86_64\ReleaseNoLTCG\</IntDir>
+    <TargetName>flac</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION="1.3.1";DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <FloatingPointModel>Default</FloatingPointModel>
+      <AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION="1.3.1";DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <FloatingPointModel>Default</FloatingPointModel>
+      <AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION="1.3.1";NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION="1.3.1";NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION="1.3.1";NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoLTCG|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION="1.3.1";NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\flac\include\FLAC\all.h" />
+    <ClInclude Include="..\..\include\flac\include\FLAC\assert.h" />
+    <ClInclude Include="..\..\include\flac\include\FLAC\callback.h" />
+    <ClInclude Include="..\..\include\flac\include\FLAC\export.h" />
+    <ClInclude Include="..\..\include\flac\include\FLAC\format.h" />
+    <ClInclude Include="..\..\include\flac\include\FLAC\metadata.h" />
+    <ClInclude Include="..\..\include\flac\include\FLAC\ordinals.h" />
+    <ClInclude Include="..\..\include\flac\include\FLAC\stream_decoder.h" />
+    <ClInclude Include="..\..\include\flac\include\FLAC\stream_encoder.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\all.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\bitmath.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\bitreader.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\bitwriter.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\cpu.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\crc.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\fixed.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\float.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\format.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\lpc.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\md5.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\memory.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\metadata.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\ogg_decoder_aspect.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\ogg_encoder_aspect.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\ogg_helper.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\ogg_mapping.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\stream_encoder.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\stream_encoder_framing.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\private\window.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\protected\all.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\protected\stream_decoder.h" />
+    <ClInclude Include="..\..\include\flac\src\libFLAC\include\protected\stream_encoder.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\include\flac\src\libFLAC\bitmath.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\bitreader.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\bitwriter.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\cpu.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\crc.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\fixed.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\fixed_intrin_sse2.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\fixed_intrin_ssse3.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\float.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\format.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\lpc.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\lpc_intrin_avx2.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\lpc_intrin_sse.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\lpc_intrin_sse2.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\lpc_intrin_sse41.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\md5.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\memory.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\metadata_iterators.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\metadata_object.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\ogg_decoder_aspect.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\ogg_encoder_aspect.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\ogg_helper.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\ogg_mapping.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\stream_decoder.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder_framing.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder_intrin_avx2.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder_intrin_sse2.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\stream_encoder_intrin_ssse3.c" />
+    <ClCompile Include="..\..\include\flac\src\libFLAC\window.c" />
+    <ClCompile Include="..\..\include\flac\src\share\win_utf8_io\win_utf8_io.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
 </Project>

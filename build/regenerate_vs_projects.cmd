@@ -6,7 +6,7 @@ cd build
 cd .. || goto err
 
 
-goto premake4
+goto premake5
 
 
 :premake4
