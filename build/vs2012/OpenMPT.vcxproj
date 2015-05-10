@@ -160,7 +160,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalOptions>/DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
@@ -188,7 +188,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalOptions>/DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
@@ -224,7 +224,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalOptions>/DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
@@ -260,7 +260,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalOptions>/DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
@@ -295,7 +295,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalOptions>/DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
@@ -330,7 +330,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalOptions>/DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
