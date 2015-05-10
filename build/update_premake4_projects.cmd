@@ -48,6 +48,7 @@ build\premake5.exe --group=OpenMPT vs2008 || goto err
 build\premake5.exe --group=all-externals vs2008 || goto err
 
 build\premake5.exe --group=libopenmpt_test vs2010 || goto err
+build\premake5.exe --group=foo_openmpt vs2010 || goto err
 build\premake5.exe --group=in_openmpt vs2010 || goto err
 build\premake5.exe --group=xmp-openmpt vs2010 || goto err
 build\premake5.exe --group=libopenmpt vs2010 || goto err

@@ -25,6 +25,7 @@ newoption {
   { "libopenmpt-all", "libopenmpt-all" },
   { "libopenmpt_test", "libopenmpt_test" },
   { "libopenmpt", "libopenmpt" },
+  { "foo_openmpt", "foo_openmpt" },
   { "in_openmpt", "in_openmpt" },
   { "xmp-openmpt", "xmp-openmpt" },
   { "openmpt123", "openmpt123" },
@@ -177,6 +178,7 @@ end
  dofile "../build/premake4-win/mpt-libopenmpt_examples.premake4.lua"
  dofile "../build/premake4-win/mpt-libopenmptDLL.premake4.lua"
  dofile "../build/premake4-win/mpt-libopenmpt_modplug.premake4.lua"
+ dofile "../build/premake4-win/mpt-foo_openmpt.premake4.lua"
  dofile "../build/premake4-win/mpt-in_openmpt.premake4.lua"
  dofile "../build/premake4-win/mpt-xmp-openmpt.premake4.lua"
  dofile "../build/premake4-win/mpt-openmpt123.premake4.lua"
@@ -202,6 +204,23 @@ end
 
 end
 
+if _OPTIONS["group"] == "foo_openmpt" then
+
+solution "foo_openmpt"
+ location ( "../build/" .. _ACTION )
+ configurations { "Debug", "Release" }
+if MPT_PREMAKE_VERSION == "5.0" then
+ platforms { "x86" }
+else
+ platforms { "x32" }
+end
+
+ dofile "../build/premake4-win/mpt-foo_openmpt.premake4.lua"
+ dofile "../build/premake4-win/mpt-libopenmpt.premake4.lua"
+ dofile "../build/premake4-win/ext-miniz.premake4.lua"
+
+end
+
 if _OPTIONS["group"] == "in_openmpt" then
 
 solution "in_openmpt"
@@ -213,10 +232,9 @@ else
  platforms { "x32" }
 end
 
- dofile "../build/premake4-win/mpt-libopenmpt.premake4.lua"
  dofile "../build/premake4-win/mpt-in_openmpt.premake4.lua"
+ dofile "../build/premake4-win/mpt-libopenmpt.premake4.lua"
  dofile "../build/premake4-win/ext-miniz.premake4.lua"
- dofile "../build/premake4-win/ext-pugixml.premake4.lua"
 
 end
 
@@ -231,8 +249,8 @@ else
  platforms { "x32" }
 end
 
- dofile "../build/premake4-win/mpt-libopenmpt.premake4.lua"
  dofile "../build/premake4-win/mpt-xmp-openmpt.premake4.lua"
+ dofile "../build/premake4-win/mpt-libopenmpt.premake4.lua"
  dofile "../build/premake4-win/ext-miniz.premake4.lua"
  dofile "../build/premake4-win/ext-pugixml.premake4.lua"
 
