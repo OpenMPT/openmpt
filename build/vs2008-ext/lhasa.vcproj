@@ -6,6 +6,7 @@
 	ProjectGUID="{6B11F6A8-B131-4D2B-80EF-5731A9016436}"
 	RootNamespace="lhasa"
 	Keyword="Win32Proj"
+	TargetFrameworkVersion="0"
 	>
 	<Platforms>
 		<Platform
@@ -20,8 +21,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\lib\x32\Debug"
-			IntermediateDirectory="..\obj\lhasa\x32\Debug"
+			OutputDirectory="..\lib\x86\Debug"
+			IntermediateDirectory="..\obj\lhasa\x86\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -52,7 +53,6 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
 				DebugInformationFormat="4"
 				CompileAs="1"
 			/>
@@ -75,9 +75,6 @@
 				Name="VCALinkTool"
 			/>
 			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
 				Name="VCXDCMakeTool"
 			/>
 			<Tool
@@ -87,19 +84,13 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\lib\x64\Debug"
-			IntermediateDirectory="..\obj\lhasa\x64\Debug"
+			OutputDirectory="..\lib\x86_64\Debug"
+			IntermediateDirectory="..\obj\lhasa\x86_64\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -131,7 +122,6 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -154,9 +144,6 @@
 				Name="VCALinkTool"
 			/>
 			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
 				Name="VCXDCMakeTool"
 			/>
 			<Tool
@@ -164,12 +151,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -177,8 +158,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\lib\x32\Release"
-			IntermediateDirectory="..\obj\lhasa\x32\Release"
+			OutputDirectory="..\lib\x86\Release"
+			IntermediateDirectory="..\obj\lhasa\x86\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -202,6 +183,7 @@
 				AdditionalOptions="/wd4244 /wd4267 /MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				WholeProgramOptimization="true"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -209,7 +191,6 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -232,9 +213,6 @@
 				Name="VCALinkTool"
 			/>
 			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
 				Name="VCXDCMakeTool"
 			/>
 			<Tool
@@ -242,12 +220,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -255,8 +227,146 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\lib\x64\Release"
-			IntermediateDirectory="..\obj\lhasa\x64\Release"
+			OutputDirectory="..\lib\x86_64\Release"
+			IntermediateDirectory="..\obj\lhasa\x86_64\Release"
+			ConfigurationType="4"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4244 /wd4267 /MP"
+				Optimization="3"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				WholeProgramOptimization="true"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\lhasa.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseNoLTCG|Win32"
+			OutputDirectory="..\lib\x86\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\lhasa\x86\ReleaseNoLTCG"
+			ConfigurationType="4"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4244 /wd4267 /MP"
+				Optimization="3"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="0"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\lhasa.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseNoLTCG|x64"
+			OutputDirectory="..\lib\x86_64\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\lhasa\x86_64\ReleaseNoLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -288,85 +398,6 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
-				DebugInformationFormat="3"
-				CompileAs="1"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa.lib"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="ReleaseNoLTCG|Win32"
-			OutputDirectory="..\lib\x32\ReleaseNoLTCG"
-			IntermediateDirectory="..\obj\lhasa\x32\ReleaseNoLTCG"
-			ConfigurationType="4"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4244 /wd4267 /GL- /MP"
-				Optimization="3"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				StringPooling="true"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="true"
-				FloatingPointModel="2"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
 				DebugInformationFormat="0"
 				CompileAs="1"
 			/>
@@ -389,9 +420,6 @@
 				Name="VCALinkTool"
 			/>
 			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
 				Name="VCXDCMakeTool"
 			/>
 			<Tool
@@ -399,91 +427,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="ReleaseNoLTCG|x64"
-			OutputDirectory="..\lib\x64\ReleaseNoLTCG"
-			IntermediateDirectory="..\obj\lhasa\x64\ReleaseNoLTCG"
-			ConfigurationType="4"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4244 /wd4267 /GL- /MP"
-				Optimization="3"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				StringPooling="true"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="true"
-				FloatingPointModel="2"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\lhasa.pdb"
-				DebugInformationFormat="0"
-				CompileAs="1"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lhasa.lib"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -494,165 +437,149 @@
 	</References>
 	<Files>
 		<Filter
-			Name="include"
-			Filter=""
+			Name="public"
 			>
-			<Filter
-				Name="lhasa"
-				Filter=""
+			<File
+				RelativePath="..\..\include\lhasa\lib\public\lha_decoder.h"
 				>
-				<Filter
-					Name="lib"
-					Filter=""
-					>
-					<Filter
-						Name="public"
-						Filter=""
-						>
-						<File
-							RelativePath="..\..\include\lhasa\lib\public\lha_decoder.h"
-							>
-						</File>
-						<File
-							RelativePath="..\..\include\lhasa\lib\public\lha_file_header.h"
-							>
-						</File>
-						<File
-							RelativePath="..\..\include\lhasa\lib\public\lha_input_stream.h"
-							>
-						</File>
-						<File
-							RelativePath="..\..\include\lhasa\lib\public\lha_reader.h"
-							>
-						</File>
-						<File
-							RelativePath="..\..\include\lhasa\lib\public\lhasa.h"
-							>
-						</File>
-					</Filter>
-					<File
-						RelativePath="..\..\include\lhasa\lib\crc16.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\ext_header.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lh1_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lh5_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lh6_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lh7_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lha_arch_unix.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lha_arch_win32.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lha_basic_reader.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lha_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lha_endian.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lha_file_header.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lha_input_stream.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lha_reader.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lhx_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lz5_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lzs_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\macbinary.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\null_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\pm1_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\pm2_decoder.c"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\crc16.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\ext_header.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lha_arch.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lha_basic_reader.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lha_decoder.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lha_endian.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lha_file_header.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\lha_input_stream.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\include\lhasa\lib\macbinary.h"
-						>
-					</File>
-				</Filter>
-			</Filter>
+			</File>
+			<File
+				RelativePath="..\..\include\lhasa\lib\public\lha_file_header.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\lhasa\lib\public\lha_input_stream.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\lhasa\lib\public\lha_reader.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\lhasa\lib\public\lhasa.h"
+				>
+			</File>
 		</Filter>
+		<File
+			RelativePath="..\..\include\lhasa\lib\crc16.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\crc16.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\ext_header.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\ext_header.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lh1_decoder.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lh5_decoder.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lh6_decoder.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lh7_decoder.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lha_arch.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lha_arch_unix.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lha_arch_win32.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lha_basic_reader.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lha_basic_reader.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lha_decoder.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lha_decoder.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lha_endian.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lha_endian.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lha_file_header.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lha_file_header.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lha_input_stream.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lha_input_stream.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lha_reader.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lhx_decoder.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lz5_decoder.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\lzs_decoder.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\macbinary.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\macbinary.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\null_decoder.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\pm1_decoder.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\include\lhasa\lib\pm2_decoder.c"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
