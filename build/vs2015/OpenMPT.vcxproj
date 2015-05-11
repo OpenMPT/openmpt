@@ -221,7 +221,6 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalOptions>/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>false</DataExecutionPrevention>
@@ -257,7 +256,6 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalOptions>/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>false</DataExecutionPrevention>
@@ -292,7 +290,6 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalOptions>/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>false</DataExecutionPrevention>
@@ -327,7 +324,6 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalOptions>/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>false</DataExecutionPrevention>

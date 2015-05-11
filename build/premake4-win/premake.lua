@@ -72,10 +72,6 @@ elseif MPT_PREMAKE_VERSION == "5.0" then
 end
 end
 
-function postprocess_vs2008_dynamicbase (filename)
-	replace_in_file(filename, "\t\t\t\tEnableCOMDATFolding=\"2\"", "\t\t\t\tEnableCOMDATFolding=\"2\"\n\t\t\t\tRandomizedBaseAddress=\"2\"")
-end
-
 function postprocess_vs2008_nonxcompat (filename)
 	replace_in_file(filename, "\t\t\t<Tool\n\t\t\t\tName=\"VCLinkerTool\"\n", "\t\t\t<Tool\n\t\t\t\tName=\"VCLinkerTool\"\n\t\t\t\t\DataExecutionPrevention=\"1\"\n")
 end
@@ -97,16 +93,6 @@ elseif MPT_PREMAKE_VERSION == "4.4" then
 	replace_in_file(filename, "<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>", "")
 elseif MPT_PREMAKE_VERSION == "5.0" then
 	replace_in_file(filename, "<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>", "")
-end
-end
-
-function postprocess_vs2010_dynamicbase (filename)
-if MPT_PREMAKE_VERSION == "4.3" then
-	replace_in_file(filename, "<EnableCOMDATFolding>true</EnableCOMDATFolding>", "<EnableCOMDATFolding>true</EnableCOMDATFolding>\n\t\t\t<RandomizedBaseAddress>true</RandomizedBaseAddress>")
-elseif MPT_PREMAKE_VERSION == "4.4" then
-	replace_in_file(filename, "<EnableCOMDATFolding>true</EnableCOMDATFolding>", "<EnableCOMDATFolding>true</EnableCOMDATFolding>\n      <RandomizedBaseAddress>true</RandomizedBaseAddress>")
-elseif MPT_PREMAKE_VERSION == "5.0" then
-	replace_in_file(filename, "<EnableCOMDATFolding>true</EnableCOMDATFolding>", "<EnableCOMDATFolding>true</EnableCOMDATFolding>\n      <RandomizedBaseAddress>true</RandomizedBaseAddress>")
 end
 end
 
@@ -146,10 +132,8 @@ newaction {
   postprocess_vs2008_main("build/vs2008/libopenmpt_example_c.vcproj")
   postprocess_vs2008_main("build/vs2008/libopenmpt_example_c_mem.vcproj")
   postprocess_vs2008_mfc("build/vs2008/OpenMPT.vcproj")
-  postprocess_vs2008_dynamicbase("build/vs2008/OpenMPT.vcproj")
   postprocess_vs2008_nonxcompat("build/vs2008/OpenMPT.vcproj")
   postprocess_vs2008_largeaddress("build/vs2008/OpenMPT.vcproj")
-  postprocess_vs2008_dynamicbase("build/vs2008/PluginBridge.vcproj")
   postprocess_vs2008_nonxcompat("build/vs2008/PluginBridge.vcproj")
   postprocess_vs2008_largeaddress("build/vs2008/PluginBridge.vcproj")
 
@@ -161,10 +145,8 @@ newaction {
   postprocess_vs2010_mfc("build/vs2010/in_openmpt.vcxproj")
   postprocess_vs2010_mfc("build/vs2010/xmp-openmpt.vcxproj")
   postprocess_vs2010_mfc("build/vs2010/OpenMPT.vcxproj")
-  postprocess_vs2010_dynamicbase("build/vs2010/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2010/OpenMPT.vcxproj")
   postprocess_vs2010_largeaddress("build/vs2010/OpenMPT.vcxproj")
-  postprocess_vs2010_dynamicbase("build/vs2010/PluginBridge.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2010/PluginBridge.vcxproj")
   postprocess_vs2010_largeaddress("build/vs2010/PluginBridge.vcxproj")
   fixbug_vs2010_pch("build/vs2010/OpenMPT.vcxproj")
@@ -179,10 +161,8 @@ if MPT_PREMAKE_VERSION == "5.0" then
   postprocess_vs2010_mfc("build/vs2012/in_openmpt.vcxproj")
   postprocess_vs2010_mfc("build/vs2012/xmp-openmpt.vcxproj")
   postprocess_vs2010_mfc("build/vs2012/OpenMPT.vcxproj")
-  postprocess_vs2010_dynamicbase("build/vs2012/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2012/OpenMPT.vcxproj")
   postprocess_vs2010_largeaddress("build/vs2012/OpenMPT.vcxproj")
-  postprocess_vs2010_dynamicbase("build/vs2012/PluginBridge.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2012/PluginBridge.vcxproj")
   postprocess_vs2010_largeaddress("build/vs2012/PluginBridge.vcxproj")
 	
@@ -194,10 +174,8 @@ if MPT_PREMAKE_VERSION == "5.0" then
   postprocess_vs2010_mfc("build/vs2013/in_openmpt.vcxproj")
   postprocess_vs2010_mfc("build/vs2013/xmp-openmpt.vcxproj")
   postprocess_vs2010_mfc("build/vs2013/OpenMPT.vcxproj")
-  postprocess_vs2010_dynamicbase("build/vs2013/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2013/OpenMPT.vcxproj")
   postprocess_vs2010_largeaddress("build/vs2013/OpenMPT.vcxproj")
-  postprocess_vs2010_dynamicbase("build/vs2013/PluginBridge.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2013/PluginBridge.vcxproj")
   postprocess_vs2010_largeaddress("build/vs2013/PluginBridge.vcxproj")
 
@@ -209,10 +187,8 @@ if MPT_PREMAKE_VERSION == "5.0" then
   postprocess_vs2010_mfc("build/vs2015/in_openmpt.vcxproj")
   postprocess_vs2010_mfc("build/vs2015/xmp-openmpt.vcxproj")
   postprocess_vs2010_mfc("build/vs2015/OpenMPT.vcxproj")
-  postprocess_vs2010_dynamicbase("build/vs2015/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2015/OpenMPT.vcxproj")
   postprocess_vs2010_largeaddress("build/vs2015/OpenMPT.vcxproj")
-  postprocess_vs2010_dynamicbase("build/vs2015/PluginBridge.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2015/PluginBridge.vcxproj")
   postprocess_vs2010_largeaddress("build/vs2015/PluginBridge.vcxproj")
 
