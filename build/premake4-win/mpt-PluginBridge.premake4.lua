@@ -20,19 +20,11 @@
   defines { "MODPLUG_TRACKER" }
   flags { "SEH", "Unicode", "WinMain", "ExtraWarnings" }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
-if MPT_PREMAKE_VERSION == "5.0" then
   filter { "architecture:x86" }
    targetsuffix "32"
   filter { "architecture:x86_64" }
    targetsuffix "64"
   filter {}
-else
-  configuration { "x32" }
-   targetsuffix "32"
-  configuration { "x64" }
-   targetsuffix "64"
-  configuration "*"
-end
   dofile "../../build/premake4-win/premake4-defaults-EXEGUI.lua"
   dofile "../../build/premake4-win/premake4-defaults.lua"
   flags { "StaticRuntime" }

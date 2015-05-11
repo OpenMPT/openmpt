@@ -1,5 +1,4 @@
 
-if MPT_PREMAKE_VERSION == "5.0" then
 if _ACTION == "vs2010" then
 
  project "foo_openmpt"
@@ -48,5 +47,4 @@ if _ACTION == "vs2010" then
   kind "StaticLib"
   language "C++"
 
-end
 end

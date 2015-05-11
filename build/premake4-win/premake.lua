@@ -6,14 +6,10 @@
 
 MPT_PREMAKE_VERSION = ""
 
-if _PREMAKE_VERSION == "4.3" then
- MPT_PREMAKE_VERSION = "4.3"
-elseif _PREMAKE_VERSION == "4.4-beta5" then
- MPT_PREMAKE_VERSION = "4.4"
-elseif _PREMAKE_VERSION == "5.0-alpha3" then
+if _PREMAKE_VERSION == "5.0-alpha3" then
  MPT_PREMAKE_VERSION = "5.0"
 else
- print "Premake 4.3 or 4.4-beta5 or 5.0-alpha3 required"
+ print "Premake 5.0-alpha3 required"
  os.exit(1)
 end
 
@@ -56,20 +52,8 @@ function replace_in_file (filename, from, to)
 	outfile:close()
 end
 
-function postprocess_vs2008_mfc (filename)
-if MPT_PREMAKE_VERSION == "4.3" then
-	replace_in_file(filename, "UseOfMFC=\"2\"", "UseOfMFC=\"1\"")
-end
-end
-
 function postprocess_vs2008_main (filename)
-if MPT_PREMAKE_VERSION == "4.3" then
 	replace_in_file(filename, "\t\t\t\tEntryPointSymbol=\"mainCRTStartup\"\n", "")
-elseif MPT_PREMAKE_VERSION == "4.4" then
-	replace_in_file(filename, "\t\t\t\tEntryPointSymbol=\"mainCRTStartup\"\n", "")
-elseif MPT_PREMAKE_VERSION == "5.0" then
-	replace_in_file(filename, "\t\t\t\tEntryPointSymbol=\"mainCRTStartup\"\n", "")
-end
 end
 
 function postprocess_vs2008_nonxcompat (filename)
@@ -80,46 +64,16 @@ function postprocess_vs2008_largeaddress (filename)
 	replace_in_file(filename, "\t\t\t<Tool\n\t\t\t\tName=\"VCLinkerTool\"\n", "\t\t\t<Tool\n\t\t\t\tName=\"VCLinkerTool\"\n\t\t\t\t\LargeAddressAware=\"2\"\n")
 end
 
-function postprocess_vs2010_mfc (filename)
-if MPT_PREMAKE_VERSION == "4.3" then
-	replace_in_file(filename, "<UseOfMfc>Dynamic</UseOfMfc>", "<UseOfMfc>Static</UseOfMfc>")
-end
-end
-
 function postprocess_vs2010_main (filename)
-if MPT_PREMAKE_VERSION == "4.3" then
 	replace_in_file(filename, "<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>", "")
-elseif MPT_PREMAKE_VERSION == "4.4" then
-	replace_in_file(filename, "<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>", "")
-elseif MPT_PREMAKE_VERSION == "5.0" then
-	replace_in_file(filename, "<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>", "")
-end
 end
 
 function postprocess_vs2010_nonxcompat (filename)
-if MPT_PREMAKE_VERSION == "4.3" then
-	replace_in_file(filename, "\t\t</Link>\n", "\t\t\t<DataExecutionPrevention>false</DataExecutionPrevention>\n\t\t</Link>\n")
-elseif MPT_PREMAKE_VERSION == "4.4" then
 	replace_in_file(filename, "    </Link>\n", "      <DataExecutionPrevention>false</DataExecutionPrevention>\n    </Link>\n")
-elseif MPT_PREMAKE_VERSION == "5.0" then
-	replace_in_file(filename, "    </Link>\n", "      <DataExecutionPrevention>false</DataExecutionPrevention>\n    </Link>\n")
-end
 end
 
 function postprocess_vs2010_largeaddress (filename)
-if MPT_PREMAKE_VERSION == "4.3" then
-	replace_in_file(filename, "\t\t</Link>\n", "\t\t\t<LargeAddressAware>true</LargeAddressAware>\n\t\t</Link>\n")
-elseif MPT_PREMAKE_VERSION == "4.4" then
 	replace_in_file(filename, "    </Link>\n", "      <LargeAddressAware>true</LargeAddressAware>\n    </Link>\n")
-elseif MPT_PREMAKE_VERSION == "5.0" then
-	replace_in_file(filename, "    </Link>\n", "      <LargeAddressAware>true</LargeAddressAware>\n    </Link>\n")
-end
-end
-
-function fixbug_vs2010_pch (filename)
-if MPT_PREMAKE_VERSION == "4.3" then
-	replace_in_file(filename, "</PrecompiledHeader>\n\t\t</ClCompile>", "</PrecompiledHeader>")
-end
 end
 
 newaction {
@@ -131,7 +85,6 @@ newaction {
   postprocess_vs2008_main("build/vs2008/openmpt123.vcproj")
   postprocess_vs2008_main("build/vs2008/libopenmpt_example_c.vcproj")
   postprocess_vs2008_main("build/vs2008/libopenmpt_example_c_mem.vcproj")
-  postprocess_vs2008_mfc("build/vs2008/OpenMPT.vcproj")
   postprocess_vs2008_nonxcompat("build/vs2008/OpenMPT.vcproj")
   postprocess_vs2008_largeaddress("build/vs2008/OpenMPT.vcproj")
   postprocess_vs2008_nonxcompat("build/vs2008/PluginBridge.vcproj")
@@ -142,25 +95,16 @@ newaction {
   postprocess_vs2010_main("build/vs2010/libopenmpt_example_c.vcxproj")
   postprocess_vs2010_main("build/vs2010/libopenmpt_example_c_mem.vcxproj")
   postprocess_vs2010_main("build/vs2010/libopenmpt_example_cxx.vcxproj")
-  postprocess_vs2010_mfc("build/vs2010/in_openmpt.vcxproj")
-  postprocess_vs2010_mfc("build/vs2010/xmp-openmpt.vcxproj")
-  postprocess_vs2010_mfc("build/vs2010/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2010/OpenMPT.vcxproj")
   postprocess_vs2010_largeaddress("build/vs2010/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2010/PluginBridge.vcxproj")
   postprocess_vs2010_largeaddress("build/vs2010/PluginBridge.vcxproj")
-  fixbug_vs2010_pch("build/vs2010/OpenMPT.vcxproj")
-
-if MPT_PREMAKE_VERSION == "5.0" then
   
 	postprocess_vs2010_main("build/vs2012/libopenmpt_test.vcxproj")
   postprocess_vs2010_main("build/vs2012/openmpt123.vcxproj")
   postprocess_vs2010_main("build/vs2012/libopenmpt_example_c.vcxproj")
   postprocess_vs2010_main("build/vs2012/libopenmpt_example_c_mem.vcxproj")
   postprocess_vs2010_main("build/vs2012/libopenmpt_example_cxx.vcxproj")
-  postprocess_vs2010_mfc("build/vs2012/in_openmpt.vcxproj")
-  postprocess_vs2010_mfc("build/vs2012/xmp-openmpt.vcxproj")
-  postprocess_vs2010_mfc("build/vs2012/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2012/OpenMPT.vcxproj")
   postprocess_vs2010_largeaddress("build/vs2012/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2012/PluginBridge.vcxproj")
@@ -171,9 +115,6 @@ if MPT_PREMAKE_VERSION == "5.0" then
   postprocess_vs2010_main("build/vs2013/libopenmpt_example_c.vcxproj")
   postprocess_vs2010_main("build/vs2013/libopenmpt_example_c_mem.vcxproj")
   postprocess_vs2010_main("build/vs2013/libopenmpt_example_cxx.vcxproj")
-  postprocess_vs2010_mfc("build/vs2013/in_openmpt.vcxproj")
-  postprocess_vs2010_mfc("build/vs2013/xmp-openmpt.vcxproj")
-  postprocess_vs2010_mfc("build/vs2013/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2013/OpenMPT.vcxproj")
   postprocess_vs2010_largeaddress("build/vs2013/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2013/PluginBridge.vcxproj")
@@ -184,15 +125,10 @@ if MPT_PREMAKE_VERSION == "5.0" then
   postprocess_vs2010_main("build/vs2015/libopenmpt_example_c.vcxproj")
   postprocess_vs2010_main("build/vs2015/libopenmpt_example_c_mem.vcxproj")
   postprocess_vs2010_main("build/vs2015/libopenmpt_example_cxx.vcxproj")
-  postprocess_vs2010_mfc("build/vs2015/in_openmpt.vcxproj")
-  postprocess_vs2010_mfc("build/vs2015/xmp-openmpt.vcxproj")
-  postprocess_vs2010_mfc("build/vs2015/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2015/OpenMPT.vcxproj")
   postprocess_vs2010_largeaddress("build/vs2015/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2015/PluginBridge.vcxproj")
   postprocess_vs2010_largeaddress("build/vs2015/PluginBridge.vcxproj")
-
-end
 
  end
 }
@@ -202,11 +138,7 @@ if _OPTIONS["group"] == "libopenmpt-all" then
 solution "libopenmpt-all"
  location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release" }
-if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86", "x86_64" }
-else
- platforms { "x32", "x64" }
-end
 
  dofile "../../build/premake4-win/mpt-libopenmpt_test.premake4.lua"
  dofile "../../build/premake4-win/mpt-libopenmpt.premake4.lua"
@@ -228,11 +160,7 @@ if _OPTIONS["group"] == "libopenmpt_test" then
 solution "libopenmpt_test"
  location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release" }
-if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86", "x86_64" }
-else
- platforms { "x32", "x64" }
-end
 
  dofile "../../build/premake4-win/mpt-libopenmpt_test.premake4.lua"
  dofile "../../build/premake4-win/ext-miniz.premake4.lua"
@@ -244,11 +172,7 @@ if _OPTIONS["group"] == "foo_openmpt" then
 solution "foo_openmpt"
  location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release" }
-if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86" }
-else
- platforms { "x32" }
-end
 
  dofile "../../build/premake4-win/mpt-foo_openmpt.premake4.lua"
  dofile "../../build/premake4-win/mpt-libopenmpt.premake4.lua"
@@ -261,11 +185,7 @@ if _OPTIONS["group"] == "in_openmpt" then
 solution "in_openmpt"
  location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release" }
-if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86" }
-else
- platforms { "x32" }
-end
 
  dofile "../../build/premake4-win/mpt-in_openmpt.premake4.lua"
  dofile "../../build/premake4-win/mpt-libopenmpt.premake4.lua"
@@ -278,11 +198,7 @@ if _OPTIONS["group"] == "xmp-openmpt" then
 solution "xmp-openmpt"
  location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release" }
-if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86" }
-else
- platforms { "x32" }
-end
 
  dofile "../../build/premake4-win/mpt-xmp-openmpt.premake4.lua"
  dofile "../../build/premake4-win/mpt-libopenmpt.premake4.lua"
@@ -297,11 +213,7 @@ if _OPTIONS["group"] == "libopenmpt" then
 solution "libopenmpt"
  location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release" }
-if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86", "x86_64" }
-else
- platforms { "x32", "x64" }
-end
 
  dofile "../../build/premake4-win/mpt-libopenmpt.premake4.lua"
  dofile "../../build/premake4-win/mpt-libopenmpt_examples.premake4.lua"
@@ -318,11 +230,7 @@ if _OPTIONS["group"] == "openmpt123" then
 solution "openmpt123"
  location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release" }
-if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86", "x86_64" }
-else
- platforms { "x32", "x64" }
-end
 
  dofile "../../build/premake4-win/mpt-openmpt123.premake4.lua"
  dofile "../../build/premake4-win/mpt-libopenmpt.premake4.lua"
@@ -338,11 +246,7 @@ if _OPTIONS["group"] == "PluginBridge" then
 solution "PluginBridge"
  location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release", "ReleaseNoLTCG" }
-if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86", "x86_64" }
-else
- platforms { "x32", "x64" }
-end
 
  dofile "../../build/premake4-win/mpt-PluginBridge.premake4.lua"
 
@@ -354,11 +258,7 @@ if _OPTIONS["group"] == "OpenMPT" then
 solution "OpenMPT"
  location ( "../../build/" .. _ACTION )
  configurations { "Debug", "Release", "ReleaseNoLTCG" }
-if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86", "x86_64" }
-else
- platforms { "x32", "x64" }
-end
  
  dofile "../../build/premake4-win/mpt-OpenMPT.premake4.lua"
  dofile "../../build/premake4-win/mpt-PluginBridge.premake4.lua"
@@ -382,11 +282,7 @@ if _OPTIONS["group"] == "all-externals" then
 solution "all-externals"
  location ( "../../build/" .. _ACTION .. "-ext" )
  configurations { "Debug", "Release", "ReleaseNoLTCG" }
-if MPT_PREMAKE_VERSION == "5.0" then
  platforms { "x86", "x86_64" }
-else
- platforms { "x32", "x64" }
-end
 
  dofile "../../build/premake4-win/ext-flac.premake4.lua"
  dofile "../../build/premake4-win/ext-lhasa.premake4.lua"
