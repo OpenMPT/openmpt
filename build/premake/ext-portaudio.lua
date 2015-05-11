@@ -72,6 +72,6 @@
   filter { "configurations:Debug" }
    defines { "PA_ENABLE_DEBUG_OUTPUT" }
   filter {}
-  dofile "../../build/premake4-win/premake4-defaults-LIB.lua"
-  dofile "../../build/premake4-win/premake4-defaults.lua"
+  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   flags { "StaticRuntime" }

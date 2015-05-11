@@ -11,6 +11,6 @@
   files {
    "../../include/smbPitchShift/smbPitchShift.h",
   }
-  dofile "../../build/premake4-win/premake4-defaults-LIB.lua"
-  dofile "../../build/premake4-win/premake4-defaults.lua"
+  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   flags { "StaticRuntime" }

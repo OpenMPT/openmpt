@@ -19,8 +19,8 @@ if _ACTION == "vs2010" then
   links { "libopenmpt", "miniz" }
 	links { "pfc", "foobar2000_SDK", "foobar2000_sdk_helpers", "foobar2000_component_client", "../../include/foobar2000sdk/foobar2000/shared/shared.lib" }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
-  dofile "../../build/premake4-win/premake4-defaults-DLL.lua"
-  dofile "../../build/premake4-win/premake4-defaults.lua"
+  dofile "../../build/premake/premake-defaults-DLL.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   flags { "StaticRuntime" }
 
  external "pfc"

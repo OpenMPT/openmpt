@@ -45,6 +45,6 @@
    "../../include/soundtouch/source/SoundTouchDLL/SoundTouchDLL.h",
   }
   defines { "DLL_EXPORTS" }
-  dofile "../../build/premake4-win/premake4-defaults-DLL.lua"
-  dofile "../../build/premake4-win/premake4-defaults.lua"
+  dofile "../../build/premake/premake-defaults-DLL.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   flags { "StaticRuntime" }

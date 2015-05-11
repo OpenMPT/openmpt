@@ -62,8 +62,8 @@
    "/DELAYLOAD:OpenMPT_SoundTouch_f32.dll",
   }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
-  dofile "../../build/premake4-win/premake4-defaults-EXEGUI.lua"
-  dofile "../../build/premake4-win/premake4-defaults.lua"
+  dofile "../../build/premake/premake-defaults-EXEGUI.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   flags { "StaticRuntime" }
 
 
@@ -99,6 +99,6 @@
    "winmm",
   }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
-  dofile "../../build/premake4-win/premake4-defaults-DLL.lua"
-  dofile "../../build/premake4-win/premake4-defaults.lua"
+  dofile "../../build/premake/premake-defaults-DLL.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   flags { "StaticRuntime" }
