@@ -140,18 +140,18 @@ solution "libopenmpt-all"
  configurations { "Debug", "Release" }
  platforms { "x86", "x86_64" }
 
- dofile "../../.build/premake/mpt-libopenmpt_test.lua"
- dofile "../../.build/premake/mpt-libopenmpt.lua"
- dofile "../../.build/premake/mpt-libopenmpt_examples.lua"
- dofile "../../.build/premake/mpt-libopenmptDLL.lua"
- dofile "../../.build/premake/mpt-libopenmpt_modplug.lua"
- dofile "../../.build/premake/mpt-foo_openmpt.lua"
- dofile "../../.build/premake/mpt-in_openmpt.lua"
- dofile "../../.build/premake/mpt-xmp-openmpt.lua"
- dofile "../../.build/premake/mpt-openmpt123.lua"
- dofile "../../.build/premake/ext-flac.lua"
- dofile "../../.build/premake/ext-miniz.lua"
- dofile "../../.build/premake/ext-portaudio.lua"
+ dofile "../../build/premake/mpt-libopenmpt_test.lua"
+ dofile "../../build/premake/mpt-libopenmpt.lua"
+ dofile "../../build/premake/mpt-libopenmpt_examples.lua"
+ dofile "../../build/premake/mpt-libopenmptDLL.lua"
+ dofile "../../build/premake/mpt-libopenmpt_modplug.lua"
+ dofile "../../build/premake/mpt-foo_openmpt.lua"
+ dofile "../../build/premake/mpt-in_openmpt.lua"
+ dofile "../../build/premake/mpt-xmp-openmpt.lua"
+ dofile "../../build/premake/mpt-openmpt123.lua"
+ dofile "../../build/premake/ext-flac.lua"
+ dofile "../../build/premake/ext-miniz.lua"
+ dofile "../../build/premake/ext-portaudio.lua"
 
 end
 
@@ -162,8 +162,8 @@ solution "libopenmpt_test"
  configurations { "Debug", "Release" }
  platforms { "x86", "x86_64" }
 
- dofile "../../.build/premake/mpt-libopenmpt_test.lua"
- dofile "../../.build/premake/ext-miniz.lua"
+ dofile "../../build/premake/mpt-libopenmpt_test.lua"
+ dofile "../../build/premake/ext-miniz.lua"
 
 end
 
@@ -174,9 +174,9 @@ solution "foo_openmpt"
  configurations { "Debug", "Release" }
  platforms { "x86" }
 
- dofile "../../.build/premake/mpt-foo_openmpt.lua"
- dofile "../../.build/premake/mpt-libopenmpt.lua"
- dofile "../../.build/premake/ext-miniz.lua"
+ dofile "../../build/premake/mpt-foo_openmpt.lua"
+ dofile "../../build/premake/mpt-libopenmpt.lua"
+ dofile "../../build/premake/ext-miniz.lua"
 
 end
 
@@ -187,9 +187,9 @@ solution "in_openmpt"
  configurations { "Debug", "Release" }
  platforms { "x86" }
 
- dofile "../../.build/premake/mpt-in_openmpt.lua"
- dofile "../../.build/premake/mpt-libopenmpt.lua"
- dofile "../../.build/premake/ext-miniz.lua"
+ dofile "../../build/premake/mpt-in_openmpt.lua"
+ dofile "../../build/premake/mpt-libopenmpt.lua"
+ dofile "../../build/premake/ext-miniz.lua"
 
 end
 
@@ -200,10 +200,10 @@ solution "xmp-openmpt"
  configurations { "Debug", "Release" }
  platforms { "x86" }
 
- dofile "../../.build/premake/mpt-xmp-openmpt.lua"
- dofile "../../.build/premake/mpt-libopenmpt.lua"
- dofile "../../.build/premake/ext-miniz.lua"
- dofile "../../.build/premake/ext-pugixml.lua"
+ dofile "../../build/premake/mpt-xmp-openmpt.lua"
+ dofile "../../build/premake/mpt-libopenmpt.lua"
+ dofile "../../build/premake/ext-miniz.lua"
+ dofile "../../build/premake/ext-pugixml.lua"
 
 end
 
@@ -215,13 +215,13 @@ solution "libopenmpt"
  configurations { "Debug", "Release" }
  platforms { "x86", "x86_64" }
 
- dofile "../../.build/premake/mpt-libopenmpt.lua"
- dofile "../../.build/premake/mpt-libopenmpt_examples.lua"
- dofile "../../.build/premake/mpt-libopenmptDLL.lua"
- dofile "../../.build/premake/mpt-libopenmpt_modplug.lua"
- dofile "../../.build/premake/ext-miniz.lua"
- dofile "../../.build/premake/ext-miniz-shared.lua"
- dofile "../../.build/premake/ext-portaudio.lua"
+ dofile "../../build/premake/mpt-libopenmpt.lua"
+ dofile "../../build/premake/mpt-libopenmpt_examples.lua"
+ dofile "../../build/premake/mpt-libopenmptDLL.lua"
+ dofile "../../build/premake/mpt-libopenmpt_modplug.lua"
+ dofile "../../build/premake/ext-miniz.lua"
+ dofile "../../build/premake/ext-miniz-shared.lua"
+ dofile "../../build/premake/ext-portaudio.lua"
 
 end
 
@@ -232,12 +232,12 @@ solution "openmpt123"
  configurations { "Debug", "Release" }
  platforms { "x86", "x86_64" }
 
- dofile "../../.build/premake/mpt-openmpt123.lua"
- dofile "../../.build/premake/mpt-libopenmpt.lua"
- dofile "../../.build/premake/ext-flac.lua"
- dofile "../../.build/premake/ext-miniz.lua"
- dofile "../../.build/premake/ext-ogg.lua"
- dofile "../../.build/premake/ext-portaudio.lua"
+ dofile "../../build/premake/mpt-openmpt123.lua"
+ dofile "../../build/premake/mpt-libopenmpt.lua"
+ dofile "../../build/premake/ext-flac.lua"
+ dofile "../../build/premake/ext-miniz.lua"
+ dofile "../../build/premake/ext-ogg.lua"
+ dofile "../../build/premake/ext-portaudio.lua"
 
 end
 
@@ -248,7 +248,7 @@ solution "PluginBridge"
  configurations { "Debug", "Release", "ReleaseNoLTCG" }
  platforms { "x86", "x86_64" }
 
- dofile "../../.build/premake/mpt-PluginBridge.lua"
+ dofile "../../build/premake/mpt-PluginBridge.lua"
 
 end
 
@@ -260,19 +260,19 @@ solution "OpenMPT"
  configurations { "Debug", "Release", "ReleaseNoLTCG" }
  platforms { "x86", "x86_64" }
  
- dofile "../../.build/premake/mpt-OpenMPT.lua"
- dofile "../../.build/premake/mpt-PluginBridge.lua"
- dofile "../../.build/premake/ext-flac.lua"
- dofile "../../.build/premake/ext-lhasa.lua"
- dofile "../../.build/premake/ext-minizip.lua"
- dofile "../../.build/premake/ext-ogg.lua"
- dofile "../../.build/premake/ext-portaudio.lua"
- dofile "../../.build/premake/ext-portmidi.lua"
- dofile "../../.build/premake/ext-r8brain.lua"
- dofile "../../.build/premake/ext-smbPitchShift.lua"
- dofile "../../.build/premake/ext-soundtouch.lua"
- dofile "../../.build/premake/ext-UnRAR.lua"
- dofile "../../.build/premake/ext-zlib.lua"
+ dofile "../../build/premake/mpt-OpenMPT.lua"
+ dofile "../../build/premake/mpt-PluginBridge.lua"
+ dofile "../../build/premake/ext-flac.lua"
+ dofile "../../build/premake/ext-lhasa.lua"
+ dofile "../../build/premake/ext-minizip.lua"
+ dofile "../../build/premake/ext-ogg.lua"
+ dofile "../../build/premake/ext-portaudio.lua"
+ dofile "../../build/premake/ext-portmidi.lua"
+ dofile "../../build/premake/ext-r8brain.lua"
+ dofile "../../build/premake/ext-smbPitchShift.lua"
+ dofile "../../build/premake/ext-soundtouch.lua"
+ dofile "../../build/premake/ext-UnRAR.lua"
+ dofile "../../build/premake/ext-zlib.lua"
 
 end
 
@@ -284,19 +284,19 @@ solution "all-externals"
  configurations { "Debug", "Release", "ReleaseNoLTCG" }
  platforms { "x86", "x86_64" }
 
- dofile "../../.build/premake/ext-flac.lua"
- dofile "../../.build/premake/ext-lhasa.lua"
- dofile "../../.build/premake/ext-miniz.lua"
- dofile "../../.build/premake/ext-miniz-shared.lua"
- dofile "../../.build/premake/ext-minizip.lua"
- dofile "../../.build/premake/ext-ogg.lua"
- dofile "../../.build/premake/ext-portaudio.lua"
- dofile "../../.build/premake/ext-portmidi.lua"
- dofile "../../.build/premake/ext-pugixml.lua"
- dofile "../../.build/premake/ext-r8brain.lua"
- dofile "../../.build/premake/ext-smbPitchShift.lua"
- dofile "../../.build/premake/ext-soundtouch.lua"
- dofile "../../.build/premake/ext-UnRAR.lua"
- dofile "../../.build/premake/ext-zlib.lua"
+ dofile "../../build/premake/ext-flac.lua"
+ dofile "../../build/premake/ext-lhasa.lua"
+ dofile "../../build/premake/ext-miniz.lua"
+ dofile "../../build/premake/ext-miniz-shared.lua"
+ dofile "../../build/premake/ext-minizip.lua"
+ dofile "../../build/premake/ext-ogg.lua"
+ dofile "../../build/premake/ext-portaudio.lua"
+ dofile "../../build/premake/ext-portmidi.lua"
+ dofile "../../build/premake/ext-pugixml.lua"
+ dofile "../../build/premake/ext-r8brain.lua"
+ dofile "../../build/premake/ext-smbPitchShift.lua"
+ dofile "../../build/premake/ext-soundtouch.lua"
+ dofile "../../build/premake/ext-UnRAR.lua"
+ dofile "../../build/premake/ext-zlib.lua"
 
 end
