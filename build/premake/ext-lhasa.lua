@@ -45,6 +45,6 @@
    "../../include/lhasa/lib/public/lhasa.h",
   }
   buildoptions { "/wd4244", "/wd4267" }
-  dofile "../../build/premake4-win/premake4-defaults-LIB.lua"
-  dofile "../../build/premake4-win/premake4-defaults.lua"
+  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   flags { "StaticRuntime" }

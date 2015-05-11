@@ -14,8 +14,8 @@ if _ACTION ~= "vs2008" then
    "../../examples/libopenmpt_example_cxx.cpp",
   }
   links { "libopenmpt", "miniz", "portaudio", "ksuser", "winmm" }
-  dofile "../../build/premake4-win/premake4-defaults-EXE.lua"
-  dofile "../../build/premake4-win/premake4-defaults.lua"
+  dofile "../../build/premake/premake-defaults-EXE.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   flags { "StaticRuntime" }
 
 end
@@ -33,8 +33,8 @@ end
    "../../examples/libopenmpt_example_c.c",
   }
   links { "libopenmpt", "miniz", "portaudio", "ksuser", "winmm" }
-  dofile "../../build/premake4-win/premake4-defaults-EXE.lua"
-  dofile "../../build/premake4-win/premake4-defaults.lua"
+  dofile "../../build/premake/premake-defaults-EXE.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   flags { "StaticRuntime" }
 
  project "libopenmpt_example_c_mem"
@@ -50,6 +50,6 @@ end
    "../../examples/libopenmpt_example_c_mem.c",
   }
   links { "libopenmpt", "miniz", "portaudio", "ksuser", "winmm" }
-  dofile "../../build/premake4-win/premake4-defaults-EXE.lua"
-  dofile "../../build/premake4-win/premake4-defaults.lua"
+  dofile "../../build/premake/premake-defaults-EXE.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   flags { "StaticRuntime" }

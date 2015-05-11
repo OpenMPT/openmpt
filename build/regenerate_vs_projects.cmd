@@ -6,7 +6,7 @@ cd build
 cd .. || goto err
 
 
-echo dofile "build/premake4-win/premake.lua" > premake5.lua || goto err
+echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 
 include\premake\premake5.exe --group=libopenmpt_test vs2008 || goto err
 include\premake\premake5.exe --group=libopenmpt vs2008 || goto err

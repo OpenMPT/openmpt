@@ -28,6 +28,6 @@
    "winmm",
   }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
-  dofile "../../build/premake4-win/premake4-defaults-EXE.lua"
-  dofile "../../build/premake4-win/premake4-defaults.lua"
+  dofile "../../build/premake/premake-defaults-EXE.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   flags { "StaticRuntime" }

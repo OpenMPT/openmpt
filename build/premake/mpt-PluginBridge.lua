@@ -25,7 +25,7 @@
   filter { "architecture:x86_64" }
    targetsuffix "64"
   filter {}
-  dofile "../../build/premake4-win/premake4-defaults-EXEGUI.lua"
-  dofile "../../build/premake4-win/premake4-defaults.lua"
+  dofile "../../build/premake/premake-defaults-EXEGUI.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   flags { "StaticRuntime" }
 
