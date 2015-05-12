@@ -593,6 +593,7 @@ static std::string ToUTF8(const std::wstring &str, char replacement = '?')
 		wchar_t c = in[i];
 		if ( c > 0x1fffff || c < 0 ) {
 			out.push_back( replacement );
+			continue;
 		}
 
 		uint32 ucs4 = 0;
