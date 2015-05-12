@@ -1027,14 +1027,17 @@ template <typename T> struct to_string_type { };
 template <> struct to_string_type<std::string    > { typedef std::string  type; };
 template <> struct to_string_type<char           > { typedef std::string  type; };
 template <> struct to_string_type<char *         > { typedef std::string  type; };
+template <> struct to_string_type<const char     > { typedef std::string  type; };
 template <> struct to_string_type<const char *   > { typedef std::string  type; };
 template <> struct to_string_type<std::wstring   > { typedef std::wstring type; };
 template <> struct to_string_type<wchar_t        > { typedef std::wstring type; };
 template <> struct to_string_type<wchar_t *      > { typedef std::wstring type; };
+template <> struct to_string_type<const wchar_t  > { typedef std::wstring type; };
 template <> struct to_string_type<const wchar_t *> { typedef std::wstring type; };
 #if MPT_USTRING_MODE_UTF8
 template <> struct to_string_type<mpt::ustring   > { typedef mpt::ustring type; };
 #endif
+template <typename T, std::size_t N> struct to_string_type<T [N]> { typedef typename to_string_type<T>::type type; };
 
 std::string PrintImpl(const std::string & format
 	, const std::string & x1 = std::string()
@@ -1075,8 +1078,6 @@ mpt::ustring PrintImpl(const mpt::ustring & format
 
 } // namespace detail
 
-// C and C++ string version
-
 template<typename Tformat
 >
 typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat & format
@@ -1252,206 +1253,6 @@ template<typename Tformat
 	, typename T8
 >
 typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat & format
-	, const T1& x1
-	, const T2& x2
-	, const T3& x3
-	, const T4& x4
-	, const T5& x5
-	, const T6& x6
-	, const T7& x7
-	, const T8& x8
-)
-{
-	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(Tstring(format)
-		, ToStringTFunctor<Tstring>()(x1)
-		, ToStringTFunctor<Tstring>()(x2)
-		, ToStringTFunctor<Tstring>()(x3)
-		, ToStringTFunctor<Tstring>()(x4)
-		, ToStringTFunctor<Tstring>()(x5)
-		, ToStringTFunctor<Tstring>()(x6)
-		, ToStringTFunctor<Tstring>()(x7)
-		, ToStringTFunctor<Tstring>()(x8)
-	);
-}
-
-// array version for literals
-
-template<typename Tformat, std::size_t N
->
-typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
-)
-{
-	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(Tstring(format)
-	);
-}
-
-template<typename Tformat, std::size_t N
-	, typename T1
->
-typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
-	, const T1& x1
-)
-{
-	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(Tstring(format)
-		, ToStringTFunctor<Tstring>()(x1)
-	);
-}
-
-template<typename Tformat, std::size_t N
-	, typename T1
-	, typename T2
->
-typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
-	, const T1& x1
-	, const T2& x2
-)
-{
-	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(Tstring(format)
-		, ToStringTFunctor<Tstring>()(x1)
-		, ToStringTFunctor<Tstring>()(x2)
-	);
-}
-
-template<typename Tformat, std::size_t N
-	, typename T1
-	, typename T2
-	, typename T3
->
-typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
-	, const T1& x1
-	, const T2& x2
-	, const T3& x3
-)
-{
-	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(Tstring(format)
-		, ToStringTFunctor<Tstring>()(x1)
-		, ToStringTFunctor<Tstring>()(x2)
-		, ToStringTFunctor<Tstring>()(x3)
-	);
-}
-
-template<typename Tformat, std::size_t N
-	, typename T1
-	, typename T2
-	, typename T3
-	, typename T4
->
-typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
-	, const T1& x1
-	, const T2& x2
-	, const T3& x3
-	, const T4& x4
-)
-{
-	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(Tstring(format)
-		, ToStringTFunctor<Tstring>()(x1)
-		, ToStringTFunctor<Tstring>()(x2)
-		, ToStringTFunctor<Tstring>()(x3)
-		, ToStringTFunctor<Tstring>()(x4)
-	);
-}
-
-template<typename Tformat, std::size_t N
-	, typename T1
-	, typename T2
-	, typename T3
-	, typename T4
-	, typename T5
->
-typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
-	, const T1& x1
-	, const T2& x2
-	, const T3& x3
-	, const T4& x4
-	, const T5& x5
-)
-{
-	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(Tstring(format)
-		, ToStringTFunctor<Tstring>()(x1)
-		, ToStringTFunctor<Tstring>()(x2)
-		, ToStringTFunctor<Tstring>()(x3)
-		, ToStringTFunctor<Tstring>()(x4)
-		, ToStringTFunctor<Tstring>()(x5)
-	);
-}
-
-template<typename Tformat, std::size_t N
-	, typename T1
-	, typename T2
-	, typename T3
-	, typename T4
-	, typename T5
-	, typename T6
->
-typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
-	, const T1& x1
-	, const T2& x2
-	, const T3& x3
-	, const T4& x4
-	, const T5& x5
-	, const T6& x6
-)
-{
-	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(Tstring(format)
-		, ToStringTFunctor<Tstring>()(x1)
-		, ToStringTFunctor<Tstring>()(x2)
-		, ToStringTFunctor<Tstring>()(x3)
-		, ToStringTFunctor<Tstring>()(x4)
-		, ToStringTFunctor<Tstring>()(x5)
-		, ToStringTFunctor<Tstring>()(x6)
-	);
-}
-
-template<typename Tformat, std::size_t N
-	, typename T1
-	, typename T2
-	, typename T3
-	, typename T4
-	, typename T5
-	, typename T6
-	, typename T7
->
-typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
-	, const T1& x1
-	, const T2& x2
-	, const T3& x3
-	, const T4& x4
-	, const T5& x5
-	, const T6& x6
-	, const T7& x7
-)
-{
-	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return detail::PrintImpl(Tstring(format)
-		, ToStringTFunctor<Tstring>()(x1)
-		, ToStringTFunctor<Tstring>()(x2)
-		, ToStringTFunctor<Tstring>()(x3)
-		, ToStringTFunctor<Tstring>()(x4)
-		, ToStringTFunctor<Tstring>()(x5)
-		, ToStringTFunctor<Tstring>()(x6)
-		, ToStringTFunctor<Tstring>()(x7)
-	);
-}
-
-template<typename Tformat, std::size_t N
-	, typename T1
-	, typename T2
-	, typename T3
-	, typename T4
-	, typename T5
-	, typename T6
-	, typename T7
-	, typename T8
->
-typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat (&format)[N]
 	, const T1& x1
 	, const T2& x2
 	, const T3& x3
