@@ -692,38 +692,44 @@ void InitCharsets()
 static bool HasCharset(Charset charset)
 {
 	MPT_ASSERT(CharsetsInitialized);
+	bool result = false;
 	switch(charset)
 	{
 #if defined(MPT_WITH_CHARSET_LOCALE)
-		case CharsetLocale:      return true; break;
+		case CharsetLocale:      result = true; break;
 #endif
-		case CharsetUTF8:        return HasCharsetUTF8;        break;
-		case CharsetASCII:       return HasCharsetASCII;       break;
-		case CharsetISO8859_1:   return HasCharsetISO8859_1;   break;
-		case CharsetISO8859_15:  return HasCharsetISO8859_15;  break;
-		case CharsetCP437:       return HasCharsetCP437;       break;
-		case CharsetWindows1252: return HasCharsetWindows1252; break;
+		case CharsetUTF8:        result = HasCharsetUTF8;        break;
+		case CharsetASCII:       result = HasCharsetASCII;       break;
+		case CharsetISO8859_1:   result = HasCharsetISO8859_1;   break;
+		case CharsetISO8859_15:  result = HasCharsetISO8859_15;  break;
+		case CharsetCP437:       result = HasCharsetCP437;       break;
+		case CharsetWindows1252: result = HasCharsetWindows1252; break;
+		case CharsetCP437AMS:    result = false; break;
+		case CharsetCP437AMS2:   result = false; break;
 	}
-	return false;
+	return result;
 }
 
 #else // !MODPLUG_TRACKER
 
 static bool HasCharset(Charset charset)
 {
+	bool result = false;
 	switch(charset)
 	{
 #if defined(MPT_WITH_CHARSET_LOCALE)
-	case CharsetLocale:      return true; break;
+		case CharsetLocale:      result = true; break;
 #endif
-	case CharsetUTF8:        return TestCodePage(CP_UTF8); break;
-	case CharsetASCII:       return TestCodePage(20127);   break;
-	case CharsetISO8859_1:   return TestCodePage(28591);   break;
-	case CharsetISO8859_15:  return TestCodePage(28605);   break;
-	case CharsetCP437:       return TestCodePage(437);     break;
-	case CharsetWindows1252: return TestCodePage(1252);    break;
+		case CharsetUTF8:        result = TestCodePage(CP_UTF8); break;
+		case CharsetASCII:       result = TestCodePage(20127);   break;
+		case CharsetISO8859_1:   result = TestCodePage(28591);   break;
+		case CharsetISO8859_15:  result = TestCodePage(28605);   break;
+		case CharsetCP437:       result = TestCodePage(437);     break;
+		case CharsetWindows1252: result = TestCodePage(1252);    break;
+		case CharsetCP437AMS:    result = false; break;
+		case CharsetCP437AMS2:   result = false; break;
 	}
-	return false;
+	return result;
 }
 
 #endif // MODPLUG_TRACKER
