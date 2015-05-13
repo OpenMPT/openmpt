@@ -13,6 +13,8 @@
 #include "../common/FlagSet.h"
 #include "../soundlib/Snd_defs.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 // Mutually exclusive hint categories
 enum HintCategory
 {
@@ -201,3 +203,5 @@ struct CommentHint : public UpdateHint
 	static const HintCategory classCategory = HINTCAT_COMMENTS;
 	CommentHint() : UpdateHint(classCategory) { type = HINT_MODCOMMENTS; }
 };
+
+OPENMPT_NAMESPACE_END

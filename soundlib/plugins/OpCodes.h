@@ -10,6 +10,8 @@
 
 #pragma once
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifndef NO_VST
 static const char *VstOpCodes[] =
 {
@@ -95,3 +97,5 @@ static const char *VstOpCodes[] =
 	"effGetNumMidiOutputChannels"
 };
 #endif
+
+OPENMPT_NAMESPACE_END
