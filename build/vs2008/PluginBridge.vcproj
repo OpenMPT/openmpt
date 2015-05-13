@@ -206,9 +206,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
-				Optimization="3"
+				Optimization="2"
 				AdditionalIncludeDirectories="..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
-				WholeProgramOptimization="true"
 				PreprocessorDefinitions="MODPLUG_TRACKER;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -291,9 +290,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
-				Optimization="3"
+				Optimization="2"
 				AdditionalIncludeDirectories="..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
-				WholeProgramOptimization="true"
 				PreprocessorDefinitions="MODPLUG_TRACKER;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -350,9 +348,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="ReleaseNoLTCG|Win32"
+			Name="ReleaseLTCG|Win32"
 			OutputDirectory="..\..\bin\Win32"
-			IntermediateDirectory="..\obj\PluginBridge\x86\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\PluginBridge\x86\ReleaseLTCG"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
@@ -377,6 +375,7 @@
 				AdditionalOptions="/MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				WholeProgramOptimization="true"
 				PreprocessorDefinitions="MODPLUG_TRACKER;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -385,7 +384,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -404,7 +403,7 @@
 				DataExecutionPrevention="1"
 				OutputFile="$(OutDir)\PluginBridge32.exe"
 				LinkIncremental="1"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -433,9 +432,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="ReleaseNoLTCG|x64"
+			Name="ReleaseLTCG|x64"
 			OutputDirectory="..\..\bin\x64"
-			IntermediateDirectory="..\obj\PluginBridge\x86_64\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\PluginBridge\x86_64\ReleaseLTCG"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
@@ -461,6 +460,7 @@
 				AdditionalOptions="/MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				WholeProgramOptimization="true"
 				PreprocessorDefinitions="MODPLUG_TRACKER;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -469,7 +469,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -488,7 +488,7 @@
 				DataExecutionPrevention="1"
 				OutputFile="$(OutDir)\PluginBridge64.exe"
 				LinkIncremental="1"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"

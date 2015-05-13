@@ -5,26 +5,26 @@
    targetdir "../../build/lib/x86/Debug"
   filter { "kind:StaticLib", "configurations:Release", "architecture:x86" }
    targetdir "../../build/lib/x86/Release"
-  filter { "kind:StaticLib", "configurations:ReleaseNoLTCG", "architecture:x86" }
-   targetdir "../../build/lib/x86/ReleaseNoLTCG"
+  filter { "kind:StaticLib", "configurations:ReleaseLTCG", "architecture:x86" }
+   targetdir "../../build/lib/x86/ReleaseLTCG"
   filter { "kind:StaticLib", "configurations:Debug", "architecture:x86_64" }
    targetdir "../../build/lib/x86_64/Debug"
   filter { "kind:StaticLib", "configurations:Release", "architecture:x86_64" }
    targetdir "../../build/lib/x86_64/Release"
-  filter { "kind:StaticLib", "configurations:ReleaseNoLTCG", "architecture:x86_64" }
-   targetdir "../../build/lib/x86_64/ReleaseNoLTCG"
+  filter { "kind:StaticLib", "configurations:ReleaseLTCG", "architecture:x86_64" }
+   targetdir "../../build/lib/x86_64/ReleaseLTCG"
   	
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:x86" }
    targetdir "../../bin/Win32-Debug"
   filter { "kind:not StaticLib", "configurations:Release", "architecture:x86" }
    targetdir "../../bin/Win32"
-  filter { "kind:not StaticLib", "configurations:ReleaseNoLTCG", "architecture:x86" }
+  filter { "kind:not StaticLib", "configurations:ReleaseLTCG", "architecture:x86" }
    targetdir "../../bin/Win32"
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:x86_64" }
    targetdir "../../bin/x64-Debug"
   filter { "kind:not StaticLib", "configurations:Release", "architecture:x86_64" }
    targetdir "../../bin/x64"
-  filter { "kind:not StaticLib", "configurations:ReleaseNoLTCG", "architecture:x86_64" }
+  filter { "kind:not StaticLib", "configurations:ReleaseLTCG", "architecture:x86_64" }
    targetdir "../../bin/x64"
 
   filter { "action:vs2008" }
@@ -39,13 +39,13 @@
   filter { "configurations:Release" }
   configuration "Release"
    defines { "NDEBUG" }
-   flags { "Symbols", "LinkTimeOptimization", "MultiProcessorCompile" }
-   optimize "Full"
+   flags { "Symbols", "MultiProcessorCompile" }
+   optimize "Speed"
    floatingpoint "Fast"
 
-  filter { "configurations:ReleaseNoLTCG" }
+  filter { "configurations:ReleaseLTCG" }
    defines { "NDEBUG" }
-   flags { "MultiProcessorCompile" }
+   flags { "Symbols", "MultiProcessorCompile", "LinkTimeOptimization" }
    optimize "Full"
    floatingpoint "Fast"
 

@@ -200,9 +200,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
-				Optimization="3"
+				Optimization="2"
 				AdditionalIncludeDirectories="..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
-				WholeProgramOptimization="true"
 				PreprocessorDefinitions="LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -282,9 +281,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
-				Optimization="3"
+				Optimization="2"
 				AdditionalIncludeDirectories="..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
-				WholeProgramOptimization="true"
 				PreprocessorDefinitions="LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
