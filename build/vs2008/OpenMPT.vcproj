@@ -2009,6 +2009,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\soundlib\plugins\OpCodes.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\soundlib\plugins\PlugInterface.h"
 					>
 				</File>

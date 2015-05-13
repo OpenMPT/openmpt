@@ -90,8 +90,19 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 			}
 		} else
 		{
-			FileReader chunk = file.ReadChunk(file.ReadUint32BE());
-			plugin.Dispatch(effSetChunk, 1, chunk.GetLength(), const_cast<char *>(chunk.GetRawData()), 0);
+			uint32 chunkSize = file.ReadUint32BE();
+			// Some nasty plugins (e.g. SmartElectronix Ambience) write to our memory block.
+			// Directly writing to a memory-mapped file block results in a crash...
+			char *chunkData = new (std::nothrow) char[chunkSize];
+			if(chunkData)
+			{
+				file.ReadRaw(chunkData, chunkSize);
+				plugin.Dispatch(effSetChunk, 1, chunkSize, chunkData, 0);
+				delete[] chunkData;
+			} else
+			{
+				return outOfMemory;
+			}
 		}
 		plugin.Dispatch(effEndSetProgram, 0, 0, nullptr, 0.0f);
 	} else if((header.fxMagic == bankMagic || header.fxMagic == chunkBankMagic) && firstChunk)
@@ -126,8 +137,19 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 			plugin.SetCurrentProgram(oldCurrentProgram);
 		} else
 		{
-			FileReader chunk = file.ReadChunk(file.ReadUint32BE());
-			plugin.Dispatch(effSetChunk, 0, chunk.GetLength(), const_cast<char *>(chunk.GetRawData()), 0);
+			uint32 chunkSize = file.ReadUint32BE();
+			// Some nasty plugins (e.g. SmartElectronix Ambience) write to our memory block.
+			// Directly writing to a memory-mapped file block results in a crash...
+			char *chunkData = new (std::nothrow) char[chunkSize];
+			if(chunkData)
+			{
+				file.ReadRaw(chunkData, chunkSize);
+				plugin.Dispatch(effSetChunk, 0, chunkSize, chunkData, 0);
+				delete[] chunkData;
+			} else
+			{
+				return outOfMemory;
+			}
 		}
 		if(header.version >= 2)
 		{
@@ -282,6 +304,8 @@ const char *VSTPresets::GetErrorMessage(ErrorCode code)
 		return "This file appears to be for a different plugin.";
 	case VSTPresets::wrongParameters:
 		return "The number of parameters in this file is incompatible with the current plugin.";
+	case VSTPresets::outOfMemory:
+		return "Not enough memory to load preset data.";
 	}
 	return nullptr;
 }

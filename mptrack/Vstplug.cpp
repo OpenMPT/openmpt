@@ -26,6 +26,7 @@
 #include "../common/mptFileIO.h"
 #include "../common/FileReader.h"
 #include "FileDialog.h"
+#include "../soundlib/plugins/OpCodes.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -1088,7 +1089,15 @@ VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 		}
 	} catch (...)
 	{
-		ReportPlugException(mpt::String::Print(L"Exception in Dispatch(%1)!", opCode));
+		std::string codeStr;
+		if(opCode < CountOf(VstOpCodes))
+		{
+			codeStr = VstOpCodes[opCode];
+		} else
+		{
+			codeStr = mpt::ToString(opCode);
+		}
+		ReportPlugException(mpt::String::Print(L"Exception in Dispatch(%1)!", codeStr));
 	}
 
 	return result;
@@ -1982,13 +1991,11 @@ void CVstPlugin::SetZxxParameter(UINT nParam, UINT nValue)
 	SetParameter(nParam, fValue);
 }
 
-//rewbs.smoothVST
 UINT CVstPlugin::GetZxxParameter(UINT nParam)
 //-------------------------------------------
 {
 	return (UINT) (GetParameter(nParam) * 127.0f + 0.5f);
 }
-//end rewbs.smoothVST
 
 
 // Automate a parameter from the plugin GUI (both custom and default plugin GUI)
@@ -2001,6 +2008,8 @@ void CVstPlugin::AutomateParameter(PlugParamIndex param)
 	{
 		return;
 	}
+
+	// TODO: Check if any params are actually automatable, and if there are but this one isn't, chicken out
 
 	if (m_bRecordAutomation)
 	{
@@ -2129,7 +2138,7 @@ void CVstPlugin::RestoreAllParameters(long nProgram)
 	{
 		UINT nParams = (m_Effect.numParams > 0) ? m_Effect.numParams : 0;
 		UINT nLen = nParams * sizeof(float);
-		ULONG nType = *(ULONG *)m_pMixStruct->pPluginData;
+		uint32_t nType = *(uint32_t *)m_pMixStruct->pPluginData;
 
 		if ((Dispatch(effIdentify, 0, 0, nullptr, 0) == 'NvEf') && (nType == 'NvEf'))
 		{
