@@ -181,9 +181,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4018 /wd4267 /MP"
-				Optimization="3"
+				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win;..\..\include\msinttypes\stdint"
-				WholeProgramOptimization="true"
 				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -251,6 +250,74 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4018 /wd4267 /MP"
+				Optimization="2"
+				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win;..\..\include\msinttypes\stdint"
+				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win;..\..\include\msinttypes\stdint"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\portaudio.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseLTCG|Win32"
+			OutputDirectory="..\lib\x86\ReleaseLTCG"
+			IntermediateDirectory="..\obj\portaudio\x86\ReleaseLTCG"
+			ConfigurationType="4"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4018 /wd4267 /MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win;..\..\include\msinttypes\stdint"
 				WholeProgramOptimization="true"
@@ -296,77 +363,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="ReleaseNoLTCG|Win32"
-			OutputDirectory="..\lib\x86\ReleaseNoLTCG"
-			IntermediateDirectory="..\obj\portaudio\x86\ReleaseNoLTCG"
-			ConfigurationType="4"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4018 /wd4267 /MP"
-				Optimization="3"
-				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win;..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				StringPooling="true"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="true"
-				FloatingPointModel="2"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				DebugInformationFormat="0"
-				CompileAs="1"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win;..\..\include\msinttypes\stdint"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\portaudio.lib"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="ReleaseNoLTCG|x64"
-			OutputDirectory="..\lib\x86_64\ReleaseNoLTCG"
-			IntermediateDirectory="..\obj\portaudio\x86_64\ReleaseNoLTCG"
+			Name="ReleaseLTCG|x64"
+			OutputDirectory="..\lib\x86_64\ReleaseLTCG"
+			IntermediateDirectory="..\obj\portaudio\x86_64\ReleaseLTCG"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -391,6 +390,7 @@
 				AdditionalOptions="/wd4018 /wd4267 /MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win;..\..\include\msinttypes\stdint"
+				WholeProgramOptimization="true"
 				PreprocessorDefinitions="PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -398,7 +398,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
 			<Tool

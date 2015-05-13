@@ -245,7 +245,7 @@ if _OPTIONS["group"] == "PluginBridge" then
 
 solution "PluginBridge"
  location ( "../../build/" .. _ACTION )
- configurations { "Debug", "Release", "ReleaseNoLTCG" }
+ configurations { "Debug", "Release", "ReleaseLTCG" }
  platforms { "x86", "x86_64" }
 
  dofile "../../build/premake/mpt-PluginBridge.lua"
@@ -257,7 +257,7 @@ if _OPTIONS["group"] == "OpenMPT" then
 
 solution "OpenMPT"
  location ( "../../build/" .. _ACTION )
- configurations { "Debug", "Release", "ReleaseNoLTCG" }
+ configurations { "Debug", "Release", "ReleaseLTCG" }
  platforms { "x86", "x86_64" }
  
  dofile "../../build/premake/mpt-OpenMPT.lua"
@@ -281,7 +281,7 @@ if _OPTIONS["group"] == "all-externals" then
 
 solution "all-externals"
  location ( "../../build/" .. _ACTION .. "-ext" )
- configurations { "Debug", "Release", "ReleaseNoLTCG" }
+ configurations { "Debug", "Release", "ReleaseLTCG" }
  platforms { "x86", "x86_64" }
 
  dofile "../../build/premake/ext-flac.lua"

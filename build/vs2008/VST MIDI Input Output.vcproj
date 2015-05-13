@@ -204,9 +204,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
-				Optimization="3"
+				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\vstsdk2.4;..\..\include;..\..\include\msinttypes\stdint"
-				WholeProgramOptimization="true"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -288,9 +287,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
-				Optimization="3"
+				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\vstsdk2.4;..\..\include;..\..\include\msinttypes\stdint"
-				WholeProgramOptimization="true"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -346,9 +344,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="ReleaseNoLTCG|Win32"
+			Name="ReleaseLTCG|Win32"
 			OutputDirectory="..\..\bin\Win32"
-			IntermediateDirectory="..\obj\PluginMidiInputOutput\x86\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\PluginMidiInputOutput\x86\ReleaseLTCG"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -373,6 +371,7 @@
 				AdditionalOptions="/MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\vstsdk2.4;..\..\include;..\..\include\msinttypes\stdint"
+				WholeProgramOptimization="true"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -380,7 +379,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -398,7 +397,7 @@
 				AdditionalDependencies="winmm.lib"
 				OutputFile="$(OutDir)\MIDI Input Output.dll"
 				LinkIncremental="1"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -428,9 +427,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="ReleaseNoLTCG|x64"
+			Name="ReleaseLTCG|x64"
 			OutputDirectory="..\..\bin\x64"
-			IntermediateDirectory="..\obj\PluginMidiInputOutput\x86_64\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\PluginMidiInputOutput\x86_64\ReleaseLTCG"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -456,6 +455,7 @@
 				AdditionalOptions="/MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\vstsdk2.4;..\..\include;..\..\include\msinttypes\stdint"
+				WholeProgramOptimization="true"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -463,7 +463,7 @@
 				FloatingPointModel="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -481,7 +481,7 @@
 				AdditionalDependencies="winmm.lib"
 				OutputFile="$(OutDir)\MIDI Input Output.dll"
 				LinkIncremental="1"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"

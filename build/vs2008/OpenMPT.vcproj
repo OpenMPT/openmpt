@@ -213,9 +213,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
-				Optimization="3"
+				Optimization="2"
 				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
-				WholeProgramOptimization="true"
 				PreprocessorDefinitions="MODPLUG_TRACKER;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -301,9 +300,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
-				Optimization="3"
+				Optimization="2"
 				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
-				WholeProgramOptimization="true"
 				PreprocessorDefinitions="MODPLUG_TRACKER;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -362,9 +360,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="ReleaseNoLTCG|Win32"
+			Name="ReleaseLTCG|Win32"
 			OutputDirectory="..\..\bin\Win32"
-			IntermediateDirectory="..\obj\OpenMPT\x86\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\OpenMPT\x86\ReleaseLTCG"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			CharacterSet="2"
@@ -390,6 +388,7 @@
 				AdditionalOptions="/MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				WholeProgramOptimization="true"
 				PreprocessorDefinitions="MODPLUG_TRACKER;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -399,7 +398,7 @@
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
 				WarningLevel="4"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -419,7 +418,7 @@
 				AdditionalOptions="/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				OutputFile="$(OutDir)\OpenMPT.exe"
 				LinkIncremental="1"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -448,9 +447,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="ReleaseNoLTCG|x64"
+			Name="ReleaseLTCG|x64"
 			OutputDirectory="..\..\bin\x64"
-			IntermediateDirectory="..\obj\OpenMPT\x86_64\ReleaseNoLTCG"
+			IntermediateDirectory="..\obj\OpenMPT\x86_64\ReleaseLTCG"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			CharacterSet="2"
@@ -477,6 +476,7 @@
 				AdditionalOptions="/MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				WholeProgramOptimization="true"
 				PreprocessorDefinitions="MODPLUG_TRACKER;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				ExceptionHandling="2"
@@ -486,7 +486,7 @@
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
 				WarningLevel="4"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -506,7 +506,7 @@
 				AdditionalOptions="/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				OutputFile="$(OutDir)\OpenMPT.exe"
 				LinkIncremental="1"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -733,7 +733,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="ReleaseNoLTCG|Win32"
+					Name="ReleaseLTCG|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -741,7 +741,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="ReleaseNoLTCG|x64"
+					Name="ReleaseLTCG|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
