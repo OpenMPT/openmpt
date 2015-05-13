@@ -507,6 +507,9 @@
     <ClInclude Include="..\..\soundlib\patternContainer.h">
       <Filter>soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\OpCodes.h">
+      <Filter>soundlib\plugins</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\PlugInterface.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>

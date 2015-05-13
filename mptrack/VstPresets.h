@@ -26,6 +26,7 @@ public:
 		invalidFile,
 		wrongPlugin,
 		wrongParameters,
+		outOfMemory,
 	};
 
 #ifndef NO_VST

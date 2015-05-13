@@ -1077,6 +1077,9 @@
     <ClInclude Include="FadeLaws.h">
       <Filter>Header Files\mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\soundlib\plugins\OpCodes.h">
+      <Filter>Header Files\soundlib\plugins</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">
