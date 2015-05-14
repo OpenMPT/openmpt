@@ -1,4 +1,4 @@
-rem @echo off
+@echo off
 
 set BATCH_DIR=%~dp0
 cd %BATCH_DIR%
