@@ -14,7 +14,7 @@ Developers:
 <initials> nick name  / real name        [email @openmpt.org]
    <al>    Relabs     / Ahti Leppänen    [relabs]
    <ec>    Ericus     / Eric Chavanon    [ericus]
-   <jh>    manx       / Joern Heusipp    [manx]
+   <jh>    manx       / Jörn Heusipp     [manx]
    <js>    Saga Musix / Johannes Schultz [sagamusix]
    <rf>    rewbs      / Robin Fernandes  [rewbs]
    <sp>    pelya      / Sergiy Pylypenko [pelya]
