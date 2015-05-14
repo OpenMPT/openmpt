@@ -402,7 +402,7 @@ std::string GetFullCreditsString()
 		"\n"
 		"Contributors:\n"
 		"Johannes Schultz (2008-2015)\n"
-		"Joern Heusipp (2012-2015)\n"
+		"J\xC3\xB6rn Heusipp (2012-2015)\n"
 		"Ahti Lepp\xC3\xA4nen (2005-2011)\n"
 		"Robin Fernandes (2004-2007)\n"
 		"Sergiy Pylypenko (2007)\n"
