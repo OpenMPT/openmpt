@@ -80,19 +80,19 @@ std::string ToStr(const VersionNum v)
 	}
 }
 
-VersionNum RemoveBuildNumber(const VersionNum num)
+VersionNum RemoveBuildNumber(const VersionNum num_)
 {
-	return (num & 0xFFFFFF00);
+	return (num_ & 0xFFFFFF00);
 }
 
-bool IsTestBuild(const VersionNum num)
+bool IsTestBuild(const VersionNum num_)
 {
 	return (
 			// Legacy
-			(num > MAKE_VERSION_NUMERIC(1,17,02,54) && num < MAKE_VERSION_NUMERIC(1,18,02,00) && num != MAKE_VERSION_NUMERIC(1,18,00,00))
+			(num_ > MAKE_VERSION_NUMERIC(1,17,02,54) && num_ < MAKE_VERSION_NUMERIC(1,18,02,00) && num_ != MAKE_VERSION_NUMERIC(1,18,00,00))
 		||
 			// Test builds have non-zero VER_MINORMINOR
-			(num > MAKE_VERSION_NUMERIC(1,18,02,00) && RemoveBuildNumber(num) != num)
+			(num_ > MAKE_VERSION_NUMERIC(1,18,02,00) && RemoveBuildNumber(num) != num_)
 		);
 }
 

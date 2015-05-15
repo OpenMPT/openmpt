@@ -43,10 +43,10 @@ namespace MptVersion
 	// Return a version without build number (the last number in the version).
 	// The current versioning scheme uses this number only for test builds, and it should be 00 for official builds,
 	// So sometimes it might be wanted to do comparisons without the build number.
-	VersionNum RemoveBuildNumber(const VersionNum num);
+	VersionNum RemoveBuildNumber(const VersionNum num_);
 
 	// Returns true if a given version number is from a test build, false if it's a release build.
-	bool IsTestBuild(const VersionNum num = MptVersion::num);
+	bool IsTestBuild(const VersionNum num_ = MptVersion::num);
 
 	// Return true if this is a debug build with no optimizations
 	bool IsDebugBuild();

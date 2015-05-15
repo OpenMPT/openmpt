@@ -61,7 +61,7 @@ private:
 	DitherMode mode;
 public:
 	Dither();
-	void SetMode(DitherMode mode);
+	void SetMode(DitherMode mode_);
 	DitherMode GetMode() const;
 	void Reset();
 	void Process(int *mixbuffer, std::size_t count, std::size_t channels, int bits);
