@@ -723,7 +723,7 @@ class ComponentManagerSettings
 	: public IComponentManagerSettings
 {
 private:
-	mutable TrackerSettings &conf;
+	TrackerSettings &conf;
 public:
 	ComponentManagerSettings(TrackerSettings &conf)
 		: conf(conf)

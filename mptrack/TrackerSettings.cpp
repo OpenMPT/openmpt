@@ -443,7 +443,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 				if(m_BufferLength_DEPRECATED > 1000) m_BufferLength_DEPRECATED = 1000; // 1sec
 				if((m_SoundDeviceID_DEPRECATED & SoundDevice::Legacy::MaskType) == SoundDevice::Legacy::TypeASIO)
 				{
-					m_LatencyMS = m_BufferLength_DEPRECATED;
+					m_LatencyMS = m_BufferLength_DEPRECATED * 1;
 					m_UpdateIntervalMS = m_BufferLength_DEPRECATED / 8;
 				} else
 				{

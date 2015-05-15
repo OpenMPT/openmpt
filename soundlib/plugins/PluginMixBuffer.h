@@ -46,19 +46,19 @@ protected:
 public:
 
 	// Allocate input and output buffers
-	bool Initialize(size_t inputs, size_t outputs)
-	//--------------------------------------------
+	bool Initialize(size_t inputs_, size_t outputs_)
+	//----------------------------------------------
 	{
 		// Short cut - we do not need to recreate the buffers.
-		if(this->inputs == inputs && this->outputs == outputs)
+		if(inputs == inputs_ && outputs == outputs_)
 		{
 			return true;
 		}
 
 		Free();
 
-		this->inputs = inputs;
-		this->outputs = outputs;
+		inputs = inputs_;
+		outputs = outputs_;
 
 		try
 		{
