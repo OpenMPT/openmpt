@@ -2,7 +2,8 @@
 
 set MY_DIR=%CD%
 
-cd build
+set BATCH_DIR=%~dp0
+cd %BATCH_DIR% || goto err
 cd .. || goto err
 
 
