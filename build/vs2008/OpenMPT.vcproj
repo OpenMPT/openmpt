@@ -85,6 +85,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="../../mptrack/res/OpenMPT.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -169,6 +170,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="../../mptrack/res/OpenMPT.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -255,6 +257,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="../../mptrack/res/OpenMPT.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -342,6 +345,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="../../mptrack/res/OpenMPT.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -429,6 +433,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="../../mptrack/res/OpenMPT.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -517,6 +522,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="../../mptrack/res/OpenMPT.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -1441,6 +1447,14 @@
 				RelativePath="..\..\mptrack\view_com.h"
 				>
 			</File>
+			<Filter
+				Name="res"
+				>
+				<File
+					RelativePath="..\..\mptrack\res\OpenMPT.manifest"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="pluginBridge"
