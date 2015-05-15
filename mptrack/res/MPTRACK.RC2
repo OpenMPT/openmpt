@@ -13,42 +13,42 @@
 #include "../common/versionNumber.h"
 #include <winver.h>
 
-#define VER_FILEVERSION             VER_MAJORMAJOR,VER_MAJOR,VER_MINOR,VER_MINORMINOR
-#define VER_FILEVERSION_STR			VER_STRINGIZE(VER_FILEVERSION)
+#define VER_FILEVERSION       VER_MAJORMAJOR,VER_MAJOR,VER_MINOR,VER_MINORMINOR
+#define VER_FILEVERSION_STR   VER_STRINGIZE(VER_FILEVERSION)
 
 #ifndef _DEBUG
-	#define VER_DEBUG				0
+    #define VER_DEBUG   0
 #else
-	#define VER_DEBUG				VS_FF_DEBUG
+    #define VER_DEBUG   VS_FF_DEBUG
 #endif
 
-#define VER_FILEFLAGSMASK			VS_FFI_FILEFLAGSMASK
-#define VER_FILEFLAGS      			(VS_FF_PRIVATEBUILD|VS_FF_PRERELEASE|VER_DEBUG)
-//Note: Changing this might need changes to BLOCK "StringFileInfo" defined below.
+// Note: Changing this might need changes to BLOCK "StringFileInfo" defined below.
+#define VER_FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+#define VER_FILEFLAGS       (VS_FF_PRIVATEBUILD|VS_FF_PRERELEASE|VER_DEBUG)
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION		VER_FILEVERSION
- PRODUCTVERSION		VER_FILEVERSION
- FILEFLAGSMASK		VER_FILEFLAGSMASK
- FILEFLAGS			VER_FILEFLAGS
- FILEOS				0x4L
- FILETYPE			0x1L
- FILESUBTYPE		0x0L
+ FILEVERSION      VER_FILEVERSION
+ PRODUCTVERSION   VER_FILEVERSION
+ FILEFLAGSMASK    VER_FILEFLAGSMASK
+ FILEFLAGS        VER_FILEFLAGS
+ FILEOS           0x4L
+ FILETYPE         0x1L
+ FILESUBTYPE      0x0L
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "Olivier Lapicque / OpenMPT team"
-            VALUE "FileDescription", "OpenMPT / ModPlug Tracker"
-            VALUE "FileVersion", VER_FILEVERSION_STR
-            VALUE "InternalName", "ModPlug Tracker"
-            VALUE "LegalCopyright", "Copyright ©1997-2003 Olivier Lapicque; ©2004-2015 contributors."
-            VALUE "LegalTrademarks", "M.O.D.P.L.U.G"
+            VALUE "CompanyName",      "Olivier Lapicque / OpenMPT team"
+            VALUE "FileDescription",  "OpenMPT / ModPlug Tracker"
+            VALUE "FileVersion",      VER_FILEVERSION_STR
+            VALUE "InternalName",     "ModPlug Tracker"
+            VALUE "LegalCopyright",   "Copyright ©1997-2003 Olivier Lapicque; ©2004-2015 contributors."
+            VALUE "LegalTrademarks",  "M.O.D.P.L.U.G"
             VALUE "OriginalFilename", "mptrack.exe"
-			VALUE "PrivateBuild", ""
-            VALUE "ProductName", "OpenMPT / ModPlug Tracker"
-            VALUE "ProductVersion", VER_FILEVERSION_STR
+            VALUE "PrivateBuild",     ""
+            VALUE "ProductName",      "OpenMPT / ModPlug Tracker"
+            VALUE "ProductVersion",   VER_FILEVERSION_STR
         END
     END
     BLOCK "VarFileInfo"
