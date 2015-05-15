@@ -472,7 +472,7 @@ public:
 class ISettingChanged
 {
 public:
-	virtual void SettingChanged(const SettingPath &path) = 0;
+	virtual void SettingChanged(const SettingPath &changedPath) = 0;
 };
 
 enum SettingFlushMode
@@ -699,9 +699,9 @@ public:
 		value = conf.Read<T>(path);
 		return *this;
 	}
-	void SettingChanged(const SettingPath &path)
+	void SettingChanged(const SettingPath &changedPath)
 	{
-		MPT_UNREFERENCED_PARAMETER(path);
+		MPT_UNREFERENCED_PARAMETER(changedPath);
 		Update();
 	}
 	template<typename Trhs> CachedSetting & operator += (const Trhs &rhs) { T tmp = *this; tmp += rhs; *this = tmp; return *this; }
