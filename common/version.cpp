@@ -166,7 +166,7 @@ int GetRevision()
 bool IsDirty()
 {
 	#if defined(OPENMPT_VERSION_DIRTY)
-		return OPENMPT_VERSION_DIRTY;
+		return OPENMPT_VERSION_DIRTY ? true : false;
 	#elif defined(OPENMPT_VERSION_SVNVERSION)
 		std::string svnversion = OPENMPT_VERSION_SVNVERSION;
 		if(svnversion.length() == 0)
@@ -186,7 +186,7 @@ bool IsDirty()
 bool HasMixedRevisions()
 {
 	#if defined(OPENMPT_VERSION_MIXEDREVISIONS)
-		return OPENMPT_VERSION_MIXEDREVISIONS;
+		return OPENMPT_VERSION_MIXEDREVISIONS ? true : false;
 	#elif defined(OPENMPT_VERSION_SVNVERSION)
 		std::string svnversion = OPENMPT_VERSION_SVNVERSION;
 		if(svnversion.length() == 0)
@@ -218,7 +218,7 @@ bool HasMixedRevisions()
 bool IsPackage()
 {
 	#if defined(OPENMPT_VERSION_IS_PACKAGE)
-		return OPENMPT_VERSION_IS_PACKAGE;
+		return OPENMPT_VERSION_IS_PACKAGE ? true : false;
 	#else
 		return false;
 	#endif
