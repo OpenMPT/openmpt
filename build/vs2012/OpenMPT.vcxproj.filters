@@ -7,6 +7,9 @@
     <Filter Include="mptrack">
       <UniqueIdentifier>{778900D8-E368-7F73-EC80-0A4A58DFE5D4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="mptrack\res">
+      <UniqueIdentifier>{3025A28F-9CDA-1A85-25CF-145C91831189}</UniqueIdentifier>
+    </Filter>
     <Filter Include="pluginBridge">
       <UniqueIdentifier>{E1FAE259-CD5D-72FE-76E3-AAB462253E81}</UniqueIdentifier>
     </Filter>
@@ -28,6 +31,11 @@
     <Filter Include="unarchiver">
       <UniqueIdentifier>{DCBADFD6-C872-2124-317A-FA7F1D51BC14}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\mptrack\res\OpenMPT.manifest">
+      <Filter>mptrack\res</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\AudioCriticalSection.h">

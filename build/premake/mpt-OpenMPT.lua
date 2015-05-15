@@ -18,6 +18,9 @@
    "../../build/svn_version",
   }
   files {
+   "../../mptrack/res/OpenMPT.manifest",
+  }
+  files {
    "../../common/*.cpp",
    "../../common/*.h",
    "../../soundlib/*.cpp",
