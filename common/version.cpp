@@ -320,25 +320,25 @@ std::string GetBuildFeaturesString()
 
 std::string GetRevisionString()
 {
-	std::string str;
+	std::string result;
 	if(GetRevision() == 0)
 	{
-		return str;
+		return result;
 	}
-	str = std::string("-r") + mpt::ToString(GetRevision());
+	result = std::string("-r") + mpt::ToString(GetRevision());
 	if(HasMixedRevisions())
 	{
-		str += "!";
+		result += "!";
 	}
 	if(IsDirty())
 	{
-		str += "+";
+		result += "+";
 	}
 	if(IsPackage())
 	{
-		str += "p";
+		result += "p";
 	}
-	return str;
+	return result;
 }
 
 std::string GetVersionStringExtended()

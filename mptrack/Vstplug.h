@@ -212,8 +212,8 @@ public:
 	bool ShouldProcessSilence() { return isInstrument() || ((m_Effect.flags & effFlagsNoSoundInStop) == 0 && Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f) != 1); }
 	void ResetSilence() { m_MixState.ResetSilence(); }
 #ifdef MODPLUG_TRACKER
-	forceinline CModDoc *GetModDoc();
-	forceinline const CModDoc *GetModDoc() const;
+	CModDoc *GetModDoc();
+	const CModDoc *GetModDoc() const;
 #endif // MODPLUG_TRACKER
 	inline CSoundFile &GetSoundFile() { return m_SndFile; }
 	inline const CSoundFile &GetSoundFile() const { return m_SndFile; }
