@@ -22,6 +22,9 @@ if _ACTION == "vs2010" then
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   flags { "StaticRuntime" }
+  filter { "configurations:Release" }
+   flags { "LinkTimeOptimization" }
+  filter {}
 
  external "pfc"
   location "../../include/foobar2000sdk/pfc"
