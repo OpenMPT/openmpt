@@ -16,15 +16,21 @@
 #define VER_FILEVERSION       VER_MAJORMAJOR,VER_MAJOR,VER_MINOR,VER_MINORMINOR
 #define VER_FILEVERSION_STR   VER_STRINGIZE(VER_FILEVERSION)
 
-#ifndef _DEBUG
-    #define VER_DEBUG   0
-#else
+#ifdef _DEBUG
     #define VER_DEBUG   VS_FF_DEBUG
+#else
+    #define VER_DEBUG   0
+#endif
+
+#if (VER_MINOR == 0) || (VER_MINORMINOR != 0)
+    #define VER_PRERELEASE   VS_FF_PRERELEASE
+#else
+    #define VER_PRERELEASE   0
 #endif
 
 // Note: Changing this might need changes to BLOCK "StringFileInfo" defined below.
 #define VER_FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
-#define VER_FILEFLAGS       (VS_FF_PRIVATEBUILD|VS_FF_PRERELEASE|VER_DEBUG)
+#define VER_FILEFLAGS       (VER_DEBUG|VER_PRERELEASE)
 
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION      VER_FILEVERSION
@@ -46,7 +52,6 @@ BEGIN
             VALUE "LegalCopyright",   "Copyright ©1997-2003 Olivier Lapicque; ©2004-2015 contributors."
             VALUE "LegalTrademarks",  "M.O.D.P.L.U.G"
             VALUE "OriginalFilename", "mptrack.exe"
-            VALUE "PrivateBuild",     ""
             VALUE "ProductName",      "OpenMPT / ModPlug Tracker"
             VALUE "ProductVersion",   VER_FILEVERSION_STR
         END
