@@ -1089,13 +1089,13 @@ VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 		}
 	} catch (...)
 	{
-		std::string codeStr;
+		std::wstring codeStr;
 		if(opCode < CountOf(VstOpCodes))
 		{
-			codeStr = VstOpCodes[opCode];
+			codeStr = mpt::ToWide(mpt::CharsetASCII, VstOpCodes[opCode]);
 		} else
 		{
-			codeStr = mpt::ToString(opCode);
+			codeStr = mpt::ToWString(opCode);
 		}
 		ReportPlugException(mpt::String::Print(L"Exception in Dispatch(%1)!", codeStr));
 	}
