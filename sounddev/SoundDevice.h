@@ -103,12 +103,6 @@ public:
 };
 
 
-////////////////////////////////////////////////////////////////////////////////////
-//
-// SoundDevice::Base Interface
-//
-
-
 static const MPT_UCHAR_TYPE TypeWAVEOUT          [] = MPT_ULITERAL("WaveOut");
 static const MPT_UCHAR_TYPE TypeDSOUND           [] = MPT_ULITERAL("DirectSound");
 static const MPT_UCHAR_TYPE TypeASIO             [] = MPT_ULITERAL("ASIO");

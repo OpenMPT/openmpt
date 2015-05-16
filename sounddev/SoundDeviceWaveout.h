@@ -25,12 +25,6 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
-////////////////////////////////////////////////////////////////////////////////////
-//
-// MMSYSTEM WaveOut device
-//
-
-
 class ComponentWaveOut : public ComponentBuiltin
 {
 	MPT_DECLARE_COMPONENT_MEMBERS
