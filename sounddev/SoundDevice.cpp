@@ -109,11 +109,6 @@ ChannelMapping ChannelMapping::FromString(const mpt::ustring &str)
 }
 
 
-///////////////////////////////////////////////////////////////////////////////////////
-//
-// SoundDevice::Base base class
-//
-
 Base::Base(SoundDevice::Info info)
 //--------------------------------
 	: m_Source(nullptr)

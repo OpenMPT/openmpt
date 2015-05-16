@@ -26,12 +26,6 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 	
-///////////////////////////////////////////////////////////////////////////////////////
-//
-// Global Functions
-//
-
-
 	struct CompareType
 	{
 		std::map<SoundDevice::Type, int> ordering;
@@ -45,6 +39,7 @@ namespace SoundDevice {
 			return (ordering[x.type] > ordering[y.type]);
 		}
 	};
+
 
 void Manager::ReEnumerate()
 //-------------------------

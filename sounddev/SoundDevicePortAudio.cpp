@@ -24,11 +24,6 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 	
-///////////////////////////////////////////////////////////////////////////////////////
-//
-// Portaudio Device implementation
-//
-
 #ifndef NO_PORTAUDIO
 
 #define PALOG(x, ...) do { } while(0)

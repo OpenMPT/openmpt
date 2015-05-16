@@ -98,11 +98,6 @@ public:
 #define asioCallUncatched(asiocall) m_pAsioDrv-> asiocall
 
 
-///////////////////////////////////////////////////////////////////////////////////////
-//
-// ASIO Device implementation
-//
-
 #define ASIO_MAXDRVNAMELEN	1024
 
 CASIODevice *CASIODevice::g_CallbacksInstance = nullptr;

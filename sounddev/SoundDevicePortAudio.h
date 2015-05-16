@@ -23,11 +23,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace SoundDevice {
 
-////////////////////////////////////////////////////////////////////////////////////
-//
-// Protaudio device
-//
-
 #ifndef NO_PORTAUDIO
 
 //=========================================

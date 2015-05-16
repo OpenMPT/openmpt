@@ -24,11 +24,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace SoundDevice {
 
-////////////////////////////////////////////////////////////////////////////////////
-//
-// DirectSound device
-//
-
 #ifndef NO_DSOUND
 
 class ComponentDirectSound : public ComponentBuiltin

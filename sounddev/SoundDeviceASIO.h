@@ -25,11 +25,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace SoundDevice {
 
-////////////////////////////////////////////////////////////////////////////////////
-//
-// ASIO device
-//
-
 #ifndef NO_ASIO
 
 class ComponentASIO : public ComponentBuiltin
