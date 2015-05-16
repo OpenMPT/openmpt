@@ -26,6 +26,7 @@ newoption {
   { "xmp-openmpt", "xmp-openmpt" },
   { "openmpt123", "openmpt123" },
   { "PluginBridge", "PluginBridge" },
+  { "OpenMPT-VSTi", "OpenMPT-VSTi" },
   { "OpenMPT", "OpenMPT" },
   { "all-externals", "all-externals" }
  }
@@ -252,6 +253,30 @@ solution "PluginBridge"
 
 end
 
+if 1 == 0 then
+-- disabled
+if _OPTIONS["group"] == "OpenMPT-VSTi" then
+
+solution "OpenMPT-VSTi"
+ location ( "../../build/" .. _ACTION )
+ configurations { "Debug", "Release" }
+ platforms { "x86", "x86_64" }
+ 
+ dofile "../../build/premake/mpt-OpenMPT-VSTi.lua"
+ dofile "../../build/premake/ext-flac.lua"
+ dofile "../../build/premake/ext-lhasa.lua"
+ dofile "../../build/premake/ext-minizip.lua"
+ dofile "../../build/premake/ext-ogg.lua"
+ dofile "../../build/premake/ext-portaudio.lua"
+ dofile "../../build/premake/ext-portmidi.lua"
+ dofile "../../build/premake/ext-r8brain.lua"
+ dofile "../../build/premake/ext-smbPitchShift.lua"
+ dofile "../../build/premake/ext-soundtouch.lua"
+ dofile "../../build/premake/ext-UnRAR.lua"
+ dofile "../../build/premake/ext-zlib.lua"
+
+end
+end
 
 if _OPTIONS["group"] == "OpenMPT" then
 
