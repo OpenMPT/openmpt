@@ -19,6 +19,7 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=libopenmpt vs2008 || goto err
 %PREMAKE% --group=openmpt123 vs2008 || goto err
 %PREMAKE% --group=PluginBridge vs2008 || goto err
+%PREMAKE% --group=OpenMPT-VSTi vs2008 || goto err
 %PREMAKE% --group=OpenMPT vs2008 || goto err
 %PREMAKE% --group=all-externals vs2008 || goto err
 
@@ -29,6 +30,7 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=libopenmpt vs2010 || goto err
 %PREMAKE% --group=openmpt123 vs2010 || goto err
 %PREMAKE% --group=PluginBridge vs2010 || goto err
+%PREMAKE% --group=OpenMPT-VSTi vs2010 || goto err
 %PREMAKE% --group=OpenMPT vs2010 || goto err
 %PREMAKE% --group=all-externals vs2010 || goto err
 
@@ -38,6 +40,7 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=libopenmpt vs2012 || goto err
 %PREMAKE% --group=openmpt123 vs2012 || goto err
 %PREMAKE% --group=PluginBridge vs2012 || goto err
+%PREMAKE% --group=OpenMPT-VSTi vs2012 || goto err
 %PREMAKE% --group=OpenMPT vs2012 || goto err
 %PREMAKE% --group=all-externals vs2012 || goto err
 
@@ -47,6 +50,7 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=libopenmpt vs2013 || goto err
 %PREMAKE% --group=openmpt123 vs2013 || goto err
 %PREMAKE% --group=PluginBridge vs2013 || goto err
+%PREMAKE% --group=OpenMPT-VSTi vs2013 || goto err
 %PREMAKE% --group=OpenMPT vs2013 || goto err
 %PREMAKE% --group=all-externals vs2013 || goto err
 
@@ -56,6 +60,7 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=libopenmpt vs2015 || goto err
 %PREMAKE% --group=openmpt123 vs2015 || goto err
 %PREMAKE% --group=PluginBridge vs2015 || goto err
+%PREMAKE% --group=OpenMPT-VSTi vs2015 || goto err
 %PREMAKE% --group=OpenMPT vs2015 || goto err
 %PREMAKE% --group=all-externals vs2015 || goto err
 
