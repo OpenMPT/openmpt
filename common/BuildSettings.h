@@ -485,9 +485,6 @@
 // happens for do { } while(0)
 #pragma warning(disable:4127) // conditional expression is constant
 
-// happens for compilation units which are empty or completely ifdef-ed out
-#pragma warning(disable:4221) // This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
-
 // happens for immutable classes (i.e. classes containing const members)
 #pragma warning(disable:4512) // assignment operator could not be generated
 
