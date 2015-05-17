@@ -97,6 +97,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x64-Debug&quot; mkdir &quot;$(TargetDir)\..\x64-Debug&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x64-Debug\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -178,6 +179,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="if not exist &quot;$(TargetDir)\..\Win32-Debug&quot; mkdir &quot;$(TargetDir)\..\Win32-Debug&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\Win32-Debug\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -261,6 +263,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x64&quot; mkdir &quot;$(TargetDir)\..\x64&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x64\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -345,6 +348,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="if not exist &quot;$(TargetDir)\..\Win32&quot; mkdir &quot;$(TargetDir)\..\Win32&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\Win32\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -429,6 +433,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="if not exist &quot;$(TargetDir)\..\x64&quot; mkdir &quot;$(TargetDir)\..\x64&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\x64\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -514,6 +519,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="if not exist &quot;$(TargetDir)\..\Win32&quot; mkdir &quot;$(TargetDir)\..\Win32&quot;&#x0D;&#x0A;copy /y &quot;$(TargetDir)\$(TargetFileName)&quot; &quot;$(TargetDir)\..\Win32\$(TargetFileName)&quot;"
 			/>
 		</Configuration>
 	</Configurations>
