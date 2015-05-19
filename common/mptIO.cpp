@@ -18,9 +18,10 @@
 #include <istream>
 #include <ostream>
 
+#if defined(MPT_WITH_FILEIO_STDIO)
 #include <cstdio>
-
 #include <stdio.h>
+#endif // MPT_WITH_FILEIO_STDIO
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -61,7 +62,7 @@ bool Flush(std::ostream & f) { f.flush(); return !f.fail(); }
 
 
 
-#if defined(MPT_WITH_FILEIO)
+#if defined(MPT_WITH_FILEIO_STDIO)
 
 bool IsValid(FILE* & f) { return f != NULL; }
 
@@ -105,7 +106,7 @@ bool WriteRaw(FILE* & f, const void * data, std::size_t size) { return fwrite(da
 bool IsEof(FILE * & f) { return feof(f) != 0; }
 bool Flush(FILE* & f) { return fflush(f) == 0; }
 
-#endif // MPT_WITH_FILEIO
+#endif // MPT_WITH_FILEIO_STDIO
 
 
 

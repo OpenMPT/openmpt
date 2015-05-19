@@ -364,6 +364,10 @@
 #define MPT_WITH_PATHSTRING // file saving requires PathString
 #endif
 
+#if !defined(MODPLUG_NO_FILESAVE) && !defined(MPT_WITH_FILEIO_STDIO)
+#define MPT_WITH_FILEIO_STDIO // file saving requires FILE*
+#endif
+
 #if defined(MPT_WITH_PATHSTRING) && !defined(MPT_WITH_CHARSET_LOCALE)
 #define MPT_WITH_CHARSET_LOCALE // PathString requires locale charset
 #endif

@@ -30,6 +30,8 @@ OPENMPT_NAMESPACE_BEGIN
 #if defined(MPT_WITH_FILEIO)
 
 
+#if defined(MPT_WITH_FILEIO_STDIO)
+
 static inline FILE * mpt_fopen(const mpt::PathString &filename, const char *mode)
 //-------------------------------------------------------------------------------
 {
@@ -39,6 +41,8 @@ static inline FILE * mpt_fopen(const mpt::PathString &filename, const char *mode
 		return fopen(filename.AsNative().c_str(), mode);
 	#endif // MPT_OS_WINDOWS
 }
+
+#endif // MPT_WITH_FILEIO_STDIO
 
 
 namespace mpt
@@ -219,6 +223,8 @@ public:
 #undef MPT_FSTREAM_OPEN
 
 
+
+#if defined(MPT_WITH_FILEIO_STDIO)
 
 // class FILE_ostream, FILE_output_streambuf and FILE_output_buffered_streambuf
 //  provide a portable way of wrapping a std::ostream around an FILE* opened for output.
@@ -483,6 +489,8 @@ public:
 		if(mpt::IO::IsValid(f)) mpt::IO::Flush(f);
 	}
 }; // class FILE_ostream                                                                                        
+
+#endif // MPT_WITH_FILEIO_STDIO
 
 
 } // namespace mpt
