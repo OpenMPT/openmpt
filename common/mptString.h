@@ -392,6 +392,22 @@ static inline CStringW ToCStringW(const mpt::ustring &str) { return ToCStringW(T
 
 #if defined(MPT_OS_WINDOWS)
 
+#ifdef UNICODE
+
+typedef std::wstring tstring;
+
+template <typename Tsrc> inline mpt::tstring ToWinAPI(const Tsrc &src) { return mpt::ToWide(src); }
+template <typename Tsrc> inline mpt::tstring ToWinAPI(Charset from, const Tsrc &src) { return mpt::ToWide(from, src); }
+
+#else
+
+typedef std::string tstring;
+
+template <typename Tsrc> inline mpt::tstring ToWinAPI(const Tsrc &src) { return mpt::ToLocale(src); }
+template <typename Tsrc> inline mpt::tstring ToWinAPI(Charset from, const Tsrc &src) { return mpt::ToLocale(from, src); }
+
+#endif
+
 namespace String { namespace detail
 {
 
