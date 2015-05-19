@@ -1032,7 +1032,7 @@ BOOL CTrackApp::InitInstance()
 				m_pSettings->Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"SampleRate",
 					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"SampleRate", defaults.Samplerate));
 				m_pSettings->Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"Channels",
-					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"Channels", defaults.Channels));
+					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"Channels", defaults.Channels.GetNumHostChannels()));
 				m_pSettings->Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"SampleFormat",
 					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"SampleFormat", defaults.sampleFormat));
 				m_pSettings->Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"ExclusiveMode",
@@ -1046,7 +1046,7 @@ BOOL CTrackApp::InitInstance()
 				m_pSettings->Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"DitherType",
 					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"DitherType", defaults.DitherType));
 				m_pSettings->Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"ChannelMapping",
-					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"ChannelMapping", defaults.ChannelMapping));
+					m_pSettings->Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"ChannelMapping", defaults.Channels));
 			}
 		}
 	}
