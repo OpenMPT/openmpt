@@ -76,8 +76,9 @@
 #include <cstdlib>
 #include <stdlib.h>
 
-#ifndef MODPLUG_NO_FILESAVE
+#if defined(MPT_WITH_FILEIO_STDIO)
 // for FILE* definition (which cannot be forward-declared in a portable way)
+#include <cstdio>
 #include <stdio.h>
 #endif
 
