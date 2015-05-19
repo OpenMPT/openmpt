@@ -170,11 +170,8 @@ public:
 
 public:
 
-	// Construct default empty mapping
-	ChannelMapping();
-
 	// Construct default identity mapping
-	ChannelMapping(uint32 numHostChannels);
+	ChannelMapping(uint32 numHostChannels = 2);
 
 	// Construct mapping from given vector.
 	// Silently fall back to identity mapping if mapping is invalid.
@@ -189,6 +186,16 @@ private:
 	static bool IsValid(const std::vector<int32> &mapping);
 
 public:
+
+	operator int () const
+	{
+		return GetNumHostChannels();
+	}
+
+	ChannelMapping & operator = (int channels)
+	{
+		return (*this = ChannelMapping(channels));
+	}
 
 	bool operator == (const SoundDevice::ChannelMapping &cmp) const
 	{
@@ -258,14 +265,13 @@ struct Settings
 	double Latency; // seconds
 	double UpdateInterval; // seconds
 	uint32 Samplerate;
-	uint8 Channels;
+	SoundDevice::ChannelMapping Channels;
 	SampleFormat sampleFormat;
 	bool ExclusiveMode; // Use hardware buffers directly
 	bool BoostThreadPriority; // Boost thread priority for glitch-free audio rendering
 	bool KeepDeviceRunning;
 	bool UseHardwareTiming;
 	int DitherType;
-	SoundDevice::ChannelMapping ChannelMapping;
 	Settings()
 		: Latency(0.1)
 		, UpdateInterval(0.005)
@@ -292,7 +298,6 @@ struct Settings
 			&& BoostThreadPriority == cmp.BoostThreadPriority
 			&& KeepDeviceRunning == cmp.KeepDeviceRunning
 			&& UseHardwareTiming == cmp.UseHardwareTiming
-			&& ChannelMapping == cmp.ChannelMapping
 			&& DitherType == cmp.DitherType
 			;
 	}

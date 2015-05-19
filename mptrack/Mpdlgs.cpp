@@ -574,10 +574,10 @@ void COptionsSoundcard::UpdateChannelMapping()
 		}
 	}
 	int usedChannels = static_cast<int>(m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel()));
-	if(m_Settings.ChannelMapping.GetNumHostChannels() != static_cast<uint32>(usedChannels))
+	if(m_Settings.Channels.GetNumHostChannels() != static_cast<uint32>(usedChannels))
 	{
 		// If the channel mapping is not valid for the selected number of channels, reset it to default identity mapping.
-		m_Settings.ChannelMapping = SoundDevice::ChannelMapping();
+		m_Settings.Channels = SoundDevice::ChannelMapping(usedChannels);
 	}
 	GetDlgItem(IDC_STATIC_CHANNELMAPPING)->EnableWindow(m_CurrentDeviceCaps.CanChannelMapping ? TRUE : FALSE);
 	for(int mch = 0; mch < NUM_CHANNELCOMBOBOXES; mch++)	// Host channels
@@ -597,7 +597,7 @@ void COptionsSoundcard::UpdateChannelMapping()
 				{
 					const int pos = (int)::SendMessageW(combo->m_hWnd, CB_ADDSTRING, 0, (LPARAM)m_CurrentDeviceDynamicCaps.channelNames[dch].c_str());
 					combo->SetItemData(pos, (DWORD_PTR)dch);
-					if(static_cast<int32>(dch) == m_Settings.ChannelMapping.ToDevice(mch))
+					if(static_cast<int32>(dch) == m_Settings.Channels.ToDevice(mch))
 					{
 						combo->SetCurSel(pos);
 					}
@@ -822,7 +822,7 @@ void COptionsSoundcard::OnOK()
 	// Channels
 	{
 		DWORD_PTR n = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
-		m_Settings.Channels = static_cast<uint8>(n);
+		m_Settings.Channels = n;
 		if((m_Settings.Channels != 1) && (m_Settings.Channels != 4))
 		{
 			m_Settings.Channels = 2;
@@ -869,10 +869,7 @@ void COptionsSoundcard::OnOK()
 				CComboBox *combo = &m_CbnChannelMapping[mch];
 				channels[mch] = static_cast<int32>(combo->GetItemData(combo->GetCurSel()));
 			}
-			m_Settings.ChannelMapping = SoundDevice::ChannelMapping(channels);
-		} else
-		{
-			m_Settings.ChannelMapping = SoundDevice::ChannelMapping();
+			m_Settings.Channels = channels;
 		}
 	}
 	CMainFrame::GetMainFrame()->SetupSoundCard(m_Settings, m_CurrentDeviceInfo.GetIdentifier(), (SoundDeviceStopMode)m_CbnStoppedMode.GetCurSel());

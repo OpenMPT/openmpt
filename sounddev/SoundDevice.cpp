@@ -25,13 +25,6 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
-ChannelMapping::ChannelMapping()
-//------------------------------
-{
-	return;
-}
-
-
 ChannelMapping::ChannelMapping(uint32 numHostChannels)
 //----------------------------------------------------
 {
@@ -172,21 +165,6 @@ bool Base::Open(const SoundDevice::Settings &settings)
 	if(m_Settings.UpdateInterval == 0.0) m_Settings.UpdateInterval = m_Caps.DefaultSettings.UpdateInterval;
 	m_Settings.Latency = Clamp(m_Settings.Latency, m_Caps.LatencyMin, m_Caps.LatencyMax);
 	m_Settings.UpdateInterval = Clamp(m_Settings.UpdateInterval, m_Caps.UpdateIntervalMin, m_Caps.UpdateIntervalMax);
-	if(m_Caps.CanChannelMapping)
-	{
-		if(m_Settings.ChannelMapping.GetNumHostChannels() == 0)
-		{
-			// default mapping
-			m_Settings.ChannelMapping = SoundDevice::ChannelMapping(m_Settings.Channels);
-		}
-		if(m_Settings.ChannelMapping.GetNumHostChannels() != m_Settings.Channels)
-		{
-			return false;
-		}
-	} else
-	{
-		m_Settings.ChannelMapping = SoundDevice::ChannelMapping(m_Settings.Channels);
-	}
 	m_Flags = SoundDevice::Flags();
 	m_DeviceUnavailableOnOpen = false;
 	m_RequestFlags.store(0);

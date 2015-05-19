@@ -434,7 +434,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		Setting<bool> m_SoundDeviceExclusiveMode(conf, "Sound Settings", "ExclusiveMode", SoundDevice::Settings().ExclusiveMode);
 		Setting<bool> m_SoundDeviceBoostThreadPriority(conf, "Sound Settings", "BoostThreadPriority", SoundDevice::Settings().BoostThreadPriority);
 		Setting<bool> m_SoundDeviceUseHardwareTiming(conf, "Sound Settings", "UseHardwareTiming", SoundDevice::Settings().UseHardwareTiming);
-		Setting<SoundDevice::ChannelMapping> m_SoundDeviceChannelMapping(conf, "Sound Settings", "ChannelMapping", SoundDevice::Settings().ChannelMapping);
+		Setting<SoundDevice::ChannelMapping> m_SoundDeviceChannelMapping(conf, "Sound Settings", "ChannelMapping", SoundDevice::Settings().Channels);
 		if(storedVersion < MAKE_VERSION_NUMERIC(1,21,01,26))
 		{
 			if(m_BufferLength_DEPRECATED != 0)
@@ -469,17 +469,15 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		m_SoundDeviceSettingsDefaults.Latency = m_LatencyMS / 1000.0;
 		m_SoundDeviceSettingsDefaults.UpdateInterval = m_UpdateIntervalMS / 1000.0;
 		m_SoundDeviceSettingsDefaults.Samplerate = MixerSamplerate;
-		m_SoundDeviceSettingsDefaults.Channels = (uint8)MixerOutputChannels;
+		if(m_SoundDeviceSettingsDefaults.Channels.GetNumHostChannels() != MixerOutputChannels)
+		{
+			// reset invalid channel mapping to default
+			m_SoundDeviceSettingsDefaults.Channels = SoundDevice::ChannelMapping(MixerOutputChannels);
+		}
 		m_SoundDeviceSettingsDefaults.sampleFormat = m_SampleFormat;
 		m_SoundDeviceSettingsDefaults.ExclusiveMode = m_SoundDeviceExclusiveMode;
 		m_SoundDeviceSettingsDefaults.BoostThreadPriority = m_SoundDeviceBoostThreadPriority;
 		m_SoundDeviceSettingsDefaults.UseHardwareTiming = m_SoundDeviceUseHardwareTiming;
-		m_SoundDeviceSettingsDefaults.ChannelMapping = m_SoundDeviceChannelMapping;
-		if(m_SoundDeviceSettingsDefaults.ChannelMapping.GetNumHostChannels() != m_SoundDeviceSettingsDefaults.Channels)
-		{
-			// reset invalid channel mapping to default
-			m_SoundDeviceSettingsDefaults.ChannelMapping = SoundDevice::ChannelMapping(m_SoundDeviceSettingsDefaults.Channels);
-		}
 		m_SoundDeviceSettingsUseOldDefaults = true;
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,25,00,04))
@@ -612,19 +610,19 @@ private:
 	SettingsContainer &conf;
 	const SoundDevice::Info deviceInfo;
 	
-public:
+private:
 
 	Setting<uint32> LatencyUS;
 	Setting<uint32> UpdateIntervalUS;
 	Setting<uint32> Samplerate;
-	Setting<uint8> Channels;
+	Setting<uint8> ChannelsOld; // compatibility with older versions
+	Setting<SoundDevice::ChannelMapping> ChannelMapping;
 	Setting<SampleFormat> sampleFormat;
 	Setting<bool> ExclusiveMode;
 	Setting<bool> BoostThreadPriority;
 	Setting<bool> KeepDeviceRunning;
 	Setting<bool> UseHardwareTiming;
 	Setting<int> DitherType;
-	Setting<SoundDevice::ChannelMapping> ChannelMapping;
 
 public:
 
@@ -634,19 +632,20 @@ public:
 		, LatencyUS(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"Latency", Util::Round<int32>(defaults.Latency * 1000000.0))
 		, UpdateIntervalUS(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"UpdateInterval", Util::Round<int32>(defaults.UpdateInterval * 1000000.0))
 		, Samplerate(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"SampleRate", defaults.Samplerate)
-		, Channels(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"Channels", defaults.Channels)
+		, ChannelsOld(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"Channels", mpt::saturate_cast<uint8>((int)defaults.Channels))
+		, ChannelMapping(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"ChannelMapping", defaults.Channels)
 		, sampleFormat(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"SampleFormat", defaults.sampleFormat)
 		, ExclusiveMode(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"ExclusiveMode", defaults.ExclusiveMode)
 		, BoostThreadPriority(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"BoostThreadPriority", defaults.BoostThreadPriority)
 		, KeepDeviceRunning(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"KeepDeviceRunning", defaults.KeepDeviceRunning)
 		, UseHardwareTiming(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"UseHardwareTiming", defaults.UseHardwareTiming)
 		, DitherType(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"DitherType", defaults.DitherType)
-		, ChannelMapping(conf, L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"ChannelMapping", defaults.ChannelMapping)
 	{
-		if(ChannelMapping.Get().GetNumHostChannels() != Channels)
+		if(ChannelMapping.Get().GetNumHostChannels() != ChannelsOld)
 		{
-			// reset invalid chanel mapping to default
-			ChannelMapping = SoundDevice::ChannelMapping(Channels);
+			// If the stored channel count and the count of channels used in the channel mapping do not match,
+			// construct a default mapping from the channel count.
+			ChannelMapping = SoundDevice::ChannelMapping(ChannelsOld);
 		}
 		// store informational data (not read back, just to allow the user to mock with the raw ini file)
 		conf.Write(L"Sound Settings", mpt::ToWide(deviceInfo.GetIdentifier()) + L"_" + L"Type", deviceInfo.type);
@@ -660,14 +659,14 @@ public:
 		LatencyUS = Util::Round<int32>(settings.Latency * 1000000.0);
 		UpdateIntervalUS = Util::Round<int32>(settings.UpdateInterval * 1000000.0);
 		Samplerate = settings.Samplerate;
-		Channels = settings.Channels;
+		ChannelsOld = mpt::saturate_cast<uint8>((int)settings.Channels);
+		ChannelMapping = settings.Channels;
 		sampleFormat = settings.sampleFormat;
 		ExclusiveMode = settings.ExclusiveMode;
 		BoostThreadPriority = settings.BoostThreadPriority;
 		KeepDeviceRunning = settings.KeepDeviceRunning;
 		UseHardwareTiming = settings.UseHardwareTiming;
 		DitherType = settings.DitherType;
-		ChannelMapping = settings.ChannelMapping;
 		return *this;
 	}
 
@@ -677,14 +676,13 @@ public:
 		settings.Latency = LatencyUS / 1000000.0;
 		settings.UpdateInterval = UpdateIntervalUS / 1000000.0;
 		settings.Samplerate = Samplerate;
-		settings.Channels = Channels;
+		settings.Channels = ChannelMapping;
 		settings.sampleFormat = sampleFormat;
 		settings.ExclusiveMode = ExclusiveMode;
 		settings.BoostThreadPriority = BoostThreadPriority;
 		settings.KeepDeviceRunning = KeepDeviceRunning;
 		settings.UseHardwareTiming = UseHardwareTiming;
 		settings.DitherType = DitherType;
-		settings.ChannelMapping = ChannelMapping;
 		return settings;
 	}
 
