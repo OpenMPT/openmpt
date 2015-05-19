@@ -101,7 +101,7 @@ private:
 public:
 	DebugReporter(DumpMode mode, _EXCEPTION_POINTERS *pExceptionInfo);
 	~DebugReporter();
-	void ReportError(CString errorMessage);
+	void ReportError(mpt::ustring errorMessage);
 };
 
 
@@ -187,30 +187,40 @@ int DebugReporter::RescueFiles()
 }
 
 
-void DebugReporter::ReportError(CString errorMessage)
+void DebugReporter::ReportError(mpt::ustring errorMessage)
 //---------------------------------------------------
 {
 
 	if(!crashDirectory.valid)
 	{
-		errorMessage += "\n\nCould not create the following directory for saving debug information and modified files to:\n"
-			+ mpt::ToCString(crashDirectory.path.ToWide());
+		errorMessage += MPT_ULITERAL("\n\n");
+		errorMessage += MPT_ULITERAL("Could not create the following directory for saving debug information and modified files to:\n");
+		errorMessage += crashDirectory.path.ToUnicode();
 	}
 
 	if(HasWrittenDebug())
 	{
-		errorMessage += "\n\nDebug information has been saved to\n"
-			+ mpt::ToCString(crashDirectory.path.ToWide());
+		errorMessage += MPT_ULITERAL("\n\n");
+		errorMessage += MPT_ULITERAL("Debug information has been saved to\n");
+		errorMessage += crashDirectory.path.ToUnicode();
 	}
 
 	if(rescuedFiles > 0)
 	{
-		errorMessage.AppendFormat("\n\n%d modified file%s been rescued, but it cannot be guaranteed that %s still intact.", rescuedFiles, (rescuedFiles == 1 ? " has" : "s have"), (rescuedFiles == 1 ? "it is" : "they are"));
+		errorMessage += MPT_ULITERAL("\n\n");
+		if(rescuedFiles == 1)
+		{
+			errorMessage += MPT_ULITERAL("1 modified file has been rescued, but it cannot be guaranteed that it is still intact.");
+		} else
+		{
+			errorMessage += mpt::String::Print(MPT_USTRING("%1 modified files have been rescued, but it cannot be guaranteed that they are still intact."), rescuedFiles);
+		}
 	}
 
-	errorMessage.AppendFormat("\n\nOpenMPT %s (%s)\n",
-		MptVersion::GetVersionStringExtended().c_str(),
-		MptVersion::GetVersionUrlString().c_str()
+	errorMessage += MPT_ULITERAL("\n\n");
+	errorMessage += mpt::String::Print(MPT_USTRING("OpenMPT %1 (%2)\n")
+		, mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringExtended())
+		, mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionUrlString())
 		);
 
 	{
@@ -316,8 +326,8 @@ LONG ExceptionHandler::UnhandledExceptionFilter(_EXCEPTION_POINTERS *pExceptionI
 	DebugReporter report(DumpModeCrash, pExceptionInfo);
 
 	CString errorMessage;
-	errorMessage.Format("Unhandled exception 0x%X at address %p occurred.", pExceptionInfo->ExceptionRecord->ExceptionCode, pExceptionInfo->ExceptionRecord->ExceptionAddress);
-	report.ReportError(errorMessage);
+	errorMessage.Format(_T("Unhandled exception 0x%X at address %p occurred."), pExceptionInfo->ExceptionRecord->ExceptionCode, pExceptionInfo->ExceptionRecord->ExceptionAddress);
+	report.ReportError(mpt::ToUnicode(errorMessage));
 
 	// Let Windows handle the exception...
 	return EXCEPTION_CONTINUE_SEARCH;
@@ -332,13 +342,13 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 	DebugReporter report(msg ? DumpModeWarning : DumpModeCrash, nullptr);
 	if(IsDebuggerPresent())
 	{
-		OutputDebugString("ASSERT(");
-		OutputDebugString(expr);
-		OutputDebugString(") failed\n");
+		OutputDebugString(_T("ASSERT("));
+		OutputDebugString(mpt::ToWinAPI(mpt::CharsetASCII, expr).c_str());
+		OutputDebugString(_T(") failed\n"));
 		DebugBreak();
 	} else
 	{
-		CString errorMessage;
+		CStringA errorMessage;
 		if(msg)
 		{
 			errorMessage.Format("Internal state inconsistency detected at %s(%d). This is just a warning that could potentially lead to a crash later on: %s [%s].", file, line, msg, function);
@@ -346,7 +356,7 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 		{
 			errorMessage.Format("Internal error occured at %s(%d): ASSERT(%s) failed in [%s].", file, line, expr, function);
 		}
-		report.ReportError(errorMessage);
+		report.ReportError(mpt::ToUnicode(mpt::CharsetLocale, errorMessage.GetString()));
 	}
 }
 
