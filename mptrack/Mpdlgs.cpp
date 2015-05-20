@@ -458,7 +458,7 @@ void COptionsSoundcard::UpdateChannels()
 		maxChannels = 4;
 	}
 	int sel = 0;
-	for(std::size_t channels = maxChannels; channels >= 1; channels /= 2)
+	for(int channels = maxChannels; channels >= 1; channels /= 2)
 	{
 		int ndx = m_CbnChannels.AddString(gszChnCfgNames[(channels+2)/2-1]);
 		m_CbnChannels.SetItemData(ndx, channels);
