@@ -96,7 +96,7 @@ void Manager::ReEnumerate()
 		typePriorities[SoundDevice::TypePORTAUDIO_DS] = 18;
 		typePriorities[SoundDevice::TypeASIO] = 10;
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = -1;
-	} else if(!mpt::Windows::Version::IsNT())
+	} else if(mpt::Windows::Version::Is9x())
 	{ // Win9x
 		typePriorities[SoundDevice::TypeWAVEOUT] = 29;
 		typePriorities[SoundDevice::TypeDSOUND] = 28;
@@ -105,7 +105,7 @@ void Manager::ReEnumerate()
 		typePriorities[SoundDevice::TypeASIO] = 1;
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = -1;
 		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = -2;
-	} else if(!mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
+	} else if(mpt::Windows::Version::IsBefore(mpt::Windows::Version::WinVista))
 	{ // WinXP
 		typePriorities[SoundDevice::TypeWAVEOUT] = 29;
 		typePriorities[SoundDevice::TypeASIO] = 28;

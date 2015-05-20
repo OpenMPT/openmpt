@@ -877,8 +877,6 @@ std::vector<char> HexToBin(const mpt::ustring &src);
 } // namespace Util
 
 
-#if MPT_OS_WINDOWS
-
 namespace mpt
 {
 namespace Windows
@@ -908,27 +906,66 @@ enum Number
 
 #if defined(MODPLUG_TRACKER)
 
+#if MPT_OS_WINDOWS
+
 // Initializes version information.
 // Version information is cached in order to be safely available in audio real-time contexts.
 // Checking version information (especially detecting Wine) can be slow.
 void Init();
 
+static inline bool IsWindows() { return true; }
+
+bool IsBefore(mpt::Windows::Version::Number version);
 bool IsAtLeast(mpt::Windows::Version::Number version);
+
+bool Is9x();
 bool IsNT();
+
+bool IsOriginal();
 bool IsWine();
+
+#else // !MPT_OS_WINDOWS
+
+static inline void Init() { return; }
+
+static inline bool IsWindows() { return false; }
+
+static inline bool IsBefore(mpt::Windows::Version::Number /* version */ ) { return false; }
+static inline bool IsAtLeast(mpt::Windows::Version::Number /* version */ ) { return false; }
+
+static inline bool Is9x() { return false; }
+static inline bool IsNT() { return false; }
+
+static inline bool IsOriginal() { return false; }
+static inline bool IsWine() { return false; }
+
+#endif // MPT_OS_WINDOWS
 
 #else // !MODPLUG_TRACKER
 
+#if MPT_OS_WINDOWS
+
+static inline bool IsWindows() { return true; }
+
+bool IsBefore(mpt::Windows::Version::Number version);
 bool IsAtLeast(mpt::Windows::Version::Number version);
 
+#else // !MPT_OS_WINDOWS
+
+static inline bool IsWindows() { return false; }
+
+static inline bool IsBefore(mpt::Windows::Version::Number /* version */ ) { return false; }
+static inline bool IsAtLeast(mpt::Windows::Version::Number /* version */ ) { return false; }
+
+#endif // MPT_OS_WINDOWS
+
 #endif // MODPLUG_TRACKER
+
 
 
 } // namespace Version
 } // namespace Windows
 } // namespace mpt
-
-#endif // MPT_OS_WINDOWS
 
 
 #if defined(MPT_WITH_DYNBIND)

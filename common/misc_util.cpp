@@ -800,6 +800,13 @@ void Init()
 }
 
 
+bool IsBefore(mpt::Windows::Version::Number version)
+//--------------------------------------------------
+{
+	return (SystemVersion < (uint32)version);
+}
+
+
 bool IsAtLeast(mpt::Windows::Version::Number version)
 //---------------------------------------------------
 {
@@ -807,10 +814,24 @@ bool IsAtLeast(mpt::Windows::Version::Number version)
 }
 
 
+bool Is9x()
+//---------
+{
+	return !SystemIsNT;
+}
+
+
 bool IsNT()
 //---------
 {
 	return SystemIsNT;
+}
+
+
+bool IsOriginal()
+//---------------
+{
+	return !SystemIsWine;
 }
 
 
@@ -822,6 +843,18 @@ bool IsWine()
 
 
 #else // !MODPLUG_TRACKER
+
+
+bool IsBefore(mpt::Windows::Version::Number version)
+//--------------------------------------------------
+{
+	OSVERSIONINFOEXW versioninfoex;
+	MemsetZero(versioninfoex);
+	versioninfoex.dwOSVersionInfoSize = sizeof(versioninfoex);
+	GetVersionExW((LPOSVERSIONINFOW)&versioninfoex);
+	uint32 SystemVersion = ((uint32)mpt::saturate_cast<uint8>(versioninfoex.dwMajorVersion) << 8) | ((uint32)mpt::saturate_cast<uint8>(versioninfoex.dwMinorVersion) << 0);
+	return (SystemVersion < (uint32)version);
+}
 
 
 bool IsAtLeast(mpt::Windows::Version::Number version)
