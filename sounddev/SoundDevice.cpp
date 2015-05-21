@@ -277,15 +277,15 @@ void Base::SourceAudioPreRead(std::size_t numFrames, std::size_t framesLatency)
 }
 
 
-void Base::SourceAudioRead(void *buffer, std::size_t numFrames)
-//-------------------------------------------------------------
+void Base::SourceAudioRead(void *buffer, const void *inputBuffer, std::size_t numFrames)
+//--------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	if(numFrames <= 0)
 	{
 		return;
 	}
-	m_Source->SoundSourceRead(m_Settings, m_Flags, GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, buffer);
+	m_Source->SoundSourceRead(m_Settings, m_Flags, GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, buffer, inputBuffer);
 }
 
 

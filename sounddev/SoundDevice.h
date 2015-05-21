@@ -81,7 +81,7 @@ public:
 	virtual void SoundSourcePostStopCallback() = 0;
 	virtual bool SoundSourceIsLockedByCurrentThread() const = 0;
 	virtual void SoundSourceLock() = 0;
-	virtual void SoundSourceRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer) = 0;
+	virtual void SoundSourceRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer) = 0;
 	virtual void SoundSourceDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo) = 0;
 	virtual void SoundSourceUnlock() = 0;
 public:
@@ -266,23 +266,27 @@ struct Settings
 	double UpdateInterval; // seconds
 	uint32 Samplerate;
 	SoundDevice::ChannelMapping Channels;
+	uint8 InputChannels;
 	SampleFormat sampleFormat;
 	bool ExclusiveMode; // Use hardware buffers directly
 	bool BoostThreadPriority; // Boost thread priority for glitch-free audio rendering
 	bool KeepDeviceRunning;
 	bool UseHardwareTiming;
 	int DitherType;
+	uint32 InputSourceID;
 	Settings()
 		: Latency(0.1)
 		, UpdateInterval(0.005)
 		, Samplerate(48000)
 		, Channels(2)
+		, InputChannels(0)
 		, sampleFormat(SampleFormatFloat32)
 		, ExclusiveMode(false)
 		, BoostThreadPriority(true)
 		, KeepDeviceRunning(true)
 		, UseHardwareTiming(false)
 		, DitherType(1)
+		, InputSourceID(0)
 	{
 		return;
 	}
@@ -293,12 +297,14 @@ struct Settings
 			&& Util::Round<int64>(UpdateInterval * 1000000000.0) == Util::Round<int64>(cmp.UpdateInterval * 1000000000.0) // compare in nanoseconds
 			&& Samplerate == cmp.Samplerate
 			&& Channels == cmp.Channels
+			&& InputChannels == cmp.InputChannels
 			&& sampleFormat == cmp.sampleFormat
 			&& ExclusiveMode == cmp.ExclusiveMode
 			&& BoostThreadPriority == cmp.BoostThreadPriority
 			&& KeepDeviceRunning == cmp.KeepDeviceRunning
 			&& UseHardwareTiming == cmp.UseHardwareTiming
 			&& DitherType == cmp.DitherType
+			&& InputSourceID == cmp.InputSourceID
 			;
 	}
 	bool operator != (const SoundDevice::Settings &cmp) const
@@ -312,6 +318,10 @@ struct Settings
 	std::size_t GetBytesPerSecond() const
 	{
 		return Samplerate * GetBytesPerFrame();
+	}
+	std::size_t GetTotalChannels() const
+	{
+		return InputChannels + Channels;
 	}
 };
 
@@ -345,6 +355,8 @@ struct Caps
 	bool CanKeepDeviceRunning;
 	bool CanUseHardwareTiming;
 	bool CanChannelMapping;
+	bool CanInput;
+	bool HasNamedInputSources;
 	bool CanDriverPanel;
 	bool HasInternalDither;
 	mpt::ustring ExclusiveModeDescription;
@@ -362,6 +374,8 @@ struct Caps
 		, CanKeepDeviceRunning(false)
 		, CanUseHardwareTiming(false)
 		, CanChannelMapping(false)
+		, CanInput(false)
+		, HasNamedInputSources(false)
 		, CanDriverPanel(false)
 		, HasInternalDither(false)
 		, ExclusiveModeDescription(MPT_USTRING("Use device exclusively"))
@@ -381,6 +395,7 @@ struct DynamicCaps
 	std::vector<uint32> supportedSampleRates;
 	std::vector<uint32> supportedExclusiveSampleRates;
 	std::vector<mpt::ustring> channelNames;
+	std::vector<std::pair<uint32, mpt::ustring> > inputSourceNames;
 	DynamicCaps()
 		: currentSampleRate(0)
 	{
@@ -539,7 +554,7 @@ protected:
 	bool SourceIsLockedByCurrentThread() const;
 	void SourceFillAudioBufferLocked();
 	void SourceAudioPreRead(std::size_t numFrames, std::size_t framesLatency);
-	void SourceAudioRead(void *buffer, std::size_t numFrames);
+	void SourceAudioRead(void *buffer, const void *inputBuffer, std::size_t numFrames);
 	void SourceAudioDone();
 
 	void RequestClose() { m_RequestFlags.fetch_or(RequestFlagClose); }

@@ -702,10 +702,11 @@ public:
 };
 
 
-void CMainFrame::SoundSourceRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer)
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CMainFrame::SoundSourceRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
+	MPT_UNREFERENCED_PARAMETER(inputBuffer);
 	MPT_ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
 	TimingInfo timingInfo;

@@ -29,24 +29,30 @@ namespace SoundDevice {
 class CPortaudioDevice: public SoundDevice::Base
 //=========================================
 {
+
 protected:
+
 	PaDeviceIndex m_DeviceIndex;
 	PaHostApiTypeId m_HostApiType;
 	PaStreamParameters m_StreamParameters;
+	PaStreamParameters m_InputStreamParameters;
 	PaWasapiStreamInfo m_WasapiStreamInfo;
 	PaStream * m_Stream;
 	const PaStreamInfo * m_StreamInfo;
 	void * m_CurrentFrameBuffer;
+	const void * m_CurrentFrameBufferInput;
 	unsigned long m_CurrentFrameCount;
 
 	double m_CurrentRealLatency; // seconds
 	mpt::atomic_uint32_t m_StatisticPeriodFrames;
 
 public:
+
 	CPortaudioDevice(SoundDevice::Info info);
 	~CPortaudioDevice();
 
 public:
+
 	bool InternalOpen();
 	bool InternalClose();
 	void InternalFillAudioBuffer();
@@ -69,6 +75,7 @@ public:
 		);
 
 public:
+
 	static int StreamCallbackWrapper(
 		const void *input, void *output,
 		unsigned long frameCount,
@@ -78,6 +85,12 @@ public:
 		);
 
 	static std::vector<SoundDevice::Info> EnumerateDevices();
+
+private:
+
+	bool HasInputChannelsOnSameDevice() const;
+
+	static std::vector<std::pair<PaDeviceIndex, mpt::ustring> > EnumerateInputOnlyDevices(PaHostApiTypeId hostApiType);
 
 };
 

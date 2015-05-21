@@ -206,6 +206,10 @@ void CASIODevice::InitMembers()
 	m_SampleBufferInt16.clear();
 	m_SampleBufferInt24.clear();
 	m_SampleBufferInt32.clear();
+	m_SampleInputBufferFloat.clear();
+	m_SampleInputBufferInt16.clear();
+	m_SampleInputBufferInt24.clear();
+	m_SampleInputBufferInt32.clear();
 	m_CanOutputReady = false;
 
 	m_DeviceRunning = false;
@@ -253,13 +257,16 @@ bool CASIODevice::InternalOpen()
 
 	InitMembers();
 
-	Log(mpt::String::Print("ASIO: Open('%1'): %2-bit, %3 channels, %4Hz, hw-timing=%5"
+	Log(mpt::String::Print("ASIO: Open('%1'): %2-bit, (%3,%4) channels, %5Hz, hw-timing=%6"
 		, mpt::ToLocale(GetDeviceInternalID())
 		, m_Settings.sampleFormat.GetBitsPerSample()
+		, m_Settings.InputChannels
 		, m_Settings.Channels
 		, m_Settings.Samplerate
 		, m_Settings.UseHardwareTiming
 		));
+
+	SoundDevice::ChannelMapping inputChannelMapping = SoundDevice::ChannelMapping::BaseChannel(m_Settings.InputChannels, m_Settings.InputSourceID);
 
 	try
 	{
@@ -285,6 +292,14 @@ bool CASIODevice::InternalOpen()
 			throw ASIOException("Not enough output channels.");
 		}
 		if(m_Settings.Channels.GetRequiredDeviceChannels() > outputChannels)
+		{
+			throw ASIOException("Channel mapping requires more channels than available.");
+		}
+		if(m_Settings.InputChannels > inputChannels)
+		{
+			throw ASIOException("Not enough input channels.");
+		}
+		if(inputChannelMapping.GetRequiredDeviceChannels() > inputChannels)
 		{
 			throw ASIOException("Channel mapping requires more channels than available.");
 		}
@@ -360,12 +375,19 @@ bool CASIODevice::InternalOpen()
 			MPT_ASSERT(false);
 		}
 	
-		m_BufferInfo.resize(m_Settings.Channels);
-		for(int channel = 0; channel < m_Settings.Channels; ++channel)
+		m_BufferInfo.resize(m_Settings.GetTotalChannels());
+		for(std::size_t channel = 0; channel < m_Settings.GetTotalChannels(); ++channel)
 		{
 			MemsetZero(m_BufferInfo[channel]);
-			m_BufferInfo[channel].isInput = ASIOFalse;
-			m_BufferInfo[channel].channelNum = m_Settings.Channels.ToDevice(channel);
+			if(channel < m_Settings.InputChannels)
+			{
+				m_BufferInfo[channel].isInput = ASIOTrue;
+				m_BufferInfo[channel].channelNum = inputChannelMapping.ToDevice(channel);
+			} else
+			{
+				m_BufferInfo[channel].isInput = ASIOFalse;
+				m_BufferInfo[channel].channelNum = m_Settings.Channels.ToDevice(channel - m_Settings.InputChannels);
+			}
 		}
 		m_Callbacks.bufferSwitch = CallbackBufferSwitch;
 		m_Callbacks.sampleRateDidChange = CallbackSampleRateDidChange;
@@ -374,20 +396,27 @@ bool CASIODevice::InternalOpen()
 		MPT_ASSERT_ALWAYS(g_CallbacksInstance == nullptr);
 		g_CallbacksInstance = this;
 		Log(mpt::String::Print("ASIO: createBuffers(numChannels=%1, bufferSize=%2)", m_Settings.Channels, m_nAsioBufferLen));
-		asioCall(createBuffers(&m_BufferInfo[0], m_Settings.Channels, m_nAsioBufferLen, &m_Callbacks));
+		asioCall(createBuffers(&m_BufferInfo[0], m_Settings.GetTotalChannels(), m_nAsioBufferLen, &m_Callbacks));
 		m_BuffersCreated = true;
 
-		m_ChannelInfo.resize(m_Settings.Channels);
-		for(int channel = 0; channel < m_Settings.Channels; ++channel)
+		m_ChannelInfo.resize(m_Settings.GetTotalChannels());
+		for(std::size_t channel = 0; channel < m_Settings.GetTotalChannels(); ++channel)
 		{
 			MemsetZero(m_ChannelInfo[channel]);
-			m_ChannelInfo[channel].isInput = ASIOFalse;
-			m_ChannelInfo[channel].channel = m_Settings.Channels.ToDevice(channel);
+			if(channel < m_Settings.InputChannels)
+			{
+				m_ChannelInfo[channel].isInput = ASIOTrue;
+				m_ChannelInfo[channel].channel = inputChannelMapping.ToDevice(channel);
+			} else
+			{
+				m_ChannelInfo[channel].isInput = ASIOFalse;
+				m_ChannelInfo[channel].channel = m_Settings.Channels.ToDevice(channel - m_Settings.InputChannels);
+			}
 			asioCall(getChannelInfo(&m_ChannelInfo[channel]));
 			MPT_ASSERT(m_ChannelInfo[channel].isActive);
 			mpt::String::SetNullTerminator(m_ChannelInfo[channel].name);
 			Log(mpt::String::Print("ASIO: getChannelInfo(isInput=%1 channel=%2) => isActive=%3 channelGroup=%4 type=%5 name='%6'"
-				, ASIOFalse
+				, (channel < m_Settings.InputChannels) ? ASIOTrue : ASIOFalse
 				, m_Settings.Channels.ToDevice(channel)
 				, m_ChannelInfo[channel].isActive
 				, m_ChannelInfo[channel].channelGroup
@@ -399,7 +428,7 @@ bool CASIODevice::InternalOpen()
 		bool allChannelsAreFloat = true;
 		bool allChannelsAreInt16 = true;
 		bool allChannelsAreInt24 = true;
-		for(int channel = 0; channel < m_Settings.Channels; ++channel)
+		for(std::size_t channel = 0; channel < m_Settings.GetTotalChannels(); ++channel)
 		{
 			if(!IsSampleTypeFloat(m_ChannelInfo[channel].type))
 			{
@@ -418,21 +447,25 @@ bool CASIODevice::InternalOpen()
 		{
 			m_Settings.sampleFormat = SampleFormatFloat32;
 			m_SampleBufferFloat.resize(m_nAsioBufferLen * m_Settings.Channels);
+			m_SampleInputBufferFloat.resize(m_nAsioBufferLen * m_Settings.InputChannels);
 		} else if(allChannelsAreInt16)
 		{
 			m_Settings.sampleFormat = SampleFormatInt16;
 			m_SampleBufferInt16.resize(m_nAsioBufferLen * m_Settings.Channels);
+			m_SampleInputBufferInt16.resize(m_nAsioBufferLen * m_Settings.InputChannels);
 		} else if(allChannelsAreInt24)
 		{
 			m_Settings.sampleFormat = SampleFormatInt24;
 			m_SampleBufferInt24.resize(m_nAsioBufferLen * m_Settings.Channels);
+			m_SampleInputBufferInt24.resize(m_nAsioBufferLen * m_Settings.InputChannels);
 		} else
 		{
 			m_Settings.sampleFormat = SampleFormatInt32;
 			m_SampleBufferInt32.resize(m_nAsioBufferLen * m_Settings.Channels);
+			m_SampleInputBufferInt32.resize(m_nAsioBufferLen * m_Settings.InputChannels);
 		}
 
-		for(int channel = 0; channel < m_Settings.Channels; ++channel)
+		for(std::size_t channel = 0; channel < m_Settings.GetTotalChannels(); ++channel)
 		{
 			if(m_BufferInfo[channel].buffers[0])
 			{
@@ -631,6 +664,10 @@ bool CASIODevice::InternalClose()
 	m_SampleBufferInt16.clear();
 	m_SampleBufferInt24.clear();
 	m_SampleBufferInt32.clear();
+	m_SampleInputBufferFloat.clear();
+	m_SampleInputBufferInt16.clear();
+	m_SampleInputBufferInt24.clear();
+	m_SampleInputBufferInt32.clear();
 	m_ChannelInfo.clear();
 	if(m_BuffersCreated)
 	{
@@ -857,22 +894,155 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 {
 	MPT_TRACE();
 	const bool rendersilence = !useSource;
-	const int channels = m_Settings.Channels;
 	const std::size_t countChunk = m_nAsioBufferLen;
+	const std::size_t inputChannels = m_Settings.InputChannels;
+	const std::size_t outputChannels = m_Settings.Channels;
+	for(std::size_t inputChannel = 0; inputChannel < inputChannels; ++inputChannel)
+	{
+		std::size_t channel = inputChannel;
+		void *src = m_BufferInfo[channel].buffers[static_cast<unsigned long>(m_BufferIndex) & 1];
+		if(IsSampleTypeBigEndian(m_ChannelInfo[channel].type))
+		{
+			if(src)
+			{
+				SwapEndian(reinterpret_cast<uint8*>(src), countChunk, GetSampleSize(m_ChannelInfo[channel].type));
+			}
+		}
+		if(m_Settings.sampleFormat == SampleFormatFloat32)
+		{
+			float *const dstFloat = &m_SampleInputBufferFloat[0];
+			if(!src)
+			{
+				// Skip if we did get no buffer for this channel,
+				// Fill with zeroes.
+				std::fill(dstFloat, dstFloat + countChunk, 0.0f);
+				continue;
+			}
+			switch(m_ChannelInfo[channel].type)
+			{
+				case ASIOSTFloat32MSB:
+				case ASIOSTFloat32LSB:
+					CopyChannelToInterleaved<SC::Convert<float, float> >(dstFloat, reinterpret_cast<float*>(src), inputChannels, countChunk, inputChannel);
+					break;
+				case ASIOSTFloat64MSB:
+				case ASIOSTFloat64LSB:
+					CopyChannelToInterleaved<SC::Convert<float, double> >(dstFloat, reinterpret_cast<double*>(src), inputChannels, countChunk, inputChannel);
+					break;
+				default:
+					ASSERT(false);
+					break;
+			}
+		} else if(m_Settings.sampleFormat == SampleFormatInt16)
+		{
+			int16 *const dstInt16 = &m_SampleInputBufferInt16[0];
+			if(!src)
+			{
+				// Skip if we did get no buffer for this channel,
+				// Fill with zeroes.
+				std::fill(dstInt16, dstInt16 + countChunk, 0);
+				continue;
+			}
+			switch(m_ChannelInfo[channel].type)
+			{
+				case ASIOSTInt16MSB:
+				case ASIOSTInt16LSB:
+						CopyChannelToInterleaved<SC::Convert<int16, int16> >(dstInt16, reinterpret_cast<int16*>(src), inputChannels, countChunk, inputChannel);
+						break;
+					default:
+						ASSERT(false);
+						break;
+			}
+		} else if(m_Settings.sampleFormat == SampleFormatInt24)
+		{
+			int24 *const dstInt24 = &m_SampleInputBufferInt24[0];
+			if(!src)
+			{
+				// Skip if we did get no buffer for this channel,
+				// Fill with zeroes.
+				std::fill(dstInt24, dstInt24 + countChunk, int24(0));
+				continue;
+			}
+			switch(m_ChannelInfo[channel].type)
+			{
+				case ASIOSTInt24MSB:
+				case ASIOSTInt24LSB:
+						CopyChannelToInterleaved<SC::Convert<int24, int24> >(dstInt24, reinterpret_cast<int24*>(src), inputChannels, countChunk, inputChannel);
+						break;
+					default:
+						ASSERT(false);
+						break;
+			}
+		} else if(m_Settings.sampleFormat == SampleFormatInt32)
+		{
+			int32 *const dstInt32 = &m_SampleInputBufferInt32[0];
+			if(!src)
+			{
+				// Skip if we did get no buffer for this channel,
+				// Fill with zeroes.
+				std::fill(dstInt32, dstInt32 + countChunk, 0);
+				continue;
+			}
+			switch(m_ChannelInfo[channel].type)
+			{
+				case ASIOSTInt16MSB:
+				case ASIOSTInt16LSB:
+					CopyChannelToInterleaved<SC::Convert<int32, int16> >(dstInt32, reinterpret_cast<int16*>(src), inputChannels, countChunk, inputChannel);
+					break;
+				case ASIOSTInt24MSB:
+				case ASIOSTInt24LSB:
+					CopyChannelToInterleaved<SC::Convert<int32, int24> >(dstInt32, reinterpret_cast<int24*>(src), inputChannels, countChunk, inputChannel);
+					break;
+				case ASIOSTInt32MSB:
+				case ASIOSTInt32LSB:
+					CopyChannelToInterleaved<SC::Convert<int32, int32> >(dstInt32, reinterpret_cast<int32*>(src), inputChannels, countChunk, inputChannel);
+					break;
+				case ASIOSTFloat32MSB:
+				case ASIOSTFloat32LSB:
+					CopyChannelToInterleaved<SC::Convert<int32, float> >(dstInt32, reinterpret_cast<float*>(src), inputChannels, countChunk, inputChannel);
+					break;
+				case ASIOSTFloat64MSB:
+				case ASIOSTFloat64LSB:
+					CopyChannelToInterleaved<SC::Convert<int32, double> >(dstInt32, reinterpret_cast<double*>(src), inputChannels, countChunk, inputChannel);
+					break;
+				case ASIOSTInt32MSB16:
+				case ASIOSTInt32LSB16:
+					CopyChannelToInterleaved<SC::ConvertShiftUp<int32, int32, 16> >(dstInt32, reinterpret_cast<int32*>(src), inputChannels, countChunk, inputChannel);
+					break;
+				case ASIOSTInt32MSB18:
+				case ASIOSTInt32LSB18:
+					CopyChannelToInterleaved<SC::ConvertShiftUp<int32, int32, 14> >(dstInt32, reinterpret_cast<int32*>(src), inputChannels, countChunk, inputChannel);
+					break;
+				case ASIOSTInt32MSB20:
+				case ASIOSTInt32LSB20:
+					CopyChannelToInterleaved<SC::ConvertShiftUp<int32, int32, 12> >(dstInt32, reinterpret_cast<int32*>(src), inputChannels, countChunk, inputChannel);
+					break;
+				case ASIOSTInt32MSB24:
+				case ASIOSTInt32LSB24:
+					CopyChannelToInterleaved<SC::ConvertShiftUp<int32, int32, 8> >(dstInt32, reinterpret_cast<int32*>(src), inputChannels, countChunk, inputChannel);
+					break;
+				default:
+					ASSERT(false);
+					break;
+			}
+		} else
+		{
+			ASSERT(false);
+		}
+	}
 	if(rendersilence)
 	{
 		if(m_Settings.sampleFormat == SampleFormatFloat32)
 		{
-			std::memset(&m_SampleBufferFloat[0], 0, countChunk * channels * sizeof(float));
+			std::memset(&m_SampleBufferFloat[0], 0, countChunk * outputChannels * sizeof(float));
 		} else if(m_Settings.sampleFormat == SampleFormatInt16)
 		{
-			std::memset(&m_SampleBufferInt16[0], 0, countChunk * channels * sizeof(int16));
+			std::memset(&m_SampleBufferInt16[0], 0, countChunk * outputChannels * sizeof(int16));
 		} else if(m_Settings.sampleFormat == SampleFormatInt24)
 		{
-			std::memset(&m_SampleBufferInt24[0], 0, countChunk * channels * sizeof(int24));
+			std::memset(&m_SampleBufferInt24[0], 0, countChunk * outputChannels * sizeof(int24));
 		} else if(m_Settings.sampleFormat == SampleFormatInt32)
 		{
-			std::memset(&m_SampleBufferInt32[0], 0, countChunk * channels * sizeof(int32));
+			std::memset(&m_SampleBufferInt32[0], 0, countChunk * outputChannels * sizeof(int32));
 		} else
 		{
 			MPT_ASSERT(false);
@@ -882,24 +1052,25 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 		SourceAudioPreRead(countChunk, m_nAsioBufferLen);
 		if(m_Settings.sampleFormat == SampleFormatFloat32)
 		{
-			SourceAudioRead(&m_SampleBufferFloat[0], countChunk);
+			SourceAudioRead(&m_SampleBufferFloat[0], (m_SampleInputBufferFloat.size() > 0) ? &m_SampleInputBufferFloat[0] : nullptr, countChunk);
 		} else if(m_Settings.sampleFormat == SampleFormatInt16)
 		{
-			SourceAudioRead(&m_SampleBufferInt16[0], countChunk);
+			SourceAudioRead(&m_SampleBufferInt16[0], (m_SampleInputBufferInt16.size() > 0) ? &m_SampleInputBufferInt16[0] : nullptr, countChunk);
 		} else if(m_Settings.sampleFormat == SampleFormatInt24)
 		{
-			SourceAudioRead(&m_SampleBufferInt24[0], countChunk);
+			SourceAudioRead(&m_SampleBufferInt24[0], (m_SampleInputBufferInt24.size() > 0) ? &m_SampleInputBufferInt24[0] : nullptr, countChunk);
 		} else if(m_Settings.sampleFormat == SampleFormatInt32)
 		{
-			SourceAudioRead(&m_SampleBufferInt32[0], countChunk);
+			SourceAudioRead(&m_SampleBufferInt32[0], (m_SampleInputBufferInt32.size() > 0) ? &m_SampleInputBufferInt32[0] : nullptr, countChunk);
 		} else
 		{
 			MPT_ASSERT(false);
 		}
 	}
-	for(int channel = 0; channel < channels; ++channel)
+	for(std::size_t outputChannel = 0; outputChannel < outputChannels; ++outputChannel)
 	{
-		void *dst = m_BufferInfo[channel].buffers[(unsigned long)m_BufferIndex & 1];
+		std::size_t channel = outputChannel + m_Settings.InputChannels;
+		void *dst = m_BufferInfo[channel].buffers[static_cast<unsigned long>(m_BufferIndex) & 1];
 		if(!dst)
 		{
 			// Skip if we did get no buffer for this channel
@@ -912,11 +1083,11 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 			{
 				case ASIOSTFloat32MSB:
 				case ASIOSTFloat32LSB:
-					CopyInterleavedToChannel<SC::Convert<float, float> >(reinterpret_cast<float*>(dst), srcFloat, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<float, float> >(reinterpret_cast<float*>(dst), srcFloat, outputChannels, countChunk, outputChannel);
 					break;
 				case ASIOSTFloat64MSB:
 				case ASIOSTFloat64LSB:
-					CopyInterleavedToChannel<SC::Convert<double, float> >(reinterpret_cast<double*>(dst), srcFloat, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<double, float> >(reinterpret_cast<double*>(dst), srcFloat, outputChannels, countChunk, outputChannel);
 					break;
 				default:
 					MPT_ASSERT(false);
@@ -929,7 +1100,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 			{
 				case ASIOSTInt16MSB:
 				case ASIOSTInt16LSB:
-						CopyInterleavedToChannel<SC::Convert<int16, int16> >(reinterpret_cast<int16*>(dst), srcInt16, channels, countChunk, channel);
+						CopyInterleavedToChannel<SC::Convert<int16, int16> >(reinterpret_cast<int16*>(dst), srcInt16, outputChannels, countChunk, outputChannel);
 						break;
 					default:
 						MPT_ASSERT(false);
@@ -942,7 +1113,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 			{
 				case ASIOSTInt24MSB:
 				case ASIOSTInt24LSB:
-						CopyInterleavedToChannel<SC::Convert<int24, int24> >(reinterpret_cast<int24*>(dst), srcInt24, channels, countChunk, channel);
+						CopyInterleavedToChannel<SC::Convert<int24, int24> >(reinterpret_cast<int24*>(dst), srcInt24, outputChannels, countChunk, outputChannel);
 						break;
 					default:
 						MPT_ASSERT(false);
@@ -955,39 +1126,39 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 			{
 				case ASIOSTInt16MSB:
 				case ASIOSTInt16LSB:
-					CopyInterleavedToChannel<SC::Convert<int16, int32> >(reinterpret_cast<int16*>(dst), srcInt32, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<int16, int32> >(reinterpret_cast<int16*>(dst), srcInt32, outputChannels, countChunk, outputChannel);
 					break;
 				case ASIOSTInt24MSB:
 				case ASIOSTInt24LSB:
-					CopyInterleavedToChannel<SC::Convert<int24, int32> >(reinterpret_cast<int24*>(dst), srcInt32, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<int24, int32> >(reinterpret_cast<int24*>(dst), srcInt32, outputChannels, countChunk, outputChannel);
 					break;
 				case ASIOSTInt32MSB:
 				case ASIOSTInt32LSB:
-					CopyInterleavedToChannel<SC::Convert<int32, int32> >(reinterpret_cast<int32*>(dst), srcInt32, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<int32, int32> >(reinterpret_cast<int32*>(dst), srcInt32, outputChannels, countChunk, outputChannel);
 					break;
 				case ASIOSTFloat32MSB:
 				case ASIOSTFloat32LSB:
-					CopyInterleavedToChannel<SC::Convert<float, int32> >(reinterpret_cast<float*>(dst), srcInt32, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<float, int32> >(reinterpret_cast<float*>(dst), srcInt32, outputChannels, countChunk, outputChannel);
 					break;
 				case ASIOSTFloat64MSB:
 				case ASIOSTFloat64LSB:
-					CopyInterleavedToChannel<SC::Convert<double, int32> >(reinterpret_cast<double*>(dst), srcInt32, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::Convert<double, int32> >(reinterpret_cast<double*>(dst), srcInt32, outputChannels, countChunk, outputChannel);
 					break;
 				case ASIOSTInt32MSB16:
 				case ASIOSTInt32LSB16:
-					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 16> >(reinterpret_cast<int32*>(dst), srcInt32, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 16> >(reinterpret_cast<int32*>(dst), srcInt32, outputChannels, countChunk, outputChannel);
 					break;
 				case ASIOSTInt32MSB18:
 				case ASIOSTInt32LSB18:
-					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 14> >(reinterpret_cast<int32*>(dst), srcInt32, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 14> >(reinterpret_cast<int32*>(dst), srcInt32, outputChannels, countChunk, outputChannel);
 					break;
 				case ASIOSTInt32MSB20:
 				case ASIOSTInt32LSB20:
-					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 12> >(reinterpret_cast<int32*>(dst), srcInt32, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 12> >(reinterpret_cast<int32*>(dst), srcInt32, outputChannels, countChunk, outputChannel);
 					break;
 				case ASIOSTInt32MSB24:
 				case ASIOSTInt32LSB24:
-					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 8> >(reinterpret_cast<int32*>(dst), srcInt32, channels, countChunk, channel);
+					CopyInterleavedToChannel<SC::ConvertShift<int32, int32, 8> >(reinterpret_cast<int32*>(dst), srcInt32, outputChannels, countChunk, outputChannel);
 					break;
 				default:
 					MPT_ASSERT(false);
@@ -1386,6 +1557,8 @@ SoundDevice::Caps CASIODevice::InternalGetDeviceCaps()
 	caps.CanKeepDeviceRunning = true;
 	caps.CanUseHardwareTiming = true;
 	caps.CanChannelMapping = true;
+	caps.CanInput = true;
+	caps.HasNamedInputSources = true;
 	caps.CanDriverPanel = true;
 
 	caps.LatencyMin = 0.000001; // 1 us
@@ -1466,6 +1639,24 @@ SoundDevice::DynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uin
 				// continue
 			}
 			caps.channelNames.push_back(name);
+		}
+		for(long i = 0; i < inputChannels; ++i)
+		{
+			ASIOChannelInfo channelInfo;
+			MemsetZero(channelInfo);
+			channelInfo.channel = i;
+			channelInfo.isInput = ASIOTrue;
+			mpt::ustring name = mpt::ufmt::dec(i);
+			try
+			{
+				asioCall(getChannelInfo(&channelInfo));
+				mpt::String::SetNullTerminator(channelInfo.name);
+				name = mpt::ToUnicode(mpt::CharsetLocale, channelInfo.name);
+			} catch(...)
+			{
+				// continue
+			}
+			caps.inputSourceNames.push_back(std::make_pair(static_cast<uint32>(i), name));
 		}
 	} catch(...)
 	{
