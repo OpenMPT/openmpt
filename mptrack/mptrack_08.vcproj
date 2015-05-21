@@ -1037,10 +1037,6 @@
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe;png"
 			>
 			<File
-				RelativePath="res\bitmap1.bmp"
-				>
-			</File>
-			<File
 				RelativePath=".\res\colors.bmp"
 				>
 			</File>
@@ -1102,14 +1098,6 @@
 			</File>
 			<File
 				RelativePath=".\res\view_pat.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\res\visnode1.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\res\vispcnode.bmp"
 				>
 			</File>
 			<File
@@ -2011,19 +1999,7 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\res\built-inTunings.tc"
-			>
-		</File>
-		<File
 			RelativePath=".\res\defaultKeybindings.mkb"
-			>
-		</File>
-		<File
-			RelativePath=".\mptrack.reg"
-			>
-		</File>
-		<File
-			RelativePath=".\VTune\mptrack.vpj"
 			>
 		</File>
 	</Files>
