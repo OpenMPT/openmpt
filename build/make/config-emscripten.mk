@@ -19,7 +19,8 @@ ARFLAGS  := rcs
 # limit memory to 64MB, faster but loading modules bigger than about 16MB will not work
 #LDFLAGS += -s TOTAL_MEMORY=67108864
 
-LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
+LDFLAGS += -s OUTLINING_LIMIT=16000
+LDFLAGS += -s TOTAL_MEMORY=67108864
 
 CXXFLAGS_WARNINGS += -Wmissing-prototypes
 CFLAGS_WARNINGS   += -Wmissing-prototypes
