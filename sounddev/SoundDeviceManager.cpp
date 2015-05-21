@@ -41,11 +41,37 @@ namespace SoundDevice {
 	};
 
 
+template <typename Tdevice>
+void Manager::EnumerateDevices()
+//------------------------------
+{
+	const std::vector<SoundDevice::Info> infos = Tdevice::EnumerateDevices();
+	m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
+	for(std::vector<SoundDevice::Info>::const_iterator it = infos.begin(); it != infos.end(); ++it)
+	{
+		SoundDevice::Identifier identifier = it->GetIdentifier();
+		if(!identifier.empty())
+		{
+			m_DeviceFactoryMethods[identifier] = ConstructSoundDevice<Tdevice>;
+		}
+	}
+}
+
+
+template <typename Tdevice>
+SoundDevice::IBase* Manager::ConstructSoundDevice(const SoundDevice::Info &info)
+//------------------------------------------------------------------------------
+{
+	return new Tdevice(info);
+}
+
+
 void Manager::ReEnumerate()
 //-------------------------
 {
 	m_SoundDevices.clear();
 	m_DeviceUnavailable.clear();
+	m_DeviceFactoryMethods.clear();
 	m_DeviceCaps.clear();
 	m_DeviceDynamicCaps.clear();
 
@@ -58,31 +84,28 @@ void Manager::ReEnumerate()
 
 	if(IsComponentAvailable(m_WaveOut))
 	{
-		const std::vector<SoundDevice::Info> infos = CWaveDevice::EnumerateDevices();
-		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
+		EnumerateDevices<CWaveDevice>();
 	}
-	// kind of deprecated by now
+
 #ifndef NO_DSOUND
+	// kind of deprecated by now
 	if(IsComponentAvailable(m_DirectSound))
 	{
-		const std::vector<SoundDevice::Info> infos = CDSoundDevice::EnumerateDevices();
-		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
+		EnumerateDevices<CDSoundDevice>();
 	}
 #endif // NO_DSOUND
 
 #ifndef NO_ASIO
 	if(IsComponentAvailable(m_ASIO))
 	{
-		const std::vector<SoundDevice::Info> infos = CASIODevice::EnumerateDevices();
-		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
+		EnumerateDevices<CASIODevice>();
 	}
 #endif // NO_ASIO
 
 #ifndef NO_PORTAUDIO
 	if(IsComponentAvailable(m_PortAudio))
 	{
-		const std::vector<SoundDevice::Info> infos = CPortaudioDevice::EnumerateDevices();
-		m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
+		EnumerateDevices<CPortaudioDevice>();
 	}
 #endif // NO_PORTAUDIO
 
@@ -129,11 +152,11 @@ void Manager::ReEnumerate()
 	Log(LogDebug, MPT_USTRING("Sound Devices enumerated:"));
 	for(std::size_t i = 0; i < m_SoundDevices.size(); ++i)
 	{
-		Log(LogDebug, mpt::String::Print(MPT_USTRING(" Identifier : %1")   , m_SoundDevices[i].GetIdentifier()));
-		Log(LogDebug, mpt::String::Print(MPT_USTRING("  Type      : %1")   , m_SoundDevices[i].type));
-		Log(LogDebug, mpt::String::Print(MPT_USTRING("  InternalID: %1")   , m_SoundDevices[i].internalID));
-		Log(LogDebug, mpt::String::Print(MPT_USTRING("  API Name  : %1")   , m_SoundDevices[i].apiName));
-		Log(LogDebug, mpt::String::Print(MPT_USTRING("  Name      : %1")   , m_SoundDevices[i].name));
+		Log(LogDebug, mpt::String::Print(MPT_USTRING(" Identifier : %1"), m_SoundDevices[i].GetIdentifier()));
+		Log(LogDebug, mpt::String::Print(MPT_USTRING("  Type      : %1"), m_SoundDevices[i].type));
+		Log(LogDebug, mpt::String::Print(MPT_USTRING("  InternalID: %1"), m_SoundDevices[i].internalID));
+		Log(LogDebug, mpt::String::Print(MPT_USTRING("  API Name  : %1"), m_SoundDevices[i].apiName));
+		Log(LogDebug, mpt::String::Print(MPT_USTRING("  Name      : %1"), m_SoundDevices[i].name));
 	}
 	
 }
@@ -205,39 +228,39 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(SoundDevice::Identifier ident
 	{
 		return SoundDevice::Info();
 	}
-	if(identifier.empty())
-	{
-			return *begin();
+	if(!identifier.empty())
+	{ // valid identifier
+		for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
+		{
+			if((it->GetIdentifier() == identifier) && !IsDeviceUnavailable(it->GetIdentifier()))
+			{ // exact match
+				return *it;
+			}
+		}
+		const SoundDevice::Type type = ParseType(identifier);
+		if(type == TypePORTAUDIO_WASAPI)
+		{
+			// WASAPI devices might change names if a different connector jack is used.
+			// In order to avoid defaulting to wave mapper in that case,
+			// just find the first WASAPI device.
+			preferSameType = true;
+		}
+		if(preferSameType)
+		{ // find first avilable device of given type
+			for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
+			{
+				if((it->type == type) && !IsDeviceUnavailable(it->GetIdentifier()))
+				{
+					return *it;
+				}
+			}
+		}
 	}
 	for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
-	{
-		if((it->GetIdentifier() == identifier) && !IsDeviceUnavailable(it->GetIdentifier()))
-		{ // exact match
+	{ // find first available device
+		if(!IsDeviceUnavailable(it->GetIdentifier()))
+		{
 			return *it;
-		}
-	}
-	const SoundDevice::Type type = ParseType(identifier);
-	if(type == TypePORTAUDIO_WASAPI)
-	{
-		// WASAPI devices might change names if a different connector jack is used.
-		// In order to avoid defaulting to wave mapper in that case,
-		// just find the first WASAPI device.
-		for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
-		{
-			if((it->type == TypePORTAUDIO_WASAPI) && !IsDeviceUnavailable(it->GetIdentifier()))
-			{
-				return *it;
-			}
-		}
-	}
-	if(preferSameType)
-	{
-		for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
-		{
-			if((it->type == type) && !IsDeviceUnavailable(it->GetIdentifier()))
-			{
-				return *it;
-			}
 		}
 	}
 	// default to first device
@@ -333,24 +356,15 @@ SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifi
 	{
 		return nullptr;
 	}
-	SoundDevice::IBase *result = nullptr;
-	if(info.type.empty()) { result = nullptr; }
-	if(info.type == TypeWAVEOUT) { result = new CWaveDevice(info); }
-#ifndef NO_DSOUND
-	if(info.type == TypeDSOUND) { result = new CDSoundDevice(info); }
-#endif // NO_DSOUND
-#ifndef NO_ASIO
-	if(info.type == TypeASIO) { result = new CASIODevice(info); }
-#endif // NO_ASIO
-#ifndef NO_PORTAUDIO
-	if(IsComponentAvailable(m_PortAudio))
+	if(m_DeviceFactoryMethods.find(identifier) == m_DeviceFactoryMethods.end())
 	{
-		if(info.type == TypePORTAUDIO_WASAPI) { result = new CPortaudioDevice(info); }
-		if(info.type == TypePORTAUDIO_WDMKS) { result = new CPortaudioDevice(info); }
-		if(info.type == TypePORTAUDIO_WMME) { result = new CPortaudioDevice(info); }
-		if(info.type == TypePORTAUDIO_DS) { result = new CPortaudioDevice(info); }
+		return nullptr;
 	}
-#endif // NO_PORTAUDIO
+	if(!m_DeviceFactoryMethods[identifier])
+	{
+		return nullptr;
+	}
+	SoundDevice::IBase *result = m_DeviceFactoryMethods[identifier](info);
 	if(!result)
 	{
 		return nullptr;
