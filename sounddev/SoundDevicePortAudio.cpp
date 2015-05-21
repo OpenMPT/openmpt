@@ -40,6 +40,7 @@ CPortaudioDevice::CPortaudioDevice(SoundDevice::Info info)
 	m_DeviceIndex = ConvertStrTo<PaDeviceIndex>(GetDeviceInternalID());
 	m_HostApiType = Pa_GetHostApiInfo(Pa_GetDeviceInfo(m_DeviceIndex)->hostApi)->type;
 	MemsetZero(m_StreamParameters);
+	MemsetZero(m_InputStreamParameters);
 	m_Stream = 0;
 	m_StreamInfo = 0;
 	m_CurrentFrameCount = 0;
@@ -58,9 +59,11 @@ bool CPortaudioDevice::InternalOpen()
 //-----------------------------------
 {
 	MemsetZero(m_StreamParameters);
+	MemsetZero(m_InputStreamParameters);
 	m_Stream = 0;
 	m_StreamInfo = 0;
 	m_CurrentFrameBuffer = 0;
+	m_CurrentFrameBufferInput = 0;
 	m_CurrentFrameCount = 0;
 	m_StreamParameters.device = m_DeviceIndex;
 	if(m_StreamParameters.device == -1) return false;
@@ -114,13 +117,19 @@ bool CPortaudioDevice::InternalOpen()
 	{
 		m_Flags.NeedsClippedFloat = false;
 	}
-	if(Pa_IsFormatSupported(NULL, &m_StreamParameters, m_Settings.Samplerate) != paFormatIsSupported) return false;
+	m_InputStreamParameters = m_StreamParameters;
+	if(!HasInputChannelsOnSameDevice())
+	{
+		m_InputStreamParameters.device = static_cast<PaDeviceIndex>(m_Settings.InputSourceID);
+	}
+	m_InputStreamParameters.channelCount = m_Settings.InputChannels;
+	if(Pa_IsFormatSupported((m_Settings.InputChannels > 0) ? &m_InputStreamParameters : NULL, &m_StreamParameters, m_Settings.Samplerate) != paFormatIsSupported) return false;
 	PaStreamFlags flags = paNoFlag;
 	if(m_Settings.DitherType == 0)
 	{
 		flags |= paDitherOff;
 	}
-	if(Pa_OpenStream(&m_Stream, NULL, &m_StreamParameters, m_Settings.Samplerate, framesPerBuffer, flags, StreamCallbackWrapper, (void*)this) != paNoError) return false;
+	if(Pa_OpenStream(&m_Stream, (m_Settings.InputChannels > 0) ? &m_InputStreamParameters : NULL, &m_StreamParameters, m_Settings.Samplerate, framesPerBuffer, flags, StreamCallbackWrapper, (void*)this) != paNoError) return false;
 	m_StreamInfo = Pa_GetStreamInfo(m_Stream);
 	if(!m_StreamInfo)
 	{
@@ -145,10 +154,12 @@ bool CPortaudioDevice::InternalClose()
 			Pa_Sleep(Util::Round<long>(bufferAttributes.Latency * 2.0 * 1000.0 + 0.5)); // wait for broken wdm drivers not closing the stream immediatly
 		}
 		MemsetZero(m_StreamParameters);
+		MemsetZero(m_InputStreamParameters);
 		m_StreamInfo = 0;
 		m_Stream = 0;
 		m_CurrentFrameCount = 0;
 		m_CurrentFrameBuffer = 0;
+		m_CurrentFrameBufferInput = 0;
 	}
 	return true;
 }
@@ -173,7 +184,7 @@ void CPortaudioDevice::InternalFillAudioBuffer()
 {
 	if(m_CurrentFrameCount == 0) return;
 	SourceAudioPreRead(m_CurrentFrameCount, Util::Round<std::size_t>(m_CurrentRealLatency * m_StreamInfo->sampleRate));
-	SourceAudioRead(m_CurrentFrameBuffer, m_CurrentFrameCount);
+	SourceAudioRead(m_CurrentFrameBuffer, m_CurrentFrameBufferInput, m_CurrentFrameCount);
 	m_StatisticPeriodFrames.store(m_CurrentFrameCount);
 	SourceAudioDone();
 }
@@ -221,14 +232,25 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 	caps.CanBoostThreadPriority = false;
 	caps.CanUseHardwareTiming = false;
 	caps.CanChannelMapping = false;
+	caps.CanInput = false;
+	caps.HasNamedInputSources = false;
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = true;
+	caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
 	const PaDeviceInfo *deviceInfo = Pa_GetDeviceInfo(m_DeviceIndex);
 	if(deviceInfo)
 	{
 		caps.DefaultSettings.Latency = deviceInfo->defaultLowOutputLatency;
 	}
-	caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
+	if(HasInputChannelsOnSameDevice())
+	{
+		caps.CanInput = true;
+		caps.HasNamedInputSources = false;
+	} else
+	{
+		caps.CanInput = (EnumerateInputOnlyDevices(m_HostApiType).size() > 0);
+		caps.HasNamedInputSources = caps.CanInput;
+	}
 	if(m_HostApiType == paWASAPI)
 	{
 		caps.CanExclusiveMode = true;
@@ -266,7 +288,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 {
 	SoundDevice::DynamicCaps caps;
 	PaDeviceIndex device = m_DeviceIndex;
-	if(device == -1)
+	if(device == paNoDevice)
 	{
 		return caps;
 	}
@@ -294,6 +316,17 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 			caps.supportedExclusiveSampleRates.push_back(baseSampleRates[n]);
 		}
 	}
+
+	if(!HasInputChannelsOnSameDevice())
+	{
+		caps.inputSourceNames.clear();
+		std::vector<std::pair<PaDeviceIndex, mpt::ustring> > inputDevices = EnumerateInputOnlyDevices(m_HostApiType);
+		for(std::vector<std::pair<PaDeviceIndex, mpt::ustring> >::const_iterator it = inputDevices.begin(); it != inputDevices.end(); ++it)
+		{
+			caps.inputSourceNames.push_back(std::make_pair(static_cast<uint32>(it->first), it->second));
+		}
+	}
+
 	return caps;
 }
 
@@ -350,10 +383,12 @@ int CPortaudioDevice::StreamCallback(
 		m_CurrentRealLatency = timeInfo->outputBufferDacTime - timeInfo->currentTime;
 	}
 	m_CurrentFrameBuffer = output;
+	m_CurrentFrameBufferInput = input;
 	m_CurrentFrameCount = frameCount;
 	SourceFillAudioBufferLocked();
 	m_CurrentFrameCount = 0;
 	m_CurrentFrameBuffer = 0;
+	m_CurrentFrameBufferInput = 0;
 	return paContinue;
 }
 
@@ -449,6 +484,68 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices()
 		devices.push_back(result);
 	}
 	return devices;
+}
+
+
+
+
+std::vector<std::pair<PaDeviceIndex, mpt::ustring> > CPortaudioDevice::EnumerateInputOnlyDevices(PaHostApiTypeId hostApiType)
+//---------------------------------------------------------------------------------------------------------------------------
+{
+	std::vector<std::pair<PaDeviceIndex, mpt::ustring> > result;
+	for(PaDeviceIndex dev = 0; dev < Pa_GetDeviceCount(); ++dev)
+	{
+		if(!Pa_GetDeviceInfo(dev))
+		{
+			continue;
+		}
+		if(Pa_GetDeviceInfo(dev)->hostApi < 0)
+		{
+			continue;
+		}
+		if(!Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi))
+		{
+			continue;
+		}
+		if(!Pa_GetDeviceInfo(dev)->name)
+		{
+			continue;
+		}
+		if(!Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name)
+		{
+			continue;
+		}
+		if(Pa_GetDeviceInfo(dev)->maxInputChannels <= 0)
+		{
+			continue;
+		}
+		if(Pa_GetDeviceInfo(dev)->maxOutputChannels > 0)
+		{ // only find devices with only input channels
+			continue;
+		}
+		if(Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type != hostApiType)
+		{
+			continue;
+		}
+		result.push_back(std::make_pair(dev, mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetDeviceInfo(dev)->name)));
+	}
+	return result;
+}
+
+
+bool CPortaudioDevice::HasInputChannelsOnSameDevice() const
+//---------------------------------------------------------
+{
+	if(m_DeviceIndex == paNoDevice)
+	{
+		return false;
+	}
+	const PaDeviceInfo *deviceinfo = Pa_GetDeviceInfo(m_DeviceIndex);
+	if(!deviceinfo)
+	{
+		return false;
+	}
+	return (deviceinfo->maxInputChannels > 0);
 }
 
 

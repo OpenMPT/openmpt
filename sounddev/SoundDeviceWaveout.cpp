@@ -75,6 +75,8 @@ SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 	caps.CanKeepDeviceRunning = false;
 	caps.CanUseHardwareTiming = false;
 	caps.CanChannelMapping = false;
+	caps.CanInput = false;
+	caps.HasNamedInputSources = false;
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = false;
 	caps.ExclusiveModeDescription = MPT_USTRING("Use direct mode");
@@ -133,6 +135,10 @@ bool CWaveDevice::InternalOpen()
 //------------------------------
 {
 	MPT_TRACE();
+	if(m_Settings.InputChannels > 0)
+	{
+		return false;
+	}
 	WAVEFORMATEXTENSIBLE wfext;
 	if(!FillWaveFormatExtensible(wfext, m_Settings))
 	{
@@ -265,7 +271,7 @@ void CWaveDevice::InternalFillAudioBuffer()
 	{
 		nLatency += m_nWaveBufferSize;
 		SourceAudioPreRead(m_nWaveBufferSize / bytesPerFrame, nLatency / bytesPerFrame);
-		SourceAudioRead(m_WaveBuffers[m_nWriteBuffer].lpData, m_nWaveBufferSize / bytesPerFrame);
+		SourceAudioRead(m_WaveBuffers[m_nWriteBuffer].lpData, nullptr, m_nWaveBufferSize / bytesPerFrame);
 		nBytesWritten += m_nWaveBufferSize;
 		m_WaveBuffers[m_nWriteBuffer].dwBufferLength = m_nWaveBufferSize;
 		InterlockedIncrement(&m_nBuffersPending);

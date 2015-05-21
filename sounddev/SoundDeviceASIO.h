@@ -71,6 +71,10 @@ protected:
 	std::vector<int16> m_SampleBufferInt16;
 	std::vector<int24> m_SampleBufferInt24;
 	std::vector<int32> m_SampleBufferInt32;
+	std::vector<float> m_SampleInputBufferFloat;
+	std::vector<int16> m_SampleInputBufferInt16;
+	std::vector<int24> m_SampleInputBufferInt24;
+	std::vector<int32> m_SampleInputBufferInt32;
 	bool m_CanOutputReady;
 
 	bool m_DeviceRunning;

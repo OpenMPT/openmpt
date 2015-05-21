@@ -142,6 +142,8 @@ SoundDevice::Caps CDSoundDevice::InternalGetDeviceCaps()
 	caps.CanBoostThreadPriority = true;
 	caps.CanUseHardwareTiming = false;
 	caps.CanChannelMapping = false;
+	caps.CanInput = false;
+	caps.HasNamedInputSources = false;
 	caps.CanDriverPanel = false;
 	caps.ExclusiveModeDescription = MPT_USTRING("Use primary buffer");
 	caps.DefaultSettings.sampleFormat = SampleFormatInt16;
@@ -238,6 +240,8 @@ SoundDevice::DynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<u
 bool CDSoundDevice::InternalOpen()
 //--------------------------------
 {
+	if(m_Settings.InputChannels > 0) return false;
+
 	WAVEFORMATEXTENSIBLE wfext;
 	if(!FillWaveFormatExtensible(wfext, m_Settings)) return false;
 	WAVEFORMATEX *pwfx = &wfext.Format;
@@ -455,8 +459,8 @@ void CDSoundDevice::InternalFillAudioBuffer()
 
 		SourceAudioPreRead(dwSize1/bytesPerFrame + dwSize2/bytesPerFrame, dwLatency/bytesPerFrame);
 
-		SourceAudioRead(buf1, dwSize1/bytesPerFrame);
-		SourceAudioRead(buf2, dwSize2/bytesPerFrame);
+		SourceAudioRead(buf1, nullptr, dwSize1/bytesPerFrame);
+		SourceAudioRead(buf2, nullptr, dwSize2/bytesPerFrame);
 
 		if(m_pMixBuffer->Unlock(buf1, dwSize1, buf2, dwSize2) != DS_OK)
 		{
