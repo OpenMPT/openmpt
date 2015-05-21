@@ -214,6 +214,20 @@ struct ConvertShift
 
 
 
+// Shift input_t up by shift and saturate to output_t.
+template <typename Tdst, typename Tsrc, int shift>
+struct ConvertShiftUp
+{
+	typedef Tsrc input_t;
+	typedef Tdst output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return mpt::saturate_cast<output_t>(val << shift);
+	}
+};
+
+
+
 
 // Every sample conversion functor has to typedef its input_t and output_t.
 // The input_t argument is taken by value because we only deal with per-single-sample conversions here.
@@ -390,6 +404,69 @@ struct Convert<int24, int32>
 	forceinline output_t operator() (input_t val)
 	{
 		return int24(val >> 8);
+	}
+};
+
+template <>
+struct Convert<int32, int8>
+{
+	typedef int8 input_t;
+	typedef int32 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return int32(val << 24);
+	}
+};
+
+template <>
+struct Convert<int32, int16>
+{
+	typedef int16 input_t;
+	typedef int32 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return int32(val << 16);
+	}
+};
+
+template <>
+struct Convert<int32, int24>
+{
+	typedef int24 input_t;
+	typedef int32 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		return int32(val << 8);
+	}
+};
+
+template <>
+struct Convert<int32, float32>
+{
+	typedef float32 input_t;
+	typedef int32 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		Limit(val, -1.0f, 1.0f);
+		val *= 2147483648.0f;
+		// MSVC with x87 floating point math calls floor for the more intuitive version
+		// return mpt::saturate_cast<int32>(static_cast<int64>(std::floor(val + 0.5f)));
+		return mpt::saturate_cast<int32>(static_cast<int64>(val * 2.0f + 1.0f) >> 1);
+	}
+};
+
+template <>
+struct Convert<int32, double>
+{
+	typedef double input_t;
+	typedef int32 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		Limit(val, -1.0, 1.0);
+		val *= 2147483648.0;
+		// MSVC with x87 floating point math calls floor for the more intuitive version
+		// return mpt::saturate_cast<int32>(static_cast<int64>(std::floor(val + 0.5)));
+		return mpt::saturate_cast<int32>(static_cast<int64>(val * 2.0 + 1.0) >> 1);
 	}
 };
 
@@ -575,6 +652,81 @@ struct ConvertFixedPoint<float32, int32, fractionalBits, clipOutput>
 	}
 };
 
+
+template <typename Tdst, typename Tsrc, int fractionalBits>
+struct ConvertToFixedPoint;
+
+template <int fractionalBits>
+struct ConvertToFixedPoint<int32, uint8, fractionalBits>
+{
+	typedef uint8 input_t;
+	typedef int32 output_t;
+	static const int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
+		STATIC_ASSERT(shiftBits >= 1);
+		return static_cast<output_t>(static_cast<int>(val)-0x80) << shiftBits;
+	}
+};
+
+template <int fractionalBits>
+struct ConvertToFixedPoint<int32, int16, fractionalBits>
+{
+	typedef int16 input_t;
+	typedef int32 output_t;
+	static const int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
+		STATIC_ASSERT(shiftBits >= 1);
+		return static_cast<output_t>(val) << shiftBits;
+	}
+};
+
+template <int fractionalBits>
+struct ConvertToFixedPoint<int32, int24, fractionalBits>
+{
+	typedef int24 input_t;
+	typedef int32 output_t;
+	static const int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
+		STATIC_ASSERT(shiftBits >= 1);
+		return static_cast<output_t>(val) << shiftBits;
+	}
+};
+
+template <int fractionalBits>
+struct ConvertToFixedPoint<int32, int32, fractionalBits>
+{
+	typedef int32 input_t;
+	typedef int32 output_t;
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
+		return static_cast<output_t>(val) >> (sizeof(input_t)*8-1-fractionalBits);
+	}
+};
+
+template <int fractionalBits>
+struct ConvertToFixedPoint<int32, float32, fractionalBits>
+{
+	typedef float32 input_t;
+	typedef int32 output_t;
+	const float factor;
+	forceinline ConvertToFixedPoint()
+		: factor( static_cast<float>(1 << fractionalBits) )
+	{
+		return;
+	}
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		return mpt::saturate_cast<output_t>(std::floor(val * factor + 0.5f));
+	}
+};
 
 
 
@@ -967,6 +1119,22 @@ void CopyInterleavedToChannel(typename SampleConversion::output_t * MPT_RESTRICT
 		*dst = sampleConv(*src);
 		src += channels;
 		dst++;
+	}
+}
+
+
+// Copy buffer to an interleaed buffer of #channels.
+template <typename SampleConversion>
+void CopyChannelToInterleaved(typename SampleConversion::output_t * MPT_RESTRICT dst, const typename SampleConversion::input_t * MPT_RESTRICT src, std::size_t channels, std::size_t countChunk, std::size_t channel, SampleConversion conv = SampleConversion())
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	SampleConversion sampleConv(conv);
+	dst += channel;
+	for(std::size_t i = 0; i < countChunk; ++i)
+	{
+		*dst = sampleConv(*src);
+		src++;
+		dst += channels;
 	}
 }
 
