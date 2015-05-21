@@ -585,8 +585,10 @@ MISC_OUTPUTS += bin/libopenmpt_example_c_stdout$(EXESUFFIX).norpath
 MISC_OUTPUTS += libopenmpt$(SOSUFFIX)
 MISC_OUTPUTS += bin/.docs
 MISC_OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
+MISC_OUTPUTS += bin/libopenmpt_test.js.mem
 MISC_OUTPUTS += bin/made.docs
 MISC_OUTPUTS += bin/$(LIBOPENMPT_SONAME)
+MISC_OUTPUTS += bin/libopenmpt.js.mem
 MISC_OUTPUTS += bin/openmpt.a
 
 MISC_OUTPUTDIRS += bin/dest
@@ -633,7 +635,11 @@ check: test
 
 .PHONY: test
 test: bin/libopenmpt_test$(EXESUFFIX)
-	$(RUNPREFIX) bin/libopenmpt_test$(EXESUFFIX)
+ifeq ($(CONFIG),emscripten)
+	cd bin && $(RUNPREFIX) libopenmpt_test$(EXESUFFIX)
+else
+	bin/libopenmpt_test$(EXESUFFIX)
+endif
 
 bin/libopenmpt_test$(EXESUFFIX): $(LIBOPENMPTTEST_OBJECTS) 
 	$(INFO) [LD-TEST] $@
