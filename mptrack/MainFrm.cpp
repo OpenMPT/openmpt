@@ -240,7 +240,6 @@ void CMainFrame::Initialize()
 	SoundDevice::Identifier dev = TrackerSettings::Instance().GetSoundDeviceIdentifier();
 	if(!theApp.GetSoundDevicesManager()->FindDeviceInfo(dev).IsValid())
 	{
-		// Fall back to default WaveOut device
 		dev = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(dev, TrackerSettings::Instance().m_SoundDevicePreferSameTypeIfDeviceUnavailable).GetIdentifier();
 		TrackerSettings::Instance().SetSoundDeviceIdentifier(dev);
 	}

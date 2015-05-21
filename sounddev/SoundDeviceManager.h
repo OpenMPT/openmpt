@@ -42,6 +42,10 @@ public:
 
 private:
 
+	typedef SoundDevice::IBase* (*CreateSoundDeviceFunc)(const SoundDevice::Info &info);
+
+private:
+
 	const SoundDevice::AppInfo m_AppInfo;
 
 	ComponentHandle<ComponentWaveOut> m_WaveOut;
@@ -57,12 +61,18 @@ private:
 
 	std::vector<SoundDevice::Info> m_SoundDevices;
 	std::map<SoundDevice::Identifier, bool> m_DeviceUnavailable;
+	std::map<SoundDevice::Identifier, CreateSoundDeviceFunc> m_DeviceFactoryMethods;
 	std::map<SoundDevice::Identifier, SoundDevice::Caps> m_DeviceCaps;
 	std::map<SoundDevice::Identifier, SoundDevice::DynamicCaps> m_DeviceDynamicCaps;
 
 public:
 	Manager(SoundDevice::AppInfo appInfo);
 	~Manager();
+
+private:
+
+	template <typename Tdevice> void EnumerateDevices();
+	template <typename Tdevice> static SoundDevice::IBase* ConstructSoundDevice(const SoundDevice::Info &info);
 
 public:
 
