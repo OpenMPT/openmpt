@@ -5,11 +5,21 @@ LD  = em++
 AR  = emar
 
 CPPFLAGS += 
-CXXFLAGS += -std=c++0x -fPIC 
+CXXFLAGS += -std=c++11 -fPIC 
 CFLAGS   += -std=c99   -fPIC
-LDFLAGS  += -O3 -s DISABLE_EXCEPTION_CATCHING=0 -s OUTLINING_LIMIT=16000 -s TOTAL_MEMORY=67108864
+LDFLAGS  += -O3 -s DISABLE_EXCEPTION_CATCHING=0
 LDLIBS   += 
 ARFLAGS  := rcs
+
+# work-around compiler bug with huge functions
+#LDFLAGS += -s OUTLINING_LIMIT=16000
+
+# allow growing heap (might be slower, especially with V8 (as used by Chrome))
+#LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
+# limit memory to 64MB, faster but loading modules bigger than about 16MB will not work
+#LDFLAGS += -s TOTAL_MEMORY=67108864
+
+LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 
 CXXFLAGS_WARNINGS += -Wmissing-prototypes
 CFLAGS_WARNINGS   += -Wmissing-prototypes
