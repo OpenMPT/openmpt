@@ -836,7 +836,7 @@ void CCtrlPatterns::OnPatternNew()
 		m_OrderList.InvalidateRect(NULL, FALSE);
 		SetCurrentPattern(newPat);
 		m_modDoc.SetModified();
-		m_modDoc.UpdateAllViews(NULL, PatternHint().Names(), this);
+		m_modDoc.UpdateAllViews(NULL, PatternHint(newPat).Names(), this);
 		m_modDoc.UpdateAllViews(NULL, SequenceHint().Data(), this);
 	}
 	SwitchToView();
