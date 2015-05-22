@@ -568,11 +568,11 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	dwSmplArr = BigEndian(pmmh.smplarr);
 	dwExpData = BigEndian(pmmh.expdata);
 	if ((dwExpData) && (dwExpData < dwMemLength - sizeof(MMD0EXP)))
-		pmex = (MMD0EXP *)(lpStream+dwExpData);
+		pmex = (const MMD0EXP *)(lpStream+dwExpData);
 	else
 		pmex = NULL;
-	pmsh = (MMD0SONGHEADER *)(lpStream + dwSong);
-	pmsh2 = (MMD2SONGHEADER *)pmsh;
+	pmsh = (const MMD0SONGHEADER *)(lpStream + dwSong);
+	pmsh2 = (const MMD2SONGHEADER *)pmsh;
 #ifdef MED_LOG
 	if (version < '2')
 	{
@@ -716,7 +716,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			if ((pseq) && (pseq < dwMemLength - sizeof(MMD2PLAYSEQ)))
 			{
-				MMD2PLAYSEQ *pmps = (MMD2PLAYSEQ *)(lpStream + pseq);
+				const MMD2PLAYSEQ *pmps = (const MMD2PLAYSEQ *)(lpStream + pseq);
 				if(songName.empty()) mpt::String::Read<mpt::String::maybeNullTerminated>(songName, pmps->name);
 				uint16 n = BigEndianW(pmps->length);
 				if (pseq+n <= dwMemLength)
@@ -816,14 +816,14 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		UINT dwPos = BigEndian(pdwTable[iSmp]);
 		if ((dwPos >= dwMemLength) || (dwPos + sizeof(MMDSAMPLEHEADER) >= dwMemLength)) continue;
-		MMDSAMPLEHEADER *psdh = (MMDSAMPLEHEADER *)(lpStream + dwPos);
+		const MMDSAMPLEHEADER *psdh = (const MMDSAMPLEHEADER *)(lpStream + dwPos);
 		UINT len = BigEndian(psdh->length);
 	#ifdef MED_LOG
 		Log("SampleData %d: stype=0x%02X len=%d\n", iSmp, BigEndianW(psdh->type), len);
 	#endif
 		if(dwPos + len + 6 > dwMemLength) len = 0;
 		UINT stype = BigEndianW(psdh->type);
-		char *psdata = (char *)(lpStream + dwPos + 6);
+		const char *psdata = (const char *)(lpStream + dwPos + 6);
 
 		SampleIO sampleIO(
 			SampleIO::_8bit,
@@ -899,13 +899,13 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		} else
 		{
-			MMD1BLOCK *pmb = (MMD1BLOCK *)(lpStream + dwPos);
+			const MMD1BLOCK *pmb = (const MMD1BLOCK *)(lpStream + dwPos);
 		#ifdef MED_LOG
 			Log("MMD1BLOCK:   lines=%2d, tracks=%2d, offset=0x%04X\n",
 				BigEndianW(pmb->lines), BigEndianW(pmb->numtracks), BigEndian(pmb->info));
 		#endif
-			MMD1BLOCKINFO *pbi = NULL;
-			BYTE *pcmdext = NULL;
+			const MMD1BLOCKINFO *pbi = NULL;
+			const BYTE *pcmdext = NULL;
 			lines = (pmb->lines >> 8) + 1;
 			tracks = pmb->numtracks >> 8;
 			if (!tracks) tracks = m_nChannels;
@@ -913,7 +913,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 			DWORD dwBlockInfo = BigEndian(pmb->info);
 			if ((dwBlockInfo) && (dwBlockInfo < dwMemLength - sizeof(MMD1BLOCKINFO)))
 			{
-				pbi = (MMD1BLOCKINFO *)(lpStream + dwBlockInfo);
+				pbi = (const MMD1BLOCKINFO *)(lpStream + dwBlockInfo);
 			#ifdef MED_LOG
 				Log("  BLOCKINFO: blockname=0x%04X namelen=%d pagetable=0x%04X &cmdexttable=0x%04X\n",
 					BigEndian(pbi->blockname), BigEndian(pbi->blocknamelen), BigEndian(pbi->pagetable), BigEndian(pbi->cmdexttable));
@@ -924,7 +924,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 					UINT namelen = BigEndian(pbi->blocknamelen);
 					if ((nameofs < dwMemLength) && (namelen < dwMemLength - nameofs))
 					{
-						Patterns[iBlk].SetName((char *)(lpStream + nameofs), namelen);
+						Patterns[iBlk].SetName((const char *)(lpStream + nameofs), namelen);
 					}
 				}
 				if (pbi->cmdexttable)
@@ -935,7 +935,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 						cmdexttable = BigEndian(*const_unaligned_ptr_le<DWORD>(lpStream + cmdexttable));
 						if ((cmdexttable) && (cmdexttable <= dwMemLength - lines*tracks))
 						{
-							pcmdext = (BYTE *)(lpStream + cmdexttable);
+							pcmdext = (const BYTE *)(lpStream + cmdexttable);
 						}
 					}
 				}

@@ -81,8 +81,8 @@ struct _ModPlugFile {
 	openmpt_module* mod;
 	signed short* buf;
 	signed int* mixerbuf;
-	const char* name;
-	const char* message;
+	char* name;
+	char* message;
 	ModPlug_Settings settings;
 	ModPlugMixerProc mixerproc;
 	unsigned char * * patterns;
@@ -124,6 +124,8 @@ static int32_t modplugresamplingmode_to_filterlength(int mode)
 LIBOPENMPT_MODPLUG_API ModPlugFile* ModPlug_Load(const void* data, int size)
 {
 	ModPlugFile* file = malloc(sizeof(ModPlugFile));
+	const char* name = NULL;
+	const char* message = NULL;
 	if(!file) return NULL;
 	memset(file,0,sizeof(ModPlugFile));
 	memcpy(&file->settings,&globalsettings,sizeof(ModPlug_Settings));
@@ -139,8 +141,34 @@ LIBOPENMPT_MODPLUG_API ModPlugFile* ModPlug_Load(const void* data, int size)
 		return NULL;
 	}
 	openmpt_module_set_repeat_count(file->mod,file->settings.mLoopCount);
-	file->name = openmpt_module_get_metadata(file->mod,"title");
-	file->message = openmpt_module_get_metadata(file->mod,"message");
+	name = openmpt_module_get_metadata(file->mod,"title");
+	if(name){
+		file->name = malloc(strlen(name)+1);
+		if(file->name){
+			strcpy(file->name,name);
+		}
+		openmpt_free_string(name);
+		name = NULL;
+	}else{
+		file->name = malloc(strlen("")+1);
+		if(file->name){
+			strcpy(file->name,"");
+		}
+	}
+	message = openmpt_module_get_metadata(file->mod,"message");
+	if(message){
+		file->message = malloc(strlen(message)+1);
+		if(file->message){
+			strcpy(file->message,message);
+		}
+		openmpt_free_string(message);
+		message = NULL;
+	}else{
+		file->message = malloc(strlen("")+1);
+		if(file->message){
+			strcpy(file->message,"");
+		}
+	}
 #ifndef LIBOPENMPT_MODPLUG_0_8_7
 	openmpt_module_set_render_param(file->mod,OPENMPT_MODULE_RENDER_STEREOSEPARATION_PERCENT,file->settings.mStereoSeparation*100/128);
 #endif
@@ -168,9 +196,9 @@ LIBOPENMPT_MODPLUG_API void ModPlug_Unload(ModPlugFile* file)
 	}
 	openmpt_module_destroy(file->mod);
 	file->mod = NULL;
-	openmpt_free_string(file->name);
+	free(file->name);
 	file->name = NULL;
-	openmpt_free_string(file->message);
+	free(file->message);
 	file->message = NULL;
 	free(file->buf);
 	file->buf = NULL;
@@ -423,7 +451,7 @@ LIBOPENMPT_MODPLUG_API int ModPlug_GetModuleType(ModPlugFile* file)
 LIBOPENMPT_MODPLUG_API char* ModPlug_GetMessage(ModPlugFile* file)
 {
 	if(!file) return NULL;
-	return (char*)file->message;
+	return file->message;
 }
 
 LIBOPENMPT_MODPLUG_API unsigned int ModPlug_NumInstruments(ModPlugFile* file)

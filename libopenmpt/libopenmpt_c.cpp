@@ -156,7 +156,7 @@ uint32_t openmpt_get_core_version(void) {
 
 void openmpt_free_string( const char * str ) {
 	try {
-		std::free( (void*)str );
+		std::free( const_cast< char * >( str ) );
 	} catch ( ... ) {
 		openmpt::report_exception( __FUNCTION__ );
 	}

@@ -309,7 +309,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 	const uint8 *lpStream = reinterpret_cast<const uint8 *>(file.GetRawData());
 
 	DWORD dwMemPos, dwPos, blocklen, dwTrackPos;
-	MDLInfoBlock *pmib;
+	const MDLInfoBlock *pmib;
 	UINT i,j, norders = 0, npatterns = 0, ntracks = 0;
 	UINT ninstruments = 0, nsamples = 0;
 	WORD block;
@@ -352,7 +352,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		#ifdef MDL_LOG
 			Log("infoblock: %d bytes\n", blocklen);
 		#endif
-			pmib = (MDLInfoBlock *)(lpStream+dwMemPos);
+			pmib = (const MDLInfoBlock *)(lpStream+dwMemPos);
 			mpt::String::Read<mpt::String::maybeNullTerminated>(songName, pmib->songname);
 			mpt::String::Read<mpt::String::maybeNullTerminated>(songArtist, pmib->composer);
 
