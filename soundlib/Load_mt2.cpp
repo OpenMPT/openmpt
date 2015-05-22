@@ -997,7 +997,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				file.ReadConvertEndianness(groups[grp]);
 			}
 
-			if(mptIns != nullptr)
+			if(mptIns != nullptr && mptIns->nMidiChannel == MidiNoChannel)
 			{
 				for(uint32 note = 0; note < 96; note++)
 				{
