@@ -49,9 +49,9 @@ protected:
 		return result;
 	}
 public:
-	sdl_stream_raii( commandlineflags & flags, std::ostream & log )
+	sdl_stream_raii( commandlineflags & flags, std::ostream & log_ )
 		: write_buffers_blocking_wrapper(flags)
-		, log(log)
+		, log(log_)
 		, channels(flags.channels)
 	{
 		if ( flags.buffer == default_high ) {
