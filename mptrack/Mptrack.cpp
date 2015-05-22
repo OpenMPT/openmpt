@@ -1010,6 +1010,7 @@ BOOL CTrackApp::InitInstance()
 			TrackerSettings::Instance().SetSoundDeviceSettings(it->GetIdentifier(), TrackerSettings::Instance().GetSoundDeviceSettingsDefaults());
 		}
 	}
+#ifndef NO_DSOUND
 	if(TrackerSettings::Instance().m_SoundDeviceDirectSoundOldDefaultIdentifier)
 	{
 		mpt::ustring oldIdentifier = SoundDevice::Legacy::GetDirectSoundDefaultDeviceIdentifierPre_1_25_00_04();
@@ -1050,6 +1051,7 @@ BOOL CTrackApp::InitInstance()
 			}
 		}
 	}
+#endif // !NO_DSOUND
 
 	// Load DLS Banks
 	if (!cmdInfo.m_bNoDls) LoadDefaultDLSBanks();
