@@ -55,7 +55,7 @@ int main( int argc, char * argv[] ) {
 		if ( count == 0 ) {
 			break;
 		}
-		Pa_WriteStream( stream, buffers, count );
+		Pa_WriteStream( stream, buffers, (unsigned long)count );
 	}
 	Pa_StopStream( stream );
 	Pa_CloseStream( stream );

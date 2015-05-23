@@ -39,7 +39,7 @@ int main( int /*argc*/, char * argv[] ) {
 			break;
 		}
 		const float * const buffers[2] = { left.data(), right.data() };
-		Pa_WriteStream( stream, buffers, count );
+		Pa_WriteStream( stream, buffers, static_cast<unsigned long>( count ) );
 	}
 	Pa_StopStream( stream );
 	Pa_CloseStream( stream );
