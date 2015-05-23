@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "SoundDevice.h"
+#include "SoundDeviceBase.h"
 #include "SoundDeviceUtilities.h"
 
 #include "../common/ComponentManager.h"

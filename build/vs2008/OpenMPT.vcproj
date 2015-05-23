@@ -1492,6 +1492,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\sounddev\SoundDeviceBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\sounddev\SoundDeviceBase.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\sounddev\SoundDeviceDirectSound.cpp"
 				>
 			</File>

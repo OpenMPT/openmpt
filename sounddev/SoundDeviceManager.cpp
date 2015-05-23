@@ -209,18 +209,6 @@ SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::Identifier identifier) co
 }
 
 
-SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier)
-//--------------------------------------------------------------------
-{
-	std::vector<mpt::ustring> tmp = mpt::String::Split<mpt::ustring>(identifier, MPT_USTRING("_"));
-	if(tmp.size() == 0)
-	{
-		return SoundDevice::Type();
-	}
-	return tmp[0];
-}
-
-
 SoundDevice::Info Manager::FindDeviceInfoBestMatch(SoundDevice::Identifier identifier, bool preferSameType)
 //---------------------------------------------------------------------------------------------------------
 {
