@@ -362,56 +362,52 @@ void COptionsSoundcard::UpdateEverything()
 			{
 				COMBOBOXEXITEM cbi;
 				MemsetZero(cbi);
-				CString name = mpt::ToCString(it->name);
-				cbi.mask = CBEIF_LPARAM | CBEIF_TEXT | CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 				cbi.iItem = iItem;
 				cbi.cchTextMax = 0;
-				if(it->type == SoundDevice::TypeWAVEOUT)
+				cbi.mask = CBEIF_LPARAM | CBEIF_TEXT;
+				cbi.lParam = theApp.GetSoundDevicesManager()->GetGlobalID(it->GetIdentifier());
+				if(it->type == SoundDevice::TypeWAVEOUT || it->type == SoundDevice::TypePORTAUDIO_WMME)
 				{
+					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_WAVEOUT;
-				} else if(it->type == SoundDevice::TypePORTAUDIO_WMME)
+				} else if(it->type == SoundDevice::TypeDSOUND || it->type == SoundDevice::TypePORTAUDIO_DS)
 				{
-					cbi.iImage = IMAGE_WAVEOUT;
-				} else if(it->type == SoundDevice::TypeDSOUND)
-				{
-					cbi.iImage = IMAGE_DIRECTX;
-				} else if(it->type == SoundDevice::TypePORTAUDIO_DS)
-				{
+					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_DIRECTX;
 				} else if(it->type == SoundDevice::TypeASIO)
 				{
+					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_ASIO;
 				} else if(it->type == SoundDevice::TypePORTAUDIO_WASAPI)
 				{
-					// No real image available for now,
-					// prepend API name to name and misuse another icon
-					cbi.iImage = IMAGE_SAMPLEMUTE;
-					name = mpt::ToCString(it->apiName) + _T(" - ") + name;
+					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
+					cbi.iImage = IMAGE_SAMPLEMUTE; // // No real image available for now,
 				} else if(it->type == SoundDevice::TypePORTAUDIO_WDMKS)
 				{
-					// No real image available for now,
-					// prepend API name to name and misuse another icon.
-					cbi.iImage = IMAGE_CHIP;
-					name = mpt::ToCString(it->apiName) + _T(" - ") + name;
+					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
+					cbi.iImage = IMAGE_CHIP; // No real image available for now,
 				} else
 				{
-					cbi.mask &= ~(CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY);
-					std::vector<mpt::ustring> api = it->apiPath;
-					api.push_back(it->apiName);
-					name = mpt::ToCString(mpt::String::Combine(api, MPT_USTRING(" - "))) + _T(" - ") + name;
-				}
-				if(it->isDefault)
-				{
-					name += _T(" (Default)");
+					cbi.iImage = 0;
 				}
 				cbi.iSelectedImage = cbi.iImage;
 				cbi.iOverlay = cbi.iImage;
-				cbi.iIndent = 0;
-				cbi.lParam = theApp.GetSoundDevicesManager()->GetGlobalID(it->GetIdentifier());
+				mpt::ustring name = it->name + (it->isDefault ? MPT_USTRING(" [default]") : MPT_USTRING(""));
+				if(it->type == SoundDevice::TypeWAVEOUT || it->type == SoundDevice::TypeDSOUND || it->type == SoundDevice::TypeASIO)
+				{
+					// leave name alone
+				} else if(it->type == SoundDevice::TypePORTAUDIO_WASAPI || it->type == SoundDevice::TypePORTAUDIO_WDMKS)
+				{
+					name = it->apiName + MPT_USTRING(" - ") + name;
+				} else
+				{
+					name = ((it->apiPath.size() > 0) ? mpt::String::Combine(it->apiPath, MPT_USTRING(" - ")) + MPT_USTRING(" - ") : MPT_USTRING("")) + it->apiName + MPT_USTRING(" - ") + name;
+				}
 				TCHAR tmp[1024];
 				MemsetZero(tmp);
-				lstrcpyn(tmp, name, 1023);
+				lstrcpyn(tmp, mpt::ToCString(name), 1023);
 				cbi.pszText = tmp;
+				cbi.iIndent = 0;
 				int pos = m_CbnDevice.InsertItem(&cbi);
 				if(static_cast<SoundDevice::Manager::GlobalID>(cbi.lParam) == theApp.GetSoundDevicesManager()->GetGlobalID(m_CurrentDeviceInfo.GetIdentifier()))
 				{

@@ -26,19 +26,21 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 	
-	struct CompareType
+struct CompareInfo
+{
+	std::map<SoundDevice::Type, int> ordering;
+	CompareInfo(const std::map<SoundDevice::Type, int> &ordering)
+		: ordering(ordering)
 	{
-		std::map<SoundDevice::Type, int> ordering;
-		CompareType(const std::map<SoundDevice::Type, int> &ordering)
-			: ordering(ordering)
-		{
-			return;
-		}
-		bool operator () (const SoundDevice::Info &x, const SoundDevice::Info &y)
-		{
-			return (ordering[x.type] > ordering[y.type]);
-		}
-	};
+		return;
+	}
+	bool operator () (const SoundDevice::Info &x, const SoundDevice::Info &y)
+	{
+		return (ordering[x.type] > ordering[y.type])
+			|| ((ordering[x.type] == ordering[y.type]) && (x.isDefault && !y.isDefault))
+			;
+	}
+};
 
 
 template <typename Tdevice>
@@ -114,10 +116,10 @@ void Manager::ReEnumerate()
 	{ // Wine
 		typePriorities[SoundDevice::TypeDSOUND] = 29;
 		typePriorities[SoundDevice::TypeWAVEOUT] = 28;
-		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = 21;
+		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = 27;
+		typePriorities[SoundDevice::TypeASIO] = 21;
 		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
 		typePriorities[SoundDevice::TypePORTAUDIO_DS] = 18;
-		typePriorities[SoundDevice::TypeASIO] = 10;
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = -1;
 	} else if(mpt::Windows::Version::Is9x())
 	{ // Win9x
@@ -147,7 +149,7 @@ void Manager::ReEnumerate()
 		typePriorities[SoundDevice::TypeDSOUND] = -1;
 		typePriorities[SoundDevice::TypePORTAUDIO_DS] = -2;
 	}
-	std::stable_sort(m_SoundDevices.begin(), m_SoundDevices.end(), CompareType(typePriorities));
+	std::stable_sort(m_SoundDevices.begin(), m_SoundDevices.end(), CompareInfo(typePriorities));
 
 	Log(LogDebug, MPT_USTRING("Sound Devices enumerated:"));
 	for(std::size_t i = 0; i < m_SoundDevices.size(); ++i)
