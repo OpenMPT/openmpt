@@ -901,13 +901,13 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			mptIns->nFilterMode = synthData.effectID == 1 ? FLTMODE_HIGHPASS : FLTMODE_LOWPASS;
 			if(flags & 4)
 			{
-				// VST enabled
+				// VSTi / MIDI synth enabled
 				mptIns->nMidiChannel = synthData.midiChannel + 1;
-				mptIns->nMidiProgram = synthData.midiProgram + 1;
 				mptIns->nMixPlug = static_cast<PLUGINDEX>(synthData.device + 1);
 				if(synthData.device < 0)
 				{
 					// TODO: This is a MIDI device - maybe use MIDI I/O plugin to emulate those?
+					mptIns->nMidiProgram = synthData.midiProgram + 1;	// MT2 only seems to use this for MIDI devices, not VSTis!
 				}
 				if(synthData.transpose)
 				{
@@ -997,7 +997,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				file.ReadConvertEndianness(groups[grp]);
 			}
 
-			if(mptIns != nullptr && mptIns->nMidiChannel == MidiNoChannel)
+			if(mptIns != nullptr && mptIns->nMixPlug != 0)
 			{
 				for(uint32 note = 0; note < 96; note++)
 				{
