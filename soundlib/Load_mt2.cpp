@@ -568,6 +568,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 		case MAGIC4LE('T','R','K','S'):
 			m_nSamplePreAmp = chunk.ReadUint16LE() >> 9;	// 131072 is 0dB... I think (that's how MTIOModule_MT2.cpp reads)
+			m_nVSTiVolume = m_nSamplePreAmp;
 			for(CHANNELINDEX c = 0; c < GetNumChannels(); c++)
 			{
 				MT2TrackSettings trackSettings;
@@ -997,7 +998,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				file.ReadConvertEndianness(groups[grp]);
 			}
 
-			if(mptIns != nullptr && mptIns->nMixPlug != 0)
+			if(mptIns != nullptr && mptIns->nMixPlug == 0)
 			{
 				for(uint32 note = 0; note < 96; note++)
 				{
