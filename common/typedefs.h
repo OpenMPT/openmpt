@@ -581,4 +581,25 @@ template <typename T> inline uint8 * GetRawBytes(T & v)
 
 
 
+#if MPT_COMPILER_MSVC
+// warning LNK4221: no public symbols found; archive member will be inaccessible
+// There is no way to selectively disable linker warnings.
+// #pragma warning does not apply and a command line option does not exist.
+// Some options:
+//  1. Macro which generates a variable with a unique name for each file (which means we have to pass the filename to the macro)
+//  2. unnamed namespace containing any symbol (does not work for c++11 compilers because they actually have internal linkage now)
+//  3. An unused trivial inline function.
+// Option 3 does not actually solve the problem though, which leaves us with option 1.
+// In any case, for optimized builds, the linker will just remove the useless symbol.
+#define MPT_MSVC_WORKAROUND_LNK4221_CONCAT_DETAIL(x,y) x##y
+#define MPT_MSVC_WORKAROUND_LNK4221_CONCAT(x,y) MPT_MSVC_WORKAROUND_LNK4221_CONCAT_DETAIL(x,y)
+#define MPT_MSVC_WORKAROUND_LNK4221(x) int MPT_MSVC_WORKAROUND_LNK4221_CONCAT(mpt_msvc_workaround_lnk4221_,x) = 0;
+#endif
+
+#ifndef MPT_MSVC_WORKAROUND_LNK4221
+#define MPT_MSVC_WORKAROUND_LNK4221(x)
+#endif
+
+
+
 OPENMPT_NAMESPACE_END

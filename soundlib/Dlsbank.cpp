@@ -1994,6 +1994,10 @@ const char *CDLSBank::GetRegionName(UINT nIns, UINT nRgn) const
 }
 
 
+#else // !MODPLUG_TRACKER
+
+MPT_MSVC_WORKAROUND_LNK4221(Dlsbank)
+
 #endif // MODPLUG_TRACKER
 
 
