@@ -223,8 +223,13 @@ static UINT MainButtons[] =
 };
 
 
+enum { MAX_MIDI_DEVICES = 256};
+
 BEGIN_MESSAGE_MAP(CMainToolBar, CToolBarEx)
 	ON_WM_VSCROLL()
+	//ON_NOTIFY(TBN_DROPDOWN, OnTbnDropDownToolBar)
+	ON_NOTIFY_REFLECT(TBN_DROPDOWN, OnTbnDropDownToolBar)
+	ON_COMMAND_RANGE(ID_SELECT_MIDI_DEVICE, ID_SELECT_MIDI_DEVICE + MAX_MIDI_DEVICES, OnSelectMIDIDevice)
 END_MESSAGE_MAP()
 
 
@@ -247,8 +252,14 @@ BOOL CMainToolBar::Create(CWnd *parent)
 	if (!SetButtons(MainButtons, CountOf(MainButtons))) return FALSE;
 
 	CRect temp;
-	GetItemRect(0,&temp);
+	GetItemRect(0, temp);
 	SetSizes(CSize(temp.Width(), temp.Height()), CSize(16, 16));
+
+	// Dropdown menus for New and MIDI buttons
+	DWORD dwExStyle = GetToolBarCtrl().SendMessage(TB_GETEXTENDEDSTYLE) | TBSTYLE_EX_DRAWDDARROWS;
+	GetToolBarCtrl().SendMessage(TB_SETEXTENDEDSTYLE, 0, dwExStyle);
+	SetButtonStyle(CommandToIndex(ID_FILE_NEW), GetButtonStyle(CommandToIndex(ID_FILE_NEW)) | TBSTYLE_DROPDOWN);
+	SetButtonStyle(CommandToIndex(ID_MIDI_RECORD), GetButtonStyle(CommandToIndex(ID_MIDI_RECORD)) | TBSTYLE_DROPDOWN);
 
 	nCurrentSpeed = 6;
 	nCurrentTempo = 125;
@@ -571,6 +582,51 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 			SetCurrentSong(pSndFile);
 		}
 	}
+}
+
+
+void CMainToolBar::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
+//----------------------------------------------------------------------
+{
+	NMTOOLBAR *pToolBar = reinterpret_cast<NMTOOLBAR *>(pNMHDR);
+	ClientToScreen(&(pToolBar->rcButton));
+
+	switch(pToolBar->iItem)
+	{
+	case ID_FILE_NEW:
+		CMainFrame::GetMainFrame()->GetFileMenu()->GetSubMenu(0)->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left, pToolBar->rcButton.bottom, this);
+		break;
+	case ID_MIDI_RECORD:
+		// Show a list of MIDI devices
+		{
+			HMENU hMenu = ::CreatePopupMenu();
+			MIDIINCAPS mic;
+			UINT ndevs = midiInGetNumDevs();
+			UINT current = TrackerSettings::Instance().m_nMidiDevice;
+			for(UINT i = 0; i < ndevs; i++)
+			{
+				mic.szPname[0] = 0;
+				if(midiInGetDevCaps(i, &mic, sizeof(mic)) == MMSYSERR_NOERROR)
+				{
+					::AppendMenu(hMenu, MF_STRING | (i == current ? MF_CHECKED : 0), ID_SELECT_MIDI_DEVICE + i, mic.szPname);
+				}
+			}
+			::TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left, pToolBar->rcButton.bottom, 0, m_hWnd, NULL);
+			::DestroyMenu(hMenu);
+		}
+		break;
+	}
+
+	*pResult = 0;
+}
+
+
+void CMainToolBar::OnSelectMIDIDevice(UINT id)
+//--------------------------------------------
+{
+	CMainFrame::GetMainFrame()->midiCloseDevice();
+	TrackerSettings::Instance().m_nMidiDevice = id - ID_SELECT_MIDI_DEVICE;
+	CMainFrame::GetMainFrame()->midiOpenDevice();
 }
 
 

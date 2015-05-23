@@ -109,6 +109,8 @@ public:
 protected:
 	//{{AFX_MSG(CMainToolBar)
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
+	afx_msg void OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnSelectMIDIDevice(UINT id);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
