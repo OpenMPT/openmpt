@@ -1458,6 +1458,52 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 	// Test case: PanReset.it
 	if(IsCompatibleMode(TRK_IMPULSETRACKER)) ApplyInstrumentPanning(pChn, pIns, pSmp);
 
+	if(bResetEnv)
+	{
+		pChn->nVolSwing = pChn->nPanSwing = 0;
+		pChn->nResSwing = pChn->nCutSwing = 0;
+		if(pIns)
+		{
+			// IT Compatiblity: NNA is reset on every note change, not every instrument change (fixes spx-farspacedance.it).
+			if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nNNA = pIns->nNNA;
+
+			if(!pIns->VolEnv.dwFlags[ENV_CARRY]) pChn->VolEnv.Reset();
+			if(!pIns->PanEnv.dwFlags[ENV_CARRY]) pChn->PanEnv.Reset();
+			if(!pIns->PitchEnv.dwFlags[ENV_CARRY]) pChn->PitchEnv.Reset();
+
+			// Volume Swing
+			if(pIns->nVolSwing)
+			{
+				const double delta = 2 * (((double) rand()) / RAND_MAX) - 1;
+				pChn->nVolSwing = static_cast<int32>(std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? pChn->nInsVol : ((pChn->nVolume + 1) / 2)) * pIns->nVolSwing / 100.0));
+			}
+			// Pan Swing
+			if(pIns->nPanSwing)
+			{
+				const double delta = 2 * (((double) rand()) / RAND_MAX) - 1;
+				pChn->nPanSwing = static_cast<int32>(std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? 4 : 1) * pIns->nPanSwing));
+				if(!IsCompatibleMode(TRK_IMPULSETRACKER))
+				{
+					pChn->nRestorePanOnNewNote = pChn->nPan + 1;
+				}
+			}
+			// Cutoff Swing
+			if(pIns->nCutSwing)
+			{
+				int32 d = ((int32)pIns->nCutSwing * (int32)((rand() & 0xFF) - 0x7F)) / 128;
+				pChn->nCutSwing = (int16)((d * pChn->nCutOff + 1) / 128);
+				pChn->nRestoreCutoffOnNewNote = pChn->nCutOff + 1;
+			}
+			// Resonance Swing
+			if(pIns->nResSwing)
+			{
+				int32 d = ((int32)pIns->nResSwing * (int32)((rand() & 0xFF) - 0x7F)) / 128;
+				pChn->nResSwing = (int16)((d * pChn->nResonance + 1) / 128);
+				pChn->nRestoreResonanceOnNewNote = pChn->nResonance + 1;
+			}
+		}
+	}
+
 	if(!pSmp) return;
 	if(period)
 	{
@@ -1591,48 +1637,6 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 
 		if(bResetEnv)
 		{
-			pChn->nVolSwing = pChn->nPanSwing = 0;
-			pChn->nResSwing = pChn->nCutSwing = 0;
-			if(pIns)
-			{
-				// IT Compatiblity: NNA is reset on every note change, not every instrument change (fixes spx-farspacedance.it).
-				if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nNNA = pIns->nNNA;
-
-				if(!pIns->VolEnv.dwFlags[ENV_CARRY]) pChn->VolEnv.Reset();
-				if(!pIns->PanEnv.dwFlags[ENV_CARRY]) pChn->PanEnv.Reset();
-				if(!pIns->PitchEnv.dwFlags[ENV_CARRY]) pChn->PitchEnv.Reset();
-
-				// Volume Swing
-				if(pIns->nVolSwing)
-				{
-					const double delta = 2 * (((double) rand()) / RAND_MAX) - 1;
-					pChn->nVolSwing = static_cast<int32>(std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? pChn->nInsVol : ((pChn->nVolume + 1) / 2)) * pIns->nVolSwing / 100.0));
-				}
-				// Pan Swing
-				if(pIns->nPanSwing)
-				{
-					const double delta = 2 * (((double) rand()) / RAND_MAX) - 1;
-					pChn->nPanSwing = static_cast<int32>(std::floor(delta * (IsCompatibleMode(TRK_IMPULSETRACKER) ? 4 : 1) * pIns->nPanSwing));
-					if(!IsCompatibleMode(TRK_IMPULSETRACKER))
-					{
-						pChn->nRestorePanOnNewNote = pChn->nPan + 1;
-					}
-				}
-				// Cutoff Swing
-				if(pIns->nCutSwing)
-				{
-					int32 d = ((int32)pIns->nCutSwing * (int32)((rand() & 0xFF) - 0x7F)) / 128;
-					pChn->nCutSwing = (int16)((d * pChn->nCutOff + 1) / 128);
-					pChn->nRestoreCutoffOnNewNote = pChn->nCutOff + 1;
-				}
-				// Resonance Swing
-				if(pIns->nResSwing)
-				{
-					int32 d = ((int32)pIns->nResSwing * (int32)((rand() & 0xFF) - 0x7F)) / 128;
-					pChn->nResSwing = (int16)((d * pChn->nResonance + 1) / 128);
-					pChn->nRestoreResonanceOnNewNote = pChn->nResonance + 1;
-				}
-			}
 			pChn->nAutoVibDepth = 0;
 			pChn->nAutoVibPos = 0;
 			// IT Compatibility: Vibrato reset

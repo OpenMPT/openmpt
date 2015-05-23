@@ -2261,20 +2261,25 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 	//If new note, determine notevelocity to use.
 	if(note != NOTE_NONE)
 	{
-		uint16 velocity = static_cast<uint16>(4 * defaultVolume);
+		int32 velocity = static_cast<int32>(4 * defaultVolume);
 		switch(pIns->nPluginVelocityHandling)
 		{
 			case PLUGIN_VELOCITYHANDLING_CHANNEL:
-				velocity = static_cast<uint16>(chn.nVolume);
+				velocity = chn.nVolume;
 			break;
 		}
+
+		int32 swing = chn.nVolSwing;
+		if(IsCompatibleMode(TRK_IMPULSETRACKER)) swing *= 4;
+		velocity += swing;
+		Limit(velocity, 0, 256);
 
 		ModCommand::NOTE realNote = note;
 		if(ModCommand::IsNote(note))
 			realNote = pIns->NoteMap[note - NOTE_MIN];
 		// Experimental VST panning
 		//ProcessMIDIMacro(nChn, false, m_MidiCfg.szMidiGlb[MIDIOUT_PAN], 0, nPlugin);
-		pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, realNote, velocity, nChn);
+		pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, realNote, static_cast<uint16>(velocity), nChn);
 	}
 
 
