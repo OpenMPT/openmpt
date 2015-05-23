@@ -1107,6 +1107,8 @@
 // From here: Command range [ID_EQSLIDER_BASE, ID_EQSLIDER_BASE + MAX_EQ_BANDS]
 #define ID_EQMENU_BASE                  32950
 // From here: Command range [ID_EQMENU_BASE, ID_EQMENU_BASE + EQ_MAX_FREQS]
+#define ID_SELECT_MIDI_DEVICE           33000
+// From here: Command range [ID_SELECT_MIDI_DEVICE, ID_SELECT_MIDI_DEVICE + MAX_MIDI_DEVICES]
 #define ID_EDIT_SPLITRECSELECT          33900
 #define ID_REARRANGE_SAMPLES            33901
 #define ID_CHANNEL_MANAGER              33905
