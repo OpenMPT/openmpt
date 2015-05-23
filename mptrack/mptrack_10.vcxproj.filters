@@ -550,6 +550,9 @@
     <ClCompile Include="..\soundlib\Load_plm.cpp">
       <Filter>Source Files\soundlib\Module Loaders</Filter>
     </ClCompile>
+    <ClCompile Include="..\sounddev\SoundDeviceBase.cpp">
+      <Filter>Source Files\sounddev</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1079,6 +1082,9 @@
     </ClInclude>
     <ClInclude Include="..\soundlib\plugins\OpCodes.h">
       <Filter>Header Files\soundlib\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sounddev\SoundDeviceBase.h">
+      <Filter>Header Files\sounddev</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -368,6 +368,9 @@
     <ClInclude Include="..\..\sounddev\SoundDeviceASIO.h">
       <Filter>sounddev</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDeviceBase.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\sounddev\SoundDeviceDirectSound.h">
       <Filter>sounddev</Filter>
     </ClInclude>
@@ -860,6 +863,9 @@
       <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceASIO.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDeviceBase.cpp">
       <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceDirectSound.cpp">

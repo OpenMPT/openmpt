@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "SoundDevice.h"
+#include "SoundDeviceBase.h"
 
 #include "../common/ComponentManager.h"
 
