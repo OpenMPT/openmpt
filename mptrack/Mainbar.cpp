@@ -223,7 +223,7 @@ static UINT MainButtons[] =
 };
 
 
-enum { MAX_MIDI_DEVICES = 256};
+enum { MAX_MIDI_DEVICES = 256 };
 
 BEGIN_MESSAGE_MAP(CMainToolBar, CToolBarEx)
 	ON_WM_VSCROLL()
@@ -610,6 +610,10 @@ void CMainToolBar::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 				{
 					::AppendMenu(hMenu, MF_STRING | (i == current ? MF_CHECKED : 0), ID_SELECT_MIDI_DEVICE + i, mic.szPname);
 				}
+			}
+			if(!ndevs)
+			{
+				::AppendMenu(hMenu, MF_STRING | MF_GRAYED, 0, _T("No MIDI input devices found"));
 			}
 			::TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left, pToolBar->rcButton.bottom, 0, m_hWnd, NULL);
 			::DestroyMenu(hMenu);
