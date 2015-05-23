@@ -211,6 +211,10 @@ void Profile::Leave()
 }
 
 
+#else // !USE_PROFILER
+
+MPT_MSVC_WORKAROUND_LNK4221(Profiler)
+
 #endif // USE_PROFILER
 
 

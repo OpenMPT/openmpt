@@ -16,6 +16,8 @@ OPENMPT_NAMESPACE_BEGIN
 #ifdef MODPLUG_TRACKER
 CRITICAL_SECTION g_csAudio;
 int g_csAudioLockCount = 0;
+#else
+MPT_MSVC_WORKAROUND_LNK4221(AudioCriticalSection)
 #endif
 
 OPENMPT_NAMESPACE_END

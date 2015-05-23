@@ -220,6 +220,10 @@ InputFile::ContentsRef InputFile::Get()
 
 #endif
 
+#else // !MPT_WITH_FILEIO
+
+MPT_MSVC_WORKAROUND_LNK4221(mptFileIO)
+
 #endif // MPT_WITH_FILEIO
 
 

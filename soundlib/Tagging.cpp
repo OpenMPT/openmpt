@@ -22,6 +22,10 @@ FileTags::FileTags()
 	encoder = mpt::ToUnicode(mpt::CharsetASCII, MptVersion::GetOpenMPTVersionStr());
 }
 
+#else // MODPLUG_NO_FILESAVE
+
+MPT_MSVC_WORKAROUND_LNK4221(Tagging)
+
 #endif // MODPLUG_NO_FILESAVE
 
 
