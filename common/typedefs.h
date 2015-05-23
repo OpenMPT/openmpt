@@ -554,13 +554,6 @@ template <typename T> inline uint8 * GetRawBytes(T & v)
 
 
 
-//STRINGIZE makes a string of given argument. If used with #defined value,
-//the string is made of the contents of the defined value.
-#define HELPER_STRINGIZE(x)			#x
-#define STRINGIZE(x)				HELPER_STRINGIZE(x)
-
-
-
 #ifndef MAX
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #endif
