@@ -981,7 +981,7 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 
 	PLUGINDEX mappedIndex = 0;
 	PlugParamIndex paramIndex = 0;
-	uint8 paramValue = 0;
+	uint16 paramValue = 0;
 	bool captured = m_SndFile.GetMIDIMapper().OnMIDImsg(midiData, mappedIndex, paramIndex, paramValue);
 
 	// Handle MIDI messages assigned to shortcuts

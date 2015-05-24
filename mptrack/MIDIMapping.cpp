@@ -108,14 +108,15 @@ bool CMIDIMapper::Deserialize(FileReader &file)
 }
 
 
-bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugParamIndex &paramindex, uint8 &paramval)
-//-------------------------------------------------------------------------------------------------------------------
+bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugParamIndex &paramindex, uint16 &paramval)
+//--------------------------------------------------------------------------------------------------------------------
 {
 	bool captured = false;
 
 	const MIDIEvents::EventType eventType = MIDIEvents::GetTypeFromEvent(midimsg);
 	const uint8 controller = MIDIEvents::GetDataByte1FromEvent(midimsg);
-	const uint8 channel = MIDIEvents::GetChannelFromEvent(midimsg);
+	const uint8 channel = MIDIEvents::GetChannelFromEvent(midimsg) & 0x7F;
+	const uint8 controllerVal = MIDIEvents::GetDataByte2FromEvent(midimsg) & 0x7F;
 
 	for(const_iterator citer = Begin(); citer != End() && !captured; citer++)
 	{
@@ -126,7 +127,18 @@ bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugPar
 
 		const PLUGINDEX plugindex = citer->GetPlugIndex();
 		const uint32 param = citer->GetParamIndex();
-		const uint8 val = (citer->GetEvent() == MIDIEvents::evChannelAftertouch ? controller : MIDIEvents::GetDataByte2FromEvent(midimsg)) & 0x7F;
+		uint16 val = (citer->GetEvent() == MIDIEvents::evChannelAftertouch ? controller : controllerVal) << 7;
+
+		if(eventType == MIDIEvents::evControllerChange)
+		{
+			// Coarse (0...31) / Fine (32...63) controller pairs - coarse should be sent first.
+			if(controller == lastCC + 32 && lastCC < 32)
+			{
+				val = (val >> 7) | lastCCvalue;
+			}
+			lastCC = controller;
+			lastCCvalue = val;
+		}
 
 		if(citer->GetAllowPatternEdit())
 		{

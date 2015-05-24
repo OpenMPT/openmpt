@@ -4608,10 +4608,10 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 				{
 					if(!isSmooth)
 					{
-						pPlugin->SetZxxParameter(plugParam, param & 0x7F);
+						pPlugin->SetZxxParameter(plugParam, (param & 0x7F) << 7);
 					} else
 					{
-						pPlugin->SetZxxParameter(plugParam, (uint32)CalculateSmoothParamChange((float)pPlugin->GetZxxParameter(plugParam), (float)(param & 0x7F)));
+						pPlugin->SetZxxParameter(plugParam, (uint32)CalculateSmoothParamChange((float)pPlugin->GetZxxParameter(plugParam), (float)((param & 0x7F) << 7)));
 					}
 				}
 			}

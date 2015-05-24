@@ -83,7 +83,7 @@ class CMIDIMapper
 {
 public:
 	typedef std::vector<CMIDIMappingDirective>::const_iterator const_iterator;
-	CMIDIMapper(CSoundFile& sndfile) : m_rSndFile(sndfile) {}
+	CMIDIMapper(CSoundFile& sndfile) : m_rSndFile(sndfile), lastCC(uint8_max), lastCCvalue(0) {}
 
 	//If mapping found:
 	//	-mappedIndex is set to mapped value(plug index)
@@ -91,7 +91,7 @@ public:
 	//	-paramvalue to parameter value.
 	//In case of multiple mappings, these get the values from the last mapping found.
 	//Returns true if MIDI was 'captured' by some directive, false otherwise.
-	bool OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugParamIndex &paramindex, uint8 &paramvalue);
+	bool OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugParamIndex &paramindex, uint16 &paramvalue);
 
 	//Swaps the positions of two elements. Returns true if swap was not done.
 	bool Swap(const size_t a, const size_t b);
@@ -122,6 +122,8 @@ private:
 private:
 	CSoundFile& m_rSndFile;
 	std::vector<CMIDIMappingDirective> m_Directives;
+	uint8 lastCC;
+	uint16 lastCCvalue;
 };
 
 
