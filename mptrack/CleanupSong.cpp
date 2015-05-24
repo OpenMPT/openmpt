@@ -10,7 +10,7 @@
 
 
 #include "stdafx.h"
-#include "moddoc.h"
+#include "Moddoc.h"
 #include "Mainfrm.h"
 #include "modsmp_ctrl.h"
 #include "CleanupSong.h"
@@ -91,8 +91,7 @@ BEGIN_MESSAGE_MAP(CModCleanupDlg, CDialog)
 	ON_COMMAND(IDC_CHK_REMOVE_PLUGINS,			OnVerifyMutualExclusive)
 	ON_COMMAND(IDC_CHK_RESET_VARIABLES,			OnVerifyMutualExclusive)
 
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, &CModCleanupDlg::OnToolTipNotify)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, &CModCleanupDlg::OnToolTipNotify)
+	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipNotify)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -168,13 +167,6 @@ void CModCleanupDlg::OnOK()
 	modDoc.UpdateAllViews(nullptr, UpdateHint().ModType());
 	logcapturer.ShowLog(true);
 	CDialog::OnOK();
-}
-
-
-void CModCleanupDlg::OnCancel()
-//-----------------------------
-{
-	CDialog::OnCancel();
 }
 
 
@@ -258,19 +250,12 @@ void CModCleanupDlg::OnPresetCompoCleanup()
 }
 
 
-BOOL CModCleanupDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
-//----------------------------------------------------------------------------
+BOOL CModCleanupDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
+//------------------------------------------------------------------
 {
-	MPT_UNREFERENCED_PARAMETER(id);
-	MPT_UNREFERENCED_PARAMETER(pResult);
-
-	// need to handle both ANSI and UNICODE versions of the message
-	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
-	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
-	CStringA strTipText = "";
+	TOOLTIPTEXT* pTTT = (TOOLTIPTEXTA*)pNMHDR;
 	UINT_PTR nID = pNMHDR->idFrom;
-	if (pNMHDR->code == TTN_NEEDTEXTA && (pTTTA->uFlags & TTF_IDISHWND) ||
-		pNMHDR->code == TTN_NEEDTEXTW && (pTTTW->uFlags & TTF_IDISHWND))
+	if (pTTT->uFlags & TTF_IDISHWND)
 	{
 		// idFrom is actually the HWND of the tool
 		nID = ::GetDlgCtrlID((HWND)nID);
@@ -280,66 +265,56 @@ BOOL CModCleanupDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 	{
 	// patterns
 	case IDC_CHK_CLEANUP_PATTERNS:
-		strTipText = "Remove all unused patterns and rearrange them.";
+		pTTT->lpszText = _T("Remove all unused patterns and rearrange them.");
 		break;
 	case IDC_CHK_REMOVE_PATTERNS:
-		strTipText = "Remove all patterns.";
+		pTTT->lpszText = _T("Remove all patterns.");
 		break;
 	case IDC_CHK_REARRANGE_PATTERNS:
-		strTipText = "Number the patterns given by their order in the sequence.";
+		pTTT->lpszText = _T("Number the patterns given by their order in the sequence.");
 		break;
 	// orders
 	case IDC_CHK_REMOVE_ORDERS:
-		strTipText = "Reset the order list.";
+		pTTT->lpszText = _T("Reset the order list.");
 		break;
 	case IDC_CHK_MERGE_SEQUENCES:
-		strTipText = "Merge multiple sequences into one.";
+		pTTT->lpszText = _T("Merge multiple sequences into one.");
 		break;
 	// samples
 	case IDC_CHK_CLEANUP_SAMPLES:
-		strTipText = "Remove all unused samples.";
+		pTTT->lpszText = _T("Remove all unused samples.");
 		break;
 	case IDC_CHK_REMOVE_SAMPLES:
-		strTipText = "Remove all samples.";
+		pTTT->lpszText = _T("Remove all samples.");
 		break;
 	case IDC_CHK_REARRANGE_SAMPLES:
-		strTipText = "Reorder sample list by removing empty samples.";
+		pTTT->lpszText = _T("Reorder sample list by removing empty samples.");
 		break;
 	case IDC_CHK_OPTIMIZE_SAMPLES:
-		strTipText = "Remove unused data after the sample loop end.";
+		pTTT->lpszText = _T("Remove unused data after the sample loop end.");
 		break;
 	// instruments
 	case IDC_CHK_CLEANUP_INSTRUMENTS:
-		strTipText = "Remove all unused instruments.";
+		pTTT->lpszText = _T("Remove all unused instruments.");
 		break;
 	case IDC_CHK_REMOVE_INSTRUMENTS:
-		strTipText = "Remove all instruments and convert them to samples.";
+		pTTT->lpszText = _T("Remove all instruments and convert them to samples.");
 		break;
 	// plugins
 	case IDC_CHK_CLEANUP_PLUGINS:
-		strTipText = "Remove all unused plugins.";
+		pTTT->lpszText = _T("Remove all unused plugins.");
 		break;
 	case IDC_CHK_REMOVE_PLUGINS:
-		strTipText = "Remove all plugins.";
+		pTTT->lpszText = _T("Remove all plugins.");
 		break;
 	// misc
 	case IDC_CHK_SAMPLEPACK:
-		strTipText = "Convert the module to .IT and reset song / sample / instrument variables";
+		pTTT->lpszText = _T("Convert the module to .IT and reset song / sample / instrument variables");
+		break;
+	default:
+		pTTT->lpszText = _T("");
 		break;
 	}
-
-	if (pNMHDR->code == TTN_NEEDTEXTA)
-	{
-		//strncpy_s(pTTTA->szText, sizeof(pTTTA->szText), strTipText, 
-		//	strTipText.GetLength() + 1);
-		mpt::String::CopyN(pTTTA->szText, strTipText);
-	}
-	else
-	{
-		::MultiByteToWideChar(CP_ACP , 0, strTipText, strTipText.GetLength() + 1,
-			pTTTW->szText, CountOf(pTTTW->szText));
-	}
-
 	return TRUE;
 }
 
@@ -626,14 +601,10 @@ bool CModCleanupDlg::OptimizeSamples()
 			}
 		}
 
-		if(sample.nLength > loopLength + 2)
+		if(sample.nLength > loopLength && loopLength >= 2)
 		{
-			SmpLength lmax = loopLength + 2;
-			if(lmax < sample.nLength && lmax >= 2)
-			{
-				modDoc.GetSampleUndo().PrepareUndo(smp, sundo_delete, "Trim Unused Data", lmax, sample.nLength);
-				ctrlSmp::ResizeSample(sample, lmax, sndFile);
-			}
+			modDoc.GetSampleUndo().PrepareUndo(smp, sundo_delete, "Trim Unused Data", loopLength, sample.nLength);
+			ctrlSmp::ResizeSample(sample, loopLength, sndFile);
 		}
 
 		// Convert stereo samples with identical channels to mono

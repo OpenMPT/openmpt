@@ -70,8 +70,7 @@ BEGIN_MESSAGE_MAP(CMIDIMappingDialog, CDialog)
 	ON_NOTIFY(UDN_DELTAPOS, IDC_SPINMOVEMAPPING, OnDeltaposSpinmovemapping)
 	ON_BN_CLICKED(IDC_CHECK_PATRECORD, OnBnClickedCheckPatRecord)
 
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, &CMIDIMappingDialog::OnToolTipNotify)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, &CMIDIMappingDialog::OnToolTipNotify)
+	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipNotify)
 
 END_MESSAGE_MAP()
 
@@ -461,19 +460,13 @@ void CMIDIMappingDialog::OnDeltaposSpinmovemapping(NMHDR *pNMHDR, LRESULT *pResu
 }
 
 
-BOOL CMIDIMappingDialog::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
-//--------------------------------------------------------------------------------
+BOOL CMIDIMappingDialog::OnToolTipNotify(UINT, NMHDR * pNMHDR, LRESULT *)
+//-----------------------------------------------------------------------
 {
-	MPT_UNREFERENCED_PARAMETER(id);
-	MPT_UNREFERENCED_PARAMETER(pResult);
-
-	// need to handle both ANSI and UNICODE versions of the message
-	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
-	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
-	const char *strTipText = "";
+	TOOLTIPTEXT *pTTT = (TOOLTIPTEXTA*)pNMHDR;
+	const TCHAR *text = _T("");
 	UINT_PTR nID = pNMHDR->idFrom;
-	if(pNMHDR->code == TTN_NEEDTEXTA && (pTTTA->uFlags & TTF_IDISHWND) ||
-		pNMHDR->code == TTN_NEEDTEXTW && (pTTTW->uFlags & TTF_IDISHWND))
+	if(pTTT->uFlags & TTF_IDISHWND)
 	{
 		// idFrom is actually the HWND of the tool
 		nID = ::GetDlgCtrlID((HWND)nID);
@@ -482,32 +475,23 @@ BOOL CMIDIMappingDialog::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResul
 	switch(nID)
 	{
 	case IDC_CHECKCAPTURE:
-		strTipText = "The event is not passed to any further MIDI mappings or recording facilities.";
+		text = _T("The event is not passed to any further MIDI mappings or recording facilities.");
 		break;
 	case IDC_CHECKACTIVE:
-		strTipText = "The MIDI mapping is enabled and can be procssed.";
+		text = _T("The MIDI mapping is enabled and can be procssed.");
 		break;
 	case IDC_CHECK_PATRECORD:
-		strTipText = "Parameter changes are recorded into patterns as Parameter Control events.";
+		text = _T("Parameter changes are recorded into patterns as Parameter Control events.");
 		break;
 	case IDC_CHECK_MIDILEARN:
-		strTipText = "Listens to incoming MIDI data to automatically fill in the appropriate data.";
+		text = _T("Listens to incoming MIDI data to automatically fill in the appropriate data.");
 		break;
 	case IDC_SPINMOVEMAPPING:
-		strTipText = "Change the processing order of the current selected MIDI mapping.";
+		text = _T("Change the processing order of the current selected MIDI mapping.");
 		break;
 	}
 
-	if(pNMHDR->code == TTN_NEEDTEXTA)
-	{
-		// 80 chars max?!
-		mpt::String::CopyN(pTTTA->szText, strTipText);
-	} else
-	{
-		::MultiByteToWideChar(CP_ACP , 0, strTipText, strlen(strTipText) + 1,
-			pTTTW->szText, CountOf(pTTTW->szText));
-	}
-
+	mpt::String::CopyN(pTTT->szText, text);
 	return TRUE;
 }
 

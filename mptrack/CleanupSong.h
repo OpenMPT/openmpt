@@ -78,7 +78,6 @@ protected:
 	//{{AFX_VIRTUAL(CModCleanupDlg)
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
-	virtual void OnCancel();
 	//}}AFX_VIRTUAL
 
 	BOOL OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult);
