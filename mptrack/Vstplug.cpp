@@ -1987,14 +1987,14 @@ bool CVstPlugin::isPlaying(UINT note, UINT midiChn, UINT trackerChn)
 void CVstPlugin::SetZxxParameter(UINT nParam, UINT nValue)
 //--------------------------------------------------------
 {
-	PlugParamValue fValue = (PlugParamValue)nValue / 127.0f;
+	PlugParamValue fValue = (PlugParamValue)nValue / 16383.0f;
 	SetParameter(nParam, fValue);
 }
 
 UINT CVstPlugin::GetZxxParameter(UINT nParam)
 //-------------------------------------------
 {
-	return (UINT) (GetParameter(nParam) * 127.0f + 0.5f);
+	return (UINT) (GetParameter(nParam) * 16383.0f + 0.5f);
 }
 
 

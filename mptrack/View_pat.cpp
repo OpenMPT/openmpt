@@ -162,8 +162,6 @@ CViewPattern::CViewPattern()
 	m_Dib.Init(CMainFrame::bmpNotes);
 	UpdateColors();
 	m_PCNoteEditMemory = ModCommand::Empty();
-
-	octaveKeyMemory.resize(10, NOTE_NONE);
 }
 
 
@@ -1449,7 +1447,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 			} else
 			{
 				if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
-					AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+					AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 				BuildRecordCtxMenu(hMenu, ih, nChn, pModDoc);
 				BuildChannelControlCtxMenu(hMenu, ih);
 			}
@@ -1460,34 +1458,35 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 		{
 			// When combining menus, use bitwise ORs to avoid shortcuts
 			if(BuildSelectionCtxMenu(hMenu, ih))
-				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			if(BuildEditCtxMenu(hMenu, ih, pModDoc))
-				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			if(BuildInterpolationCtxMenu(hMenu, ih)
 				| BuildTransposeCtxMenu(hMenu, ih))
-				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			if(BuildVisFXCtxMenu(hMenu, ih)
 				| BuildAmplifyCtxMenu(hMenu, ih)
 				| BuildSetInstCtxMenu(hMenu, ih))
-				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			if(BuildPCNoteCtxMenu(hMenu, ih))
-				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			if(BuildGrowShrinkCtxMenu(hMenu, ih))
-				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			if(BuildMiscCtxMenu(hMenu, ih))
-				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			if(BuildRowInsDelCtxMenu(hMenu, ih))
-				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 
-			CString s = "&Quantize ";
+			CString s = _T("&Quantize ");
 			if(TrackerSettings::Instance().recordQuantizeRows != 0)
 			{
-				s.AppendFormat("(Currently: %d Rows)", TrackerSettings::Instance().recordQuantizeRows.Get());
+				uint32 rows = TrackerSettings::Instance().recordQuantizeRows.Get();
+				s.AppendFormat(_T("(Currently: %d Row%s)"), rows, rows == 1 ? _T("") : _T("s"));
 			} else
 			{
-				s.Append("Settings...");
+				s.Append(_T("Settings..."));
 			}
-			s.Append("\t" + ih->GetKeyTextFromCommand(kcQuantizeSettings));
+			s.Append(_T("\t") + ih->GetKeyTextFromCommand(kcQuantizeSettings));
 			AppendMenu(hMenu, MF_STRING | (TrackerSettings::Instance().recordQuantizeRows != 0 ? MF_CHECKED : 0), ID_SETQUANTIZE, s);
 		}
 
@@ -3994,7 +3993,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	// Handle MIDI mapping.
 	PLUGINDEX mappedIndex = uint8_max;
 	PlugParamIndex paramIndex = 0;
-	uint8 paramValue = uint8_max;
+	uint16 paramValue = uint16_max;
 	bool captured = sndFile.GetMIDIMapper().OnMIDImsg(dwMidiData, mappedIndex, paramIndex, paramValue);
 
 
@@ -4008,14 +4007,14 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	}
 
 	// Write parameter control commands if needed.
-	if(paramValue != uint8_max && IsEditingEnabled() && sndFile.GetType() == MOD_TYPE_MPT)
+	if(paramValue != uint16_max && IsEditingEnabled() && sndFile.GetType() == MOD_TYPE_MPT)
 	{
 		const bool liveRecord = IsLiveRecord();
 
 		ModCommandPos editpos = GetEditPos(sndFile, liveRecord);
 		ModCommand &m = GetModCommand(sndFile, editpos);
 		pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Mapping Record");
-		m.Set(NOTE_PCS, mappedIndex, static_cast<uint16>(paramIndex), static_cast<uint16>((paramValue * ModCommand::maxColumnValue) / 127));
+		m.Set(NOTE_PCS, mappedIndex, static_cast<uint16>(paramIndex), static_cast<uint16>((paramValue * ModCommand::maxColumnValue) / 16383));
 		if(!liveRecord)
 			InvalidateRow(editpos.row);
 		pMainFrm->ThreadSafeSetModified(pModDoc);
@@ -5134,7 +5133,7 @@ void CViewPattern::TempEnterOctave(int val)
 		// custom tunings always has octave 5, no matter how many octaves the tuning actually has.
 		TempEnterNote(((target.note - NOTE_MIN) % groupSize) + (val - 5) * groupSize + NOTE_MIDDLEC);
 		// Memorize note for key-up
-		ASSERT(size_t(val) < octaveKeyMemory.size());
+		ASSERT(size_t(val) < CountOf(octaveKeyMemory));
 		octaveKeyMemory[val] = target.note;
 	}
 }
@@ -5144,7 +5143,7 @@ void CViewPattern::TempEnterOctave(int val)
 void CViewPattern::TempStopOctave(int val)
 //----------------------------------------
 {
-	ASSERT(size_t(val) < octaveKeyMemory.size());
+	ASSERT(size_t(val) < CountOf(octaveKeyMemory));
 	if(octaveKeyMemory[val] != NOTE_NONE)
 	{
 		TempStopNote(octaveKeyMemory[val]);
@@ -6416,7 +6415,7 @@ bool CViewPattern::BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler *ih) const
 bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu, CInputHandler *ih) const
 //---------------------------------------------------------------------------------
 {
-	AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+	AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSPOSECHANNEL, "&Transpose Channel\t" + ih->GetKeyTextFromCommand(kcChannelTranspose));
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DUPLICATECHANNEL, "&Duplicate Channel\t" + ih->GetKeyTextFromCommand(kcChannelDuplicate));

@@ -193,8 +193,6 @@ protected:
 
 	QuickChannelProperties quickChannelProperties;
 
-	std::vector<ModCommand::NOTE> octaveKeyMemory;
-
 	// Chord preview
 	CHANNELINDEX chordPatternChannels[MPTChord::notesPerChord];
 	ModCommand::NOTE prevChordNote, prevChordBaseNote;
@@ -202,6 +200,7 @@ protected:
 	WORD ChnVUMeters[MAX_BASECHANNELS];
 	WORD OldVUMeters[MAX_BASECHANNELS];
 
+	ModCommand::NOTE octaveKeyMemory[10];
 	ModCommand::NOTE previousNote[MAX_BASECHANNELS];
 	BYTE activeNoteChannel[NOTE_MAX + NOTE_MIN];
 	BYTE splitActiveNoteChannel[NOTE_MAX + NOTE_MIN];
