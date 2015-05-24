@@ -162,6 +162,11 @@ CViewPattern::CViewPattern()
 	m_Dib.Init(CMainFrame::bmpNotes);
 	UpdateColors();
 	m_PCNoteEditMemory = ModCommand::Empty();
+
+	for(size_t i = 0; i < CountOf(octaveKeyMemory); i++)
+	{
+		octaveKeyMemory[i] = NOTE_NONE;
+	}
 }
 
 
