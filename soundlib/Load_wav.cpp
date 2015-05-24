@@ -96,7 +96,7 @@ bool CSoundFile::ReadWav(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultTempo = 125;
 	m_SongFlags = SONG_LINEARSLIDES;
 
-	for(CHANNELINDEX channel = 0; channel < wavFile.GetNumChannels(); channel++)
+	for(CHANNELINDEX channel = 0; channel < m_nChannels; channel++)
 	{
 		ChnSettings[channel].Reset();
 		ChnSettings[channel].nPan = (channel % 2u) ? 256 : 0;
