@@ -38,6 +38,7 @@ SolidCompression=yes
 WizardImageFile=install-big.bmp
 WizardSmallImageFile=install-small.bmp
 CreateUninstallRegKey=not IsTaskSelected('portable')
+Uninstallable=not IsTaskSelected('portable')
 ;LicenseFile=license.txt
 ;The following setting is recommended by the Aero wizard guidelines.
 DisableWelcomePage=yes
@@ -184,6 +185,23 @@ begin
         SetIniString('Paths', 'Key_Config_File', ExpandConstant('{userappdata}\OpenMPT\Keybindings.mkb'), ExpandConstant('{userappdata}\OpenMPT\mptrack.ini'));
     end;
 
+end;
+
+function NextButtonClick(CurPageID: Integer): Boolean;
+var
+    programfiles: String;
+begin
+    case CurPageID of
+    wpSelectTasks:
+        begin
+            programfiles := ExpandConstant('{pf}\');
+            if((CompareText(programfiles, Copy(ExpandConstant('{app}\'), 0, Length(programfiles))) = 0) and IsTaskSelected('portable')) then
+            begin
+                MsgBox('Warning: Installing OpenMPT to' #10 + programfiles + #10 'in portable mode may lead to problems if you are not running it with an administrator account!', mbInformation, MB_OK);
+            end;
+        end;
+    end;
+    Result := true;
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
