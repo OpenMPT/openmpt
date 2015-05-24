@@ -9,6 +9,7 @@
 
 #include "stdafx.h"
 #include "CreditStatic.h"
+#include "MPTrackUtil.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -30,7 +31,7 @@ CCreditStatic::CCreditStatic()
 	m_TextHeights[0] = 21;
 	m_TextHeights[1] = 19;
 	m_TextHeights[2] = 17;
-	m_TextHeights[3] = 15;
+	m_TextHeights[3] = MulDiv(15, Util::GetDPIy(m_hWnd), 96);
 	m_nCurrentFontHeight = m_TextHeights[NORMAL_TEXT_HEIGHT];
 
 
