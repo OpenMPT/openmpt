@@ -26,8 +26,8 @@ CSoundFilePlayConfig::~CSoundFilePlayConfig()
 {
 }
 
-void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
-//-------------------------------------------------------
+void CSoundFilePlayConfig::SetMixLevels(mixLevels mixLevelType)
+//-------------------------------------------------------------
 {
 	switch (mixLevelType)
 	{

@@ -50,7 +50,7 @@ public:
 	CSoundFilePlayConfig(void);
 	~CSoundFilePlayConfig(void);
 
-	void SetMixLevels(int mixLevelType);
+	void SetMixLevels(mixLevels mixLevelType);
 
 //getters/setters
 	bool getGlobalVolumeAppliesToMaster() const { return m_globalVolumeAppliesToMaster; }

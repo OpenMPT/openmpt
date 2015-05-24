@@ -77,7 +77,7 @@ struct ModInstrument
 	int8 nPPS;							// Pitch/Pan separation (i.e. how wide the panning spreads, -32...32)
 	uint8 nPPC;							// Pitch/Pan centre
 
-	PLUGINDEX nMixPlug;					// Plugin assigned to this instrument
+	PLUGINDEX nMixPlug;					// Plugin assigned to this instrument (0 = no plugin, 1 = first plugin)
 	uint8 nCutSwing;					// Random cutoff factor (0...64)
 	uint8 nResSwing;					// Random resonance factor (0...64)
 	uint8 nFilterMode;					// Default filter mode
