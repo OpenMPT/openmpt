@@ -83,6 +83,9 @@ public:
 	// Check whether a plugin can be hosted inside OpenMPT or requires bridging
 	uint8 GetDllBits(bool fromCache = true) const;
 	bool IsNative(bool fromCache = true) const { return GetDllBits(fromCache) == sizeof(void *) * CHAR_BIT; }
+	// Check if a plugin is native, and if it is currently unknown, assume that it is native. Use this function only for performance reasons
+	// (e.g. if tons of unscanned plugins would slow down generation of the plugin selection dialog)
+	bool IsNativeFromCache() const { return dllBits == sizeof(void *) * CHAR_BIT || dllBits == 0; }
 
 	void WriteToCache() const;
 

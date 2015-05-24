@@ -339,7 +339,12 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 				}
 			}
 
-			HTREEITEM h = AddTreeItem(plug.libraryName.AsNative().c_str(), plug.isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, categoryFolders[plug.category], reinterpret_cast<LPARAM>(&plug));
+			std::wstring title = plug.libraryName.AsNative();
+			if(!plug.IsNativeFromCache())
+			{
+				title += mpt::String::Print(L" (%1-Bit)", plug.GetDllBits());
+			}
+			HTREEITEM h = AddTreeItem(title.c_str(), plug.isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, categoryFolders[plug.category], reinterpret_cast<LPARAM>(&plug));
 			categoryUsed[plug.category] = true;
 
 			if(nameFilterActive)
