@@ -301,7 +301,7 @@ UINT CSoundFile::GetSongComments( LPSTR s, UINT cbsize, UINT linesize ) {
 	}
 	std::strncpy( s, mod->get_metadata("message").c_str(), cbsize );
 	s[ cbsize - 1 ] = '\0';
-	return std::strlen( s ) + 1;
+	return static_cast<UINT>( std::strlen( s ) + 1 );
 }
 
 void CSoundFile::SetCurrentPos( UINT nPos ) {
@@ -400,7 +400,7 @@ UINT CSoundFile::Read( LPVOID lpBuffer, UINT cbBuffer ) {
 			dst[sample] = tmpbuf[sample] << (32-16-1-MIXING_ATTENUATION);
 		}
 	}
-	return frames_rendered * get_frame_size();
+	return static_cast<UINT>( frames_rendered * get_frame_size() );
 }
 
 /*
