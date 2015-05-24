@@ -33,8 +33,7 @@ BEGIN_MESSAGE_MAP(CModTypeDlg, CDialog)
 	ON_CBN_SELCHANGE(IDC_COMBO1, UpdateDialog)
 	ON_COMMAND(IDC_CHECK_PT1X,   OnPTModeChanged)
 
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, &CModTypeDlg::OnToolTipNotify)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, &CModTypeDlg::OnToolTipNotify)
+	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipNotify)
 
 	//}}AFX_MSG_MAP
 
@@ -363,19 +362,13 @@ void CModTypeDlg::OnOK()
 }
 
 
-BOOL CModTypeDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
-//-------------------------------------------------------------------------
+BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
+//---------------------------------------------------------------
 {
-	MPT_UNREFERENCED_PARAMETER(id);
-	MPT_UNREFERENCED_PARAMETER(pResult);
-
-	// need to handle both ANSI and UNICODE versions of the message
-	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
-	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
-	CStringA strTipText = "";
+	TOOLTIPTEXT *pTTT = (TOOLTIPTEXTA*)pNMHDR;
+	const TCHAR *text = _T("");
 	UINT_PTR nID = pNMHDR->idFrom;
-	if(pNMHDR->code == TTN_NEEDTEXTA && (pTTTA->uFlags & TTF_IDISHWND) ||
-		pNMHDR->code == TTN_NEEDTEXTW && (pTTTW->uFlags & TTF_IDISHWND))
+	if(pTTT->uFlags & TTF_IDISHWND)
 	{
 		// idFrom is actually the HWND of the tool
 		nID = ::GetDlgCtrlID((HWND)nID);
@@ -384,56 +377,47 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 	switch(nID)
 	{
 	case IDC_CHECK1:
-		strTipText = "Note slides always slide the same amount, not depending on the sample frequency.";
+		text = _T("Note slides always slide the same amount, not depending on the sample frequency.");
 		break;
 	case IDC_CHECK2:
-		strTipText = "Old ScreamTracker 3 volume slide behaviour (not recommended).";
+		text = _T("Old ScreamTracker 3 volume slide behaviour (not recommended).");
 		break;
 	case IDC_CHECK3:
-		strTipText = "Play some effects like in early versions of Impulse Tracker (not recommended).";
+		text = _T("Play some effects like in early versions of Impulse Tracker (not recommended).");
 		break;
 	case IDC_CHECK4:
-		strTipText = "Gxx and Exx/Fxx won't share effect memory. Gxx resets instrument envelopes.";
+		text = _T("Gxx and Exx/Fxx won't share effect memory. Gxx resets instrument envelopes.");
 		break;
 	case IDC_CHECK5:
-		strTipText = "The resonant filter's frequency range is increased from about 5KHz to 10KHz.";
+		text = _T("The resonant filter's frequency range is increased from about 5KHz to 10KHz.");
 		break;
 	case IDC_CHECK6:
-		strTipText = "The instrument settings of the external ITI files will be ignored.";
+		text = _T("The instrument settings of the external ITI files will be ignored.");
 		break;
 	case IDC_CHECK_PT1X:
-		strTipText = "Ignore pan fx, use on-the-fly sample swapping, enforce Amiga frequency limits.";
+		text = _T("Ignore pan fx, use on-the-fly sample swapping, enforce Amiga frequency limits.");
 		break;
 	case IDC_COMBO_MIXLEVELS:
-		strTipText = "Mixing method of sample and VST levels.";
+		text = _T("Mixing method of sample and VST levels.");
 		break;
 	case IDC_CHK_COMPATPLAY:
-		strTipText = "Play commands as the original tracker would play them (recommended)";
+		text = _T("Play commands as the original tracker would play them (recommended)");
 		break;
 	case IDC_CHK_MIDICCBUG:
-		strTipText = "Emulate an old bug which sent wrong volume messages to VSTis (not recommended)";
+		text = _T("Emulate an old bug which sent wrong volume messages to VSTis (not recommended)");
 		break;
 	case IDC_CHK_OLDRANDOM:
-		strTipText = "Use old (buggy) random volume / panning variation algorithm (not recommended)";
+		text = _T("Use old (buggy) random volume / panning variation algorithm (not recommended)");
 		break;
 	case IDC_CHK_OLDPITCH:
-		strTipText = "Use old (imprecise) portamento logic for instrument plugins (not recommended)";
+		text = _T("Use old (imprecise) portamento logic for instrument plugins (not recommended)");
 		break;
 	case IDC_CHK_FT2VOLRAMP:
-		strTipText = "Use Fasttracker 2 style super soft volume ramping (recommended for true compatible playback)";
+		text = _T("Use Fasttracker 2 style super soft volume ramping (recommended for true compatible playback)");
 		break;
 	}
 
-	if(pNMHDR->code == TTN_NEEDTEXTA)
-	{
-		// 80 chars max?!
-		mpt::String::CopyN(pTTTA->szText, strTipText);
-	} else
-	{
-		::MultiByteToWideChar(CP_ACP , 0, strTipText, strTipText.GetLength() + 1,
-			pTTTW->szText, CountOf(pTTTW->szText));
-	}
-
+	mpt::String::CopyN(pTTT->szText, text);
 	return TRUE;
 }
 
