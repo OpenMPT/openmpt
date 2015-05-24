@@ -25,7 +25,6 @@
 #include "../common/mptFileIO.h"
 #endif
 #include <sstream>
-#include <list>
 #include "../common/version.h"
 #include "ITTools.h"
 #include <time.h>
@@ -92,7 +91,7 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 		TNTS_MAP tNameToShort_Map;
 
 		unsigned short figMap = 0;
-		for(UINT i = 1; i <= sf.GetNumInstruments(); i++) if (sf.Instruments[i] != nullptr)
+		for(INSTRUMENTINDEX i = 1; i <= sf.GetNumInstruments(); i++) if (sf.Instruments[i] != nullptr)
 		{
 			TNTS_MAP_ITER iter = tNameToShort_Map.find(sf.Instruments[i]->pTuning);
 			if(iter != tNameToShort_Map.end())
@@ -170,7 +169,7 @@ static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0
 	ReadTuningMapTemplate<uint16, uint8>(iStrm, shortToTNameMap);
 
 	//Read & set tunings for instruments
-	std::list<std::string> notFoundTunings;
+	std::vector<std::string> notFoundTunings;
 	for(UINT i = 1; i<=csf.GetNumInstruments(); i++)
 	{
 		uint16 ui;
@@ -180,7 +179,7 @@ static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0
 		{
 			const std::string str = iter->second;
 
-			if(str == std::string("->MPT_ORIGINAL_IT<-"))
+			if(str == "->MPT_ORIGINAL_IT<-")
 			{
 				csf.Instruments[i]->pTuning = nullptr;
 				continue;
@@ -207,8 +206,8 @@ static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0
 				continue;
 
 			//Checking if not found tuning already noticed.
-			std::list<std::string>::iterator iter;
-			iter = find(notFoundTunings.begin(), notFoundTunings.end(), str);
+			std::vector<std::string>::iterator iter;
+			iter = std::find(notFoundTunings.begin(), notFoundTunings.end(), str);
 			if(iter == notFoundTunings.end())
 			{
 				notFoundTunings.push_back(str);
@@ -224,9 +223,9 @@ static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0
 			}
 			csf.Instruments[i]->pTuning = csf.GetDefaultTuning();
 
-		}
-		else //This 'else' happens probably only in case of corrupted file.
+		} else
 		{
+			//This 'else' happens probably only in case of corrupted file.
 			if(csf.Instruments[i])
 				csf.Instruments[i]->pTuning = csf.GetDefaultTuning();
 		}
