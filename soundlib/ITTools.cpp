@@ -360,10 +360,10 @@ uint32 ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 		}
 		if(note < 120)
 		{
-			mptIns.NoteMap[i] = note + 1u;
+			mptIns.NoteMap[i] = note + NOTE_MIN;
 		} else
 		{
-			mptIns.NoteMap[i] = static_cast<uint8>(i + 1);
+			mptIns.NoteMap[i] = static_cast<uint8>(i + NOTE_MIN);
 		}
 	}
 

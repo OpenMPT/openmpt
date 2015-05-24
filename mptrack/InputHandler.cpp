@@ -51,7 +51,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 		if (bNoExistingKbdFileSetting)
 			TrackerSettings::Instance().m_szKbdFile = sDefaultPath;
 		bool bSuccess = false;
-		if (PathFileExistsW(sDefaultPath.AsNative().c_str()) == TRUE)
+		if (sDefaultPath.IsFile())
 			bSuccess = activeCommandSet->LoadFile(sDefaultPath);
 		if (!bSuccess)
 		{
@@ -510,14 +510,14 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_VIEW_GRAPH:			s = _T("G&raph"); c = kcViewGraph; break; //rewbs.graph
 		case MAINVIEW:				s = _T("&Main"); c = kcViewMain; break;
 		case IDD_TREEVIEW:			s = _T("&Tree"); c = kcViewTree; break;
-		case ID_VIEW_OPTIONS:		s = _T("S&etup..."); c = kcViewOptions; break;
-		case ID_HELPSHOW:			s = _T("&Help..."); c = kcHelp; break;
-		case ID_PLUGIN_SETUP:		s = _T("Pl&ugin Manager..."); c = kcViewAddPlugin; break;
-		case ID_CHANNEL_MANAGER:	s = _T("Ch&annel Manager..."); c = kcViewChannelManager; break;
-		case ID_CLIPBOARD_MANAGER:	s = _T("C&lipboard Manager..."); c = kcToggleClipboardManager; break;
-		case ID_VIEW_SONGPROPERTIES:s = _T("Song P&roperties..."); c = kcViewSongProperties; break; //rewbs.graph
-		case ID_VIEW_MIDIMAPPING:	s = _T("&MIDI Mapping..."); c = kcViewMIDImapping; break;
-		case ID_VIEW_EDITHISTORY:	s = _T("Edit &History..."); c = kcViewEditHistory; break;
+		case ID_VIEW_OPTIONS:		s = _T("S&etup"); c = kcViewOptions; break;
+		case ID_HELPSHOW:			s = _T("&Help"); c = kcHelp; break;
+		case ID_PLUGIN_SETUP:		s = _T("Pl&ugin Manager"); c = kcViewAddPlugin; break;
+		case ID_CHANNEL_MANAGER:	s = _T("Ch&annel Manager"); c = kcViewChannelManager; break;
+		case ID_CLIPBOARD_MANAGER:	s = _T("C&lipboard Manager"); c = kcToggleClipboardManager; break;
+		case ID_VIEW_SONGPROPERTIES:s = _T("Song P&roperties"); c = kcViewSongProperties; break;
+		case ID_VIEW_MIDIMAPPING:	s = _T("&MIDI Mapping"); c = kcViewMIDImapping; break;
+		case ID_VIEW_EDITHISTORY:	s = _T("Edit &History"); c = kcViewEditHistory; break;
 		// Help submenu:
 		case ID_EXAMPLE_MODULES:	return _T("&Example Modules");
 

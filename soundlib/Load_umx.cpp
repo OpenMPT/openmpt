@@ -158,7 +158,7 @@ static void ReadUMXExportTableEntry(FileReader &chunk, int32 &objClass, int32 &o
 	ReadUMXIndex(chunk);			// Object parent
 	if(packageVersion >= 60)
 	{
-		chunk.Skip(4);					// Internal package / group of the object
+		chunk.Skip(4);				// Internal package / group of the object
 	}
 	objName = ReadUMXIndex(chunk);	// Object name (offset into the name table)
 	chunk.Skip(4);					// Object flags

@@ -100,6 +100,7 @@ public:
 	
 	// Verify if this path represents a valid directory on the file system.
 	bool IsDirectory() const { return ::PathIsDirectoryW(path.c_str()) != FALSE; }
+	// Verify if this path exists and is a file on the file system.
 	bool IsFile() const
 	{
 		DWORD dwAttrib = ::GetFileAttributesW(path.c_str());
@@ -119,15 +120,12 @@ public:
 	{
 		if(empty())
 			return false;
-		const RawPathString::value_type &c = path[path.length() - 1];
+		const RawPathString::const_reference c = path.back();
 #if MPT_OS_WINDOWS
-		if(c == L'\\' || c == L'/')
-			return true;
+		return (c == L'\\' || c == L'/');
 #else
-		if(c == '/')
-			return true;
+		return (c == '/');
 #endif
-		return false;
 	}
 
 	// Relative / absolute paths conversion

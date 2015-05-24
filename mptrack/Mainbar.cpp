@@ -602,6 +602,7 @@ void CMainToolBar::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 			HMENU hMenu = ::CreatePopupMenu();
 			MIDIINCAPS mic;
 			UINT ndevs = midiInGetNumDevs();
+			if(ndevs > MAX_MIDI_DEVICES) ndevs = MAX_MIDI_DEVICES;
 			UINT current = TrackerSettings::Instance().m_nMidiDevice;
 			for(UINT i = 0; i < ndevs; i++)
 			{

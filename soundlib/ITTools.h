@@ -88,7 +88,7 @@ struct PACKED ITEnvelope
 		envFilter	= 0x80,
 	};
 
-	uint8 flags;			// Envelope Flags
+	uint8 flags;		// Envelope Flags
 	uint8 num;			// Number of Envelope Nodes
 	uint8 lpb;			// Loop Start
 	uint8 lpe;			// Loop End

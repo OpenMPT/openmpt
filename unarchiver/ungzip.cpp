@@ -94,7 +94,8 @@ bool CGzipArchive::ExtractFile(std::size_t index)
 		return false;
 	}
 
-	try {
+	try
+	{
 		data.resize(trailer.isize);
 	} catch(...)
 	{
@@ -119,15 +120,7 @@ bool CGzipArchive::ExtractFile(std::size_t index)
 	inflateEnd(&strm);
 
 	// Everything went OK? Check return code, number of written bytes and CRC32.
-	if(retVal == Z_STREAM_END && trailer.isize == strm.total_out && trailer.crc32_ == crc32(0, (Bytef *)&data[0], trailer.isize))
-	{
-		// Success! :)
-		return true;
-	} else
-	{
-		// Fail :(
-		return false;
-	}
+	return (retVal == Z_STREAM_END && trailer.isize == strm.total_out && trailer.crc32_ == crc32(0, (Bytef *)&data[0], trailer.isize));
 }
 
 

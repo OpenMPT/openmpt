@@ -14,7 +14,7 @@
 #include "Tables.h"
 
 #define _USE_MATH_DEFINES
-#include <math.h>
+#include <cmath>
 #ifndef M_PI
 #define M_PI 3.1415926535897932385
 #endif
@@ -30,15 +30,11 @@ OPENMPT_NAMESPACE_BEGIN
 DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier) const
 //-----------------------------------------------------------------------
 {
-	float Fc;
 	MPT_ASSERT(nCutOff < 128);
-	if(m_SongFlags[SONG_EXFILTERRANGE])
-		Fc = 110.0f * pow(2.0f, 0.25f + ((float)(nCutOff * (flt_modifier + 256))) / (20.0f * 512.0f));
-	else
-		Fc = 110.0f * pow(2.0f, 0.25f + ((float)(nCutOff * (flt_modifier + 256))) / (24.0f * 512.0f));
-	LONG freq = (LONG)Fc;
+	float Fc = 110.0f * std::pow(2.0f, 0.25f + ((float)(nCutOff * (flt_modifier + 256))) / (m_SongFlags[SONG_EXFILTERRANGE] ? 20.0f * 512.0f : 24.0f * 512.0f));
+	int freq = static_cast<int>(Fc);
 	Limit(freq, 120, 20000);
-	if (freq * 2 > (LONG)m_MixerSettings.gdwMixingFreq) freq = m_MixerSettings.gdwMixingFreq >> 1;
+	if (freq * 2 > (int)m_MixerSettings.gdwMixingFreq) freq = m_MixerSettings.gdwMixingFreq / 2;
 	return (DWORD)freq;
 }
 
