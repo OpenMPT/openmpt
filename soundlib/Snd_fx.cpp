@@ -5185,7 +5185,7 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 	if (note == NOTE_NONE || (note >= NOTE_MIN_SPECIAL)) return 0;
 	note -= NOTE_MIN;
 	if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_MT2|MOD_TYPE_S3M|MOD_TYPE_STM|MOD_TYPE_MDL|MOD_TYPE_ULT|MOD_TYPE_WAV|MOD_TYPE_669|MOD_TYPE_PLM
-				|MOD_TYPE_FAR|MOD_TYPE_DMF|MOD_TYPE_PTM|MOD_TYPE_AMS|MOD_TYPE_AMS2|MOD_TYPE_DBM|MOD_TYPE_AMF|MOD_TYPE_PSM|MOD_TYPE_J2B|MOD_TYPE_IMF))
+				|MOD_TYPE_FAR|MOD_TYPE_DMF|MOD_TYPE_PTM|MOD_TYPE_AMS|MOD_TYPE_AMS2|MOD_TYPE_DBM|MOD_TYPE_AMF|MOD_TYPE_PSM|MOD_TYPE_J2B|MOD_TYPE_IMF|MOD_TYPE_UAX))
 	{
 		if(m_SongFlags[SONG_LINEARSLIDES])
 		{
@@ -5198,8 +5198,7 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 			return Util::muldiv_unsigned(8363, (FreqS3MTable[note % 12] << 5), nC5Speed << (note / 12));
 			//8363 * freq[note%12] / nC5Speed * 2^(5-note/12)
 		}
-	} else
-	if (GetType() == MOD_TYPE_XM)
+	} else if (GetType() == MOD_TYPE_XM)
 	{
 		if (note < 12) note = 12;
 		note -= 12;
