@@ -205,6 +205,13 @@ SoundDevice::BufferAttributes CPortaudioDevice::InternalGetEffectiveBufferAttrib
 	bufferAttributes.Latency = m_StreamInfo->outputLatency;
 	bufferAttributes.UpdateInterval = m_Settings.UpdateInterval;
 	bufferAttributes.NumBuffers = 1;
+	if(m_HostApiType == paWASAPI && m_Settings.ExclusiveMode)
+	{
+		// WASAPI exclusive mode streams only account for a single period of latency in PortAudio
+		// (i.e. the same way as Steinerg ASIO defines latency).
+		// That does not match our definition of latency, repair it.
+		bufferAttributes.Latency *= 2.0;
+	}
 	return bufferAttributes;
 }
 
