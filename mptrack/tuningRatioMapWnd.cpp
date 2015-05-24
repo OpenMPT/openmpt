@@ -24,6 +24,7 @@ BEGIN_MESSAGE_MAP(CTuningRatioMapWnd, CStatic)
 	ON_WM_SETFOCUS()
 	ON_WM_KILLFOCUS()
 	ON_WM_LBUTTONDOWN()
+	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 
@@ -68,14 +69,14 @@ void CTuningRatioMapWnd::OnPaint()
 		NOTEINDEXTYPE nPos = m_nNote - (nNotes/2);
 		int ypaint = 0;
 
-		
+
 		for (int ynote=0; ynote<nNotes; ynote++, ypaint+=m_cyFont, nPos++)
 		{
 			BOOL bHighLight;
 			// Note
 			NOTEINDEXTYPE noteToDraw = nPos - m_nNoteCentre;
 			s[0] = 0;
-			
+
 			const bool isValidNote = m_pTuning->IsValidNote(noteToDraw);
 			std::string temp;
 			if(isValidNote)
@@ -87,7 +88,7 @@ void CTuningRatioMapWnd::OnPaint()
 				wsprintf(s, "%s", temp.c_str());
 			else
 				wsprintf(s, "%s", "...");
-				
+
 
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
 			DrawButtonRect(hdc, &rect, s, FALSE, FALSE);
@@ -111,7 +112,7 @@ void CTuningRatioMapWnd::OnPaint()
 		DrawButtonRect(hdc, &rect, "", FALSE, FALSE);
 		if (ypaint < rcClient.bottom)
 		{
-			rect.SetRect(rcClient.left, ypaint, rcClient.right, rcClient.bottom); 
+			rect.SetRect(rcClient.left, ypaint, rcClient.right, rcClient.bottom);
 			FillRect(hdc, &rect, CMainFrame::brushGray);
 		}
 	}
@@ -133,16 +134,36 @@ void CTuningRatioMapWnd::OnKillFocus(CWnd *pNewWnd)
 	InvalidateRect(NULL, FALSE);
 }
 
-void CTuningRatioMapWnd::OnLButtonDown(UINT, CPoint pt)
-//----------------------------------------------
+
+BOOL CTuningRatioMapWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+//-------------------------------------------------------------------------
 {
-	if ((pt.x >= m_cxFont) && (pt.x < m_cxFont*2)) {
+	NOTEINDEXTYPE note = static_cast<NOTEINDEXTYPE>(m_nNote - sgn(zDelta));
+	if(m_pTuning->IsValidNote(note - m_nNoteCentre))
+	{
+		m_nNote = note;
+		InvalidateRect(NULL, FALSE);
+		if(m_pParent)
+			m_pParent->UpdateRatioMapEdits(GetShownCentre());
+	}
+
+	return CWnd::OnMouseWheel(nFlags, zDelta, pt);
+}
+
+
+void CTuningRatioMapWnd::OnLButtonDown(UINT, CPoint pt)
+//-----------------------------------------------------
+{
+	if ((pt.x >= m_cxFont) && (pt.x < m_cxFont*2))
+	{
 		InvalidateRect(NULL, FALSE);
 	}
-	if ((pt.x > m_cxFont*2) && (pt.x <= m_cxFont*3)) {
+	if ((pt.x > m_cxFont*2) && (pt.x <= m_cxFont*3))
+	{
 		InvalidateRect(NULL, FALSE);
 	}
-	if ((pt.x >= 0) && (m_cyFont)) {
+	if ((pt.x >= 0) && (m_cyFont))
+	{
 		CRect rcClient;
 		GetClientRect(&rcClient);
 		int nNotes = (rcClient.bottom + m_cyFont - 1) / m_cyFont;
@@ -155,7 +176,7 @@ void CTuningRatioMapWnd::OnLButtonDown(UINT, CPoint pt)
 			if(m_pParent)
 				m_pParent->UpdateRatioMapEdits(GetShownCentre());
 		}
-		
+
 	}
 	SetFocus();
 }
@@ -163,7 +184,7 @@ void CTuningRatioMapWnd::OnLButtonDown(UINT, CPoint pt)
 
 
 NOTEINDEXTYPE CTuningRatioMapWnd::GetShownCentre() const
-//--------------------------------------
+//------------------------------------------------------
 {
 	return m_nNote - m_nNoteCentre;
 }

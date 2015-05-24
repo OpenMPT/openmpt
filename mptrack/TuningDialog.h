@@ -92,7 +92,7 @@ public:
 	}
 
 private:
-	//Elements are collected to two arrays so that elements with the 
+	//Elements are collected to two arrays so that elements with the
 	//same index are mapped to each other.
 	std::vector<T1> m_T1;
 	std::vector<T2> m_T2;
@@ -120,13 +120,13 @@ private:
 	bool m_Dragging;
 
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-	DECLARE_MESSAGE_MAP()	
+	DECLARE_MESSAGE_MAP()
 };
 
 //===================
 class CTuningTreeItem
 //===================
-{	
+{
 private:
 	CTuning* m_pTuning;
 	CTuningCollection* m_pTuningCollection;
@@ -136,12 +136,12 @@ public:
 						m_pTuningCollection(NULL)
 	{}
 
-	CTuningTreeItem(CTuning* pT) : 
+	CTuningTreeItem(CTuning* pT) :
 					m_pTuning(pT),
 					m_pTuningCollection(NULL)
 	{}
 
-	CTuningTreeItem(CTuningCollection* pTC) : 
+	CTuningTreeItem(CTuningCollection* pTC) :
 					m_pTuning(NULL),
 					m_pTuningCollection(pTC)
 	{}
@@ -156,7 +156,7 @@ public:
 	}
 
 	void Reset() {m_pTuning = NULL; m_pTuningCollection = NULL;}
-	
+
 
 	void Set(CTuning* pT)
 	{
@@ -176,8 +176,8 @@ public:
 		//if(CTuningTreeItemInstance.m_pTuning != NULL ||
 		//	 CTuningTreeItemInstance.m_pTuningCollection != NULL)
 		if(m_pTuning)
-			return m_pTuning; 
-		else 
+			return m_pTuning;
+		else
 			return m_pTuningCollection;
 	}
 
@@ -248,18 +248,18 @@ private:
 	//Returns pointer to the tuning collection where tuning given as argument
 	//belongs to.
 	CTuningCollection* GetpTuningCollection(const CTuning* const) const;
-	
+
 	//Returns the address of corresponding tuningcollection; if it points
 	//to tuning-entry, returning the owning tuningcollection
 	CTuningCollection* GetpTuningCollection(HTREEITEM ti) const;
-	
+
 	//Checks whether tuning collection can be deleted.
 	bool IsDeletable(const CTuningCollection* const pTC) const;
 
 	// Scl-file import.
 	EnSclImport ImportScl(const mpt::PathString &filename, const mpt::ustring &name);
 	EnSclImport ImportScl(std::istream& iStrm, const mpt::ustring &name);
-	
+
 
 private:
 	CTuningRatioMapWnd m_RatioMapWnd;
@@ -285,12 +285,9 @@ private:
 
 	//-->Tuning collection edits
 	CEdit m_EditTuningCollectionName;
-	CEdit m_EditTuningCollectionVersion;
-	CEdit m_EditTuningCollectionEditMask;
-	CEdit m_EditTuningCollectionItemNum;
 	CEdit m_EditTuningCollectionPath;
 	//<--Tuningcollection edits
-	
+
 	CButton m_ButtonSet;
 	CButton m_ButtonExport;
 	CButton m_ButtonImport;
@@ -307,7 +304,7 @@ private:
 	TUNINGTREEITEM m_CommandItemSrc;
 	TUNINGTREEITEM m_CommandItemDest;
 	//Commanditem is used when receiving context menu-commands,
-	//m_CommandItemDest is used when the command really need only 
+	//m_CommandItemDest is used when the command really need only
 	//one argument.
 
 	typedef std::map<const CTuningCollection* const, bool> MODIFIED_MAP;
@@ -324,13 +321,13 @@ private:
 	static CString GetSclImportFailureMsg(EnSclImport);
 	static const size_t s_nSclImportMaxNoteCount = 64;
 
-	//To indicate whether to apply changes made to 
-	//those edit boxes(they are modified by certain activities 
+	//To indicate whether to apply changes made to
+	//those edit boxes(they are modified by certain activities
 	//in case which the modifications should not be applied to
 	//tuning data.
 	bool m_NoteEditApply;
 	bool m_RatioEditApply;
-	
+
 	enum
 	{
 		UM_TUNINGDATA = 1, //UM <-> Update Mask
@@ -344,7 +341,7 @@ private:
 
 	//Flag to prevent multiple exit error-messages.
 	bool m_DoErrorExit;
-	
+
 	void DoErrorExit();
 
 	virtual void OnOK();
@@ -356,7 +353,7 @@ public:
 	afx_msg void OnMoveTuning();
 	afx_msg void OnCopyTuning();
 	afx_msg void OnRemoveTuningCollection();
-	
+
 //Event-functions
 public:
 	afx_msg void OnCbnSelchangeComboTtype();
@@ -381,7 +378,7 @@ public:
 	afx_msg void OnTvnSelchangedTreeTuning(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnTvnDeleteitemTreeTuning(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMRclickTreeTuning(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnTvnBegindragTreeTuning(NMHDR *pNMHDR, LRESULT *pResult);	
+	afx_msg void OnTvnBegindragTreeTuning(NMHDR *pNMHDR, LRESULT *pResult);
 
 	DECLARE_MESSAGE_MAP()
 };
