@@ -117,10 +117,10 @@ void CTuningDialog::DeleteTreeItem(CTuning* pT)
 		HTREEITEM nextitem = m_TreeCtrlTuning.GetNextItem(temp, TVGN_NEXT);
 		if(!nextitem) nextitem = m_TreeCtrlTuning.GetNextItem(temp, TVGN_PREVIOUS);
 		m_pActiveTuning = m_TreeItemTuningItemMap.GetMapping_12(nextitem).GetT();
-        m_TreeCtrlTuning.DeleteItem(temp);
-		//Note: Item from map is deleted 'automatically' in 
+		m_TreeCtrlTuning.DeleteItem(temp);
+		//Note: Item from map is deleted 'automatically' in
 		//OnTvnDeleteitemTreeTuning.
-		
+
 	}
 }
 
@@ -143,7 +143,7 @@ void CTuningDialog::DeleteTreeItem(CTuningCollection* pTC)
 			pTCnext = GetpTuningCollection(nextTTI.GetT());
 		if(pTCprev == NULL)
 			pTCprev = GetpTuningCollection(prevTTI.GetT());
-        
+
 		if(pTCnext != NULL && pTCnext != m_pActiveTuningCollection)
 			m_pActiveTuningCollection = pTCnext;
 		else
@@ -153,9 +153,9 @@ void CTuningDialog::DeleteTreeItem(CTuningCollection* pTC)
 			else
 				m_pActiveTuningCollection = NULL;
 		}
-	
+
 		m_TreeCtrlTuning.DeleteItem(temp);
-		//Note: Item from map is deleted 'automatically' in 
+		//Note: Item from map is deleted 'automatically' in
 		//OnTvnDeleteitemTreeTuning.
 	}
 	else
@@ -192,11 +192,6 @@ BOOL CTuningDialog::OnInitDialog()
 
 	m_ButtonSet.EnableWindow(FALSE);
 
-	//#ifdef DEBUG
-		m_EditTuningCollectionVersion.ShowWindow(SW_SHOW);
-		m_EditTuningCollectionEditMask.ShowWindow(SW_SHOW);
-	//#endif
-
 	m_EditSteps.SetLimitText(2);
 	m_EditFineTuneSteps.SetLimitText(3);
 
@@ -217,7 +212,7 @@ void CTuningDialog::UpdateView(const int updateMask)
 		return;
 	}
 
-	//-->Updating treeview	
+	//-->Updating treeview
 	if(updateMask != UM_TUNINGDATA)
 	{
 		TUNINGTREEITEM tuningitem;
@@ -236,10 +231,10 @@ void CTuningDialog::UpdateView(const int updateMask)
 				m_TreeCtrlTuning.SetItemText(treeitem, m_pActiveTuning->GetName().c_str());
 			else
 				m_TreeCtrlTuning.SetItemText(treeitem, m_pActiveTuningCollection->GetName().c_str());
-		}		
+		}
 	}
 	//<--Updating treeview
-	
+
 
 	if(m_pActiveTuningCollection == NULL)
 	{
@@ -250,9 +245,9 @@ void CTuningDialog::UpdateView(const int updateMask)
 	if(updateMask == 0 || updateMask & UM_TUNINGCOLLECTION)
 	{
 		m_EditTuningCollectionName.SetWindowText(m_pActiveTuningCollection->GetName().c_str());
-		m_EditTuningCollectionVersion.SetWindowText(m_pActiveTuningCollection->GetVersionString().c_str());
-		m_EditTuningCollectionEditMask.SetWindowText(m_pActiveTuningCollection->GetEditMaskString().c_str());
-		m_EditTuningCollectionItemNum.SetWindowText(mpt::ToString(m_pActiveTuningCollection->GetNumTunings()).c_str());
+		//m_EditTuningCollectionVersion.SetWindowText(m_pActiveTuningCollection->GetVersionString().c_str());
+		//m_EditTuningCollectionEditMask.SetWindowText(m_pActiveTuningCollection->GetEditMaskString().c_str());
+		//m_EditTuningCollectionItemNum.SetWindowText(mpt::ToString(m_pActiveTuningCollection->GetNumTunings()).c_str());
 		::SetWindowTextW(m_EditTuningCollectionPath.m_hWnd, m_pActiveTuningCollection->GetSaveFilePath().ToWide().c_str());
 	}
 	//<-- Updating tuning collection part
@@ -323,14 +318,14 @@ void CTuningDialog::UpdateView(const int updateMask)
 		m_EditMiscActions.SetReadOnly(!enableControls);
 		m_EditFineTuneSteps.SetReadOnly(!enableControls);
 		m_EditName.SetReadOnly(!enableControls);
-		
+
 		m_ButtonSet.EnableWindow(enableControls);
 
 		m_CombobTuningType.Invalidate();
 		m_EditSteps.Invalidate();
 		m_EditRatioPeriod.Invalidate();
 	}
-	else 
+	else
 	{
 		if(m_pActiveTuning == NULL) //No active tuning, clearing tuning part.
 		{
@@ -377,9 +372,6 @@ void CTuningDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT_NAME, m_EditName);
 	DDX_Control(pDX, IDC_TREE_TUNING, m_TreeCtrlTuning);
 	DDX_Control(pDX, IDC_EDIT_TUNINGCOLLECTION_NAME, m_EditTuningCollectionName);
-	DDX_Control(pDX, IDC_EDIT_TUNINGC_VERSION, m_EditTuningCollectionVersion);
-	DDX_Control(pDX, IDC_EDIT_TUNINGC_EDITMASK, m_EditTuningCollectionEditMask);
-	DDX_Control(pDX, IDC_EDIT_TUNINGNUM, m_EditTuningCollectionItemNum);
 	DDX_Control(pDX, IDC_EDIT_TUNINGCOLLECTION_PATH, m_EditTuningCollectionPath);
 }
 
@@ -488,7 +480,7 @@ void CTuningDialog::OnCbnSelchangeComboTtype()
 				else
 					if(newType == TT_GEOMETRIC)
 						m_pActiveTuning->CreateGeometric(steps, pr);
-				
+
 				UpdateView(UM_TUNINGDATA);
 			}
 			else //Not wanting to discard current values.
@@ -500,7 +492,7 @@ void CTuningDialog::OnCbnSelchangeComboTtype()
 				{
 					if(oldType == TT_GROUPGEOMETRIC)
 						m_CombobTuningType.SetCurSel(1);
-					else 
+					else
 						m_CombobTuningType.SetCurSel(0);
 				}
 			}
@@ -524,7 +516,7 @@ void CTuningDialog::OnEnChangeEditRatioperiod()
 void CTuningDialog::OnEnChangeEditNotename()
 //------------------------------------------
 {
-	
+
 	if(!m_NoteEditApply)
 	{
 		m_NoteEditApply = true;
@@ -550,13 +542,13 @@ void CTuningDialog::OnEnChangeEditNotename()
 
 	m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 	m_RatioMapWnd.Invalidate();
-	
+
 }
 
 void CTuningDialog::OnEnChangeEditRatiovalue()
 //--------------------------------------------
 {
-	
+
 	if(!m_RatioEditApply)
 	{
 		m_RatioEditApply = true;
@@ -579,7 +571,7 @@ void CTuningDialog::OnEnChangeEditRatiovalue()
 		UpdateTuningType();
 		m_RatioMapWnd.Invalidate();
 	}
-	
+
 }
 
 void CTuningDialog::OnBnClickedButtonSetvalues()
@@ -619,7 +611,7 @@ void CTuningDialog::UpdateRatioMapEdits(const NOTEINDEXTYPE& note)
 
 void CTuningDialog::OnBnClickedButtonExport()
 //-------------------------------------------
-{	
+{
 	const CTuning* pT = m_pActiveTuning;
 	const CTuningCollection* pTC = m_pActiveTuningCollection;
 
@@ -628,7 +620,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 		MsgBox(IDS_ERR_NO_TUNING_SELECTION, this, NULL, MB_ICONINFORMATION);
 		return;
 	}
-		
+
 	std::string filter;
 	if(pT != NULL)
 		filter = std::string("Tuning files (*") + CTuning::s_FileExtension + std::string(")|*") + CTuning::s_FileExtension + std::string("|");
@@ -646,7 +638,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 	BeginWaitCursor();
 
 	bool failure = true;
-	
+
 	mpt::ofstream fout(dlg.GetFirstFile(), std::ios::binary);
 
 	if(filterIndex == 0)
@@ -662,7 +654,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 	fout.close();
 	EndWaitCursor();
 
-	
+
 	if(failure)
 		ErrorBox(IDS_ERR_EXPORT_TUNING, this);
 }
@@ -699,7 +691,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 		const bool bIsTun = (mpt::PathString::CompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuning::s_FileExtension)) == 0);
 		const bool bIsScl = (mpt::PathString::CompareNoCase(fileExt, MPT_PATHSTRING(".scl")) == 0);
-		
+
 		if (bIsTun || bIsScl)
 		{
 			CTuning* pT = nullptr;
@@ -746,7 +738,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 				else // scl import successful.
 					pT = &m_TempTunings.GetTuning(m_TempTunings.GetNumTunings() - 1);
 			}
-			
+
 			if (pT)
 			{
 				m_pActiveTuning = pT;
@@ -755,15 +747,15 @@ void CTuningDialog::OnBnClickedButtonImport()
 		}
 		else if(mpt::PathString::CompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)) == 0)
 		{
-			// For now only loading tuning collection as 
-			// a separate collection - no possibility to 
+			// For now only loading tuning collection as
+			// a separate collection - no possibility to
 			// directly replace some collection.
 			CTuningCollection* pNewTCol = new CTuningCollection;
 			pNewTCol->SetSavefilePath(files[counter]);
 			if (pNewTCol->Deserialize())
 			{
 				delete pNewTCol; pNewTCol = 0;
-				sLoadReport += L"-Unable to import tuning collection \"" + fileNameExt + L"\": unrecognized file.\n";				
+				sLoadReport += L"-Unable to import tuning collection \"" + fileNameExt + L"\": unrecognized file.\n";
 			}
 			else
 			{
@@ -774,7 +766,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 		}
 		else // Case: Unknown extension (should not happen).
 		{
-			sLoadReport += L"-Unable to load \"" + fileNameExt + L"\": unrecognized file extension.\n";				
+			sLoadReport += L"-Unable to load \"" + fileNameExt + L"\": unrecognized file extension.\n";
 		}
 	}
 	if(sLoadReport.length() > 0)
@@ -855,7 +847,7 @@ void CTuningDialog::OnEnKillfocusEditSteps()
 		m_pActiveTuning->ChangeGroupsize(ConvertStrTo<UNOTEINDEXTYPE>(buffer));
 		m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 		UpdateView(UM_TUNINGDATA);
-	}	
+	}
 }
 
 
@@ -894,7 +886,7 @@ bool CTuningDialog::GetModifiedStatus(const CTuningCollection* const pTc) const
 		return (*iter).second;
 	else
 		return false;
-		
+
 }
 
 CTuningCollection* CTuningDialog::GetpTuningCollection(HTREEITEM ti) const
@@ -944,7 +936,7 @@ void CTuningDialog::OnTvnSelchangedTreeTuning(NMHDR *pNMHDR, LRESULT *pResult)
 	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
 
 	TUNINGTREEITEM ti = m_TreeItemTuningItemMap.GetMapping_12(pNMTreeView->itemNew.hItem);
-	
+
 	if(ti)
 	{
 		int updateMask = UM_TUNINGDATA;
@@ -961,7 +953,7 @@ void CTuningDialog::OnTvnSelchangedTreeTuning(NMHDR *pNMHDR, LRESULT *pResult)
 		{
 			m_pActiveTuning = pT;
 			m_pActiveTuningCollection = GetpTuningCollection(m_pActiveTuning);
-		
+
 		}
 		if(m_pActiveTuningCollection != pPrevTuningCollection) updateMask |= UM_TUNINGCOLLECTION;
 		UpdateView(updateMask);
@@ -1064,7 +1056,7 @@ bool CTuningDialog::IsDeletable(const CTuningCollection* const pTC) const
 	std::vector<CTuningCollection*>::const_iterator iter = find(m_DeletableTuningCollections.begin(), m_DeletableTuningCollections.end(), pTC);
 	if(iter != m_DeletableTuningCollections.end())
 		return true;
-	else 
+	else
 		return false;
 }
 
@@ -1108,7 +1100,7 @@ void CTuningDialog::OnEndDrag(HTREEITEM dragDestItem)
 
 	CTuningCollection* pTCdest = NULL;
 	CTuningCollection* pTCsrc = m_CommandItemSrc.GetTC();
-		
+
 	if(pTCsrc == NULL)
 		pTCsrc = GetpTuningCollection(m_CommandItemSrc.GetT());
 
@@ -1124,9 +1116,9 @@ void CTuningDialog::OnEndDrag(HTREEITEM dragDestItem)
         pTCdest = destTunItem.GetTC();
 
 	//For now, ignoring drags within a tuning collection.
-	if(pTCdest == pTCsrc) 
+	if(pTCdest == pTCsrc)
 		return;
-		
+
 	if(pTCdest)
 	{
 		UINT mask = MF_STRING;
@@ -1238,7 +1230,7 @@ void CTuningDialog::OnMoveTuning()
 		m_CommandItemDest = s_notFoundItemTuning;
 		return;
 	}
-		
+
 	CTuningCollection* pTCdest = NULL;
 	if(m_CommandItemDest.GetT())
 		pTCdest = GetpTuningCollection(m_CommandItemDest.GetT());
@@ -1270,7 +1262,7 @@ void CTuningDialog::OnCopyTuning()
 
 	if(!pTC)
 		return;
-	
+
 	m_CommandItemDest = s_notFoundItemTuning;
 
 	CTuning* pT = m_CommandItemSrc.GetT();
@@ -1307,7 +1299,7 @@ void CTuningDialog::OnRemoveTuningCollection()
 	m_TuningCollections.erase(iter);
 	DeleteTreeItem(m_pActiveTuningCollection);
 	delete deletableTC; deletableTC = 0;
-	
+
 	UpdateView();
 }
 
@@ -1386,8 +1378,8 @@ void CTuningTreeCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 		HTREEITEM hItem;
 		hItem = HitTest(point, NULL);
 		m_rParentDialog.OnEndDrag(hItem);
-	
-		CTreeCtrl::OnLButtonUp(nFlags, point);	
+
+		CTreeCtrl::OnLButtonUp(nFlags, point);
 	}
 }
 
@@ -1404,25 +1396,25 @@ CString CTuningDialog::GetSclImportFailureMsg(EnSclImport id)
 //----------------------------------------------------------
 {
 	CString sMsg;
-    switch(id)
-    {
-        case enSclImportFailTooManyNotes:
+	switch(id)
+	{
+		case enSclImportFailTooManyNotes:
 			AfxFormatString1(sMsg, IDS_SCL_IMPORT_FAIL_8, mpt::ToString(s_nSclImportMaxNoteCount).c_str());
 			return sMsg;
-            
-        case enSclImportFailTooLargeNumDenomIntegers:
+
+		case enSclImportFailTooLargeNumDenomIntegers:
 			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_1); return sMsg;
-			
-        case enSclImportFailZeroDenominator:
+
+		case enSclImportFailZeroDenominator:
 			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_2); return sMsg;
-            
-        case enSclImportFailNegativeRatio:
+
+		case enSclImportFailNegativeRatio:
 			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_3); return sMsg;
-            
-        case enSclImportFailUnableToOpenFile:
+
+		case enSclImportFailUnableToOpenFile:
 			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_4); return sMsg;
-            
-        case enSclImportLineCountMismatch:
+
+		case enSclImportLineCountMismatch:
 			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_5); return sMsg;
 
 		case enSclImportTuningCreationFailure:
@@ -1430,32 +1422,32 @@ CString CTuningDialog::GetSclImportFailureMsg(EnSclImport id)
 
 		case enSclImportAddTuningFailure:
 			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_7); return sMsg;
-            
-        default:
-            return sMsg;
-    }
+
+		default:
+			return sMsg;
+	}
 }
 
 
 static void SkipCommentLines(std::istream& iStrm, std::string& str)
 //-----------------------------------------------------------------
 {
-    while(std::getline(iStrm, str))
-    {
-        LPCSTR psz = str.c_str();
-        for(; *psz != 0; psz++)
-        {
-            if (*psz == ' ' || *psz == '\t')
-                continue;
-            else
-            {
-                if (*psz != '!')
-                    return;
-                else // Found comment line: break for loop and get another line.
-                    break;
-            }
-        }
-    }
+	while(std::getline(iStrm, str))
+	{
+		LPCSTR psz = str.c_str();
+		for(; *psz != 0; psz++)
+		{
+			if (*psz == ' ' || *psz == '\t')
+				continue;
+			else
+			{
+				if (*psz != '!')
+					return;
+				else // Found comment line: break for loop and get another line.
+					break;
+			}
+		}
+	}
 }
 
 
@@ -1520,12 +1512,12 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 		}
 
 		if (*pNonDigit == '.') // Reading cents
-		{ 
+		{
 			SclFloat fCent = ConvertStrTo<SclFloat>(psz);
 			fRatios.push_back(static_cast<CTuningRTI::RATIOTYPE>(CentToRatio(fCent)));
 		}
 		else if (*pNonDigit == '/') // Reading ratios
-		{ 
+		{
 			*pNonDigit = 0; // Replace '/' with null.
 			int64 nNum = ConvertStrTo<int64>(psz);
 			psz = pNonDigit + 1;

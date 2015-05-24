@@ -51,7 +51,8 @@ public:
 	NOTEINDEXTYPE GetShownCentre() const;
 
 protected:
-	
+
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnLButtonDown(UINT, CPoint);
 	afx_msg void OnLButtonUp(UINT, CPoint);
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
