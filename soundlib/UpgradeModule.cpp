@@ -130,7 +130,8 @@ struct UpgradePatternData
 				}
 			}
 
-			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 01, 04) && sndFile.m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 22, 00, 00))
+			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 01, 04)
+				&& sndFile.m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 22, 00, 00))	// Ignore compatibility export
 			{
 				// OpenMPT 1.22.01.04 fixes illegal (out of range) instrument numbers; they should do nothing. In previous versions, they stopped the playing sample.
 				if(sndFile.GetNumInstruments() && m.instr > sndFile.GetNumInstruments() && !sndFile.IsCompatibleMode(TRK_IMPULSETRACKER))
@@ -165,7 +166,6 @@ struct UpgradePatternData
 			}
 
 			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 01, 10)
-				&& sndFile.m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 20, 00, 00)	// Ignore compatibility export
 				&& m.volcmd == VOLCMD_TONEPORTAMENTO && m.command == CMD_TONEPORTAMENTO
 				&& (m.vol != 0 || sndFile.IsCompatibleMode(TRK_FASTTRACKER2)) && m.param != 0)
 			{
@@ -177,7 +177,6 @@ struct UpgradePatternData
 			}
 
 			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 07, 09)
-				&& sndFile.m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 22, 00, 00)	// Ignore compatibility export
 				&& m.command == CMD_SPEED && m.param == 0)
 			{
 				// OpenMPT can emulate FT2's F00 behaviour now.
@@ -341,6 +340,31 @@ void CSoundFile::UpgradeModule()
 			&& GetMixLevels() == mixLevels_compatible)
 		{
 			SetMixLevels(mixLevels_compatible_FT2);
+		}
+	}
+
+	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 25, 00, 07) && m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 25, 00, 00))
+	{
+		// Instrument plugins can now receive random volume variation.
+		// For old instruments, disable volume swing in case there was no sample associated.
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
+		{
+			if(Instruments[i] != nullptr && Instruments[i]->nVolSwing != 0 && Instruments[i]->nMidiChannel != MidiNoChannel)
+			{
+				bool hasSample = false;
+				for(size_t k = 0; k < CountOf(Instruments[k]->Keyboard); k++)
+				{
+					if(Instruments[i]->Keyboard[k] != 0)
+					{
+						hasSample = true;
+						break;
+					}
+				}
+				if(!hasSample)
+				{
+					Instruments[i]->nVolSwing = 0;
+				}
+			}
 		}
 	}
 
