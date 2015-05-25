@@ -22,11 +22,13 @@
     #define VER_DEBUG   0
 #endif
 
-#if (VER_MINOR == 0) || (VER_MINORMINOR != 0)
+#define MAKEHEX(c) 0x##c	// Avoid issues with version numbers 08 and 09 being interpreted as octal
+#if (MAKEHEX(VER_MINOR) == 0) || (MAKEHEX(VER_MINORMINOR) != 0)
     #define VER_PRERELEASE   VS_FF_PRERELEASE
 #else
     #define VER_PRERELEASE   0
 #endif
+#undef MAKEHEX
 
 // Note: Changing this might need changes to BLOCK "StringFileInfo" defined below.
 #define VER_FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
