@@ -54,7 +54,7 @@ public:
 	virtual ~IArchive() {};
 public:
 	virtual bool IsArchive() const = 0;
-	virtual std::wstring GetComment() const = 0;
+	virtual mpt::ustring GetComment() const = 0;
 	virtual bool ExtractFile(std::size_t index) = 0;
 	virtual FileReader GetOutputFile() const = 0;
 	virtual std::size_t size() const = 0;
@@ -70,7 +70,7 @@ class ArchiveBase : public IArchive
 {
 protected:
 	FileReader inFile;
-	std::wstring comment;
+	mpt::ustring comment;
 	std::vector<ArchiveFileInfo> contents;
 	std::vector<char> data;
 public:
@@ -89,7 +89,7 @@ public:
 	{
 		return !contents.empty();
 	}
-	virtual std::wstring GetComment() const
+	virtual mpt::ustring GetComment() const
 	{
 		return comment;
 	}
