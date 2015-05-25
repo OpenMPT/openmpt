@@ -198,6 +198,58 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 
 
 
+#if MPT_COMPILER_MSVC
+#define MPT_CONSTANT_IF(x) \
+  __pragma(warning(push)) \
+  __pragma(warning(disable:4127)) \
+  if(x) \
+  __pragma(warning(pop)) \
+/**/
+#define MPT_MAYBE_CONSTANT_IF(x) \
+  __pragma(warning(push)) \
+  __pragma(warning(disable:4127)) \
+  if(x) \
+  __pragma(warning(pop)) \
+/**/
+#endif
+
+#if MPT_COMPILER_GCC
+#if MPT_GCC_AT_LEAST(4,6,0)
+#define MPT_MAYBE_CONSTANT_IF(x) \
+  _Pragma("GCC diagnostic push") \
+  _Pragma("GCC diagnostic ignored \"-Wtype-limits\"") \
+  if(x) \
+  _Pragma("GCC diagnostic pop") \
+/**/
+#else
+#define MPT_MAYBE_CONSTANT_IF(x) \
+  _Pragma("GCC diagnostic ignored \"-Wtype-limits\"") \
+  if(x) \
+/**/
+#endif
+#endif
+
+#if MPT_COMPILER_CLANG
+#define MPT_MAYBE_CONSTANT_IF(x) \
+  _Pragma("clang diagnostic push") \
+  _Pragma("clang diagnostic ignored \"-Wtype-limits\"") \
+  if(x) \
+  _Pragma("clang diagnostic pop") \
+/**/
+#endif
+
+#if !defined(MPT_CONSTANT_IF)
+// MPT_CONSTANT_IF disables compiler warnings for conditions that are either always true or always false for some reason (dependent on template arguments for example)
+#define MPT_CONSTANT_IF(x) if(x)
+#endif
+
+#if !defined(MPT_MAYBE_CONSTANT_IF)
+// MPT_MAYBE_CONSTANT_IF disables compiler warnings for conditions that may in some case be either always false or always true (useful in ASSERTions in some cases).
+#define MPT_MAYBE_CONSTANT_IF(x) if(x)
+#endif
+
+
+        
 // Static code checkers might need to get the knowledge of our assertions transferred to them.
 #define MPT_CHECKER_ASSUME_ASSERTIONS 1
 //#define MPT_CHECKER_ASSUME_ASSERTIONS 0
@@ -257,8 +309,8 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 #define MPT_ASSERT_ALWAYS(expr)          ASSERT((expr))
 #define MPT_ASSERT_ALWAYS_MSG(expr, msg) ASSERT((expr) && (msg))
 #else
-#define MPT_ASSERT_ALWAYS(expr)          do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } MPT_CHECKER_ASSUME(expr); } while(0)
-#define MPT_ASSERT_ALWAYS_MSG(expr, msg) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } MPT_CHECKER_ASSUME(expr); } while(0)
+#define MPT_ASSERT_ALWAYS(expr)          do { MPT_MAYBE_CONSTANT_IF(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } MPT_CHECKER_ASSUME(expr); } while(0)
+#define MPT_ASSERT_ALWAYS_MSG(expr, msg) do { MPT_MAYBE_CONSTANT_IF(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } MPT_CHECKER_ASSUME(expr); } while(0)
 #ifndef MPT_ASSERT_HANDLER_NEEDED
 #define MPT_ASSERT_HANDLER_NEEDED
 #endif
@@ -268,18 +320,18 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 
 #define MPT_ASSERT(expr)                 MPT_CHECKER_ASSUME(expr)
 #define MPT_ASSERT_MSG(expr, msg)        MPT_CHECKER_ASSUME(expr)
-#define MPT_ASSERT_ALWAYS(expr)          do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } MPT_CHECKER_ASSUME(expr); } while(0)
-#define MPT_ASSERT_ALWAYS_MSG(expr, msg) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } MPT_CHECKER_ASSUME(expr); } while(0)
+#define MPT_ASSERT_ALWAYS(expr)          do { MPT_MAYBE_CONSTANT_IF(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } MPT_CHECKER_ASSUME(expr); } while(0)
+#define MPT_ASSERT_ALWAYS_MSG(expr, msg) do { MPT_MAYBE_CONSTANT_IF(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } MPT_CHECKER_ASSUME(expr); } while(0)
 #ifndef MPT_ASSERT_HANDLER_NEEDED
 #define MPT_ASSERT_HANDLER_NEEDED
 #endif
 
 #else // !NO_ASSERTS
 
-#define MPT_ASSERT(expr)                 do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } MPT_CHECKER_ASSUME(expr); } while(0)
-#define MPT_ASSERT_MSG(expr, msg)        do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } MPT_CHECKER_ASSUME(expr); } while(0)
-#define MPT_ASSERT_ALWAYS(expr)          do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } MPT_CHECKER_ASSUME(expr); } while(0)
-#define MPT_ASSERT_ALWAYS_MSG(expr, msg) do { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } MPT_CHECKER_ASSUME(expr); } while(0)
+#define MPT_ASSERT(expr)                 do { MPT_MAYBE_CONSTANT_IF(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } MPT_CHECKER_ASSUME(expr); } while(0)
+#define MPT_ASSERT_MSG(expr, msg)        do { MPT_MAYBE_CONSTANT_IF(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } MPT_CHECKER_ASSUME(expr); } while(0)
+#define MPT_ASSERT_ALWAYS(expr)          do { MPT_MAYBE_CONSTANT_IF(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } MPT_CHECKER_ASSUME(expr); } while(0)
+#define MPT_ASSERT_ALWAYS_MSG(expr, msg) do { MPT_MAYBE_CONSTANT_IF(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } MPT_CHECKER_ASSUME(expr); } while(0)
 #ifndef MPT_ASSERT_HANDLER_NEEDED
 #define MPT_ASSERT_HANDLER_NEEDED
 #endif
