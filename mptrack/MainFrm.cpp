@@ -2646,7 +2646,7 @@ void CMainFrame::OnHelp()
 			case OPTIONS_PAGE_KEYBOARD:		page = "::/Setup_Keyboard.html"; break;
 			case OPTIONS_PAGE_COLORS:		page = "::/Setup_Display.html"; break;
 			case OPTIONS_PAGE_MIDI:			page = "::/Setup_MIDI.html"; break;
-			case OPTIONS_PAGE_PATHS:		page = "::/Setup_Autosave.html"; break;
+			case OPTIONS_PAGE_PATHS:		page = "::/Setup_Paths_Auto_Save.html"; break;
 			case OPTIONS_PAGE_UPDATE:		page = "::/Setup_Update.html"; break;
 			case OPTIONS_PAGE_ADVANCED:		page = "::/Setup_Advanced.html"; break;
 		}

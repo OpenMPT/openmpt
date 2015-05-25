@@ -31,6 +31,8 @@ def destname(p):
     p = p.split(':_')[1]
     p = p.replace('/', '_')
     p = p.replace('.', '_')
+    while p.find('__') >= 0:
+        p = p.replace('__', '_')
     if p.find('#') >= 0:
         parts = p.split('#')
         return parts[0] + '.html#' + parts[1]
