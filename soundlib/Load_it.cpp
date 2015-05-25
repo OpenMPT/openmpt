@@ -2115,7 +2115,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	if(!songArtist.empty())
 	{
 		std::string songArtistU8 = mpt::ToCharset(mpt::CharsetUTF8, songArtist);
-		uint32 length = mpt::saturate_cast<uint16>(songArtistU8.length());
+		uint16 length = mpt::saturate_cast<uint16>(songArtistU8.length());
 		WRITEMODULARHEADER(MAGIC4LE('A','U','T','H'), length);
 		mpt::IO::WriteRaw(f, songArtistU8.c_str(), length);
 	}
