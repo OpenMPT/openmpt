@@ -294,6 +294,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	CMainFrame::m_pAutoSaver->SetUseOriginalPath(conf.Read<bool>("AutoSave", "UseOriginalPath", CMainFrame::m_pAutoSaver->GetUseOriginalPath()));
 	CMainFrame::m_pAutoSaver->SetPath(theApp.RelativePathToAbsolute(conf.Read<mpt::PathString>("AutoSave", "Path", CMainFrame::m_pAutoSaver->GetPath())));
 	// Paths
+	TrackerDirectories::Instance().SetDefaultDirectory(theApp.GetConfigPath() + MPT_PATHSTRING("tunings\\"), DIR_TUNING);
+	TrackerDirectories::Instance().SetDefaultDirectory(theApp.GetConfigPath() + MPT_PATHSTRING("TemplateModules\\"), DIR_TEMPLATE_FILES_USER);
 	for(size_t i = 0; i < NUM_DIRS; i++)
 	{
 		if(TrackerDirectories::Instance().m_szDirectoryToSettingsName[i][0] == '\0')

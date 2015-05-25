@@ -202,9 +202,9 @@ protected:
 
 	DWORD m_GuiThreadId;
 
-	TrackerDirectories *m_pTrackerDirectories;
 	IniFileSettingsBackend *m_pSettingsIniFile;
 	SettingsContainer *m_pSettings;
+	TrackerDirectories *m_pTrackerDirectories;
 	TrackerSettings *m_pTrackerSettings;
 	IniFileSettingsBackend *m_pSongSettingsIniFile;
 	SettingsContainer *m_pSongSettings;
