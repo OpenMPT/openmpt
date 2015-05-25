@@ -39,9 +39,9 @@ struct CModSpecifications
 	MODTYPE internalType;				// Internal MODTYPE value
 	ModCommand::NOTE noteMin;			// Minimum note index (index starts from 1)
 	ModCommand::NOTE noteMax;			// Maximum note index (index starts from 1)
-	bool hasNoteCut;					// True if format has notecut.
-	bool hasNoteOff;					// True if format has noteoff.
-	bool hasNoteFade;					// True if format has notefade.
+	bool hasNoteCut : 1;				// True if format has note cut (^^).
+	bool hasNoteOff : 1;				// True if format has note off (==).
+	bool hasNoteFade : 1;				// True if format has note fade (~~).
 	PATTERNINDEX patternsMax;
 	ORDERINDEX ordersMax;
 	SEQUENCEINDEX sequencesMax;
@@ -62,18 +62,20 @@ struct CModSpecifications
 	uint8 MIDIMappingDirectivesMax;		// Number of MIDI Mapping directives that the format can store (0 = none)
 	UINT speedMin;						// Minimum ticks per frame
 	UINT speedMax;						// Maximum ticks per frame
-	bool hasComments;					// True if format has a comments field
 	uint8 envelopePointsMax;			// Maximum number of points of each envelope
-	bool hasReleaseNode;				// Envelope release node
+	bool hasReleaseNode : 1;			// Envelope release node
+	bool hasComments : 1;				// True if format has a comments field
+	bool hasIgnoreIndex : 1;			// Does "+++" pattern exist?
+	bool hasStopIndex : 1;				// Does "---" pattern exist?
+	bool hasRestartPos : 1;				// Format has an automatic restart order position
+	bool supportsPlugins : 1;			// Format can store plugins
+	bool hasPatternSignatures : 1;		// Can patterns have a custom time signature?
+	bool hasPatternNames : 1;			// Cat patterns have a name?
+	bool hasArtistName : 1;				// Can artist name be stored in file?
+	bool hasDefaultResampling : 1;		// Can default resampling be saved? (if not, it can still be modified in the GUI but won't set the module as modified)
+	FlagSet<SongFlags>::store_type songFlags;	// Supported song flags   NOTE: Do not use the overloaded operator | to set these flags because this results in dynamic initialization
 	char commands[MAX_EFFECTS + 1];		// An array holding all commands this format supports; commands that are not supported are marked with "?"
 	char volcommands[MAX_VOLCMDS + 1];	// Ditto, but for volume column
-	bool hasIgnoreIndex;				// Does "+++" pattern exist?
-	bool hasStopIndex;					// Does "---" pattern exist?
-	bool hasRestartPos;					// Format has an automatic restart order position
-	bool supportsPlugins;				// Format can store plugins
-	bool hasPatternSignatures;			// Can patterns have a custom time signature?
-	bool hasPatternNames;				// Cat patterns have a name?
-	FlagSet<SongFlags>::store_type songFlags;				// Supported song flags   NOTE: Do not use the overloaded operator | to set these flags because this results in dynamic initialization
 	FlagSet<SongFlags> GetSongFlags() const { return FlagSet<SongFlags>(songFlags); }
 };
 

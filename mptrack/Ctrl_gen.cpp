@@ -271,7 +271,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		const BOOL bIsNotMOD = (m_sndFile.GetType() != MOD_TYPE_MOD);
 		const BOOL bIsNotMOD_S3M = ((bIsNotMOD) && (m_sndFile.GetType() != MOD_TYPE_S3M));
 		const BOOL bIsNotMOD_XM = ((bIsNotMOD) && (m_sndFile.GetType() != MOD_TYPE_XM));
-		m_EditArtist.EnableWindow(bIsNotMOD_S3M);
+		m_EditArtist.EnableWindow(specs.hasArtistName);
 		m_EditTempo.EnableWindow(bIsNotMOD);
 		m_SpinTempo.EnableWindow(bIsNotMOD);
 		GetDlgItem(IDC_BUTTON1)->EnableWindow(bIsNotMOD);
@@ -660,7 +660,7 @@ void CCtrlGeneral::OnResamplingChanged()
 	if(sel >= 0)
 	{
 		m_sndFile.m_nResampling = static_cast<ResamplingMode>(m_CbnResampling.GetItemData(sel));
-		if(m_sndFile.GetType()  == MOD_TYPE_MPT)
+		if(m_sndFile.GetModSpecifications().hasDefaultResampling)
 		{
 			m_modDoc.SetModified();
 		}
