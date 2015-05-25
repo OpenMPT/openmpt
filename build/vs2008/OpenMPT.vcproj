@@ -804,6 +804,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\mptrack\AdvancedConfigDlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\mptrack\AdvancedConfigDlg.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\mptrack\AppendModule.cpp"
 				>
 			</File>
@@ -869,6 +877,14 @@
 			</File>
 			<File
 				RelativePath="..\..\mptrack\CloseMainDialog.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\mptrack\ColorConfigDlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\mptrack\ColorConfigDlg.h"
 				>
 			</File>
 			<File
@@ -1004,6 +1020,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\mptrack\GeneralConfigDlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\mptrack\GeneralConfigDlg.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\mptrack\Globals.cpp"
 				>
 			</File>
@@ -1108,14 +1132,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\mptrack\Moptions.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\mptrack\Moptions.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\mptrack\MoveFXSlotDialog.cpp"
 				>
 			</File>
@@ -1164,6 +1180,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\mptrack\PathConfigDlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\mptrack\PathConfigDlg.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\mptrack\PatternClipboard.cpp"
 				>
 			</File>
@@ -1205,6 +1229,14 @@
 			</File>
 			<File
 				RelativePath="..\..\mptrack\Reporting.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\mptrack\SampleConfigDlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\mptrack\SampleConfigDlg.h"
 				>
 			</File>
 			<File

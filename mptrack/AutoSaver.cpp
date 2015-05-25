@@ -9,11 +9,10 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "mainfrm.h"
-#include "moddoc.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
 #include "AutoSaver.h"
-#include "moptions.h"
 #include "FileDialog.h"
 #include <algorithm>
 
@@ -220,150 +219,6 @@ void CAutoSaver::CleanUpBackups(const CModDoc &modDoc)
 		foundfiles.erase(foundfiles.begin());
 	}
 	
-}
-
-
-///////////////////////////////////////////////////////////////////////////////////////
-// CAutoSaverGUI dialog : AutoSaver GUI
-///////////////////////////////////////////////////////////////////////////////////////
-
-
-IMPLEMENT_DYNAMIC(CAutoSaverGUI, CPropertyPage)
-CAutoSaverGUI::CAutoSaverGUI(CAutoSaver* pAutoSaver)
-	: CPropertyPage(CAutoSaverGUI::IDD)
-{
-	m_pAutoSaver = pAutoSaver;
-}
-
-
-void CAutoSaverGUI::DoDataExchange(CDataExchange* pDX)
-//----------------------------------------------------
-{
-	CPropertyPage::DoDataExchange(pDX);
-}
-
-BEGIN_MESSAGE_MAP(CAutoSaverGUI, CPropertyPage)
-	ON_BN_CLICKED(IDC_AUTOSAVE_BROWSE, OnBnClickedAutosaveBrowse)
-	ON_BN_CLICKED(IDC_AUTOSAVE_ENABLE, OnBnClickedAutosaveEnable)
-	ON_BN_CLICKED(IDC_AUTOSAVE_USEORIGDIR, OnBnClickedAutosaveUseorigdir)
-	ON_BN_CLICKED(IDC_AUTOSAVE_USECUSTOMDIR, OnBnClickedAutosaveUseorigdir)
-	ON_EN_UPDATE(IDC_AUTOSAVE_PATH, OnSettingsChanged)
-	ON_EN_UPDATE(IDC_AUTOSAVE_HISTORY, OnSettingsChanged)
-	ON_EN_UPDATE(IDC_AUTOSAVE_INTERVAL, OnSettingsChanged)
-END_MESSAGE_MAP()
-
-
-// CAutoSaverGUI message handlers
-
-BOOL CAutoSaverGUI::OnInitDialog()
-//--------------------------------
-{
-	CPropertyPage::OnInitDialog();
-
-	CheckDlgButton(IDC_AUTOSAVE_ENABLE, m_pAutoSaver->IsEnabled()?BST_CHECKED:BST_UNCHECKED);
-	//SetDlgItemText(IDC_AUTOSAVE_FNTEMPLATE, m_pAutoSaver->GetFilenameTemplate());
-	SetDlgItemInt(IDC_AUTOSAVE_HISTORY, m_pAutoSaver->GetHistoryDepth()); //TODO
-	::SetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, m_pAutoSaver->GetPath().AsNative().c_str());
-	SetDlgItemInt(IDC_AUTOSAVE_INTERVAL, m_pAutoSaver->GetSaveInterval());
-	CheckDlgButton(IDC_AUTOSAVE_USEORIGDIR, m_pAutoSaver->GetUseOriginalPath()?BST_CHECKED:BST_UNCHECKED);
-	CheckDlgButton(IDC_AUTOSAVE_USECUSTOMDIR, m_pAutoSaver->GetUseOriginalPath()?BST_UNCHECKED:BST_CHECKED);
-
-	//enable/disable stuff as appropriate
-	OnBnClickedAutosaveEnable();
-	OnBnClickedAutosaveUseorigdir();
-
-	return TRUE;
-}
-
-
-void CAutoSaverGUI::OnOK()
-//------------------------
-{
-	WCHAR tempPath[MAX_PATH];
-	m_pAutoSaver->SetEnabled(IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) != BST_UNCHECKED);
-	m_pAutoSaver->SetHistoryDepth(GetDlgItemInt(IDC_AUTOSAVE_HISTORY));
-	m_pAutoSaver->SetSaveInterval(GetDlgItemInt(IDC_AUTOSAVE_INTERVAL));
-	m_pAutoSaver->SetUseOriginalPath(IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR) == BST_CHECKED);
-	::GetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, tempPath, CountOf(tempPath));
-	mpt::PathString path = mpt::PathString::FromNative(tempPath);
-	if(!path.empty() && !path.HasTrailingSlash())
-	{
-		path += MPT_PATHSTRING("\\");
-	}
-	m_pAutoSaver->SetPath(path);
-
-	CPropertyPage::OnOK();
-}
-
-void CAutoSaverGUI::OnBnClickedAutosaveBrowse()
-//---------------------------------------------
-{
-	WCHAR szPath[MAX_PATH] = L"";
-	::GetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, szPath, CountOf(szPath));
-
-	BrowseForFolder dlg(mpt::PathString::FromNative(szPath), TEXT("Select a folder to store autosaved files in..."));
-	if(dlg.Show(this))
-	{
-		::SetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, dlg.GetDirectory().AsNative().c_str());
-		OnSettingsChanged();
-	}
-}
-
-
-void CAutoSaverGUI::OnBnClickedAutosaveEnable()
-//---------------------------------------------
-{
-	BOOL enabled = IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE);
-	GetDlgItem(IDC_AUTOSAVE_INTERVAL)->EnableWindow(enabled);
-	GetDlgItem(IDC_AUTOSAVE_HISTORY)->EnableWindow(enabled);
-	GetDlgItem(IDC_AUTOSAVE_USEORIGDIR)->EnableWindow(enabled);
-	GetDlgItem(IDC_AUTOSAVE_USECUSTOMDIR)->EnableWindow(enabled);
-	GetDlgItem(IDC_AUTOSAVE_PATH)->EnableWindow(enabled);
-	GetDlgItem(IDC_AUTOSAVE_BROWSE)->EnableWindow(enabled);
-	OnSettingsChanged();
-	return;
-}
-
-void CAutoSaverGUI::OnBnClickedAutosaveUseorigdir()
-//-------------------------------------------------
-{
-	if (IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE))
-	{
-		BOOL enabled = IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR);
-		GetDlgItem(IDC_AUTOSAVE_PATH)->EnableWindow(!enabled);
-		GetDlgItem(IDC_AUTOSAVE_BROWSE)->EnableWindow(!enabled);
-		OnSettingsChanged();
-	}
-	return;
-}
-
-void CAutoSaverGUI::OnSettingsChanged()
-//-------------------------------------
-{
-	SetModified(TRUE);
-}
-
-BOOL CAutoSaverGUI::OnSetActive()
-//--------------------------------
-{
-	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_AUTOSAVE;
-	return CPropertyPage::OnSetActive();
-}
-
-BOOL CAutoSaverGUI::OnKillActive()
-//--------------------------------
-{
-	WCHAR szPath[MAX_PATH] = L"";
-	::GetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, szPath, CountOf(szPath));
-
-	if (!::PathIsDirectoryW(szPath) && IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) && !IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR))
-	{
-		Reporting::Error("Backup path does not exist.");
-		GetDlgItem(IDC_AUTOSAVE_PATH)->SetFocus();
-		return 0;
-	}
-
-	return CPropertyPage::OnKillActive();
 }
 
 

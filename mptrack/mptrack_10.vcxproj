@@ -808,6 +808,7 @@
     <ClCompile Include="..\unarchiver\unzip.cpp" />
     <ClCompile Include="AboutDialog.cpp" />
     <ClCompile Include="AbstractVstEditor.cpp" />
+    <ClCompile Include="AdvancedConfigDlg.cpp" />
     <ClCompile Include="AppendModule.cpp" />
     <ClCompile Include="AutoSaver.cpp" />
     <ClCompile Include="Autotune.cpp" />
@@ -816,6 +817,7 @@
     <ClCompile Include="CImageListEx.cpp" />
     <ClCompile Include="CleanupSong.cpp" />
     <ClCompile Include="CloseMainDialog.cpp" />
+    <ClCompile Include="ColorConfigDlg.cpp" />
     <ClCompile Include="ColourEdit.cpp" />
     <ClCompile Include="CommandSet.cpp" />
     <ClCompile Include="CreditStatic.cpp" />
@@ -834,6 +836,7 @@
     <ClCompile Include="ExternalSamples.cpp" />
     <ClCompile Include="FileDialog.cpp" />
     <ClCompile Include="FolderScanner.cpp" />
+    <ClCompile Include="GeneralConfigDlg.cpp" />
     <ClCompile Include="Globals.cpp" />
     <ClCompile Include="InputHandler.cpp" />
     <ClCompile Include="KeyConfigDlg.cpp" />
@@ -847,7 +850,6 @@
     <ClCompile Include="ModConvert.cpp" />
     <ClCompile Include="Moddoc.cpp" />
     <ClCompile Include="Modedit.cpp" />
-    <ClCompile Include="Moptions.cpp" />
     <ClCompile Include="MoveFXSlotDialog.cpp" />
     <ClCompile Include="Mpdlgs.cpp" />
     <ClCompile Include="MPTHacks.cpp" />
@@ -855,6 +857,7 @@
     <ClCompile Include="MPTrackLink.cpp" />
     <ClCompile Include="MPTrackUtil.cpp" />
     <ClCompile Include="Mpt_midi.cpp" />
+    <ClCompile Include="PathConfigDlg.cpp" />
     <ClCompile Include="PatternClipboard.cpp" />
     <ClCompile Include="PatternEditorDialogs.cpp" />
     <ClCompile Include="PatternFont.cpp" />
@@ -862,6 +865,7 @@
     <ClCompile Include="PNG.cpp" />
     <ClCompile Include="PSRatioCalc.cpp" />
     <ClCompile Include="Reporting.cpp" />
+    <ClCompile Include="SampleConfigDlg.cpp" />
     <ClCompile Include="SampleEditorDialogs.cpp" />
     <ClCompile Include="ScaleEnvPointsDlg.cpp" />
     <ClCompile Include="..\common\stdafx.cpp">
@@ -1034,12 +1038,14 @@
     <ClInclude Include="..\unarchiver\unzip.h" />
     <ClInclude Include="AboutDialog.h" />
     <ClInclude Include="AbstractVstEditor.h" />
+    <ClInclude Include="AdvancedConfigDlg.h" />
     <ClInclude Include="AutoSaver.h" />
     <ClInclude Include="Autotune.h" />
     <ClInclude Include="Childfrm.h" />
     <ClInclude Include="CImageListEx.h" />
     <ClInclude Include="CleanupSong.h" />
     <ClInclude Include="CListCtrl.h" />
+    <ClInclude Include="ColorConfigDlg.h" />
     <ClInclude Include="ColourEdit.h" />
     <ClInclude Include="CommandSet.h" />
     <ClInclude Include="CreditStatic.h" />
@@ -1056,6 +1062,7 @@
     <ClInclude Include="FadeLaws.h" />
     <ClInclude Include="FileDialog.h" />
     <ClInclude Include="FolderScanner.h" />
+    <ClInclude Include="GeneralConfigDlg.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Mainbar.h" />
@@ -1069,12 +1076,14 @@
     <ClInclude Include="Mptrack.h" />
     <ClInclude Include="MPTrackUtil.h" />
     <ClInclude Include="Notification.h" />
+    <ClInclude Include="PathConfigDlg.h" />
     <ClInclude Include="PatternClipboard.h" />
     <ClInclude Include="PatternCursor.h" />
     <ClInclude Include="PatternFont.h" />
     <ClInclude Include="PNG.h" />
     <ClInclude Include="Reporting.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SampleConfigDlg.h" />
     <ClInclude Include="SelectPluginDialog.h" />
     <ClInclude Include="ChannelManagerDlg.h" />
     <ClInclude Include="CloseMainDialog.h" />
@@ -1082,7 +1091,6 @@
     <ClInclude Include="EffectVis.h" />
     <ClInclude Include="KeyConfigDlg.h" />
     <ClInclude Include="MIDIMappingDialog.h" />
-    <ClInclude Include="Moptions.h" />
     <ClInclude Include="MoveFXSlotDialog.h" />
     <ClInclude Include="Mpdlgs.h" />
     <ClInclude Include="PatternEditorDialogs.h" />

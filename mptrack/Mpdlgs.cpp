@@ -9,14 +9,12 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
+#include "Mptrack.h"
 #include "Sndfile.h"
-#include "mainfrm.h"
+#include "Mainfrm.h"
 #include "Dlsbank.h"
-#include "mpdlgs.h"
-#include "moptions.h"
-#include "moddoc.h"
-#include "mpdlgs.h"
+#include "Moddoc.h"
+#include "Mpdlgs.h"
 #include "../common/StringFixer.h"
 #include "../sounddev/SoundDevice.h"
 #include "../sounddev/SoundDeviceManager.h"

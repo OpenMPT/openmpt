@@ -106,9 +106,6 @@
     <ClCompile Include="SampleEditorDialogs.cpp">
       <Filter>Source Files\mptrack\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="Moptions.cpp">
-      <Filter>Source Files\mptrack\Dialogs</Filter>
-    </ClCompile>
     <ClCompile Include="ScaleEnvPointsDlg.cpp">
       <Filter>Source Files\mptrack\Dialogs</Filter>
     </ClCompile>
@@ -553,6 +550,21 @@
     <ClCompile Include="..\sounddev\SoundDeviceBase.cpp">
       <Filter>Source Files\sounddev</Filter>
     </ClCompile>
+    <ClCompile Include="PathConfigDlg.cpp">
+      <Filter>Source Files\mptrack\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="ColorConfigDlg.cpp">
+      <Filter>Source Files\mptrack\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneralConfigDlg.cpp">
+      <Filter>Source Files\mptrack\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="SampleConfigDlg.cpp">
+      <Filter>Source Files\mptrack\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="AdvancedConfigDlg.cpp">
+      <Filter>Source Files\mptrack\Dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -583,9 +595,6 @@
       <Filter>Header Files\mptrack\Dialogs</Filter>
     </ClInclude>
     <ClInclude Include="PatternEditorDialogs.h">
-      <Filter>Header Files\mptrack\Dialogs</Filter>
-    </ClInclude>
-    <ClInclude Include="Moptions.h">
       <Filter>Header Files\mptrack\Dialogs</Filter>
     </ClInclude>
     <ClInclude Include="ScaleEnvPointsDlg.h">
@@ -1085,6 +1094,21 @@
     </ClInclude>
     <ClInclude Include="..\sounddev\SoundDeviceBase.h">
       <Filter>Header Files\sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="PathConfigDlg.h">
+      <Filter>Header Files\mptrack\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorConfigDlg.h">
+      <Filter>Header Files\mptrack\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneralConfigDlg.h">
+      <Filter>Header Files\mptrack\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="SampleConfigDlg.h">
+      <Filter>Header Files\mptrack\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="AdvancedConfigDlg.h">
+      <Filter>Header Files\mptrack\Dialogs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
