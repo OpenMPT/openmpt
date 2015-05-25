@@ -24,15 +24,10 @@ typedef CTuningBase CTuning;
 class CTuningRTI : public CTuning //RTI <-> Ratio Table Implementation
 //================================
 {
-public: 
-//BEGIN TYPEDEFS:
-	typedef RATIOTYPE (BARFUNC)(const NOTEINDEXTYPE&, const STEPINDEXTYPE&);
-	//BARFUNC <-> Beyond Array Range FUNCtion.
-//END TYPEDEFS
 
 public:
 //BEGIN STATIC CONST MEMBERS:
-	static RATIOTYPE DefaultBARFUNC(const NOTEINDEXTYPE&, const STEPINDEXTYPE&);
+	static const RATIOTYPE s_DefaultFallbackRatio;
 	static const NOTEINDEXTYPE s_StepMinDefault = -64;
 	static const UNOTEINDEXTYPE s_RatioTableSizeDefault = 128;
 	static const USTEPINDEXTYPE s_RatioTableFineSizeMaxDefault = 1000;
@@ -168,11 +163,6 @@ private:
 	//m_GroupSize should always be >= 0.
 	NOTEINDEXTYPE m_GroupSize;
 	RATIOTYPE m_GroupRatio;
-
-
-	BARFUNC* BelowRatios;
-	BARFUNC* AboveRatios;
-	//Defines the ratio to return if the ratio table runs out.
 	
 	//<----Actual data members
 
