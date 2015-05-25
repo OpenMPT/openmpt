@@ -849,8 +849,6 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	// Set up default file locations
 	m_szConfigFileName = m_szConfigDirectory + MPT_PATHSTRING("mptrack.ini"); // config file
 	m_szPluginCacheFileName = m_szConfigDirectory + MPT_PATHSTRING("plugin.cache"); // plugin cache
-	TrackerDirectories::Instance().SetDefaultDirectory(m_szConfigDirectory + MPT_PATHSTRING("tunings\\"), DIR_TUNING);
-	TrackerDirectories::Instance().SetDefaultDirectory(m_szConfigDirectory + MPT_PATHSTRING("TemplateModules\\"), DIR_TEMPLATE_FILES_USER);
 
 	// Force use of custom ini file rather than windowsDir\executableName.ini
 	if(m_pszProfileName)
@@ -865,10 +863,6 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	if(!m_szConfigDirectory.IsDirectory())
 	{
 		CreateDirectoryW(m_szConfigDirectory.AsNative().c_str(), 0);
-	}
-	if(!TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING).IsDirectory())
-	{
-		CreateDirectoryW(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING).AsNative().c_str(), 0);
 	}
 
 
@@ -940,8 +934,6 @@ BOOL CTrackApp::InitInstance()
 		InitProcSupport();
 #endif
 
-	m_pTrackerDirectories = new TrackerDirectories();
-
 	// Set up paths to store configuration in
 	SetupPaths(cmdInfo.m_bPortable);
 
@@ -950,7 +942,14 @@ BOOL CTrackApp::InitInstance()
 
 	m_pSettingsIniFile = new IniFileSettingsBackend(m_szConfigFileName);
 	m_pSettings = new SettingsContainer(m_pSettingsIniFile);
+	m_pTrackerDirectories = new TrackerDirectories();
 	m_pTrackerSettings = new TrackerSettings(*m_pSettings);
+
+	// Create missing diretories
+	if(!TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING).IsDirectory())
+	{
+		CreateDirectoryW(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING).AsNative().c_str(), 0);
+	}
 
 	m_pSongSettingsIniFile = new IniFileSettingsBackend(m_szConfigDirectory + MPT_PATHSTRING("SongSettings.ini"));
 	m_pSongSettings = new SettingsContainer(m_pSongSettingsIniFile);
@@ -1152,6 +1151,8 @@ int CTrackApp::ExitInstance()
 	m_pComponentManagerSettings = nullptr;
 	delete m_pTrackerSettings;
 	m_pTrackerSettings = nullptr;
+	delete m_pTrackerDirectories;
+	m_pTrackerDirectories = nullptr;
 	delete m_pSettings;
 	m_pSettings = nullptr;
 	delete m_pSettingsIniFile;
@@ -1160,8 +1161,6 @@ int CTrackApp::ExitInstance()
 	m_pSongSettings = nullptr;
 	delete m_pSongSettingsIniFile;
 	m_pSongSettingsIniFile = nullptr;
-	delete m_pTrackerDirectories;
-	m_pTrackerDirectories = nullptr;
 
 	return CWinApp::ExitInstance();
 }
