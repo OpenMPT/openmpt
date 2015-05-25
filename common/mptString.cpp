@@ -1602,6 +1602,54 @@ Tstring PrintImplTemplate(const Tstring & format
 	return result;
 }
 
+#if defined(_MFC_VER)
+template<>
+CString PrintImplTemplate<CString>(const CString & format
+	, const CString & x1
+	, const CString & x2
+	, const CString & x3
+	, const CString & x4
+	, const CString & x5
+	, const CString & x6
+	, const CString & x7
+	, const CString & x8
+	)
+{
+	CString result;
+	const std::size_t len = format.GetLength();
+	for(std::size_t pos = 0; pos != len; ++pos)
+	{
+		CString::XCHAR c = format[pos];
+		if(pos + 1 != len && c == _T('%'))
+		{
+			pos++;
+			c = format[pos];
+			if(_T('1') <= c && c <= _T('9'))
+			{
+				const std::size_t n = c - _T('0');
+				switch(n)
+				{
+					case 1: result += x1; break;
+					case 2: result += x2; break;
+					case 3: result += x3; break;
+					case 4: result += x4; break;
+					case 5: result += x5; break;
+					case 6: result += x6; break;
+					case 7: result += x7; break;
+					case 8: result += x8; break;
+				}
+				continue;
+			} else if(c != _T('%'))
+			{
+				result += CString(_T('%'));
+			}
+		}
+		result += CString(c);
+	}
+	return result;
+}
+#endif
+
 std::string PrintImpl(const std::string & format
 	, const std::string & x1
 	, const std::string & x2
@@ -1645,6 +1693,22 @@ mpt::ustring PrintImpl(const mpt::ustring & format
 	)
 {
 	return PrintImplTemplate<mpt::ustring>(format, x1,x2,x3,x4,x5,x6,x7,x8);
+}
+#endif
+
+#if defined(_MFC_VER)
+CString PrintImpl(const CString & format
+	, const CString & x1
+	, const CString & x2
+	, const CString & x3
+	, const CString & x4
+	, const CString & x5
+	, const CString & x6
+	, const CString & x7
+	, const CString & x8
+	)
+{
+	return PrintImplTemplate<CString>(format, x1,x2,x3,x4,x5,x6,x7,x8);
 }
 #endif
 
