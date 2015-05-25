@@ -221,7 +221,7 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
   if(x) \
   _Pragma("GCC diagnostic pop") \
 /**/
-#else
+#elif MPT_GCC_AT_LEAST(4,5,0)
 #define MPT_MAYBE_CONSTANT_IF(x) \
   _Pragma("GCC diagnostic ignored \"-Wtype-limits\"") \
   if(x) \
