@@ -58,18 +58,20 @@ const CModSpecifications mptm =
 	200,										// Max MIDI mapping directives
 	1,											// Min Speed
 	255,										// Max Speed
-	true,										// Has song comments
 	MAX_ENVPOINTS,								// Envelope point count
 	true,										// Has envelope release node
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#?????",	// Supported Effects
-	" vpcdabuhlrgfe?o",							// Supported Volume Column commands
+	true,										// Has song comments
 	true,										// Has "+++" pattern
 	true,										// Has "---" pattern
 	true,										// Has restart position (order)
 	true,										// Supports plugins
 	true,										// Custom pattern time signatures
 	true,										// Pattern names
+	true,										// Has artist name
+	true,										// Has default resampling
 	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#?????",	// Supported Effects
+	" vpcdabuhlrgfe?o",							// Supported Volume Column commands
 };
 
 
@@ -104,18 +106,20 @@ const CModSpecifications mod =
 	0,											// Max MIDI mapping directives
 	1,											// Min Speed
 	32,											// Max Speed
-	false,										// No song comments
 	0,											// No instrument envelopes
 	false,										// No envelope release node
-	" 0123456789ABCD?FF?E????????????????????",	// Supported Effects
-	" ???????????????",							// Supported Volume Column commands
+	false,										// No song comments
 	false,										// Doesn't have "+++" pattern
 	false,										// Doesn't have "---" pattern
 	true,										// Has restart position (order)
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
 	false,										// No pattern names
+	false,										// Doesn't have artist name
+	false,										// Doesn't have default resampling
 	SongFlag(0) | SONG_PT1XMODE | SONG_AMIGALIMITS | SONG_VBLANK_TIMING,	// Supported song flags
+	" 0123456789ABCD?FF?E????????????????????",	// Supported Effects
+	" ???????????????",							// Supported Volume Column commands
 };
 
 
@@ -148,18 +152,20 @@ const CModSpecifications xm =
 	0,											// Max MIDI mapping directives
 	1,											// Min Speed
 	31,											// Max Speed
-	false,										// No song comments
 	12,											// Envelope point count
 	false,										// No envelope release node
-	" 0123456789ABCDRFFTE???GHK??XPL?????????",	// Supported Effects
-	" vpcdabuhlrg????",							// Supported Volume Column commands
+	false,										// No song comments
 	false,										// Doesn't have "+++" pattern
 	false,										// Doesn't have "---" pattern
 	true,										// Has restart position (order)
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
 	false,										// No pattern names
+	false,										// Doesn't have artist name
+	false,										// Doesn't have default resampling
 	SongFlag(0) | SONG_LINEARSLIDES,			// Supported song flags
+	" 0123456789ABCDRFFTE???GHK??XPL?????????",	// Supported Effects
+	" vpcdabuhlrg????",							// Supported Volume Column commands
 };
 
 // XM with MPT extensions
@@ -192,18 +198,20 @@ const CModSpecifications xmEx =
 	200,										// Max MIDI mapping directives
 	1,											// Min Speed
 	31,											// Max Speed
-	true,										// Has song comments
 	12,											// Envelope point count
 	false,										// No envelope release node
-	" 0123456789ABCDRFFTE???GHK?YXPLZ\\?#?????",	// Supported Effects
-	" vpcdabuhlrgfe??",							// Supported Volume Column commands
+	true,										// Has song comments
 	false,										// Doesn't have "+++" pattern
 	false,										// Doesn't have "---" pattern
 	true,										// Has restart position (order)
 	true,										// Supports plugins
 	false,										// No custom pattern time signatures
 	true,										// Pattern names
+	true,										// Has artist name
+	false,										// Doesn't have default resampling
 	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_EMBEDMIDICFG,	// Supported song flags
+	" 0123456789ABCDRFFTE???GHK?YXPLZ\\?#?????",	// Supported Effects
+	" vpcdabuhlrgfe??",							// Supported Volume Column commands
 };
 
 const CModSpecifications s3m =
@@ -235,18 +243,20 @@ const CModSpecifications s3m =
 	0,											// Max MIDI mapping directives
 	1,											// Min Speed
 	255,										// Max Speed
-	false,										// No song comments
 	0,											// No instrument envelopes
 	false,										// No envelope release node
-	" JFEGHLKRXODB?CQATI?SMNVW?U?????????????",	// Supported Effects
-	" vp?????????????",							// Supported Volume Column commands
+	false,										// No song comments
 	true,										// Has "+++" pattern
 	true,										// Has "---" pattern
 	false,										// Doesn't have restart position (order)
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
 	false,										// No pattern names
+	false,										// Doesn't have artist name
+	false,										// Doesn't have default resampling
 	SongFlag(0) | SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,	// Supported song flags
+	" JFEGHLKRXODB?CQATI?SMNVW?U?????????????",	// Supported Effects
+	" vp?????????????",							// Supported Volume Column commands
 };
 
 // S3M with MPT extensions
@@ -279,18 +289,20 @@ const CModSpecifications s3mEx =
 	0,											// Max MIDI mapping directives
 	1,											// Min Speed
 	255,										// Max Speed
-	false,										// No song comments
 	0,											// No instrument envelopes
 	false,										// No envelope release node
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z????????",	// Supported Effects
-	" vp?????????????",							// Supported Volume Column commands
+	false,										// No song comments
 	true,										// Has "+++" pattern
 	true,										// Has "---" pattern
 	false,										// Doesn't have restart position (order)
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
 	false,										// No pattern names
+	false,										// Doesn't have artist name
+	false,										// Doesn't have default resampling
 	SongFlag(0) | SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,	// Supported song flags
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z????????",	// Supported Effects
+	" vp?????????????",							// Supported Volume Column commands
 };
 
 const CModSpecifications it =
@@ -322,18 +334,20 @@ const CModSpecifications it =
 	0,											// Max MIDI mapping directives
 	1,											// Min Speed
 	255,										// Max Speed
-	true,										// Has song comments
 	25,											// Envelope point count
 	false,										// No envelope release node
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z????????",	// Supported Effects
-	" vpcdab?h??gfe??",							// Supported Volume Column commands
+	true,										// Has song comments
 	true,										// Has "+++" pattern
 	true,										// Has "--" pattern
 	false,										// Doesn't have restart position (order)
 	false,										// Doesn't support plugins
 	false,										// No custom pattern time signatures
 	false,										// No pattern names
+	false,										// Doesn't have artist name
+	false,										// Doesn't have default resampling
 	SongFlag(0) | SONG_LINEARSLIDES | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z????????",	// Supported Effects
+	" vpcdab?h??gfe??",							// Supported Volume Column commands
 };
 
 const CModSpecifications itEx =
@@ -365,18 +379,20 @@ const CModSpecifications itEx =
 	200,										// Max MIDI mapping directives
 	1,											// Min Speed
 	255,										// Max Speed
-	true,										// Has song comments
 	25,											// Envelope point count
 	false,										// No envelope release node
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\?#?????",	// Supported Effects
-	" vpcdab?h??gfe??",							// Supported Volume Column commands
+	true,										// Has song comments
 	true,										// Has "+++" pattern
 	true,										// Has "---" pattern
 	false,										// Doesn't have restart position (order)
 	true,										// Supports plugins
 	false,										// No custom pattern time signatures
 	true,										// Pattern names
+	true,										// Has artist name
+	false,										// Doesn't have default resampling
 	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\?#?????",	// Supported Effects
+	" vpcdab?h??gfe??",							// Supported Volume Column commands
 };
 
 const CModSpecifications *Collection[] = { &mptm, &mod, &s3m, &s3mEx, &xm, &xmEx, &it, &itEx };

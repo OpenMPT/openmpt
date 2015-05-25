@@ -469,7 +469,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		}
 	}
 
-	if((m_SndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT)) && !m_SndFile.songArtist.empty())
+	if(!originalSpecs->hasArtistName && !m_SndFile.songArtist.empty())
 	{
 		AddToLog("Found artist name");
 		foundHacks = true;

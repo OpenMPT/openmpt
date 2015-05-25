@@ -2080,7 +2080,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		WRITEMODULAR(MAGIC4BE('R','P','.','.'), m_nRestartPos);
 	}
 
-	if(m_nResampling != SRCMODE_DEFAULT && GetType() == MOD_TYPE_MPT)
+	if(m_nResampling != SRCMODE_DEFAULT && GetModSpecifications().hasDefaultResampling)
 	{
 		WRITEMODULAR(MAGIC4LE('R','S','M','P'), static_cast<uint32>(m_nResampling));
 	}
