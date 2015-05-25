@@ -644,6 +644,7 @@ void CSoundFile::InitializeGlobals()
 	m_SongFlags.reset();
 	m_nMinPeriod = 16;
 	m_nMaxPeriod = 32767;
+	m_nResampling = SRCMODE_DEFAULT;
 	m_dwLastSavedWithVersion = m_dwCreatedWithVersion = 0;
 
 	SetMixLevels(mixLevels_compatible);

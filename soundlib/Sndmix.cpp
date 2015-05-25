@@ -2119,6 +2119,9 @@ bool CSoundFile::ReadNote()
 			{
 				// for defined resampling modes, use per-instrument resampling mode if set
 				pChn->resamplingMode = static_cast<uint8>(pChn->pModInstrument->nResampling);
+			} else if(IsKnownResamplingMode(m_nResampling))
+			{
+				pChn->resamplingMode = static_cast<uint8>(m_nResampling);
 			} else
 			{
 				// default to global mixer settings
