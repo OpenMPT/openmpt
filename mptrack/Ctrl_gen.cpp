@@ -403,11 +403,8 @@ void CCtrlGeneral::OnArtistChanged()
 {
 	if (!m_EditArtist.m_hWnd || !m_EditArtist.GetModify()) return;
 
-	CStringW artist;
-	int len = ::GetWindowTextLengthW(m_EditArtist.m_hWnd);
-	::GetWindowTextW(m_EditArtist.m_hWnd, artist.GetBufferSetLength(len), len + 1);
-	artist.ReleaseBuffer();
-	if(artist != m_sndFile.songArtist.c_str())
+	std::wstring artist = GetWindowTextW(m_EditArtist);
+	if(artist != m_sndFile.songArtist)
 	{
 		m_EditArtist.SetModify(FALSE);
 		m_sndFile.songArtist = artist;

@@ -14,7 +14,6 @@
 #include "InputHandler.h"
 #include "Dlsbank.h"
 #include "../soundlib/MIDIEvents.h"
-#include "Moptions.h"	// for OPTIONS_PAGE_MIDI
 
 
 OPENMPT_NAMESPACE_BEGIN

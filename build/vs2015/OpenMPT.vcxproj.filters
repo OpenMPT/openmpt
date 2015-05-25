@@ -116,6 +116,9 @@
     <ClInclude Include="..\..\mptrack\AbstractVstEditor.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\AdvancedConfigDlg.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\AutoSaver.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -141,6 +144,9 @@
       <Filter>mptrack</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\CloseMainDialog.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\ColorConfigDlg.h">
       <Filter>mptrack</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\ColourEdit.h">
@@ -191,6 +197,9 @@
     <ClInclude Include="..\..\mptrack\FolderScanner.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\GeneralConfigDlg.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\Globals.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -224,9 +233,6 @@
     <ClInclude Include="..\..\mptrack\Moddoc.h">
       <Filter>mptrack</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\mptrack\Moptions.h">
-      <Filter>mptrack</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\mptrack\MoveFXSlotDialog.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -245,6 +251,9 @@
     <ClInclude Include="..\..\mptrack\PSRatioCalc.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\PathConfigDlg.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\PatternClipboard.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -261,6 +270,9 @@
       <Filter>mptrack</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\Reporting.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\SampleConfigDlg.h">
       <Filter>mptrack</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\SampleEditorDialogs.h">
@@ -616,6 +628,9 @@
     <ClCompile Include="..\..\mptrack\AbstractVstEditor.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\mptrack\AdvancedConfigDlg.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\mptrack\AppendModule.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
@@ -638,6 +653,9 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\CloseMainDialog.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\ColorConfigDlg.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\ColourEdit.cpp">
@@ -691,6 +709,9 @@
     <ClCompile Include="..\..\mptrack\FolderScanner.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\mptrack\GeneralConfigDlg.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\mptrack\Globals.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
@@ -736,9 +757,6 @@
     <ClCompile Include="..\..\mptrack\Modedit.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\mptrack\Moptions.cpp">
-      <Filter>mptrack</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\mptrack\MoveFXSlotDialog.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
@@ -757,6 +775,9 @@
     <ClCompile Include="..\..\mptrack\PSRatioCalc.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\mptrack\PathConfigDlg.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\mptrack\PatternClipboard.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
@@ -770,6 +791,9 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Reporting.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\SampleConfigDlg.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\SampleEditorDialogs.cpp">

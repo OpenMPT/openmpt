@@ -187,6 +187,14 @@ enum RecordAftertouchOptions
 	atRecordAsMacro,
 };
 
+// New file action
+enum NewFileAction
+{
+	nfDefaultFormat = 0,
+	nfSameAsCurrent,
+	nfDefaultTemplate
+};
+
 // Sample editor preview behaviour
 enum SampleEditorKeyBehaviour
 {
@@ -269,6 +277,9 @@ template<> inline SoundDevice::ChannelMapping FromSettingValue(const SettingValu
 
 template<> inline SettingValue ToSettingValue(const ResamplingMode &val) { return SettingValue(int32(val)); }
 template<> inline ResamplingMode FromSettingValue(const SettingValue &val) { return ResamplingMode(val.as<int32>()); }
+
+template<> inline SettingValue ToSettingValue(const NewFileAction &val) { return SettingValue(int32(val)); }
+template<> inline NewFileAction FromSettingValue(const SettingValue &val) { return NewFileAction(val.as<int32>()); }
 
 template<> inline SettingValue ToSettingValue(const std::bitset<128> &val)
 {
@@ -426,6 +437,7 @@ public:
 	Setting<bool> ShowSettingsOnNewVersion;
 	Setting<bool> gbShowHackControls;
 	Setting<MODTYPE> defaultModType;
+	Setting<NewFileAction> defaultNewFileAction;
 	Setting<PLUGVOLUMEHANDLING> DefaultPlugVolumeHandling;
 	Setting<bool> autoApplySmoothFT2Ramping;
 	Setting<uint32> MiscITCompressionStereo; // Mask: bit0: IT, bit1: Compat IT, bit2: MPTM

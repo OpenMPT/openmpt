@@ -16,7 +16,6 @@
 #include "TrackerSettings.h"
 // Setup dialog stuff
 #include "Mainfrm.h"
-#include "Moptions.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

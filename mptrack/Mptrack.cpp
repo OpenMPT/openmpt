@@ -1178,7 +1178,7 @@ void CTrackApp::OnFileNew()
 
 	// Build from template
 	const mpt::PathString templateFile = TrackerSettings::Instance().defaultTemplateFile;
-	if(!templateFile.empty())
+	if(TrackerSettings::Instance().defaultNewFileAction == nfDefaultTemplate && !templateFile.empty())
 	{
 		const mpt::PathString dirs[] = { GetConfigPath() + MPT_PATHSTRING("TemplateModules\\"), GetAppDirPath() + MPT_PATHSTRING("TemplateModules\\"), mpt::PathString() };
 		for(size_t i = 0; i < CountOf(dirs); i++)
@@ -1199,7 +1199,7 @@ void CTrackApp::OnFileNew()
 
 	// Get active document to make the new module of the same type
 	CModDoc *pModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
-	if(pModDoc != nullptr)
+	if(pModDoc != nullptr && TrackerSettings::Instance().defaultNewFileAction == nfSameAsCurrent)
 	{
 		newType = pModDoc->GetrSoundFile().GetBestSaveFormat();
 	}
@@ -1608,6 +1608,20 @@ void ErrorBox(UINT nStringID, CWnd *parent)
 //-----------------------------------------
 {
 	MsgBox(nStringID, parent, "Error!", MB_OK | MB_ICONERROR);
+}
+
+
+std::wstring GetWindowTextW(CWnd &wnd)
+//------------------------------------
+{
+	HWND hwnd = wnd.m_hWnd;
+	int len = ::GetWindowTextLengthW(hwnd);
+	std::wstring str(len, L' ');
+	if(len)
+	{
+		::GetWindowTextW(hwnd, &str[0], len + 1);
+	}
+	return str;
 }
 
 

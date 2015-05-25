@@ -64,38 +64,4 @@ private:
 };
 
 
-// CAutoSaverGUI dialog
-
-class CAutoSaverGUI : public CPropertyPage
-{
-	DECLARE_DYNAMIC(CAutoSaverGUI)
-
-public:
-	CAutoSaverGUI(CAutoSaver* pAutoSaver);
-
-// Dialog Data
-	enum { IDD = IDD_OPTIONS_AUTOSAVE };
-
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
-	DECLARE_MESSAGE_MAP()
-public:
-	virtual void OnOK();
-	virtual BOOL OnKillActive();
-
-private:
-	CAutoSaver *m_pAutoSaver;
-
-public:
-	afx_msg void OnBnClickedAutosaveBrowse();
-	virtual BOOL OnInitDialog();
-	afx_msg void OnBnClickedAutosaveEnable();
-	afx_msg void OnBnClickedAutosaveUseorigdir();
-	void OnSettingsChanged();
-	BOOL OnSetActive();
-	
-};
-
-
 OPENMPT_NAMESPACE_END

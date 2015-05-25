@@ -9,13 +9,12 @@
 
 
 #pragma once
-#include "mptrack.h"
 #include "MainFrm.h"
 #include "InputHandler.h"
-#include "mpdlgs.h"
-#include "moptions.h"
 
 OPENMPT_NAMESPACE_BEGIN
+
+class COptionsKeyboard;
 
 // Might promote to class so we can add rules
 // (eg automatically do note off stuff, generate chord keybindings from notes based just on modifier.

@@ -14,13 +14,17 @@
 #include "../sounddev/SoundDevice.h"
 #include "../sounddev/SoundDeviceManager.h"
 #include "../soundlib/AudioReadTarget.h"
-#include "moddoc.h"
-#include "childfrm.h"
+#include "Moddoc.h"
+#include "Childfrm.h"
 #include "Dlsbank.h"
-#include "mpdlgs.h"
-#include "moptions.h"
-#include "vstplug.h"
+#include "Mpdlgs.h"
+#include "Vstplug.h"
 #include "KeyConfigDlg.h"
+#include "PathConfigDlg.h"
+#include "GeneralConfigDlg.h"
+#include "ColorConfigDlg.h"
+#include "SampleConfigDlg.h"
+#include "AdvancedConfigDlg.h"
 #include "AutoSaver.h"
 #include "MainFrm.h"
 #include "InputHandler.h"
@@ -1799,7 +1803,7 @@ void CMainFrame::UpdateAllViews(UpdateHint hint, CObject *pHint)
 }
 
 
-VOID CMainFrame::SetUserText(LPCSTR lpszText)
+void CMainFrame::SetUserText(LPCSTR lpszText)
 //-------------------------------------------
 {
 	if (lpszText[0] | m_szUserText[0])
@@ -1810,7 +1814,7 @@ VOID CMainFrame::SetUserText(LPCSTR lpszText)
 }
 
 
-VOID CMainFrame::SetInfoText(LPCSTR lpszText)
+void CMainFrame::SetInfoText(LPCSTR lpszText)
 //-------------------------------------------
 {
 	if (lpszText[0] | m_szInfoText[0])
@@ -1821,7 +1825,7 @@ VOID CMainFrame::SetInfoText(LPCSTR lpszText)
 }
 
 
-VOID CMainFrame::SetXInfoText(LPCSTR lpszText)
+void CMainFrame::SetXInfoText(LPCSTR lpszText)
 //-------------------------------------------
 {
 	if (lpszText[0] | m_szXInfoText[0])
@@ -1832,14 +1836,14 @@ VOID CMainFrame::SetXInfoText(LPCSTR lpszText)
 }
 
 
-VOID CMainFrame::SetHelpText(LPCSTR lpszText)
+void CMainFrame::SetHelpText(LPCSTR lpszText)
 //-------------------------------------------
 {
 	m_wndStatusBar.SetPaneText(0, lpszText);
 }
 
 
-VOID CMainFrame::OnDocumentCreated(CModDoc *pModDoc)
+void CMainFrame::OnDocumentCreated(CModDoc *pModDoc)
 //--------------------------------------------------
 {
 	m_wndTree.OnDocumentCreated(pModDoc);
@@ -1847,7 +1851,7 @@ VOID CMainFrame::OnDocumentCreated(CModDoc *pModDoc)
 }
 
 
-VOID CMainFrame::OnDocumentClosed(CModDoc *pModDoc)
+void CMainFrame::OnDocumentClosed(CModDoc *pModDoc)
 //-------------------------------------------------
 {
 	if (pModDoc == GetModPlaying()) PauseMod();
@@ -1859,7 +1863,7 @@ VOID CMainFrame::OnDocumentClosed(CModDoc *pModDoc)
 }
 
 
-VOID CMainFrame::UpdateTree(CModDoc *pModDoc, UpdateHint hint, CObject *pHint)
+void CMainFrame::UpdateTree(CModDoc *pModDoc, UpdateHint hint, CObject *pHint)
 //----------------------------------------------------------------------------
 {
 	m_wndTree.OnUpdate(pModDoc, hint, pHint);
@@ -1884,7 +1888,7 @@ void CMainFrame::OnViewOptions()
 	COptionsColors colors;
 	COptionsMixer mixerdlg;
 	CMidiSetupDlg mididlg(TrackerSettings::Instance().m_dwMidiSetup, TrackerSettings::Instance().m_nMidiDevice);
-	CAutoSaverGUI autosavedlg(m_pAutoSaver);
+	PathConfigDlg pathsdlg(*m_pAutoSaver);
 	CUpdateSetupDlg updatedlg;
 #if defined(MPT_SETTINGS_CACHE)
 	COptionsAdvanced advanced;
@@ -1900,7 +1904,7 @@ void CMainFrame::OnViewOptions()
 	dlg.AddPage(&keyboard);
 	dlg.AddPage(&colors);
 	dlg.AddPage(&mididlg);
-	dlg.AddPage(&autosavedlg);
+	dlg.AddPage(&pathsdlg);
 	dlg.AddPage(&updatedlg);
 #if defined(MPT_SETTINGS_CACHE)
 	dlg.AddPage(&advanced);
@@ -2064,7 +2068,7 @@ void CMainFrame::OnTimerGUI()
 		bool success = m_pAutoSaver->DoSave(curTime);
 		if (!success)		// autosave failure; bring up options.
 		{
-			CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_AUTOSAVE;
+			CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_PATHS;
 			OnViewOptions();
 		}
 	}
@@ -2642,7 +2646,7 @@ void CMainFrame::OnHelp()
 			case OPTIONS_PAGE_KEYBOARD:		page = "::/Setup_Keyboard.html"; break;
 			case OPTIONS_PAGE_COLORS:		page = "::/Setup_Display.html"; break;
 			case OPTIONS_PAGE_MIDI:			page = "::/Setup_MIDI.html"; break;
-			case OPTIONS_PAGE_AUTOSAVE:		page = "::/Setup_Autosave.html"; break;
+			case OPTIONS_PAGE_PATHS:		page = "::/Setup_Autosave.html"; break;
 			case OPTIONS_PAGE_UPDATE:		page = "::/Setup_Update.html"; break;
 			case OPTIONS_PAGE_ADVANCED:		page = "::/Setup_Advanced.html"; break;
 		}
