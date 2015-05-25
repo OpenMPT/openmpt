@@ -226,6 +226,11 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
   _Pragma("GCC diagnostic ignored \"-Wtype-limits\"") \
   if(x) \
 /**/
+#elif MPT_GCC_AT_LEAST(4,4,0)
+// GCC 4.4 does not like _Pragma inside functions.
+// As GCC 4.4 is one of our major compilers, we do not want a noisy build.
+// Thus, just disable this warning globally.
+#pragma GCC diagnostic ignored "-Wtype-limits"
 #endif
 #endif
 
