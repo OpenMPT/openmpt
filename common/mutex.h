@@ -10,10 +10,14 @@
 #pragma once
 
 #ifdef MODPLUG_TRACKER
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
 #define NOMINMAX
 #include <windows.h>
+#else
+#include <pthread.h>
+#endif
 #endif // MODPLUG_TRACKER
 
 OPENMPT_NAMESPACE_BEGIN
@@ -21,6 +25,8 @@ OPENMPT_NAMESPACE_BEGIN
 #ifdef MODPLUG_TRACKER
 
 namespace Util {
+
+#ifdef _WIN32
 
 // compatible with c++11 std::mutex, can eventually be replaced without touching any usage site
 class mutex {
@@ -43,6 +49,44 @@ public:
 	void lock() { EnterCriticalSection(&impl); }
 	void unlock() { LeaveCriticalSection(&impl); }
 };
+
+#else // !_WIN32
+
+class mutex {
+private:
+	pthread_mutex_t hLock;
+public:
+	mutex()
+	{
+		pthread_mutexattr_t attr;
+		pthread_mutexattr_init(&attr);
+		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_NORMAL);
+		pthread_mutex_init(&hLock, &attr);
+		pthread_mutexattr_destroy(&attr);
+	}
+	~mutex() { pthread_mutex_destroy(&hLock); }
+	void lock() { pthread_mutex_lock(&hLock); }
+	void unlock() { pthread_mutex_unlock(&hLock); }
+};
+
+class recursive_mutex {
+private:
+	pthread_mutex_t hLock;
+public:
+	recursive_mutex()
+	{
+		pthread_mutexattr_t attr;
+		pthread_mutexattr_init(&attr);
+		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+		pthread_mutex_init(&hLock, &attr);
+		pthread_mutexattr_destroy(&attr);
+	}
+	~recursive_mutex() { pthread_mutex_destroy(&hLock); }
+	void lock() { pthread_mutex_lock(&hLock); }
+	void unlock() { pthread_mutex_unlock(&hLock); }
+};
+
+#endif // _WIN32
 
 // compatible with c++11 std::lock_guard, can eventually be replaced without touching any usage site
 template< typename mutex_type >
