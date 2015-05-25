@@ -1377,6 +1377,8 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerMeasure, 12);
 	VERIFY_EQUAL_NONCONT(sndFile.m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
 	VERIFY_EQUAL_NONCONT(sndFile.m_nRestartPos, 1);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nResampling, SRCMODE_POLYPHASE);
+	VERIFY_EQUAL_NONCONT(sndFile.songArtist, MPT_USTRING("Tester"));
 
 	// Edit history
 	VERIFY_EQUAL_NONCONT(sndFile.GetFileHistory().size() > 0, true);
