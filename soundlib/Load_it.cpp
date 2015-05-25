@@ -2014,7 +2014,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 #define WRITEMODULARHEADER(code, fsize) \
 	{ \
 		mpt::IO::WriteIntLE<uint32>(f, code); \
-		MPT_ASSERT(fsize <= uint16_max); \
+		MPT_ASSERT(static_cast<size_t>(fsize) <= uint16_max); \
 		const uint16 _size = fsize; \
 		mpt::IO::WriteIntLE<uint16>(f, _size); \
 	}
