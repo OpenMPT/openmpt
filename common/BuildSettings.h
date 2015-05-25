@@ -328,6 +328,14 @@
 #define NO_MINIZ
 #endif
 
+#if !MPT_OS_WINDOWS && !defined(NO_ASIO)
+#define NO_ASIO // ASIO requires Windows
+#endif
+
+#if !MPT_OS_WINDOWS && !defined(NO_DSOUND)
+#define NO_DSOUND // DirectSound requires Windows
+#endif
+
 #if !defined(MPT_CHARSET_WIN32) && !defined(MPT_CHARSET_ICONV) && !defined(MPT_CHARSET_CODECVTUTF8) && !defined(MPT_CHARSET_INTERNAL)
 #define MPT_CHARSET_INTERNAL
 #endif
@@ -342,6 +350,10 @@
 
 #if defined(ENABLE_TESTS) && !defined(MPT_WITH_PATHSTRING)
 #define MPT_WITH_FILEIO // Test suite requires PathString for file loading.
+#endif
+
+#if !MPT_OS_WINDOWS && !defined(MPT_FILEREADER_STD_ISTREAM)
+#define MPT_FILEREADER_STD_ISTREAM // MMAP is only supported on Windows
 #endif
 
 #if defined(MODPLUG_TRACKER) && !defined(MPT_WITH_FILEIO)
