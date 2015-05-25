@@ -330,7 +330,7 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 	if(IsDebuggerPresent())
 	{
 		OutputDebugString(_T("ASSERT("));
-		OutputDebugString(mpt::ToWinAPI(mpt::CharsetASCII, expr).c_str());
+		OutputDebugString(mpt::ToCString(mpt::CharsetASCII, expr));
 		OutputDebugString(_T(") failed\n"));
 		DebugBreak();
 	} else
