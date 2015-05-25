@@ -434,7 +434,7 @@ public:
 	// Periods in MPT are 4 times as fine as Amiga periods because of extra fine frequency slides (introduced in the S3M format).
 	int32 m_nMinPeriod, m_nMaxPeriod;
 
-	uint32 m_nResampling;	// Resampling mode (if overriding the globally set resampling)
+	ResamplingMode m_nResampling;	// Resampling mode (if overriding the globally set resampling)
 	int32 m_nRepeatCount;	// -1 means repeat infinitely.
 	ORDERINDEX m_nMaxOrderPosition;
 	ModChannelSettings ChnSettings[MAX_BASECHANNELS];	// Initial channels settings
@@ -719,8 +719,8 @@ public:
 	bool SaveMod(const mpt::PathString &filename) const;
 	bool SaveIT(const mpt::PathString &filename, bool compatibilityExport = false);
 	UINT SaveMixPlugins(FILE *f=NULL, bool bUpdate=true);
-	void WriteInstrumentPropertyForAllInstruments(uint32 code,  int16 size, FILE* f, UINT nInstruments) const;
-	void SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) const;
+	void WriteInstrumentPropertyForAllInstruments(uint32 code,  int16 size, FILE* f, INSTRUMENTINDEX nInstruments) const;
+	void SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, FILE* f) const;
 	void SaveExtendedSongProperties(FILE* f) const;
 	size_t SaveModularInstrumentData(FILE *f, const ModInstrument *pIns) const;
 #endif // MODPLUG_NO_FILESAVE

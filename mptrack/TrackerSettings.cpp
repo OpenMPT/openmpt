@@ -234,6 +234,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, ComponentsKeepLoaded(conf, "Components", "KeepLoaded", ComponentManagerSettingsDefault().KeepLoaded())
 	// Default template
 	, defaultTemplateFile(conf, "Paths", "DefaultTemplate", mpt::PathString())
+	, defaultArtist(conf, "Misc", "DefaultArtist", mpt::ToUnicode(mpt::CharsetLocale, std::getenv("USERNAME")))
 	// MRU List
 	, mruListLength(conf, "Misc", "MRUListLength", 10)
 	// Plugins
@@ -560,6 +561,11 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		commentsFont = FontSetting("Courier New", (m_dwPatternSetup & 0x02) ? 120 : 90);
 		patternFont = FontSetting((m_dwPatternSetup & 0x08) ? PATTERNFONT_SMALL : PATTERNFONT_LARGE, 0);
 		m_dwPatternSetup &= ~(0x08 | 0x02);
+	}
+
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,25,00,08))
+	{
+		glGeneralWindowHeight += 36;
 	}
 
 	// Effects

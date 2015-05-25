@@ -62,12 +62,13 @@ private:
 public:
 	bool m_bEditsLocked;
 	//{{AFX_DATA(CCtrlGeneral)
-	CEdit m_EditTitle;
-	CStatic m_EditModType;
+	CEdit m_EditTitle, m_EditArtist;
 	CEdit m_EditTempo, m_EditSpeed, m_EditGlobalVol, m_EditRestartPos,
 		  m_EditSamplePA, m_EditVSTiVol;
+	CButton m_BtnModType;
 	CSpinButtonCtrl m_SpinTempo, m_SpinSpeed, m_SpinGlobalVol, m_SpinRestartPos, 
 				    m_SpinSamplePA, m_SpinVSTiVol;
+	CComboBox m_CbnResampling;
 
 	CSliderCtrl m_SliderTempo, m_SliderSamplePreAmp, m_SliderGlobalVol, m_SliderVSTiVol;
 	CVuMeter m_VuMeterLeft, m_VuMeterRight;
@@ -88,6 +89,7 @@ protected:
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
 	afx_msg void OnTapTempo();
 	afx_msg void OnTitleChanged();
+	afx_msg void OnArtistChanged();
 	afx_msg void OnTempoChanged();
 	afx_msg void OnSpeedChanged();
 	afx_msg void OnGlobalVolChanged();
@@ -95,9 +97,9 @@ protected:
 	afx_msg void OnSamplePAChanged();
 	afx_msg void OnRestartPosChanged();
 	afx_msg void OnSongProperties();
-	afx_msg void OnPlayerProperties();
 	afx_msg void OnLoopSongChanged();
 	afx_msg void OnEnSetfocusEditSongtitle();
+	afx_msg void OnResamplingChanged();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

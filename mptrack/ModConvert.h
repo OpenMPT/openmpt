@@ -40,6 +40,7 @@ enum enmWarnings
 	wPitchToTempoLock,
 	wGlobalVolumeNotSupported,
 	wFilterVariation,
+	wResamplingMode,
 	wNumWarnings
 };
 

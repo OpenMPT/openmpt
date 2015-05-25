@@ -571,6 +571,13 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			CHANGEMODTYPE_WARNING(wGlobalVolumeNotSupported);
 		}
 	}
+
+	// Resampling is only saved in MPTM
+	if(!newTypeIsMPT && m_SndFile.m_nResampling != SRCMODE_DEFAULT)
+	{
+		CHANGEMODTYPE_WARNING(wResamplingMode);
+		m_SndFile.m_nResampling = SRCMODE_DEFAULT;
+	}
 		
 	// Pattern warnings
 	CHAR s[64];
@@ -606,6 +613,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	CHANGEMODTYPE_CHECK(wVolRamp, "Fasttracker 2 compatible super soft volume ramping gets lost when converting XM files to another type.");
 	CHANGEMODTYPE_CHECK(wCompatibilityMode, "Consider enabling the \"compatible playback\" option in the song properties to increase compatiblity with other players.");
 	CHANGEMODTYPE_CHECK(wGlobalVolumeNotSupported, "Default global volume is not supported by the new format.");
+	CHANGEMODTYPE_CHECK(wResamplingMode, "Song-specific resampling mode is not supported by the new format.");
 
 	SetModified();
 	GetPatternUndo().ClearUndo();

@@ -1920,8 +1920,8 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 // The reason is that ITs and XMs save [code][size][ins1.Value][ins2.Value]...
 // whereas ITP saves [code][size][ins1.Value][code][size][ins2.Value]...
 // too late to turn back....
-void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) const
-//---------------------------------------------------------------------------------
+void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, FILE *f) const
+//--------------------------------------------------------------------------------------------
 {
 	uint32 code = MAGIC4BE('M','P','T','X');	// write extension header code
 	mpt::IO::WriteIntLE<uint32>(f, code);
@@ -1987,8 +1987,8 @@ void CSoundFile::SaveExtendedInstrumentProperties(UINT nInstruments, FILE* f) co
 	return;
 }
 
-void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, int16 size, FILE* f, UINT nInstruments) const
-//------------------------------------------------------------------------------------------------------------------
+void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, int16 size, FILE *f, INSTRUMENTINDEX nInstruments) const
+//-----------------------------------------------------------------------------------------------------------------------------
 {
 	mpt::IO::WriteIntLE<uint32>(f, code);		//write code
 	mpt::IO::WriteIntLE<int16>(f, size);		//write size
@@ -2080,9 +2080,9 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		WRITEMODULAR(MAGIC4BE('R','P','.','.'), m_nRestartPos);
 	}
 
-	if(m_nResampling != SRCMODE_DEFAULT)
+	if(m_nResampling != SRCMODE_DEFAULT && GetType() == MOD_TYPE_MPT)
 	{
-		WRITEMODULAR(MAGIC4LE('R','S','M','P'), m_nResampling);
+		WRITEMODULAR(MAGIC4LE('R','S','M','P'), static_cast<uint32>(m_nResampling));
 	}
 
 	// Sample cues
@@ -2106,7 +2106,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		}
 	}
 
-	//Additional flags for XM/IT/MPTM
+	// Additional flags for XM/IT/MPTM
 	if(m_ModFlags)
 	{
 		WRITEMODULAR(MAGIC4BE('M','S','F','.'), m_ModFlags.GetRaw());
@@ -2248,7 +2248,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 			case MAGIC4BE('R','P','.','.'): if(modtype != MOD_TYPE_XM) ReadField(chunk, size, m_nRestartPos); break;
 			case MAGIC4BE('M','S','F','.'): ReadFieldFlagSet(chunk, size, m_ModFlags); break;
 			case MAGIC4LE('R','S','M','P'):
-				ReadField(chunk, size, m_nResampling);
+				ReadFieldCast(chunk, size, m_nResampling);
 				if(!IsKnownResamplingMode(m_nResampling)) m_nResampling = SRCMODE_DEFAULT;
 				break;
 #ifdef MODPLUG_TRACKER
