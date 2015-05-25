@@ -2014,7 +2014,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 #define WRITEMODULARHEADER(code, fsize) \
 	{ \
 		mpt::IO::WriteIntLE<uint32>(f, code); \
-		MPT_ASSERT(static_cast<size_t>(fsize) <= uint16_max); \
+		MPT_ASSERT(fsize <= uint16_max); \
 		const uint16 _size = fsize; \
 		mpt::IO::WriteIntLE<uint16>(f, _size); \
 	}
@@ -2110,7 +2110,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	if(!songArtist.empty())
 	{
 		std::string songArtistU8 = mpt::ToCharset(mpt::CharsetUTF8, songArtist);
-		uint16 length = mpt::saturate_cast<uint16>(songArtistU8.length());
+		uint32 length = mpt::saturate_cast<uint16>(songArtistU8.length());
 		WRITEMODULARHEADER(MAGIC4LE('A','U','T','H'), length);
 		mpt::IO::WriteRaw(f, songArtistU8.c_str(), length);
 	}
