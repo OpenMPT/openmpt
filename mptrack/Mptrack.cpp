@@ -966,6 +966,17 @@ BOOL CTrackApp::InitInstance()
 
 	LoadStdProfileSettings(0);  // Load standard INI file options (without MRU)
 
+	// create main MDI Frame window
+	CMainFrame* pMainFrame = new CMainFrame();
+	if(!pMainFrame->LoadFrame(IDR_MAINFRAME)) return FALSE;
+	m_pMainWnd = pMainFrame;
+
+	// Show splash screen
+	if(cmdInfo.m_bShowSplash && TrackerSettings::Instance().m_ShowSplashScreen)
+	{
+		StartSplashScreen();
+	}
+
 	// create component manager
 	ComponentManager::Init(*m_pComponentManagerSettings);
 
@@ -983,18 +994,9 @@ BOOL CTrackApp::InitInstance()
 	// Load Midi Library
 	ImportMidiConfig(theApp.GetSettings(), true);
 
-	// create main MDI Frame window
-	CMainFrame* pMainFrame = new CMainFrame();
-	if (!pMainFrame->LoadFrame(IDR_MAINFRAME)) return FALSE;
-	m_pMainWnd = pMainFrame;
-
 	// Enable DDE Execute open
 	EnableShellOpen();
 
-	if (cmdInfo.m_bShowSplash && TrackerSettings::Instance().m_ShowSplashScreen)
-	{
-		StartSplashScreen();
-	}
 	// Enable drag/drop open
 	m_pMainWnd->DragAcceptFiles();
 
