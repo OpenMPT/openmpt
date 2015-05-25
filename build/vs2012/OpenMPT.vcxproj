@@ -102,42 +102,42 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\Win32-Debug\</OutDir>
     <IntDir>..\obj\OpenMPT\x86\Debug\</IntDir>
-    <TargetName>OpenMPT</TargetName>
+    <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\x64-Debug\</OutDir>
     <IntDir>..\obj\OpenMPT\x86_64\Debug\</IntDir>
-    <TargetName>OpenMPT</TargetName>
+    <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\Win32\</OutDir>
     <IntDir>..\obj\OpenMPT\x86\Release\</IntDir>
-    <TargetName>OpenMPT</TargetName>
+    <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\x64\</OutDir>
     <IntDir>..\obj\OpenMPT\x86_64\Release\</IntDir>
-    <TargetName>OpenMPT</TargetName>
+    <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\Win32\</OutDir>
     <IntDir>..\obj\OpenMPT\x86\ReleaseLTCG\</IntDir>
-    <TargetName>OpenMPT</TargetName>
+    <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\x64\</OutDir>
     <IntDir>..\obj\OpenMPT\x86_64\ReleaseLTCG\</IntDir>
-    <TargetName>OpenMPT</TargetName>
+    <TargetName>mptrack</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

@@ -2,6 +2,7 @@
  project "OpenMPT"
   uuid "37FC32A4-8DDC-4A9C-A30C-62989DD8ACE9"
   language "C++"
+  targetname "mptrack"
   location ( "../../build/" .. _ACTION )
   objdir "../../build/obj/OpenMPT"
   includedirs {
