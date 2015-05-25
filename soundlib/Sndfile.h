@@ -434,6 +434,7 @@ public:
 	// Periods in MPT are 4 times as fine as Amiga periods because of extra fine frequency slides (introduced in the S3M format).
 	int32 m_nMinPeriod, m_nMaxPeriod;
 
+	uint32 m_nResampling;	// Resampling mode (if overriding the globally set resampling)
 	int32 m_nRepeatCount;	// -1 means repeat infinitely.
 	ORDERINDEX m_nMaxOrderPosition;
 	ModChannelSettings ChnSettings[MAX_BASECHANNELS];	// Initial channels settings

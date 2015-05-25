@@ -2080,6 +2080,11 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		WRITEMODULAR(MAGIC4BE('R','P','.','.'), m_nRestartPos);
 	}
 
+	if(m_nResampling != SRCMODE_DEFAULT)
+	{
+		WRITEMODULAR(MAGIC4LE('R','S','M','P'), m_nResampling);
+	}
+
 	// Sample cues
 	if(GetType() == MOD_TYPE_MPT)
 	{
@@ -2242,6 +2247,10 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 			case MAGIC4BE('D','G','V','.'): ReadField(chunk, size, m_nDefaultGlobalVolume); break;
 			case MAGIC4BE('R','P','.','.'): if(modtype != MOD_TYPE_XM) ReadField(chunk, size, m_nRestartPos); break;
 			case MAGIC4BE('M','S','F','.'): ReadFieldFlagSet(chunk, size, m_ModFlags); break;
+			case MAGIC4LE('R','S','M','P'):
+				ReadField(chunk, size, m_nResampling);
+				if(!IsKnownResamplingMode(m_nResampling)) m_nResampling = SRCMODE_DEFAULT;
+				break;
 #ifdef MODPLUG_TRACKER
 			case MAGIC4BE('M','I','M','A'): GetMIDIMapper().Deserialize(chunk); break;
 #endif
