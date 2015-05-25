@@ -373,7 +373,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 
 		case OktIffChunk::idPATT:
 			// read the orderlist
-			Order.ReadAsByte(chunk, chunk.GetLength());
+			Order.ReadAsByte(chunk, chunk.GetLength(), ORDERINDEX_MAX, 0xFF, 0xFE);
 			break;
 
 		case OktIffChunk::idPBOD:

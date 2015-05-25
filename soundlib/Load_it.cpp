@@ -448,7 +448,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	file.Seek(sizeof(ITFileHeader));
 	if(GetType() == MOD_TYPE_IT)
 	{
-		Order.ReadAsByte(file, fileHeader.ordnum);
+		Order.ReadAsByte(file, fileHeader.ordnum, fileHeader.ordnum, 0xFF, 0xFE);
 	} else
 	{
 		if(fileHeader.cwtv > 0x88A && fileHeader.cwtv <= 0x88D)
@@ -456,10 +456,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			Order.Deserialize(file);
 		} else
 		{
-			Order.ReadAsByte(file, fileHeader.ordnum);
-			// Replacing 0xFF and 0xFE with new corresponding indexes
-			Order.Replace(0xFE, Order.GetIgnoreIndex());
-			Order.Replace(0xFF, Order.GetInvalidPatIndex());
+			Order.ReadAsByte(file, fileHeader.ordnum, fileHeader.ordnum, 0xFF, 0xFE);
 		}
 	}
 
@@ -1151,7 +1148,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	if(GetType() == MOD_TYPE_MPT)
 	{
 		if(!Order.NeedsExtraDatafield()) itHeader.ordnum = Order.size();
-		else itHeader.ordnum = MIN(Order.size(), MAX_ORDERS); //Writing MAX_ORDERS at max here, and if there's more, writing them elsewhere.
+		else itHeader.ordnum = std::min(Order.size(), MAX_ORDERS); //Writing MAX_ORDERS at max here, and if there's more, writing them elsewhere.
 
 		//Crop unused orders from the end.
 		while(itHeader.ordnum > 1 && Order[itHeader.ordnum - 1] == Order.GetInvalidPatIndex()) itHeader.ordnum--;

@@ -197,7 +197,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	Order.ReadFromArray(songHeader.orders, songHeader.numOrders);
+	Order.ReadFromArray(songHeader.orders, songHeader.numOrders, 0xFF, 0xFE);
 
 	// Read pattern and sample chunks
 	PATTERNINDEX patNum = 0;

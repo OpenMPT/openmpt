@@ -723,8 +723,7 @@ void COrderList::OnPaint()
 			{
 				if(nPat == sndFile.Order.GetInvalidPatIndex()) strcpy(s, "---");
 				else if(nPat == sndFile.Order.GetIgnoreIndex()) strcpy(s, "+++");
-				else if(nPat < std::max(sndFile.Patterns.Size(), sndFile.GetModSpecifications().patternsMax)) wsprintf(s, "%u", nPat);
-				else strcpy(s, "???");
+				else wsprintf(s, _T("%u"), nPat);
 			}
 
 			const COLORREF &textCol =

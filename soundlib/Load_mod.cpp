@@ -567,7 +567,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	file.ReadStruct(fileHeader);
 	file.Skip(4);	// Magic bytes (we already parsed these)
 
-	Order.ReadFromArray(fileHeader.orderList);
+	Order.ReadFromArray(fileHeader.orderList, CountOf(fileHeader.orderList), 0xFF, 0xFE);
 
 	ORDERINDEX realOrders = fileHeader.numOrders;
 	if(realOrders > 128)

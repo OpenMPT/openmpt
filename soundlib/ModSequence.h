@@ -83,11 +83,10 @@ public:
 	// Returns length of sequence stopping counting on first '---' (or at the end of sequence).
 	ORDERINDEX GetLengthFirstEmpty() const;
 
-	PATTERNINDEX GetInvalidPatIndex() const {return m_nInvalidIndex;} // To correspond 0xFF
-	static PATTERNINDEX GetInvalidPatIndex(const MODTYPE type);
-
-	PATTERNINDEX GetIgnoreIndex() const {return m_nIgnoreIndex;} // To correspond 0xFE
-	static PATTERNINDEX GetIgnoreIndex(const MODTYPE type);
+	// Returns the internal representation of a stop '---' index
+	static PATTERNINDEX GetInvalidPatIndex() { return uint16_max; }
+	// Returns the internal representation of an ignore '+++' index
+	static PATTERNINDEX GetIgnoreIndex() {return uint16_max - 1; }
 
 	// Returns the previous/next order ignoring skip indices(+++).
 	// If no previous/next order exists, return first/last order, and zero
@@ -100,11 +99,15 @@ public:
 
 	ModSequence& operator=(const ModSequence& seq);
 
-	// Read/write.
-	size_t WriteAsByte(FILE* f, const uint16 count) const;
-	bool ReadAsByte(FileReader &file, size_t howMany, size_t readEntries = ORDERINDEX_MAX);
+	// Write order items as bytes. '---' is written as stopIndex, '+++' is written as ignoreIndex
+	size_t WriteAsByte(FILE* f, const ORDERINDEX count, uint8 stopIndex = 0xFF, uint8 ignoreIndex = 0xFE) const;
+	// Read order items as bytes from a file. 'howMany' bytes are read from the file, optionally only the first 'readEntries' of them are actually processed.
+	// 'stopIndex' is treated as '---', 'ignoreIndex' is treated as '+++'. If the format doesn't support such indices, just pass a parameter that does not fit into a byte.
+	bool ReadAsByte(FileReader &file, size_t howMany, size_t readEntries = ORDERINDEX_MAX, uint16 stopIndex = ORDERINDEX_INVALID, uint16 ignoreIndex = ORDERINDEX_INVALID);
 	template<typename T, size_t arraySize>
-	bool ReadFromArray(const T (&orders)[arraySize], size_t howMany = arraySize);
+	// Read order items from an array. Only the first 'howMany' entries are actually processed.
+	// 'stopIndex' is treated as '---', 'ignoreIndex' is treated as '+++'. If the format doesn't support such indices, just pass ORDERINDEX_INVALID.
+	bool ReadFromArray(const T (&orders)[arraySize], size_t howMany = arraySize, uint16 stopIndex = ORDERINDEX_INVALID, uint16 ignoreIndex = ORDERINDEX_INVALID);
 
 	// Deprecated function used for MPTm files created with OpenMPT 1.17.02.46 - 1.17.02.48.
 	bool Deserialize(FileReader &file);
@@ -130,35 +133,23 @@ protected:
 	const_iterator end() const {return m_pArray + m_nSize;}
 
 protected:
-	std::string m_sName;				// Sequence name.
+	std::string m_sName;			// Sequence name.
 
-protected:
 	CSoundFile &m_sndFile;			// Pointer to associated CSoundFile.
 	PATTERNINDEX *m_pArray;			// Pointer to sequence array.
 	ORDERINDEX m_nSize;				// Sequence length.
 	ORDERINDEX m_nCapacity;			// Capacity in m_pArray.
-	PATTERNINDEX m_nInvalidIndex;	// Invalid pat index.
-	PATTERNINDEX m_nIgnoreIndex;	// Ignore pat index.
 	bool m_bDeletableArray;			// True if m_pArray points the deletable(with delete[]) array.
-	MODTYPE GetSndFileType() const;
 };
 
 
-inline PATTERNINDEX ModSequence::GetInvalidPatIndex(const MODTYPE type) {return (type & (MOD_TYPE_MPT | MOD_TYPE_XM)) ?  uint16_max : 0xFF;}
-inline PATTERNINDEX ModSequence::GetIgnoreIndex(const MODTYPE type) {return (type & (MOD_TYPE_MPT | MOD_TYPE_XM)) ? uint16_max - 1 : 0xFE;}
-
-
 template<typename T, size_t arraySize>
-bool ModSequence::ReadFromArray(const T (&orders)[arraySize], size_t howMany)
-//---------------------------------------------------------------------------
+bool ModSequence::ReadFromArray(const T (&orders)[arraySize], size_t howMany, uint16 stopIndex, uint16 ignoreIndex)
+//-----------------------------------------------------------------------------------------------------------------
 {
+	STATIC_ASSERT(arraySize < ORDERINDEX_MAX);
 	LimitMax(howMany, arraySize);
-
 	ORDERINDEX readEntries = static_cast<ORDERINDEX>(howMany);
-	if(!(GetSndFileType() & MOD_TYPE_MPT))
-	{
-		LimitMax(readEntries, MAX_ORDERS);
-	}
 
 	if(GetLength() < readEntries)
 	{
@@ -167,7 +158,10 @@ bool ModSequence::ReadFromArray(const T (&orders)[arraySize], size_t howMany)
 
 	for(int i = 0; i < readEntries; i++)
 	{
-		(*this)[i] = static_cast<ORDERINDEX>(orders[i]);
+		PATTERNINDEX pat = static_cast<PATTERNINDEX>(orders[i]);
+		if(pat == stopIndex) pat = GetInvalidPatIndex();
+		if(pat == ignoreIndex) pat = GetIgnoreIndex();
+		(*this)[i] = pat;
 	}
 	return true;
 }

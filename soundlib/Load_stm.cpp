@@ -179,7 +179,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read order list
-	Order.ReadFromArray(fileHeader.order);
+	Order.ReadFromArray(fileHeader.order, CountOf(fileHeader.order), 0xFF, 0xFE);
 	for(ORDERINDEX ord = 0; ord < 128; ord++)
 	{
 		if(Order[ord] >= 99)

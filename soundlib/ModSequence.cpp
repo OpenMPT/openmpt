@@ -40,8 +40,6 @@ ModSequence::ModSequence(CSoundFile &rSf,
 		m_pArray(pArray),
 		m_nSize(nSize),
 		m_nCapacity(nCapacity),
-		m_nInvalidIndex(0xFF),
-		m_nIgnoreIndex(0xFE),
 		m_bDeletableArray(bDeletableArray)
 //-------------------------------------------------------
 {}
@@ -49,15 +47,13 @@ ModSequence::ModSequence(CSoundFile &rSf,
 
 ModSequence::ModSequence(CSoundFile& rSf, ORDERINDEX nSize) :
 	m_sndFile(rSf),
-	m_nInvalidIndex(GetInvalidPatIndex(MOD_TYPE_MPT)),
-	m_nIgnoreIndex(GetIgnoreIndex(MOD_TYPE_MPT)),
 	m_bDeletableArray(true)
 //-------------------------------------------------------------------
 {
 	m_nSize = nSize;
 	m_nCapacity = m_nSize;
 	m_pArray = new PATTERNINDEX[m_nCapacity];
-	std::fill(begin(), end(), GetInvalidPatIndex(MOD_TYPE_MPT));
+	std::fill(begin(), end(), GetInvalidPatIndex());
 }
 
 
@@ -66,8 +62,6 @@ ModSequence::ModSequence(const ModSequence& seq) :
 	m_pArray(nullptr),
 	m_nSize(0),
 	m_nCapacity(0),
-	m_nInvalidIndex(0xFF),
-	m_nIgnoreIndex(0xFE),
 	m_bDeletableArray(false)
 //------------------------------------------
 {
@@ -100,25 +94,18 @@ void ModSequence::AdjustToNewModType(const MODTYPE oldtype)
 //---------------------------------------------------------
 {
 	const CModSpecifications specs = m_sndFile.GetModSpecifications();
-	const MODTYPE newtype = m_sndFile.GetType();
-
-	m_nInvalidIndex = GetInvalidPatIndex(newtype);
-	m_nIgnoreIndex = GetIgnoreIndex(newtype);
 
 	if(oldtype != MOD_TYPE_NONE)
 	{
 		// If not supported, remove "+++" separator order items.
 		if(specs.hasIgnoreIndex == false)
 		{
-			RemovePattern(GetIgnoreIndex(oldtype));
-		} else
-		{
-			Replace(GetIgnoreIndex(oldtype), GetIgnoreIndex());
+			RemovePattern(GetIgnoreIndex());
 		}
 		// If not supported, remove "---" items between patterns.
 		if(specs.hasStopIndex == false)
 		{
-			RemovePattern(GetInvalidPatIndex(oldtype));
+			RemovePattern(GetInvalidPatIndex());
 		}
 	}
 
@@ -137,9 +124,6 @@ void ModSequence::AdjustToNewModType(const MODTYPE oldtype)
 		}
 		resize(specs.ordersMax);
 	}
-		
-	// Replace items used to denote end of song order.
-	if(oldtype != MOD_TYPE_NONE) Replace(GetInvalidPatIndex(oldtype), GetInvalidPatIndex());
 }
 
 
@@ -302,8 +286,7 @@ void ModSequence::resize(ORDERINDEX nNewSize, PATTERNINDEX nFill)
 		if (nNewSize > m_nSize)
 			std::fill(begin() + m_nSize, begin() + nNewSize, nFill);
 		m_nSize = nNewSize;
-	}
-	else
+	} else
 	{
 		const PATTERNINDEX* const pOld = m_pArray;
 		m_nCapacity = nNewSize + 100;
@@ -330,8 +313,6 @@ ModSequence& ModSequence::operator=(const ModSequence& seq)
 {
 	if (&seq == this)
 		return *this;
-	m_nIgnoreIndex = seq.m_nIgnoreIndex;
-	m_nInvalidIndex = seq.m_nInvalidIndex;
 	resize(seq.GetLength());
 	std::copy(seq.begin(), seq.end(), begin());
 	m_sName = seq.m_sName;
@@ -376,7 +357,7 @@ ModSequenceSet::ModSequenceSet(CSoundFile& sndFile)
 	  m_nCurrentSeq(0)
 //--------------------------------------------------------------
 {
-	std::fill(m_Cache, m_Cache + s_nCacheSize, GetInvalidPatIndex(MOD_TYPE_MPT));
+	std::fill(m_Cache, m_Cache + s_nCacheSize, GetInvalidPatIndex());
 	m_Sequences.push_back(ModSequence(sndFile, s_nCacheSize));
 }
 
@@ -711,38 +692,33 @@ bool ModSequence::Deserialize(FileReader &file)
 }
 
 
-size_t ModSequence::WriteAsByte(FILE* f, const uint16 count) const
-//----------------------------------------------------------------
+size_t ModSequence::WriteAsByte(FILE* f, const ORDERINDEX count, uint8 stopIndex, uint8 ignoreIndex) const
+//--------------------------------------------------------------------------------------------------------
 {
-	const size_t limit = MIN(count, GetLength());
+	const size_t limit = std::min(count, GetLength());
 
 	size_t i = 0;
 	
 	for(i = 0; i < limit; i++)
 	{
 		const PATTERNINDEX pat = (*this)[i];
-		BYTE temp = static_cast<BYTE>((*this)[i]);
+		uint8 temp = static_cast<uint8>((*this)[i]);
 
-		if(pat > 0xFD)
-		{
-			if(pat == GetInvalidPatIndex()) temp = 0xFF;
-			else temp = 0xFE;
-		}
+		if(pat == GetInvalidPatIndex()) temp = stopIndex;
+		else if(pat == GetIgnoreIndex() || pat > 0xFF) temp = ignoreIndex;
 		fwrite(&temp, 1, 1, f);
 	}
 	// Fill non-existing order items with stop indices
 	for(i = limit; i < count; i++)
 	{
-		BYTE temp = 0xFF;
-		fwrite(&temp, 1, 1, f);
+		fwrite(&stopIndex, 1, 1, f);
 	}
 	return i; //Returns the number of bytes written.
 }
 
 
-// TODO: Need a way to declare skip/stop indices?
-bool ModSequence::ReadAsByte(FileReader &file, size_t howMany, size_t readEntries)
-//--------------------------------------------------------------------------------
+bool ModSequence::ReadAsByte(FileReader &file, size_t howMany, size_t readEntries, uint16 stopIndex, uint16 ignoreIndex)
+//----------------------------------------------------------------------------------------------------------------------
 {
 	if(!file.CanRead(howMany))
 	{
@@ -758,19 +734,15 @@ bool ModSequence::ReadAsByte(FileReader &file, size_t howMany, size_t readEntrie
 
 	for(size_t i = 0; i < readEntries; i++)
 	{
-		(*this)[i] = file.ReadUint8();
+		PATTERNINDEX pat = file.ReadUint8();
+		if(pat == stopIndex) pat = GetInvalidPatIndex();
+		if(pat == ignoreIndex) pat = GetIgnoreIndex();
+		(*this)[i] = pat;
 	}
 	std::fill(begin() + readEntries, end(), GetInvalidPatIndex());
 
 	file.Skip(howMany - readEntries);
 	return true;
-}
-
-
-MODTYPE ModSequence::GetSndFileType() const
-//-----------------------------------------
-{
-	return m_sndFile.GetType();
 }
 
 
