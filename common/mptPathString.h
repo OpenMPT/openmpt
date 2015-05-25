@@ -120,7 +120,7 @@ public:
 	{
 		if(empty())
 			return false;
-		const RawPathString::const_reference c = path.back();
+		RawPathString::value_type c = path[path.length() - 1];
 #if MPT_OS_WINDOWS
 		return (c == L'\\' || c == L'/');
 #else
