@@ -11,11 +11,88 @@
 #include "stdafx.h"
 #include "mptFileIO.h"
 
+#ifdef MODPLUG_TRACKER
+#if MPT_OS_WINDOWS
+#include <WinIoCtl.h>
+#include <io.h>
+#endif // MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER
+
 
 OPENMPT_NAMESPACE_BEGIN
 
 
 #if defined(MPT_WITH_FILEIO)
+
+
+
+#ifdef MODPLUG_TRACKER
+#if MPT_OS_WINDOWS
+bool SetFilesystemCompression(HANDLE hFile)
+{
+	if(hFile == INVALID_HANDLE_VALUE)
+	{
+		return false;
+	}
+	USHORT format = COMPRESSION_FORMAT_DEFAULT;
+	DWORD dummy = 0;
+	BOOL result = DeviceIoControl(hFile, FSCTL_SET_COMPRESSION, (LPVOID)&format, sizeof(format), NULL, 0, &dummy /*required*/ , NULL);
+	return result ? true : false;
+}
+bool SetFilesystemCompression(int fd)
+{
+	if(fd < 0)
+	{
+		return false;
+	}
+	uintptr_t fhandle = _get_osfhandle(fd);
+	HANDLE hFile = (HANDLE)fhandle;
+	if(hFile == INVALID_HANDLE_VALUE)
+	{
+		return false;
+	}
+	return SetFilesystemCompression(hFile);
+}
+#if defined(MPT_WITH_FILEIO_STDIO)
+bool SetFilesystemCompression(FILE *file)
+{
+	if(!file)
+	{
+		return false;
+	}
+	int fd = _fileno(file);
+	if(fd == -1)
+	{
+		return false;
+	}
+	return SetFilesystemCompression(fd);
+}
+#endif // MPT_WITH_FILEIO_STDIO
+bool SetFilesystemCompression(const mpt::PathString &filename)
+{
+	DWORD attributes = GetFileAttributesW(filename.AsNative().c_str());
+	if(attributes == INVALID_FILE_ATTRIBUTES)
+	{
+		return false;
+	}
+	if(attributes & FILE_ATTRIBUTE_COMPRESSED)
+	{
+		return true;
+	}
+	HANDLE hFile = CreateFileW(filename.AsNative().c_str(), GENERIC_ALL, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+	if(hFile == INVALID_HANDLE_VALUE)
+	{
+		return false;
+	}
+	bool result = SetFilesystemCompression(hFile);
+	CloseHandle(hFile);
+	hFile = INVALID_HANDLE_VALUE;
+	return result;
+}
+#endif // MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER
+
+
 
 #ifdef MODPLUG_TRACKER
 

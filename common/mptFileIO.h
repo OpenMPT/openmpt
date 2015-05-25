@@ -45,6 +45,22 @@ static inline FILE * mpt_fopen(const mpt::PathString &filename, const char *mode
 #endif // MPT_WITH_FILEIO_STDIO
 
 
+// Sets the NTFS compression attribute on the file or directory.
+// Requires read and write permissions for already opened files.
+// Returns true if the attribute has been set.
+// In almost all cases, the return value should be ignored because most filesystems other than NTFS do not support compression.
+#ifdef MODPLUG_TRACKER
+#if MPT_OS_WINDOWS
+bool SetFilesystemCompression(HANDLE hFile);
+bool SetFilesystemCompression(int fd);
+#if defined(MPT_WITH_FILEIO_STDIO)
+bool SetFilesystemCompression(FILE *file);
+#endif // MPT_WITH_FILEIO_STDIO
+bool SetFilesystemCompression(const mpt::PathString &filename);
+#endif // MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER
+
+
 namespace mpt
 {
 
