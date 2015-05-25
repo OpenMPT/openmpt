@@ -372,7 +372,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 				else
 					m_nChannels = i+1;
 			}
-			Order.ReadFromArray(pmib->seq, norders);
+			Order.ReadFromArray(pmib->seq, norders, 0xFF, 0xFE);
 			break;
 		// ME: song message
 		case 0x454D:

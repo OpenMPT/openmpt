@@ -342,7 +342,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		m_nChannels = 1;
 	}
 
-	Order.ReadAsByte(file, fileHeader.ordNum);
+	Order.ReadAsByte(file, fileHeader.ordNum, fileHeader.ordNum, 0xFF, 0xFE);
 
 	// Read sample header offsets
 	std::vector<uint16> sampleOffsets(fileHeader.smpNum);

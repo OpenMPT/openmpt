@@ -142,7 +142,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	songMessage.ReadFixedLineLength(fileHeader.songMessage, 108, 36, 0);
 
 	// Reading Orders
-	Order.ReadFromArray(fileHeader.orders);
+	Order.ReadFromArray(fileHeader.orders, CountOf(fileHeader.orders), 0xFF, 0xFE);
 	m_nRestartPos = fileHeader.restartPos;
 	if(Order[m_nRestartPos] >= fileHeader.patterns) m_nRestartPos = 0;
 

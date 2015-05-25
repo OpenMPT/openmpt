@@ -432,8 +432,7 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
 	}
 
-	// ult just so happens to use 255 for its end mark, so there's no need to fiddle with this
-	Order.ReadAsByte(file, 256);
+	Order.ReadAsByte(file, 256, 256, 0xFF, 0xFE);
 
 	m_nChannels = file.ReadUint8() + 1;
 	PATTERNINDEX numPats = file.ReadUint8() + 1;
