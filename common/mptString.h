@@ -392,22 +392,6 @@ static inline CStringW ToCStringW(const mpt::ustring &str) { return ToCStringW(T
 
 #if defined(MPT_OS_WINDOWS)
 
-#ifdef UNICODE
-
-typedef std::wstring tstring;
-
-template <typename Tsrc> inline mpt::tstring ToWinAPI(const Tsrc &src) { return mpt::ToWide(src); }
-template <typename Tsrc> inline mpt::tstring ToWinAPI(Charset from, const Tsrc &src) { return mpt::ToWide(from, src); }
-
-#else
-
-typedef std::string tstring;
-
-template <typename Tsrc> inline mpt::tstring ToWinAPI(const Tsrc &src) { return mpt::ToLocale(src); }
-template <typename Tsrc> inline mpt::tstring ToWinAPI(Charset from, const Tsrc &src) { return mpt::ToLocale(from, src); }
-
-#endif
-
 namespace String { namespace detail
 {
 
@@ -752,6 +736,13 @@ template <> struct ToStringTFunctor<std::wstring> { template <typename T> inline
 #if MPT_USTRING_MODE_UTF8
 template <> struct ToStringTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x) { return ToUString(x); } };
 #endif
+#if defined(_MFC_VER)
+#ifdef UNICODE
+template <> struct ToStringTFunctor<CString> { template <typename T> inline CString operator() (const T & x) { return mpt::ToCString(ToUString(x)); } };
+#else
+template <> struct ToStringTFunctor<CString> { template <typename T> inline CString operator() (const T & x) { return mpt::ToCString(mpt::CharsetLocale, ToString(x)); } };
+#endif
+#endif
 
 template<typename Tstring, typename T> inline Tstring ToStringT(const T & x) { return ToStringTFunctor<Tstring>()(x); }
 
@@ -822,6 +813,13 @@ template <> struct FormatValTFunctor<std::string> { template <typename T> inline
 template <> struct FormatValTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x, const Format & f) { return FormatValW(x, f); } };
 #if MPT_USTRING_MODE_UTF8
 template <> struct FormatValTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x, const Format & f) { return mpt::ToUnicode(mpt::CharsetUTF8, FormatVal(x, f)); } };
+#endif
+#if defined(_MFC_VER)
+#ifdef UNICODE
+template <> struct FormatValTFunctor<CString> { template <typename T> inline CString operator() (const T & x, const Format & f) { return mpt::ToCString(FormatValW(x, f)); } };
+#else
+template <> struct FormatValTFunctor<CString> { template <typename T> inline CString operator() (const T & x, const Format & f) { return mpt::ToCString(mpt::CharsetLocale, FormatVal(x, f)); } };
+#endif
 #endif
 
 
@@ -1031,6 +1029,9 @@ typedef fmtT<std::wstring> ufmt;
 #else
 typedef fmtT<mpt::ustring> ufmt;
 #endif
+#if defined(_MFC_VER)
+typedef fmtT<CString> tfmt;
+#endif
 
 } // namespace mpt
 
@@ -1052,6 +1053,9 @@ template <> struct to_string_type<const wchar_t  > { typedef std::wstring type; 
 template <> struct to_string_type<const wchar_t *> { typedef std::wstring type; };
 #if MPT_USTRING_MODE_UTF8
 template <> struct to_string_type<mpt::ustring   > { typedef mpt::ustring type; };
+#endif
+#if defined(_MFC_VER)
+template <> struct to_string_type<CString        > { typedef CString      type; };
 #endif
 template <typename T, std::size_t N> struct to_string_type<T [N]> { typedef typename to_string_type<T>::type type; };
 
@@ -1089,6 +1093,19 @@ mpt::ustring PrintImpl(const mpt::ustring & format
 	, const mpt::ustring & x6 = mpt::ustring()
 	, const mpt::ustring & x7 = mpt::ustring()
 	, const mpt::ustring & x8 = mpt::ustring()
+	);
+#endif
+
+#if defined(_MFC_VER)
+CString PrintImpl(const CString & format
+	, const CString & x1 = CString()
+	, const CString & x2 = CString()
+	, const CString & x3 = CString()
+	, const CString & x4 = CString()
+	, const CString & x5 = CString()
+	, const CString & x6 = CString()
+	, const CString & x7 = CString()
+	, const CString & x8 = CString()
 	);
 #endif
 
