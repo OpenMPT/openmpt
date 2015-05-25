@@ -89,7 +89,6 @@ void CTuningRTI::SetDummyValues()
 		m_GroupSize = 0;
 		m_GroupRatio = 0;
 		m_RatioTableFine.clear();
-		BelowRatios = AboveRatios = DefaultBARFUNC;
 	}
 }
 
@@ -102,7 +101,6 @@ bool CTuningRTI::CreateRatioTableGG(const std::vector<RATIOTYPE>& v, const RATIO
     m_StepMin = vr.first;
 	ProSetGroupSize(static_cast<UNOTEINDEXTYPE>(v.size()));
 	ProSetGroupRatio(r);
-	BelowRatios = AboveRatios = DefaultBARFUNC;
 
 	m_RatioTable.resize(vr.second-vr.first+1);
 	std::copy(v.begin(), v.end(), m_RatioTable.begin() + (ratiostartpos - vr.first));
@@ -138,7 +136,6 @@ bool CTuningRTI::ProCreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r,
 	m_StepMin = vr.first;
 	ProSetGroupSize(s);
 	ProSetGroupRatio(r);
-	BelowRatios = AboveRatios = DefaultBARFUNC;
 	const RATIOTYPE stepRatio = pow(r, static_cast<RATIOTYPE>(1)/s);
 
 	m_RatioTable.resize(vr.second - vr.first + 1);
@@ -183,18 +180,15 @@ CTuningRTI::NOTESTR CTuningRTI::ProGetNoteName(const NOTEINDEXTYPE& x) const
 }
 
 
-CTuningRTI::RATIOTYPE CTuningRTI::DefaultBARFUNC(const NOTEINDEXTYPE&, const STEPINDEXTYPE&)
-//---------------------------------------------------------------
-{
-	return 1;
-}
+const RATIOTYPE CTuningRTI::s_DefaultFallbackRatio = 1.0f;
+
 
 //Without finetune
 CTuning::RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& stepsFromCentre) const
 //-------------------------------------------------------------------------------------
 {
-	if(stepsFromCentre < m_StepMin) return BelowRatios(stepsFromCentre,0);
-	if(stepsFromCentre >= m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size())) return AboveRatios(stepsFromCentre,0);
+	if(stepsFromCentre < m_StepMin) return s_DefaultFallbackRatio;
+	if(stepsFromCentre >= m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size())) return s_DefaultFallbackRatio;
 	return m_RatioTable[stepsFromCentre - m_StepMin];
 }
 
@@ -228,8 +222,8 @@ CTuning::RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& baseNote, const STE
 		fineStep = ((fsCount + 1) - (abs(baseStepDiff) % (fsCount+1))) % (fsCount+1);
 	}
 
-    if(note < m_StepMin) return BelowRatios(note, fineStep);
-	if(note >= m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size())) return AboveRatios(note, fineStep);
+    if(note < m_StepMin) return s_DefaultFallbackRatio;
+	if(note >= m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size())) return s_DefaultFallbackRatio;
 
 	if(fineStep) return m_RatioTable[note - m_StepMin] * GetRatioFine(note, fineStep);
 	else return m_RatioTable[note - m_StepMin];
