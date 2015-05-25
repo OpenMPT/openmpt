@@ -354,7 +354,11 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		#endif
 			pmib = (const MDLInfoBlock *)(lpStream+dwMemPos);
 			mpt::String::Read<mpt::String::maybeNullTerminated>(songName, pmib->songname);
-			mpt::String::Read<mpt::String::maybeNullTerminated>(songArtist, pmib->composer);
+			{
+				std::string artist;
+				mpt::String::Read<mpt::String::maybeNullTerminated>(artist, pmib->composer);
+				songArtist = mpt::ToUnicode(mpt::CharsetCP437, artist);
+			}
 
 			norders = pmib->norders;
 			if (norders > MAX_ORDERS) norders = MAX_ORDERS;

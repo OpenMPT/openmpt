@@ -973,7 +973,11 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals();
 	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songname);
-	mpt::String::Read<mpt::String::spacePadded>(songArtist, fileHeader.composer);
+	{
+		std::string artist;
+		mpt::String::Read<mpt::String::spacePadded>(artist, fileHeader.composer);
+		songArtist = mpt::ToUnicode(mpt::CharsetCP437, artist);
+	}
 
 	FileHistory mptHistory;
 	MemsetZero(mptHistory);
