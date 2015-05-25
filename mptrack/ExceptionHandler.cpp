@@ -18,8 +18,6 @@
 #include "../common/version.h"
 #include "../common/mptFileIO.h"
 
-#include <WinIoCtl.h>
-
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -52,23 +50,12 @@ struct CrashOutputDirectory
 		{
 			CreateDirectoryW(path.AsNative().c_str(), nullptr);
 		}
-		DWORD attributes = GetFileAttributesW(path.AsNative().c_str());
-		if(attributes != INVALID_FILE_ATTRIBUTES && !(attributes & FILE_ATTRIBUTE_COMPRESSED))
-		{
-			// Set compressed attribute in order to save disk space.
-			// Debugging information should clutter the users computer as little as possible.
-			// Performance is not important here.
-			// Ignore any errors.
-			HANDLE hDir = CreateFileW(path.AsNative().c_str(), GENERIC_ALL, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
-			if(hDir != INVALID_HANDLE_VALUE)
-			{
-				USHORT format = COMPRESSION_FORMAT_DEFAULT;
-				DWORD dummy = 0;
-				/* BOOL result = */ DeviceIoControl(hDir, FSCTL_SET_COMPRESSION, (LPVOID)&format, sizeof(format), NULL, 0, &dummy /*required*/ , NULL);
-				CloseHandle(hDir);
-			}
-			// Compression will be inherited by children directories and files automatically.
-		}
+		// Set compressed attribute in order to save disk space.
+		// Debugging information should clutter the users computer as little as possible.
+		// Performance is not important here.
+		// Ignore any errors.
+		SetFilesystemCompression(path);
+		// Compression will be inherited by children directories and files automatically.
 		path += timestampDir;
 		if(!path.IsDirectory())
 		{
