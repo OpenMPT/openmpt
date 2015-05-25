@@ -160,8 +160,14 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, fileHeader.songTitle);
 
 	// Artist name
-	mpt::String::Read<mpt::String::maybeNullTerminated>(songArtist, fileHeader.songMusician);
-	if(songArtist == "Unknown") songArtist.clear();
+	{
+		std::string artist;
+		mpt::String::Read<mpt::String::maybeNullTerminated>(artist, fileHeader.songMusician);
+		if(artist != "Unknown")
+		{
+			songArtist = mpt::ToUnicode(mpt::CharsetCP437, artist);
+		}
+	}
 
 	// Read channel pan map... 0...15 = channel panning, 16 = surround channel, 255 = channel does not exist
 	m_nChannels = 32;

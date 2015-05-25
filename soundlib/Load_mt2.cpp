@@ -610,8 +610,12 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				uint8 summaryMask[6];
 				chunk.ReadArray(summaryMask);
-				chunk.ReadNullString(songArtist);
-				if(songArtist == "Unregistered") songArtist.clear();
+				std::string artist;
+				chunk.ReadNullString(artist);
+				if(artist != "Unregistered")
+				{
+					songArtist = mpt::ToUnicode(mpt::CharsetWindows1252, artist);
+				}
 			}
 			break;
 

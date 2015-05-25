@@ -520,7 +520,7 @@ public:
 public:
 
 	std::string songName;
-	std::string songArtist;
+	mpt::ustring songArtist;
 
 	// Song message
 	SongMessage songMessage;

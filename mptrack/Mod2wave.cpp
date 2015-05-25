@@ -204,7 +204,7 @@ void CWaveConvert::LoadTags()
 {
 	m_Settings.Tags.title = mpt::ToUnicode(mpt::CharsetLocale, m_SndFile.GetTitle());
 	m_Settings.Tags.comments = mpt::ToUnicode(mpt::CharsetLocale, m_SndFile.songMessage.GetFormatted(SongMessage::leLF));
-	m_Settings.Tags.artist = m_Settings.storedTags.artist;
+	m_Settings.Tags.artist = m_SndFile.songArtist;
 	m_Settings.Tags.album = m_Settings.storedTags.album;
 	m_Settings.Tags.trackno = m_Settings.storedTags.trackno;
 	m_Settings.Tags.year = m_Settings.storedTags.year;

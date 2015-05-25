@@ -170,7 +170,7 @@ static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0
 
 	//Read & set tunings for instruments
 	std::vector<std::string> notFoundTunings;
-	for(UINT i = 1; i<=csf.GetNumInstruments(); i++)
+	for(INSTRUMENTINDEX i = 1; i<=csf.GetNumInstruments(); i++)
 	{
 		uint16 ui;
 		iStrm.read(reinterpret_cast<char*>(&ui), sizeof(ui));
@@ -2008,42 +2008,39 @@ void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, int16 siz
 void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 //--------------------------------------------------------
 {
-	//Extra song data - Yet Another Hack.
-	{
-		const uint32 code = MAGIC4BE('M','P','T','S');
-		mpt::IO::WriteIntLE(f, code);
-	}
+	// Extra song data - Yet Another Hack.
+	mpt::IO::WriteIntLE<uint32>(f, MAGIC4BE('M','P','T','S'));
 
-#define WRITEMODULARHEADER(c1, c2, c3, c4, fsize) \
+#define WRITEMODULARHEADER(code, fsize) \
 	{ \
-		const uint32 code = MAGIC4BE(c1, c2, c3, c4); \
 		mpt::IO::WriteIntLE<uint32>(f, code); \
 		MPT_ASSERT(fsize <= uint16_max); \
 		const uint16 _size = fsize; \
 		mpt::IO::WriteIntLE<uint16>(f, _size); \
 	}
-#define WRITEMODULAR(c1, c2, c3, c4, field) \
+#define WRITEMODULAR(code, field) \
 	{ \
-		WRITEMODULARHEADER(c1, c2, c3, c4, sizeof(field)) \
+		WRITEMODULARHEADER(code, sizeof(field)) \
 		mpt::IO::WriteIntLE(f, field); \
 	}
 
 	if(m_nDefaultTempo > 255)
 	{
-		WRITEMODULAR('D','T','.','.', m_nDefaultTempo);
+		WRITEMODULAR(MAGIC4BE('D','T','.','.'), m_nDefaultTempo);
 	}
 
-	WRITEMODULAR('R','P','B','.', m_nDefaultRowsPerBeat);
-	WRITEMODULAR('R','P','M','.', m_nDefaultRowsPerMeasure);
+	WRITEMODULAR(MAGIC4BE('R','P','B','.'), m_nDefaultRowsPerBeat);
+	WRITEMODULAR(MAGIC4BE('R','P','M','.'), m_nDefaultRowsPerMeasure);
 
 	if(GetType() != MOD_TYPE_XM)
 	{
-		WRITEMODULAR('C','.','.','.', m_nChannels);
+		WRITEMODULAR(MAGIC4BE('C','.','.','.'), m_nChannels);
 	}
 
-	if(TypeIsIT_MPT() && GetNumChannels() > 64)	//IT header has room only for 64 channels. Save the
-	{											//settings that do not fit to the header here as an extension.
-		WRITEMODULARHEADER('C','h','n','S', (GetNumChannels() - 64) * 2);
+	if(TypeIsIT_MPT() && GetNumChannels() > 64)
+	{
+		// IT header has only room for 64 channels. Save the settings that do not fit to the header here as an extension.
+		WRITEMODULARHEADER(MAGIC4BE('C','h','n','S'), (GetNumChannels() - 64) * 2);
 		for(CHANNELINDEX chn = 64; chn < GetNumChannels(); chn++)
 		{
 			uint8 panvol[2];
@@ -2056,31 +2053,31 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	}
 
 	{
-		WRITEMODULARHEADER('T','M','.','.', 1);
+		WRITEMODULARHEADER(MAGIC4BE('T','M','.','.'), 1);
 		uint8 mode = static_cast<uint8>(m_nTempoMode);
 		fwrite(&mode, sizeof(mode), 1, f);
 	}
 
 	const int32 tmpMixLevels = static_cast<int32>(m_nMixLevels);
-	WRITEMODULAR('P','M','M','.', tmpMixLevels);
+	WRITEMODULAR(MAGIC4BE('P','M','M','.'), tmpMixLevels);
 
 	if(m_dwCreatedWithVersion)
 	{
-		WRITEMODULAR('C','W','V','.', m_dwCreatedWithVersion);
+		WRITEMODULAR(MAGIC4BE('C','W','V','.'), m_dwCreatedWithVersion);
 	}
 
-	WRITEMODULAR('L','S','W','V', m_dwLastSavedWithVersion);
-	WRITEMODULAR('S','P','A','.', m_nSamplePreAmp);
-	WRITEMODULAR('V','S','T','V', m_nVSTiVolume);
+	WRITEMODULAR(MAGIC4BE('L','S','W','V'), m_dwLastSavedWithVersion);
+	WRITEMODULAR(MAGIC4BE('S','P','A','.'), m_nSamplePreAmp);
+	WRITEMODULAR(MAGIC4BE('V','S','T','V'), m_nVSTiVolume);
 
 	if(GetType() == MOD_TYPE_XM && m_nDefaultGlobalVolume != MAX_GLOBAL_VOLUME)
 	{
-		WRITEMODULAR('D','G','V','.', m_nDefaultGlobalVolume);
+		WRITEMODULAR(MAGIC4BE('D','G','V','.'), m_nDefaultGlobalVolume);
 	}
 
 	if(GetType() != MOD_TYPE_XM && m_nRestartPos != 0)
 	{
-		WRITEMODULAR('R','P','.','.', m_nRestartPos);
+		WRITEMODULAR(MAGIC4BE('R','P','.','.'), m_nRestartPos);
 	}
 
 	// Sample cues
@@ -2094,7 +2091,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 				// Write one chunk for every sample.
 				// Rationale: chunks are limited to 65536 bytes, which can easily be reached
 				// with the amount of samples that OpenMPT supports.
-				WRITEMODULARHEADER('S','E','U','C', 2 + CountOf(sample.cues) * 4);
+				WRITEMODULARHEADER(MAGIC4LE('C','U','E','S'), 2 + CountOf(sample.cues) * 4);
 				mpt::IO::WriteIntLE<uint16>(f, smp);
 				for(std::size_t i = 0; i < CountOf(sample.cues); i++)
 				{
@@ -2107,20 +2104,28 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	//Additional flags for XM/IT/MPTM
 	if(m_ModFlags)
 	{
-		WRITEMODULAR('M','S','F','.', m_ModFlags.GetRaw());
+		WRITEMODULAR(MAGIC4BE('M','S','F','.'), m_ModFlags.GetRaw());
+	}
+
+	if(!songArtist.empty())
+	{
+		std::string songArtistU8 = mpt::ToCharset(mpt::CharsetUTF8, songArtist);
+		uint16 length = mpt::saturate_cast<uint16>(songArtistU8.length());
+		WRITEMODULARHEADER(MAGIC4LE('A','U','T','H'), length);
+		mpt::IO::WriteRaw(f, songArtistU8.c_str(), length);
 	}
 
 #ifdef MODPLUG_TRACKER
-	//MIMA, MIDI mapping directives
+	// MIDI mapping directives
 	if(GetMIDIMapper().GetCount() > 0)
 	{
 		const size_t objectsize = GetMIDIMapper().GetSerializationSize();
 		if(objectsize > size_t(int16_max))
 		{
-			AddToLog("Datafield overflow with MIDI to plugparam mappings; data won't be written.");
+			AddToLog("Too many MIDI Mapping directives to save; data won't be written.");
 		} else
 		{
-			WRITEMODULARHEADER('M','I','M','A', static_cast<uint16>(objectsize));
+			WRITEMODULARHEADER(MAGIC4BE('M','I','M','A'), static_cast<uint16>(objectsize));
 			GetMIDIMapper().Serialize(f);
 		}
 	}
@@ -2240,6 +2245,13 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 #ifdef MODPLUG_TRACKER
 			case MAGIC4BE('M','I','M','A'): GetMIDIMapper().Deserialize(chunk); break;
 #endif
+			case MAGIC4LE('A','U','T','H'):
+				{
+					std::string artist;
+					chunk.ReadString<mpt::String::spacePadded>(artist, chunk.GetLength());
+					songArtist = mpt::ToUnicode(mpt::CharsetUTF8, artist);
+				}
+				break;
 			case MAGIC4BE('C','h','n','S'):
 				if(size <= (MAX_BASECHANNELS - 64) * 2 && (size % 2u) == 0)
 				{
