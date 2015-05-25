@@ -772,6 +772,7 @@ BOOL CModDoc::InitializeMod()
 		}
 	}
 	m_SndFile.ResetPlayPos();
+	m_SndFile.songArtist = TrackerSettings::Instance().defaultArtist;
 
 	return TRUE;
 }

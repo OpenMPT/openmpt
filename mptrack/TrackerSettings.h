@@ -547,6 +547,7 @@ public:
 	// Default template
 
 	Setting<mpt::PathString> defaultTemplateFile;
+	Setting<mpt::ustring> defaultArtist;
 
 	Setting<uint32> mruListLength;
 	std::vector<mpt::PathString> mruFiles;

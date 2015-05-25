@@ -469,6 +469,16 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		}
 	}
 
+	if((m_SndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT)) && !m_SndFile.songArtist.empty())
+	{
+		AddToLog("Found artist name");
+		foundHacks = true;
+		if(autofix)
+		{
+			m_SndFile.songArtist.clear();
+		}
+	}
+
 	if(m_SndFile.GetMixLevels() != mixLevels_compatible && m_SndFile.GetMixLevels() != mixLevels_compatible_FT2)
 	{
 		AddToLog("Found incorrect mix levels (only compatible mix levels allowed)");

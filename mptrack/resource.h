@@ -575,6 +575,7 @@
 #define IDC_EDIT_COMMENTS               2004
 #define IDC_EDIT_SONGTITLE              2005
 #define IDC_SLIDER_PREAMP               2006
+#define IDC_EDIT_ARTIST                 2006
 #define IDC_EDIT_TEMPO                  2007
 #define IDC_EDIT_SPEED                  2008
 #define IDC_EDIT_GLOBALVOL              2009
@@ -738,7 +739,6 @@
 #define IDC_FILTERMODE                  2238
 #define IDC_AUTOSAVE_USECUSTOMDIR       2245
 #define IDC_BUTTON_MODTYPE2             2246
-#define IDC_BUTTON_PLAYERPROPS          2247
 #define IDC_SLIDER_SAMPLEPREAMP3        2248
 #define IDC_SLIDER_GLOBALVOL            2249
 #define IDC_EDIT_VSTIVOL                2250

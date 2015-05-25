@@ -163,6 +163,8 @@ CDocument* CModDocTemplate::OpenTemplateFile(const mpt::PathString &filename, bo
 			sndFile.m_dwCreatedWithVersion = MptVersion::num;
 			sndFile.m_dwLastSavedWithVersion = 0;
 			sndFile.madeWithTracker.clear();
+			sndFile.songArtist = TrackerSettings::Instance().defaultArtist;
+			doc->UpdateAllViews(nullptr, UpdateHint().ModType().AsLPARAM());
 		} else
 		{
 			// Remove extension from title, so that saving the file will not suggest a filename like e.g. "example.it.it".
