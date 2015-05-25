@@ -44,7 +44,7 @@ PATTERNINDEX CPatternContainer::Duplicate(PATTERNINDEX from)
 		return PATTERNINDEX_INVALID;
 	}
 
-	const CPattern &oldPat = m_Patterns[from];
+	const CPattern oldPat = m_Patterns[from];
 	PATTERNINDEX newPatIndex = Insert(oldPat.GetNumRows());
 
 	if(newPatIndex != PATTERNINDEX_INVALID)
