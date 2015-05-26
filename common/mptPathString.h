@@ -88,7 +88,7 @@ public:
 
 public:
 
-#if defined(MODPLUG_TRACKER)
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 	void SplitPath(PathString *drive, PathString *dir, PathString *fname, PathString *ext) const;
 	PathString GetDrive() const;		// Drive letter + colon, e.g. "C:"
@@ -134,7 +134,7 @@ public:
 	mpt::PathString AbsolutePathToRelative(const mpt::PathString &relativeTo) const;
 	mpt::PathString RelativePathToAbsolute(const mpt::PathString &relativeTo) const;
 
-#endif // MODPLUG_TRACKER
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 public:
 

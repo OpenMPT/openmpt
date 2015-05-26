@@ -96,6 +96,8 @@ bool SetFilesystemCompression(const mpt::PathString &filename)
 
 #ifdef MODPLUG_TRACKER
 
+#if MPT_OS_WINDOWS
+
 CMappedFile::~CMappedFile()
 //-------------------------
 {
@@ -220,6 +222,7 @@ const void *CMappedFile::Lock()
 	return lpStream;
 }
 
+#endif // MPT_OS_WINDOWS
 
 #endif // MODPLUG_TRACKER
 

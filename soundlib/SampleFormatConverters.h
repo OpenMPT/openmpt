@@ -11,10 +11,10 @@
 #pragma once
 
 
+#include "../common/Endianness.h"
+
+
 OPENMPT_NAMESPACE_BEGIN
-
-
-struct ModSample;
 
 
 // Byte offsets, from lowest significant to highest significant byte (for various functor template parameters)
@@ -882,6 +882,10 @@ struct NormalizationChain
 
 
 
+#if defined(LIBOPENMPT_BUILD) || (defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT))
+
+struct ModSample;
+
 //////////////////////////////////////////////////////
 // Actual sample conversion functions
 
@@ -1137,6 +1141,8 @@ void CopyChannelToInterleaved(typename SampleConversion::output_t * MPT_RESTRICT
 		dst += channels;
 	}
 }
+
+#endif
 
 
 OPENMPT_NAMESPACE_END

@@ -16,7 +16,9 @@
 #include "BuildSettings.h"
 
 
-#if defined(MODPLUG_TRACKER)
+#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
+
+#if MPT_OS_WINDOWS
 
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
@@ -30,7 +32,9 @@
 #include <shlwapi.h>
 #include <mmsystem.h>
 
-#endif // MODPLUG_TRACKER
+#endif // MPT_OS_WINDOWS
+
+#endif // MODPLUG_TRACKER && !MPT_BUILD_WINESUPPORT
 
 
 #if MPT_COMPILER_MSVC

@@ -48,7 +48,9 @@ private:
 
 	const SoundDevice::AppInfo m_AppInfo;
 
+#if MPT_OS_WINDOWS
 	ComponentHandle<ComponentWaveOut> m_WaveOut;
+#endif // MPT_OS_WINDOWS
 #ifndef NO_DSOUND
 	ComponentHandle<ComponentDirectSound> m_DirectSound;
 #endif // NO_DSOUND

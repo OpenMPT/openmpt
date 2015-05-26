@@ -11,7 +11,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef MODPLUG_TRACKER
+#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 
 extern CRITICAL_SECTION g_csAudio;
 extern int g_csAudioLockCount;
@@ -93,7 +93,6 @@ public:
 	void Enter() {}
 	void Leave() {}
 	~CriticalSection() {}
-	static void AssertUnlocked() {}
 };
 
 #endif // MODPLUG_TRACKER

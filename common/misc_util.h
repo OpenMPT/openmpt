@@ -432,6 +432,8 @@ namespace Date
 
 #if defined(MODPLUG_TRACKER)
 
+#if MPT_OS_WINDOWS
+
 namespace ANSI
 {
 // uint64 counts 100ns since 1601-01-01T00:00Z
@@ -441,6 +443,8 @@ uint64 Now();
 mpt::ustring ToString(uint64 time100ns); // i.e. 2015-01-15 18:32:01.718
 
 } // namespacee ANSI
+
+#endif // MPT_OS_WINDOWS
 
 #endif // MODPLUG_TRACKER
 
@@ -764,6 +768,8 @@ namespace Util {
 namespace Util
 {
 
+#if MPT_OS_WINDOWS
+
 // RAII wrapper around timeBeginPeriod/timeEndPeriod/timeGetTime (on Windows).
 // This clock is monotonic, even across changing its resolution.
 // This is needed to synchronize time in Steinberg APIs (ASIO and VST).
@@ -797,9 +803,11 @@ public:
 	uint64 NowNanoseconds() const;
 };
 
+#endif // MPT_OS_WINDOWS
+
 } // namespace Util
 
-#endif
+#endif // MODPLUG_TRACKER
 
 #ifdef ENABLE_ASM
 #define PROCSUPPORT_MMX        0x00001 // Processor supports MMX instructions
@@ -822,6 +830,8 @@ static inline uint32 GetProcSupport()
 
 namespace Util
 {
+
+#if MPT_OS_WINDOWS
 
 // COM CLSID<->string conversion
 // A CLSID string is not necessarily a standard UUID string,
@@ -863,6 +873,8 @@ mpt::PathString GetTempDirectory();
 
 // Returns a new unique absolute path.
 mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix = mpt::PathString(), const mpt::PathString &fileNameExtension = MPT_PATHSTRING("tmp"));
+
+#endif // MPT_OS_WINDOWS
 
 } // namespace Util
 

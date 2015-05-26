@@ -84,10 +84,12 @@ void Manager::ReEnumerate()
 	}
 #endif // NO_PORTAUDIO
 
+#if MPT_OS_WINDOWS
 	if(IsComponentAvailable(m_WaveOut))
 	{
 		EnumerateDevices<CWaveDevice>();
 	}
+#endif // MPT_OS_WINDOWS
 
 #ifndef NO_DSOUND
 	// kind of deprecated by now

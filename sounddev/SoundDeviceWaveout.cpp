@@ -25,6 +25,8 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
+#if MPT_OS_WINDOWS
+
 MPT_REGISTERED_COMPONENT(ComponentWaveOut)
 
 
@@ -390,6 +392,8 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices()
 	}
 	return devices;
 }
+
+#endif // MPT_OS_WINDOWS
 
 
 } // namespace SoundDevice

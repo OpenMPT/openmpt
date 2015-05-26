@@ -341,6 +341,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 bool CPortaudioDevice::OpenDriverSettings()
 //-----------------------------------------
 {
+#if MPT_OS_WINDOWS
 	if(m_HostApiType != paWASAPI)
 	{
 		return false;
@@ -356,6 +357,9 @@ bool CPortaudioDevice::OpenDriverSettings()
 	}
 	controlEXE += MPT_PATHSTRING("control.exe");
 	return ((int)ShellExecuteW(NULL, L"open", controlEXE.AsNative().c_str(), (hasVista ? L"/name Microsoft.Sound" : L"mmsys.cpl"), NULL, SW_SHOW) > 32);
+#else // !MPT_OS_WINDOWS
+	return false;
+#endif // MPT_OS_WINDOWS
 }
 
 
@@ -494,8 +498,6 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices()
 }
 
 
-
-
 std::vector<std::pair<PaDeviceIndex, mpt::ustring> > CPortaudioDevice::EnumerateInputOnlyDevices(PaHostApiTypeId hostApiType)
 //---------------------------------------------------------------------------------------------------------------------------
 {
@@ -556,6 +558,7 @@ bool CPortaudioDevice::HasInputChannelsOnSameDevice() const
 }
 
 
+#if MPT_COMPILER_MSVC
 static void PortaudioLog(const char *text)
 //----------------------------------------
 {
@@ -564,6 +567,7 @@ static void PortaudioLog(const char *text)
 		PALOG(mpt::String::Print("PortAudio: %1", text));
 	}
 }
+#endif // MPT_COMPILER_MSVC
 
 
 MPT_REGISTERED_COMPONENT(ComponentPortAudio)
@@ -577,7 +581,9 @@ ComponentPortAudio::ComponentPortAudio()
 
 bool ComponentPortAudio::DoInitialize()
 {
+#if MPT_COMPILER_MSVC
 	PaUtil_SetDebugPrintFunction(PortaudioLog);
+#endif // MPT_COMPILER_MSVC
 	return (Pa_Initialize() == paNoError);
 }
 

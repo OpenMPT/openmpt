@@ -35,7 +35,7 @@ int PathString::CompareNoCase(const PathString & a, const PathString & b)
 
 #endif // MPT_OS_WINDOWS
 
-#if defined(MODPLUG_TRACKER)
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 namespace mpt
 {
@@ -197,12 +197,12 @@ CString PathString::TunnelIntoCString(const mpt::PathString &path)
 	#endif
 }
 
-#endif
-#endif
+#endif // MFC
+#endif // MPT_OS_WINDOWS
 
 } // namespace mpt
 
-#endif
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
 #if defined(MODPLUG_TRACKER)
@@ -299,7 +299,7 @@ void SanitizeFilename(CString &str)
 		str.SetAt(i, SanitizeFilenameChar(str.GetAt(i)));
 	}
 }
-#endif
+#endif // MFC
 
 #endif // MODPLUG_TRACKER
 

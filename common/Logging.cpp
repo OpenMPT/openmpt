@@ -56,10 +56,12 @@ static MPT_NOINLINE void DoLog(const mpt::log::Context &context, mpt::ustring me
 	// remove eol if already present
 	message = mpt::String::RTrim(message, MPT_USTRING("\r\n"));
 	#if defined(MODPLUG_TRACKER)
+#if MPT_OS_WINDOWS
 		static uint64 s_lastlogtime = 0;
 		uint64 cur = mpt::Date::ANSI::Now();
 		uint64 diff = cur/10000 - s_lastlogtime;
 		s_lastlogtime = cur/10000;
+#endif
 		#ifdef LOG_TO_FILE
 		{
 			static FILE * s_logfile = nullptr;
@@ -70,8 +72,13 @@ static MPT_NOINLINE void DoLog(const mpt::log::Context &context, mpt::ustring me
 			if(s_logfile)
 			{
 				fprintf(s_logfile, mpt::ToCharset(mpt::CharsetUTF8, mpt::String::Print(MPT_USTRING("%1+%2 %3(%4): %5 [%6]\n"
+#if MPT_OS_WINDOWS
 					, mpt::Date::ANSI::ToString(cur)
 					, mpt::ufmt::dec<6>(diff)
+#else
+					, 0
+					, 0
+#endif
 					, mpt::ToUnicode(mpt::CharsetASCII, context.file)
 					, context.line
 					, message
@@ -151,6 +158,8 @@ void Logger::operator () (const char *format, ...)
 #if defined(MODPLUG_TRACKER)
 
 namespace Trace {
+
+#if MPT_OS_WINDOWS
 
 // Debugging functionality will use simple globals.
 
@@ -343,6 +352,8 @@ void SetThreadId(mpt::log::Trace::ThreadKind kind, uint32 id)
 			break;
 	}
 }
+
+#endif // MPT_OS_WINDOWS
 
 } // namespace Trace
 
