@@ -146,7 +146,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, gbMdiMaximize(conf, "Display", "MDIMaximize", true)
 	, glTreeSplitRatio(conf, "Display", "MDITreeRatio", 128)
 	, glTreeWindowWidth(conf, "Display", "MDITreeWidth", 160)
-	, glGeneralWindowHeight(conf, "Display", "MDIGeneralHeight", 178)
+	, glGeneralWindowHeight(conf, "Display", "MDIGeneralHeight", 222)
 	, glPatternWindowHeight(conf, "Display", "MDIPatternHeight", 152)
 	, glSampleWindowHeight(conf, "Display", "MDISampleHeight", 190)
 	, glInstrumentWindowHeight(conf, "Display", "MDIInstrumentHeight", 300)
@@ -568,7 +568,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,25,00,08))
 	{
-		glGeneralWindowHeight += 36;
+		glGeneralWindowHeight += 44;
 	}
 
 	// Effects
