@@ -62,6 +62,9 @@ public:
 	// Show a confirmation dialog.
 	static ConfirmAnswer Confirm(const AnyStringLocale &text, bool showCancel = false, bool defaultNo = false, const CWnd *parent = nullptr);
 	static ConfirmAnswer Confirm(const AnyStringLocale &text, const AnyStringLocale &caption, bool showCancel = false, bool defaultNo = false, const CWnd *parent = nullptr);
+	// work-around string literals for caption decaying to bool and catching the wrong overload instead of converting to a string.
+	static ConfirmAnswer Confirm(const AnyStringLocale &text, const char *caption, bool showCancel = false, bool defaultNo = false, const CWnd *parent = nullptr) { return Confirm(text, AnyStringLocale(caption), showCancel, defaultNo, parent); }
+	static ConfirmAnswer Confirm(const AnyStringLocale &text, const wchar_t *caption, bool showCancel = false, bool defaultNo = false, const CWnd *parent = nullptr) { return Confirm(text, AnyStringLocale(caption), showCancel, defaultNo, parent); }
 
 	// Show a confirmation dialog.
 	static RetryAnswer RetryCancel(const AnyStringLocale &text, const CWnd *parent = nullptr);
