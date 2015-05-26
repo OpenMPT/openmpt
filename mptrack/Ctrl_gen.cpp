@@ -93,31 +93,17 @@ BOOL CCtrlGeneral::OnInitDialog()
 	// Song Title
 	m_EditTitle.SetLimitText(specs.modNameLengthMax);
 
-// -> CODE#0016
-// -> DESC="default tempo update"
-//	m_SpinTempo.SetRange(32, 255);	// 255 bpm max
-
-	if(m_sndFile.GetType() & MOD_TYPE_S3M)
-	{
-		// S3M HACK: ST3 will ignore speed 255, even though it can be used with Axx.
-		m_SpinSpeed.SetRange(1, 254);
-	} else
-	{
-		m_SpinSpeed.SetRange((short)specs.speedMin, (short)specs.speedMax);
-	}
-	m_SpinTempo.SetRange((short)specs.tempoMin, (short)specs.tempoMax);
-
-// -! BEHAVIOUR_CHANGE#0016
-
 	m_SpinGlobalVol.SetRange(0, (short)(256 / GetGlobalVolumeFactor()));
 	m_SpinSamplePA.SetRange(0, 2000);
 	m_SpinVSTiVol.SetRange(0, 2000);
 	m_SpinRestartPos.SetRange(0, 255);
 	
-	m_SliderTempo.SetRange(0, specs.tempoMax - specs.tempoMin);
 	m_SliderGlobalVol.SetRange(0, MAX_SLIDER_GLOBAL_VOL);
 	m_SliderVSTiVol.SetRange(0, MAX_SLIDER_VSTI_VOL);
 	m_SliderSamplePreAmp.SetRange(0, MAX_SLIDER_SAMPLE_VOL);
+
+	m_SliderTempo.SetLineSize(1);
+	m_SliderTempo.SetPageSize(10);
 	
 	m_bEditsLocked=false;
 	UpdateView(GeneralHint().ModType());
@@ -198,8 +184,9 @@ void CCtrlGeneral::OnTapTempo()
 		}
 		newTempo /= delay;
 
-		const CModSpecifications specs = m_sndFile.GetModSpecifications();
-		Limit(newTempo, specs.tempoMin, specs.tempoMax);
+		int tempoMin, tempoMax;
+		m_SpinTempo.GetRange32(tempoMin, tempoMax);
+		Limit(newTempo, TEMPO(tempoMin), TEMPO(tempoMax));
 		SetDlgItemInt(IDC_EDIT_TEMPO, newTempo, FALSE);
 	}
 }
@@ -211,62 +198,49 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 	if (pHint == this) return;
 	FlagSet<HintType> hintType = hint.GetType();
 	const bool updateAll = hintType[HINT_MODTYPE];
+
+	const struct
+	{
+		const TCHAR *name;
+		ResamplingMode mode;
+	} interpolationTypes[] =
+	{
+		{ _T("No Interpolation"), SRCMODE_NEAREST },
+		{ _T("Linear"), SRCMODE_LINEAR },
+		{ _T("Cubic Spline"), SRCMODE_SPLINE },
+		{ _T("Polyphase"), SRCMODE_POLYPHASE },
+		{ _T("XMMS-ModPlug"), SRCMODE_FIRFILTER },
+	};
+
 	if (hintType == HINT_MPTOPTIONS || updateAll)
 	{
 		m_CbnResampling.ResetContent();
-		const struct
-		{
-			const TCHAR *name;
-			ResamplingMode mode;
-		} interpolationTypes[] =
-		{
-			{ _T("No Interpolation"), SRCMODE_NEAREST },
-			{ _T("Linear"), SRCMODE_LINEAR },
-			{ _T("Cubic Spline"), SRCMODE_SPLINE },
-			{ _T("Polyphase"), SRCMODE_POLYPHASE },
-			{ _T("XMMS-ModPlug"), SRCMODE_FIRFILTER },
-		};
 		m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("Default (") + CString(interpolationTypes[TrackerSettings::Instance().ResamplerMode].name) + _T(")")), SRCMODE_DEFAULT);
-		int selection = 0;
 		for(int i = 0; i < CountOf(interpolationTypes); i++)
 		{
-			if(m_sndFile.m_nResampling == interpolationTypes[i].mode) selection = i + 1;
 			m_CbnResampling.SetItemData(m_CbnResampling.AddString(interpolationTypes[i].name), interpolationTypes[i].mode);
 		}
-	
-		m_CbnResampling.SetCurSel(selection);
 		m_CbnResampling.Invalidate(FALSE);
-	}
-	if (updateAll || (hint.GetCategory() == HINTCAT_SEQUENCE && hintType[HINT_MODSEQUENCE]))
-	{
-		// Set max valid restart position
-		m_SpinRestartPos.SetRange32(0, m_sndFile.Order.GetLengthTailTrimmed() - 1);
-	}
-	if (updateAll || (hint.GetCategory() == HINTCAT_GENERAL && hintType[HINT_MODGENERAL]))
-	{
-		if (!m_bEditsLocked)
-		{
-			m_EditTitle.SetWindowText(m_sndFile.GetTitle().c_str());
-			::SetWindowTextW(m_EditArtist.m_hWnd, mpt::ToWide(m_sndFile.songArtist).c_str());
-			SetDlgItemInt(IDC_EDIT_TEMPO, m_sndFile.m_nDefaultTempo, FALSE);
-			SetDlgItemInt(IDC_EDIT_SPEED, m_sndFile.m_nDefaultSpeed, FALSE);
-			SetDlgItemInt(IDC_EDIT_GLOBALVOL, m_sndFile.m_nDefaultGlobalVolume / GetGlobalVolumeFactor(), FALSE);
-			SetDlgItemInt(IDC_EDIT_RESTARTPOS, m_sndFile.m_nRestartPos, FALSE);
-			SetDlgItemInt(IDC_EDIT_VSTIVOL, m_sndFile.m_nVSTiVolume, FALSE);
-			SetDlgItemInt(IDC_EDIT_SAMPLEPA, m_sndFile.m_nSamplePreAmp, FALSE);
-		}
-
-		m_SliderGlobalVol.SetPos(MAX_SLIDER_GLOBAL_VOL-m_sndFile.m_nDefaultGlobalVolume);
-		m_SliderVSTiVol.SetPos(MAX_SLIDER_VSTI_VOL-m_sndFile.m_nVSTiVolume);
-		m_SliderSamplePreAmp.SetPos(MAX_SLIDER_SAMPLE_VOL-m_sndFile.m_nSamplePreAmp);
-		m_SliderTempo.SetPos(m_sndFile.GetModSpecifications().tempoMax - m_sndFile.m_nDefaultTempo);
 	}
 
 	if (updateAll)
 	{
 		CModSpecifications specs = m_sndFile.GetModSpecifications();
-		m_SpinTempo.SetRange(specs.tempoMin, specs.tempoMax);
-		m_SliderTempo.SetRange(0, specs.tempoMax - specs.tempoMin);
+		
+		// S3M HACK: ST3 will ignore speed 255, even though it can be used with Axx.
+		if(m_sndFile.GetType() == MOD_TYPE_S3M)
+			m_SpinSpeed.SetRange32(1, 254);
+		else
+			m_SpinSpeed.SetRange32(specs.speedMin, specs.speedMax);
+		
+		TEMPO tempoMin = specs.tempoMin;
+		tempoMax = specs.tempoMax;
+		// IT Hack: There are legacy OpenMPT-made ITs out there which use a higher default speed than 255.
+		// Changing the upper tempo limit in the mod specs would break them, so do it here instead.
+		if(m_sndFile.GetType() == MOD_TYPE_IT && m_sndFile.m_nDefaultTempo <= 255)
+			tempoMax = 255;
+		m_SliderTempo.SetRange(0, tempoMax - tempoMin);
+		m_SpinTempo.SetRange(tempoMin, tempoMax);
 
 		const BOOL bIsNotMOD = (m_sndFile.GetType() != MOD_TYPE_MOD);
 		const BOOL bIsNotMOD_S3M = ((bIsNotMOD) && (m_sndFile.GetType() != MOD_TYPE_S3M));
@@ -307,7 +281,40 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		wsprintf(s, _T("%s, %d channel%s"), modType, m_sndFile.GetNumChannels(), (m_sndFile.GetNumChannels() != 1) ? _T("s") : _T(""));
 		m_BtnModType.SetWindowText(s);
 	}
-	CheckDlgButton(IDC_CHECK_LOOPSONG,	(TrackerSettings::Instance().gbLoopSong) ? TRUE : FALSE);
+
+	if (updateAll || (hint.GetCategory() == HINTCAT_SEQUENCE && hintType[HINT_MODSEQUENCE]))
+	{
+		// Set max valid restart position
+		m_SpinRestartPos.SetRange32(0, m_sndFile.Order.GetLengthTailTrimmed() - 1);
+	}
+	if (updateAll || (hint.GetCategory() == HINTCAT_GENERAL && hintType[HINT_MODGENERAL]))
+	{
+		if (!m_bEditsLocked)
+		{
+			m_EditTitle.SetWindowText(m_sndFile.GetTitle().c_str());
+			::SetWindowTextW(m_EditArtist.m_hWnd, mpt::ToWide(m_sndFile.songArtist).c_str());
+			SetDlgItemInt(IDC_EDIT_TEMPO, m_sndFile.m_nDefaultTempo, FALSE);
+			SetDlgItemInt(IDC_EDIT_SPEED, m_sndFile.m_nDefaultSpeed, FALSE);
+			SetDlgItemInt(IDC_EDIT_GLOBALVOL, m_sndFile.m_nDefaultGlobalVolume / GetGlobalVolumeFactor(), FALSE);
+			SetDlgItemInt(IDC_EDIT_RESTARTPOS, m_sndFile.m_nRestartPos, FALSE);
+			SetDlgItemInt(IDC_EDIT_VSTIVOL, m_sndFile.m_nVSTiVolume, FALSE);
+			SetDlgItemInt(IDC_EDIT_SAMPLEPA, m_sndFile.m_nSamplePreAmp, FALSE);
+		}
+
+		m_SliderGlobalVol.SetPos(MAX_SLIDER_GLOBAL_VOL - m_sndFile.m_nDefaultGlobalVolume);
+		m_SliderVSTiVol.SetPos(MAX_SLIDER_VSTI_VOL - m_sndFile.m_nVSTiVolume);
+		m_SliderSamplePreAmp.SetPos(MAX_SLIDER_SAMPLE_VOL - m_sndFile.m_nSamplePreAmp);
+		m_SliderTempo.SetPos(tempoMax - m_sndFile.m_nDefaultTempo);
+
+		int srcMode = 0;
+		for(int i = 0; i < CountOf(interpolationTypes); i++)
+		{
+			if(m_sndFile.m_nResampling == interpolationTypes[i].mode) srcMode = i + 1;
+		}
+		m_CbnResampling.SetCurSel(srcMode);
+	}
+
+	CheckDlgButton(IDC_CHECK_LOOPSONG, (TrackerSettings::Instance().gbLoopSong) ? TRUE : FALSE);
 	if (hintType[HINT_MPTOPTIONS])
 	{
 		m_VuMeterLeft.InvalidateRect(NULL, FALSE);
@@ -327,9 +334,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 
 		if (pSlider==&m_SliderTempo)
 		{
-			int min, max;
-			m_SpinTempo.GetRange(min, max);
-			const UINT tempo = max - m_SliderTempo.GetPos();
+			const TEMPO tempo = tempoMax - TEMPO(m_SliderTempo.GetPos());
 			if ((tempo >= m_sndFile.GetModSpecifications().tempoMin) && (tempo <= m_sndFile.GetModSpecifications().tempoMax) && (tempo != m_sndFile.m_nDefaultTempo))
 			{
 				m_sndFile.m_nDefaultTempo = tempo;
@@ -423,8 +428,10 @@ void CCtrlGeneral::OnTempoChanged()
 		m_EditTempo.GetWindowText(s, sizeof(s));
 		if (s[0])
 		{
-			UINT n = atoi(s);
-			n = Clamp(n, m_sndFile.GetModSpecifications().tempoMin, m_sndFile.GetModSpecifications().tempoMax);
+			TEMPO n = TEMPO(atoi(s));
+			int tempoMin, tempoMax;
+			m_SpinTempo.GetRange32(tempoMin, tempoMax);
+			n = Clamp(n, TEMPO(tempoMin), TEMPO(tempoMax));
 			if (n != m_sndFile.m_nDefaultTempo)
 			{
 				m_bEditsLocked=true;
@@ -663,6 +670,7 @@ void CCtrlGeneral::OnResamplingChanged()
 		if(m_sndFile.GetModSpecifications().hasDefaultResampling)
 		{
 			m_modDoc.SetModified();
+			m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
 		}
 	}
 }

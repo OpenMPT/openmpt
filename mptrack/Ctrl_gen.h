@@ -72,6 +72,8 @@ public:
 
 	CSliderCtrl m_SliderTempo, m_SliderSamplePreAmp, m_SliderGlobalVol, m_SliderVSTiVol;
 	CVuMeter m_VuMeterLeft, m_VuMeterRight;
+
+	TEMPO tempoMax;
 	//}}AFX_DATA
 	//{{AFX_VIRTUAL(CCtrlGeneral)
 	virtual BOOL OnInitDialog();

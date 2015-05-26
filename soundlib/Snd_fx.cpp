@@ -536,11 +536,14 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 								memory.state.m_nMusicTempo = 0;
 						}
 					}
+
+					TEMPO tempoMin = GetModSpecifications().tempoMin, tempoMax = GetModSpecifications().tempoMax;
+					if(IsCompatibleMode(TRK_ALLTRACKERS))	// clamp tempo correctly in compatible mode
+					{
+						tempoMax = 255;
+					}
+					Limit(memory.state.m_nMusicTempo, tempoMin, tempoMax);
 				}
-				if(IsCompatibleMode(TRK_ALLTRACKERS))	// clamp tempo correctly in compatible mode
-					memory.state.m_nMusicTempo = Clamp(memory.state.m_nMusicTempo, 32u, 255u);
-				else
-					memory.state.m_nMusicTempo = Clamp(memory.state.m_nMusicTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
 				break;
 
 			case CMD_S3MCMDEX:
@@ -5024,6 +5027,7 @@ void CSoundFile::SetTempo(UINT param, bool setAsNonModcommand)
 //------------------------------------------------------------
 {
 	const CModSpecifications& specs = GetModSpecifications();
+
 	if(setAsNonModcommand)
 	{
 		// Set tempo from UI - ignore slide commands and such.
@@ -5040,10 +5044,12 @@ void CSoundFile::SetTempo(UINT param, bool setAsNonModcommand)
 		else
 			m_PlayState.m_nMusicTempo -= (param & 0x0F);
 
+		TEMPO tempoMin = GetModSpecifications().tempoMin, tempoMax = GetModSpecifications().tempoMax;
 		if(IsCompatibleMode(TRK_ALLTRACKERS))	// clamp tempo correctly in compatible mode
-			m_PlayState.m_nMusicTempo = Clamp(m_PlayState.m_nMusicTempo, 32u, 255u);
-		else
-			m_PlayState.m_nMusicTempo = Clamp(m_PlayState.m_nMusicTempo, specs.tempoMin, specs.tempoMax);
+		{
+			tempoMax = 255;
+		}
+		Limit(m_PlayState.m_nMusicTempo, tempoMin, tempoMax);
 	}
 }
 
