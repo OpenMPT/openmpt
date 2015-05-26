@@ -21,7 +21,7 @@ How to compile
         don't want this, uncomment `#define NO_DSOUND` in the file
         `common/BuildSettings.h`.
 
-        To compile the project, open `mptrack/MPTRACK_08.sln` and hit the
+        To compile the project, open `build/vs2008/OpenMPT.sln` and hit the
         compile button.
 
      -  Visual Studio 2010 Service Pack 1 Professional/Premium/Ultimate (Express
@@ -31,25 +31,24 @@ How to compile
         don't want this, uncomment `#define NO_DSOUND` in the file
         `common/BuildSettings.h`.
 
-        To compile the project, open `mptrack/MPTRACK_10.sln` and hit the
+        To compile the project, open `build/vs2010/OpenMPT.sln` and hit the
         compile button.
 
      -  Visual Studio 2012 Update 4 Professional/Premium/Ultimate (Express
         version is not supported as it does not include MFC).
 
-        To compile the project, open `mptrack/MPTRACK_10.sln`, confirm the
-        project files upgrade and hit the compile button.
+        To compile the project, open `build/vs2012/OpenMPT.sln` and hit the
+        compile button.
 
      -  Visual Studio 2013 Update 4 Community/Professional/Premium/Ultimate
         Edition with MBCS MFC Add-On (available at
         [microsoft.com](https://www.microsoft.com/en-us/download/details.aspx?id=40770)
         ).
 
-        To compile the project, open `mptrack/MPTRACK_10.sln`, confirm the
-        project files upgrade and hit the compile button.
+        To compile the project, open `build/vs2013/OpenMPT.sln` and hit the
+        compile button.
 
- -  The VST 2.4 and ASIO SDKs are needed for compiling with VST and ASIO
-    support.
+ -  The VST and ASIO SDKs are needed for compiling with VST and ASIO support.
 
     If you don't want this, uncomment `#define NO_VST` and `#define NO_ASIO` in
     the file `common/BuildSettings.h`.
@@ -67,19 +66,24 @@ How to compile
 
      -  VST:
 
-        If you don't use `#define NO_VST`, you will need to put the VST 2.4 SDK
-        in the `include/vstsdk2.4` folder.
+        If you don't use `#define NO_VST`, you will need to put the VST SDK in
+        the `include/vstsdk2.4` folder.
         
-        Note: The VST 2.4 SDK is no longer available on the Steinberg website.
-        However, the VST 3.x SDKs still contains all the relevant files.
-        Simply copy all files from `VST3 SDK/pluginterfaces/vst2.x` to
-        `include/vstsdk2.4/pluginterfaces/vst2.x` and the content of
-        `VST3 SDK/public.sdk/source/vst2.x` to
-        `include/vstsdk2.4/public.sdk/source/vst2.x`. 
+        Simply copy all files from the `VST3 SDK` folder in the SDK .zip file to
+        `include/vstsdk2.4/`.
+
+        Note: OpenMPT makes use of the VST 2.4 specification only. The VST3 SDK
+        still contains all necessary files in the right locations. If you still
+        have the old VST 2.4 SDK laying around, this should also work fine.
 
         Please visit
         [steinberg.net](http://www.steinberg.net/en/company/developer.html) to
         download the SDK.
+
+    Alternatively, both, the ASIO and the VST SDK, can be downloaded
+    automatically on Windows 7 or later with 7-Zip installed by just running the
+    `build/download_externals.cmd` script (works when run from either the
+    project root or directly from the build directory).
 
     If you need further help with the VST and ASIO SDKs, get in touch with the
     main developers. 
