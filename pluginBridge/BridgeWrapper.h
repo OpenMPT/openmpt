@@ -11,10 +11,53 @@
 #pragma once
 
 #include "BridgeCommon.h"
+#include "../common/ComponentManager.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
 struct VSTPluginLib;
+
+class ComponentPluginBridge
+	: public ComponentBase
+{
+public:
+	enum Availability
+	{
+		AvailabilityUnknown      =  0,
+		AvailabilityOK           =  1,
+		AvailabilityMissing      = -1,
+		AvailabilityWrongVersion = -2,
+	};
+private:
+	const int bitness;
+	mpt::PathString exeName;
+	Availability availability;
+protected:
+	ComponentPluginBridge(int bitness);
+protected:
+	virtual bool DoInitialize();
+public:
+	Availability GetAvailability() const { return availability; }
+	mpt::PathString GetFileName() const { return exeName; }
+};
+
+class ComponentPluginBridge32
+	: public ComponentPluginBridge
+{
+	MPT_DECLARE_COMPONENT_MEMBERS
+public:
+	ComponentPluginBridge32() : ComponentPluginBridge(32) { }
+	std::string GetSettingsKey() const { return "PluginBridge32"; }
+};
+
+class ComponentPluginBridge64
+	: public ComponentPluginBridge
+{
+	MPT_DECLARE_COMPONENT_MEMBERS
+public:
+	ComponentPluginBridge64() : ComponentPluginBridge(64) { }
+	std::string GetSettingsKey() const { return "PluginBridge64"; }
+};
 
 class BridgeWrapper : protected BridgeCommon
 {
@@ -24,6 +67,9 @@ protected:
 
 	ERect editRect;
 	VstSpeakerArrangement speakers[2];
+
+	ComponentHandle<ComponentPluginBridge32> pluginBridge32;
+	ComponentHandle<ComponentPluginBridge64> pluginBridge64;
 
 public:
 	enum BinaryType

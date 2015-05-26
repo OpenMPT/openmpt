@@ -24,6 +24,56 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+ComponentPluginBridge::ComponentPluginBridge(int bitness)
+	: ComponentBase(ComponentTypeBundled)
+	, bitness(bitness)
+	, availability(AvailabilityUnknown)
+{
+	return;
+}
+
+
+bool ComponentPluginBridge::DoInitialize()
+{
+	if(bitness != 32 && bitness != 64)
+	{
+		return false;
+	}
+	exeName = theApp.GetAppDirPath();
+	if(bitness == 32)
+	{
+		exeName = exeName + MPT_PATHSTRING("PluginBridge32.exe");
+	}
+	if(bitness == 64)
+	{
+		exeName = exeName + MPT_PATHSTRING("PluginBridge64.exe");
+	}
+	// First, check for validity of the bridge executable.
+	if(!exeName.IsFile())
+	{
+		availability = AvailabilityMissing;
+		return false;
+	}
+	WCHAR exePath[MAX_PATH];
+	GetModuleFileNameW(0, exePath, CountOf(exePath));
+	mpt::String::SetNullTerminator(exePath);
+	uint64 mptVersion = BridgeWrapper::GetFileVersion(exePath);
+	uint64 bridgeVersion = BridgeWrapper::GetFileVersion(exeName.AsNative().c_str());
+	if(bridgeVersion != mptVersion)
+	{
+		availability = AvailabilityWrongVersion;
+		return false;
+	}
+	availability = AvailabilityOK;
+	return true;
+}
+
+
+MPT_REGISTERED_COMPONENT(ComponentPluginBridge32)
+
+MPT_REGISTERED_COMPONENT(ComponentPluginBridge64)
+
+
 // Check whether we need to load a 32-bit or 64-bit wrapper.
 BridgeWrapper::BinaryType BridgeWrapper::GetPluginBinaryType(const mpt::PathString &pluginPath)
 {
@@ -144,28 +194,27 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 			return false;
 		}
 
-		const mpt::PathString exeName = theApp.GetAppDirPath() + (binType == bin64Bit ? MPT_PATHSTRING("PluginBridge64.exe") : MPT_PATHSTRING("PluginBridge32.exe"));
-
-		// First, check for validity of the bridge executable.
-		static uint64 mptVersion = 0;
-		if(!mptVersion)
+		const bool available = (binType == bin32Bit) ? IsComponentAvailable(pluginBridge32) : IsComponentAvailable(pluginBridge64);
+		if(!available)
 		{
-			WCHAR exePath[_MAX_PATH];
-			GetModuleFileNameW(0, exePath, CountOf(exePath));
-			mpt::String::SetNullTerminator(exePath);
-			mptVersion = GetFileVersion(exePath);
-		}
-		uint64 bridgeVersion = GetFileVersion(exeName.AsNative().c_str());
-		if(bridgeVersion == 0)
-		{
-			// Silently fail if bridge is missing.
-			throw BridgeNotFoundException();
-		} else if(bridgeVersion != mptVersion)
-		{
-			throw BridgeException("The plugin bridge version does not match your OpenMPT version.");
-			return nullptr;
+			ComponentPluginBridge::Availability availability = (binType == bin32Bit) ? pluginBridge32->GetAvailability() : pluginBridge64->GetAvailability();
+			switch(availability)
+			{
+				case ComponentPluginBridge::AvailabilityMissing:
+					// Silently fail if bridge is missing.
+					throw BridgeNotFoundException();
+					break;
+				case ComponentPluginBridge::AvailabilityWrongVersion:
+					throw BridgeException("The plugin bridge version does not match your OpenMPT version.");
+					break;
+				default:
+					throw BridgeNotFoundException();
+					break;
+			}
 		}
 
+		const mpt::PathString exeName = (binType == bin32Bit) ? pluginBridge32->GetFileName() : pluginBridge64->GetFileName();
+	
 		otherPtrSize = binType;
 
 		// Command-line must be a modifiable string...
