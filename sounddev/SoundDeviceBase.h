@@ -141,7 +141,7 @@ public:
 	virtual bool OnIdle() { return false; }
 
 	SoundDevice::Settings GetSettings() const { return m_Settings; }
-	SampleFormat GetActualSampleFormat() const { return IsOpen() ? m_Settings.sampleFormat : SampleFormatInvalid; }
+	SampleFormat GetActualSampleFormat() const { return IsOpen() ? m_Settings.sampleFormat : SampleFormat(SampleFormatInvalid); }
 	SoundDevice::BufferAttributes GetEffectiveBufferAttributes() const { return (IsOpen() && IsPlaying()) ? InternalGetEffectiveBufferAttributes() : SoundDevice::BufferAttributes(); }
 
 	SoundDevice::TimeInfo GetTimeInfo() const { return m_TimeInfo; }

@@ -514,6 +514,7 @@ public:
 
 
 #ifdef MODPLUG_TRACKER
+#if MPT_OS_WINDOWS
 //===============
 class CMappedFile
 //===============
@@ -536,6 +537,7 @@ public:
 	size_t GetLength();
 	const void *Lock();
 };
+#endif // MPT_OS_WINDOWS
 #endif // MODPLUG_TRACKER
 
 

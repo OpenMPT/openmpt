@@ -18,7 +18,9 @@
 
 #include <algorithm>
 
+#if MPT_OS_WINDOWS
 #include <mmsystem.h>
+#endif // MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -26,7 +28,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace SoundDevice {
 
-	
+
+#if MPT_OS_WINDOWS
+
 bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevice::Settings &m_Settings)
 //------------------------------------------------------------------------------------------------------
 {
@@ -59,6 +63,10 @@ bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevic
 	return true;
 }
 
+#endif // MPT_OS_WINDOWS
+
+
+#if MPT_OS_WINDOWS
 
 CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(SoundDevice)
 //------------------------------------------------------------------------------------------
@@ -459,6 +467,8 @@ void CSoundDeviceWithThread::InternalStop()
 	MPT_TRACE();
 	m_AudioThread.Deactivate();
 }
+
+#endif // MPT_OS_WINDOWS
 
 
 } // namespace SoundDevice

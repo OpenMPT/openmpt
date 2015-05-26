@@ -15,7 +15,9 @@
 
 #include "../common/misc_util.h"
 
+#if MPT_OS_WINDOWS
 #include <mmreg.h>
+#endif // MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -24,8 +26,12 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
+#if MPT_OS_WINDOWS
 bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevice::Settings &m_Settings);
+#endif // MPT_OS_WINDOWS
 
+
+#if MPT_OS_WINDOWS
 
 class CSoundDeviceWithThread;
 
@@ -94,6 +100,8 @@ public:
 	virtual void StartFromSoundThread() = 0;
 	virtual void StopFromSoundThread() = 0;
 };
+
+#endif // MPT_OS_WINDOWS
 
 
 } // namespace SoundDevice

@@ -13,7 +13,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef MODPLUG_TRACKER
+#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 CRITICAL_SECTION g_csAudio;
 int g_csAudioLockCount = 0;
 #else

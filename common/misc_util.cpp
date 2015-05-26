@@ -28,10 +28,9 @@
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
-#endif
-
 #if defined(MODPLUG_TRACKER)
 #include <mmsystem.h>
+#endif
 #endif
 
 
@@ -112,6 +111,8 @@ namespace Date
 
 #if defined(MODPLUG_TRACKER)
 
+#if MPT_OS_WINDOWS
+
 namespace ANSI
 {
 
@@ -155,6 +156,8 @@ mpt::ustring ToString(uint64 time100ns)
 }
 
 } // namespace ANSI
+
+#endif // MPT_OS_WINDOWS
 
 #endif // MODPLUG_TRACKER
 
@@ -259,6 +262,8 @@ mpt::ustring ToShortenedISO8601(tm date)
 namespace Util
 {
 
+#if MPT_OS_WINDOWS
+
 void MultimediaClock::Init()
 {
 	m_CurrentPeriod = 0;
@@ -338,6 +343,8 @@ uint64 MultimediaClock::NowNanoseconds() const
 {
 	return (uint64)timeGetTime() * (uint64)1000000;
 }
+
+#endif // MPT_OS_WINDOWS
 
 } // namespace Util
 
@@ -462,6 +469,9 @@ void InitProcSupport()
 
 namespace Util
 {
+
+
+#if MPT_OS_WINDOWS
 
 
 std::wstring CLSIDToString(CLSID clsid)
@@ -661,6 +671,9 @@ mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const 
 	filename += (!fileNameExtension.empty() ? MPT_PATHSTRING(".") + fileNameExtension : mpt::PathString());
 	return filename;
 }
+
+
+#endif // MPT_OS_WINDOWS
 
 
 } // namespace Util

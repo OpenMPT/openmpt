@@ -16,7 +16,9 @@
 
 #include "../common/ComponentManager.h"
 
+#if MPT_OS_WINDOWS
 #include <MMSystem.h>
+#endif // MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -24,6 +26,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace SoundDevice {
 
+
+#if MPT_OS_WINDOWS
 
 class ComponentWaveOut : public ComponentBuiltin
 {
@@ -81,6 +85,8 @@ public:
 	static void CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
 	static std::vector<SoundDevice::Info> EnumerateDevices();
 };
+
+#endif // MPT_OS_WINDOWS
 
 
 } // namespace SoundDevice

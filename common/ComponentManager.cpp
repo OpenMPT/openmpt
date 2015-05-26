@@ -348,7 +348,7 @@ MPT_SHARED_PTR<IComponent> ComponentManager::GetComponent(const IComponentFactor
 {
 	TComponentMap::const_iterator it = m_Components.find(componentFactory.GetName());
 	MPT_SHARED_PTR<IComponent> component = (it != m_Components.end()) ? it->second : componentFactory.Construct();
-	ASSERT(component);
+	MPT_ASSERT(component);
 	InitializeComponent(component);
 	return component;
 }
