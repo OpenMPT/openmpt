@@ -771,20 +771,29 @@ std::pair<CommandID, KeyCombination> CCommandSet::IsConflicting(KeyCombination k
 	if(IsDummyCommand(cmd))    // no need to search if we are adding a dummy key
 		return std::pair<CommandID, KeyCombination>(kcNull, KeyCombination());
 	
-	for(int curCmd = 0; curCmd < kcNumCommands; curCmd++)
+	for(int pass = 0; pass < 2; pass++)
 	{
-		if(IsDummyCommand((CommandID)curCmd))
-			continue;
-
-		for(size_t k = 0; k < commands[curCmd].kcList.size(); k++)
+		// In the first pass, only look for conflicts in the same context, since
+		// such conflicts are errors. Cross-context conflicts only emit warnings.
+		for(int curCmd = 0; curCmd < kcNumCommands; curCmd++)
 		{
-			const KeyCombination &curKc = commands[curCmd].kcList[k];
-			if(KeyCombinationConflict(curKc, kc, checkEventConflict))
+			if(IsDummyCommand((CommandID)curCmd))
+				continue;
+
+			for(size_t k = 0; k < commands[curCmd].kcList.size(); k++)
 			{
-				return std::pair<CommandID, KeyCombination>((CommandID)curCmd, curKc);
+				const KeyCombination &curKc = commands[curCmd].kcList[k];
+				if(pass == 0 && curKc.Context() != kc.Context())
+					continue;
+
+				if(KeyCombinationConflict(curKc, kc, checkEventConflict))
+				{
+					return std::pair<CommandID, KeyCombination>((CommandID)curCmd, curKc);
+				}
 			}
 		}
 	}
+
 	return std::pair<CommandID, KeyCombination>(kcNull, KeyCombination());
 }
 
