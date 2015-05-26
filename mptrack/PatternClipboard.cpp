@@ -54,8 +54,8 @@ CStringA PatternClipboard::GetFileExtension(const char *ext)
 
 
 // Copy a range of patterns to both the system clipboard and the internal clipboard.
-bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX last)
-//---------------------------------------------------------------------------------
+bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX last, bool onlyOrders)
+//--------------------------------------------------------------------------------------------------
 {
 	LimitMax(first, sndFile.Order.GetLength());
 	LimitMax(last, sndFile.Order.GetLength());
@@ -85,7 +85,10 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 			data.AppendChar('+');
 		} else if(sndFile.Patterns.IsValidPat(pattern))
 		{
-			if(patList[pattern] == PATTERNINDEX_INVALID)
+			if(onlyOrders)
+			{
+				patList[pattern] = pattern;
+			} else if(patList[pattern] == PATTERNINDEX_INVALID)
 			{
 				// New pattern
 				patList[pattern] = insertedPats++;
@@ -106,13 +109,16 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 			data.AppendFormat("%u", patList[pattern]);
 		}
 	}
-	data.Append("\r\n" + patternData);
+	if(!onlyOrders)
+	{
+		data.Append("\r\n" + patternData);
+	}
 	
 	if(instance.activeClipboard < instance.clipboards.size())
 	{
 		// Copy to internal clipboard
 		CStringA desc;
-		desc.Format("%u Patterns (%u to %u)", last - first + 1, first, last);
+		desc.Format("%u %s (%u to %u)", last - first + 1, onlyOrders ? "Orders" : "Patterns", first, last);
 		instance.clipboards[instance.activeClipboard] = PatternClipboardElement(data, desc);
 	}
 
@@ -367,6 +373,12 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 		pos = startPos + 8;
 		startPos = data.Find("\n", pos) + 1;
 		ORDERINDEX writeOrder = curOrder;
+		bool onlyOrders = (startPos == 0);
+		if(onlyOrders)
+		{
+			// Only create order list, no patterns
+			startPos = data.GetLength();
+		}
 
 		while(pos < startPos && pos != 0)
 		{
@@ -385,7 +397,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				{
 					// Duplicate pattern
 					insertPat = patList[insertPat];
-				} else
+				} else if(!onlyOrders)
 				{
 					// New pattern
 					if(insertPat >= patList.size())

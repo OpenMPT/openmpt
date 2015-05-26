@@ -106,12 +106,10 @@ public:
 	// Set given sqeuence and update orderlist display.
 	void SelectSequence(const SEQUENCEINDEX nSeq);
 
-	// Clipboard.
-	void OnEditCopy();
-	void OnEditCut();
-
 	// Helper function for entering pattern number
 	void EnterPatternNum(int enterNum);
+
+	void OnCopy(bool onlyOrders);
 
 	//{{AFX_VIRTUAL(COrderList)
 	virtual BOOL PreTranslateMessage(MSG *pMsg);
@@ -146,6 +144,9 @@ protected:
 	afx_msg void OnDuplicatePattern();
 	afx_msg void OnPatternCopy();
 	afx_msg void OnPatternPaste();
+	afx_msg void OnEditCopy() { OnCopy(false); }
+	afx_msg void OnEditCopyOrders() { OnCopy(true); }
+	afx_msg void OnEditCut();
 	afx_msg LRESULT OnDragonDropping(WPARAM bDoDrop, LPARAM lParam);
 	afx_msg LRESULT OnHelpHitTest(WPARAM, LPARAM lParam);
 	afx_msg void OnSelectSequence(UINT nid);

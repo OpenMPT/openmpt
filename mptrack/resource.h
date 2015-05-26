@@ -30,7 +30,6 @@
 #define IDD_SAMPLE_AMPLIFY              130
 #define IDD_SAMPLE_RESAMPLE             131
 #define IDD_OPTIONS_EFFECTS             133
-#define IDD_OPTIONS_AUTHOR              134
 #define IDR_MAINFRAME                   200
 #define IDR_MODULETYPE                  201
 #define IDR_TOOLBARS                    202
@@ -1204,6 +1203,7 @@
 #define ID_EDIT_PUSHFORWARDPASTE        43234
 #define ID_EDIT_SPLITKEYBOARDSETTINGS   43235
 #define ID_EDIT_PASTESPECIAL            43236
+#define ID_ORDERLIST_EDIT_COPY_ORDERS   43237
 #define ID_CHANGE_PCNOTE_PARAM          43242
 // From here: Command range [ID_CHANGE_PCNOTE_PARAM, ID_CHANGE_PCNOTE_PARAM + ModCommand::maxColumnValue]
 #define ID_MODTREE_CLOSE                44243
