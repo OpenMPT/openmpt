@@ -62,9 +62,6 @@ CSelectPluginDlg::CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent
 	m_pModDoc = pModDoc;
 	m_nPlugSlot = nPlugSlot;
 
-	hasBridge32 = (theApp.GetAppDirPath() + MPT_PATHSTRING("PluginBridge32.exe")).IsFile();
-	hasBridge64 = (theApp.GetAppDirPath() + MPT_PATHSTRING("PluginBridge64.exe")).IsFile();
-
 	if(m_pModDoc)
 	{
 		if(0 <= m_nPlugSlot && m_nPlugSlot < MAX_MIXPLUGINS)
@@ -452,7 +449,11 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 		::SetDlgItemTextW(m_hWnd, IDC_TEXT_CURRENT_VSTPLUG, pPlug->dllPath.ToWide().c_str());
 		if(pPlug->pluginId1 == kEffectMagic)
 		{
-			bool isBridgeAvailable = (hasBridge32 && pPlug->GetDllBits() == 32) || (hasBridge64 && pPlug->GetDllBits() == 64);
+			bool isBridgeAvailable =
+					((pPlug->GetDllBits() == 32) && IsComponentAvailable(pluginBridge32))
+				||
+					((pPlug->GetDllBits() == 64) && IsComponentAvailable(pluginBridge64))
+				;
 			if(TrackerSettings::Instance().bridgeAllPlugins || !isBridgeAvailable)
 			{
 				m_chkBridge.EnableWindow(FALSE);

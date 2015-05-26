@@ -12,12 +12,15 @@
 #pragma once
 
 #include "CTreeCtrl.h"
+#include "../common/ComponentManager.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
 class CModDoc;
 struct SNDMIXPLUGIN;
 struct VSTPluginLib;
+class ComponentPluginBridge32;
+class ComponentPluginBridge64;
 
 //====================================
 class CSelectPluginDlg: public CDialog
@@ -30,7 +33,8 @@ protected:
 	CTreeCtrlW m_treePlugins;
 	CButton m_chkBridge, m_chkShare;
 	std::wstring m_nameFilter;
-	bool hasBridge32, hasBridge64;
+	ComponentHandle<ComponentPluginBridge32> pluginBridge32;
+	ComponentHandle<ComponentPluginBridge64> pluginBridge64;
 
 	HTREEITEM AddTreeItem(const WCHAR *title, int image, bool sort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);
 
