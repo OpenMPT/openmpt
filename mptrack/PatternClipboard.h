@@ -67,7 +67,7 @@ protected:
 public:
 
 	// Copy a range of patterns to both the system clipboard and the internal clipboard.
-	static bool Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX last);
+	static bool Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX last, bool onlyOrders);
 	// Copy a pattern selection to both the system clipboard and the internal clipboard.
 	static bool Copy(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
 	// Try pasting a pattern selection from the system clipboard.

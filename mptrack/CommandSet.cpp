@@ -684,8 +684,8 @@ void CCommandSet::SetupCommands()
 		wsprintf(s, _T("Preview Sample Cue %u"), j - kcStartSampleCues + 1);
 		DefineKeyCommand((CommandID)j, 1924 + j - kcStartSampleCues, s);
 	}
-
-
+	// Safety margin if we want to add more cues
+	DefineKeyCommand(kcOrderlistEditCopyOrders, 1950, _T("Copy Orders"));
 
 	// Add new key commands here.
 

@@ -71,6 +71,7 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_COMMAND(ID_ORDERLIST_RENDER,				OnRenderOrder)
 	ON_COMMAND(ID_ORDERLIST_EDIT_COPY,			OnEditCopy)
 	ON_COMMAND(ID_ORDERLIST_EDIT_CUT,			OnEditCut)
+	ON_COMMAND(ID_ORDERLIST_EDIT_COPY_ORDERS,	OnEditCopyOrders)
 	
 	ON_COMMAND(ID_PATTERN_PROPERTIES,			OnPatternProperties)
 	ON_COMMAND(ID_PLAYER_PLAY,					OnPlayerPlay)
@@ -566,12 +567,12 @@ void COrderList::OnEditCut()
 }
 
 
-void COrderList::OnEditCopy()
-//---------------------------
+void COrderList::OnCopy(bool onlyOrders)
+//--------------------------------------
 {
 	const OrdSelection ordsel = GetCurSel(false);
 	BeginWaitCursor();
-	PatternClipboard::Copy(m_pModDoc.GetrSoundFile(), ordsel.firstOrd, ordsel.lastOrd);
+	PatternClipboard::Copy(m_pModDoc.GetrSoundFile(), ordsel.firstOrd, ordsel.lastOrd, onlyOrders);
 	PatternClipboardDialog::UpdateList();
 	EndWaitCursor();
 }
@@ -966,6 +967,7 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_DELETE, "&Remove Patterns\t" + ih->GetKeyTextFromCommand(kcOrderlistEditDelete));
 		AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_COPY, "&Copy Patterns\t" + ih->GetKeyTextFromCommand(kcEditCopy));
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_COPY_ORDERS, "&Copy Orders\t" + ih->GetKeyTextFromCommand(kcOrderlistEditCopyOrders));
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_CUT, "&C&ut Patterns\t" + ih->GetKeyTextFromCommand(kcEditCut));
 		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERNPASTE, "P&aste Patterns\t" + ih->GetKeyTextFromCommand(kcEditPaste));
 		AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
