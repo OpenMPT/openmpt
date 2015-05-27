@@ -408,7 +408,7 @@ void CCtrlGeneral::OnArtistChanged()
 {
 	if (!m_EditArtist.m_hWnd || !m_EditArtist.GetModify()) return;
 
-	std::wstring artist = GetWindowTextW(m_EditArtist);
+	mpt::ustring artist = mpt::ToUnicode(GetWindowTextW(m_EditArtist));
 	if(artist != m_sndFile.songArtist)
 	{
 		m_EditArtist.SetModify(FALSE);
