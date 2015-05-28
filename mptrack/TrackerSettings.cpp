@@ -37,16 +37,6 @@ OPENMPT_NAMESPACE_BEGIN
 #define OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY 0x80
 
 
-TrackerDirectories &TrackerDirectories::Instance()
-//------------------------------------------------
-{
-	return theApp.GetTrackerDirectories();
-}
-
-
-const TCHAR *TrackerDirectories::m_szDirectoryToSettingsName[NUM_DIRS] = { _T("Songs_Directory"), _T("Samples_Directory"), _T("Instruments_Directory"), _T("Plugins_Directory"), _T("Plugin_Presets_Directory"), _T("Export_Directory"), _T(""), _T("") };
-
-
 TrackerSettings &TrackerSettings::Instance()
 //------------------------------------------
 {
@@ -233,6 +223,15 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Components
 	, ComponentsLoadOnStartup(conf, "Components", "LoadOnStartup", ComponentManagerSettingsDefault().LoadOnStartup())
 	, ComponentsKeepLoaded(conf, "Components", "KeepLoaded", ComponentManagerSettingsDefault().KeepLoaded())
+	// Paths
+	, PathSongs(conf, "Paths", "Songs_Directory", mpt::PathString())
+	, PathSamples(conf, "Paths", "Samples_Directory", mpt::PathString())
+	, PathInstruments(conf, "Paths", "Instruments_Directory", mpt::PathString())
+	, PathPlugins(conf, "Paths", "Plugins_Directory", mpt::PathString())
+	, PathPluginPresets(conf, "Paths", "Plugin_Presets_Directory", mpt::PathString())
+	, PathExport(conf, "Paths", "Export_Directory", mpt::PathString())
+	, PathTunings(theApp.GetConfigPath() + MPT_PATHSTRING("tunings\\"))
+	, PathUserTemplates(theApp.GetConfigPath() + MPT_PATHSTRING("TemplateModules\\"))
 	// Default template
 	, defaultTemplateFile(conf, "Paths", "DefaultTemplate", mpt::PathString())
 	, defaultArtist(conf, "Misc", "DefaultArtist", mpt::ToUnicode(mpt::CharsetLocale, std::getenv("USERNAME")))
@@ -294,19 +293,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	CMainFrame::m_pAutoSaver->SetUseOriginalPath(conf.Read<bool>("AutoSave", "UseOriginalPath", CMainFrame::m_pAutoSaver->GetUseOriginalPath()));
 	CMainFrame::m_pAutoSaver->SetPath(theApp.RelativePathToAbsolute(conf.Read<mpt::PathString>("AutoSave", "Path", CMainFrame::m_pAutoSaver->GetPath())));
 	// Paths
-	TrackerDirectories::Instance().SetDefaultDirectory(theApp.GetConfigPath() + MPT_PATHSTRING("tunings\\"), DIR_TUNING);
-	TrackerDirectories::Instance().SetDefaultDirectory(theApp.GetConfigPath() + MPT_PATHSTRING("TemplateModules\\"), DIR_TEMPLATE_FILES_USER);
-	for(size_t i = 0; i < NUM_DIRS; i++)
-	{
-		if(TrackerDirectories::Instance().m_szDirectoryToSettingsName[i][0] == '\0')
-		{
-			continue;
-		}
-		const CString settingKey = TrackerDirectories::Instance().m_szDirectoryToSettingsName[i];
-		mpt::PathString path = conf.Read<mpt::PathString>(MPT_USTRING("Paths"), mpt::ToUnicode(settingKey), TrackerDirectories::Instance().GetDefaultDirectory(static_cast<Directory>(i)));
-		path = theApp.RelativePathToAbsolute(path);
-		TrackerDirectories::Instance().SetDefaultDirectory(path, static_cast<Directory>(i), false);
-	}
 	m_szKbdFile = conf.Read<mpt::PathString>("Paths", "Key_Config_File", mpt::PathString());
 	conf.Forget("Paths", "Key_Config_File");
 
@@ -589,10 +575,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	theApp.SetDefaultMidiMacro(macros);
 
 	// Paths
-	for(size_t i = 0; i < NUM_DIRS; i++)
-	{
-		TrackerDirectories::Instance().m_szWorkingDirectory[i] = TrackerDirectories::Instance().m_szDefaultDirectory[i];
-	}
 	m_szKbdFile = theApp.RelativePathToAbsolute(m_szKbdFile);
 
 	// Sample undo buffer size (used to be a hidden, absolute setting in MiB)
@@ -912,19 +894,6 @@ void TrackerSettings::SaveSettings()
 	conf.Write<mpt::PathString>("AutoSave", "Path", path);
 
 	// Paths
-	for(size_t i = 0; i < NUM_DIRS; i++)
-	{
-		if(TrackerDirectories::Instance().m_szDirectoryToSettingsName[i][0] == '\0')
-		{
-			continue;
-		}
-		mpt::PathString path = TrackerDirectories::Instance().GetDefaultDirectory(static_cast<Directory>(i));
-		if(theApp.IsPortableMode())
-		{
-			path = theApp.AbsolutePathToRelative(path);
-		}
-		conf.Write<mpt::PathString>("Paths", TrackerDirectories::Instance().m_szDirectoryToSettingsName[i], path);
-	}
 	// Obsolete, since we always write to Keybindings.mkb now.
 	// Older versions of OpenMPT 1.18+ will look for this file if this entry is missing, so removing this entry after having read it is kind of backwards compatible.
 	conf.Remove("Paths", "Key_Config_File");
@@ -1075,83 +1044,84 @@ std::bitset<128> StringToIgnoredCCs(const std::string &in)
 }
 
 
+DefaultAndWorkingDirectory::DefaultAndWorkingDirectory()
+//------------------------------------------------------
+{
+	return;
+}
+
+DefaultAndWorkingDirectory::DefaultAndWorkingDirectory(const mpt::PathString &def)
+//--------------------------------------------------------------------------------
+	: m_Default(def)
+	, m_Working(def)
+{
+	return;
+}
+
+DefaultAndWorkingDirectory::~DefaultAndWorkingDirectory()
+//-------------------------------------------------------
+{
+	return;
+}
+
+void DefaultAndWorkingDirectory::SetDefaultDir(const mpt::PathString &filenameFrom, bool stripFilename)
+//-----------------------------------------------------------------------------------------------------
+{
+	if(InternalSet(m_Default, filenameFrom, stripFilename) && !m_Default.empty())
+	{
+		// When updating default directory, also update the working directory.
+		InternalSet(m_Working, filenameFrom, stripFilename);
+	}
+}
+
+void DefaultAndWorkingDirectory::SetWorkingDir(const mpt::PathString &filenameFrom, bool stripFilename)
+//-----------------------------------------------------------------------------------------------------
+{
+	InternalSet(m_Working, filenameFrom, stripFilename);
+}
+
+mpt::PathString DefaultAndWorkingDirectory::GetDefaultDir() const
+//---------------------------------------------------------------
+{
+	return m_Default;
+}
+
+mpt::PathString DefaultAndWorkingDirectory::GetWorkingDir() const
+//---------------------------------------------------------------
+{
+	return m_Working;
+}
+
 // Retrieve / set default directory from given string and store it our setup variables
 // If stripFilename is true, the filenameFrom parameter is assumed to be a full path including a filename.
-void TrackerDirectories::SetDirectory(const mpt::PathString &filenameFrom, Directory dir, mpt::PathString (&directories)[NUM_DIRS], bool stripFilename)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------
+// Return true if the value changed.
+bool DefaultAndWorkingDirectory::InternalSet(mpt::PathString &dest, const mpt::PathString &filenameFrom, bool stripFilename)
+//--------------------------------------------------------------------------------------------------------------------------
 {
-	mpt::PathString path;
-
-	if(stripFilename)
+	mpt::PathString newPath = (stripFilename ? filenameFrom.GetPath() : filenameFrom);
+	if(!newPath.empty() && !newPath.HasTrailingSlash())
 	{
-		path = filenameFrom.GetPath();
-	} else
-	{
-		path = filenameFrom;
+		newPath += MPT_PATHSTRING("\\");
 	}
-
-	if(!path.empty() && !path.HasTrailingSlash())
-	{
-		path += MPT_PATHSTRING("\\");
-	}
-
-	const mpt::PathString oldDir = directories[dir]; // for comparison
-
-	directories[dir] = path;
-
-	// When updating default directory, also update the working directory.
-	if(!path.empty() && directories == m_szDefaultDirectory)
-	{
-		if(oldDir != path) // update only if default directory has changed
-			SetWorkingDirectory(path, dir);
-	}
+	mpt::PathString oldPath = dest;
+	dest = newPath;
+	return newPath != oldPath;
 }
 
-
-void TrackerDirectories::SetDefaultDirectory(const mpt::PathString &szFilenameFrom, Directory dir, bool bStripFilename)
-//---------------------------------------------------------------------------------------------------------------------
+ConfigurableDirectory::ConfigurableDirectory(SettingsContainer &conf, const AnyStringLocale &section, const AnyStringLocale &key, const mpt::PathString &def)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	: conf(conf)
+	, m_Setting(conf, section, key, def)
 {
-	SetDirectory(szFilenameFrom, dir, m_szDefaultDirectory, bStripFilename);
+	SetDefaultDir(theApp.RelativePathToAbsolute(m_Setting), false);
 }
 
-
-void TrackerDirectories::SetWorkingDirectory(const mpt::PathString &szFilenameFrom, Directory dir, bool bStripFilename)
-//---------------------------------------------------------------------------------------------------------------------
+ConfigurableDirectory::~ConfigurableDirectory()
+//---------------------------------------------
 {
-	SetDirectory(szFilenameFrom, dir, m_szWorkingDirectory, bStripFilename);
+	m_Setting = theApp.IsPortableMode() ? theApp.AbsolutePathToRelative(m_Default) : m_Default;
 }
 
-
-// Get slash-terminated default directory of given type.
-mpt::PathString TrackerDirectories::GetDefaultDirectory(Directory dir) const
-//--------------------------------------------------------------------------
-{
-	return m_szDefaultDirectory[dir];
-}
-
-
-// Get slash-terminated working directory of given type.
-mpt::PathString TrackerDirectories::GetWorkingDirectory(Directory dir) const
-//--------------------------------------------------------------------------
-{
-	return m_szWorkingDirectory[dir];
-}
-
-
-
-
-TrackerDirectories::TrackerDirectories()
-//--------------------------------------
-{
-	return;
-}
-
-
-TrackerDirectories::~TrackerDirectories()
-//---------------------------------------
-{
-	return;
-}
 
 
 OPENMPT_NAMESPACE_END

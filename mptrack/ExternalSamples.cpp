@@ -105,11 +105,11 @@ void ExternalSamplesDlg::OnSetPath(NMHDR *, LRESULT *)
 	if(TrackerSettings::Instance().previewInFileDialogs)
 		dlg.EnableAudioPreview();
 	if(path.empty())
-		dlg.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_SAMPLES));
+		dlg.WorkingDirectory(TrackerSettings::Instance().PathSamples.GetWorkingDir());
 	else
 		dlg.DefaultFilename(path);
 	if(!dlg.Show()) return;
-	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_SAMPLES);
+	TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetWorkingDirectory());
 
 	SetSample(smp, dlg.GetFirstFile());
 	modDoc.UpdateAllViews(nullptr, SampleHint(smp).Info().Names().Data());
@@ -126,10 +126,10 @@ void ExternalSamplesDlg::OnScanFolder()
 		return;
 	}
 
-	BrowseForFolder dlg(TrackerDirectories::Instance().GetWorkingDirectory(DIR_SAMPLES), _T("Select a folder to search for missing samples..."));
+	BrowseForFolder dlg(TrackerSettings::Instance().PathSamples.GetWorkingDir(), _T("Select a folder to search for missing samples..."));
 	if(dlg.Show())
 	{
-		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetDirectory(), DIR_SAMPLES);
+		TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetDirectory());
 
 		FolderScanner scan(dlg.GetDirectory(), true);
 		mpt::PathString fileName;

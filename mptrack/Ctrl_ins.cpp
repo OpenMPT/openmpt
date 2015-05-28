@@ -1466,7 +1466,7 @@ BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 	EndWaitCursor();
 	if (bOk)
 	{
-		TrackerDirectories::Instance().SetWorkingDirectory(fileName, DIR_INSTRUMENTS, true);
+		TrackerSettings::Instance().PathInstruments.SetWorkingDir(fileName, true);
 		ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 		if (pIns)
 		{
@@ -1732,11 +1732,11 @@ void CCtrlInstruments::OnInstrumentOpen()
 			"SoundFont 2.0 Banks (*.sf2)|*.sf2;*.sbk|"
 			"DLS Sound Banks (*.dls)|*.dls|"
 			"All Files (*.*)|*.*||")
-		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_INSTRUMENTS))
+		.WorkingDirectory(TrackerSettings::Instance().PathInstruments.GetWorkingDir())
 		.FilterIndex(&nLastIndex);
 	if(!dlg.Show(this)) return;
 
-	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_INSTRUMENTS);
+	TrackerSettings::Instance().PathInstruments.SetWorkingDir(dlg.GetWorkingDirectory());
 
 	const FileDialog::PathList &files = dlg.GetFilenames();
 	for(size_t counter = 0; counter < files.size(); counter++)
@@ -1791,7 +1791,7 @@ void CCtrlInstruments::OnInstrumentSave()
 		"Compressed Impulse Tracker Instruments (*.iti)|*.iti|"
 		"Impulse Tracker Instruments with external Samples (*.iti)|*.iti|"
 		"FastTracker II Instruments (*.xi)|*.xi||")
-		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_INSTRUMENTS))
+		.WorkingDirectory(TrackerSettings::Instance().PathInstruments.GetWorkingDir())
 		.FilterIndex(&index);
 	if(!dlg.Show(this)) return;
 
@@ -1807,7 +1807,7 @@ void CCtrlInstruments::OnInstrumentSave()
 	if (!ok)
 		ErrorBox(IDS_ERR_SAVEINS, this);
 	else
-		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_INSTRUMENTS);
+		TrackerSettings::Instance().PathInstruments.SetWorkingDir(dlg.GetWorkingDirectory());
 	SwitchToView();
 }
 

@@ -631,7 +631,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension(CTuning::s_FileExtension)
 		.ExtensionFilter(filter)
-		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_TUNING))
+		.WorkingDirectory(TrackerSettings::Instance().PathTunings.GetWorkingDir())
 		.FilterIndex(&filterIndex);
 	if(!dlg.Show(this)) return;
 
@@ -672,11 +672,11 @@ void CTuningDialog::OnBnClickedButtonImport()
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
 		.ExtensionFilter(sFilter)
-		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_TUNING));
+		.WorkingDirectory(TrackerSettings::Instance().PathTunings.GetWorkingDir());
 	if(!dlg.Show(this))
 		return;
 
-	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_TUNING);
+	TrackerSettings::Instance().PathTunings.SetWorkingDir(dlg.GetWorkingDirectory());
 
 	std::wstring sLoadReport;
 

@@ -619,10 +619,10 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, BOOL)
 			.DefaultExtension(defaultExtension)
 			.DefaultFilename(defaultSaveName)
 			.ExtensionFilter(ModTypeToFilter(m_SndFile))
-			.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_MODS));
+			.WorkingDirectory(TrackerSettings::Instance().PathSongs.GetWorkingDir());
 		if(!dlg.Show()) return FALSE;
 
-		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_MODS);
+		TrackerSettings::Instance().PathSongs.SetWorkingDir(dlg.GetWorkingDirectory());
 
 		saveFileName = dlg.GetFirstFile();
 	} else
@@ -1681,11 +1681,11 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		.DefaultExtension(extension)
 		.DefaultFilename(GetPathNameMpt().GetFileName() + MPT_PATHSTRING(".") + extension)
 		.ExtensionFilter(encFactory->GetTraits().fileDescription + MPT_USTRING(" (*.") + extension.ToUnicode() + MPT_USTRING(")|*.") + extension.ToUnicode() + MPT_USTRING("||"))
-		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_EXPORT));
+		.WorkingDirectory(TrackerSettings::Instance().PathExport.GetWorkingDir());
 	if(!dlg.Show()) return;
 
 	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
-	TrackerDirectories::Instance().SetDefaultDirectory(dlg.GetWorkingDirectory(), DIR_EXPORT, true);
+	TrackerSettings::Instance().PathExport.SetDefaultDir(dlg.GetWorkingDirectory(), true);
 
 	mpt::PathString drive, dir, name, ext;
 	dlg.GetFirstFile().SplitPath(&drive, &dir, &name, &ext);
@@ -1966,7 +1966,7 @@ void CModDoc::OnFileCompatibilitySave()
 		.DefaultExtension(ext)
 		.DefaultFilename(filename)
 		.ExtensionFilter(pattern)
-		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_MODS));
+		.WorkingDirectory(TrackerSettings::Instance().PathSongs.GetWorkingDir());
 	if(!dlg.Show()) return;
 
 	ScopedLogCapturer logcapturer(*this);
@@ -2888,7 +2888,7 @@ void CModDoc::OnSaveTemplateModule()
 //----------------------------------
 {
 	// Create template folder if doesn't exist already.
-	const mpt::PathString templateFolder = TrackerDirectories::Instance().GetDefaultDirectory(DIR_TEMPLATE_FILES_USER);
+	const mpt::PathString templateFolder = TrackerSettings::Instance().PathUserTemplates.GetDefaultDir();
 	if (!templateFolder.IsDirectory())
 	{
 		if (!CreateDirectoryW(templateFolder.AsNative().c_str(), nullptr))

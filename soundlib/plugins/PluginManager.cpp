@@ -526,7 +526,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	if(!pFound && strcmp(mixPlugin.GetLibraryName(), ""))
 	{
 		// Try finding the plugin DLL in the plugin directory or plugin cache instead.
-		mpt::PathString fullPath = TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINS);
+		mpt::PathString fullPath = TrackerSettings::Instance().PathPlugins.GetDefaultDir();
 		if(fullPath.empty())
 		{
 			fullPath = theApp.GetAppDirPath() + MPT_PATHSTRING("Plugins\\");

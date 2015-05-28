@@ -28,22 +28,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-/////////////////////////////////////////////////////////////////////////
-// Default directories
-
-enum Directory
-{
-	DIR_MODS = 0,
-	DIR_SAMPLES,
-	DIR_INSTRUMENTS,
-	DIR_PLUGINS,
-	DIR_PLUGINPRESETS,
-	DIR_EXPORT,
-	DIR_TUNING,
-	DIR_TEMPLATE_FILES_USER,
-	NUM_DIRS
-};
-
 
 // User-defined colors
 enum
@@ -387,6 +371,37 @@ template<> inline FontSetting FromSettingValue(const SettingValue &val)
 	return setting;
 }
 
+
+class DefaultAndWorkingDirectory
+{
+protected:
+	mpt::PathString m_Default;
+	mpt::PathString m_Working;
+public:
+	DefaultAndWorkingDirectory();
+	DefaultAndWorkingDirectory(const mpt::PathString &def);
+	~DefaultAndWorkingDirectory();
+public:
+	void SetDefaultDir(const mpt::PathString &filenameFrom, bool stripFilename = false);
+	void SetWorkingDir(const mpt::PathString &filenameFrom, bool stripFilename = false);
+	mpt::PathString GetDefaultDir() const;
+	mpt::PathString GetWorkingDir() const;
+private:
+	bool InternalSet(mpt::PathString &dest, const mpt::PathString &filenameFrom, bool stripFilename);
+};
+
+class ConfigurableDirectory
+	: public DefaultAndWorkingDirectory
+{
+protected:
+	SettingsContainer &conf;
+	Setting<mpt::PathString> m_Setting;
+public:
+	ConfigurableDirectory(SettingsContainer &conf, const AnyStringLocale &section, const AnyStringLocale &key, const mpt::PathString &def);
+	~ConfigurableDirectory();
+};
+
+
 //===================
 class TrackerSettings
 //===================
@@ -554,6 +569,14 @@ public:
 
 	// Paths
 
+	ConfigurableDirectory PathSongs;
+	ConfigurableDirectory PathSamples;
+	ConfigurableDirectory PathInstruments;
+	ConfigurableDirectory PathPlugins;
+	ConfigurableDirectory PathPluginPresets;
+	ConfigurableDirectory PathExport;
+	DefaultAndWorkingDirectory PathTunings;
+	DefaultAndWorkingDirectory PathUserTemplates;
 	mpt::PathString m_szKbdFile;
 
 	// Default template
@@ -607,38 +630,6 @@ protected:
 
 };
 
-
-//======================
-class TrackerDirectories
-//======================
-{
-	friend class TrackerSettings;
-private:
-
-	// Directory Arrays (default dir + last dir)
-	mpt::PathString m_szDefaultDirectory[NUM_DIRS];
-	mpt::PathString m_szWorkingDirectory[NUM_DIRS];
-	// Directory to INI setting translation
-	static const TCHAR *m_szDirectoryToSettingsName[NUM_DIRS];
-
-public:
-
-	TrackerDirectories();
-	~TrackerDirectories();
-
-	// access to default + working directories
-	void SetWorkingDirectory(const mpt::PathString &filenameFrom, Directory dir, bool stripFilename = false);
-	mpt::PathString GetWorkingDirectory(Directory dir) const;
-	void SetDefaultDirectory(const mpt::PathString &filenameFrom, Directory dir, bool stripFilename = false);
-	mpt::PathString GetDefaultDirectory(Directory dir) const;
-
-	static TrackerDirectories &Instance();
-
-protected:
-
-	void SetDirectory(const mpt::PathString &szFilenameFrom, Directory dir, mpt::PathString (&pDirs)[NUM_DIRS], bool bStripFilename);
-
-};
 
 
 OPENMPT_NAMESPACE_END

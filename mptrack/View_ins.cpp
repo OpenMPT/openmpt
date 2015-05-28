@@ -2552,9 +2552,9 @@ void CViewInstrument::OnEnvLoad()
 	FileDialog dlg = OpenFileDialog()
 		.DefaultExtension("envelope")
 		.ExtensionFilter("Instrument Envelopes (*.envelope)|*.envelope||")
-		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_INSTRUMENTS));
+		.WorkingDirectory(TrackerSettings::Instance().PathInstruments.GetWorkingDir());
 	if(!dlg.Show(this)) return;
-	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_INSTRUMENTS);
+	TrackerSettings::Instance().PathInstruments.SetWorkingDir(dlg.GetWorkingDirectory());
 
 	if(GetDocument()->LoadEnvelope(m_nInstrument, m_nEnv, dlg.GetFirstFile()))
 	{
@@ -2576,9 +2576,9 @@ void CViewInstrument::OnEnvSave()
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension("envelope")
 		.ExtensionFilter("Instrument Envelopes (*.envelope)|*.envelope||")
-		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_INSTRUMENTS));
+		.WorkingDirectory(TrackerSettings::Instance().PathInstruments.GetWorkingDir());
 	if(!dlg.Show(this)) return;
-	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_INSTRUMENTS);
+	TrackerSettings::Instance().PathInstruments.SetWorkingDir(dlg.GetWorkingDirectory());
 
 	if(!GetDocument()->SaveEnvelope(m_nInstrument, m_nEnv, dlg.GetFirstFile()))
 	{

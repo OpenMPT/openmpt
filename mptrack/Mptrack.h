@@ -28,7 +28,6 @@ namespace SoundDevice {
 class Manager;
 } // namespace SoundDevice
 class CDLSBank;
-class TrackerDirectories;
 class TrackerSettings;
 class ComponentManagerSettings;
 
@@ -204,7 +203,6 @@ protected:
 
 	IniFileSettingsBackend *m_pSettingsIniFile;
 	SettingsContainer *m_pSettings;
-	TrackerDirectories *m_pTrackerDirectories;
 	TrackerSettings *m_pTrackerSettings;
 	IniFileSettingsBackend *m_pSongSettingsIniFile;
 	SettingsContainer *m_pSongSettings;
@@ -258,11 +256,6 @@ public:
 	void GetDefaultMidiMacro(MIDIMacroConfig &cfg) const { cfg = m_MidiCfg; }
 	void SetDefaultMidiMacro(const MIDIMacroConfig &cfg) { m_MidiCfg = cfg; }
 	mpt::PathString GetConfigFileName() const { return m_szConfigFileName; }
-	TrackerDirectories & GetTrackerDirectories()
-	{
-		ASSERT(m_pTrackerDirectories);
-		return *m_pTrackerDirectories;
-	}
 	SettingsContainer & GetSettings()
 	{
 		ASSERT(m_pSettings);
