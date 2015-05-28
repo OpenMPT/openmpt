@@ -645,7 +645,6 @@ END_MESSAGE_MAP()
 CTrackApp::CTrackApp()
 //--------------------
 	: m_GuiThreadId(0)
-	, m_pTrackerDirectories(nullptr)
 	, m_pSettingsIniFile(nullptr)
 	, m_pSongSettings(nullptr)
 	, m_pSettings(nullptr)
@@ -942,13 +941,12 @@ BOOL CTrackApp::InitInstance()
 
 	m_pSettingsIniFile = new IniFileSettingsBackend(m_szConfigFileName);
 	m_pSettings = new SettingsContainer(m_pSettingsIniFile);
-	m_pTrackerDirectories = new TrackerDirectories();
 	m_pTrackerSettings = new TrackerSettings(*m_pSettings);
 
 	// Create missing diretories
-	if(!TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING).IsDirectory())
+	if(!TrackerSettings::Instance().PathTunings.GetDefaultDir().IsDirectory())
 	{
-		CreateDirectoryW(TrackerDirectories::Instance().GetDefaultDirectory(DIR_TUNING).AsNative().c_str(), 0);
+		CreateDirectoryW(TrackerSettings::Instance().PathTunings.GetDefaultDir().AsNative().c_str(), 0);
 	}
 
 	m_pSongSettingsIniFile = new IniFileSettingsBackend(m_szConfigDirectory + MPT_PATHSTRING("SongSettings.ini"));
@@ -1151,8 +1149,6 @@ int CTrackApp::ExitInstance()
 	m_pComponentManagerSettings = nullptr;
 	delete m_pTrackerSettings;
 	m_pTrackerSettings = nullptr;
-	delete m_pTrackerDirectories;
-	m_pTrackerDirectories = nullptr;
 	delete m_pSettings;
 	m_pSettings = nullptr;
 	delete m_pSettingsIniFile;
@@ -1299,11 +1295,11 @@ void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files)
 		"Wave Files (*.wav)|*.wav|"
 		"MIDI Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
 		"All Files (*.*)|*.*||")
-		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_MODS))
+		.WorkingDirectory(TrackerSettings::Instance().PathSongs.GetWorkingDir())
 		.FilterIndex(&nFilterIndex);
 	if(!dlg.Show()) return;
 
-	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_MODS);
+	TrackerSettings::Instance().PathSongs.SetWorkingDir(dlg.GetWorkingDirectory());
 
 	files = dlg.GetFilenames();
 }

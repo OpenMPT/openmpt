@@ -1743,11 +1743,11 @@ BOOL CMainFrame::SetupDirectories(const mpt::PathString &szModDir, const mpt::Pa
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	// will also set working directory
-	TrackerDirectories::Instance().SetDefaultDirectory(szModDir, DIR_MODS);
-	TrackerDirectories::Instance().SetDefaultDirectory(szSampleDir, DIR_SAMPLES);
-	TrackerDirectories::Instance().SetDefaultDirectory(szInstrDir, DIR_INSTRUMENTS);
-	TrackerDirectories::Instance().SetDefaultDirectory(szVstDir, DIR_PLUGINS);
-	TrackerDirectories::Instance().SetDefaultDirectory(szPresetDir, DIR_PLUGINPRESETS);
+	TrackerSettings::Instance().PathSongs.SetDefaultDir(szModDir);
+	TrackerSettings::Instance().PathSamples.SetDefaultDir(szSampleDir);
+	TrackerSettings::Instance().PathInstruments.SetDefaultDir(szInstrDir);
+	TrackerSettings::Instance().PathPlugins.SetDefaultDir(szVstDir);
+	TrackerSettings::Instance().PathPluginPresets.SetDefaultDir(szPresetDir);
 	return TRUE;
 }
 
@@ -2803,7 +2803,7 @@ void CMainFrame::UpdateMRUList()
 		pMenu->InsertMenu(firstMenu, MF_STRING | MF_BYPOSITION, ID_MRU_LIST_FIRST, _T("Recent File"));
 	} else
 	{
-		const mpt::PathString workDir = TrackerDirectories::Instance().GetWorkingDirectory(DIR_MODS);
+		const mpt::PathString workDir = TrackerSettings::Instance().PathSongs.GetWorkingDir();
 
 		for(size_t i = 0; i < TrackerSettings::Instance().mruFiles.size(); i++)
 		{

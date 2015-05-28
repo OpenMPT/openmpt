@@ -61,11 +61,11 @@ BOOL PathConfigDlg::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 
 	// Paths
-	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_MODS, TrackerDirectories::Instance().GetDefaultDirectory(DIR_MODS).AsNative().c_str());
-	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_SAMPS, TrackerDirectories::Instance().GetDefaultDirectory(DIR_SAMPLES).AsNative().c_str());
-	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_INSTS, TrackerDirectories::Instance().GetDefaultDirectory(DIR_INSTRUMENTS).AsNative().c_str());
-	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTS, TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINS).AsNative().c_str());
-	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTPRESETS,	TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINPRESETS).AsNative().c_str());
+	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_MODS, TrackerSettings::Instance().PathSongs.GetDefaultDir().AsNative().c_str());
+	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_SAMPS, TrackerSettings::Instance().PathSamples.GetDefaultDir().AsNative().c_str());
+	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_INSTS, TrackerSettings::Instance().PathInstruments.GetDefaultDir().AsNative().c_str());
+	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTS, TrackerSettings::Instance().PathPlugins.GetDefaultDir().AsNative().c_str());
+	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTPRESETS,	TrackerSettings::Instance().PathPluginPresets.GetDefaultDir().AsNative().c_str());
 
 	// Autosave
 	CheckDlgButton(IDC_AUTOSAVE_ENABLE, m_AutoSaver.IsEnabled() ? BST_CHECKED : BST_UNCHECKED);

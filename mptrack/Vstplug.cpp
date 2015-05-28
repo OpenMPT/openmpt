@@ -406,7 +406,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		//Log("VST plugin to host: Get Directory\n");
 		// Need to allocate space for path only, but I guess noone relies on this anyway.
 		//return ToVstPtr(pVstPlugin->GetPluginFactory().szDllPath);
-		//return ToVstPtr(TrackerDirectories::Instance().GetDefaultDirectory(DIR_PLUGINS));
+		//return ToVstPtr(TrackerSettings::Instance().PathPlugins.GetDefaultDir());
 		break;
 
 	// something has changed, update 'multi-fx' display
@@ -524,7 +524,7 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 			} else
 			{
 				// Plugins are probably looking for presets...?
-				//workingDir = TrackerDirectories::Instance().GetWorkingDirectory(DIR_PLUGINPRESETS);
+				//workingDir = TrackerSettings::Instance().PathPluginPresets.GetWorkingDir();
 			}
 
 			FileDialog dlg = OpenFileDialog();
@@ -977,7 +977,7 @@ void CVstPlugin::RandomizeParams(int amount)
 bool CVstPlugin::SaveProgram()
 //----------------------------
 {
-	mpt::PathString defaultDir = TrackerDirectories::Instance().GetWorkingDirectory(DIR_PLUGINPRESETS);
+	mpt::PathString defaultDir = TrackerSettings::Instance().PathPluginPresets.GetWorkingDir();
 	bool useDefaultDir = !defaultDir.empty();
 	if(!useDefaultDir)
 	{
@@ -999,7 +999,7 @@ bool CVstPlugin::SaveProgram()
 
 	if(useDefaultDir)
 	{
-		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_PLUGINPRESETS);
+		TrackerSettings::Instance().PathPluginPresets.SetWorkingDir(dlg.GetWorkingDirectory());
 	}
 
 	bool bank = (dlg.GetExtension() == MPT_PATHSTRING("fxb"));
@@ -1020,7 +1020,7 @@ bool CVstPlugin::SaveProgram()
 bool CVstPlugin::LoadProgram(mpt::PathString fileName)
 //----------------------------------------------------
 {
-	mpt::PathString defaultDir = TrackerDirectories::Instance().GetWorkingDirectory(DIR_PLUGINPRESETS);
+	mpt::PathString defaultDir = TrackerSettings::Instance().PathPluginPresets.GetWorkingDir();
 	bool useDefaultDir = !defaultDir.empty();
 	if(!useDefaultDir)
 	{
@@ -1040,7 +1040,7 @@ bool CVstPlugin::LoadProgram(mpt::PathString fileName)
 
 		if(useDefaultDir)
 		{
-			TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_PLUGINPRESETS);
+			TrackerSettings::Instance().PathPluginPresets.SetWorkingDir(dlg.GetWorkingDirectory());
 		}
 		fileName = dlg.GetFirstFile();
 	}

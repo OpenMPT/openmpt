@@ -549,10 +549,10 @@ void CSelectPluginDlg::OnAddPlugin()
 		.AllowMultiSelect()
 		.DefaultExtension("dll")
 		.ExtensionFilter("VST Plugins (*.dll)|*.dll||")
-		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_PLUGINS));
+		.WorkingDirectory(TrackerSettings::Instance().PathPlugins.GetWorkingDir());
 	if(!dlg.Show(this)) return;
 
-	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_PLUGINS);
+	TrackerSettings::Instance().PathPlugins.SetWorkingDir(dlg.GetWorkingDirectory());
 
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 
@@ -619,10 +619,10 @@ void CSelectPluginDlg::OnAddPlugin()
 void CSelectPluginDlg::OnScanFolder()
 //-----------------------------------
 {
-	BrowseForFolder dlg(TrackerDirectories::Instance().GetWorkingDirectory(DIR_PLUGINS), "Select a folder that should be scanned for VST plugins (including sub-folders)");
+	BrowseForFolder dlg(TrackerSettings::Instance().PathPlugins.GetWorkingDir(), "Select a folder that should be scanned for VST plugins (including sub-folders)");
 	if(!dlg.Show(this)) return;
 
-	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetDirectory(), DIR_PLUGINS);
+	TrackerSettings::Instance().PathPlugins.SetWorkingDir(dlg.GetDirectory());
 	VSTPluginLib *plugLib = ScanPlugins(dlg.GetDirectory(), this);
 	UpdatePluginsList(plugLib ? plugLib->pluginId2 : 0);
 }

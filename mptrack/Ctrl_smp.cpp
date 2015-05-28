@@ -895,7 +895,7 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName)
 	EndWaitCursor();
 	if (bOk)
 	{
-		TrackerDirectories::Instance().SetWorkingDirectory(fileName, DIR_SAMPLES, true);
+		TrackerSettings::Instance().PathSamples.SetWorkingDir(fileName, true);
 		if (!sample.filename[0])
 		{
 			mpt::PathString name, ext;
@@ -1031,11 +1031,11 @@ void CCtrlSamples::OnSampleOpen()
 			"AIFF Files (*.aiff;*.8svx)|*.aif;*.aiff;*.iff;*.8sv;*.8svx;*.svx|"
 			"Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|"
 			"All Files (*.*)|*.*||")
-		.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_SAMPLES))
+		.WorkingDirectory(TrackerSettings::Instance().PathSamples.GetWorkingDir())
 		.FilterIndex(&nLastIndex);
 	if(!dlg.Show(this)) return;
 
-	TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_SAMPLES);
+	TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetWorkingDirectory());
 
 	const FileDialog::PathList &files = dlg.GetFilenames();
 	for(size_t counter = 0; counter < files.size(); counter++)
@@ -1112,7 +1112,7 @@ void CCtrlSamples::OnSampleSave()
 		.ExtensionFilter("Wave File (*.wav)|*.wav|"
 			"FLAC File (*.flac)|*.flac|"
 			"RAW Audio (*.raw)|*.raw||")
-			.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_SAMPLES))
+			.WorkingDirectory(TrackerSettings::Instance().PathSamples.GetWorkingDir())
 			.FilterIndex(&filter);
 	if(!dlg.Show(this)) return;
 
@@ -1189,7 +1189,7 @@ void CCtrlSamples::OnSampleSave()
 		ErrorBox(IDS_ERR_SAVESMP, this);
 	} else
 	{
-		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_SAMPLES);
+		TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetWorkingDirectory());
 	}
 	SwitchToView();
 }

@@ -200,10 +200,14 @@ void CModTree::Init()
 
 	if(!IsSampleBrowser())
 	{
-		const Directory dirs[] = { DIR_SAMPLES, DIR_INSTRUMENTS, DIR_MODS };
+		const mpt::PathString dirs[] = {
+			TrackerSettings::Instance().PathSamples.GetDefaultDir(),
+			TrackerSettings::Instance().PathInstruments.GetDefaultDir(),
+			TrackerSettings::Instance().PathSongs.GetDefaultDir()
+		};
 		for(int i = 0; i < CountOf(dirs); i++)
 		{
-			m_InstrLibPath = TrackerDirectories::Instance().GetDefaultDirectory(dirs[i]);
+			m_InstrLibPath = dirs[i];
 			if(!m_InstrLibPath.empty())
 			{
 				break;
@@ -3228,11 +3232,11 @@ void CModTree::OnSetItemPath()
 		FileDialog dlg = OpenFileDialog()
 			.ExtensionFilter("All Samples|*.wav;*.flac|All files(*.*)|*.*||");	// Only show samples that we actually can save as well.
 		if(path.empty())
-			dlg.WorkingDirectory(TrackerDirectories::Instance().GetWorkingDirectory(DIR_SAMPLES));
+			dlg.WorkingDirectory(TrackerSettings::Instance().PathSamples.GetWorkingDir());
 		else
 			dlg.DefaultFilename(path);
 		if(!dlg.Show()) return;
-		TrackerDirectories::Instance().SetWorkingDirectory(dlg.GetWorkingDirectory(), DIR_SAMPLES);
+		TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetWorkingDirectory());
 
 		if(dlg.GetFirstFile() != pModDoc->GetrSoundFile().GetSamplePath(smpID))
 		{
