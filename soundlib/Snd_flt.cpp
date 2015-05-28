@@ -12,12 +12,7 @@
 #include "stdafx.h"
 #include "Sndfile.h"
 #include "Tables.h"
-
-#define _USE_MATH_DEFINES
-#include <cmath>
-#ifndef M_PI
-#define M_PI 3.1415926535897932385
-#endif
+#include "../common/misc_util.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
