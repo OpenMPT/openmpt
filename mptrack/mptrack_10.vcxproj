@@ -763,6 +763,7 @@
       <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</IntrinsicFunctions>
       <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='VSTi-Debug|x64'">true</IntrinsicFunctions>
     </ClCompile>
+    <ClCompile Include="..\soundlib\InstrumentExtensions.cpp" />
     <ClCompile Include="..\soundlib\ITCompression.cpp" />
     <ClCompile Include="..\soundlib\ITTools.cpp" />
     <ClCompile Include="..\soundlib\Load_digi.cpp" />

@@ -934,6 +934,9 @@
     <ClCompile Include="..\..\soundlib\ITTools.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\InstrumentExtensions.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_669.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>

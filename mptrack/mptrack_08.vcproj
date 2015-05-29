@@ -564,6 +564,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\InstrumentExtensions.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\ITCompression.cpp"
 				>
 			</File>

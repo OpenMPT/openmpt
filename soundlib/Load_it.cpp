@@ -1915,95 +1915,6 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-// Used only when saving IT, XM and MPTM.
-// ITI, ITP saves using Ericus' macros etc...
-// The reason is that ITs and XMs save [code][size][ins1.Value][ins2.Value]...
-// whereas ITP saves [code][size][ins1.Value][code][size][ins2.Value]...
-// too late to turn back....
-void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, FILE *f) const
-//--------------------------------------------------------------------------------------------
-{
-	uint32 code = MAGIC4BE('M','P','T','X');	// write extension header code
-	mpt::IO::WriteIntLE<uint32>(f, code);
-
-	if (nInstruments == 0)
-		return;
-
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','R','.','.'), sizeof(ModInstrument().nVolRampUp),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('M','i','P','.'), sizeof(ModInstrument().nMixPlug),    f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('M','C','.','.'), sizeof(ModInstrument().nMidiChannel),f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('M','P','.','.'), sizeof(ModInstrument().nMidiProgram),f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('M','B','.','.'), sizeof(ModInstrument().wMidiBank),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','.','.','.'), sizeof(ModInstrument().nPan),        f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('F','O','.','.'), sizeof(ModInstrument().nFadeOut),    f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('R','.','.','.'), sizeof(ModInstrument().nResampling), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('C','S','.','.'), sizeof(ModInstrument().nCutSwing),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('R','S','.','.'), sizeof(ModInstrument().nResSwing),   f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('F','M','.','.'), sizeof(ModInstrument().nFilterMode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','E','R','N'), sizeof(ModInstrument().PitchEnv.nReleaseNode ), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('A','E','R','N'), sizeof(ModInstrument().PanEnv.nReleaseNode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','E','R','N'), sizeof(ModInstrument().VolEnv.nReleaseNode), f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','T','T','L'), sizeof(ModInstrument().wPitchToTempoLock),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','V','E','H'), sizeof(ModInstrument().nPluginVelocityHandling),  f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','V','O','H'), sizeof(ModInstrument().nPluginVolumeHandling),  f, nInstruments);
-
-	if(!(GetType() & MOD_TYPE_XM))
-	{
-		// XM instrument headers already have support for this
-		WriteInstrumentPropertyForAllInstruments(MAGIC4BE('M','P','W','D'), sizeof(ModInstrument().midiPWD), f, nInstruments);
-	}
-
-	if(GetType() & MOD_TYPE_MPT)
-	{
-		uint32 maxNodes[3] = { 0 };
-		for(INSTRUMENTINDEX nIns = 1; nIns <= m_nInstruments; nIns++) if(Instruments[nIns] != nullptr)
-		{
-			maxNodes[0] = std::max(maxNodes[0], Instruments[nIns]->VolEnv.nNodes);
-			maxNodes[1] = std::max(maxNodes[1], Instruments[nIns]->PanEnv.nNodes);
-			maxNodes[2] = std::max(maxNodes[2], Instruments[nIns]->PitchEnv.nNodes);
-		}
-		// write full envelope information for MPTM files (more env points)
-		if(maxNodes[0] > 25)
-		{
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','E','.','.'), sizeof(ModInstrument().VolEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','P','[','.'), sizeof(ModInstrument().VolEnv.Ticks),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','E','[','.'), sizeof(ModInstrument().VolEnv.Values), f, nInstruments);
-		}
-		if(maxNodes[1] > 25)
-		{
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','E','.','.'), sizeof(ModInstrument().PanEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','P','[','.'), sizeof(ModInstrument().PanEnv.Ticks),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','E','[','.'), sizeof(ModInstrument().PanEnv.Values), f, nInstruments);
-		}
-		if(maxNodes[2] > 25)
-		{
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','E','.'), sizeof(ModInstrument().PitchEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','P','['), sizeof(ModInstrument().PitchEnv.Ticks),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','E','['), sizeof(ModInstrument().PitchEnv.Values), f, nInstruments);
-		}
-	}
-
-	return;
-}
-
-void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, int16 size, FILE *f, INSTRUMENTINDEX nInstruments) const
-//-----------------------------------------------------------------------------------------------------------------------------
-{
-	mpt::IO::WriteIntLE<uint32>(f, code);		//write code
-	mpt::IO::WriteIntLE<int16>(f, size);		//write size
-	for(UINT nins=1; nins<=nInstruments; nins++)	//for all instruments...
-	{
-		if (Instruments[nins])
-		{
-			WriteInstrumentHeaderStructOrField(Instruments[nins], f, code, size);
-		} else
-		{
-			ModInstrument emptyInstrument;
-			WriteInstrumentHeaderStructOrField(&emptyInstrument, f, code, size);
-		}
-	}
-}
-
 void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 //--------------------------------------------------------
 {
@@ -2141,42 +2052,6 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 }
 
 #endif // MODPLUG_NO_FILESAVE
-
-
-void CSoundFile::LoadExtendedInstrumentProperties(FileReader &file, bool *pInterpretMptMade)
-//------------------------------------------------------------------------------------------
-{
-	if(!file.ReadMagic("XTPM"))	// 'MPTX'
-	{
-		return;
-	}
-
-	// Found MPTX, interpret the file MPT made.
-	if(pInterpretMptMade != nullptr)
-		*pInterpretMptMade = true;
-
-	while(file.CanRead(6)) //Loop 'till beginning of end of file/mpt specific looking for inst. extensions
-	{
-		uint32 code = file.ReadUint32LE();
-
-		if(code == MAGIC4BE('M','P','T','S'))					//Reached song extensions, break out of this loop
-		{
-			file.SkipBack(4);
-			return;
-		}
-
-		// Read size of this property for *one* instrument
-		const uint16 size = file.ReadUint16LE();
-
-		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
-		{
-			if(Instruments[i])
-			{
-				ReadInstrumentExtensionField(Instruments[i], code, size, file);
-			}
-		}
-	}
-}
 
 
 template<typename T>

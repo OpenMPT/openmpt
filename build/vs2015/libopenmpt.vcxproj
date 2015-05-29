@@ -278,6 +278,7 @@
     <ClCompile Include="..\..\soundlib\Fastmix.cpp" />
     <ClCompile Include="..\..\soundlib\ITCompression.cpp" />
     <ClCompile Include="..\..\soundlib\ITTools.cpp" />
+    <ClCompile Include="..\..\soundlib\InstrumentExtensions.cpp" />
     <ClCompile Include="..\..\soundlib\Load_669.cpp" />
     <ClCompile Include="..\..\soundlib\Load_amf.cpp" />
     <ClCompile Include="..\..\soundlib\Load_ams.cpp" />

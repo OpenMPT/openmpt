@@ -194,7 +194,7 @@ public:
 	// C++11 explicit conversion cast operators ('explicit operator bool ();')
 	// would solve this in a better way and always fail at compile-time instead of this
 	// solution which just warns in some cases.
-	// The macro-based extended instrument fields writer in Sndfile.cpp currently needs this conversion,
+	// The macro-based extended instrument fields writer in InstrumentExtensions.cpp currently needs this conversion,
 	// so it is not marked deprecated (for now).
 	/*MPT_DEPRECATED*/ forceinline operator store_type () const
 	{
