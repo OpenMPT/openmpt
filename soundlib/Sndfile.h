@@ -650,7 +650,7 @@ public:
 
 	void RecalculateSamplesPerTick();
 	double GetRowDuration(UINT tempo, UINT speed) const;
-	uint32 GetTickDuration(uint32 tempo, uint32 speed, ROWINDEX rowsPerBeat);
+	uint32 GetTickDuration(PlayState &playState) const;
 
 	// A repeat count value of -1 means infinite loop
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }

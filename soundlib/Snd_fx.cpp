@@ -738,13 +738,13 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			break;
 		}
 
-		ROWINDEX rowsPerBeat = m_nDefaultRowsPerBeat;
+		m_PlayState.m_nCurrentRowsPerBeat = m_nDefaultRowsPerBeat;
 		if(Patterns[memory.state.m_nPattern].GetOverrideSignature())
 		{
-			rowsPerBeat = Patterns[memory.state.m_nPattern].GetRowsPerBeat();
+			m_PlayState.m_nCurrentRowsPerBeat = Patterns[memory.state.m_nPattern].GetRowsPerBeat();
 		}
 
-		const uint32 tickDuration = GetTickDuration(memory.state.m_nMusicTempo, memory.state.m_nMusicSpeed, rowsPerBeat);
+		const uint32 tickDuration = GetTickDuration(memory.state);
 		const uint32 rowDuration = tickDuration * numTicks;
 		memory.elapsedTime += static_cast<double>(rowDuration) / static_cast<double>(m_MixerSettings.gdwMixingFreq);
 		memory.state.m_lTotalSampleCount += rowDuration;

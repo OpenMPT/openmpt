@@ -1811,38 +1811,38 @@ void CSoundFile::RecalculateSamplesPerTick()
 // Get length of a tick in sample, with tick-to-tick tempo correction in modern tempo mode.
 // This has to be called exactly once per tick because otherwise the error accumulation
 // goes wrong.
-uint32 CSoundFile::GetTickDuration(uint32 tempo, uint32 speed, ROWINDEX rowsPerBeat)
-//----------------------------------------------------------------------------------
+uint32 CSoundFile::GetTickDuration(PlayState &playState) const
+//------------------------------------------------------------
 {
-	UINT retval = 0;
+	uint32 retval = 0;
 	switch(m_nTempoMode)
 	{
 	case tempo_mode_classic:
 	default:
-		retval = (m_MixerSettings.gdwMixingFreq * 5) / (tempo << 1);
+		retval = (m_MixerSettings.gdwMixingFreq * 5) / (playState.m_nMusicTempo << 1);
 		break;
 
 	case tempo_mode_alternative:
-		retval = m_MixerSettings.gdwMixingFreq / tempo;
+		retval = m_MixerSettings.gdwMixingFreq / playState.m_nMusicTempo;
 		break;
 
 	case tempo_mode_modern:
 		{
-			double accurateBufferCount = static_cast<double>(m_MixerSettings.gdwMixingFreq) * (60.0 / static_cast<double>(tempo) / (static_cast<double>(speed * rowsPerBeat)));
-			UINT bufferCount = static_cast<int>(accurateBufferCount);
-			m_PlayState.m_dBufferDiff += accurateBufferCount - bufferCount;
+			double accurateBufferCount = static_cast<double>(m_MixerSettings.gdwMixingFreq) * (60.0 / static_cast<double>(playState.m_nMusicTempo) / (static_cast<double>(playState.m_nMusicSpeed * playState.m_nCurrentRowsPerBeat)));
+			uint32 bufferCount = static_cast<int>(accurateBufferCount);
+			playState.m_dBufferDiff += accurateBufferCount - bufferCount;
 
 			//tick-to-tick tempo correction:
-			if(m_PlayState.m_dBufferDiff >= 1)
+			if(playState.m_dBufferDiff >= 1)
 			{
 				bufferCount++;
-				m_PlayState.m_dBufferDiff--;
+				playState.m_dBufferDiff--;
 			} else if(m_PlayState.m_dBufferDiff <= -1)
 			{
 				bufferCount--;
-				m_PlayState.m_dBufferDiff++;
+				playState.m_dBufferDiff++;
 			}
-			MPT_ASSERT(fabs(m_PlayState.m_dBufferDiff) < 1);
+			MPT_ASSERT(fabs(playState.m_dBufferDiff) < 1);
 			retval = bufferCount;
 		}
 		break;

@@ -1769,7 +1769,7 @@ bool CSoundFile::ReadNote()
 	////////////////////////////////////////////////////////////////////////////////////
 	if (!m_PlayState.m_nMusicTempo) return false;
 
-	m_PlayState.m_nSamplesPerTick = GetTickDuration(m_PlayState.m_nMusicTempo, m_PlayState.m_nMusicSpeed, m_PlayState.m_nCurrentRowsPerBeat);
+	m_PlayState.m_nSamplesPerTick = GetTickDuration(m_PlayState);
 	m_PlayState.m_nBufferCount = m_PlayState.m_nSamplesPerTick;
 
 	// Master Volume + Pre-Amplification / Attenuation setup
