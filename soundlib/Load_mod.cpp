@@ -543,7 +543,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	LimitMax(m_nChannels, MAX_BASECHANNELS);
 
 	// Startrekker 8 channel mod (needs special treatment, see below)
-	const bool isFLT8 = IsMagic(magic, "FLT8");
+	const bool isFLT8 = IsMagic(magic, "FLT8") || IsMagic(magic, "EXO8");
 	// Only apply VBlank tests to M.K. (ProTracker) modules.
 	const bool isMdKd = IsMagic(magic, "M.K.");
 
@@ -626,7 +626,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMaxPeriod = 3424 * 4;
 	// Prevent clipping based on number of channels... If all channels are playing at full volume, "256 / #channels"
 	// is the maximum possible sample pre-amp without getting distortion (Compatible mix levels given).
-	// The more channels we have, the less likely it is that all of them are used at the same time, though, so clip at 32...
+	// The more channels we have, the less likely it is that all of them are used at the same time, though, so cap at 32...
 	m_nSamplePreAmp = std::max(32, 256 / m_nChannels);
 	m_SongFlags.reset();
 
@@ -635,6 +635,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 
 	const CHANNELINDEX readChannels = (isFLT8 ? 4 : m_nChannels); // 4 channels per pattern in FLT8 format.
 	if(isFLT8) numPatterns++; // as one logical pattern consists of two real patterns in FLT8 format, the highest pattern number has to be increased by one.
+	uint8 maxPanning = 0;	// For detecting 8xx-as-sync
 	bool hasTempoCommands = false;	// for detecting VBlank MODs
 	bool leftPanning = false, extendedPanning = false;	// for detecting 800-880 panning
 	bool onlyAmigaNotes = true;
@@ -689,15 +690,19 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 					// Perform some checks for our heuristics...
 					if(m.command == CMD_TEMPO && m.param < 100)
 						hasTempoCommands = true;
-					if(m.command == CMD_PANNING8 && m.param < 0x80)
-						leftPanning = true;
-					if(m.command == CMD_PANNING8 && m.param > 0x8F && m.param != 0xA4)
-						extendedPanning = true;
+					else if(m.command == CMD_PANNING8)
+					{
+						maxPanning = std::max(maxPanning, m.param);
+						if(m.param < 0x80)
+							leftPanning = true;
+						else if(m.param > 0x8F && m.param != 0xA4)
+							extendedPanning = true;
+					}
 					if(m.note == NOTE_NONE && m.instr > 0 && !isFLT8)
 					{
 						if(lastInstrument[chn] > 0 && lastInstrument[chn] != m.instr)
 						{
-							// Arbitrary threshold for going into PT1x mode: 4 consecutive "sample swaps" in one pattern.
+							// Arbitrary threshold for going into PT1/2 mode: 4 consecutive "sample swaps" in one pattern.
 							if(++instrWithoutNoteCount[chn] >= 4)
 							{
 								m_SongFlags.set(SONG_PT1XMODE);
@@ -724,6 +729,11 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// M.K. files that don't exceed the Amiga note limit (fixes mod.mothergoose)
 		m_SongFlags.set(SONG_AMIGALIMITS);
+		// Arbitrary threshold for deciding that 8xx effects are only used as sync markers
+		if(maxPanning < 0x20)
+		{
+			m_SongFlags.set(SONG_PT1XMODE);
+		}
 	}
 
 	// Reading samples
@@ -758,7 +768,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 			m_SongFlags.set(SONG_VBLANK_TIMING);
 			if(GetLength(eNoAdjust, GetLengthTarget(songTime)).front().targetReached)
 			{
-				// This just makes things worse, song is at least as long asi n CIA mode (e.g. in "Stary Hallway" by Neurodancer)
+				// This just makes things worse, song is at least as long as in CIA mode (e.g. in "Stary Hallway" by Neurodancer)
 				// Obviously we should keep using CIA timing then...
 				m_SongFlags.reset(SONG_VBLANK_TIMING);
 			} else
