@@ -192,7 +192,7 @@ bool IsNegative(const T &val)
 	static_assert(sizeof(input->name) == sizeof(type), "Instrument property does match specified type!");\
 	fcode = MULTICHAR_STRING_TO_INT(#code);\
 	fsize = sizeof( type );\
-	if(only_this_code == Util::MaxValueOfType(only_this_code)) \
+	if(writeAll) \
 	{ \
 		mpt::IO::WriteIntLE<uint32>(file, fcode); \
 		mpt::IO::WriteIntLE<int16>(file, fsize); \
@@ -215,7 +215,7 @@ bool IsNegative(const T &val)
 	static_assert(sizeof(input->name) > sizeof(type), "Instrument property would not be truncated, use WRITE_MPTHEADER_sized_member instead!");\
 	fcode = MULTICHAR_STRING_TO_INT(#code);\
 	fsize = sizeof( type );\
-	if(only_this_code == Util::MaxValueOfType(only_this_code)) \
+	if(writeAll) \
 	{ \
 		mpt::IO::WriteIntLE<uint32>(file, fcode); \
 		mpt::IO::WriteIntLE<int16>(file, fsize); \
@@ -250,7 +250,7 @@ bool IsNegative(const T &val)
 	MPT_ASSERT(sizeof(input->name) >= sizeof(type) * arraysize);\
 	fcode = MULTICHAR_STRING_TO_INT(#code);\
 	fsize = sizeof( type ) * arraysize;\
-	if(only_this_code == Util::MaxValueOfType(only_this_code)) \
+	if(writeAll) \
 	{ \
 		mpt::IO::WriteIntLE<uint32>(file, fcode); \
 		mpt::IO::WriteIntLE<int16>(file, fsize); \
@@ -271,96 +271,35 @@ bool IsNegative(const T &val)
 	} \
 /**/
 
-// Create 'dF..' entry.
-static DWORD CreateExtensionFlags(const ModInstrument& ins)
-//---------------------------------------------------------
-{
-	DWORD dwFlags = 0;
-	if(ins.VolEnv.dwFlags[ENV_ENABLED])		dwFlags |= dFdd_VOLUME;
-	if(ins.VolEnv.dwFlags[ENV_SUSTAIN])		dwFlags |= dFdd_VOLSUSTAIN;
-	if(ins.VolEnv.dwFlags[ENV_LOOP])		dwFlags |= dFdd_VOLLOOP;
-	if(ins.PanEnv.dwFlags[ENV_ENABLED])		dwFlags |= dFdd_PANNING;
-	if(ins.PanEnv.dwFlags[ENV_SUSTAIN])		dwFlags |= dFdd_PANSUSTAIN;
-	if(ins.PanEnv.dwFlags[ENV_LOOP])		dwFlags |= dFdd_PANLOOP;
-	if(ins.PitchEnv.dwFlags[ENV_ENABLED])	dwFlags |= dFdd_PITCH;
-	if(ins.PitchEnv.dwFlags[ENV_SUSTAIN])	dwFlags |= dFdd_PITCHSUSTAIN;
-	if(ins.PitchEnv.dwFlags[ENV_LOOP])		dwFlags |= dFdd_PITCHLOOP;
-	if(ins.dwFlags[INS_SETPANNING])			dwFlags |= dFdd_SETPANNING;
-	if(ins.PitchEnv.dwFlags[ENV_FILTER])	dwFlags |= dFdd_FILTER;
-	if(ins.VolEnv.dwFlags[ENV_CARRY])		dwFlags |= dFdd_VOLCARRY;
-	if(ins.PanEnv.dwFlags[ENV_CARRY])		dwFlags |= dFdd_PANCARRY;
-	if(ins.PitchEnv.dwFlags[ENV_CARRY])		dwFlags |= dFdd_PITCHCARRY;
-	if(ins.dwFlags[INS_MUTE])				dwFlags |= dFdd_MUTE;
-	return dwFlags;
-}
 
 // Write (in 'file') 'input' ModInstrument with 'code' & 'size' extra field infos for each member
 void WriteInstrumentHeaderStructOrField(ModInstrument * input, FILE * file, uint32 only_this_code, int16 fixedsize)
 {
 uint32 fcode;
 int16 fsize;
+// If true, all extension are written to the file; otherwise only the specified extension is written.
+// writeAll is true iff we are saving an instrument (or, hypothetically, the legacy ITP format)
+const bool writeAll = only_this_code == Util::MaxValueOfType(only_this_code);
 
-if(only_this_code != Util::MaxValueOfType(only_this_code))
+if(!writeAll)
 {
 	MPT_ASSERT(fixedsize > 0);
 }
 
-WRITE_MPTHEADER_sized_member(	nFadeOut				, UINT			, FO..							)
-
-if(only_this_code == Util::MaxValueOfType(only_this_code) || only_this_code == MULTICHAR_STRING_TO_INT("dF..")){ // dwFlags needs to be constructed so write it manually.
-	//WRITE_MPTHEADER_sized_member(	dwFlags					, DWORD			, dF..							)
-	uint32 dwFlags = CreateExtensionFlags(*input);
-	fcode = MULTICHAR_STRING_TO_INT("dF..");
-	fsize = sizeof(dwFlags);
-	if(!only_this_code)
-	{
-		mpt::IO::WriteIntLE<int32>(file, fcode);
-		mpt::IO::WriteIntLE<int16>(file, fsize);
-	}
-	dwFlags = SwapBytesReturnLE(dwFlags);
-	fwrite(&dwFlags, 1, fsize, file);
-}
-
-WRITE_MPTHEADER_sized_member(	nGlobalVol				, uint32		, GV..							)
+WRITE_MPTHEADER_sized_member(	nFadeOut				, uint32		, FO..							)
 WRITE_MPTHEADER_sized_member(	nPan					, uint32		, P...							)
 WRITE_MPTHEADER_sized_member(	VolEnv.nNodes			, uint32		, VE..							)
 WRITE_MPTHEADER_sized_member(	PanEnv.nNodes			, uint32		, PE..							)
 WRITE_MPTHEADER_sized_member(	PitchEnv.nNodes			, uint32		, PiE.							)
-WRITE_MPTHEADER_sized_member(	VolEnv.nLoopStart		, uint8			, VLS.							)
-WRITE_MPTHEADER_sized_member(	VolEnv.nLoopEnd			, uint8			, VLE.							)
-WRITE_MPTHEADER_sized_member(	VolEnv.nSustainStart	, uint8			, VSB.							)
-WRITE_MPTHEADER_sized_member(	VolEnv.nSustainEnd		, uint8			, VSE.							)
-WRITE_MPTHEADER_sized_member(	PanEnv.nLoopStart		, uint8			, PLS.							)
-WRITE_MPTHEADER_sized_member(	PanEnv.nLoopEnd			, uint8			, PLE.							)
-WRITE_MPTHEADER_sized_member(	PanEnv.nSustainStart	, uint8			, PSB.							)
-WRITE_MPTHEADER_sized_member(	PanEnv.nSustainEnd		, uint8			, PSE.							)
-WRITE_MPTHEADER_sized_member(	PitchEnv.nLoopStart		, uint8			, PiLS							)
-WRITE_MPTHEADER_sized_member(	PitchEnv.nLoopEnd		, uint8			, PiLE							)
-WRITE_MPTHEADER_sized_member(	PitchEnv.nSustainStart	, uint8			, PiSB							)
-WRITE_MPTHEADER_sized_member(	PitchEnv.nSustainEnd	, uint8			, PiSE							)
-WRITE_MPTHEADER_sized_member(	nNNA					, uint8			, NNA.							)
-WRITE_MPTHEADER_sized_member(	nDCT					, uint8			, DCT.							)
-WRITE_MPTHEADER_sized_member(	nDNA					, uint8			, DNA.							)
-WRITE_MPTHEADER_sized_member(	nPanSwing				, uint8			, PS..							)
-WRITE_MPTHEADER_sized_member(	nVolSwing				, uint8			, VS..							)
-WRITE_MPTHEADER_sized_member(	nIFC					, uint8			, IFC.							)
-WRITE_MPTHEADER_sized_member(	nIFR					, uint8			, IFR.							)
 WRITE_MPTHEADER_sized_member(	wMidiBank				, uint16		, MB..							)
 WRITE_MPTHEADER_sized_member(	nMidiProgram			, uint8			, MP..							)
 WRITE_MPTHEADER_sized_member(	nMidiChannel			, uint8			, MC..							)
-WRITE_MPTHEADER_sized_member(	nMidiDrumKey			, uint8			, MDK.							)
-WRITE_MPTHEADER_sized_member(	nPPS					, int8			, PPS.							)
-WRITE_MPTHEADER_sized_member(	nPPC					, uint8			, PPC.							)
-WRITE_MPTHEADER_array_member(	VolEnv.Ticks			, uint16		, VP[.		, ((input->VolEnv.nNodes > 32) ? MAX_ENVPOINTS : 32))
-WRITE_MPTHEADER_array_member(	PanEnv.Ticks			, uint16		, PP[.		, ((input->PanEnv.nNodes > 32) ? MAX_ENVPOINTS : 32))
-WRITE_MPTHEADER_array_member(	PitchEnv.Ticks			, uint16		, PiP[		, ((input->PitchEnv.nNodes > 32) ? MAX_ENVPOINTS : 32))
-WRITE_MPTHEADER_array_member(	VolEnv.Values			, uint8			, VE[.		, ((input->VolEnv.nNodes > 32) ? MAX_ENVPOINTS : 32))
-WRITE_MPTHEADER_array_member(	PanEnv.Values			, uint8			, PE[.		, ((input->PanEnv.nNodes > 32) ? MAX_ENVPOINTS : 32))
-WRITE_MPTHEADER_array_member(	PitchEnv.Values			, uint8			, PiE[		, ((input->PitchEnv.nNodes > 32) ? MAX_ENVPOINTS : 32))
-WRITE_MPTHEADER_array_member(	NoteMap					, uint8			, NM[.		, 128				)
-WRITE_MPTHEADER_array_member(	Keyboard				, uint16		, K[..		, 128				)
-WRITE_MPTHEADER_array_member(	name					, char			, n[..		, 32				)
-WRITE_MPTHEADER_array_member(	filename				, char			, fn[.		, 12				)
+WRITE_MPTHEADER_array_member(	VolEnv.Ticks			, uint16		, VP[.		, (int16) input->VolEnv.nNodes)
+WRITE_MPTHEADER_array_member(	PanEnv.Ticks			, uint16		, PP[.		, (int16) input->PanEnv.nNodes)
+WRITE_MPTHEADER_array_member(	PitchEnv.Ticks			, uint16		, PiP[		, (int16) input->PitchEnv.nNodes)
+WRITE_MPTHEADER_array_member(	VolEnv.Values			, uint8			, VE[.		, (int16) input->VolEnv.nNodes)
+WRITE_MPTHEADER_array_member(	PanEnv.Values			, uint8			, PE[.		, (int16) input->PanEnv.nNodes)
+WRITE_MPTHEADER_array_member(	PitchEnv.Values			, uint8			, PiE[		, (int16) input->PitchEnv.nNodes)
 WRITE_MPTHEADER_sized_member(	nMixPlug				, uint8			, MiP.							)
 WRITE_MPTHEADER_sized_member(	nVolRampUp				, uint16		, VR..							)
 WRITE_MPTHEADER_trunc_member(	nResampling				, uint16		, R...							)
@@ -409,10 +348,10 @@ WRITE_MPTHEADER_sized_member(	midiPWD					, int8			, MPWD							)
 	if(fcode == MULTICHAR_STRING_TO_INT(#code)) {\
 		if( fsize <= sizeof( type ) * arraysize ) \
 		{ \
-			if(!file.CanRead(sizeof(type) * arraysize)) return false; \
+			FileReader arrayChunk = file.ReadChunk(fsize); \
 			for(std::size_t i = 0; i < arraysize; ++i) \
 			{ \
-				input-> name [i] = file.ReadIntLE<type>(); \
+				input-> name [i] = arrayChunk.ReadIntLE<type>(); \
 			} \
 			return true; \
 		} \
@@ -469,7 +408,7 @@ GET_MPTHEADER_array_member(	name					, char			, n[..		, 32				)
 GET_MPTHEADER_array_member(	filename				, char			, fn[.		, 12				)
 GET_MPTHEADER_sized_member(	nMixPlug				, uint8			, MiP.							)
 GET_MPTHEADER_sized_member(	nVolRampUp				, uint16		, VR..							)
-GET_MPTHEADER_sized_member(	nResampling				, UINT			, R...							)
+GET_MPTHEADER_sized_member(	nResampling				, uint32		, R...							)
 GET_MPTHEADER_sized_member(	nCutSwing				, uint8			, CS..							)
 GET_MPTHEADER_sized_member(	nResSwing				, uint8			, RS..							)
 GET_MPTHEADER_sized_member(	nFilterMode				, uint8			, FM..							)

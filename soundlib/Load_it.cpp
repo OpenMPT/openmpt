@@ -1935,7 +1935,6 @@ void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, 
 	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('M','P','.','.'), sizeof(ModInstrument().nMidiProgram),f, nInstruments);
 	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('M','B','.','.'), sizeof(ModInstrument().wMidiBank),   f, nInstruments);
 	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','.','.','.'), sizeof(ModInstrument().nPan),        f, nInstruments);
-	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('G','V','.','.'), sizeof(ModInstrument().nGlobalVol),  f, nInstruments);
 	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('F','O','.','.'), sizeof(ModInstrument().nFadeOut),    f, nInstruments);
 	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('R','.','.','.'), sizeof(ModInstrument().nResampling), f, nInstruments);
 	WriteInstrumentPropertyForAllInstruments(MAGIC4BE('C','S','.','.'), sizeof(ModInstrument().nCutSwing),   f, nInstruments);
