@@ -21,44 +21,63 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Window proportions
-enum
+struct Measurements
 {
-	edSpacing = 5,		// Spacing between elements
-	edLineHeight = 20,	// Line of a single parameter line
-	edEditWidth = 45,	// Width of the parameter edit box
-	edPerMilWidth = 30,	// Width of the per mil label
-	edRightWidth = edEditWidth + edSpacing + edPerMilWidth,	// Width of the right part of a parameter control set (edit box, param value)
-	edTotalHeight = 2 * edLineHeight + edSpacing,			// Height of one set of controls
+	enum
+	{
+		edSpacing = 5,		// Spacing between elements
+		edLineHeight = 20,	// Line of a single parameter line
+		edEditWidth = 45,	// Width of the parameter edit box
+		edPerMilWidth = 30,	// Width of the per mil label
+		edRightWidth = edEditWidth + edSpacing + edPerMilWidth,	// Width of the right part of a parameter control set (edit box, param value)
+		edTotalHeight = 2 * edLineHeight + edSpacing,			// Height of one set of controls
+	};
+
+	const int spacing;
+	const int lineHeight;
+	const int editWidth;
+	const int perMilWidth;
+	const int rightWidth;
+	const int totalHeight;
+
+	Measurements(HWND hWnd)
+		: spacing(Util::ScalePixels(edSpacing, hWnd))
+		, lineHeight(Util::ScalePixels(edLineHeight, hWnd))
+		, editWidth(Util::ScalePixels(edEditWidth, hWnd))
+		, perMilWidth(Util::ScalePixels(edPerMilWidth, hWnd))
+		, rightWidth(Util::ScalePixels(edRightWidth, hWnd))
+		, totalHeight(Util::ScalePixels(edTotalHeight, hWnd))
+	{ }
 };
 
 
 // Create a set of parameter controls
-ParamControlSet::ParamControlSet(CWnd *parent, const CRect &rect, int setID)
-//--------------------------------------------------------------------------
+ParamControlSet::ParamControlSet(CWnd *parent, const CRect &rect, int setID, const Measurements &m)
+//-------------------------------------------------------------------------------------------------
 {
 	// Offset of components on the right side
-	const int horizSplit = rect.left + rect.Width() - edRightWidth;
+	const int horizSplit = rect.left + rect.Width() - m.rightWidth;
 	
 	// Parameter name
-	nameLabel.Create("", WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(rect.left, rect.top, horizSplit - edSpacing, rect.top + edLineHeight), parent);
+	nameLabel.Create("", WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(rect.left, rect.top, horizSplit - m.spacing, rect.top + m.lineHeight), parent);
 	nameLabel.SetFont(parent->GetFont());
 
 	// Parameter value as reported by the plugin
-	valueLabel.Create("", WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(horizSplit, rect.top, rect.right, rect.top + edLineHeight), parent);
+	valueLabel.Create("", WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(horizSplit, rect.top, rect.right, rect.top + m.lineHeight), parent);
 	valueLabel.SetFont(parent->GetFont());
 
 	// Parameter value slider
-	valueSlider.Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP /* | TBS_NOTICKS | TBS_BOTH */ | TBS_AUTOTICKS, CRect(rect.left, rect.bottom - edLineHeight, horizSplit - edSpacing, rect.bottom), parent, ID_PLUGINEDITOR_SLIDERS_BASE + setID);
+	valueSlider.Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP /* | TBS_NOTICKS | TBS_BOTH */ | TBS_AUTOTICKS, CRect(rect.left, rect.bottom - m.lineHeight, horizSplit - m.spacing, rect.bottom), parent, ID_PLUGINEDITOR_SLIDERS_BASE + setID);
 	valueSlider.SetFont(parent->GetFont());
 	valueSlider.SetRange(0, PARAM_RESOLUTION);
 	valueSlider.SetTicFreq(PARAM_RESOLUTION / 10);
 
 	// Parameter value edit box
-	valueEdit.CreateEx(WS_EX_CLIENTEDGE, _T("EDIT"), NULL, WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER | ES_AUTOHSCROLL | ES_NUMBER, CRect(horizSplit, rect.bottom - edLineHeight, horizSplit + edEditWidth, rect.bottom), parent, ID_PLUGINEDITOR_EDIT_BASE + setID);
+	valueEdit.CreateEx(WS_EX_CLIENTEDGE, _T("EDIT"), NULL, WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER | ES_AUTOHSCROLL | ES_NUMBER, CRect(horizSplit, rect.bottom - m.lineHeight, horizSplit + m.editWidth, rect.bottom), parent, ID_PLUGINEDITOR_EDIT_BASE + setID);
 	valueEdit.SetFont(parent->GetFont());
 
 	// "Per mil" label
-	perMilLabel.Create("‰", WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(horizSplit + edEditWidth + edSpacing, rect.bottom - edLineHeight, rect.right, rect.bottom), parent);
+	perMilLabel.Create("‰", WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(horizSplit + m.editWidth + m.spacing, rect.bottom - m.lineHeight, rect.right, rect.bottom), parent);
 	perMilLabel.SetFont(parent->GetFont());
 }
 
@@ -185,6 +204,7 @@ void CDefaultVstEditor::CreateControls()
 	{
 		return;
 	}
+	Measurements m(m_hWnd);
 
 	CRect window;
 	GetWindowRect(&window);
@@ -205,22 +225,22 @@ void CDefaultVstEditor::CreateControls()
 	controls.clear();
 
 	// Create a bit of border space
-	rect.DeflateRect(edSpacing, edSpacing);
-	rect.bottom = edTotalHeight;
+	rect.DeflateRect(m.spacing, m.spacing);
+	rect.bottom = m.totalHeight;
 
 	for(int i = 0; i < NUM_PLUGINEDITOR_PARAMETERS; i++)
 	{
 		try
 		{
-			controls.push_back(new ParamControlSet(this, rect, i));
-			rect.OffsetRect(0, edTotalHeight + edSpacing);
+			controls.push_back(new ParamControlSet(this, rect, i, m));
+			rect.OffsetRect(0, m.totalHeight + m.spacing);
 		} catch(MPTMemoryException)
 		{
 		}
 	}
 
 	// Calculate new ideal window height.
-	const int heightChange = (rect.bottom - edTotalHeight + edSpacing) - origHeight;
+	const int heightChange = (rect.bottom - m.totalHeight + m.spacing) - origHeight;
 
 	// Update parameter scroll bar height
 	scrollRect.bottom += heightChange;

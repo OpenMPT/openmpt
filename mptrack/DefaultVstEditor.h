@@ -23,6 +23,8 @@ enum
 	NUM_PLUGINEDITOR_PARAMETERS = 8,	// Parameters on screen
 };
 
+struct Measurements;
+
 //===================
 class ParamControlSet
 //===================
@@ -35,7 +37,7 @@ protected:
 	CStatic perMilLabel;
 
 public:
-	ParamControlSet(CWnd *parent, const CRect &rect, int setID);
+	ParamControlSet(CWnd *parent, const CRect &rect, int setID, const Measurements &m);
 	~ParamControlSet();
 
 	void EnableControls(bool enable = true);
