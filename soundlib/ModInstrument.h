@@ -97,9 +97,9 @@ struct ModInstrument
 	char name[MAX_INSTRUMENTNAME];
 	char filename[MAX_INSTRUMENTFILENAME];
 
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// WHEN adding new members here, ALSO update Sndfile.cpp (instructions near the top of this file)!
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// WHEN adding new members here, ALSO update InstrumentExtensions.cpp
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	void SetTuning(CTuning* pT)
 	{

@@ -1660,6 +1660,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\soundlib\InstrumentExtensions.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\soundlib\IntMixer.h"
 				>
 			</File>

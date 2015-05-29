@@ -56,9 +56,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 class FileReader;
-// -----------------------------------------------------------------------------------------
-// MODULAR ModInstrument FIELD ACCESS : body content at the (near) top of Sndfile.cpp !!!
-// -----------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// MODULAR ModInstrument FIELD ACCESS : body content in InstrumentExtensions.cpp
+// -----------------------------------------------------------------------------
 #ifndef MODPLUG_NO_FILESAVE
 extern void WriteInstrumentHeaderStructOrField(ModInstrument * input, FILE * file, uint32 only_this_code = -1 /* -1 for all */, int16 fixedsize = 0);
 #endif // !MODPLUG_NO_FILESAVE
@@ -994,9 +994,6 @@ void ReadExtendedInstrumentProperty(ModInstrument* pIns, const uint32 code, File
 
 // Read extended instrument properties from 'file' to instrument 'pIns'.
 void ReadExtendedInstrumentProperties(ModInstrument* pIns, FileReader &file);
-
-// Convert instrument flags which were read from 'dF..' extension to proper internal representation.
-void ConvertReadExtendedFlags(ModInstrument* pIns);
 
 
 OPENMPT_NAMESPACE_END

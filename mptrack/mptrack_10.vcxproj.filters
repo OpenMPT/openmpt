@@ -565,6 +565,9 @@
     <ClCompile Include="AdvancedConfigDlg.cpp">
       <Filter>Source Files\mptrack\Dialogs</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\InstrumentExtensions.cpp">
+      <Filter>Source Files\soundlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">

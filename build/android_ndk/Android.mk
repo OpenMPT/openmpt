@@ -36,6 +36,7 @@ LOCAL_SRC_FILES := \
 	soundlib/Dither.cpp \
 	soundlib/Dlsbank.cpp \
 	soundlib/Fastmix.cpp \
+	soundlib/InstrumentExtensions.cpp \
 	soundlib/ITCompression.cpp \
 	soundlib/ITTools.cpp \
 	soundlib/Load_669.cpp \
