@@ -2485,21 +2485,7 @@ bool CSoundFile::ProcessEffects()
 			} else
 			if (volcmd == VOLCMD_PANNING)
 			{
-				// IT Compatibility (and other trackers as well): panning disables surround (unless panning in rear channels is enabled, which is not supported by the original trackers anyway)
-				if(IsCompatibleMode(TRK_ALLTRACKERS) && !m_SongFlags[SONG_SURROUNDPAN])
-				{
-					pChn->dwFlags.reset(CHN_SURROUND);
-				}
-				if(vol > 64) vol = 64;
-				pChn->nPan = vol * 4;
-				pChn->dwFlags.set(CHN_FASTVOLRAMP);
-				pChn->nRestorePanOnNewNote = 0;
-				//IT compatibility 20. Set pan overrides random pan
-				if(IsCompatibleMode(TRK_IMPULSETRACKER))
-				{
-					pChn->nPanSwing = 0;
-					pChn->nPanbrelloOffset = 0;
-				}
+				Panning(pChn, vol, Pan6bit);
 			}
 
 #ifdef MODPLUG_TRACKER
@@ -2874,12 +2860,10 @@ bool CSoundFile::ProcessEffects()
 
 		// Set 8-bit Panning
 		case CMD_PANNING8:
-			if(!m_SongFlags[SONG_FIRSTTICK]
-				|| m_SongFlags[SONG_PT1XMODE])	// No panning in ProTracker mode
+			if(m_SongFlags[SONG_FIRSTTICK])
 			{
-				break;
+				Panning(pChn, param, Pan8bit);
 			}
-			Panning(pChn, param, Pan8bit);
 			break;
 
 		// Panning Slide
@@ -3683,7 +3667,13 @@ void CSoundFile::Panbrello(ModChannel *p, UINT param) const
 void CSoundFile::Panning(ModChannel *pChn, uint32 param, PanningType panBits) const
 //---------------------------------------------------------------------------------
 {
-	if (!m_SongFlags[SONG_SURROUNDPAN] && (panBits == 8 || IsCompatibleMode(TRK_ALLTRACKERS)))
+	// No panning in ProTracker mode
+	if(m_SongFlags[SONG_PT1XMODE])
+	{
+		return;
+	}
+	// IT Compatibility (and other trackers as well): panning disables surround (unless panning in rear channels is enabled, which is not supported by the original trackers anyway)
+	if (!m_SongFlags[SONG_SURROUNDPAN] && (panBits == Pan8bit || IsCompatibleMode(TRK_ALLTRACKERS)))
 	{
 		pChn->dwFlags.reset(CHN_SURROUND);
 	}
@@ -4011,7 +4001,7 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 	case 0x70:	pChn->nTremoloType = param & 0x07; break;
 	// E8x: Set 4-bit Panning
 	case 0x80:
-		if(m_SongFlags[SONG_FIRSTTICK] && !m_SongFlags[SONG_PT1XMODE])
+		if(m_SongFlags[SONG_FIRSTTICK])
 		{
 			Panning(pChn, param, Pan4bit);
 		}
