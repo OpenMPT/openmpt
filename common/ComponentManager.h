@@ -54,13 +54,8 @@ public:
 
 	virtual ~IComponent() { }
 
-protected:
-
-	virtual void SetName(const std::string &name) = 0;
-
 public:
 
-	virtual std::string GetName() const = 0;
 	virtual std::string GetSettingsKey() const = 0;
 	virtual ComponentType GetType() const = 0;
 	
@@ -79,7 +74,6 @@ class ComponentBase
 
 private:
 
-	std::string m_Name;
 	ComponentType m_Type;
 
 	bool m_Initialized;
@@ -95,13 +89,11 @@ public:
 
 protected:
 
-	void SetName(const std::string &name);
 	void SetInitialized();
 	void SetAvailable();
 
 public:
 
-	virtual std::string GetName() const;
 	virtual ComponentType GetType() const;
 	virtual bool IsInitialized() const;
 	virtual bool IsAvailable() const;
@@ -232,7 +224,7 @@ protected:
 public:
 	virtual ~IComponentFactory() { }
 public:
-	virtual std::string GetName() const = 0;
+	virtual std::string GetID() const = 0;
 	virtual MPT_SHARED_PTR<IComponent> Construct() const = 0;
 };
 
@@ -241,12 +233,12 @@ class ComponentFactoryBase
 	: public IComponentFactory
 {
 private:
-	std::string m_Name;
+	std::string m_ID;
 protected:
-	ComponentFactoryBase(const std::string &name);
+	ComponentFactoryBase(const std::string &id);
 public:
 	virtual ~ComponentFactoryBase();
-	virtual std::string GetName() const;
+	virtual std::string GetID() const;
 	virtual MPT_SHARED_PTR<IComponent> Construct() const;
 	virtual MPT_SHARED_PTR<IComponent> DoConstruct() const = 0;
 };
@@ -257,8 +249,8 @@ class ComponentFactory
 	: public ComponentFactoryBase
 {
 public:
-	ComponentFactory(const std::string &name)
-		: ComponentFactoryBase(name)
+	ComponentFactory(const std::string &id)
+		: ComponentFactoryBase(id)
 	{
 		return;
 	}
@@ -322,7 +314,7 @@ struct ComponentListEntry
 		
 bool ComponentListPush(ComponentListEntry *entry);
 
-#define MPT_DECLARE_COMPONENT_MEMBERS public: static const char * const g_TypeName;
+#define MPT_DECLARE_COMPONENT_MEMBERS public: static const char * const g_ID;
 		
 #define MPT_REGISTERED_COMPONENT(name) \
 	static void RegisterComponent ## name (ComponentManager *componentManager) \
@@ -331,14 +323,14 @@ bool ComponentListPush(ComponentListEntry *entry);
 	} \
 	static ComponentListEntry Component ## name ## ListEntry = { nullptr, & RegisterComponent ## name }; \
 	static bool Component ## name ## Registered = ComponentListPush(& Component ## name ## ListEntry ); \
-	const char * const name :: g_TypeName = #name ; \
+	const char * const name :: g_ID = #name ; \
 /**/
 
 
 template <typename type>
 MPT_SHARED_PTR<type> GetComponent()
 {
-	return MPT_DYNAMIC_POINTER_CAST<type>(ComponentManager::Instance()->GetComponent(ComponentFactory<type>(type::g_TypeName)));
+	return MPT_DYNAMIC_POINTER_CAST<type>(ComponentManager::Instance()->GetComponent(ComponentFactory<type>(type::g_ID)));
 }
 
 

@@ -52,13 +52,6 @@ ComponentLibrary::~ComponentLibrary()
 }
 
 
-void ComponentBase::SetName(const std::string &name)
-//--------------------------------------------------
-{
-	m_Name = name;
-}
-
-
 void ComponentBase::SetInitialized()
 //----------------------------------
 {
@@ -116,13 +109,6 @@ bool ComponentLibrary::HasBindFailed() const
 //------------------------------------------
 {
 	return m_BindFailed;
-}
-
-
-std::string ComponentBase::GetName() const
-//----------------------------------------
-{
-	return m_Name;
 }
 
 
@@ -184,9 +170,9 @@ void ComponentBase::Initialize()
 #if MPT_COMPONENT_MANAGER
 
 
-ComponentFactoryBase::ComponentFactoryBase(const std::string &name)
-//-----------------------------------------------------------------
-	: m_Name(name)
+ComponentFactoryBase::ComponentFactoryBase(const std::string &id)
+//---------------------------------------------------------------
+	: m_ID(id)
 {
 	return;
 }
@@ -199,21 +185,17 @@ ComponentFactoryBase::~ComponentFactoryBase()
 }
 
 
-std::string ComponentFactoryBase::GetName() const
+std::string ComponentFactoryBase::GetID() const
+//---------------------------------------------
 {
-	return m_Name;
+	return m_ID;
 }
 
 
 MPT_SHARED_PTR<IComponent> ComponentFactoryBase::Construct() const
 //----------------------------------------------------------------
 {
-	MPT_SHARED_PTR<IComponent> result = DoConstruct();
-	if(result)
-	{
-		result->SetName(GetName());
-	}
-	return result;
+	return DoConstruct();
 }
 
 
@@ -289,13 +271,13 @@ ComponentManager::ComponentManager(const IComponentManagerSettings &settings)
 void ComponentManager::Register(const IComponentFactory &componentFactory)
 //------------------------------------------------------------------------
 {
-	std::string name = componentFactory.GetName();
-	TComponentMap::const_iterator it = m_Components.find(name);
+	std::string id = componentFactory.GetID();
+	TComponentMap::const_iterator it = m_Components.find(id);
 	if(it != m_Components.end())
 	{
 		return;
 	}
-	m_Components.insert(std::make_pair(name, componentFactory.Construct()));
+	m_Components.insert(std::make_pair(id, componentFactory.Construct()));
 }
 
 
@@ -346,7 +328,7 @@ void ComponentManager::Startup()
 MPT_SHARED_PTR<IComponent> ComponentManager::GetComponent(const IComponentFactory &componentFactory) const
 //--------------------------------------------------------------------------------------------------------
 {
-	TComponentMap::const_iterator it = m_Components.find(componentFactory.GetName());
+	TComponentMap::const_iterator it = m_Components.find(componentFactory.GetID());
 	MPT_SHARED_PTR<IComponent> component = (it != m_Components.end()) ? it->second : componentFactory.Construct();
 	MPT_ASSERT(component);
 	InitializeComponent(component);
