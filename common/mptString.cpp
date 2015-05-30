@@ -131,12 +131,12 @@ always available).
 All these types publicly inherit from mpt::ustring and do not contain any
 additional state. This means that they work the same way as mpt::ustring does
 and do support type-slicing for both, read and write accesses.
-These types only add conversion contructors for all string types that have a
+These types only add conversion constructors for all string types that have a
 defined encoding and for all 8bit string types using the specified encoding
 heuristic.
 
  *  AnyUnicodeString (OpenMPT, libopenmpt)
-    Is onstructible from any Unicode string.
+    Is constructible from any Unicode string.
 
  *  AnyString (OpenMPT, libopenmpt)
     Tries to do the smartest auto-magic we can do.
