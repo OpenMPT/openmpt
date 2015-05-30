@@ -3931,7 +3931,7 @@ void CSoundFile::Tremolo(ModChannel *pChn, UINT param) const
 void CSoundFile::ChannelVolSlide(ModChannel *pChn, ModCommand::PARAM param) const
 //-------------------------------------------------------------------------------
 {
-	LONG nChnSlide = 0;
+	int32 nChnSlide = 0;
 	if (param) pChn->nOldChnVolSlide = param; else param = pChn->nOldChnVolSlide;
 
 	if (((param & 0x0F) == 0x0F) && (param & 0xF0))
@@ -4863,8 +4863,8 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 }
 
 
-void CSoundFile::DoFreqSlide(ModChannel *pChn, LONG nFreqSlide) const
-//-------------------------------------------------------------------
+void CSoundFile::DoFreqSlide(ModChannel *pChn, int32 nFreqSlide) const
+//--------------------------------------------------------------------
 {
 	if(!pChn->nPeriod) return;
 	if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
