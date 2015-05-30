@@ -448,6 +448,28 @@ inline mpt::ustring FromTcharBuf(const Tchar (&buf)[size])
 	return mpt::String::detail::StringFromBuffer<mpt::CharsetLocale>(buf);
 }
 
+// mpt::FromTcharStr
+// Converts TCHAR strings to mpt::ustring in both ANSI and UNICODE builds.
+// Useful when going through CString is not appropriate.
+
+template <typename Tchar> mpt::ustring FromTcharStr(const Tchar *str);
+template <> inline mpt::ustring FromTcharStr<char>(const char *str)
+{
+	if(!str)
+	{
+		return mpt::ustring();
+	}
+	return mpt::ToUnicode(mpt::CharsetLocale, std::string(str));
+}
+template <> inline mpt::ustring FromTcharStr<wchar_t>(const wchar_t *str)
+{
+	if(!str)
+	{
+		return mpt::ustring();
+	}
+	return mpt::ToUnicode(std::wstring(str));
+}
+
 // mpt::ToTcharBuf
 // The inverse of mpt::FromTcharBuf.
 // Always NULL-terminates the buffer.
@@ -457,6 +479,21 @@ template <typename Tchar, std::size_t size>
 inline bool ToTcharBuf(Tchar (&buf)[size], const mpt::ustring &str)
 {
 	return mpt::String::detail::StringToBuffer<mpt::CharsetLocale>(buf, str);
+}
+
+// mpt::FromTcharStr
+// Converts mpt::ustring to std::basic_stringy<TCHAR>,
+// which is usable in both ANSI and UNICODE builds.
+// Useful when going through CString is not appropriate.
+
+template <typename Tchar> std::basic_string<Tchar> ToTcharStr(const mpt::ustring &str);
+template <> inline std::string ToTcharStr<char>(const mpt::ustring &str)
+{
+	return mpt::ToCharset(mpt::CharsetLocale, str);
+}
+template <> inline std::wstring ToTcharStr<wchar_t>(const mpt::ustring &str)
+{
+	return mpt::ToWide(str);
 }
 
 #endif // MPT_OS_WINDOWS
