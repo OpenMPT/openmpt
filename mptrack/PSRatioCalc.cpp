@@ -9,11 +9,9 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "mainfrm.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
 #include "PSRatioCalc.h"
-#include ".\psratiocalc.h"
-#include "Sndfile.h"		//for tempo mode enum
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -110,7 +108,7 @@ void CPSRatioCalc::OnEnChangeRows()
 	UpdateData();
 	if (m_dRowsOrig && m_dRowsNew)
 	{
-		m_dRatio = m_dRowsNew/m_dRowsOrig * 100.0;
+		m_dRatio = m_dRowsNew / m_dRowsOrig * 100.0;
 		CalcSamples();
 		CalcMs();	
 		UpdateData(FALSE);
@@ -121,8 +119,8 @@ void CPSRatioCalc::OnEnChangeRows()
 void CPSRatioCalc::OnEnChangeSpeed()
 {
 	UpdateData();
-	if (m_nTempo == 0) m_nTempo = 1;
-	if (m_nSpeed == 0) m_nSpeed = 1;
+	if (m_nTempo < 1) m_nTempo = 1;
+	if (m_nSpeed <1 ) m_nSpeed = 1;
 	CalcRows();
 	UpdateData(FALSE);
 }
@@ -135,7 +133,7 @@ void CPSRatioCalc::OnEnChangeratio()
 		CalcSamples();
 		CalcMs();
 		CalcRows();
-    	UpdateData(FALSE);
+		UpdateData(FALSE);
 	}
 }
 
@@ -155,7 +153,7 @@ void CPSRatioCalc::CalcMs()
 
 void CPSRatioCalc::CalcRows()
 {
-	double rowTime = sndFile.GetRowDuration(sndFile.m_PlayState.m_nMusicTempo, sndFile.m_PlayState.m_nMusicSpeed);
+	double rowTime = sndFile.GetRowDuration(m_nTempo, m_nSpeed);
 
 	m_dRowsOrig = (double)m_lMsOrig / rowTime;
 	m_dRowsNew = m_dRowsOrig*(m_dRatio / 100);
