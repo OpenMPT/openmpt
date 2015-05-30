@@ -65,6 +65,7 @@ BEGIN_MESSAGE_MAP(COptionsColors, CPropertyPage)
 	ON_COMMAND(IDC_CHECK2,				OnPreviewChanged)
 	ON_COMMAND(IDC_CHECK3,				OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK4,				OnPreviewChanged)
+	ON_COMMAND(IDC_CHECK5,				OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
