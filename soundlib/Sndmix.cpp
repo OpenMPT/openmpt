@@ -2063,7 +2063,7 @@ bool CSoundFile::ReadNote()
 				int32 pan = pChn->nRealPan;
 				Limit(pan, 0, 256);
 
-				LONG realvol;
+				int32 realvol;
 				if (m_PlayConfig.getUseGlobalPreAmp())
 				{
 					realvol = (pChn->nRealVolume * kChnMasterVol) >> 7;

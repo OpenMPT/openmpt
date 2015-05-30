@@ -540,7 +540,6 @@ namespace mpt { namespace Legacy {
 typedef uint8  BYTE;
 typedef uint16 WORD;
 typedef uint32 DWORD;
-typedef int32  LONG;
 typedef uint32 UINT;
 } } // namespace mpt::Legacy
 using namespace mpt::Legacy;

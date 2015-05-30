@@ -163,7 +163,7 @@ typedef struct PACKED tagMMD2SONGHEADER
 	WORD numtracks;		// # of tracks (max 64)
 	WORD numpseqs;		// # of play sequences
 	DWORD trackpans;	// filepos of tracks pan values (BYTE array)
-	LONG flags3;		// 0x1:stereo_mix, 0x2:free_panning, 0x4:GM/XG compatibility
+	int32 flags3;		// 0x1:stereo_mix, 0x2:free_panning, 0x4:GM/XG compatibility
 	WORD voladj;		// vol_adjust (set to 100 if 0)
 	WORD channels;		// # of channels (4 if =0)
 	BYTE mix_echotype;	// 1:normal,2:xecho

@@ -870,7 +870,7 @@ protected:
 
 	void SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modifier = 256) const;
 	// Low-Level effect processing
-	void DoFreqSlide(ModChannel *pChn, LONG nFreqSlide) const;
+	void DoFreqSlide(ModChannel *pChn, int32 nFreqSlide) const;
 	void UpdateTimeSignature();
 
 	uint32 GetNumTicksOnCurrentRow() const
