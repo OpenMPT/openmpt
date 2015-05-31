@@ -623,7 +623,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamples = pmsh->numsamples;
 	if (m_nSamples > 63) m_nSamples = 63;
 	// Tempo
-	m_nDefaultTempo = 125;
+	m_nDefaultTempo.Set(125);
 	deftempo = BigEndianW(pmsh->deftempo);
 	if (!deftempo) deftempo = 125;
 	if (pmsh->flags2 & MMD_FLAG2_BPM)
@@ -655,7 +655,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		if (deftempo > 255) deftempo = 255;
 	}
-	m_nDefaultTempo = deftempo;
+	m_nDefaultTempo.Set(deftempo);
 	// Reading Samples
 	for (UINT iSHdr=0; iSHdr<m_nSamples; iSHdr++)
 	{

@@ -82,7 +82,8 @@ protected:
 	CStatic m_EditTempo, m_EditSpeed, m_EditOctave, m_EditRowsPerBeat;
 	CStatic m_StaticTempo, m_StaticSpeed, m_StaticRowsPerBeat;
 	CSpinButtonCtrl m_SpinTempo, m_SpinSpeed, m_SpinOctave, m_SpinRowsPerBeat;
-	int nCurrentSpeed, nCurrentTempo, nCurrentOctave, nCurrentRowsPerBeat;
+	int nCurrentSpeed, nCurrentOctave, nCurrentRowsPerBeat;
+	TEMPO nCurrentTempo;
 public:
 	CStereoVU m_VuMeter;
 

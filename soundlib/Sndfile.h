@@ -11,14 +11,14 @@
 
 #pragma once
 
-#include "../soundlib/SoundFilePlayConfig.h"
-#include "../soundlib/MixerSettings.h"
+#include "SoundFilePlayConfig.h"
+#include "MixerSettings.h"
 #include "../common/misc_util.h"
-#include "mod_specifications.h"
 #include <vector>
 #include <bitset>
 #include <set>
 #include "Snd_defs.h"
+#include "modcommand.h"
 #include "tuning.h"
 #include "MIDIMacros.h"
 #ifdef MODPLUG_TRACKER
@@ -224,6 +224,7 @@ DECLARE_FLAGSET(ModSpecificFlag)
 
 
 class CTuningCollection;
+struct CModSpecifications;
 #ifdef MODPLUG_TRACKER
 class CModDoc;
 #endif // MODPLUG_TRACKER
@@ -407,14 +408,15 @@ public:
 	CHANNELINDEX m_nChannels;
 	SAMPLEINDEX m_nSamples;
 	INSTRUMENTINDEX m_nInstruments;
-	UINT m_nDefaultSpeed, m_nDefaultTempo, m_nDefaultGlobalVolume;
+	UINT m_nDefaultSpeed, m_nDefaultGlobalVolume;
+	TEMPO m_nDefaultTempo;
 	FlagSet<SongFlags> m_SongFlags;
 	CHANNELINDEX m_nMixChannels;
 private:
 	CHANNELINDEX m_nMixStat;
 public:
 	ROWINDEX m_nDefaultRowsPerBeat, m_nDefaultRowsPerMeasure;	// default rows per beat and measure for this module // rewbs.betterBPM
-	tempoMode m_nTempoMode;
+	TempoMode m_nTempoMode;
 	ORDERINDEX m_nRestartPos;
 
 #ifdef MODPLUG_TRACKER
@@ -454,7 +456,7 @@ public:
 protected:
 	// Mix level stuff
 	CSoundFilePlayConfig m_PlayConfig;
-	mixLevels m_nMixLevels;
+	MixLevels m_nMixLevels;
 
 public:
 	struct PlayState
@@ -473,7 +475,8 @@ public:
 		uint32 m_nSamplesPerTick;
 	public:
 		ROWINDEX m_nCurrentRowsPerBeat, m_nCurrentRowsPerMeasure;	// current rows per beat and measure for this module
-		uint32 m_nMusicSpeed, m_nMusicTempo;	// Current speed and tempo
+		uint32 m_nMusicSpeed;	// Current speed
+		TEMPO m_nMusicTempo;	// Current tempo
 
 		// Playback position
 		ROWINDEX m_nRow;
@@ -605,8 +608,8 @@ public:
 	void SetPreAmp(UINT vol);
 	UINT GetPreAmp() const { return m_MixerSettings.m_nPreAmp; }
 
-	void SetMixLevels(mixLevels levels);
-	mixLevels GetMixLevels() const { return m_nMixLevels; }
+	void SetMixLevels(MixLevels levels);
+	MixLevels GetMixLevels() const { return m_nMixLevels; }
 	const CSoundFilePlayConfig &GetPlayConfig() const { return m_PlayConfig; }
 
 	INSTRUMENTINDEX GetNumInstruments() const { return m_nInstruments; }
@@ -635,7 +638,7 @@ public:
 	const char *GetSampleName(SAMPLEINDEX nSample) const;
 	const char *GetInstrumentName(INSTRUMENTINDEX nInstr) const;
 	UINT GetMusicSpeed() const { return m_PlayState.m_nMusicSpeed; }
-	UINT GetMusicTempo() const { return m_PlayState.m_nMusicTempo; }
+	TEMPO GetMusicTempo() const { return m_PlayState.m_nMusicTempo; }
 	bool IsFirstTick() const { return (m_PlayState.m_lTotalSampleCount == 0); }
 
 	//Get modlength in various cases: total length, length to
@@ -649,7 +652,7 @@ public:
 	double GetSongTime() { return GetLength(eNoAdjust).back().duration; }
 
 	void RecalculateSamplesPerTick();
-	double GetRowDuration(UINT tempo, UINT speed) const;
+	double GetRowDuration(TEMPO tempo, UINT speed) const;
 	uint32 GetTickDuration(PlayState &playState) const;
 
 	// A repeat count value of -1 means infinite loop
@@ -790,7 +793,7 @@ public:
 	// Channel Effects
 	void KeyOff(ModChannel *pChn) const;
 	// Global Effects
-	void SetTempo(UINT param, bool setAsNonModcommand = false);
+	void SetTempo(TEMPO param, bool setAsNonModcommand = false);
 	void SetSpeed(UINT param);
 
 protected:
@@ -802,12 +805,12 @@ protected:
 	void ProcessTremolo(ModChannel *pChn, int &vol) const;
 	void ProcessTremor(ModChannel *pChn, int &vol) const;
 
-	bool IsEnvelopeProcessed(const ModChannel *pChn, enmEnvelopeTypes env) const;
+	bool IsEnvelopeProcessed(const ModChannel *pChn, EnvelopeType env) const;
 	void ProcessVolumeEnvelope(ModChannel *pChn, int &vol) const;
 	void ProcessPanningEnvelope(ModChannel *pChn) const;
 	void ProcessPitchFilterEnvelope(ModChannel *pChn, int &period) const;
 
-	void IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes envType) const;
+	void IncrementEnvelopePosition(ModChannel *pChn, EnvelopeType envType) const;
 	void IncrementEnvelopePositions(ModChannel *pChn) const;
 
 	void ProcessInstrumentFade(ModChannel *pChn, int &vol) const;

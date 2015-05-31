@@ -13,6 +13,7 @@
 #include "Mainfrm.h"
 #include "InputHandler.h"
 #include "Moddoc.h"
+#include "../soundlib/mod_specifications.h"
 #include "Childfrm.h"
 #include "Mpdlgs.h"
 #include "dlg_misc.h"
@@ -719,7 +720,8 @@ BOOL CModDoc::InitializeMod()
 		MemsetZero(m_SndFile.m_szNames);
 		//m_SndFile.SetTitle("untitled");
 
-		m_SndFile.m_PlayState.m_nMusicTempo = m_SndFile.m_nDefaultTempo = 125;
+		m_SndFile.m_PlayState.m_nMusicTempo.Set(125);
+		m_SndFile.m_nDefaultTempo.Set(125);
 		m_SndFile.m_PlayState.m_nMusicSpeed = m_SndFile.m_nDefaultSpeed = 6;
 
 		// Set up levels
@@ -2273,16 +2275,16 @@ void CModDoc::OnApproximateBPM()
 
 	switch(m_SndFile.m_nTempoMode)
 	{
-		case tempo_mode_alternative:
+		case tempoModeAlternative:
 			Message.Format("Using alternative tempo interpretation.\n\nAssuming:\n. %d ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM",
 			m_SndFile.m_PlayState.m_nMusicTempo, m_SndFile.m_PlayState.m_nMusicSpeed, m_SndFile.m_PlayState.m_nCurrentRowsPerBeat, bpm);
 			break;
 
-		case tempo_mode_modern:
+		case tempoModeModern:
 			Message.Format("Using modern tempo interpretation.\n\nThe tempo is: %.8g BPM", bpm);
 			break;
 
-		case tempo_mode_classic:
+		case tempoModeClassic:
 		default:
 			Message.Format("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %d\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM",
 			m_SndFile.m_PlayState.m_nMusicTempo, m_SndFile.m_PlayState.m_nMusicSpeed, m_SndFile.m_PlayState.m_nCurrentRowsPerBeat, bpm);

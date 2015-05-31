@@ -12,6 +12,7 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "tuningcollection.h"
+#include "mod_specifications.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/moddoc.h"
 #include "../mptrack/TrackerSettings.h"
@@ -430,7 +431,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultGlobalVolume = fileHeader.globalvol << 1;
 	if(m_nDefaultGlobalVolume > MAX_GLOBAL_VOLUME) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	if(fileHeader.speed) m_nDefaultSpeed = fileHeader.speed;
-	m_nDefaultTempo = std::max(uint8(31), fileHeader.tempo);
+	m_nDefaultTempo.Set(std::max(uint8(31), fileHeader.tempo));
 	m_nSamplePreAmp = std::min(fileHeader.mv, uint8(128));
 
 	// Reading Channels Pan Positions
@@ -738,7 +739,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	LoadExtendedInstrumentProperties(file, &interpretModPlugMade);
 	if(interpretModPlugMade)
 	{
-		m_nMixLevels = mixLevels_original;
+		m_nMixLevels = mixLevelsOriginal;
 	}
 	// We need to do this here, because if there no samples (so lastSampleOffset = 0), we need to look after the last pattern (sample data normally follows pattern data).
 	// And we need to do this before reading the patterns because m_nChannels might be modified by LoadExtendedSongProperties. *sigh*
@@ -1209,7 +1210,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	itHeader.globalvol = (uint8)(m_nDefaultGlobalVolume >> 1);
 	itHeader.mv = (uint8)MIN(m_nSamplePreAmp, 128);
 	itHeader.speed = (uint8)MIN(m_nDefaultSpeed, 255);
- 	itHeader.tempo = (uint8)MIN(m_nDefaultTempo, 255);  //Limit this one to 255, we save the real one as an extension below.
+ 	itHeader.tempo = (uint8)MIN(m_nDefaultTempo.GetInt(), 255);  //Limit this one to 255, we save the real one as an extension below.
 	itHeader.sep = 128; // pan separation
 	// IT doesn't have a per-instrument Pitch Wheel Depth setting, so we just store the first non-zero PWD setting in the header.
 	for(INSTRUMENTINDEX ins = 1; ins < GetNumInstruments(); ins++)
@@ -1918,6 +1919,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 //--------------------------------------------------------
 {
+	const CModSpecifications &specs = GetModSpecifications();
 	// Extra song data - Yet Another Hack.
 	mpt::IO::WriteIntLE<uint32>(f, MAGIC4BE('M','P','T','S'));
 
@@ -1934,9 +1936,15 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		mpt::IO::WriteIntLE(f, field); \
 	}
 
-	if(m_nDefaultTempo > 255)
+	if(m_nDefaultTempo.GetInt() > 255)
 	{
-		WRITEMODULAR(MAGIC4BE('D','T','.','.'), m_nDefaultTempo);
+		uint32 tempo = m_nDefaultTempo.GetInt();
+		WRITEMODULAR(MAGIC4BE('D','T','.','.'), tempo);
+	}
+	if(m_nDefaultTempo.GetFract() != 0 && specs.hasFractionalTempo)
+	{
+		uint32 tempo = m_nDefaultTempo.GetFract();
+		WRITEMODULAR(MAGIC4LE('D','T','F','R'), tempo);
 	}
 
 	WRITEMODULAR(MAGIC4BE('R','P','B','.'), m_nDefaultRowsPerBeat);
@@ -1990,7 +1998,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		WRITEMODULAR(MAGIC4BE('R','P','.','.'), m_nRestartPos);
 	}
 
-	if(m_nResampling != SRCMODE_DEFAULT && GetModSpecifications().hasDefaultResampling)
+	if(m_nResampling != SRCMODE_DEFAULT && specs.hasDefaultResampling)
 	{
 		WRITEMODULAR(MAGIC4LE('R','S','M','P'), static_cast<uint32>(m_nResampling));
 	}
@@ -2022,7 +2030,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		WRITEMODULAR(MAGIC4BE('M','S','F','.'), m_ModFlags.GetRaw());
 	}
 
-	if(!songArtist.empty())
+	if(!songArtist.empty() && specs.hasArtistName)
 	{
 		std::string songArtistU8 = mpt::ToCharset(mpt::CharsetUTF8, songArtist);
 		uint16 length = mpt::saturate_cast<uint16>(songArtistU8.length());
@@ -2108,7 +2116,8 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 
 		switch (code)					// interpret field code
 		{
-			case MAGIC4BE('D','T','.','.'): ReadField(chunk, size, m_nDefaultTempo); break;
+			case MAGIC4BE('D','T','.','.'): { uint32 tempo; ReadField(chunk, size, tempo); m_nDefaultTempo.Set(tempo, m_nDefaultTempo.GetFract()); break; }
+			case MAGIC4LE('D','T','F','R'): { uint32 tempoFract; ReadField(chunk, size, tempoFract); m_nDefaultTempo.Set(m_nDefaultTempo.GetInt(), tempoFract); break; }
 			case MAGIC4BE('R','P','B','.'): ReadField(chunk, size, m_nDefaultRowsPerBeat); break;
 			case MAGIC4BE('R','P','M','.'): ReadField(chunk, size, m_nDefaultRowsPerMeasure); break;
 			case MAGIC4BE('C','.','.','.'): if(modtype != MOD_TYPE_XM) ReadField(chunk, size, m_nChannels); break;

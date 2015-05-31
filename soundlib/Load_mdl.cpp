@@ -364,7 +364,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 			if (norders > MAX_ORDERS) norders = MAX_ORDERS;
 			m_nRestartPos = pmib->repeatpos;
 			m_nDefaultGlobalVolume = pmib->globalvol;
-			m_nDefaultTempo = pmib->tempo;
+			m_nDefaultTempo.Set(pmib->tempo);
 			m_nDefaultSpeed = pmib->speed;
 			m_nChannels = 4;
 			for (i=0; i<32; i++)

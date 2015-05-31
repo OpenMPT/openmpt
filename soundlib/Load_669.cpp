@@ -115,7 +115,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags = SONG_LINEARSLIDES;
 	m_nMinPeriod = 28 << 2;
 	m_nMaxPeriod = 1712 << 3;
-	m_nDefaultTempo = 78;
+	m_nDefaultTempo.Set(78);
 	m_nDefaultSpeed = 4;
 	m_nChannels = 8;
 

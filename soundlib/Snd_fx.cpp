@@ -16,6 +16,7 @@
 
 #include "stdafx.h"
 #include "Sndfile.h"
+#include "mod_specifications.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Moddoc.h"
 #endif // MODPLUG_TRACKER
@@ -514,18 +515,18 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			case CMD_TEMPO:
 				if(!m_SongFlags[SONG_VBLANK_TIMING])
 				{
-					uint32 tempo = CalculateXParam(memory.state.m_nPattern, memory.state.m_nRow, nChn);
+					TEMPO tempo(CalculateXParam(memory.state.m_nPattern, memory.state.m_nRow, nChn), 0);
 					if ((adjustMode & eAdjust) && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
 					{
-						if (tempo) pChn->nOldTempo = static_cast<uint8>(tempo); else tempo = pChn->nOldTempo;
+						if (tempo.GetInt()) pChn->nOldTempo = static_cast<uint8>(tempo.GetInt()); else tempo.Set(pChn->nOldTempo);
 					}
 
-					if (tempo >= 0x20) memory.state.m_nMusicTempo = tempo;
+					if (tempo.GetInt() >= 0x20) memory.state.m_nMusicTempo = tempo;
 					else
 					{
 						// Tempo Slide
-						uint32 tempoDiff = (tempo & 0x0F) * nonRowTicks;
-						if ((tempo & 0xF0) == 0x10)
+						TEMPO tempoDiff((tempo.GetInt() & 0x0F) * nonRowTicks, 0);
+						if ((tempo.GetInt() & 0xF0) == 0x10)
 						{
 							memory.state.m_nMusicTempo += tempoDiff;
 						} else
@@ -533,14 +534,14 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							if(tempoDiff < memory.state.m_nMusicTempo)
 								memory.state.m_nMusicTempo -= tempoDiff;
 							else
-								memory.state.m_nMusicTempo = 0;
+								memory.state.m_nMusicTempo.Set(0);
 						}
 					}
 
 					TEMPO tempoMin = GetModSpecifications().tempoMin, tempoMax = GetModSpecifications().tempoMax;
 					if(IsCompatibleMode(TRK_ALLTRACKERS))	// clamp tempo correctly in compatible mode
 					{
-						tempoMax = 255;
+						tempoMax.Set(255);
 					}
 					Limit(memory.state.m_nMusicTempo, tempoMin, tempoMax);
 				}
@@ -1276,7 +1277,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	pChn->nLoopStart = pSmp->nLoopStart;
 	pChn->nLoopEnd = pSmp->nLoopEnd;
 	// ProTracker "oneshot" loops (if loop start is 0, play the whole sample once and then repeat until loop end)
-	if(m_SongFlags[SONG_PT1XMODE] && pChn->nLoopStart == 0) pChn->nLoopEnd = pSmp->nLength;
+	if(m_SongFlags[SONG_PT_MODE] && pChn->nLoopStart == 0) pChn->nLoopEnd = pSmp->nLength;
 	pChn->dwFlags |= (pSmp->uFlags & (CHN_SAMPLEFLAGS | CHN_SURROUND));
 
 	// IT Compatibility: Autovibrato reset
@@ -1533,7 +1534,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 			pChn->nLoopStart = 0;
 			pChn->nPos = 0;
 			pChn->nPosLo = 0;
-			if(m_SongFlags[SONG_PT1XMODE] && !pChn->rowCommand.instr)
+			if(m_SongFlags[SONG_PT_MODE] && !pChn->rowCommand.instr)
 			{
 				pChn->nPos = pChn->proTrackerOffset;
 				LimitMax(pChn->nPos, pChn->nLength - 1);
@@ -1557,7 +1558,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 				if (pChn->nLength > pChn->nLoopEnd) pChn->nLength = pChn->nLoopEnd;
 			}
 			// ProTracker "oneshot" loops (if loop start is 0, play the whole sample once and then repeat until loop end)
-			if(m_SongFlags[SONG_PT1XMODE] && pChn->nLoopStart == 0) pChn->nLoopEnd = pChn->nLength = pSmp->nLength;
+			if(m_SongFlags[SONG_PT_MODE] && pChn->nLoopStart == 0) pChn->nLoopEnd = pChn->nLength = pSmp->nLength;
 
 			if(pChn->dwFlags[CHN_REVERSE])
 			{
@@ -2205,7 +2206,7 @@ bool CSoundFile::ProcessEffects()
 			bPorta = false;
 		}
 
-		if(m_SongFlags[SONG_PT1XMODE] && instr && !m_PlayState.m_nTickCount)
+		if(m_SongFlags[SONG_PT_MODE] && instr && !m_PlayState.m_nTickCount)
 		{
 			// Instrument number resets the stacked ProTracker offset.
 			// Test case: ptoffset.mod
@@ -2283,7 +2284,7 @@ bool CSoundFile::ProcessEffects()
 			bool reloadSampleSettings = (IsCompatibleMode(TRK_FASTTRACKER2) && instr != 0);
 			// ProTracker Compatibility: If a sample was stopped before, lone instrument numbers can retrigger it
 			// Test case: PTSwapEmpty.mod
-			bool keepInstr = (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (m_SongFlags[SONG_PT1XMODE] && pChn->nInc == 0);
+			bool keepInstr = (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (m_SongFlags[SONG_PT_MODE] && pChn->nInc == 0);
 
 			// Now it's time for some FT2 crap...
 			if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
@@ -2452,7 +2453,7 @@ bool CSoundFile::ProcessEffects()
 				{
 					// Special IT case: portamento+note causes sample change -> ignore portamento
 					bPorta = false;
-				} else if(m_SongFlags[SONG_PT1XMODE] && pChn->nInc == 0)
+				} else if(m_SongFlags[SONG_PT_MODE] && pChn->nInc == 0)
 				{
 					// If channel was paused and is resurrected by a lone instrument number, reset the sample position.
 					// Test case: PTSwapEmpty.mod
@@ -2725,13 +2726,16 @@ bool CSoundFile::ProcessEffects()
 				if(m_SongFlags[SONG_FIRSTTICK] && param != 0) SetSpeed(param);
 				break;
 			}
-
-			param = CalculateXParam(m_PlayState.m_nPattern, m_PlayState.m_nRow, nChn);
-			if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 			{
-				if (param) pChn->nOldTempo = static_cast<ModCommand::PARAM>(param); else param = pChn->nOldTempo;
+				param = CalculateXParam(m_PlayState.m_nPattern, m_PlayState.m_nRow, nChn);
+				if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+				{
+					if (param) pChn->nOldTempo = static_cast<ModCommand::PARAM>(param); else param = pChn->nOldTempo;
+				}
+				TEMPO t(param, 0);
+				LimitMax(t, GetModSpecifications().tempoMax);
+				SetTempo(t);
 			}
-			SetTempo(param);
 			break;
 
 		// Set Offset
@@ -3668,7 +3672,7 @@ void CSoundFile::Panning(ModChannel *pChn, uint32 param, PanningType panBits) co
 //---------------------------------------------------------------------------------
 {
 	// No panning in ProTracker mode
-	if(m_SongFlags[SONG_PT1XMODE])
+	if(m_SongFlags[SONG_PT_MODE])
 	{
 		return;
 	}
@@ -4664,7 +4668,7 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 
 	if(chn.rowCommand.IsNote())
 	{
-		if(m_SongFlags[SONG_PT1XMODE])
+		if(m_SongFlags[SONG_PT_MODE])
 		{
 			// ProTracker compatbility: PT1/2-style funky 9xx offset command
 			// Test case: ptoffset.mod
@@ -5013,8 +5017,8 @@ void CSoundFile::SetSpeed(UINT param)
 }
 
 
-void CSoundFile::SetTempo(UINT param, bool setAsNonModcommand)
-//------------------------------------------------------------
+void CSoundFile::SetTempo(TEMPO param, bool setAsNonModcommand)
+//-------------------------------------------------------------
 {
 	const CModSpecifications& specs = GetModSpecifications();
 
@@ -5022,22 +5026,23 @@ void CSoundFile::SetTempo(UINT param, bool setAsNonModcommand)
 	{
 		// Set tempo from UI - ignore slide commands and such.
 		m_PlayState.m_nMusicTempo = Clamp(param, specs.tempoMin, specs.tempoMax);
-	} else if (param >= 0x20 && m_SongFlags[SONG_FIRSTTICK])
+	} else if (param >= TEMPO(0x20, 0) && m_SongFlags[SONG_FIRSTTICK])
 	{
 		m_PlayState.m_nMusicTempo = param;
 		if (param > GetModSpecifications().tempoMax) param = GetModSpecifications().tempoMax;
-	} else if (param < 0x20 && !m_SongFlags[SONG_FIRSTTICK])
+	} else if (param < TEMPO(0x20, 0) && !m_SongFlags[SONG_FIRSTTICK])
 	{
 		// Tempo Slide
-		if ((param & 0xF0) == 0x10)
-			m_PlayState.m_nMusicTempo += (param & 0x0F);
+		TEMPO tempDiff(param.GetInt() & 0x0F, 0);
+		if ((param.GetInt() & 0xF0) == 0x10)
+			m_PlayState.m_nMusicTempo += tempDiff;
 		else
-			m_PlayState.m_nMusicTempo -= (param & 0x0F);
+			m_PlayState.m_nMusicTempo -= tempDiff;
 
 		TEMPO tempoMin = GetModSpecifications().tempoMin, tempoMax = GetModSpecifications().tempoMax;
 		if(IsCompatibleMode(TRK_ALLTRACKERS))	// clamp tempo correctly in compatible mode
 		{
-			tempoMax = 255;
+			tempoMax.Set(255);
 		}
 		Limit(m_PlayState.m_nMusicTempo, tempoMin, tempoMax);
 	}

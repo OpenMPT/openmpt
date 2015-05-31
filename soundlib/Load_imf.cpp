@@ -466,7 +466,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_SongFlags = (fileHeader.flags & IMFFileHeader::linearSlides) ? SONG_LINEARSLIDES : SongFlags(0);
 	m_nDefaultSpeed = fileHeader.tempo;
-	m_nDefaultTempo = fileHeader.bpm;
+	m_nDefaultTempo.Set(fileHeader.bpm);
 	m_nDefaultGlobalVolume = Clamp(fileHeader.master, uint8(0), uint8(64)) * 4;
 	m_nSamplePreAmp = Clamp(fileHeader.amp, uint8(4), uint8(127));
 

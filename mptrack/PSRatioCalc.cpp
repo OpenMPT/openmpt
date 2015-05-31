@@ -21,17 +21,17 @@ OPENMPT_NAMESPACE_BEGIN
 
 IMPLEMENT_DYNAMIC(CPSRatioCalc, CDialog)
 CPSRatioCalc::CPSRatioCalc(const CSoundFile &sndFile, SAMPLEINDEX sample, double ratio, CWnd* pParent /*=NULL*/)
-	: CDialog(CPSRatioCalc::IDD, pParent)
+	: CDialog(IDD_PITCHSHIFT, pParent)
 	, sndFile(sndFile), sampleIndex(sample), m_dRatio(ratio)
 {
 	// Calculate/verify samplerate at C5.
 	const ModSample &smp = sndFile.GetSample(sampleIndex);
 	uint32 sampleRate = smp.GetSampleRate(sndFile.GetType());
-	if(sampleRate <= 0) 
+	if(sampleRate <= 0)
 		sampleRate = 8363;
 
 	m_nSpeed = sndFile.m_PlayState.m_nMusicSpeed;
-	m_nTempo = sndFile.m_PlayState.m_nMusicTempo;
+	m_nTempo = sndFile.m_PlayState.m_nMusicTempo.GetInt();
 
 	// Sample rate will not change. We can calculate original duration once and disgard sampleRate.
 	m_lMsOrig = static_cast<ULONGLONG>(1000.0 * ((double)smp.nLength / sampleRate));
@@ -120,7 +120,7 @@ void CPSRatioCalc::OnEnChangeSpeed()
 {
 	UpdateData();
 	if (m_nTempo < 1) m_nTempo = 1;
-	if (m_nSpeed <1 ) m_nSpeed = 1;
+	if (m_nSpeed < 1) m_nSpeed = 1;
 	CalcRows();
 	UpdateData(FALSE);
 }
@@ -153,7 +153,7 @@ void CPSRatioCalc::CalcMs()
 
 void CPSRatioCalc::CalcRows()
 {
-	double rowTime = sndFile.GetRowDuration(m_nTempo, m_nSpeed);
+	double rowTime = sndFile.GetRowDuration(TEMPO(m_nTempo, 0), m_nSpeed);
 
 	m_dRowsOrig = (double)m_lMsOrig / rowTime;
 	m_dRowsNew = m_dRowsOrig*(m_dRatio / 100);

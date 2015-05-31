@@ -158,7 +158,7 @@ ModInstrument::ModInstrument(SAMPLEINDEX sample)
 	nCutSwing = 0;
 	nResSwing = 0;
 	nFilterMode = FLTMODE_UNCHANGED;
-	wPitchToTempoLock = 0;
+	pitchToTempoLock.Set(0);
 	nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
 	nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
@@ -227,7 +227,7 @@ void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 	if(!(toType & MOD_TYPE_MPT))
 	{
 		SetTuning(nullptr);
-		wPitchToTempoLock = 0;
+		pitchToTempoLock.Set(0);
 		nCutSwing = nResSwing = 0;
 		nFilterMode = FLTMODE_UNCHANGED;
 		nVolRampUp = 0;

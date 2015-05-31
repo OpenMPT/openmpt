@@ -621,7 +621,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	m_nType = MOD_TYPE_MOD;
 	m_nInstruments = 0;
 	m_nDefaultSpeed = 6;
-	m_nDefaultTempo = 125;
+	m_nDefaultTempo.Set(125);
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;
 	// Prevent clipping based on number of channels... If all channels are playing at full volume, "256 / #channels"
@@ -705,7 +705,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 							// Arbitrary threshold for going into PT1/2 mode: 4 consecutive "sample swaps" in one pattern.
 							if(++instrWithoutNoteCount[chn] >= 4)
 							{
-								m_SongFlags.set(SONG_PT1XMODE);
+								m_SongFlags.set(SONG_PT_MODE);
 							}
 						}
 					} else if(m.note != NOTE_NONE)
@@ -732,7 +732,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		// Arbitrary threshold for deciding that 8xx effects are only used as sync markers
 		if(maxPanning < 0x20)
 		{
-			m_SongFlags.set(SONG_PT1XMODE);
+			m_SongFlags.set(SONG_PT_MODE);
 		}
 	}
 
@@ -923,12 +923,12 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	// Now we can be pretty sure that this is a valid Soundtracker file. Set up default song settings.
 	m_nType = MOD_TYPE_MOD;
 	// Sample 7 in echoing.mod won't "loop" correctly if we don't convert the VBlank tempo.
-	m_nDefaultTempo = fileHeader.restartPos * 25 / 24;
+	m_nDefaultTempo.Set(fileHeader.restartPos * 25 / 24);
 	if(fileHeader.restartPos != 0x78)
 	{
 		// Convert to CIA timing
 		//m_nDefaultTempo = static_cast<TEMPO>(((709378.92f / 50.0f) * 125.0f) / ((240.0f - static_cast<float>(fileHeader.restartPos)) * 122.0f));
-		m_nDefaultTempo = (709379 / ((240 - fileHeader.restartPos) * 122)) * 125 / 50;
+		m_nDefaultTempo.Set((709379 / ((240 - fileHeader.restartPos) * 122)) * 125 / 50);
 		if(minVersion > UST1_80)
 		{
 			// D.O.C. SoundTracker IX re-introduced the variable tempo after some other versions dropped it.
@@ -942,7 +942,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;
 	m_nSamplePreAmp = 64;
-	m_SongFlags = SONG_PT1XMODE;
+	m_SongFlags = SONG_PT_MODE;
 	mpt::String::Read<mpt::String::spacePadded>(songName, songname);
 
 	// Setup channel pan positions and volume
@@ -1212,11 +1212,11 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = 4;
 	m_nInstruments = 0;
 	m_nDefaultSpeed = 6;
-	m_nDefaultTempo = 125;
+	m_nDefaultTempo.Set(125);
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;
 	m_nSamplePreAmp = 64;
-	m_SongFlags = SONG_PT1XMODE;
+	m_SongFlags = SONG_PT_MODE;
 
 	// Setup channel pan positions and volume
 	SetupMODPanning();

@@ -34,14 +34,11 @@ struct CModSpecifications
 	char GetEffectLetter(ModCommand::COMMAND cmd) const;
 	char GetVolEffectLetter(ModCommand::VOLCMD cmd) const;
 
-	// NOTE: If changing order, update all initializations below.
-	char fileExtension[6];				// File extension without dot.
+	// NOTE: If changing order, update all initializations in .cpp file.
 	MODTYPE internalType;				// Internal MODTYPE value
+	char fileExtension[6];				// File extension without dot.
 	ModCommand::NOTE noteMin;			// Minimum note index (index starts from 1)
 	ModCommand::NOTE noteMax;			// Maximum note index (index starts from 1)
-	bool hasNoteCut : 1;				// True if format has note cut (^^).
-	bool hasNoteOff : 1;				// True if format has note off (==).
-	bool hasNoteFade : 1;				// True if format has note fade (~~).
 	PATTERNINDEX patternsMax;
 	ORDERINDEX ordersMax;
 	SEQUENCEINDEX sequencesMax;
@@ -49,6 +46,8 @@ struct CModSpecifications
 	CHANNELINDEX channelsMax;			// Maximum number of editable channels in pattern.
 	TEMPO tempoMin;
 	TEMPO tempoMax;
+	uint32 speedMin;					// Minimum ticks per frame
+	uint32 speedMax;					// Maximum ticks per frame
 	ROWINDEX patternRowsMin;
 	ROWINDEX patternRowsMax;
 	uint16 modNameLengthMax;			// Meaning 'usable letters', possible null character is not included.
@@ -58,22 +57,25 @@ struct CModSpecifications
 	uint16 instrFilenameLengthMax;		// Ditto
 	SAMPLEINDEX samplesMax;				// Max number of samples == Highest possible sample index
 	INSTRUMENTINDEX instrumentsMax;		// Max number of instruments == Highest possible instrument index
-	mixLevels defaultMixLevels;			// Default mix levels that are used when creating a new file in this format
-	uint8 MIDIMappingDirectivesMax;		// Number of MIDI Mapping directives that the format can store (0 = none)
-	UINT speedMin;						// Minimum ticks per frame
-	UINT speedMax;						// Maximum ticks per frame
-	uint8 envelopePointsMax;			// Maximum number of points of each envelope
-	bool hasReleaseNode : 1;			// Envelope release node
-	bool hasComments : 1;				// True if format has a comments field
-	bool hasIgnoreIndex : 1;			// Does "+++" pattern exist?
-	bool hasStopIndex : 1;				// Does "---" pattern exist?
-	bool hasRestartPos : 1;				// Format has an automatic restart order position
-	bool supportsPlugins : 1;			// Format can store plugins
-	bool hasPatternSignatures : 1;		// Can patterns have a custom time signature?
-	bool hasPatternNames : 1;			// Cat patterns have a name?
-	bool hasArtistName : 1;				// Can artist name be stored in file?
-	bool hasDefaultResampling : 1;		// Can default resampling be saved? (if not, it can still be modified in the GUI but won't set the module as modified)
+	MixLevels defaultMixLevels;			// Default mix levels that are used when creating a new file in this format
 	FlagSet<SongFlags>::store_type songFlags;	// Supported song flags   NOTE: Do not use the overloaded operator | to set these flags because this results in dynamic initialization
+	uint8 MIDIMappingDirectivesMax;		// Number of MIDI Mapping directives that the format can store (0 = none)
+	uint8 envelopePointsMax;			// Maximum number of points of each envelope
+	//	Work around a possible code generation bug in MSVC10 with boolean bitfields by using uint8
+	uint8 hasNoteCut : 1;				// True if format has note cut (^^).
+	uint8 hasNoteOff : 1;				// True if format has note off (==).
+	uint8 hasNoteFade : 1;				// True if format has note fade (~~).
+	uint8 hasReleaseNode : 1;			// Envelope release node
+	uint8 hasComments : 1;				// True if format has a comments field
+	uint8 hasIgnoreIndex : 1;			// Does "+++" pattern exist?
+	uint8 hasStopIndex : 1;				// Does "---" pattern exist?
+	uint8 hasRestartPos : 1;			// Format has an automatic restart order position
+	uint8 supportsPlugins : 1;			// Format can store plugins
+	uint8 hasPatternSignatures : 1;		// Can patterns have a custom time signature?
+	uint8 hasPatternNames : 1;			// Cat patterns have a name?
+	uint8 hasArtistName : 1;			// Can artist name be stored in file?
+	uint8 hasDefaultResampling : 1;		// Can default resampling be saved? (if not, it can still be modified in the GUI but won't set the module as modified)
+	uint8 hasFractionalTempo : 1;		// Are fractional tempos allowed?
 	char commands[MAX_EFFECTS + 1];		// An array holding all commands this format supports; commands that are not supported are marked with "?"
 	char volcommands[MAX_VOLCMDS + 1];	// Ditto, but for volume column
 	FlagSet<SongFlags> GetSongFlags() const { return FlagSet<SongFlags>(songFlags); }

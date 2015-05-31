@@ -15,6 +15,7 @@
 #include "View_tre.h"
 #include "InputHandler.h"
 #include "Moddoc.h"
+#include "../soundlib/mod_specifications.h"
 #include "Globals.h"
 #include "Ctrl_pat.h"
 #include "PatternClipboard.h"

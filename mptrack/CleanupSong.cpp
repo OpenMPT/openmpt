@@ -812,13 +812,13 @@ bool CModCleanupDlg::ResetVariables()
 
 	// convert to IT...
 	modDoc.ChangeModType(MOD_TYPE_IT);
-	sndFile.SetMixLevels(mixLevels_compatible);
-	sndFile.m_nTempoMode = tempo_mode_classic;
+	sndFile.SetMixLevels(mixLevelsCompatible);
+	sndFile.m_nTempoMode = tempoModeClassic;
 	sndFile.m_SongFlags = SONG_LINEARSLIDES;
 	sndFile.m_MidiCfg.Reset();
 	
 	// Global vars
-	sndFile.m_nDefaultTempo = 125;
+	sndFile.m_nDefaultTempo.Set(125);
 	sndFile.m_nDefaultSpeed = 6;
 	sndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	sndFile.m_nSamplePreAmp = 48;

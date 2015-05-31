@@ -52,7 +52,7 @@ typedef struct SAMPLEVIEWSTATE
 typedef struct INSTRUMENTVIEWSTATE
 {
 	DWORD cbStruct;
-	enmEnvelopeTypes nEnv;
+	EnvelopeType nEnv;
 	INSTRUMENTINDEX initialInstrument;
 	bool bGrid;
 } INSTRUMENTVIEWSTATE;

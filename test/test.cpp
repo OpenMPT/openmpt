@@ -21,6 +21,7 @@
 #include "../common/serialization_utils.h"
 #include "../soundlib/Sndfile.h"
 #include "../common/FileReader.h"
+#include "../soundlib/mod_specifications.h"
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/MIDIMacros.h"
 #include "../soundlib/SampleFormatConverters.h"
@@ -1166,7 +1167,7 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(sndFile.GetTitle(), "Test Module");
 	VERIFY_EQUAL_NONCONT(sndFile.songMessage.at(0), 'O');
-	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, 139);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, TEMPO(139, 0));
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 5);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 128);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 42);
@@ -1176,8 +1177,8 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION), false);
 	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_OLDVOLSWING), false);
 	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_OLD_MIDI_PITCHBENDS), false);
-	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), mixLevels_compatible);
-	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempo_mode_modern);
+	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), mixLevelsCompatible);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempoModeModern);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerBeat, 6);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerMeasure, 12);
 	VERIFY_EQUAL_NONCONT(sndFile.m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
@@ -1271,7 +1272,7 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 
 	VERIFY_EQUAL_NONCONT(pIns->pTuning, sndFile.GetDefaultTuning());
 
-	VERIFY_EQUAL_NONCONT(pIns->wPitchToTempoLock, 0);
+	VERIFY_EQUAL_NONCONT(pIns->pitchToTempoLock, TEMPO(0, 0));
 
 	VERIFY_EQUAL_NONCONT(pIns->nPluginVelocityHandling, PLUGIN_VELOCITYHANDLING_VOLUME);
 	VERIFY_EQUAL_NONCONT(pIns->nPluginVolumeHandling, PLUGIN_VOLUMEHANDLING_MIDI);
@@ -1361,7 +1362,8 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(sndFile.GetTitle(), "Test Module_____________X");
 	VERIFY_EQUAL_NONCONT(sndFile.songMessage.at(0), 'O');
-	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, 139);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo.GetInt(), 139);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo.GetFract(), 999);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 5);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 128);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 42);
@@ -1371,8 +1373,8 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION), false);
 	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_OLDVOLSWING), false);
 	VERIFY_EQUAL_NONCONT(sndFile.GetModFlag(MSF_OLD_MIDI_PITCHBENDS), false);
-	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), mixLevels_compatible);
-	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempo_mode_modern);
+	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), mixLevelsCompatible);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempoModeModern);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerBeat, 6);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerMeasure, 12);
 	VERIFY_EQUAL_NONCONT(sndFile.m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
@@ -1552,7 +1554,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 
 		VERIFY_EQUAL_NONCONT(pIns->pTuning, sndFile.GetDefaultTuning());
 
-		VERIFY_EQUAL_NONCONT(pIns->wPitchToTempoLock, 130);
+		VERIFY_EQUAL_NONCONT(pIns->pitchToTempoLock, TEMPO(130, 2000));
 
 		VERIFY_EQUAL_NONCONT(pIns->nPluginVelocityHandling, PLUGIN_VELOCITYHANDLING_VOLUME);
 		VERIFY_EQUAL_NONCONT(pIns->nPluginVolumeHandling, PLUGIN_VOLUMEHANDLING_MIDI);
@@ -1664,14 +1666,14 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(sndFile.GetTitle(), "S3M_Test__________________X");
-	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, 33);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, TEMPO(33, 0));
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 254);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 32 * 4);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 48);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 16);
 	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_FASTVOLSLIDES);
-	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), mixLevels_compatible);
-	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempo_mode_classic);
+	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), mixLevelsCompatible);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempoModeClassic);
 	VERIFY_EQUAL_NONCONT(sndFile.m_dwLastSavedWithVersion, resaved ? (MptVersion::num & 0xFFFF0000) : MAKE_VERSION_NUMERIC(1, 20, 00, 00));
 	VERIFY_EQUAL_NONCONT(sndFile.m_nRestartPos, 0);
 

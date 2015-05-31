@@ -14,7 +14,8 @@
 #include "moddoc.h"
 #include "dlg_misc.h"
 #include "Dlsbank.h"
-#include "modsmp_ctrl.h"
+#include "../soundlib/modsmp_ctrl.h"
+#include "../soundlib/mod_specifications.h"
 #include "../common/misc_util.h"
 #include "../common/StringFixer.h"
 #include "../common/mptFileIO.h"
@@ -1083,7 +1084,7 @@ static bool StringToEnvelope(const std::string &s, InstrumentEnvelope &env, cons
 }
 
 
-bool CModDoc::CopyEnvelope(INSTRUMENTINDEX nIns, enmEnvelopeTypes nEnv)
+bool CModDoc::CopyEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
 //---------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -1116,7 +1117,7 @@ bool CModDoc::CopyEnvelope(INSTRUMENTINDEX nIns, enmEnvelopeTypes nEnv)
 }
 
 
-bool CModDoc::SaveEnvelope(INSTRUMENTINDEX nIns, enmEnvelopeTypes nEnv, const mpt::PathString &fileName)
+bool CModDoc::SaveEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::PathString &fileName)
 //------------------------------------------------------------------------------------------------------
 {
 	if (nIns < 1 || nIns > m_SndFile.m_nInstruments || !m_SndFile.Instruments[nIns]) return false;
@@ -1140,7 +1141,7 @@ bool CModDoc::SaveEnvelope(INSTRUMENTINDEX nIns, enmEnvelopeTypes nEnv, const mp
 }
 
 
-bool CModDoc::PasteEnvelope(INSTRUMENTINDEX nIns, enmEnvelopeTypes nEnv)
+bool CModDoc::PasteEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
 //----------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -1167,7 +1168,7 @@ bool CModDoc::PasteEnvelope(INSTRUMENTINDEX nIns, enmEnvelopeTypes nEnv)
 }
 
 
-bool CModDoc::LoadEnvelope(INSTRUMENTINDEX nIns, enmEnvelopeTypes nEnv, const mpt::PathString &fileName)
+bool CModDoc::LoadEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::PathString &fileName)
 //------------------------------------------------------------------------------------------------------
 {
 	InputFile f(fileName);

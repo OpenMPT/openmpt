@@ -23,6 +23,7 @@
 #include "FileDialog.h"
 #include "Globals.h"
 #include "ExternalSamples.h"
+#include "../soundlib/mod_specifications.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

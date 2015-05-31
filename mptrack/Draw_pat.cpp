@@ -10,15 +10,16 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "mainfrm.h"
-#include "moddoc.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
 #include "dlg_misc.h"
-#include "globals.h"
-#include "view_pat.h"
+#include "Globals.h"
+#include "View_pat.h"
 #include "EffectVis.h"		//rewbs.fxvis
 #include "ChannelManagerDlg.h"
 #include "../soundlib/tuningbase.h"
+#include "../soundlib/mod_specifications.h"
 #include "../common/StringFixer.h"
 #include "EffectInfo.h"
 #include "PatternFont.h"
@@ -884,7 +885,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 				{
 					tx_col = MODCOLOR_NOTE;
 
-					if(sndFile.m_SongFlags[SONG_AMIGALIMITS | SONG_PT1XMODE])
+					if(sndFile.m_SongFlags[SONG_AMIGALIMITS | SONG_PT_MODE])
 					{
 						// Highlight notes that exceed the Amiga's frequency range.
 						if(sndFile.GetType() == MOD_TYPE_MOD && (m->note < NOTE_MIDDLEC - 12 || m->note >= NOTE_MIDDLEC + 2 * 12))

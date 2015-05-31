@@ -125,7 +125,7 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 	m_nType = MOD_TYPE_AMF0;
 	m_nChannels = 8;
 	m_nDefaultSpeed = fileHeader.defaultSpeed;
-	m_nDefaultTempo = fileHeader.defaultTempo;
+	m_nDefaultTempo.Set(fileHeader.defaultTempo);
 	m_nSamples = fileHeader.numSamples;
 	if(fileHeader.restartPos < fileHeader.numOrders)
 	{
@@ -428,15 +428,13 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	// Get Tempo/Speed
 	if(fileHeader.version >= 13)
 	{
-		m_nDefaultTempo = file.ReadUint8();
+		uint8 tempo = file.ReadUint8();
+		if(tempo < 32) tempo = 125;
+		m_nDefaultTempo.Set(tempo);
 		m_nDefaultSpeed = file.ReadUint8();
-		if(m_nDefaultTempo < 32)
-		{
-			m_nDefaultTempo = 125;
-		}
 	} else
 	{
-		m_nDefaultTempo = 125;
+		m_nDefaultTempo.Set(125);
 		m_nDefaultSpeed = 6;
 	}
 

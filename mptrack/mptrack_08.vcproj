@@ -1174,6 +1174,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CDecimalSupport.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ChildFrm.h"
 				>
 			</File>

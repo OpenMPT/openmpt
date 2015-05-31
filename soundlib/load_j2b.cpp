@@ -407,7 +407,7 @@ struct PACKED AMEnvelope
 	}
 
 	// Convert envelope data to OpenMPT's internal format.
-	void ConvertToMPT(InstrumentEnvelope &mptEnv, enmEnvelopeTypes envType) const
+	void ConvertToMPT(InstrumentEnvelope &mptEnv, EnvelopeType envType) const
 	{
 		if(numPoints == 0xFF || numPoints == 0)
 			return;
@@ -788,7 +788,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_nChannels = MIN(mainChunk.channels, MAX_BASECHANNELS);
 	m_nDefaultSpeed = mainChunk.speed;
-	m_nDefaultTempo = mainChunk.tempo;
+	m_nDefaultTempo.Set(mainChunk.tempo);
 	m_nDefaultGlobalVolume = mainChunk.globalvolume * 2;
 	m_nType = MOD_TYPE_J2B;
 

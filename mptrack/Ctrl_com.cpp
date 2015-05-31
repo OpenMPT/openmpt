@@ -10,13 +10,14 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "mainfrm.h"
-#include "moddoc.h"
-#include "globals.h"
-#include "ctrl_com.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
+#include "Globals.h"
+#include "Ctrl_com.h"
 #include "view_com.h"
 #include "InputHandler.h"
+#include "../soundlib/mod_specifications.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

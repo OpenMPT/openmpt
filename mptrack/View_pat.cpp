@@ -26,6 +26,7 @@
 #include "MIDIMacros.h"
 #include "../common/misc_util.h"
 #include "../soundlib/MIDIEvents.h"
+#include "../soundlib/mod_specifications.h"
 #include <algorithm>
 
 

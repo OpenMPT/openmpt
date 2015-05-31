@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "CDecimalSupport.h"
+
 OPENMPT_NAMESPACE_BEGIN
 
 class CNoteMapWnd;
@@ -92,9 +94,10 @@ class CCtrlInstruments: public CModControlDlg
 protected:
 	CModControlBar m_ToolBar;
 	CSpinButtonCtrl m_SpinInstrument, m_SpinFadeOut, m_SpinGlobalVol, m_SpinPanning;
-	CSpinButtonCtrl m_SpinMidiPR, m_SpinPPS, m_SpinMidiBK, pwdSpin;
+	CSpinButtonCtrl m_SpinMidiPR, m_SpinPPS, m_SpinMidiBK, m_SpinPWD;
 	CComboBox m_ComboNNA, m_ComboDCT, m_ComboDCA, m_ComboPPC, m_CbnMidiCh, m_CbnMixPlug, m_CbnResampling, m_CbnFilterMode, m_CbnPluginVolumeHandling;
-	CEdit m_EditName, m_EditFileName, m_EditGlobalVol, m_EditPanning, m_EditPPS, m_EditFadeOut;
+	CEdit m_EditName, m_EditFileName, m_EditGlobalVol, m_EditPanning, m_EditFadeOut;
+	CNumberEdit m_EditPPS, m_EditPWD;
 	CButton m_CheckPanning, m_CheckCutOff, m_CheckResonance, velocityStyle;
 	CSliderCtrl m_SliderVolSwing, m_SliderPanSwing, m_SliderCutSwing, m_SliderResSwing, 
 		        m_SliderCutOff, m_SliderResonance;
@@ -113,7 +116,7 @@ protected:
 	void UpdatePluginList();
 
 	//Pitch/Tempo lock
-	CEdit m_EditPitchTempoLock;
+	CNumberEdit m_EditPitchTempoLock;
 	CButton m_CheckPitchTempoLock;
 
 	
@@ -165,10 +168,10 @@ protected:
 	afx_msg void OnDCTChanged();
 	afx_msg void OnDCAChanged();
 	afx_msg void OnMPRChanged();
-	afx_msg void OnMBKChanged();	//rewbs.MidiBank
+	afx_msg void OnMBKChanged();
 	afx_msg void OnMCHChanged();
 	afx_msg void OnResamplingChanged();
-	afx_msg void OnMixPlugChanged();  //rewbs.instroVSTi
+	afx_msg void OnMixPlugChanged();
 	afx_msg void OnPPSChanged();
 	afx_msg void OnPPCChanged();
 	afx_msg void OnFilterModeChanged();
@@ -176,18 +179,12 @@ protected:
 	afx_msg void OnPluginVolumeHandlingChanged();
 	afx_msg void OnPitchWheelDepthChanged();
 	afx_msg void OnOpenPluginList() { openendPluginListWithMouse = true; }
-
-
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
 	afx_msg void OnAttackChanged();
-// -! NEW_FEATURE#0027
-
 	afx_msg void OnEnableCutOff();
 	afx_msg void OnEnableResonance();
 	afx_msg void OnEditSampleMap();
-	afx_msg void TogglePluginEditor();  //rewbs.instroVSTi
-	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
+	afx_msg void TogglePluginEditor();
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg void OnCbnSelchangeCombotuning();
 	afx_msg void OnEnChangeEditPitchtempolock();
 	afx_msg void OnBnClickedCheckPitchtempolock();

@@ -12,6 +12,7 @@
 #include "EffectInfo.h"
 #include "Mptrack.h"	// for szHexChar
 #include "../soundlib/Sndfile.h"
+#include "../soundlib/mod_specifications.h"
 #include "../soundlib/Tables.h"
 
 

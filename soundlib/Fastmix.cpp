@@ -481,7 +481,7 @@ void CSoundFile::CreateStereoMix(int count)
 				}
 			}
 
-			if(m_SongFlags[SONG_PT1XMODE] && chn.nPos >= chn.nLoopEnd && chn.dwFlags[CHN_LOOP])
+			if(m_SongFlags[SONG_PT_MODE] && chn.nPos >= chn.nLoopEnd && chn.dwFlags[CHN_LOOP])
 			{
 				if(chn.nNewIns && chn.nNewIns <= GetNumSamples() && chn.pModSample != &Samples[chn.nNewIns])
 				{

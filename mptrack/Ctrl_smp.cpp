@@ -10,14 +10,15 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "mainfrm.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
 #include "InputHandler.h"
-#include "childfrm.h"
-#include "moddoc.h"
-#include "globals.h"
-#include "ctrl_smp.h"
-#include "view_smp.h"
+#include "Childfrm.h"
+#include "Moddoc.h"
+#include "../soundlib/mod_specifications.h"
+#include "Globals.h"
+#include "Ctrl_smp.h"
+#include "View_smp.h"
 #include "SampleEditorDialogs.h"
 #include "dlg_misc.h"
 #include "PSRatioCalc.h" //rewbs.timeStretchMods

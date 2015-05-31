@@ -376,6 +376,7 @@
     <ClInclude Include="..\..\mptrack\AdvancedConfigDlg.h" />
     <ClInclude Include="..\..\mptrack\AutoSaver.h" />
     <ClInclude Include="..\..\mptrack\Autotune.h" />
+    <ClInclude Include="..\..\mptrack\CDecimalSupport.h" />
     <ClInclude Include="..\..\mptrack\CImageListEx.h" />
     <ClInclude Include="..\..\mptrack\CListCtrl.h" />
     <ClInclude Include="..\..\mptrack\CTreeCtrl.h" />
@@ -556,6 +557,7 @@
     <ClCompile Include="..\..\mptrack\AppendModule.cpp" />
     <ClCompile Include="..\..\mptrack\AutoSaver.cpp" />
     <ClCompile Include="..\..\mptrack\Autotune.cpp" />
+    <ClCompile Include="..\..\mptrack\CDecimalSupport.cpp" />
     <ClCompile Include="..\..\mptrack\CImageListEx.cpp" />
     <ClCompile Include="..\..\mptrack\ChannelManagerDlg.cpp" />
     <ClCompile Include="..\..\mptrack\Childfrm.cpp" />

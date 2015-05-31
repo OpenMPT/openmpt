@@ -13,6 +13,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "View_pat.h"
+#include "../soundlib/mod_specifications.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -317,7 +318,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 
 	CModDoc &modDoc = *(sndFile.GetpModDoc());
 
-	const TEMPO tempoMin = sndFile.GetModSpecifications().tempoMin;
+	const uint32 tempoMin = sndFile.GetModSpecifications().tempoMin.GetInt();
 
 	bool success = false;
 	bool prepareUndo = true;	// prepare pattern for undo next time

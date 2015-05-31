@@ -155,10 +155,10 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 0x7FFF;
 #ifdef MODPLUG_TRACKER
-	m_nDefaultTempo = 125;
+	m_nDefaultTempo.Set(125);
 	m_nDefaultSpeed = fileHeader.initTempo >> 4;
 #else
-	m_nDefaultTempo = 125 * 16;
+	m_nDefaultTempo.Set(125 * 16);
 	m_nDefaultSpeed = fileHeader.initTempo;
 #endif // MODPLUG_TRACKER
 	if(m_nDefaultSpeed < 1) m_nDefaultSpeed = 1;

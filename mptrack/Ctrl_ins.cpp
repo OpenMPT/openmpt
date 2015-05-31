@@ -1,5 +1,5 @@
 /*
- * ctrl_ins.cpp
+ * Ctrl_ins.cpp
  * ------------
  * Purpose: Instrument tab, upper panel.
  * Notes  : (currently none)
@@ -15,6 +15,7 @@
 #include "InputHandler.h"
 #include "Childfrm.h"
 #include "Moddoc.h"
+#include "../soundlib/mod_specifications.h"
 #include "Globals.h"
 #include "Ctrl_ins.h"
 #include "View_ins.h"
@@ -835,7 +836,6 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN12,				m_SpinPPS);
 	DDX_Control(pDX, IDC_EDIT8,					m_EditGlobalVol);
 	DDX_Control(pDX, IDC_EDIT9,					m_EditPanning);
-	DDX_Control(pDX, IDC_EDIT15,				m_EditPPS);
 	DDX_Control(pDX, IDC_CHECK1,				m_CheckPanning);
 	DDX_Control(pDX, IDC_CHECK2,				m_CheckCutOff);
 	DDX_Control(pDX, IDC_CHECK3,				m_CheckResonance);
@@ -849,10 +849,9 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN1,					m_SpinAttack);
 	DDX_Control(pDX, IDC_COMBOTUNING,			m_ComboTuning);
 	DDX_Control(pDX, IDC_CHECK_PITCHTEMPOLOCK,	m_CheckPitchTempoLock);
-	DDX_Control(pDX, IDC_EDIT_PITCHTEMPOLOCK,	m_EditPitchTempoLock);
 	DDX_Control(pDX, IDC_PLUGIN_VOLUMESTYLE,	m_CbnPluginVolumeHandling);
 	DDX_Control(pDX, IDC_PLUGIN_VELOCITYSTYLE,	velocityStyle);
-	DDX_Control(pDX, IDC_SPIN2,					pwdSpin);
+	DDX_Control(pDX, IDC_SPIN2,					m_SpinPWD);
 	//}}AFX_DATA_MAP
 }
 
@@ -918,6 +917,9 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_SpinMidiPR.SetRange(0, 128);
 	// Midi Bank
 	m_SpinMidiBK.SetRange(0, 16384);
+	// MIDI Pitch Wheel Depth
+	m_EditPWD.SubclassDlgItem(IDC_PITCHWHEELDEPTH, this);
+	m_EditPWD.AllowFractions(false);
 
 	m_CbnResampling.SetItemData(m_CbnResampling.AddString("Default"), SRCMODE_DEFAULT);
 	m_CbnResampling.SetItemData(m_CbnResampling.AddString("None"), SRCMODE_NEAREST);
@@ -944,6 +946,8 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_SliderCutOff.SetRange(0x00, 0x7F);
 	m_SliderResonance.SetRange(0x00, 0x7F);
 	// Pitch/Pan Separation
+	m_EditPPS.SubclassDlgItem(IDC_EDIT15, this);
+	m_EditPPS.AllowFractions(false);
 	m_SpinPPS.SetRange(-32, +32);
 	// Pitch/Pan Center
 	AppendNotesToControl(m_ComboPPC, 0, NOTE_MAX - NOTE_MIN);
@@ -955,12 +959,14 @@ BOOL CCtrlInstruments::OnInitDialog()
 
 	m_SpinInstrument.SetFocus();
 
-	GetDlgItem(IDC_PITCHWHEELDEPTH)->EnableWindow(FALSE);
+	m_EditPWD.EnableWindow(FALSE);
 
 	BuildTuningComboBox();
 
 	CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, MF_UNCHECKED);
-	m_EditPitchTempoLock.SetLimitText(4);
+	m_EditPitchTempoLock.SubclassDlgItem(IDC_EDIT_PITCHTEMPOLOCK, this);
+	m_EditPitchTempoLock.AllowSign(false);
+	m_EditPitchTempoLock.SetLimitText(9);
 
 	SetRedraw(TRUE);
 	return FALSE;
@@ -1186,11 +1192,11 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 
 		// Pitch Wheel Depth
 		if(m_sndFile.GetType() == MOD_TYPE_XM)
-			pwdSpin.SetRange(0, 36);
+			m_SpinPWD.SetRange(0, 36);
 		else
-			pwdSpin.SetRange(-128, 127);
-		GetDlgItem(IDC_PITCHWHEELDEPTH)->EnableWindow(bITandXM);
-		pwdSpin.EnableWindow(bITandXM);
+			m_SpinPWD.SetRange(-128, 127);
+		m_EditPWD.EnableWindow(bITandXM);
+		m_SpinPWD.EnableWindow(bITandXM);
 
 		m_NoteMap.EnableWindow(bITandXM);
 		m_CbnResampling.EnableWindow(bITandXM);
@@ -1225,11 +1231,11 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 		{
 			CString s;
 			if (ich == MidiNoChannel)
-				s = "None";
+				s = _T("None");
 			else if (ich == MidiMappedChannel)
-				s = "Mapped";
+				s = _T("Mapped");
 			else
-				s.Format("%d", ich);
+				s.Format(_T("%u"), ich);
 			m_CbnMidiCh.SetItemData(m_CbnMidiCh.AddString(s), ich);
 		}
 	}
@@ -1255,11 +1261,11 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 			if (pIns->nMidiProgram>0 && pIns->nMidiProgram<=128)
 				SetDlgItemInt(IDC_EDIT10, pIns->nMidiProgram);
 			else
-				SetDlgItemText(IDC_EDIT10, "---");
+				SetDlgItemText(IDC_EDIT10, _T("---"));
 			if (pIns->wMidiBank && pIns->wMidiBank <= 16384)
 				SetDlgItemInt(IDC_EDIT11, pIns->wMidiBank);
 			else
-				SetDlgItemText(IDC_EDIT11, "---");
+				SetDlgItemText(IDC_EDIT11, _T("---"));
 
 			if (pIns->nMidiChannel < 18)
 			{
@@ -1310,7 +1316,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 				m_ComboPPC.SetRedraw(TRUE);
 			}
 			m_ComboPPC.SetCurSel(pIns->nPPC);
-			ASSERT(m_ComboPPC.GetItemData(m_ComboPPC.GetCurSel()) == pIns->nPPC + NOTE_MIN);
+			ASSERT((uint8)m_ComboPPC.GetItemData(m_ComboPPC.GetCurSel()) == pIns->nPPC + NOTE_MIN);
 			SetDlgItemInt(IDC_EDIT15, pIns->nPPS);
 			// Filter
 			if (m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
@@ -1334,12 +1340,12 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 			UpdateTuningComboBox();
 
 			// Only enable Pitch/Tempo Lock for MPTM files or legacy files that have this property enabled.
-			m_CheckPitchTempoLock.EnableWindow((m_sndFile.GetType() == MOD_TYPE_MPT || pIns->wPitchToTempoLock > 0) ? TRUE : FALSE);
-			CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, pIns->wPitchToTempoLock > 0 ? MF_CHECKED : MF_UNCHECKED);
-			m_EditPitchTempoLock.EnableWindow(pIns->wPitchToTempoLock > 0 ? TRUE : FALSE);
-			if(pIns->wPitchToTempoLock > 0)
+			m_CheckPitchTempoLock.EnableWindow((m_sndFile.GetType() == MOD_TYPE_MPT || pIns->pitchToTempoLock.GetRaw() > 0) ? TRUE : FALSE);
+			CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, pIns->pitchToTempoLock.GetRaw() > 0 ? MF_CHECKED : MF_UNCHECKED);
+			m_EditPitchTempoLock.EnableWindow(pIns->pitchToTempoLock.GetRaw() > 0 ? TRUE : FALSE);
+			if(pIns->pitchToTempoLock.GetRaw() > 0)
 			{
-				m_EditPitchTempoLock.SetWindowText(mpt::ToString(pIns->wPitchToTempoLock).c_str());
+				m_EditPitchTempoLock.SetTempoValue(pIns->pitchToTempoLock);
 			}
 
 			// Pitch Wheel Depth
@@ -1397,20 +1403,20 @@ void CCtrlInstruments::UpdateFilterText()
 		ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 		if(pIns)
 		{
-			CHAR s[32];
+			TCHAR s[32];
 			// In IT Compatible mode, it is enough to just have resonance enabled to turn on the filter.
 			const bool resEnabled = (pIns->IsResonanceEnabled() && pIns->GetResonance() > 0 && m_sndFile.IsCompatibleMode(TRK_IMPULSETRACKER));
 
 			if((pIns->IsCutoffEnabled() && pIns->GetCutoff() < 0x7F) || resEnabled)
 			{
 				const BYTE cutoff = (resEnabled && !pIns->IsCutoffEnabled()) ? 0x7F : pIns->GetCutoff();
-				wsprintf(s, "Z%02X (%d Hz)", cutoff, m_sndFile.CutOffToFrequency(cutoff));
+				wsprintf(s, _T("Z%02X (%u Hz)"), cutoff, m_sndFile.CutOffToFrequency(cutoff));
 			} else if(pIns->IsCutoffEnabled())
 			{
-				strcpy(s, "Z7F (Off)");
+				_tcscpy(s, _T("Z7F (Off)"));
 			} else
 			{
-				strcpy(s, "No Change");
+				_tcscpy(s, _T("No Change"));
 			}
 
 			SetDlgItemText(IDC_FILTERTEXT, s);
@@ -1556,15 +1562,13 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 			// Pitch/Tempo lock
 			{
 				const CModSpecifications& specs = m_sndFile.GetModSpecifications();
-				std::string str = std::string("Tempo range: ") + mpt::ToString(specs.tempoMin) + std::string(" - ") + mpt::ToString(specs.tempoMax);
-				if(str.size() >= 250) str.resize(250);
-				strcpy(pszText, str.c_str());
+				wsprintf(pszText, _T("Tempo range: %u - %u"), specs.tempoMin.GetInt(), specs.tempoMax.GetInt());
 				return TRUE;
 			}
 
 		case IDC_EDIT7:
 			// Fade Out
-			wsprintf(pszText, "Higher value <-> Faster fade out");
+			_tcscpy(pszText, _T("Higher value <-> Faster fade out"));
 			return TRUE;
 
 		case IDC_PLUGIN_VELOCITYSTYLE:
@@ -1575,13 +1579,13 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 			{
 				velocityStyle.EnableWindow(FALSE);
 				m_CbnPluginVolumeHandling.EnableWindow(FALSE);
-				strcpy(pszText, "To enable, clear Plugin volume command bug emulation flag from Song Properties");
+				_tcscpy(pszText, ("To enable, clear Plugin volume command bug emulation flag from Song Properties"));
 				return TRUE;
 			} else
 			{
 				if(uId == IDC_PLUGIN_VELOCITYSTYLE)
 				{
-					strcpy(pszText, "Volume commands (vxx) next to a note are sent as note velocity instead.");
+					_tcscpy(pszText, _T("Volume commands (vxx) next to a note are sent as note velocity instead."));
 					return TRUE;
 				}
 				return FALSE;
@@ -1589,7 +1593,7 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 
 		case IDC_COMBO5:
 			// MIDI Channel
-			strcpy(pszText, "Mapped: MIDI channel corresponds to pattern channel modulo 16");
+			_tcscpy(pszText, _T("Mapped: MIDI channel corresponds to pattern channel modulo 16"));
 			return TRUE;
 
 		case IDC_SLIDER1:
@@ -1601,11 +1605,11 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 			return TRUE;
 
 		case IDC_SLIDER3:
-			wsprintf(pszText, "%d", pIns->GetCutoff());
+			wsprintf(pszText, _T("%u"), pIns->GetCutoff());
 			return TRUE;
 
 		case IDC_SLIDER4:
-			wsprintf(pszText, "%d", pIns->GetResonance());
+			wsprintf(pszText, _T("%u"), pIns->GetResonance());
 			return TRUE;
 
 		case IDC_SLIDER6:
@@ -1617,7 +1621,7 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 			return TRUE;
 
 		case IDC_PITCHWHEELDEPTH:
-			strcpy(pszText, "Set this to the actual Pitch Wheel Depth used in your plugin on this channel.");
+			_tcscpy(pszText, _T("Set this to the actual Pitch Wheel Depth used in your plugin on this channel."));
 			return TRUE;
 
 		}
@@ -1755,7 +1759,7 @@ void CCtrlInstruments::OnInstrumentOpen()
 void CCtrlInstruments::OnInstrumentSave()
 //---------------------------------------
 {
-	TCHAR szFileName[_MAX_PATH] = "";
+	TCHAR szFileName[_MAX_PATH] = _T("");
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 
 	if (!pIns) return;
@@ -1820,7 +1824,7 @@ void CCtrlInstruments::OnNameChanged()
 {
 	if (!IsLocked())
 	{
-		CHAR s[64];
+		TCHAR s[64];
 		s[0] = 0;
 		m_EditName.GetWindowText(s, sizeof(s));
 		ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
@@ -1838,7 +1842,7 @@ void CCtrlInstruments::OnFileNameChanged()
 {
 	if (!IsLocked())
 	{
-		CHAR s[64];
+		TCHAR s[64];
 		s[0] = 0;
 		m_EditFileName.GetWindowText(s, sizeof(s));
 		ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
@@ -1906,7 +1910,7 @@ void CCtrlInstruments::OnSetPanningChanged()
 
 			for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
 			{
-				if(*sample <= m_sndFile.GetNumSamples() && m_sndFile.GetSample(*sample).uFlags & CHN_PANNING)
+				if(*sample <= m_sndFile.GetNumSamples() && m_sndFile.GetSample(*sample).uFlags[CHN_PANNING])
 				{
 					smpPanningInUse = true;
 					break;
@@ -1920,11 +1924,11 @@ void CCtrlInstruments::OnSetPanningChanged()
 						"Do you wish to disable panning from those samples so that the instrument pan setting is effective "
 						"for the whole instrument?")) == cnfYes)
 				{
-					for(BYTE i = 0; i < CountOf(pIns->Keyboard); i++)
+					for(size_t i = 0; i < CountOf(pIns->Keyboard); i++)
 					{
 						const SAMPLEINDEX smp = pIns->Keyboard[i];
 						if(smp > 0 && smp <= m_sndFile.GetNumSamples())
-							m_sndFile.GetSample(smp).uFlags &= ~CHN_PANNING;
+							m_sndFile.GetSample(smp).uFlags.reset(CHN_PANNING);
 					}
 					m_modDoc.UpdateAllViews(nullptr, SampleHint().Info().ModType(), this);
 				}
@@ -2016,10 +2020,10 @@ void CCtrlInstruments::OnMPRChanged()
 			}
 		}
 		// we will not set the midi bank/program if it is 0
-		if (n == 0)
+		if(n == 0)
 		{
 			LockControls();
-			SetDlgItemText(IDC_EDIT10, "---");
+			SetDlgItemText(IDC_EDIT10, _T("---"));
 			UnlockControls();
 		}
 	}
@@ -2032,17 +2036,17 @@ void CCtrlInstruments::OnMBKChanged()
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
-		WORD w = GetDlgItemInt(IDC_EDIT11);
+		uint16 w = GetDlgItemInt(IDC_EDIT11);
 		if(w >= 0 && w <= 16384 && pIns->wMidiBank != w)
 		{
 			pIns->wMidiBank = w;
 			SetModified(InstrumentHint().Info(), false);
 		}
-		//  we will not set the midi bank/program if it is 0
+		// we will not set the midi bank/program if it is 0
 		if(w == 0)
 		{
 			LockControls();
-			SetDlgItemText(IDC_EDIT11, "---");
+			SetDlgItemText(IDC_EDIT11, _T("---"));
 			UnlockControls();
 		}
 	}
@@ -2070,10 +2074,10 @@ void CCtrlInstruments::OnResamplingChanged()
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
-		int n = m_CbnResampling.GetItemData(m_CbnResampling.GetCurSel());
-		if (pIns->nResampling != (BYTE)(n & 0xff))
+		uint32 n = m_CbnResampling.GetItemData(m_CbnResampling.GetCurSel());
+		if (pIns->nResampling != n)
 		{
-			pIns->nResampling = (BYTE)(n & 0xff);
+			pIns->nResampling = n;
 			SetModified(InstrumentHint().Info(), false);
 		}
 	}
@@ -2183,7 +2187,8 @@ void CCtrlInstruments::OnPPSChanged()
 	if ((!IsLocked()) && (pIns))
 	{
 		int n = GetDlgItemInt(IDC_EDIT15);
-		if ((n >= -32) && (n <= 32)) {
+		if ((n >= -32) && (n <= 32))
+		{
 			if (pIns->nPPS != (signed char)n)
 			{
 				pIns->nPPS = (signed char)n;
@@ -2327,6 +2332,7 @@ void CCtrlInstruments::OnFilterModeChanged()
 void CCtrlInstruments::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 //----------------------------------------------------------------------
 {
+	// Give focus back to envelope editor when stopping to scroll spin buttons (for instrument preview keyboard focus)
 	CModControlDlg::OnVScroll(nCode, nPos, pSB);
 	if (nCode == SB_ENDSCROLL) SwitchToView();
 }
@@ -2697,10 +2703,9 @@ void CCtrlInstruments::OnPitchWheelDepthChanged()
 	if(!IsLocked() && pIns != nullptr)
 	{
 		int pwd = GetDlgItemInt(IDC_PITCHWHEELDEPTH, NULL, TRUE);
-		if(m_sndFile.GetType() == MOD_TYPE_XM)
-			Limit(pwd, 0, 36);
-		else
-			Limit(pwd, -128, 127);
+		int lower = -128, upper = 127;
+		m_SpinPWD.GetRange32(lower, upper);
+		Limit(pwd, lower, upper);
 		if(pwd != pIns->midiPWD)
 		{
 			pIns->midiPWD = static_cast<int8>(pwd);
@@ -2726,24 +2731,22 @@ void CCtrlInstruments::OnBnClickedCheckPitchtempolock()
 	if(IsDlgButtonChecked(IDC_CHECK_PITCHTEMPOLOCK))
 	{
 		//Checking what value to put for the wPitchToTempoLock.
-		uint16 ptl = 0;
+		TEMPO ptl;
 		if(m_EditPitchTempoLock.GetWindowTextLength() > 0)
 		{
-			TCHAR buffer[8];
-			m_EditPitchTempoLock.GetWindowText(buffer, CountOf(buffer));
-			ptl = _ttoi(buffer);
+			ptl = m_EditPitchTempoLock.GetTempoValue();
 		}
-		if(!ptl)
+		if(!ptl.GetRaw())
 		{
 			ptl = m_sndFile.m_nDefaultTempo;
 		}
-		m_EditPitchTempoLock.SetWindowText(mpt::ToString(ptl).c_str());
+		m_EditPitchTempoLock.SetTempoValue(ptl);
 
 		for(INSTRUMENTINDEX i = firstIns; i <= lastIns; i++)
 		{
-			if(m_sndFile.Instruments[i] != nullptr && m_sndFile.Instruments[i]->wPitchToTempoLock == 0)
+			if(m_sndFile.Instruments[i] != nullptr && m_sndFile.Instruments[i]->pitchToTempoLock.GetRaw() == 0)
 			{
-				m_sndFile.Instruments[i]->wPitchToTempoLock = ptl;
+				m_sndFile.Instruments[i]->pitchToTempoLock = ptl;
 				m_modDoc.SetModified();
 			}
 		}
@@ -2751,9 +2754,9 @@ void CCtrlInstruments::OnBnClickedCheckPitchtempolock()
 	{
 		for(INSTRUMENTINDEX i = firstIns; i <= lastIns; i++)
 		{
-			if(m_sndFile.Instruments[i] != nullptr && m_sndFile.Instruments[i]->wPitchToTempoLock != 0)
+			if(m_sndFile.Instruments[i] != nullptr && m_sndFile.Instruments[i]->pitchToTempoLock.GetRaw() != 0)
 			{
-				m_sndFile.Instruments[i]->wPitchToTempoLock = 0;
+				m_sndFile.Instruments[i]->pitchToTempoLock.Set(0);
 				m_modDoc.SetModified();
 			}
 		}
@@ -2767,12 +2770,10 @@ void CCtrlInstruments::OnEnChangeEditPitchtempolock()
 {
 	if(IsLocked() || !m_nInstrument || !m_sndFile.Instruments[m_nInstrument]) return;
 
-	TCHAR buffer[8];
-	m_EditPitchTempoLock.GetWindowText(buffer, CountOf(buffer));
-	TEMPO ptlTempo = _ttoi(buffer);
+	TEMPO ptlTempo = m_EditPitchTempoLock.GetTempoValue();
 	Limit(ptlTempo, m_sndFile.GetModSpecifications().tempoMin, m_sndFile.GetModSpecifications().tempoMax);
 
-	m_sndFile.Instruments[m_nInstrument]->wPitchToTempoLock = ptlTempo;
+	m_sndFile.Instruments[m_nInstrument]->pitchToTempoLock = ptlTempo;
 	m_modDoc.SetModified();	// Only update other views after killing focus
 }
 
@@ -2783,9 +2784,7 @@ void CCtrlInstruments::OnEnKillfocusEditPitchtempolock()
 	//Checking that tempo value is in correct range.
 	if(IsLocked()) return;
 
-	TCHAR buffer[8];
-	m_EditPitchTempoLock.GetWindowText(buffer, CountOf(buffer));
-	int ptlTempo = _ttoi(buffer);
+	TEMPO ptlTempo = m_EditPitchTempoLock.GetTempoValue();
 	bool changed = false;
 	const CModSpecifications& specs = m_sndFile.GetModSpecifications();
 
@@ -2793,16 +2792,14 @@ void CCtrlInstruments::OnEnKillfocusEditPitchtempolock()
 	{
 		ptlTempo = specs.tempoMin;
 		changed = true;
-	}
-	if(ptlTempo > specs.tempoMax)
+	} else if(ptlTempo > specs.tempoMax)
 	{
 		ptlTempo = specs.tempoMax;
 		changed = true;
-
 	}
 	if(changed)
 	{
-		m_EditPitchTempoLock.SetWindowText(mpt::ToString(ptlTempo).c_str());
+		m_EditPitchTempoLock.SetTempoValue(ptlTempo);
 		m_modDoc.SetModified();
 	}
 	m_modDoc.UpdateAllViews(nullptr, InstrumentHint().Info(), this);

@@ -13,6 +13,7 @@
 #include "Moddoc.h"
 #include "Mainfrm.h"
 #include "../soundlib/Sndfile.h"
+#include "../soundlib/mod_specifications.h"
 #include "Vstplug.h"
 #include "dlg_misc.h"
 #include "AbstractVstEditor.h"

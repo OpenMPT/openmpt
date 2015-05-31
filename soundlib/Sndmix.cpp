@@ -736,7 +736,7 @@ void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol) const
 {
 	if (pChn->dwFlags[CHN_TREMOLO])
 	{
-		if(m_SongFlags.test_all(SONG_FIRSTTICK | SONG_PT1XMODE))
+		if(m_SongFlags.test_all(SONG_FIRSTTICK | SONG_PT_MODE))
 		{
 			// ProTracker doesn't apply tremolo nor advance on the first tick.
 			// Test case: VibratoReset.mod
@@ -852,7 +852,7 @@ void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol) const
 }
 
 
-bool CSoundFile::IsEnvelopeProcessed(const ModChannel *pChn, enmEnvelopeTypes env) const
+bool CSoundFile::IsEnvelopeProcessed(const ModChannel *pChn, EnvelopeType env) const
 //--------------------------------------------------------------------------------------
 {
 	if(pChn->pModInstrument == nullptr)
@@ -1002,7 +1002,7 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period) const
 }
 
 
-void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, enmEnvelopeTypes envType) const
+void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, EnvelopeType envType) const
 //------------------------------------------------------------------------------------------
 {
 	ModChannel::EnvInfo &chnEnv = pChn->GetEnvelope(envType);
@@ -1346,7 +1346,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 				}
 				if(note != pChn->nNote || GetType() == MOD_TYPE_STM)
 				{
-					if(m_SongFlags[SONG_PT1XMODE] && note >= NOTE_MIDDLEC + 24)
+					if(m_SongFlags[SONG_PT_MODE] && note >= NOTE_MIDDLEC + 24)
 					{
 						// Weird arpeggio wrap-around in ProTracker.
 						// Test case: ArpWraparound.mod, and the snare sound in "Jim is dead" by doh.
@@ -1391,7 +1391,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 		} else
 		{
 			// Original behaviour
-			if(m_SongFlags.test_all(SONG_FIRSTTICK | SONG_PT1XMODE) || ((GetType() & (MOD_TYPE_DIGI | MOD_TYPE_DBM)) && m_SongFlags[SONG_FIRSTTICK]))
+			if(m_SongFlags.test_all(SONG_FIRSTTICK | SONG_PT_MODE) || ((GetType() & (MOD_TYPE_DIGI | MOD_TYPE_DBM)) && m_SongFlags[SONG_FIRSTTICK]))
 			{
 				// ProTracker doesn't apply vibrato nor advance on the first tick.
 				// Test case: VibratoReset.mod
@@ -1738,9 +1738,9 @@ uint32 CSoundFile::GetChannelIncrement(ModChannel *pChn, uint32 period, int peri
 	}
 
 	// Applying Pitch/Tempo lock.
-	if(pIns && pIns->wPitchToTempoLock)
+	if(pIns && pIns->pitchToTempoLock.GetRaw())
 	{
-		freq = Util::muldivr(freq, m_PlayState.m_nMusicTempo, pIns->wPitchToTempoLock);
+		freq = Util::muldivr(freq, m_PlayState.m_nMusicTempo.GetRaw(), pIns->pitchToTempoLock.GetRaw());
 	}
 
 	return Util::muldivr(freq, 0x10000, m_MixerSettings.gdwMixingFreq << FREQ_FRACBITS);
@@ -1759,7 +1759,7 @@ bool CSoundFile::ReadNote()
 	{
 		m_PlayState.m_nTickCount = 0;
 		if (!m_PlayState.m_nMusicSpeed) m_PlayState.m_nMusicSpeed = 6;
-		if (!m_PlayState.m_nMusicTempo) m_PlayState.m_nMusicTempo = 125;
+		if (!m_PlayState.m_nMusicTempo.GetRaw()) m_PlayState.m_nMusicTempo.Set(125);
 	} else
 #endif // MODPLUG_TRACKER
 	{
@@ -1767,7 +1767,7 @@ bool CSoundFile::ReadNote()
 			return false;
 	}
 	////////////////////////////////////////////////////////////////////////////////////
-	if (!m_PlayState.m_nMusicTempo) return false;
+	if (m_PlayState.m_nMusicTempo.GetRaw() == 0) return false;
 
 	m_PlayState.m_nSamplesPerTick = GetTickDuration(m_PlayState);
 	m_PlayState.m_nBufferCount = m_PlayState.m_nSamplesPerTick;
@@ -1923,7 +1923,7 @@ bool CSoundFile::ReadNote()
 
 			// When glissando mode is set to semitones, clamp to the next halftone.
 			if((pChn->dwFlags & (CHN_GLISSANDO | CHN_PORTAMENTO)) == (CHN_GLISSANDO | CHN_PORTAMENTO)
-				&& (!m_SongFlags[SONG_PT1XMODE] || (pChn->rowCommand.IsPortamento() && !m_SongFlags[SONG_FIRSTTICK])))
+				&& (!m_SongFlags[SONG_PT_MODE] || (pChn->rowCommand.IsPortamento() && !m_SongFlags[SONG_FIRSTTICK])))
 			{
 				if(period != pChn->cachedPeriod)
 				{
@@ -1940,7 +1940,7 @@ bool CSoundFile::ReadNote()
 			// In ST3, the frequency is always clamped to periods 113 to 856, while in ProTracker,
 			// the limit is variable, depending on the finetune of the sample.
 			// Test case: AmigaLimits.s3m, AmigaLimitsFinetune.mod
-			if(m_SongFlags[SONG_AMIGALIMITS | SONG_PT1XMODE])
+			if(m_SongFlags[SONG_AMIGALIMITS | SONG_PT_MODE])
 			{
 				int limitLow = 113 * 4, limitHigh = 856 * 4;
 				if(GetType() != MOD_TYPE_S3M)
@@ -2073,7 +2073,7 @@ bool CSoundFile::ReadNote()
 					realvol = (pChn->nRealVolume * kChnMasterVol) >> 8;
 				}
 
-				const forcePanningMode panningMode = m_PlayConfig.getForcePanningMode();
+				const ForcePanningMode panningMode = m_PlayConfig.getForcePanningMode();
 				if(panningMode == forceSoftPanning || (panningMode == dontForcePanningMode && (m_MixerSettings.MixerFlags & SNDMIX_SOFTPANNING)))
 				{
 					if (pan < 128)
@@ -2373,7 +2373,7 @@ void CSoundFile::ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long lCoun
 		const long delta = highResGlobalVolumeDestination - m_PlayState.m_lHighResRampingGlobalVolume;
 		step = delta / static_cast<long>(m_PlayState.m_nSamplesToGlobalVolRampDest);
 
-		if(m_nMixLevels == mixLevels_117RC2)
+		if(m_nMixLevels == mixLevels1_17RC2)
 		{
 			// Define max step size as some factor of user defined ramping value: the lower the value, the more likely the click.
 			// If step is too big (might cause click), extend ramp length.

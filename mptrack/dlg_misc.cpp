@@ -17,6 +17,7 @@
 #include "ChildFrm.h"
 #include "Vstplug.h"
 #include "ChannelManagerDlg.h"
+#include "../soundlib/mod_specifications.h"
 #include "../common/version.h"
 #include "../common/StringFixer.h"
 
@@ -159,7 +160,7 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox3.SetCheck(sndFile.m_SongFlags[SONG_ITOLDEFFECTS] ? BST_CHECKED : BST_UNCHECKED);
 	m_CheckBox4.SetCheck(sndFile.m_SongFlags[SONG_ITCOMPATGXX] ? BST_CHECKED : BST_UNCHECKED);
 	m_CheckBox5.SetCheck(sndFile.m_SongFlags[SONG_EXFILTERRANGE] ? BST_CHECKED : BST_UNCHECKED);
-	m_CheckBoxPT1x.SetCheck(sndFile.m_SongFlags[SONG_PT1XMODE] ? BST_CHECKED : BST_UNCHECKED);
+	m_CheckBoxPT1x.SetCheck(sndFile.m_SongFlags[SONG_PT_MODE] ? BST_CHECKED : BST_UNCHECKED);
 	m_CheckBoxAmigaLimits.SetCheck(sndFile.m_SongFlags[SONG_AMIGALIMITS] ? BST_CHECKED : BST_UNCHECKED);
 
 	const FlagSet<SongFlags> allowedFlags(sndFile.GetModSpecifications(type).songFlags);
@@ -168,13 +169,13 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox3.EnableWindow(allowedFlags[SONG_ITOLDEFFECTS]);
 	m_CheckBox4.EnableWindow(allowedFlags[SONG_ITCOMPATGXX]);
 	m_CheckBox5.EnableWindow(allowedFlags[SONG_EXFILTERRANGE]);
-	m_CheckBoxPT1x.EnableWindow(allowedFlags[SONG_PT1XMODE]);
+	m_CheckBoxPT1x.EnableWindow(allowedFlags[SONG_PT_MODE]);
 	m_CheckBoxAmigaLimits.EnableWindow(allowedFlags[SONG_AMIGALIMITS]);
 
 	// These two checkboxes are mutually exclusive and share the same screen space
 	m_CheckBoxPT1x.ShowWindow(type == MOD_TYPE_MOD ? SW_SHOW : SW_HIDE);
 	m_CheckBox5.ShowWindow(type != MOD_TYPE_MOD ? SW_SHOW : SW_HIDE);
-	if(allowedFlags[SONG_PT1XMODE]) OnPTModeChanged();
+	if(allowedFlags[SONG_PT_MODE]) OnPTModeChanged();
 
 	const bool XMorITorMPT = (type & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT));
 	const bool ITorMPT = (type & (MOD_TYPE_IT | MOD_TYPE_MPT));
@@ -202,18 +203,18 @@ void CModTypeDlg::UpdateDialog()
 	GetDlgItem(IDC_CHK_OLDPITCH)->EnableWindow(sndFile.GetModFlag(MSF_OLD_MIDI_PITCHBENDS) ? TRUE : FALSE);
 
 	// Tempo modes
-	const tempoMode oldTempoMode = initialized ? static_cast<tempoMode>(m_TempoModeBox.GetItemData(m_TempoModeBox.GetCurSel())) : sndFile.m_nTempoMode;
+	const TempoMode oldTempoMode = initialized ? static_cast<TempoMode>(m_TempoModeBox.GetItemData(m_TempoModeBox.GetCurSel())) : sndFile.m_nTempoMode;
 	m_TempoModeBox.ResetContent();
 
-	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Classic")), tempo_mode_classic);
-	if(type == MOD_TYPE_MPT || sndFile.m_nTempoMode == tempo_mode_alternative)
-		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Alternative")), tempo_mode_alternative);
-	if(type == MOD_TYPE_MPT || sndFile.m_nTempoMode == tempo_mode_modern)
-		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Modern (accurate)")), tempo_mode_modern);
+	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Classic")), tempoModeClassic);
+	if(type == MOD_TYPE_MPT || sndFile.m_nTempoMode == tempoModeAlternative)
+		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Alternative")), tempoModeAlternative);
+	if(type == MOD_TYPE_MPT || sndFile.m_nTempoMode == tempoModeModern)
+		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Modern (accurate)")), tempoModeModern);
 	m_TempoModeBox.SetCurSel(0);
 	for(int i = m_TempoModeBox.GetCount(); i > 0; i--)
 	{
-		if(static_cast<tempoMode>(m_TempoModeBox.GetItemData(i)) == oldTempoMode)
+		if(static_cast<TempoMode>(m_TempoModeBox.GetItemData(i)) == oldTempoMode)
 		{
 			m_TempoModeBox.SetCurSel(i);
 			break;
@@ -221,23 +222,23 @@ void CModTypeDlg::UpdateDialog()
 	}
 
 	// Mix levels
-	const mixLevels oldMixLevels = initialized ? static_cast<mixLevels>(m_PlugMixBox.GetItemData(m_PlugMixBox.GetCurSel())) : sndFile.GetMixLevels();
+	const MixLevels oldMixLevels = initialized ? static_cast<MixLevels>(m_PlugMixBox.GetItemData(m_PlugMixBox.GetCurSel())) : sndFile.GetMixLevels();
 	m_PlugMixBox.ResetContent();
-	if(type == MOD_TYPE_MPT || sndFile.GetMixLevels() == mixLevels_117RC3)	// In XM/IT, this is only shown for backwards compatibility with existing tunes
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC3")),	mixLevels_117RC3);
-	if(sndFile.GetMixLevels() == mixLevels_117RC2)	// Only shown for backwards compatibility with existing tunes
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC2")),	mixLevels_117RC2);
-	if(sndFile.GetMixLevels() == mixLevels_117RC1)	// Ditto
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC1")),	mixLevels_117RC1);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Original (MPT 1.16)")),	mixLevels_original);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Compatible")),			mixLevels_compatible);
+	if(type == MOD_TYPE_MPT || sndFile.GetMixLevels() == mixLevels1_17RC3)	// In XM/IT, this is only shown for backwards compatibility with existing tunes
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC3")),	mixLevels1_17RC3);
+	if(sndFile.GetMixLevels() == mixLevels1_17RC2)	// Only shown for backwards compatibility with existing tunes
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC2")),	mixLevels1_17RC2);
+	if(sndFile.GetMixLevels() == mixLevels1_17RC1)	// Ditto
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC1")),	mixLevels1_17RC1);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Original (MPT 1.16)")),	mixLevelsOriginal);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Compatible")),			mixLevelsCompatible);
 	if(type == MOD_TYPE_XM)
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Compatible (FT2 Pan Law)")), mixLevels_compatible_FT2);
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Compatible (FT2 Pan Law)")), mixLevelsCompatibleFT2);
 
 	m_PlugMixBox.SetCurSel(0);
 	for(int i = m_PlugMixBox.GetCount(); i > 0; i--)
 	{
-		if(static_cast<mixLevels>(m_PlugMixBox.GetItemData(i)) == oldMixLevels)
+		if(static_cast<MixLevels>(m_PlugMixBox.GetItemData(i)) == oldMixLevels)
 		{
 			m_PlugMixBox.SetCurSel(i);
 			break;
@@ -322,7 +323,7 @@ void CModTypeDlg::OnOK()
 	sndFile.m_SongFlags.set(SONG_ITOLDEFFECTS, m_CheckBox3.GetCheck() != BST_UNCHECKED);
 	sndFile.m_SongFlags.set(SONG_ITCOMPATGXX, m_CheckBox4.GetCheck() != BST_UNCHECKED);
 	sndFile.m_SongFlags.set(SONG_EXFILTERRANGE, m_CheckBox5.GetCheck() != BST_UNCHECKED);
-	sndFile.m_SongFlags.set(SONG_PT1XMODE, m_CheckBoxPT1x.GetCheck() != BST_UNCHECKED);
+	sndFile.m_SongFlags.set(SONG_PT_MODE, m_CheckBoxPT1x.GetCheck() != BST_UNCHECKED);
 	sndFile.m_SongFlags.set(SONG_AMIGALIMITS, m_CheckBoxAmigaLimits.GetCheck() != BST_UNCHECKED);
 
 	sel = m_ChannelsBox.GetCurSel();
@@ -334,13 +335,13 @@ void CModTypeDlg::OnOK()
 	sel = m_TempoModeBox.GetCurSel();
 	if (sel >= 0)
 	{
-		sndFile.m_nTempoMode = static_cast<tempoMode>(m_TempoModeBox.GetItemData(sel));
+		sndFile.m_nTempoMode = static_cast<TempoMode>(m_TempoModeBox.GetItemData(sel));
 	}
 
 	sel = m_PlugMixBox.GetCurSel();
 	if(sel >= 0)
 	{
-		sndFile.SetMixLevels(static_cast<mixLevels>(m_PlugMixBox.GetItemData(sel)));
+		sndFile.SetMixLevels(static_cast<MixLevels>(m_PlugMixBox.GetItemData(sel)));
 	}
 
 	sndFile.SetModFlags(FlagSet<ModSpecificFlag>());
@@ -1135,6 +1136,10 @@ BOOL CInputDlg::OnInitDialog()
 		spin.SetRange32(minValue, maxValue);
 		spin.SetBuddy(GetDlgItem(IDC_EDIT1));
 		SetDlgItemInt(IDC_EDIT1, resultNumber);
+		m_edit.SubclassDlgItem(IDC_EDIT1, this);
+		m_edit.ModifyStyle(0, ES_NUMBER);
+		m_edit.AllowSign(minValue < 0);
+		m_edit.AllowFractions(false);
 	} else
 	{
 		// Text
@@ -1184,11 +1189,11 @@ struct MsgBoxHidableMessage
 
 const MsgBoxHidableMessage HidableMessages[] =
 {
-	{TEXT("Note: First two bytes of oneshot samples are silenced for ProTracker compatibility."), 1, true},
-	{TEXT("Hint: To create IT-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 1, true},
-	{TEXT("Press OK to apply signed/unsigned conversion\n (note: this often significantly increases volume level)"), 1 << 2, false},
-	{TEXT("Hint: To create XM-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 3, true},
-	{TEXT("Warning: The exported file will not contain any of MPT's file format hacks."), 1 << 4, true},
+	{_T("Note: First two bytes of oneshot samples are silenced for ProTracker compatibility."), 1, true},
+	{_T("Hint: To create IT-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 1, true},
+	{_T("Press OK to apply signed/unsigned conversion\n (note: this often significantly increases volume level)"), 1 << 2, false},
+	{_T("Hint: To create XM-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 3, true},
+	{_T("Warning: The exported file will not contain any of MPT's file format hacks."), 1 << 4, true},
 };
 
 STATIC_ASSERT(CountOf(HidableMessages) == enMsgBoxHidableMessage_count);

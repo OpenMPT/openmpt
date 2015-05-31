@@ -17,6 +17,7 @@
 #include "../common/WriteMemoryDump.h"
 #include "../common/version.h"
 #include "../common/mptFileIO.h"
+#include "../soundlib/mod_specifications.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

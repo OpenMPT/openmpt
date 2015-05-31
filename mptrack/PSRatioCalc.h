@@ -10,18 +10,13 @@
 
 #pragma once
 
-#include "afxwin.h"
-
 OPENMPT_NAMESPACE_BEGIN
-
-// CPSRatioCalc dialog
 
 class CPSRatioCalc : public CDialog
 {
 	DECLARE_DYNAMIC(CPSRatioCalc)
 
 public:
-	enum { IDD = IDD_PITCHSHIFT };
 	CPSRatioCalc(const CSoundFile &sndFile, SAMPLEINDEX sample, double ratio, CWnd* pParent = NULL);   // standard constructor
 	virtual ~CPSRatioCalc();
 	double m_dRatio;
@@ -35,7 +30,7 @@ protected:
 	ULONGLONG m_lSamplesNew;
 	ULONGLONG m_lMsNew, m_lMsOrig;
 	double m_dRowsOrig, m_dRowsNew;
-	UINT m_nTempo, m_nSpeed;
+	uint32 m_nTempo, m_nSpeed;
 
 	afx_msg void OnEnChangeSamples();
 	afx_msg void OnEnChangeMs();

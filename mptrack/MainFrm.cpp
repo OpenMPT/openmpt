@@ -959,7 +959,7 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 		// Instrument envelopes
 		const INSTRUMENTINDEX ins = notifyItem;
 
-		enmEnvelopeTypes notifyEnv = ENV_VOLUME;
+		EnvelopeType notifyEnv = ENV_VOLUME;
 		if(notifyType[Notification::PitchEnv])
 			notifyEnv = ENV_PITCH;
 		else if(notifyType[Notification::PanEnv])
@@ -1594,15 +1594,15 @@ void CMainFrame::InitPreview()
 	} else
 	{
 		// Preview at 0dB
-		m_WaveFile.SetMixLevels(mixLevels_117RC3);
+		m_WaveFile.SetMixLevels(mixLevels1_17RC3);
 		m_WaveFile.m_nSamplePreAmp = static_cast<uint32>(m_WaveFile.GetPlayConfig().getNormalSamplePreAmp());
 	}
-	m_WaveFile.m_nDefaultTempo = 125;
+	m_WaveFile.m_nDefaultTempo.Set(125);
 	m_WaveFile.m_nDefaultSpeed = 6;
 	m_WaveFile.m_nType = MOD_TYPE_MPT;
 	m_WaveFile.m_nChannels = 2;
 	m_WaveFile.m_nInstruments = 1;
-	m_WaveFile.m_nTempoMode = tempo_mode_classic;
+	m_WaveFile.m_nTempoMode = tempoModeClassic;
 	m_WaveFile.Order.resize(1);
 	m_WaveFile.Order[0] = 0;
 	m_WaveFile.Patterns.Insert(0, 80);

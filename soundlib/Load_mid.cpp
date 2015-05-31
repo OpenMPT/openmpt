@@ -561,7 +561,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	nTempoUsec = 500000 / nPPQN;
 	tempo = ConvertMidiTempo(nTempoUsec, nTickMultiplier, importSpeed);
-	m_nDefaultTempo = tempo;
+	m_nDefaultTempo.Set(tempo);
 	m_nDefaultSpeed = importSpeed;
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	midimastervol = m_nDefaultGlobalVolume;

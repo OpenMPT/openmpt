@@ -25,6 +25,7 @@
 #include "PatternClipboard.h"
 #include "../common/ComponentManager.h"
 #include "ExceptionHandler.h"
+#include "../soundlib/mod_specifications.h"
 
 #include <algorithm>
 

@@ -337,9 +337,9 @@ void CSoundFile::UpgradeModule()
 	{
 		if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 22, 07, 19)
 			&& m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 23, 01, 04)
-			&& GetMixLevels() == mixLevels_compatible)
+			&& GetMixLevels() == mixLevelsCompatible)
 		{
-			SetMixLevels(mixLevels_compatible_FT2);
+			SetMixLevels(mixLevelsCompatibleFT2);
 		}
 	}
 

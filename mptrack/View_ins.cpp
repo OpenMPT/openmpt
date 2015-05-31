@@ -22,6 +22,7 @@
 #include "channelManagerDlg.h"
 #include "ScaleEnvPointsDlg.h"
 #include "../soundlib/MIDIEvents.h"
+#include "../soundlib/mod_specifications.h"
 #include "../common/StringFixer.h"
 #include "FileDialog.h"
 
@@ -198,7 +199,7 @@ void CViewInstrument::SetModified(InstrumentHint hint, bool updateAll)
 }
 
 
-BOOL CViewInstrument::SetCurrentInstrument(INSTRUMENTINDEX nIns, enmEnvelopeTypes nEnv)
+BOOL CViewInstrument::SetCurrentInstrument(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
 //-------------------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -570,7 +571,7 @@ bool CViewInstrument::EnvSetFlag(EnvelopeFlags flag, bool enable) const
 }
 
 
-bool CViewInstrument::EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile &sndFile, ModInstrument &ins, bool enable, BYTE defaultValue, EnvelopeFlags extraFlags)
+bool CViewInstrument::EnvToggleEnv(EnvelopeType envelope, CSoundFile &sndFile, ModInstrument &ins, bool enable, BYTE defaultValue, EnvelopeFlags extraFlags)
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	InstrumentEnvelope &env = ins.GetEnvelope(envelope);

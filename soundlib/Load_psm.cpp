@@ -629,7 +629,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Make the default variables of the first subsong global
 	m_nDefaultSpeed = subsongs[0].defaultSpeed;
-	m_nDefaultTempo = subsongs[0].defaultTempo;
+	m_nDefaultTempo.Set(subsongs[0].defaultTempo);
 	m_nRestartPos = subsongs[0].restartPos;
 	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
@@ -1157,7 +1157,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 		m_nSamplePreAmp = 48;
 	}
 	m_nDefaultSpeed = fileHeader.songSpeed;
-	m_nDefaultTempo = fileHeader.songTempo;
+	m_nDefaultTempo.Set(fileHeader.songTempo);
 
 	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songName);
 

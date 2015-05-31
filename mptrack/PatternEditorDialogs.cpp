@@ -16,6 +16,7 @@
 #include "Moddoc.h"
 #include "view_pat.h"
 #include "PatternEditorDialogs.h"
+#include "../soundlib/mod_specifications.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

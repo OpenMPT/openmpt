@@ -299,11 +299,11 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Tempo
-	m_nDefaultTempo = fileHeader.tempo;
-	if(m_nDefaultTempo < 33)
+	m_nDefaultTempo.Set(fileHeader.tempo);
+	if(fileHeader.tempo < 33)
 	{
 		// ST3 also fails to load an otherwise valid default tempo of 32...
-		m_nDefaultTempo = 125;
+		m_nDefaultTempo.Set(125);
 	}
 
 	// Global Volume
@@ -613,7 +613,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	// Song Variables
 	fileHeader.globalVol = static_cast<uint8>(MIN(m_nDefaultGlobalVolume / 4, 64));
 	fileHeader.speed = static_cast<uint8>(Clamp(m_nDefaultSpeed, 1u, 254u));
-	fileHeader.tempo = static_cast<uint8>(Clamp(m_nDefaultTempo, 33u, 255u));
+	fileHeader.tempo = static_cast<uint8>(Clamp(m_nDefaultTempo.GetInt(), 33u, 255u));
 	fileHeader.masterVolume = static_cast<uint8>(Clamp(m_nSamplePreAmp, 16u, 127u) | 0x80);
 	fileHeader.ultraClicks = 8;
 	fileHeader.usePanningTable = S3MFileHeader::idPanning;

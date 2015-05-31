@@ -20,6 +20,7 @@
 #include "ChannelManagerDlg.h"
 #include "../common/StringFixer.h"
 #include "view_com.h"
+#include "../soundlib/mod_specifications.h"
 #include <set>
 
 

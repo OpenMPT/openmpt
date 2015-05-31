@@ -15,6 +15,7 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
+#include "mod_specifications.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -190,7 +191,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_nDefaultGlobalVolume = MIN(fileHeader.masterVol * 4, 256);
 	m_nDefaultSpeed = fileHeader.tempo;
-	m_nDefaultTempo = fileHeader.bpm;
+	m_nDefaultTempo.Set(fileHeader.bpm);
 
 	// Read orders
 	if(file.Seek(fileHeader.orderOffset))

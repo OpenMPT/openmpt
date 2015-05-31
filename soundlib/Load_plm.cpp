@@ -147,7 +147,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songName);
 	m_nChannels = fileHeader.numChannels + 1;	// Additional channel for writing pattern breaks
 	m_nSamplePreAmp = fileHeader.amplify;
-	m_nDefaultTempo = fileHeader.tempo;
+	m_nDefaultTempo.Set(fileHeader.tempo);
 	m_nDefaultSpeed = fileHeader.speed;
 	for(CHANNELINDEX chn = 0; chn < fileHeader.numChannels; chn++)
 	{

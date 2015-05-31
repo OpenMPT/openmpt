@@ -398,7 +398,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 	if(m_nChannels == 0)
 		return false;
 
-	m_nDefaultTempo = 125;
+	m_nDefaultTempo.Set(125);
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nSamplePreAmp = m_nVSTiVolume = 48;
 	m_nType = MOD_TYPE_OKT;
