@@ -397,12 +397,13 @@ void AddPluginParameternamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN& plugarray)
 void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug);
 
 // Append note names in range [noteStart, noteEnd] to given combobox. Index starts from 0.
-void AppendNotesToControl(CComboBox& combobox, const ModCommand::NOTE noteStart, const ModCommand::NOTE noteEnd);
+void AppendNotesToControl(CComboBox& combobox, ModCommand::NOTE noteStart, ModCommand::NOTE noteEnd);
 
-// Append note names to combobox. If pSndFile != nullprt, appends only notes that are
-// available in the module type. If nInstr is given, instrument specific note names are used instead of
-// default note names.
-void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile &sndFile, const INSTRUMENTINDEX nInstr = MAX_INSTRUMENTS);
+// Append note names to combo box.
+// If nInstr is given, instrument-specific note names are used instead of default note names.
+// A custom note range may also be specified using the noteStart and noteEnd parameters.
+// If they are left out, only notes that are available in the module type, plus any supported "special notes" are added.
+void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile &sndFile, INSTRUMENTINDEX nInstr = MAX_INSTRUMENTS, ModCommand::NOTE noteStart = 0, ModCommand::NOTE noteEnd = 0);
 
 // Get window text (e.g. edit box conent) as a wide string
 std::wstring GetWindowTextW(CWnd &wnd);
