@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "Mptrack.h"
 #include "Mainfrm.h"
+#include "InputHandler.h"
 #include "View_tre.h"
 #include "Moddoc.h"
 #include "../soundlib/mod_specifications.h"
@@ -535,15 +536,30 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 		CSoundFile *pSndFile = pMainFrm->GetSoundFilePlaying();
 		if (pSndFile)
 		{
+			const CModSpecifications &specs = pSndFile->GetModSpecifications();
 			int n;
 			if ((n = sgn(m_SpinTempo.GetPos32())) != 0)
 			{
-				pSndFile->SetTempo(Clamp(nCurrentTempo + TEMPO(n, 0), pSndFile->GetModSpecifications().tempoMin, pSndFile->GetModSpecifications().tempoMax), true);
+				TEMPO newTempo;
+				if(specs.hasFractionalTempo)
+				{
+					n *= TEMPO::fractFact;
+					if(CMainFrame::GetMainFrame()->GetInputHandler()->CtrlPressed())
+						n /= 100;
+					else
+						n /= 10;
+					newTempo.SetRaw(n);
+				} else
+				{
+					newTempo = TEMPO(n, 0);
+				}
+				newTempo += nCurrentTempo;
+				pSndFile->SetTempo(Clamp(newTempo, specs.tempoMin, specs.tempoMax), true);
 				m_SpinTempo.SetPos(0);
 			}
 			if ((n = sgn(m_SpinSpeed.GetPos32())) != 0)
 			{
-				pSndFile->m_PlayState.m_nMusicSpeed = Clamp(UINT(nCurrentSpeed + n), pSndFile->GetModSpecifications().speedMin, pSndFile->GetModSpecifications().speedMax);
+				pSndFile->m_PlayState.m_nMusicSpeed = Clamp(uint32(nCurrentSpeed + n), specs.speedMin, specs.speedMax);
 				m_SpinSpeed.SetPos(0);
 			}
 			if ((n = m_SpinRowsPerBeat.GetPos32()) != 0)
