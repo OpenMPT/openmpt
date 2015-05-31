@@ -214,8 +214,6 @@ CMainFrame::CMainFrame()
 
 	m_InputHandler = new CInputHandler(this);
 
-	//Loading static tunings here - probably not the best place to do that but anyway.
-	CSoundFile::LoadStaticTunings();
 }
 
 

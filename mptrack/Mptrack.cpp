@@ -1054,6 +1054,9 @@ BOOL CTrackApp::InitInstance()
 	}
 #endif // !NO_DSOUND
 
+	// Load static tunings
+	CSoundFile::LoadStaticTunings();
+
 	// Load DLS Banks
 	if (!cmdInfo.m_bNoDls) LoadDefaultDLSBanks();
 
