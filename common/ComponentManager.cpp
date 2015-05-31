@@ -192,10 +192,10 @@ std::string ComponentFactoryBase::GetID() const
 }
 
 
-MPT_SHARED_PTR<IComponent> ComponentFactoryBase::Construct() const
-//----------------------------------------------------------------
+void ComponentFactoryBase::Initialize(ComponentManager &componentManager, MPT_SHARED_PTR<IComponent> component)
+//-------------------------------------------------------------------------------------------------------------
 {
-	return DoConstruct();
+	componentManager.InitializeComponent(component);
 }
 
 
@@ -264,20 +264,45 @@ ComponentManager::ComponentManager(const IComponentManagerSettings &settings)
 //---------------------------------------------------------------------------
 	: m_Settings(settings)
 {
-	return;
+	Util::lock_guard<Util::mutex> guard(ComponentListMutex());
+	for(ComponentListEntry *entry = ComponentListHead(); entry; entry = entry->next)
+	{
+		entry->reg(*this);
+	}
 }
 
 
 void ComponentManager::Register(const IComponentFactory &componentFactory)
 //------------------------------------------------------------------------
 {
-	std::string id = componentFactory.GetID();
-	TComponentMap::const_iterator it = m_Components.find(id);
-	if(it != m_Components.end())
+	if(m_Components.find(componentFactory.GetID()) != m_Components.end())
 	{
 		return;
 	}
-	m_Components.insert(std::make_pair(id, componentFactory.Construct()));
+	RegisteredComponent registeredComponent;
+	registeredComponent.factoryMethod = componentFactory.GetStaticConstructor();
+	registeredComponent.instance = MPT_SHARED_PTR<IComponent>();
+	m_Components.insert(std::make_pair(componentFactory.GetID(), registeredComponent));
+}
+
+
+void ComponentManager::Startup()
+//------------------------------
+{
+	if(m_Settings.LoadOnStartup())
+	{
+		for(TComponentMap::iterator it = m_Components.begin(); it != m_Components.end(); ++it)
+		{
+			(*it).second.instance = (*it).second.factoryMethod(*this);
+		}
+	}
+	if(!m_Settings.KeepLoaded())
+	{
+		for(TComponentMap::iterator it = m_Components.begin(); it != m_Components.end(); ++it)
+		{
+			(*it).second.instance = MPT_SHARED_PTR<IComponent>();
+		}
+	}
 }
 
 
@@ -300,38 +325,29 @@ void ComponentManager::InitializeComponent(MPT_SHARED_PTR<IComponent> component)
 }
 
 
-void ComponentManager::Startup()
-//------------------------------
+MPT_SHARED_PTR<IComponent> ComponentManager::GetComponent(const IComponentFactory &componentFactory)
+//--------------------------------------------------------------------------------------------------
 {
-	if(m_Settings.LoadOnStartup() || m_Settings.KeepLoaded())
-	{
-		Util::lock_guard<Util::mutex> guard(ComponentListMutex());
-		for(ComponentListEntry *entry = ComponentListHead(); entry; entry = entry->next)
-		{
-			entry->reg(this);
+	MPT_SHARED_PTR<IComponent> component = MPT_SHARED_PTR<IComponent>();
+	TComponentMap::iterator it = m_Components.find(componentFactory.GetID());
+	if(it != m_Components.end())
+	{ // registered component
+		if((*it).second.instance)
+		{ // loaded
+			component = (*it).second.instance;
+		} else
+		{ // not loaded
+			component = (*it).second.factoryMethod(*this);
+			if(m_Settings.KeepLoaded())
+			{ // keep the component loaded
+				(*it).second.instance = component;
+			}
 		}
+	} else
+	{ // unregistered component
+		component = componentFactory.Construct(*this);
 	}
-	if(m_Settings.LoadOnStartup())
-	{
-		for(TComponentMap::iterator it = m_Components.begin(); it != m_Components.end(); ++it)
-		{
-			InitializeComponent((*it).second);
-		}
-	}
-	if(!m_Settings.KeepLoaded())
-	{
-		m_Components.clear();
-	}
-}
-
-
-MPT_SHARED_PTR<IComponent> ComponentManager::GetComponent(const IComponentFactory &componentFactory) const
-//--------------------------------------------------------------------------------------------------------
-{
-	TComponentMap::const_iterator it = m_Components.find(componentFactory.GetID());
-	MPT_SHARED_PTR<IComponent> component = (it != m_Components.end()) ? it->second : componentFactory.Construct();
 	MPT_ASSERT(component);
-	InitializeComponent(component);
 	return component;
 }
 

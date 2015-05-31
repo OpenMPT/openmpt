@@ -217,6 +217,11 @@ public:
 #if MPT_COMPONENT_MANAGER
 
 
+class ComponentManager;
+
+typedef MPT_SHARED_PTR<IComponent> (*ComponentFactoryMethod)(ComponentManager &componentManager);
+
+
 class IComponentFactory
 {
 protected:
@@ -225,7 +230,8 @@ public:
 	virtual ~IComponentFactory() { }
 public:
 	virtual std::string GetID() const = 0;
-	virtual MPT_SHARED_PTR<IComponent> Construct() const = 0;
+	virtual MPT_SHARED_PTR<IComponent> Construct(ComponentManager &componentManager) const = 0;
+	virtual ComponentFactoryMethod GetStaticConstructor() const = 0;
 };
 
 
@@ -236,11 +242,12 @@ private:
 	std::string m_ID;
 protected:
 	ComponentFactoryBase(const std::string &id);
+	static void Initialize(ComponentManager &componentManager, MPT_SHARED_PTR<IComponent> component);
 public:
 	virtual ~ComponentFactoryBase();
 	virtual std::string GetID() const;
-	virtual MPT_SHARED_PTR<IComponent> Construct() const;
-	virtual MPT_SHARED_PTR<IComponent> DoConstruct() const = 0;
+	virtual MPT_SHARED_PTR<IComponent> Construct(ComponentManager &componentManager) const = 0;
+	virtual ComponentFactoryMethod GetStaticConstructor() const = 0;
 };
 
 
@@ -259,9 +266,19 @@ public:
 		return;
 	}
 public:
-	virtual MPT_SHARED_PTR<IComponent> DoConstruct() const
+	virtual MPT_SHARED_PTR<IComponent> Construct(ComponentManager &componentManager) const
 	{
-		return mpt::make_shared<T>();
+		return StaticConstruct(componentManager);
+	}
+	static MPT_SHARED_PTR<IComponent> StaticConstruct(ComponentManager &componentManager)
+	{
+		MPT_SHARED_PTR<IComponent> component = mpt::make_shared<T>();
+		Initialize(componentManager, component);
+		return component;
+	}
+	virtual ComponentFactoryMethod GetStaticConstructor() const
+	{
+		return &StaticConstruct;
 	}
 };
 
@@ -287,6 +304,7 @@ public:
 
 class ComponentManager
 {
+	friend class ComponentFactoryBase;
 public:
 	static void Init(const IComponentManagerSettings &settings);
 	static void Release();
@@ -294,7 +312,12 @@ public:
 private:
 	ComponentManager(const IComponentManagerSettings &settings);
 private:
-	typedef std::map<std::string, MPT_SHARED_PTR<IComponent> > TComponentMap;
+	struct RegisteredComponent
+	{
+		ComponentFactoryMethod factoryMethod;
+		MPT_SHARED_PTR<IComponent> instance;
+	};
+	typedef std::map<std::string, RegisteredComponent> TComponentMap;
 	const IComponentManagerSettings &m_Settings;
 	TComponentMap m_Components;
 private:
@@ -302,14 +325,14 @@ private:
 public:
 	void Register(const IComponentFactory &componentFactory);
 	void Startup();
-	MPT_SHARED_PTR<IComponent> GetComponent(const IComponentFactory &componentFactory) const;
+	MPT_SHARED_PTR<IComponent> GetComponent(const IComponentFactory &componentFactory);
 };
 
 
 struct ComponentListEntry
 {
 	ComponentListEntry *next;
-	void (*reg)(ComponentManager *componentManager);
+	void (*reg)(ComponentManager &componentManager);
 };
 		
 bool ComponentListPush(ComponentListEntry *entry);
@@ -317,9 +340,9 @@ bool ComponentListPush(ComponentListEntry *entry);
 #define MPT_DECLARE_COMPONENT_MEMBERS public: static const char * const g_ID;
 		
 #define MPT_REGISTERED_COMPONENT(name) \
-	static void RegisterComponent ## name (ComponentManager *componentManager) \
+	static void RegisterComponent ## name (ComponentManager &componentManager) \
 	{ \
-		componentManager->Register(ComponentFactory< name >( #name )); \
+		componentManager.Register(ComponentFactory< name >( #name )); \
 	} \
 	static ComponentListEntry Component ## name ## ListEntry = { nullptr, & RegisterComponent ## name }; \
 	static bool Component ## name ## Registered = ComponentListPush(& Component ## name ## ListEntry ); \
