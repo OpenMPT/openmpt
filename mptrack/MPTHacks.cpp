@@ -15,6 +15,7 @@
 #include "stdafx.h"
 #include "Moddoc.h"
 #include "../soundlib/modsmp_ctrl.h"
+#include "../soundlib/mod_specifications.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -327,7 +328,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 
 		// Extended instrument attributes
 		if(instr->nFilterMode != FLTMODE_UNCHANGED || instr->nVolRampUp != 0 || instr->nResampling != SRCMODE_DEFAULT ||
-			instr->nCutSwing != 0 || instr->nResSwing != 0 || instr->nMixPlug != 0 || instr->wPitchToTempoLock != 0 ||
+			instr->nCutSwing != 0 || instr->nResSwing != 0 || instr->nMixPlug != 0 || instr->pitchToTempoLock.GetRaw() != 0 ||
 			instr->nDCT == DCT_PLUGIN ||
 			instr->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET ||
 			instr->PanEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET ||
@@ -343,7 +344,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 				instr->nCutSwing = 0;
 				instr->nResSwing = 0;
 				instr->nMixPlug = 0;
-				instr->wPitchToTempoLock = 0;
+				instr->pitchToTempoLock.Set(0);
 				if(instr->nDCT == DCT_PLUGIN) instr->nDCT = DCT_NONE;
 				instr->VolEnv.nReleaseNode = instr->PanEnv.nReleaseNode = instr->PitchEnv.nReleaseNode = ENV_RELEASE_NODE_UNSET;
 			}
@@ -370,7 +371,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	// Check for invalid default tempo
 	if(m_SndFile.m_nDefaultTempo > originalSpecs->tempoMax || m_SndFile.m_nDefaultTempo < originalSpecs->tempoMin)
 	{
-		AddToLog(mpt::String::Print("Found incompatible default tempo (must be between %1 and %2)", originalSpecs->tempoMin, originalSpecs->tempoMax));
+		AddToLog(mpt::String::Print("Found incompatible default tempo (must be between %1 and %2)", originalSpecs->tempoMin.GetInt(), originalSpecs->tempoMax.GetInt()));
 		foundHacks = true;
 		if(autofix)
 			m_SndFile.m_nDefaultTempo = Clamp(m_SndFile.m_nDefaultTempo, originalSpecs->tempoMin, originalSpecs->tempoMax);
@@ -420,12 +421,12 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	}
 
 	// Check for new tempo modes
-	if(m_SndFile.m_nTempoMode != tempo_mode_classic)
+	if(m_SndFile.m_nTempoMode != tempoModeClassic)
 	{
 		AddToLog("Found incompatible tempo mode (only classic tempo mode allowed)");
 		foundHacks = true;
 		if(autofix)
-			m_SndFile.m_nTempoMode = tempo_mode_classic;
+			m_SndFile.m_nTempoMode = tempoModeClassic;
 	}
 
 	// Check for extended filter range flag
@@ -479,12 +480,12 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		}
 	}
 
-	if(m_SndFile.GetMixLevels() != mixLevels_compatible && m_SndFile.GetMixLevels() != mixLevels_compatible_FT2)
+	if(m_SndFile.GetMixLevels() != mixLevelsCompatible && m_SndFile.GetMixLevels() != mixLevelsCompatibleFT2)
 	{
 		AddToLog("Found incorrect mix levels (only compatible mix levels allowed)");
 		foundHacks = true;
 		if(autofix)
-			m_SndFile.SetMixLevels(m_SndFile.GetType() == MOD_TYPE_XM ? mixLevels_compatible_FT2 : mixLevels_compatible);
+			m_SndFile.SetMixLevels(m_SndFile.GetType() == MOD_TYPE_XM ? mixLevelsCompatibleFT2 : mixLevelsCompatible);
 	}
 
 	if(autofix && foundHacks)

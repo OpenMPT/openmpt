@@ -780,13 +780,14 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	uint16 headerFlags;
 	if(fileHeader.versionLow >= 2)
 	{
-		m_nDefaultTempo = std::max(uint8(32), static_cast<uint8>(file.ReadUint16LE() >> 8));	// 16.16 Tempo
+		uint16 tempo = std::max(uint16(32 << 8), file.ReadUint16LE());	// 8.8 tempo
+		m_nDefaultTempo.SetRaw((tempo * TEMPO::fractFact) >> 8);
 		m_nDefaultSpeed = std::max(uint8(1), file.ReadUint8());
 		file.Skip(3);	// Default values for pattern editor
 		headerFlags = file.ReadUint16LE();
 	} else
 	{
-		m_nDefaultTempo = std::max(uint8(32), file.ReadUint8());
+		m_nDefaultTempo.Set(std::max(uint8(32), file.ReadUint8()));
 		m_nDefaultSpeed = std::max(uint8(1), file.ReadUint8());
 		headerFlags = file.ReadUint8();
 	}

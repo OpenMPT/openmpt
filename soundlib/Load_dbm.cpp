@@ -249,7 +249,7 @@ static void ConvertDBMEffect(uint8 &command, uint8 &param)
 
 
 // Read a chunk of volume or panning envelopes
-static void ReadDBMEnvelopeChunk(FileReader chunk, enmEnvelopeTypes envType, CSoundFile &sndFile, bool scaleEnv)
+static void ReadDBMEnvelopeChunk(FileReader chunk, EnvelopeType envType, CSoundFile &sndFile, bool scaleEnv)
 //--------------------------------------------------------------------------------------------------------------
 {
 	uint16 numEnvs = chunk.ReadUint16BE();

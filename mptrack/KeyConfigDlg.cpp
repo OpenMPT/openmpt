@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "KeyConfigDlg.h"
 #include "FileDialog.h"
+#include "../soundlib/mod_specifications.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

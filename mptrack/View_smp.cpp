@@ -25,6 +25,7 @@
 #include "../soundlib/WAVTools.h"
 #include "../common/FileReader.h"
 #include "../soundlib/SampleFormatConverters.h"
+#include "../soundlib/mod_specifications.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "CDecimalSupport.h"
+
 OPENMPT_NAMESPACE_BEGIN
 
 //=========================
@@ -63,8 +65,9 @@ public:
 	bool m_bEditsLocked;
 	//{{AFX_DATA(CCtrlGeneral)
 	CEdit m_EditTitle, m_EditArtist;
-	CEdit m_EditTempo, m_EditSpeed, m_EditGlobalVol, m_EditRestartPos,
+	CEdit m_EditSpeed, m_EditGlobalVol, m_EditRestartPos,
 		  m_EditSamplePA, m_EditVSTiVol;
+	CNumberEdit m_EditTempo;
 	CButton m_BtnModType;
 	CSpinButtonCtrl m_SpinTempo, m_SpinSpeed, m_SpinGlobalVol, m_SpinRestartPos, 
 				    m_SpinSamplePA, m_SpinVSTiVol;
@@ -73,7 +76,7 @@ public:
 	CSliderCtrl m_SliderTempo, m_SliderSamplePreAmp, m_SliderGlobalVol, m_SliderVSTiVol;
 	CVuMeter m_VuMeterLeft, m_VuMeterRight;
 
-	TEMPO tempoMax;
+	TEMPO tempoMin, tempoMax;
 	//}}AFX_DATA
 	//{{AFX_VIRTUAL(CCtrlGeneral)
 	virtual BOOL OnInitDialog();

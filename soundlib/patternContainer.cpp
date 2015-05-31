@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "patternContainer.h"
 #include "Sndfile.h"
+#include "mod_specifications.h"
 #include "../common/serialization_utils.h"
 #include "../common/version.h"
 

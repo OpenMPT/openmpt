@@ -1101,7 +1101,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags = SONG_LINEARSLIDES | SONG_ITCOMPATGXX;	// this will be converted to IT format by MPT. SONG_ITOLDEFFECTS is not set because of tremor and vibrato.
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	m_nDefaultSpeed = 6;
-	m_nDefaultTempo = 120;
+	m_nDefaultTempo.Set(120);
 	m_nDefaultGlobalVolume = 256;
 	m_nSamplePreAmp = m_nVSTiVolume = 48;
 

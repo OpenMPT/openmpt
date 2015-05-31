@@ -19,7 +19,7 @@
 #include "Ctrl_smp.h"
 #include "Ctrl_ins.h"
 #include "Ctrl_com.h"
-//#include "ctrl_graph.h" //rewbs.graph
+#include "../soundlib/mod_specifications.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

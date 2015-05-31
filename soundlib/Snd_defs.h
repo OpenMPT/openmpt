@@ -29,7 +29,6 @@ typedef uint16 PATTERNINDEX;
 	const PATTERNINDEX PATTERNINDEX_INVALID = uint16_max;
 typedef uint8  PLUGINDEX;
 	const PLUGINDEX PLUGINDEX_INVALID = uint8_max;
-typedef uint16 TEMPO;
 typedef uint16 SAMPLEINDEX;
 	const SAMPLEINDEX SAMPLEINDEX_INVALID = uint16_max;
 typedef uint16 INSTRUMENTINDEX;
@@ -199,7 +198,7 @@ DECLARE_FLAGSET(InstrumentFlags)
 
 
 // envelope types in instrument editor
-enum enmEnvelopeTypes
+enum EnvelopeType
 {
 	ENV_VOLUME = 0,
 	ENV_PANNING,
@@ -255,13 +254,13 @@ enum SongFlags
 	//SONG_ITPEMBEDIH	= 0x40000,		// Embed instrument headers in project file
 	SONG_BREAKTOROW		= 0x80000,		// Break to row command encountered (internal flag, do not touch)
 	SONG_POSJUMP		= 0x100000,		// Position jump encountered (internal flag, do not touch)
-	SONG_PT1XMODE		= 0x200000,		// ProTracker 1/2 playback mode
+	SONG_PT_MODE		= 0x200000,		// ProTracker 1/2 playback mode
 	SONG_PLAYALLSONGS	= 0x400000,		// Play all subsongs consecutively (libopenmpt)
 	SONG_VBLANK_TIMING	= 0x800000,		// Use MOD VBlank timing (F21 and higher set speed instead of tempo)
 };
 DECLARE_FLAGSET(SongFlags)
 
-#define SONG_FILE_FLAGS	(SONG_EMBEDMIDICFG|SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_PT1XMODE|SONG_VBLANK_TIMING)
+#define SONG_FILE_FLAGS	(SONG_EMBEDMIDICFG|SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_PT_MODE|SONG_VBLANK_TIMING)
 #define SONG_PLAY_FLAGS (~SONG_FILE_FLAGS)
 
 // Global Options (Renderer)
@@ -363,5 +362,50 @@ enum VibratoType
 	VIB_RANDOM
 };
 
+
+// Fixed-point type, e.g. used for fractional tempos
+template<size_t FFact, typename T>
+struct FPInt
+{
+protected:
+	T v;
+	FPInt(T rawValue) : v(rawValue) { }
+
+public:
+	static const size_t fractFact = FFact;
+
+	FPInt() : v(0) { }
+	FPInt(const FPInt<fractFact, T> &other) : v(other.v) { }
+	FPInt(T intPart, T fractPart) : v((intPart * fractFact) + (fractPart % fractFact)) { }
+	explicit FPInt(float f) : v(static_cast<T>(f * float(fractFact))) { }
+	explicit FPInt(double f) : v(static_cast<T>(f * double(fractFact))) { }
+
+	// Set integer and fractional part
+	FPInt<fractFact, T> &Set(T intPart, T fractPart = 0) { v = (intPart * fractFact) + (fractPart % fractFact); return *this; }
+	// Set raw internal representation directly
+	FPInt<fractFact, T> &SetRaw(T value) { v = value; return *this; }
+	// Retrieve the integer part of the stored value
+	T GetInt() const { return v / fractFact; }
+	// Retrieve the fractional part of the stored value
+	T GetFract() const { return v % fractFact; }
+	// Retrieve the raw internal representation of the stored value
+	T GetRaw() const { return v; }
+	// Formats the stored value as a floating-point value
+	double ToDouble() const { return v / double(fractFact); }
+
+	FPInt<fractFact, T> operator+ (const FPInt<fractFact, T> &other) const { return FPInt<fractFact, T>(v + other.v); }
+	FPInt<fractFact, T> operator- (const FPInt<fractFact, T> &other) const { return FPInt<fractFact, T>(v - other.v); }
+	void operator+= (const FPInt<fractFact, T> &other) { v += other.v; }
+	void operator-= (const FPInt<fractFact, T> &other) { v -= other.v; }
+
+	bool operator== (const FPInt<fractFact, T> &other) const { return v == other.v; }
+	bool operator!= (const FPInt<fractFact, T> &other) const { return v != other.v; }
+	bool operator<= (const FPInt<fractFact, T> &other) const { return v <= other.v; }
+	bool operator>= (const FPInt<fractFact, T> &other) const { return v >= other.v; }
+	bool operator< (const FPInt<fractFact, T> &other) const { return v < other.v; }
+	bool operator> (const FPInt<fractFact, T> &other) const { return v > other.v; }
+};
+
+typedef FPInt<10000, uint32_t> TEMPO;
 
 OPENMPT_NAMESPACE_END

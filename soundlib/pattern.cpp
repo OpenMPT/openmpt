@@ -15,6 +15,7 @@
 #include "../common/version.h"
 #include "ITTools.h"
 #include "Sndfile.h"
+#include "mod_specifications.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

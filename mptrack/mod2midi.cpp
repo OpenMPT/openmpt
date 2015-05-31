@@ -381,9 +381,10 @@ BOOL CModToMidi::DoConvert()
 		return FALSE;
 	}
 
-	if (!m_pSndFile->m_nDefaultTempo) m_pSndFile->m_nDefaultTempo = 125;
+	uint32 tempo = m_pSndFile->m_nDefaultTempo.GetInt();
+	if (!tempo) tempo = 125;
 	nTickMultiplier = MOD2MIDI_TEMPOFACTOR;
-	const uint16 wPPQN = static_cast<uint16>((m_pSndFile->m_nDefaultTempo*nTickMultiplier) / 5);
+	const uint16 wPPQN = static_cast<uint16>((tempo * nTickMultiplier) / 5);
 	rmid.id_RIFF = IFFID_RIFF;
 	rmid.filelen = sizeof(rmid)+sizeof(mthd)-8;
 	rmid.id_RMID = 0x44494D52; // "RMID"

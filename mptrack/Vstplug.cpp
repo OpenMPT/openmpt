@@ -27,6 +27,7 @@
 #include "../common/FileReader.h"
 #include "FileDialog.h"
 #include "../soundlib/plugins/OpCodes.h"
+#include "../soundlib/mod_specifications.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

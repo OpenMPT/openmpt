@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "Sndfile.h"
+#include "mod_specifications.h"
 #include "Tables.h"
 
 

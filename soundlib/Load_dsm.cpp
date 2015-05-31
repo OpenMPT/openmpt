@@ -176,7 +176,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nType = MOD_TYPE_DSM;
 	m_nChannels = Clamp(songHeader.numChannels, uint16(1), uint16(16));
 	m_nDefaultSpeed = songHeader.speed;
-	m_nDefaultTempo = songHeader.bpm;
+	m_nDefaultTempo.Set(songHeader.bpm);
 	m_nDefaultGlobalVolume = std::min(songHeader.globalVol, uint8(64)) * 4u;
 	if(!m_nDefaultGlobalVolume) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	if(songHeader.mastervol == 0x80)

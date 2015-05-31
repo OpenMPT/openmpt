@@ -449,7 +449,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	m_nRestartPos = fileHeader.restartPos;
 	m_nDefaultSpeed = fileHeader.ticksPerLine;
 	if(!m_nDefaultSpeed) m_nDefaultSpeed = 6;
-	m_nDefaultTempo = 125;
+	m_nDefaultTempo.Set(125);
 	m_SongFlags = SONG_LINEARSLIDES | SONG_ITCOMPATGXX | SONG_EXFILTERRANGE;
 	m_nInstruments = fileHeader.numInstruments;
 	m_nSamples = fileHeader.numSamples;
@@ -460,7 +460,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(fileHeader.samplesPerTick > 100 && fileHeader.samplesPerTick < 5000)
 	{
-		m_nDefaultTempo = 110250 / fileHeader.samplesPerTick;
+		m_nDefaultTempo.SetRaw(Util::muldivr(110250, TEMPO::fractFact, fileHeader.samplesPerTick));
 		//m_nDefaultTempo = 44100 * 60 / (m_nDefaultSpeed * m_nDefaultRowsPerBeat * fileHeader.samplesPerTick);
 	}
 	Order.ReadFromArray(fileHeader.Orders, fileHeader.numOrders);
@@ -558,7 +558,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				double d = chunk.ReadDoubleLE();
 				if(fileHeader.samplesPerTick != 0 && d != 0.0)
 				{
-					m_nDefaultTempo = Util::Round<uint16>(44100.0 * 60.0 / (m_nDefaultSpeed * m_nDefaultRowsPerBeat * fileHeader.samplesPerTick * d));
+					m_nDefaultTempo = TEMPO(44100.0 * 60.0 / (m_nDefaultSpeed * m_nDefaultRowsPerBeat * fileHeader.samplesPerTick * d));
 				}
 			}
 			break;
@@ -867,7 +867,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				MT2IEnvelope mt2Env;
 				instrChunk.ReadConvertEndianness(mt2Env);
 
-				const enmEnvelopeTypes envType[4] = { ENV_VOLUME, ENV_PANNING, ENV_PITCH, ENV_PITCH };
+				const EnvelopeType envType[4] = { ENV_VOLUME, ENV_PANNING, ENV_PITCH, ENV_PITCH };
 				InstrumentEnvelope &mptEnv = mptIns->GetEnvelope(envType[env]);
 
 				mptEnv.dwFlags.set(ENV_FILTER, (env == 3) && (mt2Env.flags & 1) != 0);

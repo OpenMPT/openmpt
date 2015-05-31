@@ -1,5 +1,5 @@
 /*
- * ctrl_gen.cpp
+ * Ctrl_gen.cpp
  * ------------
  * Purpose: General tab, upper panel.
  * Notes  : (currently none)
@@ -10,15 +10,15 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "mainfrm.h"
-#include "moddoc.h"
-#include "globals.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
+#include "Globals.h"
 #include "dlg_misc.h"
-#include "ctrl_gen.h"
-#include "view_gen.h"
-#include "math.h"
+#include "Ctrl_gen.h"
+#include "View_gen.h"
 #include "../common/misc_util.h"
+#include "../soundlib/mod_specifications.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -51,7 +51,7 @@ void CCtrlGeneral::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CCtrlGeneral)
 	DDX_Control(pDX, IDC_EDIT_SONGTITLE,	m_EditTitle);
 	DDX_Control(pDX, IDC_EDIT_ARTIST,		m_EditArtist);
-	DDX_Control(pDX, IDC_EDIT_TEMPO,		m_EditTempo);
+	//DDX_Control(pDX, IDC_EDIT_TEMPO,		m_EditTempo);
 	DDX_Control(pDX, IDC_SPIN_TEMPO,		m_SpinTempo);
 	DDX_Control(pDX, IDC_EDIT_SPEED,		m_EditSpeed);
 	DDX_Control(pDX, IDC_SPIN_SPEED,		m_SpinSpeed);
@@ -102,10 +102,13 @@ BOOL CCtrlGeneral::OnInitDialog()
 	m_SliderVSTiVol.SetRange(0, MAX_SLIDER_VSTI_VOL);
 	m_SliderSamplePreAmp.SetRange(0, MAX_SLIDER_SAMPLE_VOL);
 
+	m_SpinTempo.SetRange(-10, 10);
 	m_SliderTempo.SetLineSize(1);
 	m_SliderTempo.SetPageSize(10);
+	m_EditTempo.SubclassDlgItem(IDC_EDIT_TEMPO, this);
+	m_EditTempo.AllowSign(false);
 	
-	m_bEditsLocked=false;
+	m_bEditsLocked = false;
 	UpdateView(GeneralHint().ModType());
 	OnActivatePage(0);
 	m_bInitialized = TRUE;
@@ -178,16 +181,17 @@ void CCtrlGeneral::OnTapTempo()
 	if(delay)
 	{
 		uint32 newTempo = 60000 * numSamples;
-		if(m_sndFile.m_nTempoMode != tempo_mode_modern)
+		if(m_sndFile.m_nTempoMode != tempoModeModern)
 		{
 			newTempo = (newTempo * m_sndFile.m_nDefaultSpeed * m_sndFile.m_nDefaultRowsPerBeat) / 24;
 		}
-		newTempo /= delay;
+		newTempo = Util::muldivr(newTempo, TEMPO::fractFact, delay);
+		TEMPO t;
+		t.SetRaw(newTempo);
 
-		int tempoMin, tempoMax;
-		m_SpinTempo.GetRange32(tempoMin, tempoMax);
-		Limit(newTempo, TEMPO(tempoMin), TEMPO(tempoMax));
-		SetDlgItemInt(IDC_EDIT_TEMPO, newTempo, FALSE);
+		Limit(t, tempoMin, tempoMax);
+		if(!m_sndFile.GetModSpecifications().hasFractionalTempo) t.Set(t.GetInt(), 0);
+		m_EditTempo.SetTempoValue(t);
 	}
 }
 
@@ -233,14 +237,14 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		else
 			m_SpinSpeed.SetRange32(specs.speedMin, specs.speedMax);
 		
-		TEMPO tempoMin = specs.tempoMin;
+		tempoMin = specs.tempoMin;
 		tempoMax = specs.tempoMax;
 		// IT Hack: There are legacy OpenMPT-made ITs out there which use a higher default speed than 255.
 		// Changing the upper tempo limit in the mod specs would break them, so do it here instead.
-		if(m_sndFile.GetType() == MOD_TYPE_IT && m_sndFile.m_nDefaultTempo <= 255)
-			tempoMax = 255;
-		m_SliderTempo.SetRange(0, tempoMax - tempoMin);
-		m_SpinTempo.SetRange(tempoMin, tempoMax);
+		if(m_sndFile.GetType() == MOD_TYPE_IT && m_sndFile.m_nDefaultTempo <= TEMPO(255, 0))
+			tempoMax.Set(255);
+		m_SliderTempo.SetRange(0, tempoMax.GetInt() - tempoMin.GetInt());
+		m_EditTempo.AllowFractions(specs.hasFractionalTempo);
 
 		const BOOL bIsNotMOD = (m_sndFile.GetType() != MOD_TYPE_MOD);
 		const BOOL bIsNotMOD_S3M = ((bIsNotMOD) && (m_sndFile.GetType() != MOD_TYPE_S3M));
@@ -293,7 +297,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		{
 			m_EditTitle.SetWindowText(m_sndFile.GetTitle().c_str());
 			::SetWindowTextW(m_EditArtist.m_hWnd, mpt::ToWide(m_sndFile.songArtist).c_str());
-			SetDlgItemInt(IDC_EDIT_TEMPO, m_sndFile.m_nDefaultTempo, FALSE);
+			m_EditTempo.SetTempoValue(m_sndFile.m_nDefaultTempo);
 			SetDlgItemInt(IDC_EDIT_SPEED, m_sndFile.m_nDefaultSpeed, FALSE);
 			SetDlgItemInt(IDC_EDIT_GLOBALVOL, m_sndFile.m_nDefaultGlobalVolume / GetGlobalVolumeFactor(), FALSE);
 			SetDlgItemInt(IDC_EDIT_RESTARTPOS, m_sndFile.m_nRestartPos, FALSE);
@@ -304,7 +308,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_SliderGlobalVol.SetPos(MAX_SLIDER_GLOBAL_VOL - m_sndFile.m_nDefaultGlobalVolume);
 		m_SliderVSTiVol.SetPos(MAX_SLIDER_VSTI_VOL - m_sndFile.m_nVSTiVolume);
 		m_SliderSamplePreAmp.SetPos(MAX_SLIDER_SAMPLE_VOL - m_sndFile.m_nSamplePreAmp);
-		m_SliderTempo.SetPos(tempoMax - m_sndFile.m_nDefaultTempo);
+		m_SliderTempo.SetPos((tempoMax - m_sndFile.m_nDefaultTempo).GetInt());
 
 		int srcMode = 0;
 		for(int i = 0; i < CountOf(interpolationTypes); i++)
@@ -332,20 +336,19 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 	{
 		CSliderCtrl* pSlider = (CSliderCtrl*) pscroll;
 
-		if (pSlider==&m_SliderTempo)
+		if (pSlider == &m_SliderTempo)
 		{
-			const TEMPO tempo = tempoMax - TEMPO(m_SliderTempo.GetPos());
+			const TEMPO tempo = tempoMax - TEMPO(m_SliderTempo.GetPos(), 0);
 			if ((tempo >= m_sndFile.GetModSpecifications().tempoMin) && (tempo <= m_sndFile.GetModSpecifications().tempoMax) && (tempo != m_sndFile.m_nDefaultTempo))
 			{
-				m_sndFile.m_nDefaultTempo = tempo;
-				m_sndFile.m_PlayState.m_nMusicTempo = tempo;
+				m_sndFile.m_nDefaultTempo = m_sndFile.m_PlayState.m_nMusicTempo = tempo;
 				m_modDoc.SetModified();
 
 				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
 			}
 		}
 
-		else if (pSlider==&m_SliderGlobalVol)
+		else if (pSlider == &m_SliderGlobalVol)
 		{
 			const UINT gv = MAX_SLIDER_GLOBAL_VOL - m_SliderGlobalVol.GetPos();
 			if ((gv >= 0) && (gv <= MAX_SLIDER_GLOBAL_VOL) && (gv != m_sndFile.m_nDefaultGlobalVolume))
@@ -358,7 +361,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			}
 		}
 
-		else if (pSlider==&m_SliderSamplePreAmp)
+		else if (pSlider == &m_SliderSamplePreAmp)
 		{
 			const UINT spa = MAX_SLIDER_SAMPLE_VOL - m_SliderSamplePreAmp.GetPos();
 			if ((spa >= 0) && (spa <= MAX_SLIDER_SAMPLE_VOL) && (spa != m_sndFile.m_nSamplePreAmp))
@@ -370,7 +373,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			}
 		}
 
-		else if (pSlider==&m_SliderVSTiVol)
+		else if (pSlider == &m_SliderVSTiVol)
 		{
 			const UINT vv = MAX_SLIDER_VSTI_VOL - m_SliderVSTiVol.GetPos();
 			if ((vv >= 0) && (vv <= MAX_SLIDER_VSTI_VOL) && (vv != m_sndFile.m_nVSTiVolume))
@@ -380,6 +383,20 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 				m_modDoc.SetModified();
 				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
 			}
+		}
+
+		else if(pSlider == (CSliderCtrl*)&m_SpinTempo)
+		{
+			int pos = m_SpinTempo.GetPos32();
+			if(pos != 0)
+			{
+				TEMPO newTempo = m_sndFile.m_nDefaultTempo + TEMPO(pos, 0);
+				Limit(newTempo, tempoMin, tempoMax);
+				m_sndFile.m_nDefaultTempo = m_sndFile.m_PlayState.m_nMusicTempo = newTempo;
+				m_modDoc.SetModified();
+				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
+			}
+			m_SpinTempo.SetPos(0);
 		}
 
 		UpdateView(GeneralHint().General());
@@ -422,27 +439,20 @@ void CCtrlGeneral::OnArtistChanged()
 void CCtrlGeneral::OnTempoChanged()
 //---------------------------------
 {
-	CHAR s[16];
-	if (m_bInitialized)
+	if (m_bInitialized && m_EditTempo.GetWindowTextLength() > 0)
 	{
-		m_EditTempo.GetWindowText(s, sizeof(s));
-		if (s[0])
+		TEMPO tempo = m_EditTempo.GetTempoValue();
+		Limit(tempo, tempoMin, tempoMax);
+		if(!m_sndFile.GetModSpecifications().hasFractionalTempo) tempo.Set(tempo.GetInt());
+		if (tempo != m_sndFile.m_nDefaultTempo)
 		{
-			TEMPO n = TEMPO(atoi(s));
-			int tempoMin, tempoMax;
-			m_SpinTempo.GetRange32(tempoMin, tempoMax);
-			n = Clamp(n, TEMPO(tempoMin), TEMPO(tempoMax));
-			if (n != m_sndFile.m_nDefaultTempo)
-			{
-				m_bEditsLocked=true;
-				m_EditTempo.SetModify(FALSE);
-				m_sndFile.m_nDefaultTempo = n;
-				m_sndFile.m_PlayState.m_nMusicTempo = n;
-				m_modDoc.SetModified();
-				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
-				UpdateView(GeneralHint().General());
-				m_bEditsLocked=false;
-			}
+			m_bEditsLocked=true;
+			m_EditTempo.SetModify(FALSE);
+			m_sndFile.m_nDefaultTempo = tempo;
+			m_sndFile.m_PlayState.m_nMusicTempo = tempo;
+			m_modDoc.SetModified();
+			m_modDoc.UpdateAllViews(nullptr, GeneralHint().General());
+			m_bEditsLocked=false;
 		}
 	}
 }

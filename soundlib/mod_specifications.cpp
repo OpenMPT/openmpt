@@ -31,20 +31,19 @@ const CModSpecifications mptm =
 	NOTE: If changing limits, see whether:
 			-savefile format and GUI methods can handle new values(might not be a small task :).
 	 */
-	"mptm",										// File extension
 	MOD_TYPE_MPT,								// Internal MODTYPE value
+	"mptm",										// File extension
 	NOTE_MIN,									// Minimum note index
 	NOTE_MAX,									// Maximum note index
-	true,										// Has notecut.
-	true,										// Has noteoff.
-	true,										// Has notefade.
 	4000,										// Pattern max.
 	4000,										// Order max.
 	MAX_SEQUENCES,								// Sequences max
 	1,											// Channel min
 	127,										// Channel max
-	32,											// Min tempo
-	512,										// Max tempo
+	TEMPO(32, 0),								// Min tempo
+	TEMPO(512, 0),								// Max tempo
+	1,											// Min Speed
+	255,										// Max Speed
 	1,											// Min pattern rows
 	1024,										// Max pattern rows
 	25,											// Max mod name length
@@ -54,11 +53,13 @@ const CModSpecifications mptm =
 	12,											// Max instrument filename length
 	3999,										// SamplesMax
 	255,										// instrumentMax
-	mixLevels_117RC3,							// defaultMixLevels
+	mixLevels1_17RC3,							// defaultMixLevels
+	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
 	200,										// Max MIDI mapping directives
-	1,											// Min Speed
-	255,										// Max Speed
 	MAX_ENVPOINTS,								// Envelope point count
+	true,										// Has notecut.
+	true,										// Has noteoff.
+	true,										// Has notefade.
 	true,										// Has envelope release node
 	true,										// Has song comments
 	true,										// Has "+++" pattern
@@ -69,7 +70,7 @@ const CModSpecifications mptm =
 	true,										// Pattern names
 	true,										// Has artist name
 	true,										// Has default resampling
-	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
+	true,										// Fixed point tempo
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#?????",	// Supported Effects
 	" vpcdabuhlrgfe?o",							// Supported Volume Column commands
 };
@@ -79,20 +80,19 @@ const CModSpecifications mptm =
 
 const CModSpecifications mod =
 {
-	"mod",										// File extension
 	MOD_TYPE_MOD,								// Internal MODTYPE value
+	"mod",										// File extension
 	37,											// Minimum note index
 	108,										// Maximum note index
-	false,										// No notecut.
-	false,										// No noteoff.
-	false,										// No notefade.
 	128,										// Pattern max.
 	128,										// Order max.
 	1,											// Only one order list
 	4,											// Channel min
 	99,											// Channel max
-	32,											// Min tempo
-	255,										// Max tempo
+	TEMPO(32, 0),								// Min tempo
+	TEMPO(255, 0),								// Max tempo
+	1,											// Min Speed
+	32,											// Max Speed
 	64,											// Min pattern rows
 	64,											// Max pattern rows
 	20,											// Max mod name length
@@ -102,11 +102,13 @@ const CModSpecifications mod =
 	0,											// Max instrument filename length
 	31,											// SamplesMax
 	0,											// instrumentMax
-	mixLevels_compatible,						// defaultMixLevels
+	mixLevelsCompatible,						// defaultMixLevels
+	SongFlag(0) | SONG_PT_MODE | SONG_AMIGALIMITS | SONG_VBLANK_TIMING,	// Supported song flags
 	0,											// Max MIDI mapping directives
-	1,											// Min Speed
-	32,											// Max Speed
 	0,											// No instrument envelopes
+	false,										// No notecut.
+	false,										// No noteoff.
+	false,										// No notefade.
 	false,										// No envelope release node
 	false,										// No song comments
 	false,										// Doesn't have "+++" pattern
@@ -117,7 +119,7 @@ const CModSpecifications mod =
 	false,										// No pattern names
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
-	SongFlag(0) | SONG_PT1XMODE | SONG_AMIGALIMITS | SONG_VBLANK_TIMING,	// Supported song flags
+	false,										// Integer tempo
 	" 0123456789ABCD?FF?E????????????????????",	// Supported Effects
 	" ???????????????",							// Supported Volume Column commands
 };
@@ -125,20 +127,19 @@ const CModSpecifications mod =
 
 const CModSpecifications xm =
 {
-	"xm",										// File extension
 	MOD_TYPE_XM,								// Internal MODTYPE value
+	"xm",										// File extension
 	13,											// Minimum note index
 	108,										// Maximum note index
-	false,										// No notecut.
-	true,										// Has noteoff.
-	false,										// No notefade.
 	256,										// Pattern max.
 	255,										// Order max.
 	1,											// Only one order list
 	1,											// Channel min
 	32,											// Channel max
-	32,											// Min tempo
-	512,										// Max tempo
+	TEMPO(32, 0),								// Min tempo
+	TEMPO(512, 0),								// Max tempo
+	1,											// Min Speed
+	31,											// Max Speed
 	1,											// Min pattern rows
 	256,										// Max pattern rows
 	20,											// Max mod name length
@@ -148,11 +149,13 @@ const CModSpecifications xm =
 	0,											// Max instrument filename length
 	128 * 16,									// SamplesMax (actually 16 per instrument)
 	128,										// instrumentMax
-	mixLevels_compatible_FT2,					// defaultMixLevels
+	mixLevelsCompatibleFT2,						// defaultMixLevels
+	SongFlag(0) | SONG_LINEARSLIDES,			// Supported song flags
 	0,											// Max MIDI mapping directives
-	1,											// Min Speed
-	31,											// Max Speed
 	12,											// Envelope point count
+	false,										// No notecut.
+	true,										// Has noteoff.
+	false,										// No notefade.
 	false,										// No envelope release node
 	false,										// No song comments
 	false,										// Doesn't have "+++" pattern
@@ -163,7 +166,7 @@ const CModSpecifications xm =
 	false,										// No pattern names
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
-	SongFlag(0) | SONG_LINEARSLIDES,			// Supported song flags
+	false,										// Integer tempo
 	" 0123456789ABCDRFFTE???GHK??XPL?????????",	// Supported Effects
 	" vpcdabuhlrg????",							// Supported Volume Column commands
 };
@@ -171,20 +174,19 @@ const CModSpecifications xm =
 // XM with MPT extensions
 const CModSpecifications xmEx =
 {
-	"xm",										// File extension
 	MOD_TYPE_XM,								// Internal MODTYPE value
+	"xm",										// File extension
 	13,											// Minimum note index
 	108,										// Maximum note index
-	false,										// No notecut.
-	true,										// Has noteoff.
-	false,										// No notefade.
 	256,										// Pattern max.
 	255,										// Order max.
 	1,											// Only one order list
 	1,											// Channel min
 	127,										// Channel max
-	32,											// Min tempo
-	512,										// Max tempo
+	TEMPO(32, 0),								// Min tempo
+	TEMPO(512, 0),								// Max tempo
+	1,											// Min Speed
+	31,											// Max Speed
 	1,											// Min pattern rows
 	1024,										// Max pattern rows
 	20,											// Max mod name length
@@ -194,11 +196,13 @@ const CModSpecifications xmEx =
 	0,											// Max instrument filename length
 	MAX_SAMPLES - 1,							// SamplesMax (actually 32 per instrument(256 * 32 = 8192), but limited to MAX_SAMPLES = 4000)
 	255,										// instrumentMax
-	mixLevels_compatible_FT2,					// defaultMixLevels
+	mixLevelsCompatibleFT2,						// defaultMixLevels
+	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_EMBEDMIDICFG,	// Supported song flags
 	200,										// Max MIDI mapping directives
-	1,											// Min Speed
-	31,											// Max Speed
 	12,											// Envelope point count
+	false,										// No notecut.
+	true,										// Has noteoff.
+	false,										// No notefade.
 	false,										// No envelope release node
 	true,										// Has song comments
 	false,										// Doesn't have "+++" pattern
@@ -209,27 +213,26 @@ const CModSpecifications xmEx =
 	true,										// Pattern names
 	true,										// Has artist name
 	false,										// Doesn't have default resampling
-	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_EMBEDMIDICFG,	// Supported song flags
+	false,										// Integer tempo
 	" 0123456789ABCDRFFTE???GHK?YXPLZ\\?#?????",	// Supported Effects
 	" vpcdabuhlrgfe??",							// Supported Volume Column commands
 };
 
 const CModSpecifications s3m =
 {
-	"s3m",										// File extension
 	MOD_TYPE_S3M,								// Internal MODTYPE value
+	"s3m",										// File extension
 	13,											// Minimum note index
 	108,										// Maximum note index
-	true,										// Has notecut.
-	false,										// No noteoff.
-	false,										// No notefade.
 	100,										// Pattern max.
 	255,										// Order max.
 	1,											// Only one order list
 	1,											// Channel min
 	32,											// Channel max
-	33,											// Min tempo
-	255,										// Max tempo
+	TEMPO(33, 0),								// Min tempo
+	TEMPO(255, 0),								// Max tempo
+	1,											// Min Speed
+	255,										// Max Speed
 	64,											// Min pattern rows
 	64,											// Max pattern rows
 	27,											// Max mod name length
@@ -239,11 +242,13 @@ const CModSpecifications s3m =
 	0,											// Max instrument filename length
 	99,											// SamplesMax
 	0,											// instrumentMax
-	mixLevels_compatible,						// defaultMixLevels
+	mixLevelsCompatible,						// defaultMixLevels
+	SongFlag(0) | SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,	// Supported song flags
 	0,											// Max MIDI mapping directives
-	1,											// Min Speed
-	255,										// Max Speed
 	0,											// No instrument envelopes
+	true,										// Has notecut.
+	false,										// No noteoff.
+	false,										// No notefade.
 	false,										// No envelope release node
 	false,										// No song comments
 	true,										// Has "+++" pattern
@@ -254,7 +259,7 @@ const CModSpecifications s3m =
 	false,										// No pattern names
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
-	SongFlag(0) | SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,	// Supported song flags
+	false,										// Integer tempo
 	" JFEGHLKRXODB?CQATI?SMNVW?U?????????????",	// Supported Effects
 	" vp?????????????",							// Supported Volume Column commands
 };
@@ -262,20 +267,19 @@ const CModSpecifications s3m =
 // S3M with MPT extensions
 const CModSpecifications s3mEx =
 {
-	"s3m",										// File extension
 	MOD_TYPE_S3M,								// Internal MODTYPE value
+	"s3m",										// File extension
 	13,											// Minimum note index
 	108,										// Maximum note index
-	true,										// Has notecut.
-	false,										// No noteoff.
-	false,										// No notefade.
 	100,										// Pattern max.
 	255,										// Order max.
 	1,											// Only one order list
 	1,											// Channel min
 	32,											// Channel max
-	33,											// Min tempo
-	255,										// Max tempo
+	TEMPO(33, 0),								// Min tempo
+	TEMPO(255, 0),								// Max tempo
+	1,											// Min Speed
+	255,										// Max Speed
 	64,											// Min pattern rows
 	64,											// Max pattern rows
 	27,											// Max mod name length
@@ -285,11 +289,13 @@ const CModSpecifications s3mEx =
 	0,											// Max instrument filename length
 	99,											// SamplesMax
 	0,											// instrumentMax
-	mixLevels_compatible,						// defaultMixLevels
+	mixLevelsCompatible,						// defaultMixLevels
+	SongFlag(0) | SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,	// Supported song flags
 	0,											// Max MIDI mapping directives
-	1,											// Min Speed
-	255,										// Max Speed
 	0,											// No instrument envelopes
+	true,										// Has notecut.
+	false,										// No noteoff.
+	false,										// No notefade.
 	false,										// No envelope release node
 	false,										// No song comments
 	true,										// Has "+++" pattern
@@ -300,27 +306,26 @@ const CModSpecifications s3mEx =
 	false,										// No pattern names
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
-	SongFlag(0) | SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,	// Supported song flags
+	false,										// Integer tempo
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z????????",	// Supported Effects
 	" vp?????????????",							// Supported Volume Column commands
 };
 
 const CModSpecifications it =
 {
-	"it",										// File extension
 	MOD_TYPE_IT,								// Internal MODTYPE value
+	"it",										// File extension
 	1,											// Minimum note index
 	120,										// Maximum note index
-	true,										// Has notecut.
-	true,										// Has noteoff.
-	true,										// Has notefade.
 	200,										// Pattern max.
 	256,										// Order max.
 	1,											// Only one order list
 	1,											// Channel min
 	64,											// Channel max
-	32,											// Min tempo
-	255,										// Max tempo
+	TEMPO(32, 0),								// Min tempo
+	TEMPO(255, 0),								// Max tempo
+	1,											// Min Speed
+	255,										// Max Speed
 	1,											// Min pattern rows
 	200,										// Max pattern rows
 	25,											// Max mod name length
@@ -330,11 +335,13 @@ const CModSpecifications it =
 	12,											// Max instrument filename length
 	99,											// SamplesMax
 	99,											// instrumentMax
-	mixLevels_compatible,						// defaultMixLevels
+	mixLevelsCompatible,						// defaultMixLevels
+	SongFlag(0) | SONG_LINEARSLIDES | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
 	0,											// Max MIDI mapping directives
-	1,											// Min Speed
-	255,										// Max Speed
 	25,											// Envelope point count
+	true,										// Has notecut.
+	true,										// Has noteoff.
+	true,										// Has notefade.
 	false,										// No envelope release node
 	true,										// Has song comments
 	true,										// Has "+++" pattern
@@ -345,27 +352,26 @@ const CModSpecifications it =
 	false,										// No pattern names
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
-	SongFlag(0) | SONG_LINEARSLIDES | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
+	false,										// Integer tempo
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z????????",	// Supported Effects
 	" vpcdab?h??gfe??",							// Supported Volume Column commands
 };
 
 const CModSpecifications itEx =
 {
-	"it",										// File extension
 	MOD_TYPE_IT,								// Internal MODTYPE value
+	"it",										// File extension
 	1,											// Minimum note index
 	120,										// Maximum note index
-	true,										// Has notecut.
-	true,										// Has noteoff.
-	true,										// Has notefade.
 	240,										// Pattern max.
 	256,										// Order max.
 	1,											// Only one order list
 	1,											// Channel min
 	127,										// Channel max
-	32,											// Min tempo
-	512,										// Max tempo
+	TEMPO(32, 0),								// Min tempo
+	TEMPO(512, 0),								// Max tempo
+	1,											// Min Speed
+	255,										// Max Speed
 	1,											// Min pattern rows
 	1024,										// Max pattern rows
 	25,											// Max mod name length
@@ -375,11 +381,13 @@ const CModSpecifications itEx =
 	12,											// Max instrument filename length
 	3999,										// SamplesMax
 	255,										// instrumentMax
-	mixLevels_compatible,						// defaultMixLevels
+	mixLevelsCompatible,						// defaultMixLevels
+	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
 	200,										// Max MIDI mapping directives
-	1,											// Min Speed
-	255,										// Max Speed
 	25,											// Envelope point count
+	true,										// Has notecut.
+	true,										// Has noteoff.
+	true,										// Has notefade.
 	false,										// No envelope release node
 	true,										// Has song comments
 	true,										// Has "+++" pattern
@@ -390,7 +398,7 @@ const CModSpecifications itEx =
 	true,										// Pattern names
 	true,										// Has artist name
 	false,										// Doesn't have default resampling
-	SongFlag(0) | SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX | SONG_EMBEDMIDICFG,	// Supported song flags
+	false,										// Integer tempo
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\?#?????",	// Supported Effects
 	" vpcdab?h??gfe??",							// Supported Volume Column commands
 };

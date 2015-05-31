@@ -14,6 +14,7 @@
 #include "MIDIMappingDialog.h"
 #include "InputHandler.h"
 #include "../soundlib/MIDIEvents.h"
+#include "../soundlib/mod_specifications.h"
 #include "../common/StringFixer.h"
 
 

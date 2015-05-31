@@ -41,6 +41,7 @@ enum enmWarnings
 	wGlobalVolumeNotSupported,
 	wFilterVariation,
 	wResamplingMode,
+	wFractionalTempo,
 	wNumWarnings
 };
 

@@ -813,6 +813,7 @@
     <ClCompile Include="AppendModule.cpp" />
     <ClCompile Include="AutoSaver.cpp" />
     <ClCompile Include="Autotune.cpp" />
+    <ClCompile Include="CDecimalSupport.cpp" />
     <ClCompile Include="ChannelManagerDlg.cpp" />
     <ClCompile Include="Childfrm.cpp" />
     <ClCompile Include="CImageListEx.cpp" />
@@ -1042,6 +1043,7 @@
     <ClInclude Include="AdvancedConfigDlg.h" />
     <ClInclude Include="AutoSaver.h" />
     <ClInclude Include="Autotune.h" />
+    <ClInclude Include="CDecimalSupport.h" />
     <ClInclude Include="Childfrm.h" />
     <ClInclude Include="CImageListEx.h" />
     <ClInclude Include="CleanupSong.h" />

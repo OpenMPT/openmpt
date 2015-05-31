@@ -283,7 +283,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals();
 	InitializeChannels();
 	ChangeModTypeTo(MOD_TYPE_XM);
-	m_nMixLevels = mixLevels_compatible;
+	m_nMixLevels = mixLevelsCompatible;
 
 	FlagSet<TrackerVersions> madeWith(verUnknown);
 
@@ -327,7 +327,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileHeader.speed)
 		m_nDefaultSpeed = fileHeader.speed;
 	if(fileHeader.tempo)
-		m_nDefaultTempo = Clamp(fileHeader.tempo, uint16(32), uint16(512));
+		m_nDefaultTempo.Set(Clamp(fileHeader.tempo, uint16(32), uint16(512)));
 
 	m_SongFlags.reset();
 	m_SongFlags.set(SONG_LINEARSLIDES, (fileHeader.flags & XMFileHeader::linearSlides) != 0);
@@ -585,20 +585,20 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		madeWith = verOpenMPT | verConfirmed;
 
 		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 07, 19))
-			m_nMixLevels = mixLevels_compatible;
+			m_nMixLevels = mixLevelsCompatible;
 		else
-			m_nMixLevels = mixLevels_compatible_FT2;
+			m_nMixLevels = mixLevelsCompatibleFT2;
 	}
 
 	if(m_dwLastSavedWithVersion != 0 && !madeWith[verOpenMPT])
 	{
-		m_nMixLevels = mixLevels_original;
+		m_nMixLevels = mixLevelsOriginal;
 		SetModFlag(MSF_COMPATIBLE_PLAY, false);
 	}
 
 	if(madeWith[verFT2Generic])
 	{
-		m_nMixLevels = mixLevels_compatible_FT2;
+		m_nMixLevels = mixLevelsCompatibleFT2;
 
 		if(!m_SongFlags[SONG_EMBEDMIDICFG])
 		{
@@ -752,7 +752,7 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 	fileHeader.flags = fileHeader.flags;
 
 	// Fasttracker 2 will happily accept any tempo faster than 255 BPM. XMPlay does also support this, great!
-	fileHeader.tempo = static_cast<uint16>(m_nDefaultTempo);
+	fileHeader.tempo = static_cast<uint16>(m_nDefaultTempo.GetInt());
 	fileHeader.speed = static_cast<uint16>(Clamp(m_nDefaultSpeed, 1u, 31u));
 
 	fileHeader.ConvertEndianness();

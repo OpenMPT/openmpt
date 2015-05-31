@@ -18,24 +18,24 @@ enum
 	NO_ATTENUATION = 1,
 };
 
-enum tempoMode
+enum TempoMode
 {
-	tempo_mode_classic		= 0,
-	tempo_mode_alternative	= 1,
-	tempo_mode_modern		= 2,
+	tempoModeClassic		= 0,
+	tempoModeAlternative	= 1,
+	tempoModeModern			= 2,
 };
 
-enum mixLevels
+enum MixLevels
 {
-	mixLevels_original			= 0,
-	mixLevels_117RC1			= 1,
-	mixLevels_117RC2			= 2,
-	mixLevels_117RC3			= 3,
-	mixLevels_compatible		= 4,
-	mixLevels_compatible_FT2	= 5,
+	mixLevelsOriginal		= 0,
+	mixLevels1_17RC1		= 1,
+	mixLevels1_17RC2		= 2,
+	mixLevels1_17RC3		= 3,
+	mixLevelsCompatible		= 4,
+	mixLevelsCompatibleFT2	= 5,
 };
 
-enum forcePanningMode
+enum ForcePanningMode
 {
 	dontForcePanningMode,
 	forceSoftPanning,
@@ -50,7 +50,7 @@ public:
 	CSoundFilePlayConfig(void);
 	~CSoundFilePlayConfig(void);
 
-	void SetMixLevels(mixLevels mixLevelType);
+	void SetMixLevels(MixLevels mixLevelType);
 
 //getters/setters
 	bool getGlobalVolumeAppliesToMaster() const { return m_globalVolumeAppliesToMaster; }
@@ -73,8 +73,8 @@ public:
 	bool getUseGlobalPreAmp() const { return m_ignorePreAmp; }
 	void setUseGlobalPreAmp(bool inUseGlobalPreAmp) { m_ignorePreAmp = inUseGlobalPreAmp; }
 
-	forcePanningMode getForcePanningMode() const { return m_forceSoftPanning; }
-	void setForcePanningMode(forcePanningMode inForceSoftPanning) { m_forceSoftPanning = inForceSoftPanning; }
+	ForcePanningMode getForcePanningMode() const { return m_forceSoftPanning; }
+	void setForcePanningMode(ForcePanningMode inForceSoftPanning) { m_forceSoftPanning = inForceSoftPanning; }
 
 	bool getDisplayDBValues() const { return m_displayDBValues; }
 	void setDisplayDBValues(bool in) { m_displayDBValues = in; }
@@ -103,7 +103,7 @@ protected:
 	double m_normalGlobalVol;
 
 	int m_extraAttenuation;
-	forcePanningMode m_forceSoftPanning;
+	ForcePanningMode m_forceSoftPanning;
 	bool m_globalVolumeAppliesToMaster;
 	bool m_ignorePreAmp;
 	bool m_displayDBValues;

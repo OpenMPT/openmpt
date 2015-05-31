@@ -158,7 +158,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = 16;
 	m_nSamplePreAmp = 32;
 	m_nDefaultSpeed = fileHeader.defaultSpeed;
-	m_nDefaultTempo = 80;
+	m_nDefaultTempo.Set(80);
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 
 	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, fileHeader.songName);

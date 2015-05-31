@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "Moddoc.h"
+#include "../soundlib/mod_specifications.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

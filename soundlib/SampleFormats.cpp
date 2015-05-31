@@ -11,6 +11,7 @@
 
 #include "stdafx.h"
 #include "Sndfile.h"
+#include "mod_specifications.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Moddoc.h"
 #include "../mptrack/TrackerSettings.h"

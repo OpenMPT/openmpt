@@ -135,7 +135,7 @@ struct ModChannel
 	void ClearRowCmd() { rowCommand = ModCommand::Empty(); }
 
 	// Get a reference to a specific envelope of this channel
-	const EnvInfo &GetEnvelope(enmEnvelopeTypes envType) const
+	const EnvInfo &GetEnvelope(EnvelopeType envType) const
 	{
 		switch(envType)
 		{
@@ -149,7 +149,7 @@ struct ModChannel
 		}
 	}
 
-	EnvInfo &GetEnvelope(enmEnvelopeTypes envType)
+	EnvInfo &GetEnvelope(EnvelopeType envType)
 	{
 		return const_cast<EnvInfo &>(static_cast<const ModChannel &>(*this).GetEnvelope(envType));
 	}

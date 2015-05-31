@@ -568,6 +568,9 @@
     <ClCompile Include="..\soundlib\InstrumentExtensions.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="CDecimalSupport.cpp">
+      <Filter>Source Files\mptrack</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1112,6 +1115,9 @@
     </ClInclude>
     <ClInclude Include="AdvancedConfigDlg.h">
       <Filter>Header Files\mptrack\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="CDecimalSupport.h">
+      <Filter>Header Files\mptrack</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

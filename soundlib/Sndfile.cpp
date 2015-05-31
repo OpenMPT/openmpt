@@ -24,6 +24,7 @@
 #include "../common/mptIO.h"
 #include "../common/serialization_utils.h"
 #include "Sndfile.h"
+#include "mod_specifications.h"
 #include "tuningcollection.h"
 #include "../common/StringFixer.h"
 #include "../common/FileReader.h"
@@ -108,7 +109,7 @@ CSoundFile::CSoundFile() :
 	m_nRepeatCount = 0;
 	m_PlayState.m_nSeqOverride = ORDERINDEX_INVALID;
 	m_PlayState.m_bPatternTransitionOccurred = false;
-	m_nTempoMode = tempo_mode_classic;
+	m_nTempoMode = tempoModeClassic;
 	m_bIsRendering = false;
 
 #ifdef MODPLUG_TRACKER
@@ -184,7 +185,7 @@ void CSoundFile::InitializeGlobals()
 	m_nSamplePreAmp = 48;
 	m_nVSTiVolume = 48;
 	m_nDefaultSpeed = 6;
-	m_nDefaultTempo = 125;
+	m_nDefaultTempo.Set(125);
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nRestartPos = 0;
 	m_SongFlags.reset();
@@ -193,7 +194,7 @@ void CSoundFile::InitializeGlobals()
 	m_nResampling = SRCMODE_DEFAULT;
 	m_dwLastSavedWithVersion = m_dwCreatedWithVersion = 0;
 
-	SetMixLevels(mixLevels_compatible);
+	SetMixLevels(mixLevelsCompatible);
 	SetModFlags(FlagSet<ModSpecificFlag>());
 
 	Patterns.ClearPatterns();
@@ -399,7 +400,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	// Check invalid instruments
 	while ((m_nInstruments > 0) && (!Instruments[m_nInstruments])) m_nInstruments--;
 	// Set default values
-	if (!m_nDefaultTempo) m_nDefaultTempo = 125;
+	if (!m_nDefaultTempo.GetInt()) m_nDefaultTempo.Set(125);
 	if (!m_nDefaultSpeed) m_nDefaultSpeed = 6;
 	m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
 	m_PlayState.m_nMusicTempo = m_nDefaultTempo;
@@ -588,17 +589,18 @@ double CSoundFile::GetCurrentBPM() const
 {
 	double bpm;
 
-	if (m_nTempoMode == tempo_mode_modern)
+	if (m_nTempoMode == tempoModeModern)
 	{
 		// With modern mode, we trust that true bpm is close enough to what user chose.
-		bpm = static_cast<double>(m_PlayState.m_nMusicTempo);	// This avoids oscillation due to tick-to-tick corrections.
+		// This avoids oscillation due to tick-to-tick corrections.
+		bpm = m_PlayState.m_nMusicTempo.ToDouble();
 	} else
 	{
 		//with other modes, we calculate it:
-		double ticksPerBeat = m_PlayState.m_nMusicSpeed * m_PlayState.m_nCurrentRowsPerBeat;	//ticks/beat = ticks/row * rows/beat
-		double samplesPerBeat = m_PlayState.m_nSamplesPerTick * ticksPerBeat;		//samps/beat = samps/tick * ticks/beat
-		bpm =  m_MixerSettings.gdwMixingFreq/samplesPerBeat * 60;		//beats/sec  = samps/sec  / samps/beat
-	}																	//beats/min  =  beats/sec * 60
+		double ticksPerBeat = m_PlayState.m_nMusicSpeed * m_PlayState.m_nCurrentRowsPerBeat; //ticks/beat = ticks/row * rows/beat
+		double samplesPerBeat = m_PlayState.m_nSamplesPerTick * ticksPerBeat;                //samps/beat = samps/tick * ticks/beat
+		bpm =  m_MixerSettings.gdwMixingFreq / samplesPerBeat * 60;                          //beats/sec  = samps/sec  / samps/beat
+	}	                                                                                     //beats/min  =  beats/sec * 60
 
 	return bpm;
 }
@@ -735,7 +737,7 @@ void CSoundFile::StopAllVsti()
 }
 
 
-void CSoundFile::SetMixLevels(mixLevels levels)
+void CSoundFile::SetMixLevels(MixLevels levels)
 //---------------------------------------------
 {
 	m_nMixLevels = levels;
@@ -858,7 +860,7 @@ MODTYPE CSoundFile::GetBestSaveFormat() const
 	case MOD_TYPE_DIGI:
 		return MOD_TYPE_MOD;
 	case MOD_TYPE_MED:
-		if(m_nDefaultTempo == 125 && m_nDefaultSpeed == 6 && !m_nInstruments)
+		if(m_nDefaultTempo == TEMPO(125, 0) && m_nDefaultSpeed == 6 && !m_nInstruments)
 		{
 			for(PATTERNINDEX i = 0; i < Patterns.Size(); i++)
 			{
@@ -1335,17 +1337,17 @@ void CSoundFile::RecalculateSamplesPerTick()
 {
 	switch(m_nTempoMode)
 	{
-	case tempo_mode_classic:
+	case tempoModeClassic:
 	default:
-		m_PlayState.m_nSamplesPerTick = (m_MixerSettings.gdwMixingFreq * 5) / (m_PlayState.m_nMusicTempo << 1);
+		m_PlayState.m_nSamplesPerTick = Util::muldiv(m_MixerSettings.gdwMixingFreq, 5 * TEMPO::fractFact, m_PlayState.m_nMusicTempo.GetRaw() << 1);
 		break;
 
-	case tempo_mode_modern:
-		m_PlayState.m_nSamplesPerTick = m_MixerSettings.gdwMixingFreq * (60 / m_PlayState.m_nMusicTempo / (m_PlayState.m_nMusicSpeed * m_PlayState.m_nCurrentRowsPerBeat));
+	case tempoModeModern:
+		m_PlayState.m_nSamplesPerTick = Util::muldiv(m_MixerSettings.gdwMixingFreq, 60 * TEMPO::fractFact, m_PlayState.m_nMusicTempo.GetRaw() / (m_PlayState.m_nMusicSpeed * m_PlayState.m_nCurrentRowsPerBeat));
 		break;
 
-	case tempo_mode_alternative:
-		m_PlayState.m_nSamplesPerTick = m_MixerSettings.gdwMixingFreq / m_PlayState.m_nMusicTempo;
+	case tempoModeAlternative:
+		m_PlayState.m_nSamplesPerTick = Util::muldiv(m_MixerSettings.gdwMixingFreq, TEMPO::fractFact, m_PlayState.m_nMusicTempo.GetRaw());
 		break;
 	}
 #ifndef MODPLUG_TRACKER
@@ -1363,18 +1365,18 @@ uint32 CSoundFile::GetTickDuration(PlayState &playState) const
 	uint32 retval = 0;
 	switch(m_nTempoMode)
 	{
-	case tempo_mode_classic:
+	case tempoModeClassic:
 	default:
-		retval = (m_MixerSettings.gdwMixingFreq * 5) / (playState.m_nMusicTempo << 1);
+		retval = Util::muldiv(m_MixerSettings.gdwMixingFreq, 5 * TEMPO::fractFact, playState.m_nMusicTempo.GetRaw() << 1);
 		break;
 
-	case tempo_mode_alternative:
-		retval = m_MixerSettings.gdwMixingFreq / playState.m_nMusicTempo;
+	case tempoModeAlternative:
+		retval = Util::muldiv(m_MixerSettings.gdwMixingFreq, TEMPO::fractFact, playState.m_nMusicTempo.GetRaw());
 		break;
 
-	case tempo_mode_modern:
+	case tempoModeModern:
 		{
-			double accurateBufferCount = static_cast<double>(m_MixerSettings.gdwMixingFreq) * (60.0 / static_cast<double>(playState.m_nMusicTempo) / (static_cast<double>(playState.m_nMusicSpeed * playState.m_nCurrentRowsPerBeat)));
+			double accurateBufferCount = static_cast<double>(m_MixerSettings.gdwMixingFreq) * (60.0 / playState.m_nMusicTempo.ToDouble() / (static_cast<double>(playState.m_nMusicSpeed * playState.m_nCurrentRowsPerBeat)));
 			uint32 bufferCount = static_cast<int>(accurateBufferCount);
 			playState.m_dBufferDiff += accurateBufferCount - bufferCount;
 
@@ -1402,23 +1404,23 @@ uint32 CSoundFile::GetTickDuration(PlayState &playState) const
 
 
 // Get the duration of a row in milliseconds, based on the current rows per beat and given speed and tempo settings.
-double CSoundFile::GetRowDuration(UINT tempo, UINT speed) const
-//-------------------------------------------------------------
+double CSoundFile::GetRowDuration(TEMPO tempo, UINT speed) const
+//--------------------------------------------------------------
 {
 	switch(m_nTempoMode)
 	{
-	case tempo_mode_classic:
+	case tempoModeClassic:
 	default:
-		return static_cast<double>(2500 * speed) / static_cast<double>(tempo);
+		return static_cast<double>(2500 * speed) / tempo.ToDouble();
 
-	case tempo_mode_modern:
+	case tempoModeModern:
 		{
 			// If there are any row delay effects, the row length factor compensates for those.
-			return 60000.0 / static_cast<double>(tempo) / static_cast<double>(m_PlayState.m_nCurrentRowsPerBeat);
+			return 60000.0 / tempo.ToDouble() / static_cast<double>(m_PlayState.m_nCurrentRowsPerBeat);
 		}
 
-	case tempo_mode_alternative:
-		return static_cast<double>(1000 * speed) / static_cast<double>(tempo);
+	case tempoModeAlternative:
+		return static_cast<double>(1000 * speed) / tempo.ToDouble();
 	}
 }
 

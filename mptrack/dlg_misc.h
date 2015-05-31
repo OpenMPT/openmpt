@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "CDecimalSupport.h"
+
 OPENMPT_NAMESPACE_BEGIN
 
 class CSoundFile;
@@ -234,6 +236,7 @@ class CInputDlg: public CDialog
 //=============================
 {
 protected:
+	CNumberEdit m_edit;
 	CSpinButtonCtrl spin;
 	CString description;
 	int32 minValue, maxValue;

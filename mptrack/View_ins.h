@@ -34,7 +34,7 @@ protected:
 	CBitmap *m_pbmpOldGrid;
 	CBitmap *oldBitmap;
 
-	enmEnvelopeTypes m_nEnv;
+	EnvelopeType m_nEnv;
 	UINT m_nDragItem, m_nBtnMouseOver;
 	DWORD m_dwStatus;
 	DWORD m_NcButtonState[ENV_LEFTBAR_BUTTONS];
@@ -107,7 +107,7 @@ protected:
 	bool EnvToggleReleaseNode(int nPoint);
 
 	// Set envelope status
-	bool EnvToggleEnv(enmEnvelopeTypes envelope, CSoundFile &sndFile, ModInstrument &ins, bool enable, BYTE defaultValue, EnvelopeFlags extraFlags = EnvelopeFlags(0));
+	bool EnvToggleEnv(EnvelopeType envelope, CSoundFile &sndFile, ModInstrument &ins, bool enable, BYTE defaultValue, EnvelopeFlags extraFlags = EnvelopeFlags(0));
 	bool EnvSetVolEnv(bool bEnable);
 	bool EnvSetPanEnv(bool bEnable);
 	bool EnvSetPitchEnv(bool bEnable);
@@ -134,7 +134,7 @@ protected:
 	// Misc stuff
 	void UpdateScrollSize();
 	void SetModified(InstrumentHint hint, bool updateAll);
-	BOOL SetCurrentInstrument(INSTRUMENTINDEX nIns, enmEnvelopeTypes m_nEnv = ENV_VOLUME);
+	BOOL SetCurrentInstrument(INSTRUMENTINDEX nIns, EnvelopeType m_nEnv = ENV_VOLUME);
 	ModInstrument *GetInstrumentPtr() const;
 	InstrumentEnvelope *GetEnvelopePtr() const;
 	UINT EnvInsertPoint(int nTick, int nValue);

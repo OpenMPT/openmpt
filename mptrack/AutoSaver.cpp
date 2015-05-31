@@ -14,6 +14,7 @@
 #include "Moddoc.h"
 #include "AutoSaver.h"
 #include "FileDialog.h"
+#include "../soundlib/mod_specifications.h"
 #include <algorithm>
 
 
