@@ -1138,7 +1138,7 @@ BOOL CInputDlg::OnInitDialog()
 		SetDlgItemInt(IDC_EDIT1, resultNumber);
 		m_edit.SubclassDlgItem(IDC_EDIT1, this);
 		m_edit.ModifyStyle(0, ES_NUMBER);
-		m_edit.AllowSign(minValue < 0);
+		m_edit.AllowNegative(minValue < 0);
 		m_edit.AllowFractions(false);
 	} else
 	{

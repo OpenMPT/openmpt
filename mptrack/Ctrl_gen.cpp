@@ -107,7 +107,7 @@ BOOL CCtrlGeneral::OnInitDialog()
 	m_SliderTempo.SetLineSize(1);
 	m_SliderTempo.SetPageSize(10);
 	m_EditTempo.SubclassDlgItem(IDC_EDIT_TEMPO, this);
-	m_EditTempo.AllowSign(false);
+	m_EditTempo.AllowNegative(false);
 	
 	m_bEditsLocked = false;
 	UpdateView(GeneralHint().ModType());

@@ -51,7 +51,7 @@ class CDecimalSupport
 	/// the locale dependant negative sign
 	TCHAR m_NegativeSign[6];
 
-	bool allowSign, allowFractions;
+	bool allowNegative, allowFractions;
 
 public:
 
@@ -67,7 +67,7 @@ public:
 	/// \brief Initialize m_DecimalSeparator and m_NegativeSign
 	/// \remarks calls InitDecimalSeparator and InitNegativeSign
 	CDecimalSupport()
-		: allowSign(true)
+		: allowNegative(true)
 		, allowFractions(true)
 	{
 		InitDecimalSeparator();
@@ -219,7 +219,7 @@ public:
 			bHandled = true;
 		}
 
-		if (static_cast<TCHAR>(wParam) == m_NegativeSign[0] && allowSign)
+		if (static_cast<TCHAR>(wParam) == m_NegativeSign[0] && allowNegative)
 		{
 			T* pT = static_cast<T*>(this);
 			int nStartChar;
@@ -360,9 +360,9 @@ public:
 		szBuff[std::min(buflen - 1,last_nonzero)] = _T('\0');
 	}
 
-	void AllowSign(bool allow)
+	void AllowNegative(bool allow)
 	{
-		allowSign = allow;
+		allowNegative = allow;
 	}
 
 	void AllowFractions(bool allow)
