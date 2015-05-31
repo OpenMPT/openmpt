@@ -965,7 +965,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 
 	CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, MF_UNCHECKED);
 	m_EditPitchTempoLock.SubclassDlgItem(IDC_EDIT_PITCHTEMPOLOCK, this);
-	m_EditPitchTempoLock.AllowSign(false);
+	m_EditPitchTempoLock.AllowNegative(false);
 	m_EditPitchTempoLock.SetLimitText(9);
 
 	SetRedraw(TRUE);

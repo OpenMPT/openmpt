@@ -31,7 +31,7 @@ CPSRatioCalc::CPSRatioCalc(const CSoundFile &sndFile, SAMPLEINDEX sample, double
 		sampleRate = 8363;
 
 	m_nSpeed = sndFile.m_PlayState.m_nMusicSpeed;
-	m_nTempo = sndFile.m_PlayState.m_nMusicTempo.GetInt();
+	m_nTempo = sndFile.m_PlayState.m_nMusicTempo;
 
 	// Sample rate will not change. We can calculate original duration once and disgard sampleRate.
 	m_lMsOrig = static_cast<ULONGLONG>(1000.0 * ((double)smp.nLength / sampleRate));
@@ -40,9 +40,6 @@ CPSRatioCalc::CPSRatioCalc(const CSoundFile &sndFile, SAMPLEINDEX sample, double
 	CalcRows();
 }
 
-CPSRatioCalc::~CPSRatioCalc()
-{
-}
 
 void CPSRatioCalc::DoDataExchange(CDataExchange* pDX)
 {
@@ -55,7 +52,6 @@ void CPSRatioCalc::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_MS_LENGTH_ORIGINAL2, m_lMsOrig);
 	DDX_Text(pDX, IDC_MS_LENGTH_NEW, m_lMsNew);
 	DDX_Text(pDX, IDC_SPEED, m_nSpeed);
-	DDX_Text(pDX, IDC_TEMPO, m_nTempo);
 	DDX_Text(pDX, IDC_ROW_LENGTH_ORIGINAL, m_dRowsOrig);
 
 	//These 2 CEdits must only be updated if they don't have focus (to preserve trailing . and 0s etc..)
@@ -76,6 +72,15 @@ BEGIN_MESSAGE_MAP(CPSRatioCalc, CDialog)
 	ON_BN_CLICKED(IDOK, OnBnClickedOk)
 END_MESSAGE_MAP()
 
+
+BOOL CPSRatioCalc::OnInitDialog()
+{
+	CDialog::OnInitDialog();
+	m_EditTempo.SubclassDlgItem(IDC_TEMPO, this);
+	m_EditTempo.AllowNegative(false);
+	m_EditTempo.SetTempoValue(m_nTempo);
+	return TRUE;
+}
 
 // CPSRatioCalc message handlers
 void CPSRatioCalc::OnEnChangeSamples()
@@ -119,7 +124,8 @@ void CPSRatioCalc::OnEnChangeRows()
 void CPSRatioCalc::OnEnChangeSpeed()
 {
 	UpdateData();
-	if (m_nTempo < 1) m_nTempo = 1;
+	m_nTempo = m_EditTempo.GetTempoValue();
+	if (m_nTempo < TEMPO(1, 0)) m_nTempo = TEMPO(1, 0);
 	if (m_nSpeed < 1) m_nSpeed = 1;
 	CalcRows();
 	UpdateData(FALSE);
@@ -153,10 +159,10 @@ void CPSRatioCalc::CalcMs()
 
 void CPSRatioCalc::CalcRows()
 {
-	double rowTime = sndFile.GetRowDuration(TEMPO(m_nTempo, 0), m_nSpeed);
+	double rowTime = sndFile.GetRowDuration(m_nTempo, m_nSpeed);
 
 	m_dRowsOrig = (double)m_lMsOrig / rowTime;
-	m_dRowsNew = m_dRowsOrig*(m_dRatio / 100);
+	m_dRowsNew = m_dRowsOrig * (m_dRatio / 100);
 
 	return;
 }
