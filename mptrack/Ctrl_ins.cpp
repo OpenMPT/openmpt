@@ -10,14 +10,14 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "mainfrm.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
 #include "InputHandler.h"
-#include "childfrm.h"
-#include "moddoc.h"
-#include "globals.h"
-#include "ctrl_ins.h"
-#include "view_ins.h"
+#include "Childfrm.h"
+#include "Moddoc.h"
+#include "Globals.h"
+#include "Ctrl_ins.h"
+#include "View_ins.h"
 #include "dlg_misc.h"
 #include "tuningDialog.h"
 #include "../common/misc_util.h"
@@ -268,7 +268,7 @@ void CNoteMapWnd::OnSetFocus(CWnd *pOldWnd)
 {
 	CWnd::OnSetFocus(pOldWnd);
 	InvalidateRect(NULL, FALSE);
-	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus = (CWnd*) this; //rewbs.customKeys
+	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus = (CWnd*)this;
 }
 
 
@@ -277,7 +277,7 @@ void CNoteMapWnd::OnKillFocus(CWnd *pNewWnd)
 {
 	CWnd::OnKillFocus(pNewWnd);
 	InvalidateRect(NULL, FALSE);
-	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus=NULL;	//rewbs.customKeys
+	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus = nullptr;
 }
 
 
@@ -754,17 +754,12 @@ void CNoteMapWnd::StopNote(int note = -1)
 	m_nPlayingNote = -1;
 }
 
-//end rewbs.customKeys
-
 
 /////////////////////////////////////////////////////////////////////////
 // CCtrlInstruments
 
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
 #define MAX_ATTACK_LENGTH	2001
 #define MAX_ATTACK_VALUE	(MAX_ATTACK_LENGTH - 1)  // 16 bit unsigned max
-// -! NEW_FEATURE#0027
 
 BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlInstruments)
@@ -780,7 +775,7 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_COMMAND(IDC_CHECK1,				OnSetPanningChanged)
 	ON_COMMAND(IDC_CHECK2,				OnEnableCutOff)
 	ON_COMMAND(IDC_CHECK3,				OnEnableResonance)
-	ON_COMMAND(IDC_INSVIEWPLG,			TogglePluginEditor)		//rewbs.instroVSTi
+	ON_COMMAND(IDC_INSVIEWPLG,			TogglePluginEditor)
 	ON_EN_CHANGE(IDC_EDIT_INSTRUMENT,	OnInstrumentChanged)
 	ON_EN_CHANGE(IDC_SAMPLE_NAME,		OnNameChanged)
 	ON_EN_CHANGE(IDC_SAMPLE_FILENAME,	OnFileNameChanged)
@@ -788,33 +783,29 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_EN_CHANGE(IDC_EDIT8,				OnGlobalVolChanged)
 	ON_EN_CHANGE(IDC_EDIT9,				OnPanningChanged)
 	ON_EN_CHANGE(IDC_EDIT10,			OnMPRChanged)
-	ON_EN_CHANGE(IDC_EDIT11,			OnMBKChanged)	//rewbs.MidiBank
+	ON_EN_CHANGE(IDC_EDIT11,			OnMBKChanged)
 	ON_EN_CHANGE(IDC_EDIT15,			OnPPSChanged)
 	ON_EN_CHANGE(IDC_PITCHWHEELDEPTH,	OnPitchWheelDepthChanged)
-
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
 	ON_EN_CHANGE(IDC_EDIT2,				OnAttackChanged)
-// -! NEW_FEATURE#0027
 
 	ON_CBN_SELCHANGE(IDC_COMBO1,		OnNNAChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2,		OnDCTChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO3,		OnDCAChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO4,		OnPPCChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO5,		OnMCHChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO6,		OnMixPlugChanged)		//rewbs.instroVSTi
+	ON_CBN_SELCHANGE(IDC_COMBO6,		OnMixPlugChanged)
 	ON_CBN_DROPDOWN(IDC_COMBO6,			OnOpenPluginList)
 	ON_CBN_SELCHANGE(IDC_COMBO9,		OnResamplingChanged)
 	ON_CBN_SELCHANGE(IDC_FILTERMODE,	OnFilterModeChanged)
 	ON_CBN_SELCHANGE(IDC_PLUGIN_VOLUMESTYLE,	OnPluginVolumeHandlingChanged)
 	ON_COMMAND(IDC_PLUGIN_VELOCITYSTYLE,		OnPluginVelocityHandlingChanged)
 	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP,			OnEditSampleMap)
-	//}}AFX_MSG_MAP
 	ON_CBN_SELCHANGE(IDC_COMBOTUNING, OnCbnSelchangeCombotuning)
 	ON_EN_CHANGE(IDC_EDIT_PITCHTEMPOLOCK, OnEnChangeEditPitchtempolock)
 	ON_BN_CLICKED(IDC_CHECK_PITCHTEMPOLOCK, OnBnClickedCheckPitchtempolock)
 	ON_EN_KILLFOCUS(IDC_EDIT_PITCHTEMPOLOCK, OnEnKillfocusEditPitchtempolock)
 	ON_EN_KILLFOCUS(IDC_EDIT7, OnEnKillfocusEditFadeOut)
+	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
@@ -832,7 +823,7 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO3,				m_ComboDCA);
 	DDX_Control(pDX, IDC_COMBO4,				m_ComboPPC);
 	DDX_Control(pDX, IDC_COMBO5,				m_CbnMidiCh);
-	DDX_Control(pDX, IDC_COMBO6,				m_CbnMixPlug);	//rewbs.instroVSTi
+	DDX_Control(pDX, IDC_COMBO6,				m_CbnMixPlug);
 	DDX_Control(pDX, IDC_COMBO9,				m_CbnResampling);
 	DDX_Control(pDX, IDC_FILTERMODE,			m_CbnFilterMode);
 	DDX_Control(pDX, IDC_EDIT7,					m_EditFadeOut);
@@ -840,7 +831,7 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN8,					m_SpinGlobalVol);
 	DDX_Control(pDX, IDC_SPIN9,					m_SpinPanning);
 	DDX_Control(pDX, IDC_SPIN10,				m_SpinMidiPR);
-	DDX_Control(pDX, IDC_SPIN11,				m_SpinMidiBK);	//rewbs.MidiBank
+	DDX_Control(pDX, IDC_SPIN11,				m_SpinMidiBK);
 	DDX_Control(pDX, IDC_SPIN12,				m_SpinPPS);
 	DDX_Control(pDX, IDC_EDIT8,					m_EditGlobalVol);
 	DDX_Control(pDX, IDC_EDIT9,					m_EditPanning);
@@ -854,11 +845,8 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLIDER4,				m_SliderResonance);
 	DDX_Control(pDX, IDC_SLIDER6,				m_SliderCutSwing);
 	DDX_Control(pDX, IDC_SLIDER7,				m_SliderResSwing);
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
 	DDX_Control(pDX, IDC_SLIDER5,				m_SliderAttack);
 	DDX_Control(pDX, IDC_SPIN1,					m_SpinAttack);
-// -! NEW_FEATURE#0027
 	DDX_Control(pDX, IDC_COMBOTUNING,			m_ComboTuning);
 	DDX_Control(pDX, IDC_CHECK_PITCHTEMPOLOCK,	m_CheckPitchTempoLock);
 	DDX_Control(pDX, IDC_EDIT_PITCHTEMPOLOCK,	m_EditPitchTempoLock);
@@ -915,7 +903,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_ComboDCT.AddString("Note");
 	m_ComboDCT.AddString("Sample");
 	m_ComboDCT.AddString("Instrument");
-	m_ComboDCT.AddString("Plugin");	//rewbs.instroVSTi
+	m_ComboDCT.AddString("Plugin");
 	// DCA
 	m_ComboDCA.AddString("Note Cut");
 	m_ComboDCA.AddString("Note Off");
@@ -928,7 +916,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_SpinPanning.SetRange(0, (m_modDoc.GetModType() & MOD_TYPE_IT) ? 64 : 256);
 	// Midi Program
 	m_SpinMidiPR.SetRange(0, 128);
-	// rewbs.MidiBank
+	// Midi Bank
 	m_SpinMidiBK.SetRange(0, 16384);
 
 	m_CbnResampling.SetItemData(m_CbnResampling.AddString("Default"), SRCMODE_DEFAULT);
@@ -938,7 +926,6 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_CbnResampling.SetItemData(m_CbnResampling.AddString("Polyphase"), SRCMODE_POLYPHASE);
 	m_CbnResampling.SetItemData(m_CbnResampling.AddString("XMMS"), SRCMODE_FIRFILTER);
 
-	//end rewbs.instroVSTi
 	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString("Channel default"), FLTMODE_UNCHANGED);
 	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString("Force lowpass"), FLTMODE_LOWPASS);
 	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString("Force highpass"), FLTMODE_HIGHPASS);
@@ -960,13 +947,11 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_SpinPPS.SetRange(-32, +32);
 	// Pitch/Pan Center
 	AppendNotesToControl(m_ComboPPC, 0, NOTE_MAX - NOTE_MIN);
+	SetWindowLongPtr(m_ComboPPC.m_hWnd, GWLP_USERDATA, 0);
 
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
 	// Volume ramping (attack)
 	m_SliderAttack.SetRange(0,MAX_ATTACK_VALUE);
 	m_SpinAttack.SetRange(0,MAX_ATTACK_VALUE);
-// -! NEW_FEATURE#0027
 
 	m_SpinInstrument.SetFocus();
 
@@ -1022,11 +1007,8 @@ BOOL CCtrlInstruments::SetCurrentInstrument(UINT nIns, BOOL bUpdNum)
 		// Is this a bug ?
 		m_SliderCutOff.InvalidateRect(NULL, FALSE);
 		m_SliderResonance.InvalidateRect(NULL, FALSE);
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
 		// Volume ramping (attack)
 		m_SliderAttack.InvalidateRect(NULL, FALSE);
-// -! NEW_FEATURE#0027
 	}
 	PostViewMessage(VIEWMSG_SETCURRENTINSTRUMENT, m_nInstrument);
 	UnlockControls();
@@ -1124,7 +1106,6 @@ LRESULT CCtrlInstruments::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		OnEditSampleMap();
 		break;
 
-	//rewbs.customKeys
 	case IDC_INSTRUMENT_NEW:
 		OnInstrumentNew();
 		break;
@@ -1134,7 +1115,6 @@ LRESULT CCtrlInstruments::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case IDC_INSTRUMENT_SAVEAS:
 		OnInstrumentSave();
 		break;
-	//end rewbs.customKeys
 
 	default:
 		return CModControlDlg::OnModCtrlMsg(wParam, lParam);
@@ -1296,7 +1276,6 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 				m_CbnMixPlug.SetCurSel(0);
 			}
 			OnMixPlugChanged();
-			//end rewbs.instroVSTi
 			for(int nRes = 0; nRes<m_CbnResampling.GetCount(); nRes++)
 			{
 				DWORD v = m_CbnResampling.GetItemData(nRes);
@@ -1321,7 +1300,17 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 			m_ComboDCT.SetCurSel(pIns->nDCT);
 			m_ComboDCA.SetCurSel(pIns->nDNA);
 			// Pitch/Pan Separation
+			if(hintType[HINT_MODTYPE] || pIns->pTuning != (CTuning *)GetWindowLongPtr(m_ComboPPC.m_hWnd, GWLP_USERDATA))
+			{
+				// Tuning may have changed, and thus the note names need to be updated
+				m_ComboPPC.SetRedraw(FALSE);
+				m_ComboPPC.ResetContent();
+				AppendNotesToControlEx(m_ComboPPC, m_sndFile, m_nInstrument, NOTE_MIN, NOTE_MAX);
+				SetWindowLongPtr(m_ComboPPC.m_hWnd, GWLP_USERDATA, (LONG_PTR)pIns->pTuning);
+				m_ComboPPC.SetRedraw(TRUE);
+			}
 			m_ComboPPC.SetCurSel(pIns->nPPC);
+			ASSERT(m_ComboPPC.GetItemData(m_ComboPPC.GetCurSel()) == pIns->nPPC + NOTE_MIN);
 			SetDlgItemInt(IDC_EDIT15, pIns->nPPS);
 			// Filter
 			if (m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
@@ -1681,7 +1670,7 @@ void CCtrlInstruments::OnInstrumentNew()
 //--------------------------------------
 {
 	if(m_sndFile.GetNumInstruments() > 0
-		&& CMainFrame::GetInputHandler()->ShiftPressed()) //rewbs.customKeys
+		&& CMainFrame::GetInputHandler()->ShiftPressed())
 	{
 		OnInstrumentDuplicate();
 		return;
@@ -2026,18 +2015,17 @@ void CCtrlInstruments::OnMPRChanged()
 				SetModified(InstrumentHint().Info(), false);
 			}
 		}
-		//rewbs.MidiBank: we will not set the midi bank/program if it is 0
-		if (n==0)
+		// we will not set the midi bank/program if it is 0
+		if (n == 0)
 		{
 			LockControls();
 			SetDlgItemText(IDC_EDIT10, "---");
 			UnlockControls();
 		}
-		//end rewbs.MidiBank
 	}
 }
 
-//rewbs.MidiBank
+
 void CCtrlInstruments::OnMBKChanged()
 //-----------------------------------
 {
@@ -2050,17 +2038,16 @@ void CCtrlInstruments::OnMBKChanged()
 			pIns->wMidiBank = w;
 			SetModified(InstrumentHint().Info(), false);
 		}
-		//rewbs.MidiBank: we will not set the midi bank/program if it is 0
+		//  we will not set the midi bank/program if it is 0
 		if(w == 0)
 		{
 			LockControls();
 			SetDlgItemText(IDC_EDIT11, "---");
 			UnlockControls();
 		}
-		//end rewbs.MidiBank
 	}
 }
-//end rewbs.MidiBank
+
 
 void CCtrlInstruments::OnMCHChanged()
 //-----------------------------------
@@ -2093,7 +2080,6 @@ void CCtrlInstruments::OnResamplingChanged()
 }
 
 
-//rewbs.instroVSTi
 void CCtrlInstruments::OnMixPlugChanged()
 //---------------------------------------
 {
@@ -2188,8 +2174,6 @@ void CCtrlInstruments::OnMixPlugChanged()
 	}
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSVIEWPLG), false);
 }
-//end rewbs.instroVSTi
-
 
 
 void CCtrlInstruments::OnPPSChanged()
@@ -2323,7 +2307,7 @@ void CCtrlInstruments::OnFilterModeChanged()
 		if(pIns->nFilterMode != instFiltermode)
 		{
 			pIns->nFilterMode = instFiltermode;
-			m_modDoc.SetModified();
+			SetModified(InstrumentHint().Info(), false);
 
 			//Update channel settings where this instrument is active, if required.
 			if(instFiltermode != FLTMODE_UNCHANGED)
@@ -2358,13 +2342,10 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 
 		if (pIns)
 		{
-		//Various optimisations by rewbs
 			CSliderCtrl* pSlider = (CSliderCtrl*) pSB;
 			short int n;
 			bool filterChanger = false;
 
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
 			// Volume ramping (attack)
 			if (pSlider == &m_SliderAttack)
 			{
@@ -2376,7 +2357,6 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 					SetDlgItemInt(IDC_EDIT2,n);
 					SetModified(InstrumentHint().Info(), false);
 				}
-// -! NEW_FEATURE#0027
 			}
 			// Volume Swing
 			else if (pSlider == &m_SliderVolSwing)
@@ -2494,7 +2474,6 @@ void CCtrlInstruments::TogglePluginEditor()
 }
 
 
-//rewbs.customKeys
 BOOL CCtrlInstruments::PreTranslateMessage(MSG *pMsg)
 //-----------------------------------------------
 {
@@ -2540,7 +2519,6 @@ LRESULT CCtrlInstruments::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	return 0;
 }
 
-//end rewbs.customKeys
 
 void CCtrlInstruments::OnCbnSelchangeCombotuning()
 //------------------------------------------------
@@ -2558,8 +2536,7 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 		pInstH->SetTuning(NULL);
 		cs.Leave();
 
-		m_modDoc.SetModified();
-		UpdateView(InstrumentHint(m_nInstrument).Info());
+		SetModified(InstrumentHint(m_nInstrument).Info(), true);
 		return;
 	}
 
@@ -2587,8 +2564,7 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 		pInstH->SetTuning(&tc->GetTuning(sel));
 		cs.Leave();
 
-		m_modDoc.SetModified();
-		UpdateView(InstrumentHint(m_nInstrument).Info());
+		SetModified(InstrumentHint(m_nInstrument).Info(), true);
 		return;
 	}
 
@@ -2614,7 +2590,7 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 	//new tuning(s) come visible.
 	BuildTuningComboBox();
 
-	UpdateView(InstrumentHint(m_nInstrument).Info());
+	m_modDoc.UpdateAllViews(nullptr, InstrumentHint(m_nInstrument).Info());
 }
 
 
@@ -2782,6 +2758,7 @@ void CCtrlInstruments::OnBnClickedCheckPitchtempolock()
 			}
 		}
 	}
+	m_modDoc.UpdateAllViews(nullptr, InstrumentHint().Info(), this);
 }
 
 
@@ -2796,7 +2773,7 @@ void CCtrlInstruments::OnEnChangeEditPitchtempolock()
 	Limit(ptlTempo, m_sndFile.GetModSpecifications().tempoMin, m_sndFile.GetModSpecifications().tempoMax);
 
 	m_sndFile.Instruments[m_nInstrument]->wPitchToTempoLock = ptlTempo;
-	m_modDoc.SetModified();
+	m_modDoc.SetModified();	// Only update other views after killing focus
 }
 
 
@@ -2804,7 +2781,6 @@ void CCtrlInstruments::OnEnKillfocusEditPitchtempolock()
 //------------------------------------------------------
 {
 	//Checking that tempo value is in correct range.
-
 	if(IsLocked()) return;
 
 	TCHAR buffer[8];
@@ -2824,7 +2800,12 @@ void CCtrlInstruments::OnEnKillfocusEditPitchtempolock()
 		changed = true;
 
 	}
-	if(changed) m_EditPitchTempoLock.SetWindowText(mpt::ToString(ptlTempo).c_str());
+	if(changed)
+	{
+		m_EditPitchTempoLock.SetWindowText(mpt::ToString(ptlTempo).c_str());
+		m_modDoc.SetModified();
+	}
+	m_modDoc.UpdateAllViews(nullptr, InstrumentHint().Info(), this);
 }
 
 
