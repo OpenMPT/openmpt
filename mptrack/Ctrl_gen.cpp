@@ -12,6 +12,7 @@
 #include "stdafx.h"
 #include "Mptrack.h"
 #include "Mainfrm.h"
+#include "InputHandler.h"
 #include "Moddoc.h"
 #include "Globals.h"
 #include "dlg_misc.h"
@@ -390,11 +391,26 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			int pos = m_SpinTempo.GetPos32();
 			if(pos != 0)
 			{
-				TEMPO newTempo = m_sndFile.m_nDefaultTempo + TEMPO(pos, 0);
+				TEMPO newTempo;
+				if(m_sndFile.GetModSpecifications().hasFractionalTempo)
+				{
+					pos *= TEMPO::fractFact;
+					if(CMainFrame::GetMainFrame()->GetInputHandler()->CtrlPressed())
+						pos /= 100;
+					else
+						pos /= 10;
+					newTempo.SetRaw(pos);
+				} else
+				{
+					newTempo = TEMPO(pos, 0);
+				}
+				newTempo += m_sndFile.m_nDefaultTempo;
 				Limit(newTempo, tempoMin, tempoMax);
 				m_sndFile.m_nDefaultTempo = m_sndFile.m_PlayState.m_nMusicTempo = newTempo;
 				m_modDoc.SetModified();
+				LockControls();
 				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
+				UnlockControls();
 			}
 			m_SpinTempo.SetPos(0);
 		}
@@ -626,18 +642,18 @@ BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPSTR pszText)
 
 		switch(uId)
 		{
-			case IDC_SLIDER_SAMPLEPREAMP:
-				(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_nSamplePreAmp, m_sndFile.GetPlayConfig().getNormalSamplePreAmp()) : strcpy(pszText, moreRecentMixModeNote);
-				return TRUE;
-				break;
-			case IDC_SLIDER_VSTIVOL:
-				(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_nVSTiVolume, m_sndFile.GetPlayConfig().getNormalVSTiVol()) : strcpy(pszText, moreRecentMixModeNote);
-				return TRUE;
-				break;
-			case IDC_SLIDER_GLOBALVOL:
-				(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_PlayState.m_nGlobalVolume, m_sndFile.GetPlayConfig().getNormalGlobalVol()) : strcpy(pszText, moreRecentMixModeNote);
-				return TRUE;
-				break;
+		case IDC_BUTTON_MODTYPE:
+			_tcscpy(pszText, _T("Song Properties"));
+			return TRUE;
+		case IDC_SLIDER_SAMPLEPREAMP:
+			(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_nSamplePreAmp, m_sndFile.GetPlayConfig().getNormalSamplePreAmp()) : strcpy(pszText, moreRecentMixModeNote);
+			return TRUE;
+		case IDC_SLIDER_VSTIVOL:
+			(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_nVSTiVolume, m_sndFile.GetPlayConfig().getNormalVSTiVol()) : strcpy(pszText, moreRecentMixModeNote);
+			return TRUE;
+		case IDC_SLIDER_GLOBALVOL:
+			(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_PlayState.m_nGlobalVolume, m_sndFile.GetPlayConfig().getNormalGlobalVol()) : strcpy(pszText, moreRecentMixModeNote);
+			return TRUE;
 		}
 	}
 	return FALSE;
