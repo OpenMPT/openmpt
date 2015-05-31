@@ -155,7 +155,7 @@ public:
 		if ( tempo < 32 || tempo > 512 ) {
 			throw openmpt::exception("invalid tempo");
 		}
-		m_sndFile->m_PlayState.m_nMusicTempo = tempo;
+		m_sndFile->m_PlayState.m_nMusicTempo.Set(tempo);
 	}
 
 	virtual void set_tempo_factor( double factor ) {

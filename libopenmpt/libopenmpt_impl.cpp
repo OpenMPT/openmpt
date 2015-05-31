@@ -945,7 +945,7 @@ std::int32_t module_impl::get_current_speed() const {
 	return m_sndFile->m_PlayState.m_nMusicSpeed;
 }
 std::int32_t module_impl::get_current_tempo() const {
-	return m_sndFile->m_PlayState.m_nMusicTempo;
+	return static_cast<std::int32_t>(m_sndFile->m_PlayState.m_nMusicTempo.GetInt());
 }
 std::int32_t module_impl::get_current_order() const {
 	return m_sndFile->GetCurrentOrder();
