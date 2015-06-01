@@ -212,7 +212,7 @@ protected:
 	CVstPluginManager *m_pPluginManager;
 	SoundDevice::Manager *m_pSoundDevicesManager;
 	BOOL m_bInitialized;
-	DWORD m_dwTimeStarted, m_dwLastPluginIdleCall;
+	DWORD m_dwLastPluginIdleCall;
 	// Default macro configuration
 	MIDIMacroConfig m_MidiCfg;
 	mpt::PathString m_szExePath;
