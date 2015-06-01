@@ -21,7 +21,6 @@
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
 #endif
-#include "Wav.h"
 #include "Tagging.h"
 #include "ITTools.h"
 #include "XMTools.h"

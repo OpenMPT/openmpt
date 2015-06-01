@@ -14,7 +14,6 @@
 #include "../common/StringFixer.h"
 #include "../common/mptFileIO.h"
 #include "mod2midi.h"
-#include "Wav.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -26,30 +25,30 @@ OPENMPT_NAMESPACE_BEGIN
 
 typedef struct PACKED _RMIDDATACHUNK
 {
-	DWORD id_RIFF;	// "RIFF"
-	DWORD filelen;
-	DWORD id_RMID;	// "RMID"
-	DWORD id_data;	// "data"
-	DWORD datalen;
+	char   id_RIFF[4];	// "RIFF"
+	uint32 filelen;
+	char   id_RMID[4];	// "RMID"
+	char   id_data[4];	// "data"
+	uint32 datalen;
 } RMIDDATACHUNK, *PRMIDDATACHUNK;
 
 STATIC_ASSERT(sizeof(RMIDDATACHUNK) == 20);
 
 typedef struct PACKED _MTHDCHUNK	// (big endian)
 {
-	DWORD id;		// "MThd" = 0x6468544D
-	DWORD len;		// 6
-	WORD wFmt;		// 0=single track, 1=synchro multitrack, 2=asynch multitrack 
-	WORD wTrks;		// # of tracks
-	WORD wDivision;	// PPQN
+	char   id[4];		// "MThd" = 0x6468544D
+	uint32 len;		// 6
+	uint16 wFmt;		// 0=single track, 1=synchro multitrack, 2=asynch multitrack 
+	uint16 wTrks;		// # of tracks
+	uint16 wDivision;	// PPQN
 } MTHDCHUNK, *PMTHDCHUNK;
 
 STATIC_ASSERT(sizeof(MTHDCHUNK) == 14);
 
 typedef struct PACKED _MTRKCHUNK	// (big endian)
 {
-	DWORD id;		// "MTrk" = 0x6B72544D
-	DWORD len;
+	char   id[4];		// "MTrk" = 0x6B72544D
+	uint32 len;
 } MTRKCHUNK, *PMTRKCHUNK;
 
 STATIC_ASSERT(sizeof(MTRKCHUNK) == 8);
@@ -385,12 +384,12 @@ BOOL CModToMidi::DoConvert()
 	if (!tempo) tempo = 125;
 	nTickMultiplier = MOD2MIDI_TEMPOFACTOR;
 	const uint16 wPPQN = static_cast<uint16>((tempo * nTickMultiplier) / 5);
-	rmid.id_RIFF = IFFID_RIFF;
+	memcpy(rmid.id_RIFF, "RIFF", 4);
 	rmid.filelen = sizeof(rmid)+sizeof(mthd)-8;
-	rmid.id_RMID = 0x44494D52; // "RMID"
-	rmid.id_data = IFFID_data;
+	memcpy(rmid.id_RMID, "RMID", 4);
+	memcpy(rmid.id_data, "data", 4);
 	rmid.datalen = 0;
-	mthd.id = 0x6468544d; // "MThd"
+	memcpy(mthd.id, "MThd", 4);
 	mthd.len = BigEndian(sizeof(mthd)-8);
 	mthd.wFmt = BigEndianW(1);
 	mthd.wTrks = static_cast<uint16>(Tracks.size()); // 1 track/channel
@@ -568,7 +567,7 @@ BOOL CModToMidi::DoConvert()
 		tmp[2] = 0x2f;
 		tmp[3] = 0x00;
 		Tracks[iTrk].Write(tmp, 4);
-		mtrk.id = 0x6B72544D;
+		memcpy(mtrk.id, "MTrk", 4);
 		mtrk.len = BigEndian(Tracks[iTrk].nTrackSize);
 		fwrite(&mtrk, 1, sizeof(mtrk), f);
 		rmid.filelen += sizeof(mtrk) + Tracks[iTrk].nTrackSize;

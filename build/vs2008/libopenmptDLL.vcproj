@@ -919,10 +919,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\soundlib\Wav.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\soundlib\WindowedFIR.cpp"
 				>
 			</File>

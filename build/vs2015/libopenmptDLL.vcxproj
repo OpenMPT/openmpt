@@ -247,7 +247,6 @@
     <ClInclude Include="..\..\soundlib\Tables.h" />
     <ClInclude Include="..\..\soundlib\Tagging.h" />
     <ClInclude Include="..\..\soundlib\WAVTools.h" />
-    <ClInclude Include="..\..\soundlib\Wav.h" />
     <ClInclude Include="..\..\soundlib\WindowedFIR.h" />
     <ClInclude Include="..\..\soundlib\XMTools.h" />
     <ClInclude Include="..\..\soundlib\mod_specifications.h" />

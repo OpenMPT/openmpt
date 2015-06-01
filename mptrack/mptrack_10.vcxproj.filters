@@ -741,9 +741,6 @@
     <ClInclude Include="..\soundlib\Tables.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
-    <ClInclude Include="..\soundlib\Wav.h">
-      <Filter>Header Files\soundlib</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\AudioCriticalSection.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>

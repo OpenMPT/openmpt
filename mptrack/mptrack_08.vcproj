@@ -1678,10 +1678,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\soundlib\Wav.h"
-				>
-			</File>
-			<File
 				RelativePath=".\WelcomeDialog.h"
 				>
 			</File>
