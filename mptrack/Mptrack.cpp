@@ -365,6 +365,12 @@ public:
 };
 
 
+// Splash Screen
+
+static void StartSplashScreen();
+static void StopSplashScreen();
+
+
 /////////////////////////////////////////////////////////////////////////////
 // Midi Library
 
@@ -1428,12 +1434,12 @@ void CSplashScreen::OnOK()
 }
 
 
-VOID CTrackApp::StartSplashScreen()
-//---------------------------------
+static void StartSplashScreen()
+//-----------------------------
 {
 	if (!gpSplashScreen)
 	{
-		gpSplashScreen = new CSplashScreen(m_pMainWnd);
+		gpSplashScreen = new CSplashScreen(theApp.m_pMainWnd);
 		gpSplashScreen->ShowWindow(SW_SHOW);
 		gpSplashScreen->UpdateWindow();
 		gpSplashScreen->BeginWaitCursor();
@@ -1441,8 +1447,8 @@ VOID CTrackApp::StartSplashScreen()
 }
 
 
-VOID CTrackApp::StopSplashScreen()
-//--------------------------------
+static void StopSplashScreen()
+//----------------------------
 {
 	if (gpSplashScreen)
 	{
