@@ -207,9 +207,6 @@
     <ClInclude Include="..\..\soundlib\WAVTools.h">
       <Filter>soundlib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\soundlib\Wav.h">
-      <Filter>soundlib</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\soundlib\WindowedFIR.h">
       <Filter>soundlib</Filter>
     </ClInclude>

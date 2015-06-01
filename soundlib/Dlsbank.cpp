@@ -16,7 +16,6 @@
 #include "../common/mptFileIO.h"
 #endif
 #include "Dlsbank.h"
-#include "Wav.h"
 #include "../common/StringFixer.h"
 #include "../common/FileReader.h"
 #include "../common/Endianness.h"
@@ -120,14 +119,29 @@ OPENMPT_NAMESPACE_BEGIN
 //////////////////////////////////////////////////////////
 // DLS IFF Chunk IDs
 
+// Standard IFF chunks IDs
+#define IFFID_FORM		0x4d524f46
+#define IFFID_RIFF		0x46464952
+#define IFFID_LIST		0x5453494C
+#define IFFID_INFO		0x4F464E49
+
+// IFF Info fields
+#define IFFID_ICOP		0x504F4349
+#define IFFID_INAM		0x4D414E49
+#define IFFID_ICMT		0x544D4349
+#define IFFID_IENG		0x474E4549
+#define IFFID_ISFT		0x54465349
+#define IFFID_ISBJ		0x4A425349
+
+// Wave IFF chunks IDs
+#define IFFID_wave		0x65766177
+#define IFFID_wsmp		0x706D7377
+
 #define IFFID_XDLS		0x534c4458
 #define IFFID_DLS		0x20534C44
 #define IFFID_MLS		0x20534C4D
 #define IFFID_RMID		0x44494D52
 #define IFFID_colh		0x686C6F63
-#define IFFID_vers		0x73726576
-#define IFFID_msyn		0x6E79736D
-#define IFFID_lins		0x736E696C
 #define IFFID_ins		0x20736E69
 #define IFFID_insh		0x68736E69
 #define IFFID_ptbl		0x6C627470
