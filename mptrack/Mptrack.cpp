@@ -437,7 +437,6 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 		char section[32];
 		sprintf(section, (iMidi < 128) ? "Midi%d" : "Perc%d", iMidi & 0x7f);
 		filename = file.Read<mpt::PathString>("Midi Library", section, mpt::PathString());
-		if(forgetSettings) file.Forget("Midi Library", section);
 		// Check for ULTRASND.INI
 		if(filename.empty())
 		{
