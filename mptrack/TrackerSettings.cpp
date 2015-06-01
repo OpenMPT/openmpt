@@ -45,13 +45,19 @@ TrackerSettings &TrackerSettings::Instance()
 }
 
 
-static MptVersion::VersionNum GetStoredVersion(const std::string &iniVersion)
-//---------------------------------------------------------------------------
+static MptVersion::VersionNum GetPreviousSettingsVersion(const std::string &iniVersion)
+//-------------------------------------------------------------------------------------
 {
 	MptVersion::VersionNum result = 0;
 	if(!iniVersion.empty())
 	{
 		result = MptVersion::ToNum(iniVersion);
+	} else
+	{
+		// No version stored.
+		// This is the first run, thus set the previous version to our current
+		// version which will avoid running all settings upgrade code.
+		result = MptVersion::num;
 	}
 	return result;
 }
@@ -129,8 +135,9 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 //-------------------------------------------------------
 	: conf(conf)
 	// Version
-	, IniVersion(conf, "Version", "Version", "")
-	, gcsPreviousVersion(GetStoredVersion(IniVersion))
+	, IniVersion(conf, "Version", "Version", std::string())
+	, FirstRun(IniVersion.Get() == std::string())
+	, PreviousSettingsVersion(GetPreviousSettingsVersion(IniVersion))
 	, gcsInstallGUID(conf, "Version", "InstallGUID", std::wstring())
 	// Display
 	, m_ShowSplashScreen(conf, "Display", "ShowSplashScreen", true)
@@ -384,7 +391,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Fixups:
 	// -------
 
-	const MptVersion::VersionNum storedVersion = gcsPreviousVersion ? gcsPreviousVersion : MptVersion::num;
+	const MptVersion::VersionNum storedVersion = PreviousSettingsVersion;
 
 	// Version
 	if(gcsInstallGUID.Get().empty())
