@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "CDecimalSupport.h"
+
 OPENMPT_NAMESPACE_BEGIN
 
 struct InstrumentEnvelope;
@@ -18,17 +20,18 @@ struct InstrumentEnvelope;
 class CScaleEnvPointsDlg : public CDialog
 //=======================================
 {
-public:
-
-	CScaleEnvPointsDlg(CWnd* pParent, InstrumentEnvelope &env, int nCenter) : CDialog(IDD_SCALE_ENV_POINTS, pParent), m_Env(env)
-	{
-		m_nCenter = nCenter;
-	}
-
-private:
+protected:
+	CNumberEdit m_EditX, m_EditY;
 	InstrumentEnvelope &m_Env; //To tell which envelope to process.
-	static float m_fFactorX, m_fFactorY;
+	static double m_fFactorX, m_fFactorY;
 	int m_nCenter;
+
+public:
+	CScaleEnvPointsDlg(CWnd* pParent, InstrumentEnvelope &env, int nCenter)
+		: CDialog(IDD_SCALE_ENV_POINTS, pParent)
+		, m_Env(env)
+		, m_nCenter(nCenter)
+	{ }
 
 protected:
 	virtual void OnOK();

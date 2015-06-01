@@ -29,7 +29,7 @@ void CAmpDlg::DoDataExchange(CDataExchange* pDX)
 //----------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CSampleGridDlg)
+	//{{AFX_DATA_MAP(CAmpDlg)
 	DDX_Control(pDX, IDC_COMBO1,	m_fadeBox);
 	//}}AFX_DATA_MAP
 }
@@ -56,6 +56,9 @@ BOOL CAmpDlg::OnInitDialog()
 		spin->SetPos32(m_nFactor);
 	}
 	SetDlgItemInt(IDC_EDIT1, m_nFactor);
+	m_edit.SubclassDlgItem(IDC_EDIT1, this);
+	m_edit.AllowFractions(false);
+	m_edit.AllowNegative(m_nFactorMin < 0);
 
 	const struct
 	{
@@ -121,16 +124,12 @@ void CAmpDlg::OnDestroy()
 	m_list.DeleteImageList();
 }
 
+
 void CAmpDlg::OnOK()
 //------------------
 {
-	const int nVal = static_cast<int>(GetDlgItemInt(IDC_EDIT1));
-	if(nVal < m_nFactorMin || nVal > m_nFactorMax)
-	{
-		CString str; str.Format(GetStrI18N(_T("Value should be within [%d, %d]")), m_nFactorMin, m_nFactorMax);
-		Reporting::Information(str);
-		return;
-	}
+	int nVal = static_cast<int>(GetDlgItemInt(IDC_EDIT1));
+	Limit(nVal, m_nFactorMin, m_nFactorMax);
 	m_nFactor = static_cast<int16>(nVal);
 	m_bFadeIn = (IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
 	m_bFadeOut = (IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED);
@@ -173,7 +172,7 @@ void CRawSampleDlg::UpdateDialog()
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, (m_nFormat.GetBitDepth() == 8) ? IDC_RADIO1 : IDC_RADIO2 );
 	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, (m_nFormat.GetEncoding() == SampleIO::unsignedPCM) ? IDC_RADIO3 : IDC_RADIO4);
 	CheckRadioButton(IDC_RADIO5, IDC_RADIO6, (m_nFormat.GetChannelFormat() == SampleIO::mono) ? IDC_RADIO5 : IDC_RADIO6);
-	CheckDlgButton(IDC_CHK_REMEMBERSETTINGS, (m_bRememberFormat) ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHK_REMEMBERSETTINGS, (m_bRememberFormat ? MF_CHECKED : MF_UNCHECKED));
 }
 
 
