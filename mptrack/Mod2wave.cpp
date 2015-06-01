@@ -16,7 +16,6 @@
 #include "mpdlgs.h"
 #include "vstplug.h"
 #include "mod2wave.h"
-#include "Wav.h"
 #include "WAVTools.h"
 #include "../common/mptString.h"
 #include "../common/version.h"
