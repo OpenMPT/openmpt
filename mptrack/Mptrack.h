@@ -289,11 +289,6 @@ public:
 
 	static void OpenModulesDialog(std::vector<mpt::PathString> &files);
 
-// Splash Screen
-protected:
-	void StartSplashScreen();
-	void StopSplashScreen();
-
 // Overrides
 public:
 	// ClassWizard generated virtual function overrides
