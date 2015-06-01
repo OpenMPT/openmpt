@@ -263,7 +263,7 @@ BOOL CMainToolBar::Create(CWnd *parent)
 	SetButtonStyle(CommandToIndex(ID_MIDI_RECORD), GetButtonStyle(CommandToIndex(ID_MIDI_RECORD)) | TBSTYLE_DROPDOWN);
 
 	nCurrentSpeed = 6;
-	nCurrentTempo.Set(0);
+	nCurrentTempo.Set(125);
 	nCurrentRowsPerBeat = 4;
 	nCurrentOctave = -1;
 
