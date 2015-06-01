@@ -369,6 +369,7 @@ public:
 
 static void StartSplashScreen();
 static void StopSplashScreen();
+static void TimeoutSplashScreen();
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1074,7 +1075,6 @@ BOOL CTrackApp::InitInstance()
 	pMainFrame->ShowWindow(m_nCmdShow);
 	pMainFrame->UpdateWindow();
 
-	m_dwTimeStarted = timeGetTime();
 	m_bInitialized = TRUE;
 
 
@@ -1358,6 +1358,9 @@ END_MESSAGE_MAP()
 
 static CSplashScreen *gpSplashScreen = NULL;
 
+static DWORD gSplashScreenStartTime = 0;
+
+
 CSplashScreen::CSplashScreen(CWnd *parent)
 //----------------------------------------
 {
@@ -1443,6 +1446,7 @@ static void StartSplashScreen()
 		gpSplashScreen->ShowWindow(SW_SHOW);
 		gpSplashScreen->UpdateWindow();
 		gpSplashScreen->BeginWaitCursor();
+		gSplashScreenStartTime = GetTickCount();
 	}
 }
 
@@ -1459,6 +1463,19 @@ static void StopSplashScreen()
 }
 
 
+static void TimeoutSplashScreen()
+//-------------------------------
+{
+	if(gpSplashScreen)
+	{
+		if(GetTickCount() - gSplashScreenStartTime > 100)
+		{
+			StopSplashScreen();
+		}
+	}
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 // Idle-time processing
 
@@ -1467,18 +1484,13 @@ BOOL CTrackApp::OnIdle(LONG lCount)
 {
 	BOOL b = CWinApp::OnIdle(lCount);
 
+	TimeoutSplashScreen();
+
 	if(CMainFrame::GetMainFrame())
 	{
 		CMainFrame::GetMainFrame()->IdleHandlerSounddevice();
 	}
 
-	if ((gpSplashScreen) && (m_bInitialized))
-	{
-		if (timeGetTime() - m_dwTimeStarted > 1000)		//Set splash screen duration here -rewbs
-		{
-			StopSplashScreen();
-		}
-	}
 	if (CRippleBitmap::instance)
 	{
 		if (CRippleBitmap::instance->Animate()) return TRUE;
