@@ -824,18 +824,6 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	// chose config directory
 	mpt::PathString configPath = portableMode ? configPathApp : configPathGlobal;
 
-	// check if this is the first run
-	bool firstRun = true;
-	{
-		WCHAR tempVersion[MAX_PATH];
-		MemsetZero(tempVersion);
-		GetPrivateProfileStringW(L"Version", L"Version", L"", tempVersion, CountOf(tempVersion), (configPathApp + MPT_PATHSTRING("mptrack.ini")).AsNative().c_str());
-		if(!std::wstring(tempVersion).empty())
-		{
-			firstRun = false;
-		}
-	}
-
 
 	// Update state.
 
@@ -1083,26 +1071,31 @@ BOOL CTrackApp::InitInstance()
 	m_dwTimeStarted = timeGetTime();
 	m_bInitialized = TRUE;
 
-	const bool firstRun = TrackerSettings::Instance().gcsPreviousVersion == 0;
-	if(CUpdateCheck::GetUpdateCheckPeriod() != 0 && !firstRun)
-	{
-		CUpdateCheck::DoUpdateCheck(true);
-	}
 
-	// Open settings if the previous execution was with an earlier version.
-	if(TrackerSettings::Instance().ShowSettingsOnNewVersion && !firstRun && TrackerSettings::Instance().gcsPreviousVersion < MptVersion::num)
+	if(TrackerSettings::Instance().FirstRun)
 	{
-		StopSplashScreen();
-		m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
-	}
-
-	if(firstRun)
-	{
+		
 		// On high-DPI devices, automatically upscale pattern font
 		FontSetting font = TrackerSettings::Instance().patternFont;
 		font.size = Clamp(Util::GetDPIy(m_pMainWnd->m_hWnd) / 96 - 1, 0, 9);
 		TrackerSettings::Instance().patternFont = font;
 		new WelcomeDlg(m_pMainWnd);
+
+	} else
+	{
+
+		// Update check
+		if(CUpdateCheck::GetUpdateCheckPeriod() != 0)
+		{
+			CUpdateCheck::DoUpdateCheck(true);
+		}
+
+		// Open settings if the previous execution was with an earlier version.
+		if(TrackerSettings::Instance().ShowSettingsOnNewVersion && (TrackerSettings::Instance().PreviousSettingsVersion < MptVersion::num))
+		{
+			m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
+		}
+
 	}
 
 	EndWaitCursor();
@@ -1821,7 +1814,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 
 		// Version <= 1.19.03.00 had buggy handling of custom host information. If last open was from
 		// such OpenMPT version, clear the related settings to get a clean start.
-		if(TrackerSettings::Instance().gcsPreviousVersion != 0 && TrackerSettings::Instance().gcsPreviousVersion < MAKE_VERSION_NUMERIC(1, 19, 03, 01) && buffer == "OpenMPT")
+		if(TrackerSettings::Instance().PreviousSettingsVersion < MAKE_VERSION_NUMERIC(1,19,03,01) && buffer == "OpenMPT")
 		{
 			theApp.GetSettings().Remove("VST Plugins", "HostProductString");
 			theApp.GetSettings().Remove("VST Plugins", "HostVendorString");
