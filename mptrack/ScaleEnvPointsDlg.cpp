@@ -10,28 +10,27 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "ScaleEnvPointsDlg.h"
 #include "ModInstrument.h"
+#include "ScaleEnvPointsDlg.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-float CScaleEnvPointsDlg::m_fFactorX = 1.0f;
-float CScaleEnvPointsDlg::m_fFactorY = 1.0f;
+double CScaleEnvPointsDlg::m_fFactorX = 1.0;
+double CScaleEnvPointsDlg::m_fFactorY = 1.0;
 
 
 BOOL CScaleEnvPointsDlg::OnInitDialog()
 //-------------------------------------
 {
 	CDialog::OnInitDialog();
-
-	char buffer[10];
-	_snprintf(buffer, 9, "%g", m_fFactorX);
-	SetDlgItemText(IDC_EDIT_FACTORX, buffer);
-	_snprintf(buffer, 9, "%g", m_fFactorY);
-	SetDlgItemText(IDC_EDIT_FACTORY, buffer);
-	GetDlgItem(IDC_EDIT_FACTORX)->SetFocus();
+	m_EditX.SubclassDlgItem(IDC_EDIT_FACTORX, this);
+	m_EditY.SubclassDlgItem(IDC_EDIT_FACTORY, this);
+	m_EditX.AllowNegative(false);
+	m_EditX.SetDecimalValue(m_fFactorX);
+	m_EditY.SetDecimalValue(m_fFactorY);
+	m_EditX.SetFocus();
 
 	return FALSE;	// return TRUE unless you set the focus to a control
 }
@@ -40,18 +39,14 @@ BOOL CScaleEnvPointsDlg::OnInitDialog()
 void CScaleEnvPointsDlg::OnOK()
 //-----------------------------
 {
-	char buffer[10];
-	GetDlgItemText(IDC_EDIT_FACTORX, buffer, 9);
-	m_fFactorX = ConvertStrTo<float>(buffer);
-
-	GetDlgItemText(IDC_EDIT_FACTORY, buffer, 9);
-	m_fFactorY = ConvertStrTo<float>(buffer);
+	m_EditX.GetDecimalValue(m_fFactorX);
+	m_EditY.GetDecimalValue(m_fFactorY);
 
 	if(m_fFactorX > 0 && m_fFactorX != 1)
 	{
 		for(uint32 i = 0; i < m_Env.nNodes; i++)
 		{
-			m_Env.Ticks[i] = static_cast<WORD>(m_fFactorX * m_Env.Ticks[i]);
+			m_Env.Ticks[i] = static_cast<uint16>(m_fFactorX * m_Env.Ticks[i]);
 
 			// Checking that the order of points is preserved.
 			if(i > 0 && m_Env.Ticks[i] <= m_Env.Ticks[i - 1])
@@ -61,7 +56,7 @@ void CScaleEnvPointsDlg::OnOK()
 
 	if(m_fFactorY != 1)
 	{
-		float factor = m_fFactorY;
+		double factor = m_fFactorY;
 		bool invert = false;
 		if(m_fFactorY < 0)
 		{

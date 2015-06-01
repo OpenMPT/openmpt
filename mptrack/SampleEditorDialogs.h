@@ -13,6 +13,7 @@
 
 #include "../soundlib/SampleIO.h"
 #include "FadeLaws.h"
+#include "CDecimalSupport.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -31,6 +32,7 @@ public:
 protected:
 	CComboBoxEx m_fadeBox;
 	CImageList m_list;
+	CNumberEdit m_edit;
 
 public:
 	CAmpDlg(CWnd *parent, int16 factor, Fade::Law fadeLaw, int16 factorMin = int16_min, int16 factorMax = int16_max);
