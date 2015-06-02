@@ -43,7 +43,7 @@ OPENMPT_NAMESPACE_BEGIN
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-template <class T, int limit = _CVTBUFSIZE>
+template <class T, size_t limit = _CVTBUFSIZE>
 class CDecimalSupport
 {
 	/// the locale dependant decimal separator
@@ -313,7 +313,7 @@ public:
 
 	void SetDecimalValue(double d)
 	{
-		SetDecimalValue(d , std::min(limit , static_cast<const T*>(this)->GetLimitText()) - 2);
+		SetDecimalValue(d , std::min(limit , static_cast<size_t>(static_cast<const T*>(this)->GetLimitText())) - 2);
 	}
 
 	/// sets the controls text
@@ -335,10 +335,10 @@ public:
 	/// \param[in] decimal_pos the position of the decimal point
 	/// \param[in] sign 1 if negative
 
-	void DecimalToText(TCHAR* szBuff, int buflen, const char* digits, int decimal_pos, int sign) const
+	void DecimalToText(TCHAR* szBuff, size_t buflen , const char* digits, int decimal_pos, int sign) const
 	{
 		int i = 0;
-		int pos = 0;
+		size_t pos = 0;
 		if (sign)
 		{
 			for (const TCHAR *x = m_NegativeSign; *x ; ++x , ++pos) szBuff[pos] = *x;
@@ -347,7 +347,7 @@ public:
 		for (; pos < buflen && digits[i] && i < decimal_pos ; ++i , ++pos) szBuff[pos] = digits[i];
 
 		if (decimal_pos < 1) szBuff[pos++] = _T('0');
-		int last_nonzero = pos;
+		size_t last_nonzero = pos;
 
 		for (const TCHAR *x = m_DecimalSeparator; *x ; ++x , ++pos) szBuff[pos] = *x;
 		for (; pos < buflen && decimal_pos < 0; ++decimal_pos , ++pos) szBuff[pos] = _T('0');
@@ -357,7 +357,7 @@ public:
 			szBuff[pos] = digits[i];
 			if (digits[i] != '0') last_nonzero = pos+1;
 		}
-		szBuff[std::min(buflen - 1, last_nonzero)] = _T('\0');
+		szBuff[std::min(buflen - 1,last_nonzero)] = _T('\0');
 	}
 
 	void AllowNegative(bool allow)
