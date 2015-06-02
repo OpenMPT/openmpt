@@ -586,6 +586,12 @@
     <ClCompile Include="..\common\mptUUID.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\mptStringFormat.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\mptStringParse.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1144,6 +1150,12 @@
       <Filter>Header Files\common</Filter>
     </ClInclude>
     <ClInclude Include="..\common\mptUUID.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\mptStringFormat.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\mptStringParse.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
   </ItemGroup>

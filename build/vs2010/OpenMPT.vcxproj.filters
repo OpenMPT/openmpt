@@ -98,6 +98,12 @@
     <ClInclude Include="..\..\common\mptString.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\mptStringFormat.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptStringParse.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\mptTime.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -632,6 +638,12 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptString.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptStringFormat.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptStringParse.cpp">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptTime.cpp">
