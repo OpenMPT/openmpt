@@ -141,7 +141,7 @@ public:
 				bHandled = true;
 				for (TCHAR* s = lptstr; *s; ++s)
 				{
-					if (*s == m_NegativeSign[0])
+					if (*s == m_NegativeSign[0] && m_allowNegative)
 					{
 
 						for (TCHAR* t = m_NegativeSign + 1; *t; ++t, ++s)
@@ -158,7 +158,7 @@ public:
 						++neg_sign;
 						continue;
 					}
-					if (*s == m_DecimalSeparator[0] || *s == _T('.'))
+					if ((*s == m_DecimalSeparator[0] || *s == _T('.')) && m_allowFractions)
 					{
 						for (TCHAR* t = m_DecimalSeparator + 1; *t ; ++t, ++s)
 						{
