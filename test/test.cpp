@@ -2157,7 +2157,7 @@ static MPT_NOINLINE void TestTunings()
 	// check that the generated builtin tunings match the old resource data
 
 	CSoundFile *emptyFile = new CSoundFile();
-	emptyFile->Create(FileReader());
+	emptyFile->Create(FileReader(), CSoundFile::loadCompleteModule);
 
 	static const size_t built_inTunings_tc_size = 244;
 	static const unsigned char built_inTunings_tc_data[244]=
