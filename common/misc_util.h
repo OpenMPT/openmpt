@@ -10,6 +10,12 @@
 
 #pragma once
 
+#include "mptCPU.h"
+#include "mptOS.h"
+#include "mptTime.h"
+#include "mptUUID.h"
+#include "mptLibrary.h"
+
 #include <algorithm>
 #include <limits>
 #include <string>
@@ -20,8 +26,6 @@
 
 #include <cmath>
 #include <cstring>
-
-#include <time.h>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -433,45 +437,6 @@ size_t ConvertInt2MIDI(uint8 *result, size_t maxLength, TIn value)
 }
 
 
-
-namespace mpt
-{
-namespace Date
-{
-
-#if defined(MODPLUG_TRACKER)
-
-#if MPT_OS_WINDOWS
-
-namespace ANSI
-{
-// uint64 counts 100ns since 1601-01-01T00:00Z
-
-uint64 Now();
-
-mpt::ustring ToString(uint64 time100ns); // i.e. 2015-01-15 18:32:01.718
-
-} // namespacee ANSI
-
-#endif // MPT_OS_WINDOWS
-
-#endif // MODPLUG_TRACKER
-
-namespace Unix
-{
-// time_t counts 1s since 1970-01-01T00:00Z
-
-time_t FromUTC(tm *timeUtc);
-
-} // namespace Unix
-
-mpt::ustring ToShortenedISO8601(tm date); // i.e. 2015-01-15T18:32:01Z
-
-} // namespace Date
-} // namespace mpt
-
-
-
 namespace Util
 {
 
@@ -779,104 +744,6 @@ namespace Util
 
 #if MPT_OS_WINDOWS
 
-// RAII wrapper around timeBeginPeriod/timeEndPeriod/timeGetTime (on Windows).
-// This clock is monotonic, even across changing its resolution.
-// This is needed to synchronize time in Steinberg APIs (ASIO and VST).
-class MultimediaClock
-{
-private:
-	uint32 m_CurrentPeriod;
-private:
-	void Init();
-	void SetPeriod(uint32 ms);
-	void Cleanup();
-public:
-	MultimediaClock();
-	MultimediaClock(uint32 ms);
-	~MultimediaClock();
-public:
-	// Sets the desired resolution in milliseconds, returns the obtained resolution in milliseconds.
-	// A parameter of 0 causes the resolution to be reset to system defaults.
-	// A return value of 0 means the resolution is unknown, but timestamps will still be valid.
-	uint32 SetResolution(uint32 ms);
-	// Returns obtained resolution in milliseconds.
-	// A return value of 0 means the resolution is unknown, but timestamps will still be valid.
-	uint32 GetResolution() const; 
-	// Returns current instantaneous timestamp in milliseconds.
-	// The epoch (offset) of the timestamps is undefined but constant until the next system reboot.
-	// The resolution is the value returned from GetResolution().
-	uint32 Now() const;
-	// Returns current instantaneous timestamp in nanoseconds.
-	// The epoch (offset) of the timestamps is undefined but constant until the next system reboot.
-	// The resolution is the value returned from GetResolution() in milliseconds.
-	uint64 NowNanoseconds() const;
-};
-
-#endif // MPT_OS_WINDOWS
-
-} // namespace Util
-
-#endif // MODPLUG_TRACKER
-
-#ifdef ENABLE_ASM
-#define PROCSUPPORT_MMX        0x00001 // Processor supports MMX instructions
-#define PROCSUPPORT_SSE        0x00010 // Processor supports SSE instructions
-#define PROCSUPPORT_SSE2       0x00020 // Processor supports SSE2 instructions
-#define PROCSUPPORT_SSE3       0x00040 // Processor supports SSE3 instructions
-#define PROCSUPPORT_AMD_MMXEXT 0x10000 // Processor supports AMD MMX extensions
-#define PROCSUPPORT_AMD_3DNOW  0x20000 // Processor supports AMD 3DNow! instructions
-#define PROCSUPPORT_AMD_3DNOW2 0x40000 // Processor supports AMD 3DNow!2 instructions
-extern uint32 ProcSupport;
-void InitProcSupport();
-static inline uint32 GetProcSupport()
-{
-	return ProcSupport;
-}
-#endif // ENABLE_ASM
-
-
-#ifdef MODPLUG_TRACKER
-
-namespace Util
-{
-
-#if MPT_OS_WINDOWS
-
-// COM CLSID<->string conversion
-// A CLSID string is not necessarily a standard UUID string,
-// it might also be a symbolic name for the interface.
-// (see CLSIDFromString ( http://msdn.microsoft.com/en-us/library/windows/desktop/ms680589%28v=vs.85%29.aspx ))
-std::wstring CLSIDToString(CLSID clsid);
-CLSID StringToCLSID(const std::wstring &str);
-bool VerifyStringToCLSID(const std::wstring &str, CLSID &clsid);
-bool IsCLSID(const std::wstring &str);
-
-// COM IID<->string conversion
-IID StringToIID(const std::wstring &str);
-std::wstring IIDToString(IID iid);
-
-// General GUID<->string conversion.
-// The string must/will be in standard GUID format: {4F9A455D-E7EF-4367-B2F0-0C83A38A5C72}
-GUID StringToGUID(const std::wstring &str);
-std::wstring GUIDToString(GUID guid);
-
-// General UUID<->string conversion.
-// The string must/will be in standard UUID format: 4f9a455d-e7ef-4367-b2f0-0c83a38a5c72
-UUID StringToUUID(const std::wstring &str);
-std::wstring UUIDToString(UUID uuid);
-
-// Checks the UUID against the NULL UUID. Returns false if it is NULL, true otherwise.
-bool IsValid(UUID uuid);
-
-// Create a COM GUID
-GUID CreateGUID();
-
-// Create a UUID
-UUID CreateUUID();
-
-// Create a UUID that contains local, traceable information. Safe for local use.
-UUID CreateLocalUUID();
-
 // Returns temporary directory (with trailing backslash added) (e.g. "C:\TEMP\")
 mpt::PathString GetTempDirectory();
 
@@ -896,205 +763,6 @@ mpt::ustring BinToHex(const std::vector<char> &src);
 std::vector<char> HexToBin(const mpt::ustring &src);
 
 } // namespace Util
-
-
-namespace mpt
-{
-namespace Windows
-{
-namespace Version
-{
-
-
-enum Number
-{
-
-	// Win9x
-	Win98    = 0x040a,
-	WinME    = 0x045a,
-
-	// WinNT
-	WinNT4   = 0x0400,
-	Win2000  = 0x0500,
-	WinXP    = 0x0501,
-	WinVista = 0x0600,
-	Win7     = 0x0601,
-	Win8     = 0x0602,
-	Win81    = 0x0603,
-
-};
-
-
-#if defined(MODPLUG_TRACKER)
-
-#if MPT_OS_WINDOWS
-
-// Initializes version information.
-// Version information is cached in order to be safely available in audio real-time contexts.
-// Checking version information (especially detecting Wine) can be slow.
-void Init();
-
-static inline bool IsWindows() { return true; }
-
-bool IsBefore(mpt::Windows::Version::Number version);
-bool IsAtLeast(mpt::Windows::Version::Number version);
-
-bool Is9x();
-bool IsNT();
-
-bool IsOriginal();
-bool IsWine();
-
-#else // !MPT_OS_WINDOWS
-
-static inline void Init() { return; }
-
-static inline bool IsWindows() { return false; }
-
-static inline bool IsBefore(mpt::Windows::Version::Number /* version */ ) { return false; }
-static inline bool IsAtLeast(mpt::Windows::Version::Number /* version */ ) { return false; }
-
-static inline bool Is9x() { return false; }
-static inline bool IsNT() { return false; }
-
-static inline bool IsOriginal() { return false; }
-static inline bool IsWine() { return false; }
-
-#endif // MPT_OS_WINDOWS
-
-#else // !MODPLUG_TRACKER
-
-#if MPT_OS_WINDOWS
-
-static inline bool IsWindows() { return true; }
-
-bool IsBefore(mpt::Windows::Version::Number version);
-bool IsAtLeast(mpt::Windows::Version::Number version);
-
-#else // !MPT_OS_WINDOWS
-
-static inline bool IsWindows() { return false; }
-
-static inline bool IsBefore(mpt::Windows::Version::Number /* version */ ) { return false; }
-static inline bool IsAtLeast(mpt::Windows::Version::Number /* version */ ) { return false; }
-
-#endif // MPT_OS_WINDOWS
-
-#endif // MODPLUG_TRACKER
-
-
-
-} // namespace Version
-} // namespace Windows
-} // namespace mpt
-
-
-#if defined(MPT_WITH_DYNBIND)
-
-namespace mpt
-{
-
-
-#if MPT_OS_WINDOWS
-
-// Returns the application path or an empty string (if unknown), e.g. "C:\mptrack\"
-mpt::PathString GetAppPath();
-
-// Returns the system directory path, e.g. "C:\Windows\System32\"
-mpt::PathString GetSystemPath();
-
-// Returns the absolute path for a potentially relative path and removes ".." or "." components. (same as GetFullPathNameW)
-mpt::PathString GetAbsolutePath(const mpt::PathString &path);
-
-#endif // MPT_OS_WINDOWS
-
-
-typedef void* (*FuncPtr)(); // pointer to function returning void*
-
-class LibraryHandle;
-
-enum LibrarySearchPath
-{
-	LibrarySearchPathDefault,
-	LibrarySearchPathApplication,
-	LibrarySearchPathSystem,
-	LibrarySearchPathFullPath,
-};
-
-class LibraryPath
-{
-
-private:
-	
-	mpt::LibrarySearchPath searchPath;
-	mpt::PathString fileName;
-
-private:
-
-	LibraryPath(mpt::LibrarySearchPath searchPath, const mpt::PathString &fileName);
-
-public:
-
-	mpt::LibrarySearchPath GetSearchPath() const;
-
-	mpt::PathString GetFileName() const;
-
-public:
-	
-	// "lib" on Unix-like systems, "" on Windows
-	static mpt::PathString GetDefaultPrefix();
-
-	// ".so" or ".dylib" or ".dll"
-	static mpt::PathString GetDefaultSuffix();
-
-	// Returns the library path in the application directory, with os-specific prefix and suffix added to basename.
-	// e.g.: basename = "unmo3" --> "libunmo3.so" / "apppath/unmo3.dll"
-	static LibraryPath App(const mpt::PathString &basename);
-
-	// Returns the library path in the application directory, with os-specific suffix added to fullname.
-	// e.g.: fullname = "libunmo3" --> "libunmo3.so" / "apppath/libunmo3.dll" 
-	static LibraryPath AppFullName(const mpt::PathString &fullname);
-
-	// Returns a system library name with os-specific prefix and suffix added to basename, but without any full path in order to be searched in the default search path.
-	// e.g.: basename = "unmo3" --> "libunmo3.so" / "unmo3.dll"
-	static LibraryPath System(const mpt::PathString &basename);
-
-	// Returns a system library name with os-specific suffix added to path.
-	// e.g.: path = "somepath/foo" --> "somepath/foo.so" / "somepath/foo.dll"
-	static LibraryPath FullPath(const mpt::PathString &path);
-
-};
-
-class Library
-{
-protected:
-	MPT_SHARED_PTR<LibraryHandle> m_Handle;
-public:
-	Library();
-	Library(const mpt::LibraryPath &path);
-public:
-	void Unload();
-	bool IsValid() const;
-	FuncPtr GetProcAddress(const std::string &symbol) const;
-	template <typename Tfunc>
-	bool Bind(Tfunc * & f, const std::string &symbol) const
-	{
-		#ifdef HAS_TYPE_TRAITS
-			#if (MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2013,0)) || !MPT_COMPILER_MSVC
-				// MSVC std::is_function is always false for non __cdecl functions.
-				// See https://connect.microsoft.com/VisualStudio/feedback/details/774720/stl-is-function-bug .
-				STATIC_ASSERT(std::is_function<Tfunc>::value);
-			#endif
-		#endif
-		const FuncPtr addr = GetProcAddress(symbol);
-		f = reinterpret_cast<Tfunc*>(addr);
-		return (addr != nullptr);
-	}
-};
-
-} // namespace mpt
-
-#endif // MPT_WITH_DYNBIND
 
 
 OPENMPT_NAMESPACE_END

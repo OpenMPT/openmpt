@@ -53,10 +53,15 @@ LOCAL_SRC_FILES := \
 	common/ComponentManager.cpp \
 	common/Logging.cpp \
 	common/misc_util.cpp \
+	common/mptCPU.cpp \
 	common/mptFileIO.cpp \
 	common/mptIO.cpp \
+	common/mptLibrary.cpp \
+	common/mptOS.cpp \
 	common/mptPathString.cpp \
 	common/mptString.cpp \
+	common/mptTime.cpp \
+	common/mptUUID.cpp \
 	common/Profiler.cpp \
 	common/serialization_utils.cpp \
 	common/typedefs.cpp \
