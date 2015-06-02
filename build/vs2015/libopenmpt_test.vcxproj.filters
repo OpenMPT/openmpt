@@ -54,16 +54,31 @@
     <ClInclude Include="..\..\common\mptAtomic.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\mptCPU.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\mptFileIO.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptIO.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\mptLibrary.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptOS.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\mptPathString.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptString.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptTime.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptUUID.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mutex.h">
@@ -269,16 +284,31 @@
     <ClCompile Include="..\..\common\misc_util.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\common\mptCPU.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\common\mptFileIO.cpp">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptIO.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\common\mptLibrary.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptOS.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\common\mptPathString.cpp">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptString.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptTime.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptUUID.cpp">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\serialization_utils.cpp">

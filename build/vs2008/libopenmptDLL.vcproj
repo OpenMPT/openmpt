@@ -423,6 +423,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\common\mptCPU.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\mptCPU.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\mptFileIO.cpp"
 				>
 			</File>
@@ -439,6 +447,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\common\mptLibrary.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\mptLibrary.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\mptOS.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\mptOS.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\mptPathString.cpp"
 				>
 			</File>
@@ -452,6 +476,22 @@
 			</File>
 			<File
 				RelativePath="..\..\common\mptString.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\mptTime.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\mptTime.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\mptUUID.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\mptUUID.h"
 				>
 			</File>
 			<File
