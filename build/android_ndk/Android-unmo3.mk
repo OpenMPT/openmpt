@@ -60,6 +60,8 @@ LOCAL_SRC_FILES := \
 	common/mptOS.cpp \
 	common/mptPathString.cpp \
 	common/mptString.cpp \
+	common/mptStringFormat.cpp \
+	common/mptStringParse.cpp \
 	common/mptTime.cpp \
 	common/mptUUID.cpp \
 	common/Profiler.cpp \

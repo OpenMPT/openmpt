@@ -716,6 +716,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\common\mptStringFormat.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\mptStringFormat.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\mptStringParse.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\mptStringParse.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\mptTime.cpp"
 				>
 			</File>

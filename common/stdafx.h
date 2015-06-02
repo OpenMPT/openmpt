@@ -62,6 +62,8 @@
 // <type_traits>
 // <cstring>
 
+#include "../common/mptStringFormat.h"
+
 #include "../common/mptPathString.h"
 
 #include "../common/Logging.h"
