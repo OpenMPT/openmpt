@@ -320,12 +320,11 @@ public:
 	static bool LoadStaticTunings();
 	bool SaveStaticTunings();
 	static void DeleteStaticdata();
-	static CTuningCollection& GetBuiltInTunings() {return *s_pTuningsSharedBuiltIn;}
 	static CTuningCollection& GetLocalTunings() {return *s_pTuningsSharedLocal;}
-#else
-	void LoadBuiltInTunings();
-	CTuningCollection& GetBuiltInTunings() {return *m_pTuningsBuiltIn;}
 #endif
+	void LoadBuiltInTunings();
+	void UnloadBuiltInTunings();
+	CTuningCollection& GetBuiltInTunings() {return *m_pTuningsBuiltIn;}
 	static CTuning *GetDefaultTuning() {return nullptr;}
 	CTuningCollection& GetTuneSpecificTunings() {return *m_pTuningsTuneSpecific;}
 
@@ -334,11 +333,9 @@ public:
 private:
 	CTuningCollection* m_pTuningsTuneSpecific;
 #ifdef MODPLUG_TRACKER
-	static CTuningCollection* s_pTuningsSharedBuiltIn;
 	static CTuningCollection* s_pTuningsSharedLocal;
-#else
-	CTuningCollection* m_pTuningsBuiltIn;
 #endif
+	CTuningCollection* m_pTuningsBuiltIn;
 	//<--Tuning
 
 public: // get 'controllers'

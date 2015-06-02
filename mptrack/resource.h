@@ -114,7 +114,6 @@
 #define IDD_MSGBOX_HIDABLE              516
 #define IDD_ADDSILENCE                  517
 #define IDR_DEFAULT_KEYBINDINGS         519
-#define IDR_BUILTIN_TUNINGS             520
 #define IDD_CLEANUP_SONG                521
 #define IDD_CHANNELSETTINGS             522
 #define IDD_KEYBOARD_SPLIT              523

@@ -67,7 +67,6 @@ mpt::ustring FileHistory::AsISO8601() const
 // CSoundFile
 
 #ifdef MODPLUG_TRACKER
-CTuningCollection* CSoundFile::s_pTuningsSharedBuiltIn(0);
 CTuningCollection* CSoundFile::s_pTuningsSharedLocal(0);
 #endif
 
@@ -134,10 +133,7 @@ CSoundFile::CSoundFile() :
 	m_PlayState.m_lTotalSampleCount = 0;
 	m_PlayState.m_bPositionChanged = true;
 
-#ifndef MODPLUG_TRACKER
-	m_pTuningsBuiltIn = new CTuningCollection();
 	LoadBuiltInTunings();
-#endif
 	m_pTuningsTuneSpecific = new CTuningCollection("Tune specific tunings");
 }
 
@@ -148,10 +144,7 @@ CSoundFile::~CSoundFile()
 	Destroy();
 	delete m_pTuningsTuneSpecific;
 	m_pTuningsTuneSpecific = nullptr;
-#ifndef MODPLUG_TRACKER
-	delete m_pTuningsBuiltIn;
-	m_pTuningsBuiltIn = nullptr;
-#endif
+	UnloadBuiltInTunings();
 }
 
 
@@ -1126,7 +1119,6 @@ void CSoundFile::DeleteStaticdata()
 //---------------------------------
 {
 	delete s_pTuningsSharedLocal; s_pTuningsSharedLocal = nullptr;
-	delete s_pTuningsSharedBuiltIn; s_pTuningsSharedBuiltIn = nullptr;
 }
 #endif
 
@@ -1149,31 +1141,11 @@ bool CSoundFile::SaveStaticTunings()
 bool CSoundFile::LoadStaticTunings()
 //----------------------------------
 {
-	if(s_pTuningsSharedLocal || s_pTuningsSharedBuiltIn) return true;
+	if(s_pTuningsSharedLocal) return true;
 	//For now not allowing to reload tunings(one should be careful when reloading them
 	//since various parts may use addresses of the tuningobjects).
 
-	s_pTuningsSharedBuiltIn = new CTuningCollection;
 	s_pTuningsSharedLocal = new CTuningCollection("Local tunings");
-
-	// Load built-in tunings.
-	const char* pData = nullptr;
-	HGLOBAL hglob = nullptr;
-	size_t nSize = 0;
-	if (LoadResource(MAKEINTRESOURCE(IDR_BUILTIN_TUNINGS), TEXT("TUNING"), pData, nSize, hglob) != nullptr)
-	{
-		std::istringstream iStrm(std::string(pData, nSize));
-		s_pTuningsSharedBuiltIn->Deserialize(iStrm);
-	}
-	if(s_pTuningsSharedBuiltIn->GetNumTunings() == 0)
-	{
-		MPT_ASSERT(false);
-		CTuningRTI* pT = new CTuningRTI;
-		//Note: Tuning collection class handles deleting.
-		pT->CreateGeometric(1,1);
-		if(s_pTuningsSharedBuiltIn->AddTuning(pT))
-			delete pT;
-	}
 
 	// Load local tunings.
 	s_pTuningsSharedLocal->SetSavefilePath(
@@ -1183,26 +1155,35 @@ bool CSoundFile::LoadStaticTunings()
 		);
 	s_pTuningsSharedLocal->Deserialize();
 
-	// Enabling adding/removing of tunings for standard collection
-	// only for debug builds.
-	#ifdef DEBUG
-		s_pTuningsSharedBuiltIn->SetConstStatus(CTuningCollection::EM_ALLOWALL);
-	#else
-		s_pTuningsSharedBuiltIn->SetConstStatus(CTuningCollection::EM_CONST);
-	#endif
-
 	return false;
 }
-#else
-#include "Tunings/built-inTunings.h"
+#endif
+
+
 void CSoundFile::LoadBuiltInTunings()
 //-----------------------------------
 {
-	std::string data(built_inTunings_tc_data, built_inTunings_tc_data + built_inTunings_tc_size);
-	std::istringstream iStrm(data);
-	m_pTuningsBuiltIn->Deserialize(iStrm);
+	m_pTuningsBuiltIn = new CTuningCollection("Built-in tunings");
+	CTuningRTI* pT = new CTuningRTI;
+	pT->SetName("12TET [[fs15 1.17.02.49]]");
+	pT->CreateGeometric(12, 2);
+	pT->SetFineStepCount(15);
+	for(ModCommand::NOTE note = NOTE_MIDDLEC; note < NOTE_MIDDLEC + 12; ++note)
+	{
+		pT->SetNoteName(note - NOTE_MIDDLEC, GetNoteName(note).substr(0, 2));
+	}
+	pT->SetEditMask(CTuningBase::EM_CONST_STRICT);
+	// Note: Tuning collection class handles deleting.
+	m_pTuningsBuiltIn->AddTuning(pT);
 }
-#endif
+
+
+void CSoundFile::UnloadBuiltInTunings()
+//-------------------------------------
+{
+	delete m_pTuningsBuiltIn;
+	m_pTuningsBuiltIn = nullptr;
+}
 
 
 std::string CSoundFile::GetNoteName(const ModCommand::NOTE note, const INSTRUMENTINDEX inst) const

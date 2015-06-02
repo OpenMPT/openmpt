@@ -1130,7 +1130,6 @@
     <ClInclude Include="WelcomeDialog.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\soundlib\Tunings\built-inTunings.tc" />
     <None Include="res\bitmap1.bmp" />
     <None Include="res\colors.bmp" />
     <None Include="res\dragging.cur" />

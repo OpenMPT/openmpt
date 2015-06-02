@@ -2549,11 +2549,11 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 	sel -= 1;
 	CTuningCollection* tc = 0;
 
-	if(sel < CSoundFile::GetBuiltInTunings().GetNumTunings())
-		tc = &CSoundFile::GetBuiltInTunings();
+	if(sel < m_sndFile.GetBuiltInTunings().GetNumTunings())
+		tc = &m_sndFile.GetBuiltInTunings();
 	else
 	{
-		sel -= CSoundFile::GetBuiltInTunings().GetNumTunings();
+		sel -= m_sndFile.GetBuiltInTunings().GetNumTunings();
 		if(sel < CSoundFile::GetLocalTunings().GetNumTunings())
 			tc = &CSoundFile::GetLocalTunings();
 		else
@@ -2613,9 +2613,9 @@ void CCtrlInstruments::UpdateTuningComboBox()
 		return;
 	}
 
-	for(size_t i = 0; i < CSoundFile::GetBuiltInTunings().GetNumTunings(); i++)
+	for(size_t i = 0; i < m_sndFile.GetBuiltInTunings().GetNumTunings(); i++)
 	{
-		if(pIns->pTuning == &CSoundFile::GetBuiltInTunings().GetTuning(i))
+		if(pIns->pTuning == &m_sndFile.GetBuiltInTunings().GetTuning(i))
 		{
 			m_ComboTuning.SetCurSel((int)(i + 1));
 			return;
@@ -2626,7 +2626,7 @@ void CCtrlInstruments::UpdateTuningComboBox()
 	{
 		if(pIns->pTuning == &CSoundFile::GetLocalTunings().GetTuning(i))
 		{
-			m_ComboTuning.SetCurSel((int)(i + CSoundFile::GetBuiltInTunings().GetNumTunings() + 1));
+			m_ComboTuning.SetCurSel((int)(i + m_sndFile.GetBuiltInTunings().GetNumTunings() + 1));
 			return;
 		}
 	}
@@ -2635,7 +2635,7 @@ void CCtrlInstruments::UpdateTuningComboBox()
 	{
 		if(pIns->pTuning == &m_sndFile.GetTuneSpecificTunings().GetTuning(i))
 		{
-			m_ComboTuning.SetCurSel((int)(i + CSoundFile::GetBuiltInTunings().GetNumTunings() + CSoundFile::GetLocalTunings().GetNumTunings() + 1));
+			m_ComboTuning.SetCurSel((int)(i + m_sndFile.GetBuiltInTunings().GetNumTunings() + CSoundFile::GetLocalTunings().GetNumTunings() + 1));
 			return;
 		}
 	}
@@ -2829,9 +2829,9 @@ void CCtrlInstruments::BuildTuningComboBox()
 	m_ComboTuning.ResetContent();
 
 	m_ComboTuning.AddString("OMPT IT behavior"); //<-> Instrument pTuning pointer == NULL
-	for(size_t i = 0; i<CSoundFile::GetBuiltInTunings().GetNumTunings(); i++)
+	for(size_t i = 0; i<m_sndFile.GetBuiltInTunings().GetNumTunings(); i++)
 	{
-		m_ComboTuning.AddString(CSoundFile::GetBuiltInTunings().GetTuning(i).GetName().c_str());
+		m_ComboTuning.AddString(m_sndFile.GetBuiltInTunings().GetTuning(i).GetName().c_str());
 	}
 	for(size_t i = 0; i<CSoundFile::GetLocalTunings().GetNumTunings(); i++)
 	{
