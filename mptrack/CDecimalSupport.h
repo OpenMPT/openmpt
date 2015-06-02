@@ -51,7 +51,7 @@ class CDecimalSupport
 	/// the locale dependant negative sign
 	TCHAR m_NegativeSign[6];
 
-	bool allowNegative, allowFractions;
+	bool m_allowNegative, m_allowFractions;
 
 public:
 
@@ -67,8 +67,8 @@ public:
 	/// \brief Initialize m_DecimalSeparator and m_NegativeSign
 	/// \remarks calls InitDecimalSeparator and InitNegativeSign
 	CDecimalSupport()
-		: allowNegative(true)
-		, allowFractions(true)
+		: m_allowNegative(true)
+		, m_allowFractions(true)
 	{
 		InitDecimalSeparator();
 		InitNegativeSign();
@@ -99,7 +99,7 @@ public:
 	/// \param lParam
 	/// \param[out] bHandled true, if the text is a valid number
 	/// \return 0
-	LRESULT OnPaste(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/,BOOL& bHandled)
+	LRESULT OnPaste(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, bool &bHandled)
 	{
 		bHandled = false;
 		int neg_sign = 0;
@@ -108,15 +108,15 @@ public:
 		T* pT = static_cast<T*>(this);
 		int nStartChar;
 		int nEndChar;
-		pT->GetSel(nStartChar , nEndChar);
+		pT->GetSel(nStartChar, nEndChar);
 		TCHAR buffer[limit];
 		pT->GetWindowText(buffer, limit);
 
-		// Check if the texr already contains a decimal point
+		// Check if the text already contains a decimal point
 		for (TCHAR* x = buffer; *x; ++x)
 		{
 			if (x - buffer == nStartChar) x += nEndChar - nStartChar;
-			if (*x == m_DecimalSeparator[0]) ++dec_point;
+			if (*x == m_DecimalSeparator[0] ||*x == _T('.')) ++dec_point;
 			if (*x == m_NegativeSign[0]) ++neg_sign;
 		}
 
@@ -138,6 +138,7 @@ public:
 			LPTSTR lptstr = reinterpret_cast<TCHAR*>(GlobalLock(hglb));
 			if (lptstr != NULL)
 			{
+				bHandled = true;
 				for (TCHAR* s = lptstr; *s; ++s)
 				{
 					if (*s == m_NegativeSign[0])
@@ -150,14 +151,14 @@ public:
 
 						if (neg_sign || nStartChar > 0)
 						{
-							bHandled = true;
+							bHandled = false;
 							break;
 						}
 
 						++neg_sign;
 						continue;
 					}
-					if (*s == m_DecimalSeparator[0])
+					if (*s == m_DecimalSeparator[0] || *s == _T('.'))
 					{
 						for (TCHAR* t = m_DecimalSeparator + 1; *t ; ++t, ++s)
 						{
@@ -166,7 +167,7 @@ public:
 
 						if (dec_point)
 						{
-							bHandled = true;
+							bHandled = false;
 							break;
 						}
 						++dec_point;
@@ -175,11 +176,12 @@ public:
 
 					if (*s < _T('0') || *s > _T('9'))
 					{
-						bHandled = true;
+						bHandled = false;
 						break;
 					}
 
 				}
+				if(bHandled) pT->ReplaceSel(lptstr, true);
 
 				GlobalUnlock(hglb);
 
@@ -200,7 +202,7 @@ public:
 	LRESULT OnChar(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
 	{
 		bHandled = false;
-		if (static_cast<TCHAR>(wParam) == m_DecimalSeparator[0] || wParam == _T('.') && allowFractions)
+		if (static_cast<TCHAR>(wParam) == m_DecimalSeparator[0] || wParam == _T('.') && m_allowFractions)
 		{
 			T* pT = static_cast<T*>(this);
 			int nStartChar;
@@ -219,7 +221,7 @@ public:
 			bHandled = true;
 		}
 
-		if (static_cast<TCHAR>(wParam) == m_NegativeSign[0] && allowNegative)
+		if (static_cast<TCHAR>(wParam) == m_NegativeSign[0] && m_allowNegative)
 		{
 			T* pT = static_cast<T*>(this);
 			int nStartChar;
@@ -357,17 +359,17 @@ public:
 			szBuff[pos] = digits[i];
 			if (digits[i] != '0') last_nonzero = pos+1;
 		}
-		szBuff[std::min(buflen - 1,last_nonzero)] = _T('\0');
+		szBuff[std::min(buflen - 1, last_nonzero)] = _T('\0');
 	}
 
 	void AllowNegative(bool allow)
 	{
-		allowNegative = allow;
+		m_allowNegative = allow;
 	}
 
 	void AllowFractions(bool allow)
 	{
-		allowFractions = allow;
+		m_allowFractions = allow;
 	}
 
 };
@@ -381,6 +383,7 @@ public:
 
 protected:
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg LPARAM OnPaste(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 };
 
