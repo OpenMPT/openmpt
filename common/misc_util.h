@@ -379,64 +379,6 @@ int sgn(T value)
 }
 
 
-// Convert a variable-length MIDI integer held in the byte buffer <value> to a normal integer <result>.
-// maxLength bytes are read from the byte buffer at max.
-// Function returns how many bytes have been read.
-// TODO This should report overflow errors if TOut is too small!
-template <class TOut>
-size_t ConvertMIDI2Int(TOut &result, uint8 *value, size_t maxLength)
-//------------------------------------------------------------------
-{
-	static_assert(std::numeric_limits<TOut>::is_integer == true, "Output type is a not an integer");
-
-	if(maxLength <= 0)
-	{
-		result = 0;
-		return 0;
-	}
-	size_t bytesUsed = 0;
-	result = 0;
-	uint8 b;
-	do
-	{
-		b = *value;
-		result <<= 7;
-		result |= (b & 0x7F);
-		value++;
-	} while (++bytesUsed < maxLength && (b & 0x80) != 0);
-	return bytesUsed;
-}
-
-
-// Convert an integer <value> to a variable-length MIDI integer, held in the byte buffer <result>.
-// maxLength bytes are written to the byte buffer at max.
-// Function returns how many bytes have been written.
-template <class TIn>
-size_t ConvertInt2MIDI(uint8 *result, size_t maxLength, TIn value)
-//----------------------------------------------------------------
-{
-	static_assert(std::numeric_limits<TIn>::is_integer == true, "Input type is a not an integer");
-
-	if(maxLength <= 0)
-	{
-		*result = 0;
-		return 0;
-	}
-	size_t bytesUsed = 0;
-	do
-	{
-		*result = (value & 0x7F);
-		value >>= 7;
-		if(value != 0)
-		{
-			*result |= 0x80;
-		}
-		result++;
-	} while (++bytesUsed < maxLength && value != 0);
-	return bytesUsed;
-}
-
-
 namespace Util
 {
 
