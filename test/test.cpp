@@ -26,6 +26,8 @@
 #include "../soundlib/MIDIMacros.h"
 #include "../soundlib/SampleFormatConverters.h"
 #include "../soundlib/ITCompression.h"
+#include "../soundlib/tuningcollection.h"
+#include "../soundlib/tuning.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/mptrack.h"
 #include "../mptrack/moddoc.h"
@@ -75,6 +77,7 @@ static MPT_NOINLINE void TestStringIO();
 static MPT_NOINLINE void TestMIDIEvents();
 static MPT_NOINLINE void TestSampleConversion();
 static MPT_NOINLINE void TestITCompression();
+static MPT_NOINLINE void TestTunings();
 static MPT_NOINLINE void TestPCnoteSerialization();
 static MPT_NOINLINE void TestLoadSaveFile();
 
@@ -138,6 +141,7 @@ void DoTests()
 	DO_TEST(TestMIDIEvents);
 	DO_TEST(TestSampleConversion);
 	DO_TEST(TestITCompression);
+	DO_TEST(TestTunings);
 
 	// slower tests, require opening a CModDoc
 	DO_TEST(TestPCnoteSerialization);
@@ -2106,6 +2110,110 @@ static MPT_NOINLINE void TestITCompression()
 		RunITCompressionTest(sampleData, CHN_16BIT | CHN_STEREO, i == 0);
 	}
 }
+
+
+
+static bool RatioEqual(CTuningBase::RATIOTYPE a, CTuningBase::RATIOTYPE b)
+//------------------------------------------------------------------------
+{
+	if(a == CTuningBase::RATIOTYPE(0) && b == CTuningBase::RATIOTYPE(0))
+	{
+		return true;
+	}
+	if(a == CTuningBase::RATIOTYPE(0) || b == CTuningBase::RATIOTYPE(0))
+	{
+		return false;
+	}
+	return (std::fabs(CTuningBase::RATIOTYPE(1) - (a/b)) < CTuningBase::RATIOTYPE(0.0001));
+}
+
+
+static void CheckEualTuningCollections(const CTuningCollection &a, const CTuningCollection &b)
+//--------------------------------------------------------------------------------------------
+{
+	VERIFY_EQUAL(a.GetName(), b.GetName());
+	VERIFY_EQUAL(a.GetNumTunings(), b.GetNumTunings());
+	for(std::size_t tuning = 0; tuning < std::min(a.GetNumTunings(), b.GetNumTunings()); ++tuning)
+	{
+		VERIFY_EQUAL(a.GetTuning(tuning).GetName(), b.GetTuning(tuning).GetName());
+		VERIFY_EQUAL(a.GetTuning(tuning).GetTuningType(), b.GetTuning(tuning).GetTuningType());
+		VERIFY_EQUAL(a.GetTuning(tuning).GetGroupSize(), b.GetTuning(tuning).GetGroupSize());
+		VERIFY_EQUAL(a.GetTuning(tuning).GetFineStepCount(), b.GetTuning(tuning).GetFineStepCount());
+		VERIFY_EQUAL(RatioEqual(a.GetTuning(tuning).GetGroupRatio(), b.GetTuning(tuning).GetGroupRatio()), true);
+		VERIFY_EQUAL(a.GetTuning(tuning).GetValidityRange(), b.GetTuning(tuning).GetValidityRange());
+		for(ModCommand::NOTE note = NOTE_MIN; note <= NOTE_MAX; ++note)
+		{
+			VERIFY_EQUAL(a.GetTuning(tuning).GetNoteName(note - NOTE_MIDDLEC), b.GetTuning(tuning).GetNoteName(note - NOTE_MIDDLEC));
+			VERIFY_EQUAL(RatioEqual(a.GetTuning(tuning).GetRatio(note - NOTE_MIDDLEC), b.GetTuning(tuning).GetRatio(note - NOTE_MIDDLEC)), true);
+		}
+	}
+}
+
+
+static MPT_NOINLINE void TestTunings()
+//------------------------------------
+{
+
+	// check that the generated builtin tunings match the old resource data
+
+	CSoundFile *emptyFile = new CSoundFile();
+	emptyFile->Create(FileReader());
+
+	static const size_t built_inTunings_tc_size = 244;
+	static const unsigned char built_inTunings_tc_data[244]=
+	{
+		0x32,0x32,0x38,0x02,0x54,0x43,0x1F,0x08,0x00,0x01,0x0C,
+		0x01,0x0D,0x00,0x9F,0x03,0x00,0x00,0x00,0x00,0x00,0x00,
+		0x40,0x42,0x75,0x69,0x6C,0x74,0x2D,0x69,0x6E,0x20,0x74,
+		0x75,0x6E,0x69,0x6E,0x67,0x73,0xFF,0xFF,0x32,0x32,0x38,
+		0x09,0x43,0x54,0x42,0x32,0x34,0x34,0x52,0x54,0x49,0x1F,
+		0x08,0x00,0x01,0x12,0x00,0x00,0x10,0x01,0x25,0x00,0x27,
+		0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x64,0x31,0x32,0x54,
+		0x45,0x54,0x20,0x5B,0x5B,0x66,0x73,0x31,0x35,0x20,0x31,
+		0x2E,0x31,0x37,0x2E,0x30,0x32,0x2E,0x34,0x39,0x5D,0x5D,
+		0x00,0x00,0x03,0x00,0x30,0x00,0x00,0x02,0x43,0x2D,0x01,
+		0x00,0x02,0x43,0x23,0x02,0x00,0x02,0x44,0x2D,0x03,0x00,
+		0x02,0x44,0x23,0x04,0x00,0x02,0x45,0x2D,0x05,0x00,0x02,
+		0x46,0x2D,0x06,0x00,0x02,0x46,0x23,0x07,0x00,0x02,0x47,
+		0x2D,0x08,0x00,0x02,0x47,0x23,0x09,0x00,0x02,0x41,0x2D,
+		0x0A,0x00,0x02,0x41,0x23,0x0B,0x00,0x02,0x42,0x2D,0x0F,
+		0x00,0x00,0x00,0x00,0x00,0x00,0x40,0x0C,0x00,0x80,0x00,
+		0xC0,0xFF,0x02,0x30,0x80,0x68,0x02,0x31,0xE8,0x08,0x02,
+		0x32,0xF0,0x08,0x02,0x33,0xF8,0xF4,0x02,0x34,0xED,0x01,
+		0x10,0x08,0x52,0x54,0x49,0x33,0xFD,0x01,0x10,0x08,0x52,
+		0x54,0x49,0x32,0x0D,0x02,0x08,0x08,0x52,0x54,0x49,0x34,
+		0x15,0x02,0x08,0x08,0x52,0x54,0x49,0x31,0x1D,0x02,0x08,
+		0x02,0x30,0x58,0x44,0x02,0x31,0x9C,0x08,0x02,0x32,0xA4,
+		0xF9,0x02
+	};
+	CTuningCollection *oldBuiltin = new CTuningCollection();
+	std::string builtindata(built_inTunings_tc_data, built_inTunings_tc_data + built_inTunings_tc_size);
+	std::istringstream iStrm(builtindata);
+	oldBuiltin->Deserialize(iStrm);
+
+	CheckEualTuningCollections(emptyFile->GetBuiltInTunings(), *oldBuiltin);
+
+#if MPT_COMPILER_MSVC
+
+	// Test that the serialization exactly matches the old data.
+	// This depends on exactly identical floating point representations (and thus rounding), which is why we limit this test to MSVC.
+
+	std::ostringstream stream;
+	stream.imbue(std::locale::classic());
+	emptyFile->GetBuiltInTunings().Serialize(stream);
+	std::string str = stream.str();
+	std::vector<char> data = std::vector<char>(str.data(), str.data() + str.size());
+
+	VERIFY_EQUAL(data, std::vector<char>(built_inTunings_tc_data, built_inTunings_tc_data + built_inTunings_tc_size));
+
+#endif
+
+	delete oldBuiltin;
+
+	emptyFile->Destroy();
+	delete emptyFile;
+}
+
 
 
 static double Rand01() {return rand() / double(RAND_MAX);}

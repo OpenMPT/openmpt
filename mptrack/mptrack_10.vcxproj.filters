@@ -1169,9 +1169,6 @@
     <None Include="res\vispcnode.bmp">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\soundlib\Tunings\built-inTunings.tc">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\envelope_toolbar.png">
       <Filter>Resource Files</Filter>
     </None>
