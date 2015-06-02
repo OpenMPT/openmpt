@@ -340,9 +340,36 @@ extern const char *szMidiPercussionNames[61] =
 ///////////////////////////////////////////////////////////////////////////
 // Helper functions
 
+// Convert a variable-length MIDI integer held in the byte buffer <value> to a normal integer <result>.
+// maxLength bytes are read from the byte buffer at max.
+// Function returns how many bytes have been read.
+template <class TOut>
+static size_t ConvertMIDI2Int(TOut &result, uint8 *value, size_t maxLength)
+//-------------------------------------------------------------------------
+{
+	static_assert(std::numeric_limits<TOut>::is_integer == true, "Output type is a not an integer");
+
+	if(maxLength <= 0)
+	{
+		result = 0;
+		return 0;
+	}
+	size_t bytesUsed = 0;
+	result = 0;
+	uint8 b;
+	do
+	{
+		b = *value;
+		result <<= 7;
+		result |= (b & 0x7F);
+		value++;
+	} while (++bytesUsed < maxLength && (b & 0x80) != 0);
+	return bytesUsed;
+}
+
 // Returns MOD tempo and tick multiplier
 static int ConvertMidiTempo(int tempo_us, int &tickMultiplier, int importSpeed)
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 {
 	int nBestModTempo = 120;
 	int nBestError = 1000000; // 1s
