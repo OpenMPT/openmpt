@@ -68,6 +68,13 @@ std::string ToString(const mpt::ustring & x) { return mpt::ToLocale(x); }
 std::string ToString(const mpt::ustring & x) { return mpt::ToCharset(mpt::CharsetUTF8, x); }
 #endif
 #endif
+#if defined(_MFC_VER)
+#if defined(MPT_WITH_CHARSET_LOCALE)
+std::string ToString(const CString & x) { return mpt::ToLocale(x); }
+#else
+std::string ToString(const CString & x) { return mpt::ToCharset(mpt::CharsetUTF8, x); }
+#endif
+#endif
 std::string ToString(const bool & x) { return ToStringHelper(x); }
 std::string ToString(const signed char & x) { return ToStringHelper(x); }
 std::string ToString(const unsigned char & x) { return ToStringHelper(x); }
@@ -95,6 +102,9 @@ std::wstring ToWString(const char & x) { return mpt::ToWide(mpt::CharsetUTF8, st
 #endif
 #if MPT_USTRING_MODE_UTF8
 std::wstring ToWString(const mpt::ustring & x) { return mpt::ToWide(x); }
+#endif
+#if defined(_MFC_VER)
+std::wstring ToWString(const CString & x) { return mpt::ToWide(x); }
 #endif
 std::wstring ToWString(const bool & x) { return ToWStringHelper(x); }
 std::wstring ToWString(const signed char & x) { return ToWStringHelper(x); }

@@ -72,12 +72,15 @@ static inline std::string ToString(const std::string & x) { return x; }
 static inline std::string ToString(const char * const & x) { return x; }
 MPT_DEPRECATED static inline std::string ToString(const char & x) { return std::string(1, x); } // deprecated to catch potential API mis-use, use std::string(1, x) instead
 #if MPT_WSTRING_FORMAT
-MPT_DEPRECATED std::string ToString(const std::wstring & x);
-MPT_DEPRECATED std::string ToString(const wchar_t * const & x);
+MPT_DEPRECATED std::string ToString(const std::wstring & x); // Unknown encoding.
+MPT_DEPRECATED std::string ToString(const wchar_t * const & x); // Unknown encoding.
 MPT_DEPRECATED std::string ToString(const wchar_t & x); // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
 #endif
 #if MPT_USTRING_MODE_UTF8
-MPT_DEPRECATED std::string ToString(const mpt::ustring & x);
+MPT_DEPRECATED std::string ToString(const mpt::ustring & x); // Unknown encoding.
+#endif
+#if defined(_MFC_VER)
+MPT_DEPRECATED std::string ToString(const mpt::ustring & x); // Unknown encoding.
 #endif
 std::string ToString(const bool & x);
 std::string ToString(const signed char & x);
@@ -95,14 +98,17 @@ std::string ToString(const double & x);
 std::string ToString(const long double & x);
 
 #if MPT_WSTRING_FORMAT
-MPT_DEPRECATED std::wstring ToWString(const std::string & x);
-MPT_DEPRECATED std::wstring ToWString(const char * const & x);
+MPT_DEPRECATED std::wstring ToWString(const std::string & x); // Unknown encoding.
+MPT_DEPRECATED std::wstring ToWString(const char * const & x); // Unknown encoding. Note that this also applies to TCHAR in !UNICODE builds as the type is indistinguishable from char. Wrap with CString or FromTcharStr in this case.
 MPT_DEPRECATED std::wstring ToWString(const char & x); // deprecated to catch potential API mis-use, use std::string(1, x) instead
 static inline std::wstring ToWString(const std::wstring & x) { return x; }
 static inline std::wstring ToWString(const wchar_t * const & x) { return x; }
 MPT_DEPRECATED static inline std::wstring ToWString(const wchar_t & x) { return std::wstring(1, x); } // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
 #if MPT_USTRING_MODE_UTF8
 std::wstring ToWString(const mpt::ustring & x);
+#endif
+#if defined(_MFC_VER)
+std::wstring ToWString(const CString & x);
 #endif
 std::wstring ToWString(const bool & x);
 std::wstring ToWString(const signed char & x);
