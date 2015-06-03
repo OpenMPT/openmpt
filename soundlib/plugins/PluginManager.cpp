@@ -644,7 +644,7 @@ void CVstPluginManager::ReportPlugException(const std::wstring &msg)
 {
 	Reporting::Notification(msg);
 #ifdef VST_LOG
-	Log("%s", mpt::ToLocale(msg).c_str());
+	Log(mpt::ToUnicode(msg));
 #endif
 }
 
