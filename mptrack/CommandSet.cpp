@@ -744,12 +744,12 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 		{
 			if (IsCrossContextConflict(kc, conflictCmd.second))
 			{
-				report += "Warning! the following commands may conflict:\r\n   >" + GetCommandText(conflictCmd.first) + " in " + conflictCmd.second.GetContextText() + "\r\n   >" + GetCommandText(cmd) + " in " + kc.GetContextText() + "\r\n\r\n";
+				report += "The following commands may conflict:\r\n   >" + GetCommandText(conflictCmd.first) + " in " + conflictCmd.second.GetContextText() + "\r\n   >" + GetCommandText(cmd) + " in " + kc.GetContextText() + "\r\n\r\n";
 				Log("%s", report);
 			} else
 			{
-				Remove(conflictCmd.second, conflictCmd.first);
-				report += "Removed due to conflict in same context:\r\n   >" + GetCommandText(conflictCmd.first) + " in " + conflictCmd.second.GetContextText() + "\r\n\r\n";
+				//Remove(conflictCmd.second, conflictCmd.first);
+				report += "The following commands in same context share the same key combination:\r\n   >" + GetCommandText(conflictCmd.first) + " in " + conflictCmd.second.GetContextText() + "\r\n\r\n";
 				Log("%s", report);
 			}
 		}
@@ -1426,22 +1426,21 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 	std::vector<KeyEventType> eventTypes;
 	std::vector<InputTargetContext> contexts;
 
-	//Clear map
 	km.clear();
 
-	//Copy commandlist content into map:
+	// Copy commandlist content into map:
 	for(UINT cmd=0; cmd<kcNumCommands; cmd++)
 	{
 		if(IsDummyCommand((CommandID)cmd))
 			continue;
 
-		for(size_t k=0; k<commands[cmd].kcList.size(); k++)
+		for(size_t k = 0; k < commands[cmd].kcList.size(); k++)
 		{
 			std::vector<KeyEventType> eventTypes;
 			std::vector<InputTargetContext> contexts;
 			curKc = commands[cmd].kcList[k];
 
-			//Handle keyEventType mask.
+			// Handle keyEventType mask.
 			if (curKc.EventType() & kKeyEventDown)
 				eventTypes.push_back(kKeyEventDown);
 			if (curKc.EventType() & kKeyEventUp)
@@ -1450,7 +1449,7 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 				eventTypes.push_back(kKeyEventRepeat);
 			//ASSERT(eventTypes.GetSize()>0);
 
-			//Handle super-contexts (contexts that represent a set of sub contexts)
+			// Handle super-contexts (contexts that represent a set of sub contexts)
 			if (curKc.Context() == kCtxViewPatterns)
 			{
 				contexts.push_back(kCtxViewPatternsNote);
@@ -1466,11 +1465,11 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 				contexts.push_back(curKc.Context());
 			}
 
-			for (size_t cx=0; cx<contexts.size(); cx++)
+			for (size_t cx = 0; cx < contexts.size(); cx++)
 			{
-				for (size_t ke=0; ke<eventTypes.size(); ke++)
+				for (size_t ke = 0; ke < eventTypes.size(); ke++)
 				{
-					km[KeyCombination(contexts[cx], curKc.Modifier(), curKc.KeyCode(), eventTypes[ke])] = (CommandID)cmd;
+					km.insert(std::make_pair(KeyCombination(contexts[cx], curKc.Modifier(), curKc.KeyCode(), eventTypes[ke]), (CommandID)cmd));
 				}
 			}
 		}
@@ -1479,8 +1478,8 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 }
 
 
-void CCommandSet::Copy(CCommandSet *source)
-//-----------------------------------------
+void CCommandSet::Copy(const CCommandSet *source)
+//----------------------------------------------
 {
 	// copy constructors should take care of complexity (I hope)
 	oldSpecs = nullptr;

@@ -56,7 +56,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 		if (!bSuccess)
 		{
 			// Load keybindings from resources.
-			Log("Loading keybindings from resources\n");
+			Log(LogDebug, MPT_USTRING("Loading keybindings from resources\n"));
 			bSuccess = activeCommandSet->LoadDefaultKeymap();
 			if (bSuccess && bNoExistingKbdFileSetting)
 			{
@@ -90,7 +90,7 @@ CInputHandler::~CInputHandler()
 CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam, LPARAM lParam)
 //----------------------------------------------------------------------------------------------------------
 {
-	KeyMap::const_iterator cmd = keyMap.end();
+	KeyMapRange cmd = std::make_pair(keyMap.end(), keyMap.end());
 	KeyEventType keyEventType;
 
 	if(code == HC_ACTION)
@@ -120,22 +120,25 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 		{
 			// only execute command when the input handler is not locked
 			// and the input is not a consequence of special key interception.
-			cmd = keyMap.find(KeyCombination(context, modifierMask, wParam, keyEventType));
+			cmd = keyMap.equal_range(KeyCombination(context, modifierMask, wParam, keyEventType));
 		}
 	}
 	if(code == HC_MIDI)
 	{
-		cmd = keyMap.find(KeyCombination(context, HOTKEYF_MIDI, wParam, kKeyEventDown));
+		cmd = keyMap.equal_range(KeyCombination(context, HOTKEYF_MIDI, wParam, kKeyEventDown));
 	}
 
 	CommandID executeCommand = kcNull;
-	if(m_pMainFrm && cmd != keyMap.end())
+	if(m_pMainFrm)
 	{
-		executeCommand = cmd->second;
-		if(!m_pMainFrm->SendMessage(WM_MOD_KEYCOMMAND, executeCommand, wParam))
+		for(KeyMap::const_iterator i = cmd.first; i != cmd.second; i++)
 		{
-			// Command was not handled, so let Windows process it.
-			return kcNull;
+			executeCommand = i->second;
+			if(!m_pMainFrm->SendMessage(WM_MOD_KEYCOMMAND, executeCommand, wParam))
+			{
+				// Command was not handled, so let Windows process it.
+				return kcNull;
+			}
 		}
 	}
 
@@ -148,19 +151,22 @@ CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT 
 {
 	if(InterceptSpecialKeys(nChar, nFlags, false))
 		return kcNull;
-	KeyMap::const_iterator cmd = keyMap.find(KeyCombination(context, modifierMask, nChar, keyEventType));
+	KeyMapRange cmd = keyMap.equal_range(KeyCombination(context, modifierMask, nChar, keyEventType));
 	CommandID executeCommand = kcNull;
 
 	if(pSourceWnd == nullptr)
 		pSourceWnd = m_pMainFrm;	//by default, send command message to main frame.
 
-	if(pSourceWnd && cmd != keyMap.end())
+	if(pSourceWnd != nullptr)
 	{
-		executeCommand = cmd->second;
-		if(!pSourceWnd->SendMessage(WM_MOD_KEYCOMMAND, executeCommand, nChar))
+		for(KeyMap::const_iterator i = cmd.first; i != cmd.second; i++)
 		{
-			// Command was not handled, so let Windows process it.
-			return kcNull;
+			executeCommand = i->second;
+			if(!pSourceWnd->SendMessage(WM_MOD_KEYCOMMAND, executeCommand, nChar))
+			{
+				// Command was not handled, so let Windows process it.
+				return kcNull;
+			}
 		}
 	}
 
@@ -340,11 +346,11 @@ void CInputHandler::GenCommandList(const KeyMap &km, CommandStruct coms[], )
 void CInputHandler::LogModifiers(UINT mask)
 //-----------------------------------------
 {
-	Log("----------------------------------\n");
-	if (mask & HOTKEYF_CONTROL) Log("Ctrl On"); else Log("Ctrl --");
-	if (mask & HOTKEYF_SHIFT)   Log("\tShft On"); else Log("\tShft --");
-	if (mask & HOTKEYF_ALT)     Log("\tAlt  On\n"); else Log("\tAlt  --\n");
-	if (mask & HOTKEYF_EXT)     Log("\tWin  On\n"); else Log("\tWin  --\n"); // Feature: use Windows keys as modifier keys
+	Log(LogDebug, MPT_USTRING("----------------------------------\n"));
+	if (mask & HOTKEYF_CONTROL) Log(LogDebug, MPT_USTRING("Ctrl On")); else Log(LogDebug, MPT_USTRING("Ctrl --"));
+	if (mask & HOTKEYF_SHIFT)   Log(LogDebug, MPT_USTRING("\tShft On")); else Log(LogDebug, MPT_USTRING("\tShft --"));
+	if (mask & HOTKEYF_ALT)     Log(LogDebug, MPT_USTRING("\tAlt  On\n")); else Log(LogDebug, MPT_USTRING("\tAlt  --\n"));
+	if (mask & HOTKEYF_EXT)     Log(LogDebug, MPT_USTRING("\tWin  On\n")); else Log(LogDebug, MPT_USTRING("\tWin  --\n")); // Feature: use Windows keys as modifier keys
 }
 
 
