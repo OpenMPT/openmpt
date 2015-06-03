@@ -776,18 +776,24 @@ void COptionsKeyboard::OnSetKeyChoice()
 	std::pair<CommandID, KeyCombination> conflictCmd;
 	if((conflictCmd = plocalCmdSet->IsConflicting(kc, cmd)).first != kcNull
 		&& conflictCmd.first != cmd
-		&& !plocalCmdSet->IsCrossContextConflict(kc, conflictCmd.second)
-		&& Reporting::Confirm("New shortcut (" + kc.GetKeyText() + ") conflicts with " + plocalCmdSet->GetCommandText(conflictCmd.first) + " in " + conflictCmd.second.GetContextText() + ".\nDelete the other shortcut and keep the new one?", MPT_USTRING("Shortcut Conflict"), false, false, this) == cnfNo)
+		&& !plocalCmdSet->IsCrossContextConflict(kc, conflictCmd.second))
 	{
-		// Restore original choice
-		add = false;
-		if(m_nCurKeyChoice >= 0 && m_nCurKeyChoice < plocalCmdSet->GetKeyListSize(cmd))
+		ConfirmAnswer delOld = Reporting::Confirm("New shortcut (" + kc.GetKeyText() + ") has the same key combination as " + plocalCmdSet->GetCommandText(conflictCmd.first) + " in " + conflictCmd.second.GetContextText() + ".\nDo you want to delete the other shortcut, only keeping the new one?", "Shortcut Conflict", true, false, this);
+		if(delOld == cnfYes)
 		{
-			KeyCombination origKc = plocalCmdSet->GetKey(cmd, m_nCurKeyChoice);
-			m_eCustHotKey.SetKey(origKc.Modifier(), origKc.KeyCode());
-		} else
+			plocalCmdSet->Remove(conflictCmd.second, conflictCmd.first);
+		} else if(delOld == cnfCancel)
 		{
-			m_eCustHotKey.SetWindowText(_T(""));
+			// Cancel altogther; restore original choice
+			add = false;
+			if(m_nCurKeyChoice >= 0 && m_nCurKeyChoice < plocalCmdSet->GetKeyListSize(cmd))
+			{
+				KeyCombination origKc = plocalCmdSet->GetKey(cmd, m_nCurKeyChoice);
+				m_eCustHotKey.SetKey(origKc.Modifier(), origKc.KeyCode());
+			} else
+			{
+				m_eCustHotKey.SetWindowText(_T(""));
+			}
 		}
 	}
 

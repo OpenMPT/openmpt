@@ -1233,10 +1233,11 @@ public:
 };
 
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-typedef std::tr1::unordered_map<KeyCombination, CommandID, KeyCombination::hash> KeyMap;
+typedef std::tr1::unordered_multimap<KeyCombination, CommandID, KeyCombination::hash> KeyMap;
 #else
-typedef std::unordered_map<KeyCombination, CommandID, KeyCombination::hash> KeyMap;
+typedef std::unordered_multimap<KeyCombination, CommandID, KeyCombination::hash> KeyMap;
 #endif
+typedef std::pair<KeyMap::const_iterator, KeyMap::const_iterator> KeyMapRange;
 
 //KeyMap
 
@@ -1327,7 +1328,7 @@ public:
 	CString GetKeyTextFromCommand(CommandID c, UINT key);
 
 	//Pululation ;)
-	void Copy(CCommandSet *source);	// copy the contents of a commandset into this command set
+	void Copy(const CCommandSet *source);	// copy the contents of a commandset into this command set
 	void GenKeyMap(KeyMap &km);		// Generate a keymap from this command set
 	bool SaveFile(const mpt::PathString &filename);
 	bool LoadFile(const mpt::PathString &filename);
