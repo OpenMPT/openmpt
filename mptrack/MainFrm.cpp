@@ -2853,7 +2853,7 @@ void AddPluginNamesToCombobox(CComboBox& CBox, const SNDMIXPLUGIN*plugarray, con
 		str.Preallocate(80);
 		str.Format(_T("FX%d: "), iPlug + 1);
 		const int size0 = str.GetLength();
-		str += (librarynames) ? mpt::ToCString(mpt::CharsetUTF8, plugin.GetLibraryName()) : CString(plugin.GetName());
+		str += (librarynames) ? mpt::ToCString(mpt::CharsetUTF8, plugin.GetLibraryName()) : mpt::ToCString(mpt::CharsetLocale, plugin.GetName());
 		if(str.GetLength() <= size0) str += _T("undefined");
 
 		CBox.SetItemData(CBox.AddString(str), iPlug + 1);
