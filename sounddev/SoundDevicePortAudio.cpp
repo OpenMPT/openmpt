@@ -489,7 +489,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices()
 		result.apiPath.push_back(MPT_USTRING("PortAudio"));
 		result.isDefault = (Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == (PaDeviceIndex)dev);
 		result.useNameAsIdentifier = true;
-		PALOG(mpt::String::Print("PortAudio: %1, %2, %3, %4", result.id.GetIdRaw(), mpt::ToLocale(result.name), mpt::ToLocale(result.apiName), result.isDefault));
+		PALOG(mpt::String::Print(MPT_USTRING("PortAudio: %1, %2, %3, %4"), result.id.GetIdRaw(), result.name, result.apiName, result.isDefault));
 		PALOG(mpt::String::Print(" low  : %1", Pa_GetDeviceInfo(dev)->defaultLowOutputLatency));
 		PALOG(mpt::String::Print(" high : %1", Pa_GetDeviceInfo(dev)->defaultHighOutputLatency));
 		devices.push_back(result);

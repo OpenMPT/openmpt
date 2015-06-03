@@ -123,7 +123,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices()
 			break;
 		}
 		const std::wstring keyname = keynameBuf;
-		Log(mpt::String::Print("ASIO: Found '%1':", mpt::ToLocale(keyname)));
+		Log(mpt::String::Print(MPT_USTRING("ASIO: Found '%1':"), keyname));
 
 		HKEY hksub = NULL;
 		if(RegOpenKeyExW(hkEnum, keynameBuf, 0, KEY_READ, &hksub) != ERROR_SUCCESS)
@@ -137,7 +137,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices()
 		mpt::ustring description;
 		if(ERROR_SUCCESS == RegQueryValueExW(hksub, L"Description", 0, &datatype, (LPBYTE)descriptionBuf, &datasize))
 		{
-			Log(mpt::String::Print("ASIO:   description='%1'", mpt::ToLocale(description)));
+			Log(mpt::String::Print(MPT_USTRING("ASIO:   description='%1'"), description));
 			description = mpt::ToUnicode(descriptionBuf);
 		} else
 		{
@@ -152,7 +152,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices()
 			const mpt::ustring internalID = mpt::ToUnicode(idBuf);
 			if(Util::IsCLSID(mpt::ToWide(internalID)))
 			{
-				Log(mpt::String::Print("ASIO:   clsid=%1", mpt::ToLocale(internalID)));
+				Log(mpt::String::Print(MPT_USTRING("ASIO:   clsid=%1"), internalID));
 				SoundDevice::Info info;
 				info.type = TypeASIO;
 				info.internalID = internalID;
@@ -257,8 +257,8 @@ bool CASIODevice::InternalOpen()
 
 	InitMembers();
 
-	Log(mpt::String::Print("ASIO: Open('%1'): %2-bit, (%3,%4) channels, %5Hz, hw-timing=%6"
-		, mpt::ToLocale(GetDeviceInternalID())
+	Log(mpt::String::Print(MPT_USTRING("ASIO: Open('%1'): %2-bit, (%3,%4) channels, %5Hz, hw-timing=%6")
+		, GetDeviceInternalID()
 		, m_Settings.sampleFormat.GetBitsPerSample()
 		, m_Settings.InputChannels
 		, m_Settings.Channels
