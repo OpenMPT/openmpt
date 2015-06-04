@@ -19,13 +19,11 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#ifdef MODPLUG_TRACKER
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+
 
 namespace Util
 {
-
-
-#if MPT_OS_WINDOWS
 
 
 std::wstring CLSIDToString(CLSID clsid)
@@ -201,12 +199,18 @@ UUID CreateLocalUUID()
 }
 
 
-#endif // MPT_OS_WINDOWS
 
 
 } // namespace Util
 
-#endif // MODPLUG_TRACKER
+
+#else // !(MODPLUG_TRACKER && MPT_OS_WINDOWS)
+
+
+MPT_MSVC_WORKAROUND_LNK4221(mptCPU)
+
+
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_END

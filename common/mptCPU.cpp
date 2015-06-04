@@ -124,6 +124,9 @@ void InitProcSupport()
 
 #endif // MPT_COMPILER_MSVC && ENABLE_X86
 
+#else // !ENABLE_ASM
+
+MPT_MSVC_WORKAROUND_LNK4221(mptCPU)
 
 #endif // ENABLE_ASM
 
