@@ -129,6 +129,18 @@ public:
 		return (c == '/');
 #endif
 	}
+	mpt::PathString &EnsureTrailingSlash()
+	{
+		if(!path.empty() && !HasTrailingSlash())
+		{
+#if MPT_OS_WINDOWS
+			path += L'\\';
+#else
+			path += '/';
+#endif
+		}
+		return *this;
+	}
 
 	// Relative / absolute paths conversion
 	mpt::PathString AbsolutePathToRelative(const mpt::PathString &relativeTo) const;

@@ -43,7 +43,7 @@ bool FolderScanner::NextFile(mpt::PathString &file)
 
 			currentPath = paths.back();
 			paths.pop_back();
-			if(!currentPath.HasTrailingSlash()) currentPath += MPT_PATHSTRING("\\");
+			currentPath.EnsureTrailingSlash();
 			hFind = FindFirstFileW((currentPath + MPT_PATHSTRING("*.*")).AsNative().c_str(), &wfd);
 		}
 
