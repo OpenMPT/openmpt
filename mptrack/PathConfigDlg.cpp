@@ -106,11 +106,7 @@ void PathConfigDlg::OnOK()
 	m_AutoSaver.SetSaveInterval(GetDlgItemInt(IDC_AUTOSAVE_INTERVAL));
 	m_AutoSaver.SetUseOriginalPath(IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR) == BST_CHECKED);
 	::GetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, tempPath, CountOf(tempPath));
-	mpt::PathString path = mpt::PathString::FromNative(tempPath);
-	if(!path.empty() && !path.HasTrailingSlash())
-	{
-		path += MPT_PATHSTRING("\\");
-	}
+	mpt::PathString path = mpt::PathString::FromNative(tempPath).EnsureTrailingSlash();
 	m_AutoSaver.SetPath(path);
 
 	CPropertyPage::OnOK();

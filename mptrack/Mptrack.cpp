@@ -71,7 +71,7 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 	{
 		CDocument *pDoc = nullptr;
 		mpt::PathString path = filename;
-		if(!path.HasTrailingSlash()) path += MPT_PATHSTRING("\\");
+		path.EnsureTrailingSlash();
 		HANDLE hFind;
 		WIN32_FIND_DATAW wfd;
 		MemsetZero(wfd);
@@ -456,10 +456,7 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 				if(!UltraSndPath.empty())
 				{
 					tmp = UltraSndPath;
-					if(!tmp.HasTrailingSlash())
-					{
-						tmp += MPT_PATHSTRING("\\");
-					}
+					tmp.EnsureTrailingSlash();
 				}
 				tmp += filename;
 				tmp += MPT_PATHSTRING(".pat");
@@ -790,11 +787,12 @@ bool CTrackApp::MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDi
 void CTrackApp::SetupPaths(bool overridePortable)
 //-----------------------------------------------
 {
-
-	// change to exe directory
-
-	SetCurrentDirectoryW(mpt::GetAppPath().AsNative().c_str());
-
+	// Set current directory to My Documents. If no sample / mod / etc. paths are set up by the user, this will be the default location for browsing files.
+	WCHAR dir[MAX_PATH] = { 0 };
+	if(SHGetFolderPathW(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, dir) == S_OK)
+	{
+		SetCurrentDirectoryW(dir);
+	}
 
 	// Determine paths, portable mode, first run. Do not yet update any state.
 
@@ -802,13 +800,11 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	mpt::PathString configPathGlobal; // config path in default non-portable mode
 	{
 		// Try to find a nice directory where we should store our settings (default: %APPDATA%)
-		WCHAR tempConfigDirectory[MAX_PATH];
-		MemsetZero(tempConfigDirectory);
-		if((SHGetFolderPathW(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, tempConfigDirectory) == S_OK)
-			|| (SHGetFolderPathW(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, tempConfigDirectory) == S_OK))
+		if((SHGetFolderPathW(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, dir) == S_OK)
+			|| (SHGetFolderPathW(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, dir) == S_OK))
 		{
-			// Store our app settings in %APPDATA% or "My Files"
-			configPathGlobal = mpt::PathString::FromNative(tempConfigDirectory) + MPT_PATHSTRING("\\OpenMPT\\");
+			// Store our app settings in %APPDATA% or "My Documents"
+			configPathGlobal = mpt::PathString::FromNative(dir) + MPT_PATHSTRING("\\OpenMPT\\");
 		}
 	}
 

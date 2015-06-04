@@ -201,27 +201,21 @@ void CModTree::Init()
 
 	if(!IsSampleBrowser())
 	{
-		const mpt::PathString dirs[] = {
+		WCHAR curDir[MAX_PATH];
+		GetCurrentDirectoryW(CountOf(curDir), curDir);
+		const mpt::PathString dirs[] =
+		{
 			TrackerSettings::Instance().PathSamples.GetDefaultDir(),
 			TrackerSettings::Instance().PathInstruments.GetDefaultDir(),
-			TrackerSettings::Instance().PathSongs.GetDefaultDir()
+			TrackerSettings::Instance().PathSongs.GetDefaultDir(),
+			mpt::PathString::FromNative(curDir)
 		};
 		for(int i = 0; i < CountOf(dirs); i++)
 		{
 			m_InstrLibPath = dirs[i];
-			if(!m_InstrLibPath.empty())
-			{
-				break;
-			} else if(i == CountOf(dirs) - 1)
-			{
-				// Resort to current directory.
-				WCHAR curDir[MAX_PATH];
-				GetCurrentDirectoryW(CountOf(curDir), curDir);
-				m_InstrLibPath = mpt::PathString::FromNative(curDir);
-			}
+			if(!m_InstrLibPath.empty()) break;
 		}
-		if(!m_InstrLibPath.HasTrailingSlash())
-			m_InstrLibPath += MPT_PATHSTRING("\\");
+		m_InstrLibPath.EnsureTrailingSlash();
 		m_pDataTree->InsLibSetFullPath(m_InstrLibPath, mpt::PathString());
 	}
 
@@ -355,7 +349,7 @@ mpt::PathString CModTree::InsLibGetFullPath(HTREEITEM hItem) const
 //----------------------------------------------------------------
 {
 	mpt::PathString fullPath = m_InstrLibPath;
-	if(!fullPath.HasTrailingSlash()) fullPath += MPT_PATHSTRING("\\");
+	fullPath.EnsureTrailingSlash();
 	return fullPath + mpt::PathString::FromCStringW(GetItemTextW(hItem));
 }
 
@@ -1358,8 +1352,7 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 				if(dlg.Show())
 				{
 					mpt::PathString dir = dlg.GetDirectory();
-					if(!dir.HasTrailingSlash())
-						dir += MPT_PATHSTRING("\\");
+					dir.EnsureTrailingSlash();
 					CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(dir, false);
 				}
 			}
@@ -2025,7 +2018,10 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 		{
 			// Drives are formatted like "E:\", folders are just folder name without slash.
 			if(!dir.HasTrailingSlash())
-				dir = m_InstrLibPath + dir + MPT_PATHSTRING("\\");
+			{
+				dir = m_InstrLibPath + dir;
+				dir.EnsureTrailingSlash();
+			}
 			m_InstrLibHighlightPath = MPT_PATHSTRING("..");	// Highlight first entry
 		}
 

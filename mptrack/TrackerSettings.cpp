@@ -1107,10 +1107,7 @@ bool DefaultAndWorkingDirectory::InternalSet(mpt::PathString &dest, const mpt::P
 //--------------------------------------------------------------------------------------------------------------------------
 {
 	mpt::PathString newPath = (stripFilename ? filenameFrom.GetPath() : filenameFrom);
-	if(!newPath.empty() && !newPath.HasTrailingSlash())
-	{
-		newPath += MPT_PATHSTRING("\\");
-	}
+	newPath.EnsureTrailingSlash();
 	mpt::PathString oldPath = dest;
 	dest = newPath;
 	return newPath != oldPath;
