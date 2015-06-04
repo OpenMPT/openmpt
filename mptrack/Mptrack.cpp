@@ -787,12 +787,7 @@ bool CTrackApp::MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDi
 void CTrackApp::SetupPaths(bool overridePortable)
 //-----------------------------------------------
 {
-	// Set current directory to My Documents. If no sample / mod / etc. paths are set up by the user, this will be the default location for browsing files.
 	WCHAR dir[MAX_PATH] = { 0 };
-	if(SHGetFolderPathW(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, dir) == S_OK)
-	{
-		SetCurrentDirectoryW(dir);
-	}
 
 	// Determine paths, portable mode, first run. Do not yet update any state.
 
@@ -826,6 +821,15 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	// chose config directory
 	mpt::PathString configPath = portableMode ? configPathApp : configPathGlobal;
 
+	// Set current directory to My Documents (normal) or OpenMPT directory (portable).
+	// If no sample / mod / etc. paths are set up by the user, this will be the default location for browsing files.
+	if(portableMode)
+	{
+		SetCurrentDirectoryW(configPathApp.AsNative().c_str());
+	} else if(SHGetFolderPathW(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, dir) == S_OK)
+	{
+		SetCurrentDirectoryW(dir);
+	}
 
 	// Update state.
 
