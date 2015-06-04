@@ -347,13 +347,10 @@
     <ClCompile Include="..\..\include\unrar\options.cpp" />
     <ClCompile Include="..\..\include\unrar\pathfn.cpp" />
     <ClCompile Include="..\..\include\unrar\qopen.cpp" />
-    <ClCompile Include="..\..\include\unrar\rar.cpp" />
-    <ClCompile Include="..\..\include\unrar\rarpch.cpp" />
     <ClCompile Include="..\..\include\unrar\rarvm.cpp" />
     <ClCompile Include="..\..\include\unrar\rawread.cpp" />
     <ClCompile Include="..\..\include\unrar\rdwrfn.cpp" />
     <ClCompile Include="..\..\include\unrar\recvol.cpp" />
-    <ClCompile Include="..\..\include\unrar\resource.cpp" />
     <ClCompile Include="..\..\include\unrar\rijndael.cpp" />
     <ClCompile Include="..\..\include\unrar\rs.cpp" />
     <ClCompile Include="..\..\include\unrar\rs16.cpp" />

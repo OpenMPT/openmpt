@@ -677,10 +677,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\include\unrar\rar.cpp"
-			>
-		</File>
-		<File
 			RelativePath="..\..\include\unrar\rar.hpp"
 			>
 		</File>
@@ -694,10 +690,6 @@
 		</File>
 		<File
 			RelativePath="..\..\include\unrar\raros.hpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\unrar\rarpch.cpp"
 			>
 		</File>
 		<File
@@ -734,10 +726,6 @@
 		</File>
 		<File
 			RelativePath="..\..\include\unrar\recvol.hpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\unrar\resource.cpp"
 			>
 		</File>
 		<File
