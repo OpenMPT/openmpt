@@ -479,32 +479,32 @@ static MPT_NOINLINE void TestStringFormatting()
 #endif
 
 	// basic functionality
-	VERIFY_EQUAL(mpt::String::Print("%1%2%3",1,2,3), "123");
-	VERIFY_EQUAL(mpt::String::Print("%1%1%1",1,2,3), "111");
-	VERIFY_EQUAL(mpt::String::Print("%3%3%3",1,2,3), "333");
+	VERIFY_EQUAL(MPT_FORMAT("%1%2%3",1,2,3), "123");
+	VERIFY_EQUAL(MPT_FORMAT("%1%1%1",1,2,3), "111");
+	VERIFY_EQUAL(MPT_FORMAT("%3%3%3",1,2,3), "333");
 
 	// template argument deduction of string type
-	VERIFY_EQUAL(mpt::String::Print(std::string("%1%2%3"),1,2,3), "123");
+	VERIFY_EQUAL(MPT_FORMAT(std::string("%1%2%3"),1,2,3), "123");
 #if MPT_WSTRING_FORMAT
-	VERIFY_EQUAL(mpt::String::Print(std::wstring(L"%1%2%3"),1,2,3), L"123");
-	VERIFY_EQUAL(mpt::String::Print(L"%1%2%3",1,2,3), L"123");
+	VERIFY_EQUAL(MPT_WFORMAT("%1%2%3",1,2,3), L"123");
+	VERIFY_EQUAL(MPT_WFORMAT("%1%2%3",1,2,3), L"123");
 #endif
 
 	// escaping and error behviour of '%'
-	VERIFY_EQUAL(mpt::String::Print("%"), "%");
-	VERIFY_EQUAL(mpt::String::Print("%%"), "%");
-	VERIFY_EQUAL(mpt::String::Print("%%%"), "%%");
-	VERIFY_EQUAL(mpt::String::Print("%1", "a"), "a");
-	VERIFY_EQUAL(mpt::String::Print("%1%", "a"), "a%");
-	VERIFY_EQUAL(mpt::String::Print("%1%%", "a"), "a%");
-	VERIFY_EQUAL(mpt::String::Print("%1%%%", "a"), "a%%");
-	VERIFY_EQUAL(mpt::String::Print("%%1", "a"), "%1");
-	VERIFY_EQUAL(mpt::String::Print("%%%1", "a"), "%a");
-	VERIFY_EQUAL(mpt::String::Print("%b", "a"), "%b");
+	VERIFY_EQUAL(MPT_FORMAT("%"), "%");
+	VERIFY_EQUAL(MPT_FORMAT("%%"), "%");
+	VERIFY_EQUAL(MPT_FORMAT("%%%"), "%%");
+	VERIFY_EQUAL(MPT_FORMAT("%1", "a"), "a");
+	VERIFY_EQUAL(MPT_FORMAT("%1%", "a"), "a%");
+	VERIFY_EQUAL(MPT_FORMAT("%1%%", "a"), "a%");
+	VERIFY_EQUAL(MPT_FORMAT("%1%%%", "a"), "a%%");
+	VERIFY_EQUAL(MPT_FORMAT("%%1", "a"), "%1");
+	VERIFY_EQUAL(MPT_FORMAT("%%%1", "a"), "%a");
+	VERIFY_EQUAL(MPT_FORMAT("%b", "a"), "%b");
 
 #if defined(_MFC_VER)
-	VERIFY_EQUAL(mpt::String::Print(CString(_T("%1%2%3")),1,2,3), _T("123"));
-	VERIFY_EQUAL(mpt::String::Print(CString(_T("%1%2%3")),1,mpt::tfmt::dec0<3>(2),3), _T("10023"));
+	VERIFY_EQUAL(MPT_TFORMAT("%1%2%3",1,2,3), _T("123"));
+	VERIFY_EQUAL(MPT_TFORMAT("%1%2%3",1,mpt::tfmt::dec0<3>(2),3), _T("10023"));
 #endif
 
 }

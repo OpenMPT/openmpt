@@ -731,4 +731,44 @@ typename mpt::String::detail::to_string_type<Tformat>::type Print(const Tformat 
 
 } } // namespace mpt::String
 
+#if MPT_WSTRING_FORMAT || MPT_USTRING_MODE_WIDE || (defined(_MFC_VER) && defined(UNICODE))
+#if MPT_COMPILER_HAS_VARIADIC_MACROS
+#define MPT_FORMAT_MACROS_VARIADIC 1
+#else
+#error "Variadic macro support is required by MPT_FORMAT macros and it is unknown if your compiler supports those. Please tune CompilerSettings.h and/or BuildSettings.h and report an OpenMPT bug."
+#endif
+#else
+#define MPT_FORMAT_MACROS_VARIADIC 0
+#endif
+
+#if MPT_FORMAT_MACROS_VARIADIC
+
+#define MPT_FORMAT( ... )  mpt::String::Print<std::string >(      __VA_ARGS__ )
+#if MPT_WSTRING_FORMAT
+#define MPT_WFORMAT( ... ) mpt::String::Print<std::wstring>( L ## __VA_ARGS__ )
+#endif
+#if MPT_USTRING_MODE_WIDE
+#define MPT_UFORMAT( ... ) mpt::String::Print<mpt::ustring>( L ## __VA_ARGS__ )
+#else
+#define MPT_UFORMAT( ... ) mpt::String::Print<mpt::ustring>(      __VA_ARGS__ )
+#endif
+#if defined(_MFC_VER)
+#ifdef UNICODE
+#define MPT_TFORMAT( ... ) mpt::String::Print<CString     >( L ## __VA_ARGS__ )
+#else
+#define MPT_TFORMAT( ... ) mpt::String::Print<CString     >(      __VA_ARGS__ )
+#endif
+#endif
+
+#else // !MPT_FORMAT_MACROS_VARIADIC
+
+#define MPT_FORMAT  mpt::String::Print<std::string>
+#define MPT_UFORMAT mpt::String::Print<mpt::ustring>
+#if defined(_MFC_VER)
+#define MPT_TFORMAT mpt::String::Print<CString>
+#endif
+
+#endif // MPT_FORMAT_MACROS_VARIADIC
+
+
 OPENMPT_NAMESPACE_END
