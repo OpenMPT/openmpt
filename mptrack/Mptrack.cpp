@@ -1951,7 +1951,13 @@ bool CTrackApp::OpenURL(const std::string &url)
 bool CTrackApp::OpenURL(const CString &url)
 //-----------------------------------------
 {
-	return OpenURL(mpt::PathString::FromCString(url));
+	return OpenURL(mpt::ToUnicode(url));
+}
+
+bool CTrackApp::OpenURL(const mpt::ustring &url)
+//----------------------------------------------
+{
+	return OpenURL(mpt::PathString::FromUnicode(url));
 }
 
 bool CTrackApp::OpenURL(const mpt::PathString &lpszURL)

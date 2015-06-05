@@ -1807,7 +1807,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		if(strcmp(fileNameAdd, ""))
 		{
 			SanitizeFilename(fileNameAdd);
-			thisName += mpt::PathString::FromLocale(fileNameAdd);
+			thisName += mpt::PathString::FromUnicode(mpt::ToUnicode(mpt::CharsetLocale, fileNameAdd));
 		}
 		thisName += fileExt;
 
