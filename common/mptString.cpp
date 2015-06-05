@@ -1092,17 +1092,21 @@ static const char * Charset_wchar_t()
 
 
 #if !defined(MPT_CHARSET_ICONV)
-static std::string EncodeImplFallback(Charset charset, const std::wstring &src);
+template<typename Tdststring>
+Tdststring EncodeImplFallback(Charset charset, const std::wstring &src);
 #endif // !MPT_CHARSET_ICONV
 
-static std::string EncodeImpl(Charset charset, const std::wstring &src)
+// templated on 8bit strings because of type-safe variants
+template<typename Tdststring>
+Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 {
+	STATIC_ASSERT(sizeof(typename Tdststring::value_type) == sizeof(char));
 	if(charset == CharsetCP437AMS || charset == CharsetCP437AMS2)
 	{
 		std::string out;
 		if(charset == CharsetCP437AMS ) out = String::To8bit(src, CharsetTableCP437AMS );
 		if(charset == CharsetCP437AMS2) out = String::To8bit(src, CharsetTableCP437AMS2);
-		return out;
+		return Tdststring(out.begin(), out.end());
 	}
 #if defined(MPT_WITH_CHARSET_LOCALE)
 	#if defined(MPT_LOCALE_ASSUME_CHARSET)
@@ -1115,17 +1119,17 @@ static std::string EncodeImpl(Charset charset, const std::wstring &src)
 	#if defined(MPT_CHARSET_WIN32)
 		if(!HasCharset(charset))
 		{
-			return EncodeImplFallback(charset, src);
+			return EncodeImplFallback<Tdststring>(charset, src);
 		}
 		const UINT codepage = CharsetToCodepage(charset);
 		int required_size = WideCharToMultiByte(codepage, 0, src.c_str(), -1, nullptr, 0, nullptr, nullptr);
 		if(required_size <= 0)
 		{
-			return std::string();
+			return Tdststring();
 		}
 		std::vector<CHAR> encoded_string(required_size);
 		WideCharToMultiByte(codepage, 0, src.c_str(), -1, &encoded_string[0], required_size, nullptr, nullptr);
-		return &encoded_string[0];
+		return reinterpret_cast<const typename Tdststring::value_type*>(&encoded_string[0]);
 	#elif defined(MPT_CHARSET_ICONV)
 		iconv_t conv = iconv_t();
 		conv = iconv_open(CharsetToStringTranslit(charset), Charset_wchar_t());
@@ -1157,20 +1161,21 @@ static std::string EncodeImpl(Charset charset, const std::wstring &src)
 			{
 				iconv_close(conv);
 				conv = iconv_t();
-				return std::string();
+				return Tdststring();
 			}
 		}
 		iconv_close(conv);
 		conv = iconv_t();
-		return &encoded_string[0];
+		return reinterpret_cast<const typename Tdststring::value_type*>(&encoded_string[0]);
 	#else
-		return EncodeImplFallback(charset, src);
+		return EncodeImplFallback<Tdststring>(charset, src);
 	#endif
 }
 
 
 #if !defined(MPT_CHARSET_ICONV)
-static std::string EncodeImplFallback(Charset charset, const std::wstring &src)
+template<typename Tdststring>
+Tdststring EncodeImplFallback(Charset charset, const std::wstring &src)
 {
 		std::string out;
 		switch(charset)
@@ -1187,20 +1192,24 @@ static std::string EncodeImplFallback(Charset charset, const std::wstring &src)
 			case CharsetCP437AMS2:   out = String::To8bit(src, CharsetTableCP437AMS2); break;
 			case CharsetWindows1252: out = String::To8bit(src, CharsetTableWindows1252); break;
 		}
-		return out);
+		return Tdststring(out.begin(), out.end());
 }
 #endif // !MPT_CHARSET_ICONV
 
 
 #if !defined(MPT_CHARSET_ICONV)
-static std::wstring DecodeImplFallback(Charset charset, const std::string &src);
+template<typename Tsrcstring>
+std::wstring DecodeImplFallback(Charset charset, const Tsrcstring &src);
 #endif // !MPT_CHARSET_ICONV
 
-static std::wstring DecodeImpl(Charset charset, const std::string &src)
+// templated on 8bit strings because of type-safe variants
+template<typename Tsrcstring>
+std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 {
+	STATIC_ASSERT(sizeof(typename Tsrcstring::value_type) == sizeof(char));
 	if(charset == CharsetCP437AMS || charset == CharsetCP437AMS2)
 	{
-		const std::string & in = src;
+		std::string in(src.begin(), src.end());
 		std::wstring out;
 		if(charset == CharsetCP437AMS ) out = String::From8bit(in, CharsetTableCP437AMS );
 		if(charset == CharsetCP437AMS2) out = String::From8bit(in, CharsetTableCP437AMS2);
@@ -1217,16 +1226,16 @@ static std::wstring DecodeImpl(Charset charset, const std::string &src)
 	#if defined(MPT_CHARSET_WIN32)
 		if(!HasCharset(charset))
 		{
-			return DecodeImplFallback(charset, src);
+			return DecodeImplFallback<Tsrcstring>(charset, src);
 		}
 		const UINT codepage = CharsetToCodepage(charset);
-		int required_size = MultiByteToWideChar(codepage, 0, src.c_str(), -1, nullptr, 0);
+		int required_size = MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.c_str()), -1, nullptr, 0);
 		if(required_size <= 0)
 		{
 			return std::wstring();
 		}
 		std::vector<WCHAR> decoded_string(required_size);
-		MultiByteToWideChar(codepage, 0, src.c_str(), -1, &decoded_string[0], required_size);
+		MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.c_str()), -1, &decoded_string[0], required_size);
 		return &decoded_string[0];
 	#elif defined(MPT_CHARSET_ICONV)
 		iconv_t conv = iconv_t();
@@ -1235,7 +1244,7 @@ static std::wstring DecodeImpl(Charset charset, const std::string &src)
 		{
 			throw std::runtime_error("iconv conversion not working");
 		}
-		std::vector<char> encoded_string(src.c_str(), src.c_str() + src.length() + 1);
+		std::vector<char> encoded_string(reinterpret_cast<const char*>(src.c_str()), reinterpret_cast<const char*>(src.c_str()) + src.length() + 1);
 		std::vector<wchar_t> wide_string(encoded_string.size() * 8); // large enough
 		char * inbuf = &encoded_string[0];
 		size_t inbytesleft = encoded_string.size();
@@ -1270,14 +1279,15 @@ static std::wstring DecodeImpl(Charset charset, const std::string &src)
 		conv = iconv_t();
 		return &wide_string[0];
 	#else
-		return DecodeImplFallback(charset, src);
+		return DecodeImplFallback<Tsrcstring>(charset, src);
 	#endif
 }
 
 #if !defined(MPT_CHARSET_ICONV)
-static std::wstring DecodeImplFallback(Charset charset, const std::string &src)
+template<typename Tsrcstring>
+std::wstring DecodeImplFallback(Charset charset, const Tsrcstring &src)
 {
-		const std::string & in = src;
+		std::string in(src.begin(), src.end());
 		std::wstring out;
 		switch(charset)
 		{
@@ -1298,16 +1308,22 @@ static std::wstring DecodeImplFallback(Charset charset, const std::string &src)
 #endif // !MPT_CHARSET_ICONV
 
 
-static std::string ConvertImpl(Charset to, Charset from, const std::string &src)
+// templated on 8bit strings because of type-safe variants
+template<typename Tdststring, typename Tsrcstring>
+Tdststring ConvertImpl(Charset to, Charset from, const Tsrcstring &src)
 {
+	STATIC_ASSERT(sizeof(typename Tdststring::value_type) == sizeof(char));
+	STATIC_ASSERT(sizeof(typename Tsrcstring::value_type) == sizeof(char));
 	if(to == from)
 	{
-		return src;
+		const typename Tsrcstring::value_type * src_beg = src.data();
+		const typename Tsrcstring::value_type * src_end = src_beg + src.size();
+		return Tdststring(reinterpret_cast<const typename Tdststring::value_type *>(src_beg), reinterpret_cast<const typename Tdststring::value_type *>(src_end));
 	}
 	#if defined(MPT_CHARSET_ICONV)
 		if(to == CharsetCP437AMS || to == CharsetCP437AMS2 || from == CharsetCP437AMS || from == CharsetCP437AMS2)
 		{
-			return EncodeImpl(to, DecodeImpl(from, src));
+			return EncodeImpl<Tdststring>(to, DecodeImpl(from, src));
 		}
 		iconv_t conv = iconv_t();
 		conv = iconv_open(CharsetToStringTranslit(to), CharsetToString(from));
@@ -1319,7 +1335,7 @@ static std::string ConvertImpl(Charset to, Charset from, const std::string &src)
 				throw std::runtime_error("iconv conversion not working");
 			}
 		}
-		std::vector<char> src_string(src.c_str(), src.c_str() + src.length() + 1);
+		std::vector<char> src_string(reinterpret_cast<const char*>(src.c_str()), reinterpret_cast<const char*>(src.c_str()) + src.length() + 1);
 		std::vector<char> dst_string(src_string.size() * 8); // large enough
 		char * inbuf = &src_string[0];
 		size_t inbytesleft = src_string.size();
@@ -1339,14 +1355,14 @@ static std::string ConvertImpl(Charset to, Charset from, const std::string &src)
 			{
 				iconv_close(conv);
 				conv = iconv_t();
-				return std::string();
+				return Tdststring();
 			}
 		}
 		iconv_close(conv);
 		conv = iconv_t();
-		return &dst_string[0];
+		return reinterpret_cast<const typename Tdststring::value_type*>(&dst_string[0]);
 	#else
-		return EncodeImpl(to, DecodeImpl(from, src));
+		return EncodeImpl<Tdststring>(to, DecodeImpl(from, src));
 	#endif
 }
 
@@ -1357,25 +1373,8 @@ static std::string ConvertImpl(Charset to, Charset from, const std::string &src)
 bool IsUTF8(const std::string &str)
 //---------------------------------
 {
-	return (str == String::EncodeImpl(mpt::CharsetUTF8, String::DecodeImpl(mpt::CharsetUTF8, str)));
+	return (str == String::EncodeImpl<std::string>(mpt::CharsetUTF8, String::DecodeImpl<std::string>(mpt::CharsetUTF8, str)));
 }
-
-
-#if MPT_USTRING_MODE_UTF8
-
-namespace
-{
-
-struct ustringConvUTF8 : public mpt::ustring
-{
-	inline ustringConvUTF8(const mpt::ustring &str) : mpt::ustring(str) { }
-	inline ustringConvUTF8(const std::string &str) : mpt::ustring(str.begin(), str.end()) { }
-	inline operator std::string() const { return std::string(begin(), end()); }	
-};
-
-}
-
-#endif
 
 
 #if MPT_WSTRING_CONVERT
@@ -1388,12 +1387,12 @@ std::wstring ToWide(Charset from, const std::string &str)
 #if MPT_WSTRING_CONVERT
 std::string ToCharset(Charset to, const std::wstring &str)
 {
-	return String::EncodeImpl(to, str);
+	return String::EncodeImpl<std::string>(to, str);
 }
 #endif
 std::string ToCharset(Charset to, Charset from, const std::string &str)
 {
-	return String::ConvertImpl(to, from, str);
+	return String::ConvertImpl<std::string>(to, from, str);
 }
 
 
@@ -1474,26 +1473,26 @@ CString ToCString(const CStringW &str)
 #if MPT_WSTRING_CONVERT
 mpt::ustring ToUnicode(const std::wstring &str)
 {
-	return ustringConvUTF8(String::EncodeImpl(mpt::CharsetUTF8, str));
+	return String::EncodeImpl<mpt::ustring>(mpt::CharsetUTF8, str);
 }
 #endif
 mpt::ustring ToUnicode(Charset from, const std::string &str)
 {
-	return ustringConvUTF8(String::ConvertImpl(mpt::CharsetUTF8, from, str));
+	return String::ConvertImpl<mpt::ustring>(mpt::CharsetUTF8, from, str);
 }
 #if defined(_MFC_VER)
 mpt::ustring ToUnicode(const CString &str)
 {
 	#ifdef UNICODE
-		return ustringConvUTF8(String::EncodeImpl(mpt::CharsetUTF8, str.GetString()));
+		return String::EncodeImpl<mpt::ustring>(mpt::CharsetUTF8, str.GetString());
 	#else // !UNICODE
-		return ustringConvUTF8(String::ConvertImpl(mpt::CharsetUTF8, mpt::CharsetLocale, str.GetString()));
+		return String::ConvertImpl<mpt::ustring, std::string>(mpt::CharsetUTF8, mpt::CharsetLocale, str.GetString());
 	#endif // UNICODE
 }
 #ifndef UNICODE
 mpt::ustring ToUnicode(const CStringW &str)
 {
-	return ustringConvUTF8(String::EncodeImpl(mpt::CharsetUTF8, str.GetString()));
+	return String::EncodeImpl<mpt::ustring>(mpt::CharsetUTF8, str.GetString());
 }
 #endif // !UNICODE
 #endif // MFC
@@ -1505,20 +1504,20 @@ mpt::ustring ToUnicode(const CStringW &str)
 #if MPT_WSTRING_CONVERT
 std::wstring ToWide(const mpt::ustring &str)
 {
-	return String::DecodeImpl(mpt::CharsetUTF8, ustringConvUTF8(str));
+	return String::DecodeImpl<mpt::ustring>(mpt::CharsetUTF8, str);
 }
 #endif
 std::string ToCharset(Charset to, const mpt::ustring &str)
 {
-	return String::ConvertImpl(to, mpt::CharsetUTF8, ustringConvUTF8(str));
+	return String::ConvertImpl<std::string, mpt::ustring>(to, mpt::CharsetUTF8, str);
 }
 #if defined(_MFC_VER)
 CString ToCString(const mpt::ustring &str)
 {
 	#ifdef UNICODE
-		return String::DecodeImpl(mpt::CharsetUTF8, ustringConvUTF8(str)).c_str();
+		return String::DecodeImpl<mpt::ustring>(mpt::CharsetUTF8, str).c_str();
 	#else // !UNICODE
-		return String::ConvertImpl(mpt::CharsetLocale, mpt::CharsetUTF8, ustringConvUTF8(str)).c_str();
+		return String::ConvertImpl<std::string, mpt::ustring>(mpt::CharsetLocale, mpt::CharsetUTF8, str).c_str();
 	#endif // UNICODE
 }
 #endif // MFC
@@ -1530,4 +1529,3 @@ CString ToCString(const mpt::ustring &str)
 
 
 OPENMPT_NAMESPACE_END
-
