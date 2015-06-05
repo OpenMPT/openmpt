@@ -104,6 +104,8 @@ public:
 
 		const SmpLength sampleEnd = chn.dwFlags[CHN_LOOP] ? chn.nLoopEnd : chn.nLength;
 		const SmpLength loopLength = chn.nLoopEnd - chn.nLoopStart;
+		const bool itEnvMode = sndFile.IsCompatibleMode(TRK_IMPULSETRACKER);
+		const bool updatePitchEnv = (chn.PitchEnv.flags & (ENV_ENABLED | ENV_FILTER)) == ENV_ENABLED;
 		bool stopNote = false;
 
 		int32 inc = chn.nInc * tickDuration;
@@ -133,13 +135,20 @@ public:
 				updateInc = true;
 			}
 
-			sndFile.IncrementEnvelopePositions(&chn);
+			int period = chn.nPeriod;
+			if(itEnvMode) sndFile.IncrementEnvelopePositions(&chn);
+			if(updatePitchEnv)
+			{
+				sndFile.ProcessPitchFilterEnvelope(&chn, period);
+				updateInc = true;
+			}
+			if(!itEnvMode) sndFile.IncrementEnvelopePositions(&chn);
 			int vol = 0;
 			sndFile.ProcessInstrumentFade(&chn, vol);
 
 			if(updateInc || chnSettings[channel].incChanged)
 			{
-				chn.nInc = sndFile.GetChannelIncrement(&chn, chn.nPeriod, 0);
+				chn.nInc = sndFile.GetChannelIncrement(&chn, period, 0);
 				chnSettings[channel].incChanged = false;
 				inc = chn.nInc * tickDuration;
 				if(chn.dwFlags[CHN_PINGPONGFLAG]) inc = -inc;

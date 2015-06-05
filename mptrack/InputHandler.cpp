@@ -9,15 +9,10 @@
 
 
 #include "stdafx.h"
-#include "afxtempl.h"
 #include "CommandSet.h"
-#include "inputhandler.h"
-#include "Resource.h"
-#include "mptrack.h"
-#include "mainfrm.h"
-#include <direct.h>
-#include ".\inputhandler.h"
-#include <Shlwapi.h>
+#include "InputHandler.h"
+#include "resource.h"
+#include "Mainfrm.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -87,6 +82,31 @@ CInputHandler::~CInputHandler()
 }
 
 
+static CommandID SendCommands(CWnd *wnd, const KeyMapRange &cmd, WPARAM wParam)
+//-----------------------------------------------------------------------------
+{
+	CommandID executeCommand = kcNull;
+	if(wnd != nullptr)
+	{
+		std::vector<CommandID> commands;
+		commands.reserve(std::distance(cmd.first, cmd.second));
+		for(KeyMap::const_iterator i = cmd.first; i != cmd.second; i++)
+		{
+			commands.push_back(i->second);
+		}
+		for(std::vector<CommandID>::const_iterator i = commands.begin(); i != commands.end(); i++)
+		{
+			if(wnd->SendMessage(WM_MOD_KEYCOMMAND, *i, wParam))
+			{
+				// Command was handled, no need to let the OS handle it
+				executeCommand = *i;
+			}
+		}
+	}
+	return executeCommand;
+}
+
+
 CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam, LPARAM lParam)
 //----------------------------------------------------------------------------------------------------------
 {
@@ -128,21 +148,7 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 		cmd = keyMap.equal_range(KeyCombination(context, HOTKEYF_MIDI, wParam, kKeyEventDown));
 	}
 
-	CommandID executeCommand = kcNull;
-	if(m_pMainFrm)
-	{
-		for(KeyMap::const_iterator i = cmd.first; i != cmd.second; i++)
-		{
-			executeCommand = i->second;
-			if(!m_pMainFrm->SendMessage(WM_MOD_KEYCOMMAND, executeCommand, wParam))
-			{
-				// Command was not handled, so let Windows process it.
-				return kcNull;
-			}
-		}
-	}
-
-	return executeCommand;
+	return SendCommands(m_pMainFrm, cmd, wParam);
 }
 
 
@@ -152,25 +158,10 @@ CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT 
 	if(InterceptSpecialKeys(nChar, nFlags, false))
 		return kcNull;
 	KeyMapRange cmd = keyMap.equal_range(KeyCombination(context, modifierMask, nChar, keyEventType));
-	CommandID executeCommand = kcNull;
 
 	if(pSourceWnd == nullptr)
 		pSourceWnd = m_pMainFrm;	//by default, send command message to main frame.
-
-	if(pSourceWnd != nullptr)
-	{
-		for(KeyMap::const_iterator i = cmd.first; i != cmd.second; i++)
-		{
-			executeCommand = i->second;
-			if(!pSourceWnd->SendMessage(WM_MOD_KEYCOMMAND, executeCommand, nChar))
-			{
-				// Command was not handled, so let Windows process it.
-				return kcNull;
-			}
-		}
-	}
-
-	return executeCommand;
+	return SendCommands(pSourceWnd, cmd, nChar);
 }
 
 
