@@ -31,6 +31,7 @@
 #include <tchar.h>
 #include <algorithm>
 
+
 //#include <cassert>
 #ifdef _DEBUG
 #include <intrin.h>
@@ -59,6 +60,7 @@ static LONG WINAPI CrashHandler(_EXCEPTION_POINTERS *pExceptionInfo)
 		const int ch = GetDateFormatW(LOCALE_SYSTEM_DEFAULT, 0, nullptr, L"'PluginBridge 'yyyy'-'MM'-'dd ", tempPath, CountOf(tempPath));
 		if(ch) GetTimeFormatW(LOCALE_SYSTEM_DEFAULT, 0, nullptr, L"HH'.'mm'.'ss'.dmp'", tempPath + ch - 1, CountOf(tempPath) - ch + 1);
 		filename += tempPath;
+		static_assert(CountOf(tempPath) > 3, "");
 
 		OPENMPT_NAMESPACE::WriteMemoryDump(pExceptionInfo, filename.c_str(), OPENMPT_NAMESPACE::PluginBridge::fullMemDump);
 	}
@@ -78,10 +80,8 @@ int _tmain(int argc, TCHAR *argv[])
 
 	::SetUnhandledExceptionFilter(CrashHandler);
 
-	uint32_t parentProcessId = _ttoi(argv[1]);
-
 	OPENMPT_NAMESPACE::PluginBridge::InitializeStaticVariables();
-
+	uint32_t parentProcessId = _ttoi(argv[1]);
 	new OPENMPT_NAMESPACE::PluginBridge(argv[0], OpenProcess(SYNCHRONIZE, FALSE, parentProcessId));
 
 	WaitForSingleObject(OPENMPT_NAMESPACE::PluginBridge::sigQuit, INFINITE);
@@ -528,6 +528,10 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 				NULL);
 
 			windowParent = reinterpret_cast<HWND>(msg->ptr);
+			// ProteusVX will freeze somewhere in a SetParent call if we do this before dispatching the message to the plugin.
+			// On the other hand, opening two shared KORG M1 editor instances makes the second instance crash the bridge if there is no parent.
+			if(nativeEffect->uniqueID != CCONST('P', 'R', 'V', 'X'))
+				SetParent(window, windowParent);
 		}
 		break;
 
