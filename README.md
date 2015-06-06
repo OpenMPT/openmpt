@@ -61,7 +61,7 @@ How to compile
         folder.
 
         Please visit
-        [steinberg.net](http://www.steinberg.net/en/company/developer.html) to
+        [steinberg.net](http://www.steinberg.net/en/company/developers.html) to
         download the SDK.
 
      -  VST:
@@ -77,7 +77,7 @@ How to compile
         have the old VST 2.4 SDK laying around, this should also work fine.
 
         Please visit
-        [steinberg.net](http://www.steinberg.net/en/company/developer.html) to
+        [steinberg.net](http://www.steinberg.net/en/company/developers.html) to
         download the SDK.
 
     Alternatively, both, the ASIO and the VST SDK, can be downloaded
