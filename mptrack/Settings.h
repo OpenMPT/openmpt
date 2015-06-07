@@ -276,7 +276,6 @@ public:
 	}
 	mpt::ustring FormatTypeAsString() const;
 	mpt::ustring FormatValueAsString() const;
-	mpt::ustring FormatAsString() const;
 	void SetFromString(const AnyStringLocale &newVal);
 };
 
@@ -395,10 +394,12 @@ public:
 		assign(val);
 		return *this;
 	}
-	SettingValue GetDefault() const
+#if defined(MPT_SETTINGS_CACHE_STORE_DEFAULTS)
+	const SettingValue &GetDefault() const
 	{
 		return defaultValue;
 	}
+#endif // MPT_SETTINGS_CACHE_STORE_DEFAULTS
 	bool IsDirty() const
 	{
 		return dirty;
@@ -434,11 +435,11 @@ public:
 	{
 		return;
 	}
-	mpt::ustring GetSection() const
+	const mpt::ustring &GetSection() const
 	{
 		return section;
 	}
-	mpt::ustring GetKey() const
+	const mpt::ustring &GetKey() const
 	{
 		return key;
 	}
@@ -568,6 +569,7 @@ public:
 
 			SettingsMap::const_iterator begin() const { return map.begin(); }
 			SettingsMap::const_iterator end() const { return map.end(); }
+			SettingsMap::size_type size() const { return map.size(); }
 			const SettingsMap &GetMap() const { return map; }
 
 	#endif // MPT_SETTINGS_CACHE
