@@ -395,6 +395,10 @@ public:
 		assign(val);
 		return *this;
 	}
+	SettingValue GetDefault() const
+	{
+		return defaultValue;
+	}
 	bool IsDirty() const
 	{
 		return dirty;
