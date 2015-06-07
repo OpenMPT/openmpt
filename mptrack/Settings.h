@@ -395,7 +395,11 @@ public:
 		return *this;
 	}
 #if defined(MPT_SETTINGS_CACHE_STORE_DEFAULTS)
-	const SettingValue &GetDefault() const
+	SettingValue GetDefault() const
+	{
+		return defaultValue;
+	}
+	const SettingValue &GetRefDefault() const
 	{
 		return defaultValue;
 	}
@@ -407,6 +411,14 @@ public:
 	void Clean()
 	{
 		dirty = false;
+	}
+	SettingValue GetValue() const
+	{
+		return value;
+	}
+	const SettingValue &GetRefValue() const
+	{
+		return value;
 	}
 	operator SettingValue () const
 	{
@@ -435,11 +447,19 @@ public:
 	{
 		return;
 	}
-	const mpt::ustring &GetSection() const
+	mpt::ustring GetSection() const
 	{
 		return section;
 	}
-	const mpt::ustring &GetKey() const
+	mpt::ustring GetKey() const
+	{
+		return key;
+	}
+	const mpt::ustring &GetRefSection() const
+	{
+		return section;
+	}
+	const mpt::ustring &GetRefKey() const
 	{
 		return key;
 	}
