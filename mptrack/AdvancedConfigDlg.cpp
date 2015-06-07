@@ -104,7 +104,6 @@ void COptionsAdvanced::ReInit()
 {
 	m_List.SetRedraw(FALSE);
 	m_List.DeleteAllItems();
-	const bool useGroups = m_ListGrouped;
 	m_List.SetItemCount(theApp.GetSettings().size());
 
 	m_IndexToPath.clear();
@@ -118,63 +117,96 @@ void COptionsAdvanced::ReInit()
 	for(SettingsContainer::SettingsMap::const_iterator it = theApp.GetSettings().begin(); it != theApp.GetSettings().end(); ++it)
 	{
 		const SettingPath &path = it->first;
-		const SettingValue &value = it->second;
-
-		int groupID = 0;
-		const mpt::ustring &section = path.GetSection();
-		UNORDERED_MAP<mpt::ustring, int>::const_iterator gi = m_Groups.find(section);
-		if(gi == m_Groups.end() && useGroups)
-		{
-			LVGROUP group;
-#if _WIN32_WINNT >= 0x0600
-			group.cbSize = LVGROUP_V5_SIZE;
-#else
-			group.cbSize = sizeof(group);
-#endif
-			group.mask = LVGF_HEADER | LVGF_GROUPID;
-			group.pszHeader = const_cast<wchar_t *>(section.c_str());
-			group.cchHeader = 0;
-			group.pszFooter = nullptr;
-			group.cchFooter = 0;
-			group.iGroupId = groupID = numGroups++;
-			group.stateMask = LVGS_COLLAPSIBLE;
-			group.state = LVGS_COLLAPSIBLE;
-			group.uAlign = LVGA_HEADER_LEFT;
-			ListView_InsertGroup(m_List.m_hWnd, -1, &group);
-			m_Groups.insert(std::make_pair(section, groupID));
-		} else
-		{
-			groupID = gi->second;
-		}
+		const SettingState &state = it->second;
+		const mpt::ustring &section = path.GetRefSection();
+		const mpt::ustring &key = path.GetRefKey();
+		const SettingValue &value = state.GetRefValue();
+		const SettingValue &defaultValue = state.GetRefDefault();
 
 		bool addString = true;
 		if(!findStr.IsEmpty())
 		{
 			CString str = mpt::ToCString(path.FormatAsString() + MPT_USTRING(" = ") + value.FormatValueAsString());
-			addString = str.MakeLower().Find(findStr) >= 0;
+			addString = (str.MakeLower().Find(findStr) >= 0);
 		}
-		if(addString)
-		{
-			const mpt::ustring str = useGroups ? it->first.GetKey() : it->first.FormatAsString();
-			LVITEMW lvi;
-			lvi.mask = LVIF_TEXT | LVIF_PARAM | (useGroups ? LVIF_GROUPID : 0);
-			lvi.iItem = i++;
-			lvi.iSubItem = 0;
-			lvi.state = 0;
-			lvi.stateMask = 0;
-			lvi.pszText = const_cast<wchar_t *>(str.c_str());
-			lvi.cchTextMax = 0;
-			lvi.iImage = 0;
-			lvi.lParam = m_IndexToPath.size();
-			lvi.iIndent = 0;
-			lvi.iGroupId = (useGroups ? groupID : 0);
 
-			int index = static_cast<int>(m_List.SendMessage(LVM_INSERTITEMW, 0, (LPARAM)(&lvi)));
-			m_List.SetItemText(index, 1, value.FormatTypeAsString().c_str());
-			m_List.SetItemText(index, 2, value.FormatValueAsString().c_str());
-			m_List.SetItemText(index, 3, it->second.GetDefault().FormatValueAsString().c_str());
-			m_IndexToPath.push_back(it->first);
+		if(m_ListGrouped)
+		{
+
+			int groupID = 0;
+			UNORDERED_MAP<mpt::ustring, int>::const_iterator gi = m_Groups.find(section);
+			if(gi == m_Groups.end())
+			{
+				LVGROUP group;
+	#if _WIN32_WINNT >= 0x0600
+				group.cbSize = LVGROUP_V5_SIZE;
+	#else
+				group.cbSize = sizeof(group);
+	#endif
+				group.mask = LVGF_HEADER | LVGF_GROUPID;
+				group.pszHeader = const_cast<wchar_t *>(section.c_str());
+				group.cchHeader = 0;
+				group.pszFooter = nullptr;
+				group.cchFooter = 0;
+				group.iGroupId = groupID = numGroups++;
+				group.stateMask = LVGS_COLLAPSIBLE;
+				group.state = LVGS_COLLAPSIBLE;
+				group.uAlign = LVGA_HEADER_LEFT;
+				ListView_InsertGroup(m_List.m_hWnd, -1, &group);
+				m_Groups.insert(std::make_pair(section, groupID));
+			} else
+			{
+				groupID = gi->second;
+			}
+
+			if(addString)
+			{
+				LVITEMW lvi;
+				lvi.mask = LVIF_TEXT | LVIF_PARAM | LVIF_GROUPID;
+				lvi.iItem = i++;
+				lvi.iSubItem = 0;
+				lvi.state = 0;
+				lvi.stateMask = 0;
+				lvi.pszText = const_cast<wchar_t *>(key.c_str());
+				lvi.cchTextMax = 0;
+				lvi.iImage = 0;
+				lvi.lParam = m_IndexToPath.size();
+				lvi.iIndent = 0;
+				lvi.iGroupId = groupID;
+				int index = static_cast<int>(m_List.SendMessage(LVM_INSERTITEMW, 0, (LPARAM)(&lvi)));
+				m_List.SetItemText(index, 1, value.FormatTypeAsString().c_str());
+				m_List.SetItemText(index, 2, value.FormatValueAsString().c_str());
+				m_List.SetItemText(index, 3, defaultValue.FormatValueAsString().c_str());
+				m_IndexToPath.push_back(path);
+			}
+
+		} else
+		{
+
+			if(addString)
+			{
+				const mpt::ustring sectionAndKey = path.FormatAsString();
+				LVITEMW lvi;
+				lvi.mask = LVIF_TEXT | LVIF_PARAM;
+				lvi.iItem = i++;
+				lvi.iSubItem = 0;
+				lvi.state = 0;
+				lvi.stateMask = 0;
+				lvi.pszText = const_cast<wchar_t *>(sectionAndKey.c_str());
+				lvi.cchTextMax = 0;
+				lvi.iImage = 0;
+				lvi.lParam = m_IndexToPath.size();
+				lvi.iIndent = 0;
+				lvi.iGroupId = 0;
+				int index = static_cast<int>(m_List.SendMessage(LVM_INSERTITEMW, 0, (LPARAM)(&lvi)));
+				m_List.SetItemText(index, 1, value.FormatTypeAsString().c_str());
+				m_List.SetItemText(index, 2, value.FormatValueAsString().c_str());
+				m_List.SetItemText(index, 3, defaultValue.FormatValueAsString().c_str());
+				m_IndexToPath.push_back(path);
+			}
+
 		}
+
 	}
 
 	m_List.SetItemCount(i);
