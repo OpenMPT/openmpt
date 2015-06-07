@@ -283,7 +283,7 @@ bool PluginBridge::SendToHost(BridgeMessage &sendMsg)
 		const HANDLE objects[] = { ackHandle.ack, ackHandle.send, otherProcess };
 		do
 		{
-			result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
+			result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, 100);
 			if(result == WAIT_TIMEOUT)
 			{
 				MSG msg;
