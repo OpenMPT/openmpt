@@ -10,11 +10,11 @@
 
 // TODO
 // Translate VstIntPtr size in remaining structs!!! VstFileSelect, VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow (all but VstFileSelect are currently not supported by OpenMPT)
-// Fix Purity Demo GUI freeze more nicely
 // Optimize out audioMasterProcessEvents the same way as effProcessEvents?
 // Find a nice solution for audioMasterIdle that doesn't break TAL-Elek7ro-II
 // Maybe don't keep opening and closing aux mem files - but they are rarely needed, so would this actually be worth it?
-// Kirnu GUI deadlocks
+// Kirnu GUI deadlocks during playback
+// jthalamus GUI crash
 
 // Low priority:
 // Speed up things like consecutive calls to CVstPlugin::GetFormattedProgramName by a custom opcode (is this necessary?)
@@ -282,7 +282,20 @@ bool PluginBridge::SendToHost(BridgeMessage &sendMsg)
 		// Wait until the message thread notifies us.
 		Signal &ackHandle = ackSignals[addr->header.signalID];
 		const HANDLE objects[] = { ackHandle.ack, ackHandle.send, otherProcess };
-		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
+		do
+		{
+			result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
+			if(result == WAIT_TIMEOUT)
+			{
+				MSG msg;
+				while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+				{
+					::TranslateMessage(&msg);
+					::DispatchMessage(&msg);
+				}
+				continue;
+			}
+		} while (result == WAIT_TIMEOUT);
 		addr->CopyFromSharedMemory(sendMsg);
 	}
 
@@ -516,22 +529,20 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 			TCHAR str[_MAX_PATH];
 			GetModuleFileName(library, str, CountOf(str));
 
+			windowParent = reinterpret_cast<HWND>(msg->ptr);
 			ptr = window = CreateWindow(
 				WINDOWCLASSNAME,
 				str,
 				WS_POPUP,
 				CW_USEDEFAULT, CW_USEDEFAULT,
 				1, 1,
-				NULL,
+				windowParent,
 				NULL,
 				windowClass.hInstance,
 				NULL);
 
-			windowParent = reinterpret_cast<HWND>(msg->ptr);
-			// ProteusVX and Dexed will freeze somewhere in a SetParent call if we do this before dispatching the message to the plugin.
-			// On the other hand, opening two shared KORG M1 editor instances makes the second instance crash the bridge if there is no parent.
-			if(nativeEffect->uniqueID == CCONST('K', 'L', 'M', '1'))
-				SetParent(window, windowParent);
+			// Opening two shared KORG M1 editor instances makes the second instance crash the bridge if there is no parent.
+			SetParent(window, windowParent);
 		}
 		break;
 
@@ -659,11 +670,6 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 		break;
 
 	case effEditOpen:
-		// Quick hack to get Purity demo to work (wants to show a message box during first effEditIdle call, this seems to fail after SetParent)
-		Dispatch(effEditIdle, 0, 0, nullptr, 0.0f);
-
-		// Need to do this after creating. Otherwise, we'll freeze. We also need to do this after the open call, or else ProteusVX will freeze in a SetParent call.
-		SetParent(window, windowParent);
 		SetProp(window, _T("MPT"), this);
 		ShowWindow(window, SW_SHOW);
 		break;

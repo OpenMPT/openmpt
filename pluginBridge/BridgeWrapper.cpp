@@ -42,11 +42,11 @@ bool ComponentPluginBridge::DoInitialize()
 	exeName = theApp.GetAppDirPath();
 	if(bitness == 32)
 	{
-		exeName = exeName + MPT_PATHSTRING("PluginBridge32.exe");
+		exeName += MPT_PATHSTRING("PluginBridge32.exe");
 	}
 	if(bitness == 64)
 	{
-		exeName = exeName + MPT_PATHSTRING("PluginBridge64.exe");
+		exeName += MPT_PATHSTRING("PluginBridge64.exe");
 	}
 	// First, check for validity of the bridge executable.
 	if(!exeName.IsFile())
@@ -268,7 +268,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 		throw BridgeException("Could not initialize plugin bridge, it probably crashed.");
 	} else if(initMsg.init.result != 1)
 	{
-		throw BridgeException(mpt::ToLocale(initMsg.init.str).c_str());
+		throw BridgeException(mpt::ToCharset(mpt::CharsetUTF8, initMsg.init.str).c_str());
 	} else
 	{
 		if(sharedMem->effect.flags & effFlagsCanReplacing) sharedMem->effect.processReplacing = ProcessReplacing;
@@ -379,7 +379,19 @@ bool BridgeWrapper::SendToBridge(BridgeMessage &sendMsg)
 		// Wait until the message thread notifies us.
 		Signal &ackHandle = ackSignals[addr->header.signalID];
 		const HANDLE objects[] = { ackHandle.ack, ackHandle.send, otherProcess };
-		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
+		do
+		{
+			result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, 100);
+			if(result == WAIT_TIMEOUT)
+			{
+				MSG msg;
+				while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+				{
+					::TranslateMessage(&msg);
+					::DispatchMessage(&msg);
+				}
+			}
+		} while (result == WAIT_TIMEOUT);
 		addr->CopyFromSharedMemory(sendMsg);
 
 		// Bridge caught an exception while processing this request

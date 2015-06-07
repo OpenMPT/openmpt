@@ -222,7 +222,7 @@ AEffect *CVstPluginManager::LoadPlugin(const VSTPluginLib &plugin, HINSTANCE &li
 			// If there was some error, don't try normal loading as well... unless the user really wants it.
 			if(isNative)
 			{
-				const std::wstring msg = L"The following error occured while trying to load\n" + plugin.dllPath.ToWide() + L"\n\n" + mpt::ToWide(mpt::CharsetLocale, e.what())
+				const std::wstring msg = L"The following error occured while trying to load\n" + plugin.dllPath.ToWide() + L"\n\n" + mpt::ToWide(mpt::CharsetUTF8, e.what())
 					+ L"\n\nDo you want to try to load the plugin natively?";
 				if(Reporting::Confirm(msg, L"OpenMPT Plugin Bridge") == cnfNo)
 				{
@@ -482,6 +482,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 //-----------------------------------------------------------------------------------
 {
 	VSTPluginLib *pFound = nullptr;
+	mixPlugin.SetAutoSuspend(TrackerSettings::Instance().enableAutoSuspend);
 
 	// Find plugin in library
 	int8 match = 0;	// "Match quality" of found plugin. Higher value = better match.
