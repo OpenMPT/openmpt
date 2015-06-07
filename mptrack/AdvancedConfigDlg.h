@@ -28,12 +28,12 @@ class COptionsAdvanced: public CPropertyPage
 {
 protected:
 	CListCtrlEx m_List;
-	bool m_ListGrouped;
-	std::vector<SettingPath> m_IndexToPath;
-	UNORDERED_MAP<mpt::ustring, int> m_Groups;
+	std::vector<SettingPath> m_indexToPath;
+	UNORDERED_MAP<mpt::ustring, int> m_groups;
+	bool m_listGrouped;
 
 public:
-	COptionsAdvanced():CPropertyPage(IDD_OPTIONS_ADVANCED), m_ListGrouped(false) {}
+	COptionsAdvanced():CPropertyPage(IDD_OPTIONS_ADVANCED), m_listGrouped(false) {}
 
 protected:
 	virtual BOOL OnInitDialog();
