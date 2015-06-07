@@ -14,7 +14,6 @@
 // Find a nice solution for audioMasterIdle that doesn't break TAL-Elek7ro-II
 // Maybe don't keep opening and closing aux mem files - but they are rarely needed, so would this actually be worth it?
 // Kirnu GUI deadlocks during playback
-// jthalamus GUI crash
 
 // Low priority:
 // Speed up things like consecutive calls to CVstPlugin::GetFormattedProgramName by a custom opcode (is this necessary?)
@@ -536,12 +535,12 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 				WS_POPUP,
 				CW_USEDEFAULT, CW_USEDEFAULT,
 				1, 1,
-				windowParent,
+				NULL,
 				NULL,
 				windowClass.hInstance,
 				NULL);
 
-			// Opening two shared KORG M1 editor instances makes the second instance crash the bridge if there is no parent.
+			// Opening two shared KORG M1 editor instances makes the second instance crash the bridge if there is no parent at this point.
 			SetParent(window, windowParent);
 		}
 		break;
