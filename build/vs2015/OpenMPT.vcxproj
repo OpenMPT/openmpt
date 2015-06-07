@@ -751,7 +751,24 @@
     <ClCompile Include="..\..\unarchiver\unzip.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\mptrack\res\COLORS.BMP" />
+    <None Include="..\..\mptrack\res\DRAGGING.CUR" />
+    <None Include="..\..\mptrack\res\MPTRACK.ICO" />
+    <None Include="..\..\mptrack\res\MPTRACK.RC2" />
+    <None Include="..\..\mptrack\res\NODROP.CUR" />
     <None Include="..\..\mptrack\res\OpenMPT.manifest" />
+    <None Include="..\..\mptrack\res\defaultKeybindings.mkb" />
+    <None Include="..\..\mptrack\res\envelope_toolbar.png" />
+    <None Include="..\..\mptrack\res\icons.png" />
+    <None Include="..\..\mptrack\res\main_toolbar.png" />
+    <None Include="..\..\mptrack\res\moddoc.ico" />
+    <None Include="..\..\mptrack\res\mptrack.png" />
+    <None Include="..\..\mptrack\res\nodrag.cur" />
+    <None Include="..\..\mptrack\res\pattern_toolbar.png" />
+    <None Include="..\..\mptrack\res\sample_toolbar.png" />
+    <None Include="..\..\mptrack\res\splashno.png" />
+    <None Include="..\..\mptrack\res\view_pat.bmp" />
+    <None Include="..\..\mptrack\res\vumeters.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\mptrack\mptrack.rc" />

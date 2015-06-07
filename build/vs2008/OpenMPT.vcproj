@@ -1547,7 +1547,75 @@
 				Name="res"
 				>
 				<File
+					RelativePath="..\..\mptrack\res\COLORS.BMP"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mptrack\res\DRAGGING.CUR"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mptrack\res\MPTRACK.ICO"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mptrack\res\MPTRACK.RC2"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mptrack\res\NODROP.CUR"
+					>
+				</File>
+				<File
 					RelativePath="..\..\mptrack\res\OpenMPT.manifest"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mptrack\res\defaultKeybindings.mkb"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mptrack\res\envelope_toolbar.png"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mptrack\res\icons.png"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mptrack\res\main_toolbar.png"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mptrack\res\moddoc.ico"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mptrack\res\mptrack.png"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mptrack\res\nodrag.cur"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mptrack\res\pattern_toolbar.png"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mptrack\res\sample_toolbar.png"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mptrack\res\splashno.png"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mptrack\res\view_pat.bmp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\mptrack\res\vumeters.bmp"
 					>
 				</File>
 			</Filter>
