@@ -528,9 +528,9 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 				NULL);
 
 			windowParent = reinterpret_cast<HWND>(msg->ptr);
-			// ProteusVX will freeze somewhere in a SetParent call if we do this before dispatching the message to the plugin.
+			// ProteusVX and Dexed will freeze somewhere in a SetParent call if we do this before dispatching the message to the plugin.
 			// On the other hand, opening two shared KORG M1 editor instances makes the second instance crash the bridge if there is no parent.
-			if(nativeEffect->uniqueID != CCONST('P', 'R', 'V', 'X'))
+			if(nativeEffect->uniqueID == CCONST('K', 'L', 'M', '1'))
 				SetParent(window, windowParent);
 		}
 		break;
