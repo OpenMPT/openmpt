@@ -50,15 +50,49 @@ BOOL COptionsAdvanced::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
-	const CListCtrlEx::Header headers[] =
-	{
-		{ _T("Setting"),	100, LVCFMT_LEFT },
-		{ _T("Type"),		40,  LVCFMT_LEFT },
-		{ _T("Value"),		190, LVCFMT_LEFT },
-		{ _T("Default"),	62,  LVCFMT_LEFT },
-	};
-	m_List.SetHeaders(headers);
 	m_List.SetExtendedStyle(m_List.GetExtendedStyle() | LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT);
+
+	ListView_EnableGroupView(m_List.m_hWnd, FALSE); // try to set known state
+	int enableGroupsResult1 = static_cast<int>(ListView_EnableGroupView(m_List.m_hWnd, TRUE));
+	int enableGroupsResult2 = static_cast<int>(ListView_EnableGroupView(m_List.m_hWnd, TRUE));
+	// Looks like we have to check enabling and check that a second enabling does
+	// not change anything.
+	// Just checking if enabling fails with -1, does no work for older control
+	// versions because they just do not know the window message at all and return
+	// 0, always. At least Wine does behave this way.
+	if(enableGroupsResult1 == 1 && enableGroupsResult2 == 0)
+	{
+		m_ListGrouped = true;
+	} else
+	{
+		// Did not behave as documented or expected, the actual state of the
+		// control is unknown by now.
+		// Play safe and set and assume the traditional ungrouped mode again.
+		ListView_EnableGroupView(m_List.m_hWnd, FALSE);
+		m_ListGrouped = false;
+	}
+
+	if(m_ListGrouped)
+	{
+		const CListCtrlEx::Header headers[] =
+		{
+			{ _T("Setting"), 100, LVCFMT_LEFT },
+			{ _T("Type"),	    40, LVCFMT_LEFT },
+			{ _T("Value"),   190, LVCFMT_LEFT },
+			{ _T("Default"),  62, LVCFMT_LEFT },
+		};
+		m_List.SetHeaders(headers);
+	} else
+	{
+		const CListCtrlEx::Header headers[] =
+		{
+			{ _T("Setting"), 150, LVCFMT_LEFT },
+			{ _T("Type"),	    40, LVCFMT_LEFT },
+			{ _T("Value"),   150, LVCFMT_LEFT },
+			{ _T("Default"),  52, LVCFMT_LEFT },
+		};
+		m_List.SetHeaders(headers);
+	}
 
 	ReInit();
 	return TRUE;
@@ -70,7 +104,7 @@ void COptionsAdvanced::ReInit()
 {
 	m_List.SetRedraw(FALSE);
 	m_List.DeleteAllItems();
-	bool useGroups = ((int)ListView_EnableGroupView(m_List.m_hWnd, TRUE)) != -1;
+	const bool useGroups = m_ListGrouped;
 	m_List.SetItemCount(theApp.GetSettings().size());
 
 	m_IndexToPath.clear();
@@ -123,7 +157,7 @@ void COptionsAdvanced::ReInit()
 		{
 			const mpt::ustring str = useGroups ? it->first.GetKey() : it->first.FormatAsString();
 			LVITEMW lvi;
-			lvi.mask = LVIF_TEXT | LVIF_GROUPID | LVIF_PARAM;
+			lvi.mask = LVIF_TEXT | LVIF_PARAM | (useGroups ? LVIF_GROUPID : 0);
 			lvi.iItem = i++;
 			lvi.iSubItem = 0;
 			lvi.state = 0;
@@ -133,9 +167,9 @@ void COptionsAdvanced::ReInit()
 			lvi.iImage = 0;
 			lvi.lParam = m_IndexToPath.size();
 			lvi.iIndent = 0;
-			lvi.iGroupId = groupID;
+			lvi.iGroupId = (useGroups ? groupID : 0);
 
-			int index = m_List.SendMessage(LVM_INSERTITEMW, 0, (LPARAM)(&lvi));
+			int index = static_cast<int>(m_List.SendMessage(LVM_INSERTITEMW, 0, (LPARAM)(&lvi)));
 			m_List.SetItemText(index, 1, value.FormatTypeAsString().c_str());
 			m_List.SetItemText(index, 2, value.FormatValueAsString().c_str());
 			m_List.SetItemText(index, 3, it->second.GetDefault().FormatValueAsString().c_str());
