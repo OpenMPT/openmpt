@@ -136,8 +136,9 @@ static void TranslateVSTEventsToBridge(std::vector<char> &data, const VstEvents 
 static void TranslateBridgeToVSTEvents(std::vector<char> &data, void *ptr)
 {
 	const int32_t numEvents = *static_cast<const int32_t *>(ptr);
-
-	const size_t headerSize = sizeof(VstInt32) + sizeof(VstIntPtr) + sizeof(VstEvent *) * numEvents;
+	
+	// First element is really a VstInt32, but in case of 64-bit builds, the next field gets aligned anyway.
+	const size_t headerSize = sizeof(VstIntPtr) + sizeof(VstIntPtr) + sizeof(VstEvent *) * numEvents;
 	data.reserve(headerSize + sizeof(VstEvent) * numEvents);
 	data.resize(headerSize, 0);
 	if(numEvents == 0)
