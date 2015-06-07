@@ -12,6 +12,14 @@
 
 #if defined(MPT_SETTINGS_CACHE)
 
+#include "CListCtrl.h"
+#include <unordered_map>
+#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
+#define UNORDERED_MAP std::tr1::unordered_map
+#else
+#define UNORDERED_MAP std::unordered_map
+#endif
+
 OPENMPT_NAMESPACE_BEGIN
 
 //==========================================
@@ -19,8 +27,9 @@ class COptionsAdvanced: public CPropertyPage
 //==========================================
 {
 protected:
-	CListBox m_List;
-	std::map<int, SettingPath> m_IndexToPath;
+	CListCtrlEx m_List;
+	std::vector<SettingPath> m_IndexToPath;
+	UNORDERED_MAP<mpt::ustring, int> m_Groups;
 
 public:
 	COptionsAdvanced():CPropertyPage(IDD_OPTIONS_ADVANCED) {}
@@ -31,7 +40,7 @@ protected:
 	virtual BOOL OnSetActive();
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL PreTranslateMessage(MSG *msg);
-	afx_msg void OnOptionDblClick();
+	afx_msg void OnOptionDblClick(NMHDR *, LRESULT *);
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnFindStringChanged() { ReInit(); }
 

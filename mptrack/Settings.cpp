@@ -89,12 +89,6 @@ mpt::ustring SettingValue::FormatValueAsString() const
 }
 
 
-mpt::ustring SettingValue::FormatAsString() const
-{
-	return MPT_USTRING("(") + FormatTypeAsString() + MPT_USTRING(")") + FormatValueAsString();
-}
-
-
 void SettingValue::SetFromString(const AnyStringLocale &newVal)
 {
 	switch(GetType())
