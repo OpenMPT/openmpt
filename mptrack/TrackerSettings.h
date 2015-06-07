@@ -595,6 +595,7 @@ public:
 	// Plugins
 
 	Setting<bool> bridgeAllPlugins;
+	Setting<bool> enableAutoSuspend;
 
 	// Debug
 

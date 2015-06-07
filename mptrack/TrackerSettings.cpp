@@ -247,6 +247,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, mruListLength(conf, "Misc", "MRUListLength", 10)
 	// Plugins
 	, bridgeAllPlugins(conf, "VST Plugins", "BridgeAllPlugins", false)
+	, enableAutoSuspend(conf, "VST Plugins", "EnableAutoSuspend", false)
 	, DebugTraceEnable(conf, "Debug", "TraceEnable", false)
 	, DebugTraceSize(conf, "Debug", "TraceSize", 1000000)
 	, DebugTraceAlwaysDump(conf, "Debug", "TraceAlwaysDump", false)
