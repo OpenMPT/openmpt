@@ -123,7 +123,7 @@ void COptionsAdvanced::ReInit()
 		{
 			const mpt::ustring str = useGroups ? it->first.GetKey() : it->first.FormatAsString();
 			LVITEMW lvi;
-			lvi.mask = LVIF_TEXT | LVIF_GROUPID;
+			lvi.mask = LVIF_TEXT | LVIF_GROUPID | LVIF_PARAM;
 			lvi.iItem = i++;
 			lvi.iSubItem = 0;
 			lvi.state = 0;
