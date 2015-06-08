@@ -1411,13 +1411,9 @@ BOOL CSplashScreen::OnInitDialog()
 	newcy = bitmap->height;
 	if(newcx && newcy)
 	{
-		LONG ExStyle = GetWindowLong(m_hWnd, GWL_EXSTYLE);
-		ExStyle |= WS_EX_TOPMOST;
-		SetWindowLong(m_hWnd, GWL_EXSTYLE, ExStyle);
 		rect.left -= (newcx - cx) / 2;
 		rect.top -= (newcy - cy) / 2;
-		SetWindowPos(&wndTop, rect.left, rect.top, newcx, newcy, SWP_NOCOPYBITS);
-
+		SetWindowPos(nullptr, rect.left, rect.top, newcx, newcy, SWP_NOCOPYBITS | SWP_NOZORDER);
 	}
 	return TRUE;
 }
