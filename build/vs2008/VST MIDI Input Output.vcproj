@@ -370,20 +370,21 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\vstsdk2.4;..\..\include;..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="0"
+				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="0"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\..\include\vstsdk2.4;..\..\include;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
@@ -394,7 +395,7 @@
 				AdditionalDependencies="winmm.lib"
 				OutputFile="$(OutDir)\MIDI Input Output.dll"
 				LinkIncremental="2"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				ImportLibrary="..\..\bin\Win32-Debug\MIDI Input Output.lib"
 				TargetMachine="1"
@@ -449,20 +450,21 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\vstsdk2.4;..\..\include;..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="0"
+				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\..\include\vstsdk2.4;..\..\include;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
@@ -473,7 +475,7 @@
 				AdditionalDependencies="winmm.lib"
 				OutputFile="$(OutDir)\MIDI Input Output.dll"
 				LinkIncremental="2"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				ImportLibrary="..\..\bin\x64-Debug\MIDI Input Output.lib"
 				TargetMachine="17"

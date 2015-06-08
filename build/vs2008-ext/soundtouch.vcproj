@@ -361,20 +361,21 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\soundtouch\include;..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="DLL_EXPORTS;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="DLL_EXPORTS;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="0"
+				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="0"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DLL_EXPORTS;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="DLL_EXPORTS;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\..\include\soundtouch\include;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
@@ -384,7 +385,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\OpenMPT_SoundTouch_f32.dll"
 				LinkIncremental="2"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				ImportLibrary="..\..\bin\Win32-Debug\OpenMPT_SoundTouch_f32.lib"
 				TargetMachine="1"
@@ -438,20 +439,21 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\soundtouch\include;..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="DLL_EXPORTS;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="DLL_EXPORTS;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="0"
+				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DLL_EXPORTS;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="DLL_EXPORTS;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\..\include\soundtouch\include;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
@@ -461,7 +463,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\OpenMPT_SoundTouch_f32.dll"
 				LinkIncremental="2"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				ImportLibrary="..\..\bin\x64-Debug\OpenMPT_SoundTouch_f32.lib"
 				TargetMachine="17"

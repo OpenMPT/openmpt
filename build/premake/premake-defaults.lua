@@ -38,31 +38,28 @@
   filter { "action:vs2008" }
    includedirs { "../../include/msinttypes/stdint" }
 
-  filter {}
-   flags { "StaticRuntime" }
-
   filter { "configurations:Debug" }
-	 configuration "Debug"
    defines { "DEBUG" }
    flags { "Symbols" }
+   flags { "StaticRuntime" }
    optimize "Debug"
 
   filter { "configurations:DebugMDd" }
-	 configuration "Debug"
    defines { "DEBUG" }
    flags { "Symbols" }
    optimize "Debug"
 
   filter { "configurations:Release" }
-  configuration "Release"
    defines { "NDEBUG" }
    flags { "Symbols", "MultiProcessorCompile" }
+   flags { "StaticRuntime" }
    optimize "Speed"
    floatingpoint "Fast"
 
   filter { "configurations:ReleaseLTCG" }
    defines { "NDEBUG" }
    flags { "Symbols", "MultiProcessorCompile", "LinkTimeOptimization" }
+   flags { "StaticRuntime" }
    optimize "Full"
    floatingpoint "Fast"
 
