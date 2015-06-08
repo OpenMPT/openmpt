@@ -12,14 +12,12 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-class CAutoSaver;
-
 class PathConfigDlg : public CPropertyPage
 {
 	DECLARE_DYNAMIC(PathConfigDlg)
 
 public:
-	PathConfigDlg(CAutoSaver &autoSaver);
+	PathConfigDlg();
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -29,9 +27,6 @@ public:
 	virtual void OnOK();
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnKillActive();
-
-private:
-	CAutoSaver &m_AutoSaver;
 
 protected:
 	afx_msg void OnAutosaveEnable();

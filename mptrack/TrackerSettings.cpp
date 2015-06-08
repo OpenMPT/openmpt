@@ -301,12 +301,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		const std::string colorName = mpt::String::Print("Color%1", mpt::fmt::dec0<2>(ncol));
 		rgbCustomColors[ncol] = conf.Read<uint32>("Display", colorName, rgbCustomColors[ncol]);
 	}
-	// AutoSave
-	CMainFrame::m_pAutoSaver->SetEnabled(AutosaveEnabled);
-	CMainFrame::m_pAutoSaver->SetSaveInterval(AutosaveIntervalMinutes);
-	CMainFrame::m_pAutoSaver->SetHistoryDepth(AutosaveHistoryDepth);
-	CMainFrame::m_pAutoSaver->SetUseOriginalPath(AutosaveUseOriginalPath);
-	CMainFrame::m_pAutoSaver->SetPath(AutosavePath);
 	// Paths
 	m_szKbdFile = conf.Read<mpt::PathString>("Paths", "Key_Config_File", mpt::PathString());
 	conf.Forget("Paths", "Key_Config_File");
@@ -895,18 +889,6 @@ void TrackerSettings::SaveSettings()
 	{
 		conf.Write<uint32>("Display", mpt::String::Print("Color%1", mpt::fmt::dec0<2>(ncol)), rgbCustomColors[ncol]);
 	}
-
-	// AutoSave
-	mpt::PathString path = CMainFrame::m_pAutoSaver->GetPath();
-	if(theApp.IsPortableMode())
-	{
-		path = theApp.AbsolutePathToRelative(path);
-	}
-	AutosaveEnabled = CMainFrame::m_pAutoSaver->IsEnabled();
-	AutosaveIntervalMinutes = CMainFrame::m_pAutoSaver->GetSaveInterval();
-	AutosaveHistoryDepth = CMainFrame::m_pAutoSaver->GetHistoryDepth();
-	AutosaveUseOriginalPath = CMainFrame::m_pAutoSaver->GetUseOriginalPath();
-	AutosavePath = path;
 
 	// Paths
 	// Obsolete, since we always write to Keybindings.mkb now.
