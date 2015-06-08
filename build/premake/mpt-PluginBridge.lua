@@ -48,5 +48,4 @@
   filter {}
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  flags { "StaticRuntime" }
 

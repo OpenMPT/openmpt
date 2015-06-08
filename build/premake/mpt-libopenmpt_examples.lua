@@ -16,7 +16,6 @@ if _ACTION ~= "vs2008" then
   links { "libopenmpt", "miniz", "portaudio", "ksuser", "winmm" }
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  flags { "StaticRuntime" }
 
 end
 
@@ -35,7 +34,6 @@ end
   links { "libopenmpt", "miniz", "portaudio", "ksuser", "winmm" }
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  flags { "StaticRuntime" }
 
  project "libopenmpt_example_c_mem"
   uuid "4db3da91-fafd-43af-b3b7-35699b80aba1"
@@ -52,4 +50,3 @@ end
   links { "libopenmpt", "miniz", "portaudio", "ksuser", "winmm" }
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  flags { "StaticRuntime" }
