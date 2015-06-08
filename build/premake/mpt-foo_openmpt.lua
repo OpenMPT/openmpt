@@ -21,7 +21,6 @@ if _ACTION == "vs2010" then
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  flags { "StaticRuntime" }
   filter { "configurations:Release" }
    flags { "LinkTimeOptimization" }
   filter {}

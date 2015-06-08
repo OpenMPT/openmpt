@@ -9,3 +9,5 @@
   }
   dofile "../../build/premake/premake-defaults-LIB.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  filter {}
+   removeflags { "StaticRuntime" }
