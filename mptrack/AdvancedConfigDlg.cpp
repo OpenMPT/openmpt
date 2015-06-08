@@ -108,6 +108,12 @@ void COptionsAdvanced::ReInit()
 {
 	m_List.SetRedraw(FALSE);
 	m_List.DeleteAllItems();
+#if _WIN32_WINNT >= 0x0501
+	if(m_listGrouped)
+	{
+		ListView_RemoveAllGroups(m_List.m_hWnd);
+	}
+#endif
 	m_List.SetItemCount(theApp.GetSettings().size());
 
 	m_indexToPath.clear();
