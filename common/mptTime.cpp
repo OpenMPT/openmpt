@@ -81,14 +81,31 @@ mpt::ustring ToString(uint64 time100ns)
 
 #endif // MODPLUG_TRACKER
 
-namespace Unix
+Unix::Unix()
+//----------
+	: Value(0)
 {
+	return;
+}
 
-time_t FromUTC(tm *timeUtc)
+Unix::Unix(time_t unixtime)
 //-------------------------
+	: Value(unixtime)
+{
+	return;
+}
+
+Unix::operator time_t () const
+//----------------------------
+{
+	return Value;
+}
+
+mpt::Date::Unix Unix::FromUTC(tm timeUtc)
+//---------------------------------------
 {
 	#if MPT_COMPILER_MSVC
-		return _mkgmtime(timeUtc);
+		return mpt::Date::Unix(_mkgmtime(&timeUtc));
 	#else // !MPT_COMPILER_MSVC
 		// There is no portable way in C/C++ to convert between time_t and struct tm in UTC.
 		// Approximate it as good as possible without implementing full date handling logic.
@@ -96,30 +113,28 @@ time_t FromUTC(tm *timeUtc)
 		// This can be wrong for dates during DST switch.
 		if(!timeUtc)
 		{
-			return time_t();
+			return mpt::Date::Unix(time_t());
 		}
 		tm t = *timeUtc;
 		time_t localSinceEpoch = mktime(&t);
 		const tm * tmpLocal = localtime(&localSinceEpoch);
 		if(!tmpLocal)
 		{
-			return localSinceEpoch;
+			return mpt::Date::Unix(localSinceEpoch);
 		}
 		tm localTM = *tmpLocal;
 		const tm * tmpUTC = gmtime(&localSinceEpoch);
 		if(!tmpUTC)
 		{
-			return localSinceEpoch;
+			return mpt::Date::Unix(localSinceEpoch);
 		}
 		tm utcTM = *tmpUTC;
 		double offset = difftime(mktime(&localTM), mktime(&utcTM));
 		double timeScaleFactor = difftime(2, 1);
 		time_t utcSinceEpoch = localSinceEpoch + Util::Round<time_t>(offset / timeScaleFactor);
-		return utcSinceEpoch;
+		return mpt::Date::Unix(utcSinceEpoch);
 	#endif // MPT_COMPILER_MSVC
 }
-
-} // namespace Unix
 
 mpt::ustring ToShortenedISO8601(tm date)
 //--------------------------------------

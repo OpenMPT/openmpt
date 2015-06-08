@@ -42,13 +42,18 @@ mpt::ustring ToString(uint64 time100ns); // i.e. 2015-01-15 18:32:01.718
 
 #endif // MODPLUG_TRACKER
 
-namespace Unix
+class Unix
 {
 // time_t counts 1s since 1970-01-01T00:00Z
-
-time_t FromUTC(tm *timeUtc);
-
-} // namespace Unix
+private:
+	time_t Value;
+public:
+	Unix();
+	explicit Unix(time_t unixtime);
+	operator time_t () const;
+public:
+	static mpt::Date::Unix FromUTC(tm timeUtc);
+};
 
 mpt::ustring ToShortenedISO8601(tm date); // i.e. 2015-01-15T18:32:01Z
 

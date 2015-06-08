@@ -320,6 +320,36 @@ template<> inline SoundDeviceStopMode FromSettingValue(const SettingValue &val)
 	return static_cast<SoundDeviceStopMode>(static_cast<int32>(val));
 }
 
+template<> inline SettingValue ToSettingValue(const mpt::Date::Unix &val)
+{
+	time_t t = val;
+	const tm* lastUpdate = gmtime(&t);
+	CString outDate;
+	if(lastUpdate)
+	{
+		outDate.Format(_T("%04d-%02d-%02d %02d:%02d"), lastUpdate->tm_year + 1900, lastUpdate->tm_mon + 1, lastUpdate->tm_mday, lastUpdate->tm_hour, lastUpdate->tm_min);
+	}
+	return SettingValue(outDate, "UTC");
+}
+template<> inline mpt::Date::Unix FromSettingValue(const SettingValue &val)
+{
+	MPT_ASSERT(val.GetTypeTag() == "UTC");
+	std::string s = val.as<std::string>();
+	tm lastUpdate;
+	MemsetZero(lastUpdate);
+	if(sscanf(s.c_str(), "%04d-%02d-%02d %02d:%02d", &lastUpdate.tm_year, &lastUpdate.tm_mon, &lastUpdate.tm_mday, &lastUpdate.tm_hour, &lastUpdate.tm_min) == 5)
+	{
+		lastUpdate.tm_year -= 1900;
+		lastUpdate.tm_mon--;
+	}
+	time_t outTime = mpt::Date::Unix::FromUTC(lastUpdate);
+	if(outTime < 0)
+	{
+		outTime = 0;
+	}
+	return mpt::Date::Unix(outTime);
+}
+
 struct FontSetting
 {
 	enum FontFlags
@@ -446,7 +476,6 @@ public:
 	Setting<bool> rememberSongWindows;
 
 	Setting<FontSetting> commentsFont;
-
 
 	// Misc
 
@@ -604,6 +633,14 @@ public:
 
 	Setting<bool> bridgeAllPlugins;
 	Setting<bool> enableAutoSuspend;
+
+	// Update
+
+	Setting<mpt::Date::Unix> UpdateLastUpdateCheck;
+	Setting<int32> UpdateUpdateCheckPeriod;
+	Setting<CString> UpdateUpdateURL;
+	Setting<bool> UpdateSendGUID;
+	Setting<bool> UpdateShowUpdateHint;
 
 	// Debug
 
