@@ -568,6 +568,14 @@ public:
 
 	COLORREF rgbCustomColors[MAX_MODCOLORS];
 
+	// AutoSave
+
+	Setting<bool> AutosaveEnabled;
+	Setting<uint32> AutosaveIntervalMinutes;
+	Setting<uint32> AutosaveHistoryDepth;
+	Setting<bool> AutosaveUseOriginalPath;
+	Setting<mpt::PathString> AutosavePath;
+	
 	// Paths
 
 	ConfigurableDirectory PathSongs;

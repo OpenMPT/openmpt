@@ -231,6 +231,12 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Components
 	, ComponentsLoadOnStartup(conf, "Components", "LoadOnStartup", ComponentManagerSettingsDefault().LoadOnStartup())
 	, ComponentsKeepLoaded(conf, "Components", "KeepLoaded", ComponentManagerSettingsDefault().KeepLoaded())
+	// AutoSave
+	, AutosaveEnabled(conf, "AutoSave", "Enabled", true)
+	, AutosaveIntervalMinutes(conf, "AutoSave", "IntervalMinutes", 10)
+	, AutosaveHistoryDepth(conf, "AutoSave", "BackupHistory", 3)
+	, AutosaveUseOriginalPath(conf, "AutoSave", "UseOriginalPath", true)
+	, AutosavePath(conf, "AutoSave", "Path", mpt::PathString())
 	// Paths
 	, PathSongs(conf, "Paths", "Songs_Directory", mpt::PathString())
 	, PathSamples(conf, "Paths", "Samples_Directory", mpt::PathString())
@@ -296,11 +302,11 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		rgbCustomColors[ncol] = conf.Read<uint32>("Display", colorName, rgbCustomColors[ncol]);
 	}
 	// AutoSave
-	CMainFrame::m_pAutoSaver->SetEnabled(conf.Read<bool>("AutoSave", "Enabled", CMainFrame::m_pAutoSaver->IsEnabled()));
-	CMainFrame::m_pAutoSaver->SetSaveInterval(conf.Read<int32>("AutoSave", "IntervalMinutes", CMainFrame::m_pAutoSaver->GetSaveInterval()));
-	CMainFrame::m_pAutoSaver->SetHistoryDepth(conf.Read<int32>("AutoSave", "BackupHistory", CMainFrame::m_pAutoSaver->GetHistoryDepth()));
-	CMainFrame::m_pAutoSaver->SetUseOriginalPath(conf.Read<bool>("AutoSave", "UseOriginalPath", CMainFrame::m_pAutoSaver->GetUseOriginalPath()));
-	CMainFrame::m_pAutoSaver->SetPath(theApp.RelativePathToAbsolute(conf.Read<mpt::PathString>("AutoSave", "Path", CMainFrame::m_pAutoSaver->GetPath())));
+	CMainFrame::m_pAutoSaver->SetEnabled(AutosaveEnabled);
+	CMainFrame::m_pAutoSaver->SetSaveInterval(AutosaveIntervalMinutes);
+	CMainFrame::m_pAutoSaver->SetHistoryDepth(AutosaveHistoryDepth);
+	CMainFrame::m_pAutoSaver->SetUseOriginalPath(AutosaveUseOriginalPath);
+	CMainFrame::m_pAutoSaver->SetPath(AutosavePath);
 	// Paths
 	m_szKbdFile = conf.Read<mpt::PathString>("Paths", "Key_Config_File", mpt::PathString());
 	conf.Forget("Paths", "Key_Config_File");
@@ -896,11 +902,11 @@ void TrackerSettings::SaveSettings()
 	{
 		path = theApp.AbsolutePathToRelative(path);
 	}
-	conf.Write<bool>("AutoSave", "Enabled", CMainFrame::m_pAutoSaver->IsEnabled());
-	conf.Write<int32>("AutoSave", "IntervalMinutes", CMainFrame::m_pAutoSaver->GetSaveInterval());
-	conf.Write<int32>("AutoSave", "BackupHistory", CMainFrame::m_pAutoSaver->GetHistoryDepth());
-	conf.Write<bool>("AutoSave", "UseOriginalPath", CMainFrame::m_pAutoSaver->GetUseOriginalPath());
-	conf.Write<mpt::PathString>("AutoSave", "Path", path);
+	AutosaveEnabled = CMainFrame::m_pAutoSaver->IsEnabled();
+	AutosaveIntervalMinutes = CMainFrame::m_pAutoSaver->GetSaveInterval();
+	AutosaveHistoryDepth = CMainFrame::m_pAutoSaver->GetHistoryDepth();
+	AutosaveUseOriginalPath = CMainFrame::m_pAutoSaver->GetUseOriginalPath();
+	AutosavePath = path;
 
 	// Paths
 	// Obsolete, since we always write to Keybindings.mkb now.
