@@ -378,21 +378,22 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="MODPLUG_TRACKER;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="MODPLUG_TRACKER;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				ExceptionHandling="2"
-				RuntimeLibrary="0"
+				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
-				DebugInformationFormat="0"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="MODPLUG_TRACKER;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="MODPLUG_TRACKER;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
@@ -404,7 +405,7 @@
 				DataExecutionPrevention="1"
 				OutputFile="$(OutDir)\PluginBridge32.exe"
 				LinkIncremental="2"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
 			/>
@@ -459,21 +460,22 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="MODPLUG_TRACKER;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="MODPLUG_TRACKER;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				ExceptionHandling="2"
-				RuntimeLibrary="0"
+				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="MODPLUG_TRACKER;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="MODPLUG_TRACKER;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\..\common;..\include\vstsdk2.4;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
@@ -485,7 +487,7 @@
 				DataExecutionPrevention="1"
 				OutputFile="$(OutDir)\PluginBridge64.exe"
 				LinkIncremental="2"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="17"
 			/>

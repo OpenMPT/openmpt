@@ -368,7 +368,7 @@
 			OutputDirectory="..\..\bin\Win32-Debug"
 			IntermediateDirectory="..\obj\OpenMPT\x86\DebugMDd"
 			ConfigurationType="1"
-			UseOfMFC="1"
+			UseOfMFC="2"
 			CharacterSet="2"
 			>
 			<Tool
@@ -391,22 +391,23 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="MODPLUG_TRACKER;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="MODPLUG_TRACKER;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				ExceptionHandling="2"
-				RuntimeLibrary="0"
+				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
 				WarningLevel="4"
-				DebugInformationFormat="0"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="MODPLUG_TRACKER;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="MODPLUG_TRACKER;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
@@ -419,7 +420,7 @@
 				AdditionalOptions="/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				OutputFile="$(OutDir)\mptrack.exe"
 				LinkIncremental="2"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
 			/>
@@ -451,7 +452,7 @@
 			OutputDirectory="..\..\bin\x64-Debug"
 			IntermediateDirectory="..\obj\OpenMPT\x86_64\DebugMDd"
 			ConfigurationType="1"
-			UseOfMFC="1"
+			UseOfMFC="2"
 			CharacterSet="2"
 			>
 			<Tool
@@ -475,22 +476,23 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="MODPLUG_TRACKER;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="MODPLUG_TRACKER;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				ExceptionHandling="2"
-				RuntimeLibrary="0"
+				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
 				WarningLevel="4"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="MODPLUG_TRACKER;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="MODPLUG_TRACKER;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
 			/>
 			<Tool
@@ -503,7 +505,7 @@
 				AdditionalOptions="/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				OutputFile="$(OutDir)\mptrack.exe"
 				LinkIncremental="2"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="17"
 			/>
