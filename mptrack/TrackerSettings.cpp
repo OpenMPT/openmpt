@@ -254,6 +254,13 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Plugins
 	, bridgeAllPlugins(conf, "VST Plugins", "BridgeAllPlugins", false)
 	, enableAutoSuspend(conf, "VST Plugins", "EnableAutoSuspend", false)
+	// Update
+	, UpdateLastUpdateCheck(conf, "Update", "LastUpdateCheck", mpt::Date::Unix(time_t()))
+	, UpdateUpdateCheckPeriod(conf, "Update", "UpdateCheckPeriod", CUpdateCheck::GetUpdateCheckPeriod())
+	, UpdateUpdateURL(conf, "Update", "UpdateURL", CUpdateCheck::GetUpdateURL())
+	, UpdateSendGUID(conf, "Update", "SendGUID", CUpdateCheck::GetSendGUID())
+	, UpdateShowUpdateHint(conf, "Update", "ShowUpdateHint", CUpdateCheck::GetShowUpdateHint())
+	// Debug
 	, DebugTraceEnable(conf, "Debug", "TraceEnable", false)
 	, DebugTraceSize(conf, "Debug", "TraceSize", 1000000)
 	, DebugTraceAlwaysDump(conf, "Debug", "TraceAlwaysDump", false)
@@ -337,26 +344,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	PatternClipboard::SetClipboardSize(conf.Read<int32>("Pattern Editor", "NumClipboards", mpt::saturate_cast<int32>(PatternClipboard::GetClipboardSize())));
 
 	// Update
-	{
-		tm lastUpdate;
-		MemsetZero(lastUpdate);
-		std::string s = conf.Read<std::string>("Update", "LastUpdateCheck", "1970-01-01 00:00");
-		if(sscanf(s.c_str(), "%04d-%02d-%02d %02d:%02d", &lastUpdate.tm_year, &lastUpdate.tm_mon, &lastUpdate.tm_mday, &lastUpdate.tm_hour, &lastUpdate.tm_min) == 5)
-		{
-			lastUpdate.tm_year -= 1900;
-			lastUpdate.tm_mon--;
-		}
-		time_t outTime = mpt::Date::Unix::FromUTC(&lastUpdate);
-		if(outTime < 0) outTime = 0;
-		CUpdateCheck::SetUpdateSettings
-			(
-			outTime,
-			conf.Read<int32>("Update", "UpdateCheckPeriod", CUpdateCheck::GetUpdateCheckPeriod()),
-			conf.Read<CString>("Update", "UpdateURL", CUpdateCheck::GetUpdateURL()),
-			conf.Read<int32>("Update", "SendGUID", CUpdateCheck::GetSendGUID() ? 1 : 0) != 0,
-			conf.Read<int32>("Update", "ShowUpdateHint", CUpdateCheck::GetShowUpdateHint() ? 1 : 0) != 0
-			);
-	}
+	CUpdateCheck::SetUpdateSettings(UpdateLastUpdateCheck.Get(), UpdateUpdateCheckPeriod, UpdateUpdateURL, UpdateSendGUID, UpdateShowUpdateHint);
 
 	// Chords
 	LoadChords(Chords);
@@ -847,20 +835,13 @@ void TrackerSettings::SaveSettings()
 
 	conf.Write<int32>("Pattern Editor", "NumClipboards", mpt::saturate_cast<int32>(PatternClipboard::GetClipboardSize()));
 
-	// Internet Update
+	// Update
 	{
-		CString outDate;
-		const time_t t = CUpdateCheck::GetLastUpdateCheck();
-		const tm* const lastUpdate = gmtime(&t);
-		if(lastUpdate != nullptr)
-		{
-			outDate.Format(_T("%04d-%02d-%02d %02d:%02d"), lastUpdate->tm_year + 1900, lastUpdate->tm_mon + 1, lastUpdate->tm_mday, lastUpdate->tm_hour, lastUpdate->tm_min);
-		}
-		conf.Write<CString>("Update", "LastUpdateCheck", outDate);
-		conf.Write<int32>("Update", "UpdateCheckPeriod", CUpdateCheck::GetUpdateCheckPeriod());
-		conf.Write<CString>("Update", "UpdateURL", CUpdateCheck::GetUpdateURL());
-		conf.Write<int32>("Update", "SendGUID", CUpdateCheck::GetSendGUID() ? 1 : 0);
-		conf.Write<int32>("Update", "ShowUpdateHint", CUpdateCheck::GetShowUpdateHint() ? 1 : 0);
+		UpdateLastUpdateCheck = mpt::Date::Unix(CUpdateCheck::GetLastUpdateCheck());
+		UpdateUpdateCheckPeriod = CUpdateCheck::GetUpdateCheckPeriod();
+		UpdateUpdateURL = CUpdateCheck::GetUpdateURL();
+		UpdateSendGUID = CUpdateCheck::GetSendGUID();
+		UpdateShowUpdateHint = CUpdateCheck::GetShowUpdateHint();
 	}
 
 	// Effects
