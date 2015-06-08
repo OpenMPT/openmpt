@@ -930,9 +930,6 @@ BOOL CTrackApp::InitInstance()
 	// Set up paths to store configuration in
 	SetupPaths(cmdInfo.m_bPortable);
 
-	// Construct auto saver instance, class TrackerSettings expects it being available.
-	CMainFrame::m_pAutoSaver = new CAutoSaver();
-
 	m_pSettingsIniFile = new IniFileSettingsBackend(m_szConfigFileName);
 	m_pSettings = new SettingsContainer(m_pSettingsIniFile);
 	m_pTrackerSettings = new TrackerSettings(*m_pSettings);

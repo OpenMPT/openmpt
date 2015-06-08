@@ -11,6 +11,7 @@
 #pragma once
 
 #include "Mptrack.h"
+#include "AutoSaver.h"
 #include "UpdateHints.h"
 #include "../common/AudioCriticalSection.h"
 #include "../common/mutex.h"
@@ -394,6 +395,8 @@ protected:
 
 	CHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512]; //rewbs.xinfo
 
+	CAutoSaver m_AutoSaver;
+
 public:
 	CMainFrame(/*CString regKeyExtension*/);
 	void Initialize();
@@ -446,7 +449,6 @@ public:
 	static void UpdateAllViews(UpdateHint hint, CObject *pHint=NULL);
 	static LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam);
 	static CInputHandler *m_InputHandler; 	//rewbs.customKeys
-	static CAutoSaver *m_pAutoSaver; 		//rewbs.customKeys
 
 	// Misc functions
 public:
