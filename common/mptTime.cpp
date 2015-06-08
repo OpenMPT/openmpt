@@ -111,11 +111,7 @@ mpt::Date::Unix Unix::FromUTC(tm timeUtc)
 		// Approximate it as good as possible without implementing full date handling logic.
 		// NOTE:
 		// This can be wrong for dates during DST switch.
-		if(!timeUtc)
-		{
-			return mpt::Date::Unix(time_t());
-		}
-		tm t = *timeUtc;
+		tm t = timeUtc;
 		time_t localSinceEpoch = mktime(&t);
 		const tm * tmpLocal = localtime(&localSinceEpoch);
 		if(!tmpLocal)
