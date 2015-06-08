@@ -1886,7 +1886,7 @@ void CMainFrame::OnViewOptions()
 	COptionsColors colors;
 	COptionsMixer mixerdlg;
 	CMidiSetupDlg mididlg(TrackerSettings::Instance().m_dwMidiSetup, TrackerSettings::Instance().m_nMidiDevice);
-	PathConfigDlg pathsdlg(*m_pAutoSaver);
+	PathConfigDlg pathsdlg;
 	CUpdateSetupDlg updatedlg;
 #if defined(MPT_SETTINGS_CACHE)
 	COptionsAdvanced advanced;

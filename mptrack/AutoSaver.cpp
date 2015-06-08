@@ -29,16 +29,42 @@ OPENMPT_NAMESPACE_BEGIN
 // Construction/Destruction
 ///////////////////////////
 
-CAutoSaver::CAutoSaver(bool enabled, uint32_t saveInterval, uint32_t backupHistory, bool useOriginalPath, mpt::PathString path)
-//-----------------------------------------------------------------------------------------------------------------------------
+CAutoSaver::CAutoSaver()
+//----------------------
 	: m_bSaveInProgress(false)
 	, m_nLastSave(timeGetTime())
-	, m_bEnabled(enabled)
-	, m_nSaveInterval(saveInterval * 60 * 1000) //minutes to milliseconds
-	, m_nBackupHistory(backupHistory)
-	, m_bUseOriginalPath(useOriginalPath)
-	, m_csPath(path)
 {
+}
+
+
+bool CAutoSaver::IsEnabled() const
+//--------------------------------
+{
+	return TrackerSettings::Instance().AutosaveEnabled;
+}
+
+bool CAutoSaver::GetUseOriginalPath() const
+//-----------------------------------------
+{
+	return TrackerSettings::Instance().AutosaveUseOriginalPath;
+}
+
+mpt::PathString CAutoSaver::GetPath() const
+//-----------------------------------------
+{
+	return TrackerSettings::Instance().AutosavePath.GetDefaultDir();
+}
+
+uint32 CAutoSaver::GetHistoryDepth() const
+//----------------------------------------
+{
+	return TrackerSettings::Instance().AutosaveHistoryDepth;
+}
+
+uint32 CAutoSaver::GetSaveInterval() const
+//----------------------------------------
+{
+	return TrackerSettings::Instance().AutosaveIntervalMinutes;
 }
 
 
@@ -70,7 +96,7 @@ bool CAutoSaver::DoSave(DWORD curTime)
 					CleanUpBackups(modDoc);
 				} else
 				{
-					m_bEnabled = false;
+					TrackerSettings::Instance().AutosaveEnabled = false;
 					Reporting::Warning("Warning: Auto Save failed and has been disabled. Please:\n- Review your Auto Save paths\n- Check available disk space and filesystem access rights");
 					success = false;
 				}
@@ -95,7 +121,7 @@ bool CAutoSaver::CheckTimer(DWORD curTime)
 //----------------------------------------
 {
 	DWORD curInterval = curTime - m_nLastSave;
-	return (curInterval >= m_nSaveInterval);
+	return (curInterval >= GetSaveIntervalMilliseconds());
 }
 
 
@@ -104,7 +130,7 @@ mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 {
 	mpt::PathString name;
 	
-	if(m_bUseOriginalPath)
+	if(GetUseOriginalPath())
 	{
 		if(modDoc.m_bHasValidPath && !(name = modDoc.GetPathNameMpt()).empty())
 		{
@@ -121,7 +147,7 @@ mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 		}
 	} else
 	{
-		name = m_csPath + mpt::PathString::FromCStringSilent(modDoc.GetTitle()).SanitizeComponent();
+		name = GetPath() + mpt::PathString::FromCStringSilent(modDoc.GetTitle()).SanitizeComponent();
 	}
 	
 	const mpt::ustring timeStamp = mpt::ToUnicode((CTime::GetCurrentTime()).Format(_T(".AutoSave.%Y%m%d.%H%M%S.")));
@@ -178,7 +204,7 @@ void CAutoSaver::CleanUpBackups(const CModDoc &modDoc)
 {
 	mpt::PathString path;
 	
-	if (m_bUseOriginalPath)
+	if(GetUseOriginalPath())
 	{
 		if (modDoc.m_bHasValidPath && !(path = modDoc.GetPathNameMpt()).empty())
 		{
@@ -191,7 +217,7 @@ void CAutoSaver::CleanUpBackups(const CModDoc &modDoc)
 		}
 	} else
 	{
-		path = m_csPath;
+		path = GetPath();
 	}
 
 	std::vector<mpt::PathString> foundfiles;
@@ -214,7 +240,7 @@ void CAutoSaver::CleanUpBackups(const CModDoc &modDoc)
 	}
 	std::sort(foundfiles.begin(), foundfiles.end());
 	
-	while(foundfiles.size() > (size_t)m_nBackupHistory)
+	while(foundfiles.size() > static_cast<size_t>(GetHistoryDepth()))
 	{
 		DeleteFileW(foundfiles[0].AsNative().c_str());
 		foundfiles.erase(foundfiles.begin());

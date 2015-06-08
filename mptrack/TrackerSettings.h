@@ -570,11 +570,11 @@ public:
 
 	// AutoSave
 
-	Setting<bool> AutosaveEnabled;
-	Setting<uint32> AutosaveIntervalMinutes;
-	Setting<uint32> AutosaveHistoryDepth;
-	Setting<bool> AutosaveUseOriginalPath;
-	Setting<mpt::PathString> AutosavePath;
+	CachedSetting<bool> AutosaveEnabled;
+	CachedSetting<uint32> AutosaveIntervalMinutes;
+	CachedSetting<uint32> AutosaveHistoryDepth;
+	CachedSetting<bool> AutosaveUseOriginalPath;
+	ConfigurableDirectory AutosavePath;
 	
 	// Paths
 
