@@ -52,6 +52,7 @@ BOOL COptionsAdvanced::OnInitDialog()
 
 	m_List.SetExtendedStyle(m_List.GetExtendedStyle() | LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT);
 
+#if _WIN32_WINNT >= 0x0501
 	ListView_EnableGroupView(m_List.m_hWnd, FALSE); // try to set known state
 	int enableGroupsResult1 = static_cast<int>(ListView_EnableGroupView(m_List.m_hWnd, TRUE));
 	int enableGroupsResult2 = static_cast<int>(ListView_EnableGroupView(m_List.m_hWnd, TRUE));
@@ -71,6 +72,9 @@ BOOL COptionsAdvanced::OnInitDialog()
 		ListView_EnableGroupView(m_List.m_hWnd, FALSE);
 		m_listGrouped = false;
 	}
+#else
+	m_listGrouped = false;
+#endif
 
 	if(m_listGrouped)
 	{
@@ -119,14 +123,19 @@ void COptionsAdvanced::ReInit()
 	findStr.MakeLower();
 
 	LVITEMW lvi;
-	lvi.mask = LVIF_TEXT | LVIF_PARAM | (m_listGrouped ? LVIF_GROUPID : 0);
+	lvi.mask = LVIF_TEXT | LVIF_PARAM;
+#if _WIN32_WINNT >= 0x0501
+	lvi.mask |= (m_listGrouped ? LVIF_GROUPID : 0);
+#endif
 	lvi.iSubItem = 0;
 	lvi.state = 0;
 	lvi.stateMask = 0;
 	lvi.cchTextMax = 0;
 	lvi.iImage = 0;
 	lvi.iIndent = 0;
+#if _WIN32_WINNT >= 0x0501
 	lvi.iGroupId = 0;
+#endif
 
 	int i = 0;
 	for(SettingsContainer::SettingsMap::const_iterator it = theApp.GetSettings().begin(); it != theApp.GetSettings().end(); ++it)
@@ -152,6 +161,7 @@ void COptionsAdvanced::ReInit()
 		lvi.iItem = i++;
 		lvi.lParam = m_indexToPath.size();
 
+#if _WIN32_WINNT >= 0x0501
 		if(m_listGrouped)
 		{
 
@@ -184,6 +194,7 @@ void COptionsAdvanced::ReInit()
 			index = static_cast<int>(m_List.SendMessage(LVM_INSERTITEMW, 0, (LPARAM)(&lvi)));
 
 		} else
+#endif
 		{
 
 			const mpt::ustring sectionAndKey = path.FormatAsString();
