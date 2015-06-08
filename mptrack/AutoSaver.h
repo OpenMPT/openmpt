@@ -10,8 +10,6 @@
 
 #pragma once
 
-#include "resource.h"
-
 OPENMPT_NAMESPACE_BEGIN
 
 class CModDoc;

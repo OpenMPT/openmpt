@@ -165,7 +165,6 @@ MODPLUGDIB *CMainFrame::bmpVUMeters = nullptr;
 COLORREF CMainFrame::gcolrefVuMeter[NUM_VUMETER_PENS*2];
 
 CInputHandler *CMainFrame::m_InputHandler = nullptr;
-CAutoSaver *CMainFrame::m_pAutoSaver = nullptr;
 
 static UINT indicators[] =
 {
@@ -267,7 +266,6 @@ CMainFrame::~CMainFrame()
 {
 	DeleteCriticalSection(&g_csAudio);
 	delete m_InputHandler;
-	delete m_pAutoSaver;
 
 	CChannelManagerDlg::DestroySharedInstance();
 	CSoundFile::DeleteStaticdata();
@@ -2061,9 +2059,9 @@ void CMainFrame::OnTimerGUI()
 
 	m_wndToolBar.SetCurrentSong(m_pSndFile);
 
-	if (m_pAutoSaver && m_pAutoSaver->IsEnabled())
+	if(m_AutoSaver.IsEnabled())
 	{
-		bool success = m_pAutoSaver->DoSave(curTime);
+		bool success = m_AutoSaver.DoSave(curTime);
 		if (!success)		// autosave failure; bring up options.
 		{
 			CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_PATHS;
