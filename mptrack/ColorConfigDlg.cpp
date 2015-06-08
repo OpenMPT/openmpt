@@ -105,7 +105,10 @@ BOOL COptionsColors::OnInitDialog()
 		m_ComboItem.SetItemData(m_ComboItem.AddString(colorDefs[i].name), i);
 	}
 	m_ComboItem.SetCurSel(0);
-	m_BtnPreview.SetWindowPos(NULL, 0,0, PREVIEWBMP_WIDTH*2+2, PREVIEWBMP_HEIGHT*2+2, SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
+	m_BtnPreview.SetWindowPos(NULL,
+		0, 0,
+		Util::ScalePixels(PREVIEWBMP_WIDTH * 2, m_hWnd) + 2, Util::ScalePixels(PREVIEWBMP_HEIGHT * 2, m_hWnd) + 2,
+		SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_STDHIGHLIGHT) CheckDlgButton(IDC_CHECK1, BST_CHECKED);
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_EFFECTHILIGHT) CheckDlgButton(IDC_CHECK2, BST_CHECKED);
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_2NDHIGHLIGHT) CheckDlgButton(IDC_CHECK4, BST_CHECKED);
