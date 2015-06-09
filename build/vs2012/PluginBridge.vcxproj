@@ -440,6 +440,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\Win32\$(TargetFileName
     <ClInclude Include="..\..\pluginBridge\AEffectWrapper.h" />
     <ClInclude Include="..\..\pluginBridge\Bridge.h" />
     <ClInclude Include="..\..\pluginBridge\BridgeCommon.h" />
+    <ClInclude Include="..\..\pluginBridge\BridgeOpCodes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\pluginBridge\Bridge.cpp" />

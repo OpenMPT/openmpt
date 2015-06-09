@@ -468,8 +468,23 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 		}
 		MPT_FALLTHROUGH;
 	case audioMasterIOChanged:
-		// Set up new processing file
-		processMem.Open(reinterpret_cast<wchar_t *>(ptr));
+		{
+			// If the song is playing, the rendering thread might be active at the moment,
+			// so we should keep the current processing memory alive until it is done for sure.
+			const CVstPlugin *plug = FromVstPtr<CVstPlugin>(sharedMem->effect.resvd1);
+			const bool isPlaying = plug != nullptr && plug->IsSongPlaying();
+			if(isPlaying)
+			{
+				oldProcessMem.CopyFrom(processMem);
+			}
+			// Set up new processing file
+			processMem.Open(reinterpret_cast<wchar_t *>(ptr));
+			if(isPlaying)
+			{
+				msg->result = 1;
+				return;
+			}
+		}
 		break;
 
 	case audioMasterOpenFileSelector:
@@ -644,9 +659,20 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		break;
 
 	case effVendorSpecific:
-		if(index == kVendorOpenMPT && value == kGetWrapperPointer)
+		if(index == kVendorOpenMPT)
 		{
-			return ToVstPtr<BridgeWrapper>(that);
+			switch(value)
+			{
+			case kGetWrapperPointer:
+				return ToVstPtr<BridgeWrapper>(that);
+
+			case kCloseOldProcessingMemory:
+				{
+					VstIntPtr result = that->oldProcessMem.Good();
+					that->oldProcessMem.Close();
+					return result;
+				}
+			}
 		}
 		break;
 

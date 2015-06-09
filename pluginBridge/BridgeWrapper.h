@@ -63,6 +63,7 @@ class BridgeWrapper : protected BridgeCommon
 {
 protected:
 	Event sigAutomation;
+	MappedMemory oldProcessMem;
 	bool isSettingProgram;
 
 	ERect editRect;

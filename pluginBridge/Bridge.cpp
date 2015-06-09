@@ -13,7 +13,7 @@
 // Optimize out audioMasterProcessEvents the same way as effProcessEvents?
 // Find a nice solution for audioMasterIdle that doesn't break TAL-Elek7ro-II
 // Maybe don't keep opening and closing aux mem files - but they are rarely needed, so would this actually be worth it?
-// Kirnu GUI deadlocks during playback
+// Kirnu and Combo F GUI deadlocks during playback
 
 // Low priority:
 // Speed up things like consecutive calls to CVstPlugin::GetFormattedProgramName by a custom opcode (is this necessary?)
@@ -934,7 +934,7 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 		MPT_FALLTHROUGH;
 	case audioMasterIOChanged:
 		// We need to be sure that the new values are known to the master.
-		if(!processing && nativeEffect != nullptr)
+		if(nativeEffect != nullptr)
 		{
 			UpdateEffectStruct();
 			CreateProcessingFile(dispatchData);

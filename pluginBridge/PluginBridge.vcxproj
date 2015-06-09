@@ -206,6 +206,7 @@ copy /y "$(TargetDir)$(TargetFileName)" "$(TargetDir)..\Win32\$(TargetFileName)"
     <ClInclude Include="AEffectWrapper.h" />
     <ClInclude Include="Bridge.h" />
     <ClInclude Include="BridgeCommon.h" />
+    <ClInclude Include="BridgeOpCodes.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PluginBridge.rc" />

@@ -27,6 +27,7 @@ static void PushToVector(std::vector<char> &data, const T &obj, size_t writeSize
 }
 
 #include "AEffectWrapper.h"
+#include "BridgeOpCodes.h"
 #include "../common/thread.h"
 
 
@@ -182,6 +183,16 @@ public:
 	}
 
 	bool Good() const { return view != nullptr; }
+
+	// Make a copy and detach it from the other object
+	void CopyFrom(MappedMemory &other)
+	{
+		Close();
+		mapFile = other.mapFile;
+		view = other.view;
+		other.mapFile = nullptr;
+		other.view = nullptr;
+	}
 };
 
 
