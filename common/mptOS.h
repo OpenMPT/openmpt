@@ -104,4 +104,32 @@ static inline bool IsAtLeast(mpt::Windows::Version::Number /* version */ ) { ret
 } // namespace mpt
 
 
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+
+namespace mpt
+{
+namespace Wine
+{
+
+std::string RawGetVersion();
+std::string RawGetBuildID();
+std::string RawGetHostSysName();
+std::string RawGetHostRelease();
+
+uint32 Version(uint8 a, uint8 b, uint8 c);
+std::string VersionString(uint8 a, uint8 b, uint8 c);
+std::string VersionString(uint32 v);
+
+uint32 GetVersion();
+
+bool VersionIsBefore(uint8 major, uint8 minor, uint8 update);
+bool VersionIsAtLeast(uint8 major, uint8 minor, uint8 update);
+bool HostIsLinux();
+
+} // namespace Wine
+} // namespace mpt
+
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+
+
 OPENMPT_NAMESPACE_END
