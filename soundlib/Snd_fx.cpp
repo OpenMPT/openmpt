@@ -1164,7 +1164,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	}
 
 	// Reset envelopes
-	if(bResetEnv)
+	if(bResetEnv && !bPorta)
 	{
 		// Blurb by Storlek (from the SchismTracker code):
 		// Conditions experimentally determined to cause envelope reset in Impulse Tracker:
