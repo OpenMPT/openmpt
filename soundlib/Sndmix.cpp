@@ -766,71 +766,73 @@ void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol) const
 }
 
 
-void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol) const
-//--------------------------------------------------------------
+void CSoundFile::ProcessTremor(CHANNELINDEX nChn, int &vol)
+//---------------------------------------------------------
 {
+	ModChannel &chn = m_PlayState.Chn[nChn];
+
 	if(IsCompatibleMode(TRK_FASTTRACKER2))
 	{
 		// FT2 Compatibility: Weird XM tremor.
 		// Test case: Tremor.xm
-		if(pChn->nTremorCount & 0x80)
+		if(chn.nTremorCount & 0x80)
 		{
-			if(!m_SongFlags[SONG_FIRSTTICK] && pChn->nCommand == CMD_TREMOR)
+			if(!m_SongFlags[SONG_FIRSTTICK] && chn.nCommand == CMD_TREMOR)
 			{
-				pChn->nTremorCount &= ~0x20;
-				if(pChn->nTremorCount == 0x80)
+				chn.nTremorCount &= ~0x20;
+				if(chn.nTremorCount == 0x80)
 				{
 					// Reached end of off-time
-					pChn->nTremorCount = (pChn->nTremorParam >> 4) | 0xC0;
-				} else if(pChn->nTremorCount == 0xC0)
+					chn.nTremorCount = (chn.nTremorParam >> 4) | 0xC0;
+				} else if(chn.nTremorCount == 0xC0)
 				{
 					// Reached end of on-time
-					pChn->nTremorCount = (pChn->nTremorParam & 0x0F) | 0x80;
+					chn.nTremorCount = (chn.nTremorParam & 0x0F) | 0x80;
 				} else
 				{
-					pChn->nTremorCount--;
+					chn.nTremorCount--;
 				}
 
-				pChn->dwFlags.set(CHN_FASTVOLRAMP);
+				chn.dwFlags.set(CHN_FASTVOLRAMP);
 			}
 
-			if((pChn->nTremorCount & 0xE0) == 0x80)
+			if((chn.nTremorCount & 0xE0) == 0x80)
 			{
 				vol = 0;
 			}
 		}
-	} else if(pChn->nCommand == CMD_TREMOR)
+	} else if(chn.nCommand == CMD_TREMOR)
 	{
 		// IT compatibility 12. / 13.: Tremor
 		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
-			if((pChn->nTremorCount & 0x80) && pChn->nLength)
+			if((chn.nTremorCount & 0x80) && chn.nLength)
 			{
-				if (pChn->nTremorCount == 0x80)
-					pChn->nTremorCount = (pChn->nTremorParam >> 4) | 0xC0;
-				else if (pChn->nTremorCount == 0xC0)
-					pChn->nTremorCount = (pChn->nTremorParam & 0x0F) | 0x80;
+				if (chn.nTremorCount == 0x80)
+					chn.nTremorCount = (chn.nTremorParam >> 4) | 0xC0;
+				else if (chn.nTremorCount == 0xC0)
+					chn.nTremorCount = (chn.nTremorParam & 0x0F) | 0x80;
 				else
-					pChn->nTremorCount--;
+					chn.nTremorCount--;
 			}
 
-			if((pChn->nTremorCount & 0xC0) == 0x80)
+			if((chn.nTremorCount & 0xC0) == 0x80)
 				vol = 0;
 		} else
 		{
-			uint8 ontime = pChn->nTremorParam >> 4;
-			uint8 n = ontime + (pChn->nTremorParam & 0x0F);	// Total tremor cycle time (On + Off)
+			uint8 ontime = chn.nTremorParam >> 4;
+			uint8 n = ontime + (chn.nTremorParam & 0x0F);	// Total tremor cycle time (On + Off)
 			if ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || m_SongFlags[SONG_ITOLDEFFECTS])
 			{
 				n += 2;
 				ontime++;
 			}
-			uint8 tremcount = pChn->nTremorCount;
+			uint8 tremcount = chn.nTremorCount;
 			if(!(GetType() & MOD_TYPE_XM))
 			{
 				if (tremcount >= n) tremcount = 0;
 				if (tremcount >= ontime) vol = 0;
-				pChn->nTremorCount = tremcount + 1;
+				chn.nTremorCount = tremcount + 1;
 			} else
 			{
 				if(m_SongFlags[SONG_FIRSTTICK])
@@ -842,13 +844,34 @@ void CSoundFile::ProcessTremor(ModChannel *pChn, int &vol) const
 					}
 				} else
 				{
-					pChn->nTremorCount = tremcount + 1;
+					chn.nTremorCount = tremcount + 1;
 				}
 				if (tremcount % n >= ontime) vol = 0;
 			}
 		}
-		pChn->dwFlags.set(CHN_FASTVOLRAMP);
+		chn.dwFlags.set(CHN_FASTVOLRAMP);
 	}
+
+#ifndef NO_VST
+	// Plugin tremor
+	if(chn.nCommand == CMD_TREMOR && chn.pModInstrument && chn.pModInstrument->nMixPlug
+		&& !chn.pModInstrument->dwFlags[INS_MUTE]
+		&& !chn.dwFlags[CHN_MUTE | CHN_SYNCMUTE]
+		&& ModCommand::IsNote(chn.nLastNote))
+	{
+		const ModInstrument *pIns = chn.pModInstrument;
+		IMixPlugin *pPlugin =  m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin;
+		if(pPlugin)
+		{
+			uint8 midiChn = GetBestMidiChannel(nChn);
+			bool isPlaying = pPlugin->isPlaying(chn.nLastNote, midiChn, nChn);
+			if(vol == 0 && isPlaying)
+				pPlugin->MidiCommand(midiChn, pIns->nMidiProgram, pIns->wMidiBank, chn.nLastNote + NOTE_MAX_SPECIAL, 0, nChn);
+			else if(vol != 0 && !isPlaying)
+				pPlugin->MidiCommand(midiChn, pIns->nMidiProgram, pIns->wMidiBank, chn.nLastNote, static_cast<uint16>(chn.nVolume), nChn);
+		}
+	}
+#endif // NO_VST
 }
 
 
@@ -1862,7 +1885,7 @@ bool CSoundFile::ReadNote()
 			ProcessVolumeSwing(pChn, IsCompatibleMode(TRK_IMPULSETRACKER) ? insVol : vol);
 			ProcessPanningSwing(pChn);
 			ProcessTremolo(pChn, vol);
-			ProcessTremor(pChn, vol);
+			ProcessTremor(nChn, vol);
 
 			// Clip volume and multiply (extend to 14 bits)
 			Limit(vol, 0, 256);

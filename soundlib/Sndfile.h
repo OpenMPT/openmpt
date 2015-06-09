@@ -405,7 +405,7 @@ public:
 	CHANNELINDEX m_nChannels;
 	SAMPLEINDEX m_nSamples;
 	INSTRUMENTINDEX m_nInstruments;
-	UINT m_nDefaultSpeed, m_nDefaultGlobalVolume;
+	uint32 m_nDefaultSpeed, m_nDefaultGlobalVolume;
 	TEMPO m_nDefaultTempo;
 	FlagSet<SongFlags> m_SongFlags;
 	CHANNELINDEX m_nMixChannels;
@@ -421,11 +421,11 @@ public:
 	ORDERINDEX m_lockOrderStart, m_lockOrderEnd;
 #endif // MODPLUG_TRACKER
 
-	UINT m_nSamplePreAmp, m_nVSTiVolume;
+	uint32 m_nSamplePreAmp, m_nVSTiVolume;
 	bool IsGlobalVolumeUnset() const { return IsFirstTick(); }
 #ifndef MODPLUG_TRACKER
-	UINT m_nFreqFactor; // Pitch shift factor (65536 = no pitch shifting). Only used in libopenmpt (openmpt::ext::interactive::set_pitch_factor)
-	UINT m_nTempoFactor; // Tempo factor (65536 = no tempo adjustment). Only used in libopenmpt (openmpt::ext::interactive::set_tempo_factor)
+	uint32 m_nFreqFactor; // Pitch shift factor (65536 = no pitch shifting). Only used in libopenmpt (openmpt::ext::interactive::set_pitch_factor)
+	uint32 m_nTempoFactor; // Tempo factor (65536 = no tempo adjustment). Only used in libopenmpt (openmpt::ext::interactive::set_tempo_factor)
 #endif
 
 	// Min Period = highest possible frequency, Max Period = lowest possible frequency for current format
@@ -800,7 +800,7 @@ protected:
 	void ProcessVolumeSwing(ModChannel *pChn, int &vol) const;
 	void ProcessPanningSwing(ModChannel *pChn) const;
 	void ProcessTremolo(ModChannel *pChn, int &vol) const;
-	void ProcessTremor(ModChannel *pChn, int &vol) const;
+	void ProcessTremor(CHANNELINDEX nChn, int &vol);
 
 	bool IsEnvelopeProcessed(const ModChannel *pChn, EnvelopeType env) const;
 	void ProcessVolumeEnvelope(ModChannel *pChn, int &vol) const;
