@@ -94,17 +94,6 @@ typedef AEffectProto<int64_t> AEffect64;
 #pragma pack(pop)
 
 
-enum VendorSpecificOpCodes
-{
-	kUpdateEffectStruct = 0,
-	kUpdateProcessingBuffer,
-	kGetWrapperPointer,
-	kUpdateEventMemName,
-
-	kVendorOpenMPT = CCONST('O', 'M', 'P', 'T'),
-};
-
-
 // Translate a VSTEvents struct to bridge format (placed in data vector)
 static void TranslateVSTEventsToBridge(std::vector<char> &data, const VstEvents *events, int32_t targetPtrSize)
 {

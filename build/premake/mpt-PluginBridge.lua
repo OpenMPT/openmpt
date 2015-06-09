@@ -15,6 +15,7 @@
    "../../pluginBridge/Bridge.cpp",
    "../../pluginBridge/Bridge.h",
    "../../pluginBridge/BridgeCommon.h",
+   "../../pluginBridge/BridgeOpCodes.h",
    "../../pluginBridge/PluginBridge.rc",
   }
   defines { "MODPLUG_TRACKER" }

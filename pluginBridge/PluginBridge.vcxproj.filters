@@ -10,6 +10,9 @@
     <ClInclude Include="Bridge.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BridgeOpCodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

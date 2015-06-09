@@ -706,6 +706,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\pluginBridge\BridgeOpCodes.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\pluginBridge\PluginBridge.rc"
 			>
 		</File>

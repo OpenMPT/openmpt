@@ -26,6 +26,7 @@
 #include "../common/mptFileIO.h"
 #include "../common/FileReader.h"
 #include "FileDialog.h"
+#include "../pluginBridge/BridgeOpCodes.h"
 #include "../soundlib/plugins/OpCodes.h"
 #include "../soundlib/mod_specifications.h"
 
@@ -165,7 +166,8 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 				// Time signature. numerator = rows per beats / rows pear measure (should sound somewhat logical to you).
 				// the denominator is a bit more tricky, since it cannot be set explicitely. so we just assume quarters for now.
-				timeInfo.timeSigNumerator = sndFile.m_PlayState.m_nCurrentRowsPerMeasure / std::max(sndFile.m_PlayState.m_nCurrentRowsPerBeat, ROWINDEX(1));
+				ROWINDEX rpb = std::max(sndFile.m_PlayState.m_nCurrentRowsPerBeat, ROWINDEX(1));
+				timeInfo.timeSigNumerator = std::max(sndFile.m_PlayState.m_nCurrentRowsPerMeasure, rpb) / rpb;
 				timeInfo.timeSigDenominator = 4; //gcd(pSndFile->m_nCurrentRowsPerMeasure, pSndFile->m_nCurrentRowsPerBeat);
 			}
 		}
@@ -1154,11 +1156,11 @@ CString CVstPlugin::GetFormattedProgramName(VstInt32 index)
 	CString formattedName;
 	if((unsigned char)rawname[0] < ' ')
 	{
-		formattedName.Format("%02d - Program %d", index, index);
+		formattedName.Format("%02u - Program %u", index, index);
 	}
 	else
 	{
-		formattedName.Format("%02d - %s", index, rawname);
+		formattedName.Format("%02u - %s", index, rawname);
 	}
 
 	return formattedName;
@@ -1194,14 +1196,8 @@ PlugParamValue CVstPlugin::GetParameter(PlugParamIndex nIndex)
 			//CVstPluginManager::ReportPlugException("Exception in getParameter (Plugin=\"%s\")!\n", m_Factory.szLibraryName);
 		}
 	}
-	//rewbs.VSTcompliance
-	if (fResult<0.0f)
-		return 0.0f;
-	else if (fResult>1.0f)
-		return 1.0f;
-	else
-	//end rewbs.VSTcompliance
-		return fResult;
+	Limit(fResult, 0.0f, 1.0f);
+	return fResult;
 }
 
 
@@ -1482,15 +1478,15 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 	// If the plug is found & ok, continue
 	if(m_pProcessFP != nullptr && (mixBuffer.GetInputBufferArray()) && mixBuffer.GetOutputBufferArray() && m_pMixStruct != nullptr)
 	{
-
+		VstInt32 numInputs = m_Effect.numInputs, numOutputs = m_Effect.numOutputs;
 		//RecalculateGain();
 
 		// Merge stereo input before sending to the plug if the plug can only handle one input.
-		if (m_Effect.numInputs == 1)
+		if (numInputs == 1)
 		{
 			for (size_t i = 0; i < nSamples; i++)
 			{
-				m_MixState.pOutBufferL[i] = 0.5f * m_MixState.pOutBufferL[i] + 0.5f * m_MixState.pOutBufferR[i];
+				m_MixState.pOutBufferL[i] = 0.5f * (m_MixState.pOutBufferL[i] + m_MixState.pOutBufferR[i]);
 			}
 		}
 
@@ -1515,15 +1511,15 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 		ASSERT(outputBuffers != nullptr);
 
 		// Mix outputs of multi-output VSTs:
-		if(m_Effect.numOutputs > 2)
+		if(numOutputs > 2)
 		{
 			// first, mix extra outputs on a stereo basis
-			VstInt32 numOutputs = m_Effect.numOutputs;
+			VstInt32 outs = numOutputs;
 			// so if nOuts is not even, let process the last output later
-			if((numOutputs % 2u) == 1) numOutputs--;
+			if((outs % 2u) == 1) outs--;
 
 			// mix extra stereo outputs
-			for(VstInt32 iOut = 2; iOut < numOutputs; iOut++)
+			for(VstInt32 iOut = 2; iOut < outs; iOut++)
 			{
 				for(size_t i = 0; i < nSamples; i++)
 				{
@@ -1532,21 +1528,21 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 			}
 
 			// if m_Effect.numOutputs is odd, mix half the signal of last output to each channel
-			if(numOutputs != m_Effect.numOutputs)
+			if(outs != numOutputs)
 			{
 				// trick : if we are here, numOutputs = m_Effect.numOutputs - 1 !!!
 				for(size_t i = 0; i < nSamples; i++)
 				{
-					float v = 0.5f * outputBuffers[numOutputs][i];
+					float v = 0.5f * outputBuffers[outs][i];
 					outputBuffers[0][i] += v;
 					outputBuffers[1][i] += v;
 				}
 			}
 		}
 
-		if(m_Effect.numOutputs != 0)
+		if(numOutputs != 0)
 		{
-			ProcessMixOps(pOutL, pOutR, outputBuffers[0], outputBuffers[m_Effect.numOutputs > 1 ? 1 : 0], nSamples);
+			ProcessMixOps(pOutL, pOutR, outputBuffers[0], outputBuffers[numOutputs > 1 ? 1 : 0], nSamples);
 		}
 
 		// If dry mix is ticked, we add the unprocessed buffer,
@@ -1558,6 +1554,12 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 				pOutL[i] += m_MixState.pOutBufferL[i];
 				pOutR[i] += m_MixState.pOutBufferR[i];
 			}
+		}
+
+		// If the I/O format of the bridge changed in the meanwhile, update it now.
+		if(isBridged && Dispatch(effVendorSpecific, kVendorOpenMPT, kCloseOldProcessingMemory, nullptr, 0.0f) != 0)
+		{
+			InitializeIOBuffers();
 		}
 	}
 
@@ -2018,6 +2020,7 @@ void CVstPlugin::AutomateParameter(PlugParamIndex param)
 		pModDoc->RecordParamChange(GetSlot(), param);
 	}
 
+	// TODO: This should rather be posted to the GUI thread!
 	CAbstractVstEditor *pVstEditor = GetEditor();
 
 	if(pVstEditor && pVstEditor->m_hWnd)
