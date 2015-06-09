@@ -1065,17 +1065,17 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		pSmp = nullptr;
 	}
 
-	const bool newTuning = (GetType() == MOD_TYPE_MPT && pIns && pIns->pTuning);
-	// Playback behavior change for MPT: With portamento don't change sample if it is in
-	// the same instrument as previous sample.
-	if(bPorta && newTuning && pIns == pChn->pModInstrument)
-		return;
-
 	bool returnAfterVolumeAdjust = false;
 
 	// instrumentChanged is used for IT carry-on env option
 	bool instrumentChanged = (pIns != pChn->pModInstrument);
 	const bool sampleChanged = (pChn->pModSample != nullptr) && (pSmp != pChn->pModSample);
+
+	const bool newTuning = (GetType() == MOD_TYPE_MPT && pIns && pIns->pTuning);
+	// Playback behavior change for MPT: With portamento don't change sample if it is in
+	// the same instrument as previous sample.
+	if(bPorta && newTuning && pIns == pChn->pModInstrument && sampleChanged)
+		return;
 
 	if(sampleChanged && bPorta)
 	{
@@ -1164,7 +1164,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	}
 
 	// Reset envelopes
-	if(bResetEnv && !bPorta)
+	if(bResetEnv)
 	{
 		// Blurb by Storlek (from the SchismTracker code):
 		// Conditions experimentally determined to cause envelope reset in Impulse Tracker:
@@ -1471,7 +1471,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 	// Test case: PanReset.it
 	if(IsCompatibleMode(TRK_IMPULSETRACKER)) ApplyInstrumentPanning(pChn, pIns, pSmp);
 
-	if(bResetEnv)
+	if(bResetEnv && !bPorta)
 	{
 		pChn->nVolSwing = pChn->nPanSwing = 0;
 		pChn->nResSwing = pChn->nCutSwing = 0;
