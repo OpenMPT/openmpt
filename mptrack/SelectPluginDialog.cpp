@@ -94,7 +94,7 @@ BOOL CSelectPluginDlg::OnInitDialog()
 	if (m_pPlugin)
 	{
 		CString targetSlot;
-		targetSlot.Format(_T("&Put in FX%02d"), m_nPlugSlot + 1);
+		targetSlot.Format(_T("&Put in FX%02u"), m_nPlugSlot + 1);
 		SetDlgItemText(IDOK, targetSlot);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDOK), TRUE);
 	} else
@@ -104,10 +104,13 @@ BOOL CSelectPluginDlg::OnInitDialog()
 
 	const int dpiX = Util::GetDPIx(m_hWnd);
 	const int dpiY = Util::GetDPIy(m_hWnd);
-	MoveWindow(MulDiv(TrackerSettings::Instance().gnPlugWindowX, dpiX, 96),
-		MulDiv(TrackerSettings::Instance().gnPlugWindowY, dpiY, 96),
-		MulDiv(TrackerSettings::Instance().gnPlugWindowWidth, dpiX, 96),
-		MulDiv(TrackerSettings::Instance().gnPlugWindowHeight, dpiY, 96));
+	CRect rect
+	(
+		CPoint(MulDiv(TrackerSettings::Instance().gnPlugWindowX, dpiX, 96), MulDiv(TrackerSettings::Instance().gnPlugWindowY, dpiY, 96)),
+		CSize(MulDiv(TrackerSettings::Instance().gnPlugWindowWidth, dpiX, 96), MulDiv(TrackerSettings::Instance().gnPlugWindowHeight, dpiY, 96))
+	);
+	::MapWindowPoints(GetParent()->m_hWnd, HWND_DESKTOP, (CPoint *)&rect, 2);
+	MoveWindow(rect);
 
 	UpdatePluginsList();
 	OnSelChanged(NULL, NULL);
@@ -220,6 +223,7 @@ void CSelectPluginDlg::SaveWindowPos() const
 {
 	CRect rect;
 	GetWindowRect(&rect);
+	::MapWindowPoints(HWND_DESKTOP, GetParent()->m_hWnd, (CPoint *)&rect, 2);
 	const int dpiX = Util::GetDPIx(m_hWnd);
 	const int dpiY = Util::GetDPIy(m_hWnd);
 	TrackerSettings::Instance().gnPlugWindowX = MulDiv(rect.left, 96, dpiX);
