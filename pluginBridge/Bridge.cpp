@@ -208,6 +208,13 @@ void PluginBridge::MessageThread()
 		{
 			MessageHandler();
 		}
+		// 4klang VSTi creates its custom window in the message thread, and it will freeze if we don't dispatch messages here...
+		MSG msg;
+		while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		{
+			::TranslateMessage(&msg);
+			::DispatchMessage(&msg);
+		}
 	} while(result != WAIT_OBJECT_0 + 2 && result != WAIT_FAILED && !closeInstance);
 
 	if(!closeInstance)
