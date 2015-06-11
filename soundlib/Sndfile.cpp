@@ -438,8 +438,8 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 					bool found = false;
 					for(std::vector<SNDMIXPLUGININFO *>::const_iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
 					{
-						if((**i).dwPluginId2 == (**i).dwPluginId2
-							&& (**i).dwPluginId1 == (**i).dwPluginId1)
+						if((**i).dwPluginId2 == m_MixPlugins[plug].Info.dwPluginId2
+							&& (**i).dwPluginId1 == m_MixPlugins[plug].Info.dwPluginId1)
 						{
 							found = true;
 							break;
