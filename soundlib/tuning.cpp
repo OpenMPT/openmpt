@@ -61,25 +61,25 @@ Version changes:
 
 
 static RATIOTYPE Pow(const RATIOTYPE r, const STEPINDEXTYPE s)
-//-------------------------------------------------------------
+//------------------------------------------------------------
 {
 	if(s == 0) return 1;
 	RATIOTYPE result = r;
-	STEPINDEXTYPE absS = (s > 0) ? s : -s;
-	for(STEPINDEXTYPE i = 1; i<absS; i++) result *= r;
+	STEPINDEXTYPE absS = std::abs(s);
+	for(STEPINDEXTYPE i = 1; i < absS; i++) result *= r;
 	return (s > 0) ? result : 1/result;
 }
 
 
 CTuningRTI::CTuningRTI(const CTuning* const pTun)
-//------------------------------------------
+//-----------------------------------------------
 {
 	SetDummyValues();
 	if(pTun) TuningCopy(*this, *pTun);
 }
 
 void CTuningRTI::SetDummyValues()
-//---------------------------------
+//-------------------------------
 {
 	if(MayEdit(EM_RATIOS))
 	{
@@ -94,11 +94,11 @@ void CTuningRTI::SetDummyValues()
 
 
 bool CTuningRTI::CreateRatioTableGG(const std::vector<RATIOTYPE>& v, const RATIOTYPE r, const VRPAIR& vr, const NOTEINDEXTYPE ratiostartpos)
-//-------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(v.size() == 0 || r <= 0) return true;
 
-    m_StepMin = vr.first;
+	m_StepMin = vr.first;
 	ProSetGroupSize(static_cast<UNOTEINDEXTYPE>(v.size()));
 	ProSetGroupRatio(r);
 
@@ -119,7 +119,7 @@ bool CTuningRTI::CreateRatioTableGG(const std::vector<RATIOTYPE>& v, const RATIO
 
 
 bool CTuningRTI::ProCreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RATIOTYPE& r, const VRPAIR& vr, const NOTEINDEXTYPE ratiostartpos)
-//---------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	//Note: Setting finestep is handled by base class when CreateGroupGeometric is called.
 	if(CreateRatioTableGG(v, r, vr, ratiostartpos)) return true;
@@ -128,7 +128,7 @@ bool CTuningRTI::ProCreateGroupGeometric(const std::vector<RATIOTYPE>& v, const 
 
 
 bool CTuningRTI::ProCreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r, const VRPAIR& vr)
-//---------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 {
 	if(vr.second - vr.first + 1 > NOTEINDEXTYPE_MAX) return true;
 	//Note: Setting finestep is handled by base class when CreateGeometric is called.
@@ -146,12 +146,12 @@ bool CTuningRTI::ProCreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r,
 	return false;
 }
 
-CTuningRTI::NOTESTR CTuningRTI::ProGetNoteName(const NOTEINDEXTYPE& x) const
-//-----------------------------------------------------
+CTuningRTI::NOTESTR CTuningRTI::ProGetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
+//------------------------------------------------------------------------------------------
 {
 	if(GetGroupSize() < 1)
 	{
-		return CTuning::ProGetNoteName(x);
+		return CTuning::ProGetNoteName(x, addOctave);
 	}
 	else
 	{
@@ -162,7 +162,13 @@ CTuningRTI::NOTESTR CTuningRTI::ProGetNoteName(const NOTEINDEXTYPE& x) const
 		if(nmi != m_NoteNameMap.end())
 		{
 			rValue = nmi->second;
-			(x >= 0) ? rValue += mpt::ToString(middlePeriodNumber + x/m_GroupSize) : rValue += mpt::ToString(middlePeriodNumber + (x+1)/m_GroupSize - 1);
+			if(addOctave)
+			{
+				if(x >= 0)
+					rValue += mpt::ToString(middlePeriodNumber + x / m_GroupSize);
+				else
+					rValue += mpt::ToString(middlePeriodNumber + (x + 1) / m_GroupSize - 1);
+			}
 		}
 		else
 		{
@@ -173,7 +179,13 @@ CTuningRTI::NOTESTR CTuningRTI::ProGetNoteName(const NOTEINDEXTYPE& x) const
 
 			rValue += ":";
 
-			(x >= 0) ? rValue += mpt::ToString(middlePeriodNumber + x/m_GroupSize) : rValue += mpt::ToString(middlePeriodNumber + (x+1)/m_GroupSize - 1);
+			if(addOctave)
+			{
+				if(x >= 0)
+					rValue += mpt::ToString(middlePeriodNumber + x/m_GroupSize);
+				else
+					rValue += mpt::ToString(middlePeriodNumber + (x+1)/m_GroupSize - 1);
+			}
 		}
 		return rValue;
 	}
@@ -185,7 +197,7 @@ const RATIOTYPE CTuningRTI::s_DefaultFallbackRatio = 1.0f;
 
 //Without finetune
 CTuning::RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& stepsFromCentre) const
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
 {
 	if(stepsFromCentre < m_StepMin) return s_DefaultFallbackRatio;
 	if(stepsFromCentre >= m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size())) return s_DefaultFallbackRatio;
@@ -195,7 +207,7 @@ CTuning::RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& stepsFromCentre) co
 
 //With finetune
 CTuning::RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& baseNote, const STEPINDEXTYPE& baseStepDiff) const
-//----------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------
 {
 	const STEPINDEXTYPE fsCount = static_cast<STEPINDEXTYPE>(GetFineStepCount());
 	if(fsCount == 0 || baseStepDiff == 0)
@@ -222,7 +234,7 @@ CTuning::RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& baseNote, const STE
 		fineStep = ((fsCount + 1) - (abs(baseStepDiff) % (fsCount+1))) % (fsCount+1);
 	}
 
-    if(note < m_StepMin) return s_DefaultFallbackRatio;
+	if(note < m_StepMin) return s_DefaultFallbackRatio;
 	if(note >= m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size())) return s_DefaultFallbackRatio;
 
 	if(fineStep) return m_RatioTable[note - m_StepMin] * GetRatioFine(note, fineStep);
@@ -231,7 +243,7 @@ CTuning::RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& baseNote, const STE
 
 
 CTuning::RATIOTYPE CTuningRTI::GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE sd) const
-//--------------------------------------------------------------
+//---------------------------------------------------------------------------------------------
 {
 	if(GetFineStepCount() <= 0)
 		return 1;
@@ -244,7 +256,7 @@ CTuning::RATIOTYPE CTuningRTI::GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDE
 	{
 		if(GetType() == TT_GEOMETRIC)
 		{
-            return m_RatioTableFine[sd-1];
+			return m_RatioTableFine[sd-1];
 		}
 		if(GetType() == TT_GROUPGEOMETRIC)
 			return m_RatioTableFine[GetRefNote(note) * GetFineStepCount() + sd - 1];
@@ -263,7 +275,7 @@ CTuning::RATIOTYPE CTuningRTI::GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDE
 
 
 bool CTuningRTI::ProSetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
-//--------------------------------------------------------------
+//----------------------------------------------------------------------
 {
 	//Creating ratio table if doesn't exist.
 	if(m_RatioTable.empty())
@@ -293,7 +305,7 @@ CTuningRTI::VRPAIR CTuningRTI::ProSetValidityRange(const VRPAIR&)
 
 
 void CTuningRTI::ProSetFineStepCount(const USTEPINDEXTYPE& fs)
-//-----------------------------------------------------
+//------------------------------------------------------------
 {
 	if(fs <= 0)
 	{
@@ -360,7 +372,7 @@ void CTuningRTI::ProSetFineStepCount(const USTEPINDEXTYPE& fs)
 
 
 CTuningRTI::NOTEINDEXTYPE CTuningRTI::GetRefNote(const NOTEINDEXTYPE note) const
-//------------------------------------------------------
+//------------------------------------------------------------------------------
 {
 	if(!IsOfType(TT_GROUPGEOMETRIC)) return 0;
 
@@ -370,7 +382,7 @@ CTuningRTI::NOTEINDEXTYPE CTuningRTI::GetRefNote(const NOTEINDEXTYPE note) const
 
 
 CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
-//--------------------------------------------------
+//---------------------------------------------------
 {
 	if(iStrm.fail())
 		return nullptr;
@@ -393,7 +405,7 @@ CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
 	ssb.ReadItem(pTuning->m_SerHelperRatiotableSize, "RTI4");
 
 	// If reader status is ok and m_StepMin is somewhat reasonable, process data.
-	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) == 0 && pTuning->m_StepMin >= -300 && pTuning->m_StepMin <= 300) 
+	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) == 0 && pTuning->m_StepMin >= -300 && pTuning->m_StepMin <= 300)
 	{
 		EDITMASK temp = pTuning->GetEditMask();
 		pTuning->m_EditMask = EM_ALLOWALL; //Allowing all while processing data.
@@ -407,7 +419,7 @@ CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
 			delete pTuning; pTuning = nullptr;
 		}
 		else
-		{ 
+		{
 			USTEPINDEXTYPE fsTemp = pTuning->m_FineStepCount;
 			pTuning->m_FineStepCount = 0;
 			pTuning->SetFineStepCount(fsTemp);
@@ -441,7 +453,7 @@ bool CTuningRTI::ProProcessUnserializationdata()
 
 template<class T, class SIZETYPE>
 bool VectorFromBinaryStream(std::istream& inStrm, std::vector<T>& v, const SIZETYPE maxSize = (std::numeric_limits<SIZETYPE>::max)())
-//---------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------------------
 {
 	if(!inStrm.good()) return true;
 
@@ -464,7 +476,7 @@ bool VectorFromBinaryStream(std::istream& inStrm, std::vector<T>& v, const SIZET
 
 
 CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(std::ostream& outStrm) const
-//----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 {
 	srlztn::SsbWrite ssb(outStrm);
 	ssb.BeginWrite("CTB244RTI", (GetVersion() << 24) + GetClassVersion());
@@ -506,7 +518,7 @@ namespace CTuningS11n
 {
 
 void RatioWriter::operator()(std::ostream& oStrm, const std::vector<float>& v)
-//---------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 {
 	const size_t nWriteCount = MIN(v.size(), m_nWriteCount);
 	mpt::IO::WriteAdaptiveInt64LE(oStrm, nWriteCount);
@@ -516,7 +528,7 @@ void RatioWriter::operator()(std::ostream& oStrm, const std::vector<float>& v)
 
 
 void ReadNoteMap(std::istream& iStrm, CTuning::NOTENAMEMAP& m, const size_t)
-//----------------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 {
 	uint64 val;
 	mpt::IO::ReadAdaptiveInt64LE(iStrm, val);
@@ -533,7 +545,7 @@ void ReadNoteMap(std::istream& iStrm, CTuning::NOTENAMEMAP& m, const size_t)
 
 
 void ReadRatioTable(std::istream& iStrm, std::vector<CTuningRTI::RATIOTYPE>& v, const size_t)
-//------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------
 {
 	uint64 val;
 	mpt::IO::ReadAdaptiveInt64LE(iStrm, val);
@@ -548,7 +560,7 @@ void ReadRatioTable(std::istream& iStrm, std::vector<CTuningRTI::RATIOTYPE>& v, 
 
 
 void ReadStr(std::istream& iStrm, std::string& str, const size_t)
-//-------------------------------------------------------------------
+//---------------------------------------------------------------
 {
 	uint64 val;
 	mpt::IO::ReadAdaptiveInt64LE(iStrm, val);
@@ -560,7 +572,7 @@ void ReadStr(std::istream& iStrm, std::string& str, const size_t)
 
 
 void WriteNoteMap(std::ostream& oStrm, const CTuning::NOTENAMEMAP& m)
-//---------------------------------------------------------------------------
+//-------------------------------------------------------------------
 {
 	mpt::IO::WriteAdaptiveInt64LE(oStrm, m.size());
 	CTuning::NNM_CITER iter = m.begin();
@@ -574,7 +586,7 @@ void WriteNoteMap(std::ostream& oStrm, const CTuning::NOTENAMEMAP& m)
 
 
 void WriteStr(std::ostream& oStrm, const std::string& str)
-//-----------------------------------------------------------------
+//--------------------------------------------------------
 {
 	mpt::IO::WriteAdaptiveInt64LE(oStrm, str.size());
 	oStrm.write(str.c_str(), str.size());

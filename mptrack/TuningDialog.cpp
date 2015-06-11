@@ -125,12 +125,12 @@ void CTuningDialog::DeleteTreeItem(CTuning* pT)
 }
 
 void CTuningDialog::DeleteTreeItem(CTuningCollection* pTC)
-//---------------------------------------------
+//--------------------------------------------------------
 {
 	if(!pTC)
 		return;
 
-	m_pActiveTuning = NULL;
+	m_pActiveTuning = nullptr;
 	const HTREEITEM temp = m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(pTC));
 	if(temp)
 	{
@@ -139,12 +139,12 @@ void CTuningDialog::DeleteTreeItem(CTuningCollection* pTC)
 
 		CTuningCollection* pTCprev = prevTTI.GetTC();
 		CTuningCollection* pTCnext = nextTTI.GetTC();
-		if(pTCnext == NULL)
+		if(pTCnext == nullptr)
 			pTCnext = GetpTuningCollection(nextTTI.GetT());
-		if(pTCprev == NULL)
+		if(pTCprev == nullptr)
 			pTCprev = GetpTuningCollection(prevTTI.GetT());
 
-		if(pTCnext != NULL && pTCnext != m_pActiveTuningCollection)
+		if(pTCnext != nullptr && pTCnext != m_pActiveTuningCollection)
 			m_pActiveTuningCollection = pTCnext;
 		else
 		{
@@ -601,7 +601,7 @@ void CTuningDialog::UpdateRatioMapEdits(const NOTEINDEXTYPE& note)
 	m_RatioEditApply = false;
 	m_EditRatio.SetWindowText(mpt::ToString(m_pActiveTuning->GetRatio(note)).c_str());
 	m_NoteEditApply = false;
-	m_EditNotename.SetWindowText(m_pActiveTuning->GetNoteName(note).c_str());
+	m_EditNotename.SetWindowText(m_pActiveTuning->GetNoteName(note, false).c_str());
 
 	m_EditRatio.Invalidate();
 	m_EditNotename.Invalidate();
