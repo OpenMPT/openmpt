@@ -89,7 +89,7 @@ const CTuningBase::TUNINGTYPE CTuningBase::TT_GEOMETRIC = 3; //0...11b
 
 
 void CTuningBase::TuningCopy(CTuningBase& to, const CTuningBase& from, const bool allowExactnamecopy)
-//------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------
 {
 	if(!to.MayEdit(EM_ALLOWALL))
 		return;
@@ -121,7 +121,7 @@ void CTuningBase::TuningCopy(CTuningBase& to, const CTuningBase& from, const boo
 
 
 bool CTuningBase::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
-//-----------------------------------------------------------------
+//--------------------------------------------------------------------
 {
 	if(MayEdit(EM_RATIOS))
 	{
@@ -138,7 +138,7 @@ bool CTuningBase::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
 
 
 CTuningBase::USTEPINDEXTYPE CTuningBase::SetFineStepCount(const USTEPINDEXTYPE& fs)
-//-------------------------------------------------------
+//---------------------------------------------------------------------------------
 {
 	VRPAIR vrp = GetValidityRange();
 
@@ -157,7 +157,7 @@ CTuningBase::USTEPINDEXTYPE CTuningBase::SetFineStepCount(const USTEPINDEXTYPE& 
 
 
 CTuningBase::TUNINGTYPE CTuningBase::GetTuningType(const char* str)
-//--------------------------------------------------------------------------
+//-----------------------------------------------------------------
 {
 	if(!strcmp(str, s_TuningTypeStrGroupGeometric))
 		return TT_GROUPGEOMETRIC;
@@ -169,7 +169,7 @@ CTuningBase::TUNINGTYPE CTuningBase::GetTuningType(const char* str)
 
 
 std::string CTuningBase::GetTuningTypeStr(const TUNINGTYPE& tt)
-//----------------------------------------------------------------
+//-------------------------------------------------------------
 {
 	if(tt == TT_GENERAL)
 		return s_TuningTypeStrGeneral;
@@ -183,16 +183,16 @@ std::string CTuningBase::GetTuningTypeStr(const TUNINGTYPE& tt)
 
 
 
-CTuningBase::NOTESTR CTuningBase::GetNoteName(const NOTEINDEXTYPE& x) const
-//-----------------------------------------------------------------------
+CTuningBase::NOTESTR CTuningBase::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
+//-----------------------------------------------------------------------------------------
 {
 	if(!IsValidNote(x)) return "";
-	else return ProGetNoteName(x);
+	else return ProGetNoteName(x, addOctave);
 }
 
 
-CTuningBase::NOTESTR CTuningBase::ProGetNoteName(const NOTEINDEXTYPE& x) const
-//-------------------------------------------------------------------------------------
+CTuningBase::NOTESTR CTuningBase::ProGetNoteName(const NOTEINDEXTYPE& x, bool /*addOctave*/) const
+//------------------------------------------------------------------------------------------------
 {
 	NNM_CITER i = m_NoteNameMap.find(x);
 	if(i != m_NoteNameMap.end())
@@ -204,7 +204,7 @@ CTuningBase::NOTESTR CTuningBase::ProGetNoteName(const NOTEINDEXTYPE& x) const
 
 
 bool CTuningBase::IsOfType(const TUNINGTYPE& type) const
-//----------------------------------------------------
+//------------------------------------------------------
 {
 	if(type == TT_GENERAL)
 		return true;
@@ -224,7 +224,7 @@ bool CTuningBase::IsOfType(const TUNINGTYPE& type) const
 
 
 bool CTuningBase::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
-//-----------------------------------------------------------------------
+//---------------------------------------------------------------------------
 {
 	if(MayEdit(EM_NOTENAME))
 	{
@@ -238,7 +238,7 @@ bool CTuningBase::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
 
 
 bool CTuningBase::ClearNoteName(const NOTEINDEXTYPE& n, const bool eraseAll)
-//-------------------------------------------------------
+//--------------------------------------------------------------------------
 {
 	if(MayEdit(EM_NOTENAME))
 	{
@@ -263,7 +263,7 @@ bool CTuningBase::ClearNoteName(const NOTEINDEXTYPE& n, const bool eraseAll)
 
 
 bool CTuningBase::Multiply(const RATIOTYPE& r)
-//---------------------------------------------------
+//--------------------------------------------
 {
 	if(r <= 0 || !MayEdit(EM_RATIOS))
 		return true;
@@ -281,7 +281,7 @@ bool CTuningBase::Multiply(const RATIOTYPE& r)
 
 
 bool CTuningBase::CreateGroupGeometric(const NOTEINDEXTYPE& s, const RATIOTYPE& r, const NOTEINDEXTYPE& startindex)
-//-------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------
 {
 	if(s < 1 || r <= 0 || startindex < GetValidityRange().first)
 		return true;
@@ -295,7 +295,7 @@ bool CTuningBase::CreateGroupGeometric(const NOTEINDEXTYPE& s, const RATIOTYPE& 
 
 
 bool CTuningBase::CreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RATIOTYPE& r, const VRPAIR vr, const NOTEINDEXTYPE ratiostartpos)
-//------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(MayEdit(EM_RATIOS) &&
 		(MayEdit(EM_TYPE) || GetType() == TT_GROUPGEOMETRIC))
@@ -320,7 +320,7 @@ bool CTuningBase::CreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RA
 
 
 bool CTuningBase::CreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r, const VRPAIR vr)
-//-------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------
 {
 	if(MayEdit(EM_RATIOS) &&
 	  (MayEdit(EM_TYPE) || GetType() == TT_GEOMETRIC))
@@ -344,7 +344,7 @@ bool CTuningBase::CreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r, c
 
 
 bool CTuningBase::ChangeGroupsize(const NOTEINDEXTYPE& s)
-//---------------------------------------------------
+//-------------------------------------------------------
 {
 	if(!MayEdit(EM_RATIOS) || s < 1)
 		return true;
@@ -361,7 +361,7 @@ bool CTuningBase::ChangeGroupsize(const NOTEINDEXTYPE& s)
 
 
 bool CTuningBase::ChangeGroupRatio(const RATIOTYPE& r)
-//---------------------------------------------------
+//----------------------------------------------------
 {
 	if(!MayEdit(EM_RATIOS) || r <= 0)
 		return true;
@@ -378,7 +378,7 @@ bool CTuningBase::ChangeGroupRatio(const RATIOTYPE& r)
 
 
 const char* CTuningBase::GetTuningTypeDescription(const TUNINGTYPE& type)
-//---------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 {
 	if(type == TT_GENERAL)
 		return s_TuningDescriptionGeneral;
@@ -391,7 +391,7 @@ const char* CTuningBase::GetTuningTypeDescription(const TUNINGTYPE& type)
 
 
 CTuningBase::VRPAIR CTuningBase::SetValidityRange(const VRPAIR& vrp)
-//----------------------------------------------------------------------------------------
+//------------------------------------------------------------------
 {
 	if(vrp.second < vrp.first) return GetValidityRange();
 	if(IsStepCountRangeSufficient(GetFineStepCount(), vrp)
@@ -406,7 +406,7 @@ CTuningBase::VRPAIR CTuningBase::SetValidityRange(const VRPAIR& vrp)
 
 
 bool CTuningBase::SetType(const TUNINGTYPE& tt)
-//----------------------------------------------
+//---------------------------------------------
 {
 	//Note: This doesn't check whether the tuning ratios
 	//are consistent with given type.
@@ -429,7 +429,7 @@ bool CTuningBase::SetType(const TUNINGTYPE& tt)
 
 
 bool CTuningBase::DeserializeOLD(std::istream& inStrm)
-//------------------------------------------------
+//----------------------------------------------------
 {
 	char begin[8];
 	int16 version;
