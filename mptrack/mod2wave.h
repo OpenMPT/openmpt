@@ -52,8 +52,9 @@ struct CWaveConvertSettings
 	int repeatCount;
 	ORDERINDEX minOrder, maxOrder;
 
-	bool Normalize;
-	bool SilencePlugBuffers;
+	bool normalize : 1;
+	bool silencePlugBuffers : 1;
+	bool outputToSample : 1;
 
 	std::size_t FindEncoder(const mpt::ustring &name) const;
 	void SelectEncoder(std::size_t index);
@@ -129,7 +130,7 @@ class CDoWaveConvert: public CDialog
 public:
 	const CWaveConvertSettings &m_Settings;
 	CSoundFile &m_SndFile;
-	mpt::PathString m_lpszFileName;
+	const mpt::PathString &m_lpszFileName;
 	uint64 m_dwFileLimit, m_dwSongLimit;
 	bool m_bAbort, m_bGivePlugsIdleTime;
 
