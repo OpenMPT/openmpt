@@ -1835,9 +1835,9 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 					if(smp == SAMPLEINDEX_INVALID)
 					{
 						Reporting::Error(_T("Too many samples!"));
-						break;
+						cancel = true;
 					}
-					if(m_SndFile.ReadSampleFromFile(smp, file, false))
+					if(!cancel && m_SndFile.ReadSampleFromFile(smp, file, false))
 					{
 						UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
 						if(m_SndFile.GetNumInstruments())
