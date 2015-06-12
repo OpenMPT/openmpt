@@ -95,6 +95,7 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 			SetModified();
 			UpdateAllViews(nullptr, UpdateHint().ModType());
 		}
+		EndWaitCursor();
 		return success;
 	}
 }
@@ -157,11 +158,11 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 
 	const CHANNELINDEX nRemainingChannels = static_cast<CHANNELINDEX>(newOrder.size());
 
-	if(nRemainingChannels > m_SndFile.GetModSpecifications().channelsMax || nRemainingChannels < m_SndFile.GetModSpecifications().channelsMin) 	
+	if(nRemainingChannels > m_SndFile.GetModSpecifications().channelsMax || nRemainingChannels < m_SndFile.GetModSpecifications().channelsMin)
 	{
 		CString str;
-		str.Format(GetStrI18N(_TEXT("Can't apply change: Number of channels should be between %u and %u.")), m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
-		Reporting::Error(str , "ReArrangeChannels");
+		str.Format(GetStrI18N(_T("Can't apply change: Number of channels should be between %u and %u.")), m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
+		Reporting::Error(str , "Rearrange Channels");
 		return CHANNELINDEX_INVALID;
 	}
 
@@ -206,8 +207,8 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 		}
 	}
 
-	ModChannel chns[MAX_BASECHANNELS];
-	ModChannelSettings settings[MAX_BASECHANNELS];
+	std::vector<ModChannel> chns(MAX_CHANNELS);
+	std::vector<ModChannelSettings> settings(MAX_BASECHANNELS);
 	std::vector<BYTE> recordStates(GetNumChannels(), 0);
 	std::vector<bool> chnMutePendings(GetNumChannels(), false);
 
