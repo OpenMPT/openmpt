@@ -40,17 +40,6 @@ static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outp
 }
 
 
-static mpt::ustring GetDefaultArtist()
-//------------------------------------
-{
-	if(std::getenv("USERNAME"))
-	{
-		return mpt::ToUnicode(mpt::CharsetLocale, std::getenv("USERNAME"));
-	}
-	return mpt::ustring();
-}
-
-
 static mpt::ustring GetDefaultYear()
 //----------------------------------
 {
@@ -60,7 +49,7 @@ static mpt::ustring GetDefaultYear()
 
 StoredTags::StoredTags(SettingsContainer &conf)
 //---------------------------------------------
-	: artist(conf, "Export", "TagArtist", GetDefaultArtist())
+	: artist(conf, "Export", "TagArtist", TrackerSettings::Instance().defaultArtist)
 	, album(conf, "Export", "TagAlbum", MPT_USTRING(""))
 	, trackno(conf, "Export", "TagTrackNo", MPT_USTRING(""))
 	, year(conf, "Export", "TagYear", GetDefaultYear())
@@ -81,6 +70,8 @@ BEGIN_MESSAGE_MAP(CWaveConvert, CDialog)
 	ON_COMMAND(IDC_CHECK6,			OnCheckInstrMode)
 	ON_COMMAND(IDC_RADIO1,			UpdateDialog)
 	ON_COMMAND(IDC_RADIO2,			UpdateDialog)
+	ON_COMMAND(IDC_RADIO3,			UpdateDialog)
+	ON_COMMAND(IDC_RADIO4,			UpdateDialog)
 	ON_COMMAND(IDC_PLAYEROPTIONS,	OnPlayerOptions)
 	ON_COMMAND(IDC_BUTTON1,			OnShowEncoderInfo)
 	ON_CBN_SELCHANGE(IDC_COMBO5,	OnFileTypeChanged)
@@ -192,6 +183,8 @@ BOOL CWaveConvert::OnInitDialog()
 			break;
 		}
 	}
+
+	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, m_Settings.outputToSample ? IDC_RADIO4 : IDC_RADIO3);
 
 	UpdateDialog();
 	return TRUE;
@@ -536,7 +529,6 @@ void CWaveConvert::OnSamplerateChanged()
 //--------------------------------------
 {
 	SaveEncoderSettings();
-	//DWORD dwSamplerate = m_CbnSampleRate.GetItemData(m_CbnSampleRate.GetCurSel());
 	FillFormats();
 	FillDither();
 }
@@ -546,7 +538,6 @@ void CWaveConvert::OnChannelsChanged()
 //------------------------------------
 {
 	SaveEncoderSettings();
-	//UINT nChannels = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
 	FillFormats();
 	FillDither();
 }
@@ -563,7 +554,6 @@ void CWaveConvert::OnFormatChanged()
 //----------------------------------
 {
 	SaveEncoderSettings();
-	//DWORD dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
 	FillDither();
 	FillTags();
 }
@@ -578,14 +568,23 @@ void CWaveConvert::UpdateDialog()
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), (m_dwSongLimit) ? TRUE : FALSE);
 
 	// Repeat / selection play
-	BOOL bSel = IsDlgButtonChecked(IDC_RADIO2) ? TRUE : FALSE;
-	/*m_SpinMinOrder.EnableWindow(bSel);
-	m_SpinMaxOrder.EnableWindow(bSel);*/
+	BOOL bSel = (IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED) ? TRUE : FALSE;
 	GetDlgItem(IDC_EDIT3)->EnableWindow(bSel);
 	GetDlgItem(IDC_EDIT4)->EnableWindow(bSel);
 	GetDlgItem(IDC_EDIT5)->EnableWindow(!bSel);
-
 	m_SpinLoopCount.EnableWindow(!bSel);
+
+	bSel = (IsDlgButtonChecked(IDC_RADIO4) != BST_UNCHECKED) ? FALSE : TRUE;
+	m_CbnFileType.EnableWindow(bSel);
+	if(!bSel)
+	{
+		// Render to sample: Always use WAV
+		if(m_CbnFileType.GetCurSel() != 0)
+		{
+			m_CbnFileType.SetCurSel(0);
+			OnFileTypeChanged();
+		}
+	}
 }
 
 
@@ -670,8 +669,9 @@ void CWaveConvert::OnOK()
 	}
 
 	m_Settings.repeatCount = static_cast<uint16>(GetDlgItemInt(IDC_EDIT5, NULL, FALSE));
-	m_Settings.Normalize = IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED;
-	m_Settings.SilencePlugBuffers = IsDlgButtonChecked(IDC_RENDERSILENCE) != BST_UNCHECKED;
+	m_Settings.normalize = IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED;
+	m_Settings.silencePlugBuffers = IsDlgButtonChecked(IDC_RENDERSILENCE) != BST_UNCHECKED;
+	m_Settings.outputToSample = IsDlgButtonChecked(IDC_RADIO4) != BST_UNCHECKED;
 	m_bGivePlugsIdleTime = IsDlgButtonChecked(IDC_GIVEPLUGSIDLETIME) != BST_UNCHECKED;
 	if (m_bGivePlugsIdleTime)
 	{
@@ -845,8 +845,9 @@ CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::v
 	, storedTags(conf)
 	, repeatCount(0)
 	, minOrder(ORDERINDEX_INVALID), maxOrder(ORDERINDEX_INVALID)
-	, Normalize(false)
-	, SilencePlugBuffers(false)
+	, normalize(false)
+	, silencePlugBuffers(false)
+	, outputToSample(false)
 {
 	for(std::size_t i = 0; i < EncoderFactories.size(); ++i)
 	{
@@ -912,7 +913,7 @@ void CDoWaveConvert::OnButton1()
 	float normalizePeak = 0.0f;
 	const mpt::PathString normalizeFileName = Util::CreateTempFileName(MPT_PATHSTRING("OpenMPT"));
 	mpt::fstream normalizeFile;
-	if(m_Settings.Normalize)
+	if(m_Settings.normalize)
 	{
 		normalizeFile.open(normalizeFileName, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
 	}
@@ -934,7 +935,7 @@ void CDoWaveConvert::OnButton1()
 	IAudioStreamEncoder *fileEnc = m_Settings.GetEncoderFactory()->ConstructStreamEncoder(fileStream);
 
 	// Silence mix buffer of plugins, for plugins that don't clear their reverb buffers and similar stuff when they are reset
-	if(m_Settings.SilencePlugBuffers)
+	if(m_Settings.silencePlugBuffers)
 	{
 		SetDlgItemText(IDC_TEXT1, _T("Clearing plugin buffers"));
 		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
@@ -971,7 +972,7 @@ void CDoWaveConvert::OnButton1()
 	mixersettings.gdwMixingFreq = samplerate;
 	mixersettings.gnChannels = channels;
 	m_SndFile.m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
-	if(m_Settings.Normalize)
+	if(m_Settings.normalize)
 	{
 #ifndef NO_AGC
 		mixersettings.DSPMask &= ~SNDDSP_AGC;
@@ -1057,7 +1058,7 @@ void CDoWaveConvert::OnButton1()
 	for (UINT n = 0; ; n++)
 	{
 		UINT lRead = 0;
-		if(m_Settings.Normalize || m_Settings.FinalSampleFormat == SampleFormatFloat32)
+		if(m_Settings.normalize || m_Settings.FinalSampleFormat == SampleFormatFloat32)
 		{
 			lRead = ReadInterleaved(m_SndFile, floatbuffer, MIXBUFFERSIZE, SampleFormatFloat32, dither);
 		} else
@@ -1087,7 +1088,7 @@ void CDoWaveConvert::OnButton1()
 			break;
 		ullSamples += lRead;
 
-		if(m_Settings.Normalize)
+		if(m_Settings.normalize)
 		{
 
 			std::size_t countSamples = lRead * m_SndFile.m_MixerSettings.gnChannels;
@@ -1140,7 +1141,7 @@ void CDoWaveConvert::OnButton1()
 				timeRemaining = static_cast<uint32>(((dwCurrentTime - dwStartTime) * (max - ullSamples) / ullSamples) / 1000);
 			}
 
-			if(m_Settings.Normalize)
+			if(m_Settings.normalize)
 			{
 				_stprintf(s, _T("Rendering file... (%umn%02us, %umn%02us remaining)"), l / 60, l % 60, timeRemaining / 60, timeRemaining % 60u);
 			} else
@@ -1178,7 +1179,7 @@ void CDoWaveConvert::OnButton1()
 
 	CMainFrame::GetMainFrame()->StopRenderer(&m_SndFile);
 
-	if(m_Settings.Normalize)
+	if(m_Settings.normalize)
 	{
 
 		::SendMessage(progress, PBM_SETRANGE, 0, MAKELPARAM(0, 100));

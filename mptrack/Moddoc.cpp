@@ -1684,7 +1684,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		.DefaultFilename(GetPathNameMpt().GetFileName() + MPT_PATHSTRING(".") + extension)
 		.ExtensionFilter(encFactory->GetTraits().fileDescription + MPT_USTRING(" (*.") + extension.ToUnicode() + MPT_USTRING(")|*.") + extension.ToUnicode() + MPT_USTRING("||"))
 		.WorkingDirectory(TrackerSettings::Instance().PathExport.GetWorkingDir());
-	if(!dlg.Show()) return;
+	if(!wsdlg.m_Settings.outputToSample && !dlg.Show()) return;
 
 	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
 	TrackerSettings::Instance().PathExport.SetDefaultDir(dlg.GetWorkingDirectory(), true);
@@ -1810,6 +1810,10 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			thisName += mpt::PathString::FromUnicode(mpt::ToUnicode(mpt::CharsetLocale, fileNameAdd));
 		}
 		thisName += fileExt;
+		if(wsdlg.m_Settings.outputToSample)
+		{
+			thisName = Util::CreateTempFileName(MPT_PATHSTRING("OpenMPT"));
+		}
 
 		// Render song (or current channel, or current sample/instrument)
 		CDoWaveConvert dwcdlg(m_SndFile, thisName, wsdlg.m_Settings, pMainFrm);
@@ -1817,7 +1821,48 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
 		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 
-		if(dwcdlg.DoModal() != IDOK) break;
+		bool cancel = dwcdlg.DoModal() != IDOK;
+
+		if(wsdlg.m_Settings.outputToSample)
+		{
+			if(!cancel)
+			{
+				InputFile f(thisName);
+				if(f.IsValid())
+				{
+					FileReader file = GetFileReader(f);
+					SAMPLEINDEX smp = m_SndFile.GetNextFreeSample();
+					if(smp == SAMPLEINDEX_INVALID)
+					{
+						Reporting::Error(_T("Too many samples!"));
+						break;
+					}
+					if(m_SndFile.ReadSampleFromFile(smp, file, false))
+					{
+						UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
+						if(m_SndFile.GetNumInstruments())
+						{
+							InsertInstrument(smp);
+							UpdateAllViews(nullptr, InstrumentHint().Info().Names());
+						}
+						SetModified();
+					}
+				}
+			}
+
+			// Always clean up after ourselves
+			for(int retry = 0; retry < 10; retry++)
+			{
+				// stupid virus scanners
+				if(DeleteFileW(thisName.AsNative().c_str()) != EACCES)
+				{
+					break;
+				}
+				Sleep(10);
+			}
+		}
+
+		if(cancel) break;
 	}
 
 	// Restore channels' flags
