@@ -135,11 +135,11 @@ BOOL CWaveConvert::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	CheckDlgButton(IDC_CHECK5, MF_UNCHECKED);	// Normalize
-	CheckDlgButton(IDC_CHECK3, MF_CHECKED);	// Cue points
+	CheckDlgButton(IDC_CHECK5, BST_UNCHECKED);	// Normalize
+	CheckDlgButton(IDC_CHECK3, BST_CHECKED);	// Cue points
 
-	CheckDlgButton(IDC_CHECK4, MF_UNCHECKED);
-	CheckDlgButton(IDC_CHECK6, MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK4, BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK6, BST_UNCHECKED);
 
 	const bool selection = (m_Settings.minOrder != ORDERINDEX_INVALID && m_Settings.maxOrder != ORDERINDEX_INVALID);
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, selection ? IDC_RADIO2 : IDC_RADIO1);
@@ -575,8 +575,8 @@ void CWaveConvert::OnFormatChanged()
 void CWaveConvert::UpdateDialog()
 //-------------------------------
 {
-	CheckDlgButton(IDC_CHECK1, (m_dwFileLimit) ? MF_CHECKED : 0);
-	CheckDlgButton(IDC_CHECK2, (m_dwSongLimit) ? MF_CHECKED : 0);
+	CheckDlgButton(IDC_CHECK1, (m_dwFileLimit) ? BST_CHECKED : 0);
+	CheckDlgButton(IDC_CHECK2, (m_dwSongLimit) ? BST_CHECKED : 0);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT1), (m_dwFileLimit) ? TRUE : FALSE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), (m_dwSongLimit) ? TRUE : FALSE);
 
@@ -609,8 +609,8 @@ void CWaveConvert::OnSampleSlotChanged()
 	// When choosing a specific sample slot, we cannot use per-channel or per-instrument export
 	if(m_CbnSampleSlot.GetCurSel() > 0)
 	{
-		CheckDlgButton(IDC_CHECK4, MF_UNCHECKED);
-		CheckDlgButton(IDC_CHECK6, MF_UNCHECKED);
+		CheckDlgButton(IDC_CHECK4, BST_UNCHECKED);
+		CheckDlgButton(IDC_CHECK6, BST_UNCHECKED);
 	}
 	UpdateDialog();
 }
@@ -668,7 +668,7 @@ void CWaveConvert::OnCheckChannelMode()
 {
 	if(IsDlgButtonChecked(IDC_CHECK4) != BST_UNCHECKED)
 	{
-		CheckDlgButton(IDC_CHECK6, MF_UNCHECKED);
+		CheckDlgButton(IDC_CHECK6, BST_UNCHECKED);
 		m_CbnSampleSlot.SetCurSel(0);
 		m_CbnSampleSlot.EnableWindow(FALSE);
 	} else
@@ -684,7 +684,7 @@ void CWaveConvert::OnCheckInstrMode()
 {
 	if(IsDlgButtonChecked(IDC_CHECK6) != BST_UNCHECKED)
 	{
-		CheckDlgButton(IDC_CHECK4, MF_UNCHECKED);
+		CheckDlgButton(IDC_CHECK4, BST_UNCHECKED);
 		m_CbnSampleSlot.SetCurSel(0);
 		m_CbnSampleSlot.EnableWindow(FALSE);
 	} else

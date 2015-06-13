@@ -697,7 +697,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		// Global Volume
 		SetDlgItemInt(IDC_EDIT8, sample.nGlobalVol);
 		// Panning
-		CheckDlgButton(IDC_CHECK1, (sample.uFlags[CHN_PANNING]) ? MF_CHECKED : MF_UNCHECKED);
+		CheckDlgButton(IDC_CHECK1, (sample.uFlags[CHN_PANNING]) ? BST_CHECKED : BST_UNCHECKED);
 		if (m_sndFile.GetType() == MOD_TYPE_XM)
 		{
 			SetDlgItemInt(IDC_EDIT9, sample.nPan);		//displayed panning with XM is 0-256, just like MPT's internal engine

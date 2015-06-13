@@ -773,9 +773,9 @@ void COptionsSoundcard::UpdateControls()
 	GetDlgItem(IDC_STATIC_UPDATEINTERVAL)->EnableWindow(m_CurrentDeviceCaps.CanUpdateInterval ? TRUE : FALSE);
 	GetDlgItem(IDC_COMBO_UPDATEINTERVAL)->EnableWindow(m_CurrentDeviceCaps.CanUpdateInterval ? TRUE : FALSE);
 	GetDlgItem(IDC_CHECK4)->SetWindowText(mpt::ToCString(m_CurrentDeviceCaps.ExclusiveModeDescription));
-	CheckDlgButton(IDC_CHECK4, m_CurrentDeviceCaps.CanExclusiveMode && m_Settings.ExclusiveMode ? MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(IDC_CHECK5, m_CurrentDeviceCaps.CanBoostThreadPriority && m_Settings.BoostThreadPriority ? MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(IDC_CHECK9, m_CurrentDeviceCaps.CanUseHardwareTiming && m_Settings.UseHardwareTiming ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK4, m_CurrentDeviceCaps.CanExclusiveMode && m_Settings.ExclusiveMode ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK5, m_CurrentDeviceCaps.CanBoostThreadPriority && m_Settings.BoostThreadPriority ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK9, m_CurrentDeviceCaps.CanUseHardwareTiming && m_Settings.UseHardwareTiming ? BST_CHECKED : BST_UNCHECKED);
 	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
 	{
 		m_BtnDriverPanel.EnableWindow(FALSE);
@@ -1388,24 +1388,24 @@ BOOL COptionsPlayer::OnInitDialog()
 
 	UpdateDialog();
 
-	if (dwQuality & SNDDSP_EQ) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
+	if (dwQuality & SNDDSP_EQ) CheckDlgButton(IDC_CHECK3, BST_CHECKED);
 #else
 	GetDlgItem(IDC_CHECK3)->EnableWindow(FALSE);
 #endif
 
 	// Effects
 #ifndef NO_DSP
-	if (dwQuality & SNDDSP_MEGABASS) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
+	if (dwQuality & SNDDSP_MEGABASS) CheckDlgButton(IDC_CHECK1, BST_CHECKED);
 #else
 	GetDlgItem(IDC_CHECK1)->EnableWindow(FALSE);
 #endif
 #ifndef NO_AGC
-	if (dwQuality & SNDDSP_AGC) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
+	if (dwQuality & SNDDSP_AGC) CheckDlgButton(IDC_CHECK2, BST_CHECKED);
 #else
 	GetDlgItem(IDC_CHECK2)->EnableWindow(FALSE);
 #endif
 #ifndef NO_DSP
-	if (dwQuality & SNDDSP_SURROUND) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
+	if (dwQuality & SNDDSP_SURROUND) CheckDlgButton(IDC_CHECK4, BST_CHECKED);
 #else
 	GetDlgItem(IDC_CHECK4)->EnableWindow(FALSE);
 #endif
@@ -1444,7 +1444,7 @@ BOOL COptionsPlayer::OnInitDialog()
 		m_CbnReverbPreset.EnableWindow(FALSE);
 	} else
 	{
-		if (dwQuality & SNDDSP_REVERB) CheckDlgButton(IDC_CHECK6, MF_CHECKED);
+		if (dwQuality & SNDDSP_REVERB) CheckDlgButton(IDC_CHECK6, BST_CHECKED);
 	}
 #else
 	GetDlgItem(IDC_CHECK6)->EnableWindow(FALSE);
@@ -1743,14 +1743,14 @@ BOOL CMidiSetupDlg::OnInitDialog()
 
 	CPropertyPage::OnInitDialog();
 	// Flags
-	if (m_dwMidiSetup & MIDISETUP_RECORDVELOCITY) CheckDlgButton(IDC_CHECK1, MF_CHECKED);
-	if (m_dwMidiSetup & MIDISETUP_RECORDNOTEOFF) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
-	if (m_dwMidiSetup & MIDISETUP_TRANSPOSEKEYBOARD) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
-	if (m_dwMidiSetup & MIDISETUP_MIDITOPLUG) CheckDlgButton(IDC_MIDI_TO_PLUGIN, MF_CHECKED);
-	if (m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL) CheckDlgButton(IDC_MIDI_MACRO_CONTROL, MF_CHECKED);
-	if (m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL) CheckDlgButton(IDC_MIDIVOL_TO_NOTEVOL, MF_CHECKED);
-	if (m_dwMidiSetup & MIDISETUP_RESPONDTOPLAYCONTROLMSGS) CheckDlgButton(IDC_MIDIPLAYCONTROL, MF_CHECKED);
-	if (m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN) CheckDlgButton(IDC_MIDIPLAYPATTERNONMIDIIN, MF_CHECKED);
+	if (m_dwMidiSetup & MIDISETUP_RECORDVELOCITY) CheckDlgButton(IDC_CHECK1, BST_CHECKED);
+	if (m_dwMidiSetup & MIDISETUP_RECORDNOTEOFF) CheckDlgButton(IDC_CHECK2, BST_CHECKED);
+	if (m_dwMidiSetup & MIDISETUP_TRANSPOSEKEYBOARD) CheckDlgButton(IDC_CHECK4, BST_CHECKED);
+	if (m_dwMidiSetup & MIDISETUP_MIDITOPLUG) CheckDlgButton(IDC_MIDI_TO_PLUGIN, BST_CHECKED);
+	if (m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL) CheckDlgButton(IDC_MIDI_MACRO_CONTROL, BST_CHECKED);
+	if (m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL) CheckDlgButton(IDC_MIDIVOL_TO_NOTEVOL, BST_CHECKED);
+	if (m_dwMidiSetup & MIDISETUP_RESPONDTOPLAYCONTROLMSGS) CheckDlgButton(IDC_MIDIPLAYCONTROL, BST_CHECKED);
+	if (m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN) CheckDlgButton(IDC_MIDIPLAYPATTERNONMIDIIN, BST_CHECKED);
 
 	// Midi In Device
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)

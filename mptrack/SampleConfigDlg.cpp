@@ -63,15 +63,15 @@ BOOL COptionsSampleEditor::OnInitDialog()
 
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO1 + TrackerSettings::Instance().sampleEditorKeyBehaviour);
 
-	CheckDlgButton(IDC_COMPRESS_ITI, TrackerSettings::Instance().compressITI ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_COMPRESS_ITI, TrackerSettings::Instance().compressITI ? BST_CHECKED : BST_UNCHECKED);
 
 	m_cbnDefaultVolumeHandling.SetItemData(m_cbnDefaultVolumeHandling.AddString("MIDI volume"), PLUGIN_VOLUMEHANDLING_MIDI);
 	m_cbnDefaultVolumeHandling.SetItemData(m_cbnDefaultVolumeHandling.AddString("Dry/Wet ratio"), PLUGIN_VOLUMEHANDLING_DRYWET);
 	m_cbnDefaultVolumeHandling.SetItemData(m_cbnDefaultVolumeHandling.AddString("None"), PLUGIN_VOLUMEHANDLING_IGNORE);
 	m_cbnDefaultVolumeHandling.SetCurSel(TrackerSettings::Instance().DefaultPlugVolumeHandling);
 
-	CheckDlgButton(IDC_PREVIEW_SAMPLES, TrackerSettings::Instance().previewInFileDialogs ? MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(IDC_NORMALIZE, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_PREVIEW_SAMPLES, TrackerSettings::Instance().previewInFileDialogs ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_NORMALIZE, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad ? BST_CHECKED : BST_UNCHECKED);
 
 	return TRUE;
 }

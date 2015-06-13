@@ -172,7 +172,7 @@ void CRawSampleDlg::UpdateDialog()
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, (m_nFormat.GetBitDepth() == 8) ? IDC_RADIO1 : IDC_RADIO2 );
 	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, (m_nFormat.GetEncoding() == SampleIO::unsignedPCM) ? IDC_RADIO3 : IDC_RADIO4);
 	CheckRadioButton(IDC_RADIO5, IDC_RADIO6, (m_nFormat.GetChannelFormat() == SampleIO::mono) ? IDC_RADIO5 : IDC_RADIO6);
-	CheckDlgButton(IDC_CHK_REMEMBERSETTINGS, (m_bRememberFormat ? MF_CHECKED : MF_UNCHECKED));
+	CheckDlgButton(IDC_CHK_REMEMBERSETTINGS, (m_bRememberFormat ? BST_CHECKED : BST_UNCHECKED));
 }
 
 

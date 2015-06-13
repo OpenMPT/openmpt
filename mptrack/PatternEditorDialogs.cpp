@@ -131,19 +131,19 @@ BOOL CFindReplaceTab::OnInitDialog()
 
 	CPropertyPage::OnInitDialog();
 	// Search flags
-	CheckDlgButton(IDC_CHECK1, m_Flags[FindReplace::Note] ? MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(IDC_CHECK2, m_Flags[FindReplace::Instr] ? MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(IDC_CHECK3, m_Flags[FindReplace::VolCmd] ? MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(IDC_CHECK4, m_Flags[FindReplace::Volume] ? MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(IDC_CHECK5, m_Flags[FindReplace::Command] ? MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(IDC_CHECK6, m_Flags[FindReplace::Param] ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK1, m_Flags[FindReplace::Note] ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK2, m_Flags[FindReplace::Instr] ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK3, m_Flags[FindReplace::VolCmd] ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK4, m_Flags[FindReplace::Volume] ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK5, m_Flags[FindReplace::Command] ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK6, m_Flags[FindReplace::Param] ? BST_CHECKED : BST_UNCHECKED);
 	if(m_bReplace)
 	{
-		CheckDlgButton(IDC_CHECK7, m_Flags[FindReplace::Replace] ? MF_CHECKED : MF_UNCHECKED);
-		CheckDlgButton(IDC_CHECK8, m_Flags[FindReplace::ReplaceAll] ? MF_CHECKED : MF_UNCHECKED);
+		CheckDlgButton(IDC_CHECK7, m_Flags[FindReplace::Replace] ? BST_CHECKED : BST_UNCHECKED);
+		CheckDlgButton(IDC_CHECK8, m_Flags[FindReplace::ReplaceAll] ? BST_CHECKED : BST_UNCHECKED);
 	} else
 	{
-		CheckDlgButton(IDC_CHECK7, m_Flags[FindReplace::InChannels] ? MF_CHECKED : MF_UNCHECKED);
+		CheckDlgButton(IDC_CHECK7, m_Flags[FindReplace::InChannels] ? BST_CHECKED : BST_UNCHECKED);
 		int nButton = IDC_RADIO1;
 		if(m_Flags[FindReplace::FullSearch])
 			nButton = IDC_RADIO2;
@@ -523,7 +523,7 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 		m_tempoSwing = pattern.HasTempoSwing() ? pattern.GetTempoSwing() : sndFile.m_tempoSwing;
 
 		GetDlgItem(IDC_CHECK1)->EnableWindow(sndFile.GetModSpecifications().hasPatternSignatures ? TRUE : FALSE);
-		CheckDlgButton(IDC_CHECK1, bOverride ? MF_CHECKED : MF_UNCHECKED);
+		CheckDlgButton(IDC_CHECK1, bOverride ? BST_CHECKED : BST_UNCHECKED);
 		SetDlgItemInt(IDC_ROWSPERBEAT, nRPB, FALSE);
 		SetDlgItemInt(IDC_ROWSPERMEASURE, nRPM, FALSE);
 		OnOverrideSignature();
@@ -1432,7 +1432,7 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 	}
 
 	m_CbnOctaveModifier.SetCurSel(m_Settings.octaveModifier + SplitKeyboardSettings::splitOctaveRange);
-	CheckDlgButton(IDC_PATTERN_OCTAVELINK, (m_Settings.octaveLink && m_Settings.octaveModifier != 0) ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_PATTERN_OCTAVELINK, (m_Settings.octaveLink && m_Settings.octaveModifier != 0) ? BST_CHECKED : BST_UNCHECKED);
 
 	// Volume
 	m_CbnSplitVolume.AddString("No Change");
@@ -1501,7 +1501,7 @@ void CSplitKeyboadSettings::OnCancel()
 void CSplitKeyboadSettings::OnOctaveModifierChanged()
 //---------------------------------------------------
 {
-	CheckDlgButton(IDC_PATTERN_OCTAVELINK, (m_CbnOctaveModifier.GetCurSel() != 9) ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_PATTERN_OCTAVELINK, (m_CbnOctaveModifier.GetCurSel() != 9) ? BST_CHECKED : BST_UNCHECKED);
 }
 
 
