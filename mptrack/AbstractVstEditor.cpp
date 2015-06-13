@@ -452,7 +452,7 @@ void CAbstractVstEditor::SetTitle()
 		if(strcmp(m_VstPlugin.m_pMixStruct->GetName(), ""))
 			Title.Append(m_VstPlugin.m_pMixStruct->GetName());
 		else
-			Title.Append(mpt::ToLocale(mpt::CharsetUTF8, m_VstPlugin.m_pMixStruct->GetLibraryName()).c_str());
+			Title.Append(mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, m_VstPlugin.m_pMixStruct->GetLibraryName()).c_str());
 		if(m_VstPlugin.isBridged)
 			Title.Append(" (Bridged)");
 
@@ -952,7 +952,7 @@ bool CAbstractVstEditor::CreateInstrument()
 	m_nInstrument = nIns;
 
 	_snprintf(pIns->name, CountOf(pIns->name) - 1, _T("%d: %s"), m_VstPlugin.GetSlot() + 1, sndFile.m_MixPlugins[m_VstPlugin.GetSlot()].GetName());
-	mpt::String::Copy(pIns->filename, mpt::ToLocale(mpt::CharsetUTF8, sndFile.m_MixPlugins[m_VstPlugin.GetSlot()].GetLibraryName()));
+	mpt::String::Copy(pIns->filename, mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, sndFile.m_MixPlugins[m_VstPlugin.GetSlot()].GetLibraryName()));
 	pIns->nMixPlug = (PLUGINDEX)m_VstPlugin.GetSlot() + 1;
 	pIns->nMidiChannel = 1;
 	// People will forget to change this anyway, so the following lines can lead to some bad surprises after re-opening the module.

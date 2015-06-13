@@ -255,7 +255,7 @@ public:
 	operator std::string () const
 	{
 		ASSERT(type == SettingTypeString);
-		return mpt::ToLocale(valueString);
+		return mpt::ToCharset(mpt::CharsetLocale, valueString);
 	}
 	operator std::wstring () const
 	{

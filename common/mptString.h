@@ -153,7 +153,17 @@ enum Charset {
 	CharsetCP437AMS2,
 
 	CharsetWindows1252,
+
 };
+
+
+// Locale in tracker builds, UTF8 in non-locale-aware libopenmpt builds.
+#if defined(MPT_WITH_CHARSET_LOCALE)
+const Charset CharsetLocaleOrUTF8 = CharsetLocale;
+#else
+const Charset CharsetLocaleOrUTF8 = CharsetUTF8;
+#endif
+
 
 
 // Checks if the std::string represents an UTF8 string.
@@ -266,20 +276,6 @@ CString ToCString(const CStringW &str);
 #endif // UNICODE
 
 #endif // MFC
-
-
-#if defined(MPT_WITH_CHARSET_LOCALE)
-// Convert to locale-encoded string.
-// On Windows, CP_ACP is used,
-// otherwise, the global C locale is used.
-// If str does not contain any invalid characters,
-// this conversion will be lossless iff, and only iff, the system is NOT
-// windows AND a UTF8 locale is set.
-// Invalid source bytes or characters that are not representable in the
-// destination charset will be replaced by some replacement character or string.
-template <typename Tsrc> inline std::string ToLocale(const Tsrc &str) { return ToCharset(CharsetLocale, str); }
-static inline std::string ToLocale(Charset from, const std::string &str) { return ToCharset(CharsetLocale, from, str); }
-#endif
 
 
 // mpt::ustring

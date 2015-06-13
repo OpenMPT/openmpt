@@ -1403,7 +1403,7 @@ CString ToCString(const std::wstring &str)
 	#ifdef UNICODE
 		return str.c_str();
 	#else
-		return ToLocale(str).c_str();
+		return ToCharset(CharsetLocale, str).c_str();
 	#endif
 }
 CString ToCString(Charset from, const std::string &str)
@@ -1411,7 +1411,7 @@ CString ToCString(Charset from, const std::string &str)
 	#ifdef UNICODE
 		return ToWide(from, str).c_str();
 	#else
-		return ToLocale(from, str).c_str();
+		return ToCharset(CharsetLocale, from, str).c_str();
 	#endif
 }
 std::wstring ToWide(const CString &str)
@@ -1460,7 +1460,7 @@ std::string ToCharset(Charset to, const CStringW &str)
 }
 CString ToCString(const CStringW &str)
 {
-	return ToLocale(str).c_str();
+	return ToCharset(CharsetLocale, str).c_str();
 }
 #endif // UNICODE
 

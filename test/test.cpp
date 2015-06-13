@@ -700,7 +700,7 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetISO8859_1, "a"), MPT_USTRING("a"));
 	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetASCII, "a"), MPT_USTRING("a"));
 #if defined(MPT_WITH_CHARSET_LOCALE)
-	VERIFY_EQUAL(mpt::ToLocale(MPT_USTRING("a")), "a");
+	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetLocale, MPT_USTRING("a")), "a");
 	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetLocale, "a"), MPT_USTRING("a"));
 #endif
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetUTF8, MPT_UTF8("a")), "a");
@@ -710,7 +710,7 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetISO8859_1, "a"), MPT_UTF8("a"));
 	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetASCII, "a"), MPT_UTF8("a"));
 #if defined(MPT_WITH_CHARSET_LOCALE)
-	VERIFY_EQUAL(mpt::ToLocale(MPT_UTF8("a")), "a");
+	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetLocale, MPT_UTF8("a")), "a");
 	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetLocale, "a"), MPT_UTF8("a"));
 #endif
 
@@ -799,7 +799,7 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetISO8859_1, "a"), L"a");
 	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetASCII, "a"), L"a");
 #if defined(MPT_WITH_CHARSET_LOCALE)
-	VERIFY_EQUAL(mpt::ToLocale(L"a"), "a");
+	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetLocale, L"a"), "a");
 	VERIFY_EQUAL(mpt::ToWide(mpt::CharsetLocale, "a"), L"a");
 #endif
 
