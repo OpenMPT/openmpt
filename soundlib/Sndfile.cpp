@@ -1611,7 +1611,7 @@ void TempoSwing::Normalize()
 		*i = Util::muldivr(*i, Unity, static_cast<int32>(sum));
 		remain -= *i;
 	}
-	MPT_ASSERT(std::abs(static_cast<int32>(remain)) <= size());
+	MPT_ASSERT(static_cast<uint32>(std::abs(static_cast<int32>(remain))) <= size());
 	at(0) += static_cast<int32>(remain);
 }
 
