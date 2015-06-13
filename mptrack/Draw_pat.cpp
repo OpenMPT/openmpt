@@ -302,15 +302,22 @@ void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 		srcx = pfnt->nSpaceX;
 		srcy = pfnt->nSpaceY;
 		break;
-	case '-':
-		srcx = pfnt->nAlphaAM_X;
-		srcy = pfnt->nAlphaAM_Y + 15 * pfnt->spacingY;
-		break;
 	case 'b':
 		srcx = pfnt->nAlphaAM_X;
 		srcy = pfnt->nAlphaAM_Y + 14 * pfnt->spacingY;
 		break;
-
+	case '-':
+		srcx = pfnt->nAlphaAM_X;
+		srcy = pfnt->nAlphaAM_Y + 15 * pfnt->spacingY;
+		break;
+	case '+':
+		srcx = pfnt->nAlphaAM_X;
+		srcy = pfnt->nAlphaAM_Y + 16 * pfnt->spacingY;
+		break;
+	case 'd':
+		srcx = pfnt->nAlphaAM_X;
+		srcy = pfnt->nAlphaAM_Y + 17 * pfnt->spacingY;
+		break;
 	}
 	m_Dib.TextBlt(x, y, sizex, pfnt->spacingY, srcx+ofsx, srcy, pfnt->dib);
 }

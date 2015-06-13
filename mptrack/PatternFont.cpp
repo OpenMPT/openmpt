@@ -382,6 +382,8 @@ void PatternFont::UpdateFont(HWND hwnd)
 	DrawChar(hDC, '\\', pf.nAlphaNZ_X, pf.nAlphaNZ_Y + 14 * charHeight, charWidth, charHeight);
 	DrawChar(hDC, '-', pf.nAlphaAM_X, pf.nAlphaAM_Y + 15 * charHeight, charWidth, charHeight);
 	DrawChar(hDC, ':', pf.nAlphaNZ_X, pf.nAlphaNZ_Y + 15 * charHeight, charWidth, charHeight);
+	DrawChar(hDC, '+', pf.nAlphaAM_X, pf.nAlphaAM_Y + 16 * charHeight, charWidth, charHeight);
+	DrawChar(hDC, 'd', pf.nAlphaAM_X, pf.nAlphaAM_Y + 17 * charHeight, charWidth, charHeight);
 
 	::GdiFlush();
 	std::memcpy(pf.dib->lpDibBits, data, pf.dib->bmiHeader.biSizeImage);
