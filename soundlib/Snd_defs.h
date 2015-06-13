@@ -370,7 +370,7 @@ public:
 	enum { Unity = 1u << 24 };
 	// Normalize the tempo swing coefficients so that they add up to exactly the specified tempo again
 	void Normalize();
-	void resize(size_type _Newsize, value_type val = Unity) { vector::resize(_Newsize, val); Normalize(); }
+	void resize(size_type _Newsize, value_type val = Unity) { std::vector<uint32>::resize(_Newsize, val); Normalize(); }
 
 	static void Serialize(std::ostream &oStrm, const TempoSwing &swing);
 	static void Deserialize(std::istream& iStrm, TempoSwing &swing, const size_t);
