@@ -18,6 +18,15 @@
 #include "../common/misc_util.h"
 
 
+#ifndef NO_PORTAUDIO
+#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
+#if MPT_COMPILER_MSVC
+#include "../include/portaudio/src/common/pa_debugprint.h"
+#endif
+#endif
+#endif
+
+
 OPENMPT_NAMESPACE_BEGIN
 
 
@@ -29,7 +38,6 @@ namespace SoundDevice {
 #define PALOG(x, ...) do { } while(0)
 //#define PALOG Log
 
-#include "../include/portaudio/src/common/pa_debugprint.h"
 
 
 CPortaudioDevice::CPortaudioDevice(SoundDevice::Info info)
@@ -93,12 +101,14 @@ bool CPortaudioDevice::InternalOpen()
 			m_Flags.NeedsClippedFloat = false;
 			m_StreamParameters.suggestedLatency = 0.0; // let portaudio choose
 			framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
+#if MPT_OS_WINDOWS
 			MemsetZero(m_WasapiStreamInfo);
 			m_WasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
 			m_WasapiStreamInfo.hostApiType = paWASAPI;
 			m_WasapiStreamInfo.version = 1;
 			m_WasapiStreamInfo.flags = paWinWasapiExclusive;
 			m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
+#endif // MPT_OS_WINDOWS
 		} else
 		{
 			m_Flags.NeedsClippedFloat = true;
@@ -308,6 +318,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 		StreamParameters.sampleFormat = paInt16;
 		StreamParameters.suggestedLatency = 0.0;
 		StreamParameters.hostApiSpecificStreamInfo = NULL;
+#if MPT_OS_WINDOWS
 		if((m_HostApiType == paWASAPI) && m_Settings.ExclusiveMode)
 		{
 			MemsetZero(m_WasapiStreamInfo);
@@ -317,6 +328,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 			m_WasapiStreamInfo.flags = paWinWasapiExclusive;
 			m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
 		}
+#endif // MPT_OS_WINDOWS
 		if(Pa_IsFormatSupported(NULL, &StreamParameters, baseSampleRates[n]) == paFormatIsSupported)
 		{
 			caps.supportedSampleRates.push_back(baseSampleRates[n]);
@@ -581,9 +593,11 @@ ComponentPortAudio::ComponentPortAudio()
 
 bool ComponentPortAudio::DoInitialize()
 {
+#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 #if MPT_COMPILER_MSVC
 	PaUtil_SetDebugPrintFunction(PortaudioLog);
 #endif // MPT_COMPILER_MSVC
+#endif
 	return (Pa_Initialize() == paNoError);
 }
 

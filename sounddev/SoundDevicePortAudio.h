@@ -15,8 +15,14 @@
 #include "../common/ComponentManager.h"
 
 #ifndef NO_PORTAUDIO
+#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 #include "portaudio/include/portaudio.h"
+#if MPT_OS_WINDOWS
 #include "portaudio/include/pa_win_wasapi.h"
+#endif // MPT_OS_WINDOWS
+#else
+#include <portaudio.h>
+#endif
 #endif
 
 OPENMPT_NAMESPACE_BEGIN
@@ -36,7 +42,9 @@ protected:
 	PaHostApiTypeId m_HostApiType;
 	PaStreamParameters m_StreamParameters;
 	PaStreamParameters m_InputStreamParameters;
+#if MPT_OS_WINDOWS
 	PaWasapiStreamInfo m_WasapiStreamInfo;
+#endif // MPT_OS_WINDOWS
 	PaStream * m_Stream;
 	const PaStreamInfo * m_StreamInfo;
 	void * m_CurrentFrameBuffer;
