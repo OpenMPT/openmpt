@@ -589,7 +589,7 @@ void CWaveConvert::UpdateDialog()
 
 	bSel = (IsDlgButtonChecked(IDC_RADIO4) != BST_UNCHECKED) ? FALSE : TRUE;
 	m_CbnFileType.EnableWindow(bSel);
-	m_CbnSampleSlot.EnableWindow(!bSel);
+	m_CbnSampleSlot.EnableWindow(!bSel && !IsDlgButtonChecked(IDC_CHECK4) && !IsDlgButtonChecked(IDC_CHECK6));
 	if(!bSel)
 	{
 		// Render to sample: Always use WAV
@@ -670,11 +670,8 @@ void CWaveConvert::OnCheckChannelMode()
 	{
 		CheckDlgButton(IDC_CHECK6, BST_UNCHECKED);
 		m_CbnSampleSlot.SetCurSel(0);
-		m_CbnSampleSlot.EnableWindow(FALSE);
-	} else
-	{
-		m_CbnSampleSlot.EnableWindow(IsDlgButtonChecked(IDC_RADIO4));
 	}
+	UpdateDialog();
 }
 
 
@@ -686,11 +683,8 @@ void CWaveConvert::OnCheckInstrMode()
 	{
 		CheckDlgButton(IDC_CHECK4, BST_UNCHECKED);
 		m_CbnSampleSlot.SetCurSel(0);
-		m_CbnSampleSlot.EnableWindow(FALSE);
-	} else
-	{
-		m_CbnSampleSlot.EnableWindow(IsDlgButtonChecked(IDC_RADIO4));
 	}
+	UpdateDialog();
 }
 
 

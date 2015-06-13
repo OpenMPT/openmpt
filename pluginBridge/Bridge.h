@@ -81,7 +81,6 @@ protected:
 	void RenderThread();
 
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	void MessageHandler();
 
 	static VstIntPtr VSTCALLBACK MasterCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 };
