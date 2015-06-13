@@ -274,7 +274,7 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile &snd
 
 			default:
 				m->command = m->param = 0;
-				//MPT_ASSERT(false);
+				//MPT_ASSERT_NOTREACHED();
 				break;
 			}
 		}

@@ -684,7 +684,7 @@ static std::wstring FromLocale(const std::string &str, wchar_t replacement = L'\
 	{
 		// nothing
 	}
-	MPT_ASSERT(false);
+	MPT_ASSERT_NOTREACHED();
 	return String::FromAscii(str, replacement); // fallback
 }
 
@@ -715,7 +715,7 @@ static std::string ToLocale(const std::wstring &str, char replacement = '?')
 	{
 		// nothing
 	}
-	MPT_ASSERT(false);
+	MPT_ASSERT_NOTREACHED();
 	return String::ToAscii(str, replacement); // fallback
 }
 

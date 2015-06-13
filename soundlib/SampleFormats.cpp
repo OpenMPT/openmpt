@@ -2431,7 +2431,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		SampleToFLAC32(sampleData, sample.pSample16, numSamples);
 	} else
 	{
-		MPT_ASSERT(false);
+		MPT_ASSERT_NOTREACHED();
 	}
 
 	// Do the actual conversion.

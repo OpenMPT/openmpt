@@ -273,7 +273,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 				// Can't bother to implement property reading, as no UMX files I've seen so far use properties for the relevant objects,
 				// and only the UAX files in the Unreal 1997/98 beta seem to use this and still load just fine when ignoring it.
 				// If it should be necessary to implement this, check CUnProperty.cpp in http://ut-files.com/index.php?dir=Utilities/&file=utcms_source.zip
-				MPT_ASSERT(false);
+				MPT_ASSERT_NOTREACHED();
 				continue;
 			}
 #else

@@ -305,7 +305,7 @@ void ITCompression::WriteByte(uint8 v)
 	} else
 	{
 		// How could this happen, anyway?
-		MPT_ASSERT(false);
+		MPT_ASSERT_NOTREACHED();
 	}
 }
 

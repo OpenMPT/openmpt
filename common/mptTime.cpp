@@ -227,7 +227,7 @@ void MultimediaClock::Cleanup()
 		if(timeEndPeriod(m_CurrentPeriod) != MMSYSERR_NOERROR)
 		{
 			// should not happen
-			MPT_ASSERT(false);
+			MPT_ASSERT_NOTREACHED();
 		}
 		m_CurrentPeriod = 0;
 	}

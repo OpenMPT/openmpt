@@ -400,7 +400,7 @@ void WAVWriter::Write(const void *data, size_t numBytes)
 		} else
 		{
 			// Should never happen - did we calculate a wrong memory size?
-			MPT_ASSERT(false);
+			MPT_ASSERT_NOTREACHED();
 		}
 	}
 	position += numBytes;
