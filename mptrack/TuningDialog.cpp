@@ -296,7 +296,7 @@ void CTuningDialog::UpdateView(const int updateMask)
 		if(m_pActiveTuning->GetEditMask() == EM_CONST ||
 		m_pActiveTuning->GetEditMask() == EM_CONST_STRICT)
 		{
-			CheckDlgButton(IDC_CHECK_READONLY, MF_CHECKED);
+			CheckDlgButton(IDC_CHECK_READONLY, BST_CHECKED);
 			if(m_pActiveTuning->GetEditMask() == EM_CONST_STRICT)
 				m_ButtonReadOnly.EnableWindow(FALSE);
 			else
@@ -306,7 +306,7 @@ void CTuningDialog::UpdateView(const int updateMask)
 		}
 		else
 		{
-			CheckDlgButton(IDC_CHECK_READONLY, MF_UNCHECKED);
+			CheckDlgButton(IDC_CHECK_READONLY, BST_UNCHECKED);
 			m_ButtonReadOnly.EnableWindow();
 		}
 
@@ -805,14 +805,14 @@ void CTuningDialog::OnBnClickedCheckReadonly()
 	if(IsDlgButtonChecked(IDC_CHECK_READONLY))
 	{
 		if(m_pActiveTuning->SetEditMask(EM_CONST))
-			CheckDlgButton(IDC_CHECK_READONLY, MF_UNCHECKED);
+			CheckDlgButton(IDC_CHECK_READONLY, BST_UNCHECKED);
 		else
 			UpdateView(UM_TUNINGDATA);
 	}
 	else
 	{
 		if(m_pActiveTuning->SetEditMask(EM_ALLOWALL))
-			CheckDlgButton(IDC_CHECK_READONLY, MF_CHECKED);
+			CheckDlgButton(IDC_CHECK_READONLY, BST_CHECKED);
 		else
 			UpdateView(UM_TUNINGDATA);
 	}

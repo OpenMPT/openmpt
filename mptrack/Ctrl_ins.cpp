@@ -963,7 +963,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 
 	BuildTuningComboBox();
 
-	CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, BST_UNCHECKED);
 	m_EditPitchTempoLock.SubclassDlgItem(IDC_EDIT_PITCHTEMPOLOCK, this);
 	m_EditPitchTempoLock.AllowNegative(false);
 	m_EditPitchTempoLock.SetLimitText(9);
@@ -1341,7 +1341,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 
 			// Only enable Pitch/Tempo Lock for MPTM files or legacy files that have this property enabled.
 			m_CheckPitchTempoLock.EnableWindow((m_sndFile.GetType() == MOD_TYPE_MPT || pIns->pitchToTempoLock.GetRaw() > 0) ? TRUE : FALSE);
-			CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, pIns->pitchToTempoLock.GetRaw() > 0 ? MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, pIns->pitchToTempoLock.GetRaw() > 0 ? BST_CHECKED : BST_UNCHECKED);
 			m_EditPitchTempoLock.EnableWindow(pIns->pitchToTempoLock.GetRaw() > 0 ? TRUE : FALSE);
 			if(pIns->pitchToTempoLock.GetRaw() > 0)
 			{
