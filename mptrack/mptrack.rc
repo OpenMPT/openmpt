@@ -360,7 +360,6 @@ BEGIN
     PUSHBUTTON      "&More Settings",IDC_BUTTON1,6,116,60,14
 END
 
-
 IDD_TEMPO_SWING DIALOGEX 0, 0, 246, 143
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Tempo Swing Settings"
@@ -706,7 +705,7 @@ BEGIN
     RTEXT           "Year:",IDC_STATIC,324,194,18,8
     EDITTEXT        IDC_EDIT9,348,192,30,12,ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "Export To:",IDC_STATIC,6,219,48,8
-    CONTROL         "&File",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON | WS_GROUP,54,219,48,8
+    CONTROL         "&File",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON | WS_GROUP,54,219,30,8
     CONTROL         "S&ample Slot",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,96,219,90,8
 END
 
@@ -2932,7 +2931,6 @@ END
 //
 
 IDR_DEFAULT_KEYBINDINGS KEYBINDINGS             "res\\defaultKeybindings.mkb"
-
 #endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////
 
