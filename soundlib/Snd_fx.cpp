@@ -50,6 +50,7 @@ public:
 	struct ChnSettings
 	{
 		double patLoop;
+		CSoundFile::samplecount_t patLoopSmp;
 		ROWINDEX patLoopStart;
 		uint32 ticksToRender;	// When using sample sync, we still need to render this many ticks
 		bool incChanged;		// When using sample sync, note frequency has changed
@@ -58,6 +59,7 @@ public:
 		void Reset()
 		{
 			patLoop = 0.0;
+			patLoopSmp = 0;
 			patLoopStart = 0;
 			vol = 0xFF;
 		}
@@ -396,7 +398,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		if(!memory.state.m_nRow)
 		{
 			for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
+			{
 				memory.chnSettings[chn].patLoop = memory.elapsedTime;
+				memory.chnSettings[chn].patLoopSmp = memory.state.m_lTotalSampleCount;
+			}
 		}
 
 		ModChannel *pChn = memory.state.Chn;
@@ -588,6 +593,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						for(CHANNELINDEX c = firstChn; c <= lastChn; c++)
 						{
 							memory.chnSettings[c].patLoop = memory.elapsedTime;
+							memory.chnSettings[c].patLoopSmp = memory.state.m_lTotalSampleCount;
 							memory.chnSettings[c].patLoopStart = memory.state.m_nRow;
 						}
 						patternLoopStartedOnThisRow = true;
@@ -608,6 +614,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					{
 						patternLoopStartedOnThisRow = true;
 						memory.chnSettings[nChn].patLoop = memory.elapsedTime;
+						memory.chnSettings[nChn].patLoopSmp = memory.state.m_lTotalSampleCount;
 						memory.chnSettings[nChn].patLoopStart = memory.state.m_nRow;
 					}
 				}
@@ -945,6 +952,14 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			for(std::map<double, int>::iterator i = startTimes.begin(); i != startTimes.end(); i++)
 			{
 				memory.elapsedTime += (memory.elapsedTime - i->first) * (double)(i->second - 1);
+				for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, pChn++)
+				{
+					if(memory.chnSettings[nChn].patLoop == i->first)
+					{
+						memory.state.m_lTotalSampleCount += (memory.state.m_lTotalSampleCount - memory.chnSettings[nChn].patLoopSmp) * (i->second - 1);
+						break;
+					}
+				}
 			}
 			if(GetType() == MOD_TYPE_IT)
 			{
@@ -954,6 +969,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					if((pChn->rowCommand.command == CMD_S3MCMDEX && pChn->rowCommand.param >= 0xB1 && pChn->rowCommand.param <= 0xBF))
 					{
 						memory.chnSettings[nChn].patLoop = memory.elapsedTime;
+						memory.chnSettings[nChn].patLoopSmp = memory.state.m_lTotalSampleCount;
 					}
 				}
 			}
