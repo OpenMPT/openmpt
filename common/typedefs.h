@@ -325,6 +325,7 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 
 #if defined(MPT_FRAMEWORK_ASSERT_IS_DEFINED) && (MPT_ASSERT_USE_FRAMEWORK == 1)
 
+#define MPT_ASSERT_NOTREACHED()          ASSERT(0)
 #define MPT_ASSERT(expr)                 ASSERT((expr))
 #define MPT_ASSERT_MSG(expr, msg)        ASSERT((expr) && (msg))
 #if (MPT_FRAMEWORK_ASSERT_IS_ACTIVE == 1)
@@ -340,6 +341,7 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 
 #elif defined(NO_ASSERTS)
 
+#define MPT_ASSERT_NOTREACHED()          MPT_CHECKER_ASSUME(0)
 #define MPT_ASSERT(expr)                 MPT_CHECKER_ASSUME(expr)
 #define MPT_ASSERT_MSG(expr, msg)        MPT_CHECKER_ASSUME(expr)
 #define MPT_ASSERT_ALWAYS(expr)          MPT_DO { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } MPT_CHECKER_ASSUME(expr); } MPT_WHILE_0
@@ -350,6 +352,7 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 
 #else // !NO_ASSERTS
 
+#define MPT_ASSERT_NOTREACHED()          MPT_DO { MPT_CONSTANT_IF(!(0)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, "0"); } MPT_CHECKER_ASSUME(0); } MPT_WHILE_0
 #define MPT_ASSERT(expr)                 MPT_DO { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } MPT_CHECKER_ASSUME(expr); } MPT_WHILE_0
 #define MPT_ASSERT_MSG(expr, msg)        MPT_DO { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr, msg); } MPT_CHECKER_ASSUME(expr); } MPT_WHILE_0
 #define MPT_ASSERT_ALWAYS(expr)          MPT_DO { if(!(expr)) { AssertHandler(__FILE__, __LINE__, __FUNCTION__, #expr); } MPT_CHECKER_ASSUME(expr); } MPT_WHILE_0

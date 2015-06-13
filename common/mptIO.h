@@ -298,7 +298,7 @@ inline bool WriteAdaptiveInt16LE(Tfile & f, const uint16 v, std::size_t minSize 
 		return IO::WriteIntLE<uint16>(f, static_cast<uint16>(v << 1) | 0x01);
 	} else
 	{
-		MPT_ASSERT(false);
+		MPT_ASSERT_NOTREACHED();
 		return false;
 	}
 }
@@ -328,7 +328,7 @@ inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 v, std::size_t minSize 
 		return IO::WriteIntLE<uint32>(f, static_cast<uint32>(v << 2) | 0x03);
 	} else
 	{
-		MPT_ASSERT(false);
+		MPT_ASSERT_NOTREACHED();
 		return false;
 	}
 }
@@ -353,7 +353,7 @@ inline bool WriteAdaptiveInt64LE(Tfile & f, const uint64 v, std::size_t minSize 
 		return IO::WriteIntLE<uint64>(f, static_cast<uint64>(v << 2) | 0x03);
 	} else
 	{
-		MPT_ASSERT(false);
+		MPT_ASSERT_NOTREACHED();
 		return false;
 	}
 }
