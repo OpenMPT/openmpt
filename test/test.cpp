@@ -932,19 +932,19 @@ static MPT_NOINLINE void TestCharsets()
 	_tcscpy(src_tchar, _T("ab"));
 
 #define MPT_TEST_PRINTF(dst_type, function, format, src_type) \
-	do { \
+	MPT_DO { \
 		MemsetZero(dst_ ## dst_type); \
 		function(dst_ ## dst_type, format, src_ ## src_type); \
 		VERIFY_EQUAL(std::memcmp(dst_ ## dst_type, src_ ## dst_type, 256), 0); \
-	} while(0) \
+	} MPT_WHILE_0 \
 /**/
 
 #define MPT_TEST_PRINTF_N(dst_type, function, format, src_type) \
-	do { \
+	MPT_DO { \
 		MemsetZero(dst_ ## dst_type); \
 		function(dst_ ## dst_type, 255, format, src_ ## src_type); \
 		VERIFY_EQUAL(std::memcmp(dst_ ## dst_type, src_ ## dst_type, 256), 0); \
-	} while(0) \
+	} MPT_WHILE_0 \
 /**/
 
 	// CRT narrow

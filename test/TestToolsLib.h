@@ -224,7 +224,7 @@ public:
 
 
 #define DO_TEST(func) \
-do{ \
+MPT_DO { \
 	Test::Testcase test(Test::FatalityStop, Test::VerbosityVerbose, #func , MPT_TEST_CONTEXT_CURRENT() ); \
 	try { \
 		test.ShowStart(); \
@@ -237,7 +237,7 @@ do{ \
 	} catch(...) { \
 		test.ReportException(); \
 	} \
-}while(0)
+} MPT_WHILE_0
 
 
 } // namespace Test

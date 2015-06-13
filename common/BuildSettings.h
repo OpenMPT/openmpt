@@ -500,7 +500,7 @@
 
 #if MPT_COMPILER_MSVC
 
-// happens for do { } while(0)
+// happens for if expression that only depend on template parameters
 #pragma warning(disable:4127) // conditional expression is constant
 
 // happens for immutable classes (i.e. classes containing const members)
@@ -514,5 +514,5 @@
 #pragma warning(disable:4250) // 'mpt::fstream' : inherits 'std::basic_istream<_Elem,_Traits>::std::basic_istream<_Elem,_Traits>::_Add_vtordisp1' via dominance
 #endif
 
-#endif
+#endif // MPT_COMPILER_MSVC
 

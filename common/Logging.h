@@ -138,13 +138,13 @@ void SetThreadId(mpt::log::Trace::ThreadKind kind, uint32 id);
 void Seal();
 bool Dump(const mpt::PathString &filename);
 
-#define MPT_TRACE() do { if(mpt::log::Trace::g_Enabled) { mpt::log::Trace::Trace(MPT_LOG_CURRENTCONTEXT()); } } while(0)
+#define MPT_TRACE() MPT_DO { if(mpt::log::Trace::g_Enabled) { mpt::log::Trace::Trace(MPT_LOG_CURRENTCONTEXT()); } } MPT_WHILE_0
 
 } // namespace Trace
 
 #else // !MODPLUG_TRACKER
 
-#define MPT_TRACE() do { } while(0)
+#define MPT_TRACE() MPT_DO { } MPT_WHILE_0
 
 #endif // MODPLUG_TRACKER
 

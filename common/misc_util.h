@@ -122,34 +122,34 @@ inline Tdst saturate_cast(Tsrc src)
 	// This code tries not only to obviously avoid overflows but also to avoid signed/unsigned comparison warnings and type truncation warnings (which in fact would be safe here) by explicit casting.
 	STATIC_ASSERT(std::numeric_limits<Tdst>::is_integer);
 	STATIC_ASSERT(std::numeric_limits<Tsrc>::is_integer);
-	if(std::numeric_limits<Tdst>::is_signed && std::numeric_limits<Tsrc>::is_signed)
+	MPT_CONSTANT_IF(std::numeric_limits<Tdst>::is_signed && std::numeric_limits<Tsrc>::is_signed)
 	{
-		if(sizeof(Tdst) >= sizeof(Tsrc))
+		MPT_CONSTANT_IF(sizeof(Tdst) >= sizeof(Tsrc))
 		{
 			return static_cast<Tdst>(src);
 		}
 		return static_cast<Tdst>(std::max<Tsrc>(static_cast<Tsrc>(std::numeric_limits<Tdst>::min()), std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max()))));
-	} else if(!std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed)
+	} else MPT_CONSTANT_IF(!std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed)
 	{
-		if(sizeof(Tdst) >= sizeof(Tsrc))
+		MPT_CONSTANT_IF(sizeof(Tdst) >= sizeof(Tsrc))
 		{
 			return static_cast<Tdst>(src);
 		}
 		return static_cast<Tdst>(std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
-	} else if(std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed)
+	} else MPT_CONSTANT_IF(std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed)
 	{
-		if(sizeof(Tdst) > sizeof(Tsrc))
+		MPT_CONSTANT_IF(sizeof(Tdst) > sizeof(Tsrc))
 		{
 			return static_cast<Tdst>(src);
 		}
-		if(sizeof(Tdst) == sizeof(Tsrc))
+		MPT_CONSTANT_IF(sizeof(Tdst) == sizeof(Tsrc))
 		{
 			return static_cast<Tdst>(std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
 		}
 		return static_cast<Tdst>(std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
 	} else // Tdst unsigned, Tsrc signed
 	{
-		if(sizeof(Tdst) >= sizeof(Tsrc))
+		MPT_CONSTANT_IF(sizeof(Tdst) >= sizeof(Tsrc))
 		{
 			return static_cast<Tdst>(std::max<Tsrc>(0, src));
 		}
@@ -466,7 +466,7 @@ namespace Util {
 			a = -a;
 		if(b < 0)
 			b = -b;
-		do
+		for(;;)
 		{
 			if(a == 0)
 				return b;
@@ -474,7 +474,7 @@ namespace Util {
 			if(b == 0)
 				return a;
 			a %= b;
-		} while(true);
+		}
 	}
 
 	// Least Common Multiple. Always returns non-negative number.

@@ -553,7 +553,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		switch(id)
 		{
 		case MAGIC4LE('B','P','M','+'):
-			if(0)
+			MPT_CONSTANT_IF(0)
 			{
 				double d = chunk.ReadDoubleLE();
 				if(fileHeader.samplesPerTick != 0 && d != 0.0)
