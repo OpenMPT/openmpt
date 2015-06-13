@@ -828,9 +828,12 @@ void CCtrlPatterns::OnPatternNew()
 	if(m_sndFile.Patterns.IsValidPat(newPat))
 	{
 		// update time signature
-		if(m_sndFile.Patterns.IsValidIndex(curPat) && m_sndFile.Patterns[curPat].GetOverrideSignature())
+		if(m_sndFile.Patterns.IsValidIndex(curPat))
 		{
-			m_sndFile.Patterns[newPat].SetSignature(m_sndFile.Patterns[curPat].GetRowsPerBeat(), m_sndFile.Patterns[curPat].GetRowsPerMeasure());
+			if(m_sndFile.Patterns[curPat].GetOverrideSignature())
+				m_sndFile.Patterns[newPat].SetSignature(m_sndFile.Patterns[curPat].GetRowsPerBeat(), m_sndFile.Patterns[curPat].GetRowsPerMeasure());
+			if(m_sndFile.Patterns[curPat].HasTempoSwing())
+				m_sndFile.Patterns[newPat].SetTempoSwing(m_sndFile.Patterns[curPat].GetTempoSwing());
 		}
 		// move to new pattern
 		m_OrderList.SetCurSel(curOrd);

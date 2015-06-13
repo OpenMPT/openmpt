@@ -656,6 +656,9 @@ void CMainToolBar::SetRowsPerBeat(ROWINDEX nNewRPB)
 		if(nNewRPB <= pSndFile->Patterns[nPat].GetRowsPerMeasure())
 		{
 			pSndFile->Patterns[nPat].SetSignature(nNewRPB, pSndFile->Patterns[nPat].GetRowsPerMeasure());
+			TempoSwing swing = pSndFile->Patterns[nPat].GetTempoSwing();
+			swing.resize(nNewRPB);
+			pSndFile->Patterns[nPat].SetTempoSwing(swing);
 			pModDoc->SetModified();
 		}
 	} else

@@ -372,6 +372,7 @@ struct OrigPatSettings
 {
 	// This stuff is needed for copying the old pattern properties to the new pattern number
 	std::string name;			// original pattern name
+	TempoSwing swing;			// original pattern tempo swing
 	ModCommand *data;			// original pattern data
 	ROWINDEX numRows;			// original pattern sizes
 	ROWINDEX rowsPerBeat;		// original pattern highlight
@@ -380,7 +381,7 @@ struct OrigPatSettings
 	PATTERNINDEX newIndex;		// map old pattern index <-> new pattern index
 };
 
-const OrigPatSettings defaultSettings = { "", nullptr, 0, 0, 0, PATTERNINDEX_INVALID };
+const OrigPatSettings defaultSettings = { "", TempoSwing(), nullptr, 0, 0, 0, PATTERNINDEX_INVALID };
 
 
 // Rearrange patterns (first pattern in order list = 0, etc...)
@@ -437,6 +438,7 @@ bool CModCleanupDlg::RearrangePatterns()
 				patternSettings[newIndex].rowsPerBeat = sndFile.Patterns[pat].GetRowsPerBeat();
 				patternSettings[newIndex].rowsPerMeasure = sndFile.Patterns[pat].GetRowsPerMeasure();
 			}
+			patternSettings[newIndex].swing = sndFile.Patterns[pat].GetTempoSwing();
 			patternSettings[newIndex].name = sndFile.Patterns[pat].GetName();
 		}
 	}
@@ -446,6 +448,7 @@ bool CModCleanupDlg::RearrangePatterns()
 	{
 		sndFile.Patterns[pat].SetData(patternSettings[pat].data, patternSettings[pat].numRows);
 		sndFile.Patterns[pat].SetSignature(patternSettings[pat].rowsPerBeat, patternSettings[pat].rowsPerMeasure);
+		sndFile.Patterns[pat].SetTempoSwing(patternSettings[pat].swing);
 		sndFile.Patterns[pat].SetName(patternSettings[pat].name);
 	}
 
