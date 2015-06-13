@@ -32,7 +32,7 @@ namespace srlztn
 #ifdef SSB_LOGGING
 #define SSB_LOG(x) Log(x)
 #else
-#define SSB_LOG(x) do{}while(0)
+#define SSB_LOG(x) MPT_DO { } MPT_WHILE_0
 #endif
 
 

@@ -140,8 +140,8 @@ inline char   SwapBytesBE_(char   value) { return value; }
 // argument.
 
 // In-place modifying version:
-#define SwapBytesBE(value) do { (value) = SwapBytesBE_((value)); } while(0)
-#define SwapBytesLE(value) do { (value) = SwapBytesLE_((value)); } while(0)
+#define SwapBytesBE(value) MPT_DO { (value) = SwapBytesBE_((value)); } MPT_WHILE_0
+#define SwapBytesLE(value) MPT_DO { (value) = SwapBytesLE_((value)); } MPT_WHILE_0
 
 // Alternative, function-style syntax:
 #define SwapBytesReturnBE(value) SwapBytesBE_((value))

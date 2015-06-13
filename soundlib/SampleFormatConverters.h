@@ -639,7 +639,7 @@ struct ConvertFixedPoint<float32, int32, fractionalBits, clipOutput>
 	forceinline output_t operator() (input_t val)
 	{
 		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
-		if(clipOutput)
+		MPT_CONSTANT_IF(clipOutput)
 		{
 			float32 out = val * factor;
 			if(out < -1.0f) out = -1.0f;

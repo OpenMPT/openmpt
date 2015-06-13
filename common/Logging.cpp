@@ -33,7 +33,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if MPT_COMPILER_MSVC || (MPT_COMPILER_GCC && MPT_GCC_AT_LEAST(4,3,0) && MPT_GCC_BEFORE(4,4,0))
 #ifndef va_copy
-#define va_copy(dst, src) do { (dst) = (src); } while (0)
+#define va_copy(dst, src) MPT_DO { (dst) = (src); } MPT_WHILE_0
 #endif
 #endif
 
