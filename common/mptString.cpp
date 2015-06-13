@@ -791,7 +791,7 @@ static std::wstring FromUTF8(const std::string &str, wchar_t replacement = L'\uF
 			charsleft--;
 
 			if ( charsleft == 0 ) {
-				if ( sizeof( wchar_t ) == 2 ) {
+				MPT_CONSTANT_IF ( sizeof( wchar_t ) == 2 ) {
 					if ( ucs4 > 0x1fffff ) {
 						out.push_back( replacement );
 						ucs4 = 0;
@@ -842,7 +842,7 @@ static std::string ToUTF8(const std::wstring &str, char replacement = '?')
 		}
 
 		uint32 ucs4 = 0;
-		if ( sizeof( wchar_t ) == 2 ) {
+		MPT_CONSTANT_IF ( sizeof( wchar_t ) == 2 ) {
 			if ( i + 1 < in.length() ) {
 				// check for surrogate pair
 				uint16 hi_sur = in[i+0];

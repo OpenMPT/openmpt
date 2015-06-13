@@ -500,9 +500,6 @@
 
 #if MPT_COMPILER_MSVC
 
-// happens for if expression that only depend on template parameters
-#pragma warning(disable:4127) // conditional expression is constant
-
 // happens for immutable classes (i.e. classes containing const members)
 #pragma warning(disable:4512) // assignment operator could not be generated
 

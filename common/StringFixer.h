@@ -20,6 +20,13 @@ OPENMPT_NAMESPACE_BEGIN
 namespace mpt { namespace String
 {
 
+
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4127) // conditional expression is constant
+#endif // MPT_COMPILER_MSVC
+
+
 	// Sets last character to null in given char array.
 	// Size of the array must be known at compile time.
 	template <size_t size>
@@ -381,6 +388,11 @@ namespace mpt { namespace String
 	{
 		dest.assign(src);
 	}
+
+
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 
 
 } } // namespace mpt::String
