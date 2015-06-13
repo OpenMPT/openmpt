@@ -310,7 +310,10 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_SliderVSTiVol.SetPos(MAX_SLIDER_VSTI_VOL - m_sndFile.m_nVSTiVolume);
 		m_SliderSamplePreAmp.SetPos(MAX_SLIDER_SAMPLE_VOL - m_sndFile.m_nSamplePreAmp);
 		m_SliderTempo.SetPos((tempoMax - m_sndFile.m_nDefaultTempo).GetInt());
+	}
 
+	if(updateAll || hintType == HINT_MPTOPTIONS || (hint.GetCategory() == HINTCAT_GENERAL && hintType[HINT_MODGENERAL]))
+	{
 		int srcMode = 0;
 		for(int i = 0; i < CountOf(interpolationTypes); i++)
 		{
