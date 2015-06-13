@@ -1847,7 +1847,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 							strcpy(m_SndFile.m_szNames[smp], "Render To Sample");
 							strncat(m_SndFile.m_szNames[smp], fileNameAdd, MAX_SAMPLENAME - strlen("Render To Sample") - 1);
 							UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
-							if(m_SndFile.GetNumInstruments())
+							if(m_SndFile.GetNumInstruments() && !m_SndFile.IsSampleUsed(smp))
 							{
 								InsertInstrument(smp);
 								UpdateAllViews(nullptr, InstrumentHint().Info().Names());

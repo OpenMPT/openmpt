@@ -823,10 +823,10 @@ void CTrackApp::SetupPaths(bool overridePortable)
 
 	// Set current directory to My Documents (normal) or OpenMPT directory (portable).
 	// If no sample / mod / etc. paths are set up by the user, this will be the default location for browsing files.
-	if(portableMode)
+	if(portableMode || SHGetFolderPathW(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, dir) != S_OK)
 	{
 		SetCurrentDirectoryW(configPathApp.AsNative().c_str());
-	} else if(SHGetFolderPathW(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, dir) == S_OK)
+	} else
 	{
 		SetCurrentDirectoryW(dir);
 	}
@@ -1057,8 +1057,8 @@ BOOL CTrackApp::InitInstance()
 	// Initialize CMainFrame
 	pMainFrame->Initialize();
 	InitCommonControls();
-	m_dwLastPluginIdleCall = 0;	//rewbs.VSTCompliance
-	pMainFrame->m_InputHandler->UpdateMainMenu();	//rewbs.customKeys
+	m_dwLastPluginIdleCall = 0;
+	pMainFrame->m_InputHandler->UpdateMainMenu();
 
 	// Dispatch commands specified on the command line
 	if (!ProcessShellCommand(cmdInfo))

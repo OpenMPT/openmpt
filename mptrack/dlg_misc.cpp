@@ -366,8 +366,7 @@ void CModTypeDlg::OnOK()
 	if(sndFile.m_nTempoMode == tempoModeModern)
 	{
 		sndFile.m_tempoSwing = m_tempoSwing;
-		sndFile.m_tempoSwing.resize(sndFile.m_nDefaultRowsPerBeat, TempoSwing::Unity);
-		sndFile.m_tempoSwing.Normalize();
+		sndFile.m_tempoSwing.resize(sndFile.m_nDefaultRowsPerBeat);
 	} else
 	{
 		sndFile.m_tempoSwing.clear();

@@ -32,6 +32,7 @@ OPENMPT_NAMESPACE_BEGIN
  * 'Rows: 64\r\n' (must be first)
  * 'Name: Pattern Name\r\n' (optional)
  * 'Signature: 4/16\r\n' (optional)
+ * 'Swing: 16777216,16777216,16777216,16777216\r\n' (optional)
  * Pattern data...
  */
 
@@ -94,15 +95,26 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 				// New pattern
 				patList[pattern] = insertedPats++;
 
-				patternData.AppendFormat("Rows: %u\r\n", sndFile.Patterns[pattern].GetNumRows());
-				CStringA name = sndFile.Patterns[pattern].GetName().c_str();
+				const CPattern &pat = sndFile.Patterns[pattern];
+				patternData.AppendFormat("Rows: %u\r\n", pat.GetNumRows());
+				CStringA name = pat.GetName().c_str();
 				if(!name.IsEmpty())
 				{
 					patternData.Append("Name: " + name + "\r\n");
 				}
-				if(sndFile.Patterns[pattern].GetOverrideSignature())
+				if(pat.GetOverrideSignature())
 				{
-					patternData.AppendFormat("Signature: %u/%u\r\n", sndFile.Patterns[pattern].GetRowsPerBeat(), sndFile.Patterns[pattern].GetRowsPerMeasure());
+					patternData.AppendFormat("Signature: %u/%u\r\n", pat.GetRowsPerBeat(), pat.GetRowsPerMeasure());
+				}
+				if(pat.HasTempoSwing())
+				{
+					patternData += "Swing: ";
+					const TempoSwing &swing = pat.GetTempoSwing();
+					for(size_t i = 0; i < swing.size(); i++)
+					{
+						patternData.AppendFormat(i == 0 ? "%u" : ",%u", swing[i]);
+					}
+					patternData += "\r\n";
 				}
 				patternData.Append(CreateClipboardString(sndFile, pattern, PatternRect(PatternCursor(), PatternCursor(sndFile.Patterns[pattern].GetNumRows() - 1, sndFile.GetNumChannels() - 1, PatternCursor::lastColumn))));
 			}
@@ -527,6 +539,18 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 					ROWINDEX rpb = ConvertStrTo<ROWINDEX>(data.Mid(pos, pos2 - pos));
 					ROWINDEX rpm = ConvertStrTo<ROWINDEX>(data.Mid(pos2, eol - pos2));
 					sndFile.Patterns[pattern].SetSignature(rpb, rpm);
+				} else if(data.Mid(pos, 7) == "Swing: ")
+				{
+					pos += 7;
+					TempoSwing swing;
+					swing.resize(sndFile.Patterns[pattern].GetRowsPerBeat(), TempoSwing::Unity);
+					size_t i = 0;
+					while(pos > 0 && pos < eol && i < swing.size())
+					{
+						swing[i++] = ConvertStrTo<TempoSwing::value_type>(data.Mid(pos, eol - pos));
+						pos = data.Find(",", pos + 1) + 1;
+					}
+					sndFile.Patterns[pattern].SetTempoSwing(swing);
 				} else
 				{
 					break;
