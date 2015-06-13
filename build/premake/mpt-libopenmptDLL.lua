@@ -32,7 +32,7 @@
    "../../libopenmpt/libopenmpt_ext.cpp",
    "../../libopenmpt/libopenmpt_impl.cpp",
   }
-  flags { "Unicode" }
+  flags { "Unicode", "ExtraWarnings" }
   defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_DLL" }
   links {
    "miniz-shared",
