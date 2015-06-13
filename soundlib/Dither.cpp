@@ -171,7 +171,7 @@ MPT_NOINLINE void operator () (int *mixbuffer, std::size_t count, DitherSimpleSt
 	STATIC_ASSERT(sizeof(int) == 4);
 	STATIC_ASSERT(FASTRAND_BITS * 3 >= (32-targetbits) - MIXING_ATTENUATION);
 	const int rshift = (32-targetbits) - MIXING_ATTENUATION;
-	if(rshift <= 0)
+	MPT_CONSTANT_IF(rshift <= 0)
 	{
 		// nothing to dither
 		return;
@@ -186,7 +186,7 @@ MPT_NOINLINE void operator () (int *mixbuffer, std::size_t count, DitherSimpleSt
 		for(std::size_t channel = 0; channel < channels; ++channel)
 		{
 			int noise = 0;
-			if(triangular)
+			MPT_CONSTANT_IF(triangular)
 			{
 				noise = (fastrandbits(s.rng, noise_bits) + fastrandbits(s.rng, noise_bits)) >> 1;
 			} else
@@ -195,7 +195,7 @@ MPT_NOINLINE void operator () (int *mixbuffer, std::size_t count, DitherSimpleSt
 			}
 			noise -= noise_bias; // un-bias
 			int val = *mixbuffer;
-			if(shaped)
+			MPT_CONSTANT_IF(shaped)
 			{
 				val += (s.error[channel] >> 1);
 			}
