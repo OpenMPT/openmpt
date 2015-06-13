@@ -1072,7 +1072,7 @@ static uint32 SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 {
 	size_t num = pSndFile->GetFileHistory().size();
 #ifdef MODPLUG_TRACKER
-	CModDoc *pModDoc = pSndFile->GetpModDoc();
+	const CModDoc *pModDoc = pSndFile->GetpModDoc();
 	num += (pModDoc != nullptr) ? 1 : 0;	// + 1 for this session
 #endif // MODPLUG_TRACKER
 
@@ -2024,6 +2024,17 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		}
 	}
 
+	// Tempo Swing Factors
+	if(!m_tempoSwing.empty())
+	{
+		std::ostringstream oStrm;
+		TempoSwing::Serialize(oStrm, m_tempoSwing);
+		std::string data = oStrm.str();
+		uint16 length = mpt::saturate_cast<uint16>(data.size());
+		WRITEMODULARHEADER(MAGIC4LE('S','W','N','G'), length);
+		mpt::IO::WriteRaw(f, &data[0], length);
+	}
+
 	// Additional flags for XM/IT/MPTM
 	if(m_ModFlags)
 	{
@@ -2182,25 +2193,35 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 					}
 				}
 				break;
+
+			case MAGIC4LE('S','W','N','G'):
+				// Tempo Swing Factors
+				if(size > 2)
+				{
+					std::string data(chunk.GetLength(), '\0');
+					chunk.ReadRaw(&data[0], data.size());
+					std::istringstream iStrm(data);
+					TempoSwing::Deserialize(iStrm, m_tempoSwing, data.size());
+				}
+				break;
 		}
 
 	}
 
 	// Validate read values.
 	Limit(m_nDefaultTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
-	//m_nRowsPerBeat
-	//m_nRowsPerMeasure
+	if(m_nDefaultRowsPerMeasure < m_nDefaultRowsPerBeat) m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat;
 	Limit(m_nChannels, CHANNELINDEX(1), GetModSpecifications().channelsMax);
-	//m_nTempoMode
-	//m_nMixLevels
+	if(m_nTempoMode >= tempoModeMax) m_nTempoMode = tempoModeClassic;
+	if(m_nMixLevels >= mixLevelsMax) m_nMixLevels = mixLevelsOriginal;
 	//m_dwCreatedWithVersion
 	//m_dwLastSavedWithVersion
 	//m_nSamplePreAmp
 	//m_nVSTiVolume
-	//m_nDefaultGlobalVolume);
+	//m_nDefaultGlobalVolume
+	LimitMax(m_nDefaultGlobalVolume, MAX_GLOBAL_VOLUME);
 	//m_nRestartPos
 	//m_ModFlags
-
 }
 
 
@@ -2209,6 +2230,18 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 size_t CSoundFile::SaveModularInstrumentData(FILE *f, const ModInstrument *pIns) const
 //------------------------------------------------------------------------------------
 {
+	// Yes, it is completely idiotic that we have both SaveModularInstrumentData and SaveExtendedInstrumentProperties.
+	// And they are all insane in their own way:
+	// - SaveExtendedInstrumentProperties is tacked SOMEWHERE AFTER THE SAMPLE CHUNK, which is horrible in case of
+	//   compressed samples because you don't know where to start reading without actually unpacking the sample.
+	//   this mechanism has broken a gazillion times in the past due to simple code changes. Luckily we have unit
+	//   tests which can detect this most of the time.
+	// - SaveModularInstrumentData follows the instrument data as it should, but is used for only one chunk, and
+	//   it doesn't actually specify the chunk's size. You have to hardcode chunk size or else you're lost.
+	//   That's totally awesome if you have to process unknown chunks. NOT.
+	// Oh, and of course they all use backwards FOURCCs because they originally used the non-standard '1234'
+	// multi-char MSVC extension. It's one big clusterfuck.
+
 	// As the only stuff that is actually written here is the plugin ID,
 	// we can actually chicken out if there's no plugin.
 	if(!pIns->nMixPlug)
@@ -2218,30 +2251,18 @@ size_t CSoundFile::SaveModularInstrumentData(FILE *f, const ModInstrument *pIns)
 
 	uint32 modularInstSize = 0;
 	uint32 id = MAGIC4BE('I','N','S','M');
-	SwapBytesLE(id);
-	fwrite(&id, 1, sizeof(id), f);				// mark this as an instrument with modular extensions
-	long sizePos = ftell(f);									// we will want to write the modular data's total size here
-	fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write a DUMMY size, just to move file pointer by a long
+	mpt::IO::WriteIntLE<uint32>(f, id);
+	long sizePos = ftell(f);			// we will want to write the modular data's total size here
+	mpt::IO::WriteIntLE<uint32>(f, 0);	// write a DUMMY size, just to move file pointer by a long
 
 	// Write chunks
 	{	//VST Slot chunk:
-		id = MAGIC4BE('P','L','U','G');
-		SwapBytesLE(id);
-		fwrite(&id, 1, sizeof(uint32), f);
-		fwrite(&(pIns->nMixPlug), 1, sizeof(uint8), f);
+		mpt::IO::WriteIntLE<uint32>(f, MAGIC4BE('P','L','U','G'));
+		mpt::IO::WriteIntLE<uint8>(f, pIns->nMixPlug);
 		modularInstSize += sizeof(uint32) + sizeof(uint8);
 	}
-	//How to save your own modular instrument chunk:
-/*	{
-		ID='MYID';
-		fwrite(&ID, 1, sizeof(int), f);
-		instModularDataSize+=sizeof(int);
+	// If you really need to add more chunks here, please don't repeat history (see above) and *do* add a size field for your chunk, mmmkay?
 
-		//You can save your chunk size somwhere here if you need variable chunk size.
-		fwrite(myData, 1, myDataSize, f);
-		instModularDataSize+=myDataSize;
-	}
-*/
 	//write modular data's total size
 	long curPos = ftell(f);			// remember current pos
 	fseek(f, sizePos, SEEK_SET);	// go back to  sizePos
@@ -2272,17 +2293,19 @@ size_t CSoundFile::LoadModularInstrumentData(FileReader &file, ModInstrument &in
 	while(modularData.AreBytesLeft())
 	{
 		const uint32 chunkID = modularData.ReadUint32LE();
+		uint16 chunkSize;
+		// Legacy chunk
+		if(chunkID == MAGIC4BE('P','L','U','G'))
+			chunkSize = 1;
+		else
+			chunkSize = modularData.ReadUint16LE();
+		FileReader chunkData = modularData.ReadChunk(chunkSize);
 
 		switch (chunkID)
 		{
 		case MAGIC4BE('P','L','U','G'):
-			// Chunks don't tell us their length - stupid!
-			ins.nMixPlug = modularData.ReadUint8();
+			ins.nMixPlug = chunkData.ReadUint8();
 			break;
-
-		default:
-			// move forward one byte and try to recognize again.
-			modularData.Skip(1);
 
 		}
 	}

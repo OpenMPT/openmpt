@@ -39,7 +39,7 @@ static void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELIND
 		while(nCmdRow >= 0)
 		{
 			const ModCommand *m = sndFile.Patterns[nPat].GetpModCommand(nCmdRow, nChannel);
-			if(m->command == CMD_OFFSET || m->command == CMD_PATTERNBREAK || m->command == CMD_PATTERNBREAK)
+			if(m->command == CMD_OFFSET || m->command == CMD_PATTERNBREAK || m->command == CMD_TEMPO)
 				break;
 			if(m->command != CMD_XPARAM)
 			{
@@ -470,6 +470,7 @@ BEGIN_MESSAGE_MAP(CPatternPropertiesDlg, CDialog)
 	ON_COMMAND(IDC_BUTTON_HALF,		OnHalfRowNumber)
 	ON_COMMAND(IDC_BUTTON_DOUBLE,	OnDoubleRowNumber)
 	ON_COMMAND(IDC_CHECK1,			OnOverrideSignature)
+	ON_COMMAND(IDC_BUTTON1,			OnTempoSwing)
 END_MESSAGE_MAP()
 
 BOOL CPatternPropertiesDlg::OnInitDialog()
@@ -483,7 +484,8 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 	if(m_nPattern < sndFile.Patterns.Size() && combo)
 	{
 		TCHAR s[256];
-		UINT nrows = sndFile.Patterns[m_nPattern].GetNumRows();
+		const CPattern &pattern = sndFile.Patterns[m_nPattern];
+		ROWINDEX nrows = pattern.GetNumRows();
 
 		const CModSpecifications& specs = sndFile.GetModSpecifications();
 		combo->SetRedraw(FALSE);
@@ -496,13 +498,13 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 		combo->SetRedraw(TRUE);
 		_stprintf(s, _T("Pattern #%d: %d row%s (%dK)"),
 			m_nPattern,
-			sndFile.Patterns[m_nPattern].GetNumRows(),
-			(sndFile.Patterns[m_nPattern].GetNumRows() == 1) ? _T("") : _T("s"),
-			(sndFile.Patterns[m_nPattern].GetNumRows() * sndFile.GetNumChannels() * sizeof(ModCommand)) / 1024);
+			pattern.GetNumRows(),
+			(pattern.GetNumRows() == 1) ? _T("") : _T("s"),
+			(pattern.GetNumRows() * sndFile.GetNumChannels() * sizeof(ModCommand)) / 1024);
 		SetDlgItemText(IDC_TEXT1, s);
 
 		// Window title
-		const CString patternName = sndFile.Patterns[m_nPattern].GetName().c_str();
+		const CString patternName = pattern.GetName().c_str();
 		_stprintf(s, _T("Pattern Properties for Pattern #%d"), m_nPattern);
 		if(!patternName.IsEmpty())
 		{
@@ -513,15 +515,17 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 		SetWindowText(s);
 
 		// pattern time signature
-		const bool bOverride = sndFile.Patterns[m_nPattern].GetOverrideSignature();
-		UINT nRPB = sndFile.Patterns[m_nPattern].GetRowsPerBeat(), nRPM = sndFile.Patterns[m_nPattern].GetRowsPerMeasure();
+		const bool bOverride = pattern.GetOverrideSignature();
+		ROWINDEX nRPB = pattern.GetRowsPerBeat(), nRPM = pattern.GetRowsPerMeasure();
 		if(nRPB == 0 || !bOverride) nRPB = sndFile.m_nDefaultRowsPerBeat;
 		if(nRPM == 0 || !bOverride) nRPM = sndFile.m_nDefaultRowsPerMeasure;
 
+		m_tempoSwing = pattern.HasTempoSwing() ? pattern.GetTempoSwing() : sndFile.m_tempoSwing;
+
 		GetDlgItem(IDC_CHECK1)->EnableWindow(sndFile.GetModSpecifications().hasPatternSignatures ? TRUE : FALSE);
 		CheckDlgButton(IDC_CHECK1, bOverride ? MF_CHECKED : MF_UNCHECKED);
-		SetDlgItemInt(IDC_EDIT_ROWSPERBEAT, nRPB, FALSE);
-		SetDlgItemInt(IDC_EDIT_ROWSPERMEASURE, nRPM, FALSE);
+		SetDlgItemInt(IDC_ROWSPERBEAT, nRPB, FALSE);
+		SetDlgItemInt(IDC_ROWSPERMEASURE, nRPM, FALSE);
 		OnOverrideSignature();
 	}
 	return TRUE;
@@ -556,9 +560,22 @@ void CPatternPropertiesDlg::OnDoubleRowNumber()
 
 void CPatternPropertiesDlg::OnOverrideSignature()
 //-----------------------------------------------
-{	
-	GetDlgItem(IDC_EDIT_ROWSPERBEAT)->EnableWindow(IsDlgButtonChecked(IDC_CHECK1));
-	GetDlgItem(IDC_EDIT_ROWSPERMEASURE)->EnableWindow(IsDlgButtonChecked(IDC_CHECK1));
+{
+	GetDlgItem(IDC_ROWSPERBEAT)->EnableWindow(IsDlgButtonChecked(IDC_CHECK1));
+	GetDlgItem(IDC_ROWSPERMEASURE)->EnableWindow(IsDlgButtonChecked(IDC_CHECK1));
+	GetDlgItem(IDC_BUTTON1)->EnableWindow(IsDlgButtonChecked(IDC_CHECK1) && modDoc.GetrSoundFile().m_nTempoMode == tempoModeModern);
+}
+
+
+void CPatternPropertiesDlg::OnTempoSwing()
+//----------------------------------------
+{
+	m_tempoSwing.resize(GetDlgItemInt(IDC_ROWSPERBEAT), TempoSwing::Unity);
+	CTempoSwingDlg dlg(this, m_tempoSwing);
+	if(dlg.DoModal() == IDOK)
+	{
+		m_tempoSwing = dlg.m_tempoSwing;
+	}
 }
 
 
@@ -566,31 +583,36 @@ void CPatternPropertiesDlg::OnOK()
 //--------------------------------
 {
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	CPattern &pattern = sndFile.Patterns[m_nPattern];
 	// Update pattern signature if necessary
 	if(sndFile.GetModSpecifications().hasPatternSignatures)
 	{
 		if(IsDlgButtonChecked(IDC_CHECK1))	// Enable signature
 		{
-			ROWINDEX nNewBeat = (ROWINDEX)GetDlgItemInt(IDC_EDIT_ROWSPERBEAT, NULL, FALSE), nNewMeasure = (ROWINDEX)GetDlgItemInt(IDC_EDIT_ROWSPERMEASURE, NULL, FALSE);
-			if(nNewBeat != sndFile.Patterns[m_nPattern].GetRowsPerBeat() || nNewMeasure != sndFile.Patterns[m_nPattern].GetRowsPerMeasure())
+			ROWINDEX nNewBeat = (ROWINDEX)GetDlgItemInt(IDC_ROWSPERBEAT, NULL, FALSE), nNewMeasure = (ROWINDEX)GetDlgItemInt(IDC_ROWSPERMEASURE, NULL, FALSE);
+			if(nNewBeat != pattern.GetRowsPerBeat() || nNewMeasure != pattern.GetRowsPerMeasure() || m_tempoSwing != pattern.GetTempoSwing())
 			{
-				if(!sndFile.Patterns[m_nPattern].SetSignature(nNewBeat, nNewMeasure))
+				if(!pattern.SetSignature(nNewBeat, nNewMeasure))
 				{
 					Reporting::Error("Invalid time signature!", "Pattern Properties");
-					GetDlgItem(IDC_EDIT_ROWSPERBEAT)->SetFocus();
+					GetDlgItem(IDC_ROWSPERBEAT)->SetFocus();
 					return;
 				}
+				m_tempoSwing.resize(nNewBeat, TempoSwing::Unity);
+				pattern.SetTempoSwing(m_tempoSwing);
 				modDoc.SetModified();
 			}
 		} else	// Disable signature
 		{
-			if(sndFile.Patterns[m_nPattern].GetOverrideSignature())
+			if(pattern.GetOverrideSignature() || pattern.HasTempoSwing())
 			{
-				sndFile.Patterns[m_nPattern].RemoveSignature();
+				pattern.RemoveSignature();
+				pattern.RemoveTempoSwing();
 				modDoc.SetModified();
 			}
 		}
 	}
+	
 
 	const ROWINDEX newSize = (ROWINDEX)GetDlgItemInt(IDC_COMBO1, NULL, FALSE);
 

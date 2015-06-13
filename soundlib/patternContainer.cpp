@@ -147,6 +147,7 @@ void CPatternContainer::OnModTypeChanged(const MODTYPE /*oldtype*/)
 		for(PATTERNINDEX nPat = 0; nPat < m_Patterns.size(); nPat++)
 		{
 			m_Patterns[nPat].RemoveSignature();
+			m_Patterns[nPat].RemoveTempoSwing();
 		}
 	}
 }

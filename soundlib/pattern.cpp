@@ -494,6 +494,10 @@ void WriteModPattern(std::ostream& oStrm, const CPattern& pat)
 		ssb.WriteItem<uint32>(pat.GetRowsPerBeat(), "RPB.");
 		ssb.WriteItem<uint32>(pat.GetRowsPerMeasure(), "RPM.");
 	}
+	if(pat.HasTempoSwing())
+	{
+		ssb.WriteItem<TempoSwing>(pat.GetTempoSwing(), "SWNG", TempoSwing::Serialize);
+	}
 	ssb.FinishWrite();
 }
 
@@ -511,6 +515,9 @@ void ReadModPattern(std::istream& iStrm, CPattern& pat, const size_t)
 	ssb.ReadItem<uint32>(nRPB, "RPB.");
 	ssb.ReadItem<uint32>(nRPM, "RPM.");
 	pat.SetSignature(nRPB, nRPM);
+	TempoSwing swing;
+	ssb.ReadItem<TempoSwing>(swing, "SWNG", TempoSwing::Deserialize);
+	pat.SetTempoSwing(swing);
 }
 
 

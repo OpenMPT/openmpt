@@ -26,6 +26,7 @@ public:
 	CComboBox m_TypeBox, m_ChannelsBox, m_TempoModeBox, m_PlugMixBox;
 	CButton m_CheckBox1, m_CheckBox2, m_CheckBox3, m_CheckBox4, m_CheckBox5, m_CheckBoxPT1x, m_CheckBoxFt2VolRamp, m_CheckBoxAmigaLimits;
 	CSoundFile &sndFile;
+	TempoSwing m_tempoSwing;
 	CHANNELINDEX m_nChannels;
 	MODTYPE m_nType;
 	bool initialized;
@@ -35,6 +36,8 @@ public:
 	bool VerifyData();
 	void UpdateDialog();
 	void OnPTModeChanged();
+	void OnTempoModeChanged();
+	void OnTempoSwing();
 
 protected:
 	void UpdateChannelCBox();
@@ -196,7 +199,7 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
-	virtual VOID OnOK();
+	virtual void OnOK();
 	afx_msg void OnUpdateSamples();
 	afx_msg void OnUpdateKeyboard();
 	afx_msg void OnUpdateOctave();
@@ -222,7 +225,7 @@ public:
 
 protected:
 	virtual BOOL OnInitDialog();
-	virtual VOID OnOK();
+	virtual void OnOK();
 	afx_msg void OnClearHistory();
 	DECLARE_MESSAGE_MAP()
 };
@@ -257,6 +260,39 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
+};
+
+
+/////////////////////////////////////////////////////////////////////////
+// Tempo swing dialog
+
+//==================================
+class CTempoSwingDlg: public CDialog
+//==================================
+{
+protected:
+	enum { SliderResolution = 1000, SliderUnity = SliderResolution / 2 };
+	struct RowCtls
+	{
+		CStatic rowLabel, valueLabel;
+		CSliderCtrl valueSlider;
+	};
+	std::vector<RowCtls *> m_controls;
+public:
+	TempoSwing m_tempoSwing;
+
+public:
+	CTempoSwingDlg(CWnd *parent, const TempoSwing &tempoSwing) : CDialog(IDD_TEMPO_SWING, parent), m_tempoSwing(tempoSwing) { }
+
+protected:
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+	virtual void OnCancel();
+	void OnClose();
+	afx_msg void OnReset();
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg BOOL OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *);
+	DECLARE_MESSAGE_MAP()
 };
 
 

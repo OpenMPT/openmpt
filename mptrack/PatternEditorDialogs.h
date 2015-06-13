@@ -96,10 +96,15 @@ class CPatternPropertiesDlg: public CDialog
 {
 protected:
 	CModDoc &modDoc;
+	TempoSwing m_tempoSwing;
 	PATTERNINDEX m_nPattern;
 
 public:
-	CPatternPropertiesDlg(CModDoc &modParent, PATTERNINDEX nPat, CWnd *parent=NULL):CDialog(IDD_PATTERN_PROPERTIES, parent), modDoc(modParent), m_nPattern(nPat) { }
+	CPatternPropertiesDlg(CModDoc &modParent, PATTERNINDEX nPat, CWnd *parent=NULL)
+		: CDialog(IDD_PATTERN_PROPERTIES, parent)
+		, modDoc(modParent)
+		, m_nPattern(nPat)
+	{ }
 
 protected:
 	virtual BOOL OnInitDialog();
@@ -107,6 +112,7 @@ protected:
 	afx_msg void OnHalfRowNumber();
 	afx_msg void OnDoubleRowNumber();
 	afx_msg void OnOverrideSignature();
+	afx_msg void OnTempoSwing();
 	DECLARE_MESSAGE_MAP()
 };
 

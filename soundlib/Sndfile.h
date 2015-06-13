@@ -428,6 +428,9 @@ public:
 	uint32 m_nTempoFactor; // Tempo factor (65536 = no tempo adjustment). Only used in libopenmpt (openmpt::ext::interactive::set_tempo_factor)
 #endif
 
+	// Row swing factors for modern tempo mode
+	TempoSwing m_tempoSwing;
+
 	// Min Period = highest possible frequency, Max Period = lowest possible frequency for current format
 	// Note: Period is an Amiga metric that is inverse to frequency.
 	// Periods in MPT are 4 times as fine as Amiga periods because of extra fine frequency slides (introduced in the S3M format).

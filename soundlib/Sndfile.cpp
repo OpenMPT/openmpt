@@ -96,15 +96,12 @@ CSoundFile::CSoundFile() :
 	gnDryROfsVol = 0;
 	m_nType = MOD_TYPE_NONE;
 	m_ContainerType = MOD_CONTAINERTYPE_NONE;
-	m_nChannels = 0;
 	m_nMixChannels = 0;
 	m_nSamples = 0;
 	m_nInstruments = 0;
 #ifndef MODPLUG_TRACKER
 	m_nFreqFactor = m_nTempoFactor = 65536;
 #endif
-	m_nMinPeriod = 32;
-	m_nMaxPeriod = 0x7FFF;
 	m_nRepeatCount = 0;
 	m_PlayState.m_nSeqOverride = ORDERINDEX_INVALID;
 	m_PlayState.m_bPatternTransitionOccurred = false;
@@ -122,9 +119,6 @@ CSoundFile::CSoundFile() :
 	m_nDefaultRowsPerBeat = m_PlayState.m_nCurrentRowsPerBeat = 4;
 	m_nDefaultRowsPerMeasure = m_PlayState.m_nCurrentRowsPerMeasure = 16;
 #endif // MODPLUG_TRACKER
-
-	m_dwLastSavedWithVersion=0;
-	m_dwCreatedWithVersion=0;
 
 	MemsetZero(m_PlayState.ChnMix);
 	MemsetZero(Instruments);
@@ -197,6 +191,7 @@ void CSoundFile::InitializeGlobals()
 	songMessage.clear();
 	madeWithTracker.clear();
 	m_FileHistory.clear();
+	m_tempoSwing.clear();
 }
 
 
@@ -1358,6 +1353,13 @@ uint32 CSoundFile::GetTickDuration(PlayState &playState) const
 	case tempoModeModern:
 		{
 			double accurateBufferCount = static_cast<double>(m_MixerSettings.gdwMixingFreq) * (60.0 / playState.m_nMusicTempo.ToDouble() / (static_cast<double>(playState.m_nMusicSpeed * playState.m_nCurrentRowsPerBeat)));
+			const TempoSwing &swing = Patterns[playState.m_nPattern].HasTempoSwing() ? Patterns[playState.m_nPattern].GetTempoSwing() : m_tempoSwing;
+			if(!swing.empty())
+			{
+				// Apply current row's tempo swing factor
+				TempoSwing::value_type swingFactor = swing[playState.m_nRow % m_tempoSwing.size()];
+				accurateBufferCount = accurateBufferCount * swingFactor / double(TempoSwing::Unity);
+			}
 			uint32 bufferCount = static_cast<int>(accurateBufferCount);
 			playState.m_dBufferDiff += accurateBufferCount - bufferCount;
 
@@ -1590,6 +1592,54 @@ void CSoundFile::SetupMODPanning(bool bForceSetup)
 			ChnSettings[nChn].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 0xC0 : 0x40;
 	}
 }
+
+
+// Normalize the tempo swing coefficients so that they add up to exactly the specified tempo again
+void TempoSwing::Normalize()
+//--------------------------
+{
+	if(empty()) return;
+	int64 sum = 0, remain = Unity * size();
+	for(iterator i = begin(); i != end(); i++)
+	{
+		Limit(*i, Unity / 4u, Unity * 4u);
+		sum += *i;
+	}
+	sum = sum / size();
+	for(iterator i = begin(); i != end(); i++)
+	{
+		*i = Util::muldivr(*i, Unity, static_cast<int32>(sum));
+		remain -= *i;
+	}
+	MPT_ASSERT(abs(remain) <= size());
+	at(0) += static_cast<int32>(remain);
+}
+
+
+void TempoSwing::Serialize(std::ostream &oStrm, const TempoSwing &swing)
+//----------------------------------------------------------------------
+{
+	mpt::IO::WriteIntLE<uint16>(oStrm, static_cast<uint16>(swing.size()));
+	for(std::size_t i = 0; i < swing.size(); i++)
+	{
+		mpt::IO::WriteIntLE<uint32>(oStrm, swing[i]);
+	}
+}
+
+
+void TempoSwing::Deserialize(std::istream& iStrm, TempoSwing &swing, const size_t)
+//--------------------------------------------------------------------------------
+{
+	uint16 numEntries;
+	mpt::IO::ReadIntLE<uint16>(iStrm, numEntries);
+	swing.resize(numEntries);
+	for(uint16 i = 0; i < numEntries; i++)
+	{
+		mpt::IO::ReadIntLE<uint32>(iStrm, swing[i]);
+	}
+	swing.Normalize();
+}
+
 
 
 OPENMPT_NAMESPACE_END

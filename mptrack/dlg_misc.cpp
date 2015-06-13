@@ -31,8 +31,10 @@ OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(CModTypeDlg, CDialog)
 	//{{AFX_MSG_MAP(CModTypeDlg)
-	ON_CBN_SELCHANGE(IDC_COMBO1, UpdateDialog)
-	ON_COMMAND(IDC_CHECK_PT1X,   OnPTModeChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO1,			UpdateDialog)
+	ON_CBN_SELCHANGE(IDC_COMBO_TEMPOMODE,	OnTempoModeChanged)
+	ON_COMMAND(IDC_CHECK_PT1X,				OnPTModeChanged)
+	ON_COMMAND(IDC_BUTTON1,					OnTempoSwing)
 
 	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipNotify)
 
@@ -69,6 +71,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	m_nType = sndFile.GetType();
 	m_nChannels = sndFile.GetNumChannels();
+	m_tempoSwing = sndFile.m_tempoSwing;
 	initialized = false;
 
 	// Mod types
@@ -220,6 +223,7 @@ void CModTypeDlg::UpdateDialog()
 			break;
 		}
 	}
+	OnTempoModeChanged();
 
 	// Mix levels
 	const MixLevels oldMixLevels = initialized ? static_cast<MixLevels>(m_PlugMixBox.GetItemData(m_PlugMixBox.GetCurSel())) : sndFile.GetMixLevels();
@@ -267,6 +271,25 @@ void CModTypeDlg::OnPTModeChanged()
 	const bool ptMode = IsDlgButtonChecked(IDC_CHECK_PT1X) != BST_UNCHECKED;
 	m_CheckBoxAmigaLimits.EnableWindow(!ptMode);
 	if(ptMode) m_CheckBoxAmigaLimits.SetCheck(BST_CHECKED);
+}
+
+
+void CModTypeDlg::OnTempoModeChanged()
+//------------------------------------
+{
+	GetDlgItem(IDC_BUTTON1)->EnableWindow(m_TempoModeBox.GetItemData(m_TempoModeBox.GetCurSel()) == tempoModeModern);
+}
+
+
+void CModTypeDlg::OnTempoSwing()
+//------------------------------
+{
+	m_tempoSwing.resize(GetDlgItemInt(IDC_ROWSPERBEAT), TempoSwing::Unity);
+	CTempoSwingDlg dlg(this, m_tempoSwing);
+	if(dlg.DoModal() == IDOK)
+	{
+		m_tempoSwing = dlg.m_tempoSwing;
+	}
 }
 
 
@@ -332,10 +355,22 @@ void CModTypeDlg::OnOK()
 		m_nChannels = static_cast<CHANNELINDEX>(m_ChannelsBox.GetItemData(sel));
 	}
 	
+	sndFile.m_nDefaultRowsPerBeat    = GetDlgItemInt(IDC_ROWSPERBEAT);
+	sndFile.m_nDefaultRowsPerMeasure = GetDlgItemInt(IDC_ROWSPERMEASURE);
+
 	sel = m_TempoModeBox.GetCurSel();
 	if (sel >= 0)
 	{
 		sndFile.m_nTempoMode = static_cast<TempoMode>(m_TempoModeBox.GetItemData(sel));
+	}
+	if(sndFile.m_nTempoMode == tempoModeModern)
+	{
+		sndFile.m_tempoSwing = m_tempoSwing;
+		sndFile.m_tempoSwing.resize(sndFile.m_nDefaultRowsPerBeat, TempoSwing::Unity);
+		sndFile.m_tempoSwing.Normalize();
+	} else
+	{
+		sndFile.m_tempoSwing.clear();
 	}
 
 	sel = m_PlugMixBox.GetCurSel();
@@ -353,9 +388,6 @@ void CModTypeDlg::OnOK()
 		if(IsDlgButtonChecked(IDC_CHK_OLDPITCH)) sndFile.SetModFlag(MSF_OLD_MIDI_PITCHBENDS, true);
 		if(IsDlgButtonChecked(IDC_CHK_FT2VOLRAMP)) sndFile.SetModFlag(MSF_VOLRAMP, true);
 	}
-
-	sndFile.m_nDefaultRowsPerBeat    = GetDlgItemInt(IDC_ROWSPERBEAT);
-	sndFile.m_nDefaultRowsPerMeasure = GetDlgItemInt(IDC_ROWSPERMEASURE);
 
 	if(CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
 		CChannelManagerDlg::sharedInstance()->Update();
@@ -479,10 +511,10 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 
 	if (m_nRemove > 0)
 	{
-		wsprintf(label, "Select %d channel%s to remove:", m_nRemove, (m_nRemove != 1) ? "s" : "");
+		wsprintf(label, "Select %u channel%s to remove:", m_nRemove, (m_nRemove != 1) ? "s" : "");
 	} else
 	{
-		wsprintf(label, "Select channels to remove (the minimum number of remaining channels is %d)", sndFile.GetModSpecifications().channelsMin);
+		wsprintf(label, "Select channels to remove (the minimum number of remaining channels is %u)", sndFile.GetModSpecifications().channelsMin);
 	}
 	
 	SetDlgItemText(IDC_QUESTION1, label);
@@ -1157,6 +1189,186 @@ void CInputDlg::OnOK()
 	CDialog::OnOK();
 	GetDlgItemText(IDC_EDIT1, resultString);
 	resultNumber = static_cast<int32>(GetDlgItemInt(IDC_EDIT1));
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////
+// Tempo swing dialog
+
+
+BEGIN_MESSAGE_MAP(CTempoSwingDlg, CDialog)
+	//{{AFX_MSG_MAP(CTempoSwingDlg)
+	ON_WM_HSCROLL()
+	ON_COMMAND(IDC_BUTTON1,	OnReset)
+	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipNotify)
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
+
+
+BOOL CTempoSwingDlg::OnInitDialog()
+//-----------------------------------
+{
+	struct Measurements
+	{
+		enum
+		{
+			edRowLabelWidth = 64,	// Label "Row 999:"
+			edSliderWidth = 220,	// Setting slider
+			edSliderHeight = 20,	// Setting slider
+			edValueLabelWidth = 64,	// Label "100%"
+			edPaddingX = 8,			// Spacing between elements
+			edPaddingY = 4,			// Spacing between elements
+			edPaddingTop = 35,		// Topping from top of dialog
+			edTotalHeight = edSliderHeight + edPaddingY, // Height of one set of controls
+			edFooterHeight = 32,	// Buttons
+		};
+
+		const int rowLabelWidth;
+		const int sliderWidth;
+		const int sliderHeight;
+		const int valueLabelWidth;
+		const int paddingX;
+		const int paddingY;
+		const int paddingTop;
+		const int totalHeight;
+		const int footerHeight;
+
+		Measurements(HWND hWnd)
+			: rowLabelWidth(Util::ScalePixels(edRowLabelWidth, hWnd))
+			, sliderWidth(Util::ScalePixels(edSliderWidth, hWnd))
+			, sliderHeight(Util::ScalePixels(edSliderHeight, hWnd))
+			, valueLabelWidth(Util::ScalePixels(edValueLabelWidth, hWnd))
+			, paddingX(Util::ScalePixels(edPaddingX, hWnd))
+			, paddingY(Util::ScalePixels(edPaddingY, hWnd))
+			, paddingTop(Util::ScalePixels(edPaddingTop, hWnd))
+			, totalHeight(Util::ScalePixels(edTotalHeight, hWnd))
+			, footerHeight(Util::ScalePixels(edFooterHeight, hWnd))
+		{ }
+	};
+
+	CDialog::OnInitDialog();
+	Measurements m(m_hWnd);
+	CRect windowRect, rect;
+	GetWindowRect(windowRect);
+	GetClientRect(rect);
+	windowRect.bottom = windowRect.top + windowRect.Height() - rect.Height();
+	rect.DeflateRect(m.paddingX, m.paddingTop, m.paddingX, 0);
+	m_controls.resize(m_tempoSwing.size());
+	for(size_t i = 0; i < m_controls.size(); i++)
+	{
+		RowCtls *r = m_controls[i] = new RowCtls;
+		// Parameter name
+		TCHAR s[16];
+		wsprintf(s, "Row %u:", i + 1);
+		r->rowLabel.Create(s, WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(rect.left, rect.top, rect.left + m.rowLabelWidth, rect.top + m.sliderHeight), this);
+		r->rowLabel.SetFont(GetFont());
+
+		// Parameter value as reported by the plugin
+		r->valueLabel.Create(_T("100%"), WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(rect.right - m.valueLabelWidth, rect.top, rect.right, rect.top + m.sliderHeight), this);
+		r->valueLabel.SetFont(GetFont());
+
+		// Parameter value slider
+		r->valueSlider.Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP | TBS_TOOLTIPS | TBS_AUTOTICKS, CRect(rect.left + m.rowLabelWidth, rect.top, rect.right - m.valueLabelWidth, rect.top + m.sliderHeight), this, ID_PLUGINEDITOR_SLIDERS_BASE + i);
+		r->valueSlider.SetFont(GetFont());
+		r->valueSlider.SetRange(-SliderResolution / 2, SliderResolution / 2);
+		r->valueSlider.SetTicFreq(SliderResolution / 8);
+		r->valueSlider.SetPageSize(SliderResolution / 8);
+		int32 val = Util::muldivr(static_cast<int32>(m_tempoSwing[i]) - TempoSwing::Unity, SliderUnity, TempoSwing::Unity);
+		r->valueSlider.SetPos(val);
+		rect.MoveToY(rect.top + m.totalHeight);
+	}
+	OnHScroll(0, 0, nullptr);
+	rect.MoveToY(rect.top + m.paddingY);
+	{
+		CRect buttonRect;
+		GetDlgItem(IDOK)->GetWindowRect(buttonRect);
+		GetDlgItem(IDOK)->SetWindowPos(nullptr, buttonRect.left - windowRect.left - GetSystemMetrics(SM_CXEDGE), rect.top, 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER);
+		GetDlgItem(IDCANCEL)->GetWindowRect(buttonRect);
+		GetDlgItem(IDCANCEL)->SetWindowPos(nullptr, buttonRect.left - windowRect.left - GetSystemMetrics(SM_CXEDGE), rect.top, 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER);
+	}
+
+	windowRect.bottom += rect.top + m.footerHeight;
+	SetWindowPos(nullptr, 0, 0, windowRect.Width(), windowRect.Height(), SWP_NOMOVE | SWP_NOOWNERZORDER);
+	EnableToolTips();
+
+	return TRUE;
+}
+
+
+void CTempoSwingDlg::OnOK()
+//---------------------------
+{
+	CDialog::OnOK();
+	// If this is the default setup, just clear the vector.
+	if(static_cast<size_t>(std::count(m_tempoSwing.begin(), m_tempoSwing.end(), TempoSwing::Unity)) == m_tempoSwing.size())
+	{
+		m_tempoSwing.clear();
+	}
+	OnClose();
+}
+
+
+void CTempoSwingDlg::OnCancel()
+//---------------------------
+{
+	CDialog::OnCancel();
+	OnClose();
+}
+
+
+void CTempoSwingDlg::OnClose()
+//------------------------------
+{
+	for(size_t i = 0; i < m_controls.size(); i++)
+	{
+		delete m_controls[i];
+	}
+}
+
+
+void CTempoSwingDlg::OnReset()
+//------------------------------
+{
+	for(size_t i = 0; i < m_controls.size(); i++)
+	{
+		m_controls[i]->valueSlider.SetPos(0);
+	}
+	OnHScroll(0, 0, nullptr);
+}
+
+
+void CTempoSwingDlg::OnHScroll(UINT /*nSBCode*/, UINT /*nPos*/, CScrollBar* /*pScrollBar*/)
+//-------------------------------------------------------------------------------------------
+{
+	for(size_t i = 0; i < m_controls.size(); i++)
+	{
+		m_tempoSwing[i] = Util::muldivr(m_controls[i]->valueSlider.GetPos(), TempoSwing::Unity, SliderUnity) + TempoSwing::Unity;
+	}
+	m_tempoSwing.Normalize();
+	for(size_t i = 0; i < m_tempoSwing.size(); i++)
+	{
+		TCHAR s[32];
+		wsprintf(s, _T("%u%%"), Util::muldivr(m_tempoSwing[i], 100, TempoSwing::Unity));
+		m_controls[i]->valueLabel.SetWindowText(s);
+	}
+}
+
+
+BOOL CTempoSwingDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
+//--------------------------------------------------------------------
+{
+	TOOLTIPTEXT *pTTT = (TOOLTIPTEXTA*)pNMHDR;
+	for(size_t i = 0; i < m_controls.size(); i++)
+	{
+		if((HWND)pNMHDR->idFrom == m_controls[i]->valueSlider.m_hWnd)
+		{
+			int32 val = Util::muldivr(m_tempoSwing[i], 100, TempoSwing::Unity) - 100;
+			wsprintf(pTTT->szText, _T("%s%d"), val > 0 ? _T("+") : _T(""), val);
+			return TRUE;
+		}
+	}
+	return FALSE;
 }
 
 

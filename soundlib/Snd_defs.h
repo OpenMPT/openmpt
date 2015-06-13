@@ -363,7 +363,22 @@ enum VibratoType
 };
 
 
+// Tempo swing determines how much every row in modern tempo mode contributes to a beat.
+class TempoSwing : public std::vector<uint32>
+{
+public:
+	enum { Unity = 1u << 24 };
+	// Normalize the tempo swing coefficients so that they add up to exactly the specified tempo again
+	void Normalize();
+
+	static void Serialize(std::ostream &oStrm, const TempoSwing &swing);
+	static void Deserialize(std::istream& iStrm, TempoSwing &swing, const size_t);
+};
+
+
 // Fixed-point type, e.g. used for fractional tempos
+// Note that this doesn't use classical bit shifting for the fixed point part.
+// This is mostly for the clarity of stored values and to be able to represent any value .0000 to .9999 properly.
 template<size_t FFact, typename T>
 struct FPInt
 {
