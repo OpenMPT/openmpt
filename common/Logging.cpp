@@ -101,11 +101,7 @@ static MPT_NOINLINE void DoLog(const mpt::log::Context &context, mpt::ustring me
 		std::clog
 			<< "openmpt: "
 			<< context.file << "(" << context.line << ")" << ": "
-#if defined(MPT_WITH_CHARSET_LOCALE)
-			<< mpt::ToLocale(message)
-#else
-			<< mpt::ToCharset(mpt::CharsetUTF8, message)
-#endif
+			<< mpt::ToCharset(mpt::CharsetLocaleOrUTF8, message)
 			<< " [" << context.function << "]"
 			<< std::endl;
 	#endif // MODPLUG_TRACKER
@@ -121,11 +117,7 @@ static MPT_NOINLINE void DoLog(const mpt::log::Context &context, const char *for
 	vsnprintf(message, LOGBUF_SIZE, format, va);
 	message[LOGBUF_SIZE - 1] = '\0';
 	va_end(va);
-#if defined(MPT_WITH_CHARSET_LOCALE)
-	DoLog(context, mpt::ToUnicode(mpt::CharsetLocale, message));
-#else
-	DoLog(context, mpt::ToUnicode(mpt::CharsetUTF8, message));
-#endif
+	DoLog(context, mpt::ToUnicode(mpt::CharsetLocaleOrUTF8, message));
 }
 
 

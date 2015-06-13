@@ -1556,7 +1556,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 		return enSclImportAddTuningFailure;
 	}
 
-	pT->SetName(mpt::ToLocale(name));
+	pT->SetName(mpt::ToCharset(mpt::CharsetLocale, name));
 
 	return enSclImportOk;
 }

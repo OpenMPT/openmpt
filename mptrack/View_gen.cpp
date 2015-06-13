@@ -515,7 +515,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			const SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[iOut];
 			if(plugin.IsValidPlugin())
 			{
-				std::string libName = mpt::ToLocale(mpt::CharsetUTF8, plugin.GetLibraryName());
+				std::string libName = mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, plugin.GetLibraryName());
 				if(!strcmp(plugin.GetName(), "") || libName != plugin.GetName())
 				{
 					wsprintf(s, "FX%d: %s", iOut + 1, libName.c_str());

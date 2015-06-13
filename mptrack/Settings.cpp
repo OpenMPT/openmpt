@@ -341,7 +341,7 @@ void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const std:
 {
 	::WritePrivateProfileStringW(GetSection(path).c_str(), GetKey(path).c_str(), val.c_str(), filename.AsNative().c_str());
 
-	if(mpt::ToWide(mpt::CharsetLocale, mpt::ToLocale(val)) != val) // explicit round-trip
+	if(mpt::ToWide(mpt::CharsetLocale, mpt::ToCharset(mpt::CharsetLocale, val)) != val) // explicit round-trip
 	{
 		// Value is not representable in ANSI CP.
 		// Now check if the string got stored correctly.

@@ -1281,7 +1281,7 @@ void CEQSavePresetDlg::OnOK()
 		if ((n < 0) || (n >= 4)) n = 0;
 		CString s;
 		GetDlgItemText(IDC_EDIT1, s);
-		mpt::String::Copy(m_EQ.szName, mpt::ToLocale(s));
+		mpt::String::Copy(m_EQ.szName, mpt::ToCharset(mpt::CharsetLocale, s));
 		mpt::String::SetNullTerminator(m_EQ.szName);
 		TrackerSettings::Instance().m_EqUserPresets[n] = m_EQ;
 	}

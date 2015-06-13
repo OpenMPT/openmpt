@@ -388,7 +388,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 					case INSLIST_PLUGIN:
 						if (pIns != nullptr && pIns->nMixPlug > 0 && sndFile.m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin != nullptr)
 						{
-							wsprintf(s, "FX%02u: %s", pIns->nMixPlug, mpt::ToLocale(mpt::CharsetUTF8, sndFile.m_MixPlugins[pIns->nMixPlug - 1].GetLibraryName()).c_str());
+							wsprintf(s, "FX%02u: %s", pIns->nMixPlug, mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, sndFile.m_MixPlugins[pIns->nMixPlug - 1].GetLibraryName()).c_str());
 						}
 						break;
 					}

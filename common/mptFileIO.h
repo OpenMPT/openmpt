@@ -94,8 +94,8 @@ namespace detail
 template<typename Tbase>
 inline void fstream_open(Tbase & base, const mpt::PathString & filename, std::ios_base::openmode mode)
 {
-#if defined( MPT_FSTREAM_DO_CONVERSIONS_ANSI)
-	base.open(mpt::ToLocale(filename.AsNative()).c_str(), mode);
+#if defined(MPT_FSTREAM_DO_CONVERSIONS_ANSI)
+	base.open(mpt::ToCharset(mpt::CharsetLocale, filename.AsNative()).c_str(), mode);
 #else
 	base.open(filename.AsNative().c_str(), mode);
 #endif

@@ -322,7 +322,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		// Read archive comment if there is no song comment
 		if(songMessage.empty())
 		{
-			songMessage.assign(mpt::ToLocale(unarchiver.GetComment()));
+			songMessage.assign(mpt::ToCharset(mpt::CharsetLocale, unarchiver.GetComment()));
 		}
 #endif
 
