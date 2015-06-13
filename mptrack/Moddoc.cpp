@@ -1831,21 +1831,29 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 				if(f.IsValid())
 				{
 					FileReader file = GetFileReader(f);
-					SAMPLEINDEX smp = m_SndFile.GetNextFreeSample();
+					SAMPLEINDEX smp = wsdlg.m_Settings.sampleSlot;
+					if(smp == 0 || smp > GetNumSamples()) smp = m_SndFile.GetNextFreeSample();
 					if(smp == SAMPLEINDEX_INVALID)
 					{
 						Reporting::Error(_T("Too many samples!"));
 						cancel = true;
 					}
-					if(!cancel && m_SndFile.ReadSampleFromFile(smp, file, false))
+					if(!cancel)
 					{
-						UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
-						if(m_SndFile.GetNumInstruments())
+						GetSampleUndo().PrepareUndo(smp, sundo_replace, "Render To Sample");
+						if(m_SndFile.ReadSampleFromFile(smp, file, false))
 						{
-							InsertInstrument(smp);
-							UpdateAllViews(nullptr, InstrumentHint().Info().Names());
+							UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
+							if(m_SndFile.GetNumInstruments())
+							{
+								InsertInstrument(smp);
+								UpdateAllViews(nullptr, InstrumentHint().Info().Names());
+							}
+							SetModified();
+						} else
+						{
+							GetSampleUndo().RemoveLastUndoStep(smp);
 						}
-						SetModified();
 					}
 				}
 			}

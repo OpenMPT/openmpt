@@ -51,6 +51,7 @@ struct CWaveConvertSettings
 
 	int repeatCount;
 	ORDERINDEX minOrder, maxOrder;
+	SAMPLEINDEX sampleSlot;
 
 	bool normalize : 1;
 	bool silencePlugBuffers : 1;
@@ -76,7 +77,7 @@ public:
 	uint64 m_dwFileLimit, m_dwSongLimit;
 	ORDERINDEX m_nNumOrders;
 
-	CComboBox m_CbnFileType, m_CbnSampleRate, m_CbnChannels, m_CbnDither, m_CbnSampleFormat;
+	CComboBox m_CbnFileType, m_CbnSampleRate, m_CbnChannels, m_CbnDither, m_CbnSampleFormat, m_CbnSampleSlot;
 	CSpinButtonCtrl m_SpinLoopCount, m_SpinMinOrder, m_SpinMaxOrder;
 
 	bool m_bGivePlugsIdleTime;
@@ -118,7 +119,8 @@ public:
 	afx_msg void OnChannelsChanged();
 	afx_msg void OnDitherChanged();
 	afx_msg void OnFormatChanged();
-	afx_msg void OnPlayerOptions(); //rewbs.resamplerConf
+	afx_msg void OnPlayerOptions();
+	afx_msg void OnSampleSlotChanged();
 	DECLARE_MESSAGE_MAP()
 };
 

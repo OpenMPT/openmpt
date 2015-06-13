@@ -79,6 +79,7 @@ BEGIN_MESSAGE_MAP(CWaveConvert, CDialog)
 	ON_CBN_SELCHANGE(IDC_COMBO4,	OnChannelsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO6,	OnDitherChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2,	OnFormatChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO9,	OnSampleSlotChanged)
 END_MESSAGE_MAP()
 
 
@@ -117,6 +118,7 @@ void CWaveConvert::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_SPIN3,		m_SpinMinOrder);
 	DDX_Control(pDX, IDC_SPIN4,		m_SpinMaxOrder);
 	DDX_Control(pDX, IDC_SPIN5,		m_SpinLoopCount);
+	DDX_Control(pDX, IDC_COMBO9,	m_CbnSampleSlot);
 
 	DDX_Control(pDX, IDC_COMBO3,	m_CbnGenre);
 	DDX_Control(pDX, IDC_EDIT10,	m_EditGenre);
@@ -183,6 +185,17 @@ BOOL CWaveConvert::OnInitDialog()
 			break;
 		}
 	}
+
+	// Fill list of sample slots to render into
+	m_CbnSampleSlot.AddString(_T("<empty slot>"));
+	CString s;
+	for(SAMPLEINDEX smp = 1; smp <= m_SndFile.GetNumSamples(); smp++)
+	{
+		s.Format(_T("%02u: %s%s"), smp, m_SndFile.GetSample(smp).HasSampleData() ? _T("*") : _T(""), m_SndFile.GetSampleName(smp));
+		m_CbnSampleSlot.AddString(s);
+	}
+	if(m_Settings.sampleSlot > m_SndFile.GetNumChannels()) m_Settings.sampleSlot = 0;
+	m_CbnSampleSlot.SetCurSel(m_Settings.sampleSlot);
 
 	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, m_Settings.outputToSample ? IDC_RADIO4 : IDC_RADIO3);
 
@@ -576,6 +589,7 @@ void CWaveConvert::UpdateDialog()
 
 	bSel = (IsDlgButtonChecked(IDC_RADIO4) != BST_UNCHECKED) ? FALSE : TRUE;
 	m_CbnFileType.EnableWindow(bSel);
+	m_CbnSampleSlot.EnableWindow(!bSel);
 	if(!bSel)
 	{
 		// Render to sample: Always use WAV
@@ -585,6 +599,20 @@ void CWaveConvert::UpdateDialog()
 			OnFileTypeChanged();
 		}
 	}
+}
+
+
+void CWaveConvert::OnSampleSlotChanged()
+//--------------------------------------
+{
+	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, IDC_RADIO4);
+	// When choosing a specific sample slot, we cannot use per-channel or per-instrument export
+	if(m_CbnSampleSlot.GetCurSel() > 0)
+	{
+		CheckDlgButton(IDC_CHECK4, MF_UNCHECKED);
+		CheckDlgButton(IDC_CHECK6, MF_UNCHECKED);
+	}
+	UpdateDialog();
 }
 
 
@@ -638,7 +666,15 @@ void CWaveConvert::OnCheck2()
 void CWaveConvert::OnCheckChannelMode()
 //-------------------------------------
 {
-	CheckDlgButton(IDC_CHECK6, MF_UNCHECKED);
+	if(IsDlgButtonChecked(IDC_CHECK4) != BST_UNCHECKED)
+	{
+		CheckDlgButton(IDC_CHECK6, MF_UNCHECKED);
+		m_CbnSampleSlot.SetCurSel(0);
+		m_CbnSampleSlot.EnableWindow(FALSE);
+	} else
+	{
+		m_CbnSampleSlot.EnableWindow(IsDlgButtonChecked(IDC_RADIO4));
+	}
 }
 
 
@@ -646,7 +682,15 @@ void CWaveConvert::OnCheckChannelMode()
 void CWaveConvert::OnCheckInstrMode()
 //-----------------------------------
 {
-	CheckDlgButton(IDC_CHECK4, MF_UNCHECKED);
+	if(IsDlgButtonChecked(IDC_CHECK6) != BST_UNCHECKED)
+	{
+		CheckDlgButton(IDC_CHECK4, MF_UNCHECKED);
+		m_CbnSampleSlot.SetCurSel(0);
+		m_CbnSampleSlot.EnableWindow(FALSE);
+	} else
+	{
+		m_CbnSampleSlot.EnableWindow(IsDlgButtonChecked(IDC_RADIO4));
+	}
 }
 
 
@@ -687,6 +731,8 @@ void CWaveConvert::OnOK()
 
 	m_bChannelMode = IsDlgButtonChecked(IDC_CHECK4) != BST_UNCHECKED;
 	m_bInstrumentMode= IsDlgButtonChecked(IDC_CHECK6) != BST_UNCHECKED;
+
+	m_Settings.sampleSlot = static_cast<SAMPLEINDEX>(m_CbnSampleSlot.GetCurSel());
 
 	SaveEncoderSettings();
 
