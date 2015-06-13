@@ -1840,9 +1840,12 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 					}
 					if(!cancel)
 					{
+						if(GetNumSamples() < smp) m_SndFile.m_nSamples = smp;
 						GetSampleUndo().PrepareUndo(smp, sundo_replace, "Render To Sample");
 						if(m_SndFile.ReadSampleFromFile(smp, file, false))
 						{
+							strcpy(m_SndFile.m_szNames[smp], "Render To Sample");
+							strncat(m_SndFile.m_szNames[smp], fileNameAdd, MAX_SAMPLENAME - strlen("Render To Sample") - 1);
 							UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
 							if(m_SndFile.GetNumInstruments())
 							{
@@ -1884,18 +1887,12 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 	// Restore instruments' / samples' flags
 	if(wsdlg.m_bInstrumentMode)
 	{
-		if(m_SndFile.GetNumInstruments() == 0)
+		for(size_t i = 0; i < instrMuteState.size(); i++)
 		{
-			for(SAMPLEINDEX i = 0; i < m_SndFile.GetNumSamples(); i++)
-			{
-				MuteSample(i + 1, instrMuteState[i]);
-			}
-		} else
-		{
-			for(INSTRUMENTINDEX i = 0; i < m_SndFile.GetNumInstruments(); i++)
-			{
-				MuteInstrument(i + 1, instrMuteState[i]);
-			}
+			if(m_SndFile.GetNumInstruments() == 0)
+				MuteSample(static_cast<SAMPLEINDEX>(i + 1), instrMuteState[i]);
+			else
+				MuteInstrument(static_cast<INSTRUMENTINDEX>(i + 1), instrMuteState[i]);
 		}
 	}
 

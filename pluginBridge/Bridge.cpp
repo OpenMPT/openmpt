@@ -206,9 +206,10 @@ void PluginBridge::MessageThread()
 		}
 		if(window)
 		{
-			MessageHandler();
+			Dispatch(effEditIdle, 0, 0, nullptr, 0.0f);
 		}
-		// 4klang VSTi creates its custom window in the message thread, and it will freeze if we don't dispatch messages here...
+		// Normally we would only need this block if there's an editor window, but the 4klang VSTi creates
+		// its custom window in the message thread, and it will freeze if we don't dispatch messages here...
 		MSG msg;
 		while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -687,12 +688,9 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 
 	case effGetChunk:
 		// void** in [ptr] for chunk data address
+		if(getChunkMem.Create(static_cast<const wchar_t *>(origPtr), msg->result))
 		{
-			void *chunkPtr = *reinterpret_cast<void **>(&extraData[0]);
-			if(getChunkMem.Create(static_cast<const wchar_t *>(origPtr), msg->result))
-			{
-				memcpy(getChunkMem.view, *reinterpret_cast<void **>(&extraData[0]), msg->result);
-			}
+			memcpy(getChunkMem.view, *reinterpret_cast<void **>(&extraData[0]), msg->result);
 		}
 		break;
 	}
@@ -1170,20 +1168,6 @@ LRESULT CALLBACK PluginBridge::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
 	}
 
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
-}
-
-
-// WinAPI message handler for plugin GUI
-void PluginBridge::MessageHandler()
-{
-	Dispatch(effEditIdle, 0, 0, nullptr, 0.0f);
-
-	MSG msg;
-	while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
 }
 
 
