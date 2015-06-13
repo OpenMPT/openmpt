@@ -72,26 +72,28 @@ mpt::ustring GetDirectSoundDefaultDeviceIdentifier_1_25_00_04()
 }
 
 
-static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCWSTR, LPVOID lpContext)
-//----------------------------------------------------------------------------------------------------
+static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCWSTR lpstrDriver, LPVOID lpContext)
+//----------------------------------------------------------------------------------------------------------------
 {
 	std::vector<SoundDevice::Info> &devices = *(std::vector<SoundDevice::Info>*)lpContext;
 	if(!lpstrDescription)
 	{
 		return TRUE;
 	}
+	GUID guid = (lpGuid ? *lpGuid : GUID());
 	SoundDevice::Info info;
 	info.type = TypeDSOUND;
-	if(!lpGuid)
-	{
-		info.isDefault = true;
-		info.internalID = mpt::ToUnicode(Util::GUIDToString(GUID()));
-	} else
-	{
-		info.isDefault = false;
-		info.internalID = mpt::ToUnicode(Util::GUIDToString(*lpGuid));
-	}
+	info.isDefault = (!lpGuid);
+	info.internalID = mpt::ToUnicode(Util::GUIDToString(guid));
 	info.name = mpt::ToUnicode(lpstrDescription);
+	if(lpstrDriver)
+	{
+		info.extraData[MPT_USTRING("DriverName")] = mpt::ToUnicode(lpstrDriver);
+	}
+	if(lpGuid)
+	{
+		info.extraData[MPT_USTRING("UUID")] = mpt::ToUnicode(Util::UUIDToString(guid));
+	}
 	info.apiName = MPT_USTRING("DirectSound");
 	info.useNameAsIdentifier = false;
 	devices.push_back(info);
