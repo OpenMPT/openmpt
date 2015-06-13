@@ -3,8 +3,7 @@
  * ---------------------
  * Purpose: Configuration of sound levels, pan laws, etc... for various mix configurations.
  * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
+ * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
@@ -23,6 +22,7 @@ enum TempoMode
 	tempoModeClassic		= 0,
 	tempoModeAlternative	= 1,
 	tempoModeModern			= 2,
+	tempoModeMax
 };
 
 enum MixLevels
@@ -33,6 +33,7 @@ enum MixLevels
 	mixLevels1_17RC3		= 3,
 	mixLevelsCompatible		= 4,
 	mixLevelsCompatibleFT2	= 5,
+	mixLevelsMax
 };
 
 enum ForcePanningMode

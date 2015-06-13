@@ -168,6 +168,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		{
 			SEQUENCEINDEX newSeq = m_SndFile.Order.AddSequence(false);
 			m_SndFile.Order.SetSequence(newSeq);
+			m_SndFile.Order.GetSequence(newSeq).SetName(source.Order.GetSequence(seq).GetName());
 			insertPos = 0;
 		} else
 		{
@@ -262,6 +263,18 @@ void CModDoc::AppendModule(const CSoundFile &source)
 			{
 				// Try fixing differing signature settings by copying them to the newly created patterns
 				targetPat.SetSignature(source.m_nDefaultRowsPerBeat, source.m_nDefaultRowsPerMeasure);
+			}
+		}
+		if(m_SndFile.m_nTempoMode == tempoModeModern)
+		{
+			// Swing only works in modern tempo mode
+			if(sourcePat.HasTempoSwing())
+			{
+				targetPat.SetTempoSwing(sourcePat.GetTempoSwing());
+			} else if(source.m_tempoSwing != m_SndFile.m_tempoSwing)
+			{
+				// Try fixing differing swing settings by copying them to the newly created patterns
+				targetPat.SetTempoSwing(source.m_tempoSwing);
 			}
 		}
 

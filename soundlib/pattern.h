@@ -92,6 +92,11 @@ public:
 	bool SetSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMeasure);
 	void RemoveSignature() { m_RowsPerBeat = m_RowsPerMeasure = 0; }
 
+	bool HasTempoSwing() const { return !m_tempoSwing.empty(); }
+	const TempoSwing& GetTempoSwing() const { return m_tempoSwing; }
+	void SetTempoSwing(const TempoSwing &swing) { m_tempoSwing = swing; m_tempoSwing.Normalize(); }
+	void RemoveTempoSwing() { m_tempoSwing.clear(); }
+
 	// Pattern name functions - bool functions return true on success.
 	bool SetName(const std::string &newName);
 	bool SetName(const char *newName, size_t maxChars = MAX_PATTERNNAME);
@@ -151,6 +156,7 @@ protected:
 	ROWINDEX m_Rows;
 	ROWINDEX m_RowsPerBeat;		// patterns-specific time signature. if != 0, this is implicitely set.
 	ROWINDEX m_RowsPerMeasure;	// ditto
+	TempoSwing m_tempoSwing;
 	std::string m_PatternName;
 	CPatternContainer& m_rPatternContainer;
 //END: DATA
