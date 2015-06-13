@@ -1357,7 +1357,7 @@ uint32 CSoundFile::GetTickDuration(PlayState &playState) const
 			if(!swing.empty())
 			{
 				// Apply current row's tempo swing factor
-				TempoSwing::value_type swingFactor = swing[playState.m_nRow % m_tempoSwing.size()];
+				TempoSwing::value_type swingFactor = swing[playState.m_nRow % swing.size()];
 				accurateBufferCount = accurateBufferCount * swingFactor / double(TempoSwing::Unity);
 			}
 			uint32 bufferCount = static_cast<int>(accurateBufferCount);
