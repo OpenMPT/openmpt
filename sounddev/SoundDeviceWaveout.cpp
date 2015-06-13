@@ -371,23 +371,19 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices()
 		info.useNameAsIdentifier = true;
 		WAVEOUTCAPSW woc;
 		MemsetZero(woc);
-		if(index == 0)
+		if(waveOutGetDevCapsW((index == 0) ? WAVE_MAPPER : (index - 1), &woc, sizeof(woc)) == MMSYSERR_NOERROR)
 		{
-			if(waveOutGetDevCapsW(WAVE_MAPPER, &woc, sizeof(woc)) == MMSYSERR_NOERROR)
-			{
-				info.name = mpt::ToUnicode(woc.szPname);
-			} else
-			{
-				info.name = MPT_USTRING("Auto (Wave Mapper)");
-			}
-			info.isDefault = true;
+			info.name = mpt::ToUnicode(woc.szPname);
+			info.extraData[MPT_USTRING("DriverID")] = MPT_UFORMAT("%1:%2", mpt::ufmt::hex0<4>(woc.wMid), mpt::ufmt::hex0<4>(woc.wPid));
+			info.extraData[MPT_USTRING("DriverVersion")] = MPT_UFORMAT("%3.%4", mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >> 24) & 0xff), mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >>  0) & 0xff));
+		} else if(index == 0)
+		{
+			info.name = MPT_USTRING("Auto (Wave Mapper)");
 		} else
 		{
-			if(waveOutGetDevCapsW(index-1, &woc, sizeof(woc)) == MMSYSERR_NOERROR)
-			{
-				info.name = mpt::ToUnicode(woc.szPname);
-			}
+			info.name = MPT_UFORMAT("Device %1", index - 1);
 		}
+		info.isDefault = (index == 0);
 		devices.push_back(info);
 	}
 	return devices;

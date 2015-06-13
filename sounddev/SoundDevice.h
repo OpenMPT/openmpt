@@ -14,6 +14,7 @@
 #include "../common/FlagSet.h"
 #include "../soundlib/SampleFormat.h"
 
+#include <map>
 #include <vector>
 
 
@@ -119,11 +120,12 @@ struct Info
 {
 	SoundDevice::Type type;
 	mpt::ustring internalID;
-	mpt::ustring name; // user visible
+	mpt::ustring name; // user visible (and configuration key if useNameAsIdentifier)
 	mpt::ustring apiName; // user visible
 	std::vector<mpt::ustring> apiPath; // i.e. Wine-support, PortAudio
 	bool isDefault;
 	bool useNameAsIdentifier;
+	std::map<mpt::ustring, mpt::ustring> extraData; // user visible (hidden by default)
 	Info() : isDefault(false), useNameAsIdentifier(false) { }
 	bool IsValid() const
 	{

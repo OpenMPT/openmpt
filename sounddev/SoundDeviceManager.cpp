@@ -161,6 +161,10 @@ void Manager::ReEnumerate()
 		Log(LogDebug, mpt::String::Print(MPT_USTRING("  InternalID: %1"), m_SoundDevices[i].internalID));
 		Log(LogDebug, mpt::String::Print(MPT_USTRING("  API Name  : %1"), m_SoundDevices[i].apiName));
 		Log(LogDebug, mpt::String::Print(MPT_USTRING("  Name      : %1"), m_SoundDevices[i].name));
+		for(std::map<mpt::ustring, mpt::ustring>::const_iterator extraIt = m_SoundDevices[i].extraData.begin(); extraIt != m_SoundDevices[i].extraData.end(); ++extraIt)
+		{
+			Log(LogDebug, mpt::String::Print(MPT_USTRING("  Extra Data: %1 = %2"), extraIt->first, extraIt->second));
+		}
 	}
 	
 }
