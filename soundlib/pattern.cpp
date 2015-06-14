@@ -517,6 +517,7 @@ void ReadModPattern(std::istream& iStrm, CPattern& pat, const size_t)
 	pat.SetSignature(nRPB, nRPM);
 	TempoSwing swing;
 	ssb.ReadItem<TempoSwing>(swing, "SWNG", TempoSwing::Deserialize);
+	if(!swing.empty()) swing.resize(nRPB);
 	pat.SetTempoSwing(swing);
 }
 

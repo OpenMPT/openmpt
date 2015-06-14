@@ -9,7 +9,7 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
+#include "Mptrack.h"
 #include "MainFrm.h"
 #include "../sounddev/SoundDevice.h"
 #include "../sounddev/SoundDeviceManager.h"
@@ -33,7 +33,7 @@
 #include "MIDIMappingDialog.h"
 #include <direct.h>
 #include "../common/version.h"
-#include "ctrl_pat.h"
+#include "Ctrl_pat.h"
 #include "UpdateCheck.h"
 #include "CloseMainDialog.h"
 #include "SelectPluginDialog.h"
@@ -1601,7 +1601,7 @@ void CMainFrame::InitPreview()
 	m_WaveFile.m_nTempoMode = tempoModeClassic;
 	m_WaveFile.Order.resize(1);
 	m_WaveFile.Order[0] = 0;
-	m_WaveFile.Patterns.Insert(0, 80);
+	m_WaveFile.Patterns.Insert(0, 2);
 	m_WaveFile.m_SongFlags = SONG_LINEARSLIDES;
 }
 
@@ -1621,15 +1621,11 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note)
 			m[0].note = note;
 			m[0].instr = 1;
 
-			if(m_WaveFile.GetNumInstruments() != 0 || m_WaveFile.GetSample(1).uFlags[CHN_LOOP])
-			{
-				m[48 * 2].note = NOTE_KEYOFF;
-				m[79 * 2].note = NOTE_NOTECUT;
-			}
 		}
-		m[79 * 2].command = CMD_POSITIONJUMP;
-		m[79 * 2 + 1].command = CMD_PATTERNBREAK;
-		m[79 * 2 + 1].param = 63;
+		// Infinite loop on second row
+		m[1 * 2].command = CMD_POSITIONJUMP;
+		m[1 * 2 + 1].command = CMD_PATTERNBREAK;
+		m[1 * 2 + 1].param = 1;
 	}
 }
 

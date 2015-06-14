@@ -835,7 +835,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			if(chnMask[ch] & 1)	// Note
 			{
 				uint8 note = patternData.ReadUint8();
-				if(note < 0x80) note++;
+				if(note < 0x80) note += NOTE_MIN;
 				if(!(GetType() & MOD_TYPE_MPT))
 				{
 					if(note > NOTE_MAX && note < 0xFD) note = NOTE_FADE;
@@ -1450,7 +1450,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 				uint8 vol = 0xFF;
 				uint8 note = m->note;
 				if (note != NOTE_NONE) b |= 1;
-				if (m->IsNote()) note--;
+				if (m->IsNote()) note -= NOTE_MIN;
 				if (note == NOTE_FADE && GetType() != MOD_TYPE_MPT) note = 0xF6;
 				if (m->instr) b |= 2;
 				if (m->volcmd != VOLCMD_NONE)
@@ -2222,6 +2222,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 	LimitMax(m_nDefaultGlobalVolume, MAX_GLOBAL_VOLUME);
 	//m_nRestartPos
 	//m_ModFlags
+	if(!m_tempoSwing.empty()) m_tempoSwing.resize(m_nDefaultRowsPerMeasure);
 }
 
 
