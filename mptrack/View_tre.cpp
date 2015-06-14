@@ -1377,7 +1377,10 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 		case MODITEM_SAMPLE:
 			if (modDoc)
 			{
-				if (nParam & 0x80)
+				if (nParam == NOTE_NOTECUT)
+				{
+					modDoc->NoteOff(0, true); // cut previous playing samples
+				} else if (nParam & 0x80)
 				{
 					modDoc->NoteOff(nParam & 0x7F, true);
 				} else
@@ -1391,7 +1394,10 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 		case MODITEM_INSTRUMENT:
 			if (modDoc)
 			{
-				if (nParam & 0x80)
+				if (nParam == NOTE_NOTECUT)
+				{
+					modDoc->NoteOff(0, true);
+				} else if (nParam & 0x80)
 				{
 					modDoc->NoteOff(nParam & 0x7F, true);
 				} else
@@ -1418,29 +1424,36 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam)
 
 		case MODITEM_INSLIB_SAMPLE:
 		case MODITEM_INSLIB_INSTRUMENT:
-			if(!m_SongFileName.empty())
+			if(nParam != NOTE_NOTECUT)
 			{
-				// Preview sample / instrument in module
-				char szName[16];
-				mpt::String::CopyN(szName, GetItemText(hItem));
-				const size_t n = ConvertStrTo<size_t>(szName);
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-				if (pMainFrm && m_SongFile)
+				if(!m_SongFileName.empty())
 				{
-					if (modItem.type == MODITEM_INSLIB_INSTRUMENT)
+					// Preview sample / instrument in module
+					char szName[16];
+					mpt::String::CopyN(szName, GetItemText(hItem));
+					const size_t n = ConvertStrTo<size_t>(szName);
+					if (pMainFrm && m_SongFile)
 					{
-						pMainFrm->PlaySoundFile(*m_SongFile, static_cast<INSTRUMENTINDEX>(n), SAMPLEINDEX_INVALID, nParam);
-					} else
-					{
-						pMainFrm->PlaySoundFile(*m_SongFile, INSTRUMENTINDEX_INVALID, static_cast<SAMPLEINDEX>(n), nParam);
+						if (modItem.type == MODITEM_INSLIB_INSTRUMENT)
+						{
+							pMainFrm->PlaySoundFile(*m_SongFile, static_cast<INSTRUMENTINDEX>(n), SAMPLEINDEX_INVALID, nParam);
+						} else
+						{
+							pMainFrm->PlaySoundFile(*m_SongFile, INSTRUMENTINDEX_INVALID, static_cast<SAMPLEINDEX>(n), nParam);
+						}
 					}
+				} else
+				{
+					// Preview sample / instrument file
+					if (pMainFrm) pMainFrm->PlaySoundFile(InsLibGetFullPath(hItem), nParam);
 				}
 			} else
 			{
-				// Preview sample / instrument file
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-				if (pMainFrm) pMainFrm->PlaySoundFile(InsLibGetFullPath(hItem), nParam);
+				if (pMainFrm) pMainFrm->StopPreview();
 			}
+
 			return TRUE;
 
 		case MODITEM_MIDIPERCUSSION:
@@ -2084,7 +2097,7 @@ bool CModTree::GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath)
 	case MODITEM_INSLIB_INSTRUMENT:
 		if(!m_SongFileName.empty())
 		{
-			CHAR s[32];
+			TCHAR s[32];
 			mpt::String::CopyN(s, GetItemText(m_hItemDrag));
 			const uint32 n = ConvertStrTo<uint32>(s);
 			dropInfo.dwDropType = (m_itemDrag.type == MODITEM_INSLIB_SAMPLE) ? DRAGONDROP_SAMPLE : DRAGONDROP_INSTRUMENT;
@@ -3546,11 +3559,18 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
+	ModCommand::NOTE note = NOTE_NONE;
 	const bool start = wParam >= kcTreeViewStartNotes && wParam <= kcTreeViewEndNotes,
 		stop = (wParam >= kcTreeViewStartNoteStops && wParam <= kcTreeViewEndNoteStops) && !IsSampleBrowser();
 	if(start || stop)
 	{
-		ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - (start ? kcTreeViewStartNotes : kcTreeViewStartNoteStops) + 1 + pMainFrm->GetBaseOctave() * 12);
+		note = static_cast<ModCommand::NOTE>(wParam - (start ? kcTreeViewStartNotes : kcTreeViewStartNoteStops) + 1 + pMainFrm->GetBaseOctave() * 12);
+	} else if(wParam == kcTreeViewStopPreview)
+	{
+		note = NOTE_NOTECUT;
+	}
+	if(note != NOTE_NONE)
+	{
 		if(stop) note |= 0x80;
 
 		if(PlayItem(GetSelectedItem(), note))

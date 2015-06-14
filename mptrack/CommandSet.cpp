@@ -686,6 +686,7 @@ void CCommandSet::SetupCommands()
 	}
 	// Safety margin if we want to add more cues
 	DefineKeyCommand(kcOrderlistEditCopyOrders, 1950, _T("Copy Orders"));
+	DefineKeyCommand(kcTreeViewStopPreview, 1951, _T("Stop sample preview"), kcHidden);
 
 	// Add new key commands here.
 
@@ -1296,8 +1297,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				Remove(newKcInsNoteMap, (CommandID)(kcInsNoteMapStartNotes+noteOffset));
 				Remove(newKcVSTGUI, (CommandID)(kcVSTGUIStartNotes+noteOffset));
 			}
-		}
-		if (inCmd>=kcVPStartNoteStops && inCmd<=kcVPEndNoteStops)
+		} else if (inCmd>=kcVPStartNoteStops && inCmd<=kcVPEndNoteStops)
 		{
 			KeyCombination newKcSamp = inKc;
 			KeyCombination newKcIns  = inKc;
@@ -1330,7 +1330,18 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				Remove(newKcInsNoteMap, (CommandID)(kcInsNoteMapStartNoteStops+noteOffset));
 				Remove(newKcVSTGUI, (CommandID)(kcVSTGUIStartNoteStops+noteOffset));
 			}
-
+		} else if(inCmd == kcNoteCut || inCmd == kcNoteOff || inCmd == kcNoteFade)
+		{
+			// Stop preview in instrument browser
+			KeyCombination newKcTree = inKc;
+			newKcTree.Context(kCtxViewTree);
+			if(adding)
+			{
+				Add(newKcTree, kcTreeViewStopPreview, false);
+			} else
+			{
+				Remove(newKcTree, kcTreeViewStopPreview);
+			}
 		}
 	}
 	if (enforceRule[krCheckModifiers])

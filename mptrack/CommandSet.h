@@ -1078,6 +1078,8 @@ enum CommandID
 	kcVSTGUINoteStopA_3,
 	kcVSTGUIEndNoteStops=kcVSTGUINoteStopA_3,
 
+	kcTreeViewStopPreview,
+
 	kcStartVSTGUICommands,
 	kcVSTGUIPrevPreset=kcStartVSTGUICommands,
 	kcVSTGUINextPreset,
