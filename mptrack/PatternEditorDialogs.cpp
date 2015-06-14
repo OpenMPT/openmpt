@@ -571,7 +571,7 @@ void CPatternPropertiesDlg::OnTempoSwing()
 //----------------------------------------
 {
 	m_tempoSwing.resize(GetDlgItemInt(IDC_ROWSPERBEAT), TempoSwing::Unity);
-	CTempoSwingDlg dlg(this, m_tempoSwing);
+	CTempoSwingDlg dlg(this, m_tempoSwing, modDoc.GetrSoundFile(), m_nPattern);
 	if(dlg.DoModal() == IDOK)
 	{
 		m_tempoSwing = dlg.m_tempoSwing;

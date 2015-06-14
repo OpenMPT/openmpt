@@ -280,9 +280,12 @@ protected:
 	std::vector<RowCtls *> m_controls;
 public:
 	TempoSwing m_tempoSwing;
+	const TempoSwing m_origTempoSwing;
+	CSoundFile &m_sndFile;
+	PATTERNINDEX m_pattern;
 
 public:
-	CTempoSwingDlg(CWnd *parent, const TempoSwing &tempoSwing) : CDialog(IDD_TEMPO_SWING, parent), m_tempoSwing(tempoSwing) { }
+	CTempoSwingDlg(CWnd *parent, const TempoSwing &currentTempoSwing, CSoundFile &sndFile, PATTERNINDEX pattern = PATTERNINDEX_INVALID);
 
 protected:
 	virtual BOOL OnInitDialog();

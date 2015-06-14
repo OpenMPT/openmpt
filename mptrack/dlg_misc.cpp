@@ -285,7 +285,7 @@ void CModTypeDlg::OnTempoSwing()
 //------------------------------
 {
 	m_tempoSwing.resize(GetDlgItemInt(IDC_ROWSPERBEAT), TempoSwing::Unity);
-	CTempoSwingDlg dlg(this, m_tempoSwing);
+	CTempoSwingDlg dlg(this, m_tempoSwing, sndFile);
 	if(dlg.DoModal() == IDOK)
 	{
 		m_tempoSwing = dlg.m_tempoSwing;
@@ -1205,8 +1205,16 @@ BEGIN_MESSAGE_MAP(CTempoSwingDlg, CDialog)
 END_MESSAGE_MAP()
 
 
+CTempoSwingDlg::CTempoSwingDlg(CWnd *parent, const TempoSwing &currentTempoSwing, CSoundFile &sndFile, PATTERNINDEX pattern)
+	: CDialog(IDD_TEMPO_SWING, parent)
+	, m_tempoSwing(currentTempoSwing)
+	, m_origTempoSwing(pattern == PATTERNINDEX_INVALID ? sndFile.m_tempoSwing : sndFile.Patterns[pattern].GetTempoSwing())
+	, m_sndFile(sndFile)
+	, m_pattern(pattern)
+{ }
+
 BOOL CTempoSwingDlg::OnInitDialog()
-//-----------------------------------
+//---------------------------------
 {
 	struct Measurements
 	{
@@ -1296,7 +1304,7 @@ BOOL CTempoSwingDlg::OnInitDialog()
 
 
 void CTempoSwingDlg::OnOK()
-//---------------------------
+//-------------------------
 {
 	CDialog::OnOK();
 	// If this is the default setup, just clear the vector.
@@ -1309,7 +1317,7 @@ void CTempoSwingDlg::OnOK()
 
 
 void CTempoSwingDlg::OnCancel()
-//---------------------------
+//-----------------------------
 {
 	CDialog::OnCancel();
 	OnClose();
@@ -1317,17 +1325,25 @@ void CTempoSwingDlg::OnCancel()
 
 
 void CTempoSwingDlg::OnClose()
-//------------------------------
+//----------------------------
 {
 	for(size_t i = 0; i < m_controls.size(); i++)
 	{
 		delete m_controls[i];
 	}
+	// Restore original swing properties after preview
+	if(m_pattern == PATTERNINDEX_INVALID)
+	{
+		m_sndFile.m_tempoSwing = m_origTempoSwing;
+	} else
+	{
+		m_sndFile.Patterns[m_pattern].SetTempoSwing(m_origTempoSwing);
+	}
 }
 
 
 void CTempoSwingDlg::OnReset()
-//------------------------------
+//----------------------------
 {
 	for(size_t i = 0; i < m_controls.size(); i++)
 	{
@@ -1338,13 +1354,22 @@ void CTempoSwingDlg::OnReset()
 
 
 void CTempoSwingDlg::OnHScroll(UINT /*nSBCode*/, UINT /*nPos*/, CScrollBar* /*pScrollBar*/)
-//-------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------
 {
 	for(size_t i = 0; i < m_controls.size(); i++)
 	{
 		m_tempoSwing[i] = Util::muldivr(m_controls[i]->valueSlider.GetPos(), TempoSwing::Unity, SliderUnity) + TempoSwing::Unity;
 	}
 	m_tempoSwing.Normalize();
+	// Preview
+	if(m_pattern == PATTERNINDEX_INVALID)
+	{
+		m_sndFile.m_tempoSwing = m_tempoSwing;
+	} else
+	{
+		m_sndFile.Patterns[m_pattern].SetTempoSwing(m_tempoSwing);
+	}
+
 	for(size_t i = 0; i < m_tempoSwing.size(); i++)
 	{
 		TCHAR s[32];
@@ -1355,7 +1380,7 @@ void CTempoSwingDlg::OnHScroll(UINT /*nSBCode*/, UINT /*nPos*/, CScrollBar* /*pS
 
 
 BOOL CTempoSwingDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
-//--------------------------------------------------------------------
+//------------------------------------------------------------------
 {
 	TOOLTIPTEXT *pTTT = (TOOLTIPTEXTA*)pNMHDR;
 	for(size_t i = 0; i < m_controls.size(); i++)
