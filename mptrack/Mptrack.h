@@ -28,6 +28,7 @@ namespace SoundDevice {
 class Manager;
 } // namespace SoundDevice
 class CDLSBank;
+class DebugSettings;
 class TrackerSettings;
 class ComponentManagerSettings;
 
@@ -203,6 +204,7 @@ protected:
 
 	IniFileSettingsBackend *m_pSettingsIniFile;
 	SettingsContainer *m_pSettings;
+	DebugSettings *m_pDebugSettings;
 	TrackerSettings *m_pTrackerSettings;
 	IniFileSettingsBackend *m_pSongSettingsIniFile;
 	SettingsContainer *m_pSongSettings;

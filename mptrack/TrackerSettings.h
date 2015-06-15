@@ -433,6 +433,44 @@ public:
 };
 
 
+//=================
+class DebugSettings
+//=================
+{
+
+private:
+
+	SettingsContainer &conf;
+
+private:
+
+	// Debug
+
+#if !defined(NO_LOGGING) && !defined(MPT_LOG_IS_DISABLED)
+	Setting<int> DebugLogLevel;
+	Setting<std::string> DebugLogFacilitySolo;
+	Setting<std::string> DebugLogFacilityBlocked;
+	Setting<bool> DebugLogFileEnable;
+	Setting<bool> DebugLogDebuggerEnable;
+	Setting<bool> DebugLogConsoleEnable;
+#endif
+
+	Setting<bool> DebugTraceEnable;
+	Setting<uint32> DebugTraceSize;
+	Setting<bool> DebugTraceAlwaysDump;
+
+	Setting<bool> DebugStopSoundDeviceOnCrash;
+	Setting<bool> DebugStopSoundDeviceBeforeDump;
+
+public:
+
+	DebugSettings(SettingsContainer &conf);
+
+	~DebugSettings();
+
+};
+
+
 //===================
 class TrackerSettings
 //===================
@@ -642,24 +680,6 @@ public:
 	Setting<CString> UpdateUpdateURL;
 	Setting<bool> UpdateSendGUID;
 	Setting<bool> UpdateShowUpdateHint;
-
-	// Debug
-
-#if !defined(NO_LOGGING) && !defined(MPT_LOG_IS_DISABLED)
-	Setting<int> DebugLogLevel;
-	Setting<std::string> DebugLogFacilitySolo;
-	Setting<std::string> DebugLogFacilityBlocked;
-	Setting<bool> DebugLogFileEnable;
-	Setting<bool> DebugLogDebuggerEnable;
-	Setting<bool> DebugLogConsoleEnable;
-#endif
-
-	Setting<bool> DebugTraceEnable;
-	Setting<uint32> DebugTraceSize;
-	Setting<bool> DebugTraceAlwaysDump;
-
-	Setting<bool> DebugStopSoundDeviceOnCrash;
-	Setting<bool> DebugStopSoundDeviceBeforeDump;
 
 public:
 

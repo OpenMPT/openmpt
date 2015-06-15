@@ -131,6 +131,57 @@ void SampleUndoBufferSize::CalculateSize()
 }
 
 
+DebugSettings::DebugSettings(SettingsContainer &conf)
+//---------------------------------------------------
+	: conf(conf)
+	// Debug
+#if !defined(NO_LOGGING) && !defined(MPT_LOG_IS_DISABLED)
+	, DebugLogLevel(conf, "Debug", "LogLevel", static_cast<int>(mpt::log::GlobalLogLevel))
+	, DebugLogFacilitySolo(conf, "Debug", "LogFacilitySolo", std::string())
+	, DebugLogFacilityBlocked(conf, "Debug", "LogFacilityBlocked", std::string())
+	, DebugLogFileEnable(conf, "Debug", "LogFileEnable", mpt::log::FileEnabled)
+	, DebugLogDebuggerEnable(conf, "Debug", "LogDebuggerEnable", mpt::log::DebuggerEnabled)
+	, DebugLogConsoleEnable(conf, "Debug", "LogConsoleEnable", mpt::log::ConsoleEnabled)
+#endif
+	, DebugTraceEnable(conf, "Debug", "TraceEnable", false)
+	, DebugTraceSize(conf, "Debug", "TraceSize", 1000000)
+	, DebugTraceAlwaysDump(conf, "Debug", "TraceAlwaysDump", false)
+	, DebugStopSoundDeviceOnCrash(conf, "Debug", "StopSoundDeviceOnCrash", true)
+	, DebugStopSoundDeviceBeforeDump(conf, "Debug", "StopSoundDeviceBeforeDump", false)
+{
+
+	// Duplicate state for debug stuff in order to avoid calling into settings framework from crash context.
+	ExceptionHandler::stopSoundDeviceOnCrash = DebugStopSoundDeviceOnCrash;
+	ExceptionHandler::stopSoundDeviceBeforeDump = DebugStopSoundDeviceBeforeDump;
+
+		// enable debug features (as early as possible after reading the settings)
+	#if !defined(NO_LOGGING) && !defined(MPT_LOG_IS_DISABLED)
+		#if !defined(MPT_LOG_GLOBAL_LEVEL_STATIC)
+			mpt::log::GlobalLogLevel = DebugLogLevel;
+		#endif
+		mpt::log::SetFacilities(DebugLogFacilitySolo, DebugLogFacilityBlocked);
+		mpt::log::FileEnabled = DebugLogFileEnable;
+		mpt::log::DebuggerEnabled = DebugLogDebuggerEnable;
+		mpt::log::ConsoleEnabled = DebugLogConsoleEnable;
+	#endif
+	if(DebugTraceEnable)
+	{
+		mpt::log::Trace::Enable(DebugTraceSize);
+	}
+
+}
+
+
+DebugSettings::~DebugSettings()
+//-----------------------------
+{
+	if(DebugTraceAlwaysDump)
+	{
+		DebugTraceDump();
+	}
+}
+
+
 TrackerSettings::TrackerSettings(SettingsContainer &conf)
 //-------------------------------------------------------
 	: conf(conf)
@@ -260,26 +311,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, UpdateUpdateURL(conf, "Update", "UpdateURL", CUpdateCheck::GetUpdateURL())
 	, UpdateSendGUID(conf, "Update", "SendGUID", CUpdateCheck::GetSendGUID())
 	, UpdateShowUpdateHint(conf, "Update", "ShowUpdateHint", CUpdateCheck::GetShowUpdateHint())
-	// Debug
-#if !defined(NO_LOGGING) && !defined(MPT_LOG_IS_DISABLED)
-	, DebugLogLevel(conf, "Debug", "LogLevel", static_cast<int>(mpt::log::GlobalLogLevel))
-	, DebugLogFacilitySolo(conf, "Debug", "LogFacilitySolo", std::string())
-	, DebugLogFacilityBlocked(conf, "Debug", "LogFacilityBlocked", std::string())
-	, DebugLogFileEnable(conf, "Debug", "LogFileEnable", mpt::log::FileEnabled)
-	, DebugLogDebuggerEnable(conf, "Debug", "LogDebuggerEnable", mpt::log::DebuggerEnabled)
-	, DebugLogConsoleEnable(conf, "Debug", "LogConsoleEnable", mpt::log::ConsoleEnabled)
-#endif
-	, DebugTraceEnable(conf, "Debug", "TraceEnable", false)
-	, DebugTraceSize(conf, "Debug", "TraceSize", 1000000)
-	, DebugTraceAlwaysDump(conf, "Debug", "TraceAlwaysDump", false)
-	, DebugStopSoundDeviceOnCrash(conf, "Debug", "StopSoundDeviceOnCrash", true)
-	, DebugStopSoundDeviceBeforeDump(conf, "Debug", "StopSoundDeviceBeforeDump", false)
 {
-
-	// Debug
-	// Duplicate state for debug stuff in order to avoid calling into settings framework from crash context.
-	ExceptionHandler::stopSoundDeviceOnCrash = DebugStopSoundDeviceOnCrash;
-	ExceptionHandler::stopSoundDeviceBeforeDump = DebugStopSoundDeviceBeforeDump;
 
 	// Effects
 #ifndef NO_DSP
