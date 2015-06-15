@@ -349,7 +349,58 @@ std::string GetVersionStringExtended()
 		retval += GetRevisionString();
 	}
 	#ifdef MODPLUG_TRACKER
-		retval += mpt::String::Print(" %1 bit", sizeof(void*) * 8);
+		retval += MPT_FORMAT(" %1 bit", sizeof(void*) * 8);
+		int minimumSSEVersion = 0;
+		int minimumAVXVersion = 0;
+		#if MPT_COMPILER_MSVC
+			#if defined(_M_IX86_FP)
+				#if defined(__AVX2__)
+					retval += " AVX2";
+					minimumSSEVersion = 2;
+					minimumAVXVersion = 2;
+				#elif defined(__AVX__)
+					retval += " AVX";
+					minimumSSEVersion = 2;
+					minimumAVXVersion = 1;
+				#elif (_M_IX86_FP >= 2)
+					retval += " SSE2";
+					minimumSSEVersion = 2;
+				#elif (_M_IX86_FP == 1)
+					retval += " SSE";
+					minimumSSEVersion = 1;
+				#else
+					retval += " x87";
+				#endif
+			#endif
+		#endif
+		uint16 minimumKernelVersion = 0;
+		#if MPT_COMPILER_MSVC
+			#if MPT_MSVC_AT_LEAST(2012, 0)
+				minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::WinVista);
+			#elif MPT_MSVC_AT_LEAST(2010, 0)
+				minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::Win2000);
+			#elif MPT_MSVC_AT_LEAST(2008, 0)
+				minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::Win98);
+			#endif
+		#endif
+		uint16 minimumApiVersion = 0;
+		#if defined(_WIN32_WINNT)
+			minimumApiVersion = std::max<uint16>(minimumApiVersion, _WIN32_WINNT);
+		#endif
+		if((minimumSSEVersion <= 0) && (minimumAVXVersion <= 0) && (minimumKernelVersion < mpt::Windows::Version::WinXP) && (minimumApiVersion < mpt::Windows::Version::WinXP))
+		{
+			if(IsDebugBuild() || IsTestBuild() || IsDirty() || HasMixedRevisions())
+			{
+				retval += " OLD";
+			} else
+			{
+				retval += " for older Windows";
+			}
+		}
+		if(IsDebugBuild() || IsTestBuild() || IsDirty() || HasMixedRevisions())
+		{
+			retval += MPT_FORMAT(" OS>=0x%1 API>=0x%2", mpt::fmt::hex0<4>(minimumKernelVersion), mpt::fmt::hex0<4>(minimumApiVersion));
+		}
 	#endif
 	if(IsDebugBuild() || IsTestBuild() || IsDirty() || HasMixedRevisions())
 	{
