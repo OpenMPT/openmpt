@@ -555,7 +555,7 @@ public:
 	TimingInfo m_TimingInfo; // only valid if !m_bIsRendering
 
 private:
-	// logging and user interaction
+	// logging
 	ILog *m_pCustomLog;
 
 public:
@@ -563,10 +563,10 @@ public:
 	~CSoundFile();
 
 public:
-	// logging and user interaction
+	// logging
 	void SetCustomLog(ILog *pLog) { m_pCustomLog = pLog; }
 	void AddToLog(LogLevel level, const mpt::ustring &text) const;
-	/*MPT_DEPRECATED*/ void AddToLog(const std::string &text) const { AddToLog(LogInformation, mpt::ToUnicode(mpt::CharsetLocaleOrUTF8, text)); }
+	/*MPT_DEPRECATED*/ void AddToLog(const AnyStringLocale &text) const { AddToLog(LogInformation, mpt::ToUnicode(text)); }
 
 public:
 

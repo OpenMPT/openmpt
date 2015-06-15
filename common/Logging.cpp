@@ -1,7 +1,7 @@
 /*
  * Logging.cpp
  * -----------
- * Purpose: General logging and user confirmation support
+ * Purpose: General logging
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -28,41 +28,103 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-//#define LOG_TO_FILE
-
-
-#if MPT_COMPILER_MSVC || (MPT_COMPILER_GCC && MPT_GCC_AT_LEAST(4,3,0) && MPT_GCC_BEFORE(4,4,0))
-#ifndef va_copy
-#define va_copy(dst, src) MPT_DO { (dst) = (src); } MPT_WHILE_0
-#endif
-#endif
-
-
 namespace mpt
 {
 namespace log
 {
-
-
-static const std::size_t LOGBUF_SIZE = 1024;
-
+	
 
 #ifndef NO_LOGGING
 
 
-static MPT_NOINLINE void DoLog(const mpt::log::Context &context, mpt::ustring message)
-//------------------------------------------------------------------------------------
+
+#if !defined(MPT_LOG_GLOBAL_LEVEL_STATIC)
+#if defined(MPT_LOG_GLOBAL_LEVEL)
+int GlobalLogLevel = static_cast<int>(MPT_LOG_GLOBAL_LEVEL);
+#else
+int GlobalLogLevel = static_cast<int>(LogDebug);
+#endif
+#endif
+
+
+
+#if defined(MODPLUG_TRACKER) && !defined(MPT_LOG_IS_DISABLED)
+
+bool FileEnabled = false;
+bool DebuggerEnabled = true;
+bool ConsoleEnabled = false;
+
+static char g_FacilitySolo[1024] = {0};
+static char g_FacilityBlocked[1024] = {0};
+
+void SetFacilities(const std::string &solo, const std::string &blocked)
 {
-	// remove eol if already present
-	message = mpt::String::RTrim(message, MPT_USTRING("\r\n"));
+	std::strcpy(g_FacilitySolo, solo.c_str());
+	std::strcpy(g_FacilityBlocked, blocked.c_str());
+}
+
+bool IsFacilityActive(const char *facility)
+{
+	if(facility)
+	{
+		if(std::strlen(g_FacilitySolo) > 0)
+		{
+			if(std::strcmp(facility, g_FacilitySolo) != 0)
+			{
+				return false;
+			}
+		}
+		if(std::strlen(g_FacilityBlocked) > 0)
+		{
+			if(std::strcmp(facility, g_FacilitySolo) == 0)
+			{
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+#endif
+
+
+void Logger::SendLogMessage(const Context &context, LogLevel level, const char *facility, const mpt::ustring &text)
+//-----------------------------------------------------------------------------------------------------------------
+{
+#ifdef MPT_LOG_IS_DISABLED
+	MPT_UNREFERENCED_PARAMETER(context);
+	MPT_UNREFERENCED_PARAMETER(level);
+	MPT_UNREFERENCED_PARAMETER(facility);
+	MPT_UNREFERENCED_PARAMETER(text);
+#else // !MPT_LOG_IS_DISABLED
+	MPT_MAYBE_CONSTANT_IF(mpt::log::GlobalLogLevel < level)
+	{
+		return;
+	}
+	#if defined(MODPLUG_TRACKER)
+		if(!IsFacilityActive(facility))
+		{
+			return;
+		}
+	#else // !MODPLUG_TRACKER
+		MPT_UNREFERENCED_PARAMETER(facility);
+	#endif // MODPLUG_TRACKER
+	// remove eol if already present and add log level prefix
+	const mpt::ustring message = LogLevelToString(level) + MPT_USTRING(": ") + mpt::String::RTrim(text, MPT_USTRING("\r\n"));
+	const mpt::ustring file = mpt::ToUnicode(mpt::CharsetASCII, context.file);
+	const mpt::ustring function = mpt::ToUnicode(mpt::CharsetASCII, context.function);
+	const mpt::ustring line = mpt::ufmt::dec(context.line);
 	#if defined(MODPLUG_TRACKER)
 #if MPT_OS_WINDOWS
 		static uint64 s_lastlogtime = 0;
 		uint64 cur = mpt::Date::ANSI::Now();
 		uint64 diff = cur/10000 - s_lastlogtime;
 		s_lastlogtime = cur/10000;
+#else
+		uint64 cur = 0;
+		uint64 diff = 0;
 #endif
-		#ifdef LOG_TO_FILE
+		if(mpt::log::FileEnabled)
 		{
 			static FILE * s_logfile = nullptr;
 			if(!s_logfile)
@@ -71,76 +133,75 @@ static MPT_NOINLINE void DoLog(const mpt::log::Context &context, mpt::ustring me
 			}
 			if(s_logfile)
 			{
-				fprintf(s_logfile, mpt::ToCharset(mpt::CharsetUTF8, mpt::String::Print(MPT_USTRING("%1+%2 %3(%4): %5 [%6]\n"
-#if MPT_OS_WINDOWS
+				fprintf(s_logfile, mpt::ToCharset(mpt::CharsetUTF8, MPT_UFORMAT("%1+%2 %3(%4): %5 [%6]\n"
 					, mpt::Date::ANSI::ToString(cur)
 					, mpt::ufmt::dec<6>(diff)
-#else
-					, 0
-					, 0
-#endif
-					, mpt::ToUnicode(mpt::CharsetASCII, context.file)
-					, context.line
+					, file
+					, line
 					, message
-					, mpt::ToUnicode(mpt::CharsetASCII, context.function)
-					))).c_str());
+					, function
+					)).c_str());
 				fflush(s_logfile);
 			}
 		}
-		#endif // LOG_TO_FILE
+		if(mpt::log::DebuggerEnabled)
 		{
-			OutputDebugStringW(mpt::String::Print(L"%1(%2): +%3 %4 [%5]\n"
-				, mpt::ToWide(mpt::CharsetASCII, context.file)
-				, context.line
-				, mpt::wfmt::dec<6>(diff)
+			OutputDebugStringW(mpt::ToWide(MPT_UFORMAT("%1(%2): +%3 %4 [%5]\n"
+				, file
+				, line
+				, mpt::ufmt::dec<6>(diff)
 				, message
-				, mpt::ToWide(mpt::CharsetASCII, context.function)
-				).c_str());
+				, function
+				)).c_str());
+		}
+		if(mpt::log::ConsoleEnabled)
+		{
+			static bool consoleInited = false;
+			if(!consoleInited)
+			{
+				AllocConsole();
+				consoleInited = true;
+			}
+			std::wstring consoletext = mpt::ToWide(message);
+			DWORD dummy = 0;
+			WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), consoletext.c_str(), consoletext.length(), &dummy, NULL);
 		}
 	#else // !MODPLUG_TRACKER
 		std::clog
-			<< "openmpt: "
-			<< context.file << "(" << context.line << ")" << ": "
+			<< "libopenmpt: "
+			<< mpt::ToCharset(mpt::CharsetLocaleOrUTF8, file) << "(" << mpt::ToCharset(mpt::CharsetLocaleOrUTF8, line) << ")" << ": "
 			<< mpt::ToCharset(mpt::CharsetLocaleOrUTF8, message)
-			<< " [" << context.function << "]"
+			<< " [" << mpt::ToCharset(mpt::CharsetLocaleOrUTF8, function) << "]"
 			<< std::endl;
 	#endif // MODPLUG_TRACKER
+#endif // MPT_LOG_IS_DISABLED
 }
 
-
-static MPT_NOINLINE void DoLog(const mpt::log::Context &context, const char *format, va_list args)
-//------------------------------------------------------------------------------------------------
+void LegacyLogger::operator () (const AnyStringLocale &text)
+//----------------------------------------------------------
 {
+	SendLogMessage(context, MPT_LEGACY_LOGLEVEL, "", text);
+}
+
+void LegacyLogger::operator () (const char *format, ...)
+//------------------------------------------------------
+{
+	static const std::size_t LOGBUF_SIZE = 1024;
 	char message[LOGBUF_SIZE];
 	va_list va;
-	va_copy(va, args);
-	vsnprintf(message, LOGBUF_SIZE, format, va);
-	message[LOGBUF_SIZE - 1] = '\0';
-	va_end(va);
-	DoLog(context, mpt::ToUnicode(mpt::CharsetLocaleOrUTF8, message));
-}
-
-
-void Logger::operator () (LogLevel level, const mpt::ustring &text)
-//-----------------------------------------------------------------
-{
-	DoLog(context, LogLevelToString(level) + MPT_USTRING(": ") + text);
-}
-
-void Logger::operator () (const AnyStringLocale &text)
-//----------------------------------------------------
-{
-	DoLog(context, text);
-}
-
-void Logger::operator () (const char *format, ...)
-//------------------------------------------------
-{
-	va_list va;
 	va_start(va, format);
-	DoLog(context, format, va);
+	vsnprintf(message, LOGBUF_SIZE, format, va);
 	va_end(va);
+	message[LOGBUF_SIZE - 1] = '\0';
+	SendLogMessage(context, MPT_LEGACY_LOGLEVEL, "", mpt::ToUnicode(mpt::CharsetLocaleOrUTF8, message));
 }
+
+void LegacyLogger::operator () (LogLevel level, const mpt::ustring &text)
+//-----------------------------------------------------------------------
+{
+	SendLogMessage(context, level, "", text);
+}
+
 
 
 #endif // !NO_LOGGING

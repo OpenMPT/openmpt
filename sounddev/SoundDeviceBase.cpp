@@ -219,7 +219,7 @@ void Base::SendDeviceMessage(LogLevel level, const mpt::ustring &str)
 //-------------------------------------------------------------------
 {
 	MPT_TRACE();
-	Log(level, str);
+	MPT_LOG(level, "sounddev", str);
 	if(m_MessageReceiver)
 	{
 		m_MessageReceiver->SoundDeviceMessage(level, str);

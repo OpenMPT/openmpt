@@ -503,6 +503,7 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(MPT_FORMAT("%b", "a"), "%b");
 
 #if defined(_MFC_VER)
+	VERIFY_EQUAL(mpt::ToUString(CString(_T("foobar"))), MPT_USTRING("foobar"));
 	VERIFY_EQUAL(MPT_TFORMAT("%1%2%3",1,2,3), _T("123"));
 	VERIFY_EQUAL(MPT_TFORMAT("%1%2%3",1,mpt::tfmt::dec0<3>(2),3), _T("10023"));
 #endif

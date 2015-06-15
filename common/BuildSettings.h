@@ -85,8 +85,10 @@
 //#define MODPLUG_NO_FILESAVE
 
 // Disable any debug logging
+//#define NO_LOGGING
 #ifndef _DEBUG
-#define NO_LOGGING
+#define MPT_LOG_GLOBAL_LEVEL_STATIC
+#define MPT_LOG_GLOBAL_LEVEL 0
 #endif
 
 // Disable all runtime asserts

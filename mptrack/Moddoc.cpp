@@ -909,7 +909,7 @@ mpt::ustring CModDoc::GetLogString() const
 LogLevel CModDoc::GetMaxLogLevel() const
 //--------------------------------------
 {
-	LogLevel retval = LogNotification;
+	LogLevel retval = LogInformation;
 	// find the most severe loglevel
 	for(std::vector<LogEntry>::const_iterator i=m_Log.begin(); i!=m_Log.end(); ++i)
 	{
