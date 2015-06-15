@@ -911,7 +911,7 @@ BOOL CTrackApp::InitInstance()
 	mpt::Windows::Version::Init();
 	mpt::String::InitCharsets();
 
-	Log("OpenMPT Start");
+	MPT_LOG(LogInformation, "", MPT_USTRING("OpenMPT Start"));
 
 	ASSERT(nullptr == m_pDocManager);
 	m_pDocManager = new CModDocManager();
@@ -934,6 +934,23 @@ BOOL CTrackApp::InitInstance()
 	m_pSettings = new SettingsContainer(m_pSettingsIniFile);
 	m_pTrackerSettings = new TrackerSettings(*m_pSettings);
 
+	// enable debug features (as early as possible after reading the settings)
+	#if !defined(NO_LOGGING) && !defined(MPT_LOG_IS_DISABLED)
+		#if !defined(MPT_LOG_GLOBAL_LEVEL_STATIC)
+			mpt::log::GlobalLogLevel = TrackerSettings::Instance().DebugLogLevel;
+		#endif
+		mpt::log::SetFacilities(TrackerSettings::Instance().DebugLogFacilitySolo, TrackerSettings::Instance().DebugLogFacilityBlocked);
+		mpt::log::FileEnabled = TrackerSettings::Instance().DebugLogFileEnable;
+		mpt::log::DebuggerEnabled = TrackerSettings::Instance().DebugLogDebuggerEnable;
+		mpt::log::ConsoleEnabled = TrackerSettings::Instance().DebugLogConsoleEnable;
+	#endif
+	MPT_LOG(LogInformation, "", MPT_USTRING("OpenMPT settings initialized."));
+	if(TrackerSettings::Instance().DebugTraceEnable)
+	{
+		mpt::log::Trace::Enable(TrackerSettings::Instance().DebugTraceSize);
+	}
+	MPT_TRACE();
+
 	// Create missing diretories
 	if(!TrackerSettings::Instance().PathTunings.GetDefaultDir().IsDirectory())
 	{
@@ -942,13 +959,6 @@ BOOL CTrackApp::InitInstance()
 
 	m_pSongSettingsIniFile = new IniFileSettingsBackend(m_szConfigDirectory + MPT_PATHSTRING("SongSettings.ini"));
 	m_pSongSettings = new SettingsContainer(m_pSongSettingsIniFile);
-
-	// enable debug features (as early as possible after reading the settings)
-	if(TrackerSettings::Instance().DebugTraceEnable)
-	{
-		mpt::log::Trace::Enable(TrackerSettings::Instance().DebugTraceSize);
-	}
-	MPT_TRACE();
 
 	m_pComponentManagerSettings = new ComponentManagerSettings(TrackerSettings::Instance());
 

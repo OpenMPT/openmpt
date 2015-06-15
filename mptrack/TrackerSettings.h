@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "../common/Logging.h"
+#include "../common/version.h"
 #include "../soundlib/MixerSettings.h"
 #include "../soundlib/Resampler.h"
 #include "../soundlib/SampleFormat.h"
@@ -19,7 +21,6 @@
 #include "../sounddsp/Reverb.h"
 #include "../sounddev/SoundDevice.h"
 #include "StreamEncoder.h"
-#include "../common/version.h"
 #include "Settings.h"
 
 #include <bitset>
@@ -643,6 +644,15 @@ public:
 	Setting<bool> UpdateShowUpdateHint;
 
 	// Debug
+
+#if !defined(NO_LOGGING) && !defined(MPT_LOG_IS_DISABLED)
+	Setting<int> DebugLogLevel;
+	Setting<std::string> DebugLogFacilitySolo;
+	Setting<std::string> DebugLogFacilityBlocked;
+	Setting<bool> DebugLogFileEnable;
+	Setting<bool> DebugLogDebuggerEnable;
+	Setting<bool> DebugLogConsoleEnable;
+#endif
 
 	Setting<bool> DebugTraceEnable;
 	Setting<uint32> DebugTraceSize;
