@@ -1367,8 +1367,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(sndFile.GetTitle(), "Test Module_____________X");
 	VERIFY_EQUAL_NONCONT(sndFile.songMessage.at(0), 'O');
-	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo.GetInt(), 139);
-	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo.GetFract(), 999);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, TEMPO(139, 999));
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 5);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 128);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 42);
@@ -1386,6 +1385,13 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.m_nRestartPos, 1);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nResampling, SRCMODE_POLYPHASE);
 	VERIFY_EQUAL_NONCONT(sndFile.songArtist, MPT_USTRING("Tester"));
+	VERIFY_EQUAL_NONCONT(sndFile.m_tempoSwing.size(), 6);
+	VERIFY_EQUAL_NONCONT(sndFile.m_tempoSwing[0], 29360125);
+	VERIFY_EQUAL_NONCONT(sndFile.m_tempoSwing[1], 4194305);
+	VERIFY_EQUAL_NONCONT(sndFile.m_tempoSwing[2], 29360128);
+	VERIFY_EQUAL_NONCONT(sndFile.m_tempoSwing[3], 4194305);
+	VERIFY_EQUAL_NONCONT(sndFile.m_tempoSwing[4], 29360128);
+	VERIFY_EQUAL_NONCONT(sndFile.m_tempoSwing[5], 4194305);
 
 	// Edit history
 	VERIFY_EQUAL_NONCONT(sndFile.GetFileHistory().size() > 0, true);
@@ -1614,7 +1620,18 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetOverrideSignature(), true);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetRowsPerBeat(), 5);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetRowsPerMeasure(), 10);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].HasTempoSwing(), true);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns.IsPatternEmpty(0), true);
+
+	{
+		TempoSwing swing = sndFile.Patterns[0].GetTempoSwing();
+		VERIFY_EQUAL_NONCONT(swing.size(), 5);
+		VERIFY_EQUAL_NONCONT(swing[0], 16770149);
+		VERIFY_EQUAL_NONCONT(swing[1], 16803696);
+		VERIFY_EQUAL_NONCONT(swing[2], 16770157);
+		VERIFY_EQUAL_NONCONT(swing[3], 29347774);
+		VERIFY_EQUAL_NONCONT(swing[4], 4194304);
+	}
 
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetName(), "Second Pattern");
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetNumRows(), 32);
@@ -1622,6 +1639,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetOverrideSignature(), false);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetRowsPerBeat(), 0);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetRowsPerMeasure(), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].HasTempoSwing(), false);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns.IsPatternEmpty(1), false);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->IsPcNote(), true);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->note, NOTE_PC);
