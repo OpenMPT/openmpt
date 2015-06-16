@@ -2222,7 +2222,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 	LimitMax(m_nDefaultGlobalVolume, MAX_GLOBAL_VOLUME);
 	//m_nRestartPos
 	//m_ModFlags
-	if(!m_tempoSwing.empty()) m_tempoSwing.resize(m_nDefaultRowsPerMeasure);
+	if(!m_tempoSwing.empty()) m_tempoSwing.resize(m_nDefaultRowsPerBeat);
 }
 
 
