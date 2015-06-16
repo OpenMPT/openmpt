@@ -66,7 +66,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_WM_DESTROY()
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg)		//rewbs.customKeys
 	ON_MESSAGE(WM_MOD_MIDIMSG,		OnMidiMsg)
-	ON_MESSAGE(WM_MOD_RECORDPARAM,  OnRecordPlugParamChange)
+	ON_MESSAGE(WM_MOD_RECORDPARAM,	OnRecordPlugParamChange)
 	ON_COMMAND(ID_EDIT_CUT,			OnEditCut)
 	ON_COMMAND(ID_EDIT_COPY,		OnEditCopy)
 	ON_COMMAND(ID_EDIT_PASTE,		OnEditPaste)
@@ -183,6 +183,7 @@ void CViewPattern::OnInitialUpdate()
 	memset(splitActiveNoteChannel, 0xFF, sizeof(splitActiveNoteChannel));
 	memset(activeNoteChannel, 0xFF, sizeof(activeNoteChannel));
 	m_nPlayPat = PATTERNINDEX_INVALID;
+	m_nPlayOrd = ORDERINDEX_INVALID;
 	m_nPlayRow = 0;
 	m_nPlayTick = 0;
 	m_nMidRow = 0;
@@ -613,21 +614,29 @@ bool CViewPattern::DragToSel(const PatternCursor &cursor, bool scrollHorizontal,
 }
 
 
-bool CViewPattern::SetPlayCursor(PATTERNINDEX nPat, ROWINDEX nRow)
-//----------------------------------------------------------------
+bool CViewPattern::SetPlayCursor(ORDERINDEX ord, PATTERNINDEX pat, ROWINDEX row)
+//------------------------------------------------------------------------------
 {
-	PATTERNINDEX nOldPat = m_nPlayPat;
-	ROWINDEX nOldRow = m_nPlayRow;
+	ORDERINDEX oldOrd = m_nPlayOrd;
+	PATTERNINDEX oldPat = m_nPlayPat;
+	ROWINDEX oldRow = m_nPlayRow;
 
-	if ((nPat == m_nPlayPat) && (nRow == m_nPlayRow))
+	if (ord == m_nPlayOrd && pat == m_nPlayPat && row == m_nPlayRow)
 		return true;
 	
-	m_nPlayPat = nPat;
-	m_nPlayRow = nRow;
-	if (nOldPat == m_nPattern)
-		InvalidateRow(nOldRow);
-	if (m_nPlayPat == m_nPattern)
-		InvalidateRow(m_nPlayRow);
+	m_nPlayOrd = ord;
+	m_nPlayPat = pat;
+	m_nPlayRow = row;
+	if (oldOrd != m_nPlayOrd)
+	{
+		InvalidatePattern(true);
+	} else
+	{
+		if (oldPat == m_nPattern)
+			InvalidateRow(oldRow);
+		if (m_nPlayPat == m_nPattern)
+			InvalidateRow(m_nPlayRow);
+	}
 
 	return true;
 }
@@ -3775,7 +3784,7 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 					updateOrderList = false;
 				}
 			}
-			SetPlayCursor(nPat, nRow);
+			SetPlayCursor(nOrd, nPat, nRow);
 			m_nPlayTick = pnotify->tick;
 		}
 	}
@@ -3790,7 +3799,7 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 		MemsetZero(ChnVUMeters);	// Also zero all non-visible VU meters
 		if((m_Status & (psFollowSong | psDragActive)) == psFollowSong)
 		{
-			SetPlayCursor(PATTERNINDEX_INVALID, ROWINDEX_INVALID);
+			SetPlayCursor(ORDERINDEX_INVALID, PATTERNINDEX_INVALID, ROWINDEX_INVALID);
 		}
 	}
 
@@ -4156,7 +4165,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		return m_nPattern;
 
 	case VIEWMSG_SETCURRENTPATTERN:
-		if (m_nPattern != (UINT)lParam) SetCurrentPattern(lParam);
+		SetCurrentPattern(lParam);
 		break;
 
 	case VIEWMSG_GETCURRENTPOS:

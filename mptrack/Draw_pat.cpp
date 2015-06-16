@@ -361,7 +361,8 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 	} else
 	{
 		if(pTuning)
-		{   // Drawing custom note names
+		{
+			// Drawing custom note names
 			std::string noteStr = pTuning->GetNoteName(static_cast<CTuning::NOTEINDEXTYPE>(note-NOTE_MIDDLEC));
 			if(noteStr.size() < 3)
 				noteStr.resize(3, ' ');
@@ -369,11 +370,11 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 			DrawLetter(x, y, noteStr[0], pfnt->nNoteWidth / 2, 0);
 			DrawLetter(x + pfnt->nNoteWidth / 2, y, noteStr[1], pfnt->nNoteWidth / 2, 0);
 			DrawLetter(x + pfnt->nNoteWidth, y, noteStr[2], pfnt->nOctaveWidth, 0);
-		}
-		else //Original
+		} else
 		{
-			UINT o = (note-1) / 12; //Octave
-			UINT n = (note-1) % 12; //Note
+			// Original
+			UINT o = (note - NOTE_MIN) / 12; //Octave
+			UINT n = (note - NOTE_MIN) % 12; //Note
 			m_Dib.TextBlt(x, y, pfnt->nNoteWidth, pfnt->spacingY, xsrc, ysrc+(n+1)*pfnt->spacingY, pfnt->dib);
 			if(o <= 9)
 				m_Dib.TextBlt(x+pfnt->nNoteWidth, y, pfnt->nOctaveWidth, pfnt->spacingY,
@@ -577,6 +578,12 @@ void CViewPattern::OnDraw(CDC *pDC)
 	}
 	ypaint += m_szHeader.cy;
 	
+	ORDERINDEX curOrder;
+	if(IsLiveRecord() && m_nPlayOrd < sndFile.Order.size())
+		curOrder = m_nPlayOrd;
+	else
+		curOrder = static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
+
 	if (m_nMidRow)
 	{
 		if (yofs >= m_nMidRow)
@@ -590,13 +597,12 @@ void CViewPattern::OnDraw(CDC *pDC)
 			// Display previous pattern
 			if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWPREVIOUS)
 			{
-				const ORDERINDEX startOrder = static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
-				if(startOrder > 0)
+				if(curOrder > 0)
 				{
-					ORDERINDEX prevOrder = sndFile.Order.GetPreviousOrderIgnoringSkips(startOrder);
+					ORDERINDEX prevOrder = sndFile.Order.GetPreviousOrderIgnoringSkips(curOrder);
 					//Skip +++ items
 
-					if(startOrder < sndFile.Order.size() && sndFile.Order[startOrder] == m_nPattern)
+					if(curOrder < sndFile.Order.size() && sndFile.Order[curOrder] == m_nPattern)
 					{
 						nPrevPat = sndFile.Order[prevOrder];
 					}
@@ -639,14 +645,12 @@ void CViewPattern::OnDraw(CDC *pDC)
 		if ((nVisRows > 0) && (m_nMidRow))
 		{
 			PATTERNINDEX nNextPat = PATTERNINDEX_INVALID;
-			const ORDERINDEX startOrder= static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
-
-			ORDERINDEX nNextOrder = sndFile.Order.GetNextOrderIgnoringSkips(startOrder);
-			if(nNextOrder == startOrder) nNextOrder = ORDERINDEX_INVALID;
+			ORDERINDEX nNextOrder = sndFile.Order.GetNextOrderIgnoringSkips(curOrder);
+			if(nNextOrder == curOrder) nNextOrder = ORDERINDEX_INVALID;
 			//Ignore skip items(+++) from sequence.
 			const ORDERINDEX ordCount = sndFile.Order.GetLength();
 
-			if(nNextOrder < ordCount && sndFile.Order[startOrder] == m_nPattern)
+			if(nNextOrder < ordCount && sndFile.Order[curOrder] == m_nPattern)
 			{
 				nNextPat = sndFile.Order[nNextOrder];
 			}
