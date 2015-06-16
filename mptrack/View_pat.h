@@ -163,8 +163,9 @@ protected:
 	UINT m_nMidRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
 	FlagSet<PatternStatus> m_Status;
 	ROWINDEX m_nPlayRow;
-	UINT m_nPlayTick;
+	uint32 m_nPlayTick;
 	PATTERNINDEX m_nPattern, m_nPlayPat;
+	ORDERINDEX m_nPlayOrd;
 	int32 m_nTransposeAmount;
 
 	int m_nXScroll, m_nYScroll;
@@ -269,7 +270,7 @@ public:
 	// This should be used instead of consecutive calls to SetCurrentRow() then SetCurrentColumn()
 	bool SetCursorPosition(const PatternCursor &cursor, bool wrap = false);
 	bool DragToSel(const PatternCursor &cursor, bool scrollHorizontal, bool scrollVertical, bool noMove = false);
-	bool SetPlayCursor(PATTERNINDEX nPat, ROWINDEX nRow);
+	bool SetPlayCursor(ORDERINDEX ord, PATTERNINDEX pat, ROWINDEX row);
 	bool UpdateScrollbarPositions(bool updateHorizontalScrollbar = true);
 	BYTE EnterNote(UINT nNote, UINT nIns=0, BOOL bCheck=FALSE, int vol=-1, BOOL bMultiCh=FALSE);
 	bool ShowEditWindow();
