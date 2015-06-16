@@ -325,7 +325,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		return;
 	}
 
-	CHAR s[128];
+	TCHAR s[128];
 	nTabCount = (sndFile.m_nChannels + 3) / 4;
 	if (nTabCount != m_TabCtrl.GetItemCount())
 	{
@@ -336,7 +336,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		for (int iItem=0; iItem<nTabCount; iItem++)
 		{
 			const int lastItem = MIN(iItem * 4 + 4, MAX_BASECHANNELS);
-			wsprintf(s, "%d - %d", iItem * 4 + 1, lastItem);
+			wsprintf(s, _T("%d - %d"), iItem * 4 + 1, lastItem);
 			TC_ITEM tci;
 			tci.mask = TCIF_TEXT | TCIF_PARAM;
 			tci.pszText = s;
@@ -365,7 +365,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			{
 				// Text
 				s[0] = 0;
-				if (bEnable) wsprintf(s, "Channel %u", nChn + 1);
+				if (bEnable) wsprintf(s, _T("Channel %u"), nChn + 1);
 				SetDlgItemText(IDC_TEXT1 + ichn, s);
 				// Mute
 				CheckDlgButton(IDC_CHECK1 + ichn * 2, sndFile.ChnSettings[nChn].dwFlags[CHN_MUTE] ? TRUE : FALSE);
@@ -433,10 +433,10 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		GetDlgItem(IDC_MOVEFXSLOT)->EnableWindow((pVstPlugin) ? TRUE : FALSE);
 		GetDlgItem(IDC_INSERTFXSLOT)->EnableWindow((pVstPlugin) ? TRUE : FALSE);
 		GetDlgItem(IDC_CLONEPLUG)->EnableWindow((pVstPlugin) ? TRUE : FALSE);
-		int n = static_cast<int>(plugin.fDryRatio*100);
-		wsprintf(s, "(%d%% wet, %d%% dry)", 100-n, n);
+		int n = static_cast<int>(plugin.fDryRatio * 100);
+		wsprintf(s, _T("%d%% wet, %d%% dry"), 100 - n, n);
 		SetDlgItemText(IDC_STATIC8, s);
-		m_sbDryRatio.SetPos(n);
+		m_sbDryRatio.SetPos(100 - n);
 
 		if(pVstPlugin && pVstPlugin->isInstrument())
 		{
@@ -452,7 +452,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		int gain = plugin.GetGain();
 		if(gain == 0) gain = 10;
 		float value = 0.1f * (float)gain;
-		sprintf(s,"Gain: x %1.1f", value);
+		_stprintf(s, _T("Gain: x %1.1f"), value);
 		SetDlgItemText(IDC_STATIC2, s);
 		m_SpinMixGain.SetPos(gain);
 
@@ -518,10 +518,10 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 				std::string libName = mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, plugin.GetLibraryName());
 				if(!strcmp(plugin.GetName(), "") || libName != plugin.GetName())
 				{
-					wsprintf(s, "FX%d: %s", iOut + 1, libName.c_str());
+					wsprintf(s, _T("FX%d: %s"), iOut + 1, libName.c_str());
 				} else
 				{
-					wsprintf(s, "FX%d: %s (%s)", iOut + 1, libName.c_str(), plugin.GetName());
+					wsprintf(s, _T("FX%d: %s (%s)"), iOut + 1, libName.c_str(), plugin.GetName());
 				}
 
 				int n = m_CbnOutput.AddString(s);
@@ -736,10 +736,9 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		}
 
 
-		//rewbs.dryRatio
 		if ((pScrollBar) && (pScrollBar->m_hWnd == m_sbDryRatio.m_hWnd))
 		{
-			int n = m_sbDryRatio.GetPos();
+			int n = 100 - m_sbDryRatio.GetPos();
 			if ((n >= 0) && (n <= 100) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
 			{
 				CSoundFile *pSndFile = pModDoc->GetSoundFile();
@@ -747,14 +746,13 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 				if(plugin.pMixPlugin)
 				{
-					wsprintf(s, "(%d%% wet, %d%% dry)", 100 - n, n);
+					wsprintf(s, "%d%% wet, %d%% dry", 100 - n, n);
 					SetDlgItemText(IDC_STATIC8, s);
 					plugin.fDryRatio = static_cast<float>(n) / 100.0f;
 					SetPluginModified();
 				}
 			}
 		}
-		//end rewbs.dryRatio
 
 		if (bUpdate) pModDoc->UpdateAllViews(this, GeneralHint(nChn).Channels());
 		UnlockControls();
@@ -793,7 +791,7 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	CHAR s[32];
+	TCHAR s[32];
 
 	if((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 
@@ -810,11 +808,12 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			plugin.SetGain(gain);
 
 			float fValue = 0.1f * (float)gain;
-			sprintf(s,"Gain: x %1.1f",fValue);
-			SetDlgItemText(IDC_STATIC2, s);
+			_stprintf(s, _T("Gain: x %1.1f"), fValue);
+			SetDlgItemText(IDC_EDIT16, s);
 
 			SetPluginModified();
 		}
+		m_SpinMixGain.SetFocus();
 	}
 
 	CFormView::OnVScroll(nSBCode, nPos, pScrollBar);
