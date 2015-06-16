@@ -70,9 +70,6 @@ mpt::ustring FileHistory::AsISO8601() const
 CTuningCollection* CSoundFile::s_pTuningsSharedLocal(0);
 #endif
 
-#if MPT_COMPILER_MSVC
-#pragma warning(disable : 4355) // "'this' : used in base member initializer list"
-#endif
 CSoundFile::CSoundFile() :
 	m_pTuningsTuneSpecific(nullptr),
 	m_pModSpecs(&ModSpecs::itEx),
@@ -84,9 +81,6 @@ CSoundFile::CSoundFile() :
 #endif
 	visitedSongRows(*this),
 	m_pCustomLog(nullptr)
-#if MPT_COMPILER_MSVC
-#pragma warning(default : 4355) // "'this' : used in base member initializer list"
-#endif
 //----------------------
 {
 	MemsetZero(MixSoundBuffer);
