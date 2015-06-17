@@ -29,6 +29,23 @@ namespace Version
 {
 
 
+
+static uint32 VersionDecimalToBCD(uint32 major, uint32 minor)
+{
+	// GetVersionEx returns decimal.
+	// _WIN32_WINNT macro uses BCD.
+	// We use BCD.
+	uint32 result = 0;
+	major = Clamp(major, 0u, 99u);
+	minor = Clamp(minor, 0u, 99u);
+	result |= major/10*0x10 + major%10;
+	result <<= 8;
+	result |= minor/10*0x10 + minor%10;
+	return result;
+}
+
+
+
 #if defined(MODPLUG_TRACKER)
 
 
@@ -64,7 +81,7 @@ void Init()
 	versioninfoex.dwOSVersionInfoSize = sizeof(versioninfoex);
 	GetVersionExW((LPOSVERSIONINFOW)&versioninfoex);
 	SystemIsNT = (versioninfoex.dwPlatformId == VER_PLATFORM_WIN32_NT);
-	SystemVersion = ((uint32)mpt::saturate_cast<uint8>(versioninfoex.dwMajorVersion) << 8) | ((uint32)mpt::saturate_cast<uint8>(versioninfoex.dwMinorVersion) << 0);
+	SystemVersion = VersionDecimalToBCD(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion);
 	SystemIsWine = false;
 	HMODULE hNTDLL = LoadLibraryW(L"ntdll.dll");
 	if(hNTDLL)
@@ -122,23 +139,26 @@ mpt::ustring VersionToString(uint16 version)
 //------------------------------------------
 {
 	mpt::ustring result;
-	std::vector<std::pair<uint16, mpt::ustring> > versionMapNT;
-	versionMapNT.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win81), MPT_USTRING("Windows 8.1")));
-	versionMapNT.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win8), MPT_USTRING("Windows 8")));
-	versionMapNT.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win7), MPT_USTRING("Windows 7")));
-	versionMapNT.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinVista), MPT_USTRING("Windows Vista")));
-	versionMapNT.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinXP), MPT_USTRING("Windows XP")));
-	versionMapNT.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win2000), MPT_USTRING("Windows 2000")));
-	versionMapNT.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinNT4), MPT_USTRING("Windows NT4")));
-	for(std::size_t i = 0; i < versionMapNT.size(); ++i)
+	std::vector<std::pair<uint16, mpt::ustring> > versionMap;
+	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinNewer), MPT_USTRING("Windows 8.1 (or newer)")));
+	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win81), MPT_USTRING("Windows 8.1")));
+	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win8), MPT_USTRING("Windows 8")));
+	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win7), MPT_USTRING("Windows 7")));
+	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinVista), MPT_USTRING("Windows Vista")));
+	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinXP), MPT_USTRING("Windows XP")));
+	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win2000), MPT_USTRING("Windows 2000")));
+	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinME), MPT_USTRING("Windows ME")));
+	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win98), MPT_USTRING("Windows 98")));
+	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinNT4), MPT_USTRING("Windows NT4")));
+	for(std::size_t i = 0; i < versionMap.size(); ++i)
 	{
-		if(version > versionMapNT[i].first)
+		if(version > versionMap[i].first)
 		{
-			result = MPT_USTRING("> ") + versionMapNT[i].second;
+			result = MPT_USTRING("> ") + versionMap[i].second;
 			break;
-		} else if(version == versionMapNT[i].first)
+		} else if(version == versionMap[i].first)
 		{
-			result = versionMapNT[i].second;
+			result = versionMap[i].second;
 			break;
 		}
 	}
@@ -171,9 +191,12 @@ mpt::ustring GetName()
 	}
 	if(mpt::Windows::Version::IsNT())
 	{
-		if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win81))
+		if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinNewer))
 		{
 			result += MPT_USTRING("Windows 8.1 (or newer)");
+		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win81))
+		{
+			result += MPT_USTRING("Windows 8.1");
 		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win8))
 		{
 			result += MPT_USTRING("Windows 8");
@@ -255,7 +278,7 @@ bool IsBefore(mpt::Windows::Version::Number version)
 	MemsetZero(versioninfoex);
 	versioninfoex.dwOSVersionInfoSize = sizeof(versioninfoex);
 	GetVersionExW((LPOSVERSIONINFOW)&versioninfoex);
-	uint32 SystemVersion = ((uint32)mpt::saturate_cast<uint8>(versioninfoex.dwMajorVersion) << 8) | ((uint32)mpt::saturate_cast<uint8>(versioninfoex.dwMinorVersion) << 0);
+	uint32 SystemVersion = VersionDecimalToBCD(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion);
 	return (SystemVersion < (uint32)version);
 }
 
@@ -267,7 +290,7 @@ bool IsAtLeast(mpt::Windows::Version::Number version)
 	MemsetZero(versioninfoex);
 	versioninfoex.dwOSVersionInfoSize = sizeof(versioninfoex);
 	GetVersionExW((LPOSVERSIONINFOW)&versioninfoex);
-	uint32 SystemVersion = ((uint32)mpt::saturate_cast<uint8>(versioninfoex.dwMajorVersion) << 8) | ((uint32)mpt::saturate_cast<uint8>(versioninfoex.dwMinorVersion) << 0);
+	uint32 SystemVersion = VersionDecimalToBCD(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion);
 	return (SystemVersion >= (uint32)version);
 }
 

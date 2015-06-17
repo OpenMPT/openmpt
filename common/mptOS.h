@@ -26,8 +26,8 @@ enum Number
 {
 
 	// Win9x
-	Win98    = 0x040a,
-	WinME    = 0x045a,
+	Win98    = 0x0410,
+	WinME    = 0x0490,
 
 	// WinNT
 	WinNT4   = 0x0400,
@@ -37,6 +37,8 @@ enum Number
 	Win7     = 0x0601,
 	Win8     = 0x0602,
 	Win81    = 0x0603,
+
+	WinNewer = Win81 + 1
 
 };
 
