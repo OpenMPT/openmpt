@@ -53,7 +53,6 @@ public:
 	}
 public:
 	ComponentUnMO3() : ComponentLibrary(ComponentTypeForeign) { }
-	std::string GetSettingsKey() const { return "UnMO3"; }
 	bool DoInitialize()
 	{
 #ifdef MPT_LINKED_UNMO3
@@ -79,7 +78,7 @@ public:
 #endif
 	}
 };
-MPT_REGISTERED_COMPONENT(ComponentUnMO3)
+MPT_REGISTERED_COMPONENT(ComponentUnMO3, "UnMO3")
 
 #endif // !NO_MO3
 

@@ -750,7 +750,7 @@ public:
 };
 
 
-MPT_REGISTERED_COMPONENT(ComponentUXTheme)
+MPT_REGISTERED_COMPONENT(ComponentUXTheme, "UXTheme")
 
 
 // Move a config file called sFileName from the App's directory (or one of its sub directories specified by sSubDir) to

@@ -280,9 +280,10 @@ BOOL CAboutDlg::OnInitDialog()
 	m_Tab.SubclassDlgItem(IDC_TABABOUT, this);
 
 	m_Tab.InsertItem(TCIF_TEXT, 0, _T("OpenMPT"), 0, 0, 0, 0);
-	m_Tab.InsertItem(TCIF_TEXT, 1, _T("Credits"), 0, 0, 0, 0);
-	m_Tab.InsertItem(TCIF_TEXT, 2, _T("License"), 0, 0, 0, 0);
-	m_Tab.InsertItem(TCIF_TEXT, 3, _T("Contact"), 0, 0, 0, 0);
+	m_Tab.InsertItem(TCIF_TEXT, 1, _T("Components"), 0, 0, 0, 0);
+	m_Tab.InsertItem(TCIF_TEXT, 2, _T("Credits"), 0, 0, 0, 0);
+	m_Tab.InsertItem(TCIF_TEXT, 3, _T("License"), 0, 0, 0, 0);
+	m_Tab.InsertItem(TCIF_TEXT, 4, _T("Contact"), 0, 0, 0, 0);
 	m_Tab.SetCurSel(0);
 
 	m_CheckScroll.SetCheck(TrackerSettings::Instance().MiscAboutScrollText ? BST_CHECKED : BST_UNCHECKED);
@@ -293,11 +294,11 @@ BOOL CAboutDlg::OnInitDialog()
 	mpt::ustring text;
 	text += GetTabText(0);
 	text += MPT_USTRING("\n\n\n");
-	text += GetTabText(1);
+	text += GetTabText(2);
+	text += MPT_USTRING("\n\n\n");
+	text += GetTabText(4);
 	text += MPT_USTRING("\n\n\n");
 	text += GetTabText(3);
-	text += MPT_USTRING("\n\n\n");
-	text += GetTabText(2);
 	text += MPT_USTRING("\n\n\n");
 	m_static.SetCredits(mpt::ToCString(mpt::String::Replace(text, MPT_USTRING("\n"), MPT_USTRING("|"))));
 	m_static.StartScrolling();
@@ -411,12 +412,78 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += MPT_UFORMAT("Settings%2: %1", theApp.GetConfigFileName(), theApp.IsPortableMode() ? MPT_USTRING(" (portable)") : MPT_USTRING("")) + lf;
 			break;
 		case 1:
-			text += mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetFullCreditsString());
+			{
+				if(!TrackerSettings::Instance().ComponentsKeepLoaded)
+				{
+					text += MPT_USTRING("Components are loaded and unloaded as needed.") + lf;
+					text += lf;
+					std::vector<std::string> components = ComponentManager::Instance()->GetRegisteredComponents();
+					for(std::size_t i = 0; i < components.size(); ++i)
+					{
+						ComponentInfo info = ComponentManager::Instance()->GetComponentInfo(components[i]);
+						mpt::ustring name = mpt::ToUnicode(mpt::CharsetASCII, (info.name.substr(0, 9) == "Component") ? info.name.substr(9) : info.name);
+						if(!info.settingsKey.empty())
+						{
+							name = mpt::ToUnicode(mpt::CharsetASCII, info.settingsKey);
+						}
+						text += name + lf;
+					}
+				} else
+				{
+					std::vector<std::string> components = ComponentManager::Instance()->GetRegisteredComponents();
+					for(int available = 1; available >= 0; --available)
+					{
+						if(available)
+						{
+							text += MPT_USTRING("Loaded Components:") + lf;
+						} else
+						{
+							text += lf;
+							text += MPT_USTRING("Unloaded Components:") + lf;
+						}
+						for(std::size_t i = 0; i < components.size(); ++i)
+						{
+							ComponentInfo info = ComponentManager::Instance()->GetComponentInfo(components[i]);
+							if(available  && info.state != ComponentStateAvailable) continue;
+							if(!available && info.state == ComponentStateAvailable) continue;
+							mpt::ustring name = mpt::ToUnicode(mpt::CharsetASCII, (info.name.substr(0, 9) == "Component") ? info.name.substr(9) : info.name);
+							if(!info.settingsKey.empty())
+							{
+								name = mpt::ToUnicode(mpt::CharsetASCII, info.settingsKey);
+							}
+							text += MPT_UFORMAT("%1: %2"
+								, name
+								, info.state == ComponentStateAvailable ? MPT_USTRING("ok") :
+									info.state == ComponentStateUnavailable? MPT_USTRING("missing") :
+									info.state == ComponentStateUnintialized ? MPT_USTRING("not loaded") :
+									info.state == ComponentStateBlocked ? MPT_USTRING("blocked") :
+									info.state == ComponentStateUnregistered ? MPT_USTRING("unregistered") :
+									MPT_USTRING("unknown")
+								);
+							if(info.type != ComponentTypeUnknown)
+							{
+								text += MPT_UFORMAT(" (%1)"
+									, info.type == ComponentTypeBuiltin ? MPT_USTRING("builtin") :
+										info.type == ComponentTypeSystem ? MPT_USTRING("system") :
+										info.type == ComponentTypeSystemInstallable ? MPT_USTRING("system, optional") :
+										info.type == ComponentTypeBundled ? MPT_USTRING("bundled") :
+										info.type == ComponentTypeForeign ? MPT_USTRING("foreign") :
+										MPT_USTRING("unknown")
+									);
+							}
+							text += lf;
+						}
+					}
+				}
+			}
 			break;
 		case 2:
-			text += mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetLicenseString());
+			text += mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetFullCreditsString());
 			break;
 		case 3:
+			text += mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetLicenseString());
+			break;
+		case 4:
 			text += mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetContactString());
 			break;
 	}

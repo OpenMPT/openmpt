@@ -74,8 +74,6 @@ public:
 		return;
 	}
 
-	std::string GetSettingsKey() const { return "Vorbis"; }
-
 protected:
 
 	bool DoInitialize()
@@ -181,7 +179,7 @@ public:
 		return traits;
 	}
 };
-MPT_REGISTERED_COMPONENT(ComponentVorbis)
+MPT_REGISTERED_COMPONENT(ComponentVorbis, "Vorbis")
 
 #ifndef NO_OGG
 

@@ -47,7 +47,6 @@ class ComponentPluginBridge32
 	MPT_DECLARE_COMPONENT_MEMBERS
 public:
 	ComponentPluginBridge32() : ComponentPluginBridge(32) { }
-	std::string GetSettingsKey() const { return "PluginBridge32"; }
 };
 
 class ComponentPluginBridge64
@@ -56,7 +55,6 @@ class ComponentPluginBridge64
 	MPT_DECLARE_COMPONENT_MEMBERS
 public:
 	ComponentPluginBridge64() : ComponentPluginBridge(64) { }
-	std::string GetSettingsKey() const { return "PluginBridge64"; }
 };
 
 class BridgeWrapper : protected BridgeCommon

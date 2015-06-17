@@ -30,6 +30,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 enum ComponentType
 {
+	ComponentTypeUnknown = 0,
 	ComponentTypeBuiltin,            // PortAudio
 	ComponentTypeSystem,             // uxtheme.dll, mf.dll
 	ComponentTypeSystemInstallable,  // acm mp3 codec
@@ -56,7 +57,6 @@ public:
 
 public:
 
-	virtual std::string GetSettingsKey() const = 0;
 	virtual ComponentType GetType() const = 0;
 	
 	virtual bool IsInitialized() const = 0;  // Initialize() has been called
@@ -230,6 +230,7 @@ public:
 	virtual ~IComponentFactory() { }
 public:
 	virtual std::string GetID() const = 0;
+	virtual std::string GetSettingsKey() const = 0;
 	virtual MPT_SHARED_PTR<IComponent> Construct(ComponentManager &componentManager) const = 0;
 	virtual ComponentFactoryMethod GetStaticConstructor() const = 0;
 };
@@ -240,12 +241,14 @@ class ComponentFactoryBase
 {
 private:
 	std::string m_ID;
+	std::string m_SettingsKey;
 protected:
-	ComponentFactoryBase(const std::string &id);
-	static void Initialize(ComponentManager &componentManager, MPT_SHARED_PTR<IComponent> component);
+	ComponentFactoryBase(const std::string &id, const std::string &settingsKey);
+	void Initialize(ComponentManager &componentManager, MPT_SHARED_PTR<IComponent> component) const;
 public:
 	virtual ~ComponentFactoryBase();
 	virtual std::string GetID() const;
+	virtual std::string GetSettingsKey() const;
 	virtual MPT_SHARED_PTR<IComponent> Construct(ComponentManager &componentManager) const = 0;
 	virtual ComponentFactoryMethod GetStaticConstructor() const = 0;
 };
@@ -256,8 +259,8 @@ class ComponentFactory
 	: public ComponentFactoryBase
 {
 public:
-	ComponentFactory(const std::string &id)
-		: ComponentFactoryBase(id)
+	ComponentFactory()
+		: ComponentFactoryBase(T::g_ID, T::g_SettingsKey)
 	{
 		return;
 	}
@@ -268,13 +271,13 @@ public:
 public:
 	virtual MPT_SHARED_PTR<IComponent> Construct(ComponentManager &componentManager) const
 	{
-		return StaticConstruct(componentManager);
-	}
-	static MPT_SHARED_PTR<IComponent> StaticConstruct(ComponentManager &componentManager)
-	{
 		MPT_SHARED_PTR<IComponent> component = mpt::make_shared<T>();
 		Initialize(componentManager, component);
 		return component;
+	}
+	static MPT_SHARED_PTR<IComponent> StaticConstruct(ComponentManager &componentManager)
+	{
+		return ComponentFactory().Construct(componentManager);
 	}
 	virtual ComponentFactoryMethod GetStaticConstructor() const
 	{
@@ -302,6 +305,25 @@ public:
 };
 
 
+enum ComponentState
+{
+	ComponentStateUnregistered,
+	ComponentStateBlocked,
+	ComponentStateUnintialized,
+	ComponentStateUnavailable,
+	ComponentStateAvailable,
+};
+
+
+struct ComponentInfo
+{
+	std::string name;
+	ComponentState state;
+	std::string settingsKey;
+	ComponentType type;
+};
+
+
 class ComponentManager
 {
 	friend class ComponentFactoryBase;
@@ -314,6 +336,7 @@ private:
 private:
 	struct RegisteredComponent
 	{
+		std::string settingsKey;
 		ComponentFactoryMethod factoryMethod;
 		MPT_SHARED_PTR<IComponent> instance;
 	};
@@ -321,11 +344,14 @@ private:
 	const IComponentManagerSettings &m_Settings;
 	TComponentMap m_Components;
 private:
+	bool IsComponentBlocked(const std::string &settingsKey) const;
 	void InitializeComponent(MPT_SHARED_PTR<IComponent> component) const;
 public:
 	void Register(const IComponentFactory &componentFactory);
 	void Startup();
 	MPT_SHARED_PTR<IComponent> GetComponent(const IComponentFactory &componentFactory);
+	std::vector<std::string> GetRegisteredComponents() const;
+	ComponentInfo GetComponentInfo(std::string name) const;
 };
 
 
@@ -337,23 +363,24 @@ struct ComponentListEntry
 		
 bool ComponentListPush(ComponentListEntry *entry);
 
-#define MPT_DECLARE_COMPONENT_MEMBERS public: static const char * const g_ID;
+#define MPT_DECLARE_COMPONENT_MEMBERS public: static const char * const g_ID; static const char * const g_SettingsKey;
 		
-#define MPT_REGISTERED_COMPONENT(name) \
+#define MPT_REGISTERED_COMPONENT(name, settingsKey) \
 	static void RegisterComponent ## name (ComponentManager &componentManager) \
 	{ \
-		componentManager.Register(ComponentFactory< name >( #name )); \
+		componentManager.Register(ComponentFactory< name >()); \
 	} \
 	static ComponentListEntry Component ## name ## ListEntry = { nullptr, & RegisterComponent ## name }; \
 	static bool Component ## name ## Registered = ComponentListPush(& Component ## name ## ListEntry ); \
 	const char * const name :: g_ID = #name ; \
+	const char * const name :: g_SettingsKey = settingsKey ; \
 /**/
 
 
 template <typename type>
 MPT_SHARED_PTR<type> GetComponent()
 {
-	return MPT_DYNAMIC_POINTER_CAST<type>(ComponentManager::Instance()->GetComponent(ComponentFactory<type>(type::g_ID)));
+	return MPT_DYNAMIC_POINTER_CAST<type>(ComponentManager::Instance()->GetComponent(ComponentFactory<type>()));
 }
 
 
@@ -362,7 +389,7 @@ MPT_SHARED_PTR<type> GetComponent()
 
 #define MPT_DECLARE_COMPONENT_MEMBERS
 
-#define MPT_REGISTERED_COMPONENT(name)
+#define MPT_REGISTERED_COMPONENT(name, settingsKey)
 
 
 template <typename type>

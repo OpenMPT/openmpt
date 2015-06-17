@@ -27,7 +27,7 @@ namespace SoundDevice {
 
 #if MPT_OS_WINDOWS
 
-MPT_REGISTERED_COMPONENT(ComponentWaveOut)
+MPT_REGISTERED_COMPONENT(ComponentWaveOut, "WaveOut")
 
 
 static const std::size_t WAVEOUT_MINBUFFERS = 3;

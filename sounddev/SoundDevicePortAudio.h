@@ -109,7 +109,6 @@ class ComponentPortAudio : public ComponentBuiltin
 public:
 	ComponentPortAudio();
 	virtual ~ComponentPortAudio();
-	std::string GetSettingsKey() const { return "PortAudio"; }
 	virtual bool DoInitialize();
 	bool ReInit();
 };
