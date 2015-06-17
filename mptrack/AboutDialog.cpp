@@ -2,15 +2,15 @@
 #include "resource.h"
 #include "AboutDialog.h"
 #include "PNG.h"
+#include "Mptrack.h"
+#include "TrackerSettings.h"
 #include "../common/version.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-CRippleBitmap *CRippleBitmap::instance = nullptr;
 CAboutDlg *CAboutDlg::instance = nullptr;
-
 
 BEGIN_MESSAGE_MAP(CRippleBitmap, CWnd)
 	ON_WM_PAINT()
@@ -54,7 +54,6 @@ CRippleBitmap::CRippleBitmap()
 	bi.biCompression = BI_RGB;
 	bi.biSizeImage = bitmapSrc->width * bitmapSrc->height * 4;
 
-	instance = this;
 }
 
 
@@ -67,13 +66,19 @@ CRippleBitmap::~CRippleBitmap()
 	}
 	delete bitmapSrc;
 	delete bitmapTarget;
-	if(instance == this) instance = nullptr;
 }
 
 
 void CRippleBitmap::OnMouseMove(UINT nFlags, CPoint point)
 //--------------------------------------------------------
 {
+
+	// Rate limit in order to avoid too may ripples.
+	DWORD now = timeGetTime();
+	if(now - lastRipple < UPDATE_INTERVAL)
+		return;
+	lastRipple = now;
+
 	// Initiate ripples at cursor location
 	Limit(point.x, 1, int(bitmapSrc->width) - 2);
 	Limit(point.y, 2, int(bitmapSrc->height) - 3);
@@ -91,10 +96,21 @@ void CRippleBitmap::OnMouseMove(UINT nFlags, CPoint point)
 	damp = !(nFlags & MK_RBUTTON);
 	activity = true;
 
+	// Wine will only ever generate MouseLeave message when the message
+	// queue is completely empty and the hover timeout has expired.
+	// This results in a hidden mouse cursor long after it had already left the
+	// control.
+	// Avoid hiding the mouse cursor on Wine. Interferring with the users input
+	// methods is an absolute no-go.
+	if(mpt::Windows::Version::IsWine())
+	{
+		return;
+	}
+
 	TRACKMOUSEEVENT me;
 	me.cbSize = sizeof(TRACKMOUSEEVENT);
-	me.dwFlags = TME_LEAVE | TME_HOVER;
 	me.hwndTrack = m_hWnd;
+	me.dwFlags = TME_LEAVE | TME_HOVER;
 	me.dwHoverTime = 1500;
 
 	if(TrackMouseEvent(&me) && showMouse)
@@ -139,7 +155,7 @@ bool CRippleBitmap::Animate()
 		return false;
 
 	DWORD now = timeGetTime();
-	if(now - lastFrame < 15)
+	if(now - lastFrame < UPDATE_INTERVAL)
 		return true;
 	lastFrame = now;
 	activity = false;
@@ -198,10 +214,16 @@ bool CRippleBitmap::Animate()
 	frame = !frame;
 
 	InvalidateRect(NULL, FALSE);
-	UpdateWindow();
-	Sleep(10); 	//give away some CPU
 
 	return true;
+}
+
+
+CAboutDlg::CAboutDlg()
+//--------------------
+{
+	m_TimerID = 0;
+
 }
 
 
@@ -211,10 +233,16 @@ CAboutDlg::~CAboutDlg()
 	instance = NULL;
 }
 
+
 void CAboutDlg::OnOK()
 //--------------------
 {
 	instance = NULL;
+	if(m_TimerID != 0)
+	{
+		KillTimer(m_TimerID);
+		m_TimerID = 0;
+	}
 	DestroyWindow();
 	delete this;
 }
@@ -232,21 +260,185 @@ BOOL CAboutDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
+	mpt::ustring app;
+	app += MPT_UFORMAT("OpenMPT %1 bit", sizeof(void*) * 8)
+		+ (MptVersion::IsForOlderWindows() ? MPT_USTRING(" for older Windows") : MPT_USTRING(""))
+		+ MPT_USTRING("\n");
+	app += MPT_USTRING("Version ") + mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringSimple()) + MPT_USTRING("\n");
+	app += MPT_USTRING("\n");
+	app += MPT_USTRING("http://openmpt.org/\n");
+	SetDlgItemText(IDC_EDIT3, mpt::ToCString(mpt::String::Replace(app, MPT_USTRING("\n"), MPT_USTRING("\r\n"))));
+
 	m_bmp.SubclassDlgItem(IDC_BITMAP1, this);
 
-	SetDlgItemText(IDC_EDIT2, mpt::ToCString(mpt::CharsetASCII, std::string("Build Date: ") + MptVersion::GetBuildDateString()));
-	SetDlgItemText(IDC_EDIT3, mpt::ToCString(mpt::CharsetASCII, std::string("OpenMPT ") + MptVersion::GetVersionStringExtended()));
 	m_static.SubclassDlgItem(IDC_CREDITS, this);
-	m_static.SetCredits(mpt::ToCString(mpt::CharsetUTF8, mpt::String::Replace(MptVersion::GetFullCreditsString(), "\n", "|") + "|" + mpt::String::Replace(MptVersion::GetContactString(), "\n", "|" ) + "||||||"));
-	m_static.SetSpeed(DISPLAY_SLOW);
-	m_static.SetColor(BACKGROUND_COLOR, RGB(138, 165, 219)); // Background Colour
-	m_static.SetTransparent(); // Set parts of bitmaps with RGB(192,192,192) transparent
-	m_static.SetGradient(GRADIENT_LEFT_DARK);  // Background goes from blue to black from left to right
-	// m_static.SetBkImage(IDB_BITMAP1); // Background image
+	m_static.SetSpeed(DISPLAY_MEDIUM);
+	m_static.SetColor(BACKGROUND_COLOR, RGB(83, 107, 163)); // Background Colour
+//	m_static.SetColor(BACKGROUND_COLOR, RGB(43, 69, 130)); // Background Colour
+	m_static.SetGradient(GRADIENT_RIGHT_DARK);  // Background goes from blue to black from left to right
+
+	m_Tab.SubclassDlgItem(IDC_TABABOUT, this);
+
+	m_Tab.InsertItem(TCIF_TEXT, 0, _T("OpenMPT"), 0, 0, 0, 0);
+	m_Tab.InsertItem(TCIF_TEXT, 1, _T("Credits"), 0, 0, 0, 0);
+	m_Tab.InsertItem(TCIF_TEXT, 2, _T("License"), 0, 0, 0, 0);
+	m_Tab.InsertItem(TCIF_TEXT, 3, _T("Contact"), 0, 0, 0, 0);
+	m_Tab.SetCurSel(0);
+
+	m_CheckScroll.SetCheck(TrackerSettings::Instance().MiscAboutScrollText ? BST_CHECKED : BST_UNCHECKED);
+
+	OnTabChange(nullptr, nullptr);
+	OnCheckScroll();
+
+	mpt::ustring text;
+	text += GetTabText(0);
+	text += MPT_USTRING("\n\n\n");
+	text += GetTabText(1);
+	text += MPT_USTRING("\n\n\n");
+	text += GetTabText(3);
+	text += MPT_USTRING("\n\n\n");
+	text += GetTabText(2);
+	text += MPT_USTRING("\n\n\n");
+	m_static.SetCredits(mpt::ToCString(mpt::String::Replace(text, MPT_USTRING("\n"), MPT_USTRING("|"))));
 	m_static.StartScrolling();
+
+	if(m_TimerID != 0)
+	{
+		KillTimer(m_TimerID);
+		m_TimerID = 0;
+	}
+	m_TimerID = SetTimer(TIMERID_ABOUT_DEFAULT, CRippleBitmap::UPDATE_INTERVAL, nullptr);
+
 	return TRUE;	// return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
+
+
+void CAboutDlg::OnTimer(UINT_PTR nIDEvent)
+//----------------------------------------
+{
+	if(nIDEvent == m_TimerID)
+	{
+		m_bmp.Animate();
+	}
+}
+
+
+void CAboutDlg::OnCheckScroll()
+{
+	if(m_CheckScroll.GetCheck() == BST_CHECKED)
+	{
+		m_Tab.ShowWindow(SW_HIDE);
+		m_TabEdit.ShowWindow(SW_HIDE);
+		m_static.ShowWindow(SW_SHOW);
+		TrackerSettings::Instance().MiscAboutScrollText = true;
+	} else
+	{
+		m_Tab.ShowWindow(SW_SHOW);
+		m_TabEdit.ShowWindow(SW_SHOW);
+		m_static.ShowWindow(SW_HIDE);
+		TrackerSettings::Instance().MiscAboutScrollText = false;
+	}
+}
+
+
+void CAboutDlg::OnTabChange(NMHDR * /*pNMHDR*/ , LRESULT * /*pResult*/ )
+{
+	m_TabEdit.SetWindowText(mpt::ToCString(mpt::String::Replace(GetTabText(m_Tab.GetCurSel()), MPT_USTRING("\n"), MPT_USTRING("\r\n"))));
+}
+
+
+mpt::ustring CAboutDlg::GetTabText(int tab)
+{
+	const mpt::ustring lf = MPT_USTRING("\n");
+	mpt::ustring text;
+	switch(tab)
+	{
+		case 0:
+			text += MPT_USTRING("OpenMPT - Open ModPlug Tracker") + lf;
+			text += lf;
+			text += MPT_UFORMAT("Version: %1", mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringExtended())) + lf;
+			text += MPT_UFORMAT("Source Code URL: %1", mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetUrl())) + lf;
+			text += MPT_UFORMAT("Build Date: %1", mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetBuildDateString())) + lf;
+			text += MPT_UFORMAT("Required Windows Kernel Level: %1", mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumKernelLevel())) + lf;
+			text += MPT_UFORMAT("Required Windows API Level: %1", mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumAPILevel())) + lf;
+			{
+				text += MPT_USTRING("Required CPU features: ");
+				std::vector<mpt::ustring> features;
+				if(GetMinimumSSEVersion() <= 0 && GetMinimumAVXVersion() <= 0 ) features.push_back(MPT_USTRING("FPU"));
+				if(GetMinimumSSEVersion() >= 1) features.push_back(MPT_USTRING("SSE"));
+				if(GetMinimumSSEVersion() >= 2) features.push_back(MPT_USTRING("SSE2"));
+				if(GetMinimumAVXVersion() >= 1) features.push_back(MPT_USTRING("AVX"));
+				if(GetMinimumAVXVersion() >= 2) features.push_back(MPT_USTRING("AVX2"));
+				text += mpt::String::Combine(features, MPT_USTRING(" "));
+				text += lf;
+			}
+			{
+				text += MPT_USTRING("Optional CPU features used: ");
+				std::vector<mpt::ustring> features;
+				#if MPT_COMPILER_MSVC && defined(ENABLE_ASM)
+					#if defined(ENABLE_X86)
+						features.push_back(MPT_USTRING("x86-32"));
+					#endif
+					#if defined(ENABLE_X64)
+						features.push_back(MPT_USTRING("x86-64"));
+					#endif
+					#if defined(ENABLE_MMX)
+						if(GetProcSupport() & PROCSUPPORT_MMX) features.push_back(MPT_USTRING("MMX"));
+					#endif
+					#if defined(ENABLE_SSE)
+						if(GetProcSupport() & PROCSUPPORT_SSE) features.push_back(MPT_USTRING("SSE"));
+					#endif
+					#if defined(ENABLE_SSE2)
+						if(GetProcSupport() & PROCSUPPORT_SSE2) features.push_back(MPT_USTRING("SSE2"));
+					#endif
+					#if defined(ENABLE_SSE3)
+						if(GetProcSupport() & PROCSUPPORT_SSE3) features.push_back(MPT_USTRING("SSE3"));
+					#endif
+					#if defined(ENABLE_X86_AMD)
+						if(GetProcSupport() & PROCSUPPORT_AMD_MMXEXT) features.push_back(MPT_USTRING("AMD-MMXEXT"));
+						if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW) features.push_back(MPT_USTRING("AMD-3DNOW"));
+						if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW2) features.push_back(MPT_USTRING("AMD-3DNOW2"));
+					#endif
+				#endif
+				text += mpt::String::Combine(features, MPT_USTRING(" "));
+				text += lf;
+			}
+			text += lf;
+			text += MPT_UFORMAT("Operating System: %1", mpt::Windows::Version::GetName()) + lf;
+			text += lf;
+			text += MPT_UFORMAT("OpenMPT Path%2: %1", theApp.GetAppDirPath(), theApp.IsPortableMode() ? MPT_USTRING(" (portable)") : MPT_USTRING("")) + lf;
+			text += MPT_UFORMAT("Settings%2: %1", theApp.GetConfigFileName(), theApp.IsPortableMode() ? MPT_USTRING(" (portable)") : MPT_USTRING("")) + lf;
+			break;
+		case 1:
+			text += mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetFullCreditsString());
+			break;
+		case 2:
+			text += mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetLicenseString());
+			break;
+		case 3:
+			text += mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetContactString());
+			break;
+	}
+	return text;
+}
+
+
+void CAboutDlg::DoDataExchange(CDataExchange* pDX)
+{
+	CDialog::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_CHECK_ABOUTSCROLL, m_CheckScroll);
+	DDX_Control(pDX, IDC_TABABOUT, m_Tab);
+	DDX_Control(pDX, IDC_EDITABOUT, m_TabEdit);
+}
+
+
+BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
+	ON_WM_TIMER()
+	ON_NOTIFY(TCN_SELCHANGE, IDC_TABABOUT, &CAboutDlg::OnTabChange)
+	ON_COMMAND(IDC_CHECK_ABOUTSCROLL, &CAboutDlg::OnCheckScroll)
+END_MESSAGE_MAP()
+
 
 
 OPENMPT_NAMESPACE_END

@@ -221,6 +221,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, autoApplySmoothFT2Ramping(conf, "Misc", "SmoothFT2Ramping", false)
 	, MiscITCompressionStereo(conf, "Misc", "ITCompressionStereo", 0)
 	, MiscITCompressionMono(conf, "Misc", "ITCompressionMono", 0)
+	, MiscAboutScrollText(conf, "Misc", "AboutScrollText", false)
 	// Sound Settings
 	, m_SoundSampleRates(conf, "Sound Settings", "SampleRates", GetDefaultSampleRates())
 	, m_MorePortaudio(conf, "Sound Settings", "MorePortaudio", false)

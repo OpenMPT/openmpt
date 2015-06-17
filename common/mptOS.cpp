@@ -118,6 +118,133 @@ bool IsWine()
 }
 
 
+mpt::ustring VersionToString(uint16 version)
+//------------------------------------------
+{
+	mpt::ustring result;
+	std::vector<std::pair<uint16, mpt::ustring> > versionMapNT;
+	versionMapNT.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win81), MPT_USTRING("Windows 8.1")));
+	versionMapNT.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win8), MPT_USTRING("Windows 8")));
+	versionMapNT.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win7), MPT_USTRING("Windows 7")));
+	versionMapNT.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinVista), MPT_USTRING("Windows Vista")));
+	versionMapNT.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinXP), MPT_USTRING("Windows XP")));
+	versionMapNT.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win2000), MPT_USTRING("Windows 2000")));
+	versionMapNT.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinNT4), MPT_USTRING("Windows NT4")));
+	for(std::size_t i = 0; i < versionMapNT.size(); ++i)
+	{
+		if(version > versionMapNT[i].first)
+		{
+			result = MPT_USTRING("> ") + versionMapNT[i].second;
+			break;
+		} else if(version == versionMapNT[i].first)
+		{
+			result = versionMapNT[i].second;
+			break;
+		}
+	}
+	if(result.empty())
+	{
+		result = MPT_UFORMAT("0x%1", mpt::ufmt::dec0<4>(version));
+	}
+	return result;
+}
+
+
+mpt::ustring GetName()
+//--------------------
+{
+	mpt::ustring result;
+	if(mpt::Windows::Version::IsWine())
+	{
+		result += MPT_USTRING("Wine");
+		if(mpt::Wine::GetVersion())
+		{
+			result += MPT_UFORMAT(" %1", mpt::ToUnicode(mpt::CharsetUTF8, mpt::Wine::VersionString(mpt::Wine::GetVersion())));
+		} else
+		{
+			result += MPT_UFORMAT(" (unknown version: '%1')", mpt::ToUnicode(mpt::CharsetUTF8, mpt::Wine::RawGetVersion()));
+		}
+	}
+	if(mpt::Windows::Version::IsWine())
+	{
+		result += MPT_USTRING(" (");
+	}
+	if(mpt::Windows::Version::IsNT())
+	{
+		if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win81))
+		{
+			result += MPT_USTRING("Windows 8.1 (or newer)");
+		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win8))
+		{
+			result += MPT_USTRING("Windows 8");
+		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win7))
+		{
+			result += MPT_USTRING("Windows 7");
+		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
+		{
+			result += MPT_USTRING("Windows Vista");
+		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinXP))
+		{
+			result += MPT_USTRING("Windows XP");
+		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win2000))
+		{
+			result += MPT_USTRING("Windows 2000");
+		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinNT4))
+		{
+			result += MPT_USTRING("Windows NT4");
+		} else
+		{
+			result += MPT_USTRING("Generic Windows NT");
+		}
+	} else
+	{
+		if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinME))
+		{
+			result += MPT_USTRING("Windows ME (or newer)");
+		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win98))
+		{
+			result += MPT_USTRING("Windows 98");
+		} else
+		{
+			result += MPT_USTRING("Generic Windows 9x");
+		}
+	}
+	if(mpt::Windows::Version::IsWine())
+	{
+		result += MPT_USTRING(")");
+	}
+	return result;
+}
+
+
+uint16 GetMinimumKernelLevel()
+//----------------------------
+{
+	uint16 minimumKernelVersion = 0;
+	#if MPT_COMPILER_MSVC
+		#if MPT_MSVC_AT_LEAST(2012, 0)
+			minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::WinVista);
+		#elif MPT_MSVC_AT_LEAST(2010, 0)
+			minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::Win2000);
+		#elif MPT_MSVC_AT_LEAST(2008, 0)
+			minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::Win98);
+		#endif
+	#endif
+	return minimumKernelVersion;
+}
+
+
+uint16 GetMinimumAPILevel()
+//-------------------------
+{
+	uint16 minimumApiVersion = 0;
+	#if defined(_WIN32_WINNT)
+		minimumApiVersion = std::max<uint16>(minimumApiVersion, _WIN32_WINNT);
+	#endif
+	return minimumApiVersion;
+}
+
+
 #else // !MODPLUG_TRACKER
 
 
