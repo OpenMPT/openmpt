@@ -31,4 +31,10 @@ static inline uint32 GetProcSupport()
 #endif // ENABLE_ASM
 
 
+#ifdef MODPLUG_TRACKER
+int GetMinimumSSEVersion();
+int GetMinimumAVXVersion();
+#endif
+
+
 OPENMPT_NAMESPACE_END

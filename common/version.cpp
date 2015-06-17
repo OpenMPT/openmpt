@@ -254,12 +254,12 @@ std::string GetBuildDateString()
 std::string GetBuildFlagsString()
 {
 	std::string retval;
-#ifdef MODPLUG_TRACKER
-	if(IsTestBuild())
-	{
-		retval += " TEST";
-	}
-#endif // MODPLUG_TRACKER
+	#ifdef MODPLUG_TRACKER
+		if(IsTestBuild())
+		{
+			retval += " TEST";
+		}
+	#endif // MODPLUG_TRACKER
 	if(IsDebugBuild())
 	{
 		retval += " DEBUG";
@@ -305,6 +305,10 @@ std::string GetBuildFeaturesString()
 		#endif
 	#endif
 	#ifdef MODPLUG_TRACKER
+		if(IsForOlderWindows())
+		{
+			retval += " OLDWIN";
+		}
 		#ifdef NO_VST
 			retval += " NO_VST";
 		#endif
@@ -341,7 +345,21 @@ std::string GetRevisionString()
 	return result;
 }
 
-std::string GetVersionStringExtended()
+bool IsForOlderWindows()
+{
+	#ifdef MODPLUG_TRACKER
+		return true
+			&& (GetMinimumSSEVersion() <= 0)
+			&& (GetMinimumAVXVersion() <= 0)
+			&& (mpt::Windows::Version::GetMinimumKernelLevel() < mpt::Windows::Version::WinXP)
+			&& (mpt::Windows::Version::GetMinimumAPILevel() < mpt::Windows::Version::WinXP)
+			;
+	#else
+		return false;
+	#endif
+}
+
+static std::string GetVersionString(bool verbose)
 {
 	std::string retval = MPT_VERSION_STR;
 	if(IsDebugBuild() || IsTestBuild() || IsDirty() || HasMixedRevisions())
@@ -349,67 +367,32 @@ std::string GetVersionStringExtended()
 		retval += GetRevisionString();
 	}
 	#ifdef MODPLUG_TRACKER
-		retval += MPT_FORMAT(" %1 bit", sizeof(void*) * 8);
-		int minimumSSEVersion = 0;
-		int minimumAVXVersion = 0;
-		#if MPT_COMPILER_MSVC
-			#if defined(_M_IX86_FP)
-				#if defined(__AVX2__)
-					retval += " AVX2";
-					minimumSSEVersion = 2;
-					minimumAVXVersion = 2;
-				#elif defined(__AVX__)
-					retval += " AVX";
-					minimumSSEVersion = 2;
-					minimumAVXVersion = 1;
-				#elif (_M_IX86_FP >= 2)
-					retval += " SSE2";
-					minimumSSEVersion = 2;
-				#elif (_M_IX86_FP == 1)
-					retval += " SSE";
-					minimumSSEVersion = 1;
-				#else
-					retval += " x87";
-				#endif
-			#endif
-		#endif
-		uint16 minimumKernelVersion = 0;
-		#if MPT_COMPILER_MSVC
-			#if MPT_MSVC_AT_LEAST(2012, 0)
-				minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::WinVista);
-			#elif MPT_MSVC_AT_LEAST(2010, 0)
-				minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::Win2000);
-			#elif MPT_MSVC_AT_LEAST(2008, 0)
-				minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::Win98);
-			#endif
-		#endif
-		uint16 minimumApiVersion = 0;
-		#if defined(_WIN32_WINNT)
-			minimumApiVersion = std::max<uint16>(minimumApiVersion, _WIN32_WINNT);
-		#endif
-		if((minimumSSEVersion <= 0) && (minimumAVXVersion <= 0) && (minimumKernelVersion < mpt::Windows::Version::WinXP) && (minimumApiVersion < mpt::Windows::Version::WinXP))
+		if(verbose)
 		{
-			if(IsDebugBuild() || IsTestBuild() || IsDirty() || HasMixedRevisions())
-			{
-				retval += " OLD";
-			} else
-			{
-				retval += " for older Windows";
-			}
-		}
-		if(IsDebugBuild() || IsTestBuild() || IsDirty() || HasMixedRevisions())
-		{
-			retval += MPT_FORMAT(" OS>=0x%1 API>=0x%2", mpt::fmt::hex0<4>(minimumKernelVersion), mpt::fmt::hex0<4>(minimumApiVersion));
+			retval += MPT_FORMAT(" %1 bit", sizeof(void*) * 8);
 		}
 	#endif
 	if(IsDebugBuild() || IsTestBuild() || IsDirty() || HasMixedRevisions())
 	{
 		retval += GetBuildFlagsString();
-		#ifdef MODPLUG_TRACKER
-			retval += GetBuildFeaturesString();
-		#endif
 	}
+	#ifdef MODPLUG_TRACKER
+		if(verbose)
+		{
+			retval += GetBuildFeaturesString();
+		}
+	#endif
 	return retval;
+}
+
+std::string GetVersionStringSimple()
+{
+	return GetVersionString(false);
+}
+
+std::string GetVersionStringExtended()
+{
+	return GetVersionString(true);
 }
 
 std::string GetVersionUrlString()
@@ -433,22 +416,24 @@ std::string GetVersionUrlString()
 
 std::string GetContactString()
 {
-	return "Contact / Discussion:\n"
+	return
+		"Contact / Discussion:\n"
 		"http://forum.openmpt.org/\n"
 		"\n"
 		"Updates:\n"
-		"http://openmpt.org/download";
+		"http://openmpt.org/download\n"
+		;
 }
 
 std::string GetFullCreditsString()
 {
 	return
-		"\n"
 #ifdef MODPLUG_TRACKER
 		"OpenMPT / ModPlug Tracker\n"
 #else
 		"libopenmpt (based on OpenMPT / ModPlug Tracker)\n"
 #endif
+		"\n"
 		"Copyright \xC2\xA9 2004-2015 Contributors\n"
 		"Copyright \xC2\xA9 1997-2003 Olivier Lapicque\n"
 		"\n"
@@ -566,7 +551,39 @@ std::string GetFullCreditsString()
 		"\n"
 #endif
 		;
+}
 
+std::string GetLicenseString()
+{
+	return
+		"The OpenMPT code is licensed under the BSD license." "\n"
+		"" "\n"
+		"Copyright (c) 2004-2015, OpenMPT contributors" "\n"
+		"Copyright (c) 1997-2003, Olivier Lapicque" "\n"
+		"All rights reserved." "\n"
+		"" "\n"
+		"Redistribution and use in source and binary forms, with or without" "\n"
+		"modification, are permitted provided that the following conditions are met:" "\n"
+		"    * Redistributions of source code must retain the above copyright" "\n"
+		"      notice, this list of conditions and the following disclaimer." "\n"
+		"    * Redistributions in binary form must reproduce the above copyright" "\n"
+		"      notice, this list of conditions and the following disclaimer in the" "\n"
+		"      documentation and/or other materials provided with the distribution." "\n"
+		"    * Neither the name of the OpenMPT project nor the" "\n"
+		"      names of its contributors may be used to endorse or promote products" "\n"
+		"      derived from this software without specific prior written permission." "\n"
+		"" "\n"
+		"THIS SOFTWARE IS PROVIDED BY THE CONTRIBUTORS ``AS IS'' AND ANY" "\n"
+		"EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED" "\n"
+		"WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE" "\n"
+		"DISCLAIMED. IN NO EVENT SHALL THE CONTRIBUTORS BE LIABLE FOR ANY" "\n"
+		"DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES" "\n"
+		"(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;" "\n"
+		"LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND" "\n"
+		"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT" "\n"
+		"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS" "\n"
+		"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE." "\n"
+		;
 }
 
 } // namespace MptVersion

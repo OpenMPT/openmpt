@@ -1479,11 +1479,6 @@ BOOL CTrackApp::OnIdle(LONG lCount)
 		CMainFrame::GetMainFrame()->IdleHandlerSounddevice();
 	}
 
-	if (CRippleBitmap::instance)
-	{
-		if (CRippleBitmap::instance->Animate()) return TRUE;
-	}
-
 	// Call plugins idle routine for open editor
 	if (m_pPluginManager)
 	{

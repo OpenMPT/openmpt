@@ -66,6 +66,9 @@ namespace MptVersion
 	// Return whether the build was done from packaged source code (i.e. from the genertaed .zip or .tar source)
 	bool IsPackage();
 
+	// Returns true if the build will run on ancient Windows versions.
+	bool IsForOlderWindows();
+
 	// Return a string decribing the working copy state (dirty and/or mixed revisions) (if built from a svn working copy and tsvn was available during build)
 	std::string GetStateString(); // e.g. "" or "+mixed" or "+mixed+dirty" or "+dirty"
 
@@ -81,7 +84,10 @@ namespace MptVersion
 	// Return a string decribing the revision of the svn working copy and if it was dirty (+) or had mixed revisions (!) (if built from a svn working copy and tsvn was available during build)
 	std::string GetRevisionString(); // e.g. "-r1234+"
 
-	// Returns MptVersion::str if the build is a clean release build straight from the repository or an extended strin otherwise (if built from a svn working copy and tsvn was available during build)
+	// Returns a simple version string
+	std::string GetVersionStringSimple(); // e.g. "1.17.02.08-r1234+ 32 bit"
+
+	// Returns MptVersion::str if the build is a clean release build straight from the repository or an extended string otherwise (if built from a svn working copy and tsvn was available during build)
 	std::string GetVersionStringExtended(); // e.g. "1.17.02.08-r1234+ 32 bit DEBUG"
 
 	// Returns a string combining the repository url and the revision, suitable for checkout if the working copy was clean (if built from a svn working copy and tsvn was available during build)
@@ -92,6 +98,9 @@ namespace MptVersion
 
 	// Returns a multi-line string containing developer contact and community addresses
 	std::string GetContactString();
+
+	// Returns the OpenMPT license text
+	std::string GetLicenseString();
 
 } //namespace MptVersion
 
