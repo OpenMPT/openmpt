@@ -119,8 +119,10 @@ void COptionsAdvanced::ReInit()
 	m_indexToPath.clear();
 	m_indexToPath.reserve(theApp.GetSettings().size());
 	m_groups.clear();
+#if _WIN32_WINNT >= 0x0501
 	int numGroups = 0;
-	
+#endif
+
 	CStringW findStr;
 	HWND findWnd = ::GetDlgItem(m_hWnd, IDC_EDIT1);
 	int findLen = ::GetWindowTextLengthW(findWnd);
@@ -148,8 +150,10 @@ void COptionsAdvanced::ReInit()
 	{
 		const SettingPath &path = it->first;
 		const SettingState &state = it->second;
+#if _WIN32_WINNT >= 0x0501
 		const mpt::ustring &section = path.GetRefSection();
 		const mpt::ustring &key = path.GetRefKey();
+#endif
 		const SettingValue &value = state.GetRefValue();
 		const SettingValue &defaultValue = state.GetRefDefault();
 
