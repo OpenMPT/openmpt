@@ -361,6 +361,9 @@ bool IsForOlderWindows()
 
 static std::string GetVersionString(bool verbose)
 {
+	#if !defined(MODPLUG_TRACKER)
+		MPT_UNREFERENCED_PARAMETER(verbose);
+	#endif
 	std::string retval = MPT_VERSION_STR;
 	if(IsDebugBuild() || IsTestBuild() || IsDirty() || HasMixedRevisions())
 	{
