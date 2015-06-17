@@ -69,9 +69,9 @@ bool ComponentPluginBridge::DoInitialize()
 }
 
 
-MPT_REGISTERED_COMPONENT(ComponentPluginBridge32)
+MPT_REGISTERED_COMPONENT(ComponentPluginBridge32, "PluginBridge32")
 
-MPT_REGISTERED_COMPONENT(ComponentPluginBridge64)
+MPT_REGISTERED_COMPONENT(ComponentPluginBridge64, "PluginBridge64")
 
 
 // Check whether we need to load a 32-bit or 64-bit wrapper.

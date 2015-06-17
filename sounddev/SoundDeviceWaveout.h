@@ -35,7 +35,6 @@ class ComponentWaveOut : public ComponentBuiltin
 public:
 	ComponentWaveOut() { }
 	virtual ~ComponentWaveOut() { }
-	std::string GetSettingsKey() const { return "WaveOut"; }
 	virtual bool DoInitialize() { return true; }
 };
 

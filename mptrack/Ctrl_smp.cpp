@@ -1823,9 +1823,8 @@ public:
 	{
 		return;
 	}
-	std::string GetSettingsKey() const { return "SoundTouch"; }
 };
-MPT_REGISTERED_COMPONENT(ComponentSoundTouch)
+MPT_REGISTERED_COMPONENT(ComponentSoundTouch, "SoundTouch")
 
 
 int CCtrlSamples::TimeStretch(float ratio)

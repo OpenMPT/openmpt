@@ -32,7 +32,6 @@ class ComponentDirectSound : public ComponentBuiltin
 public:
 	ComponentDirectSound() { }
 	virtual ~ComponentDirectSound() { }
-	std::string GetSettingsKey() const { return "DirectSound"; }
 	virtual bool DoInitialize() { return true; }
 };
 

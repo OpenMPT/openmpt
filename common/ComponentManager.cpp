@@ -170,9 +170,10 @@ void ComponentBase::Initialize()
 #if MPT_COMPONENT_MANAGER
 
 
-ComponentFactoryBase::ComponentFactoryBase(const std::string &id)
-//---------------------------------------------------------------
+ComponentFactoryBase::ComponentFactoryBase(const std::string &id, const std::string &settingsKey)
+//-----------------------------------------------------------------------------------------------
 	: m_ID(id)
+	, m_SettingsKey(settingsKey)
 {
 	return;
 }
@@ -192,9 +193,20 @@ std::string ComponentFactoryBase::GetID() const
 }
 
 
-void ComponentFactoryBase::Initialize(ComponentManager &componentManager, MPT_SHARED_PTR<IComponent> component)
-//-------------------------------------------------------------------------------------------------------------
+std::string ComponentFactoryBase::GetSettingsKey() const
+//------------------------------------------------------
 {
+	return m_SettingsKey;
+}
+
+
+void ComponentFactoryBase::Initialize(ComponentManager &componentManager, MPT_SHARED_PTR<IComponent> component) const
+//-------------------------------------------------------------------------------------------------------------------
+{
+	if(componentManager.IsComponentBlocked(GetSettingsKey()))
+	{
+		return;
+	}
 	componentManager.InitializeComponent(component);
 }
 
@@ -280,6 +292,7 @@ void ComponentManager::Register(const IComponentFactory &componentFactory)
 		return;
 	}
 	RegisteredComponent registeredComponent;
+	registeredComponent.settingsKey = componentFactory.GetSettingsKey();
 	registeredComponent.factoryMethod = componentFactory.GetStaticConstructor();
 	registeredComponent.instance = MPT_SHARED_PTR<IComponent>();
 	m_Components.insert(std::make_pair(componentFactory.GetID(), registeredComponent));
@@ -306,6 +319,13 @@ void ComponentManager::Startup()
 }
 
 
+bool ComponentManager::IsComponentBlocked(const std::string &settingsKey) const
+//-----------------------------------------------------------------------------
+{
+	return m_Settings.IsBlocked(settingsKey);
+}
+
+
 void ComponentManager::InitializeComponent(MPT_SHARED_PTR<IComponent> component) const
 //------------------------------------------------------------------------------------
 {
@@ -314,10 +334,6 @@ void ComponentManager::InitializeComponent(MPT_SHARED_PTR<IComponent> component)
 		return;
 	}
 	if(component->IsInitialized())
-	{
-		return;
-	}
-	if(m_Settings.IsBlocked(component->GetSettingsKey()))
 	{
 		return;
 	}
@@ -349,6 +365,58 @@ MPT_SHARED_PTR<IComponent> ComponentManager::GetComponent(const IComponentFactor
 	}
 	MPT_ASSERT(component);
 	return component;
+}
+
+
+std::vector<std::string> ComponentManager::GetRegisteredComponents() const
+{
+	std::vector<std::string> result;
+	for(TComponentMap::const_iterator it = m_Components.begin(); it != m_Components.end(); ++it)
+	{
+		result.push_back((*it).first);
+	}
+	return result;
+}
+
+
+ComponentInfo ComponentManager::GetComponentInfo(std::string name) const
+{
+	ComponentInfo result;
+	result.name = name;
+	result.state = ComponentStateUnregistered;
+	result.settingsKey = "";
+	result.type = ComponentTypeUnknown;
+	TComponentMap::const_iterator it = m_Components.find(name);
+	if(it == m_Components.end())
+	{
+		result.state = ComponentStateUnregistered;
+		return result;
+	}
+	result.settingsKey = it->second.settingsKey;
+	if(IsComponentBlocked(it->second.settingsKey))
+	{
+		result.state = ComponentStateBlocked;
+		return result;
+	}
+	MPT_SHARED_PTR<IComponent> component = ((*it).second.instance) ? it->second.instance : MPT_SHARED_PTR<IComponent>();
+	if(!component)
+	{
+		result.state = ComponentStateUnintialized;
+		return result;
+	}
+	result.type = component->GetType();
+	if(!component->IsInitialized())
+	{
+		result.state = ComponentStateUnintialized;
+		return result;
+	}
+	if(!component->IsAvailable())
+	{
+		result.state = ComponentStateUnavailable;
+		return result;
+	}
+	result.state = ComponentStateAvailable;
+	return result;
 }
 
 

@@ -2497,7 +2497,6 @@ public:
 	};
 public:
 	ComponentMPG123() : ComponentLibrary(ComponentTypeForeign) { }
-	std::string GetSettingsKey() const { return "Mpg123"; }
 	bool DoInitialize()
 	{
 		AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libmpg123-0")));
@@ -2524,7 +2523,7 @@ public:
 		return true;
 	}
 };
-MPT_REGISTERED_COMPONENT(ComponentMPG123)
+MPT_REGISTERED_COMPONENT(ComponentMPG123, "Mpg123")
 
 #endif // NO_MP3_SAMPLES
 

@@ -70,8 +70,6 @@ public:
 		return;
 	}
 
-	std::string GetSettingsKey() const { return "Opus"; }
-
 protected:
 
 	bool DoInitialize()
@@ -157,7 +155,7 @@ public:
 	}
 
 };
-MPT_REGISTERED_COMPONENT(ComponentOpus)
+MPT_REGISTERED_COMPONENT(ComponentOpus, "Opus")
 
 
 

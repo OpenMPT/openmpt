@@ -33,7 +33,6 @@ class ComponentASIO : public ComponentBuiltin
 public:
 	ComponentASIO() { }
 	virtual ~ComponentASIO() { }
-	std::string GetSettingsKey() const { return "ASIO"; }
 	virtual bool DoInitialize() { return true; }
 };
 

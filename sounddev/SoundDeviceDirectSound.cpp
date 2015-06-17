@@ -29,7 +29,7 @@ namespace SoundDevice {
 #ifndef NO_DSOUND
 
 
-MPT_REGISTERED_COMPONENT(ComponentDirectSound)
+MPT_REGISTERED_COMPONENT(ComponentDirectSound, "DirectSound")
 
 
 

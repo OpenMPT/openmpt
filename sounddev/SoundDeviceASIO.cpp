@@ -31,7 +31,7 @@ namespace SoundDevice {
 #ifndef NO_ASIO
 
 
-MPT_REGISTERED_COMPONENT(ComponentASIO)
+MPT_REGISTERED_COMPONENT(ComponentASIO, "ASIO")
 
 
 static const double AsioSampleRateTolerance = 0.05;

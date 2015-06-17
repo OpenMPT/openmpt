@@ -334,8 +334,6 @@ public:
 		return;
 	}
 
-	std::string GetSettingsKey() const { return "LibMP3Lame"; }
-
 protected:
 
 	bool DoInitialize()
@@ -470,7 +468,7 @@ public:
 		return traits;
 	}
 };
-MPT_REGISTERED_COMPONENT(ComponentLame)
+MPT_REGISTERED_COMPONENT(ComponentLame, "LibMP3Lame")
 
 class MP3LameStreamWriter : public StreamWriterBase
 {
@@ -679,8 +677,6 @@ public:
 		return;
 	}
 
-	std::string GetSettingsKey() const { return "BladeEnc"; }
-
 protected:
 
 	bool DoInitialize()
@@ -767,7 +763,7 @@ public:
 		return traits;
 	}
 };
-MPT_REGISTERED_COMPONENT(ComponentBlade)
+MPT_REGISTERED_COMPONENT(ComponentBlade, "BladeEnc")
 
 class MP3BladeStreamWriter : public StreamWriterBase
 {
@@ -950,8 +946,6 @@ public:
 	{
 		return;
 	}
-
-	std::string GetSettingsKey() const { return "ACM_MP3"; }
 
 protected:
 
@@ -1219,7 +1213,7 @@ public:
 		return traits;
 	}
 };
-MPT_REGISTERED_COMPONENT(ComponentAcmMP3)
+MPT_REGISTERED_COMPONENT(ComponentAcmMP3, "ACM_MP3")
 
 class MP3AcmStreamWriter : public StreamWriterBase
 {
