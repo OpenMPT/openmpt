@@ -94,13 +94,13 @@ namespace MptVersion
 	std::string GetVersionUrlString(); // e.g. "https://svn.code.sf.net/p/modplug/code/trunk/OpenMPT@1234+dirty"
 
 	// Returns a multi-line string containing the full credits for the code base
-	std::string GetFullCreditsString();
+	mpt::ustring GetFullCreditsString();
 
 	// Returns a multi-line string containing developer contact and community addresses
-	std::string GetContactString();
+	mpt::ustring GetContactString();
 
 	// Returns the OpenMPT license text
-	std::string GetLicenseString();
+	mpt::ustring GetLicenseString();
 
 } //namespace MptVersion
 

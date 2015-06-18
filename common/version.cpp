@@ -417,20 +417,20 @@ std::string GetVersionUrlString()
 	return url + "@" + mpt::ToString(GetRevision()) + GetStateString();
 }
 
-std::string GetContactString()
+mpt::ustring GetContactString()
 {
-	return
+	return MPT_UTF8(
 		"Contact / Discussion:\n"
 		"http://forum.openmpt.org/\n"
 		"\n"
 		"Updates:\n"
 		"http://openmpt.org/download\n"
-		;
+		);
 }
 
-std::string GetFullCreditsString()
+mpt::ustring GetFullCreditsString()
 {
-	return
+	return mpt::ToUnicode(mpt::CharsetUTF8,
 #ifdef MODPLUG_TRACKER
 		"OpenMPT / ModPlug Tracker\n"
 #else
@@ -553,12 +553,12 @@ std::string GetFullCreditsString()
 		"ASIO Technology by Steinberg Media Technologies GmbH\n"
 		"\n"
 #endif
-		;
+		);
 }
 
-std::string GetLicenseString()
+mpt::ustring GetLicenseString()
 {
-	return
+	return MPT_UTF8(
 		"The OpenMPT code is licensed under the BSD license." "\n"
 		"" "\n"
 		"Copyright (c) 2004-2015, OpenMPT contributors" "\n"
@@ -586,7 +586,7 @@ std::string GetLicenseString()
 		"ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT" "\n"
 		"(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS" "\n"
 		"SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE." "\n"
-		;
+		);
 }
 
 } // namespace MptVersion
