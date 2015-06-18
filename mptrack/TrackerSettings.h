@@ -29,6 +29,10 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+namespace SoundDevice {
+class Manager;
+} // namespace SoundDevice
+
 
 // User-defined colors
 enum
@@ -685,6 +689,8 @@ public:
 public:
 
 	TrackerSettings(SettingsContainer &conf);
+
+	void MigrateOldSoundDeviceSettings(SoundDevice::Manager &manager);
 
 	void SaveSettings();
 
