@@ -89,15 +89,15 @@ static std::string get_build_string() {
 }
 
 static std::string get_credits_string() {
-	return MptVersion::GetFullCreditsString();
+	return mpt::ToCharset(mpt::CharsetUTF8, MptVersion::GetFullCreditsString());
 }
 
 static std::string get_contact_string() {
-	return MptVersion::GetContactString();
+	return mpt::ToCharset(mpt::CharsetUTF8, MptVersion::GetContactString());
 }
 
 static std::string get_license_string() {
-	return MptVersion::GetLicenseString();
+	return mpt::ToCharset(mpt::CharsetUTF8, MptVersion::GetLicenseString());
 }
 
 std::string get_string( const std::string & key ) {

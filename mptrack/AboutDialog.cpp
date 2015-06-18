@@ -478,13 +478,13 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			}
 			break;
 		case 2:
-			text += mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetFullCreditsString());
+			text += MptVersion::GetFullCreditsString();
 			break;
 		case 3:
-			text += mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetLicenseString());
+			text += MptVersion::GetLicenseString();
 			break;
 		case 4:
-			text += mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetContactString());
+			text += MptVersion::GetContactString();
 			break;
 	}
 	return text;
