@@ -631,6 +631,64 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 }
 
 
+void TrackerSettings::MigrateOldSoundDeviceSettings(SoundDevice::Manager &manager)
+//--------------------------------------------------------------------------------
+{
+	if(m_SoundDeviceSettingsUseOldDefaults)
+	{
+		// get the old default device
+		SetSoundDeviceIdentifier(SoundDevice::Legacy::FindDeviceInfo(manager, m_SoundDeviceID_DEPRECATED).GetIdentifier());
+		// apply old global sound device settings to each found device
+		for(std::vector<SoundDevice::Info>::const_iterator it = manager.begin(); it != manager.end(); ++it)
+		{
+			SetSoundDeviceSettings(it->GetIdentifier(), GetSoundDeviceSettingsDefaults());
+		}
+	}
+#ifndef NO_DSOUND
+	if(m_SoundDeviceDirectSoundOldDefaultIdentifier)
+	{
+		mpt::ustring oldIdentifier = SoundDevice::Legacy::GetDirectSoundDefaultDeviceIdentifierPre_1_25_00_04();
+		mpt::ustring newIdentifier = SoundDevice::Legacy::GetDirectSoundDefaultDeviceIdentifier_1_25_00_04();
+		if(!oldIdentifier.empty())
+		{
+			SoundDevice::Info info = manager.FindDeviceInfo(newIdentifier);
+			if(info.IsValid())
+			{
+				SoundDevice::Settings defaults =
+					m_SoundDeviceSettingsUseOldDefaults ?
+						GetSoundDeviceSettingsDefaults()
+					:
+						manager.GetDeviceCaps(newIdentifier).DefaultSettings
+					;
+				conf.Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"Latency",
+					conf.Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"Latency", Util::Round<int32>(defaults.Latency * 1000000.0)));
+				conf.Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"UpdateInterval",
+					conf.Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"UpdateInterval", Util::Round<int32>(defaults.UpdateInterval * 1000000.0)));
+				conf.Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"SampleRate",
+					conf.Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"SampleRate", defaults.Samplerate));
+				conf.Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"Channels",
+					conf.Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"Channels", defaults.Channels.GetNumHostChannels()));
+				conf.Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"SampleFormat",
+					conf.Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"SampleFormat", defaults.sampleFormat));
+				conf.Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"ExclusiveMode",
+					conf.Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"ExclusiveMode", defaults.ExclusiveMode));
+				conf.Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"BoostThreadPriority",
+					conf.Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"BoostThreadPriority", defaults.BoostThreadPriority));
+				conf.Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"KeepDeviceRunning",
+					conf.Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"KeepDeviceRunning", defaults.KeepDeviceRunning));
+				conf.Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"UseHardwareTiming",
+					conf.Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"UseHardwareTiming", defaults.UseHardwareTiming));
+				conf.Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"DitherType",
+					conf.Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"DitherType", defaults.DitherType));
+				conf.Write(L"Sound Settings", mpt::ToWide(newIdentifier) + L"_" + L"ChannelMapping",
+					conf.Read(L"Sound Settings", mpt::ToWide(oldIdentifier) + L"_" + L"ChannelMapping", defaults.Channels));
+			}
+		}
+	}
+#endif // !NO_DSOUND
+}
+
+
 struct StoredSoundDeviceSettings
 {
 
