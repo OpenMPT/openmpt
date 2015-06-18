@@ -277,8 +277,6 @@ BOOL CAboutDlg::OnInitDialog()
 //	m_static.SetColor(BACKGROUND_COLOR, RGB(43, 69, 130)); // Background Colour
 	m_static.SetGradient(GRADIENT_RIGHT_DARK);  // Background goes from blue to black from left to right
 
-	m_Tab.SubclassDlgItem(IDC_TABABOUT, this);
-
 	m_Tab.InsertItem(TCIF_TEXT, 0, _T("OpenMPT"), 0, 0, 0, 0);
 	m_Tab.InsertItem(TCIF_TEXT, 1, _T("Components"), 0, 0, 0, 0);
 	m_Tab.InsertItem(TCIF_TEXT, 2, _T("Credits"), 0, 0, 0, 0);
