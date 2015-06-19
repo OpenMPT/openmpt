@@ -28,6 +28,11 @@
 #undef _WIN32_WINNT
 #define WINVER 0x0501
 #define _WIN32_WINNT 0x0501
+// OpenMPT wants to support pre-WinXP systems, thus set WINVER to Win2000 // OPENMPT ADDITION
+#undef WINVER // OPENMPT ADDITION
+#undef _WIN32_WINNT // OPENMPT ADDITION
+#define WINVER 0x0500 // OPENMPT ADDITION
+#define _WIN32_WINNT 0x0500 // OPENMPT ADDITION
 
 #if !defined(ZIPSFX) && !defined(SHELL_EXT) && !defined(SETUP)
 #define RAR_SMP

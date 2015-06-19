@@ -11,8 +11,8 @@ never be used in OpenMPT's context.
 
 The following files have been modified:
 arcread.cpp, extract.cpp, filcreat.cpp, file.hpp, file.cpp, filefn.cpp,
-find.cpp, match.cpp, pathfn.cpp, rar.hpp, rdwrfn.cpp, secpassword.cpp,
-volume.cpp, win32acl.cpp, win32lnk.cpp
+find.cpp, match.cpp, os.hpp, pathfn.cpp, rar.hpp, rdwrfn.cpp, secpassword.cpp,
+timefn.cpp, volume.cpp, win32acl.cpp, win32lnk.cpp
 
 The following new files have been added:
 openmpt.hpp, openmpt-callback.hpp
