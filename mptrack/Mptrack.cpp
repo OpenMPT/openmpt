@@ -660,7 +660,6 @@ CTrackApp::CTrackApp()
 	m_pModTemplate = NULL;
 	m_pPluginManager = NULL;
 	m_pSoundDevicesManager = nullptr;
-	m_bInitialized = FALSE;
 }
 
 
@@ -1030,8 +1029,6 @@ BOOL CTrackApp::InitInstance()
 	pMainFrame->ShowWindow(m_nCmdShow);
 	pMainFrame->UpdateWindow();
 
-	m_bInitialized = TRUE;
-
 	EndWaitCursor();
 
 
@@ -1126,7 +1123,6 @@ int CTrackApp::ExitInstance()
 void CTrackApp::OnFileNew()
 //-------------------------
 {
-	if (!m_bInitialized) return;
 
 	// Build from template
 	const mpt::PathString templateFile = TrackerSettings::Instance().defaultTemplateFile;
