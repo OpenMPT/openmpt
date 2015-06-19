@@ -131,10 +131,16 @@ void RarTime::SetLocal(RarLocalTime *lt)
 
     FILETIME ft;
 
+    // OpenMPT needs to support pre-WinXp systems. // OPENMPT ADDITION
+    // TzSpecificLocalTimeToSystemTime requires >= WinXP // OPENMPT ADDITION
+    // We do not care about time. Always use the fallback code. // OPENMPT ADDITION
+#if 0 // OPENMPT ADDITION
     if (WinNT() < WNT_VISTA)
     {
+#endif // OPENMPT ADDITION
       // TzSpecificLocalTimeToSystemTime based code produces 1 hour error on XP.
       LocalFileTimeToFileTime(&lft,&ft);
+#if 0 // OPENMPT ADDITION
     }
     else
     {
@@ -153,6 +159,7 @@ void RarTime::SetLocal(RarLocalTime *lt)
       ft.dwLowDateTime=(DWORD)Corrected;
       ft.dwHighDateTime=(DWORD)(Corrected>>32);
     }
+#endif // OPENMPT ADDITION
 
     *this=ft;
   }
