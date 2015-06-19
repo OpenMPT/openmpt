@@ -1,8 +1,8 @@
  - Portaudio SVN revision 1948
  - A small modification to portaudio code has been made in src/hostapi/wdmks/pa_win_wdmks.c
    to facilitate linking against strmiids.lib . Look for "OpenMPT" there.
- - For building, premake4 is used to generate Visual Studio project files.
-   See ../premake4.lua for details.
+ - For building, premake is used to generate Visual Studio project files.
+   See ../build/premake/ for details.
  - A couple of unnecessary folders have been omitted in SVN:
    bindings, build, cmake_support, doc, examples, pablio, test, testcvs
 

@@ -2,5 +2,5 @@ r8brain-free resampling library from https://github.com/avaneev/r8brain-free-src
 commit 15b97819a3d9cc9e2fcab6842ad7174e4f404bad.
 The (non-functional) example program, DLL folder and logo file have been removed.
 No further local changes have been made.
-For building, premake4 is used to generate Visual Studio project files.
-See ../r8brain.premake4.lua for details.
+For building, premake is used to generate Visual Studio project files.
+See ../build/premake/ for details.
