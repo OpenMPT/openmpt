@@ -656,15 +656,6 @@ CTrackApp::CTrackApp()
 	, m_pComponentManagerSettings(nullptr)
 	, m_pPluginCache(nullptr)
 {
-	#if MPT_COMPILER_MSVC
-		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
-	#endif
-
-	m_GuiThreadId = GetCurrentThreadId();
-	mpt::log::Trace::SetThreadId(mpt::log::Trace::ThreadKindGUI, m_GuiThreadId);
-
-	ExceptionHandler::Register();
-
 	m_bPortableMode = false;
 	m_pModTemplate = NULL;
 	m_pPluginManager = NULL;
@@ -900,33 +891,49 @@ BOOL CTrackApp::InitInstance()
 //----------------------------
 {
 
+	#if MPT_COMPILER_MSVC
+		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
+	#endif
+
 	m_GuiThreadId = GetCurrentThreadId();
 
+	mpt::log::Trace::SetThreadId(mpt::log::Trace::ThreadKindGUI, m_GuiThreadId);
+
+	ExceptionHandler::Register();
+
 	// Initialize OLE MFC support
-	AfxOleInit();
+	BOOL oleinit = AfxOleInit();
+	ASSERT(oleinit != FALSE); // no MPT_ASSERT here!
+
 	// Standard initialization
 
 	// Start loading
 	BeginWaitCursor();
 
 	mpt::Windows::Version::Init();
+
 	mpt::String::InitCharsets();
 
 	MPT_LOG(LogInformation, "", MPT_USTRING("OpenMPT Start"));
 
-	ASSERT(nullptr == m_pDocManager);
+	// Initialize DocManager (for DDE)
+	// requires mpt::PathString, which requires mpt::String::InitCharsets()
+	ASSERT(nullptr == m_pDocManager); // no MPT_ASSERT here!
 	m_pDocManager = new CModDocManager();
 
 	// Parse command line for standard shell commands, DDE, file open
 	CMPTCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
 
-#ifdef ENABLE_ASM
-	if(cmdInfo.m_bNoAssembly)
-		ProcSupport = 0;
-	else
-		InitProcSupport();
-#endif
+	#ifdef ENABLE_ASM
+		if(cmdInfo.m_bNoAssembly)
+		{
+			ProcSupport = 0;
+		} else
+		{
+			InitProcSupport();
+		}
+	#endif
 
 	// Set up paths to store configuration in
 	SetupPaths(cmdInfo.m_bPortable);
@@ -953,7 +960,9 @@ BOOL CTrackApp::InitInstance()
 
 	m_pPluginCache = new IniFileSettingsContainer(m_szPluginCacheFileName);
 
-	LoadStdProfileSettings(0);  // Load standard INI file options (without MRU)
+	// Load standard INI file options (without MRU)
+	// requires SetupPaths called
+	LoadStdProfileSettings(0);
 
 	// create main MDI Frame window
 	CMainFrame* pMainFrame = new CMainFrame();
@@ -984,12 +993,14 @@ BOOL CTrackApp::InitInstance()
 	ImportMidiConfig(theApp.GetSettings(), true);
 
 	// Enable DDE Execute open
+	// requires m_pDocManager
 	EnableShellOpen();
 
 	// Enable drag/drop open
 	m_pMainWnd->DragAcceptFiles();
 
 	// Load sound APIs
+	// requires TrackerSettings
 	m_pSoundDevicesManager = new SoundDevice::Manager(SoundDevice::AppInfo().SetName(MPT_USTRING("OpenMPT")).SetHWND(*m_pMainWnd));
 	m_pTrackerSettings->MigrateOldSoundDeviceSettings(*m_pSoundDevicesManager);
 
