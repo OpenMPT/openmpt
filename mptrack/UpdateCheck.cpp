@@ -89,6 +89,13 @@ void CUpdateCheck::UpdateThread()
 	versionStr.Append(_T("-win64"));
 #elif defined(_WIN32)
 	versionStr.Append(_T("-win32"));
+#if 0
+	// TODO: Update the update check script
+	if(MptVersion::IsForOlderWindows())
+	{
+		versionStr.Append(_T("old"));
+	}
+#endif
 #else
 #error "Platform-specific identifier missing"
 #endif
