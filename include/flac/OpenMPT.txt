@@ -1,5 +1,5 @@
 The FLAC package has been left pretty much untouched, except for a few changes:
 - Obviously, unnecessary folders and files (documentation, makefiles, etc.) have
   been removed.
-- For building, premake4 is used to generate Visual Studio project files.
-  See ../premake4.lua for details.
+- For building, premake is used to generate Visual Studio project files.
+  See ../build/premake/ for details.
