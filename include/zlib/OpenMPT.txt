@@ -1,0 +1,8 @@
+zlib 1.2.8.
+Files not required by OpenMPT have been removed.
+OpenMPT specific changes:
+ *  commit 0b5c0c94ffa8a11789c31726e13ebe59f93263fe
+    "Win32 implementation of minizip ZTELL64 broken"
+    from https://github.com/akrylysov/zlib/commit/0b5c0c94ffa8a11789c31726e13ebe59f93263fe
+    has been applied on top of zlib 1.2.8 release.
+No further changes have been made.
