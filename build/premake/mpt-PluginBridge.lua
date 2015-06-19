@@ -16,7 +16,12 @@
    "../../pluginBridge/Bridge.h",
    "../../pluginBridge/BridgeCommon.h",
    "../../pluginBridge/BridgeOpCodes.h",
+  }
+  files {
    "../../pluginBridge/PluginBridge.rc",
+  }
+  files {
+   "../../pluginBridge/PluginBridge.manifest",
   }
   defines { "MODPLUG_TRACKER" }
   flags { "SEH", "Unicode", "WinMain", "ExtraWarnings" }
