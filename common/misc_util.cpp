@@ -131,4 +131,21 @@ std::vector<char> HexToBin(const mpt::ustring &src)
 } // namespace Util
 
 
+namespace mpt
+{
+
+std::string getenv(const std::string &env_var, const std::string &def)
+//--------------------------------------------------------------------
+{
+	const char *val = std::getenv(env_var.c_str());
+	if(!val)
+	{
+		return def;
+	}
+	return val;
+}
+
+} // namespace mpt
+
+
 OPENMPT_NAMESPACE_END

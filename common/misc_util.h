@@ -607,4 +607,15 @@ std::vector<char> HexToBin(const mpt::ustring &src);
 } // namespace Util
 
 
+namespace mpt
+{
+
+// Wrapper around std::getenv.
+// Instead of returning null pointer if the environment variable is not set,
+// this wrapper returns the provided default value.
+std::string getenv(const std::string &env_var, const std::string &def = std::string());
+
+} // namespace mpt
+
+
 OPENMPT_NAMESPACE_END
