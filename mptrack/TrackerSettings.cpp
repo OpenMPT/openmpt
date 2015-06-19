@@ -300,7 +300,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, PathUserTemplates(theApp.GetConfigPath() + MPT_PATHSTRING("TemplateModules\\"))
 	// Default template
 	, defaultTemplateFile(conf, "Paths", "DefaultTemplate", mpt::PathString())
-	, defaultArtist(conf, "Misc", "DefaultArtist", mpt::ToUnicode(mpt::CharsetLocale, std::getenv("USERNAME")))
+	, defaultArtist(conf, "Misc", "DefaultArtist", mpt::ToUnicode(mpt::CharsetLocale, std::getenv("USERNAME") ? std::getenv("USERNAME") : std::string()))
 	// MRU List
 	, mruListLength(conf, "Misc", "MRUListLength", 10)
 	// Plugins
