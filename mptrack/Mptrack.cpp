@@ -1297,7 +1297,7 @@ protected:
 	PNG::Bitmap *bitmap;
 
 public:
-	CSplashScreen(CWnd *parent);
+	CSplashScreen();
 	~CSplashScreen();
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
@@ -1318,11 +1318,10 @@ static CSplashScreen *gpSplashScreen = NULL;
 static DWORD gSplashScreenStartTime = 0;
 
 
-CSplashScreen::CSplashScreen(CWnd *parent)
-//----------------------------------------
+CSplashScreen::CSplashScreen()
+//----------------------------
 {
 	bitmap = PNG::ReadPNG(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN));
-	Create(IDD_SPLASHSCREEN, parent);
 }
 
 
@@ -1353,26 +1352,21 @@ void CSplashScreen::OnPaint()
 BOOL CSplashScreen::OnInitDialog()
 //--------------------------------
 {
+	CDialog::OnInitDialog();
+
 	CDC *dc = GetDC();
 	bitmap->ToDIB(m_Bitmap, dc);
 	ReleaseDC(dc);
 
 	CRect rect;
-	int cx, cy, newcx, newcy;
-
-	CDialog::OnInitDialog();
-
 	GetWindowRect(&rect);
-	cx = rect.Width();
-	cy = rect.Height();
-	newcx = bitmap->width;
-	newcy = bitmap->height;
-	if(newcx && newcy)
-	{
-		rect.left -= (newcx - cx) / 2;
-		rect.top -= (newcy - cy) / 2;
-		SetWindowPos(nullptr, rect.left, rect.top, newcx, newcy, SWP_NOCOPYBITS | SWP_NOZORDER);
-	}
+	SetWindowPos(nullptr,
+		rect.left - ((static_cast<int32>(bitmap->width) - rect.Width()) / 2),
+		rect.top - ((static_cast<int32>(bitmap->height) - rect.Height()) / 2),
+		bitmap->width,
+		bitmap->height,
+		SWP_NOZORDER | SWP_NOCOPYBITS);
+
 	return TRUE;
 }
 
@@ -1380,22 +1374,17 @@ BOOL CSplashScreen::OnInitDialog()
 void CSplashScreen::OnOK()
 //------------------------
 {
-	if (gpSplashScreen)
-	{
-		EndWaitCursor();
-		gpSplashScreen = NULL;
-	}
-	DestroyWindow();
-	delete this;
+	StopSplashScreen();
 }
 
 
 static void StartSplashScreen()
 //-----------------------------
 {
-	if (!gpSplashScreen)
+	if(!gpSplashScreen)
 	{
-		gpSplashScreen = new CSplashScreen(theApp.m_pMainWnd);
+		gpSplashScreen = new CSplashScreen();
+		gpSplashScreen->Create(IDD_SPLASHSCREEN, theApp.m_pMainWnd);
 		gpSplashScreen->ShowWindow(SW_SHOW);
 		gpSplashScreen->UpdateWindow();
 		gpSplashScreen->BeginWaitCursor();
@@ -1407,11 +1396,12 @@ static void StartSplashScreen()
 static void StopSplashScreen()
 //----------------------------
 {
-	if (gpSplashScreen)
+	if(gpSplashScreen)
 	{
 		gpSplashScreen->EndWaitCursor();
 		gpSplashScreen->DestroyWindow();
 		delete gpSplashScreen;
+		gpSplashScreen = nullptr;
 	}
 }
 

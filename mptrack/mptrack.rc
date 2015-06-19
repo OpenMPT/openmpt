@@ -1501,7 +1501,7 @@ BEGIN
     LTEXT           "In ""Relative"" base note mode, all notes are relative to a previously entered note in the pattern cell where the chord is entered.",IDC_STATIC,6,136,234,20
 END
 
-IDD_SPLASHSCREEN DIALOGEX 0, 0, 188, 95
+IDD_SPLASHSCREEN DIALOGEX 0, 0, 266, 188
 STYLE DS_SETFONT | DS_SETFOREGROUND | DS_FIXEDSYS | DS_CENTER | WS_POPUP
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
