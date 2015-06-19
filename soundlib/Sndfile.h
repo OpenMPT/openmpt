@@ -894,12 +894,12 @@ public:
 	bool DestroyInstrument(INSTRUMENTINDEX nInstr, deleteInstrumentSamples removeSamples);
 	bool IsSampleUsed(SAMPLEINDEX nSample) const;
 	bool IsInstrumentUsed(INSTRUMENTINDEX nInstr) const;
-	bool RemoveInstrumentSamples(INSTRUMENTINDEX nInstr);
+	bool RemoveInstrumentSamples(INSTRUMENTINDEX nInstr, SAMPLEINDEX keepSample = SAMPLEINDEX_INVALID);
 	SAMPLEINDEX DetectUnusedSamples(std::vector<bool> &sampleUsed) const;
 	SAMPLEINDEX RemoveSelectedSamples(const std::vector<bool> &keepSamples);
 
 	// Samples file I/O
-	bool ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize=false);
+	bool ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize=false, bool includeInstrumentFormats=true);
 	bool ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize=false, FileReader *wsmpChunk = nullptr);
 	bool ReadPATSample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadS3ISample(SAMPLEINDEX nSample, FileReader &file);
