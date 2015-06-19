@@ -1019,7 +1019,13 @@ BOOL CTrackApp::InitInstance()
 	pMainFrame->m_InputHandler->UpdateMainMenu();
 
 	// Dispatch commands specified on the command line
-	if (!ProcessShellCommand(cmdInfo))
+	if(cmdInfo.m_nShellCommand == CCommandLineInfo::FileNew)
+	{
+		// When not asked to open any existing file,
+		// we do not want to open an empty new one on startup.
+		cmdInfo.m_nShellCommand = CCommandLineInfo::FileNothing;
+	}
+	if(!ProcessShellCommand(cmdInfo))
 	{
 		EndWaitCursor();
 		StopSplashScreen();
