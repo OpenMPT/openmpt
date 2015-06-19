@@ -76,16 +76,16 @@ static bool IsID3(FileReader file)
 #endif // NO_MP3_SAMPLES
 
 
-bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize)
-//-------------------------------------------------------------------------------------------
+bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize, bool includeInstrumentFormats)
+//--------------------------------------------------------------------------------------------------------------------------
 {
 	if(!nSample || nSample >= MAX_SAMPLES) return false;
 	if(!ReadWAVSample(nSample, file, mayNormalize)
-		&& !ReadXISample(nSample, file)
-		&& !ReadITISample(nSample, file)
+		&& !(includeInstrumentFormats && ReadXISample(nSample, file))
+		&& !(includeInstrumentFormats && ReadITISample(nSample, file))
 		&& !ReadAIFFSample(nSample, file, mayNormalize)
 		&& !ReadITSSample(nSample, file)
-		&& !ReadPATSample(nSample, file)
+		&& !(includeInstrumentFormats && ReadPATSample(nSample, file))
 		&& !ReadIFFSample(nSample, file)
 		&& !ReadS3ISample(nSample, file)
 		&& !ReadFLACSample(nSample, file)
@@ -131,56 +131,37 @@ bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, FileReader &file
 bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file, bool mayNormalize)
 //--------------------------------------------------------------------------------------------------
 {
-	file.Rewind();
-
-	if(!file.CanRead(80))
-		return false;
-	char psig[80];
-	file.ReadArray(psig);
-	file.SkipBack(80);
-	if(    (!memcmp(&psig[0], "RIFF", 4) && !memcmp(&psig[8], "WAVE", 4))	// RIFF....WAVE signature
-		|| (!memcmp(&psig[0], "LIST", 4) && !memcmp(&psig[8], "wave", 4))	// LIST....wave
-		||  !memcmp(&psig[76], "SCRS", 4)									// S3I signature
-		|| (!memcmp(&psig[0], "FORM", 4) &&
-			  (!memcmp(&psig[8], "AIFF", 4)									// AIFF signature
-			|| !memcmp(&psig[8], "AIFC", 4)									// AIFF-C signature
-			|| !memcmp(&psig[8], "8SVX", 4)))								// 8SVX signature
-		|| !memcmp(&psig[0], "IMPS", 4)										// ITS signature
-#ifndef NO_FLAC
-		|| !memcmp(&psig[0], "fLaC", 4)										// FLAC signature
-		|| (!memcmp(&psig[0], "OggS", 4) && !memcmp(&psig[29], "FLAC", 4))	// FLAC in OGG signature
-#endif // NO_FLAC
-#ifndef NO_MP3_SAMPLES
-		|| IsMPEG(file)														// MPEG signature
-		|| IsID3(file)				// MP3 signature
-#endif // NO_MP3_SAMPLES
-		)
+	// Scanning free sample
+	SAMPLEINDEX nSample = GetNextFreeSample(nInstr); // may also return samples which are only referenced by the current instrument
+	if(nSample == SAMPLEINDEX_INVALID)
 	{
-		// Scanning free sample
-		SAMPLEINDEX nSample = GetNextFreeSample(nInstr);
-		if(nSample == SAMPLEINDEX_INVALID)
-		{
-			return false;
-		}
-		
-		// Loading Instrument
-
-		ModInstrument *pIns = new (std::nothrow) ModInstrument(nSample);
-		if(pIns == nullptr)
-		{
-			return false;
-		}
-		 
-		DestroyInstrument(nInstr, deleteAssociatedSamples);
-		Instruments[nInstr] = pIns;
-
-		ReadSampleFromFile(nSample, file, mayNormalize);
-#if defined(MPT_WITH_FILEIO) && defined(MPT_EXTERNAL_SAMPLES)
-		SetSamplePath(nSample, file.GetFileName());
-#endif
-		return true;
+		return false;
 	}
-	return false;
+
+	// Loading Instrument
+	ModInstrument *pIns = new (std::nothrow) ModInstrument(nSample);
+	if(pIns == nullptr)
+	{
+		return false;
+	}
+	if(!ReadSampleFromFile(nSample, file, mayNormalize, false))
+	{
+		delete pIns;
+		return false;
+	}
+
+	// Remove all samples which are only referenced by the old instrument, except for the one we just loaded our new sample into.
+	RemoveInstrumentSamples(nInstr, nSample);
+
+	// Replace the instrument 
+	DestroyInstrument(nInstr, doNoDeleteAssociatedSamples);
+	Instruments[nInstr] = pIns;
+
+#if defined(MPT_WITH_FILEIO) && defined(MPT_EXTERNAL_SAMPLES)
+	SetSamplePath(nSample, file.GetFileName());
+#endif
+
+	return true;
 }
 
 
@@ -210,9 +191,9 @@ bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, deleteInstrumentSampl
 }
 
 
-// Removing all unused samples
-bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr)
-//--------------------------------------------------------------
+// Remove all unused samples from the given nInstr and keep keepSample if provided
+bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr, SAMPLEINDEX keepSample)
+//--------------------------------------------------------------------------------------
 {
 	if(Instruments[nInstr] == nullptr)
 	{
@@ -226,7 +207,18 @@ bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr)
 	for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
 	{
 		if((*sample) <= GetNumSamples())
+		{
 			keepSamples[*sample] = false;
+		}
+	}
+
+	// If we want to keep a specific sample, do so.
+	if(keepSample != SAMPLEINDEX_INVALID)
+	{
+		if(keepSample <= GetNumSamples())
+		{
+			keepSamples[keepSample] = true;
+		}
 	}
 
 	// Check if any of those samples are referenced by other instruments as well, in which case we want to keep them of course.
