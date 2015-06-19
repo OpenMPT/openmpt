@@ -112,6 +112,9 @@
       <Command>if not exist "$(TargetDir)..\x64-Debug" mkdir "$(TargetDir)..\x64-Debug"
 copy /y "$(TargetDir)$(TargetFileName)" "$(TargetDir)..\x64-Debug\$(TargetFileName)"</Command>
     </PostBuildEvent>
+    <Manifest>
+      <AdditionalManifestFiles>PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -138,6 +141,9 @@ copy /y "$(TargetDir)$(TargetFileName)" "$(TargetDir)..\x64-Debug\$(TargetFileNa
       <Command>if not exist "$(TargetDir)..\Win32-Debug" mkdir "$(TargetDir)..\Win32-Debug"
 copy /y "$(TargetDir)$(TargetFileName)" "$(TargetDir)..\Win32-Debug\$(TargetFileName)"</Command>
     </PostBuildEvent>
+    <Manifest>
+      <AdditionalManifestFiles>PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -168,6 +174,10 @@ copy /y "$(TargetDir)$(TargetFileName)" "$(TargetDir)..\Win32-Debug\$(TargetFile
       <Command>if not exist "$(TargetDir)..\x64" mkdir "$(TargetDir)..\x64"
 copy /y "$(TargetDir)$(TargetFileName)" "$(TargetDir)..\x64\$(TargetFileName)"</Command>
     </PostBuildEvent>
+    <Manifest />
+    <Manifest>
+      <AdditionalManifestFiles>PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -198,6 +208,9 @@ copy /y "$(TargetDir)$(TargetFileName)" "$(TargetDir)..\x64\$(TargetFileName)"</
       <Command>if not exist "$(TargetDir)..\Win32" mkdir "$(TargetDir)..\Win32"
 copy /y "$(TargetDir)$(TargetFileName)" "$(TargetDir)..\Win32\$(TargetFileName)"</Command>
     </PostBuildEvent>
+    <Manifest>
+      <AdditionalManifestFiles>PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Bridge.cpp" />

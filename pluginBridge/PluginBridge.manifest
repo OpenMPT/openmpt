@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?> 
-<assembly 
-   xmlns="urn:schemas-microsoft-com:asm.v1" 
-   manifestVersion="1.0">
- <assemblyIdentity 
-    processorArchitecture="*" 
-    version="5.1.0.0"
-    type="win32"
-    name="mptrack.exe"/>
- <description>OpenMPT</description>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+ <assemblyIdentity
+  type="win32"
+  name="OpenMPT.PluginBridge"
+  version="1.0.0.0"
+ />
+ <description>OpenMPT PluginBridge</description>
  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
   <!-- VS2008 and VS2010 mt.exe will warn with a -->
   <!-- 'manifest authoring warning 81010002: Unrecognized Element' -->

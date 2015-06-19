@@ -82,6 +82,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="../../pluginBridge/PluginBridge.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -164,6 +165,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="../../pluginBridge/PluginBridge.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -248,6 +250,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="../../pluginBridge/PluginBridge.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -333,6 +336,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="../../pluginBridge/PluginBridge.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -414,6 +418,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="../../pluginBridge/PluginBridge.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -496,6 +501,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="../../pluginBridge/PluginBridge.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -581,6 +587,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="../../pluginBridge/PluginBridge.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -667,6 +674,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="../../pluginBridge/PluginBridge.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -707,6 +715,10 @@
 		</File>
 		<File
 			RelativePath="..\..\pluginBridge\BridgeOpCodes.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\pluginBridge\PluginBridge.manifest"
 			>
 		</File>
 		<File
