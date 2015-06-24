@@ -456,11 +456,27 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 	// get the native path of currently loading bank or project
 	// (called from writeChunk) void* in <ptr> (char[2048], or sizeof(FSSpec)) - DEPRECATED in VST 2.4
+	// Note: The shortcircuit VSTi actually uses this feature.
 	case audioMasterGetChunkFile:
 #ifdef MODPLUG_TRACKER
 		if(pVstPlugin && pVstPlugin->GetModDoc())
 		{
-			strcpy(ptr, pVstPlugin->GetModDoc()->GetPathNameMpt().ToLocale().c_str());
+			mpt::PathString path = pVstPlugin->GetModDoc()->GetPathNameMpt();
+			if(path.empty())
+			{
+				return 0;
+			}
+			mpt::PathString projectPath = TrackerSettings::Instance().pluginProjectPath;
+			if(!projectPath.empty())
+			{
+				// Project files should be stored in a sub directory.
+				// Sub directory name is original filename + custom addition.
+				path += projectPath;
+				path.EnsureTrailingSlash();
+				::CreateDirectoryW(path.AsNative().c_str(), nullptr);
+				path += pVstPlugin->GetModDoc()->GetPathNameMpt().GetFullFileName();
+			}
+			strcpy(ptr, path.ToLocale().c_str());
 			return 1;
 		}
 #endif
