@@ -278,6 +278,8 @@ protected:
 		CSliderCtrl valueSlider;
 	};
 	std::vector<RowCtls *> m_controls;
+	int m_groupSize;
+
 public:
 	TempoSwing m_tempoSwing;
 	const TempoSwing m_origTempoSwing;
@@ -293,6 +295,8 @@ protected:
 	virtual void OnCancel();
 	void OnClose();
 	afx_msg void OnReset();
+	afx_msg void OnToggleGroup();
+	afx_msg void OnGroupChanged();
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg BOOL OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *);
 	DECLARE_MESSAGE_MAP()
