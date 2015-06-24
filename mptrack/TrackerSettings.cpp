@@ -306,7 +306,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Plugins
 	, bridgeAllPlugins(conf, "VST Plugins", "BridgeAllPlugins", false)
 	, enableAutoSuspend(conf, "VST Plugins", "EnableAutoSuspend", false)
-	, pluginProjectPath(conf, "VST Plugins", "ProjectPath", mpt::PathString())
+	, pluginProjectPath(conf, "VST Plugins", "ProjectPath", std::wstring())
 	// Update
 	, UpdateLastUpdateCheck(conf, "Update", "LastUpdateCheck", mpt::Date::Unix(time_t()))
 	, UpdateUpdateCheckPeriod(conf, "Update", "UpdateCheckPeriod", CUpdateCheck::GetUpdateCheckPeriod())

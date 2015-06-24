@@ -461,21 +461,18 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 #ifdef MODPLUG_TRACKER
 		if(pVstPlugin && pVstPlugin->GetModDoc())
 		{
-			mpt::PathString path = pVstPlugin->GetModDoc()->GetPathNameMpt();
+			std::wstring formatStr = TrackerSettings::Instance().pluginProjectPath;
+			if(formatStr.empty()) formatStr = L"%1";
+			const mpt::PathString projectPath = pVstPlugin->GetModDoc()->GetPathNameMpt();
+			const mpt::PathString projectFile = projectPath.GetFullFileName();
+			mpt::PathString path = mpt::PathString::FromWide(mpt::String::Print(formatStr, projectPath.GetPath().ToWide(), projectFile.ToWide()));
 			if(path.empty())
 			{
 				return 0;
 			}
-			mpt::PathString projectPath = TrackerSettings::Instance().pluginProjectPath;
-			if(!projectPath.empty())
-			{
-				// Project files should be stored in a sub directory.
-				// Sub directory name is original filename + custom addition.
-				path += projectPath;
-				path.EnsureTrailingSlash();
-				::CreateDirectoryW(path.AsNative().c_str(), nullptr);
-				path += pVstPlugin->GetModDoc()->GetPathNameMpt().GetFullFileName();
-			}
+			path.EnsureTrailingSlash();
+			::SHCreateDirectoryExW(NULL, path.AsNative().c_str(), nullptr);
+			path += projectFile;
 			strcpy(ptr, path.ToLocale().c_str());
 			return 1;
 		}
