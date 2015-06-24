@@ -1039,7 +1039,12 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 		break;
 
 	case audioMasterEditFile:
+		break;
+
 	case audioMasterGetChunkFile:
+		// Name in [ptr]
+		ptrOut = 256;
+		dispatchData.insert(dispatchData.end(), ptrC, ptrC + ptrOut);
 		break;
 
 	default:
@@ -1118,6 +1123,11 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 	case audioMasterCloseFileSelector:
 		// VstFileSelect* in [ptr]
 		// TODO
+		break;
+
+	case audioMasterGetChunkFile:
+		// Name in [ptr]
+		strcpy(ptr, extraData);
 		break;
 	}
 
