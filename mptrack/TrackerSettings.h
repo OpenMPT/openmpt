@@ -677,7 +677,7 @@ public:
 
 	Setting<bool> bridgeAllPlugins;
 	Setting<bool> enableAutoSuspend;
-	Setting<mpt::PathString> pluginProjectPath;
+	Setting<std::wstring> pluginProjectPath;
 
 	// Update
 
