@@ -1200,6 +1200,8 @@ BEGIN_MESSAGE_MAP(CTempoSwingDlg, CDialog)
 	//{{AFX_MSG_MAP(CTempoSwingDlg)
 	ON_WM_HSCROLL()
 	ON_COMMAND(IDC_BUTTON1,	OnReset)
+	ON_COMMAND(IDC_CHECK1,	OnToggleGroup)
+	ON_EN_CHANGE(IDC_EDIT1, OnGroupChanged)
 	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipNotify)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -1207,6 +1209,7 @@ END_MESSAGE_MAP()
 
 CTempoSwingDlg::CTempoSwingDlg(CWnd *parent, const TempoSwing &currentTempoSwing, CSoundFile &sndFile, PATTERNINDEX pattern)
 	: CDialog(IDD_TEMPO_SWING, parent)
+	, m_groupSize(1)
 	, m_tempoSwing(currentTempoSwing)
 	, m_origTempoSwing(pattern == PATTERNINDEX_INVALID ? sndFile.m_tempoSwing : sndFile.Patterns[pattern].GetTempoSwing())
 	, m_sndFile(sndFile)
@@ -1226,7 +1229,7 @@ BOOL CTempoSwingDlg::OnInitDialog()
 			edValueLabelWidth = 64,	// Label "100%"
 			edPaddingX = 8,			// Spacing between elements
 			edPaddingY = 4,			// Spacing between elements
-			edPaddingTop = 35,		// Topping from top of dialog
+			edPaddingTop = 64,		// Spacing from top of dialog
 			edTotalHeight = edSliderHeight + edPaddingY, // Height of one set of controls
 			edFooterHeight = 32,	// Buttons
 		};
@@ -1261,6 +1264,7 @@ BOOL CTempoSwingDlg::OnInitDialog()
 	GetClientRect(rect);
 	windowRect.bottom = windowRect.top + windowRect.Height() - rect.Height();
 	rect.DeflateRect(m.paddingX, m.paddingTop, m.paddingX, 0);
+
 	m_controls.resize(m_tempoSwing.size());
 	for(size_t i = 0; i < m_controls.size(); i++)
 	{
@@ -1285,6 +1289,11 @@ BOOL CTempoSwingDlg::OnInitDialog()
 		r->valueSlider.SetPos(val);
 		rect.MoveToY(rect.top + m.totalHeight);
 	}
+
+	((CSpinButtonCtrl *)GetDlgItem(IDC_SPIN1))->SetRange32(1, static_cast<int>(m_tempoSwing.size()));
+	SetDlgItemInt(IDC_EDIT1, m_groupSize);
+	OnToggleGroup();
+
 	OnHScroll(0, 0, nullptr);
 	rect.MoveToY(rect.top + m.paddingY);
 	{
@@ -1353,9 +1362,49 @@ void CTempoSwingDlg::OnReset()
 }
 
 
-void CTempoSwingDlg::OnHScroll(UINT /*nSBCode*/, UINT /*nPos*/, CScrollBar* /*pScrollBar*/)
-//-----------------------------------------------------------------------------------------
+void CTempoSwingDlg::OnToggleGroup()
+//----------------------------------
 {
+	const BOOL checked = IsDlgButtonChecked(IDC_CHECK1);
+	GetDlgItem(IDC_EDIT1)->EnableWindow(checked);
+	GetDlgItem(IDC_SPIN1)->EnableWindow(checked);
+}
+
+
+void CTempoSwingDlg::OnGroupChanged()
+//-----------------------------------
+{
+	m_groupSize = GetDlgItemInt(IDC_EDIT1);
+	Limit(m_groupSize, 1, static_cast<int>(m_tempoSwing.size()));
+}
+
+
+void CTempoSwingDlg::OnHScroll(UINT /*nSBCode*/, UINT /*nPos*/, CScrollBar* pScrollBar)
+//-------------------------------------------------------------------------------------
+{
+	if(IsDlgButtonChecked(IDC_CHECK1))
+	{
+		// Edit groups
+		size_t editedGroup = 0;
+		int editedValue = SliderUnity;
+		for(size_t i = 0; i < m_controls.size(); i++)
+		{
+			if(m_controls[i]->valueSlider.m_hWnd == pScrollBar->m_hWnd)
+			{
+				editedValue = m_controls[i]->valueSlider.GetPos();
+				editedGroup = (i / m_groupSize) % 2;
+				break;
+			}
+		}
+		for(size_t i = 0; i < m_controls.size(); i++)
+		{
+			if((i / m_groupSize) % 2 == editedGroup)
+			{
+				m_controls[i]->valueSlider.SetPos(editedValue);
+			}
+		}
+	}
+
 	for(size_t i = 0; i < m_controls.size(); i++)
 	{
 		m_tempoSwing[i] = Util::muldivr(m_controls[i]->valueSlider.GetPos(), TempoSwing::Unity, SliderUnity) + TempoSwing::Unity;
