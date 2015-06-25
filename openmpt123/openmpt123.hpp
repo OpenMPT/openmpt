@@ -257,6 +257,7 @@ struct commandlineflags {
 	std::int32_t repeatcount;
 	std::map<std::string, std::string> ctls;
 	double seek_target;
+	double end_time;
 	bool quiet;
 	bool verbose;
 	int terminal_width;
@@ -313,6 +314,7 @@ struct commandlineflags {
 		dither = 1;
 		repeatcount = 0;
 		seek_target = 0.0;
+		end_time = 0.0;
 		quiet = false;
 		verbose = false;
 		terminal_width = 72;

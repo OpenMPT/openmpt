@@ -281,6 +281,7 @@ static std::ostream & operator << ( std::ostream & s, const commandlineflags & f
 	s << "Output dithering: " << flags.dither << std::endl;
 	s << "Repeat count: " << flags.repeatcount << std::endl;
 	s << "Seek target: " << flags.seek_target << std::endl;
+	s << "End time: " << flags.end_time << std::endl;
 	s << "Standard output: " << flags.use_stdout << std::endl;
 	s << "Output filename: " << flags.output_filename << std::endl;
 	s << "Force overwrite output file: " << flags.force_overwrite << std::endl;
@@ -520,6 +521,7 @@ static void show_help( textout & log, bool with_info = true, bool longhelp = fal
 		log << std::endl;
 		log << "     --repeat n             Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
 		log << "     --seek n               Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
+		log << "     --end-time n           Play until position is n seconds (0 means until the end) [default: " << commandlineflags().end_time << "]" << std::endl;
 		log << std::endl;
 		log << "     --ctl c=v              Set libopenmpt ctl c to value v" << std::endl;
 		log << std::endl;
@@ -1272,6 +1274,11 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 			break;
 		}
 		
+		if ( flags.end_time > 0 && mod.get_position_seconds() >= flags.end_time )
+		{
+			break;
+		}
+
 	}
 
 	log.writeout();
@@ -1775,6 +1782,10 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 			} else if ( arg == "--seek" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.seek_target;
+				++i;
+			} else if ( arg == "--end-time" && nextarg != "" ) {
+				std::istringstream istr( nextarg );
+				istr >> flags.end_time;
 				++i;
 			} else if ( arg.size() > 0 && arg.substr( 0, 1 ) == "-" ) {
 				throw args_error_exception();
