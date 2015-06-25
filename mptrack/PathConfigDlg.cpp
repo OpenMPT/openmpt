@@ -43,6 +43,7 @@ BEGIN_MESSAGE_MAP(PathConfigDlg, CPropertyPage)
 	ON_COMMAND(IDC_BUTTON_CHANGE_VSTPRESETSDIR,	OnBrowsePresets)
 
 	// Autosave
+	ON_COMMAND(IDC_CHECK1,						OnSettingsChanged)
 	ON_BN_CLICKED(IDC_AUTOSAVE_BROWSE,			OnBrowseAutosavePath)
 	ON_BN_CLICKED(IDC_AUTOSAVE_ENABLE,			OnAutosaveEnable)
 	ON_BN_CLICKED(IDC_AUTOSAVE_USEORIGDIR,		OnAutosaveUseOrigDir)
@@ -66,6 +67,8 @@ BOOL PathConfigDlg::OnInitDialog()
 	::SetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTPRESETS,	TrackerSettings::Instance().PathPluginPresets.GetDefaultDir().AsNative().c_str());
 
 	// Autosave
+	CheckDlgButton(IDC_CHECK1, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CREATEBACKUP) != 0);
+
 	CheckDlgButton(IDC_AUTOSAVE_ENABLE, TrackerSettings::Instance().AutosaveEnabled ? BST_CHECKED : BST_UNCHECKED);
 	SetDlgItemInt(IDC_AUTOSAVE_HISTORY, TrackerSettings::Instance().AutosaveHistoryDepth);
 	::SetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, TrackerSettings::Instance().AutosavePath.GetDefaultDir().AsNative().c_str());
@@ -97,6 +100,10 @@ void PathConfigDlg::OnOK()
 			mpt::PathString::FromNative(szInsDir),
 			mpt::PathString::FromNative(szVstDir),
 			mpt::PathString::FromNative(szPresetDir));
+
+	// Autosave
+	if(IsDlgButtonChecked(IDC_CHECK1)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_CREATEBACKUP;
+	else TrackerSettings::Instance().m_dwPatternSetup &= ~PATTERN_CREATEBACKUP;
 
 	WCHAR tempPath[MAX_PATH];
 	TrackerSettings::Instance().AutosaveEnabled = (IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) != BST_UNCHECKED);
