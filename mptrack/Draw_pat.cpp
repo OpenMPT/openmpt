@@ -578,12 +578,6 @@ void CViewPattern::OnDraw(CDC *pDC)
 	}
 	ypaint += m_szHeader.cy;
 	
-	ORDERINDEX curOrder;
-	if(IsLiveRecord() && m_nPlayOrd < sndFile.Order.size())
-		curOrder = m_nPlayOrd;
-	else
-		curOrder = static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
-
 	if (m_nMidRow)
 	{
 		if (yofs >= m_nMidRow)
@@ -597,12 +591,12 @@ void CViewPattern::OnDraw(CDC *pDC)
 			// Display previous pattern
 			if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWPREVIOUS)
 			{
-				if(curOrder > 0)
+				if(m_nOrder > 0)
 				{
-					ORDERINDEX prevOrder = sndFile.Order.GetPreviousOrderIgnoringSkips(curOrder);
+					ORDERINDEX prevOrder = sndFile.Order.GetPreviousOrderIgnoringSkips(m_nOrder);
 					//Skip +++ items
 
-					if(curOrder < sndFile.Order.size() && sndFile.Order[curOrder] == m_nPattern)
+					if(m_nOrder < sndFile.Order.size() && sndFile.Order[m_nOrder] == m_nPattern)
 					{
 						nPrevPat = sndFile.Order[prevOrder];
 					}
@@ -645,12 +639,12 @@ void CViewPattern::OnDraw(CDC *pDC)
 		if ((nVisRows > 0) && (m_nMidRow))
 		{
 			PATTERNINDEX nNextPat = PATTERNINDEX_INVALID;
-			ORDERINDEX nNextOrder = sndFile.Order.GetNextOrderIgnoringSkips(curOrder);
-			if(nNextOrder == curOrder) nNextOrder = ORDERINDEX_INVALID;
+			ORDERINDEX nNextOrder = sndFile.Order.GetNextOrderIgnoringSkips(m_nOrder);
+			if(nNextOrder == m_nOrder) nNextOrder = ORDERINDEX_INVALID;
 			//Ignore skip items(+++) from sequence.
 			const ORDERINDEX ordCount = sndFile.Order.GetLength();
 
-			if(nNextOrder < ordCount && sndFile.Order[curOrder] == m_nPattern)
+			if(nNextOrder < ordCount && sndFile.Order[m_nOrder] == m_nPattern)
 			{
 				nNextPat = sndFile.Order[nNextOrder];
 			}
