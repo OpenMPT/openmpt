@@ -170,6 +170,14 @@ CViewPattern::CViewPattern()
 }
 
 
+CViewPattern::~CViewPattern()
+//---------------------------
+{
+	m_offScreenBitmap.DeleteObject();
+	m_offScreenDC.DeleteDC();
+}
+
+
 void CViewPattern::OnInitialUpdate()
 //----------------------------------
 {
@@ -182,6 +190,7 @@ void CViewPattern::OnInitialUpdate()
 	m_nPlayPat = PATTERNINDEX_INVALID;
 	m_nPlayRow = 0;
 	m_nPlayTick = 0;
+	m_nTicksOnRow = 1;
 	m_nMidRow = 0;
 	m_nDragItem = 0;
 	m_bInItemRect = false;
@@ -610,18 +619,22 @@ bool CViewPattern::DragToSel(const PatternCursor &cursor, bool scrollHorizontal,
 }
 
 
-bool CViewPattern::SetPlayCursor(PATTERNINDEX pat, ROWINDEX row)
-//--------------------------------------------------------------
+bool CViewPattern::SetPlayCursor(PATTERNINDEX pat, ROWINDEX row, uint32 tick)
+//---------------------------------------------------------------------------
 {
 	PATTERNINDEX oldPat = m_nPlayPat;
 	ROWINDEX oldRow = m_nPlayRow;
+	uint32 oldTick = m_nPlayTick;
 
 	m_nPlayPat = pat;
 	m_nPlayRow = row;
+	m_nPlayTick = tick;
 
-	if (oldPat == m_nPattern)
+	if(m_nPlayTick != oldTick && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL))
+		InvalidatePattern(true);
+	else if (oldPat == m_nPattern)
 		InvalidateRow(oldRow);
-	if (m_nPlayPat == m_nPattern)
+	else if (m_nPlayPat == m_nPattern)
 		InvalidateRow(m_nPlayRow);
 
 	return true;
@@ -633,6 +646,7 @@ UINT CViewPattern::GetCurrentInstrument() const
 {
 	return SendCtrlMessage(CTRLMSG_GETCURRENTINSTRUMENT);
 }
+
 
 bool CViewPattern::ShowEditWindow()
 //---------------------------------
@@ -3747,6 +3761,8 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 			}
 
 			// Don't follow song if user drags selections or scrollbars.
+			m_nTicksOnRow = pnotify->ticksOnRow;
+			SetPlayCursor(nPat, nRow, pnotify->tick);
 			if((m_Status & (psFollowSong | psDragActive)) == psFollowSong)
 			{
 				if (nPat < pSndFile->Patterns.Size())
@@ -3770,8 +3786,6 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 					updateOrderList = false;
 				}
 			}
-			SetPlayCursor(nPat, nRow);
-			m_nPlayTick = pnotify->tick;
 		}
 	}
 
@@ -3785,7 +3799,7 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 		MemsetZero(ChnVUMeters);	// Also zero all non-visible VU meters
 		if((m_Status & (psFollowSong | psDragActive)) == psFollowSong)
 		{
-			SetPlayCursor(PATTERNINDEX_INVALID, ROWINDEX_INVALID);
+			SetPlayCursor(PATTERNINDEX_INVALID, ROWINDEX_INVALID, 0);
 		}
 	}
 
@@ -5371,7 +5385,7 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 				newcmd.command = CMD_S3MCMDEX;
 				if(!sndFile.GetModSpecifications().HasCommand(CMD_S3MCMDEX)) newcmd.command = CMD_MODCMDEX;
 				UINT maxSpeed = 0x0F;
-				if(sndFile.m_PlayState.m_nMusicSpeed > 0) maxSpeed = MIN(0x0F, sndFile.m_PlayState.m_nMusicSpeed - 1);
+				if(m_nTicksOnRow > 0) maxSpeed = MIN(0x0F, m_nTicksOnRow - 1);
 				newcmd.param = static_cast<ModCommand::PARAM>(0xD0 | MIN(maxSpeed, m_nPlayTick));
 			}
 		}
@@ -5821,8 +5835,8 @@ void CViewPattern::QuantizeRow(PATTERNINDEX &pat, ROWINDEX &row) const
 		return;
 	}
 
-	const ROWINDEX currentTick = sndFile->m_PlayState.m_nMusicSpeed * row + m_nPlayTick;
-	const ROWINDEX ticksPerNote = TrackerSettings::Instance().recordQuantizeRows * sndFile->m_PlayState.m_nMusicSpeed;
+	const ROWINDEX currentTick = m_nTicksOnRow * row + m_nPlayTick;
+	const ROWINDEX ticksPerNote = TrackerSettings::Instance().recordQuantizeRows * m_nTicksOnRow;
 	
 	// Previous quantization step
 	const ROWINDEX quantLow = (currentTick / ticksPerNote) * ticksPerNote;
@@ -5831,10 +5845,10 @@ void CViewPattern::QuantizeRow(PATTERNINDEX &pat, ROWINDEX &row) const
 
 	if(currentTick - quantLow < quantHigh - currentTick)
 	{
-		row = quantLow / sndFile->m_PlayState.m_nMusicSpeed;
+		row = quantLow / m_nTicksOnRow;
 	} else
 	{
-		row = quantHigh / sndFile->m_PlayState.m_nMusicSpeed;
+		row = quantHigh / m_nTicksOnRow;
 	}
 	
 	if(!sndFile->Patterns[pat].IsValidRow(row))

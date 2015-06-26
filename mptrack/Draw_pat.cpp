@@ -157,6 +157,13 @@ UINT CViewPattern::GetColumnOffset(PatternCursor::Columns column) const
 }
 
 
+int CViewPattern::GetSmoothScrollOffset() const
+//---------------------------------------------
+{
+	return Util::muldivr_unsigned(m_szCell.cy, m_nPlayTick, std::max(1u, m_nTicksOnRow));
+}
+
+
 void CViewPattern::UpdateView(UpdateHint hint, CObject *pObj)
 //-----------------------------------------------------------
 {
@@ -242,6 +249,12 @@ PatternCursor CViewPattern::GetPositionFromPoint(POINT pt)
 	int yofs = GetYScrollPos();
 	int x = xofs + (pt.x - m_szHeader.cx) / GetColumnWidth();
 	if (pt.x < m_szHeader.cx) x = (xofs) ? xofs - 1 : 0;
+
+	if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) != 0 && (m_Status & (psFollowSong | psDragActive)) == psFollowSong && IsLiveRecord())
+	{
+		pt.y += GetSmoothScrollOffset();
+	}
+
 	int y = yofs - m_nMidRow + (pt.y - m_szHeader.cy) / m_szCell.cy;
 	if (y < 0) y = 0;
 	int xx = (pt.x - m_szHeader.cx) % GetColumnWidth(), dx = 0;
@@ -288,12 +301,10 @@ void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 		srcx = pfnt->nAlphaAM_X;
 		srcy = pfnt->nAlphaAM_Y + 13 * pfnt->spacingY;
 		break;
-	//rewbs.smoothVST
 	case '\\':
 		srcx = pfnt->nAlphaNZ_X;
 		srcy = pfnt->nAlphaNZ_Y + 14 * pfnt->spacingY;
 		break;
-	//end rewbs.smoothVST
 	case ':':
 		srcx = pfnt->nAlphaNZ_X;
 		srcy = pfnt->nAlphaNZ_Y + 15 * pfnt->spacingY;
@@ -461,14 +472,8 @@ void CViewPattern::OnDraw(CDC *pDC)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CHAR s[256];
-	HPEN oldpen;
 	CRect rcClient, rect, rc;
 	const CModDoc *pModDoc;
-	HDC hdc;
-	CHANNELINDEX xofs;
-	ROWINDEX yofs;
-	UINT nColumnWidth, ncols, ncolhdr;
-	int xpaint, ypaint, mixPlug;
 
 	ASSERT(pDC);
 	UpdateSizes();
@@ -477,106 +482,44 @@ void CViewPattern::OnDraw(CDC *pDC)
 	const int vuHeight = MulDiv(VUMETERS_HEIGHT, m_nDPIy, 96);
 	const int colHeight = MulDiv(COLHDR_HEIGHT, m_nDPIy, 96);
 	const int recordInsX = MulDiv(3, m_nDPIx, 96);
+	const bool liveRecord = IsLiveRecord();
+	const bool doSmoothScroll = (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) != 0;
 
 	GetClientRect(&rcClient);
-	hdc = pDC->m_hDC;
-	oldpen = SelectPen(hdc, CMainFrame::penDarkGray);
-	xofs = static_cast<CHANNELINDEX>(GetXScrollPos());
-	yofs = static_cast<ROWINDEX>(GetYScrollPos());
-	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
-	nColumnWidth = m_szCell.cx;
-	ncols = sndFile.GetNumChannels();
-	xpaint = m_szHeader.cx;
-	ypaint = rcClient.top;
-	ncolhdr = xofs;
-	rect.SetRect(0, rcClient.top, rcClient.right, rcClient.top + m_szHeader.cy);
-	if (::RectVisible(hdc, &rect))
+
+	HDC hdc;
+	HBITMAP oldBitmap;
+	if(doSmoothScroll)
 	{
-		wsprintf(s, "#%d", m_nPattern);
-		rect.right = m_szHeader.cx;
-		DrawButtonRect(hdc, &rect, s, FALSE,
-			((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_PATTERNHEADER)) ? TRUE : FALSE);
-
-		// Drawing Channel Headers
-		while (xpaint < rcClient.right)
+		if(rcClient != m_oldClient)
 		{
-			rect.SetRect(xpaint, ypaint, xpaint+nColumnWidth, ypaint + m_szHeader.cy);
-			if (ncolhdr < ncols)
-			{
-				const char *pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr]? "[Channel %d]" : "Channel %d";
-				if ((sndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) && sndFile.ChnSettings[ncolhdr].szName[0] != 0)
-					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "%d: [%s]" : "%d: %s";
-				else if (m_nDetailLevel < PatternCursor::volumeColumn) pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Ch%d]" : "Ch%d";
-				else if (m_nDetailLevel < PatternCursor::effectColumn) pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Chn %d]" : "Chn %d";
-				wsprintf(s, pszfmt, ncolhdr + 1, sndFile.ChnSettings[ncolhdr].szName);
-				DrawButtonRect(hdc, &rect, s,
-					sndFile.ChnSettings[ncolhdr].dwFlags[CHN_MUTE] ? TRUE : FALSE,
-					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & DRAGITEM_VALUEMASK) == ncolhdr)) ? TRUE : FALSE,
-					pModDoc->IsChannelRecord(static_cast<CHANNELINDEX>(ncolhdr)) ? DT_RIGHT : DT_CENTER);
-
-				// When dragging around channel headers, mark insertion position
-				if(m_Status[psDragging] && !m_bInItemRect
-					&& (m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER
-					&& (m_nDropItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER
-					&& (m_nDropItem & DRAGITEM_VALUEMASK) == ncolhdr)
-				{
-					RECT r;
-					r.top = rect.top;
-					r.bottom = rect.bottom;
-					// Drop position depends on whether hovered channel is left or right of dragged item.
-					r.left = ((m_nDropItem & DRAGITEM_VALUEMASK) < (m_nDragItem & DRAGITEM_VALUEMASK) || m_Status[psShiftDragging]) ? rect.left : rect.right - 2;
-					r.right = r.left + 2;
-					::FillRect(hdc, &r, CMainFrame::brushText);
-				}
-
-				rect.bottom = rect.top + colHeight;
-
-				CRect insRect;
-				insRect.SetRect(xpaint, ypaint, xpaint + nColumnWidth / 8 + recordInsX, ypaint + colHeight);
-				if (pModDoc->IsChannelRecord1(static_cast<CHANNELINDEX>(ncolhdr)))
-				{
-					FrameRect(hdc,&rect,CMainFrame::brushGray);
-					InvertRect(hdc, &rect);
-					s[0] = '1';
-					s[1] = '\0';
-					DrawButtonRect(hdc, &insRect, s, FALSE, FALSE, DT_CENTER);
-					FrameRect(hdc,&insRect,CMainFrame::brushBlack);
-				} else if (pModDoc->IsChannelRecord2(static_cast<CHANNELINDEX>(ncolhdr)))
-				{
-					FrameRect(hdc,&rect,CMainFrame::brushGray);
-					InvertRect(hdc, &rect);
-					s[0] = '2';
-					s[1] = '\0';
-					DrawButtonRect(hdc, &insRect, s, FALSE, FALSE, DT_CENTER);
-					FrameRect(hdc,&insRect,CMainFrame::brushBlack);
-				}
-
-				if(m_Status[psShowVUMeters])
-				{
-					OldVUMeters[ncolhdr] = 0;
-					DrawChannelVUMeter(hdc, rect.left + 1, rect.bottom, ncolhdr);
-					rect.top += vuHeight;
-					rect.bottom += vuHeight;
-				}
-				if(m_Status[psShowPluginNames])
-				{
-					rect.top += m_szPluginHeader.cy;
-					rect.bottom += m_szPluginHeader.cy;
-					mixPlug = sndFile.ChnSettings[ncolhdr].nMixPlugin;
-					if (mixPlug)
-						wsprintf(s, "%d: %s", mixPlug, (sndFile.m_MixPlugins[mixPlug - 1]).pMixPlugin ? (sndFile.m_MixPlugins[mixPlug - 1]).GetName() : "[empty]");
-					else
-						wsprintf(s, "---");
-					DrawButtonRect(hdc, &rect, s, FALSE, 
-						((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_PLUGNAME) && ((m_nDragItem & DRAGITEM_VALUEMASK) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
-				}
-
-			} else break;
-			ncolhdr++;
-			xpaint += nColumnWidth;
+			m_offScreenBitmap.DeleteObject();
+			m_offScreenDC.DeleteDC();
+			m_offScreenDC.CreateCompatibleDC(pDC);
+			m_offScreenBitmap.CreateCompatibleBitmap(pDC, rcClient.Width(), rcClient.Height());
+			m_oldClient = rcClient;
 		}
+		hdc = m_offScreenDC;
+		oldBitmap = SelectBitmap(hdc, m_offScreenBitmap);
+	} else
+	{
+		hdc = pDC->m_hDC;
 	}
-	ypaint += m_szHeader.cy;
+
+	HPEN oldpen = SelectPen(hdc, CMainFrame::penDarkGray);
+	CHANNELINDEX xofs = static_cast<CHANNELINDEX>(GetXScrollPos());
+	ROWINDEX yofs = static_cast<ROWINDEX>(GetYScrollPos());
+	const CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	UINT nColumnWidth = m_szCell.cx;
+	UINT ncols = sndFile.GetNumChannels();
+	int xpaint = m_szHeader.cx;
+	int ypaint = rcClient.top + m_szHeader.cy;
+
+	// Scroll tick by tick (always if active row is centered, otherwise only if the top row isn't the first one)
+	if(doSmoothScroll && liveRecord && (m_Status & (psFollowSong | psDragActive)) == psFollowSong && (m_nMidRow != 0 || yofs > 0))
+	{
+		ypaint -= GetSmoothScrollOffset();
+	}
 	
 	if (m_nMidRow)
 	{
@@ -677,7 +620,107 @@ void CViewPattern::OnDraw(CDC *pDC)
 	{
 		DrawDragSel(hdc);
 	}
+
+	UINT ncolhdr = xofs;
+	xpaint = m_szHeader.cx;
+	ypaint = rcClient.top;
+	rect.SetRect(0, rcClient.top, rcClient.right, rcClient.top + m_szHeader.cy);
+	if (::RectVisible(hdc, &rect))
+	{
+		sprintf(s, "#%u", m_nPattern);
+		rect.right = m_szHeader.cx;
+		DrawButtonRect(hdc, &rect, s, FALSE,
+			((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_PATTERNHEADER)) ? TRUE : FALSE);
+
+		// Drawing Channel Headers
+		while (xpaint < rcClient.right)
+		{
+			rect.SetRect(xpaint, ypaint, xpaint + nColumnWidth, ypaint + m_szHeader.cy);
+			if (ncolhdr < ncols)
+			{
+				const char *pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr]? "[Channel %u]" : "Channel %u";
+				if ((sndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) && sndFile.ChnSettings[ncolhdr].szName[0] != 0)
+					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "%u: [%s]" : "%u: %s";
+				else if (m_nDetailLevel < PatternCursor::volumeColumn) pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Ch%u]" : "Ch%u";
+				else if (m_nDetailLevel < PatternCursor::effectColumn) pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Chn %u]" : "Chn %u";
+				sprintf(s, pszfmt, ncolhdr + 1, sndFile.ChnSettings[ncolhdr].szName);
+				DrawButtonRect(hdc, &rect, s,
+					sndFile.ChnSettings[ncolhdr].dwFlags[CHN_MUTE] ? TRUE : FALSE,
+					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & DRAGITEM_VALUEMASK) == ncolhdr)) ? TRUE : FALSE,
+					pModDoc->IsChannelRecord(static_cast<CHANNELINDEX>(ncolhdr)) ? DT_RIGHT : DT_CENTER);
+
+				// When dragging around channel headers, mark insertion position
+				if(m_Status[psDragging] && !m_bInItemRect
+					&& (m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER
+					&& (m_nDropItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER
+					&& (m_nDropItem & DRAGITEM_VALUEMASK) == ncolhdr)
+				{
+					RECT r;
+					r.top = rect.top;
+					r.bottom = rect.bottom;
+					// Drop position depends on whether hovered channel is left or right of dragged item.
+					r.left = ((m_nDropItem & DRAGITEM_VALUEMASK) < (m_nDragItem & DRAGITEM_VALUEMASK) || m_Status[psShiftDragging]) ? rect.left : rect.right - 2;
+					r.right = r.left + 2;
+					::FillRect(hdc, &r, CMainFrame::brushText);
+				}
+
+				rect.bottom = rect.top + colHeight;
+
+				CRect insRect;
+				insRect.SetRect(xpaint, ypaint, xpaint + nColumnWidth / 8 + recordInsX, ypaint + colHeight);
+				if (pModDoc->IsChannelRecord1(static_cast<CHANNELINDEX>(ncolhdr)))
+				{
+					FrameRect(hdc,&rect,CMainFrame::brushGray);
+					InvertRect(hdc, &rect);
+					s[0] = '1';
+					s[1] = '\0';
+					DrawButtonRect(hdc, &insRect, s, FALSE, FALSE, DT_CENTER);
+					FrameRect(hdc,&insRect,CMainFrame::brushBlack);
+				} else if (pModDoc->IsChannelRecord2(static_cast<CHANNELINDEX>(ncolhdr)))
+				{
+					FrameRect(hdc,&rect,CMainFrame::brushGray);
+					InvertRect(hdc, &rect);
+					s[0] = '2';
+					s[1] = '\0';
+					DrawButtonRect(hdc, &insRect, s, FALSE, FALSE, DT_CENTER);
+					FrameRect(hdc,&insRect,CMainFrame::brushBlack);
+				}
+
+				if(m_Status[psShowVUMeters])
+				{
+					OldVUMeters[ncolhdr] = 0;
+					DrawChannelVUMeter(hdc, rect.left + 1, rect.bottom, ncolhdr);
+					rect.top += vuHeight;
+					rect.bottom += vuHeight;
+				}
+				if(m_Status[psShowPluginNames])
+				{
+					rect.top += m_szPluginHeader.cy;
+					rect.bottom += m_szPluginHeader.cy;
+					PLUGINDEX mixPlug = sndFile.ChnSettings[ncolhdr].nMixPlugin;
+					if (mixPlug)
+						sprintf(s, "%u: %s", mixPlug, (sndFile.m_MixPlugins[mixPlug - 1]).pMixPlugin ? (sndFile.m_MixPlugins[mixPlug - 1]).GetName() : "[empty]");
+					else
+						sprintf(s, "---");
+					DrawButtonRect(hdc, &rect, s, FALSE,
+						((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_PLUGNAME) && ((m_nDragItem & DRAGITEM_VALUEMASK) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
+				}
+
+			} else break;
+			ncolhdr++;
+			xpaint += nColumnWidth;
+		}
+	}
+
 	if (oldpen) SelectPen(hdc, oldpen);
+
+	if(doSmoothScroll)
+	{
+		CRect clipRect;
+		pDC->GetClipBox(clipRect);
+		pDC->BitBlt(clipRect.left, clipRect.top, clipRect.Width(), clipRect.Height(), &m_offScreenDC, clipRect.left, clipRect.top, SRCCOPY);
+		SelectBitmap(m_offScreenDC, oldBitmap);
+	}
 
 	//rewbs.fxVis
 	if (m_pEffectVis)

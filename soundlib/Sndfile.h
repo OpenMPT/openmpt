@@ -872,12 +872,12 @@ protected:
 	void DoFreqSlide(ModChannel *pChn, int32 nFreqSlide) const;
 	void UpdateTimeSignature();
 
+public:
 	uint32 GetNumTicksOnCurrentRow() const
 	{
 		return (m_PlayState.m_nMusicSpeed  + m_PlayState.m_nFrameDelay) * MAX(m_PlayState.m_nPatternDelay, 1);
 	}
 
-public:
 	bool DestroySample(SAMPLEINDEX nSample);
 	bool DestroySampleThreadsafe(SAMPLEINDEX nSample);
 

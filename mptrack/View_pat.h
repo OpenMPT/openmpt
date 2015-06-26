@@ -157,13 +157,16 @@ public:
 protected:
 
 	CFastBitmap m_Dib;
+	CDC m_offScreenDC;
+	CBitmap m_offScreenBitmap;
 	CEditCommand *m_pEditWnd;
 	CPatternGotoDialog *m_pGotoWnd;
 	CSize m_szHeader, m_szPluginHeader, m_szCell;
+	CRect m_oldClient;
 	UINT m_nMidRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
 	FlagSet<PatternStatus> m_Status;
 	ROWINDEX m_nPlayRow;
-	uint32 m_nPlayTick;
+	uint32 m_nPlayTick, m_nTicksOnRow;
 	PATTERNINDEX m_nPattern, m_nPlayPat;
 	ORDERINDEX m_nOrder;
 	int32 m_nTransposeAmount;
@@ -210,6 +213,7 @@ public:
 	CEffectVis *m_pEffectVis;	//rewbs.fxVis
 
 	CViewPattern();
+	~CViewPattern();
 	DECLARE_SERIAL(CViewPattern)
 
 public:
@@ -230,6 +234,7 @@ public:
 	int GetYScrollPos() const { return m_nYScroll; }
 	int GetColumnWidth() const { return m_szCell.cx; }
 	int GetColumnHeight() const { return m_szCell.cy; }
+	int GetSmoothScrollOffset() const;
 
 	PATTERNINDEX GetCurrentPattern() const { return m_nPattern; }
 	ROWINDEX GetCurrentRow() const { return m_Cursor.GetRow(); }
@@ -271,7 +276,7 @@ public:
 	// This should be used instead of consecutive calls to SetCurrentRow() then SetCurrentColumn()
 	bool SetCursorPosition(const PatternCursor &cursor, bool wrap = false);
 	bool DragToSel(const PatternCursor &cursor, bool scrollHorizontal, bool scrollVertical, bool noMove = false);
-	bool SetPlayCursor(PATTERNINDEX pat, ROWINDEX row);
+	bool SetPlayCursor(PATTERNINDEX pat, ROWINDEX row, uint32 tick);
 	bool UpdateScrollbarPositions(bool updateHorizontalScrollbar = true);
 	BYTE EnterNote(UINT nNote, UINT nIns=0, BOOL bCheck=FALSE, int vol=-1, BOOL bMultiCh=FALSE);
 	bool ShowEditWindow();
