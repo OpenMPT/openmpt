@@ -77,7 +77,7 @@ enum
 // Feel free to replace the deprecated flags by new flags, but be sure to
 // update TrackerSettings::TrackerSettings() as well.
 #define PATTERN_PLAYNEWNOTE			0x01		// play new notes while recording
-//#define PATTERN_LARGECOMMENTS		0x02		// use large font in comments
+#define PATTERN_SMOOTHSCROLL		0x02		// scroll tick by tick, not row by row
 #define PATTERN_STDHIGHLIGHT		0x04		// enable primary highlight (measures)
 //#define PATTERN_SMALLFONT			0x08		// use small font in pattern editor
 #define PATTERN_CENTERROW			0x10		// always center active row

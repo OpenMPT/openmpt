@@ -3,8 +3,7 @@
  * --------------
  * Purpose: GUI update notification struct
  * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
+ * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
@@ -39,7 +38,7 @@ struct Notification
 	FlagSet<Notification::Type> type;
 	Item item;						// Sample or instrument number, depending on type
 	ROWINDEX row;					// Always valid
-	uint32 tick;					// ditto
+	uint32 tick, ticksOnRow;		// ditto
 	ORDERINDEX order;				// ditto
 	PATTERNINDEX pattern;			// ditto
 	uint32 mixedChannels;			// ditto
@@ -47,7 +46,7 @@ struct Notification
 	uint8 masterVUchannels;			// ditto
 	SmpLength pos[MAX_CHANNELS];	// Sample / envelope pos for each channel if != PosInvalid, or pattern channel VUs
 
-	Notification(FlagSet<Notification::Type> t = Default, Item i = 0, int64 s = 0, ROWINDEX r = 0, uint32 ti = 0, ORDERINDEX o = 0, PATTERNINDEX p = 0, uint32 x = 0, uint8 outChannels = 0) : timestampSamples(s), type(t), item(i), row(r), tick(ti), order(o), pattern(p), mixedChannels(x), masterVUchannels(outChannels)
+	Notification(FlagSet<Notification::Type> t = Default, Item i = 0, int64 s = 0, ROWINDEX r = 0, uint32 ti = 0, uint32 tir = 0, ORDERINDEX o = 0, PATTERNINDEX p = 0, uint32 x = 0, uint8 outChannels = 0) : timestampSamples(s), type(t), item(i), row(r), tick(ti), ticksOnRow(tir), order(o), pattern(p), mixedChannels(x), masterVUchannels(outChannels)
 	{
 		MemsetZero(masterVU);
 	}
