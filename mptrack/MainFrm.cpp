@@ -340,7 +340,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	UpdateColors();
 
-	if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MIDIRECORD) midiOpenDevice(false);
+	if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_ENABLE_RECORD_DEFAULT) midiOpenDevice(false);
 
 	HtmlHelpW(m_hWnd, nullptr, HH_INITIALIZE, reinterpret_cast<DWORD_PTR>(&helpCookie));
 

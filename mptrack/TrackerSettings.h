@@ -96,7 +96,7 @@ enum
 #define PATTERN_CONTSCROLL			0x20000		// continous pattern scrolling
 #define PATTERN_KBDNOTEOFF			0x40000		// Record note-off events
 #define PATTERN_FOLLOWSONGOFF		0x80000		// follow song off by default
-#define PATTERN_MIDIRECORD			0x100000	// MIDI Record on by default
+//#define PATTERN_MIDIRECORD		0x100000	// MIDI Record on by default
 #define PATTERN_NOCLOSEDIALOG		0x200000	// Don't use OpenMPT's custom close dialog with a list of saved files when closing the main window
 #define PATTERN_DBLCLICKSELECT		0x400000	// Double-clicking pattern selects whole channel
 #define PATTERN_OLDCTXMENUSTYLE		0x800000	// Hide pattern context menu entries instead of greying them out.
@@ -112,7 +112,7 @@ enum
 #define PATTERNFONT_SMALL "@1"
 #define PATTERNFONT_LARGE "@2"
 
-// Midi Setup
+// MIDI Setup
 #define MIDISETUP_RECORDVELOCITY			0x01	// Record MIDI velocity
 #define MIDISETUP_TRANSPOSEKEYBOARD			0x02	// Apply transpose value to MIDI Notes
 #define MIDISETUP_MIDITOPLUG				0x04	// Pass MIDI messages to plugins
@@ -121,6 +121,7 @@ enum
 #define MIDISETUP_RESPONDTOPLAYCONTROLMSGS	0x20	// Respond to Restart/Continue/Stop MIDI commands
 #define MIDISETUP_MIDIMACROCONTROL			0x80	// Record MIDI controller changes a MIDI macro changes in pattern
 #define MIDISETUP_PLAYPATTERNONMIDIIN		0x100	// Play pattern if MIDI Note is received and playback is paused
+#define MIDISETUP_ENABLE_RECORD_DEFAULT		0x200	// Enable MIDI recording by default
 
 
 // EQ

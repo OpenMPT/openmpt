@@ -1711,6 +1711,7 @@ BEGIN_MESSAGE_MAP(CMidiSetupDlg, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_COMBO2,			OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK1,					OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK2,					OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK3,					OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK4,					OnSettingsChanged)
 	ON_COMMAND(IDC_MIDI_TO_PLUGIN,			OnSettingsChanged)
 	ON_COMMAND(IDC_MIDI_MACRO_CONTROL,		OnSettingsChanged)
@@ -1745,6 +1746,7 @@ BOOL CMidiSetupDlg::OnInitDialog()
 	// Flags
 	if (m_dwMidiSetup & MIDISETUP_RECORDVELOCITY) CheckDlgButton(IDC_CHECK1, BST_CHECKED);
 	if (m_dwMidiSetup & MIDISETUP_RECORDNOTEOFF) CheckDlgButton(IDC_CHECK2, BST_CHECKED);
+	if (m_dwMidiSetup & MIDISETUP_ENABLE_RECORD_DEFAULT) CheckDlgButton(IDC_CHECK3, BST_CHECKED);
 	if (m_dwMidiSetup & MIDISETUP_TRANSPOSEKEYBOARD) CheckDlgButton(IDC_CHECK4, BST_CHECKED);
 	if (m_dwMidiSetup & MIDISETUP_MIDITOPLUG) CheckDlgButton(IDC_MIDI_TO_PLUGIN, BST_CHECKED);
 	if (m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL) CheckDlgButton(IDC_MIDI_MACRO_CONTROL, BST_CHECKED);
@@ -1812,6 +1814,7 @@ void CMidiSetupDlg::OnOK()
 	m_nMidiDevice = MIDI_MAPPER;
 	if (IsDlgButtonChecked(IDC_CHECK1)) m_dwMidiSetup |= MIDISETUP_RECORDVELOCITY;
 	if (IsDlgButtonChecked(IDC_CHECK2)) m_dwMidiSetup |= MIDISETUP_RECORDNOTEOFF;
+	if (IsDlgButtonChecked(IDC_CHECK3)) m_dwMidiSetup |= MIDISETUP_ENABLE_RECORD_DEFAULT;
 	if (IsDlgButtonChecked(IDC_CHECK4)) m_dwMidiSetup |= MIDISETUP_TRANSPOSEKEYBOARD;
 	if (IsDlgButtonChecked(IDC_MIDI_TO_PLUGIN)) m_dwMidiSetup |= MIDISETUP_MIDITOPLUG;
 	if (IsDlgButtonChecked(IDC_MIDI_MACRO_CONTROL)) m_dwMidiSetup |= MIDISETUP_MIDIMACROCONTROL;
