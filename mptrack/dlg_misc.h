@@ -278,7 +278,7 @@ protected:
 		CSliderCtrl valueSlider;
 	};
 	std::vector<RowCtls *> m_controls;
-	int m_groupSize;
+	static int m_groupSize;
 
 public:
 	TempoSwing m_tempoSwing;
