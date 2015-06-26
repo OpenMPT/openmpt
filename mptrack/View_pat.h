@@ -244,7 +244,7 @@ public:
 	POINT GetPointFromPosition(PatternCursor cursor);
 	PatternCursor GetPositionFromPoint(POINT pt);
 
-	DWORD GetDragItem(CPoint point, LPRECT lpRect);
+	DWORD GetDragItem(CPoint point, RECT &rect);
 
 	ROWINDEX GetRowsPerBeat() const;
 	ROWINDEX GetRowsPerMeasure() const;
@@ -306,17 +306,17 @@ public:
 
 	void CursorJump(DWORD distance, bool upwards, bool snap);
 
-	void TempEnterNote(int n, int vol = -1, bool fromMidi = false);
-	void TempStopNote(int note, bool fromMidi = false, const bool bChordMode = false);
-	void TempEnterChord(int n);
-	void TempStopChord(int note) {TempStopNote(note, false, true);}
+	void TempEnterNote(ModCommand::NOTE n, int vol = -1, bool fromMidi = false);
+	void TempStopNote(ModCommand::NOTE note, bool fromMidi = false, const bool bChordMode = false);
+	void TempEnterChord(ModCommand::NOTE n);
+	void TempStopChord(ModCommand::NOTE note) {TempStopNote(note, false, true);}
 	void TempEnterIns(int val);
 	void TempEnterOctave(int val);
 	void TempStopOctave(int val);
 	void TempEnterVol(int v);
-	void TempEnterFX(int c, int v = -1);
+	void TempEnterFX(ModCommand::COMMAND c, int v = -1);
 	void TempEnterFXparam(int v);
-	void EnterAftertouch(int note, int atValue);
+	void EnterAftertouch(ModCommand::NOTE note, int atValue);
 
 	int GetDefaultVolume(const ModCommand &m) const;
 

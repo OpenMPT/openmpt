@@ -1542,12 +1542,9 @@ void CViewPattern::UpdateIndicator()
 				case PatternCursor::noteColumn:
 					// display note
 					if(m->IsSpecialNote())
-					{
 						s = szSpecialNoteShortDesc[m->note - NOTE_MIN_SPECIAL];
-					} else if(m->IsNote())
-					{
-						s.Format(_T("%s%u"), szNoteNames[(m->note - NOTE_MIN) % 12], (m->note - NOTE_MIN) / 12);
-					}
+					else if(m->IsNote())
+						s = pSndFile->GetNoteName(m->note, m->instr).c_str();
 					break;
 
 				case PatternCursor::instrColumn:
