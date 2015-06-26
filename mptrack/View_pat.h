@@ -165,7 +165,7 @@ protected:
 	ROWINDEX m_nPlayRow;
 	uint32 m_nPlayTick;
 	PATTERNINDEX m_nPattern, m_nPlayPat;
-	ORDERINDEX m_nPlayOrd;
+	ORDERINDEX m_nOrder;
 	int32 m_nTransposeAmount;
 
 	int m_nXScroll, m_nYScroll;
@@ -234,7 +234,8 @@ public:
 	PATTERNINDEX GetCurrentPattern() const { return m_nPattern; }
 	ROWINDEX GetCurrentRow() const { return m_Cursor.GetRow(); }
 	CHANNELINDEX GetCurrentChannel() const { return m_Cursor.GetChannel(); }
-	ORDERINDEX GetCurrentOrder() const { return static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER)); }
+	ORDERINDEX GetCurrentOrder() const { return m_nOrder; }
+	void SetCurrentOrder(ORDERINDEX ord) { m_nOrder = ord; SendCtrlMessage(CTRLMSG_SETCURRENTORDER, ord); }
 	// Get ModCommand at the pattern cursor position.
 	ModCommand &GetCursorCommand() { return GetModCommand(m_Cursor); };
 	void SanitizeCursor();
@@ -270,7 +271,7 @@ public:
 	// This should be used instead of consecutive calls to SetCurrentRow() then SetCurrentColumn()
 	bool SetCursorPosition(const PatternCursor &cursor, bool wrap = false);
 	bool DragToSel(const PatternCursor &cursor, bool scrollHorizontal, bool scrollVertical, bool noMove = false);
-	bool SetPlayCursor(ORDERINDEX ord, PATTERNINDEX pat, ROWINDEX row);
+	bool SetPlayCursor(PATTERNINDEX pat, ROWINDEX row);
 	bool UpdateScrollbarPositions(bool updateHorizontalScrollbar = true);
 	BYTE EnterNote(UINT nNote, UINT nIns=0, BOOL bCheck=FALSE, int vol=-1, BOOL bMultiCh=FALSE);
 	bool ShowEditWindow();

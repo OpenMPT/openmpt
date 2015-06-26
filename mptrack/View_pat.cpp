@@ -157,6 +157,7 @@ CViewPattern::CViewPattern()
 
 	m_nTransposeAmount = 1;
 	m_nPattern = 0;
+	m_nOrder = 0;
 	m_nDetailLevel = PatternCursor::lastColumn;
 	m_pEditWnd = NULL;
 	m_pGotoWnd = NULL;
@@ -177,13 +178,10 @@ void CViewPattern::OnInitialUpdate()
 	CModScrollView::OnInitialUpdate();
 	MemsetZero(ChnVUMeters);
 	MemsetZero(OldVUMeters);
-// -> CODE#0012
-// -> DESC="midi keyboard split"
 	memset(previousNote, NOTE_NONE, sizeof(previousNote));
 	memset(splitActiveNoteChannel, 0xFF, sizeof(splitActiveNoteChannel));
 	memset(activeNoteChannel, 0xFF, sizeof(activeNoteChannel));
 	m_nPlayPat = PATTERNINDEX_INVALID;
-	m_nPlayOrd = ORDERINDEX_INVALID;
 	m_nPlayRow = 0;
 	m_nPlayTick = 0;
 	m_nMidRow = 0;
@@ -288,13 +286,13 @@ bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalS
 			if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
 				ORDERINDEX curOrder = GetCurrentOrder();
-				if ((curOrder > 0) && (curOrder < pSndFile->Order.size()) && (m_nPattern == pSndFile->Order[curOrder]))
+				const ORDERINDEX prevOrd = pSndFile->Order.GetPreviousOrderIgnoringSkips(curOrder);
+				if (prevOrd < curOrder && m_nPattern == pSndFile->Order[curOrder])
 				{
-					const ORDERINDEX prevOrd = pSndFile->Order.GetPreviousOrderIgnoringSkips(curOrder);
 					const PATTERNINDEX nPrevPat = pSndFile->Order[prevOrd];
 					if ((nPrevPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nPrevPat].GetNumRows()))
 					{
-						SendCtrlMessage(CTRLMSG_SETCURRENTORDER, prevOrd);
+						SetCurrentOrder(prevOrd);
 						if (SetCurrentPattern(nPrevPat))
 							return SetCurrentRow(pSndFile->Patterns[nPrevPat].GetNumRows() + (int)row);
 					}
@@ -315,14 +313,14 @@ bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalS
 			} else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
 				ORDERINDEX curOrder = GetCurrentOrder();
-				if(curOrder + 1 < pSndFile->Order.size() && m_nPattern == pSndFile->Order[curOrder])
+				ORDERINDEX nextOrder = pSndFile->Order.GetNextOrderIgnoringSkips(curOrder);
+				if(nextOrder > curOrder && m_nPattern == pSndFile->Order[curOrder])
 				{
-					const ORDERINDEX nextOrder = pSndFile->Order.GetNextOrderIgnoringSkips(curOrder);
-					const PATTERNINDEX nextPat = pSndFile->Order[nextOrder];
+					PATTERNINDEX nextPat = pSndFile->Order[nextOrder];
 					if ((nextPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nextPat].GetNumRows()))
 					{
 						const ROWINDEX newRow = row - pSndFile->Patterns[m_nPattern].GetNumRows();
-						SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nextOrder);
+						SetCurrentOrder(nextOrder);
 						if (SetCurrentPattern(nextPat))
 							return SetCurrentRow(newRow);
 					}
@@ -614,29 +612,19 @@ bool CViewPattern::DragToSel(const PatternCursor &cursor, bool scrollHorizontal,
 }
 
 
-bool CViewPattern::SetPlayCursor(ORDERINDEX ord, PATTERNINDEX pat, ROWINDEX row)
-//------------------------------------------------------------------------------
+bool CViewPattern::SetPlayCursor(PATTERNINDEX pat, ROWINDEX row)
+//--------------------------------------------------------------
 {
-	ORDERINDEX oldOrd = m_nPlayOrd;
 	PATTERNINDEX oldPat = m_nPlayPat;
 	ROWINDEX oldRow = m_nPlayRow;
 
-	if (ord == m_nPlayOrd && pat == m_nPlayPat && row == m_nPlayRow)
-		return true;
-	
-	m_nPlayOrd = ord;
 	m_nPlayPat = pat;
 	m_nPlayRow = row;
-	if (oldOrd != m_nPlayOrd)
-	{
-		InvalidatePattern(true);
-	} else
-	{
-		if (oldPat == m_nPattern)
-			InvalidateRow(oldRow);
-		if (m_nPlayPat == m_nPattern)
-			InvalidateRow(m_nPlayRow);
-	}
+
+	if (oldPat == m_nPattern)
+		InvalidateRow(oldRow);
+	if (m_nPlayPat == m_nPattern)
+		InvalidateRow(m_nPlayRow);
 
 	return true;
 }
@@ -2021,7 +2009,7 @@ void CViewPattern::OnEditGoto()
 				SetCurrentPattern(m_pGotoWnd->m_nPattern);
 
 			if (m_pGotoWnd->m_nOrder != curOrder)
-				SendCtrlMessage(CTRLMSG_SETCURRENTORDER,  m_pGotoWnd->m_nOrder);
+				SetCurrentOrder( m_pGotoWnd->m_nOrder);
 
 			if (m_pGotoWnd->m_nChannel != curChannel)
 				SetCurrentColumn(m_pGotoWnd->m_nChannel - 1);
@@ -2211,7 +2199,7 @@ void CViewPattern::OnEditFindNext()
 						ORDERINDEX matchingOrder = pSndFile->Order.FindOrder(pat, GetCurrentOrder());
 						if(matchingOrder != ORDERINDEX_INVALID)
 						{
-							SendCtrlMessage(CTRLMSG_SETCURRENTORDER, matchingOrder);
+							SetCurrentOrder(matchingOrder);
 						}
 						// go to place of finding
 						SetCurrentPattern(pat);
@@ -3481,7 +3469,7 @@ void CViewPattern::UndoRedo(bool undo)
 				ORDERINDEX matchingOrder = GetSoundFile()->Order.FindOrder(pat, GetCurrentOrder());
 				if(matchingOrder != ORDERINDEX_INVALID)
 				{
-					SendCtrlMessage(CTRLMSG_SETCURRENTORDER, matchingOrder);
+					SetCurrentOrder(matchingOrder);
 				}
 				SetCurrentPattern(pat);
 			} else
@@ -3768,7 +3756,7 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 					if (nPat != m_nPattern || updateOrderList)
 					{
 						if(nPat != m_nPattern) SetCurrentPattern(nPat, nRow);
-						if (nOrd < pSndFile->Order.size()) SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nOrd);
+						if (nOrd < pSndFile->Order.size()) SetCurrentOrder(nOrd);
 						updateOrderList = false;
 					}
 					if (nRow != GetCurrentRow())
@@ -3784,7 +3772,7 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 					updateOrderList = false;
 				}
 			}
-			SetPlayCursor(nOrd, nPat, nRow);
+			SetPlayCursor(nPat, nRow);
 			m_nPlayTick = pnotify->tick;
 		}
 	}
@@ -3799,7 +3787,7 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 		MemsetZero(ChnVUMeters);	// Also zero all non-visible VU meters
 		if((m_Status & (psFollowSong | psDragActive)) == psFollowSong)
 		{
-			SetPlayCursor(ORDERINDEX_INVALID, PATTERNINDEX_INVALID, ROWINDEX_INVALID);
+			SetPlayCursor(PATTERNINDEX_INVALID, ROWINDEX_INVALID);
 		}
 	}
 
@@ -4136,7 +4124,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				if(plug)
 				{	
 					plug->MidiSend(dwMidiData);
-					// Sending midi may modify the plug. For now, if MIDI data
+					// Sending MIDI may modify the plugin. For now, if MIDI data
 					// is not active sensing, set modified.
 					if(dwMidiData != MIDIEvents::System(MIDIEvents::sysActiveSense))
 						pMainFrm->ThreadSafeSetModified(pModDoc);
@@ -4165,6 +4153,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		return m_nPattern;
 
 	case VIEWMSG_SETCURRENTPATTERN:
+		m_nOrder = static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
 		SetCurrentPattern(lParam);
 		break;
 
@@ -4494,7 +4483,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 								SetCurrentPattern((n < pSndFile->Patterns.Size()) ? n : 0);
 								ORDERINDEX currentOrder = GetCurrentOrder();
 								ORDERINDEX newOrder = pSndFile->Order.FindOrder(m_nPattern, currentOrder, true);
-								SendCtrlMessage(CTRLMSG_SETCURRENTORDER, newOrder);
+								SetCurrentOrder(newOrder);
 								return wParam;
 							}
 		case kcPrevPattern: {	PATTERNINDEX n = (m_nPattern) ? m_nPattern - 1 : pSndFile->Patterns.Size() - 1;
@@ -4502,7 +4491,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 								SetCurrentPattern(n);
 								ORDERINDEX currentOrder = GetCurrentOrder();
 								ORDERINDEX newOrder = pSndFile->Order.FindOrder(m_nPattern, currentOrder, false);
-								SendCtrlMessage(CTRLMSG_SETCURRENTORDER, newOrder);
+								SetCurrentOrder(newOrder);
 								return wParam;
 							}
 		case kcSelectWithCopySelect:
@@ -7100,7 +7089,7 @@ bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &past
 		// Multipaste: Switch to pasted pattern.
 		SetCurrentPattern(pos.pattern);
 		curOrder = GetSoundFile()->Order.FindOrder(pos.pattern, curOrder);
-		SendCtrlMessage(CTRLMSG_SETCURRENTORDER, curOrder);
+		SetCurrentOrder(curOrder);
 	}
 
 	if(result)
