@@ -693,6 +693,8 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 			UINT nFlags = HIWORD(pMsg->lParam);
 			KeyEventType kT = ih->GetKeyEventType(nFlags);
 			InputTargetContext ctx = (InputTargetContext)(kCtxViewPatterns + 1 + m_Cursor.GetColumnType());
+			// If editing is disabled, preview notes no matter which column we are in
+			if(!IsEditingEnabled() && TrackerSettings::Instance().patternNoEditPopup) ctx = kCtxViewPatternsNote;
 
 			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
 			{
@@ -6795,6 +6797,7 @@ bool CViewPattern::IsEditingEnabled_bmsg()
 //----------------------------------------
 {
 	if(IsEditingEnabled()) return true;
+	if(TrackerSettings::Instance().patternNoEditPopup) return false;
 
 	HMENU hMenu;
 
