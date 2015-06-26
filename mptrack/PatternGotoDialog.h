@@ -28,7 +28,10 @@ public:
 	DECLARE_MESSAGE_MAP()
 
 public:
-	UINT m_nRow, m_nChannel, m_nPattern, m_nOrder, m_nActiveOrder;
+	ROWINDEX m_nRow;
+	CHANNELINDEX m_nChannel;
+	PATTERNINDEX m_nPattern;
+	ORDERINDEX m_nOrder, m_nActiveOrder;
 	void UpdatePos(ROWINDEX row, CHANNELINDEX chan, PATTERNINDEX pat, ORDERINDEX ord, CSoundFile &sndFile);
 
 protected:

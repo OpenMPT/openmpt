@@ -39,10 +39,11 @@ CPatternGotoDialog::~CPatternGotoDialog()
 void CPatternGotoDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Text(pDX, IDC_GOTO_ROW, m_nRow);
-	DDX_Text(pDX, IDC_GOTO_CHAN, m_nChannel);
-	DDX_Text(pDX, IDC_GOTO_PAT, m_nPattern);
-	DDX_Text(pDX, IDC_GOTO_ORD, m_nOrder);
+	UINT temp;
+	DDX_Text(pDX, IDC_GOTO_ROW, temp); m_nRow = static_cast<ROWINDEX>(temp);
+	DDX_Text(pDX, IDC_GOTO_CHAN, temp); m_nChannel = static_cast<CHANNELINDEX>(temp);
+	DDX_Text(pDX, IDC_GOTO_PAT, temp); m_nPattern = static_cast<PATTERNINDEX>(temp);
+	DDX_Text(pDX, IDC_GOTO_ORD, temp); m_nOrder = static_cast<ORDERINDEX>(temp);
 }
 
 
