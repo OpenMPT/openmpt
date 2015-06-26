@@ -1206,15 +1206,17 @@ BEGIN_MESSAGE_MAP(CTempoSwingDlg, CDialog)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+int CTempoSwingDlg::m_groupSize = 1;
 
 CTempoSwingDlg::CTempoSwingDlg(CWnd *parent, const TempoSwing &currentTempoSwing, CSoundFile &sndFile, PATTERNINDEX pattern)
 	: CDialog(IDD_TEMPO_SWING, parent)
-	, m_groupSize(1)
 	, m_tempoSwing(currentTempoSwing)
 	, m_origTempoSwing(pattern == PATTERNINDEX_INVALID ? sndFile.m_tempoSwing : sndFile.Patterns[pattern].GetTempoSwing())
 	, m_sndFile(sndFile)
 	, m_pattern(pattern)
-{ }
+{
+	m_groupSize = std::min(m_groupSize, static_cast<int>(m_tempoSwing.size()));
+}
 
 BOOL CTempoSwingDlg::OnInitDialog()
 //---------------------------------
@@ -1374,8 +1376,8 @@ void CTempoSwingDlg::OnToggleGroup()
 void CTempoSwingDlg::OnGroupChanged()
 //-----------------------------------
 {
-	m_groupSize = GetDlgItemInt(IDC_EDIT1);
-	Limit(m_groupSize, 1, static_cast<int>(m_tempoSwing.size()));
+	int val = GetDlgItemInt(IDC_EDIT1);
+	if(val > 0) m_groupSize = std::min(val, static_cast<int>(m_tempoSwing.size()));
 }
 
 
@@ -1386,12 +1388,11 @@ void CTempoSwingDlg::OnHScroll(UINT /*nSBCode*/, UINT /*nPos*/, CScrollBar* pScr
 	{
 		// Edit groups
 		size_t editedGroup = 0;
-		int editedValue = SliderUnity;
+		int editedValue = reinterpret_cast<CSliderCtrl *>(pScrollBar)->GetPos();
 		for(size_t i = 0; i < m_controls.size(); i++)
 		{
 			if(m_controls[i]->valueSlider.m_hWnd == pScrollBar->m_hWnd)
 			{
-				editedValue = m_controls[i]->valueSlider.GetPos();
 				editedGroup = (i / m_groupSize) % 2;
 				break;
 			}
