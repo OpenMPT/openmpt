@@ -69,6 +69,8 @@ BOOL PathConfigDlg::OnInitDialog()
 	// Autosave
 	CheckDlgButton(IDC_CHECK1, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CREATEBACKUP) != 0);
 
+	static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1))->SetRange32(1, int32_max);
+	static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN2))->SetRange32(1, int32_max);
 	CheckDlgButton(IDC_AUTOSAVE_ENABLE, TrackerSettings::Instance().AutosaveEnabled ? BST_CHECKED : BST_UNCHECKED);
 	SetDlgItemInt(IDC_AUTOSAVE_HISTORY, TrackerSettings::Instance().AutosaveHistoryDepth);
 	::SetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, TrackerSettings::Instance().AutosavePath.GetDefaultDir().AsNative().c_str());
@@ -141,7 +143,9 @@ void PathConfigDlg::OnAutosaveEnable()
 {
 	BOOL enabled = IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE);
 	GetDlgItem(IDC_AUTOSAVE_INTERVAL)->EnableWindow(enabled);
+	GetDlgItem(IDC_SPIN1)->EnableWindow(enabled);
 	GetDlgItem(IDC_AUTOSAVE_HISTORY)->EnableWindow(enabled);
+	GetDlgItem(IDC_SPIN2)->EnableWindow(enabled);
 	GetDlgItem(IDC_AUTOSAVE_USEORIGDIR)->EnableWindow(enabled);
 	GetDlgItem(IDC_AUTOSAVE_USECUSTOMDIR)->EnableWindow(enabled);
 	GetDlgItem(IDC_AUTOSAVE_PATH)->EnableWindow(enabled);
