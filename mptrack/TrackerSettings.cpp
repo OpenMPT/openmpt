@@ -590,10 +590,15 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		patternFont = FontSetting((m_dwPatternSetup & 0x08) ? PATTERNFONT_SMALL : PATTERNFONT_LARGE, 0);
 		m_dwPatternSetup &= ~(0x08 | 0x02);
 	}
-
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,25,00,08))
 	{
 		glGeneralWindowHeight += 44;
+	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,25,00,16) && (m_dwPatternSetup & 0x100000))
+	{
+		// Move MIDI recording to MIDI setup
+		m_dwPatternSetup &= ~0x100000;
+		m_dwMidiSetup |= MIDISETUP_ENABLE_RECORD_DEFAULT;
 	}
 
 	// Effects

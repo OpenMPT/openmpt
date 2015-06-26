@@ -53,7 +53,6 @@ static const struct GeneralOptionsDescriptions
 	{PATTERN_CONTSCROLL,	"Continuous scroll",				"Jumps to the next pattern when moving past the end of a pattern"},
 	{PATTERN_KBDNOTEOFF,	"Record note off",					"Record note off when a key is released on the PC keyboard."},
 	{PATTERN_FOLLOWSONGOFF,	"Follow song off by default",		"Ensure follow song is off when opening or starting a new song."},
-	{PATTERN_MIDIRECORD,	"MIDI record",						"Enable MIDI in record by default."},
 	{PATTERN_OLDCTXMENUSTYLE, "Old style pattern context menu", "Check this option to hide unavailable items in the pattern editor context menu. Uncheck to grey-out unavailable items instead."},
 	{PATTERN_SYNCMUTE,		"Maintain sample sync on mute",		"Samples continue to be processed when channels are muted (like in IT2 and FT2)"},
 	{PATTERN_SYNCSAMPLEPOS,	"Maintain sample sync on seek",		"Sample that are still active from previous patterns are continued to be played after seeking.\nNote: Some pattern commands may prevent samples from being synced. This feature may slow down seeking."},
