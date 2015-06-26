@@ -2118,7 +2118,8 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 		const uint32 code = file.ReadUint32LE();
 		const uint16 size = file.ReadUint16LE();
 
-		if(!file.CanRead(size))
+		// Start of MPTM extensions or truncated field
+		if(code == MAGIC4LE('2','2','8',4) || !file.CanRead(size))
 		{
 			break;
 		}
