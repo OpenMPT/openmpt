@@ -204,7 +204,7 @@ SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::Identifier identifier) co
 	}
 	if(identifier.empty())
 	{
-		return m_SoundDevices[0];
+		return SoundDevice::Info();
 	}
 	for(std::vector<SoundDevice::Info>::const_iterator it = begin(); it != end(); ++it)
 	{
