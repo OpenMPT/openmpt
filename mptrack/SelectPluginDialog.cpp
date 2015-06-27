@@ -55,12 +55,13 @@ void CSelectPluginDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
-CSelectPluginDlg::CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent) : CDialog(IDD_SELECTMIXPLUGIN, parent)
-//----------------------------------------------------------------------------------------------------------------------
+CSelectPluginDlg::CSelectPluginDlg(CModDoc *pModDoc, PLUGINDEX nPlugSlot, CWnd *parent)
+	: CDialog(IDD_SELECTMIXPLUGIN, parent)
+	, m_pModDoc(pModDoc)
+	, m_nPlugSlot(nPlugSlot)
+//-------------------------------------------------------------------------------------
 {
 	m_pPlugin = NULL;
-	m_pModDoc = pModDoc;
-	m_nPlugSlot = nPlugSlot;
 
 	if(m_pModDoc)
 	{
@@ -178,7 +179,7 @@ void CSelectPluginDlg::OnOK()
 					{
 						const CSoundFile &sndFile = m_pModDoc->GetrSoundFile();
 						INSTRUMENTINDEX instr = 0;
-						for(INSTRUMENTINDEX i = 1; i < sndFile.GetNumInstruments(); i++)
+						for(INSTRUMENTINDEX i = 1; i <= sndFile.GetNumInstruments(); i++)
 						{
 							if(sndFile.Instruments[i] != nullptr && sndFile.Instruments[i]->nMixPlug == m_nPlugSlot + 1)
 							{

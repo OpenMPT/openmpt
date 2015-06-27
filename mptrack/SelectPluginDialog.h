@@ -27,7 +27,7 @@ class CSelectPluginDlg: public CDialog
 //====================================
 {
 protected:
-	int m_nPlugSlot;
+	PLUGINDEX m_nPlugSlot;
 	SNDMIXPLUGIN *m_pPlugin;
 	CModDoc *m_pModDoc;
 	CTreeCtrlW m_treePlugins;
@@ -39,7 +39,7 @@ protected:
 	HTREEITEM AddTreeItem(const WCHAR *title, int image, bool sort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);
 
 public:
-	CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent);
+	CSelectPluginDlg(CModDoc *pModDoc, PLUGINDEX nPlugSlot, CWnd *parent);
 	~CSelectPluginDlg();
 
 	static VSTPluginLib *ScanPlugins(const mpt::PathString &path, CWnd *parent);

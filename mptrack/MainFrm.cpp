@@ -1922,7 +1922,7 @@ void CMainFrame::OnPluginManager()
 //--------------------------------
 {
 #ifndef NO_VST
-	int nPlugslot=-1;
+	PLUGINDEX nPlugslot = PLUGINDEX_INVALID;
 	CModDoc* pModDoc = GetActiveDoc();
 
 	if (pModDoc)
