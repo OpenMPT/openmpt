@@ -15,14 +15,25 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 #ifdef ENABLE_ASM
-#define PROCSUPPORT_MMX        0x00001 // Processor supports MMX instructions
-#define PROCSUPPORT_SSE        0x00010 // Processor supports SSE instructions
-#define PROCSUPPORT_SSE2       0x00020 // Processor supports SSE2 instructions
-#define PROCSUPPORT_SSE3       0x00040 // Processor supports SSE3 instructions
-#define PROCSUPPORT_AMD_MMXEXT 0x10000 // Processor supports AMD MMX extensions
-#define PROCSUPPORT_AMD_3DNOW  0x20000 // Processor supports AMD 3DNow! instructions
-#define PROCSUPPORT_AMD_3DNOW2 0x40000 // Processor supports AMD 3DNow!2 instructions
+#define PROCSUPPORT_CPUID        0x00001 // Processor supports CPUID instruction (i586)
+#define PROCSUPPORT_TSC          0x00002 // Processor supports RDTSC instruction (i586)
+#define PROCSUPPORT_CMOV         0x00004 // Processor supports conditional move instructions (i686)
+#define PROCSUPPORT_FPU          0x00008 // Processor supports x87 instructions
+#define PROCSUPPORT_MMX          0x00010 // Processor supports MMX instructions
+#define PROCSUPPORT_AMD_MMXEXT   0x00020 // Processor supports AMD MMX extensions
+#define PROCSUPPORT_AMD_3DNOW    0x00040 // Processor supports AMD 3DNow! instructions
+#define PROCSUPPORT_AMD_3DNOWEXT 0x00080 // Processor supports AMD 3DNow!2 instructions
+#define PROCSUPPORT_SSE          0x00100 // Processor supports SSE instructions
+#define PROCSUPPORT_SSE2         0x00200 // Processor supports SSE2 instructions
+#define PROCSUPPORT_SSE3         0x00400 // Processor supports SSE3 instructions
+#define PROCSUPPORT_SSSE3        0x00800 // Processor supports SSSE3 instructions
+#define PROCSUPPORT_SSE4_1       0x01000 // Processor supports SSE4.1 instructions
+#define PROCSUPPORT_SSE4_2       0x02000 // Processor supports SSE4.2 instructions
 extern uint32 ProcSupport;
+extern char ProcVendorID[16+1];
+extern uint16 ProcFamily;
+extern uint8 ProcModel;
+extern uint8 ProcStepping;
 void InitProcSupport();
 static inline uint32 GetProcSupport()
 {

@@ -364,11 +364,12 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			{
 				text += MPT_USTRING("Required CPU features: ");
 				std::vector<mpt::ustring> features;
-				if(GetMinimumSSEVersion() <= 0 && GetMinimumAVXVersion() <= 0 ) features.push_back(MPT_USTRING("FPU"));
-				if(GetMinimumSSEVersion() >= 1) features.push_back(MPT_USTRING("SSE"));
-				if(GetMinimumSSEVersion() >= 2) features.push_back(MPT_USTRING("SSE2"));
-				if(GetMinimumAVXVersion() >= 1) features.push_back(MPT_USTRING("AVX"));
-				if(GetMinimumAVXVersion() >= 2) features.push_back(MPT_USTRING("AVX2"));
+				if(GetMinimumSSEVersion() <= 0 && GetMinimumAVXVersion() <= 0 ) features.push_back(MPT_USTRING("fpu"));
+				if(GetMinimumSSEVersion() >= 1) features.push_back(MPT_USTRING("cmov"));
+				if(GetMinimumSSEVersion() >= 1) features.push_back(MPT_USTRING("sse"));
+				if(GetMinimumSSEVersion() >= 2) features.push_back(MPT_USTRING("sse2"));
+				if(GetMinimumAVXVersion() >= 1) features.push_back(MPT_USTRING("avx"));
+				if(GetMinimumAVXVersion() >= 2) features.push_back(MPT_USTRING("avx2"));
 				text += mpt::String::Combine(features, MPT_USTRING(" "));
 				text += lf;
 			}
@@ -377,33 +378,52 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				std::vector<mpt::ustring> features;
 				#if MPT_COMPILER_MSVC && defined(ENABLE_ASM)
 					#if defined(ENABLE_X86)
-						features.push_back(MPT_USTRING("x86-32"));
+						features.push_back(MPT_USTRING("x86"));
+						if(GetProcSupport() & PROCSUPPORT_FPU) features.push_back(MPT_USTRING("fpu"));
+						if(GetProcSupport() & PROCSUPPORT_CMOV) features.push_back(MPT_USTRING("cmov"));
 					#endif
 					#if defined(ENABLE_X64)
 						features.push_back(MPT_USTRING("x86-64"));
 					#endif
 					#if defined(ENABLE_MMX)
-						if(GetProcSupport() & PROCSUPPORT_MMX) features.push_back(MPT_USTRING("MMX"));
+						if(GetProcSupport() & PROCSUPPORT_MMX) features.push_back(MPT_USTRING("mmx"));
 					#endif
 					#if defined(ENABLE_SSE)
-						if(GetProcSupport() & PROCSUPPORT_SSE) features.push_back(MPT_USTRING("SSE"));
+						if(GetProcSupport() & PROCSUPPORT_SSE) features.push_back(MPT_USTRING("sse"));
 					#endif
 					#if defined(ENABLE_SSE2)
-						if(GetProcSupport() & PROCSUPPORT_SSE2) features.push_back(MPT_USTRING("SSE2"));
+						if(GetProcSupport() & PROCSUPPORT_SSE2) features.push_back(MPT_USTRING("sse2"));
 					#endif
 					#if defined(ENABLE_SSE3)
-						if(GetProcSupport() & PROCSUPPORT_SSE3) features.push_back(MPT_USTRING("SSE3"));
+						if(GetProcSupport() & PROCSUPPORT_SSE3) features.push_back(MPT_USTRING("sse3"));
+						if(GetProcSupport() & PROCSUPPORT_SSSE3) features.push_back(MPT_USTRING("ssse3"));
+					#endif
+					#if defined(ENABLE_SSE4)
+						if(GetProcSupport() & PROCSUPPORT_SSE4_1) features.push_back(MPT_USTRING("sse4.1"));
+						if(GetProcSupport() & PROCSUPPORT_SSE4_2) features.push_back(MPT_USTRING("sse4.2"));
 					#endif
 					#if defined(ENABLE_X86_AMD)
-						if(GetProcSupport() & PROCSUPPORT_AMD_MMXEXT) features.push_back(MPT_USTRING("AMD-MMXEXT"));
-						if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW) features.push_back(MPT_USTRING("AMD-3DNOW"));
-						if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW2) features.push_back(MPT_USTRING("AMD-3DNOW2"));
+						if(GetProcSupport() & PROCSUPPORT_AMD_MMXEXT) features.push_back(MPT_USTRING("mmxext"));
+						if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW) features.push_back(MPT_USTRING("3dnow"));
+						if(GetProcSupport() & PROCSUPPORT_AMD_3DNOWEXT) features.push_back(MPT_USTRING("3dnowext"));
 					#endif
 				#endif
 				text += mpt::String::Combine(features, MPT_USTRING(" "));
 				text += lf;
 			}
 			text += lf;
+			if(GetProcSupport() & PROCSUPPORT_CPUID)
+			{
+				text += MPT_UFORMAT("CPU: %1, Family %2, Model %3, Stepping %4"
+					, mpt::ToUnicode(mpt::CharsetASCII, (std::strlen(ProcVendorID) > 0) ? std::string(ProcVendorID) : std::string("Generic"))
+					, ProcFamily
+					, ProcModel
+					, ProcStepping
+					) + lf;
+			} else
+			{
+				text += MPT_USTRING("Generic without CPUID") + lf;
+			}
 			text += MPT_UFORMAT("Operating System: %1", mpt::Windows::Version::GetName()) + lf;
 			text += lf;
 			text += MPT_UFORMAT("OpenMPT Path%2: %1", theApp.GetAppDirPath(), theApp.IsPortableMode() ? MPT_USTRING(" (portable)") : MPT_USTRING("")) + lf;
