@@ -566,8 +566,9 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 				fileSel->returnMultiplePaths = new (std::nothrow) char *[fileSel->nbReturnPath];
 				for(size_t i = 0; i < files.size(); i++)
 				{
-					char *fname = new (std::nothrow) char[files[i].ToLocale().length() + 1];
-					strcpy(fname, files[i].ToLocale().c_str());
+					const std::string fname_ = files[i].ToLocale();
+					char *fname = new (std::nothrow) char[fname_.length() + 1];
+					strcpy(fname, fname_.c_str());
 					fileSel->returnMultiplePaths[i] = fname;
 				}
 				return 1;
@@ -2044,8 +2045,7 @@ void CVstPlugin::AutomateParameter(PlugParamIndex param)
 			CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
 		}
 
-		// Better idea: add an update hint just for plugin params?
-		pModDoc->UpdateAllViews(nullptr, PluginHint(m_nSlot + 1).Parameter(), nullptr);
+		pModDoc->PostMessageToAllViews(WM_MOD_PLUGPARAMAUTOMATE, m_nSlot, param);
 
 		if (CMainFrame::GetInputHandler()->ShiftPressed())
 		{
