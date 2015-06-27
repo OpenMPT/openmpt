@@ -47,7 +47,6 @@ public:
 
 	void SetPreset(int32 preset);
 	void UpdatePresetField();
-	bool CreateInstrument();
 
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnLoadPreset();

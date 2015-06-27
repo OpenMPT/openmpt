@@ -1218,8 +1218,6 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 		m_CheckResonance.EnableWindow(bITandMPT);
 		m_SliderCutOff.EnableWindow(bITandMPT);
 		m_SliderResonance.EnableWindow(bITandMPT);
-		m_SpinInstrument.SetRange(1, m_sndFile.m_nInstruments);
-		m_SpinInstrument.EnableWindow((m_sndFile.m_nInstruments) ? TRUE : FALSE);
 		m_ComboTuning.EnableWindow(bMPTOnly);
 		m_EditPitchTempoLock.EnableWindow(bMPTOnly);
 		m_CheckPitchTempoLock.EnableWindow(bMPTOnly);
@@ -1239,8 +1237,11 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 			m_CbnMidiCh.SetItemData(m_CbnMidiCh.AddString(s), ich);
 		}
 	}
-	if (hintType[HINT_MODTYPE | HINT_INSTRUMENT | HINT_MODTYPE])
+	if (hintType[HINT_MODTYPE | HINT_INSTRUMENT])
 	{
+		m_SpinInstrument.SetRange(1, m_sndFile.m_nInstruments);
+		m_SpinInstrument.EnableWindow((m_sndFile.m_nInstruments) ? TRUE : FALSE);
+
 		// Backwards compatibility with IT modules that use now deprecated hack features.
 		m_SliderCutSwing.EnableWindow((pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nCutSwing != 0)) ? TRUE : FALSE);
 		m_SliderResSwing.EnableWindow((pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nResSwing != 0)) ? TRUE : FALSE);

@@ -201,6 +201,7 @@ public:
 	PATTERNINDEX InsertPattern(ORDERINDEX nOrd = ORDERINDEX_INVALID, ROWINDEX nRows = 64);
 	SAMPLEINDEX InsertSample(bool bLimit = false);
 	INSTRUMENTINDEX InsertInstrument(SAMPLEINDEX lSample = SAMPLEINDEX_INVALID, INSTRUMENTINDEX lDuplicate = INSTRUMENTINDEX_INVALID);
+	INSTRUMENTINDEX InsertInstrumentForPlugin(PLUGINDEX plug);
 	void InitializeInstrument(ModInstrument *pIns);
 	bool RemoveOrder(SEQUENCEINDEX nSeq, ORDERINDEX nOrd);
 	bool RemovePattern(PATTERNINDEX nPat);

@@ -249,7 +249,6 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 	for(CHANNELINDEX nChn = GetNumChannels(); nChn < MAX_BASECHANNELS; nChn++)
 	{
 		m_SndFile.InitChannel(nChn);
-		m_SndFile.m_PlayState.Chn[nChn].dwFlags.set(CHN_MUTE);
 	}
 
 	return GetNumChannels();
@@ -538,10 +537,7 @@ struct ConvertInstrumentsToSamplesInPatterns
 bool CModDoc::ConvertInstrumentsToSamples()
 //-----------------------------------------
 {
-	if (!m_SndFile.GetNumInstruments())
-	{
-		return false;
-	}
+	if (!m_SndFile.GetNumInstruments()) return false;
 	m_SndFile.Patterns.ForEachModCommand(ConvertInstrumentsToSamplesInPatterns(&m_SndFile));
 	return true;
 }
@@ -550,15 +546,11 @@ bool CModDoc::ConvertInstrumentsToSamples()
 bool CModDoc::ConvertSamplesToInstruments()
 //-----------------------------------------
 {
-	if(GetNumInstruments() > 0)
-	{
-		return false;
-	}
+	const INSTRUMENTINDEX instrumentMax = m_SndFile.GetModSpecifications().instrumentsMax;
+	if(GetNumInstruments() > 0 || instrumentMax == 0) return false;
 
-	const INSTRUMENTINDEX nInstrumentMax = m_SndFile.GetModSpecifications().instrumentsMax;
-	const SAMPLEINDEX nInstruments = MIN(m_SndFile.GetNumSamples(), nInstrumentMax);
-
-	for(SAMPLEINDEX smp = 1; smp <= nInstruments; smp++)
+	m_SndFile.m_nInstruments = std::min(m_SndFile.GetNumSamples(), instrumentMax);
+	for(SAMPLEINDEX smp = 1; smp <= m_SndFile.m_nInstruments; smp++)
 	{
 		const bool muted = IsSampleMuted(smp);
 		MuteSample(smp, false);
@@ -574,8 +566,6 @@ bool CModDoc::ConvertSamplesToInstruments()
 		mpt::String::Copy(instrument->name, m_SndFile.m_szNames[smp]);
 		MuteInstrument(smp, muted);
 	}
-
-	m_SndFile.m_nInstruments = nInstruments;
 
 	return true;
 
@@ -806,6 +796,46 @@ void CModDoc::InitializeInstrument(ModInstrument *pIns)
 //-----------------------------------------------------
 {
 	pIns->nPluginVolumeHandling = TrackerSettings::Instance().DefaultPlugVolumeHandling;
+}
+
+
+// Try to set up a new instrument that is linked to a given plugin
+INSTRUMENTINDEX CModDoc::InsertInstrumentForPlugin(PLUGINDEX plug)
+//----------------------------------------------------------------
+{
+#ifndef NO_VST
+	const bool first = (GetNumInstruments() == 0);
+	if(first && !ConvertSamplesToInstruments()) return INSTRUMENTINDEX_INVALID;
+
+	INSTRUMENTINDEX instr = m_SndFile.GetNextFreeInstrument();
+	if(instr == INSTRUMENTINDEX_INVALID) return INSTRUMENTINDEX_INVALID;
+
+	ModInstrument *ins = m_SndFile.AllocateInstrument(instr, 0);
+	if(ins == nullptr) return INSTRUMENTINDEX_INVALID;
+	InitializeInstrument(ins);
+
+	_snprintf(ins->name, CountOf(ins->name) - 1, _T("%u: %s"), plug + 1, m_SndFile.m_MixPlugins[plug].GetName());
+	mpt::String::Copy(ins->filename, mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, m_SndFile.m_MixPlugins[plug].GetLibraryName()));
+	ins->nMixPlug = plug + 1;
+	ins->nMidiChannel = 1;
+	// People will forget to change this anyway, so the following lines can lead to some bad surprises after re-opening the module.
+	//pIns->wMidiBank = (WORD)((m_pVstPlugin->GetCurrentProgram() >> 7) + 1);
+	//pIns->nMidiProgram = (BYTE)((m_pVstPlugin->GetCurrentProgram() & 0x7F) + 1);
+
+	if(instr > m_SndFile.m_nInstruments) m_SndFile.m_nInstruments = instr;
+
+	InstrumentHint hint = InstrumentHint(instr).Info().Envelope().Names();
+	if(first) hint.ModType();
+	UpdateAllViews(nullptr, hint);
+	if(m_SndFile.GetModSpecifications().supportsPlugins)
+	{
+		SetModified();
+	}
+
+	return instr;
+#else
+	return INSTRUMENTINDEX_INVALID;
+#endif
 }
 
 
