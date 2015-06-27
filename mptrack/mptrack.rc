@@ -311,10 +311,11 @@ STYLE DS_SETFONT | DS_3DLOOK | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
 CAPTION "Advanced"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    LTEXT           "Warning:\nChanging advanced settings might cause stability problems.\nYou should only continue if you know what you are doing.",IDC_STATIC,6,6,258,24
+    LTEXT           "Warning:\nChanging advanced settings might cause stability problems.\nYou should only continue if you know what you are doing.",IDC_STATIC,6,6,204,24
     LTEXT           "&Find:",IDC_STATIC,6,38,17,8
     EDITTEXT        IDC_EDIT1,30,36,252,12,ES_AUTOHSCROLL
     CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SORTASCENDING | LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,6,54,276,222
+    PUSHBUTTON      "&Save now",IDC_BUTTON1,228,12,50,14
 END
 
 IDD_SCANPLUGINS DIALOGEX 0, 0, 316, 34

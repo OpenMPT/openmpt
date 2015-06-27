@@ -516,10 +516,10 @@ class SettingsContainer
 		public:
 			typedef std::map<SettingPath,SettingState> SettingsMap;
 			typedef std::map<SettingPath,std::set<ISettingChanged*> > SettingsListenerMap;
+			void WriteSettings();
 		private:
 			mutable SettingsMap map;
 			mutable SettingsListenerMap mapListeners;
-			void WriteSettings();
 
 	#endif // MPT_SETTINGS_CACHE
 
