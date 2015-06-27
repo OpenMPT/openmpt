@@ -4161,6 +4161,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 
 	case VIEWMSG_SETCTRLWND:
 		m_hWndCtrl = (HWND)lParam;
+		m_nOrder = static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
 		SetCurrentPattern(static_cast<PATTERNINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTPATTERN)));
 		break;
 
