@@ -253,11 +253,11 @@ PatternCursor CViewPattern::GetPositionFromPoint(POINT pt)
 {
 	const PATTERNFONT *pfnt = PatternFont::currentFont;
 	int xofs = GetXScrollPos();
-	int yofs = GetYScrollPos() + GetSmoothScrollOffset();
+	int yofs = GetYScrollPos();
 	int x = xofs + (pt.x - m_szHeader.cx) / GetColumnWidth();
 	if (pt.x < m_szHeader.cx) x = (xofs) ? xofs - 1 : 0;
 
-	int y = yofs - m_nMidRow + (pt.y - m_szHeader.cy) / m_szCell.cy;
+	int y = yofs - m_nMidRow + (pt.y - m_szHeader.cy + GetSmoothScrollOffset()) / m_szCell.cy;
 	if (y < 0) y = 0;
 	int xx = (pt.x - m_szHeader.cx) % GetColumnWidth(), dx = 0;
 	int imax = 4;
@@ -484,7 +484,6 @@ void CViewPattern::OnDraw(CDC *pDC)
 	const int vuHeight = MulDiv(VUMETERS_HEIGHT, m_nDPIy, 96);
 	const int colHeight = MulDiv(COLHDR_HEIGHT, m_nDPIy, 96);
 	const int recordInsX = MulDiv(3, m_nDPIx, 96);
-	const bool liveRecord = IsLiveRecord();
 	const bool doSmoothScroll = (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) != 0;
 
 	GetClientRect(&rcClient);
