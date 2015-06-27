@@ -2369,6 +2369,8 @@ CChildFrame *CModDoc::GetChildFrame()
 	return nullptr;
 }
 
+
+// Get the currently edited pattern position. Note that ord might be ORDERINDEX_INVALID when editing a pattern that is not present in the order list.
 HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 //------------------------------------------------------------------------------
 {
@@ -2412,11 +2414,7 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 	//ensure order correlates with pattern.
 	if(m_SndFile.Order[ord] != pat)
 	{
-		ORDERINDEX tentativeOrder = m_SndFile.Order.FindOrder(pat);
-		if (tentativeOrder != ORDERINDEX_INVALID)	//ensure a valid order exists.
-		{
-			ord = tentativeOrder;
-		}
+		ord = m_SndFile.Order.FindOrder(pat);
 	}
 
 	return followSonghWnd;
@@ -2819,12 +2817,12 @@ void CModDoc::SongProperties()
 void CModDoc::SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow, bool setSamplePos)
 //-----------------------------------------------------------------------------
 {
+	if(nOrd == ORDERINDEX_INVALID) return;
+
 	double t = m_SndFile.GetPlaybackTimeAt(nOrd, nRow, true, setSamplePos && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SYNCSAMPLEPOS) != 0);
+
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if(pMainFrm != nullptr)
-	{
-		pMainFrm->SetElapsedTime(std::max(0.0, t));
-	}
+	if(pMainFrm != nullptr) pMainFrm->SetElapsedTime(std::max(0.0, t));
 }
 
 
