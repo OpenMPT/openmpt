@@ -109,6 +109,7 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_MESSAGE(WM_MOD_UNLOCKCONTROLS,		OnUnlockControls)
 	ON_MESSAGE(WM_MOD_VIEWMSG,	OnModViewMsg)
 	ON_MESSAGE(WM_MOD_MIDIMSG,	OnMidiMsg)
+	ON_MESSAGE(WM_MOD_PLUGPARAMAUTOMATE,	OnParamAutomated)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -769,12 +770,9 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 					const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
 					if(m_nCurrentParam < nParams)
 					{
-						float fValue = 0.01f * n;
-						wsprintf(s, "%d.%02d", n/100, n%100);
-						SetDlgItemText(IDC_EDIT14, s);
 						if (nSBCode == SB_THUMBPOSITION || nSBCode == SB_THUMBTRACK || nSBCode == SB_ENDSCROLL)
 						{
-							pVstPlugin->SetParameter(m_nCurrentParam, fValue);
+							pVstPlugin->SetParameter(m_nCurrentParam, 0.01f * n);
 							OnParamChanged();
 							SetPluginModified();
 						}
@@ -959,6 +957,17 @@ void CViewGlobals::OnSelectPlugin()
 		OnParamChanged();
 	}
 #endif // NO_VST
+}
+
+
+LRESULT CViewGlobals::OnParamAutomated(WPARAM plugin, LPARAM param)
+//-----------------------------------------------------------------
+{
+	if(plugin == m_nCurrentPlugin && param == m_nCurrentParam)
+	{
+		OnParamChanged();
+	}
+	return 0;
 }
 
 
