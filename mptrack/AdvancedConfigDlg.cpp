@@ -270,6 +270,7 @@ void COptionsAdvanced::OnOptionDblClick(NMHDR *, LRESULT *)
 void COptionsAdvanced::OnSaveNow()
 //--------------------------------
 {
+	TrackerSettings::Instance().SaveSettings();
 	#if defined(MPT_SETTINGS_CACHE)
 		theApp.GetSettings().WriteSettings();
 	#endif // MPT_SETTINGS_CACHE
