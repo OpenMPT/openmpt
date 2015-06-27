@@ -21,6 +21,7 @@ OPENMPT_NAMESPACE_BEGIN
 BEGIN_MESSAGE_MAP(COptionsAdvanced, CPropertyPage)
 	ON_NOTIFY(NM_DBLCLK,	IDC_LIST1,	OnOptionDblClick)
 	ON_EN_CHANGE(IDC_EDIT1,				OnFindStringChanged)
+	ON_COMMAND(IDC_BUTTON1, OnSaveNow)
 END_MESSAGE_MAP()
 
 void COptionsAdvanced::DoDataExchange(CDataExchange* pDX)
@@ -264,6 +265,16 @@ void COptionsAdvanced::OnOptionDblClick(NMHDR *, LRESULT *)
 	m_List.SetSelectionMark(index);
 	OnSettingsChanged();
 }
+
+
+void COptionsAdvanced::OnSaveNow()
+//--------------------------------
+{
+	#if defined(MPT_SETTINGS_CACHE)
+		theApp.GetSettings().WriteSettings();
+	#endif // MPT_SETTINGS_CACHE
+}
+
 
 OPENMPT_NAMESPACE_END
 

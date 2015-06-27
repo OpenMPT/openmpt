@@ -44,6 +44,7 @@ protected:
 	afx_msg void OnOptionDblClick(NMHDR *, LRESULT *);
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnFindStringChanged() { ReInit(); }
+	afx_msg void OnSaveNow();
 
 	void ReInit();
 
