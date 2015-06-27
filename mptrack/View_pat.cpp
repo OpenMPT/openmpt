@@ -191,6 +191,7 @@ void CViewPattern::OnInitialUpdate()
 	m_nDragItem = 0;
 	m_bInItemRect = false;
 	m_bContinueSearch = false;
+	m_smoothScrollBackwards = false;
 	m_Status = psShowPluginNames;
 	m_nXScroll = m_nYScroll = 0;
 	m_nPattern = 0;
@@ -3762,9 +3763,19 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 				m_pEffectVis->SetPlayCursor(nPat, nRow);
 			}
 
-			// Don't follow song if user drags selections or scrollbars.
+			// Simple detection of backwards-going patterns to avoid jerky animation
+			m_smoothScrollBackwards = false;
+			if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) && pSndFile->Patterns.IsValidPat(nPat))
+			{
+				for(const ModCommand *m = pSndFile->Patterns[nPat].GetRow(nRow), *mEnd = m + pSndFile->GetNumChannels(); m != mEnd; m++)
+				{
+					if(m->command == CMD_PATTERNBREAK) m_smoothScrollBackwards = (m->param == nRow - 1);
+				}
+			}
+
 			m_nTicksOnRow = pnotify->ticksOnRow;
 			SetPlayCursor(nPat, nRow, pnotify->tick);
+			// Don't follow song if user drags selections or scrollbars.
 			if((m_Status & (psFollowSong | psDragActive)) == psFollowSong)
 			{
 				if (nPat < pSndFile->Patterns.Size())

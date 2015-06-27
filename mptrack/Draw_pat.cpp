@@ -165,7 +165,10 @@ int CViewPattern::GetSmoothScrollOffset() const
 		&& (m_nMidRow != 0 || GetYScrollPos() > 0)	// If active row is not centered, only scroll when display position is actually not at the top
 		&& IsLiveRecord())	// Actually playing live (not paused or stepping)
 	{
-		return Util::muldivr_unsigned(m_szCell.cy, m_nPlayTick, std::max(1u, m_nTicksOnRow));
+		uint32 tick = m_nPlayTick;
+		// Avoid jerky animation with backwards-going patterns
+		if(m_smoothScrollBackwards) tick = m_nTicksOnRow - m_nPlayTick - 1;
+		return Util::muldivr_unsigned(m_szCell.cy, tick, std::max(1u, m_nTicksOnRow));
 	}
 	return 0;
 }
