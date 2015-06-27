@@ -527,7 +527,7 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 				return false;
 			} else
 			{
-				CreateInstrument();
+				OnCreateInstrument();
 				// Return true since we don't want to trigger the note for which the instrument has been validated yet.
 				// Otherwise, the note might hang forever because the key-up event will go missing.
 				return false;
@@ -926,48 +926,11 @@ void CAbstractVstEditor::OnSetInputInstrument(UINT nID)
 void CAbstractVstEditor::OnCreateInstrument()
 //-------------------------------------------
 {
-	CreateInstrument();
-}
-
-
-// Try to set up a new instrument that is linked to the current plugin.
-bool CAbstractVstEditor::CreateInstrument()
-//-----------------------------------------
-{
-	CModDoc *pModDoc = m_VstPlugin.GetModDoc();
-	CSoundFile &sndFile = m_VstPlugin.GetSoundFile();
-	if(pModDoc == nullptr)
+	if(m_VstPlugin.GetModDoc() != nullptr)
 	{
-		return false;
+		INSTRUMENTINDEX instr = m_VstPlugin.GetModDoc()->InsertInstrumentForPlugin(m_VstPlugin.GetSlot());
+		if(instr != INSTRUMENTINDEX_INVALID) m_nInstrument  = instr;
 	}
-
-	const bool first = (sndFile.GetNumInstruments() == 0);
-	INSTRUMENTINDEX nIns = pModDoc->InsertInstrument(0);
-	if(nIns == INSTRUMENTINDEX_INVALID)
-	{
-		return false;
-	}
-
-	ModInstrument *pIns = sndFile.Instruments[nIns];
-	m_nInstrument = nIns;
-
-	_snprintf(pIns->name, CountOf(pIns->name) - 1, _T("%d: %s"), m_VstPlugin.GetSlot() + 1, sndFile.m_MixPlugins[m_VstPlugin.GetSlot()].GetName());
-	mpt::String::Copy(pIns->filename, mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, sndFile.m_MixPlugins[m_VstPlugin.GetSlot()].GetLibraryName()));
-	pIns->nMixPlug = (PLUGINDEX)m_VstPlugin.GetSlot() + 1;
-	pIns->nMidiChannel = 1;
-	// People will forget to change this anyway, so the following lines can lead to some bad surprises after re-opening the module.
-	//pIns->wMidiBank = (WORD)((m_pVstPlugin->GetCurrentProgram() >> 7) + 1);
-	//pIns->nMidiProgram = (BYTE)((m_pVstPlugin->GetCurrentProgram() & 0x7F) + 1);
-
-	InstrumentHint hint = InstrumentHint(nIns).Info().Envelope().Names();
-	if(first) hint.ModType();
-	pModDoc->UpdateAllViews(nullptr, hint);
-	if(sndFile.GetModSpecifications().supportsPlugins)
-	{
-		pModDoc->SetModified();
-	}
-
-	return true;
 }
 
 
