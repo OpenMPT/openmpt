@@ -99,10 +99,6 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_NEXTINSTRUMENT,	OnNextInstrument)
 	ON_COMMAND(ID_PREVINSTRUMENT,	OnPrevInstrument)
 	ON_COMMAND(ID_PATTERN_PLAYROW,	OnPatternStep)
-	ON_COMMAND(ID_CONTROLENTER,		OnPatternStep)
-	ON_COMMAND(ID_CONTROLTAB,		OnSwitchToOrderList)
-	ON_COMMAND(ID_PREVORDER,		OnPrevOrder)
-	ON_COMMAND(ID_NEXTORDER,		OnNextOrder)
 	ON_COMMAND(IDC_PATTERN_RECORD,	OnPatternRecord)
 	ON_COMMAND(ID_RUN_SCRIPT,					OnRunScript)
 	ON_COMMAND(ID_TRANSPOSE_UP,					OnTransposeUp)
@@ -2487,6 +2483,10 @@ void CViewPattern::PatternStep(ROWINDEX row)
 			return;
 
 		CriticalSection cs;
+
+		// In case we were previously in smooth scrolling mode during live playback, the pattern might be misaligned.
+		if(GetSmoothScrollOffset() != 0)
+			InvalidatePattern(true);
 
 		// Cut instruments/samples in virtual channels
 		for(CHANNELINDEX i = pSndFile->GetNumChannels(); i < MAX_CHANNELS; i++)
