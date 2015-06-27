@@ -48,25 +48,31 @@ bool FolderScanner::NextFile(mpt::PathString &file)
 		}
 
 		BOOL nextFile = FALSE;
-		do
+		if(hFind != INVALID_HANDLE_VALUE)
 		{
-			file = currentPath + mpt::PathString::FromNative(wfd.cFileName);
-			if(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			do
 			{
-				if(findInSubDirs && wcscmp(wfd.cFileName, L"..") && wcscmp(wfd.cFileName, L"."))
+				file = currentPath + mpt::PathString::FromNative(wfd.cFileName);
+				if(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
-					// Add sub directory
-					paths.push_back(file);
+					if(findInSubDirs && wcscmp(wfd.cFileName, L"..") && wcscmp(wfd.cFileName, L"."))
+					{
+						// Add sub directory
+						paths.push_back(file);
+					}
+				} else
+				{
+					foundFile = true;
 				}
-			} else
-			{
-				foundFile = true;
-			}
-		} while((nextFile = FindNextFileW(hFind, &wfd)) != FALSE && !foundFile);
+			} while((nextFile = FindNextFileW(hFind, &wfd)) != FALSE && !foundFile);
+		}
 		if(nextFile == FALSE)
 		{
 			// Done with this directory, advance to next
-			FindClose(hFind);
+			if(hFind != INVALID_HANDLE_VALUE)
+			{
+				FindClose(hFind);
+			}
 			hFind = INVALID_HANDLE_VALUE;
 		}
 	} while(!foundFile);
