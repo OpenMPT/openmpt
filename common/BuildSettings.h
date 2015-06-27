@@ -50,6 +50,9 @@
 // Generate inline assembly using SSE3 instructions (only used when the CPU supports it).
 #define ENABLE_SSE3
 
+// Generate inline assembly using SSE4 instructions (only used when the CPU supports it).
+#define ENABLE_SSE4
+
 // Generate inline assembly using AMD specific instruction set extensions (only used when the CPU supports it).
 #define ENABLE_X86_AMD
 
@@ -63,6 +66,9 @@
 
 // Generate inline assembly using SSE3 instructions (only used when the CPU supports it).
 #define ENABLE_SSE3
+
+// Generate inline assembly using SSE4 instructions (only used when the CPU supports it).
+#define ENABLE_SSE4
 
 #endif
 
