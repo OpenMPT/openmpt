@@ -160,7 +160,14 @@ UINT CViewPattern::GetColumnOffset(PatternCursor::Columns column) const
 int CViewPattern::GetSmoothScrollOffset() const
 //---------------------------------------------
 {
-	return Util::muldivr_unsigned(m_szCell.cy, m_nPlayTick, std::max(1u, m_nTicksOnRow));
+	if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) != 0	// Actually using the smooth scroll feature
+		&& (m_Status & (psFollowSong | psDragActive)) == psFollowSong	// Not drawing a selection during playback
+		&& (m_nMidRow != 0 || GetYScrollPos() > 0)	// If active row is not centered, only scroll when display position is actually not at the top
+		&& IsLiveRecord())	// Actually playing live (not paused or stepping)
+	{
+		return Util::muldivr_unsigned(m_szCell.cy, m_nPlayTick, std::max(1u, m_nTicksOnRow));
+	}
+	return 0;
 }
 
 
@@ -246,14 +253,9 @@ PatternCursor CViewPattern::GetPositionFromPoint(POINT pt)
 {
 	const PATTERNFONT *pfnt = PatternFont::currentFont;
 	int xofs = GetXScrollPos();
-	int yofs = GetYScrollPos();
+	int yofs = GetYScrollPos() + GetSmoothScrollOffset();
 	int x = xofs + (pt.x - m_szHeader.cx) / GetColumnWidth();
 	if (pt.x < m_szHeader.cx) x = (xofs) ? xofs - 1 : 0;
-
-	if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) != 0 && (m_Status & (psFollowSong | psDragActive)) == psFollowSong && IsLiveRecord())
-	{
-		pt.y += GetSmoothScrollOffset();
-	}
 
 	int y = yofs - m_nMidRow + (pt.y - m_szHeader.cy) / m_szCell.cy;
 	if (y < 0) y = 0;
@@ -513,13 +515,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 	UINT nColumnWidth = m_szCell.cx;
 	UINT ncols = sndFile.GetNumChannels();
 	int xpaint = m_szHeader.cx;
-	int ypaint = rcClient.top + m_szHeader.cy;
-
-	// Scroll tick by tick (always if active row is centered, otherwise only if the top row isn't the first one)
-	if(doSmoothScroll && liveRecord && (m_Status & (psFollowSong | psDragActive)) == psFollowSong && (m_nMidRow != 0 || yofs > 0))
-	{
-		ypaint -= GetSmoothScrollOffset();
-	}
+	int ypaint = rcClient.top + m_szHeader.cy - GetSmoothScrollOffset();
 	
 	if (m_nMidRow)
 	{
@@ -1514,7 +1510,7 @@ void CViewPattern::InvalidateRow(ROWINDEX n)
 		CRect rect;
 		GetClientRect(&rect);
 		rect.left = m_szHeader.cx;
-		rect.top = m_szHeader.cy;
+		rect.top = m_szHeader.cy - GetSmoothScrollOffset();
 		rect.top += (n - yofs) * m_szCell.cy;
 		rect.bottom = rect.top + m_szCell.cy;
 		InvalidateRect(&rect, FALSE);
