@@ -190,6 +190,7 @@ protected:
 	DWORD m_dwLastNoteEntryTime; //rewbs.customkeys
 	bool m_bLastNoteEntryBlocked : 1;
 	bool m_bContinueSearch : 1, m_bWholePatternFitsOnScreen : 1;
+	bool m_smoothScrollBackwards : 1;
 
 	ModCommand m_PCNoteEditMemory;		// PC Note edit memory
 	static ModCommand m_cmdOld;			// Quick cursor copy/paste data
