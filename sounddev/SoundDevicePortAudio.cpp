@@ -226,6 +226,35 @@ SoundDevice::BufferAttributes CPortaudioDevice::InternalGetEffectiveBufferAttrib
 }
 
 
+bool CPortaudioDevice::OnIdle()
+//-----------------------------
+{
+	if(!IsPlaying())
+	{
+		return false;
+	}
+	if(m_Stream)
+	{
+		if(m_HostApiType == paWDMKS)
+		{
+			// Catch timeouts in PortAudio threading code that cause the thread to exit.
+			// Restore our desired playback state by resetting the whole sound device.
+			if(Pa_IsStreamActive(m_Stream) <= 0)
+			{
+				// Hung state tends to be caused by an overloaded system.
+				// Sleeping too long would freeze the UI,
+				// but at least sleep a tiny bit of time to let things settle down.
+				const SoundDevice::BufferAttributes bufferAttributes = GetEffectiveBufferAttributes();
+				Pa_Sleep(Util::Round<long>(bufferAttributes.Latency * 2.0 * 1000.0 + 0.5));
+				RequestReset();
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
 SoundDevice::Statistics CPortaudioDevice::GetStatistics() const
 //-------------------------------------------------------------
 {
