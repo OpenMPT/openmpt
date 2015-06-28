@@ -74,6 +74,7 @@ public:
 	SoundDevice::Caps InternalGetDeviceCaps();
 	SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 	bool OpenDriverSettings();
+	bool OnIdle();
 
 	int StreamCallback(
 		const void *input, void *output,
