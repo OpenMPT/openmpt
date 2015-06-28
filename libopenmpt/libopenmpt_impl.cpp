@@ -946,33 +946,33 @@ float module_impl::get_current_channel_vu_mono( std::int32_t channel ) const {
 	if ( channel < 0 || channel >= m_sndFile->GetNumChannels() ) {
 		return 0.0f;
 	}
-	const float left = get_current_channel_vu_left( channel );
-	const float right = get_current_channel_vu_right( channel );
+	const float left = m_sndFile->m_PlayState.Chn[channel].nLeftVU * (1.0f/128.0f);
+	const float right = m_sndFile->m_PlayState.Chn[channel].nRightVU * (1.0f/128.0f);
 	return std::sqrt(left*left + right*right);
 }
 float module_impl::get_current_channel_vu_left( std::int32_t channel ) const {
 	if ( channel < 0 || channel >= m_sndFile->GetNumChannels() ) {
 		return 0.0f;
 	}
-	return m_sndFile->m_PlayState.Chn[channel].nLeftVU * (1.0f/128.0f);
+	return m_sndFile->m_PlayState.Chn[channel].dwFlags[CHN_SURROUND] ? 0.0f : m_sndFile->m_PlayState.Chn[channel].nLeftVU * (1.0f/128.0f);
 }
 float module_impl::get_current_channel_vu_right( std::int32_t channel ) const {
 	if ( channel < 0 || channel >= m_sndFile->GetNumChannels() ) {
 		return 0.0f;
 	}
-	return m_sndFile->m_PlayState.Chn[channel].nRightVU * (1.0f/128.0f);
+	return m_sndFile->m_PlayState.Chn[channel].dwFlags[CHN_SURROUND] ? 0.0f : m_sndFile->m_PlayState.Chn[channel].nRightVU * (1.0f/128.0f);
 }
 float module_impl::get_current_channel_vu_rear_left( std::int32_t channel ) const {
 	if ( channel < 0 || channel >= m_sndFile->GetNumChannels() ) {
 		return 0.0f;
 	}
-	return 0.0f; // FIXME m_sndFile->Chn[channel].nLeftVU * (1.0f/128.0f);
+	return m_sndFile->m_PlayState.Chn[channel].dwFlags[CHN_SURROUND] ? m_sndFile->m_PlayState.Chn[channel].nLeftVU * (1.0f/128.0f) : 0.0f;
 }
 float module_impl::get_current_channel_vu_rear_right( std::int32_t channel ) const {
 	if ( channel < 0 || channel >= m_sndFile->GetNumChannels() ) {
 		return 0.0f;
 	}
-	return 0.0f; // FIXME m_sndFile->Chn[channel].nRightVU * (1.0f/128.0f);
+	return m_sndFile->m_PlayState.Chn[channel].dwFlags[CHN_SURROUND] ? m_sndFile->m_PlayState.Chn[channel].nRightVU * (1.0f/128.0f) : 0.0f;
 }
 
 std::int32_t module_impl::get_num_subsongs() const {

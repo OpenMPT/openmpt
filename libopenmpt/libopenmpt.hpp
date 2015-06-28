@@ -294,6 +294,7 @@ public:
 	/*!
 	  \param subsong Index of the subsong. -1 plays all subsongs consecutively.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception if subsong is not in range [-1,openmpt::module::get_num_subsongs()[
+	  \sa openmpt::module::get_num_subsongs, openmpt::module::get_subsong_names
 	*/
 	void select_subsong( std::int32_t subsong );
 	//! Set Repeat Count
@@ -505,6 +506,18 @@ public:
 	//! Get a metadata item value
 	/*!
 	  \param key Metadata item key to query. Use openmpt::module::get_metadata_keys to check for available keys.
+	           Possible keys are:
+	           - type: Module format extension (e.g. it)
+	           - type_long: Tracker name associated with the module format (e.g. Impulse Tracker)
+	           - container: Container format the module file is embedded in, if any (e.g. umx)
+	           - container_long: Full container name if the module is embedded in a container (e.g. Unreal Music)
+	           - tracker: Tracker that was (most likely) used to save the module file, if known
+	           - artist: Author of the module
+	           - title: Module title
+	           - date: Date the module was last saved, in ISO-8601 format.
+	           - message: Song message. If the song message is empty or the module format does not support song messages, a list of instrument and sample names is returned instead.
+	           - message_raw: Song message. If the song message is empty or the module format does not support song messages, an empty string is returned.
+	           - warnings: A list of warnings that were generated while loading the module.
 	  \return The associated value for key.
 	  \sa openmpt::module::get_metadata_keys
 	*/
@@ -541,15 +554,46 @@ public:
 	*/
 	std::int32_t get_current_playing_channels() const;
 
+	//! Get an approximate indication of the channel volume.
+	/*!
+	  \param channel The channel whose volume should be retrieved.
+	  \return The approximate channel volume.
+	  \remarks The returned value is solely based on the note velocity and does not take the actual waveform of the playing sample into account.
+	*/
 	float get_current_channel_vu_mono( std::int32_t channel ) const;
+	//! Get an approximate indication of the channel volume on the front-left speaker.
+	/*!
+	  \param channel The channel whose volume should be retrieved.
+	  \return The approximate channel volume.
+	  \remarks The returned value is solely based on the note velocity and does not take the actual waveform of the playing sample into account.
+	*/
 	float get_current_channel_vu_left( std::int32_t channel ) const;
+	//! Get an approximate indication of the channel volume on the front-right speaker.
+	/*!
+	  \param channel The channel whose volume should be retrieved.
+	  \return The approximate channel volume.
+	  \remarks The returned value is solely based on the note velocity and does not take the actual waveform of the playing sample into account.
+	*/
 	float get_current_channel_vu_right( std::int32_t channel ) const;
+	//! Get an approximate indication of the channel volume on the rear-left speaker.
+	/*!
+	  \param channel The channel whose volume should be retrieved.
+	  \return The approximate channel volume.
+	  \remarks The returned value is solely based on the note velocity and does not take the actual waveform of the playing sample into account.
+	*/
 	float get_current_channel_vu_rear_left( std::int32_t channel ) const;
+	//! Get an approximate indication of the channel volume on the rear-right speaker.
+	/*!
+	  \param channel The channel whose volume should be retrieved.
+	  \return The approximate channel volume.
+	  \remarks The returned value is solely based on the note velocity and does not take the actual waveform of the playing sample into account.
+	*/
 	float get_current_channel_vu_rear_right( std::int32_t channel ) const;
 
 	//! Get the number of subsongs
 	/*!
 	  \return The number of subsongs in the module. This includes any "hidden" songs (songs that share the same sequence, but start at different order indices) and "normal" subsongs or "sequences" (if the format supports them).
+	  \sa openmpt::module::get_subsong_names, openmpt::module::select_subsong
 	*/
 	std::int32_t get_num_subsongs() const;
 	//! Get the number of pattern channels
@@ -578,11 +622,41 @@ public:
 	*/
 	std::int32_t get_num_samples() const;
 
+	//! Get a list of subsong names
+	/*!
+	  \return All subsong names.
+	  \sa openmpt::module::get_num_subsongs, openmpt::module::select_subsong
+	*/
 	std::vector<std::string> get_subsong_names() const;
+	//! Get a list of channel names
+	/*!
+	  \return All channel names.
+	  \sa openmpt::module::get_num_channels
+	*/
 	std::vector<std::string> get_channel_names() const;
+	//! Get a list of order names
+	/*!
+	  \return All order names.
+	  \sa openmpt::module::get_num_orders
+	*/
 	std::vector<std::string> get_order_names() const;
+	//! Get a list of pattern names
+	/*!
+	  \return All pattern names.
+	  \sa openmpt::module::get_num_patterns
+	*/
 	std::vector<std::string> get_pattern_names() const;
+	//! Get a list of instrument names
+	/*!
+	  \return All instrument names.
+	  \sa openmpt::module::get_num_instruments
+	*/
 	std::vector<std::string> get_instrument_names() const;
+	//! Get a list of sample names
+	/*!
+	  \return All sample names.
+	  \sa openmpt::module::get_num_samples
+	*/
 	std::vector<std::string> get_sample_names() const;
 
 	//! Get pattern at order position
