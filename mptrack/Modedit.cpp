@@ -549,6 +549,18 @@ bool CModDoc::ConvertSamplesToInstruments()
 	const INSTRUMENTINDEX instrumentMax = m_SndFile.GetModSpecifications().instrumentsMax;
 	if(GetNumInstruments() > 0 || instrumentMax == 0) return false;
 
+	// If there is no actual sample data, don't bother creating any instruments
+	bool anySamples = false;
+	for(SAMPLEINDEX smp = 1; smp <= m_SndFile.m_nSamples; smp++)
+	{
+		if(m_SndFile.GetSample(smp).HasSampleData())
+		{
+			anySamples = true;
+			break;
+		}
+	}
+	if(!anySamples) return true;
+
 	m_SndFile.m_nInstruments = std::min(m_SndFile.GetNumSamples(), instrumentMax);
 	for(SAMPLEINDEX smp = 1; smp <= m_SndFile.m_nInstruments; smp++)
 	{

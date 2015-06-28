@@ -447,6 +447,11 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 	case IDC_CHK_FT2VOLRAMP:
 		text = _T("Use Fasttracker 2 style super soft volume ramping (recommended for true compatible playback)");
 		break;
+	case IDC_BUTTON1:
+		if(!GetDlgItem(IDC_BUTTON1)->IsWindowEnabled())
+		{
+			text = _T("Tempo swing is only available in modern tempo mode.");
+		}
 	}
 
 	mpt::String::CopyN(pTTT->szText, text);
@@ -1296,7 +1301,7 @@ BOOL CTempoSwingDlg::OnInitDialog()
 	SetDlgItemInt(IDC_EDIT1, m_groupSize);
 	OnToggleGroup();
 
-	OnHScroll(0, 0, nullptr);
+	OnHScroll(0, 0, reinterpret_cast<CScrollBar *>(&m_controls[0]->valueSlider));
 	rect.MoveToY(rect.top + m.paddingY);
 	{
 		CRect buttonRect;
@@ -1360,7 +1365,7 @@ void CTempoSwingDlg::OnReset()
 	{
 		m_controls[i]->valueSlider.SetPos(0);
 	}
-	OnHScroll(0, 0, nullptr);
+	OnHScroll(0, 0, reinterpret_cast<CScrollBar *>(&m_controls[0]->valueSlider));
 }
 
 
