@@ -899,7 +899,7 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 		return mod_string_to_utf8( retval );
 	} else if ( key == std::string("message_raw") ) {
 		std::string retval = m_sndFile->songMessage.GetFormatted( SongMessage::leLF );
-		return retval;
+		return mod_string_to_utf8( retval );
 	} else if ( key == std::string("warnings") ) {
 		std::string retval;
 		bool first = true;
