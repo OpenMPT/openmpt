@@ -41,9 +41,7 @@ goto error
 :main
 if not exist "build\externals" mkdir "build\externals"
 
-rem call :download_and_unpack "premake"   "https://downloads.sourceforge.net/project/premake/5.0/premake-5.0-alpha3-windows.zip" "premake-5.0-alpha3-windows.zip" "." || goto error
-
-call :download_and_unpack "premake" "https://downloads.sourceforge.net/project/premake/5.0/premake-5.0-alpha3-src.zip" "premake-5.0-alpha3-src.zip" "premake-5.0-alpha3" || goto error
+call :download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0.alpha4/premake-5.0.0.alpha4-src.zip" "premake-5.0-alpha4-src.zip" "premake-5.0.0.alpha4" || goto error
 
 if exist "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2013.cmd || goto error
