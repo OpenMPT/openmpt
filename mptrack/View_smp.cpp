@@ -15,11 +15,11 @@
 #include "InputHandler.h"
 #include "Childfrm.h"
 #include "Moddoc.h"
-#include "globals.h"
-#include "ctrl_smp.h"
+#include "Globals.h"
+#include "Ctrl_smp.h"
 #include "Dlsbank.h"
-#include "channelManagerDlg.h"
-#include "view_smp.h"
+#include "ChannelManagerDlg.h"
+#include "View_smp.h"
 #include "../soundlib/MIDIEvents.h"
 #include "SampleEditorDialogs.h"
 #include "../soundlib/WAVTools.h"
@@ -543,12 +543,14 @@ void CViewSample::UpdateView(UpdateHint hint, CObject *pObj)
 		UpdateNcButtonState();
 		InvalidateSample();
 	}
-
-	// sample drawing
 	if(hintType[HINT_SAMPLEINFO])
 	{
-		m_dwStatus.reset(SMPSTATUS_DRAWING);
-		UpdateNcButtonState();
+		if(!GetDocument()->GetrSoundFile().GetSample(m_nSample).HasSampleData())
+		{
+			// Disable sample drawing if we cannot actually draw anymore.
+			m_dwStatus.reset(SMPSTATUS_DRAWING);
+			UpdateNcButtonState();
+		}
 	}
 }
 
@@ -1043,8 +1045,7 @@ void CViewSample::OnDraw(CDC *pDC)
 //--------------------------------
 {
 	CRect rcClient = m_rcClient, rect, rc;
-	CModDoc *pModDoc = GetDocument();
-	HGDIOBJ oldpen;
+	const CModDoc *pModDoc = GetDocument();
 
 	const SmpLength nSmpScrollPos = ScrollPosToSamplePos();
 
@@ -1061,7 +1062,7 @@ void CViewSample::OnDraw(CDC *pDC)
 		offScreenDC.SelectObject(offScreenBitmap);
 	}
 
-	oldpen = offScreenDC.SelectObject(CMainFrame::penBlack);
+	const HGDIOBJ oldpen = offScreenDC.SelectObject(CMainFrame::penBlack);
 	rect = rcClient;
 	if ((rcClient.bottom > rcClient.top) && (rcClient.right > rcClient.left))
 	{
@@ -1411,11 +1412,9 @@ void CViewSample::UpdateNcButtonState()
 //-------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
 	CDC *pDC = NULL;
 
 	if (!pModDoc) return;
-	pSndFile = pModDoc->GetSoundFile();
 	for (UINT i=0; i<SMP_LEFTBAR_BUTTONS; i++) if (cLeftBarButtons[i] != ID_SEPARATOR)
 	{
 		DWORD dwStyle = 0;
@@ -1430,7 +1429,7 @@ void CViewSample::UpdateNcButtonState()
 		{
 			case ID_SAMPLE_DRAW:
 				if(m_dwStatus[SMPSTATUS_DRAWING]) dwStyle |= NCBTNS_CHECKED;
-				if(m_nSample > pSndFile->GetNumSamples())
+				if(m_nSample > pModDoc->GetNumSamples())
 				{
 					dwStyle |= NCBTNS_DISABLED;
 				}
