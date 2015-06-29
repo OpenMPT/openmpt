@@ -1274,8 +1274,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 			break;
 		}
 		
-		if ( flags.end_time > 0 && mod.get_position_seconds() >= flags.end_time )
-		{
+		if ( flags.end_time > 0 && mod.get_position_seconds() >= flags.end_time ) {
 			break;
 		}
 
