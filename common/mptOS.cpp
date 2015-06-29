@@ -53,7 +53,9 @@ static bool SystemIsNT = true;
 
 // Initialize to used SDK version
 static uint32 SystemVersion =
-#if NTDDI_VERSION >= 0x06030000 // NTDDI_WINBLUE
+#if NTDDI_VERSION >= 0x0A000000 // NTDDI_WIN10
+	mpt::Windows::Version::Win10
+#elif NTDDI_VERSION >= 0x06030000 // NTDDI_WINBLUE
 	mpt::Windows::Version::Win81
 #elif NTDDI_VERSION >= 0x06020000 // NTDDI_WIN8
 	mpt::Windows::Version::Win8
@@ -140,7 +142,8 @@ mpt::ustring VersionToString(uint16 version)
 {
 	mpt::ustring result;
 	std::vector<std::pair<uint16, mpt::ustring> > versionMap;
-	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinNewer), MPT_USTRING("Windows 8.1 (or newer)")));
+	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::WinNewer), MPT_USTRING("Windows 10 (or newer)")));
+	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win10), MPT_USTRING("Windows 10")));
 	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win81), MPT_USTRING("Windows 8.1")));
 	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win8), MPT_USTRING("Windows 8")));
 	versionMap.push_back(std::make_pair(static_cast<uint16>(mpt::Windows::Version::Win7), MPT_USTRING("Windows 7")));
@@ -193,7 +196,10 @@ mpt::ustring GetName()
 	{
 		if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinNewer))
 		{
-			result += MPT_USTRING("Windows 8.1 (or newer)");
+			result += MPT_USTRING("Windows 10 (or newer)");
+		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win10))
+		{
+			result += MPT_USTRING("Windows 10");
 		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win81))
 		{
 			result += MPT_USTRING("Windows 8.1");
