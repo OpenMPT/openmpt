@@ -37,8 +37,9 @@ enum Number
 	Win7     = 0x0601,
 	Win8     = 0x0602,
 	Win81    = 0x0603,
+	Win10    = 0x0a00,
 
-	WinNewer = Win81 + 1
+	WinNewer = Win10 + 1
 
 };
 
