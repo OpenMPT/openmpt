@@ -87,7 +87,7 @@ static inline bool IsNT() { return false; }
 static inline bool IsOriginal() { return false; }
 static inline bool IsWine() { return false; }
 
-static inline mpt::ustring VersionToString(uint16 version) { return mpt::ufmt::hex0(<4>(version)); }
+static inline mpt::ustring VersionToString(uint16 version) { return mpt::ufmt::hex0<4>(version); }
 
 static inline mpt::ustring GetName() { return MPT_USTRING(""); }
 
