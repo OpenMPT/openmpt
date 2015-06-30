@@ -631,7 +631,12 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 {
 	CVstPlugin *srcVstPlug = static_cast<CVstPlugin *>(source.pMixPlugin);
 	target.Destroy();
-	MemCopy(target.Info, source.Info);
+	target = source;
+	// Don't want this stuff to be accidentally erased again...
+	target.pMixPlugin = nullptr;
+	target.pMixState = nullptr;
+	target.pPluginData = nullptr;
+	target.nPluginDataSize = 0;
 #ifndef NO_VST
 	if(theApp.GetPluginManager()->CreateMixPlugin(target, GetrSoundFile()))
 	{
