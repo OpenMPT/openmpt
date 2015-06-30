@@ -106,6 +106,9 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,			OnCustomKeyMsg)
 	ON_COMMAND(ID_INTERNETUPDATE,			OnInternetUpdate)
 	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,	OnShowSettingsFolder)
+	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_PROGRESS, OnUpdateCheckProgress)
+	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_SUCCESS, OnUpdateCheckSuccess)
+	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_FAILURE, OnUpdateCheckFailure)
 	ON_COMMAND(ID_HELPSHOW,					OnHelp)
 
 	ON_COMMAND_RANGE(ID_MRU_LIST_FIRST, ID_MRU_LIST_LAST, OnOpenMRUItem)
@@ -2610,7 +2613,7 @@ void CMainFrame::OnViewEditHistory()
 void CMainFrame::OnInternetUpdate()
 //---------------------------------
 {
-	CUpdateCheck::DoUpdateCheck(false);
+	CUpdateCheck::DoManualUpdateCheck();
 }
 
 
@@ -2618,6 +2621,32 @@ void CMainFrame::OnShowSettingsFolder()
 //-------------------------------------
 {
 	theApp.OpenDirectory(theApp.GetConfigPath());
+}
+
+
+LRESULT CMainFrame::OnUpdateCheckProgress(WPARAM wparam, LPARAM lparam)
+//---------------------------------------------------------------------
+{
+	MPT_UNREFERENCED_PARAMETER(wparam);
+	MPT_UNREFERENCED_PARAMETER(lparam);
+	return TRUE;
+}
+
+
+LRESULT CMainFrame::OnUpdateCheckSuccess(WPARAM wparam, LPARAM lparam)
+//--------------------------------------------------------------------
+{
+	TrackerSettings::Instance().UpdateLastUpdateCheck = mpt::Date::Unix(CUpdateCheck::ResultFromMessage(wparam, lparam).CheckTime);
+	CUpdateCheck::ShowSuccessGUI(wparam, lparam);
+	return TRUE;
+}
+
+
+LRESULT CMainFrame::OnUpdateCheckFailure(WPARAM wparam, LPARAM lparam)
+//--------------------------------------------------------------------
+{
+	CUpdateCheck::ShowFailureGUI(wparam, lparam);
+	return TRUE;
 }
 
 

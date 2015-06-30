@@ -55,6 +55,13 @@ enum
 
 enum
 {
+	MPT_WM_APP_UPDATECHECK_PROGRESS = WM_APP + 1,
+	MPT_WM_APP_UPDATECHECK_SUCCESS = WM_APP + 2,
+	MPT_WM_APP_UPDATECHECK_FAILURE = WM_APP + 3,
+};
+
+enum
+{
 	CTRLMSG_BASE=0,
 	CTRLMSG_SETVIEWWND,
 	CTRLMSG_ACTIVATEPAGE,
@@ -609,6 +616,9 @@ protected:
 	afx_msg void OnViewEditHistory();
 	afx_msg void OnInternetUpdate();
 	afx_msg void OnShowSettingsFolder();
+	afx_msg LRESULT OnUpdateCheckProgress(WPARAM wparam, LPARAM lparam);
+	afx_msg LRESULT OnUpdateCheckSuccess(WPARAM wparam, LPARAM lparam);
+	afx_msg LRESULT OnUpdateCheckFailure(WPARAM wparam, LPARAM lparam);
 	afx_msg void OnHelp();
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	//}}AFX_MSG

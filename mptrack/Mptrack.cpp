@@ -1053,10 +1053,7 @@ BOOL CTrackApp::InitInstance()
 	{
 
 		// Update check
-		if(CUpdateCheck::GetUpdateCheckPeriod() != 0)
-		{
-			CUpdateCheck::DoUpdateCheck(true);
-		}
+		CUpdateCheck::DoAutoUpdateCheck();
 
 		// Open settings if the previous execution was with an earlier version.
 		if(TrackerSettings::Instance().ShowSettingsOnNewVersion && (TrackerSettings::Instance().PreviousSettingsVersion < MptVersion::num))
