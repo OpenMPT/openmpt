@@ -16,74 +16,108 @@
 #include "TrackerSettings.h"
 // Setup dialog stuff
 #include "Mainfrm.h"
+#include "../common/thread.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-const CString CUpdateCheck::defaultUpdateURL = "http://update.openmpt.org/check/$VERSION/$GUID";
+const TCHAR *const CUpdateCheck::defaultUpdateURL = _T("http://update.openmpt.org/check/$VERSION/$GUID");
 
-// Static configuration variables
-time_t CUpdateCheck::lastUpdateCheck = 0;
-int CUpdateCheck::updateCheckPeriod = 7;
-CString CUpdateCheck::updateBaseURL = CUpdateCheck::defaultUpdateURL;
-bool CUpdateCheck::sendGUID = true;
-bool CUpdateCheck::showUpdateHint = true;
+mpt::atomic_int32_t CUpdateCheck::s_InstanceCount;
 
 
-// Start update check
-void CUpdateCheck::DoUpdateCheck(bool autoUpdate)
-//-----------------------------------------------
+int32 CUpdateCheck::GetNumCurrentRunningInstances()
+//-------------------------------------------------
 {
-	CUpdateCheck *that = new (std::nothrow) CUpdateCheck(autoUpdate);
-	if(that != nullptr)
-	{
-		mpt::thread(MPT_DELEGATE(CUpdateCheck, UpdateThread, that)).detach();
-	}
+	return s_InstanceCount.load();
 }
 
 
-// Run update check (independent thread)
-void CUpdateCheck::UpdateThread()
-//-------------------------------
+// Start update check
+void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
+//---------------------------------------------------------
 {
-
 	if(isAutoUpdate)
 	{
-		mpt::SetCurrentThreadPriority(mpt::ThreadPriorityLower);
-	}
-
-	const time_t now = time(nullptr);
-
-	if(isAutoUpdate)
-	{
-		// Do we actually need to run the update check right now?
-		if(CUpdateCheck::updateCheckPeriod == 0 || difftime(now, CUpdateCheck::lastUpdateCheck) < (double)(CUpdateCheck::updateCheckPeriod * 86400))
+		int updateCheckPeriod = TrackerSettings::Instance().UpdateUpdateCheckPeriod;
+		if(updateCheckPeriod == 0)
 		{
-			Terminate();
+			return;
+		}
+		// Do we actually need to run the update check right now?
+		const time_t now = time(nullptr);
+		if(difftime(now, TrackerSettings::Instance().UpdateLastUpdateCheck.Get()) < (double)(updateCheckPeriod * 86400))
+		{
 			return;
 		}
 
 		// Never ran update checks before, so we notify the user of automatic update checks.
-		if(CUpdateCheck::showUpdateHint)
+		if(TrackerSettings::Instance().UpdateShowUpdateHint)
 		{
-			CUpdateCheck::showUpdateHint = false;
+			TrackerSettings::Instance().UpdateShowUpdateHint = false;
 			CString msg;
-			msg.Format(_T("OpenMPT would like to check for updates now, proceed?\n\nNote: In the future, OpenMPT will check for updates every %d days. If you do not want this, you can disable update checks in the setup."), CUpdateCheck::updateCheckPeriod);
+			msg.Format(_T("OpenMPT would like to check for updates now, proceed?\n\nNote: In the future, OpenMPT will check for updates every %d days. If you do not want this, you can disable update checks in the setup."), TrackerSettings::Instance().UpdateUpdateCheckPeriod.Get());
 			if(Reporting::Confirm(msg, "OpenMPT Internet Update") == cnfNo)
 			{
-				CUpdateCheck::lastUpdateCheck = now;
-				Terminate();
+				TrackerSettings::Instance().UpdateLastUpdateCheck = mpt::Date::Unix(now);
 				return;
 			}
-			
 		}
 	}
-	CUpdateCheck::showUpdateHint = false;
+	TrackerSettings::Instance().UpdateShowUpdateHint = false;
+
+	int32 expected = 0;
+	if(!s_InstanceCount.compare_exchange_strong(expected, 1))
+	{
+		return;
+	}
+
+	CUpdateCheck::Settings settings;
+	settings.window = CMainFrame::GetMainFrame();
+	settings.msgProgress = MPT_WM_APP_UPDATECHECK_PROGRESS;
+	settings.msgSuccess = MPT_WM_APP_UPDATECHECK_SUCCESS;
+	settings.msgFailure = MPT_WM_APP_UPDATECHECK_FAILURE;
+	settings.autoUpdate = isAutoUpdate;
+	settings.updateBaseURL = TrackerSettings::Instance().UpdateUpdateURL;
+	settings.guidString = (TrackerSettings::Instance().UpdateSendGUID ? mpt::ToCString(TrackerSettings::Instance().gcsInstallGUID.Get()) : _T("anonymous"));
+	mpt::thread(CUpdateCheck::ThreadFunc(settings)).detach();
+}
+
+
+CUpdateCheck::ThreadFunc::ThreadFunc(const CUpdateCheck::Settings &settings)
+//--------------------------------------------------------------------------
+	: settings(settings)
+{
+	return;
+}
+
+
+void CUpdateCheck::ThreadFunc::operator () ()
+//-------------------------------------------
+{
+	mpt::SetCurrentThreadPriority(settings.autoUpdate ? mpt::ThreadPriorityLower : mpt::ThreadPriorityNormal);
+	CUpdateCheck().CheckForUpdate(settings);
+}
+
+
+CUpdateCheck::CUpdateCheck()
+//--------------------------
+	: internetHandle(nullptr)
+	, connectionHandle(nullptr)
+{
+	return;
+}
+
+
+// Run update check (independent thread)
+CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &settings)
+//-------------------------------------------------------------------------------------
+{
 
 	// Prepare UA / URL strings...
 	const CString userAgent = CString(_T("OpenMPT ")) + MptVersion::str;
-	CString updateURL = CUpdateCheck::updateBaseURL;
+	CString updateURL = settings.updateBaseURL;
 	CString versionStr = MptVersion::str;
 #ifdef _WIN64
 	versionStr.Append(_T("-win64"));
@@ -100,20 +134,18 @@ void CUpdateCheck::UpdateThread()
 #error "Platform-specific identifier missing"
 #endif
 	updateURL.Replace(_T("$VERSION"), versionStr);
-	updateURL.Replace(_T("$GUID"), GetSendGUID() ? mpt::ToCString(TrackerSettings::Instance().gcsInstallGUID.Get()) : _T("anonymous"));
+	updateURL.Replace(_T("$GUID"), settings.guidString);
 
 	// Establish a connection.
 	internetHandle = InternetOpen(userAgent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	if(internetHandle == NULL)
 	{
-		Die("Could not start update check:\n", GetLastError());
-		return;
+		throw CUpdateCheck::Error("Could not start update check:\n", GetLastError());
 	}
 	connectionHandle = InternetOpenUrl(internetHandle, updateURL, NULL, 0, INTERNET_FLAG_RELOAD | INTERNET_FLAG_PRAGMA_NOCACHE | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_UI, 0);
 	if(connectionHandle == NULL)
 	{
-		Die("Could not establish connection:\n", GetLastError());
-		return;
+		throw CUpdateCheck::Error("Could not establish connection:\n", GetLastError());
 	}
 
 	// Retrieve HTTP status code.
@@ -121,58 +153,47 @@ void CUpdateCheck::UpdateThread()
 	DWORD length = sizeof(statusCodeHTTP);
 	if(HttpQueryInfo(connectionHandle, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, (LPVOID)&statusCodeHTTP, &length, NULL) == FALSE)
 	{
-		Die("Could not retrieve HTTP header information:\n", GetLastError());
-		return;
+		throw CUpdateCheck::Error("Could not retrieve HTTP header information:\n", GetLastError());
 	}
 	if(statusCodeHTTP >= 400)
 	{
 		CString error;
 		error.Format(_T("Version information could not be found on the server (HTTP status code %d). Maybe your version of OpenMPT is too old!"), statusCodeHTTP);
-		Die(error);
-		return;
+		throw CUpdateCheck::Error(error);
 	}
 
 	// Download data.
 	std::string resultBuffer = "";
-	char *downloadBuffer = new char[DOWNLOAD_BUFFER_SIZE];
-	DWORD availableSize, bytesRead;
+	DWORD bytesRead = 0;
 	do
 	{
 		// Query number of available bytes to download
+		DWORD availableSize = 0;
 		if(InternetQueryDataAvailable(connectionHandle, &availableSize, 0, NULL) == FALSE)
 		{
-			delete[] downloadBuffer;
-			Die("Error while downloading update information data:\n", GetLastError());
-			return;
+			throw CUpdateCheck::Error("Error while downloading update information data:\n", GetLastError());
 		}
 
 		LimitMax(availableSize, (DWORD)DOWNLOAD_BUFFER_SIZE);
 
 		// Put downloaded bytes into our buffer
+		char downloadBuffer[DOWNLOAD_BUFFER_SIZE];
 		if(InternetReadFile(connectionHandle, downloadBuffer, availableSize, &bytesRead) == FALSE)
 		{
-			delete[] downloadBuffer;
-			Die("Error while downloading update information data:\n", GetLastError());
-			return;
+			throw CUpdateCheck::Error("Error while downloading update information data:\n", GetLastError());
 		}
+		resultBuffer.append(downloadBuffer, downloadBuffer + bytesRead);
 
-		resultBuffer.append(downloadBuffer, downloadBuffer + availableSize);
 		Sleep(1);
-
 	} while(bytesRead != 0);
-	delete[] downloadBuffer;
 	
-	CString resultData = mpt::ToCString(mpt::CharsetUTF8, resultBuffer);
 	// Now, evaluate the downloaded data.
-	if(!resultData.CompareNoCase(_T("noupdate")))
+	CUpdateCheck::Result result;
+	result.UpdateAvailable = false;
+	result.CheckTime = time(nullptr);
+	CString resultData = mpt::ToCString(mpt::CharsetUTF8, resultBuffer);
+	if(resultData.CompareNoCase(_T("noupdate")) != 0)
 	{
-		if(!isAutoUpdate)
-		{
-			Reporting::Information("You already have the latest version of OpenMPT installed.", "OpenMPT Internet Update");
-		}
-	} else
-	{
-		CString releaseVersion, releaseDate, releaseURL;
 		CString token;
 		int parseStep = 0, parsePos = 0;
 		while((token = resultData.Tokenize(_T("\n"), parsePos)) != "")
@@ -183,73 +204,132 @@ void CUpdateCheck::UpdateThread()
 			case 0:
 				if(token.CompareNoCase(_T("update")) != 0)
 				{
-					Die("Could not understand server response. Maybe your version of OpenMPT is too old!");
-					return;
+					throw CUpdateCheck::Error("Could not understand server response. Maybe your version of OpenMPT is too old!");
 				}
 				break;
 			case 1:
-				releaseVersion = token;
+				result.Version = token;
 				break;
 			case 2:
-				releaseDate = token;
+				result.Date = token;
 				break;
 			case 3:
-				releaseURL = token;
+				result.URL = token;
 				break;
 			}
 		}
-		if(parseStep >= 4)
+		if(parseStep < 4)
 		{
-			resultData.Format(_T("A new version is available!\nOpenMPT %s has been released on %s. Would you like to visit %s for more information?"), releaseVersion, releaseDate, releaseURL);
-			if(Reporting::Confirm(resultData, "OpenMPT Internet Update") == cnfYes)
-			{
-				CTrackApp::OpenURL(releaseURL);
-			}
-		} else
-		{
-			Die("Could not understand server response. Maybe your version of OpenMPT is too old!");
-			return;
+			throw CUpdateCheck::Error("Could not understand server response. Maybe your version of OpenMPT is too old!");
 		}
+		result.UpdateAvailable = true;
 	}
-
-	CUpdateCheck::lastUpdateCheck = now;
-
-	Terminate();
+	return result;
 }
 
 
-// Die with error message
-void CUpdateCheck::Die(CString errorMessage)
-//------------------------------------------
+void CUpdateCheck::CheckForUpdate(const CUpdateCheck::Settings &settings)
+//-----------------------------------------------------------------------
 {
-	if(!isAutoUpdate)
+	// íncremented before starting the thread
+	MPT_ASSERT(s_InstanceCount.load() >= 1);
+	CUpdateCheck::Result result;
+	settings.window->SendMessage(settings.msgProgress, settings.autoUpdate ? 1 : 0, s_InstanceCount.load());
+	try
 	{
-		Reporting::Error(errorMessage, "OpenMPT Internet Update Error");
+		result = SearchUpdate(settings);
+	} catch(const CUpdateCheck::Error &e)
+	{
+		settings.window->SendMessage(settings.msgFailure, settings.autoUpdate ? 1 : 0, reinterpret_cast<LPARAM>(&e));
+		s_InstanceCount.fetch_sub(1);
+		MPT_ASSERT(s_InstanceCount.load() >= 0);
+		return;
 	}
-	Terminate();
+	settings.window->SendMessage(settings.msgSuccess, settings.autoUpdate ? 1 : 0, reinterpret_cast<LPARAM>(&result));
+	s_InstanceCount.fetch_sub(1);
+	MPT_ASSERT(s_InstanceCount.load() >= 0);
 }
 
 
-// Die with WinINet error message
-void CUpdateCheck::Die(CString errorMessage, DWORD errorCode)
-//-----------------------------------------------------------
+CUpdateCheck::Result CUpdateCheck::ResultFromMessage(WPARAM /*wparam*/ , LPARAM lparam)
+//-------------------------------------------------------------------------------------
 {
-	if(!isAutoUpdate)
-	{
-		void *lpMsgBuf;
-		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-			GetModuleHandle(TEXT("wininet.dll")), errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL);
-
-		errorMessage.Append((LPTSTR)lpMsgBuf);
-		LocalFree(lpMsgBuf);
-	}
-	Die(errorMessage);
+	const CUpdateCheck::Result &result = *reinterpret_cast<CUpdateCheck::Result*>(lparam);
+	return result;
 }
 
 
-// Kill update object
-void CUpdateCheck::Terminate()
-//----------------------------
+CUpdateCheck::Error CUpdateCheck::ErrorFromMessage(WPARAM /*wparam*/ , LPARAM lparam)
+//-----------------------------------------------------------------------------------
+{
+	const CUpdateCheck::Error &error = *reinterpret_cast<CUpdateCheck::Error*>(lparam);
+	return error;
+}
+
+
+void CUpdateCheck::ShowSuccessGUI(WPARAM wparam, LPARAM lparam)
+//-------------------------------------------------------------
+{
+	const CUpdateCheck::Result &result = *reinterpret_cast<CUpdateCheck::Result*>(lparam);
+	bool autoUpdate = (wparam ? true : false);
+	if(result.UpdateAvailable)
+	{
+		if(Reporting::Confirm(
+			MPT_UFORMAT("A new version is available!\nOpenMPT %1 has been released on %2. Would you like to visit %3 for more information?"
+			, result.Version, result.Date, result.URL
+			), MPT_USTRING("OpenMPT Internet Update")) == cnfYes)
+		{
+			CTrackApp::OpenURL(result.URL);
+		}
+	} else if(!autoUpdate)
+	{
+		Reporting::Information(MPT_USTRING("You already have the latest version of OpenMPT installed."), MPT_USTRING("OpenMPT Internet Update"));
+	}
+}
+
+
+void CUpdateCheck::ShowFailureGUI(WPARAM wparam, LPARAM lparam)
+//-------------------------------------------------------------
+{
+	const CUpdateCheck::Error &error = *reinterpret_cast<CUpdateCheck::Error*>(lparam);
+	bool autoUpdate = (wparam ? true : false);
+	if(!autoUpdate)
+	{
+		Reporting::Error(mpt::ToUnicode(mpt::CharsetUTF8, error.what() ? std::string(error.what()) : std::string()), MPT_USTRING("OpenMPT Internet Update Error"));
+	}
+}
+
+
+CUpdateCheck::Error::Error(CString errorMessage)
+//----------------------------------------------
+	: std::runtime_error(mpt::ToCharset(mpt::CharsetUTF8, errorMessage))
+{
+	return;
+}
+
+
+CUpdateCheck::Error::Error(CString errorMessage, DWORD errorCode)
+//---------------------------------------------------------------
+	: std::runtime_error(mpt::ToCharset(mpt::CharsetUTF8, FormatErrorCode(errorMessage, errorCode)))
+{
+	return;
+}
+
+
+CString CUpdateCheck::Error::FormatErrorCode(CString errorMessage, DWORD errorCode)
+//---------------------------------------------------------------------------------
+{
+	void *lpMsgBuf;
+	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		GetModuleHandle(TEXT("wininet.dll")), errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL);
+	errorMessage.Append((LPTSTR)lpMsgBuf);
+	LocalFree(lpMsgBuf);
+	return errorMessage;
+}
+
+
+CUpdateCheck::~CUpdateCheck()
+//---------------------------
 {
 	if(connectionHandle != nullptr)
 	{
@@ -261,7 +341,6 @@ void CUpdateCheck::Terminate()
 		InternetCloseHandle(internetHandle);
 		internetHandle = nullptr;
 	}
-	delete this;
 }
 
 
@@ -280,43 +359,70 @@ BEGIN_MESSAGE_MAP(CUpdateSetupDlg, CPropertyPage)
 END_MESSAGE_MAP()
 
 
+CUpdateSetupDlg::CUpdateSetupDlg()
+//--------------------------------
+	: CPropertyPage(IDD_OPTIONS_UPDATE)
+	, m_SettingChangedNotifyGuard(theApp.GetSettings(), TrackerSettings::Instance().UpdateLastUpdateCheck.GetPath())
+{
+	return;
+}
+
+
 BOOL CUpdateSetupDlg::OnInitDialog()
 //----------------------------------
 {
 	CPropertyPage::OnInitDialog();
 
 	int radioID = 0;
-	switch(CUpdateCheck::GetUpdateCheckPeriod())
+	int periodDays = TrackerSettings::Instance().UpdateUpdateCheckPeriod;
+	if(periodDays >= 30)
 	{
-	case 0:		radioID = IDC_RADIO1; break;
-	case 1:		radioID = IDC_RADIO2; break;
-	case 7:		radioID = IDC_RADIO3; break;
-	case 31:	radioID = IDC_RADIO4; break;
+		radioID = IDC_RADIO4;
+	} else if(periodDays >= 7)
+	{
+		radioID = IDC_RADIO3;
+	} else if(periodDays >= 1)
+	{
+		radioID = IDC_RADIO2;
+	} else
+	{
+		radioID = IDC_RADIO1;
 	}
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO4, radioID);
-	CheckDlgButton(IDC_CHECK1, CUpdateCheck::GetSendGUID() ? BST_CHECKED : BST_UNCHECKED);
-	SetDlgItemText(IDC_EDIT1, CUpdateCheck::GetUpdateURL());
+	CheckDlgButton(IDC_CHECK1, TrackerSettings::Instance().UpdateSendGUID ? BST_CHECKED : BST_UNCHECKED);
+	SetDlgItemText(IDC_EDIT1, TrackerSettings::Instance().UpdateUpdateURL.Get());
 
-	const time_t t = CUpdateCheck::GetLastUpdateCheck();
-	if(t > 0)
-	{
-		CString updateText;
-		const tm* const lastUpdate = localtime(&t);
-		if(lastUpdate != nullptr)
-		{
-			updateText.Format(_T("The last successful update check was run on %04d-%02d-%02d, %02d:%02d."), lastUpdate->tm_year + 1900, lastUpdate->tm_mon + 1, lastUpdate->tm_mday, lastUpdate->tm_hour, lastUpdate->tm_min);
-			SetDlgItemText(IDC_LASTUPDATE, updateText);
-		}
-	}
+	m_SettingChangedNotifyGuard.Register(this);
+	SettingChanged(TrackerSettings::Instance().UpdateLastUpdateCheck.GetPath());
 
 	return TRUE;
+}
+
+
+void CUpdateSetupDlg::SettingChanged(const SettingPath &changedPath)
+//------------------------------------------------------------------
+{
+	if(changedPath == TrackerSettings::Instance().UpdateLastUpdateCheck.GetPath())
+	{
+		const time_t t = TrackerSettings::Instance().UpdateLastUpdateCheck.Get();
+		if(t > 0)
+		{
+			CString updateText;
+			const tm* const lastUpdate = localtime(&t);
+			if(lastUpdate != nullptr)
+			{
+				updateText.Format(_T("The last successful update check was run on %04d-%02d-%02d, %02d:%02d."), lastUpdate->tm_year + 1900, lastUpdate->tm_mon + 1, lastUpdate->tm_mday, lastUpdate->tm_hour, lastUpdate->tm_min);
+				SetDlgItemText(IDC_LASTUPDATE, updateText);
+			}
+		}
+	}
 }
 
 
 void CUpdateSetupDlg::OnOK()
 //--------------------------
 {
-	int updateCheckPeriod = CUpdateCheck::GetUpdateCheckPeriod();
+	int updateCheckPeriod = TrackerSettings::Instance().UpdateUpdateCheckPeriod;
 	if(IsDlgButtonChecked(IDC_RADIO1)) updateCheckPeriod = 0;
 	if(IsDlgButtonChecked(IDC_RADIO2)) updateCheckPeriod = 1;
 	if(IsDlgButtonChecked(IDC_RADIO3)) updateCheckPeriod = 7;
@@ -324,7 +430,10 @@ void CUpdateSetupDlg::OnOK()
 
 	CString updateURL;
 	GetDlgItemText(IDC_EDIT1, updateURL);
-	CUpdateCheck::SetUpdateSettings(CUpdateCheck::GetLastUpdateCheck(), updateCheckPeriod, updateURL, IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED, CUpdateCheck::GetShowUpdateHint());
+
+	TrackerSettings::Instance().UpdateUpdateCheckPeriod = updateCheckPeriod;
+	TrackerSettings::Instance().UpdateUpdateURL = updateURL;
+	TrackerSettings::Instance().UpdateSendGUID = (IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
 	
 	CPropertyPage::OnOK();
 }

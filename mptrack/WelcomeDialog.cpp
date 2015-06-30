@@ -149,7 +149,7 @@ void WelcomeDlg::OnOK()
 	CDialog::OnOK();
 
 	bool runUpdates = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
-	CUpdateCheck::SetUpdateSettings(0, runUpdates ? 7 : 0, CUpdateCheck::GetUpdateURL(), CUpdateCheck::GetSendGUID(), CUpdateCheck::GetShowUpdateHint());
+	TrackerSettings::Instance().UpdateUpdateCheckPeriod = (runUpdates ? 7 : 0);
 	if(IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED)
 	{
 		FontSetting font = TrackerSettings::Instance().patternFont;
@@ -167,7 +167,7 @@ void WelcomeDlg::OnOK()
 	}
 	if(runUpdates)
 	{
-		CUpdateCheck::DoUpdateCheck(true);
+		CUpdateCheck::DoAutoUpdateCheck();
 	}
 	CMainFrame::GetMainFrame()->PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTOPTIONS);
 }

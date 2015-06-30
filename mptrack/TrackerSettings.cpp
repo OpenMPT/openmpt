@@ -310,10 +310,10 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, pluginProjectPath(conf, "VST Plugins", "ProjectPath", std::wstring())
 	// Update
 	, UpdateLastUpdateCheck(conf, "Update", "LastUpdateCheck", mpt::Date::Unix(time_t()))
-	, UpdateUpdateCheckPeriod(conf, "Update", "UpdateCheckPeriod", CUpdateCheck::GetUpdateCheckPeriod())
-	, UpdateUpdateURL(conf, "Update", "UpdateURL", CUpdateCheck::GetUpdateURL())
-	, UpdateSendGUID(conf, "Update", "SendGUID", CUpdateCheck::GetSendGUID())
-	, UpdateShowUpdateHint(conf, "Update", "ShowUpdateHint", CUpdateCheck::GetShowUpdateHint())
+	, UpdateUpdateCheckPeriod(conf, "Update", "UpdateCheckPeriod", 7)
+	, UpdateUpdateURL(conf, "Update", "UpdateURL", CUpdateCheck::defaultUpdateURL)
+	, UpdateSendGUID(conf, "Update", "SendGUID", true)
+	, UpdateShowUpdateHint(conf, "Update", "ShowUpdateHint", true)
 {
 
 	// Effects
@@ -385,9 +385,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// load old and messy stuff:
 
 	PatternClipboard::SetClipboardSize(conf.Read<int32>("Pattern Editor", "NumClipboards", mpt::saturate_cast<int32>(PatternClipboard::GetClipboardSize())));
-
-	// Update
-	CUpdateCheck::SetUpdateSettings(UpdateLastUpdateCheck.Get(), UpdateUpdateCheckPeriod, UpdateUpdateURL, UpdateSendGUID, UpdateShowUpdateHint);
 
 	// Chords
 	LoadChords(Chords);
@@ -940,15 +937,6 @@ void TrackerSettings::SaveSettings()
 	conf.Write<WINDOWPLACEMENT>("Display", "WindowPlacement", wpl);
 
 	conf.Write<int32>("Pattern Editor", "NumClipboards", mpt::saturate_cast<int32>(PatternClipboard::GetClipboardSize()));
-
-	// Update
-	{
-		UpdateLastUpdateCheck = mpt::Date::Unix(CUpdateCheck::GetLastUpdateCheck());
-		UpdateUpdateCheckPeriod = CUpdateCheck::GetUpdateCheckPeriod();
-		UpdateUpdateURL = CUpdateCheck::GetUpdateURL();
-		UpdateSendGUID = CUpdateCheck::GetSendGUID();
-		UpdateShowUpdateHint = CUpdateCheck::GetShowUpdateHint();
-	}
 
 	// Effects
 #ifndef NO_DSP

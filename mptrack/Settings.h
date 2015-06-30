@@ -479,10 +479,12 @@ public:
 	}
 };
 
-inline bool operator < (const SettingPath &left, const SettingPath &right)
-{
-	return left.compare(right) < 0;
-}
+inline bool operator <  (const SettingPath &left, const SettingPath &right) { return left.compare(right) <  0; }
+inline bool operator <= (const SettingPath &left, const SettingPath &right) { return left.compare(right) <= 0; }
+inline bool operator >  (const SettingPath &left, const SettingPath &right) { return left.compare(right) >  0; }
+inline bool operator >= (const SettingPath &left, const SettingPath &right) { return left.compare(right) >= 0; }
+inline bool operator == (const SettingPath &left, const SettingPath &right) { return left.compare(right) == 0; }
+inline bool operator != (const SettingPath &left, const SettingPath &right) { return left.compare(right) != 0; }
 
 
 class ISettingsBackend
@@ -848,6 +850,47 @@ public:
 	DefaultSettingsContainer();
 	~DefaultSettingsContainer();
 };
+
+
+#if defined(MPT_SETTINGS_CACHE)
+
+class SettingChangedNotifyGuard
+{
+private:
+	SettingsContainer &conf;
+	SettingPath m_Path;
+	bool m_Registered;
+	ISettingChanged *m_Handler;
+public:
+	SettingChangedNotifyGuard(SettingsContainer &conf, const SettingPath &path)
+		: conf(conf)
+		, m_Path(path)
+		, m_Registered(false)
+		, m_Handler(nullptr)
+	{
+		return;
+	}
+	void Register(ISettingChanged *handler)
+	{
+		if(m_Registered)
+		{
+			return;
+		}
+		m_Handler = handler;
+		conf.Register(m_Handler, m_Path);
+		m_Registered = true;
+	}
+	~SettingChangedNotifyGuard()
+	{
+		if(m_Registered)
+		{
+			conf.UnRegister(m_Handler, m_Path);
+			m_Registered = false;
+		}
+	}
+};
+
+#endif // MPT_SETTINGS_CACHE
 
 
 OPENMPT_NAMESPACE_END

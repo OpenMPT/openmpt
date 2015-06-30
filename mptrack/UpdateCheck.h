@@ -13,62 +13,109 @@
 #include <WinInet.h>
 #include <time.h>
 
+#include "../common/mptAtomic.h"
 #include "resource.h"
-#include "../common/thread.h"
+#include "Settings.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
-#define DOWNLOAD_BUFFER_SIZE 256
+#define DOWNLOAD_BUFFER_SIZE 4096
 
 //================
 class CUpdateCheck
 //================
 {
+
+private:
+
+	static mpt::atomic_int32_t s_InstanceCount;
+
 public:
 
-	static const CString defaultUpdateURL;
+	static const TCHAR *const defaultUpdateURL;
 
-	static void DoUpdateCheck(bool autoUpdate);
+	int32 GetNumCurrentRunningInstances();
 
-	static time_t GetLastUpdateCheck() { return lastUpdateCheck; };
-	static int GetUpdateCheckPeriod() { return updateCheckPeriod; };
-	static CString GetUpdateURL() { return updateBaseURL; };
-	static bool GetSendGUID() { return sendGUID; }
-	static bool GetShowUpdateHint() { return showUpdateHint; };
-	static void SetUpdateSettings(time_t last, int period, CString url, bool sendID, bool showHint)
-		{ lastUpdateCheck = last; updateCheckPeriod = period; updateBaseURL = url; sendGUID = sendID; showUpdateHint = showHint; };
+	static void DoAutoUpdateCheck() { StartUpdateCheckAsync(true); }
+	static void DoManualUpdateCheck() { StartUpdateCheckAsync(false); }
+
+public:
+
+	struct Settings
+	{
+		CWnd *window;
+		UINT msgProgress;
+		UINT msgSuccess;
+		UINT msgFailure;
+		bool autoUpdate;
+		CString updateBaseURL;  // URL where the version check should be made.
+		CString guidString;     // Send GUID to collect basic stats or "anonymous"
+	};
+
+	class Error
+		: public std::runtime_error
+	{
+	public:
+		Error(CString errorMessage);
+		Error(CString errorMessage, DWORD errorCode);
+	protected:
+		static CString FormatErrorCode(CString errorMessage, DWORD errorCode);
+	};
+
+	struct Result
+	{
+		time_t CheckTime;
+		bool UpdateAvailable;
+		CString Version;
+		CString Date;
+		CString URL;
+		Result()
+			: CheckTime(time_t())
+			, UpdateAvailable(false)
+		{
+			return;
+		}
+	};
+
+	static CUpdateCheck::Result ResultFromMessage(WPARAM wparam, LPARAM lparam);
+	static CUpdateCheck::Error ErrorFromMessage(WPARAM wparam, LPARAM lparam);
+
+	static void ShowSuccessGUI(WPARAM wparam, LPARAM lparam);
+	static void ShowFailureGUI(WPARAM wparam, LPARAM lparam);
 
 protected:
 
-	// Static configuration variables
-	static time_t lastUpdateCheck;	// Time of last successful update check
-	static int updateCheckPeriod;	// Check for updates every x days
-	static CString updateBaseURL;	// URL where the version check should be made.
-	static bool sendGUID;			// Send GUID to collect basic stats
-	static bool showUpdateHint;		// Show hint on first automatic update
+	static void StartUpdateCheckAsync(bool autoUpdate);
 
-	bool isAutoUpdate;	// Are we running an automatic update check?
+	struct ThreadFunc
+	{
+		CUpdateCheck::Settings settings;
+		ThreadFunc(const CUpdateCheck::Settings &settings);
+		void operator () ();
+	};
 
 	// Runtime resource handles
-	HINTERNET internetHandle, connectionHandle;
+	HINTERNET internetHandle;
+	HINTERNET connectionHandle;
 
-	// Force creation via "new" as we're using "delete this". Use CUpdateCheck::DoUpdateCheck to create an object.
-	CUpdateCheck(bool autoUpdate) : internetHandle(nullptr), connectionHandle(nullptr), isAutoUpdate(autoUpdate) { }
+	CUpdateCheck();
+	
+	void CheckForUpdate(const CUpdateCheck::Settings &settings);
 
-	void UpdateThread();
-	void Die(CString errorMessage);
-	void Die(CString errorMessage, DWORD errorCode);
-	void Terminate();
+	CUpdateCheck::Result SearchUpdate(const CUpdateCheck::Settings &settings); // may throw
+	
+	~CUpdateCheck();
+
 };
 
 
 //=========================================
 class CUpdateSetupDlg: public CPropertyPage
 //=========================================
+	, public ISettingChanged
 {
 public:
-	CUpdateSetupDlg():CPropertyPage(IDD_OPTIONS_UPDATE)
-	{ };
+	CUpdateSetupDlg();
 
 protected:
 	virtual BOOL OnInitDialog();
@@ -77,7 +124,11 @@ protected:
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnCheckNow();
 	afx_msg void OnResetURL();
+	virtual void SettingChanged(const SettingPath &changedPath);
 	DECLARE_MESSAGE_MAP()
+
+private:
+	SettingChangedNotifyGuard m_SettingChangedNotifyGuard;
 };
 
 
