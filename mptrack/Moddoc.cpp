@@ -2325,12 +2325,11 @@ void CModDoc::OnApproximateBPM()
 	CString Message;
 	double bpm = CMainFrame::GetMainFrame()->GetApproxBPM();
 
-
 	switch(m_SndFile.m_nTempoMode)
 	{
 		case tempoModeAlternative:
-			Message.Format("Using alternative tempo interpretation.\n\nAssuming:\n. %d ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM",
-			m_SndFile.m_PlayState.m_nMusicTempo, m_SndFile.m_PlayState.m_nMusicSpeed, m_SndFile.m_PlayState.m_nCurrentRowsPerBeat, bpm);
+			Message.Format("Using alternative tempo interpretation.\n\nAssuming:\n. %.8g ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM",
+			m_SndFile.m_PlayState.m_nMusicTempo.ToDouble(), m_SndFile.m_PlayState.m_nMusicSpeed, m_SndFile.m_PlayState.m_nCurrentRowsPerBeat, bpm);
 			break;
 
 		case tempoModeModern:
@@ -2339,8 +2338,8 @@ void CModDoc::OnApproximateBPM()
 
 		case tempoModeClassic:
 		default:
-			Message.Format("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %d\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM",
-			m_SndFile.m_PlayState.m_nMusicTempo, m_SndFile.m_PlayState.m_nMusicSpeed, m_SndFile.m_PlayState.m_nCurrentRowsPerBeat, bpm);
+			Message.Format("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %.8g\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM",
+			m_SndFile.m_PlayState.m_nMusicTempo.ToDouble(), m_SndFile.m_PlayState.m_nMusicSpeed, m_SndFile.m_PlayState.m_nCurrentRowsPerBeat, bpm);
 			break;
 	}
 
