@@ -1429,8 +1429,6 @@ void CCtrlInstruments::UpdateFilterText()
 BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 //--------------------------------------------------------------------
 {
-	BOOL bFirst, bOk;
-
 	BeginWaitCursor();
 	InputFile f(fileName);
 	if(!f.IsValid())
@@ -1438,29 +1436,37 @@ BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 		EndWaitCursor();
 		return FALSE;
 	}
-	bFirst = FALSE;
 
 	FileReader file = GetFileReader(f);
 
-	bOk = FALSE;
+	bool first = false, ok = false;
 	if (file.IsValid())
 	{
 		if (!m_sndFile.GetNumInstruments())
 		{
-			bFirst = TRUE;
+			first = true;
 			m_sndFile.m_nInstruments = 1;
-			m_NoteMap.SetCurrentInstrument(1);
 			m_modDoc.SetModified();
 		}
 		if (!m_nInstrument) m_nInstrument = 1;
 		if (m_sndFile.ReadInstrumentFromFile(m_nInstrument, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad))
 		{
-			bOk = TRUE;
+			ok = true;
 		}
 	}
 
+	if(!ok && first)
+	{
+		// Undo adding the instrument
+		delete m_sndFile.Instruments[1];
+		m_sndFile.m_nInstruments = 0;
+	} else if(ok && first)
+	{
+		m_NoteMap.SetCurrentInstrument(1);
+	}
+
 	EndWaitCursor();
-	if (bOk)
+	if (ok)
 	{
 		TrackerSettings::Instance().PathInstruments.SetWorkingDir(fileName, true);
 		ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
@@ -1481,15 +1487,15 @@ BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 
 			SetCurrentInstrument(m_nInstrument);
 			InstrumentHint hint = InstrumentHint().Info().Envelope().Names();
-			if(bFirst) hint.ModType();
+			if(first) hint.ModType();
 			SetModified(hint, true);
-		} else bOk = FALSE;
+		} else ok = FALSE;
 	}
 	SampleHint hint = SampleHint().Info().Data().Names();
-	if (bFirst) hint.ModType();
+	if (first) hint.ModType();
 	m_modDoc.UpdateAllViews(nullptr, hint, this);
-	if (!bOk) ErrorBox(IDS_ERR_FILETYPE, this);
-	return bOk;
+	if (!ok) ErrorBox(IDS_ERR_FILETYPE, this);
+	return ok;
 }
 
 

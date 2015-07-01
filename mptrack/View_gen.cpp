@@ -807,7 +807,7 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 			float fValue = 0.1f * (float)gain;
 			_stprintf(s, _T("Gain: x %1.1f"), fValue);
-			SetDlgItemText(IDC_EDIT16, s);
+			SetDlgItemText(IDC_STATIC2, s);
 
 			SetPluginModified();
 		}
