@@ -46,7 +46,6 @@
  *
  * \ref libopenmpt_c
  * 
- * The C API documentaion currently lacks behind the C++ API documentation.
  * In case a function is not documented here, you might want to look at the
  * \ref libopenmpt_cpp documentation. The C and C++ APIs are kept semantically
  * as close as possible.
