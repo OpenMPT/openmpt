@@ -16,6 +16,7 @@ is just a high-level summary.
     only return the volume of the front left and right channels now.
     get_current_channel_vu_rear_left and get_current_channel_vu_rear_right
     do now actually work and return non-zero values.
+ *  Completed C and C++ documentation
 
 ### libopenmpt 0.2-beta12 (2015-04-19)
 
