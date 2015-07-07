@@ -21,7 +21,7 @@
 #include "View_smp.h"
 #include "SampleEditorDialogs.h"
 #include "dlg_misc.h"
-#include "PSRatioCalc.h" //rewbs.timeStretchMods
+#include "PSRatioCalc.h"
 #include "soundtouch/include/SoundTouch.h"
 #include "soundtouch/source/SoundTouchDLL/SoundTouchDLL.h"
 #include "smbPitchShift/smbPitchShift.h"
@@ -2690,7 +2690,7 @@ void CCtrlSamples::OnLoopPointsChanged()
 	if(IsLocked()) return;
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	SmpLength start = GetDlgItemInt(IDC_EDIT1, NULL, FALSE), end = GetDlgItemInt(IDC_EDIT2, NULL, FALSE);
-	if(start < end || sample.uFlags[CHN_LOOP])
+	if(start < end || !sample.uFlags[CHN_LOOP])
 	{
 		const int n = m_ComboLoopType.GetCurSel();
 		sample.SetLoop(start, end, n > 0, n == 2, m_sndFile);
