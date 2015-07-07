@@ -165,7 +165,7 @@ protected:
 	CRect m_oldClient;
 	UINT m_nMidRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
 	FlagSet<PatternStatus> m_Status;
-	ROWINDEX m_nPlayRow;
+	ROWINDEX m_nPlayRow, m_nNextPlayRow;
 	uint32 m_nPlayTick, m_nTicksOnRow;
 	PATTERNINDEX m_nPattern, m_nPlayPat;
 	ORDERINDEX m_nOrder;
@@ -190,7 +190,6 @@ protected:
 	DWORD m_dwLastNoteEntryTime; //rewbs.customkeys
 	bool m_bLastNoteEntryBlocked : 1;
 	bool m_bContinueSearch : 1, m_bWholePatternFitsOnScreen : 1;
-	bool m_smoothScrollBackwards : 1;
 
 	ModCommand m_PCNoteEditMemory;		// PC Note edit memory
 	static ModCommand m_cmdOld;			// Quick cursor copy/paste data

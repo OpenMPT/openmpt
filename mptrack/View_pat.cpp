@@ -184,14 +184,13 @@ void CViewPattern::OnInitialUpdate()
 	memset(splitActiveNoteChannel, 0xFF, sizeof(splitActiveNoteChannel));
 	memset(activeNoteChannel, 0xFF, sizeof(activeNoteChannel));
 	m_nPlayPat = PATTERNINDEX_INVALID;
-	m_nPlayRow = 0;
+	m_nPlayRow = m_nNextPlayRow = 0;
 	m_nPlayTick = 0;
 	m_nTicksOnRow = 1;
 	m_nMidRow = 0;
 	m_nDragItem = 0;
 	m_bInItemRect = false;
 	m_bContinueSearch = false;
-	m_smoothScrollBackwards = false;
 	m_Status = psShowPluginNames;
 	m_nXScroll = m_nYScroll = 0;
 	m_nPattern = 0;
@@ -3764,12 +3763,13 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 			}
 
 			// Simple detection of backwards-going patterns to avoid jerky animation
-			m_smoothScrollBackwards = false;
+			m_nNextPlayRow = nRow + 1;
 			if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) && pSndFile->Patterns.IsValidPat(nPat))
 			{
 				for(const ModCommand *m = pSndFile->Patterns[nPat].GetRow(nRow), *mEnd = m + pSndFile->GetNumChannels(); m != mEnd; m++)
 				{
-					if(m->command == CMD_PATTERNBREAK) m_smoothScrollBackwards = (m->param == nRow - 1);
+					if(m->command == CMD_PATTERNBREAK) m_nNextPlayRow = m->param;
+					else if(m->command == CMD_POSITIONJUMP && pSndFile->GetType() == MOD_TYPE_XM) m_nNextPlayRow = 0;
 				}
 			}
 
