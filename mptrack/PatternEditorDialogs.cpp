@@ -570,12 +570,22 @@ void CPatternPropertiesDlg::OnOverrideSignature()
 void CPatternPropertiesDlg::OnTempoSwing()
 //----------------------------------------
 {
-	m_tempoSwing.resize(GetDlgItemInt(IDC_ROWSPERBEAT), TempoSwing::Unity);
+	CPattern &pat = modDoc.GetrSoundFile().Patterns[m_nPattern];
+	const ROWINDEX oldRPB = pat.GetRowsPerBeat();
+	const ROWINDEX oldRPM = pat.GetRowsPerMeasure();
+
+	// Temporarily apply new tempo signature for preview
+	ROWINDEX newRPB = std::max(1u, GetDlgItemInt(IDC_ROWSPERBEAT));
+	ROWINDEX newRPM = std::max(newRPB, GetDlgItemInt(IDC_ROWSPERMEASURE));
+	pat.SetSignature(newRPB, newRPM);
+
+	m_tempoSwing.resize(newRPB, TempoSwing::Unity);
 	CTempoSwingDlg dlg(this, m_tempoSwing, modDoc.GetrSoundFile(), m_nPattern);
 	if(dlg.DoModal() == IDOK)
 	{
 		m_tempoSwing = dlg.m_tempoSwing;
 	}
+	pat.SetSignature(oldRPB, oldRPM);
 }
 
 

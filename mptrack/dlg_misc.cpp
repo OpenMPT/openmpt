@@ -284,12 +284,26 @@ void CModTypeDlg::OnTempoModeChanged()
 void CModTypeDlg::OnTempoSwing()
 //------------------------------
 {
+	const ROWINDEX oldRPB = sndFile.m_nDefaultRowsPerBeat;
+	const ROWINDEX oldRPM = sndFile.m_nDefaultRowsPerMeasure;
+	const TempoMode oldMode = sndFile.m_nTempoMode;
+
+	// Temporarily apply new tempo signature for preview
+	ROWINDEX newRPB = std::max(1u, GetDlgItemInt(IDC_ROWSPERBEAT));
+	ROWINDEX newRPM = std::max(newRPB, GetDlgItemInt(IDC_ROWSPERMEASURE));
+	sndFile.m_nDefaultRowsPerBeat = newRPM;
+	sndFile.m_nDefaultRowsPerMeasure = newRPM;
+	sndFile.m_nTempoMode = tempoModeModern;
+
 	m_tempoSwing.resize(GetDlgItemInt(IDC_ROWSPERBEAT), TempoSwing::Unity);
 	CTempoSwingDlg dlg(this, m_tempoSwing, sndFile);
 	if(dlg.DoModal() == IDOK)
 	{
 		m_tempoSwing = dlg.m_tempoSwing;
 	}
+	sndFile.m_nDefaultRowsPerBeat = oldRPB;
+	sndFile.m_nDefaultRowsPerMeasure = oldRPM;
+	sndFile.m_nTempoMode = oldMode;
 }
 
 
