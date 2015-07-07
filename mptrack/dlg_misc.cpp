@@ -291,7 +291,7 @@ void CModTypeDlg::OnTempoSwing()
 	// Temporarily apply new tempo signature for preview
 	ROWINDEX newRPB = std::max(1u, GetDlgItemInt(IDC_ROWSPERBEAT));
 	ROWINDEX newRPM = std::max(newRPB, GetDlgItemInt(IDC_ROWSPERMEASURE));
-	sndFile.m_nDefaultRowsPerBeat = newRPM;
+	sndFile.m_nDefaultRowsPerBeat = newRPB;
 	sndFile.m_nDefaultRowsPerMeasure = newRPM;
 	sndFile.m_nTempoMode = tempoModeModern;
 
