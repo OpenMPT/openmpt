@@ -163,11 +163,12 @@ int CViewPattern::GetSmoothScrollOffset() const
 	if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) != 0	// Actually using the smooth scroll feature
 		&& (m_Status & (psFollowSong | psDragActive)) == psFollowSong	// Not drawing a selection during playback
 		&& (m_nMidRow != 0 || GetYScrollPos() > 0)	// If active row is not centered, only scroll when display position is actually not at the top
-		&& IsLiveRecord())	// Actually playing live (not paused or stepping)
+		&& IsLiveRecord()	// Actually playing live (not paused or stepping)
+		&& m_nNextPlayRow != m_nPlayRow)	// Don't scroll if we stay on the same row
 	{
 		uint32 tick = m_nPlayTick;
 		// Avoid jerky animation with backwards-going patterns
-		if(m_smoothScrollBackwards) tick = m_nTicksOnRow - m_nPlayTick - 1;
+		if(m_nNextPlayRow == m_nPlayRow - 1) tick = m_nTicksOnRow - m_nPlayTick - 1;
 		return Util::muldivr_unsigned(m_szCell.cy, tick, std::max(1u, m_nTicksOnRow));
 	}
 	return 0;
@@ -822,19 +823,20 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			nMeasure = sndFile.Patterns[nPattern].GetRowsPerMeasure();
 		}
 		// secondary highlight (beats)
+		ROWINDEX highlightRow = compRow % nMeasure;
 		if ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_2NDHIGHLIGHT)
-			&& (nBeat) && (nBeat < numRows))
+			&& nBeat > 0)
 		{
-			if(!(compRow % nBeat))
+			if((highlightRow % nBeat) == 0)
 			{
 				row_bkcol = MODCOLOR_2NDHIGHLIGHT;
 			}
 		}
 		// primary highlight (measures)
 		if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_STDHIGHLIGHT)
-			&& (nMeasure) && (nMeasure < numRows))
+			&& nMeasure > 0)
 		{
-			if(!(compRow % nMeasure))
+			if(highlightRow == 0)
 			{
 				row_bkcol = MODCOLOR_BACKHILIGHT;
 			}
