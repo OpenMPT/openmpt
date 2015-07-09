@@ -3236,6 +3236,7 @@ void CCtrlSamples::OnKeepSampleOnDisk()
 		m_sndFile.GetSample(i).uFlags.set(SMP_KEEPONDISK, enable && m_sndFile.SampleHasPath(i));
 		m_modDoc.UpdateAllViews(nullptr, SampleHint(i).Info().Names(), this);
 	}
+	m_modDoc.SetModified();
 }
 
 
