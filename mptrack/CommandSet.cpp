@@ -1745,33 +1745,33 @@ int CCommandSet::FindCmd(int uid) const
 }
 
 
-CString KeyCombination::GetContextText(InputTargetContext ctx)
-//------------------------------------------------------------
+const TCHAR *KeyCombination::GetContextText(InputTargetContext ctx)
+//-----------------------------------------------------------------
 {
 	switch(ctx)
 	{
 
-		case kCtxAllContexts:			return "Global Context";
-		case kCtxViewGeneral:			return "General Context [bottom]";
-		case kCtxViewPatterns:			return "Pattern Context [bottom]";
-		case kCtxViewPatternsNote:		return "Pattern Context [bottom] - Note Col";
-		case kCtxViewPatternsIns:		return "Pattern Context [bottom] - Ins Col";
-		case kCtxViewPatternsVol:		return "Pattern Context [bottom] - Vol Col";
-		case kCtxViewPatternsFX:		return "Pattern Context [bottom] - FX Col";
-		case kCtxViewPatternsFXparam:	return "Pattern Context [bottom] - Param Col";
-		case kCtxViewSamples:			return "Sample Context [bottom]";
-		case kCtxViewInstruments:		return "Instrument Context [bottom]";
-		case kCtxViewComments:			return "Comments Context [bottom]";
-		case kCtxCtrlGeneral:			return "General Context [top]";
-		case kCtxCtrlPatterns:			return "Pattern Context [top]";
-		case kCtxCtrlSamples:			return "Sample Context [top]";
-		case kCtxCtrlInstruments:		return "Instrument Context [top]";
-		case kCtxCtrlComments:			return "Comments Context [top]";
-		case kCtxCtrlOrderlist:			return "Orderlist";
-		case kCtxVSTGUI:				return "Plugin GUI Context";
-		case kCtxChannelSettings:		return "Quick Channel Settings Context";
+		case kCtxAllContexts:			return _T("Global Context");
+		case kCtxViewGeneral:			return _T("General Context [bottom]");
+		case kCtxViewPatterns:			return _T("Pattern Context [bottom]");
+		case kCtxViewPatternsNote:		return _T("Pattern Context [bottom] - Note Col");
+		case kCtxViewPatternsIns:		return _T("Pattern Context [bottom] - Ins Col");
+		case kCtxViewPatternsVol:		return _T("Pattern Context [bottom] - Vol Col");
+		case kCtxViewPatternsFX:		return _T("Pattern Context [bottom] - FX Col");
+		case kCtxViewPatternsFXparam:	return _T("Pattern Context [bottom] - Param Col");
+		case kCtxViewSamples:			return _T("Sample Context [bottom]");
+		case kCtxViewInstruments:		return _T("Instrument Context [bottom]");
+		case kCtxViewComments:			return _T("Comments Context [bottom]");
+		case kCtxCtrlGeneral:			return _T("General Context [top]");
+		case kCtxCtrlPatterns:			return _T("Pattern Context [top]");
+		case kCtxCtrlSamples:			return _T("Sample Context [top]");
+		case kCtxCtrlInstruments:		return _T("Instrument Context [top]");
+		case kCtxCtrlComments:			return _T("Comments Context [top]");
+		case kCtxCtrlOrderlist:			return _T("Orderlist");
+		case kCtxVSTGUI:				return _T("Plugin GUI Context");
+		case kCtxChannelSettings:		return _T("Quick Channel Settings Context");
 		case kCtxUnknownContext:
-		default:						return "Unknown Context";
+		default:						return _T("Unknown Context");
 	}
 };
 
@@ -1779,24 +1779,24 @@ CString KeyCombination::GetContextText(InputTargetContext ctx)
 CString KeyCombination::GetKeyEventText(FlagSet<KeyEventType> event)
 //------------------------------------------------------------------
 {
-	CString text="";
+	CString text = _T("");
 
 	bool first = true;
 	if (event & kKeyEventDown)
 	{
 		first=false;
-		text.Append("KeyDown");
+		text.Append(_T("KeyDown"));
 	}
 	if (event & kKeyEventRepeat)
 	{
-		if (!first) text.Append("|");
-		text.Append("KeyHold");
+		if (!first) text.Append(_T("|"));
+		text.Append(_T("KeyHold"));
 		first=false;
 	}
 	if (event & kKeyEventUp)
 	{
-		if (!first) text.Append("|");
-		text.Append("KeyUp");
+		if (!first) text.Append(_T("|"));
+		text.Append(_T("KeyUp"));
 	}
 
 	return text;
@@ -1806,12 +1806,12 @@ CString KeyCombination::GetKeyEventText(FlagSet<KeyEventType> event)
 CString KeyCombination::GetModifierText(UINT mod)
 //-----------------------------------------------
 {
-	CString text = "";
-	if (mod & HOTKEYF_SHIFT) text.Append("Shift+");
-	if (mod & HOTKEYF_CONTROL) text.Append("Ctrl+");
-	if (mod & HOTKEYF_ALT) text.Append("Alt+");
-	if (mod & HOTKEYF_EXT) text.Append("Win+"); // Feature: use Windows keys as modifier keys
-	if (mod & HOTKEYF_MIDI) text.Append("MidiCC:");
+	CString text = _T("");
+	if (mod & HOTKEYF_SHIFT) text.Append(_T("Shift+"));
+	if (mod & HOTKEYF_CONTROL) text.Append(_T("Ctrl+"));
+	if (mod & HOTKEYF_ALT) text.Append(_T("Alt+"));
+	if (mod & HOTKEYF_EXT) text.Append(_T("Win+")); // Feature: use Windows keys as modifier keys
+	if (mod & HOTKEYF_MIDI) text.Append(_T("MidiCC:"));
 	return text;
 }
 
@@ -1822,13 +1822,13 @@ CString KeyCombination::GetKeyText(UINT mod, UINT code)
 	CString keyText;
 	keyText=GetModifierText(mod);
 	if(mod & HOTKEYF_MIDI)
-		keyText.AppendFormat("%d",code);
+		keyText.AppendFormat(_T("%u"),code);
 	else
 		keyText.Append(CHotKeyCtrl::GetKeyName(code, IsExtended(code)));
 	//HACK:
-	if (keyText == "Ctrl+CTRL")		keyText="Ctrl";
-	if (keyText == "Alt+ALT")		keyText="Alt";
-	if (keyText == "Shift+SHIFT")	keyText="Shift";
+	if (keyText == _T("Ctrl+CTRL"))		keyText = _T("Ctrl");
+	if (keyText == _T("Alt+ALT"))		keyText = _T("Alt");
+	if (keyText == _T("Shift+SHIFT"))	keyText = _T("Shift");
 
 	return keyText;
 }
@@ -1840,7 +1840,7 @@ CString CCommandSet::GetKeyTextFromCommand(CommandID c, UINT key)
 	if ( key < commands[c].kcList.size())
 		return commands[c].kcList[0].GetKeyText();
 	else
-		return "";
+		return _T("");
 }
 
 

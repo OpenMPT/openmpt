@@ -588,7 +588,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		patternFont = FontSetting((m_dwPatternSetup & 0x08) ? PATTERNFONT_SMALL : PATTERNFONT_LARGE, 0);
 		m_dwPatternSetup &= ~(0x08 | 0x02);
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,25,00,08))
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,25,00,08) && glGeneralWindowHeight < 222)
 	{
 		glGeneralWindowHeight += 44;
 	}
