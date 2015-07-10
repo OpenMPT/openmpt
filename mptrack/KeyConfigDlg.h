@@ -22,7 +22,7 @@ class COptionsKeyboard;
 class CommandCategory
 {
 public:
-	CommandCategory(CString n, InputTargetContext d) : name(n), id(d) { }
+	CommandCategory(const TCHAR *n, InputTargetContext d) : name(n), id(d) { }
 
 	bool separatorAt(int c) const
 	{

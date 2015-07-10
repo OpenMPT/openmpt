@@ -185,7 +185,7 @@ BOOL COptionsKeyboard::OnInitDialog()
 	m_eCustHotKey.SetParent(m_hWnd, IDC_CUSTHOTKEY, this);
 	m_eFindHotKey.SetParent(m_hWnd, IDC_FINDHOTKEY, this);
 	m_eReport.FmtLines(TRUE);
-	m_eReport.SetWindowText("");
+	m_eReport.SetWindowText(_T(""));
 
 	m_eChordWaitTime.SetWindowText(mpt::ToString(TrackerSettings::Instance().gnAutoChordWaitTime).c_str());
 	return TRUE;
@@ -198,7 +198,7 @@ void COptionsKeyboard::DefineCommandCategories()
 //----------------------------------------------
 {
 	{
-		CommandCategory newCat("Global keys", kCtxAllContexts);
+		CommandCategory newCat(_T("Global keys"), kCtxAllContexts);
 
 		for(int c = kcStartFile; c <= kcEndFile; c++)
 			newCat.commands.push_back(c);
@@ -221,22 +221,22 @@ void COptionsKeyboard::DefineCommandCategories()
 	}
 
 	{
-		CommandCategory newCat("  General [Top]", kCtxCtrlGeneral);
+		CommandCategory newCat(_T("  General [Top]"), kCtxCtrlGeneral);
 		commandCategories.push_back(newCat);
 	}
 
 	{
-		CommandCategory newCat("  General [Bottom]", kCtxViewGeneral);
+		CommandCategory newCat(_T("  General [Bottom]"), kCtxViewGeneral);
 		commandCategories.push_back(newCat);
 	}
 
 	{
-		CommandCategory newCat("  Pattern Editor [Top]", kCtxCtrlPatterns);
+		CommandCategory newCat(_T("  Pattern Editor [Top]"), kCtxCtrlPatterns);
 		commandCategories.push_back(newCat);
 	}
 
 	{
-		CommandCategory newCat("  Pattern Editor - Order List", kCtxCtrlOrderlist);
+		CommandCategory newCat(_T("  Pattern Editor - Order List"), kCtxCtrlOrderlist);
 
 		for(int c = kcStartOrderlistCommands; c <= kcEndOrderlistCommands; c++)
 			newCat.commands.push_back(c);
@@ -248,7 +248,7 @@ void COptionsKeyboard::DefineCommandCategories()
 	}
 
 	{
-		CommandCategory newCat("  Pattern Editor - Quick Channel Settings", kCtxChannelSettings);
+		CommandCategory newCat(_T("  Pattern Editor - Quick Channel Settings"), kCtxChannelSettings);
 
 		for(int c = kcStartChnSettingsCommands; c <= kcEndChnSettingsCommands; c++)
 			newCat.commands.push_back(c);
@@ -257,7 +257,7 @@ void COptionsKeyboard::DefineCommandCategories()
 	}
 
 	{
-		CommandCategory newCat("    Pattern Editor - General", kCtxViewPatterns);
+		CommandCategory newCat(_T("    Pattern Editor - General"), kCtxViewPatterns);
 
 		for(int c = kcStartPlainNavigate; c <= kcEndPlainNavigate; c++)
 			newCat.commands.push_back(c);
@@ -298,7 +298,7 @@ void COptionsKeyboard::DefineCommandCategories()
 	}
 
 	{
-		CommandCategory newCat("        Pattern Editor - Note Column", kCtxViewPatternsNote);
+		CommandCategory newCat(_T("        Pattern Editor - Note Column"), kCtxViewPatternsNote);
 
 		for(int c = kcVPStartNotes; c <= kcVPEndNotes; c++)
 			newCat.commands.push_back(c);
@@ -313,7 +313,7 @@ void COptionsKeyboard::DefineCommandCategories()
 	}
 
 	{
-		CommandCategory newCat("        Pattern Editor - Instrument Column", kCtxViewPatternsIns);
+		CommandCategory newCat(_T("        Pattern Editor - Instrument Column"), kCtxViewPatternsIns);
 
 		for(int c = kcSetIns0; c <= kcSetIns9; c++)
 			newCat.commands.push_back(c);
@@ -322,7 +322,7 @@ void COptionsKeyboard::DefineCommandCategories()
 	}
 
 	{
-		CommandCategory newCat("        Pattern Editor - Volume Column", kCtxViewPatternsVol);
+		CommandCategory newCat(_T("        Pattern Editor - Volume Column"), kCtxViewPatternsVol);
 
 		for(int c = kcSetVolumeStart; c <= kcSetVolumeEnd; c++)
 			newCat.commands.push_back(c);
@@ -331,7 +331,7 @@ void COptionsKeyboard::DefineCommandCategories()
 	}
 
 	{
-		CommandCategory newCat("        Pattern Editor - Effect Column", kCtxViewPatternsFX);
+		CommandCategory newCat(_T("        Pattern Editor - Effect Column"), kCtxViewPatternsFX);
 
 		for(int c = kcSetFXStart; c <= kcSetFXEnd; c++)
 			newCat.commands.push_back(c);
@@ -340,23 +340,23 @@ void COptionsKeyboard::DefineCommandCategories()
 	}
 
 	{
-		CommandCategory newCat("        Pattern Editor - Effect Parameter Column", kCtxViewPatternsFXparam);
+		CommandCategory newCat(_T("        Pattern Editor - Effect Parameter Column"), kCtxViewPatternsFXparam);
 		for(int c = kcSetFXParam0; c <= kcSetFXParamF; c++)
 			newCat.commands.push_back(c);
 		commandCategories.push_back(newCat);
 	}
 
 	{
-		CommandCategory newCat("  Sample [Top]", kCtxCtrlSamples);
+		CommandCategory newCat(_T("  Sample [Top]"), kCtxCtrlSamples);
 		commandCategories.push_back(newCat);
 	}
 
 	{
-		CommandCategory newCat("    Sample Editor", kCtxViewSamples);
+		CommandCategory newCat(_T("    Sample Editor"), kCtxViewSamples);
 
 		for(int c = kcStartSampleEditing; c <= kcEndSampleEditing; c++)
 			newCat.commands.push_back(c);
-		newCat.separators.push_back(kcEndSampleEditing);			//--------------------------------------
+		newCat.separators.push_back(kcEndSampleEditing);		//--------------------------------------
 		for(int c = kcStartSampleMisc; c <= kcEndSampleMisc; c++)
 			newCat.commands.push_back(c);
 		newCat.separators.push_back(kcEndSampleMisc);			//--------------------------------------
@@ -367,7 +367,7 @@ void COptionsKeyboard::DefineCommandCategories()
 	}
 
 	{
-		CommandCategory newCat("  Instrument Editor", kCtxCtrlInstruments);
+		CommandCategory newCat(_T("  Instrument Editor"), kCtxCtrlInstruments);
 
 		for(int c = kcStartInstrumentCtrlMisc; c <= kcEndInstrumentCtrlMisc; c++)
 			newCat.commands.push_back(c);
@@ -376,7 +376,7 @@ void COptionsKeyboard::DefineCommandCategories()
 	}
 
 	{
-		CommandCategory newCat("    Envelope Editor", kCtxViewInstruments);
+		CommandCategory newCat(_T("    Envelope Editor"), kCtxViewInstruments);
 
 		for(int c = kcStartInstrumentMisc; c <= kcEndInstrumentMisc; c++)
 			newCat.commands.push_back(c);
@@ -385,17 +385,17 @@ void COptionsKeyboard::DefineCommandCategories()
 	}
 
 	{
-		CommandCategory newCat("  Comments [Top]", kCtxCtrlComments);
+		CommandCategory newCat(_T("  Comments [Top]"), kCtxCtrlComments);
 		commandCategories.push_back(newCat);
 	}
 
 	{
-		CommandCategory newCat("  Comments [Bottom]", kCtxViewComments);
+		CommandCategory newCat(_T("  Comments [Bottom]"), kCtxViewComments);
 		commandCategories.push_back(newCat);
 	}
 
 	{
-		CommandCategory newCat("  Plugin Editor", kCtxVSTGUI);
+		CommandCategory newCat(_T("  Plugin Editor"), kCtxVSTGUI);
 
 		for(int c = kcStartVSTGUICommands; c <= kcEndVSTGUICommands; c++)
 			newCat.commands.push_back(c);
@@ -547,7 +547,7 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 				{
 					if(doSearch && addCategoryName)
 					{
-						const CString catName = "------ " + commandCategories[cat].name.Trim() + " ------";
+						const CString catName = _T("------ ") + commandCategories[cat].name.Trim() + _T(" ------");
 						m_lbnCommandKeys.SetItemData(m_lbnCommandKeys.AddString(catName), DWORD_PTR(-1));
 						addCategoryName = false;
 					}
@@ -563,7 +563,7 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 				}
 
 				if(commandCategories[cat].separatorAt(com))
-					m_lbnCommandKeys.SetItemData(m_lbnCommandKeys.AddString("------------------------------------------------------"), DWORD_PTR(-1));
+					m_lbnCommandKeys.SetItemData(m_lbnCommandKeys.AddString(_T("------------------------------------------------------")), DWORD_PTR(-1));
 			}
 		}
 
@@ -587,9 +587,9 @@ void COptionsKeyboard::OnCommandKeySelChanged()
 	//Separator
 	if (nCmd == kcNull)
 	{
-		m_cmbKeyChoice.SetWindowText("");
+		m_cmbKeyChoice.SetWindowText(_T(""));
 		m_cmbKeyChoice.EnableWindow(FALSE);
-		m_eCustHotKey.SetWindowText("");
+		m_eCustHotKey.SetWindowText(_T(""));
 		m_eCustHotKey.EnableWindow(FALSE);
 		m_bKeyDown.SetCheck(0);
 		m_bKeyDown.EnableWindow(FALSE);
@@ -621,11 +621,11 @@ void COptionsKeyboard::OnCommandKeySelChanged()
 		{
 			for (int i=0; i<numChoices; i++)
 			{
-				wsprintf(s, "Choice %d (of %d)", i+1, numChoices);
+				wsprintf(s, _T("Choice %u (of %u)"), i+1, numChoices);
 				m_cmbKeyChoice.SetItemData(m_cmbKeyChoice.AddString(s), i);
 			}
 		}
-		m_cmbKeyChoice.SetItemData(m_cmbKeyChoice.AddString("<new>"), numChoices);
+		m_cmbKeyChoice.SetItemData(m_cmbKeyChoice.AddString(_T("<new>")), numChoices);
 		m_cmbKeyChoice.SetCurSel(0);
 		m_nCurKeyChoice = -1;
 		OnKeyChoiceSelect();
@@ -680,7 +680,7 @@ void COptionsKeyboard::OnChordWaitTimeChanged()
 	if (val>5000)
 	{
 		val = 5000;
-		m_eChordWaitTime.SetWindowText("5000");
+		m_eChordWaitTime.SetWindowText(_T("5000"));
 	}
 	OnSettingsChanged();
 }
@@ -758,8 +758,7 @@ void COptionsKeyboard::OnSetKeyChoice()
 	//detect invalid input
 	if (!kc.KeyCode())
 	{
-		CString error = "You need to say to which key you'd like to map this command to.";
-		Reporting::Warning(error, "Invalid key data", this);
+		Reporting::Warning("You need to say to which key you'd like to map this command to.", "Invalid key data", this);
 		return;
 	}
 	if (!kc.EventType())
@@ -778,7 +777,7 @@ void COptionsKeyboard::OnSetKeyChoice()
 		&& conflictCmd.first != cmd
 		&& !plocalCmdSet->IsCrossContextConflict(kc, conflictCmd.second))
 	{
-		ConfirmAnswer delOld = Reporting::Confirm("New shortcut (" + kc.GetKeyText() + ") has the same key combination as " + plocalCmdSet->GetCommandText(conflictCmd.first) + " in " + conflictCmd.second.GetContextText() + ".\nDo you want to delete the other shortcut, only keeping the new one?", "Shortcut Conflict", true, false, this);
+		ConfirmAnswer delOld = Reporting::Confirm(_T("New shortcut (") + kc.GetKeyText() + _T(") has the same key combination as ") + plocalCmdSet->GetCommandText(conflictCmd.first) + _T(" in ") + conflictCmd.second.GetContextText() + _T(".\nDo you want to delete the other shortcut, only keeping the new one?"), _T("Shortcut Conflict"), true, false, this);
 		if(delOld == cnfYes)
 		{
 			plocalCmdSet->Remove(conflictCmd.second, conflictCmd.first);
@@ -915,7 +914,7 @@ void COptionsKeyboard::ForceUpdateGUI()
 void COptionsKeyboard::OnClearLog()
 //---------------------------------
 {
-	m_eReport.SetWindowText("");
+	m_eReport.SetWindowText(_T(""));
 	ForceUpdateGUI();
 }
 

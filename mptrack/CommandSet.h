@@ -1219,8 +1219,8 @@ public:
 	FlagSet<KeyEventType> EventType() const { FlagSet<KeyEventType> result; result.SetRaw(event); return result; }
 
 	// Key combination to string
-	static CString GetContextText(InputTargetContext ctx);
-	CString GetContextText() const { return GetContextText(Context()); }
+	static const TCHAR *GetContextText(InputTargetContext ctx);
+	const TCHAR *GetContextText() const { return GetContextText(Context()); }
 
 	static CString GetModifierText(UINT mod);
 	CString GetModifierText() const { return GetModifierText(Modifier()); }
