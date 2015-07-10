@@ -30,15 +30,14 @@ namespace Version
 
 
 
-static uint32 VersionDecimalToBCD(uint32 major, uint32 minor)
+static uint32 VersionDecimalTo_WIN32_WINNT(uint32 major, uint32 minor)
 {
 	// GetVersionEx returns decimal.
-	// _WIN32_WINNT macro uses BCD.
-	// We use BCD.
+	// _WIN32_WINNT macro uses BCD for the minor byte (see Windows 98 / ME).
+	// We use what _WIN32_WINNT does.
 	uint32 result = 0;
-	major = Clamp(major, 0u, 99u);
 	minor = Clamp(minor, 0u, 99u);
-	result |= major/10*0x10 + major%10;
+	result |= major;
 	result <<= 8;
 	result |= minor/10*0x10 + minor%10;
 	return result;
@@ -83,7 +82,7 @@ void Init()
 	versioninfoex.dwOSVersionInfoSize = sizeof(versioninfoex);
 	GetVersionExW((LPOSVERSIONINFOW)&versioninfoex);
 	SystemIsNT = (versioninfoex.dwPlatformId == VER_PLATFORM_WIN32_NT);
-	SystemVersion = VersionDecimalToBCD(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion);
+	SystemVersion = VersionDecimalTo_WIN32_WINNT(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion);
 	SystemIsWine = false;
 	HMODULE hNTDLL = LoadLibraryW(L"ntdll.dll");
 	if(hNTDLL)
@@ -284,7 +283,7 @@ bool IsBefore(mpt::Windows::Version::Number version)
 	MemsetZero(versioninfoex);
 	versioninfoex.dwOSVersionInfoSize = sizeof(versioninfoex);
 	GetVersionExW((LPOSVERSIONINFOW)&versioninfoex);
-	uint32 SystemVersion = VersionDecimalToBCD(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion);
+	uint32 SystemVersion = VersionDecimalTo_WIN32_WINNT(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion);
 	return (SystemVersion < (uint32)version);
 }
 
@@ -296,7 +295,7 @@ bool IsAtLeast(mpt::Windows::Version::Number version)
 	MemsetZero(versioninfoex);
 	versioninfoex.dwOSVersionInfoSize = sizeof(versioninfoex);
 	GetVersionExW((LPOSVERSIONINFOW)&versioninfoex);
-	uint32 SystemVersion = VersionDecimalToBCD(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion);
+	uint32 SystemVersion = VersionDecimalTo_WIN32_WINNT(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion);
 	return (SystemVersion >= (uint32)version);
 }
 
