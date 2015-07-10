@@ -1158,7 +1158,17 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 	} else
 	{
 		CriticalSection cs;
+		// Apply note cut / off / fade (also on preview channels)
 		m_SndFile.NoteChange(&m_SndFile.m_PlayState.Chn[nChn], note);
+		for(CHANNELINDEX c = m_SndFile.GetNumChannels(); c < MAX_CHANNELS; c++)
+		{
+			ModChannel &chn = m_SndFile.m_PlayState.Chn[c];
+			if(chn.nMasterChn == 0)
+			{
+				m_SndFile.NoteChange(&chn, note);
+			}
+		}
+
 		if (pause) m_SndFile.m_SongFlags.set(SONG_PAUSED);
 	}
 	return nChn;
@@ -1216,11 +1226,11 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 }
 
 
-// Apply DNA/NNA settings for note preview
-void CModDoc::CheckNNA(ModCommand::NOTE note, INSTRUMENTINDEX ins, const std::bitset<128> &playingNotes)
-//------------------------------------------------------------------------------------------------------
+// Apply DNA/NNA settings for note preview. It will also set the specified note to be playing in the playingNotes set.
+void CModDoc::CheckNNA(ModCommand::NOTE note, INSTRUMENTINDEX ins, std::bitset<128> &playingNotes)
+//------------------------------------------------------------------------------------------------
 {
-	if(ins > GetNumInstruments() || m_SndFile.Instruments[ins] == nullptr)
+	if(ins > GetNumInstruments() || m_SndFile.Instruments[ins] == nullptr || note >= playingNotes.size())
 	{
 		return;
 	}
@@ -1256,6 +1266,7 @@ void CModDoc::CheckNNA(ModCommand::NOTE note, INSTRUMENTINDEX ins, const std::bi
 			}
 		}
 	}
+	playingNotes.set(note);
 }
 
 
