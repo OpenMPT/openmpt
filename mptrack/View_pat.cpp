@@ -5456,7 +5456,6 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 			}
 			bool isPlaying = ((pMainFrm->GetModPlaying() == pModDoc) && (pMainFrm->IsPlaying()));
 			pModDoc->CheckNNA(newcmd.note, nPlayIns, m_baPlayingNote);
-			m_baPlayingNote.set(newcmd.note);
 			pModDoc->PlayNote(newcmd.note, nPlayIns, 0, !isPlaying, 4 * vol, 0, 0, nChn);
 		}
 	}
@@ -5733,7 +5732,6 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 			for(int i = 0; i < numNotes; i++)
 			{
 				pModDoc->CheckNNA(note, nPlayIns, m_baPlayingNote);
-				m_baPlayingNote.set(note);
 				pModDoc->PlayNote(chordNotes[i], nPlayIns, 0, !isPlaying && i == 0, -1, 0, 0, chn);
 			}
 		}

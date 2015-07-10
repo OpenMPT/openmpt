@@ -1934,7 +1934,11 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (pMainFrm) && (note > 0) && (note<128))
+	if (pModDoc == nullptr || pMainFrm == nullptr)
+	{
+		return;
+	}
+	if (note > 0 && note<128)
 	{
 		CHAR s[64];
 		if (note >= NOTE_MIN_SPECIAL)
@@ -1956,7 +1960,6 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 				}
 				CriticalSection cs;
 				pModDoc->CheckNNA(note, m_nInstrument, m_baPlayingNote);
-				m_baPlayingNote[note] = true;
 				pModDoc->PlayNote(note, m_nInstrument, 0, false);
 			}
 			s[0] = 0;
@@ -1967,6 +1970,9 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 			}
 			pMainFrm->SetInfoText(s);
 		}
+	} else
+	{
+		pModDoc->PlayNote(note, m_nInstrument, 0, false);
 	}
 }
 
