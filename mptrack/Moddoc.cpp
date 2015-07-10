@@ -152,10 +152,7 @@ CModDoc::CModDoc()
 #endif
 // Fix: save pattern scrollbar position when switching to other tab
 	m_szOldPatternScrollbarsPos = CSize(-10,-10);
-// -> CODE#0015
-// -> DESC="channels management dlg"
 	ReinitRecordState();
-// -! NEW_FEATURE#0015
 	m_ShowSavedialog = false;
 
 	CMainFrame::UpdateAudioParameters(m_SndFile, true);
@@ -372,10 +369,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 		m_SndFile.ChangeModTypeTo(m_SndFile.GetBestSaveFormat());
 	}
 
-// -> CODE#0015
-// -> DESC="channels management dlg"
 	ReinitRecordState();
-// -! NEW_FEATURE#0015
 
 	if(TrackerSettings::Instance().rememberSongWindows) DeserializeViews();
 
@@ -544,10 +538,7 @@ void CModDoc::DeleteContents()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->StopMod(this);
 	m_SndFile.Destroy();
-// -> CODE#0015
-// -> DESC="channels management dlg"
 	ReinitRecordState();
-// -! NEW_FEATURE#0015
 }
 
 
@@ -1179,7 +1170,6 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 {
 	CriticalSection cs;
 
-	//rewbs.vstiLive
 	if(ins != INSTRUMENTINDEX_INVALID && ins <= m_SndFile.GetNumInstruments() && ModCommand::IsNote(ModCommand::NOTE(note)))
 	{
 
@@ -1204,7 +1194,6 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 			}
 		}
 	}
-	//end rewbs.vstiLive
 
 	const FlagSet<ChannelFlags> mask = (fade ? CHN_NOTEFADE : (CHN_NOTEFADE | CHN_KEYOFF));
 	ModChannel *pChn = &m_SndFile.m_PlayState.Chn[stopChn != CHANNELINDEX_INVALID ? stopChn : m_SndFile.m_nChannels];
@@ -1224,6 +1213,49 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 	}
 
 	return true;
+}
+
+
+// Apply DNA/NNA settings for note preview
+void CModDoc::CheckNNA(ModCommand::NOTE note, INSTRUMENTINDEX ins, const std::bitset<128> &playingNotes)
+//------------------------------------------------------------------------------------------------------
+{
+	if(ins > GetNumInstruments() || m_SndFile.Instruments[ins] == nullptr)
+	{
+		return;
+	}
+	const ModInstrument *pIns = m_SndFile.Instruments[ins];
+	for(CHANNELINDEX chn = GetNumChannels(); chn < MAX_CHANNELS; chn++)
+	{
+		const ModChannel &channel = m_SndFile.m_PlayState.Chn[chn];
+		if(channel.pModInstrument == pIns && channel.nMasterChn == 0 && ModCommand::IsNote(channel.nNote)
+			&& (channel.nLength || pIns->HasValidMIDIChannel()) && !playingNotes[channel.nNote])
+		{
+			CHANNELINDEX nnaChn = m_SndFile.CheckNNA(chn, ins, note, false);
+			// We need to update this mix channel immediately since new notes may be triggered between ticks, in which case
+			// ChnMix may not contain the moved channel yet and the past note will stop playing for the rest of this tick!
+			if(nnaChn != CHANNELINDEX_INVALID)
+			{
+				CHANNELINDEX origChnPos = CHANNELINDEX_INVALID;
+				for(CHANNELINDEX i = 0; i < m_SndFile.m_nMixChannels; i++)
+				{
+					if(m_SndFile.m_PlayState.ChnMix[i] == nnaChn)
+					{
+						// Nothing to do
+						origChnPos = CHANNELINDEX_INVALID;
+						break;
+					} else if(m_SndFile.m_PlayState.ChnMix[i] == chn)
+					{
+						origChnPos = i;
+					}
+				}
+				if(origChnPos != CHANNELINDEX_INVALID)
+				{
+					m_SndFile.m_PlayState.ChnMix[origChnPos] = nnaChn;
+				}
+			}
+		}
+	}
 }
 
 
@@ -1321,8 +1353,7 @@ bool CModDoc::UpdateChannelMuteStatus(CHANNELINDEX nChn)
 	return true;
 }
 
-// -> CODE#0012
-// -> DESC="midi keyboard split"
+
 bool CModDoc::IsChannelSolo(CHANNELINDEX nChn) const
 //--------------------------------------------------
 {
@@ -1338,11 +1369,8 @@ bool CModDoc::SoloChannel(CHANNELINDEX nChn, bool bSolo)
 	m_SndFile.ChnSettings[nChn].dwFlags.set(CHN_SOLO, bSolo);
 	return true;
 }
-// -! NEW_FEATURE#0012
 
 
-// -> CODE#0015
-// -> DESC="channels management dlg"
 bool CModDoc::IsChannelNoFx(CHANNELINDEX nChn) const
 //--------------------------------------------------
 {
@@ -1423,7 +1451,6 @@ void CModDoc::ReinitRecordState(bool unselect)
 		m_bsMultiSplitRecordMask.set();
 	}
 }
-// -! NEW_FEATURE#0015
 
 
 bool CModDoc::MuteSample(SAMPLEINDEX nSample, bool bMute)

@@ -211,6 +211,7 @@ public:
 	void ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plugin, InputTargetContext ctx);
 	CHANNELINDEX PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp, bool pause, LONG nVol=-1, SmpLength loopStart = 0, SmpLength loopEnd = 0, CHANNELINDEX nCurrentChn = CHANNELINDEX_INVALID, const SmpLength sampleOffset = 0);
 	bool NoteOff(UINT note, bool fade = false, INSTRUMENTINDEX ins = INSTRUMENTINDEX_INVALID, CHANNELINDEX currentChn = CHANNELINDEX_INVALID, CHANNELINDEX stopChn = CHANNELINDEX_INVALID); //rewbs.vstiLive: add params
+	void CheckNNA(ModCommand::NOTE note, INSTRUMENTINDEX ins, const std::bitset<128> &playingNotes);
 
 	bool IsNotePlaying(UINT note, SAMPLEINDEX nsmp = 0, INSTRUMENTINDEX nins = 0);
 	bool MuteChannel(CHANNELINDEX nChn, bool bMute);

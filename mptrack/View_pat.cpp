@@ -3809,6 +3809,7 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 
 	if(pnotify->type[Notification::Stop])
 	{
+		m_baPlayingNote.reset();
 		MemsetZero(ChnVUMeters);	// Also zero all non-visible VU meters
 		if((m_Status & (psFollowSong | psDragActive)) == psFollowSong)
 		{
@@ -5018,11 +5019,13 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, bool fromMidi, const bool
 			for(int i = 0; i < numNotes; i++)
 			{
 				pModDoc->NoteOff(notes[i], true, static_cast<INSTRUMENTINDEX>(ins), GetCurrentChannel(), playWholeRow ? chordPatternChannels[i] : CHANNELINDEX_INVALID);
+				m_baPlayingNote.reset(notes[i]);
 				noteChannels[i] = chordPatternChannels[i];
 			}
 			prevChordNote = NOTE_NONE;
 		} else
 		{
+			m_baPlayingNote.reset(note);
 			pModDoc->NoteOff(note, ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOTEFADE) || sndFile.GetNumInstruments() == 0), static_cast<INSTRUMENTINDEX>(ins), nChnCursor, playWholeRow ? nChn : CHANNELINDEX_INVALID);
 		}
 	}
@@ -5452,6 +5455,8 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 				}
 			}
 			bool isPlaying = ((pMainFrm->GetModPlaying() == pModDoc) && (pMainFrm->IsPlaying()));
+			pModDoc->CheckNNA(newcmd.note, nPlayIns, m_baPlayingNote);
+			m_baPlayingNote.set(newcmd.note);
 			pModDoc->PlayNote(newcmd.note, nPlayIns, 0, !isPlaying, 4 * vol, 0, 0, nChn);
 		}
 	}
@@ -5727,6 +5732,8 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 			const bool isPlaying = pMainFrm->GetModPlaying() == pModDoc && pMainFrm->IsPlaying();
 			for(int i = 0; i < numNotes; i++)
 			{
+				pModDoc->CheckNNA(note, nPlayIns, m_baPlayingNote);
+				m_baPlayingNote.set(note);
 				pModDoc->PlayNote(chordNotes[i], nPlayIns, 0, !isPlaying && i == 0, -1, 0, 0, chn);
 			}
 		}

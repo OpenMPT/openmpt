@@ -204,6 +204,7 @@ protected:
 	WORD ChnVUMeters[MAX_BASECHANNELS];
 	WORD OldVUMeters[MAX_BASECHANNELS];
 
+	std::bitset<128> m_baPlayingNote;
 	ModCommand::NOTE octaveKeyMemory[10];
 	ModCommand::NOTE previousNote[MAX_BASECHANNELS];
 	BYTE activeNoteChannel[NOTE_MAX + NOTE_MIN];
