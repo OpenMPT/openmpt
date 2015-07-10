@@ -403,6 +403,10 @@ public:
 	{
 		return defaultValue;
 	}
+	bool IsDefault() const
+	{
+		return value == defaultValue;
+	}
 #endif // MPT_SETTINGS_CACHE_STORE_DEFAULTS
 	bool IsDirty() const
 	{
@@ -534,6 +538,7 @@ private:
 	void BackendsRemoveSetting(const SettingPath &path);
 	void NotifyListeners(const SettingPath &path);
 	SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const;
+	bool IsDefaultSetting(const SettingPath &path) const;
 	void WriteSetting(const SettingPath &path, const SettingValue &val, SettingFlushMode flushMode);
 	void ForgetSetting(const SettingPath &path);
 	void RemoveSetting(const SettingPath &path);
@@ -552,6 +557,14 @@ public:
 	T Read(const AnyStringLocale &section, const AnyStringLocale &key, const T &def = T()) const
 	{
 		return FromSettingValue<T>(ReadSetting(SettingPath(section, key), ToSettingValue<T>(def)));
+	}
+	bool IsDefault(const SettingPath &path) const
+	{
+		return IsDefaultSetting(path);
+	}
+	bool IsDefault(const AnyStringLocale &section, const AnyStringLocale &key) const
+	{
+		return IsDefaultSetting(SettingPath(section, key));
 	}
 	template <typename T>
 	void Write(const SettingPath &path, const T &val, SettingFlushMode flushMode = SettingWriteBack)
@@ -657,6 +670,10 @@ public:
 	{
 		return conf.Read<T>(path);
 	}
+	bool IsDefault() const
+	{
+		conf.IsDefault(path);
+	}
 	template<typename Trhs> Setting & operator += (const Trhs &rhs) { T tmp = *this; tmp += rhs; *this = tmp; return *this; }
 	template<typename Trhs> Setting & operator -= (const Trhs &rhs) { T tmp = *this; tmp -= rhs; *this = tmp; return *this; }
 	template<typename Trhs> Setting & operator *= (const Trhs &rhs) { T tmp = *this; tmp *= rhs; *this = tmp; return *this; }
@@ -721,6 +738,10 @@ public:
 	const T & Get() const
 	{
 		return value;
+	}
+	bool IsDefault() const
+	{
+		conf.IsDefault(path);
 	}
 	CachedSetting & Update()
 	{
