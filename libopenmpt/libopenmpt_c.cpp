@@ -63,12 +63,12 @@ static std::string format_exception( const char * const function ) {
 	std::string err;
 	try {
 		throw;
-	} catch ( openmpt::exception & e ) {
+	} catch ( const openmpt::exception & e ) {
 		err += function;
 		err += ": ";
 		err += "ERROR: ";
 		err += e.what();
-	} catch ( std::exception & e ) {
+	} catch ( const std::exception & e ) {
 		err += function;
 		err += ": ";
 		err += "INTERNAL ERROR: ";
