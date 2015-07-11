@@ -1163,7 +1163,7 @@ CHANNELINDEX CModDoc::PlayNote(UINT note, INSTRUMENTINDEX nins, SAMPLEINDEX nsmp
 		for(CHANNELINDEX c = m_SndFile.GetNumChannels(); c < MAX_CHANNELS; c++)
 		{
 			ModChannel &chn = m_SndFile.m_PlayState.Chn[c];
-			if(chn.nMasterChn == 0)
+			if(chn.nMasterChn == 0 && (chn.pModSample || chn.pModInstrument))
 			{
 				m_SndFile.NoteChange(&chn, note);
 			}
