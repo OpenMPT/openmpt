@@ -3117,8 +3117,8 @@ bool CSoundFile::ProcessEffects()
 			}
 
 			// IT / FT2 compatibility: don't reset loop count on pattern break.
-			// Test case: gm-trippy01.it, PatLoop-Break.xm, PatLoop-Weird.xm
-			if(nPosJump != m_PlayState.m_nCurrentOrder && !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
+			// Test case: gm-trippy01.it, PatLoop-Break.xm, PatLoop-Weird.xm, PatLoop-Break.mod
+			if(nPosJump != m_PlayState.m_nCurrentOrder && !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2 | TRK_PROTRACKER))
 			{
 				for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
 				{
