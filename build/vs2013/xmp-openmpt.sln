@@ -20,23 +20,32 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
+		ReleaseNoSSE2|Win32 = ReleaseNoSSE2|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Debug|Win32.ActiveCfg = Debug|Win32
 		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Debug|Win32.Build.0 = Debug|Win32
+		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.ReleaseNoSSE2|Win32.ActiveCfg = ReleaseNoSSE2|Win32
+		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.ReleaseNoSSE2|Win32.Build.0 = ReleaseNoSSE2|Win32
 		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Release|Win32.ActiveCfg = Release|Win32
 		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Release|Win32.Build.0 = Release|Win32
 		{9C5101EF-3E20-4558-809B-277FDD50E878}.Debug|Win32.ActiveCfg = Debug|Win32
 		{9C5101EF-3E20-4558-809B-277FDD50E878}.Debug|Win32.Build.0 = Debug|Win32
+		{9C5101EF-3E20-4558-809B-277FDD50E878}.ReleaseNoSSE2|Win32.ActiveCfg = ReleaseNoSSE2|Win32
+		{9C5101EF-3E20-4558-809B-277FDD50E878}.ReleaseNoSSE2|Win32.Build.0 = ReleaseNoSSE2|Win32
 		{9C5101EF-3E20-4558-809B-277FDD50E878}.Release|Win32.ActiveCfg = Release|Win32
 		{9C5101EF-3E20-4558-809B-277FDD50E878}.Release|Win32.Build.0 = Release|Win32
 		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Debug|Win32.ActiveCfg = Debug|Win32
 		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Debug|Win32.Build.0 = Debug|Win32
+		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.ReleaseNoSSE2|Win32.ActiveCfg = ReleaseNoSSE2|Win32
+		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.ReleaseNoSSE2|Win32.Build.0 = ReleaseNoSSE2|Win32
 		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Release|Win32.ActiveCfg = Release|Win32
 		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Release|Win32.Build.0 = Release|Win32
 		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Debug|Win32.ActiveCfg = Debug|Win32
 		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Debug|Win32.Build.0 = Debug|Win32
+		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.ReleaseNoSSE2|Win32.ActiveCfg = ReleaseNoSSE2|Win32
+		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.ReleaseNoSSE2|Win32.Build.0 = ReleaseNoSSE2|Win32
 		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Release|Win32.ActiveCfg = Release|Win32
 		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection

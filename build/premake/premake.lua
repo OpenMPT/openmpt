@@ -138,7 +138,7 @@ if _OPTIONS["group"] == "libopenmpt-all" then
 
 solution "libopenmpt-all"
  location ( "../../build/" .. _ACTION )
- configurations { "Debug", "Release" }
+ configurations { "Debug", "Release", "ReleaseNoSSE2" }
  platforms { "x86", "x86_64" }
 
  dofile "../../build/premake/mpt-libopenmpt_test.lua"
@@ -160,7 +160,7 @@ if _OPTIONS["group"] == "libopenmpt_test" then
 
 solution "libopenmpt_test"
  location ( "../../build/" .. _ACTION )
- configurations { "Debug", "Release" }
+ configurations { "Debug", "Release", "ReleaseNoSSE2" }
  platforms { "x86", "x86_64" }
 
  dofile "../../build/premake/mpt-libopenmpt_test.lua"
@@ -172,7 +172,7 @@ if _OPTIONS["group"] == "foo_openmpt" then
 
 solution "foo_openmpt"
  location ( "../../build/" .. _ACTION )
- configurations { "Debug", "Release" }
+ configurations { "Debug", "Release", "ReleaseNoSSE2" }
  platforms { "x86" }
 
  dofile "../../build/premake/mpt-foo_openmpt.lua"
@@ -185,7 +185,7 @@ if _OPTIONS["group"] == "in_openmpt" then
 
 solution "in_openmpt"
  location ( "../../build/" .. _ACTION )
- configurations { "Debug", "Release" }
+ configurations { "Debug", "Release", "ReleaseNoSSE2" }
  platforms { "x86" }
 
  dofile "../../build/premake/mpt-in_openmpt.lua"
@@ -198,7 +198,7 @@ if _OPTIONS["group"] == "xmp-openmpt" then
 
 solution "xmp-openmpt"
  location ( "../../build/" .. _ACTION )
- configurations { "Debug", "Release" }
+ configurations { "Debug", "Release", "ReleaseNoSSE2" }
  platforms { "x86" }
 
  dofile "../../build/premake/mpt-xmp-openmpt.lua"
@@ -213,7 +213,7 @@ if _OPTIONS["group"] == "libopenmpt" then
 
 solution "libopenmpt"
  location ( "../../build/" .. _ACTION )
- configurations { "Debug", "Release" }
+ configurations { "Debug", "Release", "ReleaseNoSSE2" }
  platforms { "x86", "x86_64" }
 
  dofile "../../build/premake/mpt-libopenmpt.lua"
@@ -230,7 +230,7 @@ if _OPTIONS["group"] == "openmpt123" then
 
 solution "openmpt123"
  location ( "../../build/" .. _ACTION )
- configurations { "Debug", "Release" }
+ configurations { "Debug", "Release", "ReleaseNoSSE2" }
  platforms { "x86", "x86_64" }
 
  dofile "../../build/premake/mpt-openmpt123.lua"
@@ -246,7 +246,7 @@ if _OPTIONS["group"] == "PluginBridge" then
 
 solution "PluginBridge"
  location ( "../../build/" .. _ACTION )
- configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG" }
+ configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "ReleaseNoSSE2" }
  platforms { "x86", "x86_64" }
 
  dofile "../../build/premake/mpt-PluginBridge.lua"
@@ -259,7 +259,7 @@ if _OPTIONS["group"] == "OpenMPT-VSTi" then
 
 solution "OpenMPT-VSTi"
  location ( "../../build/" .. _ACTION )
- configurations { "Debug", "Release" }
+ configurations { "Debug", "Release", "ReleaseNoSSE2" }
  platforms { "x86", "x86_64" }
  
  dofile "../../build/premake/mpt-OpenMPT-VSTi.lua"
@@ -282,7 +282,7 @@ if _OPTIONS["group"] == "OpenMPT" then
 
 solution "OpenMPT"
  location ( "../../build/" .. _ACTION )
- configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG" }
+ configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "ReleaseNoSSE2" }
  platforms { "x86", "x86_64" }
  
  dofile "../../build/premake/mpt-OpenMPT.lua"
@@ -306,7 +306,7 @@ if _OPTIONS["group"] == "all-externals" then
 
 solution "all-externals"
  location ( "../../build/" .. _ACTION .. "-ext" )
- configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG" }
+ configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "ReleaseNoSSE2" }
  platforms { "x86", "x86_64" }
 
  dofile "../../build/premake/ext-flac.lua"

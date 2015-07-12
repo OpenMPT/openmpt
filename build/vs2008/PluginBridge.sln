@@ -11,6 +11,8 @@ Global
 		Debug|x64 = Debug|x64
 		ReleaseLTCG|Win32 = ReleaseLTCG|Win32
 		ReleaseLTCG|x64 = ReleaseLTCG|x64
+		ReleaseNoSSE2|Win32 = ReleaseNoSSE2|Win32
+		ReleaseNoSSE2|x64 = ReleaseNoSSE2|x64
 		Release|Win32 = Release|Win32
 		Release|x64 = Release|x64
 	EndGlobalSection
@@ -27,6 +29,10 @@ Global
 		{1A147336-891E-49AC-9EAD-A750599A224C}.ReleaseLTCG|Win32.Build.0 = ReleaseLTCG|Win32
 		{1A147336-891E-49AC-9EAD-A750599A224C}.ReleaseLTCG|x64.ActiveCfg = ReleaseLTCG|x64
 		{1A147336-891E-49AC-9EAD-A750599A224C}.ReleaseLTCG|x64.Build.0 = ReleaseLTCG|x64
+		{1A147336-891E-49AC-9EAD-A750599A224C}.ReleaseNoSSE2|Win32.ActiveCfg = ReleaseNoSSE2|Win32
+		{1A147336-891E-49AC-9EAD-A750599A224C}.ReleaseNoSSE2|Win32.Build.0 = ReleaseNoSSE2|Win32
+		{1A147336-891E-49AC-9EAD-A750599A224C}.ReleaseNoSSE2|x64.ActiveCfg = ReleaseNoSSE2|x64
+		{1A147336-891E-49AC-9EAD-A750599A224C}.ReleaseNoSSE2|x64.Build.0 = ReleaseNoSSE2|x64
 		{1A147336-891E-49AC-9EAD-A750599A224C}.Release|Win32.ActiveCfg = Release|Win32
 		{1A147336-891E-49AC-9EAD-A750599A224C}.Release|Win32.Build.0 = Release|Win32
 		{1A147336-891E-49AC-9EAD-A750599A224C}.Release|x64.ActiveCfg = Release|x64
