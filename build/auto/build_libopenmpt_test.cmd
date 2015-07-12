@@ -19,8 +19,8 @@ call "build\auto\setup_%MPT_VSVER%.cmd"
 
 
 cd "build\%MPT_VSVER%" || goto error
- devenv libopenmpt_test.sln /clean "ReleaseNoSSE2|%MPT_ARCH%" || goto error
- devenv libopenmpt_test.sln /build "ReleaseNoSSE2|%MPT_ARCH%" || goto error
+ devenv libopenmpt_test.sln /clean "Release|%MPT_ARCH%" || goto error
+ devenv libopenmpt_test.sln /build "Release|%MPT_ARCH%" || goto error
 cd ..\.. || goto error
 
 
