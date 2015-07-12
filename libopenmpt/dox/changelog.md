@@ -9,14 +9,18 @@ is just a high-level summary.
 
  *  [**Change**] The MSVC build system has been redone. Solutions are now
     located in `build/vsVERSION/`.
+
+ *  [**Bug**] get_current_channel_vu_left and get_current_channel_vu_right only
+    return the volume of the front left and right channels now.
+    get_current_channel_vu_rear_left and get_current_channel_vu_rear_right
+    do now actually work and return non-zero values.
+
+ *  Completed C and C++ documentation
  *  Added new key for openmpt::module::get_metadata, "message_raw", which
     returns an empty string if there is no song message rather than a list of
     instrument names.
- *  [**Change**] get_current_channel_vu_left and get_current_channel_vu_right
-    only return the volume of the front left and right channels now.
-    get_current_channel_vu_rear_left and get_current_channel_vu_rear_right
-    do now actually work and return non-zero values.
- *  Completed C and C++ documentation
+ *  in_openmpt: Support for compiling with VS2008.
+ *  xmp-openmpt: Support for compiling with VS2008.
 
 ### libopenmpt 0.2-beta12 (2015-04-19)
 

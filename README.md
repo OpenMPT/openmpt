@@ -112,9 +112,9 @@ How to compile
 
          -  foo_openmpt: Requires VS2010 because the foobar2000 SDK uses VS2010.
 
-         -  in_openmpt: Requires VS2010 or later with MFC.
+         -  in_openmpt: Requires Visual Studio with MFC.
 
-         -  xmp-openmpt: Requires VS2010 or later with MFC.
+         -  xmp-openmpt: Requires Visual Studio with MFC.
 
      -  You will need the Winamp 5 SDK and the xmplay SDK if you want to
         compile the plugins for these 2 players:
