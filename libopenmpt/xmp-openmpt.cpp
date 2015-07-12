@@ -90,6 +90,8 @@ enum {
 #include <sstream>
 #include <string>
 
+#include <cmath>
+
 #include <pugixml.hpp>
 
 #define SHORT_TITLE "xmp-openmpt"
@@ -116,7 +118,7 @@ LIBOPENMPT_SETTINGS_DECLARE()
 
 struct self_xmplay_t;
 
-static self_xmplay_t * self = nullptr;
+static self_xmplay_t * self = 0;
 
 static void save_options();
 
@@ -135,8 +137,8 @@ struct self_xmplay_t {
 		: samplerate(48000)
 		, num_channels(2)
 		, settings(TEXT(SHORT_TITLE), false)
-		, mod(nullptr)
-		, pattern_vis(nullptr)
+		, mod(0)
+		, pattern_vis(0)
 		, tempo_factor(0)
 		, pitch_factor(0)
 		, single_subsong_mode(false)
@@ -149,9 +151,9 @@ struct self_xmplay_t {
 	}
 	void delete_mod() {
 		if ( mod ) {
-			pattern_vis = nullptr;
+			pattern_vis = 0;
 			delete mod;
-			mod = nullptr;
+			mod = 0;
 		}
 	}
 	~self_xmplay_t() {
@@ -164,26 +166,26 @@ static std::string convert_to_native( const std::string & str ) {
 	std::string result = native_string ? native_string : "";
 	if ( native_string ) {
 		xmpfmisc->Free( native_string );
-		native_string = nullptr;
+		native_string = 0;
 	}
 	return result;
 }
 
 static std::string StringEncode( const std::wstring &src, UINT codepage )
 {
-	int required_size = WideCharToMultiByte( codepage, 0, src.c_str(), -1, nullptr, 0, nullptr, nullptr );
+	int required_size = WideCharToMultiByte( codepage, 0, src.c_str(), -1, NULL, 0, NULL, NULL );
 	if(required_size <= 0)
 	{
 		return std::string();
 	}
 	std::vector<CHAR> encoded_string( required_size );
-	WideCharToMultiByte( codepage, 0, src.c_str(), -1, &encoded_string[0], encoded_string.size(), nullptr, nullptr );
+	WideCharToMultiByte( codepage, 0, src.c_str(), -1, &encoded_string[0], encoded_string.size(), NULL, NULL );
 	return &encoded_string[0];
 }
 
 static std::wstring StringDecode( const std::string & src, UINT codepage )
 {
-	int required_size = MultiByteToWideChar( codepage, 0, src.c_str(), -1, nullptr, 0 );
+	int required_size = MultiByteToWideChar( codepage, 0, src.c_str(), -1, NULL, 0 );
 	if(required_size <= 0)
 	{
 		return std::wstring();
@@ -304,7 +306,7 @@ static void WINAPI openmpt_SetConfig( void * config, DWORD size ) {
 }
 
 static void WINAPI ShortcutHandler( DWORD id ) {
-	if ( self->mod == nullptr ) {
+	if ( !self->mod ) {
 		return;
 	}
 
@@ -323,7 +325,7 @@ static void WINAPI ShortcutHandler( DWORD id ) {
 
 	if ( tempo_changed ) {
 		std::ostringstream s;
-		s << "Tempo: " << static_cast<std::int_fast32_t>( 100.0 * tempo_factor ) << "%";
+		s << "Tempo: " << static_cast<std::int32_t>( 100.0 * tempo_factor ) << "%";
 		xmpfmisc->ShowBubble( s.str().c_str(), 0 );
 	} else if ( pitch_changed) {
 		std::ostringstream s;
@@ -1296,9 +1298,9 @@ static Color invert_color( Color c ) {
 
 static BOOL WINAPI VisOpen(DWORD colors[3]) {
 	xmpopenmpt_lock guard;
-	visDC = nullptr;
-	visbitmap = nullptr;
-	visfont = nullptr;
+	visDC = 0;
+	visbitmap = 0;
+	visfont = 0;
 
 	viscolors[col_background].dw = colors[0];
 	viscolors[col_unknown].dw = colors[1];
@@ -1366,11 +1368,11 @@ static int get_pattern_width( int chars_per_channel, int spaces_per_channel, int
 	return pattern_width;
 }
 
-static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
+static BOOL WINAPI VisRenderDC( HDC dc, SIZE size, DWORD flags ) {
 	xmpopenmpt_lock guard;
 	RECT rect;
 
-	if( visfont == nullptr ) {
+	if ( !visfont ) {
 		// Force usage of a nice monospace font
 		LOGFONT logfont;
 		GetObject ( GetCurrentObject( dc, OBJ_FONT ), sizeof(logfont), &logfont );
@@ -1383,8 +1385,7 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 		return FALSE;
 	}
 
-	if(flags & XMPIN_VIS_INIT)
-	{
+	if ( flags & XMPIN_VIS_INIT ) {
 		last_pattern = -1;
 	}
 
@@ -1440,7 +1441,7 @@ static BOOL WINAPI VisRenderDC(HDC dc, SIZE size, DWORD flags) {
 	int pattern_width = get_pattern_width( chars_per_channel, spaces_per_channel, num_cols, text_size.cx, channels );
 	int pattern_height = rows * text_size.cy;
 
-	if ( visDC == nullptr || last_pattern != pattern ) {
+	if ( !visDC || last_pattern != pattern ) {
 		DeleteBitmap( visbitmap );
 		DeleteDC( visDC );
 
@@ -1682,7 +1683,7 @@ static void xmp_openmpt_on_dll_load() {
 	filetypes_string.push_back('\0');
 	file_formats = (char*)HeapAlloc( GetProcessHeap(), 0, filetypes_string.size() );
 	if ( file_formats ) {
-		std::copy( filetypes_string.data(), filetypes_string.data() + filetypes_string.size(), file_formats );
+		std::copy( filetypes_string.begin(), filetypes_string.end(), file_formats );
 		xmpin.exts = file_formats;
 	} else {
 		xmpin.exts = xmp_openmpt_default_exts;
@@ -1693,7 +1694,7 @@ static void xmp_openmpt_on_dll_load() {
 
 static void xmp_openmpt_on_dll_unload() {
 	delete self;
-	self = nullptr;
+	self = 0;
 	LIBOPENMPT_SETTINGS_UNLOAD();
 	if ( !xmpin.exts ) {
 		return;

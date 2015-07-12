@@ -1,6 +1,4 @@
 
-if _ACTION ~= "vs2008" then
-
  project "xmp-openmpt"
   uuid "AEA14F53-ADB0-45E5-9823-81F4F36886C2"
   language "C++"
@@ -25,5 +23,3 @@ if _ACTION ~= "vs2008" then
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-
-end

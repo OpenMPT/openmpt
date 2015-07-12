@@ -17,6 +17,8 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 
 %PREMAKE% --group=libopenmpt_test vs2008 || goto err
 %PREMAKE% --group=libopenmpt vs2008 || goto err
+%PREMAKE% --group=in_openmpt vs2008 || goto err
+%PREMAKE% --group=xmp-openmpt vs2008 || goto err
 %PREMAKE% --group=openmpt123 vs2008 || goto err
 %PREMAKE% --group=PluginBridge vs2008 || goto err
 %PREMAKE% --group=OpenMPT-VSTi vs2008 || goto err
