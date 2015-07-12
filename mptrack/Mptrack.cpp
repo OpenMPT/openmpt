@@ -886,6 +886,22 @@ void CTrackApp::SetupPaths(bool overridePortable)
 
 }
 
+
+bool CTrackApp::SystemCanRunModernBuilds()
+//----------------------------------------
+{
+	return true
+		&& mpt::Windows::Version::IsNT()
+		&& mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win7)
+		&& (GetProcSupport() & PROCSUPPORT_CPUID)
+		&& (GetProcSupport() & PROCSUPPORT_TSC)
+		&& (GetProcSupport() & PROCSUPPORT_CMOV)
+		&& (GetProcSupport() & PROCSUPPORT_SSE)
+		&& (GetProcSupport() & PROCSUPPORT_SSE2)
+		;
+}
+
+
 BOOL CTrackApp::InitInstance()
 //----------------------------
 {
