@@ -9,8 +9,6 @@
    targetdir "../../build/lib/x86/Release"
   filter { "kind:StaticLib", "configurations:ReleaseLTCG", "architecture:x86" }
    targetdir "../../build/lib/x86/ReleaseLTCG"
-  filter { "kind:StaticLib", "configurations:ReleaseNoSSE2", "architecture:x86" }
-   targetdir "../../build/lib/x86/ReleaseNoSSE2"
   filter { "kind:StaticLib", "configurations:Debug", "architecture:x86_64" }
    targetdir "../../build/lib/x86_64/Debug"
   filter { "kind:StaticLib", "configurations:DebugMDd", "architecture:x86_64" }
@@ -19,8 +17,6 @@
    targetdir "../../build/lib/x86_64/Release"
   filter { "kind:StaticLib", "configurations:ReleaseLTCG", "architecture:x86_64" }
    targetdir "../../build/lib/x86_64/ReleaseLTCG"
-  filter { "kind:StaticLib", "configurations:ReleaseNoSSE2", "architecture:x86_64" }
-   targetdir "../../build/lib/x86_64/ReleaseNoSSE2"
   	
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:x86" }
    targetdir "../../bin/Win32-Debug"
@@ -30,8 +26,6 @@
    targetdir "../../bin/Win32"
   filter { "kind:not StaticLib", "configurations:ReleaseLTCG", "architecture:x86" }
    targetdir "../../bin/Win32"
-  filter { "kind:not StaticLib", "configurations:ReleaseNoSSE2", "architecture:x86" }
-   targetdir "../../bin/Win32"
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:x86_64" }
    targetdir "../../bin/x64-Debug"
   filter { "kind:not StaticLib", "configurations:DebugMDd", "architecture:x86_64" }
@@ -39,8 +33,6 @@
   filter { "kind:not StaticLib", "configurations:Release", "architecture:x86_64" }
    targetdir "../../bin/x64"
   filter { "kind:not StaticLib", "configurations:ReleaseLTCG", "architecture:x86_64" }
-   targetdir "../../bin/x64"
-  filter { "kind:not StaticLib", "configurations:ReleaseNoSSE2", "architecture:x86_64" }
    targetdir "../../bin/x64"
 
   filter { "action:vs2008" }
@@ -69,13 +61,6 @@
    flags { "Symbols", "MultiProcessorCompile", "LinkTimeOptimization" }
    flags { "StaticRuntime" }
    optimize "Full"
-   floatingpoint "Fast"
-
-  filter { "configurations:ReleaseNoSSE2" }
-   defines { "NDEBUG" }
-   flags { "Symbols", "MultiProcessorCompile" }
-   flags { "StaticRuntime" }
-   optimize "Speed"
    floatingpoint "Fast"
 
   filter { "configurations:Release", "not action:vs2008" }

@@ -18,23 +18,23 @@ call "build\auto\setup_%MPT_VSVER%.cmd"
 
 cd "build\%MPT_VSVER%" || goto error
 
- devenv libopenmpt.sln /clean "ReleaseNoSSE2|%MPT_ARCH%" || goto error
- devenv openmpt123.sln /clean "ReleaseNoSSE2|%MPT_ARCH%" || goto error
+ devenv libopenmpt.sln /clean "Release|%MPT_ARCH%" || goto error
+ devenv openmpt123.sln /clean "Release|%MPT_ARCH%" || goto error
  if "%MPT_ARCH%" == "Win32" (
-  devenv in_openmpt.sln /clean "ReleaseNoSSE2|%MPT_ARCH%" || goto error
-  devenv xmp-openmpt.sln /clean "ReleaseNoSSE2|%MPT_ARCH%" || goto error
+  devenv in_openmpt.sln /clean "Release|%MPT_ARCH%" || goto error
+  devenv xmp-openmpt.sln /clean "Release|%MPT_ARCH%" || goto error
   if "%MPT_VSVER%" == "vs2010" (
-   devenv foo_openmpt.sln /clean "ReleaseNoSSE2|%MPT_ARCH%" || goto error
+   devenv foo_openmpt.sln /clean "Release|%MPT_ARCH%" || goto error
   )
  )
  
- devenv libopenmpt.sln /build "ReleaseNoSSE2|%MPT_ARCH%" || goto error
- devenv openmpt123.sln /build "ReleaseNoSSE2|%MPT_ARCH%" || goto error
+ devenv libopenmpt.sln /build "Release|%MPT_ARCH%" || goto error
+ devenv openmpt123.sln /build "Release|%MPT_ARCH%" || goto error
  if "%MPT_ARCH%" == "Win32" (
-  devenv in_openmpt.sln /build "ReleaseNoSSE2|%MPT_ARCH%" || goto error
-  devenv xmp-openmpt.sln /build "ReleaseNoSSE2|%MPT_ARCH%" || goto error
+  devenv in_openmpt.sln /build "Release|%MPT_ARCH%" || goto error
+  devenv xmp-openmpt.sln /build "Release|%MPT_ARCH%" || goto error
   if "%MPT_VSVER%" == "vs2010" (
-   devenv foo_openmpt.sln /build "ReleaseNoSSE2|%MPT_ARCH%" || goto error
+   devenv foo_openmpt.sln /build "Release|%MPT_ARCH%" || goto error
   )
  )
 
