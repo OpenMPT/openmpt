@@ -78,6 +78,12 @@
    optimize "Speed"
    floatingpoint "Fast"
 
+  filter { "configurations:Release", "not action:vs2008" }
+   vectorextensions "SSE2"
+
+  filter { "configurations:ReleaseLTCG", "not action:vs2008" }
+   vectorextensions "SSE2"
+
   filter {}
    defines { "WIN32", "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_DEPRECATE", "_CRT_SECURE_NO_DEPRECATE", "_CRT_NONSTDC_NO_WARNINGS" }
 

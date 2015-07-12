@@ -445,7 +445,7 @@
 #if defined(_WIN32)
 
 #if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)
-#define _WIN32_WINNT        0x0501 // _WIN32_WINNT_WINXP
+#define _WIN32_WINNT        0x0601 // _WIN32_WINNT_WIN7
 #else
 #define _WIN32_WINNT        0x0500 // _WIN32_WINNT_WIN2000
 #endif
