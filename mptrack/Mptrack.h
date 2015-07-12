@@ -284,6 +284,8 @@ public:
 	mpt::PathString GetConfigPath() const { return m_szConfigDirectory; }
 	void SetupPaths(bool overridePortable);
 
+	bool SystemCanRunModernBuilds();
+
 	// Relative / absolute paths conversion
 	mpt::PathString AbsolutePathToRelative(const mpt::PathString &path) { return path.AbsolutePathToRelative(GetAppDirPath()); }
 	mpt::PathString RelativePathToAbsolute(const mpt::PathString &path) { return path.RelativePathToAbsolute(GetAppDirPath()); }
