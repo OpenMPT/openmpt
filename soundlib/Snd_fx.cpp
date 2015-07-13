@@ -741,7 +741,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			}
 		}
 
-		if(memory.state.m_nNextRow >= Patterns[memory.state.m_nPattern].GetNumRows())
+		if(memory.state.m_nNextOrder > Order.size() || Order[memory.state.m_nNextOrder] > Patterns.Size() || memory.state.m_nNextRow >= Patterns[Order[memory.state.m_nNextOrder]].GetNumRows())
 		{
 			memory.state.m_nNextOrder = memory.state.m_nCurrentOrder + 1;
 			memory.state.m_nNextRow = 0;
@@ -930,7 +930,13 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		}
 		oldTickDuration = tickDuration;
 
-		if(patternLoopEndedOnThisRow)
+		// Pattern loop is not executed in FT2 if there are any position jump or pattern break commands on the same row.
+		// Pattern loop is not executed in IT if there are any position jump commands on the same row.
+		// Test case for FT2 exception: PatLoop-Jumps.xm, PatLoop-Various.xm
+		// Test case for IT: exception: LoopBreak.it
+		if(patternLoopEndedOnThisRow
+			&& (!IsCompatibleMode(TRK_FASTTRACKER2) || !(positionJumpOnThisRow || patternBreakOnThisRow))
+			&& (!IsCompatibleMode(TRK_IMPULSETRACKER) || !positionJumpOnThisRow))
 		{
 			std::map<double, int> startTimes;
 			// This is really just a simple estimation for nested pattern loops. It should handle cases correctly where all parallel loops start and end on the same row.
@@ -3087,6 +3093,8 @@ bool CSoundFile::ProcessEffects()
 	if(m_SongFlags[SONG_FIRSTTICK])
 	{
 		const bool doPatternLoop = (nPatLoopRow != ROWINDEX_INVALID);
+		const bool doBreakRow = (nBreakRow != ROWINDEX_INVALID);
+		const bool doPosJump = (nPosJump != ORDERINDEX_INVALID);
 
 		// Pattern Loop
 		if(doPatternLoop)
@@ -3103,12 +3111,14 @@ bool CSoundFile::ProcessEffects()
 		}
 
 		// Pattern Break / Position Jump only if no loop running
+		// Exception: FastTracker 2 in all cases, Impulse Tracker in case of position jump
 		// Test case for FT2 exception: PatLoop-Jumps.xm, PatLoop-Various.xm
-		if((nBreakRow != ROWINDEX_INVALID || nPosJump != ORDERINDEX_INVALID)
-			&& (!doPatternLoop || IsCompatibleMode(TRK_FASTTRACKER2)))
+		// Test case for IT: exception: LoopBreak.it
+		if((doBreakRow || doPosJump)
+			&& (!doPatternLoop || IsCompatibleMode(TRK_FASTTRACKER2) || (IsCompatibleMode(TRK_IMPULSETRACKER) && doPosJump)))
 		{
-			if(nPosJump == ORDERINDEX_INVALID) nPosJump = m_PlayState.m_nCurrentOrder + 1;
-			if(nBreakRow == ROWINDEX_INVALID) nBreakRow = 0;
+			if(!doPosJump) nPosJump = m_PlayState.m_nCurrentOrder + 1;
+			if(!doBreakRow) nBreakRow = 0;
 			m_SongFlags.set(SONG_BREAKTOROW);
 
 			if(nPosJump >= Order.size())
@@ -3128,7 +3138,6 @@ bool CSoundFile::ProcessEffects()
 			m_PlayState.m_nNextOrder = nPosJump;
 			m_PlayState.m_nNextRow = nBreakRow;
 			m_PlayState.m_bPatternTransitionOccurred = true;
-
 		}
 
 	}

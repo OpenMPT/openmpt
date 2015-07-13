@@ -465,6 +465,22 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 		if(!GetDlgItem(IDC_BUTTON1)->IsWindowEnabled())
 		{
 			text = _T("Tempo swing is only available in modern tempo mode.");
+		} else
+		{
+			CString s = _T("Swing setting: ");
+			if(m_tempoSwing.empty())
+			{
+				s += _T("Default");
+			} else
+			{
+				for(size_t i = 0; i < m_tempoSwing.size(); i++)
+				{
+					if(i > 0) s += _T(" / ");
+					s.AppendFormat(_T("%u%%"), Util::muldivr(m_tempoSwing[i], 100, TempoSwing::Unity));
+				}
+			}
+			mpt::String::CopyN(pTTT->szText, s);
+			return TRUE;
 		}
 	}
 
