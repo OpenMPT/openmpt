@@ -245,6 +245,10 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		if(pVstPlugin)
 		{
 			return pVstPlugin->m_nSampleRate;
+		} else
+		{
+			// HERCs Abakos queries the sample rate while the plugin is being created and then never again...
+			return TrackerSettings::Instance().GetMixerSettings().gdwMixingFreq;
 		}
 
 	case audioMasterGetBlockSize:
