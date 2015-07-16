@@ -1153,14 +1153,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\mptrack\CreditStatic.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\mptrack\CreditStatic.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\mptrack\Ctrl_com.cpp"
 				>
 			</File>

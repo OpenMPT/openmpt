@@ -494,7 +494,6 @@
     <ClInclude Include="..\..\mptrack\ColorConfigDlg.h" />
     <ClInclude Include="..\..\mptrack\ColourEdit.h" />
     <ClInclude Include="..\..\mptrack\CommandSet.h" />
-    <ClInclude Include="..\..\mptrack\CreditStatic.h" />
     <ClInclude Include="..\..\mptrack\Ctrl_com.h" />
     <ClInclude Include="..\..\mptrack\Ctrl_gen.h" />
     <ClInclude Include="..\..\mptrack\Ctrl_ins.h" />
@@ -681,7 +680,6 @@
     <ClCompile Include="..\..\mptrack\ColorConfigDlg.cpp" />
     <ClCompile Include="..\..\mptrack\ColourEdit.cpp" />
     <ClCompile Include="..\..\mptrack\CommandSet.cpp" />
-    <ClCompile Include="..\..\mptrack\CreditStatic.cpp" />
     <ClCompile Include="..\..\mptrack\Ctrl_com.cpp" />
     <ClCompile Include="..\..\mptrack\Ctrl_gen.cpp" />
     <ClCompile Include="..\..\mptrack\Ctrl_ins.cpp" />

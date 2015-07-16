@@ -30,7 +30,7 @@ const char * const str = MPT_VERSION_STR;
 
 std::string GetOpenMPTVersionStr()
 {
-	return std::string("OpenMPT ") + std::string(MPT_VERSION_STR);
+	return std::string("OpenMPT " MPT_VERSION_STR);
 }
 
 struct version
@@ -148,7 +148,7 @@ int GetRevision()
 		std::istringstream s( svnversion );
 		s.imbue(std::locale::classic());
 		s >> revision;
-		return revision;	
+		return revision;
 	#else
 		#if MPT_COMPILER_MSVC
 			#pragma message("SVN revision unknown. Please check your build system.")
@@ -166,7 +166,7 @@ int GetRevision()
 bool IsDirty()
 {
 	#if defined(OPENMPT_VERSION_DIRTY)
-		return OPENMPT_VERSION_DIRTY ? true : false;
+		return OPENMPT_VERSION_DIRTY != 0;
 	#elif defined(OPENMPT_VERSION_SVNVERSION)
 		std::string svnversion = OPENMPT_VERSION_SVNVERSION;
 		if(svnversion.length() == 0)
@@ -186,7 +186,7 @@ bool IsDirty()
 bool HasMixedRevisions()
 {
 	#if defined(OPENMPT_VERSION_MIXEDREVISIONS)
-		return OPENMPT_VERSION_MIXEDREVISIONS ? true : false;
+		return OPENMPT_VERSION_MIXEDREVISIONS != 0;
 	#elif defined(OPENMPT_VERSION_SVNVERSION)
 		std::string svnversion = OPENMPT_VERSION_SVNVERSION;
 		if(svnversion.length() == 0)
@@ -218,7 +218,7 @@ bool HasMixedRevisions()
 bool IsPackage()
 {
 	#if defined(OPENMPT_VERSION_IS_PACKAGE)
-		return OPENMPT_VERSION_IS_PACKAGE ? true : false;
+		return OPENMPT_VERSION_IS_PACKAGE != 0;
 	#else
 		return false;
 	#endif
@@ -494,7 +494,7 @@ mpt::ustring GetFullCreditsString()
 #endif
 #ifndef NO_MINIZ
 		"Rich Geldreich for miniz\n"
-		"http://code.google.com/p/miniz/\n"
+		"https://github.com/richgel999/miniz\n"
 		"\n"
 #endif
 #ifndef NO_ARCHIVE_SUPPORT
@@ -530,9 +530,6 @@ mpt::ustring GetFullCreditsString()
 		"http://schismtracker.org/\n"
 		"\n"
 #ifdef MODPLUG_TRACKER
-		"Pel K. Txnder for the scrolling credits control :)\n"
-		"http://tinyurl.com/4yze8\n"
-		"\n"
 		"Nobuyuki for application and file icon\n"
 		"http://twitter.com/nobuyukinyuu\n"
 		"\n"

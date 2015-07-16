@@ -829,7 +829,6 @@
     <ClCompile Include="ColorConfigDlg.cpp" />
     <ClCompile Include="ColourEdit.cpp" />
     <ClCompile Include="CommandSet.cpp" />
-    <ClCompile Include="CreditStatic.cpp" />
     <ClCompile Include="Ctrl_com.cpp" />
     <ClCompile Include="Ctrl_gen.cpp" />
     <ClCompile Include="Ctrl_ins.cpp" />
@@ -1064,7 +1063,6 @@
     <ClInclude Include="ColorConfigDlg.h" />
     <ClInclude Include="ColourEdit.h" />
     <ClInclude Include="CommandSet.h" />
-    <ClInclude Include="CreditStatic.h" />
     <ClInclude Include="CTreeCtrl.h" />
     <ClInclude Include="Ctrl_com.h" />
     <ClInclude Include="Ctrl_gen.h" />
