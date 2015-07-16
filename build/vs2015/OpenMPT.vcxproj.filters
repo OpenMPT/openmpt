@@ -230,9 +230,6 @@
     <ClInclude Include="..\..\mptrack\CommandSet.h">
       <Filter>mptrack</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\mptrack\CreditStatic.h">
-      <Filter>mptrack</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\mptrack\Ctrl_com.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -758,9 +755,6 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\CommandSet.cpp">
-      <Filter>mptrack</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\mptrack\CreditStatic.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Ctrl_com.cpp">

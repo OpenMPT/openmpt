@@ -713,7 +713,6 @@
 #define IDC_MS_LENGTH_NEW               2216
 #define IDC_TEMPO                       2217
 #define IDC_SPEED                       2218
-#define IDC_CREDITS                     2218
 #define IDC_MS_LENGTH_ORIGINAL2         2219
 #define IDC_RICHEDIT21                  2219
 #define IDC_AUTOSAVE_PATH               2220
@@ -962,7 +961,6 @@
 #define IDC_STATIC_FORMAT               2482
 #define IDC_TABABOUT                    2483
 #define IDC_EDITABOUT                   2484
-#define IDC_CHECK_ABOUTSCROLL           2485
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773

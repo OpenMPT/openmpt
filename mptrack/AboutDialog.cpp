@@ -271,12 +271,6 @@ BOOL CAboutDlg::OnInitDialog()
 
 	m_bmp.SubclassDlgItem(IDC_BITMAP1, this);
 
-	m_static.SubclassDlgItem(IDC_CREDITS, this);
-	m_static.SetSpeed(DISPLAY_MEDIUM);
-	m_static.SetColor(BACKGROUND_COLOR, RGB(83, 107, 163)); // Background Colour
-//	m_static.SetColor(BACKGROUND_COLOR, RGB(43, 69, 130)); // Background Colour
-	m_static.SetGradient(GRADIENT_RIGHT_DARK);  // Background goes from blue to black from left to right
-
 	m_Tab.InsertItem(TCIF_TEXT, 0, _T("OpenMPT"), 0, 0, 0, 0);
 	m_Tab.InsertItem(TCIF_TEXT, 1, _T("Components"), 0, 0, 0, 0);
 	m_Tab.InsertItem(TCIF_TEXT, 2, _T("Credits"), 0, 0, 0, 0);
@@ -284,22 +278,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_Tab.InsertItem(TCIF_TEXT, 4, _T("Contact"), 0, 0, 0, 0);
 	m_Tab.SetCurSel(0);
 
-	m_CheckScroll.SetCheck(TrackerSettings::Instance().MiscAboutScrollText ? BST_CHECKED : BST_UNCHECKED);
-
 	OnTabChange(nullptr, nullptr);
-	OnCheckScroll();
-
-	mpt::ustring text;
-	text += GetTabText(0);
-	text += MPT_USTRING("\n\n\n");
-	text += GetTabText(2);
-	text += MPT_USTRING("\n\n\n");
-	text += GetTabText(4);
-	text += MPT_USTRING("\n\n\n");
-	text += GetTabText(3);
-	text += MPT_USTRING("\n\n\n");
-	m_static.SetCredits(mpt::ToCString(mpt::String::Replace(text, MPT_USTRING("\n"), MPT_USTRING("|"))));
-	m_static.StartScrolling();
 
 	if(m_TimerID != 0)
 	{
@@ -319,24 +298,6 @@ void CAboutDlg::OnTimer(UINT_PTR nIDEvent)
 	if(nIDEvent == m_TimerID)
 	{
 		m_bmp.Animate();
-	}
-}
-
-
-void CAboutDlg::OnCheckScroll()
-{
-	if(m_CheckScroll.GetCheck() == BST_CHECKED)
-	{
-		m_Tab.ShowWindow(SW_HIDE);
-		m_TabEdit.ShowWindow(SW_HIDE);
-		m_static.ShowWindow(SW_SHOW);
-		TrackerSettings::Instance().MiscAboutScrollText = true;
-	} else
-	{
-		m_Tab.ShowWindow(SW_SHOW);
-		m_TabEdit.ShowWindow(SW_SHOW);
-		m_static.ShowWindow(SW_HIDE);
-		TrackerSettings::Instance().MiscAboutScrollText = false;
 	}
 }
 
@@ -512,7 +473,6 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_CHECK_ABOUTSCROLL, m_CheckScroll);
 	DDX_Control(pDX, IDC_TABABOUT, m_Tab);
 	DDX_Control(pDX, IDC_EDITABOUT, m_TabEdit);
 }
@@ -521,7 +481,6 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 	ON_WM_TIMER()
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABABOUT, &CAboutDlg::OnTabChange)
-	ON_COMMAND(IDC_CHECK_ABOUTSCROLL, &CAboutDlg::OnCheckScroll)
 END_MESSAGE_MAP()
 
 

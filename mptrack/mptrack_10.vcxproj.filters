@@ -286,9 +286,6 @@
     <ClCompile Include="CommandSet.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
-    <ClCompile Include="CreditStatic.cpp">
-      <Filter>Source Files\mptrack</Filter>
-    </ClCompile>
     <ClCompile Include="Ctrl_com.cpp">
       <Filter>Source Files\mptrack</Filter>
     </ClCompile>
@@ -820,9 +817,6 @@
       <Filter>Header Files\mptrack</Filter>
     </ClInclude>
     <ClInclude Include="CommandSet.h">
-      <Filter>Header Files\mptrack</Filter>
-    </ClInclude>
-    <ClInclude Include="CreditStatic.h">
       <Filter>Header Files\mptrack</Filter>
     </ClInclude>
     <ClInclude Include="Ctrl_com.h">

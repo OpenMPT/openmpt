@@ -1,7 +1,5 @@
 #pragma once
 
-#include "CreditStatic.h"
-
 OPENMPT_NAMESPACE_BEGIN
 
 namespace PNG { struct Bitmap; }
@@ -51,10 +49,8 @@ class CAboutDlg: public CDialog
 {
 protected:
 	CRippleBitmap m_bmp;
-	CCreditStatic m_static;
 	CTabCtrl m_Tab;
 	CEdit m_TabEdit;
-	CButton m_CheckScroll;
 	UINT_PTR m_TimerID;
 	static const UINT_PTR TIMERID_ABOUT_DEFAULT = 3;
 
@@ -73,7 +69,6 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	afx_msg void OnTabChange(NMHDR *pNMHDR, LRESULT *pResult);
 	void OnTimer(UINT_PTR nIDEvent);
-	void OnCheckScroll();
 	mpt::ustring GetTabText(int tab);
 };
 
