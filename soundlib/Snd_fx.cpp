@@ -1010,6 +1010,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			// Target found, or there is no target (i.e. play whole song)...
 			m_PlayState = memory.state;
 			m_PlayState.m_nFrameDelay = m_PlayState.m_nPatternDelay = 0;
+			m_PlayState.m_nTickCount = Util::MaxValueOfType(m_PlayState.m_nTickCount) - 1;
 			m_PlayState.m_bPositionChanged = true;
 			for(CHANNELINDEX n = 0; n < GetNumChannels(); n++)
 			{
@@ -1108,10 +1109,11 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 			pSmp = pChn->pModSample;
 		}
 
-		// Special XM hack (also applies to MOD / S3M)
+		// Special XM hack (also applies to MOD / S3M, except when playing IT-style S3Ms, such as k_vision.s3m)
 		// Test case: PortaSmpChange.mod, PortaSmpChange.s3m
 		if((!instrumentChanged && (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)) && pIns)
-			|| (GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M | MOD_TYPE_PLM)))
+			|| (GetType() & (MOD_TYPE_MOD | MOD_TYPE_PLM))
+			|| IsCompatibleMode(TRK_SCREAMTRACKER))
 		{
 			// FT2 doesn't change the sample in this case,
 			// but still uses the sample info from the old one (bug?)
