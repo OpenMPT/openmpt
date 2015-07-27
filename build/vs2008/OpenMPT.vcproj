@@ -1569,6 +1569,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\mptrack\TempoSwingDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\mptrack\TempoSwingDialog.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\mptrack\TrackerSettings.cpp"
 				>
 			</File>

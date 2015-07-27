@@ -552,6 +552,7 @@
     <ClInclude Include="..\..\mptrack\StreamEncoderOpus.h" />
     <ClInclude Include="..\..\mptrack\StreamEncoderVorbis.h" />
     <ClInclude Include="..\..\mptrack\StreamEncoderWAV.h" />
+    <ClInclude Include="..\..\mptrack\TempoSwingDialog.h" />
     <ClInclude Include="..\..\mptrack\TrackerSettings.h" />
     <ClInclude Include="..\..\mptrack\TuningDialog.h" />
     <ClInclude Include="..\..\mptrack\Undo.h" />
@@ -742,6 +743,7 @@
     <ClCompile Include="..\..\mptrack\StreamEncoderOpus.cpp" />
     <ClCompile Include="..\..\mptrack\StreamEncoderVorbis.cpp" />
     <ClCompile Include="..\..\mptrack\StreamEncoderWAV.cpp" />
+    <ClCompile Include="..\..\mptrack\TempoSwingDialog.cpp" />
     <ClCompile Include="..\..\mptrack\TrackerSettings.cpp" />
     <ClCompile Include="..\..\mptrack\TuningDialog.cpp" />
     <ClCompile Include="..\..\mptrack\Undo.cpp" />

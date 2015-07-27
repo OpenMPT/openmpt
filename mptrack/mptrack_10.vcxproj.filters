@@ -589,6 +589,9 @@
     <ClCompile Include="..\common\mptStringParse.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
+    <ClCompile Include="TempoSwingDialog.cpp">
+      <Filter>Source Files\mptrack\Dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -921,9 +924,6 @@
     <ClInclude Include="Reporting.h">
       <Filter>Header Files\mptrack</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\BuildSettings.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
@@ -1151,6 +1151,12 @@
     </ClInclude>
     <ClInclude Include="..\common\mptStringParse.h">
       <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="TempoSwingDialog.h">
+      <Filter>Header Files\mptrack\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files\mptrack</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

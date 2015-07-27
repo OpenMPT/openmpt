@@ -380,6 +380,9 @@
     <ClInclude Include="..\..\mptrack\StreamEncoderWAV.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\TempoSwingDialog.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\TrackerSettings.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -917,6 +920,9 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\StreamEncoderWAV.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\TempoSwingDialog.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\TrackerSettings.cpp">
