@@ -961,6 +961,7 @@
 #define IDC_STATIC_FORMAT               2482
 #define IDC_TABABOUT                    2483
 #define IDC_EDITABOUT                   2484
+#define IDC_CONTAINER                   2485
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773

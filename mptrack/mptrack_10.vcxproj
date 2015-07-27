@@ -905,6 +905,7 @@
     <ClCompile Include="StreamEncoderOpus.cpp" />
     <ClCompile Include="StreamEncoderVorbis.cpp" />
     <ClCompile Include="StreamEncoderWAV.cpp" />
+    <ClCompile Include="TempoSwingDialog.cpp" />
     <ClCompile Include="TrackerSettings.cpp" />
     <ClCompile Include="TuningDialog.cpp" />
     <ClCompile Include="tuningRatioMapWnd.cpp" />
@@ -1123,6 +1124,7 @@
     <ClInclude Include="StreamEncoderOpus.h" />
     <ClInclude Include="StreamEncoderVorbis.h" />
     <ClInclude Include="StreamEncoderWAV.h" />
+    <ClInclude Include="TempoSwingDialog.h" />
     <ClInclude Include="TrackerSettings.h" />
     <ClInclude Include="TuningDialog.h" />
     <ClInclude Include="tuningRatioMapWnd.h" />

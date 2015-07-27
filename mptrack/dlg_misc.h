@@ -264,46 +264,6 @@ protected:
 
 
 /////////////////////////////////////////////////////////////////////////
-// Tempo swing dialog
-
-//==================================
-class CTempoSwingDlg: public CDialog
-//==================================
-{
-protected:
-	enum { SliderResolution = 1000, SliderUnity = SliderResolution / 2 };
-	struct RowCtls
-	{
-		CStatic rowLabel, valueLabel;
-		CSliderCtrl valueSlider;
-	};
-	std::vector<RowCtls *> m_controls;
-	static int m_groupSize;
-
-public:
-	TempoSwing m_tempoSwing;
-	const TempoSwing m_origTempoSwing;
-	CSoundFile &m_sndFile;
-	PATTERNINDEX m_pattern;
-
-public:
-	CTempoSwingDlg(CWnd *parent, const TempoSwing &currentTempoSwing, CSoundFile &sndFile, PATTERNINDEX pattern = PATTERNINDEX_INVALID);
-
-protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual void OnCancel();
-	void OnClose();
-	afx_msg void OnReset();
-	afx_msg void OnToggleGroup();
-	afx_msg void OnGroupChanged();
-	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	afx_msg BOOL OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *);
-	DECLARE_MESSAGE_MAP()
-};
-
-
-/////////////////////////////////////////////////////////////////////////
 // Messagebox with 'don't show again'-option.
 
 // Enums for message entries. See dlg_misc.cpp for the array of entries.
