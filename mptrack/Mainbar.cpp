@@ -657,8 +657,11 @@ void CMainToolBar::SetRowsPerBeat(ROWINDEX nNewRPB)
 		{
 			pSndFile->Patterns[nPat].SetSignature(nNewRPB, pSndFile->Patterns[nPat].GetRowsPerMeasure());
 			TempoSwing swing = pSndFile->Patterns[nPat].GetTempoSwing();
-			swing.resize(nNewRPB);
-			pSndFile->Patterns[nPat].SetTempoSwing(swing);
+			if(!swing.empty())
+			{
+				swing.resize(nNewRPB);
+				pSndFile->Patterns[nPat].SetTempoSwing(swing);
+			}
 			pModDoc->SetModified();
 		}
 	} else
@@ -666,6 +669,7 @@ void CMainToolBar::SetRowsPerBeat(ROWINDEX nNewRPB)
 		if(nNewRPB <= pSndFile->m_nDefaultRowsPerMeasure)
 		{
 			pSndFile->m_nDefaultRowsPerBeat = nNewRPB;
+			if(!pSndFile->m_tempoSwing.empty()) pSndFile->m_tempoSwing.resize(nNewRPB);
 			pModDoc->SetModified();
 		}
 	}
