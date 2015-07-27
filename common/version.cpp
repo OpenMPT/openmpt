@@ -409,7 +409,7 @@ std::string GetVersionUrlString()
 	#else
 		std::string url = "";
 	#endif
-	std::string baseurl = "https://svn.code.sf.net/p/modplug/code/";
+	std::string baseurl = "https://source.openmpt.org/svn/openmpt/";
 	if(url.substr(0, baseurl.length()) == baseurl)
 	{
 		url = url.substr(baseurl.length());
