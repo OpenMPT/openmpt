@@ -88,6 +88,8 @@ static CommandID SendCommands(CWnd *wnd, const KeyMapRange &cmd, WPARAM wParam)
 	CommandID executeCommand = kcNull;
 	if(wnd != nullptr)
 	{
+		// Some commands (e.g. open/close/document switching) may invalidate the key map and thus its iterators.
+		// To avoid this problem, copy over the elements we are interested in before sending commands.
 		std::vector<CommandID> commands;
 		commands.reserve(std::distance(cmd.first, cmd.second));
 		for(KeyMap::const_iterator i = cmd.first; i != cmd.second; i++)
@@ -98,7 +100,7 @@ static CommandID SendCommands(CWnd *wnd, const KeyMapRange &cmd, WPARAM wParam)
 		{
 			if(wnd->SendMessage(WM_MOD_KEYCOMMAND, *i, wParam))
 			{
-				// Command was handled, no need to let the OS handle it
+				// Command was handled, no need to let the OS handle the key
 				executeCommand = *i;
 			}
 		}
@@ -307,7 +309,7 @@ CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 me
 	if(MIDIEvents::GetTypeFromEvent(message) == MIDIEvents::evControllerChange && MIDIEvents::GetDataByte2FromEvent(message) != 0)
 	{
 		// Only capture MIDI CCs for now. Some controllers constantly send some MIDI CCs with value 0
-		// (e.g. the Roland D-50 sends CC123 whenenver releasing note keys), so we will ignore those.
+		// (e.g. the Roland D-50 sends CC123 whenenver all notes have been released), so we will ignore those.
 		return GeneralKeyEvent(context, HC_MIDI, MIDIEvents::GetDataByte1FromEvent(message), 0);
 	}
 	return kcNull;

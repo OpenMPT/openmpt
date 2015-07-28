@@ -11,12 +11,13 @@
 #include "stdafx.h"
 #include "CommandSet.h"
 #include "resource.h"
-#include "Mptrack.h"	// For MsgBox
+#include "Mptrack.h"	// For ErrorBox
 #include "../soundlib/mod_specifications.h"
 #include "../mptrack/Reporting.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "../common/mptFileIO.h"
+#include "TrackerSettings.h"
 
 #include <sstream>
 
@@ -749,7 +750,8 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 				Log("%s", report);
 			} else
 			{
-				//Remove(conflictCmd.second, conflictCmd.first);
+				//if(!TrackerSettings::Instance().MiscAllowMultipleCommandsPerKey)
+				//	Remove(conflictCmd.second, conflictCmd.first);
 				report += "The following commands in same context share the same key combination:\r\n   >" + GetCommandText(conflictCmd.first) + " in " + conflictCmd.second.GetContextText() + "\r\n\r\n";
 				Log("%s", report);
 			}
@@ -1439,6 +1441,8 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 
 	km.clear();
 
+	const bool allowDupes = TrackerSettings::Instance().MiscAllowMultipleCommandsPerKey;
+
 	// Copy commandlist content into map:
 	for(UINT cmd=0; cmd<kcNumCommands; cmd++)
 	{
@@ -1480,7 +1484,13 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 			{
 				for (size_t ke = 0; ke < eventTypes.size(); ke++)
 				{
-					km.insert(std::make_pair(KeyCombination(contexts[cx], curKc.Modifier(), curKc.KeyCode(), eventTypes[ke]), (CommandID)cmd));
+					KeyCombination kc(contexts[cx], curKc.Modifier(), curKc.KeyCode(), eventTypes[ke]);
+					if(!allowDupes)
+					{
+						KeyMapRange dupes = km.equal_range(kc);
+						km.erase(dupes.first, dupes.second);
+					}
+					km.insert(std::make_pair(kc, (CommandID)cmd));
 				}
 			}
 		}
@@ -1675,7 +1685,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 			}
 		}
 	}
-	//if(fileVersion < KEYMAP_VERSION) UpgradeKeymap(pTempCS, fileVersion);
+	//if(fileVersion < KEYMAP_VERSION) pTempCS->UpgradeKeymap(fileVersion);
 
 	if(!fillExistingSet)
 	{
@@ -2038,6 +2048,5 @@ bool CCommandSet::IsCrossContextConflict(KeyCombination kc1, KeyCombination kc2)
 {
 	return m_isParentContext[kc1.Context()][kc2.Context()] || m_isParentContext[kc2.Context()][kc1.Context()];
 }
-
 
 OPENMPT_NAMESPACE_END

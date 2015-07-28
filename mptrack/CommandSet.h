@@ -17,8 +17,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct CModSpecifications;
 
-//#define VK_ALT 0x12
-
 #define KEYMAP_VERSION 1	// Version of the .mkb format
 
 #define HOTKEYF_MIDI 0x10	// modifier mask for MIDI CCs
