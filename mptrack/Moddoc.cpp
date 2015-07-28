@@ -695,10 +695,12 @@ BOOL CModDoc::InitializeMod()
 			break;
 		}
 
+		if(GetModType() == MOD_TYPE_MPT) m_SndFile.m_nTempoMode = tempoModeModern;
+
 		// Refresh mix levels now that the correct mod type has been set
 		m_SndFile.SetMixLevels(m_SndFile.GetModSpecifications().defaultMixLevels);
 		// ...and the order length
-		m_SndFile.Order.resize(MIN(ModSequenceSet::s_nCacheSize, m_SndFile.GetModSpecifications().ordersMax));
+		m_SndFile.Order.resize(std::min(ModSequenceSet::s_nCacheSize, m_SndFile.GetModSpecifications().ordersMax));
 
 		if (m_SndFile.Order[0] >= m_SndFile.Patterns.Size())
 			m_SndFile.Order[0] = 0;
