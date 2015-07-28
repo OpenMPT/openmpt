@@ -782,7 +782,8 @@ BEGIN
     PUSHBUTTON      "Font",IDC_BUTTON10,72,36,144,12
     CONTROL         "&Enable effect highlighting",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,54,114,10
     CONTROL         "Remember each song's &window positions",IDC_CHECK5,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,72,258,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,72,168,10
+    PUSHBUTTON      "Clear Song Cac&he",IDC_BUTTON11,186,71,78,12
     CONTROL         "&Primary highlight",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,90,84,10
     EDITTEXT        IDC_PRIMARYHILITE,102,90,24,12,ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "Rows per measure (default)",IDC_STATIC,132,92,144,8
@@ -791,7 +792,7 @@ BEGIN
     LTEXT           "Rows per beat (default)",IDC_STATIC,132,110,144,8
     LTEXT           "Note: Songs' time signatures will override the default highlight values",IDC_STATIC,18,124,258,8
     GROUPBOX        "Colours",IDC_STATIC,6,150,276,120
-    LTEXT           "Select &colour for:",IDC_STATIC,18,164,63,8
+    LTEXT           "Select colo&ur for:",IDC_STATIC,18,164,63,8
     COMBOBOX        IDC_COMBO1,90,162,114,109,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "",IDC_BUTTON4,"Button",BS_OWNERDRAW | BS_FLAT,18,180,120,48
     LTEXT           "C1",IDC_TEXT1,144,182,60,8
