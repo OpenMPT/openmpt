@@ -326,7 +326,6 @@ void CTempoSwingDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
 BEGIN_MESSAGE_MAP(CTempoSwingDlg::SliderContainer, CDialog)
 	//{{AFX_MSG_MAP(CTempoSwingDlg::SliderContainer)
 	ON_WM_HSCROLL()
-	ON_WM_ERASEBKGND()
 	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipNotify)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -379,17 +378,6 @@ void CTempoSwingDlg::SliderContainer::OnHScroll(UINT nSBCode, UINT nPos, CScroll
 	}
 
 	CStatic::OnHScroll(nSBCode, nPos, pScrollBar);
-}
-
-
-BOOL CTempoSwingDlg::SliderContainer::OnEraseBkgnd(CDC *pDC)
-//----------------------------------------------------------
-{
-	return FALSE;
-	/*CRect rect;
-	GetClientRect(rect);
-	pDC->Rectangle(rect);
-	return TRUE;*/
 }
 
 
