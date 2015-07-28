@@ -530,6 +530,9 @@ mpt::ustring GetFullCreditsString()
 		"http://schismtracker.org/\n"
 		"\n"
 #ifdef MODPLUG_TRACKER
+		"Alexander Uckun for decimal input field\n"
+		"http://www.codeproject.com/Articles/21257/_\n"
+		"\n"
 		"Nobuyuki for application and file icon\n"
 		"http://twitter.com/nobuyukinyuu\n"
 		"\n"

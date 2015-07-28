@@ -317,8 +317,8 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(!memcmp(fileHeader.trackerName, "MilkyTracker ", 12))
 		{
-			// MilkyTracker prior to version 0.90.86 doesn't set a version string.
-			// Luckily, starting with v0.90.86, MilkyTracker also implements the FT2 panning scheme.
+			// MilkyTracker prior to version 0.90.87 doesn't set a version string.
+			// Luckily, starting with v0.90.87, MilkyTracker also implements the FT2 panning scheme.
 			if(memcmp(fileHeader.trackerName + 12, "        ", 8))
 			{
 				m_nMixLevels = mixLevelsCompatibleFT2;
