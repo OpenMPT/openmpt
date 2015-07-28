@@ -29,7 +29,6 @@ protected:
 		SliderContainer(CTempoSwingDlg &parent) : m_parent(parent) { }
 
 		afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar);
-		afx_msg BOOL OnEraseBkgnd(CDC *pDC);
 		afx_msg BOOL OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *);
 		DECLARE_MESSAGE_MAP()
 	};
