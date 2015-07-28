@@ -51,6 +51,7 @@ protected:
 	afx_msg void OnPresetBuzz();
 	afx_msg void OnLoadColorScheme();
 	afx_msg void OnSaveColorScheme();
+	afx_msg void OnClearWindowCache();
 	afx_msg void OnPreviewChanged();
 	DECLARE_MESSAGE_MAP();
 };

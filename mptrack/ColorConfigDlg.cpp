@@ -1,7 +1,7 @@
 /*
  * ColorConfigDlg.cpp
  * ------------------
- * Purpose: Implementation of the color setup dialog.
+ * Purpose: Implementation of the display setup dialog.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -59,6 +59,7 @@ BEGIN_MESSAGE_MAP(COptionsColors, CPropertyPage)
 	ON_COMMAND(IDC_BUTTON8,				OnPresetBuzz)
 	ON_COMMAND(IDC_BUTTON9,				OnChoosePatternFont)
 	ON_COMMAND(IDC_BUTTON10,			OnChooseCommentFont)
+	ON_COMMAND(IDC_BUTTON11,			OnClearWindowCache)
 	ON_COMMAND(IDC_LOAD_COLORSCHEME,	OnLoadColorScheme)
 	ON_COMMAND(IDC_SAVE_COLORSCHEME,	OnSaveColorScheme)
 	ON_COMMAND(IDC_CHECK1,				OnSettingsChanged)
@@ -667,5 +668,17 @@ void COptionsColors::OnSaveColorScheme()
 		}
 	}
 }
+
+
+void COptionsColors::OnClearWindowCache()
+//---------------------------------------
+{
+	SettingsContainer &settings = theApp.GetSongSettings();
+	// First, forget all settings...
+	settings.ForgetAll();
+	// Then make sure they are gone for good.
+	::DeleteFileW(theApp.GetSongSettingsFilename().AsNative().c_str());
+}
+
 
 OPENMPT_NAMESPACE_END

@@ -186,6 +186,14 @@ void SettingsContainer::ForgetSetting(const SettingPath &path)
 	map.erase(path);
 }
 
+void SettingsContainer::ForgetAll()
+{
+	while(!map.empty())
+	{
+		Forget(map.begin()->first);
+	}
+}
+
 void SettingsContainer::RemoveSetting(const SettingPath &path)
 {
 	ASSERT(theApp.InGuiThread());

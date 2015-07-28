@@ -584,6 +584,7 @@ public:
 	{
 		ForgetSetting(SettingPath(section, key));
 	}
+	void ForgetAll();
 	void Remove(const SettingPath &path)
 	{
 		RemoveSetting(path);
@@ -605,6 +606,7 @@ public:
 			SettingsMap::const_iterator begin() const { return map.begin(); }
 			SettingsMap::const_iterator end() const { return map.end(); }
 			SettingsMap::size_type size() const { return map.size(); }
+			bool empty() const { return map.empty(); }
 			const SettingsMap &GetMap() const { return map; }
 
 	#endif // MPT_SETTINGS_CACHE
@@ -856,6 +858,7 @@ public:
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const;
 	virtual void WriteSetting(const SettingPath &path, const SettingValue &val);
 	virtual void RemoveSetting(const SettingPath &path);
+	const mpt::PathString& GetFilename() const { return filename; }
 };
 
 class IniFileSettingsContainer : private IniFileSettingsBackend, public SettingsContainer

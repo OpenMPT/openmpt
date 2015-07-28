@@ -279,6 +279,10 @@ public:
 		ASSERT(m_pSongSettings);
 		return *m_pSongSettings;
 	}
+	const mpt::PathString& GetSongSettingsFilename() const
+	{
+		return m_pSongSettingsIniFile->GetFilename();
+	}
 
 	/// Returns path to config folder including trailing '\'.
 	mpt::PathString GetConfigPath() const { return m_szConfigDirectory; }
