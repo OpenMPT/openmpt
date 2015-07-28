@@ -118,8 +118,6 @@ protected:
 	afx_msg void OnCheck() { OnSetKeyChoice(); };
 	afx_msg void OnNotesRepeat();
 	afx_msg void OnNoNotesRepeat();
-	afx_msg void OnSetITEffects();
-	afx_msg void OnSetXMEffects();
 	afx_msg void OnDeleteKeyChoice();
 	afx_msg void OnRestoreKeyChoice();
 	afx_msg void OnLoad();

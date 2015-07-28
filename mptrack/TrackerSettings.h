@@ -531,7 +531,7 @@ public:
 	Setting<bool> autoApplySmoothFT2Ramping;
 	Setting<uint32> MiscITCompressionStereo; // Mask: bit0: IT, bit1: Compat IT, bit2: MPTM
 	Setting<uint32> MiscITCompressionMono;   // Mask: bit0: IT, bit1: Compat IT, bit2: MPTM
-	Setting<bool> MiscAboutScrollText;
+	CachedSetting<bool> MiscAllowMultipleCommandsPerKey;
 
 	// Sound Settings
 	

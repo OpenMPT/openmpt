@@ -111,7 +111,6 @@ BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
 	ON_LBN_SELCHANGE(IDC_COMMAND_LIST,		OnCommandKeySelChanged)
 	ON_LBN_SELCHANGE(IDC_KEYCATEGORY,		OnCategorySelChanged)
 	ON_EN_UPDATE(IDC_CHORDDETECTWAITTIME,	OnChordWaitTimeChanged) //rewbs.autochord
-	ON_COMMAND(IDC_SET,						OnSetKeyChoice)
 	ON_COMMAND(IDC_DELETE,					OnDeleteKeyChoice)
 	ON_COMMAND(IDC_RESTORE,					OnRestoreKeyChoice)
 	ON_COMMAND(IDC_LOAD,					OnLoad)
@@ -121,8 +120,6 @@ BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
 	ON_COMMAND(IDC_CHECKKEYUP,				OnCheck)
 	ON_COMMAND(IDC_NOTESREPEAT,				OnNotesRepeat)
 	ON_COMMAND(IDC_NONOTESREPEAT,			OnNoNotesRepeat)
-	ON_COMMAND(IDC_EFFECTLETTERSXM,			OnSetXMEffects)
-	ON_COMMAND(IDC_EFFECTLETTERSIT,			OnSetITEffects)
 	ON_COMMAND(IDC_CLEARLOG,				OnClearLog)
 	ON_COMMAND(IDC_RESTORE_KEYMAP,			OnRestoreDefaultKeymap)
 	ON_EN_CHANGE(IDC_FIND,					OnSearchTermChanged)
@@ -764,10 +761,6 @@ void COptionsKeyboard::OnSetKeyChoice()
 	if (!kc.EventType())
 	{
 		::MessageBeep(MB_ICONWARNING);
-/*		CString error = "You need to select at least one key event type (up, down or hold).";
-		Reporting::Warning(error, "Invalid key data");
-		return;
-*/
 		kc.EventType(kKeyEventDown);
 	}
 
@@ -882,28 +875,11 @@ void COptionsKeyboard::OnNoNotesRepeat()
 }
 
 
-void COptionsKeyboard::OnSetITEffects()
-//-------------------------------------
-{
-	plocalCmdSet->QuickChange_SetEffects(ModSpecs::itEx);
-	ForceUpdateGUI();
-}
-
-
-void COptionsKeyboard::OnSetXMEffects()
-//-------------------------------------
-{
-	plocalCmdSet->QuickChange_SetEffects(ModSpecs::xmEx);
-	ForceUpdateGUI();
-}
-
-
 void COptionsKeyboard::ForceUpdateGUI()
 //-------------------------------------
 {
-	//update gui
-	m_bForceUpdate=true; // m_nCurKeyChoice and m_nCurHotKey haven't changed, yet we still want to update.
-	int ntmpChoice = m_nCurKeyChoice;	  		// next call will overwrite m_nCurKeyChoice
+	m_bForceUpdate = true;						// m_nCurKeyChoice and m_nCurHotKey haven't changed, yet we still want to update.
+	int ntmpChoice = m_nCurKeyChoice;			// next call will overwrite m_nCurKeyChoice
 	OnCommandKeySelChanged();					// update keychoice list
 	m_cmbKeyChoice.SetCurSel(ntmpChoice);		// select fresh keychoice (thus restoring m_nCurKeyChoice)
 	OnKeyChoiceSelect();						// update key data
