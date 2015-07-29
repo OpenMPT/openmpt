@@ -9,7 +9,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: SoundTouchDLL.h 94 2010-12-12 18:28:49Z oparviai $
+// $Id: SoundTouchDLL.h 198 2014-04-06 18:06:50Z oparviai $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -38,8 +38,14 @@
 #define _SoundTouchDLL_h_
 
 #ifdef __cplusplus
-extern "C" {
+
+#ifdef DLL_EXPORTS
+    #define SOUNDTOUCHDLL_API extern "C" __declspec(dllexport)
+#else
+    #define SOUNDTOUCHDLL_API extern "C" __declspec(dllimport)
 #endif
+
+#else
 
 #ifdef DLL_EXPORTS
     #define SOUNDTOUCHDLL_API __declspec(dllexport)
@@ -47,58 +53,60 @@ extern "C" {
     #define SOUNDTOUCHDLL_API __declspec(dllimport)
 #endif
 
+#endif // __cplusplus
+
 typedef void * HANDLE;
 
 /// Create a new instance of SoundTouch processor.
-SOUNDTOUCHDLL_API HANDLE __stdcall soundtouch_createInstance();
+SOUNDTOUCHDLL_API HANDLE __cdecl soundtouch_createInstance();
 
 /// Destroys a SoundTouch processor instance.
-SOUNDTOUCHDLL_API void __stdcall soundtouch_destroyInstance(HANDLE h);
+SOUNDTOUCHDLL_API void __cdecl soundtouch_destroyInstance(HANDLE h);
 
 /// Get SoundTouch library version string
-SOUNDTOUCHDLL_API const char *__stdcall soundtouch_getVersionString();
+SOUNDTOUCHDLL_API const char *__cdecl soundtouch_getVersionString();
 
 /// Get SoundTouch library version string - alternative function for 
 /// environments that can't properly handle character string as return value
-SOUNDTOUCHDLL_API void __stdcall soundtouch_getVersionString2(char* versionString, int bufferSize);
+SOUNDTOUCHDLL_API void __cdecl soundtouch_getVersionString2(char* versionString, int bufferSize);
 
 /// Get SoundTouch library version Id
-SOUNDTOUCHDLL_API unsigned int __stdcall soundtouch_getVersionId();
+SOUNDTOUCHDLL_API unsigned int __cdecl soundtouch_getVersionId();
 
 /// Sets new rate control value. Normal rate = 1.0, smaller values
 /// represent slower rate, larger faster rates.
-SOUNDTOUCHDLL_API void __stdcall soundtouch_setRate(HANDLE h, float newRate);
+SOUNDTOUCHDLL_API void __cdecl soundtouch_setRate(HANDLE h, float newRate);
 
 /// Sets new tempo control value. Normal tempo = 1.0, smaller values
 /// represent slower tempo, larger faster tempo.
-SOUNDTOUCHDLL_API void __stdcall soundtouch_setTempo(HANDLE h, float newTempo);
+SOUNDTOUCHDLL_API void __cdecl soundtouch_setTempo(HANDLE h, float newTempo);
 
 /// Sets new rate control value as a difference in percents compared
 /// to the original rate (-50 .. +100 %);
-SOUNDTOUCHDLL_API void __stdcall soundtouch_setRateChange(HANDLE h, float newRate);
+SOUNDTOUCHDLL_API void __cdecl soundtouch_setRateChange(HANDLE h, float newRate);
 
 /// Sets new tempo control value as a difference in percents compared
 /// to the original tempo (-50 .. +100 %);
-SOUNDTOUCHDLL_API void __stdcall soundtouch_setTempoChange(HANDLE h, float newTempo);
+SOUNDTOUCHDLL_API void __cdecl soundtouch_setTempoChange(HANDLE h, float newTempo);
 
 /// Sets new pitch control value. Original pitch = 1.0, smaller values
 /// represent lower pitches, larger values higher pitch.
-SOUNDTOUCHDLL_API void __stdcall soundtouch_setPitch(HANDLE h, float newPitch);
+SOUNDTOUCHDLL_API void __cdecl soundtouch_setPitch(HANDLE h, float newPitch);
 
 /// Sets pitch change in octaves compared to the original pitch  
 /// (-1.00 .. +1.00);
-SOUNDTOUCHDLL_API void __stdcall soundtouch_setPitchOctaves(HANDLE h, float newPitch);
+SOUNDTOUCHDLL_API void __cdecl soundtouch_setPitchOctaves(HANDLE h, float newPitch);
 
 /// Sets pitch change in semi-tones compared to the original pitch
 /// (-12 .. +12);
-SOUNDTOUCHDLL_API void __stdcall soundtouch_setPitchSemiTones(HANDLE h, float newPitch);
+SOUNDTOUCHDLL_API void __cdecl soundtouch_setPitchSemiTones(HANDLE h, float newPitch);
 
 
 /// Sets the number of channels, 1 = mono, 2 = stereo
-SOUNDTOUCHDLL_API void __stdcall soundtouch_setChannels(HANDLE h, unsigned int numChannels);
+SOUNDTOUCHDLL_API void __cdecl soundtouch_setChannels(HANDLE h, unsigned int numChannels);
 
 /// Sets sample rate.
-SOUNDTOUCHDLL_API void __stdcall soundtouch_setSampleRate(HANDLE h, unsigned int srate);
+SOUNDTOUCHDLL_API void __cdecl soundtouch_setSampleRate(HANDLE h, unsigned int srate);
 
 /// Flushes the last samples from the processing pipeline to the output.
 /// Clears also the internal processing buffers.
@@ -107,12 +115,12 @@ SOUNDTOUCHDLL_API void __stdcall soundtouch_setSampleRate(HANDLE h, unsigned int
 /// stream. This function may introduce additional blank samples in the end
 /// of the sound stream, and thus it's not recommended to call this function
 /// in the middle of a sound stream.
-SOUNDTOUCHDLL_API void __stdcall soundtouch_flush(HANDLE h);
+SOUNDTOUCHDLL_API void __cdecl soundtouch_flush(HANDLE h);
 
 /// Adds 'numSamples' pcs of samples from the 'samples' memory position into
 /// the input of the object. Notice that sample rate _has_to_ be set before
 /// calling this function, otherwise throws a runtime_error exception.
-SOUNDTOUCHDLL_API void __stdcall soundtouch_putSamples(HANDLE h, 
+SOUNDTOUCHDLL_API void __cdecl soundtouch_putSamples(HANDLE h, 
         const float *samples,       ///< Pointer to sample buffer.
         unsigned int numSamples     ///< Number of samples in buffer. Notice
                                     ///< that in case of stereo-sound a single sample
@@ -121,13 +129,13 @@ SOUNDTOUCHDLL_API void __stdcall soundtouch_putSamples(HANDLE h,
 
 /// Clears all the samples in the object's output and internal processing
 /// buffers.
-SOUNDTOUCHDLL_API void __stdcall soundtouch_clear(HANDLE h);
+SOUNDTOUCHDLL_API void __cdecl soundtouch_clear(HANDLE h);
 
 /// Changes a setting controlling the processing system behaviour. See the
 /// 'SETTING_...' defines for available setting ID's.
 /// 
 /// \return 'TRUE' if the setting was succesfully changed
-SOUNDTOUCHDLL_API BOOL __stdcall soundtouch_setSetting(HANDLE h, 
+SOUNDTOUCHDLL_API BOOL __cdecl soundtouch_setSetting(HANDLE h, 
                 int settingId,   ///< Setting ID number. see SETTING_... defines.
                 int value        ///< New setting value.
                 );
@@ -136,33 +144,29 @@ SOUNDTOUCHDLL_API BOOL __stdcall soundtouch_setSetting(HANDLE h,
 /// 'SETTING_...' defines for available setting ID's.
 ///
 /// \return the setting value.
-SOUNDTOUCHDLL_API int __stdcall soundtouch_getSetting(HANDLE h, 
+SOUNDTOUCHDLL_API int __cdecl soundtouch_getSetting(HANDLE h, 
                           int settingId    ///< Setting ID number, see SETTING_... defines.
                 );
 
 
 /// Returns number of samples currently unprocessed.
-SOUNDTOUCHDLL_API unsigned int __stdcall soundtouch_numUnprocessedSamples(HANDLE h);
+SOUNDTOUCHDLL_API unsigned int __cdecl soundtouch_numUnprocessedSamples(HANDLE h);
 
 /// Adjusts book-keeping so that given number of samples are removed from beginning of the 
 /// sample buffer without copying them anywhere. 
 ///
 /// Used to reduce the number of samples in the buffer when accessing the sample buffer directly
 /// with 'ptrBegin' function.
-SOUNDTOUCHDLL_API unsigned int __stdcall soundtouch_receiveSamples(HANDLE h, 
+SOUNDTOUCHDLL_API unsigned int __cdecl soundtouch_receiveSamples(HANDLE h, 
             float *outBuffer,           ///< Buffer where to copy output samples.
             unsigned int maxSamples     ///< How many samples to receive at max.
             );
 
 /// Returns number of samples currently available.
-SOUNDTOUCHDLL_API unsigned int __stdcall soundtouch_numSamples(HANDLE h);
+SOUNDTOUCHDLL_API unsigned int __cdecl soundtouch_numSamples(HANDLE h);
 
 /// Returns nonzero if there aren't any samples available for outputting.
-SOUNDTOUCHDLL_API int __stdcall soundtouch_isEmpty(HANDLE h);
-
-#ifdef __cplusplus
-}
-#endif
+SOUNDTOUCHDLL_API int __cdecl soundtouch_isEmpty(HANDLE h);
 
 #endif  // _SoundTouchDLL_h_
 

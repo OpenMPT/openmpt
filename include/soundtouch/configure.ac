@@ -1,6 +1,6 @@
 dnl SoundTouch configure.ac, by David W. Durham
 dnl
-dnl $Id: configure.ac 188 2014-01-07 19:58:54Z oparviai $
+dnl $Id: configure.ac 221 2015-05-18 17:54:01Z oparviai $
 dnl
 dnl This file is part of SoundTouch, an audio processing library for pitch/time adjustments
 dnl 
@@ -19,9 +19,10 @@ dnl this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 dnl Place - Suite 330, Boston, MA  02111-1307, USA
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(SoundTouch, 1.8.0, [http://www.surina.net/soundtouch])
+AC_INIT(SoundTouch, 1.9.0, [http://www.surina.net/soundtouch])
 AC_CONFIG_AUX_DIR(config)
-AM_CONFIG_HEADER([include/soundtouch_config.h])
+AC_CONFIG_MACRO_DIR([config/m4])
+AM_CONFIG_HEADER([config.h include/soundtouch_config.h])
 AM_INIT_AUTOMAKE
 AM_SILENT_RULES([yes])
 #AC_DISABLE_SHARED	dnl This makes libtool only build static libs 
@@ -78,9 +79,14 @@ AC_C_INLINE
 AC_ARG_ENABLE(integer-samples,
               [AC_HELP_STRING([--enable-integer-samples],
                               [use integer samples instead of floats
-[default=yes]])],,
+[default=no]])],,
               [enable_integer_samples=no])
 
+
+AC_ARG_ENABLE(openmp,
+              [AC_HELP_STRING([--enable-openmp],
+                              [use parallel multicore calculation through OpenMP [default=no]])],,
+              [enable_openmp=no])
 
 # Let the user enable/disable the x86 optimizations.
 # Useful when compiling on non-x86 architectures.
@@ -105,14 +111,21 @@ else
 fi
 
 
+if test "x$enable_openmp" = "xyes"; then
+        echo "****** openmp optimizations enabled ******"
+        AM_CXXFLAGS="-fopenmp $AM_CXXFLAGS"
+else
+        echo "****** openmp optimizations disabled ******"
+fi
+
+
 # Check if optimizations are supported in the system at build time.
 if test "x$enable_x86_optimizations" = "xyes" -a "x$ac_cv_header_cpuid_h" = "xyes"; then
         echo "****** x86 optimizations enabled ******"
 
 	original_saved_CXXFLAGS=$CXXFLAGS
 	have_mmx_intrinsics=no
-	OPT_CXXFLAGS="-mmmx -Winline"
-	CXXFLAGS="$OPT_CXXFLAGS $CXXFLAGS"
+	CXXFLAGS="-mmmx -Winline $CXXFLAGS"
 
 	# Check if the user can compile MMX code using intrinsics.
 	# GCC supports MMX intrinsics since version 3.3
@@ -143,9 +156,10 @@ if test "x$enable_x86_optimizations" = "xyes" -a "x$ac_cv_header_cpuid_h" = "xye
 	fi
 
 
+	# SSE support
+	original_saved_CXXFLAGS=$CXXFLAGS
 	have_sse_intrinsics=no
-	OPT_CXXFLAGS="-msse -Winline"
-	CXXFLAGS="$OPT_CXXFLAGS $CXXFLAGS"
+	CXXFLAGS="-msse -Winline $CXXFLAGS"
 
 	# Check if the user can compile SSE code using intrinsics.
 	# GCC supports SSE intrinsics since version 3.3
@@ -180,6 +194,13 @@ else
         echo "****** x86 optimizations disabled ******"
         AC_DEFINE([SOUNDTOUCH_DISABLE_X86_OPTIMIZATIONS],[1],[Do not use x86 optimizations])
 fi
+
+# Set AM_CXXFLAGS
+AC_SUBST([AM_CXXFLAGS], [$AM_CXXFLAGS])
+
+# Empty default CXXFLAGS so user can set them if desirable
+AC_SUBST([CXXFLAGS], [ ])
+
 
 # SSTypes.h by default enables optimizations. Those already got disabled if
 # the user requested for it or if the system does not support them.

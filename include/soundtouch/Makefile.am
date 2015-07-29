@@ -1,6 +1,6 @@
 ## Process this file with automake to create Makefile.in
 ##
-## $Id: Makefile.am 89 2010-04-03 15:30:08Z oparviai $
+## $Id: Makefile.am 199 2014-10-05 15:33:08Z oparviai $
 ##
 ## Copyright (C) 2003 - David W. Durham
 ## 
@@ -26,9 +26,8 @@ include $(top_srcdir)/config/am_include.mk
 ## subdirectories Start at frontend_fox/Makefile.am to see how everything works.
 SUBDIRS=include source
 
-
 # list files that are documentation to be packaged in a release tarball and installed
-pkgdoc_DATA=COPYING.TXT README.html
+dist_doc_DATA=COPYING.TXT README.html
 
 # extra data files that are to be pacakged in a release tarball and installed into the data directory
 #pkgdata_DATA=

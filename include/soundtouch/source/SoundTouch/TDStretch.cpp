@@ -13,10 +13,10 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Last changed  : $Date: 2014-01-07 20:25:40 +0200 (Tue, 07 Jan 2014) $
+// Last changed  : $Date: 2015-02-22 15:07:12 +0000 (Sun, 22 Feb 2015) $
 // File revision : $Revision: 1.12 $
 //
-// $Id: TDStretch.cpp 184 2014-01-07 18:25:40Z oparviai $
+// $Id: TDStretch.cpp 205 2015-02-22 15:07:12Z oparviai $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -84,15 +84,15 @@ static const short _scanOffsets[5][24]={
 
 TDStretch::TDStretch() : FIFOProcessor(&outputBuffer)
 {
-    bQuickSeek = FALSE;
+    bQuickSeek = false;
     channels = 2;
 
     pMidBuffer = NULL;
     pMidBufferUnaligned = NULL;
     overlapLength = 0;
 
-    bAutoSeqSetting = TRUE;
-    bAutoSeekSetting = TRUE;
+    bAutoSeqSetting = true;
+    bAutoSeekSetting = true;
 
 //    outDebt = 0;
     skipFract = 0;
@@ -132,23 +132,23 @@ void TDStretch::setParameters(int aSampleRate, int aSequenceMS,
     if (aSequenceMS > 0)
     {
         this->sequenceMs = aSequenceMS;
-        bAutoSeqSetting = FALSE;
+        bAutoSeqSetting = false;
     } 
     else if (aSequenceMS == 0)
     {
         // if zero, use automatic setting
-        bAutoSeqSetting = TRUE;
+        bAutoSeqSetting = true;
     }
 
     if (aSeekWindowMS > 0) 
     {
         this->seekWindowMs = aSeekWindowMS;
-        bAutoSeekSetting = FALSE;
+        bAutoSeekSetting = false;
     } 
     else if (aSeekWindowMS == 0) 
     {
         // if zero, use automatic setting
-        bAutoSeekSetting = TRUE;
+        bAutoSeekSetting = true;
     }
 
     calcSeqParameters();
@@ -231,14 +231,14 @@ void TDStretch::clear()
 
 // Enables/disables the quick position seeking algorithm. Zero to disable, nonzero
 // to enable
-void TDStretch::enableQuickSeek(BOOL enable)
+void TDStretch::enableQuickSeek(bool enable)
 {
     bQuickSeek = enable;
 }
 
 
 // Returns nonzero if the quick seeking algorithm is enabled.
-BOOL TDStretch::isQuickSeekEnabled() const
+bool TDStretch::isQuickSeekEnabled() const
 {
     return bQuickSeek;
 }
@@ -292,9 +292,9 @@ inline void TDStretch::overlap(SAMPLETYPE *pOutput, const SAMPLETYPE *pInput, ui
 int TDStretch::seekBestOverlapPositionFull(const SAMPLETYPE *refPos) 
 {
     int bestOffs;
-    double bestCorr, corr;
-    double norm;
+    double bestCorr;
     int i;
+    double norm;
 
     bestCorr = FLT_MIN;
     bestOffs = 0;
@@ -302,14 +302,22 @@ int TDStretch::seekBestOverlapPositionFull(const SAMPLETYPE *refPos)
     // Scans for the best correlation value by testing each possible position
     // over the permitted range.
     bestCorr = calcCrossCorr(refPos, pMidBuffer, norm);
+
+    #pragma omp parallel for
     for (i = 1; i < seekLength; i ++) 
     {
-        // Calculates correlation value for the mixing position corresponding
-        // to 'i'. Now call "calcCrossCorrAccumulate" that is otherwise same as
-        // "calcCrossCorr", but saves time by reusing & updating previously stored 
+        double corr;
+        // Calculates correlation value for the mixing position corresponding to 'i'
+#ifdef _OPENMP
+        // in parallel OpenMP mode, can't use norm accumulator version as parallel executor won't
+        // iterate the loop in sequential order
+        corr = calcCrossCorr(refPos + channels * i, pMidBuffer, norm);
+#else
+        // In non-parallel version call "calcCrossCorrAccumulate" that is otherwise same
+        // as "calcCrossCorr", but saves time by reusing & updating previously stored 
         // "norm" value
         corr = calcCrossCorrAccumulate(refPos + channels * i, pMidBuffer, norm);
-
+#endif
         // heuristic rule to slightly favour values close to mid of the range
         double tmp = (double)(2 * i - seekLength) / (double)seekLength;
         corr = ((corr + 0.1) * (1.0 - 0.25 * tmp * tmp));
@@ -317,8 +325,15 @@ int TDStretch::seekBestOverlapPositionFull(const SAMPLETYPE *refPos)
         // Checks for the highest correlation value
         if (corr > bestCorr) 
         {
-            bestCorr = corr;
-            bestOffs = i;
+            // For optimal performance, enter critical section only in case that best value found.
+            // in such case repeat 'if' condition as it's possible that parallel execution may have
+            // updated the bestCorr value in the mean time
+            #pragma omp critical
+            if (corr > bestCorr)
+            {
+                bestCorr = corr;
+                bestOffs = i;
+            }
         }
     }
     // clear cross correlation routine state if necessary (is so e.g. in MMX routines).
@@ -881,9 +896,10 @@ void TDStretch::calculateOverlapLength(int overlapInMsec)
 
 
 /// Calculate cross-correlation
-double TDStretch::calcCrossCorr(const float *mixingPos, const float *compare, double &norm) const
+double TDStretch::calcCrossCorr(const float *mixingPos, const float *compare, double &anorm) const
 {
     double corr;
+    double norm;
     int i;
 
     corr = norm = 0;
@@ -905,6 +921,7 @@ double TDStretch::calcCrossCorr(const float *mixingPos, const float *compare, do
                 mixingPos[i + 3] * mixingPos[i + 3];
     }
 
+    anorm = norm;
     return corr / sqrt((norm < 1e-9 ? 1.0 : norm));
 }
 

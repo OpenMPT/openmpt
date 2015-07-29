@@ -65,8 +65,8 @@ LANGUAGE LANG_FINNISH, SUBLANG_DEFAULT
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,7,0,0
- PRODUCTVERSION 1,7,0,0
+ FILEVERSION 1,8,0,9
+ PRODUCTVERSION 1,8,0,9
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -83,12 +83,12 @@ BEGIN
         BEGIN
             VALUE "Comments", "SoundTouch Library licensed for 3rd party applications subject to LGPL license v2.1. Visit http://www.surina.net/soundtouch for more information about the SoundTouch library."
             VALUE "FileDescription", "SoundTouch Dynamic Link Library"
-            VALUE "FileVersion", "1, 7, 0, 0"
+            VALUE "FileVersion", "1, 8, 0, 9"
             VALUE "InternalName", "SoundTouch"
-            VALUE "LegalCopyright", "Copyright (C) Olli Parviainen 1999-2012"
+            VALUE "LegalCopyright", "Copyright (C) Olli Parviainen 1999-2014"
             VALUE "OriginalFilename", "SoundTouch.dll"
             VALUE "ProductName", " SoundTouch Dynamic Link Library"
-            VALUE "ProductVersion", "1, 7, 0, 0"
+            VALUE "ProductVersion", "1, 8, 0, 9"
         END
     END
     BLOCK "VarFileInfo"
