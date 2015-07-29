@@ -1,6 +1,6 @@
 ## Process this file with automake to create Makefile.in
 ##
-## $Id: Makefile.am 178 2014-01-06 18:40:23Z oparviai $
+## $Id: Makefile.am 209 2015-05-01 07:55:47Z oparviai $
 ##
 ## This file is part of SoundTouch, an audio processing library for pitch/time adjustments
 ## 
@@ -34,7 +34,7 @@ libSoundTouch_la_SOURCES=AAFilter.cpp FIRFilter.cpp FIFOSampleBuffer.cpp    \
     InterpolateShannon.cpp
 
 # Compiler flags
-AM_CXXFLAGS=-O3 -fcheck-new -I../../include
+AM_CXXFLAGS+=-O3
 
 # Compile the files that need MMX and SSE individually.
 libSoundTouch_la_LIBADD=libSoundTouchMMX.la libSoundTouchSSE.la
