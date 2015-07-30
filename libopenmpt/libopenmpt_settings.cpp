@@ -248,6 +248,63 @@ BEGIN_MESSAGE_MAP(CSettingsDialog, CDialog)
 END_MESSAGE_MAP()
 
 
+
+class CInfoDialog : public CDialog {
+
+protected:
+
+	DECLARE_MESSAGE_MAP()
+
+	CString m_Title;
+	CString m_FileInfo;
+	CEdit m_EditFileInfo;
+
+public:
+
+	CInfoDialog( CString title, CString info, CWnd * parent = NULL )
+		: CDialog( IDD_FILEINFO, parent )
+		, m_Title( title )
+		, m_FileInfo( info )
+	{
+		return;
+	}
+
+protected:
+
+	virtual void DoDataExchange( CDataExchange * pDX )
+	{
+		CDialog::DoDataExchange( pDX );
+		DDX_Control( pDX, IDC_FILEINFO, m_EditFileInfo );
+	}
+
+	afx_msg BOOL OnInitDialog() {
+
+		if ( !CDialog::OnInitDialog() ) {
+			return false;
+		}
+
+		SetWindowText( m_Title );
+
+		m_EditFileInfo.SetWindowText( m_FileInfo );
+
+		return TRUE;
+
+	}
+
+	virtual void OnOK() {
+
+		CDialog::OnOK();
+
+	}
+
+};
+
+BEGIN_MESSAGE_MAP(CInfoDialog, CDialog)
+END_MESSAGE_MAP()
+
+
+
+
 extern "C" {
 
 void libopenmpt_settings_edit( libopenmpt_settings * s, HWND parent, const char * title ) {
@@ -256,6 +313,12 @@ void libopenmpt_settings_edit( libopenmpt_settings * s, HWND parent, const char 
 	dlg.DoModal();
 }
 
-#pragma comment(linker, "/EXPORT:libopenmpt_settings_edit=_libopenmpt_settings_edit")
-
 } // extern "C"
+
+
+void libopenmpt_show_file_info( HWND parent, const char * title, const wchar_t * info ) {
+	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
+	CInfoDialog dlg( title, info, parent ? CWnd::FromHandle( parent ) : NULL );
+	dlg.DoModal();
+}
+
