@@ -153,4 +153,7 @@ public:
 
 
 
+void libopenmpt_show_file_info( HWND parent, const char * title, const wchar_t * info );
+
+
 #endif // LIBOPENMPT_SETTINGS_HPP

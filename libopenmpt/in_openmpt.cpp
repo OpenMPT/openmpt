@@ -93,6 +93,18 @@ static std::wstring StringDecode( const std::string & src, UINT codepage )
 	return &decoded_string[0];
 }
 
+template <typename Tstring, typename Tstring2, typename Tstring3>
+static inline Tstring StringReplace( Tstring str, const Tstring2 & oldStr_, const Tstring3 & newStr_ ) {
+	std::size_t pos = 0;
+	const Tstring oldStr = oldStr_;
+	const Tstring newStr = newStr_;
+	while ( ( pos = str.find( oldStr, pos ) ) != Tstring::npos ) {
+		str.replace( pos, oldStr.length(), newStr );
+		pos += newStr.length();
+	}
+	return str;
+}
+
 LIBOPENMPT_SETTINGS_DECLARE()
 
 struct self_winamp_t {
@@ -306,11 +318,11 @@ static int infobox( const in_char * fn, HWND hWndParent ) {
 		try {
 			std::ifstream s( fn, std::ios::binary );
 			openmpt::module mod( s );
-			MessageBox( hWndParent, generate_infotext( fn, mod ).c_str(), TEXT(SHORT_TITLE), 0 );
+			libopenmpt_show_file_info( hWndParent, SHORT_TITLE, StringReplace( generate_infotext( fn, mod ), L"\n", L"\r\n" ).c_str() );
 		} catch ( ... ) {
 		}
 	} else {
-		MessageBox( hWndParent, self->cached_infotext.c_str(), TEXT(SHORT_TITLE), 0 );
+		libopenmpt_show_file_info( hWndParent, SHORT_TITLE, StringReplace( self->cached_infotext, L"\n", L"\r\n" ).c_str() );
 	}
 	return 0;
 }
