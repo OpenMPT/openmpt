@@ -105,8 +105,6 @@ static inline Tstring StringReplace( Tstring str, const Tstring2 & oldStr_, cons
 	return str;
 }
 
-LIBOPENMPT_SETTINGS_DECLARE()
-
 struct self_winamp_t {
 	std::vector<char> filetypes_string;
 	openmpt::settings::settings settings;
@@ -183,12 +181,8 @@ static std::wstring generate_infotext( const std::wstring & filename, const open
 }
 
 static void config( HWND hwndParent ) {
-	if ( LIBOPENMPT_SETTINGS_IS_AVAILABLE() ) {
-		LIBOPENMPT_SETTINGS_EDIT( &self->settings, hwndParent, SHORT_TITLE );
-		apply_options();
-	} else {
-		LIBOPENMPT_SETTINGS_UNAVAILABLE( hwndParent, TEXT("in_openmpt.dll"), TEXT(SHORT_TITLE) );
-	}
+	libopenmpt_settings_edit( &self->settings, hwndParent, TEXT(SHORT_TITLE) );
+	apply_options();
 }
 
 static void about( HWND hwndParent ) {
@@ -209,7 +203,6 @@ static void about( HWND hwndParent ) {
 }
 
 static void init() {
-	LIBOPENMPT_SETTINGS_LOAD();
 	if ( !self ) {
 		self = new self_winamp_t();
 		inmod.FileExtensions = &(self->filetypes_string[0]);
@@ -222,7 +215,6 @@ static void quit() {
 		delete self;
 		self = 0;
 	}
-	LIBOPENMPT_SETTINGS_UNLOAD();
 }
 
 static int isourfile( const in_char * fn ) {
@@ -318,11 +310,11 @@ static int infobox( const in_char * fn, HWND hWndParent ) {
 		try {
 			std::ifstream s( fn, std::ios::binary );
 			openmpt::module mod( s );
-			libopenmpt_show_file_info( hWndParent, SHORT_TITLE, StringReplace( generate_infotext( fn, mod ), L"\n", L"\r\n" ).c_str() );
+			libopenmpt_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringReplace( generate_infotext( fn, mod ), L"\n", L"\r\n" ).c_str() );
 		} catch ( ... ) {
 		}
 	} else {
-		libopenmpt_show_file_info( hWndParent, SHORT_TITLE, StringReplace( self->cached_infotext, L"\n", L"\r\n" ).c_str() );
+		libopenmpt_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringReplace( self->cached_infotext, L"\n", L"\r\n" ).c_str() );
 	}
 	return 0;
 }

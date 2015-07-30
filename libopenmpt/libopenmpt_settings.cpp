@@ -304,19 +304,14 @@ END_MESSAGE_MAP()
 
 
 
-
-extern "C" {
-
-void libopenmpt_settings_edit( libopenmpt_settings * s, HWND parent, const char * title ) {
+void libopenmpt_settings_edit( libopenmpt_settings * s, HWND parent, const wchar_t * title ) {
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
 	CSettingsDialog dlg( s, title, parent ? CWnd::FromHandle( parent ) : NULL );
 	dlg.DoModal();
 }
 
-} // extern "C"
 
-
-void libopenmpt_show_file_info( HWND parent, const char * title, const wchar_t * info ) {
+void libopenmpt_show_file_info( HWND parent, const wchar_t * title, const wchar_t * info ) {
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
 	CInfoDialog dlg( title, info, parent ? CWnd::FromHandle( parent ) : NULL );
 	dlg.DoModal();

@@ -114,8 +114,6 @@ static XMPFUNC_FILE * xmpffile = NULL;
 static XMPFUNC_TEXT * xmpftext = NULL;
 static XMPFUNC_STATUS * xmpfstatus = NULL;
 
-LIBOPENMPT_SETTINGS_DECLARE()
-
 struct self_xmplay_t;
 
 static self_xmplay_t * self = 0;
@@ -421,12 +419,8 @@ static void WINAPI openmpt_About( HWND win ) {
 }
 
 static void WINAPI openmpt_Config( HWND win ) {
-	if ( LIBOPENMPT_SETTINGS_IS_AVAILABLE() ) {
-		LIBOPENMPT_SETTINGS_EDIT( &self->settings, win, SHORT_TITLE );
-		apply_and_save_options();
-	} else {
-		LIBOPENMPT_SETTINGS_UNAVAILABLE( win, TEXT("xmp-openmpt.dll"), TEXT(SHORT_TITLE) );
-	}
+	libopenmpt_settings_edit( &self->settings, win, TEXT(SHORT_TITLE) );
+	apply_and_save_options();
 }
 
 #ifdef USE_XMPLAY_FILE_IO
@@ -1688,14 +1682,12 @@ static void xmp_openmpt_on_dll_load() {
 	} else {
 		xmpin.exts = xmp_openmpt_default_exts;
 	}
-	LIBOPENMPT_SETTINGS_LOAD();
 	self = new self_xmplay_t();
 }
 
 static void xmp_openmpt_on_dll_unload() {
 	delete self;
 	self = 0;
-	LIBOPENMPT_SETTINGS_UNLOAD();
 	if ( !xmpin.exts ) {
 		return;
 	}

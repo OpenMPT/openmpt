@@ -17,11 +17,7 @@
 
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-typedef void (*changed_func)(void);
+typedef void (*changed_func)();
 
 struct libopenmpt_settings {
 	bool no_default_format;
@@ -36,13 +32,7 @@ struct libopenmpt_settings {
 	changed_func changed;
 };
 
-typedef void (*libopenmpt_settings_edit_func)( libopenmpt_settings * s, HWND parent, const char * title );
-
-void libopenmpt_settings_edit( libopenmpt_settings * s, HWND parent, const char * title );
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
+void libopenmpt_settings_edit( libopenmpt_settings * s, HWND parent, const wchar_t * title );
 
 
 
@@ -127,33 +117,7 @@ public:
 } } // namespace openmpt::settings
 
 
-
-#define LIBOPENMPT_SETTINGS_DECLARE() \
-	
-
-#define LIBOPENMPT_SETTINGS_IS_AVAILABLE() \
-	true
-
-#define LIBOPENMPT_SETTINGS_EDIT( settings, parent, title ) \
-	do { \
-		libopenmpt_settings_edit( settings , parent , title ); \
-	} while(0)
-
-#define LIBOPENMPT_SETTINGS_UNAVAILABLE( parent, dll, title ) \
-	do { \
-	} while(0)
-
-#define LIBOPENMPT_SETTINGS_LOAD() \
-	do { \
-	} while(0)
-
-#define LIBOPENMPT_SETTINGS_UNLOAD() \
-	do { \
-	} while(0)
-
-
-
-void libopenmpt_show_file_info( HWND parent, const char * title, const wchar_t * info );
+void libopenmpt_show_file_info( HWND parent, const wchar_t * title, const wchar_t * info );
 
 
 #endif // LIBOPENMPT_SETTINGS_HPP
