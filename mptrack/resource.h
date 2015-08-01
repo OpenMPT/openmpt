@@ -962,6 +962,8 @@
 #define IDC_TABABOUT                    2483
 #define IDC_EDITABOUT                   2484
 #define IDC_CONTAINER                   2485
+#define IDC_SAMPLE_OPENKNOWN            2486
+#define IDC_SAMPLE_OPENRAW              2487
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1260,7 +1262,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        541
 #define _APS_NEXT_COMMAND_VALUE         44645
-#define _APS_NEXT_CONTROL_VALUE         2486
+#define _APS_NEXT_CONTROL_VALUE         2488
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif
