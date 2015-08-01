@@ -43,7 +43,7 @@
 #include "libopenmpt.hpp"
 #include "libopenmpt_ext.hpp"
 
-#include "libopenmpt_settings.hpp"
+#include "libopenmpt_plugin_gui.hpp"
 
 #include "svn_version.h"
 #if defined(OPENMPT_VERSION_REVISION)
@@ -126,7 +126,7 @@ struct self_xmplay_t {
 	std::vector<float> subsong_lengths;
 	std::size_t samplerate;
 	std::size_t num_channels;
-	openmpt::settings::settings settings;
+	libopenmpt::plugin::settings settings;
 	openmpt::module_ext * mod;
 	openmpt::ext::pattern_vis * pattern_vis;
 	std::int32_t tempo_factor, pitch_factor;
@@ -208,7 +208,7 @@ static std::string seconds_to_string( float time ) {
 	return str.str();
 }
 
-static void save_settings_to_map( std::map<std::string,int> & result, const openmpt::settings::settings & s ) {
+static void save_settings_to_map( std::map<std::string,int> & result, const libopenmpt::plugin::settings & s ) {
 	result.clear();
 	result[ "Samplerate_Hz" ] = s.samplerate;
 	result[ "Channels" ] = s.channels;
@@ -226,7 +226,7 @@ static inline void load_map_setting( const std::map<std::string,int> & map, cons
 	}
 }
 
-static void load_settings_from_map( openmpt::settings::settings & s, const std::map<std::string,int> & map ) {
+static void load_settings_from_map( libopenmpt::plugin::settings & s, const std::map<std::string,int> & map ) {
 	load_map_setting( map, "Samplerate_Hz", s.samplerate );
 	load_map_setting( map, "Channels", s.channels );
 	load_map_setting( map, "MasterGain_milliBel", s.mastergain_millibel );
@@ -236,7 +236,7 @@ static void load_settings_from_map( openmpt::settings::settings & s, const std::
 	load_map_setting( map, "VolumeRampingStrength", s.ramping );
 }
 
-static void load_settings_from_xml( openmpt::settings::settings & s, const std::string & xml ) {
+static void load_settings_from_xml( libopenmpt::plugin::settings & s, const std::string & xml ) {
 	pugi::xml_document doc;
 	doc.load( xml.c_str() );
 	pugi::xml_node settings_node = doc.child( "settings" );
@@ -247,7 +247,7 @@ static void load_settings_from_xml( openmpt::settings::settings & s, const std::
 	load_settings_from_map( s, map );
 }
 
-static void save_settings_to_xml( std::string & xml, const openmpt::settings::settings & s ) {
+static void save_settings_to_xml( std::string & xml, const libopenmpt::plugin::settings & s ) {
 	std::map<std::string,int> map;
 	save_settings_to_map( map, s );
 	pugi::xml_document doc;
@@ -280,7 +280,7 @@ static void apply_and_save_options() {
 }
 
 static void reset_options() {
-	self->settings = openmpt::settings::settings( TEXT(SHORT_TITLE), false );
+	self->settings = libopenmpt::plugin::settings( TEXT(SHORT_TITLE), false );
 	self->settings.changed = apply_and_save_options;
 	self->settings.load();
 }
@@ -419,7 +419,7 @@ static void WINAPI openmpt_About( HWND win ) {
 }
 
 static void WINAPI openmpt_Config( HWND win ) {
-	libopenmpt_settings_edit( &self->settings, win, TEXT(SHORT_TITLE) );
+	libopenmpt::plugin::gui_edit_settings( &self->settings, win, TEXT(SHORT_TITLE) );
 	apply_and_save_options();
 }
 
@@ -1740,13 +1740,19 @@ XMPIN * WINAPI XMPIN_GetInterface( DWORD face, InterfaceProc faceproc ) {
 
 #ifdef _MFC_VER
 
-void PluginDllMainAttach() {
+namespace libopenmpt {
+namespace plugin {
+
+void DllMainAttach() {
 	xmp_openmpt_on_dll_load();
 }
 
-void PluginDllMainDetach() {
+void DllMainDetach() {
 	xmp_openmpt_on_dll_unload();
 }
+
+} // namespace plugin
+} // namespace libopenmpt
 
 #else
 

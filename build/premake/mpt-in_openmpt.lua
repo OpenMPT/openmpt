@@ -12,9 +12,10 @@
   }
   files {
    "../../libopenmpt/in_openmpt.cpp",
-   "../../libopenmpt/libopenmpt_settings.hpp",
-   "../../libopenmpt/libopenmpt_settings.cpp",
-   "../../libopenmpt/libopenmpt_settings.rc",
+   "../../libopenmpt/libopenmpt_plugin_settings.hpp",
+   "../../libopenmpt/libopenmpt_plugin_gui.hpp",
+   "../../libopenmpt/libopenmpt_plugin_gui.cpp",
+   "../../libopenmpt/libopenmpt_plugin_gui.rc",
    "../../libopenmpt/resource.h",
   }
   flags { "MFC", "Unicode" }
