@@ -16,6 +16,13 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+enum OpenSampleTypes
+{
+	OpenSampleKnown = (1<<0),
+	OpenSampleRaw   = (1<<1),
+};
+MPT_DECLARE_ENUM(OpenSampleTypes)
+
 //=======================================
 class CCtrlSamples: public CModControlDlg
 //=======================================
@@ -69,7 +76,7 @@ public:
 	~CCtrlSamples();
 
 	bool SetCurrentSample(SAMPLEINDEX nSmp, LONG lZoom = -1, bool bUpdNum = true);
-	bool OpenSample(const mpt::PathString &fileName);
+	bool OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampleTypes> types = OpenSampleKnown | OpenSampleRaw);
 	bool OpenSample(const CSoundFile &sndFile, SAMPLEINDEX nSample);
 	Setting<LONG> &GetSplitPosRef() {return TrackerSettings::Instance().glSampleWindowHeight;} 	//rewbs.varWindowSize
 
@@ -92,8 +99,11 @@ protected:
 	afx_msg void OnZoomChanged();
 	afx_msg void OnPrevInstrument();
 	afx_msg void OnNextInstrument();
+	afx_msg void OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSampleNew();
 	afx_msg void OnSampleOpen();
+	afx_msg void OnSampleOpenKnown();
+	afx_msg void OnSampleOpenRaw();
 	afx_msg void OnSampleSave();
 	afx_msg void OnSamplePlay();
 	afx_msg void OnNormalize();

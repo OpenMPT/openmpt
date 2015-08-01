@@ -67,8 +67,11 @@ struct PowerOf2Exponent<1> { enum { value = 0 }; };
 BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlSamples)
 	ON_WM_VSCROLL()
+	ON_NOTIFY(TBN_DROPDOWN, IDC_TOOLBAR1, &CCtrlSamples::OnTbnDropDownToolBar)
 	ON_COMMAND(IDC_SAMPLE_NEW,			OnSampleNew)
 	ON_COMMAND(IDC_SAMPLE_OPEN,			OnSampleOpen)
+	ON_COMMAND(IDC_SAMPLE_OPENKNOWN,	OnSampleOpenKnown)
+	ON_COMMAND(IDC_SAMPLE_OPENRAW,		OnSampleOpenRaw)
 	ON_COMMAND(IDC_SAMPLE_SAVEAS,		OnSampleSave)
 	ON_COMMAND(IDC_SAMPLE_PLAY,			OnSamplePlay)
 	ON_COMMAND(IDC_SAMPLE_NORMALIZE,	OnNormalize)
@@ -216,9 +219,10 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:128"), 8);
 	m_ComboZoom.SetCurSel(0);
 	// File ToolBar
+	m_ToolBar1.SetExtendedStyle(m_ToolBar1.GetExtendedStyle() | TBSTYLE_EX_DRAWDDARROWS);
 	m_ToolBar1.Init(CMainFrame::GetMainFrame()->m_PatternIcons,CMainFrame::GetMainFrame()->m_PatternIconsDisabled);
 	m_ToolBar1.AddButton(IDC_SAMPLE_NEW, TIMAGE_SAMPLE_NEW);
-	m_ToolBar1.AddButton(IDC_SAMPLE_OPEN, TIMAGE_OPEN);
+	m_ToolBar1.AddButton(IDC_SAMPLE_OPEN, TIMAGE_OPEN, TBSTYLE_BUTTON | TBSTYLE_DROPDOWN);
 	m_ToolBar1.AddButton(IDC_SAMPLE_SAVEAS, TIMAGE_SAVE);
 	// Edit ToolBar
 	m_ToolBar2.Init(CMainFrame::GetMainFrame()->m_PatternIcons,CMainFrame::GetMainFrame()->m_PatternIconsDisabled);
@@ -807,8 +811,8 @@ void CCtrlSamples::SetModified(SampleHint hint, bool updateAll, bool waveformMod
 
 
 
-bool CCtrlSamples::OpenSample(const mpt::PathString &fileName)
-//------------------------------------------------------------
+bool CCtrlSamples::OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampleTypes> types)
+//--------------------------------------------------------------------------------------------
 {
 	BeginWaitCursor();
 	InputFile f(fileName);
@@ -826,10 +830,14 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName)
 	}
 
 	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
-	bool bOk = m_sndFile.ReadSampleFromFile(m_nSample, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
+	bool bOk = false;
+	if(!bOk && types[OpenSampleKnown])
+	{
+		bOk = m_sndFile.ReadSampleFromFile(m_nSample, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
+	}
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
-	if (!bOk)
+	if(!bOk && types[OpenSampleRaw])
 	{
 		CRawSampleDlg dlg(this);
 		if(rememberRawFormat)
@@ -977,6 +985,27 @@ void CCtrlSamples::OnZoomChanged()
 }
 
 
+void CCtrlSamples::OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult)
+//----------------------------------------------------------------------
+{
+	LPNMTOOLBAR pToolBar = reinterpret_cast<LPNMTOOLBAR>(pNMHDR);
+	ClientToScreen(&(pToolBar->rcButton)); // TrackPopupMenu uses screen coords
+	switch(pToolBar->iItem)
+	{
+	case IDC_SAMPLE_OPEN:
+		{
+			CMenu menu;
+			menu.CreatePopupMenu();
+			menu.AppendMenu(MF_STRING, IDC_SAMPLE_OPENKNOWN, _T("Import &sample ..."));
+			menu.AppendMenu(MF_STRING, IDC_SAMPLE_OPENRAW, _T("Import &RAW sample ..."));
+			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left, pToolBar->rcButton.bottom, this);
+		}
+		break;
+	}
+	*pResult = 0;
+}
+
+
 void CCtrlSamples::OnSampleNew()
 //------------------------------
 {
@@ -1047,7 +1076,81 @@ void CCtrlSamples::OnSampleOpen()
 			OnSampleNew();
 		}
 
-		if(!OpenSample(files[counter]))
+		if(!OpenSample(files[counter]), OpenSampleKnown | OpenSampleRaw)
+			ErrorBox(IDS_ERR_FILEOPEN, this);
+	}
+	SwitchToView();
+}
+
+
+void CCtrlSamples::OnSampleOpenKnown()
+//------------------------------------
+{
+	static int nLastIndex = 0;
+	FileDialog dlg = OpenFileDialog()
+		.AllowMultiSelect()
+		.EnableAudioPreview()
+		.ExtensionFilter("All Samples|*.wav;*.flac;*.oga;*.pat;*.s3i;*.smp;*.xi;*.aif;*.aiff;*.its;*.iff;*.8sv;*.8svx;*.svx;*.mp1;*.mp2;*.mp3|"
+			"Wave Files (*.wav)|*.wav|"
+	#ifndef NO_FLAC
+			"FLAC Files (*.flac,*.oga)|*.flac;*.oga|"
+	#endif // NO_FLAC
+	#ifndef NO_MP3_SAMPLES
+			"MPEG Files (*.mp1,*.mp2,*.mp3)|*.mp1;*.mp2;*.mp3|"
+	#endif // NO_MP3_SAMPLES
+			"XI Samples (*.xi)|*.xi|"
+			"Impulse Tracker Samples (*.its)|*.its|"
+			"ScreamTracker Samples (*.s3i,*.smp)|*.s3i;*.smp|"
+			"GF1 Patches (*.pat)|*.pat|"
+			"AIFF Files (*.aiff;*.8svx)|*.aif;*.aiff;*.iff;*.8sv;*.8svx;*.svx|"
+			"All Files (*.*)|*.*||")
+		.WorkingDirectory(TrackerSettings::Instance().PathSamples.GetWorkingDir())
+		.FilterIndex(&nLastIndex);
+	if(!dlg.Show(this)) return;
+
+	TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetWorkingDirectory());
+
+	const FileDialog::PathList &files = dlg.GetFilenames();
+	for(size_t counter = 0; counter < files.size(); counter++)
+	{
+		// If loading multiple samples, create new slots for them
+		if(counter > 0)
+		{
+			OnSampleNew();
+		}
+
+		if(!OpenSample(files[counter], OpenSampleKnown))
+			ErrorBox(IDS_ERR_FILEOPEN, this);
+	}
+	SwitchToView();
+}
+
+
+void CCtrlSamples::OnSampleOpenRaw()
+//----------------------------------
+{
+	static int nLastIndex = 0;
+	FileDialog dlg = OpenFileDialog()
+		.AllowMultiSelect()
+		.EnableAudioPreview()
+		.ExtensionFilter("Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|"
+		"All Files (*.*)|*.*||")
+		.WorkingDirectory(TrackerSettings::Instance().PathSamples.GetWorkingDir())
+		.FilterIndex(&nLastIndex);
+	if(!dlg.Show(this)) return;
+
+	TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetWorkingDirectory());
+
+	const FileDialog::PathList &files = dlg.GetFilenames();
+	for(size_t counter = 0; counter < files.size(); counter++)
+	{
+		// If loading multiple samples, create new slots for them
+		if(counter > 0)
+		{
+			OnSampleNew();
+		}
+
+		if(!OpenSample(files[counter], OpenSampleRaw))
 			ErrorBox(IDS_ERR_FILEOPEN, this);
 	}
 	SwitchToView();
