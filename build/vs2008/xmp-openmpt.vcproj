@@ -194,15 +194,19 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\libopenmpt\libopenmpt_settings.cpp"
+			RelativePath="..\..\libopenmpt\libopenmpt_plugin_gui.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\libopenmpt\libopenmpt_settings.hpp"
+			RelativePath="..\..\libopenmpt\libopenmpt_plugin_gui.hpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\libopenmpt\libopenmpt_settings.rc"
+			RelativePath="..\..\libopenmpt\libopenmpt_plugin_gui.rc"
+			>
+		</File>
+		<File
+			RelativePath="..\..\libopenmpt\libopenmpt_plugin_settings.hpp"
 			>
 		</File>
 		<File

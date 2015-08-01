@@ -1,7 +1,7 @@
 /*
- * libopenmpt_settings.cpp
- * -----------------------
- * Purpose: libopenmpt plugin settings
+ * libopenmpt_plugin_gui.cpp
+ * -------------------------
+ * Purpose: libopenmpt plugin GUI
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -20,7 +20,11 @@
 
 #include "resource.h"
 
-#include "libopenmpt_settings.hpp"
+#include "libopenmpt_plugin_gui.hpp"
+
+
+namespace libopenmpt {
+namespace plugin {
 
 
 class CSettingsApp : public CWinApp {
@@ -38,12 +42,12 @@ public:
 		{
 			return FALSE;
 		}
-		PluginDllMainAttach();
+		DllMainAttach();
 		return TRUE;
 	}
 
 	virtual int ExitInstance() {
-		PluginDllMainDetach();
+		DllMainDetach();
 		return CWinApp::ExitInstance();
 	}
 
@@ -303,17 +307,20 @@ BEGIN_MESSAGE_MAP(CInfoDialog, CDialog)
 END_MESSAGE_MAP()
 
 
-
-void libopenmpt_settings_edit( libopenmpt_settings * s, HWND parent, const wchar_t * title ) {
+void gui_edit_settings( libopenmpt_settings * s, HWND parent, std::wstring title ) {
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
-	CSettingsDialog dlg( s, title, parent ? CWnd::FromHandle( parent ) : NULL );
+	CSettingsDialog dlg( s, title.c_str(), parent ? CWnd::FromHandle( parent ) : NULL );
 	dlg.DoModal();
 }
 
 
-void libopenmpt_show_file_info( HWND parent, const wchar_t * title, const wchar_t * info ) {
+void gui_show_file_info( HWND parent, std::wstring title, std::wstring info ) {
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
-	CInfoDialog dlg( title, info, parent ? CWnd::FromHandle( parent ) : NULL );
+	CInfoDialog dlg( title.c_str(), info.c_str(), parent ? CWnd::FromHandle( parent ) : NULL );
 	dlg.DoModal();
 }
+
+
+} // namespace plugin
+} // namespace libopenmpt
 

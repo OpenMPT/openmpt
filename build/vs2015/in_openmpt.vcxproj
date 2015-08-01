@@ -111,15 +111,16 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\libopenmpt\libopenmpt_settings.hpp" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_plugin_gui.hpp" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_plugin_settings.hpp" />
     <ClInclude Include="..\..\libopenmpt\resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\libopenmpt\in_openmpt.cpp" />
-    <ClCompile Include="..\..\libopenmpt\libopenmpt_settings.cpp" />
+    <ClCompile Include="..\..\libopenmpt\libopenmpt_plugin_gui.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\..\libopenmpt\libopenmpt_settings.rc" />
+    <ResourceCompile Include="..\..\libopenmpt\libopenmpt_plugin_gui.rc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="libopenmpt.vcxproj">

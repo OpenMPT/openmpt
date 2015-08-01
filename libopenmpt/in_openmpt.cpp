@@ -34,7 +34,7 @@
 
 #include "libopenmpt.hpp"
 
-#include "libopenmpt_settings.hpp"
+#include "libopenmpt_plugin_gui.hpp"
 
 #include "svn_version.h"
 #if defined(OPENMPT_VERSION_REVISION)
@@ -107,7 +107,7 @@ static inline Tstring StringReplace( Tstring str, const Tstring2 & oldStr_, cons
 
 struct self_winamp_t {
 	std::vector<char> filetypes_string;
-	openmpt::settings::settings settings;
+	libopenmpt::plugin::settings settings;
 	int samplerate;
 	int channels;
 	std::wstring cached_filename;
@@ -181,7 +181,7 @@ static std::wstring generate_infotext( const std::wstring & filename, const open
 }
 
 static void config( HWND hwndParent ) {
-	libopenmpt_settings_edit( &self->settings, hwndParent, TEXT(SHORT_TITLE) );
+	libopenmpt::plugin::gui_edit_settings( &self->settings, hwndParent, TEXT(SHORT_TITLE) );
 	apply_options();
 }
 
@@ -310,11 +310,11 @@ static int infobox( const in_char * fn, HWND hWndParent ) {
 		try {
 			std::ifstream s( fn, std::ios::binary );
 			openmpt::module mod( s );
-			libopenmpt_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringReplace( generate_infotext( fn, mod ), L"\n", L"\r\n" ).c_str() );
+			libopenmpt::plugin::gui_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringReplace( generate_infotext( fn, mod ), L"\n", L"\r\n" ) );
 		} catch ( ... ) {
 		}
 	} else {
-		libopenmpt_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringReplace( self->cached_infotext, L"\n", L"\r\n" ).c_str() );
+		libopenmpt::plugin::gui_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringReplace( self->cached_infotext, L"\n", L"\r\n" ) );
 	}
 	return 0;
 }
@@ -468,13 +468,19 @@ extern "C" __declspec(dllexport) In_Module * winampGetInModule2() {
 
 #ifdef _MFC_VER
 
-void PluginDllMainAttach() {
+namespace libopenmpt {
+namespace plugin {
+
+void DllMainAttach() {
 	// nothing
 }
 
-void PluginDllMainDetach() {
+void DllMainDetach() {
 	// nothing
 }
+
+} // namespace plugin
+} // namespace libopenmpt
 
 #else
 

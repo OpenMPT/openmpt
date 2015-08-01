@@ -1,20 +1,23 @@
 /*
- * libopenmpt_settings.hpp
- * -----------------------
+ * libopenmpt_plugin_settings.hpp
+ * ------------------------------
  * Purpose: libopenmpt plugin settings
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#ifndef LIBOPENMPT_SETTINGS_HPP
-#define LIBOPENMPT_SETTINGS_HPP
+#ifndef LIBOPENMPT_PLUGIN_SETTINGS_HPP
+#define LIBOPENMPT_PLUGIN_SETTINGS_HPP
 
 #define NOMINMAX
 #include <windows.h>
 
 #include <string>
 
+
+namespace libopenmpt {
+namespace plugin {
 
 
 typedef void (*changed_func)();
@@ -32,16 +35,6 @@ struct libopenmpt_settings {
 	changed_func changed;
 };
 
-void libopenmpt_settings_edit( libopenmpt_settings * s, HWND parent, const wchar_t * title );
-
-
-
-void PluginDllMainAttach();
-void PluginDllMainDetach();
-
-
-
-namespace openmpt { namespace settings {
 
 class settings : public libopenmpt_settings {
 private:
@@ -114,10 +107,9 @@ public:
 	}
 };
 
-} } // namespace openmpt::settings
+
+} // namespace plugin
+} // namespace libopenmpt
 
 
-void libopenmpt_show_file_info( HWND parent, const wchar_t * title, const wchar_t * info );
-
-
-#endif // LIBOPENMPT_SETTINGS_HPP
+#endif // LIBOPENMPT_PLUGIN_SETTINGS_HPP
