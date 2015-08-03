@@ -361,6 +361,9 @@ protected:
 
 	uint8 GetPlaybackMidiChannel(const ModInstrument *pIns, CHANNELINDEX nChn) const;
 
+	// Convert a linear volume property to decibels
+	static CString LinearToDecibels(double value, double valueAtZeroDB);
+
 	void SerializeViews() const;
 	void DeserializeViews();
 

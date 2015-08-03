@@ -539,9 +539,16 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, TCHAR *pszText)
 	{
 		switch(uId)
 		{
+		case IDC_EDIT7:
+		case IDC_EDIT8:
+			// Volume to dB
+			_tcscpy(pszText, CModDoc::LinearToDecibels(GetDlgItemInt(uId), 64.0));
+			return TRUE;
+
 		case IDC_EDIT5:
 		case IDC_SPIN5:
 		case IDC_COMBO_BASENOTE:
+			// Transpose + Finetune to Frequency
 			if ((m_sndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) && (m_nSample))
 			{
 				const ModSample &sample = m_sndFile.GetSample(m_nSample);
