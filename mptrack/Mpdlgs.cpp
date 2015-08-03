@@ -299,11 +299,6 @@ void COptionsSoundcard::UpdateUpdateInterval()
 void COptionsSoundcard::UpdateGeneral()
 //-------------------------------------
 {
-	{
-		m_CbnStoppedMode.EnableWindow(TRUE);
-		CPropertySheet *sheet = dynamic_cast<CPropertySheet *>(GetParent());
-		if(sheet) sheet->GetDlgItem(IDOK)->EnableWindow(TRUE);
-	}
 	// General
 	{
 		if(m_CurrentDeviceCaps.CanKeepDeviceRunning)
@@ -325,12 +320,10 @@ void COptionsSoundcard::UpdateGeneral()
 		}
 		CheckDlgButton(IDC_CHECK7, TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup ? BST_CHECKED : BST_UNCHECKED);
 	}
-	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
-	{
-		m_CbnStoppedMode.EnableWindow(FALSE);
-		CPropertySheet *sheet = dynamic_cast<CPropertySheet *>(GetParent());
-		if(sheet) sheet->GetDlgItem(IDOK)->EnableWindow(FALSE);
-	}
+	bool isUnavailble = theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier());
+	m_CbnStoppedMode.EnableWindow(isUnavailble ? FALSE : TRUE);
+	CPropertySheet *sheet = dynamic_cast<CPropertySheet *>(GetParent());
+	if(sheet) sheet->GetDlgItem(IDOK)->EnableWindow(isUnavailble ? FALSE : TRUE);
 }
 
 
@@ -1617,22 +1610,22 @@ void COptionsPlayer::OnSavePreset()
 }
 
 
-static void f2s(UINT f, LPSTR s)
-//------------------------------
+static void f2s(UINT f, TCHAR *s)
+//-------------------------------
 {
 	if (f < 1000)
 	{
-		wsprintf(s, "%dHz", f);
+		wsprintf(s, _T("%uHz"), f);
 	} else
 	{
-		UINT fHi = f / 1000;
-		UINT fLo = f % 1000;
+		UINT fHi = f / 1000u;
+		UINT fLo = f % 1000u;
 		if (fLo)
 		{
-			wsprintf(s, "%d.%dkHz", fHi, fLo/100);
+			wsprintf(s, _T("%u.%ukHz"), fHi, fLo/100);
 		} else
 		{
-			wsprintf(s, "%dkHz", fHi);
+			wsprintf(s, _T("%ukHz"), fHi);
 		}
 	}
 }
@@ -1641,7 +1634,7 @@ static void f2s(UINT f, LPSTR s)
 void COptionsPlayer::UpdateDialog()
 //---------------------------------
 {
-	CHAR s[32];
+	TCHAR s[32];
 	for (UINT i=0; i<MAX_EQ_BANDS; i++)
 	{
 		int n = 32 - m_EQPreset.Gains[i];
@@ -1650,10 +1643,10 @@ void COptionsPlayer::UpdateDialog()
 		if (n != (m_Sliders[i].GetPos() & 0xFFFF)) m_Sliders[i].SetPos(n);
 		f2s(m_EQPreset.Freqs[i], s);
 		SetDlgItemText(IDC_TEXT1 + i, s);
-		for(int i = 0; i < CountOf(TrackerSettings::Instance().m_EqUserPresets); i++)
-		{
-			SetDlgItemText(IDC_BUTTON1 + i,	TrackerSettings::Instance().m_EqUserPresets[i].szName);
-		}
+	}
+	for(int i = 0; i < CountOf(TrackerSettings::Instance().m_EqUserPresets); i++)
+	{
+		SetDlgItemText(IDC_BUTTON1 + i, TrackerSettings::Instance().m_EqUserPresets[i].szName);
 	}
 }
 
@@ -1664,10 +1657,10 @@ void COptionsPlayer::OnSliderMenu(UINT nID)
 	UINT n = nID - ID_EQSLIDER_BASE;
 	if (n < MAX_EQ_BANDS)
 	{
-		CHAR s[32];
+		TCHAR s[32];
 		HMENU hMenu = ::CreatePopupMenu();
 		m_nSliderMenu = n;
-		if (!hMenu)	return;
+		if (!hMenu) return;
 		const UINT *pFreqs = gEqBandFreqs[m_nSliderMenu];
 		for (UINT i = 0; i < EQ_MAX_FREQS; i++)
 		{
@@ -1771,13 +1764,13 @@ BOOL CMidiSetupDlg::OnInitDialog()
 	m_ATBehaviour.ResetContent();
 	static const struct
 	{
-		const char *text;
+		const TCHAR *text;
 		RecordAftertouchOptions option;
 	} aftertouchOptions[] =
 	{
-		{ "Do not record Aftertouch", atDoNotRecord },
-		{ "Record as Volume Commands", atRecordAsVolume },
-		{ "Record as MIDI Macros", atRecordAsMacro },
+		{ _T("Do not record Aftertouch"), atDoNotRecord },
+		{ _T("Record as Volume Commands"), atRecordAsVolume },
+		{ _T("Record as MIDI Macros"), atRecordAsMacro },
 	};
 
 	for(int i = 0; i < CountOf(aftertouchOptions); i++)
