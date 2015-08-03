@@ -10,6 +10,9 @@
 
 #include "stdafx.h"
 #include "Vstplug.h"
+
+#ifndef NO_VST
+
 #include "VstPresets.h"
 #ifdef MODPLUG_TRACKER
 #include "Moddoc.h"
@@ -30,11 +33,7 @@
 #include "../soundlib/plugins/OpCodes.h"
 #include "../soundlib/mod_specifications.h"
 
-
 OPENMPT_NAMESPACE_BEGIN
-
-
-#ifndef NO_VST
 
 //#define VST_LOG
 
@@ -2392,9 +2391,11 @@ void CVstPlugin::ReportPlugException(std::wstring text) const
 	CVstPluginManager::ReportPlugException(text);
 }
 
+OPENMPT_NAMESPACE_END
 
 #endif // NO_VST
 
+OPENMPT_NAMESPACE_BEGIN
 
 std::string SNDMIXPLUGIN::GetParamName(PlugParamIndex index) const
 //------------------------------------------------------------
