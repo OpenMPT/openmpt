@@ -2171,8 +2171,8 @@ void CMainFrame::SwitchToActiveView()
 void CMainFrame::OnUpdateTime(CCmdUI *)
 //-------------------------------------
 {
-	CHAR s[64];
-	wsprintf(s, "%d:%02d:%02d",
+	TCHAR s[64];
+	wsprintf(s, _T("%u:%02u:%02u"),
 		m_dwTimeSec / 3600, (m_dwTimeSec / 60) % 60, m_dwTimeSec % 60);
 
 	if(m_pSndFile != nullptr && m_pSndFile != &m_WaveFile && !m_pSndFile->IsPaused())
@@ -2180,11 +2180,11 @@ void CMainFrame::OnUpdateTime(CCmdUI *)
 		PATTERNINDEX nPat = m_pSndFile->m_PlayState.m_nPattern;
 		if(m_pSndFile->Patterns.IsValidIndex(nPat))
 		{
-			if(nPat < 10) strcat(s, " ");
-			if(nPat < 100) strcat(s, " ");
-			wsprintf(s + strlen(s), " [%d]", nPat);
+			if(nPat < 10) _tcscat(s, _T(" "));
+			if(nPat < 100) _tcscat(s, _T(" "));
+			wsprintf(s + _tcslen(s), _T(" [%d]"), nPat);
 		}
-		wsprintf(s + strlen(s), " %dch", m_nAvgMixChn);
+		wsprintf(s + _tcslen(s), _T(" %dch"), m_nAvgMixChn);
 	}
 	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_TIME), s, TRUE);
 }
