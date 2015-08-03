@@ -331,7 +331,7 @@ class CMPTCommandLineInfo: public CCommandLineInfo
 //================================================
 {
 public:
-	bool m_bNoDls, m_bNoPlugins, m_bNoAssembly,
+	bool m_bNoDls, m_bNoPlugins, m_bNoAssembly, m_bNoSysCheck,
 		 m_bPortable;
 #ifdef _DEBUG
 	bool m_bNoTests;
@@ -340,7 +340,7 @@ public:
 public:
 	CMPTCommandLineInfo()
 	{
-		m_bNoDls = m_bNoPlugins = m_bNoAssembly =
+		m_bNoDls = m_bNoPlugins = m_bNoAssembly = m_bNoSysCheck =
 		m_bPortable = false;
 #ifdef _DEBUG
 		m_bNoTests = false;
@@ -356,6 +356,7 @@ public:
 			if (!lstrcmpi(lpszParam, _T("portable"))) { m_bPortable = true; return; }
 			if (!lstrcmpi(lpszParam, _T("fullMemDump"))) { ExceptionHandler::fullMemDump = true; return; }
 			if (!lstrcmpi(lpszParam, _T("noAssembly"))) { m_bNoAssembly = true; return; }
+			if (!lstrcmpi(lpszParam, _T("noSysCheck"))) { m_bNoSysCheck = true; return; }
 #ifdef _DEBUG
 			if (!lstrcmpi(lpszParam, _T("noTests"))) { m_bNoTests = true; return; }
 #endif
@@ -887,6 +888,23 @@ void CTrackApp::SetupPaths(bool overridePortable)
 }
 
 
+bool CTrackApp::ProcessorCanRunCurrentBuild()
+//-------------------------------------------
+{
+	if(GetMinimumSSEVersion() >= 2)
+	{
+		if(!(GetProcSupport() & PROCSUPPORT_SSE2)) return false;
+	} else if(GetMinimumSSEVersion() >= 1)
+	{
+		if(!(GetProcSupport() & PROCSUPPORT_SSE)) return false;
+		if(!(GetProcSupport() & PROCSUPPORT_CMOV)) return false;
+		if(!(GetProcSupport() & PROCSUPPORT_TSC)) return false;
+		if(!(GetProcSupport() & PROCSUPPORT_CPUID)) return false;
+	}
+	return true;
+}
+
+
 bool CTrackApp::SystemCanRunModernBuilds()
 //----------------------------------------
 {
@@ -899,6 +917,66 @@ bool CTrackApp::SystemCanRunModernBuilds()
 		&& (GetProcSupport() & PROCSUPPORT_SSE)
 		&& (GetProcSupport() & PROCSUPPORT_SSE2)
 		;
+}
+
+
+bool CTrackApp::CheckSystemSupport()
+//----------------------------------
+{
+	const mpt::ustring lf = MPT_USTRING("\n");
+	const mpt::ustring url = MptVersion::GetDownloadURL();
+	if(!ProcessorCanRunCurrentBuild())
+	{
+		mpt::ustring text = mpt::ustring()
+			+ MPT_USTRING("This version of OpenMPT requires a CPU with SSE2 instruction set support.") + lf
+			+ MPT_USTRING("Your system may be supported with a special OpenMPT build named 'Win32 for older Windows (Win32old)'.") + lf
+			+ MPT_USTRING("Please visit ") + url + MPT_USTRING(".") + lf
+			+ MPT_USTRING("OpenMPT will exit now.") + lf
+			+ MPT_USTRING("Do you want to visit ") + url + MPT_USTRING(" to download OpenMPT for older Windows now?") + lf
+			;
+		if(Reporting::CustomNotification(text, "OpenMPT", MB_YESNO | MB_ICONERROR, CMainFrame::GetMainFrame()) == IDYES)
+		{
+			OpenURL(url);
+		}
+		return false;
+	}
+	if(mpt::Windows::Version::IsOriginal())
+	{ // only do windows compatibility checks on non-emulated windows
+		if(MptVersion::IsForOlderWindows())
+		{
+			if(SystemCanRunModernBuilds())
+			{
+				if(TrackerSettings::Instance().UpdateSuggestDifferentBuildVariant)
+				{
+					mpt::ustring text = mpt::ustring()
+						+ MPT_USTRING("You are running a 'Win32old' build of OpenMPT.") + lf
+						+ MPT_USTRING("However, OpenMPT detected that your system is capable of running the standard 'Win32' build as well, which provides better support for your system.") + lf
+						+ MPT_USTRING("Do you want to visit ") + url + MPT_USTRING(" now to upgrade?") + lf
+						;
+					if(Reporting::CustomNotification(text, "OpenMPT", MB_YESNO | MB_ICONINFORMATION, CMainFrame::GetMainFrame()) == IDYES)
+					{
+						OpenURL(url);
+					}
+				}
+			}
+		} else
+		{
+			if(!SystemCanRunModernBuilds())
+			{
+				mpt::ustring text = mpt::ustring()
+					+ MPT_USTRING("This version of OpenMPT requires Windows 7 or later.") + lf
+					+ MPT_USTRING("Your system may be supported with a special OpenMPT build named 'Win32 for older Windows (Win32old)'.") + lf
+					+ MPT_USTRING("Do you want to visit ") + url + MPT_USTRING(" to download OpenMPT for older Windows now?") + lf
+					;
+				if(Reporting::CustomNotification(text, "OpenMPT", MB_YESNO | MB_ICONWARNING, CMainFrame::GetMainFrame()) == IDYES)
+				{
+					OpenURL(url);
+				}
+				return true; // may work though
+			}
+		}
+	}
+	return true;
 }
 
 
@@ -1055,6 +1133,16 @@ BOOL CTrackApp::InitInstance()
 
 
 	// Perform startup tasks.
+
+	// Check whether we are running the best build for the given system.
+	if(!cmdInfo.m_bNoSysCheck)
+	{
+		if(!CheckSystemSupport())
+		{
+			StopSplashScreen();
+			return FALSE;
+		}
+	}
 
 	if(TrackerSettings::Instance().FirstRun)
 	{

@@ -232,7 +232,7 @@ BEGIN
     PUSHBUTTON      "&Reset",IDC_BUTTON2,222,146,54,12
     LTEXT           "Do not change this unless you are absolutely sure of what you are doing.",IDC_STATIC,12,180,264,12
     PUSHBUTTON      "&Check for Updates",IDC_BUTTON1,6,204,84,18
-    LTEXT           "",IDC_LASTUPDATE,6,228,276,24
+    LTEXT           "",IDC_LASTUPDATE,6,228,276,48
 END
 
 IDD_CLOSEDOCUMENTS DIALOGEX 0, 0, 370, 197

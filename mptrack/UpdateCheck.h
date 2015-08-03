@@ -50,6 +50,7 @@ public:
 		bool autoUpdate;
 		CString updateBaseURL;  // URL where the version check should be made.
 		CString guidString;     // Send GUID to collect basic stats or "anonymous"
+		bool suggestDifferentBuilds;
 	};
 
 	class Error
