@@ -1076,7 +1076,7 @@ void CCtrlSamples::OnSampleOpen()
 			OnSampleNew();
 		}
 
-		if(!OpenSample(files[counter]), OpenSampleKnown | OpenSampleRaw)
+		if(!OpenSample(files[counter], OpenSampleKnown | OpenSampleRaw))
 			ErrorBox(IDS_ERR_FILEOPEN, this);
 	}
 	SwitchToView();
