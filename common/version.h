@@ -69,6 +69,9 @@ namespace MptVersion
 	// Returns true if the build will run on ancient Windows versions.
 	bool IsForOlderWindows();
 
+	// Returns either the URL to download release builds or the URL to download test builds, depending on the current build.
+	mpt::ustring GetDownloadURL();
+
 	// Return a string decribing the working copy state (dirty and/or mixed revisions) (if built from a svn working copy and tsvn was available during build)
 	std::string GetStateString(); // e.g. "" or "+mixed" or "+mixed+dirty" or "+dirty"
 

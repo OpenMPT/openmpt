@@ -81,6 +81,7 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 	settings.autoUpdate = isAutoUpdate;
 	settings.updateBaseURL = TrackerSettings::Instance().UpdateUpdateURL;
 	settings.guidString = (TrackerSettings::Instance().UpdateSendGUID ? mpt::ToCString(TrackerSettings::Instance().gcsInstallGUID.Get()) : _T("anonymous"));
+	settings.suggestDifferentBuilds = TrackerSettings::Instance().UpdateSuggestDifferentBuildVariant;
 	mpt::thread(CUpdateCheck::ThreadFunc(settings)).detach();
 }
 
@@ -122,10 +123,12 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 #ifdef _WIN64
 	versionStr.Append(_T("-win64"));
 #elif defined(_WIN32)
-	versionStr.Append(_T("-win32"));
 	if(MptVersion::IsForOlderWindows())
 	{
-		versionStr.Append(_T("old"));
+		versionStr.Append(_T("-win32old"));
+	} else
+	{
+		versionStr.Append(_T("-win32"));
 	}
 #else
 #error "Platform-specific identifier missing"
@@ -401,17 +404,34 @@ void CUpdateSetupDlg::SettingChanged(const SettingPath &changedPath)
 {
 	if(changedPath == TrackerSettings::Instance().UpdateLastUpdateCheck.GetPath())
 	{
+		CString updateText;
 		const time_t t = TrackerSettings::Instance().UpdateLastUpdateCheck.Get();
 		if(t > 0)
 		{
-			CString updateText;
 			const tm* const lastUpdate = localtime(&t);
 			if(lastUpdate != nullptr)
 			{
 				updateText.Format(_T("The last successful update check was run on %04d-%02d-%02d, %02d:%02d."), lastUpdate->tm_year + 1900, lastUpdate->tm_mon + 1, lastUpdate->tm_mday, lastUpdate->tm_hour, lastUpdate->tm_min);
-				SetDlgItemText(IDC_LASTUPDATE, updateText);
 			}
 		}
+		updateText += _T("\r\n");
+		if(TrackerSettings::Instance().UpdateSuggestDifferentBuildVariant)
+		{
+			const CString url = mpt::ToCString(MptVersion::GetDownloadURL());
+			if(mpt::Windows::Version::IsOriginal())
+			{ // only do compatibility checks on non-emulated windows
+				if(MptVersion::IsForOlderWindows())
+				{
+					if(theApp.SystemCanRunModernBuilds())
+					{
+						updateText += CString(_T("You are running a 'Win32old' build of OpenMPT.")) + _T("\r\n");
+						updateText += CString(_T("However, OpenMPT detected that your system is capable of running the standard 'Win32' build as well, which provides better support for your system.")) + _T("\r\n");
+						updateText += CString(_T("You may want to visit ")) + url + CString(_T(" and upgrade.")) + _T("\r\n");
+					}
+				}
+			}
+		}
+		SetDlgItemText(IDC_LASTUPDATE, updateText);
 	}
 }
 

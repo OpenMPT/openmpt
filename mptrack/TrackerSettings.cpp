@@ -314,6 +314,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, UpdateUpdateURL(conf, "Update", "UpdateURL", CUpdateCheck::defaultUpdateURL)
 	, UpdateSendGUID(conf, "Update", "SendGUID", true)
 	, UpdateShowUpdateHint(conf, "Update", "ShowUpdateHint", true)
+	, UpdateSuggestDifferentBuildVariant(conf, "Update", "SuggestDifferentBuildVariant", true)
 {
 
 	// Effects

@@ -359,6 +359,20 @@ bool IsForOlderWindows()
 	#endif
 }
 
+mpt::ustring GetDownloadURL()
+{
+	#ifdef MODPLUG_TRACKER
+		return (MptVersion::IsDebugBuild() || MptVersion::IsTestBuild() || MptVersion::IsDirty() || MptVersion::HasMixedRevisions())
+			?
+				MPT_USTRING("http://buildbot.openmpt.org/builds/")
+			:
+				MPT_USTRING("http://openmpt.org/download")
+			;
+	#else
+		return MPT_USTRING("http://lib.openmpt.org/");
+	#endif
+}
+
 static std::string GetVersionString(bool verbose)
 {
 	#if !defined(MODPLUG_TRACKER)

@@ -688,6 +688,7 @@ public:
 	Setting<CString> UpdateUpdateURL;
 	Setting<bool> UpdateSendGUID;
 	Setting<bool> UpdateShowUpdateHint;
+	Setting<bool> UpdateSuggestDifferentBuildVariant;
 
 public:
 
