@@ -10,6 +10,9 @@
 
 
 #include "stdafx.h"
+
+#ifndef NO_VST
+
 #include "Mptrack.h"
 #include "Mainfrm.h"
 #include "InputHandler.h"
@@ -23,9 +26,6 @@
 
 
 OPENMPT_NAMESPACE_BEGIN
-
-
-#ifndef NO_VST
 
 /////////////////////////////////////////////////////////////////////////////////
 // Plugin selection dialog
@@ -780,7 +780,6 @@ void CSelectPluginDlg::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 	CDialog::OnGetMinMaxInfo(lpMMI);
 }
 
-#endif // NO_VST
-
-
 OPENMPT_NAMESPACE_END
+
+#endif // NO_VST
