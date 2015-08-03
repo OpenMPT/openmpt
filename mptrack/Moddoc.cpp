@@ -101,12 +101,11 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 
 	ON_COMMAND(ID_ESTIMATESONGLENGTH,	OnEstimateSongLength)
 	ON_COMMAND(ID_APPROX_BPM,			OnApproximateBPM)
-	ON_COMMAND(ID_PATTERN_PLAY,			OnPatternPlay)				//rewbs.patPlayAllViews
-	ON_COMMAND(ID_PATTERN_PLAYNOLOOP,	OnPatternPlayNoLoop)		//rewbs.patPlayAllViews
-	ON_COMMAND(ID_PATTERN_RESTART,		OnPatternRestart)			//rewbs.patPlayAllViews
+	ON_COMMAND(ID_PATTERN_PLAY,			OnPatternPlay)
+	ON_COMMAND(ID_PATTERN_PLAYNOLOOP,	OnPatternPlayNoLoop)
+	ON_COMMAND(ID_PATTERN_RESTART,		OnPatternRestart)
 	ON_UPDATE_COMMAND_UI(ID_INSERT_INSTRUMENT,		OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_INSTRUMENTS,		OnUpdateXMITMPTOnly)
-	//ON_UPDATE_COMMAND_UI(ID_VIEW_COMMENTS,			OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MIDIMAPPING,		OnUpdateHasMIDIMappings)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_EDITHISTORY,		OnUpdateITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_FILE_SAVECOMPAT,		OnUpdateCompatExportableOnly)
@@ -695,7 +694,11 @@ BOOL CModDoc::InitializeMod()
 			break;
 		}
 
-		if(GetModType() == MOD_TYPE_MPT) m_SndFile.m_nTempoMode = tempoModeModern;
+		if(GetModType() == MOD_TYPE_MPT)
+		{
+			m_SndFile.m_nTempoMode = tempoModeModern;
+			m_SndFile.m_SongFlags.set(SONG_EXFILTERRANGE);
+		}
 
 		// Refresh mix levels now that the correct mod type has been set
 		m_SndFile.SetMixLevels(m_SndFile.GetModSpecifications().defaultMixLevels);
@@ -711,23 +714,14 @@ BOOL CModDoc::InitializeMod()
 		}
 
 		MemsetZero(m_SndFile.m_szNames);
-		//m_SndFile.SetTitle("untitled");
 
 		m_SndFile.m_PlayState.m_nMusicTempo.Set(125);
 		m_SndFile.m_nDefaultTempo.Set(125);
 		m_SndFile.m_PlayState.m_nMusicSpeed = m_SndFile.m_nDefaultSpeed = 6;
 
-		// Set up levels
-		//if(m_SndFile.m_nMixLevels == mixLevels_original || m_SndFile.m_nMixLevels == mixLevels_compatible)
-		{
-			m_SndFile.m_PlayState.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
-			m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 48;
-		}
-		/*else
-		{
-			m_SndFile.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME / 2;
-			m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 128;
-		}*/
+		// Set up mix levels
+		m_SndFile.m_PlayState.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
+		m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 48;
 
 		if(m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_XM | MOD_TYPE_S3M))
 		{
@@ -3035,6 +3029,21 @@ void CModDoc::PrepareUndoForAllPatterns(bool storeChannelInfo, const char *descr
 			linkUndo = true;
 		}
 	}
+}
+
+
+CString CModDoc::LinearToDecibels(double value, double valueAtZeroDB)
+//_------------------------------------------------------------------
+{
+	if (value == 0) return _T("-inf");
+
+	double changeFactor = value / valueAtZeroDB;
+	double dB = 20.0 * std::log10(changeFactor);
+
+	char sign = (dB >= 0) ? '+' : ' ';
+	CString s;
+	s.Format(_T("%c%.2f dB"), sign, dB);
+	return s;
 }
 
 

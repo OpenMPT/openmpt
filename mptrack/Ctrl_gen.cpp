@@ -638,7 +638,7 @@ LRESULT CCtrlGeneral::OnUpdatePosition(WPARAM, LPARAM lParam)
 BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPSTR pszText)
 //--------------------------------------------------------
 {
-	const char moreRecentMixModeNote[] = "Use a more recent mixmode to see dB offsets.";
+	const TCHAR moreRecentMixModeNote[] = _T("Use a more recent mixmode to see dB offsets.");
 	if ((pszText) && (uId))
 	{
 		const bool displayDBValues = m_sndFile.GetPlayConfig().getDisplayDBValues();
@@ -649,13 +649,13 @@ BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPSTR pszText)
 			_tcscpy(pszText, _T("Song Properties"));
 			return TRUE;
 		case IDC_SLIDER_SAMPLEPREAMP:
-			(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_nSamplePreAmp, m_sndFile.GetPlayConfig().getNormalSamplePreAmp()) : strcpy(pszText, moreRecentMixModeNote);
+			_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_nSamplePreAmp, m_sndFile.GetPlayConfig().getNormalSamplePreAmp()) : moreRecentMixModeNote);
 			return TRUE;
 		case IDC_SLIDER_VSTIVOL:
-			(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_nVSTiVolume, m_sndFile.GetPlayConfig().getNormalVSTiVol()) : strcpy(pszText, moreRecentMixModeNote);
+			_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_nVSTiVolume, m_sndFile.GetPlayConfig().getNormalVSTiVol()) : moreRecentMixModeNote);
 			return TRUE;
 		case IDC_SLIDER_GLOBALVOL:
-			(displayDBValues) ? setAsDecibels(pszText, m_sndFile.m_PlayState.m_nGlobalVolume, m_sndFile.GetPlayConfig().getNormalGlobalVol()) : strcpy(pszText, moreRecentMixModeNote);
+			_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_PlayState.m_nGlobalVolume, m_sndFile.GetPlayConfig().getNormalGlobalVol()) : moreRecentMixModeNote);
 			return TRUE;
 		}
 	}

@@ -1578,6 +1578,11 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 			_tcscpy(pszText, _T("Higher value <-> Faster fade out"));
 			return TRUE;
 
+		case IDC_EDIT8:
+			// Global volume
+			_tcscpy(pszText, CModDoc::LinearToDecibels(GetDlgItemInt(IDC_EDIT8), 64.0));
+			return TRUE;
+
 		case IDC_PLUGIN_VELOCITYSTYLE:
 		case IDC_PLUGIN_VOLUMESTYLE:
 			// Plugin volume handling
