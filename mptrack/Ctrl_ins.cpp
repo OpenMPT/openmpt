@@ -1493,7 +1493,7 @@ BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 	}
 	SampleHint hint = SampleHint().Info().Data().Names();
 	if (first) hint.ModType();
-	m_modDoc.UpdateAllViews(nullptr, hint, this);
+	m_modDoc.UpdateAllViews(nullptr, hint);
 	if (!ok) ErrorBox(IDS_ERR_FILETYPE, this);
 	return ok;
 }
@@ -1581,6 +1581,11 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 		case IDC_EDIT8:
 			// Global volume
 			_tcscpy(pszText, CModDoc::LinearToDecibels(GetDlgItemInt(IDC_EDIT8), 64.0));
+			return TRUE;
+
+		case IDC_EDIT9:
+			// Panning
+			_tcscpy(pszText, CModDoc::PanningToString(pIns->nPan, 128));
 			return TRUE;
 
 		case IDC_PLUGIN_VELOCITYSTYLE:
