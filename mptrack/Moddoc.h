@@ -363,6 +363,8 @@ protected:
 
 	// Convert a linear volume property to decibels
 	static CString LinearToDecibels(double value, double valueAtZeroDB);
+	// Convert a panning value to a more readable string
+	static CString PanningToString(int32 value, int32 valueAtCenter);
 
 	void SerializeViews() const;
 	void DeserializeViews();

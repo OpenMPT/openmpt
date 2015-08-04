@@ -22,9 +22,9 @@
 #include "SampleEditorDialogs.h"
 #include "dlg_misc.h"
 #include "PSRatioCalc.h"
-#include "soundtouch/include/SoundTouch.h"
-#include "soundtouch/source/SoundTouchDLL/SoundTouchDLL.h"
-#include "smbPitchShift/smbPitchShift.h"
+#include <soundtouch/include/SoundTouch.h>
+#include <soundtouch/source/SoundTouchDLL/SoundTouchDLL.h>
+#include <smbPitchShift/smbPitchShift.h>
 #include "modsmp_ctrl.h"
 #include "Autotune.h"
 #include "../common/StringFixer.h"
@@ -543,6 +543,15 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, TCHAR *pszText)
 		case IDC_EDIT8:
 			// Volume to dB
 			_tcscpy(pszText, CModDoc::LinearToDecibels(GetDlgItemInt(uId), 64.0));
+			return TRUE;
+
+		case IDC_EDIT9:
+			// Panning
+			if(m_nSample)
+			{
+				const ModSample &sample = m_sndFile.GetSample(m_nSample);
+				_tcscpy(pszText, CModDoc::PanningToString(sample.nPan, 128));
+			}
 			return TRUE;
 
 		case IDC_EDIT5:
