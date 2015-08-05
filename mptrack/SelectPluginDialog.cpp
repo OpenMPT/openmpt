@@ -16,6 +16,7 @@
 #include "Mptrack.h"
 #include "Mainfrm.h"
 #include "InputHandler.h"
+#include "ImageLists.h"
 #include "Moddoc.h"
 #include "../common/StringFixer.h"
 #include "FileDialog.h"

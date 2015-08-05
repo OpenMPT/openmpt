@@ -13,6 +13,7 @@
 #include "Mptrack.h"
 #include "Mainfrm.h"
 #include "InputHandler.h"
+#include "ImageLists.h"
 #include "Childfrm.h"
 #include "Moddoc.h"
 #include "Globals.h"

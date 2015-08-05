@@ -19,6 +19,7 @@
 #include "Ctrl_smp.h"
 #include "Ctrl_ins.h"
 #include "Ctrl_com.h"
+#include "ImageLists.h"
 #include "../soundlib/mod_specifications.h"
 
 #ifdef _DEBUG

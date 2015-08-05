@@ -14,6 +14,7 @@
 #include "../sounddev/SoundDevice.h"
 #include "../sounddev/SoundDeviceManager.h"
 #include "../soundlib/AudioReadTarget.h"
+#include "ImageLists.h"
 #include "Moddoc.h"
 #include "Childfrm.h"
 #include "Dlsbank.h"
