@@ -187,12 +187,15 @@ BOOL CWaveConvert::OnInitDialog()
 	}
 
 	// Fill list of sample slots to render into
-	m_CbnSampleSlot.AddString(_T("<empty slot>"));
+	if(m_SndFile.GetNextFreeSample() != SAMPLEINDEX_INVALID)
+	{
+		m_CbnSampleSlot.SetItemData(m_CbnSampleSlot.AddString(_T("<empty slot>")), 0);
+	}
 	CString s;
 	for(SAMPLEINDEX smp = 1; smp <= m_SndFile.GetNumSamples(); smp++)
 	{
 		s.Format(_T("%02u: %s%s"), smp, m_SndFile.GetSample(smp).HasSampleData() ? _T("*") : _T(""), m_SndFile.GetSampleName(smp));
-		m_CbnSampleSlot.AddString(s);
+		m_CbnSampleSlot.SetItemData(m_CbnSampleSlot.AddString(s), smp);
 	}
 	if(m_Settings.sampleSlot > m_SndFile.GetNumChannels()) m_Settings.sampleSlot = 0;
 	m_CbnSampleSlot.SetCurSel(m_Settings.sampleSlot);
@@ -599,6 +602,10 @@ void CWaveConvert::UpdateDialog()
 			OnFileTypeChanged();
 		}
 	}
+	// No free slots => Cannot do instrument- or channel-based export to sample
+	BOOL canDoMultiExport = (bSel /* normal export */ || m_CbnSampleSlot.GetItemData(0) == 0 /* "free slot" is in list */) ? TRUE : FALSE;
+	GetDlgItem(IDC_CHECK4)->EnableWindow(canDoMultiExport);
+	GetDlgItem(IDC_CHECK6)->EnableWindow(canDoMultiExport);
 }
 
 
@@ -607,7 +614,8 @@ void CWaveConvert::OnSampleSlotChanged()
 {
 	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, IDC_RADIO4);
 	// When choosing a specific sample slot, we cannot use per-channel or per-instrument export
-	if(m_CbnSampleSlot.GetCurSel() > 0)
+	int sel = m_CbnSampleSlot.GetCurSel();
+	if(sel >= 0 && m_CbnSampleSlot.GetItemData(sel) > 0)
 	{
 		CheckDlgButton(IDC_CHECK4, BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK6, BST_UNCHECKED);
@@ -726,7 +734,7 @@ void CWaveConvert::OnOK()
 	m_bChannelMode = IsDlgButtonChecked(IDC_CHECK4) != BST_UNCHECKED;
 	m_bInstrumentMode= IsDlgButtonChecked(IDC_CHECK6) != BST_UNCHECKED;
 
-	m_Settings.sampleSlot = static_cast<SAMPLEINDEX>(m_CbnSampleSlot.GetCurSel());
+	m_Settings.sampleSlot = static_cast<SAMPLEINDEX>(m_CbnSampleSlot.GetItemData(m_CbnSampleSlot.GetCurSel()));
 
 	SaveEncoderSettings();
 
