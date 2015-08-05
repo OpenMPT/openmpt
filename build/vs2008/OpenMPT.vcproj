@@ -1277,6 +1277,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\mptrack\ImageLists.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\mptrack\InputHandler.cpp"
 				>
 			</File>

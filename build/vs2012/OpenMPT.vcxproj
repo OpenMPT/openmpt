@@ -517,6 +517,7 @@
     <ClInclude Include="..\..\mptrack\FolderScanner.h" />
     <ClInclude Include="..\..\mptrack\GeneralConfigDlg.h" />
     <ClInclude Include="..\..\mptrack\Globals.h" />
+    <ClInclude Include="..\..\mptrack\ImageLists.h" />
     <ClInclude Include="..\..\mptrack\InputHandler.h" />
     <ClInclude Include="..\..\mptrack\KeyConfigDlg.h" />
     <ClInclude Include="..\..\mptrack\MIDIMacroDialog.h" />

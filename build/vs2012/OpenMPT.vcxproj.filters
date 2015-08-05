@@ -275,6 +275,9 @@
     <ClInclude Include="..\..\mptrack\Globals.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\ImageLists.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\InputHandler.h">
       <Filter>mptrack</Filter>
     </ClInclude>
