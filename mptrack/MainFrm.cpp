@@ -587,7 +587,7 @@ void CMainFrame::OnTimerNotify()
 	int64 currenttotalsamples = 0;
 	if(gpSoundDevice)
 	{
-		currenttotalsamples = gpSoundDevice->GetStreamPosition().Frames; 
+		currenttotalsamples = gpSoundDevice->GetStreamPosition().Frames;
 	}
 	{
 		// advance to the newest notification, drop the obsolete ones
@@ -2569,7 +2569,7 @@ void CMainFrame::OnKillFocus(CWnd* pNewWnd)
 	CMDIFrameWnd::OnKillFocus(pNewWnd);
 
 	//rewbs: ensure modifiers are reset when we leave the window (e.g. alt-tab)
-	CMainFrame::GetMainFrame()->GetInputHandler()->SetModifierMask(0);
+	m_InputHandler->SetModifierMask(0);
 }
 
 
@@ -2705,14 +2705,14 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathSt
 			// To avoid duplicates, check whether app path and config path are the same.
 			if (i == 1 && mpt::PathString::CompareNoCase(theApp.GetAppDirPath(), theApp.GetConfigPath()) == 0)
 				break;
-			
+
 			mpt::PathString basePath;
 			basePath = (i == 0) ? theApp.GetAppDirPath() : theApp.GetConfigPath();
 			basePath += pszFolderName;
 			if(!basePath.IsDirectory())
 				continue;
 			mpt::PathString sPath = basePath + MPT_PATHSTRING("*");
-			
+
 			WIN32_FIND_DATAW findData;
 			MemsetZero(findData);
 			HANDLE hFindFile = FindFirstFileW(sPath.AsNative().c_str(), &findData);
@@ -2735,7 +2735,7 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathSt
 				FindClose(hFindFile);
 				hFindFile = INVALID_HANDLE_VALUE;
 			}
-			
+
 		}
 
 		if (nAddCounter == 0)
@@ -2859,6 +2859,94 @@ void CMainFrame::UpdateMRUList()
 			::InsertMenuW(pMenu->m_hMenu, firstMenu + i, MF_STRING | MF_BYPOSITION, ID_MRU_LIST_FIRST + i, s.c_str());
 		}
 	}
+}
+
+
+
+// ITfLanguageProfileNotifySink implementation
+
+TfLanguageProfileNotifySink::TfLanguageProfileNotifySink()
+//--------------------------------------------------------
+	: m_pProfiles(nullptr)
+	, m_pSource(nullptr)
+	, m_dwCookie(0)
+{
+	HRESULT hr = CoCreateInstance(CLSID_TF_InputProcessorProfiles, NULL, CLSCTX_INPROC_SERVER, IID_ITfInputProcessorProfiles, (void**)&m_pProfiles);
+	if(SUCCEEDED(hr))
+	{
+		hr = m_pProfiles->QueryInterface(IID_ITfSource, (void**)&m_pSource);
+		if(SUCCEEDED(hr))
+		{
+			hr = m_pSource->AdviseSink(IID_ITfLanguageProfileNotifySink,
+				static_cast<ITfLanguageProfileNotifySink *>(this),
+				&m_dwCookie);
+			ASSERT(SUCCEEDED(hr));
+			ASSERT(m_dwCookie != (DWORD)-1);
+		}
+	}
+}
+
+
+TfLanguageProfileNotifySink::~TfLanguageProfileNotifySink()
+//---------------------------------------------------------
+{
+	if(m_pSource)
+	{
+		m_pSource->UnadviseSink(m_dwCookie);
+		m_pSource->Release();
+	}
+	if(m_pProfiles) m_pProfiles->Release();
+}
+
+
+HRESULT TfLanguageProfileNotifySink::OnLanguageChange(LANGID /*langid*/, BOOL *pfAccept)
+//--------------------------------------------------------------------------------------
+{
+	*pfAccept = TRUE;
+	return ResultFromScode(S_OK);
+}
+
+
+HRESULT TfLanguageProfileNotifySink::OnLanguageChanged()
+//------------------------------------------------------
+{
+	// Input language has changed, so key positions might have changed too.
+	CMainFrame *mainFrm = CMainFrame::GetMainFrame();
+	if(mainFrm != nullptr)
+	{
+		mainFrm->UpdateEffectKeys();
+		mainFrm->m_InputHandler->SetModifierMask(0);
+	}
+	return ResultFromScode(S_OK);
+}
+
+
+HRESULT TfLanguageProfileNotifySink::QueryInterface(REFIID riid, void **ppvObject)
+//--------------------------------------------------------------------------------
+{
+	if(riid == IID_ITfLanguageProfileNotifySink || riid == IID_IUnknown)
+	{
+		*ppvObject = static_cast<ITfLanguageProfileNotifySink *>(this);
+		AddRef();
+		return ResultFromScode(S_OK);
+	}
+	*ppvObject = nullptr;
+	return ResultFromScode(E_NOINTERFACE);
+}
+
+
+ULONG TfLanguageProfileNotifySink::AddRef()
+//-----------------------------------------
+{
+	// Don't let COM do anything to this object
+	return 1;
+}
+
+ULONG TfLanguageProfileNotifySink::Release()
+//------------------------------------------
+{
+	// Don't let COM do anything to this object
+	return 1;
 }
 
 
