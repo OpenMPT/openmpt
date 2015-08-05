@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <Msctf.h>
 #include "Mptrack.h"
 #include "AutoSaver.h"
 #include "UpdateHints.h"
@@ -333,9 +334,30 @@ public:
 };
 
 
-//======================================================================================================
-class CMainFrame: public CMDIFrameWnd, public SoundDevice::ISource, public SoundDevice::IMessageReceiver
-//======================================================================================================
+//=====================================================================
+class TfLanguageProfileNotifySink : public ITfLanguageProfileNotifySink
+//=====================================================================
+{
+public:
+	TfLanguageProfileNotifySink();
+	~TfLanguageProfileNotifySink();
+
+	virtual HRESULT STDMETHODCALLTYPE OnLanguageChange(LANGID langid, __RPC__out BOOL *pfAccept);
+	virtual HRESULT STDMETHODCALLTYPE OnLanguageChanged();
+	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject);
+	virtual ULONG STDMETHODCALLTYPE AddRef();
+	virtual ULONG STDMETHODCALLTYPE Release();
+
+protected:
+	ITfInputProcessorProfiles *m_pProfiles;
+	ITfSource *m_pSource;
+	DWORD m_dwCookie;
+};
+
+
+//==========================================================================================================================================
+class CMainFrame: public CMDIFrameWnd, public SoundDevice::ISource, public SoundDevice::IMessageReceiver, public TfLanguageProfileNotifySink
+//==========================================================================================================================================
 {
 	DECLARE_DYNAMIC(CMainFrame)
 	// static data
