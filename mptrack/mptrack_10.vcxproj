@@ -1079,6 +1079,7 @@
     <ClInclude Include="FolderScanner.h" />
     <ClInclude Include="GeneralConfigDlg.h" />
     <ClInclude Include="Globals.h" />
+    <ClInclude Include="ImageLists.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Mainbar.h" />
     <ClInclude Include="Mainfrm.h" />
