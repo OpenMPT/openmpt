@@ -11,8 +11,9 @@
 
 #include "stdafx.h"
 #include "Mptrack.h"
-#include "mainfrm.h"
+#include "Mainfrm.h"
 #include "InputHandler.h"
+#include "ImageLists.h"
 #include "Childfrm.h"
 #include "Moddoc.h"
 #include "../soundlib/mod_specifications.h"

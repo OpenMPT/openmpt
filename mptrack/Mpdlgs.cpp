@@ -12,7 +12,7 @@
 #include "Mptrack.h"
 #include "Sndfile.h"
 #include "Mainfrm.h"
-#include "Dlsbank.h"
+#include "ImageLists.h"
 #include "Moddoc.h"
 #include "Mpdlgs.h"
 #include "../common/StringFixer.h"
@@ -797,11 +797,11 @@ void COptionsSoundcard::OnOK()
 
 	// General
 	{
-		TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup = IsDlgButtonChecked(IDC_CHECK7) ? true : false;
+		TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup = IsDlgButtonChecked(IDC_CHECK7) != BST_UNCHECKED;
 	}
-	m_Settings.ExclusiveMode = IsDlgButtonChecked(IDC_CHECK4) ? true : false;
-	m_Settings.BoostThreadPriority = IsDlgButtonChecked(IDC_CHECK5) ? true : false;
-	m_Settings.UseHardwareTiming = IsDlgButtonChecked(IDC_CHECK9) ? true : false;
+	m_Settings.ExclusiveMode = IsDlgButtonChecked(IDC_CHECK4) != BST_UNCHECKED;
+	m_Settings.BoostThreadPriority = IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED;
+	m_Settings.UseHardwareTiming = IsDlgButtonChecked(IDC_CHECK9) != BST_UNCHECKED;
 	// Mixing Freq
 	{
 		m_Settings.Samplerate = static_cast<uint32>(m_CbnMixingFreq.GetItemData(m_CbnMixingFreq.GetCurSel()));

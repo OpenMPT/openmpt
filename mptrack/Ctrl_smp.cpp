@@ -14,6 +14,7 @@
 #include "Mainfrm.h"
 #include "InputHandler.h"
 #include "Childfrm.h"
+#include "ImageLists.h"
 #include "Moddoc.h"
 #include "../soundlib/mod_specifications.h"
 #include "Globals.h"

@@ -13,6 +13,7 @@
 #include "Mainfrm.h"
 #include "InputHandler.h"
 #include "View_tre.h"
+#include "ImageLists.h"
 #include "Moddoc.h"
 #include "../soundlib/mod_specifications.h"
 
