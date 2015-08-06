@@ -710,28 +710,33 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		short int pos;
 
 		LockControls();
-		const CHANNELINDEX nLoopLimit = MIN(4, pModDoc->GetSoundFile()->GetNumChannels() - nChn);
+		const CHANNELINDEX nLoopLimit = std::min<CHANNELINDEX>(4, pModDoc->GetSoundFile()->GetNumChannels() - nChn);
 		for (CHANNELINDEX iCh = 0; iCh < nLoopLimit; iCh++)
 		{
-			// Volume sliders
-			pos = (short int)m_sbVolume[iCh].GetPos();
-			if ((pos >= 0) && (pos <= 64))
+			if(pScrollBar == (CScrollBar *) &m_sbVolume[iCh])
 			{
-				if (pModDoc->SetChannelGlobalVolume(nChn + iCh, pos))
+				// Volume sliders
+				pos = (short int)m_sbVolume[iCh].GetPos();
+				if ((pos >= 0) && (pos <= 64))
 				{
-					SetDlgItemInt(IDC_EDIT1 + iCh * 2, pos);
-					bUpdate = TRUE;
+					if (pModDoc->SetChannelGlobalVolume(nChn + iCh, pos))
+					{
+						SetDlgItemInt(IDC_EDIT1 + iCh * 2, pos);
+						bUpdate = TRUE;
+					}
 				}
-			}
-			// Pan sliders
-			pos = (short int)m_sbPan[iCh].GetPos();
-			if(pos >= 0 && pos <= 64 && (static_cast<uint16>(pos) != pModDoc->GetSoundFile()->ChnSettings[nChn+iCh].nPan / 4u))
+			} else if(pScrollBar == (CScrollBar *) &m_sbPan[iCh])
 			{
-				if (pModDoc->SetChannelDefaultPan(nChn + iCh, pos * 4))
+				// Pan sliders
+				pos = (short int)m_sbPan[iCh].GetPos();
+				if(pos >= 0 && pos <= 64 && (static_cast<uint16>(pos) != pModDoc->GetSoundFile()->ChnSettings[nChn+iCh].nPan / 4u))
 				{
-					SetDlgItemInt(IDC_EDIT2 + iCh * 2, pos * 4);
-					CheckDlgButton(IDC_CHECK2 + iCh * 2, BST_UNCHECKED);
-					bUpdate = TRUE;
+					if (pModDoc->SetChannelDefaultPan(nChn + iCh, pos * 4))
+					{
+						SetDlgItemInt(IDC_EDIT2 + iCh * 2, pos * 4);
+						CheckDlgButton(IDC_CHECK2 + iCh * 2, BST_UNCHECKED);
+						bUpdate = TRUE;
+					}
 				}
 			}
 		}
@@ -788,15 +793,15 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 //---------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	TCHAR s[32];
 
 	if((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	TCHAR s[32];
 
 	if(nSBCode != SB_ENDSCROLL && pScrollBar && pScrollBar == (CScrollBar*)&m_SpinMixGain)
 	{
 
-		SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
+		SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
 
 		if(plugin.pMixPlugin)
 		{
