@@ -303,7 +303,6 @@ void COptionsSoundcard::UpdateGeneral()
 	{
 		if(m_CurrentDeviceCaps.CanKeepDeviceRunning)
 		{
-			m_CbnStoppedMode.EnableWindow(TRUE);
 			m_CbnStoppedMode.ResetContent();
 			m_CbnStoppedMode.AddString(_T("Close driver"));
 			m_CbnStoppedMode.AddString(_T("Pause driver"));
@@ -311,7 +310,6 @@ void COptionsSoundcard::UpdateGeneral()
 			m_CbnStoppedMode.SetCurSel(TrackerSettings::Instance().m_SoundSettingsStopMode);
 		} else
 		{
-			m_CbnStoppedMode.EnableWindow(FALSE);
 			m_CbnStoppedMode.ResetContent();
 			m_CbnStoppedMode.AddString(_T("Close driver"));
 			m_CbnStoppedMode.AddString(_T("Close driver"));
@@ -321,7 +319,7 @@ void COptionsSoundcard::UpdateGeneral()
 		CheckDlgButton(IDC_CHECK7, TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup ? BST_CHECKED : BST_UNCHECKED);
 	}
 	bool isUnavailble = theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier());
-	m_CbnStoppedMode.EnableWindow(isUnavailble ? FALSE : TRUE);
+	m_CbnStoppedMode.EnableWindow(isUnavailble ? FALSE : (m_CurrentDeviceCaps.CanKeepDeviceRunning ? TRUE : FALSE));
 	CPropertySheet *sheet = dynamic_cast<CPropertySheet *>(GetParent());
 	if(sheet) sheet->GetDlgItem(IDOK)->EnableWindow(isUnavailble ? FALSE : TRUE);
 }
