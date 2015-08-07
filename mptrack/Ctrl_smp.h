@@ -76,6 +76,7 @@ public:
 	~CCtrlSamples();
 
 	bool SetCurrentSample(SAMPLEINDEX nSmp, LONG lZoom = -1, bool bUpdNum = true);
+	void InsertSample(bool duplicate);
 	bool OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampleTypes> types = OpenSampleKnown | OpenSampleRaw);
 	bool OpenSample(const CSoundFile &sndFile, SAMPLEINDEX nSample);
 	Setting<LONG> &GetSplitPosRef() {return TrackerSettings::Instance().glSampleWindowHeight;} 	//rewbs.varWindowSize
@@ -101,6 +102,7 @@ protected:
 	afx_msg void OnNextInstrument();
 	afx_msg void OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSampleNew();
+	afx_msg void OnSampleDuplicate() { InsertSample(true); }
 	afx_msg void OnSampleOpen();
 	afx_msg void OnSampleOpenKnown();
 	afx_msg void OnSampleOpenRaw();

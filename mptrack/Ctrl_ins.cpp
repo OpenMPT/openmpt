@@ -334,7 +334,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 
 		if (hMenu)
 		{
-			AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_SAMPLEMAP, "Edit Sample &Map\t" + ih->GetKeyTextFromCommand(kcInsNoteMapEditSampleMap));
+			AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_SAMPLEMAP, _T("Edit Sample &Map\t") + ih->GetKeyTextFromCommand(kcInsNoteMapEditSampleMap));
 			if (hSubMenu)
 			{
 				// Create sub menu with a list of all samples that are referenced by this instrument.
@@ -344,7 +344,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 				{
 					if(*sample <= sndFile.GetNumSamples())
 					{
-						wsprintf(s, "%d: ", *sample);
+						wsprintf(s, _T("%u: "), *sample);
 						size_t l = strlen(s);
 						memcpy(s + l, sndFile.m_szNames[*sample], MAX_SAMPLENAME);
 						s[l + MAX_SAMPLENAME] = '\0';
@@ -352,24 +352,24 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 					}
 				}
 
-				AppendMenu(hMenu, MF_POPUP, (UINT)hSubMenu, "&Edit Sample\t" + ih->GetKeyTextFromCommand(kcInsNoteMapEditSample));
+				AppendMenu(hMenu, MF_POPUP, (UINT)hSubMenu, _T("&Edit Sample\t") + ih->GetKeyTextFromCommand(kcInsNoteMapEditSample));
 				AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
 			}
-			wsprintf(s, "Map all notes to &sample %d\t" + ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentSample), pIns->Keyboard[m_nNote]);
+			wsprintf(s, _T("Map all notes to &sample %u\t") + ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentSample), pIns->Keyboard[m_nNote]);
 			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_SMP, s);
 
 			if(sndFile.GetType() != MOD_TYPE_XM)
 			{
 				if(ModCommand::IsNote(pIns->NoteMap[m_nNote]))
 				{
-					wsprintf(s, "Map all &notes to %s\t" + ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote), sndFile.GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument).c_str());
+					wsprintf(s, _T("Map all &notes to %s\t") + ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote), sndFile.GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument).c_str());
 					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, s);
 				}
-				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_UP, "Transpose map &up\t" + ih->GetKeyTextFromCommand(kcInsNoteMapTransposeUp));
-				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_DOWN, "Transpose map &down\t" + ih->GetKeyTextFromCommand(kcInsNoteMapTransposeDown));
+				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_UP, _T("Transpose map &up\t") + ih->GetKeyTextFromCommand(kcInsNoteMapTransposeUp));
+				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_DOWN, _T("Transpose map &down\t") + ih->GetKeyTextFromCommand(kcInsNoteMapTransposeDown));
 			}
-			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_RESET, "&Reset note mapping\t" + ih->GetKeyTextFromCommand(kcInsNoteMapReset));
-			AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_DUPLICATE, "Duplicate &Instrument\t" + ih->GetKeyTextFromCommand(kcInstrumentCtrlDuplicate));
+			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_RESET, _T("&Reset note mapping\t") + ih->GetKeyTextFromCommand(kcInsNoteMapReset));
+			AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_DUPLICATE, _T("Duplicate &Instrument\t") + ih->GetKeyTextFromCommand(kcInstrumentCtrlDuplicate));
 			SetMenuDefaultItem(hMenu, ID_INSTRUMENT_SAMPLEMAP, FALSE);
 			ClientToScreen(&pt);
 			::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
@@ -767,6 +767,7 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlInstruments)
 	ON_WM_VSCROLL()
 	ON_WM_HSCROLL()
+	ON_NOTIFY(TBN_DROPDOWN, IDC_TOOLBAR1, OnTbnDropDownToolBar)
 	ON_COMMAND(IDC_INSTRUMENT_NEW,		OnInstrumentNew)
 	ON_COMMAND(IDC_INSTRUMENT_OPEN,		OnInstrumentOpen)
 	ON_COMMAND(IDC_INSTRUMENT_SAVEAS,	OnInstrumentSave)
@@ -886,8 +887,9 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_bInitialized = FALSE;
 	SetRedraw(FALSE);
 
+	m_ToolBar.SetExtendedStyle(m_ToolBar.GetExtendedStyle() | TBSTYLE_EX_DRAWDDARROWS);
 	m_ToolBar.Init(CMainFrame::GetMainFrame()->m_PatternIcons,CMainFrame::GetMainFrame()->m_PatternIconsDisabled);
-	m_ToolBar.AddButton(IDC_INSTRUMENT_NEW, TIMAGE_INSTR_NEW);
+	m_ToolBar.AddButton(IDC_INSTRUMENT_NEW, TIMAGE_INSTR_NEW, TBSTYLE_BUTTON | TBSTYLE_DROPDOWN);
 	m_ToolBar.AddButton(IDC_INSTRUMENT_OPEN, TIMAGE_OPEN);
 	m_ToolBar.AddButton(IDC_INSTRUMENT_SAVEAS, TIMAGE_SAVE);
 	m_ToolBar.AddButton(IDC_INSTRUMENT_PLAY, TIMAGE_PREVIEW);
@@ -977,6 +979,28 @@ BOOL CCtrlInstruments::OnInitDialog()
 void CCtrlInstruments::RecalcLayout()
 //-----------------------------------
 {
+}
+
+
+void CCtrlInstruments::OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult)
+//--------------------------------------------------------------------------
+{
+	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
+	LPNMTOOLBAR pToolBar = reinterpret_cast<LPNMTOOLBAR>(pNMHDR);
+	ClientToScreen(&(pToolBar->rcButton)); // TrackPopupMenu uses screen coords
+	switch(pToolBar->iItem)
+	{
+	case IDC_INSTRUMENT_NEW:
+		{
+			CMenu menu;
+			menu.CreatePopupMenu();
+			menu.AppendMenu(MF_STRING, ID_INSTRUMENT_DUPLICATE, _T("Duplicate &Instrument\t") + ih->GetKeyTextFromCommand(kcInstrumentCtrlDuplicate));
+			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left, pToolBar->rcButton.bottom, this);
+			menu.DestroyMenu();
+		}
+		break;
+	}
+	*pResult = 0;
 }
 
 
@@ -1691,38 +1715,24 @@ void CCtrlInstruments::OnNextInstrument()
 void CCtrlInstruments::OnInstrumentNew()
 //--------------------------------------
 {
-	if(m_sndFile.GetNumInstruments() > 0
-		&& CMainFrame::GetInputHandler()->ShiftPressed())
-	{
-		OnInstrumentDuplicate();
-		return;
-	}
-	bool bFirst = (m_sndFile.GetNumInstruments() == 0);
-	INSTRUMENTINDEX ins = m_modDoc.InsertInstrument();
-	if (bFirst) m_modDoc.UpdateAllViews(nullptr, InstrumentHint().Info().Names().ModType());
+	InsertInstrument(m_sndFile.GetNumInstruments() > 0 && CMainFrame::GetInputHandler()->ShiftPressed());
+}
+
+
+void CCtrlInstruments::InsertInstrument(bool duplicate)
+//-----------------------------------------------------
+{
+	const bool hasInstruments = m_sndFile.GetNumInstruments() > 0;
+
+	INSTRUMENTINDEX ins = m_modDoc.InsertInstrument(SAMPLEINDEX_INVALID, (duplicate && hasInstruments) ? m_nInstrument : INSTRUMENTINDEX_INVALID);
+	if (!hasInstruments) m_modDoc.UpdateAllViews(nullptr, InstrumentHint().Info().Names().ModType());
+
 	if (ins != INSTRUMENTINDEX_INVALID)
 	{
 		SetCurrentInstrument(ins);
 		m_modDoc.UpdateAllViews(nullptr, InstrumentHint(ins).Info().Envelope().Names());
 	}
 	m_parent.InstrumentChanged(m_nInstrument);
-	SwitchToView();
-}
-
-
-void CCtrlInstruments::OnInstrumentDuplicate()
-//--------------------------------------------
-{
-	if(m_sndFile.GetNumInstruments() > 0)
-	{
-		INSTRUMENTINDEX ins = m_modDoc.InsertInstrument(INSTRUMENTINDEX_INVALID, m_nInstrument);
-		if(ins != INSTRUMENTINDEX_INVALID)
-		{
-			SetCurrentInstrument(ins);
-			m_modDoc.UpdateAllViews(nullptr, InstrumentHint(ins).Info().Envelope().Names());
-		}
-		m_parent.InstrumentChanged(m_nInstrument);
-	}
 	SwitchToView();
 }
 
@@ -2535,9 +2545,9 @@ LRESULT CCtrlInstruments::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	{
 		case kcInstrumentCtrlLoad: OnInstrumentOpen(); return wParam;
 		case kcInstrumentCtrlSave: OnInstrumentSave(); return wParam;
-		case kcInstrumentCtrlNew:  OnInstrumentNew();  return wParam;
+		case kcInstrumentCtrlNew:  InsertInstrument(false);  return wParam;
 
-		case kcInstrumentCtrlDuplicate:	OnInstrumentDuplicate(); return wParam;
+		case kcInstrumentCtrlDuplicate:	InsertInstrument(true); return wParam;
 	}
 
 	return 0;

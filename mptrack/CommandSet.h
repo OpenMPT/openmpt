@@ -661,6 +661,7 @@ enum CommandID
 	kcSampleLoad=kcStartSampleMisc,
 	kcSampleSave,
 	kcSampleNew,
+	kcSampleDuplicate,
 	kcSampleTransposeUp,
 	kcSampleTransposeDown,
 	kcSampleTransposeOctUp,
@@ -1334,7 +1335,6 @@ public:
 	bool LoadFile(const mpt::PathString &filename);
 	bool LoadFile(std::istream& iStrm, const std::wstring &filenameDescription, CCommandSet *commandSet = nullptr);
 	bool LoadDefaultKeymap();
-
 };
 
 OPENMPT_NAMESPACE_END

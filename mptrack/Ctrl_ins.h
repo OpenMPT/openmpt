@@ -127,6 +127,7 @@ public:
 public:
 	void SetModified(InstrumentHint hint, bool updateAll);
 	BOOL SetCurrentInstrument(UINT nIns, BOOL bUpdNum=TRUE);
+	void InsertInstrument(bool duplicate);
 	BOOL OpenInstrument(const mpt::PathString &fileName);
 	BOOL OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr);
 	BOOL EditSample(UINT nSample);
@@ -150,11 +151,12 @@ protected:
 	//{{AFX_MSG(CCtrlInstruments)
 	afx_msg void OnVScroll(UINT nCode, UINT nPos, CScrollBar *pSB);
 	afx_msg void OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB);
+	afx_msg void OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnInstrumentChanged();
 	afx_msg void OnPrevInstrument();
 	afx_msg void OnNextInstrument();
 	afx_msg void OnInstrumentNew();
-	afx_msg void OnInstrumentDuplicate();
+	afx_msg void OnInstrumentDuplicate() { InsertInstrument(true); }
 	afx_msg void OnInstrumentOpen();
 	afx_msg void OnInstrumentSave();
 	afx_msg void OnInstrumentPlay();
