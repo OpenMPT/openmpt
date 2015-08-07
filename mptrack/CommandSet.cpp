@@ -561,7 +561,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcOrderlistEditInsert, 1803, _T("Insert Order"));
 	DefineKeyCommand(kcOrderlistEditPattern, 1804, _T("Edit Pattern"));
 	DefineKeyCommand(kcOrderlistSwitchToPatternView, 1805, _T("Switch to pattern editor"));
-	DefineKeyCommand(kcDuplicatePattern, 1806, _T("Duplicate pattern"));
+	DefineKeyCommand(kcDuplicatePattern, 1806, _T("Duplicate Pattern"));
 	DefineKeyCommand(kcOrderlistPat0, 1807, _T("Pattern index digit 0"));
 	DefineKeyCommand(kcOrderlistPat1, 1808, _T("Pattern index digit 1"));
 	DefineKeyCommand(kcOrderlistPat2, 1809, _T("Pattern index digit 2"));
@@ -688,6 +688,7 @@ void CCommandSet::SetupCommands()
 	// Safety margin if we want to add more cues
 	DefineKeyCommand(kcOrderlistEditCopyOrders, 1950, _T("Copy Orders"));
 	DefineKeyCommand(kcTreeViewStopPreview, 1951, _T("Stop sample preview"), kcHidden);
+	DefineKeyCommand(kcSampleDuplicate, 1952, _T("Duplicate Sample"));
 
 	// Add new key commands here.
 

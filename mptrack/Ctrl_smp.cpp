@@ -68,8 +68,9 @@ struct PowerOf2Exponent<1> { enum { value = 0 }; };
 BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlSamples)
 	ON_WM_VSCROLL()
-	ON_NOTIFY(TBN_DROPDOWN, IDC_TOOLBAR1, &CCtrlSamples::OnTbnDropDownToolBar)
+	ON_NOTIFY(TBN_DROPDOWN, IDC_TOOLBAR1, OnTbnDropDownToolBar)
 	ON_COMMAND(IDC_SAMPLE_NEW,			OnSampleNew)
+	ON_COMMAND(IDC_SAMPLE_DUPLICATE,	OnSampleDuplicate)
 	ON_COMMAND(IDC_SAMPLE_OPEN,			OnSampleOpen)
 	ON_COMMAND(IDC_SAMPLE_OPENKNOWN,	OnSampleOpenKnown)
 	ON_COMMAND(IDC_SAMPLE_OPENRAW,		OnSampleOpenRaw)
@@ -222,7 +223,7 @@ BOOL CCtrlSamples::OnInitDialog()
 	// File ToolBar
 	m_ToolBar1.SetExtendedStyle(m_ToolBar1.GetExtendedStyle() | TBSTYLE_EX_DRAWDDARROWS);
 	m_ToolBar1.Init(CMainFrame::GetMainFrame()->m_PatternIcons,CMainFrame::GetMainFrame()->m_PatternIconsDisabled);
-	m_ToolBar1.AddButton(IDC_SAMPLE_NEW, TIMAGE_SAMPLE_NEW);
+	m_ToolBar1.AddButton(IDC_SAMPLE_NEW, TIMAGE_SAMPLE_NEW, TBSTYLE_BUTTON | TBSTYLE_DROPDOWN);
 	m_ToolBar1.AddButton(IDC_SAMPLE_OPEN, TIMAGE_OPEN, TBSTYLE_BUTTON | TBSTYLE_DROPDOWN);
 	m_ToolBar1.AddButton(IDC_SAMPLE_SAVEAS, TIMAGE_SAVE);
 	// Edit ToolBar
@@ -522,7 +523,7 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case IDC_SAMPLE_NEW:
-		OnSampleNew();
+		InsertSample(false);
 		break;
 	//end rewbs.customKeys
 
@@ -1009,13 +1010,23 @@ void CCtrlSamples::OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult)
 	ClientToScreen(&(pToolBar->rcButton)); // TrackPopupMenu uses screen coords
 	switch(pToolBar->iItem)
 	{
+	case IDC_SAMPLE_NEW:
+		{
+			CMenu menu;
+			menu.CreatePopupMenu();
+			menu.AppendMenu(MF_STRING, IDC_SAMPLE_DUPLICATE, _T("&Duplicate Sample"));
+			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left, pToolBar->rcButton.bottom, this);
+			menu.DestroyMenu();
+		}
+		break;
 	case IDC_SAMPLE_OPEN:
 		{
 			CMenu menu;
 			menu.CreatePopupMenu();
-			menu.AppendMenu(MF_STRING, IDC_SAMPLE_OPENKNOWN, _T("Import &sample ..."));
-			menu.AppendMenu(MF_STRING, IDC_SAMPLE_OPENRAW, _T("Import &RAW sample ..."));
+			menu.AppendMenu(MF_STRING, IDC_SAMPLE_OPENKNOWN, _T("Import &Sample..."));
+			menu.AppendMenu(MF_STRING, IDC_SAMPLE_OPENRAW, _T("Import &RAW Sample..."));
 			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left, pToolBar->rcButton.bottom, this);
+			menu.DestroyMenu();
 		}
 		break;
 	}
@@ -1026,8 +1037,13 @@ void CCtrlSamples::OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult)
 void CCtrlSamples::OnSampleNew()
 //------------------------------
 {
-	const bool duplicate = CMainFrame::GetInputHandler()->ShiftPressed();
+	InsertSample(CMainFrame::GetInputHandler()->ShiftPressed());
+}
 
+
+void CCtrlSamples::InsertSample(bool duplicate)
+//---------------------------------------------
+{
 	SAMPLEINDEX smp = m_modDoc.InsertSample(true);
 	if(smp != SAMPLEINDEX_INVALID)
 	{
@@ -1041,13 +1057,13 @@ void CCtrlSamples::OnSampleNew()
 			sndFile.ReadSampleFromSong(smp, sndFile, nOldSmp);
 		}
 
-		m_modDoc.UpdateAllViews(NULL, SampleHint(smp).Info().Data().Names());
+		m_modDoc.UpdateAllViews(nullptr, SampleHint(smp).Info().Data().Names());
 		if(m_modDoc.GetNumInstruments() > 0 && m_modDoc.FindSampleParent(smp) == INSTRUMENTINDEX_INVALID)
 		{
 			if(Reporting::Confirm("This sample is not used by any instrument. Do you want to create a new instrument using this sample?") == cnfYes)
 			{
 				INSTRUMENTINDEX nins = m_modDoc.InsertInstrument(smp);
-				m_modDoc.UpdateAllViews(NULL, InstrumentHint(nins).Info().Envelope().Names());
+				m_modDoc.UpdateAllViews(nullptr, InstrumentHint(nins).Info().Envelope().Names());
 				m_parent.InstrumentChanged(nins);
 			}
 		}
@@ -3192,9 +3208,10 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	int transpose = 0;
 	switch(wParam)
 	{
-	case kcSampleLoad:	OnSampleOpen(); return wParam;
-	case kcSampleSave:	OnSampleSave(); return wParam;
-	case kcSampleNew:	OnSampleNew(); return wParam;
+	case kcSampleLoad:		OnSampleOpen(); return wParam;
+	case kcSampleSave:		OnSampleSave(); return wParam;
+	case kcSampleNew:		InsertSample(false); return wParam;
+	case kcSampleDuplicate:	InsertSample(true); return wParam;
 
 	case kcSampleTransposeUp: transpose = 1; break;
 	case kcSampleTransposeDown: transpose = -1; break;
