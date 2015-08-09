@@ -183,6 +183,8 @@ CModTree::~CModTree()
 void CModTree::Init()
 //-------------------
 {
+	m_MediaFoundationExtensions = FileType(CSoundFile::GetMediaFoundationFileTypes()).GetExtensions();
+
 	DWORD dwRemove = TVS_SINGLEEXPAND;
 	DWORD dwAdd = TVS_EDITLABELS | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_SHOWSELALWAYS;
 
@@ -1661,10 +1663,11 @@ BOOL CModTree::OpenTreeItem(HTREEITEM hItem)
 BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 //---------------------------------------------
 {
+	std::vector<FileType> mediaFoundationTypes = CSoundFile::GetMediaFoundationFileTypes();
 	FileDialog dlg = OpenFileDialog()
 		.EnableAudioPreview()
 		.ExtensionFilter(
-			"All Instruments and Banks|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls;*.flac;*.oga;*.mp1;*.mp2;*.mp3|"
+			"All Instruments and Banks|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls;*.flac;*.oga;*.mp1;*.mp2;*.mp3" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
 			"FastTracker II Instruments (*.xi)|*.xi|"
 			"GF1 Patches (*.pat)|*.pat|"
 			"Wave Files (*.wav)|*.wav|"
@@ -1674,6 +1677,9 @@ BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 	#ifndef NO_MP3_SAMPLES
 			"MPEG Files (*.mp1,*.mp2,*.mp3)|*.mp1;*.mp2;*.mp3|"
 	#endif // NO_MP3_SAMPLES
+	#if !defined(NO_MEDIAFOUNDATION)
+			+ ToFilterString(mediaFoundationTypes, FileTypeFormatShowExtensions).ToLocale() +
+	#endif
 			"Impulse Tracker Instruments (*.iti)|*.iti;*.its|"
 			"SoundFont 2.0 Banks (*.sf2)|*.sf2;*.sbk|"
 			"DLS Sound Banks (*.dls)|*.dls|"
@@ -1717,6 +1723,23 @@ struct find_str
 
 	const char *s1;
 };
+
+bool CModTree::IsMediaFoundationExtension(const std::string &ext) const
+//---------------------------------------------------------------------
+{
+	for(std::size_t i = 0; i < m_MediaFoundationExtensions.size(); ++i)
+	{
+		if(m_MediaFoundationExtensions[i].empty())
+		{
+			continue;
+		}
+		if(m_MediaFoundationExtensions[i].ToLocale() == ext)
+		{
+			return true;
+		}
+	}
+	return false;
+}
 
 // Refresh Instrument Library
 void CModTree::FillInstrumentLibrary()
@@ -1871,6 +1894,7 @@ void CModTree::FillInstrumentLibrary()
 						|| !strcmp(s, "8svx")
 						|| !strcmp(s, "16sv")
 						|| !strcmp(s, "16svx")
+						|| IsMediaFoundationExtension(s)
 						|| (m_bShowAllFiles // Exclude the extensions below
 							&& strcmp(s, "txt")
 							&& strcmp(s, "diz")

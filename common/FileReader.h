@@ -899,4 +899,83 @@ FileReader GetFileReader(TInputFile &file)
 #endif // MPT_WITH_FILEIO
 
 
+#ifdef MODPLUG_TRACKER
+#if MPT_OS_WINDOWS
+
+class OnDiskFileWrapper
+{
+
+private:
+
+	mpt::PathString m_Filename;
+	bool m_IsTempFile;
+
+public:
+
+	OnDiskFileWrapper(FileReader &file)
+		: m_IsTempFile(false)
+	{
+		try
+		{
+			file.Rewind();
+			if(file.GetFileName().empty())
+			{
+				const mpt::PathString tempName = Util::CreateTempFileName(MPT_PATHSTRING("OpenMPT"));
+				HANDLE hFile = NULL;
+				hFile = CreateFileW(tempName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL);
+				if(!hFile || hFile == INVALID_HANDLE_VALUE) throw std::runtime_error("");
+				std::size_t towrite = file.GetLength();
+				std::size_t written = 0;
+				do
+				{
+					DWORD chunkSize = std::min<DWORD>(65536, mpt::saturate_cast<DWORD>(towrite));
+					DWORD chunkDone = 0;
+					WriteFile(hFile, file.GetRawData() + written, chunkSize, &chunkDone, NULL);
+					if(chunkDone != chunkSize) { CloseHandle(hFile); throw std::runtime_error(""); }
+					towrite -= chunkDone;
+					written += chunkDone;
+				} while(towrite > 0);
+				CloseHandle(hFile);
+				hFile = NULL;
+				m_Filename = tempName;
+				m_IsTempFile = true;
+			} else
+			{
+				m_Filename = file.GetFileName();
+			}
+		} catch (const std::runtime_error &)
+		{
+			m_IsTempFile = false;
+			m_Filename = mpt::PathString();
+		}
+	}
+
+	~OnDiskFileWrapper()
+	{
+		if(m_IsTempFile)
+		{
+			DeleteFileW(m_Filename.AsNative().c_str());
+			m_IsTempFile = false;
+		}
+		m_Filename = mpt::PathString();
+	}
+
+public:
+
+	bool IsValid() const
+	{
+		return !m_Filename.empty();
+	}
+
+	mpt::PathString GetFilename() const
+	{
+		return m_Filename;
+	}
+
+}; // class OnDiskFileWrapper
+
+#endif // MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER
+
+
 OPENMPT_NAMESPACE_END

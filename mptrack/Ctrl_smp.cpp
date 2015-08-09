@@ -1076,10 +1076,11 @@ void CCtrlSamples::OnSampleOpen()
 //-------------------------------
 {
 	static int nLastIndex = 0;
+	std::vector<FileType> mediaFoundationTypes = CSoundFile::GetMediaFoundationFileTypes();
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
 		.EnableAudioPreview()
-		.ExtensionFilter("All Samples|*.wav;*.flac;*.oga;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.iff;*.8sv;*.8svx;*.svx;*.pcm;*.mp1;*.mp2;*.mp3|"
+		.ExtensionFilter("All Samples|*.wav;*.flac;*.oga;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.iff;*.8sv;*.8svx;*.svx;*.pcm;*.mp1;*.mp2;*.mp3" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
 			"Wave Files (*.wav)|*.wav|"
 	#ifndef NO_FLAC
 			"FLAC Files (*.flac,*.oga)|*.flac;*.oga|"
@@ -1092,6 +1093,9 @@ void CCtrlSamples::OnSampleOpen()
 			"ScreamTracker Samples (*.s3i,*.smp)|*.s3i;*.smp|"
 			"GF1 Patches (*.pat)|*.pat|"
 			"AIFF Files (*.aiff;*.8svx)|*.aif;*.aiff;*.iff;*.8sv;*.8svx;*.svx|"
+	#if !defined(NO_MEDIAFOUNDATION)
+			+ ToFilterString(mediaFoundationTypes, FileTypeFormatShowExtensions).ToLocale() +
+	#endif
 			"Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|"
 			"All Files (*.*)|*.*||")
 		.WorkingDirectory(TrackerSettings::Instance().PathSamples.GetWorkingDir())
@@ -1120,10 +1124,11 @@ void CCtrlSamples::OnSampleOpenKnown()
 //------------------------------------
 {
 	static int nLastIndex = 0;
+	std::vector<FileType> mediaFoundationTypes = CSoundFile::GetMediaFoundationFileTypes();
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
 		.EnableAudioPreview()
-		.ExtensionFilter("All Samples|*.wav;*.flac;*.oga;*.pat;*.s3i;*.smp;*.xi;*.aif;*.aiff;*.its;*.iff;*.8sv;*.8svx;*.svx;*.mp1;*.mp2;*.mp3|"
+		.ExtensionFilter("All Samples|*.wav;*.flac;*.oga;*.pat;*.s3i;*.smp;*.xi;*.aif;*.aiff;*.its;*.iff;*.8sv;*.8svx;*.svx;*.mp1;*.mp2;*.mp3" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
 			"Wave Files (*.wav)|*.wav|"
 	#ifndef NO_FLAC
 			"FLAC Files (*.flac,*.oga)|*.flac;*.oga|"
@@ -1136,6 +1141,9 @@ void CCtrlSamples::OnSampleOpenKnown()
 			"ScreamTracker Samples (*.s3i,*.smp)|*.s3i;*.smp|"
 			"GF1 Patches (*.pat)|*.pat|"
 			"AIFF Files (*.aiff;*.8svx)|*.aif;*.aiff;*.iff;*.8sv;*.8svx;*.svx|"
+	#if !defined(NO_MEDIAFOUNDATION)
+			+ ToFilterString(mediaFoundationTypes, FileTypeFormatShowExtensions).ToLocale() +
+	#endif
 			"All Files (*.*)|*.*||")
 		.WorkingDirectory(TrackerSettings::Instance().PathSamples.GetWorkingDir())
 		.FilterIndex(&nLastIndex);

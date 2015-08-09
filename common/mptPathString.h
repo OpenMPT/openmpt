@@ -10,6 +10,10 @@
 
 #pragma once
 
+#include <vector>
+
+#include "FlagSet.h"
+
 OPENMPT_NAMESPACE_BEGIN
 
 #if defined(MPT_WITH_PATHSTRING)
@@ -280,6 +284,68 @@ void SanitizeFilename(CString &str);
 #endif
 
 #endif // MODPLUG_TRACKER
+
+
+enum FileTypeFormat
+{
+	FileTypeFormatNone           = 0   , // do not show extensions after description, i.e. "Foo Files"
+	FileTypeFormatShowExtensions = 1<<0, // show extensions after descripten, i.e. "Foo Files (*.foo,*.bar)"
+};
+MPT_DECLARE_ENUM(FileTypeFormat)
+
+class FileType
+{
+private:
+	mpt::ustring m_ShortName; // "flac", "mod" (lowercase)
+	mpt::ustring m_Description; // "FastTracker 2 Module"
+	std::vector<std::string> m_MimeTypes; // "audio/ogg" (in ASCII)
+	std::vector<mpt::PathString> m_Extensions; // "mod", "xm" (lowercase)
+	std::vector<mpt::PathString> m_Prefixes; // "mod" for "mod.*"
+public:
+	FileType() { }
+	FileType(const std::vector<FileType> &group)
+	{
+		for(std::vector<FileType>::const_iterator it = group.begin(); it != group.end(); ++it)
+		{
+			m_MimeTypes.insert(m_MimeTypes.end(), it->m_MimeTypes.begin(), it->m_MimeTypes.end());
+			m_Extensions.insert(m_Extensions.end(), it->m_Extensions.begin(), it->m_Extensions.end());
+			m_Prefixes.insert(m_Prefixes.end(), it->m_Prefixes.begin(), it->m_Prefixes.end());
+		}
+	}
+	static FileType Any()
+	{
+		return FileType().ShortName(MPT_USTRING("*")).Description(MPT_USTRING("All Files")).AddExtension(MPT_PATHSTRING("*"));
+	}
+public:
+	FileType& ShortName(const mpt::ustring &shortName) { m_ShortName = shortName; return *this; }
+	FileType& Description(const mpt::ustring &description) { m_Description = description; return *this; }
+	FileType& MimeTypes(const std::vector<std::string> &mimeTypes) { m_MimeTypes = mimeTypes; return *this; }
+	FileType& Extensions(const std::vector<mpt::PathString> &extensions) { m_Extensions = extensions; return *this; }
+	FileType& Prefixes(const std::vector<mpt::PathString> &prefixes) { m_Prefixes = prefixes; return *this; }
+	FileType& AddMimeType(const std::string &mimeType) { m_MimeTypes.push_back(mimeType); return *this; }
+	FileType& AddExtension(const mpt::PathString &extension) { m_Extensions.push_back(extension); return *this; }
+	FileType& AddPrefix(const mpt::PathString &prefix) { m_Prefixes.push_back(prefix); return *this; }
+public:
+	mpt::ustring GetShortName() const { return m_ShortName; }
+	mpt::ustring GetDescription() const { return m_Description; }
+	std::vector<std::string> GetMimeTypes() const { return m_MimeTypes; }
+	std::vector<mpt::PathString> GetExtensions() const { return m_Extensions; }
+	std::vector<mpt::PathString> GetPrefixes() const { return m_Prefixes; }
+public:
+	mpt::PathString AsFilterString(FlagSet<FileTypeFormat> format = FileTypeFormatNone) const;
+	mpt::PathString AsFilterOnlyString() const;
+}; // class FileType
+
+
+// "Ogg Vorbis|*.ogg;*.oga|" // FileTypeFormatNone
+// "Ogg Vorbis (*.ogg,*.oga)|*.ogg;*.oga|" // FileTypeFormatShowExtensions
+mpt::PathString ToFilterString(const FileType &fileType, FlagSet<FileTypeFormat> format = FileTypeFormatNone);
+mpt::PathString ToFilterString(const std::vector<FileType> &fileTypes, FlagSet<FileTypeFormat> format = FileTypeFormatNone);
+
+// "*.ogg;*.oga" / ";*.ogg;*.oga"
+mpt::PathString ToFilterOnlyString(const FileType &fileType, bool prependSemicolonWhenNotEmpty = false);
+mpt::PathString ToFilterOnlyString(const std::vector<FileType> &fileTypes, bool prependSemicolonWhenNotEmpty = false);
+
 
 #endif // MPT_WITH_PATHSTRING
 

@@ -159,6 +159,9 @@
 // Define to build without MP3 import support (via mpg123)
 //#define NO_MP3_SAMPLES
 
+// Define to build without MediaFoundation codec support
+//#define NO_MEDIAFOUNDATION
+
 // Do not build libopenmpt C api
 #define NO_LIBOPENMPT_C
 
@@ -214,6 +217,7 @@
 #endif
 //#define NO_MINIZ
 #define NO_MP3_SAMPLES
+#define NO_MEDIAFOUNDATION
 //#define NO_LIBOPENMPT_C
 //#define NO_LIBOPENMPT_CXX
 
@@ -342,6 +346,10 @@
 
 #if !MPT_OS_WINDOWS && !defined(NO_DSOUND)
 #define NO_DSOUND // DirectSound requires Windows
+#endif
+
+#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0) && !defined(NO_MEDIAFOUNDATION)
+#define NO_MEDIAFOUNDATION // MediaFoundation requires a modern SDK
 #endif
 
 #if !defined(MPT_CHARSET_WIN32) && !defined(MPT_CHARSET_ICONV) && !defined(MPT_CHARSET_CODECVTUTF8) && !defined(MPT_CHARSET_INTERNAL)
@@ -518,4 +526,10 @@
 #endif
 
 #endif // MPT_COMPILER_MSVC
+
+
+
+#if (_WIN32_WINNT < 0x0601) && !defined(NO_MEDIAFOUNDATION)
+#define NO_MEDIAFOUNDATION // MediaFoundation requires Windows 7
+#endif
 

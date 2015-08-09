@@ -177,6 +177,7 @@ protected:
 	mpt::PathString m_InstrLibHighlightPath;	// Folder to highlight in browser after a refresh
 	mpt::PathString m_SongFileName;				// Name of open module, without path (== m_szInstrLibPath).
 	bool m_bShowAllFiles;
+	std::vector<mpt::PathString> m_MediaFoundationExtensions;	// cached in order to avoid querying too ofter when changing browsed folder
 	
 	bool doLabelEdit;
 
@@ -241,6 +242,8 @@ protected:
 	ModTreeDocInfo *GetDocumentInfoFromModDoc(CModDoc &modDoc);
 
 	void InsertOrDupItem(bool insert);
+
+	bool IsMediaFoundationExtension(const std::string &ext) const;
 
 // Generated message map functions
 protected:
