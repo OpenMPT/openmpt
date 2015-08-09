@@ -325,12 +325,27 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			{
 				text += MPT_USTRING("Required CPU features: ");
 				std::vector<mpt::ustring> features;
-				if(GetMinimumSSEVersion() <= 0 && GetMinimumAVXVersion() <= 0 ) features.push_back(MPT_USTRING("fpu"));
-				if(GetMinimumSSEVersion() >= 1) features.push_back(MPT_USTRING("cmov"));
-				if(GetMinimumSSEVersion() >= 1) features.push_back(MPT_USTRING("sse"));
-				if(GetMinimumSSEVersion() >= 2) features.push_back(MPT_USTRING("sse2"));
-				if(GetMinimumAVXVersion() >= 1) features.push_back(MPT_USTRING("avx"));
-				if(GetMinimumAVXVersion() >= 2) features.push_back(MPT_USTRING("avx2"));
+				#if MPT_COMPILER_MSVC
+					#if defined(_M_X64)
+						features.push_back(MPT_USTRING("x86-64"));
+						if(GetMinimumAVXVersion() >= 1) features.push_back(MPT_USTRING("avx"));
+						if(GetMinimumAVXVersion() >= 2) features.push_back(MPT_USTRING("avx2"));
+					#elif defined(_M_IX86)
+						if(GetMinimumSSEVersion() <= 0 && GetMinimumAVXVersion() <= 0 ) features.push_back(MPT_USTRING("fpu"));
+						if(GetMinimumSSEVersion() >= 1) features.push_back(MPT_USTRING("cmov"));
+						if(GetMinimumSSEVersion() >= 1) features.push_back(MPT_USTRING("sse"));
+						if(GetMinimumSSEVersion() >= 2) features.push_back(MPT_USTRING("sse2"));
+						if(GetMinimumAVXVersion() >= 1) features.push_back(MPT_USTRING("avx"));
+						if(GetMinimumAVXVersion() >= 2) features.push_back(MPT_USTRING("avx2"));
+					#else
+						if(GetMinimumSSEVersion() <= 0 && GetMinimumAVXVersion() <= 0 ) features.push_back(MPT_USTRING("fpu"));
+						if(GetMinimumSSEVersion() >= 1) features.push_back(MPT_USTRING("cmov"));
+						if(GetMinimumSSEVersion() >= 1) features.push_back(MPT_USTRING("sse"));
+						if(GetMinimumSSEVersion() >= 2) features.push_back(MPT_USTRING("sse2"));
+						if(GetMinimumAVXVersion() >= 1) features.push_back(MPT_USTRING("avx"));
+						if(GetMinimumAVXVersion() >= 2) features.push_back(MPT_USTRING("avx2"));
+					#endif
+				#endif
 				text += mpt::String::Combine(features, MPT_USTRING(" "));
 				text += lf;
 			}
