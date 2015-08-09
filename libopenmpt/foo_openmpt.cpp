@@ -175,6 +175,9 @@ public:
 		p_info.info_set_int( "bitspersample", 32 );
 		std::vector<std::string> keys = mod->get_metadata_keys();
 		for ( std::vector<std::string>::iterator key = keys.begin(); key != keys.end(); ++key ) {
+			if ( *key == "message_raw" ) {
+				continue;
+			}
 			p_info.meta_set( (*key).c_str(), mod->get_metadata( *key ).c_str() );
 		}
 	}

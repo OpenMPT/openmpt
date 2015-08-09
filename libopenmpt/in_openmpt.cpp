@@ -175,6 +175,9 @@ static std::wstring generate_infotext( const std::wstring & filename, const open
 	str << L"duration: " << mod.get_duration_seconds() << L"seconds" << std::endl;
 	std::vector<std::string> metadatakeys = mod.get_metadata_keys();
 	for ( std::vector<std::string>::iterator key = metadatakeys.begin(); key != metadatakeys.end(); ++key ) {
+		if ( *key == "message_raw" ) {
+			continue;
+		}
 		str << StringDecode( *key, CP_UTF8 ) << L": " << StringDecode( mod.get_metadata(*key), CP_UTF8 ) << std::endl;
 	}
 	return str.str();
