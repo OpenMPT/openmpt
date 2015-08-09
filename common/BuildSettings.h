@@ -348,6 +348,10 @@
 #define NO_DSOUND // DirectSound requires Windows
 #endif
 
+#if !MPT_OS_WINDOWS && !defined(NO_MEDIAFOUNDATION)
+#define NO_MEDIAFOUNDATION // MediaFoundation requires Windows
+#endif
+
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0) && !defined(NO_MEDIAFOUNDATION)
 #define NO_MEDIAFOUNDATION // MediaFoundation requires a modern SDK
 #endif
@@ -529,7 +533,9 @@
 
 
 
+#if MPT_OS_WINDOWS
 #if (_WIN32_WINNT < 0x0601) && !defined(NO_MEDIAFOUNDATION)
 #define NO_MEDIAFOUNDATION // MediaFoundation requires Windows 7
+#endif
 #endif
 
