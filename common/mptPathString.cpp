@@ -303,6 +303,125 @@ void SanitizeFilename(CString &str)
 
 #endif // MODPLUG_TRACKER
 
+
+mpt::PathString FileType::AsFilterString(FlagSet<FileTypeFormat> format) const
+//----------------------------------------------------------------------------
+{
+	mpt::PathString filter;
+	if(GetShortName().empty() || GetExtensions().empty())
+	{
+		return filter;
+	}
+	if(!GetDescription().empty())
+	{
+		filter += mpt::PathString::FromUnicode(GetDescription());
+	} else
+	{
+		filter += mpt::PathString::FromUnicode(GetShortName());
+	}
+	const std::vector<mpt::PathString> extensions = GetExtensions();
+	if(format[FileTypeFormatShowExtensions])
+	{
+		filter += MPT_PATHSTRING(" (");
+		bool first = true;
+		for(std::vector<mpt::PathString>::const_iterator it = extensions.begin(); it != extensions.end(); ++it)
+		{
+			if(first)
+			{
+				first = false;
+			} else
+			{
+				filter += MPT_PATHSTRING(",");
+			}
+			filter += MPT_PATHSTRING("*.");
+			filter += (*it);
+		}
+		filter += MPT_PATHSTRING(")");
+	}
+	filter += MPT_PATHSTRING("|");
+	{
+		bool first = true;
+		for(std::vector<mpt::PathString>::const_iterator it = extensions.begin(); it != extensions.end(); ++it)
+		{
+			if(first)
+			{
+				first = false;
+			} else
+			{
+				filter += MPT_PATHSTRING(";");
+			}
+			filter += MPT_PATHSTRING("*.");
+			filter += (*it);
+		}
+	}
+	filter += MPT_PATHSTRING("|");
+	return filter;
+}
+
+
+mpt::PathString FileType::AsFilterOnlyString() const
+//--------------------------------------------------
+{
+	mpt::PathString filter;
+	const std::vector<mpt::PathString> extensions = GetExtensions();
+	{
+		bool first = true;
+		for(std::vector<mpt::PathString>::const_iterator it = extensions.begin(); it != extensions.end(); ++it)
+		{
+			if(first)
+			{
+				first = false;
+			} else
+			{
+				filter += MPT_PATHSTRING(";");
+			}
+			filter += MPT_PATHSTRING("*.");
+			filter += (*it);
+		}
+	}
+	return filter;
+}
+
+
+mpt::PathString ToFilterString(const FileType &fileType, FlagSet<FileTypeFormat> format)
+//--------------------------------------------------------------------------------------
+{
+	return fileType.AsFilterString(format);
+}
+
+
+mpt::PathString ToFilterString(const std::vector<FileType> &fileTypes, FlagSet<FileTypeFormat> format)
+//----------------------------------------------------------------------------------------------------
+{
+	mpt::PathString filter;
+	for(std::vector<FileType>::const_iterator it = fileTypes.begin(); it != fileTypes.end(); ++it)
+	{
+		filter += it->AsFilterString(format);
+	}
+	return filter;
+}
+
+
+mpt::PathString ToFilterOnlyString(const FileType &fileType, bool prependSemicolonWhenNotEmpty)
+//---------------------------------------------------------------------------------------------
+{
+	mpt::PathString filter = fileType.AsFilterOnlyString();
+	return filter.empty() ? filter : (prependSemicolonWhenNotEmpty ? MPT_PATHSTRING(";") : MPT_PATHSTRING("")) + filter;
+}
+
+
+mpt::PathString ToFilterOnlyString(const std::vector<FileType> &fileTypes, bool prependSemicolonWhenNotEmpty)
+//-----------------------------------------------------------------------------------------------------------
+{
+	mpt::PathString filter;
+	for(std::vector<FileType>::const_iterator it = fileTypes.begin(); it != fileTypes.end(); ++it)
+	{
+		filter += it->AsFilterOnlyString();
+	}
+	return filter.empty() ? filter : (prependSemicolonWhenNotEmpty ? MPT_PATHSTRING(";") : MPT_PATHSTRING("")) + filter;
+}
+
+
 #endif // MPT_WITH_PATHSTRING
 
 

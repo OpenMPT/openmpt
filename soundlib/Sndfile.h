@@ -910,6 +910,12 @@ public:
 	bool ReadIFFSample(SAMPLEINDEX nInstr, FileReader &file);
 	bool ReadFLACSample(SAMPLEINDEX sample, FileReader &file);
 	bool ReadMP3Sample(SAMPLEINDEX sample, FileReader &file);
+	bool ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file);
+#ifdef MODPLUG_TRACKER
+#if defined(MPT_WITH_PATHSTRING)
+	static std::vector<FileType> GetMediaFoundationFileTypes();
+#endif // MPT_WITH_PATHSTRING
+#endif // MODPLUG_TRACKER
 #ifndef MODPLUG_NO_FILESAVE
 	bool SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const;
 	bool SaveRAWSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const;

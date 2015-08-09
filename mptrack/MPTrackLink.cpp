@@ -34,6 +34,14 @@ OPENMPT_NAMESPACE_BEGIN
 
 #pragma comment(lib, "msacm32.lib")
 
+#ifndef NO_MEDIAFOUNDATION
+#pragma comment(lib, "mf.lib")
+#pragma comment(lib, "mfplat.lib")
+#pragma comment(lib, "mfreadwrite.lib")
+#pragma comment(lib, "mfuuid.lib") // static lib
+#pragma comment(lib, "propsys.lib")
+#endif
+
 #pragma comment( linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df'\"" )
 
 #endif // MPT_COMPILER_MSVC
