@@ -290,11 +290,15 @@ int GetMinimumSSEVersion()
 {
 	int minimumSSEVersion = 0;
 	#if MPT_COMPILER_MSVC
-		#if defined(_M_IX86_FP)
-			#if (_M_IX86_FP >= 2)
-				minimumSSEVersion = 2;
-			#elif (_M_IX86_FP == 1)
-				minimumSSEVersion = 1;
+		#if defined(_M_X64)
+			minimumSSEVersion = 2;
+		#elif defined(_M_IX86)
+			#if defined(_M_IX86_FP)
+				#if (_M_IX86_FP >= 2)
+					minimumSSEVersion = 2;
+				#elif (_M_IX86_FP == 1)
+					minimumSSEVersion = 1;
+				#endif
 			#endif
 		#endif
 	#endif
