@@ -2779,7 +2779,7 @@ public:
 	}
 	virtual ~ComponentMediaFoundation()
 	{
-		if(IsInitialized())
+		if(IsAvailable())
 		{
 			MFShutdown();
 		}
