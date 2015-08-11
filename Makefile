@@ -550,8 +550,6 @@ endif
 ifeq ($(OPENMPT123),1)
 OUTPUTS += bin/openmpt123$(EXESUFFIX)
 endif
-ifeq ($(NO_PORTAUDIO),1)
-else
 ifeq ($(EXAMPLES),1)
 ifeq ($(NO_PORTAUDIO),1)
 else
@@ -560,7 +558,6 @@ OUTPUTS += bin/libopenmpt_example_c_mem$(EXESUFFIX)
 OUTPUTS += bin/libopenmpt_example_cxx$(EXESUFFIX)
 endif
 OUTPUTS += bin/libopenmpt_example_c_stdout$(EXESUFFIX)
-endif
 endif
 ifeq ($(TEST),1)
 OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
