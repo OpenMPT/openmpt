@@ -597,31 +597,7 @@ void CSelectPluginDlg::OnAddPlugin()
 					plugLib = lib;
 
 					// If this plugin was missing anywhere, try loading it
-					std::vector<CModDoc *> docs(theApp.GetOpenDocuments());
-					for(size_t i = 0; i < docs.size(); i++)
-					{
-						CModDoc &doc = *docs[i];
-						CSoundFile &sndFile = doc.GetrSoundFile();
-						bool updateDoc = false;
-						for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
-						{
-							SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[plug];
-							if(plugin.pMixPlugin == nullptr
-								&& plugin.Info.dwPluginId1 == lib->pluginId1
-								&& plugin.Info.dwPluginId2 == lib->pluginId2)
-							{
-								CSoundFile::gpMixPluginCreateProc(plugin, sndFile);
-								if(plugin.pMixPlugin)
-								{
-									plugin.pMixPlugin->RestoreAllParameters(plugin.defaultProgram);
-								}
-							}
-						}
-						if(updateDoc)
-						{
-							doc.UpdateAllViews(nullptr, PluginHint().Info().Names());
-						}
-					}
+					ReloadMissingPlugins(lib);
 				}
 			}
 		}
@@ -646,6 +622,13 @@ void CSelectPluginDlg::OnScanFolder()
 	TrackerSettings::Instance().PathPlugins.SetWorkingDir(dlg.GetDirectory());
 	VSTPluginLib *plugLib = ScanPlugins(dlg.GetDirectory(), this);
 	UpdatePluginsList(plugLib ? plugLib->pluginId2 : 0);
+
+	// If any of the plugins was missing anywhere, try loading it
+	const CVstPluginManager *pManager = theApp.GetPluginManager();
+	for(CVstPluginManager::const_iterator p = pManager->begin(); p != pManager->end(); p++)
+	{
+		ReloadMissingPlugins(*p);
+	}
 }
 
 
@@ -704,6 +687,39 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 	{
 		Reporting::Error("Could not find any valid VST plugins.");
 		return nullptr;
+	}
+}
+
+
+// After adding new plugins, check if they were missing in any open songs.
+void CSelectPluginDlg::ReloadMissingPlugins(const VSTPluginLib *lib) const
+//------------------------------------------------------------------------
+{
+	std::vector<CModDoc *> docs(theApp.GetOpenDocuments());
+	for(size_t i = 0; i < docs.size(); i++)
+	{
+		CModDoc &doc = *docs[i];
+		CSoundFile &sndFile = doc.GetrSoundFile();
+		bool updateDoc = false;
+		for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
+		{
+			SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[plug];
+			if(plugin.pMixPlugin == nullptr
+				&& plugin.Info.dwPluginId1 == lib->pluginId1
+				&& plugin.Info.dwPluginId2 == lib->pluginId2)
+			{
+				CSoundFile::gpMixPluginCreateProc(plugin, sndFile);
+				if(plugin.pMixPlugin)
+				{
+					plugin.pMixPlugin->RestoreAllParameters(plugin.defaultProgram);
+				}
+			}
+		}
+		if(updateDoc)
+		{
+			doc.UpdateAllViews(nullptr, PluginHint().Info().Names());
+			CMainFrame::GetMainFrame()->UpdateTree(&doc, PluginHint().Info().Names());
+		}
 	}
 }
 

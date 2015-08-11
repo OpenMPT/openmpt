@@ -48,6 +48,8 @@ protected:
 	VSTPluginLib *GetSelectedPlugin() { return reinterpret_cast<VSTPluginLib *>(m_treePlugins.GetItemData(m_treePlugins.GetSelectedItem())); }
 	void SaveWindowPos() const;
 
+	void ReloadMissingPlugins(const VSTPluginLib *lib) const;
+
 	void DoClose();
 	void UpdatePluginsList(VstInt32 forceSelect = 0);
 	static bool VerifyPlug(VSTPluginLib *plug, CWnd *parent);
