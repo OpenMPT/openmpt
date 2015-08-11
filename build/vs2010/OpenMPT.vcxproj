@@ -199,6 +199,7 @@
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -229,6 +230,7 @@
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -268,6 +270,7 @@
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -306,6 +309,7 @@
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -335,6 +339,7 @@
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -364,6 +369,7 @@
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -403,6 +409,7 @@
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -441,6 +448,7 @@
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>

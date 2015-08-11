@@ -189,6 +189,7 @@
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -221,6 +222,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x64-Debug\$(TargetFile
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -262,6 +264,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\Win32-Debug\$(TargetFi
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -302,6 +305,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x64\$(TargetFileName)"
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -333,6 +337,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\Win32\$(TargetFileName
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -364,6 +369,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x64-Debug\$(TargetFile
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -405,6 +411,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\Win32-Debug\$(TargetFi
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -445,6 +452,7 @@ copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x64\$(TargetFileName)"
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
