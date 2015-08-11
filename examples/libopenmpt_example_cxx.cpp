@@ -16,7 +16,15 @@
 
 #include <portaudio.h>
 
+#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
+#if defined(__GNUC__)
+// mingw64 does only default to special C linkage for "main", but not for "wmain".
+extern "C"
+#endif
+int wmain( int /*argc*/, wchar_t * argv[] ) {
+#else
 int main( int /*argc*/, char * argv[] ) {
+#endif
 	const std::size_t buffersize = 480;
 	const std::int32_t samplerate = 48000;
 	std::vector<float> left( buffersize );
