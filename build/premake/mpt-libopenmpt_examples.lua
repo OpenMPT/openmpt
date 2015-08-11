@@ -13,6 +13,7 @@ if _ACTION ~= "vs2008" then
   files {
    "../../examples/libopenmpt_example_cxx.cpp",
   }
+  flags { "Unicode" }
   links { "libopenmpt", "miniz", "portaudio", "ksuser", "winmm" }
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
@@ -31,6 +32,7 @@ end
   files {
    "../../examples/libopenmpt_example_c.c",
   }
+  flags { "Unicode" }
   links { "libopenmpt", "miniz", "portaudio", "ksuser", "winmm" }
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
@@ -47,6 +49,7 @@ end
   files {
    "../../examples/libopenmpt_example_c_mem.c",
   }
+  flags { "Unicode" }
   links { "libopenmpt", "miniz", "portaudio", "ksuser", "winmm" }
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
