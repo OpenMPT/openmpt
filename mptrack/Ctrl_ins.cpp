@@ -988,6 +988,7 @@ void CCtrlInstruments::OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult)
 	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
 	LPNMTOOLBAR pToolBar = reinterpret_cast<LPNMTOOLBAR>(pNMHDR);
 	ClientToScreen(&(pToolBar->rcButton)); // TrackPopupMenu uses screen coords
+	const int offset = Util::ScalePixels(4, m_hWnd);	// Compared to the main toolbar, the offset seems to be a bit wrong here...?
 	switch(pToolBar->iItem)
 	{
 	case IDC_INSTRUMENT_NEW:
@@ -995,7 +996,7 @@ void CCtrlInstruments::OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult)
 			CMenu menu;
 			menu.CreatePopupMenu();
 			menu.AppendMenu(MF_STRING, ID_INSTRUMENT_DUPLICATE, _T("Duplicate &Instrument\t") + ih->GetKeyTextFromCommand(kcInstrumentCtrlDuplicate));
-			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left, pToolBar->rcButton.bottom, this);
+			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left + offset, pToolBar->rcButton.bottom + offset, this);
 			menu.DestroyMenu();
 		}
 		break;
@@ -2538,15 +2539,11 @@ BOOL CCtrlInstruments::PreTranslateMessage(MSG *pMsg)
 LRESULT CCtrlInstruments::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 //--------------------------------------------------------------------
 {
-	if (wParam == kcNull)
-		return NULL;
-
 	switch(wParam)
 	{
 		case kcInstrumentCtrlLoad: OnInstrumentOpen(); return wParam;
 		case kcInstrumentCtrlSave: OnInstrumentSave(); return wParam;
-		case kcInstrumentCtrlNew:  InsertInstrument(false);  return wParam;
-
+		case kcInstrumentCtrlNew:  InsertInstrument(false); return wParam;
 		case kcInstrumentCtrlDuplicate:	InsertInstrument(true); return wParam;
 	}
 
@@ -2669,7 +2666,7 @@ void CCtrlInstruments::UpdateTuningComboBox()
 	}
 
 	CString str;
-	str.Format(TEXT("Tuning %s was not found. Setting to default tuning."), m_sndFile.Instruments[m_nInstrument]->pTuning->GetName().c_str());
+	str.Format(_T("Tuning %s was not found. Setting to default tuning."), m_sndFile.Instruments[m_nInstrument]->pTuning->GetName().c_str());
 	Reporting::Notification(str);
 
 	CriticalSection cs;
@@ -2856,7 +2853,7 @@ void CCtrlInstruments::BuildTuningComboBox()
 {
 	m_ComboTuning.ResetContent();
 
-	m_ComboTuning.AddString("OMPT IT behavior"); //<-> Instrument pTuning pointer == NULL
+	m_ComboTuning.AddString("OpenMPT IT behaviour"); //<-> Instrument pTuning pointer == NULL
 	for(size_t i = 0; i<m_sndFile.GetBuiltInTunings().GetNumTunings(); i++)
 	{
 		m_ComboTuning.AddString(m_sndFile.GetBuiltInTunings().GetTuning(i).GetName().c_str());
@@ -2869,7 +2866,7 @@ void CCtrlInstruments::BuildTuningComboBox()
 	{
 		m_ComboTuning.AddString(m_sndFile.GetTuneSpecificTunings().GetTuning(i).GetName().c_str());
 	}
-	m_ComboTuning.AddString("Control tunings...");
+	m_ComboTuning.AddString("Control Tunings...");
 	m_ComboTuning.SetCurSel(0);
 }
 

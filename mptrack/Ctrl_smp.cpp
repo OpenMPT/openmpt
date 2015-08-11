@@ -1008,6 +1008,7 @@ void CCtrlSamples::OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	LPNMTOOLBAR pToolBar = reinterpret_cast<LPNMTOOLBAR>(pNMHDR);
 	ClientToScreen(&(pToolBar->rcButton)); // TrackPopupMenu uses screen coords
+	const int offset = Util::ScalePixels(4, m_hWnd);	// Compared to the main toolbar, the offset seems to be a bit wrong here...?
 	switch(pToolBar->iItem)
 	{
 	case IDC_SAMPLE_NEW:
@@ -1015,7 +1016,7 @@ void CCtrlSamples::OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult)
 			CMenu menu;
 			menu.CreatePopupMenu();
 			menu.AppendMenu(MF_STRING, IDC_SAMPLE_DUPLICATE, _T("&Duplicate Sample"));
-			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left, pToolBar->rcButton.bottom, this);
+			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left + offset, pToolBar->rcButton.bottom + offset, this);
 			menu.DestroyMenu();
 		}
 		break;
@@ -1025,7 +1026,7 @@ void CCtrlSamples::OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult)
 			menu.CreatePopupMenu();
 			menu.AppendMenu(MF_STRING, IDC_SAMPLE_OPENKNOWN, _T("Import &Sample..."));
 			menu.AppendMenu(MF_STRING, IDC_SAMPLE_OPENRAW, _T("Import &RAW Sample..."));
-			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left, pToolBar->rcButton.bottom, this);
+			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left + offset, pToolBar->rcButton.bottom + offset, this);
 			menu.DestroyMenu();
 		}
 		break;
@@ -1345,7 +1346,7 @@ void CCtrlSamples::OnSamplePlay()
 {
 	// Commented out line to fix http://forum.openmpt.org/index.php?topic=1366.0
 	// if ((m_pSndFile.IsPaused()) && (m_pModDoc.IsNotePlaying(0, m_nSample, 0)))
-	if (m_modDoc.IsNotePlaying(0, m_nSample, 0))
+	if (m_modDoc.IsNotePlaying(NOTE_NONE, m_nSample, 0))
 	{
 		m_modDoc.NoteOff(0, true);
 	} else
