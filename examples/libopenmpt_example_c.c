@@ -25,7 +25,11 @@ static int16_t left[BUFFERSIZE];
 static int16_t right[BUFFERSIZE];
 static int16_t * const buffers[2] = { left, right };
 
+#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
+int wmain( int argc, wchar_t * argv[] ) {
+#else
 int main( int argc, char * argv[] ) {
+#endif
 	FILE * file = 0;
 	openmpt_module * mod = 0;
 	size_t count = 0;
@@ -33,7 +37,11 @@ int main( int argc, char * argv[] ) {
 	PaStreamParameters streamparameters;
 	memset( &streamparameters, 0, sizeof( PaStreamParameters ) );
 	(void)argc;
+#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
+	file = _wfopen( argv[1], L"rb" );
+#else
 	file = fopen( argv[1], "rb" );
+#endif
 	mod = openmpt_module_create( openmpt_stream_get_file_callbacks(), file, NULL, NULL, NULL );
 	fclose( file );
 	Pa_Initialize();

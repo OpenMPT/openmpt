@@ -24,7 +24,11 @@ static int16_t left[BUFFERSIZE];
 static int16_t right[BUFFERSIZE];
 static int16_t * const buffers[2] = { left, right };
 
+#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
+int wmain( int argc, wchar_t * argv[] ) {
+#else
 int main( int argc, char * argv[] ) {
+#endif
 	FILE * file = 0;
 	size_t size = 0;
 	void * data = 0;
@@ -34,7 +38,11 @@ int main( int argc, char * argv[] ) {
 	PaStreamParameters streamparameters;
 	memset( &streamparameters, 0, sizeof( PaStreamParameters ) );
 	(void)argc;
+#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
+	file = _wfopen( argv[1], L"rb" );
+#else
 	file = fopen( argv[1], "rb" );
+#endif
 	fseek( file, 0, SEEK_END );
 	size = ftell( file );
 	fseek( file, 0, SEEK_SET );
