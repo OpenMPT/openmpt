@@ -5228,12 +5228,13 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 		if(m_SongFlags[SONG_LINEARSLIDES])
 		{
 			// In IT linear slide mode, periods are equal to frequency.
-			return Util::muldiv_unsigned(nC5Speed, LinearSlideUpTable[(note % 12) * 16] << (note / 12), 65536 << 5);
+			return Util::muldiv_unsigned(nC5Speed, LinearSlideUpTable[(note % 12u) * 16u] << (note / 12u), 65536 << 5);
 		} else
 		{
 			if (!nC5Speed) nC5Speed = 8363;
+			LimitMax(nC5Speed, uint32_max >> (note / 12u));
 			//(a*b)/c
-			return Util::muldiv_unsigned(8363, (FreqS3MTable[note % 12] << 5), nC5Speed << (note / 12));
+			return Util::muldiv_unsigned(8363, (FreqS3MTable[note % 12] << 5), nC5Speed << (note / 12u));
 			//8363 * freq[note%12] / nC5Speed * 2^(5-note/12)
 		}
 	} else if (GetType() == MOD_TYPE_XM)
@@ -5280,7 +5281,7 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 	{
 		nFineTune = XM2MODFineTune(nFineTune);
 		if ((nFineTune) || (note < 36) || (note >= 36 + 6 * 12))
-			return (ProTrackerTunedPeriods[nFineTune * 12 + note % 12] << 5) >> (note / 12);
+			return (ProTrackerTunedPeriods[nFineTune * 12u + note % 12u] << 5) >> (note / 12u);
 		else
 			return (ProTrackerPeriodTable[note - 36] << 2);
 	}
