@@ -1117,6 +1117,10 @@ static double WINAPI openmpt_SetPosition( DWORD pos ) {
 		return 0.0;
 	}
 
+	if ( pos ==  XMPIN_POS_TAIL || pos == XMPIN_POS_LOOP || pos == XMPIN_POS_AUTOLOOP ) {
+		return self->mod->get_position_seconds();
+	}
+
 	double new_position = self->mod->set_position_seconds( static_cast<double>( pos ) * 0.001 );
 	reset_timeinfos( new_position );
 	return new_position;
@@ -1610,7 +1614,7 @@ static XMPIN xmpin = {
 #else
 	XMPIN_FLAG_NOXMPFILE |
 #endif
-	XMPIN_FLAG_CONFIG,// 0, // XMPIN_FLAG_LOOP, the xmplay looping interface is not really compatible with libopenmpt looping interface, so dont support that for now
+	XMPIN_FLAG_CONFIG | XMPIN_FLAG_LOOP | XMPIN_FLAG_TAIL,
 	xmp_openmpt_string,
 	NULL, // "libopenmpt\0mptm/mptmz",
 	openmpt_About,

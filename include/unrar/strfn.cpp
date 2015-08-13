@@ -19,7 +19,7 @@ void IntToExt(const char *Src,char *Dest,size_t DestSize)
   Dest[DestSize-1]=0;
 #elif defined(_ANDROID)
   wchar DestW[NM];
-  UnkToWide(Src,DestW,ASIZE(DestW));
+  JniCharToWide(Src,DestW,ASIZE(DestW),true);
   WideToChar(DestW,Dest,DestSize);
 #else
   if (Dest!=Src)
@@ -285,13 +285,15 @@ wchar* wcsncatz(wchar* dest, const wchar* src, size_t maxlen)
 }
 
 
-void itoa(int64 n,char *Str)
+void itoa(int64 n,char *Str,size_t MaxSize)
 {
   char NumStr[50];
   size_t Pos=0;
 
   do
   {
+    if (Pos+1>=MaxSize)
+      break;
     NumStr[Pos++]=char(n%10)+'0';
     n=n/10;
   } while (n!=0);
@@ -302,13 +304,15 @@ void itoa(int64 n,char *Str)
 }
 
 
-void itoa(int64 n,wchar *Str)
+void itoa(int64 n,wchar *Str,size_t MaxSize)
 {
   wchar NumStr[50];
   size_t Pos=0;
 
   do
   {
+    if (Pos+1>=MaxSize)
+      break;
     NumStr[Pos++]=wchar(n%10)+'0';
     n=n/10;
   } while (n!=0);

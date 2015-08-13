@@ -128,6 +128,12 @@ bool File::Open(const wchar *Name,uint Mode)
     hNewFile=fdopen(handle,UpdateMode ? UPDATEBINARY:READBINARY);
 #endif
   }
+#ifdef _ANDROID
+  // If we open an existing file in r&w mode and external card is read-only
+  // for usual file API.
+  if (hNewFile==FILE_BAD_HANDLE && UpdateMode && errno!=ENOENT)
+    hNewFile=JniOpenFile(Name);
+#endif
   if (hNewFile==FILE_BAD_HANDLE && errno==ENOENT)
     ErrorType=FILE_NOTFOUND;
 #endif
@@ -203,6 +209,8 @@ bool File::Create(const wchar *Name,uint Mode)
 #ifdef _ANDROID
   if (hFile==FILE_BAD_HANDLE)
     hFile=JniCreateFile(Name); // If external card is read-only for usual file API.
+  if (hFile!=FILE_BAD_HANDLE)
+    JniFileNotify(Name,false);
 #endif
 #else
   hFile=fopen(NameA,WriteMode ? WRITEBINARY:CREATEBINARY);

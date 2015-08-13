@@ -240,13 +240,22 @@ bool Archive::IsArchive(bool EnableBroken)
     {
       HEADER_TYPE HeaderType=GetHeaderType();
       if (HeaderType==HEAD_SERVICE)
+      {
+        // If we have a split service headers, it surely indicates non-first
+        // volume. But not split service header does not guarantee the first
+        // volume, because we can have split file after non-split archive
+        // comment. So we do not quit from loop here.
         FirstVolume=Volume && !SubHead.SplitBefore;
+      }
       else
         if (HeaderType==HEAD_FILE)
         {
           FirstVolume=Volume && !FileHead.SplitBefore;
           break;
         }
+        else
+          if (HeaderType==HEAD_ENDARC) // Might happen if archive contains only a split service header.
+            break;
       SeekToNext();
     }
     CurBlockPos=SaveCurBlockPos;
