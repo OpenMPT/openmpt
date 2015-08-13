@@ -739,7 +739,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	if (pmex)
 	{
 		// Channel Split
-		if ((m_nChannels == 4) && (pmsh->flags & 0x40))
+		if ((m_nChannels == 4) && (pmsh->flags & MMD_FLAG_8CHANNEL))
 		{
 			for (UINT i8ch=0; i8ch<4; i8ch++)
 			{
@@ -860,7 +860,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 	if (wNumBlocks > MAX_PATTERNS) wNumBlocks = MAX_PATTERNS;
-	if ((!dwBlockArr) || (dwBlockArr > dwMemLength - 4*wNumBlocks)) return true;
+	if ((!dwBlockArr) || (dwBlockArr > dwMemLength - 4*wNumBlocks) || (4*wNumBlocks > dwMemLength)) return true;
 	pdwTable = const_unaligned_ptr_le<DWORD>(lpStream + dwBlockArr);
 	playtransp += (version == '3') ? 24 : 48;
 	for (PATTERNINDEX iBlk=0; iBlk<wNumBlocks; iBlk++)
