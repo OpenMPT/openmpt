@@ -110,6 +110,7 @@ BOOL CTempoSwingDlg::OnInitDialog()
 	m_container.GetClientRect(containerRect);
 	containerRect.bottom = displayHeight;
 	m_container.SetWindowPos(nullptr, 0, m.paddingTop, rect.right - m.scrollbarWidth, containerRect.bottom, SWP_NOZORDER);
+	m_container.ModifyStyleEx(0, WS_EX_CONTROLPARENT, 0);
 
 	// Need scrollbar?
 	if(realHeight > displayHeight)
