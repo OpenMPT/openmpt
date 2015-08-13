@@ -47,7 +47,7 @@ Unpack::Unpack(ComprDataIO *DataIO)
 
 Unpack::~Unpack()
 {
-  InitFilters30();
+  InitFilters30(false);
 
   if (Window!=NULL)
     free(Window);
@@ -114,7 +114,7 @@ void Unpack::Init(size_t WinSize,bool Solid)
   if (!Fragmented)
   {
     // Clean the window to generate the same output when unpacking corrupt
-    // RAR files, which may access to unused areas of sliding dictionary.
+    // RAR files, which may access unused areas of sliding dictionary.
     memset(NewWindow,0,WinSize);
 
     // If Window is not NULL, it means that window size has grown.
@@ -122,7 +122,7 @@ void Unpack::Init(size_t WinSize,bool Solid)
     // RAR archiving code does not allow it in solid streams now,
     // but let's implement it anyway just in case we'll change it sometimes.
     if (Grow)
-      for (size_t I=1;I<MaxWinSize;I++)
+      for (size_t I=1;I<=MaxWinSize;I++)
         NewWindow[(UnpPtr-I)&(WinSize-1)]=Window[(UnpPtr-I)&(MaxWinSize-1)];
 
     if (Window!=NULL)
@@ -184,9 +184,11 @@ void Unpack::UnpInitData(bool Solid)
     memset(&BlockTables,0,sizeof(BlockTables));
     UnpPtr=WrPtr=0;
     WriteBorder=Min(MaxWinSize,UNPACK_MAX_WRITE)&MaxWinMask;
-
-    InitFilters();
   }
+  // Filters never share several solid files, so we can safely reset them
+  // even in solid archive.
+  InitFilters();
+
   Inp.InitBitInput();
   WrittenFileSize=0;
   ReadTop=0;

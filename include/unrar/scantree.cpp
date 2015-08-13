@@ -27,11 +27,14 @@ ScanTree::~ScanTree()
 }
 
 
-SCAN_CODE ScanTree::GetNext(FindData *FindData)
+SCAN_CODE ScanTree::GetNext(FindData *FD)
 {
   if (Depth<0)
     return SCAN_DONE;
 
+#ifndef SILENT
+  uint LoopCount=0;
+#endif
 
   SCAN_CODE FindCode;
   while (1)
@@ -39,8 +42,15 @@ SCAN_CODE ScanTree::GetNext(FindData *FindData)
     if (*CurMask==0 && !GetNextMask())
       return SCAN_DONE;
 
+#ifndef SILENT
+    // Let's return some ticks to system or WinRAR can become irresponsible
+    // while scanning files in command like "winrar a -r arc c:\file.ext".
+    // Also we reset system sleep timer here.
+    if ((++LoopCount & 0x3ff)==0)
+      Wait();
+#endif
 
-    FindCode=FindProc(FindData);
+    FindCode=FindProc(FD);
     if (FindCode==SCAN_ERROR)
     {
       Errors++;
@@ -48,21 +58,85 @@ SCAN_CODE ScanTree::GetNext(FindData *FindData)
     }
     if (FindCode==SCAN_NEXT)
       continue;
-    if (FindCode==SCAN_SUCCESS && FindData->IsDir && GetDirs==SCAN_SKIPDIRS)
+    if (FindCode==SCAN_SUCCESS && FD->IsDir && GetDirs==SCAN_SKIPDIRS)
       continue;
     if (FindCode==SCAN_DONE && GetNextMask())
       continue;
+    if (FilterList.ItemsCount()>0 && FindCode==SCAN_SUCCESS)
+      if (!CommandData::CheckArgs(&FilterList,FD->IsDir,FD->Name,false,MATCH_WILDSUBPATH))
+        continue;
     break;
   }
-  return(FindCode);
+  return FindCode;
+}
+
+
+// For masks like dir1\dir2*\file.ext this function sets 'dir1' recursive mask
+// and '*\dir2*\file.ext' filter. Masks without folder wildcards are
+// returned as is.
+bool ScanTree::GetFilteredMask()
+{
+  FilterList.Reset();
+  if (!FileMasks->GetString(CurMask,ASIZE(CurMask)))
+    return false;
+
+  // Check if folder wildcards present.
+  bool WildcardFound=false,FolderWildcardFound=false;
+  uint SlashPos=0;
+  for (int I=0;CurMask[I]!=0;I++)
+  {
+    if (CurMask[I]=='?' || CurMask[I]=='*')
+      WildcardFound=true;
+    if (IsPathDiv(CurMask[I]) || IsDriveDiv(CurMask[I]))
+    {
+      if (WildcardFound)
+      {
+        FolderWildcardFound=true;
+        break;
+      }
+      SlashPos=I;
+    }
+  }
+  if (!FolderWildcardFound)
+    return true;
+
+  wchar Filter[NM];
+  // Convert path\dir*\ to *\dir filter to search for 'dir' in all 'path' subfolders.
+  wcscpy(Filter,L"*");
+  AddEndSlash(Filter,ASIZE(Filter));
+  // SlashPos might point or not point to path separator for masks like 'dir*', '\dir*' or 'd:dir*'
+  wchar *WildName=IsPathDiv(CurMask[SlashPos]) || IsDriveDiv(CurMask[SlashPos]) ? CurMask+SlashPos+1 : CurMask+SlashPos;
+  wcsncatz(Filter,WildName,ASIZE(Filter));
+
+  // Treat dir*\* or dir*\*.* as dir\, so empty 'dir' is also matched
+  // by such mask. Skipping empty dir with dir*\*.* confused some users.
+  wchar *LastMask=PointToName(Filter);
+  if (wcscmp(LastMask,L"*")==0 || wcscmp(LastMask,L"*.*")==0)
+    *LastMask=0;
+
+  FilterList.AddString(Filter);
+
+  bool RelativeDrive=IsDriveDiv(CurMask[SlashPos]);
+  if (RelativeDrive)
+    SlashPos++; // Use "d:" instead of "d" for d:* mask.
+
+  CurMask[SlashPos]=0;
+
+  if (!RelativeDrive) // Keep d: mask as is, not convert to d:\*
+  {
+    // We need to append "\*" both for -ep1 to work correctly and to
+    // convert d:\* masks previously truncated to d: back to original form.
+    AddEndSlash(CurMask,ASIZE(CurMask));
+    wcsncatz(CurMask,MASKALL,ASIZE(CurMask));
+  }
+  return true;
 }
 
 
 bool ScanTree::GetNextMask()
 {
-  if (!FileMasks->GetString(CurMask,ASIZE(CurMask)))
+  if (!GetFilteredMask())
     return false;
-  CurMask[ASIZE(CurMask)-1]=0;
 #ifdef _WIN_ALL
   UnixSlashToDos(CurMask,CurMask,ASIZE(CurMask));
 #endif
@@ -70,7 +144,7 @@ bool ScanTree::GetNextMask()
   // We wish to scan entire disk if mask like c:\ is specified
   // regardless of recursion mode. Use c:\*.* mask when need to scan only 
   // the root directory.
-  ScanEntireDisk=IsDiskLetter(CurMask) && IsPathDiv(CurMask[2]) && CurMask[3]==0;
+  ScanEntireDisk=IsDriveLetter(CurMask) && IsPathDiv(CurMask[2]) && CurMask[3]==0;
 
   wchar *Name=PointToName(CurMask);
   if (*Name==0)
@@ -113,6 +187,7 @@ SCAN_CODE ScanTree::FindProc(FindData *FD)
     // We do not use "*" for directories at any level or for files
     // at top level in recursion mode.
     bool SearchAll=!IsDir && (Depth>0 || Recurse==RECURSE_ALWAYS ||
+                   FilterList.ItemsCount()>0 ||
                    Wildcards && Recurse==RECURSE_WILDCARDS || 
                    ScanEntireDisk && Recurse!=RECURSE_DISABLE);
     if (Depth==0)

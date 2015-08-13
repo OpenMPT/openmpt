@@ -69,9 +69,9 @@ bool GetAutoRenamedName(wchar *Name,size_t MaxNameSize)
     uint NamePrefixLength=Ext-Name;
     wcsncpy(NewName,Name,NamePrefixLength);
     wcscpy(NewName+NamePrefixLength,L"(");
-    itoa(FileVer,NewName+NamePrefixLength+1);
-    wcscat(NewName,L")");
-    wcscat(NewName,Ext);
+    itoa(FileVer,NewName+NamePrefixLength+1,ASIZE(NewName)-NamePrefixLength-1);
+    wcsncatz(NewName,L")",ASIZE(NewName));
+    wcsncatz(NewName,Ext,ASIZE(NewName));
 #else
     swprintf(NewName,ASIZE(NewName),L"%.*ls(%u)%ls",uint(Ext-Name),Name,FileVer,Ext);
 #endif

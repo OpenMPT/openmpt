@@ -18,6 +18,7 @@ class CommandData;
 class ScanTree
 {
   private:
+    bool GetFilteredMask();
     bool GetNextMask();
     SCAN_CODE FindProc(FindData *FD);
     void ScanError(bool &Error);
@@ -38,6 +39,7 @@ class ScanTree
 
     wchar CurMask[NM];
     wchar OrigCurMask[NM];
+    StringList FilterList;
     bool SearchAllInRoot;
     size_t SpecPathLength;
 
