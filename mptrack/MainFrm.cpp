@@ -2870,7 +2870,7 @@ TfLanguageProfileNotifySink::TfLanguageProfileNotifySink()
 //--------------------------------------------------------
 	: m_pProfiles(nullptr)
 	, m_pSource(nullptr)
-	, m_dwCookie(0)
+	, m_dwCookie(TF_INVALID_COOKIE)
 {
 	HRESULT hr = CoCreateInstance(CLSID_TF_InputProcessorProfiles, NULL, CLSCTX_INPROC_SERVER, IID_ITfInputProcessorProfiles, (void**)&m_pProfiles);
 	if(SUCCEEDED(hr))
@@ -2882,7 +2882,7 @@ TfLanguageProfileNotifySink::TfLanguageProfileNotifySink()
 				static_cast<ITfLanguageProfileNotifySink *>(this),
 				&m_dwCookie);
 			ASSERT(SUCCEEDED(hr));
-			ASSERT(m_dwCookie != (DWORD)-1);
+			ASSERT(m_dwCookie != TF_INVALID_COOKIE);
 		}
 	}
 }
@@ -2891,12 +2891,20 @@ TfLanguageProfileNotifySink::TfLanguageProfileNotifySink()
 TfLanguageProfileNotifySink::~TfLanguageProfileNotifySink()
 //---------------------------------------------------------
 {
+	if(mpt::Windows::Version::IsWine())
+	{
+		// Calling UnadviseSink causes a random crash in Wine when computing its function pointer for some reason.
+		// Probably a race condition I don't understand, and probably a bug in Wine.
+		return;
+	}
 	if(m_pSource)
 	{
 		m_pSource->UnadviseSink(m_dwCookie);
 		m_pSource->Release();
 	}
 	if(m_pProfiles) m_pProfiles->Release();
+	m_pSource = nullptr;
+	m_pProfiles = nullptr;
 }
 
 
