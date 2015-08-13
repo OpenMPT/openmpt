@@ -204,18 +204,24 @@ static void ConvertMDLEnvelope(const unsigned char *pMDLEnv, InstrumentEnvelope 
 }
 
 
-static void UnpackMDLTrack(ModCommand *pat, UINT nChannels, UINT nRows, UINT nTrack, const BYTE *lpTracks)
-//--------------------------------------------------------------------------------------------------------
+static void UnpackMDLTrack(ModCommand *pat, UINT nChannels, UINT nRows, UINT nTrack, const BYTE *lpTracks, uint32 memLength)
+//--------------------------------------------------------------------------------------------------------------------------
 {
 	ModCommand cmd, *m = pat;
-	UINT len = *(const_unaligned_ptr_le<WORD>(lpTracks));
+	if(memLength < 2) return;
+	uint32 len = *(const_unaligned_ptr_le<WORD>(lpTracks));
 	UINT pos = 0, row = 0, i;
 	lpTracks += 2;
+	memLength -=2 ;
 	for (UINT ntrk=1; ntrk<nTrack; ntrk++)
 	{
+		if(memLength < len + 2) return;
 		lpTracks += len;
+		memLength -= len;
 		len = *(const_unaligned_ptr_le<WORD>(lpTracks));
 		lpTracks += 2;
+		memLength -= 2;
+		LimitMax(len, memLength);
 	}
 	cmd.note = cmd.instr = 0;
 	cmd.volcmd = cmd.vol = 0;
@@ -669,7 +675,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 			for (UINT chn=0; chn<m_nChannels; chn++) if ((patterntracks[ipat*32+chn]) && (patterntracks[ipat*32+chn] <= ntracks))
 			{
 				ModCommand *m = Patterns[ipat] + chn;
-				UnpackMDLTrack(m, m_nChannels, Patterns[ipat].GetNumRows(), patterntracks[ipat*32+chn], lpStream+dwTrackPos);
+				UnpackMDLTrack(m, m_nChannels, Patterns[ipat].GetNumRows(), patterntracks[ipat*32+chn], lpStream + dwTrackPos, dwMemLength - dwTrackPos);
 			}
 		}
 	}
