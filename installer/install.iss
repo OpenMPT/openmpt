@@ -75,7 +75,7 @@ Source: ..\bin\{#PlatformFolder}\unmo3.dll; DestDir: {app}; Flags: ignoreversion
 ;Source: ..\packageTemplate\Plugins\*.*; DestDir: {app}\Plugins\; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: ..\bin\{#PlatformFolder}\MIDI Input Output.dll; DestDir: {app}\Plugins\MIDI\; Flags: ignoreversion
 
-Source: ..\packageTemplate\ExampleSongs\*.*; DestDir: {app}\ExampleSongs\; Flags: ignoreversion sortfilesbyextension recursesubdirs
+Source: ..\packageTemplate\ExampleSongs\*.*; DestDir: {app}\ExampleSongs\; Flags: ignoreversion sortfilesbyextension
 
 Source: packageTemplate\readme.txt; DestDir: {app}; Flags: ignoreversion
 Source: ..\packageTemplate\History.txt; DestDir: {app}; Flags: ignoreversion
@@ -125,7 +125,7 @@ Filename: {app}\ModPlug Central.url; Section: InternetShortcut; Key: URL; String
 [Run]
 ; duh
 Filename: "{app}\OMPT_{#GetAppVersionShort}_ReleaseNotes.html"; Description: "View Release Notes"; Flags: shellexec nowait postinstall skipifsilent
-;Filename: {app}\mptrack.exe; Parameters: """{app}\ExampleSongs\manwe - evening glow.it"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: nowait postinstall skipifsilent
+Filename: {app}\mptrack.exe; Parameters: """{app}\ExampleSongs\manwe - evening glow.it"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
 ; internet shortcut has to be deleted manually
@@ -147,8 +147,6 @@ Type: files; Name: {app}\unmo3.dll; Tasks: downloadmo3
 #include "plugins.iss"
 
 [Code]
-var
-    RunIndex : Integer;
 
 #ifdef DOWNLOAD_MO3
 procedure VerifyUNMO3Checksum(); forward;
@@ -189,26 +187,6 @@ begin
 
 end;
 
-// Picks a random example song file to play
-Function RandomExampleFile(): String;
-var
-    Files: TstringList;
-    FindRec: TFindRec;
-begin
-    Result := '';
-    if FindFirst(ExpandConstant('{app}\ExampleSongs\*'), FindRec) then
-    try
-        Files := TstringList.Create;
-        repeat
-            if FindRec.Attributes and FILE_ATTRIBUTE_DIRECTORY = 0 then
-            Files.Add(FindRec.Name);
-        until not FindNext(FindRec);
-        Result := ExpandConstant('"{app}\ExampleSongs\') + Files[Random(Files.Count)] + '"';
-    finally
-        FindClose(FindRec);
-    end;
-end;
-
 function NextButtonClick(CurPageID: Integer): Boolean;
 var
     programfiles: String;
@@ -227,8 +205,6 @@ begin
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
-var
-    runResult: Integer;
 begin
     case CurStep of
     ssPostInstall:
@@ -243,21 +219,7 @@ begin
             // Copy old config files from app's directory, if possible and necessary.
             CopyConfigsToAppDataDir();
         end;
-
-    ssDone:
-        begin
-            if WizardForm.RunList.Checked[RunIndex] and not WizardSilent then
-            begin
-                ExecAsOriginalUser(ExpandConstant('{app}\mptrack.exe'), RandomExampleFile, ExpandConstant('{app}'), SW_SHOW, ewNoWait, runResult);
-            end;
-        end;
     end;
-end;
-
-procedure CurPageChanged(CurPageID: Integer);
-begin
-    if CurPageID=wpFinished then
-        RunIndex := WizardForm.RunList.AddCheckBox(ExpandConstant('{cm:LaunchProgram,OpenMPT}'), '', 0, True, True, False, False, nil);
 end;
 
 // Crappy workaround for uninstall stuff
