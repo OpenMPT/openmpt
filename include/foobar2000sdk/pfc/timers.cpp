@@ -2,7 +2,7 @@
 
 namespace pfc {
 
-#ifdef _WINDOWS
+#ifdef PFC_HAVE_PROFILER
 
 profiler_static::profiler_static(const char * p_name)
 {
@@ -28,8 +28,9 @@ profiler_static::~profiler_static()
 		OutputDebugString(_T("unexpected profiler failure\n"));
 	}
 }
+#endif
 
-#else
+#ifndef _WIN32
 
     void hires_timer::start() {
         m_start = nixGetTime();

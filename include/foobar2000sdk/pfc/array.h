@@ -12,7 +12,7 @@ namespace pfc {
 	public: typedef _t_item t_item;
 	private: typedef array_staticsize_t<t_item> t_self;
 	public:
-		array_staticsize_t() : m_size(0), m_array(NULL) {}
+		array_staticsize_t() : m_array(NULL), m_size(0) {}
 		array_staticsize_t(t_size p_size) : m_array(new t_item[p_size]), m_size(p_size) {}
 		~array_staticsize_t() {release_();}
 

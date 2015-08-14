@@ -59,6 +59,11 @@ namespace foobar2000_io
 	PFC_DECLARE_EXCEPTION(exception_io_disk_change,			exception_io,"Disc not available");
 	//! The directory is not empty.
 	PFC_DECLARE_EXCEPTION(exception_io_directory_not_empty,	exception_io,"Directory not empty");
+	//! A network connectivity error
+	PFC_DECLARE_EXCEPTION( exception_io_net, exception_io, "Connection error");
+	//! A network connectivity error, specifically a DNS query failure
+	PFC_DECLARE_EXCEPTION( exception_io_dns, exception_io_net, "DNS error");
+
 
 	//! Stores file stats (size and timestamp).
 	struct t_filestats {

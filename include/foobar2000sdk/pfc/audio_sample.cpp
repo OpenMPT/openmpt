@@ -1,7 +1,7 @@
 #include "pfc.h"
 
-namespace audio_math {
-	audio_sample decodeFloat24ptr(const void * sourcePtr) {
+namespace pfc {
+    audio_sample audio_math::decodeFloat24ptr(const void * sourcePtr) {
 		PFC_STATIC_ASSERT(pfc::byte_order_is_little_endian);
 		union {
 			uint8_t bytes[4];
@@ -14,7 +14,7 @@ namespace audio_math {
 		u.bytes[3] = s[2];
 		return u.v;
 	}
-	audio_sample decodeFloat24ptrbs(const void * sourcePtr) {
+	audio_sample audio_math::decodeFloat24ptrbs(const void * sourcePtr) {
 		PFC_STATIC_ASSERT(pfc::byte_order_is_little_endian);
 		union {
 			uint8_t bytes[4];
@@ -28,7 +28,7 @@ namespace audio_math {
 		return u.v;
 	}
 
-	audio_sample decodeFloat16(uint16_t source) {
+	audio_sample audio_math::decodeFloat16(uint16_t source) {
 		const unsigned fractionBits = 10;
 		const unsigned widthBits = 16;
 		typedef uint16_t source_t;
@@ -63,6 +63,6 @@ namespace audio_math {
 		int shift = (int) outFraction - (int) fractionBits;
 		if (shift < 0) output |= (out_t) (fraction >> -shift);
 		else output |= (out_t) (fraction << shift);
-		return *(retval_t*)&output / float16scale;
+		return *(retval_t*)&output / pfc::audio_math::float16scale;
 	}
 }

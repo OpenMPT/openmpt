@@ -1,5 +1,7 @@
 #include "pfc.h"
 
+#include "pp-winapi.h"
+
 #ifdef _WIN32
 
 BOOL pfc::winFormatSystemErrorMessage(pfc::string_base & p_out,DWORD p_code) {
@@ -95,6 +97,7 @@ void format_hresult::stamp_hex(HRESULT p_code) {
 	m_buffer << " (0x" << pfc::format_hex((t_uint32)p_code, 8) << ")";
 }
 
+#ifdef PFC_WINDOWS_DESKTOP_APP
 
 void uAddWindowStyle(HWND p_wnd,LONG p_style) {
 	SetWindowLong(p_wnd,GWL_STYLE, GetWindowLong(p_wnd,GWL_STYLE) | p_style);
@@ -191,6 +194,8 @@ void win32_menu::create_popup() {
 	if (m_menu == NULL) throw exception_win32(GetLastError());
 }
 
+#endif // #ifdef PFC_WINDOWS_DESKTOP_APP
+
 void win32_event::create(bool p_manualreset,bool p_initialstate) {
 	release();
 	SetLastError(NO_ERROR);
@@ -255,6 +260,8 @@ int win32_event::g_twoEventWait( win32_event & ev1, win32_event & ev2, double ti
     return g_twoEventWait( ev1.get_handle(), ev2.get_handle(), timeout );
 }
 
+#ifdef PFC_WINDOWS_DESKTOP_APP
+
 void win32_icon::release() {
 	HICON temp = detach();
 	if (temp != NULL) DestroyIcon(temp);
@@ -277,10 +284,14 @@ void win32_accelerator::release() {
 	}
 }
 
+#endif // #ifdef PFC_WINDOWS_DESKTOP_APP
+
 void uSleepSeconds(double p_time,bool p_alertable) {
 	SleepEx(win32_event::g_calculate_wait_time(p_time),p_alertable ? TRUE : FALSE);
 }
 
+
+#ifdef PFC_WINDOWS_DESKTOP_APP
 
 WORD GetWindowsVersionCode() throw() {
 	const DWORD ver = GetVersion();
@@ -299,4 +310,21 @@ namespace pfc {
         return IsKeyPressed(VK_MENU);
     }
 }
+
+#else
+// If unknown / not available on this architecture, return false always
+namespace pfc {
+	bool isShiftKeyPressed() {
+		return false;
+	}
+	bool isCtrlKeyPressed() {
+		return false;
+	}
+	bool isAltKeyPressed() {
+		return false;
+	}
+}
+
+#endif // #ifdef PFC_WINDOWS_DESKTOP_APP
+
 #endif

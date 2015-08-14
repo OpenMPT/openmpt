@@ -10,10 +10,10 @@
 class NOVTABLE playable_location//interface (for passing around between DLLs)
 {
 public:
-	virtual const char * get_path() const =0;
-	virtual void set_path(const char*)=0;
-	virtual t_uint32 get_subsong() const =0;
-	virtual void set_subsong(t_uint32)=0;
+	virtual const char * get_path() const = 0;
+	virtual void set_path(const char*) = 0;
+	virtual t_uint32 get_subsong() const = 0;
+	virtual void set_subsong(t_uint32) = 0;
 	
 	void copy(const playable_location & p_other) {
 		set_path(p_other.get_path());
@@ -28,13 +28,13 @@ public:
 	bool operator==(const playable_location & p_other) const;
 	bool operator!=(const playable_location & p_other) const;
 
-	inline bool is_empty() {return get_path()[0]==0 && get_subsong()==0;}
-	inline void reset() {set_path("");set_subsong(0);}
+	void reset();
+	
 	inline t_uint32 get_subsong_index() const {return get_subsong();}
 	inline void set_subsong_index(t_uint32 v) {set_subsong(v);}
 
-	bool is_empty() const { return * get_path() == 0; }
-	bool is_valid() const { return !is_empty(); }
+	bool is_empty() const;
+	bool is_valid() const;
 
 
 	class comparator {
@@ -55,19 +55,16 @@ typedef playable_location const & rcplayable_location;
 class playable_location_impl : public playable_location//implementation
 {
 public:
-	const char * get_path() const {return m_path;}
-	void set_path(const char* p_path) {m_path=p_path;}
-	t_uint32 get_subsong() const {return m_subsong;}
-	void set_subsong(t_uint32 p_subsong) {m_subsong=p_subsong;}
+	virtual const char * get_path() const;
+	virtual void set_path(const char* p_path);
+	virtual t_uint32 get_subsong() const;
+	virtual void set_subsong(t_uint32 p_subsong);
 
-	const playable_location_impl & operator=(const playable_location & src) {copy(src);return *this;}
-	const playable_location_impl & operator=(const playable_location_impl & src) {copy(src);return *this;}
+	const playable_location_impl & operator=(const playable_location & src);
 
-	playable_location_impl() : m_subsong(0) {}
-	playable_location_impl(const char * p_path,t_uint32 p_subsong) : m_path(p_path), m_subsong(p_subsong) {}
-	playable_location_impl(const playable_location & src) {copy(src);}
-	playable_location_impl(const playable_location_impl & src) {copy(src);}
-
+	playable_location_impl();
+	playable_location_impl(const char * p_path,t_uint32 p_subsong);
+	playable_location_impl(const playable_location & src);
 private:
 	pfc::string_simple m_path;
 	t_uint32 m_subsong;
@@ -80,14 +77,13 @@ class make_playable_location : public playable_location
 	const char * path;
 	t_uint32 num;
 	
-	void set_path(const char*) {throw pfc::exception_not_implemented();}
-	void set_subsong(t_uint32) {throw pfc::exception_not_implemented();}
-
+	virtual void set_path(const char*);
+	virtual void set_subsong(t_uint32);
 public:
-	const char * get_path() const {return path;}
-	t_uint32 get_subsong() const {return num;}
+	virtual const char * get_path() const;
+	virtual t_uint32 get_subsong() const;
 
-	make_playable_location(const char * p_path,t_uint32 p_num) : path(p_path), num(p_num) {}
+	make_playable_location(const char * p_path,t_uint32 p_num);
 };
 
 pfc::string_base & operator<<(pfc::string_base & p_fmt,const playable_location & p_location);

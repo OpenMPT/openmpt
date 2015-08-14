@@ -1,10 +1,17 @@
 #include "pfc.h"
 #ifdef _MSC_VER
 #include <intrin.h>
+#include <assert.h>
 #endif
 #ifndef _MSC_VER
 #include <signal.h>
 #endif
+
+#if defined(__ANDROID__)
+#include <android/log.h>
+#endif
+
+#include <math.h>
 
 namespace pfc {
 	bool permutation_is_valid(t_size const * order, t_size count) {
@@ -106,6 +113,11 @@ void pfc::crash() {
 #ifdef _MSC_VER
 	__debugbreak();
 #else
+
+#if defined(__ANDROID__) && PFC_DEBUG
+	nixSleep(1);
+#endif
+
     raise(SIGINT);
 #endif
 }
@@ -117,11 +129,32 @@ void pfc::byteswap_raw(void * p_buffer,const t_size p_bytes) {
 	for(n=0;n<p_bytes>>1;n++) swap_t(ptr[n],ptr[p_bytes-n-1]);
 }
 
-#if defined(_DEBUG) && defined(_WIN32)
-void pfc::myassert(const wchar_t * _Message, const wchar_t *_File, unsigned _Line) { 
+void pfc::outputDebugLine(const char * msg) {
+#ifdef _WIN32
+	OutputDebugString(pfc::stringcvt::string_os_from_utf8(PFC_string_formatter() << msg << "\n") );
+#elif defined(__ANDROID__)
+	__android_log_write(ANDROID_LOG_INFO, "Debug", msg);
+#else
+	printf("%s\n", msg);
+#endif
+}
+
+#if PFC_DEBUG
+
+#ifdef _WIN32
+void pfc::myassert_win32(const wchar_t * _Message, const wchar_t *_File, unsigned _Line) {
 	if (IsDebuggerPresent()) pfc::crash();
 	_wassert(_Message,_File,_Line);
 }
+#else
+
+void pfc::myassert(const char * _Message, const char *_File, unsigned _Line)
+{
+	PFC_DEBUGLOG << "Assert failure: \"" << _Message << "\" in: " << _File << " line " << _Line;
+	crash();
+}
+#endif
+
 #endif
 
 
@@ -171,3 +204,7 @@ double pfc::exp_int( const double base, const int expS ) {
     if (neg) v = 1.0 / v;
     return v;
 }
+
+
+t_int32 pfc::rint32(double p_val) { return (t_int32)floor(p_val + 0.5); }
+t_int64 pfc::rint64(double p_val) { return (t_int64)floor(p_val + 0.5); }

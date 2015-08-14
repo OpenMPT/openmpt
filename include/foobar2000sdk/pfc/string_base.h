@@ -193,6 +193,7 @@ namespace pfc {
 	class NOVTABLE string_base : public pfc::string_receiver {
 	public:
 		virtual const char * get_ptr() const = 0;
+		const char * c_str() const { return get_ptr(); }
 		virtual void add_string(const char * p_string,t_size p_length = ~0) = 0;//same as string_receiver method
 		virtual void set_string(const char * p_string,t_size p_length = ~0) {reset();add_string(p_string,p_length);}
 		virtual void truncate(t_size len)=0;
@@ -817,6 +818,7 @@ namespace pfc {
 		const t_self & operator=(const t_char * p_source) {set_string(p_source);return *this;}
 		operator const t_char* () const {return get_ptr();}
 		const t_char * get_ptr() const {return m_buffer.get_size() > 0 ? m_buffer.get_ptr() : pfc::empty_string_t<t_char>();}
+		const t_char * c_str() const { return get_ptr(); }
 	private:
 		pfc::array_t<t_char> m_buffer;
 	};
@@ -1015,8 +1017,7 @@ namespace pfc {
 	bool stringEqualsI_ascii(const char * p1,const char * p2) throw();
 	char ascii_tolower_lookup(char c);
 
-	template<typename T> inline const char * stringToPtr(T const& val) {return val.get_ptr();}
-	template<> inline const char * stringToPtr(std::string const& val) {return val.c_str();}
+	template<typename T> inline const char * stringToPtr(T const& val) {return val.c_str();}
 	inline const char * stringToPtr(const char* val) {return val;}
 
 	template<typename T> static string_part_ref stringToRef(T const & val) {return string_part(stringToPtr(val), val.length());}
@@ -1093,6 +1094,8 @@ namespace pfc {
 	void urlEncodeAppend(pfc::string_base & out, const char * in);
 	void urlEncode(pfc::string_base & out, const char * in);
 
+
+	char * strDup(const char * src); // POSIX strdup() clone, prevent MSVC complaining
 }
 
 #endif //_PFC_STRING_H_

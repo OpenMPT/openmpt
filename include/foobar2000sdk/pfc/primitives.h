@@ -709,8 +709,8 @@ namespace pfc {
 		array_rangecheck_t(p_array,p_from); array_rangecheck_t(p_array,p_to);
 	}
 
-	inline t_int32 rint32(double p_val) {return (t_int32) floor(p_val + 0.5);}
-	inline t_int64 rint64(double p_val) {return (t_int64) floor(p_val + 0.5);}
+	t_int32 rint32(double p_val);
+	t_int64 rint64(double p_val);
 
 
 
@@ -778,7 +778,7 @@ namespace pfc {
 	template<typename t_array>
 	class __list_to_array_enumerator {
 	public:
-		__list_to_array_enumerator(t_array & p_array) : m_array(p_array), m_walk(0) {}
+		__list_to_array_enumerator(t_array & p_array) : m_walk(), m_array(p_array) {}
 		template<typename t_item>
 		void operator() (const t_item & p_item) {
 			PFC_ASSERT(m_walk < m_array.get_size());

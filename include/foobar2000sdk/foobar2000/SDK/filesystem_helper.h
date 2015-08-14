@@ -1,3 +1,11 @@
+#include <functional>
+
+namespace foobar2000_io {
+    typedef std::function< void (const char *, t_filestats const & , bool ) > listDirectoryFunc_t;
+    void listDirectory( const char * path, abort_callback & aborter, listDirectoryFunc_t func);
+}
+
+
 //helper
 class file_path_canonical {
 public:

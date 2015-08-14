@@ -1,5 +1,7 @@
 #include "pfc.h"
 
+#ifndef _WIN32
+
 namespace pfc {
 
     void mutexBase::create( const pthread_mutexattr_t * attr ) {
@@ -27,3 +29,5 @@ namespace pfc {
     }
 
 }
+
+#endif // _WIN32

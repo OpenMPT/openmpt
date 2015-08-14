@@ -20,22 +20,24 @@ namespace pfc {
 		bool isActive() const;
 		void waitTillDone() {close();}
         static int currentPriority();
-#ifdef _WINDOWS
+#ifdef _WIN32
 		void winStart(int priority, DWORD * outThreadID); 
 		HANDLE winThreadHandle() { return m_thread; }
+#else
+		pthread_t posixThreadHandle() { return m_thread; }
 #endif
 	protected:
 		virtual void threadProc() {PFC_ASSERT(!"Stub thread entry - should not get here");}
 	private:
 		void close();
-#ifdef _WINDOWS
+#ifdef _WIN32
 		static unsigned CALLBACK g_entry(void* p_instance);
 #else
 		static void * g_entry( void * arg );
 #endif
         void entry();
         
-#ifdef _WINDOWS
+#ifdef _WIN32
 		HANDLE m_thread;
 #else
         pthread_t m_thread;
