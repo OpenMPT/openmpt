@@ -515,6 +515,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			uint32 bitBuf = file.ReadUint32LE(), bitNum = 32;
 
 			const uint8 *inBuf = reinterpret_cast<const uint8*>(sourceBuf) + 4;
+			size_t bytesLeft = file.BytesLeft() - 4;
 
 			uint8 dlt = 0, lowbyte = 0;
 			for(SmpLength j = 0; j < sample.nLength; j++)
@@ -523,17 +524,17 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 				uint8 sign;
 				if(GetBitDepth() == 16)
 				{
-					lowbyte = static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, 8));
+					lowbyte = static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 8));
 				}
-				sign = static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, 1));
-				if (MDLReadBits(bitBuf, bitNum, inBuf, 1))
+				sign = static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1));
+				if (MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1))
 				{
-					hibyte = static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, 3));
+					hibyte = static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 3));
 				} else
 				{
 					hibyte = 8;
-					while (!MDLReadBits(bitBuf, bitNum, inBuf, 1)) hibyte += 0x10;
-					hibyte += static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, 4));
+					while (!MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1)) hibyte += 0x10;
+					hibyte += static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 4));
 				}
 				if (sign) hibyte = ~hibyte;
 				dlt += hibyte;
