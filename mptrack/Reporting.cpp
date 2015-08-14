@@ -82,7 +82,7 @@ static UINT ShowNotificationImpl(const std::wstring &text, const std::wstring &c
 
 	if(parent == nullptr)
 	{
-		parent = pMainFrm;
+		parent = CMainFrame::GetActiveWindow();
 	}
 	UINT result = ::MessageBoxW((parent ? parent->m_hWnd : NULL), text.c_str(), caption.empty() ? MAINFRAME_TITLEW : caption.c_str(), flags);
 
