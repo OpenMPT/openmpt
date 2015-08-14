@@ -15,6 +15,11 @@ is just a high-level summary.
     get_current_channel_vu_rear_left and get_current_channel_vu_rear_right
     do now actually work and return non-zero values.
 
+ *  [**Bug**] Fix crashes and hangs in MED and MDL loaders and with some
+    truncated compressed IT samples.
+
+ *  [**Bug**] Fix crash when playing extremely high-pitched samples.
+
  *  Completed C and C++ documentation
  *  Added new key for openmpt::module::get_metadata, "message_raw", which
     returns an empty string if there is no song message rather than a list of
@@ -39,7 +44,7 @@ is just a high-level summary.
     constants, this theoretically breaks binary compatibility. The old
     libopenmpt code, however, never actually called the seek funtion, thus,
     there will be no problem in practice.
- *  [**Change**] openmpt123: When both, SDL1.2 and PortAudio, are available,
+ *  [**Change**] openmpt123: When both SDL1.2 and PortAudio are available,
     SDL is now the preferred backend because SDL is more widespread and better
     tested on all kinds of different platforms, and in generel, SDL is just
     more reliable.
