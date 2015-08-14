@@ -55,7 +55,6 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_COMMAND(ID_VIEWPLUGNAMES,			OnPatternViewPlugNames)	//rewbs.patPlugNames
 	ON_COMMAND(ID_NEXTINSTRUMENT,			OnNextInstrument)
 	ON_COMMAND(ID_PREVINSTRUMENT,			OnPrevInstrument)
-	ON_COMMAND(ID_CONTROLTAB,				OnSwitchToView)
 	ON_COMMAND(IDC_PATTERN_FOLLOWSONG,		OnFollowSong)
 	ON_COMMAND(ID_PATTERN_MIDIMACRO,		OnSetupZxxMacros)
 	ON_COMMAND(ID_PATTERN_CHORDEDIT,		OnChordEditor)
@@ -625,7 +624,8 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		PATTERNVIEWSTATE &patternViewState = pFrame->GetPatternViewState();
 		if(patternViewState.initialOrder != ORDERINDEX_INVALID)
 		{
-			m_OrderList.SetCurSel(patternViewState.initialOrder);
+			if(CMainFrame::GetMainFrame()->GetModPlaying() != &m_modDoc)
+				m_OrderList.SetCurSel(patternViewState.initialOrder);
 			patternViewState.initialOrder = ORDERINDEX_INVALID;
 		}
 
