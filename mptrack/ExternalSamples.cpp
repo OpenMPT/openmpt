@@ -200,6 +200,7 @@ bool ExternalSamplesDlg::SetSample(SAMPLEINDEX smp, const mpt::PathString &fileN
 //----------------------------------------------------------------------------------
 {
 	modDoc.GetSampleUndo().PrepareUndo(smp, sundo_replace, "Replace");
+	const mpt::PathString oldPath = sndFile.GetSamplePath(smp);
 	if(!sndFile.LoadExternalSample(smp, fileName))
 	{
 		Reporting::Information(L"Unable to load sample:\n" + fileName.AsNative());
@@ -207,7 +208,11 @@ bool ExternalSamplesDlg::SetSample(SAMPLEINDEX smp, const mpt::PathString &fileN
 		return false;
 	} else
 	{
-		modDoc.SetModified();
+		// Maybe we just put the file into its regular place, in which case the module has not really been modified.
+		if(oldPath != fileName)
+		{
+			modDoc.SetModified();
+		}
 		return true;
 	}
 }
