@@ -14,10 +14,8 @@ is just a high-level summary.
     return the volume of the front left and right channels now.
     get_current_channel_vu_rear_left and get_current_channel_vu_rear_right
     do now actually work and return non-zero values.
-
  *  [**Bug**] Fix crashes and hangs in MED and MDL loaders and with some
     truncated compressed IT samples.
-
  *  [**Bug**] Fix crash when playing extremely high-pitched samples.
 
  *  Completed C and C++ documentation

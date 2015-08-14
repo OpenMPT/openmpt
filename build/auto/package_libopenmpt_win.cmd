@@ -19,6 +19,8 @@ del /f /q libopenmpt-win-r%MPT_REVISION%.7z
 mkdir libopenmpt-win
 cd libopenmpt-win || goto error
 mkdir openmpt123
+mkdir openmpt123\x86
+mkdir openmpt123\x86_64
 mkdir XMPlay
 mkdir Winamp
 mkdir foobar2000
@@ -27,14 +29,16 @@ copy /y ..\..\libopenmpt\dox\changelog.md .\ || goto error
 copy /y ..\..\libopenmpt\doc\xmp-openmpt.txt .\XMPlay\ || goto error
 copy /y ..\..\libopenmpt\doc\in_openmpt.txt .\Winamp\ || goto error
 copy /y ..\..\libopenmpt\doc\foo_openmpt.txt .\foobar2000\ || goto error
-copy /y ..\..\bin\Win32\openmpt123.exe .\openmpt123\ || goto error
+copy /y ..\..\bin\Win32\openmpt123.exe .\openmpt123\x86\ || goto error
+copy /y ..\..\bin\x64\openmpt123.exe .\openmpt123\x86_64\ || goto error
 copy /y ..\..\bin\Win32\xmp-openmpt.dll .\XMPlay\ || goto error
 copy /y ..\..\bin\Win32\in_openmpt.dll .\Winamp\ || goto error
 copy /y ..\..\bin\Win32\foo_openmpt.dll .\foobar2000\ || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-win-r%MPT_REVISION%.7z ^
  LICENSE.txt ^
  changelog.md ^
- openmpt123\openmpt123.exe ^
+ openmpt123\x86\openmpt123.exe ^
+ openmpt123\x86_64\openmpt123.exe ^
  XMPlay\xmp-openmpt.txt ^
  XMPlay\xmp-openmpt.dll ^
  Winamp\in_openmpt.txt ^
