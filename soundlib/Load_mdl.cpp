@@ -713,16 +713,22 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 // MDL Sample Unpacking
 
 // MDL Huffman ReadBits compression
-uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), int8 n)
-//------------------------------------------------------------------------------
+uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), size_t &bytesLeft, int8 n)
+//-------------------------------------------------------------------------------------------------
 {
 	uint16 v = (uint16)(bitbuf & ((1 << n) - 1) );
 	bitbuf >>= n;
 	bitnum -= n;
 	if (bitnum <= 24)
 	{
+		if(!bytesLeft)
+		{
+			bitnum += 8;
+			return uint16_max;
+		}
 		bitbuf |= (((uint32)(*ibuf++)) << bitnum);
 		bitnum += 8;
+		bytesLeft--;
 	}
 	return v;
 }
