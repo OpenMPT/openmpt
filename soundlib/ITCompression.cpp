@@ -320,7 +320,7 @@ ITDecompression::ITDecompression(FileReader &file, ModSample &sample, bool it215
 	for(uint8 chn = 0; chn < mptSample.GetNumChannels(); chn++)
 	{
 		writtenSamples = writePos = 0;
-		while(writtenSamples < sample.nLength && file.AreBytesLeft())
+		while(writtenSamples < sample.nLength && file.CanRead(sizeof(uint16)))
 		{
 			chunk = file.ReadChunk(file.ReadUint16LE());
 
