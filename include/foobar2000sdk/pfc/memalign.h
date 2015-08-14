@@ -30,7 +30,7 @@ namespace pfc {
 				if ( ptr == NULL ) throw std::bad_alloc();
 #else
 #ifdef __ANDROID__
-                if ((ptr = memalign( s, alignBytes )) == NULL) throw std::bad_alloc();
+                if ((ptr = memalign( alignBytes, s )) == NULL) throw std::bad_alloc();
 #else
                 if (posix_memalign( &ptr, alignBytes, s ) < 0) throw std::bad_alloc();
 #endif

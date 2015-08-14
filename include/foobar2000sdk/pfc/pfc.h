@@ -6,6 +6,12 @@
 #define PFC_LEAK_STATIC_OBJECTS 1
 #endif
 
+
+#ifdef __clang__
+// Suppress a warning for a common practice in pfc/fb2k code
+#pragma clang diagnostic ignored "-Wdelete-non-virtual-dtor"
+#endif
+
 #if !defined(_WINDOWS) && (defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64) || defined(_WIN32_WCE))
 #define _WINDOWS
 #endif
@@ -23,11 +29,21 @@
 #define _NO_SYS_GUID_OPERATOR_EQ_	//fix retarded warning with operator== on GUID returning int
 #endif
 
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x500
+#include <windows.h>
+
+#if !defined(PFC_WINDOWS_STORE_APP) && !defined(PFC_WINDOWS_DESKTOP_APP)
+
+#ifdef WINAPI_FAMILY_PARTITION
+#if ! WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#define PFC_WINDOWS_STORE_APP // Windows store or Windows phone app, not a desktop app
+#endif // #if ! WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#endif // #ifdef WINAPI_FAMILY_PARTITION
+
+#ifndef PFC_WINDOWS_STORE_APP
+#define PFC_WINDOWS_DESKTOP_APP
 #endif
 
-#include <windows.h>
+#endif // #if !defined(PFC_WINDOWS_STORE_APP) && !defined(PFC_WINDOWS_DESKTOP_APP)
 
 #ifndef _SYS_GUID_OPERATOR_EQ_
 __inline bool __InlineIsEqualGUID(REFGUID rguid1, REFGUID rguid2)
@@ -49,7 +65,9 @@ inline bool operator!=(REFGUID guidOne, REFGUID guidOther) {return !__InlineIsEq
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <memory.h>
+#include <stdarg.h>
+#include <string.h> // memcmp
+
 typedef struct {
         uint32_t Data1;
         uint16_t Data2;
@@ -80,13 +98,6 @@ inline bool operator!=(const GUID & p_item1,const GUID & p_item2) {
 #include <stdexcept>
 #include <new>
 
-#include <stdio.h>
-
-#include <assert.h>
-
-#include <math.h>
-#include <float.h>
-
 #define _PFC_WIDESTRING(_String) L ## _String
 #define PFC_WIDESTRING(_String) _PFC_WIDESTRING(_String)
 
@@ -103,12 +114,13 @@ inline bool operator!=(const GUID & p_item1,const GUID & p_item2) {
 #else
 
 #ifdef _WIN32
-namespace pfc { void myassert(const wchar_t * _Message, const wchar_t *_File, unsigned _Line); }
-#define PFC_ASSERT(_Expression) (void)( (!!(_Expression)) || (pfc::myassert(PFC_WIDESTRING(#_Expression), PFC_WIDESTRING(__FILE__), __LINE__), 0) )
+namespace pfc { void myassert_win32(const wchar_t * _Message, const wchar_t *_File, unsigned _Line); }
+#define PFC_ASSERT(_Expression) (void)( (!!(_Expression)) || (pfc::myassert_win32(PFC_WIDESTRING(#_Expression), PFC_WIDESTRING(__FILE__), __LINE__), 0) )
 #define PFC_ASSERT_SUCCESS(_Expression) PFC_ASSERT(_Expression)
 #else
-#define PFC_ASSERT(_Expression) assert(_Expression)
-#define PFC_ASSERT_SUCCESS(_Expression) (void)( (_Expression), 0) //FIXME
+namespace pfc { void myassert (const char * _Message, const char *_File, unsigned _Line); }
+#define PFC_ASSERT(_Expression) (void)( (!!(_Expression)) || (pfc::myassert(#_Expression, __FILE__, __LINE__), 0) )
+#define PFC_ASSERT_SUCCESS(_Expression) PFC_ASSERT( _Expression )
 #endif
 
 #define PFC_ASSERT_NO_EXCEPTION(_Expression) { try { _Expression; } catch(...) { PFC_ASSERT(!"Should not get here - unexpected exception"); } }
@@ -128,7 +140,7 @@ namespace pfc { void myassert(const wchar_t * _Message, const wchar_t *_File, un
 #define ASSUME(X) __assume(X)
 #endif
 
-#define PFC_DEPRECATE(X) __declspec(deprecated(X))
+#define PFC_DEPRECATE(X) // __declspec(deprecated(X))   don't do this since VS2015 defaults to erroring these
 #define PFC_NORETURN __declspec(noreturn)
 #define PFC_NOINLINE __declspec(noinline)
 #else
@@ -140,6 +152,10 @@ namespace pfc { void myassert(const wchar_t * _Message, const wchar_t *_File, un
 #define PFC_NOINLINE
 
 #endif
+
+namespace pfc {
+	void selftest();
+}
 
 #include "int_types.h"
 #include "traits.h"

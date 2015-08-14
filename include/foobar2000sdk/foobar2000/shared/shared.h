@@ -3,6 +3,8 @@
 
 #include "../../pfc/pfc.h"
 
+#include <assert.h>
+
 // Global flag - whether it's OK to leak static objects as they'll be released anyway by process death
 #define FB2K_LEAK_STATIC_OBJECTS PFC_LEAK_STATIC_OBJECTS 
 

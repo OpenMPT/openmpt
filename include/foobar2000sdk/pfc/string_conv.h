@@ -554,3 +554,5 @@ namespace pfc {
     }
 #endif
 };
+
+inline pfc::string_base & operator<<(pfc::string_base & p_fmt, const wchar_t * p_str) { p_fmt.add_string(pfc::stringcvt::string_utf8_from_wide(p_str) ); return p_fmt; }

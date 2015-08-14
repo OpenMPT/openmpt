@@ -151,6 +151,14 @@ namespace pfc {
 	};
 
 	void crash();
+	void outputDebugLine(const char * msg);
+
+	class debugLog : public string_formatter {
+	public:
+		~debugLog() { outputDebugLine(this->get_ptr()); }
+	};
+#define PFC_DEBUGLOG ::pfc::debugLog()._formatter()
+	
 
 	template<typename t_type,t_type p_initval>
 	class int_container_helper {

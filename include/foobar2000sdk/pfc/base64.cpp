@@ -37,7 +37,7 @@ namespace pfc {
 		static const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 		t_uint8 alphabetRev[256];
 		for(t_size walk = 0; walk < PFC_TABSIZE(alphabetRev); ++walk) alphabetRev[walk] = 0xFF;
-		for(t_size walk = 0; walk < PFC_TABSIZE(alphabet); ++walk) alphabetRev[alphabet[walk]] = (t_uint8)walk;
+		for(t_size walk = 0; walk < PFC_TABSIZE(alphabet); ++walk) alphabetRev[ (unsigned) alphabet[walk]] = (t_uint8)walk;
 		const t_size textLen = strlen(text);
 
 		if (textLen % 4 != 0) throw pfc::exception_invalid_params();

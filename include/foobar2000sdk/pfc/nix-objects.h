@@ -1,5 +1,6 @@
 #include <sys/select.h>
 #include <sys/time.h>
+#include <set>
 
 namespace pfc {
     
@@ -37,15 +38,15 @@ namespace pfc {
 
     class fdSet {
     public:
-        fdSet() : m_nfds() {FD_ZERO( &m_set );}
         
         void operator+=( int fd );
         void operator-=( int fd );
         bool operator[] (int fd );
         void clear();
+
+        void operator+=( fdSet const & other );
         
-        fd_set m_set;
-        int m_nfds;
+        std::set<int> m_fds;
     };
     
     
@@ -60,7 +61,7 @@ namespace pfc {
         
         int Select();
         int Select( double timeOutSeconds );
-        int Select( timeval * tv );
+        int Select_( int timeOutMS );
         
         fdSet Reads, Writes, Errors;
     };
@@ -99,11 +100,9 @@ namespace pfc {
     
     void nixGetRandomData( void * outPtr, size_t outBytes );
     
-#ifdef __APPLE__ // implemented only thru NSEvent in Obj-C code
     bool isShiftKeyPressed();
     bool isCtrlKeyPressed();
     bool isAltKeyPressed();
-#endif
 }
 
 void uSleepSeconds( double seconds, bool );

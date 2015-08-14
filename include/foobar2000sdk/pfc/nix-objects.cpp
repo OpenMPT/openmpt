@@ -1,9 +1,11 @@
 #include "pfc.h"
 
+#ifndef _WIN32
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <poll.h>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
@@ -71,40 +73,70 @@ namespace pfc {
     }
 
     void fdSet::operator+=( int fd ) {
-        FD_SET( fd, &m_set );
-        max_acc( m_nfds, fd + 1 );
+        m_fds.insert( fd );
     }
     void fdSet::operator-=( int fd ) {
-        FD_CLR( fd, &m_set );
+        m_fds.erase(fd);
     }
     bool fdSet::operator[] (int fd ) {
-        return FD_ISSET( fd, &m_set ) != 0;
+        return m_fds.find( fd ) != m_fds.end();
     }
     void fdSet::clear() {
-        FD_ZERO( &m_set ); m_nfds = 0;
+        m_fds.clear();
+    }
+    
+    void fdSet::operator+=( fdSet const & other ) {
+        for(auto i = other.m_fds.begin(); i != other.m_fds.end(); ++ i ) {
+            (*this) += *i;
+        }
     }
 
     int fdSelect::Select() {
-        return Select( (timeval*) NULL );
+        return Select_( -1 );
     }
     int fdSelect::Select( double timeOutSeconds ) {
+        int ms;
         if (timeOutSeconds < 0) {
-            return Select( );
+            ms = -1;
+        } else if (timeOutSeconds == 0) {
+            ms = 0;
         } else {
-            timeval tv = makeTimeVal( timeOutSeconds );
-            return Select( & tv );
+            ms = pfc::rint32( timeOutSeconds * 1000 );
+            if (ms < 1) ms = 1;
         }
+        return Select_( ms );
     }
-    int fdSelect::Select( timeval * tv ) {
-        int nfds = 0;
-        max_acc(nfds, Reads.m_nfds);
-        max_acc(nfds, Writes.m_nfds);
-        max_acc(nfds, Errors.m_nfds);
-        int rv = select(nfds, &Reads.m_set, &Writes.m_set, &Errors.m_set, tv);
-        if (rv < 0) {
-            throw exception_nix();
+    
+    int fdSelect::Select_( int timeOutMS ) {
+        fdSet total = Reads;
+        total += Writes;
+        total += Errors;
+        const size_t count = total.m_fds.size();
+        pfc::array_t< pollfd > v;
+        v.set_size_discard( count );
+        size_t walk = 0;
+        for( auto i = total.m_fds.begin(); i != total.m_fds.end(); ++ i ) {
+            const int fd = *i;
+            auto & f = v[walk++];
+            f.fd = fd;
+            f.events = (Reads[fd] ? POLLIN : 0) | (Writes[fd] ? POLLOUT : 0);
+            f.revents = 0;
         }
-        return rv;
+        int status = poll(v.get_ptr(), (int)count, timeOutMS);
+        if (status < 0) throw exception_nix();
+        
+        Reads.clear(); Writes.clear(); Errors.clear();
+        
+        if (status > 0) {
+            for(walk = 0; walk < count; ++walk) {
+                auto & f = v[walk];
+                if (f.revents & POLLIN) Reads += f.fd;
+                if (f.events & POLLOUT) Writes += f.fd;
+                if (f.events & POLLERR) Errors += f.fd;
+            }
+        }
+        
+        return status;
     }
     
     bool fdCanRead( int fd ) {
@@ -209,13 +241,26 @@ namespace pfc {
     }
 
     void nixGetRandomData( void * outPtr, size_t outBytes ) {
-        fileHandle randomData;
-        randomData = open("/dev/random", O_RDONLY);
-        if (randomData.h < 0) throw exception_nix();
-        if ( read( randomData.h, outPtr, outBytes ) != outBytes ) throw exception_nix();
+		try {
+			fileHandle randomData;
+			randomData = open("/dev/urandom", O_RDONLY);
+			if (randomData.h < 0) throw exception_nix();
+			if (read(randomData.h, outPtr, outBytes) != outBytes) throw exception_nix();
+		}
+		catch (std::exception const & e) {
+			throw std::runtime_error("getRandomData failure");
+		}
     }
+
+#ifndef __APPLE__ // for Apple they are implemented in Obj-C
+	bool isShiftKeyPressed() {return false;}
+	bool isCtrlKeyPressed() {return false;}
+	bool isAltKeyPressed() {return false;}
+#endif
 }
 
 void uSleepSeconds( double seconds, bool ) {
     pfc::nixSleep( seconds );
 }
+#endif // _WIN32
+

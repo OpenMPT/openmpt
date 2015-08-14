@@ -1,3 +1,5 @@
+#include <functional>
+
 //! Generic service for receiving notifications about async operation completion. Used by various other services.
 class completion_notify : public service_base {
 public:
@@ -59,41 +61,23 @@ typedef service_nnptr_t<completion_notify_orphanable> completion_notify_orphanab
 //! Helper base class for classes that manage nonblocking tasks and get notified back thru completion_notify interface.
 class completion_notify_receiver {
 public:
-	completion_notify::ptr create_or_get_task(unsigned p_id) {
-		completion_notify_orphanable_ptr ptr;
-		if (!m_tasks.query(p_id,ptr)) {
-			ptr = completion_notify_create(this,p_id);
-			m_tasks.set(p_id,ptr);
-		}
-		return ptr;
-	}
-	completion_notify_ptr create_task(unsigned p_id) {
-		completion_notify_orphanable_ptr ptr;
-		if (m_tasks.query(p_id,ptr)) ptr->orphan();
-		ptr = completion_notify_create(this,p_id);
-		m_tasks.set(p_id,ptr);
-		return ptr;
-	}
-	bool have_task(unsigned p_id) const {
-		return m_tasks.have_item(p_id);
-	}
-	void orphan_task(unsigned p_id) {
-		completion_notify_orphanable_ptr ptr;
-		if (m_tasks.query(p_id,ptr)) {
-			ptr->orphan();
-			m_tasks.remove(p_id);
-		}
-	}
-	~completion_notify_receiver() {
-		orphan_all_tasks();
-	}
-	void orphan_all_tasks() {
-		m_tasks.enumerate(orphanfunc);
-		m_tasks.remove_all();
-	}
+    completion_notify::ptr create_or_get_task(unsigned p_id);
+    completion_notify_ptr create_task(unsigned p_id);
+    bool have_task(unsigned p_id) const;
+    void orphan_task(unsigned p_id);
+    ~completion_notify_receiver();
+    void orphan_all_tasks();
 
 	virtual void on_task_completion(unsigned p_id,unsigned p_status) {}
 private:
 	static void orphanfunc(unsigned,completion_notify_orphanable_nnptr p_item) {p_item->orphan();}
 	pfc::map_t<unsigned,completion_notify_orphanable_nnptr> m_tasks;
 };
+
+namespace fb2k {
+    
+    typedef std::function<void (unsigned)> completionNotifyFunc_t;
+
+    //! Modern completion_notify helper
+    completion_notify::ptr makeCompletionNotify( completionNotifyFunc_t );
+}

@@ -23,6 +23,7 @@
     <ClCompile Include="audio_math.cpp" />
     <ClCompile Include="wildcard.cpp" />
     <ClCompile Include="filehandle.cpp" />
+    <ClCompile Include="nix-objects.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="alloc.h" />
@@ -70,6 +71,9 @@
     <ClInclude Include="timers.h" />
     <ClInclude Include="wildcard.h" />
     <ClInclude Include="filehandle.h" />
+    <ClInclude Include="nix-objects.h" />
+    <ClInclude Include="pp-gettickcount.h" />
+    <ClInclude Include="pp-winapi.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="pfc-license.txt">

@@ -232,7 +232,7 @@ private:
 	static LRESULT CALLBACK myWindowProc(HWND wnd, UINT msg, WPARAM wp, LPARAM lp) {
 		TClass * i = NULL;
 		if (msg == WM_NCCREATE) {
-			TClass * i = new TClass;
+			i = new TClass;
 			i->Attach(wnd);
 			::SetWindowLongPtr(wnd, 0, reinterpret_cast<LONG_PTR>(i));
 		} else {

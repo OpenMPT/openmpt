@@ -46,6 +46,8 @@ private:
 	DWORD m_code;
 };
 
+#ifdef PFC_WINDOWS_DESKTOP_APP
+
 void uAddWindowStyle(HWND p_wnd,LONG p_style);
 void uRemoveWindowStyle(HWND p_wnd,LONG p_style);
 void uAddWindowExStyle(HWND p_wnd,LONG p_style);
@@ -94,7 +96,6 @@ private:
 	CGlobalLockScope m_scope;
 };
 
-
 bool IsPointInsideControl(const POINT& pt, HWND wnd);
 bool IsWindowChildOf(HWND child, HWND parent);
 
@@ -116,6 +117,8 @@ private:
 
 	HMENU m_menu;
 };
+
+#endif
 
 class win32_event {
 public:
@@ -154,6 +157,7 @@ private:
 
 void uSleepSeconds(double p_time,bool p_alertable);
 
+#ifdef PFC_WINDOWS_DESKTOP_APP
 
 class win32_icon {
 public:
@@ -188,7 +192,6 @@ private:
 	HACCEL m_accel;
 	PFC_CLASS_NOT_COPYABLE(win32_accelerator,win32_accelerator);
 };
-
 
 class SelectObjectScope {
 public:
@@ -225,7 +228,7 @@ private:
 	const HDC m_dc;
 	int m_state;
 };
-
+#endif // #ifdef PFC_WINDOWS_DESKTOP_APP
 
 class exception_com : public std::exception {
 public:
@@ -236,8 +239,12 @@ private:
 	HRESULT m_code;
 };
 
+#ifdef PFC_WINDOWS_DESKTOP_APP
+
 // Same format as _WIN32_WINNT macro.
 WORD GetWindowsVersionCode() throw();
+
+#endif
 
 //! Simple implementation of a COM reference counter. The initial reference count is zero, so it can be used with pfc::com_ptr_t<> with plain operator=/constructor rather than attach().
 template<typename TBase> class ImplementCOMRefCounter : public TBase {
@@ -277,4 +284,26 @@ namespace pfc {
     bool isShiftKeyPressed();
     bool isCtrlKeyPressed();
     bool isAltKeyPressed();
+
+
+	class winHandle {
+	public:
+		winHandle(HANDLE h_ = INVALID_HANDLE_VALUE) : h(h_) {}
+		~winHandle() { Close(); }
+		void Close() {
+			if (h != INVALID_HANDLE_VALUE) { CloseHandle(h); h = INVALID_HANDLE_VALUE; }
+		}
+
+		void Attach(HANDLE h_) { Close(); h = h_; }
+		HANDLE Detach() { HANDLE t = h; h = INVALID_HANDLE_VALUE; return t; }
+
+		HANDLE Get() const { return h; }
+		operator HANDLE() const { return h; }
+
+		HANDLE h;
+	private:
+		winHandle(const winHandle&);
+		void operator=(const winHandle&);
+	};
 }
+

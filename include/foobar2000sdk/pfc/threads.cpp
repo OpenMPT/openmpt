@@ -1,21 +1,21 @@
 #include "pfc.h"
 
+#ifdef _WIN32
+#include "pp-winapi.h"
+#endif
+
 #ifdef __APPLE__
 #include <sys/sysctl.h>
 #include <sys/stat.h>
 #endif
 
-#ifndef _WINDOWS
-#ifdef __ANDROID__
-#include "cpu-features.h"
-#else
+#ifndef PFC_WINDOWS_DESKTOP_APP
 #include <thread>
-#endif
 #endif
 
 namespace pfc {
 	t_size getOptimalWorkerThreadCount() {
-#ifdef _WINDOWS
+#ifdef PFC_WINDOWS_DESKTOP_APP
 		DWORD_PTR mask,system;
 		t_size ret = 0;
 		GetProcessAffinityMask(GetCurrentProcess(),&mask,&system);
@@ -24,8 +24,6 @@ namespace pfc {
 		}
 		if (ret == 0) return 1;
 		return ret;
-#elif defined(__ANDROID__)
-                return android_getCpuCount();
 #else
 		return std::thread::hardware_concurrency();
 #endif
@@ -54,7 +52,7 @@ namespace pfc {
         } catch(...) {}
     }
     
-#ifdef _WINDOWS
+#ifdef _WIN32
     thread::thread() : m_thread(INVALID_HANDLE_VALUE)
     {
     }
@@ -75,7 +73,11 @@ namespace pfc {
 	void thread::winStart(int priority, DWORD * outThreadID) {
 		close();
 		HANDLE thread;
+#ifdef PFC_WINDOWS_DESKTOP_APP
 		thread = (HANDLE)_beginthreadex(NULL, 0, g_entry, reinterpret_cast<void*>(this), CREATE_SUSPENDED, (unsigned int*)outThreadID);
+#else
+		thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) g_entry, reinterpret_cast<void*>(this), CREATE_SUSPENDED, outThreadID);
+#endif
 		if (thread == NULL) throw exception_creation();
 		SetThreadPriority(thread, priority);
 		ResumeThread(thread);

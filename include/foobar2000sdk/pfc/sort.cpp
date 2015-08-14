@@ -149,7 +149,7 @@ static counter::t_val uniqueVal() {
 #endif
 
 static t_size myrand(t_size count) {
-    const uint64_t rm = RAND_MAX + 1;
+    const uint64_t rm = (uint64_t)RAND_MAX + 1;
     uint64_t m = 1;
     uint64_t v = 0;
     for(;;) {

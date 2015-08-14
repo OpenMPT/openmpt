@@ -1,5 +1,9 @@
 #include "pfc.h"
 
+#ifdef _WIN32
+#include <Objbase.h>
+#endif
+
 /*
 6B29FC40-CA47-1067-B31D-00DD010662DA
 .
@@ -106,7 +110,7 @@ GUID GUID_from_text(const char * text) {
 static inline char print_hex_digit(unsigned val)
 {
 	static const char table[16] = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
-	assert((val & ~0xF) == 0);
+	PFC_ASSERT((val & ~0xF) == 0);
 	return table[val];
 }
 

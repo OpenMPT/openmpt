@@ -1,3 +1,5 @@
+#include <functional>
+
 //! Callback object class for main_thread_callback_manager service.
 class NOVTABLE main_thread_callback : public service_base {
 public:
@@ -82,7 +84,22 @@ static void callInMainThreadSvc(myservice_t * host, param_t const & param) {
 class callInMainThreadHelper {
 public:
     
+    typedef std::function< void () > func_t;
+    
     typedef pfc::rcptr_t< bool > killswitch_t;
+    
+    class entryFunc : public main_thread_callback {
+    public:
+        entryFunc( func_t const & func, killswitch_t ks ) : m_ks(ks), m_func(func) {}
+        
+        void callback_run() {
+            if (!*m_ks) m_func();
+        }
+        
+    private:
+        killswitch_t m_ks;
+        func_t m_func;
+    };
     
     template<typename host_t, typename arg_t>
     class entry : public main_thread_callback {
@@ -107,6 +124,10 @@ public:
         killswitch_t m_ks;
         host_t * m_host;
     };
+    
+    void add(func_t f) {
+        add_( new service_impl_t< entryFunc > ( f, m_ks ) );
+    }
     
     template<typename host_t, typename arg_t>
     void add( host_t * host, arg_t const & arg) {
@@ -136,3 +157,8 @@ private:
     killswitch_t m_ks;
     
 };
+
+// Modern helper
+namespace fb2k {
+    void inMainThread( std::function<void () > f );
+}

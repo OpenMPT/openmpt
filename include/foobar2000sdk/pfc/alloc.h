@@ -138,7 +138,7 @@ namespace pfc {
 	private:
 		typedef __array_fast_helper_t<t_item> t_self;
 	public:
-		__array_fast_helper_t() : m_buffer(NULL), m_size_total(0), m_size(0) {}
+		__array_fast_helper_t() : m_buffer(NULL), m_size(0), m_size_total(0) {}
 		
 
 		void set_size(t_size p_size,t_size p_size_total) {

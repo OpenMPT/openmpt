@@ -1,7 +1,5 @@
 #include "pfc.h"
 
-#include <stdarg.h>
-
 //implementations of deprecated string_printf methods, with a pragma to disable warnings when they reference other deprecated methods.
 
 #ifndef _MSC_VER
@@ -9,7 +7,9 @@
 #define _ultoa_s ultoa
 #endif
 
+#ifdef _MSC_VER
 #pragma warning(disable:4996)
+#endif
 
 namespace pfc {
 

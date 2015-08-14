@@ -1095,7 +1095,7 @@ uint32_t charLower(uint32_t param)
 	if (param<128) {
 		return ascii_tolower_table[param];
 	}
-#ifdef _WIN32
+#ifdef PFC_WINDOWS_DESKTOP_APP
 	else if (param<0x10000) {
 		return (unsigned)CharLowerW((WCHAR*)param);
 	}
@@ -1109,7 +1109,7 @@ uint32_t charUpper(uint32_t param)
 		if (param>='a' && param<='z') param += 'A' - 'a';
 		return param;
 	}
-#ifdef _WIN32
+#ifdef PFC_WINDOWS_DESKTOP_APP
 	else if (param<0x10000) {
 		return (unsigned)CharUpperW((WCHAR*)param);
 	}
@@ -1124,7 +1124,7 @@ bool stringEqualsI_ascii(const char * p1,const char * p2) throw() {
 		char c1 = *p1;
 		char c2 = *p2;
 		if (c1 > 0 && c2 > 0) {
-			if (ascii_tolower_table[c1] != ascii_tolower_table[c2]) return false;
+			if (ascii_tolower_table[ (unsigned) c1 ] != ascii_tolower_table[ (unsigned) c2 ]) return false;
 		} else {
 			if (c1 == 0 && c2 == 0) return true;
 			if (c1 == 0 || c2 == 0) return false;
@@ -1141,7 +1141,7 @@ bool stringEqualsI_utf8(const char * p1,const char * p2) throw()
 		char c1 = *p1;
 		char c2 = *p2;
 		if (c1 > 0 && c2 > 0) {
-			if (ascii_tolower_table[c1] != ascii_tolower_table[c2]) return false;
+			if (ascii_tolower_table[ (unsigned) c1 ] != ascii_tolower_table[ (unsigned) c2 ]) return false;
 			++p1; ++p2;
 		} else {
 			if (c1 == 0 && c2 == 0) return true;
@@ -1161,7 +1161,7 @@ bool stringEqualsI_utf8(const char * p1,const char * p2) throw()
 
 char ascii_tolower_lookup(char c) {
 	PFC_ASSERT( c >= 0);
-	return (char)ascii_tolower_table[c];
+	return (char)ascii_tolower_table[ (unsigned) c ];
 }
 
 void string_base::fix_dir_separator(char c) {
@@ -1209,4 +1209,11 @@ void string_base::fix_dir_separator(char c) {
         }
     }
 
+	char * strDup(const char * src) {
+#ifdef _MSC_VER
+		return _strdup(src);
+#else
+		return strdup(src);
+#endif
+	}
 } //namespace pfc
