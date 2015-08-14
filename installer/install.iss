@@ -29,8 +29,7 @@ AppPublisherURL=http://openmpt.org/
 AppSupportURL=http://forum.openmpt.org/
 AppUpdatesURL=http://openmpt.org/
 DefaultDirName={pf}\OpenMPT
-DefaultGroupName=OpenMPT
-AllowNoIcons=yes
+DisableProgramGroupPage=yes
 OutputDir=.\
 OutputBaseFilename=OpenMPT-{#GetAppVersion}-Setup{#BaseNameAddition}
 Compression=lzma2
@@ -46,6 +45,7 @@ DisableWelcomePage=yes
 [Tasks]
 ; icons and install mode
 Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}
+Name: startmenuicon; Description: "Create a start menu icon"; GroupDescription: {cm:AdditionalIcons}
 Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
 #ifdef DOWNLOAD_MO3
 Name: downloadmo3; Description: Download unmo3 (library needed for reading MO3 files, recommended); GroupDescription: Options:
@@ -75,7 +75,7 @@ Source: ..\bin\{#PlatformFolder}\unmo3.dll; DestDir: {app}; Flags: ignoreversion
 ;Source: ..\packageTemplate\Plugins\*.*; DestDir: {app}\Plugins\; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: ..\bin\{#PlatformFolder}\MIDI Input Output.dll; DestDir: {app}\Plugins\MIDI\; Flags: ignoreversion
 
-Source: ..\packageTemplate\ExampleSongs\*.*; DestDir: {app}\ExampleSongs\; Flags: ignoreversion sortfilesbyextension
+Source: ..\packageTemplate\ExampleSongs\*.*; DestDir: {app}\ExampleSongs\; Flags: ignoreversion sortfilesbyextension recursesubdirs
 
 Source: packageTemplate\readme.txt; DestDir: {app}; Flags: ignoreversion
 Source: ..\packageTemplate\History.txt; DestDir: {app}; Flags: ignoreversion
@@ -106,7 +106,7 @@ Name: {app}\tunings; Tasks: portable
 
 [Icons]
 ; start menu
-Name: {group}\OpenMPT; Filename: {app}\mptrack.exe
+Name: {userprograms}\OpenMPT; Filename: {app}\mptrack.exe; Tasks: startmenuicon
 
 ; app's directory and keymaps directory (for ease of use)
 Name: {app}\Configuration files; Filename: {userappdata}\OpenMPT\; Tasks: not portable
@@ -125,7 +125,7 @@ Filename: {app}\ModPlug Central.url; Section: InternetShortcut; Key: URL; String
 [Run]
 ; duh
 Filename: "{app}\OMPT_{#GetAppVersionShort}_ReleaseNotes.html"; Description: "View Release Notes"; Flags: shellexec nowait postinstall skipifsilent
-Filename: {app}\mptrack.exe; Parameters: """{app}\ExampleSongs\manwe - evening glow.it"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: nowait postinstall skipifsilent
+Filename: {app}\mptrack.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
 ; internet shortcut has to be deleted manually
@@ -185,6 +185,26 @@ begin
         SetIniString('Paths', 'Key_Config_File', ExpandConstant('{userappdata}\OpenMPT\Keybindings.mkb'), ExpandConstant('{userappdata}\OpenMPT\mptrack.ini'));
     end;
 
+end;
+
+// Picks a random example song file to play
+Function RandomExampleFile(Dummy: String): String;
+var
+    Files: TstringList;
+    FindRec: TFindRec;
+begin
+    Result := '';
+    if FindFirst(ExpandConstant('{app}\ExampleSongs\*'), FindRec) then
+    try
+        Files := TstringList.Create;
+        repeat
+            if FindRec.Attributes and FILE_ATTRIBUTE_DIRECTORY = 0 then
+            Files.Add(FindRec.Name);
+        until not FindNext(FindRec);
+        Result := ExpandConstant('{app}\ExampleSongs\') + Files[Random(Files.Count)];
+    finally
+        FindClose(FindRec);
+    end;
 end;
 
 function NextButtonClick(CurPageID: Integer): Boolean;
