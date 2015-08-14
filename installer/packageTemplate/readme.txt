@@ -1,5 +1,5 @@
 ******************
-*  OpenMPT 1.24  *
+*  OpenMPT 1.25  *
 ******************
 
 
@@ -45,6 +45,8 @@ Plugins (folder): Contains standard audio and MIDI processing plugins that ship
     with OpenMPT.
 ExampleSongs (folder): A set of module files which should give an impression of
     what can be done in OpenMPT with only a few kilobytes.
+ExampleSongs\Samples (folder): A set of samples used by some of the example
+    songs. You may use them for your own songs as well!
 History.txt: Version history.
 mptrack.exe: Main executable.
 PluginBridge32.exe: Plugin bridge server for 32-bit VST plugins.
@@ -126,7 +128,8 @@ libFLAC
 -------
 OpenMPT makes use of libFLAC, which is released under the BSD license:
 
-Copyright (C) 2000,2001,2002,2003,2004,2005,2006,2007  Josh Coalson
+Copyright (C) 2000-2009  Josh Coalson
+Copyright (C) 2011-2014  Xiph.Org Foundation
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
