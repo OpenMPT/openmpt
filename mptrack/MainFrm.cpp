@@ -2897,13 +2897,17 @@ TfLanguageProfileNotifySink::~TfLanguageProfileNotifySink()
 		// Probably a race condition I don't understand, and probably a bug in Wine.
 		return;
 	}
-	if(m_pSource)
+	if(m_pSource && (m_dwCookie != TF_INVALID_COOKIE))
 	{
 		m_pSource->UnadviseSink(m_dwCookie);
+	}
+	m_dwCookie = TF_INVALID_COOKIE;
+	if(m_pSource)
+	{
 		m_pSource->Release();
 	}
-	if(m_pProfiles) m_pProfiles->Release();
 	m_pSource = nullptr;
+	if(m_pProfiles) m_pProfiles->Release();
 	m_pProfiles = nullptr;
 }
 
