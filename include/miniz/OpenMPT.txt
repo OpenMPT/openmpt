@@ -4,4 +4,7 @@ v155_r4
 Modifications for OpenMPT:
  * #define MINIZ_NO_STDIO has been set because OpenMPT does not need stdio functionality and miniz relies on secure-CRT file i/o functions in windows builds which are not available on all mingw64 versions.
  * GCC warning 'include/miniz/miniz.c:4099:5: warning: statement with no effect [-Wunused-value]' has been silenced.
+ * Macros optionally defined to 1 are defined to 0 in the other case in order to avoid warnings.
+ * GCC warning 'include/miniz/miniz.c:2823:111: warning: cast discards ‘__attribute__((const))’ qualifier from pointer target type [-Wcast-qual]' has been silenced.
+ * GCC warning 'include/miniz/miniz.c:3311:28: warning: cast discards ‘__attribute__((const))’ qualifier from pointer target type [-Wcast-qual]' has been silenced.
 No further changes have been made.
