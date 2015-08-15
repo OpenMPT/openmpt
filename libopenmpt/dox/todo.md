@@ -11,7 +11,6 @@ Currently being worked on:
     OpenMPT and not libopenmpt.
 
 Incomplete list of stuff that needs work / known bugs:
- *  Complete the API documentation.
  *  Test on more obscure platforms.
  *  Build system, especially building shared libraries, needs work on Mac OS X
     and on probably all other systems that do not use the GNU linker.
