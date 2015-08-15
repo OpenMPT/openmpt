@@ -1235,6 +1235,8 @@ void COrderList::OnDeleteOrder()
 	{
 		Util::DeleteRange(selection.firstOrd, selection.lastOrd, sndFile.m_lockOrderStart, sndFile.m_lockOrderEnd);
 	}
+
+	SetCurSel(selection.firstOrd, true, false, true);
 }
 
 
