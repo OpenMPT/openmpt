@@ -382,7 +382,7 @@ public:
 
 protected:
 	void EnumerateDirectXDMOs();
-	AEffect *LoadPlugin(const VSTPluginLib &plugin, HINSTANCE &library, bool forceBridge);
+	AEffect *LoadPlugin(VSTPluginLib &plugin, HINSTANCE &library, bool forceBridge);
 
 public:
 	static VstIntPtr VSTCALLBACK MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
