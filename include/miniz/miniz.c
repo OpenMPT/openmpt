@@ -202,21 +202,29 @@
 #if defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__i386) || defined(__i486__) || defined(__i486) || defined(i386) || defined(__ia64__) || defined(__x86_64__)
 // MINIZ_X86_OR_X64_CPU is only used to help set the below macros.
 #define MINIZ_X86_OR_X64_CPU 1
+#else // OpenMPT
+#define MINIZ_X86_OR_X64_CPU 0 // OpenMPT
 #endif
 
 #if (__BYTE_ORDER__==__ORDER_LITTLE_ENDIAN__) || MINIZ_X86_OR_X64_CPU
 // Set MINIZ_LITTLE_ENDIAN to 1 if the processor is little endian.
 #define MINIZ_LITTLE_ENDIAN 1
+#else // OpenMPT
+#define MINIZ_LITTLE_ENDIAN 0 // OpenMPT
 #endif
 
 #if MINIZ_X86_OR_X64_CPU
 // Set MINIZ_USE_UNALIGNED_LOADS_AND_STORES to 1 on CPU's that permit efficient integer loads and stores from unaligned addresses.
 #define MINIZ_USE_UNALIGNED_LOADS_AND_STORES 1
+#else // OpenMPT
+#define MINIZ_USE_UNALIGNED_LOADS_AND_STORES 0 // OpenMPT
 #endif
 
 #if defined(_M_X64) || defined(_WIN64) || defined(__MINGW64__) || defined(_LP64) || defined(__LP64__) || defined(__ia64__) || defined(__x86_64__)
 // Set MINIZ_HAS_64BIT_REGISTERS to 1 if operations on 64-bit integers are reasonably fast (and don't involve compiler generated calls to helper functions).
 #define MINIZ_HAS_64BIT_REGISTERS 1
+#else // OpenMPT
+#define MINIZ_HAS_64BIT_REGISTERS 0 // OpenMPT
 #endif
 
 #ifdef __cplusplus
@@ -567,7 +575,7 @@ typedef enum
 // Inits a ZIP archive reader.
 // These functions read and validate the archive's central directory.
 mz_bool mz_zip_reader_init(mz_zip_archive *pZip, mz_uint64 size, mz_uint32 flags);
-mz_bool mz_zip_reader_init_mem(mz_zip_archive *pZip, const void *pMem, size_t size, mz_uint32 flags);
+mz_bool mz_zip_reader_init_mem(mz_zip_archive *pZip, void *pMem, size_t size, mz_uint32 flags); // OpenMPT
 
 #ifndef MINIZ_NO_STDIO
 mz_bool mz_zip_reader_init_file(mz_zip_archive *pZip, const char *pFilename, mz_uint32 flags);
@@ -752,6 +760,8 @@ typedef struct
 
 #if MINIZ_HAS_64BIT_REGISTERS
   #define TINFL_USE_64BIT_BITBUF 1
+#else // OpenMPT
+  #define TINFL_USE_64BIT_BITBUF 0 // OpenMPT
 #endif
 
 #if TINFL_USE_64BIT_BITBUF
@@ -2810,7 +2820,7 @@ void *tdefl_write_image_to_png_file_in_memory_ex(const void *pImage, int w, int 
   for (z = 41; z; --z) tdefl_output_buffer_putter(&z, 1, &out_buf);
   // compress image data
   tdefl_init(pComp, tdefl_output_buffer_putter, &out_buf, s_tdefl_png_num_probes[MZ_MIN(10, level)] | TDEFL_WRITE_ZLIB_HEADER);
-  for (y = 0; y < h; ++y) { tdefl_compress_buffer(pComp, &z, 1, TDEFL_NO_FLUSH); tdefl_compress_buffer(pComp, (mz_uint8*)pImage + (flip ? (h - 1 - y) : y) * bpl, bpl, TDEFL_NO_FLUSH); }
+  for (y = 0; y < h; ++y) { tdefl_compress_buffer(pComp, &z, 1, TDEFL_NO_FLUSH); tdefl_compress_buffer(pComp, (const mz_uint8*)pImage + (flip ? (h - 1 - y) : y) * bpl, bpl, TDEFL_NO_FLUSH); } // OpenMPT
   if (tdefl_compress_buffer(pComp, NULL, 0, TDEFL_FINISH) != TDEFL_STATUS_DONE) { MZ_FREE(pComp); MZ_FREE(out_buf.m_pBuf); return NULL; }
   // write real header
   *pLen_out = out_buf.m_size-41;
@@ -3288,7 +3298,7 @@ static size_t mz_zip_mem_read_func(void *pOpaque, mz_uint64 file_ofs, void *pBuf
   return s;
 }
 
-mz_bool mz_zip_reader_init_mem(mz_zip_archive *pZip, const void *pMem, size_t size, mz_uint32 flags)
+mz_bool mz_zip_reader_init_mem(mz_zip_archive *pZip, void *pMem, size_t size, mz_uint32 flags) // OpenMPT
 {
   if (!mz_zip_reader_init_internal(pZip, flags))
     return MZ_FALSE;

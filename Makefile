@@ -292,7 +292,7 @@ CFLAGS   += -g
 endif
 
 CXXFLAGS += -Wall -Wextra -Wundef -Wcast-qual -Wcast-align $(CXXFLAGS_WARNINGS)
-CFLAGS   += -Wall -Wextra         -Wcast-qual -Wcast-align $(CFLAGS_WARNINGS)
+CFLAGS   += -Wall -Wextra -Wundef -Wcast-qual -Wcast-align $(CFLAGS_WARNINGS)
 
 endif
 
