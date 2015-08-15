@@ -191,8 +191,8 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 }
 
 
-AEffect *CVstPluginManager::LoadPlugin(const VSTPluginLib &plugin, HINSTANCE &library, bool forceBridge)
-//------------------------------------------------------------------------------------------------------
+AEffect *CVstPluginManager::LoadPlugin(VSTPluginLib &plugin, HINSTANCE &library, bool forceBridge)
+//------------------------------------------------------------------------------------------------
 {
 	const mpt::PathString &pluginPath = plugin.dllPath;
 
@@ -234,6 +234,9 @@ AEffect *CVstPluginManager::LoadPlugin(const VSTPluginLib &plugin, HINSTANCE &li
 				return nullptr;
 			}
 		}
+		// If plugin was marked to use the plugin bridge but this somehow doesn't work (e.g. because the bridge is missing),
+		// disable the plugin bridge for this plugin.
+		plugin.useBridge = false;
 	}
 
 	try
@@ -313,19 +316,15 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 {
 	const mpt::PathString fileName = dllPath.GetFileName();
 
-	if(checkFileExistence && !dllPath.IsFile())
-	{
-		if(errStr)
-		{
-			*errStr += L"\nUnable to find ";
-			*errStr += dllPath.ToWide();
-		}
-	}
-
 	// Check if this is already a known plugin.
 	for(const_iterator dupePlug = begin(); dupePlug != end(); dupePlug++)
 	{
 		if(!dllPath.CompareNoCase(dllPath, (**dupePlug).dllPath)) return *dupePlug;
+	}
+
+	if(checkFileExistence && errStr != nullptr && !dllPath.IsFile())
+	{
+		*errStr += L"\nUnable to find " + dllPath.ToWide();
 	}
 
 	// Look if the plugin info is stored in the PluginCache
