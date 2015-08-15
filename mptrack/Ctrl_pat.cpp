@@ -914,7 +914,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 		}
 
 		m_OrderList.InvalidateRect(NULL, FALSE);
-		m_OrderList.SetCurSel(insertWhere);
+		m_OrderList.SetCurSel(insertWhere, true, false, true);
 
 		// If the first duplicated order is e.g. a +++ item, we need to move the pattern display on or else we'll still edit the previously shown pattern.
 		ORDERINDEX showPattern = std::min(insertWhere, m_sndFile.Order.GetLastIndex());
