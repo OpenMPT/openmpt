@@ -86,6 +86,8 @@ static cpuid_result cpuidex(uint32 function_a, uint32 function_c)
 		result.d = CPUInfo[3];
 	#else
 		// just do not test modern cpuid features with older compiler
+		MPT_UNREFERENCED_PARAMETER(function_a);
+		MPT_UNREFERENCED_PARAMETER(function_c);
 		result.a = 0;
 		result.b = 0;
 		result.c = 0;
