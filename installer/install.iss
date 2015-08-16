@@ -9,12 +9,12 @@
 ; install-unmo3-free-itd.iss - For generating the unmo3-free setup with InnoTools Downloader.
 ; install-unmo3-free.iss - For generating the unmo3-free setup with Inno Download Plugin.
 
+#ifndef PlatformName
+#error You must specify which installer to build by compiling either win32.iss or win64.iss
+#endif
+
 #define GetAppVersion StringChange(GetFileProductVersion("..\bin\" + PlatformFolder + "\mptrack.exe"), ",", ".")
 #define GetAppVersionShort Copy(GetAppVersion, 1, 4)
-
-#ifndef PlatformName
-#error You must specify which installer to build by compiliing either win32.iss or win64.iss
-#endif
 
 #ifndef BaseNameAddition
 #define BaseNameAddition
@@ -62,11 +62,18 @@ Name: english; MessagesFile: compiler:Default.isl
 ; for files that are common with the "zip package", use ..\packageTemplate\
 
 ; preserve file type order for best solid compression results (first binary, then text)
-; home folder
-Source: ..\bin\{#PlatformFolder}\mptrack.exe; DestDir: {app}; Flags: ignoreversion
-Source: ..\bin\{#PlatformFolder}\PluginBridge32.exe; DestDir: {app}; Flags: ignoreversion
-Source: ..\bin\{#PlatformFolder}\PluginBridge64.exe; DestDir: {app}; Flags: ignoreversion
-Source: ..\bin\{#PlatformFolder}\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignoreversion
+; base folder
+Source: ..\bin\{#PlatformFolder}\mptrack.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWin32Old
+Source: ..\bin\{#PlatformFolder}\PluginBridge32.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWin32Old
+Source: ..\bin\{#PlatformFolder}\PluginBridge64.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWin32Old
+Source: ..\bin\{#PlatformFolder}\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignoreversion; Check: not InstallWin32Old
+#ifdef WIN32OLD
+; Additional binaries for 32-bit legacy version
+Source: ..\bin\Win32old\mptrack.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
+Source: ..\bin\Win32old\PluginBridge32.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
+Source: ..\bin\Win32old\PluginBridge64.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
+Source: ..\bin\Win32old\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWin32Old
+#endif
 #ifndef DOWNLOAD_MO3
 Source: ..\bin\{#PlatformFolder}\unmo3.dll; DestDir: {app}; Flags: ignoreversion
 #endif
@@ -147,6 +154,11 @@ Type: files; Name: {app}\unmo3.dll; Tasks: downloadmo3
 #include "plugins.iss"
 
 [Code]
+#ifdef WIN32OLD
+var
+    BitnessPage: TInputOptionWizardPage;
+    BuildType: Integer;
+#endif
 
 #ifdef DOWNLOAD_MO3
 procedure VerifyUNMO3Checksum(); forward;
@@ -207,6 +219,62 @@ begin
     end;
 end;
 
+Function InstallWin32Old(): Boolean;
+begin
+#ifdef WIN32OLD
+    Result := (BuildType = 1);
+#else
+    Result := False;
+#endif
+end;
+
+#ifdef WIN32OLD
+function IsProcessorFeaturePresent(Feature: Integer): Integer;
+external 'IsProcessorFeaturePresent@Kernel32.dll stdcall delayload';
+
+function IsWine(): Integer;
+external 'wine_get_version@ntdll.dll stdcall delayload';
+
+procedure InitializeWizard();
+var
+    IsModernSystem: Boolean;
+begin
+    BitnessPage := CreateInputOptionPage(wpWelcome, 'OpenMPT Version', 'Select the version of OpenMPT you want to install.',
+        'Select the version of OpenMPT you want to install. Setup already determined the most suitable version for your system.', True, False);
+
+    // Add items
+    BitnessPage.Add('32-Bit, for Windows 7 or newer and CPU with SSE2 instruction set');
+    BitnessPage.Add('32-Bit, for Windows Vista or older or CPU without SSE2 instruction set');
+
+    BitnessPage.Values[1] := True;
+
+    // Win7?
+    IsModernSystem := (GetWindowsVersion >= $06010000);
+    // Check if installing in Wine
+    if(not IsModernSystem) then
+    begin
+        try
+            IsWine();
+            IsModernSystem := True;
+        except
+        end;
+    end;
+
+    if(IsModernSystem) then
+    begin
+        try
+            if(IsWin64 or (IsProcessorFeaturePresent(10) <> 0)) then
+            begin
+                // Windows 7 or Wine with SSE2
+                BitnessPage.Values[0] := True;
+            end;
+        except
+        end;
+    end else
+
+end;
+#endif
+
 function NextButtonClick(CurPageID: Integer): Boolean;
 var
     programfiles: String;
@@ -220,6 +288,13 @@ begin
                 MsgBox('Warning: Installing OpenMPT to' #10 + programfiles + #10 'in portable mode may lead to problems if you are not running it with an administrator account!', mbInformation, MB_OK);
             end;
         end;
+
+#ifdef WIN32OLD
+    BitnessPage.ID:
+        begin;
+            BuildType := BitnessPage.SelectedValueIndex;
+        end;
+#endif
     end;
     Result := true;
 end;
