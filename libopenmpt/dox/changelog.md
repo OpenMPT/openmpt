@@ -24,6 +24,7 @@ is just a high-level summary.
     instrument names.
  *  in_openmpt: Support for compiling with VS2008.
  *  xmp-openmpt: Support for compiling with VS2008.
+ *  in_openmpt: Add a more readable file information window.
 
 ### libopenmpt 0.2-beta12 (2015-04-19)
 
@@ -112,7 +113,8 @@ is just a high-level summary.
 
  *  [**Change**] libopenmpt now has an GNU Autotools based build system (in
     addition to all previously supported ways of building libopenmpt).
-    Autotools support is packaged separately as tarballs ending in `-autotools.tar.gz`.
+    Autotools support is packaged separately as tarballs ending in
+    `-autotools.tar.gz`.
 
  *  [**Bug**] The distributed windows .zip file did not include pugixml.
 
