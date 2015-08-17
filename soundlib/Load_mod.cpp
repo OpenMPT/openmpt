@@ -636,8 +636,8 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	const CHANNELINDEX readChannels = (isFLT8 ? 4 : m_nChannels); // 4 channels per pattern in FLT8 format.
 	if(isFLT8) numPatterns++; // as one logical pattern consists of two real patterns in FLT8 format, the highest pattern number has to be increased by one.
 	uint8 maxPanning = 0;	// For detecting 8xx-as-sync
-	bool hasTempoCommands = false;	// for detecting VBlank MODs
-	bool leftPanning = false, extendedPanning = false;	// for detecting 800-880 panning
+	bool hasTempoCommands = false, definitelyCIA = false;	// for detecting VBlank MODs
+	bool leftPanning = false, extendedPanning = false;		// for detecting 800-880 panning
 	bool onlyAmigaNotes = true;
 
 	// Reading patterns
@@ -677,6 +677,10 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 				// FLT8: either write to channel 1 to 4 (even patterns) or 5 to 8 (odd patterns).
 				PatternRow rowBase = Patterns[actualPattern].GetpModCommand(row, ((pat % 2u) == 0 || !isFLT8) ? 0 : 4);
 
+				// If we have more than one Fxx command on this row and one can be interpreted as speed
+				// and the other as tempo, we can be rather sure that it is not a VBlank mod.
+				bool hasSpeedOnRow = false, hasTempoOnRow = false;
+
 				for(CHANNELINDEX chn = 0; chn < readChannels; chn++)
 				{
 					ModCommand &m = rowBase[chn];
@@ -688,9 +692,15 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 					}
 
 					// Perform some checks for our heuristics...
-					if(m.command == CMD_TEMPO && m.param < 100)
-						hasTempoCommands = true;
-					else if(m.command == CMD_PANNING8)
+					if(m.command == CMD_TEMPO)
+					{
+						hasTempoOnRow = true;
+						if(m.param < 100)
+							hasTempoCommands = true;
+					} else if(m.command == CMD_SPEED)
+					{
+						hasSpeedOnRow = true;
+					} else if(m.command == CMD_PANNING8)
 					{
 						maxPanning = std::max(maxPanning, m.param);
 						if(m.param < 0x80)
@@ -721,6 +731,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 						lastInstrument[chn] = m.instr;
 					}
 				}
+				if(hasSpeedOnRow && hasTempoOnRow) definitelyCIA = true;
 			}
 		}
 	}
@@ -760,7 +771,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	// In the pattern loader above, a second condition is used: Only tempo commands
 	// below 100 BPM are taken into account. Furthermore, only M.K. (ProTracker)
 	// modules are checked.
-	if(isMdKd && hasTempoCommands)
+	if(isMdKd && hasTempoCommands && !definitelyCIA)
 	{
 		const double songTime = GetSongTime();
 		if(songTime >= 600.0)
