@@ -646,7 +646,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			// Volume Slide
 			case CMD_VOLUMESLIDE:
 			case CMD_TONEPORTAVOL:
-			case CMD_VIBRATOVOL:
 				if (param) pChn->nOldVolumeSlide = param;
 				break;
 			// Set Volume
@@ -734,10 +733,35 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					Panning(pChn, (param & 0x0F), Pan4bit);
 				}
 				break;
+
+			case CMD_VIBRATOVOL:
+				if (param) pChn->nOldVolumeSlide = param;
+				param = 0;
+				MPT_FALLTHROUGH;
+			case CMD_VIBRATO:
+				Vibrato(pChn, param);
+				break;
+			case CMD_FINEVIBRATO:
+				FineVibrato(pChn, param);
+				break;
 			}
-			if(pChn->rowCommand.volcmd == VOLCMD_PANNING)
+
+			switch(pChn->rowCommand.volcmd)
 			{
+			case VOLCMD_PANNING:
 				Panning(pChn, pChn->rowCommand.vol, Pan6bit);
+				break;
+
+			case VOLCMD_VIBRATOSPEED:
+				// FT2 does not automatically enable vibrato with the "set vibrato speed" command
+				if(IsCompatibleMode(TRK_FASTTRACKER2))
+					pChn->nVibratoSpeed = pChn->rowCommand.vol & 0x0F;
+				else
+					Vibrato(pChn, pChn->rowCommand.vol << 4);
+				break;
+			case VOLCMD_VIBRATODEPTH:
+				Vibrato(pChn, pChn->rowCommand.vol);
+				break;
 			}
 		}
 
@@ -3678,7 +3702,7 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param) const
 void CSoundFile::Vibrato(ModChannel *p, UINT param) const
 //-------------------------------------------------------
 {
-	p->m_VibratoDepth = param % 16 / 15.0F;
+	p->m_VibratoDepth = (param & 0x0F) / 15.0F;
 	//'New tuning'-thing: 0 - 1 <-> No depth - Full depth.
 
 
@@ -5234,7 +5258,7 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 			if (!nC5Speed) nC5Speed = 8363;
 			LimitMax(nC5Speed, uint32_max >> (note / 12u));
 			//(a*b)/c
-			return Util::muldiv_unsigned(8363, (FreqS3MTable[note % 12] << 5), nC5Speed << (note / 12u));
+			return Util::muldiv_unsigned(8363, (FreqS3MTable[note % 12u] << 5), nC5Speed << (note / 12u));
 			//8363 * freq[note%12] / nC5Speed * 2^(5-note/12)
 		}
 	} else if (GetType() == MOD_TYPE_XM)
