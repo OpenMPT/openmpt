@@ -94,7 +94,7 @@ List of string types
     literals.
 
  *  mpt::ustring (OpenMPT, libopenmpt)
-    The default unicode string type. Can be encoded in UTF8 or UTF6 or UTF32,
+    The default unicode string type. Can be encoded in UTF8 or UTF16 or UTF32,
     depending on MPT_USTRING_MODE_* and sizeof(wchar_t). Literals can written as
     MPT_USTRING(""). Use as your default string type if no other string type is
     a measurably better fit.
