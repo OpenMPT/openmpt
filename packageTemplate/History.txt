@@ -54,7 +54,7 @@ Pattern tab
    [Fix] <js> Duplicating and inserting patterns didn't update the tree view properly.
 
 Sample tab
-   [New] <js> Add Media Foundation (AAC, WMA, ASF, MP1, MP2, MP3, WAV-MSADPCM, ...) sample decoding support on Windows 7 and later (http://bugs.openmpt.org/view.php?id=422).
+   [New] <jh> Add Media Foundation (AAC, WMA, ASF, MP1, MP2, MP3, WAV-MSADPCM, ...) sample decoding support on Windows 7 and later (http://bugs.openmpt.org/view.php?id=422).
    [New] <jh> Support loading OggFlac sample files.
    [Imp] <js> Added dropdown menu to New button for duplicating samples.
    [Imp] <jh> Add a dropdown menu to the Open button which allows explicitely importing only known sample formats or only raw samples. This allows importing known formats as raw samples as well as allows avoiding the possibility of raw samples getting mis-interpreted as some known format.
