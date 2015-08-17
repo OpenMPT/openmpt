@@ -157,11 +157,11 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX nPat, CSoundFile &snd
 				break;
 
 			case 1: // 1 Portamento Down (Period)
-				m->command = CMD_PORTAMENTODOWN;
+				m->command = CMD_PORTAMENTOUP;
 				m->param &= 0x0F;
 				break;
 			case 2: // 2 Portamento Up (Period)
-				m->command = CMD_PORTAMENTOUP;
+				m->command = CMD_PORTAMENTODOWN;
 				m->param &= 0x0F;
 				break;
 
