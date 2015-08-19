@@ -124,7 +124,8 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_COMMAND(ID_IMPORT_MIDILIB,		OnImportMidiLib)
 	ON_COMMAND(ID_EXPORT_MIDILIB,		OnExportMidiLib)
 	ON_COMMAND(ID_SOUNDBANK_PROPERTIES,	OnSoundBankProperties)
-	ON_COMMAND(ID_MODTREE_SHOWALLFILES, OnShowAllFiles)
+	ON_COMMAND(ID_MODTREE_SHOWDIRS,		OnShowDirectories)
+	ON_COMMAND(ID_MODTREE_SHOWALLFILES,	OnShowAllFiles)
 	ON_COMMAND(ID_MODTREE_SOUNDFILESONLY,OnShowSoundFiles)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,		OnCustomKeyMsg)	//rewbs.customKeys
 	//}}AFX_MSG_MAP
@@ -1813,6 +1814,7 @@ void CModTree::FillInstrumentLibrary()
 
 		// Enumerating Directories and samples/instruments
 		const mpt::PathString path = m_InstrLibPath + MPT_PATHSTRING("*.*");
+		const bool showDirs = !IsSampleBrowser() || TrackerSettings::Instance().showDirsInSampleBrowser, showInstrs = IsSampleBrowser();
 
 		HANDLE hFind;
 		WIN32_FIND_DATAW wfd;
@@ -1824,7 +1826,7 @@ void CModTree::FillInstrumentLibrary()
 				// Up Directory
 				if(!wcscmp(wfd.cFileName, L".."))
 				{
-					if(!IsSampleBrowser())
+					if(showDirs)
 					{
 						ModTreeInsert(wfd.cFileName, IMAGE_FOLDERPARENT);
 					}
@@ -1835,7 +1837,7 @@ void CModTree::FillInstrumentLibrary()
 				} else if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
 					// Directory
-					if(wcscmp(wfd.cFileName, L".") && !IsSampleBrowser())
+					if(wcscmp(wfd.cFileName, L".") && showDirs)
 					{
 						ModTreeInsert(wfd.cFileName, IMAGE_FOLDER);
 					}
@@ -1863,14 +1865,14 @@ void CModTree::FillInstrumentLibrary()
 						|| (!strcmp(s, "dls"))
 						|| (!strcmp(s, "pat")) )
 					{
-						if (IsSampleBrowser())
+						if (showInstrs)
 						{
 							ModTreeInsert(wfd.cFileName, IMAGE_INSTRUMENTS);
 						}
 					} else if(std::find_if(modExts.begin(), modExts.end(), find_str(s)) != modExts.end())
 					{
 						// Songs
-						if (!IsSampleBrowser())
+						if (showDirs)
 						{
 							ModTreeInsert(wfd.cFileName, IMAGE_FOLDERSONG);
 						}
@@ -1910,7 +1912,7 @@ void CModTree::FillInstrumentLibrary()
 							&& strcmp(s, "mol"))
 						)
 					{
-						if (IsSampleBrowser())
+						if (showInstrs)
 						{
 							ModTreeInsert(wfd.cFileName, IMAGE_SAMPLES);
 						}
@@ -1920,7 +1922,7 @@ void CModTree::FillInstrumentLibrary()
 			FindClose(hFind);
 		}
 	}
-
+	
 	// Sort items
 	TV_SORTCB tvs;
 	tvs.hParent = (!IsSampleBrowser()) ? m_hInsLib : TVI_ROOT;
@@ -2025,8 +2027,12 @@ int CALLBACK CModTree::ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LP
 void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 //---------------------------------------------------------------------
 {
-	ASSERT(!IsSampleBrowser());
 	if(dir.empty()) return;
+	if(IsSampleBrowser())
+	{
+		CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(dir, isSong);
+		return;
+	}
 
 	BeginWaitCursor();
 
@@ -2801,8 +2807,9 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 			 || (modItem.type == MODITEM_HDR_INSTRUMENTLIB))
 			{
 				if ((bSep) || (nDefault)) AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
-				AppendMenu(hMenu, (m_bShowAllFiles) ? (MF_STRING|MF_CHECKED) : MF_STRING, ID_MODTREE_SHOWALLFILES, _T("Show All Files"));
-				AppendMenu(hMenu, (m_bShowAllFiles) ? MF_STRING : (MF_STRING|MF_CHECKED), ID_MODTREE_SOUNDFILESONLY, _T("Show Sound Files"));
+				AppendMenu(hMenu, TrackerSettings::Instance().showDirsInSampleBrowser ? (MF_STRING|MF_CHECKED) : MF_STRING, ID_MODTREE_SHOWDIRS, _T("Show &Directories in Sample Browser"));
+				AppendMenu(hMenu, (m_bShowAllFiles) ? (MF_STRING|MF_CHECKED) : MF_STRING, ID_MODTREE_SHOWALLFILES, _T("Show &All Files"));
+				AppendMenu(hMenu, (m_bShowAllFiles) ? MF_STRING : (MF_STRING|MF_CHECKED), ID_MODTREE_SOUNDFILESONLY, _T("Show &Sound Files"));
 				bSep = TRUE;
 			}
 			if ((bSep) || (nDefault)) AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
@@ -3538,6 +3545,14 @@ void CModTree::OnRefreshInstrLib()
 		if (hActive != NULL) SelectItem(hActive);
 	}
 	EndWaitCursor();
+}
+
+
+void CModTree::OnShowDirectories()
+//--------------------------------
+{
+	TrackerSettings::Instance().showDirsInSampleBrowser = !TrackerSettings::Instance().showDirsInSampleBrowser;
+	OnRefreshInstrLib();
 }
 
 
