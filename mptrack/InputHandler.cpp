@@ -506,7 +506,6 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_VIEW_PATTERNS:		s = _T("&Patterns"); c = kcViewPattern; break;
 		case ID_VIEW_INSTRUMENTS:	s = _T("&Instruments"); c = kcViewInstruments; break;
 		case ID_VIEW_COMMENTS:		s = _T("&Comments"); c = kcViewComments; break;
-		case ID_VIEW_GRAPH:			s = _T("G&raph"); c = kcViewGraph; break; //rewbs.graph
 		case MAINVIEW:				s = _T("&Main"); c = kcViewMain; break;
 		case IDD_TREEVIEW:			s = _T("&Tree"); c = kcViewTree; break;
 		case ID_VIEW_OPTIONS:		s = _T("S&etup"); c = kcViewOptions; break;
@@ -583,6 +582,7 @@ void CInputHandler::UpdateMainMenu()
 	UPDATEMENU(ID_CLIPBOARD_MANAGER);
 	UPDATEMENU(ID_VIEW_SONGPROPERTIES);
 	UPDATEMENU(ID_VIEW_MIDIMAPPING);
+	UPDATEMENU(ID_VIEW_EDITHISTORY);
 	UPDATEMENU(ID_HELPSHOW);
 #undef UPDATEMENU
 }

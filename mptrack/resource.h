@@ -1011,7 +1011,6 @@
 #define ID_ENVELOPE_REMOVEPOINT         32814
 #define ID_MODTREE_REFRESH              32815
 #define ID_PATTERN_PLAYROW              32816
-#define ID_CONTROLTAB                   32817
 #define ID_PATTERN_DELETEALLROW         32818
 #define ID_PATTERN_INSERTALLROW         32819
 #define ID_NEXTORDER                    32820
@@ -1066,8 +1065,7 @@
 #define ID_PATTERN_EXPAND               32869
 #define ID_PATTERN_SHRINK               32870
 #define ID_HELP_SEARCH                  32871
-#define ID_CURSORCOPY                   32872
-#define ID_CURSORPASTE                  32873
+#define ID_MODTREE_SHOWDIRS             32862
 #define ID_PATTERNCOPY                  32874
 #define ID_PATTERNPASTE                 32875
 #define ID_NETLINK_MODPLUG              32876

@@ -289,6 +289,7 @@ protected:
 	afx_msg void OnExportMidiLib();
 	afx_msg void OnSoundBankProperties();
 	afx_msg void OnRefreshInstrLib();
+	afx_msg void OnShowDirectories();
 	afx_msg void OnShowAllFiles();
 	afx_msg void OnShowSoundFiles();
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);	//rewbs.customKeys

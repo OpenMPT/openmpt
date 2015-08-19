@@ -518,6 +518,7 @@ public:
 	CachedSetting<float> VuMeterDecaySpeedDecibelPerSecond;
 
 	Setting<bool> rememberSongWindows;
+	Setting<bool> showDirsInSampleBrowser;
 
 	Setting<FontSetting> commentsFont;
 

@@ -211,6 +211,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, VuMeterUpdateInterval(conf, "Display", "VuMeterUpdateInterval", 15)
 	, VuMeterDecaySpeedDecibelPerSecond(conf, "Display", "VuMeterDecaySpeedDecibelPerSecond", 88.0f)
 	, rememberSongWindows(conf, "Display", "RememberSongWindows", true)
+	, showDirsInSampleBrowser(conf, "Display", "ShowDirsInSampleBrowser", false)
 	, commentsFont(conf, "Display", "Comments Font", FontSetting("Courier New", 120))
 	// Misc
 	, ShowSettingsOnNewVersion(conf, "Misc", "ShowSettingsOnNewVersion", true)
