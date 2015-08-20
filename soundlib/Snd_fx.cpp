@@ -394,7 +394,18 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 		// Update next position
 		memory.state.m_nNextRow = memory.state.m_nRow + 1;
+		if(memory.state.m_nNextRow >= Patterns[memory.state.m_nPattern].GetNumRows())
+		{
+			memory.state.m_nNextRow = 0;
+			memory.state.m_nNextOrder++;
+		}
 
+		// Jumped to invalid pattern row?
+		if(memory.state.m_nRow >= Patterns[memory.state.m_nPattern].GetNumRows())
+		{
+			memory.state.m_nRow = 0;
+		}
+		// New pattern?
 		if(!memory.state.m_nRow)
 		{
 			for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
@@ -763,14 +774,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				Vibrato(pChn, pChn->rowCommand.vol);
 				break;
 			}
-		}
-
-		if(memory.state.m_nNextOrder > Order.size() || Order[memory.state.m_nNextOrder] > Patterns.Size() || memory.state.m_nNextRow >= Patterns[Order[memory.state.m_nNextOrder]].GetNumRows())
-		{
-			memory.state.m_nNextOrder = memory.state.m_nCurrentOrder + 1;
-			memory.state.m_nNextRow = 0;
-			if(IsCompatibleMode(TRK_FASTTRACKER2)) memory.state.m_nNextRow = memory.state.m_nNextPatStartRow;		// FT2 E60 bug
-			memory.state.m_nNextPatStartRow = 0;
 		}
 
 		// Interpret F00 effect in XM files as "stop song"
