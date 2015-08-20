@@ -70,13 +70,13 @@ int main( int argc, char * argv[] ) {
 #else
 		file = fopen( argv[1], "rb" );
 #endif
+		mod = openmpt_module_create( openmpt_stream_get_file_callbacks(), file, NULL, NULL, NULL );
 	} else {
 		/* no command line parameter specified - play an embedded example module. */
 		data = chipsim_it;
 		size = sizeof(chipsim_it);
+		mod = openmpt_module_create_from_memory( data, size, NULL, NULL, NULL );
 	}
-
-	mod = openmpt_module_create( openmpt_stream_get_file_callbacks(), file, NULL, NULL, NULL );
 	
 	if ( argc > 1 ) {
 		fclose( file );
