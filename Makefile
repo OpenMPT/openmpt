@@ -703,6 +703,7 @@ endif
 	$(INSTALL_DATA) examples/libopenmpt_example_c_mem.c $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_c_mem.c
 	$(INSTALL_DATA) examples/libopenmpt_example_c_stdout.c $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_c_stdout.c
 	$(INSTALL_DATA) examples/libopenmpt_example_cxx.cpp $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/libopenmpt_example_cxx.cpp
+	$(INSTALL_DATA) examples/chipsim.h $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/examples/chipsim.h
 
 .PHONY: install-doc
 install-doc: bin/made.docs
