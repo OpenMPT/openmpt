@@ -2,18 +2,16 @@
  * libopenmpt_example_c_stdout.c
  * -----------------------------
  * Purpose: libopenmpt C API simple example
- * Notes  : (currently none)
+ * Notes  : This simple example does no error cheking at all.
+ *          This example writes raw 48000Hz / stereo / 16bit native endian PCM data to stdout.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 /*
- * This example writes raw 48000Hz / stereo / 16bit native endian PCM data to stdout.
- *
- * Use for example (on little endian platforms):
+ * Usage example:
  *
  *     bin/libopenmpt_example_c_stdout SOMEMODULE | aplay --file-type raw --format=dat
- *
  */
 
 #include <memory.h>

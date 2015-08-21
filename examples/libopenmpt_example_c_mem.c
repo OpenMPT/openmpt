@@ -2,9 +2,16 @@
  * libopenmpt_example_c_mem.c
  * --------------------------
  * Purpose: libopenmpt C API simple example
- * Notes  : (currently none)
+ * Notes  : This simple example does no error cheking at all.
+ *          PortAudio is used for sound output.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+/*
+ * Usage example:
+ *
+ *     bin/libopenmpt_example_c_mem SOMEMODULE
  */
 
 #include <memory.h>
