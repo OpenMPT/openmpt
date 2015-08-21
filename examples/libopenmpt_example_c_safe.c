@@ -32,6 +32,13 @@ static int16_t left[BUFFERSIZE];
 static int16_t right[BUFFERSIZE];
 static int16_t * const buffers[2] = { left, right };
 
+static void libopenmpt_example_logfunc( const char * message, void * user ) {
+	(void)user;
+	if ( message ) {
+		fprintf( stderr, "%s\n", message );
+	}
+}
+
 #if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
 int wmain( int argc, wchar_t * argv[] ) {
 #else
@@ -47,63 +54,63 @@ int main( int argc, char * argv[] ) {
 	PaStreamParameters streamparameters;
 	memset( &streamparameters, 0, sizeof( PaStreamParameters ) );
 	if ( argc != 2 ) {
-		fprintf( stderr, "Error: Wrong invocation. Use 'bin/libopenmpt_example_c_safe SOMEMODULE'.\n" );
+		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'bin/libopenmpt_example_c_safe SOMEMODULE'." );
 		goto fail;
 	}
 #if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
 	if ( wcslen( argv[1] ) == 0 ) {
-		fprintf( stderr, "Error: Wrong invocation. Use 'bin/libopenmpt_example_c_safe SOMEMODULE'.\n" );
+		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'bin/libopenmpt_example_c_safe SOMEMODULE'." );
 		goto fail;
 	}
 	file = _wfopen( argv[1], L"rb" );
 #else
 	if ( strlen( argv[1] ) == 0 ) {
-		fprintf( stderr, "Error: Wrong invocation. Use 'bin/libopenmpt_example_c_safe SOMEMODULE'.\n" );
+		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'bin/libopenmpt_example_c_safe SOMEMODULE'." );
 		goto fail;
 	}
 	file = fopen( argv[1], "rb" );
 #endif
 	if ( !file ) {
-		fprintf( stderr, "Error: fopen() failed.\n" );
+		fprintf( stderr, "Error: %s\n", "fopen() failed." );
 		goto fail;
 	}
-	mod = openmpt_module_create( openmpt_stream_get_file_callbacks(), file, NULL, NULL, NULL );
+	mod = openmpt_module_create( openmpt_stream_get_file_callbacks(), file, &libopenmpt_example_logfunc, NULL, NULL );
 	if ( !mod ) {
-		fprintf( stderr, "Error: openmpt_module_create() failed.\n" );
+		fprintf( stderr, "Error: %s\n", "openmpt_module_create() failed." );
 		goto fail;
 	}
 	pa_error = Pa_Initialize();
 	if ( pa_error != paNoError ) {
-		fprintf( stderr, "Error: Pa_Initialize() failed.\n" );
+		fprintf( stderr, "Error: %s\n", "Pa_Initialize() failed." );
 		goto fail;
 	}
 	pa_error = paNoError;
 	pa_initialized = 1;
 	streamparameters.device = Pa_GetDefaultOutputDevice();
 	if ( streamparameters.device == paNoDevice ) {
-		fprintf( stderr, "Error: Pa_GetDefaultOutputDevice() failed.\n" );
+		fprintf( stderr, "Error: %s\n", "Pa_GetDefaultOutputDevice() failed." );
 		goto fail;
 	}
 	streamparameters.channelCount = 2;
 	streamparameters.sampleFormat = paInt16 | paNonInterleaved;
 	if ( !Pa_GetDeviceInfo( streamparameters.device ) ) {
-		fprintf( stderr, "Error: Pa_GetDeviceInfo() failed.\n" );
+		fprintf( stderr, "Error: %s\n", "Pa_GetDeviceInfo() failed." );
 		goto fail;
 	}
 	streamparameters.suggestedLatency = Pa_GetDeviceInfo( streamparameters.device )->defaultHighOutputLatency;
 	pa_error = Pa_OpenStream( &stream, NULL, &streamparameters, SAMPLERATE, paFramesPerBufferUnspecified, 0, NULL, NULL );
 	if ( pa_error != paNoError ) {
-		fprintf( stderr, "Error: Pa_OpenStream() failed.\n" );
+		fprintf( stderr, "Error: %s\n", "Pa_OpenStream() failed." );
 		goto fail;
 	}
 	pa_error = paNoError;
 	if ( !stream ) {
-		fprintf( stderr, "Error: Pa_OpenStream() failed.\n" );
+		fprintf( stderr, "Error: %s\n", "Pa_OpenStream() failed." );
 		goto fail;
 	}
 	pa_error = Pa_StartStream( stream );
 	if ( pa_error != paNoError ) {
-		fprintf( stderr, "Error: Pa_StartStream() failed.\n" );
+		fprintf( stderr, "Error: %s\n", "Pa_StartStream() failed." );
 		goto fail;
 	}
 	while ( 1 ) {
@@ -113,7 +120,7 @@ int main( int argc, char * argv[] ) {
 		}
 		pa_error = Pa_WriteStream( stream, buffers, (unsigned long)count );
 		if ( pa_error != paNoError ) {
-			fprintf( stderr, "Error: Pa_WriteStream() failed.\n" );
+			fprintf( stderr, "Error: %s\n", "Pa_WriteStream() failed." );
 			goto fail;
 		}
 		pa_error = paNoError;
