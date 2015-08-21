@@ -320,6 +320,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += MPT_UFORMAT("Version: %1", mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringExtended())) + lf;
 			text += MPT_UFORMAT("Source Code URL: %1", mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetUrl())) + lf;
 			text += MPT_UFORMAT("Build Date: %1", mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetBuildDateString())) + lf;
+			text += MPT_UFORMAT("Compiler: %1", mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetBuildCompilerString())) + lf;
 			text += MPT_UFORMAT("Required Windows Kernel Level: %1", mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumKernelLevel())) + lf;
 			text += MPT_UFORMAT("Required Windows API Level: %1", mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumAPILevel())) + lf;
 			{

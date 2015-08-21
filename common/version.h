@@ -84,6 +84,9 @@ namespace MptVersion
 	// Return a string decribing some of the build features
 	std::string GetBuildFeaturesString(); // e.g. " NO_VST NO_DSOUND"
 
+	// Return a string describing the compiler version used for building.
+	std::string GetBuildCompilerString(); // e.g. "Microsoft Compiler 15.00.20706.01"
+
 	// Return a string decribing the revision of the svn working copy and if it was dirty (+) or had mixed revisions (!) (if built from a svn working copy and tsvn was available during build)
 	std::string GetRevisionString(); // e.g. "-r1234+"
 

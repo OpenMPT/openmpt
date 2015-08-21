@@ -322,6 +322,48 @@ std::string GetBuildFeaturesString()
 	return retval;
 }
 
+std::string GetBuildCompilerString()
+{
+	std::string retval;
+	#if MPT_COMPILER_GENERIC
+		retval += "*Generic C++11 Compiler";
+	#elif MPT_COMPILER_MSVC
+		#if defined(_MSC_FULL_VER) && defined(_MSC_BUILD)
+			if(_MSC_BUILD > 0)
+			{
+				retval += MPT_FORMAT("Microsoft Compiler %1.%2.%3.%4"
+					, _MSC_FULL_VER / 10000000
+					, mpt::fmt::dec0<2>(( _MSC_FULL_VER / 100000) % 100)
+					, mpt::fmt::dec0<5>(_MSC_FULL_VER % 100000)
+					, mpt::fmt::dec0<2>(_MSC_BUILD)
+					);
+			} else
+			{
+				retval += MPT_FORMAT("Microsoft Compiler %1.%2.%3"
+					, _MSC_FULL_VER / 10000000
+					, mpt::fmt::dec0<2>((_MSC_FULL_VER / 100000) % 100)
+					, mpt::fmt::dec0<5>(_MSC_FULL_VER % 100000)
+					);
+			}
+		#elif defined(_MSC_FULL_VER)
+			retval += MPT_FORMAT("Microsoft Compiler %1.%2.%3"
+				, _MSC_FULL_VER / 10000000
+				, mpt::fmt::dec0<2>(( _MSC_FULL_VER / 100000) % 100)
+				, mpt::fmt::dec0<5>(_MSC_FULL_VER % 100000)
+				);
+		#else
+			retval += MPT_FORMAT("Microsoft Compiler %1.%2", MPT_COMPILER_MSVC_VERSION / 100, MPT_COMPILER_MSVC_VERSION % 100);
+		#endif
+	#elif MPT_COMPILER_GCC
+		retval += MPT_FORMAT("GNU Compiler Collection %1.%2.%3", MPT_COMPILER_GCC_VERSION / 10000, (MPT_COMPILER_GCC_VERSION / 100) % 100, MPT_COMPILER_GCC_VERSION % 100);
+	#elif MPT_COMPILER_CLANG
+		retval += MPT_FORMAT("Clang %1.%2.%3", MPT_COMPILER_CLANG_VERSION / 10000, (MPT_COMPILER_CLANG_VERSION / 100) % 100, MPT_COMPILER_CLANG_VERSION % 100);
+	#else
+		retval += "*unknown";
+	#endif
+	return retval;
+}
+
 std::string GetRevisionString()
 {
 	std::string result;
