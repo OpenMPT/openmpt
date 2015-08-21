@@ -1,11 +1,7 @@
 /*
  * libopenmpt_example_c_mem.c
  * --------------------------
- * Purpose: libopenmpt C API simple example.
- *          This examples demonstrates how to play a module file from memory in C.
- *          The module file to play can be specified as a command line parameter.
- *          If no parameter is given, a built-in module is loaded from memory instead.
- *          PortAudio is used for audio output.
+ * Purpose: libopenmpt C API simple example
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -18,7 +14,6 @@
 #include <string.h>
 
 #include <libopenmpt/libopenmpt.h>
-#include "chipsim.h"
 
 #include <portaudio.h>
 
@@ -42,31 +37,20 @@ int main( int argc, char * argv[] ) {
 	PaStream * stream = 0;
 	PaStreamParameters streamparameters;
 	memset( &streamparameters, 0, sizeof( PaStreamParameters ) );
-	
-	if ( argc > 1 ) {
+	(void)argc;
 #if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
-		file = _wfopen( argv[1], L"rb" );
+	file = _wfopen( argv[1], L"rb" );
 #else
-		file = fopen( argv[1], "rb" );
+	file = fopen( argv[1], "rb" );
 #endif
-		fseek( file, 0, SEEK_END );
-		size = ftell( file );
-		fseek( file, 0, SEEK_SET );
-		data = malloc( size );
-		size = fread( data, 1, size, file );
-		fclose( file );
-	} else {
-		/* no command line parameter specified - play an embedded example module. */
-		data = chipsim_it;
-		size = sizeof(chipsim_it);
-	}
-
+	fseek( file, 0, SEEK_END );
+	size = ftell( file );
+	fseek( file, 0, SEEK_SET );
+	data = malloc( size );
+	size = fread( data, 1, size, file );
+	fclose( file );
 	mod = openmpt_module_create_from_memory( data, size, NULL, NULL, NULL );
-
-	if ( argc > 1 ) {
-		free( data );
-	}
-
+	free( data );
 	Pa_Initialize();
 	streamparameters.device = Pa_GetDefaultOutputDevice();
 	streamparameters.channelCount = 2;
