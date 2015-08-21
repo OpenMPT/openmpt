@@ -496,7 +496,7 @@ bool CSoundFile::ProcessRow()
 
 		// Weird stuff?
 		if (!Patterns.IsValidPat(m_PlayState.m_nPattern)) return false;
-		// Should never happen
+		// Did we jump to an invalid row?
 		if (m_PlayState.m_nRow >= Patterns[m_PlayState.m_nPattern].GetNumRows()) m_PlayState.m_nRow = 0;
 
 		// Has this row been visited before? We might want to stop playback now.
@@ -590,9 +590,8 @@ bool CSoundFile::ProcessRow()
 			}
 		}
 		// Reset channel values
-		ModChannel *pChn = m_PlayState.Chn;
 		ModCommand *m = Patterns[m_PlayState.m_nPattern].GetRow(m_PlayState.m_nRow);
-		for (CHANNELINDEX nChn=0; nChn<m_nChannels; pChn++, nChn++, m++)
+		for (ModChannel *pChn = m_PlayState.Chn, *pEnd = pChn + m_nChannels; pChn != pEnd; pChn++, m++)
 		{
 			pChn->rowCommand = *m;
 
@@ -1008,16 +1007,19 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period) const
 				}
 			} else //Original behavior
 			{
+				const uint32 (&upTable)[256] = m_SongFlags[SONG_LINEARSLIDES] ? LinearSlideUpTable : LinearSlideDownTable;
+				const uint32 (&downTable)[256] = m_SongFlags[SONG_LINEARSLIDES] ? LinearSlideDownTable : LinearSlideUpTable;
+
 				int l = envval;
 				if(l < 0)
 				{
 					l = -l;
 					LimitMax(l, 255);
-					period = Util::muldiv(period, LinearSlideDownTable[l], 65536);
+					period = Util::muldiv(period, downTable[l], 65536);
 				} else
 				{
 					LimitMax(l, 255);
-					period = Util::muldiv(period, LinearSlideUpTable[l], 65536);
+					period = Util::muldiv(period, upTable[l], 65536);
 				}
 			} //End: Original behavior.
 		}
