@@ -2,9 +2,6 @@
  * libopenmpt_example_cxx.cpp
  * --------------------------
  * Purpose: libopenmpt C++ API simple example
- *          This examples demonstrates how to play a module file in C++ using input streams.
- *          The module file to play must be specified as a command line parameter.
- *          PortAudio is used for audio output.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -24,16 +21,10 @@
 // mingw-w64 g++ does only default to special C linkage for "main", but not for "wmain" (see <https://sourceforge.net/p/mingw-w64/wiki2/Unicode%20apps/>).
 extern "C"
 #endif
-int wmain( int argc, wchar_t * argv[] ) {
+int wmain( int /*argc*/, wchar_t * argv[] ) {
 #else
-int main( int argc, char * argv[] ) {
+int main( int /*argc*/, char * argv[] ) {
 #endif
-
-	if ( argc < 2 ) {
-		std::cout << "Usage: libopenmpt_example_cxx /path/to/module" << std::endl;
-		return 1;
-	}
-
 	const std::size_t buffersize = 480;
 	const std::int32_t samplerate = 48000;
 	std::vector<float> left( buffersize );

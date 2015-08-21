@@ -2,9 +2,6 @@
  * libopenmpt_example_c.c
  * ----------------------
  * Purpose: libopenmpt C API simple example
- *          This examples demonstrates how to play a module file in C.
- *          The module file to play must be specified as a command line parameter.
- *          PortAudio is used for audio output.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -39,12 +36,7 @@ int main( int argc, char * argv[] ) {
 	PaStream * stream = 0;
 	PaStreamParameters streamparameters;
 	memset( &streamparameters, 0, sizeof( PaStreamParameters ) );
-
-	if ( argc < 2) {
-		printf("Usage: libopenmpt_example_c /path/to/module\n");
-		return 1;
-	}
-
+	(void)argc;
 #if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
 	file = _wfopen( argv[1], L"rb" );
 #else

@@ -28,7 +28,6 @@ nobase_dist_doc_DATA += examples/libopenmpt_example_cxx.cpp
 nobase_dist_doc_DATA += examples/libopenmpt_example_c_mem.c
 nobase_dist_doc_DATA += examples/libopenmpt_example_c.c
 nobase_dist_doc_DATA += examples/libopenmpt_example_c_stdout.c
-nobase_dist_doc_DATA += examples/chipsim.h
 
 bin_PROGRAMS = 
 check_PROGRAMS = 
