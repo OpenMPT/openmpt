@@ -41,8 +41,6 @@ int main( int argc, char * argv[] ) {
 	openmpt_module * mod = 0;
 	size_t count = 0;
 	PaStream * stream = 0;
-	PaStreamParameters streamparameters;
-	memset( &streamparameters, 0, sizeof( PaStreamParameters ) );
 	(void)argc;
 #if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
 	file = _wfopen( argv[1], L"rb" );
@@ -52,11 +50,7 @@ int main( int argc, char * argv[] ) {
 	mod = openmpt_module_create( openmpt_stream_get_file_callbacks(), file, NULL, NULL, NULL );
 	fclose( file );
 	Pa_Initialize();
-	streamparameters.device = Pa_GetDefaultOutputDevice();
-	streamparameters.channelCount = 2;
-	streamparameters.sampleFormat = paInt16 | paNonInterleaved;
-	streamparameters.suggestedLatency = Pa_GetDeviceInfo( streamparameters.device )->defaultHighOutputLatency;
-	Pa_OpenStream( &stream, NULL, &streamparameters, SAMPLERATE, paFramesPerBufferUnspecified, 0, NULL, NULL );
+	Pa_OpenDefaultStream( &stream, 0, 2, paInt16 | paNonInterleaved, SAMPLERATE, paFramesPerBufferUnspecified, NULL, NULL );
 	Pa_StartStream( stream );
 	while ( 1 ) {
 		count = openmpt_module_read_stereo( mod, SAMPLERATE, BUFFERSIZE, left, right );

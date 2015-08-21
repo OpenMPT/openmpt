@@ -51,8 +51,6 @@ int main( int argc, char * argv[] ) {
 	PaError pa_error = paNoError;
 	int pa_initialized = 0;
 	PaStream * stream = 0;
-	PaStreamParameters streamparameters;
-	memset( &streamparameters, 0, sizeof( PaStreamParameters ) );
 	if ( argc != 2 ) {
 		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'bin/libopenmpt_example_c_safe SOMEMODULE'." );
 		goto fail;
@@ -86,19 +84,7 @@ int main( int argc, char * argv[] ) {
 	}
 	pa_error = paNoError;
 	pa_initialized = 1;
-	streamparameters.device = Pa_GetDefaultOutputDevice();
-	if ( streamparameters.device == paNoDevice ) {
-		fprintf( stderr, "Error: %s\n", "Pa_GetDefaultOutputDevice() failed." );
-		goto fail;
-	}
-	streamparameters.channelCount = 2;
-	streamparameters.sampleFormat = paInt16 | paNonInterleaved;
-	if ( !Pa_GetDeviceInfo( streamparameters.device ) ) {
-		fprintf( stderr, "Error: %s\n", "Pa_GetDeviceInfo() failed." );
-		goto fail;
-	}
-	streamparameters.suggestedLatency = Pa_GetDeviceInfo( streamparameters.device )->defaultHighOutputLatency;
-	pa_error = Pa_OpenStream( &stream, NULL, &streamparameters, SAMPLERATE, paFramesPerBufferUnspecified, 0, NULL, NULL );
+	pa_error = Pa_OpenDefaultStream( &stream, 0, 2, paInt16 | paNonInterleaved, SAMPLERATE, paFramesPerBufferUnspecified, NULL, NULL );
 	if ( pa_error != paNoError ) {
 		fprintf( stderr, "Error: %s\n", "Pa_OpenStream() failed." );
 		goto fail;
@@ -137,7 +123,6 @@ cleanup:
 		Pa_CloseStream( stream );
 		stream = 0;
 	}
-	memset( &streamparameters, 0, sizeof( PaStreamParameters ) );
 	if ( pa_initialized ) {
 		Pa_Terminate();
 		pa_initialized = 0;
