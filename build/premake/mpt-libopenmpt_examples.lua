@@ -53,3 +53,21 @@ end
   links { "libopenmpt", "miniz", "portaudio", "ksuser", "winmm" }
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
+
+ project "libopenmpt_example_c_safe"
+  uuid "696a79ac-65eb-445f-981a-7639c54569f8"
+  language "C"
+  location ( "../../build/" .. _ACTION )
+  objdir "../../build/obj/libopenmpt_example_c_safe"
+  includedirs {
+   "../..",
+   "../../include/portaudio/include",
+  }
+  files {
+   "../../examples/libopenmpt_example_c_safe.c",
+  }
+  flags { "Unicode" }
+  links { "libopenmpt", "miniz", "portaudio", "ksuser", "winmm" }
+  dofile "../../build/premake/premake-defaults-EXE.lua"
+  dofile "../../build/premake/premake-defaults.lua"
+
