@@ -405,7 +405,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 	}
 
 	PatternRow m = sndFile.Patterns[pat].GetRow(0);
-	const CHANNELINDEX numChannels = std::min(sndFile.GetNumChannels(), CHANNELINDEX(patHead.numTracks));
+	const CHANNELINDEX numChannels = std::min<CHANNELINDEX>(sndFile.GetNumChannels() - 1, patHead.numTracks);
 
 	// When breaking to a pattern with less channels that the previous pattern,
 	// all voices in the now unused channels are killed:
