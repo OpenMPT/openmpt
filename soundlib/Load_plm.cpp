@@ -256,11 +256,13 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 	for(uint16 i = 0; i < fileHeader.numOrders; i++)
 	{
 		const PLMOrderItem &ord = order[i];
-		if(ord.pattern >= fileHeader.numPatterns || ord.y > fileHeader.numChannels) continue;
+		if(ord.pattern >= fileHeader.numPatterns
+			|| ord.y > fileHeader.numChannels
+			|| !file.Seek(patternPos[ord.pattern])) continue;
 
-		file.Seek(patternPos[ord.pattern]);
 		PLMPatternHeader patHeader;
 		file.ReadConvertEndianness(patHeader);
+		if(!patHeader.numRows) continue;
 		
 		ORDERINDEX curOrd = ord.x / rowsPerPat;
 		ROWINDEX curRow = ord.x % rowsPerPat;
@@ -268,7 +270,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		const uint32 patternEnd = ord.x + patHeader.numRows;
 		maxPos = std::max(maxPos, patternEnd);
 
-		ModCommand::NOTE lastNote[32]= { 0 };
+		ModCommand::NOTE lastNote[32] = { 0 };
 		for(ROWINDEX r = 0; r < patHeader.numRows; r++, curRow++)
 		{
 			if(curRow >= rowsPerPat)
