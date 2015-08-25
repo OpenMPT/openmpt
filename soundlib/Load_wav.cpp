@@ -218,15 +218,15 @@ bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file, uint1
 		nIndex = Clamp(nIndex, 0, 89);
 		file.Skip(1);
 		target[nPos++] = (int16)value;
-		for(uint32 i = 0; (i < (blockAlign - 4u) * 2u) && (nPos < sampleLen) && file.AreBytesLeft(); i++)
+		for(uint32 i = 0; (i < (blockAlign - 4u) * 2u) && (nPos < sampleLen) && file.CanRead(1); i++)
 		{
 			uint8 delta;
 			if(i & 1)
 			{
-				delta = (file.ReadIntLE<uint8>() >> 4) & 0x0F;
+				delta = (file.ReadUint8() >> 4) & 0x0F;
 			} else
 			{
-				delta = file.ReadIntLE<uint8>() & 0x0F;
+				delta = file.ReadUint8() & 0x0F;
 				file.SkipBack(1);
 			}
 			int32 v = IMAUnpackTable[nIndex] >> 3;

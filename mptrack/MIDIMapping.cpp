@@ -70,7 +70,7 @@ bool CMIDIMapper::Deserialize(FileReader &file)
 //---------------------------------------------
 {
 	m_Directives.clear();
-	while(file.AreBytesLeft())
+	while(file.CanRead(1))
 	{
 		uint8 i8 = file.ReadUint8();
 		uint8 psize = 0;

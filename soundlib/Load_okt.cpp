@@ -301,7 +301,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 	songName = "";
 
 	// Go through IFF chunks...
-	while(file.AreBytesLeft())
+	while(file.CanRead(sizeof(OktIffChunk)))
 	{
 		OktIffChunk iffHead;
 		if(!file.ReadConvertEndianness(iffHead))

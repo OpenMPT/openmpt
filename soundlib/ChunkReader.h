@@ -107,7 +107,7 @@ public:
 	ChunkList<T> ReadChunks(size_t padding)
 	{
 		ChunkList<T> result;
-		while(AreBytesLeft())
+		while(CanRead(sizeof(T)))
 		{
 			T chunkHeader;
 			if(!Read(chunkHeader))

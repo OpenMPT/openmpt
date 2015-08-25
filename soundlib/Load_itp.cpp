@@ -281,7 +281,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		code = file.ReadUint32LE();
 
 		INSTRUMENTINDEX ins = 1;
-		while(ins <= GetNumInstruments() && file.AreBytesLeft())
+		while(ins <= GetNumInstruments() && file.CanRead(4))
 		{
 			if(code == MAGIC4BE('M', 'P', 'T', 'S'))
 			{

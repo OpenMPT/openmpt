@@ -685,7 +685,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		ROWINDEX row = 0;
 		std::vector<uint8> chnMask(GetNumChannels());
 
-		while(row < numRows && patternData.AreBytesLeft())
+		while(row < numRows && patternData.CanRead(1))
 		{
 			uint8 b = patternData.ReadUint8();
 			if(!b)
@@ -781,7 +781,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 		ModCommand *patData = Patterns[pat];
 		ROWINDEX row = 0;
-		while(row < numRows && patternData.AreBytesLeft())
+		while(row < numRows && patternData.CanRead(1))
 		{
 			uint8 b = patternData.ReadUint8();
 			if(!b)
@@ -2292,7 +2292,7 @@ size_t CSoundFile::LoadModularInstrumentData(FileReader &file, ModInstrument &in
 	FileReader modularData = file.ReadChunk(file.ReadUint32LE());
 
 	// Handle chunks
-	while(modularData.AreBytesLeft())
+	while(modularData.CanRead(4))
 	{
 		const uint32 chunkID = modularData.ReadUint32LE();
 		uint16 chunkSize;

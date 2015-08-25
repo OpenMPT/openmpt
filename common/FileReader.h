@@ -275,11 +275,6 @@ public:
 		return DataContainer().GetLength() - streamPos;
 	}
 
-	bool AreBytesLeft() const
-	{
-		return CanRead(1);
-	}
-
 	bool NoBytesLeft() const
 	{
 		return !CanRead(1);
@@ -843,7 +838,7 @@ public:
 			}
 		}
 
-		while(AreBytesLeft() && (b & 0x80) != 0)
+		while(CanRead(1) && (b & 0x80) != 0)
 		{
 			b = ReadUint8();
 			target <<= 7;

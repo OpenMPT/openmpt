@@ -397,7 +397,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 					uint16 chunkCount = 0, firstOrderChunk = uint16_max;
 
 					// "Sub sub sub chunks" (grrrr, silly format)
-					while(subChunk.AreBytesLeft())
+					while(subChunk.CanRead(1))
 					{
 						uint8 subChunkID = subChunk.ReadUint8();
 						if(!subChunkID)
@@ -690,7 +690,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 			FileReader rowChunk = patternChunk.ReadChunk(rowSize - 2);
 
-			while(rowChunk.AreBytesLeft())
+			while(rowChunk.CanRead(2))
 			{
 				uint8 flags = rowChunk.ReadUint8();
 				uint8 channel = rowChunk.ReadUint8();
@@ -1240,7 +1240,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 
 			ROWINDEX curRow = 0;
 
-			while(patternChunk.AreBytesLeft() && curRow < patternHeader.numRows)
+			while(patternChunk.CanRead(1) && curRow < patternHeader.numRows)
 			{
 				uint8 chnFlag = patternChunk.ReadUint8();
 				if(chnFlag == 0)

@@ -632,7 +632,7 @@ static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSou
 	PatternRow rowBase = sndFile.Patterns[pat].GetRow(0);
 	ROWINDEX row = 0;
 
-	while(row < numRows && chunk.AreBytesLeft())
+	while(row < numRows && chunk.CanRead(1))
 	{
 		const uint8 flags = chunk.ReadUint8();
 

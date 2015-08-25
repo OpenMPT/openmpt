@@ -44,7 +44,7 @@ PNG::Bitmap *PNG::ReadPNG(FileReader &file)
 	std::vector<uint8_t> dataIn;
 	std::vector<Pixel> palette;
 
-	while(file.AreBytesLeft())
+	while(file.CanRead(12))
 	{
 		uint32_t chunkLength = file.ReadUint32BE();
 		char magic[4];

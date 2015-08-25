@@ -2062,7 +2062,7 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 		}
 		while(needMoreData)
 		{
-			if(!file.AreBytesLeft())
+			if(file.NoBytesLeft())
 			{ // stop at EOF
 				oggOK = false;
 				needMoreData = false;
