@@ -440,7 +440,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 
 			PatternRow patRow = Patterns[pat].GetRow(0);
 			ROWINDEX row = 0;
-			while(chunk.AreBytesLeft() && row < numRows)
+			while(chunk.CanRead(1) && row < numRows)
 			{
 				const uint8 ch = chunk.ReadUint8();
 

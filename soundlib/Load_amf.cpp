@@ -198,7 +198,7 @@ static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &file
 {
 	fileChunk.Rewind();
 	ModCommand::INSTR lastInstr = 0;
-	while(fileChunk.AreBytesLeft())
+	while(fileChunk.CanRead(3))
 	{
 		const uint8 row = fileChunk.ReadUint8();
 		const uint8 command = fileChunk.ReadUint8();

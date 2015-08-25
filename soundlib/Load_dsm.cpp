@@ -216,7 +216,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 
 			ROWINDEX row = 0;
 			PatternRow rowBase = Patterns[patNum];
-			while(chunk.AreBytesLeft() && row < 64)
+			while(chunk.CanRead(1) && row < 64)
 			{
 				uint8 flag = chunk.ReadUint8();
 				if(!flag)

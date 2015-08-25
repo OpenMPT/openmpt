@@ -5,6 +5,10 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.2-svn
+
+ *  [**Bug**] Fix crash in DMF loader and hang in IT / MPTM loader.
+
 ### libopenmpt 0.2-beta13 (2015-08-16)
 
  *  [**Change**] The MSVC build system has been redone. Solutions are now
@@ -45,7 +49,7 @@ is just a high-level summary.
     there will be no problem in practice.
  *  [**Change**] openmpt123: When both SDL1.2 and PortAudio are available,
     SDL is now the preferred backend because SDL is more widespread and better
-    tested on all kinds of different platforms, and in generel, SDL is just
+    tested on all kinds of different platforms, and in general, SDL is just
     more reliable.
 
  *  [**Bug**] libopenmpt now also compiles with GCC 4.3.

@@ -213,7 +213,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 
 		ModCommand *rowBase = Patterns[pat];
 		ROWINDEX row = 0;
-		while(row < 64 && file.AreBytesLeft())
+		while(row < 64 && file.CanRead(1))
 		{
 			uint8 b = file.ReadUint8();
 

@@ -493,7 +493,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			ROWINDEX row = 0;
 			CHANNELINDEX chn = 0;
-			while(chunk.AreBytesLeft())
+			while(chunk.CanRead(1))
 			{
 				MT2Command cmd;
 
@@ -545,7 +545,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read extra data
 	uint32 numVST = 0;
-	while(extraData.AreBytesLeft())
+	while(extraData.CanRead(8))
 	{
 		uint32 id = extraData.ReadUint32LE();
 		FileReader chunk = extraData.ReadChunk(extraData.ReadUint32LE());
@@ -581,7 +581,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 
 		case MAGIC4LE('T','R','K','L'):
-			for(CHANNELINDEX i = 0; i < m_nChannels && chunk.AreBytesLeft(); i++)
+			for(CHANNELINDEX i = 0; i < m_nChannels && chunk.CanRead(1); i++)
 			{
 				std::string name;
 				chunk.ReadNullString(name);
@@ -590,7 +590,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 
 		case MAGIC4LE('P','A','T','N'):
-			for(PATTERNINDEX i = 0; i < fileHeader.numPatterns && chunk.AreBytesLeft(); i++)
+			for(PATTERNINDEX i = 0; i < fileHeader.numPatterns && chunk.CanRead(1); i++)
 			{
 				std::string name;
 				chunk.ReadNullString(name);

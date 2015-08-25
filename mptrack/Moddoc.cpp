@@ -3160,7 +3160,7 @@ void CModDoc::DeserializeViews()
 	if(pos != nullptr) pChildFrm = dynamic_cast<CChildFrame *>(GetNextView(pos)->GetParentFrame());
 
 	bool anyMaximized = false;
-	while(file.AreBytesLeft())
+	while(file.CanRead(1))
 	{
 		const uint8 windowType = file.ReadUint8();
 		if(windowType == 0)
