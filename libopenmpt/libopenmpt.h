@@ -52,6 +52,8 @@
  *
  * \section libopenmpt_c_examples Examples
  *
+ * \subsection libopenmpt_c_example_unsafe Unsafe, simplified example without any error checking to get a first idea of the API
+ * \include libopenmpt_example_c_unsafe.c
  * \subsection libopenmpt_c_example_file FILE*
  * \include libopenmpt_example_c.c
  * \subsection libopenmpt_c_example_inmemory in memory

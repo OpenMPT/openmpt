@@ -28,7 +28,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt_example_c_mem", 
 		{189B867F-FF4B-45A1-B741-A97492EE69AF} = {189B867F-FF4B-45A1-B741-A97492EE69AF}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt_example_c_safe", "libopenmpt_example_c_safe.vcxproj", "{696A79AC-65EB-445F-981A-7639C54569F8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt_example_c_unsafe", "libopenmpt_example_c_unsafe.vcxproj", "{696A79AC-65EB-445F-981A-7639C54569F8}"
 	ProjectSection(ProjectDependencies) = postProject
 		{9C5101EF-3E20-4558-809B-277FDD50E878} = {9C5101EF-3E20-4558-809B-277FDD50E878}
 		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C} = {B5E0C06B-8121-426A-8FFB-4293ECAAE29C}

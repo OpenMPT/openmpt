@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="libopenmpt_example_c_safe"
+	Name="libopenmpt_example_c_unsafe"
 	ProjectGUID="{696A79AC-65EB-445F-981A-7639C54569F8}"
-	RootNamespace="libopenmpt_example_c_safe"
+	RootNamespace="libopenmpt_example_c_unsafe"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="0"
 	>
@@ -22,7 +22,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="..\..\bin\Win32-Debug"
-			IntermediateDirectory="..\obj\libopenmpt_example_c_safe\x86\Debug"
+			IntermediateDirectory="..\obj\libopenmpt_example_c_unsafe\x86\Debug"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
@@ -69,7 +69,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ksuser.lib winmm.lib"
-				OutputFile="$(OutDir)\libopenmpt_example_c_safe.exe"
+				OutputFile="$(OutDir)\libopenmpt_example_c_unsafe.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -100,7 +100,7 @@
 		<Configuration
 			Name="Debug|x64"
 			OutputDirectory="..\..\bin\x64-Debug"
-			IntermediateDirectory="..\obj\libopenmpt_example_c_safe\x86_64\Debug"
+			IntermediateDirectory="..\obj\libopenmpt_example_c_unsafe\x86_64\Debug"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
@@ -148,7 +148,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ksuser.lib winmm.lib"
-				OutputFile="$(OutDir)\libopenmpt_example_c_safe.exe"
+				OutputFile="$(OutDir)\libopenmpt_example_c_unsafe.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -179,7 +179,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="..\..\bin\Win32"
-			IntermediateDirectory="..\obj\libopenmpt_example_c_safe\x86\Release"
+			IntermediateDirectory="..\obj\libopenmpt_example_c_unsafe\x86\Release"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
@@ -227,7 +227,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ksuser.lib winmm.lib"
-				OutputFile="$(OutDir)\libopenmpt_example_c_safe.exe"
+				OutputFile="$(OutDir)\libopenmpt_example_c_unsafe.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -260,7 +260,7 @@
 		<Configuration
 			Name="Release|x64"
 			OutputDirectory="..\..\bin\x64"
-			IntermediateDirectory="..\obj\libopenmpt_example_c_safe\x86_64\Release"
+			IntermediateDirectory="..\obj\libopenmpt_example_c_unsafe\x86_64\Release"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
@@ -309,7 +309,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ksuser.lib winmm.lib"
-				OutputFile="$(OutDir)\libopenmpt_example_c_safe.exe"
+				OutputFile="$(OutDir)\libopenmpt_example_c_unsafe.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -356,7 +356,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\examples\libopenmpt_example_c_safe.c"
+			RelativePath="..\..\examples\libopenmpt_example_c_unsafe.c"
 			>
 		</File>
 	</Files>
