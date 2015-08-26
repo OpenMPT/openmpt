@@ -52,7 +52,13 @@ int main( int argc, char * argv[] ) {
 			if ( count == 0 ) {
 				break;
 			}
-			stream.write( buffers, static_cast<unsigned long>( count ) );
+			try {
+				stream.write( buffers, static_cast<unsigned long>( count ) );
+			} catch ( const portaudio::PaException & pa_exception ) {
+				if ( pa_exception.paError() != paOutputUnderflowed ) {
+					throw;
+				}
+			}
 		}
 		stream.stop();
 	} catch ( const std::exception & e ) {

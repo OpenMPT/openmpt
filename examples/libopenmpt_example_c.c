@@ -112,6 +112,9 @@ int main( int argc, char * argv[] ) {
 		}
 
 		pa_error = Pa_WriteStream( stream, buffers, (unsigned long)count );
+		if ( pa_error == paOutputUnderflowed ) {
+			pa_error = paNoError;
+		}
 		if ( pa_error != paNoError ) {
 			fprintf( stderr, "Error: %s\n", "Pa_WriteStream() failed." );
 			goto fail;
