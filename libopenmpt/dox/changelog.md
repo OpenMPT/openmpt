@@ -12,6 +12,8 @@ is just a high-level summary.
 
  *  [**Bug**] Fix crash in DMF loader and hang in IT / MPTM loader.
 
+ *  Implemented error handling in the libopenmpt API examples.
+
 ### libopenmpt 0.2-beta13 (2015-08-16)
 
  *  [**Change**] The MSVC build system has been redone. Solutions are now
