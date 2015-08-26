@@ -14,7 +14,7 @@ if _ACTION ~= "vs2008" then
    "../../examples/libopenmpt_example_cxx.cpp",
   }
   flags { "Unicode" }
-  links { "libopenmpt", "miniz", "portaudio", "ksuser", "winmm" }
+  links { "libopenmpt", "miniz", "portaudio", "portaudiocpp", "ksuser", "winmm" }
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
 
