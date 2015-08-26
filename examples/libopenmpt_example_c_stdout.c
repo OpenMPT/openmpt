@@ -63,7 +63,7 @@ int main( int argc, char * argv[] ) {
 	FILE * file = 0;
 	openmpt_module * mod = 0;
 	size_t count = 0;
-	site_t written = 0;
+	size_t written = 0;
 
 	if ( argc != 2 ) {
 		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'libopenmpt_example_c_stdout SOMEMODULE'." );
