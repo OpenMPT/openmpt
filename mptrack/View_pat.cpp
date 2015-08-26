@@ -3490,6 +3490,7 @@ void CViewPattern::UndoRedo(bool undo)
 			}
 			SetModified(false);
 			SanitizeCursor();
+			UpdateScrollSize();
 		}
 	}
 }
