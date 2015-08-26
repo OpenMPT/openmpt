@@ -1,57 +1,64 @@
 /*
  * libopenmpt_example_cxx.cpp
  * --------------------------
- * Purpose: libopenmpt C++ API simple example
- * Notes  : This simple example does no error cheking at all.
- *          PortAudio is used for sound output.
+ * Purpose: libopenmpt C++ API example
+ * Notes  : PortAudio C++ is used for sound output.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 /*
- * Usage example:
- *
- *     bin/libopenmpt_example_cxx SOMEMODULE
+ * Usage: libopenmpt_example_cxx SOMEMODULE
  */
 
+#include <exception>
 #include <fstream>
+#include <iostream>
+#include <stdexcept>
 #include <vector>
-
-#include <cstring>
 
 #include <libopenmpt/libopenmpt.hpp>
 
-#include <portaudio.h>
+#include <portaudiocpp/PortAudioCpp.hxx>
 
 #if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
 #if defined(__GNUC__)
 // mingw-w64 g++ does only default to special C linkage for "main", but not for "wmain" (see <https://sourceforge.net/p/mingw-w64/wiki2/Unicode%20apps/>).
 extern "C"
 #endif
-int wmain( int /*argc*/, wchar_t * argv[] ) {
+int wmain( int argc, wchar_t * argv[] ) {
 #else
-int main( int /*argc*/, char * argv[] ) {
+int main( int argc, char * argv[] ) {
 #endif
-	const std::size_t buffersize = 480;
-	const std::int32_t samplerate = 48000;
-	std::vector<float> left( buffersize );
-	std::vector<float> right( buffersize );
-	std::ifstream file( argv[1], std::ios::binary );
-	openmpt::module mod( file );
-	Pa_Initialize();
-	PaStream * stream = 0;
-	Pa_OpenDefaultStream( &stream, 0, 2, paInt16 | paNonInterleaved, samplerate, paFramesPerBufferUnspecified, NULL, NULL );
-	Pa_StartStream( stream );
-	while ( true ) {
-		std::size_t count = mod.read( samplerate, buffersize, left.data(), right.data() );
-		if ( count == 0 ) {
-			break;
+	try {
+		if ( argc != 2 ) {
+			throw std::runtime_error( "Usage: libopenmpt_example_cxx SOMEMODULE" );
 		}
+		const std::size_t buffersize = 480;
+		const std::int32_t samplerate = 48000;
+		std::vector<float> left( buffersize );
+		std::vector<float> right( buffersize );
 		const float * const buffers[2] = { left.data(), right.data() };
-		Pa_WriteStream( stream, buffers, static_cast<unsigned long>( count ) );
+		std::ifstream file( argv[1], std::ios::binary );
+		openmpt::module mod( file );
+		portaudio::AutoSystem portaudio_initializer;
+		portaudio::System & portaudio = portaudio::System::instance();
+		portaudio::DirectionSpecificStreamParameters outputstream_parameters( portaudio.defaultOutputDevice(), 2, portaudio::FLOAT32, false, portaudio.defaultOutputDevice().defaultHighOutputLatency(), 0 );
+		portaudio::StreamParameters stream_parameters( portaudio::DirectionSpecificStreamParameters::null(), outputstream_parameters, samplerate, paFramesPerBufferUnspecified, paNoFlag );
+		portaudio::BlockingStream stream( stream_parameters );
+		stream.start();
+		while ( true ) {
+			std::size_t count = mod.read( samplerate, buffersize, left.data(), right.data() );
+			if ( count == 0 ) {
+				break;
+			}
+			stream.write( buffers, static_cast<unsigned long>( count ) );
+		}
+		stream.stop();
+	} catch ( const std::exception & e ) {
+		std::cerr << "Error: " << std::string( e.what() ? e.what() : "unknown error" ) << std::endl;
+		return 1;
 	}
-	Pa_StopStream( stream );
-	Pa_CloseStream( stream );
-	Pa_Terminate();
 	return 0;
 }
+

@@ -84,6 +84,18 @@ PKG_CHECK_MODULES([PORTAUDIO], [portaudio-2.0],
 )
 AM_CONDITIONAL([HAVE_PORTAUDIO], [test x$have_portaudio = x1])
 
+# Optional examples dependency: PortAudio C++
+PKG_CHECK_MODULES([PORTAUDIOCPP], [portaudiocpp],
+ [
+  have_portaudiocpp=1
+  AC_DEFINE([MPT_WITH_PORTAUDIOCPP], [], [with libportaudiocpp])
+ ],
+ [
+  have_portaudiocpp=0
+ ]
+)
+AM_CONDITIONAL([HAVE_PORTAUDIOCPP], [test x$have_portaudio = x1])
+
 # Optional openmpt123 dependency: libsndfile
 PKG_CHECK_MODULES([SNDFILE], [sndfile], [AC_DEFINE([MPT_WITH_SNDFILE], [], [with libsndfile])], [AC_MSG_NOTICE([SNDFILE not found])])
 
