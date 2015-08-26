@@ -318,7 +318,7 @@ struct Settings
 	{
 		return Samplerate * GetBytesPerFrame();
 	}
-	std::size_t GetTotalChannels() const
+	uint32 GetTotalChannels() const
 	{
 		return InputChannels + Channels;
 	}
