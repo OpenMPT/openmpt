@@ -343,8 +343,8 @@ CString PrintImplTemplate<CString>(const CString & format
 	)
 {
 	CString result;
-	const std::size_t len = format.GetLength();
-	for(std::size_t pos = 0; pos != len; ++pos)
+	const int len = format.GetLength();
+	for(int pos = 0; pos != len; ++pos)
 	{
 		CString::XCHAR c = format[pos];
 		if(pos + 1 != len && c == _T('%'))
