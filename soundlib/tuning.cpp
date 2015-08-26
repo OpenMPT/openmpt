@@ -175,7 +175,7 @@ CTuningRTI::NOTESTR CTuningRTI::ProGetNoteName(const NOTEINDEXTYPE& x, bool addO
 			//By default, using notation nnP for notes; nn <-> note character starting
 			//from 'A' with char ':' as fill char, and P is period integer. For example:
 			//C:5, D:3, R:7
-			rValue = std::string(1, pos + 'A');
+			rValue = std::string(1, static_cast<char>(pos + 'A'));
 
 			rValue += ":";
 
