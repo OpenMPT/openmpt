@@ -64,10 +64,11 @@
 # Build flags for openmpt123 (provide on each `make` invocation)
 #
 #  (defaults are 0):
-#  NO_SDL=1         Avoid using SDL, even if found
-#  NO_PORTAUDIO=1   Avoid using PortAudio, even if found
-#  NO_FLAC=1        Avoid using FLAC, even if found
-#  NO_SNDFILE=1     Avoid using libsndfile, even if found
+#  NO_SDL=1            Avoid using SDL, even if found
+#  NO_PORTAUDIO=1      Avoid using PortAudio, even if found
+#  NO_PORTAUDIOCPP=1   Avoid using PortAudio C++, even if found
+#  NO_FLAC=1           Avoid using FLAC, even if found
+#  NO_SNDFILE=1        Avoid using libsndfile, even if found
 #
 #
 # Install options (provide on each `make install` invocation)
@@ -366,6 +367,18 @@ NO_PORTAUDIO:=1
 endif
 endif
 
+ifeq ($(NO_PORTAUDIOCPP),1)
+else
+#LDLIBS   += -lportaudiocpp
+ifeq ($(shell pkg-config --exists portaudiocpp && echo yes),yes)
+CPPFLAGS_PORTAUDIOCPP := $(shell pkg-config --cflags-only-I portaudiocpp ) -DMPT_WITH_PORTAUDIOCPP
+LDFLAGS_PORTAUDIOCPP  := $(shell pkg-config --libs-only-L   portaudiocpp ) $(shell pkg-config --libs-only-other portaudiocpp )
+LDLIBS_PORTAUDIOCPP   := $(shell pkg-config --libs-only-l   portaudiocpp )
+else
+NO_PORTAUDIOCPP:=1
+endif
+endif
+
 ifeq ($(NO_FLAC),1)
 else
 #LDLIBS   += -lFLAC
@@ -556,6 +569,9 @@ else
 OUTPUTS += bin/libopenmpt_example_c$(EXESUFFIX)
 OUTPUTS += bin/libopenmpt_example_c_mem$(EXESUFFIX)
 OUTPUTS += bin/libopenmpt_example_c_safe$(EXESUFFIX)
+endif
+ifeq ($(NO_PORTAUDIOCPP),1)
+else
 OUTPUTS += bin/libopenmpt_example_cxx$(EXESUFFIX)
 endif
 OUTPUTS += bin/libopenmpt_example_c_stdout$(EXESUFFIX)
@@ -901,8 +917,8 @@ examples/libopenmpt_example_c_stdout.o: examples/libopenmpt_example_c_stdout.c
 	$(SILENT)$(COMPILE.c) $(OUTPUT_OPTION) $<
 examples/libopenmpt_example_cxx.o: examples/libopenmpt_example_cxx.cpp
 	$(INFO) [CXX] $<
-	$(VERYSILENT)$(CXX) $(CXXFLAGS) $(CXXFLAGS_PORTAUDIO) $(CPPFLAGS) $(CPPFLAGS_PORTAUDIO) $(TARGET_ARCH) -M -MT$@ $< > $*.d
-	$(SILENT)$(COMPILE.cc) $(CXXFLAGS_PORTAUDIO) $(CPPFLAGS_PORTAUDIO) $(OUTPUT_OPTION) $<
+	$(VERYSILENT)$(CXX) $(CXXFLAGS) $(CXXFLAGS_PORTAUDIOCPP) $(CPPFLAGS) $(CPPFLAGS_PORTAUDIOCPP) $(TARGET_ARCH) -M -MT$@ $< > $*.d
+	$(SILENT)$(COMPILE.cc) $(CXXFLAGS_PORTAUDIOCPP) $(CPPFLAGS_PORTAUDIOCPP) $(OUTPUT_OPTION) $<
 bin/libopenmpt_example_c$(EXESUFFIX): examples/libopenmpt_example_c.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_PORTAUDIO) examples/libopenmpt_example_c.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_PORTAUDIO) -o $@
@@ -937,11 +953,11 @@ ifeq ($(HOST),unix)
 endif
 bin/libopenmpt_example_cxx$(EXESUFFIX): examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_PORTAUDIO) examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_PORTAUDIO) -o $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_PORTAUDIOCPP) examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_PORTAUDIOCPP) -o $@
 ifeq ($(HOST),unix)
 	$(SILENT)mv $@ $@.norpath
 	$(INFO) [LD] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_PORTAUDIO) examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_PORTAUDIO) -o $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_PORTAUDIOCPP) examples/libopenmpt_example_cxx.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_PORTAUDIOCPP) -o $@
 endif
 
 .PHONY: clean
