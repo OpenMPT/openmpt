@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{696A79AC-65EB-445F-981A-7639C54569F8}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>libopenmpt_example_c_safe</RootNamespace>
+    <RootNamespace>libopenmpt_example_c_unsafe</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -63,29 +63,29 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\Win32-Debug\</OutDir>
-    <IntDir>..\obj\libopenmpt_example_c_safe\x86\Debug\</IntDir>
-    <TargetName>libopenmpt_example_c_safe</TargetName>
+    <IntDir>..\obj\libopenmpt_example_c_unsafe\x86\Debug\</IntDir>
+    <TargetName>libopenmpt_example_c_unsafe</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\bin\x64-Debug\</OutDir>
-    <IntDir>..\obj\libopenmpt_example_c_safe\x86_64\Debug\</IntDir>
-    <TargetName>libopenmpt_example_c_safe</TargetName>
+    <IntDir>..\obj\libopenmpt_example_c_unsafe\x86_64\Debug\</IntDir>
+    <TargetName>libopenmpt_example_c_unsafe</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\Win32\</OutDir>
-    <IntDir>..\obj\libopenmpt_example_c_safe\x86\Release\</IntDir>
-    <TargetName>libopenmpt_example_c_safe</TargetName>
+    <IntDir>..\obj\libopenmpt_example_c_unsafe\x86\Release\</IntDir>
+    <TargetName>libopenmpt_example_c_unsafe</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\bin\x64\</OutDir>
-    <IntDir>..\obj\libopenmpt_example_c_safe\x86_64\Release\</IntDir>
-    <TargetName>libopenmpt_example_c_safe</TargetName>
+    <IntDir>..\obj\libopenmpt_example_c_unsafe\x86_64\Release\</IntDir>
+    <TargetName>libopenmpt_example_c_unsafe</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -178,7 +178,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\examples\libopenmpt_example_c_safe.c" />
+    <ClCompile Include="..\..\examples\libopenmpt_example_c_unsafe.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="libopenmpt.vcxproj">
