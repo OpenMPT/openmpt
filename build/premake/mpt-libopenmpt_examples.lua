@@ -8,6 +8,7 @@ if _ACTION ~= "vs2008" then
   objdir "../../build/obj/libopenmpt_example_cxx"
   includedirs {
    "../..",
+   "../../include/portaudio/bindings/cpp/include",
    "../../include/portaudio/include",
   }
   files {
