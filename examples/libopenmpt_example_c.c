@@ -53,19 +53,19 @@ int main( int argc, char * argv[] ) {
 	PaStream * stream = 0;
 
 	if ( argc != 2 ) {
-		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'libopenmpt_example_c_safe SOMEMODULE'." );
+		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'libopenmpt_example_c SOMEMODULE'." );
 		goto fail;
 	}
 
 #if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
 	if ( wcslen( argv[1] ) == 0 ) {
-		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'libopenmpt_example_c_safe SOMEMODULE'." );
+		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'libopenmpt_example_c SOMEMODULE'." );
 		goto fail;
 	}
 	file = _wfopen( argv[1], L"rb" );
 #else
 	if ( strlen( argv[1] ) == 0 ) {
-		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'libopenmpt_example_c_safe SOMEMODULE'." );
+		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'libopenmpt_example_c SOMEMODULE'." );
 		goto fail;
 	}
 	file = fopen( argv[1], "rb" );
