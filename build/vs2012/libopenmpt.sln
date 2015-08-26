@@ -11,6 +11,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt_example_cxx", "l
 		{9C5101EF-3E20-4558-809B-277FDD50E878} = {9C5101EF-3E20-4558-809B-277FDD50E878}
 		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C} = {B5E0C06B-8121-426A-8FFB-4293ECAAE29C}
 		{189B867F-FF4B-45A1-B741-A97492EE69AF} = {189B867F-FF4B-45A1-B741-A97492EE69AF}
+		{627CF18A-C8CA-451E-AFD0-8679CADFDA6B} = {627CF18A-C8CA-451E-AFD0-8679CADFDA6B}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt_example_c", "libopenmpt_example_c.vcxproj", "{3F39804D-01C0-479C-AB8B-025683529C57}"
@@ -50,6 +51,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "miniz-shared", "..\vs2012-ext\miniz-shared.vcxproj", "{224C35CD-12DC-4EBC-8183-B38A7199AD4B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudio", "..\vs2012-ext\portaudio.vcxproj", "{189B867F-FF4B-45A1-B741-A97492EE69AF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudiocpp", "..\vs2012-ext\portaudiocpp.vcxproj", "{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -139,6 +142,14 @@ Global
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Release|Win32.Build.0 = Release|Win32
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Release|x64.ActiveCfg = Release|x64
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Release|x64.Build.0 = Release|x64
+		{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}.Debug|Win32.Build.0 = Debug|Win32
+		{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}.Debug|x64.ActiveCfg = Debug|x64
+		{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}.Debug|x64.Build.0 = Debug|x64
+		{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}.Release|Win32.ActiveCfg = Release|Win32
+		{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}.Release|Win32.Build.0 = Release|Win32
+		{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}.Release|x64.ActiveCfg = Release|x64
+		{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

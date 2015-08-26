@@ -190,6 +190,9 @@
     <ProjectReference Include="..\vs2012-ext\portaudio.vcxproj">
       <Project>{189B867F-FF4B-45A1-B741-A97492EE69AF}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\vs2012-ext\portaudiocpp.vcxproj">
+      <Project>{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

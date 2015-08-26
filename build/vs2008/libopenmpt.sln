@@ -44,6 +44,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "miniz-shared", "..\vs2008-e
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudio", "..\vs2008-ext\portaudio.vcproj", "{189B867F-FF4B-45A1-B741-A97492EE69AF}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudiocpp", "..\vs2008-ext\portaudiocpp.vcproj", "{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -124,6 +126,14 @@ Global
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Release|Win32.Build.0 = Release|Win32
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Release|x64.ActiveCfg = Release|x64
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Release|x64.Build.0 = Release|x64
+		{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}.Debug|Win32.Build.0 = Debug|Win32
+		{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}.Debug|x64.ActiveCfg = Debug|x64
+		{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}.Debug|x64.Build.0 = Debug|x64
+		{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}.Release|Win32.ActiveCfg = Release|Win32
+		{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}.Release|Win32.Build.0 = Release|Win32
+		{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}.Release|x64.ActiveCfg = Release|x64
+		{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

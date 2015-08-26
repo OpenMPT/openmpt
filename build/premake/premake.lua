@@ -170,6 +170,7 @@ solution "libopenmpt-all"
  dofile "../../build/premake/ext-flac.lua"
  dofile "../../build/premake/ext-miniz.lua"
  dofile "../../build/premake/ext-portaudio.lua"
+ dofile "../../build/premake/ext-portaudiocpp.lua"
 
 end
 
@@ -240,6 +241,7 @@ solution "libopenmpt"
  dofile "../../build/premake/ext-miniz.lua"
  dofile "../../build/premake/ext-miniz-shared.lua"
  dofile "../../build/premake/ext-portaudio.lua"
+ dofile "../../build/premake/ext-portaudiocpp.lua"
 
 end
 
