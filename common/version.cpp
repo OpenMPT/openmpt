@@ -331,14 +331,14 @@ std::string GetBuildCompilerString()
 		#if defined(_MSC_FULL_VER) && defined(_MSC_BUILD) && (_MSC_BUILD > 0)
 			retval += MPT_FORMAT("Microsoft Compiler %1.%2.%3.%4"
 				, _MSC_FULL_VER / 10000000
-				, mpt::fmt::dec0<2>(( _MSC_FULL_VER / 100000) % 100)
+				, mpt::fmt::dec0<2>((_MSC_FULL_VER / 100000) % 100)
 				, mpt::fmt::dec0<5>(_MSC_FULL_VER % 100000)
 				, mpt::fmt::dec0<2>(_MSC_BUILD)
 				);
 		#elif defined(_MSC_FULL_VER)
 			retval += MPT_FORMAT("Microsoft Compiler %1.%2.%3"
 				, _MSC_FULL_VER / 10000000
-				, mpt::fmt::dec0<2>(( _MSC_FULL_VER / 100000) % 100)
+				, mpt::fmt::dec0<2>((_MSC_FULL_VER / 100000) % 100)
 				, mpt::fmt::dec0<5>(_MSC_FULL_VER % 100000)
 				);
 		#else
