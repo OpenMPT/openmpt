@@ -596,17 +596,18 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			IMFSample sampleHeader;
 			file.ReadConvertEndianness(sampleHeader);
-			m_nSamples++;
 
-			if(memcmp(sampleHeader.is10, "IS10", 4) || m_nSamples >= MAX_SAMPLES)
+			const SAMPLEINDEX smpID = firstSample + smp;
+			if(memcmp(sampleHeader.is10, "IS10", 4) || smpID >= MAX_SAMPLES)
 			{
 				continue;
 			}
 
-			ModSample &sample = Samples[firstSample + smp];
+			m_nSamples = smpID;
+			ModSample &sample = Samples[smpID];
 
 			sampleHeader.ConvertToMPT(sample);
-			strcpy(m_szNames[m_nSamples], sample.filename);
+			strcpy(m_szNames[smpID], sample.filename);
 
 			if(sampleHeader.length)
 			{
