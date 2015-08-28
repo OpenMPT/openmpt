@@ -144,11 +144,7 @@ int GetRevision()
 		{
 			svnversion = svnversion.substr(0, svnversion.find("P"));
 		}
-		int revision = 0;
-		std::istringstream s( svnversion );
-		s.imbue(std::locale::classic());
-		s >> revision;
-		return revision;
+		return ConvertStrTo<int>(svnversion);
 	#else
 		#if MPT_COMPILER_MSVC
 			#pragma message("SVN revision unknown. Please check your build system.")
