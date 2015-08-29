@@ -126,7 +126,7 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 			for(uint32 p = 0; p < numProgs; p++)
 			{
 				plugin.Dispatch(effBeginSetProgram, 0, 0, nullptr, 0.0f);
-				plugin.Dispatch(effSetProgram, 0, 0, nullptr, 0.0f);
+				plugin.Dispatch(effSetProgram, 0, p, nullptr, 0.0f);
 				ErrorCode retVal = LoadFile(file, plugin);
 				if(retVal != noError)
 				{
