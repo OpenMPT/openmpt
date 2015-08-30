@@ -195,6 +195,11 @@ bool CWaveDevice::InternalOpen()
 	}
 	m_nBuffersPending = 0;
 	m_nWriteBuffer = 0;
+	{
+		Util::lock_guard<Util::mutex> guard(m_PositionWraparoundMutex);
+		MemsetZero(m_PositionLast);
+		m_PositionWrappedCount = 0;
+	}
 	SetWakeupEvent(m_ThreadWakeupEvent);
 	SetWakeupInterval(m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond());
 	m_Flags.NeedsClippedFloat = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
@@ -226,6 +231,11 @@ bool CWaveDevice::InternalClose()
 		CloseHandle(m_ThreadWakeupEvent);
 		m_ThreadWakeupEvent = NULL;
 	}
+	{
+		Util::lock_guard<Util::mutex> guard(m_PositionWraparoundMutex);
+		MemsetZero(m_PositionLast);
+		m_PositionWrappedCount = 0;
+	}
 	return true;
 }
 
@@ -236,6 +246,11 @@ void CWaveDevice::StartFromSoundThread()
 	MPT_TRACE();
 	if(m_hWaveOut)
 	{
+		{
+			Util::lock_guard<Util::mutex> guard(m_PositionWraparoundMutex);
+			MemsetZero(m_PositionLast);
+			m_PositionWrappedCount = 0;
+		}
 		m_JustStarted = true;
 		// Actual starting is done in InternalFillAudioBuffer to avoid crackling with tiny buffers.
 	}
@@ -250,6 +265,11 @@ void CWaveDevice::StopFromSoundThread()
 	{
 		waveOutPause(m_hWaveOut);
 		m_JustStarted = false;
+		{
+			Util::lock_guard<Util::mutex> guard(m_PositionWraparoundMutex);
+			MemsetZero(m_PositionLast);
+			m_PositionWrappedCount = 0;
+		}
 	}
 }
 
@@ -298,17 +318,84 @@ void CWaveDevice::InternalFillAudioBuffer()
 int64 CWaveDevice::InternalGetStreamPositionFrames() const
 //---------------------------------------------------------
 {
+	// Apparently, at least with Windows XP, TIME_SAMPLES wraps aroud at 0x7FFFFFF (see
+	// http://www.tech-archive.net/Archive/Development/microsoft.public.win32.programmer.mmedia/2005-02/0070.html
+	// ).
+	// We may also, additionally, default to TIME_BYTES which would wraparound the earliest.
+	// We could thereby try to avoid any potential wraparound inside the driver on older
+	// Windows versions, which would be, once converted into other units, really
+	// difficult to detect or handle.
+	static const UINT timeType = TIME_SAMPLES; // shpuld work for sane systems
+	//static const std::size_t valid_bits = 32; // shpuld work for sane systems
+	//static const UINT timeType = TIME_BYTES; // safest
+	static const std::size_t valid_bits = 27; // safe for WinXP TIME_SAMPLES
+	static const uint32 valid_mask = static_cast<uint32>((uint64(1) << valid_bits) - 1u);
+	static const uint32 valid_watermark = static_cast<uint32>(uint64(1) << (valid_bits - 1u)); // half the valid range in order to be able to catch backwards fluctuations
+
 	MMTIME mmtime;
 	MemsetZero(mmtime);
-	mmtime.wType = TIME_SAMPLES;
-	if(waveOutGetPosition(m_hWaveOut, &mmtime, sizeof(mmtime)) != MMSYSERR_NOERROR) return 0;
+	mmtime.wType = timeType;
+	if(waveOutGetPosition(m_hWaveOut, &mmtime, sizeof(mmtime)) != MMSYSERR_NOERROR)
+	{
+		return 0;
+	}
+	if(mmtime.wType != TIME_MS && mmtime.wType != TIME_BYTES && mmtime.wType != TIME_SAMPLES)
+	{ // unsupported time format
+		return 0;
+	}
+	int64 offset = 0;
+	{
+		// handle wraparound
+		Util::lock_guard<Util::mutex> guard(m_PositionWraparoundMutex);
+		if(!m_PositionLast.wType)
+		{
+			// first call
+			m_PositionWrappedCount = 0;
+		} else if(mmtime.wType != m_PositionLast.wType)
+		{
+			// what? value type changed, do not try handling that for now.
+			m_PositionWrappedCount = 0;
+		} else
+		{
+			DWORD oldval = 0;
+			DWORD curval = 0;
+			switch(mmtime.wType)
+			{
+				case TIME_MS: oldval = m_PositionLast.u.ms; curval = mmtime.u.ms; break;
+				case TIME_BYTES: oldval = m_PositionLast.u.cb; curval = mmtime.u.cb; break;
+				case TIME_SAMPLES: oldval = m_PositionLast.u.sample; curval = mmtime.u.sample; break;
+			}
+			oldval &= valid_mask;
+			curval &= valid_mask;
+			if(((curval - oldval) & valid_mask) >= valid_watermark) // guard against driver problems resulting in time jumping backwards for short periods of time. BEWARE of integer wraparound when refactoring
+			{
+				curval = oldval;
+			}
+			switch(mmtime.wType)
+			{
+				case TIME_MS: mmtime.u.ms = curval; break;
+				case TIME_BYTES: mmtime.u.cb = curval; break;
+				case TIME_SAMPLES: mmtime.u.sample = curval; break;
+			}
+			if((curval ^ oldval) & valid_watermark) // MSB flipped
+			{
+				if(!(curval & valid_watermark)) // actually wrapped
+				{
+					m_PositionWrappedCount += 1;
+				}
+			}
+		}
+		m_PositionLast = mmtime;
+		offset = (static_cast<uint64>(m_PositionWrappedCount) << valid_bits);
+	}
+	int64 result = 0;
 	switch(mmtime.wType)
 	{
-		case TIME_BYTES:   return mmtime.u.cb / m_Settings.GetBytesPerFrame(); break;
-		case TIME_MS:      return mmtime.u.ms * m_Settings.GetBytesPerSecond() / (1000 * m_Settings.GetBytesPerFrame()); break;
-		case TIME_SAMPLES: return mmtime.u.sample; break;
-		default: return 0; break;
+		case TIME_MS: result += (static_cast<int64>(mmtime.u.ms & valid_mask) + offset) * m_Settings.GetBytesPerSecond() / (1000 * m_Settings.GetBytesPerFrame()); break;
+		case TIME_BYTES: result += (static_cast<int64>(mmtime.u.cb & valid_mask) + offset) / m_Settings.GetBytesPerFrame(); break;
+		case TIME_SAMPLES: result += (static_cast<int64>(mmtime.u.sample & valid_mask) + offset); break;
 	}
+	return result;
 }
 
 
