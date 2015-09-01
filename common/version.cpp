@@ -10,10 +10,9 @@
 #include "stdafx.h"
 #include "version.h"
 
-#include <iomanip>
-#include <locale>
-#include <sstream>
-#include <string>
+#include "mptString.h"
+#include "mptStringFormat.h"
+#include "mptStringParse.h" 
 
 #include "versionNumber.h"
 #include "svn_version.h"
@@ -33,34 +32,16 @@ std::string GetOpenMPTVersionStr()
 	return std::string("OpenMPT " MPT_VERSION_STR);
 }
 
-struct version
+VersionNum ToNum(const std::string &s)
 {
-	unsigned int a;
-	unsigned int b;
-	unsigned int c;
-	unsigned int d;
-	version() : a(0),b(0),c(0),d(0) {}
-	VersionNum Get() const
+	VersionNum result = 0;
+	std::vector<std::string> numbers = mpt::String::Split<std::string>(s, std::string("."));
+	for(std::size_t i = 0; i < numbers.size() && i < 4; ++i)
 	{
-		return (((a&0xff) << 24) | ((b&0xff) << 16) | ((c&0xff) << 8) | (d&0xff));
+		result |= (mpt::String::Parse::Hex<unsigned int>(numbers[i]) & 0xff) << ((3-i)*8);
 	}
-};
+	return result;
 
-VersionNum ToNum(const std::string &s_)
-{
-	std::istringstream s(s_);
-	s.imbue(std::locale::classic());
-	version v;
-	char dot = '\0';
-	s >> std::hex >> v.a;
-	s >> dot; if(dot != '.') return v.Get();
-	s >> std::hex >> v.b;
-	s >> dot; if(dot != '.') return v.Get();
-	s >> std::hex >> v.c;
-	s >> dot; if(dot != '.') return v.Get();
-	s >> std::hex >> v.d;
-	s >> dot; if(dot != '.') return v.Get();
-	return v.Get();
 }
 
 std::string ToStr(const VersionNum v)

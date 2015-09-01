@@ -85,4 +85,36 @@ long double ConvertStrToLongDouble(const std::wstring &str) { return ConvertStrT
 #endif
 
 
+namespace mpt
+{
+namespace String
+{
+namespace Parse
+{
+
+template<typename T>
+T HexToHelper(const std::string &str)
+{
+	std::istringstream i(str);
+	i.imbue(std::locale::classic());
+	T x;
+	if(!(i >> std::hex >> x))
+	{
+		return T();
+	}
+	return x;
+}
+template<> unsigned char HexToHelper(const std::string &str) { return static_cast<unsigned char>(HexToHelper<unsigned int>(str)); }
+
+unsigned char HexToUnsignedChar(const std::string &str) { return HexToHelper<unsigned char>(str); }
+unsigned short HexToUnsignedShort(const std::string &str) { return HexToHelper<unsigned short>(str); }
+unsigned int HexToUnsignedInt(const std::string &str) { return HexToHelper<unsigned int>(str); }
+unsigned long HexToUnsignedLong(const std::string &str) { return HexToHelper<unsigned long>(str); }
+unsigned long long HexToUnsignedLongLong(const std::string &str) { return HexToHelper<unsigned long long>(str); }
+
+} // namespace Parse
+} // namespace String
+} // namespace mpt
+
+
 OPENMPT_NAMESPACE_END
