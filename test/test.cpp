@@ -445,6 +445,12 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(ConvertStrTo<float>(mpt::ToString(-87.0)), -87.0);
 	VERIFY_EQUAL(ConvertStrTo<double>(mpt::ToString(-0.5e-6)), -0.5e-6);
 
+	VERIFY_EQUAL(mpt::String::Parse::Hex<unsigned char>("fe"), 254);
+#if MPT_WSTRING_FORMAT
+	VERIFY_EQUAL(mpt::String::Parse::Hex<unsigned char>(L"fe"), 254);
+#endif
+	VERIFY_EQUAL(mpt::String::Parse::Hex<unsigned int>(MPT_USTRING("ffff")), 65535);
+
 	TestFloatFormats(0.0f);
 	TestFloatFormats(1.0f);
 	TestFloatFormats(-1.0f);

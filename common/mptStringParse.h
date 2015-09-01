@@ -116,4 +116,67 @@ template<> inline std::wstring ConvertStrTo(const mpt::ustring &str) { return mp
 #endif
 
 
+namespace mpt
+{
+namespace String
+{
+namespace Parse
+{
+
+unsigned char HexToUnsignedChar(const std::string &str);
+unsigned short HexToUnsignedShort(const std::string &str);
+unsigned int HexToUnsignedInt(const std::string &str);
+unsigned long HexToUnsignedLong(const std::string &str);
+unsigned long long HexToUnsignedLongLong(const std::string &str);
+
+template<typename T> inline T Hex(const std::string &str); // not defined, generates compiler error for non-specialized types
+template<> inline unsigned char Hex(const std::string &str) { return HexToUnsignedChar(str); }
+template<> inline unsigned short Hex(const std::string &str) { return HexToUnsignedShort(str); }
+template<> inline unsigned int Hex(const std::string &str) { return HexToUnsignedInt(str); }
+template<> inline unsigned long Hex(const std::string &str) { return HexToUnsignedLong(str); }
+template<> inline unsigned long long Hex(const std::string &str) { return HexToUnsignedLongLong(str); }
+
+template<typename T>
+inline T Hex(const char *str)
+{
+	if(!str)
+	{
+		return T();
+	}
+	return Hex<T>(std::string(str));
+}
+
+#if MPT_WSTRING_FORMAT
+template<typename T>
+inline T Hex(const wchar_t *str)
+{
+	if(!str)
+	{
+		return T();
+	}
+	return Hex<T>(std::wstring(str));
+}
+#endif
+
+#if MPT_WSTRING_FORMAT
+template<typename T>
+inline T Hex(const std::wstring &str)
+{
+	return Hex<T>(mpt::ToCharset(mpt::CharsetUTF8, str));
+}
+#endif
+
+#if MPT_USTRING_MODE_UTF8
+template<typename T>
+inline T Hex(const mpt::ustring &str)
+{
+	return Hex<T>(mpt::ToCharset(mpt::CharsetUTF8, str));
+}
+#endif
+
+} // namespace Parse
+} // namespace String
+} // namespace mpt
+
+
 OPENMPT_NAMESPACE_END
