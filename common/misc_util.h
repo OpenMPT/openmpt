@@ -61,6 +61,21 @@ mpt::ustring Combine(const std::vector<T> &vals, const mpt::ustring &sep=MPT_UST
 	}
 	return str;
 }
+template<typename T>
+std::string Combine(const std::vector<T> &vals, const std::string &sep=std::string(","))
+//--------------------------------------------------------------------------------------
+{
+	std::string str;
+	for(std::size_t i = 0; i < vals.size(); ++i)
+	{
+		if(i > 0)
+		{
+			str += sep;
+		}
+		str += mpt::ToString(vals[i]);
+	}
+	return str;
+}
 
 // Split the given string at separator positions into individual values returned as a vector.
 // An empty string results in an empty vector.
@@ -68,6 +83,23 @@ mpt::ustring Combine(const std::vector<T> &vals, const mpt::ustring &sep=MPT_UST
 template<typename T>
 std::vector<T> Split(const mpt::ustring &str, const mpt::ustring &sep=MPT_USTRING(","))
 //-------------------------------------------------------------------------------------
+{
+	std::vector<T> vals;
+	std::size_t pos = 0;
+	while(str.find(sep, pos) != std::string::npos)
+	{
+		vals.push_back(ConvertStrTo<T>(str.substr(pos, str.find(sep, pos) - pos)));
+		pos = str.find(sep, pos) + sep.length();
+	}
+	if(!vals.empty() || (str.substr(pos).length() > 0))
+	{
+		vals.push_back(ConvertStrTo<T>(str.substr(pos)));
+	}
+	return vals;
+}
+template<typename T>
+std::vector<T> Split(const std::string &str, const std::string &sep=std::string(","))
+//-----------------------------------------------------------------------------------
 {
 	std::vector<T> vals;
 	std::size_t pos = 0;

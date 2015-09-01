@@ -256,8 +256,8 @@ template<> inline PLUGVOLUMEHANDLING FromSettingValue(const SettingValue &val)
 	return static_cast<PLUGVOLUMEHANDLING>(val.as<int32>());
 }
 
-template<> inline SettingValue ToSettingValue(const std::vector<uint32> &val) { return mpt::String::Combine(val); }
-template<> inline std::vector<uint32> FromSettingValue(const SettingValue &val) { return mpt::String::Split<uint32>(val); }
+template<> inline SettingValue ToSettingValue(const std::vector<uint32> &val) { return mpt::String::Combine(val, MPT_USTRING(",")); }
+template<> inline std::vector<uint32> FromSettingValue(const SettingValue &val) { return mpt::String::Split<uint32>(val, MPT_USTRING(",")); }
 
 template<> inline SettingValue ToSettingValue(const SampleFormat &val) { return SettingValue(int32(val.value)); }
 template<> inline SampleFormat FromSettingValue(const SettingValue &val) { return SampleFormatEnum(val.as<int32>()); }
