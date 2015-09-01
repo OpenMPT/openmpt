@@ -108,9 +108,11 @@ void CAbstractVstEditor::OnSysCommand(UINT nID, LPARAM lParam)
 //------------------------------------------------------------
 {
 	const UINT nID_ = nID & 0xFFF0;
-	if(nID_ == SC_MINIMIZE || nID_ == SC_MAXIMIZE)
+	if(nID_ == SC_MINIMIZE || nID_ == SC_MAXIMIZE && !mpt::Windows::Version::IsWine())
 	{
 		// Override minimize and maximize buttons to reduce plugin windows to their non-client area
+		// Disable this mechanism for Wine, as at least in Wine 1.6.2, this causes all VST windows to be minimized
+		// when minimizing the parent window as well, and it's impossible to restore their original size afterwards.
 		LONG style = GetWindowLong(m_hWnd, GWL_STYLE);
 		CRect rcWnd, rcClient;
 		GetWindowRect(&rcWnd);
@@ -283,6 +285,11 @@ void CAbstractVstEditor::OnRandomizePreset()
 void CAbstractVstEditor::SetupMenu(bool force)
 //--------------------------------------------
 {
+	if(mpt::Windows::Version::IsWine())
+	{
+		SetWindowLong(m_hWnd, GWL_STYLE, GetWindowLong(m_hWnd, GWL_STYLE) & ~WS_MINIMIZEBOX);
+	}
+
 	//TODO: create menus on click so they are only updated when required
 	UpdatePresetMenu(force);
 	UpdateInputMenu();
