@@ -1823,6 +1823,8 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool 
 	// Always NNA cut - using
 	if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_MT2)) || !m_nInstruments || forceCut)
 	{
+		// Cut the channel and stop any possibly playing VSTi notes
+		NoteCut(nChn, m_PlayState.m_nTickCount, true);
 		if(!pChn->nLength || pChn->dwFlags[CHN_MUTE] || !(pChn->rightVol | pChn->leftVol))
 		{
 			return CHANNELINDEX_INVALID;
@@ -1838,10 +1840,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool 
 		chn.nMasterChn = nChn + 1;
 		chn.nCommand = CMD_NONE;
 		chn.rowCommand.Clear();
-		// Cut the note
-		chn.nFadeOutVol = 0;
-		chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
-		// Stop this channel
+		// Stop this channel completely
 		pChn->nLength = pChn->nPos = pChn->nPosLo = 0;
 		pChn->nROfs = pChn->nLOfs = 0;
 		pChn->rightVol = pChn->leftVol = 0;
