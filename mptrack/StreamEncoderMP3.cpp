@@ -180,6 +180,7 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags)
 	tHeader.version[0] = 0x04; // Version 2.4.0
 	tHeader.version[1] = 0x00; // Ditto
 	tHeader.flags = 0x00; // No flags
+	tHeader.size  = 0; // will be filled later
 	s.write(reinterpret_cast<const char*>(&tHeader), sizeof(tHeader));
 
 	// Write TIT2 (Title), TCOM / TPE1 (Composer), TALB (Album), TCON (Genre), TYER / TDRC (Date), WXXX (URL), TENC (Encoder), COMM (Comment)
