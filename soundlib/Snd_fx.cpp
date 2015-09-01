@@ -4865,9 +4865,9 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 	if(doRetrig)
 	{
 		UINT dv = (param >> 4) & 0x0F;
+		int vol = chn.nVolume;
 		if (dv)
 		{
-			int vol = chn.nVolume;
 
 			// FT2 compatibility: Retrig + volume will not change volume of retrigged notes
 			if(!IsCompatibleMode(TRK_FASTTRACKER2) || !(chn.rowCommand.volcmd == VOLCMD_VOLUME))
@@ -4877,10 +4877,8 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 				else
 					vol += ((int)retrigTable2[dv]) << 2;
 			}
-
 			Limit(vol, 0, 256);
 
-			chn.nVolume = vol;
 			chn.dwFlags.set(CHN_FASTVOLRAMP);
 		}
 		UINT note = chn.nNewNote;
@@ -4899,6 +4897,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 		// IT compatibility: Really weird combination of envelopes and retrigger (see Storlek's q.it testcase)
 		// Test case: retrig.it
 		NoteChange(&chn, note, IsCompatibleMode(TRK_IMPULSETRACKER), resetEnv);
+		chn.nVolume = vol;
 		if(m_nInstruments)
 		{
 			chn.rowCommand.note = static_cast<ModCommand::NOTE>(note);	// No retrig without note...
