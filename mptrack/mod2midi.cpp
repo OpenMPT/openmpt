@@ -70,32 +70,38 @@ namespace MidiExport
 		}
 	}
 
-	class MidiPlugin
+	class MidiInstrument
 	{
+		ModInstrument m_instr;
 		AEffect m_effect;
 		VstEvents *m_events;
+		const CSoundFile *m_sndFile;
 
 		std::ostringstream f;
-		ModInstrument &m_instr;
 		double m_tempo;
 		double m_samplePos, m_prevEventTime, m_sampleRate;
 		int32 m_oldSigNumerator, m_oldSigDenominator;
+		int32 m_oldGlobalVol;
 
-		uint32 TicksSinceLastEvent() const
+		uint32 TicksSinceLastEvent()
 		{
-			return Util::Round<uint32>((m_samplePos - m_prevEventTime) * m_tempo * static_cast<double>(MidiExport::ppq) / (m_sampleRate * 60.0));
+			uint32 ticks = Util::Round<uint32>((m_samplePos - m_prevEventTime) * m_tempo * static_cast<double>(MidiExport::ppq) / (m_sampleRate * 60.0));
+			m_prevEventTime = m_samplePos;
+			return ticks;
 		}
 
 	public:
 
+		operator ModInstrument& () { return m_instr; }
 		operator AEffect& () { return m_effect; }
 
-		MidiPlugin(ModInstrument &instr)
+		MidiInstrument()
 			: m_events(nullptr)
-			, m_instr(instr)
+			, m_sndFile(nullptr)
 			, m_tempo(0.0)
 			, m_samplePos(0.0), m_prevEventTime(0.0), m_sampleRate(1.0)
 			, m_oldSigNumerator(0), m_oldSigDenominator(0)
+			, m_oldGlobalVol(-1)
 		{
 			// Initialize VST struct, needs to be done first
 			MemsetZero(m_effect);
@@ -130,8 +136,10 @@ namespace MidiExport
 			m_effect.processReplacing = Process;
 		}
 
-		void Initialize(const char *name)
+		void Initialize(const CSoundFile &sndFile, const char *name)
 		{
+			m_sndFile = &sndFile;
+
 			// Write instrument name
 			WriteString(f, kTrackName, name);
 			// Set up MIDI pitch wheel depth
@@ -157,7 +165,7 @@ namespace MidiExport
 			switch(opcode)
 			{
 			case effProcessEvents:
-				static_cast<MidiPlugin *>(effect->object)->m_events = static_cast<VstEvents *>(ptr);
+				static_cast<MidiInstrument *>(effect->object)->m_events = static_cast<VstEvents *>(ptr);
 				return 1;
 			}
 			return 0;
@@ -165,7 +173,7 @@ namespace MidiExport
 
 		static void Process(AEffect *effect, float **, float **, VstInt32)
 		{
-			static_cast<MidiPlugin *>(effect->object)->Process();
+			static_cast<MidiInstrument *>(effect->object)->Process();
 		}
 		void Process()
 		{
@@ -177,9 +185,10 @@ namespace MidiExport
 
 			const bool tempoChanged = timeInfo.tempo != m_tempo;
 			const bool sigChanged = timeInfo.timeSigNumerator != m_oldSigNumerator || timeInfo.timeSigDenominator != m_oldSigDenominator;
+			const bool volChanged = m_sndFile->m_PlayState.m_nGlobalVolume != m_oldGlobalVol;
 
 			// Anything interesting happening in this process call at all?
-			if(!tempoChanged && !sigChanged && numEvents == 0)
+			if(!tempoChanged && !sigChanged && !volChanged && numEvents == 0)
 			{
 				return;
 			}
@@ -189,6 +198,7 @@ namespace MidiExport
 
 			if(tempoChanged && timeInfo.tempo > 0.0)
 			{
+				// Write MIDI tempo
 				mpt::IO::WriteVarInt(f, tickDiff);
 				tickDiff = 0;
 
@@ -200,6 +210,7 @@ namespace MidiExport
 
 			if(sigChanged)
 			{
+				// Write MIDI time signature
 				mpt::IO::WriteVarInt(f, tickDiff);
 				tickDiff = 0;
 
@@ -208,6 +219,18 @@ namespace MidiExport
 
 				m_oldSigNumerator = timeInfo.timeSigNumerator;
 				m_oldSigDenominator = timeInfo.timeSigDenominator;
+			}
+
+			if(volChanged)
+			{
+				// Write MIDI master volume
+				mpt::IO::WriteVarInt(f, tickDiff);
+				tickDiff = 0;
+
+				m_oldGlobalVol = m_sndFile->m_PlayState.m_nGlobalVolume;
+				int32 midiVol = Util::muldiv(m_oldGlobalVol, 0x3FFF, MAX_GLOBAL_VOLUME);
+				uint8 msg[9] = { 0xF0, 0x07, 0x7F, 0x7F, 0x04, 0x01, midiVol & 0x7F, (midiVol >> 7) & 0x7F, 0xF7 };
+				mpt::IO::WriteRaw(f, msg, 9);
 			}
 
 			if(numEvents == 0) return;
@@ -220,7 +243,6 @@ namespace MidiExport
 				tickDiff = 0;
 				if(events[i]->type == kVstMidiType)
 				{
-					// TODO hack in global volume
 					const VstMidiEvent &event = *reinterpret_cast<const VstMidiEvent *>(events[i]);
 					char midiData[4];
 					MemCopy<char [4]>(midiData, event.midiData);
@@ -264,8 +286,6 @@ namespace MidiExport
 					}
 				}
 			}
-
-			m_prevEventTime = m_samplePos;
 		}
 
 		// Write end marker and return the stream
@@ -283,16 +303,6 @@ namespace MidiExport
 		static void SetParameter(AEffect *, VstInt32, float) { }
 		// No-op getParameter
 		static float GetParameter(AEffect *, VstInt32) { return 0.0f; }
-	};
-
-
-	struct MidiInstrument : public ModInstrument
-	{
-		MidiPlugin m_plugin;
-
-		MidiInstrument()
-			: m_plugin(*this)
-		{ }
 	};
 
 
@@ -333,7 +343,9 @@ namespace MidiExport
 			PLUGINDEX nextPlug = 0;
 			for(INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
 			{
-				MidiInstrument &instr = m_instruments[i - 1];
+				MidiInstrument &midiInstr = m_instruments[i - 1];
+				ModInstrument &instr = midiInstr;
+				
 				m_sndFile.Instruments[i] = &instr;
 
 				if(!m_sndFile.IsInstrumentUsed(i))
@@ -369,10 +381,10 @@ namespace MidiExport
 				}
 
 				// FIXME: Having > MAX_MIXPLUGINS used instruments won't work!
-				instr.m_plugin.Initialize(m_wasInstrumentMode ? m_oldInstruments[i - 1]->name : m_sndFile.GetSampleName(i));
+				midiInstr.Initialize(m_sndFile, m_wasInstrumentMode ? m_oldInstruments[i - 1]->name : m_sndFile.GetSampleName(i));
 				SNDMIXPLUGIN &mixPlugin = m_sndFile.m_MixPlugins[nextPlug];
 				m_sndFile.Instruments[i]->nMixPlug = nextPlug + 1;
-				m_sndFile.m_MixPlugins[nextPlug].pMixPlugin = new (std::nothrow) CVstPlugin(nullptr, m_plugFactory, mixPlugin, instr.m_plugin, m_sndFile);
+				m_sndFile.m_MixPlugins[nextPlug].pMixPlugin = new (std::nothrow) CVstPlugin(nullptr, m_plugFactory, mixPlugin, midiInstr, m_sndFile);
 
 				nextPlug++;
 			}
@@ -406,7 +418,7 @@ namespace MidiExport
 		{
 			for(INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
 			{
-				std::string data = m_instruments[i - 1].m_plugin.Finalise().str();
+				std::string data = m_instruments[i - 1].Finalise().str();
 				if(!data.empty())
 				{
 					mpt::IO::WriteRaw(m_file, "MTrk", 4);

@@ -60,7 +60,7 @@ class CDoMidiConvert: public CDialog
 {
 public:
 	CSoundFile &m_sndFile;
-	const mpt::PathString &m_fileName;
+	const mpt::PathString m_fileName;
 	const MidiExport::InstrMap &m_instrMap;
 	bool m_abort;
 
