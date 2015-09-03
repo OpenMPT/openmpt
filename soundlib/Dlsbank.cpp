@@ -1783,7 +1783,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, UI
 		}
 	}
 	pIns->nFadeOut = 1024;
-	pIns->nMidiProgram = (BYTE)(pDlsIns->ulInstrument & 0x7F);
+	pIns->nMidiProgram = (BYTE)(pDlsIns->ulInstrument & 0x7F) + 1;
 	pIns->nMidiChannel = (BYTE)((pDlsIns->ulBank & F_INSTRUMENT_DRUMS) ? 10 : 0);
 	pIns->wMidiBank = (WORD)(((pDlsIns->ulBank & 0x7F00) >> 1) | (pDlsIns->ulBank & 0x7F));
 	pIns->nNNA = NNA_NOTEOFF;

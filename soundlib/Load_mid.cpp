@@ -416,7 +416,7 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 		} else
 		// Melodic Instrument
 		{
-			if (nProgram == p->nMidiProgram) return i;
+			if (nProgram + 1 == p->nMidiProgram) return i;
 		}
 	}
 	if ((m_nInstruments + 1 >= MAX_INSTRUMENTS) || (m_nSamples + 1 >= MAX_SAMPLES)) return 0;
@@ -430,7 +430,7 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 	m_nSamples++;
 	m_nInstruments++;
 	pIns->wMidiBank = nBank;
-	pIns->nMidiProgram = nProgram;
+	pIns->nMidiProgram = nProgram + 1;
 	pIns->nMidiChannel = nChannel;
 	if (nChannel == MIDI_DRUMCHANNEL) pIns->nMidiDrumKey = nNote;
 	pIns->nFadeOut = 1024;
