@@ -256,7 +256,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 			if (pEmbeddedBank)
 			{
 				UINT nDlsIns = 0, nDrumRgn = 0;
-				UINT nProgram = pIns->nMidiProgram;
+				UINT nProgram = (pIns->nMidiProgram != 0) ? pIns->nMidiProgram - 1 : 0;
 				UINT dwKey = (nMidiCode < 128) ? 0xFF : (nMidiCode & 0x7F);
 				if ((pEmbeddedBank->FindInstrument(	(nMidiCode >= 128),
 													(pIns->wMidiBank & 0x3FFF),
@@ -299,7 +299,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 					if (pDLSBank)
 					{
 						UINT nDlsIns = 0, nDrumRgn = 0;
-						UINT nProgram = pIns->nMidiProgram;
+						UINT nProgram = (pIns->nMidiProgram != 0) ? pIns->nMidiProgram - 1 : 0;
 						UINT dwKey = (nMidiCode < 128) ? 0xFF : (nMidiCode & 0x7F);
 						if ((pDLSBank->FindInstrument(	(nMidiCode >= 128),
 														(pIns->wMidiBank & 0x3FFF),
@@ -1783,7 +1783,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		}
 	}
 
-	pMainFrm->PauseMod();
+	pMainFrm->PauseMod(this);
 	int oldRepeat = m_SndFile.GetRepeatCount();
 
 	for(int i = 0 ; i < nRenderPasses ; i++)
@@ -1984,6 +1984,7 @@ void CModDoc::OnFileMP3Convert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, bool 
 void CModDoc::OnFileMidiConvert()
 //-------------------------------
 {
+#ifndef NO_VST
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
@@ -1993,16 +1994,18 @@ void CModDoc::OnFileMidiConvert()
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension("mid")
 		.DefaultFilename(filename)
-		.ExtensionFilter("Midi Files (*.mid,*.rmi)|*.mid;*.rmi||");
+		.ExtensionFilter("MIDI Files (*.mid)|*.mid||");
 	if(!dlg.Show()) return;
 
-	CModToMidi mididlg(dlg.GetFirstFile(), &m_SndFile, pMainFrm);
+	CModToMidi mididlg(m_SndFile, pMainFrm);
 	if(mididlg.DoModal() == IDOK)
 	{
-		BeginWaitCursor();
-		mididlg.DoConvert();
-		EndWaitCursor();
+		CDoMidiConvert doconv(m_SndFile, dlg.GetFirstFile(), mididlg.m_instrMap);
+		doconv.DoModal();
 	}
+#else
+	Reporting::Error("In order to use MIDI export, OpenMPT must be built with plugin support.")
+#endif // NO_VST
 }
 
 //HACK: This is a quick fix. Needs to be better integrated into player and GUI.
@@ -2188,7 +2191,6 @@ void CModDoc::OnPlayerPlayFromStart()
 		m_SndFile.m_SongFlags.reset(SONG_STEP | SONG_PATTERNLOOP);
 		m_SndFile.ResetPlayPos();
 		//m_SndFile.visitedSongRows.Initialize(true);
-		m_SndFile.m_PlayState.m_lTotalSampleCount = 0;
 
 		m_SndFile.m_PlayState.m_bPositionChanged = true;
 

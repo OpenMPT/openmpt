@@ -10,15 +10,20 @@
 
 #pragma once
 
+#ifndef NO_VST
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-struct MOD2MIDIINSTR
+namespace MidiExport
 {
-	UINT nChannel;
-	uint8 nProgram;
-};
+	struct Mod2MidiInstr
+	{
+		uint8 nChannel;
+		uint8 nProgram;
+	};
+	typedef std::vector<Mod2MidiInstr> InstrMap;
+}
 
 
 //==============================
@@ -28,28 +33,51 @@ class CModToMidi: public CDialog
 protected:
 	CComboBox m_CbnInstrument, m_CbnChannel, m_CbnProgram;
 	CSpinButtonCtrl m_SpinInstrument;
-	CSoundFile *m_pSndFile;
-	BOOL m_bRmi, m_bPerc;
+	CSoundFile &m_sndFile;
 	UINT m_nCurrInstr;
-	mpt::PathString m_szFileName;
-	MOD2MIDIINSTR m_InstrMap[MAX_SAMPLES];
+	bool m_bPerc;
+public:
+	MidiExport::InstrMap m_instrMap;
 
 public:
-	CModToMidi(const mpt::PathString &filename, CSoundFile *pSndFile, CWnd *pWndParent=NULL);
-	~CModToMidi() {}
-	BOOL DoConvert();
+	CModToMidi(CSoundFile &sndFile, CWnd *pWndParent = nullptr);
 
 protected:
 	virtual BOOL OnInitDialog();
-	virtual VOID DoDataExchange(CDataExchange *pDX);
-	virtual VOID OnOK();
-	VOID FillProgramBox(BOOL bPerc);
-	afx_msg VOID OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	afx_msg VOID UpdateDialog();
-	afx_msg VOID OnChannelChanged();
-	afx_msg VOID OnProgramChanged();
+	virtual void DoDataExchange(CDataExchange *pDX);
+	void FillProgramBox(bool percussion);
+	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void UpdateDialog();
+	afx_msg void OnChannelChanged();
+	afx_msg void OnProgramChanged();
 	DECLARE_MESSAGE_MAP();
 };
 
 
+//==================================
+class CDoMidiConvert: public CDialog
+//==================================
+{
+public:
+	CSoundFile &m_sndFile;
+	const mpt::PathString &m_fileName;
+	const MidiExport::InstrMap &m_instrMap;
+	bool m_abort;
+
+public:
+	CDoMidiConvert(CSoundFile &sndFile, const mpt::PathString &filename, const MidiExport::InstrMap &instrMap, CWnd *parent = nullptr)
+		: CDialog(IDD_PROGRESS, parent)
+		, m_sndFile(sndFile)
+		, m_fileName(filename)
+		, m_instrMap(instrMap)
+		, m_abort(false) { }
+	BOOL OnInitDialog();
+	void OnCancel() { m_abort = true; }
+	afx_msg void DoConvert();
+	DECLARE_MESSAGE_MAP()
+};
+
+
 OPENMPT_NAMESPACE_END
+
+#endif // NO_VST

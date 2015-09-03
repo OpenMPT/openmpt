@@ -614,6 +614,7 @@ void CSoundFile::ResetPlayPos()
 	m_PlayState.m_nPatternDelay = 0;
 	m_PlayState.m_nFrameDelay = 0;
 	m_PlayState.m_nNextPatStartRow = 0;
+	m_PlayState.m_lTotalSampleCount = 0;
 	//m_nSeqOverride = 0;
 }
 
