@@ -423,10 +423,6 @@ namespace MidiExport
 
 		~Conversion()
 		{
-			for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
-			{
-				m_sndFile.m_MixPlugins[i].Destroy();
-			}
 			delete[] m_instruments;
 		}
 
@@ -447,6 +443,11 @@ namespace MidiExport
 			if(!m_wasInstrumentMode)
 			{
 				m_sndFile.m_nInstruments = 0;
+			}
+
+			for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+			{
+				m_sndFile.m_MixPlugins[i].Destroy();
 			}
 			MemCopy(m_sndFile.m_MixPlugins, m_oldPlugins);
 		}
