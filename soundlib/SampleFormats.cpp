@@ -2007,6 +2007,7 @@ struct FLACDecoder
 		} else if(metadata->type == FLAC__METADATA_TYPE_VORBIS_COMMENT && client.ready)
 		{
 			// Try reading Vorbis Comments for sample title
+			SmpLength loopStart = 0, loopLength = 0;
 			for(FLAC__uint32 i = 0; i < metadata->data.vorbis_comment.num_comments; i++)
 			{
 				const char *tag = reinterpret_cast<const char *>(metadata->data.vorbis_comment.comments[i].entry);
@@ -2015,7 +2016,24 @@ struct FLACDecoder
 				{
 					mpt::String::Read<mpt::String::maybeNullTerminated>(client.sndFile.m_szNames[client.sample], tag + 6, length - 6);
 					break;
+				} else if(length > 11 && !mpt::strnicmp(tag, "SAMPLERATE=", 11))
+				{
+					uint32 sampleRate = ConvertStrTo<uint32>(tag + 11);
+					if(sampleRate > 0) sample.nC5Speed = sampleRate;
+				} else if(length > 10 && !mpt::strnicmp(tag, "LOOPSTART=", 10))
+				{
+					loopStart = ConvertStrTo<SmpLength>(tag + 10);
+				} else if(length > 11 && !mpt::strnicmp(tag, "LOOPLENGTH=", 11))
+				{
+					loopLength = ConvertStrTo<SmpLength>(tag + 11);
 				}
+			}
+			if(loopLength > 0)
+			{
+				sample.nLoopStart = loopStart;
+				sample.nLoopEnd = loopStart + loopLength;
+				sample.uFlags.set(CHN_LOOP);
+				sample.SanitizeLoops();
 			}
 		}
 	}
@@ -2298,6 +2316,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 	}
 
 	const ModSample &sample = Samples[nSample];
+	uint32 sampleRate = sample.GetSampleRate(GetType());
 
 	// First off, set up all the metadata...
 	FLAC__StreamMetadata *metadata[] =
@@ -2317,6 +2336,13 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		FLAC__metadata_object_vorbiscomment_append_comment(metadata[0], entry, false);
 		FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "ENCODER", MptVersion::GetOpenMPTVersionStr().c_str());
 		FLAC__metadata_object_vorbiscomment_append_comment(metadata[0], entry, false);
+		if(sampleRate >= 65536)
+		{
+			// FLAC only supports 10 Hz granularity for frequencies above 65535 Hz.
+			// Store the real sample rate in a custom Vorbis comment.
+			FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "SAMPLERATE", mpt::ToString(sampleRate).c_str());
+			FLAC__metadata_object_vorbiscomment_append_comment(metadata[0], entry, false);
+		}
 	}
 	if(metadata[1])
 	{
@@ -2405,10 +2431,10 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		numBlocks++;
 	}
 
-	uint32 sampleRate = sample.GetSampleRate(GetType());
 	if(sampleRate >= 65536)
 	{
 		// FLAC only supports 10 Hz granularity for frequencies above 65535 Hz.
+		// We store the real sample rate in a custom Vorbis comment above.
 		sampleRate = ((sampleRate + 5) / 10) * 10;
 	}
 	FLAC__stream_encoder_set_channels(encoder, sample.GetNumChannels());
