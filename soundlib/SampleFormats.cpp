@@ -2015,7 +2015,6 @@ struct FLACDecoder
 				if(length > 6 && !mpt::strnicmp(tag, "TITLE=", 6))
 				{
 					mpt::String::Read<mpt::String::maybeNullTerminated>(client.sndFile.m_szNames[client.sample], tag + 6, length - 6);
-					break;
 				} else if(length > 11 && !mpt::strnicmp(tag, "SAMPLERATE=", 11))
 				{
 					uint32 sampleRate = ConvertStrTo<uint32>(tag + 11);
@@ -2336,9 +2335,9 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		FLAC__metadata_object_vorbiscomment_append_comment(metadata[0], entry, false);
 		FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "ENCODER", MptVersion::GetOpenMPTVersionStr().c_str());
 		FLAC__metadata_object_vorbiscomment_append_comment(metadata[0], entry, false);
-		if(sampleRate >= 65536)
+		if(sampleRate > 655350)
 		{
-			// FLAC only supports 10 Hz granularity for frequencies above 65535 Hz.
+			// FLAC only supports a sample rate of up to 655350 Hz.
 			// Store the real sample rate in a custom Vorbis comment.
 			FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "SAMPLERATE", mpt::ToString(sampleRate).c_str());
 			FLAC__metadata_object_vorbiscomment_append_comment(metadata[0], entry, false);
@@ -2431,11 +2430,13 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		numBlocks++;
 	}
 
-	if(sampleRate >= 65536)
+	// FLAC allows a maximum sample rate of 655350 Hz.
+	// If the real rate is higher, we store it in a Vorbis comment above.
+	LimitMax(sampleRate, 655350u);
+	if(!FLAC__format_sample_rate_is_subset(sampleRate))
 	{
-		// FLAC only supports 10 Hz granularity for frequencies above 65535 Hz.
-		// We store the real sample rate in a custom Vorbis comment above.
-		sampleRate = ((sampleRate + 5) / 10) * 10;
+		// FLAC only supports 10 Hz granularity for frequencies above 65535 Hz if the streamable subset is chosen.
+		FLAC__stream_encoder_set_streamable_subset(encoder, false);
 	}
 	FLAC__stream_encoder_set_channels(encoder, sample.GetNumChannels());
 	FLAC__stream_encoder_set_bits_per_sample(encoder, sample.GetElementarySampleSize() * 8);
