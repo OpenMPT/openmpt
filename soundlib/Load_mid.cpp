@@ -519,6 +519,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				file.Skip(length);
 			} else
 			{
+				file = file.ReadChunk(length);
 				break;
 			}
 		} while(file.BytesLeft());
