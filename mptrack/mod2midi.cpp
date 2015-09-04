@@ -39,55 +39,35 @@ namespace MidiExport
 		kCue = 7,
 	};
 
-	template <typename Tfile>
-	void WriteString(Tfile &f, StringType strType, const mpt::ustring &str)
-	{
-		WriteString(f, strType, mpt::ToCharset(mpt::CharsetLocaleOrUTF8, str));
-	}
-
-	template <typename Tfile>
-	void WriteString(Tfile &f, StringType strType, const std::string &str)
-	{
-		if(str.length() > 0)
-		{
-			uint8 msg[3] = { 0x00, 0xFF, static_cast<uint8>(strType) };
-			mpt::IO::WriteRaw(f, msg, 3);
-			mpt::IO::WriteVarInt(f, str.length());
-			mpt::IO::WriteRaw(f, str.c_str(), str.length());
-		}
-	}
-
-	template <typename Tfile>
-	void WriteString(Tfile &f, StringType strType, const char *str)
-	{
-		const size_t len = strlen(str);
-		if(len > 0)
-		{
-			uint8 msg[3] = { 0x00, 0xFF, static_cast<uint8>(strType) };
-			mpt::IO::WriteRaw(f, msg, 3);
-			mpt::IO::WriteVarInt(f, len);
-			mpt::IO::WriteRaw(f, str, len);
-		}
-	}
-
 	class MidiInstrument
 	{
 		ModInstrument m_instr;
 		AEffect m_effect;
 		VstEvents *m_events;
 		const CSoundFile *m_sndFile;
+		MidiInstrument *m_tempoTrack;	// Pointer to tempo track, nullptr if this is the tempo track
 
 		std::ostringstream f;
 		double m_tempo;
-		double m_samplePos, m_prevEventTime, m_sampleRate;
+		double m_samplePos;		// Current sample position
+		double m_prevEventTime;	// Sample position of previous event
+		double m_sampleRate;
 		int32 m_oldSigNumerator, m_oldSigDenominator;
 		int32 m_oldGlobalVol;
+		uint32 m_ticks;			// MIDI ticks since previous event
 
-		uint32 TicksSinceLastEvent()
+		// Calculate how many MIDI ticks have passed since the last written event
+		void UpdateTicksSinceLastEvent()
 		{
-			uint32 ticks = Util::Round<uint32>((m_samplePos - m_prevEventTime) * m_tempo * static_cast<double>(MidiExport::ppq) / (m_sampleRate * 60.0));
+			m_ticks += Util::Round<uint32>((m_samplePos - m_prevEventTime) * m_tempo * static_cast<double>(MidiExport::ppq) / (m_sampleRate * 60.0));
 			m_prevEventTime = m_samplePos;
-			return ticks;
+		}
+		
+		// Write delta tick count since last event
+		void WriteTicks()
+		{
+			mpt::IO::WriteVarInt(f, m_ticks);
+			m_ticks = 0;
 		}
 
 	public:
@@ -98,10 +78,12 @@ namespace MidiExport
 		MidiInstrument()
 			: m_events(nullptr)
 			, m_sndFile(nullptr)
+			, m_tempoTrack(nullptr)
 			, m_tempo(0.0)
 			, m_samplePos(0.0), m_prevEventTime(0.0), m_sampleRate(1.0)
 			, m_oldSigNumerator(0), m_oldSigDenominator(0)
 			, m_oldGlobalVol(-1)
+			, m_ticks(0)
 		{
 			// Initialize VST struct, needs to be done first
 			MemsetZero(m_effect);
@@ -136,12 +118,16 @@ namespace MidiExport
 			m_effect.processReplacing = Process;
 		}
 
-		void Initialize(const CSoundFile &sndFile, const char *name)
+		void Initialize(const CSoundFile &sndFile, MidiInstrument *tempoTrack, const char *name)
 		{
 			m_sndFile = &sndFile;
+			m_tempoTrack = tempoTrack;
+			
+			// This is the tempo track, don't write any playback-related stuff
+			if(tempoTrack == nullptr) return;
 
 			// Write instrument name
-			WriteString(f, kTrackName, name);
+			WriteString(kTrackName, name);
 			// Set up MIDI pitch wheel depth
 			uint8 firstCh = m_instr.nMidiChannel, lastCh = m_instr.nMidiChannel;
 			if(firstCh == MidiMappedChannel || firstCh == MidiNoChannel)
@@ -171,15 +157,15 @@ namespace MidiExport
 			return 0;
 		}
 
-		static void Process(AEffect *effect, float **, float **, VstInt32)
+		static void Process(AEffect *effect, float **, float **, VstInt32 numFrames)
 		{
-			static_cast<MidiInstrument *>(effect->object)->Process();
+			VstIntPtr ptr = CVstPluginManager::MasterCallBack(effect, audioMasterGetTime, 0, kVstPpqPosValid | kVstTempoValid | kVstTimeSigValid, nullptr, 0.0f);
+			VstTimeInfo timeInfo = *FromVstPtr<VstTimeInfo>(ptr);
+			static_cast<MidiInstrument *>(effect->object)->Process(timeInfo, numFrames);
 		}
-		void Process()
+		void Process(const VstTimeInfo &timeInfo, int32 numFrames)
 		{
 			const int32 numEvents = m_events != nullptr ? m_events->numEvents : 0;
-			VstIntPtr ptr = CVstPluginManager::MasterCallBack(&m_effect, audioMasterGetTime, 0, kVstPpqPosValid | kVstTempoValid | kVstTimeSigValid, nullptr, 0.0f);
-			VstTimeInfo timeInfo = *FromVstPtr<VstTimeInfo>(ptr);
 			m_samplePos = timeInfo.samplePos;
 			m_sampleRate = timeInfo.sampleRate;
 
@@ -190,62 +176,65 @@ namespace MidiExport
 			// Anything interesting happening in this process call at all?
 			if(!tempoChanged && !sigChanged && !volChanged && numEvents == 0)
 			{
+				m_samplePos += numFrames;
 				return;
 			}
-			std::string temp = f.str();
 
-			uint32 tickDiff = TicksSinceLastEvent();
+			UpdateTicksSinceLastEvent();
 
-			if(tempoChanged && timeInfo.tempo > 0.0)
+			if(timeInfo.tempo > 0.0) m_tempo = timeInfo.tempo;
+			m_oldSigNumerator = timeInfo.timeSigNumerator;
+			m_oldSigDenominator = timeInfo.timeSigDenominator;
+			m_oldGlobalVol = m_sndFile->m_PlayState.m_nGlobalVolume;
+
+			if(m_tempoTrack == nullptr)
 			{
-				// Write MIDI tempo
-				mpt::IO::WriteVarInt(f, tickDiff);
-				tickDiff = 0;
+				// This is the tempo track
+				if(tempoChanged && timeInfo.tempo > 0.0)
+				{
+					// Write MIDI tempo
+					WriteTicks();
 
-				m_tempo = timeInfo.tempo;
-				int32 mspq = Util::Round<int32>(60000000.0 / timeInfo.tempo);
-				uint8 msg[6] = { 0xFF, 0x51, 0x03, (mspq >> 16) & 0xFF, (mspq >> 8) & 0xFF, mspq & 0xFF };
-				mpt::IO::WriteRaw(f, msg, 6);
+					int32 mspq = Util::Round<int32>(60000000.0 / timeInfo.tempo);
+					uint8 msg[6] = { 0xFF, 0x51, 0x03, (mspq >> 16) & 0xFF, (mspq >> 8) & 0xFF, mspq & 0xFF };
+					mpt::IO::WriteRaw(f, msg, 6);
+				}
+
+				if(sigChanged)
+				{
+					// Write MIDI time signature
+					WriteTicks();
+
+					uint8 msg[7] = { 0xFF, 0x58, 0x04, static_cast<char>(timeInfo.timeSigNumerator), 2, 24, 8 };
+					mpt::IO::WriteRaw(f, msg, 7);
+				}
+
+				if(volChanged)
+				{
+					// Write MIDI master volume
+					WriteTicks();
+
+					int32 midiVol = Util::muldiv(m_oldGlobalVol, 0x3FFF, MAX_GLOBAL_VOLUME);
+					uint8 msg[9] = { 0xF0, 0x07, 0x7F, 0x7F, 0x04, 0x01, midiVol & 0x7F, (midiVol >> 7) & 0x7F, 0xF7 };
+					mpt::IO::WriteRaw(f, msg, 9);
+				}
+			} else
+			{
+				// This is not the tempo track, defer tempo and volume changes to that track instead.
+				m_tempoTrack->Process(timeInfo, numFrames);
 			}
 
-			if(sigChanged)
-			{
-				// Write MIDI time signature
-				mpt::IO::WriteVarInt(f, tickDiff);
-				tickDiff = 0;
-
-				uint8 msg[7] = { 0xFF, 0x58, 0x04, static_cast<char>(timeInfo.timeSigNumerator), 2, 24, 8 };
-				mpt::IO::WriteRaw(f, msg, 7);
-
-				m_oldSigNumerator = timeInfo.timeSigNumerator;
-				m_oldSigDenominator = timeInfo.timeSigDenominator;
-			}
-
-			if(volChanged)
-			{
-				// Write MIDI master volume
-				mpt::IO::WriteVarInt(f, tickDiff);
-				tickDiff = 0;
-
-				m_oldGlobalVol = m_sndFile->m_PlayState.m_nGlobalVolume;
-				int32 midiVol = Util::muldiv(m_oldGlobalVol, 0x3FFF, MAX_GLOBAL_VOLUME);
-				uint8 msg[9] = { 0xF0, 0x07, 0x7F, 0x7F, 0x04, 0x01, midiVol & 0x7F, (midiVol >> 7) & 0x7F, 0xF7 };
-				mpt::IO::WriteRaw(f, msg, 9);
-			}
-
-			if(numEvents == 0) return;
-
-			const VstEvent * const *events = m_events->events;
 			// TODO: support event.deltaFrames (currently not used by OpenMPT)
 			for(int32 i = 0; i < numEvents; i++)
 			{
-				mpt::IO::WriteVarInt(f, tickDiff);
-				tickDiff = 0;
-				if(events[i]->type == kVstMidiType)
+				WriteTicks();
+
+				const VstEvent &event = *m_events->events[i];
+				if(event.type == kVstMidiType)
 				{
-					const VstMidiEvent &event = *reinterpret_cast<const VstMidiEvent *>(events[i]);
+					const VstMidiEvent &midiEvent = reinterpret_cast<const VstMidiEvent &>(event);
 					char midiData[4];
-					MemCopy<char [4]>(midiData, event.midiData);
+					MemCopy<char [4]>(midiData, midiEvent.midiData);
 					size_t msgSize = 3;
 					switch(midiData[0] & 0xF0)
 					{
@@ -275,24 +264,26 @@ namespace MidiExport
 						midiData[0] &= 0xF7;
 					}
 					mpt::IO::WriteRaw(f, midiData, msgSize);
-				} else if(events[i]->type == kVstSysExType)
+				} else if(event.type == kVstSysExType)
 				{
-					const VstMidiSysexEvent &event = *reinterpret_cast<const VstMidiSysexEvent *>(events[i]);
-					if(event.dumpBytes > 1)
+					const VstMidiSysexEvent &sysexEvent = reinterpret_cast<const VstMidiSysexEvent &>(event);
+					if(sysexEvent.dumpBytes > 1)
 					{
 						mpt::IO::WriteIntBE<uint8>(f, 0xF0);
-						mpt::IO::WriteVarInt(f, static_cast<uint32>(event.dumpBytes - 1));
-						mpt::IO::WriteRaw(f, event.sysexDump + 1, event.dumpBytes - 1);
+						mpt::IO::WriteVarInt(f, static_cast<uint32>(sysexEvent.dumpBytes - 1));
+						mpt::IO::WriteRaw(f, sysexEvent.sysexDump + 1, sysexEvent.dumpBytes - 1);
 					}
 				}
 			}
+			m_samplePos += numFrames;
 		}
 
 		// Write end marker and return the stream
 		const std::ostringstream& Finalise()
 		{
-			uint32 tickDiff = TicksSinceLastEvent();
-			mpt::IO::WriteVarInt(f, tickDiff);
+			UpdateTicksSinceLastEvent();
+			WriteTicks();
+
 			uint8 msg[3] = { 0xFF, 0x2F, 0x00 };
 			mpt::IO::WriteRaw(f, msg, 3);
 
@@ -303,6 +294,34 @@ namespace MidiExport
 		static void SetParameter(AEffect *, VstInt32, float) { }
 		// No-op getParameter
 		static float GetParameter(AEffect *, VstInt32) { return 0.0f; }
+
+		void WriteString(StringType strType, const mpt::ustring &str)
+		{
+			WriteString(strType, mpt::ToCharset(mpt::CharsetLocaleOrUTF8, str));
+		}
+
+		void WriteString(StringType strType, const std::string &str)
+		{
+			if(str.length() > 0)
+			{
+				uint8 msg[3] = { 0x00, 0xFF, static_cast<uint8>(strType) };
+				mpt::IO::WriteRaw(f, msg, 3);
+				mpt::IO::WriteVarInt(f, str.length());
+				mpt::IO::WriteRaw(f, str.c_str(), str.length());
+			}
+		}
+
+		void WriteString(StringType strType, const char *str)
+		{
+			const size_t len = strlen(str);
+			if(len > 0)
+			{
+				uint8 msg[3] = { 0x00, 0xFF, static_cast<uint8>(strType) };
+				mpt::IO::WriteRaw(f, msg, 3);
+				mpt::IO::WriteVarInt(f, len);
+				mpt::IO::WriteRaw(f, str, len);
+			}
+		}
 	};
 
 
@@ -334,7 +353,7 @@ namespace MidiExport
 			{
 				m_sndFile.m_nInstruments = m_sndFile.m_nSamples;
 			}
-			m_instruments = new (std::nothrow) MidiInstrument[m_sndFile.GetNumInstruments()];
+			m_instruments = new (std::nothrow) MidiInstrument[1 + m_sndFile.GetNumInstruments()];
 			if(m_instruments == nullptr)
 			{
 				return;
@@ -343,7 +362,7 @@ namespace MidiExport
 			PLUGINDEX nextPlug = 0;
 			for(INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
 			{
-				MidiInstrument &midiInstr = m_instruments[i - 1];
+				MidiInstrument &midiInstr = m_instruments[i];
 				ModInstrument &instr = midiInstr;
 				
 				m_sndFile.Instruments[i] = &instr;
@@ -381,7 +400,7 @@ namespace MidiExport
 				}
 
 				// FIXME: Having > MAX_MIXPLUGINS used instruments won't work!
-				midiInstr.Initialize(m_sndFile, m_wasInstrumentMode ? m_oldInstruments[i - 1]->name : m_sndFile.GetSampleName(i));
+				midiInstr.Initialize(m_sndFile, &m_instruments[0], m_wasInstrumentMode ? m_oldInstruments[i - 1]->name : m_sndFile.GetSampleName(i));
 				SNDMIXPLUGIN &mixPlugin = m_sndFile.m_MixPlugins[nextPlug];
 				m_sndFile.Instruments[i]->nMixPlug = nextPlug + 1;
 				m_sndFile.m_MixPlugins[nextPlug].pMixPlugin = new (std::nothrow) CVstPlugin(nullptr, m_plugFactory, mixPlugin, midiInstr, m_sndFile);
@@ -395,30 +414,27 @@ namespace MidiExport
 			mpt::IO::WriteIntBE<uint16>(m_file, m_sndFile.GetNumInstruments() + 1);	// Number of tracks
 			mpt::IO::WriteIntBE<uint16>(m_file, MidiExport::ppq);
 
-			std::ostringstream tempoTrack;
-			WriteString(tempoTrack, kTrackName, m_sndFile.songName);
-			WriteString(tempoTrack, kText, m_sndFile.songMessage);
-			WriteString(tempoTrack, kCopyright, m_sndFile.songArtist);
-			mpt::IO::WriteRaw(m_file, "MTrk", 4);
-			std::string data = tempoTrack.str();
-			mpt::IO::WriteIntBE<uint32>(m_file, data.size());
-			mpt::IO::WriteRaw(m_file, &data[0], data.size());
+			MidiInstrument &tempoTrack = m_instruments[0];
+			tempoTrack.Initialize(m_sndFile, nullptr, nullptr);
+			tempoTrack.WriteString(kTrackName, m_sndFile.songName);
+			tempoTrack.WriteString(kText, m_sndFile.songMessage);
+			tempoTrack.WriteString(kCopyright, m_sndFile.songArtist);
 		}
 
 		~Conversion()
 		{
-			delete[] m_instruments;
 			for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 			{
 				m_sndFile.m_MixPlugins[i].Destroy();
 			}
+			delete[] m_instruments;
 		}
 
 		void Finalise()
 		{
-			for(INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
+			for(INSTRUMENTINDEX i = 0; i <= m_sndFile.GetNumInstruments(); i++)
 			{
-				std::string data = m_instruments[i - 1].Finalise().str();
+				std::string data = m_instruments[i].Finalise().str();
 				if(!data.empty())
 				{
 					mpt::IO::WriteRaw(m_file, "MTrk", 4);
@@ -426,7 +442,7 @@ namespace MidiExport
 					mpt::IO::WriteRaw(m_file, &data[0], data.size());
 				}
 
-				m_sndFile.Instruments[i] = m_wasInstrumentMode ? m_oldInstruments[i - 1] : nullptr;
+				if(i > 0) m_sndFile.Instruments[i] = m_wasInstrumentMode ? m_oldInstruments[i - 1] : nullptr;
 			}
 			if(!m_wasInstrumentMode)
 			{
@@ -694,6 +710,7 @@ void CDoMidiConvert::DoConvert()
 	m_sndFile.m_SongFlags.reset(SONG_PATTERNLOOP);
 	int oldRepCount = m_sndFile.GetRepeatCount();
 	m_sndFile.SetRepeatCount(0);
+	m_sndFile.m_bIsRendering = true;
 
 	MidiExport::DummyAudioTarget target;
 	UINT ok = IDOK;
@@ -735,6 +752,8 @@ void CDoMidiConvert::DoConvert()
 
 	conv.Finalise();
 
+	m_sndFile.m_bIsRendering = false;
+	m_sndFile.m_PatternCuePoints.clear();
 	m_sndFile.SetRepeatCount(oldRepCount);
 
 	EndDialog(ok);
