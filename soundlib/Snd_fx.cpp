@@ -939,6 +939,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 								pChn->nPos = pChn->nLength - 1;
 								pChn->nPosLo = 0xFFFF;
 							}
+						} else if((m.param & 0xF0) == 0x70)
+						{
+							// TODO
+							//ExtendedS3MCommands(nChn, param);
 						}
 					}
 
@@ -1169,7 +1173,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 	}
 
 	// Update Volume
-	if (bUpdVol && (!(GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)) || (pSmp != nullptr && pSmp->pSample != nullptr)))
+	if (bUpdVol && (!(GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)) || (pSmp != nullptr && pSmp->pSample != nullptr || pChn->HasMIDIOutput())))
 	{
 		pChn->nVolume = 0;
 		if(pSmp)

@@ -28,6 +28,7 @@
 #include "S3MTools.h"
 #include "WAVTools.h"
 #include "../common/version.h"
+#include "Loaders.h"
 #include "ChunkReader.h"
 #ifndef NO_OGG
 #include <ogg/ogg.h>
@@ -1068,7 +1069,7 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString 
 		}
 	}
 
-	int32 code = MULTICHAR4_LE_MSVC('M','P','T','X');
+	int32 code = MAGIC4BE('M','P','T','X');
 	fwrite(&code, 1, sizeof(int32), f);		// Write extension tag
 	WriteInstrumentHeaderStructOrField(pIns, f);	// Write full extended header.
 
@@ -1701,7 +1702,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 	}
 
 	fseek(f, 0, SEEK_END);
-	int32 code = MULTICHAR4_LE_MSVC('M','P','T','X');
+	int32 code = MAGIC4BE('M','P','T','X');
 	SwapBytesLE(code);
 	fwrite(&code, 1, sizeof(int32), f);		// Write extension tag
 	WriteInstrumentHeaderStructOrField(pIns, f);	// Write full extended header.
@@ -2404,9 +2405,15 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		numBlocks++;
 	}
 
+	uint32 sampleRate = sample.GetSampleRate(GetType());
+	if(sampleRate >= 65536)
+	{
+		// FLAC only supports 10 Hz granularity for frequencies above 65535 Hz.
+		sampleRate = ((sampleRate + 5) / 10) * 10;
+	}
 	FLAC__stream_encoder_set_channels(encoder, sample.GetNumChannels());
 	FLAC__stream_encoder_set_bits_per_sample(encoder, sample.GetElementarySampleSize() * 8);
-	FLAC__stream_encoder_set_sample_rate(encoder, sample.GetSampleRate(GetType()));
+	FLAC__stream_encoder_set_sample_rate(encoder, sampleRate);
 	FLAC__stream_encoder_set_total_samples_estimate(encoder, sample.nLength);
 	FLAC__stream_encoder_set_metadata(encoder, metadata, numBlocks);
 #ifdef MODPLUG_TRACKER
@@ -2807,10 +2814,8 @@ std::vector<FileType> CSoundFile::GetMediaFoundationFileTypes()
 
 	std::map<std::wstring, FileType> guidMap;
 
-	LONG regResult;
-
 	HKEY hkHandlers = NULL;
-	regResult = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows Media Foundation\\ByteStreamHandlers", 0, KEY_READ, &hkHandlers);
+	LSTATUS regResult = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows Media Foundation\\ByteStreamHandlers", 0, KEY_READ, &hkHandlers);
 	if(regResult != ERROR_SUCCESS)
 	{
 		return result;
