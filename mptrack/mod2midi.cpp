@@ -584,7 +584,7 @@ void CModToMidi::FillProgramBox(bool percussion)
 		for (int i = 0; i < 128; i++)
 		{
 			wsprintf(s, "%03d: %s", i + 1, szMidiProgramNames[i]);
-			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s), i + 1);
+			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s), i);
 		}
 	}
 	m_bPerc = percussion;
