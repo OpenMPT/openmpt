@@ -177,6 +177,7 @@ namespace MidiExport
 			if(!tempoChanged && !sigChanged && !volChanged && numEvents == 0)
 			{
 				m_samplePos += numFrames;
+				if(m_tempoTrack != nullptr) m_tempoTrack->m_samplePos = std::max(m_tempoTrack->m_samplePos, m_samplePos);
 				return;
 			}
 
@@ -258,6 +259,7 @@ namespace MidiExport
 						}
 						break;
 					}
+					// TODO: If channels are shared between tracks, program change events need to be inserted!
 					if((midiData[0] & 0xF0) != 0xF0 && m_instr.nMidiChannel == MidiMappedChannel)
 					{
 						// Avoid putting things on channel 10
@@ -367,17 +369,15 @@ namespace MidiExport
 				
 				m_sndFile.Instruments[i] = &instr;
 
-				if(!m_sndFile.IsInstrumentUsed(i))
+				if(!m_sndFile.IsInstrumentUsed(i) || (m_wasInstrumentMode && m_oldInstruments[i - 1] == nullptr))
 				{
 					m_sndFile.Instruments[i] = nullptr;
 					continue;
 				}
 
-				if(m_wasInstrumentMode)
-				{
-					static_cast<ModInstrument &>(instr) = *m_oldInstruments[i - 1];
-				}
-				if(!m_wasInstrumentMode || m_oldInstruments[i - 1]->nMixPlug == 0 || m_oldInstruments[i - 1]->nMidiChannel == MidiNoChannel)
+				ModInstrument &oldInstr = m_wasInstrumentMode ? *m_oldInstruments[i - 1] : instr;
+				if(m_wasInstrumentMode) instr = oldInstr;
+				if(oldInstr.nMixPlug == 0 || oldInstr.nMidiChannel == MidiNoChannel)
 				{
 					instr.midiPWD = 12;
 				}
@@ -389,7 +389,7 @@ namespace MidiExport
 				} else
 				{
 					// Drums
-					instr.nMidiProgram = 0;
+					if(oldInstr.nMidiChannel != MidiFirstChannel + 9) instr.nMidiProgram = 0;
 					if(instrMap[i].nProgram != 128)
 					{
 						for(size_t n = 0; n < CountOf(instr.NoteMap); n++)
@@ -399,11 +399,15 @@ namespace MidiExport
 					}
 				}
 
-				// FIXME: Having > MAX_MIXPLUGINS used instruments won't work!
-				midiInstr.Initialize(m_sndFile, &m_instruments[0], m_wasInstrumentMode ? m_oldInstruments[i - 1]->name : m_sndFile.GetSampleName(i));
-				SNDMIXPLUGIN &mixPlugin = m_sndFile.m_MixPlugins[nextPlug];
-				m_sndFile.Instruments[i]->nMixPlug = nextPlug + 1;
-				m_sndFile.m_MixPlugins[nextPlug].pMixPlugin = new (std::nothrow) CVstPlugin(nullptr, m_plugFactory, mixPlugin, midiInstr, m_sndFile);
+				// FIXME: Having > MAX_MIXPLUGINS used instruments won't work! So in MPTM, you can only use 250 out of 255 instruments...
+				midiInstr.Initialize(m_sndFile, &m_instruments[0], m_wasInstrumentMode ? oldInstr.name : m_sndFile.GetSampleName(i));
+				instr.nMixPlug = 0;
+				if(nextPlug < MAX_MIXPLUGINS)
+				{
+					SNDMIXPLUGIN &mixPlugin = m_sndFile.m_MixPlugins[nextPlug];
+					instr.nMixPlug = nextPlug + 1;
+					m_sndFile.m_MixPlugins[nextPlug].pMixPlugin = new (std::nothrow) CVstPlugin(nullptr, m_plugFactory, mixPlugin, midiInstr, m_sndFile);
+				}
 
 				nextPlug++;
 			}
@@ -428,6 +432,12 @@ namespace MidiExport
 
 		void Finalise()
 		{
+			for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+			{
+				IMixPlugin *plug = m_sndFile.m_MixPlugins[i].pMixPlugin;
+				if(plug != nullptr) plug->HardAllNotesOff();
+			}
+
 			for(INSTRUMENTINDEX i = 0; i <= m_sndFile.GetNumInstruments(); i++)
 			{
 				std::string data = m_instruments[i].Finalise().str();
