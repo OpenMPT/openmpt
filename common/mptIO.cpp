@@ -41,7 +41,7 @@ namespace IO {
 // MSVC std::stringbuf (and thereby std::ostringstream, std::istringstream and
 // std::stringstream) fail seekoff() when the stringbuf is currently empty.
 // seekoff() can get called via tell*() or seek*() iostream members. tell*() has
-// been special cased from VS2010 onwárds to handle this specific case and
+// been special cased from VS2010 onwards to handle this specific case and
 // changed to not fail when the stringbuf is empty.
 // In addition to using out own wrapper around std::stringstream and
 // std::stringbuf, we also work-around the plain native type's problem in case
