@@ -45,6 +45,7 @@ class CWaveDevice: public CSoundDeviceWithThread
 {
 protected:
 	HANDLE m_ThreadWakeupEvent;
+	bool m_Failed;
 	HWAVEOUT m_hWaveOut;
 	ULONG m_nWaveBufferSize;
 	bool m_JustStarted;
@@ -79,6 +80,8 @@ public:
 	SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 
 private:
+
+	bool CheckResult(MMRESULT result);
 
 	void HandleWaveoutDone();
 
