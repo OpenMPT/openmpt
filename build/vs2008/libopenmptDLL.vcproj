@@ -423,6 +423,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\common\mptBufferIO.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\mptCPU.cpp"
 				>
 			</File>

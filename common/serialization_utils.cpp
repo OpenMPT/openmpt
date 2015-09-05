@@ -14,9 +14,9 @@
 
 #include <istream>
 #include <ostream>
-#include <sstream>
 
 #include "misc_util.h"
+#include "mptBufferIO.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -265,7 +265,7 @@ void SsbWrite::WriteMapItem(const ID &id,
 					rposDataStart,
 					nDatasize));
 
-	std::ostringstream mapStream;
+	mpt::ostringstream mapStream;
 
 	if(m_nIdbytes > 0)
 	{

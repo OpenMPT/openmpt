@@ -17,9 +17,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../common/mptFileIO.h"
+#include "../common/mptBufferIO.h"
 #include "TrackerSettings.h"
-
-#include <sstream>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -1696,7 +1695,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const std::wstring &filenameDesc
 		size_t nSize = 0;
 		if(LoadResource(MAKEINTRESOURCE(IDR_DEFAULT_KEYBINDINGS), TEXT("KEYBINDINGS"), pData, nSize, hglob) != nullptr)
 		{
-			std::istringstream iStrm(std::string(pData, nSize));
+			mpt::istringstream iStrm(std::string(pData, nSize));
 			LoadFile(iStrm, std::wstring(), pTempCS);
 		}
 	} else
@@ -1737,7 +1736,7 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 bool CCommandSet::LoadDefaultKeymap()
 //-----------------------------------
 {
-	std::istringstream s;
+	mpt::istringstream s;
 	return LoadFile(s, L"\"executable resource\"");
 }
 

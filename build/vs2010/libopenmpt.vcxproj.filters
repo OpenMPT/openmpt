@@ -51,6 +51,9 @@
     <ClInclude Include="..\..\common\mptAtomic.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\mptBufferIO.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\mptCPU.h">
       <Filter>common</Filter>
     </ClInclude>

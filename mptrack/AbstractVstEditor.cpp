@@ -23,8 +23,7 @@
 #include "../common/FileReader.h"
 #include "InputHandler.h"
 #include "dlg_misc.h"
-
-#include <sstream>
+#include "../common/mptBufferIO.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -208,7 +207,7 @@ void CAbstractVstEditor::OnCopyParameters()
 	if(CMainFrame::GetMainFrame() == nullptr) return;
 
 	BeginWaitCursor();
-	std::ostringstream f(std::ios::out | std::ios::binary);
+	mpt::ostringstream f(std::ios::out | std::ios::binary);
 	if(VSTPresets::SaveFile(f, m_VstPlugin, false))
 	{
 		const std::string data = f.str();

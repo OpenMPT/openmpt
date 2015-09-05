@@ -27,7 +27,7 @@
 
 #include "../common/FileReader.h"
 #include "../common/mptIO.h"
-#include <sstream>
+#include "../common/mptBufferIO.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -444,7 +444,7 @@ void CChildFrame::OnSetFocus(CWnd* pOldWnd)
 std::string CChildFrame::SerializeView() const
 //--------------------------------------------
 {
-	std::ostringstream f(std::ios::out | std::ios::binary);
+	mpt::ostringstream f(std::ios::out | std::ios::binary);
 	// Version
 	mpt::IO::WriteVarInt(f, 0u);
 	// Current page
