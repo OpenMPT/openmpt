@@ -197,7 +197,7 @@ BOOL CWaveConvert::OnInitDialog()
 		s.Format(_T("%02u: %s%s"), smp, m_SndFile.GetSample(smp).HasSampleData() ? _T("*") : _T(""), m_SndFile.GetSampleName(smp));
 		m_CbnSampleSlot.SetItemData(m_CbnSampleSlot.AddString(s), smp);
 	}
-	if(m_Settings.sampleSlot > m_SndFile.GetNumChannels()) m_Settings.sampleSlot = 0;
+	if(m_Settings.sampleSlot > m_SndFile.GetNumSamples()) m_Settings.sampleSlot = 0;
 	m_CbnSampleSlot.SetCurSel(m_Settings.sampleSlot);
 
 	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, m_Settings.outputToSample ? IDC_RADIO4 : IDC_RADIO3);
