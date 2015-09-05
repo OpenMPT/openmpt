@@ -42,6 +42,7 @@ CWaveDevice::CWaveDevice(SoundDevice::Info info)
 {
 	MPT_TRACE();
 	m_ThreadWakeupEvent;
+	m_Failed = false;
 	m_hWaveOut = NULL;
 	m_nWaveBufferSize = 0;
 	m_JustStarted = false;
@@ -155,6 +156,7 @@ bool CWaveDevice::InternalOpen()
 		InternalClose();
 		return false;
 	}
+	m_Failed = false;
 	m_hWaveOut = NULL;
 	if(waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD_PTR)WaveOutCallBack, (DWORD_PTR)this, CALLBACK_FUNCTION | (m_Settings.ExclusiveMode ? WAVE_FORMAT_DIRECT : 0)) != MMSYSERR_NOERROR)
 	{
@@ -222,10 +224,10 @@ bool CWaveDevice::InternalClose()
 			m_nPreparedHeaders--;
 			waveOutUnprepareHeader(m_hWaveOut, &m_WaveBuffers[m_nPreparedHeaders], sizeof(WAVEHDR));
 		}
-		MMRESULT err = waveOutClose(m_hWaveOut);
-		MPT_ASSERT_ALWAYS(err == MMSYSERR_NOERROR);
+		waveOutClose(m_hWaveOut);
 		m_hWaveOut = NULL;
 	}
+	m_Failed = false;
 	if(m_ThreadWakeupEvent)
 	{
 		CloseHandle(m_ThreadWakeupEvent);
@@ -263,7 +265,7 @@ void CWaveDevice::StopFromSoundThread()
 	MPT_TRACE();
 	if(m_hWaveOut)
 	{
-		waveOutPause(m_hWaveOut);
+		CheckResult(waveOutPause(m_hWaveOut));
 		m_JustStarted = false;
 		{
 			Util::lock_guard<Util::mutex> guard(m_PositionWraparoundMutex);
@@ -271,6 +273,26 @@ void CWaveDevice::StopFromSoundThread()
 			m_PositionWrappedCount = 0;
 		}
 	}
+}
+
+
+bool CWaveDevice::CheckResult(MMRESULT result)
+//--------------------------------------------
+{
+	if(result == MMSYSERR_NOERROR)
+	{
+		return true;
+	}
+	if(!m_Failed)
+	{ // only show the first error
+		m_Failed = true;
+		WCHAR errortext[MAXERRORLENGTH + 1];
+		MemsetZero(errortext);
+		waveOutGetErrorTextW(result, errortext, MAXERRORLENGTH);
+		SendDeviceMessage(LogError, MPT_UFORMAT("WaveOut error: 0x%1: %2", mpt::ufmt::hex0<8>(result), mpt::ToUnicode(errortext)));
+	}
+	RequestClose();
+	return false;
 }
 
 
@@ -289,7 +311,7 @@ void CWaveDevice::InternalFillAudioBuffer()
 	ULONG nLatency = oldBuffersPending * m_nWaveBufferSize;
 
 	ULONG nBytesWritten = 0;
-	while(oldBuffersPending < m_nPreparedHeaders)
+	while((oldBuffersPending < m_nPreparedHeaders) && !m_Failed)
 	{
 		nLatency += m_nWaveBufferSize;
 		SourceAudioPreRead(m_nWaveBufferSize / bytesPerFrame, nLatency / bytesPerFrame);
@@ -298,18 +320,18 @@ void CWaveDevice::InternalFillAudioBuffer()
 		m_WaveBuffers[m_nWriteBuffer].dwBufferLength = m_nWaveBufferSize;
 		InterlockedIncrement(&m_nBuffersPending);
 		oldBuffersPending++; // increment separately to avoid looping without leaving at all when rendering takes more than 100% CPU
-		waveOutWrite(m_hWaveOut, &m_WaveBuffers[m_nWriteBuffer], sizeof(WAVEHDR));
+		CheckResult(waveOutWrite(m_hWaveOut, &m_WaveBuffers[m_nWriteBuffer], sizeof(WAVEHDR)));
 		m_nWriteBuffer++;
 		m_nWriteBuffer %= m_nPreparedHeaders;
 		SourceAudioDone();
 	}
 
-	if(m_JustStarted)
+	if(m_JustStarted && !m_Failed)
 	{
 		// Fill the buffers completely before starting the stream.
 		// This avoids buffer underruns which result in audible crackling with small buffers.
 		m_JustStarted = false;
-		waveOutRestart(m_hWaveOut);
+		CheckResult(waveOutRestart(m_hWaveOut));
 	}
 
 }
