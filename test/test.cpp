@@ -700,6 +700,15 @@ static MPT_NOINLINE void TestMisc()
 	{ mpt::istringstream ss; VERIFY_EQUAL(mpt::IO::SeekAbsolute(ss, 0), true); }
 	{ mpt::istringstream ss; VERIFY_EQUAL(mpt::IO::SeekRelative(ss, 0), true); }
 
+	{ std::ostringstream ss; VERIFY_EQUAL(mpt::IO::TellWrite(ss), 0); }
+	{ std::ostringstream ss; VERIFY_EQUAL(mpt::IO::SeekBegin(ss), true); }
+	{ std::ostringstream ss; VERIFY_EQUAL(mpt::IO::SeekAbsolute(ss, 0), true); }
+	{ std::ostringstream ss; VERIFY_EQUAL(mpt::IO::SeekRelative(ss, 0), true); }
+	{ std::istringstream ss; VERIFY_EQUAL(mpt::IO::TellRead(ss), 0); }
+	{ std::istringstream ss; VERIFY_EQUAL(mpt::IO::SeekBegin(ss), true); }
+	{ std::istringstream ss; VERIFY_EQUAL(mpt::IO::SeekAbsolute(ss, 0), true); }
+	{ std::istringstream ss; VERIFY_EQUAL(mpt::IO::SeekRelative(ss, 0), true); }
+
 	{
 		mpt::ostringstream s;
 		char b = 23;
@@ -742,6 +751,71 @@ static MPT_NOINLINE void TestMisc()
 
 	{
 		mpt::istringstream s("a");
+		char a = 0;
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellRead(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::SeekBegin(s), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellRead(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::ReadRaw(s, &a, 1), 1);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellRead(s), 1);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::SeekBegin(s), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellRead(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::SeekEnd(s), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellRead(s), 1);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(a, 'a');
+	}
+
+	{
+		std::ostringstream s;
+		char b = 23;
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellWrite(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::SeekBegin(s), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellWrite(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::WriteRaw(s, &b, 1), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellWrite(s), 1);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::SeekBegin(s), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellWrite(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::SeekEnd(s), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellWrite(s), 1);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(s.str(), std::string(1, b));
+	}
+
+	{
+		std::istringstream s;
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellRead(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::SeekBegin(s), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellRead(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::SeekEnd(s), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellRead(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+	}
+
+	{
+		std::istringstream s("a");
 		char a = 0;
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
 		VERIFY_EQUAL(mpt::IO::TellRead(s), 0);
