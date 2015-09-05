@@ -23,7 +23,7 @@ OPENMPT_NAMESPACE_BEGIN
 // currently empty.
 // seekpos() and seekoff() can get called via tell*() or seek*() iostream
 // members. seekoff() (and thereby tell*()), but not seekpos(), has been fixed
-// from VS2010 onwárds to handle this specific case and changed to not fail
+// from VS2010 onwards to handle this specific case and changed to not fail
 // when the stringbuf is empty.
 // Work-around strategy:
 // As re-implementing or duplicating the whole std::stringbuf semantics would be
