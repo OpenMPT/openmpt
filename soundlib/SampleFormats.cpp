@@ -2447,18 +2447,21 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 	FLAC__stream_encoder_set_compression_level(encoder, TrackerSettings::Instance().m_FLACCompressionLevel);
 #endif // MODPLUG_TRACKER
 
+	bool result = false;
+	FLAC__int32 *sampleData = nullptr;
+
 	encoder.f = mpt_fopen(filename, "wb");
 	if(encoder.f == nullptr || FLAC__stream_encoder_init_FILE(encoder, encoder.f, nullptr, nullptr) != FLAC__STREAM_ENCODER_INIT_STATUS_OK)
 	{
-		return false;
+		goto fail;
 	}
 
 	// Convert sample data to signed 32-Bit integer array.
 	const SmpLength numSamples = sample.nLength * sample.GetNumChannels();
-	FLAC__int32 *sampleData = new (std::nothrow) FLAC__int32[numSamples];
+	sampleData = new (std::nothrow) FLAC__int32[numSamples];
 	if(sampleData == nullptr)
 	{
-		return false;
+		goto fail;
 	}
 
 	if(sample.GetElementarySampleSize() == 1)
@@ -2474,6 +2477,9 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 
 	// Do the actual conversion.
 	FLAC__stream_encoder_process_interleaved(encoder, sampleData, sample.nLength);
+	result = true;
+	
+fail:
 	FLAC__stream_encoder_finish(encoder);
 
 	delete[] sampleData;
@@ -2482,7 +2488,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		FLAC__metadata_object_delete(metadata[i]);
 	}
 
-	return true;
+	return result;
 #else
 	MPT_UNREFERENCED_PARAMETER(nSample);
 	MPT_UNREFERENCED_PARAMETER(filename);
