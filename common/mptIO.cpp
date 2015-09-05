@@ -17,6 +17,10 @@
 #include <ios>
 #include <istream>
 #include <ostream>
+#include <sstream>
+#if MPT_COMPILER_MSVC
+#include <typeinfo>
+#endif // MPT_COMPILER_MSVC
 
 #if defined(MPT_WITH_FILEIO_STDIO)
 #include <cstdio>
@@ -32,25 +36,264 @@ namespace mpt {
 namespace IO {
 
 
+#if MPT_COMPILER_MSVC
+
+// MSVC std::stringbuf (and thereby std::ostringstream, std::istringstream and
+// std::stringstream) fail seekoff() when the stringbuf is currently empty.
+// seekoff() can get called via tell*() or seek*() iostream members. tell*() has
+// been special cased from VS2010 onwárds to handle this specific case and
+// changed to not fail when the stringbuf is empty.
+// In addition to using out own wrapper around std::stringstream and
+// std::stringbuf, we also work-around the plain native type's problem in case
+// we get handed such an object from third party code. This mitigation of course
+// requires using our consolidated and normalized IO functions.
+// We use the following work-around strategy:
+//  *  If the stream is already in failed state, we do not do any work-around
+//     and bail out early.
+//  *  If the underlying streambuf is not a std::stringbuf, the work-around is
+//     not necessary and we skip it.
+//  *  If querying the current position does not fail and returns a
+//     position > 0, the underlying stringbuf is not empty and we also bail out.
+//  *  Otherwise, we actually query the string contained in the stringbuf to be
+//     empty. This operation is slow as it has to copy the string into a
+//     temporary.
+//     Note, however, that this is only ever necessary if the current position
+//     is 0. If it always has been 0, the stringbuf will be empty anyway and the
+//     copy does not cost anything measurable. If it got seeked to position 0,
+//     we have to pay the price. However, this should be relatively uncommmon in
+//     pratice.
+//  *  The actual work-around consists of performing or emulating the requested
+//     operation and resetting the failed state afterwards.
+
+static bool StreamIsStringStreamAndValidAndEmpty(std::ostream & f)
+{
+	if(f.fail() || !f.rdbuf())
+	{ // failed
+		return false;
+	}
+	if(!dynamic_cast<std::stringbuf*>(f.rdbuf()) || (typeid(*(f.rdbuf())) != typeid(std::stringbuf)))
+	{ // no stringbuf
+		return false;
+	}
+	std::streampos pos = f.tellp();
+	f.clear(f.rdstate() & ~std::ios::failbit);
+	if(pos != std::streampos(-1) && pos > 0)
+	{ // if the position is not 0, the streambuf is not empty
+		return false;
+	}
+	return dynamic_cast<std::stringbuf*>(f.rdbuf())->str().empty(); // slow
+}
+
+static bool StreamIsStringStreamAndValidAndEmpty(std::istream & f)
+{
+	if(f.fail() || !f.rdbuf())
+	{ // failed
+		return false;
+	}
+	if(!dynamic_cast<std::stringbuf*>(f.rdbuf()) || (typeid(*(f.rdbuf())) != typeid(std::stringbuf)))
+	{ // no stringbuf
+		return false;
+	}
+	std::streampos pos = f.tellg();
+	f.clear(f.rdstate() & ~std::ios::failbit);
+	if(pos != std::streampos(-1) && pos > 0)
+	{ // if the position is not 0, the streambuf is not empty
+		return false;
+	}
+	return dynamic_cast<std::stringbuf*>(f.rdbuf())->str().empty(); // slow
+}
+
+static bool StreamIsStringStreamAndValidAndEmpty(std::iostream & f)
+{
+	if(f.fail() || !f.rdbuf())
+	{ // failed
+		return false;
+	}
+	if(!dynamic_cast<std::stringbuf*>(f.rdbuf()) || (typeid(*(f.rdbuf())) != typeid(std::stringbuf)))
+	{ // no stringbuf
+		return false;
+	}
+	std::streampos ipos = f.tellg();
+	f.clear(f.rdstate() & ~std::ios::failbit);
+	std::streampos opos = f.tellp();
+	f.clear(f.rdstate() & ~std::ios::failbit);
+	if((ipos != std::streampos(-1) && ipos > 0) || (opos != std::streampos(-1) && opos > 0))
+	{ // if the position is not 0, the streambuf is not empty
+		return false;
+	}
+	return dynamic_cast<std::stringbuf*>(f.rdbuf())->str().empty(); // slow
+}
+
+#endif // MPT_COMPILER_MSVC
 
 //STATIC_ASSERT(sizeof(std::streamoff) == 8); // Assert 64bit file support.
 bool IsValid(std::ostream & f) { return !f.fail(); }
 bool IsValid(std::istream & f) { return !f.fail(); }
 bool IsValid(std::iostream & f) { return !f.fail(); }
-IO::Offset TellRead(std::istream & f) { return f.tellg(); }
-IO::Offset TellWrite(std::ostream & f) { return f.tellp(); }
-bool SeekBegin(std::ostream & f) { f.seekp(0); return !f.fail(); }
-bool SeekBegin(std::istream & f) { f.seekg(0); return !f.fail(); }
-bool SeekBegin(std::iostream & f) { f.seekg(0); f.seekp(0); return !f.fail(); }
-bool SeekEnd(std::ostream & f) { f.seekp(0, std::ios::end); return !f.fail(); }
-bool SeekEnd(std::istream & f) { f.seekg(0, std::ios::end); return !f.fail(); }
-bool SeekEnd(std::iostream & f) { f.seekg(0, std::ios::end); f.seekp(0, std::ios::end); return !f.fail(); }
-bool SeekAbsolute(std::ostream & f, IO::Offset pos) { if(!OffsetFits<std::streamoff>(pos)) { return false; } f.seekp(static_cast<std::streamoff>(pos), std::ios::beg); return !f.fail(); }
-bool SeekAbsolute(std::istream & f, IO::Offset pos) { if(!OffsetFits<std::streamoff>(pos)) { return false; } f.seekg(static_cast<std::streamoff>(pos), std::ios::beg); return !f.fail(); }
-bool SeekAbsolute(std::iostream & f, IO::Offset pos) { if(!OffsetFits<std::streamoff>(pos)) { return false; } f.seekg(static_cast<std::streamoff>(pos), std::ios::beg); f.seekp(static_cast<std::streamoff>(pos), std::ios::beg); return !f.fail(); }
-bool SeekRelative(std::ostream & f, IO::Offset off) { if(!OffsetFits<std::streamoff>(off)) { return false; } f.seekp(static_cast<std::streamoff>(off), std::ios::cur); return !f.fail(); }
-bool SeekRelative(std::istream & f, IO::Offset off) { if(!OffsetFits<std::streamoff>(off)) { return false; } f.seekg(static_cast<std::streamoff>(off), std::ios::cur); return !f.fail(); }
-bool SeekRelative(std::iostream & f, IO::Offset off) { if(!OffsetFits<std::streamoff>(off)) { return false; } f.seekg(static_cast<std::streamoff>(off), std::ios::cur); f.seekp(static_cast<std::streamoff>(off), std::ios::cur); return !f.fail(); }
+IO::Offset TellRead(std::istream & f)
+{
+	#if MPT_MSVC_BEFORE(2010, 0)
+		if(StreamIsStringStreamAndValidAndEmpty(f))
+		{
+			return 0;
+		}
+	#endif
+	return f.tellg();
+}
+IO::Offset TellWrite(std::ostream & f)
+{
+	#if MPT_MSVC_BEFORE(2010, 0)
+		if(StreamIsStringStreamAndValidAndEmpty(f))
+		{
+			return 0;
+		}
+	#endif
+	return f.tellp();
+}
+bool SeekBegin(std::ostream & f)
+{
+	#if MPT_COMPILER_MSVC
+		if(StreamIsStringStreamAndValidAndEmpty(f))
+		{ // VS std::stringbuf fail seek when the internal buffer is empty. Work-around it in case the stream is not already in failed state.
+			f.seekp(0); f.clear(f.rdstate() & ~std::ios::failbit); return true;
+		}
+	#endif
+	f.seekp(0); return !f.fail();
+}
+bool SeekBegin(std::istream & f)
+{
+	#if MPT_COMPILER_MSVC
+		if(StreamIsStringStreamAndValidAndEmpty(f))
+		{
+			f.seekg(0); f.clear(f.rdstate() & ~std::ios::failbit); return true;
+		}
+	#endif
+	f.seekg(0); return !f.fail();
+}
+bool SeekBegin(std::iostream & f)
+{
+	#if MPT_COMPILER_MSVC
+		if(StreamIsStringStreamAndValidAndEmpty(f))
+		{
+			f.seekg(0); f.clear(f.rdstate() & ~std::ios::failbit); f.seekp(0); f.clear(f.rdstate() & ~std::ios::failbit); return true;
+		}
+	#endif
+	f.seekg(0); f.seekp(0); return !f.fail();
+}
+bool SeekEnd(std::ostream & f)
+{
+	#if MPT_COMPILER_MSVC
+		if(StreamIsStringStreamAndValidAndEmpty(f))
+		{
+			f.seekp(0); f.clear(f.rdstate() & ~std::ios::failbit); return true;
+		}
+	#endif
+	f.seekp(0, std::ios::end); return !f.fail();
+}
+bool SeekEnd(std::istream & f)
+{
+	#if MPT_COMPILER_MSVC
+		if(StreamIsStringStreamAndValidAndEmpty(f))
+		{
+			f.seekg(0); f.clear(f.rdstate() & ~std::ios::failbit); return true;
+		}
+	#endif
+	f.seekg(0, std::ios::end); return !f.fail();
+}
+bool SeekEnd(std::iostream & f)
+{
+	#if MPT_COMPILER_MSVC
+		if(StreamIsStringStreamAndValidAndEmpty(f))
+		{
+			f.seekg(0); f.clear(f.rdstate() & ~std::ios::failbit);  f.seekp(0); f.clear(f.rdstate() & ~std::ios::failbit); return true;
+		}
+	#endif
+	f.seekg(0, std::ios::end); f.seekp(0, std::ios::end); return !f.fail();
+}
+bool SeekAbsolute(std::ostream & f, IO::Offset pos)
+{
+	if(!OffsetFits<std::streamoff>(pos)) { return false; }
+	#if MPT_COMPILER_MSVC
+		if(StreamIsStringStreamAndValidAndEmpty(f))
+		{
+			if(pos == 0)
+			{
+				f.seekp(static_cast<std::streamoff>(pos), std::ios::beg); f.clear(f.rdstate() & ~std::ios::failbit); return true;
+			}
+		}
+	#endif
+	f.seekp(static_cast<std::streamoff>(pos), std::ios::beg); return !f.fail();
+}
+bool SeekAbsolute(std::istream & f, IO::Offset pos)
+{
+	if(!OffsetFits<std::streamoff>(pos)) { return false; }
+	#if MPT_COMPILER_MSVC
+		if(StreamIsStringStreamAndValidAndEmpty(f))
+		{
+			if(pos == 0)
+			{
+				f.seekg(static_cast<std::streamoff>(pos), std::ios::beg); f.clear(f.rdstate() & ~std::ios::failbit); return true;
+			}
+		}
+	#endif
+	f.seekg(static_cast<std::streamoff>(pos), std::ios::beg); return !f.fail();
+}
+bool SeekAbsolute(std::iostream & f, IO::Offset pos)
+{
+	if(!OffsetFits<std::streamoff>(pos)) { return false; }
+	#if MPT_COMPILER_MSVC
+		if(StreamIsStringStreamAndValidAndEmpty(f))
+		{
+			if(pos == 0)
+			{
+				f.seekg(static_cast<std::streamoff>(pos), std::ios::beg); f.clear(f.rdstate() & ~std::ios::failbit); f.seekp(static_cast<std::streamoff>(pos), std::ios::beg); f.clear(f.rdstate() & ~std::ios::failbit); return true;
+			}
+		}
+	#endif
+	f.seekg(static_cast<std::streamoff>(pos), std::ios::beg); f.seekp(static_cast<std::streamoff>(pos), std::ios::beg); return !f.fail();
+}
+bool SeekRelative(std::ostream & f, IO::Offset off)
+{
+	if(!OffsetFits<std::streamoff>(off)) { return false; }
+	#if MPT_COMPILER_MSVC
+		if(StreamIsStringStreamAndValidAndEmpty(f))
+		{
+			if(off == 0)
+			{
+				f.seekp(static_cast<std::streamoff>(off), std::ios::cur); f.clear(f.rdstate() & ~std::ios::failbit); return true;
+			}
+		}
+	#endif
+	f.seekp(static_cast<std::streamoff>(off), std::ios::cur); return !f.fail();
+}
+bool SeekRelative(std::istream & f, IO::Offset off)
+{
+	if(!OffsetFits<std::streamoff>(off)) { return false; }
+	#if MPT_COMPILER_MSVC
+		if(StreamIsStringStreamAndValidAndEmpty(f))
+		{
+			if(off == 0)
+			{
+				f.seekg(static_cast<std::streamoff>(off), std::ios::cur); f.clear(f.rdstate() & ~std::ios::failbit); return true;
+			}
+		}
+	#endif
+	f.seekg(static_cast<std::streamoff>(off), std::ios::cur); return !f.fail();
+}
+bool SeekRelative(std::iostream & f, IO::Offset off)
+{
+	if(!OffsetFits<std::streamoff>(off)) { return false; }
+	#if MPT_COMPILER_MSVC
+		if(StreamIsStringStreamAndValidAndEmpty(f))
+		{
+			if(off == 0)
+			{
+				f.seekg(static_cast<std::streamoff>(off), std::ios::cur); f.clear(f.rdstate() & ~std::ios::failbit); f.seekp(static_cast<std::streamoff>(off), std::ios::cur); f.clear(f.rdstate() & ~std::ios::failbit); return true;
+			}
+		}
+	#endif
+	f.seekg(static_cast<std::streamoff>(off), std::ios::cur); f.seekp(static_cast<std::streamoff>(off), std::ios::cur); return !f.fail();
+}
 IO::Offset ReadRaw(std::istream & f, uint8 * data, std::size_t size) { return f.read(reinterpret_cast<char *>(data), size) ? f.gcount() : std::streamsize(0); }
 IO::Offset ReadRaw(std::istream & f, char * data, std::size_t size) { return f.read(data, size) ? f.gcount() : std::streamsize(0); }
 IO::Offset ReadRaw(std::istream & f, void * data, std::size_t size) { return f.read(reinterpret_cast<char *>(data), size) ? f.gcount() : std::streamsize(0); }
