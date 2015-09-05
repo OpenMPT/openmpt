@@ -19,11 +19,11 @@
 #include "../common/misc_util.h"
 #include "../common/StringFixer.h"
 #include "../common/mptFileIO.h"
+#include "../common/mptBufferIO.h"
 // VST cloning
 #include "Vstplug.h"
 #include "VstPresets.h"
 #include "../common/FileReader.h"
-#include <sstream>
 
 
 #ifdef _DEBUG
@@ -643,7 +643,7 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 		CVstPlugin *newVstPlug = static_cast<CVstPlugin *>(target.pMixPlugin);
 		newVstPlug->SetCurrentProgram(srcVstPlug->GetCurrentProgram());
 
-		std::ostringstream f(std::ios::out | std::ios::binary);
+		mpt::ostringstream f(std::ios::out | std::ios::binary);
 		if(VSTPresets::SaveFile(f, *srcVstPlug, false))
 		{
 			const std::string data = f.str();

@@ -37,10 +37,10 @@
 #ifndef MODPLUG_TRACKER
 #include "../common/mptFileIO.h"
 #endif // !MODPLUG_TRACKER
+#include "../common/mptBufferIO.h"
 #include <limits>
 #include <istream>
 #include <ostream>
-#include <sstream>
 #include <stdexcept>
 #if MPT_COMPILER_MSVC
 #include <tchar.h>
@@ -689,6 +689,81 @@ static MPT_NOINLINE void TestMisc()
 	VERIFY_EQUAL(IsEqualUUID(uuid, Util::StringToIID(Util::IIDToString(uuid))), true);
 	VERIFY_EQUAL(IsEqualUUID(uuid, Util::StringToCLSID(Util::CLSIDToString(uuid))), true);
 #endif
+
+	// check that empty stringstream behaves correctly with our MSVC workarounds
+	{ mpt::ostringstream ss; VERIFY_EQUAL(mpt::IO::TellWrite(ss), 0); }
+	{ mpt::ostringstream ss; VERIFY_EQUAL(mpt::IO::SeekBegin(ss), true); }
+	{ mpt::ostringstream ss; VERIFY_EQUAL(mpt::IO::SeekAbsolute(ss, 0), true); }
+	{ mpt::ostringstream ss; VERIFY_EQUAL(mpt::IO::SeekRelative(ss, 0), true); }
+	{ mpt::istringstream ss; VERIFY_EQUAL(mpt::IO::TellRead(ss), 0); }
+	{ mpt::istringstream ss; VERIFY_EQUAL(mpt::IO::SeekBegin(ss), true); }
+	{ mpt::istringstream ss; VERIFY_EQUAL(mpt::IO::SeekAbsolute(ss, 0), true); }
+	{ mpt::istringstream ss; VERIFY_EQUAL(mpt::IO::SeekRelative(ss, 0), true); }
+
+	{
+		mpt::ostringstream s;
+		char b = 23;
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellWrite(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::SeekBegin(s), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellWrite(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::WriteRaw(s, &b, 1), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellWrite(s), 1);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::SeekBegin(s), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellWrite(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::SeekEnd(s), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellWrite(s), 1);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(s.str(), std::string(1, b));
+	}
+
+	{
+		mpt::istringstream s;
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellRead(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::SeekBegin(s), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellRead(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::SeekEnd(s), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellRead(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+	}
+
+	{
+		mpt::istringstream s("a");
+		char a = 0;
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellRead(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::SeekBegin(s), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellRead(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::ReadRaw(s, &a, 1), 1);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellRead(s), 1);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::SeekBegin(s), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellRead(s), 0);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::SeekEnd(s), true);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(mpt::IO::TellRead(s), 1);
+		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
+		VERIFY_EQUAL(a, 'a');
+	}
 
 }
 
@@ -2062,7 +2137,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 
 	// General file I/O tests
 	{
-		std::ostringstream f;
+		mpt::ostringstream f;
 		size_t bytesWritten;
 		mpt::IO::WriteVarInt(f, uint16(0), &bytesWritten);		VERIFY_EQUAL_NONCONT(bytesWritten, 1);
 		mpt::IO::WriteVarInt(f, uint16(127), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 1);
@@ -2097,7 +2172,7 @@ static void RunITCompressionTest(const std::vector<int8> &sampleData, FlagSet<Ch
 	std::string data;
 
 	{
-		std::ostringstream f;
+		mpt::ostringstream f;
 		ITCompression compression(smp, it215, &f);
 		data = f.str();
 	}
@@ -2213,7 +2288,7 @@ static MPT_NOINLINE void TestTunings()
 	};
 	CTuningCollection *oldBuiltin = new CTuningCollection();
 	std::string builtindata(built_inTunings_tc_data, built_inTunings_tc_data + built_inTunings_tc_size);
-	std::istringstream iStrm(builtindata);
+	mpt::istringstream iStrm(builtindata);
 	oldBuiltin->Deserialize(iStrm);
 
 	CheckEualTuningCollections(emptyFile->GetBuiltInTunings(), *oldBuiltin);
@@ -2223,7 +2298,7 @@ static MPT_NOINLINE void TestTunings()
 	// Test that the serialization exactly matches the old data.
 	// This depends on exactly identical floating point representations (and thus rounding), which is why we limit this test to MSVC.
 
-	std::ostringstream stream;
+	mpt::ostringstream stream;
 	stream.imbue(std::locale::classic());
 	emptyFile->GetBuiltInTunings().Serialize(stream);
 	std::string str = stream.str();
@@ -2305,7 +2380,7 @@ static MPT_NOINLINE void TestPCnoteSerialization()
 		for(size_t j = 0; j < numCommands[i]; j++, iter++) pat[i][j] = *iter;
 	}
 
-	std::stringstream mem;
+	mpt::stringstream mem;
 	WriteModPatterns(mem, sndFile.Patterns);
 
 	VERIFY_EQUAL_NONCONT( mem.good(), true );

@@ -234,8 +234,8 @@ void VSTPresets::SaveProgram(std::ostream &f, CVstPlugin &plugin)
 	header.fxVersion = plugin.GetVersion();
 
 	// Write unfinished header... We need to update the size once we're done writing.
+	std::streamoff start = f.tellp();
 	Write(header, f);
-	std::streamoff start = f.tellp() - static_cast<std::streamoff>(sizeof(header));	// tellp is undefined before first write with VS2008 and std::ostringstream
 
 	const uint32 numParams = plugin.GetNumParameters();
 	WriteBE(numParams, f);

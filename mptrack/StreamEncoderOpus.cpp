@@ -14,20 +14,19 @@
 #include "StreamEncoderOpus.h"
 
 #include "../common/mptIO.h"
+#include "../common/mptBufferIO.h"
 
 #include "../common/ComponentManager.h"
 
 #include "Mptrack.h"
 
 #include <deque>
-#include <sstream>
 
 #ifndef NO_OGG
 #include <ogg/ogg.h>
 #endif
 #include <opus/opus.h>
 #include <opus/opus_multistream.h>
-
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -424,7 +423,7 @@ public:
 
 		inited = true;
 
-		std::ostringstream buf(std::ios::binary);
+		mpt::ostringstream buf(std::ios::binary);
 		buf.imbue(std::locale::classic());
 
 		mpt::IO::WriteRaw(buf, "Opus", 4);

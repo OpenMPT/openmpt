@@ -31,11 +31,11 @@
 #include "CleanupSong.h"
 #include "../common/StringFixer.h"
 #include "../common/mptFileIO.h"
+#include "../common/mptBufferIO.h"
 #include "../common/FileReader.h"
 #include "FileDialog.h"
 #include "ExternalSamples.h"
 #include "Globals.h"
-#include <sstream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -3069,7 +3069,7 @@ void CModDoc::SerializeViews() const
 	{
 		return;
 	}
-	std::ostringstream f(std::ios::out | std::ios::binary);
+	mpt::ostringstream f(std::ios::out | std::ios::binary);
 
 	CRect mdiRect;
 	::GetClientRect(CMainFrame::GetMainFrame()->m_hWndMDIClient, &mdiRect);

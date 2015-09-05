@@ -25,7 +25,7 @@
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
 #endif
-#include <sstream>
+#include "../common/mptBufferIO.h"
 #include "../common/version.h"
 #include "ITTools.h"
 #include <time.h>
@@ -1032,7 +1032,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		const uint16 version = fileHeader.cwtv;
 		if(version > 0x889 && file.Seek(mptStartPos))
 		{
-			std::istringstream iStrm(std::string(file.GetRawData(), file.BytesLeft()));
+			mpt::istringstream iStrm(std::string(file.GetRawData(), file.BytesLeft()));
 
 			if(version >= 0x88D)
 			{
@@ -2027,7 +2027,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	// Tempo Swing Factors
 	if(!m_tempoSwing.empty())
 	{
-		std::ostringstream oStrm;
+		mpt::ostringstream oStrm;
 		TempoSwing::Serialize(oStrm, m_tempoSwing);
 		std::string data = oStrm.str();
 		uint16 length = mpt::saturate_cast<uint16>(data.size());
@@ -2201,7 +2201,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 				{
 					std::string data(chunk.GetLength(), '\0');
 					chunk.ReadRaw(&data[0], data.size());
-					std::istringstream iStrm(data);
+					mpt::istringstream iStrm(data);
 					TempoSwing::Deserialize(iStrm, m_tempoSwing, data.size());
 				}
 				break;
