@@ -564,8 +564,8 @@ mpt::ustring GetFullCreditsString()
 		"in the form of ideas, testing and support;\n"
 		"thanks particularly to:\n"
 		"33, 8bitbubsy, Anboi, BooT-SectoR-ViruZ, Bvanoudtshoorn\n"
-		"christofori, Diamond, Ganja, Georg, Goor00, jmkz,\n"
-		"KrazyKatz, LPChip, Nofold, Rakib, Sam Zen\n"
+		"christofori, Diamond, Ganja, Georg, Goor00, Harbinger,\n"
+		"jmkz, KrazyKatz, LPChip, Nofold, Rakib, Sam Zen\n"
 		"Skaven, Skilletaudio, Snu, Squirrel Havoc, Waxhead\n"
 		"\n"
 #ifndef NO_VST

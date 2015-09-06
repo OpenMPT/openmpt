@@ -2335,7 +2335,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		FLAC__metadata_object_vorbiscomment_append_comment(metadata[0], entry, false);
 		FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "ENCODER", MptVersion::GetOpenMPTVersionStr().c_str());
 		FLAC__metadata_object_vorbiscomment_append_comment(metadata[0], entry, false);
-		if(sampleRate > 655350)
+		if(sampleRate > FLAC__MAX_SAMPLE_RATE)
 		{
 			// FLAC only supports a sample rate of up to 655350 Hz.
 			// Store the real sample rate in a custom Vorbis comment.
@@ -2432,7 +2432,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 
 	// FLAC allows a maximum sample rate of 655350 Hz.
 	// If the real rate is higher, we store it in a Vorbis comment above.
-	LimitMax(sampleRate, 655350u);
+	LimitMax(sampleRate, FLAC__MAX_SAMPLE_RATE);
 	if(!FLAC__format_sample_rate_is_subset(sampleRate))
 	{
 		// FLAC only supports 10 Hz granularity for frequencies above 65535 Hz if the streamable subset is chosen.

@@ -83,7 +83,7 @@ fixedMacroType MIDIMacroConfig::GetFixedMacroType() const
 #elif MPT_COMPILER_CLANG
 #pragma clang diagnostic push
 #if MPT_CLANG_AT_LEAST(3,3,0)
-#pragma clang diagnostic ignored "-Wswitch"     
+#pragma clang diagnostic ignored "-Wswitch"
 #else
 #pragma clang diagnostic ignored "-Wswitch-enum"
 #endif
@@ -113,13 +113,16 @@ void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENG
 		sprintf(parameteredMacro, "Bc%02Xz", (subType & 0x7F));
 		break;
 	case sfx_plug:
-		sprintf(parameteredMacro, "F0F%03Xz", MIN(subType, 0x17F) + 0x80);
+		sprintf(parameteredMacro, "F0F%03Xz", std::min(subType, 0x17F) + 0x80);
 		break;
 	case sfx_channelAT:
 		strcpy(parameteredMacro, "Dcz");
 		break;
 	case sfx_polyAT:
 		strcpy(parameteredMacro, "Acnz");
+		break;
+	case sfx_pitch:
+		strcpy(parameteredMacro, "Ec00z");
 		break;
 	}
 }
@@ -141,7 +144,7 @@ void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENG
 #elif MPT_COMPILER_CLANG
 #pragma clang diagnostic push
 #if MPT_CLANG_AT_LEAST(3,3,0)
-#pragma clang diagnostic ignored "-Wswitch"     
+#pragma clang diagnostic ignored "-Wswitch"
 #else
 #pragma clang diagnostic ignored "-Wswitch-enum"
 #endif
@@ -195,6 +198,11 @@ void MIDIMacroConfig::CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], f
 		case zxx_polyAT:
 			// Type 7 - Z80 - ZFF controls Poly Aftertouch
 			sprintf(fixedMacros[i], "Acn%02X", i);
+			break;
+
+		case zxx_pitch:
+			// Type 7 - Z80 - ZFF controls Pitch Bend
+			sprintf(fixedMacros[i], "Ec00%02X", i);
 			break;
 		}
 	}
@@ -282,6 +290,8 @@ CString MIDIMacroConfig::GetParameteredMacroName(parameteredMacroType macroType)
 		return _T("Channel Aftertouch");
 	case sfx_polyAT:
 		return _T("Polyphonic Aftertouch");
+	case sfx_pitch:
+		return _T("Pitch Bend");
 	case sfx_custom:
 	default:
 		return _T("Custom");
@@ -311,6 +321,8 @@ CString MIDIMacroConfig::GetFixedMacroName(fixedMacroType macroType) const
 		return _T("Z80 - ZFF controls Channel Aftertouch");
 	case zxx_polyAT:
 		return _T("Z80 - ZFF controls Polyphonic Aftertouch");
+	case zxx_pitch:
+		return _T("Z80 - ZFF controls Pitch Bend");
 	case zxx_custom:
 	default:
 		return _T("Custom");

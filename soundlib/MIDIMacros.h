@@ -38,6 +38,7 @@ enum parameteredMacroType
 	sfx_cc,				// Type 6 - Z00 - Z7F controls MIDI CC
 	sfx_channelAT,		// Type 7 - Z00 - Z7F controls Channel Aftertouch
 	sfx_polyAT,			// Type 8 - Z00 - Z7F controls Poly Aftertouch
+	sfx_pitch,			// Type 9 - Z00 - Z7F controls Pitch Bend
 	sfx_custom,
 
 	sfx_max
@@ -55,6 +56,7 @@ enum fixedMacroType
 	zxx_resomode,		// Type 5 - Z80 - Z9F controls resonance + filter mode
 	zxx_channelAT,		// Type 6 - Z80 - ZFF controls Channel Aftertouch
 	zxx_polyAT,			// Type 7 - Z80 - ZFF controls Poly Aftertouch
+	zxx_pitch,			// Type 8 - Z80 - ZFF controls Pitch Bend
 	zxx_custom,
 
 	zxx_max
