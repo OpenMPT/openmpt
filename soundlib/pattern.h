@@ -69,7 +69,7 @@ public:
 	CHANNELINDEX GetNumChannels() const;
 
 	// Add or remove rows from the pattern.
-	bool Resize(const ROWINDEX newRowCount);
+	bool Resize(const ROWINDEX newRowCount, bool enforceFormatLimits = true);
 
 	// Check if there is any note data on a given row.
 	bool IsEmptyRow(ROWINDEX row) const;
@@ -114,11 +114,13 @@ public:
 	bool GetName(char *buffer, size_t maxChars) const;
 	std::string GetName() const { return m_PatternName; };
 
+#ifdef MODPLUG_TRACKER
 	// Double number of rows
 	bool Expand();
 
 	// Halve number of rows
 	bool Shrink();
+#endif // MODPLUG_TRACKER
 
 	// Write some kind of effect data to the pattern
 	bool WriteEffect(EffectWriter &settings);

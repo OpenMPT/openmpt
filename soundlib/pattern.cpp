@@ -70,17 +70,23 @@ bool CPattern::SetSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMe
 
 
 // Add or remove rows from the pattern.
-bool CPattern::Resize(const ROWINDEX newRowCount)
-//-----------------------------------------------
+bool CPattern::Resize(const ROWINDEX newRowCount, bool enforceFormatLimits)
+//-------------------------------------------------------------------------
 {
 	CSoundFile &sndFile = GetSoundFile();
-	const CModSpecifications& specs = sndFile.GetModSpecifications();
 	ModCommand *newPattern;
+
+	if(enforceFormatLimits)
+	{
+		const CModSpecifications& specs = sndFile.GetModSpecifications();
+		if(newRowCount > specs.patternRowsMax || newRowCount < specs.patternRowsMin) return false;
+	} else
+	{
+		if(newRowCount > MAX_PATTERN_ROWS || newRowCount < 1) return false;
+	}
 
 	if(m_ModCommands == nullptr
 		|| newRowCount == m_Rows
-		|| newRowCount > specs.patternRowsMax
-		|| newRowCount < specs.patternRowsMin
 		|| (newPattern = AllocatePattern(newRowCount, GetNumChannels())) == nullptr)
 	{
 		return false;
@@ -138,6 +144,8 @@ void CPattern::Deallocate()
 	m_PatternName.clear();
 }
 
+
+#ifdef MODPLUG_TRACKER
 
 bool CPattern::Expand()
 //---------------------
@@ -212,6 +220,9 @@ bool CPattern::Shrink()
 
 	return true;
 }
+
+
+#endif // MODPLUG_TRACKER
 
 
 bool CPattern::SetName(const std::string &newName)

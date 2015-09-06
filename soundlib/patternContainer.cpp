@@ -77,8 +77,7 @@ PATTERNINDEX CPatternContainer::Insert(const ROWINDEX rows)
 bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
 //---------------------------------------------------------------------------
 {
-	const CModSpecifications& specs = m_rSndFile.GetModSpecifications();
-	if(index >= specs.patternsMax || rows > MAX_PATTERN_ROWS || rows == 0)
+	if(rows > MAX_PATTERN_ROWS || rows == 0)
 		return false;
 	if(index < m_Patterns.size() && m_Patterns[index])
 		return false;
