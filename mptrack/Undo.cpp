@@ -171,7 +171,7 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 	{
 		if(!sndFile.Patterns.IsValidPat(nPattern))
 		{
-			if(!sndFile.Patterns[nPattern].AllocatePattern(undo.numPatternRows))
+			if(!sndFile.Patterns.Insert(nPattern, undo.numPatternRows))
 			{
 				DeleteStep(fromBuf, fromBuf.size() - 1);
 				return PATTERNINDEX_INVALID;
@@ -183,11 +183,13 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 
 		linkToPrevious = undo.linkToPrevious;
 		const ModCommand *pUndoData = undo.pbuffer;
-		ModCommand *pPattern = sndFile.Patterns[nPattern].GetpModCommand(undo.firstRow, undo.firstChannel);
-		for(ROWINDEX iy = 0; iy < undo.numRows; iy++)
+		CPattern &pattern = sndFile.Patterns[nPattern];
+		ModCommand *m = pattern.GetpModCommand(undo.firstRow, undo.firstChannel);
+		const ROWINDEX numRows = std::min(undo.numRows, pattern.GetNumRows());
+		for(ROWINDEX iy = 0; iy < numRows; iy++)
 		{
-			memcpy(pPattern, pUndoData, undo.numChannels * sizeof(ModCommand));
-			pPattern += sndFile.GetNumChannels();
+			memcpy(m, pUndoData, undo.numChannels * sizeof(ModCommand));
+			m += sndFile.GetNumChannels();
 			pUndoData += undo.numChannels;
 		}
 	}

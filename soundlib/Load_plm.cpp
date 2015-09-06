@@ -380,7 +380,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		PATTERNINDEX endPat = Order[maxPos / rowsPerPat];
 		if(Patterns.IsValidPat(endPat))
 		{
-			Patterns[endPat].Resize(endPatSize);
+			Patterns[endPat].Resize(endPatSize, false);
 		}
 	}
 	// If there are still any non-existent patterns in our order list, insert some blank patterns.
