@@ -893,6 +893,7 @@ CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::v
 	, storedTags(conf)
 	, repeatCount(0)
 	, minOrder(ORDERINDEX_INVALID), maxOrder(ORDERINDEX_INVALID)
+	, sampleSlot(0)
 	, normalize(false)
 	, silencePlugBuffers(false)
 	, outputToSample(false)
