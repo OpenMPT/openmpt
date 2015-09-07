@@ -22,8 +22,12 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(push, 1)
+#endif
+
 // This part of the header is identical for both presets and banks.
-struct ChunkHeader
+struct PACKED ChunkHeader
 {
 	VstInt32 chunkMagic;		///< 'CcnK'
 	VstInt32 byteSize;			///< size of this chunk, excl. magic + byteSize
@@ -45,6 +49,11 @@ struct ChunkHeader
 	}
 };
 
+STATIC_ASSERT(sizeof(ChunkHeader) == 24);
+
+#ifdef NEEDS_PRAGMA_PACK
+#pragma pack(pop)
+#endif
 
 VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 //------------------------------------------------------------------------------
@@ -172,19 +181,20 @@ bool VSTPresets::SaveFile(std::ostream &f, CVstPlugin &plugin, bool bank)
 		bool writeChunk = plugin.ProgramsAreChunks();
 		ChunkHeader header;
 		header.chunkMagic = cMagic;
+		header.byteSize = 0; // will be corrected later
 		header.version = 2;
 		header.fxID = plugin.GetUID();
 		header.fxVersion = plugin.GetVersion();
 
 		// Write unfinished header... We need to update the size once we're done writing.
-		Write(header, f);
+		mpt::IO::WriteConvertEndianness(f, header);
 
 		uint32 numProgs = std::max(plugin.GetNumPrograms(), VstInt32(1)), curProg = plugin.GetCurrentProgram();
-		WriteBE(numProgs, f);
-		WriteBE(curProg, f);
-		char reserved[124];
+		mpt::IO::WriteIntBE(f, numProgs);
+		mpt::IO::WriteIntBE(f, curProg);
+		uint8 reserved[124];
 		MemsetZero(reserved);
-		Write(reserved, f);
+		mpt::IO::WriteRaw(f, reserved, sizeof(reserved));
 
 		if(writeChunk)
 		{
@@ -192,8 +202,8 @@ bool VSTPresets::SaveFile(std::ostream &f, CVstPlugin &plugin, bool bank)
 			uint32 chunkSize = mpt::saturate_cast<uint32>(plugin.Dispatch(effGetChunk, 0, 0, &chunk, 0));
 			if(chunkSize && chunk)
 			{
-				WriteBE(chunkSize, f);
-				f.write(chunk, chunkSize);
+				mpt::IO::WriteIntBE(f, chunkSize);
+				mpt::IO::WriteRaw(f, chunk, chunkSize);
 			} else
 			{
 				// The plugin returned no chunk! Gracefully go back and save parameters instead...
@@ -214,9 +224,8 @@ bool VSTPresets::SaveFile(std::ostream &f, CVstPlugin &plugin, bool bank)
 		std::streamoff end = f.tellp();
 		header.byteSize = static_cast<VstInt32>(end - 8);
 		header.fxMagic = writeChunk ? chunkBankMagic : bankMagic;
-		header.ConvertEndianness();
-		f.seekp(0);
-		Write(header, f);
+		mpt::IO::SeekBegin(f);
+		mpt::IO::WriteConvertEndianness(f, header);
 	}
 
 	return true;
@@ -229,20 +238,21 @@ void VSTPresets::SaveProgram(std::ostream &f, CVstPlugin &plugin)
 	bool writeChunk = plugin.ProgramsAreChunks();
 	ChunkHeader header;
 	header.chunkMagic = cMagic;
+	header.byteSize = 0; // will be corrected later
 	header.version = 1;
 	header.fxID = plugin.GetUID();
 	header.fxVersion = plugin.GetVersion();
 
 	// Write unfinished header... We need to update the size once we're done writing.
-	std::streamoff start = f.tellp();
-	Write(header, f);
+	mpt::IO::Offset start = mpt::IO::TellWrite(f);
+	mpt::IO::WriteConvertEndianness(f, header);
 
 	const uint32 numParams = plugin.GetNumParameters();
-	WriteBE(numParams, f);
+	mpt::IO::WriteIntBE(f, numParams);
 
 	char name[MAX(kVstMaxProgNameLen + 1, 256)];
 	plugin.Dispatch(effGetProgramName, 0, 0, name, 0);
-	f.write(name, 28);
+	mpt::IO::WriteRaw(f, name, 28);
 
 	if(writeChunk)
 	{
@@ -250,8 +260,8 @@ void VSTPresets::SaveProgram(std::ostream &f, CVstPlugin &plugin)
 		uint32 chunkSize = mpt::saturate_cast<uint32>(plugin.Dispatch(effGetChunk, 1, 0, &chunk, 0));
 		if(chunkSize && chunk)
 		{
-			WriteBE(chunkSize, f);
-			f.write(chunk, chunkSize);
+			mpt::IO::WriteIntBE(f, chunkSize);
+			mpt::IO::WriteRaw(f, chunk, chunkSize);
 		} else
 		{
 			// The plugin returned no chunk! Gracefully go back and save parameters instead...
@@ -262,33 +272,17 @@ void VSTPresets::SaveProgram(std::ostream &f, CVstPlugin &plugin)
 	{
 		for(uint32 p = 0; p < numParams; p++)
 		{
-			WriteBE(plugin.GetParameter(p), f);
+			mpt::IO::Write(f, IEEE754binary32BE(plugin.GetParameter(p)));
 		}
 	}
 
 	// Now we know the correct chunk size.
-	std::streamoff end = f.tellp();
+	mpt::IO::Offset end = mpt::IO::TellWrite(f);
 	header.byteSize = static_cast<VstInt32>(end - start - 8);
 	header.fxMagic = writeChunk ? chunkPresetMagic : fMagic;
-	header.ConvertEndianness();
-	f.seekp(start);
-	Write(header, f);
-	f.seekp(end);
-}
-
-
-void VSTPresets::WriteBE(uint32 v, std::ostream &f)
-//-------------------------------------------------
-{
-	SwapBytesBE(v);
-	Write(v, f);
-}
-
-
-void VSTPresets::WriteBE(float v, std::ostream &f)
-//------------------------------------------------
-{
-	Write(IEEE754binary32BE(v), f);
+	mpt::IO::SeekAbsolute(f, start);
+	mpt::IO::WriteConvertEndianness(f, header);
+	mpt::IO::SeekAbsolute(f, end);
 }
 
 
