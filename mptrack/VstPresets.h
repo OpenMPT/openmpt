@@ -37,15 +37,6 @@ public:
 protected:
 	static void SaveProgram(std::ostream &f, CVstPlugin &plugin);
 
-	template<typename T>
-	static void Write(const T &v, std::ostream &f)
-	{
-		f.write(reinterpret_cast<const char *>(&v), sizeof(T));
-	}
-
-	static void WriteBE(uint32 v, std::ostream &f);
-	static void WriteBE(float v, std::ostream &f);
-
 #else
 	static ErrorCode LoadFile(FileReader &, CVstPlugin &) { return invalidFile; }
 	static bool SaveFile(std::ostream &, CVstPlugin &, bool) { return false; }
