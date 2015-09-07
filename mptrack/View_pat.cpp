@@ -3763,7 +3763,7 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 
 			// Simple detection of backwards-going patterns to avoid jerky animation
 			m_nNextPlayRow = nRow + 1;
-			if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) && pSndFile->Patterns.IsValidPat(nPat))
+			if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) && pSndFile->Patterns.IsValidPat(nPat) && pSndFile->Patterns[nPat].IsValidRow(nRow))
 			{
 				for(const ModCommand *m = pSndFile->Patterns[nPat].GetRow(nRow), *mEnd = m + pSndFile->GetNumChannels(); m != mEnd; m++)
 				{
