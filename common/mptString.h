@@ -227,6 +227,7 @@ typedef MPT_ENCODED_STRING_TYPE(mpt::CharsetUTF8) u8string;
 static inline std::wstring ToWide(const std::wstring &str) { return str; }
 static inline std::wstring ToWide(const wchar_t * str) { return (str ? std::wstring(str) : std::wstring()); }
 std::wstring ToWide(Charset from, const std::string &str);
+static inline std::wstring ToWide(Charset from, const char * str) { return ToWide(from, str ? std::string(str) : std::string()); }
 #endif
 
 // Convert to a string encoded in the 'to'-specified character set.
@@ -240,6 +241,7 @@ std::string ToCharset(Charset to, const std::wstring &str);
 static inline std::string ToCharset(Charset to, const wchar_t * str) { return ToCharset(to, str ? std::wstring(str) : std::wstring()); }
 #endif
 std::string ToCharset(Charset to, Charset from, const std::string &str);
+static inline std::string ToCharset(Charset to, Charset from, const char * str) { return ToCharset(to, from, str ? std::string(str) : std::string()); }
 
 
 #if defined(_MFC_VER)
@@ -254,6 +256,7 @@ static inline CString ToCString(const CString &str) { return str; }
 CString ToCString(const std::wstring &str);
 static inline CString ToCString(const wchar_t * str) { return ToCString(str ? std::wstring(str) : std::wstring()); }
 CString ToCString(Charset from, const std::string &str);
+static inline CString ToCString(Charset from, const char * str) { return ToCString(from, str ? std::string(str) : std::string()); }
 
 // Convert from a MFC CString. The CString encoding depends on UNICODE.
 // This should also be used when converting from TCHAR strings.
@@ -265,10 +268,12 @@ std::string ToCharset(Charset to, const CString &str);
 MPT_DEPRECATED static inline CString ToCStringW(const CString &str) { return ToCString(str); }
 MPT_DEPRECATED static inline CString ToCStringW(const std::wstring &str) { return ToCString(str); }
 MPT_DEPRECATED static inline CString ToCStringW(Charset from, const std::string &str) { return ToCString(from, str); }
+MPT_DEPRECATED static inline CString ToCStringW(Charset from, const char * str) { return ToCStringW(from, str ? std::string(str) : std::string()); }
 #else // !UNICODE
 CStringW ToCStringW(const CString &str);
 CStringW ToCStringW(const std::wstring &str);
 CStringW ToCStringW(Charset from, const std::string &str);
+static inline CStringW ToCStringW(Charset from, const char * str) { return ToCStringW(from, str ? std::string(str) : std::string()); }
 CStringW ToCStringW(const CStringW &str);
 std::wstring ToWide(const CStringW &str);
 std::string ToCharset(Charset to, const CStringW &str);
@@ -332,6 +337,7 @@ typedef mpt::u8string    ustring;
 static inline mpt::ustring ToUnicode(const std::wstring &str) { return str; }
 static inline mpt::ustring ToUnicode(const wchar_t * str) { return (str ? std::wstring(str) : std::wstring()); }
 static inline mpt::ustring ToUnicode(Charset from, const std::string &str) { return ToWide(from, str); }
+static inline mpt::ustring ToUnicode(Charset from, const char * str) { return ToUnicode(from, str ? std::string(str) : std::string()); }
 #if defined(_MFC_VER)
 static inline mpt::ustring ToUnicode(const CString &str) { return ToWide(str); }
 #ifndef UNICODE
@@ -345,6 +351,7 @@ mpt::ustring ToUnicode(const std::wstring &str);
 static inline mpt::ustring ToUnicode(const wchar_t * str) { return ToUnicode(str ? std::wstring(str) : std::wstring()); }
 #endif
 mpt::ustring ToUnicode(Charset from, const std::string &str);
+static inline mpt::ustring ToUnicode(Charset from, const char * str) { return ToUnicode(from, str ? std::string(str) : std::string()); }
 #if defined(_MFC_VER)
 mpt::ustring ToUnicode(const CString &str);
 #ifndef UNICODE
