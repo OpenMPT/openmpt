@@ -39,7 +39,7 @@ copy /y ..\..\include\soundtouch\COPYING.TXT                 .\Licenses\License.
 copy /y ..\..\include\unrar\license.txt                      .\Licenses\License.UnRAR.txt || goto error
 copy /y ..\..\include\vorbis\COPYING                         .\Licenses\License.Vorbis.txt || goto error
 copy /y ..\..\include\zlib\README                            .\Licenses\License.zlib.txt || goto error
-copy /y ..\..\include\zlib\contrb\minizip\MiniZip64_info.txt .\Licenses\License.minizip.txt || goto error
+copy /y ..\..\include\zlib\contrib\minizip\MiniZip64_info.txt .\Licenses\License.minizip.txt || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 openmpt-win32-%MPT_REVISION%.7z ^
  LICENSE.txt ^
  Licenses ^
