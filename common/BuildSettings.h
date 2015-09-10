@@ -116,6 +116,10 @@
 
 // Disable unarchiving support
 //#define NO_ARCHIVE_SUPPORT
+#define UNGZIP_SUPPORT
+#define ZIPPED_MOD_SUPPORT
+#define UNLHA_SUPPORT
+#define UNRAR_SUPPORT
 
 // Disable the built-in reverb effect
 //#define NO_REVERB
@@ -195,6 +199,10 @@
 #define MPT_FILEREADER_CALLBACK_STREAM
 //#define MPT_EXTERNAL_SAMPLES
 #define NO_ARCHIVE_SUPPORT
+//#define UNGZIP_SUPPORT
+//#define ZIPPED_MOD_SUPPORT
+//#define UNLHA_SUPPORT
+//#define UNRAR_SUPPORT
 #define NO_REVERB
 #define NO_DSP
 #define NO_EQ

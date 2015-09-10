@@ -13,11 +13,6 @@
 
 #include "archive.h"
 
-#define UNGZIP_SUPPORT
-#define UNLHA_SUPPORT
-#define UNRAR_SUPPORT
-#define ZIPPED_MOD_SUPPORT
-
 #ifdef ZIPPED_MOD_SUPPORT
 #include "unzip.h"
 #ifdef UNLHA_SUPPORT
