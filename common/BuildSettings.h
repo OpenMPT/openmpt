@@ -392,6 +392,10 @@
 #define MPT_WITH_FILEIO // External samples require disk file io
 #endif
 
+#if !defined(NO_ARCHIVE_SUPPORT) && !defined(MPT_WITH_PATHSTRING)
+#define MPT_WITH_PATHSTRING // archive requires PathString
+#endif
+
 #if defined(MPT_WITH_FILEIO) && !defined(MPT_WITH_PATHSTRING)
 #define MPT_WITH_PATHSTRING // disk file io requires PathString
 #endif
