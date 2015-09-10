@@ -17,7 +17,7 @@ set MPT_REVISION=%OPENMPT_VERSION%-r%SVNVERSION%
 cd bin\Win32 || goto error
 del /f /q openmpt-win32old.tar
 del /f /q openmpt-win32old-%MPT_REVISION%.7z
-copy /y ..\..\LICENSE .\ || goto error
+copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 rmdir /s /q Licenses
 mkdir Licenses
 copy /y ..\..\include\bladeenc\BladeDLL.html                 .\Licenses\License.BladeDLL.html || goto error
