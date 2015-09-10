@@ -890,13 +890,19 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				uint8 cmd = patternData.ReadUint8();
 				uint8 param = patternData.ReadUint8();
+				lastValue[ch].param = param;
 				if(cmd)
 				{
 					m.command = cmd;
 					m.param = param;
 					S3MConvert(m, true);
 					lastValue[ch].command = m.command;
-					lastValue[ch].param = m.param;
+				} else
+				{
+					// In some IT-compatible trackers, it is possible to input an parameter without a command.
+					// In this case, we still need to update the last value memory.
+					// Example: ckbounce.it
+					lastValue[ch].command = CMD_NONE;
 				}
 			}
 		}
@@ -1547,7 +1553,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 					if (b != chnmask[ch])
 					{
 						chnmask[ch] = b;
-						buf[len++] = uint8((ch + 1) | 0x80);
+						buf[len++] = uint8((ch + 1) | IT_bitmask_patternChanEnabled_c);
 						buf[len++] = b;
 					} else
 					{
