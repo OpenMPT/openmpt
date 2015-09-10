@@ -251,10 +251,10 @@ static uint8 DMFporta2MPT(uint8 val, const uint8 internalTicks, const bool hasFi
 {
 	if(val == 0)
 		return 0;
-	else if((val <= 0x0F || internalTicks < 2) && hasFine)
+	else if((val <= 0x0F  && hasFine) || internalTicks < 2)
 		return (val | 0xF0);
 	else
-		return MAX(1, (val / (internalTicks - 1)));	// no porta on first tick!
+		return std::max<uint8>(1, (val / (internalTicks - 1)));	// no porta on first tick!
 }
 
 
@@ -262,10 +262,10 @@ static uint8 DMFporta2MPT(uint8 val, const uint8 internalTicks, const bool hasFi
 static uint8 DMFslide2MPT(uint8 val, const uint8 internalTicks, const bool up)
 //----------------------------------------------------------------------------
 {
-	val = MAX(1, val / 4);
+	val = std::max<uint8>(1, val / 4);
 	const bool isFine = (val < 0x0F) || (internalTicks < 2);
 	if(!isFine)
-		val = MAX(1, (val + internalTicks - 2) / (internalTicks - 1));	// no slides on first tick! "+ internalTicks - 2" for rounding precision
+		val = std::max<uint8>(1, (val + internalTicks - 2) / (internalTicks - 1));	// no slides on first tick! "+ internalTicks - 2" for rounding precision
 
 	if(up)
 		return (isFine ? 0x0F : 0x00) | (val << 4);
@@ -531,7 +531,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 				//const int tickspeed = (tempoRealBPMmode) ? MAX(1, (tempoData * beat * 4) / 60) : tempoData;
 				const int tickspeed = (settings.realBPMmode) ? std::max(1, settings.tempoBPM * settings.beat * 2) : ((settings.tempoTicks + 1) * 30);
 				// Try to find matching speed - try higher speeds first, so that effects like arpeggio and tremor work better.
-				for(speed = 255; speed > 1; speed--)
+				for(speed = 255; speed > 2; speed--)
 				{
 					// Original unoptimized formula:
 					// tempo = 30 * tickspeed * speed / 48;
