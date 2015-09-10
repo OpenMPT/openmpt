@@ -9,10 +9,16 @@
 
 #include "stdafx.h"
 #include "unlha.h"
+
+#ifdef UNLHA_SUPPORT
 #include "lhasa.h"
+#endif // UNLHA_SUPPORT
 
 
 OPENMPT_NAMESPACE_BEGIN
+
+
+#ifdef UNLHA_SUPPORT
 
 
 static int LHAreadFileReader(void *handle, void *buf, size_t buf_len)
@@ -153,6 +159,9 @@ bool CLhaArchive::ExtractFile(std::size_t index)
 	CloseArchive();
 	return data.size() > 0;
 }
+
+
+#endif // UNLHA_SUPPORT
 
 
 OPENMPT_NAMESPACE_END

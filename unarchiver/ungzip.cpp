@@ -12,6 +12,8 @@
 #include "../common/FileReader.h"
 #include "ungzip.h"
 
+#ifdef UNGZIP_SUPPORT
+
 #if !defined(NO_ZLIB)
 #include <zlib/zlib.h>
 #elif !defined(NO_MINIZ)
@@ -19,8 +21,13 @@
 #include <miniz/miniz.c>
 #endif
 
+#endif // UNGZIP_SUPPORT
+
 
 OPENMPT_NAMESPACE_BEGIN
+
+
+#ifdef UNGZIP_SUPPORT
 
 	
 CGzipArchive::CGzipArchive(FileReader &file) : ArchiveBase(file)
@@ -122,6 +129,9 @@ bool CGzipArchive::ExtractFile(std::size_t index)
 	// Everything went OK? Check return code, number of written bytes and CRC32.
 	return (retVal == Z_STREAM_END && trailer.isize == strm.total_out && trailer.crc32_ == crc32(0, (Bytef *)&data[0], trailer.isize));
 }
+
+
+#endif // UNGZIP_SUPPORT
 
 
 OPENMPT_NAMESPACE_END

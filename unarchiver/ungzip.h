@@ -13,6 +13,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+#ifdef UNGZIP_SUPPORT
+
 //=====================================
 class CGzipArchive : public ArchiveBase
 //=====================================
@@ -85,5 +87,7 @@ public:
 	CGzipArchive(FileReader &file);
 	virtual ~CGzipArchive();
 };
+
+#endif // UNGZIP_SUPPORT
 
 OPENMPT_NAMESPACE_END

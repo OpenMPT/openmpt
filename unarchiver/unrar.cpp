@@ -9,6 +9,9 @@
 
 #include "stdafx.h"
 #include "unrar.h"
+
+#ifdef UNRAR_SUPPORT
+
 #include "../include/unrar/openmpt-callback.hpp"
 
 #if MPT_COMPILER_MSVC
@@ -20,9 +23,13 @@
 #pragma warning(default:4100; default:4244)
 #endif
 
+#endif // UNRAR_SUPPORT
+
 
 OPENMPT_NAMESPACE_BEGIN
 
+
+#ifdef UNRAR_SUPPORT
 
 struct RARData
 {
@@ -153,6 +160,9 @@ bool CRarArchive::ExtractFile(std::size_t index)
 		return false;
 	}
 }
+
+
+#endif // UNRAR_SUPPORT
 
 
 OPENMPT_NAMESPACE_END

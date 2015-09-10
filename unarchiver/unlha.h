@@ -11,11 +11,18 @@
 
 #include "archive.h"
 
+
+#ifdef UNLHA_SUPPORT
+
 typedef struct _LHAInputStream LHAInputStream;
 typedef struct _LHAReader LHAReader;
 typedef struct _LHAFileHeader LHAFileHeader;
 
+#endif // UNLHA_SUPPORT
+
 OPENMPT_NAMESPACE_BEGIN
+
+#ifdef UNLHA_SUPPORT
 
 //====================================
 class CLhaArchive : public ArchiveBase
@@ -33,5 +40,7 @@ public:
 public:
 	virtual bool ExtractFile(std::size_t index);
 };
+
+#endif // UNLHA_SUPPORT
 
 OPENMPT_NAMESPACE_END
