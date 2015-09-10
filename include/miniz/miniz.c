@@ -575,7 +575,7 @@ typedef enum
 // Inits a ZIP archive reader.
 // These functions read and validate the archive's central directory.
 mz_bool mz_zip_reader_init(mz_zip_archive *pZip, mz_uint64 size, mz_uint32 flags);
-mz_bool mz_zip_reader_init_mem(mz_zip_archive *pZip, void *pMem, size_t size, mz_uint32 flags); // OpenMPT
+mz_bool mz_zip_reader_init_mem(mz_zip_archive *pZip, const void *pMem, size_t size, mz_uint32 flags);
 
 #ifndef MINIZ_NO_STDIO
 mz_bool mz_zip_reader_init_file(mz_zip_archive *pZip, const char *pFilename, mz_uint32 flags);
@@ -3298,7 +3298,7 @@ static size_t mz_zip_mem_read_func(void *pOpaque, mz_uint64 file_ofs, void *pBuf
   return s;
 }
 
-mz_bool mz_zip_reader_init_mem(mz_zip_archive *pZip, void *pMem, size_t size, mz_uint32 flags) // OpenMPT
+mz_bool mz_zip_reader_init_mem(mz_zip_archive *pZip, const void *pMem, size_t size, mz_uint32 flags)
 {
   if (!mz_zip_reader_init_internal(pZip, flags))
     return MZ_FALSE;
@@ -3308,7 +3308,7 @@ mz_bool mz_zip_reader_init_mem(mz_zip_archive *pZip, void *pMem, size_t size, mz
 #ifdef __cplusplus
   pZip->m_pState->m_pMem = const_cast<void *>(pMem);
 #else
-  pZip->m_pState->m_pMem = (void *)pMem;
+  memcpy(&(pZip->m_pState->m_pMem), &pMem, sizeof(void*)); // pZip->m_pState->m_pMem = (void *)pMem; // OpenMPT (force-silence const cast warning)
 #endif
   pZip->m_pState->m_mem_size = size;
   if (!mz_zip_reader_read_central_dir(pZip, flags))
