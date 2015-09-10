@@ -250,7 +250,7 @@ CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
 		if(mz_zip_reader_file_stat(zip, i, &stat))
 		{
 			info.type = ArchiveFileNormal;
-			info.name = mpt::PathString::FromWide(mpt::ToWide(mpt::CharsetCP437, stat.m_filename));
+			info.name = mpt::PathString::FromUnicode(mpt::ToUnicode(mpt::CharsetCP437, stat.m_filename));
 			info.size = stat.m_uncomp_size;
 		}
 		if(mz_zip_reader_is_file_a_directory(zip, i))
@@ -312,7 +312,7 @@ bool CZipArchive::ExtractFile(std::size_t index)
 	{
 		return false;
 	}
-	comment = mpt::ToWide(mpt::CharsetCP437, std::string(stat.m_comment, stat.m_comment + stat.m_comment_size));
+	comment = mpt::ToUnicode(mpt::CharsetCP437, std::string(stat.m_comment, stat.m_comment + stat.m_comment_size));
 	return true;
 }
 
