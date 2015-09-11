@@ -19,6 +19,7 @@
 #include "dlg_misc.h"
 #include "Dlsbank.h"
 #include "mod2wave.h"
+#include "MIDIMacroDialog.h"
 #include "StreamEncoderFLAC.h"
 #include "StreamEncoderMP3.h"
 #include "StreamEncoderOpus.h"
@@ -91,13 +92,13 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_VIEW_SAMPLES,			OnEditSamples)
 	ON_COMMAND(ID_VIEW_INSTRUMENTS,		OnEditInstruments)
 	ON_COMMAND(ID_VIEW_COMMENTS,		OnEditComments)
-	ON_COMMAND(ID_VIEW_GRAPH,			OnEditGraph) //rewbs.graph
 	ON_COMMAND(ID_VIEW_EDITHISTORY,		OnViewEditHistory)
 	ON_COMMAND(ID_VIEW_MPTHACKS,		OnViewMPTHacks)
 	ON_COMMAND(ID_INSERT_PATTERN,		OnInsertPattern)
 	ON_COMMAND(ID_INSERT_SAMPLE,		OnInsertSample)
 	ON_COMMAND(ID_INSERT_INSTRUMENT,	OnInsertInstrument)
 	ON_COMMAND(ID_EDIT_CLEANUP,			OnShowCleanup)
+	ON_COMMAND(ID_PATTERN_MIDIMACRO,	OnSetupZxxMacros)
 
 	ON_COMMAND(ID_ESTIMATESONGLENGTH,	OnEstimateSongLength)
 	ON_COMMAND(ID_APPROX_BPM,			OnApproximateBPM)
@@ -106,6 +107,7 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_PATTERN_RESTART,		OnPatternRestart)
 	ON_UPDATE_COMMAND_UI(ID_INSERT_INSTRUMENT,		OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_INSTRUMENTS,		OnUpdateXMITMPTOnly)
+	ON_UPDATE_COMMAND_UI(ID_PATTERN_MIDIMACRO,		OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MIDIMAPPING,		OnUpdateHasMIDIMappings)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_EDITHISTORY,		OnUpdateITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_FILE_SAVECOMPAT,		OnUpdateCompatExportableOnly)
@@ -1275,7 +1277,7 @@ bool CModDoc::IsNotePlaying(UINT note, SAMPLEINDEX nsmp, INSTRUMENTINDEX nins)
 	for (CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++, pChn++) if (!pChn->nMasterChn)
 	{
 		if(pChn->nLength != 0 && !pChn->dwFlags[CHN_NOTEFADE | CHN_KEYOFF| CHN_MUTE]
-			&& (note == pChn->nNewNote || !note)
+			&& (note == pChn->nNewNote || note == NOTE_NONE)
 			&& (pChn->pModSample == &m_SndFile.GetSample(nsmp) || !nsmp)
 			&& (pChn->pModInstrument == m_SndFile.Instruments[nins] || !nins)) return true;
 	}
@@ -2236,20 +2238,42 @@ void CModDoc::OnEditComments()
 	SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_COMMENTS);
 }
 
-//rewbs.graph
-void CModDoc::OnEditGraph()
-//-------------------------
-{
-	if (m_SndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_GRAPH);
-}
-//end rewbs.graph
-
 
 void CModDoc::OnShowCleanup()
 //---------------------------
 {
 	CModCleanupDlg dlg(*this, CMainFrame::GetMainFrame());
 	dlg.DoModal();
+}
+
+
+void CModDoc::OnSetupZxxMacros()
+//------------------------------
+{
+	CMidiMacroSetup dlg(m_SndFile);
+	if (dlg.DoModal() == IDOK)
+	{
+		m_SndFile.m_MidiCfg = dlg.m_MidiCfg;
+		if (dlg.m_bEmbed)
+		{
+			m_SndFile.m_SongFlags.set(SONG_EMBEDMIDICFG);
+			SetModified();
+		} else
+		{
+			if (m_SndFile.m_SongFlags[SONG_EMBEDMIDICFG]) SetModified();
+			m_SndFile.m_SongFlags.reset(SONG_EMBEDMIDICFG);
+
+			// If this macro is not the default IT macro, display a warning.
+			if (!m_SndFile.m_MidiCfg.IsMacroDefaultSetupUsed())
+			{
+				if(Reporting::Confirm(_T("You have chosen not to embed MIDI macros. However, the current macro configuration differs from the default macro configuration that is assumed when loading a file that has no macros embedded. This can result in data loss and broken playback.\nWould you like to embed MIDI macros now?")) == cnfYes)
+				{
+					m_SndFile.m_SongFlags.set(SONG_EMBEDMIDICFG);
+					SetModified();
+				}
+			}
+		}
+	}
 }
 
 
@@ -2668,8 +2692,8 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcViewSamples: OnEditSamples(); break;
 		case kcViewInstruments: OnEditInstruments(); break;
 		case kcViewComments: OnEditComments(); break;
-		case kcViewGraph: OnEditGraph(); break; //rewbs.graph
 		case kcViewSongProperties: SongProperties(); break;
+		case kcShowMacroConfig:	OnSetupZxxMacros(); break;
 
 		case kcFileSaveAsWave:	OnFileWaveConvert(); break;
 		case kcFileSaveAsMP3:	OnFileMP3Convert(); break;
@@ -2691,14 +2715,11 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcPlaySongFromPattern: OnPatternRestart(false); break;
 		case kcStopSong: OnPlayerStop(); break;
 		case kcPanic: OnPanic(); break;
-//		case kcPauseSong: OnPlayerPause(); break;
-
-
 	}
 
 	return wParam;
 }
-//end rewbs.customKeys
+
 
 void CModDoc::TogglePluginEditor(UINT m_nCurrentPlugin)
 //-----------------------------------------------------

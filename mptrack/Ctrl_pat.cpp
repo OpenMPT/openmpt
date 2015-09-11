@@ -23,7 +23,6 @@
 #include "PatternEditorDialogs.h"
 #include "ChannelManagerDlg.h"
 #include "../common/StringFixer.h"
-#include "MIDIMacroDialog.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -47,16 +46,12 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_COMMAND(IDC_PATTERN_RECORD,			OnPatternRecord)
 	ON_COMMAND(IDC_PATTERN_LOOP,			OnChangeLoopStatus)
 	ON_COMMAND(ID_PATTERN_PLAYROW,			OnPatternPlayRow)
-// -> CODE#0015
-// -> DESC="channels management dlg"
 	ON_COMMAND(ID_PATTERN_CHANNELMANAGER,	OnChannelManager)
-// -! NEW_FEATURE#0015
 	ON_COMMAND(ID_PATTERN_VUMETERS,			OnPatternVUMeters)
-	ON_COMMAND(ID_VIEWPLUGNAMES,			OnPatternViewPlugNames)	//rewbs.patPlugNames
+	ON_COMMAND(ID_VIEWPLUGNAMES,			OnPatternViewPlugNames)
 	ON_COMMAND(ID_NEXTINSTRUMENT,			OnNextInstrument)
 	ON_COMMAND(ID_PREVINSTRUMENT,			OnPrevInstrument)
 	ON_COMMAND(IDC_PATTERN_FOLLOWSONG,		OnFollowSong)
-	ON_COMMAND(ID_PATTERN_MIDIMACRO,		OnSetupZxxMacros)
 	ON_COMMAND(ID_PATTERN_CHORDEDIT,		OnChordEditor)
 	ON_COMMAND(ID_PATTERN_PROPERTIES,		OnPatternProperties)
 	ON_COMMAND(ID_PATTERN_EXPAND,			OnPatternExpand)
@@ -111,7 +106,7 @@ CCtrlPatterns::CCtrlPatterns(CModControlView &parent, CModDoc &document) : CModC
 	m_nInstrument = 0;
 
 	m_bVUMeters = TrackerSettings::Instance().gbPatternVUMeters;
-	m_bPluginNames = TrackerSettings::Instance().gbPatternPluginNames;	 	//rewbs.patPlugNames
+	m_bPluginNames = TrackerSettings::Instance().gbPatternPluginNames;
 	m_bRecord = TrackerSettings::Instance().gbPatternRecord;
 	m_nDetailLevel = PatternCursor::lastColumn;
 }
@@ -194,7 +189,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 
 	SetDlgItemInt(IDC_EDIT_SPACING, TrackerSettings::Instance().gnPatternSpacing);
 	SetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS, m_OrderList.GetMargins());
-	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FOLLOWSONGOFF));		//rewbs.noFollow - set to unchecked
+	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FOLLOWSONGOFF));
 
 	m_SpinSequence.SetRange(0, m_sndFile.Order.GetNumSequences() - 1);
 	m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex());
@@ -521,11 +516,6 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		OnPatternDuplicate();
 		break;
 
-	case CTRLMSG_SETUPMACROS:
-		OnSetupZxxMacros();
-		break;
-
-	//end rewbs.customKeys
 	default:
 		return CModControlDlg::OnModCtrlMsg(wParam, lParam);
 	}
@@ -1127,36 +1117,6 @@ void CCtrlPatterns::OnSequenceNameChanged()
 		m_sndFile.Order.SetName(str.GetString());
 		m_modDoc.SetModified();
 		m_modDoc.UpdateAllViews(NULL, SequenceHint(m_sndFile.Order.GetCurrentSequenceIndex()).Names(), this);
-	}
-}
-
-
-void CCtrlPatterns::OnSetupZxxMacros()
-//------------------------------------
-{
-	CMidiMacroSetup dlg(m_sndFile, this);
-	if (dlg.DoModal() == IDOK)
-	{
-		m_sndFile.m_MidiCfg = dlg.m_MidiCfg;
-		if (dlg.m_bEmbed)
-		{
-			m_sndFile.m_SongFlags.set(SONG_EMBEDMIDICFG);
-			m_modDoc.SetModified();
-		} else
-		{
-			if (m_sndFile.m_SongFlags[SONG_EMBEDMIDICFG]) m_modDoc.SetModified();
-			m_sndFile.m_SongFlags.reset(SONG_EMBEDMIDICFG);
-
-			// If this macro is not the default IT macro, display a warning.
-			if(!m_sndFile.m_MidiCfg.IsMacroDefaultSetupUsed())
-			{
-				if(Reporting::Confirm(_T("You have chosen not to embed MIDI macros. However, the current macro configuration differs from the default macro configuration that is assumed when loading a file that has no macros embedded. This can result in data loss and broken playback.\nWould you like to embed MIDI macros now?")) == cnfYes)
-				{
-					m_sndFile.m_SongFlags.set(SONG_EMBEDMIDICFG);
-					m_modDoc.SetModified();
-				}
-			}
-		}
 	}
 }
 

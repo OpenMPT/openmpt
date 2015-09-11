@@ -514,6 +514,7 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_CHANNEL_MANAGER:	s = _T("Ch&annel Manager"); c = kcViewChannelManager; break;
 		case ID_CLIPBOARD_MANAGER:	s = _T("C&lipboard Manager"); c = kcToggleClipboardManager; break;
 		case ID_VIEW_SONGPROPERTIES:s = _T("Song P&roperties"); c = kcViewSongProperties; break;
+		case ID_PATTERN_MIDIMACRO:	s = _T("&Zxx Macro Configuration"); c = kcShowMacroConfig; break;
 		case ID_VIEW_MIDIMAPPING:	s = _T("&MIDI Mapping"); c = kcViewMIDImapping; break;
 		case ID_VIEW_EDITHISTORY:	s = _T("Edit &History"); c = kcViewEditHistory; break;
 		// Help submenu:
@@ -581,7 +582,8 @@ void CInputHandler::UpdateMainMenu()
 	UPDATEMENU(ID_CHANNEL_MANAGER);
 	UPDATEMENU(ID_CLIPBOARD_MANAGER);
 	UPDATEMENU(ID_VIEW_SONGPROPERTIES);
-	UPDATEMENU(ID_VIEW_MIDIMAPPING);
+	UPDATEMENU(ID_VIEW_SONGPROPERTIES);
+	UPDATEMENU(ID_PATTERN_MIDIMACRO);
 	UPDATEMENU(ID_VIEW_EDITHISTORY);
 	UPDATEMENU(ID_HELPSHOW);
 #undef UPDATEMENU

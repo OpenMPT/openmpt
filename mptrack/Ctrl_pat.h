@@ -246,7 +246,6 @@ protected:
 	afx_msg void OnPatternNameChanged();
 	afx_msg void OnSequenceNameChanged();
 	afx_msg void OnOrderListMarginsChanged();
-	afx_msg void OnSetupZxxMacros();
 	afx_msg void OnChordEditor();
 	afx_msg void OnDetailLo();
 	afx_msg void OnDetailMed();

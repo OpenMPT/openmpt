@@ -2160,12 +2160,13 @@ BEGIN
         END
         MENUITEM SEPARATOR
         MENUITEM "S&etup...",                   ID_VIEW_OPTIONS
-        MENUITEM "Pl&ugin Manager...",          ID_PLUGIN_SETUP
-        MENUITEM "Ch&annel Manager...",         ID_CHANNEL_MANAGER
-        MENUITEM "Clipboard Manager...",        ID_CLIPBOARD_MANAGER
-        MENUITEM "Song P&roperties...",         ID_VIEW_SONGPROPERTIES
-        MENUITEM "&MIDI Mapping...",            ID_VIEW_MIDIMAPPING
-        MENUITEM "Edit &History...",            ID_VIEW_EDITHISTORY
+        MENUITEM "Pl&ugin Manager",             ID_PLUGIN_SETUP
+        MENUITEM "Ch&annel Manager",            ID_CHANNEL_MANAGER
+        MENUITEM "Clipboard Manager",           ID_CLIPBOARD_MANAGER
+        MENUITEM "Song P&roperties",            ID_VIEW_SONGPROPERTIES
+        MENUITEM "&Zxx Macro Configuration",    ID_PATTERN_MIDIMACRO
+        MENUITEM "&MIDI Mapping",               ID_VIEW_MIDIMAPPING
+        MENUITEM "Edit &History",               ID_VIEW_EDITHISTORY
         MENUITEM "&Find MPT Hacks in Song",     ID_VIEW_MPTHACKS
     END
     POPUP "&Window"
