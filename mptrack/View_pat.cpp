@@ -79,11 +79,8 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_EDIT_GOTO_MENU,	OnEditGoto)
 	ON_COMMAND(ID_EDIT_FINDNEXT,	OnEditFindNext)
 	ON_COMMAND(ID_EDIT_RECSELECT,	OnRecordSelect)
-// -> CODE#0012
-// -> DESC="midi keyboard split"
 	ON_COMMAND(ID_EDIT_SPLITRECSELECT,	OnSplitRecordSelect)
 	ON_COMMAND(ID_EDIT_SPLITKEYBOARDSETTINGS,	SetSplitKeyboardSettings)
-// -! NEW_FEATURE#0012
 	ON_COMMAND(ID_EDIT_UNDO,		OnEditUndo)
 	ON_COMMAND(ID_EDIT_REDO,		OnEditRedo)
 	ON_COMMAND(ID_PATTERN_CHNRESET,	OnChannelReset)
@@ -4565,7 +4562,6 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 		case kcShowNoteProperties: ShowEditWindow(); return wParam;
 		case kcShowPatternProperties: OnPatternProperties(); return wParam;
-		case kcShowMacroConfig:	SendCtrlMessage(CTRLMSG_SETUPMACROS); return wParam;
 		case kcShowSplitKeyboardSettings:	SetSplitKeyboardSettings(); return wParam;
 		case kcShowEditMenu:	{
 									CPoint pt = GetPointFromPosition(m_Cursor);

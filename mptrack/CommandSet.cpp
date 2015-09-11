@@ -528,8 +528,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcToggleChanMuteOnPatTransition, 1770, _T("(Un)mute channel on pattern transition"));
 	DefineKeyCommand(kcChannelUnmuteAll, 1771, _T("Unmute all channels"));
 	DefineKeyCommand(kcShowPatternProperties, 1772, _T("Show Pattern Properties"));
-	DefineKeyCommand(kcShowMacroConfig, 1773, _T("Show MIDI Macro Configuration"));
-	DefineKeyCommand(kcViewSongProperties, 1775, _T("Show Song Properties"));
+	DefineKeyCommand(kcShowMacroConfig, 1773, _T("View Zxx Macro Configuration"));
+	DefineKeyCommand(kcViewSongProperties, 1775, _T("View Song Properties"));
 	DefineKeyCommand(kcChangeLoopStatus, 1776, _T("Toggle Loop Pattern"));
 	DefineKeyCommand(kcFileExportCompat, 1777, _T("File/Compatibility Export"));
 	DefineKeyCommand(kcUnmuteAllChnOnPatTransition, 1778, _T("Unmute all channels on pattern transition"));
