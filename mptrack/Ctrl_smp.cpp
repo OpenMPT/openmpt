@@ -703,6 +703,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		DWORD d;
 
 		m_SpinSample.SetRange(1, m_sndFile.GetNumSamples());
+		m_SpinSample.Invalidate(FALSE);	// In case the spin button was previously disabled
 
 		// Length / Type
 		wsprintf(s, _T("%u-bit %s, len: %u"), sample.GetElementarySampleSize() * 8, sample.uFlags[CHN_STEREO] ? _T("stereo") : _T("mono"), sample.nLength);

@@ -172,6 +172,7 @@ protected:
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
+	afx_msg void OnSampleSlice();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

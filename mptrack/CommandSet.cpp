@@ -495,12 +495,12 @@ void CCommandSet::SetupCommands()
 	//DefineKeyCommand(kcSampleCtrlLoad, 1676, _T("Load Sample"), kcHidden);
 	//DefineKeyCommand(kcSampleCtrlSave, 1677, _T("Save Sample"), kcHidden);
 	//DefineKeyCommand(kcSampleCtrlNew, 1678, _T("New Sample"), kcHidden);
-	DefineKeyCommand(kcInstrumentLoad, 1679, _T("Load an instrument"), kcHidden);
-	DefineKeyCommand(kcInstrumentSave, 1680, _T("Save instrument"), kcHidden);
-	DefineKeyCommand(kcInstrumentNew, 1681, _T("New instrument"), kcHidden);
-	DefineKeyCommand(kcInstrumentCtrlLoad, 1682, _T("Load an instrument"), kcHidden);
-	DefineKeyCommand(kcInstrumentCtrlSave, 1683, _T("Save instrument"), kcHidden);
-	DefineKeyCommand(kcInstrumentCtrlNew, 1684, _T("New instrument"), kcHidden);
+	DefineKeyCommand(kcInstrumentLoad, 1679, _T("Load Instrument"), kcHidden);
+	DefineKeyCommand(kcInstrumentSave, 1680, _T("Save Instrument"), kcHidden);
+	DefineKeyCommand(kcInstrumentNew, 1681, _T("New Instrument"), kcHidden);
+	DefineKeyCommand(kcInstrumentCtrlLoad, 1682, _T("Load Instrument"), kcHidden);
+	DefineKeyCommand(kcInstrumentCtrlSave, 1683, _T("Save Instrument"), kcHidden);
+	DefineKeyCommand(kcInstrumentCtrlNew, 1684, _T("New Instrument"), kcHidden);
 	DefineKeyCommand(kcSwitchToOrderList, 1685, _T("Switch to Order List"));
 	DefineKeyCommand(kcEditMixPasteITStyle, 1686, _T("Mix Paste (old IT Style)"));
 	DefineKeyCommand(kcApproxRealBPM, 1687, _T("Show approx. real BPM"));
@@ -688,6 +688,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcOrderlistEditCopyOrders, 1950, _T("Copy Orders"));
 	DefineKeyCommand(kcTreeViewStopPreview, 1951, _T("Stop sample preview"), kcHidden);
 	DefineKeyCommand(kcSampleDuplicate, 1952, _T("Duplicate Sample"));
+	DefineKeyCommand(kcSampleSlice, 1953, _T("Slice at cue points"));
 
 	// Add new key commands here.
 

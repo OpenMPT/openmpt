@@ -110,6 +110,7 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_ADDSILENCE,		OnAddSilence)
 	ON_COMMAND(ID_SAMPLE_GRID,				OnChangeGridSize)
 	ON_COMMAND(ID_SAMPLE_QUICKFADE,			OnQuickFade)
+	ON_COMMAND(ID_SAMPLE_SLICE,				OnSampleSlice)
 	ON_COMMAND_RANGE(ID_SAMPLE_CUE_1, ID_SAMPLE_CUE_9, OnSetCuePoint)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO,		OnUpdateUndo)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO,		OnUpdateRedo)
@@ -1777,17 +1778,22 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 							ID_SAMPLE_SETSUSTAINEND, s);
 					}
 
-					if(sndFile.GetModSpecifications().HasVolCommand(VOLCMD_OFFSET))
+					//if(sndFile.GetModSpecifications().HasVolCommand(VOLCMD_OFFSET))
 					{
+						// Sample cues
 						::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 						HMENU hCueMenu = ::CreatePopupMenu();
-						for(int i = 0; i < 9; i++)
+						bool hasValidPoints = false;
+						for(int i = 0; i < CountOf(sample.cues); i++)
 						{
-							wsprintf(s, _T("Cue &%c: %u"), '1' + i, sndFile.GetSample(m_nSample).cues[i]);
+							const SmpLength cue = sample.cues[i];
+							wsprintf(s, _T("Cue &%c: %u"), '1' + i, cue);
 							::AppendMenu(hCueMenu, MF_STRING, ID_SAMPLE_CUE_1 + i, s);
+							if(cue > 0 && cue < sample.nLength) hasValidPoints = true;
 						}
 						wsprintf(s, _T("Set Sample Cu&e to:\t%u"), dwPos);
 						::AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hCueMenu), s);
+						::AppendMenu(hMenu, MF_STRING | (hasValidPoints ? 0 : MF_GRAYED), ID_SAMPLE_SLICE, _T("Slice &at cue points") + ih->GetKeyTextFromCommand(kcSampleSlice));
 					}
 
 					::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
@@ -1795,8 +1801,8 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				}
 			}
 
-			if(sample.GetElementarySampleSize() > 1) ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_8BITCONVERT, "Convert to &8-bit\t" + ih->GetKeyTextFromCommand(kcSample8Bit));
-			else ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_16BITCONVERT, "Convert to &16-bit\t" + ih->GetKeyTextFromCommand(kcSample8Bit));
+			if(sample.GetElementarySampleSize() > 1) ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_8BITCONVERT, _T("Convert to &8-bit\t") + ih->GetKeyTextFromCommand(kcSample8Bit));
+			else ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_16BITCONVERT, _T("Convert to &16-bit\t") + ih->GetKeyTextFromCommand(kcSample8Bit));
 			if(sample.GetNumChannels() > 1)
 			{
 				HMENU hMonoMenu = ::CreatePopupMenu();
@@ -2983,6 +2989,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcSampleXFade:				PostCtrlMessage(IDC_SAMPLE_XFADE); return wParam;
 		case kcSampleAutotune:			PostCtrlMessage(IDC_SAMPLE_AUTOTUNE); return wParam;
 		case kcSampleQuickFade:			PostCtrlMessage(IDC_SAMPLE_QUICKFADE); return wParam;
+		case kcSampleSlice:			OnSampleSlice(); return wParam;
 
 		// Those don't seem to work.
 		case kcNoteOff:			PlayNote(NOTE_KEYOFF); return wParam;
@@ -3042,6 +3049,65 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	// Pass on to ctrl_smp
 	return GetControlDlg()->SendMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
+}
+
+
+void CViewSample::OnSampleSlice()
+//-------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if(pModDoc == nullptr) return;
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	ModSample &sample = sndFile.GetSample(m_nSample);
+	if(!sample.HasSampleData()) return;
+
+	// Sort cue points and add two fake cue points to make things easier below...
+	SmpLength cues[CountOf(sample.cues) + 2];
+	for(size_t i = 0; i < CountOf(sample.cues); i++)
+	{
+		cues[i] = sample.cues[i];
+		LimitMax(cues[i], sample.nLength);
+	}
+	cues[CountOf(sample.cues)] = 0;
+	cues[CountOf(sample.cues) + 1] = sample.nLength;
+	std::sort(cues, cues + CountOf(cues));
+	// Nothing to slice?
+	if(cues[1] == 0 || cues[1] == sample.nLength) return;
+
+	// Now slice the sample at each cue point
+	for(size_t i = 1; i < CountOf(cues) - 1; i++)
+	{
+		const SmpLength cue  = cues[i];
+		if(cue > cues[i - 1] && cue < cues[i + 1])
+		{
+			SAMPLEINDEX nextSmp = pModDoc->InsertSample(true);
+			if(nextSmp == SAMPLEINDEX_INVALID)
+				break;
+
+			ModSample &newSample = sndFile.GetSample(nextSmp);
+			newSample = sample;
+			newSample.nLength = cues[i + 1] - cues[i];
+			newSample.pSample = nullptr;
+			mpt::String::Copy(sndFile.m_szNames[nextSmp], sndFile.m_szNames[m_nSample]);
+			if(newSample.AllocateSample() > 0)
+			{
+				Util::DeleteRange(SmpLength(0), cues[i] - SmpLength(1), newSample.nLoopStart, newSample.nLoopEnd);
+				memcpy(newSample.pSample, sample.pSample8 + cues[i] * sample.GetBytesPerSample(), newSample.nLength * sample.GetBytesPerSample());
+				newSample.PrecomputeLoops(sndFile, false);
+
+				if(sndFile.GetNumInstruments() > 0)
+				{
+					INSTRUMENTINDEX ins = pModDoc->InsertInstrument(nextSmp);
+					if(ins != INSTRUMENTINDEX_INVALID) pModDoc->UpdateAllViews(nullptr, InstrumentHint(ins).Info().Envelope().Names());
+				}
+			}
+		}
+	}
+	
+	pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, "Slice Sample", cues[1], sample.nLength);
+	ctrlSmp::ResizeSample(sample, cues[1], sndFile);
+	sample.PrecomputeLoops(sndFile, true);
+	SetModified(SampleHint(0).Info().Data().Names(), true, true);
 }
 
 
