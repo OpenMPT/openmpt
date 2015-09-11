@@ -1073,7 +1073,7 @@
 #define ID_SAMPLE_TRIM                  32880
 #define ID_FILE_SAVEMIDI                32881
 #define ID_MODTREE_OPENITEM             32882
-#define ID_CONTROLENTER                 32885
+#define ID_SAMPLE_SLICE                 32885
 #define ID_INSTRUMENT_SAMPLEMAP         32886
 #define ID_SAMPLE_MONOCONVERT           32887
 #define ID_SAMPLE_ZOOMUP                32889

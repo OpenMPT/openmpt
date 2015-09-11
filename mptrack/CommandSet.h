@@ -700,6 +700,8 @@ enum CommandID
 
 	kcStartSampleCues,
 	kcEndSampleCues = kcStartSampleCues + 8,
+	kcSampleSlice,
+	kcEndSampleCueGroup = kcSampleSlice,
 
 	//kcSampStartNotes to kcInsNoteMapEndNoteStops must be contiguous.
 	kcSampStartNotes,
