@@ -1783,17 +1783,17 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 						// Sample cues
 						::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 						HMENU hCueMenu = ::CreatePopupMenu();
-						bool hasValidPoints = false;
+						bool hasValidCues = false;
 						for(int i = 0; i < CountOf(sample.cues); i++)
 						{
 							const SmpLength cue = sample.cues[i];
 							wsprintf(s, _T("Cue &%c: %u"), '1' + i, cue);
 							::AppendMenu(hCueMenu, MF_STRING, ID_SAMPLE_CUE_1 + i, s);
-							if(cue > 0 && cue < sample.nLength) hasValidPoints = true;
+							if(cue > 0 && cue < sample.nLength) hasValidCues = true;
 						}
 						wsprintf(s, _T("Set Sample Cu&e to:\t%u"), dwPos);
 						::AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hCueMenu), s);
-						::AppendMenu(hMenu, MF_STRING | (hasValidPoints ? 0 : MF_GRAYED), ID_SAMPLE_SLICE, _T("Slice &at cue points") + ih->GetKeyTextFromCommand(kcSampleSlice));
+						::AppendMenu(hMenu, MF_STRING | (hasValidCues ? 0 : MF_GRAYED), ID_SAMPLE_SLICE, _T("Slice &at cue points") + ih->GetKeyTextFromCommand(kcSampleSlice));
 					}
 
 					::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
@@ -2989,7 +2989,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcSampleXFade:				PostCtrlMessage(IDC_SAMPLE_XFADE); return wParam;
 		case kcSampleAutotune:			PostCtrlMessage(IDC_SAMPLE_AUTOTUNE); return wParam;
 		case kcSampleQuickFade:			PostCtrlMessage(IDC_SAMPLE_QUICKFADE); return wParam;
-		case kcSampleSlice:			OnSampleSlice(); return wParam;
+		case kcSampleSlice:				OnSampleSlice(); return wParam;
 
 		// Those don't seem to work.
 		case kcNoteOff:			PlayNote(NOTE_KEYOFF); return wParam;
@@ -3063,16 +3063,22 @@ void CViewSample::OnSampleSlice()
 
 	// Sort cue points and add two fake cue points to make things easier below...
 	SmpLength cues[CountOf(sample.cues) + 2];
+	bool hasValidCues = false;	// Any cues in ]0, length[
 	for(size_t i = 0; i < CountOf(sample.cues); i++)
 	{
 		cues[i] = sample.cues[i];
-		LimitMax(cues[i], sample.nLength);
+		if(cues[i] >= sample.nLength)
+			cues[i] = sample.nLength;
+		else if(cues[i] > 0)
+			hasValidCues = true;
 	}
+	// Nothing to slice?
+	if(!hasValidCues)
+		return;
+
 	cues[CountOf(sample.cues)] = 0;
 	cues[CountOf(sample.cues) + 1] = sample.nLength;
 	std::sort(cues, cues + CountOf(cues));
-	// Nothing to slice?
-	if(cues[1] == 0 || cues[1] == sample.nLength) return;
 
 	// Now slice the sample at each cue point
 	for(size_t i = 1; i < CountOf(cues) - 1; i++)
