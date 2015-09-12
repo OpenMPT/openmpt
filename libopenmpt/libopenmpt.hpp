@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#ifndef LIBOPENMPT_ANCIENT_COMPILER
+#ifndef LIBOPENMPT_ANCIENT_COMPILER_STDINT
 #include <cstdint>
 #endif
 
