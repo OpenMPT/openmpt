@@ -26,7 +26,7 @@
 /*!
  * \page libopenmpt_cpp_overview C++ API
  *
- * \section error Error Handling
+ * \section libopenmpt_cpp_error Error Handling
  *
  * libopenmpt C++ uses C++ exception handling for errror reporting.
  *
@@ -37,7 +37,7 @@
  * by the C++ language and C++ standard library. These are all derived from
  * std::exception.
  *
- * \section strings Strings
+ * \section libopenmpt_cpp_strings Strings
  *
  * - All strings returned from libopenmpt are encoded in UTF-8.
  * - All strings passed to libopenmpt should also be encoded in UTF-8.

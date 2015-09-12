@@ -21,7 +21,6 @@ and run
 
     make $YOURMAKEOPTIONS check
 
-.
 As the build system retains no state between make invocations, you have to
 provide your make options on every make invocation.
 

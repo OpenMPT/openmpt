@@ -17,7 +17,7 @@
 /*!
  * \page libopenmpt_c_overview C API
  *
- * \section error Error Handling
+ * \section libopenmpt_c_error Error Handling
  *
  * - Functions with no return value in the corresponding C++ API return 0 on
  * failure and 1 on success.
@@ -27,7 +27,7 @@
  * - Functions that return integer values signal error condition by returning
  * an invalid value (-1 in most cases, 0 in some cases).
  *
- * \section strings Strings
+ * \section libopenmpt_c_strings Strings
  *
  * - All strings returned from libopenmpt are encoded in UTF-8.
  * - All strings passed to libopenmpt should also be encoded in UTF-8.
@@ -265,7 +265,7 @@ LIBOPENMPT_API openmpt_module * openmpt_module_create_from_memory( const void * 
 
 /*! \brief Unload a previously created openmpt_module from memory.
  *
- * \param openmpt_module The module to unload.
+ * \param mod The module to unload.
  */
 LIBOPENMPT_API void openmpt_module_destroy( openmpt_module * mod );
 
