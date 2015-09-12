@@ -9,10 +9,16 @@ is just a high-level summary.
 
  *  [**Change**] The C++ API example now uses the PortAudio C++ bindings
     instead of the C API.
+ *  [**Change**] Default compiler options for Emscripten have been changed to
+    more closely match the Emscripten recommendations.
 
- *  [**Bug**] Fix crash in DMF loader and hang in IT / MPTM loader.
+ *  [**Bug**] Client code compilation with C89 compilers was broken in beta13.
+ *  [**Bug**] Testsuite failed on certain Emscripten/node.js combinations.
+ *  [**Bug**] Fixed various crashes or hangs in DMF, OKT, PLM, IT and MPTM
+    loaders.
 
  *  Implemented error handling in the libopenmpt API examples.
+ *  Various playback improvements and fixes for OKT, IT and MOD.
 
 ### libopenmpt 0.2-beta13 (2015-08-16)
 
