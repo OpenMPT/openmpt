@@ -2349,7 +2349,7 @@ bool CSoundFile::ProcessEffects()
 			bool reloadSampleSettings = (IsCompatibleMode(TRK_FASTTRACKER2) && instr != 0);
 			// ProTracker Compatibility: If a sample was stopped before, lone instrument numbers can retrigger it
 			// Test case: PTSwapEmpty.mod
-			bool keepInstr = (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (m_SongFlags[SONG_PT_MODE] && pChn->nInc == 0);
+			bool keepInstr = (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (m_SongFlags[SONG_PT_MODE] && pChn->nInc == 0 && pChn->pModSample != nullptr && pChn->pModSample->pSample == nullptr);
 
 			// Now it's time for some FT2 crap...
 			if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
