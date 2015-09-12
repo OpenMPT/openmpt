@@ -22,11 +22,11 @@ cc -std=c99 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.c -o bin/headerc
 echo '' > bin/headercheck.cpp
 echo '#include "libopenmpt/libopenmpt.hpp"' >> bin/headercheck.cpp
 echo 'int main() { return 0; }' >> bin/headercheck.cpp
-#c++ -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp98
+c++ -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp98 -DLIBOPENMPT_ANCIENT_COMPILER_STDINT
 c++ -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp11
 rm bin/headercheck.c89
 rm bin/headercheck.c99
-#rm bin/headercheck.cpp98
+rm bin/headercheck.cpp98
 rm bin/headercheck.cpp11
 rm bin/headercheck.c
 rm bin/headercheck.cpp
