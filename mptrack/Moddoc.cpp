@@ -1007,7 +1007,7 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 				PlayNote(note, ins, 0, false, vol);
 			}
 			return;
-		} else
+		} else if(plugin != nullptr)
 		{
 			plugin->MidiSend(midiData);
 		}

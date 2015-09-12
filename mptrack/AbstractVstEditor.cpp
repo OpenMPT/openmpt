@@ -308,11 +308,11 @@ void CAbstractVstEditor::UpdatePresetField()
 	{
 		if(m_Menu.GetMenuItemCount() < 5)
 		{
-			m_Menu.AppendMenu(MF_BYPOSITION, ID_VSTPRESETBACKWARDJUMP, TEXT("<<"));
-			m_Menu.AppendMenu(MF_BYPOSITION, ID_PREVIOUSVSTPRESET, TEXT("<"));
-			m_Menu.AppendMenu(MF_BYPOSITION, ID_NEXTVSTPRESET, TEXT(">"));
-			m_Menu.AppendMenu(MF_BYPOSITION, ID_VSTPRESETFORWARDJUMP, TEXT(">>"));
-			m_Menu.AppendMenu(MF_BYPOSITION|MF_DISABLED, 0, TEXT(""));
+			m_Menu.AppendMenu(MF_BYPOSITION, ID_VSTPRESETBACKWARDJUMP, _T("<<"));
+			m_Menu.AppendMenu(MF_BYPOSITION, ID_PREVIOUSVSTPRESET, _T("<"));
+			m_Menu.AppendMenu(MF_BYPOSITION, ID_NEXTVSTPRESET, _T(">"));
+			m_Menu.AppendMenu(MF_BYPOSITION, ID_VSTPRESETFORWARDJUMP, _T(">>"));
+			m_Menu.AppendMenu(MF_BYPOSITION|MF_DISABLED, 0, _T(""));
 		}
 
 		CString programName = m_VstPlugin.GetFormattedProgramName(m_VstPlugin.GetCurrentProgram());
@@ -452,20 +452,18 @@ void CAbstractVstEditor::SetTitle()
 {
 	if(m_VstPlugin.m_pMixStruct)
 	{
-		CStringW title;
-		title.Format(L"FX %02d: ", m_VstPlugin.m_nSlot + 1);
+		std::wstring title = mpt::String::Print(L"FX %1: ", mpt::wfmt::dec0<2>(m_VstPlugin.m_nSlot + 1));
 
-		if(strcmp(m_VstPlugin.m_pMixStruct->GetName(), ""))
-			title.Append(mpt::ToWide(mpt::CharsetLocale, m_VstPlugin.m_pMixStruct->GetName()).c_str());
-		else
-			title.Append(mpt::ToWide(mpt::CharsetUTF8, m_VstPlugin.m_pMixStruct->GetLibraryName()).c_str());
-
+		bool hasCustomName = strcmp(m_VstPlugin.m_pMixStruct->GetName(), "") != 0 && strcmp(m_VstPlugin.m_pMixStruct->GetName(), m_VstPlugin.m_pMixStruct->GetLibraryName()) != 0;
+		if(hasCustomName)
+			title += mpt::ToWide(mpt::CharsetLocale, m_VstPlugin.m_pMixStruct->GetName()) + L" (";
+		title += mpt::ToWide(mpt::CharsetUTF8, m_VstPlugin.m_pMixStruct->GetLibraryName());
+		if(hasCustomName)
+			title += L")";
 		if(m_VstPlugin.isBridged)
-		{
-			title.Append(mpt::String::Print(L" (%1-Bit Bridged)", m_VstPlugin.GetPluginFactory().GetDllBits()).c_str());
-		}
+			title += mpt::String::Print(L" (%1-Bit Bridged)", m_VstPlugin.GetPluginFactory().GetDllBits());
 
-		::SetWindowTextW(m_hWnd, title);
+		::SetWindowTextW(m_hWnd, title.c_str());
 	}
 }
 

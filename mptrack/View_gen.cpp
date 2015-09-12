@@ -25,6 +25,7 @@
 #include "SelectPluginDialog.h"
 #include "../soundlib/mod_specifications.h"
 #include "../common/StringFixer.h"
+#include "AbstractVstEditor.h"
 
 // This is used for retrieving the correct background colour for the
 // frames on the general tab when using WinXP Luna or Vista/Win7 Aero.
@@ -887,16 +888,23 @@ void CViewGlobals::OnPluginNameChanged()
 
 	if ((pModDoc) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 		GetDlgItemText(IDC_EDIT13, s, CountOf(s));
 		mpt::String::SetNullTerminator(s);
-		if (strcmp(s, pSndFile->m_MixPlugins[m_nCurrentPlugin].GetName()))
+		if (strcmp(s, sndFile.m_MixPlugins[m_nCurrentPlugin].GetName()))
 		{
-			mpt::String::Copy(pSndFile->m_MixPlugins[m_nCurrentPlugin].Info.szName, s);
-			if(pSndFile->GetModSpecifications().supportsPlugins)
+			SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
+			mpt::String::Copy(plugin.Info.szName, s);
+			if(sndFile.GetModSpecifications().supportsPlugins)
 				pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, PluginHint(m_nCurrentPlugin + 1).Info().Names(), this);
+
+			CVstPlugin *vstPlug = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
+			if(vstPlug != nullptr && vstPlug->GetEditor() != nullptr)
+			{
+				vstPlug->GetEditor()->SetTitle();
+			}
 			// Update channel plugin assignments
 			PopulateChannelPlugins();
 		}
@@ -1349,10 +1357,15 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 	}
 
 	// Update current plug
-	if(pSndFile->m_MixPlugins[dest].pMixPlugin)
+	CVstPlugin *vstPlug = dynamic_cast<CVstPlugin *>(pSndFile->m_MixPlugins[dest].pMixPlugin);
+	if(vstPlug != nullptr)
 	{
-		((CVstPlugin*)pSndFile->m_MixPlugins[dest].pMixPlugin)->SetSlot(dest);
-		((CVstPlugin*)pSndFile->m_MixPlugins[dest].pMixPlugin)->UpdateMixStructPtr(&(pSndFile->m_MixPlugins[dest]));
+		vstPlug->SetSlot(dest);
+		vstPlug->UpdateMixStructPtr(&(pSndFile->m_MixPlugins[dest]));
+		if(vstPlug->GetEditor() != nullptr)
+		{
+			vstPlug->GetEditor()->SetTitle();
+		}
 	}
 
 	// Update all other plugs' outputs
@@ -1385,7 +1398,7 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 	}
 
 	// Update MODCOMMANDs so that they won't be referring to old indexes (e.g. with NOTE_PC).
-	if (bAdjustPat && pSndFile->GetType() == MOD_TYPE_MPT)
+	if (bAdjustPat && pSndFile->GetModSpecifications().HasNote(NOTE_PC))
 		pSndFile->Patterns.ForEachModCommand(PlugIndexModifier(src + 1, src + 1, int(dest) - int(src)));
 
 	cs.Leave();
