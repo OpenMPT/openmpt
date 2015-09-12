@@ -1211,6 +1211,8 @@ void CViewPattern::DrawDragSel(HDC hdc)
 	}
 
 	// invert the brush pattern (looks just like frame window sizing)
+	::SetTextColor(hdc, RGB(255, 255, 255));
+	::SetBkColor(hdc, RGB(0, 0, 0));
 	CBrush* pBrush = CDC::GetHalftoneBrush();
 	if (pBrush != NULL)
 	{

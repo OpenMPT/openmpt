@@ -2153,6 +2153,14 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM midiData, LPARAM)
 	if(modDoc != nullptr)
 	{
 		modDoc->ProcessMIDI(static_cast<uint32>(midiData), m_nInstrument, modDoc->GetrSoundFile().GetInstrumentPlugin(m_nInstrument), kCtxViewInstruments);
+
+		MIDIEvents::EventType event  = MIDIEvents::GetTypeFromEvent(midiData);
+		uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
+		if(event == MIDIEvents::evNoteOn)
+		{
+			CMainFrame::GetMainFrame()->SetInfoText(modDoc->GetrSoundFile().GetNoteName(midiByte1 + NOTE_MIN, m_nInstrument).c_str());
+		}
+
 		return 1;
 	}
 	return 0;
