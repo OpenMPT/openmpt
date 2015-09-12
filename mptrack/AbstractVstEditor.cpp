@@ -452,17 +452,20 @@ void CAbstractVstEditor::SetTitle()
 {
 	if(m_VstPlugin.m_pMixStruct)
 	{
-		CString Title;
-		Title.Format("FX %02d: ", m_VstPlugin.m_nSlot + 1);
+		CStringW title;
+		title.Format(L"FX %02d: ", m_VstPlugin.m_nSlot + 1);
 
 		if(strcmp(m_VstPlugin.m_pMixStruct->GetName(), ""))
-			Title.Append(m_VstPlugin.m_pMixStruct->GetName());
+			title.Append(mpt::ToWide(mpt::CharsetLocale, m_VstPlugin.m_pMixStruct->GetName()).c_str());
 		else
-			Title.Append(mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, m_VstPlugin.m_pMixStruct->GetLibraryName()).c_str());
-		if(m_VstPlugin.isBridged)
-			Title.Append(" (Bridged)");
+			title.Append(mpt::ToWide(mpt::CharsetUTF8, m_VstPlugin.m_pMixStruct->GetLibraryName()).c_str());
 
-		SetWindowText(Title);
+		if(m_VstPlugin.isBridged)
+		{
+			title.Append(mpt::String::Print(L" (%1-Bit Bridged)", m_VstPlugin.GetPluginFactory().GetDllBits()).c_str());
+		}
+
+		::SetWindowTextW(m_hWnd, title);
 	}
 }
 
