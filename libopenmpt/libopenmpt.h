@@ -87,19 +87,19 @@ LIBOPENMPT_API uint32_t openmpt_get_library_version(void);
  */
 LIBOPENMPT_API uint32_t openmpt_get_core_version(void);
 
-/*! Return a verbose library version string from openmpt_string_get(). */
+/*! Return a verbose library version string from openmpt_get_string(). */
 #define OPENMPT_STRING_LIBRARY_VERSION  "library_version"
-/*! Return a verbose library features string from openmpt_string_get(). */
+/*! Return a verbose library features string from openmpt_get_string(). */
 #define OPENMPT_STRING_LIBRARY_FEATURES "library_features"
-/*! Return a verbose OpenMPT core version string from openmpt_string_get(). */
+/*! Return a verbose OpenMPT core version string from openmpt_get_string(). */
 #define OPENMPT_STRING_CORE_VERSION     "core_version"
-/*! Return information about the current build (e.g. the build date or compiler used) from openmpt_string_get(). */
+/*! Return information about the current build (e.g. the build date or compiler used) from openmpt_get_string(). */
 #define OPENMPT_STRING_BUILD            "build"
-/*! Return all contributors from openmpt_string_get(). */
+/*! Return all contributors from openmpt_get_string(). */
 #define OPENMPT_STRING_CREDITS          "credits"
-/*! Return contact infromation about libopenmpt from openmpt_string_get(). */
+/*! Return contact infromation about libopenmpt from openmpt_get_string(). */
 #define OPENMPT_STRING_CONTACT         "contact"
-/*! Return the libopenmpt license openmpt_string_get(). */
+/*! Return the libopenmpt license openmpt_get_string(). */
 #define OPENMPT_STRING_LICENSE         "license"
 
 /*! \brief Free a string returned by libopenmpt
