@@ -5,9 +5,9 @@ LD  = em++
 AR  = emar
 
 CPPFLAGS += 
-CXXFLAGS += -std=c++11 -fPIC 
-CFLAGS   += -std=c99   -fPIC
-LDFLAGS  += -O3 -s DISABLE_EXCEPTION_CATCHING=0
+CXXFLAGS += -std=c++11 -fPIC -O2 -s DISABLE_EXCEPTION_CATCHING=0 -ffast-math 
+CFLAGS   += -std=c99   -fPIC -O2 -s DISABLE_EXCEPTION_CATCHING=0 -ffast-math fno-strict-aliasing 
+LDFLAGS  += -O2 -s DISABLE_EXCEPTION_CATCHING=0
 LDLIBS   += 
 ARFLAGS  := rcs
 
@@ -35,6 +35,12 @@ STATIC_LIB=0
 EXAMPLES=1
 OPENMPT123=0
 SHARED_SONAME=0
+
+# Disable the generic compiler optimization flags as emscripten is sufficiently different.
+# Optimization flags are hard-coded for emscripten in this file.
+DEBUG=0
+OPTIMIZE=0
+OPTIMIZE_SIZE=0
 
 NO_ZLIB=1
 NO_PORTAUDIO=1
