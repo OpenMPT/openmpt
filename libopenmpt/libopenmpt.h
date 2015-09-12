@@ -99,7 +99,7 @@ LIBOPENMPT_API uint32_t openmpt_get_core_version(void);
 #define OPENMPT_STRING_CREDITS          "credits"
 /*! Return contact infromation about libopenmpt from openmpt_get_string(). */
 #define OPENMPT_STRING_CONTACT         "contact"
-/*! Return the libopenmpt license openmpt_get_string(). */
+/*! Return the libopenmpt license from openmpt_get_string(). */
 #define OPENMPT_STRING_LICENSE         "license"
 
 /*! \brief Free a string returned by libopenmpt
