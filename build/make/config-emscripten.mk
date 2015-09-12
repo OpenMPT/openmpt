@@ -6,7 +6,7 @@ AR  = emar
 
 CPPFLAGS += 
 CXXFLAGS += -std=c++11 -fPIC -O2 -s DISABLE_EXCEPTION_CATCHING=0 -ffast-math 
-CFLAGS   += -std=c99   -fPIC -O2 -s DISABLE_EXCEPTION_CATCHING=0 -ffast-math fno-strict-aliasing 
+CFLAGS   += -std=c99   -fPIC -O2 -s DISABLE_EXCEPTION_CATCHING=0 -ffast-math -fno-strict-aliasing 
 LDFLAGS  += -O2 -s DISABLE_EXCEPTION_CATCHING=0
 LDLIBS   += 
 ARFLAGS  := rcs
