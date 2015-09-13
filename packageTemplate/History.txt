@@ -25,6 +25,63 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.25.02.00 (13 September 2015, revision 5600)
+----------------------------------------------
+General tab
+   [Fix] <js> Cloning plugins failed to copy the patch data in 32-bit legacy builds (and regular 32-bit builds before OpenMPT 1.25).
+
+Pattern tab
+   [Imp] <js> Update vibrato effect memory when seeking.
+   [Fix] <js> Undoing pattern size changes didn't update the scrollbar size (http://bugs.openmpt.org/view.php?id=702).
+   [Fix] <js> Possible crash when resizing pattern during playback with smooth pattern scrolling enabled.
+   [Fix] <js> In smooth scroll mode, the dragging rectangle sometimes had the wrong colours.
+
+Sample tab
+   [New] <js> Can now slice samples at their cue points into several separate samples.
+   [Imp] <js> Add support for Vorbis comments LOOPSTART and LOOPLENGTH in FLAC files to specify loop points (some audio engines seem to use this).
+   [Fix] <js> Writing FLAC samples with a sample rate above 65535 Hz that was not a multiple of 10 Hz, or any sample rate above 655350 Hz failed. Note for software developers: Since FLAC sample rates are capped at 655350 Hz, OpenMPT now writes the real sample rate in a Vorbis comment called SAMPLERATE if it exceeds this limit. Feel free to add support for this tag in your software.
+
+Instrument tab
+   [Imp] <js> Also show the currently playing note in the status bar for notes received via MIDI (tx Xemogasa)
+   [Fix] <js> Possible crash when recording MIDI while there was no instrument yet (tx Xemogasa).
+
+Tree view
+   [New] <js> Allow folders to be shown in lower part of sample browser through a right-click option.
+
+VST / DMO Plugins
+   [Fix] <js> Loading FXBs with parameter sets instead of chunks was broken.
+   [Fix] <js> Update plugin name and slot number in editor window when renaming or moving a plugin.
+   [Reg] <js> Disable the plugin window minimize feature on Wine, as it does not work as intended.
+
+Playback
+   [Fix] <js> Pitch envelopes were upside down in non-linear slides mode since OpenMPT 1.24.01.00.
+   [Fix] <js> Avoid VSTi notes to stack up in XM files due to missing NNA handling (no, you should still not use VSTis in XM).
+
+IT::Loading
+   [Fix] Patterns containing command-less parameter values (which can be entered in some IT-compatible trackers) were imported incorrectly (fixes ckbounce.it).
+
+MOD
+   [Fix] <js> ProTracker offset quirks were partly broken since OpenMPT 1.24.04.00 (fixes professionaltracker.mod)
+
+MOD::Loading
+   [Imp] <js> If there are two Fxx commands on the same row and one can be interpreted as Set Speed and the other as Set Tempo, always treat the module to have CIA timing instead of VBlank timing.
+
+Other formats
+   [Imp] <js> MIDI export has been considerably improved. More commands are exported and it uses one MIDI track per instrument rather than one per pattern channel.
+   [Fix] <js> OKT: Portamento up and down were swapped.
+   [Fix] <js> Possible crashes and hangs with malformed DMF, PLM, IMF, IT and MPTM files.
+
+Audio I/O
+   [Imp] <jh> Detect Wave Out errors during playback, display the detailed error code and message to the user, and try to gracefully shut down the device.
+   [Fix] <jh> Fix stalled UI after longer playback with Wave Out devices, especially on Windows XP.
+
+Misc
+   [Imp] <js> Add Pitch Bend messages to MIDI macro generator.
+   [Imp] <js> Add Zxx Macro Configuration dialog to the View menu and make its shortcut global.
+   [Fix] <js> Song length estimation: Pattern breaks in a pattern followed by a --- pattern were sometimes calculated incorrectly in OpenMPT 1.25.01.00.
+   [Fix] <js> There was an excessive performance drop on some GUI parts in the previous version.
+
+
 v1.25.01.00 (16 August 2015, revision 5484)
 -------------------------------------------
 General tab
