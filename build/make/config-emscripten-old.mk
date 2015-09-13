@@ -24,6 +24,8 @@ LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 CXXFLAGS_WARNINGS += -Wmissing-prototypes
 CFLAGS_WARNINGS   += -Wmissing-prototypes
 
+REQUIRES_RUNPREFIX=1
+
 EXESUFFIX=.js
 SOSUFFIX=.js
 RUNPREFIX=nodejs 
