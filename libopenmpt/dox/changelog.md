@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.2 svn
+
 ### libopenmpt 0.2-beta14 (2015-09-13)
 
  *  [**Change**] The C++ API example now uses the PortAudio C++ bindings
@@ -13,7 +15,7 @@ is just a high-level summary.
     more closely match the Emscripten recommendations.
 
  *  [**Bug**] Client code compilation with C89 compilers was broken in beta13.
- *  [**Bug**] Testsuite failed on certain Emscripten/node.js combinations.
+ *  [**Bug**] Test suite failed on certain Emscripten/node.js combinations.
  *  [**Bug**] Fixed various crashes or hangs in DMF, OKT, PLM, IT and MPTM
     loaders.
 
