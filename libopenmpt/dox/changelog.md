@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.2 svn
+### libopenmpt 0.2-beta14 (2015-09-13)
 
  *  [**Change**] The C++ API example now uses the PortAudio C++ bindings
     instead of the C API.
