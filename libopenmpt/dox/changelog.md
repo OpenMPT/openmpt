@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.2 svn
 
+ *  [**Bug**] Emscripten support for older emscripten versions broke in -beta14.
+    These are now supported again when using `make CONFIG=emscripten-old`.
+
 ### libopenmpt 0.2-beta14 (2015-09-13)
 
  *  [**Change**] The C++ API example now uses the PortAudio C++ bindings

@@ -202,6 +202,11 @@ How to compile
         `node.js` binary, you might have to edit
         `build/make/config-emscripten.mk`.
 
+        Older and obsolete versions of emscripten may require a slightly
+        different configuration:
+
+            make CONFIG=emscripten-old
+
     The `Makefile` supports some customizations. You might want to read the top
     which should get you some possible make settings, like e.g.
     `make DYNLINK=0` or similar. Cross compiling or different compiler would
