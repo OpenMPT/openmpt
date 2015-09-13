@@ -14,7 +14,7 @@
 #
 # Build configuration (provide on each `make` invocation):
 #
-#  CONFIG=[gcc|clang|mingw64-win32|mingw64-win64|emscripten] (default: CONFIG=)
+#  CONFIG=[gcc|clang|mingw64-win32|mingw64-win64|emscripten|emscripten-old] (default: CONFIG=)
 #
 #  Build configurations can override or change defaults of other build options.
 #  See below and in `build/make/` for details.
@@ -142,6 +142,8 @@ STRICT=0
 CHECKED=0
 CHECKED_ADDRESS=0
 CHECKED_UNDEFINED=0
+
+REQUIRES_RUNPREFIX=0
 
 
 # get commandline or defaults
@@ -653,7 +655,7 @@ check: test
 
 .PHONY: test
 test: bin/libopenmpt_test$(EXESUFFIX)
-ifeq ($(CONFIG),emscripten)
+ifeq ($(REQUIRES_RUNPREFIX),1)
 	cd bin && $(RUNPREFIX) libopenmpt_test$(EXESUFFIX)
 else
 	bin/libopenmpt_test$(EXESUFFIX)
