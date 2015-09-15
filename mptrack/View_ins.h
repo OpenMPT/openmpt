@@ -27,7 +27,7 @@ class CViewInstrument: public CModScrollView
 protected:
 	CImageList m_bmpEnvBar;
 	POINT m_ptMenu;
-	CRect m_rcClient;
+	CRect m_rcClient, m_rcOldClient;
 
 	CBitmap m_bmpGrid;
 	CBitmap m_bmpMemMain;
@@ -47,9 +47,10 @@ protected:
 	int m_GridSpeed;
 
 	float m_fZoom;
+	int m_envPointSize;
 
-	bool m_bGrid;
-	bool m_bGridForceRedraw;
+	bool m_bGrid : 1;
+	bool m_bGridForceRedraw : 1;
 
 	std::bitset<128> m_baPlayingNote;
 	uint32 m_dwNotifyPos[MAX_CHANNELS];
@@ -171,6 +172,7 @@ protected:
 	//{{AFX_MSG(CViewInstrument)
 	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg LRESULT OnDPIChanged(WPARAM = 0, LPARAM = 0);
 	afx_msg void OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp);
 #if _MFC_VER > 0x0710
 	afx_msg LRESULT OnNcHitTest(CPoint point);
