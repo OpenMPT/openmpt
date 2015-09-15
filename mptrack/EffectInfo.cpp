@@ -281,14 +281,12 @@ bool EffectInfo::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, ModCommand::PARAM *p
 			break;
 		case CMD_SPEED:
 			nmin = 1;
-			nmax = 0xFF;
-			if (sndFile.GetType() & MOD_TYPE_MOD) nmax = 0x20; else
-				if (sndFile.GetType() & MOD_TYPE_XM) nmax = 0x1F;
+			if (sndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) nmax = 0x1F;
+			else nmax = 0xFF;
 			break;
 		case CMD_TEMPO:
-			nmin = 0x20;
-			if (sndFile.GetType() & MOD_TYPE_MOD) nmin = 0x21; else
-				if (sndFile.GetType() & MOD_TYPE_S3MITMPT) nmin = 0;
+			if (sndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) nmin = 0x20;
+			else nmin = 0;
 			break;
 		case CMD_VOLUMESLIDE:
 		case CMD_TONEPORTAVOL:
