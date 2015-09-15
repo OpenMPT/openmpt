@@ -78,6 +78,11 @@ IMPLEMENT_SERIAL(CViewInstrument, CModScrollView, 0)
 
 BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	//{{AFX_MSG_MAP(CViewInstrument)
+#ifdef WM_DPICHANGED
+	ON_MESSAGE(WM_DPICHANGED, OnDPIChanged)
+#else
+	ON_MESSAGE(0x02E0, OnDPIChanged)
+#endif
 	ON_WM_ERASEBKGND()
 	ON_WM_SIZE()
 	ON_WM_NCCALCSIZE()
@@ -130,13 +135,22 @@ END_MESSAGE_MAP()
 // CViewInstrument operations
 
 CViewInstrument::CViewInstrument()
+	: m_nInstrument(1)
+	, m_nEnv(ENV_VOLUME)
+	, m_dwStatus(0)
+	, m_nBtnMouseOver(0xFFFF)
+
+	, m_bGrid(true)
+	, m_bGridForceRedraw(false)
+	, m_GridSpeed(-1)
+	, m_GridScrollPos(-1)
+
+	, m_nDragItem(1)
+	, m_fZoom(ENV_ZOOM)
+	, m_envPointSize(4)
 //--------------------------------
 {
-	m_nInstrument = 1;
-	m_nEnv = ENV_VOLUME;
 	m_rcClient.bottom = 2;
-	m_dwStatus = 0;
-	m_nBtnMouseOver = 0xFFFF;
 	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 	{
 		m_dwNotifyPos[i] = (uint32)Notification::PosInvalid;
@@ -146,14 +160,6 @@ CViewInstrument::CViewInstrument()
 	m_bmpEnvBar.Create(&CMainFrame::GetMainFrame()->m_EnvelopeIcons);
 
 	m_baPlayingNote.reset();
-	//rewbs.envRowGrid
-	m_bGrid=true;
-	m_bGridForceRedraw=false;
-	m_GridSpeed = -1;
-	m_GridScrollPos = -1;
-	//end rewbs.envRowGrid
-	m_nDragItem = 1;
-	m_fZoom = ENV_ZOOM;
 }
 
 
@@ -162,7 +168,8 @@ void CViewInstrument::OnInitialUpdate()
 {
 	CModScrollView::OnInitialUpdate();
 	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
-	m_fZoom = ENV_ZOOM * Util::GetDPIx(m_hWnd) / 96.0f;
+	m_fZoom = (ENV_ZOOM * m_nDPIx) / 96.0f;
+	m_envPointSize = Util::ScalePixels(4, m_hWnd);
 	UpdateScrollSize();
 	UpdateNcButtonState();
 }
@@ -187,6 +194,15 @@ void CViewInstrument::UpdateScrollSize()
 		sizePage.cy = sizeLine.cy;
 		SetScrollSizes(MM_TEXT, sizeTotal, sizePage, sizeLine);
 	}
+}
+
+
+LRESULT CViewInstrument::OnDPIChanged(WPARAM wParam, LPARAM lParam)
+//-----------------------------------------------------------------
+{
+	LRESULT res = CModScrollView::OnDPIChanged(wParam, lParam);
+	m_envPointSize = Util::ScalePixels(4, m_hWnd);
+	return res;
 }
 
 
@@ -647,7 +663,7 @@ bool CViewInstrument::EnvSetFilterEnv(bool bEnable)
 int CViewInstrument::TickToScreen(int tick) const
 //-----------------------------------------------
 {
-	return static_cast<int>((tick * m_fZoom) - m_nScrollPosX + 4);
+	return static_cast<int>((tick * m_fZoom) - m_nScrollPosX + m_envPointSize);
 }
 
 int CViewInstrument::PointToScreen(int nPoint) const
@@ -661,8 +677,8 @@ int CViewInstrument::ScreenToTick(int x) const
 //--------------------------------------------
 {
 	int offset = m_nScrollPosX + x;
-	if(offset < 4) return 0;
-	return Util::Round<int>((offset - 4) / m_fZoom);
+	if(offset < m_envPointSize) return 0;
+	return Util::Round<int>((offset - m_envPointSize) / m_fZoom);
 }
 
 
@@ -805,7 +821,7 @@ void CViewInstrument::UpdateView(UpdateHint hint, CObject *pObj)
 	}
 }
 
-//rewbs.envRowGrid
+
 void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 //--------------------------------------------------
 {
@@ -863,34 +879,39 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 
 	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), &m_dcGrid, 0, 0, SRCCOPY);
 }
-//end rewbs.envRowGrid
+
 
 void CViewInstrument::OnDraw(CDC *pDC)
 //------------------------------------
 {
-	RECT rect;
 	CModDoc *pModDoc = GetDocument();
+	if ((!pModDoc) || (!pDC)) return;
 	HGDIOBJ oldpen;
-	int ymed = (m_rcClient.bottom - 1) / 2;
 
 	// to avoid flicker, establish a memory dc, draw to it
 	// and then BitBlt it to the destination "pDC"
 
 	//check for window resize
-	if (m_dcMemMain.GetSafeHdc())
+	if (m_dcMemMain.GetSafeHdc() && m_rcOldClient != m_rcClient)
 	{
 		m_dcMemMain.SelectObject(oldBitmap);
 		m_dcMemMain.DeleteDC();
 		m_bmpMemMain.DeleteObject();
 	}
 
-	m_dcMemMain.CreateCompatibleDC(pDC);
-	if (!m_dcMemMain)
-		return;
-	m_bmpMemMain.CreateCompatibleBitmap(pDC, m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top);
+	if (!m_dcMemMain.m_hDC)
+	{
+		m_dcMemMain.CreateCompatibleDC(pDC);
+		if (!m_dcMemMain.m_hDC)
+			return;
+	}
+	if (!m_bmpMemMain.m_hObject)
+	{
+		m_bmpMemMain.CreateCompatibleBitmap(pDC, m_rcClient.Width(), m_rcClient.Height());
+	}
+	m_rcOldClient = m_rcClient;
 	oldBitmap = (CBitmap *)m_dcMemMain.SelectObject(&m_bmpMemMain);
 
-	if ((!pModDoc) || (!pDC)) return;
 	oldpen = m_dcMemMain.SelectObject(CMainFrame::penDarkGray);
 	if (m_bGrid)
 	{
@@ -902,6 +923,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	}
 
 	// Middle line (half volume or pitch / panning center)
+	const int ymed = (m_rcClient.bottom - 1) / 2;
 	m_dcMemMain.MoveTo(0, ymed);
 	m_dcMemMain.LineTo(m_rcClient.right, ymed);
 
@@ -909,10 +931,10 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	// Drawing Loop Start/End
 	if (EnvGetLoop())
 	{
-		int x1 = PointToScreen(EnvGetLoopStart()) - (int)(m_fZoom / 2);
+		int x1 = PointToScreen(EnvGetLoopStart()) - m_envPointSize / 2;
 		m_dcMemMain.MoveTo(x1, 0);
 		m_dcMemMain.LineTo(x1, m_rcClient.bottom);
-		int x2 = PointToScreen(EnvGetLoopEnd()) + (int)(m_fZoom / 2);
+		int x2 = PointToScreen(EnvGetLoopEnd()) + m_envPointSize / 2;
 		m_dcMemMain.MoveTo(x2, 0);
 		m_dcMemMain.LineTo(x2, m_rcClient.bottom);
 	}
@@ -920,14 +942,14 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	if (EnvGetSustain())
 	{
 		m_dcMemMain.SelectObject(CMainFrame::penHalfDarkGray);
-		int nspace = m_rcClient.bottom/4;
+		int nspace = m_rcClient.bottom / 4;
 		int n1 = EnvGetSustainStart();
-		int x1 = PointToScreen(n1) - (int)(m_fZoom / 2);
+		int x1 = PointToScreen(n1) - m_envPointSize / 2;
 		int y1 = ValueToScreen(EnvGetValue(n1));
 		m_dcMemMain.MoveTo(x1, y1 - nspace);
 		m_dcMemMain.LineTo(x1, y1+nspace);
 		int n2 = EnvGetSustainEnd();
-		int x2 = PointToScreen(n2) + (int)(m_fZoom / 2);
+		int x2 = PointToScreen(n2) + m_envPointSize / 2;
 		int y2 = ValueToScreen(EnvGetValue(n2));
 		m_dcMemMain.MoveTo(x2, y2-nspace);
 		m_dcMemMain.LineTo(x2, y2+nspace);
@@ -939,15 +961,15 @@ void CViewInstrument::OnDraw(CDC *pDC)
 		maxpoint--;
 		m_dcMemMain.SelectObject(CMainFrame::penEnvelope);
 		UINT releaseNode = EnvGetReleaseNode();
-		for (UINT i=0; i<=maxpoint; i++)
+		RECT rect;
+		for (UINT i = 0; i <= maxpoint; i++)
 		{
-			//int x = (int)((EnvGetTick(i)) * m_fZoom) - nScrollPos + (i == 0 ? 4 : m_fZoom);
 			int x = PointToScreen(i);
 			int y = ValueToScreen(EnvGetValue(i));
-			rect.left = x - 3;
-			rect.top = y - 3;
-			rect.right = x + 4;
-			rect.bottom = y + 4;
+			rect.left = x - m_envPointSize + 1;
+			rect.top = y - m_envPointSize + 1;
+			rect.right = x + m_envPointSize;
+			rect.bottom = y + m_envPointSize;
 			if (i)
 				m_dcMemMain.LineTo(x, y);
 			else
@@ -970,18 +992,13 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	DrawPositionMarks();
 	if (oldpen) m_dcMemMain.SelectObject(oldpen);
 
-	//rewbs.envRowGrid
 	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), &m_dcMemMain, 0, 0, SRCCOPY);
 
-// -> CODE#0015
-// -> DESC="channels management dlg"
 	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
 	BOOL activeDoc = pMainFrm ? pMainFrm->GetActiveDoc() == GetDocument() : FALSE;
 
 	if(activeDoc && CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
 		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
-
-// -! NEW_FEATURE#0015
 }
 
 
@@ -1532,7 +1549,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 			rect.top = ValueToScreen(EnvGetValue(EnvGetSustainStart())) - nspace;
 			rect.bottom = rect.top + nspace * 2;
 			rect.right = PointToScreen(EnvGetSustainStart()) + 1;
-			rect.left = rect.right - (int)(m_fZoom * 2);
+			rect.left = rect.right - m_envPointSize * 2;
 			if (rect.PtInRect(pt))
 			{
 				bSplitCursor = true; // ENV_DRAGSUSTAINSTART;
@@ -1541,7 +1558,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 				rect.top = ValueToScreen(EnvGetValue(EnvGetSustainEnd())) - nspace;
 				rect.bottom = rect.top + nspace * 2;
 				rect.left = PointToScreen(EnvGetSustainEnd()) - 1;
-				rect.right = rect.left + (int)(m_fZoom *2);
+				rect.right = rect.left + m_envPointSize * 2;
 				if (rect.PtInRect(pt)) bSplitCursor = true; // ENV_DRAGSUSTAINEND;
 			}
 		}
@@ -1550,14 +1567,14 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 			rect.top = m_rcClient.top;
 			rect.bottom = m_rcClient.bottom;
 			rect.right = PointToScreen(EnvGetLoopStart()) + 1;
-			rect.left = rect.right - (int)(m_fZoom * 2);
+			rect.left = rect.right - m_envPointSize * 2;
 			if (rect.PtInRect(pt))
 			{
 				bSplitCursor = true; // ENV_DRAGLOOPSTART;
 			} else
 			{
 				rect.left = PointToScreen(EnvGetLoopEnd()) - 1;
-				rect.right = rect.left + (int)(m_fZoom * 2);
+				rect.right = rect.left + m_envPointSize * 2;
 				if (rect.PtInRect(pt)) bSplitCursor = true; // ENV_DRAGLOOPEND;
 			}
 		}
@@ -1592,11 +1609,12 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 		// Look if dragging a point
 		UINT maxpoint = EnvGetLastPoint();
 		m_nDragItem = 0;
+		const int hitboxSize = static_cast<int>((6 * m_nDPIx) / 96.0f);
 		for (UINT i = 0; i <= maxpoint; i++)
 		{
 			int x = PointToScreen(i);
 			int y = ValueToScreen(EnvGetValue(i));
-			rect.SetRect(x-6, y-6, x+7, y+7);
+			rect.SetRect(x - hitboxSize, y - hitboxSize, x + hitboxSize + 1, y + hitboxSize + 1);
 			if (rect.PtInRect(pt))
 			{
 				m_nDragItem = i + 1;
@@ -1609,7 +1627,7 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 			rect.top = ValueToScreen(EnvGetValue(EnvGetSustainStart())) - nspace;
 			rect.bottom = rect.top + nspace * 2;
 			rect.right = PointToScreen(EnvGetSustainStart()) + 1;
-			rect.left = rect.right - (int)(m_fZoom * 2);
+			rect.left = rect.right - m_envPointSize * 2;
 			if (rect.PtInRect(pt))
 			{
 				m_nDragItem = ENV_DRAGSUSTAINSTART;
@@ -1618,7 +1636,7 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 				rect.top = ValueToScreen(EnvGetValue(EnvGetSustainEnd())) - nspace;
 				rect.bottom = rect.top + nspace * 2;
 				rect.left = PointToScreen(EnvGetSustainEnd()) - 1;
-				rect.right = rect.left + (int)(m_fZoom * 2);
+				rect.right = rect.left + m_envPointSize * 2;
 				if (rect.PtInRect(pt)) m_nDragItem = ENV_DRAGSUSTAINEND;
 			}
 		}
@@ -1627,14 +1645,14 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 			rect.top = m_rcClient.top;
 			rect.bottom = m_rcClient.bottom;
 			rect.right = PointToScreen(EnvGetLoopStart()) + 1;
-			rect.left = rect.right - (int)(m_fZoom * 2);
+			rect.left = rect.right - m_envPointSize * 2;
 			if (rect.PtInRect(pt))
 			{
 				m_nDragItem = ENV_DRAGLOOPSTART;
 			} else
 			{
 				rect.left = PointToScreen(EnvGetLoopEnd()) - 1;
-				rect.right = rect.left + (int)(m_fZoom * 2);
+				rect.right = rect.left + m_envPointSize * 2;
 				if (rect.PtInRect(pt)) m_nDragItem = ENV_DRAGLOOPEND;
 			}
 		}
@@ -2318,10 +2336,37 @@ void CViewInstrument::EnvKbdMovePointLeft()
 //-----------------------------------------
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
-	if(m_nDragItem == 1 || !CanMovePoint(m_nDragItem - 1, -1))
-		return;
-	pEnv->Ticks[m_nDragItem - 1]--;
+	if(pEnv == nullptr) return;
+	const MODTYPE modType = GetDocument()->GetModType();
+
+	// Move loop points?
+	if(m_nDragItem == ENV_DRAGSUSTAINSTART)
+	{
+		if(pEnv->nSustainStart <= 0) return;
+		pEnv->nSustainStart--;
+		if(modType == MOD_TYPE_XM) pEnv->nSustainEnd = pEnv->nSustainStart;
+	} else if(m_nDragItem == ENV_DRAGSUSTAINEND)
+	{
+		if(pEnv->nSustainEnd <= 0) return;
+		if(pEnv->nSustainEnd <= pEnv->nSustainStart) pEnv->nSustainStart--;
+		pEnv->nSustainEnd--;
+	} else if(m_nDragItem == ENV_DRAGLOOPSTART)
+	{
+		if(pEnv->nLoopStart <= 0) return;
+		pEnv->nLoopStart--;
+	} else if(m_nDragItem == ENV_DRAGLOOPEND)
+	{
+		if(pEnv->nLoopEnd <= 0) return;
+		if(pEnv->nLoopEnd <= pEnv->nLoopStart) pEnv->nLoopStart--;
+		pEnv->nLoopEnd--;
+	} else
+	{
+		// Move envelope node
+		if(!IsDragItemEnvPoint()) return;
+		if(m_nDragItem == 1 || !CanMovePoint(m_nDragItem - 1, -1))
+			return;
+		pEnv->Ticks[m_nDragItem - 1]--;
+	}
 
 	SetModified(InstrumentHint().Envelope(), true);
 }
@@ -2331,10 +2376,37 @@ void CViewInstrument::EnvKbdMovePointRight()
 //------------------------------------------
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
-	if(m_nDragItem == 1 || !CanMovePoint(m_nDragItem - 1, 1))
-		return;
-	pEnv->Ticks[m_nDragItem - 1]++;
+	if(pEnv == nullptr) return;
+	const MODTYPE modType = GetDocument()->GetModType();
+
+	// Move loop points?
+	if(m_nDragItem == ENV_DRAGSUSTAINSTART)
+	{
+		if(pEnv->nSustainStart >= pEnv->nNodes - 1) return;
+		if(pEnv->nSustainStart >= pEnv->nSustainEnd) pEnv->nSustainEnd++;
+		pEnv->nSustainStart++;
+	} else if(m_nDragItem == ENV_DRAGSUSTAINEND)
+	{
+		if(pEnv->nSustainEnd >= pEnv->nNodes - 1) return;
+		pEnv->nSustainEnd++;
+		if(modType == MOD_TYPE_XM) pEnv->nSustainStart = pEnv->nSustainEnd;
+	} else if(m_nDragItem == ENV_DRAGLOOPSTART)
+	{
+		if(pEnv->nLoopStart >= pEnv->nNodes - 1) return;
+		if(pEnv->nLoopStart >= pEnv->nLoopEnd) pEnv->nLoopEnd++;
+		pEnv->nLoopStart++;
+	} else if(m_nDragItem == ENV_DRAGLOOPEND)
+	{
+		if(pEnv->nLoopEnd >= pEnv->nNodes - 1) return;
+		pEnv->nLoopEnd++;
+	} else
+	{
+		// Move envelope node
+		if(!IsDragItemEnvPoint()) return;
+		if(m_nDragItem == 1 || !CanMovePoint(m_nDragItem - 1, 1))
+			return;
+		pEnv->Ticks[m_nDragItem - 1]++;
+	}
 
 	SetModified(InstrumentHint().Envelope(), true);
 }
