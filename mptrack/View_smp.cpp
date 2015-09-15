@@ -3102,10 +3102,7 @@ void CViewSample::OnSampleSlice()
 				newSample.PrecomputeLoops(sndFile, false);
 
 				if(sndFile.GetNumInstruments() > 0)
-				{
-					INSTRUMENTINDEX ins = pModDoc->InsertInstrument(nextSmp);
-					if(ins != INSTRUMENTINDEX_INVALID) pModDoc->UpdateAllViews(nullptr, InstrumentHint(ins).Info().Envelope().Names());
-				}
+					pModDoc->InsertInstrument(nextSmp);
 			}
 		}
 	}
@@ -3113,7 +3110,9 @@ void CViewSample::OnSampleSlice()
 	pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, "Slice Sample", cues[1], sample.nLength);
 	ctrlSmp::ResizeSample(sample, cues[1], sndFile);
 	sample.PrecomputeLoops(sndFile, true);
-	SetModified(SampleHint(0).Info().Data().Names(), true, true);
+	SetModified(SampleHint().Info().Data().Names(), true, true);
+	pModDoc->UpdateAllViews(this, SampleHint().Info().Data().Names(), this);
+	pModDoc->UpdateAllViews(this, InstrumentHint().Info().Envelope().Names(), this);
 }
 
 
