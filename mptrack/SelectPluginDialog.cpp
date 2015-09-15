@@ -235,6 +235,17 @@ void CSelectPluginDlg::OnCancel()
 }
 
 
+VSTPluginLib* CSelectPluginDlg::GetSelectedPlugin()
+//-------------------------------------------------
+{
+	HTREEITEM item = m_treePlugins.GetSelectedItem();
+	if(item)
+		return reinterpret_cast<VSTPluginLib *>(m_treePlugins.GetItemData(item));
+	else
+		return nullptr;
+}
+
+
 void CSelectPluginDlg::SaveWindowPos() const
 //------------------------------------------
 {
@@ -465,7 +476,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	VSTPluginLib *pPlug = GetSelectedPlugin();
 	int showBoxes = SW_HIDE;
-	if ((pManager) && (pManager->IsValidPlugin(pPlug)))
+	if (pManager != nullptr && pManager->IsValidPlugin(pPlug))
 	{
 		::SetDlgItemTextW(m_hWnd, IDC_TEXT_CURRENT_VSTPLUG, pPlug->dllPath.ToWide().c_str());
 		if(pPlug->pluginId1 == kEffectMagic)
