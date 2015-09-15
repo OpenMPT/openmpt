@@ -443,6 +443,7 @@ static std::wstring From8bit(const std::string &str, const uint32 (&table)[256],
 //---------------------------------------------------------------------------------------------------------------
 {
 	std::wstring res;
+	res.reserve(str.length());
 	for(std::size_t i = 0; i < str.length(); ++i)
 	{
 		uint32 c = static_cast<uint32>(static_cast<uint8>(str[i]));
@@ -461,6 +462,7 @@ static std::string To8bit(const std::wstring &str, const uint32 (&table)[256], c
 //----------------------------------------------------------------------------------------------------
 {
 	std::string res;
+	res.reserve(str.length());
 	for(std::size_t i = 0; i < str.length(); ++i)
 	{
 		uint32 c = str[i];
@@ -504,6 +506,7 @@ static std::wstring FromAscii(const std::string &str, wchar_t replacement = L'\u
 //------------------------------------------------------------------------------------
 {
 	std::wstring res;
+	res.reserve(str.length());
 	for(std::size_t i = 0; i < str.length(); ++i)
 	{
 		uint8 c = str[i];
@@ -522,6 +525,7 @@ static std::string ToAscii(const std::wstring &str, char replacement = '?')
 //-------------------------------------------------------------------------
 {
 	std::string res;
+	res.reserve(str.length());
 	for(std::size_t i = 0; i < str.length(); ++i)
 	{
 		uint32 c = str[i];
@@ -541,6 +545,7 @@ static std::wstring FromISO_8859_1(const std::string &str, wchar_t replacement =
 {
 	MPT_UNREFERENCED_PARAMETER(replacement);
 	std::wstring res;
+	res.reserve(str.length());
 	for(std::size_t i = 0; i < str.length(); ++i)
 	{
 		uint8 c = str[i];
@@ -553,6 +558,7 @@ static std::string ToISO_8859_1(const std::wstring &str, char replacement = '?')
 //------------------------------------------------------------------------------
 {
 	std::string res;
+	res.reserve(str.length());
 	for(std::size_t i = 0; i < str.length(); ++i)
 	{
 		uint32 c = str[i];
