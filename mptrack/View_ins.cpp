@@ -33,7 +33,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #define ENV_ZOOM				4.0f
 #define ENV_MIN_ZOOM			2.0f
-#define ENV_MAX_ZOOM			100.0f
+#define ENV_MAX_ZOOM			256.0f
 #define ENV_DRAGLOOPSTART		(MAX_ENVPOINTS + 1)
 #define ENV_DRAGLOOPEND			(MAX_ENVPOINTS + 2)
 #define ENV_DRAGSUSTAINSTART	(MAX_ENVPOINTS + 3)
@@ -162,6 +162,7 @@ void CViewInstrument::OnInitialUpdate()
 {
 	CModScrollView::OnInitialUpdate();
 	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
+	m_fZoom = ENV_ZOOM * Util::GetDPIx(m_hWnd) / 96.0f;
 	UpdateScrollSize();
 	UpdateNcButtonState();
 }
@@ -643,10 +644,10 @@ bool CViewInstrument::EnvSetFilterEnv(bool bEnable)
 }
 
 
-int CViewInstrument::TickToScreen(int nTick) const
-//------------------------------------------------
+int CViewInstrument::TickToScreen(int tick) const
+//-----------------------------------------------
 {
-	return ((int)((nTick + 1) * m_fZoom)) - m_nScrollPosX;
+	return static_cast<int>((tick * m_fZoom) - m_nScrollPosX + 4);
 }
 
 int CViewInstrument::PointToScreen(int nPoint) const
@@ -659,7 +660,9 @@ int CViewInstrument::PointToScreen(int nPoint) const
 int CViewInstrument::ScreenToTick(int x) const
 //--------------------------------------------
 {
-	return (int)(((float)m_nScrollPosX + (float)x + 1 - m_fZoom) / m_fZoom);
+	int offset = m_nScrollPosX + x;
+	if(offset < 4) return 0;
+	return Util::Round<int>((offset - 4) / m_fZoom);
 }
 
 
@@ -808,7 +811,7 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 {
 	bool windowResized = false;
 
-	if (m_dcGrid.GetSafeHdc())
+	if (m_dcGrid.m_hDC)
 	{
 		m_dcGrid.SelectObject(m_pbmpOldGrid);
 		m_dcGrid.DeleteDC();
@@ -816,10 +819,8 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 		windowResized = true;
 	}
 
-
-	if (windowResized || m_bGridForceRedraw || (m_nScrollPosX != m_GridScrollPos) || (speed != (UINT)m_GridSpeed))
+	if (windowResized || m_bGridForceRedraw || (m_nScrollPosX != m_GridScrollPos) || (speed != (UINT)m_GridSpeed) && speed > 0)
 	{
-
 		m_GridSpeed = speed;
 		m_GridScrollPos = m_nScrollPosX;
 		m_bGridForceRedraw = false;
@@ -829,40 +830,34 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 		m_bmpGrid.CreateCompatibleBitmap(pDC,  m_rcClient.Width(), m_rcClient.Height());
 		m_pbmpOldGrid = m_dcGrid.SelectObject(&m_bmpGrid);
 
-		//do draw
-		int width = m_rcClient.Width();
-		int nPrevTick = -1;
-		int nTick, nRow;
-		int nRowsPerBeat = 1, nRowsPerMeasure = 1;
+		// Do draw
+		const int width = m_rcClient.Width();
+		int rowsPerBeat = 1, rowsPerMeasure = 1;
 		CModDoc *modDoc = GetDocument();
 		if(modDoc != nullptr)
 		{
-			nRowsPerBeat = modDoc->GetrSoundFile().m_nDefaultRowsPerBeat;
-			nRowsPerMeasure = modDoc->GetrSoundFile().m_nDefaultRowsPerMeasure;
+			rowsPerBeat = modDoc->GetrSoundFile().m_nDefaultRowsPerBeat;
+			rowsPerMeasure = modDoc->GetrSoundFile().m_nDefaultRowsPerMeasure;
 		}
 
 		// Paint it black!
 		m_dcGrid.FillSolidRect(&m_rcClient, TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKENV]);
 
-		for (int x = 3; x < width; x++)
+		uint32 startTick = (ScreenToTick(0) / speed) * speed;
+		uint32 endTick = (ScreenToTick(width) / speed) * speed;
+
+		for (uint32 tick = startTick, row = startTick / speed; tick <= endTick; tick += speed, row++)
 		{
-			nTick = ScreenToTick(x);
-			if (nTick != nPrevTick && !(nTick%speed))
-			{
-				nPrevTick = nTick;
-				nRow = nTick / speed;
+			if (rowsPerMeasure > 0 && row % rowsPerMeasure == 0)
+				m_dcGrid.SelectObject(CMainFrame::penGray80);
+			else if (rowsPerBeat > 0 && row % rowsPerBeat == 0)
+				m_dcGrid.SelectObject(CMainFrame::penGray55);
+			else
+				m_dcGrid.SelectObject(CMainFrame::penGray33);
 
-				if (nRowsPerMeasure > 0 && nRow % nRowsPerMeasure == 0)
-					m_dcGrid.SelectObject(CMainFrame::penGray80);
-				else if (nRowsPerBeat > 0 && nRow % nRowsPerBeat == 0)
-					m_dcGrid.SelectObject(CMainFrame::penGray55);
-				else
-					m_dcGrid.SelectObject(CMainFrame::penGray33);
-
-				m_dcGrid.MoveTo(x+1, 0);
-				m_dcGrid.LineTo(x+1, m_rcClient.bottom);
-
-			}
+			int x = TickToScreen(tick);
+			m_dcGrid.MoveTo(x, 0);
+			m_dcGrid.LineTo(x, m_rcClient.bottom);
 		}
 	}
 
@@ -874,14 +869,10 @@ void CViewInstrument::OnDraw(CDC *pDC)
 //------------------------------------
 {
 	RECT rect;
-	int nScrollPos = m_nScrollPosX;
 	CModDoc *pModDoc = GetDocument();
 	HGDIOBJ oldpen;
-	//HDC hdc;
-	UINT maxpoint;
 	int ymed = (m_rcClient.bottom - 1) / 2;
 
-//rewbs.envRowGrid
 	// to avoid flicker, establish a memory dc, draw to it
 	// and then BitBlt it to the destination "pDC"
 
@@ -899,10 +890,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	m_bmpMemMain.CreateCompatibleBitmap(pDC, m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top);
 	oldBitmap = (CBitmap *)m_dcMemMain.SelectObject(&m_bmpMemMain);
 
-//end rewbs.envRowGrid
-
 	if ((!pModDoc) || (!pDC)) return;
-	//hdc = pDC->m_hDC;
 	oldpen = m_dcMemMain.SelectObject(CMainFrame::penDarkGray);
 	if (m_bGrid)
 	{
@@ -944,7 +932,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 		m_dcMemMain.MoveTo(x2, y2-nspace);
 		m_dcMemMain.LineTo(x2, y2+nspace);
 	}
-	maxpoint = EnvGetNumPoints();
+	uint32 maxpoint = EnvGetNumPoints();
 	// Drawing Envelope
 	if (maxpoint)
 	{
@@ -953,19 +941,17 @@ void CViewInstrument::OnDraw(CDC *pDC)
 		UINT releaseNode = EnvGetReleaseNode();
 		for (UINT i=0; i<=maxpoint; i++)
 		{
-			int x = (int)((EnvGetTick(i) + 1) * m_fZoom) - nScrollPos;
+			//int x = (int)((EnvGetTick(i)) * m_fZoom) - nScrollPos + (i == 0 ? 4 : m_fZoom);
+			int x = PointToScreen(i);
 			int y = ValueToScreen(EnvGetValue(i));
 			rect.left = x - 3;
 			rect.top = y - 3;
 			rect.right = x + 4;
 			rect.bottom = y + 4;
 			if (i)
-			{
 				m_dcMemMain.LineTo(x, y);
-			} else
-			{
+			else
 				m_dcMemMain.MoveTo(x, y);
-			}
 			if (i == releaseNode)
 			{
 				m_dcMemMain.FrameRect(&rect, CBrush::FromHandle(CMainFrame::brushHighLightRed));
@@ -1693,15 +1679,23 @@ void CViewInstrument::OnLButtonUp(UINT, CPoint)
 }
 
 
-void CViewInstrument::OnRButtonDown(UINT, CPoint pt)
-//--------------------------------------------------
+void CViewInstrument::OnRButtonDown(UINT flags, CPoint pt)
+//--------------------------------------------------------
 {
 	const CModDoc *pModDoc = GetDocument();
 	if(!pModDoc) return;
 	const CSoundFile &sndFile = GetDocument()->GetrSoundFile();
 
-	CMenu Menu;
 	if (m_dwStatus & INSSTATUS_DRAGGING) return;
+
+	// Ctrl + Right-Click = Delete point
+	if(flags & MK_CONTROL)
+	{
+		OnMButtonDown(flags, pt);
+		return;
+	}
+
+	CMenu Menu;
 	if ((pModDoc) && (Menu.LoadMenu(IDR_ENVELOPES)))
 	{
 		CMenu* pSubMenu = Menu.GetSubMenu(0);
@@ -2194,6 +2188,7 @@ BOOL CViewInstrument::PreTranslateMessage(MSG *pMsg)
 	return CModScrollView::PreTranslateMessage(pMsg);
 }
 
+
 LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 //------------------------------------------------------------
 {
@@ -2253,8 +2248,10 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 
 	return NULL;
 }
+
+
 void CViewInstrument::OnEnvelopeScalepoints()
-//--------------------------------------------
+//-------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr)
