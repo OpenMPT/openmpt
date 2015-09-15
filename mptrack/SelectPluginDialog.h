@@ -27,7 +27,6 @@ class CSelectPluginDlg: public CDialog
 //====================================
 {
 protected:
-	PLUGINDEX m_nPlugSlot;
 	SNDMIXPLUGIN *m_pPlugin;
 	CModDoc *m_pModDoc;
 	CTreeCtrlW m_treePlugins;
@@ -35,6 +34,7 @@ protected:
 	std::wstring m_nameFilter;
 	ComponentHandle<ComponentPluginBridge32> pluginBridge32;
 	ComponentHandle<ComponentPluginBridge64> pluginBridge64;
+	PLUGINDEX m_nPlugSlot;
 
 	HTREEITEM AddTreeItem(const WCHAR *title, int image, bool sort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);
 
@@ -45,7 +45,7 @@ public:
 	static VSTPluginLib *ScanPlugins(const mpt::PathString &path, CWnd *parent);
 
 protected:
-	VSTPluginLib *GetSelectedPlugin() { return reinterpret_cast<VSTPluginLib *>(m_treePlugins.GetItemData(m_treePlugins.GetSelectedItem())); }
+	VSTPluginLib *GetSelectedPlugin();
 	void SaveWindowPos() const;
 
 	void ReloadMissingPlugins(const VSTPluginLib *lib) const;
