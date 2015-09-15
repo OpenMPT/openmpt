@@ -39,8 +39,11 @@ void CSoundFile::ConvertModCommand(ModCommand &m) const
 	case 0x0D:	m.command = CMD_PATTERNBREAK; m.param = ((m.param >> 4) * 10) + (m.param & 0x0F); break;
 	case 0x0E:	m.command = CMD_MODCMDEX; break;
 	case 0x0F:
-		// Speed is 01...1F in XM, but 01...20 in MOD. 15-sample Soundtracker MODs always ignore the high nibble anyway (this is fixed in ReadM15 already)
-		if(m.param <= ((GetType() & MOD_TYPE_MOD) ? 0x20u : 0x1Fu))
+		// For a very long time, this code imported 0x20 as CMD_SPEED for MOD files, but this seems to contradict
+		// pretty much the majority of other MOD player out there.
+		// 0x20 is Speed: Impulse Tracker, Scream Tracker, old ModPlug
+		// 0x20 is Tempo: ProTracker, XMPlay, Imago Orpheus, Cubic Player, ChibiTracker, BeRoTracker, DigiTrakker, DigiTrekker, Disorder Tracker 2, DMP, Extreme's Tracker, ...
+		if(m.param < 0x20)
 			m.command = CMD_SPEED;
 		else
 			m.command = CMD_TEMPO;
@@ -123,8 +126,8 @@ void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool co
 	case CMD_VOLUME:			command = 0x0C; break;
 	case CMD_PATTERNBREAK:		command = 0x0D; param = ((param / 10) << 4) | (param % 10); break;
 	case CMD_MODCMDEX:			command = 0x0E; break;
-	case CMD_SPEED:				command = 0x0F; param = MIN(param, (toXM) ? 0x1Fu : 0x20u); break;
-	case CMD_TEMPO:				command = 0x0F; param = MAX(param, (toXM) ? 0x20u : 0x21u); break;
+	case CMD_SPEED:				command = 0x0F; param = std::min<uint8>(param, 0x1F); break;
+	case CMD_TEMPO:				command = 0x0F; param = std::max<uint8>(param, 0x20); break;
 	case CMD_GLOBALVOLUME:		command = 'G' - 55; break;
 	case CMD_GLOBALVOLSLIDE:	command = 'H' - 55; break;
 	case CMD_KEYOFF:			command = 'K' - 55; break;
