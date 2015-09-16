@@ -4781,6 +4781,7 @@ void CViewPattern::TempEnterVol(int v)
 
 	ModCommand &target = GetCursorCommand();
 	ModCommand oldcmd = target; // This is the command we are about to overwrite
+	const bool isDigit = (v >= 0) && (v <= 9);
 
 	if(target.IsPcNote())
 	{
@@ -4789,13 +4790,14 @@ void CViewPattern::TempEnterVol(int v)
 	{
 		ModCommand::VOLCMD volcmd = target.volcmd;
 		uint16 vol = target.vol;
-		if ((v >= 0) && (v <= 9))
+		if (isDigit)
 		{
 			vol = ((vol * 10) + v) % 100;
 			if (!volcmd) volcmd = VOLCMD_VOLUME;
 		} else
-			switch(v+kcSetVolumeStart)
 		{
+			switch(v+kcSetVolumeStart)
+			{
 			case kcSetVolumeVol:			volcmd = VOLCMD_VOLUME; break;
 			case kcSetVolumePan:			volcmd = VOLCMD_PANNING; break;
 			case kcSetVolumeVolSlideUp:		volcmd = VOLCMD_VOLSLIDEUP; break;
@@ -4810,6 +4812,7 @@ void CViewPattern::TempEnterVol(int v)
 			case kcSetVolumeITPortaUp:		volcmd = VOLCMD_PORTAUP; break;
 			case kcSetVolumeITPortaDown:	volcmd = VOLCMD_PORTADOWN; break;
 			case kcSetVolumeITOffset:		volcmd = VOLCMD_OFFSET; break;
+			}
 		}
 
 		UINT max = 64;
@@ -4834,6 +4837,16 @@ void CViewPattern::TempEnterVol(int v)
 		InvalidateCell(m_Cursor);
 		UpdateIndicator();
 	}
+
+	// Cursor step for command letter
+	if(!target.IsPcNote() && !isDigit && m_nSpacing > 0 && m_nSpacing <= MAX_SPACING && !IsLiveRecord() && TrackerSettings::Instance().patternStepCommands)
+	{
+		if(m_Cursor.GetRow() + m_nSpacing < pSndFile->Patterns[m_nPattern].GetNumRows() || (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
+		{
+			SetCurrentRow(m_Cursor.GetRow() + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) != 0);
+		}
+	}
+
 }
 
 
@@ -4901,6 +4914,15 @@ void CViewPattern::TempEnterFX(ModCommand::COMMAND c, int v)
 		SetModified(false);
 		InvalidateCell(m_Cursor);
 		UpdateIndicator();
+	}
+
+	// Cursor step for command letter
+	if(!target.IsPcNote() && m_nSpacing > 0 && m_nSpacing <= MAX_SPACING && !IsLiveRecord() && TrackerSettings::Instance().patternStepCommands)
+	{
+		if(m_Cursor.GetRow() + m_nSpacing < pSndFile->Patterns[m_nPattern].GetNumRows() || (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
+		{
+			SetCurrentRow(m_Cursor.GetRow() + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) != 0);
+		}
 	}
 }
 
