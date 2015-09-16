@@ -2493,6 +2493,7 @@ void CViewPattern::PatternStep(ROWINDEX row)
 		pSndFile->m_SongFlags.reset(SONG_PAUSED);
 		pSndFile->m_SongFlags.set(SONG_STEP);
 
+		SetPlayCursor(m_nPattern, pSndFile->m_PlayState.m_nNextRow, 0);
 		cs.Leave();
 
 		if(pMainFrm->GetModPlaying() != pModDoc)
@@ -3807,10 +3808,7 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 	{
 		m_baPlayingNote.reset();
 		MemsetZero(ChnVUMeters);	// Also zero all non-visible VU meters
-		if((m_Status & (psFollowSong | psDragActive)) == psFollowSong)
-		{
-			SetPlayCursor(PATTERNINDEX_INVALID, ROWINDEX_INVALID, 0);
-		}
+		SetPlayCursor(PATTERNINDEX_INVALID, ROWINDEX_INVALID, 0);
 	}
 
 	UpdateIndicator();
