@@ -1910,7 +1910,7 @@ bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 	oldSpecs = &modSpecs;
 
 	int choices = 0;
-	KeyCombination kc(kCtxViewPatternsFX, 0, 0, kKeyEventDown);
+	KeyCombination kc(kCtxViewPatternsFX, 0, 0, kKeyEventDown | kKeyEventRepeat);
 
 	for(CommandID cmd = kcFixedFXStart; cmd <= kcFixedFXend; cmd = static_cast<CommandID>(cmd + 1))
 	{
