@@ -231,6 +231,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 		{
 			throw BridgeException("Failed to launch plugin bridge.");
 		}
+		CloseHandle(processInfo.hThread);
 		otherProcess = processInfo.hProcess;
 	} else
 	{
@@ -283,6 +284,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 BridgeWrapper::~BridgeWrapper()
 {
 	SignalObjectAndWait(sigThreadExit, otherThread, INFINITE, FALSE);
+	CloseHandle(otherThread);
 }
 
 

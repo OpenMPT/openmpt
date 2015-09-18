@@ -92,7 +92,7 @@ const CModSpecifications mod =
 	TEMPO(32, 0),								// Min tempo
 	TEMPO(255, 0),								// Max tempo
 	1,											// Min Speed
-	32,											// Max Speed
+	31,											// Max Speed
 	64,											// Min pattern rows
 	64,											// Max pattern rows
 	20,											// Max mod name length
