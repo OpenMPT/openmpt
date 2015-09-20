@@ -30,9 +30,8 @@ BOOL CScaleEnvPointsDlg::OnInitDialog()
 	m_EditX.AllowNegative(false);
 	m_EditX.SetDecimalValue(m_fFactorX);
 	m_EditY.SetDecimalValue(m_fFactorY);
-	m_EditX.SetFocus();
 
-	return FALSE;	// return TRUE unless you set the focus to a control
+	return TRUE;	// return TRUE unless you set the focus to a control
 }
 
 
