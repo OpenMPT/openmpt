@@ -1860,7 +1860,9 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
 		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 
+		pMainFrm->GetInputHandler()->Bypass(true);
 		bool cancel = dwcdlg.DoModal() != IDOK;
+		pMainFrm->GetInputHandler()->Bypass(false);
 
 		if(wsdlg.m_Settings.outputToSample)
 		{
@@ -2003,7 +2005,9 @@ void CModDoc::OnFileMidiConvert()
 	if(mididlg.DoModal() == IDOK)
 	{
 		CDoMidiConvert doconv(m_SndFile, dlg.GetFirstFile(), mididlg.m_instrMap);
+		pMainFrm->GetInputHandler()->Bypass(true);
 		doconv.DoModal();
+		pMainFrm->GetInputHandler()->Bypass(false);
 	}
 #else
 	Reporting::Error("In order to use MIDI export, OpenMPT must be built with plugin support.")
