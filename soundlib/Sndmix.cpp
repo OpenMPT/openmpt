@@ -1028,7 +1028,7 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period) const
 
 
 void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, EnvelopeType envType) const
-//------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 {
 	ModChannel::EnvInfo &chnEnv = pChn->GetEnvelope(envType);
 
@@ -2019,7 +2019,9 @@ bool CSoundFile::ReadNote()
 				// In this case: GetType() == MOD_TYPE_MPT and using custom tunings.
 				if(pChn->m_CalculateFreq || (pChn->m_ReCalculateFreqOnFirstTick && m_PlayState.m_nTickCount == 0))
 				{
-					pChn->m_Freq = Util::Round<uint32>((pChn->nC5Speed << FREQ_FRACBITS) * vibratoFactor * pIns->pTuning->GetRatio(pChn->nNote - NOTE_MIDDLEC + arpeggioSteps, pChn->nFineTune+pChn->m_PortamentoFineSteps));
+					ModCommand::NOTE note = pChn->nNote;
+					if(!ModCommand::IsNote(note)) note = pChn->nLastNote;
+					pChn->m_Freq = Util::Round<uint32>((pChn->nC5Speed << FREQ_FRACBITS) * vibratoFactor * pIns->pTuning->GetRatio(note - NOTE_MIDDLEC + arpeggioSteps, pChn->nFineTune+pChn->m_PortamentoFineSteps));
 					if(!pChn->m_CalculateFreq)
 						pChn->m_ReCalculateFreqOnFirstTick = false;
 					else
