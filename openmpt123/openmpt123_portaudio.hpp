@@ -88,97 +88,6 @@ public:
 
 std::ostream * portaudio_raii::portaudio_log_stream = 0;
 
-#if defined(MPT_PORTAUDIO_CALLBACK)
-
-class portaudio_stream_callback_raii : public portaudio_raii, public write_buffers_blocking_wrapper {
-private:
-	PaStream * stream;
-	openmpt123::mutex audioMutex;
-	bool use_float;
-public:
-	portaudio_stream_callback_raii( commandlineflags & flags, std::ostream & log )
-		: portaudio_raii(flags.verbose, log)
-		, write_buffers_blocking_wrapper(flags)
-		, stream(NULL)
-		, use_float(flags.use_float)
-	{
-		flags.apply_default_buffer_sizes();
-		PaStreamParameters streamparameters;
-		std::memset( &streamparameters, 0, sizeof(PaStreamParameters) );
-		streamparameters.device = ( flags.device == -1 ) ? Pa_GetDefaultOutputDevice() : flags.device;
-		streamparameters.channelCount = flags.channels;
-		streamparameters.sampleFormat = ( flags.use_float ? paFloat32 : paInt16 );
-		streamparameters.suggestedLatency = flags.buffer * 0.001;
-		check_portaudio_error( Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, paFramesPerBufferUnspecified, ( flags.dither > 0 ) ? paNoFlag : paDitherOff, &portaudio_callback_wrapper, this ) );
-		if ( flags.verbose ) {
-			log << "PortAudio (Callback):" << std::endl;
-			log << " device: "
-				<< streamparameters.device
-				<< " [ " << Pa_GetHostApiInfo( Pa_GetDeviceInfo( streamparameters.device )->hostApi )->name << " / " << Pa_GetDeviceInfo( streamparameters.device )->name << " ] "
-				<< std::endl;
-			log << " channels: " << streamparameters.channelCount << std::endl;
-			log << " sampleformat: " << ( ( streamparameters.sampleFormat == paFloat32 ) ? "paFloat32" : "paInt16" ) << std::endl;
-			log << " latency: " << Pa_GetStreamInfo( stream )->outputLatency << std::endl;
-			log << " samplerate: " << Pa_GetStreamInfo( stream )->sampleRate << std::endl;
-			log << std::endl;
-		}
-		double bufferSeconds = ( flags.buffer * 0.001 ) - Pa_GetStreamInfo( stream )->outputLatency;
-		if ( bufferSeconds <= ( flags.period * 0.001 * 2.0 )  ) {
-			bufferSeconds = flags.period * 0.001 * 2.0;
-		}
-		set_queue_size_frames( static_cast<std::size_t>( bufferSeconds * Pa_GetStreamInfo( stream )->sampleRate ) );
-		check_portaudio_error( Pa_StartStream( stream ) );
-	}
-	~portaudio_stream_callback_raii() {
-		if ( stream ) {
-			PaError stopped = Pa_IsStreamStopped( stream );
-			check_portaudio_error( stopped );
-			if ( !stopped ) {
-				check_portaudio_error( Pa_StopStream( stream ) );
-			}
-			check_portaudio_error( Pa_CloseStream( stream ) );
-			stream = NULL;
-		}
-	}
-private:
-	static int portaudio_callback_wrapper( const void * input, void * output, unsigned long frameCount, const PaStreamCallbackTimeInfo * timeInfo, PaStreamCallbackFlags statusFlags, void * userData ) {
-		return reinterpret_cast<portaudio_stream_callback_raii*>( userData )->portaudio_callback( input, output, frameCount, timeInfo, statusFlags );
-	}
-	int portaudio_callback( const void * input, void * output, unsigned long frameCount, const PaStreamCallbackTimeInfo * timeInfo, PaStreamCallbackFlags statusFlags ) {
-		lock();
-		if ( use_float ) {
-			fill_buffer( reinterpret_cast<float*>( output ), frameCount );
-		} else {
-			fill_buffer( reinterpret_cast<std::int16_t*>( output ), frameCount );
-		}
-		unlock();
-		return paContinue;
-	}
-public:
-	bool unpause() {
-		check_portaudio_error( Pa_StartStream( stream ) );
-		return true;
-	}
-	bool pause() {
-		check_portaudio_error( Pa_StopStream( stream ) );
-		return true;
-	}
-	void lock() {
-		audioMutex.lock();
-	}
-	void unlock() {
-		audioMutex.unlock();
-	}
-	bool sleep( int ms ) {
-		Pa_Sleep( ms );
-		return true;
-	}
-};
-
-#define portaudio_stream_raii portaudio_stream_callback_raii
-
-#else
-
 class portaudio_stream_blocking_raii : public portaudio_raii, public write_buffers_interface {
 private:
 	PaStream * stream;
@@ -346,8 +255,6 @@ public:
 };
 
 #define portaudio_stream_raii portaudio_stream_blocking_raii
-
-#endif
 
 static std::string show_portaudio_devices( std::ostream & log ) {
 	std::ostringstream devices;
