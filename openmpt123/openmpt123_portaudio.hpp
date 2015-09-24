@@ -104,7 +104,10 @@ public:
 	{
 		PaStreamParameters streamparameters;
 		std::memset( &streamparameters, 0, sizeof(PaStreamParameters) );
-		streamparameters.device = ( flags.device == -1 ) ? Pa_GetDefaultOutputDevice() : flags.device;
+		std::istringstream device_string( flags.device );
+		int device = -1;
+		device_string >> device;
+		streamparameters.device = ( device == -1 ) ? Pa_GetDefaultOutputDevice() : device;
 		streamparameters.channelCount = flags.channels;
 		streamparameters.sampleFormat = ( flags.use_float ? paFloat32 : paInt16 ) | paNonInterleaved;
 		if ( flags.buffer == default_high ) {

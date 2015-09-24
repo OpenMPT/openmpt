@@ -76,9 +76,12 @@ PKG_CHECK_MODULES([PORTAUDIO], [portaudio-2.0],
  ],
  [
   have_portaudio=0
-  PKG_CHECK_MODULES([SDL], [sdl],
-   [AC_DEFINE([MPT_WITH_SDL], [], [with libsdl])],
-   [AC_MSG_WARN([Neither PORTAUDIO nor SDL is available. openmpt123 will be built without realtime audio output.])]
+  PKG_CHECK_MODULES([SDL2], [sdl2],
+   [AC_DEFINE([MPT_WITH_SDL2], [], [with libsdl2])],
+   PKG_CHECK_MODULES([SDL], [sdl],
+    [AC_DEFINE([MPT_WITH_SDL], [], [with libsdl])],
+    [AC_MSG_WARN([Neither PORTAUDIO nor SDL2/SDL1 is available. openmpt123 will be built without realtime audio output.])]
+   )
   )
  ]
 )

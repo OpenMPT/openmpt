@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.2 svn
 
+ *  [**Change**] openmpt123: SDL2 is now supported and preferred to SDL1 if
+    available.
+
  *  [**Bug**] Emscripten support for older emscripten versions broke in -beta14.
     These are now supported again when using `make CONFIG=emscripten-old`.
 

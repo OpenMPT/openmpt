@@ -9,7 +9,7 @@
 
 static const char * const license =
 "The OpenMPT code is licensed under the BSD license." "\n"
-" " "\n"
+"" "\n"
 "Copyright (c) 2004-2015, OpenMPT contributors" "\n"
 "Copyright (c) 1997-2003, Olivier Lapicque" "\n"
 "All rights reserved." "\n"
@@ -92,6 +92,7 @@ static const char * const license =
 #include "openmpt123_stdout.hpp"
 #include "openmpt123_portaudio.hpp"
 #include "openmpt123_sdl.hpp"
+#include "openmpt123_sdl2.hpp"
 #include "openmpt123_waveout.hpp"
 
 namespace openmpt123 {
@@ -384,6 +385,22 @@ static void show_info( std::ostream & log, bool verbose ) {
 	}
 	log << "  libopenmpt Features: " << openmpt::string::get( openmpt::string::library_features ) << std::endl;
 	log << "  libopenmpt Build: " << openmpt::string::get( openmpt::string::build ) << std::endl;
+#ifdef MPT_WITH_SDL2
+	log << " libSDL2 ";
+	SDL_version sdlver;
+	std::memset( &sdlver, 0, sizeof( SDL_version ) );
+	SDL_GetVersion( &sdlver );
+	log << static_cast<int>( sdlver.major ) << "." << static_cast<int>( sdlver.minor ) << "." << static_cast<int>( sdlver.patch ) << "." << SDL_GetRevisionNumber();
+	const char * revision = SDL_GetRevision();
+	if ( revision ) {
+		log << " (" << revision << ")";
+	}
+	log << ", ";
+	std::memset( &sdlver, 0, sizeof( SDL_version ) );
+	SDL_VERSION( &sdlver );
+	log << "API: " << static_cast<int>( sdlver.major ) << "." << static_cast<int>( sdlver.minor ) << "." << static_cast<int>( sdlver.patch ) << "";
+	log << " <https://libsdl.org/>" << std::endl;
+#endif
 #ifdef MPT_WITH_SDL
 	const SDL_version * linked_sdlver = SDL_Linked_Version();
 	log << " libSDL ";
@@ -452,13 +469,11 @@ static std::string get_driver_string( const std::string & driver ) {
 	return driver;
 }
 
-static std::string get_device_string( int device ) {
-	if ( device == -1 ) {
+static std::string get_device_string( const std::string & device ) {
+	if ( device.empty() ) {
 		return "default";
 	}
-	std::ostringstream str;
-	str << device;
-	return str.str();
+	return device;
 }
 
 static void show_help( textout & log, bool with_info = true, bool longhelp = false, bool man_version = false, const std::string & message = std::string() ) {
@@ -1651,6 +1666,9 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 					std::ostringstream drivers;
 					drivers << " Available drivers:" << std::endl;
 					drivers << "    " << "default" << std::endl;
+#if defined( MPT_WITH_SDL2 )
+					drivers << "    " << "sdl2" << std::endl;
+#endif
 #if defined( MPT_WITH_SDL )
 					drivers << "    " << "sdl" << std::endl;
 #endif
@@ -1674,6 +1692,9 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 					std::ostringstream devices;
 					devices << " Available devices:" << std::endl;
 					devices << "    " << "default" << ": " << "default" << std::endl;
+#if defined( MPT_WITH_SDL2 )
+					devices << show_sdl2_devices( log );
+#endif
 #if defined( MPT_WITH_PORTAUDIO )
 					devices << show_portaudio_devices( log );
 #endif
@@ -1682,10 +1703,9 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 #endif
 					throw show_help_exception( devices.str() );
 				} else if ( nextarg == "default" ) {
-					flags.device = -1;
+					flags.device = "";
 				} else {
-					std::istringstream istr( nextarg );
-					istr >> flags.device;
+					flags.device = nextarg;
 				}
 				++i;
 			} else if ( arg == "--buffer" && nextarg != "" ) {
@@ -1986,6 +2006,11 @@ static int main( int argc, char * argv [] ) {
 					flags.apply_default_buffer_sizes();
 					file_audio_stream_raii file_audio_stream( flags, flags.output_filename, log );
 					render_files( flags, log, file_audio_stream );
+#if defined( MPT_WITH_SDL2 )
+				} else if ( flags.driver == "sdl2" || flags.driver.empty() ) {
+					sdl2_stream_raii sdl2_stream( flags, log );
+					render_files( flags, log, sdl2_stream );
+#endif
 #if defined( MPT_WITH_SDL )
 				} else if ( flags.driver == "sdl" || flags.driver.empty() ) {
 					sdl_stream_raii sdl_stream( flags, log );
@@ -2033,6 +2058,12 @@ static int main( int argc, char * argv [] ) {
 #ifdef MPT_WITH_SDL
 	} catch ( sdl_exception & e ) {
 		std_err << "SDL error: " << e.what() << std::endl;
+		std_err.writeout();
+		return 1;
+#endif
+#ifdef MPT_WITH_SDL2
+	} catch ( sdl2_exception & e ) {
+		std_err << "SDL2 error: " << e.what() << std::endl;
 		std_err.writeout();
 		return 1;
 #endif
