@@ -65,6 +65,7 @@
 #
 #  (defaults are 0):
 #  NO_SDL=1            Avoid using SDL, even if found
+#  NO_SDL2=1           Avoid using SDL2, even if found
 #  NO_PORTAUDIO=1      Avoid using PortAudio, even if found
 #  NO_PORTAUDIOCPP=1   Avoid using PortAudio C++, even if found
 #  NO_FLAC=1           Avoid using FLAC, even if found
@@ -345,6 +346,19 @@ LDLIBS_MO3  := -lltdl
 else
 endif
 
+ifeq ($(NO_SDL2),1)
+else
+#LDLIBS   += -lsdl2
+ifeq ($(shell pkg-config --exists sdl2 && echo yes),yes)
+CPPFLAGS_SDL := $(shell pkg-config --cflags-only-I sdl2 ) -DMPT_WITH_SDL2
+LDFLAGS_SDL  := $(shell pkg-config --libs-only-L   sdl2 ) $(shell pkg-config --libs-only-other sdl2 )
+LDLIBS_SDL   := $(shell pkg-config --libs-only-l   sdl2 )
+NO_SDL:=1
+else
+NO_SDL2:=1
+endif
+endif
+
 ifeq ($(NO_SDL),1)
 else
 #LDLIBS   += -lsdl
@@ -409,9 +423,9 @@ CPPFLAGS += $(CPPFLAGS_ZLIB) $(CPPFLAGS_MO3)
 LDFLAGS += $(LDFLAGS_ZLIB) $(LDFLAGS_MO3)
 LDLIBS += $(LDLIBS_ZLIB) $(LDLIBS_MO3)
 
-CPPFLAGS_OPENMPT123 += $(CPPFLAGS_SDL) $(CPPFLAGS_PORTAUDIO) $(CPPFLAGS_FLAC) $(CPPFLAGS_SNDFILE)
-LDFLAGS_OPENMPT123  += $(LDFLAGS_SDL) $(LDFLAGS_PORTAUDIO) $(LDFLAGS_FLAC) $(LDFLAGS_SNDFILE)
-LDLIBS_OPENMPT123   += $(LDLIBS_SDL) $(LDLIBS_PORTAUDIO) $(LDLIBS_FLAC) $(LDLIBS_SNDFILE)
+CPPFLAGS_OPENMPT123 += $(CPPFLAGS_SDL2) $(CPPFLAGS_SDL) $(CPPFLAGS_PORTAUDIO) $(CPPFLAGS_FLAC) $(CPPFLAGS_SNDFILE)
+LDFLAGS_OPENMPT123  += $(LDFLAGS_SDL2) $(LDFLAGS_SDL) $(LDFLAGS_PORTAUDIO) $(LDFLAGS_FLAC) $(LDFLAGS_SNDFILE)
+LDLIBS_OPENMPT123   += $(LDLIBS_SDL2) $(LDLIBS_SDL) $(LDLIBS_PORTAUDIO) $(LDLIBS_FLAC) $(LDLIBS_SNDFILE)
 
 
 %: %.o

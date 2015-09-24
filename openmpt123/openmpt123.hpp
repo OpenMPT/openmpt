@@ -242,7 +242,7 @@ struct commandlineflags {
 	std::int32_t ui_redraw_interval;
 	bool canProgress;
 	std::string driver;
-	int device;
+	std::string device;
 	std::int32_t buffer;
 	std::int32_t period;
 	std::int32_t samplerate;
@@ -299,7 +299,7 @@ struct commandlineflags {
 		mode = ModeUI;
 		ui_redraw_interval = default_high;
 		driver = "";
-		device = -1;
+		device = "";
 		buffer = default_high;
 		period = default_high;
 		samplerate = 48000;

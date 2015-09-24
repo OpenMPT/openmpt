@@ -59,7 +59,10 @@ public:
 		wfx.nBlockAlign = ( wfx.wBitsPerSample / 8 ) * wfx.nChannels;
 		wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
 		wfx.cbSize = 0;
-		waveOutOpen( &waveout, flags.device == -1 ? WAVE_MAPPER : flags.device, &wfx, 0, 0, CALLBACK_NULL );
+		std::istringstream device_string( flags.device );
+		int device = -1;
+		device_string >> device;
+		waveOutOpen( &waveout, device == -1 ? WAVE_MAPPER : device, &wfx, 0, 0, CALLBACK_NULL );
 		num_channels = flags.channels;
 		std::size_t frames_per_buffer = flags.samplerate * flags.buffer / 1000;
 		num_chunks = ( flags.buffer + flags.period - 1 ) / flags.period;
