@@ -396,6 +396,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\openmpt123\openmpt123_sdl2.hpp"
+			>
+		</File>
+		<File
 			RelativePath="..\..\openmpt123\openmpt123_sndfile.hpp"
 			>
 		</File>
