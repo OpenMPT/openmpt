@@ -657,22 +657,31 @@ void CModDoc::OnAppendModule()
 	FileDialog::PathList files;
 	CTrackApp::OpenModulesDialog(files);
 
-	CSoundFile source;
 	ScopedLogCapturer logcapture(*this, "Append Failures");
-
+	CSoundFile *source;
+	try
+	{
+		source = new CSoundFile;
+	} catch(MPTMemoryException)
+	{
+		AddToLog("Out of memory.");
+		return;
+	}
+	
 	for(size_t counter = 0; counter < files.size(); counter++)
 	{
 		InputFile f;
-		if(f.Open(files[counter]) && source.Create(GetFileReader(f), CSoundFile::loadCompleteModule))
+		if(f.Open(files[counter]) && source->Create(GetFileReader(f), CSoundFile::loadCompleteModule))
 		{
-			AppendModule(source);
-			source.Destroy();
+			AppendModule(*source);
+			source->Destroy();
 			SetModified();
 		} else
 		{
 			AddToLog("Unable to open source file!");
 		}
 	}
+	delete source;
 	UpdateAllViews(nullptr, SequenceHint().Data().ModType());
 }
 
