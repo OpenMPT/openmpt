@@ -1095,8 +1095,6 @@ void CDoWaveConvert::OnButton1()
 
 	// For calculating the remaining time
 	DWORD dwStartTime = timeGetTime();
-	// For giving away some processing time every now and then
-	DWORD dwSleepTime = dwStartTime;
 
 	uint64 bytesWritten = 0;
 
@@ -1198,13 +1196,6 @@ void CDoWaveConvert::OnButton1()
 				_stprintf(s, _T("Writing file... (%lluKB, %umn%02us, %umn%02us remaining)"), bytesWritten >> 10, l / 60, l % 60u, timeRemaining / 60, timeRemaining % 60u);
 			}
 			SetDlgItemText(IDC_TEXT1, s);
-
-			// Give windows some time to redraw the window, if necessary (else, the infamous "OpenMPT does not respond" will pop up)
-			if ((!m_bGivePlugsIdleTime) && (dwCurrentTime > dwSleepTime + 1000))
-			{
-				Sleep(1);
-				dwSleepTime = dwCurrentTime;
-			}
 		}
 		if ((progress != NULL) && ((DWORD)(ullSamples >> 14) != pos))
 		{
