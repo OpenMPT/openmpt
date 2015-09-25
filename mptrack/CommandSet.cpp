@@ -689,6 +689,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcTreeViewStopPreview, 1951, _T("Stop sample preview"), kcHidden);
 	DefineKeyCommand(kcSampleDuplicate, 1952, _T("Duplicate Sample"));
 	DefineKeyCommand(kcSampleSlice, 1953, _T("Slice at cue points"));
+	DefineKeyCommand(kcInstrumentEnvelopeScale, 1954, _T("Scale Envelope Points"));
 
 	// Add new key commands here.
 
@@ -1376,7 +1377,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	}
 	if (enforceRule[krPropagateSampleManipulation])
 	{
-		if (inCmd>=kcStartSampleMisc && inCmd<=kcEndSampleMisc)
+		if (inCmd>=kcSampleLoad && inCmd<=kcSampleNew)
 		{
 			int newCmd;
 			int offset = inCmd-kcStartSampleMisc;
