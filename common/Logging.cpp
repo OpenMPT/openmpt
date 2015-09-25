@@ -162,7 +162,7 @@ void Logger::SendLogMessage(const Context &context, LogLevel level, const char *
 				AllocConsole();
 				consoleInited = true;
 			}
-			std::wstring consoletext = mpt::ToWide(message);
+			std::wstring consoletext = mpt::ToWide(message) + L"\r\n";
 			DWORD dummy = 0;
 			WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), consoletext.c_str(), consoletext.length(), &dummy, NULL);
 		}
