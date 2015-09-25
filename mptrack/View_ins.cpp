@@ -2235,6 +2235,7 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		case kcInstrumentEnvelopeSave:					OnEnvSave(); return wParam;
 		case kcInstrumentEnvelopeZoomIn:				OnEnvZoomIn(); return wParam;
 		case kcInstrumentEnvelopeZoomOut:				OnEnvZoomOut(); return wParam;
+		case kcInstrumentEnvelopeScale:					OnEnvelopeScalepoints(); return wParam;
 		case kcInstrumentEnvelopePointPrev:				EnvKbdSelectPrevPoint(); return wParam;
 		case kcInstrumentEnvelopePointNext:				EnvKbdSelectNextPoint(); return wParam;
 		case kcInstrumentEnvelopePointMoveLeft:			EnvKbdMovePointLeft(); return wParam;

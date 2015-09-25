@@ -617,6 +617,7 @@ enum CommandID
 	kcSetFXEnd=kcSetFXextension,
 
 	kcStartInstrumentMisc,
+	// Note: Order must be the same as kcStartSampleMisc because commands are propagated!
 	kcInstrumentLoad=kcStartInstrumentMisc,
 	kcInstrumentSave,
 	kcInstrumentNew,
@@ -624,6 +625,7 @@ enum CommandID
 	kcInstrumentEnvelopeSave,
 	kcInstrumentEnvelopeZoomIn,
 	kcInstrumentEnvelopeZoomOut,
+	kcInstrumentEnvelopeScale,
 	kcInstrumentEnvelopePointPrev,
 	kcInstrumentEnvelopePointNext,
 	kcInstrumentEnvelopePointMoveLeft,

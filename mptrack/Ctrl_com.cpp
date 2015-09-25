@@ -75,7 +75,8 @@ BOOL CCtrlComments::OnInitDialog()
 {
 	CModControlDlg::OnInitDialog();
 	// Initialize comments
-	m_EditComments.SetMargins(4, 0);
+	UINT margin = Util::ScalePixels(4, m_EditComments.m_hWnd);
+	m_EditComments.SetMargins(margin, 0);
 	UpdateView(CommentHint().ModType());
 	m_EditComments.SetFocus();
 	m_bInitialized = TRUE;
@@ -134,17 +135,17 @@ void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 
 	m_EditComments.SetRedraw(FALSE);
 	m_EditComments.SetSel(0, -1, TRUE);
-	m_EditComments.ReplaceSel("");
+	m_EditComments.ReplaceSel(_T(""));
 	if(!m_sndFile.songMessage.empty())
 	{
-		CHAR s[256], c;
+		TCHAR s[256], c;
 		const char *p = m_sndFile.songMessage.c_str();
 		UINT ln = 0;
 		while ((c = *p++) != NULL)
 		{
 			if ((ln >= LINE_LENGTH-1) || (!*p))
 			{
-				if (((BYTE)c) > ' ') s[ln++] = c;
+				if (((uint32)c) > _T(' ')) s[ln++] = c;
 				c = SongMessage::InternalLineEnding;
 			}
 			if (c == SongMessage::InternalLineEnding)
@@ -157,7 +158,7 @@ void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 				ln = 0;
 			} else
 			{
-				if (((BYTE)c) < ' ') c = ' ';
+				if (((uint32)c) < _T(' ')) c = _T(' ');
 				s[ln++] = c;
 			}
 		}
@@ -180,12 +181,12 @@ void CCtrlComments::OnCommentsChanged()
 		|| !m_sndFile.GetModSpecifications().hasComments) return;
 	if ((!m_bInitialized) || (!m_EditComments.m_hWnd) || (!m_EditComments.GetModify())) return;
 
-	CHAR s[LINE_LENGTH + 2];
+	TCHAR s[LINE_LENGTH + 2];
 
 	// Updating comments
 	{
 		UINT n = m_EditComments.GetLineCount();
-		LPSTR p = new char[n * LINE_LENGTH + 1];
+		TCHAR *p = new (std::nothrow) TCHAR[n * LINE_LENGTH + 1];
 		if (!p)
 		{
 			return;
@@ -196,18 +197,18 @@ void CCtrlComments::OnCommentsChanged()
 		{
 			int ln = m_EditComments.GetLine(i, s, LINE_LENGTH);
 			if (ln < 0) ln = 0;
-			if (ln > LINE_LENGTH-1) ln = LINE_LENGTH-1;
+			if (ln > LINE_LENGTH - 1) ln = LINE_LENGTH - 1;
 			s[ln] = 0;
-			while ((ln > 0) && (((BYTE)s[ln-1]) <= ' ')) s[--ln] = 0;
+			while ((ln > 0) && (((uint32)s[ln-1]) <= _T(' '))) s[--ln] = 0;
 			if (i+1 < n)
 			{
-				size_t l = strlen(s);
+				size_t l = _tcslen(s);
 				s[l++] = SongMessage::InternalLineEnding;
-				s[l] = '\0';
+				s[l] = _T('\0');
 			}
-			strcat(p, s);
+			_tcscat(p, s);
 		}
-		size_t len = strlen(p);
+		size_t len = _tcslen(p);
 		while ((len > 0) && ((p[len-1] == ' ') || (p[len - 1] == SongMessage::InternalLineEnding)))
 		{
 			len--;

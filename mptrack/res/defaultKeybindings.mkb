@@ -325,6 +325,7 @@ version:1
 //----( Instrument Context [bottom] (9) )------------
 9:1837:0:107:5		//Zoom In: NUM PLUS (KeyDown|KeyHold)
 9:1838:0:109:5		//Zoom Out: NUM SUB (KeyDown|KeyHold)
+9:1954:2:69:1		//Scale Envelope Points: Ctrl+E (KeyDown)
 9:1825:1:9:5		//Select previous envelope point: Shift+TAB (KeyDown|KeyHold)
 9:1826:0:9:5		//Select next envelope point: TAB (KeyDown|KeyHold)
 9:1821:0:37:5		//Move envelope point left: LEFT (KeyDown|KeyHold)
