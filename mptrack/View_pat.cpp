@@ -1951,7 +1951,7 @@ void CViewPattern::OnEditFind()
 	{
 		CFindReplaceTab pageFind(IDD_EDIT_FIND, false, pModDoc->GetrSoundFile());
 		CFindReplaceTab pageReplace(IDD_EDIT_REPLACE, true, pModDoc->GetrSoundFile());
-		CPropertySheet dlg("Find/Replace");
+		CPropertySheet dlg(_T("Find/Replace"));
 
 		pageFind.m_Cmd = m_findReplace.cmdFind;
 		pageFind.m_Flags = m_findReplace.findFlags;
@@ -3760,15 +3760,16 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 			}
 
 			// Simple detection of backwards-going patterns to avoid jerky animation
-			m_nNextPlayRow = nRow + 1;
+			m_nNextPlayRow = ROWINDEX_INVALID;
 			if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) && pSndFile->Patterns.IsValidPat(nPat) && pSndFile->Patterns[nPat].IsValidRow(nRow))
 			{
 				for(const ModCommand *m = pSndFile->Patterns[nPat].GetRow(nRow), *mEnd = m + pSndFile->GetNumChannels(); m != mEnd; m++)
 				{
 					if(m->command == CMD_PATTERNBREAK) m_nNextPlayRow = m->param;
-					else if(m->command == CMD_POSITIONJUMP && pSndFile->GetType() == MOD_TYPE_XM) m_nNextPlayRow = 0;
+					else if(m->command == CMD_POSITIONJUMP && (m_nNextPlayRow == ROWINDEX_INVALID || pSndFile->GetType() == MOD_TYPE_XM)) m_nNextPlayRow = 0;
 				}
 			}
+			if(m_nNextPlayRow == ROWINDEX_INVALID) m_nNextPlayRow = nRow + 1;
 
 			m_nTicksOnRow = pnotify->ticksOnRow;
 			SetPlayCursor(nPat, nRow, pnotify->tick);
