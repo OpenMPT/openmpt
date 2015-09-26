@@ -349,7 +349,7 @@ static void ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 			{
 			case 0x20:	// Cutoff + Resonance
 				m.command = CMD_MIDI;
-				m.param = p.fxparam1 >> 1;
+				m.param = p.fxparam2 >> 1;
 				break;
 				
 			case 0x22:	// Cutoff + Resonance + Attack + Decay
@@ -715,6 +715,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read drum channels
 	INSTRUMENTINDEX drumMap[8] = { 0 };
+	uint16 drumSample[8] = { 0 };
 	if(hasDrumChannels)
 	{
 		MT2DrumsData drumHeader;
@@ -724,6 +725,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		for(INSTRUMENTINDEX i = 0; i < 8; i++)
 		{
 			drumMap[i] = GetNextFreeInstrument(m_nInstruments + 1);
+			drumSample[i] = drumHeader.DrumSamples[i];
 			if(drumMap[i] != INSTRUMENTINDEX_INVALID)
 			{
 				m_nInstruments = drumMap[i];
@@ -893,6 +895,9 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			mptIns->nFadeOut = int16_max;
 		}
 
+		mptIns->SetCutoff(0x7F, true);
+		mptIns->SetResonance(0, true);
+
 		if(flags)
 		{
 			MT2InstrSynth synthData;
@@ -901,8 +906,11 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			// Translate frequency back to extended IT cutoff factor
 			float cutoff = 28.8539f * std::log(0.00764451f * synthData.cutoff);
 			Limit(cutoff, 0.0f, 127.0f);
-			mptIns->SetCutoff(Util::Round<uint8>(cutoff), (flags & 2) != 0);
-			mptIns->SetResonance(synthData.resonance, (flags & 2) != 0);
+			if(flags & 2)
+			{
+				mptIns->SetCutoff(Util::Round<uint8>(cutoff), true);
+				mptIns->SetResonance(synthData.resonance, true);
+			}
 			mptIns->nFilterMode = synthData.effectID == 1 ? FLTMODE_HIGHPASS : FLTMODE_LOWPASS;
 			if(flags & 4)
 			{
@@ -929,6 +937,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read sample headers
 	std::bitset<256> sampleNoInterpolation;
+	std::bitset<256> sampleSynchronized;
 	for(SAMPLEINDEX i = 0; i < 256; i++)
 	{
 		char sampleName[32];
@@ -965,7 +974,13 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			mptSmp.uFlags.set(CHN_PANNING);
 			mptSmp.RelativeTone = sampleHeader.note;
 
-			//if(sampleHeader.flags & 2) // Sample is synchronized to beat - not supported in OpenMPT
+			if(sampleHeader.flags & 2)
+			{
+				// Sample is synchronized to beat
+				// The synchronization part is not supported in OpenMPT, but synchronized samples also always play at the same pitch as C-5, which we CAN do!
+				sampleSynchronized[i] = true;
+				//mptSmp.nC5Speed = Util::muldiv(mptSmp.nC5Speed, sampleHeader.spb, 22050);
+			}
 			if(sampleHeader.flags & 5)
 			{
 				// External sample
@@ -976,7 +991,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				sampleNoInterpolation[i] = true;
 				for(INSTRUMENTINDEX drum = 0; drum < 8; drum++)
 				{
-					if(drumMap[drum] != 0 && Instruments[drumMap[drum]] != nullptr)
+					if(drumSample[drum] == i && Instruments[drumMap[drum]] != nullptr)
 					{
 						Instruments[drumMap[drum]]->nResampling = SRCMODE_NEAREST;
 					}
@@ -1023,6 +1038,10 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 							if(sampleNoInterpolation[sample - 1])
 							{
 								mptIns->nResampling = SRCMODE_NEAREST;
+							}
+							if(sampleSynchronized[sample - 1])
+							{
+								mptIns->NoteMap[note + 11 + NOTE_MIN] = NOTE_MIDDLEC;
 							}
 						}
 						// TODO: volume, finetune for duplicated samples
