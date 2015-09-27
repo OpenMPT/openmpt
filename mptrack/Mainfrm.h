@@ -254,7 +254,6 @@ public:
 	static HICON m_hIcon;
 	static HFONT m_hGUIFont, m_hFixedFont;
 	static HBRUSH brushGray, brushBlack, brushWhite, brushText, brushHighLight, brushHighLightRed, brushWindow, brushYellow;
-//	static CBrush *pbrushBlack, *pbrushWhite;
 	static HPEN penBlack, penDarkGray, penLightGray, penWhite, penHalfDarkGray, penSample, penEnvelope, penEnvelopeHighlight, penSeparator, penScratch, penGray00, penGray33, penGray40, penGray55, penGray80, penGray99, penGraycc, penGrayff;
 	static HCURSOR curDragging, curNoDrop, curArrow, curNoDrop2, curVSplit;
 	static MODPLUGDIB *bmpNotes, *bmpVUMeters;
@@ -306,7 +305,7 @@ protected:
 	// Instrument preview in tree view
 	CSoundFile m_WaveFile;
 
-	CHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512]; //rewbs.xinfo
+	CHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512];
 
 	CAutoSaver m_AutoSaver;
 
@@ -361,25 +360,24 @@ public:
 	static HFONT &GetCommentsFont() { return m_hFixedFont; }
 	static void UpdateAllViews(UpdateHint hint, CObject *pHint=NULL);
 	static LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam);
-	static CInputHandler *m_InputHandler; 	//rewbs.customKeys
+	static CInputHandler *m_InputHandler;
 
 	// Misc functions
 public:
 	void SetUserText(LPCSTR lpszText);
 	void SetInfoText(LPCSTR lpszText);
-	void SetXInfoText(LPCSTR lpszText); //rewbs.xinfo
+	void SetXInfoText(LPCSTR lpszText);
 	void SetHelpText(LPCSTR lpszText);
 	UINT GetBaseOctave() const;
 	CModDoc *GetActiveDoc();
-	CView *GetActiveView();  	//rewbs.customKeys
+	CView *GetActiveView();
 	void OnDocumentCreated(CModDoc *pModDoc);
 	void OnDocumentClosed(CModDoc *pModDoc);
 	void UpdateTree(CModDoc *pModDoc, UpdateHint hint, CObject *pHint=NULL);
-	static CInputHandler* GetInputHandler() { return m_InputHandler; }  	//rewbs.customKeys
-	bool m_bModTreeHasFocus;  	//rewbs.customKeys
-	CWnd *m_pNoteMapHasFocus;  	//rewbs.customKeys
+	static CInputHandler* GetInputHandler() { return m_InputHandler; }
+	bool m_bModTreeHasFocus;
+	CWnd *m_pNoteMapHasFocus;
 	CWnd* m_pOrderlistHasFocus;
-	double GetApproxBPM();
 	void ThreadSafeSetModified(CModDoc* modified) { InterlockedExchangePointer(reinterpret_cast<void **>(&m_pJustModifiedDoc), modified); }
 	void SetElapsedTime(double t) { m_dwTimeSec = static_cast<CSoundFile::samplecount_t>(t); }
 
@@ -431,8 +429,10 @@ public:
 	void PlayPreview() { PlaySoundFile(&m_WaveFile); }
 
 	inline bool IsPlaying() const { return m_pSndFile != nullptr; }
+	// Return currently playing module (nullptr if none is playing)
 	inline CModDoc *GetModPlaying() const { return m_pSndFile ? m_pSndFile->GetpModDoc() : nullptr; }
-	inline CSoundFile *GetSoundFilePlaying() const { return m_pSndFile; } // may be nullptr
+	// Return currently playing module (nullptr if none is playing)
+	inline CSoundFile *GetSoundFilePlaying() const { return m_pSndFile; }
 	BOOL InitRenderer(CSoundFile*);
 	BOOL StopRenderer(CSoundFile*);
 	void SwitchToActiveView();
@@ -483,7 +483,7 @@ public:
 public:
 	afx_msg void OnAddDlsBank();
 	afx_msg void OnImportMidiLib();
-	afx_msg void OnViewOptions();		 //rewbs.resamplerConf: made public so it's accessible from mod2wav gui :/
+	afx_msg void OnViewOptions();
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnRButtonDown(UINT, CPoint);

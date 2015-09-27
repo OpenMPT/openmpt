@@ -2488,20 +2488,6 @@ void CMainFrame::OnInitMenu(CMenu* pMenu)
 }
 
 
-double CMainFrame::GetApproxBPM()
-//-------------------------------
-{
-	CSoundFile *pSndFile = NULL;
-
-	pSndFile = GetActiveDoc()->GetSoundFile();
-	if (pSndFile)
-	{
-		pSndFile->RecalculateSamplesPerTick();
-		return pSndFile->GetCurrentBPM();
-	}
-	return 0;
-}
-
 BOOL CMainFrame::InitRenderer(CSoundFile* pSndFile)
 //-------------------------------------------------
 {
@@ -2511,6 +2497,7 @@ BOOL CMainFrame::InitRenderer(CSoundFile* pSndFile)
 	pSndFile->ResumePlugins();
 	return true;
 }
+
 
 BOOL CMainFrame::StopRenderer(CSoundFile* pSndFile)
 //-------------------------------------------------

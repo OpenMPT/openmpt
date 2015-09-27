@@ -2396,13 +2396,19 @@ void CModDoc::OnEstimateSongLength()
 	Reporting::Information(s);
 }
 
+
 void CModDoc::OnApproximateBPM()
 //------------------------------
 {
-	//Convert BPM to string:
-	CString Message;
-	double bpm = CMainFrame::GetMainFrame()->GetApproxBPM();
+	if(CMainFrame::GetMainFrame()->GetModPlaying() != this)
+	{
+		m_SndFile.m_PlayState.m_nCurrentRowsPerBeat = m_SndFile.m_nDefaultRowsPerBeat;
+		m_SndFile.m_PlayState.m_nCurrentRowsPerMeasure = m_SndFile.m_nDefaultRowsPerMeasure;
+	}
+	m_SndFile.RecalculateSamplesPerTick();
+	const double bpm = m_SndFile.GetCurrentBPM();
 
+	CString Message;
 	switch(m_SndFile.m_nTempoMode)
 	{
 		case tempoModeAlternative:
@@ -2425,7 +2431,6 @@ void CModDoc::OnApproximateBPM()
 }
 
 
-//rewbs.customKeys
 CChildFrame *CModDoc::GetChildFrame()
 //-----------------------------------
 {
