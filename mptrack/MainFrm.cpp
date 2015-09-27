@@ -31,7 +31,6 @@
 #include "InputHandler.h"
 #include "globals.h"
 #include "ChannelManagerDlg.h"
-#include "MIDIMappingDialog.h"
 #include <direct.h>
 #include "../common/version.h"
 #include "Ctrl_pat.h"
@@ -76,11 +75,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_COMMAND(ID_VIEW_OPTIONS,				OnViewOptions)
 
 	ON_COMMAND(ID_PLUGIN_SETUP,				OnPluginManager)
-	ON_COMMAND(ID_CHANNEL_MANAGER,			OnChannelManager)
 	ON_COMMAND(ID_CLIPBOARD_MANAGER,		OnClipboardManager)
-	ON_COMMAND(ID_VIEW_MIDIMAPPING,			OnViewMIDIMapping)
 	//ON_COMMAND(ID_HELP,					CMDIFrameWnd::OnHelp)
-	ON_COMMAND(ID_VIEW_SONGPROPERTIES,		OnSongProperties)
 	ON_COMMAND(ID_REPORT_BUG,				OnReportBug)
 	ON_COMMAND(ID_NEXTOCTAVE,				OnNextOctave)
 	ON_COMMAND(ID_PREVOCTAVE,				OnPrevOctave)
@@ -1914,14 +1910,6 @@ void CMainFrame::OnViewOptions()
 }
 
 
-void CMainFrame::OnSongProperties()
-//---------------------------------
-{
-	CModDoc* pModDoc = GetActiveDoc();
-	if(pModDoc) pModDoc->SongProperties();
-}
-
-
 void CMainFrame::OnPluginManager()
 //--------------------------------
 {
@@ -1954,22 +1942,6 @@ void CMainFrame::OnPluginManager()
 		pActiveChild->ForceRefresh();
 	}
 #endif // NO_VST
-}
-
-
-void CMainFrame::OnChannelManager()
-//---------------------------------
-{
-	if(GetActiveDoc() && CChannelManagerDlg::sharedInstance())
-	{
-		if(CChannelManagerDlg::sharedInstance()->IsDisplayed())
-			CChannelManagerDlg::sharedInstance()->Hide();
-		else
-		{
-			CChannelManagerDlg::sharedInstance()->SetDocument(NULL);
-			CChannelManagerDlg::sharedInstance()->Show();
-		}
-	}
 }
 
 
@@ -2434,9 +2406,6 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcMidiRecord:	OnMidiRecord(); break;
 		case kcHelp: 		OnHelp(); break;
 		case kcViewAddPlugin: OnPluginManager(); break;
-		case kcViewChannelManager: OnChannelManager(); break;
-		case kcViewMIDImapping: OnViewMIDIMapping(); break;
-		case kcViewEditHistory:	OnViewEditHistory(); break;
 		case kcNextDocument:	MDINext(); break;
 		case kcPrevDocument:	MDIPrev(); break;
 		case kcFileCloseAll:	theApp.OnFileCloseAll(); break;
@@ -2458,6 +2427,9 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcViewComments:
 		case kcViewGraph: //rewbs.graph
 		case kcViewSongProperties:
+		case kcViewMIDImapping:
+		case kcViewEditHistory:
+		case kcViewChannelManager:
 		case kcPlayPatternFromCursor:
 		case kcPlayPatternFromStart:
 		case kcPlaySongFromCursor:
@@ -2585,28 +2557,6 @@ void CMainFrame::OnShowWindow(BOOL bShow, UINT /*nStatus*/)
 		GetWindowPlacement(&wpl);
 		wpl = theApp.GetSettings().Read<WINDOWPLACEMENT>("Display", "WindowPlacement", wpl);
 		SetWindowPlacement(&wpl);
-	}
-}
-
-
-void CMainFrame::OnViewMIDIMapping()
-//----------------------------------
-{
-	CModDoc* pModDoc = GetActiveDoc();
-	if(!pModDoc) return;
-
-	CMIDIMappingDialog dlg(this, pModDoc->GetrSoundFile());
-	dlg.DoModal();
-}
-
-
-void CMainFrame::OnViewEditHistory()
-//----------------------------------
-{
-	CModDoc* pModDoc = GetActiveDoc();
-	if(pModDoc != nullptr)
-	{
-		pModDoc->OnViewEditHistory();
 	}
 }
 
