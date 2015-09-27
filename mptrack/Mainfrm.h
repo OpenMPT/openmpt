@@ -489,7 +489,6 @@ protected:
 	afx_msg void OnRButtonDown(UINT, CPoint);
 	afx_msg void OnClose();
 	afx_msg void OnTimer(UINT_PTR);
-	afx_msg void OnSongProperties();
 
 	afx_msg void OnPluginManager();
 
@@ -517,8 +516,6 @@ protected:
 	afx_msg LRESULT OnInvalidatePatterns(WPARAM, LPARAM);
 	afx_msg LRESULT OnSpecialKey(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
-	afx_msg void OnViewMIDIMapping();
-	afx_msg void OnViewEditHistory();
 	afx_msg void OnInternetUpdate();
 	afx_msg void OnShowSettingsFolder();
 	afx_msg LRESULT OnUpdateCheckProgress(WPARAM wparam, LPARAM lparam);

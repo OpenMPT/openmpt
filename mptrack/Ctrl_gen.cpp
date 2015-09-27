@@ -610,7 +610,7 @@ void CCtrlGeneral::OnRestartPosChanged()
 void CCtrlGeneral::OnSongProperties()
 //-----------------------------------
 {
-	m_modDoc.SongProperties();
+	m_modDoc.OnSongProperties();
 }
 
 

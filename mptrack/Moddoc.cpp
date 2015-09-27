@@ -19,7 +19,9 @@
 #include "dlg_misc.h"
 #include "Dlsbank.h"
 #include "mod2wave.h"
+#include "ChannelManagerDlg.h"
 #include "MIDIMacroDialog.h"
+#include "MIDIMappingDialog.h"
 #include "StreamEncoderFLAC.h"
 #include "StreamEncoderMP3.h"
 #include "StreamEncoderOpus.h"
@@ -87,18 +89,21 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_PLAYER_PAUSE,			OnPlayerPause)
 	ON_COMMAND(ID_PLAYER_STOP,			OnPlayerStop)
 	ON_COMMAND(ID_PLAYER_PLAYFROMSTART,	OnPlayerPlayFromStart)
+	ON_COMMAND(ID_VIEW_SONGPROPERTIES,	OnSongProperties)
 	ON_COMMAND(ID_VIEW_GLOBALS,			OnEditGlobals)
 	ON_COMMAND(ID_VIEW_PATTERNS,		OnEditPatterns)
 	ON_COMMAND(ID_VIEW_SAMPLES,			OnEditSamples)
 	ON_COMMAND(ID_VIEW_INSTRUMENTS,		OnEditInstruments)
 	ON_COMMAND(ID_VIEW_COMMENTS,		OnEditComments)
 	ON_COMMAND(ID_VIEW_EDITHISTORY,		OnViewEditHistory)
+	ON_COMMAND(ID_VIEW_MIDIMAPPING,		OnViewMIDIMapping)
 	ON_COMMAND(ID_VIEW_MPTHACKS,		OnViewMPTHacks)
 	ON_COMMAND(ID_INSERT_PATTERN,		OnInsertPattern)
 	ON_COMMAND(ID_INSERT_SAMPLE,		OnInsertSample)
 	ON_COMMAND(ID_INSERT_INSTRUMENT,	OnInsertInstrument)
 	ON_COMMAND(ID_EDIT_CLEANUP,			OnShowCleanup)
 	ON_COMMAND(ID_PATTERN_MIDIMACRO,	OnSetupZxxMacros)
+	ON_COMMAND(ID_CHANNEL_MANAGER,		OnChannelManager)
 
 	ON_COMMAND(ID_ESTIMATESONGLENGTH,	OnEstimateSongLength)
 	ON_COMMAND(ID_APPROX_BPM,			OnApproximateBPM)
@@ -2705,8 +2710,11 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcViewSamples: OnEditSamples(); break;
 		case kcViewInstruments: OnEditInstruments(); break;
 		case kcViewComments: OnEditComments(); break;
-		case kcViewSongProperties: SongProperties(); break;
+		case kcViewSongProperties: OnSongProperties(); break;
 		case kcShowMacroConfig:	OnSetupZxxMacros(); break;
+		case kcViewMIDImapping: OnViewMIDIMapping(); break;
+		case kcViewEditHistory:	OnViewEditHistory(); break;
+		case kcViewChannelManager: OnChannelManager(); break;
 
 		case kcFileSaveAsWave:	OnFileWaveConvert(); break;
 		case kcFileSaveAsMP3:	OnFileMP3Convert(); break;
@@ -2852,8 +2860,8 @@ void CModDoc::LearnMacro(int macroToSet, PlugParamIndex paramToUse)
 }
 
 
-void CModDoc::SongProperties()
-//----------------------------
+void CModDoc::OnSongProperties()
+//------------------------------
 {
 	CModTypeDlg dlg(m_SndFile, CMainFrame::GetMainFrame());
 	if (dlg.DoModal() == IDOK)
@@ -2879,6 +2887,31 @@ void CModDoc::SongProperties()
 		}
 
 		SetModified();
+	}
+}
+
+
+void CModDoc::OnViewMIDIMapping()
+//-------------------------------
+{
+	CMIDIMappingDialog dlg(CMainFrame::GetMainFrame(), m_SndFile);
+	dlg.DoModal();
+}
+
+
+void CModDoc::OnChannelManager()
+//------------------------------
+{
+	CChannelManagerDlg *instance = CChannelManagerDlg::sharedInstance();
+	if(instance != nullptr)
+	{
+		if(instance->IsDisplayed())
+			instance->Hide();
+		else
+		{
+			instance->SetDocument(nullptr);
+			instance->Show();
+		}
 	}
 }
 

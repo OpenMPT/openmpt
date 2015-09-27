@@ -169,7 +169,7 @@ public:
 
 	void ActivateWindow();
 
-	void SongProperties();
+	void OnSongProperties();
 
 	void PrepareUndoForAllPatterns(bool storeChannelInfo = false, const char *description = "");
 	CPatternUndo &GetPatternUndo() { return m_PatternUndo; }
@@ -413,6 +413,8 @@ public:
 	afx_msg void OnViewMPTHacks();
 	afx_msg void OnSaveTemplateModule();
 	afx_msg void OnAppendModule();
+	afx_msg void OnViewMIDIMapping();
+	afx_msg void OnChannelManager();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
