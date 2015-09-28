@@ -34,7 +34,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define PRESETS_PER_COLUMN 32
 #define PRESETS_PER_GROUP 128
 
-UINT CAbstractVstEditor::clipboardFormat = RegisterClipboardFormat("VST Preset Data");
+UINT CAbstractVstEditor::m_clipboardFormat = RegisterClipboardFormat("VST Preset Data");
 
 BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_WM_CLOSE()
@@ -43,7 +43,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_WM_ACTIVATE()
 	ON_WM_DROPFILES()
 	ON_WM_MOVE()
-	ON_WM_SYSCOMMAND()
+	ON_WM_NCLBUTTONDBLCLK()
 	ON_COMMAND(ID_EDIT_COPY,			OnCopyParameters)
 	ON_COMMAND(ID_EDIT_PASTE,			OnPasteParameters)
 	ON_COMMAND(ID_PRESET_LOAD,			OnLoadPreset)
@@ -66,14 +66,16 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_COMMAND_RANGE(ID_LEARN_MACRO_FROM_PLUGGUI, ID_LEARN_MACRO_FROM_PLUGGUI + NUM_MACROS, PrepareToLearnMacro)
 END_MESSAGE_MAP()
 
-CAbstractVstEditor::CAbstractVstEditor(CVstPlugin &plugin) : m_VstPlugin(plugin), updateDisplay(false)
+CAbstractVstEditor::CAbstractVstEditor(CVstPlugin &plugin)
+	: m_VstPlugin(plugin)
+	, m_currentPresetMenu(0)
+	, m_nLearnMacro(-1)
+	, m_isMinimized(false)
+	, m_updateDisplay(false)
+	, m_nCurProg(-1)
 {
-	m_nCurProg = -1;
-
 	m_Menu.LoadMenu(IDR_VSTMENU);
 	m_nInstrument = GetBestInstrumentCandidate();
-	m_nLearnMacro = -1;
-	currentPresetMenu = 0;
 }
 
 CAbstractVstEditor::~CAbstractVstEditor()
@@ -103,41 +105,28 @@ CAbstractVstEditor::~CAbstractVstEditor()
 }
 
 
-void CAbstractVstEditor::OnSysCommand(UINT nID, LPARAM lParam)
-//------------------------------------------------------------
+void CAbstractVstEditor::OnNcLButtonDblClk(UINT nHitTest, CPoint point)
+//---------------------------------------------------------------------
 {
-	const UINT nID_ = nID & 0xFFF0;
-	if(nID_ == SC_MINIMIZE || nID_ == SC_MAXIMIZE && !mpt::Windows::Version::IsWine())
+	CDialog::OnNcLButtonDblClk(nHitTest, point);
+	// Double click on title bar = reduce plugin window to non-client area
+	if(nHitTest == HTCAPTION)
 	{
-		// Override minimize and maximize buttons to reduce plugin windows to their non-client area
-		// Disable this mechanism for Wine, as at least in Wine 1.6.2, this causes all VST windows to be minimized
-		// when minimizing the parent window as well, and it's impossible to restore their original size afterwards.
-		LONG style = GetWindowLong(m_hWnd, GWL_STYLE);
 		CRect rcWnd, rcClient;
 		GetWindowRect(&rcWnd);
-		if(nID_ == SC_MINIMIZE)
+		if(!m_isMinimized)
 		{
 			// When minimizing, remove the client area
 			GetClientRect(&rcClient);
-			clientHeight = rcClient.Height();
-
-			style &= ~WS_MINIMIZEBOX;
-			style |= WS_MAXIMIZEBOX;
-		} else
-		{
-			style |= WS_MINIMIZEBOX;
-			style &= ~WS_MAXIMIZEBOX;
+			m_clientHeight = rcClient.Height();
 		}
-		clientHeight = -clientHeight;
-		int rcHeight = rcWnd.Height() + clientHeight;
+		m_isMinimized = !m_isMinimized;
+		m_clientHeight = -m_clientHeight;
+		int rcHeight = rcWnd.Height() + m_clientHeight;
 
-		SetWindowLong(m_hWnd, GWL_STYLE, style);
 		SetWindowPos(NULL, 0, 0,
 			rcWnd.Width(), rcHeight,
 			SWP_NOZORDER | SWP_NOMOVE);
-	} else
-	{
-		CDialog::OnSysCommand(nID, lParam);
 	}
 }
 
@@ -222,7 +211,7 @@ void CAbstractVstEditor::OnCopyParameters()
 				memcpy(p, &data[0], data.length());
 			}
 			GlobalUnlock(hCpy);
-			SetClipboardData(clipboardFormat, (HANDLE) hCpy);
+			SetClipboardData(m_clipboardFormat, (HANDLE) hCpy);
 			CloseClipboard();
 		}
 	}
@@ -238,7 +227,7 @@ void CAbstractVstEditor::OnPasteParameters()
 	BeginWaitCursor();
 	if(CMainFrame::GetMainFrame()->OpenClipboard())
 	{
-		HGLOBAL hCpy = ::GetClipboardData(clipboardFormat);
+		HGLOBAL hCpy = ::GetClipboardData(m_clipboardFormat);
 		const char *p;
 
 		if(hCpy != nullptr && (p = static_cast<const char *>(GlobalLock(hCpy))) != nullptr)
@@ -284,11 +273,6 @@ void CAbstractVstEditor::OnRandomizePreset()
 void CAbstractVstEditor::SetupMenu(bool force)
 //--------------------------------------------
 {
-	if(mpt::Windows::Version::IsWine())
-	{
-		SetWindowLong(m_hWnd, GWL_STYLE, GetWindowLong(m_hWnd, GWL_STYLE) & ~WS_MINIMIZEBOX);
-	}
-
 	//TODO: create menus on click so they are only updated when required
 	UpdatePresetMenu(force);
 	UpdateInputMenu();
@@ -328,7 +312,7 @@ void CAbstractVstEditor::UpdatePresetField()
 void CAbstractVstEditor::OnSetPreset(UINT nID)
 //--------------------------------------------
 {
-	SetPreset(nID - ID_PRESET_SET + currentPresetMenu * PRESETS_PER_GROUP);
+	SetPreset(nID - ID_PRESET_SET + m_currentPresetMenu * PRESETS_PER_GROUP);
 }
 
 
@@ -567,7 +551,7 @@ void CAbstractVstEditor::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu)
 		{
 		case 0:
 			// Grey out paste menu item.
-			m_Menu.EnableMenuItem(ID_EDIT_PASTE, MF_BYCOMMAND | (IsClipboardFormatAvailable(clipboardFormat) ? 0 : MF_GRAYED));
+			m_Menu.EnableMenuItem(ID_EDIT_PASTE, MF_BYCOMMAND | (IsClipboardFormatAvailable(m_clipboardFormat) ? 0 : MF_GRAYED));
 			break;
 		case 1:
 			// If there would be only one sub menu, we add presets directly to the factory menu
@@ -583,7 +567,7 @@ void CAbstractVstEditor::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu)
 	} else if(hSysMenu == m_Menu.GetSubMenu(1)->m_hMenu)
 	{
 		// Preset menu
-		currentPresetMenu = nItemID;
+		m_currentPresetMenu = nItemID;
 		GeneratePresetMenu(nItemID * PRESETS_PER_GROUP, *m_pPresetMenuGroup[nItemID]);
 	}
 }
@@ -651,7 +635,7 @@ void CAbstractVstEditor::UpdatePresetMenu(bool force)
 		}
 	}
 
-	currentPresetMenu = 0;
+	m_currentPresetMenu = 0;
 	m_nCurProg = curProg;
 }
 
