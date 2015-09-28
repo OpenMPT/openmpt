@@ -29,10 +29,13 @@ protected:
 	CMenu m_OutputMenu;
 	CMenu m_MacroMenu;
 	CMenu m_OptionsMenu;
-	static UINT clipboardFormat;
-	int32 currentPresetMenu;
-	int32 clientHeight;
-	bool updateDisplay : 1;
+	static UINT m_clipboardFormat;
+	int32 m_currentPresetMenu;
+	int32 m_clientHeight;
+	int m_nLearnMacro;
+	INSTRUMENTINDEX m_nInstrument;
+	bool m_isMinimized : 1;
+	bool m_updateDisplay : 1;
 
 public:
 	CVstPlugin &m_VstPlugin;
@@ -48,7 +51,7 @@ public:
 	void SetPreset(int32 preset);
 	void UpdatePresetField();
 
-	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
+	afx_msg void OnNcLButtonDblClk(UINT nHitTest, CPoint point);
 	afx_msg void OnLoadPreset();
 	afx_msg void OnSavePreset();
 	afx_msg void OnCopyParameters();
@@ -75,14 +78,14 @@ public:
 	virtual void OnCancel() = 0;
 	virtual bool OpenEditor(CWnd *parent) = 0;
 	virtual void DoClose() = 0;
-	virtual void UpdateParamDisplays() { if(updateDisplay) { SetupMenu(true); updateDisplay = false; } }
+	virtual void UpdateParamDisplays() { if(m_updateDisplay) { SetupMenu(true); m_updateDisplay = false; } }
 	virtual afx_msg void OnClose() = 0;
 	virtual void OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized);
 
 	virtual bool IsResizable() const = 0;
 	virtual bool SetSize(int contentWidth, int contentHeight) = 0;
 
-	void UpdateDisplay() { updateDisplay = true; }
+	void UpdateDisplay() { m_updateDisplay = true; }
 
 	DECLARE_MESSAGE_MAP()
 
@@ -97,8 +100,6 @@ protected:
 	INSTRUMENTINDEX GetBestInstrumentCandidate() const;
 	bool CheckInstrument(INSTRUMENTINDEX ins) const;
 	bool ValidateCurrentInstrument();
-	INSTRUMENTINDEX m_nInstrument;
-	int m_nLearnMacro;
 
 	void OnToggleEditor(UINT nID);
 	void OnSetInputInstrument(UINT nID);
