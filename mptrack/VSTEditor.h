@@ -21,11 +21,11 @@ class COwnerVstEditor: public CAbstractVstEditor
 //==============================================
 {
 protected:
-	CStatic plugWindow;
+	CStatic m_plugWindow;
 
 public:
 	COwnerVstEditor(CVstPlugin &plugin);
-	virtual ~COwnerVstEditor();
+	virtual ~COwnerVstEditor() { };
 	virtual void OnOK();
 	virtual void OnCancel();
 

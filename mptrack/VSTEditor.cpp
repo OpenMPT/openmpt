@@ -33,13 +33,6 @@ COwnerVstEditor::COwnerVstEditor(CVstPlugin &plugin) : CAbstractVstEditor(plugin
 }
 
 
-COwnerVstEditor::~COwnerVstEditor()
-//---------------------------------
-{
-
-}
-
-
 void COwnerVstEditor::OnPaint()
 //-----------------------------
 {
@@ -49,9 +42,9 @@ void COwnerVstEditor::OnPaint()
 		// Instantly redraw bridged plugins so that we don't have to wait for their periodic refresh.
 		// This usually makes the timer used in the bridge unnecessary, but not always.
 		CRect rect;
-		if(plugWindow.GetUpdateRect(&rect, FALSE))
+		if(m_plugWindow.GetUpdateRect(&rect, FALSE))
 		{
-			CWnd *child = plugWindow.GetWindow(GW_CHILD | GW_HWNDFIRST);
+			CWnd *child = m_plugWindow.GetWindow(GW_CHILD | GW_HWNDFIRST);
 			if(child) child->RedrawWindow(&rect, nullptr, RDW_INVALIDATE | RDW_ALLCHILDREN);
 		}
 	}
@@ -65,7 +58,7 @@ bool COwnerVstEditor::OpenEditor(CWnd *parent)
 	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
 
 	// Some plugins (e.g. ProteusVX) need to be planted into another control or else they will break our window proc, making the window unusable.
-	plugWindow.Create(nullptr, WS_CHILD | WS_VISIBLE, CRect(0, 0, 100, 100), this);
+	m_plugWindow.Create(nullptr, WS_CHILD | WS_VISIBLE, CRect(0, 0, 100, 100), this);
 
 	SetupMenu();
 
@@ -75,7 +68,7 @@ bool COwnerVstEditor::OpenEditor(CWnd *parent)
 	ERect *pRect = nullptr;
 	m_VstPlugin.Dispatch(effEditGetRect, 0, 0, &pRect, 0);
 	if(pRect) rect = *pRect;
-	m_VstPlugin.Dispatch(effEditOpen, 0, 0, plugWindow.m_hWnd, 0);
+	m_VstPlugin.Dispatch(effEditOpen, 0, 0, m_plugWindow.m_hWnd, 0);
 	m_VstPlugin.Dispatch(effEditGetRect, 0, 0, &pRect, 0);
 	if(pRect) rect = *pRect;
 	if(rect.right > rect.left && rect.bottom > rect.top)
@@ -122,12 +115,11 @@ void COwnerVstEditor::OnCancel()
 void COwnerVstEditor::DoClose()
 //-----------------------------
 {
+	ShowWindow(SW_HIDE);
+	if(m_isMinimized) OnNcLButtonDblClk(HTCAPTION, CPoint(0, 0));
 	StoreWindowPos();
 	m_VstPlugin.Dispatch(effEditClose, 0, 0, NULL, 0);
-	if(m_hWnd)
-	{
-		DestroyWindow();
-	}
+	DestroyWindow();
 }
 
 
@@ -158,7 +150,7 @@ bool COwnerVstEditor::SetSize(int contentWidth, int contentHeight)
 	SetWindowPos(NULL, 0, 0,
 		windowWidth, windowHeight,
 		SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
-	plugWindow.SetWindowPos(NULL, 0, 0,
+	m_plugWindow.SetWindowPos(NULL, 0, 0,
 		contentWidth, contentHeight,
 		SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
 
