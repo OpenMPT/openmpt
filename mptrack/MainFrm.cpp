@@ -477,9 +477,31 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam)
 //-------------------------------------------------------------------------------
 {
-	if (code>=0)
+
+	static bool s_KeyboardHookReentryFlag = false; // work-around for https://bugs.openmpt.org/view.php?id=713
+
+	if(mpt::Windows::Version::IsWine()) // work-around for https://bugs.openmpt.org/view.php?id=713
 	{
-		//Check if textbox has focus
+		// TODO: Properly fix this in same way or another.
+		if(code < 0)
+		{
+			return CallNextHookEx(ghKbdHook, code, wParam, lParam); // required by spec
+		}
+		if(theApp.InGuiThread())
+		{
+			if(s_KeyboardHookReentryFlag)
+			{
+				return -1; // exit early without calling further hooks when re-entering
+			}
+			s_KeyboardHookReentryFlag = true;
+		}
+	}
+
+	bool skipFurtherProcessing = false;
+
+	if(code >= 0)
+	{
+		// Check if textbox has focus
 		bool textboxHasFocus = false;
 		bool handledByTextBox = false;
 
@@ -498,13 +520,33 @@ LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam
 		if(!handledByTextBox && m_InputHandler->GeneralKeyEvent(kCtxAllContexts, code, wParam, lParam) != kcNull)
 		{
 			if(wParam != VK_ESCAPE)
-				return -1;	// We've handled the keypress. No need to take it further.
-							// Unless it was esc, in which case we need it to close Windows
-							// (there might be other special cases, we'll see.. )
+			{
+				// We've handled the keypress. No need to take it further.
+				// Unless it was esc, in which case we need it to close Windows
+				// (there might be other special cases, we'll see.. )
+				skipFurtherProcessing = true;
+			}
 		}
 	}
 
-	return CallNextHookEx(ghKbdHook, code, wParam, lParam);
+	LRESULT result = 0;
+	if(skipFurtherProcessing)
+	{
+		result = -1;
+	} else
+	{
+		result = CallNextHookEx(ghKbdHook, code, wParam, lParam);
+	}
+
+	if(mpt::Windows::Version::IsWine()) // work-around for https://bugs.openmpt.org/view.php?id=713
+	{
+		if(theApp.InGuiThread())
+		{
+			s_KeyboardHookReentryFlag = false;
+		}
+	}
+
+	return result;
 }
 
 
