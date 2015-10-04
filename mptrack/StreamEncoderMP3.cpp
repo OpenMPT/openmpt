@@ -623,9 +623,7 @@ public:
 		buf.resize(7200);
 		buf.resize(lame.lame_encode_flush(gfp, (unsigned char*)&buf[0], buf.size()));
 		WriteBuffer();
-#ifdef MPT_FORCE_ID3V1_TAGS_IN_CBR_MODE
 		if(Mode != Encoder::ModeCBR)
-#endif
 		{
 			std::streampos endPos = f.tellp();
 			std::size_t id3v2Size = lame.lame_get_id3v2_tag(gfp, nullptr, 0);
