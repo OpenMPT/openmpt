@@ -65,10 +65,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#define MPT_FORCE_ID3V1_TAGS_IN_CBR_MODE
-
-
-
 #if defined(MPT_MP3ENCODER_BLADE) || defined(MPT_MP3ENCODER_ACM)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -456,9 +452,10 @@ public:
 		traits.canTags = true;
 		traits.genres.clear();
 		id3tag_genre_list(&GenreEnumCallback, &traits);
-#ifdef MPT_FORCE_ID3V1_TAGS_IN_CBR_MODE
-		traits.modesWithFixedGenres = Encoder::ModeCBR;
-#endif
+		if(!StreamEncoderSettings::Instance().MP3LameAllowID3v2inCBR)
+		{
+			traits.modesWithFixedGenres = Encoder::ModeCBR;
+		}
 		traits.maxChannels = 2;
 		traits.samplerates = std::vector<uint32>(layer3_samplerates, layer3_samplerates + CountOf(layer3_samplerates));
 		traits.modes = Encoder::ModeCBR | Encoder::ModeQuality;
@@ -480,6 +477,7 @@ private:
 	Encoder::Mode Mode;
 	bool gfp_inited;
 	lame_t gfp;
+	bool lame_id3;
 public:
 	MP3LameStreamWriter(ComponentLame &lame_, std::ostream &stream)
 		: StreamWriterBase(stream)
@@ -488,6 +486,7 @@ public:
 		Mode = Encoder::ModeInvalid;
 		gfp_inited = false;
 		gfp = lame_t();
+		lame_id3 = true;
 	}
 	virtual ~MP3LameStreamWriter()
 	{
@@ -502,6 +501,7 @@ public:
 
 		uint32 samplerate = settings.Samplerate;
 		uint16 channels = settings.Channels;
+		lame_id3 = settings.Tags;
 
 		lame.lame_set_in_samplerate(gfp, samplerate);
 		lame.lame_set_num_channels(gfp, channels);
@@ -559,14 +559,9 @@ public:
 		if(settings.Tags)
 		{
 			lame.id3tag_init(gfp);
-			if(settings.Mode == Encoder::ModeCBR)
+			if(settings.Mode == Encoder::ModeCBR && !StreamEncoderSettings::Instance().MP3LameAllowID3v2inCBR)
 			{
-				#ifdef MPT_FORCE_ID3V1_TAGS_IN_CBR_MODE
-					lame.id3tag_v1_only(gfp);
-				#else
-					lame.id3tag_add_v2(gfp);
-					lame.id3tag_v2_only(gfp);
-				#endif
+				lame.id3tag_v1_only(gfp);
 			} else
 			{
 				lame.id3tag_add_v2(gfp);
@@ -626,7 +621,11 @@ public:
 		if(Mode != Encoder::ModeCBR)
 		{
 			std::streampos endPos = f.tellp();
-			std::size_t id3v2Size = lame.lame_get_id3v2_tag(gfp, nullptr, 0);
+			std::size_t id3v2Size = 0;
+			if(lame_id3)
+			{
+				id3v2Size = lame.lame_get_id3v2_tag(gfp, nullptr, 0);
+			}
 			f.seekp(fStart + std::streampos(id3v2Size));
 			buf.resize(lame.lame_get_lametag_frame(gfp, nullptr, 0));
 			buf.resize(lame.lame_get_lametag_frame(gfp, (unsigned char*)&buf[0], buf.size()));
