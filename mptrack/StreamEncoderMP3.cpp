@@ -283,6 +283,7 @@ public:
 	int  (CDECL * lame_set_bWriteVbrTag)(lame_global_flags *, int);
 	int  (CDECL * lame_set_strict_ISO)(lame_global_flags *, int);
 	int  (CDECL * lame_set_disable_reservoir)(lame_global_flags *, int);
+	int  (CDECL * lame_set_findReplayGain)(lame_global_flags *, int);
 
 	void (CDECL * id3tag_genre_list)(void (*handler)(int, const char *, void *), void* cookie);
 	void (CDECL * id3tag_init)     (lame_t gfp);
@@ -391,6 +392,7 @@ private:
 		MPT_COMPONENT_BIND("libmp3lame", lame_set_bWriteVbrTag);
 		MPT_COMPONENT_BIND("libmp3lame", lame_set_strict_ISO);
 		MPT_COMPONENT_BIND("libmp3lame", lame_set_disable_reservoir);
+		MPT_COMPONENT_BIND("libmp3lame", lame_set_findReplayGain);
 		MPT_COMPONENT_BIND("libmp3lame", id3tag_genre_list);
 		MPT_COMPONENT_BIND("libmp3lame", id3tag_init);
 		MPT_COMPONENT_BIND("libmp3lame", id3tag_v1_only);
@@ -549,6 +551,8 @@ public:
 			lame.lame_set_VBR(gfp, vbr_default);
 
 			lame.lame_set_bWriteVbrTag(gfp, 1);
+
+			lame.lame_set_findReplayGain(gfp, 1);
 
 		}
 
