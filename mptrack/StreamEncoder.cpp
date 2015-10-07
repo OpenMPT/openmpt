@@ -31,6 +31,8 @@ StreamEncoderSettings &StreamEncoderSettings::Instance()
 StreamEncoderSettings::StreamEncoderSettings(SettingsContainer &conf, const mpt::ustring &section)
 //------------------------------------------------------------------------------------------------
 	: FLACCompressionLevel(conf, section, "FLACCompressionLevel", 5)
+	, MP3ID3v2MinPadding(conf, section, "MP3ID3v2MinPadding", 1024)
+	, MP3ID3v2PaddingAlignHint(conf, section, "MP3ID3v2PaddingAlignHint", 4096)
 	, MP3LameQuality(conf, section, "MP3LameQuality", 3)
 	, MP3LameAllowID3v2inCBR(conf, section, "MP3LameAllowID3v2inCBR", false)
 	, MP3ACMFast(conf, section, "MP3ACMFast", false)
