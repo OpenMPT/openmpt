@@ -483,7 +483,15 @@ private:
 	Encoder::Mode Mode;
 	bool gfp_inited;
 	lame_t gfp;
-	bool lame_id3;
+	enum ID3Type
+	{
+		ID3None,
+		ID3v1,
+		ID3v2Lame,
+		ID3v2OpenMPT,
+	};
+	ID3Type id3type;
+	std::streamoff id3v2Size;
 public:
 	MP3LameStreamWriter(ComponentLame &lame_, std::ostream &stream)
 		: StreamWriterBase(stream)
@@ -492,7 +500,8 @@ public:
 		Mode = Encoder::ModeInvalid;
 		gfp_inited = false;
 		gfp = lame_t();
-		lame_id3 = true;
+		id3type = ID3v2Lame;
+		id3v2Size = 0;
 	}
 	virtual ~MP3LameStreamWriter()
 	{
@@ -507,7 +516,23 @@ public:
 
 		uint32 samplerate = settings.Samplerate;
 		uint16 channels = settings.Channels;
-		lame_id3 = settings.Tags;
+		if(settings.Tags)
+		{
+			if(settings.Mode == Encoder::ModeCBR && !StreamEncoderSettings::Instance().MP3LameAllowID3v2inCBR)
+			{
+				id3type = ID3v1;
+			} else if(StreamEncoderSettings::Instance().MP3LameID3v2UseLame)
+			{
+				id3type = ID3v2Lame;
+			} else
+			{
+				id3type = ID3v2OpenMPT;
+			}
+		} else
+		{
+			id3type = ID3None;
+		}
+		id3v2Size = 0;
 
 		lame.lame_set_in_samplerate(gfp, samplerate);
 		lame.lame_set_num_channels(gfp, channels);
@@ -562,36 +587,48 @@ public:
 
 		}
 
-		if(settings.Tags)
+		switch(id3type)
 		{
-			lame.id3tag_init(gfp);
-			if(settings.Mode == Encoder::ModeCBR && !StreamEncoderSettings::Instance().MP3LameAllowID3v2inCBR)
-			{
-				lame.id3tag_v1_only(gfp);
-			} else
-			{
-				lame.id3tag_add_v2(gfp);
-				lame.id3tag_v2_only(gfp);
-				lame.id3tag_set_pad(gfp, StreamEncoderSettings::Instance().MP3ID3v2MinPadding);
-			}
-
-		} else
-		{
+		case ID3None:
 			lame.lame_set_write_id3tag_automatic(gfp, 0);
+			break;
+		case ID3v1:
+			lame.id3tag_init(gfp);
+			lame.id3tag_v1_only(gfp);
+			break;
+		case ID3v2Lame:
+			lame.id3tag_init(gfp);
+			lame.id3tag_add_v2(gfp);
+			lame.id3tag_v2_only(gfp);
+			lame.id3tag_set_pad(gfp, StreamEncoderSettings::Instance().MP3ID3v2MinPadding);
+			break;
+		case ID3v2OpenMPT:
+			lame.lame_set_write_id3tag_automatic(gfp, 0);
+			break;
 		}
 
 		Mode = settings.Mode;
 	}
 	virtual void WriteMetatags(const FileTags &tags)
 	{
-		// Lame API expects Latin1, which is sad, but we cannot change that.
-		if(!tags.title.empty())    lame.id3tag_set_title(   gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.title   ).c_str());
-		if(!tags.artist.empty())   lame.id3tag_set_artist(  gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.artist  ).c_str());
-		if(!tags.album.empty())    lame.id3tag_set_album(   gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.album   ).c_str());
-		if(!tags.year.empty())     lame.id3tag_set_year(    gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.year    ).c_str());
-		if(!tags.comments.empty()) lame.id3tag_set_comment( gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.comments).c_str());
-		if(!tags.trackno.empty())  lame.id3tag_set_track(   gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.trackno ).c_str());
-		if(!tags.genre.empty())    lame.id3tag_set_genre(   gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.genre   ).c_str());
+		if(id3type == ID3v2Lame || id3type == ID3v1)
+		{
+			// Lame API expects Latin1, which is sad, but we cannot change that.
+			if(!tags.title.empty())    lame.id3tag_set_title(  gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.title   ).c_str());
+			if(!tags.artist.empty())   lame.id3tag_set_artist( gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.artist  ).c_str());
+			if(!tags.album.empty())    lame.id3tag_set_album(  gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.album   ).c_str());
+			if(!tags.year.empty())     lame.id3tag_set_year(   gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.year    ).c_str());
+			if(!tags.comments.empty()) lame.id3tag_set_comment(gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.comments).c_str());
+			if(!tags.trackno.empty())  lame.id3tag_set_track(  gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.trackno ).c_str());
+			if(!tags.genre.empty())    lame.id3tag_set_genre(  gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.genre   ).c_str());
+		} else if(id3type == ID3v2OpenMPT)
+		{
+			std::streampos id3beg = f.tellp();
+			ID3V2Tagger tagger;
+			tagger.WriteID3v2Tags(f, tags);
+			std::streampos id3end = f.tellp();
+			id3v2Size = id3end - id3beg;
+		}
 	}
 	virtual void WriteInterleaved(size_t count, const float *interleaved)
 	{
@@ -628,12 +665,14 @@ public:
 		if(Mode != Encoder::ModeCBR)
 		{
 			std::streampos endPos = f.tellp();
-			std::size_t id3v2Size = 0;
-			if(lame_id3)
+			if(id3type == ID3v2Lame)
 			{
 				id3v2Size = lame.lame_get_id3v2_tag(gfp, nullptr, 0);
+			} else if(id3type == ID3v2OpenMPT)
+			{
+				// id3v2Size already set
 			}
-			f.seekp(fStart + std::streampos(id3v2Size));
+			f.seekp(fStart + id3v2Size);
 			buf.resize(lame.lame_get_lametag_frame(gfp, nullptr, 0));
 			buf.resize(lame.lame_get_lametag_frame(gfp, (unsigned char*)&buf[0], buf.size()));
 			WriteBuffer();
