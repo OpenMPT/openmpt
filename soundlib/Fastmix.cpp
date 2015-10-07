@@ -504,7 +504,6 @@ void CSoundFile::CreateStereoMix(int count)
 				{
 					// ProTracker "oneshot" loops (if loop start is 0, play the whole sample once and then repeat until loop end)
 					chn.nPos = 0;
-					chn.nPosLo = 0;
 					chn.nLoopEnd = chn.nLength = chn.pModSample->nLoopEnd;
 				}
 			}
