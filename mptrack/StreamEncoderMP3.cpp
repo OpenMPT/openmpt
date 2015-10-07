@@ -99,9 +99,6 @@ STATIC_ASSERT(sizeof(ID3v2Frame) == 10);
 #pragma pack(pop)
 #endif
 
-// we will add some padding bytes to our id3v2 tag (extending tags will be easier this way)
-#define ID3v2_PADDING 512
-
 // charset... choose text ending accordingly.
 // $00 = ISO-8859-1. Terminated with $00.
 // $01 = UTF-16 with BOM. Terminated with $00 00.
@@ -193,12 +190,19 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags)
 	WriteID3v2Frame("COMM", mpt::ToCharset(mpt::CharsetUTF8, tags.comments), s);
 
 	// Write Padding
-	for(size_t i = 0; i < ID3v2_PADDING; i++)
+	uint32 totalID3v2SizeWithoutPadding = totalID3v2Size;
+	uint32 paddingSize = StreamEncoderSettings::Instance().MP3ID3v2MinPadding;
+	totalID3v2Size += paddingSize;
+	if(StreamEncoderSettings::Instance().MP3ID3v2PaddingAlignHint > 0)
+	{
+		totalID3v2Size = Util::AlignUp<uint32>(totalID3v2Size, StreamEncoderSettings::Instance().MP3ID3v2PaddingAlignHint);
+		paddingSize = totalID3v2Size - totalID3v2SizeWithoutPadding;
+	}
+	for(size_t i = 0; i < paddingSize; i++)
 	{
 		char c = 0;
 		s.write(&c, 1);
 	}
-	totalID3v2Size += ID3v2_PADDING;
 
 	// Write correct header (update tag size)
 	tHeader.size = intToSynchsafe(totalID3v2Size);
@@ -286,6 +290,7 @@ public:
 	void (CDECL * id3tag_v1_only)  (lame_t gfp);
 	void (CDECL * id3tag_add_v2)   (lame_t gfp);
 	void (CDECL * id3tag_v2_only)  (lame_t gfp);
+	void (CDECL * id3tag_set_pad)  (lame_t gfp, size_t n);
 	void (CDECL * lame_set_write_id3tag_automatic)(lame_global_flags * gfp, int);
 
 	void (CDECL * id3tag_set_title)(lame_t gfp, const char* title);
@@ -394,6 +399,7 @@ private:
 		MPT_COMPONENT_BIND("libmp3lame", id3tag_v1_only);
 		MPT_COMPONENT_BIND("libmp3lame", id3tag_add_v2);
 		MPT_COMPONENT_BIND("libmp3lame", id3tag_v2_only);
+		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_pad);
 		MPT_COMPONENT_BIND("libmp3lame", lame_set_write_id3tag_automatic);
 		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_title);
 		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_artist);
@@ -566,6 +572,7 @@ public:
 			{
 				lame.id3tag_add_v2(gfp);
 				lame.id3tag_v2_only(gfp);
+				lame.id3tag_set_pad(gfp, StreamEncoderSettings::Instance().MP3ID3v2MinPadding);
 			}
 
 		} else

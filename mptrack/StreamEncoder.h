@@ -196,6 +196,8 @@ struct StreamEncoderSettings
 //==========================
 {
 	Setting<int32> FLACCompressionLevel;
+	Setting<uint32> MP3ID3v2MinPadding;
+	Setting<uint32> MP3ID3v2PaddingAlignHint;
 	Setting<int32> MP3LameQuality;
 	Setting<bool> MP3LameAllowID3v2inCBR;
 	Setting<bool> MP3ACMFast;
