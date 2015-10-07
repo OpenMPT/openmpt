@@ -204,7 +204,7 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags)
 	tHeader.size = intToSynchsafe(totalID3v2Size);
 	s.seekp(fOffset);
 	s.write(reinterpret_cast<const char*>(&tHeader), sizeof(tHeader));
-	s.seekp(s.tellp() + std::streampos(totalID3v2Size));
+	s.seekp(totalID3v2Size - sizeof(tHeader), std::ios::cur);
 
 }
 
