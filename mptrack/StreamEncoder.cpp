@@ -35,6 +35,7 @@ StreamEncoderSettings::StreamEncoderSettings(SettingsContainer &conf, const mpt:
 	, MP3ID3v2PaddingAlignHint(conf, section, "MP3ID3v2PaddingAlignHint", 4096)
 	, MP3LameQuality(conf, section, "MP3LameQuality", 3)
 	, MP3LameAllowID3v2inCBR(conf, section, "MP3LameAllowID3v2inCBR", false)
+	, MP3LameID3v2UseLame(conf, section, "MP3LameID3v2UseLame", false)
 	, MP3ACMFast(conf, section, "MP3ACMFast", false)
 	, OpusComplexity(conf, section, "OpusComplexity", -1)
 {
