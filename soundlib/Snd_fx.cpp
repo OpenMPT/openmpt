@@ -4774,6 +4774,9 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 				// Test case: 3xx-no-old-samp.xm
 				chn.dwFlags.set(CHN_FASTVOLRAMP);
 				chn.nVolume = chn.nPeriod = 0;
+			} else if(GetType() == MOD_TYPE_MOD && chn.dwFlags[CHN_LOOP])
+			{
+				chn.nPos = chn.nLoopStart;
 			}
 		}
 	} else if ((param < chn.nLength) && (GetType() & (MOD_TYPE_MTM | MOD_TYPE_DMF | MOD_TYPE_MDL | MOD_TYPE_PLM)))
