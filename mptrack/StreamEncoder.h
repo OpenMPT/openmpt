@@ -198,9 +198,12 @@ struct StreamEncoderSettings
 	Setting<int32> FLACCompressionLevel;
 	Setting<uint32> MP3ID3v2MinPadding;
 	Setting<uint32> MP3ID3v2PaddingAlignHint;
+	Setting<bool> MP3ID3v2WriteReplayGainTXXX;
 	Setting<int32> MP3LameQuality;
 	Setting<bool> MP3LameAllowID3v2inCBR;
 	Setting<bool> MP3LameID3v2UseLame;
+	Setting<bool> MP3LameCalculateReplayGain;
+	Setting<bool> MP3LameCalculatePeakSample;
 	Setting<bool> MP3ACMFast;
 	Setting<int32> OpusComplexity;
 	StreamEncoderSettings(SettingsContainer &conf, const mpt::ustring &section);

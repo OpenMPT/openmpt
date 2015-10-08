@@ -33,9 +33,12 @@ StreamEncoderSettings::StreamEncoderSettings(SettingsContainer &conf, const mpt:
 	: FLACCompressionLevel(conf, section, "FLACCompressionLevel", 5)
 	, MP3ID3v2MinPadding(conf, section, "MP3ID3v2MinPadding", 1024)
 	, MP3ID3v2PaddingAlignHint(conf, section, "MP3ID3v2PaddingAlignHint", 4096)
+	, MP3ID3v2WriteReplayGainTXXX(conf, section, "MP3ID3v2WriteReplayGainTXXX", true)
 	, MP3LameQuality(conf, section, "MP3LameQuality", 3)
 	, MP3LameAllowID3v2inCBR(conf, section, "MP3LameAllowID3v2inCBR", false)
 	, MP3LameID3v2UseLame(conf, section, "MP3LameID3v2UseLame", false)
+	, MP3LameCalculateReplayGain(conf, section, "MP3LameCalculateReplayGain", true)
+	, MP3LameCalculatePeakSample(conf, section, "MP3LameCalculatePeakSample", true)
 	, MP3ACMFast(conf, section, "MP3ACMFast", false)
 	, OpusComplexity(conf, section, "OpusComplexity", -1)
 {
