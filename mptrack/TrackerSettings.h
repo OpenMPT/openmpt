@@ -525,7 +525,6 @@ public:
 	// Misc
 
 	Setting<bool> ShowSettingsOnNewVersion;
-	Setting<bool> gbShowHackControls;
 	Setting<MODTYPE> defaultModType;
 	Setting<NewFileAction> defaultNewFileAction;
 	Setting<PLUGVOLUMEHANDLING> DefaultPlugVolumeHandling;

@@ -72,7 +72,6 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_EN_CHANGE(IDC_EDIT_PATTERNNAME,		OnPatternNameChanged)
 	ON_EN_CHANGE(IDC_EDIT_SEQUENCE_NAME,	OnSequenceNameChanged)
 	ON_EN_CHANGE(IDC_EDIT_SEQNUM,			OnSequenceNumChanged)
-	ON_EN_KILLFOCUS(IDC_EDIT_ORDERLIST_MARGINS, OnOrderListMarginsChanged)
 	ON_UPDATE_COMMAND_UI(IDC_PATTERN_RECORD,OnUpdateRecord)
 	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipText)
 	//}}AFX_MSG_MAP
@@ -88,11 +87,9 @@ void CCtrlPatterns::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON2,				m_BtnPrev);
 	DDX_Control(pDX, IDC_COMBO_INSTRUMENT,		m_CbnInstrument);
 	DDX_Control(pDX, IDC_EDIT_SPACING,			m_EditSpacing);
-	DDX_Control(pDX, IDC_EDIT_ORDERLIST_MARGINS,m_EditOrderListMargins);
 	DDX_Control(pDX, IDC_EDIT_PATTERNNAME,		m_EditPatName);
 	DDX_Control(pDX, IDC_EDIT_SEQNUM,			m_EditSequence);
 	DDX_Control(pDX, IDC_SPIN_SPACING,			m_SpinSpacing);
-	DDX_Control(pDX, IDC_SPIN_ORDERLIST_MARGINS,m_SpinOrderListMargins);
 	DDX_Control(pDX, IDC_SPIN_INSTRUMENT,		m_SpinInstrument);
 	DDX_Control(pDX, IDC_SPIN_SEQNUM,			m_SpinSequence);
 	DDX_Control(pDX, IDC_TOOLBAR1,				m_ToolBar);
@@ -165,8 +162,6 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_EditSpacing.SetParent(this);
 	m_EditPatName.SetParent(this);
 	m_EditPatName.SetLimitText(MAX_PATTERNNAME - 1);
-	m_EditOrderListMargins.SetParent(this);
-	m_EditOrderListMargins.SetLimitText(3);
 	// Spin controls
 	m_SpinSpacing.SetRange(0, MAX_SPACING);
 	m_SpinSpacing.SetPos(TrackerSettings::Instance().gnPatternSpacing);
@@ -174,21 +169,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_SpinInstrument.SetRange(-1, 1);
 	m_SpinInstrument.SetPos(0);
 
-	if(TrackerSettings::Instance().gbShowHackControls == true)
-	{
-		m_SpinOrderListMargins.ShowWindow(SW_SHOW);
-		m_EditOrderListMargins.ShowWindow(SW_SHOW);
-		m_SpinOrderListMargins.SetRange(0, m_OrderList.GetMarginsMax());
-		m_SpinOrderListMargins.SetPos(m_OrderList.GetMargins());
-	}
-	else
-	{
-		m_SpinOrderListMargins.ShowWindow(SW_HIDE);
-		m_EditOrderListMargins.ShowWindow(SW_HIDE);
-	}
-
 	SetDlgItemInt(IDC_EDIT_SPACING, TrackerSettings::Instance().gnPatternSpacing);
-	SetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS, m_OrderList.GetMargins());
 	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FOLLOWSONGOFF));
 
 	m_SpinSequence.SetRange(0, m_sndFile.Order.GetNumSequences() - 1);
@@ -230,9 +211,6 @@ void CCtrlPatterns::RecalcLayout()
 		{
 			m_OrderList.SetWindowPos(NULL, 0,0, cx, cy, SWP_NOMOVE|SWP_NOZORDER|SWP_DRAWFRAME);
 		}
-		SetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS, m_OrderList.GetMargins());
-		m_SpinOrderListMargins.SetRange(0, m_OrderList.GetMarginsMax());
-		m_SpinOrderListMargins.SetPos(m_OrderList.GetMargins());
 	}
 }
 
@@ -698,24 +676,6 @@ void CCtrlPatterns::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 //------------------------------------------------------------------
 {
 	CModControlDlg::OnKeyDown(nChar, nRepCnt, nFlags);
-}
-
-
-void CCtrlPatterns::OnOrderListMarginsChanged()
-//---------------------------------------------
-{
-	ORDERINDEX i;
-	if((m_EditOrderListMargins.m_hWnd) && (m_EditOrderListMargins.IsWindowVisible()) && (m_EditOrderListMargins.GetWindowTextLength() > 0))
-	{
-		i = m_OrderList.SetMargins(GetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS));
-	} else
-	{
-		i = m_OrderList.GetMargins();
-	}
-
-	m_SpinOrderListMargins.SetRange(0, m_OrderList.GetMarginsMax());
-	SetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS, i);
-
 }
 
 

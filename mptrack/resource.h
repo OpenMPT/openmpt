@@ -747,9 +747,7 @@
 #define IDC_PATTERN_LOOP                2255
 #define IDC_EDIT_FACTORX                2256
 #define IDC_EDIT_FACTORY                2257
-#define IDC_EDIT_ORDERLIST_MARGINS      2258
 #define IDC_STATICRATIOMAP              2259
-#define IDC_SPIN_ORDERLIST_MARGINS      2260
 #define IDC_COMBO_TCOL                  2261
 #define IDC_TUNINGBOX                   2262
 #define IDC_TUNINGNAME                  2263
