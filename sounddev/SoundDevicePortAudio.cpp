@@ -530,9 +530,9 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices()
 		result.apiPath.push_back(MPT_USTRING("PortAudio"));
 		result.isDefault = (Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev));
 		result.useNameAsIdentifier = true;
-		PALOG(mpt::String::Print(MPT_USTRING("PortAudio: %1, %2, %3, %4"), result.id.GetIdRaw(), result.name, result.apiName, result.isDefault));
-		PALOG(mpt::String::Print(" low  : %1", Pa_GetDeviceInfo(dev)->defaultLowOutputLatency));
-		PALOG(mpt::String::Print(" high : %1", Pa_GetDeviceInfo(dev)->defaultHighOutputLatency));
+		PALOG(MPT_UFORMAT("PortAudio: %1, %2, %3, %4", result.id.GetIdRaw(), result.name, result.apiName, result.isDefault));
+		PALOG(MPT_UFORMAT(" low  : %1", mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetDeviceInfo(dev)->defaultLowOutputLatency)));
+		PALOG(MPT_UFORMAT(" high : %1", mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetDeviceInfo(dev)->defaultHighOutputLatency)));
 		devices.push_back(result);
 	}
 	return devices;
@@ -603,10 +603,11 @@ bool CPortaudioDevice::HasInputChannelsOnSameDevice() const
 static void PortaudioLog(const char *text)
 //----------------------------------------
 {
-	if(text)
+	if(!text)
 	{
-		PALOG(mpt::String::Print("PortAudio: %1", text));
+		return;
 	}
+	PALOG(MPT_UFORMAT("PortAudio: %1", mpt::ToUnicode(mpt::CharsetUTF8, text)));
 }
 #endif // MPT_COMPILER_MSVC
 
