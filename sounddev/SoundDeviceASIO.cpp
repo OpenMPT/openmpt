@@ -523,13 +523,13 @@ void CASIODevice::UpdateLatency()
 		inputLatency = 0;
 		outputLatency = 0;
 	}
-	if(outputLatency >= (long)m_nAsioBufferLen)
+	if(outputLatency >= static_cast<long>(m_nAsioBufferLen))
 	{
-		m_BufferLatency = (double)(outputLatency + m_nAsioBufferLen) / (double)m_Settings.Samplerate; // ASIO and OpenMPT semantics of 'latency' differ by one chunk/buffer
+		m_BufferLatency = static_cast<double>(outputLatency + m_nAsioBufferLen) / static_cast<double>(m_Settings.Samplerate); // ASIO and OpenMPT semantics of 'latency' differ by one chunk/buffer
 	} else
 	{
 		// pointless value returned from asio driver, use a sane estimate
-		m_BufferLatency = 2.0 * (double)m_nAsioBufferLen / (double)m_Settings.Samplerate;
+		m_BufferLatency = 2.0 * static_cast<double>(m_nAsioBufferLen) / static_cast<double>(m_Settings.Samplerate);
 	}
 }
 
