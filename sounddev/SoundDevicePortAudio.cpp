@@ -139,7 +139,7 @@ bool CPortaudioDevice::InternalOpen()
 	{
 		flags |= paDitherOff;
 	}
-	if(Pa_OpenStream(&m_Stream, (m_Settings.InputChannels > 0) ? &m_InputStreamParameters : NULL, &m_StreamParameters, m_Settings.Samplerate, framesPerBuffer, flags, StreamCallbackWrapper, (void*)this) != paNoError) return false;
+	if(Pa_OpenStream(&m_Stream, (m_Settings.InputChannels > 0) ? &m_InputStreamParameters : NULL, &m_StreamParameters, m_Settings.Samplerate, framesPerBuffer, flags, StreamCallbackWrapper, reinterpret_cast<void*>(this)) != paNoError) return false;
 	m_StreamInfo = Pa_GetStreamInfo(m_Stream);
 	if(!m_StreamInfo)
 	{
@@ -423,13 +423,13 @@ int CPortaudioDevice::StreamCallback(
 	} else if(m_HostApiType == paWASAPI)
 	{
 		// PortAudio latency calculation appears to miss the current period or chunk for WASAPI. Compensate it.
-		m_CurrentRealLatency = timeInfo->outputBufferDacTime - timeInfo->currentTime + ((double)frameCount / (double)m_Settings.Samplerate);
+		m_CurrentRealLatency = timeInfo->outputBufferDacTime - timeInfo->currentTime + (static_cast<double>(frameCount) / static_cast<double>(m_Settings.Samplerate));
 	} else if(m_HostApiType == paDirectSound)
 	{
 		// PortAudio latency calculation appears to miss the buffering latency.
 		// The current chunk, however, appears to be compensated for.
 		// Repair the confusion.
-		m_CurrentRealLatency = timeInfo->outputBufferDacTime - timeInfo->currentTime + m_StreamInfo->outputLatency - ((double)frameCount / (double)m_Settings.Samplerate);
+		m_CurrentRealLatency = timeInfo->outputBufferDacTime - timeInfo->currentTime + m_StreamInfo->outputLatency - (static_cast<double>(frameCount) / static_cast<double>(m_Settings.Samplerate));
 	} else
 	{
 		m_CurrentRealLatency = timeInfo->outputBufferDacTime - timeInfo->currentTime;
@@ -454,7 +454,7 @@ int CPortaudioDevice::StreamCallbackWrapper(
 	)
 //------------------------------------------
 {
-	return ((CPortaudioDevice*)userData)->StreamCallback(input, output, frameCount, timeInfo, statusFlags);
+	return reinterpret_cast<CPortaudioDevice*>(userData)->StreamCallback(input, output, frameCount, timeInfo, statusFlags);
 }
 
 
@@ -528,7 +528,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices()
 				break;
 		}
 		result.apiPath.push_back(MPT_USTRING("PortAudio"));
-		result.isDefault = (Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == (PaDeviceIndex)dev);
+		result.isDefault = (Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev));
 		result.useNameAsIdentifier = true;
 		PALOG(mpt::String::Print(MPT_USTRING("PortAudio: %1, %2, %3, %4"), result.id.GetIdRaw(), result.name, result.apiName, result.isDefault));
 		PALOG(mpt::String::Print(" low  : %1", Pa_GetDeviceInfo(dev)->defaultLowOutputLatency));
