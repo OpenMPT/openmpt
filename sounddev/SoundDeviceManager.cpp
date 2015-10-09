@@ -163,7 +163,7 @@ void Manager::ReEnumerate()
 		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("  Name      : %1", m_SoundDevices[i].name));
 		for(std::map<mpt::ustring, mpt::ustring>::const_iterator extraIt = m_SoundDevices[i].extraData.begin(); extraIt != m_SoundDevices[i].extraData.end(); ++extraIt)
 		{
-			Log(LogDebug, mpt::String::Print(MPT_USTRING("  Extra Data: %1 = %2"), extraIt->first, extraIt->second));
+			Log(LogDebug, MPT_UFORMAT("  Extra Data: %1 = %2", extraIt->first, extraIt->second));
 		}
 	}
 	
