@@ -581,10 +581,14 @@ void COrderList::OnCopy(bool onlyOrders)
 void COrderList::UpdateView(UpdateHint hint, CObject *pObj)
 //---------------------------------------------------------
 {
-	if(pObj != this && hint.ToType<SequenceHint>().GetType()[HINT_MODTYPE |HINT_MODSEQUENCE])
+	if(pObj != this && hint.ToType<SequenceHint>().GetType()[HINT_MODTYPE | HINT_MODSEQUENCE])
 	{
 		InvalidateRect(NULL, FALSE);
 		UpdateInfoText();
+	}
+	if(hint.GetType()[HINT_MPTOPTIONS])
+	{
+		m_nOrderlistMargins = TrackerSettings::Instance().orderlistMargins;
 	}
 }
 
@@ -710,7 +714,7 @@ void COrderList::OnPaint()
 			{
 				MoveToEx(dc.m_hDC, rect.left + 4, rect.bottom - 4, NULL);
 				LineTo(dc.m_hDC, rect.right - 4, rect.bottom - 4);
-			} 
+			}
 
 			// Drawing 'playing'-indicator.
 			if(nIndex == sndFile.GetCurrentOrder() && CMainFrame::GetMainFrame()->IsPlaying())

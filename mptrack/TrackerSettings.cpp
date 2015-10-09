@@ -215,7 +215,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, commentsFont(conf, "Display", "Comments Font", FontSetting("Courier New", 120))
 	// Misc
 	, ShowSettingsOnNewVersion(conf, "Misc", "ShowSettingsOnNewVersion", true)
-	, gbShowHackControls(conf, "Misc", "ShowHackControls", false)
 	, defaultModType(conf, "Misc", "DefaultModType", MOD_TYPE_IT)
 	, defaultNewFileAction(conf, "Misc", "DefaultNewFileAction", nfDefaultFormat)
 	, DefaultPlugVolumeHandling(conf, "Misc", "DefaultPlugVolumeHandling", PLUGIN_VOLUMEHANDLING_IGNORE)

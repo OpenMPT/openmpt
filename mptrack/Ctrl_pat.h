@@ -183,8 +183,8 @@ protected:
 	COrderList m_OrderList;
 	CButton m_BtnPrev, m_BtnNext;
 	CComboBox m_CbnInstrument;
-	CPatEdit m_EditSpacing, m_EditPatName, m_EditOrderListMargins, m_EditSequence;
-	CSpinButtonCtrl m_SpinInstrument, m_SpinSpacing, m_SpinOrderListMargins, m_SpinSequence;
+	CPatEdit m_EditSpacing, m_EditPatName, m_EditSequence;
+	CSpinButtonCtrl m_SpinInstrument, m_SpinSpacing, m_SpinSequence;
 	CModControlBar m_ToolBar;
 	INSTRUMENTINDEX m_nInstrument;
 	PatternCursor::Columns m_nDetailLevel;			// Visible Columns
@@ -245,7 +245,6 @@ protected:
 	afx_msg void OnSpacingChanged();
 	afx_msg void OnPatternNameChanged();
 	afx_msg void OnSequenceNameChanged();
-	afx_msg void OnOrderListMarginsChanged();
 	afx_msg void OnChordEditor();
 	afx_msg void OnDetailLo();
 	afx_msg void OnDetailMed();
