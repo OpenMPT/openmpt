@@ -116,68 +116,73 @@ CAudioThread::~CAudioThread()
 }
 
 
+MPT_REGISTERED_COMPONENT(ComponentAvRt, "AvRt")
+
+ComponentAvRt::ComponentAvRt()
+//----------------------------
+	: ComponentLibrary(ComponentTypeSystem)
+	, AvSetMmThreadCharacteristicsW(nullptr)
+	, AvRevertMmThreadCharacteristics(nullptr)
+{
+	return;
+}
+
+bool ComponentAvRt::DoInitialize()
+//--------------------------------
+{
+	if(!mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
+	{
+		return false;
+	}
+	AddLibrary("avrt", mpt::LibraryPath::System(MPT_PATHSTRING("avrt")));
+	MPT_COMPONENT_BIND("avrt", AvSetMmThreadCharacteristicsW);
+	MPT_COMPONENT_BIND("avrt", AvRevertMmThreadCharacteristics);
+	if(HasBindFailed())
+	{
+		return false;
+	}
+	return true;
+}
+
+ComponentAvRt::~ComponentAvRt()
+//-----------------------------
+{
+	return;
+}
+
+
 CPriorityBooster::CPriorityBooster(bool boostPriority)
 //----------------------------------------------------
-	: m_HasVista(false)
-	, pAvSetMmThreadCharacteristics(nullptr)
-	, pAvRevertMmThreadCharacteristics(nullptr)
-	, m_BoostPriority(boostPriority)
+	: m_BoostPriority(boostPriority)
 	, task_idx(0)
 	, hTask(NULL)
 {
-
 	MPT_TRACE();
-
-	m_HasVista = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
-
-	if(m_HasVista)
-	{
-		m_AvRtDLL = mpt::Library(mpt::LibraryPath::System(MPT_PATHSTRING("avrt")));
-		if(m_AvRtDLL.IsValid())
-		{
-			if(!m_AvRtDLL.Bind(pAvSetMmThreadCharacteristics, "AvSetMmThreadCharacteristicsA"))
-			{
-				m_HasVista = false;
-			}
-			if(!m_AvRtDLL.Bind(pAvRevertMmThreadCharacteristics, "AvRevertMmThreadCharacteristics"))
-			{
-				m_HasVista = false;
-			}
-		} else
-		{
-			m_HasVista = false;
-		}
-	}
-
 	#ifdef _DEBUG
 		m_BoostPriority = false;
 	#endif
-
 	if(m_BoostPriority)
 	{
-		if(m_HasVista)
+		if(IsComponentAvailable(m_AvRt))
 		{
-			hTask = pAvSetMmThreadCharacteristics(TEXT("Pro Audio"), &task_idx);
+			hTask = m_AvRt->AvSetMmThreadCharacteristicsW(L"Pro Audio", &task_idx);
 		} else
 		{
 			SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
 		}
 	}
-
 }
 
 
 CPriorityBooster::~CPriorityBooster()
 //-----------------------------------
 {
-
 	MPT_TRACE();
-
 	if(m_BoostPriority)
 	{
-		if(m_HasVista)
+		if(IsComponentAvailable(m_AvRt))
 		{
-			pAvRevertMmThreadCharacteristics(hTask);
+			m_AvRt->AvRevertMmThreadCharacteristics(hTask);
 			hTask = NULL;
 			task_idx = 0;
 		} else
@@ -185,10 +190,6 @@ CPriorityBooster::~CPriorityBooster()
 			SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
 		}
 	}
-
-	pAvRevertMmThreadCharacteristics = nullptr;
-	pAvSetMmThreadCharacteristics = nullptr;
-
 }
 
 

@@ -14,6 +14,7 @@
 #include "SoundDeviceBase.h"
 
 #include "../common/misc_util.h"
+#include "../common/ComponentManager.h"
 
 #if MPT_OS_WINDOWS
 #include <mmreg.h>
@@ -36,16 +37,25 @@ bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevic
 class CSoundDeviceWithThread;
 
 
+class ComponentAvRt : public ComponentLibrary
+{
+	MPT_DECLARE_COMPONENT_MEMBERS
+public:
+	typedef HANDLE (WINAPI *pAvSetMmThreadCharacteristicsW)(LPCWSTR, LPDWORD);
+	typedef BOOL (WINAPI *pAvRevertMmThreadCharacteristics)(HANDLE);
+	pAvSetMmThreadCharacteristicsW AvSetMmThreadCharacteristicsW;
+	pAvRevertMmThreadCharacteristics AvRevertMmThreadCharacteristics;
+public:
+	ComponentAvRt();
+	virtual ~ComponentAvRt();
+	virtual bool DoInitialize();
+};
+
+
 class CPriorityBooster
 {
 private:
-	typedef HANDLE (WINAPI *FAvSetMmThreadCharacteristics)(LPCTSTR, LPDWORD);
-	typedef BOOL (WINAPI *FAvRevertMmThreadCharacteristics)(HANDLE);
-private:
-	bool m_HasVista;
-	mpt::Library m_AvRtDLL;
-	FAvSetMmThreadCharacteristics pAvSetMmThreadCharacteristics;
-	FAvRevertMmThreadCharacteristics pAvRevertMmThreadCharacteristics;
+	ComponentHandle<ComponentAvRt> m_AvRt;
 	bool m_BoostPriority;
 	DWORD task_idx;
 	HANDLE hTask;
