@@ -497,6 +497,7 @@ public:
 
 	Setting<bool> m_ShowSplashScreen;
 	Setting<bool> gbMdiMaximize;
+	Setting<bool> highResUI;
 	Setting<LONG> glTreeSplitRatio;
 	Setting<LONG> glTreeWindowWidth;
 	Setting<LONG> glGeneralWindowHeight;

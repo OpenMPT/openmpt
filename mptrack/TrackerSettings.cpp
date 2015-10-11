@@ -193,6 +193,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Display
 	, m_ShowSplashScreen(conf, "Display", "ShowSplashScreen", true)
 	, gbMdiMaximize(conf, "Display", "MDIMaximize", true)
+	, highResUI(conf, "Display", "HighResUI", false)
 	, glTreeSplitRatio(conf, "Display", "MDITreeRatio", 128)
 	, glTreeWindowWidth(conf, "Display", "MDITreeWidth", 160)
 	, glGeneralWindowHeight(conf, "Display", "MDIGeneralHeight", 222)
