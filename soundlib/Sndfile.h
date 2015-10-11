@@ -721,10 +721,8 @@ public:
 	void WriteInstrumentPropertyForAllInstruments(uint32 code,  int16 size, FILE* f, INSTRUMENTINDEX nInstruments) const;
 	void SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, FILE* f) const;
 	void SaveExtendedSongProperties(FILE* f) const;
-	size_t SaveModularInstrumentData(FILE *f, const ModInstrument *pIns) const;
 #endif // MODPLUG_NO_FILESAVE
 	void LoadExtendedSongProperties(const MODTYPE modtype, FileReader &file, bool* pInterpretMptMade = nullptr);
-	static size_t LoadModularInstrumentData(FileReader &file, ModInstrument &ins);
 
 	std::string GetSchismTrackerVersion(uint16 cwtv);
 

@@ -277,8 +277,23 @@ size_t CSoundFile::ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trk
 		size_t instSize = instrumentHeader.ConvertToMPT(ins, GetType());
 		file.Seek(offset + instSize);
 
-		// Try reading modular instrument data
-		instSize += LoadModularInstrumentData(file, ins);
+		// Try reading modular instrument data.
+		// Yes, it is completely idiotic that we have both this and LoadExtendedInstrumentProperties.
+		// This is only required for files saved with *really* old OpenMPT versions (pre-1.17-RC1).
+		// This chunk was also written in later versions (probably to maintain compatibility with
+		// those ancient versions), but this also means that redundant information is stored in the file.
+		// Starting from OpenMPT 1.25.02.07, this chunk is no longer written.
+		if(file.ReadMagic("MSNI"))
+		{
+			//...the next piece of data must be the total size of the modular data
+			FileReader modularData = file.ReadChunk(file.ReadUint32LE());
+			instSize += 8 + modularData.GetLength();
+			if(modularData.ReadMagic("GULP"))
+			{
+				ins.nMixPlug = modularData.ReadUint8();
+				if(ins.nMixPlug > MAX_MIXPLUGINS) ins.nMixPlug = 0;
+			}
+		}
 
 		return instSize;
 	}
@@ -1373,13 +1388,6 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		dwPos += instSize;
 		iti.ConvertEndianness();
 		fwrite(&iti, 1, instSize, f);
-
-		//------------ rewbs.modularInstData
-		if (Instruments[nins] && !compatibilityExport)
-		{
-			dwPos += SaveModularInstrumentData(f, Instruments[nins]);
-		}
-		//------------ end rewbs.modularInstData
 	}
 
 	// Writing sample headers
@@ -2222,95 +2230,6 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 	//m_nRestartPos
 	//m_ModFlags
 	if(!m_tempoSwing.empty()) m_tempoSwing.resize(m_nDefaultRowsPerBeat);
-}
-
-
-#ifndef MODPLUG_NO_FILESAVE
-
-size_t CSoundFile::SaveModularInstrumentData(FILE *f, const ModInstrument *pIns) const
-//------------------------------------------------------------------------------------
-{
-	// Yes, it is completely idiotic that we have both SaveModularInstrumentData and SaveExtendedInstrumentProperties.
-	// And they are all insane in their own way:
-	// - SaveExtendedInstrumentProperties is tacked SOMEWHERE AFTER THE SAMPLE CHUNK, which is horrible in case of
-	//   compressed samples because you don't know where to start reading without actually unpacking the sample.
-	//   this mechanism has broken a gazillion times in the past due to simple code changes. Luckily we have unit
-	//   tests which can detect this most of the time.
-	// - SaveModularInstrumentData follows the instrument data as it should, but is used for only one chunk, and
-	//   it doesn't actually specify the chunk's size. You have to hardcode chunk size or else you're lost.
-	//   That's totally awesome if you have to process unknown chunks. NOT.
-	// Oh, and of course they all use backwards FOURCCs because they originally used the non-standard '1234'
-	// multi-char MSVC extension. It's one big clusterfuck.
-
-	// As the only stuff that is actually written here is the plugin ID,
-	// we can actually chicken out if there's no plugin.
-	if(!pIns->nMixPlug)
-	{
-		return 0;
-	}
-
-	uint32 modularInstSize = 0;
-	uint32 id = MAGIC4BE('I','N','S','M');
-	mpt::IO::WriteIntLE<uint32>(f, id);
-	long sizePos = ftell(f);			// we will want to write the modular data's total size here
-	mpt::IO::WriteIntLE<uint32>(f, 0);	// write a DUMMY size, just to move file pointer by a long
-
-	// Write chunks
-	{	//VST Slot chunk:
-		mpt::IO::WriteIntLE<uint32>(f, MAGIC4BE('P','L','U','G'));
-		mpt::IO::WriteIntLE<uint8>(f, pIns->nMixPlug);
-		modularInstSize += sizeof(uint32) + sizeof(uint8);
-	}
-	// If you really need to add more chunks here, please don't repeat history (see above) and *do* add a size field for your chunk, mmmkay?
-
-	//write modular data's total size
-	long curPos = ftell(f);			// remember current pos
-	fseek(f, sizePos, SEEK_SET);	// go back to  sizePos
-	mpt::IO::WriteIntLE<uint32>(f, modularInstSize);	// write data
-	fseek(f, curPos, SEEK_SET);		// go back to where we were.
-
-	// Compute the size that we just wasted.
-	return sizeof(id) + sizeof(modularInstSize) + modularInstSize;
-}
-
-#endif // MODPLUG_NO_FILESAVE
-
-
-size_t CSoundFile::LoadModularInstrumentData(FileReader &file, ModInstrument &ins)
-//--------------------------------------------------------------------------------
-{
-	// find end of standard header
-
-	//If the next piece of data is 'INSM' we have modular extensions to our instrument...
-	if(!file.ReadMagic("MSNI"))
-	{
-		return 0;
-	}
-	//...the next piece of data must be the total size of the modular data
-	FileReader modularData = file.ReadChunk(file.ReadUint32LE());
-
-	// Handle chunks
-	while(modularData.CanRead(4))
-	{
-		const uint32 chunkID = modularData.ReadUint32LE();
-		uint16 chunkSize;
-		// Legacy chunk
-		if(chunkID == MAGIC4BE('P','L','U','G'))
-			chunkSize = 1;
-		else
-			chunkSize = modularData.ReadUint16LE();
-		FileReader chunkData = modularData.ReadChunk(chunkSize);
-
-		switch (chunkID)
-		{
-		case MAGIC4BE('P','L','U','G'):
-			ins.nMixPlug = chunkData.ReadUint8();
-			break;
-
-		}
-	}
-
-	return 8 + modularData.GetLength();
 }
 
 
