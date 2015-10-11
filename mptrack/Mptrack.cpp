@@ -1057,6 +1057,38 @@ BOOL CTrackApp::InitInstance()
 	// requires SetupPaths called
 	LoadStdProfileSettings(0);
 
+	// Dynamic DPI-awareness. Some users might want to disable DPI-awareness because of their DPI-unaware VST plugins.
+	bool setDPI = false;
+	// For Windows 8.1 and newer
+	{
+		HMODULE shcore = LoadLibraryW(L"SHCore.dll");
+		if(shcore)
+		{
+			typedef HRESULT (WINAPI * PSETPROCESSDPIAWARENESS)(int);
+			PSETPROCESSDPIAWARENESS SetProcessDPIAwareness = (PSETPROCESSDPIAWARENESS)GetProcAddress(shcore, "SetProcessDpiAwareness");
+			if(SetProcessDPIAwareness)
+			{
+				setDPI = (SetProcessDPIAwareness(TrackerSettings::Instance().highResUI ? 2 : 0) == S_OK);
+			}
+			FreeLibrary(shcore);
+		}
+	}
+	// For Vista and newer
+	if(!setDPI && TrackerSettings::Instance().highResUI)
+	{
+		HMODULE user32 = LoadLibraryW(L"user32.dll");
+		if(user32 != nullptr)
+		{
+			typedef BOOL (WINAPI * PSETPROCESSDPIAWARE)();
+			PSETPROCESSDPIAWARE SetProcessDPIAware = (PSETPROCESSDPIAWARE)GetProcAddress(user32, "SetProcessDPIAware");
+			if(SetProcessDPIAware != nullptr)
+			{
+				SetProcessDPIAware();
+			}
+			FreeLibrary(user32);
+		}
+	}
+
 	// create main MDI Frame window
 	CMainFrame* pMainFrame = new CMainFrame();
 	if(!pMainFrame->LoadFrame(IDR_MAINFRAME)) return FALSE;
