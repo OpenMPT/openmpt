@@ -11,3 +11,20 @@
 
 #include "TestToolsTracker.h"
 #include "TestToolsLib.h"
+
+#include "../common/mptPathString.h"
+
+OPENMPT_NAMESPACE_BEGIN
+
+#ifdef ENABLE_TESTS
+
+namespace Test
+{
+
+mpt::PathString GetPathPrefix();
+
+} // namespace Test
+
+OPENMPT_NAMESPACE_END
+
+#endif

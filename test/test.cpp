@@ -87,8 +87,8 @@ static mpt::PathString *PathPrefix = nullptr;
 
 
 
-static mpt::PathString GetPathPrefix()
-//------------------------------------
+mpt::PathString GetPathPrefix()
+//-----------------------------
 {
 	if((*PathPrefix).empty())
 	{
