@@ -520,7 +520,7 @@ struct ConvertInstrumentsToSamplesInPatterns
 				const ModInstrument *pIns = pSndFile->Instruments[instr];
 				newinstr = pIns->Keyboard[note];
 				newnote = pIns->NoteMap[note];
-				if(newinstr >= MAX_SAMPLES) newinstr = 0;
+				if(pIns->Keyboard[note] > Util::MaxValueOfType(m.instr)) newinstr = 0;
 			}
 			m.instr = newinstr;
 			if(m.IsNote())
@@ -1133,7 +1133,7 @@ static bool StringToEnvelope(const std::string &s, InstrumentEnvelope &env, cons
 
 
 bool CModDoc::CopyEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
-//---------------------------------------------------------------------
+//-----------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	HANDLE hCpy;
@@ -1166,7 +1166,7 @@ bool CModDoc::CopyEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
 
 
 bool CModDoc::SaveEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::PathString &fileName)
-//------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 {
 	if (nIns < 1 || nIns > m_SndFile.m_nInstruments || !m_SndFile.Instruments[nIns]) return false;
 	BeginWaitCursor();

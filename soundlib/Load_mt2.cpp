@@ -773,7 +773,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 			FileReader &chunk = patternChunks[drumHeader.DrumPatternOrder[ord]];
 			chunk.Rewind();
-			const ROWINDEX numRows = chunk.GetLength() / 32u;
+			const ROWINDEX numRows = static_cast<ROWINDEX>(chunk.GetLength() / 32u);
 			for(ROWINDEX row = 0; row < Patterns[writePat].GetNumRows(); row++)
 			{
 				ModCommand *m = Patterns[writePat].GetpModCommand(row, m_nChannels - 8);

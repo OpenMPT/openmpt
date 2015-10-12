@@ -335,7 +335,7 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 		CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
 
 		//Translate message manually
-		UINT nChar = pMsg->wParam;
+		UINT nChar = (UINT)pMsg->wParam;
 		UINT nRepCnt = LOWORD(pMsg->lParam);
 		UINT nFlags = HIWORD(pMsg->lParam);
 		KeyEventType kT = ih->GetKeyEventType(nFlags);
