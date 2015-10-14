@@ -658,7 +658,11 @@ void CKeyboardControl::Init(HWND parent, UINT nOctaves, bool cursNotify)
 	
 	// Point size to pixels
 	int fontSize = -MulDiv(60, Util::GetDPIy(m_hWnd), 720);
+#if _WIN32_WINNT >= 0x0501
 	m_font.CreateFont(fontSize, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_RASTER_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, FIXED_PITCH | FF_DONTCARE, "MS Shell Dlg");
+#else
+	m_font.CreateFont(fontSize, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_RASTER_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FIXED_PITCH | FF_DONTCARE, "MS Shell Dlg");
+#endif
 }
 
 
