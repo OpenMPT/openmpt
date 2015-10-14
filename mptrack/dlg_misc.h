@@ -147,19 +147,23 @@ public:
 	};
 protected:
 	HWND m_hParent;
+	CFont m_font;
 	UINT m_nOctaves;
 	int m_nSelection;
-	BOOL m_bCapture, m_bCursorNotify;
-	BYTE KeyFlags[NOTE_MAX]; // 10 octaves max
+	bool m_bCapture, m_bCursorNotify;
+	uint8 KeyFlags[NOTE_MAX]; // 10 octaves max
+	SAMPLEINDEX m_sampleNum[NOTE_MAX];
 
 public:
 	CKeyboardControl() { m_hParent = NULL; m_nOctaves = 1; m_nSelection = -1; m_bCapture = FALSE; }
 
 public:
-	void Init(HWND parent, UINT nOctaves=1, BOOL bCursNotify=FALSE) { m_hParent = parent; 
-	m_nOctaves = nOctaves; m_bCursorNotify = bCursNotify; MemsetZero(KeyFlags); }
-	void SetFlags(UINT key, UINT flags) { if (key < NOTE_MAX) KeyFlags[key] = (BYTE)flags; }
-	UINT GetFlags(UINT key) const { return (key < NOTE_MAX) ? KeyFlags[key] : 0; }
+	void Init(HWND parent, UINT nOctaves=1, bool cursNotify = false);
+	void SetFlags(UINT key, uint8 flags) { if (key < NOTE_MAX) KeyFlags[key] = flags; }
+	uint8 GetFlags(UINT key) const { return (key < NOTE_MAX) ? KeyFlags[key] : 0; }
+	void SetSample(UINT key, SAMPLEINDEX sample) { if (key < NOTE_MAX) m_sampleNum[key] = sample; }
+	SAMPLEINDEX GetSample(UINT key) const { return (key < NOTE_MAX) ? m_sampleNum[key] : 0; }
+	afx_msg void OnDestroy();
 	afx_msg void OnPaint();
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);

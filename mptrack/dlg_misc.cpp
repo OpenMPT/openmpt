@@ -635,15 +635,38 @@ BOOL CSoundBankProperties::OnInitDialog()
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Keyboard Control
 
-const BYTE whitetab[7] = {0,2,4,5,7,9,11};
-const BYTE blacktab[7] = {0xff,1,3,0xff,6,8,10};
+static const uint8 whitetab[7] = {0,2,4,5,7,9,11};
+static const uint8 blacktab[7] = {0xff,1,3,0xff,6,8,10};
 
 BEGIN_MESSAGE_MAP(CKeyboardControl, CWnd)
+	ON_WM_DESTROY()
 	ON_WM_PAINT()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 END_MESSAGE_MAP()
+
+
+void CKeyboardControl::Init(HWND parent, UINT nOctaves, bool cursNotify)
+//----------------------------------------------------------------------
+{
+	m_hParent = parent;
+	m_nOctaves = nOctaves;
+	m_bCursorNotify = cursNotify;
+	MemsetZero(KeyFlags);
+	MemsetZero(m_sampleNum);
+	
+	// Point size to pixels
+	int fontSize = -MulDiv(60, Util::GetDPIy(m_hWnd), 720);
+	m_font.CreateFont(fontSize, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_RASTER_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, FIXED_PITCH | FF_DONTCARE, "MS Shell Dlg");
+}
+
+
+void CKeyboardControl::OnDestroy()
+//--------------------------------
+{
+	m_font.DeleteObject();
+}
 
 
 void CKeyboardControl::OnPaint()
@@ -656,12 +679,15 @@ void CKeyboardControl::OnPaint()
 	HBRUSH brushDot[2];
 
 	if (!m_nOctaves) m_nOctaves = 1;
+	dc.SetBkMode(TRANSPARENT);
+	dc.SetTextColor(RGB(0, 0, 0));
 	GetClientRect(&rcClient);
 	rect = rcClient;
 	oldpen = ::SelectObject(hdc, CMainFrame::penBlack);
 	oldbrush = ::SelectObject(hdc, CMainFrame::brushWhite);
 	brushDot[0] = ::CreateSolidBrush(RGB(0xFF, 0, 0));
 	brushDot[1] = ::CreateSolidBrush(RGB(0xFF, 0xC0, 0xC0));
+	CFont *oldFont = dc.SelectObject(&m_font);
 	// White notes
 	for (UINT note=0; note<m_nOctaves*7; note++)
 	{
@@ -672,9 +698,16 @@ void CKeyboardControl::OnPaint()
 		if (val == m_nSelection) ::SelectObject(hdc, CMainFrame::brushWhite);
 		if (val < NOTE_MAX && KeyFlags[val] != KEYFLAG_NORMAL && KeyFlags[val] < KEYFLAG_MAX)
 		{
+			CRect ellipseRect(rect.left + 2, rect.bottom - (rect.right - rect.left) + 2, rect.right - 2, rect.bottom - 2);
 			::SelectObject(hdc, brushDot[KeyFlags[val] - 1]);
-			dc.Ellipse(rect.left+2, rect.bottom - (rect.right-rect.left) + 2, rect.right-2, rect.bottom-2);
+			dc.Ellipse(ellipseRect);
 			::SelectObject(hdc, CMainFrame::brushWhite);
+			if(m_sampleNum[val] != 0)
+			{
+				TCHAR s[16];
+				wsprintf(s, _T("%u"), m_sampleNum[val]);
+				dc.DrawText(s, -1, ellipseRect, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+			}
 		}
 		rect.left = rect.right - 1;
 	}
@@ -703,9 +736,16 @@ void CKeyboardControl::OnPaint()
 				if (val == m_nSelection) ::SelectObject(hdc, CMainFrame::brushBlack);
 				if (val < NOTE_MAX && KeyFlags[val] != KEYFLAG_NORMAL && KeyFlags[val] < KEYFLAG_MAX)
 				{
+					CRect ellipseRect(rect.left, rect.bottom - (rect.right - rect.left), rect.right, rect.bottom);
 					::SelectObject(hdc, brushDot[KeyFlags[val] - 1]);
-					dc.Ellipse(rect.left, rect.bottom - (rect.right-rect.left), rect.right, rect.bottom);
+					dc.Ellipse(ellipseRect);
 					::SelectObject(hdc, CMainFrame::brushBlack);
+					if(m_sampleNum[val] != 0)
+					{
+						TCHAR s[16];
+						wsprintf(s, _T("%u"), m_sampleNum[val]);
+						dc.DrawText(s, -1, ellipseRect, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+					}
 				}
 			}
 			break;
@@ -717,6 +757,7 @@ void CKeyboardControl::OnPaint()
 	{
 		DeleteBrush(brushDot[i]);
 	}
+	dc.SelectObject(oldFont);
 }
 
 
@@ -942,10 +983,10 @@ void CSampleMapDlg::OnUpdateSamples()
 void CSampleMapDlg::OnUpdateOctave()
 //----------------------------------
 {
-	CHAR s[64];
+	TCHAR s[64];
 
 	UINT nBaseOctave = m_SbOctave.GetPos() & 7;
-	wsprintf(s, "Octaves %d-%d", nBaseOctave, nBaseOctave+2);
+	wsprintf(s, _T("Octaves %u-%u"), nBaseOctave, nBaseOctave+2);
 	SetDlgItemText(IDC_TEXT1, s);
 }
 
@@ -959,14 +1000,16 @@ void CSampleMapDlg::OnUpdateKeyboard()
 	BOOL bRedraw = FALSE;
 	for (UINT iNote=0; iNote<3*12; iNote++)
 	{
-		UINT nOld = m_Keyboard.GetFlags(iNote);
+		uint8 nOld = m_Keyboard.GetFlags(iNote);
+		SAMPLEINDEX oldSmp = m_Keyboard.GetSample(iNote);
 		UINT ndx = nBaseOctave*12+iNote;
-		UINT nNew = CKeyboardControl::KEYFLAG_NORMAL;
+		uint8 nNew = CKeyboardControl::KEYFLAG_NORMAL;
 		if(KeyboardMap[ndx] == nSample) nNew = CKeyboardControl::KEYFLAG_REDDOT;
 		else if(KeyboardMap[ndx] != 0) nNew = CKeyboardControl::KEYFLAG_BRIGHTDOT;
-		if (nNew != nOld)
+		if (nNew != nOld || oldSmp != KeyboardMap[ndx])
 		{
 			m_Keyboard.SetFlags(iNote, nNew);
+			m_Keyboard.SetSample(iNote, KeyboardMap[ndx]);
 			bRedraw = TRUE;
 		}
 	}

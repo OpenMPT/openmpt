@@ -1340,7 +1340,7 @@ void CChordEditor::UpdateKeyboard()
 	}
 	for(UINT i = 0; i < 2 * 12; i++)
 	{
-		UINT b = CKeyboardControl::KEYFLAG_NORMAL;
+		uint8 b = CKeyboardControl::KEYFLAG_NORMAL;
 		if(i == note) b = CKeyboardControl::KEYFLAG_REDDOT;
 		else if(chord.notes[0] && i + 1 == chord.notes[0]) b = CKeyboardControl::KEYFLAG_REDDOT;
 		else if(chord.notes[1] && i + 1 == chord.notes[1]) b = CKeyboardControl::KEYFLAG_REDDOT;
