@@ -724,6 +724,49 @@ bool XFadeSample(ModSample &smp, SmpLength iFadeLength, int fadeLaw, bool afterl
 
 
 template <class T>
+static void SilenceSampleImpl(T *p, SmpLength length, SmpLength inc, bool fromStart, bool toEnd)
+//----------------------------------------------------------------------------------------------
+{
+	const int dest = toEnd ? 0 : p[(length - 1) * inc];
+	const int base = fromStart ? 0 :p[0];
+	const int delta = dest - base;
+	const int64 len_m1 = length - 1;
+	for(SmpLength i = 0; i < length; i++)
+	{
+		int n = base + static_cast<int>((static_cast<int64>(delta) * static_cast<int64>(i)) / len_m1);
+		*p = static_cast<T>(n);
+		p += inc;
+	}
+}
+
+// X-Fade sample data to create smooth loop transitions
+bool SilenceSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile)
+//-------------------------------------------------------------------------------------
+{
+	LimitMax(end, smp.nLength);
+	if(!smp.HasSampleData() || start >= end) return false;
+
+	const SmpLength length = end - start;
+	const bool fromStart = start == 0;
+	const bool toEnd = end == smp.nLength;
+	const uint8 numChn = smp.GetNumChannels();
+
+	for(uint8 chn = 0; chn < numChn; chn++)
+	{
+		if(smp.GetElementarySampleSize() == 2)
+			SilenceSampleImpl(smp.pSample16 + start * numChn + chn, length, numChn, fromStart, toEnd);
+		else if(smp.GetElementarySampleSize() == 1)
+			SilenceSampleImpl(smp.pSample8 + start * numChn + chn, length, numChn, fromStart, toEnd);
+		else
+			return false;
+	}
+
+	PrecomputeLoops(smp, sndFile, false);
+	return true;
+}
+
+
+template <class T>
 static void ConvertStereoToMonoMixImpl(T *pDest, const SmpLength length)
 //----------------------------------------------------------------------
 {

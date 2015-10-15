@@ -2468,37 +2468,10 @@ void CCtrlSamples::OnSilence()
 	{
 		ModSample &sample = m_sndFile.GetSample(m_nSample);
 		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_update, "Silence", selection.nStart, selection.nEnd);
-
-		if (sample.uFlags[CHN_STEREO])
+		if(ctrlSmp::SilenceSample(sample, selection.nStart, selection.nEnd, m_sndFile))
 		{
-			int smplsize = sample.GetBytesPerSample();
-			memset(sample.pSample8 + selection.nStart * smplsize, 0, len * smplsize);
-		} else
-			if (sample.uFlags[CHN_16BIT])
-			{
-				int16 *p = sample.pSample16 + selection.nStart;
-				int dest = (selection.nEnd < sample.nLength) ? p[len-1] : 0;
-				int base = (selection.nStart) ? p[0] : 0;
-				int delta = dest - base;
-				for (SmpLength i=0; i<len; i++)
-				{
-					int n = base + (int)(((int64)delta * (int64)i) / int64(len - 1));
-					p[i] = (signed short)n;
-				}
-			} else
-			{
-				int8 *p = sample.pSample8 + selection.nStart;
-				int dest = (selection.nEnd < sample.nLength) ? p[len-1] : 0;
-				int base = (selection.nStart) ? p[0] : 0;
-				int delta = dest - base;
-				for (SmpLength i=0; i<len; i++)
-				{
-					int n = base + (int)(((int64)delta * (int64)i) / int64(len - 1));
-					p[i] = (signed char)n;
-				}
-			}
-			sample.PrecomputeLoops(m_sndFile, false);
 			SetModified(SampleHint().Data(), false, true);
+		}
 	}
 
 	EndWaitCursor();
@@ -3318,6 +3291,11 @@ void CCtrlSamples::OnXFade()
 		return;
 	}
 	const SmpLength maxSamples = Util::Min(sample.nLength, sample.nLoopStart, sample.nLoopEnd / 2);
+	if(maxSamples == 0)
+	{
+		Reporting::Error("Crossfade requires the sample to have data before the loop start.", this);
+		return;
+	}
 
 	CSampleXFadeDlg dlg(this, sample.nLoopEnd - sample.nLoopStart, maxSamples);
 	if(dlg.DoModal() == IDOK)

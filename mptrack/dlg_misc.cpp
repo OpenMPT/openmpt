@@ -684,7 +684,6 @@ void CKeyboardControl::OnPaint()
 
 	if (!m_nOctaves) m_nOctaves = 1;
 	dc.SetBkMode(TRANSPARENT);
-	dc.SetTextColor(RGB(0, 0, 0));
 	GetClientRect(&rcClient);
 	rect = rcClient;
 	oldpen = ::SelectObject(hdc, CMainFrame::penBlack);
@@ -708,6 +707,7 @@ void CKeyboardControl::OnPaint()
 			::SelectObject(hdc, CMainFrame::brushWhite);
 			if(m_sampleNum[val] != 0)
 			{
+				dc.SetTextColor(KeyFlags[val] == KEYFLAG_REDDOT ? RGB(255, 255, 255) : RGB(0, 0, 0));
 				TCHAR s[16];
 				wsprintf(s, _T("%u"), m_sampleNum[val]);
 				dc.DrawText(s, -1, ellipseRect, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
@@ -746,6 +746,7 @@ void CKeyboardControl::OnPaint()
 					::SelectObject(hdc, CMainFrame::brushBlack);
 					if(m_sampleNum[val] != 0)
 					{
+						dc.SetTextColor(KeyFlags[val] == KEYFLAG_REDDOT ? RGB(255, 255, 255) : RGB(0, 0, 0));
 						TCHAR s[16];
 						wsprintf(s, _T("%u"), m_sampleNum[val]);
 						dc.DrawText(s, -1, ellipseRect, DT_CENTER | DT_SINGLELINE | DT_VCENTER);

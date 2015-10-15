@@ -82,6 +82,9 @@ bool InvertSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &
 // Crossfade sample data to create smooth loops
 bool XFadeSample(ModSample &smp, SmpLength iFadeLength, int fadeLaw, bool afterloopFade, CSoundFile &sndFile);
 
+// Silence parts of the sample data
+bool SilenceSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile);
+
 enum StereoToMonoMode
 {
 	mixChannels,
