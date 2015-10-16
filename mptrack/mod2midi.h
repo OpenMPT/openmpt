@@ -9,6 +9,7 @@
 
 
 #pragma once
+#include "ProgressDialog.h"
 
 #ifndef NO_VST
 
@@ -54,27 +55,23 @@ protected:
 };
 
 
-//==================================
-class CDoMidiConvert: public CDialog
-//==================================
+//==========================================
+class CDoMidiConvert: public CProgressDialog
+//==========================================
 {
 public:
 	CSoundFile &m_sndFile;
 	const mpt::PathString m_fileName;
 	const MidiExport::InstrMap &m_instrMap;
-	bool m_abort;
 
 public:
 	CDoMidiConvert(CSoundFile &sndFile, const mpt::PathString &filename, const MidiExport::InstrMap &instrMap, CWnd *parent = nullptr)
-		: CDialog(IDD_PROGRESS, parent)
+		: CProgressDialog(parent)
 		, m_sndFile(sndFile)
 		, m_fileName(filename)
 		, m_instrMap(instrMap)
-		, m_abort(false) { }
-	BOOL OnInitDialog();
-	void OnCancel() { m_abort = true; }
-	afx_msg void DoConvert();
-	DECLARE_MESSAGE_MAP()
+	{ }
+	void Run();
 };
 
 

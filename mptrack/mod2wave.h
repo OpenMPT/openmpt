@@ -12,6 +12,7 @@
 
 #include "StreamEncoder.h"
 #include "Settings.h"
+#include "ProgressDialog.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -125,29 +126,26 @@ public:
 };
 
 
-//==================================
-class CDoWaveConvert: public CDialog
-//==================================
+//==========================================
+class CDoWaveConvert: public CProgressDialog
+//==========================================
 {
 public:
 	const CWaveConvertSettings &m_Settings;
 	CSoundFile &m_SndFile;
 	const mpt::PathString &m_lpszFileName;
 	uint64 m_dwFileLimit, m_dwSongLimit;
-	bool m_bAbort, m_bGivePlugsIdleTime;
+	bool m_bGivePlugsIdleTime;
 
 public:
 	CDoWaveConvert(CSoundFile &sndFile, const mpt::PathString &filename, const CWaveConvertSettings &settings, CWnd *parent = NULL)
-		: CDialog(IDD_PROGRESS, parent)
+		: CProgressDialog(parent)
 		, m_SndFile(sndFile)
 		, m_Settings(settings)
 		, m_lpszFileName(filename)
-		, m_bAbort(false)
-		, m_dwFileLimit(0), m_dwSongLimit(0) { }
-	BOOL OnInitDialog();
-	void OnCancel() { m_bAbort = true; }
-	afx_msg void OnButton1();
-	DECLARE_MESSAGE_MAP()
+		, m_dwFileLimit(0), m_dwSongLimit(0)
+	{ }
+	void Run();
 };
 
 

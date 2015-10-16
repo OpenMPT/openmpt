@@ -28,6 +28,8 @@ class CCtrlSamples: public CModControlDlg
 //=======================================
 {
 protected:
+	friend class CDoPitchShiftTimeStretch;
+
 	struct SampleSelectionPoints
 	{
 		SmpLength nStart;
@@ -56,8 +58,6 @@ protected:
 
 	CComboBox m_ComboPitch, m_ComboQuality, m_ComboFFT;
 
-	int PitchShift(float pitch);
-	int TimeStretch(float ratio);
 	void UpdateTimeStretchParameterString();
 	void ReadTimeStretchParameters();
 

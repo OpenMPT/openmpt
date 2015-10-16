@@ -926,30 +926,14 @@ CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::v
 /////////////////////////////////////////////////////////////////////////////////////////
 // CDoWaveConvert: save a mod as a wave file
 
-BEGIN_MESSAGE_MAP(CDoWaveConvert, CDialog)
-	ON_COMMAND(IDC_BUTTON1,	OnButton1)
-END_MESSAGE_MAP()
-
-
-BOOL CDoWaveConvert::OnInitDialog()
-//---------------------------------
-{
-	CDialog::OnInitDialog();
-	PostMessage(WM_COMMAND, IDC_BUTTON1);
-	return TRUE;
-}
-
-
-void CDoWaveConvert::OnButton1()
-//------------------------------
+void CDoWaveConvert::Run()
+//------------------------
 {
 	static char buffer[MIXBUFFERSIZE * 4 * 4]; // channels * sizeof(biggestsample)
 	static float floatbuffer[MIXBUFFERSIZE * 4]; // channels
 	static int mixbuffer[MIXBUFFERSIZE * 4]; // channels
 
-	MSG msg;
 	TCHAR s[80];
-	HWND progress = ::GetDlgItem(m_hWnd, IDC_PROGRESS1);
 	UINT ok = IDOK, pos = 0;
 	uint64 ullSamples = 0, ullMaxSamples;
 
@@ -986,7 +970,7 @@ void CDoWaveConvert::OnButton1()
 	// Silence mix buffer of plugins, for plugins that don't clear their reverb buffers and similar stuff when they are reset
 	if(m_Settings.silencePlugBuffers)
 	{
-		SetDlgItemText(IDC_TEXT1, _T("Clearing plugin buffers"));
+		SetText(_T("Clearing plugin buffers"));
 		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 		{
 			if(m_SndFile.m_MixPlugins[i].pMixPlugin != nullptr)
@@ -1001,14 +985,10 @@ void CDoWaveConvert::OnButton1()
 					}
 				}
 
-				while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+				ProcessMessages();
+				if(m_abort)
 				{
-					::TranslateMessage(&msg);
-					::DispatchMessage(&msg);
-				}
-				if(m_bAbort)
-				{
-					m_bAbort = false;
+					m_abort = false;
 					break;
 				}
 			}
@@ -1082,10 +1062,7 @@ void CDoWaveConvert::OnButton1()
 
 	if (l < max) max = l;
 
-	if (progress != NULL)
-	{
-		::SendMessage(progress, PBM_SETRANGE, 0, MAKELPARAM(0, (DWORD)(max >> 14)));
-	}
+	SetRange(0, static_cast<uint32>(max >> 14));
 
 	// No pattern cue points yet
 	m_SndFile.m_PatternCuePoints.clear();
@@ -1195,20 +1172,16 @@ void CDoWaveConvert::OnButton1()
 			{
 				_stprintf(s, _T("Writing file... (%lluKB, %umn%02us, %umn%02us remaining)"), bytesWritten >> 10, l / 60, l % 60u, timeRemaining / 60, timeRemaining % 60u);
 			}
-			SetDlgItemText(IDC_TEXT1, s);
+			SetText(s);
 		}
-		if ((progress != NULL) && ((DWORD)(ullSamples >> 14) != pos))
+		if (static_cast<uint32>(ullSamples >> 14) != pos)
 		{
-			pos = (DWORD)(ullSamples >> 14);
-			::SendMessage(progress, PBM_SETPOS, pos, 0);
+			pos = static_cast<uint32>(ullSamples >> 14);
+			SetProgress(pos);
 		}
-		while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		{
-			::TranslateMessage(&msg);
-			::DispatchMessage(&msg);
-		}
+		ProcessMessages();
 
-		if (m_bAbort)
+		if (m_abort)
 		{
 			ok = IDCANCEL;
 			break;
@@ -1221,8 +1194,7 @@ void CDoWaveConvert::OnButton1()
 
 	if(m_Settings.normalize)
 	{
-
-		::SendMessage(progress, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
+		SetRange(0, 100);
 
 		const float normalizeFactor = (normalizePeak != 0.0f) ? (1.0f / normalizePeak) : 1.0f;
 
@@ -1275,19 +1247,15 @@ void CDoWaveConvert::OnButton1()
 				if(percent != lastPercent)
 				{
 					_stprintf(s, _T("Normalizing... (%d%%)"), percent);
-					SetDlgItemText(IDC_TEXT1, s);
-					::SendMessage(progress, PBM_SETPOS, percent, 0);
+					SetText(s);
+					SetProgress(percent);
 					lastPercent = percent;
 				}
 			}
 
 			if(!(framesToProcess % 10))
 			{
-				while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-				{
-					::TranslateMessage(&msg);
-					::DispatchMessage(&msg);
-				}
+				ProcessMessages();
 			}
 
 			framesProcessed += framesChunk;

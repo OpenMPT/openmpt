@@ -682,22 +682,8 @@ void CModToMidi::OnProgramChanged()
 }
 
 
-BEGIN_MESSAGE_MAP(CDoMidiConvert, CDialog)
-	ON_COMMAND(IDC_BUTTON1,	DoConvert)
-END_MESSAGE_MAP()
-
-
-BOOL CDoMidiConvert::OnInitDialog()
-//---------------------------------
-{
-	CDialog::OnInitDialog();
-	PostMessage(WM_COMMAND, IDC_BUTTON1);
-	return TRUE;
-}
-
-
-void CDoMidiConvert::DoConvert()
-//------------------------------
+void CDoMidiConvert::Run()
+//------------------------
 {
 	mpt::ofstream f(m_fileName, std::ios::binary | std::ios::trunc);
 	if(!f.good()) 
@@ -712,8 +698,7 @@ void CDoMidiConvert::DoConvert()
 
 	double duration = m_sndFile.GetLength(eNoAdjust).front().duration;
 	uint64 totalSamples = Util::Round<uint64>(duration * m_sndFile.m_MixerSettings.gdwMixingFreq);
-	HWND progress = ::GetDlgItem(m_hWnd, IDC_PROGRESS1);
-	::SendMessage(progress, PBM_SETRANGE, 0, MAKELPARAM(0, Util::Round<uint32>(duration)));
+	SetRange(0, Util::Round<uint32>(duration));
 	DWORD startTime = timeGetTime();
 
 	m_sndFile.SetCurrentOrder(0);
@@ -743,15 +728,9 @@ void CDoMidiConvert::DoConvert()
 			}
 			TCHAR s[128];
 			_stprintf(s, _T("Rendering file... (%umn%02us, %umn%02us remaining)"), curTime / 60, curTime % 60, timeRemaining / 60, timeRemaining % 60u);
-			SetDlgItemText(IDC_TEXT1, s);
-			::SendMessage(progress, PBM_SETPOS, curTime, 0);
-
-			MSG msg;
-			while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-			{
-				::TranslateMessage(&msg);
-				::DispatchMessage(&msg);
-			}
+			SetText(s);
+			SetProgress(curTime);
+			ProcessMessages();
 
 			if(m_abort)
 			{
