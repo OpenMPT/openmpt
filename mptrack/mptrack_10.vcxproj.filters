@@ -592,6 +592,9 @@
     <ClCompile Include="TempoSwingDialog.cpp">
       <Filter>Source Files\mptrack\Dialogs</Filter>
     </ClCompile>
+    <ClCompile Include="ProgressDialog.cpp">
+      <Filter>Source Files\mptrack\Dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1160,6 +1163,9 @@
     </ClInclude>
     <ClInclude Include="ImageLists.h">
       <Filter>Header Files\mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="ProgressDialog.h">
+      <Filter>Header Files\mptrack\Dialogs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

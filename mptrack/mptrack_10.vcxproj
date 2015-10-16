@@ -877,6 +877,7 @@
     <ClCompile Include="PatternFont.cpp" />
     <ClCompile Include="PatternGotoDialog.cpp" />
     <ClCompile Include="PNG.cpp" />
+    <ClCompile Include="ProgressDialog.cpp" />
     <ClCompile Include="PSRatioCalc.cpp" />
     <ClCompile Include="Reporting.cpp" />
     <ClCompile Include="SampleConfigDlg.cpp" />
@@ -1103,6 +1104,7 @@
     <ClInclude Include="PatternCursor.h" />
     <ClInclude Include="PatternFont.h" />
     <ClInclude Include="PNG.h" />
+    <ClInclude Include="ProgressDialog.h" />
     <ClInclude Include="Reporting.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SampleConfigDlg.h" />
