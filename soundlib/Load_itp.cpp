@@ -20,7 +20,6 @@
 #ifdef MODPLUG_TRACKER
 // For loading external instruments
 #include "../mptrack/Moddoc.h"
-#include "../mptrack/TrackerSettings.h"
 #endif // MODPLUG_TRACKER
 #ifdef MPT_EXTERNAL_SAMPLES
 #include "../common/mptFileIO.h"
@@ -259,14 +258,11 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			instrPaths[ins] = instrPaths[ins].RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt().GetPath());
 		}
-		const bool mayNormalize = TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad;
-#else
-		const bool mayNormalize = false;
 #endif // MODPLUG_TRACKER
 
 		InputFile f(instrPaths[ins]);
 		FileReader file = GetFileReader(f);
-		if(!ReadInstrumentFromFile(ins + 1, file, mayNormalize))
+		if(!ReadInstrumentFromFile(ins + 1, file, true))
 		{
 			AddToLog(LogWarning, MPT_USTRING("Unable to open instrument: ") + instrPaths[ins].ToUnicode());
 		}
