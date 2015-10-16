@@ -61,14 +61,6 @@ void CProgressDialog::SetProgress(uint32 progress)
 }
 
 
-void CProgressDialog::SetUnknownProgress()
-//----------------------------------------
-{
-	HWND wnd = ::GetDlgItem(m_hWnd, IDC_PROGRESS1);
-	SetWindowLong(wnd, GWL_STYLE, GetWindowLong(wnd, GWL_STYLE) | PBS_MARQUEE);
-}
-
-
 void CProgressDialog::ProcessMessages()
 //-------------------------------------
 {
