@@ -15,6 +15,7 @@
 #include "../mptrack/TrackerSettings.h"
 #include "../mptrack/Moddoc.h"
 #include "../mptrack/Reporting.h"
+#include "../mptrack/Mainfrm.h"
 #endif // MODPLUG_TRACKER
 #ifdef MPT_EXTERNAL_SAMPLES
 #include "../common/mptFileIO.h"
@@ -416,6 +417,16 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		{
 			if(m_MixPlugins[plug].IsValidPlugin())
 			{
+#ifdef MODPLUG_TRACKER
+				// Provide some visual feedback
+				{
+					mpt::ustring s = MPT_UFORMAT("Loading Plugin FX%1: %2 (%3)",
+						mpt::ufmt::dec0<2>(plug + 1),
+						mpt::ToUnicode(mpt::CharsetUTF8, m_MixPlugins[plug].Info.szLibraryName),
+						mpt::ToUnicode(mpt::CharsetLocale, m_MixPlugins[plug].Info.szName));
+					CMainFrame::GetMainFrame()->SetHelpText(mpt::ToCString(s));
+				}
+#endif // MODPLUG_TRACKER
 				gpMixPluginCreateProc(m_MixPlugins[plug], *this);
 				if (m_MixPlugins[plug].pMixPlugin)
 				{
@@ -1594,19 +1605,20 @@ void TempoSwing::Normalize()
 //--------------------------
 {
 	if(empty()) return;
-	int64 sum = 0, remain = Unity * size();
+	uint64 sum = 0;
 	for(iterator i = begin(); i != end(); i++)
 	{
 		Limit(*i, Unity / 4u, Unity * 4u);
 		sum += *i;
 	}
-	sum = sum / size();
+	sum /= size();
+	int64 remain = Unity * size();
 	for(iterator i = begin(); i != end(); i++)
 	{
-		*i = Util::muldivr(*i, Unity, static_cast<int32>(sum));
+		*i = Util::muldivr_unsigned(*i, Unity, static_cast<int32>(sum));
 		remain -= *i;
 	}
-	MPT_ASSERT(static_cast<uint32>(std::abs(static_cast<int32>(remain))) <= size());
+	//MPT_ASSERT(static_cast<uint32>(std::abs(static_cast<int32>(remain))) <= size());
 	at(0) += static_cast<int32>(remain);
 }
 
@@ -1622,7 +1634,7 @@ void TempoSwing::Serialize(std::ostream &oStrm, const TempoSwing &swing)
 }
 
 
-void TempoSwing::Deserialize(std::istream& iStrm, TempoSwing &swing, const size_t)
+void TempoSwing::Deserialize(std::istream &iStrm, TempoSwing &swing, const size_t)
 //--------------------------------------------------------------------------------
 {
 	uint16 numEntries;
@@ -1634,7 +1646,6 @@ void TempoSwing::Deserialize(std::istream& iStrm, TempoSwing &swing, const size_
 	}
 	swing.Normalize();
 }
-
 
 
 OPENMPT_NAMESPACE_END
