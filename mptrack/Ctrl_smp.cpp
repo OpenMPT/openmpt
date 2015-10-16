@@ -1664,7 +1664,7 @@ void CCtrlSamples::ApplyResample(uint32_t newRate)
 		selection.nEnd = sample.nLength;
 	}
 
-	const uint32_t oldRate = sample.GetSampleRate(m_sndFile.GetType());
+	const uint32 oldRate = sample.GetSampleRate(m_sndFile.GetType());
 	const SmpLength selLength = (selection.nEnd - selection.nStart);
 	const SmpLength newSelLength = Util::muldivr_unsigned(selLength, newRate, oldRate);
 	const SmpLength newSelEnd = selection.nStart + newSelLength;
@@ -1680,7 +1680,8 @@ void CCtrlSamples::ApplyResample(uint32_t newRate)
 		std::memcpy(newSample, sample.pSample, selection.nStart * bps);
 		std::memcpy(static_cast<char *>(newSample) + newSelEnd * bps, static_cast<char *>(sample.pSample) + selection.nEnd * bps, (sample.nLength - selection.nEnd) * bps);
 
-		std::vector<double> convBuffer(Clamp(selLength, SmpLength(oldRate), SmpLength(1024 * 1024)));
+		const SmpLength bufferSize = std::min(std::max(selLength, SmpLength(oldRate)), SmpLength(1024 * 1024));
+		std::vector<double> convBuffer(bufferSize);
 		r8b::CDSPResampler16 resampler(oldRate, newRate, convBuffer.size());
 
 		for(uint8 chn = 0; chn < numChannels; chn++)
@@ -1714,11 +1715,17 @@ void CCtrlSamples::ApplyResample(uint32_t newRate)
 
 				// 10ms or less would probably be enough, but we will pre-fill the buffer with exactly "oldRate" samples
 				// to prevent any further rounding errors when using smaller buffers or when dividing oldRate or newRate.
-				for(SmpLength i = 0; i < oldRate; i++) convBuffer[i] = firstVal;
-				SmpLength procCount = resampler.process(&convBuffer[0], oldRate, outBuffer);
-				MPT_ASSERT(procCount <= outLatency);
-				LimitMax(procCount, outLatency);
-				outLatency -= procCount;
+				uint32 remain = oldRate;
+				for(SmpLength i = 0; i < bufferSize; i++) convBuffer[i] = firstVal;
+				while(remain > 0)
+				{
+					uint32 procIn = std::min<uint32>(remain, bufferSize);
+					SmpLength procCount = resampler.process(&convBuffer[0], procIn, outBuffer);
+					MPT_ASSERT(procCount <= outLatency);
+					LimitMax(procCount, outLatency);
+					outLatency -= procCount;
+					remain -= procIn;
+				}
 			}
 
 			// Now we can start with the actual resampling work...
