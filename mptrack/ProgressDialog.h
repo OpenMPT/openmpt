@@ -29,8 +29,6 @@ public:
 	void SetRange(uint32 min, uint32 max);
 	// Set the current progress.
 	void SetProgress(uint32 progress);
-	// Set the progress bar to marquee mode, i.e. only show activity, but no specific progress percentage.
-	void SetUnknownProgress();
 	// Process all queued Windows messages
 	void ProcessMessages();
 	// Run method for this dialog that must implement the action to be carried out.
