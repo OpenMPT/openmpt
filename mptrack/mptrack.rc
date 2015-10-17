@@ -770,40 +770,43 @@ STYLE DS_SETFONT | DS_3DLOOK | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Display"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "",IDC_STATIC,6,6,276,138
+    GROUPBOX        "",IDC_STATIC,6,6,276,144
     LTEXT           "Pattern &Font:",IDC_STATIC,18,20,54,8
     COMBOBOX        IDC_COMBO2,72,18,144,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "&Custom...",IDC_BUTTON9,222,18,50,12
     LTEXT           "Comments f&ont:",IDC_STATIC,18,38,52,8
     PUSHBUTTON      "Font",IDC_BUTTON10,72,36,144,12
-    CONTROL         "&Enable effect highlighting",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,54,114,10
+    LTEXT           "Display accidentals as:",IDC_STATIC,18,53,78,12,SS_CENTERIMAGE
+    CONTROL         "Sha&rps (#)",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,96,53,66,12
+    CONTROL         "Fla&ts (b)",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,162,53,108,12
+    CONTROL         "&Enable effect highlighting",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,69,114,10
     CONTROL         "Remember each song's &window positions",IDC_CHECK5,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,72,168,10
-    PUSHBUTTON      "Clear Song Cac&he",IDC_BUTTON11,186,71,78,12
-    CONTROL         "&Primary highlight",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,90,84,10
-    EDITTEXT        IDC_PRIMARYHILITE,102,90,24,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "Rows per measure (default)",IDC_STATIC,132,92,144,8
-    CONTROL         "&Secondary highlight",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,108,80,10
-    EDITTEXT        IDC_SECONDARYHILITE,102,108,24,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "Rows per beat (default)",IDC_STATIC,132,110,144,8
-    LTEXT           "Note: Songs' time signatures will override the default highlight values",IDC_STATIC,18,124,258,8
-    GROUPBOX        "Colours",IDC_STATIC,6,150,276,120
-    LTEXT           "Select colo&ur for:",IDC_STATIC,18,164,63,8
-    COMBOBOX        IDC_COMBO1,90,162,114,109,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "",IDC_BUTTON4,"Button",BS_OWNERDRAW | BS_FLAT,18,180,120,48
-    LTEXT           "C1",IDC_TEXT1,144,182,60,8
-    CONTROL         "Change &1",IDC_BUTTON1,"Button",BS_OWNERDRAW,210,180,51,12
-    LTEXT           "C2",IDC_TEXT2,144,200,62,8
-    CONTROL         "Change &2",IDC_BUTTON2,"Button",BS_OWNERDRAW,210,198,51,12
-    LTEXT           "C3",IDC_TEXT3,144,218,61,8
-    CONTROL         "Change &3",IDC_BUTTON3,"Button",BS_OWNERDRAW,210,216,51,12
-    LTEXT           "Presets:",IDC_STATIC,18,234,48,8
-    PUSHBUTTON      "&Load...",IDC_LOAD_COLORSCHEME,18,246,42,15
-    PUSHBUTTON      "S&ave...",IDC_SAVE_COLORSCHEME,66,246,42,15
-    PUSHBUTTON      "&MPT",IDC_BUTTON5,132,246,30,15
-    PUSHBUTTON      "&Green",IDC_BUTTON7,168,246,30,15
-    PUSHBUTTON      "&Blue",IDC_BUTTON6,204,246,30,15
-    PUSHBUTTON      "Bu&zz",IDC_BUTTON8,240,246,30,15
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,86,168,10
+    PUSHBUTTON      "Clear Song Cac&he",IDC_BUTTON11,186,84,78,12
+    CONTROL         "&Primary highlight",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,103,84,10
+    EDITTEXT        IDC_PRIMARYHILITE,102,103,24,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Rows per measure (default)",IDC_STATIC,132,105,144,8
+    CONTROL         "&Secondary highlight",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,121,80,10
+    EDITTEXT        IDC_SECONDARYHILITE,102,121,24,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Rows per beat (default)",IDC_STATIC,132,124,144,8
+    LTEXT           "Note: Songs' time signatures will override the default highlight values",IDC_STATIC,18,137,258,8
+    GROUPBOX        "Colours",IDC_STATIC,6,156,276,120
+    LTEXT           "Select colo&ur for:",IDC_STATIC,18,170,63,8
+    COMBOBOX        IDC_COMBO1,90,168,114,109,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_BUTTON4,"Button",BS_OWNERDRAW | BS_FLAT,18,186,120,48
+    LTEXT           "C1",IDC_TEXT1,144,188,60,8
+    CONTROL         "Change &1",IDC_BUTTON1,"Button",BS_OWNERDRAW,210,186,51,12
+    LTEXT           "C2",IDC_TEXT2,144,206,62,8
+    CONTROL         "Change &2",IDC_BUTTON2,"Button",BS_OWNERDRAW,210,204,51,12
+    LTEXT           "C3",IDC_TEXT3,144,224,61,8
+    CONTROL         "Change &3",IDC_BUTTON3,"Button",BS_OWNERDRAW,210,222,51,12
+    LTEXT           "Presets:",IDC_STATIC,18,240,48,8
+    PUSHBUTTON      "&Load...",IDC_LOAD_COLORSCHEME,18,252,42,15
+    PUSHBUTTON      "S&ave...",IDC_SAVE_COLORSCHEME,66,252,42,15
+    PUSHBUTTON      "&MPT",IDC_BUTTON5,132,252,30,15
+    PUSHBUTTON      "&Green",IDC_BUTTON7,168,252,30,15
+    PUSHBUTTON      "&Blue",IDC_BUTTON6,204,252,30,15
+    PUSHBUTTON      "Bu&zz",IDC_BUTTON8,240,252,30,15
 END
 
 IDD_OPTIONS_MIDI DIALOGEX 0, 0, 286, 269

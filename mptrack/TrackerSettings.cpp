@@ -18,7 +18,6 @@
 #include "../common/version.h"
 #include "UpdateCheck.h"
 #include "Mpdlgs.h"
-#include "AutoSaver.h"
 #include "../common/StringFixer.h"
 #include "TrackerSettings.h"
 #include "../common/misc_util.h"
@@ -26,6 +25,8 @@
 #include "../common/ComponentManager.h"
 #include "ExceptionHandler.h"
 #include "../soundlib/mod_specifications.h"
+#include "../soundlib/Tables.h"
+
 
 #include <algorithm>
 
@@ -211,6 +212,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, GUIUpdateInterval(conf, "Display", "GUIUpdateInterval", 0)
 	, VuMeterUpdateInterval(conf, "Display", "VuMeterUpdateInterval", 15)
 	, VuMeterDecaySpeedDecibelPerSecond(conf, "Display", "VuMeterDecaySpeedDecibelPerSecond", 88.0f)
+	, accidentalFlats(conf, "Display", "AccidentalFlats", false)
 	, rememberSongWindows(conf, "Display", "RememberSongWindows", true)
 	, showDirsInSampleBrowser(conf, "Display", "ShowDirsInSampleBrowser", false)
 	, commentsFont(conf, "Display", "Comments Font", FontSetting("Courier New", 120))
@@ -1054,7 +1056,9 @@ void TrackerSettings::LoadChords(MPTChords &chords)
 	for(size_t i = 0; i < CountOf(chords); i++)
 	{
 		uint32 chord;
-		if((chord = conf.Read<int32>("Chords", CSoundFile::GetNoteName(ModCommand::NOTE(i + NOTE_MIN)), -1)) != uint32(-1))
+		char note[4];
+		sprintf(note, "%s%u", NoteNamesSharp[i % 12], i / 12);
+		if((chord = conf.Read<int32>("Chords", note, -1)) != uint32(-1))
 		{
 			if((chord & 0xFFFFFFC0) || (!chords[i].notes[0]))
 			{
@@ -1074,7 +1078,9 @@ void TrackerSettings::SaveChords(MPTChords &chords)
 	for(size_t i = 0; i < CountOf(chords); i++)
 	{
 		int32 s = (chords[i].key) | (chords[i].notes[0] << 6) | (chords[i].notes[1] << 12) | (chords[i].notes[2] << 18);
-		conf.Write<int32>("Chords", CSoundFile::GetNoteName(ModCommand::NOTE(i + NOTE_MIN)), s);
+		char note[4];
+		sprintf(note, "%s%u", NoteNamesSharp[i % 12], i / 12);
+		conf.Write<int32>("Chords", note, s);
 	}
 }
 

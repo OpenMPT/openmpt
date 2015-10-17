@@ -644,12 +644,12 @@ void CModTree::RefreshDlsBanks()
 
 								if (keymin >= keymax)
 								{
-									wsprintf(szName, "%s%u: %s", szNoteNames[keymin % 12], keymin / 12, regionName);
+									wsprintf(szName, "%s%u: %s", CSoundFile::m_NoteNames[keymin % 12], keymin / 12, regionName);
 								} else
 								{
 									wsprintf(szName, "%s%u-%s%u: %s",
-										szNoteNames[keymin % 12], keymin / 12,
-										szNoteNames[keymax % 12], keymax / 12,
+										CSoundFile::m_NoteNames[keymin % 12], keymin / 12,
+										CSoundFile::m_NoteNames[keymax % 12], keymax / 12,
 										regionName);
 								}
 								LPARAM lParam = DlsItem::EncodeValuePerc((uint8)(iRgn), (uint16)iIns);

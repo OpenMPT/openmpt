@@ -13,6 +13,9 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+extern const char NoteNamesSharp[12][4];
+extern const char NoteNamesFlat[12][4];
+
 extern const uint8 ImpulseTrackerPortaVolCmd[16];
 extern const uint16 ProTrackerPeriodTable[6*12];
 extern const uint16 ProTrackerTunedPeriods[16*12];

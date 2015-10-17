@@ -2302,7 +2302,7 @@ static bool RatioEqual(CTuningBase::RATIOTYPE a, CTuningBase::RATIOTYPE b)
 }
 
 
-static void CheckEualTuningCollections(const CTuningCollection &a, const CTuningCollection &b)
+static void CheckEqualTuningCollections(const CTuningCollection &a, const CTuningCollection &b)
 //--------------------------------------------------------------------------------------------
 {
 	VERIFY_EQUAL(a.GetName(), b.GetName());
@@ -2365,7 +2365,7 @@ static MPT_NOINLINE void TestTunings()
 	mpt::istringstream iStrm(builtindata);
 	oldBuiltin->Deserialize(iStrm);
 
-	CheckEualTuningCollections(emptyFile->GetBuiltInTunings(), *oldBuiltin);
+	CheckEqualTuningCollections(emptyFile->GetBuiltInTunings(), *oldBuiltin);
 
 #if MPT_COMPILER_MSVC
 

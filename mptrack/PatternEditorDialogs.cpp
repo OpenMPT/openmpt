@@ -1255,8 +1255,8 @@ BOOL CChordEditor::OnInitDialog()
 	for (int inotes=-1; inotes<24; inotes++)
 	{
 		if (inotes < 0) strcpy(s, "--"); else
-			if (inotes < 12) wsprintf(s, "%s", szNoteNames[inotes % 12]);
-			else wsprintf(s, "%s (+%d)", szNoteNames[inotes % 12], inotes / 12);
+			if (inotes < 12) wsprintf(s, "%s", CSoundFile::m_NoteNames[inotes % 12]);
+			else wsprintf(s, "%s (+%d)", CSoundFile::m_NoteNames[inotes % 12], inotes / 12);
 			m_CbnNote1.AddString(s);
 			m_CbnNote2.AddString(s);
 			m_CbnNote3.AddString(s);

@@ -14,6 +14,7 @@
 #include "Moddoc.h"
 #include "View_pat.h"
 #include "../soundlib/mod_specifications.h"
+#include "../soundlib/Tables.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -204,7 +205,16 @@ CStringA PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNIND
 			// Note
 			if(selection.ContainsHorizontal(cursor))
 			{
-				data.Append(CSoundFile::GetNoteName(m->note).c_str());
+				if(m->IsNote())
+				{
+					// Need to guarantee that sharps are used for the clipboard.
+					char note[4];
+					sprintf(note, "%s%u", NoteNamesSharp[(m->note - NOTE_MIN) % 12], (m->note - NOTE_MIN) / 12);
+					data.Append(note);
+				} else
+				{
+					data.Append(CSoundFile::GetNoteName(m->note).c_str());
+				}
 			} else
 			{
 				// No note
@@ -630,7 +640,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 						// Check note names
 						for(size_t i = 0; i < 12; i++)
 						{
-							if(data[pos] == szNoteNames[i][0] && data[pos + 1] == szNoteNames[i][1])
+							if(data[pos] == NoteNamesSharp[i][0] && data[pos + 1] == NoteNamesSharp[i][1])
 							{
 								m.note = ModCommand::NOTE(i + NOTE_MIN);
 								break;

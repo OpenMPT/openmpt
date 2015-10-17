@@ -67,6 +67,8 @@ BEGIN_MESSAGE_MAP(COptionsColors, CPropertyPage)
 	ON_COMMAND(IDC_CHECK3,				OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK4,				OnPreviewChanged)
 	ON_COMMAND(IDC_CHECK5,				OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO1,				OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO2,				OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
@@ -116,6 +118,7 @@ BOOL COptionsColors::OnInitDialog()
 	CheckDlgButton(IDC_CHECK5, TrackerSettings::Instance().rememberSongWindows ? BST_CHECKED : BST_UNCHECKED);
 	SetDlgItemInt(IDC_PRIMARYHILITE, TrackerSettings::Instance().m_nRowHighlightMeasures);
 	SetDlgItemInt(IDC_SECONDARYHILITE, TrackerSettings::Instance().m_nRowHighlightBeats);
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, TrackerSettings::Instance().accidentalFlats ? IDC_RADIO2 : IDC_RADIO1);
 
 	patternFont = TrackerSettings::Instance().patternFont;
 	m_ComboFont.AddString("Built-in (small)");
@@ -171,6 +174,7 @@ void COptionsColors::OnOK()
 	if (IsDlgButtonChecked(IDC_CHECK2)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_EFFECTHILIGHT;
 	if (IsDlgButtonChecked(IDC_CHECK4)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_2NDHIGHLIGHT;
 	TrackerSettings::Instance().rememberSongWindows = IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED;
+	TrackerSettings::Instance().accidentalFlats = IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED;
 
 	FontSetting newPatternFont = patternFont;
 	const int fontSel = m_ComboFont.GetCurSel();
@@ -202,6 +206,7 @@ void COptionsColors::OnOK()
 	CMainFrame::UpdateColors();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTOPTIONS);
+	CSoundFile::SetDefaultNoteNames();
 	CPropertyPage::OnOK();
 }
 

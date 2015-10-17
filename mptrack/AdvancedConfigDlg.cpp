@@ -229,6 +229,9 @@ void COptionsAdvanced::ReInit()
 void COptionsAdvanced::OnOK()
 //---------------------------
 {
+	CSoundFile::SetDefaultNoteNames();
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	if (pMainFrm) pMainFrm->PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTOPTIONS);
 	CPropertyPage::OnOK();
 }
 

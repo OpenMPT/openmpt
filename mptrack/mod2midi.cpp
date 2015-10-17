@@ -583,10 +583,10 @@ void CModToMidi::FillProgramBox(bool percussion)
 	m_CbnProgram.ResetContent();
 	if (percussion)
 	{
-		for (int i = 0; i < 61; i++)
+		for (ModCommand::NOTE i = 0; i < 61; i++)
 		{
-			int note = i + 24;
-			wsprintf(s, "%d (%s%d): %s", note, szNoteNames[note % 12], note / 12, szMidiPercussionNames[i]);
+			ModCommand::NOTE note = i + 24;
+			sprintf(s, "%u (%s): %s", note, m_sndFile.GetNoteName(note + NOTE_MIN).c_str(), szMidiPercussionNames[i]);
 			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s), note);
 		}
 		m_CbnProgram.SetItemData(m_CbnProgram.AddString(_T("Mapped")), 128);
@@ -594,7 +594,7 @@ void CModToMidi::FillProgramBox(bool percussion)
 	{
 		for (int i = 0; i < 128; i++)
 		{
-			wsprintf(s, "%03d: %s", i + 1, szMidiProgramNames[i]);
+			sprintf(s, "%03d: %s", i + 1, szMidiProgramNames[i]);
 			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s), i);
 		}
 	}

@@ -167,6 +167,33 @@ protected:
 public:
 	static std::vector<CDLSBank *> gpDLSBanks;
 
+protected:
+
+	DWORD m_GuiThreadId;
+
+	IniFileSettingsBackend *m_pSettingsIniFile;
+	SettingsContainer *m_pSettings;
+	DebugSettings *m_pDebugSettings;
+	TrackerSettings *m_pTrackerSettings;
+	IniFileSettingsBackend *m_pSongSettingsIniFile;
+	SettingsContainer *m_pSongSettings;
+	ComponentManagerSettings *m_pComponentManagerSettings;
+	IniFileSettingsContainer *m_pPluginCache;
+	CModDocTemplate *m_pModTemplate;
+	CVstPluginManager *m_pPluginManager;
+	SoundDevice::Manager *m_pSoundDevicesManager;
+	mpt::PathString m_szExePath;
+	mpt::PathString m_szConfigDirectory;
+	mpt::PathString m_szConfigFileName;
+	mpt::PathString m_szPluginCacheFileName;
+	// Default macro configuration
+	MIDIMacroConfig m_MidiCfg;
+	DWORD m_dwLastPluginIdleCall;
+	bool m_bPortableMode;
+
+public:
+	CTrackApp();
+
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
 	MPT_DEPRECATED_PATH virtual CDocument* OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU = TRUE)
 	{
@@ -196,33 +223,6 @@ public:
 	/// Removes item from MRU-list; most recent item has index zero.
 	void RemoveMruItem(const size_t item);
 	void RemoveMruItem(const mpt::PathString &path);
-
-protected:
-
-	DWORD m_GuiThreadId;
-
-	IniFileSettingsBackend *m_pSettingsIniFile;
-	SettingsContainer *m_pSettings;
-	DebugSettings *m_pDebugSettings;
-	TrackerSettings *m_pTrackerSettings;
-	IniFileSettingsBackend *m_pSongSettingsIniFile;
-	SettingsContainer *m_pSongSettings;
-	ComponentManagerSettings *m_pComponentManagerSettings;
-	IniFileSettingsContainer *m_pPluginCache;
-	CModDocTemplate *m_pModTemplate;
-	CVstPluginManager *m_pPluginManager;
-	SoundDevice::Manager *m_pSoundDevicesManager;
-	DWORD m_dwLastPluginIdleCall;
-	// Default macro configuration
-	MIDIMacroConfig m_MidiCfg;
-	mpt::PathString m_szExePath;
-	mpt::PathString m_szConfigDirectory;
-	mpt::PathString m_szConfigFileName;
-	mpt::PathString m_szPluginCacheFileName;
-	bool m_bPortableMode;
-
-public:
-	CTrackApp();
 
 public:
 

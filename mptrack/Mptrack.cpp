@@ -1131,6 +1131,7 @@ BOOL CTrackApp::InitInstance()
 
 	// Load static tunings
 	CSoundFile::LoadStaticTunings();
+	CSoundFile::SetDefaultNoteNames();
 
 	// Load DLS Banks
 	if (!cmdInfo.m_bNoDls) LoadDefaultDLSBanks();
