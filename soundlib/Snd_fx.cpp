@@ -120,7 +120,7 @@ public:
 			{
 				const ModCommand *p = sndFile.Patterns[state.m_nPattern].GetpModCommand(state.m_nRow, channel);
 				if(p->command == CMD_TONEPORTAMENTO) sndFile.TonePortamento(&chn, p->param);
-				//else if(p->command == CMD_TONEPORTAVOL) TonePortamento(pChn, 0);
+				else if(p->command == CMD_TONEPORTAVOL) sndFile.TonePortamento(&chn, 0);
 				if(p->volcmd == VOLCMD_TONEPORTAMENTO)
 				{
 					uint32 param = p->vol;
@@ -234,11 +234,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 	if(adjustSamplePos)
 	{
 		forbiddenCommands.set(CMD_ARPEGGIO);             forbiddenCommands.set(CMD_PORTAMENTOUP);
-		forbiddenCommands.set(CMD_PORTAMENTODOWN);       forbiddenCommands.set(CMD_VIBRATOVOL);
-		forbiddenCommands.set(CMD_TONEPORTAVOL);         forbiddenCommands.set(CMD_VOLUMESLIDE);
-		forbiddenCommands.set(CMD_XFINEPORTAUPDOWN);     forbiddenCommands.set(CMD_NOTESLIDEUP);
-		forbiddenCommands.set(CMD_NOTESLIDEUPRETRIG);    forbiddenCommands.set(CMD_NOTESLIDEDOWN);
-		forbiddenCommands.set(CMD_NOTESLIDEDOWNRETRIG);
+		forbiddenCommands.set(CMD_PORTAMENTODOWN);       forbiddenCommands.set(CMD_XFINEPORTAUPDOWN);
+		forbiddenCommands.set(CMD_NOTESLIDEUP);          forbiddenCommands.set(CMD_NOTESLIDEUPRETRIG);
+		forbiddenCommands.set(CMD_NOTESLIDEDOWN);        forbiddenCommands.set(CMD_NOTESLIDEDOWNRETRIG);
 		forbiddenVolCommands.set(VOLCMD_PORTAUP);        forbiddenVolCommands.set(VOLCMD_PORTADOWN);
 		forbiddenVolCommands.set(VOLCMD_VOLSLIDEUP);     forbiddenVolCommands.set(VOLCMD_VOLSLIDEDOWN);
 		forbiddenVolCommands.set(VOLCMD_FINEVOLUP);      forbiddenVolCommands.set(VOLCMD_FINEVOLDOWN);
@@ -805,7 +803,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				uint32 startTick = 0;
 				const ModCommand &m = pChn->rowCommand;
 				uint32 paramHi = m.param >> 4, paramLo = m.param & 0x0F;
-				bool porta = m.command == CMD_TONEPORTAMENTO /*|| m.command CMD_TONEPORTAVOL*/ || m.volcmd == VOLCMD_TONEPORTAMENTO; // CMD_TONEPORTAVOL requires volume slides which we don't emulate right now.
+				bool porta = m.command == CMD_TONEPORTAMENTO || m.command == CMD_TONEPORTAVOL || m.volcmd == VOLCMD_TONEPORTAMENTO;
 				bool stopNote = patternLoopStartedOnThisRow;	// It's too much trouble to keep those pattern loops in sync...
 
 				if(m.instr) pChn->proTrackerOffset = 0;
@@ -922,8 +920,21 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						memory.RenderChannel(nChn, oldTickDuration);	// Re-sync what we've got so far
 					}
 
-					if(m.command == CMD_S3MCMDEX)
+					switch(m.command)
 					{
+					case CMD_TONEPORTAVOL:
+					case CMD_VOLUMESLIDE:
+						if(m.param || (GetType() != MOD_TYPE_MOD))
+						{
+							for(uint32 i = 0; i < numTicks; i++)
+							{
+								pChn->isFirstTick = (i == 0);
+								VolumeSlide(pChn, m.param);
+							}
+						}
+						break;
+
+					case CMD_S3MCMDEX:
 						if(m.param == 0x9E)
 						{
 							// Play forward
@@ -944,6 +955,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							// TODO
 							//ExtendedS3MCommands(nChn, param);
 						}
+						break;
 					}
 
 					if(porta)
@@ -1049,7 +1061,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				{
 					m_PlayState.Chn[n].nNewNote = memory.state.Chn[n].nLastNote;
 				}
-				if(memory.chnSettings[n].vol != 0xFF)
+				if(memory.chnSettings[n].vol != 0xFF && !adjustSamplePos)
 				{
 					if(memory.chnSettings[n].vol > 64) memory.chnSettings[n].vol = 64;
 					m_PlayState.Chn[n].nVolume = memory.chnSettings[n].vol * 4;
@@ -2138,10 +2150,13 @@ bool CSoundFile::ProcessEffects()
 			bPorta = false;
 		}
 
-		// Process Invert Loop (MOD Effect, called every row)
+		// Process Invert Loop (MOD Effect, called every row if it's active)
 		if(!m_SongFlags[SONG_FIRSTTICK])
 		{
 			InvertLoop(&m_PlayState.Chn[nChn]);
+		} else
+		{
+			if(instr) m_PlayState.Chn[nChn].nEFxOffset = 0;
 		}
 
 		// Process special effects (note delay, pattern delay, pattern loop)
@@ -2752,7 +2767,7 @@ bool CSoundFile::ProcessEffects()
 
 		// Volume Slide
 		case CMD_VOLUMESLIDE:
-			if ((param) || (GetType() != MOD_TYPE_MOD)) VolumeSlide(pChn, static_cast<ModCommand::PARAM>(param));
+			if (param || (GetType() != MOD_TYPE_MOD)) VolumeSlide(pChn, static_cast<ModCommand::PARAM>(param));
 			break;
 
 		// Tone-Portamento
