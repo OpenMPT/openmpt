@@ -92,7 +92,7 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 	if(!mpt::PathString::CompareNoCase(filename.GetFileExt(), MPT_PATHSTRING(".dll")))
 	{
 		CVstPluginManager *pPluginManager = theApp.GetPluginManager();
-		if(pPluginManager && pPluginManager->AddPlugin(filename) != nullptr)
+		if(pPluginManager && pPluginManager->AddPlugin(filename, mpt::ustring()) != nullptr)
 		{
 			return nullptr;
 		}
@@ -1928,7 +1928,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 	for(size_t plug = 0; plug < numPlugins; plug++)
 	{
 		char tmp[32];
-		sprintf(tmp, "Plugin%d", plug);
+		sprintf(tmp, "Plugin%u", plug);
 		mpt::PathString plugPath = theApp.GetSettings().Read<mpt::PathString>("VST Plugins", tmp, MPT_PATHSTRING(""));
 		if(!plugPath.empty())
 		{
@@ -1942,7 +1942,11 @@ BOOL CTrackApp::InitializeDXPlugins()
 					continue;
 				}
 			}
-			m_pPluginManager->AddPlugin(plugPath, true, true, &nonFoundPlugs);
+
+			sprintf(tmp, "Plugin%u.Tags", plug);
+			mpt::ustring plugTags = theApp.GetSettings().Read<mpt::ustring>("VST Plugins", tmp, std::wstring());
+
+			m_pPluginManager->AddPlugin(plugPath, plugTags, true, true, &nonFoundPlugs);
 		}
 
 		if(!dialogShown && GetTickCount() >= scanStart + 2000)
@@ -1986,13 +1990,17 @@ BOOL CTrackApp::UninitializeDXPlugins()
 		if((**pPlug).pluginId1 != kDmoMagic)
 		{
 			char tmp[32];
-			sprintf(tmp, "Plugin%d", plug);
+			sprintf(tmp, "Plugin%u", plug);
 			mpt::PathString plugPath = (**pPlug).dllPath;
 			if(theApp.IsPortableMode())
 			{
 				plugPath = AbsolutePathToRelative(plugPath);
 			}
 			theApp.GetSettings().Write<mpt::PathString>("VST Plugins", tmp, plugPath);
+
+			sprintf(tmp, "Plugin%u.Tags", plug);
+			theApp.GetSettings().Write("VST Plugins", tmp, (**pPlug).tags);
+
 			plug++;
 		}
 	}

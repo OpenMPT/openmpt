@@ -61,21 +61,23 @@ public:
 	CVstPlugin *pPluginsList;		// Pointer to first plugin instance (this instance carries pointers to other instances)
 	mpt::PathString libraryName;	// Display name
 	mpt::PathString dllPath;		// Full path name
+	mpt::ustring tags;				// User tags
 	VstInt32 pluginId1;				// Plugin type (kEffectMagic, kDmoMagic)
 	VstInt32 pluginId2;				// Plugin unique ID
 	PluginCategory category;
-	bool isInstrument;
-	bool useBridge, shareBridgeInstance;
+	bool isInstrument : 1;
+	bool useBridge : 1, shareBridgeInstance : 1;
 protected:
-	mutable uint8 dllBits;
+	mutable uint8 dllBits : 1;
 
 public:
-	VSTPluginLib(const mpt::PathString &dllPath, const mpt::PathString &libraryName)
+	VSTPluginLib(const mpt::PathString &dllPath, const mpt::PathString &libraryName, const mpt::ustring &tags)
 		: pPluginsList(nullptr),
 		libraryName(libraryName), dllPath(dllPath),
 		pluginId1(0), pluginId2(0),
 		category(catUnknown),
 		isInstrument(false), useBridge(false), shareBridgeInstance(true),
+		tags(tags),
 		dllBits(0)
 	{
 	}
@@ -373,7 +375,7 @@ public:
 	void reserve(size_t num) { pluginList.reserve(num); }
 
 	bool IsValidPlugin(const VSTPluginLib *pLib) const;
-	VSTPluginLib *AddPlugin(const mpt::PathString &dllPath, bool fromCache = true, const bool checkFileExistence = false, std::wstring* const errStr = nullptr);
+	VSTPluginLib *AddPlugin(const mpt::PathString &dllPath, const mpt::ustring &tags, bool fromCache = true, const bool checkFileExistence = false, std::wstring* const errStr = nullptr);
 	bool RemovePlugin(VSTPluginLib *);
 	bool CreateMixPlugin(SNDMIXPLUGIN &, CSoundFile &);
 	void OnIdle();
@@ -400,7 +402,7 @@ public:
 
 #else // NO_VST
 public:
-	VSTPluginLib *AddPlugin(const mpt::PathString &, bool = true, const bool = false, std::wstring* const = nullptr) { return 0; }
+	VSTPluginLib *AddPlugin(const mpt::PathString &, const mpt::ustring &, bool = true, const bool = false, std::wstring* const = nullptr) { return 0; }
 
 	const VSTPluginLib **begin() const { return nullptr; }
 	const VSTPluginLib **end() const { return nullptr; }

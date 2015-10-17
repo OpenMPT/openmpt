@@ -69,6 +69,7 @@ protected:
 	afx_msg void OnSelDblClk(NMHDR *pNotifyStruct, LRESULT *result);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
+	afx_msg void OnPluginTagsChanged();
 };
 
 OPENMPT_NAMESPACE_END

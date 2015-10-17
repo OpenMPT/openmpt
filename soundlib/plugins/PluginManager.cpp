@@ -169,7 +169,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 					{
 						mpt::String::SetNullTerminator(name);
 
-						VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(mpt::PathString::FromNative(Util::GUIDToString(clsid)), mpt::PathString::FromNative(name));
+						VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(mpt::PathString::FromNative(Util::GUIDToString(clsid)), mpt::PathString::FromNative(name), mpt::ustring());
 						if(plug != nullptr)
 						{
 							pluginList.push_back(plug);
@@ -311,8 +311,8 @@ static void GetPluginInformation(AEffect *effect, VSTPluginLib &library)
 
 
 // Add a plugin to the list of known plugins.
-VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool fromCache, const bool checkFileExistence, std::wstring *const errStr)
-//---------------------------------------------------------------------------------------------------------------------------------------------------
+VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const mpt::ustring &tags, bool fromCache, const bool checkFileExistence, std::wstring *const errStr)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const mpt::PathString fileName = dllPath.GetFileName();
 
@@ -341,7 +341,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 
 			if(!realPath.empty() && !dllPath.CompareNoCase(realPath, dllPath))
 			{
-				VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(dllPath, fileName);
+				VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(dllPath, fileName, tags);
 				if(plug == nullptr)
 				{
 					return nullptr;
@@ -386,7 +386,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	HINSTANCE hLib;
 	bool validPlug = false;
 
-	VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(dllPath, fileName);
+	VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(dllPath, fileName, tags);
 	if(plug == nullptr)
 	{
 		return nullptr;
@@ -533,7 +533,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		}
 		fullPath += mpt::PathString::FromUTF8(mixPlugin.GetLibraryName()) + MPT_PATHSTRING(".dll");
 
-		pFound = AddPlugin(fullPath);
+		pFound = AddPlugin(fullPath, mpt::ustring());
 		if(!pFound)
 		{
 			// Try plugin cache (search for library name)
@@ -547,7 +547,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 					fullPath = theApp.RelativePathToAbsolute(fullPath);
 					if(fullPath.IsFile())
 					{
-						pFound = AddPlugin(fullPath);
+						pFound = AddPlugin(fullPath, mpt::ustring());
 					}
 				}
 			}
