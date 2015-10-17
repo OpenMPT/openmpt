@@ -25,6 +25,7 @@
 #include "../common/mptIO.h"
 #include "../common/serialization_utils.h"
 #include "Sndfile.h"
+#include "Tables.h"
 #include "mod_specifications.h"
 #include "tuningcollection.h"
 #include "../common/StringFixer.h"
@@ -68,7 +69,8 @@ mpt::ustring FileHistory::AsISO8601() const
 // CSoundFile
 
 #ifdef MODPLUG_TRACKER
-CTuningCollection* CSoundFile::s_pTuningsSharedLocal(0);
+CTuningCollection* CSoundFile::s_pTuningsSharedLocal(nullptr);
+const char (*CSoundFile::m_NoteNames)[4] = NoteNamesFlat;
 #endif
 
 CSoundFile::CSoundFile() :
@@ -1169,9 +1171,9 @@ void CSoundFile::LoadBuiltInTunings()
 	pT->SetName("12TET [[fs15 1.17.02.49]]");
 	pT->CreateGeometric(12, 2);
 	pT->SetFineStepCount(15);
-	for(ModCommand::NOTE note = NOTE_MIDDLEC; note < NOTE_MIDDLEC + 12; ++note)
+	for(ModCommand::NOTE note = 0; note < 12; ++note)
 	{
-		pT->SetNoteName(note - NOTE_MIDDLEC, GetNoteName(note).substr(0, 2));
+		pT->SetNoteName(note, NoteNamesSharp[note]);
 	}
 	pT->SetEditMask(CTuningBase::EM_CONST_STRICT);
 	// Note: Tuning collection class handles deleting.
@@ -1213,15 +1215,30 @@ std::string CSoundFile::GetNoteName(const ModCommand::NOTE note)
 	} else if(ModCommand::IsNote(note))
 	{
 		char name[4];
-		MemCopy<char[4]>(name, szNoteNames[(note - NOTE_MIN) % 12]);	// e.g. "C#"
+#ifdef MODPLUG_TRACKER
+#define NOTENAMES m_NoteNames
+#else
+#define NOTENAMES NoteNamesSharp
+#endif // MODPLUG_TRACKER
+		MemCopy<char[4]>(name, NOTENAMES[(note - NOTE_MIN) % 12]);	// e.g. "C#"
 		name[2] = '0' + (note - NOTE_MIN) / 12;	// e.g. 5
-		return name; //szNoteNames[(note - NOTE_MIN) % 12] + std::string(1, '0' + (note - NOTE_MIN) / 12);
+		return name; //NoteNamesSharp[(note - NOTE_MIN) % 12] + std::string(1, '0' + (note - NOTE_MIN) / 12);
+#undef NOTENAMES
 	} else if(note == NOTE_NONE)
 	{
 		return "...";
 	}
 	return "???";
 }
+
+
+#ifdef MODPLUG_TRACKER
+void CSoundFile::SetDefaultNoteNames()
+//------------------------------------
+{
+	m_NoteNames = TrackerSettings::Instance().accidentalFlats ? NoteNamesFlat : NoteNamesSharp;
+}
+#endif // MODPLUG_TRACKER
 
 
 void CSoundFile::SetModSpecsPointer(const CModSpecifications*& pModSpecs, const MODTYPE type)

@@ -20,6 +20,7 @@
 #include "ChannelManagerDlg.h"
 #include "../soundlib/tuningbase.h"
 #include "../soundlib/mod_specifications.h"
+#include "../soundlib/Tables.h"
 #include "../common/StringFixer.h"
 #include "EffectInfo.h"
 #include "PatternFont.h"
@@ -380,7 +381,7 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 		if(pTuning)
 		{
 			// Drawing custom note names
-			std::string noteStr = pTuning->GetNoteName(static_cast<CTuning::NOTEINDEXTYPE>(note-NOTE_MIDDLEC));
+			std::string noteStr = pTuning->GetNoteName(static_cast<CTuning::NOTEINDEXTYPE>(note - NOTE_MIDDLEC));
 			if(noteStr.size() < 3)
 				noteStr.resize(3, ' ');
 			
@@ -392,7 +393,17 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 			// Original
 			UINT o = (note - NOTE_MIN) / 12; //Octave
 			UINT n = (note - NOTE_MIN) % 12; //Note
-			m_Dib.TextBlt(x, y, pfnt->nNoteWidth, pfnt->spacingY, xsrc, ysrc+(n+1)*pfnt->spacingY, pfnt->dib);
+
+			// Hack for default pattern font, allowing for sharps
+			if(TrackerSettings::Instance().accidentalFlats)
+			{
+				DrawLetter(x, y, NoteNamesFlat[n][0], pfnt->nNoteWidth / 2, 0);
+				DrawLetter(x + pfnt->nNoteWidth / 2, y, NoteNamesFlat[n][1], pfnt->nNoteWidth / 2, 0);
+			} else
+			{
+				m_Dib.TextBlt(x, y, pfnt->nNoteWidth, pfnt->spacingY, xsrc, ysrc+(n+1)*pfnt->spacingY, pfnt->dib);
+			}
+
 			if(o <= 9)
 				m_Dib.TextBlt(x+pfnt->nNoteWidth, y, pfnt->nOctaveWidth, pfnt->spacingY,
 								pfnt->nNumX, pfnt->nNumY+o*pfnt->spacingY, pfnt->dib);

@@ -1162,6 +1162,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 	if (hint.GetType()[HINT_MPTOPTIONS])
 	{
 		m_ToolBar.UpdateStyle();
+		hint.ModType(); // For possibly updating note names in Pitch/Pan Separation dropdown
 	}
 	LockControls();
 	if (hint.ToType<PluginHint>().GetType()[HINT_MIXPLUGINS | HINT_PLUGINNAMES]) OnMixPlugChanged();
@@ -1361,7 +1362,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 			// Volume ramping (attack)
 			int n = pIns->nVolRampUp; //? MAX_ATTACK_LENGTH - pIns->nVolRampUp : 0;
 			m_SliderAttack.SetPos(n);
-			if(n == 0) SetDlgItemText(IDC_EDIT2,"default");
+			if(n == 0) SetDlgItemText(IDC_EDIT2, _T("default"));
 			else SetDlgItemInt(IDC_EDIT2,n);
 
 			UpdateTuningComboBox();

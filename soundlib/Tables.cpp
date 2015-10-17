@@ -22,12 +22,18 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Common Tables
+// Note Name Tables
 
-const char szNoteNames[12][4] =
+const char NoteNamesSharp[12][4] =
 {
 	"C-", "C#", "D-", "D#", "E-", "F-",
 	"F#", "G-", "G#", "A-", "A#", "B-"
+};
+
+const char NoteNamesFlat[12][4] =
+{
+	"C-", "Db", "D-", "Eb", "E-", "F-",
+	"Gb", "G-", "Ab", "A-", "Bb", "B-"
 };
 
 

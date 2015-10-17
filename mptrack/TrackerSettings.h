@@ -518,6 +518,7 @@ public:
 	CachedSetting<uint32> VuMeterUpdateInterval;
 	CachedSetting<float> VuMeterDecaySpeedDecibelPerSecond;
 
+	CachedSetting<bool> accidentalFlats;
 	Setting<bool> rememberSongWindows;
 	Setting<bool> showDirsInSampleBrowser;
 

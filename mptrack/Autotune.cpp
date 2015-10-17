@@ -340,7 +340,7 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 // CAutotuneDlg
 
 int CAutotuneDlg::pitchReference = 440;	// Pitch reference in Hz
-int CAutotuneDlg::targetNote = 0;		// Target note (C = 0, C# = 1, etc...)
+int CAutotuneDlg::targetNote = 0;		// Target note (C- = 0, C# = 1, etc...)
 
 void CAutotuneDlg::DoDataExchange(CDataExchange* pDX)
 //---------------------------------------------------
@@ -360,7 +360,7 @@ BOOL CAutotuneDlg::OnInitDialog()
 	m_CbnNoteBox.ResetContent();
 	for(int note = 0; note < 12; note++)
 	{
-		const int item = m_CbnNoteBox.AddString(mpt::ToCString(mpt::CharsetASCII, szNoteNames[note]));
+		const int item = m_CbnNoteBox.AddString(mpt::ToCString(mpt::CharsetASCII, CSoundFile::m_NoteNames[note]));
 		m_CbnNoteBox.SetItemData(item, note);
 		if(note == targetNote)
 		{

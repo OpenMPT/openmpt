@@ -13,6 +13,7 @@
 #include "Mptrack.h"
 #include "Mainfrm.h"
 #include "TrackerSettings.h"
+#include "../soundlib/Tables.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -338,7 +339,7 @@ void PatternFont::UpdateFont(HWND hwnd)
 	// Notes
 	for(int i = 0; i < 12; i++)
 	{
-		DrawString(hDC, szNoteNames[i], 2, pf.nNoteX, pf.nNoteY + (i + 1) * charHeight, charWidth, charHeight);
+		DrawString(hDC, NoteNamesSharp[i], 2, pf.nNoteX, pf.nNoteY + (i + 1) * charHeight, charWidth, charHeight);
 	}
 	DrawString(hDC, "^^", 2, pf.nNoteX, pf.nNoteY + 13 * charHeight, charWidth, charHeight);
 	DrawString(hDC, "==", 2, pf.nNoteX, pf.nNoteY + 14 * charHeight, charWidth, charHeight);

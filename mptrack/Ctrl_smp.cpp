@@ -198,20 +198,20 @@ BOOL CCtrlSamples::OnInitDialog()
 	SetRedraw(FALSE);
 
 	// Zoom Selection
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("Auto"), 0);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:1"), 1);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("2:1"), (DWORD_PTR)-2);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("4:1"), (DWORD_PTR)-3);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("8:1"), (DWORD_PTR)-4);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("16:1"), (DWORD_PTR)-5);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("32:1"), (DWORD_PTR)-6);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:2"), 2);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:4"), 3);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:8"), 4);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:16"), 5);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:32"), 6);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:64"), 7);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString("1:128"), 8);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("Auto")), 0);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:1")), 1);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("2:1")), (DWORD_PTR)-2);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("4:1")), (DWORD_PTR)-3);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("8:1")), (DWORD_PTR)-4);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("16:1")), (DWORD_PTR)-5);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("32:1")), (DWORD_PTR)-6);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:2")), 2);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:4")), 3);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:8")), 4);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:16")), 5);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:32")), 6);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:64")), 7);
+	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:128")), 8);
 	m_ComboZoom.SetCurSel(0);
 	// File ToolBar
 	m_ToolBar1.SetExtendedStyle(m_ToolBar1.GetExtendedStyle() | TBSTYLE_EX_DRAWDDARROWS);
@@ -237,13 +237,10 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_SpinVolume.SetRange(0, 64);
 	m_SpinGlobalVol.SetRange(0, 64);
 
-	for (int i = BASENOTE_MIN; i <= BASENOTE_MAX; i++)
+	for (ModCommand::NOTE i = BASENOTE_MIN; i <= BASENOTE_MAX; i++)
 	{
-		CHAR s[16];
-		wsprintf(s, "%s%u", szNoteNames[i%12], i/12);
-		m_CbnBaseNote.SetItemData(m_CbnBaseNote.AddString(s), i - (NOTE_MIDDLEC - NOTE_MIN));
+		m_CbnBaseNote.SetItemData(m_CbnBaseNote.AddString(m_sndFile.GetNoteName(i + NOTE_MIN).c_str()), i - (NOTE_MIDDLEC - NOTE_MIN));
 	}
-
 
 	m_ComboFFT.ShowWindow(SW_SHOW);
 	m_ComboPitch.ShowWindow(SW_SHOW);
@@ -253,14 +250,14 @@ BOOL CCtrlSamples::OnInitDialog()
 	GetDlgItem(IDC_BUTTON1)->ShowWindow(SW_SHOW); // PitchShiftTimeStretch
 	GetDlgItem(IDC_BUTTON2)->ShowWindow(SW_SHOW); // EstimateSampleSize
 	GetDlgItem(IDC_CHECK3)->ShowWindow(SW_SHOW);  // EnableStretchToSize
-	GetDlgItem(IDC_EDIT6)->ShowWindow(SW_SHOW);   //
-	GetDlgItem(IDC_GROUPBOX_PITCH_TIME)->ShowWindow(SW_SHOW);  //
-	GetDlgItem(IDC_TEXT_PITCH)->ShowWindow(SW_SHOW);  //
-	GetDlgItem(IDC_TEXT_QUALITY)->ShowWindow(SW_SHOW);  //
-	GetDlgItem(IDC_TEXT_FFT)->ShowWindow(SW_SHOW);  //
-	GetDlgItem(IDC_GROUPBOX_PITCH_TIME)->ShowWindow(SW_SHOW);  //
+	GetDlgItem(IDC_EDIT6)->ShowWindow(SW_SHOW);
+	GetDlgItem(IDC_GROUPBOX_PITCH_TIME)->ShowWindow(SW_SHOW);
+	GetDlgItem(IDC_TEXT_PITCH)->ShowWindow(SW_SHOW);
+	GetDlgItem(IDC_TEXT_QUALITY)->ShowWindow(SW_SHOW);
+	GetDlgItem(IDC_TEXT_FFT)->ShowWindow(SW_SHOW);
+	GetDlgItem(IDC_GROUPBOX_PITCH_TIME)->ShowWindow(SW_SHOW);
 
-	CHAR str[16];
+	TCHAR str[16];
 
 	// Pitch selection
 	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO4);
@@ -269,9 +266,9 @@ BOOL CCtrlSamples::OnInitDialog()
 		// Allow pitch from -12 (1 octave down) to +12 (1 octave up)
 		for(int i = -12 ; i <= 12 ; i++)
 		{
-			if(i == 0) wsprintf(str,"none");
-			else wsprintf(str,i < 0 ? " %d" : "+%d",i);
-			combo->SetItemData(combo->AddString(str), i+12);
+			if(i == 0) _tcscpy(str, _T("none"));
+			else wsprintf(str, i < 0 ? _T(" %d") : _T("+%d"), i);
+			combo->SetItemData(combo->AddString(str), i + 12);
 		}
 		// Set "none" as default pitch
 		combo->SetCurSel(12);
@@ -284,7 +281,7 @@ BOOL CCtrlSamples::OnInitDialog()
 		// Allow quality from 4 to 128
 		for(int i = 4 ; i <= 128 ; i++)
 		{
-			wsprintf(str,"%d",i);
+			wsprintf(str, _T("%u"), i);
 			combo->SetItemData(combo->AddString(str), i-4);
 		}
 		// Set 32 as default quality
@@ -300,15 +297,15 @@ BOOL CCtrlSamples::OnInitDialog()
 		// Allow FFT size from 2^8 (256) to 2^exponent (MAX_FRAME_LENGTH)
 		for(int i = 8 ; i <= exponent ; i++)
 		{
-			wsprintf(str,"%d",1<<i);
-			combo->SetItemData(combo->AddString(str), i-8);
+			wsprintf(str, _T("%u"), 1 << i);
+			combo->SetItemData(combo->AddString(str), i - 8);
 		}
 		// Set 4096 as default FFT size
 		combo->SetCurSel(4);
 	}
 
 	// Stretch ratio
-	SetDlgItemInt(IDC_EDIT6,100,FALSE);
+	SetDlgItemInt(IDC_EDIT6, 100, FALSE);
 
 	// Stretch to size check box
 	OnEnableStretchToSize();

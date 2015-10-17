@@ -330,6 +330,11 @@ public:
 
 	std::string GetNoteName(const ModCommand::NOTE note, const INSTRUMENTINDEX inst) const;
 	static std::string GetNoteName(const ModCommand::NOTE note);
+#ifdef MODPLUG_TRACKER
+	static const char (*m_NoteNames)[4];
+	static void SetDefaultNoteNames();
+#endif
+
 private:
 	CTuningCollection* m_pTuningsTuneSpecific;
 #ifdef MODPLUG_TRACKER
@@ -965,9 +970,6 @@ public:
 	uint8 GetBestMidiChannel(CHANNELINDEX nChn) const;
 
 };
-
-
-extern const char szNoteNames[12][4];
 
 
 inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
