@@ -909,6 +909,8 @@
 #define IDC_LIST_SAMPLEGEN_PRESETS      2425
 #define IDC_CHECK_UNDO                  2426
 #define IDC_CHK_REMEMBERSETTINGS        2427
+#define IDC_PLUGINTAGS                  2428
+#define IDC_STATIC_PLUGINTAGS           2429
 #define IDC_BTN_CLEAR                   2430
 #define IDC_TOTAL_EDIT_TIME             2431
 #define IDC_EDIT_HISTORY                2432

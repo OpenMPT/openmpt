@@ -41,6 +41,7 @@ BEGIN_MESSAGE_MAP(CSelectPluginDlg, CDialog)
 	ON_COMMAND(IDC_CHECK1,			OnSetBridge)
 	ON_COMMAND(IDC_CHECK2,			OnSetBridge)
 	ON_EN_CHANGE(IDC_NAMEFILTER,	OnNameFilterChanged)
+	ON_EN_CHANGE(IDC_PLUGINTAGS,	OnPluginTagsChanged)
 	ON_WM_SIZE()
 	ON_WM_GETMINMAXINFO()
 END_MESSAGE_MAP()
@@ -60,16 +61,12 @@ CSelectPluginDlg::CSelectPluginDlg(CModDoc *pModDoc, PLUGINDEX nPlugSlot, CWnd *
 	: CDialog(IDD_SELECTMIXPLUGIN, parent)
 	, m_pModDoc(pModDoc)
 	, m_nPlugSlot(nPlugSlot)
+	, m_pPlugin(nullptr)
 //-------------------------------------------------------------------------------------
 {
-	m_pPlugin = NULL;
-
-	if(m_pModDoc)
+	if(m_pModDoc && 0 <= m_nPlugSlot && m_nPlugSlot < MAX_MIXPLUGINS)
 	{
-		if(0 <= m_nPlugSlot && m_nPlugSlot < MAX_MIXPLUGINS)
-		{
-			m_pPlugin = &(pModDoc->GetrSoundFile().m_MixPlugins[m_nPlugSlot]);
-		}
+		m_pPlugin = &(pModDoc->GetrSoundFile().m_MixPlugins[m_nPlugSlot]);
 	}
 
 	CMainFrame::GetMainFrame()->GetInputHandler()->Bypass(true);
@@ -344,6 +341,8 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 	bool foundCurrentPlug = false;
 
 	const bool nameFilterActive = !m_nameFilter.empty();
+	std::vector<mpt::ustring> currentTags = mpt::String::Split<std::wstring>(m_nameFilter, L" ");
+
 	if(pManager)
 	{
 		bool first = true;
@@ -355,12 +354,31 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 			if(nameFilterActive)
 			{
 				// Apply name filter
-				std::wstring displayName = plug.libraryName.ToWide();
-				for(size_t i = 0; i < displayName.length(); i++) displayName[i] = ::towlower(displayName[i]);
-				if(displayName.find(m_nameFilter, 0) == displayName.npos)
+				bool matches = false;
+				// Search in plugin names
 				{
-					continue;
+					std::wstring displayName = plug.libraryName.ToWide();
+					for(size_t i = 0; i < displayName.length(); i++) displayName[i] = ::towlower(displayName[i]);
+					if(displayName.find(m_nameFilter, 0) != displayName.npos)
+					{
+						matches = true;
+					}
 				}
+				// Search in plugin tags
+				if(!matches)
+				{
+					mpt::ustring tags = plug.tags;
+					for(size_t i = 0; i < tags.length(); i++) tags[i] = ::towlower(tags[i]);
+					for(std::vector<mpt::ustring>::const_iterator it = currentTags.begin(); it != currentTags.end(); it++)
+					{
+						if(!it->empty() && tags.find(*it, 0) != tags.npos)
+						{
+							matches = true;
+							break;
+						}
+					}
+				}
+				if(!matches) continue;
 			}
 
 			std::wstring title = plug.libraryName.AsNative();
@@ -476,9 +494,11 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	VSTPluginLib *pPlug = GetSelectedPlugin();
 	int showBoxes = SW_HIDE;
+	BOOL enableTagsTextBox = FALSE;
 	if (pManager != nullptr && pManager->IsValidPlugin(pPlug))
 	{
 		::SetDlgItemTextW(m_hWnd, IDC_TEXT_CURRENT_VSTPLUG, pPlug->dllPath.ToWide().c_str());
+		::SetDlgItemTextW(m_hWnd, IDC_PLUGINTAGS, pPlug->tags.c_str());
 		if(pPlug->pluginId1 == kEffectMagic)
 		{
 			bool isBridgeAvailable =
@@ -502,13 +522,16 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 			m_chkShare.EnableWindow(m_chkBridge.GetCheck() != BST_UNCHECKED);
 
 			showBoxes = SW_SHOW;
+			enableTagsTextBox = TRUE;
 		}
 	} else
 	{
 		SetDlgItemText(IDC_TEXT_CURRENT_VSTPLUG, _T(""));
+		SetDlgItemText(IDC_PLUGINTAGS, "");
 	}
 	m_chkBridge.ShowWindow(showBoxes);
 	m_chkShare.ShowWindow(showBoxes);
+	GetDlgItem(IDC_PLUGINTAGS)->EnableWindow(enableTagsTextBox);
 	if (result) *result = 0;
 }
 
@@ -781,10 +804,14 @@ void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 
 	if (m_treePlugins)
 	{
-		m_treePlugins.MoveWindow(MulDiv(8, dpiX, 96), MulDiv(36, dpiY, 96), cx - MulDiv(109, dpiX, 96), cy - MulDiv(88, dpiY, 96), FALSE);
+		m_treePlugins.MoveWindow(MulDiv(8, dpiX, 96), MulDiv(36, dpiY, 96), cx - MulDiv(109, dpiX, 96), cy - MulDiv(118, dpiY, 96), FALSE);
 
 		GetDlgItem(IDC_STATIC_VSTNAMEFILTER)->MoveWindow(MulDiv(8, dpiX, 96), MulDiv(11, dpiY, 96), MulDiv(40, dpiX, 96), MulDiv(21, dpiY, 96), FALSE);
 		GetDlgItem(IDC_NAMEFILTER)->MoveWindow(MulDiv(40, dpiX, 96), MulDiv(8, dpiY, 96), cx - MulDiv(141, dpiX, 96), MulDiv(21, dpiY, 96), FALSE);
+
+		GetDlgItem(IDC_STATIC_PLUGINTAGS)->MoveWindow(MulDiv(8, dpiX, 96), cy - MulDiv(71, dpiY, 96), MulDiv(40, dpiX, 96), MulDiv(21, dpiY, 96), FALSE);
+		GetDlgItem(IDC_PLUGINTAGS)->MoveWindow(MulDiv(40, dpiX, 96), cy - MulDiv(74, dpiY, 96), cx - MulDiv(141, dpiX, 96), MulDiv(21, dpiY, 96), FALSE);
+
 		GetDlgItem(IDC_TEXT_CURRENT_VSTPLUG)->MoveWindow(MulDiv(8, dpiX, 96), cy - MulDiv(45, dpiY, 96), cx - MulDiv(22, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
 		m_chkBridge.MoveWindow(MulDiv(8, dpiX, 96), cy - MulDiv(25, dpiY, 96), MulDiv(110, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
 		m_chkShare.MoveWindow(MulDiv(120, dpiX, 96), cy - MulDiv(25, dpiY, 96), cx - MulDiv(128, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
@@ -800,6 +827,7 @@ void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
+
 void CSelectPluginDlg::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 //-------------------------------------------------------
 {
@@ -807,6 +835,25 @@ void CSelectPluginDlg::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 	lpMMI->ptMinTrackSize.y = MulDiv(270, Util::GetDPIy(m_hWnd), 96);
 	CDialog::OnGetMinMaxInfo(lpMMI);
 }
+
+
+void CSelectPluginDlg::OnPluginTagsChanged()
+//------------------------------------------
+{
+	VSTPluginLib *plug = GetSelectedPlugin();
+	if (plug)
+	{
+		HWND hwnd = ::GetDlgItem(m_hWnd, IDC_PLUGINTAGS);
+		int len = ::GetWindowTextLengthW(hwnd);
+		mpt::ustring tags(len, MPT_UCHAR(' '));
+		if(len)
+		{
+			::GetWindowTextW(hwnd, &tags[0], len + 1);
+		}
+		plug->tags = tags;
+	}
+}
+
 
 OPENMPT_NAMESPACE_END
 
