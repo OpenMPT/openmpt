@@ -77,7 +77,8 @@ public:
 	virtual void ResetSilence() = 0;
 	virtual void SetEditorPos(int32 x, int32 y) = 0;
 	virtual void GetEditorPos(int32 &x, int32 &y) const = 0;
-
+	virtual int GetNumInputChannels() const = 0;
+	virtual int GetNumOutputChannels() const = 0;
 };
 
 
