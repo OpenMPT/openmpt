@@ -85,7 +85,7 @@ struct _ModPlugFile {
 	char* message;
 	ModPlug_Settings settings;
 	ModPlugMixerProc mixerproc;
-	unsigned char * * patterns;
+	ModPlugNote** patterns;
 };
 
 static ModPlug_Settings globalsettings = {
@@ -543,9 +543,9 @@ LIBOPENMPT_MODPLUG_API ModPlugNote* ModPlug_GetPattern(ModPlugFile* file, int pa
 		return NULL;
 	}
 	if(!file->patterns){
-		file->patterns = malloc(sizeof(unsigned char*)*openmpt_module_get_pattern_num_rows(file->mod,pattern));
+		file->patterns = malloc(sizeof(ModPlugNote*)*openmpt_module_get_pattern_num_rows(file->mod,pattern));
 		if(!file->patterns) return NULL;
-		memset(file->patterns,0,sizeof(unsigned char*)*openmpt_module_get_pattern_num_rows(file->mod,pattern));
+		memset(file->patterns,0,sizeof(ModPlugNote*)*openmpt_module_get_pattern_num_rows(file->mod,pattern));
 	}
 	if(!file->patterns[pattern]){
 		file->patterns[pattern] = malloc(sizeof(ModPlugNote)*openmpt_module_get_pattern_num_rows(file->mod,pattern)*openmpt_module_get_num_channels(file->mod));
@@ -563,10 +563,10 @@ LIBOPENMPT_MODPLUG_API ModPlugNote* ModPlug_GetPattern(ModPlugFile* file, int pa
 			note.Effect = openmpt_module_get_pattern_row_channel_command(file->mod,pattern,r,c,OPENMPT_MODULE_COMMAND_EFFECT);
 			note.Volume = openmpt_module_get_pattern_row_channel_command(file->mod,pattern,r,c,OPENMPT_MODULE_COMMAND_VOLUME);
 			note.Parameter = openmpt_module_get_pattern_row_channel_command(file->mod,pattern,r,c,OPENMPT_MODULE_COMMAND_PARAMETER);
-			memcpy(&file->patterns[pattern][r*numc*sizeof(ModPlugNote)+c*sizeof(ModPlugNote)],&note,sizeof(ModPlugNote));
+			memcpy(&file->patterns[pattern][r*numc+c],&note,sizeof(ModPlugNote));
 		}
 	}
-	return (ModPlugNote*)file->patterns[pattern];
+	return file->patterns[pattern];
 }
 
 LIBOPENMPT_MODPLUG_API void ModPlug_InitMixerCallback(ModPlugFile* file,ModPlugMixerProc proc)
