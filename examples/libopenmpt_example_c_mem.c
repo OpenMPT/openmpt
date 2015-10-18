@@ -49,6 +49,7 @@ static void free_blob( blob_t * blob ) {
 			blob->data = 0;
 		}
 		blob->size = 0;
+		free( blob );
 	}
 }
 
