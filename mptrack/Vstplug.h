@@ -287,6 +287,9 @@ public:
 	void SetZxxParameter(UINT nParam, UINT nValue);
 	UINT GetZxxParameter(UINT nParam); //rewbs.smoothVST
 
+	int GetNumInputChannels() const { return m_Effect.numInputs; }
+	int GetNumOutputChannels() const { return m_Effect.numOutputs; }
+
 protected:
 	void MidiPitchBend(uint8 nMidiCh, int32 pitchBendPos);
 	// Converts a 14-bit MIDI pitch bend position to our internal pitch bend position representation
@@ -348,6 +351,9 @@ public:
 
 	void SetEditorPos(int32, int32) { }
 	void GetEditorPos(int32 &x, int32 &y) const { x = y = int32_min; }
+
+	int GetNumInputChannels() const { return 0; }
+	int GetNumOutputChannels() const { return 0; }
 
 #endif // NO_VST
 };
