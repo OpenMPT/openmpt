@@ -68,16 +68,16 @@ public:
 	bool isInstrument : 1;
 	bool useBridge : 1, shareBridgeInstance : 1;
 protected:
-	mutable uint8 dllBits : 1;
+	mutable uint8 dllBits;
 
 public:
 	VSTPluginLib(const mpt::PathString &dllPath, const mpt::PathString &libraryName, const mpt::ustring &tags)
 		: pPluginsList(nullptr),
 		libraryName(libraryName), dllPath(dllPath),
+		tags(tags),
 		pluginId1(0), pluginId2(0),
 		category(catUnknown),
 		isInstrument(false), useBridge(false), shareBridgeInstance(true),
-		tags(tags),
 		dllBits(0)
 	{
 	}
