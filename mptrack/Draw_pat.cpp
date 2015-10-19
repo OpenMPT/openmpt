@@ -385,9 +385,9 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 			if(noteStr.size() < 3)
 				noteStr.resize(3, ' ');
 			
-			DrawLetter(x, y, noteStr[0], pfnt->nNoteWidth / 2, 0);
-			DrawLetter(x + pfnt->nNoteWidth / 2, y, noteStr[1], pfnt->nNoteWidth / 2, 0);
-			DrawLetter(x + pfnt->nNoteWidth, y, noteStr[2], pfnt->nOctaveWidth, 0);
+			DrawLetter(x, y, noteStr[0], pfnt->nNoteWidth[0], 0);
+			DrawLetter(x + pfnt->nNoteWidth[0], y, noteStr[1], pfnt->nNoteWidth[1], 0);
+			DrawLetter(x + pfnt->nNoteWidth[0] + pfnt->nNoteWidth[1], y, noteStr[2], pfnt->nOctaveWidth, 0);
 		} else
 		{
 			// Original
@@ -397,18 +397,18 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 			// Hack for default pattern font, allowing for sharps
 			if(TrackerSettings::Instance().accidentalFlats)
 			{
-				DrawLetter(x, y, NoteNamesFlat[n][0], pfnt->nNoteWidth / 2, 0);
-				DrawLetter(x + pfnt->nNoteWidth / 2, y, NoteNamesFlat[n][1], pfnt->nNoteWidth / 2, 0);
+				DrawLetter(x, y, NoteNamesFlat[n][0], pfnt->nNoteWidth[0], 0);
+				DrawLetter(x + pfnt->nNoteWidth[0], y, NoteNamesFlat[n][1], pfnt->nNoteWidth[1], 0);
 			} else
 			{
-				m_Dib.TextBlt(x, y, pfnt->nNoteWidth, pfnt->spacingY, xsrc, ysrc+(n+1)*pfnt->spacingY, pfnt->dib);
+				m_Dib.TextBlt(x, y, pfnt->nNoteWidth[0] + pfnt->nNoteWidth[1], pfnt->spacingY, xsrc, ysrc+(n+1)*pfnt->spacingY, pfnt->dib);
 			}
 
 			if(o <= 9)
-				m_Dib.TextBlt(x+pfnt->nNoteWidth, y, pfnt->nOctaveWidth, pfnt->spacingY,
+				m_Dib.TextBlt(x + pfnt->nNoteWidth[0] + pfnt->nNoteWidth[1], y, pfnt->nOctaveWidth, pfnt->spacingY,
 								pfnt->nNumX, pfnt->nNumY+o*pfnt->spacingY, pfnt->dib);
 			else
-				DrawLetter(x+pfnt->nNoteWidth, y, '?', pfnt->nOctaveWidth);
+				DrawLetter(x + pfnt->nNoteWidth[0] + pfnt->nNoteWidth[1], y, '?', pfnt->nOctaveWidth);
 		}
 	}
 	DrawPadding(m_Dib, pfnt, x, y, 0);

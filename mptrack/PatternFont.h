@@ -27,7 +27,7 @@ struct PATTERNFONT
 	int nAlphaAM_X,nAlphaAM_Y;	// Letters A-M +#
 	int nAlphaNZ_X,nAlphaNZ_Y;	// Letters N-Z +?
 	int nNoteX, nNoteY;			// Notes ..., C-, C#, ...
-	int nNoteWidth;				// Total width of note (C#)
+	int nNoteWidth[2];			// Total width of note (C#)
 	int nOctaveWidth;			// Octave Width
 	int nVolX, nVolY;			// Volume Column Effects
 	int nVolCmdWidth;			// Width of volume effect

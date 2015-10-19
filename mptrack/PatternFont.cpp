@@ -34,8 +34,8 @@ const PATTERNFONT gDefaultPatternFont =
 	64,26,	// A-M#
 	78,26,	// N-Z?										// MEDIUM FONT !!!
 	0, 0,
-	12,8,	// Note & Octave Width
-	42,13,	// Volume Column Effects
+	{ 7, 5 }, 8,	// Note & Octave Width
+	42,13,			// Volume Column Effects
 	8,8,
 	-1,
 	8,		// 8+7 = 15
@@ -63,8 +63,8 @@ const PATTERNFONT gSmallPatternFont =
 	142,26,	// A-M#
 	150,26,	// N-Z?										// SMALL FONT !!!
 	92, 0,	// Notes
-	10,6,	// Note & Octave Width
-	132,13,	// Volume Column Effects
+	{ 5, 5 }, 6,	// Note & Octave Width
+	132,13,		// Volume Column Effects
 	6,5,
 	-1,
 	6,		// 8+7 = 15
@@ -211,7 +211,8 @@ void PatternFont::UpdateFont(HWND hwnd)
 		pf.nAlphaNZ_Y = builtinFont->nAlphaNZ_Y * font.size;
 		pf.nNoteX = builtinFont->nNoteX * font.size;
 		pf.nNoteY = builtinFont->nNoteY * font.size;
-		pf.nNoteWidth = builtinFont->nNoteWidth * font.size;
+		pf.nNoteWidth[0] = builtinFont->nNoteWidth[0] * font.size;
+		pf.nNoteWidth[1] = builtinFont->nNoteWidth[1] * font.size;
 		pf.nOctaveWidth = builtinFont->nOctaveWidth * font.size;
 		pf.nVolX = builtinFont->nVolX * font.size;
 		pf.nVolY = builtinFont->nVolY * font.size;
@@ -279,7 +280,8 @@ void PatternFont::UpdateFont(HWND hwnd)
 	pf.nAlphaNZ_Y = charHeight * 2;
 	pf.nNoteX = 0;						// Notes ..., C-, C#, ...
 	pf.nNoteY = 0;
-	pf.nNoteWidth = charWidth * 2;		// Total width of note (C#)
+	pf.nNoteWidth[0] = charWidth;		// Total width of note (C#)
+	pf.nNoteWidth[1] = charWidth;		// Total width of note (C#)
 	pf.nOctaveWidth = charWidth;		// Octave Width
 	pf.nVolX = charWidth * 8;			// Volume Column Effects
 	pf.nVolY = charHeight;
