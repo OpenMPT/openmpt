@@ -156,6 +156,7 @@ public:
 	VOID UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify);
 	HWND GetModTreeHWND(); //rewbs.customKeys
 	BOOL PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam); //rewbs.customKeys
+	bool SetTreeSoundfile(FileReader &file);
 
 
 protected:

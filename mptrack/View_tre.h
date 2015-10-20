@@ -190,6 +190,7 @@ public:
 	void Init();
 	bool InsLibSetFullPath(const mpt::PathString &libPath, const mpt::PathString &songFolder);
 	mpt::PathString InsLibGetFullPath(HTREEITEM hItem) const;
+	bool SetSoundFile(FileReader &file);
 	void RefreshMidiLibrary();
 	void RefreshDlsBanks();
 	void RefreshInstrumentLibrary();
