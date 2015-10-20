@@ -53,6 +53,7 @@ BEGIN_MESSAGE_MAP(CNoteMapWnd, CStatic)
 	ON_COMMAND(ID_NOTEMAP_COPY_NOTE,	OnMapCopyNote)
 	ON_COMMAND(ID_NOTEMAP_COPY_SMP,		OnMapCopySample)
 	ON_COMMAND(ID_NOTEMAP_RESET,		OnMapReset)
+	ON_COMMAND(ID_NOTEMAP_REMOVE,		OnMapRemove)
 	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP, OnEditSampleMap)
 	ON_COMMAND(ID_INSTRUMENT_DUPLICATE, OnInstrumentDuplicate)
 	ON_COMMAND_RANGE(ID_NOTEMAP_EDITSAMPLE, ID_NOTEMAP_EDITSAMPLE+MAX_SAMPLES, OnEditSample)
@@ -369,6 +370,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_DOWN, _T("Transpose map &down\t") + ih->GetKeyTextFromCommand(kcInsNoteMapTransposeDown));
 			}
 			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_RESET, _T("&Reset note mapping\t") + ih->GetKeyTextFromCommand(kcInsNoteMapReset));
+			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_REMOVE, _T("Remo&ve all samples\t") + ih->GetKeyTextFromCommand(kcInsNoteMapRemove));
 			AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_DUPLICATE, _T("Duplicate &Instrument\t") + ih->GetKeyTextFromCommand(kcInstrumentCtrlDuplicate));
 			SetMenuDefaultItem(hMenu, ID_INSTRUMENT_SAMPLEMAP, FALSE);
 			ClientToScreen(&pt);
@@ -438,9 +440,30 @@ void CNoteMapWnd::OnMapReset()
 	if (pIns)
 	{
 		bool bModified = false;
-		for (NOTEINDEXTYPE i = 0; i < CountOf(pIns->NoteMap); i++) if (pIns->NoteMap[i] != i + 1)
+		for (size_t i = 0; i < CountOf(pIns->NoteMap); i++) if (pIns->NoteMap[i] != i + 1)
 		{
 			pIns->NoteMap[i] = i + 1;
+			bModified = true;
+		}
+		if (bModified)
+		{
+			m_pParent.SetModified(InstrumentHint().Info(), false);
+			InvalidateRect(NULL, FALSE);
+		}
+	}
+}
+
+
+void CNoteMapWnd::OnMapRemove()
+//-----------------------------
+{
+	ModInstrument *pIns = m_modDoc.GetrSoundFile().Instruments[m_nInstrument];
+	if (pIns)
+	{
+		bool bModified = false;
+		for (size_t i = 0; i < CountOf(pIns->Keyboard); i++) if (pIns->Keyboard[i] != 0)
+		{
+			pIns->Keyboard[i] = 0;
 			bModified = true;
 		}
 		if (bModified)
@@ -562,6 +585,7 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	case kcInsNoteMapCopyCurrentSample:	OnMapCopySample(); return wParam;
 	case kcInsNoteMapCopyCurrentNote:	OnMapCopyNote(); return wParam;
 	case kcInsNoteMapReset:				OnMapReset(); return wParam;
+	case kcInsNoteMapRemove:			OnMapRemove(); return wParam;
 
 	case kcInsNoteMapEditSample:		if(pIns) OnEditSample(pIns->Keyboard[m_nNote] + ID_NOTEMAP_EDITSAMPLE); return wParam;
 	case kcInsNoteMapEditSampleMap:		OnEditSampleMap(); return wParam;
