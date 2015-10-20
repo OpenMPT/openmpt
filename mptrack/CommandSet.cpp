@@ -690,6 +690,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleDuplicate, 1952, _T("Duplicate Sample"));
 	DefineKeyCommand(kcSampleSlice, 1953, _T("Slice at cue points"));
 	DefineKeyCommand(kcInstrumentEnvelopeScale, 1954, _T("Scale Envelope Points"));
+	DefineKeyCommand(kcInsNoteMapRemove, 1955, _T("Remove All Samples"));
 
 	// Add new key commands here.
 

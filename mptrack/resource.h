@@ -1013,8 +1013,7 @@
 #define ID_PATTERN_PLAYROW              32816
 #define ID_PATTERN_DELETEALLROW         32818
 #define ID_PATTERN_INSERTALLROW         32819
-#define ID_NEXTORDER                    32820
-#define ID_PREVORDER                    32821
+#define ID_NOTEMAP_REMOVE               32820
 #define ID_MODTREE_EXECUTE              32822
 #define ID_MODTREE_REMOVE               32823
 #define ID_IMPORT_MIDILIB               32824
@@ -1065,7 +1064,7 @@
 #define ID_PATTERN_EXPAND               32869
 #define ID_PATTERN_SHRINK               32870
 #define ID_HELP_SEARCH                  32871
-#define ID_MODTREE_SHOWDIRS             32862
+#define ID_MODTREE_SHOWDIRS             32872
 #define ID_PATTERNCOPY                  32874
 #define ID_PATTERNPASTE                 32875
 #define ID_NETLINK_MODPLUG              32876

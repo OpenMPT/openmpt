@@ -843,19 +843,19 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampl
 	if(types[OpenSampleKnown])
 	{
 		bOk = m_sndFile.ReadSampleFromFile(m_nSample, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
-	}
-	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
-	if(!bOk)
-	{
-		// Try loading as module
-		bOk = CMainFrame::GetMainFrame()->SetTreeSoundfile(file);
-		if(bOk)
+		if(!bOk)
 		{
-			m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
-			return true;
+			// Try loading as module
+			bOk = CMainFrame::GetMainFrame()->SetTreeSoundfile(file);
+			if(bOk)
+			{
+				m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
+				return true;
+			}
 		}
 	}
+	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
 	if(!bOk && types[OpenSampleRaw])
 	{
