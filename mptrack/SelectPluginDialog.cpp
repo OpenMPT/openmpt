@@ -619,7 +619,7 @@ void CSelectPluginDlg::OnAddPlugin()
 	{
 		if (pManager)
 		{
-			VSTPluginLib *lib = pManager->AddPlugin(files[counter], false);
+			VSTPluginLib *lib = pManager->AddPlugin(files[counter], mpt::ustring(), false);
 			if(lib != nullptr)
 			{
 				update = true;
@@ -696,7 +696,7 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 				::DispatchMessage(&msg);
 			}
 
-			VSTPluginLib *lib = pManager->AddPlugin(fileName, false);
+			VSTPluginLib *lib = pManager->AddPlugin(fileName, mpt::ustring(), false);
 			if(lib)
 			{
 				update = true;
