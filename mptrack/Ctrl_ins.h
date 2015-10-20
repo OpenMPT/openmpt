@@ -128,8 +128,8 @@ public:
 	void SetModified(InstrumentHint hint, bool updateAll);
 	BOOL SetCurrentInstrument(UINT nIns, BOOL bUpdNum=TRUE);
 	void InsertInstrument(bool duplicate);
-	BOOL OpenInstrument(const mpt::PathString &fileName);
-	BOOL OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr);
+	bool OpenInstrument(const mpt::PathString &fileName);
+	bool OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr);
 	BOOL EditSample(UINT nSample);
 	VOID UpdateFilterText();
 	Setting<LONG> &GetSplitPosRef() {return TrackerSettings::Instance().glInstrumentWindowHeight;} 	//rewbs.varWindowSize

@@ -1453,7 +1453,7 @@ void CCtrlInstruments::UpdateFilterText()
 }
 
 
-BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
+bool CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 //--------------------------------------------------------------------
 {
 	BeginWaitCursor();
@@ -1461,7 +1461,7 @@ BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 	if(!f.IsValid())
 	{
 		EndWaitCursor();
-		return FALSE;
+		return false;
 	}
 
 	FileReader file = GetFileReader(f);
@@ -1493,7 +1493,7 @@ BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 	}
 
 	EndWaitCursor();
-	if (ok)
+	if(ok)
 	{
 		TrackerSettings::Instance().PathInstruments.SetWorkingDir(fileName, true);
 		ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
@@ -1517,6 +1517,11 @@ BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 			if(first) hint.ModType();
 			SetModified(hint, true);
 		} else ok = FALSE;
+	} else
+	{
+		// Try loading as module
+		ok = CMainFrame::GetMainFrame()->SetTreeSoundfile(file);
+		if(ok) return true;
 	}
 	SampleHint hint = SampleHint().Info().Data().Names();
 	if (first) hint.ModType();
@@ -1526,26 +1531,26 @@ BOOL CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 }
 
 
-BOOL CCtrlInstruments::OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr)
+bool CCtrlInstruments::OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr)
 //--------------------------------------------------------------------------------
 {
-	if((!nInstr) || (nInstr > sndFile.GetNumInstruments())) return FALSE;
+	if((!nInstr) || (nInstr > sndFile.GetNumInstruments())) return false;
 	BeginWaitCursor();
 
 	CriticalSection cs;
 
-	bool bFirst = false;
+	bool first = false;
 	if (!m_sndFile.GetNumInstruments())
 	{
-		bFirst = true;
+		first = true;
 		m_sndFile.m_nInstruments = 1;
 		m_NoteMap.SetCurrentInstrument(1);
-		bFirst = true;
+		first = true;
 	}
 	if (!m_nInstrument)
 	{
 		m_nInstrument = 1;
-		bFirst = true;
+		first = true;
 	}
 	m_sndFile.ReadInstrumentFromSong(m_nInstrument, sndFile, nInstr);
 
@@ -1553,16 +1558,16 @@ BOOL CCtrlInstruments::OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInst
 
 	{
 		InstrumentHint hint = InstrumentHint().Info().Envelope().Names();
-		if (bFirst) hint.ModType();
+		if (first) hint.ModType();
 		SetModified(hint, true);
 	}
 	{
 		SampleHint hint = SampleHint().Info().Data().Names();
-		if (bFirst) hint.ModType();
+		if (first) hint.ModType();
 		m_modDoc.UpdateAllViews(nullptr, hint, this);
 	}
 	EndWaitCursor();
-	return TRUE;
+	return true;
 }
 
 

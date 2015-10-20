@@ -383,6 +383,7 @@ public:
 
 	CModTree *GetUpperTreeview() { return m_wndTree.m_pModTree; }
 	CModTree *GetLowerTreeview() { return m_wndTree.m_pModTreeData; }
+	bool SetTreeSoundfile(FileReader &file) { return m_wndTree.SetTreeSoundfile(file); }
 
 	void CreateExampleModulesMenu();
 	void CreateTemplateModulesMenu();

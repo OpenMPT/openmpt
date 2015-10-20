@@ -1151,13 +1151,15 @@ void CModTreeBar::OnLButtonUp(UINT, CPoint)
 	DoLButtonUp();
 }
 
-//rewbs.customKeys
+
 HWND CModTreeBar::GetModTreeHWND()
+//--------------------------------
 {
 	return m_pModTree->m_hWnd;
 }
 
 BOOL CModTreeBar::PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam)
+//------------------------------------------------------------------------------
 {
 	if (::GetFocus() == m_pModTree->m_hWnd)
 		return m_pModTree->SendMessage(cmdID, wParam, lParam);
@@ -1166,7 +1168,15 @@ BOOL CModTreeBar::PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam)
 
 	return 0;
 }
-//end rewbs.customKeys
+
+
+bool CModTreeBar::SetTreeSoundfile(FileReader &file)
+//--------------------------------------------------
+{
+	return m_pModTree->SetSoundFile(file);
+}
+
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
