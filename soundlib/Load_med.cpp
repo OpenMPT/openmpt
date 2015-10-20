@@ -646,15 +646,6 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultSpeed = pmsh->tempo2;
 	if (!m_nDefaultSpeed) m_nDefaultSpeed = 6;
 	if (deftempo < 0x21) deftempo = 0x21;
-	if (deftempo > 255)
-	{
-		while ((m_nDefaultSpeed > 3) && (deftempo > 260))
-		{
-			deftempo = (deftempo * (m_nDefaultSpeed - 1)) / m_nDefaultSpeed;
-			m_nDefaultSpeed--;
-		}
-		if (deftempo > 255) deftempo = 255;
-	}
 	m_nDefaultTempo.Set(deftempo);
 	// Reading Samples
 	for (UINT iSHdr=0; iSHdr<m_nSamples; iSHdr++)
@@ -700,7 +691,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 		for (UINT iSection=0; iSection<nSections; iSection++)
 		{
 			UINT nplayseq = 0;
-			if ((sectiontable) && (sectiontable < dwMemLength-2))
+			if (sectiontable && sectiontable < dwMemLength && 2 >= dwMemLength - sectiontable)
 			{
 				nplayseq = lpStream[sectiontable+1];
 				sectiontable += 2; // WORDs
@@ -710,11 +701,11 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			UINT pseq = 0;
 
-			if ((playseqtable) && (playseqtable < dwMemLength) && (nplayseq*4 < dwMemLength - playseqtable))
+			if ((playseqtable) && (playseqtable < dwMemLength) && (nplayseq * 4 <= dwMemLength - playseqtable))
 			{
 				pseq = BigEndian((const_unaligned_ptr_le<DWORD>(lpStream+playseqtable))[nplayseq]);
 			}
-			if ((pseq) && (pseq < dwMemLength - sizeof(MMD2PLAYSEQ)))
+			if (pseq && pseq < dwMemLength && sizeof(MMD2PLAYSEQ) <= dwMemLength - pseq)
 			{
 				const MMD2PLAYSEQ *pmps = (const MMD2PLAYSEQ *)(lpStream + pseq);
 				if(songName.empty()) mpt::String::Read<mpt::String::maybeNullTerminated>(songName, pmps->name);
