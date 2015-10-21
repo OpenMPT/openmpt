@@ -1044,8 +1044,8 @@ void CCtrlSamples::OnSampleNew()
 }
 
 
-void CCtrlSamples::InsertSample(bool duplicate)
-//---------------------------------------------
+void CCtrlSamples::InsertSample(bool duplicate, int8 *confirm)
+//------------------------------------------------------------
 {
 	SAMPLEINDEX smp = m_modDoc.InsertSample(true);
 	if(smp != SAMPLEINDEX_INVALID)
@@ -1063,7 +1063,16 @@ void CCtrlSamples::InsertSample(bool duplicate)
 		m_modDoc.UpdateAllViews(nullptr, SampleHint(smp).Info().Data().Names());
 		if(m_modDoc.GetNumInstruments() > 0 && m_modDoc.FindSampleParent(smp) == INSTRUMENTINDEX_INVALID)
 		{
-			if(Reporting::Confirm("This sample is not used by any instrument. Do you want to create a new instrument using this sample?") == cnfYes)
+			bool insertInstrument;
+			if(confirm == nullptr || *confirm == -1)
+			{
+				insertInstrument = Reporting::Confirm("This sample is not used by any instrument. Do you want to create a new instrument using this sample?") == cnfYes;
+				if(confirm != nullptr) *confirm = insertInstrument;
+			} else
+			{
+				insertInstrument = (*confirm) != 0;
+			}
+			if(insertInstrument)
 			{
 				INSTRUMENTINDEX nins = m_modDoc.InsertInstrument(smp);
 				m_modDoc.UpdateAllViews(nullptr, InstrumentHint(nins).Info().Envelope().Names());
@@ -1108,12 +1117,13 @@ void CCtrlSamples::OnSampleOpen()
 	TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetWorkingDirectory());
 
 	const FileDialog::PathList &files = dlg.GetFilenames();
+	int8 confirm = -1;
 	for(size_t counter = 0; counter < files.size(); counter++)
 	{
 		// If loading multiple samples, create new slots for them
 		if(counter > 0)
 		{
-			OnSampleNew();
+			InsertSample(CMainFrame::GetInputHandler()->ShiftPressed(), &confirm);
 		}
 
 		if(!OpenSample(files[counter], OpenSampleKnown | OpenSampleRaw))
@@ -1155,12 +1165,13 @@ void CCtrlSamples::OnSampleOpenKnown()
 	TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetWorkingDirectory());
 
 	const FileDialog::PathList &files = dlg.GetFilenames();
+	int8 confirm = -1;
 	for(size_t counter = 0; counter < files.size(); counter++)
 	{
 		// If loading multiple samples, create new slots for them
 		if(counter > 0)
 		{
-			OnSampleNew();
+			InsertSample(CMainFrame::GetInputHandler()->ShiftPressed(), &confirm);
 		}
 
 		if(!OpenSample(files[counter], OpenSampleKnown))
@@ -1186,12 +1197,13 @@ void CCtrlSamples::OnSampleOpenRaw()
 	TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetWorkingDirectory());
 
 	const FileDialog::PathList &files = dlg.GetFilenames();
+	int8 confirm = -1;
 	for(size_t counter = 0; counter < files.size(); counter++)
 	{
 		// If loading multiple samples, create new slots for them
 		if(counter > 0)
 		{
-			OnSampleNew();
+			InsertSample(CMainFrame::GetInputHandler()->ShiftPressed(), &confirm);
 		}
 
 		if(!OpenSample(files[counter], OpenSampleRaw))
