@@ -109,8 +109,6 @@ PluginBridge *PluginBridge::latestInstance = nullptr;
 WNDCLASSEX PluginBridge::windowClass;
 #define WINDOWCLASSNAME _T("OpenMPTPluginBridge")
 
-enum { kVstTimeInfoInit = 1 << 31 };
-
 
 // Initialize static stuff like the editor window class
 void PluginBridge::InitializeStaticVariables()
@@ -460,9 +458,6 @@ void PluginBridge::InitBridge(InitMsg *msg)
 	msg->result = 1;
 
 	UpdateEffectStruct();
-	// Set a custom time info flag that will differ from any other flags on the first audioMasterGetTime call.
-	// This fixes plugins like KarmaFX EQ that don't send any flags (only query sample frequency).
-	sharedMem->timeInfo.flags = kVstTimeInfoInit;
 
 	// Init process buffer
 	DispatchToHost(audioMasterVendorSpecific, kVendorOpenMPT, kUpdateProcessingBuffer, nullptr, 0.0f);
