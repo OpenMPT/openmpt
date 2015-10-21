@@ -842,7 +842,11 @@ static std::string ToUTF8(const std::wstring &str, char replacement = '?')
 	for ( std::size_t i=0; i<in.length(); i++ ) {
 
 		wchar_t c = in[i];
-		if ( c > 0x1fffff || c < 0 ) {
+		MPT_MAYBE_CONSTANT_IF ( c < 0 ) {
+			out.push_back( replacement );
+			continue;
+		}
+		MPT_MAYBE_CONSTANT_IF ( c > 0x1fffff ) {
 			out.push_back( replacement );
 			continue;
 		}
