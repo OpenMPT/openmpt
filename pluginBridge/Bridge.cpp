@@ -904,13 +904,9 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 		// VstTimeInfo* in [return value]
 		if(processing)
 		{
-			// During processing, read the cached time info if possible.
-			// Only check validity flags. OpenMPT ignores the other flags anyway, as they are host-to-plugin flags.
-			value &= (kVstNanosValid | kVstPpqPosValid | kVstTempoValid | kVstBarsValid | kVstCyclePosValid | kVstTimeSigValid | kVstSmpteValid | kVstClockValid | kVstTimeInfoInit);
-			if((sharedMem->timeInfo.flags & value) == value)
-			{
-				return ToVstPtr<VstTimeInfo>(&sharedMem->timeInfo);
-			}
+			// During processing, read the cached time info. It won't change during the call
+			// and we can save some valuable inter-process calls that way.
+			return ToVstPtr<VstTimeInfo>(&sharedMem->timeInfo);
 		}
 		break;
 

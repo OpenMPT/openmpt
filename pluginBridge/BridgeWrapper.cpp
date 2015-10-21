@@ -947,15 +947,11 @@ void BridgeWrapper::BuildProcessBuffer(ProcessMsg::ProcessType type, VstInt32 nu
 	}
 
 	ProcessMsg *msg = static_cast<ProcessMsg *>(processMem.view);
-	const VstInt32 timeInfoFlags = sharedMem->timeInfo.flags;
 	new (msg) ProcessMsg(type, numInputs, numOutputs, sampleFrames);
 
-	// Plugin asked for time info in the past (flags are set), so we anticipate that it will do that again
-	// and cache the time info so that plugin doesn't have to ask for it.
-	if(timeInfoFlags != 0)
-	{
-		sharedMem->timeInfo = *reinterpret_cast<VstTimeInfo *>(CVstPluginManager::MasterCallBack(&sharedMem->effect, audioMasterGetTime, 0, timeInfoFlags, nullptr, 0.0f));
-	}
+	// Anticipate that many plugins will query the play position in a process call and send it along the process call
+	// to save some valuable inter-process calls.
+	sharedMem->timeInfo = *reinterpret_cast<VstTimeInfo *>(CVstPluginManager::MasterCallBack(&sharedMem->effect, audioMasterGetTime, 0, kVstNanosValid | kVstPpqPosValid | kVstTempoValid | kVstBarsValid | kVstCyclePosValid | kVstTimeSigValid | kVstSmpteValid | kVstClockValid, nullptr, 0.0f));
 
 	buf_t *ptr = reinterpret_cast<buf_t *>(msg + 1);
 	for(VstInt32 i = 0; i < numInputs; i++)
