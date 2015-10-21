@@ -11,7 +11,7 @@ LDFLAGS  +=
 LDLIBS   += -lm
 ARFLAGS  := rcs
 
-CXXFLAGS_WARNINGS += -Wmissing-prototypes
+CXXFLAGS_WARNINGS += -Wmissing-declarations
 CFLAGS_WARNINGS   += -Wmissing-prototypes
 
 ifeq ($(CHECKED_ADDRESS),1)

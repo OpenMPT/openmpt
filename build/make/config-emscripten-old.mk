@@ -21,7 +21,7 @@ LDFLAGS += -s OUTLINING_LIMIT=16000
 
 LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 
-CXXFLAGS_WARNINGS += -Wmissing-prototypes
+CXXFLAGS_WARNINGS += -Wmissing-declarations
 CFLAGS_WARNINGS   += -Wmissing-prototypes
 
 REQUIRES_RUNPREFIX=1
