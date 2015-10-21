@@ -27,6 +27,8 @@
 #include "../common/typedefs.h"
 #include <Windows.h>
 #include <ShellAPI.h>
+#include <ShlObj.h>
+#include <CommDlg.h>
 #include <tchar.h>
 #include <algorithm>
 
@@ -1024,9 +1026,7 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 	case audioMasterOpenFileSelector:
 	case audioMasterCloseFileSelector:
 		// VstFileSelect* in [ptr]
-		// TODO
-		ptrOut = sizeof(VstFileSelect);
-		return 0;
+		return VstFileSelector(opcode == audioMasterCloseFileSelector, static_cast<VstFileSelect *>(ptr));
 		break;
 
 	case audioMasterEditFile:
@@ -1123,6 +1123,223 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 	}
 
 	return static_cast<VstIntPtr>(resultMsg->result);
+}
+
+
+// Helper function for file selection dialog stuff.
+// Note: This has been mostly copied from Vstplug.cpp. Ugly, but serializing this over the bridge would be even uglier.
+VstIntPtr PluginBridge::VstFileSelector(bool destructor, VstFileSelect *fileSel)
+{
+	if(fileSel == nullptr)
+	{
+		return 0;
+	}
+
+	if(!destructor)
+	{
+		fileSel->nbReturnPath = 0;
+		fileSel->reserved = 0;
+
+		if(fileSel->command != kVstDirectorySelect)
+		{
+			// Plugin wants to load or save a file.
+			std::string extensions, workingDir;
+			for(VstInt32 i = 0; i < fileSel->nbFileTypes; i++)
+			{
+				VstFileType *pType = &(fileSel->fileTypes[i]);
+				extensions += pType->name;
+				extensions.push_back(0);
+#if (defined(WIN32) || (defined(WINDOWS) && WINDOWS == 1))
+				extensions += "*.";
+				extensions += pType->dosType;
+#elif defined(MAC) && MAC == 1
+				extensions += "*";
+				extensions += pType->macType;
+#elif defined(UNIX) && UNIX == 1
+				extensions += "*.";
+				extensions += pType->unixType;
+#else
+#error Platform-specific code missing
+#endif
+				extensions.push_back(0);
+			}
+			extensions.push_back(0);
+
+			if(fileSel->initialPath != nullptr)
+			{
+				workingDir = fileSel->initialPath;
+			} else
+			{
+				// Plugins are probably looking for presets...?
+				//workingDir = TrackerSettings::Instance().PathPluginPresets.GetWorkingDir();
+			}
+
+			std::string filenameBuffer(uint16_max, 0);
+
+			const bool multiSelect = (fileSel->command == kVstMultipleFilesLoad);
+			const bool load = (fileSel->command != kVstFileSave);
+			OPENFILENAMEA ofn;
+			memset(&ofn, 0, sizeof(ofn));
+			ofn.lStructSize = sizeof(ofn);
+			ofn.hwndOwner = window;
+			ofn.hInstance = NULL;
+			ofn.lpstrFilter = extensions.c_str();
+			ofn.lpstrCustomFilter = NULL;
+			ofn.nMaxCustFilter = 0;
+			ofn.nFilterIndex = 0;
+			ofn.lpstrFile = &filenameBuffer[0];
+			ofn.nMaxFile = filenameBuffer.size();
+			ofn.lpstrFileTitle = NULL;
+			ofn.nMaxFileTitle = 0;
+			ofn.lpstrInitialDir = workingDir.empty() ? NULL : workingDir.c_str();
+			ofn.lpstrTitle = NULL;
+			ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | (multiSelect ? OFN_ALLOWMULTISELECT : 0) | (load ? 0 : (OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN));
+			ofn.nFileOffset = 0;
+			ofn.nFileExtension = 0;
+			ofn.lpstrDefExt = NULL;
+			ofn.lCustData = reinterpret_cast<LPARAM>(this);
+			ofn.lpfnHook = NULL;
+			ofn.lpTemplateName = NULL;
+			ofn.pvReserved = NULL;
+			ofn.dwReserved = 0;
+			ofn.FlagsEx = 0;
+
+			BOOL result = load ? GetOpenFileNameA(&ofn) : GetSaveFileNameA(&ofn);
+
+			if(!result)
+			{
+				return 0;
+			}
+
+			if(multiSelect)
+			{
+				// Multiple files might have been selected
+				size_t numFiles = 0;
+				const char *currentFile = ofn.lpstrFile + ofn.nFileOffset;
+				while(currentFile[0] != 0)
+				{
+					numFiles++;
+					currentFile += lstrlenA(currentFile) + 1;
+				}
+
+				fileSel->nbReturnPath = numFiles;
+				fileSel->returnMultiplePaths = new (std::nothrow) char *[fileSel->nbReturnPath];
+
+				currentFile = ofn.lpstrFile + ofn.nFileOffset;
+				CHAR filePath[MAX_PATH + 1];
+				lstrcpyA(filePath, ofn.lpstrFile);
+				lstrcatA(filePath, "\\");
+
+				for(size_t i = 0; i < numFiles; i++)
+				{
+					lstrcpyA(&filePath[ofn.nFileOffset], currentFile);
+					currentFile += lstrlenA(currentFile) + 1;
+					
+					char *fname = new (std::nothrow) char[lstrlenA(filePath) + 1];
+					strcpy(fname, filePath);
+					fileSel->returnMultiplePaths[i] = fname;
+				}
+				
+			} else
+			{
+				// Single path
+
+				// VOPM doesn't initialize required information properly (it doesn't memset the struct to 0)...
+				if(CCONST('V', 'O', 'P', 'M') == nativeEffect->uniqueID)
+				{
+					fileSel->sizeReturnPath = _MAX_PATH;
+				}
+
+				if(fileSel->returnPath == nullptr || fileSel->sizeReturnPath == 0)
+				{
+
+					// Provide some memory for the return path.
+					fileSel->sizeReturnPath = lstrlenA(ofn.lpstrFile) + 1;
+					fileSel->returnPath = new (std::nothrow) char[fileSel->sizeReturnPath];
+					if(fileSel->returnPath == nullptr)
+					{
+						return 0;
+					}
+					fileSel->returnPath[fileSel->sizeReturnPath - 1] = '\0';
+					fileSel->reserved = 1;
+				} else
+				{
+					fileSel->reserved = 0;
+				}
+				strncpy(fileSel->returnPath, ofn.lpstrFile, fileSel->sizeReturnPath - 1);
+				fileSel->nbReturnPath = 1;
+				fileSel->returnMultiplePaths = nullptr;
+			}
+			return 1;
+		} else
+		{
+			// Plugin wants a directory
+			CHAR path[MAX_PATH];
+
+			BROWSEINFOA bi;
+			memset(&bi, 0, sizeof(bi));
+			bi.hwndOwner = window;
+			bi.lpszTitle = fileSel->title;
+			bi.pszDisplayName = path;
+			bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
+			bi.lpfn = NULL;
+			bi.lParam = NULL;
+			LPITEMIDLIST pid = SHBrowseForFolderA(&bi);
+			if(pid != NULL && SHGetPathFromIDListA(pid, path))
+			{
+				if(CCONST('V', 'S', 'T', 'r') == nativeEffect->uniqueID && fileSel->returnPath != nullptr && fileSel->sizeReturnPath == 0)
+				{
+					// old versions of reViSiT (which still relied on the host's file selection code) seem to be dodgy.
+					// They report a path size of 0, but when using an own buffer, they will crash.
+					// So we'll just assume that reViSiT can handle long enough (_MAX_PATH) paths here.
+					fileSel->sizeReturnPath = lstrlenA(path) + 1;
+					fileSel->returnPath[fileSel->sizeReturnPath - 1] = '\0';
+				}
+				if(fileSel->returnPath == nullptr || fileSel->sizeReturnPath == 0)
+				{
+					// Provide some memory for the return path.
+					fileSel->sizeReturnPath = lstrlenA(path) + 1;
+					fileSel->returnPath = new char[fileSel->sizeReturnPath];
+					if(fileSel->returnPath == nullptr)
+					{
+						return 0;
+					}
+					fileSel->returnPath[fileSel->sizeReturnPath - 1] = '\0';
+					fileSel->reserved = 1;
+				} else
+				{
+					fileSel->reserved = 0;
+				}
+				strncpy(fileSel->returnPath, path, fileSel->sizeReturnPath - 1);
+				fileSel->nbReturnPath = 1;
+				return 1;
+			}
+			return 0;
+		}
+	} else
+	{
+		// Close file selector - delete allocated strings.
+		if(fileSel->command == kVstMultipleFilesLoad && fileSel->returnMultiplePaths != nullptr)
+		{
+			for(VstInt32 i = 0; i < fileSel->nbReturnPath; i++)
+			{
+				if(fileSel->returnMultiplePaths[i] != nullptr)
+				{
+					delete[] fileSel->returnMultiplePaths[i];
+				}
+			}
+			delete[] fileSel->returnMultiplePaths;
+			fileSel->returnMultiplePaths = nullptr;
+		} else
+		{
+			if(fileSel->reserved == 1 && fileSel->returnPath != nullptr)
+			{
+				delete[] fileSel->returnPath;
+				fileSel->returnPath = nullptr;
+			}
+		}
+		return 1;
+	}
 }
 
 

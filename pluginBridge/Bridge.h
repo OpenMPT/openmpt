@@ -45,8 +45,8 @@ protected:
 	std::vector<void *> samplePointers;
 	uint32_t mixBufSize;
 
-	bool needIdle;	// Plugin needs idle time
-	bool closeInstance;
+	bool needIdle : 1 ;	// Plugin needs idle time
+	bool closeInstance : 1;
 
 public:
 	PluginBridge(const wchar_t *memName, HANDLE otherProcess);
@@ -72,6 +72,7 @@ protected:
 	void ProcessReplacing();
 	void ProcessDoubleReplacing();
 	VstIntPtr DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
+	VstIntPtr VstFileSelector(bool destructor, VstFileSelect *fileSel);
 	void SendErrorMessage(const wchar_t *str);
 	VstIntPtr Dispatch(VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 
