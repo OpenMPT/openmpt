@@ -266,27 +266,21 @@ static std::string show_portaudio_devices( std::ostream & log ) {
 	for ( PaDeviceIndex i = 0; i < Pa_GetDeviceCount(); ++i ) {
 		if ( Pa_GetDeviceInfo( i ) && Pa_GetDeviceInfo( i )->maxOutputChannels > 0 ) {
 			devices << "    " << i << ": ";
-			bool first = true;
 			if ( Pa_GetHostApiInfo( Pa_GetDeviceInfo( i )->hostApi ) && Pa_GetHostApiInfo( Pa_GetDeviceInfo( i )->hostApi )->name ) {
-				if ( first ) {
-					first = false;
-				} else {
-					devices << " - ";
-				}
 				devices << Pa_GetHostApiInfo( Pa_GetDeviceInfo( i )->hostApi )->name;
+			} else {
+				devices << "Host API " << Pa_GetDeviceInfo( i )->hostApi;
 			}
 			if ( Pa_GetHostApiInfo( Pa_GetDeviceInfo( i )->hostApi ) ) {
 				if ( i == Pa_GetHostApiInfo( Pa_GetDeviceInfo( i )->hostApi )->defaultOutputDevice ) {
 					devices << " (default)";
 				}
 			}
+			devices << " - ";
 			if ( Pa_GetDeviceInfo( i )->name ) {
-				if ( first ) {
-					first = false;
-				} else {
-					devices << " - ";
-				}
 				devices << Pa_GetDeviceInfo( i )->name;
+			} else {
+				devices << "Device " << i;
 			}
 			devices << " (";
 			devices << "high latency: " << Pa_GetDeviceInfo( i )->defaultHighOutputLatency;
