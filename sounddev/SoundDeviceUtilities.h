@@ -55,12 +55,12 @@ public:
 class CPriorityBooster
 {
 private:
-	ComponentHandle<ComponentAvRt> m_AvRt;
+	ComponentHandle<ComponentAvRt> & m_AvRt;
 	bool m_BoostPriority;
 	DWORD task_idx;
 	HANDLE hTask;
 public:
-	CPriorityBooster(bool boostPriority);
+	CPriorityBooster(ComponentHandle<ComponentAvRt> & avrt, bool boostPriority);
 	~CPriorityBooster();
 };
 
@@ -71,6 +71,7 @@ class CAudioThread
 private:
 	CSoundDeviceWithThread & m_SoundDevice;
 
+	ComponentHandle<ComponentAvRt> m_AvRt;
 	double m_WakeupInterval;
 	HANDLE m_hAudioWakeUp;
 	HANDLE m_hPlayThread;

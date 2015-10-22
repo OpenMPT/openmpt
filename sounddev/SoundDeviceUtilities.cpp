@@ -151,9 +151,10 @@ ComponentAvRt::~ComponentAvRt()
 }
 
 
-CPriorityBooster::CPriorityBooster(bool boostPriority)
-//----------------------------------------------------
-	: m_BoostPriority(boostPriority)
+CPriorityBooster::CPriorityBooster(ComponentHandle<ComponentAvRt> & avrt, bool boostPriority)
+//-------------------------------------------------------------------------------------------
+	: m_AvRt(avrt)
+	, m_BoostPriority(boostPriority)
 	, task_idx(0)
 	, hTask(NULL)
 {
@@ -337,7 +338,7 @@ DWORD CAudioThread::AudioThread()
 		if(!terminate)
 		{
 
-			CPriorityBooster priorityBooster(m_SoundDevice.m_Settings.BoostThreadPriority);
+			CPriorityBooster priorityBooster(m_AvRt, m_SoundDevice.m_Settings.BoostThreadPriority);
 			CPeriodicWaker periodicWaker(*this, m_WakeupInterval);
 
 			m_SoundDevice.StartFromSoundThread();
