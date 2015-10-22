@@ -306,9 +306,10 @@ void BridgeWrapper::MessageThread()
 			for(size_t i = 0; i < CountOf(sharedMem->toBridge); i++)
 			{
 				BridgeMessage &msg = sharedMem->toBridge[i];
+				LONG signalID = msg.header.signalID;
 				if(InterlockedCompareExchange(&msg.header.status, MsgHeader::delivered, MsgHeader::done) == MsgHeader::done)
 				{
-					ackSignals[msg.header.signalID].Confirm();
+					ackSignals[signalID].Confirm();
 				}
 			}
 		}
@@ -489,6 +490,10 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 		}
 		break;
 
+	case audioMasterUpdateDisplay:
+		cachedProgNames.clear();
+		break;
+
 	case audioMasterOpenFileSelector:
 	case audioMasterCloseFileSelector:
 		// TODO: Translate the structs
@@ -550,11 +555,22 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 	case effGetProductString:
 	case effShellGetNextPlugin:
 		// Name in [ptr]
+		if(opcode == effGetProgramNameIndexed && !that->cachedProgNames.empty())
+		{
+			// First check if we have cached this program name
+			if(index >= that->cachedProgNameStart && index < that->cachedProgNameStart + mpt::saturate_cast<int32>(that->cachedProgNames.size() / kCachedProgramNameLength))
+			{
+				strcpy(ptr, &that->cachedProgNames[(index - that->cachedProgNameStart) * kCachedProgramNameLength]);
+				return 1;
+			}
+		}
 		ptrOut = 256;
 		copyPtrBack = true;
 		break;
 
 	case effSetProgramName:
+		that->cachedProgNames.clear();
+		MPT_FALLTHROUGH;
 	case effCanDo:
 		// char* in [ptr]
 		ptrOut = strlen(ptrC) + 1;
@@ -575,6 +591,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		// HWND in [ptr] - Note: Window handles are interoperable between 32-bit and 64-bit applications in Windows (http://msdn.microsoft.com/en-us/library/windows/desktop/aa384203%28v=vs.85%29.aspx)
 		ptrOut = reinterpret_cast<int64_t>(ptr);
 		ptrIsSize = false;
+		that->cachedProgNames.clear();
 		break;
 
 	case effEditIdle:
@@ -595,6 +612,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		// void* in [ptr] for chunk data
 		ptrOut = value;
 		dispatchData.insert(dispatchData.end(), ptrC, ptrC + value);
+		that->cachedProgNames.clear();
 		break;
 
 	case effProcessEvents:
@@ -674,6 +692,15 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 					that->oldProcessMem.Close();
 					return result;
 				}
+
+			case kCacheProgramNames:
+				{
+					int32 *prog = static_cast<int32 *>(ptr);
+					that->cachedProgNameStart = prog[0];
+					ptrOut = sizeof(int32) * 2 + (prog[1] - prog[0]) * kCachedProgramNameLength;
+					dispatchData.insert(dispatchData.end(), ptrC, ptrC + 2 * sizeof(int32));
+				}
+				break;
 			}
 		}
 		break;
@@ -713,6 +740,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		{
 			that->SendAutomationQueue();
 		}
+		that->cachedProgNames.clear();
 		break;
 
 	case effGetSpeakerArrangement:
@@ -725,6 +753,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 	case effBeginLoadProgram:
 		// VstPatchChunkInfo* in [ptr]
 		ptrOut = sizeof(VstPatchChunkInfo);
+		that->cachedProgNames.clear();
 		break;
 
 	default:
@@ -811,6 +840,23 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 			} else
 			{
 				return 0;
+			}
+		}
+		break;
+
+	case effVendorSpecific:
+		if(index == kVendorOpenMPT)
+		{
+			switch(value)
+			{
+			case kCacheProgramNames:
+				{
+					const int32 *prog = reinterpret_cast<const int32 *>(extraData);
+					const char *names = extraData + 2 * sizeof(int32);
+					int32 numProgs = prog[1] - prog[0];
+					that->cachedProgNames.assign(names, names + kCachedProgramNameLength * numProgs);
+				}
+				break;
 			}
 		}
 		break;

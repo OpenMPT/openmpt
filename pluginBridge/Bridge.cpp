@@ -16,7 +16,6 @@
 // Kirnu and Combo F GUI deadlocks during playback
 
 // Low priority:
-// Speed up things like consecutive calls to CVstPlugin::GetFormattedProgramName by a custom opcode (is this necessary?)
 // Re-enable DEP in OpenMPT?
 // Clean up code :)
 
@@ -602,6 +601,33 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 			case kUpdateEventMemName:
 				eventMem.Open(static_cast<const wchar_t *>(ptr));
 				break;
+			case kCacheProgramNames:
+				{
+					int32 progMin = static_cast<const int32 *>(ptr)[0];
+					int32 progMax  = static_cast<const int32 *>(ptr)[1];
+					char *name = static_cast<char *>(ptr ) + 2 * sizeof(int32);
+					for(int32 i = progMin; i < progMax; i++)
+					{
+						strcpy(name, "");
+						if(nativeEffect->numPrograms <= 0 || Dispatch(effGetProgramNameIndexed, i, -1, name, 0) != 1)
+						{
+							// Fallback: Try to get current program name.
+							strcpy(name, "");
+							int32 curProg = static_cast<int32>(Dispatch(effGetProgram, 0, 0, nullptr, 0.0f));
+							if(i != curProg)
+							{
+								Dispatch(effSetProgram, 0, i, nullptr, 0.0f);
+							}
+							Dispatch(effGetProgramName, 0, 0, name, 0);
+							if(i != curProg)
+							{
+								Dispatch(effSetProgram, 0, curProg, nullptr, 0.0f);
+							}
+						}
+						name[kCachedProgramNameLength - 1] = 0;
+						name += kCachedProgramNameLength;
+					}
+				}
 			default:
 				msg->result = 0;
 			}
@@ -1188,7 +1214,7 @@ VstIntPtr PluginBridge::VstFileSelector(bool destructor, VstFileSelect *fileSel)
 			ofn.nMaxCustFilter = 0;
 			ofn.nFilterIndex = 0;
 			ofn.lpstrFile = &filenameBuffer[0];
-			ofn.nMaxFile = filenameBuffer.size();
+			ofn.nMaxFile = static_cast<DWORD>(filenameBuffer.size());
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
 			ofn.lpstrInitialDir = workingDir.empty() ? NULL : workingDir.c_str();
@@ -1222,7 +1248,7 @@ VstIntPtr PluginBridge::VstFileSelector(bool destructor, VstFileSelect *fileSel)
 					currentFile += lstrlenA(currentFile) + 1;
 				}
 
-				fileSel->nbReturnPath = numFiles;
+				fileSel->nbReturnPath = static_cast<VstInt32>(numFiles);
 				fileSel->returnMultiplePaths = new (std::nothrow) char *[fileSel->nbReturnPath];
 
 				currentFile = ofn.lpstrFile + ofn.nFileOffset;

@@ -889,12 +889,12 @@ void CViewGlobals::OnPluginNameChanged()
 	if ((pModDoc) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
 	{
 		CSoundFile &sndFile = pModDoc->GetrSoundFile();
+		SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
 
 		GetDlgItemText(IDC_EDIT13, s, CountOf(s));
 		mpt::String::SetNullTerminator(s);
-		if (strcmp(s, sndFile.m_MixPlugins[m_nCurrentPlugin].GetName()))
+		if (strcmp(s, plugin.GetName()))
 		{
-			SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
 			mpt::String::Copy(plugin.Info.szName, s);
 			if(sndFile.GetModSpecifications().supportsPlugins)
 				pModDoc->SetModified();
@@ -1585,10 +1585,13 @@ void CViewGlobals::FillPluginProgramBox(VstInt32 firstProg, VstInt32 lastProg)
 
 	m_CbnPreset.SetRedraw(FALSE);
 	m_CbnPreset.ResetContent();
+
+	pVstPlugin->CacheProgramNames(firstProg, lastProg + 1);
 	for (VstInt32 i = firstProg; i <= lastProg; i++)
 	{
 		m_CbnPreset.SetItemData(m_CbnPreset.AddString(pVstPlugin->GetFormattedProgramName(i)), i);
 	}
+
 	m_CbnPreset.SetRedraw(TRUE);
 	m_CbnPreset.Invalidate(FALSE);
 }

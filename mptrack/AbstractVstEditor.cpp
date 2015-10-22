@@ -653,6 +653,7 @@ void CAbstractVstEditor::GeneratePresetMenu(int32 offset, CMenu &parent)
 		return;
 	}
 
+	m_VstPlugin.CacheProgramNames(offset, endProg);
 	for(VstInt32 p = offset, row = 0, id = 0; p < endProg; p++, row++, id++)
 	{
 		CString programName = m_VstPlugin.GetFormattedProgramName(p);
