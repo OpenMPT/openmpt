@@ -16,7 +16,7 @@ OPENMPT_NAMESPACE_BEGIN
 static const char *VstOpCodes[] =
 {
 	"effOpen",
-	"effClose,"
+	"effClose",
 	"effSetProgram",
 	"effGetProgram",
 	"effSetProgramName",
@@ -25,12 +25,12 @@ static const char *VstOpCodes[] =
 	"effGetParamDisplay",
 	"effGetParamName",
 	"effGetVu",
-	"effSetSampleRate"
-	"effSetBlockSize"
-	"effMainsChanged"
-	"effEditGetRect,"
-	"effEditOpen,"
-	"effEditClose,"
+	"effSetSampleRate",
+	"effSetBlockSize",
+	"effMainsChanged",
+	"effEditGetRect",
+	"effEditOpen",
+	"effEditClose",
 	"effEditDraw",
 	"effEditMouse",
 	"effEditKey",

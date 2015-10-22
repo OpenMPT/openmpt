@@ -62,6 +62,10 @@ class BridgeWrapper : protected BridgeCommon
 protected:
 	Event sigAutomation;
 	MappedMemory oldProcessMem;
+	
+	std::string cachedProgNames;
+	int32 cachedProgNameStart;
+	
 	bool isSettingProgram;
 
 	ERect editRect;

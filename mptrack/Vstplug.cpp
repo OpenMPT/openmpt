@@ -499,6 +499,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 
 
 // Helper function for file selection dialog stuff.
+// Note: This function has been copied over to the Plugin Bridge. Ugly, but serializing this over the bridge would be even uglier.
 VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fileSel, const CVstPlugin *plugin)
 //-------------------------------------------------------------------------------------------------------------
 {
@@ -574,7 +575,6 @@ VstIntPtr CVstPluginManager::VstFileSelector(bool destructor, VstFileSelect *fil
 					strcpy(fname, fname_.c_str());
 					fileSel->returnMultiplePaths[i] = fname;
 				}
-				return 1;
 			} else
 			{
 				// Single path
@@ -697,7 +697,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 
 	m_bSongPlaying = false;
 	m_bPlugResumed = false;
-	m_nSampleRate = uint32_max;
+	m_nSampleRate = sndFile.GetSampleRate();
 	isInitialized = false;
 
 	MemsetZero(m_MidiCh);
@@ -2085,14 +2085,16 @@ void CVstPlugin::SaveAllParameters()
 			void *p = nullptr;
 
 			// Try to get whole bank
-			uint32 nByteSize = mpt::saturate_cast<uint32>(Dispatch(effGetChunk, 0,0, &p, 0));
+			uint32 nByteSize = mpt::saturate_cast<uint32>(Dispatch(effGetChunk, 0, 0, &p, 0));
 
 			if (!p)
 			{
-				nByteSize = mpt::saturate_cast<uint32>(Dispatch(effGetChunk, 1,0, &p, 0)); 	// Getting bank failed, try to get just preset
+				// Getting bank failed, try to get just preset
+				nByteSize = mpt::saturate_cast<uint32>(Dispatch(effGetChunk, 1, 0, &p, 0));
 			} else
 			{
-				m_pMixStruct->defaultProgram = GetCurrentProgram();	//we managed to get the bank, now we need to remember which program we're on.
+				// We managed to get the bank, now we need to remember which program we're on.
+				m_pMixStruct->defaultProgram = GetCurrentProgram();
 			}
 			if (p != nullptr)
 			{
@@ -2120,7 +2122,7 @@ void CVstPlugin::SaveAllParameters()
 		}
 		// This plug doesn't support chunks: save parameters
 		PlugParamIndex nParams = (m_Effect.numParams > 0) ? m_Effect.numParams : 0;
-		UINT nLen = nParams * sizeof(float);
+		uint32 nLen = nParams * sizeof(float);
 		if (!nLen) return;
 		nLen += 4;
 		if ((m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= nLen))
@@ -2130,7 +2132,7 @@ void CVstPlugin::SaveAllParameters()
 		{
 			if (m_pMixStruct->pPluginData) delete[] m_pMixStruct->pPluginData;
 			m_pMixStruct->nPluginDataSize = 0;
-			m_pMixStruct->pPluginData = new char[nLen];
+			m_pMixStruct->pPluginData = new (std::nothrow) char[nLen];
 			if (m_pMixStruct->pPluginData)
 			{
 				m_pMixStruct->nPluginDataSize = nLen;
@@ -2139,7 +2141,7 @@ void CVstPlugin::SaveAllParameters()
 		if (m_pMixStruct->pPluginData)
 		{
 			float *p = (float *)m_pMixStruct->pPluginData;
-			*(ULONG *)p = 0;
+			memset(p, 0, sizeof(uint32));	// Plugin data type
 			p++;
 			for(PlugParamIndex i = 0; i < nParams; i++)
 			{
@@ -2156,11 +2158,9 @@ void CVstPlugin::RestoreAllParameters(long nProgram)
 {
 	if(m_pMixStruct != nullptr && m_pMixStruct->pPluginData != nullptr && m_pMixStruct->nPluginDataSize >= 4)
 	{
-		UINT nParams = (m_Effect.numParams > 0) ? m_Effect.numParams : 0;
-		UINT nLen = nParams * sizeof(float);
-		uint32_t nType = *(uint32_t *)m_pMixStruct->pPluginData;
+		uint32 nType = *(uint32 *)m_pMixStruct->pPluginData;
 
-		if ((Dispatch(effIdentify, 0, 0, nullptr, 0) == 'NvEf') && (nType == 'NvEf'))
+		if ((nType == 'NvEf') && (Dispatch(effIdentify, 0, 0, nullptr, 0) == 'NvEf'))
 		{
 			if ((nProgram>=0) && (nProgram < m_Effect.numPrograms))
 			{
@@ -2177,12 +2177,14 @@ void CVstPlugin::RestoreAllParameters(long nProgram)
 
 		} else
 		{
+			const uint32 nParams = (m_Effect.numParams > 0) ? m_Effect.numParams : 0;
+			const uint32 nLen = nParams * sizeof(float);
 			Dispatch(effBeginSetProgram, 0, 0, nullptr, 0.0f);
 			float *p = (float *)m_pMixStruct->pPluginData;
 			if (m_pMixStruct->nPluginDataSize >= nLen + 4) p++;
 			if (m_pMixStruct->nPluginDataSize >= nLen)
 			{
-				for (UINT i = 0; i < nParams; i++)
+				for (uint32 i = 0; i < nParams; i++)
 				{
 					SetParameter(i, p[i]);
 				}
@@ -2390,6 +2392,19 @@ void CVstPlugin::ReportPlugException(std::wstring text) const
 	text += L" (Plugin=" + m_Factory.libraryName.ToWide() + L")";
 	CVstPluginManager::ReportPlugException(text);
 }
+
+
+// Cache program names for plugin bridge
+void CVstPlugin::CacheProgramNames(int32 firstProg, int32 lastProg)
+//-----------------------------------------------------------------
+{
+	if(isBridged)
+	{
+		VstInt32 offsets[2] = { firstProg, lastProg };
+		Dispatch(effVendorSpecific, kVendorOpenMPT, kCacheProgramNames, offsets, 0.0f);
+	}
+}
+
 
 OPENMPT_NAMESPACE_END
 

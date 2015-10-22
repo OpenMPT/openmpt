@@ -258,6 +258,8 @@ public:
 	size_t GetInputInstrumentList(std::vector<INSTRUMENTINDEX> &list);
 	size_t GetInputChannelList(std::vector<CHANNELINDEX> &list);
 
+	void CacheProgramNames(int32 firstProg, int32 lastProg);
+
 public:
 	void Release();
 	void SaveAllParameters();
