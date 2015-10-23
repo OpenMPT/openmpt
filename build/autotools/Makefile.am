@@ -555,7 +555,7 @@ doxygen-doc: doxygen-run
 	$(DX_ENV) $(DX_DOXYGEN) $(DX_CONFIG)
 	touch $@
 
-DX_CLEANFILES = @DX_DOCDIR@/@PACKAGE@.tag -r $(DX_CLEAN_HTML) 
+DX_CLEANFILES = @DX_DOCDIR@/@PACKAGE@.tag @DX_DOCDIR@/doxygen_sqlite3.db -r $(DX_CLEAN_HTML) 
 
 endif DX_COND_doc
 
