@@ -14,21 +14,32 @@ set -e
 export PATH="/usr/lib/ccache:$PATH"
 
 # Check that the API headers are standard compliant
+echo "Checking C header ..."
 echo '' > bin/headercheck.c
 echo '#include "libopenmpt/libopenmpt.h"' >> bin/headercheck.c
 echo 'int main() { return 0; }' >> bin/headercheck.c
-cc -std=c89 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.c -o bin/headercheck.c89
-cc -std=c99 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.c -o bin/headercheck.c99
+cc             -pedantic -Wall -Wextra                        -Werror -I. bin/headercheck.c -o bin/headercheck.cc.out
+cc    -std=c89 -pedantic -Wall -Wextra                        -Werror -I. bin/headercheck.c -o bin/headercheck.cc89.out
+cc    -std=c99 -pedantic -Wall -Wextra                        -Werror -I. bin/headercheck.c -o bin/headercheck.cc99.out
+gcc   -std=c89 -pedantic -Wall -Wextra                        -Werror -I. bin/headercheck.c -o bin/headercheck.gcc89.out
+gcc   -std=c99 -pedantic -Wall -Wextra                        -Werror -I. bin/headercheck.c -o bin/headercheck.gcc99.out
+clang -std=c89 -pedantic -Wall -Wextra -Wpedantic             -Werror -I. bin/headercheck.c -o bin/headercheck.clang89.out
+clang -std=c99 -pedantic -Wall -Wextra -Wpedantic             -Werror -I. bin/headercheck.c -o bin/headercheck.clang99.out
+tcc                      -Wall -Wunusupported -Wwrite-strings -Werror -I. bin/headercheck.c -o bin/headercheck.tcc.out
+rm bin/headercheck.*.out
+rm bin/headercheck.c
+echo "Checking C++ header ..."
 echo '' > bin/headercheck.cpp
 echo '#include "libopenmpt/libopenmpt.hpp"' >> bin/headercheck.cpp
 echo 'int main() { return 0; }' >> bin/headercheck.cpp
-c++ -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp98 -DLIBOPENMPT_ANCIENT_COMPILER_STDINT
-c++ -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp11
-rm bin/headercheck.c89
-rm bin/headercheck.c99
-rm bin/headercheck.cpp98
-rm bin/headercheck.cpp11
-rm bin/headercheck.c
+c++                -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp.out       -DLIBOPENMPT_ANCIENT_COMPILER_STDINT
+c++     -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp98.out     -DLIBOPENMPT_ANCIENT_COMPILER_STDINT
+c++     -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp11.out
+g++     -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp98.out     -DLIBOPENMPT_ANCIENT_COMPILER_STDINT
+g++     -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp11.out
+clang++ -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp98.out -DLIBOPENMPT_ANCIENT_COMPILER_STDINT
+clang++ -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp11.out
+rm bin/headercheck.*.out
 rm bin/headercheck.cpp
 
 # Clean dist
