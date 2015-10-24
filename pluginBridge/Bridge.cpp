@@ -12,7 +12,6 @@
 // Translate VstIntPtr size in remaining structs!!! VstFileSelect, VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow (all but VstFileSelect are currently not supported by OpenMPT)
 // Optimize out audioMasterProcessEvents the same way as effProcessEvents?
 // Find a nice solution for audioMasterIdle that doesn't break TAL-Elek7ro-II
-// Maybe don't keep opening and closing aux mem files - but they are rarely needed, so would this actually be worth it?
 // Kirnu and Combo F GUI deadlocks during playback
 
 // Low priority:

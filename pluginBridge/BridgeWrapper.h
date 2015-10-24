@@ -62,6 +62,17 @@ class BridgeWrapper : protected BridgeCommon
 protected:
 	Event sigAutomation;
 	MappedMemory oldProcessMem;
+
+	struct AuxMem
+	{
+		LONG used;
+		uint32 size;
+		MappedMemory memory;
+		wchar_t name[64];
+
+		AuxMem() : used(0), size(0) { }
+	};
+	AuxMem auxMems[SharedMemLayout::queueSize];
 	
 	std::string cachedProgNames;
 	int32 cachedProgNameStart;
@@ -121,6 +132,7 @@ protected:
 	void DispatchToHost(DispatchMsg *msg);
 	bool SendToBridge(BridgeMessage &sendMsg);
 	void SendAutomationQueue();
+	AuxMem *GetAuxMemory(size_t size);
 
 	static VstIntPtr VSTCALLBACK DispatchToPlugin(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	static void VSTCALLBACK SetParameter(AEffect *effect, VstInt32 index, float parameter);
