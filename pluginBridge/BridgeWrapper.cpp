@@ -781,9 +781,9 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		if(auxMem == nullptr)
 			return 0;
 
-		// Move message data to shared memory and then move shared memory name to message data
+		// First, move message data to shared memory...
 		memcpy(auxMem->memory.view, &dispatchData[sizeof(DispatchMsg)], extraSize);
-		// Now put the shared memory identifier in the message instead.
+		// ...Now put the shared memory name in the message instead.
 		memcpy(&dispatchData[sizeof(DispatchMsg)], auxMem->name, sizeof(auxMem->name));
 	}
 
@@ -846,6 +846,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 			switch(value)
 			{
 			case kCacheProgramNames:
+				if(resultMsg->result == 1)
 				{
 					const int32 *prog = reinterpret_cast<const int32 *>(extraData);
 					const char *names = extraData + 2 * sizeof(int32);
@@ -883,12 +884,12 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 
 
 // Allocate auxiliary shared memory for too long bridge messages
-BridgeWrapper::AuxMem *BridgeWrapper::GetAuxMemory(size_t size)
+BridgeWrapper::AuxMem *BridgeWrapper::GetAuxMemory(uint32 size)
 {
 	size_t index = CountOf(auxMems);
 	for(int pass = 0; pass < 2; pass++)
 	{
-		for(size_t i = 0; i< CountOf(auxMems); i++)
+		for(size_t i = 0; i < CountOf(auxMems); i++)
 		{
 			if(auxMems[i].size >= size || pass == 1)
 			{
@@ -916,13 +917,17 @@ BridgeWrapper::AuxMem *BridgeWrapper::GetAuxMemory(size_t size)
 	}
 	// Create new memory with appropriate size
 	static_assert(sizeof(DispatchMsg) + sizeof(auxMem.name) <= sizeof(BridgeMessage), "Check message sizes, this will crash!");
-	swprintf(auxMem.name, CountOf(auxMem.name), L"Local\\openmpt-%d-auxmem-%d", GetCurrentProcessId(), GetCurrentThreadId());
+	static int auxMemCount = 0;
+	swprintf(auxMem.name, CountOf(auxMem.name), L"Local\\openmpt-%d-auxmem-%d", GetCurrentProcessId(), auxMemCount++);
 	if(auxMem.memory.Create(auxMem.name, size))
 	{
 		auxMem.size = size;
 		return &auxMem;
+	} else
+	{
+		InterlockedExchange(&auxMem.used, 0);
+		return nullptr;
 	}
-	return nullptr;
 }
 
 
