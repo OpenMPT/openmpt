@@ -59,11 +59,11 @@ ParamControlSet::ParamControlSet(CWnd *parent, const CRect &rect, int setID, con
 	const int horizSplit = rect.left + rect.Width() - m.rightWidth;
 	
 	// Parameter name
-	nameLabel.Create("", WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(rect.left, rect.top, horizSplit - m.spacing, rect.top + m.lineHeight), parent);
+	nameLabel.Create(_T(""), WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(rect.left, rect.top, horizSplit - m.spacing, rect.top + m.lineHeight), parent);
 	nameLabel.SetFont(parent->GetFont());
 
 	// Parameter value as reported by the plugin
-	valueLabel.Create("", WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(horizSplit, rect.top, rect.right, rect.top + m.lineHeight), parent);
+	valueLabel.Create(_T(""), WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(horizSplit, rect.top, rect.right, rect.top + m.lineHeight), parent);
 	valueLabel.SetFont(parent->GetFont());
 
 	// Parameter value slider
@@ -278,6 +278,7 @@ void CDefaultVstEditor::UpdateControls(bool updateParamNames)
 		updateParamNames = true;
 	}
 
+	m_VstPlugin.CacheParameterNames(paramOffset, std::min(paramOffset + NUM_PLUGINEDITOR_PARAMETERS, numParams));
 	for(PlugParamIndex i = 0; i < NUM_PLUGINEDITOR_PARAMETERS; i++)
 	{
 		const PlugParamIndex param = paramOffset + i;

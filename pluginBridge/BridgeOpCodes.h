@@ -28,6 +28,8 @@ enum VendorSpecificOpCodes
 	kCloseOldProcessingMemory,
 	// Cache program names - ptr points to 2x int32 containing the start and end program index - caches names in range [start, end[
 	kCacheProgramNames,
+	// Cache parameter information - ptr points to 2x int32 containing the start and end parameter index - caches info in range [start, end[
+	kCacheParameterInfo,
 
 	// Constant for identifying our vendor-specific opcodes
 	kVendorOpenMPT = CCONST('O', 'M', 'P', 'T'),

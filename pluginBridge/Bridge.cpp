@@ -604,7 +604,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 				{
 					int32 progMin = static_cast<const int32 *>(ptr)[0];
 					int32 progMax  = static_cast<const int32 *>(ptr)[1];
-					char *name = static_cast<char *>(ptr ) + 2 * sizeof(int32);
+					char *name = static_cast<char *>(ptr);
 					for(int32 i = progMin; i < progMax; i++)
 					{
 						strcpy(name, "");
@@ -623,10 +623,37 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 								Dispatch(effSetProgram, 0, curProg, nullptr, 0.0f);
 							}
 						}
-						name[kCachedProgramNameLength - 1] = 0;
+						name[kCachedProgramNameLength - 1] = '\0';
 						name += kCachedProgramNameLength;
 					}
 				}
+				break;
+			case kCacheParameterInfo:
+				{
+					int32 paramMin = static_cast<const int32 *>(ptr)[0];
+					int32 paramMax  = static_cast<const int32 *>(ptr)[1];
+					ParameterInfo *param = static_cast<ParameterInfo *>(ptr);
+					for(int32 i = paramMin; i < paramMax; i++)
+					{
+						strcpy(param->name, "");
+						strcpy(param->label, "");
+						strcpy(param->display, "");
+						Dispatch(effGetParamName, i, 0, param->name, 0.0f);
+						Dispatch(effGetParamLabel, i, 0, param->label, 0.0f);
+						Dispatch(effGetParamDisplay, i, 0, param->display, 0.0f);
+						param->name[CountOf(param->label) - 1] = '\0';
+						param->label[CountOf(param->label) - 1] = '\0';
+						param->display[CountOf(param->display) - 1] = '\0';
+
+						if(Dispatch(effGetParameterProperties, i, 0, &param->props, 0.0f) != 1)
+						{
+							memset(&param->props, 0, sizeof(param->props));
+							strncpy(param->props.label, param->name, CountOf(param->props.label));
+						}
+						param++;
+					}
+				}
+				break;
 			default:
 				msg->result = 0;
 			}

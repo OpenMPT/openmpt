@@ -492,6 +492,7 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 
 	case audioMasterUpdateDisplay:
 		cachedProgNames.clear();
+		cachedParamInfo.clear();
 		break;
 
 	case audioMasterOpenFileSelector:
@@ -543,10 +544,21 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 
 	switch(opcode)
 	{
-	case effGetProgramName:
 	case effGetParamLabel:
 	case effGetParamDisplay:
 	case effGetParamName:
+		if(index >= that->cachedParamInfoStart && index < that->cachedParamInfoStart + mpt::saturate_cast<int32>(that->cachedParamInfo.size()))
+		{
+			if(opcode == effGetParamLabel)
+				strcpy(ptr, that->cachedParamInfo[index - that->cachedParamInfoStart].label);
+			else if(opcode == effGetParamDisplay)
+				strcpy(ptr, that->cachedParamInfo[index - that->cachedParamInfoStart].display);
+			else if(opcode == effGetParamName)
+				strcpy(ptr, that->cachedParamInfo[index - that->cachedParamInfoStart].name);
+			return 1;
+		}
+		MPT_FALLTHROUGH;
+	case effGetProgramName:
 	case effString2Parameter:
 	case effGetProgramNameIndexed:
 	case effGetEffectName:
@@ -592,6 +604,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		ptrOut = reinterpret_cast<int64_t>(ptr);
 		ptrIsSize = false;
 		that->cachedProgNames.clear();
+		that->cachedParamInfo.clear();
 		break;
 
 	case effEditIdle:
@@ -613,6 +626,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		ptrOut = value;
 		dispatchData.insert(dispatchData.end(), ptrC, ptrC + value);
 		that->cachedProgNames.clear();
+		that->cachedParamInfo.clear();
 		break;
 
 	case effProcessEvents:
@@ -697,16 +711,29 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 				{
 					int32 *prog = static_cast<int32 *>(ptr);
 					that->cachedProgNameStart = prog[0];
-					ptrOut = sizeof(int32) * 2 + (prog[1] - prog[0]) * kCachedProgramNameLength;
+					ptrOut = std::max<int64>(sizeof(int32) * 2, (prog[1] - prog[0]) * kCachedProgramNameLength);
 					dispatchData.insert(dispatchData.end(), ptrC, ptrC + 2 * sizeof(int32));
 				}
 				break;
+
+			case kCacheParameterInfo:
+				{
+					int32 *param = static_cast<int32 *>(ptr);
+					that->cachedParamInfoStart = param[0];
+					ptrOut = std::max<int64>(sizeof(int32) * 2, (param[1] - param[0]) * sizeof(ParameterInfo));
+					dispatchData.insert(dispatchData.end(), ptrC, ptrC + 2 * sizeof(int32));
+				}
 			}
 		}
 		break;
 
 	case effGetParameterProperties:
 		// VstParameterProperties* in [ptr]
+		if(index >= that->cachedParamInfoStart && index < that->cachedParamInfoStart + mpt::saturate_cast<int32>(that->cachedParamInfo.size()))
+		{
+			*static_cast<VstParameterProperties *>(ptr) = that->cachedParamInfo[index - that->cachedParamInfoStart].props;
+			return 1;
+		}
 		ptrOut = sizeof(VstParameterProperties);
 		copyPtrBack = true;
 		break;
@@ -741,6 +768,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 			that->SendAutomationQueue();
 		}
 		that->cachedProgNames.clear();
+		that->cachedParamInfo.clear();
 		break;
 
 	case effGetSpeakerArrangement:
@@ -754,6 +782,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		// VstPatchChunkInfo* in [ptr]
 		ptrOut = sizeof(VstPatchChunkInfo);
 		that->cachedProgNames.clear();
+		that->cachedParamInfo.clear();
 		break;
 
 	default:
@@ -848,10 +877,14 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 			case kCacheProgramNames:
 				if(resultMsg->result == 1)
 				{
-					const int32 *prog = reinterpret_cast<const int32 *>(extraData);
-					const char *names = extraData + 2 * sizeof(int32);
-					int32 numProgs = prog[1] - prog[0];
-					that->cachedProgNames.assign(names, names + kCachedProgramNameLength * numProgs);
+					that->cachedProgNames.assign(extraData, extraData + ptrOut);
+				}
+				break;
+			case kCacheParameterInfo:
+				if(resultMsg->result == 1)
+				{
+					const ParameterInfo *params = reinterpret_cast<const ParameterInfo *>(extraData);
+					that->cachedParamInfo.assign(params, params + ptrOut / sizeof(ParameterInfo));
 				}
 				break;
 			}
@@ -897,7 +930,6 @@ BridgeWrapper::AuxMem *BridgeWrapper::GetAuxMemory(uint32 size)
 				assert((intptr_t(&auxMems[i].used) & 3) == 0);	// InterlockedExchangeAdd operand should be aligned to 32 bits
 				if(InterlockedCompareExchange(&auxMems[i].used, 1, 0) == 0)
 				{
-
 					index = i;
 					break;
 				}

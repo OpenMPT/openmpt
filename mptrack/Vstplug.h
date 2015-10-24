@@ -259,6 +259,7 @@ public:
 	size_t GetInputChannelList(std::vector<CHANNELINDEX> &list);
 
 	void CacheProgramNames(int32 firstProg, int32 lastProg);
+	void CacheParameterNames(int32 firstParam, int32 lastParam);
 
 public:
 	void Release();
