@@ -63,6 +63,7 @@ protected:
 	Event sigAutomation;
 	MappedMemory oldProcessMem;
 
+	// Helper struct for keeping track of auxiliary shared memory
 	struct AuxMem
 	{
 		LONG used;
@@ -132,7 +133,7 @@ protected:
 	void DispatchToHost(DispatchMsg *msg);
 	bool SendToBridge(BridgeMessage &sendMsg);
 	void SendAutomationQueue();
-	AuxMem *GetAuxMemory(size_t size);
+	AuxMem *GetAuxMemory(uint32 size);
 
 	static VstIntPtr VSTCALLBACK DispatchToPlugin(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	static void VSTCALLBACK SetParameter(AEffect *effect, VstInt32 index, float parameter);
