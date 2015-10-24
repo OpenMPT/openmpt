@@ -522,7 +522,7 @@ mpt::ustring GetFullCreditsString()
 #endif
 #ifndef NO_ARCHIVE_SUPPORT
 		"Simon Howard for lhasa\n"
-		"http://fragglet.github.io/lhasa/\n"
+		"https://fragglet.github.io/lhasa/\n"
 		"\n"
 		"Alexander L. Roshal for UnRAR\n"
 		"http://rarlab.com/\n"
@@ -534,8 +534,8 @@ mpt::ustring GetFullCreditsString()
 		"\n"
 #endif
 #ifndef NO_FLAC
-		"Josh Coalson for libFLAC\n"
-		"http://flac.sourceforge.net/\n"
+		"Josh Coalson / Xiph.Org Foundation for libFLAC\n"
+		"https://xiph.org/flac/\n"
 		"\n"
 #endif
 #ifndef NO_MP3_SAMPLES
@@ -564,8 +564,8 @@ mpt::ustring GetFullCreditsString()
 		"in the form of ideas, testing and support;\n"
 		"thanks particularly to:\n"
 		"33, 8bitbubsy, Anboi, BooT-SectoR-ViruZ, Bvanoudtshoorn\n"
-		"christofori, Diamond, Ganja, Georg, Goor00, Harbinger,\n"
-		"jmkz, KrazyKatz, LPChip, Nofold, Rakib, Sam Zen\n"
+		"christofori, cubaxd, Diamond, Ganja, Georg, Goor00,\n"
+		"Harbinger, jmkz, KrazyKatz, LPChip, Nofold, Rakib, Sam Zen\n"
 		"Skaven, Skilletaudio, Snu, Squirrel Havoc, Waxhead\n"
 		"\n"
 #ifndef NO_VST
