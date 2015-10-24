@@ -2406,6 +2406,18 @@ void CVstPlugin::CacheProgramNames(int32 firstProg, int32 lastProg)
 }
 
 
+// Cache parameter names for plugin bridge
+void CVstPlugin::CacheParameterNames(int32 firstParam, int32 lastParam)
+//---------------------------------------------------------------------
+{
+	if(isBridged)
+	{
+		VstInt32 offsets[2] = { firstParam, lastParam };
+		Dispatch(effVendorSpecific, kVendorOpenMPT, kCacheParameterInfo, offsets, 0.0f);
+	}
+}
+
+
 OPENMPT_NAMESPACE_END
 
 #endif // NO_VST

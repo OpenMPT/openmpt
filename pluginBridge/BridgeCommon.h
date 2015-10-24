@@ -139,7 +139,7 @@ public:
 	~MappedMemory() { Close(); }
 
 	// Create a shared memory object.
-	bool Create(const wchar_t *name, uint32_t size)
+	bool Create(const wchar_t *name, uint32 size)
 	{
 		Close();
 
@@ -205,7 +205,7 @@ struct AutomationQueue
 {
 	struct Parameter
 	{
-		uint32_t index;
+		uint32 index;
 		float value;
 	};
 
@@ -224,13 +224,13 @@ struct ProcessMsg
 		processDoubleReplacing,
 	};
 
-	int32_t processType;
-	int32_t numInputs;
-	int32_t numOutputs;
-	int32_t sampleFrames;
+	int32 processType;
+	int32 numInputs;
+	int32 numOutputs;
+	int32 sampleFrames;
 	// Input and output buffers follow
 
-	ProcessMsg(ProcessMsg::ProcessType processType, int32_t numInputs, int32_t numOutputs, int32_t sampleFrames) :
+	ProcessMsg(ProcessMsg::ProcessType processType, int32 numInputs, int32 numOutputs, int32 sampleFrames) :
 		processType(processType), numInputs(numInputs), numOutputs(numOutputs), sampleFrames(sampleFrames) { }
 };
 
@@ -267,8 +267,8 @@ struct MsgHeader
 	};
 
 	LONG status;			// See BridgeMessageStatus
-	uint32_t size;			// Size of complete message, including this header
-	uint32_t type;			// See BridgeMessageType
+	uint32 size;			// Size of complete message, including this header
+	uint32 type;			// See BridgeMessageType
 	LONG signalID;			// Signal that should be triggered to answer this message
 };
 
@@ -283,11 +283,11 @@ struct NewInstanceMsg : public MsgHeader
 // Host-to-bridge initialization message
 struct InitMsg : public MsgHeader
 {
-	int32_t result;
-	int32_t version;		// Protocol version used by host
-	int32_t hostPtrSize;	// Size of VstIntPtr in host
-	uint32_t mixBufSize;	// Interal mix buffer size (for shared memory audio buffers)
-	uint32_t fullMemDump;	// When crashing, create full memory dumps instead of stack dumps
+	int32 result;
+	int32 version;			// Protocol version used by host
+	int32 hostPtrSize;		// Size of VstIntPtr in host
+	uint32 mixBufSize;		// Interal mix buffer size (for shared memory audio buffers)
+	uint32 fullMemDump;		// When crashing, create full memory dumps instead of stack dumps
 	wchar_t str[_MAX_PATH];	// Plugin file to load. Out: Error message if result != 0.
 };
 
@@ -295,19 +295,19 @@ struct InitMsg : public MsgHeader
 // Host-to-bridge VST dispatch message
 struct DispatchMsg : public MsgHeader
 {
-	int32_t opcode;
-	int32_t index;
-	int64_t value;
-	int64_t ptr;	// Usually, this will be the size of whatever ptr points to. In that case, the data itself is stored after this struct.
+	int32 opcode;
+	int32 index;
+	int64 value;
+	int64 ptr;	// Usually, this will be the size of whatever ptr points to. In that case, the data itself is stored after this struct.
 	float   opt;
-	int32_t result;
+	int32 result;
 };
 
 
 // Host-to-bridge VST setParameter / getParameter message
 struct ParameterMsg : public MsgHeader
 {
-	int32_t index;	// Parameter ID
+	int32 index;	// Parameter ID
 	float value;	// Parameter value (in/out)
 };
 
@@ -328,9 +328,9 @@ union BridgeMessage
 	DispatchMsg dispatch;
 	ParameterMsg parameter;
 	ErrorMsg error;
-	uint8_t dummy[1024];
+	uint8_t dummy[2048];	// Enough space for most default structs, e.g. 2x speaker negotiation struct
 
-	void SetType(MsgHeader::BridgeMessageType msgType, uint32_t size)
+	void SetType(MsgHeader::BridgeMessageType msgType, uint32 size)
 	{
 		header.status = MsgHeader::empty;
 		header.size = size;
@@ -345,7 +345,7 @@ union BridgeMessage
 		wcsncpy(newInstance.memName, memName, CountOf(newInstance.memName) - 1);
 	}
 
-	void Init(const wchar_t *pluginPath, uint32_t mixBufSize, bool fullMemDump)
+	void Init(const wchar_t *pluginPath, uint32 mixBufSize, bool fullMemDump)
 	{
 		SetType(MsgHeader::init, sizeof(InitMsg));
 
@@ -356,7 +356,7 @@ union BridgeMessage
 		wcsncpy(init.str, pluginPath, CountOf(init.str) - 1);
 	}
 
-	void Dispatch(int32_t opcode, int32_t index, int64_t value, int64_t ptr, float opt, uint32_t extraDataSize)
+	void Dispatch(int32 opcode, int32 index, int64 value, int64 ptr, float opt, uint32 extraDataSize)
 	{
 		SetType(MsgHeader::dispatch, sizeof(DispatchMsg) + extraDataSize);
 
@@ -368,7 +368,7 @@ union BridgeMessage
 		dispatch.opt = opt;
 	}
 
-	void SetParameter(int32_t index, float value)
+	void SetParameter(int32 index, float value)
 	{
 		SetType(MsgHeader::setParameter, sizeof(ParameterMsg));
 
@@ -376,7 +376,7 @@ union BridgeMessage
 		parameter.value = value;
 	}
 
-	void GetParameter(int32_t index)
+	void GetParameter(int32 index)
 	{
 		SetType(MsgHeader::getParameter, sizeof(ParameterMsg));
 
@@ -434,6 +434,16 @@ struct SharedMemLayout
 static_assert(sizeof(AEffect) <= sizeof(AEffect64), "Something's going very wrong here.");
 
 
+// For caching parameter information
+struct ParameterInfo
+{
+	VstParameterProperties props;
+	char name[64];
+	char label[64];
+	char display[64];
+};
+
+
 #pragma pack(pop)
 
 // Common variables that we will find in both the host and plugin side of the bridge (this is not shared memory)
@@ -459,10 +469,10 @@ public:
 	SharedMemLayout * volatile sharedMem;
 
 	// Thread ID for message thread
-	uint32_t msgThreadID;
+	uint32 msgThreadID;
 
 	// Pointer size of the "other" side of the bridge, in bytes
-	int32_t otherPtrSize;
+	int32 otherPtrSize;
 
 	BridgeCommon() : sharedMem(nullptr), otherPtrSize(0), msgThreadID(0)
 	{

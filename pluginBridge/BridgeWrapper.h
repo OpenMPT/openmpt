@@ -75,8 +75,9 @@ protected:
 	};
 	AuxMem auxMems[SharedMemLayout::queueSize];
 	
-	std::string cachedProgNames;
-	int32 cachedProgNameStart;
+	std::vector<char> cachedProgNames;
+	std::vector<ParameterInfo> cachedParamInfo;
+	int32 cachedProgNameStart, cachedParamInfoStart;
 	
 	bool isSettingProgram;
 

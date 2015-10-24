@@ -1550,6 +1550,7 @@ void CViewGlobals::OnFillParamCombo()
 	m_CbnParam.SetRedraw(FALSE);
 	m_CbnParam.ResetContent();
 
+	pVstPlugin->CacheParameterNames(0, nParams);
 	for(PlugParamIndex i = 0; i < nParams; i++)
 	{
 		m_CbnParam.SetItemData(m_CbnParam.AddString(pVstPlugin->GetFormattedParamName(i)), i);
