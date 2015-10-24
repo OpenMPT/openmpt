@@ -773,22 +773,18 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 	msg->Dispatch(opcode, index, value, ptrOut, opt, extraSize);
 
 	const bool useAuxMem = dispatchData.size() > sizeof(BridgeMessage);
-	MappedMemory auxMem;
+	AuxMem *auxMem = nullptr;
 	if(useAuxMem)
 	{
 		// Extra data doesn't fit in message - use secondary memory
-		wchar_t auxMemName[64];
-		static_assert(sizeof(DispatchMsg) + sizeof(auxMemName) <= sizeof(BridgeMessage), "Check message sizes, this will crash!");
-		swprintf(auxMemName, CountOf(auxMemName), L"Local\\openmpt-%d-auxmem-%d", GetCurrentProcessId(), GetCurrentThreadId());
-		if(auxMem.Create(auxMemName, extraSize))
-		{
-			// Move message data to shared memory and then move shared memory name to message data
-			memcpy(auxMem.view, &dispatchData[sizeof(DispatchMsg)], extraSize);
-			memcpy(&dispatchData[sizeof(DispatchMsg)], auxMemName, sizeof(auxMemName));
-		} else
-		{
+		auxMem = that->GetAuxMemory(dispatchData.size());
+		if(auxMem == nullptr)
 			return 0;
-		}
+
+		// Move message data to shared memory and then move shared memory name to message data
+		memcpy(auxMem->memory.view, &dispatchData[sizeof(DispatchMsg)], extraSize);
+		// Now put the shared memory identifier in the message instead.
+		memcpy(&dispatchData[sizeof(DispatchMsg)], auxMem->name, sizeof(auxMem->name));
 	}
 
 	//std::cout << "about to dispatch " << opcode << " to host...";
@@ -800,7 +796,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 	//std::cout << "done." << std::endl;
 	const DispatchMsg *resultMsg = &msg->dispatch;
 
-	const char *extraData = useAuxMem ? static_cast<const char *>(auxMem.view) : reinterpret_cast<const char *>(resultMsg + 1);
+	const char *extraData = useAuxMem ? static_cast<const char *>(auxMem->memory.view) : reinterpret_cast<const char *>(resultMsg + 1);
 	// Post-fix some opcodes
 	switch(opcode)
 	{
@@ -877,7 +873,56 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		}
 	}
 
+	if(auxMem != nullptr)
+	{
+		InterlockedExchange(&auxMem->used, 0);
+	}
+
 	return static_cast<VstIntPtr>(resultMsg->result);
+}
+
+
+// Allocate auxiliary shared memory for too long bridge messages
+BridgeWrapper::AuxMem *BridgeWrapper::GetAuxMemory(size_t size)
+{
+	size_t index = CountOf(auxMems);
+	for(int pass = 0; pass < 2; pass++)
+	{
+		for(size_t i = 0; i< CountOf(auxMems); i++)
+		{
+			if(auxMems[i].size >= size || pass == 1)
+			{
+				// Good candidate - is it taken yet?
+				assert((intptr_t(&auxMems[i].used) & 3) == 0);	// InterlockedExchangeAdd operand should be aligned to 32 bits
+				if(InterlockedCompareExchange(&auxMems[i].used, 1, 0) == 0)
+				{
+
+					index = i;
+					break;
+				}
+			}
+		}
+		if(index != CountOf(auxMems))
+			break;
+	}
+	if(index == CountOf(auxMems))
+		return nullptr;
+
+	AuxMem &auxMem = auxMems[index];
+	if(auxMem.size >= size && auxMem.memory.Good())
+	{
+		// Re-use as-is
+		return &auxMem;
+	}
+	// Create new memory with appropriate size
+	static_assert(sizeof(DispatchMsg) + sizeof(auxMem.name) <= sizeof(BridgeMessage), "Check message sizes, this will crash!");
+	swprintf(auxMem.name, CountOf(auxMem.name), L"Local\\openmpt-%d-auxmem-%d", GetCurrentProcessId(), GetCurrentThreadId());
+	if(auxMem.memory.Create(auxMem.name, size))
+	{
+		auxMem.size = size;
+		return &auxMem;
+	}
+	return nullptr;
 }
 
 
