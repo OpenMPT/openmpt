@@ -1,6 +1,8 @@
- - Portaudio SVN revision 1948
+ - Portaudio SVN revision r1963, 2015-10-21
  - A small modification to portaudio code has been made in src/hostapi/wdmks/pa_win_wdmks.c
    to facilitate linking against strmiids.lib . Look for "OpenMPT" there.
+ - src/common/pa_front.c has been fixed to compile with a C89 compiler.
+   Modifications have been marked with // OpenMPT.
  - For building, premake is used to generate Visual Studio project files.
    See ../build/premake/ for details.
  - A couple of unnecessary folders have been omitted in SVN:

@@ -35,6 +35,7 @@
    "../../include/portaudio/src/common/pa_ringbuffer.h",
    "../../include/portaudio/src/common/pa_stream.c",
    "../../include/portaudio/src/common/pa_stream.h",
+   "../../include/portaudio/src/common/pa_svnrevision.h",
    "../../include/portaudio/src/common/pa_trace.c",
    "../../include/portaudio/src/common/pa_trace.h",
    "../../include/portaudio/src/common/pa_types.h",

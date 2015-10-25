@@ -357,6 +357,7 @@
     <ClInclude Include="..\..\include\portaudio\src\common\pa_process.h" />
     <ClInclude Include="..\..\include\portaudio\src\common\pa_ringbuffer.h" />
     <ClInclude Include="..\..\include\portaudio\src\common\pa_stream.h" />
+    <ClInclude Include="..\..\include\portaudio\src\common\pa_svnrevision.h" />
     <ClInclude Include="..\..\include\portaudio\src\common\pa_trace.h" />
     <ClInclude Include="..\..\include\portaudio\src\common\pa_types.h" />
     <ClInclude Include="..\..\include\portaudio\src\common\pa_util.h" />
