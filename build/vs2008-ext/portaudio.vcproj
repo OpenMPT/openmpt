@@ -704,6 +704,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\include\portaudio\src\common\pa_svnrevision.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\include\portaudio\src\common\pa_trace.c"
 					>
 				</File>
