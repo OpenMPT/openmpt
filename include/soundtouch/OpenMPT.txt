@@ -1,6 +1,6 @@
 SoundTouch Audio Processing Library
 http://www.surina.net/soundtouch/
-version 1.9.0
+version 1.9.2
 Some unused files (SoundStretch, Android library, VS solutions...) have been removed.
 
 For building, premake is used to generate Visual Studio project files.
