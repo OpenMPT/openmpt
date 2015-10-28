@@ -109,16 +109,19 @@ class CTuningTreeCtrl : public CTreeCtrl
 {
 private:
 	CTuningDialog& m_rParentDialog;
+	bool m_Dragging;
+
 public:
-	CTuningTreeCtrl(CTuningDialog* parent) : m_rParentDialog(*parent) {}
+	CTuningTreeCtrl(CTuningDialog* parent)
+		: m_rParentDialog(*parent)
+		, m_Dragging(false)
+	{}
 	//Note: Parent address may be given in its initializer list.
 
 	void SetDragging(bool state = true) {m_Dragging = state;}
 	bool IsDragging() {return m_Dragging;}
 
-private:
-	bool m_Dragging;
-
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	DECLARE_MESSAGE_MAP()
 };
@@ -243,6 +246,8 @@ private:
 	void DeleteTreeItem(CTuning* pT);
 	void DeleteTreeItem(CTuningCollection* pTC);
 
+	// Check if item can be dropped here. If yes, the target collection is returned, otherwise nullptr.
+	CTuningCollection *CanDrop(HTREEITEM dragDestItem);
 	void OnEndDrag(HTREEITEM dragDestItem);
 
 	//Returns pointer to the tuning collection where tuning given as argument

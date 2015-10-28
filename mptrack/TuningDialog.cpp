@@ -17,6 +17,7 @@
 #include "../common/misc_util.h"
 #include "tuningdialog.h"
 #include "FileDialog.h"
+#include "Mainfrm.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -202,7 +203,7 @@ BOOL CTuningDialog::OnInitDialog()
 
 
 void CTuningDialog::UpdateView(const int updateMask)
-//------------------------------
+//--------------------------------------------------
 {
 	if(m_DoErrorExit)
 	{
@@ -1076,46 +1077,68 @@ void CTuningDialog::OnTvnBegindragTreeTuning(NMHDR *pNMHDR, LRESULT *pResult)
 		return;
 	}
 
+	SetCursor(CMainFrame::curDragging);
+
 	m_TreeCtrlTuning.SetDragging();
 	m_DragItem = m_TreeItemTuningItemMap.GetMapping_12(pNMTreeView->itemNew.hItem);
 
 	m_TreeCtrlTuning.Select(pNMTreeView->itemNew.hItem, TVGN_CARET);
 }
 
-void CTuningDialog::OnEndDrag(HTREEITEM dragDestItem)
-//--------------------------------------------------
-{
-	m_TreeCtrlTuning.SetDragging(false);
-	if(m_DragItem == NULL)
-		return;
 
-	m_CommandItemSrc = m_DragItem;
-	m_DragItem.Reset();
+CTuningCollection *CTuningDialog::CanDrop(HTREEITEM dragDestItem)
+//---------------------------------------------------------------
+{
+	if(m_DragItem == NULL)
+		return nullptr;
 
 	TUNINGTREEITEM destTunItem = m_TreeItemTuningItemMap.GetMapping_12(dragDestItem);
 	if(!destTunItem)
-		return;
+		return nullptr;
 
-	CTuningCollection* pTCdest = NULL;
-	CTuningCollection* pTCsrc = m_CommandItemSrc.GetTC();
+	CTuningCollection* pTCdest = nullptr;
+	CTuningCollection* pTCsrc = m_DragItem.GetTC();
 
-	if(pTCsrc == NULL)
-		pTCsrc = GetpTuningCollection(m_CommandItemSrc.GetT());
+	if(pTCsrc == nullptr)
+		pTCsrc = GetpTuningCollection(m_DragItem.GetT());
 
 	if(pTCsrc == NULL)
 	{
 		ASSERT(false);
-		return;
+		return nullptr;
 	}
 
 	if(destTunItem.GetT()) //Item dragged on tuning
 		pTCdest = GetpTuningCollection(destTunItem.GetT());
 	else //Item dragged on tuningcollecition
-        pTCdest = destTunItem.GetTC();
+		pTCdest = destTunItem.GetTC();
 
 	//For now, ignoring drags within a tuning collection.
 	if(pTCdest == pTCsrc)
+		return nullptr;
+
+	return pTCdest;
+}
+
+
+void CTuningDialog::OnEndDrag(HTREEITEM dragDestItem)
+//--------------------------------------------------
+{
+	SetCursor(CMainFrame::curArrow);
+	m_TreeCtrlTuning.SetDragging(false);
+	if(m_DragItem == NULL)
 		return;
+
+	CTuningCollection* pTCdest = CanDrop(dragDestItem);
+	m_CommandItemSrc = m_DragItem;
+	m_DragItem.Reset();
+
+	if(!pTCdest)
+		return;
+
+	CTuningCollection* pTCsrc = m_CommandItemSrc.GetTC();
+	if(pTCsrc == nullptr)
+		pTCsrc = GetpTuningCollection(m_CommandItemSrc.GetT());
 
 	if(pTCdest)
 	{
@@ -1364,8 +1387,22 @@ void CTuningDialog::OnOK()
 ////////////////////////////////////////////////////////
 
 BEGIN_MESSAGE_MAP(CTuningTreeCtrl, CTreeCtrl)
+	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
 END_MESSAGE_MAP()
+
+
+void CTuningTreeCtrl::OnMouseMove(UINT nFlags, CPoint point)
+//----------------------------------------------------------
+{
+	if(IsDragging())
+	{
+		HTREEITEM hItem = HitTest(point, nullptr);
+		SetCursor((hItem == NULL || m_rParentDialog.CanDrop(hItem) == nullptr) ? CMainFrame::curNoDrop2 : CMainFrame::curDragging);
+	}
+
+	CTreeCtrl::OnMouseMove(nFlags, point);
+}
 
 
 void CTuningTreeCtrl::OnLButtonUp(UINT nFlags, CPoint point)
@@ -1373,8 +1410,7 @@ void CTuningTreeCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	if(IsDragging())
 	{
-		HTREEITEM hItem;
-		hItem = HitTest(point, NULL);
+		HTREEITEM hItem = HitTest(point, nullptr);
 		m_rParentDialog.OnEndDrag(hItem);
 
 		CTreeCtrl::OnLButtonUp(nFlags, point);
