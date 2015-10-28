@@ -1954,17 +1954,11 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 	if (note > 0 && note<128)
 	{
 		CHAR s[64];
-		if (note >= NOTE_MIN_SPECIAL)
-		{
-			pModDoc->NoteOff(0, (note == NOTE_NOTECUT), m_nInstrument);
-			pMainFrm->SetInfoText("");
-		} else
 		if (m_nInstrument && !m_baPlayingNote[note])
 		{
 			CSoundFile &sndFile = pModDoc->GetrSoundFile();
 			ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
 			if ((!pIns) || (!pIns->Keyboard[note - NOTE_MIN] && !pIns->nMixPlug)) return;
-
 			{
 				if (pMainFrm->GetModPlaying() != pModDoc)
 				{

@@ -1250,8 +1250,8 @@ void CModDoc::CheckNNA(ModCommand::NOTE note, INSTRUMENTINDEX ins, std::bitset<1
 	for(CHANNELINDEX chn = GetNumChannels(); chn < MAX_CHANNELS; chn++)
 	{
 		const ModChannel &channel = m_SndFile.m_PlayState.Chn[chn];
-		if(channel.pModInstrument == pIns && channel.nMasterChn == 0 && ModCommand::IsNote(channel.nNote)
-			&& (channel.nLength || pIns->HasValidMIDIChannel()) && !playingNotes[channel.nNote])
+		if(channel.pModInstrument == pIns && channel.nMasterChn == 0 && ModCommand::IsNote(channel.nLastNote)
+			&& (channel.nLength || pIns->HasValidMIDIChannel()) && !playingNotes[channel.nLastNote])
 		{
 			CHANNELINDEX nnaChn = m_SndFile.CheckNNA(chn, ins, note, false);
 			// We need to update this mix channel immediately since new notes may be triggered between ticks, in which case

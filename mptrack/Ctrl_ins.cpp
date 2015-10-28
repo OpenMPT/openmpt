@@ -442,7 +442,7 @@ void CNoteMapWnd::OnMapReset()
 		bool bModified = false;
 		for (size_t i = 0; i < CountOf(pIns->NoteMap); i++) if (pIns->NoteMap[i] != i + 1)
 		{
-			pIns->NoteMap[i] = i + 1;
+			pIns->NoteMap[i] = static_cast<ModCommand::NOTE>(i + 1);
 			bModified = true;
 		}
 		if (bModified)
@@ -492,7 +492,7 @@ void CNoteMapWnd::OnMapTransposeDown()
 void CNoteMapWnd::MapTranspose(int nAmount)
 //-----------------------------------------
 {
-	if(nAmount == 0) return;
+	if(nAmount == 0 || m_modDoc.GetModType() == MOD_TYPE_XM) return;
 
 	ModInstrument *pIns = m_modDoc.GetrSoundFile().Instruments[m_nInstrument];
 	if((nAmount == 12 || nAmount == -12) && pIns->pTuning != nullptr)
@@ -617,7 +617,7 @@ void CNoteMapWnd::EnterNote(UINT note)
 			}
 			if (n != pIns->NoteMap[m_nNote])
 			{
-				pIns->NoteMap[m_nNote] = n;
+				pIns->NoteMap[m_nNote] = static_cast<ModCommand::NOTE>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
 				InvalidateRect(NULL, FALSE);
 			}
@@ -652,7 +652,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 
 			if (n != pIns->Keyboard[m_nNote])
 			{
-				pIns->Keyboard[m_nNote] = n;
+				pIns->Keyboard[m_nNote] = static_cast<SAMPLEINDEX>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
 				InvalidateRect(NULL, FALSE);
 				PlayNote(m_nNote+1);
@@ -684,7 +684,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 
 			if (n != pIns->NoteMap[m_nNote])
 			{
-				pIns->NoteMap[m_nNote] = n;
+				pIns->NoteMap[m_nNote] = static_cast<ModCommand::NOTE>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
 				InvalidateRect(NULL, FALSE);
 			}
@@ -2026,7 +2026,7 @@ void CCtrlInstruments::OnNNAChanged()
 	{
 		if (pIns->nNNA != m_ComboNNA.GetCurSel())
 		{
-			pIns->nNNA = m_ComboNNA.GetCurSel();
+			pIns->nNNA = static_cast<uint8>(m_ComboNNA.GetCurSel());
 			SetModified(InstrumentHint().Info(), false);
 		}
 	}
@@ -2041,7 +2041,7 @@ void CCtrlInstruments::OnDCTChanged()
 	{
 		if (pIns->nDCT != m_ComboDCT.GetCurSel())
 		{
-			pIns->nDCT = m_ComboDCT.GetCurSel();
+			pIns->nDCT = static_cast<uint8>(m_ComboDCT.GetCurSel());
 			SetModified(InstrumentHint().Info(), false);
 		}
 	}
@@ -2056,7 +2056,7 @@ void CCtrlInstruments::OnDCAChanged()
 	{
 		if (pIns->nDNA != m_ComboDCA.GetCurSel())
 		{
-			pIns->nDNA = m_ComboDCA.GetCurSel();
+			pIns->nDNA = static_cast<uint8>(m_ComboDCA.GetCurSel());
 			SetModified(InstrumentHint().Info(), false);
 		}
 	}
@@ -2074,7 +2074,7 @@ void CCtrlInstruments::OnMPRChanged()
 		{
 			if (pIns->nMidiProgram != n)
 			{
-				pIns->nMidiProgram = n;
+				pIns->nMidiProgram = static_cast<uint8>(n);
 				SetModified(InstrumentHint().Info(), false);
 			}
 		}
@@ -2095,7 +2095,7 @@ void CCtrlInstruments::OnMBKChanged()
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
-		uint16 w = GetDlgItemInt(IDC_EDIT11);
+		uint16 w = static_cast<uint16>(GetDlgItemInt(IDC_EDIT11));
 		if(w >= 0 && w <= 16384 && pIns->wMidiBank != w)
 		{
 			pIns->wMidiBank = w;
@@ -2469,7 +2469,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 				n = m_SliderCutOff.GetPos();
 				if ((n >= 0) && (n < 0x80) && (n != (int)(pIns->GetCutoff())))
 				{
-					pIns->SetCutoff(n, pIns->IsCutoffEnabled());
+					pIns->SetCutoff(static_cast<uint8>(n), pIns->IsCutoffEnabled());
 					SetModified(InstrumentHint().Info(), false);
 					UpdateFilterText();
 					filterChanger = true;
@@ -2481,7 +2481,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 				n = m_SliderResonance.GetPos();
 				if ((n >= 0) && (n < 0x80) && (n != (int)(pIns->GetResonance())))
 				{
-					pIns->SetResonance(n, pIns->IsResonanceEnabled());
+					pIns->SetResonance(static_cast<uint8>(n), pIns->IsResonanceEnabled());
 					SetModified(InstrumentHint().Info(), false);
 					UpdateFilterText();
 					filterChanger = true;
