@@ -841,18 +841,11 @@ static std::string ToUTF8(const std::wstring &str, char replacement = '?')
 
 	for ( std::size_t i=0; i<in.length(); i++ ) {
 
-		wchar_t c = in[i];
-		MPT_MAYBE_CONSTANT_IF ( c < 0 ) {
-			out.push_back( replacement );
-			continue;
-		}
-		MPT_MAYBE_CONSTANT_IF ( c > 0x1fffff ) {
-			out.push_back( replacement );
-			continue;
-		}
+		wchar_t wc = in[i];
 
 		uint32 ucs4 = 0;
 		MPT_CONSTANT_IF ( sizeof( wchar_t ) == 2 ) {
+			uint16 c = static_cast<uint16>( wc );
 			if ( i + 1 < in.length() ) {
 				// check for surrogate pair
 				uint16 hi_sur = in[i+0];
@@ -862,17 +855,22 @@ static std::string ToUTF8(const std::wstring &str, char replacement = '?')
 					++i;
 					hi_sur &= (1<<10)-1;
 					lo_sur &= (1<<10)-1;
-					ucs4 = ( (uint32)hi_sur << 10 ) | ( (uint32)lo_sur << 0 );
+					ucs4 = ( static_cast<uint32>(hi_sur) << 10 ) | ( static_cast<uint32>(lo_sur) << 0 );
 				} else {
 					// no surrogate pair
-					ucs4 = (uint32)(uint16)c;
+					ucs4 = static_cast<uint32>( c );
 				}
 			} else {
 				// no surrogate possible
-				ucs4 = (uint32)(uint16)c;
+				ucs4 = static_cast<uint32>( c );
 			}
 		} else {
-			ucs4 = c;
+			ucs4 = static_cast<uint32>( wc );
+		}
+		
+		if ( ucs4 > 0x1fffff ) {
+			out.push_back( replacement );
+			continue;
 		}
 
 		uint8 utf8[6];
