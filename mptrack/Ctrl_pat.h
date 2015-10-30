@@ -262,6 +262,7 @@ private:
 	bool HasValidPlug(INSTRUMENTINDEX instr);
 public:
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+	afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);
 	afx_msg BOOL OnToolTip(UINT id, NMHDR *pTTTStruct, LRESULT *pResult);
 };
 

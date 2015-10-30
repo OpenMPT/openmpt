@@ -94,6 +94,7 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_WM_LBUTTONUP()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_MBUTTONDOWN()
+	ON_WM_XBUTTONUP()
 	ON_WM_NCLBUTTONDOWN()
 	ON_WM_NCLBUTTONUP()
 	ON_WM_NCLBUTTONDBLCLK()
@@ -2590,6 +2591,15 @@ BOOL CViewInstrument::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	}
 
 	return CModScrollView::OnMouseWheel(nFlags, zDelta, pt);
+}
+
+
+void CViewInstrument::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
+//------------------------------------------------------------------------
+{
+	if(nButton == XBUTTON1) OnPrevInstrument();
+	else if(nButton == XBUTTON2) OnNextInstrument();
+	CModScrollView::OnXButtonUp(nFlags, nButton, point);
 }
 
 

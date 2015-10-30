@@ -61,6 +61,7 @@ struct PowerOf2Exponent<1> { enum { value = 0 }; };
 BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlSamples)
 	ON_WM_VSCROLL()
+	ON_WM_XBUTTONUP()
 	ON_NOTIFY(TBN_DROPDOWN, IDC_TOOLBAR1, OnTbnDropDownToolBar)
 	ON_COMMAND(IDC_SAMPLE_NEW,			OnSampleNew)
 	ON_COMMAND(IDC_SAMPLE_DUPLICATE,	OnSampleDuplicate)
@@ -3410,6 +3411,15 @@ void CCtrlSamples::PropagateAutoVibratoChanges()
 			}
 		}
 	}
+}
+
+
+void CCtrlSamples::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
+//---------------------------------------------------------------------
+{
+	if(nButton == XBUTTON1) OnPrevInstrument();
+	else if(nButton == XBUTTON2) OnNextInstrument();
+	CModControlDlg::OnXButtonUp(nFlags, nButton, point);
 }
 
 OPENMPT_NAMESPACE_END

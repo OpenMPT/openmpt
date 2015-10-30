@@ -36,6 +36,7 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlPatterns)
 	ON_WM_KEYDOWN()
 	ON_WM_VSCROLL()
+	ON_WM_XBUTTONUP()
 	ON_COMMAND(IDC_BUTTON1,					OnSequenceNext)
 	ON_COMMAND(IDC_BUTTON2,					OnSequencePrev)
 	ON_COMMAND(ID_PLAYER_PAUSE,				OnPlayerPause)
@@ -1160,9 +1161,6 @@ bool CCtrlPatterns::HasValidPlug(INSTRUMENTINDEX instr)
 }
 
 
-//end rewbs.instroVST
-
-
 BOOL CCtrlPatterns::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 //--------------------------------------------------------------------
 {
@@ -1172,6 +1170,16 @@ BOOL CCtrlPatterns::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	}
 	return CModControlDlg::OnMouseWheel(nFlags, zDelta, pt);
 }
+
+
+void CCtrlPatterns::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
+//----------------------------------------------------------------------
+{
+	if(nButton == XBUTTON1) OnModCtrlMsg(CTRLMSG_PREVORDER, 0);
+	else if(nButton == XBUTTON2) OnModCtrlMsg(CTRLMSG_NEXTORDER, 0);
+	CModControlDlg::OnXButtonUp(nFlags, nButton, point);
+}
+
 
 BOOL CCtrlPatterns::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 //---------------------------------------------------------------------

@@ -82,6 +82,7 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_WM_CHAR()
 	ON_WM_DROPFILES()
 	ON_WM_MOUSEWHEEL()
+	ON_WM_XBUTTONUP()
 	ON_COMMAND(ID_EDIT_UNDO,				OnEditUndo)
 	ON_COMMAND(ID_EDIT_REDO,				OnEditRedo)
 	ON_COMMAND(ID_EDIT_SELECT_ALL,			OnEditSelectAll)
@@ -3207,6 +3208,15 @@ BOOL CViewSample::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	}
 
 	return CModScrollView::OnMouseWheel(nFlags, zDelta, pt);
+}
+
+
+void CViewSample::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
+//--------------------------------------------------------------------
+{
+	if(nButton == XBUTTON1) OnPrevInstrument();
+	else if(nButton == XBUTTON2) OnNextInstrument();
+	CModScrollView::OnXButtonUp(nFlags, nButton, point);
 }
 
 
