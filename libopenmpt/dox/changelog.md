@@ -12,6 +12,9 @@ is just a high-level summary.
 
  *  [**Bug**] Emscripten support for older emscripten versions broke in -beta14.
     These are now supported again when using `make CONFIG=emscripten-old`.
+ *  [**Bug**] Fixed crashes in MED loader.
+
+ *  Playback improvements and loader fixes for MOD, MT2 and MED.
 
 ### libopenmpt 0.2-beta14 (2015-09-13)
 
