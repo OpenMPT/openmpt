@@ -791,6 +791,7 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlInstruments)
 	ON_WM_VSCROLL()
 	ON_WM_HSCROLL()
+	ON_WM_XBUTTONUP()
 	ON_NOTIFY(TBN_DROPDOWN, IDC_TOOLBAR1, OnTbnDropDownToolBar)
 	ON_COMMAND(IDC_INSTRUMENT_NEW,		OnInstrumentNew)
 	ON_COMMAND(IDC_INSTRUMENT_OPEN,		OnInstrumentOpen)
@@ -2928,6 +2929,15 @@ void CCtrlInstruments::UpdatePluginList()
 	m_CbnMixPlug.SetRedraw(TRUE);
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if ((pIns) && (pIns->nMixPlug <= MAX_MIXPLUGINS)) m_CbnMixPlug.SetCurSel(pIns->nMixPlug);
+}
+
+
+void CCtrlInstruments::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
+//-------------------------------------------------------------------------
+{
+	if(nButton == XBUTTON1) OnPrevInstrument();
+	else if(nButton == XBUTTON2) OnNextInstrument();
+	CModControlDlg::OnXButtonUp(nFlags, nButton, point);
 }
 
 

@@ -193,6 +193,7 @@ protected:
 	afx_msg void OnBnClickedCheckPitchtempolock();
 	afx_msg void OnEnKillfocusEditPitchtempolock();
 	afx_msg void OnEnKillfocusEditFadeOut();
+	afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

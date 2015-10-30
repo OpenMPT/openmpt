@@ -217,6 +217,7 @@ protected:
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+	afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);
 	virtual BOOL PreTranslateMessage(MSG *pMsg); //rewbs.customKeys
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

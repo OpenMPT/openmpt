@@ -170,6 +170,7 @@ protected:
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+	afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);
 	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
 	afx_msg void OnSampleSlice();

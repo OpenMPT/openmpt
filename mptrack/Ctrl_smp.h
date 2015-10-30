@@ -139,6 +139,7 @@ protected:
 	afx_msg void OnKeepSampleOnDisk();
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
+	afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);
 
 	afx_msg void OnPitchShiftTimeStretch();
 	afx_msg void OnEnableStretchToSize();
