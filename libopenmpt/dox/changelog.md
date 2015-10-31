@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.2 svn
+### libopenmpt 0.2-beta15 (2015-10-31)
 
  *  [**Change**] openmpt123: SDL2 is now supported and preferred to SDL1 if
     available.
