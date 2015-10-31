@@ -52,6 +52,7 @@ enum
 	WM_MOD_KEYCOMMAND,
 	WM_MOD_RECORDPARAM,
 	WM_MOD_PLUGPARAMAUTOMATE,
+	WM_MOD_MIDIMAPPING,
 };
 
 enum
@@ -496,6 +497,7 @@ protected:
 	afx_msg void OnChannelManager();
 	afx_msg void OnClipboardManager();
 
+	afx_msg LRESULT OnViewMIDIMapping(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnUpdateTime(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateUser(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateInfo(CCmdUI *pCmdUI);

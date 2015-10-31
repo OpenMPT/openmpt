@@ -101,6 +101,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE(WM_MOD_INVALIDATEPATTERNS,	OnInvalidatePatterns)
 	ON_MESSAGE(WM_MOD_SPECIALKEY,			OnSpecialKey)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,			OnCustomKeyMsg)
+	ON_MESSAGE(WM_MOD_MIDIMAPPING,			OnViewMIDIMapping)
 	ON_COMMAND(ID_INTERNETUPDATE,			OnInternetUpdate)
 	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,	OnShowSettingsFolder)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_PROGRESS, OnUpdateCheckProgress)
@@ -2671,6 +2672,16 @@ void CMainFrame::OnHelp()
 }
 
 
+LRESULT CMainFrame::OnViewMIDIMapping(WPARAM wParam, LPARAM lParam)
+//-----------------------------------------------------------------
+{
+	CModDoc *doc = GetActiveDoc();
+	if(doc != nullptr)
+		doc->ViewMIDIMapping(static_cast<PLUGINDEX>(wParam), static_cast<PlugParamIndex>(lParam));
+	return 0;
+}
+
+
 HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathString>& vPaths, const mpt::PathString &pszFolderName, const uint16 nIdRangeBegin)
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
@@ -2840,7 +2851,6 @@ void CMainFrame::UpdateMRUList()
 		}
 	}
 }
-
 
 
 // ITfLanguageProfileNotifySink implementation

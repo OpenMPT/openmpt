@@ -2896,10 +2896,15 @@ void CModDoc::OnSongProperties()
 }
 
 
-void CModDoc::OnViewMIDIMapping()
-//-------------------------------
+void CModDoc::ViewMIDIMapping(PLUGINDEX plugin, PlugParamIndex param)
+//-------------------------------------------------------------------
 {
-	CMIDIMappingDialog dlg(CMainFrame::GetMainFrame(), m_SndFile);
+	CMIDIMappingDialog dlg(CWnd::GetActiveWindow(), m_SndFile);
+	if(plugin != PLUGINDEX_INVALID)
+	{
+		dlg.m_Setting.SetPlugIndex(plugin + 1);
+		dlg.m_Setting.SetParamIndex(param);
+	}
 	dlg.DoModal();
 }
 

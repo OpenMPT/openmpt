@@ -2037,6 +2037,7 @@ void CVstPlugin::AutomateParameter(PlugParamIndex param)
 		pModDoc->RecordParamChange(GetSlot(), param);
 	}
 
+	pModDoc->PostMessageToAllViews(WM_MOD_PLUGPARAMAUTOMATE, m_nSlot, param);
 	// TODO: This should rather be posted to the GUI thread!
 	CAbstractVstEditor *pVstEditor = GetEditor();
 
@@ -2048,17 +2049,12 @@ void CVstPlugin::AutomateParameter(PlugParamIndex param)
 			CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
 		}
 
-		pModDoc->PostMessageToAllViews(WM_MOD_PLUGPARAMAUTOMATE, m_nSlot, param);
 
 		if (CMainFrame::GetInputHandler()->ShiftPressed())
 		{
 			// Shift pressed -> Open MIDI mapping dialog
 			CMainFrame::GetInputHandler()->SetModifierMask(0); // Make sure that the dialog will open only once.
-
-			CMIDIMappingDialog dlg(pVstEditor, pModDoc->GetrSoundFile());
-			dlg.m_Setting.SetParamIndex(param);
-			dlg.m_Setting.SetPlugIndex(GetSlot() + 1);
-			dlg.DoModal();
+			CMainFrame::GetMainFrame()->PostMessage(WM_MOD_MIDIMAPPING, m_nSlot, param);
 		}
 
 		// Learn macro
