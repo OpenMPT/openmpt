@@ -135,7 +135,7 @@ void CAbstractVstEditor::OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimize
 //--------------------------------------------------------------------------------
 {
 	CDialog::OnActivate(nState, pWndOther, bMinimized);
-	CMainFrame::GetMainFrame()->SetMidiRecordWnd(GetSafeHwnd());
+	if(nState != WA_INACTIVE) CMainFrame::GetMainFrame()->SetMidiRecordWnd(GetSafeHwnd());
 }
 
 

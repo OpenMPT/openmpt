@@ -369,6 +369,9 @@ protected:
 	void SerializeViews() const;
 	void DeserializeViews();
 
+	// View MIDI Mapping dialog for given plugin and parameter combination.
+	void ViewMIDIMapping(PLUGINDEX plugin = PLUGINDEX_INVALID, PlugParamIndex param = 0);
+
 // Implementation
 public:
 	virtual ~CModDoc();
@@ -413,7 +416,7 @@ public:
 	afx_msg void OnViewMPTHacks();
 	afx_msg void OnSaveTemplateModule();
 	afx_msg void OnAppendModule();
-	afx_msg void OnViewMIDIMapping();
+	afx_msg void OnViewMIDIMapping() { ViewMIDIMapping(); }
 	afx_msg void OnChannelManager();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
