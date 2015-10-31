@@ -25,6 +25,87 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.25.03.00 (31 October 2015, revision 5703)
+--------------------------------------------
+Pattern tab
+   [New] <js> Added hidden setting "Pattern Editor.EditStepAppliesToCommands" to also apply edit step to command letters (tx uctumi).
+   [Imp] <js> Support effect-column volume slides when using sample sync.
+   [Imp] <js> Forward / backward mouse buttons can be used to switch to next / previous order.
+   [Fix] <js> Go To Dialog was not filled with sensible default values since OpenMPT 1.25.01.00.
+
+Sample tab
+   [Imp] <js> Pre-select the input field in the sample resize dialog (http://bugs.openmpt.org/view.php?id=705).
+   [Imp] <js> Silence tool now works the same way for stereo samples as it does for mono samples.
+   [Imp] <js> Time stretch and pitch shift are now abortable.
+   [Imp] <js> When trying to load a module into a sample slot, open it directly in the tree view for importing samples.
+   [Imp] <js> Forward / backward mouse buttons can be used to switch to next / previous sample.
+   [Mod] <js> When loading several samples, only ask once if they should be associated with an instrument (http://bugs.openmpt.org/view.php?id=340).
+   [Fix] <js> Properly update all sample lists when slicing a sample.
+   [Fix] <js> Resampling a sample with a very high sample rate (> 1 MHz) crashed the program.
+
+Instrument tab
+   [New] <js> Option in sample map context menu to remove all sample associations.
+   [Imp] <js> Added keyboard shortcut for scaling envelopes (default: Ctrl+E).
+   [Imp] <js> Ctrl+Right-click can now also be used to delete an envelope point.
+   [Imp] <js> Nicer envelope drawing at higher zoom levels. Adjust default zoom level for High-DPI screens.
+   [Imp] <js> After grabbing a sustain or loop point with the mouse, it can now also be moved using the keyboard shortcuts for moving nodes.
+   [Imp] <js> Show sample numbers in Sample Map editor (http://forum.openmpt.org/index.php?topic=1795.msg15678#msg15678).
+   [Imp] <js> When trying to load a module into an instrument slot, open it directly in the tree view for importing instruments.
+   [Imp] <js> Forward / backward mouse buttons can be used to switch to next / previous instrument.
+   [Fix] <js> Previewing several notes at once was broken for XM modules.
+   [Fix] <js> Bogus shortcuts were added for some envelope editor shortcuts.
+
+
+VST / DMO Plugins
+   [New] <js> Allow the user to enter plugin-specific tags in the plugin selection dialog. The name filter now searches for both plugin names and tags (patch partially provided by arseniiv, http://bugs.openmpt.org/view.php?id=541).
+   [Imp] <js> When loading a module, indicate which plugin is being loaded in the status bar (http://forum.openmpt.org/index.php?topic=1693.0).
+   [Fix] <js> Plugin editor minimizing should now also work with Wine. As a consequence, minimizing now only works through double-clicking, there are no minimize / maximize buttons any more.
+   [Fix] <js> No longer apply auto-suspend logic to plugins that don't output any audio, as they can never fulfill it.
+
+VST::Specific Plugin Fixes
+   [Fix] <js> When closing Electri-Q's editor while it was minimized and having its resizable GUI enabled, the GUI would no longer work on any host as it stored a bogus default window size.
+
+VST::Plugin Bridge
+   [Imp] <js> Implement audioMasterOpenFileSelector opcode for opening load / save file dialogs from some plugin GUIs (e.g. VOPM).
+   [Imp] <js> Speed up preset and parameter name retrieval (e.g. in plugin editor preset menu).
+   [Mod] <js> Optimized audioMasterGetTime opcode caching.
+
+MPTM::Custom Tuning
+   [Fix] <js> Pitch effects (portamento, arpeggio) triggered after a note-off were broken since OpenMPT 1.22.
+
+MOD
+   [Mod] <js> As the majority of trackers including ProTracker seem to interpret F20 as tempo rather than speed, OpenMPT now does the same. The only other programs I could find that treat F20 as speed are ScreamTracker 3 and Impulse Tracker.
+   [Fix] <js> Invert Loop position was not reset with instrument numbers.
+   [Fix] <js> Offset beyond sample loop end was broken.
+
+MOD::ProTracker 1/2 Mode
+   [Fix] <js> Very short sample loops starting at the first sample point were detuned.
+
+Other formats
+   [Imp] <js> Better handling of tempos > 255 in MED.
+   [Mod] <js> ITP: For the rare case that an ITP file loaded a 24-bit or higher quality WAV sample as an instrument, always enable the auto-normalize feature for those samples, as this was the default and fixed setting for loading such samples during most of the time when the ITP format was actively supported.
+   [Fix] <js> MT2: Better handling of filters and synchronized samples.
+   [Fix] <js> Crash in MED loader.
+ 
+Stream Export
+   [Imp] <jh> Write ReplayGain tags when exporting VBR MP3 using libmp3lame (http://bugs.openmpt.org/view.php?id=712). Can be disabled using "Export.MP3LameCalculateReplayGain", "Export.MP3LameCalculatePeakSample" and "Export.MP3ID3v2WriteReplayGainTXXX" settings. 
+   [Imp] <jh> ID3v2 padding size is now configurable via hidden settings "Export.MP3ID3v2MinPadding" and "Export.MP3ID3v2PaddingAlignHint".
+   [Imp] <jh> Use ID3v2.4 tags also when exporting VBR MP3 using libmp3lame. Toggle hidden setting "Export.MP3LameID3v2UseLame" to revert to ID3v2.3 tags.
+
+Misc
+   [New] <js> Allow to change between sharp and flat accidentals in Display settings.
+   [New] <js> Added hidden settings "Display.HighResUI", which can be used to enable DPI-awareness in OpenMPT. Right now it is disabled by default because there are no high-DPI icons yet. In the future, people may want to keep this setting disabled when using plugin UIs that are not DPI-aware.
+   [Fix] <js> Do not process keyboard commands while export dialogs are active (http://bugs.openmpt.org/view.php?id=704).
+   [Fix] <js> Crash in 64-bit builds when trying to append a module.
+   [Fix] <js> After changing the default rows per beat, the new value was not used in tempo approximation for classic and alternative tempo mode if the song was not currently playing.
+   [Fix] <js> Some menu items were not greyed out when they should have been (http://bugs.openmpt.org/view.php?id=710).
+   [Fix] <jh> Fix resource exhaustion on Wine when invoking any popup windows via a keyboard hotkey (http://bugs.openmpt.org/view.php?id=713).
+   [Reg] <js> Remove hidden setting "Misc.ShowHackControls". All it did was showing an input field for changing the sequence margins, which can already be controlled through a different setting "Pattern Editor.DefaultSequenceMargins".
+
+Third-Party Libraries
+   [Mod] Update PortAudio (SVN r1963) and SoundTouch (v1.9.2).
+
+
 v1.25.02.00 (13 September 2015, revision 5600)
 ----------------------------------------------
 General tab
@@ -60,14 +141,14 @@ Playback
 IT::Loading
    [Fix] Patterns containing command-less parameter values (which can be entered in some IT-compatible trackers) were imported incorrectly (fixes ckbounce.it).
 
-MOD
+MOD::ProTracker 1/2 Mode
    [Fix] <js> ProTracker offset quirks were partly broken since OpenMPT 1.24.04.00 (fixes professionaltracker.mod)
 
 MOD::Loading
    [Imp] <js> If there are two Fxx commands on the same row and one can be interpreted as Set Speed and the other as Set Tempo, always treat the module to have CIA timing instead of VBlank timing.
 
 Other formats
-   [Imp] <js> MIDI export has been considerably improved. More commands are exported and it uses one MIDI track per instrument rather than one per pattern channel.
+   [Imp] <js> MIDI export has been considerably improved. More commands are exported and it uses one MIDI track per instrument rather than one per pattern channel (http://bugs.openmpt.org/view.php?id=535).
    [Fix] <js> OKT: Portamento up and down were swapped.
    [Fix] <js> Possible crashes and hangs with malformed DMF, PLM, IMF, IT and MPTM files.
 
@@ -1530,7 +1611,7 @@ Misc
 v1.20.02.00 (7 July 2012, revision 1318)
 ----------------------------------------
 Pattern tab
-   [New] <js> Middle-clicking or Ctrl-right-clicking a channel header shows the Quick Channel Settings dialog, where channel name, volume and panning settings can be quickly set up.
+   [New] <js> Middle-clicking or Ctrl+right-clicking a channel header shows the Quick Channel Settings dialog, where channel name, volume and panning settings can be quickly set up.
    [Imp] <js> After selecting a column through a double click, it is possible to extend this selection to other channels by keeping the mouse button down after the second click (http://bugs.openmpt.org/view.php?id=245).
    [Mod] <js> Order list display is now "blanked" after maximum supported length instead of internal size.
    [Mod] <js> Interpolation and transpose context menu items have been moved to sub menus.
@@ -3479,13 +3560,13 @@ v1.17.02.20
          - 1.17RC2  (what I believe to be correct... mastering plugins report the same levels as exported WAVs with this one).
    [New] <rf> OpenMPT version saved in file, visible in song settings dialog.
    [New] <rf> Added customisable shortcut key for toggling (un)mute on pattern transition.
-   [New] <rf> Force pattern sequence override (ctrl-left-click orderlist) now works in play-pattern mode.
+   [New] <rf> Force pattern sequence override (ctrl+left-click orderlist) now works in play-pattern mode.
          - Known issue: orderlist GUI is not refreshed so line remains.
    [Mod] <rf> Enabled XP themes.
    [Mod] <rf> Resolution of plugin default GUI parameter slider increased from 100 to 1000. I couldn't get the per-thousand symbol to display yet. :(
    [Mod] <rf> Version number change - we no longer specify revision number explicitly. It is bad practice to make revision numbers external, as we have no real control over the way they change. The version number will always be in the CVS-commit comments field from now on.
    [Mod] <rf> GUI now uses radiobuttons for path type selection.
-   [Mod] <rf> Toggle (un)mute on pattern transition is now ctrl-left-click (not ctrl-right-click).
+   [Mod] <rf> Toggle (un)mute on pattern transition is now ctrl+left-click (not ctrl+right-click).
    [Mod] <rf> Song settings dialog cleanup. Minor instrument tab GUI cleanups. About dialog cleanups.
    [Fix] <rf> ITP users are now warned that autosaves fail if their instrument paths aren't set up.
    [Fix] <rf> If "use songs' original dirs" is ticked but the song has never been saved and therefore has no path, the backups will now always go in mptrack.exe's working directory as it was at startup.
@@ -3506,7 +3587,7 @@ v1.17.02.20
 
 v1.17RC1 (revision 1.13.2.19)
 -----------------------------
-   [New] <rf> Ctrl-right-clicking a channel will cause it to be muted at the next pattern transition.
+   [New] <rf> Ctrl+right-clicking a channel will cause it to be muted at the next pattern transition.
          Let me know if this is working the way you want, then I'll work on adding keyboard shortcuts, channel manager integration etc...
    [Mod] <rf> First (naive) attempt at allowing sample & intrument plaback from sample & instrument tab without stopping the track. Let me know what breaks.
    [Mod] <rf> Setting a documement's "modified" flag (the asterisk) is now done in a thread safe manner if the modification come from the audio thread rather than the GUI thread. Could prevent rare crashes.
@@ -3538,9 +3619,9 @@ v1.17RC1 (revision 1.13.2.17)
    [New] <rf> "Select Plugin" window now remembers size & position, plus other minor enhancements.
    [New] <rf> NEW - Precise & simplified BPM Mode! (Please test :D)
          - Enable it in the song setting window, where you set module type, num channels etc. Set "tempo mode: modern".
-         - Txx (Fxx with xx>20 with XM) defines the real, exact beats per minute. Always.
+         - Txx (Fxx with xx>1F with XM) defines the real, exact beats per minute. Always.
          - The effective playback speed therefore also depends on the "rows per beat" value in the song settings.
-         - Axx (Fxx with xx<21 with XM) continues to define the ticks per row, but does not affect playback speed per se.
+         - Axx (Fxx with xx<20 with XM) continues to define the ticks per row, but does not affect playback speed per se.
          - Features tick-to-tick compensation for buffer size calculation rounding errors (aka high precision).
          - Feedback more than welcome!!
    [New] <rf> To avoid getting Settings popup when version number in registry is less than current version, use command line option: "/noSettingsOnNewVersion"
