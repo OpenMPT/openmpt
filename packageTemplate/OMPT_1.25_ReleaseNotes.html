@@ -107,6 +107,7 @@
 
     <h3>General</h3>
     <div class="screenshots">
+        <img src="ReleaseNotesImages/1.25/flats.png" width="255" height="198" alt="Flats as accidentals" title="Flats as accidentals" /> <br />
         <a href="ReleaseNotesImages/1.25/generaltab.png"><img src="ReleaseNotesImages/1.25/generaltab.png" width="255" height="96" alt="Revamped General Tab" title="Revamped General Tab" /></a> <br />
         <a href="ReleaseNotesImages/1.25/pathsettings.png"><img src="ReleaseNotesImages/1.25/pathsettings.png" width="255" height="319" alt="Path / Auto Save Settings" title="Path / Auto Save Settings" /></a>
     </div>
@@ -119,7 +120,9 @@
         <li>It is now possible to <strong>export to a sample slot</strong> rather than a file.</li>
         <li>Experimental support for <strong>14-bit MIDI controllers</strong> in the MIDI Mapper. Combinations of CC 0...31 and CC 32...63 now act as double-precision MIDI messages. I don't have a 14-bit MIDI controller, so if you can test this feature, feedback would be appreciated!</li>
         <li>A default module format or template to use when creating a new module can now be specified in the settings dialog.</li>
-        <li>Hidden setting Misc.AllowMultipleCommandsPerKey can be used to allow more than one keyboard shortcut being bound to the same key combination (may do unexpected things with existing mappings with overlapping shortcuts such as IT-style "Play Row" on the 8 key, so beware).</li> 
+        <li>Hidden setting Misc.AllowMultipleCommandsPerKey can be used to allow more than one keyboard shortcut being bound to the same key combination (may do unexpected things with existing mappings with overlapping shortcuts such as IT-style "Play Row" on the 8 key, so beware).</li>
+        <li>The forward / backward mouse buttons can now be used to cycle between orders, samples and instruments in the pattern, sample and instrument editor.</li>
+        <li>ReplayGain export in MP3 files.</li>
     </ul>
 
     <h3>Pattern Editor</h3>
@@ -128,6 +131,7 @@
         <li>Added option for <strong>smooth (tick-by-tick) pattern scrolling</strong>. This is still somewhat experimental and consumes more CPU than necessary at the moment, but should be optimized in the future.</li>
         <li>Apply <strong>DNA and NNA settings</strong> to live note preview.</li>
         <li>The effect visualizer window size is now remembered across sessions.</li>
+        <li>Allow to change between sharp and <strong>flat accidentals</strong> in Display settings.</li>
     </ul>
     
     <h3>Tree view</h3>
@@ -141,6 +145,8 @@
         <li>Added hidden setting "VST Plugins.EnableAutoSuspend" which activates plugin auto-suspension for all plugins (later, this will be configurable per plugin). If a plugin didn't emit any sound during the last four seconds, its sound output is automatically suspended. Mostly useful for bridged plugins to save on process calls.</li>
         <li>When using the plugin bridge, MIDI events sent to 64-bit plugins or 64-bit OpenMPT do now work correctly.</li>
         <li>A few more plugins do now work correctly in the plugin bridge.</li>
+        <li>Improved plugin bridge performance.</li>
+        <li>User-defined <strong>tags</strong> can now be assigned to plugins for easier plugin management.</li>
     </ul>
 
     <h3>Sample / Instrument Editor</h3>
@@ -149,6 +155,11 @@
         <li>Hovering the default and global volume fields now displays their attenuation in dB. Similarly, hovering the panning field shows its value in a more human-readable form.</li>
         <li>Added dropdown menu to New button for duplicating samples.</li>
         <li>A <strong>sample can be split</strong> into several smaller samples at its cue points.</li>
+        <li>The Silence tool now works the same way for stereo samples as it does for mono samples.</li>
+        <li>Time stretch and pitch shift are now <strong>abortable</strong>.</li>
+        <li>When trying to load a module into a sample / instrument slot, open it directly in the tree view for importing samples.</li>
+        <li>Nicer envelope drawing at higher zoom levels.</li>
+        <li>Sample numbers are now shown in the Sample Map editor.</li>
     </ul>
 
     <h3>Playback</h3>
@@ -160,6 +171,9 @@
         <li><strong>Tremor</strong> (Ixx) is now also supported for instrument plugins.</li>
         <li>The NNA channel allocation algorithm has been finetuned to also take volume envelopes into account when running out of free channels.</li>
         <li>When executing tone portamento with instruments with custom tunings and the sample doesn't change between the notes, re-apply the sample settings such as default volume and panning like with normal samples.</li>
+        <li>Invert Loop MOD effect is now applied correctly.</li>
+        <li>Very short sample loops starting at the first sample point were detuned in ProTracker 1/2 mode.</li>
+        <li>Behaviour change for MOD files: As the majority of trackers including ProTracker seem to interpret F20 as tempo rather than speed, OpenMPT now does the same.</li>
     </ul>
 
     <h3>File Format Support</h3>
