@@ -89,6 +89,9 @@ inline T ConvertStrTo(const char *str)
 }
 
 #if MPT_WSTRING_FORMAT
+#if MPT_USTRING_MODE_UTF8
+template<> inline mpt::ustring ConvertStrTo(const std::wstring &str) { return mpt::ToUnicode(str); }
+#endif
 template<typename T>
 inline T ConvertStrTo(const wchar_t *str)
 {
@@ -98,9 +101,6 @@ inline T ConvertStrTo(const wchar_t *str)
 	}
 	return ConvertStrTo<T>(std::wstring(str));
 }
-#if MPT_USTRING_MODE_UTF8
-template<> inline mpt::ustring ConvertStrTo(const std::wstring &str) { return mpt::ToUnicode(str); }
-#endif
 #endif
 
 #if MPT_USTRING_MODE_UTF8
@@ -147,6 +147,13 @@ inline T Hex(const char *str)
 }
 
 #if MPT_WSTRING_FORMAT
+
+template<typename T>
+inline T Hex(const std::wstring &str)
+{
+	return Hex<T>(mpt::ToCharset(mpt::CharsetUTF8, str));
+}
+
 template<typename T>
 inline T Hex(const wchar_t *str)
 {
@@ -156,14 +163,7 @@ inline T Hex(const wchar_t *str)
 	}
 	return Hex<T>(std::wstring(str));
 }
-#endif
 
-#if MPT_WSTRING_FORMAT
-template<typename T>
-inline T Hex(const std::wstring &str)
-{
-	return Hex<T>(mpt::ToCharset(mpt::CharsetUTF8, str));
-}
 #endif
 
 #if MPT_USTRING_MODE_UTF8
