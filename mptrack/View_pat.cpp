@@ -3374,11 +3374,11 @@ void CViewPattern::OnDuplicateChannel()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc == nullptr) return;
 
-	const CHANNELINDEX nDupChn = m_MenuCursor.GetChannel();
-	if(nDupChn >= pModDoc->GetNumChannels())
+	const CHANNELINDEX dupChn = m_MenuCursor.GetChannel();
+	if(dupChn >= pModDoc->GetNumChannels())
 		return;
 
-	if(!pModDoc->IsChannelUnused(nDupChn) && Reporting::Confirm(GetStrI18N(_TEXT("This affects all patterns, proceed?"))) != cnfYes)
+	if(!pModDoc->IsChannelUnused(dupChn) && Reporting::Confirm(GetStrI18N(_T("This affects all patterns, proceed?")), GetStrI18N(_T("Duplicate Channel"))) != cnfYes)
 		return;
 
 	BeginWaitCursor();
@@ -3388,17 +3388,15 @@ void CViewPattern::OnDuplicateChannel()
 	for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels() + 1; nChn++)
 	{
 		channels[nChn] = i;
-		if(nChn != nDupChn)
-		{
+		if(nChn != dupChn)
 			i++;
-		}
 	}
 
 	// Check that duplication happened and in that case update.
 	if(pModDoc->ReArrangeChannels(channels) != CHANNELINDEX_INVALID)
 	{
 		pModDoc->SetModified();
-		pModDoc->UpdateAllViews(NULL, GeneralHint().General().Channels().ModType()); //refresh channel headers
+		pModDoc->UpdateAllViews(nullptr, GeneralHint().General().Channels().ModType()); //refresh channel headers
 		SetCurrentPattern(m_nPattern);
 	}
 	EndWaitCursor();
@@ -4100,7 +4098,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 			// Checking whether to record MIDI controller change as MIDI macro change.
 			// Don't write this if command was already written by MIDI mapping.
-			if((paramValue == uint8_max || sndFile.GetType() != MOD_TYPE_MPT)
+			if((paramValue == uint16_max || sndFile.GetType() != MOD_TYPE_MPT)
 				&& IsEditingEnabled()
 				&& (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL)
 				&& !TrackerSettings::Instance().midiIgnoreCCs.Get()[nByte1 & 0x7F])
