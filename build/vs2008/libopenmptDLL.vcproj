@@ -507,6 +507,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\common\mptTypeTraits.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\mptUUID.cpp"
 				>
 			</File>

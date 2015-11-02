@@ -51,9 +51,11 @@
 #include "../common/typedefs.h"
 // <memory>
 // <new>
-// <type_traits> // if available
 // <cstdint>
 // <stdint.h>
+
+#include "../common/mptTypeTraits.h"
+// <type_traits> // if available
 
 #include "../common/mptString.h"
 // <algorithm>

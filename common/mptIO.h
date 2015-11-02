@@ -14,13 +14,11 @@
 
 
 #include "../common/typedefs.h"
+#include "../common/mptTypeTraits.h"
 #include "../common/Endianness.h"
 #include <algorithm>
 #include <iosfwd>
 #include <limits>
-#if defined(HAS_TYPE_TRAITS)
-#include <type_traits>
-#endif
 #include <cstring>
 
 #if defined(MPT_WITH_FILEIO_STDIO)
@@ -115,7 +113,7 @@ template <typename T, typename Tfile>
 inline bool ReadBinaryTruncatedLE(Tfile & f, T & v, std::size_t size)
 {
 	bool result = false;
-	#ifdef HAS_TYPE_TRAITS
+	#if MPT_COMPILER_HAS_TYPE_TRAITS
 		static_assert(std::is_trivial<T>::value == true, "");
 	#endif
 	uint8 bytes[sizeof(T)];

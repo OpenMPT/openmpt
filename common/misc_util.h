@@ -16,13 +16,11 @@
 #include "mptTime.h"
 #include "mptUUID.h"
 #include "mptLibrary.h"
+#include "mptTypeTraits.h"
 
 #include <algorithm>
 #include <limits>
 #include <string>
-#if defined(HAS_TYPE_TRAITS)
-#include <type_traits>
-#endif
 #include <vector>
 
 #include <cmath>
@@ -123,7 +121,7 @@ template <class T>
 inline void MemsetZero(T &a)
 //--------------------------
 {
-#ifdef HAS_TYPE_TRAITS
+#if MPT_COMPILER_HAS_TYPE_TRAITS
 	static_assert(std::is_pointer<T>::value == false, "Won't memset pointers.");
 	static_assert(std::is_pod<T>::value == true, "Won't memset non-pods.");
 #endif
@@ -136,7 +134,7 @@ template <class T>
 inline T &MemCopy(T &destination, const T &source)
 //------------------------------------------------
 {
-#ifdef HAS_TYPE_TRAITS
+#if MPT_COMPILER_HAS_TYPE_TRAITS
 	static_assert(std::is_pointer<T>::value == false, "Won't copy pointers.");
 	static_assert(std::is_pod<T>::value == true, "Won't copy non-pods.");
 #endif

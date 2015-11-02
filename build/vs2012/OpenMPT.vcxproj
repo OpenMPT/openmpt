@@ -487,6 +487,7 @@
     <ClInclude Include="..\..\common\mptStringFormat.h" />
     <ClInclude Include="..\..\common\mptStringParse.h" />
     <ClInclude Include="..\..\common\mptTime.h" />
+    <ClInclude Include="..\..\common\mptTypeTraits.h" />
     <ClInclude Include="..\..\common\mptUUID.h" />
     <ClInclude Include="..\..\common\mutex.h" />
     <ClInclude Include="..\..\common\serialization_utils.h" />

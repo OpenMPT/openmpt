@@ -390,7 +390,7 @@ static inline Tstring HEX0(const T& x)
 template<typename T>
 static inline Tstring flt(const T& x, std::size_t width = 0, int precision = -1)
 {
-	#if defined(HAS_TYPE_TRAITS)
+	#if MPT_COMPILER_HAS_TYPE_TRAITS
 		STATIC_ASSERT(std::is_floating_point<T>::value);
 	#endif
 	if(width == 0)
@@ -404,7 +404,7 @@ static inline Tstring flt(const T& x, std::size_t width = 0, int precision = -1)
 template<typename T>
 static inline Tstring fix(const T& x, std::size_t width = 0, int precision = -1)
 {
-	#if defined(HAS_TYPE_TRAITS)
+	#if MPT_COMPILER_HAS_TYPE_TRAITS
 		STATIC_ASSERT(std::is_floating_point<T>::value);
 	#endif
 	if(width == 0)
@@ -418,7 +418,7 @@ static inline Tstring fix(const T& x, std::size_t width = 0, int precision = -1)
 template<typename T>
 static inline Tstring sci(const T& x, std::size_t width = 0, int precision = -1)
 {
-	#if defined(HAS_TYPE_TRAITS)
+	#if MPT_COMPILER_HAS_TYPE_TRAITS
 		STATIC_ASSERT(std::is_floating_point<T>::value);
 	#endif
 	if(width == 0)
@@ -433,7 +433,7 @@ static inline Tstring sci(const T& x, std::size_t width = 0, int precision = -1)
 template <typename T, typename Tformat>
 static inline Tstring f(const Tformat & format, const T& x)
 {
-	#if defined(HAS_TYPE_TRAITS)
+	#if MPT_COMPILER_HAS_TYPE_TRAITS
 		STATIC_ASSERT(std::is_floating_point<T>::value);
 	#endif
 	return FormatValTFunctor<Tstring>()(x, Format().ParsePrintf(format));
