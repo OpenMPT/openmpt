@@ -1050,12 +1050,6 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 
 	case audioMasterCanDo:
 		// Name in [ptr]
-		if(!strcmp(ptrC, "openFileSelector")
-			|| !strcmp(ptrC, "closeFileSelector"))
-		{
-			// Not supported through the bridge yet.
-			return -1;
-		}
 		ptrOut = strlen(ptrC) + 1;
 		dispatchData.insert(dispatchData.end(), ptrC, ptrC + ptrOut);
 		break;
