@@ -1,0 +1,134 @@
+/*
+ * mptTypeTraits.h
+ * ---------------
+ * Purpose: C++11 similar type_traits header plus some OpenMPT specific traits.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#pragma once
+
+#if MPT_COMPILER_HAS_TYPE_TRAITS
+#include <type_traits>
+#endif // MPT_COMPILER_HAS_TYPE_TRAITS
+
+
+
+OPENMPT_NAMESPACE_BEGIN
+
+
+
+namespace mpt {
+
+#if MPT_COMPILER_HAS_TYPE_TRAITS
+
+typedef std::true_type true_type;
+typedef std::false_type false_type;
+
+#else // !MPT_COMPILER_HAS_TYPE_TRAITS
+
+struct true_type {
+	typedef true_type type;
+	typedef bool value_type;
+	static const value_type value = true;
+	operator value_type () const { return value; }
+	value_type operator () () const { return value; }
+};
+
+struct false_type {
+	typedef true_type type;
+	typedef bool value_type;
+	static const value_type value = false;
+	operator value_type () const { return value; }
+	value_type operator () () const { return value; }
+};
+
+#endif // MPT_COMPILER_HAS_TYPE_TRAITS
+
+namespace detail {
+
+template <std::size_t size> struct int_of_size { };
+template <> struct int_of_size<1> { typedef int8  type; };
+template <> struct int_of_size<2> { typedef int16 type; };
+template <> struct int_of_size<3> { typedef int32 type; };
+template <> struct int_of_size<4> { typedef int32 type; };
+template <> struct int_of_size<5> { typedef int64 type; };
+template <> struct int_of_size<6> { typedef int64 type; };
+template <> struct int_of_size<7> { typedef int64 type; };
+template <> struct int_of_size<8> { typedef int64 type; };
+
+template <std::size_t size> struct uint_of_size { };
+template <> struct uint_of_size<1> { typedef uint8  type; };
+template <> struct uint_of_size<2> { typedef uint16 type; };
+template <> struct uint_of_size<3> { typedef uint32 type; };
+template <> struct uint_of_size<4> { typedef uint32 type; };
+template <> struct uint_of_size<5> { typedef uint64 type; };
+template <> struct uint_of_size<6> { typedef uint64 type; };
+template <> struct uint_of_size<7> { typedef uint64 type; };
+template <> struct uint_of_size<8> { typedef uint64 type; };
+
+} // namespace detail
+
+// Simplified version of C++11 std::make_signed and std::make_unsigned:
+//  - we do not require a C++11 <type_traits> header
+//  - no support fr CV-qualifiers
+//  - does not error out on non-integral types
+template <typename T> struct make_signed { typedef typename mpt::detail::int_of_size<sizeof(T)>::type type; };
+template <typename T> struct make_unsigned { typedef typename mpt::detail::uint_of_size<sizeof(T)>::type type; };
+
+} // namespace mpt
+
+
+
+namespace mpt {
+
+// Tell which types are safe to binary write into files.
+// By default, no types are safe.
+// When a safe type gets defined,
+// also specialize this template so that IO functions will work.
+template <typename T> struct is_binary_safe : public mpt::false_type { }; 
+
+// Specialization for byte types.
+template <> struct is_binary_safe<char>  : public mpt::true_type { };
+template <> struct is_binary_safe<uint8> : public mpt::true_type { };
+template <> struct is_binary_safe<int8>  : public mpt::true_type { };
+
+template <typename T>
+struct GetRawBytesFunctor
+{
+	inline const uint8 * operator () (const T & v) const
+	{
+		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+		return reinterpret_cast<const uint8 *>(&v);
+	}
+	inline uint8 * operator () (T & v) const
+	{
+		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+		return reinterpret_cast<uint8 *>(&v);
+	}
+};
+
+// In order to be able to partially specialize it,
+// GetRawBytes is implemented via a class template.
+// Do not overload or specialize GetRawBytes directly.
+// Using a wrapper (by default just around a cast to const uint8 *),
+// allows for implementing raw memroy access
+// via on-demand generating a cached serialized representation.
+template <typename T> inline const uint8 * GetRawBytes(const T & v)
+{
+	STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+	return mpt::GetRawBytesFunctor<T>()(v);
+}
+template <typename T> inline uint8 * GetRawBytes(T & v)
+{
+	STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+	return mpt::GetRawBytesFunctor<T>()(v);
+}
+
+} // namespace mpt
+
+
+
+OPENMPT_NAMESPACE_END

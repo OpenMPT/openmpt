@@ -11,6 +11,7 @@
 #pragma once
 
 #include "../common/typedefs.h"
+#include "../common/mptTypeTraits.h"
 #include "../common/mptIO.h"
 #include "../common/Endianness.h"
 
@@ -24,10 +25,6 @@
 
 #include <istream>
 #include <ostream>
-
-#ifdef HAS_TYPE_TRAITS
-#include <type_traits>
-#endif
 
 #include <cstring>
 
@@ -136,7 +133,7 @@ template <class T>
 inline void WriteItem(std::ostream& oStrm, const T& data)
 //-------------------------------------------------------
 {
-	#ifdef HAS_TYPE_TRAITS
+	#if MPT_COMPILER_HAS_TYPE_TRAITS
 		static_assert(std::is_trivial<T>::value == true, "");
 	#endif
 	Binarywrite(oStrm, data);
@@ -177,7 +174,7 @@ template <class T>
 inline void ReadItem(std::istream& iStrm, T& data, const DataSize nSize)
 //----------------------------------------------------------------------
 {
-	#ifdef HAS_TYPE_TRAITS
+	#if MPT_COMPILER_HAS_TYPE_TRAITS
 		static_assert(std::is_trivial<T>::value == true, "");
 	#endif
 	if (nSize == sizeof(T) || nSize == invalidDatasize)

@@ -10,12 +10,11 @@
 
 #pragma once
 
+#include "mptTypeTraits.h"
+
 #include <algorithm>
 #include <limits>
 #include <string>
-#if defined(HAS_TYPE_TRAITS)
-#include <type_traits>
-#endif
 
 #include <cstring>
 

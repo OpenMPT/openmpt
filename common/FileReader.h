@@ -12,6 +12,7 @@
 
 
 #include "typedefs.h"
+#include "mptTypeTraits.h"
 #include "StringFixer.h"
 #include "misc_util.h"
 #include "Endianness.h"
