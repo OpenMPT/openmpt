@@ -278,6 +278,15 @@ public:
 		MPT_ASSERT(!joinable());
 	}
 
+public:
+
+	static unsigned int hardware_concurrency()
+	{
+		SYSTEM_INFO sysInfo;
+		GetSystemInfo(&sysInfo);
+		return std::max<unsigned int>(sysInfo.dwNumberOfProcessors, 1);
+	}
+
 };
 
 
