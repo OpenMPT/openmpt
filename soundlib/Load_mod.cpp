@@ -886,7 +886,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 
 		for(size_t i = 0; i < CountOf(sampleHeader.name); i++)
 		{
-			char c = sampleHeader.name[i];
+			uint8 c = sampleHeader.name[i];
 			if(c != 0 && (c < 32 || c > 127))
 				invalidChars++;
 		}
