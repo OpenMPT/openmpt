@@ -503,13 +503,19 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		|| IsMagic(magic, "M!K!")	// ProTracker (64+ patterns)
 		|| IsMagic(magic, "M&K!")	// NoiseTracker
 		|| IsMagic(magic, "N.T.")	// NoiseTracker
-		|| IsMagic(magic, "FEST"))	// jobbig.mod by Mahoney
+		|| IsMagic(magic, "FEST")	// jobbig.mod by Mahoney
+		|| IsMagic(magic, "NSMS"))	// kingdomofpleasure.mod by bee hunter
 	{
 		m_nChannels = 4;
-	} else if(IsMagic(magic, "CD81"))	// Falcon
+	} else if(IsMagic(magic, "CD81")	// Octalyser on Atari STe/Falcon
+		|| IsMagic(magic, "CD61"))
 	{
-		m_nChannels = 8;
-		madeWithTracker = "Falcon";
+		m_nChannels = magic[2] - '0';
+		madeWithTracker = "Octalyser (Atari)";
+	} else if(!memcmp(magic, "FA0", 3) && magic[3] >= '4' && magic[3] <= '8')	// Digital Tracker on Atari Falcon
+	{
+		m_nChannels = magic[3] - '0';
+		madeWithTracker = "Digital Tracker";
 	} else if(IsMagic(magic, "OKTA")	// Oktalyzer
 		|| IsMagic(magic, "OCTA"))		// Oktalyzer
 	{
@@ -906,7 +912,8 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	file.ReadStruct(fileHeader);
 
 	// Sanity check: No more than 128 positions. ST's GUI limits tempo to [1, 220].
-	if(fileHeader.numOrders > 128 || fileHeader.restartPos == 0 || fileHeader.restartPos > 220)
+	// There are some mods with a tempo of 0 (explora3-death.mod) though, so ignore the lower limit.
+	if(fileHeader.numOrders > 128 || fileHeader.restartPos > 220)
 	{
 		return false;
 	}
@@ -923,8 +930,8 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	Order.ReadFromArray(fileHeader.orderList);
 	PATTERNINDEX numPatterns = GetNumPatterns(file, Order, fileHeader.numOrders, totalSampleLen, m_nChannels, false);
 
-	// Let's see if the file is too small (including some overhead for broken files like sll7.mod)
-	if(file.BytesLeft() + 32767 < numPatterns * 64u * 4u + totalSampleLen)
+	// Let's see if the file is too small (including some overhead for broken files like sll7.mod or ghostbus.mod)
+	if(file.BytesLeft() + 65536 < numPatterns * 64u * 4u + totalSampleLen)
 	{
 		return false;
 	}
@@ -936,6 +943,9 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Now we can be pretty sure that this is a valid Soundtracker file. Set up default song settings.
 	m_nType = MOD_TYPE_MOD;
+	// explora3-death.mod has a tempo of 0
+	if(!fileHeader.restartPos)
+		fileHeader.restartPos = 0x78;
 	// Sample 7 in echoing.mod won't "loop" correctly if we don't convert the VBlank tempo.
 	m_nDefaultTempo.Set(fileHeader.restartPos * 25 / 24);
 	if(fileHeader.restartPos != 0x78)
