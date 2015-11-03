@@ -67,7 +67,7 @@ public:
 	{
 		Leave();
 	}
-	static bool IsLocked() // DEBUGGING only
+	static bool IsLockedByCurrentThread() // DEBUGGING only
 	{
 		bool islocked = false;
 		if(TryEnterCriticalSection(&g_csAudio))
@@ -76,11 +76,6 @@ public:
 			LeaveCriticalSection(&g_csAudio);
 		}
 		return islocked;
-	}
-	static void AssertUnlocked()
-	{
-		// asserts that the critical section is currently not hold by THIS thread
-		MPT_ASSERT_ALWAYS(!IsLocked());
 	}
 };
 
