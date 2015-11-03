@@ -10,6 +10,8 @@
 #include "stdafx.h"
 #include "mptPathString.h"
 
+#include "misc_util.h"
+
 #if MPT_OS_WINDOWS
 #include <windows.h>
 #endif
@@ -203,6 +205,43 @@ CString PathString::TunnelIntoCString(const mpt::PathString &path)
 } // namespace mpt
 
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+
+
+#if defined(MODPLUG_TRACKER)
+#if MPT_OS_WINDOWS
+
+namespace mpt
+{
+
+mpt::PathString GetTempDirectory()
+//--------------------------------
+{
+	WCHAR tempPath[MAX_PATH+2];
+	MemsetZero(tempPath);
+	DWORD result = GetTempPathW(MAX_PATH+1, tempPath);
+	if(result == 0 || result > MAX_PATH+1)
+	{ // error
+		// use app directory as fallback
+		return mpt::GetAppPath();
+	}
+	return mpt::PathString::FromNative(tempPath);
+}
+
+mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const mpt::PathString &fileNameExtension)
+//-----------------------------------------------------------------------------------------------------------------
+{
+	mpt::PathString filename = mpt::GetTempDirectory();
+	filename += (!fileNamePrefix.empty() ? fileNamePrefix + MPT_PATHSTRING("_") : mpt::PathString());
+	filename += mpt::PathString::FromWide(Util::UUIDToString(Util::CreateLocalUUID()));
+	filename += (!fileNameExtension.empty() ? MPT_PATHSTRING(".") + fileNameExtension : mpt::PathString());
+	return filename;
+}
+
+} // namespace mpt
+
+#endif // MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER
+
 
 
 #if defined(MODPLUG_TRACKER)

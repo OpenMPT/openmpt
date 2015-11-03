@@ -944,7 +944,7 @@ void CDoWaveConvert::Run()
 	}
 
 	float normalizePeak = 0.0f;
-	const mpt::PathString normalizeFileName = Util::CreateTempFileName(MPT_PATHSTRING("OpenMPT"));
+	const mpt::PathString normalizeFileName = mpt::CreateTempFileName(MPT_PATHSTRING("OpenMPT"));
 	mpt::fstream normalizeFile;
 	if(m_Settings.normalize)
 	{

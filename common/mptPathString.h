@@ -252,6 +252,23 @@ static inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWid
 
 #endif // MPT_OS_WINDOWS
 
+namespace mpt
+{
+
+#if defined(MODPLUG_TRACKER)
+#if MPT_OS_WINDOWS
+
+// Returns temporary directory (with trailing backslash added) (e.g. "C:\TEMP\")
+mpt::PathString GetTempDirectory();
+
+// Returns a new unique absolute path.
+mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix = mpt::PathString(), const mpt::PathString &fileNameExtension = MPT_PATHSTRING("tmp"));
+
+#endif // MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER
+
+} // namespace mpt
+
 #if defined(MODPLUG_TRACKER)
 
 // Sanitize a filename (remove special chars)
