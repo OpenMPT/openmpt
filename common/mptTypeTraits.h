@@ -22,6 +22,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace mpt {
 
+
+
 #if MPT_COMPILER_HAS_TYPE_TRAITS
 
 typedef std::true_type true_type;
@@ -47,7 +49,6 @@ struct false_type {
 
 #endif // MPT_COMPILER_HAS_TYPE_TRAITS
 
-namespace detail {
 
 template <std::size_t size> struct int_of_size { };
 template <> struct int_of_size<1> { typedef int8  type; };
@@ -69,20 +70,47 @@ template <> struct uint_of_size<6> { typedef uint64 type; };
 template <> struct uint_of_size<7> { typedef uint64 type; };
 template <> struct uint_of_size<8> { typedef uint64 type; };
 
-} // namespace detail
+
+#if MPT_COMPILER_HAS_TYPE_TRAITS
+
+using std::make_signed;
+using std::make_unsigned;
+
+#else // !MPT_COMPILER_HAS_TYPE_TRAITS
 
 // Simplified version of C++11 std::make_signed and std::make_unsigned:
 //  - we do not require a C++11 <type_traits> header
 //  - no support fr CV-qualifiers
-//  - does not error out on non-integral types
-template <typename T> struct make_signed { typedef typename mpt::detail::int_of_size<sizeof(T)>::type type; };
-template <typename T> struct make_unsigned { typedef typename mpt::detail::uint_of_size<sizeof(T)>::type type; };
+//  - does not fail for non-integral types
 
-} // namespace mpt
+template <typename T> struct make_signed { typedef mpt::int_of_size<sizeof(T)>::type type; };
+template <> struct make_signed<char> { typedef signed char type; };
+template <> struct make_signed<signed char> { typedef signed char type; };
+template <> struct make_signed<unsigned char> { typedef signed char type; };
+template <> struct make_signed<signed short> { typedef signed short type; };
+template <> struct make_signed<unsigned short> { typedef signed short type; };
+template <> struct make_signed<signed int> { typedef signed int type; };
+template <> struct make_signed<unsigned int> { typedef signed int type; };
+template <> struct make_signed<signed long> { typedef signed long type; };
+template <> struct make_signed<unsigned long> { typedef signed long type; };
+template <> struct make_signed<signed long long> { typedef signed long long type; };
+template <> struct make_signed<unsigned long long> { typedef signed long long type; };
 
+template <typename T> struct make_unsigned { typedef mpt::uint_of_size<sizeof(T)>::type type; };
+template <> struct make_unsigned<char> { typedef unsigned char type; };
+template <> struct make_unsigned<signed char> { typedef unsigned char type; };
+template <> struct make_unsigned<unsigned char> { typedef unsigned char type; };
+template <> struct make_unsigned<signed short> { typedef unsigned short type; };
+template <> struct make_unsigned<unsigned short> { typedef unsigned short type; };
+template <> struct make_unsigned<signed int> { typedef unsigned int type; };
+template <> struct make_unsigned<unsigned int> { typedef unsigned int type; };
+template <> struct make_unsigned<signed long> { typedef unsigned long type; };
+template <> struct make_unsigned<unsigned long> { typedef unsigned long type; };
+template <> struct make_unsigned<signed long long> { typedef unsigned long long type; };
+template <> struct make_unsigned<unsigned long long> { typedef unsigned long long type; };
 
+#endif // MPT_COMPILER_HAS_TYPE_TRAITS
 
-namespace mpt {
 
 // Tell which types are safe to binary write into files.
 // By default, no types are safe.
@@ -126,6 +154,8 @@ template <typename T> inline uint8 * GetRawBytes(T & v)
 	STATIC_ASSERT(mpt::is_binary_safe<T>::value);
 	return mpt::GetRawBytesFunctor<T>()(v);
 }
+
+
 
 } // namespace mpt
 
