@@ -83,7 +83,7 @@ using std::make_unsigned;
 //  - no support fr CV-qualifiers
 //  - does not fail for non-integral types
 
-template <typename T> struct make_signed { typedef mpt::int_of_size<sizeof(T)>::type type; };
+template <typename T> struct make_signed { typedef typename mpt::int_of_size<sizeof(T)>::type type; };
 template <> struct make_signed<char> { typedef signed char type; };
 template <> struct make_signed<signed char> { typedef signed char type; };
 template <> struct make_signed<unsigned char> { typedef signed char type; };
@@ -96,7 +96,7 @@ template <> struct make_signed<unsigned long> { typedef signed long type; };
 template <> struct make_signed<signed long long> { typedef signed long long type; };
 template <> struct make_signed<unsigned long long> { typedef signed long long type; };
 
-template <typename T> struct make_unsigned { typedef mpt::uint_of_size<sizeof(T)>::type type; };
+template <typename T> struct make_unsigned { typedef typename mpt::uint_of_size<sizeof(T)>::type type; };
 template <> struct make_unsigned<char> { typedef unsigned char type; };
 template <> struct make_unsigned<signed char> { typedef unsigned char type; };
 template <> struct make_unsigned<unsigned char> { typedef unsigned char type; };
