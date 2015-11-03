@@ -504,23 +504,27 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		|| IsMagic(magic, "M&K!")	// NoiseTracker
 		|| IsMagic(magic, "N.T.")	// NoiseTracker
 		|| IsMagic(magic, "FEST")	// jobbig.mod by Mahoney
-		|| IsMagic(magic, "NSMS"))	// kingdomofpleasure.mod by bee hunter
+		|| IsMagic(magic, "NSMS")	// kingdomofpleasure.mod by bee hunter
+		|| IsMagic(magic, "LARD"))	// judgement_day_gvine.mod by 4-mat
 	{
 		m_nChannels = 4;
-	} else if(IsMagic(magic, "CD81")	// Octalyser on Atari STe/Falcon
-		|| IsMagic(magic, "CD61"))
+	} else if(IsMagic(magic, "OKTA")
+		|| IsMagic(magic, "OCTA"))
 	{
-		m_nChannels = magic[2] - '0';
-		madeWithTracker = "Octalyser (Atari)";
-	} else if(!memcmp(magic, "FA0", 3) && magic[3] >= '4' && magic[3] <= '8')	// Digital Tracker on Atari Falcon
-	{
-		m_nChannels = magic[3] - '0';
-		madeWithTracker = "Digital Tracker";
-	} else if(IsMagic(magic, "OKTA")	// Oktalyzer
-		|| IsMagic(magic, "OCTA"))		// Oktalyzer
-	{
+		// Oktalyzer
 		m_nChannels = 8;
 		madeWithTracker = "Oktalyzer";
+	} else if(IsMagic(magic, "CD81")
+		|| IsMagic(magic, "CD61"))
+	{
+		// Octalyser on Atari STe/Falcon
+		m_nChannels = magic[2] - '0';
+		madeWithTracker = "Octalyser (Atari)";
+	} else if(!memcmp(magic, "FA0", 3) && magic[3] >= '4' && magic[3] <= '8')
+	{
+		// Digital Tracker on Atari Falcon
+		m_nChannels = magic[3] - '0';
+		madeWithTracker = "Digital Tracker";
 	} else if((!memcmp(magic, "FLT", 3) || !memcmp(magic, "EXO", 3)) && magic[3] >= '4' && magic[3] <= '9')
 	{
 		// FLTx / EXOx - Startrekker by Exolon / Fairlight
@@ -870,13 +874,25 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	size_t totalSampleLen = 0;
 	m_nSamples = 15;
 
+	// In theory, sample names should only ever contain printable ASCII chars and null.
+	// However, there are quite a few SoundTracker modules in the wild with random
+	// characters. To still be able to distguish them from other formats, we just reject
+	// files with *too* many bogus characters. Arbitrary threshold: 32 bogus characters.
+	uint32 invalidChars = 0;
 	for(SAMPLEINDEX smp = 1; smp <= 15; smp++)
 	{
 		MODSampleHeader sampleHeader;
 		ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp]);
 
+		for(size_t i = 0; i < CountOf(sampleHeader.name); i++)
+		{
+			char c = sampleHeader.name[i];
+			if(c != 0 && (c < 32 || c > 127))
+				invalidChars++;
+		}
+
 		// Sanity checks
-		if(!IsValidName(sampleHeader.name, sizeof(sampleHeader.name), 14)
+		if(invalidChars > 32
 			|| sampleHeader.volume > 64
 			|| (sampleHeader.finetune >> 4) != 0
 			|| sampleHeader.length > 32768)
@@ -903,9 +919,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 
 		// UST only handles samples up to 9999 bytes. Master Soundtracker 1.0 and SoundTracker 2.0 introduce 32KB samples.
 		if(sampleHeader.length > 4999 || sampleHeader.loopStart > 9999)
-		{
 			minVersion = std::max(minVersion, MST1_00);
-		}
 	}
 
 	MODFileHeader fileHeader;
@@ -914,17 +928,13 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	// Sanity check: No more than 128 positions. ST's GUI limits tempo to [1, 220].
 	// There are some mods with a tempo of 0 (explora3-death.mod) though, so ignore the lower limit.
 	if(fileHeader.numOrders > 128 || fileHeader.restartPos > 220)
-	{
 		return false;
-	}
 
 	for(ORDERINDEX ord = 0; ord < CountOf(fileHeader.orderList); ord++)
 	{
 		// Sanity check: 64 patterns max.
 		if(fileHeader.orderList[ord] > 63)
-		{
 			return false;
-		}
 	}
 
 	Order.ReadFromArray(fileHeader.orderList);
@@ -932,14 +942,10 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Let's see if the file is too small (including some overhead for broken files like sll7.mod or ghostbus.mod)
 	if(file.BytesLeft() + 65536 < numPatterns * 64u * 4u + totalSampleLen)
-	{
 		return false;
-	}
 
 	if(loadFlags == onlyVerifyHeader)
-	{
 		return true;
-	}
 
 	// Now we can be pretty sure that this is a valid Soundtracker file. Set up default song settings.
 	m_nType = MOD_TYPE_MOD;
