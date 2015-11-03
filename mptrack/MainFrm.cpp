@@ -698,7 +698,7 @@ bool CMainFrame::SoundSourceIsLockedByCurrentThread() const
 //---------------------------------------------------------
 {
 	MPT_TRACE();
-	return CriticalSection::IsLocked();
+	return CriticalSection::IsLockedByCurrentThread();
 }
 
 
@@ -1360,7 +1360,7 @@ void CMainFrame::SetPlaybackSoundFile(CSoundFile *pSndFile)
 bool CMainFrame::PlayMod(CModDoc *pModDoc)
 //----------------------------------------
 {
-	CriticalSection::AssertUnlocked();
+	MPT_ASSERT_ALWAYS(!CriticalSection::IsLockedByCurrentThread());
 	if(!pModDoc) return false;
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 	if(!IsValidSoundFile(sndFile)) return false;
@@ -1407,7 +1407,7 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc)
 bool CMainFrame::PauseMod(CModDoc *pModDoc)
 //-----------------------------------------
 {
-	CriticalSection::AssertUnlocked();
+	MPT_ASSERT_ALWAYS(!CriticalSection::IsLockedByCurrentThread());
 	if(pModDoc && (pModDoc != GetModPlaying())) return false;
 	if(!IsPlaying()) return true;
 
@@ -1425,7 +1425,7 @@ bool CMainFrame::PauseMod(CModDoc *pModDoc)
 bool CMainFrame::StopMod(CModDoc *pModDoc)
 //----------------------------------------
 {
-	CriticalSection::AssertUnlocked();
+	MPT_ASSERT_ALWAYS(!CriticalSection::IsLockedByCurrentThread());
 	if(pModDoc && (pModDoc != GetModPlaying())) return false;
 	if(!IsPlaying()) return true;
 
@@ -1445,7 +1445,7 @@ bool CMainFrame::StopMod(CModDoc *pModDoc)
 bool CMainFrame::StopSoundFile(CSoundFile *pSndFile)
 //--------------------------------------------------
 {
-	CriticalSection::AssertUnlocked();
+	MPT_ASSERT_ALWAYS(!CriticalSection::IsLockedByCurrentThread());
 	if(!IsValidSoundFile(pSndFile)) return false;
 	if(pSndFile != m_pSndFile) return false;
 	if(!IsPlaying()) return true;
@@ -1464,7 +1464,7 @@ bool CMainFrame::StopSoundFile(CSoundFile *pSndFile)
 bool CMainFrame::PlaySoundFile(CSoundFile *pSndFile)
 //--------------------------------------------------
 {
-	CriticalSection::AssertUnlocked();
+	MPT_ASSERT_ALWAYS(!CriticalSection::IsLockedByCurrentThread());
 	if(!IsValidSoundFile(pSndFile)) return false;
 
 	PausePlayback();
