@@ -1865,7 +1865,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		thisName += fileExt;
 		if(wsdlg.m_Settings.outputToSample)
 		{
-			thisName = Util::CreateTempFileName(MPT_PATHSTRING("OpenMPT"));
+			thisName = mpt::CreateTempFileName(MPT_PATHSTRING("OpenMPT"));
 		}
 
 		// Render song (or current channel, or current sample/instrument)

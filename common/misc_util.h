@@ -618,15 +618,6 @@ namespace Util {
 namespace Util
 {
 
-#if MPT_OS_WINDOWS
-
-// Returns temporary directory (with trailing backslash added) (e.g. "C:\TEMP\")
-mpt::PathString GetTempDirectory();
-
-// Returns a new unique absolute path.
-mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix = mpt::PathString(), const mpt::PathString &fileNameExtension = MPT_PATHSTRING("tmp"));
-
-#endif // MPT_OS_WINDOWS
 
 } // namespace Util
 

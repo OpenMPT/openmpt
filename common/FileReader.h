@@ -916,7 +916,7 @@ public:
 			file.Rewind();
 			if(file.GetFileName().empty())
 			{
-				const mpt::PathString tempName = Util::CreateTempFileName(MPT_PATHSTRING("OpenMPT"));
+				const mpt::PathString tempName = mpt::CreateTempFileName(MPT_PATHSTRING("OpenMPT"));
 				HANDLE hFile = NULL;
 				hFile = CreateFileW(tempName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL);
 				if(!hFile || hFile == INVALID_HANDLE_VALUE) throw std::runtime_error("");

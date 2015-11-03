@@ -24,31 +24,6 @@ namespace Util
 
 #if MPT_OS_WINDOWS
 
-mpt::PathString GetTempDirectory()
-//--------------------------------
-{
-	WCHAR tempPath[MAX_PATH+2];
-	MemsetZero(tempPath);
-	DWORD result = GetTempPathW(MAX_PATH+1, tempPath);
-	if(result == 0 || result > MAX_PATH+1)
-	{ // error
-		// use app directory as fallback
-		return mpt::GetAppPath();
-	}
-	return mpt::PathString::FromNative(tempPath);
-}
-
-
-mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const mpt::PathString &fileNameExtension)
-//-----------------------------------------------------------------------------------------------------------------
-{
-	mpt::PathString filename = Util::GetTempDirectory();
-	filename += (!fileNamePrefix.empty() ? fileNamePrefix + MPT_PATHSTRING("_") : mpt::PathString());
-	filename += mpt::PathString::FromWide(Util::UUIDToString(Util::CreateLocalUUID()));
-	filename += (!fileNameExtension.empty() ? MPT_PATHSTRING(".") + fileNameExtension : mpt::PathString());
-	return filename;
-}
-
 
 #endif // MPT_OS_WINDOWS
 
