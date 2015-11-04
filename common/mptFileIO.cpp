@@ -70,7 +70,7 @@ bool SetFilesystemCompression(FILE *file)
 #endif // MPT_WITH_FILEIO_STDIO
 bool SetFilesystemCompression(const mpt::PathString &filename)
 {
-	DWORD attributes = GetFileAttributesW(filename.AsNative().c_str());
+	DWORD attributes = GetFileAttributesW(filename.AsNativePrefixed().c_str());
 	if(attributes == INVALID_FILE_ATTRIBUTES)
 	{
 		return false;
@@ -79,7 +79,7 @@ bool SetFilesystemCompression(const mpt::PathString &filename)
 	{
 		return true;
 	}
-	HANDLE hFile = CreateFileW(filename.AsNative().c_str(), GENERIC_ALL, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+	HANDLE hFile = CreateFileW(filename.AsNativePrefixed().c_str(), GENERIC_ALL, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 	if(hFile == INVALID_HANDLE_VALUE)
 	{
 		return false;
@@ -109,7 +109,7 @@ bool CMappedFile::Open(const mpt::PathString &filename)
 //-----------------------------------------------------
 {
 	m_hFile = CreateFileW(
-		filename.AsNative().c_str(),
+		filename.AsNativePrefixed().c_str(),
 		GENERIC_READ,
 		FILE_SHARE_READ,
 		NULL,

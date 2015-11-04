@@ -174,6 +174,8 @@ public:
 	static PathString FromWide(const std::wstring &path) { return PathString(path); }
 	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToWide(path)); }
 	RawPathString AsNative() const { return path; }
+	// Return native string, with possible \\?\ prefix if it exceeds MAX_PATH characters.
+	RawPathString AsNativePrefixed() const;
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
 #if defined(_MFC_VER)
 	// CString TCHAR, so this is CHAR or WCHAR, depending on UNICODE
@@ -213,6 +215,7 @@ public:
 #endif
 	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToCharset(mpt::CharsetLocale, path)); }
 	RawPathString AsNative() const { return path; }
+	RawPathString AsNativePrefixed() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
 #else
 	std::string ToUTF8() const { return path; }
