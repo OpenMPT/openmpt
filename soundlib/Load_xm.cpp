@@ -347,6 +347,12 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	Order.ReadAsByte(file, fileHeader.orders);
+	if(fileHeader.orders == 0 && madeWith[verFT2Generic])
+	{
+		// Fix lamb_-_dark_lighthouse.xm, which only contains one pattern and an empty order list
+		Order.resize(1);
+		Order[0] = 0;
+	}
 	file.Seek(fileHeader.size + 60);
 
 	if(fileHeader.version >= 0x0104)
