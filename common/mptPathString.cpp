@@ -27,6 +27,28 @@ OPENMPT_NAMESPACE_BEGIN
 namespace mpt
 {
 
+
+RawPathString PathString::AsNativePrefixed() const
+//------------------------------------------------
+{
+	if(Length() <= MAX_PATH || path.substr(0, 4) == L"\\\\?\\")
+	{
+		// Path is short enough or already in prefixed form
+		return path;
+	}
+	const RawPathString absPath = mpt::GetAbsolutePath(path).AsNative();
+	if(absPath.substr(0, 2) == L"\\\\")
+	{
+		// Path is a network share: \\server\foo.bar -> \\?\UNC\server\foo.bar
+		return L"\\\\?\\UNC" + absPath.substr(1);
+	} else
+	{
+		// Regular file: C:\foo.bar -> \\?\C:\foo.bar
+		return L"\\\\?\\" + absPath;
+	}
+}
+
+
 int PathString::CompareNoCase(const PathString & a, const PathString & b)
 //-----------------------------------------------------------------------
 {
@@ -148,7 +170,7 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 	{
 		return result;
 	}
-	if(AsNative().length() >= 2 && AsNative().substr(0, 1) == L"\\" && AsNative().substr(0, 2) != L"\\\\")
+	if(AsNative().length() >= 2 && AsNative().at(0) == L'\\' && AsNative().at(1) != L'\\')
 	{
 		// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\"), but ignore network paths starting with "\\"
 		result = mpt::PathString::FromNative(relativeTo.AsNative().substr(0, 2));
