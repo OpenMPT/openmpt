@@ -80,7 +80,7 @@ int _tmain(int argc, TCHAR *argv[])
 	::SetUnhandledExceptionFilter(CrashHandler);
 
 	OPENMPT_NAMESPACE::PluginBridge::InitializeStaticVariables();
-	uint32_t parentProcessId = _ttoi(argv[1]);
+	uint32 parentProcessId = _ttoi(argv[1]);
 	new OPENMPT_NAMESPACE::PluginBridge(argv[0], OpenProcess(SYNCHRONIZE, FALSE, parentProcessId));
 
 	WaitForSingleObject(OPENMPT_NAMESPACE::PluginBridge::sigQuit, INFINITE);
@@ -330,7 +330,7 @@ void PluginBridge::UpdateEffectStruct()
 // Create the memory-mapped file containing the processing message and audio buffers
 void PluginBridge::CreateProcessingFile(std::vector<char> &dispatchData)
 {
-	static uint32_t plugId = 0;
+	static uint32 plugId = 0;
 	wchar_t mapName[64];
 	swprintf(mapName, CountOf(mapName), L"Local\\openmpt-%d-%d", GetCurrentProcessId(), plugId++);
 
@@ -564,7 +564,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 		// VstAudioFile* in [ptr]
 		extraData.resize(sizeof(VstAudioFile *) * static_cast<size_t>(msg->value));
 		ptr = &extraData[0];
-		for(int64_t i = 0; i < msg->value; i++)
+		for(int64 i = 0; i < msg->value; i++)
 		{
 			// TODO create pointers
 		}
@@ -575,7 +575,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 		// VstOfflineTask* in [ptr]
 		extraData.resize(sizeof(VstOfflineTask *) * static_cast<size_t>(msg->value));
 		ptr = &extraData[0];
-		for(int64_t i = 0; i < msg->value; i++)
+		for(int64 i = 0; i < msg->value; i++)
 		{
 			// TODO create pointers
 		}
@@ -584,7 +584,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 	case effSetSpeakerArrangement:
 	case effGetSpeakerArrangement:
 		// VstSpeakerArrangement* in [value] and [ptr]
-		msg->value = reinterpret_cast<int64_t>(ptr) + sizeof(VstSpeakerArrangement);
+		msg->value = reinterpret_cast<int64>(ptr) + sizeof(VstSpeakerArrangement);
 		break;
 
 	case effVendorSpecific:
@@ -672,7 +672,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 	//std::flush(std::cout);
 	try
 	{
-		msg->result = static_cast<int32_t>(nativeEffect->dispatcher(nativeEffect, msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt));
+		msg->result = static_cast<int32>(nativeEffect->dispatcher(nativeEffect, msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt));
 	} catch(...)
 	{
 		msg->type = MsgHeader::exceptionMsg;
@@ -792,9 +792,9 @@ void PluginBridge::AutomateParameters()
 {
 	try
 	{
-		uint32_t numEvents = InterlockedExchange(&sharedMem->automationQueue.pendingEvents, 0);
+		uint32 numEvents = InterlockedExchange(&sharedMem->automationQueue.pendingEvents, 0);
 		const AutomationQueue::Parameter *param = sharedMem->automationQueue.params;
-		for(uint32_t i = 0; i < numEvents; i++, param++)
+		for(uint32 i = 0; i < numEvents; i++, param++)
 		{
 			nativeEffect->setParameter(nativeEffect, param->index, param->value);
 		}
@@ -857,7 +857,7 @@ void PluginBridge::Process()
 	if(nativeEffect->process)
 	{
 		float **inPointers, **outPointers;
-		int32_t sampleFrames = BuildProcessPointers(inPointers, outPointers);
+		int32 sampleFrames = BuildProcessPointers(inPointers, outPointers);
 		try
 		{
 			nativeEffect->process(nativeEffect, inPointers, outPointers, sampleFrames);
@@ -875,7 +875,7 @@ void PluginBridge::ProcessReplacing()
 	if(nativeEffect->processReplacing)
 	{
 		float **inPointers, **outPointers;
-		int32_t sampleFrames = BuildProcessPointers(inPointers, outPointers);
+		int32 sampleFrames = BuildProcessPointers(inPointers, outPointers);
 		try
 		{
 			nativeEffect->processReplacing(nativeEffect, inPointers, outPointers, sampleFrames);
@@ -893,7 +893,7 @@ void PluginBridge::ProcessDoubleReplacing()
 	if(nativeEffect->processDoubleReplacing)
 	{
 		double **inPointers, **outPointers;
-		int32_t sampleFrames = BuildProcessPointers(inPointers, outPointers);
+		int32 sampleFrames = BuildProcessPointers(inPointers, outPointers);
 		try
 		{
 			nativeEffect->processDoubleReplacing(nativeEffect, inPointers, outPointers, sampleFrames);
@@ -907,7 +907,7 @@ void PluginBridge::ProcessDoubleReplacing()
 
 // Helper function to build the pointer arrays required by the VST process functions.
 template<typename buf_t>
-int32_t PluginBridge::BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outPointers))
+int32 PluginBridge::BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outPointers))
 {
 	assert(processMem.Good());
 	ProcessMsg *msg = static_cast<ProcessMsg *>(processMem.view);
@@ -937,7 +937,7 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 	const bool processing = InterlockedExchangeAdd(&isProcessing, 0) != 0;
 
 	std::vector<char> dispatchData(sizeof(DispatchMsg), 0);
-	int64_t ptrOut = 0;
+	int64 ptrOut = 0;
 	char *ptrC = static_cast<char *>(ptr);
 
 	switch(opcode)
@@ -948,6 +948,9 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 	case audioMasterIdle:
 	case audioMasterPinConnected:
 		break;
+
+	case audioMasterWantMidi:
+		return 1;
 
 	case audioMasterGetTime:
 		// VstTimeInfo* in [return value]
@@ -1097,7 +1100,7 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 		dispatchData.resize(sizeof(DispatchMsg) + static_cast<size_t>(ptrOut), 0);
 	}
 	
-	uint32_t extraSize = static_cast<uint32_t>(dispatchData.size() - sizeof(DispatchMsg));
+	uint32 extraSize = static_cast<uint32>(dispatchData.size() - sizeof(DispatchMsg));
 
 	// Create message header
 	BridgeMessage *msg = reinterpret_cast<BridgeMessage *>(&dispatchData[0]);
@@ -1272,18 +1275,16 @@ VstIntPtr PluginBridge::VstFileSelector(bool destructor, VstFileSelect *fileSel)
 				fileSel->returnMultiplePaths = new (std::nothrow) char *[fileSel->nbReturnPath];
 
 				currentFile = ofn.lpstrFile + ofn.nFileOffset;
-				CHAR filePath[MAX_PATH + 1];
-				lstrcpyA(filePath, ofn.lpstrFile);
-				lstrcatA(filePath, "\\");
-
 				for(size_t i = 0; i < numFiles; i++)
 				{
-					lstrcpyA(&filePath[ofn.nFileOffset], currentFile);
-					currentFile += lstrlenA(currentFile) + 1;
-					
-					char *fname = new (std::nothrow) char[lstrlenA(filePath) + 1];
-					strcpy(fname, filePath);
+					int len = lstrlenA(currentFile);
+					char *fname = new (std::nothrow) char[ofn.nFileOffset + len + 1];
+					lstrcpyA(fname, ofn.lpstrFile);
+					lstrcatA(fname, "\\");
+					lstrcpyA(fname + ofn.nFileOffset, currentFile);
 					fileSel->returnMultiplePaths[i] = fname;
+
+					currentFile += len + 1;
 				}
 				
 			} else

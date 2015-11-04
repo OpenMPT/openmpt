@@ -2468,8 +2468,9 @@ void CViewSample::OnDropFiles(HDROP hDropInfo)
 	CMainFrame::GetMainFrame()->SetForegroundWindow();
 	for(UINT f = 0; f < nFiles; f++)
 	{
-		WCHAR fileName[MAX_PATH];
-		if(::DragQueryFileW(hDropInfo, f, fileName, CountOf(fileName)))
+		UINT size = ::DragQueryFileW(hDropInfo, f, nullptr, 0);
+		std::wstring fileName(size, L'\0');
+		if(::DragQueryFileW(hDropInfo, f, &fileName[0], size + 1))
 		{
 			const mpt::PathString file = mpt::PathString::FromNative(fileName);
 			if(SendCtrlMessage(CTRLMSG_SMP_OPENFILE, (LPARAM)&file) && f < nFiles - 1)

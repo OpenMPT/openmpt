@@ -85,23 +85,27 @@ BOOL PathConfigDlg::OnInitDialog()
 }
 
 
+static mpt::PathString GetPath(HWND hwnd, int id)
+//-----------------------------------------------
+{
+	hwnd = ::GetDlgItem(hwnd, id);
+	int len = ::GetWindowTextLengthW(hwnd) + 1;
+	std::wstring str(len, L'\0');
+	::GetWindowTextW(hwnd, &str[0], len);
+	return mpt::PathString::FromNative(&str[0]);
+}
+
+
 void PathConfigDlg::OnOK()
 //------------------------
 {
 	// Default paths
-	WCHAR szModDir[MAX_PATH], szSmpDir[MAX_PATH], szInsDir[MAX_PATH], szVstDir[MAX_PATH], szPresetDir[MAX_PATH];
-	szModDir[0] = szInsDir[0] = szSmpDir[0] = szVstDir[0] = szPresetDir[0] = 0;
-	::GetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_MODS, szModDir, MAX_PATH);
-	::GetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_SAMPS, szSmpDir, MAX_PATH);
-	::GetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_INSTS, szInsDir, MAX_PATH);
-	::GetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTS, szVstDir, MAX_PATH);
-	::GetDlgItemTextW(m_hWnd, IDC_OPTIONS_DIR_VSTPRESETS, szPresetDir, MAX_PATH);
 	CMainFrame::GetMainFrame()->SetupDirectories(
-			mpt::PathString::FromNative(szModDir),
-			mpt::PathString::FromNative(szSmpDir),
-			mpt::PathString::FromNative(szInsDir),
-			mpt::PathString::FromNative(szVstDir),
-			mpt::PathString::FromNative(szPresetDir));
+		GetPath(m_hWnd, IDC_OPTIONS_DIR_MODS),
+		GetPath(m_hWnd, IDC_OPTIONS_DIR_SAMPS),
+		GetPath(m_hWnd, IDC_OPTIONS_DIR_INSTS),
+		GetPath(m_hWnd, IDC_OPTIONS_DIR_VSTS),
+		GetPath(m_hWnd, IDC_OPTIONS_DIR_VSTPRESETS));
 
 	// Autosave
 	if(IsDlgButtonChecked(IDC_CHECK1)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_CREATEBACKUP;
@@ -123,13 +127,10 @@ void PathConfigDlg::OnOK()
 void PathConfigDlg::BrowseFolder(UINT nID)
 //----------------------------------------
 {
-	WCHAR szPath[MAX_PATH] = L"";
-	::GetDlgItemTextW(m_hWnd, nID, szPath, CountOf(szPath));
-
 	TCHAR *prompt = (nID == IDC_AUTOSAVE_PATH)
 		? _T("Select a folder to store autosaved files in...")
 		: _T("Select a default folder...");
-	BrowseForFolder dlg(mpt::PathString::FromNative(szPath), prompt);
+	BrowseForFolder dlg(GetPath(m_hWnd, nID), prompt);
 	if(dlg.Show(this))
 	{
 		::SetDlgItemTextW(m_hWnd, nID, dlg.GetDirectory().AsNative().c_str());
@@ -187,10 +188,9 @@ BOOL PathConfigDlg::OnSetActive()
 BOOL PathConfigDlg::OnKillActive()
 //--------------------------------
 {
-	WCHAR szPath[MAX_PATH] = L"";
-	::GetDlgItemTextW(m_hWnd, IDC_AUTOSAVE_PATH, szPath, CountOf(szPath));
+	mpt::PathString path = GetPath(m_hWnd, IDC_AUTOSAVE_PATH);
 
-	if (!::PathIsDirectoryW(szPath) && IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) && !IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR))
+	if (!path.IsDirectory() && IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) && !IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR))
 	{
 		Reporting::Error("Backup path does not exist.");
 		GetDlgItem(IDC_AUTOSAVE_PATH)->SetFocus();

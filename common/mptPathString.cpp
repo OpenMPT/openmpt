@@ -216,15 +216,17 @@ namespace mpt
 mpt::PathString GetTempDirectory()
 //--------------------------------
 {
-	WCHAR tempPath[MAX_PATH+2];
-	MemsetZero(tempPath);
-	DWORD result = GetTempPathW(MAX_PATH+1, tempPath);
-	if(result == 0 || result > MAX_PATH+1)
-	{ // error
-		// use app directory as fallback
-		return mpt::GetAppPath();
+	DWORD size = GetTempPathW(0, nullptr);
+	if(size)
+	{
+		std::wstring tempPath(size, L'\0');
+		if(GetTempPathW(size + 1, &tempPath[0]))
+		{
+			return mpt::PathString::FromNative(tempPath);
+		}
 	}
-	return mpt::PathString::FromNative(tempPath);
+	// use app directory as fallback
+	return mpt::GetAppPath();
 }
 
 mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const mpt::PathString &fileNameExtension)

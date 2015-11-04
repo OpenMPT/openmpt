@@ -53,12 +53,12 @@ namespace mpt
 mpt::PathString GetAppPath()
 {
 #if defined(MODPLUG_TRACKER)
-	WCHAR exeFileName[MAX_PATH + 1] = L"";
-	if(!GetModuleFileNameW(NULL, exeFileName, MAX_PATH))
+	std::vector<WCHAR> exeFileName(MAX_PATH);
+	while(GetModuleFileNameW(0, &exeFileName[0], exeFileName.size()) >= exeFileName.size())
 	{
-		return mpt::PathString();
+		exeFileName.resize(exeFileName.size() * 2);
 	}
-	return mpt::GetAbsolutePath(mpt::PathString::FromNative(exeFileName).GetPath());
+	return mpt::GetAbsolutePath(mpt::PathString::FromNative(&exeFileName[0]).GetPath());
 #else
 	return mpt::PathString(); // dummy
 #endif
@@ -67,8 +67,9 @@ mpt::PathString GetAppPath()
 
 mpt::PathString GetSystemPath()
 {
-	WCHAR path[MAX_PATH + 1] = L"";
-	if(!GetSystemDirectoryW(path, MAX_PATH))
+	DWORD size = GetSystemDirectoryW(nullptr, 0);
+	std::wstring path(size, L'\0');
+	if(!GetSystemDirectoryW(&path[0], size + 1))
 	{
 		return mpt::PathString();
 	}
@@ -78,12 +79,17 @@ mpt::PathString GetSystemPath()
 
 mpt::PathString GetAbsolutePath(const mpt::PathString &path)
 {
-	WCHAR fullPathName[MAX_PATH + 1] = L"";
-	if(!GetFullPathNameW(path.AsNative().c_str(), MAX_PATH, fullPathName, NULL))
+	DWORD size = GetFullPathNameW(path.AsNative().c_str(), 0, nullptr, nullptr);
+	if(size > 0)
 	{
-		return path;
+		// Don't use std::wstring, size might actually be more than required.
+		std::vector<WCHAR> fullPathName(size, L'\0');
+		if(GetFullPathNameW(path.AsNative().c_str(), size, &fullPathName[0], nullptr))
+		{
+			return mpt::PathString::FromNative(&fullPathName[0]);
+		}
 	}
-	return mpt::PathString::FromNative(fullPathName);
+	return path;
 }
 
 
