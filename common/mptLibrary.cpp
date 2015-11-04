@@ -68,12 +68,12 @@ mpt::PathString GetAppPath()
 mpt::PathString GetSystemPath()
 {
 	DWORD size = GetSystemDirectoryW(nullptr, 0);
-	std::wstring path(size, L'\0');
+	std::vector<WCHAR> path(size + 1);
 	if(!GetSystemDirectoryW(&path[0], size + 1))
 	{
 		return mpt::PathString();
 	}
-	return mpt::PathString::FromNative(path) + MPT_PATHSTRING("\\");
+	return mpt::PathString::FromNative(&path[0]) + MPT_PATHSTRING("\\");
 }
 
 
@@ -82,7 +82,6 @@ mpt::PathString GetAbsolutePath(const mpt::PathString &path)
 	DWORD size = GetFullPathNameW(path.AsNative().c_str(), 0, nullptr, nullptr);
 	if(size > 0)
 	{
-		// Don't use std::wstring, size might actually be more than required.
 		std::vector<WCHAR> fullPathName(size, L'\0');
 		if(GetFullPathNameW(path.AsNative().c_str(), size, &fullPathName[0], nullptr))
 		{
