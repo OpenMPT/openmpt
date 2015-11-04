@@ -241,10 +241,10 @@ mpt::PathString GetTempDirectory()
 	DWORD size = GetTempPathW(0, nullptr);
 	if(size)
 	{
-		std::wstring tempPath(size, L'\0');
+		std::vector<WCHAR> tempPath(size + 1);
 		if(GetTempPathW(size + 1, &tempPath[0]))
 		{
-			return mpt::PathString::FromNative(tempPath);
+			return mpt::PathString::FromNative(&tempPath[0]);
 		}
 	}
 	// use app directory as fallback

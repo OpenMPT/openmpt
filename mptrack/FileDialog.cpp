@@ -31,8 +31,8 @@ bool FileDialog::Show(const CWnd *parent)
 	extFilter.push_back(0);
 
 	// Prepare filename buffer.
-	std::wstring filenameBuffer = defaultFilename;
-	filenameBuffer.resize(uint16_max, 0);
+	std::vector<WCHAR> filenameBuffer(uint16_max, 0);
+	wcscpy(&filenameBuffer[0], defaultFilename.c_str());
 
 	preview = preview && TrackerSettings::Instance().previewInFileDialogs;
 	const std::wstring workingDirectoryNative = workingDirectory.AsNative();

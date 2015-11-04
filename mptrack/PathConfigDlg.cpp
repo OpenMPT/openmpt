@@ -90,7 +90,7 @@ static mpt::PathString GetPath(HWND hwnd, int id)
 {
 	hwnd = ::GetDlgItem(hwnd, id);
 	int len = ::GetWindowTextLengthW(hwnd) + 1;
-	std::wstring str(len, L'\0');
+	std::vector<WCHAR> str(len + 1);
 	::GetWindowTextW(hwnd, &str[0], len);
 	return mpt::PathString::FromNative(&str[0]);
 }
