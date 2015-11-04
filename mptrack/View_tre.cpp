@@ -205,8 +205,13 @@ void CModTree::Init()
 
 	if(!IsSampleBrowser())
 	{
-		WCHAR curDir[MAX_PATH];
-		GetCurrentDirectoryW(CountOf(curDir), curDir);
+		std::wstring curDir;
+		DWORD size = GetCurrentDirectoryW(0, nullptr);
+		if(size)
+		{
+			curDir.resize(size);
+			GetCurrentDirectoryW(size + 1, &curDir[0]);
+		}
 		const mpt::PathString dirs[] =
 		{
 			TrackerSettings::Instance().PathSamples.GetDefaultDir(),
@@ -1614,7 +1619,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 
 	case MODITEM_SAMPLE:
 		wsprintf(s, _T("Remove sample %u?"), modItemID);
-		if(Reporting::Confirm(s, false, true) == cnfYes)
+		if(!modDoc->GetrSoundFile().GetSample(static_cast<SAMPLEINDEX>(modItemID)).HasSampleData() || Reporting::Confirm(s, false, true) == cnfYes)
 		{
 			modDoc->GetSampleUndo().PrepareUndo((SAMPLEINDEX)modItemID, sundo_replace, "Delete");
 			const SAMPLEINDEX oldNumSamples = modDoc->GetNumSamples();
@@ -3927,8 +3932,9 @@ void CModTree::OnDropFiles(HDROP hDropInfo)
 	CMainFrame::GetMainFrame()->SetForegroundWindow();
 	for(UINT f = 0; f < nFiles; f++)
 	{
-		WCHAR fileName[MAX_PATH];
-		if(::DragQueryFileW(hDropInfo, f, fileName, CountOf(fileName)))
+		UINT size = ::DragQueryFileW(hDropInfo, f, nullptr, 0);
+		std::wstring fileName(size, L'\0');
+		if(::DragQueryFileW(hDropInfo, f, &fileName[0], size + 1))
 		{
 			mpt::PathString file(mpt::PathString::FromNative(fileName));
 			if(IsSampleBrowser())

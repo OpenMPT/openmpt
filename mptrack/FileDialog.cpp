@@ -27,14 +27,12 @@ bool FileDialog::Show(const CWnd *parent)
 
 	// Convert filter representation to WinAPI style.
 	for(size_t i = 0; i < extFilter.length(); i++)
-		if(extFilter[i] == '|') extFilter[i] = 0;
+		if(extFilter[i] == L'|') extFilter[i] = 0;
 	extFilter.push_back(0);
 
 	// Prepare filename buffer.
-	std::vector<WCHAR> filenameBuffer(uint16_max, 0);
-	wcscpy(&filenameBuffer[0], defaultFilename.c_str());
-	//filenameBuffer.insert(filenameBuffer.begin(), defaultFilename.begin(), defaultFilename.end());
-	//filenameBuffer.push_back(0);
+	std::wstring filenameBuffer = defaultFilename;
+	filenameBuffer.resize(uint16_max, 0);
 
 	preview = preview && TrackerSettings::Instance().previewInFileDialogs;
 	const std::wstring workingDirectoryNative = workingDirectory.AsNative();
@@ -88,16 +86,16 @@ bool FileDialog::Show(const CWnd *parent)
 	if(multiSelect)
 	{
 		// Multiple files might have been selected
-		int pos = ofn.nFileOffset;
-		const WCHAR *currentFile = ofn.lpstrFile + pos;
-		WCHAR filePath[MAX_PATH + 1];
-		lstrcpyW(filePath, ofn.lpstrFile);
-		lstrcatW(filePath, L"\\");
+		const WCHAR *currentFile = ofn.lpstrFile + ofn.nFileOffset;
+		std::wstring filePath = ofn.lpstrFile;
+		filePath += L"\\";
 
 		while(currentFile[0] != 0)
 		{
+			int len = lstrlenW(currentFile);
+			filePath.resize(ofn.nFileOffset + len);
 			lstrcpyW(&filePath[ofn.nFileOffset], currentFile);
-			currentFile += lstrlenW(currentFile) + 1;
+			currentFile += len + 1;
 			filenames.push_back(mpt::PathString::FromNative(filePath));
 		}
 	} else

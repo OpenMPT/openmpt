@@ -30,8 +30,6 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	activeCommandSet = new CCommandSet();
 
 	mpt::PathString sDefaultPath = theApp.GetConfigPath() + MPT_PATHSTRING("Keybindings.mkb");
-	if(sDefaultPath.AsNative().length() > MAX_PATH - 1)
-		sDefaultPath = mpt::PathString();
 
 	const bool bNoExistingKbdFileSetting = TrackerSettings::Instance().m_szKbdFile.empty();
 
