@@ -103,7 +103,15 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 		|| fileHeader.patterns > 128)
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
+	}
+	
+	for(size_t i = 0; i < CountOf(fileHeader.breaks); i++)
+	{
+		if(fileHeader.breaks[i] > 64)
+			return false;
+	}
+
+	if(loadFlags == onlyVerifyHeader)
 	{
 		return true;
 	}
