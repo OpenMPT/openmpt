@@ -1534,10 +1534,16 @@ void CViewPattern::OnRButtonUp(UINT nFlags, CPoint point)
 BOOL CViewPattern::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 //-------------------------------------------------------------------
 {
-	// Ctrl + mouse wheel: Increment / decrement values
 	if(nFlags & MK_CONTROL)
 	{
+		// Ctrl + mouse wheel: Increment / decrement values
 		DataEntry(zDelta > 0, (nFlags & MK_SHIFT) == MK_SHIFT);
+		return TRUE;
+	}
+	if(IsLiveRecord())
+	{
+		// During live playback with "follow song" enabled, the mouse wheel can be used to jump forwards and backwards.
+		CursorJump(-sgn(zDelta), false);
 		return TRUE;
 	}
 	return CModScrollView::OnMouseWheel(nFlags, zDelta, pt);
