@@ -136,10 +136,10 @@ void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 	m_EditComments.SetRedraw(FALSE);
 	m_EditComments.SetSel(0, -1, TRUE);
 	m_EditComments.ReplaceSel(_T(""));
-	if(!m_sndFile.songMessage.empty())
+	if(!m_sndFile.m_songMessage.empty())
 	{
 		TCHAR s[256], c;
-		const char *p = m_sndFile.songMessage.c_str();
+		const char *p = m_sndFile.m_songMessage.c_str();
 		UINT ln = 0;
 		while ((c = *p++) != NULL)
 		{
@@ -216,9 +216,9 @@ void CCtrlComments::OnCommentsChanged()
 		}
 
 		m_EditComments.SetModify(FALSE);
-		if(p != m_sndFile.songMessage)
+		if(p != m_sndFile.m_songMessage)
 		{
-			m_sndFile.songMessage.assign(p);
+			m_sndFile.m_songMessage.assign(p);
 			m_modDoc.SetModified();
 			m_modDoc.UpdateAllViews(nullptr, CommentHint(), this);
 		}

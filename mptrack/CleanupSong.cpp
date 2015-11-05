@@ -816,7 +816,7 @@ bool CModCleanupDlg::ResetVariables()
 	// convert to IT...
 	modDoc.ChangeModType(MOD_TYPE_IT);
 	sndFile.SetMixLevels(mixLevelsCompatible);
-	sndFile.songArtist.clear();
+	sndFile.m_songArtist.clear();
 	sndFile.m_nTempoMode = tempoModeClassic;
 	sndFile.m_SongFlags = SONG_LINEARSLIDES;
 	sndFile.m_MidiCfg.Reset();

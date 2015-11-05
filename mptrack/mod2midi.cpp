@@ -420,9 +420,9 @@ namespace MidiExport
 
 			MidiInstrument &tempoTrack = m_instruments[0];
 			tempoTrack.Initialize(m_sndFile, nullptr, nullptr);
-			tempoTrack.WriteString(kTrackName, m_sndFile.songName);
-			tempoTrack.WriteString(kText, m_sndFile.songMessage);
-			tempoTrack.WriteString(kCopyright, m_sndFile.songArtist);
+			tempoTrack.WriteString(kTrackName, m_sndFile.m_songName);
+			tempoTrack.WriteString(kText, m_sndFile.m_songMessage);
+			tempoTrack.WriteString(kCopyright, m_sndFile.m_songArtist);
 		}
 
 		~Conversion()

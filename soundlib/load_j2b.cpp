@@ -792,15 +792,15 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultGlobalVolume = mainChunk.globalvolume * 2;
 	m_nType = MOD_TYPE_J2B;
 
-	madeWithTracker = "Galaxy Sound System (";
+	m_madeWithTracker = "Galaxy Sound System (";
 	if(isAM)
-		madeWithTracker += "new version)";
+		m_madeWithTracker += "new version)";
 	else
-		madeWithTracker += "old version)";
+		m_madeWithTracker += "old version)";
 
 	MPT_ASSERT(mainChunk.unknown == LittleEndian(0xFF0001C5) || mainChunk.unknown == LittleEndian(0x35800716) || mainChunk.unknown == LittleEndian(0xFF00FFFF));
 
-	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, mainChunk.songname);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, mainChunk.songname);
 
 	// It seems like there's no way to differentiate between
 	// Muted and Surround channels (they're all 0xA0) - might

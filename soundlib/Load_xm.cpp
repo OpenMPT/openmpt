@@ -306,14 +306,14 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// ???
 			madeWith.set(verConfirmed);
-			madeWithTracker = "FastTracker Clone";
+			m_madeWithTracker = "FastTracker Clone";
 		}
 	} else
 	{
 		// Something else!
 		madeWith = verUnknown | verConfirmed;
 
-		mpt::String::Read<mpt::String::spacePadded>(madeWithTracker, fileHeader.trackerName);
+		mpt::String::Read<mpt::String::spacePadded>(m_madeWithTracker, fileHeader.trackerName);
 
 		if(!memcmp(fileHeader.trackerName, "MilkyTracker ", 12))
 		{
@@ -326,7 +326,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songName);
+	mpt::String::Read<mpt::String::spacePadded>(m_songName, fileHeader.songName);
 
 	m_nMinPeriod = 1;
 	m_nMaxPeriod = 31999;
@@ -389,12 +389,12 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				// ModPlug Tracker Alpha
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
-				madeWithTracker = "ModPlug Tracker 1.0 alpha";
+				m_madeWithTracker = "ModPlug Tracker 1.0 alpha";
 			} else if(instrHeader.size == 263)
 			{
 				// ModPlug Tracker Beta (Beta 1 still behaves like Alpha, but Beta 3.3 does it this way)
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, B3);
-				madeWithTracker = "ModPlug Tracker 1.0 beta";
+				m_madeWithTracker = "ModPlug Tracker 1.0 beta";
 			} else
 			{
 				// WTF?
@@ -529,7 +529,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	// Read song comments: "text"
 	if(file.ReadMagic("text"))
 	{
-		songMessage.Read(file, file.ReadUint32LE(), SongMessage::leCR);
+		m_songMessage.Read(file, file.ReadUint32LE(), SongMessage::leCR);
 		madeWith |= verConfirmed;
 	}
 	
@@ -583,11 +583,11 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		if(madeWith[verModPlug1_09])
 		{
 			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
-			madeWithTracker = "ModPlug Tracker 1.09";
+			m_madeWithTracker = "ModPlug Tracker 1.09";
 		} else if(madeWith[verNewModPlug])
 		{
 			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
-			madeWithTracker = "ModPlug Tracker 1.16";
+			m_madeWithTracker = "ModPlug Tracker 1.16";
 		}
 	}
 
@@ -635,17 +635,17 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	if(madeWithTracker.empty())
+	if(m_madeWithTracker.empty())
 	{
 		if(madeWith[verDigiTracker] && sampleReserved == 0 && (instrType ? instrType : -1) == -1)
 		{
-			madeWithTracker = "DigiTrakker";
+			m_madeWithTracker = "DigiTrakker";
 		} else if(madeWith[verFT2Generic])
 		{
-			madeWithTracker = "FastTracker 2 or compatible";
+			m_madeWithTracker = "FastTracker 2 or compatible";
 		} else
 		{
-			madeWithTracker = "Unknown";
+			m_madeWithTracker = "Unknown";
 		}
 	}
 
@@ -674,7 +674,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 00, 00))
 	{
-		madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
+		m_madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
 	}
 
 	// We no longer allow any --- or +++ items in the order list now.
@@ -711,7 +711,7 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 	MemsetZero(fileHeader);
 
 	memcpy(fileHeader.signature, "Extended Module: ", 17);
-	mpt::String::Write<mpt::String::spacePadded>(fileHeader.songName, songName);
+	mpt::String::Write<mpt::String::spacePadded>(fileHeader.songName, m_songName);
 	fileHeader.eof = 0x1A;
 	const std::string openMptTrackerName = MptVersion::GetOpenMPTVersionStr();
 	mpt::String::Write<mpt::String::spacePadded>(fileHeader.trackerName, openMptTrackerName);
@@ -1045,16 +1045,16 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 		// Writing song comments
 		char magic[4];
 		int32 size;
-		if(!songMessage.empty())
+		if(!m_songMessage.empty())
 		{
 			memcpy(magic, "text", 4);
 			fwrite(magic, 1, 4, f);
 
-			size = songMessage.length();
+			size = m_songMessage.length();
 			SwapBytesLE(size);
 			fwrite(&size, 1, 4, f);
 
-			fwrite(songMessage.c_str(), 1, songMessage.length(), f);
+			fwrite(m_songMessage.c_str(), 1, m_songMessage.length(), f);
 		}
 		// Writing midi cfg
 		if(m_SongFlags[SONG_EMBEDMIDICFG])

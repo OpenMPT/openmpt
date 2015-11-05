@@ -75,10 +75,10 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals();
-	file.ReadString<mpt::String::maybeNullTerminated>(songName, file.ReadUint32LE());
+	file.ReadString<mpt::String::maybeNullTerminated>(m_songName, file.ReadUint32LE());
 
 	// Song comments
-	songMessage.Read(file, file.ReadUint32LE(), SongMessage::leCR);
+	m_songMessage.Read(file, file.ReadUint32LE(), SongMessage::leCR);
 
 	// Song global config
 	const uint32 songFlags = file.ReadUint32LE();
@@ -317,7 +317,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		m_SongFlags.set(SONG_EMBEDMIDICFG);
 	}
 
-	madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
+	m_madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
 
 	return true;
 #endif // MPT_EXTERNAL_SAMPLES

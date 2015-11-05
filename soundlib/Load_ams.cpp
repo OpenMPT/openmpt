@@ -405,7 +405,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamples = fileHeader.numSamps;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	SetupMODPanning(true);
-	madeWithTracker = mpt::String::Print("Extreme's Tracker %1.%2", fileHeader.versionHigh, fileHeader.versionLow);
+	m_madeWithTracker = mpt::String::Print("Extreme's Tracker %1.%2", fileHeader.versionHigh, fileHeader.versionLow);
 
 	std::vector<bool> packSample(fileHeader.numSamps);
 
@@ -419,7 +419,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Texts
-	ReadAMSString(songName, file);
+	ReadAMSString(m_songName, file);
 
 	// Read sample names
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
@@ -469,7 +469,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 		str = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS, str);
 
 		// Packed text doesn't include any line breaks!
-		songMessage.ReadFixedLineLength(str.c_str(), str.length(), 76, 0);
+		m_songMessage.ReadFixedLineLength(str.c_str(), str.length(), 76, 0);
 	}
 
 	// Read Order List
@@ -760,7 +760,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals();
 
-	if(!ReadAMSString(songName, file)
+	if(!ReadAMSString(m_songName, file)
 		|| !file.ReadConvertEndianness(fileHeader)
 		|| fileHeader.versionHigh != 2 || fileHeader.versionLow > 2)
 	{
@@ -775,7 +775,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = 32;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	SetupMODPanning(true);
-	madeWithTracker = mpt::String::Print("Velvet Studio %1.%2", fileHeader.versionHigh, mpt::fmt::dec0<2>(fileHeader.versionLow));
+	m_madeWithTracker = mpt::String::Print("Velvet Studio %1.%2", fileHeader.versionHigh, mpt::fmt::dec0<2>(fileHeader.versionLow));
 
 	uint16 headerFlags;
 	if(fileHeader.versionLow >= 2)
@@ -893,7 +893,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		std::string str;
 		file.ReadString<mpt::String::spacePadded>(str, composerLength);
-		songArtist = mpt::ToUnicode(mpt::CharsetCP437AMS2, str);
+		m_songArtist = mpt::ToUnicode(mpt::CharsetCP437AMS2, str);
 	}
 
 	// Channel names
@@ -935,7 +935,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		std::string str(textOut.begin(), textOut.begin() + descriptionHeader.unpackedLen);
 		str = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS2, str);
 		// Packed text doesn't include any line breaks!
-		songMessage.ReadFixedLineLength(str.c_str(), str.length(), 74, 0);
+		m_songMessage.ReadFixedLineLength(str.c_str(), str.length(), 74, 0);
 	}
 
 	// Read Order List

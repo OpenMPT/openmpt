@@ -298,7 +298,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// "TITL" - Song Title
 	FileReader titleChunk = chunks.GetChunk(PSMChunk::idTITL);
-	titleChunk.ReadString<mpt::String::spacePadded>(songName, titleChunk.GetLength());
+	titleChunk.ReadString<mpt::String::spacePadded>(m_songName, titleChunk.GetLength());
 
 	// "SDFT" - Format info (song data starts here)
 	if(!chunks.GetChunk(PSMChunk::idSDFT).ReadMagic("MAINSONG"))
@@ -639,11 +639,11 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		ChnSettings[chn].dwFlags.set(CHN_SURROUND, subsongs[0].channelSurround[chn]);
 	}
 
-	madeWithTracker = "Epic MegaGames MASI (";
+	m_madeWithTracker = "Epic MegaGames MASI (";
 	if(newFormat)
-		madeWithTracker += "New Version / Sinaria)";
+		m_madeWithTracker += "New Version / Sinaria)";
 	else
-		madeWithTracker += "New Version)";
+		m_madeWithTracker += "New Version)";
 
 	if(!(loadFlags & loadPatternData))
 	{
@@ -1147,7 +1147,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Seems to be valid!
 	InitializeGlobals();
-	madeWithTracker = "Epic MegaGames MASI (Old Version)";
+	m_madeWithTracker = "Epic MegaGames MASI (Old Version)";
 	m_nType = MOD_TYPE_S3M;
 	m_nChannels = Clamp(CHANNELINDEX(fileHeader.numChannelsPlay), CHANNELINDEX(fileHeader.numChannelsReal), MAX_BASECHANNELS);
 	m_nSamplePreAmp = fileHeader.masterVolume;
@@ -1159,7 +1159,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultSpeed = fileHeader.songSpeed;
 	m_nDefaultTempo.Set(fileHeader.songTempo);
 
-	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songName);
+	mpt::String::Read<mpt::String::spacePadded>(m_songName, fileHeader.songName);
 
 	// Read orders
 	if(fileHeader.orderOffset > 4 && file.Seek(fileHeader.orderOffset - 4) && file.ReadUint32LE() == PSM16FileHeader::idPORD)
@@ -1430,7 +1430,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileHeader.commentsOffset != 0)
 	{
 		file.Seek(fileHeader.commentsOffset);
-		songMessage.Read(file, file.ReadUint16LE(), SongMessage::leAutodetect);
+		m_songMessage.Read(file, file.ReadUint16LE(), SongMessage::leAutodetect);
 	}
 
 	return true;

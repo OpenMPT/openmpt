@@ -155,10 +155,10 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals();
 	m_nType = gdmFormatOrigin[fileHeader.originalFormat];
 	m_ContainerType = MOD_CONTAINERTYPE_GDM;
-	madeWithTracker = mpt::String::Print("BWSB 2GDM %1.%2 (converted from %3)", fileHeader.trackerMajorVer, fileHeader.formatMinorVer, ModTypeToTracker(GetType()));
+	m_madeWithTracker = mpt::String::Print("BWSB 2GDM %1.%2 (converted from %3)", fileHeader.trackerMajorVer, fileHeader.formatMinorVer, ModTypeToTracker(GetType()));
 
 	// Song name
-	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, fileHeader.songTitle);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songTitle);
 
 	// Artist name
 	{
@@ -166,7 +166,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		mpt::String::Read<mpt::String::maybeNullTerminated>(artist, fileHeader.songMusician);
 		if(artist != "Unknown")
 		{
-			songArtist = mpt::ToUnicode(mpt::CharsetCP437, artist);
+			m_songArtist = mpt::ToUnicode(mpt::CharsetCP437, artist);
 		}
 	}
 
@@ -519,7 +519,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	// Read song comments
 	if(fileHeader.messageTextLength > 0 && file.Seek(fileHeader.messageTextOffset))
 	{
-		songMessage.Read(file, fileHeader.messageTextLength, SongMessage::leAutodetect);
+		m_songMessage.Read(file, fileHeader.messageTextLength, SongMessage::leAutodetect);
 	}
 
 	return true;

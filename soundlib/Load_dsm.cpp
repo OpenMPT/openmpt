@@ -172,7 +172,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 	songHeader.ConvertEndianness();
 
 	InitializeGlobals();
-	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, songHeader.songName);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, songHeader.songName);
 	m_nType = MOD_TYPE_DSM;
 	m_nChannels = Clamp(songHeader.numChannels, uint16(1), uint16(16));
 	m_nDefaultSpeed = songHeader.speed;

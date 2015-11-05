@@ -513,23 +513,23 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// Oktalyzer
 		m_nChannels = 8;
-		madeWithTracker = "Oktalyzer";
+		m_madeWithTracker = "Oktalyzer";
 	} else if(IsMagic(magic, "CD81")
 		|| IsMagic(magic, "CD61"))
 	{
 		// Octalyser on Atari STe/Falcon
 		m_nChannels = magic[2] - '0';
-		madeWithTracker = "Octalyser (Atari)";
+		m_madeWithTracker = "Octalyser (Atari)";
 	} else if(!memcmp(magic, "FA0", 3) && magic[3] >= '4' && magic[3] <= '8')
 	{
 		// Digital Tracker on Atari Falcon
 		m_nChannels = magic[3] - '0';
-		madeWithTracker = "Digital Tracker";
+		m_madeWithTracker = "Digital Tracker";
 	} else if((!memcmp(magic, "FLT", 3) || !memcmp(magic, "EXO", 3)) && magic[3] >= '4' && magic[3] <= '9')
 	{
 		// FLTx / EXOx - Startrekker by Exolon / Fairlight
 		m_nChannels = magic[3] - '0';
-		madeWithTracker = "Startrekker";
+		m_madeWithTracker = "Startrekker";
 	} else if(magic[0] >= '1' && magic[0] <= '9' && !memcmp(magic + 1, "CHN", 3))
 	{
 		// xCHN - Many trackers
@@ -543,7 +543,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// TDZx - TakeTracker
 		m_nChannels = magic[3] - '0';
-		madeWithTracker = "TakeTracker";
+		m_madeWithTracker = "TakeTracker";
 	} else
 	{
 		return false;
@@ -562,7 +562,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Reading song title
 	file.Seek(0);
-	file.ReadString<mpt::String::spacePadded>(songName, 20);
+	file.ReadString<mpt::String::spacePadded>(m_songName, 20);
 
 	// Load Samples
 	size_t totalSampleLen = 0;
@@ -602,7 +602,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	if(isMdKd && GetNumChannels() == 8)
 	{
 		// M.K. with 8 channels = Grave Composer
-		madeWithTracker = "Mod's Grave";
+		m_madeWithTracker = "Mod's Grave";
 	}
 
 	if(isFLT8)
@@ -797,7 +797,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 				m_SongFlags.reset(SONG_VBLANK_TIMING);
 			} else
 			{
-				madeWithTracker = "ProTracker (VBlank)";
+				m_madeWithTracker = "ProTracker (VBlank)";
 			}
 		}
 	}
@@ -973,7 +973,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMaxPeriod = 3424 * 4;
 	m_nSamplePreAmp = 64;
 	m_SongFlags = SONG_PT_MODE;
-	mpt::String::Read<mpt::String::spacePadded>(songName, songname);
+	mpt::String::Read<mpt::String::spacePadded>(m_songName, songname);
 
 	// Setup channel pan positions and volume
 	SetupMODPanning();
@@ -1146,26 +1146,26 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	switch(minVersion)
 	{
 	case UST1_00:
-		madeWithTracker = "Ultimate Soundtracker 1.0-1.21";
+		m_madeWithTracker = "Ultimate Soundtracker 1.0-1.21";
 		break;
 	case UST1_80:
-		madeWithTracker = "Ultimate Soundtracker 1.8-2.0";
+		m_madeWithTracker = "Ultimate Soundtracker 1.8-2.0";
 		break;
 	case ST2_00_Exterminator:
-		madeWithTracker = "SoundTracker 2.0 / D.O.C. Sountracker II";
+		m_madeWithTracker = "SoundTracker 2.0 / D.O.C. Sountracker II";
 		break;
 	case ST_III:
-		madeWithTracker = "Defjam Soundtracker III / Alpha Flight SoundTracker IV / D.O.C. SoundTracker IV / VI";
+		m_madeWithTracker = "Defjam Soundtracker III / Alpha Flight SoundTracker IV / D.O.C. SoundTracker IV / VI";
 		break;
 	case ST_IX:
-		madeWithTracker = "D.O.C. SoundTracker IX";
+		m_madeWithTracker = "D.O.C. SoundTracker IX";
 		break;
 	case MST1_00:
-		madeWithTracker = "Master Soundtracker 1.0";
+		m_madeWithTracker = "Master Soundtracker 1.0";
 		break;
 	case ST2_00:
 	case ST2_00_with_Bxx:
-		madeWithTracker = "SoundTracker 2.0 / 2.1 / 2.2";
+		m_madeWithTracker = "SoundTracker 2.0 / 2.1 / 2.2";
 		break;
 	}
 
@@ -1203,15 +1203,15 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals();
 
 	if(IsMagic(magic, "MTN\0"))
-		madeWithTracker = "SoundTracker 2.6";
+		m_madeWithTracker = "SoundTracker 2.6";
 	else if(IsMagic(magic, "IT10"))
-		madeWithTracker = "Ice Tracker 1.0 / 1.1";
+		m_madeWithTracker = "Ice Tracker 1.0 / 1.1";
 	else
 		return false;
 
 	// Reading song title
 	file.Seek(0);
-	file.ReadString<mpt::String::spacePadded>(songName, 20);
+	file.ReadString<mpt::String::spacePadded>(m_songName, 20);
 
 	// Load Samples
 	m_nSamples = 31;
@@ -1345,7 +1345,7 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 	// Write song title
 	{
 		char name[20];
-		mpt::String::Write<mpt::String::maybeNullTerminated>(name, songName);
+		mpt::String::Write<mpt::String::maybeNullTerminated>(name, m_songName);
 		fwrite(name, 20, 1, f);
 	}
 

@@ -359,11 +359,11 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 			Log("infoblock: %d bytes\n", blocklen);
 		#endif
 			pmib = (const MDLInfoBlock *)(lpStream+dwMemPos);
-			mpt::String::Read<mpt::String::maybeNullTerminated>(songName, pmib->songname);
+			mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, pmib->songname);
 			{
 				std::string artist;
 				mpt::String::Read<mpt::String::maybeNullTerminated>(artist, pmib->composer);
-				songArtist = mpt::ToUnicode(mpt::CharsetCP437, artist);
+				m_songArtist = mpt::ToUnicode(mpt::CharsetCP437, artist);
 			}
 
 			norders = pmib->norders;
@@ -391,7 +391,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		#endif
 			if(blocklen)
 			{
-				songMessage.Read(lpStream + dwMemPos, blocklen - 1, SongMessage::leCR);
+				m_songMessage.Read(lpStream + dwMemPos, blocklen - 1, SongMessage::leCR);
 			}
 			break;
 		// PA: Pattern Data

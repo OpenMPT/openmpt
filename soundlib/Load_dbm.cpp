@@ -328,11 +328,11 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = Clamp(infoData.channels, uint16(1), uint16(MAX_BASECHANNELS));	// note: MAX_BASECHANNELS is currently 127, but DBPro 2 supports up to 128 channels, DBPro 3 apparently up to 254.
 	m_nInstruments = std::min<INSTRUMENTINDEX>(infoData.instruments, MAX_INSTRUMENTS - 1);
 	m_nSamples = std::min<SAMPLEINDEX>(infoData.samples, MAX_SAMPLES - 1);
-	madeWithTracker = mpt::String::Print("DigiBooster Pro %1.%2", mpt::fmt::hex(fileHeader.trkVerHi), mpt::fmt::hex(fileHeader.trkVerLo));
+	m_madeWithTracker = mpt::String::Print("DigiBooster Pro %1.%2", mpt::fmt::hex(fileHeader.trkVerHi), mpt::fmt::hex(fileHeader.trkVerLo));
 
 	// Name chunk
 	FileReader nameChunk = chunks.GetChunk(DBMChunk::idNAME);
-	nameChunk.ReadString<mpt::String::maybeNullTerminated>(songName, nameChunk.GetLength());
+	nameChunk.ReadString<mpt::String::maybeNullTerminated>(m_songName, nameChunk.GetLength());
 
 	// Song chunk
 	FileReader songChunk = chunks.GetChunk(DBMChunk::idSONG);
@@ -341,9 +341,9 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		char name[44];
 		songChunk.ReadString<mpt::String::maybeNullTerminated>(name, 44);
-		if(songName.empty())
+		if(m_songName.empty())
 		{
-			songName = name;
+			m_songName = name;
 		}
 #ifdef DBM_USE_REAL_SUBSONGS
 		if(i > 0) Order.AddSequence(false);

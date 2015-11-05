@@ -128,9 +128,9 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = 8;
 
 	if(fileHeader.sig == _669FileHeader::magic669)
-		madeWithTracker = "Composer 669";
+		m_madeWithTracker = "Composer 669";
 	else
-		madeWithTracker = "UNIS 669";
+		m_madeWithTracker = "UNIS 669";
 
 	m_nSamples = fileHeader.samples;
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
@@ -145,9 +145,9 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Copy first song message line into song title
-	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songMessage, 36);
+	mpt::String::Read<mpt::String::spacePadded>(m_songName, fileHeader.songMessage, 36);
 	// Song Message
-	songMessage.ReadFixedLineLength(fileHeader.songMessage, 108, 36, 0);
+	m_songMessage.ReadFixedLineLength(fileHeader.songMessage, 108, 36, 0);
 
 	// Reading Orders
 	Order.ReadFromArray(fileHeader.orders, CountOf(fileHeader.orders), 0xFF, 0xFE);

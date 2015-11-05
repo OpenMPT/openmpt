@@ -395,18 +395,18 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals();
-	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, fileHeader.songName);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songName);
 
 	const char *versions[] = {"<1.4", "1.4", "1.5", "1.6"};
-	madeWithTracker = "UltraTracker ";
-	madeWithTracker += versions[fileHeader.version - '1'];
+	m_madeWithTracker = "UltraTracker ";
+	m_madeWithTracker += versions[fileHeader.version - '1'];
 
 	m_nType = MOD_TYPE_ULT;
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;	// this will be converted to IT format by MPT.
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	// read "messageLength" lines, each containing 32 characters.
-	songMessage.ReadFixedLineLength(file, fileHeader.messageLength * 32, 32, 0);
+	m_songMessage.ReadFixedLineLength(file, fileHeader.messageLength * 32, 32, 0);
 
 	m_nSamples = static_cast<SAMPLEINDEX>(file.ReadUint8());
 	if(GetNumSamples() >= MAX_SAMPLES)

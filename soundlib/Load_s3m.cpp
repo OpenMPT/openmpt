@@ -215,11 +215,11 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// MPT 1.16 and older versions of OpenMPT - Simply keep default (filter) MIDI macros
 			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
-			madeWithTracker = "ModPlug Tracker / OpenMPT";
+			m_madeWithTracker = "ModPlug Tracker / OpenMPT";
 			keepMidiMacros = true;
 		} else if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && fileHeader.ultraClicks == 0 && fileHeader.flags == 0 && fileHeader.usePanningTable == 0)
 		{
-			madeWithTracker = "Velvet Studio";
+			m_madeWithTracker = "Velvet Studio";
 		} else
 		{
 			trackerStr = "Scream Tracker";
@@ -233,13 +233,13 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		if(fileHeader.cwtv <= S3MFileHeader::trkIT2_14)
 			trackerStr = "Impulse Tracker";
 		else
-			madeWithTracker = mpt::String::Print("Impulse Tracker 2.14p%1", fileHeader.cwtv - S3MFileHeader::trkIT2_14);
+			m_madeWithTracker = mpt::String::Print("Impulse Tracker 2.14p%1", fileHeader.cwtv - S3MFileHeader::trkIT2_14);
 		break;
 	case S3MFileHeader::trkSchismTracker:
 		if(fileHeader.cwtv == S3MFileHeader::trkBeRoTrackerOld)
-			madeWithTracker = "BeRoTracker";
+			m_madeWithTracker = "BeRoTracker";
 		else
-			madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
+			m_madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
 		break;
 	case S3MFileHeader::trkOpenMPT:
 		trackerStr = "OpenMPT";
@@ -247,17 +247,17 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		SetModFlag(MSF_COMPATIBLE_PLAY, true);
 		break; 
 	case S3MFileHeader::trkBeRoTracker:
-		madeWithTracker = "BeRoTracker";
+		m_madeWithTracker = "BeRoTracker";
 		SetModFlag(MSF_COMPATIBLE_PLAY, true);
 		break;
 	case S3MFileHeader::trkCreamTracker:
-		madeWithTracker = "CreamTracker";
+		m_madeWithTracker = "CreamTracker";
 		SetModFlag(MSF_COMPATIBLE_PLAY, true);
 		break;
 	}
 	if(!trackerStr.empty())
 	{
-		madeWithTracker = mpt::String::Print("%1 %2.%3", trackerStr, (fileHeader.cwtv & 0xF00) >> 8, mpt::fmt::hex0<2>(fileHeader.cwtv & 0xFF));
+		m_madeWithTracker = mpt::String::Print("%1 %2.%3", trackerStr, (fileHeader.cwtv & 0xF00) >> 8, mpt::fmt::hex0<2>(fileHeader.cwtv & 0xFF));
 	}
 
 	if((fileHeader.cwtv & S3MFileHeader::trackerMask) > S3MFileHeader::trkScreamTracker)
@@ -279,7 +279,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	m_nType = MOD_TYPE_S3M;
-	mpt::String::Read<mpt::String::nullTerminated>(songName, fileHeader.name);
+	mpt::String::Read<mpt::String::nullTerminated>(m_songName, fileHeader.name);
 
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 32767;
@@ -558,7 +558,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	S3MFileHeader fileHeader;
 	MemsetZero(fileHeader);
 
-	mpt::String::Write<mpt::String::nullTerminated>(fileHeader.name, songName);
+	mpt::String::Write<mpt::String::nullTerminated>(fileHeader.name, m_songName);
 	fileHeader.dosEof = S3MFileHeader::idEOF;
 	fileHeader.fileType = S3MFileHeader::idS3MType;
 

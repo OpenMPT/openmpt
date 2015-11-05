@@ -470,13 +470,13 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		}
 	}
 
-	if(!originalSpecs->hasArtistName && !m_SndFile.songArtist.empty())
+	if(!originalSpecs->hasArtistName && !m_SndFile.m_songArtist.empty())
 	{
 		AddToLog("Found artist name");
 		foundHacks = true;
 		if(autofix)
 		{
-			m_SndFile.songArtist.clear();
+			m_SndFile.m_songArtist.clear();
 		}
 	}
 

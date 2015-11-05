@@ -297,7 +297,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		if (!m_bEditsLocked)
 		{
 			m_EditTitle.SetWindowText(m_sndFile.GetTitle().c_str());
-			::SetWindowTextW(m_EditArtist.m_hWnd, mpt::ToWide(m_sndFile.songArtist).c_str());
+			::SetWindowTextW(m_EditArtist.m_hWnd, mpt::ToWide(m_sndFile.m_songArtist).c_str());
 			m_EditTempo.SetTempoValue(m_sndFile.m_nDefaultTempo);
 			SetDlgItemInt(IDC_EDIT_SPEED, m_sndFile.m_nDefaultSpeed, FALSE);
 			SetDlgItemInt(IDC_EDIT_GLOBALVOL, m_sndFile.m_nDefaultGlobalVolume / GetGlobalVolumeFactor(), FALSE);
@@ -445,10 +445,10 @@ void CCtrlGeneral::OnArtistChanged()
 	if (!m_EditArtist.m_hWnd || !m_EditArtist.GetModify()) return;
 
 	mpt::ustring artist = mpt::ToUnicode(GetWindowTextW(m_EditArtist));
-	if(artist != m_sndFile.songArtist)
+	if(artist != m_sndFile.m_songArtist)
 	{
 		m_EditArtist.SetModify(FALSE);
-		m_sndFile.songArtist = artist;
+		m_sndFile.m_songArtist = artist;
 		m_modDoc.SetModified();
 		m_modDoc.UpdateAllViews(NULL, GeneralHint().General(), this);
 	}

@@ -528,12 +528,12 @@ public:
 
 public:
 
-	std::string songName;
-	mpt::ustring songArtist;
+	std::string m_songName;
+	mpt::ustring m_songArtist;
 
 	// Song message
-	SongMessage songMessage;
-	std::string madeWithTracker;
+	SongMessage m_songMessage;
+	std::string m_madeWithTracker;
 
 protected:
 	std::vector<FileHistory> m_FileHistory;	// File edit history
@@ -634,7 +634,7 @@ public:
 	void ResetMixStat() { m_nMixStat = 0; }
 	void ResetPlayPos();
 	void SetCurrentOrder(ORDERINDEX nOrder);
-	std::string GetTitle() const { return songName; }
+	std::string GetTitle() const { return m_songName; }
 	bool SetTitle(const std::string &newTitle); // Return true if title was changed.
 	const char *GetSampleName(SAMPLEINDEX nSample) const;
 	const char *GetInstrumentName(INSTRUMENTINDEX nInstr) const;

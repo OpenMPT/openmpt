@@ -215,7 +215,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Now we can be pretty sure that we're doing the right thing.
 	InitializeGlobals();
-	madeWithTracker = mpt::String::Print("Unreal Package v%1", fileHeader.packageVersion);
+	m_madeWithTracker = mpt::String::Print("Unreal Package v%1", fileHeader.packageVersion);
 	
 	for(uint32 i = 0; i < fileHeader.exportCount; i++)
 	{

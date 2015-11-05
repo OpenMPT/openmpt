@@ -107,7 +107,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	// Version information
 
 	if(sndFile.m_dwCreatedWithVersion) SetDlgItemText(IDC_EDIT_CREATEDWITH, _T("OpenMPT ") + FormatVersionNumber(sndFile.m_dwCreatedWithVersion));
-	SetDlgItemText(IDC_EDIT_SAVEDWITH, sndFile.madeWithTracker.c_str());
+	SetDlgItemText(IDC_EDIT_SAVEDWITH, sndFile.m_madeWithTracker.c_str());
 	UpdateDialog();
 
 	initialized = true;
