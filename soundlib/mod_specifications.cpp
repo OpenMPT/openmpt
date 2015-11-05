@@ -419,7 +419,7 @@ MODTYPE CModSpecifications::ExtensionToType(std::string ext)
 	{
 		ext = ext.substr(1);
 	}
-	std::transform( ext.begin(), ext.end(), ext.begin(), tolower );
+	ext = mpt::ToLowerCaseAscii(ext);
 	for(std::size_t i = 0; i < CountOf(ModSpecs::Collection); i++)
 	{
 		if(ext == ModSpecs::Collection[i]->fileExtension)
