@@ -854,9 +854,9 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 	} else if ( key == std::string("container_long") ) {
 		return CSoundFile::ModContainerTypeToTracker( m_sndFile->GetContainerType() );
 	} else if ( key == std::string("tracker") ) {
-		return m_sndFile->madeWithTracker;
+		return m_sndFile->m_madeWithTracker;
 	} else if ( key == std::string("artist") ) {
-		return mpt::ToCharset( mpt::CharsetUTF8, m_sndFile->songArtist );
+		return mpt::ToCharset( mpt::CharsetUTF8, m_sndFile->m_songArtist );
 	} else if ( key == std::string("title") ) {
 		return mod_string_to_utf8( m_sndFile->GetTitle() );
 	} else if ( key == std::string("date") ) {
@@ -865,7 +865,7 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 		}
 		return mpt::ToCharset(mpt::CharsetUTF8, m_sndFile->GetFileHistory()[m_sndFile->GetFileHistory().size() - 1].AsISO8601() );
 	} else if ( key == std::string("message") ) {
-		std::string retval = m_sndFile->songMessage.GetFormatted( SongMessage::leLF );
+		std::string retval = m_sndFile->m_songMessage.GetFormatted( SongMessage::leLF );
 		if ( retval.empty() ) {
 			std::string tmp;
 			bool valid = false;
@@ -898,7 +898,7 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 		}
 		return mod_string_to_utf8( retval );
 	} else if ( key == std::string("message_raw") ) {
-		std::string retval = m_sndFile->songMessage.GetFormatted( SongMessage::leLF );
+		std::string retval = m_sndFile->m_songMessage.GetFormatted( SongMessage::leLF );
 		return mod_string_to_utf8( retval );
 	} else if ( key == std::string("warnings") ) {
 		std::string retval;
