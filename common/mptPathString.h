@@ -92,6 +92,8 @@ public:
 
 public:
 
+	size_t Length() const { return path.size(); }
+
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 	void SplitPath(PathString *drive, PathString *dir, PathString *fname, PathString *ext) const;
@@ -102,8 +104,6 @@ public:
 	PathString GetFileExt() const;		// Extension including dot, e.g. ".exe"
 	PathString GetFullFileName() const;	// File name + extension, e.g. "mptrack.exe"
 
-	size_t Length() const { return path.size(); }
-	
 	// Verify if this path represents a valid directory on the file system.
 	bool IsDirectory() const { return ::PathIsDirectoryW(path.c_str()) != FALSE; }
 	// Verify if this path exists and is a file on the file system.
