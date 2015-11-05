@@ -149,6 +149,11 @@ void COptionsAdvanced::ReInit()
 	int i = 0;
 	for(SettingsContainer::SettingsMap::const_iterator it = theApp.GetSettings().begin(); it != theApp.GetSettings().end(); ++it)
 	{
+		// In MPT_USTRING_MODE_WIDE mode,
+		// this loop is heavily optimized to avoid as much string copies as possible
+		// in order to perform ok-ish in debug builds.
+		// MPT_USTRING_MODE_UTF8 is not optimized as we (currently) do not build in
+		// this mode by default.
 		const SettingPath &path = it->first;
 		const SettingState &state = it->second;
 #if _WIN32_WINNT >= 0x0501
@@ -161,11 +166,19 @@ void COptionsAdvanced::ReInit()
 		if(!findStr.IsEmpty())
 		{
 			mpt::ustring str = path.FormatAsString() + MPT_USTRING("=") + value.FormatValueAsString();
+#if MPT_USTRING_MODE_WIDE
 			CStringW::StrTraits::StringLowercase(&str[0], str.size() + 1);
 			if(str.find(findStr) == mpt::ustring::npos)
 			{
 				continue;
 			}
+#else
+			str = mpt::ToLowerCase(str);
+			if(str.find(mpt::ToUnicode(findStr)) == mpt::ustring::npos)
+			{
+				continue;
+			}
+#endif
 		}
 
 		int index;
@@ -176,7 +189,7 @@ void COptionsAdvanced::ReInit()
 		if(m_listGrouped)
 		{
 
-			UNORDERED_MAP<mpt::ustring, int>::const_iterator gi = m_groups.find(section);
+			GroupMap::const_iterator gi = m_groups.find(section);
 			if(gi == m_groups.end())
 			{
 				LVGROUP group;
@@ -186,7 +199,12 @@ void COptionsAdvanced::ReInit()
 				group.cbSize = sizeof(group);
 	#endif
 				group.mask = LVGF_HEADER | LVGF_GROUPID;
+#if MPT_USTRING_MODE_WIDE
 				group.pszHeader = const_cast<wchar_t *>(section.c_str());
+#else
+				const std::wstring wsection = mpt::ToWide(section);
+				group.pszHeader = const_cast<wchar_t *>(wsection.c_str());
+#endif
 				group.cchHeader = 0;
 				group.pszFooter = nullptr;
 				group.cchFooter = 0;
@@ -201,7 +219,12 @@ void COptionsAdvanced::ReInit()
 				lvi.iGroupId = gi->second;
 			}
 
+#if MPT_USTRING_MODE_WIDE
 			lvi.pszText = const_cast<wchar_t *>(key.c_str());
+#else
+			const std::wstring wkey = mpt::ToWide(key);
+			lvi.pszText = const_cast<wchar_t *>(wkey.c_str());
+#endif
 			index = static_cast<int>(m_List.SendMessage(LVM_INSERTITEMW, 0, (LPARAM)(&lvi)));
 
 		} else
@@ -209,7 +232,12 @@ void COptionsAdvanced::ReInit()
 		{
 
 			const mpt::ustring sectionAndKey = path.FormatAsString();
+#if MPT_USTRING_MODE_WIDE
 			lvi.pszText = const_cast<wchar_t *>(sectionAndKey.c_str());
+#else
+			const std::wstring wsectionAndKey = mpt::ToWide(sectionAndKey);
+			lvi.pszText = const_cast<wchar_t *>(wsectionAndKey.c_str());
+#endif
 			index = static_cast<int>(m_List.SendMessage(LVM_INSERTITEMW, 0, (LPARAM)(&lvi)));
 
 		}

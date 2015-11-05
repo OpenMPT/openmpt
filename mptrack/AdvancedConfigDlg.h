@@ -13,11 +13,15 @@
 #if defined(MPT_SETTINGS_CACHE)
 
 #include "CListCtrl.h"
+#if MPT_USTRING_MODE_WIDE
 #include <unordered_map>
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-#define UNORDERED_MAP std::tr1::unordered_map
+#define MPT_UNORDERED_MAP std::tr1::unordered_map
 #else
-#define UNORDERED_MAP std::unordered_map
+#define MPT_UNORDERED_MAP std::unordered_map
+#endif
+#else
+#include <map>
 #endif
 
 OPENMPT_NAMESPACE_BEGIN
@@ -28,8 +32,13 @@ class COptionsAdvanced: public CPropertyPage
 {
 protected:
 	CListCtrlEx m_List;
+#if MPT_USTRING_MODE_WIDE
+	typedef MPT_UNORDERED_MAP<mpt::ustring, int> GroupMap;
+#else
+	typedef std::map<mpt::ustring, int> GroupMap;
+#endif
 	std::vector<SettingPath> m_indexToPath;
-	UNORDERED_MAP<mpt::ustring, int> m_groups;
+	GroupMap m_groups;
 	bool m_listGrouped;
 
 public:
