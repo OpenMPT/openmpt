@@ -271,7 +271,7 @@ public:
 	void SetSelToCursor() { SetCurSel(m_Cursor); };
 
 	bool SetCurrentPattern(PATTERNINDEX pat, ROWINDEX row = ROWINDEX_INVALID);
-	bool SetCurrentRow(ROWINDEX row, bool wrap = false, bool updateHorizontalScrollbar = true);
+	ROWINDEX SetCurrentRow(ROWINDEX row, bool wrap = false, bool updateHorizontalScrollbar = true);
 	bool SetCurrentColumn(const PatternCursor &cursor) { return SetCurrentColumn(cursor.GetChannel(), cursor.GetColumnType()); };
 	bool SetCurrentColumn(CHANNELINDEX channel, PatternCursor::Columns column = PatternCursor::firstColumn);
 	// This should be used instead of consecutive calls to SetCurrentRow() then SetCurrentColumn()

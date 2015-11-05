@@ -263,16 +263,16 @@ bool CViewPattern::SetCursorPosition(const PatternCursor &cursor, bool wrap)
 	SetCurrentRow(cursor.GetRow(), wrap, false);
 	// Now set column and update scroll position:
 	SetCurrentColumn(cursor);
-	return true; 
+	return true;
 }
 
 
-bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalScrollbar)
-//---------------------------------------------------------------------------------------
+ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalScrollbar)
+//-------------------------------------------------------------------------------------------
 {
 	const CSoundFile *pSndFile = GetSoundFile();
 	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidIndex(m_nPattern))
-		return false;
+		return ROWINDEX_INVALID;
 
 	if(wrap && pSndFile->Patterns[m_nPattern].GetNumRows())
 	{
@@ -361,7 +361,7 @@ bool CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalS
 // 		selStart.GetChannel(),
 // 		selStart.GetColumnType());
 
-	return true;
+	return row;
 }
 
 
@@ -4373,7 +4373,7 @@ void CViewPattern::CursorJump(int distance, bool snap)
 		row = (((row + (upwards ? -1 : 0)) / distanceAbs) + (upwards ? 0 : 1)) * distanceAbs;
 	else
 		row += distance;
-	SetCurrentRow(row, true);
+	row = SetCurrentRow(row, true);
 
 	if(IsLiveRecord())
 	{
@@ -4383,6 +4383,10 @@ void CViewPattern::CursorJump(int distance, bool snap)
 		sndFile.m_PlayState.m_nPattern = m_nPattern;
 		sndFile.m_PlayState.m_nRow = m_nPlayRow = row;
 		sndFile.m_PlayState.m_nNextRow = m_nNextPlayRow = row + 1;
+		if(sndFile.Patterns.IsValidPat(m_nPattern) && m_nNextPlayRow >= sndFile.Patterns[m_nPattern].GetNumRows())
+		{
+			sndFile.m_PlayState.m_nNextOrder++;
+		}
 		CMainFrame::GetMainFrame()->ResetNotificationBuffer();
 	}
 }
