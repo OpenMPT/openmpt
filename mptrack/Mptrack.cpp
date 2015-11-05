@@ -162,8 +162,8 @@ CDocument* CModDocTemplate::OpenTemplateFile(const mpt::PathString &filename, bo
 			sndFile.GetFileHistory().clear();
 			sndFile.m_dwCreatedWithVersion = MptVersion::num;
 			sndFile.m_dwLastSavedWithVersion = 0;
-			sndFile.madeWithTracker.clear();
-			sndFile.songArtist = TrackerSettings::Instance().defaultArtist;
+			sndFile.m_madeWithTracker.clear();
+			sndFile.m_songArtist = TrackerSettings::Instance().defaultArtist;
 			doc->UpdateAllViews(nullptr, UpdateHint().ModType().AsLPARAM());
 		} else
 		{

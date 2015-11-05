@@ -443,8 +443,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals();
 	InitializeChannels();
 	m_nType = MOD_TYPE_MT2;
-	mpt::String::Read<mpt::String::maybeNullTerminated>(madeWithTracker, fileHeader.trackerName);
-	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, fileHeader.songName);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_madeWithTracker, fileHeader.trackerName);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songName);
 	m_nChannels = Clamp(fileHeader.numChannels, CHANNELINDEX(1), MAX_BASECHANNELS);
 	m_nRestartPos = fileHeader.restartPos;
 	m_nDefaultSpeed = fileHeader.ticksPerLine;
@@ -600,7 +600,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 		case MAGIC4LE('M','S','G','\0'):
 			chunk.Skip(1);	// Show message on startup
-			songMessage.Read(chunk, chunk.BytesLeft(), SongMessage::leCRLF);
+			m_songMessage.Read(chunk, chunk.BytesLeft(), SongMessage::leCRLF);
 			break;
 
 		case MAGIC4LE('P','I','C','T'):
@@ -614,7 +614,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				chunk.ReadNullString(artist);
 				if(artist != "Unregistered")
 				{
-					songArtist = mpt::ToUnicode(mpt::CharsetWindows1252, artist);
+					m_songArtist = mpt::ToUnicode(mpt::CharsetWindows1252, artist);
 				}
 			}
 			break;

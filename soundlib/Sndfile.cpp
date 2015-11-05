@@ -183,10 +183,10 @@ void CSoundFile::InitializeGlobals()
 
 	Patterns.ClearPatterns();
 
-	songName.clear();
-	songArtist.clear();
-	songMessage.clear();
-	madeWithTracker.clear();
+	m_songName.clear();
+	m_songArtist.clear();
+	m_songMessage.clear();
+	m_madeWithTracker.clear();
 	m_FileHistory.clear();
 	m_tempoSwing.clear();
 }
@@ -310,16 +310,16 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			m_ContainerType = packedContainerType;
 		}
 
-		if(madeWithTracker.empty())
+		if(m_madeWithTracker.empty())
 		{
-			madeWithTracker = ModTypeToTracker(GetType());
+			m_madeWithTracker = ModTypeToTracker(GetType());
 		}
 
 #ifndef NO_ARCHIVE_SUPPORT
 		// Read archive comment if there is no song comment
-		if(songMessage.empty())
+		if(m_songMessage.empty())
 		{
-			songMessage.assign(mpt::ToCharset(mpt::CharsetLocale, unarchiver.GetComment()));
+			m_songMessage.assign(mpt::ToCharset(mpt::CharsetLocale, unarchiver.GetComment()));
 		}
 #endif
 
@@ -520,10 +520,10 @@ bool CSoundFile::Destroy()
 
 	Patterns.DestroyPatterns();
 
-	songName.clear();
-	songArtist.clear();
-	songMessage.clear();
-	madeWithTracker.clear();
+	m_songName.clear();
+	m_songArtist.clear();
+	m_songMessage.clear();
+	m_madeWithTracker.clear();
 	m_FileHistory.clear();
 
 	for(SAMPLEINDEX i = 1; i < MAX_SAMPLES; i++)
@@ -1309,9 +1309,9 @@ void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 bool CSoundFile::SetTitle(const std::string &newTitle)
 //----------------------------------------------------
 {
-	if(songName != newTitle)
+	if(m_songName != newTitle)
 	{
-		songName = newTitle;
+		m_songName = newTitle;
 		return true;
 	}
 	return false;

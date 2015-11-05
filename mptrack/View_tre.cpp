@@ -390,7 +390,7 @@ bool CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::Path
 					}
 					// Destroy some stuff that we're not going to use anyway.
 					m_SongFile->Patterns.DestroyPatterns();
-					m_SongFile->songMessage.clear();
+					m_SongFile->m_songMessage.clear();
 				}
 			}
 		} else
@@ -421,7 +421,7 @@ bool CModTree::SetSoundFile(FileReader &file)
 	}
 	m_SongFile = sndFile;
 	m_SongFile->Patterns.DestroyPatterns();
-	m_SongFile->songMessage.clear();
+	m_SongFile->m_songMessage.clear();
 	const mpt::PathString fileName = file.GetFileName();
 	m_InstrLibPath = fileName.GetPath();
 	m_SongFileName = fileName.GetFullFileName();

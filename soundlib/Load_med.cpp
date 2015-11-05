@@ -560,7 +560,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeChannels();
 	// Setup channel pan positions and volume
 	SetupMODPanning(true);
-	madeWithTracker = mpt::String::Print("OctaMED (MMD%1)", std::string(1, version));
+	m_madeWithTracker = mpt::String::Print("OctaMED (MMD%1)", std::string(1, version));
 
 	m_nType = MOD_TYPE_MED;
 	m_nSamplePreAmp = 32;
@@ -708,7 +708,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 			if (pseq && pseq < dwMemLength && sizeof(MMD2PLAYSEQ) <= dwMemLength - pseq)
 			{
 				const MMD2PLAYSEQ *pmps = (const MMD2PLAYSEQ *)(lpStream + pseq);
-				if(songName.empty()) mpt::String::Read<mpt::String::maybeNullTerminated>(songName, pmps->name);
+				if(m_songName.empty()) mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, pmps->name);
 				uint16 n = BigEndianW(pmps->length);
 				if (pseq+n <= dwMemLength)
 				{
@@ -743,14 +743,14 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 		annolen = MIN(annolen, MED_MAX_COMMENT_LENGTH); //Thanks to Luigi Auriemma for pointing out an overflow risk
 		if ((annotxt) && (annolen) && (annolen <= dwMemLength) && (annotxt <= dwMemLength - annolen) )
 		{
-			songMessage.Read(lpStream + annotxt, annolen - 1, SongMessage::leAutodetect);
+			m_songMessage.Read(lpStream + annotxt, annolen - 1, SongMessage::leAutodetect);
 		}
 		// Song Name
 		UINT songname = BigEndian(pmex->songname);
 		UINT songnamelen = BigEndian(pmex->songnamelen);
 		if ((songname) && (songnamelen) && (songname <= dwMemLength) && (songnamelen <= dwMemLength-songname))
 		{
-			mpt::String::Read<mpt::String::maybeNullTerminated>(songName, reinterpret_cast<const char *>(lpStream + songname), songnamelen);
+			mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, reinterpret_cast<const char *>(lpStream + songname), songnamelen);
 		}
 		// Sample Names
 		DWORD smpinfoex = BigEndian(pmex->iinfo);

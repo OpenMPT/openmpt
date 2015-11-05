@@ -211,8 +211,8 @@ void CWaveConvert::LoadTags()
 //---------------------------
 {
 	m_Settings.Tags.title = mpt::ToUnicode(mpt::CharsetLocale, m_SndFile.GetTitle());
-	m_Settings.Tags.comments = mpt::ToUnicode(mpt::CharsetLocale, m_SndFile.songMessage.GetFormatted(SongMessage::leLF));
-	m_Settings.Tags.artist = m_SndFile.songArtist;
+	m_Settings.Tags.comments = mpt::ToUnicode(mpt::CharsetLocale, m_SndFile.m_songMessage.GetFormatted(SongMessage::leLF));
+	m_Settings.Tags.artist = m_SndFile.m_songArtist;
 	m_Settings.Tags.album = m_Settings.storedTags.album;
 	m_Settings.Tags.trackno = m_Settings.storedTags.trackno;
 	m_Settings.Tags.year = m_Settings.storedTags.year;
@@ -775,9 +775,9 @@ void CWaveConvert::OnOK()
 			m_Settings.Tags.year = mpt::ustring();
 		}
 
-		if(!m_SndFile.songMessage.empty())
+		if(!m_SndFile.m_songMessage.empty())
 		{
-			m_Settings.Tags.comments = mpt::ToUnicode(mpt::CharsetLocale, m_SndFile.songMessage.GetFormatted(SongMessage::leLF));
+			m_Settings.Tags.comments = mpt::ToUnicode(mpt::CharsetLocale, m_SndFile.m_songMessage.GetFormatted(SongMessage::leLF));
 		}
 
 		m_Settings.Tags.bpm = mpt::ToUString(m_SndFile.GetCurrentBPM());

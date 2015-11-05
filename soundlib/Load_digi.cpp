@@ -118,7 +118,7 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = fileHeader.numChannels;
 	m_nSamples = 31;
 	m_nSamplePreAmp = 256 / m_nChannels;
-	madeWithTracker = mpt::String::Print("Digi Booster %1.%2", fileHeader.versionInt >> 4, fileHeader.versionInt & 0x0F);
+	m_madeWithTracker = mpt::String::Print("Digi Booster %1.%2", fileHeader.versionInt >> 4, fileHeader.versionInt & 0x0F);
 
 	Order.ReadFromArray(fileHeader.orders, fileHeader.lastOrdIndex + 1);
 
@@ -141,7 +141,7 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read song + sample names
-	file.ReadString<mpt::String::maybeNullTerminated>(songName, 32);
+	file.ReadString<mpt::String::maybeNullTerminated>(m_songName, 32);
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		file.ReadString<mpt::String::maybeNullTerminated>(m_szNames[smp], 30);

@@ -972,11 +972,11 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals();
-	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songname);
+	mpt::String::Read<mpt::String::spacePadded>(m_songName, fileHeader.songname);
 	{
 		std::string artist;
 		mpt::String::Read<mpt::String::spacePadded>(artist, fileHeader.composer);
-		songArtist = mpt::ToUnicode(mpt::CharsetCP437, artist);
+		m_songArtist = mpt::ToUnicode(mpt::CharsetCP437, artist);
 	}
 
 	FileHistory mptHistory;
@@ -1058,7 +1058,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 		// The skipped byte seems to always be 0.
 		// This also matches how XT 1.03 itself displays the song message.
 		chunk.Skip(1);
-		songMessage.ReadFixedLineLength(chunk, chunk.GetLength() - 1, 40, 0);
+		m_songMessage.ReadFixedLineLength(chunk, chunk.GetLength() - 1, 40, 0);
 	}
 	
 	// Read sample headers + data

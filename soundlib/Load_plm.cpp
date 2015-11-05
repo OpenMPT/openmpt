@@ -142,9 +142,9 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	m_nType = MOD_TYPE_PLM;
 	m_SongFlags = SONG_ITOLDEFFECTS;
-	madeWithTracker = "Disorder Tracker 2";
+	m_madeWithTracker = "Disorder Tracker 2";
 	// Some PLMs use ASCIIZ, some space-padding strings...weird. Oh, and the file browser stops at 0 bytes in the name, the main GUI doesn't.
-	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songName);
+	mpt::String::Read<mpt::String::spacePadded>(m_songName, fileHeader.songName);
 	m_nChannels = fileHeader.numChannels + 1;	// Additional channel for writing pattern breaks
 	m_nSamplePreAmp = fileHeader.amplify;
 	m_nDefaultTempo.Set(fileHeader.tempo);

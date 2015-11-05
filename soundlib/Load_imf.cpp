@@ -462,7 +462,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	// Song Name
-	mpt::String::Read<mpt::String::nullTerminated>(songName, fileHeader.title);
+	mpt::String::Read<mpt::String::nullTerminated>(m_songName, fileHeader.title);
 
 	m_SongFlags = (fileHeader.flags & IMFFileHeader::linearSlides) ? SONG_LINEARSLIDES : SongFlags(0);
 	m_nDefaultSpeed = fileHeader.tempo;

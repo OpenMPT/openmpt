@@ -572,7 +572,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	m_nType = MOD_TYPE_MID;
 	m_nChannels = 32;
 	m_SongFlags = SONG_LINEARSLIDES;
-	songName = "";
+	m_songName = "";
 
 	// MIDI->MOD Tempo Conversion
 	division = BigEndianW(pmfh.wDivision);
@@ -756,21 +756,21 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						// FF.01 [text]: Song Information
 						case 0x01:
 							if (!len) break;
-							if ((len < 32) && songName.empty())
+							if ((len < 32) && m_songName.empty())
 							{
-								mpt::String::Read<mpt::String::maybeNullTerminated>(songName, reinterpret_cast<const char*>(ptrk->ptracks), len);
+								mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, reinterpret_cast<const char*>(ptrk->ptracks), len);
 							} else
-							if (songMessage.empty() && (ptrk->ptracks[0]) && (ptrk->ptracks[0] < 0x7F))
+							if (m_songMessage.empty() && (ptrk->ptracks[0]) && (ptrk->ptracks[0] < 0x7F))
 							{
-								songMessage.Read(ptrk->ptracks, len, SongMessage::leAutodetect);
+								m_songMessage.Read(ptrk->ptracks, len, SongMessage::leAutodetect);
 							}
 							break;
 						// FF.02 [text]: Song Copyright
 						case 0x02:
 							if (!len) break;
-							if (songMessage.empty() && (ptrk->ptracks[0]) && (ptrk->ptracks[0] < 0x7F) && (len > 7))
+							if (m_songMessage.empty() && (ptrk->ptracks[0]) && (ptrk->ptracks[0] < 0x7F) && (len > 7))
 							{
-								songMessage.Read(ptrk->ptracks, len, SongMessage::leAutodetect);
+								m_songMessage.Read(ptrk->ptracks, len, SongMessage::leAutodetect);
 							}
 							break;
 						// FF.03: Sequence Name
@@ -784,7 +784,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 								if ((!mpt::CompareNoCaseAscii(s.c_str(), "Copyri", 6)) || s.empty()) break;
 								if (i == 0x03)
 								{
-									if(songName.empty()) mpt::String::Copy(songName, s);
+									if(m_songName.empty()) mpt::String::Copy(m_songName, s);
 								} else
 								if (!trk)
 								{

@@ -1373,7 +1373,7 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(sndFile.GetTitle(), "Test Module");
-	VERIFY_EQUAL_NONCONT(sndFile.songMessage.at(0), 'O');
+	VERIFY_EQUAL_NONCONT(sndFile.m_songMessage.at(0), 'O');
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, TEMPO(139, 0));
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 5);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 128);
@@ -1568,7 +1568,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(sndFile.GetTitle(), "Test Module_____________X");
-	VERIFY_EQUAL_NONCONT(sndFile.songMessage.at(0), 'O');
+	VERIFY_EQUAL_NONCONT(sndFile.m_songMessage.at(0), 'O');
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, TEMPO(139, 999));
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 5);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 128);
@@ -1586,7 +1586,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
 	VERIFY_EQUAL_NONCONT(sndFile.m_nRestartPos, 1);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nResampling, SRCMODE_POLYPHASE);
-	VERIFY_EQUAL_NONCONT(sndFile.songArtist, MPT_USTRING("Tester"));
+	VERIFY_EQUAL_NONCONT(sndFile.m_songArtist, MPT_USTRING("Tester"));
 	VERIFY_EQUAL_NONCONT(sndFile.m_tempoSwing.size(), 6);
 	VERIFY_EQUAL_NONCONT(sndFile.m_tempoSwing[0], 29360125);
 	VERIFY_EQUAL_NONCONT(sndFile.m_tempoSwing[1], 4194305);

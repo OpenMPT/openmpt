@@ -402,20 +402,20 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					// ModPlug Tracker 1.16 (semi-raped IT format)
 					m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
-					madeWithTracker = "ModPlug Tracker 1.09 - 1.16";
+					m_madeWithTracker = "ModPlug Tracker 1.09 - 1.16";
 				} else
 				{
 					// OpenMPT 1.17 disguised as this in compatible mode,
 					// but never writes 0xFF in the pan map for unused channels (which is an invalid value).
 					m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
-					madeWithTracker = "OpenMPT 1.17 (compatibility export)";
+					m_madeWithTracker = "OpenMPT 1.17 (compatibility export)";
 				}
 				interpretModPlugMade = true;
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0202 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4))
 			{
 				// ModPlug Tracker b3.3 - 1.09, instruments 557 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
-				madeWithTracker = "ModPlug Tracker b3.3 - 1.09";
+				m_madeWithTracker = "ModPlug Tracker b3.3 - 1.09";
 				interpretModPlugMade = true;
 			}
 		} else // case: type == MOD_TYPE_MPT
@@ -440,7 +440,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags.set(SONG_EMBEDMIDICFG, (fileHeader.flags & ITFileHeader::reqEmbeddedMIDIConfig) || (fileHeader.special & ITFileHeader::embedMIDIConfiguration));
 	m_SongFlags.set(SONG_EXFILTERRANGE, (fileHeader.flags & ITFileHeader::extendedFilterRange) != 0);
 
-	mpt::String::Read<mpt::String::spacePadded>(songName, fileHeader.songname);
+	mpt::String::Read<mpt::String::spacePadded>(m_songName, fileHeader.songname);
 
 	// Global Volume
 	m_nDefaultGlobalVolume = fileHeader.globalvol << 1;
@@ -541,7 +541,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// These were not zero bytes -> We're in the wrong place!
 			file.SkipBack(2);
-			madeWithTracker = "UNMO3";
+			m_madeWithTracker = "UNMO3";
 		}
 	}
 
@@ -594,7 +594,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			// Generally, IT files should use CR for line endings. However, ChibiTracker uses LF. One could do...
 			// if(itHeader.cwtv == 0x0214 && itHeader.cmwt == 0x0214 && itHeader.reserved == ITFileHeader::chibiMagic) --> Chibi detected.
 			// But we'll just use autodetection here:
-			songMessage.Read(file, fileHeader.msglength, SongMessage::leAutodetect);
+			m_songMessage.Read(file, fileHeader.msglength, SongMessage::leAutodetect);
 		}
 	}
 
@@ -924,22 +924,22 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
 	}
 
-	if(m_dwLastSavedWithVersion && madeWithTracker.empty())
+	if(m_dwLastSavedWithVersion && m_madeWithTracker.empty())
 	{
-		madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
+		m_madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
 		if(memcmp(fileHeader.reserved, "OMPT", 4) && (fileHeader.cwtv & 0xF000) == 0x5000)
 		{
-			madeWithTracker += " (compatibility export)";
+			m_madeWithTracker += " (compatibility export)";
 		} else if(MptVersion::IsTestBuild(m_dwLastSavedWithVersion))
 		{
-			madeWithTracker += " (test build)";
+			m_madeWithTracker += " (test build)";
 		}
 	} else
 	{
 		switch(fileHeader.cwtv >> 12)
 		{
 		case 0:
-			if(!madeWithTracker.empty())
+			if(!m_madeWithTracker.empty())
 			{
 				// BeRoTracker has been detected above.
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0200 && fileHeader.flags == 9 && fileHeader.special == 0
@@ -948,33 +948,33 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				&& fileHeader.globalvol == 128 && fileHeader.mv == 100 && fileHeader.speed == 1 && fileHeader.sep == 128 && fileHeader.pwd == 0
 				&& fileHeader.msglength == 0 && fileHeader.msgoffset == 0 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4))
 			{
-				madeWithTracker = "OpenSPC conversion";
+				m_madeWithTracker = "OpenSPC conversion";
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0200 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4))
 			{
 				// ModPlug Tracker 1.00a5, instruments 560 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
-				madeWithTracker = "ModPlug Tracker 1.00a5";
+				m_madeWithTracker = "ModPlug Tracker 1.00a5";
 				interpretModPlugMade = true;
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !memcmp(fileHeader.reserved, "CHBI", 4))
 			{
-				madeWithTracker = "ChibiTracker";
+				m_madeWithTracker = "ChibiTracker";
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !(fileHeader.special & 3) && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
 			{
-				madeWithTracker = "CheeseTracker";
+				m_madeWithTracker = "CheeseTracker";
 			} else if(fileHeader.cmwt < 0x0888)
 			{
 				if(fileHeader.cmwt > 0x0214)
 				{
-					madeWithTracker = "Impulse Tracker 2.15";
+					m_madeWithTracker = "Impulse Tracker 2.15";
 				} else if(fileHeader.cwtv > 0x0214)
 				{
 					// Patched update of IT 2.14 (0x0215 - 0x0217 == p1 - p3)
 					// p4 (as found on modland) adds the ITVSOUND driver, but doesn't seem to change
 					// anything as far as file saving is concerned.
-					madeWithTracker = mpt::String::Print("Impulse Tracker 2.14p%1", fileHeader.cwtv - 0x0214);
+					m_madeWithTracker = mpt::String::Print("Impulse Tracker 2.14p%1", fileHeader.cwtv - 0x0214);
 				} else
 				{
-					madeWithTracker = mpt::String::Print("Impulse Tracker %1.%2", (fileHeader.cwtv & 0x0F00) >> 8, mpt::fmt::hex0<2>((fileHeader.cwtv & 0xFF)));
+					m_madeWithTracker = mpt::String::Print("Impulse Tracker %1.%2", (fileHeader.cwtv & 0x0F00) >> 8, mpt::fmt::hex0<2>((fileHeader.cwtv & 0xFF)));
 				}
 				if(m_FileHistory.empty() && memcmp(fileHeader.reserved, "\0\0\0\0", 4))
 				{
@@ -999,19 +999,19 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			break;
 		case 1:
-			madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
+			m_madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
 			break;
 		case 4:
-			madeWithTracker = mpt::String::Print("pyIT %1.%2", (fileHeader.cwtv & 0x0F00) >> 8, mpt::fmt::hex0<2>((fileHeader.cwtv & 0xFF)));
+			m_madeWithTracker = mpt::String::Print("pyIT %1.%2", (fileHeader.cwtv & 0x0F00) >> 8, mpt::fmt::hex0<2>((fileHeader.cwtv & 0xFF)));
 			break;
 		case 6:
-			madeWithTracker = "BeRoTracker";
+			m_madeWithTracker = "BeRoTracker";
 			break;
 		case 7:
-			madeWithTracker = mpt::String::Print("ITMCK %1.%2.%3", (fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
+			m_madeWithTracker = mpt::String::Print("ITMCK %1.%2.%3", (fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
 			break;
 		case 0xD:
-			madeWithTracker = "spc2it";
+			m_madeWithTracker = "spc2it";
 			break;
 		}
 	}
@@ -1154,7 +1154,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	MemsetZero(itHeader);
 	dwChnNamLen = 0;
 	memcpy(itHeader.id, "IMPM", 4);
-	mpt::String::Write<mpt::String::nullTerminated>(itHeader.songname, songName);
+	mpt::String::Write<mpt::String::nullTerminated>(itHeader.songname, m_songName);
 
 	itHeader.highlight_minor = (uint8)std::min(m_nDefaultRowsPerBeat, ROWINDEX(uint8_max));
 	itHeader.highlight_major = (uint8)std::min(m_nDefaultRowsPerMeasure, ROWINDEX(uint8_max));
@@ -1286,10 +1286,10 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 	// Comments
 	uint16 msglength = 0;
-	if(!songMessage.empty())
+	if(!m_songMessage.empty())
 	{
 		itHeader.special |= ITFileHeader::embedSongMessage;
-		itHeader.msglength = msglength = mpt::saturate_cast<uint16>(songMessage.length() + 1u);
+		itHeader.msglength = msglength = mpt::saturate_cast<uint16>(m_songMessage.length() + 1u);
 		itHeader.msgoffset = dwHdrPos + dwExtra + (itHeader.insnum + itHeader.smpnum + itHeader.patnum) * 4;
 	}
 
@@ -1364,7 +1364,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	if(itHeader.special & ITFileHeader::embedSongMessage)
 	{
 		dwPos += msglength;
-		fwrite(songMessage.c_str(), 1, msglength, f);
+		fwrite(m_songMessage.c_str(), 1, msglength, f);
 	}
 
 	// Writing instruments
@@ -1909,7 +1909,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 			}
 		} else if(!memcmp(code, "MODU", 4))
 		{
-			madeWithTracker = "BeRoTracker";
+			m_madeWithTracker = "BeRoTracker";
 		} else if(!memcmp(code, "XTPM", 4))
 		{
 			// Read too far, chicken out...
@@ -2047,9 +2047,9 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		WRITEMODULAR(MAGIC4BE('M','S','F','.'), m_ModFlags.GetRaw());
 	}
 
-	if(!songArtist.empty() && specs.hasArtistName)
+	if(!m_songArtist.empty() && specs.hasArtistName)
 	{
-		std::string songArtistU8 = mpt::ToCharset(mpt::CharsetUTF8, songArtist);
+		std::string songArtistU8 = mpt::ToCharset(mpt::CharsetUTF8, m_songArtist);
 		uint16 length = mpt::saturate_cast<uint16>(songArtistU8.length());
 		WRITEMODULARHEADER(MAGIC4LE('A','U','T','H'), length);
 		mpt::IO::WriteRaw(f, songArtistU8.c_str(), length);
@@ -2159,7 +2159,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 				{
 					std::string artist;
 					chunk.ReadString<mpt::String::spacePadded>(artist, chunk.GetLength());
-					songArtist = mpt::ToUnicode(mpt::CharsetUTF8, artist);
+					m_songArtist = mpt::ToUnicode(mpt::CharsetUTF8, artist);
 				}
 				break;
 			case MAGIC4BE('C','h','n','S'):

@@ -228,7 +228,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 
 	logcapturer.ShowLog(std::wstring()
 		+ L"File: " + filename.ToWide() + L"\n"
-		+ L"Last saved with: " + mpt::ToWide(mpt::CharsetLocale, m_SndFile.madeWithTracker) + L", you are using OpenMPT " + mpt::ToWide(mpt::CharsetUTF8, MptVersion::str) + L"\n"
+		+ L"Last saved with: " + mpt::ToWide(mpt::CharsetLocale, m_SndFile.m_madeWithTracker) + L", you are using OpenMPT " + mpt::ToWide(mpt::CharsetUTF8, MptVersion::str) + L"\n"
 		+ L"\n"
 		);
 
@@ -777,7 +777,7 @@ BOOL CModDoc::InitializeMod()
 		}
 	}
 	m_SndFile.ResetPlayPos();
-	m_SndFile.songArtist = TrackerSettings::Instance().defaultArtist;
+	m_SndFile.m_songArtist = TrackerSettings::Instance().defaultArtist;
 
 	return TRUE;
 }

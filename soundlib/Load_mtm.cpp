@@ -120,11 +120,11 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals();
-	mpt::String::Read<mpt::String::maybeNullTerminated>(songName, fileHeader.songName);
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songName);
 	m_nType = MOD_TYPE_MTM;
 	m_nSamples = fileHeader.numSamples;
 	m_nChannels = fileHeader.numChannels;
-	madeWithTracker = mpt::String::Print("MultiTracker %1.%2", fileHeader.version >> 4, fileHeader.version & 0x0F);
+	m_madeWithTracker = mpt::String::Print("MultiTracker %1.%2", fileHeader.version >> 4, fileHeader.version & 0x0F);
 
 	// Reading instruments
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
@@ -196,7 +196,7 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// Read message with a fixed line length of 40 characters
 		// (actually the last character is always null, so make that 39 + 1 padding byte)
-		songMessage.ReadFixedLineLength(file, fileHeader.commentSize, 39, 1);
+		m_songMessage.ReadFixedLineLength(file, fileHeader.commentSize, 39, 1);
 	}
 
 	// Reading Samples
