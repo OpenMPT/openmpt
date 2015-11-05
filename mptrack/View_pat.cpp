@@ -4355,23 +4355,30 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-//rewbs.customKeys
-void CViewPattern::CursorJump(DWORD distance, bool upwards, bool snap)
-//--------------------------------------------------------------------
+
+void CViewPattern::CursorJump(int distance, bool snap)
+//----------------------------------------------------
 {
-	switch(snap)
+	ROWINDEX row = GetCurrentRow();
+	const bool upwards = distance < 0;
+	const int distanceAbs = std::abs(distance);
+
+	if(snap)
+		row = (((row + (upwards ? -1 : 0)) / distanceAbs) + (upwards ? 0 : 1)) * distanceAbs;
+	else
+		row += distance;
+	SetCurrentRow(row, true);
+
+	if(IsLiveRecord())
 	{
-		case false:
-			//no snap
-			SetCurrentRow(GetCurrentRow() + ((int)(upwards ? -1 : 1)) * distance, true);
-			break;
-
-		case true:
-			//snap
-			SetCurrentRow((((GetCurrentRow() + (int)(upwards ? -1 : 0)) / distance) + (int)(upwards ? 0 : 1)) * distance, true);
-			break;
+		CriticalSection cs;
+		CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+		sndFile.m_PlayState.m_nCurrentOrder = sndFile.m_PlayState.m_nNextOrder = GetCurrentOrder();
+		sndFile.m_PlayState.m_nPattern = m_nPattern;
+		sndFile.m_PlayState.m_nRow = m_nPlayRow = row;
+		sndFile.m_PlayState.m_nNextRow = m_nNextPlayRow = row + 1;
+		CMainFrame::GetMainFrame()->ResetNotificationBuffer();
 	}
-
 }
 
 
@@ -4440,32 +4447,32 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 		// Pattern navigation:
 		case kcPatternJumpUph1Select:
-		case kcPatternJumpUph1:			CursorJump(GetRowsPerMeasure(), true, false); return wParam;
+		case kcPatternJumpUph1:			CursorJump(-(int)GetRowsPerMeasure(), false); return wParam;
 		case kcPatternJumpDownh1Select:
-		case kcPatternJumpDownh1:		CursorJump(GetRowsPerMeasure(), false, false);  return wParam;
+		case kcPatternJumpDownh1:		CursorJump(GetRowsPerMeasure(), false);  return wParam;
 		case kcPatternJumpUph2Select:
-		case kcPatternJumpUph2:			CursorJump(GetRowsPerBeat(), true, false);  return wParam;
+		case kcPatternJumpUph2:			CursorJump(-(int)GetRowsPerBeat(), false);  return wParam;
 		case kcPatternJumpDownh2Select:
-		case kcPatternJumpDownh2:		CursorJump(GetRowsPerBeat(), false, false);  return wParam;
+		case kcPatternJumpDownh2:		CursorJump(GetRowsPerBeat(), false);  return wParam;
 
 		case kcPatternSnapUph1Select:
-		case kcPatternSnapUph1:			CursorJump(GetRowsPerMeasure(), true, true); return wParam;
+		case kcPatternSnapUph1:			CursorJump(-(int)GetRowsPerMeasure(), true); return wParam;
 		case kcPatternSnapDownh1Select:
-		case kcPatternSnapDownh1:		CursorJump(GetRowsPerMeasure(), false, true);  return wParam;
+		case kcPatternSnapDownh1:		CursorJump(GetRowsPerMeasure(), true);  return wParam;
 		case kcPatternSnapUph2Select:
-		case kcPatternSnapUph2:			CursorJump(GetRowsPerBeat(), true, true);  return wParam;
+		case kcPatternSnapUph2:			CursorJump(-(int)GetRowsPerBeat(), true);  return wParam;
 		case kcPatternSnapDownh2Select:
-		case kcPatternSnapDownh2:		CursorJump(GetRowsPerBeat(), false, true);  return wParam;
+		case kcPatternSnapDownh2:		CursorJump(GetRowsPerBeat(), true);  return wParam;
 
 		case kcNavigateDownSelect:
-		case kcNavigateDown:	SetCurrentRow(GetCurrentRow() + 1, true); return wParam;
+		case kcNavigateDown:	CursorJump(1, false); return wParam;
 		case kcNavigateUpSelect:
-		case kcNavigateUp:		SetCurrentRow(GetCurrentRow() - 1, true); return wParam;
+		case kcNavigateUp:		CursorJump(-1, false); return wParam;
 
 		case kcNavigateDownBySpacingSelect:
-		case kcNavigateDownBySpacing:	SetCurrentRow(GetCurrentRow() + m_nSpacing, true); return wParam;
+		case kcNavigateDownBySpacing:	CursorJump(m_nSpacing, false); return wParam;
 		case kcNavigateUpBySpacingSelect:
-		case kcNavigateUpBySpacing:		SetCurrentRow(GetCurrentRow() - m_nSpacing, true); return wParam;
+		case kcNavigateUpBySpacing:		CursorJump(-(int)m_nSpacing, false); return wParam;
 
 		case kcNavigateLeftSelect:
 		case kcNavigateLeft:
