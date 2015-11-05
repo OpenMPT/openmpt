@@ -271,7 +271,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	if(!file.ReadConvertEndianness(fileHeader)
 		|| fileHeader.channels == 0
 		|| fileHeader.channels > MAX_BASECHANNELS
-		|| mpt::strnicmp(fileHeader.signature, "Extended Module: ", 17)
+		|| mpt::CompareNoCaseAscii(fileHeader.signature, "Extended Module: ", 17)
 		|| !file.CanRead(fileHeader.orders))
 	{
 		return false;

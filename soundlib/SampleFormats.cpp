@@ -2012,17 +2012,17 @@ struct FLACDecoder
 			{
 				const char *tag = reinterpret_cast<const char *>(metadata->data.vorbis_comment.comments[i].entry);
 				const FLAC__uint32 length = metadata->data.vorbis_comment.comments[i].length;
-				if(length > 6 && !mpt::strnicmp(tag, "TITLE=", 6))
+				if(length > 6 && !mpt::CompareNoCaseAscii(tag, "TITLE=", 6))
 				{
 					mpt::String::Read<mpt::String::maybeNullTerminated>(client.sndFile.m_szNames[client.sample], tag + 6, length - 6);
-				} else if(length > 11 && !mpt::strnicmp(tag, "SAMPLERATE=", 11))
+				} else if(length > 11 && !mpt::CompareNoCaseAscii(tag, "SAMPLERATE=", 11))
 				{
 					uint32 sampleRate = ConvertStrTo<uint32>(tag + 11);
 					if(sampleRate > 0) sample.nC5Speed = sampleRate;
-				} else if(length > 10 && !mpt::strnicmp(tag, "LOOPSTART=", 10))
+				} else if(length > 10 && !mpt::CompareNoCaseAscii(tag, "LOOPSTART=", 10))
 				{
 					loopStart = ConvertStrTo<SmpLength>(tag + 10);
-				} else if(length > 11 && !mpt::strnicmp(tag, "LOOPLENGTH=", 11))
+				} else if(length > 11 && !mpt::CompareNoCaseAscii(tag, "LOOPLENGTH=", 11))
 				{
 					loopLength = ConvertStrTo<SmpLength>(tag + 11);
 				}

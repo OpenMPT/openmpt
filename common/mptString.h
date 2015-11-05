@@ -132,7 +132,9 @@ static inline std::size_t strnlen(const char *str, std::size_t n)
 }
 
 
+#ifdef MODPLUG_TRACKER
 int strnicmp(const char *a, const char *b, size_t count);
+#endif // MODPLUG_TRACKER
 
 
 enum Charset {
@@ -499,6 +501,25 @@ template <> inline std::wstring ToTcharStr<wchar_t>(const mpt::ustring &str)
 }
 
 #endif // MPT_OS_WINDOWS
+
+#endif // MODPLUG_TRACKER
+
+
+
+
+
+char ToLowerCaseAscii(char c);
+char ToUpperCaseAscii(char c);
+std::string ToLowerCaseAscii(std::string s);
+std::string ToUpperCaseAscii(std::string s);
+
+int CompareNoCaseAscii(const char *a, const char *b, std::size_t n);
+int CompareNoCaseAscii(const std::string &a, const std::string &b);
+
+#if defined(MODPLUG_TRACKER)
+
+mpt::ustring ToLowerCase(const mpt::ustring &s);
+mpt::ustring ToUpperCase(const mpt::ustring &s);
 
 #endif // MODPLUG_TRACKER
 

@@ -288,6 +288,12 @@ ToTcharStr, FromTcharStr.
 namespace mpt {
 
 
+#ifdef MODPLUG_TRACKER
+
+// We cannot use the C runtime version in libopenmpt as it depends on the
+// global C locale.
+// We provide a plain ASCII version as mpt::CompareNoCaseAscci().
+
 int strnicmp(const char *a, const char *b, size_t count)
 //------------------------------------------------------
 {
@@ -297,6 +303,8 @@ int strnicmp(const char *a, const char *b, size_t count)
 	return strncasecmp(a, b, count);
 #endif
 }
+
+#endif // MODPLUG_TRACKER
 
 
 } // namespace mpt
@@ -1530,6 +1538,111 @@ CString ToCString(const mpt::ustring &str)
 }
 #endif // MFC
 #endif // MPT_USTRING_MODE_WIDE
+
+
+
+
+
+char ToLowerCaseAscii(char c)
+{
+	if('A' <= c && c <= 'Z')
+	{
+		c += 'a' - 'A';
+	}
+	return c;
+}
+
+char ToUpperCaseAscii(char c)
+{
+	if('a' <= c && c <= 'z')
+	{
+		c -= 'a' - 'A';
+	}
+	return c;
+}
+
+std::string ToLowerCaseAscii(std::string s)
+{
+	std::transform(s.begin(), s.end(), s.begin(), static_cast<char(*)(char)>(&mpt::ToLowerCaseAscii));
+	return s;
+}
+
+std::string ToUpperCaseAscii(std::string s)
+{
+	std::transform(s.begin(), s.end(), s.begin(), static_cast<char(*)(char)>(&mpt::ToUpperCaseAscii));
+	return s;
+}
+
+int CompareNoCaseAscii(const char *a, const char *b, std::size_t n)
+{
+	while(n--)
+	{
+		unsigned char ac = static_cast<unsigned char>(mpt::ToLowerCaseAscii(*a));
+		unsigned char bc = static_cast<unsigned char>(mpt::ToLowerCaseAscii(*b));
+		if(ac != bc)
+		{
+			return ac < bc ? -1 : 1;
+		} else if(!ac && !bc)
+		{
+			return 0;
+		}
+		++a;
+		++b;
+	}
+	return 0;
+}
+
+int CompareNoCaseAscii(const std::string &a, const std::string &b)
+{
+	for(std::size_t i = 0; i < std::min(a.length(), b.length()); ++i)
+	{
+		unsigned char ac = static_cast<unsigned char>(mpt::ToLowerCaseAscii(a[i]));
+		unsigned char bc = static_cast<unsigned char>(mpt::ToLowerCaseAscii(b[i]));
+		if(ac != bc)
+		{
+			return ac < bc ? -1 : 1;
+		} else if(!ac && !bc)
+		{
+			return 0;
+		}
+	}
+	if(a.length() == b.length())
+	{
+		return 0;
+	}
+	return a.length() < b.length() ? -1 : 1;
+}
+
+#if defined(MODPLUG_TRACKER)
+
+mpt::ustring ToLowerCase(const mpt::ustring &s)
+{
+	#if defined(_MFC_VER)
+		CStringW tmp = mpt::ToCStringW(s);
+		tmp.MakeLower();
+		return mpt::ToUnicode(tmp);
+	#else // !_MFC_VER
+		std::wstring ws = mpt::ToWide(s);
+		std::transform(ws.begin(), ws.end(), ws.begin(), &std::towlower);	
+		return mpt::ToUnicode(ws);
+	#endif // _MFC_VER
+}
+
+mpt::ustring ToUpperCase(const mpt::ustring &s)
+{
+	#if defined(_MFC_VER)
+		CStringW tmp = mpt::ToCStringW(s);
+		tmp.MakeUpper();
+		return mpt::ToUnicode(tmp);
+	#else // !_MFC_VER
+		std::wstring ws = mpt::ToWide(s);
+		std::transform(ws.begin(), ws.end(), ws.begin(), &std::towlower);	
+		return mpt::ToUnicode(ws);
+	#endif // _MFC_VER
+}
+
+#endif // MODPLUG_TRACKER
+
 
 
 } // namespace mpt

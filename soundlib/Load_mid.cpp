@@ -781,7 +781,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 							{
 								std::string s;
 								mpt::String::Read<mpt::String::maybeNullTerminated>(s, reinterpret_cast<const char*>(ptrk->ptracks), len);
-								if ((!mpt::strnicmp(s.c_str(), "Copyri", 6)) || s.empty()) break;
+								if ((!mpt::CompareNoCaseAscii(s.c_str(), "Copyri", 6)) || s.empty()) break;
 								if (i == 0x03)
 								{
 									if(songName.empty()) mpt::String::Copy(songName, s);
