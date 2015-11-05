@@ -310,7 +310,7 @@ public:
 	// True if default volume should be drawn for a given cell.
 	static bool DrawDefaultVolume(const ModCommand *m) { return (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWDEFAULTVOLUME) && m->volcmd == VOLCMD_NONE && m->command != CMD_VOLUME && m->instr != 0 && m->IsNote(); }
 
-	void CursorJump(DWORD distance, bool upwards, bool snap);
+	void CursorJump(int distance, bool snap);
 
 	void TempEnterNote(ModCommand::NOTE n, int vol = -1, bool fromMidi = false);
 	void TempStopNote(ModCommand::NOTE note, bool fromMidi = false, const bool bChordMode = false);
