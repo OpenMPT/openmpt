@@ -31,7 +31,7 @@ protected:
 	CModDoc *m_pModDoc;
 	CTreeCtrlW m_treePlugins;
 	CButton m_chkBridge, m_chkShare;
-	std::wstring m_nameFilter;
+	mpt::ustring m_nameFilter;
 	ComponentHandle<ComponentPluginBridge32> pluginBridge32;
 	ComponentHandle<ComponentPluginBridge64> pluginBridge64;
 	PLUGINDEX m_nPlugSlot;

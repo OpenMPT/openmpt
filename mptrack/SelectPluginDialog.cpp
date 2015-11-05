@@ -291,9 +291,7 @@ void CSelectPluginDlg::OnNameFilterChanged()
 //------------------------------------------
 {
 	// Update name filter text
-	m_nameFilter = GetWindowTextW(*GetDlgItem(IDC_NAMEFILTER));
-	int len = m_nameFilter.length();
-	for(int i = 0; i < len; i++) m_nameFilter[i] = ::towlower(m_nameFilter[i]);
+	m_nameFilter = mpt::ToLowerCase(mpt::ToUnicode(GetWindowTextW(*GetDlgItem(IDC_NAMEFILTER))));
 
 	UpdatePluginsList();
 }
@@ -341,7 +339,7 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 	bool foundCurrentPlug = false;
 
 	const bool nameFilterActive = !m_nameFilter.empty();
-	std::vector<mpt::ustring> currentTags = mpt::String::Split<std::wstring>(m_nameFilter, L" ");
+	std::vector<mpt::ustring> currentTags = mpt::String::Split<mpt::ustring>(m_nameFilter, MPT_USTRING(" "));
 
 	if(pManager)
 	{
@@ -357,8 +355,7 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 				bool matches = false;
 				// Search in plugin names
 				{
-					std::wstring displayName = plug.libraryName.ToWide();
-					for(size_t i = 0; i < displayName.length(); i++) displayName[i] = ::towlower(displayName[i]);
+					mpt::ustring displayName = mpt::ToLowerCase(plug.libraryName.ToUnicode());
 					if(displayName.find(m_nameFilter, 0) != displayName.npos)
 					{
 						matches = true;
@@ -367,8 +364,7 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 				// Search in plugin tags
 				if(!matches)
 				{
-					mpt::ustring tags = plug.tags;
-					for(size_t i = 0; i < tags.length(); i++) tags[i] = ::towlower(tags[i]);
+					mpt::ustring tags = mpt::ToLowerCase(plug.tags);
 					for(std::vector<mpt::ustring>::const_iterator it = currentTags.begin(); it != currentTags.end(); it++)
 					{
 						if(!it->empty() && tags.find(*it, 0) != tags.npos)
@@ -498,7 +494,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 	if (pManager != nullptr && pManager->IsValidPlugin(pPlug))
 	{
 		::SetDlgItemTextW(m_hWnd, IDC_TEXT_CURRENT_VSTPLUG, pPlug->dllPath.ToWide().c_str());
-		::SetDlgItemTextW(m_hWnd, IDC_PLUGINTAGS, pPlug->tags.c_str());
+		::SetDlgItemTextW(m_hWnd, IDC_PLUGINTAGS, mpt::ToWide(pPlug->tags).c_str());
 		if(pPlug->pluginId1 == kEffectMagic)
 		{
 			bool isBridgeAvailable =
@@ -845,12 +841,12 @@ void CSelectPluginDlg::OnPluginTagsChanged()
 	{
 		HWND hwnd = ::GetDlgItem(m_hWnd, IDC_PLUGINTAGS);
 		int len = ::GetWindowTextLengthW(hwnd);
-		mpt::ustring tags(len, MPT_UCHAR(' '));
+		std::wstring tags(len, L' ');
 		if(len)
 		{
 			::GetWindowTextW(hwnd, &tags[0], len + 1);
 		}
-		plug->tags = tags;
+		plug->tags = mpt::ToUnicode(tags);
 	}
 }
 
