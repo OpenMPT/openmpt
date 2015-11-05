@@ -2766,12 +2766,12 @@ static FileTags ReadMFMetadata(IMFMediaSource *mediaSource)
 
 		if(stringVal.length() > 0)
 		{
-			if(propName == std::wstring(L"Author")) tags.artist = stringVal;
-			if(propName == std::wstring(L"Title")) tags.title = stringVal;
-			if(propName == std::wstring(L"WM/AlbumTitle")) tags.album = stringVal;
-			if(propName == std::wstring(L"WM/Track")) tags.trackno = stringVal;
-			if(propName == std::wstring(L"WM/Year")) tags.year = stringVal;
-			if(propName == std::wstring(L"WM/Genre")) tags.genre = stringVal;
+			if(propName == std::wstring(L"Author")) tags.artist = mpt::ToUnicode(stringVal);
+			if(propName == std::wstring(L"Title")) tags.title = mpt::ToUnicode(stringVal);
+			if(propName == std::wstring(L"WM/AlbumTitle")) tags.album = mpt::ToUnicode(stringVal);
+			if(propName == std::wstring(L"WM/Track")) tags.trackno = mpt::ToUnicode(stringVal);
+			if(propName == std::wstring(L"WM/Year")) tags.year = mpt::ToUnicode(stringVal);
+			if(propName == std::wstring(L"WM/Genre")) tags.genre = mpt::ToUnicode(stringVal);
 		}
 	}
 

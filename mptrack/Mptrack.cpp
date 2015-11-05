@@ -1944,7 +1944,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 			}
 
 			sprintf(tmp, "Plugin%u.Tags", plug);
-			mpt::ustring plugTags = theApp.GetSettings().Read<mpt::ustring>("VST Plugins", tmp, std::wstring());
+			mpt::ustring plugTags = theApp.GetSettings().Read<mpt::ustring>("VST Plugins", tmp, mpt::ustring());
 
 			m_pPluginManager->AddPlugin(plugPath, plugTags, true, true, &nonFoundPlugs);
 		}
