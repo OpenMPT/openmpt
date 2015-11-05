@@ -300,8 +300,7 @@ template<> inline SettingValue ToSettingValue(const SampleEditorDefaultFormat &v
 }
 template<> inline SampleEditorDefaultFormat FromSettingValue(const SettingValue &val)
 {
-	std::string format = val.as<std::string>();
-	for(std::string::iterator c = format.begin(); c != format.end(); c++) *c = std::string::value_type(::tolower(*c));
+	std::string format = mpt::ToLowerCaseAscii(val.as<std::string>());
 	if(format == "wav")
 		return dfWAV;
 	if(format == "raw")
