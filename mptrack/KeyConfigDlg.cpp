@@ -862,7 +862,7 @@ void COptionsKeyboard::OnSave()
 void COptionsKeyboard::OnNotesRepeat()
 //------------------------------------
 {
-	plocalCmdSet->QuickChange_NotesRepeat();
+	plocalCmdSet->QuickChange_NotesRepeat(true);
 	ForceUpdateGUI();
 }
 
@@ -870,7 +870,7 @@ void COptionsKeyboard::OnNotesRepeat()
 void COptionsKeyboard::OnNoNotesRepeat()
 //--------------------------------------
 {
-	plocalCmdSet->QuickChange_NoNotesRepeat();
+	plocalCmdSet->QuickChange_NotesRepeat(false);
 	ForceUpdateGUI();
 }
 

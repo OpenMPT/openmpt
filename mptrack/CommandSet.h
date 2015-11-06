@@ -1323,8 +1323,7 @@ public:
 
 	//Tranformation
 	bool QuickChange_SetEffects(const CModSpecifications &modSpecs);
-	bool QuickChange_NotesRepeat();
-	bool QuickChange_NoNotesRepeat();
+	bool QuickChange_NotesRepeat(bool repeat);
 
 	//Communication
 	KeyCombination GetKey(CommandID cmd, UINT key) const { return commands[cmd].kcList[key]; }
