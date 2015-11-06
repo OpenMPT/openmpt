@@ -766,6 +766,13 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 					{
 						switch(param & 0xF0)
 						{
+						case 0x10:
+							if(param & 1)
+								strcpy(s, "off");
+							else
+								strcpy(s, "on");
+							break;
+
 						case 0x30: // glissando control
 							if((param & 0x0F) == 0)
 								strcpy(s, "smooth");
@@ -971,6 +978,7 @@ bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, LPSTR s) const
 			{
 				cmd = CMD_TONEPORTAMENTO;
 				if(sndFile.GetType() != MOD_TYPE_XM) param = ImpulseTrackerPortaVolCmd[m.vol & 0x0F];
+				else param = m.vol << 4;
 			}
 			sprintf(s, "%u (%c%02X)",
 				m.vol,
