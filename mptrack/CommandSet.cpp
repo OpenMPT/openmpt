@@ -1861,40 +1861,17 @@ CString CCommandSet::GetKeyTextFromCommand(CommandID c, UINT key)
 // Quick Changes - modify many commands with one call.
 //-------------------------------------------------------
 
-bool CCommandSet::QuickChange_NotesRepeat()
-//-----------------------------------------
+bool CCommandSet::QuickChange_NotesRepeat(bool repeat)
+//----------------------------------------------------
 {
-	KeyCombination kc;
-	int choices;
-	for (CommandID cmd=kcVPStartNotes; cmd<=kcVPEndNotes; cmd=(CommandID)(cmd+1))		//for all notes
+	for (CommandID cmd = kcVPStartNotes; cmd <= kcVPEndNotes; cmd=(CommandID)(cmd + 1))		//for all notes
 	{
-		choices = GetKeyListSize(cmd);
-		for (int p=0; p<choices; p++)							//for all choices
+		for(std::vector<KeyCombination>::iterator kc = commands[cmd].kcList.begin(); kc != commands[cmd].kcList.end(); kc++)
 		{
-			kc = GetKey(cmd, p);
-			kc.EventType(kc.EventType() | kKeyEventRepeat);
-			//Remove(p, cmd);		//out with the old
-			Add(kc, cmd, true, p);		//in with the new
-		}
-	}
-	return true;
-}
-
-
-bool CCommandSet::QuickChange_NoNotesRepeat()
-//-------------------------------------------
-{
-	KeyCombination kc;
-	int choices;
-	for (CommandID cmd=kcVPStartNotes; cmd<=kcVPEndNotes; cmd=(CommandID)(cmd+1))		//for all notes
-	{
-		choices = GetKeyListSize(cmd);
-		for (int p=0; p<choices; p++)							//for all choices
-		{
-			kc = GetKey(cmd, p);
-			kc.EventType(kc.EventType() & ~kKeyEventRepeat);
-			//Remove(p, cmd);		//out with the old
-			Add(kc, cmd, true, p);		//in with the new
+			if(repeat)
+				kc->EventType(kc->EventType() | kKeyEventRepeat);
+			else
+				kc->EventType(kc->EventType() & ~kKeyEventRepeat);
 		}
 	}
 	return true;
