@@ -1540,7 +1540,7 @@ BOOL CViewPattern::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 		DataEntry(zDelta > 0, (nFlags & MK_SHIFT) == MK_SHIFT);
 		return TRUE;
 	}
-	if(IsLiveRecord())
+	if(IsLiveRecord() && !m_Status[psDragActive])
 	{
 		// During live playback with "follow song" enabled, the mouse wheel can be used to jump forwards and backwards.
 		CursorJump(-sgn(zDelta), false);
@@ -4375,7 +4375,7 @@ void CViewPattern::CursorJump(int distance, bool snap)
 		row += distance;
 	row = SetCurrentRow(row, true);
 
-	if(IsLiveRecord())
+	if(IsLiveRecord() && !m_Status[psDragActive])
 	{
 		CriticalSection cs;
 		CSoundFile &sndFile = GetDocument()->GetrSoundFile();
@@ -4393,7 +4393,7 @@ void CViewPattern::CursorJump(int distance, bool snap)
 
 
 LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
-//----------------------------------------------------------------
+//--------------------------------------------------------------------
 {
 	if (wParam == kcNull)
 		return NULL;
