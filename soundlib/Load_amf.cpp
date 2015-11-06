@@ -13,6 +13,7 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
+#include <algorithm>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -539,21 +540,24 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 			SampleIO::littleEndian,
 			SampleIO::unsignedPCM);
 
-		// Why is all of this sample loading business so dumb in AMF?
-		// Surely there must be some great idea behind it which isn't handled here (re-using the same sample data for different sample slots maybe?)
-		for(uint32 seekPos = 1; seekPos <= maxSamplePos; seekPos++)
+		// Why is all of this sample loading business so weird in AMF?
+		// Surely there must be some great idea behind it which isn't handled here or used in the wild
+		// (re-using the same sample data for different sample slots maybe?)
+
+		// First, try compacting the sample indices so that the loop won't have 2^32 iterations in the worst case.
+		std::vector<uint32> samplePosCompact = samplePos;
+		std::sort(samplePosCompact.begin(), samplePosCompact.end());
+		std::vector<uint32>::const_iterator end = std::unique(samplePosCompact.begin(), samplePosCompact.end());
+
+		for(std::vector<uint32>::const_iterator pos = samplePosCompact.begin(); pos != end; pos++)
 		{
 			for(SAMPLEINDEX smp = 0; smp < GetNumSamples(); smp++)
 			{
-				if(seekPos == samplePos[smp])
+				if(*pos == samplePos[smp])
 				{
 					sampleIO.ReadSample(Samples[smp + 1], file);
 					break;
 				}
-			}
-			if(file.NoBytesLeft())
-			{
-				break;
 			}
 		}
 	}

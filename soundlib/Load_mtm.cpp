@@ -110,7 +110,6 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 		|| fileHeader.numChannels > 32
 		|| fileHeader.numChannels == 0
 		|| fileHeader.lastPattern >= MAX_PATTERNS
-		|| fileHeader.beatsPerTrack == 0
 		|| !file.CanRead(sizeof(MTMSampleHeader) * fileHeader.numSamples + 128 + 192 * fileHeader.numTracks + 64 * (fileHeader.lastPattern + 1) + fileHeader.commentSize))
 	{
 		return false;
@@ -147,7 +146,7 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 	Order.ReadAsByte(file, 128, readOrders, 0xFF, 0xFE);
 
 	// Reading Patterns
-	const ROWINDEX rowsPerPat = std::min(ROWINDEX(fileHeader.beatsPerTrack), MAX_PATTERN_ROWS);
+	const ROWINDEX rowsPerPat = fileHeader.beatsPerTrack ? std::min(ROWINDEX(fileHeader.beatsPerTrack), MAX_PATTERN_ROWS) : 64;
 	FileReader tracks = file.ReadChunk(192 * fileHeader.numTracks);
 
 	for(PATTERNINDEX pat = 0; pat <= fileHeader.lastPattern; pat++)

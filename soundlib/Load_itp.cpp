@@ -108,12 +108,12 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	// Channels' data
 	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
-		ChnSettings[chn].nPan = static_cast<uint16>(file.ReadUint32LE());
+		ChnSettings[chn].nPan = std::min(static_cast<uint16>(file.ReadUint32LE()), uint16(256));
 		ChnSettings[chn].dwFlags.reset();
 		uint32 flags = file.ReadUint32LE();
 		if(flags & 0x100) ChnSettings[chn].dwFlags.set(CHN_MUTE);
 		if(flags & 0x800) ChnSettings[chn].dwFlags.set(CHN_SURROUND);
-		ChnSettings[chn].nVolume = static_cast<uint16>(file.ReadUint32LE());
+		ChnSettings[chn].nVolume = std::min(static_cast<uint16>(file.ReadUint32LE()), uint16(64));
 		file.ReadString<mpt::String::maybeNullTerminated>(ChnSettings[chn].szName, size);
 	}
 
