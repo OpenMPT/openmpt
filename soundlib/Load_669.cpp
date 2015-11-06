@@ -100,7 +100,8 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 		|| (fileHeader.sig != _669FileHeader::magic669 && fileHeader.sig != _669FileHeader::magic669Ext)
 		|| fileHeader.samples > 64
 		|| fileHeader.restartPos >= 128
-		|| fileHeader.patterns > 128)
+		|| fileHeader.patterns > 128
+		|| !file.CanRead(fileHeader.samples * sizeof(_669Sample)))
 	{
 		return false;
 	}
@@ -136,10 +137,11 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 	{
 		_669Sample sampleHeader;
-		if(!file.ReadConvertEndianness(sampleHeader))
-		{
+		file.ReadConvertEndianness(sampleHeader);
+		// Since 669 files have very unfortunate magic bytes ("if") and can
+		// hardly be validated, reject any file with far too big samples.
+		if(sampleHeader.length >= 0x4000000)
 			return false;
-		}
 		sampleHeader.ConvertToMPT(Samples[smp]);
 		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.filename);
 	}
