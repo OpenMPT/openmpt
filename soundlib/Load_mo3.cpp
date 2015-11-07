@@ -371,7 +371,7 @@ struct PACKED MO3Sample
 				mptSmp.nC5Speed = static_cast<uint32>(freqFinetune);
 			else
 				mptSmp.nC5Speed = Util::Round<uint32>(15787.0 * std::pow(2.0, freqFinetune / 1536.0));
-		} else
+		} else if(type != MOD_TYPE_MTM)
 		{
 			mptSmp.nFineTune = static_cast<int8>(freqFinetune - 128);
 			mptSmp.RelativeTone = transpose;
@@ -504,7 +504,7 @@ static bool UnpackMO3Data(FileReader &file, uint8 *dst, uint32 size)
 			strLen = (strLen << 1) + carry;
 			if(strLen == 0)
 			{
-				// length do not fit in 2 bits
+				// length does not fit in 2 bits
 				DECODE_CTRL_BITS;	// decode length: 1 is the most significant bit,
 				strLen += 2;		// then first bit of each bits pairs (noted n1), until n0.
 			}
@@ -512,7 +512,7 @@ static bool UnpackMO3Data(FileReader &file, uint8 *dst, uint32 size)
 			if(size >= static_cast<uint32>(strLen))
 			{
 				const uint8 *string = dst + strOffset; // pointer to previous string
-				if(string < initDst || string >= initDst + initSize || string + strLen < initDst || string + strLen >= initDst + initSize)
+				if(string < initDst || string >= dst)
 				{
 					break;
 				}
@@ -594,9 +594,9 @@ static void UnpackMO3DeltaSample(FileReader &file, typename Properties::sample_t
 
 	for(uint8 chn = 0; chn < numChannels; chn++)
 	{
-		uint32 i = length;
 		typename Properties::sample_t *p = dst + chn;
-		while(i > 0)
+		const typename Properties::sample_t * const pEnd = p + length * numChannels;
+		while(p < pEnd)
 		{
 			val = 0;
 			Properties::Decode(file, carry, data, dh, val);
@@ -624,7 +624,6 @@ static void UnpackMO3DeltaSample(FileReader &file, typename Properties::sample_t
 			*p = val;
 			p += numChannels;
 			previous = val;
-			i--;
 		}
 	}
 }
@@ -643,9 +642,9 @@ static void UnpackMO3DeltaPredictionSample(FileReader &file, typename Properties
 
 	for(uint8 chn = 0; chn < numChannels; chn++)
 	{
-		uint32 i = length;
 		typename Properties::sample_t *p = dst + chn;
-		while(i > 0)
+		const typename Properties::sample_t * const pEnd = p + length * numChannels;
+		while(p < pEnd)
 		{
 			val = 0;
 			Properties::Decode(file, carry, data, dh, val);
@@ -680,7 +679,6 @@ static void UnpackMO3DeltaPredictionSample(FileReader &file, typename Properties
 			Limit(next, std::numeric_limits<typename Properties::sample_t>::min(), std::numeric_limits<typename Properties::sample_t>::max());
 
 			previous = sval;
-			i--;
 		}
 	}
 }
@@ -1001,6 +999,11 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		VOLCMD_FINEVOLUP,		VOLCMD_PORTADOWN,		VOLCMD_PORTAUP,
 	};
 
+	uint8 noteOffset = NOTE_MIN;
+	if(m_nType == MOD_TYPE_MTM)
+		noteOffset = 13 + NOTE_MIN;
+	else if(m_nType != MOD_TYPE_IT)
+		noteOffset = 12 + NOTE_MIN;
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)
 	{
 		const ROWINDEX numRows = patLengthChunk.ReadUint16LE();
@@ -1032,7 +1035,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 					case 0x01:
 						// Note
 						m.note = cmd[1];
-						if(m.note < 120) m.note += NOTE_MIN;
+						if(m.note < 120) m.note += noteOffset;
 						else if(m.note == 0xFF) m.note = NOTE_KEYOFF;
 						else if(m.note == 0xFE) m.note = NOTE_NOTECUT;
 						else m.note = NOTE_FADE;

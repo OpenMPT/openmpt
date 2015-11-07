@@ -1045,9 +1045,6 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 				}
 			}
 		}
-	} else
-	{
-		return false;
 	}
 
 	// Read song message
