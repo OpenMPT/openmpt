@@ -504,6 +504,11 @@ mpt::ustring GetFullCreditsString()
 		"http://www.un4seen.com/mo3.html\n"
 		"\n"
 #endif
+#ifdef MPT_BUILTIN_MO3
+		"Laurent Cl\xc3\xA9vy for unofficial MO3 documentation and decompression code\n"
+		"https://github.com/lclevy/unmo3\n"
+		"\n"
+#endif
 		"Ben \"GreaseMonkey\" Russell for IT sample compression code\n"
 		"https://github.com/iamgreaser/it2everything/\n"
 		"\n"

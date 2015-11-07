@@ -691,8 +691,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		uint16 len = file.ReadUint16LE();
 		ROWINDEX numRows = file.ReadUint16LE();
 
-		if(numRows < GetModSpecifications().patternRowsMin
-			|| numRows > GetModSpecifications().patternRowsMax
+		if(numRows < 1
+			|| numRows > MAX_PATTERN_ROWS
 			|| !file.Skip(4))
 			continue;
 
@@ -780,9 +780,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		uint16 len = file.ReadUint16LE();
 		ROWINDEX numRows = file.ReadUint16LE();
 
-		if(numRows < GetModSpecifications().patternRowsMin
-			|| numRows > GetModSpecifications().patternRowsMax
-			|| !file.Skip(4)
+		if(!file.Skip(4)
 			|| !Patterns.Insert(pat, numRows))
 			continue;
 			
@@ -1849,63 +1847,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 
 			if(plug < MAX_MIXPLUGINS)
 			{
-				// MPT's standard plugin data. Size not specified in file.. grrr..
-				chunk.ReadConvertEndianness(m_MixPlugins[plug].Info);
-				mpt::String::SetNullTerminator(m_MixPlugins[plug].Info.szName);
-				mpt::String::SetNullTerminator(m_MixPlugins[plug].Info.szLibraryName);
-				m_MixPlugins[plug].editorX = m_MixPlugins[plug].editorY = int32_min;
-
-				//data for VST setchunk? size lies just after standard plugin data.
-				const uint32 pluginDataChunkSize = chunk.ReadUint32LE();
-				FileReader pluginDataChunk = chunk.ReadChunk(pluginDataChunkSize);
-
-				if(pluginDataChunk.IsValid())
-				{
-					m_MixPlugins[plug].nPluginDataSize = 0;
-					m_MixPlugins[plug].pPluginData = new (std::nothrow) char[pluginDataChunkSize];
-					if(m_MixPlugins[plug].pPluginData)
-					{
-						m_MixPlugins[plug].nPluginDataSize = pluginDataChunkSize;
-						pluginDataChunk.ReadRaw(m_MixPlugins[plug].pPluginData, pluginDataChunkSize);
-					}
-				}
-
-				//rewbs.modularPlugData
-				FileReader modularData = chunk.ReadChunk(chunk.ReadUint32LE());
-
-				//if dwMPTExtra is positive and there are dwMPTExtra bytes left in nPluginSize, we have some more data!
-				if(modularData.IsValid())
-				{
-					while(modularData.CanRead(5))
-					{
-						// do we recognize this chunk?
-						modularData.ReadArray(code);
-						uint32 dataSize = 0;
-						if(!memcmp(code, "DWRT", 4) || !memcmp(code, "PROG", 4))
-						{
-							// Legacy system with fixed size chunks
-							dataSize = 4;
-						} else
-						{
-							dataSize = modularData.ReadUint32LE();
-						}
-						FileReader dataChunk = modularData.ReadChunk(dataSize);
-
-						if(!memcmp(code, "DWRT", 4))
-						{
-							m_MixPlugins[plug].fDryRatio = dataChunk.ReadFloatLE();
-						} else if(!memcmp(code, "PROG", 4))
-						{
-							m_MixPlugins[plug].defaultProgram = dataChunk.ReadUint32LE();
-						} else if(!memcmp(code, "MCRO", 4))
-						{
-							// Read plugin-specific macros
-							//dataChunk.ReadStructPartial(m_MixPlugins[plug].macros, dataChunk.GetLength());
-						}
-					}
-
-				}
-				//end rewbs.modularPlugData
+				ReadMixPluginChunk(chunk, m_MixPlugins[plug]);
 			}
 		} else if(!memcmp(code, "MODU", 4))
 		{
@@ -1915,6 +1857,67 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 			// Read too far, chicken out...
 			file.SkipBack(8);
 			return;
+		}
+	}
+}
+
+
+void CSoundFile::ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin)
+//-------------------------------------------------------------------------
+{
+	// MPT's standard plugin data. Size not specified in file.. grrr..
+	file.ReadConvertEndianness(plugin.Info);
+	mpt::String::SetNullTerminator(plugin.Info.szName);
+	mpt::String::SetNullTerminator(plugin.Info.szLibraryName);
+	plugin.editorX = plugin.editorY = int32_min;
+
+	//data for VST setchunk? size lies just after standard plugin data.
+	const uint32 pluginDataChunkSize = file.ReadUint32LE();
+	FileReader pluginDataChunk = file.ReadChunk(pluginDataChunkSize);
+
+	if(pluginDataChunk.IsValid())
+	{
+		plugin.nPluginDataSize = 0;
+		plugin.pPluginData = new (std::nothrow) char[pluginDataChunkSize];
+		if(plugin.pPluginData)
+		{
+			plugin.nPluginDataSize = pluginDataChunkSize;
+			pluginDataChunk.ReadRaw(plugin.pPluginData, pluginDataChunkSize);
+		}
+	}
+
+	FileReader modularData = file.ReadChunk(file.ReadUint32LE());
+
+	//if dwMPTExtra is positive and there are dwMPTExtra bytes left in nPluginSize, we have some more data!
+	if(modularData.IsValid())
+	{
+		while(modularData.CanRead(5))
+		{
+			// do we recognize this chunk?
+			char code[4];
+			modularData.ReadArray(code);
+			uint32 dataSize = 0;
+			if(!memcmp(code, "DWRT", 4) || !memcmp(code, "PROG", 4))
+			{
+				// Legacy system with fixed size chunks
+				dataSize = 4;
+			} else
+			{
+				dataSize = modularData.ReadUint32LE();
+			}
+			FileReader dataChunk = modularData.ReadChunk(dataSize);
+
+			if(!memcmp(code, "DWRT", 4))
+			{
+				plugin.fDryRatio = dataChunk.ReadFloatLE();
+			} else if(!memcmp(code, "PROG", 4))
+			{
+				plugin.defaultProgram = dataChunk.ReadUint32LE();
+			} else if(!memcmp(code, "MCRO", 4))
+			{
+				// Read plugin-specific macros
+				//dataChunk.ReadStructPartial(plugin.macros, dataChunk.GetLength());
+			}
 		}
 	}
 }
@@ -2218,7 +2221,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 	// Validate read values.
 	Limit(m_nDefaultTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
 	if(m_nDefaultRowsPerMeasure < m_nDefaultRowsPerBeat) m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat;
-	Limit(m_nChannels, CHANNELINDEX(1), GetModSpecifications().channelsMax);
+	Limit(m_nChannels, CHANNELINDEX(1), MAX_BASECHANNELS);
 	if(m_nTempoMode >= tempoModeMax) m_nTempoMode = tempoModeClassic;
 	if(m_nMixLevels >= mixLevelsMax) m_nMixLevels = mixLevelsOriginal;
 	//m_dwCreatedWithVersion

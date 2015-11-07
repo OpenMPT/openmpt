@@ -901,6 +901,9 @@ public:
 	SAMPLEINDEX DetectUnusedSamples(std::vector<bool> &sampleUsed) const;
 	SAMPLEINDEX RemoveSelectedSamples(const std::vector<bool> &keepSamples);
 
+	// Set the autovibrato settings for all samples associated to the given instrument.
+	void PropagateXMAutoVibrato(INSTRUMENTINDEX ins, uint8 type, uint8 sweep, uint8 depth, uint8 rate);
+
 	// Samples file I/O
 	bool ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize=false, bool includeInstrumentFormats=true);
 	bool ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize=false, FileReader *wsmpChunk = nullptr);
@@ -950,6 +953,7 @@ public:
 
 	UINT MapMidiInstrument(DWORD dwProgram, UINT nChannel, UINT nNote);
 	size_t ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trkvers);
+	static void ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin);
 	void LoadMixPlugins(FileReader &file);
 
 	DWORD CutOffToFrequency(UINT nCutOff, int flt_modifier=256) const; // [0-127] => [1-10KHz]

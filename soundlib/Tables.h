@@ -39,4 +39,7 @@ extern const uint32 LinearSlideDownTable[256];
 extern const float ITResonanceTable[128];
 extern const uint16 XMPanningTable[256];
 
+extern const uint8 AutoVibratoIT2XM[8];
+extern const uint8 AutoVibratoXM2IT[8];
+
 OPENMPT_NAMESPACE_END
