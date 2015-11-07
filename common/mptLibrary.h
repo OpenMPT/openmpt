@@ -28,9 +28,6 @@ mpt::PathString GetAppPath();
 // Returns the system directory path, e.g. "C:\Windows\System32\"
 mpt::PathString GetSystemPath();
 
-// Returns the absolute path for a potentially relative path and removes ".." or "." components. (same as GetFullPathNameW)
-mpt::PathString GetAbsolutePath(const mpt::PathString &path);
-
 #endif // MPT_OS_WINDOWS
 
 

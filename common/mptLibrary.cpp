@@ -77,21 +77,6 @@ mpt::PathString GetSystemPath()
 }
 
 
-mpt::PathString GetAbsolutePath(const mpt::PathString &path)
-{
-	DWORD size = GetFullPathNameW(path.AsNative().c_str(), 0, nullptr, nullptr);
-	if(size > 0)
-	{
-		std::vector<WCHAR> fullPathName(size, L'\0');
-		if(GetFullPathNameW(path.AsNative().c_str(), size, &fullPathName[0], nullptr))
-		{
-			return mpt::PathString::FromNative(&fullPathName[0]);
-		}
-	}
-	return path;
-}
-
-
 class LibraryHandle
 {
 
