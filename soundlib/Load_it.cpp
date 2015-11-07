@@ -629,6 +629,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Reading Samples
 	m_nSamples = std::min(fileHeader.smpnum, SAMPLEINDEX(MAX_SAMPLES - 1));
+	bool lastSampleCompressed = false;
 	for(SAMPLEINDEX i = 0; i < GetNumSamples(); i++)
 	{
 		ITSample sampleHeader;
@@ -641,16 +642,30 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 				mpt::String::Read<mpt::String::spacePadded>(m_szNames[i + 1], sampleHeader.name);
 
-				if((loadFlags & loadSampleData) && file.Seek(sampleOffset))
+				if(!file.Seek(sampleOffset))
+					continue;
+
+				lastSampleCompressed = false;
+				if(!sample.uFlags[SMP_KEEPONDISK])
 				{
-					if(!sample.uFlags[SMP_KEEPONDISK])
+					SampleIO sampleIO = sampleHeader.GetSampleFormat(fileHeader.cwtv);
+					if(loadFlags & loadSampleData)
 					{
-						sampleHeader.GetSampleFormat(fileHeader.cwtv).ReadSample(sample, file);
+						sampleIO.ReadSample(sample, file);
 					} else
 					{
-						// External sample in MPTM file
-						size_t strLen;
-						file.ReadVarInt(strLen);
+						if(sampleIO.GetEncoding() == SampleIO::signedPCM)
+							file.Skip(sample.nLength * (sampleIO.GetBitDepth() / 8) * sampleIO.GetNumChannels());
+						else
+							lastSampleCompressed = true;
+					}
+				} else
+				{
+					// External sample in MPTM file
+					size_t strLen;
+					file.ReadVarInt(strLen);
+					if(loadFlags & loadSampleData)
+					{
 						std::string filenameU8;
 						file.ReadString<mpt::String::maybeNullTerminated>(filenameU8, strLen);
 #ifdef MPT_EXTERNAL_SAMPLES
@@ -658,9 +673,12 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 #else
 						AddToLog(LogWarning, mpt::String::Print(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."), i, mpt::ToUnicode(mpt::CharsetUTF8, filenameU8)));
 #endif // MPT_EXTERNAL_SAMPLES
+					} else
+					{
+						file.Skip(strLen);
 					}
-					lastSampleOffset = std::max(lastSampleOffset, file.GetPosition());
 				}
+				lastSampleOffset = std::max(lastSampleOffset, file.GetPosition());
 			}
 		}
 	}
@@ -748,6 +766,21 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	if(lastSampleOffset > 0)
 	{
 		file.Seek(lastSampleOffset);
+		if(lastSampleCompressed)
+		{
+			// If the last sample was compressed, we do not know where it ends.
+			// Hence, in case we decided not to decode the sample data, we now
+			// have to emulate this until we reach EOF or some instrument / song properties.
+			while(file.CanRead(4))
+			{
+				if(file.ReadMagic("XTPM") || file.ReadMagic("STPM"))
+				{
+					file.SkipBack(4);
+					break;
+				}
+				file.Skip(file.ReadUint16LE());
+			}
+		}
 	}
 
 	// Load instrument and song extensions.
