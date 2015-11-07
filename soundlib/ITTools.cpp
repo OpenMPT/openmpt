@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "ITTools.h"
+#include "Tables.h"
 #include "../common/StringFixer.h"
 
 
@@ -526,8 +527,7 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 	susloopend = mpt::saturate_cast<uint32>(mptSmp.nSustainEnd);
 
 	// Auto Vibrato settings
-	static const uint8 autovibxm2it[8] = { 0, 2, 4, 1, 3, 0, 0, 0 };	// OpenMPT VibratoType -> IT Vibrato
-	vit = autovibxm2it[mptSmp.nVibType & 7];
+	vit = AutoVibratoXM2IT[mptSmp.nVibType & 7];
 	vis = MIN(mptSmp.nVibRate, 64);
 	vid = MIN(mptSmp.nVibDepth, 32);
 	vir = MIN(mptSmp.nVibSweep, 255);
@@ -597,8 +597,7 @@ uint32 ITSample::ConvertToMPT(ModSample &mptSmp) const
 	mptSmp.SanitizeLoops();
 
 	// Auto Vibrato settings
-	static const uint8 autovibit2xm[8] = { VIB_SINE, VIB_RAMP_DOWN, VIB_SQUARE, VIB_RANDOM, VIB_RAMP_UP, 0, 0, 0 };	// IT Vibrato -> OpenMPT VibratoType
-	mptSmp.nVibType = autovibit2xm[vit & 7];
+	mptSmp.nVibType = AutoVibratoIT2XM[vit & 7];
 	mptSmp.nVibRate = vis;
 	mptSmp.nVibDepth = vid & 0x7F;
 	mptSmp.nVibSweep = vir;

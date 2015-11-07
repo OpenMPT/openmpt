@@ -759,6 +759,11 @@ const uint16 XMPanningTable[256] =
 };
 
 
+// IT Vibrato -> OpenMPT/XM VibratoType
+const uint8 AutoVibratoIT2XM[8] = { VIB_SINE, VIB_RAMP_DOWN, VIB_SQUARE, VIB_RANDOM, VIB_RAMP_UP, 0, 0, 0 };
+// OpenMPT/XM VibratoType -> IT Vibrato
+const uint8 AutoVibratoXM2IT[8] = { 0, 2, 4, 1, 3, 0, 0, 0 };
+
 // Reversed sinc coefficients for 4x256 taps polyphase FIR resampling filter (SchismTracker's lutgen.c should generate a very similar table, but it's more precise)
 const int16 CResampler::FastSincTable[256*4] =
 { // Cubic Spline

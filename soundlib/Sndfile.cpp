@@ -1617,6 +1617,27 @@ void CSoundFile::SetupMODPanning(bool bForceSetup)
 }
 
 
+void CSoundFile::PropagateXMAutoVibrato(INSTRUMENTINDEX ins, uint8 type, uint8 sweep, uint8 depth, uint8 rate)
+//------------------------------------------------------------------------------------------------------------
+{
+	if(ins > m_nInstruments || Instruments[ins] == nullptr)
+		return;
+	const std::set<SAMPLEINDEX> referencedSamples = Instruments[ins]->GetSamples();
+
+	// Propagate changes to all samples that belong to this instrument.
+	for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
+	{
+		if(*sample <= m_nSamples)
+		{
+			Samples[*sample].nVibDepth = depth;
+			Samples[*sample].nVibType = type;
+			Samples[*sample].nVibRate = rate;
+			Samples[*sample].nVibSweep = sweep;
+		}
+	}
+}
+
+
 // Normalize the tempo swing coefficients so that they add up to exactly the specified tempo again
 void TempoSwing::Normalize()
 //--------------------------
