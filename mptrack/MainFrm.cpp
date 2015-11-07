@@ -209,8 +209,7 @@ CMainFrame::CMainFrame()
 	MemsetZero(gcolrefVuMeter);
 
 	// Create Audio Critical Section
-	MemsetZero(g_csAudio);
-	InitializeCriticalSection(&g_csAudio);
+	mpt::CreateGlobalCriticalSectionMutex();
 
 	m_InputHandler = new CInputHandler(this);
 
@@ -265,7 +264,8 @@ void CMainFrame::Initialize()
 CMainFrame::~CMainFrame()
 //-----------------------
 {
-	DeleteCriticalSection(&g_csAudio);
+	mpt::DestroyGlobalCriticalSectionMutex();
+
 	delete m_InputHandler;
 
 	CChannelManagerDlg::DestroySharedInstance();
