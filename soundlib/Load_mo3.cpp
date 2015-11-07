@@ -689,7 +689,7 @@ static void UnpackMO3DeltaPredictionSample(FileReader &file, typename Properties
 #undef READ_CTRL_BIT
 #undef DECODE_CTRL_BITS
 
-#endif MPT_BUILTIN_MO3
+#endif // MPT_BUILTIN_MO3
 
 
 
