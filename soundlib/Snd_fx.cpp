@@ -4749,6 +4749,12 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 {
 	chn.proTrackerOffset += param;
 
+	if(param >= chn.nLoopEnd && GetType() == MOD_TYPE_MTM && chn.dwFlags[CHN_LOOP] && chn.nLoopEnd > 0)
+	{
+		// Offset wrap-around
+		param = (param - chn.nLoopStart) % (chn.nLoopEnd - chn.nLoopStart) + chn.nLoopStart;
+	}
+
 	if(chn.rowCommand.IsNote())
 	{
 		if(m_SongFlags[SONG_PT_MODE])
@@ -4766,7 +4772,7 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 		if (chn.nPos >= chn.nLength || (chn.dwFlags[CHN_LOOP] && chn.nPos >= chn.nLoopEnd))
 		{
 			// Offset beyond sample size
-			if (!(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MOD)))
+			if (!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MOD | MOD_TYPE_MTM)))
 			{
 				// IT Compatibility: Offset
 				if(IsCompatibleMode(TRK_IMPULSETRACKER))
@@ -4783,7 +4789,7 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 						chn.nPos = chn.nLength - 2;
 					}
 				}
-			} else if(IsCompatibleMode(TRK_FASTTRACKER2))
+			} else if(IsCompatibleMode(TRK_FASTTRACKER2) || GetType() == MOD_TYPE_MTM)
 			{
 				// FT2 Compatibility: Don't play note if offset is beyond sample length
 				// Test case: 3xx-no-old-samp.xm
@@ -4855,6 +4861,10 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 			if (!retrigSpeed) retrigSpeed = 1;
 			if ((retrigCount) && (!(retrigCount % retrigSpeed))) doRetrig = true;
 			retrigCount++;
+		} else if(GetType() == MOD_TYPE_MTM)
+		{
+			// In MultiTracker, E9x retriggers the last note at exactly the x-th tick of the row
+			doRetrig = m_PlayState.m_nTickCount == (param & 0x0F) && retrigSpeed != 0;
 		} else
 		{
 			int realspeed = retrigSpeed;
