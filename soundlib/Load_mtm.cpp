@@ -179,13 +179,21 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 				if(cmd == 0x0A)
 				{
 					if(param & 0xF0) param &= 0xF0; else param &= 0x0F;
+				} else if(cmd == 0x08)
+				{
+					// No 8xx panning in MultiTracker, only E8x
+					cmd = param = 0;
 				}
 				m->command = cmd;
 				m->param = param;
 				if(cmd != 0 || param != 0)
 				{
 					ConvertModCommand(*m);
+#ifdef MODPLUG_TRACKER
 					m->Convert(MOD_TYPE_MOD, MOD_TYPE_S3M, *this);
+					if(m->command == CMD_RETRIG && !m->param)
+						m->command = CMD_NONE;
+#endif
 				}
 			}
 		}
