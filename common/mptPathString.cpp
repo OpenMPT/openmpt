@@ -229,11 +229,31 @@ CString PathString::TunnelIntoCString(const mpt::PathString &path)
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
-#if defined(MODPLUG_TRACKER)
-#if MPT_OS_WINDOWS
-
 namespace mpt
 {
+
+#if MPT_OS_WINDOWS
+
+mpt::PathString GetAbsolutePath(const mpt::PathString &path)
+//----------------------------------------------------------
+{
+	DWORD size = GetFullPathNameW(path.AsNative().c_str(), 0, nullptr, nullptr);
+	if(size == 0)
+	{
+		return path;
+	}
+	std::vector<WCHAR> fullPathName(size, L'\0');
+	if(GetFullPathNameW(path.AsNative().c_str(), size, &fullPathName[0], nullptr) == 0)
+	{
+		return path;
+	}
+	return mpt::PathString::FromNative(&fullPathName[0]);
+}
+
+#endif // MPT_OS_WINDOWS
+
+#if defined(MODPLUG_TRACKER)
+#if MPT_OS_WINDOWS
 
 mpt::PathString GetTempDirectory()
 //--------------------------------
@@ -261,10 +281,10 @@ mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const 
 	return filename;
 }
 
-} // namespace mpt
-
 #endif // MPT_OS_WINDOWS
 #endif // MODPLUG_TRACKER
+
+} // namespace mpt
 
 
 

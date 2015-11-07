@@ -258,6 +258,13 @@ static inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWid
 namespace mpt
 {
 
+#if MPT_OS_WINDOWS
+
+// Returns the absolute path for a potentially relative path and removes ".." or "." components. (same as GetFullPathNameW)
+mpt::PathString GetAbsolutePath(const mpt::PathString &path);
+
+#endif // MPT_OS_WINDOWS
+
 #if defined(MODPLUG_TRACKER)
 #if MPT_OS_WINDOWS
 
