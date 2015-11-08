@@ -24,7 +24,12 @@ AC_DEFINE([MPT_SVNVERSION], ["!!MPT_SVNVERSION!!"], [svn version])
 AC_DEFINE([MPT_PACKAGE], [!!MPT_PACKAGE!!], [is package])
 
 # Required libopenmpt dependency: zlib
-PKG_CHECK_MODULES([ZLIB], [zlib], AC_DEFINE([MPT_WITH_ZLIB], [], [with libz]))
+AC_ARG_WITH([zlib], AS_HELP_STRING([--without-zlib], [Disable use of zlib.]))
+AS_IF([test "x$with_zlib" != "xno"],
+ [
+  PKG_CHECK_MODULES([ZLIB], [zlib], [AC_DEFINE([MPT_WITH_ZLIB], [], [with zlib])], [AC_MSG_ERROR([Unable to find zlib.])])
+ ]
+)
 
 # Optional libopenmpt dependency: libltdl
 AC_ARG_ENABLE([unmo3], AS_HELP_STRING([--enable-unmo3], [Enable the use of dynamically loaded libunmo3.]))
@@ -68,32 +73,41 @@ AS_IF([test "x$have_ltdl" = "x1"],
 AC_SUBST([LTDL_CPPFLAGS])
 AC_SUBST([LTDL_LIBS])
 
-# Optional openmpt123 dependency: PortAudio, try SDL if PortAudio is unavailable
-PKG_CHECK_MODULES([PORTAUDIO], [portaudio-2.0],
+# Optional openmpt123 and examples dependency
+AC_ARG_WITH([portaudio], AS_HELP_STRING([--without-portaudio], [Disable use of libportaudio.]))
+AS_IF([test "x$with_portaudio" != "xno"],
  [
-  have_portaudio=1
-  AC_DEFINE([MPT_WITH_PORTAUDIO], [], [with libportaudio])
+  PKG_CHECK_MODULES([PORTAUDIO], [portaudio-2.0],
+   [
+    have_portaudio=1
+    AC_DEFINE([MPT_WITH_PORTAUDIO], [], [with libportaudio])
+   ],
+   [
+    have_portaudio=0
+    AC_MSG_ERROR([Unable to find libportaudio.])
+   ]
+  )
  ],
  [
   have_portaudio=0
-  PKG_CHECK_MODULES([SDL2], [sdl2],
-   [AC_DEFINE([MPT_WITH_SDL2], [], [with libsdl2])],
-   [
-    PKG_CHECK_MODULES([SDL], [sdl],
-     [AC_DEFINE([MPT_WITH_SDL], [], [with libsdl])],
-     [AC_MSG_WARN([Neither PORTAUDIO nor SDL2/SDL1 is available. openmpt123 will be built without realtime audio output.])]
-    )
-   ]
-  )
  ]
 )
 AM_CONDITIONAL([HAVE_PORTAUDIO], [test x$have_portaudio = x1])
 
 # Optional examples dependency: PortAudio C++
-PKG_CHECK_MODULES([PORTAUDIOCPP], [portaudiocpp],
+AC_ARG_WITH([portaudiocpp], AS_HELP_STRING([--without-portaudiocpp], [Disable use of libportaudiocpp.]))
+AS_IF([test "x$with_portaudiocpp" != "xno"],
  [
-  have_portaudiocpp=1
-  AC_DEFINE([MPT_WITH_PORTAUDIOCPP], [], [with libportaudiocpp])
+  PKG_CHECK_MODULES([PORTAUDIOCPP], [portaudiocpp],
+   [
+    have_portaudiocpp=1
+    AC_DEFINE([MPT_WITH_PORTAUDIOCPP], [], [with libportaudiocpp])
+   ],
+   [
+    have_portaudiocpp=0
+    AC_MSG_ERROR([Unable to find libportaudiocpp.])
+   ]
+  )
  ],
  [
   have_portaudiocpp=0
@@ -101,11 +115,37 @@ PKG_CHECK_MODULES([PORTAUDIOCPP], [portaudiocpp],
 )
 AM_CONDITIONAL([HAVE_PORTAUDIOCPP], [test x$have_portaudio = x1])
 
+# Optional disabled openmpt123 dependency: libsdl2
+AC_ARG_WITH([sdl2], AS_HELP_STRING([--with-sdl2], [Enable use of libsdl2.]))
+AS_IF([test "x$with_sdl2" = "xyes"],
+ [
+  PKG_CHECK_MODULES([SDL2], [sdl2], [AC_DEFINE([MPT_WITH_SDL2], [], [with libsdl2])], [AC_MSG_ERROR([Unable to find libsdl2.])])
+ ]
+)
+
+# Optional disabled openmpt123 dependency: libsdl
+AC_ARG_WITH([sdl], AS_HELP_STRING([--with-sdl], [Enable use of libsdl.]))
+AS_IF([test "x$with_sdl" = "xyes"],
+ [
+  PKG_CHECK_MODULES([SDL], [sdl], [AC_DEFINE([MPT_WITH_SDL], [], [with libsdl])], [AC_MSG_ERROR([Unable to find libsdl.])])
+ ]
+)
+
 # Optional openmpt123 dependency: libsndfile
-PKG_CHECK_MODULES([SNDFILE], [sndfile], [AC_DEFINE([MPT_WITH_SNDFILE], [], [with libsndfile])], [AC_MSG_NOTICE([SNDFILE not found])])
+AC_ARG_WITH([sndfile], AS_HELP_STRING([--without-sndfile], [Disable use of libsndfile.]))
+AS_IF([test "x$with_sndfile" != "xno"],
+ [
+  PKG_CHECK_MODULES([SNDFILE], [sndfile], [AC_DEFINE([MPT_WITH_SNDFILE], [], [with libsndfile])], [AC_MSG_ERROR([Unable to find libsndfile.])])
+ ]
+)
 
 # Optional openmpt123 dependency: libFLAC
-PKG_CHECK_MODULES([FLAC], [flac], [AC_DEFINE([MPT_WITH_FLAC], [], [with libflac])], [AC_MSG_NOTICE([FLAC not found])])
+AC_ARG_WITH([flac], AS_HELP_STRING([--without-flac], [Disable use of libflac.]))
+AS_IF([test "x$with_flac" != "xno"],
+ [
+  PKG_CHECK_MODULES([FLAC], [flac], [AC_DEFINE([MPT_WITH_FLAC], [], [with libflac])], [AC_MSG_ERROR([Unable to find libflac.])])
+ ]
+)
 
 # We want a modern C compiler 
 AC_PROG_CC_STDC
