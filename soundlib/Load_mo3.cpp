@@ -263,10 +263,19 @@ struct PACKED MO3Instrument
 	// Convert MO3 instrument data into OpenMPT's internal instrument format
 	void ConvertToMPT(ModInstrument &mptIns, MODTYPE type) const
 	{
-		for(size_t i = 0; i < CountOf(sampleMap); i++)
+		if(type == MOD_TYPE_XM)
 		{
-			mptIns.NoteMap[i] = static_cast<uint8>(sampleMap[i][0] + NOTE_MIN);
-			mptIns.Keyboard[i] = sampleMap[i][1] + 1;
+			for(size_t i = 0; i < 96; i++)
+			{
+				mptIns.Keyboard[i + 12] = sampleMap[i][1] + 1;
+			}
+		} else
+		{
+			for(size_t i = 0; i < 120; i++)
+			{
+				mptIns.NoteMap[i] = static_cast<uint8>(sampleMap[i][0] + NOTE_MIN);
+				mptIns.Keyboard[i] = sampleMap[i][1] + 1;
+			}
 		}
 		volEnv.ConvertToMPT(mptIns.VolEnv, 0);
 		panEnv.ConvertToMPT(mptIns.PanEnv, 0);
@@ -807,6 +816,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	std::string message;
 	musicChunk.ReadNullString(m_songMessage);
 
+	STATIC_ASSERT(MAX_BASECHANNELS >= 64);
 	MO3FileHeader fileHeader;
 	if(!musicChunk.ReadConvertEndianness(fileHeader)
 		|| fileHeader.numChannels == 0 || fileHeader.numChannels > 64
@@ -826,7 +836,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_madeWithTracker = "MO3";
 	m_ContainerType = MOD_CONTAINERTYPE_MO3;
-	ASSERT(!(fileHeader.flags & 0x4000));
 	if(fileHeader.flags & MO3FileHeader::isIT)
 		m_nType = MOD_TYPE_IT;
 	else if(fileHeader.flags & MO3FileHeader::isS3M)
@@ -853,30 +862,25 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	SetModFlag(MSF_COMPATIBLE_PLAY, !(fileHeader.flags & MO3FileHeader::modplugMode));
 
 	if(m_nType == MOD_TYPE_IT)
-	{
 		m_nDefaultGlobalVolume = std::min<uint16>(fileHeader.globalVol, 128) * 2;
-	} else if(m_nType == MOD_TYPE_XM)
-	{
+	else if(m_nType == MOD_TYPE_S3M)
 		m_nDefaultGlobalVolume = std::min<uint16>(fileHeader.globalVol, 64) * 4;
-	}
 
 	if(fileHeader.sampleVolume < 0)
 		m_nSamplePreAmp = fileHeader.sampleVolume + 52;
 	else
 		m_nSamplePreAmp = static_cast<uint32>(std::exp(fileHeader.sampleVolume * 3.1 / 20.0)) + 51;
 
-	STATIC_ASSERT(MAX_BASECHANNELS >= 64);
-	for(CHANNELINDEX i = 0; i < 64; i++)
+	for(CHANNELINDEX i = 0; i < m_nChannels; i++)
 	{
 		if(m_nType == MOD_TYPE_IT)
-		{
 			ChnSettings[i].nVolume = std::min(fileHeader.chnVolume[i], uint8(64));
-		}
-		ChnSettings[i].nPan = fileHeader.chnPan[i];
-		if(ChnSettings[i].nPan == 127)
+		if(m_nType != MOD_TYPE_XM)
 		{
-			ChnSettings[i].nPan = 128;
-			ChnSettings[i].dwFlags = CHN_SURROUND;
+			if(fileHeader.chnPan[i] == 127)
+				ChnSettings[i].dwFlags = CHN_SURROUND;
+			else
+				ChnSettings[i].nPan = fileHeader.chnPan[i];
 		}
 	}
 
@@ -977,7 +981,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	31 = VOLCMD_PORTADOWN (IT)
 	32 = VOLCMD_PORTAUP (IT)
 
-	Note: S3M/IT CMD_TONEPORTAVOL / CMD_VIBRATOVOL are encoded as:
+	Note: S3M/IT CMD_TONEPORTAVOL / CMD_VIBRATOVOL are encoded as two commands:
 	K= 07 00 22 x
 	L= 06 00 22 x
 	*/
