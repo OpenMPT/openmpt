@@ -5,10 +5,19 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt svn
+
+ *  [**Change**] The Autotools build system does strict checking of all
+    dependencies now. Instead of best effort auto-magic detection of all
+    potentially optional dependencies, the default set of dependencies is now
+    enforced unless each individual dependency gets explicitely disabled via
+    `--without-foo` or `--disable-foo` `./configure` switches. Run
+    `./configure --help` for the full list of options.
+
 ### libopenmpt 0.2-beta15 (2015-10-31)
 
  *  [**Change**] openmpt123: SDL2 is now supported and preferred to SDL1 if
-    available.
+    available with the `Makefile` build system.
 
  *  [**Bug**] Emscripten support for older emscripten versions broke in -beta14.
     These are now supported again when using `make CONFIG=emscripten-old`.
