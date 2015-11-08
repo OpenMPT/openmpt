@@ -108,8 +108,8 @@ struct PACKED MO3FileHeader
 		isMOD			= 0x0080,
 		isIT			= 0x0100,
 		instrumentMode	= 0x0200,
-		itOldFX			= 0x0400,
-		itCompatGxx		= 0x0800,
+		itCompatGxx		= 0x0400,
+		itOldFX			= 0x0800,
 		modplugMode		= 0x10000,
 		unknown			= 0x20000,	// Always set
 		hasPlugins		= 0x100000,
@@ -840,13 +840,13 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(fileHeader.flags & MO3FileHeader::linearSlides)
 		m_SongFlags.set(SONG_LINEARSLIDES);
-	if(fileHeader.flags & MO3FileHeader::s3mAmigaLimits)
+	if((fileHeader.flags & MO3FileHeader::s3mAmigaLimits) && m_nType == MOD_TYPE_S3M)
 		m_SongFlags.set(SONG_AMIGALIMITS);
-	if(fileHeader.flags & MO3FileHeader::s3mFastSlides)
+	if((fileHeader.flags & MO3FileHeader::s3mFastSlides) && m_nType == MOD_TYPE_S3M)
 		m_SongFlags.set(SONG_FASTVOLSLIDES);
-	if(fileHeader.flags & MO3FileHeader::itOldFX)
+	if(!(fileHeader.flags & MO3FileHeader::itOldFX) && m_nType == MOD_TYPE_IT)
 		m_SongFlags.set(SONG_ITOLDEFFECTS);
-	if(fileHeader.flags & MO3FileHeader::itCompatGxx)
+	if(!(fileHeader.flags & MO3FileHeader::itCompatGxx) && m_nType == MOD_TYPE_IT)
 		m_SongFlags.set(SONG_ITCOMPATGXX);
 	if(fileHeader.flags & MO3FileHeader::extFilterRange)
 		m_SongFlags.set(SONG_EXFILTERRANGE);
