@@ -708,7 +708,7 @@ LIBOPENMPT_API const char * openmpt_module_get_subsong_name( openmpt_module * mo
  * \sa openmpt_module_get_num_channels
  */
 LIBOPENMPT_API const char * openmpt_module_get_channel_name( openmpt_module * mod, int32_t index );
-/*! \brief Get a order name
+/*! \brief Get an order name
  *
  * \param mod The module handle to work on.
  * \param index The order whose name should be retreived
@@ -724,7 +724,7 @@ LIBOPENMPT_API const char * openmpt_module_get_order_name( openmpt_module * mod,
  * \sa openmpt_module_get_num_patterns
  */
 LIBOPENMPT_API const char * openmpt_module_get_pattern_name( openmpt_module * mod, int32_t index );
-/*! \brief Get a instrument name
+/*! \brief Get an instrument name
  *
  * \param mod The module handle to work on.
  * \param index The instrument whose name should be retreived
