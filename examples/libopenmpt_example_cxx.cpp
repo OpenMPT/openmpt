@@ -21,12 +21,13 @@
 
 #include <portaudiocpp/PortAudioCpp.hxx>
 
-#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
-#if defined(__GNUC__)
+#if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
+#if defined( __GNUC__ )
 // mingw-w64 g++ does only default to special C linkage for "main", but not for "wmain" (see <https://sourceforge.net/p/mingw-w64/wiki2/Unicode%20apps/>).
-extern "C"
-#endif
+extern "C" int wmain( int argc, wchar_t * argv[] ) {
+#else
 int wmain( int argc, wchar_t * argv[] ) {
+#endif
 #else
 int main( int argc, char * argv[] ) {
 #endif
@@ -67,4 +68,3 @@ int main( int argc, char * argv[] ) {
 	}
 	return 0;
 }
-

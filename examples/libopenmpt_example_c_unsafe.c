@@ -30,7 +30,7 @@ static int16_t left[BUFFERSIZE];
 static int16_t right[BUFFERSIZE];
 static int16_t * const buffers[2] = { left, right };
 
-#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
+#if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
 int wmain( int argc, wchar_t * argv[] ) {
 #else
 int main( int argc, char * argv[] ) {
@@ -40,7 +40,7 @@ int main( int argc, char * argv[] ) {
 	size_t count = 0;
 	PaStream * stream = 0;
 	(void)argc;
-#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
+#if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
 	file = _wfopen( argv[1], L"rb" );
 #else
 	file = fopen( argv[1], "rb" );

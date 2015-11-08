@@ -32,7 +32,6 @@ static void libopenmpt_example_logfunc( const char * message, void * userdata ) 
 	if ( message ) {
 		fprintf( stderr, "%s\n", message );
 	}
-
 }
 
 static ssize_t xwrite( int fd, const void * buffer, size_t size ) {
@@ -53,7 +52,7 @@ static ssize_t xwrite( int fd, const void * buffer, size_t size ) {
 
 static int16_t buffer[BUFFERSIZE * 2];
 
-#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
+#if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
 int wmain( int argc, wchar_t * argv[] ) {
 #else
 int main( int argc, char * argv[] ) {
@@ -70,7 +69,7 @@ int main( int argc, char * argv[] ) {
 		goto fail;
 	}
 
-#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
+#if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
 	if ( wcslen( argv[1] ) == 0 ) {
 		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'libopenmpt_example_c_stdout SOMEMODULE'." );
 		goto fail;
@@ -106,7 +105,6 @@ int main( int argc, char * argv[] ) {
 			fprintf( stderr, "Error: %s\n", "write() failed." );
 			goto fail;
 		}
-
 	}
 
 	result = 0;
@@ -130,5 +128,4 @@ cleanup:
 	}
 
 	return result;
-
 }

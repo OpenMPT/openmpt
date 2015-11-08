@@ -34,7 +34,6 @@ static void libopenmpt_example_logfunc( const char * message, void * userdata ) 
 	if ( message ) {
 		fprintf( stderr, "%s\n", message );
 	}
-
 }
 
 typedef struct blob_t {
@@ -53,7 +52,7 @@ static void free_blob( blob_t * blob ) {
 	}
 }
 
-#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
+#if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
 static blob_t * load_file( const wchar_t * filename ) {
 #else
 static blob_t * load_file( const char * filename ) {
@@ -70,7 +69,7 @@ static blob_t * load_file( const char * filename ) {
 	}
 	memset( blob, 0, sizeof( blob_t ) );
 
-#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
+#if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
 	file = _wfopen( filename, L"rb" );
 #else
 	file = fopen( filename, "rb" );
@@ -127,10 +126,9 @@ cleanup:
 	}
 
 	return result;
-
 }
 
-#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
+#if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
 int wmain( int argc, wchar_t * argv[] ) {
 #else
 int main( int argc, char * argv[] ) {
@@ -149,7 +147,7 @@ int main( int argc, char * argv[] ) {
 		goto fail;
 	}
 
-#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
+#if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
 	if ( wcslen( argv[1] ) == 0 ) {
 		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'libopenmpt_example_c_mem SOMEMODULE'." );
 		goto fail;
@@ -210,7 +208,6 @@ int main( int argc, char * argv[] ) {
 			fprintf( stderr, "Error: %s\n", "Pa_WriteStream() failed." );
 			goto fail;
 		}
-
 	}
 
 	result = 0;
@@ -247,6 +244,4 @@ cleanup:
 	}
 
 	return result;
-
 }
-

@@ -35,10 +35,9 @@ static void libopenmpt_example_logfunc( const char * message, void * userdata ) 
 	if ( message ) {
 		fprintf( stderr, "%s\n", message );
 	}
-
 }
 
-#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
+#if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
 int wmain( int argc, wchar_t * argv[] ) {
 #else
 int main( int argc, char * argv[] ) {
@@ -57,7 +56,7 @@ int main( int argc, char * argv[] ) {
 		goto fail;
 	}
 
-#if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
+#if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
 	if ( wcslen( argv[1] ) == 0 ) {
 		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'libopenmpt_example_c SOMEMODULE'." );
 		goto fail;
@@ -119,7 +118,6 @@ int main( int argc, char * argv[] ) {
 			fprintf( stderr, "Error: %s\n", "Pa_WriteStream() failed." );
 			goto fail;
 		}
-
 	}
 
 	result = 0;
@@ -156,6 +154,4 @@ cleanup:
 	}
 
 	return result;
-
 }
-
