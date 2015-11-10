@@ -172,10 +172,11 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		ModSample &sample = Samples[smp + 1];
 		sample.Initialize();
 
-		if(samplePos[smp] == 0) continue;
-		file.Seek(samplePos[smp]);
 		PLMSampleHeader sampleHeader;
-		file.ReadConvertEndianness(sampleHeader);
+		if(samplePos[smp] == 0
+			|| !file.Seek(samplePos[smp])
+			|| !file.ReadConvertEndianness(sampleHeader))
+				continue;
 
 		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp + 1], sampleHeader.name);
 		mpt::String::Read<mpt::String::maybeNullTerminated>(sample.filename, sampleHeader.filename);

@@ -228,7 +228,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		SAMPLEINDEX realSample = static_cast<SAMPLEINDEX>(file.ReadUint32LE());
 		ITSample sampleHeader;
 		file.ReadConvertEndianness(sampleHeader);
-		size = file.ReadUint32LE();
+		FileReader sampleData = file.ReadChunk(file.ReadUint32LE());
 
 		if(realSample >= 1 && realSample <= GetNumSamples() && !memcmp(sampleHeader.id, "IMPS", 4) && (loadFlags & loadSampleData))
 		{
@@ -236,10 +236,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 			mpt::String::Read<mpt::String::nullTerminated>(m_szNames[realSample], sampleHeader.name);
 
 			// Read sample data
-			sampleHeader.GetSampleFormat().ReadSample(Samples[realSample], file);
-		} else
-		{
-			file.Skip(size);
+			sampleHeader.GetSampleFormat().ReadSample(Samples[realSample], sampleData);
 		}
 	}
 
