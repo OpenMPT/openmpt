@@ -240,7 +240,8 @@ BOOL CCtrlSamples::OnInitDialog()
 
 	for (ModCommand::NOTE i = BASENOTE_MIN; i <= BASENOTE_MAX; i++)
 	{
-		m_CbnBaseNote.SetItemData(m_CbnBaseNote.AddString(m_sndFile.GetNoteName(i + NOTE_MIN).c_str()), i - (NOTE_MIDDLEC - NOTE_MIN));
+		std::string noteName = CSoundFile::m_NoteNames[i % 12] + mpt::ToString(i / 12);
+		m_CbnBaseNote.SetItemData(m_CbnBaseNote.AddString(noteName.c_str()), i - (NOTE_MIDDLEC - NOTE_MIN));
 	}
 
 	m_ComboFFT.ShowWindow(SW_SHOW);

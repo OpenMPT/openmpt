@@ -251,7 +251,7 @@ static uint8 DMFporta2MPT(uint8 val, const uint8 internalTicks, const bool hasFi
 {
 	if(val == 0)
 		return 0;
-	else if((val <= 0x0F  && hasFine) || internalTicks < 2)
+	else if((val <= 0x0F && hasFine) || internalTicks < 2)
 		return (val | 0xF0);
 	else
 		return std::max<uint8>(1, (val / (internalTicks - 1)));	// no porta on first tick!

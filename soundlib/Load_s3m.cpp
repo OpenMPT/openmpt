@@ -191,7 +191,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	// Is it a valid S3M file?
 	S3MFileHeader fileHeader;
 	if(!file.ReadConvertEndianness(fileHeader)
-		|| !file.CanRead(fileHeader.ordNum + (fileHeader.smpNum + fileHeader.patNum) * 2) 
+		|| !file.CanRead(fileHeader.ordNum + (fileHeader.smpNum + fileHeader.patNum) * 2)
 		|| memcmp(fileHeader.magic, "SCRM", 4)
 		|| fileHeader.fileType != S3MFileHeader::idS3MType
 		|| (fileHeader.formatVersion != S3MFileHeader::oldVersion && fileHeader.formatVersion != S3MFileHeader::newVersion))
@@ -690,14 +690,14 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 
 	// Write channel panning
 	uint8 chnPan[32];
-	for(CHANNELINDEX pat = 0; pat < 32; pat++)
+	for(CHANNELINDEX chn = 0; chn < 32; chn++)
 	{
-		if(pat < GetNumChannels())
+		if(chn < GetNumChannels())
 		{
-			chnPan[pat] = static_cast<uint8>(((ChnSettings[pat].nPan * 15 + 128) / 256)) | 0x20;
+			chnPan[chn] = static_cast<uint8>(((ChnSettings[chn].nPan * 15 + 128) / 256)) | 0x20;
 		} else
 		{
-			chnPan[pat] = 0x08;
+			chnPan[chn] = 0x08;
 		}
 	}
 	fwrite(chnPan, 32, 1, f);
@@ -832,7 +832,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 			buffer.insert(buffer.end(), 64, s3mEndOfRow);
 		}
 
-		size_t length = MIN(buffer.size(), uint16_max);
+		size_t length = std::min(buffer.size(), size_t(uint16_max));
 		buffer[0] = static_cast<uint8>(length & 0xFF);
 		buffer[1] = static_cast<uint8>((length >> 8) & 0xFF);
 

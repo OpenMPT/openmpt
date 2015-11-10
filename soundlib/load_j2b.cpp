@@ -344,13 +344,13 @@ struct PACKED AMFFSampleHeader
 		}
 
 		if(flags & AMFFSampleHeader::smp16Bit)
-			mptSmp.uFlags |= CHN_16BIT;
+			mptSmp.uFlags.set(CHN_16BIT);
 		if(flags & AMFFSampleHeader::smpLoop)
-			mptSmp.uFlags |= CHN_LOOP;
+			mptSmp.uFlags.set(CHN_LOOP);
 		if(flags & AMFFSampleHeader::smpPingPong)
-			mptSmp.uFlags |= CHN_PINGPONGLOOP;
+			mptSmp.uFlags.set(CHN_PINGPONGLOOP);
 		if(flags & AMFFSampleHeader::smpPanning)
-			mptSmp.uFlags |= CHN_PANNING;
+			mptSmp.uFlags.set(CHN_PANNING);
 	}
 
 	// Retrieve the internal sample format flags for this sample.
@@ -892,7 +892,10 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 
 				mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
 				sampleHeader.ConvertToMPT(instrHeader, Samples[smp]);
-				sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
+				if(loadFlags & loadSampleData)
+					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
+				else
+					chunk.Skip(Samples[smp].GetSampleSizeInBytes());
 			}
 		}
 	} else
