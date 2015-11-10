@@ -2,8 +2,9 @@
  * Load_mo3.cpp
  * ------------
  * Purpose: MO3 module loader.
- * Notes  : This makes use of an external library (unmo3.dll / libunmo3.so).
- * Authors: Johannes Schultz
+ * Notes  : OpenMPT has its own built-in decoder (enabled with MPT_BUILTIN_MO3), but can also
+ *          make use of the official, closed-source library (unmo3.dll / libunmo3.so).
+ * Authors: Johannes Schultz / OpenMPT Devs
  *          Based on documentation and the decompression routines from the
  *          open-source UNMO3 project (https://github.com/lclevy/unmo3).
  *          The modified decompression code has been relicensed to the BSD
@@ -105,6 +106,8 @@ struct PACKED MO3FileHeader
 		s3mFastSlides	= 0x0004,
 		isMTM			= 0x0008,	// Actually this is simply "not XM". But if none of the S3M, MOD and IT flags are set, it's an MTM.
 		s3mAmigaLimits	= 0x0010,
+		// 0x20 and 0x40 have been used in old versions for things that can be inferred from the file format anyway.
+		// The official UNMO3 ignores them.
 		isMOD			= 0x0080,
 		isIT			= 0x0100,
 		instrumentMode	= 0x0200,
@@ -112,11 +115,12 @@ struct PACKED MO3FileHeader
 		itOldFX			= 0x0800,
 		modplugMode		= 0x10000,
 		unknown			= 0x20000,	// Always set
+		modVBlank		= 0x80000,
 		hasPlugins		= 0x100000,
 		extFilterRange	= 0x200000,
 	};
 
-	uint8  numChannels;		// 0...64 (limited by channel panning and volume)
+	uint8  numChannels;		// 1...64 (limited by channel panning and volume)
 	uint16 numOrders;
 	uint16 restartPos;
 	uint16 numPatterns;
@@ -329,7 +333,7 @@ struct PACKED MO3Sample
 		smpSustain			= 0x100,
 		smpSustainPingPong	= 0x200,
 		smpStereo			= 0x400,
-		smpCompressionMP3	= 0x1000,					// MP3 sample
+		smpCompressionMPEG	= 0x1000,					// MPEG sample (MP3, MPEG 1, MPEG 2.5)
 		smpCompressionOGG	= 0x1000 | 0x2000,			// OGG sample
 		smpSharedOGG		= 0x1000 | 0x2000 | 0x4000,	// OGG sample with shared vorbis header
 		smpDeltaCompression	= 0x2000,					// Deltas + compression
@@ -349,11 +353,11 @@ struct PACKED MO3Sample
 	uint8  vibSweep;
 	uint8  vibDepth;
 	uint8  vibRate;
-	uint8  globalVol;		// 0...64
+	uint8  globalVol;		// 0...64 in IT, in XM it represents the instrument number
 	uint32 sustainStart;
 	uint32 sustainEnd;
 	int32  compressedSize;
-	uint16 encoderDelay;
+	uint16 encoderDelay;	// MP3: Ignore first n bytes of decoded output. OGG: Shared OGG header size
 
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
@@ -371,15 +375,15 @@ struct PACKED MO3Sample
 	}
 
 	// Convert MO3 sample data into OpenMPT's internal instrument format
-	void ConvertToMPT(ModSample &mptSmp, MODTYPE type, uint8 version) const
+	void ConvertToMPT(ModSample &mptSmp, MODTYPE type, bool frequencyIsHertz) const
 	{
 		mptSmp.Initialize();
 		if(type & (MOD_TYPE_IT | MOD_TYPE_S3M))
 		{
-			if(version >= 5)
+			if(frequencyIsHertz)
 				mptSmp.nC5Speed = static_cast<uint32>(freqFinetune);
 			else
-				mptSmp.nC5Speed = Util::Round<uint32>(15787.0 * std::pow(2.0, freqFinetune / 1536.0));
+				mptSmp.nC5Speed = Util::Round<uint32>(8363.0 * std::pow(2.0, (freqFinetune + 1408) / 1536.0));
 		} else if(type != MOD_TYPE_MTM)
 		{
 			mptSmp.nFineTune = static_cast<int8>(freqFinetune - 128);
@@ -426,16 +430,16 @@ STATIC_ASSERT(sizeof(MO3Sample) == 41);
 // then the next 2 bits determines what is the LZ ptr
 // ('00' same as previous, else stored in stream)
 
-#define READ_CTRL_BIT(n) \
+#define READ_CTRL_BIT \
 	data <<= 1; \
-	carry = (data >= (1 << (n))); \
-	data &= ((1 << (n)) - 1); \
+	carry = (data > 0xFF); \
+	data &= 0xFF; \
 	if(data == 0) \
 	{ \
 		data = file.ReadUint8(); \
 		data = (data << 1) + 1; \
-		carry = (data >= (1 << (n))); \
-		data &= ((1 << (n)) - 1); \
+		carry = (data > 0xFF); \
+		data &= 0xFF; \
 	}
 
 // length coded within control stream:
@@ -447,9 +451,9 @@ STATIC_ASSERT(sizeof(MO3Sample) == 41);
 { \
 	strLen++; \
 	do { \
-		READ_CTRL_BIT(8); \
+		READ_CTRL_BIT; \
 		strLen = (strLen << 1) + carry; \
-		READ_CTRL_BIT(8); \
+		READ_CTRL_BIT; \
 	} while(carry); \
 }
 
@@ -475,7 +479,7 @@ static bool UnpackMO3Data(FileReader &file, uint8 *dst, uint32 size)
 
 	while(size > 0)
 	{
-		READ_CTRL_BIT(8);
+		READ_CTRL_BIT;
 		if(!carry)
 		{
 			// a 0 ctrl bit means 'copy', not compressed byte
@@ -507,9 +511,9 @@ static bool UnpackMO3Data(FileReader &file, uint8 *dst, uint32 size)
 			}
 
 			// read the next 2 bits as part of strLen
-			READ_CTRL_BIT(8);
+			READ_CTRL_BIT;
 			strLen = (strLen << 1) + carry;
-			READ_CTRL_BIT(8);
+			READ_CTRL_BIT;
 			strLen = (strLen << 1) + carry;
 			if(strLen == 0)
 			{
@@ -537,7 +541,7 @@ static bool UnpackMO3Data(FileReader &file, uint8 *dst, uint32 size)
 			}
 		}
 	}
-	return (dst - initDst) == static_cast<ptrdiff_t>(initSize);
+	return (dst - initDst) == static_cast<std::ptrdiff_t>(initSize);
 }
 
 
@@ -552,9 +556,9 @@ struct MO3Delta8BitParams
 	{
 		do
 		{
-			READ_CTRL_BIT(8);
+			READ_CTRL_BIT;
 			val = (val << 1) + carry;
-			READ_CTRL_BIT(8);
+			READ_CTRL_BIT;
 		} while(carry);
 	}
 };
@@ -572,19 +576,19 @@ struct MO3Delta16BitParams
 		{
 			do
 			{
-				READ_CTRL_BIT(8);
+				READ_CTRL_BIT;
 				val = (val << 1) + carry;
-				READ_CTRL_BIT(8);
+				READ_CTRL_BIT;
 				val = (val << 1) + carry;
-				READ_CTRL_BIT(8); \
+				READ_CTRL_BIT; \
 			} while(carry);
 		} else
 		{
 			do
 			{
-				READ_CTRL_BIT(8);
+				READ_CTRL_BIT;
 				val = (val << 1) + carry;
-				READ_CTRL_BIT(8);
+				READ_CTRL_BIT;
 			} while(carry);
 		}
 	}
@@ -612,7 +616,7 @@ static void UnpackMO3DeltaSample(FileReader &file, typename Properties::sample_t
 			cl = dh;
 			while(cl > 0)
 			{
-				READ_CTRL_BIT(8);
+				READ_CTRL_BIT;
 				val = (val << 1) + carry;
 				cl--;
 			}
@@ -660,7 +664,7 @@ static void UnpackMO3DeltaPredictionSample(FileReader &file, typename Properties
 			cl = dh;	// length in bits of: delta second part (right most bits of delta) and sign bit
 			while(cl > 0)
 			{
-				READ_CTRL_BIT(8);
+				READ_CTRL_BIT;
 				val = (val << 1) + carry;
 				cl--;
 			}
@@ -712,7 +716,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	const uint8 version = file.ReadUint8();
 	const uint32 musicSize = file.ReadUint32LE();
-	if(musicSize <= 422 /*sizeof(MO3FileHeader) */)
+	if(musicSize <= 422 /*sizeof(MO3FileHeader)*/)
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -720,7 +724,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-#ifdef NO_MO3
+#if defined(NO_MO3) && !defined(MPT_BUILTIN_MO3)
 	// As of November 2015, the format revision is 5; Versions > 31 are unlikely to exist in the next few years,
 	// so we will just ignore those if there's no UNMO3 library to tell us if the file is valid or not
 	// (avoid log entry with .MOD files that have a song name starting with "MO3".
@@ -859,6 +863,8 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		m_SongFlags.set(SONG_ITCOMPATGXX);
 	if(fileHeader.flags & MO3FileHeader::extFilterRange)
 		m_SongFlags.set(SONG_EXFILTERRANGE);
+	if(fileHeader.flags & MO3FileHeader::modVBlank)
+		m_SongFlags.set(SONG_VBLANK_TIMING);
 	SetModFlag(MSF_COMPATIBLE_PLAY, !(fileHeader.flags & MO3FileHeader::modplugMode));
 
 	if(m_nType == MOD_TYPE_IT)
@@ -1169,7 +1175,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 					case 0x1F:
 					case 0x20:
-						// XM volume colume vibrato
+						// XM volume column vibrato
 						m.volcmd = effTrans[cmd[0]];
 						m.vol = cmd[1];
 						break;
@@ -1262,6 +1268,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	if(itSampleMode)
 		m_nInstruments = 0;
 
+	const bool frequencyIsHertz = (version >= 5 || !(fileHeader.flags & MO3FileHeader::linearSlides));
 	bool unsupportedSamples = false;
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 	{
@@ -1278,7 +1285,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		MO3Sample smpHeader;
 		if(!musicChunk.ReadConvertEndianness(smpHeader))
 			break;
-		smpHeader.ConvertToMPT(sample, m_nType, version);
+		smpHeader.ConvertToMPT(sample, m_nType, frequencyIsHertz);
 
 		if(version >= 5 && (smpHeader.flags & MO3Sample::smpCompressionMask) == MO3Sample::smpSharedOGG)
 		{
