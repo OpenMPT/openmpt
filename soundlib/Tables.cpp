@@ -112,9 +112,9 @@ static const ModContainerInfo modContainerInfo[] =
 	// Container formats
 	{ MOD_CONTAINERTYPE_GDM,   "General Digital Music",    "gdm"   },
 	{ MOD_CONTAINERTYPE_UMX,   "Unreal Music",             "umx"   },
-#ifndef NO_MO3
+#if !defined(NO_MO3) || defined(MPT_BUILTIN_MO3)
 	{ MOD_CONTAINERTYPE_MO3,   "Un4seen MO3",              "mo3"   },
-#endif // NO_MO3
+#endif // !defined(NO_MO3) || defined(MPT_BUILTIN_MO3)
 	{ MOD_CONTAINERTYPE_XPK,   "XPK packed",               "xpk"   },
 	{ MOD_CONTAINERTYPE_PP20,  "PowerPack PP20",           "ppm"   },
 	{ MOD_CONTAINERTYPE_MMCMP, "Music Module Compressor",  "mmcmp" }
