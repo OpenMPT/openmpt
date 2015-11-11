@@ -16,8 +16,18 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "../common/ComponentManager.h"
+
 #ifdef MPT_BUILTIN_MO3
 #include "Tables.h"
+
+#ifdef MPT_BUILTIN_MO3_STB_VORBIS
+// Using stb_vorbis for OGG Vorbis decoding
+#pragma warning(disable:4244 4100 4245 4701)
+#include <stb_vorbis/stb_vorbis.c>
+#include "SampleFormatConverters.h"
+#pragma warning(default:4244 4100 4245 4701)
+#endif // MPT_BUILTIN_MO3_STB_VORBIS
+
 #endif // MPT_BUILTIN_MO3
 
 #ifndef NO_MO3
@@ -384,9 +394,10 @@ struct PACKED MO3Sample
 				mptSmp.nC5Speed = static_cast<uint32>(freqFinetune);
 			else
 				mptSmp.nC5Speed = Util::Round<uint32>(8363.0 * std::pow(2.0, (freqFinetune + 1408) / 1536.0));
-		} else if(type != MOD_TYPE_MTM)
+		} else
 		{
 			mptSmp.nFineTune = static_cast<int8>(freqFinetune - 128);
+			if(type == MOD_TYPE_MTM) mptSmp.nFineTune += 128;
 			mptSmp.RelativeTone = transpose;
 		}
 		mptSmp.nVolume = std::min(defaultVolume, uint8(64)) * 4u;
@@ -1270,6 +1281,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 	const bool frequencyIsHertz = (version >= 5 || !(fileHeader.flags & MO3FileHeader::linearSlides));
 	bool unsupportedSamples = false;
+	std::vector<FileReader> sampleChunks(m_nSamples);	// For shared OGG headers
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 	{
 		ModSample &sample = Samples[smp];
@@ -1287,33 +1299,33 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 		smpHeader.ConvertToMPT(sample, m_nType, frequencyIsHertz);
 
+		SAMPLEINDEX sharedOggHeader = 0;
 		if(version >= 5 && (smpHeader.flags & MO3Sample::smpCompressionMask) == MO3Sample::smpSharedOGG)
 		{
-			// OGG header sharing
-			musicChunk.Skip(2);
+			sharedOggHeader = smp + musicChunk.ReadInt16LE();
 		}
 
 		if(!(loadFlags & loadSampleData))
 			continue;
 
-		if(smpHeader.compressedSize > 0)
+		const uint32 compression = (smpHeader.flags & MO3Sample::smpCompressionMask);
+		if(!compression && smpHeader.compressedSize == 0)
+		{
+			// Uncompressed sample
+			SampleIO(
+				(smpHeader.flags & MO3Sample::smp16Bit) ? SampleIO::_16bit : SampleIO::_8bit,
+				(smpHeader.flags & MO3Sample::smpStereo) ? SampleIO::stereoSplit : SampleIO::mono,
+				SampleIO::littleEndian,
+				SampleIO::signedPCM)
+				.ReadSample(Samples[smp], file);
+		} else if(smpHeader.compressedSize > 0)
 		{
 			if(smpHeader.flags & MO3Sample::smp16Bit) sample.uFlags.set(CHN_16BIT);
 			if(smpHeader.flags & MO3Sample::smpStereo) sample.uFlags.set(CHN_STEREO);
 
-			FileReader sampleData = file.ReadChunk(smpHeader.compressedSize);
-			uint32 compression = (smpHeader.flags & MO3Sample::smpCompressionMask);
+			FileReader &sampleData = sampleChunks[smp - 1] = file.ReadChunk(smpHeader.compressedSize);
 			const uint8 numChannels = sample.GetNumChannels();
-			if(!compression)
-			{
-				// Uncompressed sample
-				SampleIO(
-					(smpHeader.flags & MO3Sample::smp16Bit) ? SampleIO::_16bit : SampleIO::_8bit,
-					(smpHeader.flags & MO3Sample::smpStereo) ? SampleIO::stereoSplit : SampleIO::mono,
-					SampleIO::littleEndian,
-					SampleIO::signedPCM)
-					.ReadSample(Samples[smp], sampleData);
-			} else if(compression == MO3Sample::smpDeltaCompression)
+			if(compression == MO3Sample::smpDeltaCompression)
 			{
 				if(sample.AllocateSample())
 				{
@@ -1331,12 +1343,58 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 					else
 						UnpackMO3DeltaPredictionSample<MO3Delta8BitParams>(sampleData, sample.pSample8, sample.nLength, numChannels);
 				}
+			} else if(compression == MO3Sample::smpCompressionOGG || compression == MO3Sample::smpSharedOGG)
+			{
+#ifdef MPT_BUILTIN_MO3_STB_VORBIS
+				// Which chunk are we going to read the header from?
+				// Note: stb_vorbis (currently) ignores the serial number so we can just reuse the header without further modifications.
+				const bool sharedHeader = (compression == MO3Sample::smpSharedOGG && sharedOggHeader > 0 && sharedOggHeader < smp);
+				FileReader &headerChunk = sharedHeader ? sampleChunks[sharedOggHeader - 1] : sampleData;
+				int initialRead = sharedHeader ? smpHeader.encoderDelay : sampleData.BytesLeft();
+
+				headerChunk.Rewind();
+				if(sharedHeader && !headerChunk.CanRead(smpHeader.encoderDelay))
+					continue;
+
+				int consumed = 0, error = 0;
+				stb_vorbis *vorb = stb_vorbis_open_pushdata(reinterpret_cast<const uint8 *>(headerChunk.GetRawData()), initialRead, &consumed, &error, nullptr);
+				headerChunk.Skip(consumed);
+				if(vorb)
+				{
+					// Header has been read, proceed to reading the sample data
+					sample.AllocateSample();
+					SmpLength offset = 0;
+					while(!sampleData.NoBytesLeft() && offset < sample.nLength && sample.pSample != nullptr)
+					{
+						int channels = 0, decodedSamples = 0;
+						float **output;
+						int consumed = stb_vorbis_decode_frame_pushdata(vorb, reinterpret_cast<const uint8 *>(sampleData.GetRawData()), mpt::saturate_cast<int>(sampleData.BytesLeft()), &channels, &output, &decodedSamples);
+						sampleData.Skip(consumed);
+						LimitMax(decodedSamples, mpt::saturate_cast<int>(sample.nLength - offset));
+						if(decodedSamples > 0 && channels == sample.GetNumChannels())
+						{
+							for(int chn = 0; chn < channels; chn++)
+							{
+								if(smpHeader.flags & MO3Sample::smp16Bit)
+									CopyChannelToInterleaved<SC::Convert<int16, float> >(sample.pSample16 + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
+								else
+									CopyChannelToInterleaved<SC::Convert<int8, float> >(sample.pSample8 + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
+							}
+						}
+						offset += decodedSamples;
+					}
+					stb_vorbis_close(vorb);
+				}
+#else
+				unsupportedSamples = true;
+#endif // MPT_BUILTIN_MO3_STB_VORBIS
 			} else
 			{
 				unsupportedSamples = true;
 			}
 		} else if(smpHeader.compressedSize < 0 && -smpHeader.compressedSize < smp)
 		{
+			// Duplicate sample
 			const ModSample &smpFrom = Samples[smp + smpHeader.compressedSize];
 			LimitMax(sample.nLength, smpFrom.nLength);
 			sample.uFlags.set(CHN_16BIT, smpFrom.uFlags[CHN_16BIT]);
