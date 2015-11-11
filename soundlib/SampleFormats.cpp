@@ -2693,6 +2693,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 #else
 	MPT_UNREFERENCED_PARAMETER(sample);
 	MPT_UNREFERENCED_PARAMETER(file);
+	MPT_UNREFERENCED_PARAMETER(mo3Decode);
 #endif // NO_MP3_SAMPLES
 	return false;
 }
