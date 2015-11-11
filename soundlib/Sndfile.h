@@ -905,17 +905,17 @@ public:
 	void PropagateXMAutoVibrato(INSTRUMENTINDEX ins, uint8 type, uint8 sweep, uint8 depth, uint8 rate);
 
 	// Samples file I/O
-	bool ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize=false, bool includeInstrumentFormats=true);
-	bool ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize=false, FileReader *wsmpChunk = nullptr);
+	bool ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize = false, bool includeInstrumentFormats = true);
+	bool ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize = false, FileReader *wsmpChunk = nullptr);
 	bool ReadPATSample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadS3ISample(SAMPLEINDEX nSample, FileReader &file);
-	bool ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize=false);
+	bool ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize = false);
 	bool ReadXISample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewind = true);
 	bool ReadITISample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadIFFSample(SAMPLEINDEX nInstr, FileReader &file);
 	bool ReadFLACSample(SAMPLEINDEX sample, FileReader &file);
-	bool ReadMP3Sample(SAMPLEINDEX sample, FileReader &file);
+	bool ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Decode = false);
 	bool ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file);
 #ifdef MODPLUG_TRACKER
 #if defined(MPT_WITH_PATHSTRING)

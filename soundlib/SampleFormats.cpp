@@ -2006,7 +2006,7 @@ struct FLACDecoder
 			riffReader.ApplySampleSettings(sample, client.sndFile.m_szNames[client.sample]);
 		} else if(metadata->type == FLAC__METADATA_TYPE_VORBIS_COMMENT && client.ready)
 		{
-			// Try reading Vorbis Comments for sample title
+			// Try reading Vorbis Comments for sample title, sample rate and loop points
 			SmpLength loopStart = 0, loopLength = 0;
 			for(FLAC__uint32 i = 0; i < metadata->data.vorbis_comment.num_comments; i++)
 			{
@@ -2507,6 +2507,19 @@ class ComponentMPG123 : public ComponentLibrary
 {
 	MPT_DECLARE_COMPONENT_MEMBERS
 public:
+	enum mpg123_enc_enum
+	{
+		MPG123_ENC_16 = 0x040, MPG123_ENC_SIGNED = 0x080,
+	};
+	enum mpg123_parms
+	{
+		MPG123_REMOVE_FLAGS = 13,
+	};
+	enum mpg123_param_flags
+	{
+		MPG123_GAPLESS = 0x40,
+	};
+
 	typedef struct {int foo;} mpg123_handle;
 	int (*mpg123_init )(void);
 	mpg123_handle* (*mpg123_new )(char*,int*);
@@ -2520,6 +2533,7 @@ public:
 	int (*mpg123_getformat )(mpg123_handle*, long*, int*, int*);
 	int (*mpg123_scan )(mpg123_handle*);
 	off_t (*mpg123_length )(mpg123_handle*);
+	int (*mpg123_param )(mpg123_handle*, mpg123_parms, long, double);
 	static size_t FileReaderRead(void *fp, void *buf, size_t count)
 	{
 		FileReader &file = *static_cast<FileReader *>(fp);
@@ -2535,10 +2549,7 @@ public:
 		else file.Seek(offset);
 		return file.GetPosition();
 	}
-	enum mpg123_enc_enum
-	{
-		MPG123_ENC_16 = 0x040, MPG123_ENC_SIGNED = 0x080,
-	};
+
 public:
 	ComponentMPG123() : ComponentLibrary(ComponentTypeForeign) { }
 	bool DoInitialize()
@@ -2556,6 +2567,7 @@ public:
 		MPT_COMPONENT_BIND("mpg123", mpg123_getformat);
 		MPT_COMPONENT_BIND("mpg123", mpg123_scan);
 		MPT_COMPONENT_BIND("mpg123", mpg123_length);
+		MPT_COMPONENT_BIND("mpg123", mpg123_param);
 		if(HasBindFailed())
 		{
 			return false;
@@ -2572,8 +2584,8 @@ MPT_REGISTERED_COMPONENT(ComponentMPG123, "Mpg123")
 #endif // NO_MP3_SAMPLES
 
 
-bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
-//------------------------------------------------------------------
+bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Decode)
+//----------------------------------------------------------------------------------
 {
 #ifndef NO_MP3_SAMPLES
 
@@ -2632,6 +2644,13 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 	if((mh = mpg123->mpg123_new(0, &err)) == nullptr) return false;
 	file.Rewind();
 
+	if(mo3Decode)
+	{
+		// Must disable LAME header gap removal for MO3, as the MO3 header already includes the
+		// number of samples that should be removed.
+		mpg123->mpg123_param(mh, ComponentMPG123::MPG123_REMOVE_FLAGS, ComponentMPG123::MPG123_GAPLESS, 0.0);
+	}
+
 	long rate; int nchannels, encoding;
 	SmpLength length;
 
@@ -2649,11 +2668,14 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 	}
 
 	DestroySampleThreadsafe(sample);
-	strcpy(m_szNames[sample], "");
-	Samples[sample].Initialize();
+	if(!mo3Decode)
+	{
+		strcpy(m_szNames[sample], "");
+		Samples[sample].Initialize();
+		Samples[sample].nC5Speed = rate;
+	}
 	Samples[sample].nLength = length;
 
-	Samples[sample].nC5Speed = rate;
 	Samples[sample].uFlags.set(CHN_16BIT);
 	Samples[sample].uFlags.set(CHN_STEREO, nchannels == 2);
 	Samples[sample].AllocateSample();
@@ -2662,12 +2684,12 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file)
 	mpg123->mpg123_read(mh, static_cast<unsigned char *>(Samples[sample].pSample), Samples[sample].GetSampleSizeInBytes(), &ndecoded);
 	mpg123->mpg123_delete(mh);
 
-	if(Samples[sample].pSample != nullptr)
+	if(!mo3Decode)
 	{
 		Samples[sample].Convert(MOD_TYPE_IT, GetType());
 		Samples[sample].PrecomputeLoops(*this, false);
-		return true;
 	}
+	return Samples[sample].pSample != nullptr;
 #else
 	MPT_UNREFERENCED_PARAMETER(sample);
 	MPT_UNREFERENCED_PARAMETER(file);

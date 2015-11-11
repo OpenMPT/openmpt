@@ -343,7 +343,7 @@ struct PACKED MO3Sample
 		smpSustain			= 0x100,
 		smpSustainPingPong	= 0x200,
 		smpStereo			= 0x400,
-		smpCompressionMPEG	= 0x1000,					// MPEG sample (MP3, MPEG 1, MPEG 2.5)
+		smpCompressionMPEG	= 0x1000,					// MPEG 1.0 / 2.0 / 2.5 sample
 		smpCompressionOGG	= 0x1000 | 0x2000,			// OGG sample
 		smpSharedOGG		= 0x1000 | 0x2000 | 0x4000,	// OGG sample with shared vorbis header
 		smpDeltaCompression	= 0x2000,					// Deltas + compression
@@ -1033,7 +1033,10 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 		for(CHANNELINDEX chn = 0; chn < fileHeader.numChannels; chn++)
 		{
-			FileReader &track = tracks[trackChunk.ReadUint16LE()];
+			uint16 trackIndex = trackChunk.ReadUint16LE();
+			if(trackIndex >= tracks.size())
+				continue;
+			FileReader &track = tracks[trackIndex];
 			track.Rewind();
 			ROWINDEX row = 0;
 			ModCommand *patData = Patterns[pat].GetpModCommand(0, chn);
@@ -1279,9 +1282,21 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	if(itSampleMode)
 		m_nInstruments = 0;
 
+	// We need all this information for OGG-compressed samples with shared headers:
+	// A shared header can be taken from a sample that has not been read yet, so
+	// we first need to read all headers, and then load the OGG samples afterwards.
+	struct SampleChunk
+	{
+		FileReader chunk;
+		uint16 headerSize;
+		int16 sharedHeader;
+		SampleChunk(const FileReader &chunk_ = FileReader(), uint16 headerSize_ = 0, int16 sharedHeader_ = 0)
+			: chunk(chunk_), headerSize(headerSize_), sharedHeader(sharedHeader_) { }
+	};
+	std::vector<SampleChunk> sampleChunks(m_nSamples);
+
 	const bool frequencyIsHertz = (version >= 5 || !(fileHeader.flags & MO3FileHeader::linearSlides));
 	bool unsupportedSamples = false;
-	std::vector<FileReader> sampleChunks(m_nSamples);	// For shared OGG headers
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 	{
 		ModSample &sample = Samples[smp];
@@ -1299,10 +1314,10 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 		smpHeader.ConvertToMPT(sample, m_nType, frequencyIsHertz);
 
-		SAMPLEINDEX sharedOggHeader = 0;
+		int16 sharedOggHeader = 0;
 		if(version >= 5 && (smpHeader.flags & MO3Sample::smpCompressionMask) == MO3Sample::smpSharedOGG)
 		{
-			sharedOggHeader = smp + musicChunk.ReadInt16LE();
+			sharedOggHeader = musicChunk.ReadInt16LE();
 		}
 
 		if(!(loadFlags & loadSampleData))
@@ -1318,13 +1333,25 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				SampleIO::littleEndian,
 				SampleIO::signedPCM)
 				.ReadSample(Samples[smp], file);
+		} else if(smpHeader.compressedSize < 0 && -smpHeader.compressedSize < smp)
+		{
+			// Duplicate sample
+			const ModSample &smpFrom = Samples[smp + smpHeader.compressedSize];
+			LimitMax(sample.nLength, smpFrom.nLength);
+			sample.uFlags.set(CHN_16BIT, smpFrom.uFlags[CHN_16BIT]);
+			sample.uFlags.set(CHN_STEREO, smpFrom.uFlags[CHN_STEREO]);
+			if(smpFrom.pSample != nullptr && sample.AllocateSample())
+			{
+				memcpy(sample.pSample, smpFrom.pSample, sample.GetSampleSizeInBytes());
+			}
 		} else if(smpHeader.compressedSize > 0)
 		{
 			if(smpHeader.flags & MO3Sample::smp16Bit) sample.uFlags.set(CHN_16BIT);
 			if(smpHeader.flags & MO3Sample::smpStereo) sample.uFlags.set(CHN_STEREO);
 
-			FileReader &sampleData = sampleChunks[smp - 1] = file.ReadChunk(smpHeader.compressedSize);
+			FileReader sampleData = file.ReadChunk(smpHeader.compressedSize);
 			const uint8 numChannels = sample.GetNumChannels();
+
 			if(compression == MO3Sample::smpDeltaCompression)
 			{
 				if(sample.AllocateSample())
@@ -1345,63 +1372,87 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				}
 			} else if(compression == MO3Sample::smpCompressionOGG || compression == MO3Sample::smpSharedOGG)
 			{
-#ifdef MPT_BUILTIN_MO3_STB_VORBIS
-				// Which chunk are we going to read the header from?
-				// Note: stb_vorbis (currently) ignores the serial number so we can just reuse the header without further modifications.
-				const bool sharedHeader = (compression == MO3Sample::smpSharedOGG && sharedOggHeader > 0 && sharedOggHeader < smp);
-				FileReader &headerChunk = sharedHeader ? sampleChunks[sharedOggHeader - 1] : sampleData;
-				int initialRead = sharedHeader ? smpHeader.encoderDelay : sampleData.BytesLeft();
-
-				headerChunk.Rewind();
-				if(sharedHeader && !headerChunk.CanRead(smpHeader.encoderDelay))
-					continue;
-
-				int consumed = 0, error = 0;
-				stb_vorbis *vorb = stb_vorbis_open_pushdata(reinterpret_cast<const uint8 *>(headerChunk.GetRawData()), initialRead, &consumed, &error, nullptr);
-				headerChunk.Skip(consumed);
-				if(vorb)
+				// Since shared OGG headers can stem from a sample that has not been read yet, postpone OGG import.
+				sampleChunks[smp - 1] = SampleChunk(sampleData, smpHeader.encoderDelay, sharedOggHeader);
+			} else if(compression == MO3Sample::smpCompressionMPEG)
+			{
+				if(ReadMP3Sample(smp, sampleData, true))
 				{
-					// Header has been read, proceed to reading the sample data
-					sample.AllocateSample();
-					SmpLength offset = 0;
-					while(!sampleData.NoBytesLeft() && offset < sample.nLength && sample.pSample != nullptr)
+					if(smpHeader.encoderDelay > 0 && smpHeader.encoderDelay < sample.GetSampleSizeInBytes())
 					{
-						int channels = 0, decodedSamples = 0;
-						float **output;
-						int consumed = stb_vorbis_decode_frame_pushdata(vorb, reinterpret_cast<const uint8 *>(sampleData.GetRawData()), mpt::saturate_cast<int>(sampleData.BytesLeft()), &channels, &output, &decodedSamples);
-						sampleData.Skip(consumed);
-						LimitMax(decodedSamples, mpt::saturate_cast<int>(sample.nLength - offset));
-						if(decodedSamples > 0 && channels == sample.GetNumChannels())
-						{
-							for(int chn = 0; chn < channels; chn++)
-							{
-								if(smpHeader.flags & MO3Sample::smp16Bit)
-									CopyChannelToInterleaved<SC::Convert<int16, float> >(sample.pSample16 + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
-								else
-									CopyChannelToInterleaved<SC::Convert<int8, float> >(sample.pSample8 + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
-							}
-						}
-						offset += decodedSamples;
+						SmpLength delay = smpHeader.encoderDelay / sample.GetBytesPerSample();
+						memmove(sample.pSample8, sample.pSample8 + smpHeader.encoderDelay, sample.GetSampleSizeInBytes() - smpHeader.encoderDelay);
+						sample.nLength -= delay;
 					}
-					stb_vorbis_close(vorb);
+					LimitMax(sample.nLength, smpHeader.length);
+				} else
+				{
+					unsupportedSamples = true;
 				}
-#else
-				unsupportedSamples = true;
-#endif // MPT_BUILTIN_MO3_STB_VORBIS
 			} else
 			{
 				unsupportedSamples = true;
 			}
-		} else if(smpHeader.compressedSize < 0 && -smpHeader.compressedSize < smp)
+		}
+	}
+
+	// Now we can load OGG samples with shared headers.
+	if(loadFlags & loadSampleData)
+	{
+		for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 		{
-			// Duplicate sample
-			const ModSample &smpFrom = Samples[smp + smpHeader.compressedSize];
-			LimitMax(sample.nLength, smpFrom.nLength);
-			sample.uFlags.set(CHN_16BIT, smpFrom.uFlags[CHN_16BIT]);
-			sample.uFlags.set(CHN_STEREO, smpFrom.uFlags[CHN_STEREO]);
-			if(smpFrom.pSample != nullptr && sample.AllocateSample())
+			SampleChunk &sampleChunk = sampleChunks[smp - 1];
+			// Is this an OGG sample?
+			if(!sampleChunk.chunk.IsValid())
+				continue;
+
+#ifdef MPT_BUILTIN_MO3_STB_VORBIS
+			SAMPLEINDEX sharedOggHeader = smp + sampleChunk.sharedHeader;
+			// Which chunk are we going to read the header from?
+			// Note: stb_vorbis (currently) ignores the serial number so we can just reuse the header without further modifications.
+			const bool sharedHeader = sharedOggHeader != smp && sharedOggHeader > 0 && sharedOggHeader <= m_nSamples;
+			FileReader &sampleData = sampleChunk.chunk;
+			FileReader &headerChunk = sharedHeader ? sampleChunks[sharedOggHeader - 1].chunk : sampleData;
+			int initialRead = sharedHeader ? sampleChunk.headerSize : sampleData.BytesLeft();
+
+			headerChunk.Rewind();
+			if(sharedHeader && !headerChunk.CanRead(sampleChunk.headerSize))
+				continue;
+
+			int consumed = 0, error = 0;
+			stb_vorbis *vorb = stb_vorbis_open_pushdata(reinterpret_cast<const uint8 *>(headerChunk.GetRawData()), initialRead, &consumed, &error, nullptr);
+			if(vorb)
 			{
-				memcpy(sample.pSample, smpFrom.pSample, sample.GetSampleSizeInBytes());
+				// Header has been read, proceed to reading the sample data
+				headerChunk.Skip(consumed);
+				ModSample &sample = Samples[smp];
+				sample.AllocateSample();
+				SmpLength offset = 0;
+				while((vorb->error == VORBIS__no_error || (vorb->error == VORBIS_need_more_data && sampleData.CanRead(1)))
+					&& offset < sample.nLength && sample.pSample != nullptr)
+				{
+					int channels = 0, decodedSamples = 0;
+					float **output;
+					consumed = stb_vorbis_decode_frame_pushdata(vorb, reinterpret_cast<const uint8 *>(sampleData.GetRawData()), mpt::saturate_cast<int>(sampleData.BytesLeft()), &channels, &output, &decodedSamples);
+					sampleData.Skip(consumed);
+					LimitMax(decodedSamples, mpt::saturate_cast<int>(sample.nLength - offset));
+					if(decodedSamples > 0 && channels == sample.GetNumChannels())
+					{
+						for(int chn = 0; chn < channels; chn++)
+						{
+							if(sample.uFlags[CHN_16BIT])
+								CopyChannelToInterleaved<SC::Convert<int16, float> >(sample.pSample16 + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
+							else
+								CopyChannelToInterleaved<SC::Convert<int8, float> >(sample.pSample8 + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
+						}
+					}
+					offset += decodedSamples;
+				}
+				stb_vorbis_close(vorb);
+			} else
+#endif // MPT_BUILTIN_MO3_STB_VORBIS
+			{
+				unsupportedSamples = true;
 			}
 		}
 	}
