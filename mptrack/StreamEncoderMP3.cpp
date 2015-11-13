@@ -1538,28 +1538,6 @@ public:
 			acmDriver = NULL;
 			return;
 		}
-
-		uint16 encoderDelayFrames = 0;
-		if(pwfexDst->wFormatTag == WAVE_FORMAT_MPEGLAYER3 && pwfexDst->cbSize >= MPEGLAYER3_WFX_EXTRA_BYTES)
-		{
-			LPMPEGLAYER3WAVEFORMAT pwfexl3Dst = (LPMPEGLAYER3WAVEFORMAT)pwfexDst;
-			encoderDelayFrames = pwfexl3Dst->nCodecDelay;
-		}
-		if(acmChannels == 1)
-		{
-			for(std::size_t i = 0; i < encoderDelayFrames; ++i)
-			{
-				acm_sampleBuf.push_back(0);
-			}
-		} else
-		{
-			for(std::size_t i = 0; i < encoderDelayFrames; ++i)
-			{
-				acm_sampleBuf.push_back(0);
-				acm_sampleBuf.push_back(0);
-			}
-		}
-
 	}
 	virtual void WriteMetatags(const FileTags &tags)
 	{
