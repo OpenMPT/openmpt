@@ -2663,7 +2663,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		|| mpg123->mpg123_scan(mh)
 		|| mpg123->mpg123_getformat(mh, &rate, &nchannels, &encoding)
 		|| !nchannels || nchannels > 2
-		|| (encoding & ComponentMPG123::MPG123_ENC_16 | ComponentMPG123::MPG123_ENC_SIGNED) == 0
+		|| (encoding & (ComponentMPG123::MPG123_ENC_16 | ComponentMPG123::MPG123_ENC_SIGNED)) != (ComponentMPG123::MPG123_ENC_16 | ComponentMPG123::MPG123_ENC_SIGNED)
 		|| (length = mpg123->mpg123_length(mh)) == 0)
 	{
 		mpg123->mpg123_delete(mh);
