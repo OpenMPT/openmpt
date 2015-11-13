@@ -1624,7 +1624,27 @@ public:
 			std::memcpy(&buf[0], &acmDstBuf[0], acmHeader.cbDstLengthUsed);
 			WriteBuffer();
 		}
+		// acmStreamUnprepareHeader demands original buffer sizes to be specified
+		acmHeader.cbSrcLength = static_cast<DWORD>(acmSrcBuf.size());
+		acmHeader.cbSrcLengthUsed = 0;
+		acmHeader.cbDstLength = static_cast<DWORD>(acmDstBuf.size());
+		acmHeader.cbDstLengthUsed = 0;
+		std::fill(acmSrcBuf.begin(), acmSrcBuf.end(), 0);
+		std::fill(acmDstBuf.begin(), acmDstBuf.end(), 0);
 		acmStreamUnprepareHeader(acmStream, &acmHeader, 0);
+		if(0 < acmHeader.cbDstLengthUsed && acmHeader.cbDstLengthUsed <= acmDstBuf.size())
+		{
+			// LAME ACM flushes the MP3 codec here, instead of when getting passed
+			// ACM_STREAMCONVERTF_END.
+			// This is not documented or supported behaviour according to MSDN,
+			// and probably even violates the interface.
+			// Instead of checking against the codec name string, we rely on other
+			// codecs at least not messing with cbDstLengthUsed in
+			// acmStreamUnprepareHeader.
+			buf.resize(acmHeader.cbDstLengthUsed);
+			std::memcpy(&buf[0], &acmDstBuf[0], acmHeader.cbDstLengthUsed);
+			WriteBuffer();
+		}
 		MemsetZero(acmHeader);
 		acmStreamClose(acmStream, 0);
 		acmStream = NULL;
