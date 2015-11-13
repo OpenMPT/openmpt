@@ -2534,6 +2534,8 @@ public:
 	int (*mpg123_scan )(mpg123_handle*);
 	off_t (*mpg123_length )(mpg123_handle*);
 	int (*mpg123_param )(mpg123_handle*, mpg123_parms, long, double);
+	int (*mpg123_framebyframe_next )(mpg123_handle*);
+
 	static size_t FileReaderRead(void *fp, void *buf, size_t count)
 	{
 		FileReader &file = *static_cast<FileReader *>(fp);
@@ -2568,6 +2570,7 @@ public:
 		MPT_COMPONENT_BIND("mpg123", mpg123_scan);
 		MPT_COMPONENT_BIND("mpg123", mpg123_length);
 		MPT_COMPONENT_BIND("mpg123", mpg123_param);
+		MPT_COMPONENT_BIND("mpg123", mpg123_framebyframe_next);
 		if(HasBindFailed())
 		{
 			return false;
@@ -2673,6 +2676,13 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		strcpy(m_szNames[sample], "");
 		Samples[sample].Initialize();
 		Samples[sample].nC5Speed = rate;
+	} else
+	{
+		// I'm not entirely sure why, but doing it like this works for files
+		// with no LAME header at all, with LAME header (very old MO3 files) and
+		// files with overwritten LAME header (newer MO3 files).
+		file.Rewind();
+		mpg123->mpg123_framebyframe_next(mh);
 	}
 	Samples[sample].nLength = length;
 

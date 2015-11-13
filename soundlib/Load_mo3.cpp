@@ -21,11 +21,14 @@
 #include "Tables.h"
 
 #ifdef MPT_BUILTIN_MO3_STB_VORBIS
-// Using stb_vorbis for OGG Vorbis decoding
+// Using stb_vorbis for Ogg Vorbis decoding
+#define STB_VORBIS_NO_STDIO
+#define STB_VORBIS_NO_PULLDATA_API
+#define STB_VORBIS_MAX_CHANNELS 2
 #pragma warning(disable:4244 4100 4245 4701)
 #include <stb_vorbis/stb_vorbis.c>
-#include "SampleFormatConverters.h"
 #pragma warning(default:4244 4100 4245 4701)
+#include "SampleFormatConverters.h"
 #endif // MPT_BUILTIN_MO3_STB_VORBIS
 
 #endif // MPT_BUILTIN_MO3
@@ -344,8 +347,8 @@ struct PACKED MO3Sample
 		smpSustainPingPong	= 0x200,
 		smpStereo			= 0x400,
 		smpCompressionMPEG	= 0x1000,					// MPEG 1.0 / 2.0 / 2.5 sample
-		smpCompressionOGG	= 0x1000 | 0x2000,			// OGG sample
-		smpSharedOGG		= 0x1000 | 0x2000 | 0x4000,	// OGG sample with shared vorbis header
+		smpCompressionOgg	= 0x1000 | 0x2000,			// Ogg sample
+		smpSharedOgg		= 0x1000 | 0x2000 | 0x4000,	// Ogg sample with shared vorbis header
 		smpDeltaCompression	= 0x2000,					// Deltas + compression
 		smpDeltaPrediction	= 0x4000,					// Delta prediction + compression
 		smpCompressionMask	= 0x1000 | 0x2000 | 0x4000
@@ -367,7 +370,7 @@ struct PACKED MO3Sample
 	uint32 sustainStart;
 	uint32 sustainEnd;
 	int32  compressedSize;
-	uint16 encoderDelay;	// MP3: Ignore first n bytes of decoded output. OGG: Shared OGG header size
+	uint16 encoderDelay;	// MP3: Ignore first n bytes of decoded output. Ogg: Shared Ogg header size
 
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
@@ -396,8 +399,8 @@ struct PACKED MO3Sample
 				mptSmp.nC5Speed = Util::Round<uint32>(8363.0 * std::pow(2.0, (freqFinetune + 1408) / 1536.0));
 		} else
 		{
-			mptSmp.nFineTune = static_cast<int8>(freqFinetune - 128);
-			if(type == MOD_TYPE_MTM) mptSmp.nFineTune += 128;
+			mptSmp.nFineTune = static_cast<int8>(freqFinetune);
+			if(type != MOD_TYPE_MTM) mptSmp.nFineTune -= 128;
 			mptSmp.RelativeTone = transpose;
 		}
 		mptSmp.nVolume = std::min(defaultVolume, uint8(64)) * 4u;
@@ -788,7 +791,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	} else
 	{
 #ifndef MPT_BUILTIN_MO3
-		AddToLog(GetStrI18N("Loading MO3 file failed because unmo3.dll could not be loaded."));
+		AddToLog(GetStrI18N("Loading MO3 file failed because the unmo3 library could not be loaded."));
 		return false;
 #endif // MPT_BUILTIN_MO3
 	}
@@ -1282,9 +1285,9 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	if(itSampleMode)
 		m_nInstruments = 0;
 
-	// We need all this information for OGG-compressed samples with shared headers:
+	// We need all this information for Ogg-compressed samples with shared headers:
 	// A shared header can be taken from a sample that has not been read yet, so
-	// we first need to read all headers, and then load the OGG samples afterwards.
+	// we first need to read all headers, and then load the Ogg samples afterwards.
 	struct SampleChunk
 	{
 		FileReader chunk;
@@ -1315,7 +1318,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		smpHeader.ConvertToMPT(sample, m_nType, frequencyIsHertz);
 
 		int16 sharedOggHeader = 0;
-		if(version >= 5 && (smpHeader.flags & MO3Sample::smpCompressionMask) == MO3Sample::smpSharedOGG)
+		if(version >= 5 && (smpHeader.flags & MO3Sample::smpCompressionMask) == MO3Sample::smpSharedOgg)
 		{
 			sharedOggHeader = musicChunk.ReadInt16LE();
 		}
@@ -1370,9 +1373,9 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 					else
 						UnpackMO3DeltaPredictionSample<MO3Delta8BitParams>(sampleData, sample.pSample8, sample.nLength, numChannels);
 				}
-			} else if(compression == MO3Sample::smpCompressionOGG || compression == MO3Sample::smpSharedOGG)
+			} else if(compression == MO3Sample::smpCompressionOgg || compression == MO3Sample::smpSharedOgg)
 			{
-				// Since shared OGG headers can stem from a sample that has not been read yet, postpone OGG import.
+				// Since shared Ogg headers can stem from a sample that has not been read yet, postpone Ogg import.
 				sampleChunks[smp - 1] = SampleChunk(sampleData, smpHeader.encoderDelay, sharedOggHeader);
 			} else if(compression == MO3Sample::smpCompressionMPEG)
 			{
@@ -1396,20 +1399,22 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	// Now we can load OGG samples with shared headers.
+	// Now we can load Ogg samples with shared headers.
 	if(loadFlags & loadSampleData)
 	{
 		for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 		{
 			SampleChunk &sampleChunk = sampleChunks[smp - 1];
-			// Is this an OGG sample?
+			// Is this an Ogg sample?
 			if(!sampleChunk.chunk.IsValid())
 				continue;
 
 #ifdef MPT_BUILTIN_MO3_STB_VORBIS
 			SAMPLEINDEX sharedOggHeader = smp + sampleChunk.sharedHeader;
 			// Which chunk are we going to read the header from?
-			// Note: stb_vorbis (currently) ignores the serial number so we can just reuse the header without further modifications.
+			// Note: Every Ogg stream has a unique serial number.
+			// stb_vorbis (currently) ignores this serial number so we can just stitch
+			// together our sample without adjusting the shared header's serial number.
 			const bool sharedHeader = sharedOggHeader != smp && sharedOggHeader > 0 && sharedOggHeader <= m_nSamples;
 			FileReader &sampleData = sampleChunk.chunk;
 			FileReader &headerChunk = sharedHeader ? sampleChunks[sharedOggHeader - 1].chunk : sampleData;
