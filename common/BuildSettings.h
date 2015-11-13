@@ -224,7 +224,9 @@
 #endif
 #endif
 //#define NO_MINIZ
+#if !defined(MPT_WITH_MPG123)
 #define NO_MP3_SAMPLES
+#endif
 #define NO_MEDIAFOUNDATION
 //#define NO_LIBOPENMPT_C
 //#define NO_LIBOPENMPT_CXX
@@ -372,8 +374,12 @@
 #define MPT_WITH_DYNBIND // Tracker requires dynamic library loading for export codecs
 #endif
 
-#if (!defined(NO_MO3) || !defined(NO_MP3_SAMPLES)) && !defined(MPT_WITH_DYNBIND)
-#define MPT_WITH_DYNBIND // mpg123 and unmo3 are loaded dynamically
+#if !defined(MPT_WITH_MPG123) && !defined(NO_MP3_SAMPLES) && !defined(MPT_WITH_DYNBIND)
+#define MPT_WITH_DYNBIND // mpg123 is loaded dynamically
+#endif
+
+#if !defined(NO_MO3) && !defined(MPT_WITH_DYNBIND)
+#define MPT_WITH_DYNBIND // unmo3 is loaded dynamically
 #endif
 
 #if defined(ENABLE_TESTS) && !defined(MPT_WITH_PATHSTRING)

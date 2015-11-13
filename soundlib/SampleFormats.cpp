@@ -42,6 +42,9 @@
 #endif // !NO_FLAC
 #include "../common/ComponentManager.h"
 #include <iterator>
+#if defined(MPT_WITH_MPG123)
+#include "mpg123.h"
+#endif // MPT_WITH_MPG123
 #if !defined(NO_MEDIAFOUNDATION)
 #include <windows.h>
 #include <mfapi.h>
@@ -62,6 +65,9 @@ static bool IsMPEG(const uint8 (&header)[3])
 {
 	return header[0] == 0xFF && (header[1] & 0xE0) == 0xE0 && (header[1] & 0x18) != 0x08 && (header[1] & 0x06) != 0x00 && (header[2] & 0xF0) != 0xF0;
 }
+
+#if 0
+// unused
 
 static bool IsMPEG(FileReader file)
 //---------------------------------
@@ -84,6 +90,9 @@ static bool IsID3(FileReader file)
 	file.SkipBack(3);
 	return header[0] == 'I' && header[1] == 'D' && header[2] == '3';
 }
+
+#endif
+
 #endif // NO_MP3_SAMPLES
 
 
@@ -2503,10 +2512,8 @@ fail:
 
 #ifndef NO_MP3_SAMPLES
 
-class ComponentMPG123 : public ComponentLibrary
-{
-	MPT_DECLARE_COMPONENT_MEMBERS
-public:
+#if !defined(MPT_WITH_MPG123)
+
 	enum mpg123_enc_enum
 	{
 		MPG123_ENC_16 = 0x040, MPG123_ENC_SIGNED = 0x080,
@@ -2521,14 +2528,34 @@ public:
 	};
 
 	typedef struct {int foo;} mpg123_handle;
+
+#endif // MPT_WITH_MPG123
+
+class ComponentMPG123
+#if !defined(MPT_WITH_MPG123)
+	: public ComponentLibrary
+#endif // !MPT_WITH_MPG123
+{
+#if !defined(MPT_WITH_MPG123)
+	MPT_DECLARE_COMPONENT_MEMBERS
+#endif // !MPT_WITH_MPG123
+public:
+
 	int (*mpg123_init )(void);
-	mpg123_handle* (*mpg123_new )(char*,int*);
+	mpg123_handle* (*mpg123_new )(const char*,int*);
 	void (*mpg123_delete )(mpg123_handle*);
 	int (*mpg123_open_handle )(mpg123_handle*, void*);
+#if MPT_COMPILER_MSVC
 	int (*mpg123_replace_reader_handle)(mpg123_handle*, 
 		size_t(*)(void *, void *, size_t),
 		off_t(*)(void *, off_t, int),
 		void(*)(void *));
+#else // !MPT_COMPILER_MSVC
+	int (*mpg123_replace_reader_handle)(mpg123_handle*, 
+		ssize_t(*)(void *, void *, size_t),
+		off_t(*)(void *, off_t, int),
+		void(*)(void *));
+#endif // MPT_COMPILER_MSVC
 	int (*mpg123_read )(mpg123_handle*, unsigned char*, size_t, size_t*);
 	int (*mpg123_getformat )(mpg123_handle*, long*, int*, int*);
 	int (*mpg123_scan )(mpg123_handle*);
@@ -2536,7 +2563,11 @@ public:
 	int (*mpg123_param )(mpg123_handle*, mpg123_parms, long, double);
 	int (*mpg123_framebyframe_next )(mpg123_handle*);
 
+#if MPT_COMPILER_MSVC
 	static size_t FileReaderRead(void *fp, void *buf, size_t count)
+#else // !MPT_COMPILER_MSVC
+	static ssize_t FileReaderRead(void *fp, void *buf, size_t count)
+#endif // MPT_COMPILER_MSVC
 	{
 		FileReader &file = *static_cast<FileReader *>(fp);
 		size_t readBytes = std::min(count, static_cast<size_t>(file.BytesLeft()));
@@ -2553,6 +2584,24 @@ public:
 	}
 
 public:
+#if defined(MPT_WITH_MPG123)
+	ComponentMPG123()
+	{
+		#define MPT_GLOBAL_BIND(lib, name) name = &::name;
+			MPT_GLOBAL_BIND("mpg123", mpg123_init);
+			MPT_GLOBAL_BIND("mpg123", mpg123_new);
+			MPT_GLOBAL_BIND("mpg123", mpg123_delete);
+			MPT_GLOBAL_BIND("mpg123", mpg123_open_handle);
+			MPT_GLOBAL_BIND("mpg123", mpg123_replace_reader_handle);
+			MPT_GLOBAL_BIND("mpg123", mpg123_read);
+			MPT_GLOBAL_BIND("mpg123", mpg123_getformat);
+			MPT_GLOBAL_BIND("mpg123", mpg123_scan);
+			MPT_GLOBAL_BIND("mpg123", mpg123_length);
+			MPT_GLOBAL_BIND("mpg123", mpg123_param);
+			MPT_GLOBAL_BIND("mpg123", mpg123_framebyframe_next);
+		#undef MPT_GLOBAL_BIND
+	}
+#else // !MPT_WITH_MPG123
 	ComponentMPG123() : ComponentLibrary(ComponentTypeForeign) { }
 	bool DoInitialize()
 	{
@@ -2581,8 +2630,11 @@ public:
 		}
 		return true;
 	}
+#endif // MPT_WITH_MPG123
 };
+#if !defined(MPT_WITH_MPG123)
 MPT_REGISTERED_COMPONENT(ComponentMPG123, "Mpg123")
+#endif // !MPT_WITH_MPG123
 
 #endif // NO_MP3_SAMPLES
 
@@ -2636,13 +2688,18 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		}
 	}
 
+#if defined(MPT_WITH_MPG123)
+	ComponentMPG123 mpg123_;
+	ComponentMPG123 *mpg123 = &mpg123_;
+#else // !MPT_WITH_MPG123
 	ComponentHandle<ComponentMPG123> mpg123;
 	if(!IsComponentAvailable(mpg123))
 	{
 		return false;
 	}
+#endif // MPT_WITH_MPG123
 
-	ComponentMPG123::mpg123_handle *mh;
+	mpg123_handle *mh;
 	int err;
 	if((mh = mpg123->mpg123_new(0, &err)) == nullptr) return false;
 	file.Rewind();
@@ -2651,7 +2708,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	{
 		// Must disable LAME header gap removal for MO3, as the MO3 header already includes the
 		// number of samples that should be removed.
-		mpg123->mpg123_param(mh, ComponentMPG123::MPG123_REMOVE_FLAGS, ComponentMPG123::MPG123_GAPLESS, 0.0);
+		mpg123->mpg123_param(mh, MPG123_REMOVE_FLAGS, MPG123_GAPLESS, 0.0);
 	}
 
 	long rate; int nchannels, encoding;
@@ -2663,7 +2720,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		|| mpg123->mpg123_scan(mh)
 		|| mpg123->mpg123_getformat(mh, &rate, &nchannels, &encoding)
 		|| !nchannels || nchannels > 2
-		|| (encoding & (ComponentMPG123::MPG123_ENC_16 | ComponentMPG123::MPG123_ENC_SIGNED)) != (ComponentMPG123::MPG123_ENC_16 | ComponentMPG123::MPG123_ENC_SIGNED)
+		|| (encoding & (MPG123_ENC_16 | MPG123_ENC_SIGNED)) != (MPG123_ENC_16 | MPG123_ENC_SIGNED)
 		|| (length = mpg123->mpg123_length(mh)) == 0)
 	{
 		mpg123->mpg123_delete(mh);
