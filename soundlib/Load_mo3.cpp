@@ -1418,7 +1418,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			const bool sharedHeader = sharedOggHeader != smp && sharedOggHeader > 0 && sharedOggHeader <= m_nSamples;
 			FileReader &sampleData = sampleChunk.chunk;
 			FileReader &headerChunk = sharedHeader ? sampleChunks[sharedOggHeader - 1].chunk : sampleData;
-			int initialRead = sharedHeader ? sampleChunk.headerSize : sampleData.BytesLeft();
+			int initialRead = sharedHeader ? sampleChunk.headerSize : headerChunk.GetLength();
 
 			headerChunk.Rewind();
 			if(sharedHeader && !headerChunk.CanRead(sampleChunk.headerSize))
