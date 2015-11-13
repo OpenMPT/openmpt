@@ -401,7 +401,8 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 	file.Rewind();
 	if(!file.ReadConvertEndianness(fileHeader)
 		|| memcmp(fileHeader.im10, "IM10", 4)
-		|| fileHeader.ordNum > CountOf(fileHeader.orderlist))
+		|| fileHeader.ordNum > CountOf(fileHeader.orderlist)
+		|| fileHeader.insNum >= MAX_INSTRUMENTS)
 	{
 		return false;
 	}
