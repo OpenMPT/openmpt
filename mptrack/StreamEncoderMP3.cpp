@@ -206,6 +206,7 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGa
 	tHeader.flags = 0x00; // No flags
 	tHeader.size  = 0; // will be filled later
 	s.write(reinterpret_cast<const char*>(&tHeader), sizeof(tHeader));
+	totalID3v2Size += sizeof(tHeader);
 
 	// Write TIT2 (Title), TCOM / TPE1 (Composer), TALB (Album), TCON (Genre), TYER / TDRC (Date), WXXX (URL), TENC (Encoder), COMM (Comment)
 	WriteID3v2Frame("TIT2", mpt::ToCharset(mpt::CharsetUTF8, tags.title), s);
@@ -246,7 +247,7 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGa
 	}
 
 	// Write correct header (update tag size)
-	tHeader.size = intToSynchsafe(totalID3v2Size);
+	tHeader.size = intToSynchsafe(totalID3v2Size - sizeof(tHeader));
 	s.seekp(fOffset);
 	s.write(reinterpret_cast<const char*>(&tHeader), sizeof(tHeader));
 	s.seekp(totalID3v2Size - sizeof(tHeader), std::ios::cur);
