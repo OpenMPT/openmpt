@@ -22,24 +22,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#if MPT_COMPILER_GCC || MPT_COMPILER_MSVC
-// Compiler supports type-punning through unions. This is not stricly standard-conforming.
-// For GCC, this is documented, for MSVC this is apparently not documented, but we assume it.
-#define MPT_COMPILER_UNION_TYPE_ALIASES 1
-#endif
-
-#ifndef MPT_COMPILER_UNION_TYPE_ALIASES
-// Compiler does not support type-punning through unions. std::memcpy is used instead.
-// This is the safe fallback and strictly standard-conforming.
-// Another standard-compliant alternative would be casting pointers to a character type pointer.
-// This results in rather unreadable code and,
-// in most cases, compilers generate better code by just inlining the memcpy anyway.
-// (see <http://blog.regehr.org/archives/959>).
-#define MPT_COMPILER_UNION_TYPE_ALIASES 0
-#endif
-
-
-
 // Platform has native IEEE floating point representation.
 // (Currently always assumed)
 #define MPT_PLATFORM_IEEE_FLOAT 1
@@ -270,7 +252,7 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 #define MPT_WHILE_0 while(0)
 #endif
 
-      
+
 
 // Static code checkers might need to get the knowledge of our assertions transferred to them.
 #define MPT_CHECKER_ASSUME_ASSERTIONS 1

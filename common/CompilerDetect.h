@@ -239,6 +239,23 @@
 #endif
 
 
+#if MPT_COMPILER_GCC || MPT_COMPILER_MSVC
+// Compiler supports type-punning through unions. This is not stricly standard-conforming.
+// For GCC, this is documented, for MSVC this is apparently not documented, but we assume it.
+#define MPT_COMPILER_UNION_TYPE_ALIASES 1
+#endif
+
+#ifndef MPT_COMPILER_UNION_TYPE_ALIASES
+// Compiler does not support type-punning through unions. std::memcpy is used instead.
+// This is the safe fallback and strictly standard-conforming.
+// Another standard-compliant alternative would be casting pointers to a character type pointer.
+// This results in rather unreadable code and,
+// in most cases, compilers generate better code by just inlining the memcpy anyway.
+// (see <http://blog.regehr.org/archives/959>).
+#define MPT_COMPILER_UNION_TYPE_ALIASES 0
+#endif
+
+
 
 // The order of the checks matters!
 #if defined(__EMSCRIPTEN__)
