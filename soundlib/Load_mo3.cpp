@@ -752,7 +752,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	AddToLog(GetStrI18N("The file appears to be a MO3 file, but this OpenMPT build does not support loading MO3 files."));
 	return false;
 
-#else // !NO_MO3
+#elif !defined(NO_MO3)
 	MPT_UNREFERENCED_PARAMETER(version);
 
 	// Try to load unmo3 dynamically.
