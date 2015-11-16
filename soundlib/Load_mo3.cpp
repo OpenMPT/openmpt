@@ -1386,18 +1386,19 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				// into account. We should not depend on the MP3 decoder's capabilities to read or ignore such frames:
 				// - libmpg123 has MPG123_IGNORE_INFOFRAME but that requires API version 31 (mpg123 v1.14) or higher
 				// - Media Foundation does (currently) not read LAME gapless information at all
-				// So we just play save and remove such frames.
+				// So we just play safe and remove such frames.
 				FileReader mpegData(sampleData);
 				MPEGFrame frame(sampleData);
 				uint16 frameDelay = frame.numSamples * 2;
 				if(frame.isLAME && smpHeader.encoderDelay >= frameDelay)
 				{
+					// The info frame does not produce any output, but still counts towards the encoder delay.
 					smpHeader.encoderDelay -= frameDelay;
 					sampleData.Seek(frame.frameSize);
 					mpegData = sampleData.ReadChunk(sampleData.BytesLeft());
 				}
 				
-				if(ReadMP3Sample(smp, mpegData, true))
+				if(ReadMP3Sample(smp, mpegData, true) || ReadMediaFoundationSample(smp, mpegData, true))
 				{
 					if(smpHeader.encoderDelay > 0 && smpHeader.encoderDelay < sample.GetSampleSizeInBytes())
 					{

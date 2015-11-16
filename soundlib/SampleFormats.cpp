@@ -2728,9 +2728,9 @@ static void mptMFSafeRelease(T **ppT)
 // Additionally, one has to also implement a custom IMFAsyncResult for the
 // BeginRead/EndRead interface which allows transferring the number of read
 // bytes around.
-// To make things even worse, MediaFoundation fails to detect AAC files if a
-// non-file-based or read-only stream is used for opening.
-// The only sane option which remains if we do not have a on-disk filename
+// To make things even worse, MediaFoundation fails to detect some AAC and MPEG
+// files if a non-file-based or read-only stream is used for opening.
+// The only sane option which remains if we do not have an on-disk filename
 // available:
 //  1 - write a temporary file
 //  2 - close it
@@ -2967,14 +2967,15 @@ std::vector<FileType> CSoundFile::GetMediaFoundationFileTypes()
 #endif // MODPLUG_TRACKER
 
 
-bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file)
-//------------------------------------------------------------------------------
+bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file, bool mo3Decode)
+//----------------------------------------------------------------------------------------------
 {
 
 #if defined(NO_MEDIAFOUNDATION)
 
 	MPT_UNREFERENCED_PARAMETER(sample);
 	MPT_UNREFERENCED_PARAMETER(file);
+	MPT_UNREFERENCED_PARAMETER(mo3Decode);
 	return false;
 
 #else
@@ -2986,7 +2987,10 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file)
 	}
 
 	file.Rewind();
-	OnDiskFileWrapper diskfile(file);
+	// When using MF to decode MP3 samples in MO3 files, we need the mp3 file extension
+	// for some of them or otherwise MF refuses to recognize them.
+	// It won't hurt for other formats to use this extension, so just use it unconditionally.
+	OnDiskFileWrapper diskfile(file, MPT_PATHSTRING("mp3"));
 	if(!diskfile.IsValid())
 	{
 		return false;
@@ -3051,7 +3055,7 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file)
 			BYTE *data = NULL;
 			DWORD dataSize = 0;
 			MPT_MF_CHECKED(buffer->Lock(&data, NULL, &dataSize));
-			std::copy(reinterpret_cast<char*>(data), reinterpret_cast<char*>(data + dataSize), std::back_inserter(rawData));
+			rawData.insert(rawData.end(), reinterpret_cast<char*>(data), reinterpret_cast<char*>(data + dataSize));
 			MPT_MF_CHECKED(buffer->Unlock());
 		}
 		mptMFSafeRelease(&buffer);
@@ -3073,10 +3077,13 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file)
 	SmpLength length = rawData.size() / numChannels / (bitsPerSample/8);
 
 	DestroySampleThreadsafe(sample);
-	mpt::String::Copy(m_szNames[sample], sampleName);
-	Samples[sample].Initialize();
+	if(!mo3Decode)
+	{
+		mpt::String::Copy(m_szNames[sample], sampleName);
+		Samples[sample].Initialize();
+		Samples[sample].nC5Speed = samplesPerSecond;
+	}
 	Samples[sample].nLength = length;
-	Samples[sample].nC5Speed = samplesPerSecond;
 	Samples[sample].uFlags.set(CHN_16BIT, bitsPerSample >= 16);
 	Samples[sample].uFlags.set(CHN_STEREO, numChannels == 2);
 	Samples[sample].AllocateSample();
