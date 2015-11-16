@@ -53,47 +53,11 @@
 #include <mferror.h>
 #include <Propvarutil.h>
 #endif // !NO_MEDIAFOUNDATION
-
+#ifndef NO_MP3_SAMPLES
+#include "MPEGFrame.h"
+#endif // NO_MP3_SAMPLES
 
 OPENMPT_NAMESPACE_BEGIN
-
-
-#ifndef NO_MP3_SAMPLES
-// Check for valid MPEG header
-static bool IsMPEG(const uint8 (&header)[3])
-//------------------------------------------
-{
-	return header[0] == 0xFF && (header[1] & 0xE0) == 0xE0 && (header[1] & 0x18) != 0x08 && (header[1] & 0x06) != 0x00 && (header[2] & 0xF0) != 0xF0;
-}
-
-#if 0
-// unused
-
-static bool IsMPEG(FileReader file)
-//---------------------------------
-{
-	uint8 header[3];
-	if(!file.CanRead(3))
-		return false;
-	file.ReadArray(header);
-	file.SkipBack(3);
-	return IsMPEG(header);
-}
-
-static bool IsID3(FileReader file)
-//--------------------------------
-{
-	char header[3];
-	if(!file.CanRead(3))
-		return false;
-	file.ReadArrayLE(header);
-	file.SkipBack(3);
-	return header[0] == 'I' && header[1] == 'D' && header[2] == '3';
-}
-
-#endif
-
-#endif // NO_MP3_SAMPLES
 
 
 bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize, bool includeInstrumentFormats)
@@ -2518,14 +2482,6 @@ fail:
 	{
 		MPG123_ENC_16 = 0x040, MPG123_ENC_SIGNED = 0x080,
 	};
-	enum mpg123_parms
-	{
-		MPG123_REMOVE_FLAGS = 13,
-	};
-	enum mpg123_param_flags
-	{
-		MPG123_GAPLESS = 0x40,
-	};
 
 	typedef struct {int foo;} mpg123_handle;
 
@@ -2560,8 +2516,6 @@ public:
 	int (*mpg123_getformat )(mpg123_handle*, long*, int*, int*);
 	int (*mpg123_scan )(mpg123_handle*);
 	off_t (*mpg123_length )(mpg123_handle*);
-	int (*mpg123_param )(mpg123_handle*, mpg123_parms, long, double);
-	int (*mpg123_framebyframe_next )(mpg123_handle*);
 
 #if MPT_COMPILER_MSVC
 	static size_t FileReaderRead(void *fp, void *buf, size_t count)
@@ -2597,8 +2551,6 @@ public:
 			MPT_GLOBAL_BIND("mpg123", mpg123_getformat);
 			MPT_GLOBAL_BIND("mpg123", mpg123_scan);
 			MPT_GLOBAL_BIND("mpg123", mpg123_length);
-			MPT_GLOBAL_BIND("mpg123", mpg123_param);
-			MPT_GLOBAL_BIND("mpg123", mpg123_framebyframe_next);
 		#undef MPT_GLOBAL_BIND
 	}
 #else // !MPT_WITH_MPG123
@@ -2618,8 +2570,6 @@ public:
 		MPT_COMPONENT_BIND("mpg123", mpg123_getformat);
 		MPT_COMPONENT_BIND("mpg123", mpg123_scan);
 		MPT_COMPONENT_BIND("mpg123", mpg123_length);
-		MPT_COMPONENT_BIND("mpg123", mpg123_param);
-		MPT_COMPONENT_BIND("mpg123", mpg123_framebyframe_next);
 		if(HasBindFailed())
 		{
 			return false;
@@ -2677,7 +2627,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		{
 			// This might be some padding, followed by an MPEG header, so try again.
 			file.SkipBack(2);
-		} else if(IsMPEG(header))
+		} else if(MPEGFrame::IsMPEGHeader(header))
 		{
 			// This is what we want!
 			break;
@@ -2704,12 +2654,6 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	if((mh = mpg123->mpg123_new(0, &err)) == nullptr) return false;
 	file.Rewind();
 
-	if(mo3Decode)
-	{
-		// Must disable LAME header gap removal for MO3, as the MO3 header already includes the
-		// number of samples that should be removed.
-		mpg123->mpg123_param(mh, MPG123_REMOVE_FLAGS, MPG123_GAPLESS, 0.0);
-	}
 
 	long rate; int nchannels, encoding;
 	SmpLength length;
@@ -2733,13 +2677,6 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		strcpy(m_szNames[sample], "");
 		Samples[sample].Initialize();
 		Samples[sample].nC5Speed = rate;
-	} else
-	{
-		// I'm not entirely sure why, but doing it like this works for files
-		// with no LAME header at all, with LAME header (very old MO3 files) and
-		// files with overwritten LAME header (newer MO3 files).
-		file.Rewind();
-		mpg123->mpg123_framebyframe_next(mh);
 	}
 	Samples[sample].nLength = length;
 

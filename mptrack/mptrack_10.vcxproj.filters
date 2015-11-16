@@ -595,6 +595,9 @@
     <ClCompile Include="ProgressDialog.cpp">
       <Filter>Source Files\mptrack\Dialogs</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\MPEGFrame.cpp">
+      <Filter>Source Files\soundlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1166,6 +1169,9 @@
     </ClInclude>
     <ClInclude Include="ProgressDialog.h">
       <Filter>Header Files\mptrack\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\MPEGFrame.h">
+      <Filter>Header Files\soundlib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

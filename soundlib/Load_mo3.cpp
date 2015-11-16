@@ -20,6 +20,8 @@
 #ifdef MPT_BUILTIN_MO3
 #include "Tables.h"
 
+#include "MPEGFrame.h"
+
 #ifdef MPT_BUILTIN_MO3_STB_VORBIS
 // Using stb_vorbis for Ogg Vorbis decoding
 #define STB_VORBIS_NO_STDIO
@@ -1379,7 +1381,23 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				sampleChunks[smp - 1] = SampleChunk(sampleData, smpHeader.encoderDelay, sharedOggHeader);
 			} else if(compression == MO3Sample::smpCompressionMPEG)
 			{
-				if(ReadMP3Sample(smp, sampleData, true))
+				// Old MO3 encoders didn't remove LAME info frames. This is unfortunate since the encoder delay
+				// specified in the sample header does not take the gapless information from the LAME info frame
+				// into account. We should not depend on the MP3 decoder's capabilities to read or ignore such frames:
+				// - libmpg123 has MPG123_IGNORE_INFOFRAME but that requires API version 31 (mpg123 v1.14) or higher
+				// - Media Foundation does (currently) not read LAME gapless information at all
+				// So we just play save and remove such frames.
+				FileReader mpegData(sampleData);
+				MPEGFrame frame(sampleData);
+				uint16 frameDelay = frame.numSamples * 2;
+				if(frame.isLAME && smpHeader.encoderDelay >= frameDelay)
+				{
+					smpHeader.encoderDelay -= frameDelay;
+					sampleData.Seek(frame.frameSize);
+					mpegData = sampleData.ReadChunk(sampleData.BytesLeft());
+				}
+				
+				if(ReadMP3Sample(smp, mpegData, true))
 				{
 					if(smpHeader.encoderDelay > 0 && smpHeader.encoderDelay < sample.GetSampleSizeInBytes())
 					{
