@@ -908,7 +908,7 @@ private:
 
 public:
 
-	OnDiskFileWrapper(FileReader &file)
+	OnDiskFileWrapper(FileReader &file, const mpt::PathString &fileNameExtension = MPT_PATHSTRING("tmp"))
 		: m_IsTempFile(false)
 	{
 		try
@@ -916,7 +916,7 @@ public:
 			file.Rewind();
 			if(file.GetFileName().empty())
 			{
-				const mpt::PathString tempName = mpt::CreateTempFileName(MPT_PATHSTRING("OpenMPT"));
+				const mpt::PathString tempName = mpt::CreateTempFileName(MPT_PATHSTRING("OpenMPT"), fileNameExtension);
 				HANDLE hFile = NULL;
 				hFile = CreateFileW(tempName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL);
 				if(!hFile || hFile == INVALID_HANDLE_VALUE) throw std::runtime_error("");

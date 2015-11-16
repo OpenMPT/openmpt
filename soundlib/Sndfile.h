@@ -916,7 +916,7 @@ public:
 	bool ReadIFFSample(SAMPLEINDEX nInstr, FileReader &file);
 	bool ReadFLACSample(SAMPLEINDEX sample, FileReader &file);
 	bool ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Decode = false);
-	bool ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file);
+	bool ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file, bool mo3Decode = false);
 #ifdef MODPLUG_TRACKER
 #if defined(MPT_WITH_PATHSTRING)
 	static std::vector<FileType> GetMediaFoundationFileTypes();
