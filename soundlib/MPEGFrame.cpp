@@ -61,7 +61,7 @@ static const uint8 sideInfoSize[2][2] =
 bool MPEGFrame::IsMPEGHeader(const uint8 (&header)[3])
 //----------------------------------------------------
 {
-	return header[0] == 0xFF && (header[1] & 0xE0) == 0xE0 && (header[1] & 0x18) != 0x08 && (header[1] & 0x06) != 0x00 && (header[2] & 0x06) != 0x06 && (header[2] & 0xF0) != 0xF0;
+	return header[0] == 0xFF && (header[1] & 0xE0) == 0xE0 && (header[1] & 0x18) != 0x08 && (header[1] & 0x06) != 0x00 && (header[2] & 0x0C) != 0x0C && (header[2] & 0xF0) != 0xF0;
 }
 
 
