@@ -794,6 +794,7 @@
     <ClCompile Include="..\soundlib\ModSequence.cpp" />
     <ClCompile Include="..\soundlib\modsmp_ctrl.cpp" />
     <ClCompile Include="..\soundlib\mod_specifications.cpp" />
+    <ClCompile Include="..\soundlib\MPEGFrame.cpp" />
     <ClCompile Include="..\soundlib\pattern.cpp" />
     <ClCompile Include="..\soundlib\patternContainer.cpp" />
     <ClCompile Include="..\soundlib\plugins\DmoToVst.cpp" />
@@ -1028,6 +1029,7 @@
     <ClInclude Include="..\soundlib\ModSequence.h" />
     <ClInclude Include="..\soundlib\modsmp_ctrl.h" />
     <ClInclude Include="..\soundlib\mod_specifications.h" />
+    <ClInclude Include="..\soundlib\MPEGFrame.h" />
     <ClInclude Include="..\soundlib\pattern.h" />
     <ClInclude Include="..\soundlib\patternContainer.h" />
     <ClInclude Include="..\soundlib\plugins\OpCodes.h" />

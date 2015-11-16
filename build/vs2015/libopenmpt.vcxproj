@@ -232,6 +232,7 @@
     <ClInclude Include="..\..\soundlib\Loaders.h" />
     <ClInclude Include="..\..\soundlib\MIDIEvents.h" />
     <ClInclude Include="..\..\soundlib\MIDIMacros.h" />
+    <ClInclude Include="..\..\soundlib\MPEGFrame.h" />
     <ClInclude Include="..\..\soundlib\Message.h" />
     <ClInclude Include="..\..\soundlib\Mixer.h" />
     <ClInclude Include="..\..\soundlib\MixerInterface.h" />
@@ -326,6 +327,7 @@
     <ClCompile Include="..\..\soundlib\Load_xm.cpp" />
     <ClCompile Include="..\..\soundlib\MIDIEvents.cpp" />
     <ClCompile Include="..\..\soundlib\MIDIMacros.cpp" />
+    <ClCompile Include="..\..\soundlib\MPEGFrame.cpp" />
     <ClCompile Include="..\..\soundlib\Message.cpp" />
     <ClCompile Include="..\..\soundlib\MixerLoops.cpp" />
     <ClCompile Include="..\..\soundlib\MixerSettings.cpp" />
