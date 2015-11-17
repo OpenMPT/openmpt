@@ -211,7 +211,7 @@ void CViewGlobals::OnInitialUpdate()
 	m_CbnSpecialMixProcessing.AddString("LR balance");
 	m_SpinMixGain.SetRange(0,80);
 	m_SpinMixGain.SetPos(10);
-	SetDlgItemText(IDC_STATIC2, "Gain: x 1.0");
+	SetDlgItemText(IDC_EDIT16, _T("Gain: x1.0"));
 
 	UpdateView(UpdateHint().ModType());
 	OnParamChanged();
@@ -454,8 +454,8 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		int gain = plugin.GetGain();
 		if(gain == 0) gain = 10;
 		float value = 0.1f * (float)gain;
-		_stprintf(s, _T("Gain: x %1.1f"), value);
-		SetDlgItemText(IDC_STATIC2, s);
+		_stprintf(s, _T("Gain: x%1.1f"), value);
+		SetDlgItemText(IDC_EDIT16, s);
 		m_SpinMixGain.SetPos(gain);
 
 		if (pVstPlugin)
@@ -812,12 +812,12 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			plugin.SetGain(gain);
 
 			float fValue = 0.1f * (float)gain;
-			_stprintf(s, _T("Gain: x %1.1f"), fValue);
-			SetDlgItemText(IDC_STATIC2, s);
+			_stprintf(s, _T("Gain: x%1.1f"), fValue);
+			CEdit *gainEdit = (CEdit *)GetDlgItem(IDC_EDIT16);
+			gainEdit->SetWindowText(s);
 
 			SetPluginModified();
 		}
-		m_SpinMixGain.SetFocus();
 	}
 
 	CFormView::OnVScroll(nSBCode, nPos, pScrollBar);
