@@ -432,7 +432,9 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	if(!file.ReadConvertEndianness(fileHeader)
 		|| memcmp(fileHeader.signature, "MT20", 4)
 		|| fileHeader.version < 0x200 || fileHeader.version >= 0x300
-		|| fileHeader.numOrders > 256)
+		|| fileHeader.numOrders > 256
+		|| fileHeader.numInstruments >= MAX_INSTRUMENTS
+		|| fileHeader.numSamples >= MAX_SAMPLES)
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -770,6 +772,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 					Order[ord] = writePat;
 				}
 			}
+			if(!Patterns.IsValidPat(writePat))
+				continue;
 
 			FileReader &chunk = patternChunks[drumHeader.DrumPatternOrder[ord]];
 			chunk.Rewind();
