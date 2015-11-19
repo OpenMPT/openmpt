@@ -1382,7 +1382,7 @@ void CCtrlSamples::OnNormalize()
 	//Shift -> Normalize all samples
 	if(CMainFrame::GetInputHandler()->ShiftPressed())
 	{
-		if(Reporting::Confirm(GetStrI18N(TEXT("This will normalize all samples independently. Continue?")), GetStrI18N(TEXT("Normalize"))) == cnfNo)
+		if(Reporting::Confirm(_T("This will normalize all samples independently. Continue?"), _T("Normalize")) == cnfNo)
 			return;
 		minSample = 1;
 		maxSample = m_sndFile.GetNumSamples();
@@ -1491,7 +1491,7 @@ void CCtrlSamples::OnRemoveDCOffset()
 	//Shift -> Process all samples
 	if(CMainFrame::GetInputHandler()->ShiftPressed())
 	{
-		if(Reporting::Confirm(GetStrI18N(TEXT("This will process all samples independently. Continue?")), GetStrI18N(TEXT("DC Offset Removal"))) == cnfNo)
+		if(Reporting::Confirm(_T("This will process all samples independently. Continue?"), _T("DC Offset Removal")) == cnfNo)
 			return;
 		minSample = 1;
 		maxSample = m_sndFile.GetNumSamples();
@@ -1545,16 +1545,16 @@ void CCtrlSamples::OnRemoveDCOffset()
 		SetModified(SampleHint().Info().Data(), true, true);
 		if(numModified == 1)
 		{
-			dcInfo.Format(GetStrI18N(TEXT("Removed DC offset (%.1f%%)")), fReportOffset * 100);
+			dcInfo.Format(_T("Removed DC offset (%.1f%%)"), fReportOffset * 100);
 		}
 		else
 		{
-			dcInfo.Format(GetStrI18N(TEXT("Removed DC offset from %u samples (avg %0.1f%%)")), numModified, fReportOffset / numModified * 100);
+			dcInfo.Format(_T("Removed DC offset from %u samples (avg %0.1f%%)"), numModified, fReportOffset / numModified * 100);
 		}
 	}
 	else
 	{
-		dcInfo.SetString(GetStrI18N(TEXT("No DC offset found")));
+		dcInfo.SetString(_T("No DC offset found"));
 	}
 
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();

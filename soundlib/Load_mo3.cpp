@@ -749,7 +749,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	AddToLog(GetStrI18N("The file appears to be a MO3 file, but this OpenMPT build does not support loading MO3 files."));
+	AddToLog(LogError, MPT_USTRING("The file appears to be a MO3 file, but this OpenMPT build does not support loading MO3 files."));
 	return false;
 
 #elif !defined(NO_MO3)
@@ -793,7 +793,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	} else
 	{
 #ifndef MPT_BUILTIN_MO3
-		AddToLog(GetStrI18N("Loading MO3 file failed because the unmo3 library could not be loaded."));
+		AddToLog(LogError, MPT_USTRING("Loading MO3 file failed because the unmo3 library could not be loaded."));
 		return false;
 #endif // MPT_BUILTIN_MO3
 	}

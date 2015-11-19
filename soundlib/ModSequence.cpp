@@ -30,7 +30,7 @@ static char THIS_FILE[] = __FILE__;
 
 OPENMPT_NAMESPACE_BEGIN
 
-#define str_SequenceTruncationNote (GetStrI18N("Module has sequence of length %1; it will be truncated to maximum supported length, %2."))
+#define str_SequenceTruncationNote ("Module has sequence of length %1; it will be truncated to maximum supported length, %2.")
 
 ModSequence::ModSequence(CSoundFile &rSf,
 						 PATTERNINDEX* pArray,

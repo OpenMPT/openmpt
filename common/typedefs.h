@@ -482,9 +482,6 @@ using namespace mpt::Legacy;
 #define MPT_PRINTF_FUNC(formatstringindex,varargsindex)
 #endif
 
-//To mark string that should be translated in case of multilingual version.
-#define GetStrI18N(x)	(x)
-
 
 
 #ifndef MAX

@@ -33,9 +33,9 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#define str_tooMuchPatternData	(GetStrI18N(("Warning: File format limit was reached. Some pattern data may not get written to file.")))
-#define str_pattern				(GetStrI18N(("pattern")))
-#define str_PatternSetTruncationNote (GetStrI18N(("The module contains %1 patterns but only %2 patterns can be loaded in this OpenMPT version.")))
+#define str_tooMuchPatternData	("Warning: File format limit was reached. Some pattern data may not get written to file.")
+#define str_pattern				("pattern")
+#define str_PatternSetTruncationNote ("The module contains %1 patterns but only %2 patterns can be loaded in this OpenMPT version.")
 #define str_LoadingIncompatibleVersion	"The file informed that it is incompatible with this version of OpenMPT. Loading was terminated."
 #define str_LoadingMoreRecentVersion	"The loaded file was made with a more recent OpenMPT version and this version may not be able to load all the features or play the file correctly."
 
