@@ -16,12 +16,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#if MPT_COMPILER_MSVC
-#pragma warning(error : 4309) // Treat "truncation of constant value"-warning as error.
-#endif
-
-
-
 // Platform has native IEEE floating point representation.
 // (Currently always assumed)
 #define MPT_PLATFORM_IEEE_FLOAT 1
