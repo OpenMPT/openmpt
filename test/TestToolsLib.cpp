@@ -191,6 +191,28 @@ void Testcase::ReportException()
 } // namespace Test
 
 
+#if defined(MPT_ASSERT_HANDLER_NEEDED)
+
+MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
+//------------------------------------------------------------------------------------------------------------------
+{
+	Test::fail_count++;
+	if(msg)
+	{
+		mpt::log::Logger().SendLogMessage(mpt::log::Context(file, line, function), LogError, "ASSERT",
+			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetASCII, msg) + MPT_USTRING(" (") + mpt::ToUnicode(mpt::CharsetASCII, expr) + MPT_USTRING(")")
+			);
+	} else
+	{
+		mpt::log::Logger().SendLogMessage(mpt::log::Context(file, line, function), LogError, "ASSERT",
+			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetASCII, expr)
+			);
+	}
+}
+
+#endif // MPT_ASSERT_HANDLER_NEEDED
+
+
 OPENMPT_NAMESPACE_END
 
 
