@@ -559,7 +559,7 @@ void WAVWriter::WriteCueInformation(const ModSample &sample)
 {
 	StartChunk(RIFFChunk::idcue_);
 	{
-		const uint32 numPoints = SwapBytesLE_(CountOf(sample.cues));
+		const uint32 numPoints = SwapBytesLE_(static_cast<uint32>(CountOf(sample.cues)));
 		Write(numPoints);
 	}
 	for(uint32 i = 0; i < CountOf(sample.cues); i++)
