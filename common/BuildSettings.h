@@ -547,6 +547,8 @@
 #pragma warning(disable:4250) // 'mpt::fstream' : inherits 'std::basic_istream<_Elem,_Traits>::std::basic_istream<_Elem,_Traits>::_Add_vtordisp1' via dominance
 #endif
 
+#pragma warning(error:4309) // Treat "truncation of constant value"-warning as error.
+
 #endif // MPT_COMPILER_MSVC
 
 
