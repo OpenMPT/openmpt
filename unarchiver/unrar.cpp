@@ -15,12 +15,13 @@
 #include "../include/unrar/openmpt-callback.hpp"
 
 #if MPT_COMPILER_MSVC
-// Disable "unreferenced formal parameter" and type conversion warnings
-#pragma warning(disable:4100; disable:4244)
+#pragma warning(push)
+#pragma warning(disable:4100) // "unreferenced formal parameter"
+#pragma warning(disable:4244) // "conversion from 'type1' to 'type2', possible loss of data"
 #endif
 #include "../include/unrar/rar.hpp"
 #if MPT_COMPILER_MSVC
-#pragma warning(default:4100; default:4244)
+#pragma warning(pop)
 #endif
 
 #endif // UNRAR_SUPPORT

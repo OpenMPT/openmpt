@@ -27,9 +27,17 @@
 #define STB_VORBIS_NO_STDIO
 #define STB_VORBIS_NO_PULLDATA_API
 #define STB_VORBIS_MAX_CHANNELS 2
-#pragma warning(disable:4244 4100 4245 4701)
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4100) // "unreferenced formal parameter"
+#pragma warning(disable:4244) // "conversion from 'type1' to 'type2', possible loss of data"
+#pragma warning(disable:4245) // conversion' : conversion from 'type1' to 'type2', signed/unsigned mismatch
+#pragma warning(disable:4701) // Potentially uninitialized local variable 'name' used
+#endif // MPT_COMPILER_MSVC
 #include <stb_vorbis/stb_vorbis.c>
-#pragma warning(default:4244 4100 4245 4701)
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 #include "SampleFormatConverters.h"
 #endif // MPT_BUILTIN_MO3_STB_VORBIS
 

@@ -50,7 +50,10 @@ static const EQBANDSTRUCT gEQDefaults[MAX_EQ_BANDS*2] =
 
 #ifdef ENABLE_X86
 
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
 #pragma warning(disable:4100)
+#endif // MPT_COMPILER_MSVC
 
 #define PBS_A0	DWORD PTR [eax]
 #define PBS_A1	DWORD PTR [eax+4]
@@ -291,7 +294,9 @@ done:;
 
 #endif // ENABLE_SSE
 
-#pragma warning(default:4100)
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 
 #else
 
