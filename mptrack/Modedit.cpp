@@ -161,7 +161,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 	if(nRemainingChannels > m_SndFile.GetModSpecifications().channelsMax || nRemainingChannels < m_SndFile.GetModSpecifications().channelsMin)
 	{
 		CString str;
-		str.Format(GetStrI18N(_T("Can't apply change: Number of channels should be between %u and %u.")), m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
+		str.Format(_T("Can't apply change: Number of channels should be between %u and %u."), m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
 		Reporting::Error(str , "Rearrange Channels");
 		return CHANNELINDEX_INVALID;
 	}

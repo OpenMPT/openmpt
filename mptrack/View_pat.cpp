@@ -3384,7 +3384,7 @@ void CViewPattern::OnDuplicateChannel()
 	if(dupChn >= pModDoc->GetNumChannels())
 		return;
 
-	if(!pModDoc->IsChannelUnused(dupChn) && Reporting::Confirm(GetStrI18N(_T("This affects all patterns, proceed?")), GetStrI18N(_T("Duplicate Channel"))) != cnfYes)
+	if(!pModDoc->IsChannelUnused(dupChn) && Reporting::Confirm(_T("This affects all patterns, proceed?"), _T("Duplicate Channel")) != cnfYes)
 		return;
 
 	BeginWaitCursor();
