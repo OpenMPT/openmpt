@@ -727,7 +727,7 @@ public:
 	void SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, FILE* f) const;
 	void SaveExtendedSongProperties(FILE* f) const;
 #endif // MODPLUG_NO_FILESAVE
-	void LoadExtendedSongProperties(const MODTYPE modtype, FileReader &file, bool* pInterpretMptMade = nullptr);
+	void LoadExtendedSongProperties(FileReader &file, bool* pInterpretMptMade = nullptr);
 
 	std::string GetSchismTrackerVersion(uint16 cwtv);
 

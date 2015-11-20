@@ -296,7 +296,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 	if(code == MAGIC4BE('M', 'P', 'T', 'S'))
 	{
 		file.SkipBack(4);
-		LoadExtendedSongProperties(MOD_TYPE_IT, file);
+		LoadExtendedSongProperties(file);
 	}
 
 	m_nType = MOD_TYPE_IT;
