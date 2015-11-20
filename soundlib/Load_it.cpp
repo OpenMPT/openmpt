@@ -396,6 +396,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				// OpenMPT 1.17 and 1.18 (raped IT format)
 				// Exact version number will be determined later.
 				interpretModPlugMade = true;
+				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
 			} else if(fileHeader.cwtv == 0x0217 && fileHeader.cmwt == 0x0200 && !memcmp(fileHeader.reserved, "\0\0\0\0", 4))
 			{
 				if(memchr(fileHeader.chnpan, 0xFF, sizeof(fileHeader.chnpan)) != nullptr)
@@ -441,6 +442,26 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags.set(SONG_EXFILTERRANGE, (fileHeader.flags & ITFileHeader::extendedFilterRange) != 0);
 
 	mpt::String::Read<mpt::String::spacePadded>(m_songName, fileHeader.songname);
+
+	// Read row highlights
+	if((fileHeader.special & ITFileHeader::embedPatternHighlights))
+	{
+		// MPT 1.09 and older (and maybe also newer) versions leave this blank (0/0), but have the "special" flag set.
+		// Newer versions of MPT and OpenMPT 1.17 *always* write 4/16 here.
+		// Thus, we will just ignore those old versions.
+		// Note: OpenMPT 1.17.03.02 was the first version to properly make use of the time signature in the IT header.
+		// This poses a small unsolvable problem:
+		// - In compatible mode, we cannot distinguish this version from earlier 1.17 releases.
+		//   Thus we cannot know when to read this field or not (m_dwLastSavedWithVersion will always be 1.17.00.00).
+		//   Luckily OpenMPT 1.17.03.02 should not be very wide-spread.
+		// - In normal mode the time signature is always present in the song extensions anyway. So it's okay if we read
+		//   the signature here and maybe overwrite it later when parsing the song extensions.
+		if(m_dwLastSavedWithVersion == 0 || m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 03, 02))
+		{
+			m_nDefaultRowsPerBeat = fileHeader.highlight_minor;
+			m_nDefaultRowsPerMeasure = fileHeader.highlight_major;
+		}
+	}
 
 	// Global Volume
 	m_nDefaultGlobalVolume = fileHeader.globalvol << 1;
@@ -760,6 +781,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			// Effect
 			if(chnMask[ch] & 8) patternData.Skip(2);
 		}
+		lastSampleOffset = std::max(lastSampleOffset, file.GetPosition());
 	}
 
 	// Compute extra instruments settings position
@@ -789,9 +811,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		m_nMixLevels = mixLevelsOriginal;
 	}
-	// We need to do this here, because if there no samples (so lastSampleOffset = 0), we need to look after the last pattern (sample data normally follows pattern data).
-	// And we need to do this before reading the patterns because m_nChannels might be modified by LoadExtendedSongProperties. *sigh*
-	LoadExtendedSongProperties(GetType(), file, &interpretModPlugMade);
+	// Need to do this before reading the patterns because m_nChannels might be modified by LoadExtendedSongProperties. *sigh*
+	LoadExtendedSongProperties(file, &interpretModPlugMade);
 
 	// Reading Patterns
 	Patterns.ResizeArray(std::max(MAX_PATTERNS, numPats));
@@ -1033,30 +1054,17 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			m_madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
 			break;
 		case 4:
-			m_madeWithTracker = mpt::String::Print("pyIT %1.%2", (fileHeader.cwtv & 0x0F00) >> 8, mpt::fmt::hex0<2>((fileHeader.cwtv & 0xFF)));
+			m_madeWithTracker = MPT_FORMAT("pyIT %1.%2", (fileHeader.cwtv & 0x0F00) >> 8, mpt::fmt::hex0<2>((fileHeader.cwtv & 0xFF)));
 			break;
 		case 6:
 			m_madeWithTracker = "BeRoTracker";
 			break;
 		case 7:
-			m_madeWithTracker = mpt::String::Print("ITMCK %1.%2.%3", (fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
+			m_madeWithTracker = MPT_FORMAT("ITMCK %1.%2.%3", (fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
 			break;
 		case 0xD:
 			m_madeWithTracker = "spc2it";
 			break;
-		}
-	}
-
-	// Read row highlights
-	if((fileHeader.special & ITFileHeader::embedPatternHighlights))
-	{
-		// MPT 1.09 and older (and maybe also newer) versions leave this blank (0/0), but have the "special" flag set.
-		// Newer versions of MPT and OpenMPT 1.17 *always* write 4/16 here.
-		// Thus, we will just ignore those old versions.
-		if(m_dwLastSavedWithVersion == 0 || m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 03, 02))
-		{
-			m_nDefaultRowsPerBeat = fileHeader.highlight_minor;
-			m_nDefaultRowsPerMeasure = fileHeader.highlight_major;
 		}
 	}
 
@@ -2140,8 +2148,8 @@ void ReadFieldCast(FileReader &chunk, std::size_t size, T &field)
 }
 
 
-void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &file, bool *pInterpretMptMade)
-//-----------------------------------------------------------------------------------------------------------
+void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMptMade)
+//------------------------------------------------------------------------------------
 {
 	if(!file.ReadMagic("STPM"))	// 'MPTS'
 	{
@@ -2174,7 +2182,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 			case MAGIC4LE('D','T','F','R'): { uint32 tempoFract; ReadField(chunk, size, tempoFract); m_nDefaultTempo.Set(m_nDefaultTempo.GetInt(), tempoFract); break; }
 			case MAGIC4BE('R','P','B','.'): ReadField(chunk, size, m_nDefaultRowsPerBeat); break;
 			case MAGIC4BE('R','P','M','.'): ReadField(chunk, size, m_nDefaultRowsPerMeasure); break;
-			case MAGIC4BE('C','.','.','.'): { CHANNELINDEX chn = 0; if(modtype != MOD_TYPE_XM) ReadField(chunk, size, chn); m_nChannels = std::max(m_nChannels, chn); break; }
+			case MAGIC4BE('C','.','.','.'): if(GetType() != MOD_TYPE_XM) { CHANNELINDEX chn = 0; ReadField(chunk, size, chn); m_nChannels = std::max(m_nChannels, chn); } break;
 			case MAGIC4BE('T','M','.','.'): ReadFieldCast(chunk, size, m_nTempoMode); break;
 			case MAGIC4BE('P','M','M','.'): ReadFieldCast(chunk, size, m_nMixLevels); break;
 			case MAGIC4BE('C','W','V','.'): ReadField(chunk, size, m_dwCreatedWithVersion); break;
@@ -2182,7 +2190,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 			case MAGIC4BE('S','P','A','.'): ReadField(chunk, size, m_nSamplePreAmp); break;
 			case MAGIC4BE('V','S','T','V'): ReadField(chunk, size, m_nVSTiVolume); break;
 			case MAGIC4BE('D','G','V','.'): ReadField(chunk, size, m_nDefaultGlobalVolume); break;
-			case MAGIC4BE('R','P','.','.'): if(modtype != MOD_TYPE_XM) ReadField(chunk, size, m_nRestartPos); break;
+			case MAGIC4BE('R','P','.','.'): if(GetType() != MOD_TYPE_XM) ReadField(chunk, size, m_nRestartPos); break;
 			case MAGIC4BE('M','S','F','.'): ReadFieldFlagSet(chunk, size, m_ModFlags); break;
 			case MAGIC4LE('R','S','M','P'):
 				ReadFieldCast(chunk, size, m_nResampling);
@@ -2199,6 +2207,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, FileReader &f
 				}
 				break;
 			case MAGIC4BE('C','h','n','S'):
+				// Channel settings for channels 65+
 				if(size <= (MAX_BASECHANNELS - 64) * 2 && (size % 2u) == 0)
 				{
 					STATIC_ASSERT(CountOf(ChnSettings) >= 64);

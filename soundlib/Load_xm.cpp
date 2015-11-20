@@ -500,7 +500,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 					// Sample 15 in dirtysex.xm by J/M/T/M is a 16-bit sample with an odd size of 0x18B according to the header, while the real sample size would be 0x18A.
 					// Always read as many bytes as specified in the header, even if the sample reader would probably read less bytes.
 					FileReader sampleChunk = file.ReadChunk(sampleFlags[sample].GetEncoding() != SampleIO::ADPCM ? sampleSize[sample] : (16 + (sampleSize[sample] + 1) / 2));
-					if(sample < sampleSlots.size())
+					if(sample < sampleSlots.size() && (loadFlags & loadSampleData))
 					{
 						sampleFlags[sample].ReadSample(Samples[sampleSlots[sample]], sampleChunk);
 					}
@@ -518,11 +518,17 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileHeader.version < 0x0104)
 	{
 		// Load Patterns and Samples (Version 1.02 and 1.03)
-		ReadXMPatterns(file, fileHeader, *this);
-
-		for(SAMPLEINDEX sample = 1; sample <= GetNumSamples(); sample++)
+		if(loadFlags & (loadPatternData | loadSampleData))
 		{
-			sampleFlags[sample - 1].ReadSample(Samples[sample], file);
+			ReadXMPatterns(file, fileHeader, *this);
+		}
+
+		if(loadFlags & loadSampleData)
+		{
+			for(SAMPLEINDEX sample = 1; sample <= GetNumSamples(); sample++)
+			{
+				sampleFlags[sample - 1].ReadSample(Samples[sample], file);
+			}
 		}
 	}
 
@@ -658,7 +664,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		LoadExtendedInstrumentProperties(file, &interpretOpenMPTMade);
 	}
 
-	LoadExtendedSongProperties(GetType(), file, &interpretOpenMPTMade);
+	LoadExtendedSongProperties(file, &interpretOpenMPTMade);
 
 	if(interpretOpenMPTMade)
 	{
@@ -1113,9 +1119,9 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 
 		//Save hacked-on extra info
 		SaveMixPlugins(f);
-		if(m_nInstruments)
+		if(GetNumInstruments())
 		{
-			SaveExtendedInstrumentProperties(MIN(GetNumInstruments(), writeInstruments), f);
+			SaveExtendedInstrumentProperties(writeInstruments, f);
 		}
 		SaveExtendedSongProperties(f);
 	}
