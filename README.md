@@ -207,6 +207,12 @@ How to compile
 
             make CONFIG=emscripten-old
 
+     -  Haiku:
+
+        To compile libopenmpt on Haiku (using the 32-bit gcc2h), run:
+
+            make CONFIG=haiku
+
     The `Makefile` supports some customizations. You might want to read the top
     which should get you some possible make settings, like e.g.
     `make DYNLINK=0` or similar. Cross compiling or different compiler would
