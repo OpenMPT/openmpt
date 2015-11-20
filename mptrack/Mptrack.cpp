@@ -1005,12 +1005,10 @@ BOOL CTrackApp::InitInstance()
 
 	mpt::Windows::Version::Init();
 
-	mpt::String::InitCharsets();
-
 	MPT_LOG(LogInformation, "", MPT_USTRING("OpenMPT Start"));
 
 	// Initialize DocManager (for DDE)
-	// requires mpt::PathString, which requires mpt::String::InitCharsets()
+	// requires mpt::PathString
 	ASSERT(nullptr == m_pDocManager); // no MPT_ASSERT here!
 	m_pDocManager = new CModDocManager();
 

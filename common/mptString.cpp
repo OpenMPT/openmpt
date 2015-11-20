@@ -925,54 +925,8 @@ static std::string ToUTF8(const std::wstring &str, char replacement = '?')
 
 static bool TestCodePage(UINT cp)
 {
-	CPINFOEX cpinfo;
-	MemsetZero(cpinfo);
-	return GetCPInfoEx(cp, 0, &cpinfo) ? true : false;
+	return IsValidCodePage(cp) ? true : false;
 }
-
-#ifdef MODPLUG_TRACKER
-
-static bool CharsetsInitialized = false;
-static bool HasCharsetUTF8 = true;
-static bool HasCharsetASCII = true;
-static bool HasCharsetISO8859_1 = true;
-static bool HasCharsetISO8859_15 = true;
-static bool HasCharsetCP437 = true;
-static bool HasCharsetWindows1252 = true;
-
-void InitCharsets()
-{
-	HasCharsetUTF8 = TestCodePage(CP_UTF8);
-	HasCharsetASCII = TestCodePage(20127);
-	HasCharsetISO8859_1 = TestCodePage(28591);
-	HasCharsetISO8859_15 = TestCodePage(28605);
-	HasCharsetCP437 = TestCodePage(437);
-	HasCharsetWindows1252 = TestCodePage(1252);
-	CharsetsInitialized = true;
-}
-
-static bool HasCharset(Charset charset)
-{
-	MPT_ASSERT(CharsetsInitialized);
-	bool result = false;
-	switch(charset)
-	{
-#if defined(MPT_WITH_CHARSET_LOCALE)
-		case CharsetLocale:      result = true; break;
-#endif
-		case CharsetUTF8:        result = HasCharsetUTF8;        break;
-		case CharsetASCII:       result = HasCharsetASCII;       break;
-		case CharsetISO8859_1:   result = HasCharsetISO8859_1;   break;
-		case CharsetISO8859_15:  result = HasCharsetISO8859_15;  break;
-		case CharsetCP437:       result = HasCharsetCP437;       break;
-		case CharsetWindows1252: result = HasCharsetWindows1252; break;
-		case CharsetCP437AMS:    result = false; break;
-		case CharsetCP437AMS2:   result = false; break;
-	}
-	return result;
-}
-
-#else // !MODPLUG_TRACKER
 
 static bool HasCharset(Charset charset)
 {
@@ -993,19 +947,6 @@ static bool HasCharset(Charset charset)
 	}
 	return result;
 }
-
-#endif // MODPLUG_TRACKER
-
-#else // !MPT_CHARSET_WIN32
-
-#ifdef MODPLUG_TRACKER
-
-void InitCharsets()
-{
-	return;
-}
-
-#endif // MODPLUG_TRACKER
 
 #endif // MPT_CHARSET_WIN32
 
