@@ -465,7 +465,6 @@ bool ReadInstrumentHeaderField(ModInstrument *input, uint32 fcode, uint16 fsize,
 	GET_MPTHEADER_sized_member(	wMidiBank				, uint16		, MAGIC4BE('M','B','.','.')	)
 	GET_MPTHEADER_sized_member(	nMidiProgram			, uint8			, MAGIC4BE('M','P','.','.')	)
 	GET_MPTHEADER_sized_member(	nMidiChannel			, uint8			, MAGIC4BE('M','C','.','.')	)
-	GET_MPTHEADER_sized_member(	nMidiDrumKey			, uint8			, MAGIC4BE('M','D','K','.')	)
 	GET_MPTHEADER_sized_member(	nPPS					, int8			, MAGIC4BE('P','P','S','.')	)
 	GET_MPTHEADER_sized_member(	nPPC					, uint8			, MAGIC4BE('P','P','C','.')	)
 	GET_MPTHEADER_array_member(	VolEnv.Ticks			, uint16		, MAGIC4BE('V','P','[','.')	)
@@ -628,11 +627,13 @@ void CSoundFile::LoadExtendedInstrumentProperties(FileReader &file, bool *pInter
 	if(pInterpretMptMade != nullptr)
 		*pInterpretMptMade = true;
 
-	while(file.CanRead(6)) //Loop 'till beginning of end of file/mpt specific looking for inst. extensions
+	while(file.CanRead(6))
 	{
 		uint32 code = file.ReadUint32LE();
 
-		if(code == MAGIC4BE('M','P','T','S'))					//Reached song extensions, break out of this loop
+		if(code == MAGIC4BE('M','P','T','S')	// Reached song extensions, break out of this loop
+			|| code == MAGIC4LE('2','2','8',4)	// Reached MPTM extensions (in case there are no song extensions)
+			|| (code & 0x80808080) || !(code & 0x60606060))	// Non-ASCII chunk ID
 		{
 			file.SkipBack(4);
 			return;

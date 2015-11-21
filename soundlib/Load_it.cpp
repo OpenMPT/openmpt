@@ -797,8 +797,13 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				if(file.ReadMagic("XTPM") || file.ReadMagic("STPM"))
 				{
-					file.SkipBack(4);
-					break;
+					uint32 id = file.ReadUint32LE();
+					file.SkipBack(8);
+					// Our chunk IDs should only contain ASCII characters
+					if(!(id & 0x80808080) && (id & 0x60606060))
+					{
+						break;
+					}
 				}
 				file.Skip(file.ReadUint16LE());
 			}
@@ -2169,7 +2174,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 		const uint16 size = file.ReadUint16LE();
 
 		// Start of MPTM extensions or truncated field
-		if(code == MAGIC4LE('2','2','8',4) || !file.CanRead(size))
+		if(code == MAGIC4LE('2','2','8',4) || !file.CanRead(size) || (code & 0x80808080) || !(code & 0x60606060))
 		{
 			break;
 		}
