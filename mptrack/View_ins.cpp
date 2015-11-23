@@ -34,10 +34,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define ENV_ZOOM				4.0f
 #define ENV_MIN_ZOOM			2.0f
 #define ENV_MAX_ZOOM			256.0f
-#define ENV_DRAGLOOPSTART		(MAX_ENVPOINTS + 1)
-#define ENV_DRAGLOOPEND			(MAX_ENVPOINTS + 2)
-#define ENV_DRAGSUSTAINSTART	(MAX_ENVPOINTS + 3)
-#define ENV_DRAGSUSTAINEND		(MAX_ENVPOINTS + 4)
+
 
 // Non-client toolbar
 #define ENV_LEFTBAR_CY			29
@@ -928,13 +925,14 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	m_dcMemMain.MoveTo(0, ymed);
 	m_dcMemMain.LineTo(m_rcClient.right, ymed);
 
-	m_dcMemMain.SelectObject(CMainFrame::penDarkGray);
 	// Drawing Loop Start/End
 	if (EnvGetLoop())
 	{
+		m_dcMemMain.SelectObject(m_nDragItem == ENV_DRAGLOOPSTART ? CMainFrame::penGray99 : CMainFrame::penDarkGray);
 		int x1 = PointToScreen(EnvGetLoopStart()) - m_envPointSize / 2;
 		m_dcMemMain.MoveTo(x1, 0);
 		m_dcMemMain.LineTo(x1, m_rcClient.bottom);
+		m_dcMemMain.SelectObject(m_nDragItem == ENV_DRAGLOOPEND ? CMainFrame::penGray99 : CMainFrame::penDarkGray);
 		int x2 = PointToScreen(EnvGetLoopEnd()) + m_envPointSize / 2;
 		m_dcMemMain.MoveTo(x2, 0);
 		m_dcMemMain.LineTo(x2, m_rcClient.bottom);
@@ -1609,6 +1607,7 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 		CRect rect;
 		// Look if dragging a point
 		UINT maxpoint = EnvGetLastPoint();
+		UINT oldDragItem = m_nDragItem;
 		m_nDragItem = 0;
 		const int hitboxSize = static_cast<int>((6 * m_nDPIx) / 96.0f);
 		for (UINT i = 0; i <= maxpoint; i++)
@@ -1675,6 +1674,9 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 					// Drag point if successful
 					SetCapture();
 					m_dwStatus |= INSSTATUS_DRAGGING;
+				} else if(oldDragItem)
+				{
+					InvalidateRect(NULL, FALSE);
 				}
 			}
 		}
@@ -2232,8 +2234,12 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		case kcInstrumentEnvelopeZoomIn:				OnEnvZoomIn(); return wParam;
 		case kcInstrumentEnvelopeZoomOut:				OnEnvZoomOut(); return wParam;
 		case kcInstrumentEnvelopeScale:					OnEnvelopeScalepoints(); return wParam;
-		case kcInstrumentEnvelopePointPrev:				EnvKbdSelectPrevPoint(); return wParam;
-		case kcInstrumentEnvelopePointNext:				EnvKbdSelectNextPoint(); return wParam;
+		case kcInstrumentEnvelopeSelectLoopStart:		EnvKbdSelectPoint(ENV_DRAGLOOPSTART); return wParam;
+		case kcInstrumentEnvelopeSelectLoopEnd:			EnvKbdSelectPoint(ENV_DRAGLOOPEND); return wParam;
+		case kcInstrumentEnvelopeSelectSustainStart:	EnvKbdSelectPoint(ENV_DRAGSUSTAINSTART); return wParam;
+		case kcInstrumentEnvelopeSelectSustainEnd:		EnvKbdSelectPoint(ENV_DRAGSUSTAINEND); return wParam;
+		case kcInstrumentEnvelopePointPrev:				EnvKbdSelectPoint(ENV_DRAGPREVIOUS); return wParam;
+		case kcInstrumentEnvelopePointNext:				EnvKbdSelectPoint(ENV_DRAGNEXT); return wParam;
 		case kcInstrumentEnvelopePointMoveLeft:			EnvKbdMovePointLeft(); return wParam;
 		case kcInstrumentEnvelopePointMoveRight:		EnvKbdMovePointRight(); return wParam;
 		case kcInstrumentEnvelopePointMoveUp:			EnvKbdMovePointUp(1); return wParam;
@@ -2303,28 +2309,37 @@ void CViewInstrument::EnvSetZoom(float fNewZoom)
 ////////////////////////////////////////
 //  Envelope Editor - Keyboard actions
 
-void CViewInstrument::EnvKbdSelectPrevPoint()
-//-------------------------------------------
+void CViewInstrument::EnvKbdSelectPoint(DragPoints point)
+//-------------------------------------------------------
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr) return;
-	if(m_nDragItem <= 1 || m_nDragItem > pEnv->nNodes)
-		m_nDragItem = pEnv->nNodes;
-	else
-		m_nDragItem--;
-	InvalidateRect(NULL, FALSE);
-}
 
-
-void CViewInstrument::EnvKbdSelectNextPoint()
-//-------------------------------------------
-{
-	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr) return;
-	if(m_nDragItem >= pEnv->nNodes)
-		m_nDragItem = 1;
-	else
-		m_nDragItem++;
+	switch(point)
+	{
+	case ENV_DRAGLOOPSTART:
+	case ENV_DRAGLOOPEND:
+		if(!pEnv->dwFlags[ENV_LOOP]) return;
+		m_nDragItem = point;
+		break;
+	case ENV_DRAGSUSTAINSTART:
+	case ENV_DRAGSUSTAINEND:
+		if(!pEnv->dwFlags[ENV_SUSTAIN]) return;
+		m_nDragItem = point;
+		break;
+	case ENV_DRAGPREVIOUS:
+		if(m_nDragItem <= 1 || m_nDragItem > pEnv->nNodes)
+			m_nDragItem = pEnv->nNodes;
+		else
+			m_nDragItem--;
+		break;
+	case ENV_DRAGNEXT:
+		if(m_nDragItem >= pEnv->nNodes)
+			m_nDragItem = 1;
+		else
+			m_nDragItem++;
+		break;
+	}
 	InvalidateRect(NULL, FALSE);
 }
 
