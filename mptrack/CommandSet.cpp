@@ -691,6 +691,10 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleSlice, 1953, _T("Slice at cue points"));
 	DefineKeyCommand(kcInstrumentEnvelopeScale, 1954, _T("Scale Envelope Points"));
 	DefineKeyCommand(kcInsNoteMapRemove, 1955, _T("Remove All Samples"));
+	DefineKeyCommand(kcInstrumentEnvelopeSelectLoopStart, 1956, _T("Select Envelope Loop Start"));
+	DefineKeyCommand(kcInstrumentEnvelopeSelectLoopEnd, 1957, _T("Select Envelope Loop End"));
+	DefineKeyCommand(kcInstrumentEnvelopeSelectSustainStart, 1958, _T("Select Envelope Sustain Start"));
+	DefineKeyCommand(kcInstrumentEnvelopeSelectSustainEnd, 1959, _T("Select Envelope Sustain End"));
 
 	// Add new key commands here.
 

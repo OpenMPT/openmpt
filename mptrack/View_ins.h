@@ -20,6 +20,16 @@ OPENMPT_NAMESPACE_BEGIN
 // Non-Client toolbar buttons
 #define ENV_LEFTBAR_BUTTONS		22
 
+enum DragPoints
+{
+	ENV_DRAGLOOPSTART		= (MAX_ENVPOINTS + 1),
+	ENV_DRAGLOOPEND			= (MAX_ENVPOINTS + 2),
+	ENV_DRAGSUSTAINSTART	= (MAX_ENVPOINTS + 3),
+	ENV_DRAGSUSTAINEND		= (MAX_ENVPOINTS + 4),
+	ENV_DRAGPREVIOUS		= (MAX_ENVPOINTS + 5),
+	ENV_DRAGNEXT			= (MAX_ENVPOINTS + 6),
+};
+
 //==========================================
 class CViewInstrument: public CModScrollView
 //==========================================
@@ -115,8 +125,7 @@ protected:
 	bool EnvSetFilterEnv(bool bEnable);
 
 	// Keyboard envelope control
-	void EnvKbdSelectPrevPoint();
-	void EnvKbdSelectNextPoint();
+	void EnvKbdSelectPoint(DragPoints point);
 	void EnvKbdMovePointLeft();
 	void EnvKbdMovePointRight();
 	void EnvKbdMovePointUp(BYTE stepsize = 1);
