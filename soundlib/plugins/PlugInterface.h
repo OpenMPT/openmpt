@@ -65,14 +65,14 @@ protected:
 public:
 	// Non-virtual part of the interface
 	IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
-		: m_pPrev(nullptr)
-		, m_pNext(nullptr)
+		: m_pNext(nullptr)
+		, m_pPrev(nullptr)
 		, m_Factory(factory)
 		, m_SndFile(sndFile)
-#ifdef MODPLUG_TRACKER
 		, m_pMixStruct(mixStruct)
-#endif // MODPLUG_TRACKER
+#ifdef MODPLUG_TRACKER
 		, m_pEditor(nullptr)
+#endif // MODPLUG_TRACKER
 		, m_nSlot(0)
 		, m_bRecordAutomation(false)
 		, m_bPassKeypressesToPlug(false)
