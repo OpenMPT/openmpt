@@ -37,7 +37,7 @@ void COwnerVstEditor::OnPaint()
 //-----------------------------
 {
 	CAbstractVstEditor::OnPaint();
-	if(m_VstPlugin.isBridged)
+	if(static_cast<CVstPlugin &>(m_VstPlugin).isBridged)
 	{
 		// Instantly redraw bridged plugins so that we don't have to wait for their periodic refresh.
 		// This usually makes the timer used in the bridge unnecessary, but not always.
@@ -66,10 +66,11 @@ bool COwnerVstEditor::OpenEditor(CWnd *parent)
 	ERect rect;
 	MemsetZero(rect);
 	ERect *pRect = nullptr;
-	m_VstPlugin.Dispatch(effEditGetRect, 0, 0, &pRect, 0);
+	CVstPlugin &vstPlug = static_cast<CVstPlugin &>(m_VstPlugin);
+	vstPlug.Dispatch(effEditGetRect, 0, 0, &pRect, 0);
 	if(pRect) rect = *pRect;
-	m_VstPlugin.Dispatch(effEditOpen, 0, 0, m_plugWindow.m_hWnd, 0);
-	m_VstPlugin.Dispatch(effEditGetRect, 0, 0, &pRect, 0);
+	vstPlug.Dispatch(effEditOpen, 0, 0, m_plugWindow.m_hWnd, 0);
+	vstPlug.Dispatch(effEditGetRect, 0, 0, &pRect, 0);
 	if(pRect) rect = *pRect;
 	if(rect.right > rect.left && rect.bottom > rect.top)
 	{
@@ -80,11 +81,11 @@ bool COwnerVstEditor::OpenEditor(CWnd *parent)
 	RestoreWindowPos();
 	SetTitle();
 
-	m_VstPlugin.Dispatch(effEditTop, 0,0, NULL, 0);
-	m_VstPlugin.Dispatch(effEditIdle, 0,0, NULL, 0);
+	vstPlug.Dispatch(effEditTop, 0,0, NULL, 0);
+	vstPlug.Dispatch(effEditIdle, 0,0, NULL, 0);
 
 	// Set knob mode to linear (2) instead of circular (0) for those plugins that support it (e.g. Steinberg VB-1)
-	m_VstPlugin.Dispatch(effSetEditKnobMode, 0, 2, nullptr, 0.0f);
+	vstPlug.Dispatch(effSetEditKnobMode, 0, 2, nullptr, 0.0f);
 
 	ShowWindow(SW_SHOW);
 	return TRUE;
@@ -118,7 +119,7 @@ void COwnerVstEditor::DoClose()
 	ShowWindow(SW_HIDE);
 	if(m_isMinimized) OnNcLButtonDblClk(HTCAPTION, CPoint(0, 0));
 	StoreWindowPos();
-	m_VstPlugin.Dispatch(effEditClose, 0, 0, NULL, 0);
+	static_cast<CVstPlugin &>(m_VstPlugin).Dispatch(effEditClose, 0, 0, NULL, 0);
 	DestroyWindow();
 }
 

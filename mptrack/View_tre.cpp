@@ -849,7 +849,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 
 				wsprintf(s, "FX%u: %s", i + 1, plugin.GetName());
 				int nImage = IMAGE_NOPLUGIN;
-				if(plugin.pMixPlugin != nullptr) nImage = (plugin.pMixPlugin->isInstrument()) ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN;
+				if(plugin.pMixPlugin != nullptr) nImage = (plugin.pMixPlugin->IsInstrument()) ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN;
 				
 				if(hItem)
 				{
@@ -3131,10 +3131,10 @@ void CModTree::OnMuteTreeItem()
 			UpdateView(*info, InstrumentHint((INSTRUMENTINDEX)modItemID).Info().Names());
 		} else if ((modItem.type == MODITEM_EFFECT))
 		{
-			CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(modDoc.GetrSoundFile().m_MixPlugins[modItemID].pMixPlugin);
-			if(pVstPlugin == nullptr)
+			IMixPlugin *pPlugin = modDoc.GetrSoundFile().m_MixPlugins[modItemID].pMixPlugin;
+			if(pPlugin == nullptr)
 				return;
-			pVstPlugin->ToggleBypass();
+			pPlugin->ToggleBypass();
 			modDoc.SetModified();
 			//UpdateView(GetDocumentIDFromModDoc(pModDoc), HINT_MIXPLUGINS);
 		}

@@ -15,7 +15,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 class FileReader;
-class CVstPlugin;
+class IMixPlugin;
 
 class VSTPresets
 {
@@ -30,16 +30,16 @@ public:
 	};
 
 #ifndef NO_VST
-	static ErrorCode LoadFile(FileReader &file, CVstPlugin &plugin);
-	static bool SaveFile(std::ostream &, CVstPlugin &plugin, bool bank);
+	static ErrorCode LoadFile(FileReader &file, IMixPlugin &plugin);
+	static bool SaveFile(std::ostream &, IMixPlugin &plugin, bool bank);
 	static const char *GetErrorMessage(ErrorCode code);
 
 protected:
-	static void SaveProgram(std::ostream &f, CVstPlugin &plugin);
+	static void SaveProgram(std::ostream &f, IMixPlugin &plugin);
 
 #else
-	static ErrorCode LoadFile(FileReader &, CVstPlugin &) { return invalidFile; }
-	static bool SaveFile(std::ostream &, CVstPlugin &, bool) { return false; }
+	static ErrorCode LoadFile(FileReader &, IMixPlugin &) { return invalidFile; }
+	static bool SaveFile(std::ostream &, IMixPlugin &, bool) { return false; }
 	static const char *GetErrorMessage(ErrorCode) { return "OpenMPT has been built without VST support"; }
 #endif // NO_VST
 };

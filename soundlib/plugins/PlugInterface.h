@@ -10,15 +10,6 @@
 
 #pragma once
 
-// For VstInt32 and stuff - a stupid workaround.
-#ifndef NO_VST
-#define VST_FORCE_DEPRECATED 0
-#include <pluginterfaces/vst2.x/aeffect.h>			// VST
-#else
-typedef OPENMPT_NAMESPACE::int32 VstInt32;
-typedef intptr_t VstIntPtr;
-#endif
-
 #include "../../soundlib/Snd_defs.h"
 #include "../../common/misc_util.h"
 #include "../../soundlib/MIDIEvents.h"
@@ -30,19 +21,94 @@ OPENMPT_NAMESPACE_BEGIN
 ////////////////////////////////////////////////////////////////////
 // Mix Plugins
 
-typedef VstInt32 PlugParamIndex;
+typedef int32 PlugParamIndex;
 typedef float PlugParamValue;
+
+struct VSTPluginLib;
+struct SNDMIXPLUGIN;
+class CSoundFile;
+class CModDoc;
+class CAbstractVstEditor;
 
 //==============
 class IMixPlugin
 //==============
 {
+	friend class CAbstractVstEditor;
+
 protected:
-	virtual ~IMixPlugin() {}
+	IMixPlugin *m_pNext, *m_pPrev;
+	VSTPluginLib &m_Factory;
+	CSoundFile &m_SndFile;
+	SNDMIXPLUGIN *m_pMixStruct;
+#ifdef MODPLUG_TRACKER
+	CAbstractVstEditor *m_pEditor;
+#endif // MODPLUG_TRACKER
+	PLUGINDEX m_nSlot;
+
 public:
+	bool m_bRecordAutomation : 1;
+	bool m_bPassKeypressesToPlug : 1;
+	bool m_bRecordMIDIOut : 1;
+
+protected:
+	virtual ~IMixPlugin()
+	{
+		if (m_pNext) m_pNext->m_pPrev = m_pPrev;
+		if (m_pPrev) m_pPrev->m_pNext = m_pNext;
+		m_pPrev = nullptr;
+		m_pNext = nullptr;
+	}
+
+	void InsertIntoFactoryList();
+
+public:
+	// Non-virtual part of the interface
+	IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
+		: m_pPrev(nullptr)
+		, m_pNext(nullptr)
+		, m_Factory(factory)
+		, m_SndFile(sndFile)
+#ifdef MODPLUG_TRACKER
+		, m_pMixStruct(mixStruct)
+#endif // MODPLUG_TRACKER
+		, m_pEditor(nullptr)
+		, m_nSlot(0)
+		, m_bRecordAutomation(false)
+		, m_bPassKeypressesToPlug(false)
+		, m_bRecordMIDIOut(false)
+	{ }
+
+	inline CSoundFile &GetSoundFile() { return m_SndFile; }
+	inline const CSoundFile &GetSoundFile() const { return m_SndFile; }
+
+#ifdef MODPLUG_TRACKER
+	inline CModDoc *GetModDoc();
+	inline const CModDoc *GetModDoc() const;
+
+	CAbstractVstEditor *GetEditor() { return m_pEditor; }
+	const CAbstractVstEditor *GetEditor() const { return m_pEditor; }
+#endif // MODPLUG_TRACKER
+
+	inline VSTPluginLib &GetPluginFactory() const { return m_Factory; }
+	inline IMixPlugin *GetNextInstance() const { return m_pNext; }
+
+	PLUGINDEX FindSlot() const;
+	inline void SetSlot(PLUGINDEX slot) { m_nSlot = slot; }
+	inline PLUGINDEX GetSlot() const { return m_nSlot; }
+
+	inline void UpdateMixStructPtr(SNDMIXPLUGIN *p) { m_pMixStruct = p; }
+
 	virtual void Release() = 0;
+	virtual int32 GetUID() const = 0;
+	virtual int32 GetVersion() const = 0;
+	virtual void Idle() = 0;
+	virtual int32 GetNumPrograms() = 0;
+	virtual int32 GetCurrentProgram() = 0;
+	virtual void SetCurrentProgram(int32 nIndex) = 0;
+	virtual PlugParamIndex GetNumParameters() = 0;
 	virtual void SaveAllParameters() = 0;
-	virtual void RestoreAllParameters(long nProg=-1) = 0; //rewbs.plugDefaultProgram: added param
+	virtual void RestoreAllParameters(long nProg=-1) = 0;
 	virtual void Process(float *pOutL, float *pOutR, size_t nSamples) = 0;
 	virtual float RenderSilence(size_t numSamples) = 0;
 	virtual bool MidiSend(uint32 dwMidiCode) = 0;
@@ -51,34 +117,69 @@ public:
 	virtual void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd) = 0;
 	virtual void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd) = 0;
 	virtual void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel) = 0;
-	virtual void HardAllNotesOff() = 0;		//rewbs.VSTCompliance
+	virtual void HardAllNotesOff() = 0;
 	virtual void RecalculateGain() = 0;
-	virtual bool isPlaying(UINT note, UINT midiChn, UINT trackerChn) = 0; //rewbs.VSTiNNA
-	virtual PlugParamIndex GetNumParameters() = 0;
+	virtual bool IsPlaying(uint32 note, uint32 midiChn, uint32 trackerChn) = 0;
 	virtual void SetParameter(PlugParamIndex paramindex, PlugParamValue paramvalue) = 0;
-	virtual void SetZxxParameter(UINT nParam, UINT nValue) = 0;
+	virtual void SetZxxParameter(PlugParamIndex nParam, uint32 nValue) = 0;
 	virtual PlugParamValue GetParameter(PlugParamIndex nIndex) = 0;
-	virtual UINT GetZxxParameter(UINT nParam) = 0; //rewbs.smoothVST
+	virtual uint32 GetZxxParameter(PlugParamIndex nParam) = 0;
 	virtual void ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff);
 	virtual void AutomateParameter(PlugParamIndex param) = 0;
-	virtual VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt) =0; //rewbs.VSTCompliance
-	virtual void NotifySongPlaying(bool) = 0;	//rewbs.VSTCompliance
+	virtual void NotifySongPlaying(bool) = 0;
 	virtual bool IsSongPlaying() const = 0;
-	virtual bool IsResumed() = 0;
+	virtual bool IsResumed() const = 0;
 	virtual void Resume() = 0;
 	virtual void Suspend() = 0;
 	virtual void Bypass(bool = true) = 0;
 	virtual bool IsBypassed() const = 0;
 	bool ToggleBypass() { Bypass(!IsBypassed()); return IsBypassed(); };
-	virtual bool isInstrument() = 0;
+	virtual bool IsInstrument() const = 0;
 	virtual bool CanRecieveMidiEvents() = 0;
-	virtual void SetDryRatio(UINT param) = 0;
+	virtual void SetDryRatio(uint32 param) = 0;
 	virtual bool ShouldProcessSilence() = 0;
 	virtual void ResetSilence() = 0;
+
+	size_t GetOutputPlugList(std::vector<IMixPlugin *> &list);
+	size_t GetInputPlugList(std::vector<IMixPlugin *> &list);
+	size_t GetInputInstrumentList(std::vector<INSTRUMENTINDEX> &list);
+	size_t GetInputChannelList(std::vector<CHANNELINDEX> &list);
+
+#ifdef MODPLUG_TRACKER
+	virtual bool SaveProgram() = 0;
+	virtual bool LoadProgram(mpt::PathString fileName = mpt::PathString()) = 0;
+
+	virtual CString GetDefaultEffectName() = 0;
+
+	virtual void CacheProgramNames(int32 firstProg, int32 lastProg) = 0;
+	virtual void CacheParameterNames(int32 firstParam, int32 lastParam) = 0;
+
+	virtual CString GetParamName(PlugParamIndex param) = 0;
+	virtual CString GetParamLabel(PlugParamIndex param) = 0;
+	virtual CString GetParamDisplay(PlugParamIndex param) = 0;
+	CString GetFormattedParamName(PlugParamIndex param);
+	CString GetFormattedParamValue(PlugParamIndex param);
+	virtual CString GetCurrentProgramName() = 0;
+	virtual void SetCurrentProgramName(const CString &name) = 0;
+	virtual CString GetProgramName(int32 program) = 0;
+	CString GetFormattedProgramName(int32 index);
+
+	virtual bool HasEditor() const = 0;
+	virtual void ToggleEditor() = 0;
+
+	virtual void BeginSetProgram(int32 program = -1) = 0;
+	virtual void EndSetProgram() = 0;
+#endif
+
 	virtual void SetEditorPos(int32 x, int32 y) = 0;
 	virtual void GetEditorPos(int32 &x, int32 &y) const = 0;
+
 	virtual int GetNumInputChannels() const = 0;
 	virtual int GetNumOutputChannels() const = 0;
+
+	virtual bool ProgramsAreChunks() const = 0;
+	virtual size_t GetChunk(char *(&chunk), bool isBank) = 0;
+	virtual void SetChunk(size_t size, char *chunk, bool isBank) = 0;
 };
 
 
@@ -135,8 +236,8 @@ struct PACKED SNDMIXPLUGININFO
 		irAutoSuspend	= 0x10,		// Plugin will automatically suspend on silence
 	};
 
-	VstInt32 dwPluginId1;			// Plugin type (kEffectMagic, kDmoMagic, kBuzzMagic)
-	VstInt32 dwPluginId2;			// Plugin unique ID
+	int32 dwPluginId1;				// Plugin type (kEffectMagic, kDmoMagic, kBuzzMagic)
+	int32 dwPluginId2;				// Plugin unique ID
 	uint8 routingFlags;				// See RoutingFlags
 	uint8 mixMode;
 	uint8 gain;						// Divide by 10 to get real gain
@@ -174,11 +275,11 @@ struct SNDMIXPLUGIN
 {
 	IMixPlugin *pMixPlugin;
 	SNDMIXPLUGINSTATE *pMixState;
-	uint32 nPluginDataSize;
 	char *pPluginData;
+	uint32 nPluginDataSize;
 	SNDMIXPLUGININFO Info;
 	float fDryRatio;
-	VstInt32 defaultProgram;
+	int32 defaultProgram;
 	int32 editorX, editorY;
 
 	const char *GetName() const

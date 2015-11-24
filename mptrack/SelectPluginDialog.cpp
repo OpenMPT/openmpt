@@ -126,8 +126,8 @@ void CSelectPluginDlg::OnOK()
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	VSTPluginLib *pNewPlug = GetSelectedPlugin();
 	VSTPluginLib *pFactory = nullptr;
-	CVstPlugin *pCurrentPlugin = nullptr;
-	if (m_pPlugin) pCurrentPlugin = dynamic_cast<CVstPlugin *>(m_pPlugin->pMixPlugin);
+	IMixPlugin *pCurrentPlugin = nullptr;
+	if (m_pPlugin) pCurrentPlugin = m_pPlugin->pMixPlugin;
 	if ((pManager) && (pManager->IsValidPlugin(pNewPlug))) pFactory = pNewPlug;
 
 	if (pFactory)
@@ -165,15 +165,14 @@ void CSelectPluginDlg::OnOK()
 				pManager->CreateMixPlugin(*m_pPlugin, m_pModDoc->GetrSoundFile());
 				if (m_pPlugin->pMixPlugin)
 				{
-					CHAR s[128];
-					CVstPlugin *p = (CVstPlugin *)m_pPlugin->pMixPlugin;
-					s[0] = 0;
-					if ((p->GetDefaultEffectName(s)) && (s[0]))
+					IMixPlugin *p = m_pPlugin->pMixPlugin;
+					const CString name = p->GetDefaultEffectName();
+					if(!name.IsEmpty())
 					{
-						mpt::String::Copy(m_pPlugin->Info.szName, s);
+						mpt::String::Copy(m_pPlugin->Info.szName, name.GetString());
 					}
 					// Check if plugin slot is already assigned to any instrument, and if not, create one.
-					if(p->isInstrument())
+					if(p->IsInstrument())
 					{
 						const CSoundFile &sndFile = m_pModDoc->GetrSoundFile();
 						INSTRUMENTINDEX instr = 0;
@@ -297,8 +296,8 @@ void CSelectPluginDlg::OnNameFilterChanged()
 }
 
 
-void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
-//---------------------------------------------------------------------
+void CSelectPluginDlg::UpdatePluginsList(int32 forceSelect /* = 0*/)
+//------------------------------------------------------------------
 {
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 
@@ -409,8 +408,8 @@ void CSelectPluginDlg::UpdatePluginsList(VstInt32 forceSelect /* = 0*/)
 				if(m_pPlugin->pMixPlugin)
 				{
 					//Current slot's plugin
-					CVstPlugin *pVstPlug = (CVstPlugin *)m_pPlugin->pMixPlugin;
-					if (&pVstPlug->GetPluginFactory() == &plug)
+					IMixPlugin *pPlugin = m_pPlugin->pMixPlugin;
+					if (&pPlugin->GetPluginFactory() == &plug)
 					{
 						currentPlug = h;
 					}
@@ -538,8 +537,8 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 	// TODO: Keep these lists up-to-date.
 	static const struct
 	{
-		VstInt32 id1;
-		VstInt32 id2;
+		int32 id1;
+		int32 id2;
 		char *name;
 		char *problem;
 	} problemPlugs[] =
@@ -553,8 +552,8 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 	// Plugins that should always be bridged.
 	static const struct
 	{
-		VstInt32 id1;
-		VstInt32 id2;
+		int32 id1;
+		int32 id2;
 		bool useBridge;
 		bool shareInstance;
 	} bridgedPlugs[] =

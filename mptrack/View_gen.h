@@ -71,11 +71,7 @@ public:
 	LRESULT OnMidiMsg(WPARAM midiData, LPARAM);
 	virtual HBRUSH OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor);
 
-	// -> CODE#0015
-// -> DESC="channels management dlg"
 	virtual void OnDraw(CDC* pDC);
-// -! NEW_FEATURE#0015
-	//}}AFX_VIRTUAL
 
 private:
 	void OnMute(const CHANNELINDEX chnMod4, const UINT itemID);
@@ -85,9 +81,9 @@ private:
 	void OnEditName(const CHANNELINDEX chnMod4, const UINT itemID);
 	void OnFxChanged(const CHANNELINDEX chnMod4);
 
-	CVstPlugin *GetCurrentPlugin() const;
+	IMixPlugin *GetCurrentPlugin() const;
 
-	void FillPluginProgramBox(VstInt32 firstProg, VstInt32 lastProg);
+	void FillPluginProgramBox(int32 firstProg, int32 lastProg);
 	void SetPluginModified();
 
 protected:

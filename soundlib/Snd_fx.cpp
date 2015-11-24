@@ -1999,7 +1999,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool 
 				{
 					note = pChn->pModInstrument->NoteMap[note - 1];
 				}
-				applyNNAtoPlug = pPlugin->isPlaying(note, GetBestMidiChannel(nChn), nChn);
+				applyNNAtoPlug = pPlugin->IsPlaying(note, GetBestMidiChannel(nChn), nChn);
 			}
 		}
 	}

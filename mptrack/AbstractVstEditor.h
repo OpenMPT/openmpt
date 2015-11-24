@@ -17,7 +17,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-class CVstPlugin;
+class IMixPlugin;
 
 class CAbstractVstEditor: public CDialog
 {
@@ -38,10 +38,10 @@ protected:
 	bool m_updateDisplay : 1;
 
 public:
-	CVstPlugin &m_VstPlugin;
+	IMixPlugin &m_VstPlugin;
 	int m_nCurProg;
 
-	CAbstractVstEditor(CVstPlugin &plugin);
+	CAbstractVstEditor(IMixPlugin &plugin);
 	virtual ~CAbstractVstEditor();
 	void SetupMenu(bool force = false);
 	void SetTitle();
@@ -110,7 +110,6 @@ protected:
 	void RestoreWindowPos();
 
 };
-//end rewbs.defaultPlugGUI
 
 OPENMPT_NAMESPACE_END
 
