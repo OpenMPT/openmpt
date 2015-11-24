@@ -55,7 +55,7 @@ STATIC_ASSERT(sizeof(ChunkHeader) == 24);
 #pragma pack(pop)
 #endif
 
-VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
+VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, IMixPlugin &plugin)
 //------------------------------------------------------------------------------
 {
 	const bool firstChunk = file.GetPosition() == 0;
@@ -68,24 +68,28 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 	{
 		return wrongPlugin;
 	}
+	CVstPlugin *vstPlug = dynamic_cast<CVstPlugin *>(&plugin);
 
 	if(header.fxMagic == fMagic || header.fxMagic == chunkPresetMagic)
 	{
 		// Program
 		PlugParamIndex numParams = file.ReadUint32BE();
 
-		VstPatchChunkInfo info;
-		info.version = 1;
-		info.pluginUniqueID = header.fxID;
-		info.pluginVersion = header.fxVersion;
-		info.numElements = numParams;
-		MemsetZero(info.future);
-		plugin.Dispatch(effBeginLoadProgram, 0, 0, &info, 0.0f);
-		plugin.Dispatch(effBeginSetProgram, 0, 0, nullptr, 0.0f);
+		if(vstPlug != nullptr)
+		{
+			VstPatchChunkInfo info;
+			info.version = 1;
+			info.pluginUniqueID = header.fxID;
+			info.pluginVersion = header.fxVersion;
+			info.numElements = numParams;
+			MemsetZero(info.future);
+			vstPlug->Dispatch(effBeginLoadProgram, 0, 0, &info, 0.0f);
+		}
+		plugin.BeginSetProgram();
 
 		char prgName[28];
 		file.ReadString<mpt::String::maybeNullTerminated>(prgName, 28);
-		plugin.Dispatch(effSetProgramName, 0, 0, prgName, 0.0f);
+		plugin.SetCurrentProgramName(prgName);
 
 		if(header.fxMagic == fMagic)
 		{
@@ -106,14 +110,14 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 			if(chunkData)
 			{
 				file.ReadRaw(chunkData, chunkSize);
-				plugin.Dispatch(effSetChunk, 1, chunkSize, chunkData, 0);
+				plugin.SetChunk(chunkSize, chunkData, false);
 				delete[] chunkData;
 			} else
 			{
 				return outOfMemory;
 			}
 		}
-		plugin.Dispatch(effEndSetProgram, 0, 0, nullptr, 0.0f);
+		plugin.EndSetProgram();
 	} else if((header.fxMagic == bankMagic || header.fxMagic == chunkBankMagic) && firstChunk)
 	{
 		// Bank - only read if it's the first chunk in the file, not if it's a sub chunk.
@@ -121,27 +125,29 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 		uint32 currentProgram = file.ReadUint32BE();
 		file.Skip(124);
 
-		VstPatchChunkInfo info;
-		info.version = 1;
-		info.pluginUniqueID = header.fxID;
-		info.pluginVersion = header.fxVersion;
-		info.numElements = numProgs;
-		MemsetZero(info.future);
-		plugin.Dispatch(effBeginLoadBank, 0, 0, &info, 0.0f);
+		if(vstPlug != nullptr)
+		{
+			VstPatchChunkInfo info;
+			info.version = 1;
+			info.pluginUniqueID = header.fxID;
+			info.pluginVersion = header.fxVersion;
+			info.numElements = numProgs;
+			MemsetZero(info.future);
+			vstPlug->Dispatch(effBeginLoadBank, 0, 0, &info, 0.0f);
+		}
 
 		if(header.fxMagic == bankMagic)
 		{
 			VstInt32 oldCurrentProgram = plugin.GetCurrentProgram();
 			for(uint32 p = 0; p < numProgs; p++)
 			{
-				plugin.Dispatch(effBeginSetProgram, 0, 0, nullptr, 0.0f);
-				plugin.Dispatch(effSetProgram, 0, p, nullptr, 0.0f);
+				plugin.BeginSetProgram(p);
 				ErrorCode retVal = LoadFile(file, plugin);
 				if(retVal != noError)
 				{
 					return retVal;
 				}
-				plugin.Dispatch(effEndSetProgram, 0, 0, nullptr, 0.0f);
+				plugin.EndSetProgram();
 			}
 			plugin.SetCurrentProgram(oldCurrentProgram);
 		} else
@@ -153,7 +159,7 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 			if(chunkData)
 			{
 				file.ReadRaw(chunkData, chunkSize);
-				plugin.Dispatch(effSetChunk, 0, chunkSize, chunkData, 0);
+				plugin.SetChunk(chunkSize, chunkData, true);
 				delete[] chunkData;
 			} else
 			{
@@ -170,7 +176,7 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, CVstPlugin &plugin)
 }
 
 
-bool VSTPresets::SaveFile(std::ostream &f, CVstPlugin &plugin, bool bank)
+bool VSTPresets::SaveFile(std::ostream &f, IMixPlugin &plugin, bool bank)
 //-----------------------------------------------------------------------
 {
 	if(!bank)
@@ -199,7 +205,7 @@ bool VSTPresets::SaveFile(std::ostream &f, CVstPlugin &plugin, bool bank)
 		if(writeChunk)
 		{
 			char *chunk = nullptr;
-			uint32 chunkSize = mpt::saturate_cast<uint32>(plugin.Dispatch(effGetChunk, 0, 0, &chunk, 0));
+			uint32 chunkSize = mpt::saturate_cast<uint32>(plugin.GetChunk(chunk, true));
 			if(chunkSize && chunk)
 			{
 				mpt::IO::WriteIntBE(f, chunkSize);
@@ -232,7 +238,7 @@ bool VSTPresets::SaveFile(std::ostream &f, CVstPlugin &plugin, bool bank)
 }
 
 
-void VSTPresets::SaveProgram(std::ostream &f, CVstPlugin &plugin)
+void VSTPresets::SaveProgram(std::ostream &f, IMixPlugin &plugin)
 //---------------------------------------------------------------
 {
 	bool writeChunk = plugin.ProgramsAreChunks();
@@ -250,14 +256,14 @@ void VSTPresets::SaveProgram(std::ostream &f, CVstPlugin &plugin)
 	const uint32 numParams = plugin.GetNumParameters();
 	mpt::IO::WriteIntBE(f, numParams);
 
-	char name[MAX(kVstMaxProgNameLen + 1, 256)];
-	plugin.Dispatch(effGetProgramName, 0, 0, name, 0);
+	char name[28];
+	mpt::String::Write<mpt::String::maybeNullTerminated>(name, mpt::ToCharset(mpt::CharsetLocale, plugin.GetCurrentProgramName()));
 	mpt::IO::WriteRaw(f, name, 28);
 
 	if(writeChunk)
 	{
 		char *chunk = nullptr;
-		uint32 chunkSize = mpt::saturate_cast<uint32>(plugin.Dispatch(effGetChunk, 1, 0, &chunk, 0));
+		uint32 chunkSize = mpt::saturate_cast<uint32>(plugin.GetChunk(chunk, false));
 		if(chunkSize && chunk)
 		{
 			mpt::IO::WriteIntBE(f, chunkSize);

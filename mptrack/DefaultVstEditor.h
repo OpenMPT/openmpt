@@ -68,7 +68,7 @@ protected:
 
 public:
 
-	CDefaultVstEditor(CVstPlugin &plugin);
+	CDefaultVstEditor(IMixPlugin &plugin);
 	virtual ~CDefaultVstEditor();
 
 	virtual void UpdateParamDisplays() { CAbstractVstEditor::UpdateParamDisplays(); UpdateControls(false); };

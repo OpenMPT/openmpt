@@ -2198,7 +2198,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 				{
 					GetDlgItem(IDC_INSVIEWPLG)->EnableWindow(true);
 
-					if(active && plugin.pMixPlugin->isInstrument())
+					if(active && plugin.pMixPlugin->IsInstrument())
 					{
 						if(pIns->nMidiChannel == MidiNoChannel)
 						{

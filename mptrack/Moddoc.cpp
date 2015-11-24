@@ -1344,7 +1344,7 @@ bool CModDoc::UpdateChannelMuteStatus(CHANNELINDEX nChn)
 		PLUGINDEX nPlug = m_SndFile.GetBestPlugin(nChn, PrioritiseInstrument, EvenIfMuted);
 		if ((nPlug) && (nPlug<=MAX_MIXPLUGINS))
 		{
-			CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug - 1].pMixPlugin;
+			IMixPlugin *pPlug = m_SndFile.m_MixPlugins[nPlug - 1].pMixPlugin;
 			const ModInstrument* pIns = m_SndFile.m_PlayState.Chn[nChn].pModInstrument;
 			if (pPlug && pIns)
 			{
@@ -2752,11 +2752,10 @@ void CModDoc::TogglePluginEditor(UINT m_nCurrentPlugin)
 {
 	if(m_nCurrentPlugin < MAX_MIXPLUGINS)
 	{
-		SNDMIXPLUGIN &plugin = m_SndFile.m_MixPlugins[m_nCurrentPlugin];
-		CVstPlugin *pVstPlugin = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
-		if(pVstPlugin != nullptr)
+		IMixPlugin *pPlugin = m_SndFile.m_MixPlugins[m_nCurrentPlugin].pMixPlugin;
+		if(pPlugin != nullptr)
 		{
-			pVstPlugin->ToggleEditor();
+			pPlugin->ToggleEditor();
 		}
 	}
 }

@@ -235,7 +235,7 @@ CString MIDIMacroConfig::GetParameteredMacroName(size_t macroIndex, PLUGINDEX pl
 #ifndef NO_VST
 			if(plugin < MAX_MIXPLUGINS)
 			{
-				CVstPlugin *pPlug = dynamic_cast<CVstPlugin *>(sndFile.m_MixPlugins[plugin].pMixPlugin);
+				IMixPlugin *pPlug = sndFile.m_MixPlugins[plugin].pMixPlugin;
 				if(pPlug)
 				{
 					CString paramName;

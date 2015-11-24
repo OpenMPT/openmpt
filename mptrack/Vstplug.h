@@ -26,7 +26,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 class CVstPluginManager;
-class CVstPlugin;
 #ifdef MODPLUG_TRACKER
 class CModDoc;
 #endif // MODPLUG_TRACKER
@@ -58,12 +57,12 @@ public:
 	};
 
 public:
-	CVstPlugin *pPluginsList;		// Pointer to first plugin instance (this instance carries pointers to other instances)
+	IMixPlugin *pPluginsList;		// Pointer to first plugin instance (this instance carries pointers to other instances)
 	mpt::PathString libraryName;	// Display name
 	mpt::PathString dllPath;		// Full path name
 	mpt::ustring tags;				// User tags
-	VstInt32 pluginId1;				// Plugin type (kEffectMagic, kDmoMagic)
-	VstInt32 pluginId2;				// Plugin unique ID
+	int32 pluginId1;				// Plugin type (kEffectMagic, kDmoMagic)
+	int32 pluginId2;				// Plugin unique ID
 	PluginCategory category;
 	bool isInstrument : 1;
 	bool useBridge : 1, shareBridgeInstance : 1;
@@ -132,7 +131,6 @@ OPENMPT_NAMESPACE_BEGIN
 class CVstPlugin: public IMixPlugin
 //=================================
 {
-	friend class CAbstractVstEditor;
 	friend class CVstPluginManager;
 #ifndef NO_VST
 protected:
@@ -158,26 +156,21 @@ protected:
 		void ResetProgram() { currentProgram = 0; currentBank = 0; }
 	};
 
-	CVstPlugin *m_pNext, *m_pPrev;
 	HINSTANCE m_hLibrary;
-	VSTPluginLib &m_Factory;
-	SNDMIXPLUGIN *m_pMixStruct;
 	AEffect &m_Effect;
 	void (*m_pProcessFP)(AEffect*, float**, float**, VstInt32); //Function pointer to AEffect processReplacing if supported, else process.
-	CAbstractVstEditor *m_pEditor;
-	CSoundFile &m_SndFile;
 
 	uint32 m_nSampleRate;
 	SNDMIXPLUGINSTATE m_MixState;
 
 	double lastBarStartPos;
 	float m_fGain;
-	PLUGINDEX m_nSlot;
-	bool m_bSongPlaying;
-	bool m_bPlugResumed;
-	bool m_bIsVst2;
-	bool m_bIsInstrument;
-	bool isInitialized;
+	bool m_bSongPlaying : 1;
+	bool m_bPlugResumed : 1;
+	bool m_bIsVst2 : 1;
+	bool m_bIsInstrument : 1;
+	bool m_isInitialized : 1;
+	bool m_bNeedIdle : 1;
 
 	VSTInstrChannel m_MidiCh[16];						// MIDI channel state
 	PluginMixBuffer<float, MIXBUFFERSIZE> mixBuffer;	// Float buffers (input and output) for plugins
@@ -185,11 +178,7 @@ protected:
 	PluginEventQueue<vstNumProcessEvents> vstEvents;	// MIDI events that should be sent to the plugin
 
 public:
-	bool m_bNeedIdle; //rewbs.VSTCompliance
-	bool m_bRecordAutomation;
-	bool m_bPassKeypressesToPlug;
-	bool m_bRecordMIDIOut;
-	const bool isBridged;		// True if our built-in plugin bridge is being used.
+	const bool isBridged : 1;		// True if our built-in plugin bridge is being used.
 
 public:
 	CVstPlugin(HINSTANCE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixPlugin, AEffect &effect, CSoundFile &sndFile);
@@ -197,66 +186,49 @@ public:
 	void Initialize();
 
 public:
-	VSTPluginLib &GetPluginFactory() const { return m_Factory; }
-	CVstPlugin *GetNextInstance() const { return m_pNext; }
-	bool HasEditor();
-	VstInt32 GetNumPrograms();
+	void Idle();
+	bool HasEditor() const;
+	int32 GetNumPrograms();
+	int32 GetCurrentProgram();
 	PlugParamIndex GetNumParameters();
-	VstInt32 GetCurrentProgram();
 	VstInt32 GetNumProgramCategories();
-	CString GetFormattedProgramName(VstInt32 index);
 	bool LoadProgram(mpt::PathString fileName = mpt::PathString());
 	bool SaveProgram();
-	VstInt32 GetUID() const;
-	VstInt32 GetVersion() const;
+	int32 GetUID() const;
+	int32 GetVersion() const;
 	// Check if programs should be stored as chunks or parameters
 	bool ProgramsAreChunks() const { return (m_Effect.flags & effFlagsProgramChunks) != 0; }
+	size_t GetChunk(char *(&chunk), bool isBank);
+	void SetChunk(size_t size, char *chunk, bool isBank);
 	bool GetParams(float* param, VstInt32 min, VstInt32 max);
-	void RandomizeParams(int amount);
 	// If true, the plugin produces an output even if silence is being fed into it.
-	bool ShouldProcessSilence() { return isInstrument() || ((m_Effect.flags & effFlagsNoSoundInStop) == 0 && Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f) != 1); }
+	bool ShouldProcessSilence() { return IsInstrument() || ((m_Effect.flags & effFlagsNoSoundInStop) == 0 && Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f) != 1); }
 	void ResetSilence() { m_MixState.ResetSilence(); }
-#ifdef MODPLUG_TRACKER
-	CModDoc *GetModDoc();
-	const CModDoc *GetModDoc() const;
-#endif // MODPLUG_TRACKER
-	inline CSoundFile &GetSoundFile() { return m_SndFile; }
-	inline const CSoundFile &GetSoundFile() const { return m_SndFile; }
-	PLUGINDEX FindSlot();
-	void SetSlot(PLUGINDEX slot);
-	PLUGINDEX GetSlot();
-	void UpdateMixStructPtr(SNDMIXPLUGIN *);
 
 	void SetEditorPos(int32 x, int32 y) { m_pMixStruct->editorX= x; m_pMixStruct->editorY = y; }
 	void GetEditorPos(int32 &x, int32 &y) const { x = m_pMixStruct->editorX; y = m_pMixStruct->editorY; }
 
-	void SetCurrentProgram(VstInt32 nIndex);
+	void SetCurrentProgram(int32 nIndex);
 	PlugParamValue GetParameter(PlugParamIndex nIndex);
 	void SetParameter(PlugParamIndex nIndex, PlugParamValue fValue);
 
-	CString GetFormattedParamName(PlugParamIndex param);
-	CString GetFormattedParamValue(PlugParamIndex param);
-	CString GetParamName(PlugParamIndex param) { return GetParamPropertyString(param, effGetParamName); };
+	CString GetCurrentProgramName();
+	void SetCurrentProgramName(const CString &name);
+	CString GetProgramName(int32 program);
+
+	CString GetParamName(PlugParamIndex param);
 	CString GetParamLabel(PlugParamIndex param) { return GetParamPropertyString(param, effGetParamLabel); };
 	CString GetParamDisplay(PlugParamIndex param) { return GetParamPropertyString(param, effGetParamDisplay); };
 
 	VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	void ToggleEditor();
-	void GetPluginType(LPSTR pszType);
-	BOOL GetDefaultEffectName(LPSTR pszName);
-	CAbstractVstEditor *GetEditor() { return m_pEditor; }
-	const CAbstractVstEditor *GetEditor() const { return m_pEditor; }
+	CString GetDefaultEffectName();
 
 	void Bypass(bool bypass = true);
 	bool IsBypassed() const { return m_pMixStruct->IsBypassed(); };
 
-	bool isInstrument();
+	bool IsInstrument() const;
 	bool CanRecieveMidiEvents();
-
-	size_t GetOutputPlugList(std::vector<CVstPlugin *> &list);
-	size_t GetInputPlugList(std::vector<CVstPlugin *> &list);
-	size_t GetInputInstrumentList(std::vector<INSTRUMENTINDEX> &list);
-	size_t GetInputChannelList(std::vector<CHANNELINDEX> &list);
 
 	void CacheProgramNames(int32 firstProg, int32 lastProg);
 	void CacheParameterNames(int32 firstParam, int32 lastParam);
@@ -275,23 +247,26 @@ public:
 	void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd);
 	void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel);
 	void HardAllNotesOff();
-	bool isPlaying(UINT note, UINT midiChn, UINT trackerChn);
+	bool IsPlaying(uint32 note, uint32 midiChn, uint32 trackerChn);
 	void NotifySongPlaying(bool playing);
 	bool IsSongPlaying() const { return m_bSongPlaying; }
-	bool IsResumed() {return m_bPlugResumed;}
+	bool IsResumed() const { return m_bPlugResumed; }
 	void Resume();
 	void Suspend();
-	void SetDryRatio(UINT param);
+	void SetDryRatio(uint32 param);
 	void AutomateParameter(PlugParamIndex param);
 
 	// Check whether a VST parameter can be automated
 	bool CanAutomateParameter(PlugParamIndex index);
 
-	void SetZxxParameter(UINT nParam, UINT nValue);
-	UINT GetZxxParameter(UINT nParam); //rewbs.smoothVST
+	void SetZxxParameter(PlugParamIndex nParam, uint32 nValue);
+	uint32 GetZxxParameter(PlugParamIndex nParam);
 
 	int GetNumInputChannels() const { return m_Effect.numInputs; }
 	int GetNumOutputChannels() const { return m_Effect.numOutputs; }
+
+	void BeginSetProgram(int32 program);
+	void EndSetProgram();
 
 protected:
 	void MidiPitchBend(uint8 nMidiCh, int32 pitchBendPos);
@@ -301,8 +276,6 @@ protected:
 	static int16 DecodePitchBendParam(int32 position) { return static_cast<int16>(position >> vstPitchBendShift); }
 	// Apply Pitch Wheel Depth (PWD) to some MIDI pitch bend value.
 	static inline void ApplyPitchWheelDepth(int32 &value, int8 pwd);
-
-	bool GetProgramNameIndexed(VstInt32 index, VstIntPtr category, char *text);	//rewbs.VSTpresets
 
 	// Helper function for retreiving parameter name / label / display
 	CString GetParamPropertyString(VstInt32 param, VstInt32 opcode);
@@ -323,11 +296,11 @@ public:
 	PlugParamIndex GetNumParameters() { return 0; }
 	void ToggleEditor() {}
 	bool HasEditor() { return false; }
-	void GetPluginType(LPSTR) {}
 	VstInt32 GetNumPrograms() { return 0; }
 	VstInt32 GetCurrentProgram() { return 0; }
-	bool GetProgramNameIndexed(long, long, char*) { return false; }
-	CString GetFormattedProgramName(VstInt32) { return ""; }
+	CString GetCurrentProgramName() { return _T(""); }
+	void SetCurrentProgramName(const CString &) { }
+	CString GetProgramName(int32) { return _T(""); }
 	void SetParameter(PlugParamIndex, PlugParamValue) {}
 	VstInt32 GetUID() const { return 0; }
 	VstInt32 GetVersion() const { return 0; }
@@ -336,18 +309,14 @@ public:
 
 	bool CanAutomateParameter(PlugParamIndex) { return false; }
 
-	CString GetFormattedParamName(PlugParamIndex) { return ""; };
-	CString GetFormattedParamValue(PlugParamIndex){ return ""; };
-	CString GetParamName(PlugParamIndex) { return ""; };
-	CString GetParamLabel(PlugParamIndex) { return ""; };
-	CString GetParamDisplay(PlugParamIndex) { return ""; };
+	CString GetParamName(PlugParamIndex) { return _T(""); };
+	CString GetParamLabel(PlugParamIndex) { return _T(""); };
+	CString GetParamDisplay(PlugParamIndex) { return _T(""); };
 
 	PlugParamValue GetParameter(PlugParamIndex) { return 0; }
 	bool LoadProgram(mpt::PathString = mpt::PathString()) { return false; }
 	bool SaveProgram() { return false; }
 	void SetCurrentProgram(VstInt32) {}
-	void SetSlot(PLUGINDEX) {}
-	void UpdateMixStructPtr(void*) {}
 	void Bypass(bool = true) { }
 	bool IsBypassed() const { return false; }
 	bool IsSongPlaying() const { return false; }
@@ -357,6 +326,13 @@ public:
 
 	int GetNumInputChannels() const { return 0; }
 	int GetNumOutputChannels() const { return 0; }
+
+	bool ProgramsAreChunks() const { return false; };
+	size_t GetChunk(char *(&), bool) { return 0; }
+	void SetChunk(size_t, char *, bool) { }
+
+	void BeginSetProgram(int32) { }
+	void EndSetProgram() { }
 
 #endif // NO_VST
 };
@@ -400,7 +376,7 @@ public:
 
 protected:
 	VstIntPtr VstCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
-	VstIntPtr VstFileSelector(bool destructor, VstFileSelect *fileSel, const CVstPlugin *plugin);
+	VstIntPtr VstFileSelector(bool destructor, VstFileSelect *fileSel, const IMixPlugin *plugin);
 	static bool CreateMixPluginProc(SNDMIXPLUGIN &, CSoundFile &);
 	VstTimeInfo timeInfo;
 

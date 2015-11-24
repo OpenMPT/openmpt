@@ -15,6 +15,9 @@
 // For loading external samples
 #include "../common/mptPathString.h"
 #endif // MPT_EXTERNAL_SAMPLES
+#ifndef NO_VST
+#include "../mptrack/Vstplug.h"
+#endif // NO_VST
 
 OPENMPT_NAMESPACE_BEGIN
 

@@ -140,7 +140,7 @@ AEffect *BridgeWrapper::Create(const VSTPluginLib &plugin)
 	if(plugin.shareBridgeInstance)
 	{
 		// Well, then find some instance to share with!
-		CVstPlugin *vstPlug = plugin.pPluginsList;
+		CVstPlugin *vstPlug = dynamic_cast<CVstPlugin *>(plugin.pPluginsList);
 		while(vstPlug != nullptr)
 		{
 			if(vstPlug->isBridged)
@@ -148,7 +148,7 @@ AEffect *BridgeWrapper::Create(const VSTPluginLib &plugin)
 				sharedInstance = reinterpret_cast<BridgeWrapper *>(vstPlug->Dispatch(effVendorSpecific, kVendorOpenMPT, kGetWrapperPointer, nullptr, 0.0f));
 				break;
 			}
-			vstPlug = vstPlug->GetNextInstance();
+			vstPlug = dynamic_cast<CVstPlugin *>(vstPlug->GetNextInstance());
 		}
 	}
 

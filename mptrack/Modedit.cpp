@@ -629,7 +629,7 @@ PLUGINDEX CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
 void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 //-------------------------------------------------------------------------
 {
-	CVstPlugin *srcVstPlug = static_cast<CVstPlugin *>(source.pMixPlugin);
+	IMixPlugin *srcVstPlug = source.pMixPlugin;
 	target.Destroy();
 	target = source;
 	// Don't want this stuff to be accidentally erased again...
@@ -640,7 +640,7 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 #ifndef NO_VST
 	if(theApp.GetPluginManager()->CreateMixPlugin(target, GetrSoundFile()))
 	{
-		CVstPlugin *newVstPlug = static_cast<CVstPlugin *>(target.pMixPlugin);
+		IMixPlugin *newVstPlug = target.pMixPlugin;
 		newVstPlug->SetCurrentProgram(srcVstPlug->GetCurrentProgram());
 
 		mpt::ostringstream f(std::ios::out | std::ios::binary);
@@ -766,18 +766,6 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 	} else if (!pDup)
 	{
 		newsmp = m_SndFile.GetNextFreeSample(newins);
-		/*
-		for(SAMPLEINDEX k = 1; k <= m_SndFile.GetNumSamples(); k++)
-		{
-			if (!m_SndFile.IsSampleUsed(k))
-			{
-				// Sample isn't referenced by any instrument yet, so let's use it...
-				newsmp = k;
-				break;
-			}
-		}
-		if (!newsmp)
-		*/
 		if (newsmp > m_SndFile.GetNumSamples())
 		{
 			// Add a new sample

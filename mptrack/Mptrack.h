@@ -389,16 +389,15 @@ RGBQUAD rgb2quad(COLORREF c);
 void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText=NULL, BOOL bDisabled=FALSE, BOOL bPushed=FALSE, DWORD dwFlags=(DT_CENTER|DT_VCENTER));
 
 // Misc functions
-class CVstPlugin;
 UINT MsgBox(UINT nStringID, CWnd *p=NULL, LPCSTR lpszTitle=NULL, UINT n=MB_OK);
 void ErrorBox(UINT nStringID, CWnd*p=NULL);
 
 // Helper function declarations.
 struct SNDMIXPLUGIN;
-class CVstPlugin;
+class IMixPlugin;
 void AddPluginNamesToCombobox(CComboBox& CBox, const SNDMIXPLUGIN *plugarray, const bool librarynames = false);
 void AddPluginParameternamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN& plugarray);
-void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug);
+void AddPluginParameternamesToCombobox(CComboBox& CBox, IMixPlugin& plug);
 
 // Append note names in range [noteStart, noteEnd] to given combobox. Index starts from 0.
 void AppendNotesToControl(CComboBox& combobox, ModCommand::NOTE noteStart, ModCommand::NOTE noteEnd);

@@ -607,21 +607,16 @@ void CVstPluginManager::OnIdle()
 	for(const_iterator pFactory = begin(); pFactory != end(); pFactory++)
 	{
 		// Note: bridged plugins won't receive these messages and generate their own idle messages.
-		CVstPlugin *p = (**pFactory).pPluginsList;
+		IMixPlugin *p = (**pFactory).pPluginsList;
 		while (p)
 		{
 			//rewbs. VSTCompliance: A specific plug has requested indefinite periodic processing time.
-			if (p->m_bNeedIdle)
-			{
-				if (!(p->Dispatch(effIdle, 0, 0, nullptr, 0.0f)))
-					p->m_bNeedIdle=false;
-			}
+			p->Idle();
 			//We need to update all open editors
 			CAbstractVstEditor *editor = p->GetEditor();
 			if (editor && editor->m_hWnd)
 			{
 				editor->UpdateParamDisplays();
-				p->Dispatch(effEditIdle, 0, 0, nullptr, 0.0f);
 			}
 			//end rewbs. VSTCompliance:
 

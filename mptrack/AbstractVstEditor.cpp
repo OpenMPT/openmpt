@@ -66,7 +66,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_COMMAND_RANGE(ID_LEARN_MACRO_FROM_PLUGGUI, ID_LEARN_MACRO_FROM_PLUGGUI + NUM_MACROS, PrepareToLearnMacro)
 END_MESSAGE_MAP()
 
-CAbstractVstEditor::CAbstractVstEditor(CVstPlugin &plugin)
+CAbstractVstEditor::CAbstractVstEditor(IMixPlugin &plugin)
 	: m_VstPlugin(plugin)
 	, m_currentPresetMenu(0)
 	, m_nLearnMacro(-1)
@@ -265,7 +265,15 @@ void CAbstractVstEditor::OnRandomizePreset()
 	if(dlg.DoModal() == IDOK)
 	{
 		randomFactor = dlg.resultNumber;
-		m_VstPlugin.RandomizeParams(randomFactor);
+		PlugParamValue factor = PlugParamValue(randomFactor) / 100.0f;
+		PlugParamIndex numParams = m_VstPlugin.GetNumParameters();
+		for(PlugParamIndex p = 0; p < numParams; p++)
+		{
+			PlugParamValue val = m_VstPlugin.GetParameter(p);
+			val += (2.0f * PlugParamValue(rand()) / PlugParamValue(RAND_MAX) - 1.0f) * factor;
+			Limit(val, 0.0f, 1.0f);
+			m_VstPlugin.SetParameter(p, val);
+		}
 		UpdateParamDisplays();
 	}
 }
@@ -445,7 +453,8 @@ void CAbstractVstEditor::SetTitle()
 		title += mpt::ToWide(mpt::CharsetUTF8, m_VstPlugin.m_pMixStruct->GetLibraryName());
 		if(hasCustomName)
 			title += L")";
-		if(m_VstPlugin.isBridged)
+		const CVstPlugin *vstPlugin = dynamic_cast<CVstPlugin *>(&m_VstPlugin);
+		if(vstPlugin != nullptr && vstPlugin->isBridged)
 			title += mpt::String::Print(L" (%1-Bit Bridged)", m_VstPlugin.GetPluginFactory().GetDllBits());
 
 		::SetWindowTextW(m_hWnd, title.c_str());
@@ -458,8 +467,6 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 {
 	if(wParam == kcNull)
 		return NULL;
-
-//	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	switch(wParam)
 	{
@@ -513,7 +520,7 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 			// We might need to steal the focus from the plugin bridge. This is going to work
 			// as the plugin bridge will call AllowSetForegroundWindow on key messages.
 			SetForegroundWindow();
-			if(!m_VstPlugin.isInstrument() || m_VstPlugin.GetSoundFile().GetModSpecifications().instrumentsMax == 0 ||
+			if(!m_VstPlugin.IsInstrument() || m_VstPlugin.GetSoundFile().GetModSpecifications().instrumentsMax == 0 ||
 				Reporting::Confirm(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), false, false, this) == cnfNo)
 			{
 				return false;
@@ -692,7 +699,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 
 	CString name;
 
-	std::vector<CVstPlugin *> inputPlugs;
+	std::vector<IMixPlugin *> inputPlugs;
 	m_VstPlugin.GetInputPlugList(inputPlugs);
 	for(size_t nPlug=0; nPlug < inputPlugs.size(); nPlug++)
 	{
@@ -752,7 +759,7 @@ void CAbstractVstEditor::UpdateOutputMenu()
 		m_OutputMenu.CreatePopupMenu();
 	}
 
-	std::vector<CVstPlugin *> outputPlugs;
+	std::vector<IMixPlugin *> outputPlugs;
 	m_VstPlugin.GetOutputPlugList(outputPlugs);
 	CString name;
 

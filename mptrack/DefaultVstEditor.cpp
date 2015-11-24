@@ -177,7 +177,7 @@ void CDefaultVstEditor::DoDataExchange(CDataExchange* pDX)
 }
 
 
-CDefaultVstEditor::CDefaultVstEditor(CVstPlugin &plugin) : CAbstractVstEditor(plugin)
+CDefaultVstEditor::CDefaultVstEditor(IMixPlugin &plugin) : CAbstractVstEditor(plugin)
 //-----------------------------------------------------------------------------------
 {
 	m_nControlLock = 0;
@@ -463,8 +463,6 @@ void CDefaultVstEditor::DoClose()
 //-------------------------------
 {
 	StoreWindowPos();
-	m_VstPlugin.Dispatch(effEditClose, 0, 0, NULL, 0);
-
 	DestroyWindow();
 }
 

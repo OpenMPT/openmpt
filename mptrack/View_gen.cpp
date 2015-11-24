@@ -430,17 +430,17 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		CheckDlgButton(IDC_CHECK9, plugin.IsMasterEffect() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK10, plugin.IsBypassed() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK11, plugin.IsWetMix() ? BST_CHECKED : BST_UNCHECKED);
-		CVstPlugin *pVstPlugin = (plugin.pMixPlugin) ? (CVstPlugin *)plugin.pMixPlugin : nullptr;
-		m_BtnEdit.EnableWindow((pVstPlugin != nullptr && (pVstPlugin->HasEditor() || pVstPlugin->GetNumParameters())) ? TRUE : FALSE);
-		GetDlgItem(IDC_MOVEFXSLOT)->EnableWindow((pVstPlugin) ? TRUE : FALSE);
-		GetDlgItem(IDC_INSERTFXSLOT)->EnableWindow((pVstPlugin) ? TRUE : FALSE);
-		GetDlgItem(IDC_CLONEPLUG)->EnableWindow((pVstPlugin) ? TRUE : FALSE);
+		IMixPlugin *pPlugin = plugin.pMixPlugin;
+		m_BtnEdit.EnableWindow((pPlugin != nullptr && (pPlugin->HasEditor() || pPlugin->GetNumParameters())) ? TRUE : FALSE);
+		GetDlgItem(IDC_MOVEFXSLOT)->EnableWindow((pPlugin) ? TRUE : FALSE);
+		GetDlgItem(IDC_INSERTFXSLOT)->EnableWindow((pPlugin) ? TRUE : FALSE);
+		GetDlgItem(IDC_CLONEPLUG)->EnableWindow((pPlugin) ? TRUE : FALSE);
 		int n = static_cast<int>(plugin.fDryRatio * 100);
 		wsprintf(s, _T("%d%% wet, %d%% dry"), 100 - n, n);
 		SetDlgItemText(IDC_STATIC8, s);
 		m_sbDryRatio.SetPos(100 - n);
 
-		if(pVstPlugin && pVstPlugin->isInstrument())
+		if(pPlugin && pPlugin->IsInstrument())
 		{
 			m_CbnSpecialMixProcessing.EnableWindow(FALSE);
 			GetDlgItem(IDC_CHECK12)->EnableWindow(FALSE);
@@ -458,16 +458,16 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		SetDlgItemText(IDC_EDIT16, s);
 		m_SpinMixGain.SetPos(gain);
 
-		if (pVstPlugin)
+		if (pPlugin)
 		{
-			const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
+			const PlugParamIndex nParams = pPlugin->GetNumParameters();
 			m_CbnParam.SetRedraw(FALSE);
 			m_CbnParam.ResetContent();
 			if (m_nCurrentParam >= nParams) m_nCurrentParam = 0;
 
 			if(nParams)
 			{
-				m_CbnParam.SetItemData(m_CbnParam.AddString(pVstPlugin->GetFormattedParamName(m_nCurrentParam)), m_nCurrentParam);
+				m_CbnParam.SetItemData(m_CbnParam.AddString(pPlugin->GetFormattedParamName(m_nCurrentParam)), m_nCurrentParam);
 			}
 
 			m_CbnParam.SetCurSel(0);
@@ -475,7 +475,14 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			OnParamChanged();
 
 			// Input / Output type
-			pVstPlugin->GetPluginType(s);
+			int in = pPlugin->GetNumInputChannels(), out = pPlugin->GetNumOutputChannels();
+			if (in < 1) _tcscpy(s, _T("No input"));
+			else if (in == 1) _tcscpy(s, _T("Mono-In"));
+			else _tcscpy(s, _T("Stereo-In"));
+			_tcscat(s, _T(", "));
+			if (out < 1) _tcscat(s, _T("No output"));
+			else if (out == 1) _tcscat(s, _T("Mono-Out"));
+			else _tcscat(s, _T("Stereo-Out"));
 
 			// For now, only display the "current" preset.
 			// This prevents the program from hanging when switching between plugin slots or
@@ -483,7 +490,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			// Some plugins like Synth1 have so many presets that this *does* indeed make a difference,
 			// even on fairly modern CPUs. The rest of the presets are just added when the combo box
 			// gets the focus, i.e. just when they're needed.
-			VstInt32 currentProg = pVstPlugin->GetCurrentProgram();
+			VstInt32 currentProg = pPlugin->GetCurrentProgram();
 			FillPluginProgramBox(currentProg, currentProg);
 			m_CbnPreset.SetCurSel(0);
 
@@ -586,7 +593,7 @@ void CViewGlobals::PopulateChannelPlugins()
 }
 
 
-CVstPlugin *CViewGlobals::GetCurrentPlugin() const
+IMixPlugin *CViewGlobals::GetCurrentPlugin() const
 //------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -596,7 +603,7 @@ CVstPlugin *CViewGlobals::GetCurrentPlugin() const
 		return nullptr;
 	}
 
-	return dynamic_cast<CVstPlugin *>(pSndFile->m_MixPlugins[m_nCurrentPlugin].pMixPlugin);
+	return pSndFile->m_MixPlugins[m_nCurrentPlugin].pMixPlugin;
 }
 
 
@@ -769,16 +776,15 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			int n = (short int)m_sbValue.GetPos();
 			if ((n >= 0) && (n <= 100) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
 			{
-				CVstPlugin *pVstPlugin = GetCurrentPlugin();
-
-				if(pVstPlugin != nullptr)
+				IMixPlugin *pPlugin = GetCurrentPlugin();
+				if(pPlugin != nullptr)
 				{
-					const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
+					const PlugParamIndex nParams = pPlugin->GetNumParameters();
 					if(m_nCurrentParam < nParams)
 					{
 						if (nSBCode == SB_THUMBPOSITION || nSBCode == SB_THUMBTRACK || nSBCode == SB_ENDSCROLL)
 						{
-							pVstPlugin->SetParameter(m_nCurrentParam, 0.01f * n);
+							pPlugin->SetParameter(m_nCurrentParam, 0.01f * n);
 							OnParamChanged();
 							SetPluginModified();
 						}
@@ -900,10 +906,10 @@ void CViewGlobals::OnPluginNameChanged()
 				pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, PluginHint(m_nCurrentPlugin + 1).Info().Names(), this);
 
-			CVstPlugin *vstPlug = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
-			if(vstPlug != nullptr && vstPlug->GetEditor() != nullptr)
+			IMixPlugin *pPlugin = plugin.pMixPlugin;
+			if(pPlugin != nullptr && pPlugin->GetEditor() != nullptr)
 			{
-				vstPlug->GetEditor()->SetTitle();
+				pPlugin->GetEditor()->SetTitle();
 			}
 			// Update channel plugin assignments
 			PopulateChannelPlugins();
@@ -989,22 +995,22 @@ void CViewGlobals::OnParamChanged()
 {
 	int cursel = m_CbnParam.GetItemData(m_CbnParam.GetCurSel());
 
-	CVstPlugin *pVstPlugin = GetCurrentPlugin();
+	IMixPlugin *pPlugin = GetCurrentPlugin();
 
-	if(pVstPlugin != nullptr && cursel != CB_ERR)
+	if(pPlugin != nullptr && cursel != CB_ERR)
 	{
-		const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
+		const PlugParamIndex nParams = pPlugin->GetNumParameters();
 		if(cursel >= 0 && cursel < nParams) m_nCurrentParam = cursel;
 		if(m_nCurrentParam < nParams)
 		{
-			int nValue = Util::Round<int>(pVstPlugin->GetParameter(m_nCurrentParam) * 100.0f);
+			int nValue = Util::Round<int>(pPlugin->GetParameter(m_nCurrentParam) * 100.0f);
 			LockControls();
 			if(GetFocus() != GetDlgItem(IDC_EDIT14))
 			{
-				CString s = pVstPlugin->GetFormattedParamValue(m_nCurrentParam).Trim();
+				CString s = pPlugin->GetFormattedParamValue(m_nCurrentParam).Trim();
 				if(s.IsEmpty())
 				{
-					s.Format(_T("%f"), pVstPlugin->GetParameter(m_nCurrentParam));
+					s.Format(_T("%f"), pPlugin->GetParameter(m_nCurrentParam));
 				}
 				SetDlgItemText(IDC_EDIT14, s);
 			}
@@ -1054,14 +1060,13 @@ void CViewGlobals::OnProgramChanged()
 {
 	VstInt32 curProg = m_CbnPreset.GetItemData(m_CbnPreset.GetCurSel());
 
-	CVstPlugin *pVstPlugin = GetCurrentPlugin();
-
-	if(pVstPlugin != nullptr)
+	IMixPlugin *pPlugin = GetCurrentPlugin();
+	if(pPlugin != nullptr)
 	{
-		const VstInt32 numProgs = pVstPlugin->GetNumPrograms();
+		const VstInt32 numProgs = pPlugin->GetNumPrograms();
 		if(curProg <= numProgs)
 		{
-			pVstPlugin->SetCurrentProgram(curProg);
+			pPlugin->SetCurrentProgram(curProg);
 			// Update parameter display
 			OnParamChanged();
 
@@ -1074,23 +1079,24 @@ void CViewGlobals::OnProgramChanged()
 void CViewGlobals::OnLoadParam()
 //------------------------------
 {
-	CVstPlugin *pVstPlugin = GetCurrentPlugin();
-	if(pVstPlugin != nullptr && pVstPlugin->LoadProgram())
+	IMixPlugin *pPlugin = GetCurrentPlugin();
+	if(pPlugin != nullptr && pPlugin->LoadProgram())
 	{
-		VstInt32 currentProg = pVstPlugin->GetCurrentProgram();
+		VstInt32 currentProg = pPlugin->GetCurrentProgram();
 		FillPluginProgramBox(currentProg, currentProg);
 		m_CbnPreset.SetCurSel(0);
 		SetPluginModified();
 	}
 }
 
+
 void CViewGlobals::OnSaveParam()
 //------------------------------
 {
-	CVstPlugin *pVstPlugin = GetCurrentPlugin();
-	if(pVstPlugin != nullptr)
+	IMixPlugin *pPlugin = GetCurrentPlugin();
+	if(pPlugin != nullptr)
 	{
-		pVstPlugin->SaveProgram();
+		pPlugin->SaveProgram();
 	}
 }
 
@@ -1357,14 +1363,14 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 	}
 
 	// Update current plug
-	CVstPlugin *vstPlug = dynamic_cast<CVstPlugin *>(pSndFile->m_MixPlugins[dest].pMixPlugin);
-	if(vstPlug != nullptr)
+	IMixPlugin *pPlugin = pSndFile->m_MixPlugins[dest].pMixPlugin;
+	if(pPlugin != nullptr)
 	{
-		vstPlug->SetSlot(dest);
-		vstPlug->UpdateMixStructPtr(&(pSndFile->m_MixPlugins[dest]));
-		if(vstPlug->GetEditor() != nullptr)
+		pPlugin->SetSlot(dest);
+		pPlugin->UpdateMixStructPtr(&(pSndFile->m_MixPlugins[dest]));
+		if(pPlugin->GetEditor() != nullptr)
 		{
-			vstPlug->GetEditor()->SetTitle();
+			pPlugin->GetEditor()->SetTitle();
 		}
 	}
 
@@ -1543,17 +1549,17 @@ void CViewGlobals::OnFillParamCombo()
 	if(m_CbnParam.GetCount() > 1)
 		return;
 
-	CVstPlugin *pVstPlugin = GetCurrentPlugin();
-	if(pVstPlugin == nullptr) return;
+	IMixPlugin *pPlugin = GetCurrentPlugin();
+	if(pPlugin == nullptr) return;
 
-	const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
+	const PlugParamIndex nParams = pPlugin->GetNumParameters();
 	m_CbnParam.SetRedraw(FALSE);
 	m_CbnParam.ResetContent();
 
-	pVstPlugin->CacheParameterNames(0, nParams);
+	pPlugin->CacheParameterNames(0, nParams);
 	for(PlugParamIndex i = 0; i < nParams; i++)
 	{
-		m_CbnParam.SetItemData(m_CbnParam.AddString(pVstPlugin->GetFormattedParamName(i)), i);
+		m_CbnParam.SetItemData(m_CbnParam.AddString(pPlugin->GetFormattedParamName(i)), i);
 	}
 
 	if (m_nCurrentParam >= nParams) m_nCurrentParam = 0;
@@ -1571,26 +1577,26 @@ void CViewGlobals::OnFillProgramCombo()
 	if(m_CbnPreset.GetCount() > 1)
 		return;
 
-	CVstPlugin *pVstPlugin = GetCurrentPlugin();
-	if(pVstPlugin == nullptr) return;
+	IMixPlugin *pPlugin = GetCurrentPlugin();
+	if(pPlugin == nullptr) return;
 
-	FillPluginProgramBox(0, pVstPlugin->GetNumPrograms() - 1);
-	m_CbnPreset.SetCurSel(pVstPlugin->GetCurrentProgram());
+	FillPluginProgramBox(0, pPlugin->GetNumPrograms() - 1);
+	m_CbnPreset.SetCurSel(pPlugin->GetCurrentProgram());
 }
 
 
-void CViewGlobals::FillPluginProgramBox(VstInt32 firstProg, VstInt32 lastProg)
-//----------------------------------------------------------------------------
+void CViewGlobals::FillPluginProgramBox(int32 firstProg, int32 lastProg)
+//----------------------------------------------------------------------
 {
-	CVstPlugin *pVstPlugin = GetCurrentPlugin();
+	IMixPlugin *pPlugin = GetCurrentPlugin();
 
 	m_CbnPreset.SetRedraw(FALSE);
 	m_CbnPreset.ResetContent();
 
-	pVstPlugin->CacheProgramNames(firstProg, lastProg + 1);
-	for (VstInt32 i = firstProg; i <= lastProg; i++)
+	pPlugin->CacheProgramNames(firstProg, lastProg + 1);
+	for (int32 i = firstProg; i <= lastProg; i++)
 	{
-		m_CbnPreset.SetItemData(m_CbnPreset.AddString(pVstPlugin->GetFormattedProgramName(i)), i);
+		m_CbnPreset.SetItemData(m_CbnPreset.AddString(pPlugin->GetFormattedProgramName(i)), i);
 	}
 
 	m_CbnPreset.SetRedraw(TRUE);

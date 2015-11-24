@@ -38,7 +38,7 @@ public:
 	virtual bool SetSize(int contentWidth, int contentHeight);
 
 	//Overridden:
-	virtual void UpdateParamDisplays() { CAbstractVstEditor::UpdateParamDisplays(); m_VstPlugin.Dispatch(effEditIdle, 0, 0, nullptr, 0.0f); };	//we trust that the plugin GUI can update its display with a bit of idle time.
+	virtual void UpdateParamDisplays() { CAbstractVstEditor::UpdateParamDisplays(); static_cast<CVstPlugin &>(m_VstPlugin).Dispatch(effEditIdle, 0, 0, nullptr, 0.0f); };	//we trust that the plugin GUI can update its display with a bit of idle time.
 	afx_msg void OnClose();
 	bool OpenEditor(CWnd *parent);
 	void DoClose();

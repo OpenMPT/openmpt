@@ -2979,11 +2979,11 @@ void AddPluginParameternamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN& plug)
 //-------------------------------------------------------------------------
 {
 	if(plug.pMixPlugin)
-		AddPluginParameternamesToCombobox(CBox, *(CVstPlugin *)plug.pMixPlugin);
+		AddPluginParameternamesToCombobox(CBox, *plug.pMixPlugin);
 }
 
 
-void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug)
+void AddPluginParameternamesToCombobox(CComboBox& CBox, IMixPlugin& plug)
 //-----------------------------------------------------------------------
 {
 	const PlugParamIndex nParams = plug.GetNumParameters();
