@@ -839,6 +839,7 @@ bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar: bin/dist.mk bin/svn_vers
 	svn export ./libopenmpt      bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/libopenmpt
 	svn export ./examples        bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/examples
 	svn export ./openmpt123      bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123
+	svn export ./contrib         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/contrib
 	svn export ./include/miniz   bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/miniz
 	svn export ./include/modplug bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/modplug
 	cp bin/dist.mk bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
@@ -863,6 +864,7 @@ bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip: bin/dist.mk bin/
 	svn export ./libopenmpt            bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/libopenmpt            --native-eol CRLF
 	svn export ./examples              bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/examples              --native-eol CRLF
 	svn export ./openmpt123            bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123            --native-eol CRLF
+	svn export ./contrib               bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/contrib               --native-eol CRLF
 	svn export ./include/miniz         bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/miniz         --native-eol CRLF
 	svn export ./include/flac          bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/flac          --native-eol CRLF
 	svn export ./include/portaudio     bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/portaudio     --native-eol CRLF
