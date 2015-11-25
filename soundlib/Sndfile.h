@@ -606,8 +606,8 @@ public:
 	// rough heuristic, could be improved
 	mpt::Charset GetCharset() const { return GetCharsetFromModType(GetType()); }
 
-	void SetPreAmp(UINT vol);
-	UINT GetPreAmp() const { return m_MixerSettings.m_nPreAmp; }
+	void SetPreAmp(uint32 vol);
+	uint32 GetPreAmp() const { return m_MixerSettings.m_nPreAmp; }
 
 	void SetMixLevels(MixLevels levels);
 	MixLevels GetMixLevels() const { return m_nMixLevels; }
@@ -638,7 +638,7 @@ public:
 	bool SetTitle(const std::string &newTitle); // Return true if title was changed.
 	const char *GetSampleName(SAMPLEINDEX nSample) const;
 	const char *GetInstrumentName(INSTRUMENTINDEX nInstr) const;
-	UINT GetMusicSpeed() const { return m_PlayState.m_nMusicSpeed; }
+	uint32 GetMusicSpeed() const { return m_PlayState.m_nMusicSpeed; }
 	TEMPO GetMusicTempo() const { return m_PlayState.m_nMusicTempo; }
 	bool IsFirstTick() const { return (m_PlayState.m_lTotalSampleCount == 0); }
 
@@ -653,7 +653,7 @@ public:
 	double GetSongTime() { return GetLength(eNoAdjust).back().duration; }
 
 	void RecalculateSamplesPerTick();
-	double GetRowDuration(TEMPO tempo, UINT speed) const;
+	double GetRowDuration(TEMPO tempo, uint32 speed) const;
 	uint32 GetTickDuration(PlayState &playState) const;
 
 	// A repeat count value of -1 means infinite loop
@@ -722,7 +722,7 @@ public:
 	bool SaveS3M(const mpt::PathString &filename) const;
 	bool SaveMod(const mpt::PathString &filename) const;
 	bool SaveIT(const mpt::PathString &filename, bool compatibilityExport = false);
-	UINT SaveMixPlugins(FILE *f=NULL, bool bUpdate=true);
+	uint32 SaveMixPlugins(FILE *f=NULL, bool bUpdate=true);
 	void WriteInstrumentPropertyForAllInstruments(uint32 code,  int16 size, FILE* f, INSTRUMENTINDEX nInstruments) const;
 	void SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, FILE* f) const;
 	void SaveExtendedSongProperties(FILE* f) const;
@@ -757,10 +757,10 @@ public:
 private:
 	void CreateStereoMix(int count);
 public:
-	bool FadeSong(UINT msec);
+	bool FadeSong(uint32 msec);
 private:
 	void ProcessDSP(std::size_t countChunk);
-	void ProcessPlugins(UINT nCount);
+	void ProcessPlugins(uint32 nCount);
 public:
 	samplecount_t GetTotalSampleCount() const { return m_PlayState.m_lTotalSampleCount; }
 	bool HasPositionChanged() { bool b = m_PlayState.m_bPositionChanged; m_PlayState.m_bPositionChanged = false; return b; }
@@ -773,19 +773,19 @@ public:
 	void SetMixerSettings(const MixerSettings &mixersettings);
 	void SetResamplerSettings(const CResamplerSettings &resamplersettings);
 	void InitPlayer(bool bReset=false);
-	void SetDspEffects(DWORD DSPMask);
-	DWORD GetSampleRate() { return m_MixerSettings.gdwMixingFreq; }
+	void SetDspEffects(uint32 DSPMask);
+	uint32 GetSampleRate() { return m_MixerSettings.gdwMixingFreq; }
 #ifndef NO_EQ
-	void SetEQGains(const UINT *pGains, UINT nBands, const UINT *pFreqs=NULL, bool bReset=false)	{ m_EQ.SetEQGains(pGains, nBands, pFreqs, bReset, m_MixerSettings.gdwMixingFreq); } // 0=-12dB, 32=+12dB
+	void SetEQGains(const uint32 *pGains, uint32 nBands, const uint32 *pFreqs=NULL, bool bReset=false)	{ m_EQ.SetEQGains(pGains, nBands, pFreqs, bReset, m_MixerSettings.gdwMixingFreq); } // 0=-12dB, 32=+12dB
 #endif // NO_EQ
 public:
 	bool ReadNote();
 	bool ProcessRow();
 	bool ProcessEffects();
 	CHANNELINDEX GetNNAChannel(CHANNELINDEX nChn) const;
-	CHANNELINDEX CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut);
+	CHANNELINDEX CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, bool forceCut);
 	void NoteChange(ModChannel *pChn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false) const;
-	void InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true) const;
+	void InstrumentChange(ModChannel *pChn, uint32 instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true) const;
 	void ApplyInstrumentPanning(ModChannel *pChn, const ModInstrument *instr, const ModSample *smp) const;
 	uint32 CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX chn, bool *isExtended = nullptr) const;
 
@@ -793,7 +793,7 @@ public:
 	void KeyOff(ModChannel *pChn) const;
 	// Global Effects
 	void SetTempo(TEMPO param, bool setAsNonModcommand = false);
-	void SetSpeed(UINT param);
+	void SetSpeed(uint32 param);
 
 protected:
 	// Channel effect processing
@@ -842,25 +842,25 @@ protected:
 	void FinePortamentoDown(ModChannel *pChn, ModCommand::PARAM param) const;
 	void ExtraFinePortamentoUp(ModChannel *pChn, ModCommand::PARAM param) const;
 	void ExtraFinePortamentoDown(ModChannel *pChn, ModCommand::PARAM param) const;
-	void NoteSlide(ModChannel *pChn, UINT param, bool slideUp, bool retrig) const;
-	void TonePortamento(ModChannel *pChn, UINT param) const;
-	void Vibrato(ModChannel *pChn, UINT param) const;
-	void FineVibrato(ModChannel *pChn, UINT param) const;
+	void NoteSlide(ModChannel *pChn, uint32 param, bool slideUp, bool retrig) const;
+	void TonePortamento(ModChannel *pChn, uint32 param) const;
+	void Vibrato(ModChannel *pChn, uint32 param) const;
+	void FineVibrato(ModChannel *pChn, uint32 param) const;
 	void VolumeSlide(ModChannel *pChn, ModCommand::PARAM param);
 	void PanningSlide(ModChannel *pChn, ModCommand::PARAM param, bool memory = true);
 	void ChannelVolSlide(ModChannel *pChn, ModCommand::PARAM param) const;
 	void FineVolumeUp(ModChannel *pChn, ModCommand::PARAM param, bool volCol) const;
 	void FineVolumeDown(ModChannel *pChn, ModCommand::PARAM param, bool volCol) const;
-	void Tremolo(ModChannel *pChn, UINT param) const;
-	void Panbrello(ModChannel *pChn, UINT param) const;
+	void Tremolo(ModChannel *pChn, uint32 param) const;
+	void Panbrello(ModChannel *pChn, uint32 param) const;
 	void Panning(ModChannel *pChn, uint32 param, PanningType panBits) const;
 	void RetrigNote(CHANNELINDEX nChn, int param, int offset = 0);
 	void SampleOffset(ModChannel &chn, SmpLength param) const;
-	void NoteCut(CHANNELINDEX nChn, UINT nTick, bool cutSample);
-	ROWINDEX PatternLoop(ModChannel *, UINT param);
+	void NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample);
+	ROWINDEX PatternLoop(ModChannel *, uint32 param);
 	void ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param);
 	void ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param);
-	void ExtendedChannelEffect(ModChannel *, UINT param);
+	void ExtendedChannelEffect(ModChannel *, uint32 param);
 	void InvertLoop(ModChannel* pChn);
 	ROWINDEX PatternBreak(PlayState &state, CHANNELINDEX chn, uint8 param) const;
 	void GlobalVolSlide(ModCommand::PARAM param, uint8 &nOldGlobalVolSlide);
@@ -944,19 +944,19 @@ public:
 	bool ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &srcSong, SAMPLEINDEX sourceSample);
 
 	// Period/Note functions
-	UINT GetNoteFromPeriod(UINT period, int nFineTune = 0, UINT nC5Speed = 0) const;
-	UINT GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) const;
-	UINT GetFreqFromPeriod(UINT period, int nPeriodFrac = 0) const;
+	uint32 GetNoteFromPeriod(uint32 period, int nFineTune = 0, uint32 nC5Speed = 0) const;
+	uint32 GetPeriodFromNote(uint32 note, int nFineTune, uint32 nC5Speed) const;
+	uint32 GetFreqFromPeriod(uint32 period, int nPeriodFrac = 0) const;
 	// Misc functions
 	ModSample &GetSample(SAMPLEINDEX sample) { MPT_ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
 	const ModSample &GetSample(SAMPLEINDEX sample) const { MPT_ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
 
-	UINT MapMidiInstrument(DWORD dwProgram, UINT nChannel, UINT nNote);
+	uint32 MapMidiInstrument(uint32 dwProgram, uint32 nChannel, uint32 nNote);
 	size_t ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trkvers);
 	static void ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin);
 	void LoadMixPlugins(FileReader &file);
 
-	DWORD CutOffToFrequency(UINT nCutOff, int flt_modifier=256) const; // [0-127] => [1-10KHz]
+	uint32 CutOffToFrequency(uint32 nCutOff, int flt_modifier=256) const; // [0-127] => [1-10KHz]
 #ifdef MODPLUG_TRACKER
 	void ProcessMidiOut(CHANNELINDEX nChn);
 #endif // MODPLUG_TRACKER

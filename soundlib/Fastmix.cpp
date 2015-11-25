@@ -522,7 +522,7 @@ void CSoundFile::CreateStereoMix(int count)
 }
 
 
-void CSoundFile::ProcessPlugins(UINT nCount)
+void CSoundFile::ProcessPlugins(uint32 nCount)
 //------------------------------------------
 {
 	// If any sample channels are active or any plugin has some input, possibly suspended master plugins need to be woken up.
@@ -669,7 +669,7 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 				{
 					float *pInL = pState->pOutBufferL;
 					float *pInR = pState->pOutBufferR;
-					for (UINT i=0; i<nCount; i++)
+					for (uint32 i=0; i<nCount; i++)
 					{
 						pInL[i] += pMixL[i];
 						pInR[i] += pMixR[i];
@@ -700,7 +700,7 @@ void CSoundFile::ProcessPlugins(UINT nCount)
 			{
 				const float * const pInL = pState->pOutBufferL;
 				const float * const pInR = pState->pOutBufferR;
-				for (UINT i=0; i<nCount; i++)
+				for (uint32 i=0; i<nCount; i++)
 				{
 					pOutL[i] += pInL[i];
 					pOutR[i] += pInR[i];

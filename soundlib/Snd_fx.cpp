@@ -1091,8 +1091,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 // Effects
 
 // Change sample or instrument number.
-void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, bool bUpdVol, bool bResetEnv) const
-//--------------------------------------------------------------------------------------------------------------
+void CSoundFile::InstrumentChange(ModChannel *pChn, uint32 instr, bool bPorta, bool bUpdVol, bool bResetEnv) const
+//----------------------------------------------------------------------------------------------------------------
 {
 	if(instr >= MAX_INSTRUMENTS) return;
 	const ModInstrument *pIns = (instr < MAX_INSTRUMENTS) ? Instruments[instr] : nullptr;
@@ -1113,7 +1113,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, UINT instr, bool bPorta, boo
 		}
 
 		if(pIns->NoteMap[note - NOTE_MIN] > NOTE_MAX) return;
-		UINT n = pIns->Keyboard[note - NOTE_MIN];
+		uint32 n = pIns->Keyboard[note - NOTE_MIN];
 		pSmp = ((n) && (n < MAX_SAMPLES)) ? &Samples[n] : nullptr;
 	} else if(GetNumInstruments())
 	{
@@ -1426,7 +1426,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 
 	if((pIns) && (note - NOTE_MIN < (int)CountOf(pIns->Keyboard)))
 	{
-		UINT n = pIns->Keyboard[note - NOTE_MIN];
+		uint32 n = pIns->Keyboard[note - NOTE_MIN];
 		if((n) && (n < MAX_SAMPLES))
 		{
 			pSmp = &Samples[n];
@@ -1531,7 +1531,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 	if ((!bPorta) || (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
 		pChn->nNewIns = 0;
 
-	UINT period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
+	uint32 period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
 	pChn->nPanbrelloOffset = 0;
 
 	// IT compatibility: Sample and instrument panning is only applied on note change, not instrument change
@@ -1826,8 +1826,8 @@ CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 }
 
 
-CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool forceCut)
-//---------------------------------------------------------------------------------------
+CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, bool forceCut)
+//-----------------------------------------------------------------------------------------
 {
 	CHANNELINDEX nnaChn = CHANNELINDEX_INVALID;
 	ModChannel *pChn = &m_PlayState.Chn[nChn];
@@ -1871,7 +1871,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, UINT instr, int note, bool 
 		pIns = Instruments[instr];
 		if (pIns)
 		{
-			UINT n = 0;
+			uint32 n = 0;
 			if (note <= NOTE_MAX)
 			{
 				n = pIns->Keyboard[note - 1];
@@ -2081,14 +2081,14 @@ bool CSoundFile::ProcessEffects()
 	for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, pChn++)
 	{
 		const uint32 tickCount = m_PlayState.m_nTickCount % (m_PlayState.m_nMusicSpeed + m_PlayState.m_nFrameDelay);
-		UINT instr = pChn->rowCommand.instr;
-		UINT volcmd = pChn->rowCommand.volcmd;
-		UINT vol = pChn->rowCommand.vol;
-		UINT cmd = pChn->rowCommand.command;
-		UINT param = pChn->rowCommand.param;
+		uint32 instr = pChn->rowCommand.instr;
+		uint32 volcmd = pChn->rowCommand.volcmd;
+		uint32 vol = pChn->rowCommand.vol;
+		uint32 cmd = pChn->rowCommand.command;
+		uint32 param = pChn->rowCommand.param;
 		bool bPorta = pChn->rowCommand.IsPortamento();
 
-		UINT nStartTick = 0;
+		uint32 nStartTick = 0;
 		pChn->isFirstTick = m_SongFlags[SONG_FIRSTTICK];
 
 		pChn->dwFlags.reset(CHN_FASTVOLRAMP);
@@ -2164,7 +2164,7 @@ bool CSoundFile::ProcessEffects()
 		{
 			//:xy --> note delay until tick x, note cut at tick x+y
 			nStartTick = (param & 0xF0) >> 4;
-			const UINT cutAtTick = nStartTick + (param & 0x0F);
+			const uint32 cutAtTick = nStartTick + (param & 0x0F);
 			NoteCut(nChn, cutAtTick, IsCompatibleMode(TRK_IMPULSETRACKER) || GetType() == MOD_TYPE_S3M);
 		} else if ((cmd == CMD_MODCMDEX) || (cmd == CMD_S3MCMDEX))
 		{
@@ -2600,7 +2600,7 @@ bool CSoundFile::ProcessEffects()
 		{
 			if (volcmd == VOLCMD_TONEPORTAMENTO)
 			{
-				UINT param = 0;
+				uint32 param = 0;
 				if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DMF | MOD_TYPE_DBM | MOD_TYPE_IMF | MOD_TYPE_PSM | MOD_TYPE_J2B | MOD_TYPE_ULT | MOD_TYPE_OKT | MOD_TYPE_MT2 | MOD_TYPE_MDL))
 				{
 					param = ImpulseTrackerPortaVolCmd[vol & 0x0F];
@@ -2864,12 +2864,12 @@ bool CSoundFile::ProcessEffects()
 			// IT compatibility 15. Retrigger
 			if(IsCompatibleMode(TRK_IMPULSETRACKER))
 			{
-				if (param) pChn->nRetrigParam = (BYTE)(param & 0xFF);
+				if (param) pChn->nRetrigParam = static_cast<uint8>(param & 0xFF);
 				RetrigNote(nChn, pChn->nRetrigParam, (volcmd == VOLCMD_OFFSET) ? vol + 1 : 0);
 			} else
 			{
 				// XM Retrig
-				if (param) pChn->nRetrigParam = (BYTE)(param & 0xFF); else param = pChn->nRetrigParam;
+				if (param) pChn->nRetrigParam = static_cast<uint8>(param & 0xFF); else param = pChn->nRetrigParam;
 				RetrigNote(nChn, param, (volcmd == VOLCMD_OFFSET) ? vol + 1 : 0);
 			}
 			break;
@@ -3583,8 +3583,8 @@ void CSoundFile::ExtraFinePortamentoDown(ModChannel *pChn, ModCommand::PARAM par
 
 // Implemented for IMF compatibility, can't actually save this in any formats
 // Slide up / down every x ticks by y semitones
-void CSoundFile::NoteSlide(ModChannel *pChn, UINT param, bool slideUp, bool retrig) const
-//---------------------------------------------------------------------------------------
+void CSoundFile::NoteSlide(ModChannel *pChn, uint32 param, bool slideUp, bool retrig) const
+//-----------------------------------------------------------------------------------------
 {
 	uint8 x, y;
 	if(m_SongFlags[SONG_FIRSTTICK])
@@ -3614,8 +3614,8 @@ void CSoundFile::NoteSlide(ModChannel *pChn, UINT param, bool slideUp, bool retr
 }
 
 // Portamento Slide
-void CSoundFile::TonePortamento(ModChannel *pChn, UINT param) const
-//-----------------------------------------------------------------
+void CSoundFile::TonePortamento(ModChannel *pChn, uint32 param) const
+//-------------------------------------------------------------------
 {
 	pChn->dwFlags.set(CHN_PORTAMENTO);
 
@@ -3687,7 +3687,7 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param) const
 			int32 delta = pChn->nPortamentoSlide;
 			if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 			{
-				UINT n = pChn->nPortamentoSlide / 4;
+				uint32 n = pChn->nPortamentoSlide / 4;
 				if (n > 255) n = 255;
 				// Return (a*b+c/2)/c - no divide error
 				// Table is 65536*2(n/192)
@@ -3702,7 +3702,7 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param) const
 			int32 delta = -pChn->nPortamentoSlide;
 			if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 			{
-				UINT n = pChn->nPortamentoSlide / 4;
+				uint32 n = pChn->nPortamentoSlide / 4;
 				if (n > 255) n = 255;
 				delta = Util::muldivr(pChn->nPeriod, LinearSlideDownTable[n], 65536) - pChn->nPeriod;
 				if (delta > -1) delta = -1;
@@ -3721,8 +3721,8 @@ void CSoundFile::TonePortamento(ModChannel *pChn, UINT param) const
 }
 
 
-void CSoundFile::Vibrato(ModChannel *p, UINT param) const
-//-------------------------------------------------------
+void CSoundFile::Vibrato(ModChannel *p, uint32 param) const
+//---------------------------------------------------------
 {
 	p->m_VibratoDepth = (param & 0x0F) / 15.0F;
 	//'New tuning'-thing: 0 - 1 <-> No depth - Full depth.
@@ -3734,8 +3734,8 @@ void CSoundFile::Vibrato(ModChannel *p, UINT param) const
 }
 
 
-void CSoundFile::FineVibrato(ModChannel *p, UINT param) const
-//-----------------------------------------------------------
+void CSoundFile::FineVibrato(ModChannel *p, uint32 param) const
+//-------------------------------------------------------------
 {
 	if (param & 0x0F) p->nVibratoDepth = param & 0x0F;
 	if (param & 0xF0) p->nVibratoSpeed = (param >> 4) & 0x0F;
@@ -3743,8 +3743,8 @@ void CSoundFile::FineVibrato(ModChannel *p, UINT param) const
 }
 
 
-void CSoundFile::Panbrello(ModChannel *p, UINT param) const
-//---------------------------------------------------------
+void CSoundFile::Panbrello(ModChannel *p, uint32 param) const
+//-----------------------------------------------------------
 {
 	if (param & 0x0F) p->nPanbrelloDepth = param & 0x0F;
 	if (param & 0xF0) p->nPanbrelloSpeed = (param >> 4) & 0x0F;
@@ -4006,8 +4006,8 @@ void CSoundFile::FineVolumeDown(ModChannel *pChn, ModCommand::PARAM param, bool 
 }
 
 
-void CSoundFile::Tremolo(ModChannel *pChn, UINT param) const
-//----------------------------------------------------------
+void CSoundFile::Tremolo(ModChannel *pChn, uint32 param) const
+//------------------------------------------------------------
 {
 	if (param & 0x0F) pChn->nTremoloDepth = (param & 0x0F) << 2;
 	if (param & 0xF0) pChn->nTremoloSpeed = (param >> 4) & 0x0F;
@@ -4289,8 +4289,8 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 }
 
 
-void CSoundFile::ExtendedChannelEffect(ModChannel *pChn, UINT param)
-//------------------------------------------------------------------
+void CSoundFile::ExtendedChannelEffect(ModChannel *pChn, uint32 param)
+//--------------------------------------------------------------------
 {
 	// S9x and X9x commands (S3M/XM/IT only)
 	if(!m_SongFlags[SONG_FIRSTTICK]) return;
@@ -4864,7 +4864,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 		} else if(GetType() == MOD_TYPE_MTM)
 		{
 			// In MultiTracker, E9x retriggers the last note at exactly the x-th tick of the row
-			doRetrig = m_PlayState.m_nTickCount == (param & 0x0F) && retrigSpeed != 0;
+			doRetrig = m_PlayState.m_nTickCount == static_cast<uint32>(param & 0x0F) && retrigSpeed != 0;
 		} else
 		{
 			int realspeed = retrigSpeed;
@@ -4897,7 +4897,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 
 	if(doRetrig)
 	{
-		UINT dv = (param >> 4) & 0x0F;
+		uint32 dv = (param >> 4) & 0x0F;
 		int vol = chn.nVolume;
 		if (dv)
 		{
@@ -4914,7 +4914,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 
 			chn.dwFlags.set(CHN_FASTVOLRAMP);
 		}
-		UINT note = chn.nNewNote;
+		uint32 note = chn.nNewNote;
 		int32 oldPeriod = chn.nPeriod;
 		if ((note) && (note <= NOTE_MAX) && (chn.nLength)) CheckNNA(nChn, 0, note, true);
 		bool resetEnv = false;
@@ -4972,7 +4972,7 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, int32 nFreqSlide) const
 		const int32 nOldPeriod = pChn->nPeriod;
 		if (nFreqSlide < 0)
 		{
-			UINT n = (-nFreqSlide) / 4;
+			uint32 n = (-nFreqSlide) / 4;
 			if (n)
 			{
 				if (n > 255) n = 255;
@@ -4981,7 +4981,7 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, int32 nFreqSlide) const
 			}
 		} else
 		{
-			UINT n = (nFreqSlide) / 4;
+			uint32 n = (nFreqSlide) / 4;
 			if (n)
 			{
 				if (n > 255) n = 255;
@@ -5005,8 +5005,8 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, int32 nFreqSlide) const
 }
 
 
-void CSoundFile::NoteCut(CHANNELINDEX nChn, UINT nTick, bool cutSample)
-//---------------------------------------------------------------------
+void CSoundFile::NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample)
+//-----------------------------------------------------------------------
 {
 	if (m_PlayState.m_nTickCount == nTick)
 	{
@@ -5097,8 +5097,8 @@ void CSoundFile::KeyOff(ModChannel *pChn) const
 // CSoundFile: Global Effects
 
 
-void CSoundFile::SetSpeed(UINT param)
-//-----------------------------------
+void CSoundFile::SetSpeed(uint32 param)
+//-------------------------------------
 {
 #ifdef MODPLUG_TRACKER
 	// FT2 appears to be decrementing the tick count before checking for zero,
@@ -5144,8 +5144,8 @@ void CSoundFile::SetTempo(TEMPO param, bool setAsNonModcommand)
 }
 
 
-ROWINDEX CSoundFile::PatternLoop(ModChannel *pChn, UINT param)
-//------------------------------------------------------------
+ROWINDEX CSoundFile::PatternLoop(ModChannel *pChn, uint32 param)
+//--------------------------------------------------------------
 {
 	if (param)
 	{
@@ -5246,8 +5246,8 @@ void CSoundFile::GlobalVolSlide(ModCommand::PARAM param, uint8 &nOldGlobalVolSli
 // Note/Period/Frequency functions
 
 // Find lowest note which has same or lower period as a given period (i.e. the note has the same or higher frequency)
-UINT CSoundFile::GetNoteFromPeriod(UINT period, int nFineTune, UINT nC5Speed) const
-//---------------------------------------------------------------------------------
+uint32 CSoundFile::GetNoteFromPeriod(uint32 period, int nFineTune, uint32 nC5Speed) const
+//---------------------------------------------------------------------------------------
 {
 	if(!period) return 0;
 	if(IsCompatibleMode(TRK_FASTTRACKER2))
@@ -5275,8 +5275,8 @@ UINT CSoundFile::GetNoteFromPeriod(UINT period, int nFineTune, UINT nC5Speed) co
 }
 
 
-UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) const
-//-------------------------------------------------------------------------------
+uint32 CSoundFile::GetPeriodFromNote(uint32 note, int nFineTune, uint32 nC5Speed) const
+//-------------------------------------------------------------------------------------
 {
 	if (note == NOTE_NONE || (note >= NOTE_MIN_SPECIAL)) return 0;
 	note -= NOTE_MIN;
@@ -5311,16 +5311,16 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 		{
 			int l = ((NOTE_MAX - note) << 6) - (nFineTune / 2);
 			if (l < 1) l = 1;
-			return (UINT)l;
+			return (uint32)l;
 		} else
 		{
 			int finetune = nFineTune;
-			UINT rnote = (note % 12) << 3;
-			UINT roct = note / 12;
+			uint32 rnote = (note % 12) << 3;
+			uint32 roct = note / 12;
 			int rfine = finetune / 16;
 			int i = rnote + rfine + 8;
 			Limit(i , 0, 103);
-			UINT per1 = XMPeriodTable[i];
+			uint32 per1 = XMPeriodTable[i];
 			if(finetune < 0)
 			{
 				rfine--;
@@ -5329,7 +5329,7 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 			i = rnote+rfine+8;
 			if (i < 0) i = 0;
 			if (i >= 104) i = 103;
-			UINT per2 = XMPeriodTable[i];
+			uint32 per2 = XMPeriodTable[i];
 			rfine = finetune & 0x0F;
 			per1 *= 16-rfine;
 			per2 *= rfine;
@@ -5347,8 +5347,8 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) cons
 
 
 // Converts period value to sample frequency. Return value is fixed point, with FREQ_FRACBITS fractional bits.
-UINT CSoundFile::GetFreqFromPeriod(UINT period, int nPeriodFrac) const
-//--------------------------------------------------------------------
+uint32 CSoundFile::GetFreqFromPeriod(uint32 period, int nPeriodFrac) const
+//------------------------------------------------------------------------
 {
 	if (!period) return 0;
 	if (GetType() & (MOD_TYPE_MED|MOD_TYPE_MOD|MOD_TYPE_DIGI|MOD_TYPE_MTM|MOD_TYPE_AMF0))

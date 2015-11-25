@@ -551,8 +551,8 @@ bool CSoundFile::Destroy()
 // Misc functions
 
 
-void CSoundFile::SetDspEffects(DWORD DSPMask)
-//-------------------------------------------
+void CSoundFile::SetDspEffects(uint32 DSPMask)
+//--------------------------------------------
 {
 #ifdef ENABLE_ASM
 #ifndef NO_REVERB
@@ -564,8 +564,8 @@ void CSoundFile::SetDspEffects(DWORD DSPMask)
 }
 
 
-void CSoundFile::SetPreAmp(UINT nVol)
-//-----------------------------------
+void CSoundFile::SetPreAmp(uint32 nVol)
+//-------------------------------------
 {
 	if (nVol < 1) nVol = 1;
 	if (nVol > 0x200) nVol = 0x200;	// x4 maximum
@@ -1410,8 +1410,8 @@ uint32 CSoundFile::GetTickDuration(PlayState &playState) const
 
 
 // Get the duration of a row in milliseconds, based on the current rows per beat and given speed and tempo settings.
-double CSoundFile::GetRowDuration(TEMPO tempo, UINT speed) const
-//--------------------------------------------------------------
+double CSoundFile::GetRowDuration(TEMPO tempo, uint32 speed) const
+//----------------------------------------------------------------
 {
 	switch(m_nTempoMode)
 	{

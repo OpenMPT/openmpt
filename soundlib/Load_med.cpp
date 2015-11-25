@@ -67,23 +67,23 @@ OPENMPT_NAMESPACE_BEGIN
 typedef struct PACKED tagMEDMODULEHEADER
 {
 	char  id[4];	// MMD1-MMD3
-	DWORD modlen;	// Size of file
-	DWORD song;		// Position in file for this song
-	WORD psecnum;
-	WORD pseq;
-	DWORD blockarr;	// Position in file for blocks
-	DWORD mmdflags;
-	DWORD smplarr;	// Position in file for samples
-	DWORD reserved;
-	DWORD expdata;	// Absolute offset in file for ExpData (0 if not present)
-	DWORD reserved2;
-	WORD pstate;
-	WORD pblock;
-	WORD pline;
-	WORD pseqnum;
-	WORD actplayline;
-	BYTE counter;
-	BYTE extra_songs;	// # of songs - 1
+	uint32 modlen;	// Size of file
+	uint32 song;		// Position in file for this song
+	uint16 psecnum;
+	uint16 pseq;
+	uint32 blockarr;	// Position in file for blocks
+	uint32 mmdflags;
+	uint32 smplarr;	// Position in file for samples
+	uint32 reserved;
+	uint32 expdata;	// Absolute offset in file for ExpData (0 if not present)
+	uint32 reserved2;
+	uint16 pstate;
+	uint16 pblock;
+	uint16 pline;
+	uint16 pseqnum;
+	uint16 actplayline;
+	uint8 counter;
+	uint8 extra_songs;	// # of songs - 1
 } MEDMODULEHEADER;
 
 STATIC_ASSERT(sizeof(MEDMODULEHEADER) == 52);
@@ -91,10 +91,10 @@ STATIC_ASSERT(sizeof(MEDMODULEHEADER) == 52);
 
 typedef struct PACKED tagMMD0SAMPLE
 {
-	WORD rep, replen;
-	BYTE midich;
-	BYTE midipreset;
-	BYTE svol;
+	uint16 rep, replen;
+	uint8 midich;
+	uint8 midipreset;
+	uint8 svol;
 	signed char strans;
 } MMD0SAMPLE;
 
@@ -104,8 +104,8 @@ STATIC_ASSERT(sizeof(MMD0SAMPLE) == 8);
 // Sample header is immediately followed by sample data...
 typedef struct PACKED tagMMDSAMPLEHEADER
 {
-	DWORD length;     // length of *one* *unpacked* channel in *bytes*
-	WORD type;
+	uint32 length;     // length of *one* *unpacked* channel in *bytes*
+	uint16 type;
 				// if non-negative
 					// bits 0-3 reserved for multi-octave instruments, not supported on the PC
 					// 0x10: 16 bit (otherwise 8 bit)
@@ -115,17 +115,17 @@ typedef struct PACKED tagMMDSAMPLEHEADER
 				// -1: Synth
 				// -2: Hybrid
 	// if type indicates packed data, these fields follow, otherwise we go right to the data
-	WORD packtype;	// Only 1 = ADPCM is supported
-	WORD subtype;	// Packing subtype
+	uint16 packtype;	// Only 1 = ADPCM is supported
+	uint16 subtype;	// Packing subtype
 		// ADPCM subtype
 		// 1: g723_40
 		// 2: g721
 		// 3: g723_24
-	BYTE commonflags;	// flags common to all packtypes (none defined so far)
-	BYTE packerflags;	// flags for the specific packtype
+	uint8 commonflags;	// flags common to all packtypes (none defined so far)
+	uint8 packerflags;	// flags for the specific packtype
 	uint32 leftchlen;	// packed length of left channel in bytes
 	uint32 rightchlen;	// packed length of right channel in bytes (ONLY PRESENT IN STEREO SAMPLES)
-	BYTE SampleData[1];	// Sample Data
+	uint8 SampleData[1];	// Sample Data
 } MMDSAMPLEHEADER;
 
 STATIC_ASSERT(sizeof(MMDSAMPLEHEADER) == 21);
@@ -135,17 +135,17 @@ STATIC_ASSERT(sizeof(MMDSAMPLEHEADER) == 21);
 typedef struct PACKED tagMMD0SONGHEADER
 {
 	MMD0SAMPLE sample[63];
-	WORD numblocks;		// # of blocks
-	WORD songlen;		// # of entries used in playseq
-	BYTE playseq[256];	// Play sequence
-	WORD deftempo;		// BPM tempo
+	uint16 numblocks;		// # of blocks
+	uint16 songlen;		// # of entries used in playseq
+	uint8 playseq[256];	// Play sequence
+	uint16 deftempo;		// BPM tempo
 	signed char playtransp;	// Play transpose
-	BYTE flags;			// 0x10: Hex Volumes | 0x20: ST/NT/PT Slides | 0x40: 8 Channels song
-	BYTE flags2;		// [b4-b0]+1: Tempo LPB, 0x20: tempo mode, 0x80: mix_conv=on
-	BYTE tempo2;		// tempo TPL
-	BYTE trkvol[16];	// track volumes
-	BYTE mastervol;		// master volume
-	BYTE numsamples;	// # of samples (max=63)
+	uint8 flags;			// 0x10: Hex Volumes | 0x20: ST/NT/PT Slides | 0x40: 8 Channels song
+	uint8 flags2;		// [b4-b0]+1: Tempo LPB, 0x20: tempo mode, 0x80: mix_conv=on
+	uint8 tempo2;		// tempo TPL
+	uint8 trkvol[16];	// track volumes
+	uint8 mastervol;		// master volume
+	uint8 numsamples;	// # of samples (max=63)
 } MMD0SONGHEADER;
 
 STATIC_ASSERT(sizeof(MMD0SONGHEADER) == 788);
@@ -155,30 +155,30 @@ STATIC_ASSERT(sizeof(MMD0SONGHEADER) == 788);
 typedef struct PACKED tagMMD2SONGHEADER
 {
 	MMD0SAMPLE sample[63];
-	WORD numblocks;		// # of blocks
-	WORD numsections;	// # of sections
-	DWORD playseqtable;	// filepos of play sequence
-	DWORD sectiontable;	// filepos of sections table (WORD array)
-	DWORD trackvols;	// filepos of tracks volume (BYTE array)
-	WORD numtracks;		// # of tracks (max 64)
-	WORD numpseqs;		// # of play sequences
-	DWORD trackpans;	// filepos of tracks pan values (BYTE array)
+	uint16 numblocks;		// # of blocks
+	uint16 numsections;	// # of sections
+	uint32 playseqtable;	// filepos of play sequence
+	uint32 sectiontable;	// filepos of sections table (uint16 array)
+	uint32 trackvols;	// filepos of tracks volume (uint8 array)
+	uint16 numtracks;		// # of tracks (max 64)
+	uint16 numpseqs;		// # of play sequences
+	uint32 trackpans;	// filepos of tracks pan values (uint8 array)
 	int32 flags3;		// 0x1:stereo_mix, 0x2:free_panning, 0x4:GM/XG compatibility
-	WORD voladj;		// vol_adjust (set to 100 if 0)
-	WORD channels;		// # of channels (4 if =0)
-	BYTE mix_echotype;	// 1:normal,2:xecho
-	BYTE mix_echodepth;	// 1..6
-	WORD mix_echolen;	// > 0
+	uint16 voladj;		// vol_adjust (set to 100 if 0)
+	uint16 channels;		// # of channels (4 if =0)
+	uint8 mix_echotype;	// 1:normal,2:xecho
+	uint8 mix_echodepth;	// 1..6
+	uint16 mix_echolen;	// > 0
 	signed char mix_stereosep;	// -4..4
-	BYTE pad0[223];
-	WORD deftempo;		// BPM tempo
+	uint8 pad0[223];
+	uint16 deftempo;		// BPM tempo
 	signed char playtransp;	// play transpose
-	BYTE flags;			// 0x1:filteron, 0x2:jumpingon, 0x4:jump8th, 0x8:instr_attached, 0x10:hex_vol, 0x20:PT_slides, 0x40:8ch_conv,0x80:hq slows playing speed
-	BYTE flags2;		// 0x80:mix_conv=on, [b4-b0]+1:tempo LPB, 0x20:tempo_mode
-	BYTE tempo2;		// tempo TPL
-	BYTE pad1[16];
-	BYTE mastervol;		// master volume
-	BYTE numsamples;	// # of samples (max 63)
+	uint8 flags;			// 0x1:filteron, 0x2:jumpingon, 0x4:jump8th, 0x8:instr_attached, 0x10:hex_vol, 0x20:PT_slides, 0x40:8ch_conv,0x80:hq slows playing speed
+	uint8 flags2;		// 0x80:mix_conv=on, [b4-b0]+1:tempo LPB, 0x20:tempo_mode
+	uint8 tempo2;		// tempo TPL
+	uint8 pad1[16];
+	uint8 mastervol;		// master volume
+	uint8 numsamples;	// # of samples (max 63)
 } MMD2SONGHEADER;
 
 STATIC_ASSERT(sizeof(MMD2SONGHEADER) == 788);
@@ -193,9 +193,9 @@ STATIC_ASSERT(sizeof(MMD2SONGHEADER) == 788);
 // represents the first data byte.
 typedef struct PACKED tagMMD0BLOCK
 {
-	BYTE numtracks;
-	BYTE lines;		// File value is 1 less than actual, so 0 -> 1 line
-} MMD0BLOCK;		// BYTE data[lines+1][tracks][3];
+	uint8 numtracks;
+	uint8 lines;		// File value is 1 less than actual, so 0 -> 1 line
+} MMD0BLOCK;			// uint8 data[lines+1][tracks][3];
 
 STATIC_ASSERT(sizeof(MMD0BLOCK) == 2);
 
@@ -209,9 +209,9 @@ STATIC_ASSERT(sizeof(MMD0BLOCK) == 2);
 // otherwise byte2 represents the first data byte.
 typedef struct PACKED tagMMD1BLOCK
 {
-	WORD numtracks;	// Number of tracks, may be > 64, but then that data is skipped.
-	WORD lines;		// Stored value is 1 less than actual, so 0 -> 1 line
-	DWORD info;		// Offset of BlockInfo (if 0, no block_info is present)
+	uint16 numtracks;	// Number of tracks, may be > 64, but then that data is skipped.
+	uint16 lines;		// Stored value is 1 less than actual, so 0 -> 1 line
+	uint32 info;		// Offset of BlockInfo (if 0, no block_info is present)
 } MMD1BLOCK;
 
 STATIC_ASSERT(sizeof(MMD1BLOCK) == 8);
@@ -219,12 +219,12 @@ STATIC_ASSERT(sizeof(MMD1BLOCK) == 8);
 
 typedef struct PACKED tagMMD1BLOCKINFO
 {
-	DWORD hlmask;		// Unimplemented - ignore
-	DWORD blockname;	// file offset of block name
-	DWORD blocknamelen;	// length of block name (including term. 0)
-	DWORD pagetable;	// file offset of command page table
-	DWORD cmdexttable;	// file offset of command extension table
-	DWORD reserved[4];	// future expansion
+	uint32 hlmask;		// Unimplemented - ignore
+	uint32 blockname;	// file offset of block name
+	uint32 blocknamelen;	// length of block name (including term. 0)
+	uint32 pagetable;	// file offset of command page table
+	uint32 cmdexttable;	// file offset of command extension table
+	uint32 reserved[4];	// future expansion
 } MMD1BLOCKINFO;
 
 STATIC_ASSERT(sizeof(MMD1BLOCKINFO) == 36);
@@ -235,10 +235,10 @@ STATIC_ASSERT(sizeof(MMD1BLOCKINFO) == 36);
 typedef struct PACKED tagMMD2PLAYSEQ
 {
 	char name[32];
-	DWORD command_offs;	// filepos of command table
-	DWORD reserved;
-	WORD length;
-	WORD seq[512];	// skip if > 0x8000
+	uint32 command_offs;	// filepos of command table
+	uint32 reserved;
+	uint16 length;
+	uint16 seq[512];	// skip if > 0x8000
 } MMD2PLAYSEQ;
 
 STATIC_ASSERT(sizeof(MMD2PLAYSEQ) == 1066);
@@ -246,13 +246,13 @@ STATIC_ASSERT(sizeof(MMD2PLAYSEQ) == 1066);
 
 // A command table contains commands that effect a particular play sequence
 // entry.  The only commands read in are STOP or POSJUMP, all others are ignored
-// POSJUMP is presumed to have extra bytes containing a WORD for the position
+// POSJUMP is presumed to have extra bytes containing a uint16 for the position
 typedef struct PACKED tagMMDCOMMAND
 {
-	WORD offset;		// Offset within current sequence entry
-	BYTE cmdnumber;		// STOP (537) or POSJUMP (538) (others skipped)
-	BYTE extra_count;
-	BYTE extra_bytes[4];// [extra_count];
+	uint16 offset;			// Offset within current sequence entry
+	uint8 cmdnumber;		// STOP (537) or POSJUMP (538) (others skipped)
+	uint8 extra_count;
+	uint8 extra_bytes[4];	// [extra_count];
 } MMDCOMMAND;  // Last entry has offset == 0xFFFF, cmd_number == 0 and 0 extrabytes
 
 STATIC_ASSERT(sizeof(MMDCOMMAND) == 8);
@@ -260,28 +260,28 @@ STATIC_ASSERT(sizeof(MMDCOMMAND) == 8);
 
 typedef struct PACKED tagMMD0EXP
 {
-	DWORD nextmod;			// File offset of next Hdr
-	DWORD exp_smp;			// Pointer to extra instrument data
-	WORD s_ext_entries;		// Number of extra instrument entries
-	WORD s_ext_entrsz;		// Size of extra instrument data
-	DWORD annotxt;
-	DWORD annolen;
-	DWORD iinfo;			// Instrument names
-	WORD i_ext_entries;
-	WORD i_ext_entrsz;
-	DWORD jumpmask;
-	DWORD rgbtable;
-	BYTE channelsplit[4];	// Only used if 8ch_conv (extra channel for every nonzero entry)
-	DWORD n_info;
-	DWORD songname;			// Song name
-	DWORD songnamelen;
-	DWORD dumps;
-	DWORD mmdinfo;
-	DWORD mmdrexx;
-	DWORD mmdcmd3x;
-	DWORD trackinfo_ofs;	// ptr to song->numtracks ptrs to tag lists
-	DWORD effectinfo_ofs;	// ptr to group ptrs
-	DWORD tag_end;
+	uint32 nextmod;			// File offset of next Hdr
+	uint32 exp_smp;			// Pointer to extra instrument data
+	uint16 s_ext_entries;	// Number of extra instrument entries
+	uint16 s_ext_entrsz;	// Size of extra instrument data
+	uint32 annotxt;
+	uint32 annolen;
+	uint32 iinfo;			// Instrument names
+	uint16 i_ext_entries;
+	uint16 i_ext_entrsz;
+	uint32 jumpmask;
+	uint32 rgbtable;
+	uint8  channelsplit[4];	// Only used if 8ch_conv (extra channel for every nonzero entry)
+	uint32 n_info;
+	uint32 songname;		// Song name
+	uint32 songnamelen;
+	uint32 dumps;
+	uint32 mmdinfo;
+	uint32 mmdrexx;
+	uint32 mmdcmd3x;
+	uint32 trackinfo_ofs;	// ptr to song->numtracks ptrs to tag lists
+	uint32 effectinfo_ofs;	// ptr to group ptrs
+	uint32 tag_end;
 } MMD0EXP;
 
 STATIC_ASSERT(sizeof(MMD0EXP) == 80);
@@ -296,10 +296,10 @@ STATIC_ASSERT(sizeof(MMD0EXP) == 80);
 static void MedConvert(ModCommand *p, const MMD0SONGHEADER *pmsh)
 //---------------------------------------------------------------
 {
-	const BYTE bpmvals[9] = { 179,164,152,141,131,123,116,110,104};
+	const uint8 bpmvals[9] = { 179,164,152,141,131,123,116,110,104};
 
 	ModCommand::COMMAND command = p->command;
-	UINT param = p->param;
+	uint32 param = p->param;
 	switch(command)
 	{
 	case 0x00:	if (param) command = CMD_ARPEGGIO; else command = 0; break;
@@ -507,7 +507,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 {
 	file.Rewind();
 	MEDMODULEHEADER pmmh;
-	DWORD dwSong;
+	uint32 dwSong;
 	if(!file.CanRead(512)
 		|| !file.ReadStruct(pmmh)
 		|| memcmp(pmmh.id, "MMD", 3)
@@ -528,10 +528,10 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	const MMD0SONGHEADER *pmsh;
 	const MMD2SONGHEADER *pmsh2;
 	const MMD0EXP *pmex;
-	DWORD dwBlockArr, dwSmplArr, dwExpData, wNumBlocks;
-	const_unaligned_ptr_le<DWORD> pdwTable;
+	uint32 dwBlockArr, dwSmplArr, dwExpData, wNumBlocks;
+	const_unaligned_ptr_le<uint32> pdwTable;
 	int8 version = pmmh.id[3];
-	UINT deftempo;
+	uint32 deftempo;
 	int playtransp = 0;
 
 #ifdef MED_LOG
@@ -580,14 +580,14 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 		Log("  numblocks  = %d\n", BigEndianW(pmsh->numblocks));
 		Log("  songlen    = %d\n", BigEndianW(pmsh->songlen));
 		Log("  playseq    = ");
-		for (UINT idbg1=0; idbg1<16; idbg1++) Log("%2d, ", pmsh->playseq[idbg1]);
+		for (uint32 idbg1=0; idbg1<16; idbg1++) Log("%2d, ", pmsh->playseq[idbg1]);
 		Log("...\n");
 		Log("  deftempo   = 0x%04X\n", BigEndianW(pmsh->deftempo));
 		Log("  playtransp = %d\n", (signed char)pmsh->playtransp);
 		Log("  flags(1,2) = 0x%02X, 0x%02X\n", pmsh->flags, pmsh->flags2);
 		Log("  tempo2     = %d\n", pmsh->tempo2);
 		Log("  trkvol     = ");
-		for (UINT idbg2=0; idbg2<16; idbg2++) Log("0x%02X, ", pmsh->trkvol[idbg2]);
+		for (uint32 idbg2=0; idbg2<16; idbg2++) Log("0x%02X, ", pmsh->trkvol[idbg2]);
 		Log("...\n");
 		Log("  mastervol  = 0x%02X\n", pmsh->mastervol);
 		Log("  numsamples = %d\n", pmsh->numsamples);
@@ -628,7 +628,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	if (!deftempo) deftempo = 125;
 	if (pmsh->flags2 & MMD_FLAG2_BPM)
 	{
-		UINT tempo_tpl = (pmsh->flags2 & MMD_FLAG2_BMASK) + 1;
+		uint32 tempo_tpl = (pmsh->flags2 & MMD_FLAG2_BMASK) + 1;
 		if (!tempo_tpl) tempo_tpl = 4;
 		deftempo *= tempo_tpl;
 		deftempo /= 4;
@@ -648,7 +648,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	if (deftempo < 0x21) deftempo = 0x21;
 	m_nDefaultTempo.Set(deftempo);
 	// Reading Samples
-	for (UINT iSHdr=0; iSHdr<m_nSamples; iSHdr++)
+	for (uint32 iSHdr=0; iSHdr<m_nSamples; iSHdr++)
 	{
 		ModSample &sample = Samples[iSHdr + 1];
 		sample.nLoopStart = BigEndianW(pmsh->sample[iSHdr].rep) << 1;
@@ -669,41 +669,41 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	// Reading play sequence
 	if (version < '2')
 	{
-		UINT nbo = BigEndianW(pmsh->songlen);
+		uint32 nbo = BigEndianW(pmsh->songlen);
 		if (nbo >= MAX_ORDERS) nbo = MAX_ORDERS-1;
 		if (!nbo) nbo = 1;
 		Order.ReadFromArray(pmsh->playseq, nbo);
 		playtransp = pmsh->playtransp;
 	} else
 	{
-		UINT nSections;
+		uint32 nSections;
 		ORDERINDEX nOrders = 0;
-		WORD nTrks = BigEndianW(pmsh2->numtracks);
+		uint16 nTrks = BigEndianW(pmsh2->numtracks);
 		if ((nTrks >= 4) && (nTrks <= 32)) m_nChannels = nTrks;
-		DWORD playseqtable = BigEndian(pmsh2->playseqtable);
-		UINT numplayseqs = BigEndianW(pmsh2->numpseqs);
+		uint32 playseqtable = BigEndian(pmsh2->playseqtable);
+		uint32 numplayseqs = BigEndianW(pmsh2->numpseqs);
 		if (!numplayseqs) numplayseqs = 1;
 		nSections = BigEndianW(pmsh2->numsections);
-		DWORD sectiontable = BigEndian(pmsh2->sectiontable);
+		uint32 sectiontable = BigEndian(pmsh2->sectiontable);
 		if ((!nSections) || (!sectiontable) || (sectiontable >= dwMemLength-2)) nSections = 1;
 		nOrders = 0;
 		Order.resize(0);
-		for (UINT iSection=0; iSection<nSections; iSection++)
+		for (uint32 iSection=0; iSection<nSections; iSection++)
 		{
-			UINT nplayseq = 0;
+			uint32 nplayseq = 0;
 			if (sectiontable && sectiontable < dwMemLength && 2 >= dwMemLength - sectiontable)
 			{
 				nplayseq = lpStream[sectiontable+1];
-				sectiontable += 2; // WORDs
+				sectiontable += 2; // uint16s
 			} else
 			{
 				nSections = 0;
 			}
-			UINT pseq = 0;
+			uint32 pseq = 0;
 
 			if ((playseqtable) && (playseqtable < dwMemLength) && (nplayseq * 4 <= dwMemLength - playseqtable))
 			{
-				pseq = BigEndian((const_unaligned_ptr_le<DWORD>(lpStream+playseqtable))[nplayseq]);
+				pseq = BigEndian((const_unaligned_ptr_le<uint32>(lpStream+playseqtable))[nplayseq]);
 			}
 			if (pseq && pseq < dwMemLength && sizeof(MMD2PLAYSEQ) <= dwMemLength - pseq)
 			{
@@ -713,9 +713,9 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 				if (pseq+n <= dwMemLength)
 				{
 					Order.resize(nOrders + n);
-					for (UINT i=0; i<n; i++)
+					for (uint32 i=0; i<n; i++)
 					{
-						WORD seqval = BigEndianW(pmps->seq[i]);
+						uint16 seqval = BigEndianW(pmps->seq[i]);
 						if ((seqval < wNumBlocks) && (nOrders < MAX_ORDERS-1))
 						{
 							Order[nOrders++] = (ORDERINDEX)seqval;
@@ -732,59 +732,59 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 		// Channel Split
 		if ((m_nChannels == 4) && (pmsh->flags & MMD_FLAG_8CHANNEL))
 		{
-			for (UINT i8ch=0; i8ch<4; i8ch++)
+			for (uint32 i8ch=0; i8ch<4; i8ch++)
 			{
 				if (pmex->channelsplit[i8ch]) m_nChannels++;
 			}
 		}
 		// Song Comments (null-terminated)
-		UINT annotxt = BigEndian(pmex->annotxt);
-		UINT annolen = BigEndian(pmex->annolen);
+		uint32 annotxt = BigEndian(pmex->annotxt);
+		uint32 annolen = BigEndian(pmex->annolen);
 		annolen = MIN(annolen, MED_MAX_COMMENT_LENGTH); //Thanks to Luigi Auriemma for pointing out an overflow risk
 		if ((annotxt) && (annolen) && (annolen <= dwMemLength) && (annotxt <= dwMemLength - annolen) )
 		{
 			m_songMessage.Read(lpStream + annotxt, annolen - 1, SongMessage::leAutodetect);
 		}
 		// Song Name
-		UINT songname = BigEndian(pmex->songname);
-		UINT songnamelen = BigEndian(pmex->songnamelen);
+		uint32 songname = BigEndian(pmex->songname);
+		uint32 songnamelen = BigEndian(pmex->songnamelen);
 		if ((songname) && (songnamelen) && (songname <= dwMemLength) && (songnamelen <= dwMemLength-songname))
 		{
 			mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, reinterpret_cast<const char *>(lpStream + songname), songnamelen);
 		}
 		// Sample Names
-		DWORD smpinfoex = BigEndian(pmex->iinfo);
+		uint32 smpinfoex = BigEndian(pmex->iinfo);
 		if (smpinfoex)
 		{
-			DWORD iinfoptr = BigEndian(pmex->iinfo);
-			UINT ientries = BigEndianW(pmex->i_ext_entries);
-			UINT ientrysz = BigEndianW(pmex->i_ext_entrsz);
+			uint32 iinfoptr = BigEndian(pmex->iinfo);
+			uint32 ientries = BigEndianW(pmex->i_ext_entries);
+			uint32 ientrysz = BigEndianW(pmex->i_ext_entrsz);
 
 			if ((iinfoptr) && (ientrysz < 256) && (ientries*ientrysz < dwMemLength) && (iinfoptr < dwMemLength - ientries*ientrysz))
 			{
 				const char *psznames = (const char *)(lpStream + iinfoptr);
-				for (UINT i=0; i<ientries; i++) if (i < m_nSamples)
+				for (uint32 i=0; i<ientries; i++) if (i < m_nSamples)
 				{
 					mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[i + 1], reinterpret_cast<const char *>(psznames + i * ientrysz), ientrysz);
 				}
 			}
 		}
 		// Track Names
-		DWORD trackinfo_ofs = BigEndian(pmex->trackinfo_ofs);
+		uint32 trackinfo_ofs = BigEndian(pmex->trackinfo_ofs);
 		if ((trackinfo_ofs) && (trackinfo_ofs < dwMemLength) && (m_nChannels * 4u < dwMemLength - trackinfo_ofs))
 		{
-			const_unaligned_ptr_le<DWORD> ptrktags = const_unaligned_ptr_le<DWORD>(lpStream + trackinfo_ofs);
-			for (UINT i=0; i<m_nChannels; i++)
+			const_unaligned_ptr_le<uint32> ptrktags = const_unaligned_ptr_le<uint32>(lpStream + trackinfo_ofs);
+			for (uint32 i=0; i<m_nChannels; i++)
 			{
-				DWORD trknameofs = 0, trknamelen = 0;
-				DWORD trktagofs = BigEndian(ptrktags[i]);
+				uint32 trknameofs = 0, trknamelen = 0;
+				uint32 trktagofs = BigEndian(ptrktags[i]);
 				if (trktagofs && (trktagofs <= dwMemLength - 8) )
 				{
 					while (trktagofs+8 < dwMemLength)
 					{
-						DWORD ntag = BigEndian(*const_unaligned_ptr_le<DWORD>(lpStream + trktagofs));
+						uint32 ntag = BigEndian(*const_unaligned_ptr_le<uint32>(lpStream + trktagofs));
 						if (ntag == MMDTAG_END) break;
-						DWORD tagdata = BigEndian(*const_unaligned_ptr_le<DWORD>(lpStream + trktagofs + 4));
+						uint32 tagdata = BigEndian(*const_unaligned_ptr_le<uint32>(lpStream + trktagofs + 4));
 						switch(ntag)
 						{
 						case MMDTAG_TRK_NAMELEN:	trknamelen = tagdata; break;
@@ -802,18 +802,18 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	// Reading samples
 	if (dwSmplArr > dwMemLength - 4*m_nSamples) return true;
-	pdwTable = const_unaligned_ptr_le<DWORD>(lpStream + dwSmplArr);
-	for (UINT iSmp=0; iSmp<m_nSamples; iSmp++) if (pdwTable[iSmp])
+	pdwTable = const_unaligned_ptr_le<uint32>(lpStream + dwSmplArr);
+	for (uint32 iSmp=0; iSmp<m_nSamples; iSmp++) if (pdwTable[iSmp])
 	{
-		UINT dwPos = BigEndian(pdwTable[iSmp]);
+		uint32 dwPos = BigEndian(pdwTable[iSmp]);
 		if ((dwPos >= dwMemLength) || (dwPos + sizeof(MMDSAMPLEHEADER) >= dwMemLength)) continue;
 		const MMDSAMPLEHEADER *psdh = (const MMDSAMPLEHEADER *)(lpStream + dwPos);
-		UINT len = BigEndian(psdh->length);
+		uint32 len = BigEndian(psdh->length);
 	#ifdef MED_LOG
 		Log("SampleData %d: stype=0x%02X len=%d\n", iSmp, BigEndianW(psdh->type), len);
 	#endif
 		if(dwPos + len + 6 > dwMemLength) len = 0;
-		UINT stype = BigEndianW(psdh->type);
+		uint32 stype = BigEndianW(psdh->type);
 		const char *psdata = (const char *)(lpStream + dwPos + 6);
 
 		SampleIO sampleIO(
@@ -852,13 +852,13 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	if (wNumBlocks > MAX_PATTERNS) wNumBlocks = MAX_PATTERNS;
 	if ((!dwBlockArr) || (dwBlockArr > dwMemLength - 4*wNumBlocks) || (4*wNumBlocks > dwMemLength)) return true;
-	pdwTable = const_unaligned_ptr_le<DWORD>(lpStream + dwBlockArr);
+	pdwTable = const_unaligned_ptr_le<uint32>(lpStream + dwBlockArr);
 	playtransp += (version == '3') ? 24 : 48;
 	for (PATTERNINDEX iBlk=0; iBlk<wNumBlocks; iBlk++)
 	{
-		UINT dwPos = BigEndian(pdwTable[iBlk]);
+		uint32 dwPos = BigEndian(pdwTable[iBlk]);
 		if ((!dwPos) || (dwPos >= dwMemLength) || (dwPos >= dwMemLength - 8)) continue;
-		UINT lines = 64, tracks = 4;
+		uint32 lines = 64, tracks = 4;
 		if (version == '0')
 		{
 			const MMD0BLOCK *pmb = (const MMD0BLOCK *)(lpStream + dwPos);
@@ -868,17 +868,17 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 			if(!Patterns.Insert(iBlk, lines)) continue;
 			ModCommand *p = Patterns[iBlk];
 			const uint8 * s = (const uint8 *)(lpStream + dwPos + 2);
-			UINT maxlen = tracks*lines*3;
+			uint32 maxlen = tracks*lines*3;
 			if (maxlen + dwPos > dwMemLength - 2) break;
-			for (UINT y=0; y<lines; y++)
+			for (uint32 y=0; y<lines; y++)
 			{
-				for (UINT x=0; x<tracks; x++, s+=3) if (x < m_nChannels)
+				for (uint32 x=0; x<tracks; x++, s+=3) if (x < m_nChannels)
 				{
-					BYTE note = s[0] & 0x3F;
-					BYTE instr = s[1] >> 4;
+					uint8 note = s[0] & 0x3F;
+					uint8 instr = s[1] >> 4;
 					if (s[0] & 0x80) instr |= 0x10;
 					if (s[0] & 0x40) instr |= 0x20;
-					if ((note) && (note <= 132)) p->note = static_cast<BYTE>(note + playtransp);
+					if ((note) && (note <= 132)) p->note = static_cast<uint8>(note + playtransp);
 					p->instr = instr;
 					p->command = s[1] & 0x0F;
 					p->param = s[2];
@@ -896,12 +896,12 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 				BigEndianW(pmb->lines), BigEndianW(pmb->numtracks), BigEndian(pmb->info));
 		#endif
 			const MMD1BLOCKINFO *pbi = NULL;
-			const BYTE *pcmdext = NULL;
+			const uint8 *pcmdext = NULL;
 			lines = (pmb->lines >> 8) + 1;
 			tracks = pmb->numtracks >> 8;
 			if (!tracks) tracks = m_nChannels;
 			Patterns.Insert(iBlk, lines);
-			DWORD dwBlockInfo = BigEndian(pmb->info);
+			uint32 dwBlockInfo = BigEndian(pmb->info);
 			if ((dwBlockInfo) && (dwBlockInfo < dwMemLength - sizeof(MMD1BLOCKINFO)))
 			{
 				pbi = (const MMD1BLOCKINFO *)(lpStream + dwBlockInfo);
@@ -911,8 +911,8 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 			#endif
 				if ((pbi->blockname) && (pbi->blocknamelen))
 				{
-					DWORD nameofs = BigEndian(pbi->blockname);
-					UINT namelen = BigEndian(pbi->blocknamelen);
+					uint32 nameofs = BigEndian(pbi->blockname);
+					uint32 namelen = BigEndian(pbi->blocknamelen);
 					if ((nameofs < dwMemLength) && (namelen < dwMemLength - nameofs))
 					{
 						Patterns[iBlk].SetName((const char *)(lpStream + nameofs), namelen);
@@ -920,32 +920,32 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 				}
 				if (pbi->cmdexttable)
 				{
-					DWORD cmdexttable = BigEndian(pbi->cmdexttable);
+					uint32 cmdexttable = BigEndian(pbi->cmdexttable);
 					if (cmdexttable < dwMemLength - 4)
 					{
-						cmdexttable = BigEndian(*const_unaligned_ptr_le<DWORD>(lpStream + cmdexttable));
+						cmdexttable = BigEndian(*const_unaligned_ptr_le<uint32>(lpStream + cmdexttable));
 						if ((cmdexttable) && (cmdexttable <= dwMemLength - lines*tracks))
 						{
-							pcmdext = (const BYTE *)(lpStream + cmdexttable);
+							pcmdext = (const uint8 *)(lpStream + cmdexttable);
 						}
 					}
 				}
 			}
 			ModCommand *p = Patterns[iBlk];
 			const uint8 * s = (const uint8 *)(lpStream + dwPos + 8);
-			UINT maxlen = tracks*lines*4;
+			uint32 maxlen = tracks*lines*4;
 			if (maxlen + dwPos > dwMemLength - 8) break;
-			for (UINT y=0; y<lines; y++)
+			for (uint32 y=0; y<lines; y++)
 			{
-				for (UINT x=0; x<tracks; x++, s+=4) if (x < m_nChannels)
+				for (uint32 x=0; x<tracks; x++, s+=4) if (x < m_nChannels)
 				{
-					BYTE note = s[0];
+					uint8 note = s[0];
 					if ((note) && (note <= 132))
 					{
 						int rnote = note + playtransp;
 						if (rnote < 1) rnote = 1;
 						if (rnote > NOTE_MAX) rnote = NOTE_MAX;
-						p->note = (BYTE)rnote;
+						p->note = (uint8)rnote;
 					}
 					p->instr = s[1];
 					p->command = s[2];

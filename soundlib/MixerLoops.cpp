@@ -395,7 +395,7 @@ I2R_Loop:
 static void C_FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 nCount, const float _f2ic)
 //-----------------------------------------------------------------------------------------------------------------
 {
-	for(UINT i=0; i<nCount; ++i)
+	for(uint32 i=0; i<nCount; ++i)
 	{
 		*pOut++ = (int)(*pIn1++ * _f2ic);
 		*pOut++ = (int)(*pIn2++ * _f2ic);
@@ -406,7 +406,7 @@ static void C_FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut
 static void C_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCount, const float _i2fc)
 //-------------------------------------------------------------------------------------------------------------
 {
-	for(UINT i=0; i<nCount; ++i)
+	for(uint32 i=0; i<nCount; ++i)
 	{
 		*pOut1++ = *pSrc++ * _i2fc;
 		*pOut2++ = *pSrc++ * _i2fc;
@@ -417,7 +417,7 @@ static void C_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, ui
 static void C_FloatToMonoMix(const float *pIn, int32 *pOut, uint32 nCount, const float _f2ic)
 //-------------------------------------------------------------------------------------------
 {
-	for(UINT i=0; i<nCount; ++i)
+	for(uint32 i=0; i<nCount; ++i)
 	{
 		*pOut++ = (int)(*pIn++ * _f2ic);
 	}
@@ -427,7 +427,7 @@ static void C_FloatToMonoMix(const float *pIn, int32 *pOut, uint32 nCount, const
 static void C_MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _i2fc)
 //--------------------------------------------------------------------------------------------
 {
-	for(UINT i=0; i<nCount; ++i)
+	for(uint32 i=0; i<nCount; ++i)
 	{
 		*pOut++ = *pSrc++ * _i2fc;
 	}
@@ -525,7 +525,7 @@ void MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _
 }
 
 
-void FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic)
+void FloatToMonoMix(const float *pIn, int *pOut, uint32 nCount, const float _f2ic)
 {
 
 	#ifdef ENABLE_X86_AMD
@@ -767,8 +767,8 @@ static void C_StereoFill(mixsample_t *pBuffer, uint32 nSamples, mixsample_t &rof
 }
 
 
-void StereoFill(mixsample_t *pBuffer, UINT nSamples, mixsample_t &rofs, mixsample_t &lofs)
-//----------------------------------------------------------------------------------------
+void StereoFill(mixsample_t *pBuffer, uint32 nSamples, mixsample_t &rofs, mixsample_t &lofs)
+//------------------------------------------------------------------------------------------
 {
 	#if defined(ENABLE_X86) && defined(MPT_INTMIXER)
 		X86_StereoFill(pBuffer, nSamples, &rofs, &lofs);

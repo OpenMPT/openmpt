@@ -73,8 +73,8 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 			nPan = 128;
 		}
 
-		LimitMax(nVibDepth, BYTE(15));
-		LimitMax(nVibRate, BYTE(63));
+		LimitMax(nVibDepth, uint8(15));
+		LimitMax(nVibRate, uint8(63));
 	}
 
 

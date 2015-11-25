@@ -22,15 +22,15 @@ OPENMPT_NAMESPACE_BEGIN
 // EMU10K1 docs: cutoff = reg[0-127]*62+100
 
 
-DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier) const
-//-----------------------------------------------------------------------
+uint32 CSoundFile::CutOffToFrequency(uint32 nCutOff, int flt_modifier) const
+//--------------------------------------------------------------------------
 {
 	MPT_ASSERT(nCutOff < 128);
 	float Fc = 110.0f * std::pow(2.0f, 0.25f + ((float)(nCutOff * (flt_modifier + 256))) / (m_SongFlags[SONG_EXFILTERRANGE] ? 20.0f * 512.0f : 24.0f * 512.0f));
 	int freq = static_cast<int>(Fc);
 	Limit(freq, 120, 20000);
 	if (freq * 2 > (int)m_MixerSettings.gdwMixingFreq) freq = m_MixerSettings.gdwMixingFreq / 2;
-	return (DWORD)freq;
+	return (uint32)freq;
 }
 
 

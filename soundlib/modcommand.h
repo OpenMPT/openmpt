@@ -120,12 +120,12 @@ class ModCommand
 //==============
 {
 public:
-	typedef BYTE NOTE;
-	typedef BYTE INSTR;
-	typedef BYTE VOL;
-	typedef BYTE VOLCMD;
-	typedef BYTE COMMAND;
-	typedef BYTE PARAM;
+	typedef uint8 NOTE;
+	typedef uint8 INSTR;
+	typedef uint8 VOL;
+	typedef uint8 VOLCMD;
+	typedef uint8 COMMAND;
+	typedef uint8 PARAM;
 
 	// Defines the maximum value for column data when interpreted as 2-byte value
 	// (for example volcmd and vol). The valid value range is [0, maxColumnValue].
@@ -140,12 +140,12 @@ public:
 	void Set(NOTE n, INSTR ins, uint16 volcol, uint16 effectcol) { note = n; instr = ins; SetValueVolCol(volcol); SetValueEffectCol(effectcol); }
 
 	uint16 GetValueVolCol() const { return GetValueVolCol(volcmd, vol); }
-	static uint16 GetValueVolCol(BYTE volcmd, BYTE vol) { return (volcmd << 8) + vol; }
-	void SetValueVolCol(const uint16 val) { volcmd = static_cast<BYTE>(val >> 8); vol = static_cast<BYTE>(val & 0xFF); }
+	static uint16 GetValueVolCol(uint8 volcmd, uint8 vol) { return (volcmd << 8) + vol; }
+	void SetValueVolCol(const uint16 val) { volcmd = static_cast<uint8>(val >> 8); vol = static_cast<uint8>(val & 0xFF); }
 
 	uint16 GetValueEffectCol() const { return GetValueEffectCol(command, param); }
-	static uint16 GetValueEffectCol(BYTE command, BYTE param) { return (command << 8) + param; }
-	void SetValueEffectCol(const uint16 val) { command = static_cast<BYTE>(val >> 8); param = static_cast<BYTE>(val & 0xFF); }
+	static uint16 GetValueEffectCol(uint8 command, uint8 param) { return (command << 8) + param; }
+	void SetValueEffectCol(const uint16 val) { command = static_cast<uint8>(val >> 8); param = static_cast<uint8>(val & 0xFF); }
 
 	// Clears modcommand.
 	void Clear() { memset(this, 0, sizeof(ModCommand)); }
@@ -207,12 +207,12 @@ public:
 	}
 
 public:
-	BYTE note;
-	BYTE instr;
-	BYTE volcmd;
-	BYTE command;
-	BYTE vol;
-	BYTE param;
+	uint8 note;
+	uint8 instr;
+	uint8 volcmd;
+	uint8 command;
+	uint8 vol;
+	uint8 param;
 };
 
 typedef ModCommand MODCOMMAND_ORIGINAL;

@@ -53,7 +53,7 @@ MPTM version history for cwtv-field in "IT" header (only for MPTM files!):
 				       0x88A->0x88B. Now extended orderlist is saved as extension.
 0x88C(1.17.02.48) -> 0x88D(1.17.02.49): Some tuning related changes - that part fails to read on older versions.
 0x88B -> 0x88C: Changed type in which tuning number is printed to file: size_t -> uint16.
-0x88A -> 0x88B: Changed order-to-pattern-index table type from BYTE-array to vector<UINT>.
+0x88A -> 0x88B: Changed order-to-pattern-index table type from uint8-array to vector<uint32>.
 */
 
 
@@ -117,7 +117,7 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 		}
 
 		//Writing tuning data for instruments.
-		for(UINT i = 1; i <= sf.GetNumInstruments(); i++)
+		for(INSTRUMENTINDEX i = 1; i <= sf.GetNumInstruments(); i++)
 		{
 			TNTS_MAP_ITER iter = tNameToShort_Map.find(sf.Instruments[i]->pTuning);
 			if(iter == tNameToShort_Map.end()) //Should never happen
@@ -1187,9 +1187,9 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 {
 	const CModSpecifications &specs = (GetType() == MOD_TYPE_MPT ? ModSpecs::mptm : (compatibilityExport ? ModSpecs::it : ModSpecs::itEx));
 
-	DWORD dwChnNamLen;
+	uint32 dwChnNamLen;
 	ITFileHeader itHeader;
-	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 0;
+	uint32 dwPos = 0, dwHdrPos = 0, dwExtra = 0;
 	FILE *f;
 
 	if(filename.empty() || ((f = mpt_fopen(filename, "wb")) == NULL)) return false;
@@ -1390,8 +1390,8 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		memcpy(magic, "CNAM", 4);
 		fwrite(magic, 4, 1, f);
 		mpt::IO::WriteIntLE<uint32>(f, dwChnNamLen);
-		UINT nChnNames = dwChnNamLen / MAX_CHANNELNAME;
-		for(UINT inam = 0; inam < nChnNames; inam++)
+		uint32 nChnNames = dwChnNamLen / MAX_CHANNELNAME;
+		for(uint32 inam = 0; inam < nChnNames; inam++)
 		{
 			fwrite(ChnSettings[inam].szName, 1, MAX_CHANNELNAME, f);
 		}
@@ -1760,8 +1760,8 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 #ifndef MODPLUG_NO_FILESAVE
 
-UINT CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
-//----------------------------------------------------
+uint32 CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
+//------------------------------------------------------
 {
 	uint32 chinfo[MAX_BASECHANNELS];
 	char id[4];

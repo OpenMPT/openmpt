@@ -435,16 +435,16 @@ struct PACKED AMEnvelope
 			switch(envType)
 			{
 			case ENV_VOLUME:	// 0....32767
-				mptEnv.Values[i] = (BYTE)((val + 1) >> 9);
+				mptEnv.Values[i] = (uint8)((val + 1) >> 9);
 				break;
 			case ENV_PITCH:		// -4096....4096
-				mptEnv.Values[i] = (BYTE)((((int16)val) + 0x1001) >> 7);
+				mptEnv.Values[i] = (uint8)((((int16)val) + 0x1001) >> 7);
 				break;
 			case ENV_PANNING:	// -32768...32767
-				mptEnv.Values[i] = (BYTE)((((int16)val) + 0x8001) >> 10);
+				mptEnv.Values[i] = (uint8)((((int16)val) + 0x8001) >> 10);
 				break;
 			}
-			Limit(mptEnv.Values[i], BYTE(ENVELOPE_MIN), BYTE(ENVELOPE_MAX));
+			Limit(mptEnv.Values[i], uint8(ENVELOPE_MIN), uint8(ENVELOPE_MAX));
 		}
 	}
 };
@@ -489,7 +489,7 @@ struct PACKED AMInstrumentHeader
 		mpt::String::Read<mpt::String::maybeNullTerminated>(mptIns.name, name);
 
 		STATIC_ASSERT(CountOf(sampleMap) <= CountOf(mptIns.Keyboard));
-		for(BYTE i = 0; i < CountOf(sampleMap); i++)
+		for(uint8 i = 0; i < CountOf(sampleMap); i++)
 		{
 			mptIns.Keyboard[i] = sampleMap[i] + baseSample + 1;
 		}
@@ -674,7 +674,7 @@ static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSou
 					if(m.volcmd == VOLCMD_NONE)
 					{
 						m.volcmd = VOLCMD_VOLUME;
-						m.vol = Clamp(m.param, BYTE(0), BYTE(64));
+						m.vol = Clamp(m.param, uint8(0), uint8(64));
 						m.command = CMD_NONE;
 						m.param = 0;
 					}

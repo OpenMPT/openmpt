@@ -33,7 +33,7 @@ PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
 // Log tables for pre-amp
 // Pre-amp (or more precisely: Pre-attenuation) depends on the number of channels,
 // Which this table takes care of.
-static const UINT PreAmpTable[16] =
+static const uint32 PreAmpTable[16] =
 {
 	0x60, 0x60, 0x60, 0x70,	// 0-7
 	0x80, 0x88, 0x90, 0x98,	// 8-15
@@ -42,7 +42,7 @@ static const UINT PreAmpTable[16] =
 };
 
 #ifndef NO_AGC
-static const UINT PreAmpAGCTable[16] =
+static const uint32 PreAmpAGCTable[16] =
 {
 	0x60, 0x60, 0x60, 0x64,
 	0x68, 0x70, 0x78, 0x80,
@@ -102,8 +102,8 @@ void CSoundFile::InitPlayer(bool bReset)
 }
 
 
-bool CSoundFile::FadeSong(UINT msec)
-//----------------------------------
+bool CSoundFile::FadeSong(uint32 msec)
+//------------------------------------
 {
 	samplecount_t nsamples = Util::muldiv(msec, m_MixerSettings.gdwMixingFreq, 1000);
 	if (nsamples <= 0) return false;
@@ -111,7 +111,7 @@ bool CSoundFile::FadeSong(UINT msec)
 	m_PlayState.m_nBufferCount = nsamples;
 	int32 nRampLength = static_cast<int32>(m_PlayState.m_nBufferCount);
 	// Ramp everything down
-	for (UINT noff=0; noff < m_nMixChannels; noff++)
+	for (uint32 noff=0; noff < m_nMixChannels; noff++)
 	{
 		ModChannel *pramp = &m_PlayState.Chn[m_PlayState.ChnMix[noff]];
 		if (!pramp) continue;
@@ -742,7 +742,7 @@ void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol) const
 			return;
 		}
 
-		UINT trempos = pChn->nTremoloPos;
+		uint32 trempos = pChn->nTremoloPos;
 		// IT compatibility: Why would you not want to execute tremolo at volume 0?
 		if(vol > 0 || IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
@@ -1316,7 +1316,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 				//IT playback compatibility 01 & 02
 
 				// Pattern delay restarts tick counting. Not quite correct yet!
-				const UINT tick = m_PlayState.m_nTickCount % (m_PlayState.m_nMusicSpeed + m_PlayState.m_nFrameDelay);
+				const uint32 tick = m_PlayState.m_nTickCount % (m_PlayState.m_nMusicSpeed + m_PlayState.m_nFrameDelay);
 				if(pChn->nArpeggio != 0)
 				{
 					uint32 arpRatio = 65536;
@@ -1399,7 +1399,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 
 	if(chn.dwFlags[CHN_VIBRATO])
 	{
-		UINT vibpos = chn.nVibratoPos;
+		uint32 vibpos = chn.nVibratoPos;
 
 		int vdelta = GetVibratoDelta(chn.nVibratoType, vibpos);
 
@@ -1428,7 +1428,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 				vdelta = -vdelta;
 			}
 
-			UINT vdepth;
+			uint32 vdepth;
 			// IT compatibility: correct vibrato depth
 			if(IsCompatibleMode(TRK_IMPULSETRACKER))
 			{
@@ -1659,12 +1659,12 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 					if (n < 0)
 					{
 						n = -n;
-						UINT n1 = n >> 8;
+						uint32 n1 = n >> 8;
 						df1 = downTable[n1];
 						df2 = downTable[n1+1];
 					} else
 					{
-						UINT n1 = n >> 8;
+						uint32 n1 = n >> 8;
 						df1 = upTable[n1];
 						df2 = upTable[n1+1];
 					}
@@ -1798,11 +1798,11 @@ bool CSoundFile::ReadNote()
 	m_PlayState.m_nBufferCount = m_PlayState.m_nSamplesPerTick;
 
 	// Master Volume + Pre-Amplification / Attenuation setup
-	DWORD nMasterVol;
+	uint32 nMasterVol;
 	{
 		CHANNELINDEX nchn32 = Clamp(m_nChannels, CHANNELINDEX(1), CHANNELINDEX(31));
 
-		DWORD mastervol;
+		uint32 mastervol;
 
 		if (m_PlayConfig.getUseGlobalPreAmp())
 		{
@@ -1821,7 +1821,7 @@ bool CSoundFile::ReadNote()
 
 		if (m_PlayConfig.getUseGlobalPreAmp())
 		{
-			UINT attenuation =
+			uint32 attenuation =
 #ifndef NO_AGC
 				(m_MixerSettings.DSPMask & SNDDSP_AGC) ? PreAmpAGCTable[nchn32 >> 1] :
 #endif
@@ -2067,21 +2067,21 @@ bool CSoundFile::ReadNote()
 		if (pChn->pCurrentSample)
 		{
 			// Update VU-Meter (nRealVolume is 14-bit)
-			UINT vul = (pChn->nRealVolume * pChn->nRealPan) >> 14;
+			uint32 vul = (pChn->nRealVolume * pChn->nRealPan) >> 14;
 			if (vul > 127) vul = 127;
-			if (pChn->nLeftVU > 127) pChn->nLeftVU = (BYTE)vul;
+			if (pChn->nLeftVU > 127) pChn->nLeftVU = (uint8)vul;
 			vul >>= 1;
-			if (pChn->nLeftVU < vul) pChn->nLeftVU = (BYTE)vul;
-			UINT vur = (pChn->nRealVolume * (256-pChn->nRealPan)) >> 14;
+			if (pChn->nLeftVU < vul) pChn->nLeftVU = (uint8)vul;
+			uint32 vur = (pChn->nRealVolume * (256-pChn->nRealPan)) >> 14;
 			if (vur > 127) vur = 127;
-			if (pChn->nRightVU > 127) pChn->nRightVU = (BYTE)vur;
+			if (pChn->nRightVU > 127) pChn->nRightVU = (uint8)vur;
 			vur >>= 1;
-			if (pChn->nRightVU < vur) pChn->nRightVU = (BYTE)vur;
+			if (pChn->nRightVU < vur) pChn->nRightVU = (uint8)vur;
 
 #ifdef MODPLUG_TRACKER
-			const UINT kChnMasterVol = pChn->dwFlags[CHN_EXTRALOUD] ? (UINT)m_PlayConfig.getNormalSamplePreAmp() : nMasterVol;
+			const uint32 kChnMasterVol = pChn->dwFlags[CHN_EXTRALOUD] ? (uint32)m_PlayConfig.getNormalSamplePreAmp() : nMasterVol;
 #else
-			const UINT kChnMasterVol = nMasterVol;
+			const uint32 kChnMasterVol = nMasterVol;
 #endif // MODPLUG_TRACKER
 
 			// Adjusting volumes
