@@ -36,8 +36,8 @@ void ITFileHeader::ConvertEndianness()
 
 
 // Convert OpenMPT's internal envelope format into an IT/MPTM envelope.
-void ITEnvelope::ConvertToIT(const InstrumentEnvelope &mptEnv, BYTE envOffset, BYTE envDefault)
-//---------------------------------------------------------------------------------------------
+void ITEnvelope::ConvertToIT(const InstrumentEnvelope &mptEnv, uint8 envOffset, uint8 envDefault)
+//-----------------------------------------------------------------------------------------------
 {
 	// Envelope Flags
 	if(mptEnv.dwFlags[ENV_ENABLED]) flags |= ITEnvelope::envEnabled;

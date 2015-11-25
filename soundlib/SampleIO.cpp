@@ -654,13 +654,13 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 	{
 		// 8-bit Stereo samples (not interleaved)
 		const int s_ofs = (GetEncoding() == unsignedPCM) ? 0x80 : 0;
-		for (UINT iCh=0; iCh<2; iCh++)
+		for (uint32 iCh=0; iCh<2; iCh++)
 		{
 			const int8 *p = pSample8 + iCh;
 			int s_old = 0;
 
 			bufcount = 0;
-			for (UINT j=0; j<numSamples; j++)
+			for (uint32 j=0; j<numSamples; j++)
 			{
 				int s_new = *p;
 				p += 2;
@@ -688,7 +688,7 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 	{
 		// 16-bit little-endian Stereo samples (not interleaved)
 		const int s_ofs = (GetEncoding() == unsignedPCM) ? 0x8000 : 0;
-		for (UINT iCh=0; iCh<2; iCh++)
+		for (uint32 iCh=0; iCh<2; iCh++)
 		{
 			const int16 *p = pSample16 + iCh;
 			int s_old = 0;

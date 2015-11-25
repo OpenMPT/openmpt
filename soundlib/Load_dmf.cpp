@@ -1126,8 +1126,8 @@ struct DMFHTree
 
 
 // DMF Huffman ReadBits
-static BYTE DMFReadBits(DMFHTree *tree, uint32 nbits)
-//---------------------------------------------------
+static uint8 DMFReadBits(DMFHTree *tree, uint32 nbits)
+//----------------------------------------------------
 {
 	uint8 x = 0, bitv = 1;
 	while(nbits--)

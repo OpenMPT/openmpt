@@ -35,16 +35,16 @@ OPENMPT_NAMESPACE_BEGIN
 
 typedef struct PACKED DLSREGION
 {
-	DWORD ulLoopStart;
-	DWORD ulLoopEnd;
-	WORD nWaveLink;
-	WORD uPercEnv;
-	WORD usVolume;		// 0..256
-	WORD fuOptions;	// flags + key group
+	uint32 ulLoopStart;
+	uint32 ulLoopEnd;
+	uint16 nWaveLink;
+	uint16 uPercEnv;
+	uint16 usVolume;		// 0..256
+	uint16 fuOptions;	// flags + key group
 	int16 sFineTune;	// 1..100
-	BYTE uKeyMin;
-	BYTE uKeyMax;
-	BYTE uUnityNote;
+	uint8 uKeyMin;
+	uint8 uKeyMax;
+	uint8 uUnityNote;
 } DLSREGION;
 
 STATIC_ASSERT(sizeof(DLSREGION) == 21);
@@ -52,12 +52,12 @@ STATIC_ASSERT(sizeof(DLSREGION) == 21);
 typedef struct PACKED DLSENVELOPE
 {
 	// Volume Envelope
-	WORD wVolAttack;		// Attack Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
-	WORD wVolDecay;			// Decay Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
-	WORD wVolRelease;		// Release Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
-	BYTE nVolSustainLevel;	// Sustain Level: 0-128, 128=100%
+	uint16 wVolAttack;		// Attack Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
+	uint16 wVolDecay;			// Decay Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
+	uint16 wVolRelease;		// Release Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
+	uint8 nVolSustainLevel;	// Sustain Level: 0-128, 128=100%
 	// Default Pan
-	BYTE nDefPan;
+	uint8 nDefPan;
 } DLSENVELOPE;
 
 STATIC_ASSERT(sizeof(DLSENVELOPE) == 8);
@@ -67,12 +67,12 @@ STATIC_ASSERT(sizeof(DLSENVELOPE) == 8);
 
 typedef struct PACKED DLSINSTRUMENT
 {
-	DWORD ulBank, ulInstrument;
-	UINT nRegions, nMelodicEnv;
+	uint32 ulBank, ulInstrument;
+	uint32 nRegions, nMelodicEnv;
 	DLSREGION Regions[DLSMAXREGIONS];
 	char szName[32];
 	// SF2 stuff (DO NOT USE! -> used internally by the SF2 loader)
-	WORD wPresetBagNdx, wPresetBagNum;
+	uint16 wPresetBagNdx, wPresetBagNum;
 } DLSINSTRUMENT;
 
 STATIC_ASSERT(sizeof(DLSINSTRUMENT) == 2740);
@@ -80,11 +80,11 @@ STATIC_ASSERT(sizeof(DLSINSTRUMENT) == 2740);
 typedef struct PACKED DLSSAMPLEEX
 {
 	char szName[20];
-	DWORD dwLen;
-	DWORD dwStartloop;
-	DWORD dwEndloop;
-	DWORD dwSampleRate;
-	BYTE byOriginalPitch;
+	uint32 dwLen;
+	uint32 dwStartloop;
+	uint32 dwEndloop;
+	uint32 dwSampleRate;
+	uint8 byOriginalPitch;
 	char chPitchCorrection;
 } DLSSAMPLEEX;
 
@@ -120,11 +120,11 @@ class CDLSBank
 protected:
 	SOUNDBANKINFO m_BankInfo;
 	mpt::PathString m_szFileName;
-	UINT m_nType;
-	DWORD m_dwWavePoolOffset;
+	uint32 m_nType;
+	uint32 m_dwWavePoolOffset;
 	// DLS Information
-	UINT m_nInstruments, m_nWaveForms, m_nEnvelopes, m_nSamplesEx, m_nMaxWaveLink;
-	DWORD *m_pWaveForms;
+	uint32 m_nInstruments, m_nWaveForms, m_nEnvelopes, m_nSamplesEx, m_nMaxWaveLink;
+	uint32 *m_pWaveForms;
 	DLSINSTRUMENT *m_pInstruments;
 	DLSSAMPLEEX *m_pSamplesEx;
 	DLSENVELOPE m_Envelopes[DLSMAXENVELOPES];
@@ -134,32 +134,32 @@ public:
 	virtual ~CDLSBank();
 	void Destroy();
 	static bool IsDLSBank(const mpt::PathString &filename);
-	static DWORD MakeMelodicCode(UINT bank, UINT instr) { return ((bank << 16) | (instr));}
-	static DWORD MakeDrumCode(UINT rgn, UINT instr) { return (0x80000000 | (rgn << 16) | (instr));}
+	static uint32 MakeMelodicCode(uint32 bank, uint32 instr) { return ((bank << 16) | (instr));}
+	static uint32 MakeDrumCode(uint32 rgn, uint32 instr) { return (0x80000000 | (rgn << 16) | (instr));}
 
 public:
 	bool Open(const mpt::PathString &filename);
 	bool Open(FileReader file);
 	mpt::PathString GetFileName() const { return m_szFileName; }
-	UINT GetBankType() const { return m_nType; }
-	UINT GetBankInfo(SOUNDBANKINFO *pBankInfo=NULL) const { if (pBankInfo) *pBankInfo = m_BankInfo; return m_nType; }
+	uint32 GetBankType() const { return m_nType; }
+	uint32 GetBankInfo(SOUNDBANKINFO *pBankInfo=NULL) const { if (pBankInfo) *pBankInfo = m_BankInfo; return m_nType; }
 
 public:
-	UINT GetNumInstruments() const { return m_nInstruments; }
-	UINT GetNumSamples() const { return m_nWaveForms; }
-	DLSINSTRUMENT *GetInstrument(UINT iIns) { return (m_pInstruments) ? &m_pInstruments[iIns] : NULL; }
-	DLSINSTRUMENT *FindInstrument(bool bDrum, UINT nBank=0xFF, DWORD dwProgram=0xFF, DWORD dwKey=0xFF, UINT *pInsNo=NULL);
-	UINT GetRegionFromKey(UINT nIns, UINT nKey);
+	uint32 GetNumInstruments() const { return m_nInstruments; }
+	uint32 GetNumSamples() const { return m_nWaveForms; }
+	DLSINSTRUMENT *GetInstrument(uint32 iIns) { return (m_pInstruments) ? &m_pInstruments[iIns] : NULL; }
+	DLSINSTRUMENT *FindInstrument(bool bDrum, uint32 nBank=0xFF, uint32 dwProgram=0xFF, uint32 dwKey=0xFF, uint32 *pInsNo=NULL);
+	uint32 GetRegionFromKey(uint32 nIns, uint32 nKey);
 	bool FreeWaveForm(uint8 *p);
-	bool ExtractWaveForm(UINT nIns, UINT nRgn, uint8 **ppWave, DWORD *pLen);
-	bool ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, UINT nIns, UINT nRgn, int transpose=0);
-	bool ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, UINT nIns, UINT nDrumRgn);
-	const char *GetRegionName(UINT nIns, UINT nRgn) const;
+	bool ExtractWaveForm(uint32 nIns, uint32 nRgn, uint8 **ppWave, uint32 *pLen);
+	bool ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nIns, uint32 nRgn, int transpose=0);
+	bool ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, uint32 nIns, uint32 nDrumRgn);
+	const char *GetRegionName(uint32 nIns, uint32 nRgn) const;
 
 // Internal Loader Functions
 protected:
-	bool UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pchunk, DWORD dwMaxLen);
-	bool UpdateSF2PresetData(void *psf2info, void *pchunk, DWORD dwMaxLen);
+	bool UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pchunk, uint32 dwMaxLen);
+	bool UpdateSF2PresetData(void *psf2info, void *pchunk, uint32 dwMaxLen);
 	bool ConvertSF2ToDLS(void *psf2info);
 
 public:
@@ -167,7 +167,7 @@ public:
 	static LONG DLS32BitTimeCentsToMilliseconds(LONG lTimeCents);
 	static LONG DLS32BitRelativeGainToLinear(LONG lCentibels);	// 0dB = 0x10000
 	static LONG DLS32BitRelativeLinearToGain(LONG lGain);		// 0dB = 0x10000
-	static LONG DLSMidiVolumeToLinear(UINT nMidiVolume);		// [0-127] -> [0-0x10000]
+	static LONG DLSMidiVolumeToLinear(uint32 nMidiVolume);		// [0-127] -> [0-0x10000]
 };
 
 
