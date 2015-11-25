@@ -1137,6 +1137,8 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 		|| (fileHeader.formatVersion != 0x10 && fileHeader.formatVersion != 0x01) // why is this sometimes 0x01?
 		|| fileHeader.patternVersion != 0 // 255ch pattern version not supported (did anyone use this?)
 		|| (fileHeader.songType & 3) != 0
+		|| fileHeader.numChannelsPlay > MAX_BASECHANNELS
+		|| fileHeader.numChannelsReal > MAX_BASECHANNELS
 		|| std::max(fileHeader.numChannelsPlay, fileHeader.numChannelsReal) == 0)
 	{
 		return false;
@@ -1192,13 +1194,16 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			SAMPLEINDEX smp = sampleHeader.sampleNumber;
-			m_nSamples = std::max(m_nSamples, smp);
+			if(smp < MAX_SAMPLES)
+			{
+				m_nSamples = std::max(m_nSamples, smp);
 
-			mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.name);
-			sampleHeader.ConvertToMPT(Samples[smp]);
+				mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.name);
+				sampleHeader.ConvertToMPT(Samples[smp]);
 
-			file.Seek(sampleHeader.offset);
-			sampleHeader.GetSampleFormat().ReadSample(Samples[smp], file);
+				file.Seek(sampleHeader.offset);
+				sampleHeader.GetSampleFormat().ReadSample(Samples[smp], file);
+			}
 		}
 	}
 
