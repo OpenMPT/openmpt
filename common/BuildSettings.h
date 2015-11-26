@@ -422,10 +422,6 @@
 #define MPT_WITH_CHARSET_LOCALE // PathString requires locale charset
 #endif
 
-#if MPT_OS_WINDOWS && defined(MODPLUG_TRACKER)
-#define MPT_USE_WINDOWS_H
-#endif
-
 
 
 #if defined(MODPLUG_TRACKER)

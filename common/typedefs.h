@@ -460,22 +460,6 @@ STATIC_ASSERT(sizeof(float64) == 8);
 
 
 
-#if !defined(MPT_USE_WINDOWS_H)
-
-// openmpt assumes these type have exact WIN32 semantics
-
-namespace mpt { namespace Legacy {
-typedef uint8  BYTE;
-typedef uint16 WORD;
-typedef uint32 DWORD;
-typedef uint32 UINT;
-} } // namespace mpt::Legacy
-using namespace mpt::Legacy;
-
-#endif // !MPT_USE_WINDOWS_H
-
-
-
 #if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define MPT_PRINTF_FUNC(formatstringindex,varargsindex) __attribute__((format(printf, formatstringindex, varargsindex)))
 #else
