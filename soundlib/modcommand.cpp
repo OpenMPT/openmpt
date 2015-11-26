@@ -938,7 +938,10 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 		effect = VOLCMD_VIBRATODEPTH;
 		break;
 	case CMD_PANNING8:
-		param = std::min<PARAM>(64, param * 64 / 255);
+		if(param == 255)
+			param = 64;
+		else
+			param /= 4;
 		effect = VOLCMD_PANNING;
 		break;
 	case CMD_VOLUMESLIDE:

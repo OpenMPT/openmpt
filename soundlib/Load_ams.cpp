@@ -1001,11 +1001,11 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		if(sourceInstr == 0
 			|| --sourceInstr >= firstSample.size())
 		{
-				continue;
+			continue;
 		}
 
 		SAMPLEINDEX sourceSample = ((sampleSettings[smp] & sampleIndexMask) >> sampleIndexShift) + firstSample[sourceInstr];
-		if(sourceSample > GetNumSamples())
+		if(sourceSample > GetNumSamples() || Samples[sourceSample].pSample == nullptr)
 		{
 			continue;
 		}
@@ -1013,13 +1013,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		// Copy over original sample
 		ModSample &sample = Samples[smp + 1];
 		ModSample &source = Samples[sourceSample];
-		if(source.uFlags & CHN_16BIT)
-		{
-			sample.uFlags |= CHN_16BIT;
-		} else
-		{
-			sample.uFlags &= ~CHN_16BIT;
-		}
+		sample.uFlags.set(CHN_16BIT, source.uFlags[CHN_16BIT]);
 		sample.nLength = source.nLength;
 		if(sample.AllocateSample())
 		{
