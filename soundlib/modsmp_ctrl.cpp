@@ -264,7 +264,7 @@ void PrecomputeLoopsImpl(ModSample &smp, const CSoundFile &sndFile)
 	const int copySamples = numChannels * InterpolationMaxLookahead;
 	// Optimization: Put normal loop wraparound buffer right at the sample end if the normal loop ends there.
 	// Note that we can't do this for sustain loops, as we would get clicks at the sample end after releasing the loop.
-	const bool loopEndsAtSampleEnd = smp.uFlags[CHN_LOOP] && smp.nLoopEnd == smp.nLength;
+	const bool loopEndsAtSampleEnd = smp.uFlags[CHN_LOOP] && smp.nLoopEnd == smp.nLength && smp.nLength >= InterpolationMaxLookahead;
 	
 	T *sampleData = static_cast<T *>(smp.pSample);
 	T *afterSampleStart = sampleData + smp.nLength * numChannels;
@@ -531,7 +531,7 @@ float RemoveDCOffset(ModSample &smp,
 	dMin += dOffset;
 
 	// ... and that might cause distortion, so we will normalize this.
-	const double dAmplify = 1 / MAX(dMax, -dMin);
+	const double dAmplify = 1 / std::max(dMax, -dMin);
 
 	// step 2: centralize + normalize sample
 	dOffset *= dMaxAmplitude * dAmplify;

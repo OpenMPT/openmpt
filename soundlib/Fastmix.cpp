@@ -282,7 +282,7 @@ static inline void UpdateLookaheadPointers(const int8* &samplePointer, const int
 	// If there is no interpolation happening, there is no lookahead happening the sample read-out is exact.
 	if(chn.dwFlags[CHN_LOOP] && resamplingMode != MixFuncTable::ndxNoInterpolation)
 	{
-		const bool loopEndsAtSampleEnd = chn.pModSample->uFlags[CHN_LOOP] && chn.pModSample->nLoopEnd == chn.pModSample->nLength;
+		const bool loopEndsAtSampleEnd = chn.pModSample->uFlags[CHN_LOOP] && chn.pModSample->nLoopEnd == chn.pModSample->nLength && chn.pModSample->nLength >= InterpolationMaxLookahead;
 		const bool inSustainLoop = chn.InSustainLoop();
 
 		// Do not enable wraparound magic if we're previewing a custom loop!
