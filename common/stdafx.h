@@ -42,10 +42,6 @@
 #endif
 
 
-#if defined(MPT_USE_WINDOWS_H)
-#include <windows.h>
-#endif
-
 // this will be available everywhere
 
 #include "../common/typedefs.h"
