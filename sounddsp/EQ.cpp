@@ -57,32 +57,15 @@ static const EQBANDSTRUCT gEQDefaults[MAX_EQ_BANDS*2] =
 #pragma warning(disable:4100)
 #endif // MPT_COMPILER_MSVC
 
-STATIC_ASSERT(offsetof(EQBANDSTRUCT, a0) == 0);
-#define PBS_A0	DWORD PTR [eax]
-
-STATIC_ASSERT(offsetof(EQBANDSTRUCT, a1) == 4);
-#define PBS_A1	DWORD PTR [eax+4]
-
-STATIC_ASSERT(offsetof(EQBANDSTRUCT, a2) == 8);
-#define PBS_A2	DWORD PTR [eax+8]
-
-STATIC_ASSERT(offsetof(EQBANDSTRUCT, b1) == 12);
-#define PBS_B1	DWORD PTR [eax+12]
-
-STATIC_ASSERT(offsetof(EQBANDSTRUCT, b2) == 16);
-#define PBS_B2	DWORD PTR [eax+16]
-
-STATIC_ASSERT(offsetof(EQBANDSTRUCT, x1) == 20);
-#define PBS_X1	DWORD PTR [eax+20]
-
-STATIC_ASSERT(offsetof(EQBANDSTRUCT, x2) == 24);
-#define PBS_X2	DWORD PTR [eax+24]
-
-STATIC_ASSERT(offsetof(EQBANDSTRUCT, y1) == 28);
-#define PBS_Y1	DWORD PTR [eax+28]
-
-STATIC_ASSERT(offsetof(EQBANDSTRUCT, y2) == 32);
-#define PBS_Y2	DWORD PTR [eax+32]
+#define PBS_A0	DWORD PTR [eax + EQBANDSTRUCT.a0]
+#define PBS_A1	DWORD PTR [eax + EQBANDSTRUCT.a1]
+#define PBS_A2	DWORD PTR [eax + EQBANDSTRUCT.a2]
+#define PBS_B1	DWORD PTR [eax + EQBANDSTRUCT.b1]
+#define PBS_B2	DWORD PTR [eax + EQBANDSTRUCT.b2]
+#define PBS_X1	DWORD PTR [eax + EQBANDSTRUCT.x1]
+#define PBS_X2	DWORD PTR [eax + EQBANDSTRUCT.x2]
+#define PBS_Y1	DWORD PTR [eax + EQBANDSTRUCT.y1]
+#define PBS_Y2	DWORD PTR [eax + EQBANDSTRUCT.y2]
 
 static void EQFilter(EQBANDSTRUCT *pbs, float32 *pbuffer, UINT nCount)
 //--------------------------------------------------------------------
