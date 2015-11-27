@@ -13,7 +13,7 @@
 
 #if defined(MPT_WITH_ATOMIC)
 
-#if MPT_COMPILER_GENERIC
+#if !(MPT_MSVC_BEFORE(2012,0) || MPT_GCC_BEFORE(4,4,0) || MPT_CLANG_BEFORE(3,1,0))
 #include <atomic>
 #endif // MPT_COMPILER
 
@@ -30,7 +30,7 @@ namespace mpt
 {
 
 
-#if MPT_COMPILER_CLANG || MPT_COMPILER_GCC
+#if MPT_GCC_BEFORE(4,4,0) || MPT_CLANG_BEFORE(3,1,0)
 
 template < typename T >
 class atomic_impl {
@@ -112,7 +112,7 @@ public:
 
 }; // class atomic
 
-#elif MPT_COMPILER_MSVC
+#elif MPT_MSVC_BEFORE(2012,0)
 	
 template < typename T >
 class atomic_impl_32 {
@@ -285,15 +285,15 @@ public:
 
 }; // class atomic_impl_ptr
 
-#endif
+#endif // X86 || AMD64
 
 #endif // MPT_COMPILER
 
-#if MPT_COMPILER_CLANG || MPT_COMPILER_GCC
+#if MPT_GCC_BEFORE(4,4,0) || MPT_CLANG_BEFORE(3,1,0)
 typedef mpt::atomic_impl<uint32> atomic_uint32_t;
 typedef mpt::atomic_impl<int32> atomic_int32_t;
 #define MPT_ATOMIC_PTR mpt::atomic_impl // use as MPT_ATOMIC_PTR<T*>
-#elif MPT_COMPILER_MSVC
+#elif MPT_MSVC_BEFORE(2012,0)
 typedef mpt::atomic_impl_32<uint32> atomic_uint32_t;
 typedef mpt::atomic_impl_32<int32> atomic_int32_t;
 #define MPT_ATOMIC_PTR mpt::atomic_impl_ptr // use as MPT_ATOMIC_PTR<T*>
