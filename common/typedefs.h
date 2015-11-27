@@ -62,16 +62,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#if MPT_COMPILER_MSVC
-#define ALIGN(n) __declspec(align(n))
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
-#define ALIGN(n) __attribute__((aligned(n)))
-#else
-#define ALIGN(n) alignas(n)
-#endif
-
-
-
 // Advanced inline attributes
 #if MPT_COMPILER_MSVC
 #define forceinline __forceinline
