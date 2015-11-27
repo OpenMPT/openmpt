@@ -17,7 +17,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #define MAX_EQ_BANDS	6
 
-typedef struct ALIGN(4) _EQBANDSTRUCT
+typedef struct _EQBANDSTRUCT
 {
 	float32 a0;
 	float32 a1;
