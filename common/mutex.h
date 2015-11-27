@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef MODPLUG_TRACKER
+#if defined(MPT_WITH_THREAD)
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
@@ -18,11 +18,11 @@
 #else
 #include <pthread.h>
 #endif
-#endif // MODPLUG_TRACKER
+#endif // MPT_WITH_THREAD
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef MODPLUG_TRACKER
+#if defined(MPT_WITH_THREAD)
 
 namespace Util {
 
@@ -100,6 +100,6 @@ public:
 
 } // namespace Util
 
-#endif // MODPLUG_TRACKER
+#endif // MPT_WITH_THREAD
 
 OPENMPT_NAMESPACE_END

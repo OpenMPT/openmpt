@@ -394,6 +394,14 @@
 #define MPT_WITH_FILEIO // Tracker requires disk file io
 #endif
 
+#if defined(MODPLUG_TRACKER) && !defined(MPT_WITH_THREAD)
+#define MPT_WITH_THREAD // Tracker requires threads
+#endif
+
+#if defined(MODPLUG_TRACKER) && !defined(MPT_WITH_ATOMIC)
+#define MPT_WITH_ATOMIC // Tracker requires threads
+#endif
+
 #if defined(MPT_EXTERNAL_SAMPLES) && !defined(MPT_WITH_FILEIO)
 #define MPT_WITH_FILEIO // External samples require disk file io
 #endif
