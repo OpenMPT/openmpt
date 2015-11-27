@@ -11,16 +11,19 @@
 
 #pragma once
 
+#if defined(MPT_WITH_ATOMIC)
 
 #if MPT_COMPILER_GENERIC
 #include <atomic>
 #endif // MPT_COMPILER
 
+#endif // MPT_WITH_ATOMIC
+
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MODPLUG_TRACKER)
+#if defined(MPT_WITH_ATOMIC)
 
 
 namespace mpt
@@ -304,7 +307,7 @@ typedef std::atomic<int32> atomic_int32_t;
 } // namespace mpt
 
 
-#endif // MODPLUG_TRACKER
+#endif // MPT_WITH_ATOMIC
 
 
 OPENMPT_NAMESPACE_END
