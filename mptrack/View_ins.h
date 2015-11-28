@@ -107,7 +107,7 @@ protected:
 	bool EnvSetCarry(bool enable) const {return EnvSetFlag(ENV_CARRY, enable);};
 
 	// Misc.
-	bool EnvSetValue(int nPoint, int nTick = -1, int nValue = -1, bool moveTail = false);
+	bool EnvSetValue(int nPoint, int nTick, int nValue, bool moveTail = false);
 	bool CanMovePoint(UINT envPoint, int step);
 
 	// Set loop points
@@ -128,8 +128,7 @@ protected:
 	void EnvKbdSelectPoint(DragPoints point);
 	void EnvKbdMovePointLeft();
 	void EnvKbdMovePointRight();
-	void EnvKbdMovePointUp(BYTE stepsize = 1);
-	void EnvKbdMovePointDown(BYTE stepsize = 1);
+	void EnvKbdMovePointVertical(int stepsize);
 	void EnvKbdInsertPoint();
 	void EnvKbdRemovePoint();
 	void EnvKbdSetLoopStart();
@@ -162,6 +161,8 @@ protected:
 	void UpdateNcButtonState();
 	void PlayNote(ModCommand::NOTE note);
 	void DrawGrid(CDC *memDC, UINT speed);
+	void UpdateIndicator();
+	void UpdateIndicator(int tick, int val);
 
 	void OnEnvZoomIn() { EnvSetZoom(m_fZoom + 1); };
 	void OnEnvZoomOut() { EnvSetZoom(m_fZoom - 1); };
