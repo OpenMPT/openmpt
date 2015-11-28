@@ -306,7 +306,11 @@ LIBOPENMPT_API void openmpt_module_destroy( openmpt_module * mod );
  */
 #define OPENMPT_MODULE_RENDER_VOLUMERAMPING_STRENGTH     4
 
-/*! \brief Parameter index to use with openmpt_module_get_pattern_row_channel_command, openmpt_module_format_pattern_row_channel_command and openmpt_module_highlight_pattern_row_channel_command
+/**
+ * \defgroup openmpt_module_command_index Pattern cell indices
+ *
+ * \brief Parameter index to use with openmpt_module_get_pattern_row_channel_command, openmpt_module_format_pattern_row_channel_command and openmpt_module_highlight_pattern_row_channel_command
+ * @{
  */
 #define OPENMPT_MODULE_COMMAND_NOTE         0
 #define OPENMPT_MODULE_COMMAND_INSTRUMENT   1
@@ -314,6 +318,7 @@ LIBOPENMPT_API void openmpt_module_destroy( openmpt_module * mod );
 #define OPENMPT_MODULE_COMMAND_EFFECT       3
 #define OPENMPT_MODULE_COMMAND_VOLUME       4
 #define OPENMPT_MODULE_COMMAND_PARAMETER    5
+/** @}*/
 
 /*! \brief Select a subsong from a multi-song module
  *
