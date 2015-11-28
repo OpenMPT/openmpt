@@ -71,6 +71,7 @@ SoundDevice::IBase* Manager::ConstructSoundDevice(const SoundDevice::Info &info)
 void Manager::ReEnumerate()
 //-------------------------
 {
+	MPT_TRACE();
 	m_SoundDevices.clear();
 	m_DeviceUnavailable.clear();
 	m_DeviceFactoryMethods.clear();
@@ -187,6 +188,7 @@ SoundDevice::Manager::GlobalID Manager::GetGlobalID(SoundDevice::Identifier iden
 SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::Manager::GlobalID id) const
 //--------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	if(id > m_SoundDevices.size())
 	{
 		return SoundDevice::Info();
@@ -198,6 +200,7 @@ SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::Manager::GlobalID id) con
 SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::Identifier identifier) const
 //---------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	if(m_SoundDevices.empty())
 	{
 		return SoundDevice::Info();
@@ -220,6 +223,7 @@ SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::Identifier identifier) co
 SoundDevice::Info Manager::FindDeviceInfoBestMatch(SoundDevice::Identifier identifier, bool preferSameType)
 //---------------------------------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	if(m_SoundDevices.empty())
 	{
 		return SoundDevice::Info();
@@ -267,6 +271,7 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(SoundDevice::Identifier ident
 bool Manager::OpenDriverSettings(SoundDevice::Identifier identifier, SoundDevice::IMessageReceiver *messageReceiver, SoundDevice::IBase *currentSoundDevice)
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	bool result = false;
 	if(currentSoundDevice && FindDeviceInfo(identifier).IsValid() && (currentSoundDevice->GetDeviceInfo().GetIdentifier() == identifier))
 	{
@@ -288,6 +293,7 @@ bool Manager::OpenDriverSettings(SoundDevice::Identifier identifier, SoundDevice
 SoundDevice::Caps Manager::GetDeviceCaps(SoundDevice::Identifier identifier, SoundDevice::IBase *currentSoundDevice)
 //------------------------------------------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	if(m_DeviceCaps.find(identifier) == m_DeviceCaps.end())
 	{
 		if(currentSoundDevice && FindDeviceInfo(identifier).IsValid() && (currentSoundDevice->GetDeviceInfo().GetIdentifier() == identifier))
@@ -313,6 +319,7 @@ SoundDevice::Caps Manager::GetDeviceCaps(SoundDevice::Identifier identifier, Sou
 SoundDevice::DynamicCaps Manager::GetDeviceDynamicCaps(SoundDevice::Identifier identifier, const std::vector<uint32> &baseSampleRates, SoundDevice::IMessageReceiver *messageReceiver, SoundDevice::IBase *currentSoundDevice, bool update)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	if((m_DeviceDynamicCaps.find(identifier) == m_DeviceDynamicCaps.end()) || update)
 	{
 		if(currentSoundDevice && FindDeviceInfo(identifier).IsValid() && (currentSoundDevice->GetDeviceInfo().GetIdentifier() == identifier))
@@ -347,6 +354,7 @@ SoundDevice::DynamicCaps Manager::GetDeviceDynamicCaps(SoundDevice::Identifier i
 SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifier)
 //---------------------------------------------------------------------------------
 {
+	MPT_TRACE();
 	const SoundDevice::Info info = FindDeviceInfo(identifier);
 	if(!info.IsValid())
 	{
