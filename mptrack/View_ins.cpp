@@ -1994,7 +1994,8 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 				if (pMainFrm->GetModPlaying() != pModDoc)
 				{
 					sndFile.m_SongFlags.set(SONG_PAUSED);
-					pMainFrm->PlayMod(pModDoc);
+					if(!pMainFrm->PlayMod(pModDoc))
+						return;
 				}
 				CriticalSection cs;
 				pModDoc->CheckNNA(note, m_nInstrument, m_baPlayingNote);
