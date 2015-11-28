@@ -126,7 +126,7 @@ class CEditCommand: public CDialog
 //================================
 {
 protected:
-	CComboBox cbnNote, cbnInstr, cbnVolCmd, cbnCommand;
+	CComboBox cbnNote, cbnInstr, cbnVolCmd, cbnCommand, cbnPlugParam;
 	CSliderCtrl sldVolParam, sldParam;
 	CSoundFile &sndFile;
 	const CModSpecifications *oldSpecs;
@@ -143,10 +143,11 @@ public:
 	bool ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor, CWnd *parent);
 
 protected:
-	void InitAll() { InitNote(); InitVolume(); InitEffect(); }
+	void InitAll() { InitNote(); InitVolume(); InitEffect(); InitPlugParam(); }
 	void InitNote();
 	void InitVolume();
 	void InitEffect();
+	void InitPlugParam();
 
 	void UpdateVolCmdRange();
 	void UpdateVolCmdValue();
@@ -166,6 +167,7 @@ protected:
 	afx_msg void OnNoteChanged();
 	afx_msg void OnVolCmdChanged();
 	afx_msg void OnCommandChanged();
+	afx_msg void OnPlugParamChanged();
 	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
