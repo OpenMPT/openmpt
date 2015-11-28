@@ -25,15 +25,15 @@ static const uint16 bitRates[2][3][15] =
 {
 	// MPEG 1
 	{
-		{ 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448 },	// Layer1
-		{ 0, 32, 48, 56,  64,  80,  96, 112, 128, 160, 192, 224, 256, 320, 384 },	// Layer2
-		{ 0, 32, 40, 48,  56,  64,  80,  96, 112, 128, 160, 192, 224, 256, 320 }	// Layer3
+		{ 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448 },	// Layer 1
+		{ 0, 32, 48, 56,  64,  80,  96, 112, 128, 160, 192, 224, 256, 320, 384 },	// Layer 2
+		{ 0, 32, 40, 48,  56,  64,  80,  96, 112, 128, 160, 192, 224, 256, 320 }	// Layer 3
 	},
 	// MPEG 2 / 2.5
 	{
-		{ 0, 32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 192, 224, 256 },	// Layer1
-		{ 0,  8, 16, 24, 32, 40, 48,  56,  64,  80,  96, 112, 128, 144, 160 },	// Layer2
-		{ 0,  8, 16, 24, 32, 40, 48,  56,  64,  80,  96, 112, 128, 144, 160 }	// Layer3
+		{ 0, 32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 192, 224, 256 },	// Layer 1
+		{ 0,  8, 16, 24, 32, 40, 48,  56,  64,  80,  96, 112, 128, 144, 160 },	// Layer 2
+		{ 0,  8, 16, 24, 32, 40, 48,  56,  64,  80,  96, 112, 128, 144, 160 }	// Layer 3
 	}
 };
 // Sampling rates for each MPEG version and all three layers
@@ -61,7 +61,11 @@ static const uint8 sideInfoSize[2][2] =
 bool MPEGFrame::IsMPEGHeader(const uint8 (&header)[3])
 //----------------------------------------------------
 {
-	return header[0] == 0xFF && (header[1] & 0xE0) == 0xE0 && (header[1] & 0x18) != 0x08 && (header[1] & 0x06) != 0x00 && (header[2] & 0x0C) != 0x0C && (header[2] & 0xF0) != 0xF0;
+	return header[0] == 0xFF && (header[1] & 0xE0) == 0xE0	// Sync
+		&& (header[1] & 0x18) != 0x08	// Invalid MPEG version
+		&& (header[1] & 0x06) != 0x00	// Invalid MPEG layer
+		&& (header[2] & 0x0C) != 0x0C	// Invalid frequency
+		&& (header[2] & 0xF0) != 0xF0;	// Invalid bitrate
 }
 
 
@@ -105,6 +109,7 @@ MPEGFrame::MPEGFrame(FileReader &file)
 
 	uint8 magic[4];
 	file.ReadArray(magic);
+	// This is all we really need to know for our purposes in the MO3 decoder.
 	isLAME = !memcmp(magic, "Info", 4) || !memcmp(magic, "Xing", 4);
 }
 

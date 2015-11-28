@@ -204,7 +204,13 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 	if(mmh.blktable > file.GetLength()) return false;
 	if(mmh.blktable + 4 * mmh.nblocks > file.GetLength()) return false;
 
-	unpackedData.resize(mmh.filesize);
+	try
+	{
+		unpackedData.resize(mmh.filesize);
+	} catch(MPTMemoryException)
+	{
+		return false;
+	}
 
 	for (uint32 nBlock=0; nBlock<mmh.nblocks; nBlock++)
 	{
@@ -720,12 +726,12 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
 #ifdef MMCMP_LOG
 	Log("XPK detected (SrcLen=%d DstLen=%d) filesize=%d\n", header.SrcLen, header.DstLen, file.GetLength());
 #endif
-	unpackedData.resize(header.DstLen);
 	bool result = false;
 	try
 	{
+		unpackedData.resize(header.DstLen);
 		result = XPK_DoUnpack(reinterpret_cast<const uint8 *>(file.GetRawData()), header.SrcLen + 8 - sizeof(XPKFILEHEADER), reinterpret_cast<uint8 *>(&(unpackedData[0])), header.DstLen);
-	} catch(XPK_error&)
+	} catch(...)
 	{
 		return false;
 	}
@@ -848,7 +854,13 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
 	dstLen |= file.ReadUint8() << 8;
 	dstLen |= file.ReadUint8() << 0;
 	if(dstLen == 0) return false;
-	unpackedData.resize(dstLen);
+	try
+	{
+		unpackedData.resize(dstLen);
+	} catch(MPTMemoryException)
+	{
+		return false;
+	}
 	file.Seek(4);
 	bool result = PP20_DoUnpack(reinterpret_cast<const uint8 *>(file.GetRawData()), static_cast<uint32>(file.GetLength() - 4), reinterpret_cast<uint8 *>(&(unpackedData[0])), dstLen);
 
