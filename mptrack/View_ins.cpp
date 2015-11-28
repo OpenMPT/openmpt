@@ -338,15 +338,12 @@ bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue, bool moveTa
 				ok = true;
 			}
 		}
-		if(nValue >= 0)
+		const int maxVal = (GetDocument()->GetModType() != MOD_TYPE_XM || m_nEnv != ENV_PANNING) ? 64 : 63;
+		Limit(nValue, 0, maxVal);
+		if(nValue != envelope->Values[nPoint])
 		{
-			const int maxVal = (GetDocument()->GetModType() != MOD_TYPE_XM || m_nEnv != ENV_PANNING) ? 64 : 63;
-			LimitMax(nValue, maxVal);
-			if(nValue != envelope->Values[nPoint])
-			{
-				envelope->Values[nPoint] = (uint8)nValue;
-				ok = true;
-			}
+			envelope->Values[nPoint] = (uint8)nValue;
+			ok = true;
 		}
 	}
 
@@ -1454,11 +1451,9 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 //------------------------------------------------
 {
 	ModInstrument *pIns = GetInstrumentPtr();
-	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if (pIns == nullptr || pEnv == nullptr) return;
+	if (pIns == nullptr) return;
 
 	bool bSplitCursor = false;
-	CHAR s[256];
 
 	if ((m_nBtnMouseOver < ENV_LEFTBAR_BUTTONS) || (m_dwStatus & INSSTATUS_NCLBTNDOWN))
 	{
@@ -1469,25 +1464,9 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 		if (pMainFrm) pMainFrm->SetHelpText("");
 	}
 	int nTick = ScreenToTick(pt.x);
-	int nVal = ScreenToValue(pt.y);
-	nVal = Clamp(nVal, ENVELOPE_MIN, ENVELOPE_MAX);
+	int nVal = Clamp(ScreenToValue(pt.y), ENVELOPE_MIN, ENVELOPE_MAX);
 	if (nTick < 0) nTick = 0;
-	if (nTick <= EnvGetReleaseNodeTick() + 1 || EnvGetReleaseNode() == ENV_RELEASE_NODE_UNSET)
-	{
-		// ticks before release node (or no release node)
-		const int displayVal = (m_nEnv != ENV_VOLUME && !(m_nEnv == ENV_PITCH && pIns->PitchEnv.dwFlags[ENV_FILTER])) ? nVal - 32 : nVal;
-		if(m_nEnv != ENV_PANNING)
-			wsprintf(s, "Tick %d, [%d]", nTick, displayVal);
-		else	// panning envelope: display right/center/left chars
-			wsprintf(s, "Tick %d, [%d %c]", nTick, abs(displayVal), displayVal > 0 ? 'R' : (displayVal < 0 ? 'L' : 'C'));
-	} else
-	{
-		// ticks after release node
-		int displayVal = (nVal - EnvGetReleaseNodeValue()) * 2;
-		displayVal = (m_nEnv != ENV_VOLUME) ? displayVal - 32 : displayVal;
-		wsprintf(s, "Tick %d, [Rel%c%d]",  nTick, displayVal > 0 ? '+' : '-', abs(displayVal));
-	}
-	UpdateIndicator(s);
+	UpdateIndicator(nTick, nVal);
 
 	if ((m_dwStatus & INSSTATUS_DRAGGING) && (m_nDragItem))
 	{
@@ -1599,6 +1578,52 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 }
 
 
+
+void CViewInstrument::UpdateIndicator()
+//-------------------------------------
+{
+	InstrumentEnvelope *pEnv = GetEnvelopePtr();
+	if(pEnv == nullptr || !m_nDragItem) return;
+
+	uint32 point;
+	if(m_nDragItem == ENV_DRAGLOOPSTART) point = pEnv->nLoopStart;
+	else if(m_nDragItem == ENV_DRAGLOOPEND) point = pEnv->nLoopEnd;
+	else if(m_nDragItem == ENV_DRAGSUSTAINSTART) point = pEnv->nSustainStart;
+	else if(m_nDragItem == ENV_DRAGSUSTAINEND) point = pEnv->nSustainEnd;
+	else point = m_nDragItem - 1;
+
+	if(point < pEnv->nNodes)
+	{
+		UpdateIndicator(pEnv->Ticks[point], pEnv->Values[point]);
+	}
+}
+
+
+void CViewInstrument::UpdateIndicator(int tick, int val)
+//------------------------------------------------------
+{
+	ModInstrument *pIns = GetInstrumentPtr();
+	if (pIns == nullptr) return;
+	TCHAR s[64];
+	if (tick <= EnvGetReleaseNodeTick() + 1 || EnvGetReleaseNode() == ENV_RELEASE_NODE_UNSET)
+	{
+		// ticks before release node (or no release node)
+		const int displayVal = (m_nEnv != ENV_VOLUME && !(m_nEnv == ENV_PITCH && pIns->PitchEnv.dwFlags[ENV_FILTER])) ? val - 32 : val;
+		if(m_nEnv != ENV_PANNING)
+			wsprintf(s, _T("Tick %d, [%d]"), tick, displayVal);
+		else	// panning envelope: display right/center/left chars
+			wsprintf(s, _T("Tick %d, [%d %c]"), tick, abs(displayVal), displayVal > 0 ? _T('R') : (displayVal < 0 ? _T('L') : _T('C')));
+	} else
+	{
+		// ticks after release node
+		int displayVal = (val - EnvGetReleaseNodeValue()) * 2;
+		displayVal = (m_nEnv != ENV_VOLUME) ? displayVal - 32 : displayVal;
+		wsprintf(s, _T("Tick %d, [Rel%c%d]"),  tick, displayVal > 0 ? _T('+') : _T('-'), abs(displayVal));
+	}
+	CModScrollView::UpdateIndicator(s);
+}
+
+
 void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 //--------------------------------------------------
 {
@@ -1678,6 +1703,9 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 				{
 					InvalidateRect(NULL, FALSE);
 				}
+			} else if(oldDragItem)
+			{
+				InvalidateRect(NULL, FALSE);
 			}
 		}
 	}
@@ -2242,10 +2270,10 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		case kcInstrumentEnvelopePointNext:				EnvKbdSelectPoint(ENV_DRAGNEXT); return wParam;
 		case kcInstrumentEnvelopePointMoveLeft:			EnvKbdMovePointLeft(); return wParam;
 		case kcInstrumentEnvelopePointMoveRight:		EnvKbdMovePointRight(); return wParam;
-		case kcInstrumentEnvelopePointMoveUp:			EnvKbdMovePointUp(1); return wParam;
-		case kcInstrumentEnvelopePointMoveDown:			EnvKbdMovePointDown(1); return wParam;
-		case kcInstrumentEnvelopePointMoveUp8:			EnvKbdMovePointUp(8); return wParam;
-		case kcInstrumentEnvelopePointMoveDown8:		EnvKbdMovePointDown(8); return wParam;
+		case kcInstrumentEnvelopePointMoveUp:			EnvKbdMovePointVertical(1); return wParam;
+		case kcInstrumentEnvelopePointMoveDown:			EnvKbdMovePointVertical(-1); return wParam;
+		case kcInstrumentEnvelopePointMoveUp8:			EnvKbdMovePointVertical(8); return wParam;
+		case kcInstrumentEnvelopePointMoveDown8:		EnvKbdMovePointVertical(-8); return wParam;
 		case kcInstrumentEnvelopePointInsert:			EnvKbdInsertPoint(); return wParam;
 		case kcInstrumentEnvelopePointRemove:			EnvKbdRemovePoint(); return wParam;
 		case kcInstrumentEnvelopeSetLoopStart:			EnvKbdSetLoopStart(); return wParam;
@@ -2340,6 +2368,7 @@ void CViewInstrument::EnvKbdSelectPoint(DragPoints point)
 			m_nDragItem++;
 		break;
 	}
+	UpdateIndicator();
 	InvalidateRect(NULL, FALSE);
 }
 
@@ -2379,7 +2408,7 @@ void CViewInstrument::EnvKbdMovePointLeft()
 			return;
 		pEnv->Ticks[m_nDragItem - 1]--;
 	}
-
+	UpdateIndicator();
 	SetModified(InstrumentHint().Envelope(), true);
 }
 
@@ -2419,37 +2448,24 @@ void CViewInstrument::EnvKbdMovePointRight()
 			return;
 		pEnv->Ticks[m_nDragItem - 1]++;
 	}
-
+	UpdateIndicator();
 	SetModified(InstrumentHint().Envelope(), true);
 }
 
 
-void CViewInstrument::EnvKbdMovePointUp(BYTE stepsize)
-//----------------------------------------------------
+void CViewInstrument::EnvKbdMovePointVertical(int stepsize)
+//---------------------------------------------------------
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
-	if(pEnv->Values[m_nDragItem - 1] <= ENVELOPE_MAX - stepsize)
-		pEnv->Values[m_nDragItem - 1] += stepsize;
-	else
-		pEnv->Values[m_nDragItem - 1] = ENVELOPE_MAX;
-
-	SetModified(InstrumentHint().Envelope(), true);
+	int val = pEnv->Values[m_nDragItem - 1] + stepsize;
+	if(EnvSetValue(m_nDragItem - 1, -1, val, false))
+	{
+		UpdateIndicator();
+		SetModified(InstrumentHint().Envelope(), true);
+	}
 }
 
-
-void CViewInstrument::EnvKbdMovePointDown(BYTE stepsize)
-//------------------------------------------------------
-{
-	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
-	if(pEnv->Values[m_nDragItem - 1] >= ENVELOPE_MIN + stepsize)
-		pEnv->Values[m_nDragItem - 1] -= stepsize;
-	else
-		pEnv->Values[m_nDragItem - 1] = ENVELOPE_MIN;
-
-	SetModified(InstrumentHint().Envelope(), true);
-}
 
 void CViewInstrument::EnvKbdInsertPoint()
 //---------------------------------------
@@ -2468,6 +2484,7 @@ void CViewInstrument::EnvKbdInsertPoint()
 
 	UINT newPoint = EnvInsertPoint(newTick, newVal);
 	if(newPoint > 0) m_nDragItem = newPoint;
+	UpdateIndicator();
 }
 
 
@@ -2478,6 +2495,7 @@ void CViewInstrument::EnvKbdRemovePoint()
 	if(pEnv == nullptr || !IsDragItemEnvPoint() || pEnv->nNodes == 0) return;
 	if(m_nDragItem > pEnv->nNodes) m_nDragItem = pEnv->nNodes;
 	EnvRemovePoint(m_nDragItem - 1);
+	UpdateIndicator();
 }
 
 
@@ -2542,6 +2560,7 @@ void CViewInstrument::EnvKbdToggleReleaseNode()
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(EnvToggleReleaseNode(m_nDragItem - 1))
 	{
+		UpdateIndicator();
 		SetModified(InstrumentHint().Envelope(), true);
 	}
 }
