@@ -663,6 +663,7 @@ BEGIN_MESSAGE_MAP(CEditCommand, CDialog)
 	ON_CBN_SELCHANGE(IDC_COMBO2,	OnNoteChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO3,	OnVolCmdChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO4,	OnCommandChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO5,	OnPlugParamChanged)
 	ON_WM_HSCROLL()
 END_MESSAGE_MAP()
 
@@ -676,6 +677,7 @@ void CEditCommand::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO2,	cbnInstr);
 	DDX_Control(pDX, IDC_COMBO3,	cbnVolCmd);
 	DDX_Control(pDX, IDC_COMBO4,	cbnCommand);
+	DDX_Control(pDX, IDC_COMBO5,	cbnPlugParam);
 	DDX_Control(pDX, IDC_SLIDER1,	sldVolParam);
 	DDX_Control(pDX, IDC_SLIDER2,	sldParam);
 	//}}AFX_DATA_MAP
@@ -734,7 +736,7 @@ bool CEditCommand::ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor,
 		break;
 	case PatternCursor::volumeColumn:
 		if(m->IsPcNote())
-			cbnCommand.SetFocus();
+			cbnPlugParam.SetFocus();
 		else
 			cbnVolCmd.SetFocus();
 		break;
@@ -870,44 +872,61 @@ void CEditCommand::InitVolume()
 void CEditCommand::InitEffect()
 //-----------------------------
 {
+	if(m->IsPcNote())
+	{
+		cbnCommand.ShowWindow(SW_HIDE);
+		return;
+	}
+	cbnCommand.ShowWindow(SW_SHOW);
 	xParam = 0;
 	xMultiplier = 1;
 	getXParam(m->command, editPos.pattern, editPos.row, editPos.channel, sndFile, xParam, xMultiplier);
 
 	cbnCommand.SetRedraw(FALSE);
 	cbnCommand.ResetContent();
-	if(m->IsPcNote())
-	{
-		// Plugin param control note
-		if(m->instr > 0 && m->instr <= MAX_MIXPLUGINS)
-		{
-			cbnCommand.ModifyStyle(CBS_SORT, 0);	// Y U NO WORK?
-			AddPluginParameternamesToCombobox(cbnCommand, sndFile.m_MixPlugins[m->instr - 1]);
-			cbnCommand.SetCurSel(m->GetValueVolCol());
-		}
-	} else
-	{
-		// Normal effect
-		uint32 numfx = effectInfo.GetNumEffects();
-		uint32 fxndx = effectInfo.GetIndexFromEffect(m->command, m->param);
-		cbnCommand.ModifyStyle(0, CBS_SORT);
-		cbnCommand.SetItemData(cbnCommand.AddString(" None"), (DWORD_PTR)-1);
-		if(m->command == CMD_NONE) cbnCommand.SetCurSel(0);
+	uint32 numfx = effectInfo.GetNumEffects();
+	uint32 fxndx = effectInfo.GetIndexFromEffect(m->command, m->param);
+	cbnCommand.SetItemData(cbnCommand.AddString(" None"), (DWORD_PTR)-1);
+	if(m->command == CMD_NONE) cbnCommand.SetCurSel(0);
 
-		CHAR s[128];
-		for(uint32 i = 0; i < numfx; i++)
+	CHAR s[128];
+	for(uint32 i = 0; i < numfx; i++)
+	{
+		if(effectInfo.GetEffectInfo(i, s, true))
 		{
-			if(effectInfo.GetEffectInfo(i, s, true))
-			{
-				int k = cbnCommand.AddString(s);
-				cbnCommand.SetItemData(k, i);
-				if (i == fxndx) cbnCommand.SetCurSel(k);
-			}
+			int k = cbnCommand.AddString(s);
+			cbnCommand.SetItemData(k, i);
+			if (i == fxndx) cbnCommand.SetCurSel(k);
 		}
-		cbnCommand.ModifyStyle(CBS_SORT, 0);
 	}
 	UpdateEffectRange(false);
 	cbnCommand.SetRedraw(TRUE);
+	cbnCommand.Invalidate();
+}
+
+
+void CEditCommand::InitPlugParam()
+//--------------------------------
+{
+	if(!m->IsPcNote())
+	{
+		cbnPlugParam.ShowWindow(SW_HIDE);
+		return;
+	}
+	cbnPlugParam.ShowWindow(SW_SHOW);
+	
+	cbnPlugParam.SetRedraw(FALSE);
+	cbnPlugParam.ResetContent();
+	
+	if(m->instr > 0 && m->instr <= MAX_MIXPLUGINS)
+	{
+		AddPluginParameternamesToCombobox(cbnPlugParam, sndFile.m_MixPlugins[m->instr - 1]);
+		cbnPlugParam.SetCurSel(m->GetValueVolCol());
+	}
+	UpdateEffectRange(false);
+
+	cbnPlugParam.SetRedraw(TRUE);
+	cbnPlugParam.Invalidate();
 }
 
 
@@ -1053,55 +1072,55 @@ void CEditCommand::OnVolCmdChanged()
 void CEditCommand::OnCommandChanged()
 //-----------------------------------
 {
-	uint16 newPlugParam = m->GetValueVolCol();
 	ModCommand::COMMAND newCommand = m->command;
 	ModCommand::PARAM newParam = m->param;
 
 	int n = cbnCommand.GetCurSel();
 	if(n >= 0)
 	{
-		if(m->IsPcNote())
-		{
-			// Plugin param control note
-			newPlugParam = static_cast<uint16>(cbnCommand.GetItemData(n));
-		} else
-		{
-			// Process as effect
-			int ndx = cbnCommand.GetItemData(n);
-			newCommand = static_cast<ModCommand::COMMAND>((ndx >= 0) ? effectInfo.GetEffectFromIndex(ndx, newParam) : CMD_NONE);
-		}
-
+		int ndx = cbnCommand.GetItemData(n);
+		newCommand = static_cast<ModCommand::COMMAND>((ndx >= 0) ? effectInfo.GetEffectFromIndex(ndx, newParam) : CMD_NONE);
 	}
 
-	// -> CODE#0010
-	// -> DESC="add extended parameter mechanism to pattern effects"
 	if(newCommand == CMD_OFFSET || newCommand == CMD_PATTERNBREAK || newCommand == CMD_TEMPO || newCommand == CMD_XPARAM)
 	{
 		xParam = 0;
 		xMultiplier = 1;
 		getXParam(newCommand, editPos.pattern, editPos.row, editPos.channel, sndFile, xParam, xMultiplier);
 	}
-	// -! NEW_FEATURE#0010
 
-	if((!m->IsPcNote() && (m->command != newCommand || m->param != newParam))
-		|| (m->IsPcNote() && m->GetValueVolCol() != newPlugParam))
+	if(m->command != newCommand || m->param != newParam)
 	{
 		PrepareUndo("Effect Entry");
-		CModDoc *modDoc = sndFile.GetpModDoc();
-		if(m->IsPcNote())
+
+		m->command = newCommand;
+		if(newCommand != CMD_NONE)
 		{
-			m->SetValueVolCol(newPlugParam);
-		} else
-		{
-			m->command = newCommand;
-			if(newCommand != CMD_NONE)
-			{
-				m->param = static_cast<ModCommand::PARAM>(newParam);
-			}
+			m->param = newParam;
 		}
 		UpdateEffectRange(true);
 
-		modDoc->UpdateAllViews(NULL, RowHint(editPos.row), NULL);
+		sndFile.GetpModDoc()->UpdateAllViews(NULL, RowHint(editPos.row), NULL);
+	}
+}
+
+
+void CEditCommand::OnPlugParamChanged()
+//-------------------------------------
+{
+	uint16 newPlugParam = m->GetValueVolCol();
+
+	int n = cbnPlugParam.GetCurSel();
+	if(n >= 0)
+	{
+		newPlugParam = static_cast<uint16>(cbnPlugParam.GetItemData(n));
+	}
+
+	if(m->GetValueVolCol() != newPlugParam)
+	{
+		PrepareUndo("Effect Entry");
+		m->SetValueVolCol(newPlugParam);
+		sndFile.GetpModDoc()->UpdateAllViews(NULL, RowHint(editPos.row), NULL);
 	}
 }
 
