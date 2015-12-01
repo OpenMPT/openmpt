@@ -878,7 +878,7 @@ protected:
 public:
 	uint32 GetNumTicksOnCurrentRow() const
 	{
-		return (m_PlayState.m_nMusicSpeed  + m_PlayState.m_nFrameDelay) * MAX(m_PlayState.m_nPatternDelay, 1);
+		return (m_PlayState.m_nMusicSpeed  + m_PlayState.m_nFrameDelay) * std::max(m_PlayState.m_nPatternDelay, static_cast<uint32>(1));
 	}
 
 	bool DestroySample(SAMPLEINDEX nSample);
