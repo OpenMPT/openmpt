@@ -458,16 +458,6 @@ STATIC_ASSERT(sizeof(float64) == 8);
 
 
 
-#ifndef MAX
-#define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#endif
-
-#ifndef MIN
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-
-
-
 #if MPT_COMPILER_MSVC && defined(UNREFERENCED_PARAMETER)
 #define MPT_UNREFERENCED_PARAMETER(x) UNREFERENCED_PARAMETER(x)
 #else
