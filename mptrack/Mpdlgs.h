@@ -33,6 +33,7 @@ protected:
 	CComboBox m_CbnChannelMapping[NUM_CHANNELCOMBOBOXES];
 
 	SoundDevice::Identifier m_InitialDeviceIdentifier;
+
 	void SetInitialDevice();
 
 	void SetDevice(SoundDevice::Identifier dev, bool forceReload=false);
@@ -107,8 +108,13 @@ protected:
 
 	CSliderCtrl m_SliderPreAmp;
 
+	bool m_initialized : 1;
+
 public:
-	COptionsMixer():CPropertyPage(IDD_OPTIONS_MIXER) {}
+	COptionsMixer()
+		: CPropertyPage(IDD_OPTIONS_MIXER)
+		, m_initialized(false)
+	{}
 
 protected:
 	void UpdateRamping();
