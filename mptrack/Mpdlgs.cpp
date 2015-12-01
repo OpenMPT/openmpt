@@ -962,6 +962,7 @@ BOOL COptionsMixer::OnInitDialog()
 	// Resampler bandwidth
 	{
 		m_CEditWFIRCutoff.SetWindowText(mpt::ToCString(mpt::ToUString(TrackerSettings::Instance().ResamplerCutoffPercent)));
+		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1))->SetRange32(1, 99);
 	}
 
 	// Resampler filter window
@@ -973,6 +974,8 @@ BOOL COptionsMixer::OnInitDialog()
 	{
 		m_CEditRampUp.SetWindowText(mpt::ToCString(mpt::ToUString(TrackerSettings::Instance().GetMixerSettings().GetVolumeRampUpMicroseconds())));
 		m_CEditRampDown.SetWindowText(mpt::ToCString(mpt::ToUString(TrackerSettings::Instance().GetMixerSettings().GetVolumeRampDownMicroseconds())));
+		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN2))->SetRange32(0, int32_max);
+		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN3))->SetRange32(0, int32_max);
 		UpdateRamping();
 	}
 
@@ -1019,6 +1022,7 @@ BOOL COptionsMixer::OnInitDialog()
 	}
 
 	OnResamplerChanged();
+	m_initialized = true;
 
 	return TRUE;
 }
@@ -1075,18 +1079,22 @@ void COptionsMixer::OnResamplerChanged()
 			m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().ResamplerSubMode);
 			break;
 	}
+	CSpinButtonCtrl *spinWFIRCutoff = static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1));
 	switch(dwSrcMode)
 	{
 		case SRCMODE_POLYPHASE:
 			m_CEditWFIRCutoff.EnableWindow(TRUE);
+			spinWFIRCutoff->EnableWindow(TRUE);
 			m_CbnWFIRType.EnableWindow(FALSE);
 			break;
 		case SRCMODE_FIRFILTER:
 			m_CEditWFIRCutoff.EnableWindow(TRUE);
+			spinWFIRCutoff->EnableWindow(TRUE);
 			m_CbnWFIRType.EnableWindow(TRUE);
 			break;
 		default:
 			m_CEditWFIRCutoff.EnableWindow(FALSE);
+			spinWFIRCutoff->EnableWindow(FALSE);
 			m_CbnWFIRType.EnableWindow(FALSE);
 			break;
 	}
@@ -1097,6 +1105,8 @@ void COptionsMixer::OnResamplerChanged()
 void COptionsMixer::OnRampingChanged()
 //------------------------------------
 {
+	if(!m_initialized)
+		return;
 	UpdateRamping();
 	OnSettingsChanged();
 }
