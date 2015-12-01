@@ -356,7 +356,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 		const ORDERINDEX startIndex = Order.GetLength();
 		if(startIndex < ORDERINDEX_MAX)
 		{
-			LimitMax(numOrders, ORDERINDEX_MAX - startIndex);
+			LimitMax(numOrders, static_cast<ORDERINDEX>(ORDERINDEX_MAX - startIndex));
 			Order.resize(startIndex + numOrders + 1, Order.GetInvalidPatIndex());
 
 			for(uint16 ord = 0; ord < numOrders; ord++)
