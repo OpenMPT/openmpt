@@ -639,13 +639,12 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		ChnSettings[chn].dwFlags.set(CHN_SURROUND, subsongs[0].channelSurround[chn]);
 	}
 
-	m_madeWithTracker = "Epic MegaGames MASI (";
 	if(newFormat)
-		m_madeWithTracker += "New Version / Sinaria)";
+		m_madeWithTracker = "Epic MegaGames MASI (New Version / Sinaria)";
 	else
-		m_madeWithTracker += "New Version)";
+		m_madeWithTracker = "Epic MegaGames MASI (New Version)";
 
-	if(!(loadFlags & loadPatternData))
+	if(!(loadFlags & loadPatternData) || m_nChannels == 0)
 	{
 		return true;
 	}
@@ -695,7 +694,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				uint8 flags = rowChunk.ReadUint8();
 				uint8 channel = rowChunk.ReadUint8();
 				// Point to the correct channel
-				ModCommand &m = rowBase[MIN(m_nChannels - 1, channel)];
+				ModCommand &m = rowBase[std::min<CHANNELINDEX>(m_nChannels - 1, channel)];
 
 				if(flags & noteFlag)
 				{
