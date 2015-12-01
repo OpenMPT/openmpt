@@ -332,7 +332,6 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 			}
 		}
 	}
-	//rewbs.customKeys
 	//We handle keypresses before Windows has a chance to handle them (for alt etc..)
 	if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
 		(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
@@ -349,7 +348,6 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 		if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
 			return true; // Mapped to a command, no need to pass message on.
 	}
-	//end rewbs.customKeys
 	return CTreeCtrl::PreTranslateMessage(pMsg);
 }
 
@@ -976,17 +974,18 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				hAncestorNode = info.tiSequences[nSeq];
 			}
 
+			const ORDERINDEX ordLength = sndFile.Order.GetSequence(nSeq).GetLengthTailTrimmed();
 			// If there are items past the new sequence length, delete them.
-			for(size_t nOrd = sndFile.Order.GetSequence(nSeq).GetLengthTailTrimmed(); nOrd < info.tiOrders[nSeq].size(); nOrd++) if (info.tiOrders[nSeq][nOrd])
+			for(size_t nOrd = ordLength; nOrd < info.tiOrders[nSeq].size(); nOrd++) if (info.tiOrders[nSeq][nOrd])
 			{
 				DeleteItem(info.tiOrders[nSeq][nOrd]); info.tiOrders[nSeq][nOrd] = NULL;
 			}
-			if (info.tiOrders[nSeq].size() < sndFile.Order.GetSequence(nSeq).GetLengthTailTrimmed()) // Resize tiOrders if needed.
-				info.tiOrders[nSeq].resize(sndFile.Order.GetSequence(nSeq).GetLengthTailTrimmed(), nullptr);
+			if (info.tiOrders[nSeq].size() < ordLength) // Resize tiOrders if needed.
+				info.tiOrders[nSeq].resize(ordLength, nullptr);
 			const bool patNamesOnly = patternHint.GetType()[HINT_PATNAMES];
 
 			//if (hintFlagPart == HINT_PATNAMES) && (dwHintParam < sndFile.Order.size())) imin = imax = dwHintParam;
-			for (ORDERINDEX iOrd = 0; iOrd < sndFile.Order.GetSequence(nSeq).GetLengthTailTrimmed(); iOrd++)
+			for (ORDERINDEX iOrd = 0; iOrd < ordLength; iOrd++)
 			{
 				if(patNamesOnly && sndFile.Order.GetSequence(nSeq)[iOrd] != nPat)
 					continue;
