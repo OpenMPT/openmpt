@@ -348,16 +348,21 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 #ifdef DBM_USE_REAL_SUBSONGS
 		if(i > 0) Order.AddSequence(false);
 		Order.SetSequence(i);
+		Order.clear();
 		Order.m_sName = name;
 #endif // DBM_USE_REAL_SUBSONGS
 
-		const uint16 numOrders = songChunk.ReadUint16BE();
+		uint16 numOrders = songChunk.ReadUint16BE();
 		const ORDERINDEX startIndex = Order.GetLength();
-		Order.resize(startIndex + numOrders + 1, Order.GetInvalidPatIndex());
-
-		for(uint16 ord = 0; ord < numOrders; ord++)
+		if(startIndex < ORDERINDEX_MAX)
 		{
-			Order[startIndex + ord] = static_cast<PATTERNINDEX>(songChunk.ReadUint16BE());
+			LimitMax(numOrders, ORDERINDEX_MAX - startIndex);
+			Order.resize(startIndex + numOrders + 1, Order.GetInvalidPatIndex());
+
+			for(uint16 ord = 0; ord < numOrders; ord++)
+			{
+				Order[startIndex + ord] = static_cast<PATTERNINDEX>(songChunk.ReadUint16BE());
+			}
 		}
 	}
 #ifdef DBM_USE_REAL_SUBSONGS

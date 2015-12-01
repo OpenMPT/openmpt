@@ -757,7 +757,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		std::vector<PATTERNINDEX> patMapping(fileHeader.numPatterns, PATTERNINDEX_INVALID);
 		for(uint32 ord = 0; ord < fileHeader.numOrders; ord++)
 		{
-			if(drumHeader.DrumPatternOrder[ord] >= drumHeader.numDrumPatterns)
+			if(drumHeader.DrumPatternOrder[ord] >= drumHeader.numDrumPatterns || Order[ord] >= fileHeader.numPatterns)
 				continue;
 
 			// Figure out where to write this drum pattern
