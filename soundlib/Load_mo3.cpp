@@ -545,7 +545,7 @@ static bool UnpackMO3Data(FileReader &file, uint8 *dst, uint32 size)
 				DECODE_CTRL_BITS;	// decode length: 1 is the most significant bit,
 				strLen += 2;		// then first bit of each bits pairs (noted n1), until n0.
 			}
-			strLen = strLen + ebp; // length adjustment
+			strLen += ebp; // length adjustment
 			if(size >= static_cast<uint32>(strLen) && strLen > 0)
 			{
 				// Copy previous string
@@ -554,8 +554,12 @@ static bool UnpackMO3Data(FileReader &file, uint8 *dst, uint32 size)
 					break;
 				}
 				size -= strLen;
-				memcpy(dst, dst + strOffset, strLen);
-				dst += strLen;
+				const uint8 *string = dst + strOffset;
+				while(strLen > 0)
+				{
+					*dst++ = *string++;
+					strLen--;
+				}
 			} else
 			{
 				break;
@@ -839,7 +843,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 	FileReader musicChunk(musicData, musicSize);
 	musicChunk.ReadNullString(m_songName);
-	std::string message;
 	musicChunk.ReadNullString(m_songMessage);
 
 	STATIC_ASSERT(MAX_BASECHANNELS >= 64);
