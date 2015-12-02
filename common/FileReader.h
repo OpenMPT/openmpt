@@ -649,16 +649,21 @@ public:
 	template<mpt::String::ReadWriteMode mode, off_t destSize>
 	bool ReadString(char (&destBuffer)[destSize], const off_t srcSize)
 	{
-		if(CanRead(srcSize))
+		if(CanRead(srcSize) && srcSize > 0)
 		{
-			std::vector<char> tmp(srcSize + 1); // +1 because tmp[0] does not work with srcSize==0 otherwise
-			DataContainer().Read(&tmp[0], streamPos, srcSize);
-			mpt::String::Read<mode, destSize>(destBuffer, &tmp[0], srcSize);
+			try
+			{
+				std::vector<char> tmp(srcSize);
+				DataContainer().Read(&tmp[0], streamPos, srcSize);
+				mpt::String::Read<mode, destSize>(destBuffer, &tmp[0], srcSize);
+			} catch(MPTMemoryException)
+			{
+			}
 			streamPos += srcSize;
 			return true;
 		} else
 		{
-			return false;
+			return (srcSize == 0);
 		}
 	}
 
@@ -667,16 +672,21 @@ public:
 	template<mpt::String::ReadWriteMode mode>
 	bool ReadString(std::string &dest, const off_t srcSize)
 	{
-		if(CanRead(srcSize))
+		if(srcSize > 0 && CanRead(srcSize))
 		{
-			std::vector<char> tmp(srcSize + 1); // +1 because tmp[0] does not work with srcSize==0 otherwise
-			DataContainer().Read(&tmp[0], streamPos, srcSize);
-			mpt::String::Read<mode>(dest, &tmp[0], srcSize);
+			try
+			{
+				std::vector<char> tmp(srcSize);
+				DataContainer().Read(&tmp[0], streamPos, srcSize);
+				mpt::String::Read<mode>(dest, &tmp[0], srcSize);
+			} catch(MPTMemoryException)
+			{
+			}
 			streamPos += srcSize;
 			return true;
 		} else
 		{
-			return false;
+			return (srcSize == 0);
 		}
 	}
 
