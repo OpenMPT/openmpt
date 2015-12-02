@@ -314,11 +314,11 @@ struct PACKED MO3Instrument
 			mptIns.nMixPlug = midiChannel - 127;
 		} else if(midiChannel < 17 && (flags & playOnMIDI))
 		{
-			// XM
+			// XM / IT with recent encoder
 			mptIns.nMidiChannel = midiChannel + MidiFirstChannel;
 		} else if(midiChannel > 0 && midiChannel < 17)
 		{
-			// IT (yes, channel 0 is represented the same way as "no channel")
+			// IT with old encoder (yes, channel 0 is represented the same way as "no channel")
 			mptIns.nMidiChannel = midiChannel + MidiFirstChannel;
 		}
 		mptIns.wMidiBank = midiBank;
@@ -512,7 +512,7 @@ static bool UnpackMO3Data(FileReader &file, uint8 *dst, uint32 size)
 		} else
 		{
 			// a 1 ctrl bit means compressed bytes are following
-			ebp = 0; // lenth adjustement
+			ebp = 0; // lenth adjustment
 			DECODE_CTRL_BITS; // read length, and if strLen > 3 (coded using more than 1 bits pair) also part of the offset value
 			strLen -=3;
 			if(strLen < 0)
@@ -545,20 +545,17 @@ static bool UnpackMO3Data(FileReader &file, uint8 *dst, uint32 size)
 				DECODE_CTRL_BITS;	// decode length: 1 is the most significant bit,
 				strLen += 2;		// then first bit of each bits pairs (noted n1), until n0.
 			}
-			strLen = strLen + ebp; // length adjustement
-			if(size >= static_cast<uint32>(strLen))
+			strLen = strLen + ebp; // length adjustment
+			if(size >= static_cast<uint32>(strLen) && strLen > 0)
 			{
-				const uint8 *string = dst + strOffset; // pointer to previous string
-				if(string < initDst || string >= dst)
+				// Copy previous string
+				if(strOffset >= 0 || static_cast<std::ptrdiff_t>(dst - initDst) + strOffset < 0)
 				{
 					break;
 				}
 				size -= strLen;
-				while(strLen > 0)
-				{
-					*dst++ = *string++; // copies it
-					strLen--;
-				}
+				memcpy(dst, dst + strOffset, strLen);
+				dst += strLen;
 			} else
 			{
 				break;
@@ -819,6 +816,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return false;
 	}
+	memset(musicData, 0, musicSize);
 	uint32 compressedSize = uint32_max;
 	if(version >= 5)
 	{
@@ -909,6 +907,8 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			if(fileHeader.chnPan[i] == 127)
 				ChnSettings[i].dwFlags = CHN_SURROUND;
+			else if(fileHeader.chnPan[i] == 255)
+				ChnSettings[i].nPan = 256;
 			else
 				ChnSettings[i].nPan = fileHeader.chnPan[i];
 		}
@@ -1460,7 +1460,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				ModSample &sample = Samples[smp];
 				sample.AllocateSample();
 				SmpLength offset = 0;
-				while((vorb->error == VORBIS__no_error || (vorb->error == VORBIS_need_more_data && sampleData.CanRead(1)))
+				while((error == VORBIS__no_error || (error == VORBIS_need_more_data && sampleData.CanRead(1)))
 					&& offset < sample.nLength && sample.pSample != nullptr)
 				{
 					int channels = 0, decodedSamples = 0;
@@ -1479,6 +1479,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 						}
 					}
 					offset += decodedSamples;
+					error = stb_vorbis_get_error(vorb);
 				}
 				stb_vorbis_close(vorb);
 			} else
@@ -1499,7 +1500,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 #ifndef NO_VST
-	if(musicChunk.CanRead(1))
+	if((fileHeader.flags & MO3FileHeader::hasPlugins) && musicChunk.CanRead(1))
 	{
 		// Plugin data
 		uint8 pluginFlags = musicChunk.ReadUint8();
