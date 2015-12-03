@@ -41,7 +41,6 @@
 #include "SampleFormatConverters.h"
 #endif // !NO_FLAC
 #include "../common/ComponentManager.h"
-#include <iterator>
 #if defined(MPT_WITH_MPG123)
 #include "mpg123.h"
 #endif // MPT_WITH_MPG123
@@ -2989,8 +2988,8 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	file.Rewind();
 	// When using MF to decode MP3 samples in MO3 files, we need the mp3 file extension
 	// for some of them or otherwise MF refuses to recognize them.
-	// It won't hurt for other formats to use this extension, so just use it unconditionally.
-	OnDiskFileWrapper diskfile(file, MPT_PATHSTRING("mp3"));
+	mpt::PathString tmpfileExtension = (mo3Decode ? MPT_PATHSTRING("mp3") : MPT_PATHSTRING("tmp"));
+	OnDiskFileWrapper diskfile(file, tmpfileExtension);
 	if(!diskfile.IsValid())
 	{
 		return false;
