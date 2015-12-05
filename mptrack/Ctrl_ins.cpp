@@ -811,6 +811,7 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_EN_CHANGE(IDC_EDIT8,				OnGlobalVolChanged)
 	ON_EN_CHANGE(IDC_EDIT9,				OnPanningChanged)
 	ON_EN_CHANGE(IDC_EDIT10,			OnMPRChanged)
+	ON_EN_KILLFOCUS(IDC_EDIT10,			OnMPRKillFocus)
 	ON_EN_CHANGE(IDC_EDIT11,			OnMBKChanged)
 	ON_EN_CHANGE(IDC_EDIT15,			OnPPSChanged)
 	ON_EN_CHANGE(IDC_PITCHWHEELDEPTH,	OnPitchWheelDepthChanged)
@@ -1645,6 +1646,21 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 			_tcscpy(pszText, CModDoc::PanningToString(pIns->nPan, 128));
 			return TRUE;
 
+		case IDC_EDIT10:
+		case IDC_EDIT11:
+			// Show plugin program name when hovering program or bank edits
+			if(pIns->nMixPlug > 0 && pIns->nMidiProgram != 0)
+			{
+				const SNDMIXPLUGIN &plugin = m_sndFile.m_MixPlugins[pIns->nMixPlug - 1];
+				if(plugin.pMixPlugin != nullptr)
+				{
+					int32 prog = pIns->nMidiProgram - 1;
+					if(pIns->wMidiBank > 1) prog += 128 * (pIns->wMidiBank - 1);
+					_tcscpy(pszText, plugin.pMixPlugin->GetFormattedProgramName(prog));
+				}
+			}
+			return TRUE;
+
 		case IDC_PLUGIN_VELOCITYSTYLE:
 		case IDC_PLUGIN_VOLUMESTYLE:
 			// Plugin volume handling
@@ -2084,6 +2100,29 @@ void CCtrlInstruments::OnMPRChanged()
 		{
 			LockControls();
 			SetDlgItemText(IDC_EDIT10, _T("---"));
+			UnlockControls();
+		}
+	}
+}
+
+
+void CCtrlInstruments::OnMPRKillFocus()
+//-------------------------------------
+{
+	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
+	if ((!IsLocked()) && (pIns))
+	{
+		int n = GetDlgItemInt(IDC_EDIT10);
+		if (n > 128)
+		{
+			n--;
+			pIns->nMidiProgram = static_cast<uint8>(n % 128 + 1);
+			pIns->wMidiBank = static_cast<uint16>(n / 128 + 1);
+			SetModified(InstrumentHint().Info(), false);
+
+			LockControls();
+			SetDlgItemInt(IDC_EDIT10, pIns->nMidiProgram);
+			SetDlgItemInt(IDC_EDIT11, pIns->wMidiBank);
 			UnlockControls();
 		}
 	}
