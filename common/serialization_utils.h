@@ -239,14 +239,14 @@ public:
 		return m_Status;
 	}
 
+	void SetFlag(Rwf flag, bool val) {m_Flags.set(flag, val);}
+	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
+
 protected:
 
 	// When writing, returns the number of entries written.
 	// When reading, returns the number of entries read not including unrecognized entries.
 	NumType GetCounter() const {return m_nCounter;}
-
-	void SetFlag(Rwf flag, bool val) {m_Flags.set(flag, val);}
-	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
 
 protected:
 
@@ -322,10 +322,10 @@ public:
 	template <class T, class FuncObj>
 	ReadRv ReadIterItem(const ReadIterator& iter, T& obj, FuncObj func);
 
-private:
-
 	// Reads map to cache.
 	void CacheMap();
+
+private:
 
 	// Searches for entry with given ID. If found, returns pointer to corresponding entry, else
 	// returns nullptr.
@@ -452,25 +452,22 @@ SsbRead::ReadRv SsbRead::ReadIterItem(const ReadIterator& iter, T& obj, FuncObj 
 inline SsbRead::IdMatchStatus SsbRead::CompareId(const ReadIterator& iter, const ID &id)
 //--------------------------------------------------------------------------------------
 {
+	if(iter->nIdpos >= m_Idarray.size()) return IdMismatch;
 	return (id == ID(&m_Idarray[iter->nIdpos], iter->nIdLength)) ? IdMatch : IdMismatch;
 }
 
 
 inline SsbRead::ReadIterator SsbRead::GetReadBegin()
-//------------------------------------------
+//--------------------------------------------------
 {
-	MPT_ASSERT(GetFlag(RwfRMapHasId) && (GetFlag(RwfRMapHasStartpos) || GetFlag(RwfRMapHasSize) || m_nFixedEntrySize > 0));
-	if (GetFlag(RwfRMapCached) == false)
-		CacheMap();
+	MPT_ASSERT(GetFlag(RwfRMapHasId) && GetFlag(RwfRMapCached) && (GetFlag(RwfRMapHasStartpos) || GetFlag(RwfRMapHasSize) || m_nFixedEntrySize > 0));
 	return mapData.begin();
 }
 
 
 inline SsbRead::ReadIterator SsbRead::GetReadEnd()
-//----------------------------------------
+//------------------------------------------------
 {
-	if (GetFlag(RwfRMapCached) == false)
-		CacheMap();
 	return mapData.end();
 }
 

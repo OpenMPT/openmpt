@@ -597,7 +597,7 @@ void SsbRead::BeginRead(const ID &id, const uint64& nVersion)
 
 
 void SsbRead::CacheMap()
-//------------------
+//----------------------
 {
 	std::istream& iStrm = *m_pIstrm;
 	if(GetFlag(RwfRwHasMap) || m_nFixedEntrySize > 0)
