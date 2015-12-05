@@ -171,6 +171,7 @@ protected:
 	afx_msg void OnDCTChanged();
 	afx_msg void OnDCAChanged();
 	afx_msg void OnMPRChanged();
+	afx_msg void OnMPRKillFocus();
 	afx_msg void OnMBKChanged();
 	afx_msg void OnMCHChanged();
 	afx_msg void OnResamplingChanged();
