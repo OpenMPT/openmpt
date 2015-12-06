@@ -446,6 +446,20 @@ STATIC_ASSERT(sizeof(MO3Sample) == 41);
 #pragma pack(pop)
 #endif
 
+
+// We need all this information for Ogg-compressed samples with shared headers:
+// A shared header can be taken from a sample that has not been read yet, so
+// we first need to read all headers, and then load the Ogg samples afterwards.
+struct MO3SampleChunk
+{
+	FileReader chunk;
+	uint16 headerSize;
+	int16 sharedHeader;
+	MO3SampleChunk(const FileReader &chunk_ = FileReader(), uint16 headerSize_ = 0, int16 sharedHeader_ = 0)
+		: chunk(chunk_), headerSize(headerSize_), sharedHeader(sharedHeader_) { }
+};
+
+
 // Unpack macros
 
 // shift control bits until it is empty:
@@ -1298,18 +1312,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	if(itSampleMode)
 		m_nInstruments = 0;
 
-	// We need all this information for Ogg-compressed samples with shared headers:
-	// A shared header can be taken from a sample that has not been read yet, so
-	// we first need to read all headers, and then load the Ogg samples afterwards.
-	struct SampleChunk
-	{
-		FileReader chunk;
-		uint16 headerSize;
-		int16 sharedHeader;
-		SampleChunk(const FileReader &chunk_ = FileReader(), uint16 headerSize_ = 0, int16 sharedHeader_ = 0)
-			: chunk(chunk_), headerSize(headerSize_), sharedHeader(sharedHeader_) { }
-	};
-	std::vector<SampleChunk> sampleChunks(m_nSamples);
+	std::vector<MO3SampleChunk> sampleChunks(m_nSamples);
 
 	const bool frequencyIsHertz = (version >= 5 || !(fileHeader.flags & MO3FileHeader::linearSlides));
 	bool unsupportedSamples = false;
@@ -1389,7 +1392,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			} else if(compression == MO3Sample::smpCompressionOgg || compression == MO3Sample::smpSharedOgg)
 			{
 				// Since shared Ogg headers can stem from a sample that has not been read yet, postpone Ogg import.
-				sampleChunks[smp - 1] = SampleChunk(sampleData, smpHeader.encoderDelay, sharedOggHeader);
+				sampleChunks[smp - 1] = MO3SampleChunk(sampleData, smpHeader.encoderDelay, sharedOggHeader);
 			} else if(compression == MO3Sample::smpCompressionMPEG)
 			{
 				// Old MO3 encoders didn't remove LAME info frames. This is unfortunate since the encoder delay
@@ -1434,7 +1437,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 		{
-			SampleChunk &sampleChunk = sampleChunks[smp - 1];
+			MO3SampleChunk &sampleChunk = sampleChunks[smp - 1];
 			// Is this an Ogg sample?
 			if(!sampleChunk.chunk.IsValid())
 				continue;
