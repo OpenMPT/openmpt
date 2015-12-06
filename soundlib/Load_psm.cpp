@@ -1149,7 +1149,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	// Seems to be valid!
 	InitializeGlobals();
 	m_madeWithTracker = "Epic MegaGames MASI (Old Version)";
-	m_nType = MOD_TYPE_S3M;
+	m_nType = MOD_TYPE_PSM;
 	m_nChannels = Clamp(CHANNELINDEX(fileHeader.numChannelsPlay), CHANNELINDEX(fileHeader.numChannelsReal), MAX_BASECHANNELS);
 	m_nSamplePreAmp = fileHeader.masterVolume;
 	if(m_nSamplePreAmp == 255)
@@ -1362,6 +1362,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 					case 0x2A: // note cut
 						m.command = CMD_S3MCMDEX;
+#ifdef MODPLUG_TRACKER
 						if(m.param == 0)	// in S3M mode, SC0 is ignored, so we convert it to a note cut.
 						{
 							if(m.note == NOTE_NONE)
@@ -1373,6 +1374,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 								m.param = 1;
 							}
 						}
+#endif // MODPLUG_TRACKER
 						m.param |= 0xC0;
 						break;
 					case 0x2B: // note delay
@@ -1410,11 +1412,11 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 					case 0x47: // set finetune
 						m.command = CMD_S3MCMDEX;
-						m.param |= 0x20;
+						m.param = 0x20 | (m.param & 0x0F);
 						break;
 					case 0x48: // set balance (panning?)
-						m.command = CMD_PANNING8;
-						m.param = (m.param << 4) + 8;
+						m.command = CMD_S3MCMDEX;
+						m.param = 0x80 | (m.param & 0x0F);
 						break;
 
 					default:
