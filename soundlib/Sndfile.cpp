@@ -866,6 +866,18 @@ MODTYPE CSoundFile::GetBestSaveFormat() const
 			return MOD_TYPE_MOD;
 		}
 		return MOD_TYPE_XM;
+	case MOD_TYPE_PSM:
+		if(GetNumChannels() > 16)
+			return MOD_TYPE_IT;
+		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
+		{
+			if(ChnSettings[i].dwFlags[CHN_SURROUND] || ChnSettings[i].nVolume != 64)
+			{
+				return MOD_TYPE_IT;
+				break;
+			}
+		}
+		return MOD_TYPE_S3M;
 	case MOD_TYPE_669:
 	case MOD_TYPE_FAR:
 	case MOD_TYPE_STM:
@@ -878,7 +890,6 @@ MODTYPE CSoundFile::GetBestSaveFormat() const
 	case MOD_TYPE_DMF:
 	case MOD_TYPE_DBM:
 	case MOD_TYPE_IMF:
-	case MOD_TYPE_PSM:
 	case MOD_TYPE_J2B:
 	case MOD_TYPE_ULT:
 	case MOD_TYPE_OKT:
