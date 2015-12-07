@@ -792,7 +792,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 						}
 						trktagofs += 8;
 					}
-					if ((trknameofs) && (trknameofs < dwMemLength - trknamelen))
+					if ((trknameofs) && (trknameofs < dwMemLength - trknamelen) && trknamelen < dwMemLength)
 					{
 						mpt::String::Read<mpt::String::maybeNullTerminated>(ChnSettings[i].szName, reinterpret_cast<const char *>(lpStream + trknameofs), trknamelen);
 					}
