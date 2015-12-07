@@ -1352,7 +1352,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				SampleIO::littleEndian,
 				SampleIO::signedPCM)
 				.ReadSample(Samples[smp], file);
-		} else if(smpHeader.compressedSize < 0 && -smpHeader.compressedSize < smp)
+		} else if(smpHeader.compressedSize < 0 && (smp + smpHeader.compressedSize) > 0)
 		{
 			// Duplicate sample
 			const ModSample &smpFrom = Samples[smp + smpHeader.compressedSize];
