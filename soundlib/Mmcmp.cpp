@@ -804,6 +804,7 @@ static bool PP20_DoUnpack(const uint8 *pSrc, uint32 nSrcLen, uint8 *pDst, uint32
 				n += code;
 				if (code != 3) break;
 			}
+			LimitMax(n, nBytesLeft);
 			for (uint32 i=0; i<n; i++)
 			{
 				pDst[--nBytesLeft] = (uint8)BitBuffer.GetBits(8);
@@ -828,6 +829,7 @@ static bool PP20_DoUnpack(const uint8 *pSrc, uint32 nSrcLen, uint8 *pDst, uint32
 			{
 				nofs = BitBuffer.GetBits(nbits);
 			}
+			LimitMax(n, nBytesLeft);
 			for (uint32 i=0; i<=n; i++)
 			{
 				pDst[nBytesLeft-1] = (nBytesLeft+nofs < nDstLen) ? pDst[nBytesLeft+nofs] : 0;

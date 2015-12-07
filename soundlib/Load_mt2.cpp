@@ -595,7 +595,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 
 		case MAGIC4LE('P','A','T','N'):
-			for(PATTERNINDEX i = 0; i < fileHeader.numPatterns && chunk.CanRead(1); i++)
+			for(PATTERNINDEX i = 0; i < fileHeader.numPatterns && chunk.CanRead(1) && Patterns.IsValidIndex(i); i++)
 			{
 				std::string name;
 				chunk.ReadNullString(name);
