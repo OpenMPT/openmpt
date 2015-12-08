@@ -2486,7 +2486,9 @@ bool CSoundFile::ProcessEffects()
 			if (instr >= MAX_INSTRUMENTS) instr = 0;
 
 			// Note Cut/Off/Fade => ignore instrument
-			if (note >= NOTE_MIN_SPECIAL) instr = 0;
+			// IT compatibility: Default value of instrument is recalled if instrument number is next to a note-off.
+			// Test case: NoteOffInstr.it
+			if (note >= NOTE_MIN_SPECIAL && !m_playBehaviour[kITInstrWithNoteOff]) instr = 0;
 
 			if(ModCommand::IsNote(note))
 			{
