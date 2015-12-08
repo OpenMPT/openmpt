@@ -1933,7 +1933,7 @@ void CVstPlugin::MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nPa
 	LimitMax(nController, MIDIEvents::MIDICC_end);
 	LimitMax(nParam, uint8(127));
 
-	if(m_SndFile.GetModFlag(MSF_MIDICC_BUGEMULATION))
+	if(m_SndFile.m_playBehaviour[kMIDICCBugEmulation])
 		MidiSend(MIDIEvents::Event(MIDIEvents::evControllerChange, nMidiCh, nParam, static_cast<uint8>(nController)));	// param and controller are swapped (old broken implementation)
 	else
 		MidiSend(MIDIEvents::CC(nController, nMidiCh, nParam));
@@ -1957,7 +1957,7 @@ void CVstPlugin::ApplyPitchWheelDepth(int32 &value, int8 pwd)
 void CVstPlugin::MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd)
 //----------------------------------------------------------------------
 {
-	if(m_SndFile.GetModFlag(MSF_OLD_MIDI_PITCHBENDS))
+	if(m_SndFile.m_playBehaviour[kOldMIDIPitchBends])
 	{
 		// OpenMPT Legacy: Old pitch slides never were really accurate, but setting the PWD to 13 in plugins would give the closest results.
 		increment = (increment * 0x800 * 13) / (0xFF * pwd);

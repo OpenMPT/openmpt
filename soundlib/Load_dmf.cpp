@@ -971,7 +971,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_DMF);
 	mpt::String::Read<mpt::String::spacePadded>(m_songName, fileHeader.songname);
 	{
 		std::string artist;
@@ -1094,9 +1094,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeChannels();
-	m_nType = MOD_TYPE_DMF;
 	m_SongFlags = SONG_LINEARSLIDES | SONG_ITCOMPATGXX;	// this will be converted to IT format by MPT. SONG_ITOLDEFFECTS is not set because of tremor and vibrato.
-	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	m_nDefaultSpeed = 6;
 	m_nDefaultTempo.Set(120);
 	m_nDefaultGlobalVolume = 256;

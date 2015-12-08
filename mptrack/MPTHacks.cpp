@@ -451,12 +451,12 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	}
 
 	// Player flags
-	if((m_SndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT)) && !m_SndFile.GetModFlag(MSF_COMPATIBLE_PLAY))
+	if((m_SndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT)) && !m_SndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY])
 	{
 		AddToLog("Compatible play is deactivated");
 		foundHacks = true;
 		if(autofix)
-			m_SndFile.SetModFlag(MSF_COMPATIBLE_PLAY, true);
+			m_SndFile.SetDefaultPlaybackBehaviour(m_SndFile.GetType());
 	}
 
 	// Check for restart position where it should not be

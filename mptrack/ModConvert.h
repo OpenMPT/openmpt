@@ -36,7 +36,6 @@ enum enmWarnings
 	wEditHistory,
 	wMixmode,
 	wVolRamp,
-	wCompatibilityMode,
 	wPitchToTempoLock,
 	wGlobalVolumeNotSupported,
 	wFilterVariation,

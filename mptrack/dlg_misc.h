@@ -25,8 +25,11 @@ class CModTypeDlg: public CDialog
 public:
 	CComboBox m_TypeBox, m_ChannelsBox, m_TempoModeBox, m_PlugMixBox;
 	CButton m_CheckBox1, m_CheckBox2, m_CheckBox3, m_CheckBox4, m_CheckBox5, m_CheckBoxPT1x, m_CheckBoxFt2VolRamp, m_CheckBoxAmigaLimits;
+	HICON m_warnIcon;
+
 	CSoundFile &sndFile;
 	TempoSwing m_tempoSwing;
+	PlayBehaviourSet m_playBehaviour;
 	CHANNELINDEX m_nChannels;
 	MODTYPE m_nType;
 	bool initialized;
@@ -38,6 +41,8 @@ public:
 	void OnPTModeChanged();
 	void OnTempoModeChanged();
 	void OnTempoSwing();
+	void OnLegacyPlaybackSettings();
+	void OnDefaultBehaviour();
 
 protected:
 	void UpdateChannelCBox();
@@ -52,6 +57,34 @@ protected:
 	//}}AFX_VIRTUAL
 
 	BOOL OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult);
+
+	DECLARE_MESSAGE_MAP()
+};
+
+
+//===============================================
+class CLegacyPlaybackSettingsDlg : public CDialog
+//===============================================
+{
+protected:
+	CCheckListBox m_CheckList;
+	PlayBehaviourSet &m_playBehaviour;
+	MODTYPE m_modType;
+
+public:
+	CLegacyPlaybackSettingsDlg(CWnd *parent, PlayBehaviourSet &playBehaviour, MODTYPE modType)
+		: CDialog(IDD_LEGACY_PLAYBACK, parent)
+		, m_playBehaviour(playBehaviour)
+		, m_modType(modType)
+	{ }
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+
+	afx_msg void OnSelectDefaults();
+	afx_msg void UpdateSelectDefaults();
 
 	DECLARE_MESSAGE_MAP()
 };

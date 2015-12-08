@@ -202,12 +202,13 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_S3M);
 
 	// ST3 ignored Zxx commands, so if we find that a file was made with ST3, we should erase all MIDI macros.
 	bool keepMidiMacros = false;
 
 	std::string trackerStr;
+	bool nonCompatTracker = false;
 	switch(fileHeader.cwtv & S3MFileHeader::trackerMask)
 	{
 	case S3MFileHeader::trkScreamTracker:
@@ -217,47 +218,53 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
 			m_madeWithTracker = "ModPlug Tracker / OpenMPT";
 			keepMidiMacros = true;
+			nonCompatTracker = true;
 		} else if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && fileHeader.ultraClicks == 0 && fileHeader.flags == 0 && fileHeader.usePanningTable == 0)
 		{
 			m_madeWithTracker = "Velvet Studio";
 		} else
 		{
 			trackerStr = "Scream Tracker";
-			SetModFlag(MSF_COMPATIBLE_PLAY, true);
 		}
 		break;
 	case S3MFileHeader::trkImagoOrpheus:
 		trackerStr = "Imago Orpheus";
+		nonCompatTracker = true;
 		break;
 	case S3MFileHeader::trkImpulseTracker:
 		if(fileHeader.cwtv <= S3MFileHeader::trkIT2_14)
 			trackerStr = "Impulse Tracker";
 		else
 			m_madeWithTracker = mpt::String::Print("Impulse Tracker 2.14p%1", fileHeader.cwtv - S3MFileHeader::trkIT2_14);
+		nonCompatTracker = true;
 		break;
 	case S3MFileHeader::trkSchismTracker:
 		if(fileHeader.cwtv == S3MFileHeader::trkBeRoTrackerOld)
 			m_madeWithTracker = "BeRoTracker";
 		else
 			m_madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
+		nonCompatTracker = true;
 		break;
 	case S3MFileHeader::trkOpenMPT:
 		trackerStr = "OpenMPT";
 		m_dwLastSavedWithVersion = (fileHeader.cwtv & S3MFileHeader::versionMask) << 16;
-		SetModFlag(MSF_COMPATIBLE_PLAY, true);
 		break; 
 	case S3MFileHeader::trkBeRoTracker:
 		m_madeWithTracker = "BeRoTracker";
-		SetModFlag(MSF_COMPATIBLE_PLAY, true);
 		break;
 	case S3MFileHeader::trkCreamTracker:
 		m_madeWithTracker = "CreamTracker";
-		SetModFlag(MSF_COMPATIBLE_PLAY, true);
 		break;
 	}
 	if(!trackerStr.empty())
 	{
 		m_madeWithTracker = mpt::String::Print("%1 %2.%3", trackerStr, (fileHeader.cwtv & 0xF00) >> 8, mpt::fmt::hex0<2>(fileHeader.cwtv & 0xFF));
+	}
+	if(nonCompatTracker)
+	{
+		m_playBehaviour.reset(kST3NoMutedChannels);
+		m_playBehaviour.reset(kST3EffectMemory);
+		m_playBehaviour.reset(kST3PortaSampleChange);
 	}
 
 	if((fileHeader.cwtv & S3MFileHeader::trackerMask) > S3MFileHeader::trkScreamTracker)
@@ -278,7 +285,6 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		MemsetZero(m_MidiCfg.szMidiZXXExt);
 	}
 
-	m_nType = MOD_TYPE_S3M;
 	mpt::String::Read<mpt::String::nullTerminated>(m_songName, fileHeader.name);
 
 	m_nMinPeriod = 64;
@@ -562,7 +568,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	fileHeader.dosEof = S3MFileHeader::idEOF;
 	fileHeader.fileType = S3MFileHeader::idS3MType;
 
-	if(!IsCompatibleMode(TRK_SCREAMTRACKER))
+	if(!m_playBehaviour[MSF_COMPATIBLE_PLAY])
 	{
 		AddToLog("Compatible playback mode is currently disabled. This setting is not saved in S3M files and will be enabled automatically once the file is reloaded.");
 	}

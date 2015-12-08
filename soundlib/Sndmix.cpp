@@ -52,6 +52,13 @@ static const uint32 PreAmpAGCTable[16] =
 #endif
 
 
+// Compensate frequency slide LUTs depending on whether we are handling periods or frequency - "up" and "down" in function name are seen from frequency perspective.
+static uint32 GetLinearSlideDownTable    (const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < CountOf(LinearSlideDownTable));     return sndFile->m_playBehaviour[kHertzInLinearMode] ? LinearSlideDownTable[i]     : LinearSlideUpTable[i]; }
+static uint32 GetLinearSlideUpTable      (const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < CountOf(LinearSlideDownTable));     return sndFile->m_playBehaviour[kHertzInLinearMode] ? LinearSlideUpTable[i]       : LinearSlideDownTable[i]; }
+static uint32 GetFineLinearSlideDownTable(const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < CountOf(FineLinearSlideDownTable)); return sndFile->m_playBehaviour[kHertzInLinearMode] ? FineLinearSlideDownTable[i] : FineLinearSlideUpTable[i]; }
+static uint32 GetFineLinearSlideUpTable  (const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < CountOf(FineLinearSlideDownTable)); return sndFile->m_playBehaviour[kHertzInLinearMode] ? FineLinearSlideUpTable[i]   : FineLinearSlideDownTable[i]; }
+
+
 void CSoundFile::SetMixerSettings(const MixerSettings &mixersettings)
 //-------------------------------------------------------------------
 {
@@ -583,7 +590,7 @@ bool CSoundFile::ProcessRow()
 
 			// FT2 idiosyncrasy: When E60 is used on a pattern row x, the following pattern also starts from row x
 			// instead of the beginning of the pattern, unless there was a Bxx or Dxx effect.
-			if(IsCompatibleMode(TRK_FASTTRACKER2))
+			if(m_playBehaviour[kFT2LoopE60Restart])
 			{
 				m_PlayState.m_nNextRow = m_PlayState.m_nNextPatStartRow;
 				m_PlayState.m_nNextPatStartRow = 0;
@@ -598,7 +605,7 @@ bool CSoundFile::ProcessRow()
 			pChn->rightVol = pChn->newRightVol;
 			pChn->leftVol = pChn->newLeftVol;
 			pChn->dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO);
-			if(!IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPanbrelloOffset = 0;
+			if(!m_playBehaviour[kITVibratoTremoloPanbrello]) pChn->nPanbrelloOffset = 0;
 			pChn->nCommand = CMD_NONE;
 			pChn->m_plugParamValueStep = 0;
 		}
@@ -660,7 +667,7 @@ int CSoundFile::GetVibratoDelta(int type, int position) const
 //-----------------------------------------------------------
 {
 	// IT compatibility: IT has its own, more precise tables
-	if(IsCompatibleMode(TRK_IMPULSETRACKER))
+	if(m_playBehaviour[kITVibratoTremoloPanbrello])
 	{
 		switch(type & 0x03)
 		{
@@ -695,11 +702,11 @@ int CSoundFile::GetVibratoDelta(int type, int position) const
 void CSoundFile::ProcessVolumeSwing(ModChannel *pChn, int &vol) const
 //-------------------------------------------------------------------
 {
-	if(IsCompatibleMode(TRK_IMPULSETRACKER))
+	if(m_playBehaviour[kITSwingBehaviour])
 	{
 		vol += pChn->nVolSwing;
 		Limit(vol, 0, 64);
-	} else if(GetModFlag(MSF_OLDVOLSWING))
+	} else if(m_playBehaviour[kMPTOldSwingBehaviour])
 	{
 		vol += pChn->nVolSwing;
 		Limit(vol, 0, 256);
@@ -716,7 +723,7 @@ void CSoundFile::ProcessVolumeSwing(ModChannel *pChn, int &vol) const
 void CSoundFile::ProcessPanningSwing(ModChannel *pChn) const
 //----------------------------------------------------------
 {
-	if(IsCompatibleMode(TRK_IMPULSETRACKER) || GetModFlag(MSF_OLDVOLSWING))
+	if(m_playBehaviour[kITSwingBehaviour] || m_playBehaviour[kMPTOldSwingBehaviour])
 	{
 		pChn->nRealPan = pChn->nPan + pChn->nPanSwing;
 		Limit(pChn->nRealPan, 0, 256);
@@ -744,10 +751,10 @@ void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol) const
 
 		uint32 trempos = pChn->nTremoloPos;
 		// IT compatibility: Why would you not want to execute tremolo at volume 0?
-		if(vol > 0 || IsCompatibleMode(TRK_IMPULSETRACKER))
+		if(vol > 0 || m_playBehaviour[kITVibratoTremoloPanbrello])
 		{
 			// IT compatibility: We don't need a different attenuation here because of the different tables we're going to use
-			const int tremattn = ((GetType() & MOD_TYPE_XM) || IsCompatibleMode(TRK_IMPULSETRACKER)) ? 5 : 6;
+			const int tremattn = ((GetType() & MOD_TYPE_XM) || m_playBehaviour[kITVibratoTremoloPanbrello]) ? 5 : 6;
 
 			int delta = GetVibratoDelta(pChn->nTremoloType, trempos);
 			if(GetType() == MOD_TYPE_DMF) delta -= 127;
@@ -756,7 +763,7 @@ void CSoundFile::ProcessTremolo(ModChannel *pChn, int &vol) const
 		if(!m_SongFlags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]))
 		{
 			// IT compatibility: IT has its own, more precise tables
-			if(IsCompatibleMode(TRK_IMPULSETRACKER))
+			if(m_playBehaviour[kITVibratoTremoloPanbrello])
 				pChn->nTremoloPos = (pChn->nTremoloPos + 4 * pChn->nTremoloSpeed) & 0xFF;
 			else
 				pChn->nTremoloPos = (pChn->nTremoloPos + pChn->nTremoloSpeed) & 0x3F;
@@ -770,7 +777,7 @@ void CSoundFile::ProcessTremor(CHANNELINDEX nChn, int &vol)
 {
 	ModChannel &chn = m_PlayState.Chn[nChn];
 
-	if(IsCompatibleMode(TRK_FASTTRACKER2))
+	if(m_playBehaviour[kFT2Tremor])
 	{
 		// FT2 Compatibility: Weird XM tremor.
 		// Test case: Tremor.xm
@@ -803,7 +810,7 @@ void CSoundFile::ProcessTremor(CHANNELINDEX nChn, int &vol)
 	} else if(chn.nCommand == CMD_TREMOR)
 	{
 		// IT compatibility 12. / 13.: Tremor
-		if(IsCompatibleMode(TRK_IMPULSETRACKER))
+		if(m_playBehaviour[kITTremor])
 		{
 			if((chn.nTremorCount & 0x80) && chn.nLength)
 			{
@@ -875,7 +882,7 @@ void CSoundFile::ProcessTremor(CHANNELINDEX nChn, int &vol)
 
 
 bool CSoundFile::IsEnvelopeProcessed(const ModChannel *pChn, EnvelopeType env) const
-//--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------
 {
 	if(pChn->pModInstrument == nullptr)
 	{
@@ -885,7 +892,7 @@ bool CSoundFile::IsEnvelopeProcessed(const ModChannel *pChn, EnvelopeType env) c
 
 	// IT Compatibility: S77/S79/S7B do not disable the envelope, they just pause the counter
 	// Test cases: s77.it, EnvLoops.xm
-	return ((pChn->GetEnvelope(env).flags[ENV_ENABLED] || (insEnv.dwFlags[ENV_ENABLED] && IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2)))
+	return ((pChn->GetEnvelope(env).flags[ENV_ENABLED] || (insEnv.dwFlags[ENV_ENABLED] && m_playBehaviour[kITEnvelopePositionHandling]))
 		&& insEnv.nNodes != 0);
 }
 
@@ -897,12 +904,12 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol) const
 	{
 		const ModInstrument *pIns = pChn->pModInstrument;
 
-		if(IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->VolEnv.nEnvPosition == 0)
+		if(m_playBehaviour[kITEnvelopePositionHandling] && pChn->VolEnv.nEnvPosition == 0)
 		{
 			// If the envelope is disabled at the very same moment as it is triggered, we do not process anything.
 			return;
 		}
-		const int envpos = pChn->VolEnv.nEnvPosition - (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
+		const int envpos = pChn->VolEnv.nEnvPosition - (m_playBehaviour[kITEnvelopePositionHandling] ? 1 : 0);
 		// Get values in [0, 256]
 		int envval = pIns->VolEnv.GetValueFromPosition(envpos, 256);
 
@@ -938,13 +945,13 @@ void CSoundFile::ProcessPanningEnvelope(ModChannel *pChn) const
 	{
 		const ModInstrument *pIns = pChn->pModInstrument;
 
-		if(IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->PanEnv.nEnvPosition == 0)
+		if(m_playBehaviour[kITEnvelopePositionHandling] && pChn->PanEnv.nEnvPosition == 0)
 		{
 			// If the envelope is disabled at the very same moment as it is triggered, we do not process anything.
 			return;
 		}
 
-		const int envpos = pChn->PanEnv.nEnvPosition - (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
+		const int envpos = pChn->PanEnv.nEnvPosition - (m_playBehaviour[kITEnvelopePositionHandling] ? 1 : 0);
 		// Get values in [-32, 32]
 		const int envval = pIns->PanEnv.GetValueFromPosition(envpos, 64) - 32;
 
@@ -969,13 +976,13 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period) const
 	{
 		const ModInstrument *pIns = pChn->pModInstrument;
 
-		if(IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->PitchEnv.nEnvPosition == 0)
+		if(m_playBehaviour[kITEnvelopePositionHandling] && pChn->PitchEnv.nEnvPosition == 0)
 		{
 			// If the envelope is disabled at the very same moment as it is triggered, we do not process anything.
 			return;
 		}
 
-		const int envpos = pChn->PitchEnv.nEnvPosition - (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
+		const int envpos = pChn->PitchEnv.nEnvPosition - (m_playBehaviour[kITEnvelopePositionHandling] ? 1 : 0);
 		// Get values in [-256, 256]
 #ifdef MODPLUG_TRACKER
 		const int32 range = ENVELOPE_MAX;
@@ -1007,8 +1014,9 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period) const
 				}
 			} else //Original behavior
 			{
-				const uint32 (&upTable)[256] = m_SongFlags[SONG_LINEARSLIDES] ? LinearSlideUpTable : LinearSlideDownTable;
-				const uint32 (&downTable)[256] = m_SongFlags[SONG_LINEARSLIDES] ? LinearSlideDownTable : LinearSlideUpTable;
+				const bool useFreq = m_SongFlags[SONG_LINEARSLIDES] && m_playBehaviour[kHertzInLinearMode];
+				const uint32 (&upTable)[256] = useFreq ? LinearSlideUpTable : LinearSlideDownTable;
+				const uint32 (&downTable)[256] = useFreq ? LinearSlideDownTable : LinearSlideUpTable;
 
 				int l = envval;
 				if(l < 0)
@@ -1038,7 +1046,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, EnvelopeType envTyp
 	}
 
 	// Increase position
-	uint32 position = chnEnv.nEnvPosition + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 0 : 1);
+	uint32 position = chnEnv.nEnvPosition + (m_playBehaviour[kITEnvelopePositionHandling] ? 0 : 1);
 
 	const InstrumentEnvelope &insEnv = pChn->pModInstrument->GetEnvelope(envType);
 	if(!insEnv.nNodes)
@@ -1048,7 +1056,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, EnvelopeType envTyp
 
 	bool endReached = false;
 
-	if(!IsCompatibleMode(TRK_IMPULSETRACKER))
+	if(!m_playBehaviour[kITEnvelopePositionHandling])
 	{
 		// FT2-style envelope processing.
 		if(insEnv.dwFlags[ENV_LOOP])
@@ -1059,20 +1067,11 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, EnvelopeType envTyp
 
 			// FT2 compatibility: If the sustain point is at the loop end and the sustain loop has been released, don't loop anymore.
 			// Test case: EnvLoops.xm
-			const bool escapeLoop = (insEnv.nLoopEnd == insEnv.nSustainEnd && insEnv.dwFlags[ENV_SUSTAIN] && pChn->dwFlags[CHN_KEYOFF] && IsCompatibleMode(TRK_FASTTRACKER2));
+			const bool escapeLoop = (insEnv.nLoopEnd == insEnv.nSustainEnd && insEnv.dwFlags[ENV_SUSTAIN] && pChn->dwFlags[CHN_KEYOFF] && m_playBehaviour[kFT2EnvelopeEscape]);
 
 			if(position == end && !escapeLoop)
 			{
 				position = insEnv.Ticks[insEnv.nLoopStart];
-
-				if(envType == ENV_VOLUME && insEnv.nLoopStart == insEnv.nLoopEnd && insEnv.Values[insEnv.nLoopEnd] == 0
-					&& (!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)) || (insEnv.nLoopEnd + 1u == insEnv.nNodes)))
-				{
-					// Stop channel if the envelope loop only covers the last silent envelope point.
-					// Can't see a point in this, and it breaks doommix3.xm if you allow loading one-point loops, so disabling it for now.
-					//pChn->dwFlags |= CHN_NOTEFADE;
-					//pChn->nFadeOutVol = 0;
-				}
 			}
 		}
 
@@ -1146,7 +1145,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, EnvelopeType envTyp
 		}
 	}
 
-	chnEnv.nEnvPosition = position + (IsCompatibleMode(TRK_IMPULSETRACKER) ? 1 : 0);
+	chnEnv.nEnvPosition = position + (m_playBehaviour[kITEnvelopePositionHandling] ? 1 : 0);
 
 }
 
@@ -1205,7 +1204,7 @@ void CSoundFile::ProcessPanbrello(ModChannel *pChn) const
 	{
 		uint32 panpos;
 		// IT compatibility: IT has its own, more precise tables
-		if(IsCompatibleMode(TRK_IMPULSETRACKER))
+		if(m_playBehaviour[kITVibratoTremoloPanbrello])
 			panpos = pChn->nPanbrelloPos & 0xFF;
 		else
 			panpos = ((pChn->nPanbrelloPos + 0x10) >> 2) & 0x3F;
@@ -1214,7 +1213,7 @@ void CSoundFile::ProcessPanbrello(ModChannel *pChn) const
 
 		// IT compatibility: Sample-and-hold style random panbrello (tremolo and vibrato don't use this mechanism in IT)
 		// Test case: RandomWaveform.it
-		if(IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->nPanbrelloType == 3)
+		if(m_playBehaviour[kITSampleAndHoldPanbrello] && pChn->nPanbrelloType == 3)
 		{
 			if(pChn->nPanbrelloPos == 0 || pChn->nPanbrelloPos >= pChn->nPanbrelloSpeed)
 			{
@@ -1229,7 +1228,7 @@ void CSoundFile::ProcessPanbrello(ModChannel *pChn) const
 		}
 		// IT compatibility: Panbrello effect is active until next note or panning command.
 		// Test case: PanbrelloHold.it
-		if(IsCompatibleMode(TRK_IMPULSETRACKER))
+		if(m_playBehaviour[kITPanbrelloHold])
 		{
 			pChn->nPanbrelloOffset = static_cast<int8>(pdelta);
 		}
@@ -1311,7 +1310,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 			pChn->m_ReCalculateFreqOnFirstTick = true;
 		} else
 		{
-			if(IsCompatibleMode(TRK_IMPULSETRACKER))
+			if(m_playBehaviour[kITArpeggio])
 			{
 				//IT playback compatibility 01 & 02
 
@@ -1325,12 +1324,12 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 					case 1: arpRatio = LinearSlideUpTable[(pChn->nArpeggio >> 4) * 16]; break;
 					case 2: arpRatio = LinearSlideUpTable[(pChn->nArpeggio & 0x0F) * 16]; break;
 					}
-					if(m_SongFlags[SONG_LINEARSLIDES])
+					if(m_SongFlags[SONG_LINEARSLIDES] && m_playBehaviour[kHertzInLinearMode])
 						period = Util::muldivr(period, arpRatio, 65536);
 					else
 						period = Util::muldivr(period, 65536, arpRatio);
 				}
-			} else if(IsCompatibleMode(TRK_FASTTRACKER2))
+			} else if(m_playBehaviour[kFT2Arpeggio])
 			{
 				// FastTracker 2: Swedish tracker logic (TM) arpeggio
 				if(!m_SongFlags[SONG_FIRSTTICK])
@@ -1430,7 +1429,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 
 			uint32 vdepth;
 			// IT compatibility: correct vibrato depth
-			if(IsCompatibleMode(TRK_IMPULSETRACKER))
+			if(m_playBehaviour[kITVibratoTremoloPanbrello])
 			{
 				// Yes, vibrato goes backwards with old effects enabled!
 				if(m_SongFlags[SONG_ITOLDEFFECTS])
@@ -1458,12 +1457,12 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 				if (l < 0)
 				{
 					l = -l;
-					vdelta = Util::muldiv(period, LinearSlideUpTable[l >> 2], 65536) - period;
-					if (l & 0x03) vdelta += Util::muldiv(period, FineLinearSlideUpTable[l & 0x03], 65536) - period;
+					vdelta = Util::muldiv(period, GetLinearSlideUpTable(this, l >> 2), 65536) - period;
+					if (l & 0x03) vdelta += Util::muldiv(period, GetFineLinearSlideUpTable(this, l & 0x03), 65536) - period;
 				} else
 				{
-					vdelta = Util::muldiv(period, LinearSlideDownTable[l >> 2], 65536) - period;
-					if (l & 0x03) vdelta += Util::muldiv(period, FineLinearSlideDownTable[l & 0x03], 65536) - period;
+					vdelta = Util::muldiv(period, GetLinearSlideDownTable(this, l >> 2), 65536) - period;
+					if (l & 0x03) vdelta += Util::muldiv(period, GetFineLinearSlideDownTable(this, l & 0x03), 65536) - period;
 				}
 			}
 			period += vdelta;
@@ -1487,7 +1486,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 		if(!m_SongFlags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !(m_SongFlags[SONG_ITOLDEFFECTS])))
 		{
 			// IT compatibility: IT has its own, more precise tables
-			if(IsCompatibleMode(TRK_IMPULSETRACKER))
+			if(m_playBehaviour[kITVibratoTremoloPanbrello])
 				chn.nVibratoPos = (vibpos + 4 * chn.nVibratoSpeed) & 0xFF;
 			else
 				chn.nVibratoPos = (vibpos + chn.nVibratoSpeed) & 0x3F;
@@ -1515,13 +1514,14 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 
 		// In IT linear slide mode, we use frequencies, otherwise we use periods, which are upside down.
 		// In this context, the "up" tables refer to the tables that increase frequency, and the down tables are the ones that decrease frequency.
-		const uint32 (&upTable)[256] = m_SongFlags[SONG_LINEARSLIDES] ? LinearSlideUpTable : LinearSlideDownTable;
-		const uint32 (&downTable)[256] = m_SongFlags[SONG_LINEARSLIDES] ? LinearSlideDownTable : LinearSlideUpTable;
-		const uint32 (&fineUpTable)[16] = m_SongFlags[SONG_LINEARSLIDES] ? FineLinearSlideUpTable : FineLinearSlideDownTable;
-		const uint32 (&fineDownTable)[16] = m_SongFlags[SONG_LINEARSLIDES] ? FineLinearSlideDownTable : FineLinearSlideUpTable;
+		const bool useFreq = m_SongFlags[SONG_LINEARSLIDES] && m_playBehaviour[kHertzInLinearMode];
+		const uint32 (&upTable)[256] = useFreq ? LinearSlideUpTable : LinearSlideDownTable;
+		const uint32 (&downTable)[256] = useFreq ? LinearSlideDownTable : LinearSlideUpTable;
+		const uint32 (&fineUpTable)[16] = useFreq ? FineLinearSlideUpTable : FineLinearSlideDownTable;
+		const uint32 (&fineDownTable)[16] = useFreq ? FineLinearSlideDownTable : FineLinearSlideUpTable;
 
 		// IT compatibility: Autovibrato is so much different in IT that I just put this in a separate code block, to get rid of a dozen IsCompatibilityMode() calls.
-		if(IsCompatibleMode(TRK_IMPULSETRACKER) && !alternativeTuning)
+		if(m_playBehaviour[kITVibratoTremoloPanbrello] && !alternativeTuning)
 		{
 			// Schism's autovibrato code
 
@@ -1693,7 +1693,7 @@ void CSoundFile::ProcessRamping(ModChannel *pChn) const
 		rampLength = globalRampLength = (rampUp ? m_MixerSettings.GetVolumeRampUpSamples() : m_MixerSettings.GetVolumeRampDownSamples());
 		//XXXih: add real support for bidi ramping here
 
-		if(GetModFlag(MSF_VOLRAMP) && (GetType() & MOD_TYPE_XM))
+		if(m_playBehaviour[kFT2VolumeRamping] && (GetType() & MOD_TYPE_XM))
 		{
 			// apply FT2-style super-soft volume ramping (5ms), overriding openmpt settings
 			rampLength = globalRampLength = Util::muldivr(5, m_MixerSettings.gdwMixingFreq, 1000);
@@ -1756,7 +1756,7 @@ uint32 CSoundFile::GetChannelIncrement(ModChannel *pChn, uint32 period, int peri
 	const ModInstrument *pIns = pChn->pModInstrument;
 	if(GetType() != MOD_TYPE_MPT || pIns == nullptr || pIns->pTuning == nullptr)
 	{
-		freq = GetFreqFromPeriod(period, periodFrac);
+		freq = GetFreqFromPeriod(period, pChn->nC5Speed, periodFrac);
 	} else
 	{
 		freq = pChn->m_Freq;
@@ -1843,7 +1843,7 @@ bool CSoundFile::ReadNote()
 		// FT2 Compatibility: Prevent notes to be stopped after a fadeout. This way, a portamento effect can pick up a faded instrument which is long enough.
 		// This occours for example in the bassline (channel 11) of jt_burn.xm. I hope this won't break anything else...
 		// I also suppose this could decrease mixing performance a bit, but hey, which CPU can't handle 32 muted channels these days... :-)
-		if(pChn->dwFlags[CHN_NOTEFADE] && (!(pChn->nFadeOutVol|pChn->leftVol|pChn->rightVol)) && (!IsCompatibleMode(TRK_FASTTRACKER2)))
+		if(pChn->dwFlags[CHN_NOTEFADE] && (!(pChn->nFadeOutVol|pChn->leftVol|pChn->rightVol)) && !m_playBehaviour[kFT2ProcessSilentChannels])
 		{
 			pChn->nLength = 0;
 			pChn->nROfs = pChn->nLOfs = 0;
@@ -1884,7 +1884,7 @@ bool CSoundFile::ReadNote()
 			int vol = pChn->nVolume;
 			int insVol = pChn->nInsVol;		// This is the "SV * IV" value in ITTECH.TXT
 
-			ProcessVolumeSwing(pChn, IsCompatibleMode(TRK_IMPULSETRACKER) ? insVol : vol);
+			ProcessVolumeSwing(pChn, m_playBehaviour[kITSwingBehaviour] ? insVol : vol);
 			ProcessPanningSwing(pChn);
 			ProcessTremolo(pChn, vol);
 			ProcessTremor(nChn, vol);
@@ -1896,7 +1896,7 @@ bool CSoundFile::ReadNote()
 			// Process Envelopes
 			if (pIns)
 			{
-				if(IsCompatibleMode(TRK_IMPULSETRACKER))
+				if(m_playBehaviour[kITEnvelopePositionHandling])
 				{
 					// In IT compatible mode, envelope position indices are shifted by one for proper envelope pausing,
 					// so we have to update the position before we actually process the envelopes.
@@ -1943,7 +1943,7 @@ bool CSoundFile::ReadNote()
 			// ST3 only clamps the final output period, but never the channel's internal period.
 			// Test case: PeriodLimit.s3m
 			if (pChn->nPeriod < m_nMinPeriod && GetType() != MOD_TYPE_S3M) pChn->nPeriod = m_nMinPeriod;
-			if(IsCompatibleMode(TRK_FASTTRACKER2)) Clamp(pChn->nPeriod, 1, 31999);
+			if(m_playBehaviour[kFT2Periods]) Clamp(pChn->nPeriod, 1, 31999);
 			period = pChn->nPeriod;
 
 			// When glissando mode is set to semitones, clamp to the next halftone.
@@ -1984,7 +1984,7 @@ bool CSoundFile::ReadNote()
 
 		// IT Compatibility: Ensure that there is no pan swing, panbrello, panning envelopes, etc. applied on surround channels.
 		// Test case: surround-pan.it
-		if(pChn->dwFlags[CHN_SURROUND] && !m_SongFlags[SONG_SURROUNDPAN] && IsCompatibleMode(TRK_IMPULSETRACKER))
+		if(pChn->dwFlags[CHN_SURROUND] && !m_SongFlags[SONG_SURROUNDPAN] && m_playBehaviour[kITNoSurroundPan])
 		{
 			pChn->nRealPan = 128;
 		}
@@ -2047,7 +2047,7 @@ bool CSoundFile::ReadNote()
 		}
 
 		// Increment envelope positions
-		if(pIns != nullptr && !IsCompatibleMode(TRK_IMPULSETRACKER))
+		if(pIns != nullptr && !m_playBehaviour[kITEnvelopePositionHandling])
 		{
 			// In IT and FT2 compatible mode, envelope positions are updated above.
 			// Test cases: s77.it, EnvLoops.xm
@@ -2271,7 +2271,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 	}
 	const bool hasVolCommand = (vol != 0xFF);
 
-	if(GetModFlag(MSF_MIDICC_BUGEMULATION))
+	if(m_playBehaviour[kMIDICCBugEmulation])
 	{
 		if(note != NOTE_NONE)
 		{
@@ -2300,7 +2300,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 		}
 
 		int32 swing = chn.nVolSwing;
-		if(IsCompatibleMode(TRK_IMPULSETRACKER)) swing *= 4;
+		if(m_playBehaviour[kITSwingBehaviour]) swing *= 4;
 		velocity += swing;
 		Limit(velocity, 0, 256);
 

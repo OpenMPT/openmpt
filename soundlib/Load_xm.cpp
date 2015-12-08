@@ -280,9 +280,8 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_XM);
 	InitializeChannels();
-	ChangeModTypeTo(MOD_TYPE_XM);
 	m_nMixLevels = mixLevelsCompatible;
 
 	FlagSet<TrackerVersions> madeWith(verUnknown);
@@ -342,9 +341,6 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags.reset();
 	m_SongFlags.set(SONG_LINEARSLIDES, (fileHeader.flags & XMFileHeader::linearSlides) != 0);
 	m_SongFlags.set(SONG_EXFILTERRANGE, (fileHeader.flags & XMFileHeader::extendedFilterRange) != 0);
-
-	// set this here already because XMs compressed with BoobieSqueezer will exit the function early
-	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	Order.ReadAsByte(file, fileHeader.orders);
 	if(fileHeader.orders == 0 && madeWith[verFT2Generic])
@@ -615,7 +611,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	if(m_dwLastSavedWithVersion != 0 && !madeWith[verOpenMPT])
 	{
 		m_nMixLevels = mixLevelsOriginal;
-		SetModFlag(MSF_COMPATIBLE_PLAY, false);
+		m_playBehaviour.reset();
 	}
 
 	if(madeWith[verFT2Generic])
@@ -637,7 +633,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			)
 		{
 			// apply FT2-style super-soft volume ramping
-			SetModFlag(MSF_VOLRAMP, true);
+			m_playBehaviour.set(kFT2VolumeRamping);
 		}
 	}
 
@@ -666,16 +662,11 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 	LoadExtendedSongProperties(file, &interpretOpenMPTMade);
 
-	if(interpretOpenMPTMade)
+	if(interpretOpenMPTMade && m_dwLastSavedWithVersion == 0)
 	{
-		UpgradeModFlags();
-
-		if(m_dwLastSavedWithVersion == 0)
-		{
-			// Up to OpenMPT 1.17.02.45 (r165), it was possible that the "last saved with" field was 0
-			// when saving a file in OpenMPT for the first time.
-			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
-		}
+		// Up to OpenMPT 1.17.02.45 (r165), it was possible that the "last saved with" field was 0
+		// when saving a file in OpenMPT for the first time.
+		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
 	}
 
 	if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 00, 00))

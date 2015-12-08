@@ -152,8 +152,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals();
-	m_nType = gdmFormatOrigin[fileHeader.originalFormat];
+	InitializeGlobals(gdmFormatOrigin[fileHeader.originalFormat]);
 	m_ContainerType = MOD_CONTAINERTYPE_GDM;
 	m_madeWithTracker = mpt::String::Print("BWSB 2GDM %1.%2 (converted from %3)", fileHeader.trackerMajorVer, fileHeader.formatMinorVer, ModTypeToTracker(GetType()));
 

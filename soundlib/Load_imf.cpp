@@ -445,7 +445,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_IMF);
 	m_nChannels = detectedChannels;
 
 	//From mikmod: work around an Orpheus bug
@@ -459,9 +459,6 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 			for(chn = 1; chn < 16; chn++)
 				ChnSettings[chn].dwFlags.reset(CHN_MUTE);
 	}
-
-	m_nType = MOD_TYPE_IMF;
-	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	// Song Name
 	mpt::String::Read<mpt::String::nullTerminated>(m_songName, fileHeader.title);

@@ -568,11 +568,9 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	miditracks.resize(tracks);
 
 	// Reading File...
-	InitializeGlobals();
-	m_nType = MOD_TYPE_MID;
+	InitializeGlobals(MOD_TYPE_MID);
 	m_nChannels = 32;
 	m_SongFlags = SONG_LINEARSLIDES;
-	m_songName = "";
 
 	// MIDI->MOD Tempo Conversion
 	division = BigEndianW(pmfh.wDivision);

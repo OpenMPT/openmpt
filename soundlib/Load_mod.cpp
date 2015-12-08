@@ -495,7 +495,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_MOD);
 	m_nChannels = 4;
 
 	// Check MOD Magic
@@ -631,7 +631,6 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Now we can be pretty sure that this is a valid MOD file. Set up default song settings.
-	m_nType = MOD_TYPE_MOD;
 	m_nInstruments = 0;
 	m_nDefaultSpeed = 6;
 	m_nDefaultTempo.Set(125);
@@ -789,12 +788,12 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		const double songTime = GetSongTime();
 		if(songTime >= 600.0)
 		{
-			m_SongFlags.set(SONG_VBLANK_TIMING);
+			m_playBehaviour.set(kMODVBlankTiming);
 			if(GetLength(eNoAdjust, GetLengthTarget(songTime)).front().targetReached)
 			{
 				// This just makes things worse, song is at least as long as in CIA mode (e.g. in "Stary Hallway" by Neurodancer)
 				// Obviously we should keep using CIA timing then...
-				m_SongFlags.reset(SONG_VBLANK_TIMING);
+				m_playBehaviour.reset(kMODVBlankTiming);
 			} else
 			{
 				m_madeWithTracker = "ProTracker (VBlank)";
@@ -865,7 +864,8 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_MOD);
+	m_playBehaviour.reset(kMODOneShotLoops);
 	m_nChannels = 4;
 
 	STVersions minVersion = UST1_00;
@@ -948,7 +948,6 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 
 	// Now we can be pretty sure that this is a valid Soundtracker file. Set up default song settings.
-	m_nType = MOD_TYPE_MOD;
 	// explora3-death.mod has a tempo of 0
 	if(!fileHeader.restartPos)
 		fileHeader.restartPos = 0x78;
@@ -1200,7 +1199,8 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_MOD);
+	m_playBehaviour.reset(kMODOneShotLoops);
 
 	if(IsMagic(magic, "MTN\0"))
 		m_madeWithTracker = "SoundTracker 2.6";
@@ -1238,7 +1238,6 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 
 	// Now we can be pretty sure that this is a valid MOD file. Set up default song settings.
-	m_nType = MOD_TYPE_MOD;
 	m_nChannels = 4;
 	m_nInstruments = 0;
 	m_nDefaultSpeed = 6;

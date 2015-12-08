@@ -113,14 +113,6 @@ enum MODCONTAINERTYPE
 };
 
 
-// For compatibility mode
-#define TRK_IMPULSETRACKER	(MOD_TYPE_IT | MOD_TYPE_MPT)
-#define TRK_FASTTRACKER2	(MOD_TYPE_XM)
-#define TRK_SCREAMTRACKER	(MOD_TYPE_S3M)
-#define TRK_PROTRACKER		(MOD_TYPE_MOD)
-#define TRK_ALLTRACKERS		(~Enum<MODTYPE>::value_type())
-
-
 // Channel flags:
 enum ChannelFlags
 {
@@ -256,11 +248,10 @@ enum SongFlags
 	SONG_POSJUMP		= 0x100000,		// Position jump encountered (internal flag, do not touch)
 	SONG_PT_MODE		= 0x200000,		// ProTracker 1/2 playback mode
 	SONG_PLAYALLSONGS	= 0x400000,		// Play all subsongs consecutively (libopenmpt)
-	SONG_VBLANK_TIMING	= 0x800000,		// Use MOD VBlank timing (F21 and higher set speed instead of tempo)
 };
 DECLARE_FLAGSET(SongFlags)
 
-#define SONG_FILE_FLAGS	(SONG_EMBEDMIDICFG|SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_PT_MODE|SONG_VBLANK_TIMING)
+#define SONG_FILE_FLAGS	(SONG_EMBEDMIDICFG|SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_PT_MODE)
 #define SONG_PLAY_FLAGS (~SONG_FILE_FLAGS)
 
 // Global Options (Renderer)
@@ -360,6 +351,100 @@ enum VibratoType
 	VIB_RAMP_UP,
 	VIB_RAMP_DOWN,
 	VIB_RANDOM
+};
+
+
+// Tracker-specific playback behaviour
+// Note: The index of every flag has to be fixed, so do not remove flags and add new flags at the end!
+enum PlayBehaviour
+{
+	MSF_COMPATIBLE_PLAY,			// No-op - only used during loading (Old general compatibility flag for IT/MPT/XM)
+	kMPTOldSwingBehaviour,			// MPT 1.16 swing behaviour (IT/MPT, deprecated)
+	kMIDICCBugEmulation,			// Emulate broken volume MIDI CC behaviour (IT/MPT/XM, deprecated)
+	kOldMIDIPitchBends,				// Old VST MIDI pitch bend behaviour (IT/MPT/XM, deprecated)
+	kFT2VolumeRamping,				// Smooth volume ramping like in FT2 (XM)
+	kMODVBlankTiming,				// F21 and above set speed instead of tempo
+	kMODOneShotLoops,				// Allow ProTracker-like oneshot loops
+
+	kHertzInLinearMode,				// Compute note frequency in hertz rather than periods
+	kTempoClamp,					// Clamp tempo to 32-255 range.
+	kPerChannelGlobalVolSlide,		// Global volume slide memory is per-channel
+	kPanOverride,					// Panning commands override surround and random pan variation
+
+	kITInstrWithoutNote,			// Avoid instrument handling if there is no note
+	kITVolColFinePortamento,		// Volume column portamento never does fine portamento
+	kITArpeggio,					// IT arpeggio algorithm
+	kITOutOfRangeDelay,				// Out-of-range delay command behaviour in IT
+	kITPortaMemoryShare,			// Gxx shares memory with Exx and Fxx
+	kITPatternLoopTargetReset,		// After finishing a pattern loop, set the pattern loop target to the next row
+	kITFT2PatternLoop,				// Nested pattern loop behaviour
+	kITPingPongNoReset,				// Don't reset ping pong direction with instrument numbers
+	kITEnvelopeReset,				// IT envelope reset behaviour
+	kITClearOldNoteAfterCut,		// Forget the previous note after cutting it
+	kITVibratoTremoloPanbrello,		// More IT-like Hxx / hx, Rxx, Yxx and autovibrato handling, including more precise LUTs
+	kITTremor,						// Ixx behaves like in IT
+	kITRetrigger,					// Qxx behaves like in IT
+	kITMultiSampleBehaviour,		// Properly update C-5 frequency when changing in multisampled instrument
+	kITPortaTargetReached,			// Clear portamento target after it has been reached
+	kITPatternLoopBreak,			// Don't reset loop count on pattern break.
+	kITOffset,						// IT-style Oxx edge case handling
+	kITSwingBehaviour,				// IT's swing behaviour
+	kITNNAReset,					// NNA is reset on every note change, not every instrument change
+	kITSCxStopsSample,				// SCx really stops the sample and does not just mute it
+	kITEnvelopePositionHandling,	// IT-style envelope position advance + enable/disable behaviour
+	kITPortamentoInstrument,		// No sample changes during portamento with Compatible Gxx enabled, instrument envelope reset with portamento
+	kITPingPongMode,				// Don't repeat last sample point in ping pong loop, like IT's software mixer
+	kITRealNoteMapping,				// Use triggered note rather than translated note for PPS and other effects
+	kITHighOffsetNoRetrig,			// SAx should not apply an offset effect to a note next to it
+	kITFilterBehaviour,				// User IT's filter coefficients (unless extended filter range is used)
+	kITNoSurroundPan,				// Panning and surround are mutually exclusive
+	kITShortSampleRetrig,			// Don't retrigger already stopped channels
+	kITPortaNoNote,					// Don't apply any portamento if no previous note is playing
+	kITDontResetNoteOffOnPorta,		// Only reset note-off status on portamento in IT Compatible Gxx mode
+	kITVolColMemory,				// IT volume column effects share their memory with the effect column
+	kITPortamentoSwapResetsPos,		// Portamento with sample swap plays the new sample from the beginning
+	kITEmptyNoteMapSlot,			// IT ignores instrument note map entries with no note completely
+	kITFirstTickHandling,			// IT-style first tick handling
+	kITSampleAndHoldPanbrello,		// IT-style sample&hold panbrello waveform
+	kITClearPortaTarget,			// New notes reset portamento target in IT
+	kITPanbrelloHold,				// Don't reset panbrello effect until next note or panning effect
+	kITPanningReset,				// Sample and instrument panning is only applied on note change, not instrument change
+	kITPatternLoopWithJumps,		// Bxx on the same row as SBx terminates the loop in IT
+
+	kFT2Arpeggio,					// FT2 arpeggio algorithm
+	kFT2Retrigger,					// Rxx behaves like in FT2
+	kFT2VolColVibrato,				// Vibrato depth in volume column does not actually execute the vibrato effect
+	kFT2PortaNoNote,				// Don't play portamento-ed note if no previous note is playing
+	kFT2KeyOff,						// FT2-style Kxx handling
+	kFT2PanSlide,					// Volume-column pan slides should be handled like fine slides
+	kFT2OffsetOutOfRange,			// FT2-style 9xx edge case handling
+	kFT2RestrictXCommand,			// Don't allow MPT extensions to Xxx command in XM
+	kFT2RetrigWithNoteDelay,		// Retrigger envelopes if there is a note delay with no note
+	kFT2SetPanEnvPos,				// Lxx only sets the pan env position if the volume envelope's sustain flag is set
+	kFT2PortaIgnoreInstr,			// Portamento plus instrument number applies the volume settings of the new sample, but not the new sample itself.
+	kFT2VolColMemory,				// No volume column memory in FT2
+	kFT2LoopE60Restart,				// Next pattern starts on the same row as the last E60 command
+	kFT2ProcessSilentChannels,		// Keep processing silent channels for later 3xx pickup
+	kFT2ReloadSampleSettings,		// Reload sample settings even if a note-off is placed next to an instrument number
+	kFT2PortaDelay,					// Portamento with note delay next to it is ignored in FT2
+	kFT2Transpose,					// Out-of-range transposed notes in FT2
+	kFT2PatternLoopWithJumps,		// Bxx or Dxx on the same row as E6x terminates the loop in FT2
+	kFT2PortaTargetNoReset,			// Portamento target is not reset with new notes in FT2
+	kFT2EnvelopeEscape,				// FT2 sustain point at end of envelope
+	kFT2Tremor,						// Txx behaves like in FT2
+	kFT2OutOfRangeDelay,			// Out-of-range delay command behaviour in FT2
+	kFT2Periods,					// Use FT2's broken period handling
+	kFT2PanWithDelayedNoteOff,		// Pan command with delayed note-off
+	kFT2VolColDelay,				// FT2-style volume column handling if there is a note delay
+	kFT2FinetunePrecision,			// Only take the upper 4 bits of sample finetune.
+
+	kST3NoMutedChannels,			// Don't process any effects on muted S3M channels
+	kST3EffectMemory,				// Most effects share the same memory in ST3
+	kST3PortaSampleChange,			// Portamento plus instrument number applies the volume settings of the new sample, but not the new sample itself.
+
+	// Add new play behaviours here.
+
+	kMaxPlayBehaviours,
 };
 
 

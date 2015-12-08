@@ -815,6 +815,7 @@ bool CModCleanupDlg::ResetVariables()
 
 	// convert to IT...
 	modDoc.ChangeModType(MOD_TYPE_IT);
+	sndFile.SetDefaultPlaybackBehaviour(sndFile.GetType());
 	sndFile.SetMixLevels(mixLevelsCompatible);
 	sndFile.m_songArtist.clear();
 	sndFile.m_nTempoMode = tempoModeClassic;
@@ -844,15 +845,13 @@ bool CModCleanupDlg::ResetVariables()
 		sndFile.Instruments[i]->nResSwing = 0;
 	}
 
-	sndFile.InitializeChannels();
+	for(CHANNELINDEX chn = 0; chn < sndFile.GetNumChannels(); chn++)
+	{
+		sndFile.InitChannel(chn);
+	}
 
 	// reset samples
 	ctrlSmp::ResetSamples(sndFile, ctrlSmp::SmpResetCompo);
-
-	// Set modflags.
-	sndFile.SetModFlag(MSF_MIDICC_BUGEMULATION, false);
-	sndFile.SetModFlag(MSF_OLDVOLSWING, false);
-	sndFile.SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	cs.Leave();
 	EndWaitCursor();

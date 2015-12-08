@@ -1020,7 +1020,7 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 					if(chnEnv.flags[ENV_ENABLED])
 					{
 						pos = chnEnv.nEnvPosition;
-						if(m_pSndFile->IsCompatibleMode(TRK_IMPULSETRACKER))
+						if(m_pSndFile->m_playBehaviour[kITEnvelopePositionHandling])
 						{
 							// Impulse Tracker envelope handling (see e.g. CSoundFile::IncrementEnvelopePosition in SndMix.cpp for details)
 							if(pos > 0)

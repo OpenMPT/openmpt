@@ -121,9 +121,8 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_AMF0);
 	InitializeChannels();
-	m_nType = MOD_TYPE_AMF0;
 	m_nChannels = 8;
 	m_nDefaultSpeed = fileHeader.defaultSpeed;
 	m_nDefaultTempo.Set(fileHeader.defaultTempo);
@@ -382,10 +381,9 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_AMF);
 	InitializeChannels();
 
-	m_nType = MOD_TYPE_AMF;
 	m_nChannels = fileHeader.numChannels;
 	m_nSamples = fileHeader.numSamples;
 

@@ -339,7 +339,8 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 	pvolenv = ppanenv = ppitchenv = NULL;
 	nvolenv = npanenv = npitchenv = 0;
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_MDL);
+	m_SongFlags = SONG_LINEARSLIDES;
 
 	while (dwMemPos+6 < dwMemLength)
 	{
@@ -703,8 +704,6 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 	}
-	m_SongFlags = SONG_LINEARSLIDES;
-	m_nType = MOD_TYPE_MDL;
 	return true;
 }
 

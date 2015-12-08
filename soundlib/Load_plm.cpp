@@ -137,10 +137,8 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_PLM);
 	InitializeChannels();
-	SetModFlag(MSF_COMPATIBLE_PLAY, true);
-	m_nType = MOD_TYPE_PLM;
 	m_SongFlags = SONG_ITOLDEFFECTS;
 	m_madeWithTracker = "Disorder Tracker 2";
 	// Some PLMs use ASCIIZ, some space-padding strings...weird. Oh, and the file browser stops at 0 bytes in the name, the main GUI doesn't.

@@ -297,8 +297,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 	std::vector<bool> sample7bit;	// 7-/8-bit sample
 	ORDERINDEX nOrders = 0;
 
-	InitializeGlobals();
-	m_songName.clear();
+	InitializeGlobals(MOD_TYPE_OKT);
 
 	// Go through IFF chunks...
 	while(file.CanRead(sizeof(OktIffChunk)))
@@ -401,7 +400,6 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultTempo.Set(125);
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nSamplePreAmp = m_nVSTiVolume = 48;
-	m_nType = MOD_TYPE_OKT;
 	m_nMinPeriod = 0x71 * 4;
 	m_nMaxPeriod = 0x358 * 4;
 
@@ -446,8 +444,6 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 
 		nFileSmp++;
 	}
-
-	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	return true;
 }

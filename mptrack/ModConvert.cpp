@@ -507,7 +507,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		CHANGEMODTYPE_WARNING(wEditHistory);
 	}
 
-	if((nOldType & MOD_TYPE_XM) && m_SndFile.GetModFlag(MSF_VOLRAMP))
+	if((nOldType & MOD_TYPE_XM) && m_SndFile.m_playBehaviour[kFT2VolumeRamping])
 	{
 		CHANGEMODTYPE_WARNING(wVolRamp);
 	}
@@ -534,16 +534,6 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	if(oldTypeIsMPT && m_SndFile.GetMixLevels() != mixLevelsCompatible && m_SndFile.GetMixLevels() != mixLevelsCompatibleFT2)
 	{
 		CHANGEMODTYPE_WARNING(wMixmode);
-	}
-
-	// Automatically enable compatible mode when converting from MOD, since it's automatically enabled there and should be used in the other formats as well.
-	if((nOldType & MOD_TYPE_MOD) && (nNewType & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_S3M)))
-	{
-		m_SndFile.SetModFlag(MSF_COMPATIBLE_PLAY, true);
-	}
-	if((nNewType & (MOD_TYPE_XM | MOD_TYPE_IT)) && !m_SndFile.GetModFlag(MSF_COMPATIBLE_PLAY))
-	{
-		CHANGEMODTYPE_WARNING(wCompatibilityMode);
 	}
 
 	if(!specs.hasFractionalTempo && m_SndFile.m_nDefaultTempo.GetFract() != 0)
@@ -620,7 +610,6 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	CHANGEMODTYPE_CHECK(wEditHistory, _T("Edit history will not be saved in the new format."));
 	CHANGEMODTYPE_CHECK(wMixmode, _T("Consider setting the mix levels to \"Compatible\" in the song properties when working with legacy formats."));
 	CHANGEMODTYPE_CHECK(wVolRamp, _T("Fasttracker 2 compatible super soft volume ramping gets lost when converting XM files to another type."));
-	CHANGEMODTYPE_CHECK(wCompatibilityMode, _T("Consider enabling the \"compatible playback\" option in the song properties to increase compatiblity with other players."));
 	CHANGEMODTYPE_CHECK(wGlobalVolumeNotSupported, _T("Default global volume is not supported by the new format."));
 	CHANGEMODTYPE_CHECK(wResamplingMode, _T("Song-specific resampling mode is not supported by the new format."));
 	CHANGEMODTYPE_CHECK(wFractionalTempo, _T("Fractional tempo is not supported by the new format."));

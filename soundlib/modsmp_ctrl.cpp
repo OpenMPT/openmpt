@@ -289,7 +289,7 @@ void PrecomputeLoopsImpl(ModSample &smp, const CSoundFile &sndFile)
 			smp.nLoopEnd - smp.nLoopStart,
 			numChannels,
 			smp.uFlags[CHN_PINGPONGLOOP],
-			sndFile.IsITPingPongMode());
+			sndFile.m_playBehaviour[kITPingPongMode]);
 	}
 	if(smp.uFlags[CHN_SUSTAINLOOP])
 	{
@@ -298,7 +298,7 @@ void PrecomputeLoopsImpl(ModSample &smp, const CSoundFile &sndFile)
 			smp.nSustainEnd - smp.nSustainStart,
 			numChannels,
 			smp.uFlags[CHN_PINGPONGSUSTAIN],
-			sndFile.IsITPingPongMode());
+			sndFile.m_playBehaviour[kITPingPongMode]);
 	}
 }
 

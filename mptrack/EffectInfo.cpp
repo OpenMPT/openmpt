@@ -310,7 +310,7 @@ bool EffectInfo::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, ModCommand::PARAM *p
 			break;
 		case CMD_S3MCMDEX:
 			// adjust waveform types for IT/S3M
-			if(gFXInfo[ndx].paramValue >= 0x30 && gFXInfo[ndx].paramValue <= 0x50) nmax = gFXInfo[ndx].paramValue | (sndFile.IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER) ? 0x03 : 0x07);
+			if(gFXInfo[ndx].paramValue >= 0x30 && gFXInfo[ndx].paramValue <= 0x50) nmax = gFXInfo[ndx].paramValue | ((sndFile.m_playBehaviour[kITVibratoTremoloPanbrello] || sndFile.GetType() == MOD_TYPE_S3M) ? 0x03 : 0x07);
 			break;
 		case CMD_PATTERNBREAK:
 			// no big patterns in MOD/S3M files
@@ -711,7 +711,7 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 						case 0x30: // vibrato waveform
 						case 0x40: // tremolo waveform
 						case 0x50: // panbrello waveform
-							if(((param & 0x0F) > 0x03) && sndFile.IsCompatibleMode(TRK_IMPULSETRACKER))
+							if(((param & 0x0F) > 0x03) && sndFile.m_playBehaviour[kITVibratoTremoloPanbrello])
 							{
 								strcpy(s, "ignore");
 								break;

@@ -880,15 +880,15 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	m_madeWithTracker = "MO3";
 	m_ContainerType = MOD_CONTAINERTYPE_MO3;
 	if(fileHeader.flags & MO3FileHeader::isIT)
-		m_nType = MOD_TYPE_IT;
+		SetType(MOD_TYPE_IT);
 	else if(fileHeader.flags & MO3FileHeader::isS3M)
-		m_nType = MOD_TYPE_S3M;
+		SetType(MOD_TYPE_S3M);
 	else if(fileHeader.flags & MO3FileHeader::isMOD)
-		m_nType = MOD_TYPE_MOD;
+		SetType(MOD_TYPE_MOD);
 	else if(fileHeader.flags & MO3FileHeader::isMTM)
-		m_nType = MOD_TYPE_MTM;
+		SetType(MOD_TYPE_MTM);
 	else
-		m_nType = MOD_TYPE_XM;
+		SetType(MOD_TYPE_XM);
 
 	if(fileHeader.flags & MO3FileHeader::linearSlides)
 		m_SongFlags.set(SONG_LINEARSLIDES);
@@ -903,8 +903,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileHeader.flags & MO3FileHeader::extFilterRange)
 		m_SongFlags.set(SONG_EXFILTERRANGE);
 	if(fileHeader.flags & MO3FileHeader::modVBlank)
-		m_SongFlags.set(SONG_VBLANK_TIMING);
-	SetModFlag(MSF_COMPATIBLE_PLAY, !(fileHeader.flags & MO3FileHeader::modplugMode));
+		m_playBehaviour.set(kMODVBlankTiming);
 
 	if(m_nType == MOD_TYPE_IT)
 		m_nDefaultGlobalVolume = std::min<uint16>(fileHeader.globalVol, 128) * 2;

@@ -60,7 +60,7 @@ bool CSoundFile::ReadWav(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_WAV);
 	m_nChannels = std::max(wavFile.GetNumChannels(), uint16(2));
 	if(!Patterns.Insert(0, 64) || !Patterns.Insert(1, 64))
 	{
@@ -89,7 +89,6 @@ bool CSoundFile::ReadWav(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	m_nType = MOD_TYPE_WAV;
 	m_nSamples = wavFile.GetNumChannels();
 	m_nInstruments = 0;
 	m_nDefaultSpeed = ticksPerRow;

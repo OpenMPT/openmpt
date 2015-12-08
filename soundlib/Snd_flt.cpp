@@ -30,7 +30,7 @@ uint32 CSoundFile::CutOffToFrequency(uint32 nCutOff, int flt_modifier) const
 	int freq = static_cast<int>(Fc);
 	Limit(freq, 120, 20000);
 	if (freq * 2 > (int)m_MixerSettings.gdwMixingFreq) freq = m_MixerSettings.gdwMixingFreq / 2;
-	return (uint32)freq;
+	return static_cast<uint32>(freq);
 }
 
 
@@ -44,7 +44,7 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 	Limit(cutoff, 0, 127);
 	Limit(resonance, 0, 127);
 
-	if(!GetModFlag(MSF_OLDVOLSWING))
+	if(!m_playBehaviour[kMPTOldSwingBehaviour])
 	{
 		pChn->nCutOff = (uint8)cutoff;
 		pChn->nCutSwing = 0;
@@ -58,7 +58,7 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 	const int computedCutoff = cutoff * (flt_modifier + 256) / 256;
 
 	// Filtering is only ever done in IT if either cutoff is not full or if resonance is set.
-	if(IsCompatibleMode(TRK_IMPULSETRACKER) && resonance == 0 && computedCutoff >= 254)
+	if(m_playBehaviour[kITFilterBehaviour] && resonance == 0 && computedCutoff >= 254)
 	{
 		if(pChn->rowCommand.IsNote() && !pChn->rowCommand.IsPortamento() && !pChn->nMasterChn && m_SongFlags[SONG_FIRSTTICK])
 		{
@@ -71,7 +71,7 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 
 	pChn->dwFlags.set(CHN_FILTER);
 
-	if(UseITFilterMode())
+	if(m_playBehaviour[kITFilterBehaviour] && !m_SongFlags[SONG_EXFILTERRANGE])
 	{
 		const float freqParameterMultiplier = 128.0f / (24.0f * 256.0f);
 
