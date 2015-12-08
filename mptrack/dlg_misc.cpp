@@ -528,6 +528,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kFT2VolumeRamping: desc = _T("Use smooth Fasttracker 2 volume ramping"); break;
 
 		case kMODVBlankTiming: desc = _T("VBlank timing: F21 and above sets speed instead of tempo"); break;
+		case kMODOneShotLoops: desc = _T("ProTracker one-shot loops"); break;
 		case kHertzInLinearMode: desc = _T("Compute note frequency in hertz rather than periods"); break;
 		case kTempoClamp: desc = _T("Clamp tempo to 32-255 range"); break;
 		case kPerChannelGlobalVolSlide: desc = _T("Global volume slide memory is per-channel"); break;
@@ -572,6 +573,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kITPanbrelloHold: desc = _T("Don't reset panbrello effect until next note or panning effect"); break;
 		case kITPanningReset: desc = _T("Sample and instrument panning is only applied on note change, not instrument change"); break;
 		case kITPatternLoopWithJumps: desc = _T("Bxx on the same row as SBx terminates the loop in IT"); break;
+		case kITInstrWithNoteOff: desc = _T("Instrument number with note-off recalls default volume"); break;
 		case kFT2Arpeggio: desc = _T("FT2 arpeggio algorithm"); break;
 		case kFT2Retrigger: desc = _T("Rxx behaves like in FT2"); break;
 		case kFT2VolColVibrato: desc = _T("Vibrato depth in volume column does not actually execute the vibrato effect"); break;

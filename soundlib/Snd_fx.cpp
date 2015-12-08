@@ -1453,8 +1453,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 		if(note == NOTE_KEYOFF || !(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
 			KeyOff(pChn);
-		}
-		else // Invalid Note -> Note Fade
+		} else // Invalid Note -> Note Fade
 		{
 			if(/*note == NOTE_FADE && */ GetNumInstruments())
 				pChn->dwFlags.set(CHN_NOTEFADE);
@@ -1464,7 +1463,10 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 		if (note == NOTE_NOTECUT)
 		{
 			pChn->dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
-			if ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || m_nInstruments != 0) pChn->nVolume = 0;
+			// IT compatibility: Stopping sample playback by setting sample increment to 0 rather than volume
+			// Test case: NoteOffInstr.it
+			if ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || (m_nInstruments != 0 && !m_playBehaviour[kITInstrWithNoteOff])) pChn->nVolume = 0;
+			if(m_playBehaviour[kITInstrWithNoteOff]) pChn->nInc = 0;
 			pChn->nFadeOutVol = 0;
 		}
 
@@ -2172,7 +2174,7 @@ bool CSoundFile::ProcessEffects()
 			//:xy --> note delay until tick x, note cut at tick x+y
 			nStartTick = (param & 0xF0) >> 4;
 			const uint32 cutAtTick = nStartTick + (param & 0x0F);
-			NoteCut(nChn, cutAtTick, m_playBehaviour[kITSCxStopsSample] || GetType() == MOD_TYPE_S3M);
+			NoteCut(nChn, cutAtTick);
 		} else if ((cmd == CMD_MODCMDEX) || (cmd == CMD_S3MCMDEX))
 		{
 			if ((!param) && (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
@@ -2486,9 +2488,26 @@ bool CSoundFile::ProcessEffects()
 			if (instr >= MAX_INSTRUMENTS) instr = 0;
 
 			// Note Cut/Off/Fade => ignore instrument
-			// IT compatibility: Default value of instrument is recalled if instrument number is next to a note-off.
-			// Test case: NoteOffInstr.it
-			if (note >= NOTE_MIN_SPECIAL && !m_playBehaviour[kITInstrWithNoteOff]) instr = 0;
+			if (note >= NOTE_MIN_SPECIAL)
+			{
+				// IT compatibility: Default volume of sample is recalled if instrument number is next to a note-off.
+				// Test case: NoteOffInstr.it, noteoff2.it
+				if(m_playBehaviour[kITInstrWithNoteOff] && instr)
+				{
+					SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(instr);
+					if(GetNumInstruments())
+					{
+						smp = 0;
+						if(instr <= GetNumInstruments() && Instruments[instr] != nullptr && ModCommand::IsNote(pChn->nLastNote))
+						{
+							smp = Instruments[instr]->Keyboard[pChn->nLastNote - NOTE_MIN];
+						}
+					}
+					if(smp > 0 && smp <= GetNumSamples())
+						pChn->nVolume = Samples[smp].nVolume;
+				}
+				instr = 0;
+			}
 
 			if(ModCommand::IsNote(note))
 			{
@@ -2528,7 +2547,9 @@ bool CSoundFile::ProcessEffects()
 				//const ModInstrument *oldInstrument = pChn->pModInstrument;
 
 				InstrumentChange(pChn, instr, bPorta, true);
-				pChn->nNewIns = 0;
+				// IT compatibility: Keep new instrument number for next instrument-less note even if sample playback is stopped
+				// Test case: StoppedInstrSwap.it
+				if(!m_playBehaviour[kITInstrWithNoteOff] || ModCommand::IsNote(note)) pChn->nNewIns = 0;
 
 				if(m_playBehaviour[kITPortamentoSwapResetsPos])
 				{
@@ -4110,7 +4131,7 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 	// EBx: Fine Volume Down
 	case 0xB0:	if ((param) || (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))) FineVolumeDown(pChn, param, false); break;
 	// ECx: Note Cut
-	case 0xC0:	NoteCut(nChn, param, false); break;
+	case 0xC0:	NoteCut(nChn, param); break;
 	// EDx: Note Delay
 	// EEx: Pattern Delay
 	case 0xF0:
@@ -4284,7 +4305,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 		}
 		// S3M/IT compatibility: Note Cut really cuts notes and does not just mute them (so that following volume commands could restore the sample)
 		// Test case: scx.it
-		NoteCut(nChn, param, m_playBehaviour[kITSCxStopsSample] || GetType() == MOD_TYPE_S3M);
+		NoteCut(nChn, param);
 		break;
 	// SDx: Note Delay
 	// SEx: Pattern Delay for x rows
@@ -5015,17 +5036,21 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, int32 nFreqSlide) const
 }
 
 
-void CSoundFile::NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample)
-//-----------------------------------------------------------------------
+void CSoundFile::NoteCut(CHANNELINDEX nChn, uint32 nTick)
+//-------------------------------------------------------
 {
 	if (m_PlayState.m_nTickCount == nTick)
 	{
 		ModChannel *pChn = &m_PlayState.Chn[nChn];
-		pChn->nVolume = 0;
+		const bool cutSample = m_playBehaviour[kITSCxStopsSample] || GetType() == MOD_TYPE_S3M;
 		if(cutSample)
 		{
+			pChn->nInc = 0;
 			pChn->nFadeOutVol = 0;
 			pChn->dwFlags.set(CHN_NOTEFADE);
+		} else
+		{
+			pChn->nVolume = 0;
 		}
 		pChn->dwFlags.set(CHN_FASTVOLRAMP);
 
