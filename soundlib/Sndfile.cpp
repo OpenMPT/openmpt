@@ -909,6 +909,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kITPanbrelloHold);
 		playBehaviour.set(kITPanningReset);
 		playBehaviour.set(kITPatternLoopWithJumps);
+		playBehaviour.set(kITInstrWithNoteOff);
 		break;
 
 	case MOD_TYPE_XM:

@@ -374,6 +374,7 @@ void CSoundFile::UpgradeModule()
 	
 	if(compatModeIT && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
 	{
+		// Pre-1.26: Detailed compatibility flags did not exist.
 		static const PlayBehaviourVersion behaviours[] =
 		{
 			{ kTempoClamp,						MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
@@ -422,10 +423,14 @@ void CSoundFile::UpgradeModule()
 
 		for(size_t i = 0; i < CountOf(behaviours); i++)
 		{
-			m_playBehaviour.set(behaviours[i].behaviour, (m_dwLastSavedWithVersion >= behaviours[i].version || m_dwLastSavedWithVersion == (behaviours[i].behaviour & 0xFFFF0000)));
+			m_playBehaviour.set(behaviours[i].behaviour, (m_dwLastSavedWithVersion >= behaviours[i].version || m_dwLastSavedWithVersion == (behaviours[i].version & 0xFFFF0000)));
 		}
+
+		// The following behaviours were added in OpenMPT 1.26, so are not affected by the upgrade mechanism above.
+		m_playBehaviour.reset(kITInstrWithNoteOff);
 	} else if(compatModeXM && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
 	{
+		// Pre-1.26: Detailed compatibility flags did not exist.
 		static const PlayBehaviourVersion behaviours[] =
 		{
 			{ kTempoClamp,						MAKE_VERSION_NUMERIC(1, 17, 03, 02) },

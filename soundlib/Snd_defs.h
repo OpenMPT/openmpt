@@ -410,6 +410,7 @@ enum PlayBehaviour
 	kITPanbrelloHold,				// Don't reset panbrello effect until next note or panning effect
 	kITPanningReset,				// Sample and instrument panning is only applied on note change, not instrument change
 	kITPatternLoopWithJumps,		// Bxx on the same row as SBx terminates the loop in IT
+	kITInstrWithNoteOff,			// Instrument number with note-off recalls default volume
 
 	kFT2Arpeggio,					// FT2 arpeggio algorithm
 	kFT2Retrigger,					// Rxx behaves like in FT2
