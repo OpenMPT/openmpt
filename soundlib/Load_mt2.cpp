@@ -435,6 +435,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	if(!file.ReadConvertEndianness(fileHeader)
 		|| memcmp(fileHeader.signature, "MT20", 4)
 		|| fileHeader.version < 0x200 || fileHeader.version >= 0x300
+		|| fileHeader.numChannels < 1 || fileHeader.numChannels > 64
 		|| fileHeader.numOrders > 256
 		|| fileHeader.numInstruments >= MAX_INSTRUMENTS
 		|| fileHeader.numSamples >= MAX_SAMPLES)
@@ -450,7 +451,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	m_nType = MOD_TYPE_MT2;
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_madeWithTracker, fileHeader.trackerName);
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songName);
-	m_nChannels = Clamp(fileHeader.numChannels, CHANNELINDEX(1), MAX_BASECHANNELS);
+	m_nChannels = fileHeader.numChannels;
 	m_nRestartPos = fileHeader.restartPos;
 	m_nDefaultSpeed = fileHeader.ticksPerLine;
 	if(!m_nDefaultSpeed) m_nDefaultSpeed = 6;
@@ -475,6 +476,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 	const CHANNELINDEX channelsWithoutDrums = m_nChannels;
 	const bool hasDrumChannels = drumData.CanRead(sizeof(MT2DrumsData));
+	STATIC_ASSERT(MAX_BASECHANNELS >= 64 + 8);
 	if(hasDrumChannels)
 	{
 		m_nChannels += 8;
