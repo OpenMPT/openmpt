@@ -40,6 +40,11 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+// Module decompression
+bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file);
+bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file);
+bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file);
+
 
 mpt::ustring FileHistory::AsISO8601() const
 //-----------------------------------------
@@ -157,11 +162,16 @@ void CSoundFile::AddToLog(LogLevel level, const mpt::ustring &text) const
 
 
 // Global variable initializer for loader functions
-void CSoundFile::InitializeGlobals()
-//----------------------------------
+void CSoundFile::InitializeGlobals(MODTYPE type)
+//----------------------------------------------
 {
 	// Do not add or change any of these values! And if you do, review each and every loader to check if they require these defaults!
-	m_nType = MOD_TYPE_NONE;
+	m_nType = type;
+
+	MODTYPE bestType = GetBestSaveFormat();
+	m_playBehaviour = GetDefaultPlaybackBehaviour(bestType);
+	SetModSpecsPointer(m_pModSpecs, bestType);
+
 	m_ContainerType = MOD_CONTAINERTYPE_NONE;
 	m_nChannels = 0;
 	m_nInstruments = 0;
@@ -179,7 +189,6 @@ void CSoundFile::InitializeGlobals()
 	m_dwLastSavedWithVersion = m_dwCreatedWithVersion = 0;
 
 	SetMixLevels(mixLevelsCompatible);
-	SetModFlags(FlagSet<ModSpecificFlag>());
 
 	Patterns.ClearPatterns();
 
@@ -648,7 +657,7 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 		m_PlayState.Chn[j].nPatternLoop = 0;
 		m_PlayState.Chn[j].nVibratoPos = m_PlayState.Chn[j].nTremoloPos = m_PlayState.Chn[j].nPanbrelloPos = 0;
 		//IT compatibility 15. Retrigger
-		if(IsCompatibleMode(TRK_IMPULSETRACKER))
+		if(m_playBehaviour[kITRetrigger])
 		{
 			m_PlayState.Chn[j].nRetrigCount = 0;
 			m_PlayState.Chn[j].nRetrigParam = 1;
@@ -839,6 +848,157 @@ void CSoundFile::DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 	m_SongFlags.reset(SONG_PATTERNLOOP);
 }
 //end rewbs.playSongFromCursor
+
+
+void CSoundFile::SetDefaultPlaybackBehaviour(MODTYPE type)
+//--------------------------------------------------------
+{
+	m_playBehaviour = GetDefaultPlaybackBehaviour(type);
+}
+
+
+PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
+//----------------------------------------------------------------------
+{
+	PlayBehaviourSet playBehaviour;
+	switch(type)
+	{
+	case MOD_TYPE_MPT:
+	case MOD_TYPE_IT:
+		playBehaviour.set(MSF_COMPATIBLE_PLAY);
+		playBehaviour.set(kHertzInLinearMode);
+		playBehaviour.set(kTempoClamp);
+		playBehaviour.set(kPerChannelGlobalVolSlide);
+		playBehaviour.set(kPanOverride);
+		playBehaviour.set(kITInstrWithoutNote);
+		playBehaviour.set(kITVolColFinePortamento);
+		playBehaviour.set(kITArpeggio);
+		playBehaviour.set(kITOutOfRangeDelay);
+		playBehaviour.set(kITPortaMemoryShare);
+		playBehaviour.set(kITPatternLoopTargetReset);
+		playBehaviour.set(kITFT2PatternLoop);
+		playBehaviour.set(kITPingPongNoReset);
+		playBehaviour.set(kITEnvelopeReset);
+		playBehaviour.set(kITClearOldNoteAfterCut);
+		playBehaviour.set(kITVibratoTremoloPanbrello);
+		playBehaviour.set(kITTremor);
+		playBehaviour.set(kITRetrigger);
+		playBehaviour.set(kITMultiSampleBehaviour);
+		playBehaviour.set(kITPortaTargetReached);
+		playBehaviour.set(kITPatternLoopBreak);
+		playBehaviour.set(kITOffset);
+		playBehaviour.set(kITSwingBehaviour);
+		playBehaviour.set(kITNNAReset);
+		playBehaviour.set(kITSCxStopsSample);
+		playBehaviour.set(kITEnvelopePositionHandling);
+		playBehaviour.set(kITPortamentoInstrument);
+		playBehaviour.set(kITPingPongMode);
+		playBehaviour.set(kITRealNoteMapping);
+		playBehaviour.set(kITHighOffsetNoRetrig);
+		playBehaviour.set(kITFilterBehaviour);
+		playBehaviour.set(kITNoSurroundPan);
+		playBehaviour.set(kITShortSampleRetrig);
+		playBehaviour.set(kITPortaNoNote);
+		playBehaviour.set(kITDontResetNoteOffOnPorta);
+		playBehaviour.set(kITVolColMemory);
+		playBehaviour.set(kITPortamentoSwapResetsPos);
+		playBehaviour.set(kITEmptyNoteMapSlot);
+		playBehaviour.set(kITFirstTickHandling);
+		playBehaviour.set(kITSampleAndHoldPanbrello);
+		playBehaviour.set(kITClearPortaTarget);
+		playBehaviour.set(kITPanbrelloHold);
+		playBehaviour.set(kITPanningReset);
+		playBehaviour.set(kITPatternLoopWithJumps);
+		break;
+
+	case MOD_TYPE_XM:
+		playBehaviour.set(MSF_COMPATIBLE_PLAY);
+		playBehaviour.set(kFT2VolumeRamping);
+		playBehaviour.set(kTempoClamp);
+		playBehaviour.set(kPerChannelGlobalVolSlide);
+		playBehaviour.set(kPanOverride);
+		playBehaviour.set(kITFT2PatternLoop);
+		playBehaviour.set(kFT2Arpeggio);
+		playBehaviour.set(kFT2Retrigger);
+		playBehaviour.set(kFT2VolColVibrato);
+		playBehaviour.set(kFT2PortaNoNote);
+		playBehaviour.set(kFT2KeyOff);
+		playBehaviour.set(kFT2PanSlide);
+		playBehaviour.set(kFT2OffsetOutOfRange);
+		playBehaviour.set(kFT2RestrictXCommand);
+		playBehaviour.set(kFT2RetrigWithNoteDelay);
+		playBehaviour.set(kFT2SetPanEnvPos);
+		playBehaviour.set(kFT2PortaIgnoreInstr);
+		playBehaviour.set(kFT2VolColMemory);
+		playBehaviour.set(kFT2LoopE60Restart);
+		playBehaviour.set(kFT2ProcessSilentChannels);
+		playBehaviour.set(kFT2ReloadSampleSettings);
+		playBehaviour.set(kFT2PortaDelay);
+		playBehaviour.set(kFT2Transpose);
+		playBehaviour.set(kFT2PatternLoopWithJumps);
+		playBehaviour.set(kFT2PortaTargetNoReset);
+		playBehaviour.set(kFT2EnvelopeEscape);
+		playBehaviour.set(kFT2Tremor);
+		playBehaviour.set(kFT2OutOfRangeDelay);
+		playBehaviour.set(kFT2Periods);
+		playBehaviour.set(kFT2PanWithDelayedNoteOff);
+		playBehaviour.set(kFT2VolColDelay);
+		playBehaviour.set(kFT2FinetunePrecision);
+		break;
+
+	case MOD_TYPE_S3M:
+		playBehaviour.set(MSF_COMPATIBLE_PLAY);
+		playBehaviour.set(kTempoClamp);
+		playBehaviour.set(kPanOverride);
+		playBehaviour.set(kST3NoMutedChannels);
+		playBehaviour.set(kST3PortaSampleChange);
+		playBehaviour.set(kST3EffectMemory);
+		break;
+
+	case MOD_TYPE_MOD:
+		playBehaviour.set(kMODVBlankTiming);
+		playBehaviour.set(kMODOneShotLoops);
+		break;
+
+	default:
+		playBehaviour.set(MSF_COMPATIBLE_PLAY);
+		playBehaviour.set(kHertzInLinearMode);
+		playBehaviour.set(kTempoClamp);
+		playBehaviour.set(kPanOverride);
+		break;
+	}
+	return playBehaviour;
+}
+
+
+PlayBehaviourSet CSoundFile::GetDefaultPlaybackBehaviour(MODTYPE type)
+//--------------------------------------------------------------------
+{
+	PlayBehaviourSet playBehaviour;
+	switch(type)
+	{
+	case MOD_TYPE_MPT:
+		playBehaviour.set(kHertzInLinearMode);
+		playBehaviour.set(kPerChannelGlobalVolSlide);
+		playBehaviour.set(kPanOverride);
+		break;
+
+	case MOD_TYPE_XM:
+		playBehaviour = GetSupportedPlaybackBehaviour(type);
+		// Only set this explicitely for FT2-made XMs.
+		playBehaviour.reset(kFT2VolumeRamping);
+		break;
+
+	case MOD_TYPE_MOD:
+		playBehaviour.set(kMODOneShotLoops);
+		break;
+
+	default:
+		playBehaviour = GetSupportedPlaybackBehaviour(type);
+		break;
+	}
+	return playBehaviour;
+}
 
 
 MODTYPE CSoundFile::GetBestSaveFormat() const
@@ -1281,20 +1441,12 @@ void CSoundFile::SetModSpecsPointer(const CModSpecifications*& pModSpecs, const 
 }
 
 
-FlagSet<ModSpecificFlag> CSoundFile::GetModFlagMask(MODTYPE oldtype, MODTYPE newtype) const
-//-----------------------------------------------------------------------------------------
+void CSoundFile::SetType(MODTYPE type)
+//------------------------------------
 {
-	const Enum<MODTYPE>::value_type combined = oldtype | newtype;
-
-	// XM <-> IT/MPT conversion.
-	if(combined == (MOD_TYPE_IT|MOD_TYPE_XM) || combined == (MOD_TYPE_MPT|MOD_TYPE_XM))
-		return MSF_COMPATIBLE_PLAY | MSF_MIDICC_BUGEMULATION | MSF_OLD_MIDI_PITCHBENDS;
-
-	// IT <-> MPT conversion.
-	if(combined == (MOD_TYPE_IT|MOD_TYPE_MPT))
-		return FlagSet<ModSpecificFlag>().flip();
-
-	return MSF_COMPATIBLE_PLAY;
+	m_nType = type;
+	m_playBehaviour = GetDefaultPlaybackBehaviour(GetBestSaveFormat());
+	SetModSpecsPointer(m_pModSpecs, GetBestSaveFormat());
 }
 
 
@@ -1310,7 +1462,17 @@ void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 
 	SetupMODPanning(); // Setup LRRL panning scheme if needed
 
-	m_ModFlags = m_ModFlags & GetModFlagMask(oldtype, newType);
+	// Only keep supported play behaviour flags
+	PlayBehaviourSet oldAllowedFlags = GetSupportedPlaybackBehaviour(oldtype);
+	PlayBehaviourSet newAllowedFlags = GetSupportedPlaybackBehaviour(newType);
+	PlayBehaviourSet newDefaultFlags = GetDefaultPlaybackBehaviour(newType);
+	for(size_t i = 0; i < m_playBehaviour.size(); i++)
+	{
+		// If a flag is supported in both formats, keep its status
+		if(m_playBehaviour[i]) m_playBehaviour.set(i, newAllowedFlags[i]);
+		// Set allowed flags to their defaults if they were not supported in the old format
+		if(!oldAllowedFlags[i]) m_playBehaviour.set(i, newDefaultFlags[i]);
+	}
 
 	Order.OnModTypeChanged(oldtype);
 	Patterns.OnModTypeChanged(oldtype);

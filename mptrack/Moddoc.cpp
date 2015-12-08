@@ -715,6 +715,7 @@ BOOL CModDoc::InitializeMod()
 			m_SndFile.m_nTempoMode = tempoModeModern;
 			m_SndFile.m_SongFlags.set(SONG_EXFILTERRANGE);
 		}
+		m_SndFile.SetDefaultPlaybackBehaviour(GetModType());
 
 		// Refresh mix levels now that the correct mod type has been set
 		m_SndFile.SetMixLevels(m_SndFile.GetModSpecifications().defaultMixLevels);
@@ -738,11 +739,6 @@ BOOL CModDoc::InitializeMod()
 		// Set up mix levels
 		m_SndFile.m_PlayState.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 		m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 48;
-
-		if(m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_XM | MOD_TYPE_S3M))
-		{
-			m_SndFile.SetModFlag(MSF_COMPATIBLE_PLAY, true);
-		}
 
 		for (CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
 		{

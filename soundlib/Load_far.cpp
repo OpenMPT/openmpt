@@ -153,8 +153,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Globals
-	InitializeGlobals();
-	m_nType = MOD_TYPE_FAR;
+	InitializeGlobals(MOD_TYPE_FAR);
 	m_nChannels = 16;
 	m_nSamplePreAmp = 32;
 	m_nDefaultSpeed = fileHeader.defaultSpeed;

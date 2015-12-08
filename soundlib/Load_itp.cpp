@@ -74,7 +74,8 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_IT);
+	m_playBehaviour.reset();
 	file.ReadString<mpt::String::maybeNullTerminated>(m_songName, file.ReadUint32LE());
 
 	// Song comments
@@ -299,11 +300,8 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		LoadExtendedSongProperties(file);
 	}
 
-	m_nType = MOD_TYPE_IT;
 	m_nMaxPeriod = 0xF000;
 	m_nMinPeriod = 8;
-
-	UpgradeModFlags();
 
 	// Before OpenMPT 1.20.01.09, the MIDI macros were always read from the file, even if the "embed" flag was not set.
 	if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1,20,01,09) && !m_SongFlags[SONG_EMBEDMIDICFG])

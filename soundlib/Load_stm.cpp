@@ -143,8 +143,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals();
-	m_nType = MOD_TYPE_STM;
+	InitializeGlobals(MOD_TYPE_STM);
 
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songname);
 

@@ -18,7 +18,6 @@
 #include <bitset>
 #include <set>
 #include "Snd_defs.h"
-#include "modcommand.h"
 #include "tuning.h"
 #include "MIDIMacros.h"
 #ifdef MODPLUG_TRACKER
@@ -40,10 +39,10 @@
 #include "../sounddsp/EQ.h"
 #endif
 
+#include "modcommand.h"
 #include "ModSample.h"
 #include "ModInstrument.h"
 #include "ModChannel.h"
-#include "modcommand.h"
 #include "plugins/PlugInterface.h"
 #include "RowVisitor.h"
 #include "Message.h"
@@ -66,19 +65,10 @@ extern bool ReadInstrumentHeaderField(ModInstrument * input, uint32 fcode, uint1
 // --------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------
 
-// Sample decompression
-void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter);
-uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), size_t &bytesLeft, int8 n);
-uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen);
-bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file, uint16 blockAlign);
-
-// Module decompression
-bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file);
-bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file);
-bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file);
-
 typedef void (* LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
 
+
+typedef std::bitset<kMaxPlayBehaviours> PlayBehaviourSet;
 
 #ifdef MODPLUG_TRACKER
 
@@ -209,20 +199,6 @@ enum deleteInstrumentSamples
 };
 
 
-//Note: These are bit indeces. MSF <-> Mod(Specific)Flag.
-//If changing these, ChangeModTypeTo() might need modification.
-enum ModSpecificFlag
-{
-	MSF_COMPATIBLE_PLAY		= 1,		//IT/MPT/XM
-	MSF_OLDVOLSWING			= 2,		//IT/MPT
-	MSF_MIDICC_BUGEMULATION	= 4,		//IT/MPT/XM
-	MSF_OLD_MIDI_PITCHBENDS	= 8,		//IT/MPT/XM
-	MSF_VOLRAMP				= 16,		//XM(FT2)
-};
-template <> struct enum_traits<ModSpecificFlag> { typedef uint16 store_type; };
-DECLARE_FLAGSET(ModSpecificFlag)
-
-
 class CTuningCollection;
 struct CModSpecifications;
 #ifdef MODPLUG_TRACKER
@@ -290,30 +266,6 @@ public: //Misc
 	// If updateSamplePos is also true, the sample positions of samples still playing from previous patterns will be kept in sync.
 	double GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool updateVars, bool updateSamplePos);
 
-	FlagSet<ModSpecificFlag> GetModFlags() const { return m_ModFlags; }
-	void SetModFlags(FlagSet<ModSpecificFlag> v) { m_ModFlags = v;}
-	bool GetModFlag(ModSpecificFlag i) const { return m_ModFlags.test(i); }
-	void SetModFlag(ModSpecificFlag i, bool val) { m_ModFlags.set(i, val); }
-
-	// Is compatible mode for a specific tracker turned on?
-	// Hint 1: No need to poll for MOD_TYPE_MPT, as it will automatically be linked with MOD_TYPE_IT when using TRK_IMPULSETRACKER
-	// Hint 2: Always returns true for MOD / S3M format (if that is the format of the current file)
-	bool IsCompatibleMode(FlagSet<MODTYPE>::value_type type) const
-	{
-		if(GetType() & type & MOD_TYPE_MOD)
-			return true; // MOD format doesn't have compatibility flags, so we will always return true
-		return ((GetType() & type) && GetModFlag(MSF_COMPATIBLE_PLAY));
-	}
-
-	// Process pingpong loops like Impulse Tracker (see Fastmix.cpp for an explanation)
-	bool IsITPingPongMode() const
-	{
-		return IsCompatibleMode(TRK_IMPULSETRACKER);
-	}
-
-	// Check whether a filter algorithm closer to IT's should be used.
-	bool UseITFilterMode() const { return IsCompatibleMode(TRK_IMPULSETRACKER) && !m_SongFlags[SONG_EXFILTERRANGE]; }
-
 	//Tuning-->
 public:
 #ifdef MODPLUG_TRACKER
@@ -343,30 +295,20 @@ private:
 	CTuningCollection* m_pTuningsBuiltIn;
 	//<--Tuning
 
-public: // get 'controllers'
-
 #ifdef MODPLUG_TRACKER
+public:
 	CMIDIMapper& GetMIDIMapper() {return m_MIDIMapper;}
 	const CMIDIMapper& GetMIDIMapper() const {return m_MIDIMapper;}
-#endif // MODPLUG_TRACKER
+private:
+	CMIDIMapper m_MIDIMapper;
 
-private: //Effect functions
-	void PortamentoMPT(ModChannel*, int);
-	void PortamentoFineMPT(ModChannel*, int);
+#endif // MODPLUG_TRACKER
 
 private: //Misc private methods.
 	static void SetModSpecsPointer(const CModSpecifications*& pModSpecs, const MODTYPE type);
-	FlagSet<ModSpecificFlag> GetModFlagMask(MODTYPE oldtype, MODTYPE newtype) const;
-
-private: //'Controllers'
-
-#ifdef MODPLUG_TRACKER
-	CMIDIMapper m_MIDIMapper;
-#endif // MODPLUG_TRACKER
 
 private: //Misc data
 	const CModSpecifications *m_pModSpecs;
-	FlagSet<ModSpecificFlag> m_ModFlags;
 
 private:
 	// Interleaved Front Mix Buffer (Also room for interleaved rear mix)
@@ -417,7 +359,7 @@ public:
 private:
 	CHANNELINDEX m_nMixStat;
 public:
-	ROWINDEX m_nDefaultRowsPerBeat, m_nDefaultRowsPerMeasure;	// default rows per beat and measure for this module // rewbs.betterBPM
+	ROWINDEX m_nDefaultRowsPerBeat, m_nDefaultRowsPerMeasure;	// default rows per beat and measure for this module
 	TempoMode m_nTempoMode;
 	ORDERINDEX m_nRestartPos;
 
@@ -453,10 +395,12 @@ public:
 	ModInstrument *Instruments[MAX_INSTRUMENTS];		// Instrument Headers
 	MIDIMacroConfig m_MidiCfg;							// MIDI Macro config table
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
-	char m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
+	char m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Sample names
 
 	uint32 m_dwCreatedWithVersion;
 	uint32 m_dwLastSavedWithVersion;
+
+	PlayBehaviourSet m_playBehaviour;
 
 protected:
 	// Mix level stuff
@@ -664,10 +608,6 @@ public:
 
 	bool InitChannel(CHANNELINDEX nChn);
 
-	// Global variable initializer for loader functions
-	void InitializeGlobals();
-	void InitializeChannels();
-
 	// Module Loaders
 	bool ReadXM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadS3M(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
@@ -713,7 +653,6 @@ public:
 	static std::string ModTypeToTracker(MODTYPE modtype);
 	static std::string ModContainerTypeToTracker(MODCONTAINERTYPE containertype);
 
-	void UpgradeModFlags();
 	void UpgradeModule();
 
 	// Save Functions
@@ -736,6 +675,10 @@ public:
 	// of the tag, else returns NULL.
 	void LoadExtendedInstrumentProperties(FileReader &file, bool *pInterpretMptMade = nullptr);
 
+	void SetDefaultPlaybackBehaviour(MODTYPE type);
+	static PlayBehaviourSet GetSupportedPlaybackBehaviour(MODTYPE type);
+	static PlayBehaviourSet GetDefaultPlaybackBehaviour(MODTYPE type);
+
 	// MOD Convert function
 	MODTYPE GetBestSaveFormat() const;
 	void ConvertModCommand(ModCommand &m) const;
@@ -748,9 +691,9 @@ public:
 
 public:
 	// Real-time sound functions
-	void SuspendPlugins(); //rewbs.VSTCompliance
-	void ResumePlugins();  //rewbs.VSTCompliance
-	void StopAllVsti();    //rewbs.VSTCompliance
+	void SuspendPlugins();
+	void ResumePlugins();
+	void StopAllVsti();
 	void RecalculateGainForAllPlugs();
 	void ResetChannels();
 	samplecount_t Read(samplecount_t count, IAudioReadTarget &target);
@@ -796,6 +739,11 @@ public:
 	void SetSpeed(uint32 param);
 
 protected:
+	// Global variable initializer for loader functions
+	void SetType(MODTYPE type);
+	void InitializeGlobals(MODTYPE type = MOD_TYPE_NONE);
+	void InitializeChannels();
+
 	// Channel effect processing
 	int GetVibratoDelta(int type, int position) const;
 
@@ -842,6 +790,8 @@ protected:
 	void FinePortamentoDown(ModChannel *pChn, ModCommand::PARAM param) const;
 	void ExtraFinePortamentoUp(ModChannel *pChn, ModCommand::PARAM param) const;
 	void ExtraFinePortamentoDown(ModChannel *pChn, ModCommand::PARAM param) const;
+	void PortamentoMPT(ModChannel*, int);
+	void PortamentoFineMPT(ModChannel*, int);
 	void NoteSlide(ModChannel *pChn, uint32 param, bool slideUp, bool retrig) const;
 	void TonePortamento(ModChannel *pChn, uint32 param) const;
 	void Vibrato(ModChannel *pChn, uint32 param) const;
@@ -944,9 +894,9 @@ public:
 	bool ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &srcSong, SAMPLEINDEX sourceSample);
 
 	// Period/Note functions
-	uint32 GetNoteFromPeriod(uint32 period, int nFineTune = 0, uint32 nC5Speed = 0) const;
-	uint32 GetPeriodFromNote(uint32 note, int nFineTune, uint32 nC5Speed) const;
-	uint32 GetFreqFromPeriod(uint32 period, int nPeriodFrac = 0) const;
+	uint32 GetNoteFromPeriod(uint32 period, int32 nFineTune = 0, uint32 nC5Speed = 0) const;
+	uint32 GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Speed) const;
+	uint32 GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPeriodFrac = 0) const;
 	// Misc functions
 	ModSample &GetSample(SAMPLEINDEX sample) { MPT_ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
 	const ModSample &GetSample(SAMPLEINDEX sample) const { MPT_ASSERT(sample <= m_nSamples && sample < CountOf(Samples)); return Samples[sample]; }
@@ -956,7 +906,7 @@ public:
 	static void ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin);
 	void LoadMixPlugins(FileReader &file);
 
-	uint32 CutOffToFrequency(uint32 nCutOff, int flt_modifier=256) const; // [0-127] => [1-10KHz]
+	uint32 CutOffToFrequency(uint32 nCutOff, int flt_modifier = 256) const; // [0-127] => [1-10KHz]
 #ifdef MODPLUG_TRACKER
 	void ProcessMidiOut(CHANNELINDEX nChn);
 #endif // MODPLUG_TRACKER

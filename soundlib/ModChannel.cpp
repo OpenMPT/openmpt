@@ -31,7 +31,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		dwFlags.set(CHN_KEYOFF | CHN_NOTEFADE);
 		dwOldFlags.reset();
 		//IT compatibility 15. Retrigger
-		if(sndFile.IsCompatibleMode(TRK_IMPULSETRACKER))
+		if(sndFile.m_playBehaviour[kITRetrigger])
 		{
 			nRetrigParam = 1;
 			nRetrigCount = 0;

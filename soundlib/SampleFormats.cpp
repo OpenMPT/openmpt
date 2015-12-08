@@ -333,6 +333,8 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 ////////////////////////////////////////////////////////////////////////////////
 // WAV Open
 
+bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file, uint16 blockAlign);
+
 bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize, FileReader *wsmpChunk)
 //-------------------------------------------------------------------------------------------------------------
 {

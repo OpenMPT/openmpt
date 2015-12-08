@@ -397,13 +397,11 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_AMS);
 
-	m_nType = MOD_TYPE_AMS;
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
 	m_nChannels = (fileHeader.channelConfig & 0x1F) + 1;
 	m_nSamples = fileHeader.numSamps;
-	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	SetupMODPanning(true);
 	m_madeWithTracker = mpt::String::Print("Extreme's Tracker %1.%2", fileHeader.versionHigh, fileHeader.versionLow);
 
@@ -758,7 +756,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_AMS2);
 
 	if(!ReadAMSString(m_songName, file)
 		|| !file.ReadConvertEndianness(fileHeader)
@@ -770,10 +768,8 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 	
-	m_nType = MOD_TYPE_AMS2;
 	m_nInstruments = fileHeader.numIns;
 	m_nChannels = 32;
-	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	SetupMODPanning(true);
 	m_madeWithTracker = mpt::String::Print("Velvet Studio %1.%2", fileHeader.versionHigh, mpt::fmt::dec0<2>(fileHeader.versionLow));
 

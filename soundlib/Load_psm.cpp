@@ -278,10 +278,8 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Yep, this seems to be a valid file.
-	InitializeGlobals();
-	m_nType = MOD_TYPE_PSM;
+	InitializeGlobals(MOD_TYPE_PSM);
 	m_SongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
-	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	// pattern offset and identifier
 	PATTERNINDEX numPatterns = 0;		// used for setting up the orderlist - final pattern count
@@ -1147,9 +1145,8 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Seems to be valid!
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_PSM);
 	m_madeWithTracker = "Epic MegaGames MASI (Old Version)";
-	m_nType = MOD_TYPE_PSM;
 	m_nChannels = Clamp(CHANNELINDEX(fileHeader.numChannelsPlay), CHANNELINDEX(fileHeader.numChannelsReal), MAX_BASECHANNELS);
 	m_nSamplePreAmp = fileHeader.masterVolume;
 	if(m_nSamplePreAmp == 255)

@@ -556,13 +556,12 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	Log("\n");
 #endif
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_MED);
 	InitializeChannels();
 	// Setup channel pan positions and volume
 	SetupMODPanning(true);
 	m_madeWithTracker = mpt::String::Print("OctaMED (MMD%1)", std::string(1, version));
 
-	m_nType = MOD_TYPE_MED;
 	m_nSamplePreAmp = 32;
 	dwBlockArr = BigEndian(pmmh.blockarr);
 	dwSmplArr = BigEndian(pmmh.smplarr);

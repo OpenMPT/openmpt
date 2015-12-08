@@ -119,8 +119,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 
 	//bool has669Ext = fileHeader.sig == _669FileHeader::magic669Ext;
 
-	InitializeGlobals();
-	m_nType = MOD_TYPE_669;
+	InitializeGlobals(MOD_TYPE_669);
 	m_SongFlags = SONG_LINEARSLIDES;
 	m_nMinPeriod = 28 << 2;
 	m_nMaxPeriod = 1712 << 3;

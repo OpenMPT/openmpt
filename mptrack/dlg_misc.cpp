@@ -36,6 +36,8 @@ BEGIN_MESSAGE_MAP(CModTypeDlg, CDialog)
 	ON_CBN_SELCHANGE(IDC_COMBO_TEMPOMODE,	OnTempoModeChanged)
 	ON_COMMAND(IDC_CHECK_PT1X,				OnPTModeChanged)
 	ON_COMMAND(IDC_BUTTON1,					OnTempoSwing)
+	ON_COMMAND(IDC_BUTTON2,					OnLegacyPlaybackSettings)
+	ON_COMMAND(IDC_BUTTON3,					OnDefaultBehaviour)
 
 	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipNotify)
 
@@ -73,6 +75,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	m_nType = sndFile.GetType();
 	m_nChannels = sndFile.GetNumChannels();
 	m_tempoSwing = sndFile.m_tempoSwing;
+	m_playBehaviour = sndFile.m_playBehaviour;
 	initialized = false;
 
 	// Mod types
@@ -91,14 +94,6 @@ BOOL CModTypeDlg::OnInitDialog()
 	default:			m_TypeBox.SetCurSel(0); break;
 	}
 
-	// Misc flags
-
-	CheckDlgButton(IDC_CHK_COMPATPLAY, sndFile.GetModFlag(MSF_COMPATIBLE_PLAY));
-	CheckDlgButton(IDC_CHK_MIDICCBUG, sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION));
-	CheckDlgButton(IDC_CHK_OLDRANDOM, sndFile.GetModFlag(MSF_OLDVOLSWING));
-	CheckDlgButton(IDC_CHK_OLDPITCH, sndFile.GetModFlag(MSF_OLD_MIDI_PITCHBENDS));
-	CheckDlgButton(IDC_CHK_FT2VOLRAMP, sndFile.GetModFlag(MSF_VOLRAMP));
-
 	// Time signature information
 
 	SetDlgItemInt(IDC_ROWSPERBEAT, sndFile.m_nDefaultRowsPerBeat);
@@ -108,6 +103,10 @@ BOOL CModTypeDlg::OnInitDialog()
 
 	if(sndFile.m_dwCreatedWithVersion) SetDlgItemText(IDC_EDIT_CREATEDWITH, _T("OpenMPT ") + FormatVersionNumber(sndFile.m_dwCreatedWithVersion));
 	SetDlgItemText(IDC_EDIT_SAVEDWITH, sndFile.m_madeWithTracker.c_str());
+
+	const int iconSize = Util::ScalePixels(32, m_hWnd);
+	m_warnIcon = (HICON)::LoadImage(NULL, IDI_EXCLAMATION, IMAGE_ICON, iconSize, iconSize, LR_SHARED);
+
 	UpdateDialog();
 
 	initialized = true;
@@ -142,7 +141,7 @@ void CModTypeDlg::UpdateChannelCBox()
 		CString s;
 		for(CHANNELINDEX i = minChans; i <= maxChans; i++)
 		{
-			s.Format(_T("%d Channel%s"), i, (i != 1) ? _T("s") : _T(""));
+			s.Format(_T("%u Channel%s"), i, (i != 1) ? _T("s") : _T(""));
 			m_ChannelsBox.SetItemData(m_ChannelsBox.AddString(s), i);
 		}
 
@@ -155,7 +154,7 @@ void CModTypeDlg::UpdateChannelCBox()
 void CModTypeDlg::UpdateDialog()
 //------------------------------
 {
-	const MODTYPE type = static_cast<MODTYPE>(m_TypeBox.GetItemData(m_TypeBox.GetCurSel()));
+	m_nType = static_cast<MODTYPE>(m_TypeBox.GetItemData(m_TypeBox.GetCurSel()));
 
 	UpdateChannelCBox();
 
@@ -167,7 +166,7 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBoxPT1x.SetCheck(sndFile.m_SongFlags[SONG_PT_MODE] ? BST_CHECKED : BST_UNCHECKED);
 	m_CheckBoxAmigaLimits.SetCheck(sndFile.m_SongFlags[SONG_AMIGALIMITS] ? BST_CHECKED : BST_UNCHECKED);
 
-	const FlagSet<SongFlags> allowedFlags(sndFile.GetModSpecifications(type).songFlags);
+	const FlagSet<SongFlags> allowedFlags(sndFile.GetModSpecifications(m_nType).songFlags);
 	m_CheckBox1.EnableWindow(allowedFlags[SONG_LINEARSLIDES]);
 	m_CheckBox2.EnableWindow(allowedFlags[SONG_FASTVOLSLIDES]);
 	m_CheckBox3.EnableWindow(allowedFlags[SONG_ITOLDEFFECTS]);
@@ -177,43 +176,18 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBoxAmigaLimits.EnableWindow(allowedFlags[SONG_AMIGALIMITS]);
 
 	// These two checkboxes are mutually exclusive and share the same screen space
-	m_CheckBoxPT1x.ShowWindow(type == MOD_TYPE_MOD ? SW_SHOW : SW_HIDE);
-	m_CheckBox5.ShowWindow(type != MOD_TYPE_MOD ? SW_SHOW : SW_HIDE);
+	m_CheckBoxPT1x.ShowWindow(m_nType == MOD_TYPE_MOD ? SW_SHOW : SW_HIDE);
+	m_CheckBox5.ShowWindow(m_nType != MOD_TYPE_MOD ? SW_SHOW : SW_HIDE);
 	if(allowedFlags[SONG_PT_MODE]) OnPTModeChanged();
-
-	const bool XMorITorMPT = (type & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT));
-	const bool ITorMPT = (type & (MOD_TYPE_IT | MOD_TYPE_MPT));
-	const bool XM = (type & (MOD_TYPE_XM));
-
-	// Misc Flags
-	if(ITorMPT)
-	{
-		GetDlgItem(IDC_CHK_COMPATPLAY)->SetWindowText(_T("More Impulse Tracker &compatible playback"));
-	} else if(XM)
-	{
-		GetDlgItem(IDC_CHK_COMPATPLAY)->SetWindowText(_T("More Fasttracker 2 &compatible playback"));
-	} else
-	{
-		GetDlgItem(IDC_CHK_COMPATPLAY)->SetWindowText(_T("More ScreamTracker 3 &compatible playback"));
-	}
-
-	GetDlgItem(IDC_CHK_OLDRANDOM)->ShowWindow(!XM);
-	GetDlgItem(IDC_CHK_FT2VOLRAMP)->ShowWindow(XM);
-
-	// Deprecated flags are greyed out if they are not being used.
-	GetDlgItem(IDC_CHK_COMPATPLAY)->EnableWindow(type != MOD_TYPE_MOD ? TRUE : FALSE);
-	GetDlgItem(IDC_CHK_MIDICCBUG)->EnableWindow(sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION) ? TRUE : FALSE);
-	GetDlgItem(IDC_CHK_OLDRANDOM)->EnableWindow((ITorMPT && sndFile.GetModFlag(MSF_OLDVOLSWING)) ? TRUE : FALSE);
-	GetDlgItem(IDC_CHK_OLDPITCH)->EnableWindow(sndFile.GetModFlag(MSF_OLD_MIDI_PITCHBENDS) ? TRUE : FALSE);
 
 	// Tempo modes
 	const TempoMode oldTempoMode = initialized ? static_cast<TempoMode>(m_TempoModeBox.GetItemData(m_TempoModeBox.GetCurSel())) : sndFile.m_nTempoMode;
 	m_TempoModeBox.ResetContent();
 
 	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Classic")), tempoModeClassic);
-	if(type == MOD_TYPE_MPT || (sndFile.GetType() != MOD_TYPE_MPT && sndFile.m_nTempoMode == tempoModeAlternative))
+	if(m_nType == MOD_TYPE_MPT || (sndFile.GetType() != MOD_TYPE_MPT && sndFile.m_nTempoMode == tempoModeAlternative))
 		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Alternative")), tempoModeAlternative);
-	if(type == MOD_TYPE_MPT || (sndFile.GetType() != MOD_TYPE_MPT && sndFile.m_nTempoMode == tempoModeModern))
+	if(m_nType == MOD_TYPE_MPT || (sndFile.GetType() != MOD_TYPE_MPT && sndFile.m_nTempoMode == tempoModeModern))
 		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Modern (accurate)")), tempoModeModern);
 	m_TempoModeBox.SetCurSel(0);
 	for(int i = m_TempoModeBox.GetCount(); i > 0; i--)
@@ -229,19 +203,22 @@ void CModTypeDlg::UpdateDialog()
 	// Mix levels
 	const MixLevels oldMixLevels = initialized ? static_cast<MixLevels>(m_PlugMixBox.GetItemData(m_PlugMixBox.GetCurSel())) : sndFile.GetMixLevels();
 	m_PlugMixBox.ResetContent();
-	if(type == MOD_TYPE_MPT || (sndFile.GetType() != MOD_TYPE_MPT && sndFile.GetMixLevels() == mixLevels1_17RC3))	// In XM/IT, this is only shown for backwards compatibility with existing tunes
+	if(m_nType == MOD_TYPE_MPT || (sndFile.GetType() != MOD_TYPE_MPT && sndFile.GetMixLevels() == mixLevels1_17RC3))	// In XM/IT, this is only shown for backwards compatibility with existing tunes
 		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC3")),	mixLevels1_17RC3);
 	if(sndFile.GetMixLevels() == mixLevels1_17RC2)	// Only shown for backwards compatibility with existing tunes
 		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC2")),	mixLevels1_17RC2);
 	if(sndFile.GetMixLevels() == mixLevels1_17RC1)	// Ditto
 		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC1")),	mixLevels1_17RC1);
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Original (MPT 1.16)")),	mixLevelsOriginal);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Compatible")),			mixLevelsCompatible);
-	if(type == MOD_TYPE_XM)
+	int compatMixMode = m_PlugMixBox.AddString(_T("Compatible"));
+	m_PlugMixBox.SetItemData(compatMixMode,										mixLevelsCompatible);
+	if(m_nType == MOD_TYPE_XM)
 		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Compatible (FT2 Pan Law)")), mixLevelsCompatibleFT2);
 
-	m_PlugMixBox.SetCurSel(0);
-	for(int i = m_PlugMixBox.GetCount(); i > 0; i--)
+	// Default to compatible mix mode
+	m_PlugMixBox.SetCurSel(compatMixMode);
+	int mixCount = m_PlugMixBox.GetCount();
+	for(int i = 0; i < mixCount; i++)
 	{
 		if(static_cast<MixLevels>(m_PlugMixBox.GetItemData(i)) == oldMixLevels)
 		{
@@ -249,6 +226,8 @@ void CModTypeDlg::UpdateDialog()
 			break;
 		}
 	}
+
+	const bool XMorITorMPT = (m_nType & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT));
 
 	// Mixmode Box
 	GetDlgItem(IDC_TEXT_MIXMODE)->EnableWindow(XMorITorMPT);
@@ -262,6 +241,29 @@ void CModTypeDlg::UpdateDialog()
 	GetDlgItem(IDC_TEXT_ROWSPERMEASURE)->EnableWindow(XMorITorMPT);
 	GetDlgItem(IDC_TEXT_TEMPOMODE)->EnableWindow(XMorITorMPT);
 	GetDlgItem(IDC_FRAME_TEMPOMODE)->EnableWindow(XMorITorMPT);
+
+	// Compatibility settings
+	PlayBehaviourSet defaultBehaviour = CSoundFile::GetDefaultPlaybackBehaviour(m_nType);
+	bool usesDefaultBehaviour = true;
+	if(m_nType == MOD_TYPE_IT || m_nType == MOD_TYPE_XM)
+	{
+		for(size_t i = 0; i < m_playBehaviour.size(); i++)
+		{
+			// Some flags are not really important for "default" behaviour.
+			if(defaultBehaviour[i] != m_playBehaviour[i]
+				&& i != MSF_COMPATIBLE_PLAY
+				&& i != kFT2VolumeRamping)
+			{
+				usesDefaultBehaviour = false;
+				break;
+			}
+		}
+	}
+	static_cast<CStatic *>(GetDlgItem(IDC_STATIC1))->SetIcon(usesDefaultBehaviour ? NULL : m_warnIcon);
+	GetDlgItem(IDC_STATIC2)->SetWindowText(usesDefaultBehaviour
+		? _T("Compatibility settings are currently optimal. It is advised to not edit them.")
+		: _T("Compatibility settings are not optimal for this legacy module. Click \"Set Defaults\" to use the recommended settings."));
+	GetDlgItem(IDC_BUTTON3)->EnableWindow(usesDefaultBehaviour ? FALSE:  TRUE);
 }
 
 
@@ -305,6 +307,23 @@ void CModTypeDlg::OnTempoSwing()
 	sndFile.m_nDefaultRowsPerBeat = oldRPB;
 	sndFile.m_nDefaultRowsPerMeasure = oldRPM;
 	sndFile.m_nTempoMode = oldMode;
+}
+
+
+void CModTypeDlg::OnLegacyPlaybackSettings()
+//------------------------------------------
+{
+	CLegacyPlaybackSettingsDlg dlg(this, m_playBehaviour, m_nType);
+	dlg.DoModal();
+	UpdateDialog();
+}
+
+
+void CModTypeDlg::OnDefaultBehaviour()
+//------------------------------------
+{
+	m_playBehaviour = CSoundFile::GetDefaultPlaybackBehaviour(m_nType);
+	UpdateDialog();
 }
 
 
@@ -393,18 +412,17 @@ void CModTypeDlg::OnOK()
 		sndFile.SetMixLevels(static_cast<MixLevels>(m_PlugMixBox.GetItemData(sel)));
 	}
 
-	sndFile.SetModFlags(FlagSet<ModSpecificFlag>());
-	if(IsDlgButtonChecked(IDC_CHK_COMPATPLAY)) sndFile.SetModFlag(MSF_COMPATIBLE_PLAY, true);
-	if(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))
+	PlayBehaviourSet allowedFlags = CSoundFile::GetSupportedPlaybackBehaviour(m_nType);
+	for(size_t i = 0; i < kMaxPlayBehaviours; i++)
 	{
-		if(IsDlgButtonChecked(IDC_CHK_MIDICCBUG)) sndFile.SetModFlag(MSF_MIDICC_BUGEMULATION, true);
-		if(IsDlgButtonChecked(IDC_CHK_OLDRANDOM)) sndFile.SetModFlag(MSF_OLDVOLSWING, true);
-		if(IsDlgButtonChecked(IDC_CHK_OLDPITCH)) sndFile.SetModFlag(MSF_OLD_MIDI_PITCHBENDS, true);
-		if(IsDlgButtonChecked(IDC_CHK_FT2VOLRAMP)) sndFile.SetModFlag(MSF_VOLRAMP, true);
+		// Only set those flags which are supported by the new format or were already enabled previously
+		sndFile.m_playBehaviour.set(i, m_playBehaviour[i] && (allowedFlags[i] || (sndFile.m_playBehaviour[i] && sndFile.GetType() == m_nType)));
 	}
 
 	if(CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
 		CChannelManagerDlg::sharedInstance()->Update();
+
+	DestroyIcon(m_warnIcon);
 	CDialog::OnOK();
 }
 
@@ -447,21 +465,6 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 	case IDC_COMBO_MIXLEVELS:
 		text = _T("Mixing method of sample and VST levels.");
 		break;
-	case IDC_CHK_COMPATPLAY:
-		text = _T("Play commands as the original tracker would play them (recommended)");
-		break;
-	case IDC_CHK_MIDICCBUG:
-		text = _T("Emulate an old bug which sent wrong volume messages to VSTis (not recommended)");
-		break;
-	case IDC_CHK_OLDRANDOM:
-		text = _T("Use old (buggy) random volume / panning variation algorithm (not recommended)");
-		break;
-	case IDC_CHK_OLDPITCH:
-		text = _T("Use old (imprecise) portamento logic for instrument plugins (not recommended)");
-		break;
-	case IDC_CHK_FT2VOLRAMP:
-		text = _T("Use Fasttracker 2 style super soft volume ramping (recommended for true compatible playback)");
-		break;
 	case IDC_BUTTON1:
 		if(!GetDlgItem(IDC_BUTTON1)->IsWindowEnabled())
 		{
@@ -488,6 +491,176 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 	mpt::String::CopyN(pTTT->szText, text);
 	return TRUE;
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+// CLegacyPlaybackSettings
+
+BEGIN_MESSAGE_MAP(CLegacyPlaybackSettingsDlg, CDialog)
+	ON_COMMAND(IDC_BUTTON1,			OnSelectDefaults)
+	ON_CLBN_CHKCHANGE(IDC_LIST1,	UpdateSelectDefaults)
+END_MESSAGE_MAP()
+
+void CLegacyPlaybackSettingsDlg::DoDataExchange(CDataExchange* pDX)
+//-----------------------------------------------------------------
+{
+	CDialog::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_LIST1,	m_CheckList);
+}
+
+
+BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
+//---------------------------------------------
+{
+	CDialog::OnInitDialog();
+
+	PlayBehaviourSet allowedFlags = CSoundFile::GetSupportedPlaybackBehaviour(m_modType);
+	for(size_t i = 0; i < kMaxPlayBehaviours; i++)
+	{
+		const TCHAR *desc = _T("");
+		switch(i)
+		{
+		case MSF_COMPATIBLE_PLAY: continue;
+
+		case kMPTOldSwingBehaviour: desc = _T("OpenMPT <= 1.17 compatible random variation behaviour for instruments"); break;
+		case kMIDICCBugEmulation: desc = _T("Plugin volume command bug emulation"); break;
+		case kOldMIDIPitchBends: desc = _T("Old Pitch Wheel behaviour for instrument plugins"); break;
+		case kFT2VolumeRamping: desc = _T("Use smooth Fasttracker 2 volume ramping"); break;
+
+		case kMODVBlankTiming: desc = _T("VBlank timing: F21 and above sets speed instead of tempo"); break;
+		case kHertzInLinearMode: desc = _T("Compute note frequency in hertz rather than periods"); break;
+		case kTempoClamp: desc = _T("Clamp tempo to 32-255 range"); break;
+		case kPerChannelGlobalVolSlide: desc = _T("Global volume slide memory is per-channel"); break;
+		case kPanOverride: desc = _T("Panning commands override surround and random pan variation"); break;
+
+		case kITInstrWithoutNote: desc = _T("Avoid instrument handling if there is no note"); break;
+		case kITVolColFinePortamento: desc = _T("Volume column portamento never does fine portamento"); break;
+		case kITArpeggio: desc = _T("IT arpeggio algorithm"); break;
+		case kITOutOfRangeDelay: desc = _T("Out-of-range delay command behaviour in IT"); break;
+		case kITPortaMemoryShare: desc = _T("Gxx shares memory with Exx and Fxx"); break;
+		case kITPatternLoopTargetReset: desc = _T("After finishing a pattern loop, set the pattern loop target to the next row"); break;
+		case kITFT2PatternLoop: desc = _T("Nested pattern loop behaviour"); break;
+		case kITPingPongNoReset: desc = _T("Don't reset ping pong direction with instrument numbers"); break;
+		case kITEnvelopeReset: desc = _T("IT envelope reset behaviour"); break;
+		case kITClearOldNoteAfterCut: desc = _T("Forget the previous note after cutting it"); break;
+		case kITVibratoTremoloPanbrello: desc = _T("More IT-like Vibrato, Tremolo and Panbrello handling"); break;
+		case kITTremor: desc = _T("Ixx behaves like in IT"); break;
+		case kITRetrigger: desc = _T("Qxx behaves like in IT"); break;
+		case kITMultiSampleBehaviour: desc = _T("Properly update C-5 frequency when changing in multisampled instrument"); break;
+		case kITPortaTargetReached: desc = _T("Clear portamento target after it has been reached"); break;
+		case kITPatternLoopBreak: desc = _T("Don't reset loop count on pattern break."); break;
+		case kITOffset: desc = _T("IT-style Oxx edge case handling"); break;
+		case kITSwingBehaviour: desc = _T("IT's swing behaviour"); break;
+		case kITNNAReset: desc = _T("NNA is reset on every note change, not every instrument change"); break;
+		case kITSCxStopsSample: desc = _T("SCx really stops the sample and does not just mute it"); break;
+		case kITEnvelopePositionHandling: desc = _T("IT-style envelope position advance + enable/disable behaviour"); break;
+		case kITPortamentoInstrument: desc = _T("More compatible instrument change + portamento"); break;
+		case kITPingPongMode: desc = _T("Don't repeat last sample point in ping pong loop, like IT's software mixer"); break;
+		case kITRealNoteMapping: desc = _T("Use triggered note rather than translated note for PPS and other effects"); break;
+		case kITHighOffsetNoRetrig: desc = _T("SAx should not apply an offset effect to a note next to it"); break;
+		case kITFilterBehaviour: desc = _T("User IT's filter coefficients (unless extended filter range is used) and behaviour"); break;
+		case kITNoSurroundPan: desc = _T("Panning modulation is disabled on surround channels"); break;
+		case kITShortSampleRetrig: desc = _T("Don't retrigger already stopped channels"); break;
+		case kITPortaNoNote: desc = _T("Don't apply any portamento if no previous note is playing"); break;
+		case kITDontResetNoteOffOnPorta: desc = _T("Only reset note-off status on portamento in IT Compatible Gxx mode"); break;
+		case kITVolColMemory: desc = _T("IT volume column effects share their memory with the effect column"); break;
+		case kITPortamentoSwapResetsPos: desc = _T("Portamento with sample swap plays the new sample from the beginning"); break;
+		case kITEmptyNoteMapSlot: desc = _T("IT ignores instrument note map entries with no note completely"); break;
+		case kITFirstTickHandling: desc = _T("IT-style first tick handling"); break;
+		case kITSampleAndHoldPanbrello: desc = _T("IT-style sample&hold panbrello waveform"); break;
+		case kITClearPortaTarget: desc = _T("New notes reset portamento target in IT"); break;
+		case kITPanbrelloHold: desc = _T("Don't reset panbrello effect until next note or panning effect"); break;
+		case kITPanningReset: desc = _T("Sample and instrument panning is only applied on note change, not instrument change"); break;
+		case kITPatternLoopWithJumps: desc = _T("Bxx on the same row as SBx terminates the loop in IT"); break;
+		case kFT2Arpeggio: desc = _T("FT2 arpeggio algorithm"); break;
+		case kFT2Retrigger: desc = _T("Rxx behaves like in FT2"); break;
+		case kFT2VolColVibrato: desc = _T("Vibrato depth in volume column does not actually execute the vibrato effect"); break;
+		case kFT2PortaNoNote: desc = _T("Don't play portamento-ed note if no previous note is playing"); break;
+		case kFT2KeyOff: desc = _T("FT2-style Kxx handling"); break;
+		case kFT2PanSlide: desc = _T("Volume-column pan slides should be handled like fine slides"); break;
+		case kFT2OffsetOutOfRange: desc = _T("FT2-style 9xx edge case handling"); break;
+		case kFT2RestrictXCommand: desc = _T("Don't allow MPT extensions to Xxx command in XM"); break;
+		case kFT2RetrigWithNoteDelay: desc = _T("Retrigger envelopes if there is a note delay with no note"); break;
+		case kFT2SetPanEnvPos: desc = _T("Lxx only sets the pan env position if the volume envelope's sustain flag is set"); break;
+		case kFT2PortaIgnoreInstr: desc = _T("Portamento plus instrument number applies the volume settings of the new sample, but not the new sample itself."); break;
+		case kFT2VolColMemory: desc = _T("No volume column memory in FT2"); break;
+		case kFT2LoopE60Restart: desc = _T("Next pattern starts on the same row as the last E60 command"); break;
+		case kFT2ProcessSilentChannels: desc = _T("Keep processing silent channels for later 3xx pickup"); break;
+		case kFT2ReloadSampleSettings: desc = _T("Reload sample settings even if a note-off is placed next to an instrument number"); break;
+		case kFT2PortaDelay: desc = _T("Portamento with note delay next to it is ignored in FT2"); break;
+		case kFT2Transpose: desc = _T("Out-of-range transposed notes in FT2"); break;
+		case kFT2PatternLoopWithJumps: desc = _T("Bxx or Dxx on the same row as E6x terminates the loop in FT2"); break;
+		case kFT2PortaTargetNoReset: desc = _T("Portamento target is not reset with new notes in FT2"); break;
+		case kFT2EnvelopeEscape: desc = _T("FT2 sustain point at end of envelope"); break;
+		case kFT2Tremor: desc = _T("Txx behaves like in FT2"); break;
+		case kFT2OutOfRangeDelay: desc = _T("Out-of-range delay command behaviour in FT2"); break;
+		case kFT2Periods: desc = _T("Use FT2's broken period handling"); break;
+		case kFT2PanWithDelayedNoteOff: desc = _T("Pan command with delayed note-off"); break;
+		case kFT2VolColDelay: desc = _T("FT2-style volume column handling if there is a note delay"); break;
+		case kFT2FinetunePrecision: desc = _T("Only take the upper 4 bits of sample finetune."); break;
+		case kST3NoMutedChannels: desc = _T("Don't process any effects on muted S3M channels"); break;
+		case kST3EffectMemory: desc = _T("Most effects share the same memory in ST3"); break;
+		case kST3PortaSampleChange: desc = _T("Portamento plus instrument number applies the volume settings of the new sample, but not the new sample itself."); break;
+
+		default: MPT_ASSERT(0);
+		}
+
+		if(m_playBehaviour[i] || allowedFlags[i])
+		{
+			int item = m_CheckList.AddString(desc);
+			m_CheckList.SetItemData(item, i);
+			int check = m_playBehaviour[i] ? BST_CHECKED : BST_UNCHECKED;
+			if(!allowedFlags[i]) check = BST_INDETERMINATE;	// Is checked but not supported by format -> grey out
+			m_CheckList.SetCheck(item, check);
+		}
+	}
+	UpdateSelectDefaults();
+	return TRUE;
+}
+
+
+void CLegacyPlaybackSettingsDlg::OnOK()
+//-------------------------------------
+{
+	CDialog::OnOK();
+
+	const int count = m_CheckList.GetCount();
+	for(int i = 0; i < count; i++)
+	{
+		m_playBehaviour.set(m_CheckList.GetItemData(i), m_CheckList.GetCheck(i) != BST_UNCHECKED);
+	}
+}
+
+
+void CLegacyPlaybackSettingsDlg::OnSelectDefaults()
+//-------------------------------------------------
+{
+	const int count = m_CheckList.GetCount();
+	PlayBehaviourSet defaults = CSoundFile::GetDefaultPlaybackBehaviour(m_modType);
+	for(int i = 0; i < count; i++)
+	{
+		m_CheckList.SetCheck(i, defaults[m_CheckList.GetItemData(i)] ? BST_CHECKED : BST_UNCHECKED);
+	}
+}
+
+
+void CLegacyPlaybackSettingsDlg::UpdateSelectDefaults()
+//-----------------------------------------------------
+{
+	bool usesDefaults = false;
+	const int count = m_CheckList.GetCount();
+	PlayBehaviourSet defaults = CSoundFile::GetDefaultPlaybackBehaviour(m_modType);
+	for(int i = 0; i < count; i++)
+	{
+		if((m_CheckList.GetCheck(i) != BST_UNCHECKED) != defaults[m_CheckList.GetItemData(i)])
+		{
+			usesDefaults = true;
+			break;
+		}
+	}
+	GetDlgItem(IDC_BUTTON1)->EnableWindow(usesDefaults ? TRUE : FALSE);
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////////

@@ -118,9 +118,8 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_MTM);
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songName);
-	m_nType = MOD_TYPE_MTM;
 	m_nSamples = fileHeader.numSamples;
 	m_nChannels = fileHeader.numChannels;
 	m_madeWithTracker = mpt::String::Print("MultiTracker %1.%2", fileHeader.version >> 4, fileHeader.version & 0x0F);

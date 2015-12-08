@@ -16,40 +16,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-// For old files made with MPT that don't have m_ModFlags set yet, set the flags appropriately.
-void CSoundFile::UpgradeModFlags()
-//--------------------------------
-{
-	if(m_dwLastSavedWithVersion && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 02, 50))
-	{
-		SetModFlag(MSF_COMPATIBLE_PLAY, false);
-		SetModFlag(MSF_MIDICC_BUGEMULATION, false);
-
-		if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 00, 00))
-		{
-			// If there are any plugins that can receive volume commands, enable volume bug emulation.
-			for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i])
-			{
-				if(Instruments[i]->nMixPlug && Instruments[i]->HasValidMIDIChannel())
-				{
-					SetModFlag(MSF_MIDICC_BUGEMULATION, true);
-					break;
-				}
-			}
-		}
-
-		// If there are any instruments with random variation, enable the old random variation behaviour.
-		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
-		{
-			if(Instruments[i] && (Instruments[i]->nVolSwing | Instruments[i]->nPanSwing | Instruments[i]->nCutSwing | Instruments[i]->nResSwing))
-			{
-				SetModFlag(MSF_OLDVOLSWING, true);
-				break;
-			}
-		}
-	}
-}
-
 
 struct UpgradePatternData
 //=======================
@@ -83,7 +49,7 @@ struct UpgradePatternData
 		else if((sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 		{
 			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02) ||
-				(!sndFile.IsCompatibleMode(TRK_IMPULSETRACKER) && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+				(!sndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY] && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
 			{
 				if(m.command == CMD_GLOBALVOLUME)
 				{
@@ -112,7 +78,7 @@ struct UpgradePatternData
 			// For note volume slides, OpenMPT 1.18 fixes this in compatible mode, OpenMPT 1.20 fixes this in normal mode as well.
 			const bool noteVolSlide =
 				(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00) ||
-				(!sndFile.IsCompatibleMode(TRK_IMPULSETRACKER) && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+				(!sndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY] && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
 				&&
 				(m.command == CMD_VOLUMESLIDE || m.command == CMD_VIBRATOVOL || m.command == CMD_TONEPORTAVOL || m.command == CMD_PANNINGSLIDE);
 
@@ -134,7 +100,7 @@ struct UpgradePatternData
 				&& sndFile.m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 22, 00, 00))	// Ignore compatibility export
 			{
 				// OpenMPT 1.22.01.04 fixes illegal (out of range) instrument numbers; they should do nothing. In previous versions, they stopped the playing sample.
-				if(sndFile.GetNumInstruments() && m.instr > sndFile.GetNumInstruments() && !sndFile.IsCompatibleMode(TRK_IMPULSETRACKER))
+				if(sndFile.GetNumInstruments() && m.instr > sndFile.GetNumInstruments() && !sndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY])
 				{
 					m.volcmd = VOLCMD_VOLUME;
 					m.vol = 0;
@@ -146,7 +112,7 @@ struct UpgradePatternData
 		{
 			// Something made be believe that out-of-range global volume commands are ignored in XM
 			// just like they are ignored in IT, but apparently they are not. Aaaaaargh!
-			if(((sndFile.m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 03, 02) && sndFile.IsCompatibleMode(TRK_FASTTRACKER2)) || (sndFile.m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+			if(((sndFile.m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 03, 02) && sndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY]) || (sndFile.m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
 				&& sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 24, 02, 02)
 				&& m.command == CMD_GLOBALVOLUME
 				&& m.param > 64)
@@ -155,7 +121,7 @@ struct UpgradePatternData
 			}
 
 			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 19, 00, 00)
-				|| (!sndFile.IsCompatibleMode(TRK_FASTTRACKER2) && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+				|| (!sndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY] && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
 			{
 				if(m.command == CMD_OFFSET && m.volcmd == VOLCMD_TONEPORTAMENTO)
 				{
@@ -167,7 +133,7 @@ struct UpgradePatternData
 
 			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 01, 10)
 				&& m.volcmd == VOLCMD_TONEPORTAMENTO && m.command == CMD_TONEPORTAMENTO
-				&& (m.vol != 0 || sndFile.IsCompatibleMode(TRK_FASTTRACKER2)) && m.param != 0)
+				&& (m.vol != 0 || sndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY]) && m.param != 0)
 			{
 				// Mx and 3xx on the same row does weird things in FT2: 3xx is completely ignored and the Mx parameter is doubled. Fixed in revision 1312 / OpenMPT 1.20.01.10
 				// Previously the values were just added up, so let's fix this!
@@ -192,7 +158,7 @@ struct UpgradePatternData
 			// We also fix X6x commands in hacked XM files, since they are treated identically to the S6x command in IT/S3M files.
 			// We don't treat them in files made with OpenMPT 1.18+ that have compatible play enabled, though, since they are ignored there anyway.
 			const bool fixX6x = (m.command == CMD_XFINEPORTAUPDOWN && (m.param & 0xF0) == 0x60
-				&& (!sndFile.IsCompatibleMode(TRK_FASTTRACKER2) || sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00)));
+				&& (!(sndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY] && sndFile.GetType() == MOD_TYPE_XM) || sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00)));
 
 			if(fixS6x || fixX6x)
 			{
@@ -240,30 +206,56 @@ struct UpgradePatternData
 void CSoundFile::UpgradeModule()
 //------------------------------
 {
+	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 02, 46) && m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 17, 00, 00))
+	{
+		// Compatible playback mode didn't exist in earlier versions, so definitely disable it.
+		m_playBehaviour.reset(MSF_COMPATIBLE_PLAY);
+	}
+
+	const bool compatModeIT = m_playBehaviour[MSF_COMPATIBLE_PLAY] && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT));
+	const bool compatModeXM = m_playBehaviour[MSF_COMPATIBLE_PLAY] && GetType() == MOD_TYPE_XM;
+
 	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
 	{
 		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr)
 		{
+			ModInstrument *ins = Instruments[i];
 			// Previously, volume swing values ranged from 0 to 64. They should reach from 0 to 100 instead.
-			Instruments[i]->nVolSwing = MIN(Instruments[i]->nVolSwing * 100 / 64, 100);
+			ins->nVolSwing = static_cast<uint8>(std::min<uint32>(ins->nVolSwing * 100 / 64, 100));
 
-			if(!IsCompatibleMode(TRK_IMPULSETRACKER) || m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00))
+			if(!compatModeIT || m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00))
 			{
 				// Previously, Pitch/Pan Separation was only half depth.
 				// This was corrected in compatible mode in OpenMPT 1.18, and in OpenMPT 1.20 it is corrected in normal mode as well.
-				Instruments[i]->nPPS = (Instruments[i]->nPPS + (Instruments[i]->nPPS >= 0 ? 1 : -1)) / 2;
+				ins->nPPS = (ins->nPPS + (ins->nPPS >= 0 ? 1 : -1)) / 2;
 			}
 
-			if(!IsCompatibleMode(TRK_IMPULSETRACKER) || m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02))
+			if(!compatModeIT || m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02))
 			{
 				// IT compatibility 24. Short envelope loops
 				// Previously, the pitch / filter envelope loop handling was broken, the loop was shortened by a tick (like in XM).
 				// This was corrected in compatible mode in OpenMPT 1.17.03.02, and in OpenMPT 1.20 it is corrected in normal mode as well.
-				Instruments[i]->GetEnvelope(ENV_PITCH).Convert(MOD_TYPE_XM, GetType());
+				ins->GetEnvelope(ENV_PITCH).Convert(MOD_TYPE_XM, GetType());
+			}
+
+			if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 00, 00) && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 02, 50))
+			{
+				// If there are any plugins that can receive volume commands, enable volume bug emulation.
+				if(ins->nMixPlug && ins->HasValidMIDIChannel())
+				{
+					m_playBehaviour.set(kMIDICCBugEmulation);
+				}
+			}
+
+			if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 02, 50) && (ins->nVolSwing | ins->nPanSwing | ins->nCutSwing | ins->nResSwing))
+			{
+				// If there are any instruments with random variation, enable the old random variation behaviour.
+				m_playBehaviour.set(kMPTOldSwingBehaviour);
+				break;
 			}
 		}
 
-		if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02) || !IsCompatibleMode(TRK_IMPULSETRACKER)))
+		if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02) || !compatModeIT))
 		{
 			// In the IT format, a sweep value of 0 shouldn't apply vibrato at all. Previously, a value of 0 was treated as "no sweep".
 			// In OpenMPT 1.17.03.02, this was corrected in compatible mode, in OpenMPT 1.20 it is corrected in normal mode as well,
@@ -297,14 +289,14 @@ void CSoundFile::UpgradeModule()
 		}
 		if(instrPlugs)
 		{
-			SetModFlag(MSF_OLD_MIDI_PITCHBENDS, true);
+			m_playBehaviour.set(kOldMIDIPitchBends);
 		}
 	}
 
 	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 03, 12)
 		&& m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 22, 00, 00)
 		&& (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
-		&& (IsCompatibleMode(TRK_IMPULSETRACKER) || GetModFlag(MSF_OLDVOLSWING)))
+		&& (m_playBehaviour[MSF_COMPATIBLE_PLAY] || m_playBehaviour[kMPTOldSwingBehaviour]))
 	{
 		// The "correct" pan swing implementation did nothing if the instrument also had a pan envelope.
 		// If there's a pan envelope, disable pan swing for such modules.
@@ -369,6 +361,134 @@ void CSoundFile::UpgradeModule()
 	}
 
 	Patterns.ForEachModCommand(UpgradePatternData(*this));
+
+	// Convert compatibility flags
+	// NOTE: Some of these version numbers are just approximations.
+	// Sometimes a quirk flag is shared by several code locations which might have been fixed at different times.
+	// Sometimes the quirk behaviour has been revised over time, in which case the first version that emulated the quirk enables it.
+	struct PlayBehaviourVersion
+	{
+		PlayBehaviour behaviour;
+		MptVersion::VersionNum version;
+	};
+	
+	if(compatModeIT && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
+	{
+		static const PlayBehaviourVersion behaviours[] =
+		{
+			{ kTempoClamp,						MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kPerChannelGlobalVolSlide,		MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kPanOverride,						MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kITInstrWithoutNote,				MAKE_VERSION_NUMERIC(1, 17, 02, 46) },
+			{ kITVolColFinePortamento,			MAKE_VERSION_NUMERIC(1, 17, 02, 49) },
+			{ kITArpeggio,						MAKE_VERSION_NUMERIC(1, 17, 02, 49) },
+			{ kITOutOfRangeDelay,				MAKE_VERSION_NUMERIC(1, 17, 02, 49) },
+			{ kITPortaMemoryShare,				MAKE_VERSION_NUMERIC(1, 17, 02, 49) },
+			{ kITPatternLoopTargetReset,		MAKE_VERSION_NUMERIC(1, 17, 02, 49) },
+			{ kITFT2PatternLoop,				MAKE_VERSION_NUMERIC(1, 17, 02, 49) },
+			{ kITPingPongNoReset,				MAKE_VERSION_NUMERIC(1, 17, 02, 51) },
+			{ kITEnvelopeReset,					MAKE_VERSION_NUMERIC(1, 17, 02, 51) },
+			{ kITClearOldNoteAfterCut,			MAKE_VERSION_NUMERIC(1, 17, 02, 52) },
+			{ kITVibratoTremoloPanbrello,		MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kITTremor,						MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kITRetrigger,						MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kITMultiSampleBehaviour,			MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kITPortaTargetReached,			MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kITPatternLoopBreak,				MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kITOffset,						MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kITSwingBehaviour,				MAKE_VERSION_NUMERIC(1, 18, 00, 00) },
+			{ kITNNAReset,						MAKE_VERSION_NUMERIC(1, 18, 00, 00) },
+			{ kITSCxStopsSample,				MAKE_VERSION_NUMERIC(1, 18, 00, 01) },
+			{ kITEnvelopePositionHandling,		MAKE_VERSION_NUMERIC(1, 18, 01, 00) },
+			{ kITPortamentoInstrument,			MAKE_VERSION_NUMERIC(1, 19, 00, 01) },
+			{ kITPingPongMode,					MAKE_VERSION_NUMERIC(1, 19, 00, 21) },
+			{ kITRealNoteMapping,				MAKE_VERSION_NUMERIC(1, 19, 00, 30) },
+			{ kITHighOffsetNoRetrig,			MAKE_VERSION_NUMERIC(1, 20, 00, 14) },
+			{ kITFilterBehaviour,				MAKE_VERSION_NUMERIC(1, 20, 00, 35) },
+			{ kITNoSurroundPan,					MAKE_VERSION_NUMERIC(1, 20, 00, 53) },
+			{ kITShortSampleRetrig,				MAKE_VERSION_NUMERIC(1, 20, 00, 54) },
+			{ kITPortaNoNote,					MAKE_VERSION_NUMERIC(1, 20, 00, 56) },
+			{ kITDontResetNoteOffOnPorta,		MAKE_VERSION_NUMERIC(1, 20, 02, 06) },
+			{ kITVolColMemory,					MAKE_VERSION_NUMERIC(1, 21, 01, 16) },
+			{ kITPortamentoSwapResetsPos,		MAKE_VERSION_NUMERIC(1, 21, 01, 25) },
+			{ kITEmptyNoteMapSlot,				MAKE_VERSION_NUMERIC(1, 21, 01, 25) },
+			{ kITFirstTickHandling,				MAKE_VERSION_NUMERIC(1, 22, 07, 09) },
+			{ kITSampleAndHoldPanbrello,		MAKE_VERSION_NUMERIC(1, 22, 07, 19) },
+			{ kITClearPortaTarget,				MAKE_VERSION_NUMERIC(1, 23, 04, 03) },
+			{ kITPanbrelloHold,					MAKE_VERSION_NUMERIC(1, 24, 01, 06) },
+			{ kITPanningReset,					MAKE_VERSION_NUMERIC(1, 24, 01, 06) },
+			{ kITPatternLoopWithJumps,			MAKE_VERSION_NUMERIC(1, 25, 00, 19) },
+		};
+
+		for(size_t i = 0; i < CountOf(behaviours); i++)
+		{
+			m_playBehaviour.set(behaviours[i].behaviour, (m_dwLastSavedWithVersion >= behaviours[i].version || m_dwLastSavedWithVersion == (behaviours[i].behaviour & 0xFFFF0000)));
+		}
+	} else if(compatModeXM && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
+	{
+		static const PlayBehaviourVersion behaviours[] =
+		{
+			{ kTempoClamp,						MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kPerChannelGlobalVolSlide,		MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kPanOverride,						MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kITFT2PatternLoop,				MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kFT2Arpeggio,						MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kFT2Retrigger,					MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kFT2VolColVibrato,				MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kFT2PortaNoNote,					MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kFT2KeyOff,						MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kFT2PanSlide,						MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kFT2OffsetOutOfRange,				MAKE_VERSION_NUMERIC(1, 17, 03, 02) },
+			{ kFT2RestrictXCommand,				MAKE_VERSION_NUMERIC(1, 18, 00, 00) },
+			{ kFT2RetrigWithNoteDelay,			MAKE_VERSION_NUMERIC(1, 18, 00, 00) },
+			{ kFT2SetPanEnvPos,					MAKE_VERSION_NUMERIC(1, 18, 00, 00) },
+			{ kFT2PortaIgnoreInstr,				MAKE_VERSION_NUMERIC(1, 18, 00, 01) },
+			{ kFT2VolColMemory,					MAKE_VERSION_NUMERIC(1, 18, 01, 00) },
+			{ kFT2LoopE60Restart,				MAKE_VERSION_NUMERIC(1, 18, 02, 01) },
+			{ kFT2ProcessSilentChannels,		MAKE_VERSION_NUMERIC(1, 18, 02, 01) },
+			{ kFT2ReloadSampleSettings,			MAKE_VERSION_NUMERIC(1, 20, 00, 36) },
+			{ kFT2PortaDelay,					MAKE_VERSION_NUMERIC(1, 20, 00, 40) },
+			{ kFT2Transpose,					MAKE_VERSION_NUMERIC(1, 20, 00, 62) },
+			{ kFT2PatternLoopWithJumps,			MAKE_VERSION_NUMERIC(1, 20, 00, 69) },
+			{ kFT2PortaTargetNoReset,			MAKE_VERSION_NUMERIC(1, 20, 00, 69) },
+			{ kFT2EnvelopeEscape,				MAKE_VERSION_NUMERIC(1, 20, 00, 77) },
+			{ kFT2Tremor,						MAKE_VERSION_NUMERIC(1, 20, 01, 11) },
+			{ kFT2OutOfRangeDelay,				MAKE_VERSION_NUMERIC(1, 20, 02, 02) },
+			{ kFT2Periods,						MAKE_VERSION_NUMERIC(1, 22, 03, 01) },
+			{ kFT2PanWithDelayedNoteOff,		MAKE_VERSION_NUMERIC(1, 22, 03, 02) },
+			{ kFT2VolColDelay,					MAKE_VERSION_NUMERIC(1, 22, 07, 19) },
+			{ kFT2FinetunePrecision,			MAKE_VERSION_NUMERIC(1, 22, 07, 19) },
+		};
+
+		for(size_t i = 0; i < CountOf(behaviours); i++)
+		{
+			m_playBehaviour.set(behaviours[i].behaviour, m_dwLastSavedWithVersion >= behaviours[i].version);
+		}
+	} else if(GetType() == MOD_TYPE_S3M)
+	{
+		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00))
+			m_playBehaviour.reset(kST3NoMutedChannels);
+		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
+			m_playBehaviour.reset(kST3EffectMemory);
+		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 00, 00))
+			m_playBehaviour.reset(kST3PortaSampleChange);
+	}
+
+	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 00, 00))
+	{
+		// MPT 1.16 has a maximum tempo of 255.
+		m_playBehaviour.set(kTempoClamp);
+	}
+
+	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 24, 00, 00))
+	{
+		// No frequency slides in Hz before OpenMPT 1.24
+		m_playBehaviour.reset(kHertzInLinearMode);
+	} else if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 24, 00, 00) && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00) && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+	{
+		// Frequency slides were always in Hz rather than periods in this version range.
+		m_playBehaviour.set(kHertzInLinearMode);
+	}
 }
 
 

@@ -446,9 +446,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_MT2);
 	InitializeChannels();
-	m_nType = MOD_TYPE_MT2;
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_madeWithTracker, fileHeader.trackerName);
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songName);
 	m_nChannels = fileHeader.numChannels;
@@ -462,7 +461,6 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultRowsPerBeat = fileHeader.linesPerBeat;
 	if(!m_nDefaultRowsPerBeat) m_nDefaultRowsPerBeat = 4;
 	m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat * 4;
-	SetModSpecsPointer(m_pModSpecs, GetBestSaveFormat());
 
 	if(fileHeader.samplesPerTick > 100 && fileHeader.samplesPerTick < 5000)
 	{

@@ -2437,7 +2437,7 @@ void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos, int
 
 			CSoundFile &sndFile = pModDoc->GetrSoundFile();
 			ModSample &sample = sndFile.GetSample(m_nSample);
-			uint32 freq = sndFile.GetFreqFromPeriod(sndFile.GetPeriodFromNote(note + (sndFile.GetType() == MOD_TYPE_XM ? sample.RelativeTone : 0), sample.nFineTune, sample.nC5Speed), 0);
+			uint32 freq = sndFile.GetFreqFromPeriod(sndFile.GetPeriodFromNote(note + (sndFile.GetType() == MOD_TYPE_XM ? sample.RelativeTone : 0), sample.nFineTune, sample.nC5Speed), sample.nC5Speed, 0);
 
 			const std::string s = mpt::String::Print("%1 (%2.%3 Hz)",
 				sndFile.GetNoteName((ModCommand::NOTE)note),

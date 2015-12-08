@@ -23,6 +23,11 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+// Sample decompression routines in other source files
+void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter);
+uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), size_t &bytesLeft, int8 n);
+uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen);
+
 
 #if MPT_COMPILER_GCC
 #if MPT_GCC_AT_LEAST(4,6,0)

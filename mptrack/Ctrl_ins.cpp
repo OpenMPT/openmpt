@@ -1407,7 +1407,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 
 			if(m_sndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
 			{
-				BOOL enableVol = (m_CbnMixPlug.GetCurSel() > 0 && !m_sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION)) ? TRUE : FALSE;
+				BOOL enableVol = (m_CbnMixPlug.GetCurSel() > 0 && !m_sndFile.m_playBehaviour[kMIDICCBugEmulation]) ? TRUE : FALSE;
 				velocityStyle.EnableWindow(enableVol);
 				m_CbnPluginVolumeHandling.EnableWindow(enableVol);
 			}
@@ -1459,7 +1459,7 @@ void CCtrlInstruments::UpdateFilterText()
 		{
 			TCHAR s[32];
 			// In IT Compatible mode, it is enough to just have resonance enabled to turn on the filter.
-			const bool resEnabled = (pIns->IsResonanceEnabled() && pIns->GetResonance() > 0 && m_sndFile.IsCompatibleMode(TRK_IMPULSETRACKER));
+			const bool resEnabled = (pIns->IsResonanceEnabled() && pIns->GetResonance() > 0 && m_sndFile.m_playBehaviour[kITFilterBehaviour]);
 
 			if((pIns->IsCutoffEnabled() && pIns->GetCutoff() < 0x7F) || resEnabled)
 			{
@@ -1665,7 +1665,7 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 		case IDC_PLUGIN_VOLUMESTYLE:
 			// Plugin volume handling
 			if(pIns->nMixPlug < 1) return FALSE;
-			if(m_sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION))
+			if(m_sndFile.m_playBehaviour[kMIDICCBugEmulation])
 			{
 				velocityStyle.EnableWindow(FALSE);
 				m_CbnPluginVolumeHandling.EnableWindow(FALSE);
@@ -2194,7 +2194,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 
 	if (pIns)
 	{
-		BOOL enableVol = (nPlug < 1 || m_sndFile.GetModFlag(MSF_MIDICC_BUGEMULATION)) ? FALSE : TRUE;
+		BOOL enableVol = (nPlug < 1 || m_sndFile.m_playBehaviour[kMIDICCBugEmulation]) ? FALSE : TRUE;
 		velocityStyle.EnableWindow(enableVol);
 		m_CbnPluginVolumeHandling.EnableWindow(enableVol);
 

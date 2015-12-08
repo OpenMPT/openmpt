@@ -313,7 +313,7 @@ void CSoundFile::CreateStereoMix(int count)
 
 	CHANNELINDEX nchmixed = 0;
 
-	const bool ITPingPongMode = IsITPingPongMode();
+	const bool ITPingPongMode = m_playBehaviour[kITPingPongMode];
 	const bool realtimeMix = !IsRenderingToDisc();
 
 	for(uint32 nChn = 0; nChn < m_nMixChannels; nChn++)
@@ -500,7 +500,7 @@ void CSoundFile::CreateStereoMix(int count)
 					{
 						break;
 					}
-				} else if(chn.nLoopStart == 0)
+				} else if(chn.nLoopStart == 0 && m_playBehaviour[kMODOneShotLoops])
 				{
 					// ProTracker "oneshot" loops (if loop start is 0, play the whole sample once and then repeat until loop end)
 					chn.nPos = 0;

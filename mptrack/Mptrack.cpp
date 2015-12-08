@@ -164,6 +164,7 @@ CDocument* CModDocTemplate::OpenTemplateFile(const mpt::PathString &filename, bo
 			sndFile.m_dwLastSavedWithVersion = 0;
 			sndFile.m_madeWithTracker.clear();
 			sndFile.m_songArtist = TrackerSettings::Instance().defaultArtist;
+			sndFile.m_playBehaviour = sndFile.GetDefaultPlaybackBehaviour(sndFile.GetType());
 			doc->UpdateAllViews(nullptr, UpdateHint().ModType().AsLPARAM());
 		} else
 		{

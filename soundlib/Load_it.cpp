@@ -354,7 +354,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals();
+	InitializeGlobals(MOD_TYPE_IT);
 
 	bool interpretModPlugMade = false;
 
@@ -375,10 +375,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		if(mptStartPos <= file.GetLength() - 3 && fileHeader.cwtv > 0x888 && fileHeader.cwtv <= 0xFFF)
 		{
 			file.Seek(mptStartPos);
-			ChangeModTypeTo(file.ReadMagic("228") ? MOD_TYPE_MPT : MOD_TYPE_IT);
-		} else
-		{
-			ChangeModTypeTo(MOD_TYPE_IT);
+			if(file.ReadMagic("228"))
+				SetType(MOD_TYPE_MPT);
 		}
 
 		if(GetType() == MOD_TYPE_IT)
@@ -814,6 +812,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	LoadExtendedInstrumentProperties(file, &interpretModPlugMade);
 	if(interpretModPlugMade)
 	{
+		m_playBehaviour.reset();
 		m_nMixLevels = mixLevelsOriginal;
 	}
 	// Need to do this before reading the patterns because m_nChannels might be modified by LoadExtendedSongProperties. *sigh*
@@ -972,8 +971,6 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	UpgradeModFlags();
-
 	if(!m_dwLastSavedWithVersion && fileHeader.cwtv == 0x0888)
 	{
 		// Up to OpenMPT 1.17.02.45 (r165), it was possible that the "last saved with" field was 0
@@ -1057,6 +1054,11 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 		case 1:
 			m_madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
+			// Schism Tracker considers this quirk to be a bug and does not emulate it.
+			m_playBehaviour.reset(kITShortSampleRetrig);
+			// Hertz in linear mode: Added 2015-01-29, http://schismtracker.org/hg/rev/ba3f9ecff466
+			if(fileHeader.cwtv < 0x17CC)
+				m_playBehaviour.reset(kHertzInLinearMode);
 			break;
 		case 4:
 			m_madeWithTracker = MPT_FORMAT("pyIT %1.%2", (fileHeader.cwtv & 0x0F00) >> 8, mpt::fmt::hex0<2>((fileHeader.cwtv & 0xFF)));
@@ -1073,16 +1075,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	if(GetType() == MOD_TYPE_IT)
-	{
-		// Set appropriate mod flags if the file was not made with MPT.
-		if(!interpretModPlugMade)
-		{
-			SetModFlag(MSF_MIDICC_BUGEMULATION, false);
-			SetModFlag(MSF_OLDVOLSWING, false);
-			SetModFlag(MSF_COMPATIBLE_PLAY, true);
-		}
-	} else
+	if(GetType() == MOD_TYPE_MPT)
 	{
 		//START - mpt specific:
 		//Using member cwtv on pifh as the version number.
@@ -2090,10 +2083,22 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		mpt::IO::WriteRaw(f, &data[0], length);
 	}
 
-	// Additional flags for XM/IT/MPTM
-	if(m_ModFlags)
+	// Playback compatibility flags
 	{
-		WRITEMODULAR(MAGIC4BE('M','S','F','.'), m_ModFlags.GetRaw());
+		uint8 bits[(kMaxPlayBehaviours + 7) / 8u];
+		MemsetZero(bits);
+		size_t maxBit = 0;
+		for(size_t i = 0; i < kMaxPlayBehaviours; i++)
+		{
+			if(m_playBehaviour[i])
+			{
+				bits[i >> 3] |= 1 << (i & 0x07);
+				maxBit = i + 8;
+			}
+		}
+		uint16 numBytes = static_cast<uint16>(maxBit / 8u);
+		WRITEMODULARHEADER(MAGIC4BE('M','S','F','.'), numBytes);
+		mpt::IO::WriteRaw(f, bits, numBytes);
 	}
 
 	if(!m_songArtist.empty() && specs.hasArtistName)
@@ -2109,7 +2114,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 	if(GetMIDIMapper().GetCount() > 0)
 	{
 		const size_t objectsize = GetMIDIMapper().GetSerializationSize();
-		if(objectsize > size_t(int16_max))
+		if(!Util::TypeCanHoldValue<uint16>(objectsize))
 		{
 			AddToLog("Too many MIDI Mapping directives to save; data won't be written.");
 		} else
@@ -2136,14 +2141,6 @@ void ReadField(FileReader &chunk, std::size_t size, T &field)
 }
 
 
-template<typename Tenum, typename Tstore>
-void ReadFieldFlagSet(FileReader &chunk, std::size_t size, FlagSet<Tenum, Tstore> &field)
-//---------------------------------------------------------------------------------------
-{
-	field.SetRaw(chunk.ReadSizedIntLE<Tstore>(size));
-}
-
-
 template<typename T>
 void ReadFieldCast(FileReader &chunk, std::size_t size, T &field)
 //---------------------------------------------------------------
@@ -2166,14 +2163,14 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 		*pInterpretMptMade = true;
 
 	// HACK: Reset mod flags to default values here, as they are not always written.
-	m_ModFlags.reset();
+	m_playBehaviour.reset();
 
 	while(file.CanRead(7))
 	{
 		const uint32 code = file.ReadUint32LE();
 		const uint16 size = file.ReadUint16LE();
 
-		// Start of MPTM extensions or truncated field
+		// Start of MPTM extensions, truncated field or non-ASCII ID
 		if(code == MAGIC4LE('2','2','8',4) || !file.CanRead(size) || (code & 0x80808080) || !(code & 0x60606060))
 		{
 			break;
@@ -2196,7 +2193,6 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 			case MAGIC4BE('V','S','T','V'): ReadField(chunk, size, m_nVSTiVolume); break;
 			case MAGIC4BE('D','G','V','.'): ReadField(chunk, size, m_nDefaultGlobalVolume); break;
 			case MAGIC4BE('R','P','.','.'): if(GetType() != MOD_TYPE_XM) ReadField(chunk, size, m_nRestartPos); break;
-			case MAGIC4BE('M','S','F','.'): ReadFieldFlagSet(chunk, size, m_ModFlags); break;
 			case MAGIC4LE('R','S','M','P'):
 				ReadFieldCast(chunk, size, m_nResampling);
 				if(!IsKnownResamplingMode(m_nResampling)) m_nResampling = SRCMODE_DEFAULT;
@@ -2259,6 +2255,25 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 					chunk.ReadRaw(&data[0], data.size());
 					mpt::istringstream iStrm(data);
 					TempoSwing::Deserialize(iStrm, m_tempoSwing, data.size());
+				}
+				break;
+
+			case MAGIC4BE('M','S','F','.'):
+				// Playback compatibility flags
+				{
+					size_t bit = 0;
+					m_playBehaviour.reset();
+					while(chunk.CanRead(1) && bit < m_playBehaviour.size())
+					{
+						uint8 b = chunk.ReadUint8();
+						for(uint8 i = 0; i < 8; i++, bit++)
+						{
+							if((b & (1 << i)) && bit < m_playBehaviour.size())
+							{
+								m_playBehaviour.set(bit);
+							}
+						}
+					}
 				}
 				break;
 		}

@@ -102,8 +102,8 @@
 #define IDD_PITCHSHIFT                  442
 #define IDD_OPTIONS_AUTOSAVE            443
 #define IDD_EDIT_GOTO                   444
-#define IDD_DIALOG1                     501
 #define IDD_MOVEFXSLOT                  501
+#define IDD_LEGACY_PLAYBACK             502
 #define IDD_CONTROL_GRAPH               507
 #define IDD_SCALE_ENV_POINTS            510
 #define IDD_TUNING                      511
@@ -936,6 +936,7 @@
 #define IDC_STATIC_BUFFERLENGTH         2457
 #define IDC_STATIC_UPDATEINTERVAL       2458
 #define IDC_COMBO_UPDATEINTERVAL        2459
+#define IDC_STATIC2                     2460
 #define IDC_STATIC_BASECHANNEL          2461
 #define IDC_COMBO_FILTER                2462
 #define IDC_COMBO_POLYPHONY             2463
