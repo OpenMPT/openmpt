@@ -217,7 +217,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals();
 	m_madeWithTracker = mpt::String::Print("Unreal Package v%1", fileHeader.packageVersion);
 	
-	for(uint32 i = 0; i < fileHeader.exportCount; i++)
+	for(uint32 i = 0; i < fileHeader.exportCount && file.CanRead(4); i++)
 	{
 		int32 objClass, objOffset, objSize, objName;
 		ReadUMXExportTableEntry(file, objClass, objOffset, objSize, objName, fileHeader.packageVersion);
