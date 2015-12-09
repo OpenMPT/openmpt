@@ -18,7 +18,7 @@
 #include "Globals.h"
 #include "Ctrl_gen.h"
 #include "View_gen.h"
-#include "Vstplug.h"
+#include "../soundlib/plugins/PlugInterface.h"
 #include "EffectVis.h"
 #include "MoveFXSlotDialog.h"
 #include "ChannelManagerDlg.h"
@@ -490,7 +490,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			// Some plugins like Synth1 have so many presets that this *does* indeed make a difference,
 			// even on fairly modern CPUs. The rest of the presets are just added when the combo box
 			// gets the focus, i.e. just when they're needed.
-			VstInt32 currentProg = pPlugin->GetCurrentProgram();
+			int32 currentProg = pPlugin->GetCurrentProgram();
 			FillPluginProgramBox(currentProg, currentProg);
 			m_CbnPreset.SetCurSel(0);
 
@@ -1028,14 +1028,14 @@ void CViewGlobals::OnParamChanged()
 void CViewGlobals::OnFocusParam()
 //-------------------------------
 {
-	IMixPlugin *pVstPlugin = GetCurrentPlugin();
-	if(pVstPlugin != nullptr)
+	IMixPlugin *pPlugin = GetCurrentPlugin();
+	if(pPlugin != nullptr)
 	{
-		const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
+		const PlugParamIndex nParams = pPlugin->GetNumParameters();
 		if(m_nCurrentParam < nParams)
 		{
 			TCHAR s[32];
-			float fValue = pVstPlugin->GetParameter(m_nCurrentParam);
+			float fValue = pPlugin->GetParameter(m_nCurrentParam);
 			sprintf(s, _T("%f"), fValue);
 			LockControls();
 			SetDlgItemText(IDC_EDIT14, s);
@@ -1058,12 +1058,12 @@ void CViewGlobals::SetPluginModified()
 void CViewGlobals::OnProgramChanged()
 //-----------------------------------
 {
-	VstInt32 curProg = m_CbnPreset.GetItemData(m_CbnPreset.GetCurSel());
+	int32 curProg = m_CbnPreset.GetItemData(m_CbnPreset.GetCurSel());
 
 	IMixPlugin *pPlugin = GetCurrentPlugin();
 	if(pPlugin != nullptr)
 	{
-		const VstInt32 numProgs = pPlugin->GetNumPrograms();
+		const int32 numProgs = pPlugin->GetNumPrograms();
 		if(curProg <= numProgs)
 		{
 			pPlugin->SetCurrentProgram(curProg);
@@ -1082,7 +1082,7 @@ void CViewGlobals::OnLoadParam()
 	IMixPlugin *pPlugin = GetCurrentPlugin();
 	if(pPlugin != nullptr && pPlugin->LoadProgram())
 	{
-		VstInt32 currentProg = pPlugin->GetCurrentProgram();
+		int32 currentProg = pPlugin->GetCurrentProgram();
 		FillPluginProgramBox(currentProg, currentProg);
 		m_CbnPreset.SetCurSel(0);
 		SetPluginModified();
@@ -1105,17 +1105,17 @@ void CViewGlobals::OnSetParameter()
 //---------------------------------
 {
 	if(m_nCurrentPlugin >= MAX_MIXPLUGINS || IsLocked()) return;
-	IMixPlugin *pVstPlugin = GetCurrentPlugin();
+	IMixPlugin *pPlugin = GetCurrentPlugin();
 
-	if(pVstPlugin != nullptr)
+	if(pPlugin != nullptr)
 	{
-		const PlugParamIndex nParams = pVstPlugin->GetNumParameters();
+		const PlugParamIndex nParams = pPlugin->GetNumParameters();
 		TCHAR s[32];
 		GetDlgItemText(IDC_EDIT14, s, CountOf(s));
 		if ((m_nCurrentParam < nParams) && (s[0]))
 		{
 			float fValue = (float)_tstof(s);
-			pVstPlugin->SetParameter(m_nCurrentParam, fValue);
+			pPlugin->SetParameter(m_nCurrentParam, fValue);
 			OnParamChanged();
 			SetPluginModified();
 		}
