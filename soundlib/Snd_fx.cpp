@@ -1181,7 +1181,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, uint32 instr, bool bPorta, b
 	// FT2 compatibility: new instrument + portamento = ignore new instrument number, but reload old instrument settings (the world of XM is upside down...)
 	// And this does *not* happen if volume column portamento is used together with note delay... (handled in ProcessEffects(), where all the other note delay stuff is.)
 	// Test case: porta-delay.xm
-	if(instrumentChanged && bPorta && m_playBehaviour[kFT2PortaIgnoreInstr])
+	if(instrumentChanged && bPorta && m_playBehaviour[kFT2PortaIgnoreInstr] && (pChn->pModInstrument != nullptr || pChn->pModSample != nullptr))
 	{
 		pIns = pChn->pModInstrument;
 		pSmp = pChn->pModSample;
@@ -5349,7 +5349,7 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 		{
 			int l = ((NOTE_MAX - note) << 6) - (nFineTune / 2);
 			if (l < 1) l = 1;
-			return (uint32)l;
+			return static_cast<uint32>(l);
 		} else
 		{
 			int finetune = nFineTune;
