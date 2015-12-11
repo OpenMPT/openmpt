@@ -711,6 +711,9 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 							}
 						}
 					}
+				} else
+				{
+					break;
 				}
 			}
 #endif // NO_VST
@@ -820,7 +823,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			const uint32 numEnvelopes = ((fileHeader.flags & MT2FileHeader::drumsAutomation) ? m_nChannels : channelsWithoutDrums)
 				+ numVST
 				+ ((fileHeader.flags & MT2FileHeader::masterAutomation) ? 1 : 0);
-			for(uint32 env = 0; env < numEnvelopes; env++)
+			for(uint32 env = 0; env < numEnvelopes && file.CanRead(4); env++)
 			{
 				// TODO
 				ReadMT2Automation(fileHeader.version, file);
