@@ -2260,6 +2260,15 @@ bool CSoundFile::ProcessEffects()
 			}
 		}
 
+		if(GetType() == MOD_TYPE_MTM && cmd == CMD_MODCMDEX && (param & 0xF0) == 0xD0)
+		{
+			// Apparently, retrigger and note delay have the same behaviour in MultiTracker:
+			// They both restart the note at tick x, and if there is a note on the same row,
+			// this note is started on the first tick.
+			nStartTick = 0;
+			param = 0x90 | (param & 0x0F);
+		}
+
 		if(nStartTick != 0 && pChn->rowCommand.note == NOTE_KEYOFF && pChn->rowCommand.volcmd == VOLCMD_PANNING && m_playBehaviour[kFT2PanWithDelayedNoteOff])
 		{
 			// FT2 compatibility: If there's a delayed note off, panning commands are ignored. WTF!
@@ -3328,6 +3337,8 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, ModCommand::PARAM param, const 
 		// Portamento for instruments with custom tuning
 		if(param >= 0xF0 && !doFinePortamentoAsRegular)
 			PortamentoFineMPT(pChn, param - 0xF0);
+		else if(param >= 0xE0 && !doFinePortamentoAsRegular)
+			PortamentoExtraFineMPT(pChn, param - 0xE0);
 		else
 			PortamentoMPT(pChn, param);
 		return;
@@ -3385,6 +3396,8 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, ModCommand::PARAM param, cons
 		// Portamento for instruments with custom tuning
 		if(param >= 0xF0 && !doFinePortamentoAsRegular)
 			PortamentoFineMPT(pChn, -static_cast<int>(param - 0xF0));
+		else if(param >= 0xE0 && !doFinePortamentoAsRegular)
+			PortamentoExtraFineMPT(pChn, -static_cast<int>(param - 0xE0));
 		else
 			PortamentoMPT(pChn, -static_cast<int>(param));
 		return;
@@ -5667,6 +5680,20 @@ void CSoundFile::PortamentoFineMPT(ModChannel* pChn, int param)
 		pChn->nOldFinePortaUpDown = static_cast<int8>(std::abs(tickParam));
 
 	pChn->m_CalculateFreq = true;
+}
+
+
+void CSoundFile::PortamentoExtraFineMPT(ModChannel* pChn, int param)
+//------------------------------------------------------------------
+{
+	// This kinda behaves like regular fine portamento.
+	// It changes the pitch by n finetune steps on the first tick.
+
+	if(pChn->isFirstTick)
+	{
+		pChn->m_PortamentoFineSteps += param;
+		pChn->m_CalculateFreq = true;
+	}
 }
 
 

@@ -792,6 +792,7 @@ protected:
 	void ExtraFinePortamentoDown(ModChannel *pChn, ModCommand::PARAM param) const;
 	void PortamentoMPT(ModChannel*, int);
 	void PortamentoFineMPT(ModChannel*, int);
+	void PortamentoExtraFineMPT(ModChannel*, int);
 	void NoteSlide(ModChannel *pChn, uint32 param, bool slideUp, bool retrig) const;
 	void TonePortamento(ModChannel *pChn, uint32 param) const;
 	void Vibrato(ModChannel *pChn, uint32 param) const;
