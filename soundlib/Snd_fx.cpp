@@ -2174,7 +2174,7 @@ bool CSoundFile::ProcessEffects()
 			//:xy --> note delay until tick x, note cut at tick x+y
 			nStartTick = (param & 0xF0) >> 4;
 			const uint32 cutAtTick = nStartTick + (param & 0x0F);
-			NoteCut(nChn, cutAtTick);
+			NoteCut(nChn, cutAtTick, m_playBehaviour[kITSCxStopsSample]);
 		} else if ((cmd == CMD_MODCMDEX) || (cmd == CMD_S3MCMDEX))
 		{
 			if ((!param) && (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
@@ -4131,7 +4131,7 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 	// EBx: Fine Volume Down
 	case 0xB0:	if ((param) || (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))) FineVolumeDown(pChn, param, false); break;
 	// ECx: Note Cut
-	case 0xC0:	NoteCut(nChn, param); break;
+	case 0xC0:	NoteCut(nChn, param, false); break;
 	// EDx: Note Delay
 	// EEx: Pattern Delay
 	case 0xF0:
@@ -4305,7 +4305,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 		}
 		// S3M/IT compatibility: Note Cut really cuts notes and does not just mute them (so that following volume commands could restore the sample)
 		// Test case: scx.it
-		NoteCut(nChn, param);
+		NoteCut(nChn, param, m_playBehaviour[kITSCxStopsSample] || GetType() == MOD_TYPE_S3M);
 		break;
 	// SDx: Note Delay
 	// SEx: Pattern Delay for x rows
@@ -5036,13 +5036,12 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, int32 nFreqSlide) const
 }
 
 
-void CSoundFile::NoteCut(CHANNELINDEX nChn, uint32 nTick)
-//-------------------------------------------------------
+void CSoundFile::NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample)
+//-----------------------------------------------------------------------
 {
 	if (m_PlayState.m_nTickCount == nTick)
 	{
 		ModChannel *pChn = &m_PlayState.Chn[nChn];
-		const bool cutSample = m_playBehaviour[kITSCxStopsSample] || GetType() == MOD_TYPE_S3M;
 		if(cutSample)
 		{
 			pChn->nInc = 0;

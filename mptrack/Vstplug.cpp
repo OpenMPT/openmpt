@@ -1892,13 +1892,22 @@ void CVstPlugin::HardAllNotesOff()
 		channel.ResetProgram();
 
 		MidiPitchBend(mc, EncodePitchBendParam(MIDIEvents::pitchBendCentre));		// centre pitch bend
-		if(GetUID() != CCONST('K', 'L', 'W', 'V'))
+
+		const bool isWavestation = GetUID() == CCONST('K', 'L', 'W', 'V');
+		const bool isSawer = GetUID() == CCONST('S', 'a', 'W', 'R');
+		if(!isWavestation && !isSawer)
 		{
 			// Korg Wavestation doesn't seem to like this CC, it can introduce ghost notes or
 			// prevent new notes from being played.
+			// Image-Line Sawer does not like it either and resets some parameters so that the plugin is all
+			// distorted afterwards.
 			MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllControllersOff, mc, 0));		// reset all controllers
 		}
-		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllNotesOff, mc, 0));			// all notes off
+		if(!isSawer)
+		{
+			// Image-Line Sawer takes ages to execute this CC.
+			MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllNotesOff, mc, 0));			// all notes off
+		}
 		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllSoundOff, mc, 0));			// all sounds off
 
 		for(size_t i = 0; i < CountOf(channel.noteOnMap); i++)	//all notes
