@@ -520,7 +520,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			uint32 bitBuf = file.ReadUint32LE(), bitNum = 32;
 
 			const uint8 *inBuf = reinterpret_cast<const uint8*>(sourceBuf) + 4;
-			size_t bytesLeft = file.BytesLeft() - 4;
+			size_t bytesLeft = file.BytesLeft();
 
 			uint8 dlt = 0, lowbyte = 0;
 			for(SmpLength j = 0; j < sample.nLength; j++)
