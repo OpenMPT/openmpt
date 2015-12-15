@@ -330,10 +330,90 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 }
 
 
+////////////////////////////////////////////////////////////////////////
+// IMA ADPCM Support for WAV files
+
+
+static bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file, uint16 blockAlign, uint32 numChannels)
+//----------------------------------------------------------------------------------------------------------------------
+{
+	static const int32 IMAIndexTab[8] =  { -1, -1, -1, -1, 2, 4, 6, 8 };
+	static const int32 IMAUnpackTable[90] =
+	{
+		7,     8,     9,     10,    11,    12,    13,    14,
+		16,    17,    19,    21,    23,    25,    28,    31,
+		34,    37,    41,    45,    50,    55,    60,    66,
+		73,    80,    88,    97,    107,   118,   130,   143,
+		157,   173,   190,   209,   230,   253,   279,   307,
+		337,   371,   408,   449,   494,   544,   598,   658,
+		724,   796,   876,   963,   1060,  1166,  1282,  1411,
+		1552,  1707,  1878,  2066,  2272,  2499,  2749,  3024,
+		3327,  3660,  4026,  4428,  4871,  5358,  5894,  6484,
+		7132,  7845,  8630,  9493,  10442, 11487, 12635, 13899,
+		15289, 16818, 18500, 20350, 22385, 24623, 27086, 29794,
+		32767, 0
+	};
+
+	if(target == nullptr || blockAlign < 5)
+		return false;
+
+	SmpLength samplePos = 0;
+	sampleLen *= numChannels;
+	while(file.CanRead(4 * numChannels) && samplePos < sampleLen)
+	{
+		FileReader block = file.ReadChunk(blockAlign);
+		const uint8 *data = reinterpret_cast<const uint8 *>(block.GetRawData());
+		const uint32 blockSize = static_cast<uint32>(block.GetLength());
+		if(blockSize <= 4u * numChannels)
+			break;
+
+		for(uint32 chn = 0; chn < numChannels; chn++)
+		{
+			// Block header
+			int32 value = block.ReadInt16LE();
+			int32 nIndex = block.ReadUint8();
+			Limit(nIndex, 0, 89);
+			block.Skip(1);
+
+			SmpLength smpPos = samplePos + chn;
+			uint32 dataPos = (numChannels + chn) * 4;
+			// Block data
+			while(smpPos <= (sampleLen - 8) && dataPos <= (blockSize - 4))
+			{
+				for(uint32 i = 0; i < 8; i++)
+				{
+					uint8 delta = data[dataPos];
+					if(i & 1)
+					{
+						delta >>= 4;
+						dataPos++;
+					} else
+					{
+						delta &= 0x0F;
+					}
+					int32 v = IMAUnpackTable[nIndex] >> 3;
+					if (delta & 1) v += IMAUnpackTable[nIndex] >> 2;
+					if (delta & 2) v += IMAUnpackTable[nIndex] >> 1;
+					if (delta & 4) v += IMAUnpackTable[nIndex];
+					if (delta & 8) value -= v; else value += v;
+					nIndex += IMAIndexTab[delta & 7];
+					Limit(nIndex, 0, 88);
+					Limit(value, -32768, 32767);
+					target[smpPos] = static_cast<int16>(value);
+					smpPos += numChannels;
+				}
+				dataPos += (numChannels - 1) * 4u;
+			}
+		}
+		samplePos += ((blockSize - (numChannels * 4u)) * 2u);
+	}
+
+	return true;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // WAV Open
-
-bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file, uint16 blockAlign);
 
 bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize, FileReader *wsmpChunk)
 //-------------------------------------------------------------------------------------------------------------
@@ -360,22 +440,22 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 
 	FileReader sampleChunk = wavFile.GetSampleData();
 
-	if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtIMA_ADPCM)
+	if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtIMA_ADPCM && wavFile.GetNumChannels() <= 2)
 	{
 		// IMA ADPCM 4:1
 		LimitMax(sample.nLength, MAX_SAMPLE_LENGTH);
 		sample.uFlags.set(CHN_16BIT);
-		sample.uFlags.reset(CHN_STEREO);
+		sample.uFlags.set(CHN_STEREO, wavFile.GetNumChannels() == 2);
 		if(!sample.AllocateSample())
 		{
 			return false;
 		}
-		IMAADPCMUnpack16(sample.pSample16, sample.nLength, FileReader(sampleChunk.GetRawData(), sampleChunk.BytesLeft()), wavFile.GetBlockAlign());
+		IMAADPCMUnpack16(sample.pSample16, sample.nLength, FileReader(sampleChunk.GetRawData(), sampleChunk.BytesLeft()), wavFile.GetBlockAlign(), wavFile.GetNumChannels());
 		sample.PrecomputeLoops(*this, false);
 	} else if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtMP3)
 	{
 		// MP3 in WAV
-		return ReadMP3Sample(nSample, sampleChunk);
+		return ReadMP3Sample(nSample, sampleChunk, true) || ReadMediaFoundationSample(nSample, sampleChunk, true);
 	} else if(!wavFile.IsExtensibleFormat() && wavFile.MayBeCoolEdit16_8() && wavFile.GetSampleFormat() == WAVFormatChunk::fmtPCM && wavFile.GetBitsPerSample() == 32 && wavFile.GetBlockAlign() == wavFile.GetNumChannels() * 4)
 	{
 		// Syntrillium Cool Edit hack to store IEEE 32bit floating point
