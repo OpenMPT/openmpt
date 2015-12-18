@@ -242,7 +242,7 @@ enum SongFlags
 	SONG_SURROUNDPAN	= 0x4000,		// Pan in the rear channels
 	SONG_EXFILTERRANGE	= 0x8000,		// Cutoff Filter has double frequency range (up to ~10Khz)
 	SONG_AMIGALIMITS	= 0x10000,		// Enforce amiga frequency limits
-	//SONG_ITPROJECT	= 0x20000,		// Is a project file
+	SONG_S3MOLDVIBRATO	= 0x20000,		// ScreamTracker 2 vibrato in S3M files
 	//SONG_ITPEMBEDIH	= 0x40000,		// Embed instrument headers in project file
 	SONG_BREAKTOROW		= 0x80000,		// Break to row command encountered (internal flag, do not touch)
 	SONG_POSJUMP		= 0x100000,		// Position jump encountered (internal flag, do not touch)

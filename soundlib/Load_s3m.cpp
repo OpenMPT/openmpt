@@ -209,6 +209,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 	std::string trackerStr;
 	bool nonCompatTracker = false;
+	bool isST3 = false;
 	switch(fileHeader.cwtv & S3MFileHeader::trackerMask)
 	{
 	case S3MFileHeader::trkScreamTracker:
@@ -225,6 +226,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		} else
 		{
 			trackerStr = "Scream Tracker";
+			isST3 = true;
 		}
 		break;
 	case S3MFileHeader::trkImagoOrpheus:
@@ -289,7 +291,8 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 32767;
-	m_SongFlags = (fileHeader.flags & S3MFileHeader::amigaLimits) ? SONG_AMIGALIMITS : SongFlags(0);
+	if(fileHeader.flags & S3MFileHeader::amigaLimits) m_SongFlags.set(SONG_AMIGALIMITS);
+	if(fileHeader.flags & S3MFileHeader::st2Vibrato) m_SongFlags.set(SONG_S3MOLDVIBRATO);
 
 	if(fileHeader.cwtv < S3MFileHeader::trkST3_20 || (fileHeader.flags & S3MFileHeader::fastVolumeSlides) != 0)
 	{
@@ -298,7 +301,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Speed
 	m_nDefaultSpeed = fileHeader.speed;
-	if(m_nDefaultSpeed == 0 || m_nDefaultSpeed == 255)
+	if(m_nDefaultSpeed == 0 || (m_nDefaultSpeed == 255 && isST3))
 	{
 		// Even though ST3 accepts the command AFF as expected, it mysteriously fails to load a default speed of 255...
 		m_nDefaultSpeed = 6;
@@ -309,11 +312,11 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileHeader.tempo < 33)
 	{
 		// ST3 also fails to load an otherwise valid default tempo of 32...
-		m_nDefaultTempo.Set(125);
+		m_nDefaultTempo.Set(isST3 ? 125 : 32);
 	}
 
 	// Global Volume
-	m_nDefaultGlobalVolume = MIN(fileHeader.globalVol, 64) * 4;
+	m_nDefaultGlobalVolume = std::min<uint32>(fileHeader.globalVol, 64) * 4u;
 	// The following check is probably not very reliable, but it fixes a few tunes, e.g.
 	// DARKNESS.S3M by Purple Motion (ST 3.00) and "Image of Variance" by C.C.Catch (ST 3.01):
 	if(m_nDefaultGlobalVolume == 0 && fileHeader.cwtv < S3MFileHeader::trkST3_20)
@@ -381,7 +384,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	bool hasAdlibPatches = false;
 
 	// Reading sample headers
-	m_nSamples = MIN(fileHeader.smpNum, MAX_SAMPLES - 1);
+	m_nSamples = std::min<SAMPLEINDEX>(fileHeader.smpNum, MAX_SAMPLES - 1);
 	for(SAMPLEINDEX smp = 0; smp < m_nSamples; smp++)
 	{
 		S3MSampleHeader sampleHeader;
@@ -427,7 +430,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return true;
 	}
-	const PATTERNINDEX readPatterns = MIN(fileHeader.patNum, MAX_PATTERNS);
+	const PATTERNINDEX readPatterns = std::min<PATTERNINDEX>(fileHeader.patNum, MAX_PATTERNS);
 	for(PATTERNINDEX pat = 0; pat < readPatterns; pat++)
 	{
 		// A zero parapointer indicates an empty pattern.
