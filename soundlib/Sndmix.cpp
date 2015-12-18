@@ -838,7 +838,12 @@ void CSoundFile::ProcessTremor(CHANNELINDEX nChn, int &vol)
 			{
 				if (tremcount >= n) tremcount = 0;
 				if (tremcount >= ontime) vol = 0;
-				chn.nTremorCount = tremcount + 1;
+
+				// ScreamTracker 2 only updates effects on every 16th tick.
+				if((m_PlayState.m_nTickCount & 0x0F) != 0 || GetType() != MOD_TYPE_STM)
+				{
+					chn.nTremorCount = tremcount + 1;
+				}
 			} else
 			{
 				if(m_SongFlags[SONG_FIRSTTICK])
@@ -1362,8 +1367,12 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 			// Other trackers
 			else
 			{
+				uint32 tick = m_PlayState.m_nTickCount;
+				if(GetType() == MOD_TYPE_STM)
+					tick >>= 4;
+
 				int note = pChn->nNote;
-				switch(m_PlayState.m_nTickCount % 3)
+				switch(tick % 3)
 				{
 				case 1: note += (pChn->nArpeggio >> 4); break;
 				case 2: note += (pChn->nArpeggio & 0x0F); break;
@@ -1446,6 +1455,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 			{
 				vdepth = ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || m_SongFlags[SONG_ITOLDEFFECTS]) ? 6 : 7;
 				if(GetType() == MOD_TYPE_DBM) vdepth = 7;	// Closer than 6, but not quite.
+				if(m_SongFlags[SONG_S3MOLDVIBRATO]) vdepth = 5;
 			}
 
 			vdelta = (vdelta * (int)chn.nVibratoDepth) >> vdepth;
@@ -1485,6 +1495,13 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 		// Advance vibrato position - IT updates on every tick, unless "old effects" are enabled (in this case it only updates on non-first ticks like other trackers)
 		if(!m_SongFlags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !(m_SongFlags[SONG_ITOLDEFFECTS])))
 		{
+			// ScreamTracker 2 only updates effects on every 16th tick.
+			if((m_PlayState.m_nTickCount & 0x0F) != 0 && GetType() == MOD_TYPE_STM)
+			{
+				return;
+			}
+
+
 			// IT compatibility: IT has its own, more precise tables
 			if(m_playBehaviour[kITVibratoTremoloPanbrello])
 				chn.nVibratoPos = (vibpos + 4 * chn.nVibratoSpeed) & 0xFF;

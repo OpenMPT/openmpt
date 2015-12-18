@@ -54,6 +54,7 @@ struct PACKED S3MFileHeader
 	// Flags
 	enum S3MHeaderFlags
 	{
+		st2Vibrato			= 0x01,	// Vibrato is twice as deep. Cannot be enabled from UI.
 		zeroVolOptim		= 0x08,	// Volume 0 optimisations
 		amigaLimits			= 0x10,	// Enforce Amiga limits
 		fastVolumeSlides	= 0x40,	// Fast volume slides (like in ST3.00)

@@ -243,7 +243,7 @@ const CModSpecifications s3m =
 	99,											// SamplesMax
 	0,											// instrumentMax
 	mixLevelsCompatible,						// defaultMixLevels
-	SongFlag(0) | SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,	// Supported song flags
+	SongFlag(0) | SONG_FASTVOLSLIDES | SONG_AMIGALIMITS | SONG_S3MOLDVIBRATO,	// Supported song flags
 	0,											// Max MIDI mapping directives
 	0,											// No instrument envelopes
 	true,										// Has notecut.
