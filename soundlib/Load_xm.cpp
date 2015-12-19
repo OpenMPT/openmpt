@@ -322,10 +322,12 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				m_nMixLevels = mixLevelsCompatibleFT2;
 			}
-		} else if(!memcmp(fileHeader.trackerName, "MadTracker 2.0\0\0\0\0\0\0", 20))
+		} else if(!memcmp(fileHeader.trackerName, "MadTracker 2.0\0", 15))
 		{
 			// Fix channel 2 in m3_cha.xm
 			m_playBehaviour.reset(kFT2PortaNoNote);
+			// Fix arpeggios in kragle_-_happy_day.xm
+			m_playBehaviour.reset(kFT2Arpeggio);
 		}
 	}
 
