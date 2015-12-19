@@ -721,7 +721,9 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
 	if(std::memcmp(header.SQSH, "SQSH", 4) != 0) return false;
 	if(header.SrcLen == 0) return false;
 	if(header.DstLen == 0) return false;
-	if(!file.CanRead(header.SrcLen + 8 - sizeof(XPKFILEHEADER))) return false;
+	STATIC_ASSERT(sizeof(XPKFILEHEADER) >= 8);
+	if(header.SrcLen < (sizeof(XPKFILEHEADER) - 8)) return false;
+	if(!file.CanRead(header.SrcLen - (sizeof(XPKFILEHEADER) - 8))) return false;
 
 #ifdef MMCMP_LOG
 	Log("XPK detected (SrcLen=%d DstLen=%d) filesize=%d\n", header.SrcLen, header.DstLen, file.GetLength());
@@ -730,8 +732,6 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
 	try
 	{
 		unpackedData.resize(header.DstLen);
-		STATIC_ASSERT(sizeof(XPKFILEHEADER) >= 8);
-		if(header.SrcLen < (sizeof(XPKFILEHEADER) - 8)) throw XPK_error();
 		result = XPK_DoUnpack(reinterpret_cast<const uint8 *>(file.GetRawData()), header.SrcLen - (sizeof(XPKFILEHEADER) - 8), reinterpret_cast<uint8 *>(&(unpackedData[0])), header.DstLen);
 	} catch(MPTMemoryException)
 	{
