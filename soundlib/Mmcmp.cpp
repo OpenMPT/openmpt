@@ -437,33 +437,46 @@ void XPKFILEHEADER::ConvertEndianness()
 	SwapBytesBE(Reserved);
 }
 
-
-struct XPK_BufferBounds
-{
-	const uint8 *pSrcBeg;
-	const uint8 *pSrcEnd;
-	uint8 *pDstBeg;
-	uint8 *pDstEnd;
-};
-
 struct XPK_error : public std::range_error
 {
 	XPK_error() : std::range_error("invalid XPK data") { }
 };
 
-static int32 bfextu(const uint8 *p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
-//-----------------------------------------------------------------------------
+struct XPK_BufferBounds
+{
+	const uint8 *pSrcBeg;
+	std::size_t SrcSize;
+	uint8 *pDstBeg;
+	std::size_t DstSize;
+
+	inline uint8 SrcRead(std::size_t index)
+	{
+		if(index >= SrcSize) throw XPK_error();
+		return pSrcBeg[index];
+	}
+	inline void DstWrite(std::size_t index, uint8 value)
+	{
+		if(index >= DstSize) throw XPK_error();
+		pDstBeg[index] = value;
+	}
+	inline uint8 DstRead(std::size_t index)
+	{
+		if(index >= DstSize) throw XPK_error();
+		return pDstBeg[index];
+	}
+};
+
+static int32 bfextu(std::size_t p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
+//----------------------------------------------------------------------------
 {
 	int32 r;
 
 	p += bo / 8;
-	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
-	r = *(p++);
+	r = bufs.SrcRead(p); p++;
 	r <<= 8;
-	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
-	r |= *(p++);
+	r |= bufs.SrcRead(p); p++;
 	r <<= 8;
-	r |= *p;
+	r |= bufs.SrcRead(p);
 	r <<= bo % 8;
 	r &= 0xffffff;
 	r >>= 24 - bc;
@@ -471,19 +484,17 @@ static int32 bfextu(const uint8 *p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
 	return r;
 }
 
-static int32 bfexts(const uint8 *p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
-//-----------------------------------------------------------------------------
+static int32 bfexts(std::size_t p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
+//----------------------------------------------------------------------------
 {
 	int32 r;
 
 	p += bo / 8;
-	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
-	r = *(p++);
+	r = bufs.SrcRead(p); p++;
 	r <<= 8;
-	if(p < bufs.pSrcBeg || p >= bufs.pSrcEnd) throw XPK_error();
-	r |= *(p++);
+	r |= bufs.SrcRead(p); p++;
 	r <<= 8;
-	r |= *p;
+	r |= bufs.SrcRead(p);
 	r <<= (bo % 8) + 8;
 	r >>= 32 - bc;
 
@@ -491,44 +502,55 @@ static int32 bfexts(const uint8 *p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
 }
 
 
-static bool XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
-//------------------------------------------------------------------------------
+static uint8 XPK_ReadTable(int32 index)
+//-------------------------------------
 {
-	if(len <= 0) return false;
 	static const uint8 xpk_table[] = {
 		2,3,4,5,6,7,8,0,3,2,4,5,6,7,8,0,4,3,5,2,6,7,8,0,5,4,6,2,3,7,8,0,6,5,7,2,3,4,8,0,7,6,8,2,3,4,5,0,8,7,6,2,3,4,5,0
 	};
+	if(index < 0) throw XPK_error();
+	if(static_cast<std::size_t>(index) >= static_cast<std::size_t>(CountOf(xpk_table))) throw XPK_error();
+	return xpk_table[index];
+}
+
+static bool XPK_DoUnpack(const uint8 *src_, uint32 srcLen, uint8 *dst_, int32 len)
+//--------------------------------------------------------------------------------
+{
+	if(len <= 0) return false;
 	int32 d0,d1,d2,d3,d4,d5,d6,a2,a5;
 	int32 cp, cup1, type;
-	const uint8 *c;
-	uint8 *phist = nullptr;
-	uint8 *dstmax = dst + len;
+	std::size_t c;
+	std::size_t src;
+	std::size_t dst;
+
+	std::size_t phist = 0;
+	std::size_t dstmax = len;
 
 	XPK_BufferBounds bufs;
-	bufs.pSrcBeg = src;
-	bufs.pSrcEnd = src + srcLen;
-	bufs.pDstBeg = dst;
-	bufs.pDstEnd = dst + len;
+	bufs.pSrcBeg = src_;
+	bufs.SrcSize = srcLen;
+	bufs.pDstBeg = dst_;
+	bufs.DstSize = len;
 
+	src = 0;
+	dst = 0;
 	c = src;
 	while (len > 0)
 	{
-		if(&(c[0]) < bufs.pSrcBeg || &(c[0]) >= bufs.pSrcEnd) throw XPK_error();
-		if(&(c[7]) < bufs.pSrcBeg || &(c[7]) >= bufs.pSrcEnd) throw XPK_error();
-		type = c[0];
-		cp = (c[4]<<8) | (c[5]); // packed
-		cup1 = (c[6]<<8) | (c[7]); // unpacked
+		type = bufs.SrcRead(c+0);
+		cp = (bufs.SrcRead(c+4)<<8) | (bufs.SrcRead(c+5)); // packed
+		cup1 = (bufs.SrcRead(c+6)<<8) | (bufs.SrcRead(c+7)); // unpacked
 		//Log("  packed=%6d unpacked=%6d bytes left=%d dst=%08X(%d)\n", cp, cup1, len, dst, dst);
 		c += 8;
 		src = c+2;
 		if (type == 0)
 		{
 			// RAW chunk
-			if(c < bufs.pSrcBeg || c >= bufs.pSrcEnd) throw XPK_error();
-			if(c + cp > bufs.pSrcEnd) throw XPK_error();
-			if(dst < bufs.pDstBeg || dst >= bufs.pDstEnd) throw XPK_error();
-			if(dst + cp > bufs.pDstEnd) throw XPK_error();
-			memcpy(dst,c,cp);
+			if(cp < 0) throw XPK_error();
+			for(int32 i = 0; i < cp; ++i)
+			{
+				bufs.DstWrite(dst + i, bufs.SrcRead(c + i));
+			}
 			dst+=cp;
 			c+=cp;
 			len -= cp;
@@ -547,9 +569,8 @@ static bool XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
 		c += cp;
 
 		d0 = d1 = d2 = a2 = 0;
-		d3 = *(src++);
-		if(dst < bufs.pDstBeg || dst >= bufs.pDstEnd) throw XPK_error();
-		*dst = (uint8)d3;
+		d3 = bufs.SrcRead(src); src++;
+		bufs.DstWrite(dst, (uint8)d3);
 		if (dst < dstmax) dst++;
 		cup1--;
 
@@ -583,7 +604,7 @@ static bool XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
 		l708:
 			d0 += 1;
 		l70a:
-			d6 = xpk_table[(8*a2) + d6 -17];
+			d6 = XPK_ReadTable((8*a2) + d6 -17);
 			if (d6 != 8) goto l730;
 		l718:
 			if (d2 >= 20)
@@ -609,8 +630,7 @@ static bool XPK_DoUnpack(const uint8 *src, uint32 srcLen, uint8 *dst, int32 len)
 				d4 = bfexts(src,d0,d6,bufs);
 				d0 += d6;
 				d3 -= d4;
-				if(dst < bufs.pDstBeg || dst >= bufs.pDstEnd) throw XPK_error();
-				*dst = (uint8)d3;
+				bufs.DstWrite(dst, (uint8)d3);
 				if (dst < dstmax) dst++;
 				cup1--;
 				d5--;
@@ -697,10 +717,8 @@ l7ca:
 
 	while ((d6 >= 0) && (cup1 > 0))
 	{
-		if(phist < bufs.pDstBeg || phist >= bufs.pDstEnd) throw XPK_error();
-		d3 = *phist++;
-		if(dst < bufs.pDstBeg || dst >= bufs.pDstEnd) throw XPK_error();
-		*dst = (uint8)d3;
+		d3 = bufs.DstRead(phist); phist++;
+		bufs.DstWrite(dst, (uint8)d3);
 		if (dst < dstmax) dst++;
 		cup1--;
 		d6--;
