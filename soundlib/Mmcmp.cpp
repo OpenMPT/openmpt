@@ -731,7 +731,10 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
 	{
 		unpackedData.resize(header.DstLen);
 		result = XPK_DoUnpack(reinterpret_cast<const uint8 *>(file.GetRawData()), header.SrcLen + 8 - sizeof(XPKFILEHEADER), reinterpret_cast<uint8 *>(&(unpackedData[0])), header.DstLen);
-	} catch(...)
+	} catch(MPTMemoryException)
+	{
+		return false;
+	} catch(const XPK_error &)
 	{
 		return false;
 	}
