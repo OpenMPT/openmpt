@@ -4987,12 +4987,11 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 		// IT compatibility: see previous IT compatibility comment =)
 		if(m_playBehaviour[kITRetrigger]) chn.nPos = chn.nPosLo = 0;
 
-		if(offset && chn.pModSample != nullptr)
+		offset--;
+		if(offset >= 0 && offset <= static_cast<int>(CountOf(chn.pModSample->cues)) && chn.pModSample != nullptr)
 		{
-			chn.nLength = chn.pModSample->nLength;
-			offset--;
 			if(offset == 0) offset = chn.oldOffset;
-			else if(offset <= static_cast<int>(CountOf(chn.pModSample->cues))) offset = chn.oldOffset = chn.pModSample->cues[offset - 1];
+			else offset = chn.oldOffset = chn.pModSample->cues[offset - 1];
 			SampleOffset(chn, offset);
 		}
 	}
