@@ -48,6 +48,8 @@ struct InstrumentEnvelope
 	// returns value in range [0, rangeOut].
 	int32 GetValueFromPosition(int position, int32 rangeOut, int32 rangeIn = ENVELOPE_MAX) const;
 
+	// Ensure that ticks are ordered in increasing order and values are within the allowed range.
+	void FixEnvelope(uint8 maxValue = ENVELOPE_MAX);
 };
 
 // Instrument Struct
