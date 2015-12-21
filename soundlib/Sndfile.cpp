@@ -1541,6 +1541,8 @@ void CSoundFile::RecalculateSamplesPerTick()
 #ifndef MODPLUG_TRACKER
 	m_PlayState.m_nSamplesPerTick = Util::muldivr(m_PlayState.m_nSamplesPerTick, m_nTempoFactor, 65536);
 #endif // !MODPLUG_TRACKER
+	if(!m_PlayState.m_nSamplesPerTick)
+		m_PlayState.m_nSamplesPerTick = 1;
 }
 
 
@@ -1594,6 +1596,8 @@ uint32 CSoundFile::GetTickDuration(PlayState &playState) const
 	// when the user modifies the tempo, we do not really care about accurate tempo error accumulation
 	retval = Util::muldivr(retval, m_nTempoFactor, 65536);
 #endif // !MODPLUG_TRACKER
+	if(!retval)
+		retval  = 1;
 	return retval;
 }
 
