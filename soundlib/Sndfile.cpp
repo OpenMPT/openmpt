@@ -1567,7 +1567,9 @@ uint32 CSoundFile::GetTickDuration(PlayState &playState) const
 	case tempoModeModern:
 		{
 			double accurateBufferCount = static_cast<double>(m_MixerSettings.gdwMixingFreq) * (60.0 / playState.m_nMusicTempo.ToDouble() / (static_cast<double>(playState.m_nMusicSpeed * playState.m_nCurrentRowsPerBeat)));
-			const TempoSwing &swing = Patterns[playState.m_nPattern].HasTempoSwing() ? Patterns[playState.m_nPattern].GetTempoSwing() : m_tempoSwing;
+			const TempoSwing &swing = (Patterns.IsValidPat(playState.m_nPattern) && Patterns[playState.m_nPattern].HasTempoSwing())
+				? Patterns[playState.m_nPattern].GetTempoSwing()
+				: m_tempoSwing;
 			if(!swing.empty())
 			{
 				// Apply current row's tempo swing factor
