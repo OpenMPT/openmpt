@@ -126,6 +126,25 @@ int32 InstrumentEnvelope::GetValueFromPosition(int position, int32 rangeOut, int
 }
 
 
+void InstrumentEnvelope::FixEnvelope(uint8 maxValue)
+//--------------------------------------------------
+{
+	Ticks[0] = 0;
+	for(uint32 i = 1; i < nNodes; i++)
+	{
+		if(Ticks[i] < Ticks[i - 1])
+			Ticks[i] = Ticks[i - 1];
+		LimitMax(Values[i], maxValue);
+	}
+	LimitMax(nLoopEnd, nNodes);
+	LimitMax(nLoopStart, nLoopEnd);
+	LimitMax(nSustainEnd, nNodes);
+	LimitMax(nSustainStart, nSustainEnd);
+	if(nReleaseNode != ENV_RELEASE_NODE_UNSET)
+		LimitMax(nReleaseNode, nNodes);
+}
+
+
 ModInstrument::ModInstrument(SAMPLEINDEX sample)
 //----------------------------------------------
 {

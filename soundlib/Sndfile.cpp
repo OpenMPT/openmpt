@@ -271,11 +271,6 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		if(!ReadXM(file, loadFlags)
 		 && !ReadIT(file, loadFlags)
 		 && !ReadS3M(file, loadFlags)
-		 && !ReadITProject(file, loadFlags)
-#ifdef MODPLUG_TRACKER
-		// this makes little sense for a module player library
-		 && !ReadWav(file, loadFlags)
-#endif // MODPLUG_TRACKER
 		 && !ReadSTM(file, loadFlags)
 		 && !ReadMed(file, loadFlags)
 		 && !ReadMTM(file, loadFlags)
@@ -295,7 +290,10 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		 && !ReadPSM(file, loadFlags)
 		 && !ReadPSM16(file, loadFlags)
 		 && !ReadMT2(file, loadFlags)
+		 && !ReadITProject(file, loadFlags)
 #ifdef MODPLUG_TRACKER
+		 // this makes little sense for a module player library
+		 && !ReadWav(file, loadFlags)
 		 && !ReadMID(file, loadFlags)
 #endif // MODPLUG_TRACKER
 		 && !ReadGDM(file, loadFlags)
@@ -392,7 +390,24 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		if(sample.nGlobalVol > 64) sample.nGlobalVol = 64;
 	}
 	// Check invalid instruments
-	while ((m_nInstruments > 0) && (!Instruments[m_nInstruments])) m_nInstruments--;
+	INSTRUMENTINDEX maxInstr = 0;
+	for(INSTRUMENTINDEX i = 0; i <= m_nInstruments; i++)
+	{
+		if(Instruments[i] != nullptr)
+		{
+			maxInstr = i;
+#ifdef MODPLUG_TRACKER
+			const int32 range = ENVELOPE_MAX;
+#else
+			const int32 range = GetType() == MOD_TYPE_AMS2 ? uint8_max : ENVELOPE_MAX;
+#endif
+			Instruments[i]->VolEnv.FixEnvelope();
+			Instruments[i]->PanEnv.FixEnvelope();
+			Instruments[i]->PitchEnv.FixEnvelope(range);
+		}
+	}
+	m_nInstruments = maxInstr;
+
 	// Set default values
 	if (!m_nDefaultTempo.GetInt()) m_nDefaultTempo.Set(125);
 	if (!m_nDefaultSpeed) m_nDefaultSpeed = 6;
