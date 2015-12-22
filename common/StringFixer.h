@@ -145,19 +145,29 @@ namespace mpt { namespace String
 		{
 
 			// Copy null-terminated string, stopping at null.
-			dest.assign(src, std::find(src, src + srcSize, '\0'));
+			try
+			{
+				dest.assign(src, std::find(src, src + srcSize, '\0'));
+			} catch(MPTMemoryException)
+			{
+			}
 
 		} else if(mode == spacePadded || mode == spacePaddedNull)
 		{
 
-			// Copy string over.
-			dest.assign(src, src + srcSize);
+			try
+			{
+				// Copy string over.
+				dest.assign(src, src + srcSize);
 
-			// Convert null characters to spaces.
-			std::transform(dest.begin(), dest.end(), dest.begin(), detail::NullToSpace);
+				// Convert null characters to spaces.
+				std::transform(dest.begin(), dest.end(), dest.begin(), detail::NullToSpace);
 
-			// Trim trailing spaces.
-			dest = mpt::String::RTrim(dest);
+				// Trim trailing spaces.
+				dest = mpt::String::RTrim(dest);
+			} catch(MPTMemoryException)
+			{
+			}
 
 		}
 	}

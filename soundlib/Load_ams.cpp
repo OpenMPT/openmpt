@@ -31,7 +31,6 @@ static bool ReadAMSString(char (&destBuffer)[destSize], FileReader &file)
 //-----------------------------------------------------------------------
 {
 	const size_t length = file.ReadUint8();
-	destBuffer[0] = 0;
 	return file.ReadString<mpt::String::spacePadded>(destBuffer, length);
 }
 
