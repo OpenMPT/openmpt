@@ -397,9 +397,9 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		{
 			maxInstr = i;
 #ifdef MODPLUG_TRACKER
-			const int32 range = ENVELOPE_MAX;
+			const uint8 range = ENVELOPE_MAX;
 #else
-			const int32 range = GetType() == MOD_TYPE_AMS2 ? uint8_max : ENVELOPE_MAX;
+			const uint8 range = GetType() == MOD_TYPE_AMS2 ? uint8_max : ENVELOPE_MAX;
 #endif
 			Instruments[i]->VolEnv.FixEnvelope();
 			Instruments[i]->PanEnv.FixEnvelope();

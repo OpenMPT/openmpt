@@ -31,6 +31,7 @@ static bool ReadAMSString(char (&destBuffer)[destSize], FileReader &file)
 //-----------------------------------------------------------------------
 {
 	const size_t length = file.ReadUint8();
+	destBuffer[0] = 0;
 	return file.ReadString<mpt::String::spacePadded>(destBuffer, length);
 }
 
@@ -698,21 +699,12 @@ struct PACKED AMS2SampleHeader
 			mptSmp.uFlags = CHN_PANNING;
 		}
 
-		if(flags & smp16Bit)
-		{
-			mptSmp.uFlags.set(CHN_16BIT);
-		}
+		if(flags & smp16Bit) mptSmp.uFlags.set(CHN_16BIT);
 		if((flags & smpLoop) && mptSmp.nLoopStart < mptSmp.nLoopEnd)
 		{
 			mptSmp.uFlags.set(CHN_LOOP);
-			if(flags & smpBidiLoop)
-			{
-				mptSmp.uFlags.set(CHN_PINGPONGLOOP);
-			}
-			if(flags & smpReverse)
-			{
-				mptSmp.uFlags.set(CHN_REVERSE);
-			}
+			if(flags & smpBidiLoop) mptSmp.uFlags.set(CHN_PINGPONGLOOP);
+			if(flags & smpReverse) mptSmp.uFlags.set(CHN_REVERSE);
 		}
 	}
 };
