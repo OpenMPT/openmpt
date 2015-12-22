@@ -325,7 +325,7 @@ public:
 	}
 
 	// Returns raw stream data at cursor position.
-	// Should only be used if absolutely necessary, for example for sample reading.
+	// Should only be used if absolutely necessary, for example for sample reading, or when used with a small chunk of the file retrieved by ReadChunk().
 	FILEREADER_DEPRECATED const char *GetRawData() const
 	{
 		// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
@@ -646,58 +646,41 @@ public:
 
 	// Read a string of length srcSize into fixed-length char array destBuffer using a given read mode.
 	// The file cursor is advanced by "srcSize" bytes.
+	// Returns true if at least one byte could be read or 0 bytes were requested.
 	template<mpt::String::ReadWriteMode mode, off_t destSize>
 	bool ReadString(char (&destBuffer)[destSize], const off_t srcSize)
 	{
-		if(CanRead(srcSize) && srcSize > 0)
-		{
-			try
-			{
-				std::vector<char> tmp(srcSize);
-				DataContainer().Read(&tmp[0], streamPos, srcSize);
-				mpt::String::Read<mode, destSize>(destBuffer, &tmp[0], srcSize);
-			} catch(MPTMemoryException)
-			{
-			}
-			streamPos += srcSize;
-			return true;
-		} else
-		{
-			return (srcSize == 0);
-		}
+		FileReader source = ReadChunk(srcSize);	// Make sure the string is cached properly.
+		off_t realSrcSize = source.GetLength();	// In case fewer bytes are available
+		mpt::String::Read<mode, destSize>(destBuffer, source.GetRawData(), realSrcSize);
+		return (realSrcSize > 0 || srcSize == 0);
 	}
 
 	// Read a string of length srcSize into a std::string dest using a given read mode.
 	// The file cursor is advanced by "srcSize" bytes.
+	// Returns true if at least one byte could be read or 0 bytes were requested.
 	template<mpt::String::ReadWriteMode mode>
 	bool ReadString(std::string &dest, const off_t srcSize)
 	{
-		if(srcSize > 0 && CanRead(srcSize))
-		{
-			try
-			{
-				std::vector<char> tmp(srcSize);
-				DataContainer().Read(&tmp[0], streamPos, srcSize);
-				mpt::String::Read<mode>(dest, &tmp[0], srcSize);
-			} catch(MPTMemoryException)
-			{
-			}
-			streamPos += srcSize;
-			return true;
-		} else
-		{
-			return (srcSize == 0);
-		}
+		FileReader source = ReadChunk(srcSize);	// Make sure the string is cached properly.
+		off_t realSrcSize = source.GetLength();	// In case fewer bytes are available
+		mpt::String::Read<mode>(dest, source.GetRawData(), realSrcSize);
+		return (realSrcSize > 0 || srcSize == 0);
 	}
 
 	// Read a null-terminated string into a std::string
 	bool ReadNullString(std::string &dest, const off_t maxLength = std::numeric_limits<std::size_t>::max())
 	{
 		dest.clear();
-		char c;
-		while(Read(c) && c != 0 && dest.length() < maxLength)
+		try
 		{
-			dest += c;
+			char c;
+			while(Read(c) && c != 0 && dest.length() < maxLength)
+			{
+				dest += c;
+			}
+		} catch(MPTMemoryException)
+		{
 		}
 		return dest.length() != 0;
 	}
@@ -772,7 +755,13 @@ public:
 	bool ReadVectorLE(std::vector<T> &destVector, size_t destSize)
 	{
 		const off_t readSize = sizeof(T) * destSize;
-		destVector.resize(destSize);
+		try
+		{
+			destVector.resize(destSize);
+		} catch(MPTMemoryException)
+		{
+			return false;
+		}
 		if(CanRead(readSize))
 		{
 			for(std::size_t i = 0; i < destSize; ++i)
@@ -789,9 +778,15 @@ public:
 	// Compare a magic string with the current stream position.
 	// Returns true if they are identical and advances the file cursor by the the length of the "magic" string.
 	// Returns false if the string could not be found. The file cursor is not advanced in this case.
-	bool ReadMagic(const char *const magic)
+	template<size_t N>
+	bool ReadMagic(const char (&magic)[N])
 	{
-		const off_t magicLength = std::strlen(magic);
+		MPT_ASSERT(magic[N - 1] == 0);
+		return ReadMagic(magic, N - 1);
+	}
+
+	bool ReadMagic(const char *const magic, off_t magicLength)
+	{
 		if(CanRead(magicLength))
 		{
 			bool identical = true;
