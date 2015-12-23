@@ -112,7 +112,7 @@ protected:
 
 	virtual uint32 GetClassVersion() const {return GetVersion();}
 
-	virtual bool ProProcessUnserializationdata();
+	virtual bool ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize);
 
 
 //END PROTECTED VIRTUALS
@@ -165,8 +165,6 @@ private:
 	RATIOTYPE m_GroupRatio;
 
 	//<----Actual data members
-
-	mutable UNOTEINDEXTYPE m_SerHelperRatiotableSize;
 
 	static const std::string s_DerivedclassID;
 

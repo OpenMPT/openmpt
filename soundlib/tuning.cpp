@@ -402,14 +402,15 @@ CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
 	ssb.ReadItem(pTuning->m_StepMin, "RTI1");
 	ssb.ReadItem(pTuning->m_GroupSize, "RTI2");
 	ssb.ReadItem(pTuning->m_GroupRatio, "RTI3");
-	ssb.ReadItem(pTuning->m_SerHelperRatiotableSize, "RTI4");
+	UNOTEINDEXTYPE ratiotableSize = 0;
+	ssb.ReadItem(ratiotableSize, "RTI4");
 
 	// If reader status is ok and m_StepMin is somewhat reasonable, process data.
 	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) == 0 && pTuning->m_StepMin >= -300 && pTuning->m_StepMin <= 300)
 	{
 		EDITMASK temp = pTuning->GetEditMask();
 		pTuning->m_EditMask = EM_ALLOWALL; //Allowing all while processing data.
-		if (pTuning->ProProcessUnserializationdata())
+		if (pTuning->ProProcessUnserializationdata(ratiotableSize))
 		{
 #ifdef MODPLUG_TRACKER
 			Reporting::Error(("Processing loaded data for tuning \"" + pTuning->GetName() + "\" failed.").c_str(), "Tuning load failure");
@@ -432,19 +433,19 @@ CTuning* CTuningRTI::Deserialize(std::istream& iStrm)
 }
 
 
-bool CTuningRTI::ProProcessUnserializationdata()
-//----------------------------------------------
+bool CTuningRTI::ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize)
+//---------------------------------------------------------------------------
 {
 	if (m_GroupSize < 0) {m_GroupSize = 0; return true;}
 	if (m_RatioTable.size() > static_cast<size_t>(NOTEINDEXTYPE_MAX)) return true;
 	if (IsOfType(TT_GROUPGEOMETRIC))
 	{
-		if (m_SerHelperRatiotableSize < 1 || m_SerHelperRatiotableSize > NOTEINDEXTYPE_MAX) return true;
+		if (ratiotableSize < 1 || ratiotableSize > NOTEINDEXTYPE_MAX) return true;
 		if (GetType() == TT_GEOMETRIC)
-			return CTuning::CreateGeometric(GetGroupSize(), GetGroupRatio(), VRPAIR(m_StepMin, m_StepMin+m_SerHelperRatiotableSize-1));
+			return CTuning::CreateGeometric(GetGroupSize(), GetGroupRatio(), VRPAIR(m_StepMin, m_StepMin+ratiotableSize-1));
 		else
 		{
-			return CreateGroupGeometric(m_RatioTable, GetGroupRatio(), VRPAIR(m_StepMin, m_StepMin+m_SerHelperRatiotableSize-1), m_StepMin);
+			return CreateGroupGeometric(m_RatioTable, GetGroupRatio(), VRPAIR(m_StepMin, m_StepMin+ratiotableSize-1), m_StepMin);
 		}
 	}
 	return false;
@@ -501,8 +502,8 @@ CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(std::ostream& outStrm) 
 
 	if(tt == TT_GEOMETRIC || tt == TT_GROUPGEOMETRIC)
 	{	//For Groupgeometric this data is the number of ratios in ratiotable.
-		m_SerHelperRatiotableSize = static_cast<UNOTEINDEXTYPE>(m_RatioTable.size());
-		ssb.WriteItem(m_SerHelperRatiotableSize, "RTI4");
+		UNOTEINDEXTYPE ratiotableSize = static_cast<UNOTEINDEXTYPE>(m_RatioTable.size());
+		ssb.WriteItem(ratiotableSize, "RTI4");
 	}
 
 	//m_StepMin
