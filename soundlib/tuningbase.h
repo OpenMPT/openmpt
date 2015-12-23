@@ -227,9 +227,6 @@ protected:
 
 	TUNINGTYPE GetType() const {return m_TuningType;}
 
-	//This is appended to baseclassID in serialization with which objects are identified when loading.
-	virtual std::string GetDerivedClassID() const = 0;
-
 	//Return true if data loading failed, false otherwise.
 	virtual bool ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize) = 0;
 
