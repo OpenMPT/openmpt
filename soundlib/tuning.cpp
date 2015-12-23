@@ -549,7 +549,7 @@ void ReadRatioTable(std::istream& iStrm, std::vector<CTuningRTI::RATIOTYPE>& v, 
 {
 	uint64 val;
 	mpt::IO::ReadAdaptiveInt64LE(iStrm, val);
-	v.resize( static_cast<size_t>(MIN(val, 256))); // Read 256 vals at max.
+	v.resize( static_cast<size_t>(MIN(val, 256u))); // Read 256 vals at max.
 	for(size_t i = 0; i < v.size(); i++)
 	{
 		IEEE754binary32LE tmp(0.0f);

@@ -46,7 +46,7 @@ void ITEnvelope::ConvertToIT(const InstrumentEnvelope &mptEnv, uint8 envOffset, 
 	if(mptEnv.dwFlags[ENV_CARRY]) flags |= ITEnvelope::envCarry;
 
 	// Nodes and Loops
-	num = (uint8)MIN(mptEnv.nNodes, 25);
+	num = (uint8)MIN(mptEnv.nNodes, 25u);
 	lpb = (uint8)mptEnv.nLoopStart;
 	lpe = (uint8)mptEnv.nLoopEnd;
 	slb = (uint8)mptEnv.nSustainStart;
@@ -217,9 +217,9 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	mpt::String::Write<mpt::String::nullTerminated>(name, mptIns.name);
 
 	// Volume / Panning
-	fadeout = static_cast<uint16>(MIN(mptIns.nFadeOut >> 5, 256));
-	gbv = static_cast<uint8>(MIN(mptIns.nGlobalVol * 2, 128));
-	dfp = static_cast<uint8>(MIN(mptIns.nPan / 4, 64));
+	fadeout = static_cast<uint16>(MIN(mptIns.nFadeOut >> 5, 256u));
+	gbv = static_cast<uint8>(MIN(mptIns.nGlobalVol * 2, 128u));
+	dfp = static_cast<uint8>(MIN(mptIns.nPan / 4, 64u));
 	if(!mptIns.dwFlags[INS_SETPANNING]) dfp |= ITInstrument::ignorePanning;
 
 	// Random Variation
