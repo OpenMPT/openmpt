@@ -32,6 +32,10 @@ OPENMPT_NAMESPACE_BEGIN
 
 #define str_SequenceTruncationNote ("Module has sequence of length %1; it will be truncated to maximum supported length, %2.")
 
+
+const ORDERINDEX ModSequenceSet::s_nCacheSize = MAX_ORDERS;
+
+
 ModSequence::ModSequence(CSoundFile &rSf,
 						 PATTERNINDEX* pArray,
 						 ORDERINDEX nSize,

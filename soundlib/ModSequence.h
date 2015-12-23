@@ -203,13 +203,19 @@ public:
 	// Returns true if sequences were modified, false otherwise.
 	bool ConvertSubsongsToMultipleSequences();
 
-	static const ORDERINDEX s_nCacheSize = MAX_ORDERS;
+	static const ORDERINDEX s_nCacheSize;
 
 private:
 	void CopyCacheToStorage();
 	void CopyStorageToCache();
 
-	PATTERNINDEX m_Cache[s_nCacheSize];		// Local cache array.
+	// Array size should be s_nCacheSize.
+	// s_nCacheSize is defined out of line, because taking references to
+	// static const members is problematic for some clang and GCC versions
+	// otherwise.
+	// Defining s_nCacheSize out of line makes it unavailable for declaring
+	// an array.
+	PATTERNINDEX m_Cache[MAX_ORDERS];		// Local cache array.
 	std::vector<ModSequence> m_Sequences;	// Array of sequences.
 	SEQUENCEINDEX m_nCurrentSeq;			// Index of current sequence.
 };
