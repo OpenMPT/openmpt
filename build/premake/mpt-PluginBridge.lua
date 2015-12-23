@@ -24,7 +24,8 @@
    "../../pluginBridge/PluginBridge.manifest",
   }
   defines { "MODPLUG_TRACKER" }
-  flags { "SEH", "Unicode", "WinMain", "ExtraWarnings" }
+  exceptionhandling "SEH"
+  flags { "Unicode", "WinMain", "ExtraWarnings" }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   filter { "architecture:x86" }
    targetsuffix "32"
