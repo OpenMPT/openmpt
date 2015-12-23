@@ -1258,9 +1258,9 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	if(m_SongFlags[SONG_EXFILTERRANGE] && !compatibilityExport) itHeader.flags |= ITFileHeader::extendedFilterRange;
 
 	itHeader.globalvol = (uint8)(m_nDefaultGlobalVolume >> 1);
-	itHeader.mv = (uint8)MIN(m_nSamplePreAmp, 128);
-	itHeader.speed = (uint8)MIN(m_nDefaultSpeed, 255);
- 	itHeader.tempo = (uint8)MIN(m_nDefaultTempo.GetInt(), 255);  //Limit this one to 255, we save the real one as an extension below.
+	itHeader.mv = (uint8)MIN(m_nSamplePreAmp, 128u);
+	itHeader.speed = (uint8)MIN(m_nDefaultSpeed, 255u);
+ 	itHeader.tempo = (uint8)MIN(m_nDefaultTempo.GetInt(), 255u);  //Limit this one to 255, we save the real one as an extension below.
 	itHeader.sep = 128; // pan separation
 	// IT doesn't have a per-instrument Pitch Wheel Depth setting, so we just store the first non-zero PWD setting in the header.
 	for(INSTRUMENTINDEX ins = 1; ins < GetNumInstruments(); ins++)

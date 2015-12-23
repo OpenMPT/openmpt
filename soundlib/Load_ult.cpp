@@ -246,15 +246,15 @@ static int ReadULTEvent(ModCommand &m, FileReader &file)
 	{
 		uint32 off = ((param1 << 8) | param2) >> 6;
 		cmd1 = CMD_NONE;
-		param1 = (uint8)MIN(off, 0xFF);
+		param1 = (uint8)MIN(off, 0xFFu);
 	} else if(cmd1 == CMD_OFFSET)
 	{
 		uint32 off = param1 * 4;
-		param1 = (uint8)MIN(off, 0xFF);
+		param1 = (uint8)MIN(off, 0xFFu);
 	} else if(cmd2 == CMD_OFFSET)
 	{
 		uint32 off = param2 * 4;
-		param2 = (uint8)MIN(off, 0xFF);
+		param2 = (uint8)MIN(off, 0xFFu);
 	} else if(cmd1 == cmd2)
 	{
 		// don't try to figure out how ultratracker does this, it's quite random

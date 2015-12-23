@@ -739,7 +739,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 		// Song Comments (null-terminated)
 		uint32 annotxt = BigEndian(pmex->annotxt);
 		uint32 annolen = BigEndian(pmex->annolen);
-		annolen = MIN(annolen, MED_MAX_COMMENT_LENGTH); //Thanks to Luigi Auriemma for pointing out an overflow risk
+		annolen = std::min<uint32>(annolen, MED_MAX_COMMENT_LENGTH); //Thanks to Luigi Auriemma for pointing out an overflow risk
 		if ((annotxt) && (annolen) && (annolen <= dwMemLength) && (annotxt <= dwMemLength - annolen) )
 		{
 			m_songMessage.Read(lpStream + annotxt, annolen - 1, SongMessage::leAutodetect);
