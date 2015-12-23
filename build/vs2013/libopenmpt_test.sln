@@ -1,10 +1,6 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt_test", "libopenmpt_test.vcxproj", "{0A313F63-131E-46A0-931D-23C3A3D488F2}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C} = {B5E0C06B-8121-426A-8FFB-4293ECAAE29C}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "miniz", "..\vs2013-ext\miniz.vcxproj", "{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}"
 EndProject

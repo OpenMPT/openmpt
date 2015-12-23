@@ -52,7 +52,8 @@
 	pchheader "stdafx.h"
 	pchsource "../../common/stdafx.cpp"
   defines { "MODPLUG_TRACKER" }
-  flags { "MFC", "SEH", "ExtraWarnings", "WinMain" }
+  exceptionhandling "SEH"
+  flags { "MFC", "ExtraWarnings", "WinMain" }
   links {
    "UnRAR",
    "zlib",
