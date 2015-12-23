@@ -27,8 +27,6 @@ typedef CTuningRTI::UNOTEINDEXTYPE UNOTEINDEXTYPE;
 typedef CTuningRTI::STEPINDEXTYPE STEPINDEXTYPE;
 typedef CTuningRTI::USTEPINDEXTYPE USTEPINDEXTYPE;
 
-const std::string CTuningRTI::s_DerivedclassID = "RTI";
-
 namespace CTuningS11n
 {
 	void ReadStr(std::istream& iStrm, std::string& str, const size_t);

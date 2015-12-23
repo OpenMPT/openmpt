@@ -130,8 +130,6 @@ protected:
 	//For example GetRefNote(-1) is to return note :'groupsize-1'.
 	NOTEINDEXTYPE GetRefNote(NOTEINDEXTYPE note) const;
 
-	virtual std::string GetDerivedClassID() const {return s_DerivedclassID;}
-
 private:
 	//PRIVATE METHODS:
 
@@ -165,9 +163,6 @@ private:
 	RATIOTYPE m_GroupRatio;
 
 	//<----Actual data members
-
-	static const std::string s_DerivedclassID;
-
 
 }; //End: CTuningRTI declaration.
 
