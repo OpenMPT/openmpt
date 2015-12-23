@@ -231,7 +231,7 @@ protected:
 	virtual std::string GetDerivedClassID() const = 0;
 
 	//Return true if data loading failed, false otherwise.
-	virtual bool ProProcessUnserializationdata() = 0;
+	virtual bool ProProcessUnserializationdata(UNOTEINDEXTYPE ratiotableSize) = 0;
 
 
 //END PROTECTED INTERFACE
