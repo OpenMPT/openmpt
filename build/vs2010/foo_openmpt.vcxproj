@@ -104,23 +104,23 @@
     <ClCompile Include="..\..\libopenmpt\foo_openmpt.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\include\foobar2000sdk\foobar2000\foobar2000_component_client\foobar2000_component_client.vcxproj">
-      <Project>{71AD2674-065B-48F5-B8B0-E1F9D3892081}</Project>
-    </ProjectReference>
     <ProjectReference Include="libopenmpt.vcxproj">
       <Project>{9C5101EF-3E20-4558-809B-277FDD50E878}</Project>
     </ProjectReference>
     <ProjectReference Include="..\vs2010-ext\miniz.vcxproj">
       <Project>{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\include\foobar2000sdk\foobar2000\SDK\foobar2000_SDK.vcxproj">
-      <Project>{E8091321-D79D-4575-86EF-064EA1A4A20D}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\..\include\foobar2000sdk\pfc\pfc.vcxproj">
       <Project>{EBFFFB4E-261D-44D3-B89C-957B31A0BF9C}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\include\foobar2000sdk\foobar2000\SDK\foobar2000_SDK.vcxproj">
+      <Project>{E8091321-D79D-4575-86EF-064EA1A4A20D}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\include\foobar2000sdk\foobar2000\helpers\foobar2000_sdk_helpers.vcxproj">
       <Project>{EE47764E-A202-4F85-A767-ABDAB4AFF35F}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\include\foobar2000sdk\foobar2000\foobar2000_component_client\foobar2000_component_client.vcxproj">
+      <Project>{71AD2674-065B-48F5-B8B0-E1F9D3892081}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
