@@ -1,12 +1,13 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xmp-openmpt", "xmp-openmpt.vcxproj", "{AEA14F53-ADB0-45E5-9823-81F4F36886C2}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt", "libopenmpt.vcxproj", "{9C5101EF-3E20-4558-809B-277FDD50E878}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "miniz", "..\vs2012-ext\miniz.vcxproj", "{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pugixml", "..\vs2012-ext\pugixml.vcxproj", "{07B89124-7C71-42CC-81AB-62B09BB61F9B}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xmp-openmpt", "xmp-openmpt.vcxproj", "{AEA14F53-ADB0-45E5-9823-81F4F36886C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,6 +15,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Debug|Win32.Build.0 = Debug|Win32
+		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Release|Win32.ActiveCfg = Release|Win32
+		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Release|Win32.Build.0 = Release|Win32
 		{9C5101EF-3E20-4558-809B-277FDD50E878}.Debug|Win32.ActiveCfg = Debug|Win32
 		{9C5101EF-3E20-4558-809B-277FDD50E878}.Debug|Win32.Build.0 = Debug|Win32
 		{9C5101EF-3E20-4558-809B-277FDD50E878}.Release|Win32.ActiveCfg = Release|Win32
@@ -26,10 +31,6 @@ Global
 		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Debug|Win32.Build.0 = Debug|Win32
 		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Release|Win32.ActiveCfg = Release|Win32
 		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Release|Win32.Build.0 = Release|Win32
-		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Debug|Win32.ActiveCfg = Debug|Win32
-		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Debug|Win32.Build.0 = Debug|Win32
-		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Release|Win32.ActiveCfg = Release|Win32
-		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

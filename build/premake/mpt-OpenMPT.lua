@@ -53,6 +53,7 @@
 	pchsource "../../common/stdafx.cpp"
   defines { "MODPLUG_TRACKER" }
   exceptionhandling "SEH"
+  largeaddressaware ( true )
   flags { "MFC", "ExtraWarnings", "WinMain" }
   links {
    "UnRAR",

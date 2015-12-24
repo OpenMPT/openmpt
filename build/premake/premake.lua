@@ -6,10 +6,10 @@
 
 MPT_PREMAKE_VERSION = ""
 
-if _PREMAKE_VERSION == "5.0.0-alpha6" then
+if _PREMAKE_VERSION == "5.0.0-alpha7" then
  MPT_PREMAKE_VERSION = "5.0"
 else
- print "Premake 5.0.0-alpha6 required"
+ print "Premake 5.0.0-alpha7 required"
  os.exit(1)
 end
 
@@ -73,10 +73,6 @@ function postprocess_vs2010_nonxcompat (filename)
 	replace_in_file(filename, "    </Link>\n", "      <DataExecutionPrevention>false</DataExecutionPrevention>\n    </Link>\n")
 end
 
-function postprocess_vs2010_largeaddress (filename)
-	replace_in_file(filename, "    </Link>\n", "      <LargeAddressAware>true</LargeAddressAware>\n    </Link>\n")
-end
-
 function postprocess_vs2010_disabledpiaware (filename)
 	replace_in_file(filename, "%%%(AdditionalManifestFiles%)</AdditionalManifestFiles>\n", "%%%(AdditionalManifestFiles%)</AdditionalManifestFiles>\n      <EnableDPIAwareness>false</EnableDPIAwareness>\n")
 end
@@ -103,10 +99,8 @@ newaction {
   postprocess_vs2010_main("build/vs2010/libopenmpt_example_c_unsafe.vcxproj")
   postprocess_vs2010_main("build/vs2010/libopenmpt_example_cxx.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2010/OpenMPT.vcxproj")
-  postprocess_vs2010_largeaddress("build/vs2010/OpenMPT.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2010/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2010/PluginBridge.vcxproj")
-  postprocess_vs2010_largeaddress("build/vs2010/PluginBridge.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2010/PluginBridge.vcxproj")
   
   postprocess_vs2010_main("build/vs2012/libopenmpt_test.vcxproj")
@@ -116,10 +110,8 @@ newaction {
   postprocess_vs2010_main("build/vs2012/libopenmpt_example_c_unsafe.vcxproj")
   postprocess_vs2010_main("build/vs2012/libopenmpt_example_cxx.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2012/OpenMPT.vcxproj")
-  postprocess_vs2010_largeaddress("build/vs2012/OpenMPT.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2012/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2012/PluginBridge.vcxproj")
-  postprocess_vs2010_largeaddress("build/vs2012/PluginBridge.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2012/PluginBridge.vcxproj")
 	
   postprocess_vs2010_main("build/vs2013/libopenmpt_test.vcxproj")
@@ -129,10 +121,8 @@ newaction {
   postprocess_vs2010_main("build/vs2013/libopenmpt_example_c_unsafe.vcxproj")
   postprocess_vs2010_main("build/vs2013/libopenmpt_example_cxx.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2013/OpenMPT.vcxproj")
-  postprocess_vs2010_largeaddress("build/vs2013/OpenMPT.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2013/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2013/PluginBridge.vcxproj")
-  postprocess_vs2010_largeaddress("build/vs2013/PluginBridge.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2013/PluginBridge.vcxproj")
 
   postprocess_vs2010_main("build/vs2015/libopenmpt_test.vcxproj")
@@ -142,10 +132,8 @@ newaction {
   postprocess_vs2010_main("build/vs2015/libopenmpt_example_c_unsafe.vcxproj")
   postprocess_vs2010_main("build/vs2015/libopenmpt_example_cxx.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2015/OpenMPT.vcxproj")
-  postprocess_vs2010_largeaddress("build/vs2015/OpenMPT.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2015/OpenMPT.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2015/PluginBridge.vcxproj")
-  postprocess_vs2010_largeaddress("build/vs2015/PluginBridge.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2015/PluginBridge.vcxproj")
 
  end
