@@ -140,7 +140,7 @@ goto error
 call :download_and_unpack "winamp"    "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe"              "WA5.55_SDK.exe"                     "."          || goto error
 call :download_and_unpack "xmplay"    "http://us.un4seen.com/files/xmp-sdk.zip"                                    "xmp-sdk.zip"                        "."          || goto error
 call :download_and_unpack "ASIOSDK2"  "https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                     "asiosdk2.3.zip"                     "ASIOSDK2.3" || goto error
-call :download_and_unpack "vstsdk2.4" "https://www.steinberg.net/sdk_downloads/vstsdk360_22_11_2013_build_100.zip" "vstsdk360_22_11_2013_build_100.zip" "VST3 SDK"   || goto error
+call :download_and_unpack "vstsdk2.4" "https://www.steinberg.net/sdk_downloads/vstsdk365_12_11_2015_build_67.zip"  "vstsdk365_12_11_2015_build_67.zip"  "VST3 SDK"   || goto error
 
 goto ok
 
