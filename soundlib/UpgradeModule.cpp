@@ -323,7 +323,7 @@ void CSoundFile::UpgradeModule()
 		}
 	}
 
-	// Starting from OpenMPT 1.22.07.19, FT2-style panning was applied compatible mix mode.
+	// Starting from OpenMPT 1.22.07.19, FT2-style panning was applied in compatible mix mode.
 	// Starting from OpenMPT 1.23.01.04, FT2-style panning has its own mix mode instead.
 	if(GetType() == MOD_TYPE_XM)
 	{
@@ -357,6 +357,16 @@ void CSoundFile::UpgradeModule()
 					Instruments[i]->nVolSwing = 0;
 				}
 			}
+		}
+	}
+
+	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
+	{
+		// Even after fixing it in OpenMPT 1.18, instrument PPS was only half the depth.
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr)
+		{
+			ModInstrument *ins = Instruments[i];
+			ins->nPPS = (ins->nPPS + (ins->nPPS >= 0 ? 1 : -1)) / 2;
 		}
 	}
 

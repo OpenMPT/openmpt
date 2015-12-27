@@ -1738,7 +1738,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		VERIFY_EQUAL_NONCONT(pIns->nPan, 64);
 		VERIFY_EQUAL_NONCONT(pIns->dwFlags, INS_SETPANNING);
 
-		VERIFY_EQUAL_NONCONT(pIns->nPPS, 16);
+		VERIFY_EQUAL_NONCONT(pIns->nPPS, 8);
 		VERIFY_EQUAL_NONCONT(pIns->nPPC, (NOTE_MIDDLEC - NOTE_MIN) + 6);	// F#5
 
 		VERIFY_EQUAL_NONCONT(pIns->nVolRampUp, 1200);
