@@ -334,6 +334,8 @@ version:1
 9:1826:0:9:5		//Select next envelope point: TAB (KeyDown|KeyHold)
 9:1821:0:37:5		//Move envelope point left: LEFT (KeyDown|KeyHold)
 9:1822:0:39:5		//Move envelope point right: RIGHT (KeyDown|KeyHold)
+9:1960:1:37:5		//Move envelope point left (Coarse): Shift+LEFT (KeyDown|KeyHold)
+9:1961:1:39:5		//Move envelope point right (Coarse): Shift+RIGHT (KeyDown|KeyHold)
 9:1823:0:38:5		//Move envelope point up: UP (KeyDown|KeyHold)
 9:1834:0:33:5		//Move envelope point up (big step): PGUP (KeyDown|KeyHold)
 9:1824:0:40:5		//Move envelope point down: DOWN (KeyDown|KeyHold)

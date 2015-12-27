@@ -107,7 +107,7 @@ protected:
 	bool EnvSetCarry(bool enable) const {return EnvSetFlag(ENV_CARRY, enable);};
 
 	// Misc.
-	bool EnvSetValue(int nPoint, int nTick, int nValue, bool moveTail = false);
+	bool EnvSetValue(int nPoint, int32 nTick = int32_min, int32 nValue = int32_min, bool moveTail = false);
 	bool CanMovePoint(UINT envPoint, int step);
 
 	// Set loop points
@@ -126,8 +126,8 @@ protected:
 
 	// Keyboard envelope control
 	void EnvKbdSelectPoint(DragPoints point);
-	void EnvKbdMovePointLeft();
-	void EnvKbdMovePointRight();
+	void EnvKbdMovePointLeft(int stepsize);
+	void EnvKbdMovePointRight(int stepsize);
 	void EnvKbdMovePointVertical(int stepsize);
 	void EnvKbdInsertPoint();
 	void EnvKbdRemovePoint();

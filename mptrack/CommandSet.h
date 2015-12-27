@@ -634,6 +634,8 @@ enum CommandID
 	kcInstrumentEnvelopePointNext,
 	kcInstrumentEnvelopePointMoveLeft,
 	kcInstrumentEnvelopePointMoveRight,
+	kcInstrumentEnvelopePointMoveLeftCoarse,
+	kcInstrumentEnvelopePointMoveRightCoarse,
 	kcInstrumentEnvelopePointMoveUp,
 	kcInstrumentEnvelopePointMoveUp8,
 	kcInstrumentEnvelopePointMoveDown,
