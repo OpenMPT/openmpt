@@ -136,12 +136,13 @@ void InstrumentEnvelope::FixEnvelope(uint8 maxValue)
 			Ticks[i] = Ticks[i - 1];
 		LimitMax(Values[i], maxValue);
 	}
-	LimitMax(nLoopEnd, nNodes);
+	STATIC_ASSERT(MAX_ENVPOINTS <= 255);
+	LimitMax(nLoopEnd, static_cast<uint8>(nNodes));
 	LimitMax(nLoopStart, nLoopEnd);
-	LimitMax(nSustainEnd, nNodes);
+	LimitMax(nSustainEnd, static_cast<uint8>(nNodes));
 	LimitMax(nSustainStart, nSustainEnd);
 	if(nReleaseNode != ENV_RELEASE_NODE_UNSET)
-		LimitMax(nReleaseNode, nNodes);
+		LimitMax(nReleaseNode, static_cast<uint8>(nNodes));
 }
 
 
