@@ -301,8 +301,8 @@ UINT CViewInstrument::EnvGetValue(int nPoint) const
 }
 
 
-bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue, bool moveTail)
-//---------------------------------------------------------------------------------
+bool CViewInstrument::EnvSetValue(int nPoint, int32 nTick, int32 nValue, bool moveTail)
+//-------------------------------------------------------------------------------------
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr || nPoint < 0) return false;
@@ -339,11 +339,14 @@ bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue, bool moveTa
 			}
 		}
 		const int maxVal = (GetDocument()->GetModType() != MOD_TYPE_XM || m_nEnv != ENV_PANNING) ? 64 : 63;
-		Limit(nValue, 0, maxVal);
-		if(nValue != envelope->Values[nPoint])
+		if(nValue != int32_min)
 		{
-			envelope->Values[nPoint] = (uint8)nValue;
-			ok = true;
+			Limit(nValue, 0, maxVal);
+			if(nValue != envelope->Values[nPoint])
+			{
+				envelope->Values[nPoint] = (uint8)nValue;
+				ok = true;
+			}
 		}
 	}
 
@@ -2242,6 +2245,7 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 
 	CModDoc *pModDoc = GetDocument();
 	if(!pModDoc) return NULL;
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
@@ -2269,8 +2273,10 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		case kcInstrumentEnvelopeSelectSustainEnd:		EnvKbdSelectPoint(ENV_DRAGSUSTAINEND); return wParam;
 		case kcInstrumentEnvelopePointPrev:				EnvKbdSelectPoint(ENV_DRAGPREVIOUS); return wParam;
 		case kcInstrumentEnvelopePointNext:				EnvKbdSelectPoint(ENV_DRAGNEXT); return wParam;
-		case kcInstrumentEnvelopePointMoveLeft:			EnvKbdMovePointLeft(); return wParam;
-		case kcInstrumentEnvelopePointMoveRight:		EnvKbdMovePointRight(); return wParam;
+		case kcInstrumentEnvelopePointMoveLeft:			EnvKbdMovePointLeft(1); return wParam;
+		case kcInstrumentEnvelopePointMoveRight:		EnvKbdMovePointRight(1); return wParam;
+		case kcInstrumentEnvelopePointMoveLeftCoarse:	EnvKbdMovePointLeft(sndFile.m_PlayState.m_nCurrentRowsPerBeat * sndFile.m_PlayState.m_nMusicSpeed); return wParam;
+		case kcInstrumentEnvelopePointMoveRightCoarse:	EnvKbdMovePointRight(sndFile.m_PlayState.m_nCurrentRowsPerBeat * sndFile.m_PlayState.m_nMusicSpeed); return wParam;
 		case kcInstrumentEnvelopePointMoveUp:			EnvKbdMovePointVertical(1); return wParam;
 		case kcInstrumentEnvelopePointMoveDown:			EnvKbdMovePointVertical(-1); return wParam;
 		case kcInstrumentEnvelopePointMoveUp8:			EnvKbdMovePointVertical(8); return wParam;
@@ -2374,8 +2380,8 @@ void CViewInstrument::EnvKbdSelectPoint(DragPoints point)
 }
 
 
-void CViewInstrument::EnvKbdMovePointLeft()
-//-----------------------------------------
+void CViewInstrument::EnvKbdMovePointLeft(int stepsize)
+//-----------------------------------------------------
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr) return;
@@ -2404,18 +2410,18 @@ void CViewInstrument::EnvKbdMovePointLeft()
 	} else
 	{
 		// Move envelope node
-		if(!IsDragItemEnvPoint()) return;
-		if(m_nDragItem == 1 || !CanMovePoint(m_nDragItem - 1, -1))
+		if(!IsDragItemEnvPoint() || m_nDragItem <= 1)
 			return;
-		pEnv->Ticks[m_nDragItem - 1]--;
+		if(!EnvSetValue(m_nDragItem - 1, pEnv->Ticks[m_nDragItem - 1] - stepsize))
+			return;
 	}
 	UpdateIndicator();
 	SetModified(InstrumentHint().Envelope(), true);
 }
 
 
-void CViewInstrument::EnvKbdMovePointRight()
-//------------------------------------------
+void CViewInstrument::EnvKbdMovePointRight(int stepsize)
+//------------------------------------------------------
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr) return;
@@ -2444,10 +2450,10 @@ void CViewInstrument::EnvKbdMovePointRight()
 	} else
 	{
 		// Move envelope node
-		if(!IsDragItemEnvPoint()) return;
-		if(m_nDragItem == 1 || !CanMovePoint(m_nDragItem - 1, 1))
+		if(!IsDragItemEnvPoint() || m_nDragItem <= 1)
 			return;
-		pEnv->Ticks[m_nDragItem - 1]++;
+		if(!EnvSetValue(m_nDragItem - 1, pEnv->Ticks[m_nDragItem - 1] + stepsize))
+			return;
 	}
 	UpdateIndicator();
 	SetModified(InstrumentHint().Envelope(), true);
@@ -2460,7 +2466,7 @@ void CViewInstrument::EnvKbdMovePointVertical(int stepsize)
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	int val = pEnv->Values[m_nDragItem - 1] + stepsize;
-	if(EnvSetValue(m_nDragItem - 1, -1, val, false))
+	if(EnvSetValue(m_nDragItem - 1, int32_min, val, false))
 	{
 		UpdateIndicator();
 		SetModified(InstrumentHint().Envelope(), true);
@@ -2474,8 +2480,8 @@ void CViewInstrument::EnvKbdInsertPoint()
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr) return;
 	if(!IsDragItemEnvPoint()) m_nDragItem = pEnv->nNodes;
-	WORD newTick = pEnv->Ticks[pEnv->nNodes - 1] + 4;	// if last point is selected: add point after last point
-	BYTE newVal = pEnv->Values[pEnv->nNodes - 1];
+	uint16 newTick = pEnv->Ticks[pEnv->nNodes - 1] + 4;	// if last point is selected: add point after last point
+	uint8 newVal = pEnv->Values[pEnv->nNodes - 1];
 	// if some other point is selected: interpolate between this and next point (if there's room between them)
 	if(m_nDragItem < pEnv->nNodes && (pEnv->Ticks[m_nDragItem] - pEnv->Ticks[m_nDragItem - 1] > 1))
 	{

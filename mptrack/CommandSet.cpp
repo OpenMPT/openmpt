@@ -695,6 +695,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcInstrumentEnvelopeSelectLoopEnd, 1957, _T("Select Envelope Loop End"));
 	DefineKeyCommand(kcInstrumentEnvelopeSelectSustainStart, 1958, _T("Select Envelope Sustain Start"));
 	DefineKeyCommand(kcInstrumentEnvelopeSelectSustainEnd, 1959, _T("Select Envelope Sustain End"));
+	DefineKeyCommand(kcInstrumentEnvelopePointMoveLeftCoarse, 1960, _T("Move envelope point left (Coarse)"));
+	DefineKeyCommand(kcInstrumentEnvelopePointMoveRightCoarse, 1961, _T("Move envelope point right (Coarse)"));
 
 	// Add new key commands here.
 
