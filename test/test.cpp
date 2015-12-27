@@ -2175,6 +2175,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
+			GetrSoundFile(sndFileContainer).m_dwLastSavedWithVersion = MptVersion::num;
 			SaveIT(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.mptm"));
 		#endif
 
@@ -2210,6 +2211,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
+			GetrSoundFile(sndFileContainer).m_dwLastSavedWithVersion = MptVersion::num;
 			SaveXM(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.xm"));
 		#endif
 
@@ -2237,6 +2239,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
+			GetrSoundFile(sndFileContainer).m_dwLastSavedWithVersion = MptVersion::num;
 			SaveS3M(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.s3m"));
 		#endif
 
