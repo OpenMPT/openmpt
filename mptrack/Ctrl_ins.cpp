@@ -397,8 +397,8 @@ void CNoteMapWnd::OnMapCopyNote()
 	if (pIns)
 	{
 		bool bModified = false;
-		BYTE n = pIns->NoteMap[m_nNote];
-		for (NOTEINDEXTYPE i = 0; i < CountOf(pIns->NoteMap); i++) if (pIns->NoteMap[i] != n)
+		uint8 n = pIns->NoteMap[m_nNote];
+		for (size_t i = 0; i < CountOf(pIns->NoteMap); i++) if (pIns->NoteMap[i] != n)
 		{
 			pIns->NoteMap[i] = n;
 			bModified = true;
@@ -623,7 +623,7 @@ void CNoteMapWnd::EnterNote(UINT note)
 			}
 			if (bOk)
 			{
-				PlayNote(m_nNote + 1);
+				PlayNote(m_nNote);
 				//SetCurrentNote(m_nNote+1);
 			}
 
@@ -655,7 +655,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 				pIns->Keyboard[m_nNote] = static_cast<SAMPLEINDEX>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
 				InvalidateRect(NULL, FALSE);
-				PlayNote(m_nNote+1);
+				PlayNote(m_nNote);
 			}
 
 			if (c == ' ')
@@ -765,7 +765,7 @@ void CNoteMapWnd::PlayNote(int note)
 //----------------------------------
 {
 	if(m_nPlayingNote >= 0) return; //no polyphony in notemap window
-	m_modDoc.PlayNote(note, m_nInstrument, 0, false);
+	m_modDoc.PlayNote(note + NOTE_MIN, m_nInstrument, 0, false);
 	m_nPlayingNote = note;
 }
 
@@ -1049,7 +1049,7 @@ BOOL CCtrlInstruments::SetCurrentInstrument(UINT nIns, BOOL bUpdNum)
 	LockControls();
 	if ((m_nInstrument != nIns) || (!m_bInitialized))
 	{
-		m_nInstrument = nIns;
+		m_nInstrument = static_cast<INSTRUMENTINDEX>(nIns);
 		m_NoteMap.SetCurrentInstrument(m_nInstrument);
 		UpdateView(InstrumentHint(m_nInstrument).Info().Envelope(), NULL);
 	} else
@@ -1148,7 +1148,7 @@ LRESULT CCtrlInstruments::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 			const DRAGONDROP *pDropInfo = (const DRAGONDROP *)lParam;
 			CSoundFile *pSndFile = (CSoundFile *)(pDropInfo->lDropParam);
 			if (pDropInfo->pModDoc) pSndFile = pDropInfo->pModDoc->GetSoundFile();
-			if (pSndFile) return OpenInstrument(*pSndFile, pDropInfo->dwDropItem);
+			if (pSndFile) return OpenInstrument(*pSndFile, static_cast<INSTRUMENTINDEX>(pDropInfo->dwDropItem));
 		}
 		break;
 
@@ -1669,7 +1669,7 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 			{
 				velocityStyle.EnableWindow(FALSE);
 				m_CbnPluginVolumeHandling.EnableWindow(FALSE);
-				_tcscpy(pszText, ("To enable, clear Plugin volume command bug emulation flag from Song Properties"));
+				_tcscpy(pszText, _T("To enable, clear Plugin volume command bug emulation flag from Song Properties"));
 				return TRUE;
 			} else
 			{
@@ -2158,7 +2158,7 @@ void CCtrlInstruments::OnMCHChanged()
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if(!IsLocked() && pIns)
 	{
-		uint8 ch = m_CbnMidiCh.GetItemData(m_CbnMidiCh.GetCurSel());
+		uint8 ch = static_cast<uint8>(m_CbnMidiCh.GetItemData(m_CbnMidiCh.GetCurSel()));
 		if(pIns->nMidiChannel != ch)
 		{
 			pIns->nMidiChannel = ch;
@@ -2455,10 +2455,9 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 			if (pSlider == &m_SliderAttack)
 			{
 				n = m_SliderAttack.GetPos();
-				int newRamp = n; //? MAX_ATTACK_LENGTH - n : 0;
-				if(pIns->nVolRampUp != newRamp)
+				if(pIns->nVolRampUp != n)
 				{
-					pIns->nVolRampUp = newRamp;
+					pIns->nVolRampUp = n;
 					SetDlgItemInt(IDC_EDIT2,n);
 					SetModified(InstrumentHint().Info(), false);
 				}
