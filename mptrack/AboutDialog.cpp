@@ -102,7 +102,7 @@ void CRippleBitmap::OnMouseMove(UINT nFlags, CPoint point)
 	// control.
 	// Avoid hiding the mouse cursor on Wine. Interferring with the users input
 	// methods is an absolute no-go.
-	if(mpt::Windows::Version::IsWine())
+	if(mpt::Windows::IsWine())
 	{
 		return;
 	}
@@ -401,7 +401,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			{
 				text += MPT_USTRING("Generic without CPUID") + lf;
 			}
-			text += MPT_UFORMAT("Operating System: %1", mpt::Windows::Version::GetName()) + lf;
+			text += MPT_UFORMAT("Operating System: %1", mpt::Windows::Version::Current().GetName()) + lf;
 			text += lf;
 			text += MPT_UFORMAT("OpenMPT Path%2: %1", theApp.GetAppDirPath(), theApp.IsPortableMode() ? MPT_USTRING(" (portable)") : MPT_USTRING("")) + lf;
 			text += MPT_UFORMAT("Settings%2: %1", theApp.GetConfigFileName(), theApp.IsPortableMode() ? MPT_USTRING(" (portable)") : MPT_USTRING("")) + lf;

@@ -38,6 +38,8 @@ class CPortaudioDevice: public SoundDevice::Base
 
 protected:
 
+	mpt::Windows::Version m_WindowsVersion;
+
 	PaDeviceIndex m_DeviceIndex;
 	PaHostApiTypeId m_HostApiType;
 	PaStreamParameters m_StreamParameters;

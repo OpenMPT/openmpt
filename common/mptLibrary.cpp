@@ -90,12 +90,14 @@ public:
 		: hModule(NULL)
 	{
 
+		mpt::Windows::Version WindowsVersion = mpt::Windows::Version::Current();
+
 		// Check for KB2533623:
 		bool hasKB2533623 = false;
-		if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win8))
+		if(WindowsVersion.IsAtLeast(mpt::Windows::Version::Win8))
 		{
 			hasKB2533623 = true;
-		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
+		} else if(WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista))
 		{
 			HMODULE hKernel32DLL = LoadLibraryW(L"kernel32.dll");
 			if(hKernel32DLL)

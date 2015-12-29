@@ -45,8 +45,8 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 	// Icons with alpha transparency screw up in Windows 2000 and older as well as Wine 1.4 and older.
 	// They all support 1-bit transparency, though, so we pre-multiply all pixels with the default button face colour and create a transparency mask.
 	// Additionally, since we create a bitmap that fits the device's bit depth, we apply this fix when using a bit depth that doesn't have an alpha channel.
-	if(mpt::Windows::Version::IsBefore(mpt::Windows::Version::WinXP)
-		|| mpt::Windows::Version::IsWine()
+	if(mpt::Windows::Version::Current().IsBefore(mpt::Windows::Version::WinXP)
+		|| mpt::Windows::IsWine()
 		|| GetDeviceCaps(dc->GetSafeHdc(), BITSPIXEL) * GetDeviceCaps(dc->GetSafeHdc(), PLANES) < 32)
 	{
 		PNG::Bitmap bitmapMask(bitmap->width, bitmap->height);

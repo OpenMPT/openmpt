@@ -2906,7 +2906,7 @@ public:
 	}
 	virtual bool DoInitialize()
 	{
-		if(!mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win7))
+		if(!mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::Win7))
 		{
 			return false;
 		}

@@ -39,6 +39,7 @@ static const std::size_t WAVEOUT_MAXBUFFERSIZE = 16384; // fits in int16
 CWaveDevice::CWaveDevice(SoundDevice::Info info)
 //----------------------------------------------
 	: CSoundDeviceWithThread(info)
+	, m_WindowsVersion(mpt::Windows::Version::Current())
 {
 	MPT_TRACE();
 	m_ThreadWakeupEvent;
@@ -83,10 +84,10 @@ SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = false;
 	caps.ExclusiveModeDescription = MPT_USTRING("Use direct mode");
-	if(mpt::Windows::Version::IsWine())
+	if(mpt::Windows::IsWine())
 	{
 		caps.DefaultSettings.sampleFormat = SampleFormatInt16;
-	} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
+	} else if(m_WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista))
 	{
 		caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
 	} else
@@ -204,7 +205,7 @@ bool CWaveDevice::InternalOpen()
 	}
 	SetWakeupEvent(m_ThreadWakeupEvent);
 	SetWakeupInterval(m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond());
-	m_Flags.NeedsClippedFloat = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
+	m_Flags.NeedsClippedFloat = m_WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista);
 	return true;
 }
 

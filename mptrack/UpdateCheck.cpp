@@ -418,7 +418,7 @@ void CUpdateSetupDlg::SettingChanged(const SettingPath &changedPath)
 		if(TrackerSettings::Instance().UpdateSuggestDifferentBuildVariant)
 		{
 			const CString url = mpt::ToCString(MptVersion::GetDownloadURL());
-			if(mpt::Windows::Version::IsOriginal())
+			if(mpt::Windows::IsOriginal())
 			{ // only do compatibility checks on non-emulated windows
 				if(MptVersion::IsForOlderWindows())
 				{

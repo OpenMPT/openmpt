@@ -115,7 +115,8 @@ void Manager::ReEnumerate()
 #endif // NO_PORTAUDIO
 
 	std::map<SoundDevice::Type, int> typePriorities;
-	if(mpt::Windows::Version::IsWine())
+	mpt::Windows::Version WindowsVersion = mpt::Windows::Version::Current();
+	if(mpt::Windows::IsWine())
 	{ // Wine
 		typePriorities[SoundDevice::TypeDSOUND] = 29;
 		typePriorities[SoundDevice::TypeWAVEOUT] = 28;
@@ -124,7 +125,7 @@ void Manager::ReEnumerate()
 		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
 		typePriorities[SoundDevice::TypePORTAUDIO_DS] = 18;
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = -1;
-	} else if(mpt::Windows::Version::Is9x())
+	} else if(WindowsVersion.Is9x())
 	{ // Win9x
 		typePriorities[SoundDevice::TypeWAVEOUT] = 29;
 		typePriorities[SoundDevice::TypeDSOUND] = 28;
@@ -133,7 +134,7 @@ void Manager::ReEnumerate()
 		typePriorities[SoundDevice::TypeASIO] = 1;
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = -1;
 		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = -2;
-	} else if(mpt::Windows::Version::IsBefore(mpt::Windows::Version::WinVista))
+	} else if(WindowsVersion.IsBefore(mpt::Windows::Version::WinVista))
 	{ // WinXP
 		typePriorities[SoundDevice::TypeWAVEOUT] = 29;
 		typePriorities[SoundDevice::TypeASIO] = 28;

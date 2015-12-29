@@ -18,106 +18,67 @@ namespace mpt
 {
 namespace Windows
 {
-namespace Version
+
+class Version
 {
 
+public:
 
-enum Number
-{
+	enum Number
+	{
 
-	// Win9x
-	Win98    = 0x0410,
-	WinME    = 0x0490,
+		// Win9x
+		Win98    = 0x0410,
+		WinME    = 0x0490,
 
-	// WinNT
-	WinNT4   = 0x0400,
-	Win2000  = 0x0500,
-	WinXP    = 0x0501,
-	WinVista = 0x0600,
-	Win7     = 0x0601,
-	Win8     = 0x0602,
-	Win81    = 0x0603,
-	Win10    = 0x0a00,
+		// WinNT
+		WinNT4   = 0x0400,
+		Win2000  = 0x0500,
+		WinXP    = 0x0501,
+		WinVista = 0x0600,
+		Win7     = 0x0601,
+		Win8     = 0x0602,
+		Win81    = 0x0603,
+		Win10    = 0x0a00,
 
-	WinNewer = Win10 + 1
+		WinNewer = Win10 + 1
 
-};
+	};
 
+	static mpt::ustring VersionToString(uint16 version);
 
-#if defined(MODPLUG_TRACKER)
+private:
 
-#if MPT_OS_WINDOWS
+	bool SystemIsWindows;
 
-// Initializes version information.
-// Version information is cached in order to be safely available in audio real-time contexts.
-// Checking version information (especially detecting Wine) can be slow.
-void Init();
+	bool SystemIsNT;
+	uint32 SystemVersion;
 
-static inline bool IsWindows() { return true; }
+private:
 
-bool IsBefore(mpt::Windows::Version::Number version);
-bool IsAtLeast(mpt::Windows::Version::Number version);
+	Version();
 
-bool Is9x();
-bool IsNT();
+public:
 
-bool IsOriginal();
-bool IsWine();
+	static mpt::Windows::Version Current();
 
-mpt::ustring VersionToString(uint16 version);
+public:
 
-mpt::ustring GetName();
+	bool IsBefore(mpt::Windows::Version::Number version) const;
+	bool IsAtLeast(mpt::Windows::Version::Number version) const;
 
-uint16 GetMinimumKernelLevel();
+	bool Is9x() const;
+	bool IsNT() const;
 
-uint16 GetMinimumAPILevel();
+	mpt::ustring GetName() const;
 
-#else // !MPT_OS_WINDOWS
+public:
 
-static inline void Init() { return; }
+	static uint16 GetMinimumKernelLevel();
+	static uint16 GetMinimumAPILevel();
 
-static inline bool IsWindows() { return false; }
+}; // class Version
 
-static inline bool IsBefore(mpt::Windows::Version::Number /* version */ ) { return false; }
-static inline bool IsAtLeast(mpt::Windows::Version::Number /* version */ ) { return false; }
-
-static inline bool Is9x() { return false; }
-static inline bool IsNT() { return false; }
-
-static inline bool IsOriginal() { return false; }
-static inline bool IsWine() { return false; }
-
-static inline mpt::ustring VersionToString(uint16 version) { return mpt::ufmt::hex0<4>(version); }
-
-static inline mpt::ustring GetName() { return MPT_USTRING(""); }
-
-static inline uint16 GetMinimumKernelLevel() { return 0; }
-static inline uint16 GetMinimumAPILevel() { return 0; }
-
-#endif // MPT_OS_WINDOWS
-
-#else // !MODPLUG_TRACKER
-
-#if MPT_OS_WINDOWS
-
-static inline bool IsWindows() { return true; }
-
-bool IsBefore(mpt::Windows::Version::Number version);
-bool IsAtLeast(mpt::Windows::Version::Number version);
-
-#else // !MPT_OS_WINDOWS
-
-static inline bool IsWindows() { return false; }
-
-static inline bool IsBefore(mpt::Windows::Version::Number /* version */ ) { return false; }
-static inline bool IsAtLeast(mpt::Windows::Version::Number /* version */ ) { return false; }
-
-#endif // MPT_OS_WINDOWS
-
-#endif // MODPLUG_TRACKER
-
-
-} // namespace Version
 } // namespace Windows
 } // namespace mpt
 
@@ -126,6 +87,15 @@ static inline bool IsAtLeast(mpt::Windows::Version::Number /* version */ ) { ret
 
 namespace mpt
 {
+
+namespace Windows
+{
+
+bool IsOriginal();
+bool IsWine();
+
+} // namespace Windows
+
 namespace Wine
 {
 
@@ -134,17 +104,34 @@ std::string RawGetBuildID();
 std::string RawGetHostSysName();
 std::string RawGetHostRelease();
 
-uint32 Version(uint8 a, uint8 b, uint8 c);
-std::string VersionString(uint8 a, uint8 b, uint8 c);
-std::string VersionString(uint32 v);
+class Version
+{
+private:
+	bool valid;
+	uint8 major;
+	uint8 minor;
+	uint8 update;
+public:
+	Version();
+	Version(uint8 major, uint8 minor, uint8 update);
+	explicit Version(const mpt::ustring &version);
+public:
+	bool IsValid() const;
+	mpt::ustring AsString() const;
+private:
+	static mpt::Wine::Version FromInteger(uint32 version);
+	uint32 AsInteger() const;
+public:
+	bool IsBefore(mpt::Wine::Version other) const;
+	bool IsAtLeast(mpt::Wine::Version other) const;
+};
 
-uint32 GetVersion();
+mpt::Wine::Version GetVersion();
 
-bool VersionIsBefore(uint8 major, uint8 minor, uint8 update);
-bool VersionIsAtLeast(uint8 major, uint8 minor, uint8 update);
 bool HostIsLinux();
 
 } // namespace Wine
+
 } // namespace mpt
 
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS

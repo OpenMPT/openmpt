@@ -130,7 +130,7 @@ ComponentAvRt::ComponentAvRt()
 bool ComponentAvRt::DoInitialize()
 //--------------------------------
 {
-	if(!mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
+	if(!mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::WinVista))
 	{
 		return false;
 	}
@@ -205,6 +205,8 @@ private:
 
 	Util::MultimediaClock clock_noxp;
 
+	mpt::Windows::Version WindowsVersion;
+
 	bool period_nont_set;
 	bool periodic_nt_timer;
 
@@ -212,8 +214,11 @@ private:
 
 public:
 
-	CPeriodicWaker(CAudioThread &self_, double sleepSeconds_) : self(self_), sleepSeconds(sleepSeconds_)
-	//--------------------------------------------------------------------------------------------------
+	CPeriodicWaker(CAudioThread &self_, double sleepSeconds_)
+	//-------------------------------------------------------
+		: self(self_)
+		, sleepSeconds(sleepSeconds_)
+		, WindowsVersion(mpt::Windows::Version::Current())
 	{
 
 		MPT_TRACE();
@@ -228,7 +233,7 @@ public:
 
 		sleepEvent = NULL;
 
-		if(mpt::Windows::Version::IsNT())
+		if(WindowsVersion.IsNT())
 		{
 			if(periodic_nt_timer)
 			{
@@ -265,7 +270,7 @@ public:
 	//--------------
 	{
 		MPT_TRACE();
-		if(mpt::Windows::Version::IsNT())
+		if(WindowsVersion.IsNT())
 		{
 			if(!periodic_nt_timer)
 			{
@@ -283,7 +288,7 @@ public:
 	//-------------------------------
 	{
 		MPT_TRACE();
-		if(mpt::Windows::Version::IsNT())
+		if(WindowsVersion.IsNT())
 		{
 			if(periodic_nt_timer)
 			{
