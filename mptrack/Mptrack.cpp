@@ -910,8 +910,8 @@ bool CTrackApp::SystemCanRunModernBuilds()
 //----------------------------------------
 {
 	return true
-		&& mpt::Windows::Version::IsNT()
-		&& mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win7)
+		&& mpt::Windows::Version::Current().IsNT()
+		&& mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::Win7)
 		&& (GetProcSupport() & PROCSUPPORT_CPUID)
 		&& (GetProcSupport() & PROCSUPPORT_TSC)
 		&& (GetProcSupport() & PROCSUPPORT_CMOV)
@@ -941,7 +941,7 @@ bool CTrackApp::CheckSystemSupport()
 		}
 		return false;
 	}
-	if(mpt::Windows::Version::IsOriginal())
+	if(mpt::Windows::IsOriginal())
 	{ // only do windows compatibility checks on non-emulated windows
 		if(MptVersion::IsForOlderWindows())
 		{
@@ -1003,8 +1003,6 @@ BOOL CTrackApp::InitInstance()
 
 	// Start loading
 	BeginWaitCursor();
-
-	mpt::Windows::Version::Init();
 
 	MPT_LOG(LogInformation, "", MPT_USTRING("OpenMPT Start"));
 

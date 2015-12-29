@@ -1391,7 +1391,7 @@ BOOL CViewPattern::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
 		{
 			rect.left = m_szHeader.cx;
 			rect.top = 0;
-			if(mpt::Windows::Version::IsWine())
+			if(mpt::Windows::IsWine())
 			{
 				InvalidateRect(&rect, FALSE);
 			} else
@@ -1404,7 +1404,7 @@ BOOL CViewPattern::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
 		{
 			rect.left = 0;
 			rect.top = m_szHeader.cy;
-			if(mpt::Windows::Version::IsWine())
+			if(mpt::Windows::IsWine())
 			{
 				InvalidateRect(&rect, FALSE);
 			} else

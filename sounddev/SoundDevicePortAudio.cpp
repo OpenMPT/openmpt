@@ -43,6 +43,7 @@ namespace SoundDevice {
 CPortaudioDevice::CPortaudioDevice(SoundDevice::Info info)
 //--------------------------------------------------------
 	: SoundDevice::Base(info)
+	, m_WindowsVersion(mpt::Windows::Version::Current())
 	, m_StatisticPeriodFrames(0)
 {
 	m_DeviceIndex = ConvertStrTo<PaDeviceIndex>(GetDeviceInternalID());
@@ -119,10 +120,10 @@ bool CPortaudioDevice::InternalOpen()
 		framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
 	} else if(m_HostApiType == paMME)
 	{
-		m_Flags.NeedsClippedFloat = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
+		m_Flags.NeedsClippedFloat = m_WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista);
 	} else if(m_HostApiType == paDirectSound)
 	{
-		m_Flags.NeedsClippedFloat = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
+		m_Flags.NeedsClippedFloat = m_WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista);
 	} else
 	{
 		m_Flags.NeedsClippedFloat = false;
@@ -311,10 +312,10 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 		caps.DefaultSettings.sampleFormat = SampleFormatInt16;
 	} else if(m_HostApiType == paMME)
 	{
-		if(mpt::Windows::Version::IsWine())
+		if(mpt::Windows::IsWine())
 		{
 			caps.DefaultSettings.sampleFormat = SampleFormatInt16;
-		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
+		} else if(m_WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista))
 		{
 			caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
 		} else
@@ -387,7 +388,7 @@ bool CPortaudioDevice::OpenDriverSettings()
 	{
 		return false;
 	}
-	bool hasVista = mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista);
+	bool hasVista = m_WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista);
 	mpt::PathString controlEXE;
 	WCHAR systemDir[MAX_PATH];
 	MemsetZero(systemDir);
@@ -515,7 +516,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices()
 				result.apiName = MPT_USTRING("WASAPI");
 				break;
 			case paWDMKS:
-				if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
+				if(mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::WinVista))
 				{
 					result.apiName = MPT_USTRING("WaveRT");
 				} else

@@ -19,15 +19,13 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if MPT_OS_WINDOWS
-
 namespace mpt
 {
 namespace Windows
 {
-namespace Version
-{
 
+
+#if MPT_OS_WINDOWS
 
 
 static uint32 VersionDecimalTo_WIN32_WINNT(uint32 major, uint32 minor)
@@ -44,100 +42,140 @@ static uint32 VersionDecimalTo_WIN32_WINNT(uint32 major, uint32 minor)
 }
 
 
-
-#if defined(MODPLUG_TRACKER)
-
-
-static bool SystemIsNT = true;
-
-// Initialize to used SDK version
-static uint32 SystemVersion =
-#if NTDDI_VERSION >= 0x0A000000 // NTDDI_WIN10
-	mpt::Windows::Version::Win10
-#elif NTDDI_VERSION >= 0x06030000 // NTDDI_WINBLUE
-	mpt::Windows::Version::Win81
-#elif NTDDI_VERSION >= 0x06020000 // NTDDI_WIN8
-	mpt::Windows::Version::Win8
-#elif NTDDI_VERSION >= 0x06010000 // NTDDI_WIN7
-	mpt::Windows::Version::Win7
-#elif NTDDI_VERSION >= 0x06000000 // NTDDI_VISTA
-	mpt::Windows::Version::WinVista
-#elif NTDDI_VERSION >= NTDDI_WINXP
-	mpt::Windows::Version::WinXP
-#elif NTDDI_VERSION >= NTDDI_WIN2K
-	mpt::Windows::Version::Win2000
-#else
-	mpt::Windows::Version::WinNT4
-#endif
-	;
-
-static bool SystemIsWine = false;
-
-
-void Init()
-//---------
+static void GatherWindowsVersion(bool & SystemIsNT, uint32 & SystemVersion)
+//-------------------------------------------------------------------------
 {
+	// Initialize to used SDK version
+	SystemVersion =
+		#if NTDDI_VERSION >= 0x0A000000 // NTDDI_WIN10
+			mpt::Windows::Version::Win10
+		#elif NTDDI_VERSION >= 0x06030000 // NTDDI_WINBLUE
+			mpt::Windows::Version::Win81
+		#elif NTDDI_VERSION >= 0x06020000 // NTDDI_WIN8
+			mpt::Windows::Version::Win8
+		#elif NTDDI_VERSION >= 0x06010000 // NTDDI_WIN7
+			mpt::Windows::Version::Win7
+		#elif NTDDI_VERSION >= 0x06000000 // NTDDI_VISTA
+			mpt::Windows::Version::WinVista
+		#elif NTDDI_VERSION >= NTDDI_WINXP
+			mpt::Windows::Version::WinXP
+		#elif NTDDI_VERSION >= NTDDI_WIN2K
+			mpt::Windows::Version::Win2000
+		#else
+			mpt::Windows::Version::WinNT4
+		#endif
+		;
 	OSVERSIONINFOEXW versioninfoex;
 	MemsetZero(versioninfoex);
 	versioninfoex.dwOSVersionInfoSize = sizeof(versioninfoex);
 	GetVersionExW((LPOSVERSIONINFOW)&versioninfoex);
 	SystemIsNT = (versioninfoex.dwPlatformId == VER_PLATFORM_WIN32_NT);
 	SystemVersion = VersionDecimalTo_WIN32_WINNT(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion);
-	SystemIsWine = false;
-	HMODULE hNTDLL = LoadLibraryW(L"ntdll.dll");
-	if(hNTDLL)
+}
+
+
+#ifdef MODPLUG_TRACKER
+
+namespace {
+struct WindowsVersionCache
+{
+	bool SystemIsNT;
+	uint32 SystemVersion;
+	WindowsVersionCache()
+		: SystemIsNT(false)
+		, SystemVersion(mpt::Windows::Version::WinNT4)
 	{
-		SystemIsWine = (GetProcAddress(hNTDLL, "wine_get_version") != NULL);
-		FreeLibrary(hNTDLL);
-		hNTDLL = NULL;
+		GatherWindowsVersion(SystemIsNT, SystemVersion);
 	}
+};
+}
+
+static void GatherWindowsVersionFromCache(bool & SystemIsNT, uint32 & SystemVersion)
+//----------------------------------------------------------------------------------
+{
+	static WindowsVersionCache gs_WindowsVersionCache;
+	SystemIsNT = gs_WindowsVersionCache.SystemIsNT;
+	SystemVersion = gs_WindowsVersionCache.SystemVersion;
+}
+
+#endif // MODPLUG_TRACKER
+
+
+#endif // MPT_OS_WINDOWS
+
+
+Version::Version()
+//----------------
+	: SystemIsWindows(false)
+	, SystemIsNT(true)
+	, SystemVersion(mpt::Windows::Version::WinNT4)
+{
+	return;
 }
 
 
-bool IsBefore(mpt::Windows::Version::Number version)
-//--------------------------------------------------
+mpt::Windows::Version Version::Current()
+//--------------------------------------
 {
-	return (SystemVersion < (uint32)version);
+	mpt::Windows::Version result;
+	#if MPT_OS_WINDOWS
+		result.SystemIsWindows = true;
+		#ifdef MODPLUG_TRACKER
+			GatherWindowsVersionFromCache(result.SystemIsNT, result.SystemVersion);
+		#else // !MODPLUG_TRACKER
+			GatherWindowsVersion(result.SystemIsNT, result.SystemVersion);
+		#endif // MODPLUG_TRACKER
+	#endif // MPT_OS_WINDOWS
+	return result;
 }
 
 
-bool IsAtLeast(mpt::Windows::Version::Number version)
-//---------------------------------------------------
+bool Version::IsBefore(mpt::Windows::Version::Number version) const
+//-----------------------------------------------------------------
 {
-	return (SystemVersion >= (uint32)version);
+	if(!SystemIsWindows)
+	{
+		return false;
+	}
+	return (SystemVersion < static_cast<uint32>(version));
 }
 
 
-bool Is9x()
-//---------
+bool Version::IsAtLeast(mpt::Windows::Version::Number version) const
+//------------------------------------------------------------------
 {
+	if(!SystemIsWindows)
+	{
+		return false;
+	}
+	return (SystemVersion >= static_cast<uint32>(version));
+}
+
+
+bool Version::Is9x() const
+//------------------------
+{
+	if(!SystemIsWindows)
+	{
+		return false;
+	}
 	return !SystemIsNT;
 }
 
 
-bool IsNT()
-//---------
+bool Version::IsNT() const
+//------------------------
 {
+	if(!SystemIsWindows)
+	{
+		return false;
+	}
 	return SystemIsNT;
 }
 
 
-bool IsOriginal()
-//---------------
-{
-	return !SystemIsWine;
-}
-
-
-bool IsWine()
-//-----------
-{
-	return SystemIsWine;
-}
-
-
-mpt::ustring VersionToString(uint16 version)
-//------------------------------------------
+mpt::ustring Version::VersionToString(uint16 version)
+//---------------------------------------------------
 {
 	mpt::ustring result;
 	std::vector<std::pair<uint16, mpt::ustring> > versionMap;
@@ -172,84 +210,84 @@ mpt::ustring VersionToString(uint16 version)
 }
 
 
-mpt::ustring GetName()
-//--------------------
+mpt::ustring Version::GetName() const
+//-----------------------------------
 {
-	mpt::ustring result;
-	if(mpt::Windows::Version::IsWine())
-	{
-		result += MPT_USTRING("Wine");
-		if(mpt::Wine::GetVersion())
-		{
-			result += MPT_UFORMAT(" %1", mpt::ToUnicode(mpt::CharsetUTF8, mpt::Wine::VersionString(mpt::Wine::GetVersion())));
-		} else
-		{
-			result += MPT_UFORMAT(" (unknown version: '%1')", mpt::ToUnicode(mpt::CharsetUTF8, mpt::Wine::RawGetVersion()));
-		}
-	}
-	if(mpt::Windows::Version::IsWine())
-	{
-		result += MPT_USTRING(" (");
-	}
+	mpt::ustring name;
 	if(mpt::Windows::Version::IsNT())
 	{
 		if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinNewer))
 		{
-			result += MPT_USTRING("Windows 10 (or newer)");
+			name = MPT_USTRING("Windows 10 (or newer)");
 		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win10))
 		{
-			result += MPT_USTRING("Windows 10");
+			name = MPT_USTRING("Windows 10");
 		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win81))
 		{
-			result += MPT_USTRING("Windows 8.1");
+			name = MPT_USTRING("Windows 8.1");
 		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win8))
 		{
-			result += MPT_USTRING("Windows 8");
+			name = MPT_USTRING("Windows 8");
 		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win7))
 		{
-			result += MPT_USTRING("Windows 7");
+			name = MPT_USTRING("Windows 7");
 		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinVista))
 		{
-			result += MPT_USTRING("Windows Vista");
+			name = MPT_USTRING("Windows Vista");
 		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinXP))
 		{
-			result += MPT_USTRING("Windows XP");
+			name = MPT_USTRING("Windows XP");
 		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win2000))
 		{
-			result += MPT_USTRING("Windows 2000");
+			name = MPT_USTRING("Windows 2000");
 		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinNT4))
 		{
-			result += MPT_USTRING("Windows NT4");
+			name = MPT_USTRING("Windows NT4");
 		} else
 		{
-			result += MPT_USTRING("Generic Windows NT");
+			name = MPT_USTRING("Generic Windows NT");
 		}
 	} else
 	{
 		if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::WinME))
 		{
-			result += MPT_USTRING("Windows ME (or newer)");
+			name = MPT_USTRING("Windows ME (or newer)");
 		} else if(mpt::Windows::Version::IsAtLeast(mpt::Windows::Version::Win98))
 		{
-			result += MPT_USTRING("Windows 98");
+			name = MPT_USTRING("Windows 98");
 		} else
 		{
-			result += MPT_USTRING("Generic Windows 9x");
+			name = MPT_USTRING("Generic Windows 9x");
 		}
 	}
-	if(mpt::Windows::Version::IsWine())
-	{
-		result += MPT_USTRING(")");
-	}
+	mpt::ustring result = name;
+	#if defined(MODPLUG_TRACKER)
+		if(mpt::Windows::IsWine())
+		{
+			if(mpt::Wine::GetVersion().IsValid())
+			{
+				result = MPT_UFORMAT("Wine %1 (%2)"
+					, mpt::Wine::GetVersion().AsString()
+					, name
+					);
+			} else
+			{
+				result = MPT_UFORMAT("Wine (unknown version: '%1') (%2)"
+					, mpt::ToUnicode(mpt::CharsetUTF8, mpt::Wine::RawGetVersion())
+					, name
+					);
+			}
+		}
+	#endif // MODPLUG_TRACKER
 	return result;
 }
 
 
-uint16 GetMinimumKernelLevel()
-//----------------------------
+uint16 Version::GetMinimumKernelLevel()
+//-------------------------------------
 {
 	uint16 minimumKernelVersion = 0;
-	#if MPT_COMPILER_MSVC
+	#if MPT_OS_WINDOWS && MPT_COMPILER_MSVC
 		#if MPT_MSVC_AT_LEAST(2012, 0)
 			minimumKernelVersion = std::max<uint16>(minimumKernelVersion, mpt::Windows::Version::WinVista);
 		#elif MPT_MSVC_AT_LEAST(2010, 0)
@@ -262,52 +300,19 @@ uint16 GetMinimumKernelLevel()
 }
 
 
-uint16 GetMinimumAPILevel()
-//-------------------------
+uint16 Version::GetMinimumAPILevel()
+//----------------------------------
 {
 	uint16 minimumApiVersion = 0;
-	#if defined(_WIN32_WINNT)
+	#if MPT_OS_WINDOWS && defined(_WIN32_WINNT)
 		minimumApiVersion = std::max<uint16>(minimumApiVersion, _WIN32_WINNT);
 	#endif
 	return minimumApiVersion;
 }
 
 
-#else // !MODPLUG_TRACKER
-
-
-bool IsBefore(mpt::Windows::Version::Number version)
-//--------------------------------------------------
-{
-	OSVERSIONINFOEXW versioninfoex;
-	MemsetZero(versioninfoex);
-	versioninfoex.dwOSVersionInfoSize = sizeof(versioninfoex);
-	GetVersionExW((LPOSVERSIONINFOW)&versioninfoex);
-	uint32 SystemVersion = VersionDecimalTo_WIN32_WINNT(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion);
-	return (SystemVersion < (uint32)version);
-}
-
-
-bool IsAtLeast(mpt::Windows::Version::Number version)
-//---------------------------------------------------
-{
-	OSVERSIONINFOEXW versioninfoex;
-	MemsetZero(versioninfoex);
-	versioninfoex.dwOSVersionInfoSize = sizeof(versioninfoex);
-	GetVersionExW((LPOSVERSIONINFOW)&versioninfoex);
-	uint32 SystemVersion = VersionDecimalTo_WIN32_WINNT(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion);
-	return (SystemVersion >= (uint32)version);
-}
-
-
-#endif // MODPLUG_TRACKER
-
-
-} // namespace Version
 } // namespace Windows
 } // namespace mpt
-
-#endif // MPT_OS_WINDOWS
 
 
 
@@ -315,14 +320,59 @@ bool IsAtLeast(mpt::Windows::Version::Number version)
 
 namespace mpt
 {
+
+
+namespace Windows
+{
+
+
+namespace {
+struct SystemIsWineCache
+{
+	bool SystemIsWine;
+	SystemIsWineCache()
+		: SystemIsWine(false)
+	{
+		HMODULE hNTDLL = LoadLibraryW(L"ntdll.dll");
+		if(hNTDLL)
+		{
+			SystemIsWine = (GetProcAddress(hNTDLL, "wine_get_version") != NULL);
+			FreeLibrary(hNTDLL);
+			hNTDLL = NULL;
+		}
+	}
+};
+}
+static bool SystemIsWine()
+{
+	static SystemIsWineCache gs_SystemIsWineCache;
+	return gs_SystemIsWineCache.SystemIsWine;
+}
+
+bool IsOriginal()
+//---------------
+{
+	return !SystemIsWine();
+}
+
+bool IsWine()
+//-----------
+{
+	return SystemIsWine();
+}
+
+
+} // namespace Windows
+
+
 namespace Wine
 {
 
-	
+
 std::string RawGetVersion()
 //-------------------------
 {
-	if(!mpt::Windows::Version::IsWine())
+	if(!mpt::Windows::IsWine())
 	{
 		return std::string();
 	}
@@ -348,7 +398,7 @@ std::string RawGetVersion()
 std::string RawGetBuildID()
 //-------------------------
 {
-	if(!mpt::Windows::Version::IsWine())
+	if(!mpt::Windows::IsWine())
 	{
 		return std::string();
 	}
@@ -374,7 +424,7 @@ std::string RawGetBuildID()
 std::string RawGetHostSysName()
 //-----------------------------
 {
-	if(!mpt::Windows::Version::IsWine())
+	if(!mpt::Windows::IsWine())
 	{
 		return std::string();
 	}
@@ -401,7 +451,7 @@ std::string RawGetHostSysName()
 std::string RawGetHostRelease()
 //-----------------------------
 {
-	if(!mpt::Windows::Version::IsWine())
+	if(!mpt::Windows::IsWine())
 	{
 		return std::string();
 	}
@@ -426,94 +476,134 @@ std::string RawGetHostRelease()
 }
 
 
-uint32 Version(uint8 a, uint8 b, uint8 c)
-//---------------------------------------
+Version::Version()
+//----------------
+	: valid(false)
+	, major(0)
+	, minor(0)
+	, update(0)
 {
-	return (a << 16) | (b << 8) | c;
-}
-
-std::string VersionString(uint8 a, uint8 b, uint8 c)
-//--------------------------------------------------
-{
-	return mpt::fmt::dec(a) + "." + mpt::fmt::dec(b) + "." + mpt::fmt::dec(c);
-}
-
-std::string VersionString(uint32 v)
-//---------------------------------
-{
-	if(v > 0xffffff)
-	{
-		return std::string();
-	}
-	return VersionString((uint8)(v >> 16), (uint8)(v >> 8), (uint8)(v >> 0));
+	return;
 }
 
 
-uint32 GetVersion()
-//-----------------
+Version::Version(const mpt::ustring &rawVersion)
+//----------------------------------------------
+	: valid(false)
+	, major(0)
+	, minor(0)
+	, update(0)
 {
-	if(!mpt::Windows::Version::IsWine())
-	{
-		return 0;
-	}
-	mpt::ustring rawVersion = mpt::ToUnicode(mpt::CharsetUTF8, Wine::RawGetVersion());
 	if(rawVersion.empty())
 	{
-		return 0;
+		return;
 	}
 	std::vector<uint8> version = mpt::String::Split<uint8>(rawVersion, MPT_USTRING("."));
 	if(version.size() < 3)
 	{
-		return 0;
+		return;
 	}
 	mpt::ustring parsedVersion = mpt::String::Combine(version, MPT_USTRING("."));
 	std::size_t len = std::min(parsedVersion.length(), rawVersion.length());
 	if(len == 0)
 	{
-		return 0;
+		return;
 	}
 	if(parsedVersion.substr(0, len) != rawVersion.substr(0, len))
 	{
-		return 0;
+		return;
 	}
-	return Wine::Version(version[0], version[1], version[2]);
+	valid = true;
+	major = version[0];
+	minor = version[1];
+	update = version[2];
 }
 
 
-bool VersionIsBefore(uint8 major, uint8 minor, uint8 update)
-//----------------------------------------------------------
+Version::Version(uint8 major, uint8 minor, uint8 update)
+//------------------------------------------------------
+	: valid((major > 0) || (minor > 0) || (update > 0)) 
+	, major(major)
+	, minor(minor)
+	, update(update)
 {
-	if(!mpt::Windows::Version::IsWine())
-	{
-		return false;
-	}
-	uint32 version = mpt::Wine::GetVersion();
-	if(version == 0)
-	{
-		return false;
-	}
-	return (version < mpt::Wine::Version(major, minor, update));
+	return;
 }
 
-bool VersionIsAtLeast(uint8 major, uint8 minor, uint8 update)
-//-----------------------------------------------------------
+
+mpt::Wine::Version Version::FromInteger(uint32 version)
+//-----------------------------------------------------
 {
-	if(!mpt::Windows::Version::IsWine())
-	{
-		return false;
-	}
-	uint32 version = mpt::Wine::GetVersion();
-	if(version == 0)
-	{
-		return false;
-	}
-	return (version >= mpt::Wine::Version(major, minor, update));
+	mpt::Wine::Version result;
+	result.valid = (version <= 0xffffff);
+	result.major = static_cast<uint8>(version >> 16);
+	result.minor = static_cast<uint8>(version >> 8);
+	result.update = static_cast<uint8>(version >> 0);
+	return result;
 }
+
+
+bool Version::IsValid() const
+//---------------------------
+{
+	return valid;
+}
+
+
+mpt::ustring Version::AsString() const
+//------------------------------------
+{
+	return mpt::ufmt::dec(major) + MPT_USTRING(".") + mpt::ufmt::dec(minor) + MPT_USTRING(".") + mpt::ufmt::dec(update);
+}
+
+
+uint32 Version::AsInteger() const
+{
+	uint32 version = 0;
+	version |= static_cast<uint32>(major) << 16;
+	version |= static_cast<uint32>(minor) << 8;
+	version |= static_cast<uint32>(update) << 0;
+	return version;
+}
+
+
+mpt::Wine::Version GetVersion()
+//-----------------------------
+{
+	if(!mpt::Windows::IsWine())
+	{
+		return mpt::Wine::Version();
+	}
+	return mpt::Wine::Version(mpt::ToUnicode(mpt::CharsetUTF8, Wine::RawGetVersion()));
+}
+
+
+bool Version::IsBefore(mpt::Wine::Version other) const
+//----------------------------------------------------
+{
+	if(!IsValid())
+	{
+		return false;
+	}
+	return (AsInteger() < other.AsInteger());
+}
+
+
+bool Version::IsAtLeast(mpt::Wine::Version other) const
+//-----------------------------------------------------
+{
+	if(!IsValid())
+	{
+		return false;
+	}
+	return (AsInteger() >= other.AsInteger());
+}
+
 
 bool HostIsLinux()
 //----------------
 {
-	if(!mpt::Windows::Version::IsWine())
+	if(!mpt::Windows::IsWine())
 	{
 		return false;
 	}

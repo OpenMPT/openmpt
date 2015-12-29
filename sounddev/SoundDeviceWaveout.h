@@ -44,6 +44,7 @@ class CWaveDevice: public CSoundDeviceWithThread
 //==============================================
 {
 protected:
+	mpt::Windows::Version m_WindowsVersion;
 	HANDLE m_ThreadWakeupEvent;
 	bool m_Failed;
 	HWAVEOUT m_hWaveOut;
