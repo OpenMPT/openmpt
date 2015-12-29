@@ -245,7 +245,7 @@ void CModTypeDlg::UpdateDialog()
 	// Compatibility settings
 	PlayBehaviourSet defaultBehaviour = CSoundFile::GetDefaultPlaybackBehaviour(m_nType);
 	bool usesDefaultBehaviour = true;
-	const bool mptmOnly = (m_nType == MOD_TYPE_MPT);
+	const bool isMPTM = (m_nType == MOD_TYPE_MPT);
 	if(m_nType & (MOD_TYPE_MPT | MOD_TYPE_IT | MOD_TYPE_XM))
 	{
 		for(size_t i = 0; i < m_playBehaviour.size(); i++)
@@ -260,8 +260,8 @@ void CModTypeDlg::UpdateDialog()
 			}
 		}
 	}
-	static_cast<CStatic *>(GetDlgItem(IDC_STATIC1))->SetIcon((usesDefaultBehaviour && !mptmOnly) ? NULL : m_warnIcon);
-	GetDlgItem(IDC_STATIC2)->SetWindowText((usesDefaultBehaviour && !mptmOnly)
+	static_cast<CStatic *>(GetDlgItem(IDC_STATIC1))->SetIcon((usesDefaultBehaviour || isMPTM) ? NULL : m_warnIcon);
+	GetDlgItem(IDC_STATIC2)->SetWindowText((usesDefaultBehaviour || isMPTM)
 		? _T("Compatibility settings are currently optimal. It is advised to not edit them.")
 		: _T("Compatibility settings are not optimal for this legacy module. Click \"Set Defaults\" to use the recommended settings."));
 	GetDlgItem(IDC_BUTTON3)->EnableWindow(usesDefaultBehaviour ? FALSE:  TRUE);
