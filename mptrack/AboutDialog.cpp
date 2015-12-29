@@ -266,7 +266,7 @@ BOOL CAboutDlg::OnInitDialog()
 		+ MPT_USTRING("\n");
 	app += MPT_USTRING("Version ") + mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringSimple()) + MPT_USTRING("\n");
 	app += MPT_USTRING("\n");
-	app += MPT_USTRING("http://openmpt.org/\n");
+	app += MPT_USTRING("https://openmpt.org/\n");
 	SetDlgItemText(IDC_EDIT3, mpt::ToCString(mpt::String::Replace(app, MPT_USTRING("\n"), MPT_USTRING("\r\n"))));
 
 	m_bmp.SubclassDlgItem(IDC_BITMAP1, this);
