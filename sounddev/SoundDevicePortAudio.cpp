@@ -339,7 +339,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 	{
 		return caps;
 	}
-	for(UINT n=0; n<baseSampleRates.size(); n++)
+	for(std::size_t n = 0; n<baseSampleRates.size(); n++)
 	{
 		PaStreamParameters StreamParameters;
 		MemsetZero(StreamParameters);
