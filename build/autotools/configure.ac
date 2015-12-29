@@ -1,4 +1,4 @@
-AC_INIT([libopenmpt], [0.2.!!MPT_SVNVERSION!!-autotools], [http://bugs.openmpt.org/], [libopenmpt], [http://lib.openmpt.org/])
+AC_INIT([libopenmpt], [0.2.!!MPT_SVNVERSION!!-autotools], [https://bugs.openmpt.org/], [libopenmpt], [https://lib.openmpt.org/])
 AC_PREREQ([2.68])
 
 AC_CONFIG_MACRO_DIR([m4])

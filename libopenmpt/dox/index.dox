@@ -4,7 +4,7 @@
  *
  * libopenmpt is a cross-platform C++ and C library to decode <a href="https://en.wikipedia.org/wiki/Module_file">tracked music files (modules)</a> into a raw PCM audio stream.
  *
- * libopenmpt is based on the player code of the Open ModPlug Tracker project (OpenMPT, <a href="http://openmpt.org/">http://openmpt.org/</a>)
+ * libopenmpt is based on the player code of the Open ModPlug Tracker project (OpenMPT, <a href="https://openmpt.org/">https://openmpt.org/</a>)
  *
  * \section toc Contents
  * - \ref quickstart "Quick Start"
@@ -27,7 +27,7 @@
  *   - \ref libopenmpt_ext_cpp "Details"
  *
  * \section toc_website Website
- * http://lib.openmpt.org/
+ * https://lib.openmpt.org/
  *
  * \section toc_license License
  * \include LICENSE

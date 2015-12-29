@@ -373,12 +373,12 @@ mpt::ustring GetDownloadURL()
 	#ifdef MODPLUG_TRACKER
 		return (MptVersion::IsDebugBuild() || MptVersion::IsTestBuild() || MptVersion::IsDirty() || MptVersion::HasMixedRevisions())
 			?
-				MPT_USTRING("http://buildbot.openmpt.org/builds/")
+				MPT_USTRING("https://buildbot.openmpt.org/builds/")
 			:
-				MPT_USTRING("http://openmpt.org/download")
+				MPT_USTRING("https://openmpt.org/download")
 			;
 	#else
-		return MPT_USTRING("http://lib.openmpt.org/");
+		return MPT_USTRING("https://lib.openmpt.org/");
 	#endif
 }
 
@@ -444,10 +444,10 @@ mpt::ustring GetContactString()
 {
 	return MPT_UTF8(
 		"Contact / Discussion:\n"
-		"http://forum.openmpt.org/\n"
+		"https://forum.openmpt.org/\n"
 		"\n"
 		"Updates:\n"
-		"http://openmpt.org/download\n"
+		"https://openmpt.org/download\n"
 		);
 }
 

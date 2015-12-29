@@ -2372,7 +2372,7 @@ void CMainFrame::OnOctaveChanged()
 void CMainFrame::OnReportBug()
 //----------------------------
 {
-	CTrackApp::OpenURL("http://bugs.openmpt.org/");
+	CTrackApp::OpenURL("https://bugs.openmpt.org/");
 	return;
 }
 
@@ -2384,8 +2384,8 @@ BOOL CMainFrame::OnInternetLink(UINT nID)
 
 	switch(nID)
 	{
-	case ID_NETLINK_MODPLUG:	pszURL = "http://openmpt.org/"; break;
-	case ID_NETLINK_TOP_PICKS:	pszURL = "http://openmpt.org/top_picks"; break;
+	case ID_NETLINK_MODPLUG:	pszURL = "https://openmpt.org/"; break;
+	case ID_NETLINK_TOP_PICKS:	pszURL = "https://openmpt.org/top_picks"; break;
 	}
 	if(pszURL != nullptr)
 	{
