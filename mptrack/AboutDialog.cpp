@@ -261,7 +261,7 @@ BOOL CAboutDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	mpt::ustring app;
-	app += MPT_UFORMAT("OpenMPT %1 bit", sizeof(void*) * 8)
+	app += mpt::format(MPT_USTRING("OpenMPT %1 bit"))(sizeof(void*) * 8)
 		+ (MptVersion::IsForOlderWindows() ? MPT_USTRING(" for older Windows") : MPT_USTRING(""))
 		+ MPT_USTRING("\n");
 	app += MPT_USTRING("Version ") + mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringSimple()) + MPT_USTRING("\n");
@@ -317,12 +317,12 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 		case 0:
 			text += MPT_USTRING("OpenMPT - Open ModPlug Tracker") + lf;
 			text += lf;
-			text += MPT_UFORMAT("Version: %1", mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringExtended())) + lf;
-			text += MPT_UFORMAT("Source Code URL: %1", mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetUrl())) + lf;
-			text += MPT_UFORMAT("Build Date: %1", mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetBuildDateString())) + lf;
-			text += MPT_UFORMAT("Compiler: %1", mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetBuildCompilerString())) + lf;
-			text += MPT_UFORMAT("Required Windows Kernel Level: %1", mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumKernelLevel())) + lf;
-			text += MPT_UFORMAT("Required Windows API Level: %1", mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumAPILevel())) + lf;
+			text += mpt::format(MPT_USTRING("Version: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringExtended())) + lf;
+			text += mpt::format(MPT_USTRING("Source Code URL: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetUrl())) + lf;
+			text += mpt::format(MPT_USTRING("Build Date: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetBuildDateString())) + lf;
+			text += mpt::format(MPT_USTRING("Compiler: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetBuildCompilerString())) + lf;
+			text += mpt::format(MPT_USTRING("Required Windows Kernel Level: %1"))(mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumKernelLevel())) + lf;
+			text += mpt::format(MPT_USTRING("Required Windows API Level: %1"))(mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumAPILevel())) + lf;
 			{
 				text += MPT_USTRING("Required CPU features: ");
 				std::vector<mpt::ustring> features;
@@ -391,8 +391,8 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += lf;
 			if(GetProcSupport() & PROCSUPPORT_CPUID)
 			{
-				text += MPT_UFORMAT("CPU: %1, Family %2, Model %3, Stepping %4"
-					, mpt::ToUnicode(mpt::CharsetASCII, (std::strlen(ProcVendorID) > 0) ? std::string(ProcVendorID) : std::string("Generic"))
+				text += mpt::format(MPT_USTRING("CPU: %1, Family %2, Model %3, Stepping %4"))
+					( mpt::ToUnicode(mpt::CharsetASCII, (std::strlen(ProcVendorID) > 0) ? std::string(ProcVendorID) : std::string("Generic"))
 					, ProcFamily
 					, ProcModel
 					, ProcStepping
@@ -401,10 +401,10 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			{
 				text += MPT_USTRING("Generic without CPUID") + lf;
 			}
-			text += MPT_UFORMAT("Operating System: %1", mpt::Windows::Version::Current().GetName()) + lf;
+			text += mpt::format(MPT_USTRING("Operating System: %1"))(mpt::Windows::Version::Current().GetName()) + lf;
 			text += lf;
-			text += MPT_UFORMAT("OpenMPT Path%2: %1", theApp.GetAppDirPath(), theApp.IsPortableMode() ? MPT_USTRING(" (portable)") : MPT_USTRING("")) + lf;
-			text += MPT_UFORMAT("Settings%2: %1", theApp.GetConfigFileName(), theApp.IsPortableMode() ? MPT_USTRING(" (portable)") : MPT_USTRING("")) + lf;
+			text += mpt::format(MPT_USTRING("OpenMPT Path%2: %1"))(theApp.GetAppDirPath(), theApp.IsPortableMode() ? MPT_USTRING(" (portable)") : MPT_USTRING("")) + lf;
+			text += mpt::format(MPT_USTRING("Settings%2: %1"))(theApp.GetConfigFileName(), theApp.IsPortableMode() ? MPT_USTRING(" (portable)") : MPT_USTRING("")) + lf;
 			break;
 		case 1:
 			{
@@ -446,8 +446,8 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 							{
 								name = mpt::ToUnicode(mpt::CharsetASCII, info.settingsKey);
 							}
-							text += MPT_UFORMAT("%1: %2"
-								, name
+							text += mpt::format(MPT_USTRING("%1: %2"))
+								( name
 								, info.state == ComponentStateAvailable ? MPT_USTRING("ok") :
 									info.state == ComponentStateUnavailable? MPT_USTRING("missing") :
 									info.state == ComponentStateUnintialized ? MPT_USTRING("not loaded") :
@@ -457,8 +457,8 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 								);
 							if(info.type != ComponentTypeUnknown)
 							{
-								text += MPT_UFORMAT(" (%1)"
-									, info.type == ComponentTypeBuiltin ? MPT_USTRING("builtin") :
+								text += mpt::format(MPT_USTRING(" (%1)"))
+									( info.type == ComponentTypeBuiltin ? MPT_USTRING("builtin") :
 										info.type == ComponentTypeSystem ? MPT_USTRING("system") :
 										info.type == ComponentTypeSystemInstallable ? MPT_USTRING("system, optional") :
 										info.type == ComponentTypeBundled ? MPT_USTRING("bundled") :

@@ -1061,13 +1061,13 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				m_playBehaviour.reset(kHertzInLinearMode);
 			break;
 		case 4:
-			m_madeWithTracker = MPT_FORMAT("pyIT %1.%2", (fileHeader.cwtv & 0x0F00) >> 8, mpt::fmt::hex0<2>((fileHeader.cwtv & 0xFF)));
+			m_madeWithTracker = mpt::format("pyIT %1.%2")((fileHeader.cwtv & 0x0F00) >> 8, mpt::fmt::hex0<2>((fileHeader.cwtv & 0xFF)));
 			break;
 		case 6:
 			m_madeWithTracker = "BeRoTracker";
 			break;
 		case 7:
-			m_madeWithTracker = MPT_FORMAT("ITMCK %1.%2.%3", (fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
+			m_madeWithTracker = mpt::format("ITMCK %1.%2.%3")((fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
 			break;
 		case 0xD:
 			m_madeWithTracker = "spc2it";

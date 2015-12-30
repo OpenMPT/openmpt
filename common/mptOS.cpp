@@ -204,7 +204,7 @@ mpt::ustring Version::VersionToString(uint16 version)
 	}
 	if(result.empty())
 	{
-		result = MPT_UFORMAT("0x%1", mpt::ufmt::dec0<4>(version));
+		result = mpt::format(MPT_USTRING("0x%1"))(mpt::ufmt::dec0<4>(version));
 	}
 	return result;
 }
@@ -266,14 +266,14 @@ mpt::ustring Version::GetName() const
 		{
 			if(mpt::Wine::GetVersion().IsValid())
 			{
-				result = MPT_UFORMAT("Wine %1 (%2)"
-					, mpt::Wine::GetVersion().AsString()
+				result = mpt::format(MPT_USTRING("Wine %1 (%2)"))(
+					  mpt::Wine::GetVersion().AsString()
 					, name
 					);
 			} else
 			{
-				result = MPT_UFORMAT("Wine (unknown version: '%1') (%2)"
-					, mpt::ToUnicode(mpt::CharsetUTF8, mpt::Wine::RawGetVersion())
+				result = mpt::format(MPT_USTRING("Wine (unknown version: '%1') (%2)"))(
+					  mpt::ToUnicode(mpt::CharsetUTF8, mpt::Wine::RawGetVersion())
 					, name
 					);
 			}

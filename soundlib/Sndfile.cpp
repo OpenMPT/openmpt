@@ -446,7 +446,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 #ifdef MODPLUG_TRACKER
 				// Provide some visual feedback
 				{
-					mpt::ustring s = MPT_UFORMAT("Loading Plugin FX%1: %2 (%3)",
+					mpt::ustring s = mpt::format(MPT_USTRING("Loading Plugin FX%1: %2 (%3)"))(
 						mpt::ufmt::dec0<2>(plug + 1),
 						mpt::ToUnicode(mpt::CharsetUTF8, m_MixPlugins[plug].Info.szLibraryName),
 						mpt::ToUnicode(mpt::CharsetLocale, m_MixPlugins[plug].Info.szName));
