@@ -155,17 +155,17 @@ void Manager::ReEnumerate()
 	}
 	std::stable_sort(m_SoundDevices.begin(), m_SoundDevices.end(), CompareInfo(typePriorities));
 
-	MPT_LOG(LogDebug, "sounddev", MPT_USTRING("Sound Devices enumerated:"));
+	MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("Sound Devices enumerated:"))());
 	for(std::size_t i = 0; i < m_SoundDevices.size(); ++i)
 	{
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT(" Identifier : %1", m_SoundDevices[i].GetIdentifier()));
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("  Type      : %1", m_SoundDevices[i].type));
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("  InternalID: %1", m_SoundDevices[i].internalID));
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("  API Name  : %1", m_SoundDevices[i].apiName));
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("  Name      : %1", m_SoundDevices[i].name));
+		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING(" Identifier : %1"))(m_SoundDevices[i].GetIdentifier()));
+		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("  Type      : %1"))(m_SoundDevices[i].type));
+		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("  InternalID: %1"))(m_SoundDevices[i].internalID));
+		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("  API Name  : %1"))(m_SoundDevices[i].apiName));
+		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("  Name      : %1"))(m_SoundDevices[i].name));
 		for(std::map<mpt::ustring, mpt::ustring>::const_iterator extraIt = m_SoundDevices[i].extraData.begin(); extraIt != m_SoundDevices[i].extraData.end(); ++extraIt)
 		{
-			Log(LogDebug, MPT_UFORMAT("  Extra Data: %1 = %2", extraIt->first, extraIt->second));
+			Log(LogDebug, mpt::format(MPT_USTRING("  Extra Data: %1 = %2"))(extraIt->first, extraIt->second));
 		}
 	}
 	

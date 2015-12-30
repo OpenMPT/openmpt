@@ -290,7 +290,7 @@ bool CWaveDevice::CheckResult(MMRESULT result)
 		WCHAR errortext[MAXERRORLENGTH + 1];
 		MemsetZero(errortext);
 		waveOutGetErrorTextW(result, errortext, MAXERRORLENGTH);
-		SendDeviceMessage(LogError, MPT_UFORMAT("WaveOut error: 0x%1: %2", mpt::ufmt::hex0<8>(result), mpt::ToUnicode(errortext)));
+		SendDeviceMessage(LogError, mpt::format(MPT_USTRING("WaveOut error: 0x%1: %2"))(mpt::ufmt::hex0<8>(result), mpt::ToUnicode(errortext)));
 	}
 	RequestClose();
 	return false;
@@ -484,14 +484,14 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices()
 		if(waveOutGetDevCapsW((index == 0) ? WAVE_MAPPER : (index - 1), &woc, sizeof(woc)) == MMSYSERR_NOERROR)
 		{
 			info.name = mpt::ToUnicode(woc.szPname);
-			info.extraData[MPT_USTRING("DriverID")] = MPT_UFORMAT("%1:%2", mpt::ufmt::hex0<4>(woc.wMid), mpt::ufmt::hex0<4>(woc.wPid));
-			info.extraData[MPT_USTRING("DriverVersion")] = MPT_UFORMAT("%3.%4", mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >> 24) & 0xff), mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >>  0) & 0xff));
+			info.extraData[MPT_USTRING("DriverID")] = mpt::format(MPT_USTRING("%1:%2"))(mpt::ufmt::hex0<4>(woc.wMid), mpt::ufmt::hex0<4>(woc.wPid));
+			info.extraData[MPT_USTRING("DriverVersion")] = mpt::format(MPT_USTRING("%3.%4"))(mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >> 24) & 0xff), mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >>  0) & 0xff));
 		} else if(index == 0)
 		{
-			info.name = MPT_USTRING("Auto (Wave Mapper)");
+			info.name = mpt::format(MPT_USTRING("Auto (Wave Mapper)"))();
 		} else
 		{
-			info.name = MPT_UFORMAT("Device %1", index - 1);
+			info.name = mpt::format(MPT_USTRING("Device %1"))(index - 1);
 		}
 		info.isDefault = (index == 0);
 		devices.push_back(info);

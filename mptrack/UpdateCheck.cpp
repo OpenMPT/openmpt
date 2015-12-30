@@ -275,9 +275,9 @@ void CUpdateCheck::ShowSuccessGUI(WPARAM wparam, LPARAM lparam)
 	if(result.UpdateAvailable)
 	{
 		if(Reporting::Confirm(
-			MPT_UFORMAT("A new version is available!\nOpenMPT %1 has been released on %2. Would you like to visit %3 for more information?"
-			, result.Version, result.Date, result.URL
-			), MPT_USTRING("OpenMPT Internet Update")) == cnfYes)
+			mpt::format(MPT_USTRING("A new version is available!\nOpenMPT %1 has been released on %2. Would you like to visit %3 for more information?"))
+			 (result.Version, result.Date, result.URL)
+			 , MPT_USTRING("OpenMPT Internet Update")) == cnfYes)
 		{
 			CTrackApp::OpenURL(result.URL);
 		}

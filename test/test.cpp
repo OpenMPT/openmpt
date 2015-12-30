@@ -484,35 +484,19 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::wfmt::flt(6.12345, 0, 4), L"6.123");
 #endif
 
-	// basic functionality
-	VERIFY_EQUAL(MPT_FORMAT("%1%2%3",1,2,3), "123");
-	VERIFY_EQUAL(MPT_FORMAT("%1%1%1",1,2,3), "111");
-	VERIFY_EQUAL(MPT_FORMAT("%3%3%3",1,2,3), "333");
+	// basic
 	VERIFY_EQUAL(mpt::format("%1%2%3")(1,2,3), "123");
 	VERIFY_EQUAL(mpt::format("%1%1%1")(1,2,3), "111");
 	VERIFY_EQUAL(mpt::format("%3%3%3")(1,2,3), "333");
 
 	// template argument deduction of string type
-	VERIFY_EQUAL(MPT_FORMAT(std::string("%1%2%3"),1,2,3), "123");
 	VERIFY_EQUAL(mpt::format(std::string("%1%2%3"))(1,2,3), "123");
 #if MPT_WSTRING_FORMAT
-	VERIFY_EQUAL(MPT_WFORMAT("%1%2%3",1,2,3), L"123");
-	VERIFY_EQUAL(MPT_WFORMAT("%1%2%3",1,2,3), L"123");
 	VERIFY_EQUAL(mpt::format(L"%1%2%3")(1,2,3), L"123");
 	VERIFY_EQUAL(mpt::format(L"%1%2%3")(1,2,3), L"123");
 #endif
 
 	// escaping and error behviour of '%'
-	VERIFY_EQUAL(MPT_FORMAT("%"), "%");
-	VERIFY_EQUAL(MPT_FORMAT("%%"), "%");
-	VERIFY_EQUAL(MPT_FORMAT("%%%"), "%%");
-	VERIFY_EQUAL(MPT_FORMAT("%1", "a"), "a");
-	VERIFY_EQUAL(MPT_FORMAT("%1%", "a"), "a%");
-	VERIFY_EQUAL(MPT_FORMAT("%1%%", "a"), "a%");
-	VERIFY_EQUAL(MPT_FORMAT("%1%%%", "a"), "a%%");
-	VERIFY_EQUAL(MPT_FORMAT("%%1", "a"), "%1");
-	VERIFY_EQUAL(MPT_FORMAT("%%%1", "a"), "%a");
-	VERIFY_EQUAL(MPT_FORMAT("%b", "a"), "%b");
 	VERIFY_EQUAL(mpt::format("%")(), "%");
 	VERIFY_EQUAL(mpt::format("%%")(), "%");
 	VERIFY_EQUAL(mpt::format("%%%")(), "%%");
@@ -526,8 +510,6 @@ static MPT_NOINLINE void TestStringFormatting()
 
 #if defined(_MFC_VER)
 	VERIFY_EQUAL(mpt::ToUString(CString(_T("foobar"))), MPT_USTRING("foobar"));
-	VERIFY_EQUAL(MPT_TFORMAT("%1%2%3",1,2,3), _T("123"));
-	VERIFY_EQUAL(MPT_TFORMAT("%1%2%3",1,mpt::tfmt::dec0<3>(2),3), _T("10023"));
 	VERIFY_EQUAL(mpt::ToUString(CString(_T("foobar"))), MPT_USTRING("foobar"));
 	VERIFY_EQUAL(mpt::format(CString(_T("%1%2%3")))(1,2,3), _T("123"));
 	VERIFY_EQUAL(mpt::format(CString(_T("%1%2%3")))(1,mpt::tfmt::dec0<3>(2),3), _T("10023"));
