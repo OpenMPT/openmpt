@@ -38,8 +38,6 @@ class CPortaudioDevice: public SoundDevice::Base
 
 protected:
 
-	mpt::Windows::Version m_WindowsVersion;
-
 	PaDeviceIndex m_DeviceIndex;
 	PaHostApiTypeId m_HostApiType;
 	PaStreamParameters m_StreamParameters;
@@ -58,7 +56,7 @@ protected:
 
 public:
 
-	CPortaudioDevice(SoundDevice::Info info);
+	CPortaudioDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	~CPortaudioDevice();
 
 public:
@@ -95,7 +93,7 @@ public:
 		void *userData
 		);
 
-	static std::vector<SoundDevice::Info> EnumerateDevices();
+	static std::vector<SoundDevice::Info> EnumerateDevices(SoundDevice::SysInfo sysInfo);
 
 private:
 

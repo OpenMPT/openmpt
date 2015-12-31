@@ -42,10 +42,11 @@ public:
 
 private:
 
-	typedef SoundDevice::IBase* (*CreateSoundDeviceFunc)(const SoundDevice::Info &info);
+	typedef SoundDevice::IBase* (*CreateSoundDeviceFunc)(const SoundDevice::Info &info, SoundDevice::SysInfo sysInfo);
 
 private:
 
+	const SoundDevice::SysInfo m_SysInfo;
 	const SoundDevice::AppInfo m_AppInfo;
 
 #if MPT_OS_WINDOWS
@@ -68,15 +69,19 @@ private:
 	std::map<SoundDevice::Identifier, SoundDevice::DynamicCaps> m_DeviceDynamicCaps;
 
 public:
-	Manager(SoundDevice::AppInfo appInfo);
+
+	Manager(SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo);
 	~Manager();
 
 private:
 
-	template <typename Tdevice> void EnumerateDevices();
-	template <typename Tdevice> static SoundDevice::IBase* ConstructSoundDevice(const SoundDevice::Info &info);
+	template <typename Tdevice> void EnumerateDevices(SoundDevice::SysInfo sysInfo);
+	template <typename Tdevice> static SoundDevice::IBase* ConstructSoundDevice(const SoundDevice::Info &info, SoundDevice::SysInfo sysInfo);
 
 public:
+
+	SoundDevice::SysInfo GetSysInfo() const { return m_SysInfo; }
+	SoundDevice::AppInfo GetAppInfo() const { return m_AppInfo; }
 
 	void ReEnumerate();
 

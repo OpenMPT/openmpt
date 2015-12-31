@@ -24,6 +24,22 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
+SysInfo::SysInfo()
+//----------------
+	: WindowsVersion(mpt::Windows::Version::Current())
+	, IsWine(mpt::Windows::IsWine())
+{
+	return;
+}
+
+
+SysInfo SysInfo::Current()
+//------------------------
+{
+	return SysInfo();
+}
+
+
 SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier)
 //--------------------------------------------------------------------
 {

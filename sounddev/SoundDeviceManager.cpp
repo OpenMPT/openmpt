@@ -44,10 +44,10 @@ struct CompareInfo
 
 
 template <typename Tdevice>
-void Manager::EnumerateDevices()
-//------------------------------
+void Manager::EnumerateDevices(SoundDevice::SysInfo sysInfo)
+//----------------------------------------------------------
 {
-	const std::vector<SoundDevice::Info> infos = Tdevice::EnumerateDevices();
+	const std::vector<SoundDevice::Info> infos = Tdevice::EnumerateDevices(sysInfo);
 	m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
 	for(std::vector<SoundDevice::Info>::const_iterator it = infos.begin(); it != infos.end(); ++it)
 	{
@@ -61,10 +61,10 @@ void Manager::EnumerateDevices()
 
 
 template <typename Tdevice>
-SoundDevice::IBase* Manager::ConstructSoundDevice(const SoundDevice::Info &info)
-//------------------------------------------------------------------------------
+SoundDevice::IBase* Manager::ConstructSoundDevice(const SoundDevice::Info &info, SoundDevice::SysInfo sysInfo)
+//------------------------------------------------------------------------------------------------------------
 {
-	return new Tdevice(info);
+	return new Tdevice(info, sysInfo);
 }
 
 
@@ -88,7 +88,7 @@ void Manager::ReEnumerate()
 #if MPT_OS_WINDOWS
 	if(IsComponentAvailable(m_WaveOut))
 	{
-		EnumerateDevices<CWaveDevice>();
+		EnumerateDevices<CWaveDevice>(GetSysInfo());
 	}
 #endif // MPT_OS_WINDOWS
 
@@ -96,27 +96,26 @@ void Manager::ReEnumerate()
 	// kind of deprecated by now
 	if(IsComponentAvailable(m_DirectSound))
 	{
-		EnumerateDevices<CDSoundDevice>();
+		EnumerateDevices<CDSoundDevice>(GetSysInfo());
 	}
 #endif // NO_DSOUND
 
 #ifndef NO_ASIO
 	if(IsComponentAvailable(m_ASIO))
 	{
-		EnumerateDevices<CASIODevice>();
+		EnumerateDevices<CASIODevice>(GetSysInfo());
 	}
 #endif // NO_ASIO
 
 #ifndef NO_PORTAUDIO
 	if(IsComponentAvailable(m_PortAudio))
 	{
-		EnumerateDevices<CPortaudioDevice>();
+		EnumerateDevices<CPortaudioDevice>(GetSysInfo());
 	}
 #endif // NO_PORTAUDIO
 
 	std::map<SoundDevice::Type, int> typePriorities;
-	mpt::Windows::Version WindowsVersion = mpt::Windows::Version::Current();
-	if(mpt::Windows::IsWine())
+	if(GetSysInfo().IsWine)
 	{ // Wine
 		typePriorities[SoundDevice::TypeDSOUND] = 29;
 		typePriorities[SoundDevice::TypeWAVEOUT] = 28;
@@ -125,7 +124,7 @@ void Manager::ReEnumerate()
 		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
 		typePriorities[SoundDevice::TypePORTAUDIO_DS] = 18;
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = -1;
-	} else if(WindowsVersion.Is9x())
+	} else if(GetSysInfo().WindowsVersion.Is9x())
 	{ // Win9x
 		typePriorities[SoundDevice::TypeWAVEOUT] = 29;
 		typePriorities[SoundDevice::TypeDSOUND] = 28;
@@ -134,7 +133,7 @@ void Manager::ReEnumerate()
 		typePriorities[SoundDevice::TypeASIO] = 1;
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = -1;
 		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = -2;
-	} else if(WindowsVersion.IsBefore(mpt::Windows::Version::WinVista))
+	} else if(GetSysInfo().WindowsVersion.IsBefore(mpt::Windows::Version::WinVista))
 	{ // WinXP
 		typePriorities[SoundDevice::TypeWAVEOUT] = 29;
 		typePriorities[SoundDevice::TypeASIO] = 28;
@@ -369,7 +368,7 @@ SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifi
 	{
 		return nullptr;
 	}
-	SoundDevice::IBase *result = m_DeviceFactoryMethods[identifier](info);
+	SoundDevice::IBase *result = m_DeviceFactoryMethods[identifier](info, GetSysInfo());
 	if(!result)
 	{
 		return nullptr;
@@ -385,9 +384,10 @@ SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifi
 }
 
 
-Manager::Manager(SoundDevice::AppInfo appInfo)
-//--------------------------------------------
-	: m_AppInfo(appInfo)
+Manager::Manager(SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo)
+//--------------------------------------------------------------------------
+	: m_SysInfo(sysInfo)
+	, m_AppInfo(appInfo)
 {
 	ReEnumerate();
 }

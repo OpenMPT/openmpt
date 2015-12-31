@@ -45,6 +45,7 @@ private:
 
 protected:
 
+	SoundDevice::SysInfo m_SysInfo;
 	SoundDevice::AppInfo m_AppInfo;
 	SoundDevice::Settings m_Settings;
 	SoundDevice::Flags m_Flags;
@@ -62,6 +63,11 @@ private:
 	int64 m_StreamPositionOutputFrames;
 
 	mpt::atomic_uint32_t m_RequestFlags;
+
+public:
+
+	SoundDevice::SysInfo GetSysInfo() const { return m_SysInfo; }
+	SoundDevice::AppInfo GetAppInfo() const { return m_AppInfo; }
 
 protected:
 
@@ -111,7 +117,7 @@ protected:
 
 protected:
 
-	Base(SoundDevice::Info info);
+	Base(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 
 public:
 

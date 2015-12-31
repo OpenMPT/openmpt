@@ -130,6 +130,13 @@ mpt::Windows::Version Version::Current()
 }
 
 
+bool Version::IsWindows() const
+//-----------------------------
+{
+	return SystemIsWindows;
+}
+
+
 bool Version::IsBefore(mpt::Windows::Version::Number version) const
 //-----------------------------------------------------------------
 {

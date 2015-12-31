@@ -12,6 +12,7 @@
 #pragma once
 
 #include "../common/FlagSet.h"
+#include "../common/mptOS.h"
 #include "../soundlib/SampleFormat.h"
 
 #include <map>
@@ -238,6 +239,17 @@ public:
 
 	static SoundDevice::ChannelMapping FromString(const mpt::ustring &str);
 
+};
+
+
+struct SysInfo
+{
+	mpt::Windows::Version WindowsVersion;
+	bool IsWine;
+public:
+	static SysInfo Current();
+private:
+	SysInfo();
 };
 
 

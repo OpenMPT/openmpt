@@ -64,6 +64,8 @@ public:
 
 public:
 
+	bool IsWindows() const;
+
 	bool IsBefore(mpt::Windows::Version::Number version) const;
 	bool IsAtLeast(mpt::Windows::Version::Number version) const;
 

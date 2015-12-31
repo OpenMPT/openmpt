@@ -40,10 +40,9 @@ namespace SoundDevice {
 
 
 
-CPortaudioDevice::CPortaudioDevice(SoundDevice::Info info)
-//--------------------------------------------------------
-	: SoundDevice::Base(info)
-	, m_WindowsVersion(mpt::Windows::Version::Current())
+CPortaudioDevice::CPortaudioDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+//--------------------------------------------------------------------------------------
+	: SoundDevice::Base(info, sysInfo)
 	, m_StatisticPeriodFrames(0)
 {
 	m_DeviceIndex = ConvertStrTo<PaDeviceIndex>(GetDeviceInternalID());
@@ -120,10 +119,10 @@ bool CPortaudioDevice::InternalOpen()
 		framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
 	} else if(m_HostApiType == paMME)
 	{
-		m_Flags.NeedsClippedFloat = m_WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista);
+		m_Flags.NeedsClippedFloat = GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista);
 	} else if(m_HostApiType == paDirectSound)
 	{
-		m_Flags.NeedsClippedFloat = m_WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista);
+		m_Flags.NeedsClippedFloat = GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista);
 	} else
 	{
 		m_Flags.NeedsClippedFloat = false;
@@ -312,10 +311,10 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 		caps.DefaultSettings.sampleFormat = SampleFormatInt16;
 	} else if(m_HostApiType == paMME)
 	{
-		if(mpt::Windows::IsWine())
+		if(GetSysInfo().IsWine)
 		{
 			caps.DefaultSettings.sampleFormat = SampleFormatInt16;
-		} else if(m_WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista))
+		} else if(GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista))
 		{
 			caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
 		} else
@@ -388,7 +387,7 @@ bool CPortaudioDevice::OpenDriverSettings()
 	{
 		return false;
 	}
-	bool hasVista = m_WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista);
+	bool hasVista = GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista);
 	mpt::PathString controlEXE;
 	WCHAR systemDir[MAX_PATH];
 	MemsetZero(systemDir);
@@ -459,8 +458,8 @@ int CPortaudioDevice::StreamCallbackWrapper(
 }
 
 
-std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices()
-//-----------------------------------------------------------------
+std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::SysInfo sysInfo)
+//---------------------------------------------------------------------------------------------
 {
 	std::vector<SoundDevice::Info> devices;
 	for(PaDeviceIndex dev = 0; dev < Pa_GetDeviceCount(); ++dev)
@@ -516,7 +515,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices()
 				result.apiName = MPT_USTRING("WASAPI");
 				break;
 			case paWDMKS:
-				if(mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::WinVista))
+				if(sysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista))
 				{
 					result.apiName = MPT_USTRING("WaveRT");
 				} else
