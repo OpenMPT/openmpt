@@ -68,8 +68,9 @@ bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevic
 
 #if MPT_OS_WINDOWS
 
-CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice) : m_SoundDevice(SoundDevice)
-//------------------------------------------------------------------------------------------
+CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice)
+//-------------------------------------------------------------
+	: m_SoundDevice(SoundDevice)
 {
 	MPT_TRACE();
 	m_WakeupInterval = 0.0;
@@ -151,9 +152,10 @@ ComponentAvRt::~ComponentAvRt()
 }
 
 
-CPriorityBooster::CPriorityBooster(ComponentHandle<ComponentAvRt> & avrt, bool boostPriority)
-//-------------------------------------------------------------------------------------------
-	: m_AvRt(avrt)
+CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle<ComponentAvRt> & avrt, bool boostPriority)
+//-------------------------------------------------------------------------------------------------------------------------
+	: m_SysInfo(sysInfo)
+	, m_AvRt(avrt)
 	, m_BoostPriority(boostPriority)
 	, task_idx(0)
 	, hTask(NULL)
@@ -164,7 +166,7 @@ CPriorityBooster::CPriorityBooster(ComponentHandle<ComponentAvRt> & avrt, bool b
 	#endif
 	if(m_BoostPriority)
 	{
-		if(IsComponentAvailable(m_AvRt))
+		if(m_SysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista) && IsComponentAvailable(m_AvRt))
 		{
 			hTask = m_AvRt->AvSetMmThreadCharacteristicsW(L"Pro Audio", &task_idx);
 		} else
@@ -181,7 +183,7 @@ CPriorityBooster::~CPriorityBooster()
 	MPT_TRACE();
 	if(m_BoostPriority)
 	{
-		if(IsComponentAvailable(m_AvRt))
+		if(m_SysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista) && IsComponentAvailable(m_AvRt))
 		{
 			m_AvRt->AvRevertMmThreadCharacteristics(hTask);
 			hTask = NULL;
@@ -205,8 +207,6 @@ private:
 
 	Util::MultimediaClock clock_noxp;
 
-	mpt::Windows::Version WindowsVersion;
-
 	bool period_nont_set;
 	bool periodic_nt_timer;
 
@@ -218,7 +218,6 @@ public:
 	//-------------------------------------------------------
 		: self(self_)
 		, sleepSeconds(sleepSeconds_)
-		, WindowsVersion(mpt::Windows::Version::Current())
 	{
 
 		MPT_TRACE();
@@ -233,7 +232,7 @@ public:
 
 		sleepEvent = NULL;
 
-		if(WindowsVersion.IsNT())
+		if(self.m_SoundDevice.GetSysInfo().WindowsVersion.IsNT())
 		{
 			if(periodic_nt_timer)
 			{
@@ -270,7 +269,7 @@ public:
 	//--------------
 	{
 		MPT_TRACE();
-		if(WindowsVersion.IsNT())
+		if(self.m_SoundDevice.GetSysInfo().WindowsVersion.IsNT())
 		{
 			if(!periodic_nt_timer)
 			{
@@ -288,7 +287,7 @@ public:
 	//-------------------------------
 	{
 		MPT_TRACE();
-		if(WindowsVersion.IsNT())
+		if(self.m_SoundDevice.GetSysInfo().WindowsVersion.IsNT())
 		{
 			if(periodic_nt_timer)
 			{
@@ -343,7 +342,7 @@ DWORD CAudioThread::AudioThread()
 		if(!terminate)
 		{
 
-			CPriorityBooster priorityBooster(m_AvRt, m_SoundDevice.m_Settings.BoostThreadPriority);
+			CPriorityBooster priorityBooster(m_SoundDevice.GetSysInfo(), m_AvRt, m_SoundDevice.m_Settings.BoostThreadPriority);
 			CPeriodicWaker periodicWaker(*this, m_WakeupInterval);
 
 			m_SoundDevice.StartFromSoundThread();

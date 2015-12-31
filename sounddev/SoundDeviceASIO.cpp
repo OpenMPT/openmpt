@@ -103,8 +103,8 @@ public:
 CASIODevice *CASIODevice::g_CallbacksInstance = nullptr;
 
 
-std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices()
-//----------------------------------------------------------
+std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInfo /* sysInfo */ )
+//-----------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	std::vector<SoundDevice::Info> devices;
@@ -182,9 +182,9 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices()
 }
 
 
-CASIODevice::CASIODevice(SoundDevice::Info info)
-//----------------------------------------------
-	: SoundDevice::Base(info)
+CASIODevice::CASIODevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+//----------------------------------------------------------------------------
+	: SoundDevice::Base(info, sysInfo)
 {
 	MPT_TRACE();
 	InitMembers();

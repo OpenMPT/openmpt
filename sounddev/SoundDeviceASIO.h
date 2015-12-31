@@ -104,7 +104,7 @@ private:
 	void SetRenderSilence(bool silence, bool wait=false);
 
 public:
-	CASIODevice(SoundDevice::Info info);
+	CASIODevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	~CASIODevice();
 
 private:
@@ -136,7 +136,7 @@ public:
 	SoundDevice::Statistics GetStatistics() const;
 
 public:
-	static std::vector<SoundDevice::Info> EnumerateDevices();
+	static std::vector<SoundDevice::Info> EnumerateDevices(SoundDevice::SysInfo sysInfo);
 
 protected:
 	void OpenDriver();

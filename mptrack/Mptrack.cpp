@@ -1123,7 +1123,8 @@ BOOL CTrackApp::InitInstance()
 
 	// Load sound APIs
 	// requires TrackerSettings
-	m_pSoundDevicesManager = new SoundDevice::Manager(SoundDevice::AppInfo().SetName(MPT_USTRING("OpenMPT")).SetHWND(*m_pMainWnd));
+	SoundDevice::SysInfo sysInfo = SoundDevice::SysInfo::Current();
+	m_pSoundDevicesManager = new SoundDevice::Manager(sysInfo, SoundDevice::AppInfo().SetName(MPT_USTRING("OpenMPT")).SetHWND(*m_pMainWnd));
 	m_pTrackerSettings->MigrateOldSoundDeviceSettings(*m_pSoundDevicesManager);
 
 	// Load static tunings

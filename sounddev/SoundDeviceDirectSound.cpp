@@ -101,8 +101,8 @@ static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCW
 }
 
 
-std::vector<SoundDevice::Info> CDSoundDevice::EnumerateDevices()
-//------------------------------------------------------------
+std::vector<SoundDevice::Info> CDSoundDevice::EnumerateDevices(SoundDevice::SysInfo /* sysInfo */ )
+//-------------------------------------------------------------------------------------------------
 {
 	std::vector<SoundDevice::Info> devices;
 	DirectSoundEnumerateW(DSEnumCallbackW, &devices);
@@ -110,9 +110,9 @@ std::vector<SoundDevice::Info> CDSoundDevice::EnumerateDevices()
 }
 
 
-CDSoundDevice::CDSoundDevice(SoundDevice::Info info)
-//--------------------------------------------------
-	: CSoundDeviceWithThread(info)
+CDSoundDevice::CDSoundDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+//--------------------------------------------------------------------------------
+	: CSoundDeviceWithThread(info, sysInfo)
 	, m_piDS(NULL)
 	, m_pPrimary(NULL)
 	, m_pMixBuffer(NULL)
@@ -338,7 +338,7 @@ bool CDSoundDevice::InternalOpen()
 	}
 	m_dwWritePos = 0xFFFFFFFF;
 	SetWakeupInterval(std::min(m_Settings.UpdateInterval, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond())));
-	m_Flags.NeedsClippedFloat = mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::WinVista);
+	m_Flags.NeedsClippedFloat = GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista);
 	return true;
 }
 

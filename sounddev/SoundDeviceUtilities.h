@@ -55,12 +55,13 @@ public:
 class CPriorityBooster
 {
 private:
+	SoundDevice::SysInfo m_SysInfo;
 	ComponentHandle<ComponentAvRt> & m_AvRt;
 	bool m_BoostPriority;
 	DWORD task_idx;
 	HANDLE hTask;
 public:
-	CPriorityBooster(ComponentHandle<ComponentAvRt> & avrt, bool boostPriority);
+	CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle<ComponentAvRt> & avrt, bool boostPriority);
 	~CPriorityBooster();
 };
 
@@ -104,7 +105,7 @@ protected:
 	void SetWakeupEvent(HANDLE ev);
 	void SetWakeupInterval(double seconds);
 public:
-	CSoundDeviceWithThread(SoundDevice::Info info) : SoundDevice::Base(info), m_AudioThread(*this) {}
+	CSoundDeviceWithThread(SoundDevice::Info info, SoundDevice::SysInfo sysInfo) : SoundDevice::Base(info, sysInfo), m_AudioThread(*this) {}
 	virtual ~CSoundDeviceWithThread() {}
 	bool InternalStart();
 	void InternalStop();

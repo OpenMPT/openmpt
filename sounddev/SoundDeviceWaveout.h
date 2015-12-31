@@ -44,7 +44,6 @@ class CWaveDevice: public CSoundDeviceWithThread
 //==============================================
 {
 protected:
-	mpt::Windows::Version m_WindowsVersion;
 	HANDLE m_ThreadWakeupEvent;
 	bool m_Failed;
 	HWAVEOUT m_hWaveOut;
@@ -61,7 +60,7 @@ protected:
 	mutable std::size_t m_PositionWrappedCount;
 
 public:
-	CWaveDevice(SoundDevice::Info info);
+	CWaveDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	~CWaveDevice();
 
 public:
@@ -90,7 +89,7 @@ private:
 	
 public:
 	static void CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
-	static std::vector<SoundDevice::Info> EnumerateDevices();
+	static std::vector<SoundDevice::Info> EnumerateDevices(SoundDevice::SysInfo sysInfo);
 };
 
 #endif // MPT_OS_WINDOWS
