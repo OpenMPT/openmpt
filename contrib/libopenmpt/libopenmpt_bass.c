@@ -101,9 +101,9 @@ int main( int argc, char * argv[] ) {
 	}
 
 	BASS_StreamFree( stream );
-	BASS_Free();
 	openmpt_module_destroy( mod );
 
 fail:
+	BASS_Free();
 	return result;
 }

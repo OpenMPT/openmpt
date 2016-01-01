@@ -53,6 +53,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_WM_VSCROLL()
 	ON_WM_SIZE()
 	ON_WM_MOUSEWHEEL()
+	ON_WM_MOUSEHWHEEL()
 	ON_WM_XBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONDOWN()
@@ -1550,6 +1551,13 @@ BOOL CViewPattern::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 }
 
 
+void CViewPattern::OnMouseHWheel(UINT nFlags, short zDelta, CPoint pt)
+//--------------------------------------------------------------------
+{
+	OnScrollBy(CSize(sgn(zDelta) * m_szCell.cx, 0));
+}
+
+
 void CViewPattern::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
 //---------------------------------------------------------------------
 {
@@ -2390,86 +2398,68 @@ EndSearch:
 	{
 		CString result;
 		result.Preallocate(14 + 16);
-		result = "Cannot find \"";
+		result = _T("Cannot find \"");
 
 		// Note
 		if(m_findReplace.findFlags[FindReplace::Note])
-		{
 			result.Append(pSndFile->GetNoteName(m_findReplace.cmdFind.note).c_str());
-		} else
-		{
-			result.Append("???");
-		}
-		result.AppendChar(' ');
+		else
+			result.Append(_T("???"));
+		result.AppendChar(_T(' '));
 
 		// Instrument
 		if(m_findReplace.findFlags[FindReplace::Instr])
 		{
 			if (m_findReplace.cmdFind.instr)
-			{
-				result.AppendFormat("%03d", m_findReplace.cmdFind.instr);
-			} else
-			{
-				result.Append(" ..");
-			}
+				result.AppendFormat(_T("%03d"), m_findReplace.cmdFind.instr);
+			else
+				result.Append(_T(" .."));
 		} else
 		{
-			result.Append(" ??");
+			result.Append(_T(" ??"));
 		}
-		result.AppendChar(' ');
+		result.AppendChar(_T(' '));
 
 		// Volume Command
 		if(m_findReplace.findFlags[FindReplace::VolCmd])
 		{
 			if(m_findReplace.cmdFind.volcmd)
-			{
 				result.AppendChar(pSndFile->GetModSpecifications().GetVolEffectLetter(m_findReplace.cmdFind.volcmd));
-			} else
-			{
-				result.AppendChar('.');
-			}
+			else
+				result.AppendChar(_T('.'));
 		} else
 		{
-			result.AppendChar('?');
+			result.AppendChar(_T('?'));
 		}
 
 		// Volume Parameter
 		if(m_findReplace.findFlags[FindReplace::Volume])
-		{
-			result.AppendFormat("%02d", m_findReplace.cmdFind.vol);
-		} else
-		{
-			result.AppendFormat("??");
-		}
-		result.AppendChar(' ');
+			result.AppendFormat(_T("%02d"), m_findReplace.cmdFind.vol);
+		else
+			result.AppendFormat(_T("??"));
+		result.AppendChar(_T(' '));
 
 		// Effect Command
 		if(m_findReplace.findFlags[FindReplace::Command])
 		{
 			if(m_findReplace.cmdFind.command)
-			{
 				result.AppendChar(pSndFile->GetModSpecifications().GetEffectLetter(m_findReplace.cmdFind.command));
-			} else
-			{
-				result.AppendChar('.');
-			}
+			else
+				result.AppendChar(_T('.'));
 		} else
 		{
-			result.AppendChar('?');
+			result.AppendChar(_T('?'));
 		}
 
 		// Effect Parameter
 		if(m_findReplace.findFlags[FindReplace::Param])
-		{
-			result.AppendFormat("%02X", m_findReplace.cmdFind.param);
-		} else
-		{
-			result.AppendFormat("??");
-		}
+			result.AppendFormat(_T("%02X"), m_findReplace.cmdFind.param);
+		else
+			result.AppendFormat(_T("??"));
 
-		result.AppendChar('"');
+		result.AppendChar(_T('"'));
 
-		Reporting::Information(result, "Find/Replace");
+		Reporting::Information(result, _T("Find/Replace"));
 	}
 }
 
@@ -2521,9 +2511,9 @@ void CViewPattern::PatternStep(ROWINDEX row)
 		if(row == ROWINDEX_INVALID)
 		{
 			if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
-				SetCurrentRow(GetCurrentRow() + 1, TRUE);
+				SetCurrentRow(GetCurrentRow() + 1, true);
 			else
-				SetCurrentRow((GetCurrentRow() + 1) % pSndFile->Patterns[m_nPattern].GetNumRows(), FALSE);
+				SetCurrentRow((GetCurrentRow() + 1) % pSndFile->Patterns[m_nPattern].GetNumRows(), false);
 		}
 		SetFocus();
 	}

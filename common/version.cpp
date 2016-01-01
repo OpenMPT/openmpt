@@ -460,7 +460,7 @@ mpt::ustring GetFullCreditsString()
 		"libopenmpt (based on OpenMPT / ModPlug Tracker)\n"
 #endif
 		"\n"
-		"Copyright \xC2\xA9 2004-2015 Contributors\n"
+		"Copyright \xC2\xA9 2004-2016 Contributors\n"
 		"Copyright \xC2\xA9 1997-2003 Olivier Lapicque\n"
 		"\n"
 		"Contributors:\n"
