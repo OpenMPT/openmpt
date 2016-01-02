@@ -53,7 +53,6 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_WM_VSCROLL()
 	ON_WM_SIZE()
 	ON_WM_MOUSEWHEEL()
-	ON_WM_MOUSEHWHEEL()
 	ON_WM_XBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONDOWN()
@@ -1548,13 +1547,6 @@ BOOL CViewPattern::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 		return TRUE;
 	}
 	return CModScrollView::OnMouseWheel(nFlags, zDelta, pt);
-}
-
-
-void CViewPattern::OnMouseHWheel(UINT nFlags, short zDelta, CPoint pt)
-//--------------------------------------------------------------------
-{
-	OnScrollBy(CSize(sgn(zDelta) * m_szCell.cx, 0));
 }
 
 
