@@ -268,7 +268,7 @@ mpt::ustring Version::GetName() const
 		}
 	}
 	mpt::ustring result = name;
-	#if defined(MODPLUG_TRACKER)
+	#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 		if(mpt::Windows::IsWine())
 		{
 			if(mpt::Wine::GetVersion().IsValid())
@@ -285,7 +285,7 @@ mpt::ustring Version::GetName() const
 					);
 			}
 		}
-	#endif // MODPLUG_TRACKER
+	#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 	return result;
 }
 
@@ -318,6 +318,71 @@ uint16 Version::GetMinimumAPILevel()
 }
 
 
+#if defined(MODPLUG_TRACKER)
+
+
+#if MPT_OS_WINDOWS
+
+static bool GatherSystemIsWine()
+//------------------------------
+{
+	bool SystemIsWine = false;
+	HMODULE hNTDLL = LoadLibraryW(L"ntdll.dll");
+	if(hNTDLL)
+	{
+		SystemIsWine = (GetProcAddress(hNTDLL, "wine_get_version") != NULL);
+		FreeLibrary(hNTDLL);
+		hNTDLL = NULL;
+	}
+	return SystemIsWine;
+}
+
+#endif // MPT_OS_WINDOWS
+
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+
+namespace {
+struct SystemIsWineCache
+{
+	bool SystemIsWine;
+	SystemIsWineCache()
+		: SystemIsWine(GatherSystemIsWine())
+	{
+		return;
+	}
+};
+}
+
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+
+static bool SystemIsWine()
+{
+	#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+		static SystemIsWineCache gs_SystemIsWineCache;
+		return gs_SystemIsWineCache.SystemIsWine;
+	#elif MPT_OS_WINDOWS
+		return GatherSystemIsWine();
+	#else
+		return false;
+	#endif
+}
+
+bool IsOriginal()
+//---------------
+{
+	return mpt::Windows::Version::Current().IsWindows() && !SystemIsWine();
+}
+
+bool IsWine()
+//-----------
+{
+	return mpt::Windows::Version::Current().IsWindows() && SystemIsWine();
+}
+
+
+#endif // MODPLUG_TRACKER
+
+
 } // namespace Windows
 } // namespace mpt
 
@@ -327,51 +392,6 @@ uint16 Version::GetMinimumAPILevel()
 
 namespace mpt
 {
-
-
-namespace Windows
-{
-
-
-namespace {
-struct SystemIsWineCache
-{
-	bool SystemIsWine;
-	SystemIsWineCache()
-		: SystemIsWine(false)
-	{
-		HMODULE hNTDLL = LoadLibraryW(L"ntdll.dll");
-		if(hNTDLL)
-		{
-			SystemIsWine = (GetProcAddress(hNTDLL, "wine_get_version") != NULL);
-			FreeLibrary(hNTDLL);
-			hNTDLL = NULL;
-		}
-	}
-};
-}
-static bool SystemIsWine()
-{
-	static SystemIsWineCache gs_SystemIsWineCache;
-	return gs_SystemIsWineCache.SystemIsWine;
-}
-
-bool IsOriginal()
-//---------------
-{
-	return !SystemIsWine();
-}
-
-bool IsWine()
-//-----------
-{
-	return SystemIsWine();
-}
-
-
-} // namespace Windows
-
-
 namespace Wine
 {
 

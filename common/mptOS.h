@@ -81,6 +81,13 @@ public:
 
 }; // class Version
 
+#if defined(MODPLUG_TRACKER)
+
+bool IsOriginal();
+bool IsWine();
+
+#endif // MODPLUG_TRACKER
+
 } // namespace Windows
 } // namespace mpt
 
@@ -89,14 +96,6 @@ public:
 
 namespace mpt
 {
-
-namespace Windows
-{
-
-bool IsOriginal();
-bool IsWine();
-
-} // namespace Windows
 
 namespace Wine
 {
