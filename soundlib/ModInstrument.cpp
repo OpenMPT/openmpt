@@ -126,9 +126,10 @@ int32 InstrumentEnvelope::GetValueFromPosition(int position, int32 rangeOut, int
 }
 
 
-void InstrumentEnvelope::FixEnvelope(uint8 maxValue)
-//--------------------------------------------------
+void InstrumentEnvelope::Sanitize(uint8 maxValue)
+//-----------------------------------------------
 {
+	LimitMax(nNodes, MAX_ENVPOINTS);
 	Ticks[0] = 0;
 	for(uint32 i = 1; i < nNodes; i++)
 	{
@@ -287,6 +288,40 @@ void ModInstrument::GetSamples(std::vector<bool> &referencedSamples) const
 			referencedSamples[Keyboard[i]] = true;
 		}
 	}
+}
+
+
+void ModInstrument::Sanitize(MODTYPE modType)
+//-------------------------------------------
+{
+	LimitMax(nFadeOut, 65536u);
+	LimitMax(nGlobalVol, 64u);
+	LimitMax(nPan, 256u);
+
+	LimitMax(wMidiBank, 16384u);
+	LimitMax(nMidiProgram, 128u);
+	LimitMax(nMidiChannel, 17u);
+
+	if(nNNA > NNA_NOTEFADE) nNNA = NNA_NOTECUT;
+	if(nDCT > DCT_PLUGIN) nDCT = DCT_NONE;
+	if(nDNA > DNA_NOTEFADE) nDNA = DNA_NOTECUT;
+
+	LimitMax(nPanSwing, 64u);
+	LimitMax(nVolSwing, 100u);
+
+	Limit(nPPS, -32, 32);
+
+	LimitMax(nCutSwing, 64u);
+	LimitMax(nResSwing, 64u);
+	
+#ifdef MODPLUG_TRACKER
+	const uint8 range = ENVELOPE_MAX;
+#else
+	const uint8 range = modType == MOD_TYPE_AMS2 ? uint8_max : ENVELOPE_MAX;
+#endif
+	VolEnv.Sanitize();
+	PanEnv.Sanitize();
+	PitchEnv.Sanitize(range);
 }
 
 
