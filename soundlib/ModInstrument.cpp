@@ -129,7 +129,7 @@ int32 InstrumentEnvelope::GetValueFromPosition(int position, int32 rangeOut, int
 void InstrumentEnvelope::Sanitize(uint8 maxValue)
 //-----------------------------------------------
 {
-	LimitMax(nNodes, MAX_ENVPOINTS);
+	LimitMax(nNodes, uint32(MAX_ENVPOINTS));
 	Ticks[0] = 0;
 	for(uint32 i = 1; i < nNodes; i++)
 	{
