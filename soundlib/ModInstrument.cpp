@@ -309,7 +309,7 @@ void ModInstrument::Sanitize(MODTYPE modType)
 	LimitMax(nPanSwing, 64u);
 	LimitMax(nVolSwing, 100u);
 
-	Limit(nPPS, -32, 32);
+	Limit(nPPS, int8(-32), int8(32));
 
 	LimitMax(nCutSwing, 64u);
 	LimitMax(nResSwing, 64u);
