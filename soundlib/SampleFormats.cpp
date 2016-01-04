@@ -354,18 +354,16 @@ static bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file
 		32767, 0
 	};
 
-	if(target == nullptr || blockAlign < 5)
+	if(target == nullptr || blockAlign < 4u * numChannels)
 		return false;
 
 	SmpLength samplePos = 0;
 	sampleLen *= numChannels;
-	while(file.CanRead(4 * numChannels) && samplePos < sampleLen)
+	while(file.CanRead(4u * numChannels) && samplePos < sampleLen)
 	{
 		FileReader block = file.ReadChunk(blockAlign);
 		const uint8 *data = reinterpret_cast<const uint8 *>(block.GetRawData());
 		const uint32 blockSize = static_cast<uint32>(block.GetLength());
-		if(blockSize <= 4u * numChannels)
-			break;
 
 		for(uint32 chn = 0; chn < numChannels; chn++)
 		{
@@ -1058,6 +1056,7 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 
 	// Read MPT crap
 	ReadExtendedInstrumentProperties(pIns, file);
+	pIns->Sanitize(GetType());
 	return true;
 }
 
@@ -1672,6 +1671,7 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		// Read MPT crap
 		ReadExtendedInstrumentProperties(pIns, file);
 	}
+	pIns->Sanitize(GetType());
 
 	return true;
 }

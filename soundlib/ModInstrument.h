@@ -49,7 +49,7 @@ struct InstrumentEnvelope
 	int32 GetValueFromPosition(int position, int32 rangeOut, int32 rangeIn = ENVELOPE_MAX) const;
 
 	// Ensure that ticks are ordered in increasing order and values are within the allowed range.
-	void FixEnvelope(uint8 maxValue = ENVELOPE_MAX);
+	void Sanitize(uint8 maxValue = ENVELOPE_MAX);
 };
 
 // Instrument Struct
@@ -166,6 +166,9 @@ struct ModInstrument
 
 	// Translate instrument properties between two given formats.
 	void Convert(MODTYPE fromType, MODTYPE toType);
+
+	// Sanitize all instrument data.
+	void Sanitize(MODTYPE modType);
 
 };
 
