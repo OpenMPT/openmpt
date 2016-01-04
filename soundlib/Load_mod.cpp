@@ -393,7 +393,9 @@ static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, O
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	PATTERNINDEX numPatterns = 0;			// Total number of patterns in file (determined by going through the whole order list) with pattern number < 128
+#ifdef _DEBUG
 	PATTERNINDEX officialPatterns = 0;		// Number of patterns only found in the "official" part of the order list (i.e. order positions < claimed order length)
+#endif
 	PATTERNINDEX numPatternsIllegal = 0;	// Total number of patterns in file, also counting in "invalid" pattern indexes >= 128
 
 	for(ORDERINDEX ord = 0; ord < 128; ord++)
@@ -402,10 +404,12 @@ static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, O
 		if(pat < 128 && numPatterns <= pat)
 		{
 			numPatterns = pat + 1;
+#ifdef _DEBUG
 			if(ord < numOrders)
 			{
 				officialPatterns = numPatterns;
 			}
+#endif
 		}
 		if(pat >= numPatternsIllegal)
 		{
@@ -429,16 +433,21 @@ static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, O
 		numChannels = 8;
 	}
 
-	// Now we have to check if the "hidden" patterns in the order list are actually real, i.e. if they are saved in the file.
-	if(numPatterns != officialPatterns && sizeWithoutPatterns + numPatterns * numChannels * 256 != file.GetLength())
+#ifdef _DEBUG
+	// Check if the "hidden" patterns in the order list are actually real, i.e. if they are saved in the file.
+	// OpenMPT did this check in the past, but no other tracker appears to do this.
+	// Interestingly, only taking the "official" patterns into account, a (broken) variant
+	// of the module "killing butterfly" (MD5 bd676358b1dbb40d40f25435e845cf6b, SHA1 9df4ae21214ff753802756b616a0cafaeced8021)
+	// and "quartex" by Reflex (MD5 35526bef0fb21cb96394838d94c14bab, SHA1 116756c68c7b6598dcfbad75a043477fcc54c96c)
+	// seem to have the correct file size when only taking the official patterns into account, but it only plays correctly
+	// when also loading the inofficial patterns.
+	// Keep this assertion in the code to find potential other broken MODs.
+	if(numPatterns != officialPatterns && sizeWithoutPatterns + officialPatterns * numChannels * 256 == file.GetLength())
 	{
-		// Ok, size does not match the number of patterns including "hidden" patterns. Does it match the number of "official" patterns?
-		if(sizeWithoutPatterns + officialPatterns * numChannels * 256 == file.GetLength())
-		{
-			// It does! Forget about that crap.
-			numPatterns = officialPatterns;
-		}
-	} else if(numPatternsIllegal > numPatterns && sizeWithoutPatterns + numPatternsIllegal * numChannels * 256 == file.GetLength())
+		ASSERT(false);
+	} else
+#endif
+	if(numPatternsIllegal > numPatterns && sizeWithoutPatterns + numPatternsIllegal * numChannels * 256 == file.GetLength())
 	{
 		// Even those illegal pattern indexes (> 128) appear to be valid... What a weird file!
 		numPatterns = numPatternsIllegal;
