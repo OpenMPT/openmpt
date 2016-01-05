@@ -692,6 +692,7 @@ public:
 	Setting<bool> UpdateSendGUID;
 	Setting<bool> UpdateShowUpdateHint;
 	Setting<bool> UpdateSuggestDifferentBuildVariant;
+	Setting<CString> UpdateIgnoreVersion;
 
 public:
 

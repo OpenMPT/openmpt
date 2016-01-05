@@ -107,8 +107,7 @@
 #define IDD_CONTROL_GRAPH               507
 #define IDD_SCALE_ENV_POINTS            510
 #define IDD_TUNING                      511
-#define IDD_DIALOG2                     512
-#define IDD_DIALOG3                     513
+#define IDD_UPDATE                      512
 #define IDS_ERR_TUNING_SERIALISATION    514
 #define IDD_MIDIPARAMCONTROL            515
 #define IDD_MSGBOX_HIDABLE              516
@@ -895,7 +894,6 @@
 #define IDC_EDIT_SAMPLE_LENGTH          2413
 #define IDC_EDIT_SAMPLE_FREQ            2414
 #define IDC_EDIT_FORMULA                2415
-#define IDC_EDIT_SAMPLE_LENGTH2         2416
 #define IDC_EDIT_SAMPLE_LENGTH_SEC      2416
 #define IDC_RADIO_SMPCLIP1              2417
 #define IDC_RADIO_SMPCLIP2              2418
@@ -931,6 +929,10 @@
 #define IDC_VOLUME_HANDLING             2447
 #define IDC_NORMALIZE                   2448
 #define IDC_UNDOSIZE                    2449
+#define IDC_SYSLINK1                    2450
+#define IDC_VERSION1                    2451
+#define IDC_VERSION2                    2552
+#define IDC_DATE                        2553
 #define IDC_SLIDER_NUMBUFFERS           2454
 #define IDC_EDIT_STATISTICS             2455
 #define IDC_VUMETER                     2456

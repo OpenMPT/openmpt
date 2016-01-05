@@ -96,8 +96,7 @@ protected:
 	};
 
 	// Runtime resource handles
-	HINTERNET internetHandle;
-	HINTERNET connectionHandle;
+	HINTERNET internetHandle, connectionHandle, requestHandle;
 
 	CUpdateCheck();
 	

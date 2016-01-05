@@ -364,6 +364,25 @@ BEGIN
     PUSHBUTTON      "&More Settings",IDC_BUTTON1,6,116,60,14
 END
 
+IDD_UPDATE DIALOGEX 0, 0, 196, 138
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "OpenMPT Internet Update"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "&Update",IDOK,84,120,50,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,138,120,50,14
+    LTEXT           "A new version of OpenMPT has been released.",IDC_STATIC,6,6,180,12
+    LTEXT           "Your version:",IDC_STATIC,6,24,44,8
+    LTEXT           "",IDC_VERSION1,78,24,114,8
+    LTEXT           "Current version:",IDC_STATIC,6,36,54,8
+    LTEXT           "",IDC_VERSION2,78,36,114,8
+    LTEXT           "Release date:",IDC_STATIC,6,52,46,8
+    LTEXT           "",IDC_DATE,78,52,114,8
+    CONTROL         "Link",IDC_SYSLINK1,"SysLink",WS_TABSTOP,6,66,186,24
+    CONTROL         "&Do not remind me about this version again.",IDC_CHECK1,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,96,186,12
+END
+
 IDD_TEMPO_SWING DIALOGEX 0, 0, 246, 143
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Tempo Swing Settings"
@@ -553,6 +572,14 @@ BEGIN
         RIGHTMARGIN, 249
         TOPMARGIN, 7
         BOTTOMMARGIN, 130
+    END
+
+    IDD_UPDATE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 189
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 131
     END
 
     IDD_TEMPO_SWING, DIALOG

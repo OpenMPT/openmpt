@@ -320,6 +320,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, UpdateSendGUID(conf, "Update", "SendGUID", true)
 	, UpdateShowUpdateHint(conf, "Update", "ShowUpdateHint", true)
 	, UpdateSuggestDifferentBuildVariant(conf, "Update", "SuggestDifferentBuildVariant", true)
+	, UpdateIgnoreVersion(conf, "Update", "IgnoreVersion", _T(""))
 {
 
 	// Effects

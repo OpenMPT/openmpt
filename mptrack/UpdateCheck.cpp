@@ -21,8 +21,65 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+// Update notification dialog
+class UpdateDialog : public CDialog
+{
+protected:
+	const CString &m_releaseVersion;
+	const CString &m_releaseDate;
+	const CString &m_releaseURL;
+	CFont m_boldFont;
+public:
+	bool ignoreVersion;
 
-const TCHAR *const CUpdateCheck::defaultUpdateURL = _T("http://update.openmpt.org/check/$VERSION/$GUID");
+public:
+	UpdateDialog(const CString &releaseVersion, const CString &releaseDate, const CString &releaseURL)
+		: CDialog(IDD_UPDATE)
+		, m_releaseVersion(releaseVersion)
+		, m_releaseDate(releaseDate)
+		, m_releaseURL(releaseURL)
+		, ignoreVersion(false)
+	{ }
+
+	BOOL OnInitDialog()
+	{
+		CDialog::OnInitDialog();
+
+		CFont *font = GetDlgItem(IDC_VERSION2)->GetFont();
+		LOGFONT lf;
+		font->GetLogFont(&lf);
+		lf.lfWeight = FW_BOLD;
+		m_boldFont.CreateFontIndirect(&lf);
+		GetDlgItem(IDC_VERSION2)->SetFont(&m_boldFont);
+
+		GetDlgItem(IDC_VERSION1)->SetWindowText(MptVersion::str);
+		GetDlgItem(IDC_VERSION2)->SetWindowText(m_releaseVersion);
+		GetDlgItem(IDC_DATE)->SetWindowText(m_releaseDate);
+		GetDlgItem(IDC_SYSLINK1)->SetWindowText(_T("More information about this build:\n<a href=\"") + m_releaseURL + _T("\">") + m_releaseURL + _T("</a>"));
+		CheckDlgButton(IDC_CHECK1, (TrackerSettings::Instance().UpdateIgnoreVersion == m_releaseVersion) ? BST_CHECKED : BST_UNCHECKED);
+		return FALSE;
+	}
+
+	void OnClose()
+	{
+		m_boldFont.DeleteObject();
+		CDialog::OnClose();
+		TrackerSettings::Instance().UpdateIgnoreVersion = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED ? m_releaseVersion : _T("");
+	}
+
+	void OnClickURL(NMHDR * /*pNMHDR*/, LRESULT * /*pResult*/)
+	{
+		CTrackApp::OpenURL(m_releaseURL);
+	}
+
+	DECLARE_MESSAGE_MAP()
+};
+
+BEGIN_MESSAGE_MAP(UpdateDialog, CDialog)
+	ON_NOTIFY(NM_CLICK, IDC_SYSLINK1, &UpdateDialog::OnClickURL)
+END_MESSAGE_MAP()
+
+const TCHAR *const CUpdateCheck::defaultUpdateURL = _T("https://update.openmpt.org/check/$VERSION/$GUID");
 
 mpt::atomic_int32_t CUpdateCheck::s_InstanceCount;
 
@@ -57,7 +114,7 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 		{
 			TrackerSettings::Instance().UpdateShowUpdateHint = false;
 			CString msg;
-			msg.Format(_T("OpenMPT would like to check for updates now, proceed?\n\nNote: In the future, OpenMPT will check for updates every %d days. If you do not want this, you can disable update checks in the setup."), TrackerSettings::Instance().UpdateUpdateCheckPeriod.Get());
+			msg.Format(_T("OpenMPT would like to check for updates now, proceed?\n\nNote: In the future, OpenMPT will check for updates every %u days. If you do not want this, you can disable update checks in the setup."), TrackerSettings::Instance().UpdateUpdateCheckPeriod.Get());
 			if(Reporting::Confirm(msg, "OpenMPT Internet Update") == cnfNo)
 			{
 				TrackerSettings::Instance().UpdateLastUpdateCheck = mpt::Date::Unix(now);
@@ -119,6 +176,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 	// Prepare UA / URL strings...
 	const CString userAgent = CString(_T("OpenMPT ")) + MptVersion::str;
 	CString updateURL = settings.updateBaseURL;
+	if(updateURL.IsEmpty()) updateURL = defaultUpdateURL;
 	CString versionStr = MptVersion::str;
 #ifdef _WIN64
 	versionStr.Append(_T("-win64"));
@@ -142,18 +200,57 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 	{
 		throw CUpdateCheck::Error("Could not start update check:\n", GetLastError());
 	}
-	connectionHandle = InternetOpenUrl(internetHandle, updateURL, NULL, 0, INTERNET_FLAG_RELOAD | INTERNET_FLAG_PRAGMA_NOCACHE | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_UI, 0);
+
+	// TLS 1.0 is not enabled by default until IE7. Since WinInet won't let us override this setting, we cannot assume that HTTPS
+	// is going to work on older systems. Besides... Windows XP is already enough of a security risk by itself. :P
+	INTERNET_PORT port = mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::WinVista) ? INTERNET_DEFAULT_HTTPS_PORT : INTERNET_DEFAULT_HTTP_PORT;
+	const int protoEnd = updateURL.Find(_T("://"));
+	if(protoEnd != -1)
+	{
+		if(updateURL.Left(protoEnd) == "http") port = INTERNET_DEFAULT_HTTP_PORT;
+		updateURL = updateURL.Mid(protoEnd + 3);
+	}
+	const int pathStart = updateURL.Find(_T("/"));
+	CString updatePath = _T("/");
+	if(pathStart != -1)
+	{
+		updatePath = updateURL.Mid(pathStart);
+		updateURL = updateURL.Left(pathStart);
+	}
+	connectionHandle = InternetConnect(internetHandle, updateURL, port, nullptr, nullptr, INTERNET_SERVICE_HTTP, 0, 0);
 	if(connectionHandle == NULL)
 	{
-		throw CUpdateCheck::Error("Could not establish connection:\n", GetLastError());
+		throw CUpdateCheck::Error(_T("Could not establish connection:\n"), GetLastError());
+	}
+
+	requestHandle = HttpOpenRequest(connectionHandle, _T("GET"), updatePath, NULL, NULL, NULL, (port == INTERNET_DEFAULT_HTTPS_PORT ? INTERNET_FLAG_SECURE : 0) | INTERNET_FLAG_RELOAD | INTERNET_FLAG_DONT_CACHE | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP, NULL);
+	if(requestHandle == NULL)
+	{
+		throw CUpdateCheck::Error(_T("Preparing HTTP request failed:\n"), GetLastError());
+	}
+
+	// StartSSL certificates are available since 2009 as an optional update for Windows XP / Vista,
+	// so ignore unknown CA issues for system which are not guaranteed to have the root certificate.
+	if(mpt::Windows::Version::Current().IsBefore(mpt::Windows::Version::Win7))
+	{
+		DWORD dwFlags = 0;
+		DWORD dwBuffLen = sizeof(dwFlags);
+		InternetQueryOption(requestHandle, INTERNET_OPTION_SECURITY_FLAGS, &dwFlags, &dwBuffLen);
+		dwFlags |= SECURITY_FLAG_IGNORE_UNKNOWN_CA;
+		InternetSetOption(requestHandle, INTERNET_OPTION_SECURITY_FLAGS, &dwFlags, sizeof(dwFlags));
+	}
+
+	if(!HttpSendRequest(requestHandle, NULL, 0, NULL, 0))
+	{
+		throw CUpdateCheck::Error(_T("Sending HTTP request failed:\n"), GetLastError());
 	}
 
 	// Retrieve HTTP status code.
 	DWORD statusCodeHTTP = 0;
 	DWORD length = sizeof(statusCodeHTTP);
-	if(HttpQueryInfo(connectionHandle, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, (LPVOID)&statusCodeHTTP, &length, NULL) == FALSE)
+	if(HttpQueryInfo(requestHandle, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, (LPVOID)&statusCodeHTTP, &length, NULL) == FALSE)
 	{
-		throw CUpdateCheck::Error("Could not retrieve HTTP header information:\n", GetLastError());
+		throw CUpdateCheck::Error(_T("Could not retrieve HTTP header information:\n"), GetLastError());
 	}
 	if(statusCodeHTTP >= 400)
 	{
@@ -169,7 +266,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 	{
 		// Query number of available bytes to download
 		DWORD availableSize = 0;
-		if(InternetQueryDataAvailable(connectionHandle, &availableSize, 0, NULL) == FALSE)
+		if(InternetQueryDataAvailable(requestHandle, &availableSize, 0, NULL) == FALSE)
 		{
 			throw CUpdateCheck::Error("Error while downloading update information data:\n", GetLastError());
 		}
@@ -178,7 +275,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 
 		// Put downloaded bytes into our buffer
 		char downloadBuffer[DOWNLOAD_BUFFER_SIZE];
-		if(InternetReadFile(connectionHandle, downloadBuffer, availableSize, &bytesRead) == FALSE)
+		if(InternetReadFile(requestHandle, downloadBuffer, availableSize, &bytesRead) == FALSE)
 		{
 			throw CUpdateCheck::Error("Error while downloading update information data:\n", GetLastError());
 		}
@@ -271,17 +368,15 @@ void CUpdateCheck::ShowSuccessGUI(WPARAM wparam, LPARAM lparam)
 //-------------------------------------------------------------
 {
 	const CUpdateCheck::Result &result = *reinterpret_cast<CUpdateCheck::Result*>(lparam);
-	bool autoUpdate = (wparam ? true : false);
-	if(result.UpdateAvailable)
+	bool autoUpdate = wparam != 0;
+	if(result.UpdateAvailable && (!autoUpdate || result.Version != TrackerSettings::Instance().UpdateIgnoreVersion))
 	{
-		if(Reporting::Confirm(
-			mpt::format(MPT_USTRING("A new version is available!\nOpenMPT %1 has been released on %2. Would you like to visit %3 for more information?"))
-			 (result.Version, result.Date, result.URL)
-			 , MPT_USTRING("OpenMPT Internet Update")) == cnfYes)
+		UpdateDialog dlg(result.Version, result.Date, result.URL);
+		if(dlg.DoModal() == IDOK)
 		{
 			CTrackApp::OpenURL(result.URL);
 		}
-	} else if(!autoUpdate)
+	} else if(!result.UpdateAvailable && !autoUpdate)
 	{
 		Reporting::Information(MPT_USTRING("You already have the latest version of OpenMPT installed."), MPT_USTRING("OpenMPT Internet Update"));
 	}
@@ -292,7 +387,7 @@ void CUpdateCheck::ShowFailureGUI(WPARAM wparam, LPARAM lparam)
 //-------------------------------------------------------------
 {
 	const CUpdateCheck::Error &error = *reinterpret_cast<CUpdateCheck::Error*>(lparam);
-	bool autoUpdate = (wparam ? true : false);
+	bool autoUpdate = wparam != 0;
 	if(!autoUpdate)
 	{
 		Reporting::Error(mpt::ToUnicode(mpt::CharsetUTF8, error.what() ? std::string(error.what()) : std::string()), MPT_USTRING("OpenMPT Internet Update Error"));
