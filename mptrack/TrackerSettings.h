@@ -533,6 +533,7 @@ public:
 	Setting<uint32> MiscITCompressionStereo; // Mask: bit0: IT, bit1: Compat IT, bit2: MPTM
 	Setting<uint32> MiscITCompressionMono;   // Mask: bit0: IT, bit1: Compat IT, bit2: MPTM
 	CachedSetting<bool> MiscAllowMultipleCommandsPerKey;
+	CachedSetting<bool> MiscDistinguishModifiers;
 
 	// Sound Settings
 	
