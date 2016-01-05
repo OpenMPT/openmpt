@@ -95,6 +95,12 @@ struct PolyphaseInterpolation
 
 	forceinline void Start(const ModChannel &chn, const CResampler &resampler)
 	{
+		#ifdef MODPLUG_TRACKER
+			// Otherwise causes "warning C4100: 'resampler' : unreferenced formal parameter"
+			// because all 3 tables are static members.
+			// #pragma warning fails with this templated case for unknown reasons.
+			MPT_UNREFERENCED_PARAMETER(resampler);
+		#endif // MODPLUG_TRACKER
 		sinc = (((chn.nInc > 0x13000) || (chn.nInc < -0x13000)) ?
 			(((chn.nInc > 0x18000) || (chn.nInc < -0x18000)) ? resampler.gDownsample2x : resampler.gDownsample13x) : resampler.gKaiserSinc);
 	}
