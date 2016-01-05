@@ -132,7 +132,7 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 		// NB: we want to catch modifiers even when the input handler is locked
 		if(keyEventType == kKeyEventUp || keyEventType == kKeyEventDown)
 		{
-			scancode =(lParam >> 16) & 0x1FF;
+			scancode = (lParam >> 16) & 0x1FF;
 			CatchModifierChange(wParam, keyEventType, scancode);
 		}
 
@@ -233,49 +233,26 @@ void CInputHandler::SetupSpecialKeyInterception()
 
 
 //Deal with Modifier keypresses. Private surouting used above.
-bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType, int /*scancode*/)
-//-------------------------------------------------------------------------------------------------
+bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType, int scancode)
+//---------------------------------------------------------------------------------------------
 {
 	UINT tempModifierMask = 0;
+	// Scancode for right modifier keys should have bit 8 set, but Right Shift is actually 0x36.
+	const bool isRight = (TrackerSettings::Instance().MiscDistinguishModifiers && ((scancode & 0x100) || scancode == 0x36));
 	switch(wParam)
 	{
 		case VK_CONTROL:
-/*			if (m_bDistinguishControls)
-			{
-				if		(scancode == SC_LCONTROL)	tempModifierMask |= LControl;
-				else if (scancode == SC_RCONTROL)	tempModifierMask |= RControl;
-				break;
-			}
-			else
-			{
-*/				tempModifierMask |= HOTKEYF_CONTROL;
-				break;
-//			}
+			tempModifierMask |= isRight ? HOTKEYF_RCONTROL : HOTKEYF_CONTROL;
+			break;
 
 		case VK_SHIFT:
-/*			if (m_bDistinguishShifts)
-			{
-				if		(scancode == SC_LSHIFT)		tempModifierMask |= LShift;
-				else if (scancode == SC_RSHIFT)		tempModifierMask |= RShift;
-				break;
-			}
-			else
-			{
-*/				tempModifierMask |= HOTKEYF_SHIFT;
-				break;
-//			}
+			tempModifierMask |= isRight ? HOTKEYF_RSHIFT : HOTKEYF_SHIFT;
+			break;
 
 		case VK_MENU:
-/*			if (m_bDistinguishAlts)
-			{
-				if		(scancode == SC_LALT)		{tempModifierMask |= LAlt;	break;}
-				else if	(scancode == SC_RALT)		{tempModifierMask |= RAlt;	break;}
-			}
-			else
-			{
-*/				tempModifierMask |= HOTKEYF_ALT;
-				break;
-//			}
+			tempModifierMask |= isRight ? HOTKEYF_RALT : HOTKEYF_ALT;
+			break;
+
 		case VK_LWIN: case VK_RWIN: // Feature: use Windows keys as modifier keys
 				tempModifierMask |= HOTKEYF_EXT;
 				break;

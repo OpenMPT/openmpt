@@ -19,7 +19,10 @@ struct CModSpecifications;
 
 #define KEYMAP_VERSION 1	// Version of the .mkb format
 
-#define HOTKEYF_MIDI 0x10	// modifier mask for MIDI CCs
+#define HOTKEYF_MIDI 0x10		// modifier mask for MIDI CCs
+#define HOTKEYF_RSHIFT 0x20		// modifier mask for right Shift key
+#define HOTKEYF_RCONTROL 0x40	// modifier mask for right Ctrl key
+#define HOTKEYF_RALT 0x80		// modifier mask for right Alt key
 
 enum InputTargetContext
 {
@@ -1170,7 +1173,7 @@ enum Modifiers
 	RAlt     = 1<<5,
 	MaxMod   = 1<<6,
 */
-	MaxMod = HOTKEYF_ALT | HOTKEYF_CONTROL | HOTKEYF_EXT | HOTKEYF_SHIFT | HOTKEYF_MIDI,
+	MaxMod = HOTKEYF_ALT | HOTKEYF_CONTROL | HOTKEYF_EXT | HOTKEYF_SHIFT | HOTKEYF_MIDI | HOTKEYF_RSHIFT | HOTKEYF_RCONTROL | HOTKEYF_RALT,
 };
 
 

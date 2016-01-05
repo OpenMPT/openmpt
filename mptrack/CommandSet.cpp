@@ -1062,7 +1062,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			// Register key-up when releasing any of the modifiers.
 			// Otherwise, select key combos might get stuck. Example:
 			// [Ctrl Down] [Alt Down] [Alt Up] [Ctrl Up] After this action, copy select (Ctrl+Drag) would still be activated without.
-			for(UINT i = 0; i <= (HOTKEYF_ALT | HOTKEYF_CONTROL | HOTKEYF_SHIFT); i++)
+			for(UINT i = 0; i <= MaxMod; i++)
 			{
 				newKcDeSel.Modifier(i);
 				//newKcDeSel.mod&=~CodeToModifier(inKc.code);		//<-- Need to get rid of right modifier!!
@@ -1829,6 +1829,9 @@ CString KeyCombination::GetModifierText(UINT mod)
 	if (mod & HOTKEYF_SHIFT) text.Append(_T("Shift+"));
 	if (mod & HOTKEYF_CONTROL) text.Append(_T("Ctrl+"));
 	if (mod & HOTKEYF_ALT) text.Append(_T("Alt+"));
+	if (mod & HOTKEYF_RSHIFT) text.Append(_T("RShift+"));
+	if (mod & HOTKEYF_RCONTROL) text.Append(_T("RCtrl+"));
+	if (mod & HOTKEYF_RALT) text.Append(_T("RAlt+"));
 	if (mod & HOTKEYF_EXT) text.Append(_T("Win+")); // Feature: use Windows keys as modifier keys
 	if (mod & HOTKEYF_MIDI) text.Append(_T("MidiCC:"));
 	return text;
@@ -1845,9 +1848,12 @@ CString KeyCombination::GetKeyText(UINT mod, UINT code)
 	else
 		keyText.Append(CHotKeyCtrl::GetKeyName(code, IsExtended(code)));
 	//HACK:
-	if (keyText == _T("Ctrl+CTRL"))		keyText = _T("Ctrl");
-	if (keyText == _T("Alt+ALT"))		keyText = _T("Alt");
-	if (keyText == _T("Shift+SHIFT"))	keyText = _T("Shift");
+	if (keyText == _T("Ctrl+CTRL"))			keyText = _T("Ctrl");
+	else if (keyText == _T("Alt+ALT"))		keyText = _T("Alt");
+	else if (keyText == _T("Shift+SHIFT"))	keyText = _T("Shift");
+	else if (keyText == _T("RCtrl+CTRL"))	keyText = _T("RCtrl");
+	else if (keyText == _T("RAlt+ALT"))		keyText = _T("RAlt");
+	else if (keyText == _T("RShift+SHIFT"))	keyText = _T("RShift");
 
 	return keyText;
 }

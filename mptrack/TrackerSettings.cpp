@@ -225,6 +225,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, MiscITCompressionStereo(conf, "Misc", "ITCompressionStereo", 0)
 	, MiscITCompressionMono(conf, "Misc", "ITCompressionMono", 0)
 	, MiscAllowMultipleCommandsPerKey(conf, "Misc", "AllowMultipleCommandsPerKey", false)
+	, MiscDistinguishModifiers(conf, "Misc", "DistinguishModifiers", false)
 	// Sound Settings
 	, m_SoundSampleRates(conf, "Sound Settings", "SampleRates", GetDefaultSampleRates())
 	, m_MorePortaudio(conf, "Sound Settings", "MorePortaudio", false)
