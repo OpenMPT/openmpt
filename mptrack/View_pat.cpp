@@ -4333,7 +4333,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	case VIEWMSG_DOSCROLL:
-		CModScrollView::OnMouseWheel(0, static_cast<short>(lParam), CPoint(0, 0));
+		OnMouseWheel(0, static_cast<short>(lParam), CPoint(0, 0));
 		break;
 
 
@@ -4361,10 +4361,18 @@ void CViewPattern::CursorJump(int distance, bool snap)
 	{
 		CriticalSection cs;
 		CSoundFile &sndFile = GetDocument()->GetrSoundFile();
+		if(m_nOrder != sndFile.m_PlayState.m_nCurrentOrder)
+		{
+			// We jumped to a different order
+			sndFile.ResetChannels();
+			sndFile.StopAllVsti();
+		}
+
 		sndFile.m_PlayState.m_nCurrentOrder = sndFile.m_PlayState.m_nNextOrder = GetCurrentOrder();
 		sndFile.m_PlayState.m_nPattern = m_nPattern;
 		sndFile.m_PlayState.m_nRow = m_nPlayRow = row;
 		sndFile.m_PlayState.m_nNextRow = m_nNextPlayRow = row + 1;
+		// Queue the correct follow-up pattern if we just jumped to the last row.
 		if(sndFile.Patterns.IsValidPat(m_nPattern) && m_nNextPlayRow >= sndFile.Patterns[m_nPattern].GetNumRows())
 		{
 			sndFile.m_PlayState.m_nNextOrder++;
