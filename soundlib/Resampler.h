@@ -66,8 +66,6 @@ public:
 	CWindowedFIR m_WindowedFIR;
 	static const int16 FastSincTable[256 * 4];
 
-	SINC_TYPE gKaiserSinc[SINC_PHASES * 8];				// Upsampling
-
 #ifdef MODPLUG_TRACKER
 	static bool StaticTablesInitialized;
 	#define RESAMPLER_TABLE static
@@ -76,8 +74,9 @@ public:
 	#define RESAMPLER_TABLE 
 #endif // MODPLUG_TRACKER
 
-	RESAMPLER_TABLE SINC_TYPE gDownsample13x[SINC_PHASES * 8];	// Downsample 1.333x
-	RESAMPLER_TABLE SINC_TYPE gDownsample2x[SINC_PHASES * 8];	// Downsample 2x
+	RESAMPLER_TABLE SINC_TYPE gKaiserSinc[SINC_PHASES * 8];     // Upsampling
+	RESAMPLER_TABLE SINC_TYPE gDownsample13x[SINC_PHASES * 8];  // Downsample 1.333x
+	RESAMPLER_TABLE SINC_TYPE gDownsample2x[SINC_PHASES * 8];   // Downsample 2x
 
 #ifndef MPT_INTMIXER
 	RESAMPLER_TABLE mixsample_t FastSincTablef[256 * 4];	// Cubic spline LUT

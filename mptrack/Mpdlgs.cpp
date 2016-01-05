@@ -1083,8 +1083,8 @@ void COptionsMixer::OnResamplerChanged()
 	switch(dwSrcMode)
 	{
 		case SRCMODE_POLYPHASE:
-			m_CEditWFIRCutoff.EnableWindow(TRUE);
-			spinWFIRCutoff->EnableWindow(TRUE);
+			m_CEditWFIRCutoff.EnableWindow(FALSE);
+			spinWFIRCutoff->EnableWindow(FALSE);
 			m_CbnWFIRType.EnableWindow(FALSE);
 			break;
 		case SRCMODE_FIRFILTER:

@@ -922,8 +922,9 @@ static void getdownsample2x(short int *psinc)
 
 #ifdef MODPLUG_TRACKER
 bool CResampler::StaticTablesInitialized = false;
-SINC_TYPE CResampler::gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
-SINC_TYPE CResampler::gDownsample2x[SINC_PHASES*8];		// Downsample 2x
+SINC_TYPE CResampler::gKaiserSinc[SINC_PHASES*8];     // Upsampling
+SINC_TYPE CResampler::gDownsample13x[SINC_PHASES*8];  // Downsample 1.333x
+SINC_TYPE CResampler::gDownsample2x[SINC_PHASES*8];   // Downsample 2x
 #ifndef MPT_INTMIXER
 mixsample_t CResampler::FastSincTablef[256 * 4];		// Cubic spline LUT
 mixsample_t CResampler::LinearTablef[256];				// Linear interpolation LUT
@@ -940,6 +941,7 @@ void CResampler::InitializeTables(bool force)
 	if((m_OldSettings == m_Settings) && !force) return;
 #endif // MODPLUG_TRACKER
 	{
+		getsinc(gKaiserSinc, 9.6377, 0.97);
 		//ericus' downsampling improvement.
 		//getsinc(gDownsample13x, 8.5, 3.0/4.0);
 		//getdownsample2x(gDownsample2x);
@@ -963,7 +965,6 @@ void CResampler::InitializeTables(bool force)
 	}
 
 	m_WindowedFIR.InitTable(m_Settings.gdWFIRCutoff, m_Settings.gbWFIRType);
-	getsinc(gKaiserSinc, 9.6377, m_Settings.gdWFIRCutoff);
 
 #ifdef MODPLUG_TRACKER
 	StaticTablesInitialized = true;
