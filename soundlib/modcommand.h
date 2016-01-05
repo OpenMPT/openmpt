@@ -134,7 +134,15 @@ public:
 	// Returns empty modcommand.
 	static ModCommand Empty() { ModCommand m = { 0, 0, 0, 0, 0, 0 }; return m; }
 
-	bool operator==(const ModCommand& mc) const { return (std::memcmp(this, &mc, sizeof(ModCommand)) == 0); }
+	bool operator==(const ModCommand& mc) const
+	{
+		return (note == mc.note)
+			&& (instr == mc.instr)
+			&& (volcmd == mc.volcmd)
+			&& (command == mc.command)
+			&& (volcmd == VOLCMD_NONE || vol == mc.vol)
+			&& (command == CMD_NONE || param == mc.param);
+	}
 	bool operator!=(const ModCommand& mc) const { return !(*this == mc); }
 
 	void Set(NOTE n, INSTR ins, uint16 volcol, uint16 effectcol) { note = n; instr = ins; SetValueVolCol(volcol); SetValueEffectCol(effectcol); }
@@ -151,13 +159,9 @@ public:
 	void Clear() { memset(this, 0, sizeof(ModCommand)); }
 
 	// Returns true if modcommand is empty, false otherwise.
-	// If ignoreEffectValues is true (default), effect values are ignored if there is no effect command present.
-	bool IsEmpty(const bool ignoreEffectValues = true) const
+	bool IsEmpty() const
 	{
-		if(ignoreEffectValues)
-			return (note == 0 && instr == 0 && volcmd == VOLCMD_NONE && command == CMD_NONE);
-		else
-			return (*this == Empty());
+		return (note == NOTE_NONE && instr == 0 && volcmd == VOLCMD_NONE && command == CMD_NONE);
 	}
 
 	// Returns true if instrument column represents plugin index.

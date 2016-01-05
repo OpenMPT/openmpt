@@ -39,8 +39,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 PatternClipboard PatternClipboard::instance;
 
-CStringA PatternClipboard::GetFileExtension(const char *ext)
-//----------------------------------------------------------
+CStringA PatternClipboard::GetFileExtension(const char *ext, bool addPadding)
+//---------------------------------------------------------------------------
 {
 	CStringA format(ext);
 	if(format.GetLength() > 3)
@@ -48,9 +48,9 @@ CStringA PatternClipboard::GetFileExtension(const char *ext)
 		format.Truncate(3);
 	}
 	format.MakeUpper();
-	while(format.GetLength() < 3)
+	if(addPadding)
 	{
-		format = " " + format;
+		format = CStringA(" ", 3 - format.GetLength()) + format;
 	}
 	return format;
 }
@@ -64,7 +64,7 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX la
 	LimitMax(last, sndFile.Order.GetLength());
 
 	// Set up clipboard header.
-	CStringA data = "ModPlug Tracker " + GetFileExtension(sndFile.GetModSpecifications().fileExtension) + "\r\nOrders: ";
+	CStringA data = "ModPlug Tracker " + GetFileExtension(sndFile.GetModSpecifications().fileExtension, true) + "\r\nOrders: ";
 	CStringA patternData;
 
 	// Pattern => Order list assignment
@@ -151,7 +151,7 @@ bool PatternClipboard::Copy(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRe
 	}
 
 	// Set up clipboard header.
-	data = "ModPlug Tracker " + GetFileExtension(sndFile.GetModSpecifications().fileExtension) + "\r\n" + data;
+	data = "ModPlug Tracker " + GetFileExtension(sndFile.GetModSpecifications().fileExtension, true) + "\r\n" + data;
 
 	if(instance.activeClipboard < instance.clipboards.size())
 	{
@@ -353,11 +353,11 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 	{
 		startPos += 16;
 		// Check paste format
-		const CStringA format = data.Mid(startPos, 3);
+		const CStringA format = data.Mid(startPos, 3).Trim().MakeUpper();
 
 		for(size_t i = 0; i < CountOf(ModSpecs::Collection); i++)
 		{
-			const CStringA ext = GetFileExtension(ModSpecs::Collection[i]->fileExtension);
+			const CStringA ext = GetFileExtension(ModSpecs::Collection[i]->fileExtension, false);
 			if(format == ext)
 			{
 				pasteFormat = ModSpecs::Collection[i]->internalType;
@@ -805,7 +805,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				// if the original modcommand was empty as otherwise the unchanged parts
 				// of the old modcommand would falsely be interpreted being of type
 				// origFormat and ConvertCommand could change them.
-				if(pasteFormat != sndFile.GetType() && (!doMixPaste || origModCmd.IsEmpty(false)))
+				if(pasteFormat != sndFile.GetType() && (!doMixPaste || origModCmd.IsEmpty()))
 					m.Convert(pasteFormat, sndFile.GetType(), sndFile);
 
 				// Adjust pattern selection

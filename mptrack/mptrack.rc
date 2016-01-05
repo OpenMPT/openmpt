@@ -42,36 +42,37 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,330,6,60,14
     PUSHBUTTON      "Cancel",IDCANCEL,330,24,60,14
+    LTEXT           "Patterns:",IDC_STATIC,6,6,84,12
     CONTROL         "Remove unused",IDC_CHK_CLEANUP_PATTERNS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,108,6,90,10
     CONTROL         "Remove all",IDC_CHK_REMOVE_PATTERNS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,204,6,90,10
     CONTROL         "Rearrange",IDC_CHK_REARRANGE_PATTERNS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,108,18,90,10
+    CONTROL         "Remove duplicates",IDC_CHK_REMOVE_DUPLICATES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,204,18,90,10
+    LTEXT           "Orders / Sequences:",IDC_STATIC,6,36,84,12
     CONTROL         "Merge sequences",IDC_CHK_MERGE_SEQUENCES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,108,36,90,10
     CONTROL         "Remove all orders",IDC_CHK_REMOVE_ORDERS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,204,36,90,10
+    LTEXT           "Samples:",IDC_STATIC,6,53,84,12
     CONTROL         "Remove unused",IDC_CHK_CLEANUP_SAMPLES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,108,54,90,10
     CONTROL         "Remove all",IDC_CHK_REMOVE_SAMPLES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,204,54,90,10
     CONTROL         "Rearrange",IDC_CHK_REARRANGE_SAMPLES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,108,66,90,10
     CONTROL         "Remove unused sample data",IDC_CHK_OPTIMIZE_SAMPLES,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,204,66,108,10
+    LTEXT           "Instruments:",IDC_STATIC,6,82,84,12
     CONTROL         "Remove unused",IDC_CHK_CLEANUP_INSTRUMENTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,108,84,90,10
     CONTROL         "Remove all (convert to samples)",IDC_CHK_REMOVE_INSTRUMENTS,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,204,84,120,10
+    LTEXT           "Plugins:",IDC_STATIC,6,101,84,12
     CONTROL         "Remove unused",IDC_CHK_CLEANUP_PLUGINS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,108,102,90,10
     CONTROL         "Remove all",IDC_CHK_REMOVE_PLUGINS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,204,102,90,10
+    LTEXT           "Miscellaneous:",IDC_STATIC,6,119,84,12
     CONTROL         "Reset all variables",IDC_CHK_RESET_VARIABLES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,108,120,90,10
+    LTEXT           "Presets:",IDC_STATIC,6,137,84,12
     PUSHBUTTON      "Remove all unused stuff",IDC_BTN_CLEANUP_SONG,108,138,90,12
     PUSHBUTTON      "Create samplepack",IDC_BTN_COMPO_CLEANUP,204,138,90,12
-    LTEXT           "Patterns:",IDC_STATIC,6,6,84,12
-    LTEXT           "Orders / Sequences:",IDC_STATIC,6,36,84,12
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,6,30,312,1
-    LTEXT           "Samples:",IDC_STATIC,6,53,84,12
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,6,48,312,1
-    LTEXT           "Instruments:",IDC_STATIC,6,82,84,12
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,6,78,312,1
-    LTEXT           "Plugins:",IDC_STATIC,6,101,84,12
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,6,96,312,1
-    LTEXT           "Miscellaneous:",IDC_STATIC,6,119,84,12
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,6,114,312,1
-    LTEXT           "Presets:",IDC_STATIC,6,137,84,12
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,6,132,312,1
 END
 

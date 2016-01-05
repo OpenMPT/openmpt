@@ -885,6 +885,7 @@
 #define IDC_CHK_REMOVE_SAMPLES          2404
 #define IDC_CHK_REMOVE_PLUGINS          2405
 #define IDC_CHK_OPTIMIZE_SAMPLES        2406
+#define IDC_CHK_REMOVE_DUPLICATES       2407
 #define IDC_CHK_MERGE_SEQUENCES         2408
 #define IDC_CHECK_PT1X                  2409
 #define IDC_STATIC_CHANNEL_NAME         2410

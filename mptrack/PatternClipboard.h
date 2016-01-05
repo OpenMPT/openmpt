@@ -91,7 +91,7 @@ protected:
 
 	PatternClipboard() : activeClipboard(0) { SetClipboardSize(1); };
 
-	static CStringA GetFileExtension(const char *ext);
+	static CStringA GetFileExtension(const char *ext, bool addPadding);
 
 	// Create the clipboard text for a pattern selection
 	static CStringA CreateClipboardString(CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
