@@ -23,6 +23,7 @@ private:
 		CU_CLEANUP_PATTERNS = 0,
 		CU_REMOVE_PATTERNS,
 		CU_REARRANGE_PATTERNS,
+		CU_REMOVE_DUPLICATE_PATTERNS,
 		// orders
 		CU_MERGE_SEQUENCES,
 		CU_REMOVE_ORDERS,
@@ -51,6 +52,7 @@ private:
 
 	// Actual cleanup implementations:
 	// Patterns
+	bool RemoveDuplicatePatterns();
 	bool RemoveUnusedPatterns(); // Remove unused patterns
 	bool RearrangePatterns(); // Rearrange patterns
 	bool RemoveAllPatterns();

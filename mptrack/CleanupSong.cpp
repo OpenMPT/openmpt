@@ -23,7 +23,7 @@ OPENMPT_NAMESPACE_BEGIN
 // Default checkbox state
 bool CModCleanupDlg::m_bCheckBoxes[CU_MAX_CLEANUP_OPTIONS] =
 {
-	true,	false,	true,			// patterns
+	true,	false,	true,	true,	// patterns
 	false,	false,					// orders
 	true,	false,	false,	true,	// samples
 	true,	false,					// instruments
@@ -35,12 +35,13 @@ bool CModCleanupDlg::m_bCheckBoxes[CU_MAX_CLEANUP_OPTIONS] =
 WORD const CModCleanupDlg::m_nCleanupIDtoDlgID[CU_MAX_CLEANUP_OPTIONS] =
 {
 	// patterns
-	IDC_CHK_CLEANUP_PATTERNS,		IDC_CHK_REMOVE_PATTERNS,	IDC_CHK_REARRANGE_PATTERNS,
+	IDC_CHK_CLEANUP_PATTERNS,		IDC_CHK_REMOVE_PATTERNS,
+	IDC_CHK_REARRANGE_PATTERNS,		IDC_CHK_REMOVE_DUPLICATES,
 	// orders
 	IDC_CHK_MERGE_SEQUENCES,		IDC_CHK_REMOVE_ORDERS,
 	// samples
-	IDC_CHK_CLEANUP_SAMPLES,		IDC_CHK_REMOVE_SAMPLES,		IDC_CHK_REARRANGE_SAMPLES,
-	IDC_CHK_OPTIMIZE_SAMPLES,
+	IDC_CHK_CLEANUP_SAMPLES,		IDC_CHK_REMOVE_SAMPLES,
+	IDC_CHK_REARRANGE_SAMPLES,		IDC_CHK_OPTIMIZE_SAMPLES,
 	// instruments
 	IDC_CHK_CLEANUP_INSTRUMENTS,	IDC_CHK_REMOVE_INSTRUMENTS,
 	// plugins
@@ -53,12 +54,13 @@ WORD const CModCleanupDlg::m_nCleanupIDtoDlgID[CU_MAX_CLEANUP_OPTIONS] =
 CModCleanupDlg::ENUM_CLEANUP_OPTIONS const CModCleanupDlg::m_nMutuallyExclusive[CModCleanupDlg::CU_MAX_CLEANUP_OPTIONS] =
 {
 	// patterns
-	CU_REMOVE_PATTERNS,		CU_CLEANUP_PATTERNS,	CU_REMOVE_PATTERNS,
+	CU_REMOVE_PATTERNS,		CU_CLEANUP_PATTERNS,
+	CU_REMOVE_PATTERNS,		CU_REMOVE_PATTERNS,
 	// orders
 	CU_REMOVE_ORDERS,		CU_MERGE_SEQUENCES,
 	// samples
-	CU_REMOVE_SAMPLES,		CU_CLEANUP_SAMPLES,		CU_REMOVE_SAMPLES,
-	CU_REMOVE_SAMPLES,
+	CU_REMOVE_SAMPLES,		CU_CLEANUP_SAMPLES,
+	CU_REMOVE_SAMPLES,		CU_REMOVE_SAMPLES,
 	// instruments
 	CU_REMOVE_INSTRUMENTS,	CU_CLEANUP_INSTRUMENTS,
 	// plugins
@@ -79,6 +81,7 @@ BEGIN_MESSAGE_MAP(CModCleanupDlg, CDialog)
 	ON_COMMAND(IDC_CHK_CLEANUP_PATTERNS,		OnVerifyMutualExclusive)
 	ON_COMMAND(IDC_CHK_REMOVE_PATTERNS,			OnVerifyMutualExclusive)
 	ON_COMMAND(IDC_CHK_REARRANGE_PATTERNS,		OnVerifyMutualExclusive)
+	ON_COMMAND(IDC_CHK_REMOVE_DUPLICATES,		OnVerifyMutualExclusive)
 	ON_COMMAND(IDC_CHK_MERGE_SEQUENCES,			OnVerifyMutualExclusive)
 	ON_COMMAND(IDC_CHK_REMOVE_ORDERS,			OnVerifyMutualExclusive)
 	ON_COMMAND(IDC_CHK_CLEANUP_SAMPLES,			OnVerifyMutualExclusive)
@@ -129,41 +132,42 @@ void CModCleanupDlg::OnOK()
 		m_bCheckBoxes[i] = IsDlgButtonChecked(m_nCleanupIDtoDlgID[i]) != BST_UNCHECKED;
 	}
 
-	bool bModified = false;
+	bool modified = false;
 
 	// Orders
-	if(m_bCheckBoxes[CU_MERGE_SEQUENCES]) bModified |= MergeSequences();
-	if(m_bCheckBoxes[CU_REMOVE_ORDERS]) bModified |= RemoveAllOrders();
+	if(m_bCheckBoxes[CU_MERGE_SEQUENCES]) modified |= MergeSequences();
+	if(m_bCheckBoxes[CU_REMOVE_ORDERS]) modified |= RemoveAllOrders();
 
 	// Patterns
-	if(m_bCheckBoxes[CU_REMOVE_PATTERNS]) bModified |= RemoveAllPatterns();
-	if(m_bCheckBoxes[CU_CLEANUP_PATTERNS]) bModified |= RemoveUnusedPatterns();
-	if(m_bCheckBoxes[CU_REARRANGE_PATTERNS]) bModified |= RearrangePatterns();
+	if(m_bCheckBoxes[CU_REMOVE_PATTERNS]) modified |= RemoveAllPatterns();
+	if(m_bCheckBoxes[CU_CLEANUP_PATTERNS]) modified |= RemoveUnusedPatterns();
+	if(m_bCheckBoxes[CU_REMOVE_DUPLICATE_PATTERNS]) modified |= RemoveDuplicatePatterns();
+	if(m_bCheckBoxes[CU_REARRANGE_PATTERNS]) modified |= RearrangePatterns();
 
 	// Instruments
 	if(modDoc.GetSoundFile()->m_nInstruments > 0)
 	{
-		if(m_bCheckBoxes[CU_REMOVE_INSTRUMENTS]) bModified |= RemoveAllInstruments();
-		if(m_bCheckBoxes[CU_CLEANUP_INSTRUMENTS]) bModified |= RemoveUnusedInstruments();
+		if(m_bCheckBoxes[CU_REMOVE_INSTRUMENTS]) modified |= RemoveAllInstruments();
+		if(m_bCheckBoxes[CU_CLEANUP_INSTRUMENTS]) modified |= RemoveUnusedInstruments();
 	}
 
 	// Samples
-	if(m_bCheckBoxes[CU_REMOVE_SAMPLES]) bModified |= RemoveAllSamples();
-	if(m_bCheckBoxes[CU_CLEANUP_SAMPLES]) bModified |= RemoveUnusedSamples();
-	if(m_bCheckBoxes[CU_OPTIMIZE_SAMPLES]) bModified |= OptimizeSamples();
+	if(m_bCheckBoxes[CU_REMOVE_SAMPLES]) modified |= RemoveAllSamples();
+	if(m_bCheckBoxes[CU_CLEANUP_SAMPLES]) modified |= RemoveUnusedSamples();
+	if(m_bCheckBoxes[CU_OPTIMIZE_SAMPLES]) modified |= OptimizeSamples();
 	if(modDoc.GetSoundFile()->m_nSamples > 1)
 	{
-		if(m_bCheckBoxes[CU_REARRANGE_SAMPLES]) bModified |= RearrangeSamples();
+		if(m_bCheckBoxes[CU_REARRANGE_SAMPLES]) modified |= RearrangeSamples();
 	}
 
 	// Plugins
-	if(m_bCheckBoxes[CU_REMOVE_PLUGINS]) bModified |= RemoveAllPlugins();
-	if(m_bCheckBoxes[CU_CLEANUP_PLUGINS]) bModified |= RemoveUnusedPlugins();
+	if(m_bCheckBoxes[CU_REMOVE_PLUGINS]) modified |= RemoveAllPlugins();
+	if(m_bCheckBoxes[CU_CLEANUP_PLUGINS]) modified |= RemoveUnusedPlugins();
 
 	// Create samplepack
-	if(m_bCheckBoxes[CU_RESET_VARIABLES]) bModified |= ResetVariables();
+	if(m_bCheckBoxes[CU_RESET_VARIABLES]) modified |= ResetVariables();
 
-	if(bModified) modDoc.SetModified();
+	if(modified) modDoc.SetModified();
 	modDoc.UpdateAllViews(nullptr, UpdateHint().ModType());
 	logcapturer.ShowLog(true);
 	CDialog::OnOK();
@@ -205,6 +209,7 @@ void CModCleanupDlg::OnPresetCleanupSong()
 	CheckDlgButton(IDC_CHK_CLEANUP_PATTERNS, BST_CHECKED);
 	CheckDlgButton(IDC_CHK_REMOVE_PATTERNS, BST_UNCHECKED);
 	CheckDlgButton(IDC_CHK_REARRANGE_PATTERNS, BST_CHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_DUPLICATES, BST_CHECKED);
 	// orders
 	CheckDlgButton(IDC_CHK_MERGE_SEQUENCES, BST_UNCHECKED);
 	CheckDlgButton(IDC_CHK_REMOVE_ORDERS, BST_UNCHECKED);
@@ -231,6 +236,7 @@ void CModCleanupDlg::OnPresetCompoCleanup()
 	CheckDlgButton(IDC_CHK_CLEANUP_PATTERNS, BST_UNCHECKED);
 	CheckDlgButton(IDC_CHK_REMOVE_PATTERNS, BST_CHECKED);
 	CheckDlgButton(IDC_CHK_REARRANGE_PATTERNS, BST_UNCHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_DUPLICATES, BST_UNCHECKED);
 	// orders
 	CheckDlgButton(IDC_CHK_MERGE_SEQUENCES, BST_UNCHECKED);
 	CheckDlgButton(IDC_CHK_REMOVE_ORDERS, BST_CHECKED);
@@ -272,6 +278,9 @@ BOOL CModCleanupDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 		break;
 	case IDC_CHK_REARRANGE_PATTERNS:
 		pTTT->lpszText = _T("Number the patterns given by their order in the sequence.");
+		break;
+	case IDC_CHK_REMOVE_DUPLICATES:
+		pTTT->lpszText = _T("Merge patterns with identical content.");
 		break;
 	// orders
 	case IDC_CHK_REMOVE_ORDERS:
@@ -321,6 +330,79 @@ BOOL CModCleanupDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 
 ///////////////////////////////////////////////////////////////////////
 // Actual cleanup implementations
+
+bool CModCleanupDlg::RemoveDuplicatePatterns()
+//-----------------------------------------
+{
+	CSoundFile &sndFile = modDoc.GetrSoundFile();
+	const PATTERNINDEX numPatterns = sndFile.Patterns.Size();
+	std::vector<PATTERNINDEX> patternMapping(numPatterns, PATTERNINDEX_INVALID);
+
+	BeginWaitCursor();
+	CriticalSection cs;
+
+	PATTERNINDEX foundDupes = 0;
+	for(PATTERNINDEX pat1 = 0; pat1 < numPatterns; pat1++)
+	{
+		if(!sndFile.Patterns.IsValidPat(pat1))
+			continue;
+		const CPattern pattern1 = sndFile.Patterns[pat1];
+		for(PATTERNINDEX pat2 = pat1 + 1; pat2 < numPatterns; pat2++)
+		{
+			if(!sndFile.Patterns.IsValidPat(pat2) || patternMapping[pat2] != PATTERNINDEX_INVALID)
+				continue;
+			const CPattern pattern2 = sndFile.Patterns[pat2];
+			if(pattern1.GetNumRows() != pattern2.GetNumRows() || pattern1.GetNumChannels() != pattern2.GetNumChannels())
+				continue;
+
+			size_t i = pattern1.GetNumRows() * pattern1.GetNumChannels();
+			const ModCommand *m1 = pattern1, *m2 = pattern2;
+			bool identical = true;
+			while(i--)
+			{
+				if(*m1 != *m2)
+				{
+					identical = false;
+					break;
+				}
+				m1++;
+				m2++;
+			}
+			if(identical)
+			{
+				modDoc.GetPatternUndo().PrepareUndo(pat2, 0, 0, pattern2.GetNumChannels(), pattern2.GetNumRows(), "Remove Duplicate Patterns", foundDupes != 0, false);
+				sndFile.Patterns.Remove(pat2);
+
+				patternMapping[pat2] = pat1;
+				foundDupes++;
+			}
+		}
+	}
+
+	if(foundDupes != 0)
+	{
+		modDoc.AddToLog(mpt::String::Print("%1 duplicate pattern%2 merged.", foundDupes, foundDupes == 1 ? "" : "s"));
+
+		// Fix order list
+		const SEQUENCEINDEX numSequences = sndFile.Order.GetNumSequences();
+		for(SEQUENCEINDEX seq = 0; seq < numSequences; seq++)
+		{
+			for(ORDERINDEX ord = 0; ord < sndFile.Order.GetSequence(seq).GetLength(); ord++)
+			{
+				PATTERNINDEX pat = sndFile.Order.GetSequence(seq)[ord];
+				if(pat < numPatterns && patternMapping[pat] != PATTERNINDEX_INVALID)
+				{
+					sndFile.Order.GetSequence(seq)[ord] = patternMapping[pat];
+				}
+			}
+		}
+	}
+
+	EndWaitCursor();
+
+	return foundDupes != 0;
+}
+
 
 // Remove unused patterns
 bool CModCleanupDlg::RemoveUnusedPatterns()
