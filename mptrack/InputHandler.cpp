@@ -263,6 +263,10 @@ bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType
 		if (keyEventType == kKeyEventDown)
 		{
 			modifierMask |= tempModifierMask;
+			// Right Alt is registered as Ctrl+Alt.
+			// Left Ctrl + Right Alt seems like a pretty difficult to use key combination anyway, so just ignore Ctrl.
+			if(scancode == 0x138)
+				modifierMask &= ~HOTKEYF_CONTROL;
 #ifdef _DEBUG
 			LogModifiers(modifierMask);
 #endif
