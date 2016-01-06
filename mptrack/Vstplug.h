@@ -205,9 +205,6 @@ public:
 	bool ShouldProcessSilence() { return IsInstrument() || ((m_Effect.flags & effFlagsNoSoundInStop) == 0 && Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f) != 1); }
 	void ResetSilence() { m_MixState.ResetSilence(); }
 
-	void SetEditorPos(int32 x, int32 y) { m_pMixStruct->editorX= x; m_pMixStruct->editorY = y; }
-	void GetEditorPos(int32 &x, int32 &y) const { x = m_pMixStruct->editorX; y = m_pMixStruct->editorY; }
-
 	void SetCurrentProgram(int32 nIndex);
 	PlugParamValue GetParameter(PlugParamIndex nIndex);
 	void SetParameter(PlugParamIndex nIndex, PlugParamValue fValue);

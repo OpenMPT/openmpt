@@ -114,6 +114,23 @@ CString IMixPlugin::GetFormattedProgramName(VstInt32 index)
 	return formattedName;
 }
 
+
+void IMixPlugin::SetEditorPos(int32 x, int32 y)
+//---------------------------------------------
+{
+	m_pMixStruct->editorX= x;
+	m_pMixStruct->editorY = y;
+}
+
+
+void IMixPlugin::GetEditorPos(int32 &x, int32 &y) const
+//-----------------------------------------------------
+{
+	x = m_pMixStruct->editorX;
+	y = m_pMixStruct->editorY;
+}
+
+
 #endif // MODPLUG_TRACKER
 
 // Get list of plugins to which output is sent. A nullptr indicates master output.

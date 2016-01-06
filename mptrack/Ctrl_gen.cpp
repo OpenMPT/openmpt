@@ -184,7 +184,7 @@ void CCtrlGeneral::OnTapTempo()
 		uint32 newTempo = 60000 * numSamples;
 		if(m_sndFile.m_nTempoMode != tempoModeModern)
 		{
-			newTempo = (newTempo * m_sndFile.m_nDefaultSpeed * m_sndFile.m_nDefaultRowsPerBeat) / 24;
+			newTempo = Util::muldiv(newTempo, m_sndFile.m_nDefaultSpeed * m_sndFile.m_nDefaultRowsPerBeat, 24);
 		}
 		newTempo = Util::muldivr(newTempo, TEMPO::fractFact, delay);
 		TEMPO t;

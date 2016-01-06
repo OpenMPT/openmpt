@@ -140,8 +140,7 @@ void CChildFrame::ActivateFrame(int nCmdShow)
 	CMDIChildWnd::ActivateFrame(nCmdShow);
 
 
-	//rewbs.fix3185: When song first loads, initialise patternViewState
-	//               to point to start of song.
+	// When song first loads, initialise patternViewState to point to start of song.
 	CView *pView = GetActiveView();
 	CModDoc *pModDoc = NULL;
 	if (pView) pModDoc = (CModDoc *)pView->GetDocument();
@@ -155,7 +154,6 @@ void CChildFrame::ActivateFrame(int nCmdShow)
 			m_bInitialActivation=false;
 		}
 	}
-	//end rewbs.fix3185
 }
 
 

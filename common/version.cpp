@@ -548,6 +548,11 @@ mpt::ustring GetFullCreditsString()
 		"http://mpg123.de/\n"
 		"\n"
 #endif
+#ifdef MPT_BUILTIN_MO3_STB_VORBIS
+		"Sean Barrett for stb_vorbis\n"
+		"https://github.com/nothings/stb/\n"
+		"\n"
+#endif
 #ifndef NO_OGG
 		"Xiph.Org Foundation for libogg\n"
 		"https://xiph.org/ogg/\n"
@@ -562,7 +567,7 @@ mpt::ustring GetFullCreditsString()
 		"http://www.codeproject.com/Articles/21257/_\n"
 		"\n"
 		"Nobuyuki for application and file icon\n"
-		"http://twitter.com/nobuyukinyuu\n"
+		"https://twitter.com/nobuyukinyuu\n"
 		"\n"
 #endif
 		"The people at ModPlug forums for crucial contribution\n"

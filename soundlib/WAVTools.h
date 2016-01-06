@@ -245,7 +245,7 @@ struct PACKED WAVSampleLoop
 	void ConvertToWAV(SmpLength start, SmpLength end, bool bidi);
 };
 
-STATIC_ASSERT(sizeof(RIFFHeader) == 12);
+STATIC_ASSERT(sizeof(WAVSampleLoop) == 24);
 
 
 // MPT-specific "xtra" chunk

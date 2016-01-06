@@ -11,7 +11,6 @@
 #pragma once
 
 #include "CListCtrl.h"
-#include "../common/thread.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
