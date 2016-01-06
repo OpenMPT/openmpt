@@ -284,10 +284,11 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 				uint32 newval = 0x10000;
 				uint32 d = bb.GetBits(numbits+1);
 
-				if (d >= MMCMP16BitCommands[numbits])
+				uint32 command = MMCMP16BitCommands[numbits & 0x0F];
+				if (d >= command)
 				{
-					uint32 nFetch = MMCMP16BitFetch[numbits];
-					uint32 newbits = bb.GetBits(nFetch) + ((d - MMCMP16BitCommands[numbits]) << nFetch);
+					uint32 nFetch = MMCMP16BitFetch[numbits & 0x0F];
+					uint32 newbits = bb.GetBits(nFetch) + ((d - command) << nFetch);
 					if (newbits != numbits)
 					{
 						numbits = newbits & 0x0F;
@@ -358,10 +359,11 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 				uint32 newval = 0x100;
 				uint32 d = bb.GetBits(numbits+1);
 
-				if (d >= MMCMP8BitCommands[numbits])
+				uint32 command = MMCMP8BitCommands[numbits & 0x07];
+				if (d >= command)
 				{
-					uint32 nFetch = MMCMP8BitFetch[numbits];
-					uint32 newbits = bb.GetBits(nFetch) + ((d - MMCMP8BitCommands[numbits]) << nFetch);
+					uint32 nFetch = MMCMP8BitFetch[numbits & 0x07];
+					uint32 newbits = bb.GetBits(nFetch) + ((d - command) << nFetch);
 					if (newbits != numbits)
 					{
 						numbits = newbits & 0x07;
