@@ -643,7 +643,7 @@ static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSou
 			continue;
 		}
 
-		ModCommand &m = rowBase[MIN((flags & channelMask), channels - 1)];
+		ModCommand &m = rowBase[std::min<CHANNELINDEX>((flags & channelMask), channels - 1)];
 
 		if(flags & dataFlag)
 		{
@@ -835,6 +835,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	// "PATT" - Pattern data for one pattern
 	if(loadFlags & loadPatternData)
 	{
+		PATTERNINDEX maxPattern = 0;
 		std::vector<FileReader> pattChunks = chunks.GetAllChunks(AMFFRiffChunk::idPATT);
 		for(std::vector<FileReader>::iterator patternIter = pattChunks.begin(); patternIter != pattChunks.end(); patternIter++)
 		{
@@ -842,6 +843,12 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 			PATTERNINDEX pat = chunk.ReadUint8();
 			size_t patternSize = chunk.ReadUint32LE();
 			ConvertAMPattern(chunk.ReadChunk(patternSize), pat, isAM, *this);
+			maxPattern = std::max(maxPattern, pat);
+		}
+		for(PATTERNINDEX pat = 0; pat < maxPattern; pat++)
+		{
+			if(!Patterns.IsValidPat(pat))
+				Patterns.Insert(pat, 64);
 		}
 	}
 

@@ -100,7 +100,7 @@ struct PACKED ITEnvelope
 	// Convert OpenMPT's internal envelope format to an IT/MPTM envelope.
 	void ConvertToIT(const InstrumentEnvelope &mptEnv, uint8 envOffset, uint8 envDefault);
 	// Convert IT/MPTM envelope data into OpenMPT's internal envelope format - To be used by ITInstrToMPT()
-	void ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envOffset, int maxNodes) const;
+	void ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envOffset, uint8 maxNodes) const;
 };
 
 STATIC_ASSERT(sizeof(ITEnvelope) == 82);

@@ -185,7 +185,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 	// Read name table
 	std::vector<std::string> names;
 	names.reserve(fileHeader.nameCount);
-	for(uint32 i = 0; i < fileHeader.nameCount; i++)
+	for(uint32 i = 0; i < fileHeader.nameCount && file.CanRead(4); i++)
 	{
 		names.push_back(ReadUMXNameTableEntry(file, fileHeader.packageVersion));
 	}
@@ -198,7 +198,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 
 	std::vector<int32> classes;
 	classes.reserve(fileHeader.importCount);
-	for(uint32 i = 0; i < fileHeader.importCount; i++)
+	for(uint32 i = 0; i < fileHeader.importCount && file.CanRead(4); i++)
 	{
 		int32 objName = ReadUMXImportTableEntry(file, fileHeader.packageVersion);
 		if(static_cast<size_t>(objName) < names.size())
