@@ -18,6 +18,23 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+#ifdef LIBOPENMPT_BUILD
+// All these optimizations are not applicable to the tracker
+// because cutoff and firtype are configurable there.
+
+// Cache resampler tables across resampler object creation.
+// A C++11-style function-static singleton is holding the cached values.
+#define MPT_RESAMPLER_TABLES_CACHED
+
+// Prime the tables cache when the library is loaded.
+// Caching gets triggered via a global object that primes the cache during
+//  construction.
+// This is only really useful with MPT_RESAMPLER_TABLES_CACHED.
+#define MPT_RESAMPLER_TABLES_CACHED_ONSTARTUP
+
+#endif // LIBOPENMPT_BUILD
+
+
 #define SINC_WIDTH       8
 
 #define SINC_PHASES_BITS 12
@@ -88,10 +105,36 @@ public:
 private:
 	CResamplerSettings m_OldSettings;
 public:
-	CResampler() { InitializeTables(true); }
+	CResampler(bool fresh_generate=false)
+	{
+		if(fresh_generate)
+		{
+			InitializeTablesFromScratch(true);
+		} else
+		{
+			InitializeTables();
+		}
+	}
+	void InitializeTables()
+	{
+		#if defined(MPT_RESAMPLER_TABLES_CACHED)
+			InitializeTablesFromCache();
+		#else
+			InitializeTablesFromScratch(true);
+		#endif
+	}
+	void UpdateTables()
+	{
+		InitializeTablesFromScratch(false);
+	}
 	~CResampler() {}
-	void InitializeTables(bool force=false);
 	bool IsHQ() const { return m_Settings.SrcMode >= SRCMODE_SPLINE && m_Settings.SrcMode < SRCMODE_DEFAULT; }
+private:
+	void InitFloatmixerTables();
+	void InitializeTablesFromScratch(bool force=false);
+#ifdef MPT_RESAMPLER_TABLES_CACHED
+	void InitializeTablesFromCache();
+#endif
 };
 
 
