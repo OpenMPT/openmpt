@@ -124,7 +124,7 @@ struct MMCMPBITBUFFER
 	uint32 bitcount;
 	uint32 bitbuffer;
 	const uint8 *pSrc;
-	const uint8 *pEnd;
+	uint32 bytesLeft;
 
 	uint32 GetBits(uint32 nBits);
 };
@@ -137,7 +137,12 @@ uint32 MMCMPBITBUFFER::GetBits(uint32 nBits)
 	if (!nBits) return 0;
 	while (bitcount < 24)
 	{
-		bitbuffer |= ((pSrc < pEnd) ? *pSrc++ : 0) << bitcount;
+		if(bytesLeft)
+		{
+			bitbuffer |= *pSrc << bitcount;
+			pSrc++;
+			bytesLeft--;
+		}
 		bitcount += 8;
 	}
 	d = bitbuffer & ((1 << nBits) - 1);
@@ -273,7 +278,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 			if(!file.Seek(memPos + blk.tt_entries)) return false;
 			if(!file.CanRead(blk.pk_size - blk.tt_entries)) return false;
 			bb.pSrc = reinterpret_cast<const uint8 *>(file.GetRawData());
-			bb.pEnd = reinterpret_cast<const uint8 *>(file.GetRawData() - blk.tt_entries + blk.pk_size);
+			bb.bytesLeft = blk.pk_size - blk.tt_entries;
 			while (subblk < blk.sub_blk)
 			{
 				uint32 newval = 0x10000;
@@ -347,7 +352,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 			if(!file.Seek(memPos + blk.tt_entries)) return false;
 			if(!file.CanRead(blk.pk_size - blk.tt_entries)) return false;
 			bb.pSrc = reinterpret_cast<const uint8 *>(file.GetRawData());
-			bb.pEnd = reinterpret_cast<const uint8 *>(file.GetRawData() - blk.tt_entries + blk.pk_size);
+			bb.bytesLeft = blk.pk_size - blk.tt_entries;
 			while (subblk < blk.sub_blk)
 			{
 				uint32 newval = 0x100;
