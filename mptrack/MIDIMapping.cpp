@@ -97,7 +97,7 @@ bool CMIDIMapper::Deserialize(FileReader &file)
 		SwapBytesLE(i32);
 
 		s.SetChannel(((i16 & 1) != 0) ? 0 : 1 + ((i16 >> 1) & 0xF));
-		s.SetEvent(static_cast<BYTE>((i16 >> 5) & 0xF));
+		s.SetEvent(static_cast<uint8>((i16 >> 5) & 0xF));
 		s.SetController(i16 >> 9);
 		s.SetPlugIndex(i8);
 		s.SetParamIndex(i32);

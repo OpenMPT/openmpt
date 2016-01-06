@@ -143,7 +143,7 @@ void CPatternGotoDialog::OnEnChangeGotoOrd()
 		if(candidatePattern < m_pSndFile->Patterns.Size() && m_pSndFile->Patterns[candidatePattern])
 		{
 			m_nPattern = candidatePattern;
-		} 
+		}
 	}
 
 	LockControls();

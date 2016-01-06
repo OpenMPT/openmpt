@@ -166,13 +166,12 @@ public:
 
 	virtual bool HasEditor() const = 0;
 	virtual void ToggleEditor() = 0;
+	void SetEditorPos(int32 x, int32 y);
+	void GetEditorPos(int32 &x, int32 &y) const;
 
 	virtual void BeginSetProgram(int32 program = -1) = 0;
 	virtual void EndSetProgram() = 0;
 #endif
-
-	virtual void SetEditorPos(int32 x, int32 y) = 0;
-	virtual void GetEditorPos(int32 &x, int32 &y) const = 0;
 
 	virtual int GetNumInputChannels() const = 0;
 	virtual int GetNumOutputChannels() const = 0;

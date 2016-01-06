@@ -59,7 +59,7 @@ BOOL COptionsAdvanced::OnInitDialog()
 	int enableGroupsResult2 = static_cast<int>(ListView_EnableGroupView(m_List.m_hWnd, TRUE));
 	// Looks like we have to check enabling and check that a second enabling does
 	// not change anything.
-	// Just checking if enabling fails with -1 does no work for older control
+	// Just checking if enabling fails with -1 does not work for older control
 	// versions because they just do not know the window message at all and return
 	// 0, always. At least Wine does behave this way.
 	if(enableGroupsResult1 == 1 && enableGroupsResult2 == 0)

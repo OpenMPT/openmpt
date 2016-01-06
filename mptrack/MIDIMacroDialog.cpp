@@ -444,7 +444,7 @@ void CMidiMacroSetup::ToggleBoxes(UINT sfx_preset, UINT sfx)
 		m_CbnMacroParam.ShowWindow(TRUE);
 		m_CbnMacroPlug.EnableWindow(TRUE);
 		m_CbnMacroParam.EnableWindow(TRUE);
-		SetDlgItemText(IDC_GENMACROLABEL, "Plug/Param");
+		SetDlgItemText(IDC_GENMACROLABEL, _T("Plugin/Param"));
 		m_CbnMacroParam.SetCurSel(m_MidiCfg.MacroToPlugParam(sfx));
 	} else
 	{
@@ -458,15 +458,12 @@ void CMidiMacroSetup::ToggleBoxes(UINT sfx_preset, UINT sfx)
 		m_CbnMacroCC.ShowWindow(TRUE);
 		m_CbnMacroPlug.ShowWindow(FALSE);
 		m_CbnMacroParam.ShowWindow(FALSE);
-		SetDlgItemText(IDC_GENMACROLABEL, "MIDI CC");
+		SetDlgItemText(IDC_GENMACROLABEL, _T("MIDI CC"));
 		m_CbnMacroCC.SetCurSel(m_MidiCfg.MacroToMidiCC(sfx));
 	} else
 	{
 		m_CbnMacroCC.EnableWindow(FALSE);
 	}
-
-	//m_EditSFx.EnableWindow((sfx_preset == sfx_unused) ? FALSE : TRUE);
-
 }
 
 

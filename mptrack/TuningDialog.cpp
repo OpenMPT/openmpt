@@ -662,7 +662,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 void CTuningDialog::OnBnClickedButtonImport()
 //-------------------------------------------
 {
-	std::string sFilter = mpt::String::Print("Tuning files (*%1, *%2, *.scl)|*%3;*%4;*.scl|",
+	std::string sFilter = mpt::format("Tuning files (*%1, *%2, *.scl)|*%3;*%4;*.scl|")(
 		CTuning::s_FileExtension,
 		CTuningCollection::s_FileExtension,
 		CTuning::s_FileExtension,
@@ -709,16 +709,16 @@ void CTuningDialog::OnBnClickedButtonImport()
 						delete pT; pT = nullptr;
 						if (m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
 						{
-							sLoadReport += L"-Failed to load file " + fileNameExt + L": maximum number(" + mpt::ToWString(CTuningCollection::s_nMaxTuningCount) + L") of temporary tunings is already open.\n";
+							sLoadReport += mpt::format(L"-Failed to load file \"%1\": maximum number(%2) of temporary tunings is already open.\n")(fileNameExt, CTuningCollection::s_nMaxTuningCount);
 						}
 						else // Case: Can't add tuning to tuning collection for unknown reason.
 						{
-							sLoadReport += L"-Unable to import file \"" + fileNameExt + L"\": unknown reason.\n";
+							sLoadReport += mpt::format(L"-Unable to import file \"%1\": unknown reason.\n")(fileNameExt);
 						}
 					}
 				} else // pT == nullptr
 				{
-					sLoadReport += L"-Unable to import file \"" + fileNameExt + L"\": unrecognized file.\n";
+					sLoadReport += mpt::format(L"-Unable to import file \"%1\": unrecognized file.\n")(fileNameExt);
 				}
 			} else // scl import.
 			{
@@ -727,11 +727,11 @@ void CTuningDialog::OnBnClickedButtonImport()
 				{
 					if (a == enSclImportAddTuningFailure && m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
 					{
-						sLoadReport += L"-Failed to load file " + fileNameExt + L": maximum number(" + mpt::ToWString(CTuningCollection::s_nMaxTuningCount) + L") of temporary tunings is already open.\n";
+						sLoadReport += mpt::format(L"-Failed to load file \"%1\": maximum number(%2) of temporary tunings is already open.\n")(fileNameExt, CTuningCollection::s_nMaxTuningCount);
 					}
 					else
 					{
-						sLoadReport += L"-Unable to import " + fileNameExt + L": " + mpt::ToWide(GetSclImportFailureMsg(a)) + L".\n";
+						sLoadReport += mpt::format(L"-Unable to import \"%1\": %2.\n")(fileNameExt, GetSclImportFailureMsg(a));
 					}
 				}
 				else // scl import successful.
@@ -753,8 +753,8 @@ void CTuningDialog::OnBnClickedButtonImport()
 			pNewTCol->SetSavefilePath(files[counter]);
 			if (pNewTCol->Deserialize())
 			{
-				delete pNewTCol; pNewTCol = 0;
-				sLoadReport += L"-Unable to import tuning collection \"" + fileNameExt + L"\": unrecognized file.\n";
+				delete pNewTCol; pNewTCol = nullptr;
+				sLoadReport += mpt::format(L"-Unable to import tuning collection \"%1\": unrecognized file.\n")(fileNameExt);
 			}
 			else
 			{
@@ -765,7 +765,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 		}
 		else // Case: Unknown extension (should not happen).
 		{
-			sLoadReport += L"-Unable to load \"" + fileNameExt + L"\": unrecognized file extension.\n";
+			sLoadReport += mpt::format(L"-Unable to load \"%1\": unrecognized file extension.\n")(fileNameExt);
 		}
 	}
 	if(sLoadReport.length() > 0)

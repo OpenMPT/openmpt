@@ -607,18 +607,17 @@ void COrderList::UpdateInfoText()
 	if(pMainFrm != nullptr && ::GetFocus() == m_hWnd)
 	{
 		CSoundFile &sndFile = m_pModDoc.GetrSoundFile();
-		CHAR s[128];
-		strcpy(s, "");
+		TCHAR s[128] = _T("");
 
 		const ORDERINDEX nLength = sndFile.Order.GetLengthTailTrimmed();
 
 		if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY)
 		{
-			wsprintf(s, "Position %02Xh of %02Xh", m_nScrollPos, nLength);
+			wsprintf(s, _T("Position %02Xh of %02Xh"), m_nScrollPos, nLength);
 		}
 		else
 		{
-			wsprintf(s, "Position %d of %d (%02Xh of %02Xh)", m_nScrollPos, nLength, m_nScrollPos, nLength);
+			wsprintf(s, _T("Position %u of %u (%02Xh of %02Xh)"), m_nScrollPos, nLength, m_nScrollPos, nLength);
 		}
 		
 		if (m_nScrollPos < sndFile.Order.GetLength())
@@ -626,10 +625,11 @@ void COrderList::UpdateInfoText()
 			PATTERNINDEX nPat = sndFile.Order[m_nScrollPos];
 			if (nPat < sndFile.Patterns.Size())
 			{
-				char szpat[MAX_PATTERNNAME] = "";
-				if (sndFile.Patterns[nPat].GetName(szpat) && strcmp(szpat, ""))
+				std::string patName = sndFile.Patterns[nPat].GetName();
+				if (!patName.empty())
 				{
-					wsprintf(s + strlen(s), ": %s", szpat);
+					_tcscat(s, _T(": "));
+					_tcscat(s, patName.c_str());
 				}
 			}
 		}

@@ -54,10 +54,12 @@ bool ComponentPluginBridge::DoInitialize()
 		availability = AvailabilityMissing;
 		return false;
 	}
-	WCHAR exePath[MAX_PATH];
-	GetModuleFileNameW(0, exePath, CountOf(exePath));
-	mpt::String::SetNullTerminator(exePath);
-	uint64 mptVersion = BridgeWrapper::GetFileVersion(exePath);
+	std::vector<WCHAR> exePath(MAX_PATH);
+	while(GetModuleFileNameW(0, &exePath[0], exePath.size()) >= exePath.size())
+	{
+		exePath.resize(exePath.size() * 2);
+	}
+	uint64 mptVersion = BridgeWrapper::GetFileVersion(&exePath[0]);
 	uint64 bridgeVersion = BridgeWrapper::GetFileVersion(exeName.AsNative().c_str());
 	if(bridgeVersion != mptVersion)
 	{
@@ -171,7 +173,7 @@ AEffect *BridgeWrapper::Create(const VSTPluginLib &plugin)
 // Initialize and launch bridge
 bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *sharedInstace)
 {
-	static uint32_t plugId = 0;
+	static uint32 plugId = 0;
 	plugId++;
 	const DWORD procId = GetCurrentProcessId();
 
@@ -538,7 +540,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 	}
 
 	std::vector<char> dispatchData(sizeof(DispatchMsg), 0);
-	int64_t ptrOut = 0;
+	int64 ptrOut = 0;
 	bool copyPtrBack = false, ptrIsSize = true;
 	char *ptrC = static_cast<char *>(ptr);
 
@@ -601,7 +603,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 
 	case effEditOpen:
 		// HWND in [ptr] - Note: Window handles are interoperable between 32-bit and 64-bit applications in Windows (http://msdn.microsoft.com/en-us/library/windows/desktop/aa384203%28v=vs.85%29.aspx)
-		ptrOut = reinterpret_cast<int64_t>(ptr);
+		ptrOut = reinterpret_cast<int64>(ptr);
 		ptrIsSize = false;
 		that->cachedProgNames.clear();
 		that->cachedParamInfo.clear();
@@ -614,7 +616,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 	case effGetChunk:
 		// void** in [ptr] for chunk data address
 		{
-			static uint32_t chunkId = 0;
+			static uint32 chunkId = 0;
 			const std::wstring mapName = L"Local\\openmpt-" + mpt::ToWString(GetCurrentProcessId()) + L"-chunkdata-" + mpt::ToWString(chunkId++);
 			ptrOut = (mapName.length() + 1) * sizeof(wchar_t);
 			PushToVector(dispatchData, *mapName.c_str(), static_cast<size_t>(ptrOut));
@@ -638,11 +640,11 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 			if(that->eventMem.Size() < events.size())
 			{
 				// Resize memory
-				static uint32_t chunkId = 0;
+				static uint32 chunkId = 0;
 				const std::wstring mapName = L"Local\\openmpt-" + mpt::ToWString(GetCurrentProcessId()) + L"-events-" + mpt::ToWString(chunkId++);
 				ptrOut = (mapName.length() + 1) * sizeof(wchar_t);
 				PushToVector(dispatchData, *mapName.c_str(), static_cast<size_t>(ptrOut));
-				that->eventMem.Create(mapName.c_str(), static_cast<uint32_t>(events.size() + 1024));
+				that->eventMem.Create(mapName.c_str(), static_cast<uint32>(events.size() + 1024));
 
 				opcode = effVendorSpecific;
 				index = kVendorOpenMPT;
@@ -795,7 +797,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 		dispatchData.resize(sizeof(DispatchMsg) + static_cast<size_t>(ptrOut), 0);
 	}
 
-	uint32_t extraSize = static_cast<uint32_t>(dispatchData.size() - sizeof(DispatchMsg));
+	uint32 extraSize = static_cast<uint32>(dispatchData.size() - sizeof(DispatchMsg));
 	
 	// Create message header
 	BridgeMessage *msg = reinterpret_cast<BridgeMessage *>(&dispatchData[0]);
@@ -988,7 +990,7 @@ void VSTCALLBACK BridgeWrapper::SetParameter(AEffect *effect, VstInt32 index, fl
 		if(that->isSettingProgram || (plug && plug->IsSongPlaying()))
 		{
 			// Queue up messages while rendering to reduce latency introduced by every single bridge call
-			uint32_t i;
+			uint32 i;
 			while((i = InterlockedExchangeAdd(&autoQueue.pendingEvents, 1)) >= CountOf(autoQueue.params))
 			{
 				// Queue full!

@@ -130,7 +130,7 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 				const int nOdc = theApp.GetOpenDocumentCount();
 				Reporting::Notification(mpt::String::Print(L"Opening \"%1\" failed. This can happen if "
 					L"no more documents can be opened or if the file type was not "
-					L"recognised. If the former is true, it's "
+					L"recognised. If the former is true, it is "
 					L"recommended to close some documents as otherwise a crash is likely"
 					L"(currently there %2 %3 document%4 open).",
 					filename, (nOdc == 1) ? L"is" : L"are", nOdc, (nOdc == 1) ? L"" : L"s"));
@@ -1059,11 +1059,11 @@ BOOL CTrackApp::InitInstance()
 	// For Windows 8.1 and newer
 	{
 		HMODULE shcore = LoadLibraryW(L"SHCore.dll");
-		if(shcore)
+		if(shcore != nullptr)
 		{
 			typedef HRESULT (WINAPI * PSETPROCESSDPIAWARENESS)(int);
 			PSETPROCESSDPIAWARENESS SetProcessDPIAwareness = (PSETPROCESSDPIAWARENESS)GetProcAddress(shcore, "SetProcessDpiAwareness");
-			if(SetProcessDPIAwareness)
+			if(SetProcessDPIAwareness != nullptr)
 			{
 				setDPI = (SetProcessDPIAwareness(TrackerSettings::Instance().highResUI ? 2 : 0) == S_OK);
 			}

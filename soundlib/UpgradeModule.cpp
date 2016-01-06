@@ -20,7 +20,10 @@ OPENMPT_NAMESPACE_BEGIN
 struct UpgradePatternData
 //=======================
 {
-	UpgradePatternData(CSoundFile &sf) : sndFile(sf), chn(0) { }
+	UpgradePatternData(CSoundFile &sf)
+		: sndFile(sf)
+		, chn(0)
+		, compatPlay(sf.m_playBehaviour[MSF_COMPATIBLE_PLAY]) { }
 
 	void operator() (ModCommand &m)
 	{
@@ -49,7 +52,7 @@ struct UpgradePatternData
 		else if((sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 		{
 			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 02) ||
-				(!sndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY] && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+				(!compatPlay && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
 			{
 				if(m.command == CMD_GLOBALVOLUME)
 				{
@@ -78,7 +81,7 @@ struct UpgradePatternData
 			// For note volume slides, OpenMPT 1.18 fixes this in compatible mode, OpenMPT 1.20 fixes this in normal mode as well.
 			const bool noteVolSlide =
 				(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00) ||
-				(!sndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY] && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+				(!compatPlay && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
 				&&
 				(m.command == CMD_VOLUMESLIDE || m.command == CMD_VIBRATOVOL || m.command == CMD_TONEPORTAVOL || m.command == CMD_PANNINGSLIDE);
 
@@ -100,7 +103,7 @@ struct UpgradePatternData
 				&& sndFile.m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 22, 00, 00))	// Ignore compatibility export
 			{
 				// OpenMPT 1.22.01.04 fixes illegal (out of range) instrument numbers; they should do nothing. In previous versions, they stopped the playing sample.
-				if(sndFile.GetNumInstruments() && m.instr > sndFile.GetNumInstruments() && !sndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY])
+				if(sndFile.GetNumInstruments() && m.instr > sndFile.GetNumInstruments() && !compatPlay)
 				{
 					m.volcmd = VOLCMD_VOLUME;
 					m.vol = 0;
@@ -112,7 +115,7 @@ struct UpgradePatternData
 		{
 			// Something made be believe that out-of-range global volume commands are ignored in XM
 			// just like they are ignored in IT, but apparently they are not. Aaaaaargh!
-			if(((sndFile.m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 03, 02) && sndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY]) || (sndFile.m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+			if(((sndFile.m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 03, 02) && compatPlay) || (sndFile.m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
 				&& sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 24, 02, 02)
 				&& m.command == CMD_GLOBALVOLUME
 				&& m.param > 64)
@@ -121,7 +124,7 @@ struct UpgradePatternData
 			}
 
 			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 19, 00, 00)
-				|| (!sndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY] && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+				|| (!compatPlay && sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
 			{
 				if(m.command == CMD_OFFSET && m.volcmd == VOLCMD_TONEPORTAMENTO)
 				{
@@ -133,7 +136,7 @@ struct UpgradePatternData
 
 			if(sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 01, 10)
 				&& m.volcmd == VOLCMD_TONEPORTAMENTO && m.command == CMD_TONEPORTAMENTO
-				&& (m.vol != 0 || sndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY]) && m.param != 0)
+				&& (m.vol != 0 || compatPlay) && m.param != 0)
 			{
 				// Mx and 3xx on the same row does weird things in FT2: 3xx is completely ignored and the Mx parameter is doubled. Fixed in revision 1312 / OpenMPT 1.20.01.10
 				// Previously the values were just added up, so let's fix this!
@@ -158,7 +161,7 @@ struct UpgradePatternData
 			// We also fix X6x commands in hacked XM files, since they are treated identically to the S6x command in IT/S3M files.
 			// We don't treat them in files made with OpenMPT 1.18+ that have compatible play enabled, though, since they are ignored there anyway.
 			const bool fixX6x = (m.command == CMD_XFINEPORTAUPDOWN && (m.param & 0xF0) == 0x60
-				&& (!(sndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY] && sndFile.GetType() == MOD_TYPE_XM) || sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00)));
+				&& (!(compatPlay && sndFile.GetType() == MOD_TYPE_XM) || sndFile.m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00)));
 
 			if(fixS6x || fixX6x)
 			{
@@ -198,8 +201,9 @@ struct UpgradePatternData
 
 	}
 
-	CSoundFile &sndFile;
+	const CSoundFile &sndFile;
 	CHANNELINDEX chn;
+	const bool compatPlay;
 };
 
 
