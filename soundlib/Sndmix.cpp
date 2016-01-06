@@ -80,7 +80,7 @@ void CSoundFile::SetResamplerSettings(const CResamplerSettings &resamplersetting
 //--------------------------------------------------------------------------------
 {
 	m_Resampler.m_Settings = resamplersettings;
-	m_Resampler.InitializeTables();
+	m_Resampler.UpdateTables();
 }
 
 
@@ -93,7 +93,7 @@ void CSoundFile::InitPlayer(bool bReset)
 		gnDryLOfsVol = 0;
 		gnDryROfsVol = 0;
 	}
-	m_Resampler.InitializeTables();
+	m_Resampler.UpdateTables();
 #ifndef NO_REVERB
 	m_Reverb.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
 #endif

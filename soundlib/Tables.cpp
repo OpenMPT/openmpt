@@ -923,8 +923,8 @@ static void getdownsample2x(short int *psinc)
 #ifdef MODPLUG_TRACKER
 bool CResampler::StaticTablesInitialized = false;
 SINC_TYPE CResampler::gKaiserSinc[SINC_PHASES*8];     // Upsampling
-SINC_TYPE CResampler::gDownsample13x[SINC_PHASES*8];  // Downsample 1.333x
-SINC_TYPE CResampler::gDownsample2x[SINC_PHASES*8];   // Downsample 2x
+SINC_TYPE CResampler::gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
+SINC_TYPE CResampler::gDownsample2x[SINC_PHASES*8];		// Downsample 2x
 #ifndef MPT_INTMIXER
 mixsample_t CResampler::FastSincTablef[256 * 4];		// Cubic spline LUT
 mixsample_t CResampler::LinearTablef[256];				// Linear interpolation LUT
@@ -932,15 +932,43 @@ mixsample_t CResampler::LinearTablef[256];				// Linear interpolation LUT
 #endif // MODPLUG_TRACKER
 
 
-void CResampler::InitializeTables(bool force)
+void CResampler::InitFloatmixerTables()
 {
-#ifdef MODPLUG_TRACKER
-	if((m_OldSettings == m_Settings) && !force && StaticTablesInitialized) return;
-	if(!StaticTablesInitialized)
-#else
-	if((m_OldSettings == m_Settings) && !force) return;
-#endif // MODPLUG_TRACKER
+#ifndef MPT_INTMIXER
+	// Prepare fast sinc coefficients for floating point mixer
+	for(size_t i = 0; i < CountOf(FastSincTable); i++)
 	{
+		FastSincTablef[i] = static_cast<mixsample_t>(FastSincTable[i] * mixsample_t(1.0f / 16384.0f));
+	}
+
+	// Prepare linear interpolation coefficients for floating point mixer
+	for(size_t i = 0; i < CountOf(LinearTablef); i++)
+	{
+		LinearTablef[i] = static_cast<mixsample_t>(i * mixsample_t(1.0f / CountOf(LinearTablef)));
+	}
+#endif // !defined(MPT_INTMIXER)
+}
+
+
+void CResampler::InitializeTablesFromScratch(bool force)
+{
+
+	bool initParameterIndependentTables = false;
+	if(force)
+	{
+		initParameterIndependentTables = true;
+	}
+	#ifdef MODPLUG_TRACKER
+		if(!StaticTablesInitialized)
+		{
+			initParameterIndependentTables = true;
+		}
+	#endif // MODPLUG_TRACKER
+
+	MPT_MAYBE_CONSTANT_IF(initParameterIndependentTables)
+	{
+		InitFloatmixerTables();
+
 		getsinc(gKaiserSinc, 9.6377, 0.97);
 		//ericus' downsampling improvement.
 		//getsinc(gDownsample13x, 8.5, 3.0/4.0);
@@ -949,29 +977,50 @@ void CResampler::InitializeTables(bool force)
 		getsinc(gDownsample2x, 2.7625, 0.425);
 		//end ericus' downsampling improvement.
 
-#ifndef MPT_INTMIXER
-		// Prepare fast sinc coefficients for floating point mixer
-		for(size_t i = 0; i < CountOf(FastSincTable); i++)
-		{
-			FastSincTablef[i] = static_cast<mixsample_t>(FastSincTable[i] * mixsample_t(1.0f / 16384.0f));
-		}
+		#ifdef MODPLUG_TRACKER
+			StaticTablesInitialized = true;
+		#endif // MODPLUG_TRACKER
+	}
 
-		// Prepare linear interpolation coefficients for floating point mixer
-		for(size_t i = 0; i < CountOf(LinearTablef); i++)
-		{
-			LinearTablef[i] = static_cast<mixsample_t>(i * mixsample_t(1.0f / CountOf(LinearTablef)));
-		}
-#endif // !defined(MPT_INTMIXER)
+	if((m_OldSettings == m_Settings) && !force)
+	{
+		return;
 	}
 
 	m_WindowedFIR.InitTable(m_Settings.gdWFIRCutoff, m_Settings.gbWFIRType);
 
-#ifdef MODPLUG_TRACKER
-	StaticTablesInitialized = true;
-#endif // MODPLUG_TRACKER
-
 	m_OldSettings = m_Settings;
+
 }
+
+
+#ifdef MPT_RESAMPLER_TABLES_CACHED
+
+void CResampler::InitializeTablesFromCache()
+{
+	static CResampler s_CachedResampler(true);
+	InitFloatmixerTables();
+	std::copy(s_CachedResampler.gKaiserSinc, s_CachedResampler.gKaiserSinc + SINC_PHASES*8, gKaiserSinc);
+	std::copy(s_CachedResampler.gDownsample13x, s_CachedResampler.gDownsample13x + SINC_PHASES*8, gDownsample13x);
+	std::copy(s_CachedResampler.gDownsample2x, s_CachedResampler.gDownsample2x + SINC_PHASES*8, gDownsample2x);
+	std::copy(s_CachedResampler.m_WindowedFIR.lut, s_CachedResampler.m_WindowedFIR.lut + WFIR_LUTLEN*WFIR_WIDTH, m_WindowedFIR.lut);
+}
+
+#endif // MPT_RESAMPLER_TABLES_CACHED
+
+
+#ifdef MPT_RESAMPLER_TABLES_CACHED_ONSTARTUP
+
+struct ResampleCacheInitialzer
+{
+	ResampleCacheInitialzer()
+	{
+		CResampler cachePrimer;
+	}
+};
+static ResampleCacheInitialzer g_ResamplerCachePrimer;
+
+#endif // MPT_RESAMPLER_TABLES_CACHED_ONSTARTUP
 
 
 OPENMPT_NAMESPACE_END
