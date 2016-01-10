@@ -11,7 +11,7 @@
 #pragma once
 #include <string>
 #include "../common/FlagSet.h"
-#include <unordered_map>
+#include <map>
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -1192,6 +1192,17 @@ protected:
 	STATIC_ASSERT(static_cast<uint8>(MAINKEYS - 1) == MAINKEYS - 1);
 	STATIC_ASSERT(static_cast<uint8>(kNumKeyEvents - 1) == kNumKeyEvents - 1);
 
+	uint32 AsUint32() const
+	{
+		STATIC_ASSERT(sizeof(KeyCombination) == sizeof(uint32));
+		return static_cast<uint32>(0)
+			| (static_cast<uint32>(ctx  ) << 24)
+			| (static_cast<uint32>(mod  ) << 16)
+			| (static_cast<uint32>(code ) <<  8)
+			| (static_cast<uint32>(event) <<  0)
+			;
+	}
+
 public:
 	KeyCombination(InputTargetContext context = kCtxAllContexts, UINT modifier = 0, UINT key = 0, FlagSet<KeyEventType> type = kKeyEventNone)
 		: ctx(static_cast<uint8>(context))
@@ -1205,15 +1216,10 @@ public:
 		return ctx == other.ctx && mod == other.mod && code == other.code && event == other.event;
 	}
 
-	// For hash
-	struct hash
+	bool operator < (const KeyCombination &kc) const
 	{
-		size_t operator() (const KeyCombination &kc) const
-		{
-			STATIC_ASSERT(sizeof(KeyCombination) == sizeof(uint32));
-			return *reinterpret_cast<const uint32 *>(&kc);
-		}
-	};
+		return AsUint32() < kc.AsUint32();
+	}
 
 	// Getters / Setters
 	void Context(InputTargetContext context) { ctx = static_cast<uint8>(context); }
@@ -1247,11 +1253,7 @@ public:
 	static bool IsExtended(UINT code);
 };
 
-#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)
-typedef std::tr1::unordered_multimap<KeyCombination, CommandID, KeyCombination::hash> KeyMap;
-#else
-typedef std::unordered_multimap<KeyCombination, CommandID, KeyCombination::hash> KeyMap;
-#endif
+typedef std::multimap<KeyCombination, CommandID> KeyMap;
 typedef std::pair<KeyMap::const_iterator, KeyMap::const_iterator> KeyMapRange;
 
 //KeyMap
