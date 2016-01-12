@@ -352,7 +352,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 
 		uint16 numOrders = songChunk.ReadUint16BE();
 		const ORDERINDEX startIndex = Order.GetLength();
-		if(startIndex < ORDERINDEX_MAX)
+		if(startIndex < ORDERINDEX_MAX && songChunk.CanRead(2))
 		{
 			LimitMax(numOrders, static_cast<ORDERINDEX>(ORDERINDEX_MAX - startIndex));
 			Order.resize(startIndex + numOrders + 1, Order.GetInvalidPatIndex());
