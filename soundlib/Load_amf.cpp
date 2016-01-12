@@ -549,7 +549,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 
 		for(std::vector<uint32>::const_iterator pos = samplePosCompact.begin(); pos != end; pos++)
 		{
-			for(SAMPLEINDEX smp = 0; smp < GetNumSamples(); smp++)
+			for(SAMPLEINDEX smp = 0; smp < GetNumSamples() && file.CanRead(1); smp++)
 			{
 				if(*pos == samplePos[smp])
 				{
