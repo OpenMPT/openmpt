@@ -1466,6 +1466,8 @@ void CSoundFile::SetType(MODTYPE type)
 }
 
 
+#ifdef MODPLUG_TRACKER
+
 void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 //------------------------------------------------------
 {
@@ -1493,6 +1495,8 @@ void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 	Order.OnModTypeChanged(oldtype);
 	Patterns.OnModTypeChanged(oldtype);
 }
+
+#endif // MODPLUG_TRACKER
 
 
 bool CSoundFile::SetTitle(const std::string &newTitle)

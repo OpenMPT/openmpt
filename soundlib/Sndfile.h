@@ -259,7 +259,9 @@ class CSoundFile
 	friend class GetLengthMemory;
 
 public: //Misc
+#ifdef MODPLUG_TRACKER
 	void ChangeModTypeTo(const MODTYPE& newType);
+#endif // MODPLUG_TRACKER
 
 	// Returns value in seconds. If given position won't be played at all, returns -1.
 	// If updateVars is true, the state of various playback variables will be updated according to the playback position.
