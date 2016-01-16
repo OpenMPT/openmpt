@@ -55,8 +55,8 @@ ModSequence::ModSequence(CSoundFile &rSf,
 ModSequence::ModSequence(CSoundFile& rSf, ORDERINDEX nSize) :
 	m_sndFile(rSf),
 	m_restartPos(0),
-	m_bDeletableArray(true),
-//-------------------------------------------------------------------
+	m_bDeletableArray(true)
+//------------------------------------------------------------
 {
 	m_nSize = nSize;
 	m_nCapacity = m_nSize;
