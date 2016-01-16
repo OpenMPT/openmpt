@@ -2481,7 +2481,7 @@ static MPT_NOINLINE void TestPCnoteSerialization()
 	FileReader file;
 	MPT_SHARED_PTR<CSoundFile> pSndFile = mpt::make_shared<CSoundFile>();
 	CSoundFile &sndFile = *pSndFile.get();
-	sndFile.InitializeGlobals(MOD_TYPE_MPT);
+	sndFile.m_nType = MOD_TYPE_MPT;
 	sndFile.Patterns.DestroyPatterns();
 	sndFile.m_nChannels = ModSpecs::mptm.channelsMax;
 
