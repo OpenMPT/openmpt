@@ -577,7 +577,11 @@ bool ModSequenceSet::RestartPosToPattern(SEQUENCEINDEX seq)
 	{
 		if(length[i].endOrder != ORDERINDEX_INVALID && length[i].endRow != ROWINDEX_INVALID)
 		{
-			result = m_sndFile.Patterns[order[length[i].endOrder]].WriteEffect(EffectWriter(CMD_POSITIONJUMP, order.GetRestartPos()).Row(length[i].endRow).Retry(EffectWriter::rmTryNextRow));
+			if(Util::TypeCanHoldValue<ModCommand::PARAM>(order.GetRestartPos()))
+				result = m_sndFile.Patterns[order[length[i].endOrder]].WriteEffect(
+					EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(order.GetRestartPos())).Row(length[i].endRow).Retry(EffectWriter::rmTryNextRow));
+			else
+				result = false;
 		}
 	}
 	order.SetRestartPos(0);
