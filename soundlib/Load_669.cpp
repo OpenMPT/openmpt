@@ -152,8 +152,8 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Reading Orders
 	Order.ReadFromArray(fileHeader.orders, CountOf(fileHeader.orders), 0xFF, 0xFE);
-	m_nRestartPos = fileHeader.restartPos;
-	if(Order[m_nRestartPos] >= fileHeader.patterns) m_nRestartPos = 0;
+	if(Order[fileHeader.restartPos] < fileHeader.patterns)
+		Order.SetRestartPos(fileHeader.restartPos);
 
 	// Set up panning
 	for(CHANNELINDEX chn = 0; chn < 8; chn++)

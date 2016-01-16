@@ -2041,9 +2041,9 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		WRITEMODULAR(MAGIC4BE('D','G','V','.'), m_nDefaultGlobalVolume);
 	}
 
-	if(GetType() != MOD_TYPE_XM && m_nRestartPos != 0)
+	if(GetType() != MOD_TYPE_XM && Order.GetRestartPos() != 0)
 	{
-		WRITEMODULAR(MAGIC4BE('R','P','.','.'), m_nRestartPos);
+		WRITEMODULAR(MAGIC4BE('R','P','.','.'), Order.GetRestartPos());
 	}
 
 	if(m_nResampling != SRCMODE_DEFAULT && specs.hasDefaultResampling)
@@ -2192,7 +2192,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 			case MAGIC4BE('S','P','A','.'): ReadField(chunk, size, m_nSamplePreAmp); break;
 			case MAGIC4BE('V','S','T','V'): ReadField(chunk, size, m_nVSTiVolume); break;
 			case MAGIC4BE('D','G','V','.'): ReadField(chunk, size, m_nDefaultGlobalVolume); break;
-			case MAGIC4BE('R','P','.','.'): if(GetType() != MOD_TYPE_XM) ReadField(chunk, size, m_nRestartPos); break;
+			case MAGIC4BE('R','P','.','.'): if(GetType() != MOD_TYPE_XM) { ORDERINDEX restartPos; ReadField(chunk, size, restartPos); Order.SetRestartPos(restartPos); } break;
 			case MAGIC4LE('R','S','M','P'):
 				ReadFieldCast(chunk, size, m_nResampling);
 				if(!IsKnownResamplingMode(m_nResampling)) m_nResampling = SRCMODE_DEFAULT;

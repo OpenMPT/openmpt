@@ -895,7 +895,7 @@ bool CModCleanupDlg::ResetVariables()
 	BeginWaitCursor();
 	CriticalSection cs;
 
-	// convert to IT...
+	// Convert to IT...
 	modDoc.ChangeModType(MOD_TYPE_IT);
 	sndFile.SetDefaultPlaybackBehaviour(sndFile.GetType());
 	sndFile.SetMixLevels(mixLevelsCompatible);
@@ -910,9 +910,9 @@ bool CModCleanupDlg::ResetVariables()
 	sndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	sndFile.m_nSamplePreAmp = 48;
 	sndFile.m_nVSTiVolume = 48;
-	sndFile.m_nRestartPos = 0;
+	sndFile.Order.SetRestartPos(0);
 
-	// reset instruments (if there are any)
+	// Reset instruments (if there are any)
 	for(INSTRUMENTINDEX i = 1; i <= sndFile.GetNumInstruments(); i++) if(sndFile.Instruments[i])
 	{
 		sndFile.Instruments[i]->nFadeOut = 256;

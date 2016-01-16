@@ -309,10 +309,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			// End of song?
 			if((memory.state.m_nPattern == orderList.GetInvalidPatIndex()) || (memory.state.m_nCurrentOrder >= orderList.size()))
 			{
-				if(memory.state.m_nCurrentOrder == m_nRestartPos)
+				if(memory.state.m_nCurrentOrder == orderList.GetRestartPos())
 					break;
 				else
-					memory.state.m_nCurrentOrder = m_nRestartPos;
+					memory.state.m_nCurrentOrder = orderList.GetRestartPos();
 			} else
 			{
 				memory.state.m_nCurrentOrder++;
@@ -345,7 +345,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		if((memory.state.m_nPattern >= Patterns.Size()) || (!Patterns[memory.state.m_nPattern]))
 		{
 			// If there isn't even a tune, we should probably stop here.
-			if(memory.state.m_nCurrentOrder == m_nRestartPos)
+			if(memory.state.m_nCurrentOrder == orderList.GetRestartPos())
 			{
 				if(!hasSearchTarget || !visitedRows.GetFirstUnvisitedRow(memory.state.m_nNextOrder, memory.state.m_nNextRow, true))
 				{

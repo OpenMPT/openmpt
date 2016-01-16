@@ -262,7 +262,6 @@ public:
 	void SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow, bool setSamplePos);
 
 	// Global settings to pattern effect conversion
-	bool RestartPosToPattern();
 	bool GlobalVolumeToPattern();
 
 	bool HasMPTHacks(const bool autofix = false);

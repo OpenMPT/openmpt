@@ -403,18 +403,18 @@ bool CSoundFile::ProcessRow()
 
 					//if (!m_nRepeatCount) return false;
 
-					ORDERINDEX nRestartPosOverride = m_nRestartPos;
-					if(!m_nRestartPos && m_PlayState.m_nCurrentOrder <= Order.size() && m_PlayState.m_nCurrentOrder > 0)
+					ORDERINDEX restartPosOverride = Order.GetRestartPos();
+					if(restartPosOverride == 0 && m_PlayState.m_nCurrentOrder <= Order.size() && m_PlayState.m_nCurrentOrder > 0)
 					{
 						/* Subtune detection. Subtunes are separated by "---" order items, so if we're in a
 						   subtune and there's no restart position, we go to the first order of the subtune
 						   (i.e. the first order after the previous "---" item) */
-						for(ORDERINDEX iOrd = m_PlayState.m_nCurrentOrder - 1; iOrd > 0; iOrd--)
+						for(ORDERINDEX ord = m_PlayState.m_nCurrentOrder - 1; ord > 0; ord--)
 						{
-							if(Order[iOrd] == Order.GetInvalidPatIndex())
+							if(Order[ord] == Order.GetInvalidPatIndex())
 							{
 								// Jump back to first order of this subtune
-								nRestartPosOverride = iOrd + 1;
+								restartPosOverride = ord + 1;
 								break;
 							}
 						}
@@ -428,7 +428,7 @@ bool CSoundFile::ProcessRow()
 						m_SongFlags.set(SONG_BREAKTOROW);
 					}
 
-					if (!nRestartPosOverride && !m_SongFlags[SONG_BREAKTOROW])
+					if (restartPosOverride == 0 && !m_SongFlags[SONG_BREAKTOROW])
 					{
 						//rewbs.instroVSTi: stop all VSTi at end of song, if looping.
 						StopAllVsti();
@@ -466,7 +466,7 @@ bool CSoundFile::ProcessRow()
 
 					//Handle Repeat position
 					//if (m_nRepeatCount > 0) m_nRepeatCount--;
-					m_PlayState.m_nCurrentOrder = nRestartPosOverride;
+					m_PlayState.m_nCurrentOrder = restartPosOverride;
 					m_SongFlags.reset(SONG_BREAKTOROW);
 					//If restart pos points to +++, move along
 					while(m_PlayState.m_nCurrentOrder < Order.size() && Order[m_PlayState.m_nCurrentOrder] == Order.GetIgnoreIndex())

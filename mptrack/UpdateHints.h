@@ -60,6 +60,7 @@ enum HintType
 	// Sequence-specific hints (SequenceHint)
 	HINT_MODSEQUENCE	= 0x10,	// The pattern sequence has changed.
 	HINT_SEQNAMES		= 0x20,	// Sequence names have changed. Parameter: Sequence ID (0 = all sequences)
+	HINT_RESTARTPOS		= 0x40,	// Restart position has changed. Parameter: Sequence ID (0 = all sequences)
 	// Plugin-specific hints (PluginHint)
 	HINT_MIXPLUGINS		= 0x10,	// Plugin properties have changed. Parameter: Plugin ID (0 = all plugins, 1 = first plugin)
 	HINT_PLUGINNAMES	= 0x20,	// Plugin names have changed. Parameter: Plugin ID (0 = all plugins, 1 = first plugin)
@@ -183,6 +184,7 @@ struct SequenceHint : public UpdateHint
 	SequenceHint(SEQUENCEINDEX item = 0) : UpdateHint(classCategory, item) { }
 	forceinline SequenceHint &Data() { type |= HINT_MODSEQUENCE; return *this; }
 	forceinline SequenceHint &Names() { type |= HINT_SEQNAMES; return *this; }
+	forceinline SequenceHint &RestartPos() { type |= HINT_RESTARTPOS; return *this; }
 
 	forceinline SEQUENCEINDEX GetSequence() const { return GetData<SEQUENCEINDEX>(); }
 };

@@ -460,13 +460,16 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	}
 
 	// Check for restart position where it should not be
-	if(m_SndFile.m_nRestartPos > 0 && !originalSpecs->hasRestartPos)
+	for(SEQUENCEINDEX seq = 0; seq < m_SndFile.Order.GetNumSequences(); seq++)
 	{
-		AddToLog("Found restart position");
-		foundHacks = true;
-		if(autofix)
+		if(m_SndFile.Order.GetSequence(0).GetRestartPos() > 0 && !originalSpecs->hasRestartPos)
 		{
-			RestartPosToPattern();
+			AddToLog("Found restart position");
+			foundHacks = true;
+			if(autofix)
+			{
+				m_SndFile.Order.RestartPosToPattern(seq);
+			}
 		}
 	}
 

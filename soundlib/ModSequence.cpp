@@ -39,12 +39,14 @@ const ORDERINDEX ModSequenceSet::s_nCacheSize = MAX_ORDERS;
 ModSequence::ModSequence(CSoundFile &rSf,
 						 PATTERNINDEX* pArray,
 						 ORDERINDEX nSize,
-						 ORDERINDEX nCapacity, 
+						 ORDERINDEX nCapacity,
+						 ORDERINDEX restartPos,
 						 const bool bDeletableArray) :
 		m_sndFile(rSf),
 		m_pArray(pArray),
 		m_nSize(nSize),
 		m_nCapacity(nCapacity),
+		m_restartPos(restartPos),
 		m_bDeletableArray(bDeletableArray)
 //-------------------------------------------------------
 {}
@@ -52,7 +54,8 @@ ModSequence::ModSequence(CSoundFile &rSf,
 
 ModSequence::ModSequence(CSoundFile& rSf, ORDERINDEX nSize) :
 	m_sndFile(rSf),
-	m_bDeletableArray(true)
+	m_bDeletableArray(true),
+	m_restartPos(0)
 //-------------------------------------------------------------------
 {
 	m_nSize = nSize;
@@ -67,6 +70,7 @@ ModSequence::ModSequence(const ModSequence& seq) :
 	m_pArray(nullptr),
 	m_nSize(0),
 	m_nCapacity(0),
+	m_restartPos(seq.m_restartPos),
 	m_bDeletableArray(false)
 //------------------------------------------
 {
@@ -242,9 +246,9 @@ void ModSequence::RemovePattern(PATTERNINDEX which)
 	}
 
 	m_sndFile.Patterns.ForEachModCommand(FixJumpCommands(jumpOffset));
-	if(m_sndFile.m_nRestartPos < jumpOffset.size())
+	if(m_restartPos < jumpOffset.size())
 	{
-		m_sndFile.m_nRestartPos -= jumpOffset[m_sndFile.m_nRestartPos];
+		m_restartPos -= jumpOffset[m_restartPos];
 	}
 }
 
@@ -324,6 +328,7 @@ ModSequence& ModSequence::operator=(const ModSequence& seq)
 	resize(seq.GetLength());
 	std::copy(seq.begin(), seq.end(), begin());
 	m_sName = seq.m_sName;
+	m_restartPos = seq.m_restartPos;
 	return *this;
 }
 
@@ -361,7 +366,7 @@ ORDERINDEX ModSequence::FindOrder(PATTERNINDEX nPat, ORDERINDEX startFromOrder, 
 
 
 ModSequenceSet::ModSequenceSet(CSoundFile& sndFile)
-	: ModSequence(sndFile, m_Cache, s_nCacheSize, s_nCacheSize, false),
+	: ModSequence(sndFile, m_Cache, s_nCacheSize, s_nCacheSize, 0, false),
 	  m_nCurrentSeq(0)
 //--------------------------------------------------------------
 {
@@ -408,6 +413,7 @@ void ModSequenceSet::CopyStorageToCache()
 		m_nSize = rSeq.GetLength();
 		m_nCapacity = s_nCacheSize;
 		m_sName = rSeq.m_sName;
+		m_restartPos = rSeq.m_restartPos;
 		std::copy(rSeq.m_pArray, rSeq.m_pArray+m_nSize, m_pArray);
 		if (m_bDeletableArray)
 			delete[] pOld;
@@ -565,6 +571,28 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 }
 
 
+#ifdef MODPLUG_TRACKER
+
+
+// Convert the sequence's restart position information to a pattern command.
+bool ModSequenceSet::RestartPosToPattern(SEQUENCEINDEX seq)
+//---------------------------------------------------------
+{
+	bool result = false;
+	std::vector<GetLengthType> length = m_sndFile.GetLength(eNoAdjust, GetLengthTarget(true).StartPos(seq, 0, 0));
+	ModSequence order = GetSequence(seq);
+	for(size_t i = 0; i < length.size(); i++)
+	{
+		if(length[i].endOrder != ORDERINDEX_INVALID && length[i].endRow != ROWINDEX_INVALID)
+		{
+			result = m_sndFile.Patterns[order[length[i].endOrder]].WriteEffect(EffectWriter(CMD_POSITIONJUMP, order.GetRestartPos()).Row(length[i].endRow).Retry(EffectWriter::rmTryNextRow));
+		}
+	}
+	order.SetRestartPos(0);
+	return result;
+}
+
+
 bool ModSequenceSet::MergeSequences()
 //-----------------------------------
 {
@@ -595,7 +623,9 @@ bool ModSequenceSet::MergeSequences()
 			continue;
 		}
 		Append(GetInvalidPatIndex()); // Separator item
-		for(ORDERINDEX nOrd = 0; nOrd < GetSequence(1).GetLengthTailTrimmed(); nOrd++)
+		RestartPosToPattern(1);
+		const ORDERINDEX lengthTrimmed = GetSequence(1).GetLengthTailTrimmed();
+		for(ORDERINDEX nOrd = 0; nOrd < lengthTrimmed; nOrd++)
 		{
 			PATTERNINDEX nPat = GetSequence(1)[nOrd];
 			Append(nPat);
@@ -611,17 +641,17 @@ bool ModSequenceSet::MergeSequences()
 					if(patternsFixed[nPat] != SEQUENCEINDEX_INVALID && patternsFixed[nPat] != removedSequences)
 					{
 						// Oops, some other sequence uses this pattern already.
-						const PATTERNINDEX nNewPat = m_sndFile.Patterns.Insert(m_sndFile.Patterns[nPat].GetNumRows());
-						if(nNewPat != SEQUENCEINDEX_INVALID)
+						const PATTERNINDEX newPat = m_sndFile.Patterns.Insert(m_sndFile.Patterns[nPat].GetNumRows());
+						if(newPat != SEQUENCEINDEX_INVALID)
 						{
 							// could create new pattern - copy data over and continue from here.
-							At(nFirstOrder + nOrd) = nNewPat;
+							At(nFirstOrder + nOrd) = newPat;
 							ModCommand *pSrc = m_sndFile.Patterns[nPat];
-							ModCommand *pDest = m_sndFile.Patterns[nNewPat];
+							ModCommand *pDest = m_sndFile.Patterns[newPat];
 							memcpy(pDest, pSrc, m_sndFile.Patterns[nPat].GetNumRows() * m_sndFile.m_nChannels * sizeof(ModCommand));
 							m = pDest + len;
-							patternsFixed.resize(MAX(nNewPat + 1, (PATTERNINDEX)patternsFixed.size()), SEQUENCEINDEX_INVALID);
-							nPat = nNewPat;
+							patternsFixed.resize(MAX(newPat + 1, (PATTERNINDEX)patternsFixed.size()), SEQUENCEINDEX_INVALID);
+							nPat = newPat;
 						} else
 						{
 							// cannot create new pattern: notify the user
@@ -646,7 +676,6 @@ bool ModSequenceSet::MergeSequences()
 }
 
 
-#ifdef MODPLUG_TRACKER
 // Check if a playback position is currently locked (inaccessible)
 bool ModSequence::IsPositionLocked(ORDERINDEX position) const
 //-----------------------------------------------------------
@@ -655,20 +684,6 @@ bool ModSequence::IsPositionLocked(ORDERINDEX position) const
 		&& (position < m_sndFile.m_lockOrderStart || position > m_sndFile.m_lockOrderEnd));
 }
 #endif // MODPLUG_TRACKER
-
-
-void ModSequence::SetName(const std::string &newName)
-//---------------------------------------------------
-{
-	m_sName = newName;
-}
-
-
-std::string ModSequence::GetName() const
-//--------------------------------------
-{
-	return m_sName;
-}
 
 
 /////////////////////////////////////
@@ -800,6 +815,8 @@ void WriteModSequence(std::ostream& oStrm, const ModSequence& seq)
 	const uint16 nLength = seq.GetLengthTailTrimmed();
 	ssb.WriteItem<uint16>(nLength, "l");
 	ssb.WriteItem(seq.m_pArray, "a", srlztn::ArrayWriter<uint16>(nLength));
+	if(seq.GetRestartPos() > 0)
+		ssb.WriteItem<uint16>(seq.GetRestartPos(), "r");
 	ssb.FinishWrite();
 }
 
@@ -814,11 +831,15 @@ void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t)
 	std::string str;
 	ssb.ReadItem(str, "n");
 	seq.m_sName = str;
-	uint16 nSize = MAX_ORDERS;
-	ssb.ReadItem<uint16>(nSize, "l");
+	ORDERINDEX nSize = MAX_ORDERS;
+	ssb.ReadItem(nSize, "l");
 	LimitMax(nSize, ModSpecs::mptm.ordersMax);
-	seq.resize(MAX(nSize, ModSequenceSet::s_nCacheSize));
+	seq.resize(std::max(nSize, ModSequenceSet::s_nCacheSize));
 	ssb.ReadItem(seq.m_pArray, "a", srlztn::ArrayReader<uint16>(nSize));
+
+	ORDERINDEX restartPos = ORDERINDEX_INVALID;
+	if(ssb.ReadItem(restartPos, "r") != srlztn::SsbRead::EntryNotFound && restartPos < nSize)
+		seq.SetRestartPos(restartPos);
 }
 
 
@@ -859,8 +880,12 @@ void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 	if (seq.GetNumSequences() < nSeqs)
 		seq.m_Sequences.resize(nSeqs, ModSequence(seq.m_sndFile, seq.s_nCacheSize));
 
+	// There used to be only one restart position for all sequences
+	ORDERINDEX legacyRestartPos = seq.GetRestartPos();
+
 	for(uint8 i = 0; i < nSeqs; i++)
 	{
+		seq.m_Sequences[i].SetRestartPos(legacyRestartPos);
 		ssb.ReadItem(seq.m_Sequences[i], srlztn::ID::FromInt<uint8>(i), &ReadModSequence);
 	}
 	seq.m_nCurrentSeq = (nCurrent < seq.GetNumSequences()) ? nCurrent : 0;

@@ -83,6 +83,7 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_COMMAND(ID_ORDERLIST_COPY,				OnDuplicatePattern)
 	ON_COMMAND(ID_PATTERNCOPY,					OnPatternCopy)
 	ON_COMMAND(ID_PATTERNPASTE,					OnPatternPaste)
+	ON_COMMAND(ID_SETRESTARTPOS,				OnSetRestartPos)
 	ON_COMMAND(ID_ORDERLIST_LOCKPLAYBACK,		OnLockPlayback)
 	ON_COMMAND(ID_ORDERLIST_UNLOCKPLAYBACK,		OnUnlockPlayback)
 	ON_COMMAND_RANGE(ID_SEQUENCE_ITEM, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 2, OnSelectSequence)
@@ -967,67 +968,71 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 	if(multiSelection)
 	{
 		// Several patterns are selected.
-		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT, "&Insert Patterns\t" + ih->GetKeyTextFromCommand(kcOrderlistEditInsert));
-		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_DELETE, "&Remove Patterns\t" + ih->GetKeyTextFromCommand(kcOrderlistEditDelete));
-		AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_COPY, "&Copy Patterns\t" + ih->GetKeyTextFromCommand(kcEditCopy));
-		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_COPY_ORDERS, "&Copy Orders\t" + ih->GetKeyTextFromCommand(kcOrderlistEditCopyOrders));
-		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_CUT, "&C&ut Patterns\t" + ih->GetKeyTextFromCommand(kcEditCut));
-		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERNPASTE, "P&aste Patterns\t" + ih->GetKeyTextFromCommand(kcEditPaste));
-		AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_COPY, "&Duplicate Patterns\t" + ih->GetKeyTextFromCommand(kcDuplicatePattern));
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT, _T("&Insert Patterns\t") + ih->GetKeyTextFromCommand(kcOrderlistEditInsert));
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_DELETE, _T("&Remove Patterns\t") + ih->GetKeyTextFromCommand(kcOrderlistEditDelete));
+		AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_COPY, _T("&Copy Patterns\t") + ih->GetKeyTextFromCommand(kcEditCopy));
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_COPY_ORDERS, _T("&Copy Orders\t") + ih->GetKeyTextFromCommand(kcOrderlistEditCopyOrders));
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_CUT, _T("&C&ut Patterns\t") + ih->GetKeyTextFromCommand(kcEditCut));
+		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERNPASTE, _T("P&aste Patterns\t") + ih->GetKeyTextFromCommand(kcEditPaste));
+		AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
+		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_COPY, _T("&Duplicate Patterns\t") + ih->GetKeyTextFromCommand(kcDuplicatePattern));
 	} else
 	{
 		// Only one pattern is selected
-		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT, "&Insert Pattern\t" + ih->GetKeyTextFromCommand(kcOrderlistEditInsert));
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT, _T("&Insert Pattern\t") + ih->GetKeyTextFromCommand(kcOrderlistEditInsert));
 		if(sndFile.GetModSpecifications().hasIgnoreIndex)
 		{
-			AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT_SEPARATOR, "&Insert Separator\t" + ih->GetKeyTextFromCommand(kcOrderlistPatIgnore));
+			AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT_SEPARATOR, _T("&Insert Separator\t") + ih->GetKeyTextFromCommand(kcOrderlistPatIgnore));
 		}
-		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_DELETE, "&Remove Pattern\t" + ih->GetKeyTextFromCommand(kcOrderlistEditDelete));
-		AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_NEW, "Create &New Pattern\t" + ih->GetKeyTextFromCommand(kcNewPattern));
-		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_COPY, "&Duplicate Pattern\t" + ih->GetKeyTextFromCommand(kcDuplicatePattern));
-		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERNCOPY, "&Copy Pattern");
-		AppendMenu(hMenu, MF_STRING, ID_PATTERNPASTE, "P&aste Pattern\t" + ih->GetKeyTextFromCommand(kcEditPaste));
-		if (sndFile.TypeIsIT_MPT_XM())
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_DELETE, _T("&Remove Pattern\t") + ih->GetKeyTextFromCommand(kcOrderlistEditDelete));
+		AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_NEW, _T("Create &New Pattern\t") + ih->GetKeyTextFromCommand(kcNewPattern));
+		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_COPY, _T("&Duplicate Pattern\t") + ih->GetKeyTextFromCommand(kcDuplicatePattern));
+		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERNCOPY, _T("&Copy Pattern"));
+		AppendMenu(hMenu, MF_STRING, ID_PATTERNPASTE, _T("P&aste Pattern\t") + ih->GetKeyTextFromCommand(kcEditPaste));
+		const bool hasPatternProperties = sndFile.GetModSpecifications().patternRowsMin != sndFile.GetModSpecifications().patternRowsMax;
+		if (hasPatternProperties || sndFile.GetModSpecifications().hasRestartPos)
 		{
-			AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-			AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERN_PROPERTIES, "&Pattern Properties...");
+			AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
+			if(hasPatternProperties)
+				AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERN_PROPERTIES, _T("&Pattern Properties..."));
+			if(sndFile.GetModSpecifications().hasRestartPos)
+				AppendMenu(hMenu, MF_STRING | greyed | ((sndFile.Order.GetRestartPos() == m_nScrollPos) ? MF_CHECKED : 0), ID_SETRESTARTPOS, _T("R&estart Position"));
 		}
 		if (sndFile.GetModSpecifications().sequencesMax > 1)
 		{
-			AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
+			AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
 
 			HMENU menuSequence = ::CreatePopupMenu();
-			AppendMenu(hMenu, MF_POPUP, (UINT_PTR)menuSequence, TEXT("Sequences"));
+			AppendMenu(hMenu, MF_POPUP, (UINT_PTR)menuSequence, _T("Sequences"));
 			
 			const SEQUENCEINDEX numSequences = sndFile.Order.GetNumSequences();
 			for(SEQUENCEINDEX i = 0; i < numSequences; i++)
 			{
 				CString str;
 				if(sndFile.Order.GetSequence(i).GetName().empty())
-					str.Format(TEXT("Sequence %u"), i);
+					str.Format(_T("Sequence %u"), i);
 				else
-					str.Format(TEXT("%u: %s"), i, sndFile.Order.GetSequence(i).GetName().c_str());
+					str.Format(_T("%u: %s"), i, sndFile.Order.GetSequence(i).GetName().c_str());
 				const UINT flags = (sndFile.Order.GetCurrentSequenceIndex() == i) ? MF_STRING|MF_CHECKED : MF_STRING;
 				AppendMenu(menuSequence, flags, ID_SEQUENCE_ITEM + i, str);
 			}
 			if (sndFile.Order.GetNumSequences() < MAX_SEQUENCES)
 			{
-				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES, TEXT("&Duplicate current sequence"));
-				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 1, TEXT("&Create empty sequence"));
+				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES, _T("&Duplicate current sequence"));
+				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 1, _T("&Create empty sequence"));
 			}
 			if (sndFile.Order.GetNumSequences() > 1)
-				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 2, TEXT("D&elete current sequence"));
+				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 2, _T("D&elete current sequence"));
 		}
 	}
-	AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-	AppendMenu(hMenu, ((selection.firstOrd == sndFile.m_lockOrderStart && selection.lastOrd == sndFile.m_lockOrderEnd) ? (MF_STRING | MF_CHECKED) : MF_STRING), ID_ORDERLIST_LOCKPLAYBACK, "&Lock Playback to Selection\t" + ih->GetKeyTextFromCommand(kcOrderlistLockPlayback));
-	AppendMenu(hMenu, (sndFile.m_lockOrderStart == ORDERINDEX_INVALID ? (MF_STRING | MF_GRAYED) : MF_STRING), ID_ORDERLIST_UNLOCKPLAYBACK, "&Unlock Playback\t" + ih->GetKeyTextFromCommand(kcOrderlistUnlockPlayback));
+	AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
+	AppendMenu(hMenu, ((selection.firstOrd == sndFile.m_lockOrderStart && selection.lastOrd == sndFile.m_lockOrderEnd) ? (MF_STRING | MF_CHECKED) : MF_STRING), ID_ORDERLIST_LOCKPLAYBACK, _T("&Lock Playback to Selection\t") + ih->GetKeyTextFromCommand(kcOrderlistLockPlayback));
+	AppendMenu(hMenu, (sndFile.m_lockOrderStart == ORDERINDEX_INVALID ? (MF_STRING | MF_GRAYED) : MF_STRING), ID_ORDERLIST_UNLOCKPLAYBACK, _T("&Unlock Playback\t") + ih->GetKeyTextFromCommand(kcOrderlistUnlockPlayback));
 
-	AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-	AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_RENDER, "Render to &Wave");
+	AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
+	AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_RENDER, _T("Render to &Wave"));
 
 	ClientToScreen(&pt);
 	::TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
@@ -1303,6 +1308,30 @@ void COrderList::OnPatternPaste()
 //-------------------------------
 {
 	m_pParent.PostMessage(WM_COMMAND, ID_PATTERNPASTE);
+}
+
+
+void COrderList::OnSetRestartPos()
+//--------------------------------
+{
+	CSoundFile &sndFile = m_pModDoc.GetrSoundFile();
+	bool modified = false;
+	if(m_nScrollPos == sndFile.Order.GetRestartPos())
+	{
+		// Unset position
+		modified = (m_nScrollPos != 0);
+		sndFile.Order.SetRestartPos(0);
+	} else if(sndFile.GetModSpecifications().hasRestartPos)
+	{
+		// Set new position
+		modified = true;
+		sndFile.Order.SetRestartPos(m_nScrollPos);
+	}
+	if(modified)
+	{
+		m_pModDoc.SetModified();
+		m_pModDoc.UpdateAllViews(nullptr, SequenceHint().RestartPos(), this);
+	}
 }
 
 

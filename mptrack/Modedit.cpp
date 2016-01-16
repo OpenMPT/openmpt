@@ -1265,24 +1265,6 @@ bool CModDoc::IsChannelUnused(CHANNELINDEX nChn) const
 }
 
 
-// Convert the module's restart position information to a pattern command.
-bool CModDoc::RestartPosToPattern()
-//---------------------------------
-{
-	bool result = false;
-	std::vector<GetLengthType> length = m_SndFile.GetLength(eNoAdjust, GetLengthTarget(true));
-	for(size_t i = 0; i < length.size(); i++)
-	{
-		if(length[i].endOrder != ORDERINDEX_INVALID && length[i].endRow != ROWINDEX_INVALID)
-		{
-			result = m_SndFile.Patterns[m_SndFile.Order[length[i].endOrder]].WriteEffect(EffectWriter(CMD_POSITIONJUMP, m_SndFile.m_nRestartPos).Row(length[i].endRow).Retry(EffectWriter::rmTryNextRow));
-		}
-	}
-	m_SndFile.m_nRestartPos = 0;
-	return result;
-}
-
-
 // Convert module's default global volume to a pattern command.
 bool CModDoc::GlobalVolumeToPattern()
 //-----------------------------------

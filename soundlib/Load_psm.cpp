@@ -246,11 +246,12 @@ struct PSMSubSong // For internal use (pattern conversion)
 static uint8 ConvertPSMPorta(uint8 param, bool newFormat)
 //-------------------------------------------------------
 {
-	return (newFormat
-		? param
-		: ((param < 4)
-			? (param | 0xF0)
-			: (param >> 2)));
+	if(newFormat)
+		return param;
+	if(param < 4)
+		return (param | 0xF0);
+	else
+		return (param >> 2);
 }
 
 
@@ -628,7 +629,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	// Make the default variables of the first subsong global
 	m_nDefaultSpeed = subsongs[0].defaultSpeed;
 	m_nDefaultTempo.Set(subsongs[0].defaultTempo);
-	m_nRestartPos = subsongs[0].restartPos;
+	Order.SetRestartPos(subsongs[0].restartPos);
 	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
 		ChnSettings[chn].Reset();

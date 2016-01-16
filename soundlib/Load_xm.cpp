@@ -336,7 +336,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 1;
 	m_nMaxPeriod = 31999;
 
-	m_nRestartPos = fileHeader.restartPos;
+	Order.SetRestartPos(fileHeader.restartPos);
 	m_nChannels = fileHeader.channels;
 	m_nInstruments = std::min(fileHeader.instruments, uint16(MAX_INSTRUMENTS - 1));
 	if(fileHeader.speed)
@@ -722,7 +722,7 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 	// Writing song header
 	fileHeader.version = 0x0104;					// XM Format v1.04
 	fileHeader.size = sizeof(XMFileHeader) - 60;	// minus everything before this field
-	fileHeader.restartPos = m_nRestartPos;
+	fileHeader.restartPos = Order.GetRestartPos();
 
 	fileHeader.channels = m_nChannels;
 	if((m_nChannels % 2u) && m_nChannels < 32)

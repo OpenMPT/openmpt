@@ -267,30 +267,33 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_SliderVSTiVol.EnableWindow(bIsNotMOD_S3M);
 		m_EditVSTiVol.EnableWindow(bIsNotMOD_S3M);
 		m_SpinVSTiVol.EnableWindow(bIsNotMOD_S3M);
-		m_EditRestartPos.EnableWindow((specs.hasRestartPos || m_sndFile.m_nRestartPos != 0));
+		m_EditRestartPos.EnableWindow((specs.hasRestartPos || m_sndFile.Order.GetRestartPos() != 0));
 		m_SpinRestartPos.EnableWindow(m_EditRestartPos.IsWindowEnabled());
 		
 		//Note: Sample volume slider is not disabled for MOD
 		//on purpose(can be used to control play volume)
 
 		// MOD Type
-		TCHAR *modType = _T("MOD (ProTracker)");
+		const TCHAR *modType = _T("");
 		switch(m_sndFile.GetType())
 		{
+		case MOD_TYPE_MOD:	modType = _T("MOD (ProTracker)"); break;
 		case MOD_TYPE_S3M:	modType = _T("S3M (ScreamTracker)"); break;
 		case MOD_TYPE_XM:	modType = _T("XM (FastTracker 2)"); break;
 		case MOD_TYPE_IT:	modType = _T("IT (Impulse Tracker)"); break;
 		case MOD_TYPE_MPT:	modType = _T("MPTM (OpenMPT)"); break;
+		default:			modType = CSoundFile::ModTypeToString(m_sndFile.GetType()); break;
 		}
 		TCHAR s[256];
-		wsprintf(s, _T("%s, %d channel%s"), modType, m_sndFile.GetNumChannels(), (m_sndFile.GetNumChannels() != 1) ? _T("s") : _T(""));
+		wsprintf(s, _T("%s, %u channel%s"), modType, m_sndFile.GetNumChannels(), (m_sndFile.GetNumChannels() != 1) ? _T("s") : _T(""));
 		m_BtnModType.SetWindowText(s);
 	}
 
-	if (updateAll || (hint.GetCategory() == HINTCAT_SEQUENCE && hintType[HINT_MODSEQUENCE]))
+	if (updateAll || (hint.GetCategory() == HINTCAT_SEQUENCE && hintType[HINT_MODSEQUENCE | HINT_RESTARTPOS]))
 	{
 		// Set max valid restart position
 		m_SpinRestartPos.SetRange32(0, m_sndFile.Order.GetLengthTailTrimmed() - 1);
+		SetDlgItemInt(IDC_EDIT_RESTARTPOS, m_sndFile.Order.GetRestartPos(), FALSE);
 	}
 	if (updateAll || (hint.GetCategory() == HINTCAT_GENERAL && hintType[HINT_MODGENERAL]))
 	{
@@ -301,7 +304,6 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 			m_EditTempo.SetTempoValue(m_sndFile.m_nDefaultTempo);
 			SetDlgItemInt(IDC_EDIT_SPEED, m_sndFile.m_nDefaultSpeed, FALSE);
 			SetDlgItemInt(IDC_EDIT_GLOBALVOL, m_sndFile.m_nDefaultGlobalVolume / GetGlobalVolumeFactor(), FALSE);
-			SetDlgItemInt(IDC_EDIT_RESTARTPOS, m_sndFile.m_nRestartPos, FALSE);
 			SetDlgItemInt(IDC_EDIT_VSTIVOL, m_sndFile.m_nVSTiVolume, FALSE);
 			SetDlgItemInt(IDC_EDIT_SAMPLEPA, m_sndFile.m_nSamplePreAmp, FALSE);
 		}
@@ -595,10 +597,10 @@ void CCtrlGeneral::OnRestartPosChanged()
 			for (ORDERINDEX i = 0; i <= n; i++)
 				if (m_sndFile.Order[i] == m_sndFile.Order.GetInvalidPatIndex()) return;
 
-			if (n != m_sndFile.m_nRestartPos)
+			if (n != m_sndFile.Order.GetRestartPos())
 			{
 				m_EditRestartPos.SetModify(FALSE);
-				m_sndFile.m_nRestartPos = n;
+				m_sndFile.Order.SetRestartPos(n);
 				m_modDoc.SetModified();
 				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
 			}

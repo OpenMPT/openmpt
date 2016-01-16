@@ -298,23 +298,24 @@ void ModInstrument::Sanitize(MODTYPE modType)
 	LimitMax(nGlobalVol, 64u);
 	LimitMax(nPan, 256u);
 
-	LimitMax(wMidiBank, 16384u);
-	LimitMax(nMidiProgram, 128u);
-	LimitMax(nMidiChannel, 17u);
+	LimitMax(wMidiBank, uint16(16384));
+	LimitMax(nMidiProgram, uint8(128));
+	LimitMax(nMidiChannel, uint8(17));
 
 	if(nNNA > NNA_NOTEFADE) nNNA = NNA_NOTECUT;
 	if(nDCT > DCT_PLUGIN) nDCT = DCT_NONE;
 	if(nDNA > DNA_NOTEFADE) nDNA = DNA_NOTECUT;
 
-	LimitMax(nPanSwing, 64u);
-	LimitMax(nVolSwing, 100u);
+	LimitMax(nPanSwing, uint8(64));
+	LimitMax(nVolSwing, uint8(100));
 
 	Limit(nPPS, int8(-32), int8(32));
 
-	LimitMax(nCutSwing, 64u);
-	LimitMax(nResSwing, 64u);
+	LimitMax(nCutSwing, uint8(64));
+	LimitMax(nResSwing, uint8(64));
 	
 #ifdef MODPLUG_TRACKER
+	MPT_UNREFERENCED_PARAMETER(modType);
 	const uint8 range = ENVELOPE_MAX;
 #else
 	const uint8 range = modType == MOD_TYPE_AMS2 ? uint8_max : ENVELOPE_MAX;

@@ -361,7 +361,6 @@ private:
 public:
 	ROWINDEX m_nDefaultRowsPerBeat, m_nDefaultRowsPerMeasure;	// default rows per beat and measure for this module
 	TempoMode m_nTempoMode;
-	ORDERINDEX m_nRestartPos;
 
 #ifdef MODPLUG_TRACKER
 	// Lock playback between two orders. Lock is active if lock start != ORDERINDEX_INVALID).
