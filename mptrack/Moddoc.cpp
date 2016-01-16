@@ -2268,7 +2268,7 @@ void CModDoc::OnSetupZxxMacros()
 	if (dlg.DoModal() == IDOK)
 	{
 		m_SndFile.m_MidiCfg = dlg.m_MidiCfg;
-		if (dlg.m_bEmbed)
+		if (dlg.m_bEmbed || !m_SndFile.m_MidiCfg.IsMacroDefaultSetupUsed())
 		{
 			m_SndFile.m_SongFlags.set(SONG_EMBEDMIDICFG);
 			SetModified();
@@ -2276,16 +2276,6 @@ void CModDoc::OnSetupZxxMacros()
 		{
 			if (m_SndFile.m_SongFlags[SONG_EMBEDMIDICFG]) SetModified();
 			m_SndFile.m_SongFlags.reset(SONG_EMBEDMIDICFG);
-
-			// If this macro is not the default IT macro, display a warning.
-			if (!m_SndFile.m_MidiCfg.IsMacroDefaultSetupUsed())
-			{
-				if(Reporting::Confirm(_T("You have chosen not to embed MIDI macros. However, the current macro configuration differs from the default macro configuration that is assumed when loading a file that has no macros embedded. This can result in data loss and broken playback.\nWould you like to embed MIDI macros now?")) == cnfYes)
-				{
-					m_SndFile.m_SongFlags.set(SONG_EMBEDMIDICFG);
-					SetModified();
-				}
-			}
 		}
 	}
 }
