@@ -54,8 +54,8 @@ ModSequence::ModSequence(CSoundFile &rSf,
 
 ModSequence::ModSequence(CSoundFile& rSf, ORDERINDEX nSize) :
 	m_sndFile(rSf),
+	m_restartPos(0),
 	m_bDeletableArray(true),
-	m_restartPos(0)
 //-------------------------------------------------------------------
 {
 	m_nSize = nSize;
@@ -81,10 +81,7 @@ ModSequence::ModSequence(const ModSequence& seq) :
 bool ModSequence::NeedsExtraDatafield() const
 //-------------------------------------------
 {
-	if(m_sndFile.GetType() == MOD_TYPE_MPT && m_sndFile.Patterns.Size() > 0xFD)
-		return true;
-	else
-		return false;
+	return (m_sndFile.GetType() == MOD_TYPE_MPT && m_sndFile.Patterns.Size() > 0xFD);
 }
 
 namespace
