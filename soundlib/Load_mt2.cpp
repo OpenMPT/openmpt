@@ -451,7 +451,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_madeWithTracker, fileHeader.trackerName);
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songName);
 	m_nChannels = fileHeader.numChannels;
-	m_nRestartPos = fileHeader.restartPos;
+	Order.SetRestartPos(fileHeader.restartPos);
 	m_nDefaultSpeed = fileHeader.ticksPerLine;
 	if(!m_nDefaultSpeed) m_nDefaultSpeed = 6;
 	m_nDefaultTempo.Set(125);

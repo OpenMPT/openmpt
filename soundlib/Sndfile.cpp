@@ -181,7 +181,7 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 	m_nDefaultSpeed = 6;
 	m_nDefaultTempo.Set(125);
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
-	m_nRestartPos = 0;
+	Order.SetRestartPos(0);
 	m_SongFlags.reset();
 	m_nMinPeriod = 16;
 	m_nMaxPeriod = 32767;
@@ -423,7 +423,14 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	RecalculateSamplesPerTick();
 	visitedSongRows.Initialize(true);
 
-	if ((m_nRestartPos >= Order.size()) || (Order[m_nRestartPos] >= Patterns.Size())) m_nRestartPos = 0;
+	for(SEQUENCEINDEX i = 0; i < Order.GetNumSequences(); i++)
+	{
+		ModSequence &order = Order.GetSequence(i);
+		if(order.GetRestartPos() >= order.size())
+		{
+			order.SetRestartPos(0);
+		}
+	}
 
 #ifndef NO_VST
 	// plugin loader

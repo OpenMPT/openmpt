@@ -33,7 +33,7 @@ public:
 	virtual ~ModSequence() {if (m_bDeletableArray) delete[] m_pArray;}
 	ModSequence(const ModSequence&);
 	ModSequence(CSoundFile& rSf, ORDERINDEX nSize);
-	ModSequence(CSoundFile& rSf, PATTERNINDEX* pArray, ORDERINDEX nSize, ORDERINDEX nCapacity, bool bDeletableArray);
+	ModSequence(CSoundFile& rSf, PATTERNINDEX* pArray, ORDERINDEX nSize, ORDERINDEX nCapacity, ORDERINDEX restartPos, bool bDeletableArray);
 
 	// Initialize default sized sequence.
 	void Init();
@@ -120,11 +120,14 @@ public:
 	bool IsPositionLocked(ORDERINDEX position) const;
 #endif // MODPLUG_TRACKER
 
-	// Sequence name setter
-	void SetName(const std::string &newName);
-	
-	// Sequence name getter
-	std::string GetName() const;
+	// Sequence name setter / getter
+	inline void SetName(const std::string &newName) { m_sName = newName;}
+	inline std::string GetName() const { return m_sName; }
+
+	// Restart position setter / getter
+	inline void SetRestartPos(ORDERINDEX restartPos) { m_restartPos = restartPos; }
+	inline ORDERINDEX GetRestartPos() const { return m_restartPos; }
+
 
 protected:
 	iterator begin() {return m_pArray;}
@@ -139,6 +142,7 @@ protected:
 	PATTERNINDEX *m_pArray;			// Pointer to sequence array.
 	ORDERINDEX m_nSize;				// Sequence length.
 	ORDERINDEX m_nCapacity;			// Capacity in m_pArray.
+	ORDERINDEX m_restartPos;		// Restart position when playback of this order ended
 	bool m_bDeletableArray;			// True if m_pArray points the deletable(with delete[]) array.
 };
 
@@ -193,9 +197,13 @@ public:
 
 	ModSequenceSet& operator=(const ModSequence& seq) {ModSequence::operator=(seq); return *this;}
 
+#ifdef MODPLUG_TRACKER
+	// Convert the sequence's restart position information to a pattern command.
+	bool RestartPosToPattern(SEQUENCEINDEX seq);
 	// Merges multiple sequences into one and destroys all other sequences.
 	// Returns false if there were no sequences to merge, true otherwise.
 	bool MergeSequences();
+#endif // MODPLUG_TRACKER
 
 	// If there are subsongs (separated by "---" or "+++" patterns) in the module,
 	// asks user whether to convert these into multiple sequences (given that the 

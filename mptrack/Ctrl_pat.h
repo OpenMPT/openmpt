@@ -144,6 +144,7 @@ protected:
 	afx_msg void OnDuplicatePattern();
 	afx_msg void OnPatternCopy();
 	afx_msg void OnPatternPaste();
+	afx_msg void OnSetRestartPos();
 	afx_msg void OnEditCopy() { OnCopy(false); }
 	afx_msg void OnEditCopyOrders() { OnCopy(true); }
 	afx_msg void OnEditCut();

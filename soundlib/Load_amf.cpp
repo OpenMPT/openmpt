@@ -129,7 +129,7 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamples = fileHeader.numSamples;
 	if(fileHeader.restartPos < fileHeader.numOrders)
 	{
-		m_nRestartPos = fileHeader.restartPos;
+		Order.SetRestartPos(fileHeader.restartPos);
 	}
 	m_songName.clear();
 

@@ -456,13 +456,16 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	}
 
 	// Is the "restart position" value allowed in this format?
-	if(m_SndFile.m_nRestartPos > 0 && !specs.hasRestartPos)
+	for(SEQUENCEINDEX seq = 0; seq < m_SndFile.Order.GetNumSequences(); seq++)
 	{
-		// Try to fix it by placing a pattern jump command in the pattern.
-		if(!RestartPosToPattern())
+		if(m_SndFile.Order.GetSequence(seq).GetRestartPos() > 0 && !specs.hasRestartPos)
 		{
-			// Couldn't fix it! :(
-			CHANGEMODTYPE_WARNING(wRestartPos);
+			// Try to fix it by placing a pattern jump command in the pattern.
+			if(!m_SndFile.Order.RestartPosToPattern(seq))
+			{
+				// Couldn't fix it! :(
+				CHANGEMODTYPE_WARNING(wRestartPos);
+			}
 		}
 	}
 

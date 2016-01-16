@@ -625,7 +625,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	
 	// Restart position sanity checks
 	realOrders--;
-	m_nRestartPos = fileHeader.restartPos;
+	Order.SetRestartPos(fileHeader.restartPos);
 
 	// (Ultimate) Soundtracker didn't have a restart position, but instead stored a default tempo in this value.
 	// The default value for this is 0x78 (120 BPM). This is probably the reason why some M.K. modules
@@ -633,10 +633,10 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	// Files that have restart pos == 0x78: action's batman by DJ Uno (M.K.), 3ddance.mod (M15, so handled by ReadM15),
 	// VALLEY.MOD (M.K.), WormsTDC.MOD (M.K.), ZWARTZ.MOD (M.K.)
 	// Files that have an order list longer than 0x78 with restart pos = 0x78: my_shoe_is_barking.mod, papermix.mod
-	MPT_ASSERT(m_nRestartPos != 0x78 || m_nRestartPos + 1u >= realOrders);
-	if(m_nRestartPos >= 128 || m_nRestartPos + 1u >= realOrders || m_nRestartPos == 0x78)
+	MPT_ASSERT(fileHeader.restartPos != 0x78 || fileHeader.restartPos + 1u >= realOrders);
+	if(fileHeader.restartPos >= 128 || fileHeader.restartPos + 1u >= realOrders || fileHeader.restartPos == 0x78)
 	{
-		m_nRestartPos = 0;
+		Order.SetRestartPos(0);
 	}
 
 	// Now we can be pretty sure that this is a valid MOD file. Set up default song settings.
@@ -1410,9 +1410,9 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 		}
 	}
 
-	if(m_nRestartPos < 128)
+	if(Order.GetRestartPos() < 128)
 	{
-		fileHeader.restartPos = static_cast<uint8>(m_nRestartPos);
+		fileHeader.restartPos = static_cast<uint8>(Order.GetRestartPos());
 	}
 	fwrite(&fileHeader, sizeof(fileHeader), 1, f);
 
