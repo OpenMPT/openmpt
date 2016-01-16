@@ -193,23 +193,23 @@ public:
 	void RemoveSequence(SEQUENCEINDEX);		// Removes given sequence
 	SEQUENCEINDEX GetCurrentSequenceIndex() const {return m_nCurrentSeq;}
 
-	void OnModTypeChanged(const MODTYPE oldtype);
-
 	ModSequenceSet& operator=(const ModSequence& seq) {ModSequence::operator=(seq); return *this;}
 
 #ifdef MODPLUG_TRACKER
+	// Adjust sequence when converting between module formats
+	void OnModTypeChanged(const MODTYPE oldtype);
+	// If there are subsongs (separated by "---" or "+++" patterns) in the module,
+	// asks user whether to convert these into multiple sequences (given that the 
+	// modformat supports multiple sequences).
+	// Returns true if sequences were modified, false otherwise.
+	bool ConvertSubsongsToMultipleSequences();
+
 	// Convert the sequence's restart position information to a pattern command.
 	bool RestartPosToPattern(SEQUENCEINDEX seq);
 	// Merges multiple sequences into one and destroys all other sequences.
 	// Returns false if there were no sequences to merge, true otherwise.
 	bool MergeSequences();
 #endif // MODPLUG_TRACKER
-
-	// If there are subsongs (separated by "---" or "+++" patterns) in the module,
-	// asks user whether to convert these into multiple sequences (given that the 
-	// modformat supports multiple sequences).
-	// Returns true if sequences were modified, false otherwise.
-	bool ConvertSubsongsToMultipleSequences();
 
 	static const ORDERINDEX s_nCacheSize;
 

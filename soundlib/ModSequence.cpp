@@ -464,6 +464,8 @@ void ModSequenceSet::RemoveSequence(SEQUENCEINDEX i)
 }
 
 
+#ifdef MODPLUG_TRACKER
+
 void ModSequenceSet::OnModTypeChanged(const MODTYPE oldtype)
 //----------------------------------------------------------
 {
@@ -485,7 +487,6 @@ void ModSequenceSet::OnModTypeChanged(const MODTYPE oldtype)
 bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 //-------------------------------------------------------
 {
-#ifdef MODPLUG_TRACKER
 	// Allow conversion only if there's only one sequence.
 	if(GetNumSequences() != 1 || m_sndFile.GetModSpecifications().sequencesMax <= 1)
 		return false;
@@ -565,13 +566,7 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 		SetSequence(0);
 	}
 	return modified;
-#else
-	return false;
-#endif // MODPLUG_TRACKER
 }
-
-
-#ifdef MODPLUG_TRACKER
 
 
 // Convert the sequence's restart position information to a pattern command.
