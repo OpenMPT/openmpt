@@ -369,7 +369,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	if(!memcmp(fileHeader.id, "tpm.", 4))
 	{
 		// Legacy MPTM files (old 1.17.02.xx releases)
-		ChangeModTypeTo(MOD_TYPE_MPT);
+		SetType(MOD_TYPE_MPT);
 	} else
 	{
 		if(mptStartPos <= file.GetLength() - 3 && fileHeader.cwtv > 0x888 && fileHeader.cwtv <= 0xFFF)
