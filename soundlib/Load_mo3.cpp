@@ -19,6 +19,7 @@
 
 #ifdef MPT_BUILTIN_MO3
 #include "Tables.h"
+#include "../common/version.h"
 
 #include "MPEGFrame.h"
 
@@ -877,7 +878,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultSpeed = fileHeader.defaultSpeed ? fileHeader.defaultSpeed : 6;
 	m_nDefaultTempo.Set(fileHeader.defaultTempo ? fileHeader.defaultTempo : 125, 0);
 
-	m_madeWithTracker = "MO3";
 	m_ContainerType = MOD_CONTAINERTYPE_MO3;
 	if(fileHeader.flags & MO3FileHeader::isIT)
 		SetType(MOD_TYPE_IT);
@@ -1026,6 +1026,11 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	30 = VOLCMD_FINEVOLUP x=0...9 (IT) / VOLCMD_FINEVOLDOWN x=10...19 (IT) / VOLCMD_VOLSLIDEUP x=20...29 (IT) / VOLCMD_VOLSLIDEDOWN x=30...39 (IT)
 	31 = VOLCMD_PORTADOWN (IT)
 	32 = VOLCMD_PORTAUP (IT)
+	33 = Unused XM command "W" (XM)
+	34 = Any other IT volume column command to support OpenMPT extensions (IT)
+	35 = CMD_XPARAM (IT)
+	36 = CMD_SMOOTHMIDI (IT)
+	37 = CMD_DELAYCUT (IT)
 
 	Note: S3M/IT CMD_TONEPORTAVOL / CMD_VIBRATOVOL are encoded as two commands:
 	K= 07 00 22 x
@@ -1046,7 +1051,8 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		CMD_PORTAMENTOUP,		CMD_TREMOR,				CMD_RETRIG,				CMD_FINEVIBRATO,
 		CMD_CHANNELVOLUME,		CMD_CHANNELVOLSLIDE,	CMD_PANNINGSLIDE,		CMD_S3MCMDEX,
 		CMD_TEMPO,				CMD_GLOBALVOLSLIDE,		CMD_PANBRELLO,			CMD_MIDI,
-		VOLCMD_FINEVOLUP,		VOLCMD_PORTADOWN,		VOLCMD_PORTAUP,
+		VOLCMD_FINEVOLUP,		VOLCMD_PORTADOWN,		VOLCMD_PORTAUP,			CMD_NONE,
+		VOLCMD_OFFSET,			CMD_XPARAM,				CMD_SMOOTHMIDI,			CMD_DELAYCUT
 	};
 
 	uint8 noteOffset = NOTE_MIN;
@@ -1249,6 +1255,14 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 						// IT volume column portamento
 						m.volcmd = effTrans[cmd[0]];
 						m.vol = cmd[1];
+						break;
+					case 0x34:
+						// Any unrecognized IT volume command
+						if(cmd[1] >= 223 && cmd[1] <= 232)
+						{
+							m.volcmd = VOLCMD_OFFSET;
+							m.vol = cmd[1] - 223;
+						}
 						break;
 					default:
 						if(cmd[0] < CountOf(effTrans))
@@ -1504,7 +1518,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-#ifndef NO_VST
 	if((fileHeader.flags & MO3FileHeader::hasPlugins) && musicChunk.CanRead(1))
 	{
 		// Plugin data
@@ -1523,13 +1536,101 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			if(!plug)
 				break;
 			FileReader pluginChunk = musicChunk.ReadChunk(musicChunk.ReadUint32LE());
+#ifndef NO_VST
 			if(plug <= MAX_MIXPLUGINS)
 			{
 				ReadMixPluginChunk(pluginChunk, m_MixPlugins[plug - 1]);
 			}
+#endif // NO_VST
 		}
 	}
-#endif // NO_VST
+
+	uint16 cwtv = 0;
+	uint16 cmwt = 0;
+	while(musicChunk.CanRead(8))
+	{
+		uint32 id = musicChunk.ReadUint32LE();
+		uint32 len = musicChunk.ReadUint32LE();
+		FileReader chunk = musicChunk.ReadChunk(len);
+		switch(id)
+		{
+		case MAGIC4LE('V','E','R','S'):
+			// Tracker magic bytes (depending on format)
+			switch(m_nType)
+			{
+			case MOD_TYPE_IT:
+				cwtv = chunk.ReadUint16LE();
+				cmwt = chunk.ReadUint16LE();
+				/*switch(cwtv >> 12)
+				{
+					
+				}*/
+				break;
+			case MOD_TYPE_S3M:
+				cwtv = chunk.ReadUint16LE();
+				break;
+			case MOD_TYPE_XM:
+				chunk.ReadString<mpt::String::spacePadded>(m_madeWithTracker, std::min(FileReader::off_t(32), chunk.GetLength()));
+				break;
+			case MOD_TYPE_MTM:
+				{
+					uint8 version = chunk.ReadUint8();
+					m_madeWithTracker = mpt::String::Print("MultiTracker %1.%2", version >> 4, version & 0x0F);
+				}
+				break;
+			}
+			break;
+		case MAGIC4LE('M', 'I', 'D', 'I'):
+			// Full MIDI config
+			chunk.ReadStruct<MIDIMacroConfigData>(m_MidiCfg);
+			m_MidiCfg.Sanitize();
+			break;
+		case MAGIC4LE('O', 'M', 'P', 'T'):
+			// Read pattern names: "PNAM"
+			if(chunk.ReadMagic("PNAM"))
+			{
+				FileReader patterns = chunk.ReadChunk(chunk.ReadUint32LE());
+				const PATTERNINDEX namedPats = std::min(static_cast<PATTERNINDEX>(patterns.GetLength() / MAX_PATTERNNAME), Patterns.Size());
+
+				for(PATTERNINDEX pat = 0; pat < namedPats; pat++)
+				{
+					char patName[MAX_PATTERNNAME];
+					patterns.ReadString<mpt::String::maybeNullTerminated>(patName, MAX_PATTERNNAME);
+					Patterns[pat].SetName(patName);
+				}
+			}
+
+			// Read channel names: "CNAM"
+			if(chunk.ReadMagic("CNAM"))
+			{
+				FileReader channels = chunk.ReadChunk(chunk.ReadUint32LE());
+				const CHANNELINDEX namedChans = std::min(static_cast<CHANNELINDEX>(channels.GetLength() / MAX_CHANNELNAME), GetNumChannels());
+				for(CHANNELINDEX chn = 0; chn < namedChans; chn++)
+				{
+					channels.ReadString<mpt::String::maybeNullTerminated>(ChnSettings[chn].szName, MAX_CHANNELNAME);
+				}
+			}
+
+			LoadExtendedInstrumentProperties(chunk);
+			LoadExtendedSongProperties(chunk);
+			if(cwtv > 0x0889 && cwtv <= 0x8FF)
+			{
+				m_nType = MOD_TYPE_MPT;
+				LoadMPTMProperties(chunk, cwtv);
+			}
+
+			if(m_dwLastSavedWithVersion)
+			{
+				m_madeWithTracker = "OpenMPT " + MptVersion::ToStr(m_dwLastSavedWithVersion);
+			}
+			break;
+		}
+	}
+
+	if(m_madeWithTracker.empty())
+		m_madeWithTracker = mpt::String::Print("MO3 v%1", version);
+	else
+		m_madeWithTracker = mpt::String::Print("MO3 v%1 (%2)", version, m_madeWithTracker);
 
 	delete[] musicData;
 

@@ -1012,7 +1012,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !memcmp(fileHeader.reserved, "CHBI", 4))
 			{
 				m_madeWithTracker = "ChibiTracker";
-			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !(fileHeader.special & 3) && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
+			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !(fileHeader.special & 3) && !memcmp(fileHeader.reserved, "\0\0\0\0", 4) && m_nSamples > 0 && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
 			{
 				m_madeWithTracker = "CheeseTracker";
 			} else if(fileHeader.cmwt < 0x0888)
@@ -1077,52 +1077,59 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(GetType() == MOD_TYPE_MPT)
 	{
-		//START - mpt specific:
-		//Using member cwtv on pifh as the version number.
-		const uint16 version = fileHeader.cwtv;
-		if(version > 0x889 && file.Seek(mptStartPos))
+		// START - mpt specific:
+		if(fileHeader.cwtv > 0x0889 && file.Seek(mptStartPos))
 		{
-			mpt::istringstream iStrm(std::string(file.GetRawData(), file.BytesLeft()));
-
-			if(version >= 0x88D)
-			{
-				srlztn::SsbRead ssb(iStrm);
-				ssb.BeginRead("mptm", MptVersion::num);
-				ssb.ReadItem(GetTuneSpecificTunings(), "0", &ReadTuningCollection);
-				ssb.ReadItem(*this, "1", &ReadTuningMap);
-				ssb.ReadItem(Order, "2", &ReadModSequenceOld);
-				ssb.ReadItem(Patterns, FileIdPatterns, &ReadModPatterns);
-				ssb.ReadItem(Order, FileIdSequences, &ReadModSequences);
-
-				if(ssb.GetStatus() & srlztn::SNT_FAILURE)
-				{
-					AddToLog("Unknown error occured while deserializing file.");
-				}
-			} else //Loading for older files.
-			{
-				if(GetTuneSpecificTunings().Deserialize(iStrm))
-				{
-					AddToLog("Error occured - loading failed while trying to load tune specific tunings.");
-				} else
-				{
-					ReadTuningMap(iStrm, *this);
-				}
-			}
-		} //version condition(MPT)
+			LoadMPTMProperties(file, fileHeader.cwtv);
+		}
 	}
 
 	return true;
 }
 
+
+void CSoundFile::LoadMPTMProperties(FileReader &file, uint16 cwtv)
+//----------------------------------------------------------------
+{
+	mpt::istringstream iStrm(std::string(file.GetRawData(), file.BytesLeft()));
+
+	if(cwtv >= 0x88D)
+	{
+		srlztn::SsbRead ssb(iStrm);
+		ssb.BeginRead("mptm", MptVersion::num);
+		ssb.ReadItem(GetTuneSpecificTunings(), "0", &ReadTuningCollection);
+		ssb.ReadItem(*this, "1", &ReadTuningMap);
+		ssb.ReadItem(Order, "2", &ReadModSequenceOld);
+		ssb.ReadItem(Patterns, FileIdPatterns, &ReadModPatterns);
+		ssb.ReadItem(Order, FileIdSequences, &ReadModSequences);
+
+		if(ssb.GetStatus() & srlztn::SNT_FAILURE)
+		{
+			AddToLog(LogError, MPT_USTRING("Unknown error occurred while deserializing file."));
+		}
+	} else
+	{
+		// Loading for older files.
+		if(GetTuneSpecificTunings().Deserialize(iStrm))
+		{
+			AddToLog(LogError, MPT_USTRING("Loading tune specific tunings failed."));
+		} else
+		{
+			ReadTuningMap(iStrm, *this);
+		}
+	}
+}
+
+
 #ifndef MODPLUG_NO_FILESAVE
 
 // Save edit history. Pass a null pointer for *f to retrieve the number of bytes that would be written.
-static uint32 SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
-//------------------------------------------------------------------
+static uint32 SaveITEditHistory(const CSoundFile &sndFile, FILE *f)
+//-----------------------------------------------------------------
 {
-	size_t num = pSndFile->GetFileHistory().size();
+	size_t num = sndFile.GetFileHistory().size();
 #ifdef MODPLUG_TRACKER
-	const CModDoc *pModDoc = pSndFile->GetpModDoc();
+	const CModDoc *pModDoc = sndFile.GetpModDoc();
 	num += (pModDoc != nullptr) ? 1 : 0;	// + 1 for this session
 #endif // MODPLUG_TRACKER
 
@@ -1142,11 +1149,11 @@ static uint32 SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 		FileHistory mptHistory;
 
 #ifdef MODPLUG_TRACKER
-		if(n < pSndFile->GetFileHistory().size())
+		if(n < sndFile.GetFileHistory().size())
 #endif // MODPLUG_TRACKER
 		{
 			// Previous timestamps
-			mptHistory = pSndFile->GetFileHistory().at(n);
+			mptHistory = sndFile.GetFileHistory().at(n);
 #ifdef MODPLUG_TRACKER
 		} else
 		{
@@ -1159,7 +1166,7 @@ static uint32 SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 			if (p != nullptr)
 				mptHistory.loadDate = *p;
 			else
-				pSndFile->AddToLog("localtime() returned nullptr.");
+				sndFile.AddToLog("Unable to retrieve current time.");
 
 			mptHistory.openTime = (uint32)(difftime(time(nullptr), creationTime) * (double)HISTORY_TIMER_PRECISION);
 #endif // MODPLUG_TRACKER
@@ -1319,7 +1326,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	}
 
 	// Edit History. Just calculate the size of this extra block for now.
-	dwExtra += SaveITEditHistory(this, nullptr);
+	dwExtra += SaveITEditHistory(*this, nullptr);
 
 	// Comments
 	uint16 msglength = 0;
@@ -1351,7 +1358,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	}
 
 	// Writing edit history information
-	SaveITEditHistory(this, f);
+	SaveITEditHistory(*this, f);
 
 	// Writing midi cfg
 	if(itHeader.flags & ITFileHeader::reqEmbeddedMIDIConfig)
@@ -1666,7 +1673,10 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	//Save hacked-on extra info
 	if(!compatibilityExport)
 	{
-		SaveExtendedInstrumentProperties(itHeader.insnum, f);
+		if(GetNumInstruments())
+		{
+			SaveExtendedInstrumentProperties(itHeader.insnum, f);
+		}
 		SaveExtendedSongProperties(f);
 	}
 
@@ -1723,7 +1733,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 	if(ssb.GetStatus() & srlztn::SNT_FAILURE)
 	{
-		AddToLog("Error occured in writing MPTM extensions.");
+		AddToLog(LogError, MPT_USTRING("Error occurred in writing MPTM extensions."));
 	}
 
 	//Last 4 bytes should tell where the hack mpt things begin.
@@ -2032,7 +2042,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		WRITEMODULAR(MAGIC4BE('C','W','V','.'), m_dwCreatedWithVersion);
 	}
 
-	WRITEMODULAR(MAGIC4BE('L','S','W','V'), m_dwLastSavedWithVersion);
+	WRITEMODULAR(MAGIC4BE('L','S','W','V'), MptVersion::num);
 	WRITEMODULAR(MAGIC4BE('S','P','A','.'), m_nSamplePreAmp);
 	WRITEMODULAR(MAGIC4BE('V','S','T','V'), m_nVSTiVolume);
 
@@ -2171,7 +2181,11 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 		const uint16 size = file.ReadUint16LE();
 
 		// Start of MPTM extensions, truncated field or non-ASCII ID
-		if(code == MAGIC4LE('2','2','8',4) || !file.CanRead(size) || (code & 0x80808080) || !(code & 0x60606060))
+		if(code == MAGIC4LE('2','2','8',4))
+		{
+			file.SkipBack(6);
+			break;
+		} else if(!file.CanRead(size) || (code & 0x80808080) || !(code & 0x60606060))
 		{
 			break;
 		}
@@ -2184,7 +2198,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 			case MAGIC4LE('D','T','F','R'): { uint32 tempoFract; ReadField(chunk, size, tempoFract); m_nDefaultTempo.Set(m_nDefaultTempo.GetInt(), tempoFract); break; }
 			case MAGIC4BE('R','P','B','.'): ReadField(chunk, size, m_nDefaultRowsPerBeat); break;
 			case MAGIC4BE('R','P','M','.'): ReadField(chunk, size, m_nDefaultRowsPerMeasure); break;
-			case MAGIC4BE('C','.','.','.'): if(GetType() != MOD_TYPE_XM) { CHANNELINDEX chn = 0; ReadField(chunk, size, chn); m_nChannels = std::max(m_nChannels, chn); } break;
+			case MAGIC4BE('C','.','.','.'): if(GetType() != MOD_TYPE_XM && m_ContainerType != MOD_CONTAINERTYPE_MO3) { CHANNELINDEX chn = 0; ReadField(chunk, size, chn); m_nChannels = std::max(m_nChannels, chn); } break;
 			case MAGIC4BE('T','M','.','.'): ReadFieldCast(chunk, size, m_nTempoMode); break;
 			case MAGIC4BE('P','M','M','.'): ReadFieldCast(chunk, size, m_nMixLevels); break;
 			case MAGIC4BE('C','W','V','.'): ReadField(chunk, size, m_dwCreatedWithVersion); break;
