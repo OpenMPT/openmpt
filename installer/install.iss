@@ -29,6 +29,7 @@ AppPublisherURL=http://openmpt.org/
 AppSupportURL=http://forum.openmpt.org/
 AppUpdatesURL=http://openmpt.org/
 DefaultDirName={pf}\OpenMPT
+DisableDirPage=no
 DisableProgramGroupPage=yes
 OutputDir=.\
 OutputBaseFilename=OpenMPT-{#GetAppVersion}-Setup{#BaseNameAddition}
@@ -38,8 +39,6 @@ WizardImageFile=install-big.bmp
 WizardSmallImageFile=install-small.bmp
 CreateUninstallRegKey=not IsTaskSelected('portable')
 Uninstallable=not IsTaskSelected('portable')
-;LicenseFile=license.txt
-;The following setting is recommended by the Aero wizard guidelines.
 DisableWelcomePage=yes
 
 [Tasks]
