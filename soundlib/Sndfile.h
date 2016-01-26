@@ -668,6 +668,7 @@ public:
 	void SaveExtendedSongProperties(FILE* f) const;
 #endif // MODPLUG_NO_FILESAVE
 	void LoadExtendedSongProperties(FileReader &file, bool* pInterpretMptMade = nullptr);
+	void LoadMPTMProperties(FileReader &file, uint16 cwtv);
 
 	std::string GetSchismTrackerVersion(uint16 cwtv);
 
