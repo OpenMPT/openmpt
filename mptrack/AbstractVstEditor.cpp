@@ -14,6 +14,7 @@
 #include "Mainfrm.h"
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/mod_specifications.h"
+#include "../soundlib/plugins/PluginManager.h"
 #include "Vstplug.h"
 #include "dlg_misc.h"
 #include "AbstractVstEditor.h"
@@ -453,6 +454,7 @@ void CAbstractVstEditor::SetTitle()
 		title += mpt::ToWide(mpt::CharsetUTF8, m_VstPlugin.m_pMixStruct->GetLibraryName());
 		if(hasCustomName)
 			title += L")";
+
 		const CVstPlugin *vstPlugin = dynamic_cast<CVstPlugin *>(&m_VstPlugin);
 		if(vstPlugin != nullptr && vstPlugin->isBridged)
 			title += mpt::String::Print(L" (%1-Bit Bridged)", m_VstPlugin.GetPluginFactory().GetDllBits());

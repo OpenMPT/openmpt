@@ -16,7 +16,6 @@
 #include "moddoc.h"
 #include "globals.h"
 #include "Dlsbank.h"
-#include "vstplug.h"
 #include "commctrl.h"
 #include "../common/version.h"
 #include "../test/test.h"
@@ -33,6 +32,7 @@
 #include "../common/ComponentManager.h"
 #include "WelcomeDialog.h"
 #include "../sounddev/SoundDeviceManager.h"
+#include "../soundlib/plugins/PluginManager.h"
 
 // rewbs.memLeak
 #define _CRTDBG_MAP_ALLOC

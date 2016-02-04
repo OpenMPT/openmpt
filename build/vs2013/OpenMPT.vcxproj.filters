@@ -626,6 +626,9 @@
     <ClInclude Include="..\..\soundlib\plugins\PluginEventQueue.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\PluginManager.h">
+      <Filter>soundlib\plugins</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\PluginMixBuffer.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
@@ -1235,6 +1238,9 @@
       <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\DmoToVst.cpp">
+      <Filter>soundlib\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\PlugInterface.cpp">
       <Filter>soundlib\plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\PluginManager.cpp">

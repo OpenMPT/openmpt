@@ -1161,7 +1161,7 @@ bool CSoundFile::IsSampleUsed(SAMPLEINDEX nSample) const
 bool CSoundFile::IsInstrumentUsed(INSTRUMENTINDEX nInstr) const
 //-------------------------------------------------------------
 {
-	if ((!nInstr) || (nInstr > GetNumInstruments()) || (!Instruments[nInstr])) return false;
+	if (nInstr < 1 || nInstr > GetNumInstruments()) return false;
 	for (PATTERNINDEX i = 0; i < Patterns.Size(); i++) if (Patterns.IsValidPat(i))
 	{
 		CPattern::const_iterator mEnd = Patterns[i].End();

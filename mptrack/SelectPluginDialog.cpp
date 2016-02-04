@@ -20,7 +20,7 @@
 #include "Moddoc.h"
 #include "../common/StringFixer.h"
 #include "FileDialog.h"
-#include "Vstplug.h"
+#include "../soundlib/plugins/PluginManager.h"
 #include "SelectPluginDialog.h"
 #include "../pluginBridge/BridgeWrapper.h"
 #include "FolderScanner.h"

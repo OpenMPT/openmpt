@@ -598,6 +598,9 @@
     <ClCompile Include="..\soundlib\MPEGFrame.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\plugins\PlugInterface.cpp">
+      <Filter>Source Files\soundlib\plugins</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1172,6 +1175,9 @@
     </ClInclude>
     <ClInclude Include="..\soundlib\MPEGFrame.h">
       <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\plugins\PluginManager.h">
+      <Filter>Header Files\soundlib\plugins</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

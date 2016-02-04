@@ -719,7 +719,7 @@ public:
 	void SetResamplerSettings(const CResamplerSettings &resamplersettings);
 	void InitPlayer(bool bReset=false);
 	void SetDspEffects(uint32 DSPMask);
-	uint32 GetSampleRate() { return m_MixerSettings.gdwMixingFreq; }
+	uint32 GetSampleRate() const { return m_MixerSettings.gdwMixingFreq; }
 #ifndef NO_EQ
 	void SetEQGains(const uint32 *pGains, uint32 nBands, const uint32 *pFreqs=NULL, bool bReset=false)	{ m_EQ.SetEQGains(pGains, nBands, pFreqs, bReset, m_MixerSettings.gdwMixingFreq); } // 0=-12dB, 32=+12dB
 #endif // NO_EQ

@@ -799,6 +799,7 @@
     <ClCompile Include="..\soundlib\patternContainer.cpp" />
     <ClCompile Include="..\soundlib\plugins\DmoToVst.cpp" />
     <ClCompile Include="..\soundlib\plugins\PluginManager.cpp" />
+    <ClCompile Include="..\soundlib\plugins\PlugInterface.cpp" />
     <ClCompile Include="..\soundlib\RowVisitor.cpp" />
     <ClCompile Include="..\soundlib\S3MTools.cpp" />
     <ClCompile Include="..\soundlib\SampleFormats.cpp" />
@@ -1034,6 +1035,7 @@
     <ClInclude Include="..\soundlib\patternContainer.h" />
     <ClInclude Include="..\soundlib\plugins\OpCodes.h" />
     <ClInclude Include="..\soundlib\plugins\PluginEventQueue.h" />
+    <ClInclude Include="..\soundlib\plugins\PluginManager.h" />
     <ClInclude Include="..\soundlib\plugins\PluginMixBuffer.h" />
     <ClInclude Include="..\soundlib\plugins\PlugInterface.h" />
     <ClInclude Include="..\soundlib\Resampler.h" />

@@ -9,9 +9,9 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
-#include "mainfrm.h"
-#include "moddoc.h"
+#include "Mptrack.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
 #include "dlg_misc.h"
 #include "Dlsbank.h"
 #include "../soundlib/modsmp_ctrl.h"
@@ -20,8 +20,9 @@
 #include "../common/StringFixer.h"
 #include "../common/mptFileIO.h"
 #include "../common/mptBufferIO.h"
-// VST cloning
-#include "Vstplug.h"
+// Plugin cloning
+#include "../soundlib/plugins/PluginManager.h"
+#include "../soundlib/plugins/PlugInterface.h"
 #include "VstPresets.h"
 #include "../common/FileReader.h"
 
