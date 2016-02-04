@@ -134,10 +134,16 @@
 //#define NO_AGC
 
 // Define to build without ASIO support; makes build possible without ASIO SDK.
-//#define NO_ASIO 
+//#define NO_ASIO
 
-// (HACK) Define to build without VST support; makes build possible without VST SDK.
+// Define to build without VST plugin support; makes build possible without VST SDK.
 //#define NO_VST
+
+// Define to build without DMO plugin support
+//#define NO_DMO
+
+// (HACK) Define to build without any plugin support
+//#define NO_PLUGINS
 
 // Define to build without portaudio.
 //#define NO_PORTAUDIO
@@ -209,6 +215,8 @@
 #define NO_AGC
 #define NO_ASIO
 #define NO_VST
+#define NO_DMO
+#define NO_PLUGINS
 #define NO_PORTAUDIO
 #if !defined(MPT_WITH_MO3) && !(MPT_COMPILER_MSVC)
 #ifndef NO_MO3
@@ -428,6 +436,12 @@
 
 #if defined(MPT_WITH_PATHSTRING) && !defined(MPT_WITH_CHARSET_LOCALE)
 #define MPT_WITH_CHARSET_LOCALE // PathString requires locale charset
+#endif
+
+#if defined(NO_PLUGINS)
+// Any plugin type requires NO_PLUGINS to not be defined.
+#define NO_VST
+#define NO_DMO
 #endif
 
 

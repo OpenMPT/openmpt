@@ -25,11 +25,6 @@ OPENMPT_NAMESPACE_BEGIN
 // VU-Meter
 #define VUMETER_DECAY		4
 
-#ifndef NO_VST
-PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
-#endif
-
-
 // Log tables for pre-amp
 // Pre-amp (or more precisely: Pre-attenuation) depends on the number of channels,
 // Which this table takes care of.
@@ -863,7 +858,7 @@ void CSoundFile::ProcessTremor(CHANNELINDEX nChn, int &vol)
 		chn.dwFlags.set(CHN_FASTVOLRAMP);
 	}
 
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 	// Plugin tremor
 	if(chn.nCommand == CMD_TREMOR && chn.pModInstrument && chn.pModInstrument->nMixPlug
 		&& !chn.pModInstrument->dwFlags[INS_MUTE]
@@ -882,7 +877,7 @@ void CSoundFile::ProcessTremor(CHANNELINDEX nChn, int &vol)
 				pPlugin->MidiCommand(midiChn, pIns->nMidiProgram, pIns->wMidiBank, chn.nLastNote, static_cast<uint16>(chn.nVolume), nChn);
 		}
 	}
-#endif // NO_VST
+#endif // NO_PLUGINS
 }
 
 
@@ -1251,7 +1246,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 {
 	ModChannel *pChn = &m_PlayState.Chn[nChn];
 
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 	// Plugin arpeggio
 	if(pChn->pModInstrument && pChn->pModInstrument->nMixPlug
 		&& !pChn->pModInstrument->dwFlags[INS_MUTE]
@@ -1298,7 +1293,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, CTuning::NOTEIN
 				pChn->nArpeggioLastNote = NOTE_NONE;
 		}
 	}
-#endif // NO_VST
+#endif // NO_PLUGINS
 
 	if(pChn->nCommand == CMD_ARPEGGIO)
 	{

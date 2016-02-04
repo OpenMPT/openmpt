@@ -11,7 +11,7 @@
 
 #include "stdafx.h"
 
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 
 #include "Mptrack.h"
 #include "Mainfrm.h"
@@ -494,6 +494,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 	{
 		::SetDlgItemTextW(m_hWnd, IDC_TEXT_CURRENT_VSTPLUG, pPlug->dllPath.ToWide().c_str());
 		::SetDlgItemTextW(m_hWnd, IDC_PLUGINTAGS, mpt::ToWide(pPlug->tags).c_str());
+#ifndef NO_VST
 		if(pPlug->pluginId1 == kEffectMagic)
 		{
 			bool isBridgeAvailable =
@@ -519,6 +520,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 			showBoxes = SW_SHOW;
 			enableTagsTextBox = TRUE;
 		}
+#endif
 	} else
 	{
 		SetDlgItemText(IDC_TEXT_CURRENT_VSTPLUG, _T(""));
@@ -852,4 +854,4 @@ void CSelectPluginDlg::OnPluginTagsChanged()
 
 OPENMPT_NAMESPACE_END
 
-#endif // NO_VST
+#endif // NO_PLUGINS

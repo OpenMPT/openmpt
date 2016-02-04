@@ -448,4 +448,17 @@ bool IMidiPlugin::IsPlaying(uint32 note, uint32 midiChn, uint32 trackerChn)
 }
 
 
+std::string SNDMIXPLUGIN::GetParamName(PlugParamIndex index) const
+//----------------------------------------------------------------
+{
+	if(pMixPlugin != nullptr)
+	{
+		return pMixPlugin->GetFormattedParamName(index).GetString();
+	} else
+	{
+		return std::string();
+	}
+}
+
+
 OPENMPT_NAMESPACE_END

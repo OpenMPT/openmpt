@@ -40,6 +40,11 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+#ifndef NO_PLUGINS
+PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = nullptr;
+#endif
+
+
 // Module decompression
 bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file);
 bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file);
@@ -432,7 +437,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		}
 	}
 
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 	// plugin loader
 	std::string notFoundText;
 	std::vector<SNDMIXPLUGININFO *> notFoundIDs;
@@ -506,7 +511,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			CTrackApp::OpenURL(mpt::PathString::FromUTF8(url));
 		}
 	}
-#endif // NO_VST
+#endif // NO_PLUGINS
 
 	// Set up mix levels
 	SetMixLevels(m_nMixLevels);
@@ -680,10 +685,10 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 		m_PlayState.Chn[j].nTremorCount = 0;
 	}
 
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 	// Stop hanging notes from VST instruments as well
 	StopAllVsti();
-#endif // NO_VST
+#endif // NO_PLUGINS
 
 	if (!nOrder)
 	{

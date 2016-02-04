@@ -2060,21 +2060,3 @@ void CVstPlugin::SetChunk(size_t size, char *chunk, bool isBank)
 OPENMPT_NAMESPACE_END
 
 #endif // NO_VST
-
-OPENMPT_NAMESPACE_BEGIN
-
-std::string SNDMIXPLUGIN::GetParamName(PlugParamIndex index) const
-//------------------------------------------------------------
-{
-	CVstPlugin *vstPlug = dynamic_cast<CVstPlugin *>(pMixPlugin);
-	if(vstPlug != nullptr)
-	{
-		return vstPlug->GetFormattedParamName(index).GetString();
-	} else
-	{
-		return std::string();
-	}
-}
-
-
-OPENMPT_NAMESPACE_END

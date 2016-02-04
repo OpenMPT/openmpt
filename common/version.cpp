@@ -289,6 +289,12 @@ std::string GetBuildFeaturesString()
 		#ifdef NO_VST
 			retval += " NO_VST";
 		#endif
+		#ifdef NO_DMO
+			retval += " NO_DMO";
+		#endif
+		#ifdef NO_PLUGINS
+			retval += " NO_PLUGINS";
+		#endif
 		#ifdef NO_ASIO
 			retval += " NO_ASIO";
 		#endif

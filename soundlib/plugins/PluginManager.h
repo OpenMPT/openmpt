@@ -112,7 +112,7 @@ struct AEffect;
 class CVstPluginManager
 //=====================
 {
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 protected:
 	std::vector<VSTPluginLib *> pluginList;
 
@@ -139,7 +139,11 @@ public:
 
 protected:
 	void EnumerateDirectXDMOs();
+#ifndef NO_VST
 	AEffect *LoadPlugin(VSTPluginLib &plugin, HINSTANCE &library, bool forceBridge);
+#else
+	AEffect *LoadPlugin(VSTPluginLib &, HINSTANCE &, bool) { return nullptr; }
+#endif // NO_VST
 
 	static bool CreateMixPluginProc(SNDMIXPLUGIN &, CSoundFile &);
 
@@ -148,7 +152,7 @@ public:
 	static char s_szHostVendorString[64];
 	static int32 s_nHostVendorVersion;
 
-#else // NO_VST
+#else // NO_PLUGINS
 public:
 	VSTPluginLib *AddPlugin(const mpt::PathString &, const mpt::ustring &, bool = true, const bool = false, std::wstring* const = nullptr) { return 0; }
 
@@ -157,7 +161,7 @@ public:
 	void reserve(size_t) { }
 
 	void OnIdle() {}
-#endif // NO_VST
+#endif // NO_PLUGINS
 };
 
 

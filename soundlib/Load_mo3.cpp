@@ -1536,12 +1536,12 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			if(!plug)
 				break;
 			FileReader pluginChunk = musicChunk.ReadChunk(musicChunk.ReadUint32LE());
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 			if(plug <= MAX_MIXPLUGINS)
 			{
 				ReadMixPluginChunk(pluginChunk, m_MixPlugins[plug - 1]);
 			}
-#endif // NO_VST
+#endif // NO_PLUGINS
 		}
 	}
 

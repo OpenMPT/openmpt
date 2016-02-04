@@ -11,13 +11,15 @@
 #pragma once
 
 #ifndef NO_VST
-	#define VST_FORCE_DEPRECATED 0
-	#include <pluginterfaces/vst2.x/aeffectx.h>			// VST
-#endif
+
+#define VST_FORCE_DEPRECATED 0
+#include <pluginterfaces/vst2.x/aeffectx.h>			// VST
 
 #include "../soundlib/Snd_defs.h"
 #include "../soundlib/plugins/PluginMixBuffer.h"
 #include "../soundlib/plugins/PlugInterface.h"
+#include "../soundlib/plugins/PluginEventQueue.h"
+#include "../soundlib/Mixer.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -29,19 +31,10 @@ class CModDoc;
 class CSoundFile;
 
 
-OPENMPT_NAMESPACE_END
-#ifndef NO_VST
-#include "../soundlib/plugins/PluginEventQueue.h"
-#include "../soundlib/Mixer.h"
-#endif // NO_VST
-OPENMPT_NAMESPACE_BEGIN
-
-
 //==================================
 class CVstPlugin: public IMidiPlugin
 //==================================
 {
-#ifndef NO_VST
 protected:
 
 	enum
@@ -172,52 +165,9 @@ public:
 	static VstIntPtr VSTCALLBACK MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 protected:
 	VstIntPtr VstFileSelector(bool destructor, VstFileSelect *fileSel);
-
-#else // case: NO_VST
-public:
-	PlugParamIndex GetNumParameters() { return 0; }
-	void ToggleEditor() {}
-	bool HasEditor() { return false; }
-	VstInt32 GetNumPrograms() { return 0; }
-	VstInt32 GetCurrentProgram() { return 0; }
-	CString GetCurrentProgramName() { return _T(""); }
-	void SetCurrentProgramName(const CString &) { }
-	CString GetProgramName(int32) { return _T(""); }
-	void SetParameter(PlugParamIndex, PlugParamValue) {}
-	VstInt32 GetUID() const { return 0; }
-	VstInt32 GetVersion() const { return 0; }
-	bool ShouldProcessSilence() { return false; }
-	void ResetSilence() { }
-
-	bool CanAutomateParameter(PlugParamIndex) { return false; }
-
-	CString GetParamName(PlugParamIndex) { return _T(""); };
-	CString GetParamLabel(PlugParamIndex) { return _T(""); };
-	CString GetParamDisplay(PlugParamIndex) { return _T(""); };
-
-	PlugParamValue GetParameter(PlugParamIndex) { return 0; }
-	bool LoadProgram(mpt::PathString = mpt::PathString()) { return false; }
-	bool SaveProgram() { return false; }
-	void SetCurrentProgram(VstInt32) {}
-	void Bypass(bool = true) { }
-	bool IsBypassed() const { return false; }
-	bool IsSongPlaying() const { return false; }
-
-	void SetEditorPos(int32, int32) { }
-	void GetEditorPos(int32 &x, int32 &y) const { x = y = int32_min; }
-
-	int GetNumInputChannels() const { return 0; }
-	int GetNumOutputChannels() const { return 0; }
-
-	bool ProgramsAreChunks() const { return false; };
-	size_t GetChunk(char *(&), bool) { return 0; }
-	void SetChunk(size_t, char *, bool) { }
-
-	void BeginSetProgram(int32) { }
-	void EndSetProgram() { }
-
-#endif // NO_VST
 };
 
 
 OPENMPT_NAMESPACE_END
+
+#endif // NO_VST

@@ -1998,7 +1998,7 @@ void CModDoc::OnFileMP3Convert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, bool 
 void CModDoc::OnFileMidiConvert()
 //-------------------------------
 {
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
@@ -2020,8 +2020,8 @@ void CModDoc::OnFileMidiConvert()
 		pMainFrm->GetInputHandler()->Bypass(false);
 	}
 #else
-	Reporting::Error("In order to use MIDI export, OpenMPT must be built with plugin support.")
-#endif // NO_VST
+	Reporting::Error("In order to use MIDI export, OpenMPT must be built with plugin support.");
+#endif // NO_PLUGINS
 }
 
 //HACK: This is a quick fix. Needs to be better integrated into player and GUI.

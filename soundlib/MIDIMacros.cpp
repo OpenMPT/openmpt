@@ -232,7 +232,7 @@ CString MIDIMacroConfig::GetParameteredMacroName(size_t macroIndex, PLUGINDEX pl
 			const int param = MacroToPlugParam(macroIndex);
 			CString formattedName;
 			formattedName.Format(_T("Param %u"), param);
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 			if(plugin < MAX_MIXPLUGINS)
 			{
 				IMixPlugin *pPlug = sndFile.m_MixPlugins[plugin].pMixPlugin;
@@ -246,7 +246,7 @@ CString MIDIMacroConfig::GetParameteredMacroName(size_t macroIndex, PLUGINDEX pl
 					}
 				}
 			} else
-#endif // NO_VST
+#endif // NO_PLUGINS
 			{
 				formattedName += _T(" (N/A)");
 			}
