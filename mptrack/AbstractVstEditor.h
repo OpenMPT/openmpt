@@ -10,7 +10,7 @@
 
 #pragma once
 
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 
 #include <vector>
 #include "../soundlib/Snd_defs.h"
@@ -113,4 +113,4 @@ protected:
 
 OPENMPT_NAMESPACE_END
 
-#endif // NO_VST
+#endif // NO_PLUGINS

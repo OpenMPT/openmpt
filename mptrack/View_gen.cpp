@@ -960,7 +960,7 @@ void CViewGlobals::OnPluginChanged()
 void CViewGlobals::OnSelectPlugin()
 //---------------------------------
 {
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 	CModDoc *pModDoc = GetDocument();
 
 	if ((pModDoc) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
@@ -975,7 +975,7 @@ void CViewGlobals::OnSelectPlugin()
 		OnPluginChanged();
 		OnParamChanged();
 	}
-#endif // NO_VST
+#endif // NO_PLUGINS
 }
 
 

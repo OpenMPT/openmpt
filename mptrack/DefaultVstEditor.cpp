@@ -17,7 +17,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 
 
 // Window proportions
@@ -553,7 +553,7 @@ void CDefaultVstEditor::UpdateParamDisplay(PlugParamIndex param)
 	
 }
 
-#endif // NO_VST
+#endif // NO_PLUGINS
 
 
 OPENMPT_NAMESPACE_END

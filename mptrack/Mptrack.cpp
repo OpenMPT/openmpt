@@ -1897,7 +1897,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 	if(!m_pPluginManager) return FALSE;
 	const size_t numPlugins = theApp.GetSettings().Read<int32>("VST Plugins", "NumPlugins", 0);
 
-	#ifndef NO_VST
+	#ifndef NO_PLUGINS
 		std::string buffer = theApp.GetSettings().Read<std::string>("VST Plugins", "HostProductString", CVstPluginManager::s_szHostProductString);
 
 		// Version <= 1.19.03.00 had buggy handling of custom host information. If last open was from
@@ -1980,7 +1980,7 @@ BOOL CTrackApp::UninitializeDXPlugins()
 {
 	if(!m_pPluginManager) return FALSE;
 
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 
 	size_t plug = 0;
 	for(CVstPluginManager::const_iterator pPlug = m_pPluginManager->begin(); pPlug != m_pPluginManager->end(); pPlug++)
@@ -2003,7 +2003,7 @@ BOOL CTrackApp::UninitializeDXPlugins()
 		}
 	}
 	theApp.GetSettings().Write<int32>("VST Plugins", "NumPlugins", plug);
-#endif // NO_VST
+#endif // NO_PLUGINS
 
 	delete m_pPluginManager;
 	m_pPluginManager = nullptr;

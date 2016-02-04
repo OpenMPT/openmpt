@@ -30,7 +30,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 
 #define PRESETS_PER_COLUMN 32
 #define PRESETS_PER_GROUP 128
@@ -455,9 +455,11 @@ void CAbstractVstEditor::SetTitle()
 		if(hasCustomName)
 			title += L")";
 
+#ifndef NO_VST
 		const CVstPlugin *vstPlugin = dynamic_cast<CVstPlugin *>(&m_VstPlugin);
 		if(vstPlugin != nullptr && vstPlugin->isBridged)
 			title += mpt::String::Print(L" (%1-Bit Bridged)", m_VstPlugin.GetPluginFactory().GetDllBits());
+#endif // NO_VST
 
 		::SetWindowTextW(m_hWnd, title.c_str());
 	}
@@ -544,7 +546,7 @@ bool CAbstractVstEditor::ValidateCurrentInstrument()
 }
 
 
-static int GetNumSubMenus(VstInt32 numProgs) { return (numProgs + (PRESETS_PER_GROUP - 1)) / PRESETS_PER_GROUP; }
+static int GetNumSubMenus(int32 numProgs) { return (numProgs + (PRESETS_PER_GROUP - 1)) / PRESETS_PER_GROUP; }
 
 
 void CAbstractVstEditor::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu)
@@ -566,7 +568,7 @@ void CAbstractVstEditor::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu)
 		case 1:
 			// If there would be only one sub menu, we add presets directly to the factory menu
 			{
-				const VstInt32 numProgs = m_VstPlugin.GetNumPrograms();
+				const int32 numProgs = m_VstPlugin.GetNumPrograms();
 				if(GetNumSubMenus(numProgs) <= 1)
 				{
 					GeneratePresetMenu(0, m_PresetMenu);
@@ -586,8 +588,8 @@ void CAbstractVstEditor::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu)
 void CAbstractVstEditor::UpdatePresetMenu(bool force)
 //---------------------------------------------------
 {
-	const VstInt32 numProgs = m_VstPlugin.GetNumPrograms();
-	const VstInt32 curProg  = m_VstPlugin.GetCurrentProgram();
+	const int32 numProgs = m_VstPlugin.GetNumPrograms();
+	const int32 curProg  = m_VstPlugin.GetCurrentProgram();
 
 	if(m_PresetMenu.m_hMenu)						// We rebuild the menu from scratch, so remove any exiting menus...
 	{
@@ -653,9 +655,9 @@ void CAbstractVstEditor::UpdatePresetMenu(bool force)
 void CAbstractVstEditor::GeneratePresetMenu(int32 offset, CMenu &parent)
 //----------------------------------------------------------------------
 {
-	const VstInt32 numProgs = m_VstPlugin.GetNumPrograms();
-	const VstInt32 curProg  = m_VstPlugin.GetCurrentProgram();
-	const VstInt32 endProg = std::min(offset + PRESETS_PER_GROUP, numProgs);
+	const int32 numProgs = m_VstPlugin.GetNumPrograms();
+	const int32 curProg  = m_VstPlugin.GetCurrentProgram();
+	const int32 endProg = std::min(offset + PRESETS_PER_GROUP, numProgs);
 
 	if(parent.GetMenuItemCount() != 0)
 	{
@@ -664,7 +666,7 @@ void CAbstractVstEditor::GeneratePresetMenu(int32 offset, CMenu &parent)
 	}
 
 	m_VstPlugin.CacheProgramNames(offset, endProg);
-	for(VstInt32 p = offset, row = 0, id = 0; p < endProg; p++, row++, id++)
+	for(int32 p = offset, row = 0, id = 0; p < endProg; p++, row++, id++)
 	{
 		CString programName = m_VstPlugin.GetFormattedProgramName(p);
 		programName.Replace("&", "&&");
@@ -705,7 +707,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 	m_VstPlugin.GetInputPlugList(inputPlugs);
 	for(size_t nPlug=0; nPlug < inputPlugs.size(); nPlug++)
 	{
-		name.Format("FX%02d: %s", inputPlugs[nPlug]->m_nSlot + 1, inputPlugs[nPlug]->m_pMixStruct->GetName());
+		name.Format("FX%02u: %s", inputPlugs[nPlug]->m_nSlot + 1, inputPlugs[nPlug]->m_pMixStruct->GetName());
 		m_InputMenu.AppendMenu(MF_STRING, ID_PLUGSELECT + inputPlugs[nPlug]->m_nSlot, name);
 	}
 
@@ -717,7 +719,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 		{
 			m_InputMenu.AppendMenu(MF_SEPARATOR);
 		}
-		name.Format("Chn%02d: %s", inputChannels[nChn] + 1, sndFile.ChnSettings[inputChannels[nChn]].szName);
+		name.Format("Chn%02u: %s", inputChannels[nChn] + 1, sndFile.ChnSettings[inputChannels[nChn]].szName);
 		m_InputMenu.AppendMenu(MF_STRING, NULL, name);
 	}
 
@@ -730,7 +732,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 		{
 			m_InputMenu.AppendMenu(MF_SEPARATOR);
 		}
-		name.Format("Ins%02d: %s", inputInstruments[nIns], sndFile.GetInstrumentName(inputInstruments[nIns]));
+		name.Format("Ins%02u: %s", inputInstruments[nIns], sndFile.GetInstrumentName(inputInstruments[nIns]));
 		if(inputInstruments[nIns] == m_nInstrument)	checked = true;
 		m_InputMenu.AppendMenu(MF_STRING | (checked ? MF_CHECKED : 0), ID_SELECTINST + inputInstruments[nIns], name);
 	}
@@ -739,10 +741,10 @@ void CAbstractVstEditor::UpdateInputMenu()
 		inputChannels.size() == 0 &&
 		inputInstruments.size() == 0)
 	{
-		m_InputMenu.AppendMenu(MF_STRING | MF_GRAYED, NULL, "None");
+		m_InputMenu.AppendMenu(MF_STRING | MF_GRAYED, NULL, _T("None"));
 	}
 
-	pInfoMenu->InsertMenu(0, MF_BYPOSITION | MF_POPUP, reinterpret_cast<UINT_PTR>(m_InputMenu.m_hMenu), "I&nputs");
+	pInfoMenu->InsertMenu(0, MF_BYPOSITION | MF_POPUP, reinterpret_cast<UINT_PTR>(m_InputMenu.m_hMenu), _T("I&nputs"));
 }
 
 
@@ -1010,7 +1012,7 @@ void CAbstractVstEditor::RestoreWindowPos()
 }
 
 
-#endif // NO_VST
+#endif // NO_PLUGINS
 
 
 OPENMPT_NAMESPACE_END

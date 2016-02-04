@@ -32,8 +32,10 @@ protected:
 	CTreeCtrlW m_treePlugins;
 	CButton m_chkBridge, m_chkShare;
 	mpt::ustring m_nameFilter;
+#ifndef NO_VST
 	ComponentHandle<ComponentPluginBridge32> pluginBridge32;
 	ComponentHandle<ComponentPluginBridge64> pluginBridge64;
+#endif
 	PLUGINDEX m_nPlugSlot;
 
 	HTREEITEM AddTreeItem(const WCHAR *title, int image, bool sort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);

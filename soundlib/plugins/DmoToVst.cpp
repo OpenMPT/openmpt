@@ -2,7 +2,7 @@
  * DmoToVst.cpp
  * ------------
  * Purpose: DirectX Media Object to VST plugin adapter class.
- * Notes  : (currently none)
+ * Notes  : This should make use of IMixPlugin rather than going through CVstPlugin.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 
-#ifndef NO_VST
+#ifndef NO_DMO
 #include <uuids.h>
 #include <dmoreg.h>
 #include <medparam.h>
@@ -556,7 +556,7 @@ AEffect *DmoToVst(VSTPluginLib &lib)
 	return nullptr;
 }
 
-#endif // NO_VST
+#endif // NO_DMO
 
 
 OPENMPT_NAMESPACE_END

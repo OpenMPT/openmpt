@@ -29,7 +29,7 @@ public:
 		outOfMemory,
 	};
 
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 	static ErrorCode LoadFile(FileReader &file, IMixPlugin &plugin);
 	static bool SaveFile(std::ostream &, IMixPlugin &plugin, bool bank);
 	static const char *GetErrorMessage(ErrorCode code);
@@ -41,7 +41,7 @@ protected:
 	static ErrorCode LoadFile(FileReader &, IMixPlugin &) { return invalidFile; }
 	static bool SaveFile(std::ostream &, IMixPlugin &, bool) { return false; }
 	static const char *GetErrorMessage(ErrorCode) { return "OpenMPT has been built without VST support"; }
-#endif // NO_VST
+#endif // NO_PLUGINS
 };
 
 OPENMPT_NAMESPACE_END

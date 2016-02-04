@@ -337,7 +337,7 @@ public:
 	CAGC m_AGC;
 #endif
 
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
 #endif
 

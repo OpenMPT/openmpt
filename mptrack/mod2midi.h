@@ -11,8 +11,6 @@
 #pragma once
 #include "ProgressDialog.h"
 
-#ifndef NO_VST
-
 OPENMPT_NAMESPACE_BEGIN
 
 
@@ -76,5 +74,3 @@ public:
 
 
 OPENMPT_NAMESPACE_END
-
-#endif // NO_VST

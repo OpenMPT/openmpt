@@ -638,7 +638,7 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 	target.pMixState = nullptr;
 	target.pPluginData = nullptr;
 	target.nPluginDataSize = 0;
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 	if(theApp.GetPluginManager()->CreateMixPlugin(target, GetrSoundFile()))
 	{
 		IMixPlugin *newVstPlug = target.pMixPlugin;
@@ -652,7 +652,7 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 			VSTPresets::LoadFile(file, *newVstPlug);
 		}
 	}
-#endif // !NO_VST
+#endif // !NO_PLUGINS
 }
 
 
@@ -809,7 +809,7 @@ void CModDoc::InitializeInstrument(ModInstrument *pIns)
 INSTRUMENTINDEX CModDoc::InsertInstrumentForPlugin(PLUGINDEX plug)
 //----------------------------------------------------------------
 {
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 	const bool first = (GetNumInstruments() == 0);
 	if(first && !ConvertSamplesToInstruments()) return INSTRUMENTINDEX_INVALID;
 

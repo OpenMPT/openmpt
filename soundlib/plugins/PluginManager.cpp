@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 #include "../../common/version.h"
 #include "../../mptrack/Vstplug.h"
 #include "PluginManager.h"
@@ -39,9 +39,11 @@ VstInt32 CVstPluginManager::s_nHostVendorVersion = MptVersion::num;
 typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
 
 //#define VST_LOG
-#define DMO_LOG
 
+#ifndef NO_DMO
+#define DMO_LOG
 AEffect *DmoToVst(VSTPluginLib &lib);
+#endif // NO_DMO
 
 static const MPT_UCHAR_TYPE *const cacheSection = MPT_ULITERAL("PluginCache");
 
@@ -49,10 +51,14 @@ static const MPT_UCHAR_TYPE *const cacheSection = MPT_ULITERAL("PluginCache");
 uint8 VSTPluginLib::GetDllBits(bool fromCache) const
 //--------------------------------------------------
 {
+#ifndef NO_VST
 	if(!dllBits || !fromCache)
 	{
 		dllBits = static_cast<uint8>(BridgeWrapper::GetPluginBinaryType(dllPath));
 	}
+#else
+	MPT_UNREFERENCED_PARAMETER(fromCache);
+#endif // NO_VST
 	return dllBits;
 }
 
@@ -180,6 +186,8 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 }
 
 
+#ifndef NO_VST
+
 AEffect *CVstPluginManager::LoadPlugin(VSTPluginLib &plugin, HINSTANCE &library, bool forceBridge)
 //------------------------------------------------------------------------------------------------
 {
@@ -280,6 +288,9 @@ AEffect *CVstPluginManager::LoadPlugin(VSTPluginLib &plugin, HINSTANCE &library,
 
 	return effect;
 }
+
+#endif // NO_VST
+
 
 
 // Extract instrument and category information from plugin.
@@ -503,6 +514,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 
 	if(mixPlugin.Info.dwPluginId1 == kDmoMagic)
 	{
+#ifndef NO_DMO
 		if (!pFound) return false;
 		AEffect *pEffect = DmoToVst(*pFound);
 		if(pEffect && pEffect->magic == kDmoMagic)
@@ -510,6 +522,9 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 			CVstPlugin *pVstPlug = new (std::nothrow) CVstPlugin(nullptr, *pFound, mixPlugin, *pEffect, sndFile);
 			return pVstPlug != nullptr;
 		}
+#else
+		return nullptr;
+#endif // NO_DMO
 	}
 
 	if(!pFound && strcmp(mixPlugin.GetLibraryName(), ""))
@@ -549,6 +564,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		HINSTANCE hLibrary = nullptr;
 		bool validPlugin = false;
 
+#ifndef NO_VST
 		try
 		{
 			pEffect = LoadPlugin(*pFound, hLibrary, TrackerSettings::Instance().bridgeAllPlugins);
@@ -577,6 +593,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		{
 			CVstPluginManager::ReportPlugException(mpt::String::Print(L"Exception while trying to create plugin \"%1\"!\n", pFound->libraryName));
 		}
+#endif
 
 		return validPlugin;
 	} else
@@ -632,7 +649,7 @@ void CVstPluginManager::ReportPlugException(const std::wstring &msg)
 #endif
 }
 
-#endif // NO_VST
+#endif // NO_PLUGINS
 
 
 OPENMPT_NAMESPACE_END

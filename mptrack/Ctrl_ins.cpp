@@ -2218,7 +2218,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 				if(!plugin.IsValidPlugin() && active && wasOpenedWithMouse)
 				{
 					// No plugin in this slot yet: Ask user to add one.
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 					CSelectPluginDlg dlg(&m_modDoc, nPlug - 1, this);
 					if (dlg.DoModal() == IDOK)
 					{
@@ -2230,7 +2230,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 
 						m_modDoc.UpdateAllViews(nullptr, PluginHint(nPlug).Info().Names());
 					}
-#endif // NO_VST
+#endif // NO_PLUGINS
 				}
 
 				if(plugin.pMixPlugin != nullptr)

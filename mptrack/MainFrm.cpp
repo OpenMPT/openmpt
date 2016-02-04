@@ -228,6 +228,12 @@ void CMainFrame::Initialize()
 	#ifdef NO_VST
 		title += " NO_VST";
 	#endif
+	#ifdef NO_DMO
+		title += " NO_DMO";
+	#endif
+	#ifdef NO_PLUGINS
+		title += " NO_PLUGINS";
+	#endif
 	#ifdef NO_ASIO
 		title += " NO_ASIO";
 	#endif
@@ -1957,7 +1963,7 @@ void CMainFrame::OnViewOptions()
 void CMainFrame::OnPluginManager()
 //--------------------------------
 {
-#ifndef NO_VST
+#ifndef NO_PLUGINS
 	PLUGINDEX nPlugslot = PLUGINDEX_INVALID;
 	CModDoc* pModDoc = GetActiveDoc();
 
@@ -1985,7 +1991,7 @@ void CMainFrame::OnPluginManager()
 		CChildFrame *pActiveChild = (CChildFrame *)MDIGetActive();
 		pActiveChild->ForceRefresh();
 	}
-#endif // NO_VST
+#endif // NO_PLUGINS
 }
 
 
