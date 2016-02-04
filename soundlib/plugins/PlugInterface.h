@@ -30,6 +30,35 @@ class CSoundFile;
 class CModDoc;
 class CAbstractVstEditor;
 
+
+struct SNDMIXPLUGINSTATE
+{
+	// dwFlags flags
+	enum PluginStateFlags
+	{
+		psfMixReady = 0x01,				// Set when cleared
+		psfHasInput = 0x02,				// Set when plugin has non-silent input
+		psfSilenceBypass = 0x04,		// Bypass because of silence detection
+	};
+
+	mixsample_t *pMixBuffer;			// Stereo effect send buffer
+	float *pOutBufferL;					// Temp storage for int -> float conversion
+	float *pOutBufferR;
+	uint32 dwFlags;						// PluginStateFlags
+	uint32 inputSilenceCount;			// How much silence has been processed? (for plugin auto-turnoff)
+	mixsample_t nVolDecayL, nVolDecayR;	// End of sample click removal
+
+	SNDMIXPLUGINSTATE() { memset(this, 0, sizeof(*this)); }
+
+	void ResetSilence()
+	{
+		dwFlags |= psfHasInput;
+		dwFlags &= ~psfSilenceBypass;
+		inputSilenceCount = 0;
+	}
+};
+
+
 //==============
 class IMixPlugin
 //==============
@@ -44,6 +73,7 @@ protected:
 #ifdef MODPLUG_TRACKER
 	CAbstractVstEditor *m_pEditor;
 #endif // MODPLUG_TRACKER
+	SNDMIXPLUGINSTATE m_MixState;
 	PLUGINDEX m_nSlot;
 
 public:
@@ -64,27 +94,13 @@ protected:
 
 public:
 	// Non-virtual part of the interface
-	IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
-		: m_pNext(nullptr)
-		, m_pPrev(nullptr)
-		, m_Factory(factory)
-		, m_SndFile(sndFile)
-		, m_pMixStruct(mixStruct)
-#ifdef MODPLUG_TRACKER
-		, m_pEditor(nullptr)
-#endif // MODPLUG_TRACKER
-		, m_nSlot(0)
-		, m_bRecordAutomation(false)
-		, m_bPassKeypressesToPlug(false)
-		, m_bRecordMIDIOut(false)
-	{ }
-
+	IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 	inline CSoundFile &GetSoundFile() { return m_SndFile; }
 	inline const CSoundFile &GetSoundFile() const { return m_SndFile; }
 
 #ifdef MODPLUG_TRACKER
-	inline CModDoc *GetModDoc();
-	inline const CModDoc *GetModDoc() const;
+	CModDoc *GetModDoc();
+	const CModDoc *GetModDoc() const;
 
 	CAbstractVstEditor *GetEditor() { return m_pEditor; }
 	const CAbstractVstEditor *GetEditor() const { return m_pEditor; }
@@ -191,31 +207,52 @@ inline void IMixPlugin::ModifyParameter(PlugParamIndex nIndex, PlugParamValue di
 }
 
 
-struct SNDMIXPLUGINSTATE
+// IMidiPlugin: Default implementation of plugins with MIDI input
+
+//===================================
+class IMidiPlugin : public IMixPlugin
+//===================================
 {
-	// dwFlags flags
-	enum PluginStateFlags
+protected:
+	enum
 	{
-		psfMixReady = 0x01,				// Set when cleared
-		psfHasInput = 0x02,				// Set when plugin has non-silent input
-		psfSilenceBypass = 0x04,		// Bypass because of silence detection
+		// Pitch wheel constants
+		vstPitchBendShift	= 12,		// Use lowest 12 bits for fractional part and vibrato flag => 16.11 fixed point precision
+		vstPitchBendMask	= (~1),
+		vstVibratoFlag		= 1,
 	};
 
-	mixsample_t *pMixBuffer;			// Stereo effect send buffer
-	float *pOutBufferL;					// Temp storage for int -> float conversion
-	float *pOutBufferR;
-	uint32 dwFlags;						// PluginStateFlags
-	uint32 inputSilenceCount;			// How much silence has been processed? (for plugin auto-turnoff)
-	mixsample_t nVolDecayL, nVolDecayR;	// End of sample click removal
-
-	SNDMIXPLUGINSTATE() { memset(this, 0, sizeof(*this)); }
-
-	void ResetSilence()
+	struct PlugInstrChannel
 	{
-		dwFlags |= psfHasInput;
-		dwFlags &= ~psfSilenceBypass;
-		inputSilenceCount = 0;
-	}
+		int32  midiPitchBendPos;		// Current Pitch Wheel position, in 16.11 fixed point format. Lowest bit is used for indicating that vibrato was applied. Vibrato offset itself is not stored in this value.
+		uint16 currentProgram;
+		uint16 currentBank;
+		uint8  noteOnMap[128][MAX_CHANNELS];
+
+		void ResetProgram() { currentProgram = 0; currentBank = 0; }
+	};
+
+	PlugInstrChannel m_MidiCh[16];	// MIDI channel state
+
+public:
+	IMidiPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
+
+	virtual void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel);
+	virtual void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd);
+	virtual void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd);
+	virtual void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel);
+	virtual bool IsPlaying(uint32 note, uint32 midiChn, uint32 trackerChn);
+
+protected:
+	// Converts a 14-bit MIDI pitch bend position to our internal pitch bend position representation
+	static int32 EncodePitchBendParam(int32 position) { return (position << vstPitchBendShift); }
+	// Converts the internal pitch bend position to a 14-bit MIDI pitch bend position
+	static int16 DecodePitchBendParam(int32 position) { return static_cast<int16>(position >> vstPitchBendShift); }
+	// Apply Pitch Wheel Depth (PWD) to some MIDI pitch bend value.
+	static inline void ApplyPitchWheelDepth(int32 &value, int8 pwd);
+
+	void MidiPitchBend(uint8 nMidiCh, int32 pitchBendPos);
+
 };
 
 

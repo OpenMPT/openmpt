@@ -15,6 +15,7 @@
 #include <dmoreg.h>
 #include <medparam.h>
 #include "../../mptrack/Vstplug.h"
+#include "PluginManager.h"
 #include "../Snd_defs.h"
 #include "../../common/misc_util.h"
 

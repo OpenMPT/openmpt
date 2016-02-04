@@ -13,6 +13,7 @@
 #ifndef NO_VST
 #include "../../common/version.h"
 #include "../../mptrack/Vstplug.h"
+#include "PluginManager.h"
 #include "../../mptrack/Mptrack.h"
 #include "../../mptrack/TrackerSettings.h"
 #include "../../mptrack/AbstractVstEditor.h"
@@ -80,18 +81,6 @@ void VSTPluginLib::WriteToCache() const
 	cacheFile.Write<mpt::ustring>(cacheSection, libraryName.ToUnicode(), IDs);
 	cacheFile.Write<mpt::PathString>(cacheSection, IDs, writePath);
 	cacheFile.Write<int32>(cacheSection, flagsKey, EncodeCacheFlags());
-}
-
-
-VstIntPtr VSTCALLBACK CVstPluginManager::MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
-//----------------------------------------------------------------------------------------------------------------------------------------------
-{
-	CVstPluginManager *that = theApp.GetPluginManager();
-	if(that)
-	{
-		return that->VstCallback(effect, opcode, index, value, ptr, opt);
-	}
-	return 0;
 }
 
 
@@ -280,7 +269,7 @@ AEffect *CVstPluginManager::LoadPlugin(VSTPluginLib &plugin, HINSTANCE &library,
 
 		if(pMainProc != nullptr)
 		{
-			effect = pMainProc(MasterCallBack);
+			effect = pMainProc(CVstPlugin::MasterCallBack);
 		} else
 		{
 #ifdef VST_LOG
@@ -351,7 +340,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 				// Extract plugin IDs
 				for (int i = 0; i < 16; i++)
 				{
-					VstInt32 n = IDs[i] - '0';
+					int32 n = IDs[i] - '0';
 					if (n > 9) n = IDs[i] + 10 - 'A';
 					n &= 0x0f;
 					if (i < 8)

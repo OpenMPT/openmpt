@@ -4761,18 +4761,20 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 			if(nPlug > 0 && nPlug <= MAX_MIXPLUGINS)
 			{
 				IMixPlugin *pPlugin = m_MixPlugins[nPlug - 1].pMixPlugin;
-				if ((pPlugin) && (m_MixPlugins[nPlug - 1].pMixState))
+				if (pPlugin != nullptr)
 				{
 					if(macro[0] == 0xF0)
 					{
 						pPlugin->MidiSysexSend(reinterpret_cast<const char *>(macro), macroLen);
 					} else
 					{
-						for(uint32 pos = 0; pos < macroLen; pos += 3)
+						for(uint32 pos = 0; pos < macroLen;)
 						{
+							uint32 len = std::min<uint32>(MIDIEvents::GetEventLength(macro[pos]), macroLen - pos);
 							uint32 curData = 0;
-							memcpy(&curData, macro + pos, std::min<uint32>(3, macroLen - pos));
+							memcpy(&curData, macro + pos, len);
 							pPlugin->MidiSend(curData);
+							pos += len;
 						}
 					}
 				}
@@ -5577,7 +5579,7 @@ IMixPlugin *CSoundFile::GetChannelInstrumentPlugin(CHANNELINDEX chn) const
 uint8 CSoundFile::GetBestMidiChannel(CHANNELINDEX nChn) const
 //-----------------------------------------------------------
 {
-	if(nChn == CHANNELINDEX_INVALID)
+	if(nChn >= MAX_CHANNELS)
 	{
 		return 0;
 	}

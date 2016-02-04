@@ -2412,6 +2412,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\soundlib\plugins\PlugInterface.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\soundlib\plugins\PlugInterface.h"
 					>
 				</File>
@@ -2421,6 +2425,10 @@
 				</File>
 				<File
 					RelativePath="..\..\soundlib\plugins\PluginManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\soundlib\plugins\PluginManager.h"
 					>
 				</File>
 				<File

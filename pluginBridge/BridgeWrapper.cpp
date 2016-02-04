@@ -12,13 +12,14 @@
 
 #ifndef NO_VST
 #include "BridgeWrapper.h"
-#include "misc_util.h"
+#include "../soundlib/plugins/PluginManager.h"
 #include "../mptrack/Mptrack.h"
 #include "../mptrack/Vstplug.h"
 #include "../mptrack/ExceptionHandler.h"
 #include "../common/mptFileIO.h"
 #include "../common/thread.h"
 #include "../common/StringFixer.h"
+#include "../common/misc_util.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -504,7 +505,7 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 		return;
 	}
 
-	VstIntPtr result = CVstPluginManager::MasterCallBack(&sharedMem->effect, msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt);
+	VstIntPtr result = CVstPlugin::MasterCallBack(&sharedMem->effect, msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt);
 	msg->result = static_cast<int32>(result);
 
 	// Post-fix some opcodes
@@ -1081,7 +1082,7 @@ void BridgeWrapper::BuildProcessBuffer(ProcessMsg::ProcessType type, VstInt32 nu
 
 	// Anticipate that many plugins will query the play position in a process call and send it along the process call
 	// to save some valuable inter-process calls.
-	sharedMem->timeInfo = *reinterpret_cast<VstTimeInfo *>(CVstPluginManager::MasterCallBack(&sharedMem->effect, audioMasterGetTime, 0, kVstNanosValid | kVstPpqPosValid | kVstTempoValid | kVstBarsValid | kVstCyclePosValid | kVstTimeSigValid | kVstSmpteValid | kVstClockValid, nullptr, 0.0f));
+	sharedMem->timeInfo = *reinterpret_cast<VstTimeInfo *>(CVstPlugin::MasterCallBack(&sharedMem->effect, audioMasterGetTime, 0, kVstNanosValid | kVstPpqPosValid | kVstTempoValid | kVstBarsValid | kVstCyclePosValid | kVstTimeSigValid | kVstSmpteValid | kVstClockValid, nullptr, 0.0f));
 
 	buf_t *ptr = reinterpret_cast<buf_t *>(msg + 1);
 	for(VstInt32 i = 0; i < numInputs; i++)
