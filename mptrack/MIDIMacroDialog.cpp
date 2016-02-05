@@ -130,6 +130,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	}
 	UpdateMacroList();
 
+#ifndef NO_PLUGINS
 	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
 		const SNDMIXPLUGIN &plugin = m_SndFile.m_MixPlugins[i];
@@ -140,6 +141,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 			m_CbnMacroPlug.SetItemData(m_CbnMacroPlug.AddString(s), i);
 		}
 	}
+#endif // NO_PLUGINS
 	m_CbnMacroPlug.SetCurSel(0);
 	OnPlugChanged();
 	return FALSE;
@@ -365,6 +367,7 @@ void CMidiMacroSetup::OnSetSFx(UINT id)
 void CMidiMacroSetup::OnViewAllParams(UINT id)
 //--------------------------------------------
 {
+#ifndef NO_PLUGINS
 	CString message, plugName, line;
 	int sfx = id - ID_PLUGSELECT;
 	int param = m_MidiCfg.MacroToPlugParam(sfx);
@@ -385,11 +388,13 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 	}
 
 	Reporting::Notification(message, "Macro -> Params");
+#endif // NO_PLUGINS
 }
 
 void CMidiMacroSetup::OnPlugChanged()
 //-----------------------------------
 {
+#ifndef NO_PLUGINS
 	int plug = m_CbnMacroPlug.GetItemData(m_CbnMacroPlug.GetCurSel());
 
 	if (plug < 0 || plug > MAX_MIXPLUGINS)
@@ -407,7 +412,7 @@ void CMidiMacroSetup::OnPlugChanged()
 		int param = m_MidiCfg.MacroToPlugParam(m_CbnSFx.GetCurSel());
 		m_CbnMacroParam.SetCurSel(param);
 	}
-	//OnPlugParamChanged();
+#endif // NO_PLUGINS
 }
 
 void CMidiMacroSetup::OnPlugParamChanged()

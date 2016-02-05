@@ -150,10 +150,12 @@ bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugPar
 
 		if(plugindex > 0 && plugindex <= MAX_MIXPLUGINS)
 		{
+#ifndef NO_PLUGINS
 			IMixPlugin *pPlug = m_rSndFile.m_MixPlugins[plugindex - 1].pMixPlugin;
 			if(!pPlug) continue;
 			pPlug->SetZxxParameter(param, val);
 			CMainFrame::GetMainFrame()->ThreadSafeSetModified(m_rSndFile.GetpModDoc());
+#endif // NO_PLUGINS
 		}
 	}
 

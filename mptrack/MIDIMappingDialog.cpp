@@ -17,6 +17,7 @@
 #include "../soundlib/mod_specifications.h"
 #include "../common/StringFixer.h"
 
+#ifndef NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -498,3 +499,5 @@ BOOL CMIDIMappingDialog::OnToolTipNotify(UINT, NMHDR * pNMHDR, LRESULT *)
 
 
 OPENMPT_NAMESPACE_END
+
+#endif // NO_PLUGINS
