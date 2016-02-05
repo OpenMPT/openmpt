@@ -351,6 +351,7 @@ void CSoundFile::CreateStereoMix(int count)
 			pbuffer = MixRearBuffer;
 
 		//Look for plugins associated with this implicit tracker channel.
+#ifndef NO_PLUGINS
 		PLUGINDEX nMixPlugin = GetBestPlugin(m_PlayState.ChnMix[nChn], PrioritiseInstrument, RespectMutes);
 
 		if ((nMixPlugin > 0) && (nMixPlugin <= MAX_MIXPLUGINS))
@@ -369,6 +370,7 @@ void CSoundFile::CreateStereoMix(int count)
 				}
 			}
 		}
+#endif // NO_PLUGINS
 
 		const int8 * samplePointer = nullptr;
 		const int8 * lookaheadPointer = nullptr;
@@ -513,10 +515,12 @@ void CSoundFile::CreateStereoMix(int count)
 		chn.pCurrentSample = samplePointer;
 		nchmixed += naddmix;
 	
+#ifndef NO_PLUGINS
 		if(naddmix && nMixPlugin > 0 && nMixPlugin <= MAX_MIXPLUGINS && m_MixPlugins[nMixPlugin - 1].pMixState)
 		{
 			m_MixPlugins[nMixPlugin - 1].pMixState->ResetSilence();
 		}
+#endif // NO_PLUGINS
 	}
 	m_nMixStat = std::max<CHANNELINDEX>(m_nMixStat, nchmixed);
 }
@@ -525,6 +529,7 @@ void CSoundFile::CreateStereoMix(int count)
 void CSoundFile::ProcessPlugins(uint32 nCount)
 //------------------------------------------
 {
+#ifndef NO_PLUGINS
 	// If any sample channels are active or any plugin has some input, possibly suspended master plugins need to be woken up.
 	bool masterHasInput = (m_nMixStat > 0);
 
@@ -739,6 +744,10 @@ void CSoundFile::ProcessPlugins(uint32 nCount)
 #else
 	InterleaveStereo(pMixL, pMixR, MixSoundBuffer, nCount);
 #endif // MPT_INTMIXER
+
+#else
+	MPT_UNREFERENCED_PARAMETER(nCount);
+#endif // NO_PLUGINS
 }
 
 
