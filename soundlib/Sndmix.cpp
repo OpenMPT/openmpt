@@ -1455,7 +1455,9 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 			}
 
 			vdelta = (vdelta * (int)chn.nVibratoDepth) >> vdepth;
+#ifndef NO_PLUGINS
 			int16 midiDelta = static_cast<int16>(-vdelta);	// Periods are upside down
+#endif // NO_PLUGINS
 
 			if (m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 			{

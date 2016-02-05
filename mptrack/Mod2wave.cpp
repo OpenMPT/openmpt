@@ -176,6 +176,7 @@ BOOL CWaveConvert::OnInitDialog()
 	// Plugin quirk options are only available if there are any plugins loaded.
 	GetDlgItem(IDC_GIVEPLUGSIDLETIME)->EnableWindow(FALSE);
 	GetDlgItem(IDC_RENDERSILENCE)->EnableWindow(FALSE);
+#ifndef NO_PLUGINS
 	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
 		if(m_SndFile.m_MixPlugins[i].pMixPlugin != nullptr)
@@ -185,6 +186,7 @@ BOOL CWaveConvert::OnInitDialog()
 			break;
 		}
 	}
+#endif // NO_PLUGINS
 
 	// Fill list of sample slots to render into
 	if(m_SndFile.GetNextFreeSample() != SAMPLEINDEX_INVALID)
@@ -968,6 +970,7 @@ void CDoWaveConvert::Run()
 	IAudioStreamEncoder *fileEnc = m_Settings.GetEncoderFactory()->ConstructStreamEncoder(fileStream);
 
 	// Silence mix buffer of plugins, for plugins that don't clear their reverb buffers and similar stuff when they are reset
+#ifndef NO_PLUGINS
 	if(m_Settings.silencePlugBuffers)
 	{
 		SetText(_T("Clearing plugin buffers"));
@@ -994,6 +997,7 @@ void CDoWaveConvert::Run()
 			}
 		}
 	}
+#endif // NO_PLUGINS
 
 	MixerSettings oldmixersettings = m_SndFile.m_MixerSettings;
 	MixerSettings mixersettings = TrackerSettings::Instance().GetMixerSettings();

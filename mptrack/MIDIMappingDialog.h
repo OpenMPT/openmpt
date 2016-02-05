@@ -9,6 +9,9 @@
 
 
 #pragma once
+
+#ifndef NO_PLUGINS
+
 #include <vector>
 #include "MIDIMapping.h"
 #include "CListCtrl.h"
@@ -77,3 +80,5 @@ protected:
 };
 
 OPENMPT_NAMESPACE_END
+
+#endif // NO_PLUGINS
