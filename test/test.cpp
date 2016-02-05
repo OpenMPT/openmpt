@@ -1400,10 +1400,14 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	// Channels
 	VERIFY_EQUAL_NONCONT(sndFile.GetNumChannels(), 2);
 	VERIFY_EQUAL_NONCONT(strcmp(sndFile.ChnSettings[0].szName, "First Channel"), 0);
+#ifndef NO_PLUGINS
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[0].nMixPlugin, 0);
+#endif // NO_PLUGINS
 
 	VERIFY_EQUAL_NONCONT(strcmp(sndFile.ChnSettings[1].szName, "Second Channel"), 0);
+#ifndef NO_PLUGINS
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[1].nMixPlugin, 1);
+#endif // NO_PLUGINS
 
 	// Samples
 	VERIFY_EQUAL_NONCONT(sndFile.GetNumSamples(), 3);
@@ -1620,19 +1624,25 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[0].nPan, 32);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[0].nVolume, 32);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[0].dwFlags, CHN_MUTE);
+#ifndef NO_PLUGINS
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[0].nMixPlugin, 0);
+#endif // NO_PLUGINS
 
 	VERIFY_EQUAL_NONCONT(strcmp(sndFile.ChnSettings[1].szName, "Second Channel"), 0);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[1].nPan, 128);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[1].nVolume, 16);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[1].dwFlags, CHN_SURROUND);
+#ifndef NO_PLUGINS
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[1].nMixPlugin, 1);
+#endif // NO_PLUGINS
 
 	VERIFY_EQUAL_NONCONT(strcmp(sndFile.ChnSettings[69].szName, "Last Channel______X"), 0);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].nPan, 256);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].nVolume, 7);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].dwFlags, ChannelFlags(0));
+#ifndef NO_PLUGINS
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].nMixPlugin, 1);
+#endif // NO_PLUGINS
 	// Samples
 	VERIFY_EQUAL_NONCONT(sndFile.GetNumSamples(), 4);
 	{
