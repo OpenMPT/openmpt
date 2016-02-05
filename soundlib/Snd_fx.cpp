@@ -2613,9 +2613,9 @@ bool CSoundFile::ProcessEffects()
 				Panning(pChn, vol, Pan6bit);
 			}
 
-#ifdef MODPLUG_TRACKER
+#ifndef NO_PLUGINS
 			if (m_nInstruments) ProcessMidiOut(nChn);
-#endif // MODPLUG_TRACKER
+#endif // NO_PLUGINS
 		}
 
 		if(m_playBehaviour[kST3NoMutedChannels] && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
@@ -4995,9 +4995,9 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 		if(m_nInstruments)
 		{
 			chn.rowCommand.note = static_cast<ModCommand::NOTE>(note);	// No retrig without note...
-#ifdef MODPLUG_TRACKER
+#ifndef NO_PLUGINS
 			ProcessMidiOut(nChn);	//Send retrig to Midi
-#endif // MODPLUG_TRACKER
+#endif // NO_PLUGINS
 		}
 		if ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!chn.rowCommand.note) && (oldPeriod)) chn.nPeriod = oldPeriod;
 		if (!(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) retrigCount = 0;

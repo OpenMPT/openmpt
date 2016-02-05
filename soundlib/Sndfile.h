@@ -910,21 +910,19 @@ public:
 
 	uint32 MapMidiInstrument(uint32 dwProgram, uint32 nChannel, uint32 nNote);
 	size_t ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trkvers);
+	void LoadMixPlugins(FileReader &file);
 #ifndef NO_PLUGINS
 	static void ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin);
+	void ProcessMidiOut(CHANNELINDEX nChn);
 #endif // NO_PLUGINS
-	void LoadMixPlugins(FileReader &file);
 
 	uint32 CutOffToFrequency(uint32 nCutOff, int flt_modifier = 256) const; // [0-127] => [1-10KHz]
-#ifdef MODPLUG_TRACKER
-	void ProcessMidiOut(CHANNELINDEX nChn);
-#endif // MODPLUG_TRACKER
 	void ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long countChunk);
 
 private:
 	PLUGINDEX GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const;
 	PLUGINDEX GetActiveInstrumentPlugin(CHANNELINDEX, PluginMutePriority respectMutes) const;
-	IMixPlugin * GetChannelInstrumentPlugin(CHANNELINDEX chn) const;
+	IMixPlugin *GetChannelInstrumentPlugin(CHANNELINDEX chn) const;
 
 	void HandlePatternTransitionEvents();
 
