@@ -1943,9 +1943,9 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			// Duplicate Note Action
 			if (bOk)
 			{
-				//rewbs.VSTiNNA
 				if (applyDNAtoPlug)
 				{
+#ifndef NO_PLUGINS
 					switch(p->pModInstrument->nDNA)
 					{
 					case DNA_NOTECUT:
@@ -1959,8 +1959,8 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 						}
 						break;
 					}
+#endif // NO_PLUGINS
 				}
-				//end rewbs.VSTiNNA
 
 				switch(p->pModInstrument->nDNA)
 				{
@@ -1987,10 +1987,10 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 		}
 	}
 
-	//rewbs.VSTiNNA
 	// Do we need to apply New/Duplicate Note Action to a VSTi?
 	bool applyNNAtoPlug = false;
-	IMixPlugin *pPlugin = NULL;
+#ifndef NO_PLUGINS
+	IMixPlugin *pPlugin = nullptr;
 	if(pChn->HasMIDIOutput() && ModCommand::IsNote(pChn->nNote)) // instro sends to a midi chan
 	{
 		PLUGINDEX nPlugin = GetBestPlugin(nChn, PrioritiseInstrument, RespectMutes);
@@ -2012,7 +2012,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			}
 		}
 	}
-	//end rewbs.VSTiNNA
+#endif // NO_PLUGINS
 
 	// New Note Action
 	//if ((pChn->nVolume) && (pChn->nLength))
@@ -2029,7 +2029,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 
 			p->nMasterChn = nChn < GetNumChannels() ? nChn + 1 : 0;
 			p->nCommand = CMD_NONE;
-			//rewbs.VSTiNNA
+#ifndef NO_PLUGINS
 			if(applyNNAtoPlug && pPlugin)
 			{
 				//Move note to the NNA channel (odd, but makes sense with DNA stuff).
@@ -2046,7 +2046,8 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 					break;
 				}
 			}
-			//end rewbs.VSTiNNA
+#endif // NO_PLUGINS
+
 			// Key Off the note
 			switch(pChn->nNNA)
 			{
@@ -2105,12 +2106,14 @@ bool CSoundFile::ProcessEffects()
 		// Process parameter control note.
 		if(pChn->rowCommand.note == NOTE_PC)
 		{
+#ifndef NO_PLUGINS
 			const PLUGINDEX plug = pChn->rowCommand.instr;
 			const PlugParamIndex plugparam = ModCommand::GetValueVolCol(pChn->rowCommand.volcmd, pChn->rowCommand.vol);
 			const PlugParamValue value = ModCommand::GetValueEffectCol(pChn->rowCommand.command, pChn->rowCommand.param) / PlugParamValue(ModCommand::maxColumnValue);
 
 			if(plug > 0 && plug <= MAX_MIXPLUGINS && m_MixPlugins[plug - 1].pMixPlugin)
 				m_MixPlugins[plug-1].pMixPlugin->SetParameter(plugparam, value);
+#endif // NO_PLUGINS
 		}
 
 		// Process continuous parameter control note.
@@ -2121,6 +2124,7 @@ bool CSoundFile::ProcessEffects()
 		// of NOTE_PCS, not because of macro.
 		if(pChn->rowCommand.note == NOTE_PCS || (cmd == CMD_NONE && pChn->m_plugParamValueStep != 0))
 		{
+#ifndef NO_PLUGINS
 			const bool isFirstTick = m_SongFlags[SONG_FIRSTTICK];
 			if(isFirstTick)
 				pChn->m_RowPlug = pChn->rowCommand.instr;
@@ -2144,6 +2148,7 @@ bool CSoundFile::ProcessEffects()
 				else
 					m_MixPlugins[nPlug-1].pMixPlugin->ModifyParameter(plugparam, pChn->m_plugParamValueStep);
 			}
+#endif // NO_PLUGINS
 		}
 
 		// Apart from changing parameters, parameter control notes are intended to be 'invisible'.
@@ -3468,6 +3473,7 @@ void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides)
 
 	if(pitchBend)
 	{
+#ifndef NO_PLUGINS
 		IMixPlugin *plugin = GetChannelInstrumentPlugin(nChn);
 		if(plugin != nullptr)
 		{
@@ -3478,6 +3484,7 @@ void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides)
 			}
 			plugin->MidiPitchBend(GetBestMidiChannel(nChn), pitchBend, pwd);
 		}
+#endif // NO_PLUGINS
 	}
 }
 
@@ -4254,12 +4261,14 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 									bkp->dwFlags.set(CHN_NOTEFADE);
 									bkp->nFadeOutVol = 0;
 								}
+#ifndef NO_PLUGINS
 								const ModInstrument *pIns = bkp->pModInstrument;
 								IMixPlugin *pPlugin;
 								if(pIns != nullptr && pIns->nMixPlug && (pPlugin = m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin) != nullptr)
 								{
 									pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, bkp->nNote + NOTE_MAX_SPECIAL, 0, nChn);
 								}
+#endif // NO_PLUGINS
 							}
 						}
 					}
@@ -4702,6 +4711,7 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 
 			return 4;
 
+#ifndef NO_PLUGINS
 		} else if(macroCode == 0x03 && !isExtended)
 		{
 			// F0.F0.03.xx: Set plug dry/wet
@@ -4741,6 +4751,7 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 			}
 
 			return 4;
+#endif // NO_PLUGINS
 
 		}
 
@@ -4748,6 +4759,7 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 
 	} else
 	{
+#ifndef NO_PLUGINS
 		// Not an internal device. Pass on to appropriate plugin.
 		const CHANNELINDEX plugChannel = (nChn < GetNumChannels()) ? nChn + 1 : pChn->nMasterChn;
 		if(plugChannel > 0 && plugChannel <= GetNumChannels())	// XXX do we need this? I guess it might be relevant for previewing notes in the pattern... Or when using this mechanism for volume/panning!
@@ -4780,6 +4792,9 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 				}
 			}
 		}
+#else
+		MPT_UNREFERENCED_PARAMETER(plugin);
+#endif // NO_PLUGINS
 
 		return macroLen;
 
@@ -5067,6 +5082,7 @@ void CSoundFile::NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample)
 		}
 		pChn->dwFlags.set(CHN_FASTVOLRAMP);
 
+#ifndef NO_PLUGINS
 		const ModInstrument *pIns = pChn->pModInstrument;
 		// instro sends to a midi chan
 		if (pIns && pIns->HasValidMIDIChannel())
@@ -5081,7 +5097,7 @@ void CSoundFile::NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample)
 				}
 			}
 		}
-
+#endif // NO_PLUGINS
 	}
 }
 
@@ -5554,6 +5570,7 @@ PLUGINDEX CSoundFile::GetActiveInstrumentPlugin(CHANNELINDEX nChn, PluginMutePri
 IMixPlugin *CSoundFile::GetChannelInstrumentPlugin(CHANNELINDEX chn) const
 //------------------------------------------------------------------------
 {
+#ifndef NO_PLUGINS
 	if(m_PlayState.Chn[chn].dwFlags[CHN_MUTE | CHN_SYNCMUTE])
 	{
 		// Don't process portamento on muted channels. Note that this might have a side-effect
@@ -5571,6 +5588,9 @@ IMixPlugin *CSoundFile::GetChannelInstrumentPlugin(CHANNELINDEX chn) const
 			return m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin;
 		}
 	}
+#else
+	MPT_UNREFERENCED_PARAMETER(chn);
+#endif // NO_PLUGINS
 	return nullptr;
 }
 

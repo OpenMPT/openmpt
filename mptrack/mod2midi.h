@@ -9,6 +9,8 @@
 
 
 #pragma once
+
+#ifndef NO_PLUGINS
 #include "ProgressDialog.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -74,3 +76,5 @@ public:
 
 
 OPENMPT_NAMESPACE_END
+
+#endif // NO_PLUGINS

@@ -29,6 +29,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 
 	///////////////////////////////////////////////////////////////////////////
 	// Copy plugins
+#ifndef NO_PLUGINS
 	if(specs.supportsPlugins)
 	{
 		PLUGINDEX plug = 0;
@@ -61,6 +62,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 			}
 		}
 	}
+#endif // NO_PLUGINS
 
 	///////////////////////////////////////////////////////////////////////////
 	// Copy samples / instruments

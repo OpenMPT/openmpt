@@ -13,6 +13,7 @@
 #include "PlugInterface.h"
 #include "PluginManager.h"
 
+#ifndef NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -462,3 +463,5 @@ std::string SNDMIXPLUGIN::GetParamName(PlugParamIndex index) const
 
 
 OPENMPT_NAMESPACE_END
+
+#endif // NO_PLUGINS

@@ -1766,6 +1766,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 uint32 CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 //------------------------------------------------------
 {
+#ifndef NO_PLUGINS
 	uint32 chinfo[MAX_BASECHANNELS];
 	char id[4];
 	uint32 nPluginSize;
@@ -1858,6 +1859,11 @@ uint32 CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 		nTotalSize += nChInfo * 4 + 8;
 	}
 	return nTotalSize;
+#else
+	MPT_UNREFERENCED_PARAMETER(f);
+	MPT_UNREFERENCED_PARAMETER(bUpdate);
+	return 0;
+#endif // NO_PLUGINS
 }
 
 #endif // MODPLUG_NO_FILESAVE
@@ -1881,6 +1887,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 		// Channel FX
 		if(!memcmp(code, "CHFX", 4))
 		{
+#ifndef NO_PLUGINS
 			for (size_t ch = 0; ch < MAX_BASECHANNELS; ch++)
 			{
 				ChnSettings[ch].nMixPlugin = (uint8)chunk.ReadUint32LE();
@@ -1898,6 +1905,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 			{
 				ReadMixPluginChunk(chunk, m_MixPlugins[plug]);
 			}
+#endif // NO_PLUGINS
 		} else if(!memcmp(code, "MODU", 4))
 		{
 			m_madeWithTracker = "BeRoTracker";
@@ -1911,6 +1919,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 }
 
 
+#ifndef NO_PLUGINS
 void CSoundFile::ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin)
 //-------------------------------------------------------------------------
 {
@@ -1970,6 +1979,7 @@ void CSoundFile::ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin)
 		}
 	}
 }
+#endif // NO_PLUGINS
 
 
 #ifndef MODPLUG_NO_FILESAVE

@@ -19,6 +19,7 @@
 #include "../soundlib/plugins/PluginManager.h"
 #include <sstream>
 
+#ifndef NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -784,3 +785,5 @@ void CDoMidiConvert::Run()
 }
 
 OPENMPT_NAMESPACE_END
+
+#endif // NO_PLUGINS

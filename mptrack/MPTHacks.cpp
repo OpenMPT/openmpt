@@ -132,6 +132,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	ClearLog();
 
 	// Check for plugins
+#ifndef NO_PLUGINS
 	foundHere = false;
 	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
@@ -144,6 +145,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	}
 	if(foundHere)
 		AddToLog("Found plugins");
+#endif // NO_PLUGINS
 
 	// Check for invalid order items
 	for(ORDERINDEX i = m_SndFile.Order.GetLengthTailTrimmed(); i > 0; i--)

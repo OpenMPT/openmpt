@@ -130,7 +130,6 @@ CSoundFile::CSoundFile() :
 	MemsetZero(m_PlayState.ChnMix);
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
-	MemsetZero(m_MixPlugins);
 	m_PlayState.m_lTotalSampleCount = 0;
 	m_PlayState.m_bPositionChanged = true;
 
@@ -251,7 +250,9 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	MemsetZero(m_PlayState.ChnMix);
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
+#ifndef NO_PLUGINS
 	MemsetZero(m_MixPlugins);
+#endif // NO_PLUGINS
 
 	if(file.IsValid())
 	{
@@ -564,10 +565,12 @@ bool CSoundFile::Destroy()
 		delete Instruments[i];
 		Instruments[i] = nullptr;
 	}
+#ifndef NO_PLUGINS
 	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
 		m_MixPlugins[i].Destroy();
 	}
+#endif // NO_PLUGINS
 
 	m_nType = MOD_TYPE_NONE;
 	m_ContainerType = MOD_CONTAINERTYPE_NONE;
@@ -708,57 +711,62 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 }
 
-//rewbs.VSTCompliance
 void CSoundFile::SuspendPlugins()
 //-------------------------------
 {
-	for (PLUGINDEX iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
+#ifndef NO_PLUGINS
+	for (PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
-		if (!m_MixPlugins[iPlug].pMixPlugin)
+		if (!m_MixPlugins[i].pMixPlugin)
 			continue;  //most common branch
 
-		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
-		if (m_MixPlugins[iPlug].pMixState && pPlugin->IsResumed())
+		IMixPlugin *pPlugin = m_MixPlugins[i].pMixPlugin;
+		if (m_MixPlugins[i].pMixState && pPlugin->IsResumed())
 		{
 			pPlugin->NotifySongPlaying(false);
 			pPlugin->HardAllNotesOff();
 			pPlugin->Suspend();
 		}
 	}
+#endif // NO_PLUGINS
 }
 
 void CSoundFile::ResumePlugins()
 //------------------------------
 {
-	for (PLUGINDEX iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
+#ifndef NO_PLUGINS
+	for (PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
-		if (!m_MixPlugins[iPlug].pMixPlugin)
+		if (!m_MixPlugins[i].pMixPlugin)
 			continue;  //most common branch
 
-		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
-		if (m_MixPlugins[iPlug].pMixState && !pPlugin->IsResumed())
+		IMixPlugin *pPlugin = m_MixPlugins[i].pMixPlugin;
+		if (m_MixPlugins[i].pMixState && !pPlugin->IsResumed())
 		{
 			pPlugin->NotifySongPlaying(true);
 			pPlugin->Resume();
 		}
 	}
+#endif // NO_PLUGINS
 }
 
 
 void CSoundFile::StopAllVsti()
 //----------------------------
 {
-	for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
+#ifndef NO_PLUGINS
+	for (PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
-		if (!m_MixPlugins[iPlug].pMixPlugin)
+		if (!m_MixPlugins[i].pMixPlugin)
 			continue;  //most common branch
 
-		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
-		if (m_MixPlugins[iPlug].pMixState && pPlugin->IsResumed())
+		IMixPlugin *pPlugin = m_MixPlugins[i].pMixPlugin;
+		if (m_MixPlugins[i].pMixState && pPlugin->IsResumed())
 		{
 			pPlugin->HardAllNotesOff();
 		}
 	}
+#endif // NO_PLUGINS
 }
 
 
@@ -774,17 +782,19 @@ void CSoundFile::SetMixLevels(MixLevels levels)
 void CSoundFile::RecalculateGainForAllPlugs()
 //-------------------------------------------
 {
-	for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
+#ifndef NO_PLUGINS
+	for (PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
-		if (!m_MixPlugins[iPlug].pMixPlugin)
+		if (!m_MixPlugins[i].pMixPlugin)
 			continue;  //most common branch
 
-		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
-		if (m_MixPlugins[iPlug].pMixState)
+		IMixPlugin *pPlugin = m_MixPlugins[i].pMixPlugin;
+		if (m_MixPlugins[i].pMixState)
 		{
 			pPlugin->RecalculateGain();
 		}
 	}
+#endif // NO_PLUGINS
 }
 
 

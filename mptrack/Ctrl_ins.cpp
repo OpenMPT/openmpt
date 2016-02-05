@@ -1646,6 +1646,7 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 			_tcscpy(pszText, CModDoc::PanningToString(pIns->nPan, 128));
 			return TRUE;
 
+#ifndef NO_PLUGINS
 		case IDC_EDIT10:
 		case IDC_EDIT11:
 			// Show plugin program name when hovering program or bank edits
@@ -1660,6 +1661,7 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 				}
 			}
 			return TRUE;
+#endif // NO_PLUGINS
 
 		case IDC_PLUGIN_VELOCITYSTYLE:
 		case IDC_PLUGIN_VOLUMESTYLE:
@@ -2209,6 +2211,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 			velocityStyle.SetCheck(pIns->nPluginVelocityHandling == PLUGIN_VELOCITYHANDLING_CHANNEL ? BST_CHECKED : BST_UNCHECKED);
 			m_CbnPluginVolumeHandling.SetCurSel(pIns->nPluginVolumeHandling);
 
+#ifndef NO_PLUGINS
 			if(pIns->nMixPlug)
 			{
 				// we have selected a plugin that's not "no plugin"
@@ -2218,7 +2221,6 @@ void CCtrlInstruments::OnMixPlugChanged()
 				if(!plugin.IsValidPlugin() && active && wasOpenedWithMouse)
 				{
 					// No plugin in this slot yet: Ask user to add one.
-#ifndef NO_PLUGINS
 					CSelectPluginDlg dlg(&m_modDoc, nPlug - 1, this);
 					if (dlg.DoModal() == IDOK)
 					{
@@ -2230,7 +2232,6 @@ void CCtrlInstruments::OnMixPlugChanged()
 
 						m_modDoc.UpdateAllViews(nullptr, PluginHint(nPlug).Info().Names());
 					}
-#endif // NO_PLUGINS
 				}
 
 				if(plugin.pMixPlugin != nullptr)
@@ -2272,6 +2273,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 					return;
 				}
 			}
+#endif // NO_PLUGINS
 		}
 
 	}
@@ -2946,6 +2948,7 @@ void CCtrlInstruments::UpdatePluginList()
 	m_CbnMixPlug.SetRedraw(FALSE);
 	m_CbnMixPlug.Clear();
 	m_CbnMixPlug.ResetContent();
+#ifndef NO_PLUGINS
 	CHAR s[64];
 	for (PLUGINDEX nPlug = 0; nPlug <= MAX_MIXPLUGINS; nPlug++)
 	{
@@ -2964,6 +2967,7 @@ void CCtrlInstruments::UpdatePluginList()
 
 		m_CbnMixPlug.SetItemData(m_CbnMixPlug.AddString(s), nPlug);
 	}
+#endif // NO_PLUGINS
 	m_CbnMixPlug.SetRedraw(TRUE);
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if ((pIns) && (pIns->nMixPlug <= MAX_MIXPLUGINS)) m_CbnMixPlug.SetCurSel(pIns->nMixPlug);
