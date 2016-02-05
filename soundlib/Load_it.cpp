@@ -1887,11 +1887,11 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 		// Channel FX
 		if(!memcmp(code, "CHFX", 4))
 		{
-#ifndef NO_PLUGINS
 			for (size_t ch = 0; ch < MAX_BASECHANNELS; ch++)
 			{
 				ChnSettings[ch].nMixPlugin = (uint8)chunk.ReadUint32LE();
 			}
+#ifndef NO_PLUGINS
 		}
 		// Plugin Data FX00, ... FX99, F100, ... F255
 #define ISNUMERIC(x) (code[(x)] >= '0' && code[(x)] <= '9')
