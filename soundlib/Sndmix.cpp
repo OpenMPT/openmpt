@@ -188,6 +188,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 	MPT_ASSERT_ALWAYS(m_MixerSettings.IsValid());
 
 	bool mixPlugins = false;
+#ifndef NO_PLUGINS
 	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; ++i)
 	{
 		if(m_MixPlugins[i].pMixPlugin)
@@ -196,6 +197,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 			break;
 		}
 	}
+#endif // NO_PLUGINS
 
 	const samplecount_t countGoal = count;
 	samplecount_t countRendered = 0;
@@ -1472,6 +1474,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 			period += vdelta;
 
 			// Process MIDI vibrato for plugins:
+#ifndef NO_PLUGINS
 			IMixPlugin *plugin = GetChannelInstrumentPlugin(nChn);
 			if(plugin != nullptr)
 			{
@@ -1484,6 +1487,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 				}
 				plugin->MidiVibrato(GetBestMidiChannel(nChn), midiDelta, pwd);
 			}
+#endif // NO_PLUGINS
 		}
 
 		// Advance vibrato position - IT updates on every tick, unless "old effects" are enabled (in this case it only updates on non-first ticks like other trackers)
@@ -1505,11 +1509,13 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 	} else if(chn.dwOldFlags[CHN_VIBRATO])
 	{
 		// Stop MIDI vibrato for plugins:
+#ifndef NO_PLUGINS
 		IMixPlugin *plugin = GetChannelInstrumentPlugin(nChn);
 		if(plugin != nullptr)
 		{
 			plugin->MidiVibrato(GetBestMidiChannel(nChn), 0, 0);
 		}
+#endif // NO_PLUGINS
 	}
 }
 
@@ -2239,7 +2245,7 @@ void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
 }
 
 
-#ifdef MODPLUG_TRACKER
+#ifndef NO_PLUGINS
 
 void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 //------------------------------------------------
@@ -2344,7 +2350,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 	}
 }
 
-#endif // MODPLUG_TRACKER
+#endif // NO_PLUGINS
 
 
 template<int channels>
