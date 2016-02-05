@@ -395,7 +395,9 @@ protected:
 public:
 	ModInstrument *Instruments[MAX_INSTRUMENTS];		// Instrument Headers
 	MIDIMacroConfig m_MidiCfg;							// MIDI Macro config table
+#ifndef NO_PLUGINS
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
+#endif
 	char m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Sample names
 
 	uint32 m_dwCreatedWithVersion;
@@ -564,7 +566,9 @@ public:
 	ORDERINDEX GetCurrentOrder() const { return m_PlayState.m_nCurrentOrder; }
 	CHANNELINDEX GetNumChannels() const { return m_nChannels; }
 
+#ifndef NO_PLUGINS
 	IMixPlugin* GetInstrumentPlugin(INSTRUMENTINDEX instr);
+#endif
 	const CModSpecifications& GetModSpecifications() const {return *m_pModSpecs;}
 	static const CModSpecifications& GetModSpecifications(const MODTYPE type);
 
@@ -906,7 +910,9 @@ public:
 
 	uint32 MapMidiInstrument(uint32 dwProgram, uint32 nChannel, uint32 nNote);
 	size_t ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trkvers);
+#ifndef NO_PLUGINS
 	static void ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin);
+#endif // NO_PLUGINS
 	void LoadMixPlugins(FileReader &file);
 
 	uint32 CutOffToFrequency(uint32 nCutOff, int flt_modifier = 256) const; // [0-127] => [1-10KHz]
@@ -929,6 +935,7 @@ public:
 };
 
 
+#ifndef NO_PLUGINS
 inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
 //-----------------------------------------------------------------------
 {
@@ -937,6 +944,7 @@ inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
 	else
 		return nullptr;
 }
+#endif // NO_PLUGINS
 
 
 ///////////////////////////////////////////////////////////

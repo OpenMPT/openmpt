@@ -31,6 +31,8 @@ class CModDoc;
 class CAbstractVstEditor;
 
 
+#ifndef NO_PLUGINS
+
 struct SNDMIXPLUGINSTATE
 {
 	// dwFlags flags
@@ -386,8 +388,14 @@ struct SNDMIXPLUGIN
 	}
 };
 
-class CSoundFile;
 typedef bool (*PMIXPLUGINCREATEPROC)(SNDMIXPLUGIN &, CSoundFile &);
 
+#else
+
+class IMixPlugin;
+struct SNDMIXPLUGIN;
+struct SNDMIXPLUGINSTATE;
+
+#endif // NO_PLUGINS
 
 OPENMPT_NAMESPACE_END

@@ -246,6 +246,9 @@ CString MIDIMacroConfig::GetParameteredMacroName(size_t macroIndex, PLUGINDEX pl
 					}
 				}
 			} else
+#else
+			MPT_UNREFERENCED_PARAMETER(sndFile);
+			MPT_UNREFERENCED_PARAMETER(plugin);
 #endif // NO_PLUGINS
 			{
 				formattedName += _T(" (N/A)");

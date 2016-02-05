@@ -313,6 +313,7 @@ void CSoundFile::UpgradeModule()
 		}
 	}
 
+#ifndef NO_PLUGINS
 	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 07, 01))
 	{
 		// Convert ANSI plugin path names to UTF-8 (irrelevant in probably 99% of all cases anyway, I think I've never seen a VST plugin with a non-ASCII file name)
@@ -326,6 +327,7 @@ void CSoundFile::UpgradeModule()
 			mpt::String::Copy(m_MixPlugins[i].Info.szLibraryName, name);
 		}
 	}
+#endif // NO_PLUGINS
 
 	// Starting from OpenMPT 1.22.07.19, FT2-style panning was applied in compatible mix mode.
 	// Starting from OpenMPT 1.23.01.04, FT2-style panning has its own mix mode instead.

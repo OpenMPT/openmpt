@@ -2966,37 +2966,43 @@ ULONG TfLanguageProfileNotifySink::Release()
 void AddPluginNamesToCombobox(CComboBox& CBox, const SNDMIXPLUGIN*plugarray, const bool librarynames)
 //---------------------------------------------------------------------------------------------------
 {
+#ifndef NO_PLUGINS
 	for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 	{
 		const SNDMIXPLUGIN &plugin = plugarray[iPlug];
 		CString str;
 		str.Preallocate(80);
-		str.Format(_T("FX%d: "), iPlug + 1);
+		str.Format(_T("FX%u: "), iPlug + 1);
 		const int size0 = str.GetLength();
 		str += (librarynames) ? mpt::ToCString(mpt::CharsetUTF8, plugin.GetLibraryName()) : mpt::ToCString(mpt::CharsetLocale, plugin.GetName());
 		if(str.GetLength() <= size0) str += _T("undefined");
 
 		CBox.SetItemData(CBox.AddString(str), iPlug + 1);
 	}
+#endif // NO_PLUGINS
 }
 
 
 void AddPluginParameternamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN& plug)
 //-------------------------------------------------------------------------
 {
+#ifndef NO_PLUGINS
 	if(plug.pMixPlugin)
 		AddPluginParameternamesToCombobox(CBox, *plug.pMixPlugin);
+#endif // NO_PLUGINS
 }
 
 
 void AddPluginParameternamesToCombobox(CComboBox& CBox, IMixPlugin& plug)
 //-----------------------------------------------------------------------
 {
+#ifndef NO_PLUGINS
 	const PlugParamIndex nParams = plug.GetNumParameters();
 	for (PlugParamIndex i = 0; i < nParams; i++)
 	{
 		CBox.SetItemData(CBox.AddString(plug.GetFormattedParamName(i)), i);
 	}
+#endif // NO_PLUGINS
 }
 
 
