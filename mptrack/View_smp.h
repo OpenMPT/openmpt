@@ -102,6 +102,7 @@ protected:
 	inline SmpLength ScrollPosToSamplePos(int nZoom) const;
 
 	void OnMonoConvert(ctrlSmp::StereoToMonoMode convert);
+	void TrimSample(bool trimToLoopEnd);
 
 public:
 	//{{AFX_VIRTUAL(CViewSample)
@@ -151,7 +152,7 @@ protected:
 	afx_msg void OnMonoConvertLeft() { OnMonoConvert(ctrlSmp::onlyLeft); }
 	afx_msg void OnMonoConvertRight() { OnMonoConvert(ctrlSmp::onlyRight); }
 	afx_msg void OnMonoConvertSplit() { OnMonoConvert(ctrlSmp::splitSample); }
-	afx_msg void OnSampleTrim();
+	afx_msg void OnSampleTrim() { TrimSample(false); }
 	afx_msg void OnPrevInstrument();
 	afx_msg void OnNextInstrument();
 	afx_msg void OnZoomOnSel();
