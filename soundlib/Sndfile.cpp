@@ -130,6 +130,9 @@ CSoundFile::CSoundFile() :
 	MemsetZero(m_PlayState.ChnMix);
 	MemsetZero(Instruments);
 	MemsetZero(m_szNames);
+#ifndef NO_PLUGINS
+	MemsetZero(m_MixPlugins);
+#endif // NO_PLUGINS
 	m_PlayState.m_lTotalSampleCount = 0;
 	m_PlayState.m_bPositionChanged = true;
 
