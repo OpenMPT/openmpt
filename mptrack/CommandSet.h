@@ -682,6 +682,7 @@ enum CommandID
 
 	kcStartSampleEditing,
 	kcSampleTrim=kcStartSampleEditing,
+	kcSampleTrimToLoopEnd,
 	kcSampleSilence,
 	kcSampleNormalize,
 	kcSampleAmplify,
@@ -690,6 +691,8 @@ enum CommandID
 	kcSampleZoomUp,
 	kcSampleZoomDown,
 	kcSampleZoomSelection,
+	kcSampleCenterSampleStart,
+	kcSampleCenterSampleEnd,
 	kcSampleCenterLoopStart,
 	kcSampleCenterLoopEnd,
 	kcSampleCenterSustainStart,

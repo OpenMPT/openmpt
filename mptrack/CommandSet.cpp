@@ -697,6 +697,9 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcInstrumentEnvelopeSelectSustainEnd, 1959, _T("Select Envelope Sustain End"));
 	DefineKeyCommand(kcInstrumentEnvelopePointMoveLeftCoarse, 1960, _T("Move envelope point left (Coarse)"));
 	DefineKeyCommand(kcInstrumentEnvelopePointMoveRightCoarse, 1961, _T("Move envelope point right (Coarse)"));
+	DefineKeyCommand(kcSampleCenterSampleStart, 1962, _T("Zoom into sample start"));
+	DefineKeyCommand(kcSampleCenterSampleEnd, 1963, _T("Zoom into sample end"));
+	DefineKeyCommand(kcSampleTrimToLoopEnd, 1964, _T("Trim to loop end"));
 
 	// Add new key commands here.
 
@@ -1061,8 +1064,9 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 
 			// Register key-up when releasing any of the modifiers.
 			// Otherwise, select key combos might get stuck. Example:
-			// [Ctrl Down] [Alt Down] [Alt Up] [Ctrl Up] After this action, copy select (Ctrl+Drag) would still be activated without.
-			for(UINT i = 0; i <= MaxMod; i++)
+			// [Ctrl Down] [Alt Down] [Ctrl Up] [Alt Up] After this action, copy select (Ctrl+Drag) would still be activated without this code.
+			const UINT maxMod = TrackerSettings::Instance().MiscDistinguishModifiers ? MaxMod : (MaxMod & ~(HOTKEYF_RSHIFT | HOTKEYF_RCONTROL | HOTKEYF_RALT));
+			for(UINT i = 0; i <= maxMod; i++)
 			{
 				newKcDeSel.Modifier(i);
 				//newKcDeSel.mod&=~CodeToModifier(inKc.code);		//<-- Need to get rid of right modifier!!

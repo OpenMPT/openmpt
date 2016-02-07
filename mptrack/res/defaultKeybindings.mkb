@@ -290,6 +290,7 @@ version:1
 
 //----( Sample Context [bottom] (8) )------------
 8:1380:2:84:1		//Trim sample around loop points: Ctrl+T (KeyDown)
+8:1964:3:84:1		//Trim to loop end: Shift+Ctrl+T (KeyDown)
 8:1383:0:8:1		//Silence sample selection: BACKSPACE (KeyDown)
 8:1384:1:78:1		//Normalise Sample: Shift+N (KeyDown)
 8:1385:2:77:1		//Amplify Sample: Ctrl+M (KeyDown)
@@ -298,6 +299,8 @@ version:1
 8:1386:0:107:1		//Zoom Out: NUM PLUS (KeyDown)
 8:1387:0:109:1		//Zoom In: NUM SUB (KeyDown)
 8:1882:0:32:1		//Zoom into Selection: Space (KeyDown)
+8:1962:0:49:1		//Zoom into sample start: 1 (KeyDown)
+8:1963:0:50:1		//Zoom into sample end: 2 (KeyDown)
 8:1916:2:49:1		//Center loop start in view: Ctrl+1 (KeyDown)
 8:1917:2:50:1		//Center loop end in view: Ctrl+2 (KeyDown)
 8:1918:2:51:1		//Center sustain loop start in view: Ctrl+3 (KeyDown)

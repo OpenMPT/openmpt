@@ -2352,8 +2352,8 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 }
 
 
-void CViewSample::OnSampleTrim()
-//------------------------------
+void CViewSample::TrimSample(bool trimToLoopEnd)
+//----------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	//nothing loaded or invalid sample slot.
@@ -2362,7 +2362,11 @@ void CViewSample::OnSampleTrim()
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 	ModSample &sample = sndFile.GetSample(m_nSample);
 
-	if(m_dwBeginSel == m_dwEndSel)
+	if(trimToLoopEnd)
+	{
+		m_dwBeginSel = 0;
+		m_dwEndSel = sample.nLoopEnd;
+	} else if(m_dwBeginSel == m_dwEndSel)
 	{
 		// Trim around loop points if there's no selection
 		m_dwBeginSel = sample.nLoopStart;
@@ -2934,10 +2938,13 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	switch(wParam)
 	{
-		case kcSampleTrim:		OnSampleTrim() ; return wParam;
-		case kcSampleZoomUp:	OnZoomUp(); return wParam;
-		case kcSampleZoomDown:	OnZoomDown(); return wParam;
-		case kcSampleZoomSelection: OnZoomOnSel(); return wParam;
+		case kcSampleTrim:			TrimSample(false); return wParam;
+		case kcSampleTrimToLoopEnd:	TrimSample(true); return wParam;
+		case kcSampleZoomUp:		OnZoomUp(); return wParam;
+		case kcSampleZoomDown:		OnZoomDown(); return wParam;
+		case kcSampleZoomSelection:	OnZoomOnSel(); return wParam;
+		case kcSampleCenterSampleStart:
+		case kcSampleCenterSampleEnd:
 		case kcSampleCenterLoopStart:
 		case kcSampleCenterLoopEnd:
 		case kcSampleCenterSustainStart:
@@ -2947,6 +2954,8 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				ModSample &sample = sndFile.GetSample(m_nSample);
 				switch(wParam)
 				{
+				case kcSampleCenterSampleStart:		point = 0; break;
+				case kcSampleCenterSampleEnd:		point = sample.nLength; break;
 				case kcSampleCenterLoopStart:		point = sample.nLoopStart; break;
 				case kcSampleCenterLoopEnd:			point = sample.nLoopEnd; break;
 				case kcSampleCenterSustainStart:	point = sample.nSustainStart; break;
