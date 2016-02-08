@@ -153,7 +153,7 @@ bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugPar
 #ifndef NO_PLUGINS
 			IMixPlugin *pPlug = m_rSndFile.m_MixPlugins[plugindex - 1].pMixPlugin;
 			if(!pPlug) continue;
-			pPlug->SetZxxParameter(param, val);
+			pPlug->SetParameter(param, val / 16383.0f);
 			CMainFrame::GetMainFrame()->ThreadSafeSetModified(m_rSndFile.GetpModDoc());
 #endif // NO_PLUGINS
 		}

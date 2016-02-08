@@ -3897,7 +3897,9 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 			pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1, "Automation Entry");
 
 			pRow->command = CMD_SMOOTHMIDI;
-			pRow->param = static_cast<ModCommand::PARAM>(pPlug->GetZxxParameter(paramIndex));
+			PlugParamValue param = pPlug->GetParameter(paramIndex);
+			Limit(param, 0.0f, 1.0f);
+			pRow->param = static_cast<ModCommand::PARAM>(param * 127.0f);
 			InvalidateRow(nRow);
 		}
 

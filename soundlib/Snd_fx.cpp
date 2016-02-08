@@ -4740,12 +4740,13 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 				IMixPlugin *pPlugin = m_MixPlugins[nPlug - 1].pMixPlugin;
 				if((pPlugin) && (m_MixPlugins[nPlug - 1].pMixState) && (param < 0x80))
 				{
+					const float fParam = (param & 0x7F) / 127.0f;
 					if(!isSmooth)
 					{
-						pPlugin->SetZxxParameter(plugParam, (param & 0x7F) << 7);
+						pPlugin->SetParameter(plugParam, fParam);
 					} else
 					{
-						pPlugin->SetZxxParameter(plugParam, (uint32)CalculateSmoothParamChange((float)pPlugin->GetZxxParameter(plugParam), (float)((param & 0x7F) << 7)));
+						pPlugin->SetParameter(plugParam, CalculateSmoothParamChange(pPlugin->GetParameter(plugParam), fParam));
 					}
 				}
 			}

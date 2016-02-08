@@ -139,9 +139,7 @@ public:
 	virtual void RecalculateGain() = 0;
 	virtual bool IsPlaying(uint32 note, uint32 midiChn, uint32 trackerChn) = 0;
 	virtual void SetParameter(PlugParamIndex paramindex, PlugParamValue paramvalue) = 0;
-	virtual void SetZxxParameter(PlugParamIndex nParam, uint32 nValue) = 0;
 	virtual PlugParamValue GetParameter(PlugParamIndex nIndex) = 0;
-	virtual uint32 GetZxxParameter(PlugParamIndex nParam) = 0;
 	virtual void ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff);
 	virtual void AutomateParameter(PlugParamIndex param) = 0;
 	virtual void NotifySongPlaying(bool) = 0;

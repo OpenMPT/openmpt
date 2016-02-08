@@ -1757,20 +1757,6 @@ void CVstPlugin::HardAllNotesOff()
 }
 
 
-void CVstPlugin::SetZxxParameter(PlugParamIndex nParam, uint32 nValue)
-//--------------------------------------------------------------------
-{
-	PlugParamValue fValue = (PlugParamValue)nValue / 16383.0f;
-	SetParameter(nParam, fValue);
-}
-
-uint32 CVstPlugin::GetZxxParameter(PlugParamIndex nParam)
-//-------------------------------------------------------
-{
-	return Util::Round<uint32>(GetParameter(nParam) * 16383.0f);
-}
-
-
 // Automate a parameter from the plugin GUI (both custom and default plugin GUI)
 void CVstPlugin::AutomateParameter(PlugParamIndex param)
 //------------------------------------------------------
