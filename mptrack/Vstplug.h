@@ -137,9 +137,6 @@ public:
 	// Check whether a VST parameter can be automated
 	bool CanAutomateParameter(PlugParamIndex index);
 
-	void SetZxxParameter(PlugParamIndex nParam, uint32 nValue);
-	uint32 GetZxxParameter(PlugParamIndex nParam);
-
 	int GetNumInputChannels() const { return m_Effect.numInputs; }
 	int GetNumOutputChannels() const { return m_Effect.numOutputs; }
 
