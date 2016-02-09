@@ -140,8 +140,8 @@ public:
 	virtual bool IsPlaying(uint32 note, uint32 midiChn, uint32 trackerChn) = 0;
 	virtual void SetParameter(PlugParamIndex paramindex, PlugParamValue paramvalue) = 0;
 	virtual PlugParamValue GetParameter(PlugParamIndex nIndex) = 0;
+	// Modify parameter by given amount. Only needs to be re-implemented if plugin architecture allows this to be performed atomically.
 	virtual void ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff);
-	virtual void AutomateParameter(PlugParamIndex param) = 0;
 	virtual void NotifySongPlaying(bool) = 0;
 	virtual bool IsSongPlaying() const = 0;
 	virtual bool IsResumed() const = 0;
@@ -184,6 +184,8 @@ public:
 	virtual void ToggleEditor() = 0;
 	void SetEditorPos(int32 x, int32 y);
 	void GetEditorPos(int32 &x, int32 &y) const;
+
+	void AutomateParameter(PlugParamIndex param);
 
 	virtual void BeginSetProgram(int32 program = -1) = 0;
 	virtual void EndSetProgram() = 0;

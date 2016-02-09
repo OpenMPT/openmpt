@@ -132,7 +132,6 @@ public:
 	void Resume();
 	void Suspend();
 	void SetDryRatio(uint32 param);
-	void AutomateParameter(PlugParamIndex param);
 
 	// Check whether a VST parameter can be automated
 	bool CanAutomateParameter(PlugParamIndex index);
