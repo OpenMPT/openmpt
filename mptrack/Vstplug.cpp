@@ -1759,120 +1759,81 @@ void CVstPlugin::HardAllNotesOff()
 void CVstPlugin::SaveAllParameters()
 //----------------------------------
 {
-	if (m_pMixStruct)
+	if(m_pMixStruct == nullptr)
 	{
-		m_pMixStruct->defaultProgram = -1;
+		return;
+	}
+	m_pMixStruct->defaultProgram = -1;
 
-		if(ProgramsAreChunks() && Dispatch(effIdentify, 0,0, nullptr, 0.0f) == 'NvEf')
+	if(ProgramsAreChunks() && Dispatch(effIdentify, 0,0, nullptr, 0.0f) == 'NvEf')
+	{
+		void *p = nullptr;
+
+		// Try to get whole bank
+		uint32 nByteSize = mpt::saturate_cast<uint32>(Dispatch(effGetChunk, 0, 0, &p, 0));
+
+		if (!p)
 		{
-			void *p = nullptr;
-
-			// Try to get whole bank
-			uint32 nByteSize = mpt::saturate_cast<uint32>(Dispatch(effGetChunk, 0, 0, &p, 0));
-
-			if (!p)
-			{
-				// Getting bank failed, try to get just preset
-				nByteSize = mpt::saturate_cast<uint32>(Dispatch(effGetChunk, 1, 0, &p, 0));
-			} else
-			{
-				// We managed to get the bank, now we need to remember which program we're on.
-				m_pMixStruct->defaultProgram = GetCurrentProgram();
-			}
-			if (p != nullptr)
-			{
-				LimitMax(nByteSize, Util::MaxValueOfType(nByteSize) - 4);
-				if ((m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= nByteSize + 4))
-				{
-					m_pMixStruct->nPluginDataSize = nByteSize + 4;
-				} else
-				{
-					delete[] m_pMixStruct->pPluginData;
-					m_pMixStruct->nPluginDataSize = 0;
-					m_pMixStruct->pPluginData = new char[nByteSize + 4];
-					if (m_pMixStruct->pPluginData)
-					{
-						m_pMixStruct->nPluginDataSize = nByteSize + 4;
-					}
-				}
-				if (m_pMixStruct->pPluginData)
-				{
-					*(uint32 *)m_pMixStruct->pPluginData = 'NvEf';
-					memcpy(m_pMixStruct->pPluginData + 4, p, nByteSize);
-					return;
-				}
-			}
-		}
-		// This plug doesn't support chunks: save parameters
-		PlugParamIndex nParams = (m_Effect.numParams > 0) ? m_Effect.numParams : 0;
-		uint32 nLen = nParams * sizeof(float);
-		if (!nLen) return;
-		nLen += 4;
-		if ((m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= nLen))
-		{
-			m_pMixStruct->nPluginDataSize = nLen;
+			// Getting bank failed, try to get just preset
+			nByteSize = mpt::saturate_cast<uint32>(Dispatch(effGetChunk, 1, 0, &p, 0));
 		} else
 		{
-			if (m_pMixStruct->pPluginData) delete[] m_pMixStruct->pPluginData;
-			m_pMixStruct->nPluginDataSize = 0;
-			m_pMixStruct->pPluginData = new (std::nothrow) char[nLen];
+			// We managed to get the bank, now we need to remember which program we're on.
+			m_pMixStruct->defaultProgram = GetCurrentProgram();
+		}
+		if (p != nullptr)
+		{
+			LimitMax(nByteSize, Util::MaxValueOfType(nByteSize) - 4);
+			if ((m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= nByteSize + 4))
+			{
+				m_pMixStruct->nPluginDataSize = nByteSize + 4;
+			} else
+			{
+				delete[] m_pMixStruct->pPluginData;
+				m_pMixStruct->nPluginDataSize = 0;
+				m_pMixStruct->pPluginData = new char[nByteSize + 4];
+				if (m_pMixStruct->pPluginData)
+				{
+					m_pMixStruct->nPluginDataSize = nByteSize + 4;
+				}
+			}
 			if (m_pMixStruct->pPluginData)
 			{
-				m_pMixStruct->nPluginDataSize = nLen;
-			}
-		}
-		if (m_pMixStruct->pPluginData)
-		{
-			float *p = (float *)m_pMixStruct->pPluginData;
-			memset(p, 0, sizeof(uint32));	// Plugin data type
-			p++;
-			for(PlugParamIndex i = 0; i < nParams; i++)
-			{
-				p[i] = GetParameter(i);
+				*reinterpret_cast<uint32 *>(m_pMixStruct->pPluginData) = 'NvEf';
+				memcpy(m_pMixStruct->pPluginData + 4, p, nByteSize);
+				return;
 			}
 		}
 	}
-	return;
+	// This plug doesn't support chunks: save parameters
+	IMixPlugin::SaveAllParameters();
 }
 
 
-void CVstPlugin::RestoreAllParameters(long nProgram)
+void CVstPlugin::RestoreAllParameters(int32 program)
 //--------------------------------------------------
 {
 	if(m_pMixStruct != nullptr && m_pMixStruct->pPluginData != nullptr && m_pMixStruct->nPluginDataSize >= 4)
 	{
-		uint32 nType = *(uint32 *)m_pMixStruct->pPluginData;
+		uint32 type = *reinterpret_cast<const uint32 *>(m_pMixStruct->pPluginData);
 
-		if ((nType == 'NvEf') && (Dispatch(effIdentify, 0, 0, nullptr, 0) == 'NvEf'))
+		if ((type == 'NvEf') && (Dispatch(effIdentify, 0, 0, nullptr, 0) == 'NvEf'))
 		{
-			if ((nProgram>=0) && (nProgram < m_Effect.numPrograms))
+			if ((program>=0) && (program < m_Effect.numPrograms))
 			{
 				// Bank
 				Dispatch(effSetChunk, 0, m_pMixStruct->nPluginDataSize - 4, m_pMixStruct->pPluginData + 4, 0);
-				SetCurrentProgram(nProgram);
+				SetCurrentProgram(program);
 			} else
 			{
 				// Program
-				Dispatch(effBeginSetProgram, 0, 0, nullptr, 0.0f);
+				BeginSetProgram(-1);
 				Dispatch(effSetChunk, 1, m_pMixStruct->nPluginDataSize - 4, m_pMixStruct->pPluginData + 4, 0);
-				Dispatch(effEndSetProgram, 0, 0, nullptr, 0.0f);
+				EndSetProgram();
 			}
-
 		} else
 		{
-			const uint32 nParams = (m_Effect.numParams > 0) ? m_Effect.numParams : 0;
-			const uint32 nLen = nParams * sizeof(float);
-			Dispatch(effBeginSetProgram, 0, 0, nullptr, 0.0f);
-			float *p = (float *)m_pMixStruct->pPluginData;
-			if (m_pMixStruct->nPluginDataSize >= nLen + 4) p++;
-			if (m_pMixStruct->nPluginDataSize >= nLen)
-			{
-				for (uint32 i = 0; i < nParams; i++)
-				{
-					SetParameter(i, p[i]);
-				}
-			}
-			Dispatch(effEndSetProgram, 0, 0, nullptr, 0.0f);
+			IMixPlugin::RestoreAllParameters(program);
 		}
 	}
 }

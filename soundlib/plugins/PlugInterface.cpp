@@ -17,6 +17,7 @@
 #include "../../mptrack/Mainfrm.h"
 #include "../../mptrack/InputHandler.h"
 #include "../../mptrack/AbstractVstEditor.h"
+#include "../../mptrack/DefaultVstEditor.h"
 #include "../mod_specifications.h"
 #endif // MODPLUG_TRACKER
 
@@ -238,7 +239,92 @@ size_t IMixPlugin::GetInputChannelList(std::vector<CHANNELINDEX> &list)
 }
 
 
+void IMixPlugin::SaveAllParameters()
+//----------------------------------
+{
+	if (m_pMixStruct == nullptr)
+	{
+		return;
+	}
+	m_pMixStruct->defaultProgram = -1;
+	
+	// Default implementation: Save all parameter values
+	PlugParamIndex numParams = std::min<uint32>(GetNumParameters(), std::numeric_limits<uint32>::max() / sizeof(IEEE754binary32LE));
+	uint32 nLen = numParams * sizeof(IEEE754binary32LE);
+	if (!nLen) return;
+	nLen += 4;
+	if ((m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= nLen))
+	{
+		m_pMixStruct->nPluginDataSize = nLen;
+	} else
+	{
+		if (m_pMixStruct->pPluginData) delete[] m_pMixStruct->pPluginData;
+		m_pMixStruct->nPluginDataSize = 0;
+		m_pMixStruct->pPluginData = new (std::nothrow) char[nLen];
+		if (m_pMixStruct->pPluginData)
+		{
+			m_pMixStruct->nPluginDataSize = nLen;
+		}
+	}
+	if (m_pMixStruct->pPluginData != nullptr)
+	{
+		IEEE754binary32LE *p = reinterpret_cast<IEEE754binary32LE *>(m_pMixStruct->pPluginData);
+		memset(p, 0, sizeof(uint32));	// Plugin data type
+		p++;
+		for(PlugParamIndex i = 0; i < numParams; i++)
+		{
+			p[i] = IEEE754binary32LE(GetParameter(i));
+		}
+	}
+}
+
+
+void IMixPlugin::RestoreAllParameters(int32 /*program*/)
+//------------------------------------------------------
+{
+	if(m_pMixStruct != nullptr && m_pMixStruct->pPluginData != nullptr && m_pMixStruct->nPluginDataSize >= 4)
+	{
+		uint32 type = *reinterpret_cast<const uint32 *>(m_pMixStruct->pPluginData);
+		if (type == 0)
+		{
+			const uint32 numParams = std::min<uint32>(GetNumParameters(), (m_pMixStruct->nPluginDataSize - 4u) / sizeof(IEEE754binary32LE));
+			BeginSetProgram(-1);
+			const IEEE754binary32LE *p = reinterpret_cast<const IEEE754binary32LE *>(m_pMixStruct->pPluginData) + 1;
+			for (uint32 i = 0; i < numParams; i++)
+			{
+				SetParameter(i, p[i]);
+			}
+			EndSetProgram();
+		}
+	}
+}
+
+
 #ifdef MODPLUG_TRACKER
+// Provide default plugin editor
+void IMixPlugin::ToggleEditor()
+//-----------------------------
+{
+	if ((m_pEditor) && (!m_pEditor->m_hWnd))
+	{
+		delete m_pEditor;
+		m_pEditor = nullptr;
+	}
+	if (m_pEditor)
+	{
+		if (m_pEditor->m_hWnd) m_pEditor->DoClose();
+		if ((volatile void *)m_pEditor) delete m_pEditor;
+		m_pEditor = nullptr;
+	} else
+	{
+		m_pEditor = new CDefaultVstEditor(*this);
+
+		if (m_pEditor)
+			m_pEditor->OpenEditor(CMainFrame::GetMainFrame());
+	}
+}
+
+
 // Automate a parameter from the plugin GUI (both custom and default plugin GUI)
 void IMixPlugin::AutomateParameter(PlugParamIndex param)
 //------------------------------------------------------
