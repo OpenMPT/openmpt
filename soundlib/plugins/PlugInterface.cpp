@@ -12,6 +12,13 @@
 #include "Sndfile.h"
 #include "PlugInterface.h"
 #include "PluginManager.h"
+#ifdef MODPLUG_TRACKER
+#include "../../mptrack/Moddoc.h"
+#include "../../mptrack/Mainfrm.h"
+#include "../../mptrack/InputHandler.h"
+#include "../../mptrack/AbstractVstEditor.h"
+#include "../mod_specifications.h"
+#endif // MODPLUG_TRACKER
 
 #ifndef NO_PLUGINS
 
@@ -229,6 +236,57 @@ size_t IMixPlugin::GetInputChannelList(std::vector<CHANNELINDEX> &list)
 	return list.size();
 
 }
+
+
+#ifdef MODPLUG_TRACKER
+// Automate a parameter from the plugin GUI (both custom and default plugin GUI)
+void IMixPlugin::AutomateParameter(PlugParamIndex param)
+//------------------------------------------------------
+{
+	CModDoc *modDoc = GetModDoc();
+	if(modDoc == nullptr)
+	{
+		return;
+	}
+
+	// TODO: Check if any params are actually automatable, and if there are but this one isn't, chicken out
+
+	if(m_bRecordAutomation)
+	{
+		// Record parameter change
+		modDoc->RecordParamChange(GetSlot(), param);
+	}
+
+	modDoc->PostMessageToAllViews(WM_MOD_PLUGPARAMAUTOMATE, m_nSlot, param);
+	// TODO: This should rather be posted to the GUI thread!
+	CAbstractVstEditor *pVstEditor = GetEditor();
+
+	if(pVstEditor && pVstEditor->m_hWnd)
+	{
+		// Mark track modified if GUI is open and format supports plugins
+		if(m_SndFile.GetModSpecifications().supportsPlugins)
+		{
+			CMainFrame::GetMainFrame()->ThreadSafeSetModified(modDoc);
+		}
+
+
+		if (CMainFrame::GetInputHandler()->ShiftPressed())
+		{
+			// Shift pressed -> Open MIDI mapping dialog
+			CMainFrame::GetInputHandler()->SetModifierMask(0); // Make sure that the dialog will open only once.
+			CMainFrame::GetMainFrame()->PostMessage(WM_MOD_MIDIMAPPING, m_nSlot, param);
+		}
+
+		// Learn macro
+		int macroToLearn = pVstEditor->GetLearnMacro();
+		if (macroToLearn > -1)
+		{
+			modDoc->LearnMacro(macroToLearn, param);
+			pVstEditor->SetLearnMacro(-1);
+		}
+	}
+}
+#endif // MODPLUG_TRACKER
 
 
 ////////////////////////////////////////////////////////////////////

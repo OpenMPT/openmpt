@@ -1,7 +1,7 @@
 /*
  * Vstplug.cpp
  * -----------
- * Purpose: Plugin handling / processing
+ * Purpose: VST Plugin handling / processing
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -9,15 +9,14 @@
 
 
 #include "stdafx.h"
-#include "Vstplug.h"
 
 #ifndef NO_VST
 
+#include "Vstplug.h"
 #include "VstPresets.h"
 #ifdef MODPLUG_TRACKER
 #include "Moddoc.h"
 #include "Mainfrm.h"
-#include "InputHandler.h"
 #endif // MODPLUG_TRACKER
 #include "../soundlib/Sndfile.h"
 #include "AbstractVstEditor.h"
@@ -1042,7 +1041,7 @@ bool CVstPlugin::LoadProgram(mpt::PathString fileName)
 
 	if(errorStr == nullptr)
 	{
-#ifndef MODPLUG_TRACKER
+#ifdef MODPLUG_TRACKER
 		if(GetModDoc() != nullptr && GetSoundFile().GetModSpecifications().supportsPlugins)
 		{
 			GetModDoc()->SetModified();
@@ -1754,57 +1753,6 @@ void CVstPlugin::HardAllNotesOff()
 	{
 		Suspend();
 	}
-}
-
-
-// Automate a parameter from the plugin GUI (both custom and default plugin GUI)
-void CVstPlugin::AutomateParameter(PlugParamIndex param)
-//------------------------------------------------------
-{
-#ifdef MODPLUG_TRACKER
-	CModDoc* pModDoc = GetModDoc();
-	if(pModDoc == nullptr)
-	{
-		return;
-	}
-
-	// TODO: Check if any params are actually automatable, and if there are but this one isn't, chicken out
-
-	if (m_bRecordAutomation)
-	{
-		// Record parameter change
-		pModDoc->RecordParamChange(GetSlot(), param);
-	}
-
-	pModDoc->PostMessageToAllViews(WM_MOD_PLUGPARAMAUTOMATE, m_nSlot, param);
-	// TODO: This should rather be posted to the GUI thread!
-	CAbstractVstEditor *pVstEditor = GetEditor();
-
-	if(pVstEditor && pVstEditor->m_hWnd)
-	{
-		// Mark track modified if GUI is open and format supports plugins
-		if(pModDoc->GetrSoundFile().GetModSpecifications().supportsPlugins)
-		{
-			CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
-		}
-
-
-		if (CMainFrame::GetInputHandler()->ShiftPressed())
-		{
-			// Shift pressed -> Open MIDI mapping dialog
-			CMainFrame::GetInputHandler()->SetModifierMask(0); // Make sure that the dialog will open only once.
-			CMainFrame::GetMainFrame()->PostMessage(WM_MOD_MIDIMAPPING, m_nSlot, param);
-		}
-
-		// Learn macro
-		int macroToLearn = pVstEditor->GetLearnMacro();
-		if (macroToLearn > -1)
-		{
-			pModDoc->LearnMacro(macroToLearn, param);
-			pVstEditor->SetLearnMacro(-1);
-		}
-	}
-#endif // MODPLUG_TRACKER
 }
 
 
