@@ -236,8 +236,6 @@ namespace MidiExport
 		virtual int32 GetCurrentProgram() { return 0; }
 		virtual void SetCurrentProgram(int32) { }
 		virtual PlugParamIndex GetNumParameters() { return 0; }
-		virtual void SaveAllParameters() { }
-		virtual void RestoreAllParameters(long) { }
 
 		virtual float RenderSilence(size_t) { return 0.0f; }
 
@@ -353,7 +351,6 @@ namespace MidiExport
 		virtual void SetCurrentProgramName(const CString &) { }
 		virtual CString GetProgramName(int32) { return CString(); }
 		virtual bool HasEditor() const { return false; }
-		virtual void ToggleEditor() { }
 		virtual void BeginSetProgram(int32) { }
 		virtual void EndSetProgram() { }
 #endif // MODPLUG_TRACKER

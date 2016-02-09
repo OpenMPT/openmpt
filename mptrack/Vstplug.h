@@ -119,7 +119,7 @@ public:
 public:
 	void Release();
 	void SaveAllParameters();
-	void RestoreAllParameters(long nProg=-1);
+	void RestoreAllParameters(int32 program);
 	void RecalculateGain();
 	void Process(float *pOutL, float *pOutR, size_t nSamples);
 	float RenderSilence(size_t numSamples);

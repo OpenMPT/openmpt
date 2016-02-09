@@ -527,7 +527,7 @@ void CSoundFile::CreateStereoMix(int count)
 
 
 void CSoundFile::ProcessPlugins(uint32 nCount)
-//------------------------------------------
+//--------------------------------------------
 {
 #ifndef NO_PLUGINS
 	// If any sample channels are active or any plugin has some input, possibly suspended master plugins need to be woken up.

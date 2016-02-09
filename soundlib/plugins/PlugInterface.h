@@ -125,8 +125,8 @@ public:
 	virtual int32 GetCurrentProgram() = 0;
 	virtual void SetCurrentProgram(int32 nIndex) = 0;
 	virtual PlugParamIndex GetNumParameters() = 0;
-	virtual void SaveAllParameters() = 0;
-	virtual void RestoreAllParameters(long nProg=-1) = 0;
+	virtual void SaveAllParameters();
+	virtual void RestoreAllParameters(int32 program);
 	virtual void Process(float *pOutL, float *pOutR, size_t nSamples) = 0;
 	virtual float RenderSilence(size_t numSamples) = 0;
 	virtual bool MidiSend(uint32 dwMidiCode) = 0;
@@ -181,7 +181,7 @@ public:
 	CString GetFormattedProgramName(int32 index);
 
 	virtual bool HasEditor() const = 0;
-	virtual void ToggleEditor() = 0;
+	virtual void ToggleEditor();
 	void SetEditorPos(int32 x, int32 y);
 	void GetEditorPos(int32 &x, int32 &y) const;
 
