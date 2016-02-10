@@ -187,6 +187,18 @@ void IMixPlugin::SetDryRatio(uint32 param)
 }
 
 
+void IMixPlugin::Bypass(bool bypass)
+//----------------------------------
+{
+	m_pMixStruct->Info.SetBypass(bypass);
+
+#ifdef MODPLUG_TRACKER
+	if(m_SndFile.GetpModDoc())
+		m_SndFile.GetpModDoc()->UpdateAllViews(nullptr, PluginHint(m_nSlot).Info(), nullptr);
+#endif // MODPLUG_TRACKER
+}
+
+
 // Get list of plugins to which output is sent. A nullptr indicates master output.
 size_t IMixPlugin::GetOutputPlugList(std::vector<IMixPlugin *> &list)
 //-------------------------------------------------------------------
@@ -729,7 +741,7 @@ void IMidiPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, 
 }
 
 
-bool IMidiPlugin::IsPlaying(uint32 note, uint32 midiChn, uint32 trackerChn)
+bool IMidiPlugin::IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn)
 //-------------------------------------------------------------------------
 {
 	note -= NOTE_MIN;

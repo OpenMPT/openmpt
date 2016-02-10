@@ -872,7 +872,7 @@ void CSoundFile::ProcessTremor(CHANNELINDEX nChn, int &vol)
 		if(pPlugin)
 		{
 			uint8 midiChn = GetBestMidiChannel(nChn);
-			bool isPlaying = pPlugin->IsPlaying(chn.nLastNote, midiChn, nChn);
+			bool isPlaying = pPlugin->IsNotePlaying(chn.nLastNote, midiChn, nChn);
 			if(vol == 0 && isPlaying)
 				pPlugin->MidiCommand(midiChn, pIns->nMidiProgram, pIns->wMidiBank, chn.nLastNote + NOTE_MAX_SPECIAL, 0, nChn);
 			else if(vol != 0 && !isPlaying)

@@ -1714,14 +1714,8 @@ CAbstractVstEditor *CVstPlugin::OpenEditor()
 void CVstPlugin::Bypass(bool bypass)
 //----------------------------------
 {
-	m_pMixStruct->Info.SetBypass(bypass);
-
 	Dispatch(effSetBypass, bypass ? 1 : 0, 0, nullptr, 0.0f);
-
-#ifdef MODPLUG_TRACKER
-	if(m_SndFile.GetpModDoc())
-		m_SndFile.GetpModDoc()->UpdateAllViews(nullptr, PluginHint(m_nSlot).Info(), nullptr);
-#endif // MODPLUG_TRACKER
+	IMixPlugin::Bypass(bypass);
 }
 
 

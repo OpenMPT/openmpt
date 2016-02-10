@@ -14,6 +14,7 @@
 #include "../../common/version.h"
 #include "../../mptrack/Vstplug.h"
 #include "PluginManager.h"
+#include "DigiBoosterEcho.h"
 #include "../../mptrack/Mptrack.h"
 #include "../../mptrack/TrackerSettings.h"
 #include "../../mptrack/AbstractVstEditor.h"
@@ -510,6 +511,12 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 			pFound = plug;
 			match = 1;
 		}
+	}
+
+	if(!memcmp(&mixPlugin.Info.dwPluginId1, "DBM0", 4) && !memcmp(&mixPlugin.Info.dwPluginId2, "Echo", 4))
+	{
+		IMixPlugin *pVstPlug = new (std::nothrow) DigiBoosterEcho(*pFound, sndFile, &mixPlugin);
+		return pVstPlug != nullptr;
 	}
 
 	if(mixPlugin.Info.dwPluginId1 == kDmoMagic)

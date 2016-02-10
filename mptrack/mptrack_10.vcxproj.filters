@@ -601,6 +601,9 @@
     <ClCompile Include="..\soundlib\plugins\PlugInterface.cpp">
       <Filter>Source Files\soundlib\plugins</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\plugins\DigiBoosterEcho.cpp">
+      <Filter>Source Files\soundlib\plugins</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1177,6 +1180,9 @@
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\plugins\PluginManager.h">
+      <Filter>Header Files\soundlib\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\plugins\DigiBoosterEcho.h">
       <Filter>Header Files\soundlib\plugins</Filter>
     </ClInclude>
   </ItemGroup>

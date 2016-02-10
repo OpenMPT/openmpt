@@ -2404,6 +2404,14 @@
 				Name="plugins"
 				>
 				<File
+					RelativePath="..\..\soundlib\plugins\DigiBoosterEcho.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\soundlib\plugins\DigiBoosterEcho.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\soundlib\plugins\DmoToVst.cpp"
 					>
 				</File>

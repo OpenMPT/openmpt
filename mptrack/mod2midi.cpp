@@ -323,16 +323,11 @@ namespace MidiExport
 			}
 		}
 
-		virtual void NotifySongPlaying(bool) { }
-		virtual bool IsSongPlaying() const { return true; }
-		virtual bool IsResumed() const { return true; }
 		virtual void Resume() { }
 		virtual void Suspend() { }
-		virtual void Bypass(bool) { }
 		virtual bool IsInstrument() const { return true; }
 		virtual bool CanRecieveMidiEvents() { return true; }
 		virtual bool ShouldProcessSilence() { return true; }
-		virtual void ResetSilence() { }
 #ifdef MODPLUG_TRACKER
 		virtual CString GetDefaultEffectName() { return CString(); }
 		virtual void CacheProgramNames(int32, int32) { }

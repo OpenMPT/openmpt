@@ -11,8 +11,7 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "ChunkReader.h"
-
-OPENMPT_NAMESPACE_BEGIN
+#include "plugins/DigiBoosterEcho.h"
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
@@ -41,7 +40,8 @@ struct PACKED DBMChunk
 		idPENV	= 0x564E4550,
 		idPATT	= 0x54544150,
 		idPNAM	= 0x4D414E50,
-		idSMPL	= 0x4c504d53,
+		idSMPL	= 0x4C504D53,
+		idDSPE	= 0x45505344,
 		idMPEG	= 0x4745504D,
 	};
 
@@ -166,13 +166,21 @@ static const ModCommand::COMMAND dbmEffects[] =
 	CMD_PANNING8, CMD_OFFSET, CMD_VOLUMESLIDE, CMD_POSITIONJUMP,
 	CMD_VOLUME, CMD_PATTERNBREAK, CMD_MODCMDEX, CMD_TEMPO,
 	CMD_GLOBALVOLUME, CMD_GLOBALVOLSLIDE, CMD_KEYOFF, CMD_SETENVPOSITION,
-	CMD_CHANNELVOLUME, CMD_CHANNELVOLSLIDE, CMD_PANNINGSLIDE,
+	CMD_CHANNELVOLUME, CMD_CHANNELVOLSLIDE, CMD_NONE, CMD_NONE,
+	CMD_NONE, CMD_PANNINGSLIDE, CMD_NONE, CMD_NONE,
+	CMD_NONE, CMD_NONE, CMD_NONE,
+	CMD_NONE,	// Toggle DSP
+	CMD_MIDI,	// Wxx Echo Delay
+	CMD_MIDI,	// Xxx Echo Feedback
+	CMD_MIDI,	// Yxx Echo Mix
+	CMD_MIDI,	// Zxx Echo Cross
 };
 
 
 static void ConvertDBMEffect(uint8 &command, uint8 &param)
 //--------------------------------------------------------
 {
+	uint8 oldCmd = command;
 	if(command < CountOf(dbmEffects))
 		command = dbmEffects[command];
 	else
@@ -244,13 +252,17 @@ static void ConvertDBMEffect(uint8 &command, uint8 &param)
 			// TODO key of at tick 0
 		}
 		break;
+
+	case CMD_MIDI:
+		// Encode echo parameters into fixed MIDI macros
+		param = 128 + (oldCmd - 32) * 32 + param / 8;
 	}
 }
 
 
 // Read a chunk of volume or panning envelopes
 static void ReadDBMEnvelopeChunk(FileReader chunk, EnvelopeType envType, CSoundFile &sndFile, bool scaleEnv)
-//--------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------
 {
 	uint16 numEnvs = chunk.ReadUint16BE();
 	for(uint16 i = 0; i < numEnvs; i++)
@@ -529,6 +541,59 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 	}
+
+#ifndef NO_PLUGINS
+	// DSPs
+	FileReader dspChunk = chunks.GetChunk(DBMChunk::idDSPE);
+	if(dspChunk.IsValid() && (loadFlags & loadPluginData))
+	{
+		uint16 maskLen = dspChunk.ReadUint16BE();
+		bool anyEnabled = false;	// TODO: also check for pattern commands that enable DSPs!
+		for(uint16 i = 0; i < maskLen; i++)
+		{
+			bool enabled = (dspChunk.ReadUint8() == 0);
+			if(i < m_nChannels && enabled)
+			{
+				ChnSettings[i].nMixPlugin = 1;
+				anyEnabled = true;
+			}
+		}
+
+		uint8 settings[8];
+		if(anyEnabled && dspChunk.ReadArray(settings))
+		{
+			SNDMIXPLUGIN &plugin = m_MixPlugins[0];
+			plugin.Destroy();
+			memcpy(&plugin.Info.dwPluginId1, "DBM0", 4);
+			memcpy(&plugin.Info.dwPluginId2, "Echo", 4);
+			plugin.Info.routingFlags = SNDMIXPLUGININFO::irAutoSuspend;
+			plugin.Info.mixMode = 0;
+			plugin.Info.gain = 10;
+			plugin.Info.reserved = 0;
+			plugin.Info.dwOutputRouting = 0;
+			MemsetZero(plugin.Info.dwReserved);
+			strcpy(plugin.Info.szName, "Echo");
+			strcpy(plugin.Info.szLibraryName, "DigiBooster Pro Echo");
+
+			plugin.nPluginDataSize = sizeof(DigiBoosterEcho::PluginChunk);
+			plugin.pPluginData = new (std::nothrow) char[sizeof(DigiBoosterEcho::PluginChunk)];
+			if(plugin.pPluginData != nullptr)
+			{
+				new (plugin.pPluginData) DigiBoosterEcho::PluginChunk(settings[1], settings[3], settings[5], settings[7]);
+			}
+
+			// Encode echo parameters into fixed MIDI macros
+			for(uint32 i = 0; i < 128; i++)
+			{
+				uint32 param = (i * 127u) / 32u;
+				sprintf(m_MidiCfg.szMidiZXXExt[i     ], "F0F080%02X", param);
+				sprintf(m_MidiCfg.szMidiZXXExt[i + 32], "F0F081%02X", param);
+				sprintf(m_MidiCfg.szMidiZXXExt[i + 64], "F0F082%02X", param);
+				sprintf(m_MidiCfg.szMidiZXXExt[i + 96], "F0F083%02X", param);
+			}
+		}
+	}
+#endif // NO_PLUGINS
 
 	// Samples
 	FileReader sampleChunk = chunks.GetChunk(DBMChunk::idSMPL);
