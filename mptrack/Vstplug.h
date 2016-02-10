@@ -16,7 +16,6 @@
 #include <pluginterfaces/vst2.x/aeffectx.h>			// VST
 
 #include "../soundlib/Snd_defs.h"
-#include "../soundlib/plugins/PluginMixBuffer.h"
 #include "../soundlib/plugins/PlugInterface.h"
 #include "../soundlib/plugins/PluginEventQueue.h"
 #include "../soundlib/Mixer.h"
@@ -52,8 +51,6 @@ protected:
 	bool m_isInitialized : 1;
 	bool m_bNeedIdle : 1;
 
-	PluginMixBuffer<float, MIXBUFFERSIZE> m_mixBuffer;	// Float buffers (input and output) for plugins
-	mixsample_t m_MixBuffer[MIXBUFFERSIZE * 2 + 2];		// Stereo interleaved
 	PluginEventQueue<vstNumProcessEvents> vstEvents;	// MIDI events that should be sent to the plugin
 
 	static VstTimeInfo timeInfo;
@@ -69,9 +66,11 @@ protected:
 	void Initialize();
 
 public:
-	virtual void Idle();
 	virtual int32 GetUID() const;
 	virtual int32 GetVersion() const;
+	virtual void Idle();
+	virtual uint32 GetLatency() const { return m_Effect.initialDelay; }
+
 	// Check if programs should be stored as chunks or parameters
 	virtual bool ProgramsAreChunks() const { return (m_Effect.flags & effFlagsProgramChunks) != 0; }
 	virtual size_t GetChunk(char *(&chunk), bool isBank);
@@ -113,8 +112,7 @@ public:
 	virtual void Release();
 	virtual void SaveAllParameters();
 	virtual void RestoreAllParameters(int32 program);
-	virtual void Process(float *pOutL, float *pOutR, size_t nSamples);
-	virtual float RenderSilence(size_t numSamples);
+	virtual void Process(float *pOutL, float *pOutR, uint32 numFrames);
 	virtual bool MidiSend(uint32 dwMidiCode);
 	virtual bool MidiSysexSend(const char *message, uint32 length);
 	virtual void HardAllNotesOff();
@@ -141,8 +139,6 @@ protected:
 	// Process incoming and outgoing VST events.
 	void ProcessVSTEvents();
 	void ReceiveVSTEvents(const VstEvents *events);
-
-	void ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput, float *rightPlugOutput, size_t nSamples);
 
 	void ReportPlugException(std::wstring text) const;
 

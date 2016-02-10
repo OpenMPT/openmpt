@@ -85,20 +85,12 @@ namespace MidiExport
 			, m_oldSigNumerator(0)
 			, m_oldGlobalVol(-1)
 		{
-			// TODO: Solve this more elegantly (should probably be part of the base implementation anyway).
-			static mixsample_t m_MixBuffer[MIXBUFFERSIZE * 2 + 2];
-			static float out[MIXBUFFERSIZE + 1];
-			m_MixState.pMixBuffer = m_MixBuffer;
-			m_MixState.pOutBufferL = out;
-			m_MixState.pOutBufferR = out;
-
 			// Write instrument / song name
 			WriteString(kTrackName, name);
 
 			// This is the tempo track, don't write any playback-related stuff
 			if(tempoTrack == nullptr) return;
 
-			m_pMixStruct->pMixState = &m_MixState;
 			m_pMixStruct->pMixPlugin = this;
 
 			// Set up MIDI pitch wheel depth
@@ -175,7 +167,7 @@ namespace MidiExport
 		}
 
 
-		virtual void Process(float *, float *, size_t numFrames)
+		virtual void Process(float *, float *, uint32 numFrames)
 		{
 			UpdateGlobals();
 			if(m_tempoTrack != nullptr) m_tempoTrack->UpdateGlobals();
@@ -229,6 +221,7 @@ namespace MidiExport
 		virtual int32 GetUID() const { return 0; }
 		virtual int32 GetVersion() const { return 0; }
 		virtual void Idle() { }
+		virtual uint32 GetLatency() const { return 0; }
 
 		virtual int32 GetNumPrograms() const { return 0; }
 		virtual int32 GetCurrentProgram() { return 0; }
@@ -238,7 +231,7 @@ namespace MidiExport
 		virtual PlugParamValue GetParameter(PlugParamIndex) { return 0; }
 		virtual void SetParameter(PlugParamIndex, PlugParamValue) { }
 
-		virtual float RenderSilence(size_t) { return 0.0f; }
+		virtual float RenderSilence(uint32) { return 0.0f; }
 
 		virtual bool MidiSend(uint32 dwMidiCode)
 		{

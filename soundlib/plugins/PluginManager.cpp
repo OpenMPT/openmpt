@@ -14,6 +14,7 @@
 #include "../../common/version.h"
 #include "../../mptrack/Vstplug.h"
 #include "PluginManager.h"
+#include "DMOPlugin.h"
 #include "DigiBoosterEcho.h"
 #include "../../mptrack/Mptrack.h"
 #include "../../mptrack/TrackerSettings.h"
@@ -43,7 +44,6 @@ typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
 
 #ifndef NO_DMO
 #define DMO_LOG
-AEffect *DmoToVst(VSTPluginLib &lib);
 #endif // NO_DMO
 
 static const MPT_UCHAR_TYPE *const cacheSection = MPT_ULITERAL("PluginCache");
@@ -515,6 +515,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 
 	if(!memcmp(&mixPlugin.Info.dwPluginId1, "DBM0", 4) && !memcmp(&mixPlugin.Info.dwPluginId2, "Echo", 4))
 	{
+		// DigiBooster Pro Echo DSP
 		IMixPlugin *pVstPlug = new (std::nothrow) DigiBoosterEcho(*pFound, sndFile, &mixPlugin);
 		return pVstPlug != nullptr;
 	}
@@ -523,12 +524,8 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	{
 #ifndef NO_DMO
 		if (!pFound) return false;
-		AEffect *pEffect = DmoToVst(*pFound);
-		if(pEffect && pEffect->magic == kDmoMagic)
-		{
-			CVstPlugin *pVstPlug = new (std::nothrow) CVstPlugin(nullptr, *pFound, mixPlugin, *pEffect, sndFile);
-			return pVstPlug != nullptr;
-		}
+		IMixPlugin *plugin = DMOPlugin::Create(*pFound, sndFile, &mixPlugin);
+		return plugin != nullptr;
 #else
 		return nullptr;
 #endif // NO_DMO

@@ -16,11 +16,11 @@
 #ifdef MODPLUG_TRACKER
 #include "Moddoc.h"
 #include "Mainfrm.h"
-#endif // MODPLUG_TRACKER
-#include "../soundlib/Sndfile.h"
 #include "AbstractVstEditor.h"
 #include "VstEditor.h"
 #include "DefaultVstEditor.h"
+#endif // MODPLUG_TRACKER
+#include "../soundlib/Sndfile.h"
 #include "../soundlib/MIDIEvents.h"
 #include "MIDIMappingDialog.h"
 #include "../common/StringFixer.h"
@@ -698,10 +698,6 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 {
 	m_pProcessFP = nullptr;
 
-	m_MixState.pMixBuffer = (mixsample_t *)((((intptr_t)m_MixBuffer) + 7) & ~7);
-	m_MixState.pOutBufferL = m_mixBuffer.GetInputBuffer(0);
-	m_MixState.pOutBufferR = m_mixBuffer.GetInputBuffer(1);
-
 	// Open plugin and initialize data structures
 	Initialize();
 	// Now we should be ready to go
@@ -1061,7 +1057,7 @@ PlugParamValue CVstPlugin::GetParameter(PlugParamIndex nIndex)
 			fResult = m_Effect.getParameter(&m_Effect, nIndex);
 		} catch (...)
 		{
-			//CVstPluginManager::ReportPlugException("Exception in getParameter (Plugin=\"%s\")!\n", m_Factory.szLibraryName);
+			//ReportPlugException("Exception in getParameter (Plugin=\"%s\")!\n", m_Factory.szLibraryName);
 		}
 	}
 	Limit(fResult, 0.0f, 1.0f);
@@ -1218,14 +1214,26 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
 
 	if(receiver != PLUGINDEX_INVALID)
 	{
-		SNDMIXPLUGIN &mixPlug = m_SndFile.m_MixPlugins[receiver];
-		CVstPlugin *vstPlugin = dynamic_cast<CVstPlugin *>(mixPlug.pMixPlugin);
-		if(vstPlugin != nullptr)
+		IMixPlugin *plugin = m_SndFile.m_MixPlugins[receiver].pMixPlugin;
+		CVstPlugin *vstPlugin = dynamic_cast<CVstPlugin *>(plugin);
+		// Add all events to the plugin's queue.
+		for(VstInt32 i = 0; i < events->numEvents; i++)
 		{
-			// Add all events to the plugin's queue.
-			for(VstInt32 i = 0; i < events->numEvents; i++)
+			if(vstPlugin != nullptr)
 			{
+				// Directly enqueue the message and preserve as much of the event data as possible (e.g. delta frames, which are currently not used by OpenMPT but might be by plugins)
 				vstPlugin->vstEvents.Enqueue(events->events[i]);
+			} else if(plugin != nullptr)
+			{
+				if(events->events[i]->type == kVstMidiType)
+				{
+					VstMidiEvent *event = reinterpret_cast<VstMidiEvent *>(events->events[i]);
+					plugin->MidiSend(reinterpret_cast<uint32>(event->midiData));
+				} else if(events->events[i]->type == kVstSysExType)
+				{
+					VstMidiSysexEvent *event = reinterpret_cast<VstMidiSysexEvent *>(events->events[i]);
+					plugin->MidiSysexSend(event->sysexDump, event->dumpBytes);
+				}
 			}
 		}
 	}
@@ -1247,48 +1255,8 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
 }
 
 
-// Render some silence and return maximum level returned by the plugin.
-float CVstPlugin::RenderSilence(size_t numSamples)
-//------------------------------------------------
-{
-	// The JUCE framework doesn't like processing while being suspended.
-	const bool wasSuspended = !IsResumed();
-	if(wasSuspended)
-	{
-		Resume();
-	}
-
-	float out[2][MIXBUFFERSIZE]; // scratch buffers
-	float maxVal = 0.0f;
-	m_mixBuffer.ClearInputBuffers(MIXBUFFERSIZE);
-
-	while(numSamples > 0)
-	{
-		size_t renderSamples = numSamples;
-		LimitMax(renderSamples, CountOf(out[0]));
-		MemsetZero(out);
-
-		Process(out[0], out[1], renderSamples);
-		for(size_t i = 0; i < renderSamples; i++)
-		{
-			maxVal = std::max(maxVal, fabs(out[0][i]));
-			maxVal = std::max(maxVal, fabs(out[1][i]));
-		}
-
-		numSamples -= renderSamples;
-	}
-
-	if(wasSuspended)
-	{
-		Suspend();
-	}
-
-	return maxVal;
-}
-
-
-void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
-//-------------------------------------------------------------------
+void CVstPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
+//--------------------------------------------------------------------
 {
 	ProcessVSTEvents();
 
@@ -1301,7 +1269,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 		// Merge stereo input before sending to the plug if the plug can only handle one input.
 		if (numInputs == 1)
 		{
-			for (size_t i = 0; i < nSamples; i++)
+			for (uint32 i = 0; i < numFrames; i++)
 			{
 				m_MixState.pOutBufferL[i] = 0.5f * (m_MixState.pOutBufferL[i] + m_MixState.pOutBufferR[i]);
 			}
@@ -1310,14 +1278,14 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 		float **outputBuffers = m_mixBuffer.GetOutputBufferArray();
 		if(!isBridged)
 		{
-			m_mixBuffer.ClearOutputBuffers(nSamples);
+			m_mixBuffer.ClearOutputBuffers(numFrames);
 		}
 
 		// Do the VST processing magic
 		try
 		{
-			ASSERT(nSamples <= MIXBUFFERSIZE);
-			m_pProcessFP(&m_Effect, m_mixBuffer.GetInputBufferArray(), outputBuffers, nSamples);
+			ASSERT(numFrames <= MIXBUFFERSIZE);
+			m_pProcessFP(&m_Effect, m_mixBuffer.GetInputBufferArray(), outputBuffers, numFrames);
 		} catch (...)
 		{
 			Bypass();
@@ -1338,7 +1306,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 			// mix extra stereo outputs
 			for(VstInt32 iOut = 2; iOut < outs; iOut++)
 			{
-				for(size_t i = 0; i < nSamples; i++)
+				for(uint32 i = 0; i < numFrames; i++)
 				{
 					outputBuffers[iOut % 2u][i] += outputBuffers[iOut][i]; // assumed stereo.
 				}
@@ -1348,7 +1316,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 			if(outs != numOutputs)
 			{
 				// trick : if we are here, numOutputs = m_Effect.numOutputs - 1 !!!
-				for(size_t i = 0; i < nSamples; i++)
+				for(uint32 i = 0; i < numFrames; i++)
 				{
 					float v = 0.5f * outputBuffers[outs][i];
 					outputBuffers[0][i] += v;
@@ -1359,19 +1327,9 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 
 		if(numOutputs != 0)
 		{
-			ProcessMixOps(pOutL, pOutR, outputBuffers[0], outputBuffers[numOutputs > 1 ? 1 : 0], nSamples);
+			ProcessMixOps(pOutL, pOutR, outputBuffers[0], outputBuffers[numOutputs > 1 ? 1 : 0], numFrames);
 		}
 
-		// If dry mix is ticked, we add the unprocessed buffer,
-		// except if this is an instrument since this it has already been done:
-		if(m_pMixStruct->IsWetMix() && !m_bIsInstrument)
-		{
-			for(size_t i = 0; i < nSamples; i++)
-			{
-				pOutL[i] += m_MixState.pOutBufferL[i];
-				pOutR[i] += m_MixState.pOutBufferR[i];
-			}
-		}
 
 		// If the I/O format of the bridge changed in the meanwhile, update it now.
 		if(isBridged && Dispatch(effVendorSpecific, kVendorOpenMPT, kCloseOldProcessingMemory, nullptr, 0.0f) != 0)
@@ -1381,126 +1339,6 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, size_t nSamples)
 	}
 
 	vstEvents.Clear();
-}
-
-
-void CVstPlugin::ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput, float *rightPlugOutput, size_t nSamples)
-//------------------------------------------------------------------------------------------------------------------------
-{
-/*	float *leftPlugOutput;
-	float *rightPlugOutput;
-
-	if(m_Effect.numOutputs == 1)
-	{
-		// If there was just the one plugin output we copy it into our 2 outputs
-		leftPlugOutput = rightPlugOutput = mixBuffer.GetOutputBuffer(0);
-	} else if(m_Effect.numOutputs > 1)
-	{
-		// Otherwise we actually only cater for two outputs max (outputs > 2 have been mixed together already).
-		leftPlugOutput = mixBuffer.GetOutputBuffer(0);
-		rightPlugOutput = mixBuffer.GetOutputBuffer(1);
-	} else
-	{
-		return;
-	}*/
-
-	// -> mixop == 0 : normal processing
-	// -> mixop == 1 : MIX += DRY - WET * wetRatio
-	// -> mixop == 2 : MIX += WET - DRY * dryRatio
-	// -> mixop == 3 : MIX -= WET - DRY * wetRatio
-	// -> mixop == 4 : MIX -= middle - WET * wetRatio + middle - DRY
-	// -> mixop == 5 : MIX_L += wetRatio * (WET_L - DRY_L) + dryRatio * (DRY_R - WET_R)
-	//                 MIX_R += dryRatio * (WET_L - DRY_L) + wetRatio * (DRY_R - WET_R)
-
-	int mixop;
-	if(m_bIsInstrument || m_pMixStruct == nullptr)
-	{
-		// Force normal mix mode for instruments
-		mixop = 0;
-	} else
-	{
-		mixop = m_pMixStruct->GetMixMode();
-	}
-
-	float wetRatio = 1 - m_pMixStruct->fDryRatio;
-	float dryRatio = m_bIsInstrument ? 1 : m_pMixStruct->fDryRatio; // Always mix full dry if this is an instrument
-
-	// Wet / Dry range expansion [0,1] -> [-1,1]
-	if(m_Effect.numInputs > 0 && m_pMixStruct->IsExpandedMix())
-	{
-		wetRatio = 2.0f * wetRatio - 1.0f;
-		dryRatio = -wetRatio;
-	}
-
-	wetRatio *= m_fGain;
-	dryRatio *= m_fGain;
-
-	// Mix operation
-	switch(mixop)
-	{
-
-	// Default mix
-	case 0:
-		for(size_t i = 0; i < nSamples; i++)
-		{
-			//rewbs.wetratio - added the factors. [20040123]
-			pOutL[i] += leftPlugOutput[i] * wetRatio + m_MixState.pOutBufferL[i] * dryRatio;
-			pOutR[i] += rightPlugOutput[i] * wetRatio + m_MixState.pOutBufferR[i] * dryRatio;
-		}
-		break;
-
-	// Wet subtract
-	case 1:
-		for(size_t i = 0; i < nSamples; i++)
-		{
-			pOutL[i] += m_MixState.pOutBufferL[i] - leftPlugOutput[i] * wetRatio;
-			pOutR[i] += m_MixState.pOutBufferR[i] - rightPlugOutput[i] * wetRatio;
-		}
-		break;
-
-	// Dry subtract
-	case 2:
-		for(size_t i = 0; i < nSamples; i++)
-		{
-			pOutL[i] += leftPlugOutput[i] - m_MixState.pOutBufferL[i] * dryRatio;
-			pOutR[i] += rightPlugOutput[i] - m_MixState.pOutBufferR[i] * dryRatio;
-		}
-		break;
-
-	// Mix subtract
-	case 3:
-		for(size_t i = 0; i < nSamples; i++)
-		{
-			pOutL[i] -= leftPlugOutput[i] - m_MixState.pOutBufferL[i] * wetRatio;
-			pOutR[i] -= rightPlugOutput[i] - m_MixState.pOutBufferR[i] * wetRatio;
-		}
-		break;
-
-	// Middle subtract
-	case 4:
-		for(size_t i = 0; i < nSamples; i++)
-		{
-			float middle = (pOutL[i] + m_MixState.pOutBufferL[i] + pOutR[i] + m_MixState.pOutBufferR[i]) / 2.0f;
-			pOutL[i] -= middle - leftPlugOutput[i] * wetRatio + middle - m_MixState.pOutBufferL[i];
-			pOutR[i] -= middle - rightPlugOutput[i] * wetRatio + middle - m_MixState.pOutBufferR[i];
-		}
-		break;
-
-	// Left / Right balance
-	case 5:
-		if(m_pMixStruct->IsExpandedMix())
-		{
-			wetRatio /= 2.0f;
-			dryRatio /= 2.0f;
-		}
-
-		for(size_t i = 0; i < nSamples; i++)
-		{
-			pOutL[i] += wetRatio * (leftPlugOutput[i] - m_MixState.pOutBufferL[i]) + dryRatio * (m_MixState.pOutBufferR[i] - rightPlugOutput[i]);
-			pOutR[i] += dryRatio * (leftPlugOutput[i] - m_MixState.pOutBufferL[i]) + wetRatio * (m_MixState.pOutBufferR[i] - rightPlugOutput[i]);
-		}
-		break;
-	}
 }
 
 

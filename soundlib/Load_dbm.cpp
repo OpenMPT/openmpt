@@ -598,6 +598,8 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(anyEnabled)
 		{
+			// Note: DigiBooster Pro 3 has a more versatile per-channel echo effect.
+			// In this case, we'd have to create one plugin per channel.
 			SNDMIXPLUGIN &plugin = m_MixPlugins[0];
 			plugin.Destroy();
 			memcpy(&plugin.Info.dwPluginId1, "DBM0", 4);
