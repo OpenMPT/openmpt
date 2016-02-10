@@ -55,6 +55,10 @@ IMixPlugin::IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 	, m_bPassKeypressesToPlug(false)
 	, m_bRecordMIDIOut(false)
 {
+	m_MixState.pMixBuffer = (mixsample_t *)((((intptr_t)m_MixBuffer) + 7) & ~7);
+	m_MixState.pOutBufferL = m_mixBuffer.GetInputBuffer(0);
+	m_MixState.pOutBufferR = m_mixBuffer.GetInputBuffer(1);
+
 	m_MixState.dwFlags = 0;
 	m_MixState.nVolDecayL = 0;
 	m_MixState.nVolDecayR = 0;
@@ -213,6 +217,177 @@ void IMixPlugin::Bypass(bool bypass)
 	if(m_SndFile.GetpModDoc())
 		m_SndFile.GetpModDoc()->UpdateAllViews(nullptr, PluginHint(m_nSlot).Info(), nullptr);
 #endif // MODPLUG_TRACKER
+}
+
+
+void IMixPlugin::ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput, float *rightPlugOutput, uint32 numFrames) const
+//-------------------------------------------------------------------------------------------------------------------------------
+{
+/*	float *leftPlugOutput;
+	float *rightPlugOutput;
+
+	if(m_Effect.numOutputs == 1)
+	{
+		// If there was just the one plugin output we copy it into our 2 outputs
+		leftPlugOutput = rightPlugOutput = mixBuffer.GetOutputBuffer(0);
+	} else if(m_Effect.numOutputs > 1)
+	{
+		// Otherwise we actually only cater for two outputs max (outputs > 2 have been mixed together already).
+		leftPlugOutput = mixBuffer.GetOutputBuffer(0);
+		rightPlugOutput = mixBuffer.GetOutputBuffer(1);
+	} else
+	{
+		return;
+	}*/
+
+	// -> mixop == 0 : normal processing
+	// -> mixop == 1 : MIX += DRY - WET * wetRatio
+	// -> mixop == 2 : MIX += WET - DRY * dryRatio
+	// -> mixop == 3 : MIX -= WET - DRY * wetRatio
+	// -> mixop == 4 : MIX -= middle - WET * wetRatio + middle - DRY
+	// -> mixop == 5 : MIX_L += wetRatio * (WET_L - DRY_L) + dryRatio * (DRY_R - WET_R)
+	//                 MIX_R += dryRatio * (WET_L - DRY_L) + wetRatio * (DRY_R - WET_R)
+
+	int mixop;
+	if(IsInstrument() || m_pMixStruct == nullptr)
+	{
+		// Force normal mix mode for instruments
+		mixop = 0;
+	} else
+	{
+		mixop = m_pMixStruct->GetMixMode();
+	}
+
+	float wetRatio = 1 - m_pMixStruct->fDryRatio;
+	float dryRatio = IsInstrument() ? 1 : m_pMixStruct->fDryRatio; // Always mix full dry if this is an instrument
+
+	// Wet / Dry range expansion [0,1] -> [-1,1]
+	if(GetNumInputChannels() > 0 && m_pMixStruct->IsExpandedMix())
+	{
+		wetRatio = 2.0f * wetRatio - 1.0f;
+		dryRatio = -wetRatio;
+	}
+
+	wetRatio *= m_fGain;
+	dryRatio *= m_fGain;
+
+	// Mix operation
+	switch(mixop)
+	{
+
+	// Default mix
+	case 0:
+		for(uint32 i = 0; i < numFrames; i++)
+		{
+			//rewbs.wetratio - added the factors. [20040123]
+			pOutL[i] += leftPlugOutput[i] * wetRatio + m_MixState.pOutBufferL[i] * dryRatio;
+			pOutR[i] += rightPlugOutput[i] * wetRatio + m_MixState.pOutBufferR[i] * dryRatio;
+		}
+		break;
+
+	// Wet subtract
+	case 1:
+		for(uint32 i = 0; i < numFrames; i++)
+		{
+			pOutL[i] += m_MixState.pOutBufferL[i] - leftPlugOutput[i] * wetRatio;
+			pOutR[i] += m_MixState.pOutBufferR[i] - rightPlugOutput[i] * wetRatio;
+		}
+		break;
+
+	// Dry subtract
+	case 2:
+		for(uint32 i = 0; i < numFrames; i++)
+		{
+			pOutL[i] += leftPlugOutput[i] - m_MixState.pOutBufferL[i] * dryRatio;
+			pOutR[i] += rightPlugOutput[i] - m_MixState.pOutBufferR[i] * dryRatio;
+		}
+		break;
+
+	// Mix subtract
+	case 3:
+		for(uint32 i = 0; i < numFrames; i++)
+		{
+			pOutL[i] -= leftPlugOutput[i] - m_MixState.pOutBufferL[i] * wetRatio;
+			pOutR[i] -= rightPlugOutput[i] - m_MixState.pOutBufferR[i] * wetRatio;
+		}
+		break;
+
+	// Middle subtract
+	case 4:
+		for(uint32 i = 0; i < numFrames; i++)
+		{
+			float middle = (pOutL[i] + m_MixState.pOutBufferL[i] + pOutR[i] + m_MixState.pOutBufferR[i]) / 2.0f;
+			pOutL[i] -= middle - leftPlugOutput[i] * wetRatio + middle - m_MixState.pOutBufferL[i];
+			pOutR[i] -= middle - rightPlugOutput[i] * wetRatio + middle - m_MixState.pOutBufferR[i];
+		}
+		break;
+
+	// Left / Right balance
+	case 5:
+		if(m_pMixStruct->IsExpandedMix())
+		{
+			wetRatio /= 2.0f;
+			dryRatio /= 2.0f;
+		}
+
+		for(uint32 i = 0; i < numFrames; i++)
+		{
+			pOutL[i] += wetRatio * (leftPlugOutput[i] - m_MixState.pOutBufferL[i]) + dryRatio * (m_MixState.pOutBufferR[i] - rightPlugOutput[i]);
+			pOutR[i] += dryRatio * (leftPlugOutput[i] - m_MixState.pOutBufferL[i]) + wetRatio * (m_MixState.pOutBufferR[i] - rightPlugOutput[i]);
+		}
+		break;
+	}
+
+	// If dry mix is ticked, we add the unprocessed buffer,
+	// except if this is an instrument since this it has already been done:
+	if(m_pMixStruct->IsWetMix() && !IsInstrument())
+	{
+		for(uint32 i = 0; i < numFrames; i++)
+		{
+			pOutL[i] += m_MixState.pOutBufferL[i];
+			pOutR[i] += m_MixState.pOutBufferR[i];
+		}
+	}
+}
+
+
+// Render some silence and return maximum level returned by the plugin.
+float IMixPlugin::RenderSilence(uint32 numFrames)
+//-----------------------------------------------
+{
+	// The JUCE framework doesn't like processing while being suspended.
+	const bool wasSuspended = !IsResumed();
+	if(wasSuspended)
+	{
+		Resume();
+	}
+
+	float out[2][MIXBUFFERSIZE]; // scratch buffers
+	float maxVal = 0.0f;
+	m_mixBuffer.ClearInputBuffers(MIXBUFFERSIZE);
+
+	while(numFrames > 0)
+	{
+		uint32 renderSamples = numFrames;
+		LimitMax(renderSamples, CountOf(out[0]));
+		MemsetZero(out);
+
+		Process(out[0], out[1], renderSamples);
+		for(size_t i = 0; i < renderSamples; i++)
+		{
+			maxVal = std::max(maxVal, fabs(out[0][i]));
+			maxVal = std::max(maxVal, fabs(out[1][i]));
+		}
+
+		numFrames -= renderSamples;
+	}
+
+	if(wasSuspended)
+	{
+		Suspend();
+	}
+
+	return maxVal;
 }
 
 

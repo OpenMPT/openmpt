@@ -11,10 +11,13 @@
 #pragma once
 
 #include "../../soundlib/Snd_defs.h"
+#ifndef NO_PLUGINS
 #include "../../common/misc_util.h"
 #include "../../soundlib/MIDIEvents.h"
 #include "../../common/Endianness.h"
 #include "../../soundlib/Mixer.h"
+#include "PluginMixBuffer.h"
+#endif // NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -76,6 +79,10 @@ protected:
 	CAbstractVstEditor *m_pEditor;
 #endif // MODPLUG_TRACKER
 	SNDMIXPLUGINSTATE m_MixState;
+
+	PluginMixBuffer<float, MIXBUFFERSIZE> m_mixBuffer;	// Float buffers (input and output) for plugins
+	mixsample_t m_MixBuffer[MIXBUFFERSIZE * 2 + 2];		// Stereo interleaved input (sample mixer renders here)
+
 	float m_fGain;
 	PLUGINDEX m_nSlot;
 
@@ -122,6 +129,7 @@ public:
 	virtual int32 GetUID() const = 0;
 	virtual int32 GetVersion() const = 0;
 	virtual void Idle() = 0;
+	virtual uint32 GetLatency() const = 0;
 
 	virtual int32 GetNumPrograms() const = 0;
 	virtual int32 GetCurrentProgram() = 0;
@@ -133,8 +141,10 @@ public:
 
 	virtual void SaveAllParameters();
 	virtual void RestoreAllParameters(int32 program);
-	virtual void Process(float *pOutL, float *pOutR, size_t nSamples) = 0;
-	virtual float RenderSilence(size_t numSamples) = 0;
+	virtual void Process(float *pOutL, float *pOutR, uint32 numFrames) = 0;
+	void ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput, float *rightPlugOutput, uint32 numFrames) const;
+	// Render silence and return the highest resulting output level
+	virtual float RenderSilence(uint32 numSamples);
 	virtual bool MidiSend(uint32 dwMidiCode) = 0;
 	virtual bool MidiSysexSend(const char *message, uint32 length) = 0;
 	virtual void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) = 0;
@@ -259,7 +269,6 @@ protected:
 	static inline void ApplyPitchWheelDepth(int32 &value, int8 pwd);
 
 	void MidiPitchBend(uint8 nMidiCh, int32 pitchBendPos);
-
 };
 
 
@@ -287,7 +296,7 @@ struct PACKED SNDMIXPLUGININFO
 	uint8 reserved;
 	uint32 dwOutputRouting;			// 0 = send to master 0x80 + x = send to plugin x
 	uint32 dwReserved[4];			// Reserved for routing info
-	char szName[32];				// User-chosen plugin name - this is locale ANSI!
+	char szName[32];				// User-chosen plugin display name - this is locale ANSI!
 	char szLibraryName[64];			// original DLL name - this is UTF-8!
 
 	// Should only be called from SNDMIXPLUGIN::SetBypass() and IMixPlugin::Bypass()

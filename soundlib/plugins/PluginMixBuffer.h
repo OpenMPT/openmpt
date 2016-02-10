@@ -15,7 +15,7 @@ OPENMPT_NAMESPACE_BEGIN
 // At least this part of the code is ready for double-precision rendering... :>
 // buffer_t: Sample buffer type (float, double, ...)
 // bufferSize: Buffer size in samples
-template<typename buffer_t, size_t bufferSize>
+template<typename buffer_t, uint32 bufferSize>
 //===================
 class PluginMixBuffer
 //===================
@@ -27,16 +27,16 @@ protected:
 	buffer_t **inputsArray;		// Pointers to input buffers
 	buffer_t **outputsArray;	// Pointers to output buffers
 
-	size_t inputs, outputs;		// Number of input and output buffers
+	uint32 inputs, outputs;		// Number of input and output buffers
 
 	// Buffers on 32-Bit platforms: Aligned to 32 bytes
 	// Buffers on 64-Bit platforms: Aligned to 64 bytes
 	static_assert(sizeof(intptr_t) * 8 >= sizeof(buffer_t), "Check buffer alignment code");
-	static const size_t bufferAlignmentInBytes = (sizeof(intptr_t) * 8) - 1;
-	static const size_t additionalBuffer = ((sizeof(intptr_t) * 8) / sizeof(buffer_t));
+	static const uint32 bufferAlignmentInBytes = (sizeof(intptr_t) * 8) - 1;
+	static const uint32 additionalBuffer = ((sizeof(intptr_t) * 8) / sizeof(buffer_t));
 
 	// Return pointer to an aligned buffer
-	buffer_t *GetBuffer(size_t index) const
+	buffer_t *GetBuffer(uint32 index) const
 	//-------------------------------------
 	{
 		ASSERT(index < inputs + outputs);
@@ -46,7 +46,7 @@ protected:
 public:
 
 	// Allocate input and output buffers
-	bool Initialize(size_t inputs_, size_t outputs_)
+	bool Initialize(uint32 inputs_, uint32 outputs_)
 	//----------------------------------------------
 	{
 		// Short cut - we do not need to recreate the buffers.
@@ -63,7 +63,7 @@ public:
 		try
 		{
 			// Create inputs + outputs buffers with additional alignment.
-			const size_t totalBufferSize = bufferSize * (inputs + outputs) + additionalBuffer;
+			const uint32 totalBufferSize = bufferSize * (inputs + outputs) + additionalBuffer;
 			mixBuffer = new buffer_t[totalBufferSize];
 			memset(mixBuffer, 0, totalBufferSize * sizeof(buffer_t));
 
@@ -77,12 +77,12 @@ public:
 			return false;
 		}
 
-		for(size_t i = 0; i < inputs; i++)
+		for(uint32 i = 0; i < inputs; i++)
 		{
 			inputsArray[i] = GetInputBuffer(i);
 		}
 
-		for(size_t i = 0; i < outputs; i++)
+		for(uint32 i = 0; i < outputs; i++)
 		{
 			outputsArray[i] = GetOutputBuffer(i);
 		}
@@ -109,22 +109,22 @@ public:
 	}
 
 	// Silence all input buffers.
-	void ClearInputBuffers(size_t numSamples)
+	void ClearInputBuffers(uint32 numSamples)
 	//---------------------------------------
 	{
 		ASSERT(numSamples <= bufferSize);
-		for(size_t i = 0; i < inputs; i++)
+		for(uint32 i = 0; i < inputs; i++)
 		{
 			memset(inputsArray[i], 0, numSamples * sizeof(buffer_t));
 		}
 	}
 
 	// Silence all output buffers.
-	void ClearOutputBuffers(size_t numSamples)
+	void ClearOutputBuffers(uint32 numSamples)
 	//----------------------------------------
 	{
 		ASSERT(numSamples <= bufferSize);
-		for(size_t i = 0; i < outputs; i++)
+		for(uint32 i = 0; i < outputs; i++)
 		{
 			memset(outputsArray[i], 0, numSamples * sizeof(buffer_t));
 		}
@@ -150,8 +150,8 @@ public:
 	}
 
 	// Return pointer to a given input or output buffer
-	buffer_t *GetInputBuffer(size_t index) const { return GetBuffer(index); }
-	buffer_t *GetOutputBuffer(size_t index) const { return GetBuffer(inputs + index); }
+	buffer_t *GetInputBuffer(uint32 index) const { return GetBuffer(index); }
+	buffer_t *GetOutputBuffer(uint32 index) const { return GetBuffer(inputs + index); }
 
 	// Return pointer array to all input or output buffers
 	buffer_t **GetInputBufferArray() const { return inputsArray; }

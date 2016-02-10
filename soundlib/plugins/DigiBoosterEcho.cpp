@@ -25,21 +25,16 @@ DigiBoosterEcho::DigiBoosterEcho(VSTPluginLib &factory, CSoundFile &sndFile, SND
 {
 	RecalculateEchoParams();
 
-	m_MixState.pMixBuffer = (mixsample_t *)((((intptr_t)m_MixBuffer) + 7) & ~7);
-	m_MixState.pOutBufferL = m_mixBuffer.GetInputBuffer(0);
-	m_MixState.pOutBufferR = m_mixBuffer.GetInputBuffer(1);
-
-	m_pMixStruct->pMixState = &m_MixState;
 	m_pMixStruct->pMixPlugin = this;
 }
 
 
-void DigiBoosterEcho::Process(float *pOutL, float *pOutR, size_t numSamples)
-//--------------------------------------------------------------------------
+void DigiBoosterEcho::Process(float *pOutL, float *pOutR, uint32 numFrames)
+//-------------------------------------------------------------------------
 {
 	const float *srcL = m_mixBuffer.GetInputBuffer(0), *srcR = m_mixBuffer.GetInputBuffer(1);
 
-	while(numSamples--)
+	while(numFrames--)
 	{
 		int readPos = m_writePos - m_delayTime;
 		if(readPos < 0)

@@ -11,7 +11,6 @@
 #ifndef NO_PLUGINS
 
 #include "plugins/PlugInterface.h"
-#include "plugins/PluginMixBuffer.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -48,9 +47,6 @@ public:
 	};
 
 protected:
-	PluginMixBuffer<float, MIXBUFFERSIZE> m_mixBuffer;	// Float buffers (input and output) for plugins
-	mixsample_t m_MixBuffer[MIXBUFFERSIZE * 2 + 2];		// Stereo interleaved
-
 	std::vector<float> m_delayLine;	// Echo delay line
 	uint32 m_bufferSize;			// Delay line length in frames
 	uint32 m_writePos;				// Current write position in the delay line
@@ -68,16 +64,17 @@ protected:
 public:
 	DigiBoosterEcho(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 
-	virtual void Release() { }
+	virtual void Release() { delete this; }
 	virtual void SaveAllParameters();
 	virtual void RestoreAllParameters(int32 program);
 	virtual int32 GetUID() const { int32 id; memcpy(&id, "Echo", 4); return id; }
 	virtual int32 GetVersion() const { return 0; }
 	virtual void Idle() { }
+	virtual uint32 GetLatency() const { return 0; }
 
-	virtual void Process(float *pOutL, float *pOutR, size_t numSamples);
+	virtual void Process(float *pOutL, float *pOutR, uint32 numFrames);
 
-	virtual float RenderSilence(size_t) { return 0.0f; }
+	virtual float RenderSilence(uint32) { return 0.0f; }
 	virtual bool MidiSend(uint32) { return true; }
 	virtual bool MidiSysexSend(const char *, uint32) { return true; }
 	virtual void MidiCC(uint8, MIDIEvents::MidiCC, uint8, CHANNELINDEX) { }

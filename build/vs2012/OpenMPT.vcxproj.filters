@@ -617,6 +617,9 @@
     <ClInclude Include="..\..\soundlib\patternContainer.h">
       <Filter>soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\DMOPlugin.h">
+      <Filter>soundlib\plugins</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\DigiBoosterEcho.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
@@ -1240,10 +1243,10 @@
     <ClCompile Include="..\..\soundlib\patternContainer.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\plugins\DigiBoosterEcho.cpp">
+    <ClCompile Include="..\..\soundlib\plugins\DMOPlugin.cpp">
       <Filter>soundlib\plugins</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\plugins\DmoToVst.cpp">
+    <ClCompile Include="..\..\soundlib\plugins\DigiBoosterEcho.cpp">
       <Filter>soundlib\plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\PlugInterface.cpp">
