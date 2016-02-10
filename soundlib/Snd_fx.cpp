@@ -3167,6 +3167,31 @@ bool CSoundFile::ProcessEffects()
 				pChn->nPosLo = 0;
 			}
 			break;
+
+#ifndef NO_PLUGINS
+		// DBM: Toggle DSP Echo
+		case CMD_DBMECHO:
+			if(m_PlayState.m_nTickCount == 0)
+			{
+				uint32 chns = (param >> 4), enable = (param & 0x0F);
+				if(chns > 1 || enable > 2)
+				{
+					break;
+				}
+				CHANNELINDEX firstChn = nChn, lastChn = nChn;
+				if(chns == 1)
+				{
+					firstChn = 0;
+					lastChn = m_nChannels - 1;
+				}
+				for(CHANNELINDEX c = firstChn; c <= lastChn; c++)
+				{
+					ChnSettings[c].dwFlags.set(CHN_NOFX, enable == 1);
+					m_PlayState.Chn[c].dwFlags.set(CHN_NOFX, enable == 1);
+				}
+			}
+			break;
+#endif // NO_PLUGINS
 		}
 
 		if(m_playBehaviour[kST3EffectMemory] && param != 0)

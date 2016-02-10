@@ -12,7 +12,6 @@
 
 #include "plugins/PlugInterface.h"
 #include "plugins/PluginMixBuffer.h"
-#include "plugins/PluginManager.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -43,6 +42,8 @@ public:
 			param[kEchoFeedback] = feedback;
 			param[kEchoMix] = mix;
 			param[kEchoCross] = cross;
+
+			STATIC_ASSERT(sizeof(PluginChunk) == 8);
 		}
 	};
 
@@ -98,10 +99,10 @@ public:
 	virtual void Suspend() { }
 	virtual bool IsInstrument() const { return false; }
 	virtual bool CanRecieveMidiEvents() { return false; }
-	virtual bool ShouldProcessSilence() { return false; }
+	virtual bool ShouldProcessSilence() { return true; }
 
 #ifdef MODPLUG_TRACKER
-	virtual CString GetDefaultEffectName() { return CString(); }
+	virtual CString GetDefaultEffectName() { return _T("Echo"); }
 
 	virtual void CacheProgramNames(int32, int32) { }
 	virtual void CacheParameterNames(int32, int32) { }

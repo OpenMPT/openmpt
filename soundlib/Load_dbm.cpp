@@ -173,11 +173,11 @@ static const ModCommand::COMMAND dbmEffects[] =
 	CMD_CHANNELVOLUME, CMD_CHANNELVOLSLIDE, CMD_NONE, CMD_NONE,
 	CMD_NONE, CMD_PANNINGSLIDE, CMD_NONE, CMD_NONE,
 	CMD_NONE, CMD_NONE, CMD_NONE,
-	CMD_NONE,	// Toggle DSP
-	CMD_MIDI,	// Wxx Echo Delay
-	CMD_MIDI,	// Xxx Echo Feedback
-	CMD_MIDI,	// Yxx Echo Mix
-	CMD_MIDI,	// Zxx Echo Cross
+	CMD_DBMECHO,	// Toggle DSP
+	CMD_MIDI,		// Wxx Echo Delay
+	CMD_MIDI,		// Xxx Echo Feedback
+	CMD_MIDI,		// Yxx Echo Mix
+	CMD_MIDI,		// Zxx Echo Cross
 };
 
 
@@ -437,6 +437,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Patterns
 	FileReader patternChunk = chunks.GetChunk(DBMChunk::idPATT);
+	bool hasEchoEnable = false, hasEchoParams = false;
 	if(patternChunk.IsValid() && (loadFlags & loadPatternData))
 	{
 		FileReader patternNameChunk = chunks.GetChunk(DBMChunk::idPNAM);
@@ -541,30 +542,57 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 #ifdef MODPLUG_TRACKER
 					m.ExtendedMODtoS3MEffect();
 #endif // MODPLUG_TRACKER
+					if(m.command == CMD_DBMECHO)
+						hasEchoEnable = true;
+					else if(m.command == CMD_MIDI)
+						hasEchoParams = true;
 				}
 			}
 		}
 	}
 
 #ifndef NO_PLUGINS
-	// DSPs
-	FileReader dspChunk = chunks.GetChunk(DBMChunk::idDSPE);
-	if(dspChunk.IsValid() && (loadFlags & loadPluginData))
+	// Echo DSP
+	if(loadFlags & loadPluginData)
 	{
-		uint16 maskLen = dspChunk.ReadUint16BE();
-		bool anyEnabled = false;	// TODO: also check for pattern commands that enable DSPs!
-		for(uint16 i = 0; i < maskLen; i++)
+		if(hasEchoEnable)
 		{
-			bool enabled = (dspChunk.ReadUint8() == 0);
-			if(i < m_nChannels && enabled)
+			// If there are any Vxx effects to dynamically enable / disable echo, use the CHN_NOFX flag.
+			for(CHANNELINDEX i = 0; i < m_nChannels; i++)
 			{
 				ChnSettings[i].nMixPlugin = 1;
-				anyEnabled = true;
+				ChnSettings[i].dwFlags.set(CHN_NOFX);
 			}
 		}
 
-		uint8 settings[8];
-		if(anyEnabled && dspChunk.ReadArray(settings))
+		bool anyEnabled = hasEchoEnable;
+		// DBP 3 Documentation says that the defaults are 64/128/128/255, but they appear to be 80/150/80/255 in DBP 2.21
+		uint8 settings[8] = { 0, 80, 0, 150, 0, 80, 0, 255 };
+
+		FileReader dspChunk = chunks.GetChunk(DBMChunk::idDSPE);
+		if(dspChunk.IsValid())
+		{
+			uint16 maskLen = dspChunk.ReadUint16BE();
+			for(uint16 i = 0; i < maskLen; i++)
+			{
+				bool enabled = (dspChunk.ReadUint8() == 0);
+				if(i < m_nChannels)
+				{
+					if(hasEchoEnable)
+					{
+						// If there are any Vxx effects to dynamically enable / disable echo, use the CHN_NOFX flag.
+						ChnSettings[i].dwFlags.set(CHN_NOFX, !enabled);
+					} else if(enabled)
+					{
+						ChnSettings[i].nMixPlugin = 1;
+						anyEnabled = true;
+					}
+				}
+			}
+			dspChunk.ReadArray(settings);
+		}
+
+		if(anyEnabled)
 		{
 			SNDMIXPLUGIN &plugin = m_MixPlugins[0];
 			plugin.Destroy();
@@ -585,16 +613,19 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				new (plugin.pPluginData) DigiBoosterEcho::PluginChunk(settings[1], settings[3], settings[5], settings[7]);
 			}
+		}
+	}
 
-			// Encode echo parameters into fixed MIDI macros
-			for(uint32 i = 0; i < 128; i++)
-			{
-				uint32 param = (i * 127u) / 32u;
-				sprintf(m_MidiCfg.szMidiZXXExt[i     ], "F0F080%02X", param);
-				sprintf(m_MidiCfg.szMidiZXXExt[i + 32], "F0F081%02X", param);
-				sprintf(m_MidiCfg.szMidiZXXExt[i + 64], "F0F082%02X", param);
-				sprintf(m_MidiCfg.szMidiZXXExt[i + 96], "F0F083%02X", param);
-			}
+	// Encode echo parameters into fixed MIDI macros
+	if(hasEchoParams)
+	{
+		for(uint32 i = 0; i < 32; i++)
+		{
+			uint32 param = (i * 127u) / 32u;
+			sprintf(m_MidiCfg.szMidiZXXExt[i     ], "F0F080%02X", param);
+			sprintf(m_MidiCfg.szMidiZXXExt[i + 32], "F0F081%02X", param);
+			sprintf(m_MidiCfg.szMidiZXXExt[i + 64], "F0F082%02X", param);
+			sprintf(m_MidiCfg.szMidiZXXExt[i + 96], "F0F083%02X", param);
 		}
 	}
 #endif // NO_PLUGINS
