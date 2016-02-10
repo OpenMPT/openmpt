@@ -76,7 +76,11 @@ protected:
 	CAbstractVstEditor *m_pEditor;
 #endif // MODPLUG_TRACKER
 	SNDMIXPLUGINSTATE m_MixState;
+	float m_fGain;
 	PLUGINDEX m_nSlot;
+
+	bool m_bSongPlaying : 1;
+	bool m_bPlugResumed : 1;
 
 public:
 	bool m_bRecordAutomation : 1;
@@ -116,15 +120,23 @@ public:
 	inline PLUGINDEX GetSlot() const { return m_nSlot; }
 
 	inline void UpdateMixStructPtr(SNDMIXPLUGIN *p) { m_pMixStruct = p; }
+	void SetDryRatio(uint32 param);
+	bool IsBypassed() const;
+	void RecalculateGain();
 
 	virtual void Release() = 0;
 	virtual int32 GetUID() const = 0;
 	virtual int32 GetVersion() const = 0;
 	virtual void Idle() = 0;
-	virtual int32 GetNumPrograms() = 0;
+
+	virtual int32 GetNumPrograms() const = 0;
 	virtual int32 GetCurrentProgram() = 0;
 	virtual void SetCurrentProgram(int32 nIndex) = 0;
-	virtual PlugParamIndex GetNumParameters() = 0;
+
+	virtual PlugParamIndex GetNumParameters() const = 0;
+	virtual void SetParameter(PlugParamIndex paramindex, PlugParamValue paramvalue) = 0;
+	virtual PlugParamValue GetParameter(PlugParamIndex nIndex) = 0;
+
 	virtual void SaveAllParameters();
 	virtual void RestoreAllParameters(int32 program);
 	virtual void Process(float *pOutL, float *pOutR, size_t nSamples) = 0;
@@ -136,10 +148,7 @@ public:
 	virtual void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd) = 0;
 	virtual void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel) = 0;
 	virtual void HardAllNotesOff() = 0;
-	virtual void RecalculateGain() = 0;
 	virtual bool IsPlaying(uint32 note, uint32 midiChn, uint32 trackerChn) = 0;
-	virtual void SetParameter(PlugParamIndex paramindex, PlugParamValue paramvalue) = 0;
-	virtual PlugParamValue GetParameter(PlugParamIndex nIndex) = 0;
 	// Modify parameter by given amount. Only needs to be re-implemented if plugin architecture allows this to be performed atomically.
 	virtual void ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff);
 	virtual void NotifySongPlaying(bool) = 0;
@@ -148,11 +157,9 @@ public:
 	virtual void Resume() = 0;
 	virtual void Suspend() = 0;
 	virtual void Bypass(bool = true) = 0;
-	virtual bool IsBypassed() const = 0;
 	bool ToggleBypass() { Bypass(!IsBypassed()); return IsBypassed(); };
 	virtual bool IsInstrument() const = 0;
 	virtual bool CanRecieveMidiEvents() = 0;
-	virtual void SetDryRatio(uint32 param) = 0;
 	virtual bool ShouldProcessSilence() = 0;
 	virtual void ResetSilence() = 0;
 
@@ -162,8 +169,8 @@ public:
 	size_t GetInputChannelList(std::vector<CHANNELINDEX> &list);
 
 #ifdef MODPLUG_TRACKER
-	virtual bool SaveProgram() = 0;
-	virtual bool LoadProgram(mpt::PathString fileName = mpt::PathString()) = 0;
+	bool SaveProgram();
+	bool LoadProgram(mpt::PathString fileName = mpt::PathString());
 
 	virtual CString GetDefaultEffectName() = 0;
 
@@ -181,7 +188,10 @@ public:
 	CString GetFormattedProgramName(int32 index);
 
 	virtual bool HasEditor() const = 0;
-	virtual void ToggleEditor();
+protected:
+	virtual CAbstractVstEditor *OpenEditor();
+public:
+	void ToggleEditor();
 	void SetEditorPos(int32 x, int32 y);
 	void GetEditorPos(int32 &x, int32 &y) const;
 
