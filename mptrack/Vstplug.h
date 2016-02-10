@@ -78,7 +78,6 @@ public:
 	virtual void SetChunk(size_t size, char *chunk, bool isBank);
 	// If true, the plugin produces an output even if silence is being fed into it.
 	virtual bool ShouldProcessSilence() { return IsInstrument() || ((m_Effect.flags & effFlagsNoSoundInStop) == 0 && Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f) != 1); }
-	virtual void ResetSilence() { m_MixState.ResetSilence(); }
 
 	virtual int32 GetNumPrograms() const;
 	virtual int32 GetCurrentProgram();
@@ -120,8 +119,6 @@ public:
 	virtual bool MidiSysexSend(const char *message, uint32 length);
 	virtual void HardAllNotesOff();
 	virtual void NotifySongPlaying(bool playing);
-	virtual bool IsSongPlaying() const { return m_bSongPlaying; }
-	virtual bool IsResumed() const { return m_bPlugResumed; }
 	virtual void Resume();
 	virtual void Suspend();
 

@@ -148,20 +148,20 @@ public:
 	virtual void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd) = 0;
 	virtual void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel) = 0;
 	virtual void HardAllNotesOff() = 0;
-	virtual bool IsPlaying(uint32 note, uint32 midiChn, uint32 trackerChn) = 0;
+	virtual bool IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn) = 0;
 	// Modify parameter by given amount. Only needs to be re-implemented if plugin architecture allows this to be performed atomically.
 	virtual void ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff);
-	virtual void NotifySongPlaying(bool) = 0;
-	virtual bool IsSongPlaying() const = 0;
-	virtual bool IsResumed() const = 0;
+	virtual void NotifySongPlaying(bool playing) { m_bSongPlaying = playing; }
+	virtual bool IsSongPlaying() const { return m_bSongPlaying; }
+	virtual bool IsResumed() const { return m_bPlugResumed; }
 	virtual void Resume() = 0;
 	virtual void Suspend() = 0;
-	virtual void Bypass(bool = true) = 0;
+	virtual void Bypass(bool = true);
 	bool ToggleBypass() { Bypass(!IsBypassed()); return IsBypassed(); };
 	virtual bool IsInstrument() const = 0;
 	virtual bool CanRecieveMidiEvents() = 0;
 	virtual bool ShouldProcessSilence() = 0;
-	virtual void ResetSilence() = 0;
+	virtual void ResetSilence() { m_MixState.ResetSilence(); }
 
 	size_t GetOutputPlugList(std::vector<IMixPlugin *> &list);
 	size_t GetInputPlugList(std::vector<IMixPlugin *> &list);
@@ -253,7 +253,7 @@ public:
 	virtual void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd);
 	virtual void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd);
 	virtual void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel);
-	virtual bool IsPlaying(uint32 note, uint32 midiChn, uint32 trackerChn);
+	virtual bool IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn);
 
 protected:
 	// Converts a 14-bit MIDI pitch bend position to our internal pitch bend position representation

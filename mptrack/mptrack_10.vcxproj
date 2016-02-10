@@ -797,6 +797,7 @@
     <ClCompile Include="..\soundlib\MPEGFrame.cpp" />
     <ClCompile Include="..\soundlib\pattern.cpp" />
     <ClCompile Include="..\soundlib\patternContainer.cpp" />
+    <ClCompile Include="..\soundlib\plugins\DigiBoosterEcho.cpp" />
     <ClCompile Include="..\soundlib\plugins\DmoToVst.cpp" />
     <ClCompile Include="..\soundlib\plugins\PluginManager.cpp" />
     <ClCompile Include="..\soundlib\plugins\PlugInterface.cpp" />
@@ -1033,6 +1034,7 @@
     <ClInclude Include="..\soundlib\MPEGFrame.h" />
     <ClInclude Include="..\soundlib\pattern.h" />
     <ClInclude Include="..\soundlib\patternContainer.h" />
+    <ClInclude Include="..\soundlib\plugins\DigiBoosterEcho.h" />
     <ClInclude Include="..\soundlib\plugins\OpCodes.h" />
     <ClInclude Include="..\soundlib\plugins\PluginEventQueue.h" />
     <ClInclude Include="..\soundlib\plugins\PluginManager.h" />
