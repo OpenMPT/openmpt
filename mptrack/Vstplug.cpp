@@ -13,7 +13,6 @@
 #ifndef NO_VST
 
 #include "Vstplug.h"
-#include "VstPresets.h"
 #ifdef MODPLUG_TRACKER
 #include "Moddoc.h"
 #include "Mainfrm.h"
@@ -25,13 +24,10 @@
 #include "../soundlib/MIDIEvents.h"
 #include "MIDIMappingDialog.h"
 #include "../common/StringFixer.h"
-#include "../common/mptFileIO.h"
-#include "../common/FileReader.h"
 #include "FileDialog.h"
 #include "../pluginBridge/BridgeOpCodes.h"
 #include "../soundlib/plugins/OpCodes.h"
 #include "../soundlib/plugins/PluginManager.h"
-#include "../soundlib/mod_specifications.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -947,115 +943,6 @@ VstInt32 CVstPlugin::GetVersion() const
 }
 
 
-bool CVstPlugin::GetParams(float *param, VstInt32 min, VstInt32 max)
-//------------------------------------------------------------------
-{
-	LimitMax(max, m_Effect.numParams);
-
-	for(VstInt32 p = min; p < max; p++)
-		param[p - min] = GetParameter(p);
-
-	return true;
-}
-
-
-bool CVstPlugin::SaveProgram()
-//----------------------------
-{
-	mpt::PathString defaultDir = TrackerSettings::Instance().PathPluginPresets.GetWorkingDir();
-	bool useDefaultDir = !defaultDir.empty();
-	if(!useDefaultDir)
-	{
-		defaultDir = m_Factory.dllPath.GetPath();
-	}
-
-	CString progName = GetCurrentProgramName();
-	SanitizeFilename(progName);
-
-	FileDialog dlg = SaveFileDialog()
-		.DefaultExtension("fxb")
-		.DefaultFilename(progName)
-		.ExtensionFilter("VST Plugin Programs (*.fxp)|*.fxp|"
-			"VST Plugin Banks (*.fxb)|*.fxb||")
-		.WorkingDirectory(defaultDir);
-	if(!dlg.Show(m_pEditor)) return false;
-
-	if(useDefaultDir)
-	{
-		TrackerSettings::Instance().PathPluginPresets.SetWorkingDir(dlg.GetWorkingDirectory());
-	}
-
-	bool bank = (dlg.GetExtension() == MPT_PATHSTRING("fxb"));
-
-	mpt::fstream f(dlg.GetFirstFile(), std::ios::out | std::ios::trunc | std::ios::binary);
-	if(f.good() && VSTPresets::SaveFile(f, *this, bank))
-	{
-		return true;
-	} else
-	{
-		Reporting::Error("Error saving preset.", m_pEditor);
-		return false;
-	}
-
-}
-
-
-bool CVstPlugin::LoadProgram(mpt::PathString fileName)
-//----------------------------------------------------
-{
-	mpt::PathString defaultDir = TrackerSettings::Instance().PathPluginPresets.GetWorkingDir();
-	bool useDefaultDir = !defaultDir.empty();
-	if(!useDefaultDir)
-	{
-		defaultDir = m_Factory.dllPath.GetPath();
-	}
-
-	if(fileName.empty())
-	{
-		FileDialog dlg = OpenFileDialog()
-			.DefaultExtension("fxp")
-			.ExtensionFilter("VST Plugin Programs and Banks (*.fxp,*.fxb)|*.fxp;*.fxb|"
-			"VST Plugin Programs (*.fxp)|*.fxp|"
-			"VST Plugin Banks (*.fxb)|*.fxb|"
-			"All Files|*.*||")
-			.WorkingDirectory(defaultDir);
-		if(!dlg.Show(m_pEditor)) return false;
-
-		if(useDefaultDir)
-		{
-			TrackerSettings::Instance().PathPluginPresets.SetWorkingDir(dlg.GetWorkingDirectory());
-		}
-		fileName = dlg.GetFirstFile();
-	}
-
-	const char *errorStr = nullptr;
-	InputFile f(fileName);
-	if(f.IsValid())
-	{
-		FileReader file = GetFileReader(f);
-		errorStr = VSTPresets::GetErrorMessage(VSTPresets::LoadFile(file, *this));
-	} else
-	{
-		errorStr = "Can't open file.";
-	}
-
-	if(errorStr == nullptr)
-	{
-#ifdef MODPLUG_TRACKER
-		if(GetModDoc() != nullptr && GetSoundFile().GetModSpecifications().supportsPlugins)
-		{
-			GetModDoc()->SetModified();
-		}
-#endif // MODPLUG_TRACKER
-		return true;
-	} else
-	{
-		Reporting::Error(errorStr, m_pEditor);
-		return false;
-	}
-}
-
-
 VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
 //----------------------------------------------------------------------------------------------------
 {
@@ -1366,29 +1253,6 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
 		}
 	}
 #endif // MODPLUG_TRACKER
-}
-
-
-void CVstPlugin::RecalculateGain()
-//--------------------------------
-{
-	float gain = 0.1f * static_cast<float>(m_pMixStruct ? m_pMixStruct->GetGain() : 10);
-	if(gain < 0.1f) gain = 1.0f;
-
-	if(m_bIsInstrument)
-	{
-		gain /= m_SndFile.GetPlayConfig().getVSTiAttenuation();
-		gain = static_cast<float>(gain * (m_SndFile.m_nVSTiVolume / m_SndFile.GetPlayConfig().getNormalVSTiVol()));
-	}
-	m_fGain = gain;
-}
-
-
-void CVstPlugin::SetDryRatio(uint32 param)
-//----------------------------------------
-{
-	param = std::min(param, uint32(127));
-	m_pMixStruct->fDryRatio = 1.0f - (param / 127.0f);
 }
 
 
@@ -1839,34 +1703,19 @@ void CVstPlugin::RestoreAllParameters(int32 program)
 }
 
 
-void CVstPlugin::ToggleEditor()
-//-----------------------------
+CAbstractVstEditor *CVstPlugin::OpenEditor()
+//------------------------------------------
 {
 	try
 	{
-		if ((m_pEditor) && (!m_pEditor->m_hWnd))
-		{
-			delete m_pEditor;
-			m_pEditor = nullptr;
-		}
-		if (m_pEditor)
-		{
-			if (m_pEditor->m_hWnd) m_pEditor->DoClose();
-			if ((volatile void *)m_pEditor) delete m_pEditor;
-			m_pEditor = nullptr;
-		} else
-		{
-			if (HasEditor())
-				m_pEditor =  new COwnerVstEditor(*this);
-			else
-				m_pEditor = new CDefaultVstEditor(*this);
-
-			if (m_pEditor)
-				m_pEditor->OpenEditor(CMainFrame::GetMainFrame());
-		}
+		if (HasEditor())
+			return new COwnerVstEditor(*this);
+		else
+			return new CDefaultVstEditor(*this);
 	} catch (...)
 	{
-		ReportPlugException(L"Exception in ToggleEditor()");
+		ReportPlugException(L"Exception in OpenEditor()");
+		return nullptr;
 	}
 }
 

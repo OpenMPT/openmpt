@@ -18,6 +18,11 @@
 #include "../../mptrack/InputHandler.h"
 #include "../../mptrack/AbstractVstEditor.h"
 #include "../../mptrack/DefaultVstEditor.h"
+// LoadProgram/SaveProgram
+#include "../../mptrack/FileDialog.h"
+#include "../../mptrack/VstPresets.h"
+#include "../../common/FileReader.h"
+#include "../../common/mptFileIO.h"
 #include "../mod_specifications.h"
 #endif // MODPLUG_TRACKER
 
@@ -147,6 +152,37 @@ void IMixPlugin::GetEditorPos(int32 &x, int32 &y) const
 
 
 #endif // MODPLUG_TRACKER
+
+
+bool IMixPlugin::IsBypassed() const
+//---------------------------------
+{
+	return m_pMixStruct != nullptr && m_pMixStruct->IsBypassed();
+}
+
+
+void IMixPlugin::RecalculateGain()
+//--------------------------------
+{
+	float gain = 0.1f * static_cast<float>(m_pMixStruct ? m_pMixStruct->GetGain() : 10);
+	if(gain < 0.1f) gain = 1.0f;
+
+	if(IsInstrument())
+	{
+		gain /= m_SndFile.GetPlayConfig().getVSTiAttenuation();
+		gain = static_cast<float>(gain * (m_SndFile.m_nVSTiVolume / m_SndFile.GetPlayConfig().getNormalVSTiVol()));
+	}
+	m_fGain = gain;
+}
+
+
+void IMixPlugin::SetDryRatio(uint32 param)
+//----------------------------------------
+{
+	param = std::min(param, uint32(127));
+	m_pMixStruct->fDryRatio = 1.0f - (param / 127.0f);
+}
+
 
 // Get list of plugins to which output is sent. A nullptr indicates master output.
 size_t IMixPlugin::GetOutputPlugList(std::vector<IMixPlugin *> &list)
@@ -301,26 +337,34 @@ void IMixPlugin::RestoreAllParameters(int32 /*program*/)
 
 
 #ifdef MODPLUG_TRACKER
-// Provide default plugin editor
 void IMixPlugin::ToggleEditor()
 //-----------------------------
 {
-	if ((m_pEditor) && (!m_pEditor->m_hWnd))
-	{
-		delete m_pEditor;
-		m_pEditor = nullptr;
-	}
 	if (m_pEditor)
 	{
 		if (m_pEditor->m_hWnd) m_pEditor->DoClose();
-		if ((volatile void *)m_pEditor) delete m_pEditor;
+		delete m_pEditor;
 		m_pEditor = nullptr;
 	} else
 	{
-		m_pEditor = new CDefaultVstEditor(*this);
+		m_pEditor = OpenEditor();
 
 		if (m_pEditor)
 			m_pEditor->OpenEditor(CMainFrame::GetMainFrame());
+	}
+}
+
+
+// Provide default plugin editor
+CAbstractVstEditor *IMixPlugin::OpenEditor()
+//------------------------------------------
+{
+	try
+	{
+		return new CDefaultVstEditor(*this);
+	} catch(MPTMemoryException)
+	{
+		return nullptr;
 	}
 }
 
@@ -372,6 +416,103 @@ void IMixPlugin::AutomateParameter(PlugParamIndex param)
 		}
 	}
 }
+
+
+bool IMixPlugin::SaveProgram()
+//----------------------------
+{
+	mpt::PathString defaultDir = TrackerSettings::Instance().PathPluginPresets.GetWorkingDir();
+	bool useDefaultDir = !defaultDir.empty();
+	if(!useDefaultDir)
+	{
+		defaultDir = m_Factory.dllPath.GetPath();
+	}
+
+	CString progName = GetCurrentProgramName();
+	SanitizeFilename(progName);
+
+	FileDialog dlg = SaveFileDialog()
+		.DefaultExtension("fxb")
+		.DefaultFilename(progName)
+		.ExtensionFilter("VST Plugin Programs (*.fxp)|*.fxp|"
+			"VST Plugin Banks (*.fxb)|*.fxb||")
+		.WorkingDirectory(defaultDir);
+	if(!dlg.Show(m_pEditor)) return false;
+
+	if(useDefaultDir)
+	{
+		TrackerSettings::Instance().PathPluginPresets.SetWorkingDir(dlg.GetWorkingDirectory());
+	}
+
+	bool bank = (dlg.GetExtension() == MPT_PATHSTRING("fxb"));
+
+	mpt::fstream f(dlg.GetFirstFile(), std::ios::out | std::ios::trunc | std::ios::binary);
+	if(f.good() && VSTPresets::SaveFile(f, *this, bank))
+	{
+		return true;
+	} else
+	{
+		Reporting::Error("Error saving preset.", m_pEditor);
+		return false;
+	}
+
+}
+
+
+bool IMixPlugin::LoadProgram(mpt::PathString fileName)
+//----------------------------------------------------
+{
+	mpt::PathString defaultDir = TrackerSettings::Instance().PathPluginPresets.GetWorkingDir();
+	bool useDefaultDir = !defaultDir.empty();
+	if(!useDefaultDir)
+	{
+		defaultDir = m_Factory.dllPath.GetPath();
+	}
+
+	if(fileName.empty())
+	{
+		FileDialog dlg = OpenFileDialog()
+			.DefaultExtension("fxp")
+			.ExtensionFilter("VST Plugin Programs and Banks (*.fxp,*.fxb)|*.fxp;*.fxb|"
+			"VST Plugin Programs (*.fxp)|*.fxp|"
+			"VST Plugin Banks (*.fxb)|*.fxb|"
+			"All Files|*.*||")
+			.WorkingDirectory(defaultDir);
+		if(!dlg.Show(m_pEditor)) return false;
+
+		if(useDefaultDir)
+		{
+			TrackerSettings::Instance().PathPluginPresets.SetWorkingDir(dlg.GetWorkingDirectory());
+		}
+		fileName = dlg.GetFirstFile();
+	}
+
+	const char *errorStr = nullptr;
+	InputFile f(fileName);
+	if(f.IsValid())
+	{
+		FileReader file = GetFileReader(f);
+		errorStr = VSTPresets::GetErrorMessage(VSTPresets::LoadFile(file, *this));
+	} else
+	{
+		errorStr = "Can't open file.";
+	}
+
+	if(errorStr == nullptr)
+	{
+		if(GetModDoc() != nullptr && GetSoundFile().GetModSpecifications().supportsPlugins)
+		{
+			GetModDoc()->SetModified();
+		}
+		return true;
+	} else
+	{
+		Reporting::Error(errorStr, m_pEditor);
+		return false;
+	}
+}
+
+
 #endif // MODPLUG_TRACKER
 
 

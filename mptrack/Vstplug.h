@@ -24,11 +24,9 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-class CVstPluginManager;
-#ifdef MODPLUG_TRACKER
-class CModDoc;
-#endif // MODPLUG_TRACKER
 class CSoundFile;
+struct SNDMIXPLUGIN;
+struct VSTPluginLib;
 
 
 //==================================
@@ -48,10 +46,7 @@ protected:
 	void (*m_pProcessFP)(AEffect*, float**, float**, VstInt32); //Function pointer to AEffect processReplacing if supported, else process.
 
 	double lastBarStartPos;
-	float m_fGain;
 	uint32 m_nSampleRate;
-	bool m_bSongPlaying : 1;
-	bool m_bPlugResumed : 1;
 	bool m_bIsVst2 : 1;
 	bool m_bIsInstrument : 1;
 	bool m_isInitialized : 1;
@@ -69,78 +64,73 @@ public:
 public:
 	CVstPlugin(HINSTANCE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixPlugin, AEffect &effect, CSoundFile &sndFile);
 	virtual ~CVstPlugin();
+
+protected:
 	void Initialize();
 
 public:
-	void Idle();
-	bool HasEditor() const;
-	int32 GetNumPrograms();
-	int32 GetCurrentProgram();
-	PlugParamIndex GetNumParameters();
-	VstInt32 GetNumProgramCategories();
-	bool LoadProgram(mpt::PathString fileName = mpt::PathString());
-	bool SaveProgram();
-	int32 GetUID() const;
-	int32 GetVersion() const;
+	virtual void Idle();
+	virtual bool HasEditor() const;
+	virtual int32 GetNumPrograms();
+	virtual int32 GetCurrentProgram();
+	virtual PlugParamIndex GetNumParameters();
+	virtual int32 GetUID() const;
+	virtual int32 GetVersion() const;
 	// Check if programs should be stored as chunks or parameters
-	bool ProgramsAreChunks() const { return (m_Effect.flags & effFlagsProgramChunks) != 0; }
-	size_t GetChunk(char *(&chunk), bool isBank);
-	void SetChunk(size_t size, char *chunk, bool isBank);
-	bool GetParams(float* param, VstInt32 min, VstInt32 max);
+	virtual bool ProgramsAreChunks() const { return (m_Effect.flags & effFlagsProgramChunks) != 0; }
+	virtual size_t GetChunk(char *(&chunk), bool isBank);
+	virtual void SetChunk(size_t size, char *chunk, bool isBank);
 	// If true, the plugin produces an output even if silence is being fed into it.
-	bool ShouldProcessSilence() { return IsInstrument() || ((m_Effect.flags & effFlagsNoSoundInStop) == 0 && Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f) != 1); }
-	void ResetSilence() { m_MixState.ResetSilence(); }
+	virtual bool ShouldProcessSilence() { return IsInstrument() || ((m_Effect.flags & effFlagsNoSoundInStop) == 0 && Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f) != 1); }
+	virtual void ResetSilence() { m_MixState.ResetSilence(); }
 
-	void SetCurrentProgram(int32 nIndex);
-	PlugParamValue GetParameter(PlugParamIndex nIndex);
-	void SetParameter(PlugParamIndex nIndex, PlugParamValue fValue);
+	virtual void SetCurrentProgram(int32 nIndex);
+	virtual PlugParamValue GetParameter(PlugParamIndex nIndex);
+	virtual void SetParameter(PlugParamIndex nIndex, PlugParamValue fValue);
 
-	CString GetCurrentProgramName();
-	void SetCurrentProgramName(const CString &name);
-	CString GetProgramName(int32 program);
+	virtual CString GetCurrentProgramName();
+	virtual void SetCurrentProgramName(const CString &name);
+	virtual CString GetProgramName(int32 program);
 
-	CString GetParamName(PlugParamIndex param);
-	CString GetParamLabel(PlugParamIndex param) { return GetParamPropertyString(param, effGetParamLabel); };
-	CString GetParamDisplay(PlugParamIndex param) { return GetParamPropertyString(param, effGetParamDisplay); };
+	virtual CString GetParamName(PlugParamIndex param);
+	virtual CString GetParamLabel(PlugParamIndex param) { return GetParamPropertyString(param, effGetParamLabel); };
+	virtual CString GetParamDisplay(PlugParamIndex param) { return GetParamPropertyString(param, effGetParamDisplay); };
 
 	VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
-	void ToggleEditor();
-	CString GetDefaultEffectName();
+	virtual CAbstractVstEditor *OpenEditor();
+	virtual CString GetDefaultEffectName();
 
-	void Bypass(bool bypass = true);
-	bool IsBypassed() const { return m_pMixStruct->IsBypassed(); };
+	virtual void Bypass(bool bypass = true);
 
-	bool IsInstrument() const;
-	bool CanRecieveMidiEvents();
+	virtual bool IsInstrument() const;
+	virtual bool CanRecieveMidiEvents();
 
-	void CacheProgramNames(int32 firstProg, int32 lastProg);
-	void CacheParameterNames(int32 firstParam, int32 lastParam);
+	virtual void CacheProgramNames(int32 firstProg, int32 lastProg);
+	virtual void CacheParameterNames(int32 firstParam, int32 lastParam);
 
 public:
-	void Release();
-	void SaveAllParameters();
-	void RestoreAllParameters(int32 program);
-	void RecalculateGain();
-	void Process(float *pOutL, float *pOutR, size_t nSamples);
-	float RenderSilence(size_t numSamples);
-	bool MidiSend(uint32 dwMidiCode);
-	bool MidiSysexSend(const char *message, uint32 length);
-	void HardAllNotesOff();
-	void NotifySongPlaying(bool playing);
-	bool IsSongPlaying() const { return m_bSongPlaying; }
-	bool IsResumed() const { return m_bPlugResumed; }
-	void Resume();
-	void Suspend();
-	void SetDryRatio(uint32 param);
+	virtual void Release();
+	virtual void SaveAllParameters();
+	virtual void RestoreAllParameters(int32 program);
+	virtual void Process(float *pOutL, float *pOutR, size_t nSamples);
+	virtual float RenderSilence(size_t numSamples);
+	virtual bool MidiSend(uint32 dwMidiCode);
+	virtual bool MidiSysexSend(const char *message, uint32 length);
+	virtual void HardAllNotesOff();
+	virtual void NotifySongPlaying(bool playing);
+	virtual bool IsSongPlaying() const { return m_bSongPlaying; }
+	virtual bool IsResumed() const { return m_bPlugResumed; }
+	virtual void Resume();
+	virtual void Suspend();
 
 	// Check whether a VST parameter can be automated
 	bool CanAutomateParameter(PlugParamIndex index);
 
-	int GetNumInputChannels() const { return m_Effect.numInputs; }
-	int GetNumOutputChannels() const { return m_Effect.numOutputs; }
+	virtual int GetNumInputChannels() const { return m_Effect.numInputs; }
+	virtual int GetNumOutputChannels() const { return m_Effect.numOutputs; }
 
-	void BeginSetProgram(int32 program);
-	void EndSetProgram();
+	virtual void BeginSetProgram(int32 program);
+	virtual void EndSetProgram();
 
 protected:
 	// Helper function for retreiving parameter name / label / display
