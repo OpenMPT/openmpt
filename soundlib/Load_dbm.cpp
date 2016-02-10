@@ -11,7 +11,9 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "ChunkReader.h"
+#ifndef NO_PLUGINS
 #include "plugins/DigiBoosterEcho.h"
+#endif // NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
 
