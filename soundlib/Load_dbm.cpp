@@ -437,7 +437,9 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Patterns
 	FileReader patternChunk = chunks.GetChunk(DBMChunk::idPATT);
+#ifndef NO_PLUGINS
 	bool hasEchoEnable = false, hasEchoParams = false;
+#endif // NO_PLUGINS
 	if(patternChunk.IsValid() && (loadFlags & loadPatternData))
 	{
 		FileReader patternNameChunk = chunks.GetChunk(DBMChunk::idPNAM);
@@ -542,10 +544,12 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 #ifdef MODPLUG_TRACKER
 					m.ExtendedMODtoS3MEffect();
 #endif // MODPLUG_TRACKER
+#ifndef NO_PLUGINS
 					if(m.command == CMD_DBMECHO)
 						hasEchoEnable = true;
 					else if(m.command == CMD_MIDI)
 						hasEchoParams = true;
+#endif // NO_PLUGINS
 				}
 			}
 		}
