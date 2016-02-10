@@ -88,13 +88,7 @@ public:
 	bool m_bRecordMIDIOut : 1;
 
 protected:
-	virtual ~IMixPlugin()
-	{
-		if (m_pNext) m_pNext->m_pPrev = m_pPrev;
-		if (m_pPrev) m_pPrev->m_pNext = m_pNext;
-		m_pPrev = nullptr;
-		m_pNext = nullptr;
-	}
+	virtual ~IMixPlugin();
 
 	void InsertIntoFactoryList();
 
@@ -160,6 +154,7 @@ public:
 	bool ToggleBypass() { Bypass(!IsBypassed()); return IsBypassed(); };
 	virtual bool IsInstrument() const = 0;
 	virtual bool CanRecieveMidiEvents() = 0;
+	// If false is returned, mixing this plugin can be skipped if its input are currently completely silent.
 	virtual bool ShouldProcessSilence() = 0;
 	virtual void ResetSilence() { m_MixState.ResetSilence(); }
 

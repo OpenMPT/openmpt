@@ -11,7 +11,7 @@
 #include "stdafx.h"
 
 #ifndef NO_PLUGINS
-#include "Sndfile.h"
+#include "../Sndfile.h"
 #include "DigiBoosterEcho.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -20,14 +20,7 @@ DigiBoosterEcho::DigiBoosterEcho(VSTPluginLib &factory, CSoundFile &sndFile, SND
 	: IMixPlugin(factory, sndFile, mixStruct)
 	, m_bufferSize(0)
 	, m_writePos(0)
-	, m_delayTime(0)
 	, m_sampleRate(sndFile.GetSampleRate())
-	, m_PMix(0.0f)
-	, m_NMix(0.0f)
-	, m_PCrossPBack(0.0f)
-	, m_PCrossNBack(0.0f)
-	, m_NCrossPBack(0.0f)
-	, m_NCrossNBack(0.0f)
 //---------------------------------------------------------------------------------------------------
 {
 	RecalculateEchoParams();
@@ -44,7 +37,7 @@ DigiBoosterEcho::DigiBoosterEcho(VSTPluginLib &factory, CSoundFile &sndFile, SND
 void DigiBoosterEcho::Process(float *pOutL, float *pOutR, size_t numSamples)
 //--------------------------------------------------------------------------
 {
-	float *srcL = m_mixBuffer.GetInputBuffer(0), *srcR = m_mixBuffer.GetInputBuffer(1);
+	const float *srcL = m_mixBuffer.GetInputBuffer(0), *srcR = m_mixBuffer.GetInputBuffer(1);
 
 	while(numSamples--)
 	{
@@ -52,10 +45,8 @@ void DigiBoosterEcho::Process(float *pOutL, float *pOutR, size_t numSamples)
 		if(readPos < 0)
 			readPos += m_bufferSize;
 
-		float l = *srcL++;
-		float r = *srcR++;
-		float lDelay = m_delayLine[readPos * 2];
-		float rDelay = m_delayLine[readPos * 2 + 1];
+		float l = *srcL++, r = *srcR++;
+		float lDelay = m_delayLine[readPos * 2], rDelay = m_delayLine[readPos * 2 + 1];
 
 		// Calculate the delay
 		float al = l * m_NCrossNBack;
@@ -67,6 +58,12 @@ void DigiBoosterEcho::Process(float *pOutL, float *pOutR, size_t numSamples)
 		ar += l * m_PCrossNBack;
 		ar += rDelay * m_NCrossPBack;
 		ar += lDelay * m_PCrossPBack;
+
+		// Prevent denormals
+		if(std::abs(al) < 1e-24f)
+			al = 0.0f;
+		if(std::abs(ar) < 1e-24f)
+			ar = 0.0f;
 
 		m_delayLine[m_writePos * 2] = al;
 		m_delayLine[m_writePos * 2 + 1] = ar;
@@ -138,7 +135,8 @@ void DigiBoosterEcho::Resume()
 //----------------------------
 {
 	m_sampleRate = m_SndFile.GetSampleRate();
-	m_bufferSize = ((m_sampleRate >> 1) + (m_sampleRate >> 6) + 3) & ~4;
+	m_bufferSize = (m_sampleRate >> 1) + (m_sampleRate >> 6);
+	RecalculateEchoParams();
 	try
 	{
 		m_delayLine.assign(m_bufferSize * 2, 0);
@@ -159,8 +157,8 @@ CString DigiBoosterEcho::GetParamName(PlugParamIndex param)
 	{
 	case kEchoDelay: return _T("Delay");
 	case kEchoFeedback: return _T("Feedback");
-	case kEchoMix: return _T("Mix");
-	case kEchoCross: return _T("Cross");
+	case kEchoMix: return _T("Wet / Dry Ratio");
+	case kEchoCross: return _T("Cross Echo");
 	}
 	return CString();
 }
@@ -182,7 +180,7 @@ CString DigiBoosterEcho::GetParamDisplay(PlugParamIndex param)
 	if(param == kEchoMix)
 	{
 		int wet = (chunk.param[kEchoMix] * 100) / 255;
-		s.Format(_T("%d%% wet, %d%% dry"), wet, 100 - wet);
+		s.Format(_T("%d%% / %d%%"), wet, 100 - wet);
 	} else if(param < kEchoNumParameters)
 	{
 		int val = chunk.param[param];

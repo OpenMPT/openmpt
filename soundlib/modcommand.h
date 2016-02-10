@@ -100,7 +100,8 @@ enum EffectCommands
 	CMD_NOTESLIDEUPRETRIG	= 37, // PTM Lxy (Slide y notes up every x ticks + retrigger note)
 	CMD_NOTESLIDEDOWNRETRIG	= 38, // PTM Mxy (Slide y notes down every x ticks + retrigger note)
 	CMD_REVERSEOFFSET		= 39, // PTM Nxx Revert sample + offset
-	MAX_EFFECTS				= 40
+	CMD_DBMECHO				= 40, // DBM enable/disable echo
+	MAX_EFFECTS				= 41
 };
 
 

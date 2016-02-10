@@ -71,7 +71,7 @@ const CModSpecifications mptm =
 	true,										// Has artist name
 	true,										// Has default resampling
 	true,										// Fixed point tempo
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#?????",	// Supported Effects
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#??????",	// Supported Effects
 	" vpcdabuhlrgfe?o",							// Supported Volume Column commands
 };
 
@@ -120,7 +120,7 @@ const CModSpecifications mod =
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	" 0123456789ABCD?FF?E????????????????????",	// Supported Effects
+	" 0123456789ABCD?FF?E?????????????????????",	// Supported Effects
 	" ???????????????",							// Supported Volume Column commands
 };
 
@@ -167,7 +167,7 @@ const CModSpecifications xm =
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	" 0123456789ABCDRFFTE???GHK??XPL?????????",	// Supported Effects
+	" 0123456789ABCDRFFTE???GHK??XPL??????????",	// Supported Effects
 	" vpcdabuhlrg????",							// Supported Volume Column commands
 };
 
@@ -214,7 +214,7 @@ const CModSpecifications xmEx =
 	true,										// Has artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	" 0123456789ABCDRFFTE???GHK?YXPLZ\\?#?????",	// Supported Effects
+	" 0123456789ABCDRFFTE???GHK?YXPLZ\\?#??????",	// Supported Effects
 	" vpcdabuhlrgfe??",							// Supported Volume Column commands
 };
 
@@ -260,7 +260,7 @@ const CModSpecifications s3m =
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	" JFEGHLKRXODB?CQATI?SMNVW?U?????????????",	// Supported Effects
+	" JFEGHLKRXODB?CQATI?SMNVW?U??????????????",	// Supported Effects
 	" vp?????????????",							// Supported Volume Column commands
 };
 
@@ -307,7 +307,7 @@ const CModSpecifications s3mEx =
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z????????",	// Supported Effects
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z?????????",	// Supported Effects
 	" vp?????????????",							// Supported Volume Column commands
 };
 
@@ -353,7 +353,7 @@ const CModSpecifications it =
 	false,										// Doesn't have artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z????????",	// Supported Effects
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z?????????",	// Supported Effects
 	" vpcdab?h??gfe??",							// Supported Volume Column commands
 };
 
@@ -399,7 +399,7 @@ const CModSpecifications itEx =
 	true,										// Has artist name
 	false,										// Doesn't have default resampling
 	false,										// Integer tempo
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\?#?????",	// Supported Effects
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\?#??????",	// Supported Effects
 	" vpcdab?h??gfe??",							// Supported Volume Column commands
 };
 

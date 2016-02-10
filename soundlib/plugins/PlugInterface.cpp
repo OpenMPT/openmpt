@@ -64,6 +64,23 @@ IMixPlugin::IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 }
 
 
+IMixPlugin::~IMixPlugin()
+//-----------------------
+{
+	if(m_pEditor != nullptr)
+	{
+		if(m_pEditor->m_hWnd) m_pEditor->OnClose();
+		delete m_pEditor;
+		m_pEditor = nullptr;
+	}
+
+	if (m_pNext) m_pNext->m_pPrev = m_pPrev;
+	if (m_pPrev) m_pPrev->m_pNext = m_pNext;
+	m_pPrev = nullptr;
+	m_pNext = nullptr;
+}
+
+
 void IMixPlugin::InsertIntoFactoryList()
 //--------------------------------------
 {
