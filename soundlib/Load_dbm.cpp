@@ -13,6 +13,8 @@
 #include "ChunkReader.h"
 #include "plugins/DigiBoosterEcho.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
