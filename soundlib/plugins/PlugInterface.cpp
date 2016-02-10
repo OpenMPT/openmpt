@@ -47,7 +47,10 @@ IMixPlugin::IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 #ifdef MODPLUG_TRACKER
 	, m_pEditor(nullptr)
 #endif // MODPLUG_TRACKER
+	, m_fGain(1.0f)
 	, m_nSlot(0)
+	, m_bSongPlaying(false)
+	, m_bPlugResumed(false)
 	, m_bRecordAutomation(false)
 	, m_bPassKeypressesToPlug(false)
 	, m_bRecordMIDIOut(false)

@@ -70,10 +70,6 @@ protected:
 
 public:
 	virtual void Idle();
-	virtual bool HasEditor() const;
-	virtual int32 GetNumPrograms();
-	virtual int32 GetCurrentProgram();
-	virtual PlugParamIndex GetNumParameters();
 	virtual int32 GetUID() const;
 	virtual int32 GetVersion() const;
 	// Check if programs should be stored as chunks or parameters
@@ -84,7 +80,11 @@ public:
 	virtual bool ShouldProcessSilence() { return IsInstrument() || ((m_Effect.flags & effFlagsNoSoundInStop) == 0 && Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f) != 1); }
 	virtual void ResetSilence() { m_MixState.ResetSilence(); }
 
+	virtual int32 GetNumPrograms() const;
+	virtual int32 GetCurrentProgram();
 	virtual void SetCurrentProgram(int32 nIndex);
+
+	virtual PlugParamIndex GetNumParameters() const;
 	virtual PlugParamValue GetParameter(PlugParamIndex nIndex);
 	virtual void SetParameter(PlugParamIndex nIndex, PlugParamValue fValue);
 
@@ -97,6 +97,8 @@ public:
 	virtual CString GetParamDisplay(PlugParamIndex param) { return GetParamPropertyString(param, effGetParamDisplay); };
 
 	VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
+
+	virtual bool HasEditor() const { return (m_Effect.flags & effFlagsHasEditor) != 0; }
 	virtual CAbstractVstEditor *OpenEditor();
 	virtual CString GetDefaultEffectName();
 

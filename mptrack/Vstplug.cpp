@@ -692,8 +692,6 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 	, isBridged(!memcmp(&effect.resvd2, "OMPT", 4))
 	, m_hLibrary(hLibrary)
 	, m_nSampleRate(sndFile.GetSampleRate())
-	, m_bSongPlaying(false)
-	, m_bPlugResumed(false)
 	, m_isInitialized(false)
 	, m_bNeedIdle(false)
 //----------------------------------------------------------------------------------------------------------------------------
@@ -900,22 +898,15 @@ void CVstPlugin::Idle()
 }
 
 
-bool CVstPlugin::HasEditor() const
-//--------------------------------
-{
-	return (m_Effect.flags & effFlagsHasEditor) != 0;
-}
-
-
-int32 CVstPlugin::GetNumPrograms()
-//--------------------------------
+int32 CVstPlugin::GetNumPrograms() const
+//--------------------------------------
 {
 	return std::max(m_Effect.numPrograms, VstInt32(0));
 }
 
 
-PlugParamIndex CVstPlugin::GetNumParameters()
-//-------------------------------------------
+PlugParamIndex CVstPlugin::GetNumParameters() const
+//-------------------------------------------------
 {
 	return std::max(m_Effect.numParams, VstInt32(0));
 }

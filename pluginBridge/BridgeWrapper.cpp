@@ -478,7 +478,7 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 			// If the song is playing, the rendering thread might be active at the moment,
 			// so we should keep the current processing memory alive until it is done for sure.
 			const CVstPlugin *plug = FromVstPtr<CVstPlugin>(sharedMem->effect.resvd1);
-			const bool isPlaying = plug != nullptr && plug->IsSongPlaying();
+			const bool isPlaying = plug != nullptr && plug->IsResumed();
 			if(isPlaying)
 			{
 				oldProcessMem.CopyFrom(processMem);
@@ -988,7 +988,7 @@ void VSTCALLBACK BridgeWrapper::SetParameter(AEffect *effect, VstInt32 index, fl
 	if(that)
 	{
 		AutomationQueue &autoQueue = that->sharedMem->automationQueue;
-		if(that->isSettingProgram || (plug && plug->IsSongPlaying()))
+		if(that->isSettingProgram || (plug && plug->IsResumed()))
 		{
 			// Queue up messages while rendering to reduce latency introduced by every single bridge call
 			uint32 i;

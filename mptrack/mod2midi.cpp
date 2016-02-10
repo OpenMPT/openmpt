@@ -225,17 +225,18 @@ namespace MidiExport
 			}
 		}
 
-		virtual void SetParameter(PlugParamIndex, PlugParamValue) { }
-		virtual PlugParamValue GetParameter(PlugParamIndex) { return 0; }
-
 		virtual void Release() { }
 		virtual int32 GetUID() const { return 0; }
 		virtual int32 GetVersion() const { return 0; }
 		virtual void Idle() { }
-		virtual int32 GetNumPrograms() { return 0; }
+
+		virtual int32 GetNumPrograms() const { return 0; }
 		virtual int32 GetCurrentProgram() { return 0; }
 		virtual void SetCurrentProgram(int32) { }
-		virtual PlugParamIndex GetNumParameters() { return 0; }
+
+		virtual PlugParamIndex GetNumParameters() const { return 0; }
+		virtual PlugParamValue GetParameter(PlugParamIndex) { return 0; }
+		virtual void SetParameter(PlugParamIndex, PlugParamValue) { }
 
 		virtual float RenderSilence(size_t) { return 0.0f; }
 
