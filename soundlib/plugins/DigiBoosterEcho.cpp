@@ -22,12 +22,12 @@ DigiBoosterEcho::DigiBoosterEcho(VSTPluginLib &factory, CSoundFile &sndFile, SND
 	, m_writePos(0)
 	, m_delayTime(0)
 	, m_sampleRate(sndFile.GetSampleRate())
-	, m_PMix(0)
-	, m_NMix(0)
-	, m_PCrossPBack(0)
-	, m_PCrossNBack(0)
-	, m_NCrossPBack(0)
-	, m_NCrossNBack(0)
+	, m_PMix(0.0f)
+	, m_NMix(0.0f)
+	, m_PCrossPBack(0.0f)
+	, m_PCrossNBack(0.0f)
+	, m_NCrossPBack(0.0f)
+	, m_NCrossNBack(0.0f)
 //---------------------------------------------------------------------------------------------------
 {
 	RecalculateEchoParams();
@@ -68,15 +68,15 @@ void DigiBoosterEcho::Process(float *pOutL, float *pOutR, size_t numSamples)
 		ar += rDelay * m_NCrossPBack;
 		ar += lDelay * m_PCrossPBack;
 
-		m_delayLine[m_writePos * 2] = al * (1.0f / 65536.0f);
-		m_delayLine[m_writePos * 2 + 1] = ar * (1.0f / 65536.0f);
+		m_delayLine[m_writePos * 2] = al;
+		m_delayLine[m_writePos * 2 + 1] = ar;
 		m_writePos++;
 		if(m_writePos == m_bufferSize)
 			m_writePos = 0;
 
 		// Output samples now
-		*pOutL++ += (l * m_NMix + lDelay * m_PMix) * (1.0f / 256.0f);
-		*pOutR++ += (r * m_NMix + rDelay * m_PMix) * (1.0f / 256.0f);
+		*pOutL++ += (l * m_NMix + lDelay * m_PMix);
+		*pOutR++ += (r * m_NMix + rDelay * m_PMix);
 	}
 }
 
@@ -150,6 +150,8 @@ void DigiBoosterEcho::Resume()
 }
 
 
+#ifdef MODPLUG_TRACKER
+
 CString DigiBoosterEcho::GetParamName(PlugParamIndex param)
 //---------------------------------------------------------
 {
@@ -191,6 +193,8 @@ CString DigiBoosterEcho::GetParamDisplay(PlugParamIndex param)
 	return s;
 }
 
+#endif // MODPLUG_TRACKER
+
 
 size_t DigiBoosterEcho::GetChunk(char *(&data), bool)
 //---------------------------------------------------
@@ -215,12 +219,12 @@ void DigiBoosterEcho::RecalculateEchoParams()
 //-------------------------------------------
 {
 	m_delayTime = (chunk.param[kEchoDelay] * m_sampleRate + 250) / 500;
-	m_PMix = chunk.param[kEchoMix];
-	m_NMix = 256 - chunk.param[kEchoMix];
-	m_PCrossPBack = chunk.param[kEchoCross] * chunk.param[kEchoFeedback];
-	m_PCrossNBack = chunk.param[kEchoCross] * (256 - chunk.param[kEchoFeedback]);
-	m_NCrossPBack = (chunk.param[kEchoCross] - 256) * chunk.param[kEchoFeedback];
-	m_NCrossNBack = (chunk.param[kEchoCross] - 256) * (chunk.param[kEchoFeedback] - 256);
+	m_PMix = (chunk.param[kEchoMix]) * (1.0f / 256.0f);
+	m_NMix = (256 - chunk.param[kEchoMix]) * (1.0f / 256.0f);
+	m_PCrossPBack = (chunk.param[kEchoCross] * chunk.param[kEchoFeedback]) * (1.0f / 65536.0f);
+	m_PCrossNBack = (chunk.param[kEchoCross] * (256 - chunk.param[kEchoFeedback])) * (1.0f / 65536.0f);
+	m_NCrossPBack = ((chunk.param[kEchoCross] - 256) * chunk.param[kEchoFeedback]) * (1.0f / 65536.0f);
+	m_NCrossNBack = ((chunk.param[kEchoCross] - 256) * (chunk.param[kEchoFeedback] - 256)) * (1.0f / 65536.0f);
 }
 
 OPENMPT_NAMESPACE_END

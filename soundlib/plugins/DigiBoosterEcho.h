@@ -57,9 +57,9 @@ protected:
 	uint32 m_sampleRate;
 
 	// Echo calculation coefficients
-	int32 m_PMix, m_NMix;
-	int32 m_PCrossPBack, m_PCrossNBack;
-	int32 m_NCrossPBack, m_NCrossNBack;
+	float m_PMix, m_NMix;
+	float m_PCrossPBack, m_PCrossNBack;
+	float m_NCrossPBack, m_NCrossNBack;
 
 	// Settings chunk for file I/O
 	PluginChunk chunk;
