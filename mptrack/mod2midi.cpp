@@ -321,26 +321,18 @@ namespace MidiExport
 				}
 			}
 		}
-		virtual void RecalculateGain() { }
 
-		virtual void SetZxxParameter(PlugParamIndex, uint32) { }
-		virtual uint32 GetZxxParameter(PlugParamIndex) { return 0; }
-		virtual void AutomateParameter(PlugParamIndex) { }
 		virtual void NotifySongPlaying(bool) { }
 		virtual bool IsSongPlaying() const { return true; }
 		virtual bool IsResumed() const { return true; }
 		virtual void Resume() { }
 		virtual void Suspend() { }
 		virtual void Bypass(bool) { }
-		virtual bool IsBypassed() const { return false; }
 		virtual bool IsInstrument() const { return true; }
 		virtual bool CanRecieveMidiEvents() { return true; }
-		virtual void SetDryRatio(uint32) { }
 		virtual bool ShouldProcessSilence() { return true; }
 		virtual void ResetSilence() { }
 #ifdef MODPLUG_TRACKER
-		virtual bool SaveProgram() { return false; }
-		virtual bool LoadProgram(mpt::PathString) { return false; }
 		virtual CString GetDefaultEffectName() { return CString(); }
 		virtual void CacheProgramNames(int32, int32) { }
 		virtual void CacheParameterNames(int32, int32) { }
