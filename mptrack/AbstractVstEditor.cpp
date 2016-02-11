@@ -820,7 +820,7 @@ void CAbstractVstEditor::UpdateMacroMenu()
 			greyed = false;
 		} else
 		{
-			macroName = midiCfg.GetParameteredMacroName(nMacro, m_VstPlugin.GetSlot(), m_VstPlugin.GetSoundFile());
+			macroName = midiCfg.GetParameteredMacroName(nMacro, &m_VstPlugin);
 			if(macroType != sfx_plug || macroName.Left(3) != "N/A")
 			{
 				greyed = false;

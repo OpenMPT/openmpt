@@ -84,7 +84,9 @@ protected:
 	mixsample_t m_MixBuffer[MIXBUFFERSIZE * 2 + 2];		// Stereo interleaved input (sample mixer renders here)
 
 	float m_fGain;
+#ifdef MODPLUG_TRACKER
 	PLUGINDEX m_nSlot;
+#endif // MODPLUG_TRACKER
 
 	bool m_bSongPlaying : 1;
 	bool m_bPlugResumed : 1;
@@ -97,6 +99,7 @@ public:
 protected:
 	virtual ~IMixPlugin();
 
+	// Insert plugin into list of loaded plugins.
 	void InsertIntoFactoryList();
 
 public:
@@ -109,22 +112,23 @@ public:
 	CModDoc *GetModDoc();
 	const CModDoc *GetModDoc() const;
 
+	void SetSlot(PLUGINDEX slot);
+	inline PLUGINDEX GetSlot() const { return m_nSlot; }
+
+	// Get the plugin's editor window
 	CAbstractVstEditor *GetEditor() { return m_pEditor; }
 	const CAbstractVstEditor *GetEditor() const { return m_pEditor; }
 #endif // MODPLUG_TRACKER
 
 	inline VSTPluginLib &GetPluginFactory() const { return m_Factory; }
+	// Returns the next instance of the same plugin
 	inline IMixPlugin *GetNextInstance() const { return m_pNext; }
 
-	PLUGINDEX FindSlot() const;
-	inline void SetSlot(PLUGINDEX slot) { m_nSlot = slot; }
-	inline PLUGINDEX GetSlot() const { return m_nSlot; }
-
-	inline void UpdateMixStructPtr(SNDMIXPLUGIN *p) { m_pMixStruct = p; }
 	void SetDryRatio(uint32 param);
 	bool IsBypassed() const;
 	void RecalculateGain();
 
+	// Destroy the plugin
 	virtual void Release() = 0;
 	virtual int32 GetUID() const = 0;
 	virtual int32 GetVersion() const = 0;
@@ -139,7 +143,9 @@ public:
 	virtual void SetParameter(PlugParamIndex paramindex, PlugParamValue paramvalue) = 0;
 	virtual PlugParamValue GetParameter(PlugParamIndex nIndex) = 0;
 
+	// Save parameters for storing them in a module file
 	virtual void SaveAllParameters();
+	// Restore parameters from module file
 	virtual void RestoreAllParameters(int32 program);
 	virtual void Process(float *pOutL, float *pOutR, uint32 numFrames) = 0;
 	void ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput, float *rightPlugOutput, uint32 numFrames) const;

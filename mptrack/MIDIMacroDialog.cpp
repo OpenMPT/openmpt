@@ -175,7 +175,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 	for (int m = start; m <= end; m++)
 	{
 		// SFx
-		s.Format("SF%X", m);
+		s.Format(_T("SF%X"), m);
 		m_EditMacro[m].SetWindowText(s);
 
 		// Macro value:
@@ -187,15 +187,15 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 		switch (macroType)
 		{
 		case sfx_plug: 
-			s.Format("Control Plugin Param %d", m_MidiCfg.MacroToPlugParam(m));
+			s.Format(_T("Control Plugin Param %u"), m_MidiCfg.MacroToPlugParam(m));
 			break;
 
 		default:
-			s = m_MidiCfg.GetParameteredMacroName(m, 0, m_SndFile);
+			s = m_MidiCfg.GetParameteredMacroName(m);
 			break;
 		}
 		m_EditMacroType[m].SetWindowText(s);
-		m_EditMacroType[m].SetBackColor(m == selectedMacro ? RGB(200,200,225) : RGB(245,245,245) );
+		m_EditMacroType[m].SetBackColor(m == selectedMacro ? RGB(200,200,225) : RGB(245,245,245));
 
 		// Param details button:
 		m_BtnMacroShowAll[m].ShowWindow((macroType == sfx_plug) ? SW_SHOW : SW_HIDE);

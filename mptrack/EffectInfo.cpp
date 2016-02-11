@@ -632,7 +632,8 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 			{
 				const uint8 macroIndex = sndFile.m_PlayState.Chn[chn].nActiveMacro;
 				const PLUGINDEX plugin = sndFile.GetBestPlugin(chn, PrioritiseChannel, EvenIfMuted) - 1;
-				wsprintf(pszName, "SFx MIDI Macro z=%d (SF%X: %s)", param, macroIndex, sndFile.m_MidiCfg.GetParameteredMacroName(macroIndex, plugin, sndFile));
+				IMixPlugin *pPlugin = (plugin < MAX_MIXPLUGINS ? sndFile.m_MixPlugins[plugin].pMixPlugin : nullptr);
+				wsprintf(pszName, "SFx MIDI Macro z=%d (SF%X: %s)", param, macroIndex, sndFile.m_MidiCfg.GetParameteredMacroName(macroIndex, pPlugin));
 			} else
 			{
 				wsprintf(pszName, "SFx MIDI Macro z=%02X (%d)", param, param);
@@ -757,7 +758,7 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 							strcat(s, " rows");
 							break;
 						case 0xF0: // macro
-							strcpy(s, sndFile.m_MidiCfg.GetParameteredMacroName(param & 0x0F, PLUGINDEX_INVALID, sndFile));
+							strcpy(s, sndFile.m_MidiCfg.GetParameteredMacroName(param & 0x0F));
 							break;
 						default:
 							break;
@@ -837,7 +838,7 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 							} else
 							{
 								// macro
-								strcpy(s, sndFile.m_MidiCfg.GetParameteredMacroName(param & 0x0F, PLUGINDEX_INVALID, sndFile));
+								strcpy(s, sndFile.m_MidiCfg.GetParameteredMacroName(param & 0x0F));
 							}
 							break;
 						default:
