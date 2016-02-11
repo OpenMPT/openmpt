@@ -173,11 +173,13 @@ static const ModCommand::COMMAND dbmEffects[] =
 	CMD_CHANNELVOLUME, CMD_CHANNELVOLSLIDE, CMD_NONE, CMD_NONE,
 	CMD_NONE, CMD_PANNINGSLIDE, CMD_NONE, CMD_NONE,
 	CMD_NONE, CMD_NONE, CMD_NONE,
+#ifndef NO_PLUGINS
 	CMD_DBMECHO,	// Toggle DSP
 	CMD_MIDI,		// Wxx Echo Delay
 	CMD_MIDI,		// Xxx Echo Feedback
 	CMD_MIDI,		// Yxx Echo Mix
 	CMD_MIDI,		// Zxx Echo Cross
+#endif // NO_PLUGINS
 };
 
 

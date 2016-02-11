@@ -21,12 +21,12 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-parameteredMacroType MIDIMacroConfig::GetParameteredMacroType(size_t macroIndex) const
+parameteredMacroType MIDIMacroConfig::GetParameteredMacroType(uint32 macroIndex) const
 //------------------------------------------------------------------------------------
 {
 	const std::string macro = GetSafeMacro(szMidiSFXExt[macroIndex]);
 
-	for(size_t i = 0; i < sfx_max; i++)
+	for(uint32 i = 0; i < sfx_max; i++)
 	{
 		parameteredMacroType sfx = static_cast<parameteredMacroType>(i);
 		if(sfx != sfx_custom)
@@ -50,7 +50,7 @@ fixedMacroType MIDIMacroConfig::GetFixedMacroType() const
 //-------------------------------------------------------
 {
 	// Compare with all possible preset patterns
-	for(size_t i = 0; i < zxx_max; i++)
+	for(uint32 i = 0; i < zxx_max; i++)
 	{
 		fixedMacroType zxx = static_cast<fixedMacroType>(i);
 		if(zxx != zxx_custom)
@@ -60,7 +60,7 @@ fixedMacroType MIDIMacroConfig::GetFixedMacroType() const
 			CreateFixedMacro(macros, zxx);
 
 			bool found = true;
-			for(size_t j = 0; j < 128; j++)
+			for(uint32 j = 0; j < 128; j++)
 			{
 				if(strncmp(macros[j], szMidiZXXExt[j], MACRO_LENGTH))
 				{
@@ -154,7 +154,7 @@ void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENG
 void MIDIMacroConfig::CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], fixedMacroType macroType) const
 //------------------------------------------------------------------------------------------------------------
 {
-	for(unsigned int i = 0; i < 128; i++)
+	for(uint32 i = 0; i < 128; i++)
 	{
 		switch(macroType)
 		{
@@ -220,8 +220,8 @@ void MIDIMacroConfig::CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], f
 #ifdef MODPLUG_TRACKER
 
 // Returns macro description including plugin parameter / MIDI CC information
-CString MIDIMacroConfig::GetParameteredMacroName(size_t macroIndex, PLUGINDEX plugin, const CSoundFile &sndFile) const
-//--------------------------------------------------------------------------------------------------------------------
+CString MIDIMacroConfig::GetParameteredMacroName(uint32 macroIndex, IMixPlugin *plugin) const
+//-------------------------------------------------------------------------------------------
 {
 	const parameteredMacroType macroType = GetParameteredMacroType(macroIndex);
 
@@ -233,21 +233,15 @@ CString MIDIMacroConfig::GetParameteredMacroName(size_t macroIndex, PLUGINDEX pl
 			CString formattedName;
 			formattedName.Format(_T("Param %u"), param);
 #ifndef NO_PLUGINS
-			if(plugin < MAX_MIXPLUGINS)
+			if(plugin != nullptr)
 			{
-				IMixPlugin *pPlug = sndFile.m_MixPlugins[plugin].pMixPlugin;
-				if(pPlug)
+				CString paramName = plugin->GetParamName(param);
+				if(!paramName.IsEmpty())
 				{
-					CString paramName;
-					paramName = pPlug->GetParamName(param);
-					if(!paramName.IsEmpty())
-					{
-						formattedName += _T(" (") + paramName + _T(")");
-					}
+					formattedName += _T(" (") + paramName + _T(")");
 				}
 			} else
 #else
-			MPT_UNREFERENCED_PARAMETER(sndFile);
 			MPT_UNREFERENCED_PARAMETER(plugin);
 #endif // NO_PLUGINS
 			{
@@ -333,7 +327,7 @@ CString MIDIMacroConfig::GetFixedMacroName(fixedMacroType macroType) const
 }
 
 
-int MIDIMacroConfig::MacroToPlugParam(size_t macroIndex) const
+int MIDIMacroConfig::MacroToPlugParam(uint32 macroIndex) const
 //------------------------------------------------------------
 {
 	const std::string macro = GetSafeMacro(szMidiSFXExt[macroIndex]);
@@ -353,7 +347,7 @@ int MIDIMacroConfig::MacroToPlugParam(size_t macroIndex) const
 }
 
 
-int MIDIMacroConfig::MacroToMidiCC(size_t macroIndex) const
+int MIDIMacroConfig::MacroToMidiCC(uint32 macroIndex) const
 //---------------------------------------------------------
 {
 	const std::string macro = GetSafeMacro(szMidiSFXExt[macroIndex]);
@@ -397,7 +391,7 @@ bool MIDIMacroConfig::IsMacroDefaultSetupUsed() const
 	// TODO - Global macros (currently not checked because they are not editable)
 
 	// SF0: Z00-Z7F controls cutoff, all other parametered macros are unused
-	for(size_t i = 0; i < NUM_MACROS; i++)
+	for(uint32 i = 0; i < NUM_MACROS; i++)
 	{
 		if(GetParameteredMacroType(i) != defaultConfig.GetParameteredMacroType(i))
 		{
@@ -439,15 +433,15 @@ void MIDIMacroConfig::Reset()
 void MIDIMacroConfig::Sanitize()
 //------------------------------
 {
-	for(size_t i = 0; i < CountOf(szMidiGlb); i++)
+	for(uint32 i = 0; i < CountOf(szMidiGlb); i++)
 	{
 		mpt::String::FixNullString(szMidiGlb[i]);
 	}
-	for(size_t i = 0; i < CountOf(szMidiSFXExt); i++)
+	for(uint32 i = 0; i < CountOf(szMidiSFXExt); i++)
 	{
 		mpt::String::FixNullString(szMidiSFXExt[i]);
 	}
-	for(size_t i = 0; i < CountOf(szMidiZXXExt); i++)
+	for(uint32 i = 0; i < CountOf(szMidiZXXExt); i++)
 	{
 		mpt::String::FixNullString(szMidiZXXExt[i]);
 	}
@@ -458,7 +452,7 @@ void MIDIMacroConfig::Sanitize()
 void MIDIMacroConfig::UpgradeMacroString(char *macro) const
 //---------------------------------------------------------
 {
-	for(size_t i = 0; i < MACRO_LENGTH; i++)
+	for(uint32 i = 0; i < MACRO_LENGTH; i++)
 	{
 		if(macro[i] >= 'a' && macro[i] <= 'f')		// both A-F and a-f were treated as hex constants
 		{
@@ -478,11 +472,11 @@ void MIDIMacroConfig::UpgradeMacroString(char *macro) const
 void MIDIMacroConfig::UpgradeMacros()
 //-----------------------------------
 {
-	for(size_t i = 0; i < CountOf(szMidiSFXExt); i++)
+	for(uint32 i = 0; i < CountOf(szMidiSFXExt); i++)
 	{
 		UpgradeMacroString(szMidiSFXExt[i]);
 	}
-	for(size_t i = 0; i < CountOf(szMidiZXXExt); i++)
+	for(uint32 i = 0; i < CountOf(szMidiZXXExt); i++)
 	{
 		UpgradeMacroString(szMidiZXXExt[i]);
 	}

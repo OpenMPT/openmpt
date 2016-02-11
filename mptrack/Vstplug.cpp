@@ -715,7 +715,6 @@ void CVstPlugin::Initialize()
 {
 	// Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
 	m_Effect.resvd1 = ToVstPtr(this);
-	m_nSlot = FindSlot();
 	m_nSampleRate = m_SndFile.GetSampleRate();
 
 	Dispatch(effOpen, 0, 0, nullptr, 0.0f);

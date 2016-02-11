@@ -102,14 +102,14 @@ public:
 	MIDIMacroConfig() { Reset(); };
 
 	// Get macro type from a macro string
-	parameteredMacroType GetParameteredMacroType(size_t macroIndex) const;
+	parameteredMacroType GetParameteredMacroType(uint32 macroIndex) const;
 	fixedMacroType GetFixedMacroType() const;
 
 	// Create a new macro
 protected:
 	void CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENGTH], parameteredMacroType macroType, int subType) const;
 public:
-	void CreateParameteredMacro(size_t macroIndex, parameteredMacroType macroType, int subType = 0)
+	void CreateParameteredMacro(uint32 macroIndex, parameteredMacroType macroType, int subType = 0)
 	{
 		CreateParameteredMacro(szMidiSFXExt[macroIndex], macroType, subType);
 	};
@@ -131,13 +131,13 @@ public:
 #ifdef MODPLUG_TRACKER
 
 	// Translate macro type or macro string to macro name
-	CString GetParameteredMacroName(size_t macroIndex, PLUGINDEX plugin, const CSoundFile &sndFile) const;
+	CString GetParameteredMacroName(uint32 macroIndex, IMixPlugin *plugin = nullptr) const;
 	CString GetParameteredMacroName(parameteredMacroType macroType) const;
 	CString GetFixedMacroName(fixedMacroType macroType) const;
 
 	// Extract information from a parametered macro string.
-	int MacroToPlugParam(size_t macroIndex) const;
-	int MacroToMidiCC(size_t macroIndex) const;
+	int MacroToPlugParam(uint32 macroIndex) const;
+	int MacroToMidiCC(uint32 macroIndex) const;
 
 	// Check if any macro can automate a given plugin parameter
 	int FindMacroForParam(PlugParamIndex param) const;

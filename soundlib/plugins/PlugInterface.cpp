@@ -48,7 +48,9 @@ IMixPlugin::IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 	, m_pEditor(nullptr)
 #endif // MODPLUG_TRACKER
 	, m_fGain(1.0f)
+#ifdef MODPLUG_TRACKER
 	, m_nSlot(0)
+#endif // MODPLUG_TRACKER
 	, m_bSongPlaying(false)
 	, m_bPlugResumed(false)
 	, m_bRecordAutomation(false)
@@ -65,6 +67,13 @@ IMixPlugin::IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 
 	// Update Mix structure
 	m_pMixStruct->pMixState = &m_MixState;
+
+#ifdef MODPLUG_TRACKER
+	while(m_pMixStruct != &(m_SndFile.m_MixPlugins[m_nSlot]) && m_nSlot < MAX_MIXPLUGINS - 1)
+	{
+		m_nSlot++;
+	}
+#endif // MODPLUG_TRACKER
 }
 
 
@@ -97,18 +106,15 @@ void IMixPlugin::InsertIntoFactoryList()
 }
 
 
-PLUGINDEX IMixPlugin::FindSlot() const
-//------------------------------------
+#ifdef MODPLUG_TRACKER
+
+void IMixPlugin::SetSlot(PLUGINDEX slot)
+//--------------------------------------
 {
-	PLUGINDEX slot = 0;
-	while(m_pMixStruct != &(m_SndFile.m_MixPlugins[slot]) && slot < MAX_MIXPLUGINS - 1)
-	{
-		slot++;
-	}
-	return slot;
+	m_nSlot = slot;
+	m_pMixStruct = &m_SndFile.m_MixPlugins[slot];
 }
 
-#ifdef MODPLUG_TRACKER
 
 CString IMixPlugin::GetFormattedParamName(PlugParamIndex param)
 //-------------------------------------------------------------

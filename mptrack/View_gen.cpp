@@ -1367,7 +1367,6 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 	if(pPlugin != nullptr)
 	{
 		pPlugin->SetSlot(dest);
-		pPlugin->UpdateMixStructPtr(&(pSndFile->m_MixPlugins[dest]));
 		if(pPlugin->GetEditor() != nullptr)
 		{
 			pPlugin->GetEditor()->SetTitle();
