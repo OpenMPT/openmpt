@@ -18,8 +18,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-void CSoundFile::ConvertModCommand(ModCommand &m) const
-//-----------------------------------------------------
+void CSoundFile::ConvertModCommand(ModCommand &m)
+//-----------------------------------------------
 {
 	switch(m.command)
 	{

@@ -20,8 +20,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-void CSoundFile::S3MConvert(ModCommand &m, bool fromIT) const
-//-----------------------------------------------------------
+void CSoundFile::S3MConvert(ModCommand &m, bool fromIT)
+//-----------------------------------------------------
 {
 	switch(m.command | 0x40)
 	{

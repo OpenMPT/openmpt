@@ -207,7 +207,7 @@ static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSo
 
 			if(m->command | m->param)
 			{
-				sndFile.ConvertModCommand(*m);
+				CSoundFile::ConvertModCommand(*m);
 			} else
 			{
 				m->command = CMD_NONE;
