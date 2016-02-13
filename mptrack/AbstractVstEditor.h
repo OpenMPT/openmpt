@@ -81,6 +81,7 @@ public:
 	virtual void UpdateParamDisplays() { if(m_updateDisplay) { SetupMenu(true); m_updateDisplay = false; } }
 	virtual afx_msg void OnClose() = 0;
 	virtual void OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized);
+	virtual void PostNcDestroy();
 
 	virtual bool IsResizable() const = 0;
 	virtual bool SetSize(int contentWidth, int contentHeight) = 0;

@@ -185,6 +185,7 @@ public:
 
 	virtual CString GetDefaultEffectName() = 0;
 
+	// Cache a range of names, in case one-by-one retrieval would be slow (e.g. when using plugin bridge)
 	virtual void CacheProgramNames(int32 firstProg, int32 lastProg) = 0;
 	virtual void CacheParameterNames(int32 firstParam, int32 lastParam) = 0;
 

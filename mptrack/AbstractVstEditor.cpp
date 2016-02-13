@@ -67,6 +67,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_COMMAND_RANGE(ID_LEARN_MACRO_FROM_PLUGGUI, ID_LEARN_MACRO_FROM_PLUGGUI + NUM_MACROS, PrepareToLearnMacro)
 END_MESSAGE_MAP()
 
+
 CAbstractVstEditor::CAbstractVstEditor(IMixPlugin &plugin)
 	: m_VstPlugin(plugin)
 	, m_currentPresetMenu(0)
@@ -79,7 +80,9 @@ CAbstractVstEditor::CAbstractVstEditor(IMixPlugin &plugin)
 	m_nInstrument = GetBestInstrumentCandidate();
 }
 
+
 CAbstractVstEditor::~CAbstractVstEditor()
+//---------------------------------------
 {
 #ifdef VST_LOG
 	Log("~CVstEditor()\n");
@@ -103,6 +106,14 @@ CAbstractVstEditor::~CAbstractVstEditor()
 	m_pPresetMenuGroup.clear();
 
 	m_VstPlugin.m_pEditor = nullptr;
+}
+
+
+void CAbstractVstEditor::PostNcDestroy()
+//--------------------------------------
+{
+	CDialog::PostNcDestroy();
+	delete this;
 }
 
 
