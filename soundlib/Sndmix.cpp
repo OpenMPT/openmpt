@@ -2157,9 +2157,12 @@ bool CSoundFile::ReadNote()
 			//if (pChn->nNewRightVol > 0xFFFF) pChn->nNewRightVol = 0xFFFF;
 			//if (pChn->nNewLeftVol > 0xFFFF) pChn->nNewLeftVol = 0xFFFF;
 
-			if(pChn->nInc == 0x10000)
+			if(pChn->nInc == 0x10000 && !(pChn->dwFlags[CHN_VIBRATO] || pChn->nAutoVibDepth))
 			{
-				// exact samplerate match, do not resample at all, regardless of selected resampler
+				// Exact sample rate match, do not resample at all, regardless of selected resampler
+				// - unless vibrato is applied, because in this case the constant enabling and disabling
+				// of resampling can introduce clicks (this is easily observable with a sine sample
+				// played at the mix rate).
 				pChn->resamplingMode = SRCMODE_NEAREST;
 			} else if(pChn->pModInstrument && IsKnownResamplingMode(pChn->pModInstrument->nResampling))
 			{
