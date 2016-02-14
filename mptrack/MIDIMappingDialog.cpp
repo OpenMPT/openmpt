@@ -195,10 +195,14 @@ int CMIDIMappingDialog::InsertItem(const CMIDIMappingDirective &m, int insertAt)
 	const PLUGINDEX plugindex = m.GetPlugIndex();
 	if(plugindex > 0 && plugindex < MAX_MIXPLUGINS)
 	{
+		const SNDMIXPLUGIN &plug = m_rSndFile.m_MixPlugins[plugindex - 1];
 		s.Format(_T("FX%u: "), plugindex);
-		s += m_rSndFile.m_MixPlugins[plugindex - 1].GetName();
+		s += plug.GetName();
 		m_List.SetItemText(insertAt, 2, s);
-		s = m_rSndFile.m_MixPlugins[plugindex - 1].GetParamName(m.GetParamIndex()).c_str();
+		if(plug.pMixPlugin != nullptr)
+			s = plug.pMixPlugin->GetFormattedParamName(m.GetParamIndex());
+		else
+			s.Empty();
 		m_List.SetItemText(insertAt, 3, s);
 	}
 	m_List.SetItemText(insertAt, 4, m.GetCaptureMIDI() ? _T("Capt") : _T(""));
