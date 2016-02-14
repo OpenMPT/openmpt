@@ -39,7 +39,7 @@ protected:
 	buffer_t *GetBuffer(uint32 index) const
 	//-------------------------------------
 	{
-		ASSERT(index < inputs + outputs);
+		MPT_ASSERT(index < inputs + outputs);
 		return &alignedBuffer[bufferSize * index];
 	}
 
@@ -112,7 +112,7 @@ public:
 	void ClearInputBuffers(uint32 numSamples)
 	//---------------------------------------
 	{
-		ASSERT(numSamples <= bufferSize);
+		MPT_ASSERT(numSamples <= bufferSize);
 		for(uint32 i = 0; i < inputs; i++)
 		{
 			memset(inputsArray[i], 0, numSamples * sizeof(buffer_t));

@@ -44,8 +44,8 @@ static bool ReadAMSString(std::string &dest, FileReader &file)
 
 
 // Read AMS or AMS2 (newVersion = true) pattern. At least this part of the format is more or less identical between the two trackers...
-static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patternChunk, CSoundFile &sndFile)
-//-----------------------------------------------------------------------------------------------------------
+static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patternChunk)
+//--------------------------------------------------------------------------------------
 {
 	enum
 	{
@@ -152,7 +152,7 @@ static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patte
 					{
 						// PT commands
 						m.command = effect;
-						sndFile.ConvertModCommand(m);
+						CSoundFile::ConvertModCommand(m);
 
 						// Post-fix some commands
 						switch(m.command)
@@ -489,7 +489,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(loadFlags & loadPatternData)
 		{
-			ReadAMSPattern(Patterns[pat], false, patternChunk, *this);
+			ReadAMSPattern(Patterns[pat], false, patternChunk);
 		}
 	}
 
@@ -957,7 +957,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 			ReadAMSString(patternName, patternChunk);
 			Patterns[pat].SetName(patternName);
 
-			ReadAMSPattern(Patterns[pat], true, patternChunk, *this);
+			ReadAMSPattern(Patterns[pat], true, patternChunk);
 		}
 	}
 

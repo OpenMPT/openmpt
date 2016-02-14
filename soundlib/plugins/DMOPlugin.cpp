@@ -477,8 +477,6 @@ CString DMOPlugin::GetParamDisplay(PlugParamIndex param)
 
 #endif // MODPLUG_TRACKER
 
+OPENMPT_NAMESPACE_END
 
 #endif // NO_DMO
-
-
-OPENMPT_NAMESPACE_END
