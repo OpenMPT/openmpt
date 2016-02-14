@@ -17,6 +17,7 @@
 #include "ImageLists.h"
 #include "Moddoc.h"
 #include "../soundlib/mod_specifications.h"
+#include "../soundlib/plugins/PlugInterface.h"
 #include "Globals.h"
 #include "Ctrl_ins.h"
 #include "View_ins.h"

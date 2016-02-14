@@ -27,6 +27,7 @@
 #include "../common/misc_util.h"
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/mod_specifications.h"
+#include "../soundlib/plugins/PlugInterface.h"
 #include <algorithm>
 
 

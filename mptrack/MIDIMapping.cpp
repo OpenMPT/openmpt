@@ -9,10 +9,11 @@
 
 
 #include "stdafx.h"
-#include "../soundlib/MIDIEvents.h"
 #include "Mainfrm.h"
-#include "../common/FileReader.h"
 #include "MIDIMapping.h"
+#include "../common/FileReader.h"
+#include "../soundlib/MIDIEvents.h"
+#include "../soundlib/plugins/PlugInterface.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

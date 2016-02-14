@@ -15,6 +15,7 @@
 #include "InputHandler.h"
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/mod_specifications.h"
+#include "../soundlib/plugins/PlugInterface.h"
 #include "../common/StringFixer.h"
 
 #ifndef NO_PLUGINS
