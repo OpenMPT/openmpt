@@ -2447,6 +2447,10 @@
 					RelativePath="..\..\soundlib\plugins\PluginMixBuffer.h"
 					>
 				</File>
+				<File
+					RelativePath="..\..\soundlib\plugins\PluginStructs.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter

@@ -29,6 +29,7 @@
 #else
 #include "FloatMixer.h"
 #endif // MPT_INTMIXER
+#include "plugins/PlugInterface.h"
 #include <algorithm>
 
 

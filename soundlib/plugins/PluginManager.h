@@ -10,13 +10,14 @@
 
 #pragma once
 
-#include "../soundlib/plugins/PluginMixBuffer.h"
-#include "../soundlib/plugins/PlugInterface.h"
-
 OPENMPT_NAMESPACE_BEGIN
 
 //#define kBuzzMagic	'Buzz'
 #define kDmoMagic	'DXMO'
+
+class CSoundFile;
+class IMixPlugin;
+struct SNDMIXPLUGIN;
 
 struct VSTPluginLib
 {
@@ -141,8 +142,6 @@ protected:
 	void EnumerateDirectXDMOs();
 #ifndef NO_VST
 	AEffect *LoadPlugin(VSTPluginLib &plugin, HINSTANCE &library, bool forceBridge);
-#else
-	AEffect *LoadPlugin(VSTPluginLib &, HINSTANCE &, bool) { return nullptr; }
 #endif // NO_VST
 
 	static bool CreateMixPluginProc(SNDMIXPLUGIN &, CSoundFile &);

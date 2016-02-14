@@ -14,7 +14,6 @@
 #include "Dlsbank.h"
 #include "mainfrm.h"
 #include "mpdlgs.h"
-#include "vstplug.h"
 #include "mod2wave.h"
 #include "WAVTools.h"
 #include "../common/mptString.h"
@@ -22,6 +21,7 @@
 #include "../soundlib/MixerLoops.h"
 #include "../soundlib/Dither.h"
 #include "../soundlib/AudioReadTarget.h"
+#include "../soundlib/plugins/PlugInterface.h"
 
 #include "../common/mptFileIO.h"
 

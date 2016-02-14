@@ -43,7 +43,7 @@
 #include "ModSample.h"
 #include "ModInstrument.h"
 #include "ModChannel.h"
-#include "plugins/PlugInterface.h"
+#include "plugins/PluginStructs.h"
 #include "RowVisitor.h"
 #include "Message.h"
 #include "pattern.h"

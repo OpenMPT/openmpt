@@ -19,7 +19,6 @@
 #include "Childfrm.h"
 #include "Dlsbank.h"
 #include "Mpdlgs.h"
-#include "Vstplug.h"
 #include "KeyConfigDlg.h"
 #include "PathConfigDlg.h"
 #include "GeneralConfigDlg.h"
@@ -43,6 +42,7 @@
 #include "../common/mptFileIO.h"
 #include "../common/FileReader.h"
 #include "../common/Profiler.h"
+#include "../soundlib/plugins/PlugInterface.h"
 #include "FileDialog.h"
 #include <HtmlHelp.h>
 
@@ -1973,7 +1973,7 @@ void CMainFrame::OnPluginManager()
 		//Find empty plugin slot
 		for (PLUGINDEX nPlug = 0; nPlug < MAX_MIXPLUGINS; nPlug++)
 		{
-			if (pSndFile->m_MixPlugins[nPlug].pMixPlugin == NULL)
+			if (pSndFile->m_MixPlugins[nPlug].pMixPlugin == nullptr)
 			{
 				nPlugslot = nPlug;
 				break;

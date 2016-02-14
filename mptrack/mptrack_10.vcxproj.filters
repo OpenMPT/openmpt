@@ -1188,6 +1188,9 @@
     <ClInclude Include="..\soundlib\plugins\DMOPlugin.h">
       <Filter>Header Files\soundlib\plugins</Filter>
     </ClInclude>
+    <ClInclude Include="..\soundlib\plugins\PluginStructs.h">
+      <Filter>Header Files\soundlib\plugins</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">

@@ -638,6 +638,9 @@
     <ClInclude Include="..\..\soundlib\plugins\PluginMixBuffer.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\PluginStructs.h">
+      <Filter>soundlib\plugins</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\tuning.h">
       <Filter>soundlib</Filter>
     </ClInclude>
