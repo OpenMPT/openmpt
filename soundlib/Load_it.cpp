@@ -24,7 +24,8 @@
 #include "../common/serialization_utils.h"
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
-#endif
+#endif // MODPLUG_NO_FILESAVE
+#include "plugins/PlugInterface.h"
 #include "../common/mptBufferIO.h"
 #include "../common/version.h"
 #include "ITTools.h"

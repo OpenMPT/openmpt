@@ -21,6 +21,7 @@
 #include "../common/StringFixer.h"
 #include "FileDialog.h"
 #include "../soundlib/plugins/PluginManager.h"
+#include "../soundlib/plugins/PlugInterface.h"
 #include "SelectPluginDialog.h"
 #include "../pluginBridge/BridgeWrapper.h"
 #include "FolderScanner.h"

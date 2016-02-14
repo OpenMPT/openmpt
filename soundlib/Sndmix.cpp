@@ -18,7 +18,10 @@
 #include "Tables.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/TrackerSettings.h"
-#endif
+#endif // MODPLUG_TRACKER
+#ifndef NO_PLUGINS
+#include "plugins/PlugInterface.h"
+#endif // NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
 

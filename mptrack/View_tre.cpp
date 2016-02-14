@@ -18,13 +18,13 @@
 #include "Moddoc.h"
 #include "Dlsbank.h"
 #include "dlg_misc.h"
-#include "Vstplug.h"
 #include "../common/mptFileIO.h"
 #include "../common/FileReader.h"
 #include "FileDialog.h"
 #include "Globals.h"
 #include "ExternalSamples.h"
 #include "../soundlib/mod_specifications.h"
+#include "../soundlib/plugins/PlugInterface.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

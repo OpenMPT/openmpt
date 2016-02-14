@@ -647,6 +647,7 @@
     <ClInclude Include="..\..\soundlib\plugins\PluginEventQueue.h" />
     <ClInclude Include="..\..\soundlib\plugins\PluginManager.h" />
     <ClInclude Include="..\..\soundlib\plugins\PluginMixBuffer.h" />
+    <ClInclude Include="..\..\soundlib\plugins\PluginStructs.h" />
     <ClInclude Include="..\..\soundlib\tuning.h" />
     <ClInclude Include="..\..\soundlib\tuningbase.h" />
     <ClInclude Include="..\..\soundlib\tuningcollection.h" />

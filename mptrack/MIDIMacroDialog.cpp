@@ -13,10 +13,10 @@
 #include "../common/StringFixer.h"
 #include "Mainfrm.h"
 #include "mptrack.h"
-#include "Vstplug.h"
 #include "resource.h"
 #include "MIDIMacroDialog.h"
 #include "../soundlib/MIDIEvents.h"
+#include "../soundlib/plugins/PlugInterface.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

@@ -23,6 +23,7 @@
 #include "tuning.h"
 #include "Tables.h"
 #include "modsmp_ctrl.h"	// For updating the loop wraparound data with the invert loop effect
+#include "plugins/PlugInterface.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

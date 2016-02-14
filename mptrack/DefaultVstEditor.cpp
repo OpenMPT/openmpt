@@ -11,7 +11,7 @@
 #include "stdafx.h"
 #include "DefaultVstEditor.h"
 #include "../soundlib/Sndfile.h"
-#include "Vstplug.h"
+#include "../soundlib/plugins/PlugInterface.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

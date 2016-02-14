@@ -16,7 +16,7 @@
 
 #ifdef MODPLUG_TRACKER
 #include "Sndfile.h"
-#include "../mptrack/Vstplug.h"
+#include "plugins/PlugInterface.h"
 #endif // MODPLUG_TRACKER
 
 OPENMPT_NAMESPACE_BEGIN

@@ -17,11 +17,7 @@ enum
 };
 
 #ifdef MODPLUG_TRACKER
-OPENMPT_NAMESPACE_BEGIN
-class CSoundFile;
-OPENMPT_NAMESPACE_END
-#include "plugins/PlugInterface.h"
-#include "Snd_defs.h"
+#include "plugins/PluginStructs.h"
 #endif // MODPLUG_TRACKER
 
 OPENMPT_NAMESPACE_BEGIN

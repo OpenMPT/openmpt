@@ -343,7 +343,7 @@ void IMixPlugin::ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput
 	}
 
 	// If dry mix is ticked, we add the unprocessed buffer,
-	// except if this is an instrument since this it has already been done:
+	// except if this is an instrument since then it has already been done:
 	if(m_pMixStruct->IsWetMix() && !IsInstrument())
 	{
 		for(uint32 i = 0; i < numFrames; i++)
@@ -944,6 +944,41 @@ bool IMidiPlugin::IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn)
 	return (m_MidiCh[midiChn].noteOnMap[note][trackerChn] != 0);
 }
 
+
+// SNDMIXPLUGIN functions
+
+void SNDMIXPLUGIN::SetGain(uint8 gain)
+//------------------------------------
+{
+	Info.gain = gain;
+	if(pMixPlugin != nullptr) pMixPlugin->RecalculateGain();
+}
+
+
+void SNDMIXPLUGIN::SetBypass(bool bypass)
+//---------------------------------------
+{
+	if(pMixPlugin != nullptr)
+		pMixPlugin->Bypass(bypass);
+	else
+		Info.SetBypass(bypass);
+}
+
+
+void SNDMIXPLUGIN::Destroy()
+//--------------------------
+{
+	delete[] pPluginData;
+	pPluginData = nullptr;
+	nPluginDataSize = 0;
+
+	pMixState = nullptr;
+	if(pMixPlugin)
+	{
+		pMixPlugin->Release();
+		pMixPlugin = nullptr;
+	}
+}
 
 OPENMPT_NAMESPACE_END
 

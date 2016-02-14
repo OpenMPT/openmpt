@@ -28,6 +28,7 @@
 #include "Tables.h"
 #include "mod_specifications.h"
 #include "tuningcollection.h"
+#include "plugins/PlugInterface.h"
 #include "../common/StringFixer.h"
 #include "../common/FileReader.h"
 #include <sstream>

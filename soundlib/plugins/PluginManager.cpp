@@ -12,10 +12,11 @@
 
 #ifndef NO_PLUGINS
 #include "../../common/version.h"
-#include "../../mptrack/Vstplug.h"
 #include "PluginManager.h"
+#include "PlugInterface.h"
 #include "DMOPlugin.h"
 #include "DigiBoosterEcho.h"
+#include "../../mptrack/Vstplug.h"
 #include "../../mptrack/Mptrack.h"
 #include "../../mptrack/TrackerSettings.h"
 #include "../../mptrack/AbstractVstEditor.h"

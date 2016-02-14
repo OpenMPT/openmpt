@@ -14,7 +14,6 @@
 #include "../soundlib/Sndfile.h"
 #ifndef NO_VST
 #include "Vstplug.h"
-#include <vstsdk2.4/pluginterfaces/vst2.x/vstfxstore.h>
 #endif // NO_VST
 #include "VstPresets.h"
 #include "../common/FileReader.h"
