@@ -12,6 +12,7 @@
 #include "KeyConfigDlg.h"
 #include "FileDialog.h"
 #include "../soundlib/mod_specifications.h"
+#include "../soundlib/MIDIEvents.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

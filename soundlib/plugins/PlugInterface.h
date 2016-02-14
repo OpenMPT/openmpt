@@ -13,9 +13,7 @@
 #ifndef NO_PLUGINS
 
 #include "../../soundlib/Snd_defs.h"
-#include "../../common/misc_util.h"
 #include "../../soundlib/MIDIEvents.h"
-#include "../../common/Endianness.h"
 #include "../../soundlib/Mixer.h"
 #include "PluginMixBuffer.h"
 #include "PluginStructs.h"

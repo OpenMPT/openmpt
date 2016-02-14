@@ -13,6 +13,7 @@
 #include "InputHandler.h"
 #include "resource.h"
 #include "Mainfrm.h"
+#include "../soundlib/MIDIEvents.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
