@@ -851,7 +851,6 @@ CVstPlugin::~CVstPlugin()
 	if (m_pMixStruct)
 	{
 		m_pMixStruct->pMixPlugin = nullptr;
-		m_pMixStruct->pMixState = nullptr;
 		m_pMixStruct = nullptr;
 	}
 

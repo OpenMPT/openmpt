@@ -4764,9 +4764,9 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 			if((nPlug) && (nPlug <= MAX_MIXPLUGINS))
 			{
 				IMixPlugin *pPlugin = m_MixPlugins[nPlug - 1].pMixPlugin;
-				if((pPlugin) && (m_MixPlugins[nPlug - 1].pMixState) && (param < 0x80))
+				if(pPlugin && param < 0x80)
 				{
-					const float fParam = (param & 0x7F) / 127.0f;
+					const float fParam = param / 127.0f;
 					if(!isSmooth)
 					{
 						pPlugin->SetParameter(plugParam, fParam);

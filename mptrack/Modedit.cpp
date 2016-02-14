@@ -613,9 +613,6 @@ PLUGINDEX CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
 			plug.pMixPlugin->Release();
 			plug.pMixPlugin = nullptr;
 		}
-		delete plug.pMixState;
-		plug.pMixState= nullptr;
-
 		MemsetZero(plug.Info);
 		plug.nPluginDataSize = 0;
 		plug.fDryRatio = 0;
@@ -635,7 +632,6 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 	target = source;
 	// Don't want this stuff to be accidentally erased again...
 	target.pMixPlugin = nullptr;
-	target.pMixState = nullptr;
 	target.pPluginData = nullptr;
 	target.nPluginDataSize = 0;
 #ifndef NO_PLUGINS

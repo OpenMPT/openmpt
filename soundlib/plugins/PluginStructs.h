@@ -83,7 +83,6 @@ STATIC_ASSERT(sizeof(SNDMIXPLUGININFO) == 128);	// this is directly written to f
 struct SNDMIXPLUGIN
 {
 	IMixPlugin *pMixPlugin;
-	SNDMIXPLUGINSTATE *pMixState;
 	char *pPluginData;
 	uint32 nPluginDataSize;
 	SNDMIXPLUGININFO Info;

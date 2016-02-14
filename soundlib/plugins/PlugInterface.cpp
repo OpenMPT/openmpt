@@ -63,9 +63,6 @@ IMixPlugin::IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 	m_MixState.nVolDecayL = 0;
 	m_MixState.nVolDecayR = 0;
 
-	// Update Mix structure
-	m_pMixStruct->pMixState = &m_MixState;
-
 	while(m_pMixStruct != &(m_SndFile.m_MixPlugins[m_nSlot]) && m_nSlot < MAX_MIXPLUGINS - 1)
 	{
 		m_nSlot++;
@@ -972,7 +969,6 @@ void SNDMIXPLUGIN::Destroy()
 	pPluginData = nullptr;
 	nPluginDataSize = 0;
 
-	pMixState = nullptr;
 	if(pMixPlugin)
 	{
 		pMixPlugin->Release();

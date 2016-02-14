@@ -68,8 +68,11 @@ protected:
 #ifdef MODPLUG_TRACKER
 	CAbstractVstEditor *m_pEditor;
 #endif // MODPLUG_TRACKER
+
+public:
 	SNDMIXPLUGINSTATE m_MixState;
 
+protected:
 	PluginMixBuffer<float, MIXBUFFERSIZE> m_mixBuffer;	// Float buffers (input and output) for plugins
 	mixsample_t m_MixBuffer[MIXBUFFERSIZE * 2 + 2];		// Stereo interleaved input (sample mixer renders here)
 
