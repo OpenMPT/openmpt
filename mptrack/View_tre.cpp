@@ -869,6 +869,18 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				hasPlugs = true;
 			}
 		}
+		if(!hasPlugs && firstPlug == lastPlug)
+		{
+			// If we only updated one plugin, we still need to check all the other slots if there is any plugin in them.
+			for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+			{
+				if(sndFile.m_MixPlugins[i].IsValidPlugin())
+				{
+					hasPlugs = true;
+					break;
+				}
+			}
+		}
 		if(!hasPlugs && info.hEffects)
 		{
 			DeleteItem(info.hEffects);

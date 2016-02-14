@@ -518,7 +518,17 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		int outputsel = 0;
 		m_CbnOutput.SetRedraw(FALSE);
 		m_CbnOutput.ResetContent();
-		m_CbnOutput.SetItemData(m_CbnOutput.AddString("Default"), 0);
+		m_CbnOutput.SetItemData(m_CbnOutput.AddString(_T("Default")), 0);
+
+		for(PLUGINDEX i = m_nCurrentPlugin + 1; i < MAX_MIXPLUGINS; i++)
+		{
+			if(!sndFile.m_MixPlugins[i].IsValidPlugin())
+			{
+				m_CbnOutput.SetItemData(m_CbnOutput.AddString(_T("New Plugin...")), 1);
+				break;
+			}
+		}
+
 		for (PLUGINDEX iOut = m_nCurrentPlugin + 1; iOut < MAX_MIXPLUGINS; iOut++)
 		{
 			const SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[iOut];
@@ -1230,13 +1240,34 @@ void CViewGlobals::OnOutputRoutingChanged()
 //-----------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
 	int nroute;
 
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
-	pSndFile = pModDoc->GetSoundFile();
-	SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
+	CSoundFile &sndFile = pModDoc->GetrSoundFile();
+	SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
 	nroute = m_CbnOutput.GetItemData(m_CbnOutput.GetCurSel());
+
+	if(nroute == 1)
+	{
+		// Add new plugin
+		for(PLUGINDEX i = m_nCurrentPlugin + 1; i < MAX_MIXPLUGINS; i++)
+		{
+			if(!sndFile.m_MixPlugins[i].IsValidPlugin())
+			{
+				CSelectPluginDlg dlg(pModDoc, i, this);
+				if(dlg.DoModal() == IDOK)
+				{
+					plugin.SetOutputPlugin(i);
+					pModDoc->UpdateAllViews(nullptr, PluginHint(m_nCurrentPlugin).Info());
+					nroute = 0x80 + i;
+					m_nCurrentPlugin = i;
+					m_CbnPlugin.SetCurSel(i);
+					OnPluginChanged();
+				}
+				break;
+			}
+		}
+	}
 
 	if(!nroute)
 		plugin.SetOutputToMaster();
