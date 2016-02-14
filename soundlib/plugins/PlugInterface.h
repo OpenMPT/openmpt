@@ -84,9 +84,7 @@ protected:
 	mixsample_t m_MixBuffer[MIXBUFFERSIZE * 2 + 2];		// Stereo interleaved input (sample mixer renders here)
 
 	float m_fGain;
-#ifdef MODPLUG_TRACKER
 	PLUGINDEX m_nSlot;
-#endif // MODPLUG_TRACKER
 
 	bool m_bSongPlaying : 1;
 	bool m_bPlugResumed : 1;
@@ -208,10 +206,10 @@ public:
 	void GetEditorPos(int32 &x, int32 &y) const;
 
 	void AutomateParameter(PlugParamIndex param);
+#endif
 
 	virtual void BeginSetProgram(int32 program = -1) = 0;
 	virtual void EndSetProgram() = 0;
-#endif
 
 	virtual int GetNumInputChannels() const = 0;
 	virtual int GetNumOutputChannels() const = 0;
@@ -345,7 +343,6 @@ struct SNDMIXPLUGIN
 		{ return Info.szName; }
 	const char *GetLibraryName() const
 		{ return Info.szLibraryName; }
-	std::string GetParamName(PlugParamIndex index) const;
 
 	// Check if a plugin is loaded into this slot (also returns true if the plugin in this slot has not been found)
 	bool IsValidPlugin() const { return (Info.dwPluginId1 | Info.dwPluginId2) != 0; };

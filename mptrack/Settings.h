@@ -89,7 +89,7 @@ public:
 		{
 			return *this;
 		}
-		ASSERT(type == SettingTypeNone || (type == other.type && typeTag == other.typeTag));
+		MPT_ASSERT(type == SettingTypeNone || (type == other.type && typeTag == other.typeTag));
 		type = other.type;
 		valueBool = other.valueBool;
 		valueInt = other.valueInt;
@@ -239,39 +239,39 @@ public:
 	}
 	operator bool () const
 	{
-		ASSERT(type == SettingTypeBool);
+		MPT_ASSERT(type == SettingTypeBool);
 		return valueBool;
 	}
 	operator int32 () const
 	{
-		ASSERT(type == SettingTypeInt);
+		MPT_ASSERT(type == SettingTypeInt);
 		return valueInt;
 	}
 	operator double () const
 	{
-		ASSERT(type == SettingTypeFloat);
+		MPT_ASSERT(type == SettingTypeFloat);
 		return valueFloat;
 	}
 	operator std::string () const
 	{
-		ASSERT(type == SettingTypeString);
+		MPT_ASSERT(type == SettingTypeString);
 		return mpt::ToCharset(mpt::CharsetLocale, valueString);
 	}
 	operator std::wstring () const
 	{
-		ASSERT(type == SettingTypeString);
+		MPT_ASSERT(type == SettingTypeString);
 		return mpt::ToWide(valueString);
 	}
 #if MPT_USTRING_MODE_UTF8
 	operator mpt::ustring () const
 	{
-		ASSERT(type == SettingTypeString);
+		MPT_ASSERT(type == SettingTypeString);
 		return valueString;
 	}
 #endif
 	operator std::vector<char> () const
 	{
-		ASSERT(type == SettingTypeBinary);
+		MPT_ASSERT(type == SettingTypeBinary);
 		return valueBinary;
 	}
 	mpt::ustring FormatTypeAsString() const;
@@ -374,7 +374,7 @@ public:
 	SettingState & assign(const SettingValue &other, bool setDirty = true)
 	{
 #if defined(MPT_SETTINGS_CACHE_STORE_DEFAULTS)
-		ASSERT(defaultValue.GetType() == SettingTypeNone || (defaultValue.GetType() == other.GetType() && defaultValue.GetTypeTag() == other.GetTypeTag()));
+		MPT_ASSERT(defaultValue.GetType() == SettingTypeNone || (defaultValue.GetType() == other.GetType() && defaultValue.GetTypeTag() == other.GetTypeTag()));
 #endif // MPT_SETTINGS_CACHE_STORE_DEFAULTS
 		if(setDirty)
 		{

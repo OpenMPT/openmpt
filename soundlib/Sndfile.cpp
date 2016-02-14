@@ -442,8 +442,10 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	}
 
 #ifndef NO_PLUGINS
-	// plugin loader
+	// Load plugins
+#ifdef MODPLUG_TRACKER
 	std::string notFoundText;
+#endif // MODPLUG_TRACKER
 	std::vector<SNDMIXPLUGININFO *> notFoundIDs;
 
 	if (gpMixPluginCreateProc && (loadFlags & loadPluginData))
@@ -465,11 +467,11 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 				gpMixPluginCreateProc(m_MixPlugins[plug], *this);
 				if (m_MixPlugins[plug].pMixPlugin)
 				{
-					// plugin has been found
+					// Plugin was found
 					m_MixPlugins[plug].pMixPlugin->RestoreAllParameters(m_MixPlugins[plug].defaultProgram);
 				} else
 				{
-					// plugin not found - add to list
+					// Plugin not found - add to list
 					bool found = false;
 					for(std::vector<SNDMIXPLUGININFO *>::const_iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
 					{
@@ -483,15 +485,20 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 
 					if(!found)
 					{
+#ifdef MODPLUG_TRACKER
 						notFoundText.append(m_MixPlugins[plug].GetLibraryName());
 						notFoundText.append("\n");
 						notFoundIDs.push_back(&m_MixPlugins[plug].Info); // add this to the list of missing IDs so we will find the needed plugins later when calling KVRAudio
+#else
+						AddToLog(LogWarning, MPT_USTRING("Plugin not found: ") + mpt::ToUnicode(mpt::CharsetUTF8, m_MixPlugins[plug].GetLibraryName()));
+#endif // MODPLUG_TRACKER
 					}
 				}
 			}
 		}
 	}
 
+#ifdef MODPLUG_TRACKER
 	// Display a nice message so the user sees which plugins are missing
 	// TODO: Use IDD_MODLOADING_WARNINGS dialog (NON-MODAL!) to display all warnings that are encountered when loading a module.
 	if(!notFoundIDs.empty())
@@ -515,6 +522,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			CTrackApp::OpenURL(mpt::PathString::FromUTF8(url));
 		}
 	}
+#endif // MODPLUG_TRACKER
 #endif // NO_PLUGINS
 
 	// Set up mix levels

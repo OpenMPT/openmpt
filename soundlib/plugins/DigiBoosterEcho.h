@@ -113,10 +113,10 @@ public:
 	virtual CString GetProgramName(int32) { return CString(); }
 
 	virtual bool HasEditor() const { return false; }
+#endif
 
 	virtual void BeginSetProgram(int32) { }
 	virtual void EndSetProgram() { }
-#endif
 
 	virtual int GetNumInputChannels() const {return 2; }
 	virtual int GetNumOutputChannels() const {return 2; }

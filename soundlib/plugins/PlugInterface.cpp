@@ -48,9 +48,7 @@ IMixPlugin::IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 	, m_pEditor(nullptr)
 #endif // MODPLUG_TRACKER
 	, m_fGain(1.0f)
-#ifdef MODPLUG_TRACKER
 	, m_nSlot(0)
-#endif // MODPLUG_TRACKER
 	, m_bSongPlaying(false)
 	, m_bPlugResumed(false)
 	, m_bRecordAutomation(false)
@@ -68,24 +66,24 @@ IMixPlugin::IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 	// Update Mix structure
 	m_pMixStruct->pMixState = &m_MixState;
 
-#ifdef MODPLUG_TRACKER
 	while(m_pMixStruct != &(m_SndFile.m_MixPlugins[m_nSlot]) && m_nSlot < MAX_MIXPLUGINS - 1)
 	{
 		m_nSlot++;
 	}
-#endif // MODPLUG_TRACKER
 }
 
 
 IMixPlugin::~IMixPlugin()
 //-----------------------
 {
+#ifdef MODPLUG_TRACKER
 	if(m_pEditor != nullptr)
 	{
 		if(m_pEditor->m_hWnd) m_pEditor->OnClose();
 		delete m_pEditor;
 		m_pEditor = nullptr;
 	}
+#endif // MODPLUG_TRACKER
 
 	if (m_pNext) m_pNext->m_pPrev = m_pPrev;
 	if (m_pPrev) m_pPrev->m_pNext = m_pNext;
@@ -799,7 +797,7 @@ void IMidiPlugin::MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd)
 void IMidiPlugin::MidiPitchBend(uint8 nMidiCh, int32 newPitchBendPos)
 //-------------------------------------------------------------------
 {
-	ASSERT(EncodePitchBendParam(MIDIEvents::pitchBendMin) <= newPitchBendPos && newPitchBendPos <= EncodePitchBendParam(MIDIEvents::pitchBendMax));
+	MPT_ASSERT(EncodePitchBendParam(MIDIEvents::pitchBendMin) <= newPitchBendPos && newPitchBendPos <= EncodePitchBendParam(MIDIEvents::pitchBendMax));
 	m_MidiCh[nMidiCh].midiPitchBendPos = newPitchBendPos;
 	MidiSend(MIDIEvents::PitchBend(nMidiCh, DecodePitchBendParam(newPitchBendPos)));
 }
@@ -944,19 +942,6 @@ bool IMidiPlugin::IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn)
 {
 	note -= NOTE_MIN;
 	return (m_MidiCh[midiChn].noteOnMap[note][trackerChn] != 0);
-}
-
-
-std::string SNDMIXPLUGIN::GetParamName(PlugParamIndex index) const
-//----------------------------------------------------------------
-{
-	if(pMixPlugin != nullptr)
-	{
-		return pMixPlugin->GetFormattedParamName(index).GetString();
-	} else
-	{
-		return std::string();
-	}
 }
 
 
