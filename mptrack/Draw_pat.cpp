@@ -1654,7 +1654,11 @@ void CViewPattern::UpdateIndicator()
 						// display plugin param name.
 						if(m->instr > 0 && m->instr <= MAX_MIXPLUGINS)
 						{
-							s = pSndFile->m_MixPlugins[m->instr - 1].GetParamName(m->GetValueVolCol()).c_str();
+							const SNDMIXPLUGIN &plug = pSndFile->m_MixPlugins[m->instr - 1];
+							if(plug.pMixPlugin != nullptr)
+							{
+								s = plug.pMixPlugin->GetFormattedParamName(m->GetValueVolCol());
+							}
 						}
 					} else if(m->volcmd != VOLCMD_NONE)
 					{

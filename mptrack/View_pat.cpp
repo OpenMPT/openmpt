@@ -3862,7 +3862,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		// Other formats: Use MIDI macros
 
 		//Figure out which plug param (if any) is controllable using the active macro on this channel.
-		long activePlugParam  = -1;
+		int activePlugParam  = -1;
 		BYTE activeMacro      = pSndFile->m_PlayState.Chn[nChn].nActiveMacro;
 
 		if (pSndFile->m_MidiCfg.GetParameteredMacroType(activeMacro) == sfx_plug)
@@ -6630,7 +6630,7 @@ bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const
 
 			for(PlugParamIndex i = 0; i < nParams; i++)
 			{
-				AppendMenu(paramChangeMenu, MF_STRING | (i == curParam) ? MF_CHECKED : 0, ID_CHANGE_PCNOTE_PARAM + i, plug.GetParamName(i).c_str());
+				AppendMenu(paramChangeMenu, MF_STRING | (i == curParam) ? MF_CHECKED : 0, ID_CHANGE_PCNOTE_PARAM + i, plug.pMixPlugin->GetFormattedParamName(i));
 			}
 		}
 	}
