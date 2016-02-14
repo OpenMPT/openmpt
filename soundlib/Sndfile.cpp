@@ -729,11 +729,8 @@ void CSoundFile::SuspendPlugins()
 #ifndef NO_PLUGINS
 	for (PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
-		if (!m_MixPlugins[i].pMixPlugin)
-			continue;  //most common branch
-
 		IMixPlugin *pPlugin = m_MixPlugins[i].pMixPlugin;
-		if (m_MixPlugins[i].pMixState && pPlugin->IsResumed())
+		if (pPlugin != nullptr && pPlugin->IsResumed())
 		{
 			pPlugin->NotifySongPlaying(false);
 			pPlugin->HardAllNotesOff();
@@ -749,11 +746,8 @@ void CSoundFile::ResumePlugins()
 #ifndef NO_PLUGINS
 	for (PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
-		if (!m_MixPlugins[i].pMixPlugin)
-			continue;  //most common branch
-
 		IMixPlugin *pPlugin = m_MixPlugins[i].pMixPlugin;
-		if (m_MixPlugins[i].pMixState && !pPlugin->IsResumed())
+		if (pPlugin != nullptr && !pPlugin->IsResumed())
 		{
 			pPlugin->NotifySongPlaying(true);
 			pPlugin->Resume();
@@ -769,11 +763,8 @@ void CSoundFile::StopAllVsti()
 #ifndef NO_PLUGINS
 	for (PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
-		if (!m_MixPlugins[i].pMixPlugin)
-			continue;  //most common branch
-
 		IMixPlugin *pPlugin = m_MixPlugins[i].pMixPlugin;
-		if (m_MixPlugins[i].pMixState && pPlugin->IsResumed())
+		if (pPlugin != nullptr && pPlugin->IsResumed())
 		{
 			pPlugin->HardAllNotesOff();
 		}
@@ -800,11 +791,7 @@ void CSoundFile::RecalculateGainForAllPlugs()
 		if (!m_MixPlugins[i].pMixPlugin)
 			continue;  //most common branch
 
-		IMixPlugin *pPlugin = m_MixPlugins[i].pMixPlugin;
-		if (m_MixPlugins[i].pMixState)
-		{
-			pPlugin->RecalculateGain();
-		}
+		m_MixPlugins[i].pMixPlugin->RecalculateGain();
 	}
 #endif // NO_PLUGINS
 }
