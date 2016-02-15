@@ -340,28 +340,6 @@ STATIC_ASSERT(sizeof(MODSampleHeader) == 30);
 #endif
 
 
-// Functor for fixing VBlank MODs and MODs with 7-bit panning
-struct Fix7BitPanning
-//===================
-{
-	void operator()(ModCommand &m)
-	{
-		if(m.command == CMD_PANNING8)
-		{
-			// Fix MODs with 7-bit + surround panning
-			if(m.param == 0xA4)
-			{
-				m.command = CMD_S3MCMDEX;
-				m.param = 0x91;
-			} else
-			{
-				m.param = MIN(m.param * 2, 0xFF);
-			}
-		}
-	}
-};
-
-
 // Check if header magic equals a given string.
 static bool IsMagic(const char *magic1, const char *magic2)
 //---------------------------------------------------------
@@ -465,6 +443,7 @@ void CSoundFile::ReadMODPatternEntry(FileReader &file, ModCommand &m) const
 
 	// Read Period
 	uint16 period = (((static_cast<uint16>(data[0]) & 0x0F) << 8) | data[1]);
+	m.note = NOTE_NONE;
 	if(period > 0 && period != 0xFFF)
 	{
 		m.note = 6 * 12 + 35 + NOTE_MIN;
@@ -510,13 +489,16 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	// Check MOD Magic
 	if(IsMagic(magic, "M.K.")		// ProTracker and compatible
 		|| IsMagic(magic, "M!K!")	// ProTracker (64+ patterns)
-		|| IsMagic(magic, "M&K!")	// NoiseTracker
-		|| IsMagic(magic, "N.T.")	// NoiseTracker
 		|| IsMagic(magic, "FEST")	// jobbig.mod by Mahoney
 		|| IsMagic(magic, "NSMS")	// kingdomofpleasure.mod by bee hunter
 		|| IsMagic(magic, "LARD"))	// judgement_day_gvine.mod by 4-mat
 	{
 		m_nChannels = 4;
+	} else if(IsMagic(magic, "M&K!")
+		|| IsMagic(magic, "N.T."))
+	{
+		m_nChannels = 4;
+		m_madeWithTracker = "NoiseTracker";
 	} else if(IsMagic(magic, "OKTA")
 		|| IsMagic(magic, "OCTA"))
 	{
@@ -638,6 +620,10 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		Order.SetRestartPos(0);
 	}
+	if(fileHeader.restartPos == 0x7F && isMdKd && fileHeader.restartPos + 1u >= realOrders)
+	{
+		m_madeWithTracker = "ScreamTracker";
+	}
 
 	// Now we can be pretty sure that this is a valid MOD file. Set up default song settings.
 	m_nInstruments = 0;
@@ -654,12 +640,52 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	// Setup channel pan positions and volume
 	SetupMODPanning();
 
+	// Before loading patterns, apply some heuristics:
+	// - Scan patterns to check if file could be a NoiseTracker file in disguise.
+	//   In this case, the parameter of Dxx commands needs to be ignored.
+	// - Use the same code to find notes that would be out-of-range on Amiga.
+	// - Detect 7-bit panning.
+	bool isNoiseTracker = IsMagic(magic, "M&K!") || IsMagic(magic, "N.T.");
+	bool onlyAmigaNotes = true;
+	bool fix7BitPanning = false;
+	uint8 maxPanning = 0;	// For detecting 8xx-as-sync
+	if(!isNoiseTracker)
+	{
+		bool leftPanning = false, extendedPanning = false;	// For detecting 800-880 panning
+		isNoiseTracker = isMdKd;
+		for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
+		{
+			for(uint32 i = 0; i < 256; i++)
+			{
+				ModCommand m;
+				ReadMODPatternEntry(file, m);
+				if(m.note != NOTE_NONE && (m.note < NOTE_MIDDLEC - 12 || m.note >= NOTE_MIDDLEC + 24))
+				{
+					isNoiseTracker = onlyAmigaNotes = false;
+				}
+				if((m.command > 0x06 && m.command < 0x0A)
+					|| (m.command == 0x0E && m.param > 0x01)
+					|| (m.command == 0x0F && m.param > 0x1F))
+				{
+					isNoiseTracker = false;
+				}
+				if(m.command == CMD_PANNING8)
+				{
+					maxPanning = std::max(maxPanning, m.param);
+					if(m.param < 0x80)
+						leftPanning = true;
+					else if(m.param > 0x8F && m.param != 0xA4)
+						extendedPanning = true;
+				}
+			}
+		}
+		fix7BitPanning = leftPanning && !extendedPanning;
+	}
+	file.Seek(1084);
+
 	const CHANNELINDEX readChannels = (isFLT8 ? 4 : m_nChannels); // 4 channels per pattern in FLT8 format.
 	if(isFLT8) numPatterns++; // as one logical pattern consists of two real patterns in FLT8 format, the highest pattern number has to be increased by one.
-	uint8 maxPanning = 0;	// For detecting 8xx-as-sync
 	bool hasTempoCommands = false, definitelyCIA = false;	// for detecting VBlank MODs
-	bool leftPanning = false, extendedPanning = false;		// for detecting 800-880 panning
-	bool onlyAmigaNotes = true;
 
 	// Reading patterns
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
@@ -721,13 +747,20 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 					} else if(m.command == CMD_SPEED)
 					{
 						hasSpeedOnRow = true;
-					} else if(m.command == CMD_PANNING8)
+					} else if(m.command == CMD_PATTERNBREAK && isNoiseTracker)
 					{
-						maxPanning = std::max(maxPanning, m.param);
-						if(m.param < 0x80)
-							leftPanning = true;
-						else if(m.param > 0x8F && m.param != 0xA4)
-							extendedPanning = true;
+						m.param = 0;
+					} else if(m.command == CMD_PANNING8 && fix7BitPanning)
+					{
+						// Fix MODs with 7-bit + surround panning
+						if(m.param == 0xA4)
+						{
+							m.command = CMD_S3MCMDEX;
+							m.param = 0x91;
+						} else
+						{
+							m.param = MIN(m.param * 2, 0xFF);
+						}
 					}
 					if(m.note == NOTE_NONE && m.instr > 0 && !isFLT8)
 					{
@@ -742,10 +775,6 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 					} else if(m.note != NOTE_NONE)
 					{
 						instrWithoutNoteCount[chn] = 0;
-					}
-					if(m.note != NOTE_NONE && (m.note < NOTE_MIDDLEC - 12 || m.note > NOTE_MIDDLEC + 23))
-					{
-						onlyAmigaNotes = false;
 					}
 					if(m.instr != 0)
 					{
@@ -808,10 +837,6 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 				m_madeWithTracker = "ProTracker (VBlank)";
 			}
 		}
-	}
-	if(leftPanning && !extendedPanning)
-	{
-		Patterns.ForEachModCommand(Fix7BitPanning());
 	}
 
 	return true;
