@@ -328,6 +328,9 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			m_playBehaviour.reset(kFT2PortaNoNote);
 			// Fix arpeggios in kragle_-_happy_day.xm
 			m_playBehaviour.reset(kFT2Arpeggio);
+		} else if(!memcmp(fileHeader.trackerName, "Skale Tracker\0", 14))
+		{
+			m_playBehaviour.reset(kFT2OffsetOutOfRange);
 		}
 	}
 
@@ -595,7 +598,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		} else if(madeWith[verNewModPlug])
 		{
 			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
-			m_madeWithTracker = "ModPlug Tracker 1.16";
+			m_madeWithTracker = "ModPlug Tracker 1.10 - 1.16";
 		}
 	}
 
