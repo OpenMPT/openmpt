@@ -620,10 +620,6 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		Order.SetRestartPos(0);
 	}
-	if(fileHeader.restartPos == 0x7F && isMdKd && fileHeader.restartPos + 1u >= realOrders)
-	{
-		m_madeWithTracker = "ScreamTracker";
-	}
 
 	// Now we can be pretty sure that this is a valid MOD file. Set up default song settings.
 	m_nInstruments = 0;
@@ -795,6 +791,9 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			m_SongFlags.set(SONG_PT_MODE);
 		}
+	} else if(!onlyAmigaNotes && fileHeader.restartPos == 0x7F && isMdKd && fileHeader.restartPos + 1u >= realOrders)
+	{
+		m_madeWithTracker = "ScreamTracker";
 	}
 
 	// Reading samples
