@@ -801,10 +801,11 @@ void CVstPlugin::Initialize()
 	// On the other hand, some other plugins (notably Synthedit plugins like Superwave P8 2.3 or Rez 3.0) don't like this
 	// and won't load their stored plugin data instantly, so only do this for the troublesome plugins...
 	// Also apply this fix for Korg's M1 plugin, as this will fixes older versions of said plugin, newer versions don't require the fix.
-	// EZDrummer won't load its samples until playback has started.
+	// EZDrummer / Superior Drummer won't load their samples until playback has started.
 	if(GetUID() == CCONST('K', 'L', 'W', 'V')			// Wavestation
 		|| GetUID() == CCONST('K', 'L', 'M', '1')		// M1
-		|| GetUID() == CCONST('d', 'f', 'h', 'e'))		// EZDrummer
+		|| GetUID() == CCONST('d', 'f', 'h', 'e')		// EZDrummer
+		|| GetUID() == CCONST('d', 'f', 'h', '2'))		// Superior Drummer
 	{
 		Resume();
 		Suspend();
