@@ -289,7 +289,7 @@ void COptionsAdvanced::OnOptionDblClick(NMHDR *, LRESULT *)
 		{
 			return;
 		}
-		val.SetFromString(inputDlg.resultString);
+		val.SetFromString(inputDlg.resultAsString);
 	}
 	theApp.GetSettings().Write(path, val);
 	m_List.SetItemText(index, 2, val.FormatValueAsString().c_str());
