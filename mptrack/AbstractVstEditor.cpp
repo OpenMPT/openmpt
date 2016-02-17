@@ -272,11 +272,11 @@ void CAbstractVstEditor::OnPasteParameters()
 void CAbstractVstEditor::OnRandomizePreset()
 //-----------------------------------------
 {
-	static int randomFactor = 10;
-	CInputDlg dlg(this, _T("Input parameter randomization amount (0 = no change, 100 = completely random)"), 0, 100, randomFactor);
+	static double randomFactor = 10.0;
+	CInputDlg dlg(this, _T("Input parameter randomization amount (0 = no change, 100 = completely random)"), 0.0, 100.0, randomFactor);
 	if(dlg.DoModal() == IDOK)
 	{
-		randomFactor = dlg.resultNumber;
+		randomFactor = dlg.resultAsDouble;
 		PlugParamValue factor = PlugParamValue(randomFactor) / 100.0f;
 		PlugParamIndex numParams = m_VstPlugin.GetNumParameters();
 		for(PlugParamIndex p = 0; p < numParams; p++)

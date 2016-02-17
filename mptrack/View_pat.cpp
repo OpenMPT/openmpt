@@ -2905,10 +2905,10 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 void CViewPattern::OnTransposeChannel()
 //-------------------------------------
 {
-	CInputDlg dlg(this, "Enter transpose amount (affects all patterns):", -(NOTE_MAX - NOTE_MIN), (NOTE_MAX - NOTE_MIN), m_nTransposeAmount);
+	CInputDlg dlg(this, _T("Enter transpose amount (affects all patterns):"), -(NOTE_MAX - NOTE_MIN), (NOTE_MAX - NOTE_MIN), m_nTransposeAmount);
 	if(dlg.DoModal() == IDOK)
 	{
-		m_nTransposeAmount = dlg.resultNumber;
+		m_nTransposeAmount = dlg.resultAsInt;
 
 		CSoundFile &sndFile = *GetSoundFile();
 		bool changed = false;
@@ -2952,11 +2952,11 @@ void CViewPattern::OnTransposeChannel()
 void CViewPattern::OnTransposeCustom()
 //------------------------------------
 {
-	CInputDlg dlg(this, "Enter transpose amount:", -(NOTE_MAX - NOTE_MIN), (NOTE_MAX - NOTE_MIN), m_nTransposeAmount);
+	CInputDlg dlg(this, _T("Enter transpose amount:"), -(NOTE_MAX - NOTE_MIN), (NOTE_MAX - NOTE_MIN), m_nTransposeAmount);
 	if(dlg.DoModal() == IDOK)
 	{
-		m_nTransposeAmount = dlg.resultNumber;
-		TransposeSelection(dlg.resultNumber);
+		m_nTransposeAmount = dlg.resultAsInt;
+		TransposeSelection(dlg.resultAsInt);
 	}
 }
 
@@ -5967,10 +5967,10 @@ PATTERNINDEX CViewPattern::GetNextPattern() const
 void CViewPattern::OnSetQuantize()
 //--------------------------------
 {
-	CInputDlg dlg(this, "Quantize amount in rows for live recording (0 to disable):", 0, MAX_PATTERN_ROWS, TrackerSettings::Instance().recordQuantizeRows);
+	CInputDlg dlg(this, _T("Quantize amount in rows for live recording (0 to disable):"), 0, MAX_PATTERN_ROWS, TrackerSettings::Instance().recordQuantizeRows);
 	if(dlg.DoModal())
 	{
-		TrackerSettings::Instance().recordQuantizeRows = static_cast<ROWINDEX>(dlg.resultNumber);
+		TrackerSettings::Instance().recordQuantizeRows = static_cast<ROWINDEX>(dlg.resultAsInt);
 	}
 }
 

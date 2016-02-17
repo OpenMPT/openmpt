@@ -1406,36 +1406,47 @@ BOOL CInputDlg::OnInitDialog()
 	ScreenToClient(cancelRect);
 
 	// Find out how big our label shall be
-	CSize size;
 	HDC dc = ::GetDC(m_hWnd);
-	GetTextExtentPoint32(dc, description, strlen(description), &size);
+	CRect textRect;
+	DrawText(dc, description, description.GetLength(), textRect, DT_CALCRECT);
+	LPtoDP(dc, &textRect.BottomRight(), 1);
 	::ReleaseDC(m_hWnd, dc);
-	if(size.cx < 320) size.cx = 320;
-	const int windowWidth = windowRect.Width() - labelRect.Width() + size.cx;
-	const int windowHeight = windowRect.Height() - labelRect.Height() + size.cy;
+	if(textRect.right < 320) textRect.right = 320;
+	const int windowWidth = windowRect.Width() - labelRect.Width() + textRect.right;
+	const int windowHeight = windowRect.Height() - labelRect.Height() + textRect.bottom;
 
 	// Resize and move all controls
-	GetDlgItem(IDC_PROMPT)->SetWindowPos(nullptr, 0, 0, size.cx, size.cy, SWP_NOMOVE | SWP_NOZORDER);
-	GetDlgItem(IDC_EDIT1)->SetWindowPos(nullptr, inputRect.left, labelRect.top + size.cy + (inputRect.top - labelRect.bottom), size.cx, inputRect.Height(), SWP_NOZORDER);
+	GetDlgItem(IDC_PROMPT)->SetWindowPos(nullptr, 0, 0, textRect.right, textRect.bottom, SWP_NOMOVE | SWP_NOZORDER);
+	GetDlgItem(IDC_EDIT1)->SetWindowPos(nullptr, inputRect.left, labelRect.top + textRect.bottom + (inputRect.top - labelRect.bottom), textRect.right, inputRect.Height(), SWP_NOZORDER);
 	GetDlgItem(IDOK)->SetWindowPos(nullptr, windowWidth - (windowRect.Width() - okRect.left), windowHeight - (windowRect.Height() - okRect.top), 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 	GetDlgItem(IDCANCEL)->SetWindowPos(nullptr, windowWidth - (windowRect.Width() - cancelRect.left), windowHeight - (windowRect.Height() - cancelRect.top), 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 	SetWindowPos(nullptr, 0, 0, windowWidth, windowHeight, SWP_NOMOVE | SWP_NOZORDER);
 
-	if(minValue != maxValue)
+	if(m_minValueInt != m_maxValueInt)
 	{
-		// Numeric
-		spin.SetRange32(minValue, maxValue);
+		// Numeric (int)
+		spin.SetRange32(m_minValueInt, m_maxValueInt);
 		spin.SetBuddy(GetDlgItem(IDC_EDIT1));
-		SetDlgItemInt(IDC_EDIT1, resultNumber);
+		SetDlgItemInt(IDC_EDIT1, resultAsInt);
 		m_edit.SubclassDlgItem(IDC_EDIT1, this);
 		m_edit.ModifyStyle(0, ES_NUMBER);
-		m_edit.AllowNegative(minValue < 0);
+		m_edit.AllowNegative(m_minValueInt < 0);
 		m_edit.AllowFractions(false);
+	} else if(m_minValueDbl != m_maxValueDbl)
+	{
+		// Numeric (double)
+		spin.SetRange32(static_cast<int32>(m_minValueDbl), static_cast<int32>(m_maxValueDbl));
+		spin.SetBuddy(GetDlgItem(IDC_EDIT1));
+		m_edit.SubclassDlgItem(IDC_EDIT1, this);
+		m_edit.ModifyStyle(0, ES_NUMBER);
+		m_edit.AllowNegative(m_minValueDbl < 0);
+		m_edit.AllowFractions(true);
+		m_edit.SetDecimalValue(resultAsDouble);
 	} else
 	{
 		// Text
 		spin.ShowWindow(SW_HIDE);
-		SetDlgItemText(IDC_EDIT1, resultString);
+		SetDlgItemText(IDC_EDIT1, resultAsString);
 	}
 
 	return TRUE;
@@ -1446,8 +1457,9 @@ void CInputDlg::OnOK()
 //--------------------
 {
 	CDialog::OnOK();
-	GetDlgItemText(IDC_EDIT1, resultString);
-	resultNumber = static_cast<int32>(GetDlgItemInt(IDC_EDIT1));
+	GetDlgItemText(IDC_EDIT1, resultAsString);
+	resultAsInt = static_cast<int32>(GetDlgItemInt(IDC_EDIT1));
+	m_edit.GetDecimalValue(resultAsDouble);
 }
 
 
