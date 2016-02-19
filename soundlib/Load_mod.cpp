@@ -485,20 +485,22 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_MOD);
 	m_nChannels = 4;
+	bool isNoiseTracker = false;
 
 	// Check MOD Magic
 	if(IsMagic(magic, "M.K.")		// ProTracker and compatible
 		|| IsMagic(magic, "M!K!")	// ProTracker (64+ patterns)
-		|| IsMagic(magic, "FEST")	// jobbig.mod by Mahoney
 		|| IsMagic(magic, "NSMS")	// kingdomofpleasure.mod by bee hunter
 		|| IsMagic(magic, "LARD"))	// judgement_day_gvine.mod by 4-mat
 	{
 		m_nChannels = 4;
 	} else if(IsMagic(magic, "M&K!")
+		|| IsMagic(magic, "FEST")	// "His Master's Noise" musicdisk
 		|| IsMagic(magic, "N.T."))
 	{
 		m_nChannels = 4;
 		m_madeWithTracker = "NoiseTracker";
+		isNoiseTracker = true;
 	} else if(IsMagic(magic, "OKTA")
 		|| IsMagic(magic, "OCTA"))
 	{
@@ -550,20 +552,26 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	const bool isFLT8 = IsMagic(magic, "FLT8") || IsMagic(magic, "EXO8");
 	// Only apply VBlank tests to M.K. (ProTracker) modules.
 	const bool isMdKd = IsMagic(magic, "M.K.");
+	// Adjust finetune values for modules saved with "His Master's Noisetracker"
+	const bool isHMNT = IsMagic(magic, "M&K!") || IsMagic(magic, "FEST");
 
 	// Reading song title
 	file.Seek(0);
 	file.ReadString<mpt::String::spacePadded>(m_songName, 20);
 
-	// Load Samples
+	// Load Sample Headers
 	size_t totalSampleLen = 0;
 	m_nSamples = 31;
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		MODSampleHeader sampleHeader;
 		ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp]);
-
 		totalSampleLen += Samples[smp].nLength;
+
+		if(isHMNT)
+		{
+			Samples[smp].nFineTune = -static_cast<int8>(sampleHeader.finetune << 3);
+		}
 	}
 
 	// Read order information
@@ -641,7 +649,6 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	//   In this case, the parameter of Dxx commands needs to be ignored.
 	// - Use the same code to find notes that would be out-of-range on Amiga.
 	// - Detect 7-bit panning.
-	bool isNoiseTracker = IsMagic(magic, "M&K!") || IsMagic(magic, "N.T.");
 	bool onlyAmigaNotes = true;
 	bool fix7BitPanning = false;
 	uint8 maxPanning = 0;	// For detecting 8xx-as-sync
