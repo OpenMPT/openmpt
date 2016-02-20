@@ -571,6 +571,9 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		if(isHMNT)
 		{
 			Samples[smp].nFineTune = -static_cast<int8>(sampleHeader.finetune << 3);
+		} else if(Samples[smp].nLength > 65535)
+		{
+			isNoiseTracker = false;
 		}
 	}
 
@@ -887,7 +890,6 @@ enum STVersions
 	ST_IX,					// D.O.C. SoundTracker IX (Unknown/D.O.C.)
 	MST1_00,				// Master Soundtracker 1.0 (Tip/The New Masters)
 	ST2_00,					// SoundTracker 2.0, 2.1, 2.2 (Unknown/D.O.C.)
-	ST2_00_with_Bxx,		// Bxx effect found, so definitely SoundTracker 2.0, 2.1, 2.2 (Unknown/D.O.C.)
 };
 
 
@@ -943,7 +945,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 
 		totalSampleLen += Samples[smp].nLength;
 
-		if(m_szNames[smp][0] && ((memcmp(m_szNames[smp], "st-", 3) && memcmp(m_szNames[smp], "ST-", 3)) || m_szNames[smp][0] < '0' || m_szNames[smp][0] > '9'))
+		if(m_szNames[smp][0] && ((memcmp(m_szNames[smp], "st-", 3) && memcmp(m_szNames[smp], "ST-", 3)) || m_szNames[smp][5] != ':'))
 		{
 			// Ultimate Soundtracker 1.8 and D.O.C. SoundTracker IX always have sample names containing disk names.
 			hasDiskNames = false;
@@ -1021,23 +1023,39 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Scan patterns to identify Ultimate Soundtracker modules.
 	uint8 emptyCmds = 0;
-	for(size_t i = 0; i < numPatterns * 64u * 4u; i++)
+	uint8 numDxx = 0;
+	for(uint32 i = 0; i < numPatterns * 64u * 4u; i++)
 	{
 		uint8 data[4];
 		file.ReadArray(data);
+		const ROWINDEX row = (i / 4u) % 64u;
+		const bool firstInPattern = (i % (64u * 4u)) == 0;
 		const uint8 eff = data[2] & 0x0F, param = data[3];
-		if(emptyCmds != 0 && !memcmp(data, "\0\0\0\0", 4))
+		// Check for empty space between the last Dxx command and the beginning of another pattern
+		if(emptyCmds != 0 && !firstInPattern && !memcmp(data, "\0\0\0\0", 4))
 		{
 			emptyCmds++;
 			if(emptyCmds > 32)
 			{
 				// Since there is a lot of empty space after the last Dxx command,
 				// we assume it's supposed to be a pattern break effect.
-				minVersion = ST2_00_with_Bxx;
+				minVersion = ST2_00;
 			}
 		} else
 		{
 			emptyCmds = 0;
+		}
+
+		// Check for a large number of Dxx commands in the previous pattern
+		if(numDxx != 0 && firstInPattern)
+		{
+			if(numDxx < 3)
+			{
+				// not many Dxx commands in one pattern means they were probably pattern breaks
+				minVersion = ST2_00;
+			}
+			
+			numDxx = 0;
 		}
 
 		switch(eff)
@@ -1048,25 +1066,29 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				// If a 1xx / 2xx effect has a parameter greater than 0x20, it is assumed to be UST.
 				minVersion = hasDiskNames ? UST1_80 : UST1_00;
-			} else if(eff == 1 && param < 0x03)
+			} else if(eff == 1 && param > 0 && param < 0x03)
 			{
 				// This doesn't look like an arpeggio.
 				minVersion = std::max(minVersion, ST2_00_Exterminator);
 			}
 			break;
 		case 0x0B:
-			minVersion = ST2_00_with_Bxx;
+			minVersion = ST2_00;
 			break;
 		case 0x0C:
 		case 0x0D:
 		case 0x0E:
 			minVersion = std::max(minVersion, ST2_00_Exterminator);
-			if(eff == 0x0D && param == 0)
+			if(eff == 0x0D)
 			{
-				// Assume this is a pattern break command.
-				minVersion = std::max(minVersion, ST2_00);
+				emptyCmds = 1;
+				if(param == 0 && row == 0)
+				{
+					// Fix a possible tracking mistake in Blood Money title - who wants to do a pattern break on the first row anyway?
+					break;
+				}
+				numDxx++;
 			}
-			emptyCmds = 1;
 			break;
 		case 0x0F:
 			minVersion = std::max(minVersion, ST_III);
@@ -1114,14 +1136,10 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 					}
 					if(m.command == 0x0D)
 					{
-						if((m.param != 0 && minVersion != ST2_00_with_Bxx) || minVersion < ST_IX)
+						if(minVersion != ST2_00)
 						{
 							// Dxy is volume slide in some Soundtracker versions, D00 is a pattern break in the latest versions.
 							m.command = 0x0A;
-						} else if(m.param == 0 && row == 0 && minVersion != ST2_00_with_Bxx)
-						{
-							// Fix a possible tracking mistake in Blood Money title - who wants to do a pattern break on the first row anyway?
-							m.command = m.param = 0;
 						} else
 						{
 							m.param = 0;
@@ -1191,7 +1209,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		m_madeWithTracker = "Ultimate Soundtracker 1.8-2.0";
 		break;
 	case ST2_00_Exterminator:
-		m_madeWithTracker = "SoundTracker 2.0 / D.O.C. Sountracker II";
+		m_madeWithTracker = "SoundTracker 2.0 / D.O.C. SoundTracker II";
 		break;
 	case ST_III:
 		m_madeWithTracker = "Defjam Soundtracker III / Alpha Flight SoundTracker IV / D.O.C. SoundTracker IV / VI";
@@ -1203,7 +1221,6 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		m_madeWithTracker = "Master Soundtracker 1.0";
 		break;
 	case ST2_00:
-	case ST2_00_with_Bxx:
 		m_madeWithTracker = "SoundTracker 2.0 / 2.1 / 2.2";
 		break;
 	}
