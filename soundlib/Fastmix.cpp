@@ -18,7 +18,7 @@
 //   with more than two taps since they're not symmetric. We might need separate LUTs
 //   because otherwise we will add tons of branches.
 // - Loop wraparound works pretty well in general, but not at the start of bidi samples.
-// - THe loop lookahead stuff might still fail for samples with backward loops.
+// - The loop lookahead stuff might still fail for samples with backward loops.
 
 #include "stdafx.h"
 #include "Sndfile.h"
@@ -484,7 +484,7 @@ void CSoundFile::CreateStereoMix(int count)
 				}
 			}
 
-			if(m_SongFlags[SONG_PT_MODE] && chn.nPos >= chn.nLoopEnd && chn.dwFlags[CHN_LOOP])
+			if((m_SongFlags[SONG_PT_MODE] || m_playBehaviour[kMODOneShotLoops]) && chn.nPos >= chn.nLoopEnd && chn.dwFlags[CHN_LOOP])
 			{
 				if(chn.nNewIns && chn.nNewIns <= GetNumSamples() && chn.pModSample != &Samples[chn.nNewIns])
 				{
@@ -720,8 +720,8 @@ void CSoundFile::ProcessPlugins(uint32 nCount)
 					bool isSilent = true;
 					for(uint32 i = 0; i < nCount; i++)
 					{
-						if(pOutL[i] > FLT_EPSILON || pOutL[i] < -FLT_EPSILON
-							|| pOutR[i] > FLT_EPSILON || pOutR[i] < -FLT_EPSILON)
+						if(pOutL[i] >= FLT_EPSILON || pOutL[i] <= -FLT_EPSILON
+							|| pOutR[i] >= FLT_EPSILON || pOutR[i] <= -FLT_EPSILON)
 						{
 							isSilent = false;
 							break;
