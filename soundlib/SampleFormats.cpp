@@ -55,6 +55,9 @@
 #ifndef NO_MP3_SAMPLES
 #include "MPEGFrame.h"
 #endif // NO_MP3_SAMPLES
+//#include "../common/mptCRC.h"
+#include "OggStream.h"
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -2245,7 +2248,7 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 		}
 		// skip CRC check for now
 		if(oggPageSegments != 1)
-		{ // first OggFlac page msut contain exactly 1 segment
+		{ // first OggFlac page must contain exactly 1 segment
 			return false;
 		}
 		if(oggPageSegmentLength != 51)

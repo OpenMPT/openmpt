@@ -795,6 +795,7 @@
     <ClCompile Include="..\soundlib\modsmp_ctrl.cpp" />
     <ClCompile Include="..\soundlib\mod_specifications.cpp" />
     <ClCompile Include="..\soundlib\MPEGFrame.cpp" />
+    <ClCompile Include="..\soundlib\OggStream.cpp" />
     <ClCompile Include="..\soundlib\pattern.cpp" />
     <ClCompile Include="..\soundlib\patternContainer.cpp" />
     <ClCompile Include="..\soundlib\plugins\DigiBoosterEcho.cpp" />
@@ -975,6 +976,7 @@
     <ClInclude Include="..\common\misc_util.h" />
     <ClInclude Include="..\common\mptAtomic.h" />
     <ClInclude Include="..\common\mptCPU.h" />
+    <ClInclude Include="..\common\mptCRC.h" />
     <ClInclude Include="..\common\mptFileIO.h" />
     <ClInclude Include="..\common\mptIO.h" />
     <ClInclude Include="..\common\mptLibrary.h" />
@@ -1032,6 +1034,7 @@
     <ClInclude Include="..\soundlib\modsmp_ctrl.h" />
     <ClInclude Include="..\soundlib\mod_specifications.h" />
     <ClInclude Include="..\soundlib\MPEGFrame.h" />
+    <ClInclude Include="..\soundlib\OggStream.h" />
     <ClInclude Include="..\soundlib\pattern.h" />
     <ClInclude Include="..\soundlib\patternContainer.h" />
     <ClInclude Include="..\soundlib\plugins\DigiBoosterEcho.h" />

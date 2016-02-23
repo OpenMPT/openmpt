@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 #include "MPEGFrame.h"
-#include "FileReader.h"
+#include "../common/FileReader.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
