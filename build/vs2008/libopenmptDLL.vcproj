@@ -435,6 +435,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\common\mptCRC.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\mptFileIO.cpp"
 				>
 			</File>
@@ -888,6 +892,14 @@
 			</File>
 			<File
 				RelativePath="..\..\soundlib\ModSequence.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\OggStream.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\OggStream.h"
 				>
 			</File>
 			<File

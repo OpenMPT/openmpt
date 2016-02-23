@@ -197,6 +197,7 @@
     <ClInclude Include="..\..\common\mptAtomic.h" />
     <ClInclude Include="..\..\common\mptBufferIO.h" />
     <ClInclude Include="..\..\common\mptCPU.h" />
+    <ClInclude Include="..\..\common\mptCRC.h" />
     <ClInclude Include="..\..\common\mptFileIO.h" />
     <ClInclude Include="..\..\common\mptIO.h" />
     <ClInclude Include="..\..\common\mptLibrary.h" />
@@ -245,6 +246,7 @@
     <ClInclude Include="..\..\soundlib\ModInstrument.h" />
     <ClInclude Include="..\..\soundlib\ModSample.h" />
     <ClInclude Include="..\..\soundlib\ModSequence.h" />
+    <ClInclude Include="..\..\soundlib\OggStream.h" />
     <ClInclude Include="..\..\soundlib\Resampler.h" />
     <ClInclude Include="..\..\soundlib\RowVisitor.h" />
     <ClInclude Include="..\..\soundlib\S3MTools.h" />
@@ -339,6 +341,7 @@
     <ClCompile Include="..\..\soundlib\ModInstrument.cpp" />
     <ClCompile Include="..\..\soundlib\ModSample.cpp" />
     <ClCompile Include="..\..\soundlib\ModSequence.cpp" />
+    <ClCompile Include="..\..\soundlib\OggStream.cpp" />
     <ClCompile Include="..\..\soundlib\RowVisitor.cpp" />
     <ClCompile Include="..\..\soundlib\S3MTools.cpp" />
     <ClCompile Include="..\..\soundlib\SampleFormats.cpp" />

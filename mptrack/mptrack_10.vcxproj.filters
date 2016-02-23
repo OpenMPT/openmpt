@@ -604,6 +604,9 @@
     <ClCompile Include="..\soundlib\plugins\DigiBoosterEcho.cpp">
       <Filter>Source Files\soundlib\plugins</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\OggStream.cpp">
+      <Filter>Source Files\soundlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1190,6 +1193,12 @@
     </ClInclude>
     <ClInclude Include="..\soundlib\plugins\PluginStructs.h">
       <Filter>Header Files\soundlib\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\mptCRC.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\OggStream.h">
+      <Filter>Header Files\soundlib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

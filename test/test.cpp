@@ -17,6 +17,7 @@
 
 #include "../common/version.h"
 #include "../common/misc_util.h"
+#include "../common/mptCRC.h"
 #include "../common/StringFixer.h"
 #include "../common/serialization_utils.h"
 #include "../soundlib/Sndfile.h"
@@ -839,6 +840,9 @@ static MPT_NOINLINE void TestMisc()
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
 		VERIFY_EQUAL(a, 'a');
 	}
+
+	VERIFY_EQUAL(mpt::crc32(std::string("123456789")), 0xCBF43926u);
+	VERIFY_EQUAL(mpt::crc32_ogg(std::string("123456789")), 0x89a1897fu);
 
 }
 
