@@ -9,6 +9,7 @@
 
 
 #include "../common/Endianness.h"
+#include "../common/mptIO.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
