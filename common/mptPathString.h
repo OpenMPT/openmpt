@@ -217,7 +217,7 @@ public:
 	RawPathString AsNative() const { return path; }
 	RawPathString AsNativePrefixed() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
-#else
+#else // !MPT_WITH_CHARSET_LOCALE
 	std::string ToUTF8() const { return path; }
 #if MPT_WSTRING_CONVERT
 	std::wstring ToWide() const { return mpt::ToWide(mpt::CharsetUTF8, path); }
@@ -229,8 +229,9 @@ public:
 #endif
 	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToCharset(mpt::CharsetUTF8, path)); }
 	RawPathString AsNative() const { return path; }
+	RawPathString AsNativePrefixed() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
-#endif
+#endif // MPT_WITH_CHARSET_LOCALE
 
 #endif // MPT_OS_WINDOWS
 
@@ -313,6 +314,8 @@ void SanitizeFilename(CString &str);
 #endif // MODPLUG_TRACKER
 
 
+#if defined(MODPLUG_TRACKER)
+
 enum FileTypeFormat
 {
 	FileTypeFormatNone           = 0   , // do not show extensions after description, i.e. "Foo Files"
@@ -372,6 +375,8 @@ mpt::PathString ToFilterString(const std::vector<FileType> &fileTypes, FlagSet<F
 // "*.ogg;*.oga" / ";*.ogg;*.oga"
 mpt::PathString ToFilterOnlyString(const FileType &fileType, bool prependSemicolonWhenNotEmpty = false);
 mpt::PathString ToFilterOnlyString(const std::vector<FileType> &fileTypes, bool prependSemicolonWhenNotEmpty = false);
+
+#endif // MODPLUG_TRACKER
 
 
 #endif // MPT_WITH_PATHSTRING

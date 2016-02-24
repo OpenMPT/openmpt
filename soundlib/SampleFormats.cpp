@@ -560,8 +560,12 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filen
 	}
 	
 	FileTags tags;
-	tags.title = mpt::ToUnicode(mpt::CharsetLocale, m_szNames[nSample]);
-	tags.encoder = mpt::ToUnicode(mpt::CharsetLocale, MptVersion::GetOpenMPTVersionStr());
+	#if defined(MPT_WITH_CHARSET_LOCALE)
+		tags.title = mpt::ToUnicode(mpt::CharsetLocale, m_szNames[nSample]);
+	#else // !MPT_WITH_CHARSET_LOCALE
+		tags.title = mpt::ToUnicode(GetCharset(), m_szNames[nSample]);
+	#endif // MPT_WITH_CHARSET_LOCALE
+	tags.encoder = mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetOpenMPTVersionStr());
 	file.WriteMetatags(tags);
 	
 	return true;
