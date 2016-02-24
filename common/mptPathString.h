@@ -16,7 +16,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#if defined(MPT_WITH_PATHSTRING)
 
 #define MPT_DEPRECATED_PATH
 //#define MPT_DEPRECATED_PATH MPT_DEPRECATED
@@ -378,7 +377,5 @@ mpt::PathString ToFilterOnlyString(const std::vector<FileType> &fileTypes, bool 
 
 #endif // MODPLUG_TRACKER
 
-
-#endif // MPT_WITH_PATHSTRING
 
 OPENMPT_NAMESPACE_END

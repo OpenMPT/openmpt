@@ -20,8 +20,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MPT_WITH_PATHSTRING)
-
 #if MPT_OS_WINDOWS
 
 namespace mpt
@@ -509,9 +507,6 @@ mpt::PathString ToFilterOnlyString(const std::vector<FileType> &fileTypes, bool 
 
 
 #endif // MODPLUG_TRACKER
-
-
-#endif // MPT_WITH_PATHSTRING
 
 
 OPENMPT_NAMESPACE_END
