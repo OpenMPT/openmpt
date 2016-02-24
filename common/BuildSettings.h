@@ -114,6 +114,9 @@
 // Support for externally linked samples e.g. in MPTM files
 #define MPT_EXTERNAL_SAMPLES
 
+// Support mpt::ChartsetLocale
+#define MPT_WITH_CHARSET_LOCALE
+
 // Disable unarchiving support
 //#define NO_ARCHIVE_SUPPORT
 #define UNGZIP_SUPPORT
@@ -204,6 +207,11 @@
 #define MPT_FILEREADER_STD_ISTREAM_SEEKABLE
 #define MPT_FILEREADER_CALLBACK_STREAM
 //#define MPT_EXTERNAL_SAMPLES
+#if defined(ENABLE_TESTS)
+#define MPT_WITH_CHARSET_LOCALE
+#else
+//#define MPT_WITH_CHARSET_LOCALE
+#endif
 #define NO_ARCHIVE_SUPPORT
 //#define UNGZIP_SUPPORT
 //#define ZIPPED_MOD_SUPPORT
@@ -269,13 +277,16 @@
 #elif MPT_OS_MACOSX_OR_IOS
 
 	#if defined(MPT_WITH_ICONV)
-	#define MPT_CHARSET_ICONV
-	#ifndef MPT_ICONV_NO_WCHAR
-	#define MPT_ICONV_NO_WCHAR
-	#endif
+		#define MPT_CHARSET_ICONV
+		#ifndef MPT_ICONV_NO_WCHAR
+		#define MPT_ICONV_NO_WCHAR
+		#endif
 	#else
-	#define MPT_CHARSET_CODECVTUTF8
+		#define MPT_CHARSET_CODECVTUTF8
 	#endif
+	//#ifndef MPT_LOCALE_ASSUME_CHARSET
+	//#define MPT_LOCALE_ASSUME_CHARSET CharsetUTF8
+	//#endif
 
 #elif defined(MPT_WITH_ICONV)
 
@@ -432,10 +443,6 @@
 
 #if !defined(MODPLUG_NO_FILESAVE) && !defined(MPT_WITH_FILEIO_STDIO)
 #define MPT_WITH_FILEIO_STDIO // file saving requires FILE*
-#endif
-
-#if defined(MPT_WITH_PATHSTRING) && !defined(MPT_WITH_CHARSET_LOCALE)
-#define MPT_WITH_CHARSET_LOCALE // PathString requires locale charset
 #endif
 
 #if defined(NO_PLUGINS)

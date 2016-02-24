@@ -387,6 +387,9 @@ void SanitizeFilename(CString &str)
 #endif // MODPLUG_TRACKER
 
 
+#if defined(MODPLUG_TRACKER)
+
+
 mpt::PathString FileType::AsFilterString(FlagSet<FileTypeFormat> format) const
 //----------------------------------------------------------------------------
 {
@@ -503,6 +506,9 @@ mpt::PathString ToFilterOnlyString(const std::vector<FileType> &fileTypes, bool 
 	}
 	return filter.empty() ? filter : (prependSemicolonWhenNotEmpty ? MPT_PATHSTRING(";") : MPT_PATHSTRING("")) + filter;
 }
+
+
+#endif // MODPLUG_TRACKER
 
 
 #endif // MPT_WITH_PATHSTRING
