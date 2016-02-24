@@ -401,7 +401,7 @@
 #define MPT_WITH_DYNBIND // unmo3 is loaded dynamically
 #endif
 
-#if defined(ENABLE_TESTS) && !defined(MPT_WITH_PATHSTRING)
+#if defined(ENABLE_TESTS)
 #define MPT_WITH_FILEIO // Test suite requires PathString for file loading.
 #endif
 
@@ -423,22 +423,6 @@
 
 #if defined(MPT_EXTERNAL_SAMPLES) && !defined(MPT_WITH_FILEIO)
 #define MPT_WITH_FILEIO // External samples require disk file io
-#endif
-
-#if !defined(NO_ARCHIVE_SUPPORT) && !defined(MPT_WITH_PATHSTRING)
-#define MPT_WITH_PATHSTRING // archive requires PathString
-#endif
-
-#if defined(MPT_WITH_FILEIO) && !defined(MPT_WITH_PATHSTRING)
-#define MPT_WITH_PATHSTRING // disk file io requires PathString
-#endif
-
-#if defined(MPT_WITH_DYNBIND) && !defined(MPT_WITH_PATHSTRING)
-#define MPT_WITH_PATHSTRING // dynamic library loading requires PathString
-#endif
-
-#if !defined(MODPLUG_NO_FILESAVE) && !defined(MPT_WITH_PATHSTRING)
-#define MPT_WITH_PATHSTRING // file saving requires PathString
 #endif
 
 #if !defined(MODPLUG_NO_FILESAVE) && !defined(MPT_WITH_FILEIO_STDIO)

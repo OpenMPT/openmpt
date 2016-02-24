@@ -875,9 +875,7 @@ public:
 	bool ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Decode = false);
 	bool ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file, bool mo3Decode = false);
 #ifdef MODPLUG_TRACKER
-#if defined(MPT_WITH_PATHSTRING)
 	static std::vector<FileType> GetMediaFoundationFileTypes();
-#endif // MPT_WITH_PATHSTRING
 #endif // MODPLUG_TRACKER
 #ifndef MODPLUG_NO_FILESAVE
 	bool SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const;

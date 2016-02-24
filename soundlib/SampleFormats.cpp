@@ -2946,7 +2946,6 @@ MPT_REGISTERED_COMPONENT(ComponentMediaFoundation, "MediaFoundation")
 
 
 #ifdef MODPLUG_TRACKER
-#if defined(MPT_WITH_PATHSTRING)
 std::vector<FileType> CSoundFile::GetMediaFoundationFileTypes()
 //-------------------------------------------------------------
 {
@@ -3051,7 +3050,6 @@ std::vector<FileType> CSoundFile::GetMediaFoundationFileTypes()
 
 	return result;
 }
-#endif // MPT_WITH_PATHSTRING
 #endif // MODPLUG_TRACKER
 
 
