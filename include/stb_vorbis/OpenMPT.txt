@@ -1,0 +1,5 @@
+This folder contains the stb_vorbis library from
+https://github.com/nothings/stb/blob/master/stb_vorbis.c
+(commit 79f29bafffdbf33cb566102b1635c144beba0f28)
+
+No modifications have been applied.
