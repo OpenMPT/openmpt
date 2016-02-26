@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <vector>
 
-#if defined(MPT_WITH_ZLIB)
+#if defined(MPT_WITH_ZLIB) && defined(MPT_WITH_MINIZIP)
 #include <contrib/minizip/unzip.h>
 #elif defined(MPT_WITH_MINIZ)
 #define MINIZ_HEADER_FILE_ONLY
@@ -26,7 +26,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MPT_WITH_ZLIB)
+#if defined(MPT_WITH_ZLIB) && defined(MPT_WITH_MINIZIP)
 
 
 // Low-level file abstractions for in-memory file handling
