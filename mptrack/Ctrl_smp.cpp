@@ -1096,9 +1096,9 @@ void CCtrlSamples::OnSampleOpen()
 		.EnableAudioPreview()
 		.ExtensionFilter("All Samples|*.wav;*.flac;*.oga;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.iff;*.8sv;*.8svx;*.svx;*.pcm;*.mp1;*.mp2;*.mp3" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
 			"Wave Files (*.wav)|*.wav|"
-	#ifndef NO_FLAC
+	#ifdef MPT_WITH_FLAC
 			"FLAC Files (*.flac,*.oga)|*.flac;*.oga|"
-	#endif // NO_FLAC
+	#endif // MPT_WITH_FLAC
 	#ifndef NO_MP3_SAMPLES
 			"MPEG Files (*.mp1,*.mp2,*.mp3)|*.mp1;*.mp2;*.mp3|"
 	#endif // NO_MP3_SAMPLES
@@ -1145,9 +1145,9 @@ void CCtrlSamples::OnSampleOpenKnown()
 		.EnableAudioPreview()
 		.ExtensionFilter("All Samples|*.wav;*.flac;*.oga;*.pat;*.s3i;*.smp;*.xi;*.aif;*.aiff;*.its;*.iff;*.8sv;*.8svx;*.svx;*.mp1;*.mp2;*.mp3" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
 			"Wave Files (*.wav)|*.wav|"
-	#ifndef NO_FLAC
+	#ifdef MPT_WITH_FLAC
 			"FLAC Files (*.flac,*.oga)|*.flac;*.oga|"
-	#endif // NO_FLAC
+	#endif // MPT_WITH_FLAC
 	#ifndef NO_MP3_SAMPLES
 			"MPEG Files (*.mp1,*.mp2,*.mp3)|*.mp1;*.mp2;*.mp3|"
 	#endif // NO_MP3_SAMPLES

@@ -17,7 +17,7 @@
 
 #include "Mptrack.h"
 
-#ifndef NO_OGG
+#ifdef MPT_WITH_OGG
 #include <ogg/ogg.h>
 #endif
 #include <vorbis/vorbisenc.h>
@@ -102,7 +102,7 @@ protected:
 				break;
 			}
 		}
-#ifndef NO_OGG
+#ifdef MPT_WITH_OGG
 		return ok;
 #else
 		return false;
@@ -181,7 +181,7 @@ public:
 };
 MPT_REGISTERED_COMPONENT(ComponentVorbis, "Vorbis")
 
-#ifndef NO_OGG
+#ifdef MPT_WITH_OGG
 
 class VorbisStreamWriter : public StreamWriterBase
 {
@@ -385,7 +385,7 @@ public:
 	}
 };
 
-#endif // !NO_OGG
+#endif // MPT_WITH_OGG
 
 
 
@@ -420,7 +420,7 @@ IAudioStreamEncoder *VorbisEncoder::ConstructStreamEncoder(std::ostream &file) c
 	{
 		return nullptr;
 	}
-#ifndef NO_OGG
+#ifdef MPT_WITH_OGG
 	return new VorbisStreamWriter(*m_Vorbis, file);
 #else
 	return nullptr;

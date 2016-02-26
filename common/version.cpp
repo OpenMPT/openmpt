@@ -544,7 +544,7 @@ mpt::ustring GetFullCreditsString()
 		"http://www.portaudio.com/\n"
 		"\n"
 #endif
-#ifndef NO_FLAC
+#ifdef MPT_WITH_FLAC
 		"Josh Coalson / Xiph.Org Foundation for libFLAC\n"
 		"https://xiph.org/flac/\n"
 		"\n"
@@ -559,7 +559,7 @@ mpt::ustring GetFullCreditsString()
 		"https://github.com/nothings/stb/\n"
 		"\n"
 #endif
-#ifndef NO_OGG
+#ifdef MPT_WITH_OGG
 		"Xiph.Org Foundation for libogg\n"
 		"https://xiph.org/ogg/\n"
 		"\n"
