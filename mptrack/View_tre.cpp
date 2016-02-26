@@ -1717,9 +1717,9 @@ BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 	#ifdef MPT_WITH_FLAC
 			"FLAC Files (*.flac,*.oga)|*.flac;*.oga|"
 	#endif // MPT_WITH_FLAC
-	#ifndef NO_MP3_SAMPLES
+	#if defined(MPT_ENABLE_MP3_SAMPLES)
 			"MPEG Files (*.mp1,*.mp2,*.mp3)|*.mp1;*.mp2;*.mp3|"
-	#endif // NO_MP3_SAMPLES
+	#endif // MPT_ENABLE_MP3_SAMPLES
 	#if defined(MPT_WITH_MEDIAFOUNDATION)
 			+ ToFilterString(mediaFoundationTypes, FileTypeFormatShowExtensions).ToLocale() +
 	#endif

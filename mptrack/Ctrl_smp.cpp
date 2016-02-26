@@ -1099,9 +1099,9 @@ void CCtrlSamples::OnSampleOpen()
 	#ifdef MPT_WITH_FLAC
 			"FLAC Files (*.flac,*.oga)|*.flac;*.oga|"
 	#endif // MPT_WITH_FLAC
-	#ifndef NO_MP3_SAMPLES
+	#if defined(MPT_ENABLE_MP3_SAMPLES)
 			"MPEG Files (*.mp1,*.mp2,*.mp3)|*.mp1;*.mp2;*.mp3|"
-	#endif // NO_MP3_SAMPLES
+	#endif // MPT_ENABLE_MP3_SAMPLES
 			"XI Samples (*.xi)|*.xi|"
 			"Impulse Tracker Samples (*.its)|*.its|"
 			"ScreamTracker Samples (*.s3i,*.smp)|*.s3i;*.smp|"
@@ -1148,9 +1148,9 @@ void CCtrlSamples::OnSampleOpenKnown()
 	#ifdef MPT_WITH_FLAC
 			"FLAC Files (*.flac,*.oga)|*.flac;*.oga|"
 	#endif // MPT_WITH_FLAC
-	#ifndef NO_MP3_SAMPLES
+#if defined(MPT_ENABLE_MP3_SAMPLES)
 			"MPEG Files (*.mp1,*.mp2,*.mp3)|*.mp1;*.mp2;*.mp3|"
-	#endif // NO_MP3_SAMPLES
+	#endif // MPT_ENABLE_MP3_SAMPLES
 			"XI Samples (*.xi)|*.xi|"
 			"Impulse Tracker Samples (*.its)|*.its|"
 			"ScreamTracker Samples (*.s3i,*.smp)|*.s3i;*.smp|"

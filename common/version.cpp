@@ -549,7 +549,7 @@ mpt::ustring GetFullCreditsString()
 		"https://xiph.org/flac/\n"
 		"\n"
 #endif
-#ifndef NO_MP3_SAMPLES
+#if defined(MPT_WITH_MPG123) || defined(MPT_WITH_MPG123_DYNBIND)
 		"The mpg123 project for libmpg123\n"
 		"http://mpg123.de/\n"
 		"\n"
