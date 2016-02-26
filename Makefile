@@ -132,6 +132,7 @@ DYNLINK=1
 SHARED_LIB=1
 STATIC_LIB=1
 EXAMPLES=1
+FUZZ=0
 SHARED_SONAME=1
 DEBUG=0
 OPTIMIZE=1
@@ -569,6 +570,16 @@ ALL_OBJECTS += $(EXAMPLES_OBJECTS)
 ALL_DEPENDS += $(EXAMPLES_DEPENDS)
 
 
+FUZZ_CXX_SOURCES += $(wildcard contrib/fuzzing/*.cpp)
+FUZZ_C_SOURCES += $(wildcard contrib/fuzzing/*.c)
+
+FUZZ_OBJECTS += $(FUZZ_CXX_SOURCES:.cpp=.o)
+FUZZ_OBJECTS += $(FUZZ_C_SOURCES:.c=.o)
+FUZZ_DEPENDS = $(FUZZ_OBJECTS:.o=.d)
+ALL_OBJECTS += $(FUZZ_OBJECTS)
+ALL_DEPENDS += $(FUZZ_DEPENDS)
+
+
 .PHONY: all
 all:
 
@@ -599,6 +610,9 @@ else
 OUTPUTS += bin/libopenmpt_example_cxx$(EXESUFFIX)
 endif
 OUTPUTS += bin/libopenmpt_example_c_stdout$(EXESUFFIX)
+endif
+ifeq ($(FUZZ),1)
+OUTPUTS += bin/fuzz$(EXESUFFIX)
 endif
 ifeq ($(TEST),1)
 OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
@@ -926,6 +940,19 @@ ifeq ($(HOST),unix)
 	$(SILENT)mv $@ $@.norpath
 	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_OPENMPT123) $(OPENMPT123_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_OPENMPT123) -o $@
+endif
+
+contrib/fuzzing/fuzz.o: contrib/fuzzing/fuzz.c
+	$(INFO) [CC] $<
+	$(VERYSILENT)$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -M -MT$@ $< > $*.d
+	$(SILENT)$(COMPILE.c) $(OUTPUT_OPTION) $<
+bin/fuzz$(EXESUFFIX): contrib/fuzzing/fuzz.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
+	$(INFO) [LD] $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) contrib/fuzzing/fuzz.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
+ifeq ($(HOST),unix)
+	$(SILENT)mv $@ $@.norpath
+	$(INFO) [LD] $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) contrib/fuzzing/fuzz.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 endif
 
 examples/libopenmpt_example_c.o: examples/libopenmpt_example_c.c
