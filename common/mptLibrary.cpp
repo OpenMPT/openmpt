@@ -16,7 +16,7 @@
 #include <windows.h>
 #elif MPT_OS_ANDROID
 #include <dlfcn.h>
-#else
+#elif defined(MPT_WITH_LTDL)
 #include <ltdl.h>
 #endif
 #endif
@@ -231,7 +231,7 @@ public:
 
 
 
-#else // MPT_OS
+#elif defined(MPT_WITH_LTDL)
 
 
 class LibraryHandle
@@ -284,6 +284,46 @@ public:
 			return nullptr;
 		}
 		return reinterpret_cast<FuncPtr>(lt_dlsym(handle, symbol.c_str()));
+	}
+
+};
+
+
+#else // MPT_OS
+
+
+// dummy implementation
+
+class LibraryHandle
+{
+public:
+
+	LibraryHandle(const mpt::LibraryPath &path)
+	{
+		MPT_UNREFERENCED_PARAMETER(path);
+		return;
+	}
+
+	~LibraryHandle()
+	{
+		return;
+	}
+
+public:
+
+	bool IsValid() const
+	{
+		return false;
+	}
+
+	FuncPtr GetProcAddress(const std::string &symbol) const
+	{
+		MPT_UNREFERENCED_PARAMETER(symbol);
+		if(!IsValid())
+		{
+			return nullptr;
+		}
+		return nullptr;
 	}
 
 };
