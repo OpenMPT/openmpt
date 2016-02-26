@@ -167,7 +167,6 @@
 
 // Disable unarchiving support
 //#define NO_ARCHIVE_SUPPORT
-#define UNGZIP_SUPPORT
 #define UNLHA_SUPPORT
 #define UNRAR_SUPPORT
 
@@ -238,7 +237,6 @@
 //#define MPT_ENABLE_CHARSET_LOCALE
 #endif
 #define NO_ARCHIVE_SUPPORT
-//#define UNGZIP_SUPPORT
 //#define UNLHA_SUPPORT
 //#define UNRAR_SUPPORT
 #define NO_REVERB

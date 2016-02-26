@@ -13,7 +13,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef UNGZIP_SUPPORT
+#if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
 
 //=====================================
 class CGzipArchive : public ArchiveBase
@@ -88,6 +88,6 @@ public:
 	virtual ~CGzipArchive();
 };
 
-#endif // UNGZIP_SUPPORT
+#endif // MPT_WITH_ZLIB || MPT_WITH_MINIZ
 
 OPENMPT_NAMESPACE_END

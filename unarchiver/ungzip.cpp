@@ -12,7 +12,7 @@
 #include "../common/FileReader.h"
 #include "ungzip.h"
 
-#ifdef UNGZIP_SUPPORT
+#if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
 
 #if defined(MPT_WITH_ZLIB)
 #include <zlib/zlib.h>
@@ -21,13 +21,13 @@
 #include <miniz/miniz.c>
 #endif
 
-#endif // UNGZIP_SUPPORT
+#endif // MPT_WITH_ZLIB || MPT_WITH_MINIZ
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-#ifdef UNGZIP_SUPPORT
+#if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
 
 	
 CGzipArchive::CGzipArchive(FileReader &file) : ArchiveBase(file)
@@ -131,7 +131,7 @@ bool CGzipArchive::ExtractFile(std::size_t index)
 }
 
 
-#endif // UNGZIP_SUPPORT
+#endif // MPT_WITH_ZLIB || MPT_WITH_MINIZ
 
 
 OPENMPT_NAMESPACE_END
