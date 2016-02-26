@@ -31,66 +31,6 @@
 
 
 
-#ifdef MODPLUG_TRACKER
-
-// Use inline assembly at all
-#define ENABLE_ASM
-
-#else
-
-// Do not use inline asm in library builds. There is just about no codepath which would use it anyway.
-//#define ENABLE_ASM
-
-#endif
-
-
-
-// inline assembly requires MSVC compiler
-#if defined(ENABLE_ASM) && MPT_COMPILER_MSVC
-
-#ifdef _M_IX86
-
-// Generate general x86 inline assembly / intrinsics.
-#define ENABLE_X86
-
-// Generate inline assembly using MMX instructions (only used when the CPU supports it).
-#define ENABLE_MMX
-
-// Generate inline assembly using SSE instructions (only used when the CPU supports it).
-#define ENABLE_SSE
-
-// Generate inline assembly using SSE2 instructions (only used when the CPU supports it).
-#define ENABLE_SSE2
-
-// Generate inline assembly using SSE3 instructions (only used when the CPU supports it).
-#define ENABLE_SSE3
-
-// Generate inline assembly using SSE4 instructions (only used when the CPU supports it).
-#define ENABLE_SSE4
-
-// Generate inline assembly using AMD specific instruction set extensions (only used when the CPU supports it).
-#define ENABLE_X86_AMD
-
-#elif defined(_M_X64)
-
-// Generate general x64 inline assembly / intrinsics.
-#define ENABLE_X64
-
-// Generate inline assembly using SSE2 instructions (only used when the CPU supports it).
-#define ENABLE_SSE2
-
-// Generate inline assembly using SSE3 instructions (only used when the CPU supports it).
-#define ENABLE_SSE3
-
-// Generate inline assembly using SSE4 instructions (only used when the CPU supports it).
-#define ENABLE_SSE4
-
-#endif
-
-#endif // ENABLE_ASM
-
-
-
 #if defined(MODPLUG_TRACKER) && defined(LIBOPENMPT_BUILD)
 #error "either MODPLUG_TRACKER or LIBOPENMPT_BUILD has to be defined"
 #elif defined(MODPLUG_TRACKER)
@@ -214,6 +154,9 @@
 // Support mpt::ChartsetLocale
 #define MPT_ENABLE_CHARSET_LOCALE
 
+// Use inline assembly
+#define ENABLE_ASM
+
 // Disable unarchiving support
 //#define NO_ARCHIVE_SUPPORT
 
@@ -274,6 +217,8 @@
 #else
 //#define MPT_ENABLE_CHARSET_LOCALE
 #endif
+// Do not use inline asm in library builds. There is just about no codepath which would use it anyway.
+//#define ENABLE_ASM
 #define NO_ARCHIVE_SUPPORT
 #define NO_REVERB
 #define NO_DSP
@@ -385,6 +330,42 @@
 
 
 // fixing stuff up
+
+#if !MPT_COMPILER_MSVC && defined(ENABLE_ASM)
+#undef ENABLE_ASM // inline assembly requires MSVC compiler
+#endif
+
+#if defined(ENABLE_ASM)
+#if MPT_COMPILER_MSVC && defined(_M_IX86)
+
+// Generate general x86 inline assembly / intrinsics.
+#define ENABLE_X86
+// Generate inline assembly using MMX instructions (only used when the CPU supports it).
+#define ENABLE_MMX
+// Generate inline assembly using SSE instructions (only used when the CPU supports it).
+#define ENABLE_SSE
+// Generate inline assembly using SSE2 instructions (only used when the CPU supports it).
+#define ENABLE_SSE2
+// Generate inline assembly using SSE3 instructions (only used when the CPU supports it).
+#define ENABLE_SSE3
+// Generate inline assembly using SSE4 instructions (only used when the CPU supports it).
+#define ENABLE_SSE4
+// Generate inline assembly using AMD specific instruction set extensions (only used when the CPU supports it).
+#define ENABLE_X86_AMD
+
+#elif MPT_COMPILER_MSVC && defined(_M_X64)
+
+// Generate general x64 inline assembly / intrinsics.
+#define ENABLE_X64
+// Generate inline assembly using SSE2 instructions (only used when the CPU supports it).
+#define ENABLE_SSE2
+// Generate inline assembly using SSE3 instructions (only used when the CPU supports it).
+#define ENABLE_SSE3
+// Generate inline assembly using SSE4 instructions (only used when the CPU supports it).
+#define ENABLE_SSE4
+
+#endif // arch
+#endif // ENABLE_ASM
 
 #if !defined(ENABLE_MMX) && !defined(NO_REVERB)
 #define NO_REVERB // reverb requires mmx
