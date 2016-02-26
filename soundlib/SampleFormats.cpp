@@ -44,14 +44,14 @@
 #if defined(MPT_WITH_MPG123)
 #include "mpg123.h"
 #endif // MPT_WITH_MPG123
-#if !defined(NO_MEDIAFOUNDATION)
+#if defined(MPT_WITH_MEDIAFOUNDATION)
 #include <windows.h>
 #include <mfapi.h>
 #include <mfidl.h>
 #include <mfreadwrite.h>
 #include <mferror.h>
 #include <Propvarutil.h>
-#endif // !NO_MEDIAFOUNDATION
+#endif // MPT_WITH_MEDIAFOUNDATION
 #ifndef NO_MP3_SAMPLES
 #include "MPEGFrame.h"
 #endif // NO_MP3_SAMPLES
@@ -2791,7 +2791,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 }
 
 
-#if !defined(NO_MEDIAFOUNDATION)
+#if defined(MPT_WITH_MEDIAFOUNDATION)
 
 template <typename T>
 static void mptMFSafeRelease(T **ppT)
@@ -2942,7 +2942,7 @@ public:
 };
 MPT_REGISTERED_COMPONENT(ComponentMediaFoundation, "MediaFoundation")
 
-#endif // !NO_MEDIAFOUNDATION
+#endif // MPT_WITH_MEDIAFOUNDATION
 
 
 #ifdef MODPLUG_TRACKER
@@ -2951,7 +2951,7 @@ std::vector<FileType> CSoundFile::GetMediaFoundationFileTypes()
 {
 	std::vector<FileType> result;
 
-#if !defined(NO_MEDIAFOUNDATION)
+#if defined(MPT_WITH_MEDIAFOUNDATION)
 
 	ComponentHandle<ComponentMediaFoundation> mf;
 	if(!IsComponentAvailable(mf))
@@ -3046,7 +3046,7 @@ std::vector<FileType> CSoundFile::GetMediaFoundationFileTypes()
 		result.push_back(it->second);
 	}
 
-#endif // !NO_MEDIAFOUNDATION
+#endif // MPT_WITH_MEDIAFOUNDATION
 
 	return result;
 }
@@ -3057,7 +3057,7 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 //----------------------------------------------------------------------------------------------
 {
 
-#if defined(NO_MEDIAFOUNDATION)
+#if !defined(MPT_WITH_MEDIAFOUNDATION)
 
 	MPT_UNREFERENCED_PARAMETER(sample);
 	MPT_UNREFERENCED_PARAMETER(file);
