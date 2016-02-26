@@ -106,12 +106,16 @@
 #define MPT_WITH_PORTAUDIO
 
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
+//#define MPT_WITH_MINIZ
+#define MPT_WITH_ZLIB
 
 #endif
 
 #if defined(LIBOPENMPT_BUILD)
 
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
+#define MPT_WITH_MINIZ
+//#define MPT_WITH_ZLIB
 
 #endif
 
@@ -193,12 +197,6 @@
 // Define to build without FLAC support
 //#define NO_FLAC
 
-// Define to build without zlib support
-//#define NO_ZLIB
-
-// Define to build without miniz support
-#define NO_MINIZ
-
 // Define to build without MP3 import support (via mpg123)
 //#define NO_MP3_SAMPLES
 
@@ -260,12 +258,6 @@
 #endif
 #define NO_OGG
 #define NO_FLAC
-#if !defined(MPT_WITH_ZLIB)
-#ifndef NO_ZLIB
-#define NO_ZLIB
-#endif
-#endif
-//#define NO_MINIZ
 #if !defined(MPT_WITH_MPG123)
 #define NO_MP3_SAMPLES
 #endif
@@ -386,9 +378,9 @@
 #undef MODPLUG_NO_FILESAVE // tests recommend file saving
 #endif
 
-#if !defined(NO_ZLIB) && !defined(NO_MINIZ)
+#if defined(MPT_WITH_ZLIB) && defined(MPT_WITH_MINIZ)
 // Only one deflate implementation should be used. Prefer zlib.
-#define NO_MINIZ
+#undef MPT_WITH_MINIZ
 #endif
 
 #if !MPT_OS_WINDOWS && !defined(NO_MEDIAFOUNDATION)

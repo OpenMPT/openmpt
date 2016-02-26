@@ -15,9 +15,9 @@
 #include <algorithm>
 #include <vector>
 
-#if !defined(NO_ZLIB)
+#if defined(MPT_WITH_ZLIB)
 #include <contrib/minizip/unzip.h>
-#elif !defined(NO_MINIZ)
+#elif defined(MPT_WITH_MINIZ)
 #define MINIZ_HEADER_FILE_ONLY
 #include <miniz/miniz.c>
 #endif
@@ -26,7 +26,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if !defined(NO_ZLIB)
+#if defined(MPT_WITH_ZLIB)
 
 
 // Low-level file abstractions for in-memory file handling
@@ -218,7 +218,7 @@ bool CZipArchive::ExtractFile(std::size_t index)
 }
 
 
-#elif !defined(NO_MINIZ)
+#elif defined(MPT_WITH_MINIZ)
 
 
 CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
@@ -317,7 +317,7 @@ bool CZipArchive::ExtractFile(std::size_t index)
 }
 
 
-#endif // NO_ZLIB || NO_MINIZ
+#endif // MPT_WITH_ZLIB || MPT_WITH_MINIZ
 
 
 OPENMPT_NAMESPACE_END

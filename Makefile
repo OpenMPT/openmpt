@@ -327,7 +327,6 @@ endif
 endif
 
 ifeq ($(NO_ZLIB),1)
-CPPFLAGS_ZLIB := -DNO_ZLIB
 else
 #LDLIBS   += -lz
 ifeq ($(shell pkg-config --exists zlib && echo yes),yes)
@@ -335,7 +334,6 @@ CPPFLAGS_ZLIB := $(shell pkg-config --cflags-only-I zlib ) -DMPT_WITH_ZLIB
 LDFLAGS_ZLIB  := $(shell pkg-config --libs-only-L   zlib ) $(shell pkg-config --libs-only-other zlib )
 LDLIBS_ZLIB   := $(shell pkg-config --libs-only-l   zlib )
 else
-CPPFLAGS_ZLIB := -DNO_ZLIB
 NO_ZLIB:=1
 endif
 endif
@@ -501,6 +499,7 @@ LIBOPENMPT_CXX_SOURCES += \
  
 ifeq ($(NO_ZLIB),1)
 LIBOPENMPT_C_SOURCES += include/miniz/miniz.c
+CPPFLAGS += -DMPT_WITH_MINIZ
 endif
 
 LIBOPENMPT_OBJECTS += $(LIBOPENMPT_CXX_SOURCES:.cpp=.o) $(LIBOPENMPT_C_SOURCES:.c=.o)

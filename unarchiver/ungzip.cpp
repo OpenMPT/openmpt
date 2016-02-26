@@ -14,9 +14,9 @@
 
 #ifdef UNGZIP_SUPPORT
 
-#if !defined(NO_ZLIB)
+#if defined(MPT_WITH_ZLIB)
 #include <zlib/zlib.h>
-#elif !defined(NO_MINIZ)
+#elif defined(MPT_WITH_MINIZ)
 #define MINIZ_HEADER_FILE_ONLY
 #include <miniz/miniz.c>
 #endif

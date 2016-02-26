@@ -268,9 +268,9 @@ std::string GetBuildFeaturesString()
 		#elif defined(MPT_CHARSET_INTERNAL)
 			retval += " +INTERNALCHARSETS";
 		#endif
-		#if !defined(NO_ZLIB)
+		#if defined(MPT_WITH_ZLIB)
 			retval += " +ZLIB";
-		#elif !defined(NO_MINIZ)
+		#elif defined(MPT_WITH_MINIZ)
 			retval += " +MINIZ";
 		#else
 			retval += " -INFLATE";
@@ -521,12 +521,12 @@ mpt::ustring GetFullCreditsString()
 		"Alexander Chemeris for msinttypes\n"
 		"https://github.com/chemeris/msinttypes\n"
 		"\n"
-#ifndef NO_ZLIB
+#ifdef MPT_WITH_ZLIB
 		"Jean-loup Gailly and Mark Adler for zlib\n"
 		"http://zlib.net/\n"
 		"\n"
 #endif
-#ifndef NO_MINIZ
+#ifdef MPT_WITH_MINIZ
 		"Rich Geldreich for miniz\n"
 		"https://github.com/richgel999/miniz\n"
 		"\n"

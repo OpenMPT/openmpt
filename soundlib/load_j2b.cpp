@@ -15,7 +15,7 @@
 #include "Loaders.h"
 #include "ChunkReader.h"
 
-#if !defined(NO_ZLIB)
+#if defined(MPT_WITH_ZLIB)
 
 #if MPT_COMPILER_MSVC
 #include <zlib/zlib.h>
@@ -23,7 +23,7 @@
 #include <zlib.h>
 #endif
 
-#elif !defined(NO_MINIZ)
+#elif defined(MPT_WITH_MINIZ)
 
 #define MINIZ_HEADER_FILE_ONLY
 #include "miniz/miniz.c"
@@ -1000,7 +1000,7 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
 
-#if defined(NO_ZLIB) && defined(NO_MINIZ)
+#if !defined(MPT_WITH_ZLIB) && !defined(MPT_WITH_MINIZ)
 
 	MPT_UNREFERENCED_PARAMETER(file);
 	MPT_UNREFERENCED_PARAMETER(loadFlags);
