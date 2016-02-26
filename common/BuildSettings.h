@@ -154,7 +154,7 @@
 #define MPT_EXTERNAL_SAMPLES
 
 // Support mpt::ChartsetLocale
-#define MPT_WITH_CHARSET_LOCALE
+#define MPT_ENABLE_CHARSET_LOCALE
 
 // Disable unarchiving support
 //#define NO_ARCHIVE_SUPPORT
@@ -237,9 +237,9 @@
 #define MPT_FILEREADER_CALLBACK_STREAM
 //#define MPT_EXTERNAL_SAMPLES
 #if defined(ENABLE_TESTS)
-#define MPT_WITH_CHARSET_LOCALE
+#define MPT_ENABLE_CHARSET_LOCALE
 #else
-//#define MPT_WITH_CHARSET_LOCALE
+//#define MPT_ENABLE_CHARSET_LOCALE
 #endif
 #define NO_ARCHIVE_SUPPORT
 //#define UNGZIP_SUPPORT
@@ -335,11 +335,11 @@
 #if MPT_USTRING_MODE_UTF8
 
 	// MPT_USTRING_MODE_UTF8 mpt::ustring is implemented via mpt::u8string
-	#define MPT_WITH_U8STRING 1
+	#define MPT_ENABLE_U8STRING 1
 
 #else
 
-	#define MPT_WITH_U8STRING 0
+	#define MPT_ENABLE_U8STRING 0
 
 #endif
 
@@ -403,44 +403,44 @@
 #define MPT_CHARSET_INTERNAL
 #endif
 
-#if defined(MODPLUG_TRACKER) && !defined(MPT_WITH_DYNBIND)
-#define MPT_WITH_DYNBIND // Tracker requires dynamic library loading for export codecs
+#if defined(MODPLUG_TRACKER) && !defined(MPT_ENABLE_DYNBIND)
+#define MPT_ENABLE_DYNBIND // Tracker requires dynamic library loading for export codecs
 #endif
 
-#if !defined(MPT_WITH_MPG123) && !defined(NO_MP3_SAMPLES) && !defined(MPT_WITH_DYNBIND)
-#define MPT_WITH_DYNBIND // mpg123 is loaded dynamically
+#if !defined(MPT_WITH_MPG123) && !defined(NO_MP3_SAMPLES) && !defined(MPT_ENABLE_DYNBIND)
+#define MPT_ENABLE_DYNBIND // mpg123 is loaded dynamically
 #endif
 
-#if !defined(NO_MO3) && !defined(MPT_WITH_DYNBIND)
-#define MPT_WITH_DYNBIND // unmo3 is loaded dynamically
+#if !defined(NO_MO3) && !defined(MPT_ENABLE_DYNBIND)
+#define MPT_ENABLE_DYNBIND // unmo3 is loaded dynamically
 #endif
 
 #if defined(ENABLE_TESTS)
-#define MPT_WITH_FILEIO // Test suite requires PathString for file loading.
+#define MPT_ENABLE_FILEIO // Test suite requires PathString for file loading.
 #endif
 
 #if !MPT_OS_WINDOWS && !defined(MPT_FILEREADER_STD_ISTREAM)
 #define MPT_FILEREADER_STD_ISTREAM // MMAP is only supported on Windows
 #endif
 
-#if defined(MODPLUG_TRACKER) && !defined(MPT_WITH_FILEIO)
-#define MPT_WITH_FILEIO // Tracker requires disk file io
+#if defined(MODPLUG_TRACKER) && !defined(MPT_ENABLE_FILEIO)
+#define MPT_ENABLE_FILEIO // Tracker requires disk file io
 #endif
 
-#if defined(MODPLUG_TRACKER) && !defined(MPT_WITH_THREAD)
-#define MPT_WITH_THREAD // Tracker requires threads
+#if defined(MODPLUG_TRACKER) && !defined(MPT_ENABLE_THREAD)
+#define MPT_ENABLE_THREAD // Tracker requires threads
 #endif
 
-#if defined(MODPLUG_TRACKER) && !defined(MPT_WITH_ATOMIC)
-#define MPT_WITH_ATOMIC // Tracker requires threads
+#if defined(MODPLUG_TRACKER) && !defined(MPT_ENABLE_ATOMIC)
+#define MPT_ENABLE_ATOMIC // Tracker requires threads
 #endif
 
-#if defined(MPT_EXTERNAL_SAMPLES) && !defined(MPT_WITH_FILEIO)
-#define MPT_WITH_FILEIO // External samples require disk file io
+#if defined(MPT_EXTERNAL_SAMPLES) && !defined(MPT_ENABLE_FILEIO)
+#define MPT_ENABLE_FILEIO // External samples require disk file io
 #endif
 
-#if !defined(MODPLUG_NO_FILESAVE) && !defined(MPT_WITH_FILEIO_STDIO)
-#define MPT_WITH_FILEIO_STDIO // file saving requires FILE*
+#if !defined(MODPLUG_NO_FILESAVE) && !defined(MPT_ENABLE_FILEIO_STDIO)
+#define MPT_ENABLE_FILEIO_STDIO // file saving requires FILE*
 #endif
 
 #if defined(NO_PLUGINS)

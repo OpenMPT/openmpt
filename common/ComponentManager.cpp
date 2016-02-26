@@ -16,7 +16,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MPT_WITH_DYNBIND)
+#if defined(MPT_ENABLE_DYNBIND)
 
 
 ComponentBase::ComponentBase(ComponentType type)
@@ -423,7 +423,7 @@ ComponentInfo ComponentManager::GetComponentInfo(std::string name) const
 #endif // MPT_COMPONENT_MANAGER
 
 
-#endif // MPT_WITH_DYNBIND
+#endif // MPT_ENABLE_DYNBIND
 
 
 OPENMPT_NAMESPACE_END

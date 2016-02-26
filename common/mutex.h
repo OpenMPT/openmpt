@@ -9,7 +9,7 @@
 
 #pragma once
 
-#if defined(MPT_WITH_THREAD)
+#if defined(MPT_ENABLE_THREAD)
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
@@ -18,11 +18,11 @@
 #else
 #include <pthread.h>
 #endif
-#endif // MPT_WITH_THREAD
+#endif // MPT_ENABLE_THREAD
 
 OPENMPT_NAMESPACE_BEGIN
 
-#if defined(MPT_WITH_THREAD)
+#if defined(MPT_ENABLE_THREAD)
 
 namespace Util {
 
@@ -100,6 +100,6 @@ public:
 
 } // namespace Util
 
-#endif // MPT_WITH_THREAD
+#endif // MPT_ENABLE_THREAD
 
 OPENMPT_NAMESPACE_END

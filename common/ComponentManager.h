@@ -18,7 +18,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MPT_WITH_DYNBIND)
+#if defined(MPT_ENABLE_DYNBIND)
 
 
 #if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
@@ -451,7 +451,7 @@ bool IsComponentAvailable(const ComponentHandle<T> &handle)
 }
 
 
-#endif // MPT_WITH_DYNBIND
+#endif // MPT_ENABLE_DYNBIND
 
 
 OPENMPT_NAMESPACE_END

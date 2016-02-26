@@ -9,7 +9,7 @@
 
 #pragma once
 
-#if defined(MPT_WITH_FILEIO)
+#if defined(MPT_ENABLE_FILEIO)
 
 #include "../common/mptString.h"
 #include "../common/mptPathString.h"
@@ -21,16 +21,16 @@
 #include <streambuf>
 #include <utility>
 
-#endif // MPT_WITH_FILEIO
+#endif // MPT_ENABLE_FILEIO
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MPT_WITH_FILEIO)
+#if defined(MPT_ENABLE_FILEIO)
 
 
-#if defined(MPT_WITH_FILEIO_STDIO)
+#if defined(MPT_ENABLE_FILEIO_STDIO)
 
 static inline FILE * mpt_fopen(const mpt::PathString &filename, const char *mode)
 //-------------------------------------------------------------------------------
@@ -42,7 +42,7 @@ static inline FILE * mpt_fopen(const mpt::PathString &filename, const char *mode
 	#endif // MPT_OS_WINDOWS
 }
 
-#endif // MPT_WITH_FILEIO_STDIO
+#endif // MPT_ENABLE_FILEIO_STDIO
 
 
 // Sets the NTFS compression attribute on the file or directory.
@@ -53,9 +53,9 @@ static inline FILE * mpt_fopen(const mpt::PathString &filename, const char *mode
 #if MPT_OS_WINDOWS
 bool SetFilesystemCompression(HANDLE hFile);
 bool SetFilesystemCompression(int fd);
-#if defined(MPT_WITH_FILEIO_STDIO)
+#if defined(MPT_ENABLE_FILEIO_STDIO)
 bool SetFilesystemCompression(FILE *file);
-#endif // MPT_WITH_FILEIO_STDIO
+#endif // MPT_ENABLE_FILEIO_STDIO
 bool SetFilesystemCompression(const mpt::PathString &filename);
 #endif // MPT_OS_WINDOWS
 #endif // MODPLUG_TRACKER
@@ -240,7 +240,7 @@ public:
 
 
 
-#if defined(MPT_WITH_FILEIO_STDIO)
+#if defined(MPT_ENABLE_FILEIO_STDIO)
 
 // class FILE_ostream, FILE_output_streambuf and FILE_output_buffered_streambuf
 //  provide a portable way of wrapping a std::ostream around an FILE* opened for output.
@@ -506,7 +506,7 @@ public:
 	}
 }; // class FILE_ostream                                                                                        
 
-#endif // MPT_WITH_FILEIO_STDIO
+#endif // MPT_ENABLE_FILEIO_STDIO
 
 
 } // namespace mpt
@@ -572,7 +572,7 @@ public:
 };
 
 
-#endif // MPT_WITH_FILEIO
+#endif // MPT_ENABLE_FILEIO
 
 
 OPENMPT_NAMESPACE_END

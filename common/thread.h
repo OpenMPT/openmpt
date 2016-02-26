@@ -10,7 +10,7 @@
 #pragma once
 
  
-#if defined(MPT_WITH_THREAD)
+#if defined(MPT_ENABLE_THREAD)
 
 #if MPT_OS_WINDOWS && MPT_MSVC_BEFORE(2012,0)
 // our own
@@ -406,5 +406,5 @@ inline void SetThreadPriority(mpt::UnmanagedThread &t, mpt::ThreadPriority prior
 
 OPENMPT_NAMESPACE_END
 
-#endif // MPT_WITH_THREAD
+#endif // MPT_ENABLE_THREAD
 

@@ -80,7 +80,7 @@
 #include <cstdlib>
 #include <stdlib.h>
 
-#if defined(MPT_WITH_FILEIO_STDIO)
+#if defined(MPT_ENABLE_FILEIO_STDIO)
 // for FILE* definition (which cannot be forward-declared in a portable way)
 #include <cstdio>
 #include <stdio.h>

@@ -22,7 +22,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MPT_WITH_FILEIO)
+#if defined(MPT_ENABLE_FILEIO)
 
 
 
@@ -53,7 +53,7 @@ bool SetFilesystemCompression(int fd)
 	}
 	return SetFilesystemCompression(hFile);
 }
-#if defined(MPT_WITH_FILEIO_STDIO)
+#if defined(MPT_ENABLE_FILEIO_STDIO)
 bool SetFilesystemCompression(FILE *file)
 {
 	if(!file)
@@ -67,7 +67,7 @@ bool SetFilesystemCompression(FILE *file)
 	}
 	return SetFilesystemCompression(fd);
 }
-#endif // MPT_WITH_FILEIO_STDIO
+#endif // MPT_ENABLE_FILEIO_STDIO
 bool SetFilesystemCompression(const mpt::PathString &filename)
 {
 	DWORD attributes = GetFileAttributesW(filename.AsNativePrefixed().c_str());
@@ -300,11 +300,11 @@ InputFile::ContentsRef InputFile::Get()
 
 #endif
 
-#else // !MPT_WITH_FILEIO
+#else // !MPT_ENABLE_FILEIO
 
 MPT_MSVC_WORKAROUND_LNK4221(mptFileIO)
 
-#endif // MPT_WITH_FILEIO
+#endif // MPT_ENABLE_FILEIO
 
 
 OPENMPT_NAMESPACE_END

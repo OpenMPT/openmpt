@@ -11,7 +11,7 @@
 #include "stdafx.h"
 #include "mptLibrary.h"
 
-#if defined(MPT_WITH_DYNBIND)
+#if defined(MPT_ENABLE_DYNBIND)
 #if MPT_OS_WINDOWS
 #include <windows.h>
 #elif MPT_OS_ANDROID
@@ -25,7 +25,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MPT_WITH_DYNBIND)
+#if defined(MPT_ENABLE_DYNBIND)
 
 
 namespace mpt
@@ -407,7 +407,7 @@ FuncPtr Library::GetProcAddress(const std::string &symbol) const
 } // namespace mpt
 
 
-#endif // MPT_WITH_DYNBIND
+#endif // MPT_ENABLE_DYNBIND
 
 
 OPENMPT_NAMESPACE_END
