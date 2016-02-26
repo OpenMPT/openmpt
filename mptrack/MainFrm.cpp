@@ -234,10 +234,10 @@ void CMainFrame::Initialize()
 	#ifdef NO_PLUGINS
 		title += " NO_PLUGINS";
 	#endif
-	#ifdef NO_ASIO
+	#ifndef MPT_WITH_ASIO
 		title += " NO_ASIO";
 	#endif
-	#ifdef NO_DSOUND
+	#ifndef MPT_WITH_DSOUND
 		title += " NO_DSOUND";
 	#endif
 	SetTitle(title);

@@ -295,10 +295,10 @@ std::string GetBuildFeaturesString()
 		#ifdef NO_PLUGINS
 			retval += " NO_PLUGINS";
 		#endif
-		#ifdef NO_ASIO
+		#ifndef MPT_WITH_ASIO
 			retval += " NO_ASIO";
 		#endif
-		#ifdef NO_DSOUND
+		#ifndef MPT_WITH_DSOUND
 			retval += " NO_DSOUND";
 		#endif
 	#endif
@@ -539,7 +539,7 @@ mpt::ustring GetFullCreditsString()
 		"http://rarlab.com/\n"
 		"\n"
 #endif
-#ifndef NO_PORTAUDIO
+#ifdef MPT_WITH_PORTAUDIO
 		"PortAudio contributors\n"
 		"http://www.portaudio.com/\n"
 		"\n"
@@ -588,7 +588,7 @@ mpt::ustring GetFullCreditsString()
 		"VST PlugIn Technology by Steinberg Media Technologies GmbH\n"
 		"\n"
 #endif
-#ifndef NO_ASIO
+#ifdef MPT_WITH_ASIO
 		"ASIO Technology by Steinberg Media Technologies GmbH\n"
 		"\n"
 #endif

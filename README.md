@@ -50,13 +50,13 @@ How to compile
 
  -  The VST and ASIO SDKs are needed for compiling with VST and ASIO support.
 
-    If you don't want this, uncomment `#define NO_VST` and `#define NO_ASIO` in
-    the file `common/BuildSettings.h`.
+    If you don't want this, uncomment `#define NO_VST` and comment out
+    `#define MPT_WITH_ASIO` in the file `common/BuildSettings.h`.
 
      -  ASIO:
 
-        If you don't use `#define NO_ASIO`, you will need to put the ASIO SDK
-        in the `include/ASIOSDK2` folder. The top level directory of the SDK is
+        If you use `#define MPT_WITH_ASIO`, you will need to put the ASIO SDK in
+        the `include/ASIOSDK2` folder. The top level directory of the SDK is
         already named `ASIOSDK2`, so simply move that directory in the include
         folder.
 

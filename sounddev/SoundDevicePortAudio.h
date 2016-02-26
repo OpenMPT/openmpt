@@ -14,7 +14,7 @@
 
 #include "../common/ComponentManager.h"
 
-#ifndef NO_PORTAUDIO
+#ifdef MPT_WITH_PORTAUDIO
 #if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 #include "portaudio/include/portaudio.h"
 #if MPT_OS_WINDOWS
@@ -29,7 +29,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace SoundDevice {
 
-#ifndef NO_PORTAUDIO
+#ifdef MPT_WITH_PORTAUDIO
 
 //=========================================
 class CPortaudioDevice: public SoundDevice::Base
@@ -115,7 +115,7 @@ public:
 };
 
 
-#endif // NO_PORTAUDIO
+#endif // MPT_WITH_PORTAUDIO
 
 
 } // namespace SoundDevice
