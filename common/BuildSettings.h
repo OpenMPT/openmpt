@@ -207,9 +207,6 @@
 // (HACK) Define to build without any plugin support
 //#define NO_PLUGINS
 
-// Define to build without MO3 support.
-//#define NO_MO3
-
 // Define to build without MP3 import support (via mpg123)
 //#define NO_MP3_SAMPLES
 
@@ -257,16 +254,6 @@
 #define NO_VST
 #define NO_DMO
 #define NO_PLUGINS
-#if defined(MPT_WITH_UNMO3_DYNBIND)
-#ifndef NO_MO3
-#define NO_MO3
-#endif
-#endif
-#if !defined(MPT_WITH_UNMO3)
-#ifndef NO_MO3
-#define NO_MO3
-#endif
-#endif
 #if !defined(MPT_WITH_MPG123)
 #define NO_MP3_SAMPLES
 #endif
@@ -411,7 +398,11 @@
 #define MPT_ENABLE_DYNBIND // mpg123 is loaded dynamically
 #endif
 
-#if !defined(NO_MO3) && !defined(MPT_ENABLE_DYNBIND)
+#if defined(MPT_WITH_UNMO3) || defined(MPT_WITH_UNMO3_DYNBIND) || defined(MPT_BUILTIN_MO3)
+#define MPT_ENABLE_MO3
+#endif
+
+#if !defined(MPT_WITH_UNMO3_DYNBIND) && !defined(MPT_ENABLE_DYNBIND)
 #define MPT_ENABLE_DYNBIND // unmo3 is loaded dynamically
 #endif
 

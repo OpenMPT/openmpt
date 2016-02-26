@@ -31,7 +31,7 @@
 
 #endif // MPT_BUILTIN_MO3
 
-#ifndef NO_MO3
+#if defined(MPT_WITH_UNMO3) || defined(MPT_WITH_UNMO3_DYNBIND)
 // unmo3.h
 #if MPT_OS_WINDOWS
 #define UNMO3_API __stdcall
@@ -45,13 +45,13 @@ void UNMO3_API UNMO3_Free(const void *data);
 OPENMPT_NAMESPACE::int32 UNMO3_API UNMO3_Decode(const void **data, OPENMPT_NAMESPACE::uint32 *len, OPENMPT_NAMESPACE::uint32 flags);
 }
 #endif // !MPT_WITH_UNMO3_DYNBIND
-#endif // !NO_MO3
+#endif // MPT_WITH_UNMO3 || MPT_WITH_UNMO3_DYNBIND
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-#ifndef NO_MO3
+#if defined(MPT_WITH_UNMO3) || defined(MPT_WITH_UNMO3_DYNBIND)
 
 class ComponentUnMO3 : public ComponentLibrary
 {
@@ -99,7 +99,7 @@ public:
 };
 MPT_REGISTERED_COMPONENT(ComponentUnMO3, "UnMO3")
 
-#endif // !NO_MO3
+#endif // MPT_WITH_UNMO3 || MPT_WITH_UNMO3_DYNBIND
 
 
 #ifdef MPT_BUILTIN_MO3
@@ -751,7 +751,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-#if defined(NO_MO3) && !defined(MPT_BUILTIN_MO3)
+#if !(defined(MPT_WITH_UNMO3) || defined(MPT_WITH_UNMO3_DYNBIND)) && !defined(MPT_BUILTIN_MO3)
 	// As of November 2015, the format revision is 5; Versions > 31 are unlikely to exist in the next few years,
 	// so we will just ignore those if there's no UNMO3 library to tell us if the file is valid or not
 	// (avoid log entry with .MOD files that have a song name starting with "MO3".
@@ -763,7 +763,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	AddToLog(LogError, MPT_USTRING("The file appears to be a MO3 file, but this OpenMPT build does not support loading MO3 files."));
 	return false;
 
-#elif !defined(NO_MO3)
+#elif defined(MPT_WITH_UNMO3) || defined(MPT_WITH_UNMO3_DYNBIND)
 	MPT_UNREFERENCED_PARAMETER(version);
 
 	// Try to load unmo3 dynamically.
@@ -808,7 +808,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 #endif // MPT_BUILTIN_MO3
 	}
-#endif // NO_MO3
+#endif
 
 #ifdef MPT_BUILTIN_MO3
 
