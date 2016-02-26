@@ -1369,11 +1369,11 @@ void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files)
 		.ExtensionFilter("All Modules|" + exts + ";mod.*"
 		"|"
 		"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz"
-#ifndef NO_MO3
+#ifdef MPT_ENABLE_MO3
 		";*.mo3"
 #endif
 		")|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha;*.pma;*.lzs;*.gz"
-#ifndef NO_MO3
+#ifdef MPT_ENABLE_MO3
 		";*.mo3"
 #endif
 		"|"

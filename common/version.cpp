@@ -275,7 +275,7 @@ std::string GetBuildFeaturesString()
 		#else
 			retval += " -INFLATE";
 		#endif
-		#if !defined(NO_MO3)
+		#if defined(MPT_WITH_UNMO3) || defined(MPT_WITH_UNMO3_DYNBIND)
 			retval += " +UNMO3";
 		#else
 			retval += " -UNMO3";
@@ -505,7 +505,7 @@ mpt::ustring GetFullCreditsString()
 		"http://www.hermannseib.com/english/vsthost.htm\n"
 		"\n"
 #endif
-#ifndef NO_MO3
+#if defined(MPT_WITH_UNMO3) || defined(MPT_WITH_UNMO3_DYNBIND)
 		"Ian Luck for UNMO3\n"
 		"http://www.un4seen.com/mo3.html\n"
 		"\n"
