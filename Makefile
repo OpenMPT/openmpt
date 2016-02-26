@@ -339,7 +339,7 @@ endif
 endif
 
 ifeq ($(USE_MO3),1)
-CPPFLAGS_MO3 := -DMPT_WITH_MO3
+CPPFLAGS_MO3 := -DMPT_WITH_UNMO3
 LDLIBS_MO3  := -lltdl
 else
 endif

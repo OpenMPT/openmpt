@@ -62,7 +62,7 @@ AS_IF([test "x$enable_unmo3" = "xyes"],
 )
 AS_IF([test "x$have_ltdl" = "x1"],
  [
-  LTDL_CPPFLAGS=-DMPT_WITH_MO3
+  LTDL_CPPFLAGS=-DMPT_WITH_UNMO3
   LTDL_LIBS=-lltdl
  ],
  [
