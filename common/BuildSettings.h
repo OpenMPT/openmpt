@@ -16,6 +16,21 @@
 
 
 
+// set windows version early so that we can deduce dependencies from SDK version
+
+#if MPT_OS_WINDOWS
+
+#if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)
+#define _WIN32_WINNT 0x0601 // _WIN32_WINNT_WIN7
+#else
+#define _WIN32_WINNT 0x0500 // _WIN32_WINNT_WIN2000
+#endif
+#define WINVER       _WIN32_WINNT
+
+#endif // MPT_OS_WINDOWS
+
+
+
 #ifdef MODPLUG_TRACKER
 
 // Use inline assembly at all
@@ -126,7 +141,11 @@
 
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
 #define MPT_WITH_FLAC
+#if MPT_OS_WINDOWS
+#if (_WIN32_WINNT >= 0x0601) && defined(MPT_WITH_MEDIAFOUNDATION)
 #define MPT_WITH_MEDIAFOUNDATION
+#endif
+#endif
 //#define MPT_WITH_MINIZ
 //#define MPT_WITH_MPG123
 #define MPT_WITH_MPG123_DYNBIND
@@ -492,18 +511,10 @@
 
 
 
-#if MPT_COMPILER_MSVC
-#define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
-#endif
+// platform configuration
 
-#if defined(_WIN32)
+#if MPT_OS_WINDOWS
 
-#if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)
-#define _WIN32_WINNT        0x0601 // _WIN32_WINNT_WIN7
-#else
-#define _WIN32_WINNT        0x0500 // _WIN32_WINNT_WIN2000
-#endif
-#define WINVER              _WIN32_WINNT
 #define WIN32_LEAN_AND_MEAN
 
 // windows.h excludes
@@ -536,7 +547,11 @@
 #define NONEWIC
 #define NOBITMAP
 
-#endif
+#endif // MPT_OS_WINDOWS
+
+
+
+// stdlib configuration
 
 #define __STDC_CONSTANT_MACROS
 #define __STDC_LIMIT_MACROS
@@ -547,7 +562,14 @@
 #define _FILE_OFFSET_BITS 64
 #endif
 
+
+
+// compiler configuration
+
 #if MPT_COMPILER_MSVC
+
+#define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
+
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS		// Define to disable the "This function or variable may be unsafe" warnings.
 #endif
@@ -556,11 +578,6 @@
 #ifndef _SCL_SECURE_NO_WARNINGS
 #define _SCL_SECURE_NO_WARNINGS
 #endif
-#endif
-
-
-
-#if MPT_COMPILER_MSVC
 
 #pragma warning(disable:4355) // 'this' : used in base member initializer list
 
@@ -577,13 +594,7 @@
 
 
 
-#if MPT_OS_WINDOWS
-#if (_WIN32_WINNT < 0x0601) && defined(MPT_WITH_MEDIAFOUNDATION)
-#undef MPT_WITH_MEDIAFOUNDATION // MediaFoundation requires Windows 7
-#endif
-#endif
-
-
+// third-party library configuration
 
 #ifdef MPT_WITH_STBVORBIS
 #define STB_VORBIS_HEADER_ONLY
