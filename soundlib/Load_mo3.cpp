@@ -38,13 +38,13 @@
 #else
 #define UNMO3_API
 #endif
-#ifdef MPT_LINKED_UNMO3
+#if !defined(MPT_WITH_UNMO3_DYNBIND)
 extern "C" {
 OPENMPT_NAMESPACE::uint32 UNMO3_API UNMO3_GetVersion(void);
 void UNMO3_API UNMO3_Free(const void *data);
 OPENMPT_NAMESPACE::int32 UNMO3_API UNMO3_Decode(const void **data, OPENMPT_NAMESPACE::uint32 *len, OPENMPT_NAMESPACE::uint32 flags);
 }
-#endif // MPT_LINKED_UNMO3
+#endif // !MPT_WITH_UNMO3_DYNBIND
 #endif // !NO_MO3
 
 
