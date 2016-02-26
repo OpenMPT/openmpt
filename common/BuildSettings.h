@@ -106,6 +106,14 @@
 // Dependencies from the MSVC build system
 #if MPT_COMPILER_MSVC
 
+// This section defines which dependencies are available when building with
+// MSVC. Other build systems provide MPT_WITH_* macros via command-line or other
+// means.
+// OpenMPT and libopenmpt should compile and run successfully (albeit with
+// reduced functionality) with any or all dependencies missing/disabled.
+// The defaults match the bundled third-party libraries with the addition of
+// ASIO and VST SDKs.
+
 #if defined(MODPLUG_TRACKER)
 
 // OpenMPT-only dependencies
@@ -126,7 +134,7 @@
 #define MPT_WITH_UNMO3_DYNBIND
 #define MPT_WITH_ZLIB
 
-#endif
+#endif // MODPLUG_TRACKER
 
 #if defined(LIBOPENMPT_BUILD)
 
@@ -140,7 +148,7 @@
 #define MPT_WITH_UNMO3_DYNBIND
 //#define MPT_WITH_ZLIB
 
-#endif
+#endif // LIBOPENMPT_BUILD
 
 #endif // MPT_COMPILER_MSVC
 
