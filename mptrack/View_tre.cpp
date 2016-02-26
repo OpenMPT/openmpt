@@ -1720,7 +1720,7 @@ BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 	#ifndef NO_MP3_SAMPLES
 			"MPEG Files (*.mp1,*.mp2,*.mp3)|*.mp1;*.mp2;*.mp3|"
 	#endif // NO_MP3_SAMPLES
-	#if !defined(NO_MEDIAFOUNDATION)
+	#if defined(MPT_WITH_MEDIAFOUNDATION)
 			+ ToFilterString(mediaFoundationTypes, FileTypeFormatShowExtensions).ToLocale() +
 	#endif
 			"Impulse Tracker Instruments (*.iti)|*.iti;*.its|"

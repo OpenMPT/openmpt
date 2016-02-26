@@ -118,6 +118,7 @@
 
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
 #define MPT_WITH_FLAC
+#define MPT_WITH_MEDIAFOUNDATION
 //#define MPT_WITH_MINIZ
 #define MPT_WITH_OGG
 #define MPT_WITH_ZLIB
@@ -128,6 +129,7 @@
 
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
 //#define MPT_WITH_FLAC
+//#define MPT_WITH_MEDIAFOUNDATION
 #define MPT_WITH_MINIZ
 //#define MPT_WITH_OGG
 //#define MPT_WITH_ZLIB
@@ -205,9 +207,6 @@
 // Define to build without MP3 import support (via mpg123)
 //#define NO_MP3_SAMPLES
 
-// Define to build without MediaFoundation codec support
-//#define NO_MEDIAFOUNDATION
-
 // Do not build libopenmpt C api
 #define NO_LIBOPENMPT_C
 
@@ -260,7 +259,6 @@
 #if !defined(MPT_WITH_MPG123)
 #define NO_MP3_SAMPLES
 #endif
-#define NO_MEDIAFOUNDATION
 //#define NO_LIBOPENMPT_C
 //#define NO_LIBOPENMPT_CXX
 
@@ -382,12 +380,12 @@
 #undef MPT_WITH_MINIZ
 #endif
 
-#if !MPT_OS_WINDOWS && !defined(NO_MEDIAFOUNDATION)
-#define NO_MEDIAFOUNDATION // MediaFoundation requires Windows
+#if !MPT_OS_WINDOWS && defined(MPT_WITH_MEDIAFOUNDATION)
+#undef MPT_WITH_MEDIAFOUNDATION // MediaFoundation requires Windows
 #endif
 
-#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0) && !defined(NO_MEDIAFOUNDATION)
-#define NO_MEDIAFOUNDATION // MediaFoundation requires a modern SDK
+#if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0) && defined(MPT_WITH_MEDIAFOUNDATION)
+#undef MPT_WITH_MEDIAFOUNDATION // MediaFoundation requires a modern SDK
 #endif
 
 #if !defined(MPT_CHARSET_WIN32) && !defined(MPT_CHARSET_ICONV) && !defined(MPT_CHARSET_CODECVTUTF8) && !defined(MPT_CHARSET_INTERNAL)
@@ -568,8 +566,8 @@
 
 
 #if MPT_OS_WINDOWS
-#if (_WIN32_WINNT < 0x0601) && !defined(NO_MEDIAFOUNDATION)
-#define NO_MEDIAFOUNDATION // MediaFoundation requires Windows 7
+#if (_WIN32_WINNT < 0x0601) && defined(MPT_WITH_MEDIAFOUNDATION)
+#undef MPT_WITH_MEDIAFOUNDATION // MediaFoundation requires Windows 7
 #endif
 #endif
 

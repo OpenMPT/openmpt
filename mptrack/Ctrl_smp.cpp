@@ -1107,7 +1107,7 @@ void CCtrlSamples::OnSampleOpen()
 			"ScreamTracker Samples (*.s3i,*.smp)|*.s3i;*.smp|"
 			"GF1 Patches (*.pat)|*.pat|"
 			"AIFF Files (*.aiff;*.8svx)|*.aif;*.aiff;*.iff;*.8sv;*.8svx;*.svx|"
-	#if !defined(NO_MEDIAFOUNDATION)
+	#if defined(MPT_WITH_MEDIAFOUNDATION)
 			+ ToFilterString(mediaFoundationTypes, FileTypeFormatShowExtensions).ToLocale() +
 	#endif
 			"Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|"
@@ -1156,7 +1156,7 @@ void CCtrlSamples::OnSampleOpenKnown()
 			"ScreamTracker Samples (*.s3i,*.smp)|*.s3i;*.smp|"
 			"GF1 Patches (*.pat)|*.pat|"
 			"AIFF Files (*.aiff;*.8svx)|*.aif;*.aiff;*.iff;*.8sv;*.8svx;*.svx|"
-	#if !defined(NO_MEDIAFOUNDATION)
+	#if defined(MPT_WITH_MEDIAFOUNDATION)
 			+ ToFilterString(mediaFoundationTypes, FileTypeFormatShowExtensions).ToLocale() +
 	#endif
 			"All Files (*.*)|*.*||")

@@ -34,7 +34,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #pragma comment(lib, "msacm32.lib")
 
-#ifndef NO_MEDIAFOUNDATION
+#ifdef MPT_WITH_MEDIAFOUNDATION
 #pragma comment(lib, "mf.lib")
 #pragma comment(lib, "mfplat.lib")
 #pragma comment(lib, "mfreadwrite.lib")
