@@ -103,6 +103,7 @@
 // OpenMPT-only dependencies
 #define MPT_WITH_ASIO
 #define MPT_WITH_DSOUND
+#define MPT_WITH_MINIZIP
 #define MPT_WITH_PORTAUDIO
 
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
@@ -167,7 +168,6 @@
 // Disable unarchiving support
 //#define NO_ARCHIVE_SUPPORT
 #define UNGZIP_SUPPORT
-#define ZIPPED_MOD_SUPPORT
 #define UNLHA_SUPPORT
 #define UNRAR_SUPPORT
 
@@ -239,7 +239,6 @@
 #endif
 #define NO_ARCHIVE_SUPPORT
 //#define UNGZIP_SUPPORT
-//#define ZIPPED_MOD_SUPPORT
 //#define UNLHA_SUPPORT
 //#define UNRAR_SUPPORT
 #define NO_REVERB

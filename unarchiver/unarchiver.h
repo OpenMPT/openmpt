@@ -13,7 +13,7 @@
 
 #include "archive.h"
 
-#ifdef ZIPPED_MOD_SUPPORT
+#if (defined(MPT_WITH_ZLIB) && defined(MPT_WITH_MINIZIP)) || defined(MPT_WITH_MINIZ)
 #include "unzip.h"
 #ifdef UNLHA_SUPPORT
 #include "unlha.h"
@@ -42,7 +42,7 @@ private:
 	FileReader inFile;
 
 	ArchiveBase emptyArchive;
-#ifdef ZIPPED_MOD_SUPPORT
+#if (defined(MPT_WITH_ZLIB) && defined(MPT_WITH_MINIZIP)) || defined(MPT_WITH_MINIZ)
 	CZipArchive zipArchive;
 #endif
 #ifdef UNLHA_SUPPORT

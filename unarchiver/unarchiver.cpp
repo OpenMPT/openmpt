@@ -21,7 +21,7 @@ CUnarchiver::CUnarchiver(FileReader &file)
 	: impl(nullptr)
 	, inFile(file)
 	, emptyArchive(inFile)
-#ifdef ZIPPED_MOD_SUPPORT
+#if (defined(MPT_WITH_ZLIB) && defined(MPT_WITH_MINIZIP)) || defined(MPT_WITH_MINIZ)
 	, zipArchive(inFile)
 #endif
 #ifdef UNLHA_SUPPORT
@@ -35,7 +35,7 @@ CUnarchiver::CUnarchiver(FileReader &file)
 #endif
 {
 	inFile.Rewind();
-#ifdef ZIPPED_MOD_SUPPORT
+#if (defined(MPT_WITH_ZLIB) && defined(MPT_WITH_MINIZIP)) || defined(MPT_WITH_MINIZ)
 	if(zipArchive.IsArchive()) { impl = &zipArchive; return; }
 #endif
 #ifdef UNLHA_SUPPORT
