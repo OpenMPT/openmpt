@@ -22,7 +22,7 @@
 
 #include <deque>
 
-#ifndef NO_OGG
+#ifdef MPT_WITH_OGG
 #include <ogg/ogg.h>
 #endif
 #include <opus/opus.h>
@@ -117,7 +117,7 @@ private:
 			Reset();
 			return false;
 		}
-#ifndef NO_OGG
+#ifdef MPT_WITH_OGG
 		return true;
 #else
 		return false;
@@ -158,7 +158,7 @@ MPT_REGISTERED_COMPONENT(ComponentOpus, "Opus")
 
 
 
-#ifndef NO_OGG
+#ifdef MPT_WITH_OGG
 
 class OpusStreamWriter : public StreamWriterBase
 {
@@ -536,7 +536,7 @@ public:
 	}
 };
 
-#endif // !NO_OGG
+#endif // MPT_WITH_OGG
 
 
 
@@ -571,7 +571,7 @@ IAudioStreamEncoder *OggOpusEncoder::ConstructStreamEncoder(std::ostream &file) 
 	{
 		return nullptr;
 	}
-#ifndef NO_OGG
+#ifdef MPT_WITH_OGG
 	return new OpusStreamWriter(*m_Opus, file);
 #else
 	return nullptr;

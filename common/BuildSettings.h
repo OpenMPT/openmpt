@@ -106,7 +106,9 @@
 #define MPT_WITH_PORTAUDIO
 
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
+#define MPT_WITH_FLAC
 //#define MPT_WITH_MINIZ
+#define MPT_WITH_OGG
 #define MPT_WITH_ZLIB
 
 #endif
@@ -114,7 +116,9 @@
 #if defined(LIBOPENMPT_BUILD)
 
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
+//#define MPT_WITH_FLAC
 #define MPT_WITH_MINIZ
+//#define MPT_WITH_OGG
 //#define MPT_WITH_ZLIB
 
 #endif
@@ -191,12 +195,6 @@
 // Define to build without MO3 support.
 //#define NO_MO3
 
-// Define to build without OGG support
-//#define NO_OGG
-
-// Define to build without FLAC support
-//#define NO_FLAC
-
 // Define to build without MP3 import support (via mpg123)
 //#define NO_MP3_SAMPLES
 
@@ -256,8 +254,6 @@
 #define NO_MO3
 #endif
 #endif
-#define NO_OGG
-#define NO_FLAC
 #if !defined(MPT_WITH_MPG123)
 #define NO_MP3_SAMPLES
 #endif

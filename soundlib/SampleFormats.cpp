@@ -30,16 +30,16 @@
 #include "../common/version.h"
 #include "Loaders.h"
 #include "ChunkReader.h"
-#ifndef NO_OGG
+#ifdef MPT_WITH_OGG
 #include <ogg/ogg.h>
-#endif // !NO_OGG
-#ifndef NO_FLAC
+#endif // MPT_WITH_OGG
+#ifdef MPT_WITH_FLAC
 #define FLAC__NO_DLL
 #include <flac/include/FLAC/stream_decoder.h>
 #include <flac/include/FLAC/stream_encoder.h>
 #include <flac/include/FLAC/metadata.h>
 #include "SampleFormatConverters.h"
-#endif // !NO_FLAC
+#endif // MPT_WITH_FLAC
 #include "../common/ComponentManager.h"
 #if defined(MPT_WITH_MPG123)
 #include "mpg123.h"
@@ -1925,7 +1925,7 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // FLAC Samples
 
-#ifndef NO_FLAC
+#ifdef MPT_WITH_FLAC
 
 struct FLACDecoder
 {
@@ -2103,23 +2103,23 @@ struct FLACDecoder
 	}
 };
 
-#endif // NO_FLAC
+#endif // MPT_WITH_FLAC
 
 
 bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 //-------------------------------------------------------------------
 {
-#ifndef NO_FLAC
+#ifdef MPT_WITH_FLAC
 	file.Rewind();
 	bool isOgg = false;
-#ifndef NO_OGG
+#ifdef MPT_WITH_OGG
 	uint32 oggFlacBitstreamSerial = 0;
 #endif
 	// Check whether we are dealing with native FLAC, OggFlac or no FLAC at all.
 	if(file.ReadMagic("fLaC"))
 	{ // ok
 		isOgg = false;
-#ifndef NO_OGG
+#ifdef MPT_WITH_OGG
 	} else if(file.ReadMagic("OggS"))
 	{ // use libogg to find the first OggFlac stream header
 		file.Rewind();
@@ -2222,7 +2222,7 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 			return false;
 		}
 		isOgg = true;
-#else // NO_OGG
+#else // !MPT_WITH_OGG
 	} else if(file.CanRead(78) && file.ReadMagic("OggS"))
 	{ // first OggFlac page is exactly 78 bytes long
 		// only support plain OggFlac here with the FLAC logical bitstream being the first one
@@ -2273,7 +2273,7 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 		}
 		// by now, we are pretty confident that we are not parsing random junk
 		isOgg = true;
-#endif // !NO_OGG
+#endif // MPT_WITH_OGG
 	} else
 	{
 		return false;
@@ -2286,7 +2286,7 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 		return false;
 	}
 
-#ifndef NO_OGG
+#ifdef MPT_WITH_OGG
 	if(isOgg)
 	{
 		// force flac decoding of the logical bitstream that actually is OggFlac
@@ -2329,12 +2329,12 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 #else
 	MPT_UNREFERENCED_PARAMETER(sample);
 	MPT_UNREFERENCED_PARAMETER(file);
-#endif // NO_FLAC
+#endif // MPT_WITH_FLAC
 	return false;
 }
 
 
-#ifndef NO_FLAC
+#ifdef MPT_WITH_FLAC
 // Helper function for copying OpenMPT's sample data to FLAC's int32 buffer.
 template<typename T>
 inline static void SampleToFLAC32(FLAC__int32 *dst, const T *src, SmpLength numSamples)
@@ -2368,7 +2368,7 @@ struct FLAC__StreamEncoder_RAII
 bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const
 //-----------------------------------------------------------------------------------------
 {
-#ifndef NO_FLAC
+#ifdef MPT_WITH_FLAC
 	FLAC__StreamEncoder_RAII encoder;
 	if(encoder == nullptr)
 	{
@@ -2554,7 +2554,7 @@ fail:
 	MPT_UNREFERENCED_PARAMETER(nSample);
 	MPT_UNREFERENCED_PARAMETER(filename);
 	return false;
-#endif // NO_FLAC
+#endif // MPT_WITH_FLAC
 }
 #endif // MODPLUG_NO_FILESAVE
 
