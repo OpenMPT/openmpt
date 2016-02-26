@@ -145,7 +145,7 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file
 	DestroyInstrument(nInstr, doNoDeleteAssociatedSamples);
 	Instruments[nInstr] = pIns;
 
-#if defined(MPT_WITH_FILEIO) && defined(MPT_EXTERNAL_SAMPLES)
+#if defined(MPT_ENABLE_FILEIO) && defined(MPT_EXTERNAL_SAMPLES)
 	SetSamplePath(nSample, file.GetFileName());
 #endif
 
@@ -560,11 +560,11 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filen
 	}
 	
 	FileTags tags;
-	#if defined(MPT_WITH_CHARSET_LOCALE)
+	#if defined(MPT_ENABLE_CHARSET_LOCALE)
 		tags.title = mpt::ToUnicode(mpt::CharsetLocale, m_szNames[nSample]);
-	#else // !MPT_WITH_CHARSET_LOCALE
+	#else // !MPT_ENABLE_CHARSET_LOCALE
 		tags.title = mpt::ToUnicode(GetCharset(), m_szNames[nSample]);
-	#endif // MPT_WITH_CHARSET_LOCALE
+	#endif // MPT_ENABLE_CHARSET_LOCALE
 	tags.encoder = mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetOpenMPTVersionStr());
 	file.WriteMetatags(tags);
 	

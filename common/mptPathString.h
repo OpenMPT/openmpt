@@ -159,13 +159,13 @@ public:
 #error "mpt::PathString on Windows depends on MPT_WSTRING_CONVERT)"
 #endif
 	// conversions
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 	MPT_DEPRECATED_PATH std::string ToLocale() const { return mpt::ToCharset(mpt::CharsetLocale, path); }
 #endif
 	std::string ToUTF8() const { return mpt::ToCharset(mpt::CharsetUTF8, path); }
 	std::wstring ToWide() const { return path; }
 	mpt::ustring ToUnicode() const { return mpt::ToUnicode(path); }
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 	MPT_DEPRECATED_PATH static PathString FromLocale(const std::string &path) { return PathString(mpt::ToWide(mpt::CharsetLocale, path)); }
 	static PathString FromLocaleSilent(const std::string &path) { return PathString(mpt::ToWide(mpt::CharsetLocale, path)); }
 #endif
@@ -199,7 +199,7 @@ public:
 #else // !MPT_OS_WINDOWS
 
 	// conversions
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 	std::string ToLocale() const { return path; }
 	std::string ToUTF8() const { return mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetLocale, path); }
 #if MPT_WSTRING_CONVERT
@@ -216,7 +216,7 @@ public:
 	RawPathString AsNative() const { return path; }
 	RawPathString AsNativePrefixed() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
-#else // !MPT_WITH_CHARSET_LOCALE
+#else // !MPT_ENABLE_CHARSET_LOCALE
 	std::string ToUTF8() const { return path; }
 #if MPT_WSTRING_CONVERT
 	std::wstring ToWide() const { return mpt::ToWide(mpt::CharsetUTF8, path); }
@@ -230,13 +230,13 @@ public:
 	RawPathString AsNative() const { return path; }
 	RawPathString AsNativePrefixed() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
-#endif // MPT_WITH_CHARSET_LOCALE
+#endif // MPT_ENABLE_CHARSET_LOCALE
 
 #endif // MPT_OS_WINDOWS
 
 };
 
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 MPT_DEPRECATED_PATH static inline std::string ToString(const mpt::PathString & x) { return mpt::ToCharset(mpt::CharsetLocale, x.ToUnicode()); }
 #endif
 #if MPT_WSTRING_FORMAT

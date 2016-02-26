@@ -14,7 +14,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MPT_WITH_DYNBIND)
+#if defined(MPT_ENABLE_DYNBIND)
 
 namespace mpt
 {
@@ -116,7 +116,7 @@ public:
 
 } // namespace mpt
 
-#endif // MPT_WITH_DYNBIND
+#endif // MPT_ENABLE_DYNBIND
 
 
 OPENMPT_NAMESPACE_END

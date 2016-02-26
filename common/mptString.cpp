@@ -581,7 +581,7 @@ static std::string ToISO_8859_1(const std::wstring &str, char replacement = '?')
 	return res;
 }
 
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 
 static std::wstring LocaleDecode(const std::string &str, const std::locale & locale, wchar_t replacement = L'\uFFFD')
 //-------------------------------------------------------------------------------------------------------------------
@@ -933,7 +933,7 @@ static bool HasCharset(Charset charset)
 	bool result = false;
 	switch(charset)
 	{
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 		case CharsetLocale:      result = true; break;
 #endif
 		case CharsetUTF8:        result = TestCodePage(CP_UTF8); break;
@@ -956,7 +956,7 @@ static UINT CharsetToCodepage(Charset charset)
 {
 	switch(charset)
 	{
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 		case CharsetLocale:      return CP_ACP;  break;
 #endif
 		case CharsetUTF8:        return CP_UTF8; break;
@@ -979,7 +979,7 @@ static const char * CharsetToString(Charset charset)
 {
 	switch(charset)
 	{
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 		case CharsetLocale:      return "";            break; // "char" breaks with glibc when no locale is set
 #endif
 		case CharsetUTF8:        return "UTF-8";       break;
@@ -998,7 +998,7 @@ static const char * CharsetToStringTranslit(Charset charset)
 {
 	switch(charset)
 	{
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 		case CharsetLocale:      return "//TRANSLIT";            break; // "char" breaks with glibc when no locale is set
 #endif
 		case CharsetUTF8:        return "UTF-8//TRANSLIT";       break;
@@ -1065,7 +1065,7 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 		if(charset == CharsetCP437AMS2) out = String::To8bit(src, CharsetTableCP437AMS2);
 		return Tdststring(out.begin(), out.end());
 	}
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 	#if defined(MPT_LOCALE_ASSUME_CHARSET)
 		if(charset == CharsetLocale)
 		{
@@ -1137,7 +1137,7 @@ Tdststring EncodeImplFallback(Charset charset, const std::wstring &src)
 		std::string out;
 		switch(charset)
 		{
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 			case CharsetLocale:      out = String::ToLocale(src); break;
 #endif
 			case CharsetUTF8:        out = String::ToUTF8(src); break;
@@ -1172,7 +1172,7 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 		if(charset == CharsetCP437AMS2) out = String::From8bit(in, CharsetTableCP437AMS2);
 		return out;
 	}
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 	#if defined(MPT_LOCALE_ASSUME_CHARSET)
 		if(charset == CharsetLocale)
 		{
@@ -1248,7 +1248,7 @@ std::wstring DecodeImplFallback(Charset charset, const Tsrcstring &src)
 		std::wstring out;
 		switch(charset)
 		{
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 			case CharsetLocale:      out = String::FromLocale(in); break;
 #endif
 			case CharsetUTF8:        out = String::FromUTF8(in); break;

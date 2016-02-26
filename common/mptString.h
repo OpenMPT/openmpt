@@ -133,7 +133,7 @@ int strnicmp(const char *a, const char *b, size_t count);
 
 
 enum Charset {
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 	CharsetLocale, // CP_ACP on windows, current C locale otherwise
 #endif
 
@@ -154,7 +154,7 @@ enum Charset {
 
 
 // Locale in tracker builds, UTF8 in non-locale-aware libopenmpt builds.
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 const Charset CharsetLocaleOrUTF8 = CharsetLocale;
 #else
 const Charset CharsetLocaleOrUTF8 = CharsetUTF8;
@@ -183,7 +183,7 @@ bool IsUTF8(const std::string &str);
 #define MPT_WSTRING(x)   std::wstring( L ## x )
 
 
-#if MPT_WITH_U8STRING
+#if MPT_ENABLE_U8STRING
 
 template <mpt::Charset charset_tag>
 struct charset_char_traits : std::char_traits<char> {
@@ -212,7 +212,7 @@ typedef MPT_ENCODED_STRING_TYPE(mpt::CharsetUTF8) u8string;
 // mpt::u8string is meant as an alternative implementaion to std::wstring
 // for implementing the unicode string type mpt::ustring.
 
-#endif // MPT_WITH_U8STRING
+#endif // MPT_ENABLE_U8STRING
 
 
 #if MPT_WSTRING_CONVERT
@@ -627,7 +627,7 @@ public:
 
 // AnyString
 // Try to do the smartest auto-magic we can do.
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 typedef BasicAnyString<mpt::CharsetLocale, true> AnyString;
 #elif MPT_OS_WINDOWS
 typedef BasicAnyString<mpt::CharsetWindows1252, true> AnyString;
@@ -637,7 +637,7 @@ typedef BasicAnyString<mpt::CharsetISO8859_1, true> AnyString;
 
 // AnyStringLocale
 // char-based strings are assumed to be in locale encoding.
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 typedef BasicAnyString<mpt::CharsetLocale, false> AnyStringLocale;
 #else
 typedef BasicAnyString<mpt::CharsetUTF8, false> AnyStringLocale;
@@ -645,7 +645,7 @@ typedef BasicAnyString<mpt::CharsetUTF8, false> AnyStringLocale;
 
 // AnyStringUTF8orLocale
 // char-based strings are tried in UTF8 first, if this fails, locale is used.
-#if defined(MPT_WITH_CHARSET_LOCALE)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 typedef BasicAnyString<mpt::CharsetLocale, true> AnyStringUTF8orLocale;
 #else
 typedef BasicAnyString<mpt::CharsetUTF8, false> AnyStringUTF8orLocale;

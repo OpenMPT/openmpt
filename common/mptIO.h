@@ -21,10 +21,10 @@
 #include <limits>
 #include <cstring>
 
-#if defined(MPT_WITH_FILEIO_STDIO)
+#if defined(MPT_ENABLE_FILEIO_STDIO)
 #include <cstdio>
 #include <stdio.h>
-#endif // MPT_WITH_FILEIO_STDIO
+#endif // MPT_ENABLE_FILEIO_STDIO
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -75,7 +75,7 @@ bool Flush(std::ostream & f);
 
 
 
-#if defined(MPT_WITH_FILEIO_STDIO)
+#if defined(MPT_ENABLE_FILEIO_STDIO)
 
 bool IsValid(FILE* & f);
 IO::Offset TellRead(FILE* & f);
@@ -93,7 +93,7 @@ bool WriteRaw(FILE* & f, const void * data, std::size_t size);
 bool IsEof(FILE * & f);
 bool Flush(FILE* & f);
 
-#endif // MPT_WITH_FILEIO_STDIO
+#endif // MPT_ENABLE_FILEIO_STDIO
 
 
 

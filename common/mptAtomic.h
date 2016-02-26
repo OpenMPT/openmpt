@@ -11,19 +11,19 @@
 
 #pragma once
 
-#if defined(MPT_WITH_ATOMIC)
+#if defined(MPT_ENABLE_ATOMIC)
 
 #if !(MPT_MSVC_BEFORE(2012,0) || MPT_GCC_BEFORE(4,4,0) || MPT_CLANG_BEFORE(3,1,0))
 #include <atomic>
 #endif // MPT_COMPILER
 
-#endif // MPT_WITH_ATOMIC
+#endif // MPT_ENABLE_ATOMIC
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MPT_WITH_ATOMIC)
+#if defined(MPT_ENABLE_ATOMIC)
 
 
 namespace mpt
@@ -307,7 +307,7 @@ typedef std::atomic<int32> atomic_int32_t;
 } // namespace mpt
 
 
-#endif // MPT_WITH_ATOMIC
+#endif // MPT_ENABLE_ATOMIC
 
 
 OPENMPT_NAMESPACE_END
