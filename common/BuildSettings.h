@@ -122,6 +122,7 @@
 //#define MPT_WITH_MINIZ
 #define MPT_WITH_OGG
 #define MPT_WITH_STBVORBIS
+#define MPT_WITH_UNMO3_DYNBIND
 #define MPT_WITH_ZLIB
 
 #endif
@@ -134,6 +135,7 @@
 #define MPT_WITH_MINIZ
 //#define MPT_WITH_OGG
 //#define MPT_WITH_STBVORBIS
+#define MPT_WITH_UNMO3_DYNBIND
 //#define MPT_WITH_ZLIB
 
 #endif
@@ -253,6 +255,11 @@
 #define NO_VST
 #define NO_DMO
 #define NO_PLUGINS
+#if defined(MPT_WITH_UNMO3_DYNBIND)
+#ifndef MPT_WITH_UNMO3
+#define MPT_WITH_UNMO3
+#endif
+#endif
 #if !defined(MPT_WITH_UNMO3) && !(MPT_COMPILER_MSVC)
 #ifndef NO_MO3
 #define NO_MO3

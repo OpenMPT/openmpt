@@ -74,7 +74,7 @@ public:
 	ComponentUnMO3() : ComponentLibrary(ComponentTypeForeign) { }
 	bool DoInitialize()
 	{
-#ifdef MPT_LINKED_UNMO3
+#if !defined(MPT_WITH_UNMO3_DYNBIND)
 		UNMO3_GetVersion = &(::UNMO3_GetVersion);
 		UNMO3_Free = &(::UNMO3_Free);
 		UNMO3_Decode_Old = nullptr;

@@ -57,8 +57,11 @@
 # Build flags for libopenmpt (provide on each `make` invocation)
 #  (defaults are 0):
 #
+#  NO_LTDL=1        Do not require libltdl
+#
 #  NO_ZLIB=1        Avoid using zlib, even if found
-#  USE_MO3=1        Support dynamic loading of unmo3 shared library
+#
+#  USE_UNMO3=1      Support dynamic loading of unmo3 shared library
 #
 #
 # Build flags for openmpt123 (provide on each `make` invocation)
@@ -326,6 +329,12 @@ endif
 
 endif
 
+ifeq ($(NO_LTDL),1)
+else
+CPPFLAGS_LTDL := -DMPT_WITH_LTDL
+LDLIBS_LTDL   := -lltdl
+endif
+
 ifeq ($(NO_ZLIB),1)
 else
 #LDLIBS   += -lz
@@ -338,9 +347,9 @@ NO_ZLIB:=1
 endif
 endif
 
-ifeq ($(USE_MO3),1)
-CPPFLAGS_MO3 := -DMPT_WITH_UNMO3
-LDLIBS_MO3  := -lltdl
+ifeq ($(USE_UNMO3),1)
+CPPFLAGS_UNMO3 := -DMPT_WITH_UNMO3_DYNBIND
+LDLIBS_UNMO3   := 
 else
 endif
 
@@ -417,9 +426,9 @@ NO_SNDFILE:=1
 endif
 endif
 
-CPPFLAGS += $(CPPFLAGS_ZLIB) $(CPPFLAGS_MO3)
-LDFLAGS += $(LDFLAGS_ZLIB) $(LDFLAGS_MO3)
-LDLIBS += $(LDLIBS_ZLIB) $(LDLIBS_MO3)
+CPPFLAGS += $(CPPFLAGS_LTDL) $(CPPFLAGS_ZLIB) $(CPPFLAGS_UNMO3)
+LDFLAGS += $(LDFLAGS_LTDL) $(LDFLAGS_ZLIB) $(LDFLAGS_UNMO3)
+LDLIBS += $(LDLIBS_LTDL) $(LDLIBS_ZLIB) $(LDLIBS_UNMO3)
 
 CPPFLAGS_OPENMPT123 += $(CPPFLAGS_SDL2) $(CPPFLAGS_SDL) $(CPPFLAGS_PORTAUDIO) $(CPPFLAGS_FLAC) $(CPPFLAGS_SNDFILE)
 LDFLAGS_OPENMPT123  += $(LDFLAGS_SDL2) $(LDFLAGS_SDL) $(LDFLAGS_PORTAUDIO) $(LDFLAGS_FLAC) $(LDFLAGS_SNDFILE)

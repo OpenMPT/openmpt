@@ -5,6 +5,16 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt svn
+
+ *  [**Change**] The `Makefile` build system now requires to explicitely
+    specify `NO_LTDL=1` if no support for dynamic loading of third party
+    libraries via libtool libltdl is desired.
+ *  [**Change**] In the `Makefile` build system `USE_MO3` has been renamed to
+    `USE_UNMO3`.
+ *  [**Change**] The Autotools build system renamed `--enable-mo3` to
+    `--enable-unmo3` and added `--without-ltdl` accordingly.
+
 ### libopenmpt 0.2-beta16 (2015-11-22)
 
  *  [**Change**] The Autotools build system does strict checking of all
