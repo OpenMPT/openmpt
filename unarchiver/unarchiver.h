@@ -18,7 +18,7 @@
 #ifdef UNLHA_SUPPORT
 #include "unlha.h"
 #endif
-#ifdef UNGZIP_SUPPORT
+#if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
 #include "ungzip.h"
 #endif
 #endif
@@ -48,7 +48,7 @@ private:
 #ifdef UNLHA_SUPPORT
 	CLhaArchive lhaArchive;
 #endif
-#ifdef UNGZIP_SUPPORT
+#if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
 	CGzipArchive gzipArchive;
 #endif
 #ifdef UNRAR_SUPPORT

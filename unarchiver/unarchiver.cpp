@@ -27,7 +27,7 @@ CUnarchiver::CUnarchiver(FileReader &file)
 #ifdef UNLHA_SUPPORT
 	, lhaArchive(inFile)
 #endif
-#ifdef UNGZIP_SUPPORT
+#if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
 	, gzipArchive(inFile)
 #endif
 #ifdef UNRAR_SUPPORT
@@ -41,7 +41,7 @@ CUnarchiver::CUnarchiver(FileReader &file)
 #ifdef UNLHA_SUPPORT
 	if(lhaArchive.IsArchive()) { impl = &lhaArchive; return; }
 #endif
-#ifdef UNGZIP_SUPPORT
+#if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
 	if(gzipArchive.IsArchive()) { impl = &gzipArchive; return; }
 #endif
 #ifdef UNRAR_SUPPORT
