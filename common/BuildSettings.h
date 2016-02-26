@@ -121,6 +121,7 @@
 #define MPT_WITH_MEDIAFOUNDATION
 //#define MPT_WITH_MINIZ
 #define MPT_WITH_OGG
+#define MPT_WITH_STBVORBIS
 #define MPT_WITH_ZLIB
 
 #endif
@@ -132,6 +133,7 @@
 //#define MPT_WITH_MEDIAFOUNDATION
 #define MPT_WITH_MINIZ
 //#define MPT_WITH_OGG
+//#define MPT_WITH_STBVORBIS
 //#define MPT_WITH_ZLIB
 
 #endif
@@ -569,5 +571,13 @@
 #if (_WIN32_WINNT < 0x0601) && defined(MPT_WITH_MEDIAFOUNDATION)
 #undef MPT_WITH_MEDIAFOUNDATION // MediaFoundation requires Windows 7
 #endif
+#endif
+
+
+
+#ifdef MPT_WITH_STBVORBIS
+#define STB_VORBIS_HEADER_ONLY
+#define STB_VORBIS_NO_PULLDATA_API
+#define STB_VORBIS_NO_STDIO
 #endif
 

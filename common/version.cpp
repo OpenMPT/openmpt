@@ -554,7 +554,7 @@ mpt::ustring GetFullCreditsString()
 		"http://mpg123.de/\n"
 		"\n"
 #endif
-#ifdef MPT_BUILTIN_MO3_STB_VORBIS
+#ifdef MPT_WITH_STBVORBIS
 		"Sean Barrett for stb_vorbis\n"
 		"https://github.com/nothings/stb/\n"
 		"\n"

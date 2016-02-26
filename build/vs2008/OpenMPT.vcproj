@@ -751,6 +751,10 @@
 			ReferencedProjectIdentifier="{F5F8F6DE-84CF-4E9D-91EA-D9B5E2AA36CD}"
 			RelativePathToProject="..\vs2008-ext\soundtouch.vcproj"
 		/>
+		<ProjectReference
+			ReferencedProjectIdentifier="{E0D81662-85EF-4172-B0D8-F8DCFF712607}"
+			RelativePathToProject="..\vs2008-ext\stb_vorbis.vcproj"
+		/>
 	</References>
 	<Files>
 		<Filter

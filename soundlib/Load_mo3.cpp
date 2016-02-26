@@ -23,24 +23,11 @@
 
 #include "MPEGFrame.h"
 
-#ifdef MPT_BUILTIN_MO3_STB_VORBIS
+#ifdef MPT_WITH_STBVORBIS
 // Using stb_vorbis for Ogg Vorbis decoding
-#define STB_VORBIS_NO_STDIO
-#define STB_VORBIS_NO_PULLDATA_API
-#define STB_VORBIS_MAX_CHANNELS 2
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable:4100) // "unreferenced formal parameter"
-#pragma warning(disable:4244) // "conversion from 'type1' to 'type2', possible loss of data"
-#pragma warning(disable:4245) // conversion' : conversion from 'type1' to 'type2', signed/unsigned mismatch
-#pragma warning(disable:4701) // Potentially uninitialized local variable 'name' used
-#endif // MPT_COMPILER_MSVC
 #include <stb_vorbis/stb_vorbis.c>
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif // MPT_COMPILER_MSVC
 #include "SampleFormatConverters.h"
-#endif // MPT_BUILTIN_MO3_STB_VORBIS
+#endif // MPT_WITH_STBVORBIS
 
 #endif // MPT_BUILTIN_MO3
 
@@ -1455,7 +1442,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			if(!sampleChunk.chunk.IsValid())
 				continue;
 
-#ifdef MPT_BUILTIN_MO3_STB_VORBIS
+#ifdef MPT_WITH_STBVORBIS
 			SAMPLEINDEX sharedOggHeader = smp + sampleChunk.sharedHeader;
 			// Which chunk are we going to read the header from?
 			// Note: Every Ogg stream has a unique serial number.
@@ -1502,7 +1489,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				}
 				stb_vorbis_close(vorb);
 			} else
-#endif // MPT_BUILTIN_MO3_STB_VORBIS
+#endif // MPT_WITH_STBVORBIS
 			{
 				unsupportedSamples = true;
 			}
