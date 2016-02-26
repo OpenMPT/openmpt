@@ -12,17 +12,17 @@
 #include "archive.h"
 
 
-#ifdef UNLHA_SUPPORT
+#ifdef MPT_WITH_LHASA
 
 typedef struct _LHAInputStream LHAInputStream;
 typedef struct _LHAReader LHAReader;
 typedef struct _LHAFileHeader LHAFileHeader;
 
-#endif // UNLHA_SUPPORT
+#endif // MPT_WITH_LHASA
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef UNLHA_SUPPORT
+#ifdef MPT_WITH_LHASA
 
 //====================================
 class CLhaArchive : public ArchiveBase
@@ -41,6 +41,6 @@ public:
 	virtual bool ExtractFile(std::size_t index);
 };
 
-#endif // UNLHA_SUPPORT
+#endif // MPT_WITH_LHASA
 
 OPENMPT_NAMESPACE_END

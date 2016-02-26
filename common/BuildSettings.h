@@ -111,8 +111,10 @@
 // OpenMPT-only dependencies
 #define MPT_WITH_ASIO
 #define MPT_WITH_DSOUND
+#define MPT_WITH_LHASA
 #define MPT_WITH_MINIZIP
 #define MPT_WITH_PORTAUDIO
+#define MPT_WITH_UNRAR
 
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
 #define MPT_WITH_FLAC
@@ -175,8 +177,6 @@
 
 // Disable unarchiving support
 //#define NO_ARCHIVE_SUPPORT
-#define UNLHA_SUPPORT
-#define UNRAR_SUPPORT
 
 // Disable the built-in reverb effect
 //#define NO_REVERB
@@ -245,8 +245,6 @@
 //#define MPT_ENABLE_CHARSET_LOCALE
 #endif
 #define NO_ARCHIVE_SUPPORT
-//#define UNLHA_SUPPORT
-//#define UNRAR_SUPPORT
 #define NO_REVERB
 #define NO_DSP
 #define NO_EQ

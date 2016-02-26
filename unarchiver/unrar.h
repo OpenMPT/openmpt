@@ -13,7 +13,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifdef UNRAR_SUPPORT
+#ifdef MPT_WITH_UNRAR
 
 struct RARData;
 
@@ -32,6 +32,6 @@ public:
 	virtual bool ExtractFile(std::size_t index);
 };
 
-#endif // UNRAR_SUPPORT
+#endif // MPT_WITH_UNRAR
 
 OPENMPT_NAMESPACE_END

@@ -10,15 +10,15 @@
 #include "stdafx.h"
 #include "unlha.h"
 
-#ifdef UNLHA_SUPPORT
+#ifdef MPT_WITH_LHASA
 #include "lhasa.h"
-#endif // UNLHA_SUPPORT
+#endif // MPT_WITH_LHASA
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-#ifdef UNLHA_SUPPORT
+#ifdef MPT_WITH_LHASA
 
 
 static int LHAreadFileReader(void *handle, void *buf, size_t buf_len)
@@ -161,7 +161,7 @@ bool CLhaArchive::ExtractFile(std::size_t index)
 }
 
 
-#endif // UNLHA_SUPPORT
+#endif // MPT_WITH_LHASA
 
 
 OPENMPT_NAMESPACE_END
