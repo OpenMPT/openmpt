@@ -22,7 +22,7 @@
 #include "ungzip.h"
 #endif
 #endif
-#ifdef UNRAR_SUPPORT
+#ifdef MPT_WITH_UNRAR
 #include "unrar.h"
 #endif
 
@@ -51,7 +51,7 @@ private:
 #if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
 	CGzipArchive gzipArchive;
 #endif
-#ifdef UNRAR_SUPPORT
+#ifdef MPT_WITH_UNRAR
 	CRarArchive rarArchive;
 #endif
 
