@@ -251,7 +251,7 @@
 #define NO_VST
 #define NO_DMO
 #define NO_PLUGINS
-#if !defined(MPT_WITH_MO3) && !(MPT_COMPILER_MSVC)
+#if !defined(MPT_WITH_UNMO3) && !(MPT_COMPILER_MSVC)
 #ifndef NO_MO3
 #define NO_MO3
 #endif
