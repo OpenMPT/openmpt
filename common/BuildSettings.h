@@ -77,10 +77,33 @@
 
 
 #if defined(MODPLUG_TRACKER) && defined(LIBOPENMPT_BUILD)
-
 #error "either MODPLUG_TRACKER or LIBOPENMPT_BUILD has to be defined"
-
 #elif defined(MODPLUG_TRACKER)
+// nothing
+#elif defined(LIBOPENMPT_BUILD)
+// nothing
+#else
+#error "either MODPLUG_TRACKER or LIBOPENMPT_BUILD has to be defined"
+#endif // MODPLUG_TRACKER || LIBOPENMPT_BUILD
+
+
+
+// wrapper for autoconf macros
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif // HAVE_CONFIG_H
+
+
+
+// dependencies from the MSVC build system
+#if MPT_COMPILER_MSVC
+
+
+#endif // MPT_COMPILER_MSVC
+
+
+
+#if defined(MODPLUG_TRACKER)
 
 // Enable built-in test suite.
 #ifdef _DEBUG
@@ -181,12 +204,11 @@
 // Do not build libopenmpt C++ api
 #define NO_LIBOPENMPT_CXX
 
-#elif defined(LIBOPENMPT_BUILD)
+#endif // MODPLUG_TRACKER
 
-#if defined(HAVE_CONFIG_H)
-// wrapper for autoconf macros
-#include "config.h"
-#endif // HAVE_CONFIG_H
+
+
+#if defined(LIBOPENMPT_BUILD)
 
 #if (defined(_DEBUG) || defined(DEBUG)) && !defined(MPT_BUILD_DEBUG)
 #define MPT_BUILD_DEBUG
@@ -247,11 +269,7 @@
 //#define NO_LIBOPENMPT_C
 //#define NO_LIBOPENMPT_CXX
 
-#else
-
-#error "either MODPLUG_TRACKER or LIBOPENMPT_BUILD has to be defined"
-
-#endif
+#endif // LIBOPENMPT_BUILD
 
 
 
