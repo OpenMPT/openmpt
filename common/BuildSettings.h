@@ -128,6 +128,8 @@
 #define MPT_WITH_FLAC
 #define MPT_WITH_MEDIAFOUNDATION
 //#define MPT_WITH_MINIZ
+//#define MPT_WITH_MPG123
+#define MPT_WITH_MPG123_DYNBIND
 #define MPT_WITH_OGG
 #define MPT_WITH_STBVORBIS
 //#define MPT_WITH_UNMO3
@@ -143,6 +145,8 @@
 //#define MPT_WITH_MEDIAFOUNDATION
 #define MPT_WITH_MINIZ
 //#define MPT_WITH_OGG
+//#define MPT_WITH_MPG123
+//#define MPT_WITH_MPG123_DYNBIND
 //#define MPT_WITH_STBVORBIS
 //#define MPT_WITH_UNMO3
 #define MPT_WITH_UNMO3_DYNBIND
@@ -215,9 +219,6 @@
 // (HACK) Define to build without any plugin support
 //#define NO_PLUGINS
 
-// Define to build without MP3 import support (via mpg123)
-//#define NO_MP3_SAMPLES
-
 // Do not build libopenmpt C api
 #define NO_LIBOPENMPT_C
 
@@ -262,9 +263,6 @@
 #define NO_VST
 #define NO_DMO
 #define NO_PLUGINS
-#if !defined(MPT_WITH_MPG123)
-#define NO_MP3_SAMPLES
-#endif
 //#define NO_LIBOPENMPT_C
 //#define NO_LIBOPENMPT_CXX
 
@@ -402,8 +400,12 @@
 #define MPT_ENABLE_DYNBIND // Tracker requires dynamic library loading for export codecs
 #endif
 
-#if !defined(MPT_WITH_MPG123) && !defined(NO_MP3_SAMPLES) && !defined(MPT_ENABLE_DYNBIND)
+#if !defined(MPT_WITH_MPG123_DYNBIND) && !defined(MPT_ENABLE_DYNBIND)
 #define MPT_ENABLE_DYNBIND // mpg123 is loaded dynamically
+#endif
+
+#if (defined(MPT_WITH_MPG123) || defined(MPT_WITH_MPG123_DYNBIND)) && !defined(MPT_ENABLE_MP3_SAMPLES)
+#define MPT_ENABLE_MP3_SAMPLES
 #endif
 
 #if defined(MPT_WITH_UNMO3) || defined(MPT_WITH_UNMO3_DYNBIND) || defined(MPT_BUILTIN_MO3)
