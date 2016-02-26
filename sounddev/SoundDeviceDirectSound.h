@@ -16,7 +16,7 @@
 
 #include "../common/ComponentManager.h"
 
-#ifndef NO_DSOUND
+#ifdef MPT_WITH_DSOUND
 #include <dsound.h>
 #endif
 
@@ -24,7 +24,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace SoundDevice {
 
-#ifndef NO_DSOUND
+#ifdef MPT_WITH_DSOUND
 
 class ComponentDirectSound : public ComponentBuiltin
 {

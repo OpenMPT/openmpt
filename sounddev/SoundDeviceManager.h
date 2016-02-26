@@ -52,15 +52,15 @@ private:
 #if MPT_OS_WINDOWS
 	ComponentHandle<ComponentWaveOut> m_WaveOut;
 #endif // MPT_OS_WINDOWS
-#ifndef NO_DSOUND
+#ifdef MPT_WITH_DSOUND
 	ComponentHandle<ComponentDirectSound> m_DirectSound;
-#endif // NO_DSOUND
-#ifndef NO_ASIO
+#endif // MPT_WITH_DSOUND
+#ifdef MPT_WITH_ASIO
 	ComponentHandle<ComponentASIO> m_ASIO;
-#endif // NO_ASIO
-#ifndef NO_PORTAUDIO
+#endif // MPT_WITH_ASIO
+#ifdef MPT_WITH_PORTAUDIO
 	ComponentHandle<ComponentPortAudio> m_PortAudio;
-#endif // NO_PORTAUDIO
+#endif // MPT_WITH_PORTAUDIO
 
 	std::vector<SoundDevice::Info> m_SoundDevices;
 	std::map<SoundDevice::Identifier, bool> m_DeviceUnavailable;

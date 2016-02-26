@@ -17,15 +17,15 @@
 
 #include "../common/FlagSet.h"
 
-#ifndef NO_ASIO
+#ifdef MPT_WITH_ASIO
 #include <iasiodrv.h>
-#endif
+#endif // MPT_WITH_ASIO
 
 OPENMPT_NAMESPACE_BEGIN
 
 namespace SoundDevice {
 
-#ifndef NO_ASIO
+#ifdef MPT_WITH_ASIO
 
 class ComponentASIO : public ComponentBuiltin
 {
@@ -163,7 +163,7 @@ protected:
 	void ReportASIOException(const std::string &str);
 };
 
-#endif // NO_ASIO
+#endif // MPT_WITH_ASIO
 
 
 } // namespace SoundDevice

@@ -655,7 +655,7 @@ void TrackerSettings::MigrateOldSoundDeviceSettings(SoundDevice::Manager &manage
 			SetSoundDeviceSettings(it->GetIdentifier(), GetSoundDeviceSettingsDefaults());
 		}
 	}
-#ifndef NO_DSOUND
+#ifdef MPT_WITH_DSOUND
 	if(m_SoundDeviceDirectSoundOldDefaultIdentifier)
 	{
 		mpt::ustring oldIdentifier = SoundDevice::Legacy::GetDirectSoundDefaultDeviceIdentifierPre_1_25_00_04();
@@ -696,7 +696,7 @@ void TrackerSettings::MigrateOldSoundDeviceSettings(SoundDevice::Manager &manage
 			}
 		}
 	}
-#endif // !NO_DSOUND
+#endif // MPT_WITH_DSOUND
 }
 
 

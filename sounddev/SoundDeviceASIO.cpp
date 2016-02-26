@@ -28,7 +28,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
-#ifndef NO_ASIO
+#ifdef MPT_WITH_ASIO
 
 
 MPT_REGISTERED_COMPONENT(ComponentASIO, "ASIO")
@@ -1689,7 +1689,7 @@ bool CASIODevice::OpenDriverSettings()
 }
 
 
-#endif // NO_ASIO
+#endif // MPT_WITH_ASIO
 
 
 } // namespace SoundDevice

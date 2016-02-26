@@ -95,9 +95,25 @@
 
 
 
-// dependencies from the MSVC build system
+// Dependencies from the MSVC build system
 #if MPT_COMPILER_MSVC
 
+#if defined(MODPLUG_TRACKER)
+
+// OpenMPT-only dependencies
+#define MPT_WITH_ASIO
+#define MPT_WITH_DSOUND
+#define MPT_WITH_PORTAUDIO
+
+// OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
+
+#endif
+
+#if defined(LIBOPENMPT_BUILD)
+
+// OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
+
+#endif
 
 #endif // MPT_COMPILER_MSVC
 
@@ -159,9 +175,6 @@
 // Disable the built-in automatic gain control
 //#define NO_AGC
 
-// Define to build without ASIO support; makes build possible without ASIO SDK.
-//#define NO_ASIO
-
 // Define to build without VST plugin support; makes build possible without VST SDK.
 //#define NO_VST
 
@@ -171,14 +184,8 @@
 // (HACK) Define to build without any plugin support
 //#define NO_PLUGINS
 
-// Define to build without portaudio.
-//#define NO_PORTAUDIO
-
 // Define to build without MO3 support.
 //#define NO_MO3
-
-// Define to build without DirectSound support.
-//#define NO_DSOUND
 
 // Define to build without OGG support
 //#define NO_OGG
@@ -243,17 +250,14 @@
 #define NO_DSP
 #define NO_EQ
 #define NO_AGC
-#define NO_ASIO
 #define NO_VST
 #define NO_DMO
 #define NO_PLUGINS
-#define NO_PORTAUDIO
 #if !defined(MPT_WITH_MO3) && !(MPT_COMPILER_MSVC)
 #ifndef NO_MO3
 #define NO_MO3
 #endif
 #endif
-#define NO_DSOUND
 #define NO_OGG
 #define NO_FLAC
 #if !defined(MPT_WITH_ZLIB)
@@ -385,14 +389,6 @@
 #if !defined(NO_ZLIB) && !defined(NO_MINIZ)
 // Only one deflate implementation should be used. Prefer zlib.
 #define NO_MINIZ
-#endif
-
-#if !MPT_OS_WINDOWS && !defined(NO_ASIO)
-#define NO_ASIO // ASIO requires Windows
-#endif
-
-#if !MPT_OS_WINDOWS && !defined(NO_DSOUND)
-#define NO_DSOUND // DirectSound requires Windows
 #endif
 
 #if !MPT_OS_WINDOWS && !defined(NO_MEDIAFOUNDATION)

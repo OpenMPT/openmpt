@@ -78,12 +78,12 @@ void Manager::ReEnumerate()
 	m_DeviceCaps.clear();
 	m_DeviceDynamicCaps.clear();
 
-#ifndef NO_PORTAUDIO
+#ifdef MPT_WITH_PORTAUDIO
 	if(IsComponentAvailable(m_PortAudio))
 	{
 		m_PortAudio->ReInit();
 	}
-#endif // NO_PORTAUDIO
+#endif // MPT_WITH_PORTAUDIO
 
 #if MPT_OS_WINDOWS
 	if(IsComponentAvailable(m_WaveOut))
@@ -92,27 +92,27 @@ void Manager::ReEnumerate()
 	}
 #endif // MPT_OS_WINDOWS
 
-#ifndef NO_DSOUND
+#ifdef MPT_WITH_DSOUND
 	// kind of deprecated by now
 	if(IsComponentAvailable(m_DirectSound))
 	{
 		EnumerateDevices<CDSoundDevice>(GetSysInfo());
 	}
-#endif // NO_DSOUND
+#endif // MPT_WITH_DSOUND
 
-#ifndef NO_ASIO
+#ifdef MPT_WITH_ASIO
 	if(IsComponentAvailable(m_ASIO))
 	{
 		EnumerateDevices<CASIODevice>(GetSysInfo());
 	}
-#endif // NO_ASIO
+#endif // MPT_WITH_ASIO
 
-#ifndef NO_PORTAUDIO
+#ifdef MPT_WITH_PORTAUDIO
 	if(IsComponentAvailable(m_PortAudio))
 	{
 		EnumerateDevices<CPortaudioDevice>(GetSysInfo());
 	}
-#endif // NO_PORTAUDIO
+#endif // MPT_WITH_PORTAUDIO
 
 	std::map<SoundDevice::Type, int> typePriorities;
 	if(GetSysInfo().IsWine)

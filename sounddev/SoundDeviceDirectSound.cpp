@@ -26,7 +26,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
-#ifndef NO_DSOUND
+#ifdef MPT_WITH_DSOUND
 
 
 MPT_REGISTERED_COMPONENT(ComponentDirectSound, "DirectSound")

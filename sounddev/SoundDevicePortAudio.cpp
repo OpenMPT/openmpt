@@ -18,7 +18,7 @@
 #include "../common/misc_util.h"
 
 
-#ifndef NO_PORTAUDIO
+#ifdef MPT_WITH_PORTAUDIO
 #if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 #if MPT_COMPILER_MSVC
 #include "../include/portaudio/src/common/pa_debugprint.h"
@@ -33,7 +33,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 	
-#ifndef NO_PORTAUDIO
+#ifdef MPT_WITH_PORTAUDIO
 
 #define PALOG(x, ...) do { } while(0)
 //#define PALOG Log
@@ -652,7 +652,7 @@ bool ComponentPortAudio::ReInit()
 }
 
 
-#endif // NO_PORTAUDIO
+#endif // MPT_WITH_PORTAUDIO
 
 
 } // namespace SoundDevice
