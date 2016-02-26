@@ -10,7 +10,7 @@
 #include "stdafx.h"
 #include "unrar.h"
 
-#ifdef UNRAR_SUPPORT
+#ifdef MPT_WITH_UNRAR
 
 #include "../include/unrar/openmpt-callback.hpp"
 
@@ -24,13 +24,13 @@
 #pragma warning(pop)
 #endif
 
-#endif // UNRAR_SUPPORT
+#endif // MPT_WITH_UNRAR
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-#ifdef UNRAR_SUPPORT
+#ifdef MPT_WITH_UNRAR
 
 struct RARData
 {
@@ -163,7 +163,7 @@ bool CRarArchive::ExtractFile(std::size_t index)
 }
 
 
-#endif // UNRAR_SUPPORT
+#endif // MPT_WITH_UNRAR
 
 
 OPENMPT_NAMESPACE_END

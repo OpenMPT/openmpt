@@ -24,7 +24,7 @@ CUnarchiver::CUnarchiver(FileReader &file)
 #if (defined(MPT_WITH_ZLIB) && defined(MPT_WITH_MINIZIP)) || defined(MPT_WITH_MINIZ)
 	, zipArchive(inFile)
 #endif
-#ifdef UNLHA_SUPPORT
+#ifdef MPT_WITH_LHASA
 	, lhaArchive(inFile)
 #endif
 #if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
@@ -38,7 +38,7 @@ CUnarchiver::CUnarchiver(FileReader &file)
 #if (defined(MPT_WITH_ZLIB) && defined(MPT_WITH_MINIZIP)) || defined(MPT_WITH_MINIZ)
 	if(zipArchive.IsArchive()) { impl = &zipArchive; return; }
 #endif
-#ifdef UNLHA_SUPPORT
+#ifdef MPT_WITH_LHASA
 	if(lhaArchive.IsArchive()) { impl = &lhaArchive; return; }
 #endif
 #if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
