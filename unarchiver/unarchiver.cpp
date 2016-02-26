@@ -30,7 +30,7 @@ CUnarchiver::CUnarchiver(FileReader &file)
 #if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
 	, gzipArchive(inFile)
 #endif
-#ifdef UNRAR_SUPPORT
+#ifdef MPT_WITH_UNRAR
 	, rarArchive(inFile)
 #endif
 {
@@ -44,7 +44,7 @@ CUnarchiver::CUnarchiver(FileReader &file)
 #if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
 	if(gzipArchive.IsArchive()) { impl = &gzipArchive; return; }
 #endif
-#ifdef UNRAR_SUPPORT
+#ifdef MPT_WITH_UNRAR
 	if(rarArchive.IsArchive()) { impl = &rarArchive; return; }
 #endif
 	impl = &emptyArchive;
