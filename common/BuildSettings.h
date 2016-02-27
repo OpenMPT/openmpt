@@ -81,6 +81,7 @@
 
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
 #define MPT_WITH_FLAC
+//#define MPT_WITH_ICONV
 #if MPT_OS_WINDOWS
 #if (_WIN32_WINNT >= 0x0601) && defined(MPT_WITH_MEDIAFOUNDATION)
 #define MPT_WITH_MEDIAFOUNDATION
@@ -101,6 +102,7 @@
 
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
 //#define MPT_WITH_FLAC
+//#define MPT_WITH_ICONV
 //#define MPT_WITH_MEDIAFOUNDATION
 #define MPT_WITH_MINIZ
 //#define MPT_WITH_OGG
@@ -181,6 +183,9 @@
 // (HACK) Define to build without any plugin support
 //#define NO_PLUGINS
 
+// Enable built-in MO3 decoder
+//#define MPT_BUILTIN_MO3
+
 // Do not build libopenmpt C api
 #define NO_LIBOPENMPT_C
 
@@ -227,6 +232,7 @@
 #define NO_VST
 #define NO_DMO
 #define NO_PLUGINS
+//#define MPT_BUILTIN_MO3
 //#define NO_LIBOPENMPT_C
 //#define NO_LIBOPENMPT_CXX
 
