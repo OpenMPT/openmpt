@@ -83,7 +83,7 @@
 #define MPT_WITH_FLAC
 //#define MPT_WITH_ICONV
 #if MPT_OS_WINDOWS
-#if (_WIN32_WINNT >= 0x0601) && defined(MPT_WITH_MEDIAFOUNDATION)
+#if (_WIN32_WINNT >= 0x0601)
 #define MPT_WITH_MEDIAFOUNDATION
 #endif
 #endif
