@@ -53,6 +53,7 @@ function replace_in_file (filename, from, to)
 	outfile:close()
 end
 
+-- related to issue https://github.com/premake/premake-core/issues/68
 function postprocess_vs2008_main (filename)
 	replace_in_file(filename, "\t\t\t\tEntryPointSymbol=\"mainCRTStartup\"\n", "")
 end
@@ -61,6 +62,7 @@ function postprocess_vs2008_nonxcompat (filename)
 	replace_in_file(filename, "\t\t\t<Tool\n\t\t\t\tName=\"VCLinkerTool\"\n", "\t\t\t<Tool\n\t\t\t\tName=\"VCLinkerTool\"\n\t\t\t\t\DataExecutionPrevention=\"1\"\n")
 end
 
+-- related to issue https://github.com/premake/premake-core/issues/68
 function postprocess_vs2010_main (filename)
 	replace_in_file(filename, "<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>", "")
 end
