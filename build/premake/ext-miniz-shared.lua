@@ -4,6 +4,7 @@
   language "C"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/miniz-shared"
+  characterset "MBCS"
   files {
    "../../include/miniz/miniz.c",
   }

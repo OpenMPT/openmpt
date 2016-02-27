@@ -18,6 +18,7 @@
    "../../libopenmpt/libopenmpt_plugin_gui.rc",
    "../../libopenmpt/resource.h",
   }
+  characterset "Unicode"
   flags { "MFC", "Unicode" }
   links { "libopenmpt", "miniz" }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

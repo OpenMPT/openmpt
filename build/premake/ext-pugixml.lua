@@ -5,6 +5,7 @@
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/pugixml"
   includedirs { }
+  characterset "MBCS"
   files {
    "../../include/pugixml/src/pugixml.cpp",
   }

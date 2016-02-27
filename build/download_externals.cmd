@@ -41,115 +41,49 @@ goto error
 :main
 if not exist "build\externals" mkdir "build\externals"
 
-call :download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha7/premake-5.0.0-alpha7-src.zip" "premake-5.0-alpha7-src.zip" "premake-5.0.0-alpha7" || goto error
+call :download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha8/premake-5.0.0-alpha8-src.zip" "premake-5.0-alpha8-src.zip" "premake-5.0.0-alpha8" || goto error
 
 if exist "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" (
- cd include\premake || goto error
-  echo Applying work-around for https://github.com/premake/premake-core/issues/383 ...
-  powershell -Command "(Get-Content contrib\curl\build\curl-lib.vcxproj ) -replace 'v120', 'v120' | Set-Content contrib\curl\build\curl-lib.vcxproj" || goto error
-  powershell -Command "(Get-Content contrib\libzip\build\zip-lib.vcxproj ) -replace 'v120', 'v120' | Set-Content contrib\libzip\build\zip-lib.vcxproj" || goto error
-  powershell -Command "(Get-Content contrib\zlib\build\zlib-lib.vcxproj ) -replace 'v120', 'v120' | Set-Content contrib\zlib\build\zlib-lib.vcxproj" || goto error
- cd ..\.. || goto error
  call build\auto\setup_vs2013.cmd || goto error
  cd include\premake\build\vs2013 || goto error
  devenv Premake5.sln /build "Release|Win32" || goto error
-  echo Applying work-around for https://github.com/premake/premake-core/issues/384 ...
-  cd ..\.. || goto error
-  bin\release\premake5.exe --scripts=. embed || goto error  
-  cd build\vs2013 || goto error
-  devenv Premake5.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
 if exist "C:\Program Files\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" (
- cd include\premake || goto error
-  echo Applying work-around for https://github.com/premake/premake-core/issues/383 ...
-  powershell -Command "(Get-Content contrib\curl\build\curl-lib.vcxproj ) -replace 'v120', 'v120' | Set-Content contrib\curl\build\curl-lib.vcxproj" || goto error
-  powershell -Command "(Get-Content contrib\libzip\build\zip-lib.vcxproj ) -replace 'v120', 'v120' | Set-Content contrib\libzip\build\zip-lib.vcxproj" || goto error
-  powershell -Command "(Get-Content contrib\zlib\build\zlib-lib.vcxproj ) -replace 'v120', 'v120' | Set-Content contrib\zlib\build\zlib-lib.vcxproj" || goto error
- cd ..\.. || goto error
  call build\auto\setup_vs2013.cmd || goto error
  cd include\premake\build\vs2013 || goto error
  devenv Premake5.sln /build "Release|Win32" || goto error
-  echo Applying work-around for https://github.com/premake/premake-core/issues/384 ...
-  cd ..\.. || goto error
-  bin\release\premake5.exe --scripts=. embed || goto error  
-  cd build\vs2013 || goto error
-  devenv Premake5.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
 
 if exist "C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\vcvarsall.bat" (
- cd include\premake || goto error
-  echo Applying work-around for https://github.com/premake/premake-core/issues/383 ...
-  powershell -Command "(Get-Content contrib\curl\build\curl-lib.vcxproj ) -replace 'v120', 'v110' | Set-Content contrib\curl\build\curl-lib.vcxproj" || goto error
-  powershell -Command "(Get-Content contrib\libzip\build\zip-lib.vcxproj ) -replace 'v120', 'v110' | Set-Content contrib\libzip\build\zip-lib.vcxproj" || goto error
-  powershell -Command "(Get-Content contrib\zlib\build\zlib-lib.vcxproj ) -replace 'v120', 'v110' | Set-Content contrib\zlib\build\zlib-lib.vcxproj" || goto error
- cd ..\.. || goto error
  call build\auto\setup_vs2012.cmd || goto error
  cd include\premake\build\vs2012 || goto error
  devenv Premake5.sln /build "Release|Win32" || goto error
-  echo Applying work-around for https://github.com/premake/premake-core/issues/384 ...
-  cd ..\.. || goto error
-  bin\release\premake5.exe --scripts=. embed || goto error  
-  cd build\vs2012 || goto error
-  devenv Premake5.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
 if exist "C:\Program Files\Microsoft Visual Studio 11.0\VC\vcvarsall.bat" (
- cd include\premake || goto error
-  echo Applying work-around for https://github.com/premake/premake-core/issues/383 ...
-  powershell -Command "(Get-Content contrib\curl\build\curl-lib.vcxproj ) -replace 'v120', 'v110' | Set-Content contrib\curl\build\curl-lib.vcxproj" || goto error
-  powershell -Command "(Get-Content contrib\libzip\build\zip-lib.vcxproj ) -replace 'v120', 'v110' | Set-Content contrib\libzip\build\zip-lib.vcxproj" || goto error
-  powershell -Command "(Get-Content contrib\zlib\build\zlib-lib.vcxproj ) -replace 'v120', 'v110' | Set-Content contrib\zlib\build\zlib-lib.vcxproj" || goto error
- cd ..\.. || goto error
  call build\auto\setup_vs2012.cmd || goto error
  cd include\premake\build\vs2012 || goto error
  devenv Premake5.sln /build "Release|Win32" || goto error
-  echo Applying work-around for https://github.com/premake/premake-core/issues/384 ...
-  cd ..\.. || goto error
-  bin\release\premake5.exe --scripts=. embed || goto error  
-  cd build\vs2012 || goto error
-  devenv Premake5.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
 
 if exist "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" (
- cd include\premake || goto error
-  echo Applying work-around for https://github.com/premake/premake-core/issues/383 ...
-  powershell -Command "(Get-Content contrib\curl\build\curl-lib.vcxproj ) -replace 'v120', 'v100' | Set-Content contrib\curl\build\curl-lib.vcxproj" || goto error
-  powershell -Command "(Get-Content contrib\libzip\build\zip-lib.vcxproj ) -replace 'v120', 'v100' | Set-Content contrib\libzip\build\zip-lib.vcxproj" || goto error
-  powershell -Command "(Get-Content contrib\zlib\build\zlib-lib.vcxproj ) -replace 'v120', 'v100' | Set-Content contrib\zlib\build\zlib-lib.vcxproj" || goto error
- cd ..\.. || goto error
  call build\auto\setup_vs2010.cmd || goto error
  cd include\premake\build\vs2010 || goto error
  devenv Premake5.sln /build "Release|Win32" || goto error
-  echo Applying work-around for https://github.com/premake/premake-core/issues/384 ...
-  cd ..\.. || goto error
-  bin\release\premake5.exe --scripts=. embed || goto error  
-  cd build\vs2010 || goto error
-  devenv Premake5.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
 if exist "C:\Program Files\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" (
- cd include\premake || goto error
-  echo Applying work-around for https://github.com/premake/premake-core/issues/383 ...
-  powershell -Command "(Get-Content contrib\curl\build\curl-lib.vcxproj ) -replace 'v120', 'v100' | Set-Content contrib\curl\build\curl-lib.vcxproj" || goto error
-  powershell -Command "(Get-Content contrib\libzip\build\zip-lib.vcxproj ) -replace 'v120', 'v100' | Set-Content contrib\libzip\build\zip-lib.vcxproj" || goto error
-  powershell -Command "(Get-Content contrib\zlib\build\zlib-lib.vcxproj ) -replace 'v120', 'v100' | Set-Content contrib\zlib\build\zlib-lib.vcxproj" || goto error
- cd ..\.. || goto error
  call build\auto\setup_vs2010.cmd || goto error
  cd include\premake\build\vs2010 || goto error
  devenv Premake5.sln /build "Release|Win32" || goto error
-  echo Applying work-around for https://github.com/premake/premake-core/issues/384 ...
-  cd ..\.. || goto error
-  bin\release\premake5.exe --scripts=. embed || goto error  
-  cd build\vs2010 || goto error
-  devenv Premake5.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
@@ -158,11 +92,6 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2008.cmd || goto error
  cd include\premake\build\vs2008 || goto error
  devenv Premake5.sln /build "Release|Win32" || goto error
-  echo Applying work-around for https://github.com/premake/premake-core/issues/384 ...
-  cd ..\.. || goto error
-  bin\release\premake5.exe --scripts=. embed || goto error  
-  cd build\vs2008 || goto error
-  devenv Premake5.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
@@ -170,11 +99,6 @@ if exist "C:\Program Files\Microsoft Visual Studio 9.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2008.cmd || goto error
  cd include\premake\build\vs2008 || goto error
  devenv Premake5.sln /build "Release|Win32" || goto error
-  echo Applying work-around for https://github.com/premake/premake-core/issues/384 ...
-  cd ..\.. || goto error
-  bin\release\premake5.exe --scripts=. embed || goto error  
-  cd build\vs2008 || goto error
-  devenv Premake5.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )

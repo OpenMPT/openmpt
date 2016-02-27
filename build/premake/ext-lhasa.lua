@@ -5,6 +5,7 @@
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/lhasa"
   includedirs { "../../include/msinttypes/inttypes" }
+  characterset "MBCS"
   files {
    "../../include/lhasa/lib/crc16.c",
    "../../include/lhasa/lib/ext_header.c",

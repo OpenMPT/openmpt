@@ -5,6 +5,7 @@
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/minizip"
   includedirs { "../../include/zlib", "../../include/zlib/contrib/minizip" }
+  characterset "MBCS"
   files {
    "../../include/zlib/contrib/minizip/ioapi.c",
    "../../include/zlib/contrib/minizip/iowin32.c",

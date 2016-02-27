@@ -69,12 +69,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LargeAddressAware="2"
 				DataExecutionPrevention="1"
 				OutputFile="$(OutDir)\PluginBridge32.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -152,12 +152,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LargeAddressAware="2"
 				DataExecutionPrevention="1"
 				OutputFile="$(OutDir)\PluginBridge64.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -235,12 +235,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LargeAddressAware="2"
 				DataExecutionPrevention="1"
 				OutputFile="$(OutDir)\PluginBridge32.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -321,12 +321,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LargeAddressAware="2"
 				DataExecutionPrevention="1"
 				OutputFile="$(OutDir)\PluginBridge64.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="17"
@@ -405,12 +405,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LargeAddressAware="2"
 				DataExecutionPrevention="1"
 				OutputFile="$(OutDir)\PluginBridge32.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -488,12 +488,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LargeAddressAware="2"
 				DataExecutionPrevention="1"
 				OutputFile="$(OutDir)\PluginBridge64.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -572,12 +572,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LargeAddressAware="2"
 				DataExecutionPrevention="1"
 				OutputFile="$(OutDir)\PluginBridge32.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -659,12 +659,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LargeAddressAware="2"
 				DataExecutionPrevention="1"
 				OutputFile="$(OutDir)\PluginBridge64.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="17"

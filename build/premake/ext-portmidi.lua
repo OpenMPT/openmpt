@@ -5,6 +5,7 @@
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/portmidi"
   includedirs { "../../include/portmidi/porttime", "../../include/portmidi/pm_common", "../../include/portmidi/pm_win" }
+  characterset "MBCS"
   files {
    "../../include/portmidi/porttime/porttime.c",
    "../../include/portmidi/porttime/ptwinmm.c",

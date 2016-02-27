@@ -5,6 +5,7 @@
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/zlib"
   includedirs { "../../include/zlib" }
+  characterset "MBCS"
   files {
    "../../include/zlib/adler32.c",
    "../../include/zlib/compress.c",

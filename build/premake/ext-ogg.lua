@@ -5,6 +5,7 @@
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/ogg"
   includedirs { "../../include/ogg/include" }
+  characterset "MBCS"
   files {
    "../../include/ogg/include/ogg/ogg.h",
    "../../include/ogg/include/ogg/os_types.h",
