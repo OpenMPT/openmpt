@@ -94,6 +94,8 @@
 #define MPT_WITH_STBVORBIS
 //#define MPT_WITH_UNMO3
 #define MPT_WITH_UNMO3_DYNBIND
+//#define MPT_WITH_VORBIS
+//#define MPT_WITH_VORBISFILE
 #define MPT_WITH_ZLIB
 
 #endif // MODPLUG_TRACKER
@@ -111,6 +113,8 @@
 //#define MPT_WITH_STBVORBIS
 //#define MPT_WITH_UNMO3
 #define MPT_WITH_UNMO3_DYNBIND
+//#define MPT_WITH_VORBIS
+//#define MPT_WITH_VORBISFILE
 //#define MPT_WITH_ZLIB
 
 #endif // LIBOPENMPT_BUILD
@@ -232,7 +236,9 @@
 #define NO_VST
 #define NO_DMO
 #define NO_PLUGINS
-//#define MPT_BUILTIN_MO3
+#if ((defined(MPT_WITH_MPG123) || defined(MPT_WITH_MPG123_DYNBIND)) || defined(MPT_WITH_MEDIAFOUNDATION)) && ((defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)) || defined(MPT_WITH_STBVORBIS))
+#define MPT_BUILTIN_MO3
+#endif
 //#define NO_LIBOPENMPT_C
 //#define NO_LIBOPENMPT_CXX
 
