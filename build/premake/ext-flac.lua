@@ -5,6 +5,7 @@
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/flac"
   includedirs { "../../include/flac/include", "../../include/flac/src/libFLAC/include", "../../include/ogg/include" }
+  characterset "MBCS"
   files {
    "../../include/flac/src/libFLAC/bitmath.c",
    "../../include/flac/src/libFLAC/bitreader.c",

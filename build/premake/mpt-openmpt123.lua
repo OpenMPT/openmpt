@@ -17,6 +17,7 @@
    "../../openmpt123/*.hpp",
   }
   defines { }
+  characterset "Unicode"
   flags { "Unicode" }
   links {
    "libopenmpt",

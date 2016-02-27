@@ -34,6 +34,7 @@
    "../../libopenmpt/libopenmpt_impl.cpp",
    "../../libopenmpt/libopenmpt_test.cpp",
   }
+  characterset "Unicode"
   flags { "Unicode", "ExtraWarnings" }
   defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_TEST" }
   links {

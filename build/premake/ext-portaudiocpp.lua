@@ -5,6 +5,7 @@
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/portaudiocpp"
   includedirs { "../../include/portaudio/include", "../../include/portaudio/bindings/cpp/include" }
+  characterset "MBCS"
   defines {
    "PAWIN_USE_WDMKS_DEVICE_INFO",
    "PA_WDMKS_NO_KSGUID_LIB",

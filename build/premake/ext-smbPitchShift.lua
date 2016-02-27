@@ -5,6 +5,7 @@
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/smbPitchShift"
   includedirs { }
+  characterset "MBCS"
   files {
    "../../include/smbPitchShift/smbPitchShift.cpp",
   }

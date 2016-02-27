@@ -52,6 +52,7 @@
 	pchsource "../../common/stdafx.cpp"
   defines { "MODPLUG_TRACKER" }
   defines { "OPENMPT_VST" }
+  characterset "MBCS"
   flags { "MFC", "SEH", "ExtraWarnings", "WinMain" }
   links {
    "UnRAR",

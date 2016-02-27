@@ -6,10 +6,10 @@
 
 MPT_PREMAKE_VERSION = ""
 
-if _PREMAKE_VERSION == "5.0.0-alpha7" then
+if _PREMAKE_VERSION == "5.0.0-alpha8" then
  MPT_PREMAKE_VERSION = "5.0"
 else
- print "Premake 5.0.0-alpha7 required"
+ print "Premake 5.0.0-alpha8 required"
  os.exit(1)
 end
 
@@ -61,10 +61,6 @@ function postprocess_vs2008_nonxcompat (filename)
 	replace_in_file(filename, "\t\t\t<Tool\n\t\t\t\tName=\"VCLinkerTool\"\n", "\t\t\t<Tool\n\t\t\t\tName=\"VCLinkerTool\"\n\t\t\t\t\DataExecutionPrevention=\"1\"\n")
 end
 
-function postprocess_vs2008_largeaddress (filename)
-	replace_in_file(filename, "\t\t\t<Tool\n\t\t\t\tName=\"VCLinkerTool\"\n", "\t\t\t<Tool\n\t\t\t\tName=\"VCLinkerTool\"\n\t\t\t\t\LargeAddressAware=\"2\"\n")
-end
-
 function postprocess_vs2010_main (filename)
 	replace_in_file(filename, "<EntryPointSymbol>mainCRTStartup</EntryPointSymbol>", "")
 end
@@ -88,9 +84,7 @@ newaction {
   postprocess_vs2008_main("build/vs2008/libopenmpt_example_c_mem.vcproj")
   postprocess_vs2008_main("build/vs2008/libopenmpt_example_c_unsafe.vcproj")
   postprocess_vs2008_nonxcompat("build/vs2008/OpenMPT.vcproj")
-  postprocess_vs2008_largeaddress("build/vs2008/OpenMPT.vcproj")
   postprocess_vs2008_nonxcompat("build/vs2008/PluginBridge.vcproj")
-  postprocess_vs2008_largeaddress("build/vs2008/PluginBridge.vcproj")
 
   postprocess_vs2010_main("build/vs2010/libopenmpt_test.vcxproj")
   postprocess_vs2010_main("build/vs2010/openmpt123.vcxproj")

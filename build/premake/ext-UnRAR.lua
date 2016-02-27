@@ -5,6 +5,7 @@
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/unrar"
   includedirs { "../../include/unrar" }
+  characterset "MBCS"
   files {
    "../../include/unrar/archive.cpp",
    "../../include/unrar/arcread.cpp",

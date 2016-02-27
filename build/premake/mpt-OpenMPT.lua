@@ -54,6 +54,7 @@
   defines { "MODPLUG_TRACKER" }
   exceptionhandling "SEH"
   largeaddressaware ( true )
+  characterset "MBCS"
   flags { "MFC", "ExtraWarnings", "WinMain" }
   links {
    "UnRAR",
@@ -113,6 +114,7 @@
    "../../include/vstsdk2.4/public.sdk/source/vst2.x/audioeffectx.h",
    "../../include/vstsdk2.4/public.sdk/source/vst2.x/vstplugmain.cpp",
   }
+  characterset "MBCS"
   links {
    "portmidi",
    "winmm",

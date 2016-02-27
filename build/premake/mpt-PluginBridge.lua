@@ -26,6 +26,7 @@
   defines { "MODPLUG_TRACKER" }
   exceptionhandling "SEH"
   largeaddressaware ( true )
+  characterset "Unicode"
   flags { "Unicode", "WinMain", "ExtraWarnings" }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   filter { "architecture:x86" }

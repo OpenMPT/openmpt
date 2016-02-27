@@ -5,6 +5,7 @@
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/r8brain"
   includedirs { "../../include/r8brain" }
+  characterset "MBCS"
   files {
    "../../include/r8brain/r8bbase.cpp",
   }

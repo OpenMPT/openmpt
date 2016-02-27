@@ -6,6 +6,7 @@
   objdir "../../build/obj/soundtouch"
   targetname "OpenMPT_SoundTouch_f32"
   includedirs { "../../include/soundtouch/include" }
+  characterset "MBCS"
   files {
    "../../include/soundtouch/include/BPMDetect.h",
    "../../include/soundtouch/include/FIFOSampleBuffer.h",

@@ -15,6 +15,7 @@
    "../../libopenmpt/libopenmpt_modplug.c",
    "../../libopenmpt/libopenmpt_modplug_cpp.cpp",
   }
+  characterset "MBCS"
   links { "libopenmptDLL", "miniz-shared" }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   dofile "../../build/premake/premake-defaults-DLL.lua"

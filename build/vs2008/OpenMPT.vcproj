@@ -71,13 +71,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LargeAddressAware="2"
 				DataExecutionPrevention="1"
 				AdditionalOptions="/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				OutputFile="$(OutDir)\mptrack.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -156,13 +156,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LargeAddressAware="2"
 				DataExecutionPrevention="1"
 				AdditionalOptions="/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				OutputFile="$(OutDir)\mptrack.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -241,13 +241,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LargeAddressAware="2"
 				DataExecutionPrevention="1"
 				AdditionalOptions="/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				OutputFile="$(OutDir)\mptrack.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -329,13 +329,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LargeAddressAware="2"
 				DataExecutionPrevention="1"
 				AdditionalOptions="/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				OutputFile="$(OutDir)\mptrack.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="17"
@@ -415,13 +415,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LargeAddressAware="2"
 				DataExecutionPrevention="1"
 				AdditionalOptions="/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				OutputFile="$(OutDir)\mptrack.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -500,13 +500,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LargeAddressAware="2"
 				DataExecutionPrevention="1"
 				AdditionalOptions="/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				OutputFile="$(OutDir)\mptrack.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -586,13 +586,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LargeAddressAware="2"
 				DataExecutionPrevention="1"
 				AdditionalOptions="/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				OutputFile="$(OutDir)\mptrack.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -675,13 +675,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LargeAddressAware="2"
 				DataExecutionPrevention="1"
 				AdditionalOptions="/DELAYLOAD:uxtheme.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll"
 				OutputFile="$(OutDir)\mptrack.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				LargeAddressAware="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="17"
