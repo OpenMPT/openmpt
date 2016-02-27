@@ -47,7 +47,14 @@ uint16 PageInfo::GetPageDataSize() const
 
 bool AdvanceToPageMagic(FileReader &file)
 {
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4127) // conditional expression is constant
+#endif // MPT_COMPILER_MSVC
 	while(true)
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 	{
 		if(!file.CanRead(4))
 		{
@@ -116,7 +123,14 @@ bool ReadPageAndSkipJunk(FileReader &file, PageInfo &pageInfo, std::vector<uint8
 {
 	pageInfo = PageInfo();
 	pageData.clear();
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4127) // conditional expression is constant
+#endif // MPT_COMPILER_MSVC
 	while(true)
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 	{
 		if(!AdvanceToPageMagic(file))
 		{
