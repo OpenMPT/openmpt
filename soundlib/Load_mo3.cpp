@@ -22,6 +22,10 @@
 #include "../common/version.h"
 
 #include "MPEGFrame.h"
+#include "OggStream.h"
+#if 0
+#include "../common/mptBufferIO.h"
+#endif
 
 #ifdef MPT_WITH_STBVORBIS
 // Using stb_vorbis for Ogg Vorbis decoding
@@ -1449,9 +1453,80 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			// stb_vorbis (currently) ignores this serial number so we can just stitch
 			// together our sample without adjusting the shared header's serial number.
 			const bool sharedHeader = sharedOggHeader != smp && sharedOggHeader > 0 && sharedOggHeader <= m_nSamples;
+#if 1
 			FileReader &sampleData = sampleChunk.chunk;
 			FileReader &headerChunk = sharedHeader ? sampleChunks[sharedOggHeader - 1].chunk : sampleData;
 			int initialRead = sharedHeader ? sampleChunk.headerSize : headerChunk.GetLength();
+#else
+
+			int outHeaderSize = 0;
+
+			std::vector<char> mergedData;
+			if(sharedHeader)
+			{
+				// Prepend the shared header to the actual sample data and adjust bitstream serial numbers.
+				// We do not handle multiple muxed logical streams as they do not exist in practice in mo3.
+				// We assume sequence numbers are consecutive at the end of the headers.
+				// Corrupted pages get dropped as required by Ogg spec. We cannot do any further sane parsing on them anyway.
+				// We do not validate packet structure or logical bitstream structure (i.e. sequence numbers and granule positions).
+				// We copy the whole data into a single consecutive buffer in order to keep things simple when interfacing libvorbisfile.
+				// We could in theory only adjust the header and pass 2 chunks to libvorbisfile.
+				// Another option would be to demux both chunks on our own (or using libogg) and pass the raw packet data to libvorbis directly.
+
+				mpt::ostringstream mergedStream(std::ios::binary);
+				mergedStream.imbue(std::locale::classic());
+
+				sampleChunks[sharedOggHeader - 1].chunk.Rewind();
+				FileReader sharedChunk = sampleChunks[sharedOggHeader - 1].chunk.ReadChunk(sampleChunk.headerSize);
+				sharedChunk.Rewind();
+
+				std::vector<uint32> streamSerials;
+				Ogg::PageInfo oggPageInfo;
+				std::vector<uint8> oggPageData;
+
+				streamSerials.clear();
+				while(Ogg::ReadPageAndSkipJunk(sharedChunk, oggPageInfo, oggPageData))
+				{
+					std::vector<uint32>::iterator it = std::find(streamSerials.begin(), streamSerials.end(), oggPageInfo.header.bitstream_serial_number);
+					if(it == streamSerials.end())
+					{
+						streamSerials.push_back(oggPageInfo.header.bitstream_serial_number);
+						it = streamSerials.begin() + (streamSerials.size() - 1);
+					}
+					uint32 newSerial = it - streamSerials.begin() + 1;
+					oggPageInfo.header.bitstream_serial_number = newSerial;
+					Ogg::UpdatePageCRC(oggPageInfo, oggPageData);
+					Ogg::WritePage(mergedStream, oggPageInfo, oggPageData);
+				}
+
+				outHeaderSize = mpt::saturate_cast<int>(mpt::IO::TellWrite(mergedStream));
+
+				streamSerials.clear();
+				while(Ogg::ReadPageAndSkipJunk(sampleChunk.chunk, oggPageInfo, oggPageData))
+				{
+					std::vector<uint32>::iterator it = std::find(streamSerials.begin(), streamSerials.end(), oggPageInfo.header.bitstream_serial_number);
+					if(it == streamSerials.end())
+					{
+						streamSerials.push_back(oggPageInfo.header.bitstream_serial_number);
+						it = streamSerials.begin() + (streamSerials.size() - 1);
+					}
+					uint32 newSerial = it - streamSerials.begin() + 1;
+					oggPageInfo.header.bitstream_serial_number = newSerial;
+					Ogg::UpdatePageCRC(oggPageInfo, oggPageData);
+					Ogg::WritePage(mergedStream, oggPageInfo, oggPageData);
+				}
+
+				std::string mergedStreamData = mergedStream.str();
+				mergedData.insert(mergedData.end(), mergedStreamData.begin(), mergedStreamData.end());
+
+			}
+			FileReader mergedDataChunk(&(mergedData[0]), mergedData.size());
+
+			FileReader &sampleData = sharedHeader ? mergedDataChunk : sampleChunk.chunk;
+			FileReader &headerChunk = sampleData;
+			int initialRead = sharedHeader ? outHeaderSize : headerChunk.GetLength();
+
+#endif
 
 			headerChunk.Rewind();
 			if(sharedHeader && !headerChunk.CanRead(sampleChunk.headerSize))
