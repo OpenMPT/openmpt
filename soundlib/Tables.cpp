@@ -934,6 +934,12 @@ mixsample_t CResampler::LinearTablef[256];				// Linear interpolation LUT
 
 void CResampler::InitFloatmixerTables()
 {
+#ifdef MPT_BUILD_FUZZER
+	// Creating resampling tables can take a little while which we really should not spend
+	// when fuzzing OpenMPT for crashes and hangs. This content of the tables is not really
+	// relevant for any kind of possible crashes or hangs.
+	return;
+#endif
 #ifndef MPT_INTMIXER
 	// Prepare fast sinc coefficients for floating point mixer
 	for(size_t i = 0; i < CountOf(FastSincTable); i++)
