@@ -2566,9 +2566,37 @@ fail:
 
 #if !defined(MPT_WITH_MPG123) && defined(MPT_WITH_MPG123_DYNBIND)
 
+	enum mpg123_parms
+	{
+		MPG123_VERBOSE = 0,
+		MPG123_FLAGS,
+		MPG123_ADD_FLAGS,
+		MPG123_FORCE_RATE,
+		MPG123_DOWN_SAMPLE,
+		MPG123_RVA,
+		MPG123_DOWNSPEED,
+		MPG123_UPSPEED,
+		MPG123_START_FRAME,
+		MPG123_DECODE_FRAMES,
+		MPG123_ICY_INTERVAL,
+		MPG123_OUTSCALE,
+		MPG123_TIMEOUT,
+		MPG123_REMOVE_FLAGS,
+		MPG123_RESYNC_LIMIT,
+		MPG123_INDEX_SIZE,
+		MPG123_PREFRAMES,
+		MPG123_FEEDPOOL,
+		MPG123_FEEDBUFFER
+	};
+	
+	enum mpg123_parms_flags
+	{
+		MPG123_QUIET = 0x20
+	};
+  
 	enum mpg123_enc_enum
 	{
-		MPG123_ENC_16 = 0x040, MPG123_ENC_SIGNED = 0x080,
+		MPG123_ENC_16 = 0x040, MPG123_ENC_SIGNED = 0x080
 	};
 
 	typedef struct {int foo;} mpg123_handle;
@@ -2589,6 +2617,7 @@ public:
 	void (*mpg123_exit )(void);
 	mpg123_handle* (*mpg123_new )(const char*,int*);
 	void (*mpg123_delete )(mpg123_handle*);
+	int (*mpg123_param )(mpg123_handle*, enum mpg123_parms, long, double);
 	int (*mpg123_open_handle )(mpg123_handle*, void*);
 #if MPT_COMPILER_MSVC
 	int (*mpg123_replace_reader_handle)(mpg123_handle*, 
@@ -2637,6 +2666,7 @@ public:
 			MPT_GLOBAL_BIND("mpg123", mpg123_exit);
 			MPT_GLOBAL_BIND("mpg123", mpg123_new);
 			MPT_GLOBAL_BIND("mpg123", mpg123_delete);
+			MPT_GLOBAL_BIND("mpg123", mpg123_param);
 			MPT_GLOBAL_BIND("mpg123", mpg123_open_handle);
 			MPT_GLOBAL_BIND("mpg123", mpg123_replace_reader_handle);
 			MPT_GLOBAL_BIND("mpg123", mpg123_read);
@@ -2665,6 +2695,7 @@ public:
 		MPT_COMPONENT_BIND("mpg123", mpg123_exit);
 		MPT_COMPONENT_BIND("mpg123", mpg123_new);
 		MPT_COMPONENT_BIND("mpg123", mpg123_delete);
+		MPT_COMPONENT_BIND("mpg123", mpg123_param);
 		MPT_COMPONENT_BIND("mpg123", mpg123_open_handle);
 		MPT_COMPONENT_BIND("mpg123", mpg123_replace_reader_handle);
 		MPT_COMPONENT_BIND("mpg123", mpg123_read);
@@ -2766,16 +2797,35 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	if((mh = mpg123->mpg123_new(0, &err)) == nullptr) return false;
 	file.Rewind();
 
-
 	long rate; int nchannels, encoding;
 	SmpLength length;
-
 	// Set up decoder...
-	if(mpg123->mpg123_replace_reader_handle(mh, ComponentMPG123::FileReaderRead, ComponentMPG123::FileReaderLSeek, 0)
-		|| mpg123->mpg123_open_handle(mh, &file)
-		|| mpg123->mpg123_scan(mh)
-		|| mpg123->mpg123_getformat(mh, &rate, &nchannels, &encoding)
-		|| !nchannels || nchannels > 2
+	if(mpg123->mpg123_param(mh, MPG123_ADD_FLAGS, MPG123_QUIET, 0.0))
+	{
+		mpg123->mpg123_delete(mh);
+		return false;
+	}
+	if(mpg123->mpg123_replace_reader_handle(mh, ComponentMPG123::FileReaderRead, ComponentMPG123::FileReaderLSeek, 0))
+	{
+		mpg123->mpg123_delete(mh);
+		return false;
+	}
+	if(mpg123->mpg123_open_handle(mh, &file))
+	{
+		mpg123->mpg123_delete(mh);
+		return false;
+	}
+	if(mpg123->mpg123_scan(mh))
+	{
+		mpg123->mpg123_delete(mh);
+		return false;
+	}
+	if(mpg123->mpg123_getformat(mh, &rate, &nchannels, &encoding))
+	{
+		mpg123->mpg123_delete(mh);
+		return false;
+	}
+	if(!nchannels || nchannels > 2
 		|| (encoding & (MPG123_ENC_16 | MPG123_ENC_SIGNED)) != (MPG123_ENC_16 | MPG123_ENC_SIGNED)
 		|| (length = mpg123->mpg123_length(mh)) == 0)
 	{
