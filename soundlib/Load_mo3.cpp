@@ -1604,6 +1604,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			FileReader &sampleData = sharedHeader ? mergedDataChunk : sampleChunk.chunk;
 			FileReader &headerChunk = sampleData;
 			int initialRead = sharedHeader ? outHeaderSize : headerChunk.GetLength();
+			MPT_UNUSED_VARIABLE(initialRead);
 
 #else
 
@@ -1619,6 +1620,10 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 #if defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)
 
+			MPT_UNUSED_VARIABLE(OV_CALLBACKS_DEFAULT);
+			MPT_UNUSED_VARIABLE(OV_CALLBACKS_NOCLOSE);
+			MPT_UNUSED_VARIABLE(OV_CALLBACKS_STREAMONLY);
+			MPT_UNUSED_VARIABLE(OV_CALLBACKS_STREAMONLY_NOCLOSE);
 			ov_callbacks callbacks = {
 				&VorbisfileFilereaderRead,
 				&VorbisfileFilereaderSeek,
@@ -1769,6 +1774,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 	uint16 cwtv = 0;
 	uint16 cmwt = 0;
+	MPT_UNUSED_VARIABLE(cmwt);
 	while(musicChunk.CanRead(8))
 	{
 		uint32 id = musicChunk.ReadUint32LE();
@@ -1799,6 +1805,8 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 					uint8 version = chunk.ReadUint8();
 					m_madeWithTracker = mpt::String::Print("MultiTracker %1.%2", version >> 4, version & 0x0F);
 				}
+				break;
+			default:
 				break;
 			}
 			break;
