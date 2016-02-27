@@ -1021,7 +1021,9 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 		|| fileHeader.fileLength != file.GetLength()
 		|| fileHeader.packedLength != file.BytesLeft()
 		|| fileHeader.packedLength == 0
+#ifndef MPT_BUILD_FUZZER
 		|| fileHeader.crc32 != crc32(0, reinterpret_cast<const Bytef *>(file.GetRawData()), fileHeader.packedLength)
+#endif
 		)
 	{
 		return false;
@@ -1042,7 +1044,9 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 
 	bool result = false;
 
+#ifndef MPT_BUILD_FUZZER
 	if(destSize == fileHeader.unpackedLength && retVal == Z_OK)
+#endif
 	{
 		// Success, now load the RIFF AM(FF) module.
 		FileReader amFile(reinterpret_cast<const char *>(amFileData), destSize);

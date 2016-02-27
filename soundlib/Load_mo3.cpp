@@ -581,6 +581,14 @@ static bool UnpackMO3Data(FileReader &file, uint8 *dst, uint32 size)
 			}
 		}
 	}
+#ifdef MPT_BUILD_FUZZER
+	// When using a fuzzer, we should not care if the decompressed buffer has the correct size.
+	// This makes finding new interesting test cases much easier.
+	while(size-- > 0)
+	{
+		*dst++ = 0;
+	}
+#endif
 	return (dst - initDst) == static_cast<std::ptrdiff_t>(initSize);
 }
 
@@ -909,7 +917,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return false;
 	}
-	memset(musicData, 0, musicSize);
 	uint32 compressedSize = uint32_max;
 	if(version >= 5)
 	{
