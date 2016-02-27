@@ -2586,6 +2586,7 @@ class ComponentMPG123
 public:
 
 	int (*mpg123_init )(void);
+	void (*mpg123_exit )(void);
 	mpg123_handle* (*mpg123_new )(const char*,int*);
 	void (*mpg123_delete )(mpg123_handle*);
 	int (*mpg123_open_handle )(mpg123_handle*, void*);
@@ -2627,10 +2628,13 @@ public:
 
 public:
 #if defined(MPT_WITH_MPG123)
+	bool initialized;
 	ComponentMPG123()
+		: initialized(false)
 	{
 		#define MPT_GLOBAL_BIND(lib, name) name = &::name;
 			MPT_GLOBAL_BIND("mpg123", mpg123_init);
+			MPT_GLOBAL_BIND("mpg123", mpg123_exit);
 			MPT_GLOBAL_BIND("mpg123", mpg123_new);
 			MPT_GLOBAL_BIND("mpg123", mpg123_delete);
 			MPT_GLOBAL_BIND("mpg123", mpg123_open_handle);
@@ -2640,6 +2644,14 @@ public:
 			MPT_GLOBAL_BIND("mpg123", mpg123_scan);
 			MPT_GLOBAL_BIND("mpg123", mpg123_length);
 		#undef MPT_GLOBAL_BIND
+		initialized = (mpg123_init() == 0);
+	}
+	virtual ~ComponentMPG123()
+	{
+		if(initialized)
+		{
+			mpg123_exit();
+		}
 	}
 #elif defined(MPT_WITH_MPG123_DYNBIND)
 	ComponentMPG123() : ComponentLibrary(ComponentTypeForeign) { }
@@ -2650,6 +2662,7 @@ public:
 		AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("mpg123-0")));
 		AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("mpg123")));
 		MPT_COMPONENT_BIND("mpg123", mpg123_init);
+		MPT_COMPONENT_BIND("mpg123", mpg123_exit);
 		MPT_COMPONENT_BIND("mpg123", mpg123_new);
 		MPT_COMPONENT_BIND("mpg123", mpg123_delete);
 		MPT_COMPONENT_BIND("mpg123", mpg123_open_handle);
@@ -2667,6 +2680,13 @@ public:
 			return false;
 		}
 		return true;
+	}
+	virtual ~ComponentMPG123()
+	{
+		if(IsAvailable())
+		{
+			mpg123_exit();
+		}
 	}
 #endif // MPT_WITH_MPG123
 };
@@ -2729,6 +2749,10 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 #if defined(MPT_WITH_MPG123)
 	ComponentMPG123 mpg123_;
 	ComponentMPG123 *mpg123 = &mpg123_;
+	if(!mpg123->initialized)
+	{
+		return false;
+	}
 #elif defined(MPT_WITH_MPG123_DYNBIND)
 	ComponentHandle<ComponentMPG123> mpg123;
 	if(!IsComponentAvailable(mpg123))
