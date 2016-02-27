@@ -23,8 +23,17 @@
 
 #include "MPEGFrame.h"
 #include "OggStream.h"
-#if 0
+#if defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)
 #include "../common/mptBufferIO.h"
+#endif
+
+#if defined(MPT_WITH_VORBIS)
+#include "vorbis/codec.h"
+#endif
+
+#if defined(MPT_WITH_VORBISFILE)
+#include "vorbis/vorbisfile.h"
+#include "SampleFormatConverters.h"
 #endif
 
 #ifdef MPT_WITH_STBVORBIS
@@ -730,6 +739,80 @@ static void UnpackMO3DeltaPredictionSample(FileReader &file, typename Properties
 
 #undef READ_CTRL_BIT
 #undef DECODE_CTRL_BITS
+
+
+#if defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)
+
+static size_t VorbisfileFilereaderRead(void *ptr, size_t size, size_t nmemb, void *datasource)
+{
+	FileReader &file = *reinterpret_cast<FileReader*>(datasource);
+	return file.ReadRaw(ptr, size * nmemb) / size;
+}
+
+static int VorbisfileFilereaderSeek(void *datasource, ogg_int64_t offset, int whence)
+{
+	FileReader &file = *reinterpret_cast<FileReader*>(datasource);
+	switch(whence)
+	{
+	case SEEK_SET:
+		{
+			if(!Util::TypeCanHoldValue<FileReader::off_t>(offset))
+			{
+				return -1;
+			}
+			return file.Seek(mpt::saturate_cast<FileReader::off_t>(offset)) ? 0 : -1;
+		}
+		break;
+	case SEEK_CUR:
+		{
+			if(offset < 0)
+			{
+				if(offset == std::numeric_limits<ogg_int64_t>::min())
+				{
+					return -1;
+				}
+				if(!Util::TypeCanHoldValue<FileReader::off_t>(0-offset))
+				{
+					return -1;
+				}
+				return file.SkipBack(mpt::saturate_cast<FileReader::off_t>(0 - offset)) ? 0 : -1;
+			} else
+			{
+				if(!Util::TypeCanHoldValue<FileReader::off_t>(offset))
+				{
+					return -1;
+				}
+				return file.Skip(mpt::saturate_cast<FileReader::off_t>(offset)) ? 0 : -1;
+			}
+		}
+		break;
+	case SEEK_END:
+		{
+			if(!Util::TypeCanHoldValue<FileReader::off_t>(offset))
+			{
+				return -1;
+			}
+			if(!Util::TypeCanHoldValue<FileReader::off_t>(file.GetLength() + offset))
+			{
+				return -1;
+			}
+			return file.Seek(mpt::saturate_cast<FileReader::off_t>(file.GetLength() + offset)) ? 0 : -1;
+		}
+		break;
+	default:
+		return -1;
+	}
+}
+
+static long VorbisfileFilereaderTell(void *datasource)
+{
+	FileReader &file = *reinterpret_cast<FileReader*>(datasource);
+	return file.GetPosition();
+}
+
+#endif // MPT_WITH_VORBIS && MPT_WITH_VORBISFILE
+
+
 
 #endif // MPT_BUILTIN_MO3
 
@@ -1446,18 +1529,14 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			if(!sampleChunk.chunk.IsValid())
 				continue;
 
-#ifdef MPT_WITH_STBVORBIS
 			SAMPLEINDEX sharedOggHeader = smp + sampleChunk.sharedHeader;
 			// Which chunk are we going to read the header from?
 			// Note: Every Ogg stream has a unique serial number.
 			// stb_vorbis (currently) ignores this serial number so we can just stitch
 			// together our sample without adjusting the shared header's serial number.
 			const bool sharedHeader = sharedOggHeader != smp && sharedOggHeader > 0 && sharedOggHeader <= m_nSamples;
-#if 1
-			FileReader &sampleData = sampleChunk.chunk;
-			FileReader &headerChunk = sharedHeader ? sampleChunks[sharedOggHeader - 1].chunk : sampleData;
-			int initialRead = sharedHeader ? sampleChunk.headerSize : headerChunk.GetLength();
-#else
+
+#if defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)
 
 			int outHeaderSize = 0;
 
@@ -1526,11 +1605,87 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			FileReader &headerChunk = sampleData;
 			int initialRead = sharedHeader ? outHeaderSize : headerChunk.GetLength();
 
+#else
+
+			FileReader &sampleData = sampleChunk.chunk;
+			FileReader &headerChunk = sharedHeader ? sampleChunks[sharedOggHeader - 1].chunk : sampleData;
+			int initialRead = sharedHeader ? sampleChunk.headerSize : headerChunk.GetLength();
+
 #endif
 
 			headerChunk.Rewind();
 			if(sharedHeader && !headerChunk.CanRead(sampleChunk.headerSize))
 				continue;
+
+#if defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)
+
+			ov_callbacks callbacks = {
+				&VorbisfileFilereaderRead,
+				&VorbisfileFilereaderSeek,
+				NULL,
+				&VorbisfileFilereaderTell
+			};
+			OggVorbis_File vf;
+			MemsetZero(vf);
+			if(ov_open_callbacks(&sampleData, &vf, NULL, 0, callbacks) == 0)
+			{
+				if(ov_streams(&vf) == 1)
+				{ // we do not support chained vorbis samples
+					vorbis_info *vi = ov_info(&vf, -1);
+					if(vi && vi->rate > 0 && vi->channels > 0)
+					{
+						ModSample &sample = Samples[smp];
+						sample.AllocateSample();
+						SmpLength offset = 0;
+						int current_section = 0;
+						long decodedSamples = 0;
+						bool eof = false;
+						while(!eof && offset < sample.nLength && sample.pSample != nullptr)
+						{
+							int channels = vi->channels;
+							float **output = nullptr;
+							long ret = ov_read_float(&vf, &output, 1024, &current_section);
+							if(ret == 0)
+							{
+								eof = true;
+							} else if(ret < 0)
+							{
+								// stream error, just try to continue
+							} else
+							{
+								decodedSamples = ret;
+								LimitMax(decodedSamples, mpt::saturate_cast<long>(sample.nLength - offset));
+								if(decodedSamples > 0 && channels == sample.GetNumChannels())
+								{
+									for(int chn = 0; chn < channels; chn++)
+									{
+										if(sample.uFlags[CHN_16BIT])
+										{
+											CopyChannelToInterleaved<SC::Convert<int16, float> >(sample.pSample16 + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
+										} else
+										{
+											CopyChannelToInterleaved<SC::Convert<int8, float> >(sample.pSample8 + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
+										}
+									}
+								}
+								offset += decodedSamples;
+							}
+						}
+					} else
+					{
+						unsupportedSamples = true;
+					}
+				} else
+				{
+					unsupportedSamples = true;
+				}
+				ov_clear(&vf);
+			} else
+			{
+				unsupportedSamples = true;
+			}
+
+#elif defined(MPT_WITH_STBVORBIS)
 
 			int consumed = 0, error = 0;
 			stb_vorbis *vorb = stb_vorbis_open_pushdata(reinterpret_cast<const uint8 *>(headerChunk.GetRawData()), initialRead, &consumed, &error, nullptr);
@@ -1564,10 +1719,15 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				}
 				stb_vorbis_close(vorb);
 			} else
-#endif // MPT_WITH_STBVORBIS
 			{
 				unsupportedSamples = true;
 			}
+
+#else // !VORBIS
+
+			unsupportedSamples = true;
+
+#endif // VORBIS
 		}
 	}
 
