@@ -873,12 +873,17 @@ static int error(vorb *f, enum STBVorbisError e)
 
 #define array_size_required(count,size)  (count*(sizeof(void *)+(size)))
 
+#if 0 // OpenMPT
 #define temp_alloc(f,size)              (f->alloc.alloc_buffer ? setup_temp_malloc(f,size) : alloca(size))
 #ifdef dealloca
 #define temp_free(f,p)                  (f->alloc.alloc_buffer ? 0 : dealloca(size))
 #else
 #define temp_free(f,p)                  0
 #endif
+#else // OpenMPT
+#define temp_alloc(f,size)              (f->alloc.alloc_buffer ? setup_temp_malloc(f,size) : malloc(size)) // OpenMPT
+#define temp_free(f,p)                  (f->alloc.alloc_buffer ? 0 : free(p)) // OpenMPT
+#endif // OpenMPT
 #define temp_alloc_save(f)              ((f)->temp_offset)
 #define temp_alloc_restore(f,p)         ((f)->temp_offset = (p))
 

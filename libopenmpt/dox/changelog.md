@@ -10,16 +10,24 @@ is just a high-level summary.
  *  [**Change**] The `Makefile` build system now requires to explicitely
     specify `NO_LTDL=1` if no support for dynamic loading of third party
     libraries via libtool libltdl is desired.
- *  [**Change**] In the `Makefile` build system `USE_MO3` has been renamed to
-    `USE_UNMO3`.
+ *  [**Change**] In the `Makefile` build system option `USE_MO3` has been
+    renamed to `USE_UNMO3`.
  *  [**Change**] The Autotools build system renamed `--enable-mo3` to
     `--enable-unmo3` and added `--without-ltdl` accordingly.
 
+ *  libopenmpt got native MO3 support with MP3 decoding either via libmpg123 or
+    MediaFoundation (on Windows 7 and up) and Vorbis decoding via libogg,
+    libvorbis, libvorsfile or stb_vorbis.
  *  libopenmpt MSVC builds with Visual Studio 2010 or later on Windows 7 or
     later now use an internal MO3 decoder with stb_vorbis and libmpg123 or
     MediaFoundation suppport by defaut. Visual Studio 2008 builds still use
     unmo3.dll by default but also support the builtin decoder in which case
     libmpg123 is required.
+ *  The `Makefile` build system got 4 new options NO_MPG123, NO_OGG, NO_VORBIS,
+    NO_VORBISFILE. The default is to use the new dependencies automatically.
+ *  The `Autotools` build system got 4 new options --without-mpg123,
+    --without-ogg, --without-vorbis, --without-vorbisfile. The default is to use
+    the new dependencies automatically.
 
 ### libopenmpt 0.2-beta16 (2015-11-22)
 

@@ -31,6 +31,38 @@ AS_IF([test "x$with_zlib" != "xno"],
  ]
 )
 
+# Required libopenmpt dependency: mpg123
+AC_ARG_WITH([mpg123], AS_HELP_STRING([--without-mpg123], [Disable use of libmpg123.]))
+AS_IF([test "x$with_mpg123" != "xno"],
+ [
+  PKG_CHECK_MODULES([MPG123], [libmpg123], [AC_DEFINE([MPT_WITH_MPG123], [], [with mpg123])], [AC_MSG_ERROR([Unable to find libmpg123.])])
+ ]
+)
+
+# Required libopenmpt dependency: ogg
+AC_ARG_WITH([ogg], AS_HELP_STRING([--without-ogg], [Disable use of libogg.]))
+AS_IF([test "x$with_ogg" != "xno"],
+ [
+  PKG_CHECK_MODULES([OGG], [ogg], [AC_DEFINE([MPT_WITH_OGG], [], [with ogg])], [AC_MSG_ERROR([Unable to find libogg.])])
+ ]
+)
+
+# Required libopenmpt dependency: vorbis
+AC_ARG_WITH([vorbis], AS_HELP_STRING([--without-vorbis], [Disable use of libvorbis.]))
+AS_IF([test "x$with_vorbis" != "xno"],
+ [
+  PKG_CHECK_MODULES([VORBIS], [vorbis], [AC_DEFINE([MPT_WITH_VORBIS], [], [with vorbis])], [AC_MSG_ERROR([Unable to find libvorbis.])])
+ ]
+)
+
+# Required libopenmpt dependency: vorbisfile
+AC_ARG_WITH([vorbisfile], AS_HELP_STRING([--without-vorbisfile], [Disable use of libvorbisfile.]))
+AS_IF([test "x$with_vorbisfile" != "xno"],
+ [
+  PKG_CHECK_MODULES([VORBISFILE], [vorbisfile], [AC_DEFINE([MPT_WITH_VORBISFILE], [], [with vorbisfile])], [AC_MSG_ERROR([Unable to find libvorbisfile.])])
+ ]
+)
+
 # Optional libopenmpt dependency: libltdl
 AC_ARG_WITH([ltdl], AS_HELP_STRING([--without-ltdl], [Disable the use of libtool libltdl for dynamic loading of third party libraries.]))
 AS_IF([test "x$with_ltdl" = "xno"],

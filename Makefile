@@ -60,6 +60,10 @@
 #  NO_LTDL=1        Do not require libltdl
 #
 #  NO_ZLIB=1        Avoid using zlib, even if found
+#  NO_MPG123=1      Avoid using libmpg123, even if found
+#  NO_OGG=1         Avoid using libogg, even if found
+#  NO_VORBIS=1      Avoid using libvorbis, even if found
+#  NO_VORBISFILE=1  Avoid using libvorbisfile, even if found
 #
 #  USE_UNMO3=1      Support dynamic loading of unmo3 shared library
 #
@@ -348,6 +352,54 @@ NO_ZLIB:=1
 endif
 endif
 
+ifeq ($(NO_MPG123),1)
+else
+#LDLIBS   += -lmpg123
+ifeq ($(shell pkg-config --exists libmpg123 && echo yes),yes)
+CPPFLAGS_MPG123 := $(shell pkg-config --cflags-only-I libmpg123 ) -DMPT_WITH_MPG123
+LDFLAGS_MPG123  := $(shell pkg-config --libs-only-L   libmpg123 ) $(shell pkg-config --libs-only-other libmpg123 )
+LDLIBS_MPG123   := $(shell pkg-config --libs-only-l   libmpg123 )
+else
+NO_MPG123:=1
+endif
+endif
+
+ifeq ($(NO_OGG),1)
+else
+#LDLIBS   += -logg
+ifeq ($(shell pkg-config --exists ogg && echo yes),yes)
+CPPFLAGS_OGG := $(shell pkg-config --cflags-only-I ogg ) -DMPT_WITH_OGG
+LDFLAGS_OGG  := $(shell pkg-config --libs-only-L   ogg ) $(shell pkg-config --libs-only-other ogg )
+LDLIBS_OGG   := $(shell pkg-config --libs-only-l   ogg )
+else
+NO_OGG:=1
+endif
+endif
+
+ifeq ($(NO_VORBIS),1)
+else
+#LDLIBS   += -lvorbis
+ifeq ($(shell pkg-config --exists vorbis && echo yes),yes)
+CPPFLAGS_VORBIS := $(shell pkg-config --cflags-only-I vorbis ) -DMPT_WITH_VORBIS
+LDFLAGS_VORBIS  := $(shell pkg-config --libs-only-L   vorbis ) $(shell pkg-config --libs-only-other vorbis )
+LDLIBS_VORBIS   := $(shell pkg-config --libs-only-l   vorbis )
+else
+NO_VORBIS:=1
+endif
+endif
+
+ifeq ($(NO_VORBISFILE),1)
+else
+#LDLIBS   += -lvorbisfile
+ifeq ($(shell pkg-config --exists vorbisfile && echo yes),yes)
+CPPFLAGS_VORBISFILE := $(shell pkg-config --cflags-only-I vorbisfile ) -DMPT_WITH_VORBISFILE
+LDFLAGS_VORBISFILE  := $(shell pkg-config --libs-only-L   vorbisfile ) $(shell pkg-config --libs-only-other vorbisfile )
+LDLIBS_VORBISFILE   := $(shell pkg-config --libs-only-l   vorbisfile )
+else
+NO_VORBISFILE:=1
+endif
+endif
+
 ifeq ($(USE_UNMO3),1)
 CPPFLAGS_UNMO3 := -DMPT_WITH_UNMO3_DYNBIND
 LDLIBS_UNMO3   := 
@@ -427,9 +479,9 @@ NO_SNDFILE:=1
 endif
 endif
 
-CPPFLAGS += $(CPPFLAGS_LTDL) $(CPPFLAGS_ZLIB) $(CPPFLAGS_UNMO3)
-LDFLAGS += $(LDFLAGS_LTDL) $(LDFLAGS_ZLIB) $(LDFLAGS_UNMO3)
-LDLIBS += $(LDLIBS_LTDL) $(LDLIBS_ZLIB) $(LDLIBS_UNMO3)
+CPPFLAGS += $(CPPFLAGS_LTDL) $(CPPFLAGS_ZLIB) $(CPPFLAGS_MPG123) $(CPPFLAGS_OGG) $(CPPFLAGS_VORBIS) $(CPPFLAGS_VORBISFILE) $(CPPFLAGS_UNMO3)
+LDFLAGS += $(LDFLAGS_LTDL) $(LDFLAGS_ZLIB) $(LDFLAGS_MPG123) $(LDFLAGS_OGG) $(LDFLAGS_VORBIS) $(LDFLAGS_VORBISFILE) $(LDFLAGS_UNMO3)
+LDLIBS += $(LDLIBS_LTDL) $(LDLIBS_ZLIB) $(LDLIBS_MPG123) $(LDLIBS_OGG) $(LDLIBS_VORBIS) $(LDLIBS_VORBISFILE) $(LDLIBS_UNMO3)
 
 CPPFLAGS_OPENMPT123 += $(CPPFLAGS_SDL2) $(CPPFLAGS_SDL) $(CPPFLAGS_PORTAUDIO) $(CPPFLAGS_FLAC) $(CPPFLAGS_SNDFILE)
 LDFLAGS_OPENMPT123  += $(LDFLAGS_SDL2) $(LDFLAGS_SDL) $(LDFLAGS_PORTAUDIO) $(LDFLAGS_FLAC) $(LDFLAGS_SNDFILE)
@@ -509,7 +561,31 @@ LIBOPENMPT_CXX_SOURCES += \
  
 ifeq ($(NO_ZLIB),1)
 LIBOPENMPT_C_SOURCES += include/miniz/miniz.c
+LIBOPENMPTTEST_C_SOURCES += include/miniz/miniz.c
 CPPFLAGS += -DMPT_WITH_MINIZ
+endif
+
+ifeq ($(NO_MPG123),1)
+CPPFLAGS += -DMPT_WITH_MPG123_DYNBIND
+endif
+
+ifeq ($(NO_OGG),1)
+LIBOPENMPT_C_SOURCES += include/stb_vorbis/stb_vorbis.c
+LIBOPENMPTTEST_C_SOURCES += include/stb_vorbis/stb_vorbis.c
+CPPFLAGS += -DMPT_WITH_STBVORBIS
+else
+ifeq ($(NO_VORBIS),1)
+LIBOPENMPT_C_SOURCES += include/stb_vorbis/stb_vorbis.c
+LIBOPENMPTTEST_C_SOURCES += include/stb_vorbis/stb_vorbis.c
+CPPFLAGS += -DMPT_WITH_STBVORBIS
+else
+ifeq ($(NO_VORBISFILE),1)
+LIBOPENMPT_C_SOURCES += include/stb_vorbis/stb_vorbis.c
+LIBOPENMPTTEST_C_SOURCES += include/stb_vorbis/stb_vorbis.c
+CPPFLAGS += -DMPT_WITH_STBVORBIS
+else
+endif
+endif
 endif
 
 LIBOPENMPT_OBJECTS += $(LIBOPENMPT_CXX_SOURCES:.cpp=.o) $(LIBOPENMPT_C_SOURCES:.c=.o)
@@ -550,10 +626,6 @@ LIBOPENMPTTEST_CXX_SOURCES += \
  $(SOUNDLIB_CXX_SOURCES) \
  $(wildcard test/*.cpp) \
  
-ifeq ($(NO_ZLIB),1)
-LIBOPENMPTTEST_C_SOURCES += include/miniz/miniz.c
-endif
-
 LIBOPENMPTTEST_OBJECTS = $(LIBOPENMPTTEST_CXX_SOURCES:.cpp=.test.o) $(LIBOPENMPTTEST_C_SOURCES:.c=.test.o)
 LIBOPENMPTTEST_DEPENDS = $(LIBOPENMPTTEST_CXX_SOURCES:.cpp=.test.d) $(LIBOPENMPTTEST_C_SOURCES:.c=.test.d)
 ALL_OBJECTS += $(LIBOPENMPTTEST_OBJECTS)
@@ -714,7 +786,7 @@ bin/libopenmpt.pc:
 	$(VERYSILENT)echo 'Description: Tracker module player based on OpenMPT' >> $@.tmp
 	$(VERYSILENT)echo 'Version: $(DIST_LIBOPENMPT_VERSION)' >> $@.tmp
 	$(VERYSILENT)echo 'Libs: -L$${libdir} -lopenmpt' >> $@.tmp
-	$(VERYSILENT)echo 'Libs.private: zlib' >> $@.tmp
+	$(VERYSILENT)echo 'Libs.private: -lzlib -lmpg123 -logg -lvorbis -lvorbisfile' >> $@.tmp
 	$(VERYSILENT)echo 'Cflags: -I$${includedir}' >> $@.tmp
 	$(VERYSILENT)mv $@.tmp $@
 

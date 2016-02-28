@@ -564,6 +564,11 @@ mpt::ustring GetFullCreditsString()
 		"https://xiph.org/ogg/\n"
 		"\n"
 #endif
+#if defined(MPT_WITH_VORBIS) || defined(MPT_WITH_LIBVORBISFILE)
+		"Xiph.Org Foundation for libvorbis\n"
+		"https://xiph.org/vorbis/\n"
+		"\n"
+#endif
 		"Storlek for all the IT compatibility hints and testcases\n"
 		"as well as the IMF, OKT and ULT loaders\n"
 		"http://schismtracker.org/\n"
