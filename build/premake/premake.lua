@@ -153,8 +153,11 @@ solution "libopenmpt-all"
  dofile "../../build/premake/mpt-openmpt123.lua"
  dofile "../../build/premake/ext-flac.lua"
  dofile "../../build/premake/ext-miniz.lua"
+ dofile "../../build/premake/ext-miniz-shared.lua"
  dofile "../../build/premake/ext-portaudio.lua"
  dofile "../../build/premake/ext-portaudiocpp.lua"
+ dofile "../../build/premake/ext-stb_vorbis.lua"
+ dofile "../../build/premake/ext-stb_vorbis-shared.lua"
 
 end
 
@@ -167,6 +170,7 @@ solution "libopenmpt_test"
 
  dofile "../../build/premake/mpt-libopenmpt_test.lua"
  dofile "../../build/premake/ext-miniz.lua"
+ dofile "../../build/premake/ext-stb_vorbis.lua"
 
 end
 
@@ -180,6 +184,7 @@ solution "foo_openmpt"
  dofile "../../build/premake/mpt-foo_openmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
  dofile "../../build/premake/ext-miniz.lua"
+ dofile "../../build/premake/ext-stb_vorbis.lua"
 
 end
 
@@ -193,6 +198,7 @@ solution "in_openmpt"
  dofile "../../build/premake/mpt-in_openmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
  dofile "../../build/premake/ext-miniz.lua"
+ dofile "../../build/premake/ext-stb_vorbis.lua"
 
 end
 
@@ -207,6 +213,7 @@ solution "xmp-openmpt"
  dofile "../../build/premake/mpt-libopenmpt.lua"
  dofile "../../build/premake/ext-miniz.lua"
  dofile "../../build/premake/ext-pugixml.lua"
+ dofile "../../build/premake/ext-stb_vorbis.lua"
 
 end
 
@@ -226,6 +233,8 @@ solution "libopenmpt"
  dofile "../../build/premake/ext-miniz-shared.lua"
  dofile "../../build/premake/ext-portaudio.lua"
  dofile "../../build/premake/ext-portaudiocpp.lua"
+ dofile "../../build/premake/ext-stb_vorbis.lua"
+ dofile "../../build/premake/ext-stb_vorbis-shared.lua"
 
 end
 
@@ -242,6 +251,7 @@ solution "openmpt123"
  dofile "../../build/premake/ext-miniz.lua"
  dofile "../../build/premake/ext-ogg.lua"
  dofile "../../build/premake/ext-portaudio.lua"
+ dofile "../../build/premake/ext-stb_vorbis.lua"
 
 end
 
@@ -327,6 +337,7 @@ solution "all-externals"
  dofile "../../build/premake/ext-smbPitchShift.lua"
  dofile "../../build/premake/ext-soundtouch.lua"
  dofile "../../build/premake/ext-stb_vorbis.lua"
+ dofile "../../build/premake/ext-stb_vorbis-shared.lua"
  dofile "../../build/premake/ext-UnRAR.lua"
  dofile "../../build/premake/ext-zlib.lua"
 

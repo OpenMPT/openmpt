@@ -105,14 +105,20 @@
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
 //#define MPT_WITH_FLAC
 //#define MPT_WITH_ICONV
-//#define MPT_WITH_MEDIAFOUNDATION
+#if MPT_OS_WINDOWS
+#if MPT_COMPILER_MSVC && (_WIN32_WINNT >= 0x0601)
+#define MPT_WITH_MEDIAFOUNDATION
+#endif
+#endif
 #define MPT_WITH_MINIZ
-//#define MPT_WITH_OGG
 //#define MPT_WITH_MPG123
-//#define MPT_WITH_MPG123_DYNBIND
-//#define MPT_WITH_STBVORBIS
+#define MPT_WITH_MPG123_DYNBIND
+//#define MPT_WITH_OGG
+#define MPT_WITH_STBVORBIS
 //#define MPT_WITH_UNMO3
+#if !(defined(MPT_WITH_MPG123) || defined(MPT_WITH_MEDIAFOUNDATION)) || !((defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)) || defined(MPT_WITH_STBVORBIS))
 #define MPT_WITH_UNMO3_DYNBIND
+#endif
 //#define MPT_WITH_VORBIS
 //#define MPT_WITH_VORBISFILE
 //#define MPT_WITH_ZLIB
@@ -402,6 +408,14 @@
 
 #if MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0) && defined(MPT_WITH_MEDIAFOUNDATION)
 #undef MPT_WITH_MEDIAFOUNDATION // MediaFoundation requires a modern SDK
+#endif
+
+#if defined(MPT_WITH_MEDIAFOUNDATION) && !defined(MPT_ENABLE_TEMPFILE)
+#define MPT_ENABLE_TEMPFILE
+#endif
+
+#if defined(MODPLUG_TRACKER) && !defined(MPT_ENABLE_TEMPFILE)
+#define MPT_ENABLE_TEMPFILE
 #endif
 
 #if !defined(MPT_CHARSET_WIN32) && !defined(MPT_CHARSET_ICONV) && !defined(MPT_CHARSET_CODECVTUTF8) && !defined(MPT_CHARSET_INTERNAL)

@@ -37,6 +37,7 @@
   defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_DLL" }
   links {
    "miniz-shared",
+   "stb_vorbis-shared",
   }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   dofile "../../build/premake/premake-defaults-DLL.lua"

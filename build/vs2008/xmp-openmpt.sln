@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "miniz", "..\vs2008-ext\mini
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pugixml", "..\vs2008-ext\pugixml.vcproj", "{07B89124-7C71-42CC-81AB-62B09BB61F9B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stb_vorbis", "..\vs2008-ext\stb_vorbis.vcproj", "{E0D81662-85EF-4172-B0D8-F8DCFF712607}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -31,6 +33,10 @@ Global
 		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Debug|Win32.Build.0 = Debug|Win32
 		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Release|Win32.ActiveCfg = Release|Win32
 		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Release|Win32.Build.0 = Release|Win32
+		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Debug|Win32.Build.0 = Debug|Win32
+		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Release|Win32.ActiveCfg = Release|Win32
+		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

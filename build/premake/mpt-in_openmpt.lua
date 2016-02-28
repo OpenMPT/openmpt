@@ -20,7 +20,7 @@
   }
   characterset "Unicode"
   flags { "MFC", "Unicode" }
-  links { "libopenmpt", "miniz" }
+  links { "libopenmpt" }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"

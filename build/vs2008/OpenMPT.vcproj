@@ -789,6 +789,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\common\FileReader.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\FileReader.h"
 				>
 			</File>

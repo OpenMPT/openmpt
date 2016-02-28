@@ -51,6 +51,7 @@
 #include <mfreadwrite.h>
 #include <mferror.h>
 #include <Propvarutil.h>
+#include "SampleFormatConverters.h"
 #endif // MPT_WITH_MEDIAFOUNDATION
 #ifdef MPT_ENABLE_MP3_SAMPLES
 #include "MPEGFrame.h"
@@ -2877,13 +2878,13 @@ static void mptMFSafeRelease(T **ppT)
 	}
 }
 
-#define MPT_MF_CHECKED(x) do { \
+#define MPT_MF_CHECKED(x) MPT_DO { \
 	HRESULT hr = (x); \
 	if(!SUCCEEDED(hr)) \
 	{ \
 		goto fail; \
 	} \
-} while(0)
+} MPT_WHILE_0
 
 // Implementing IMFByteStream is apparently not enough to stream raw bytes
 // data to MediaFoundation.
@@ -3015,6 +3016,14 @@ public:
 	}
 };
 MPT_REGISTERED_COMPONENT(ComponentMediaFoundation, "MediaFoundation")
+
+#if defined(LIBOPENMPT_BUILD) && MPT_COMPILER_MSVC
+#pragma comment(lib, "mf.lib")
+#pragma comment(lib, "mfplat.lib")
+#pragma comment(lib, "mfreadwrite.lib")
+#pragma comment(lib, "mfuuid.lib") // static lib
+#pragma comment(lib, "propsys.lib")
+#endif
 
 #endif // MPT_WITH_MEDIAFOUNDATION
 
@@ -3226,13 +3235,23 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	mptMFSafeRelease(&partialType);
 	mptMFSafeRelease(&sourceReader);
 
-	if(tags.artist.empty())
-	{
-		sampleName = mpt::ToCharset(mpt::CharsetLocale, tags.title);
-	} else
-	{
-		sampleName = mpt::String::Print("%1 (by %2)", mpt::ToCharset(mpt::CharsetLocale, tags.title), mpt::ToCharset(mpt::CharsetLocale, tags.artist));
-	}
+	#if defined(MPT_ENABLE_CHARSET_LOCALE)
+		if(tags.artist.empty())
+		{
+			sampleName = mpt::ToCharset(mpt::CharsetLocale, tags.title);
+		} else
+		{
+			sampleName = mpt::String::Print("%1 (by %2)", mpt::ToCharset(mpt::CharsetLocale, tags.title), mpt::ToCharset(mpt::CharsetLocale, tags.artist));
+		}
+	#else // !MPT_ENABLE_CHARSET_LOCALE
+		if(tags.artist.empty())
+		{
+			sampleName = mpt::ToCharset(GetCharset(), tags.title);
+		} else
+		{
+			sampleName = mpt::String::Print("%1 (by %2)", mpt::ToCharset(GetCharset(), tags.title), mpt::ToCharset(GetCharset(), tags.artist));
+		}
+	#endif // MPT_ENABLE_CHARSET_LOCALE
 
 	SmpLength length = rawData.size() / numChannels / (bitsPerSample/8);
 

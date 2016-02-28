@@ -183,10 +183,6 @@
 			ReferencedProjectIdentifier="{9C5101EF-3E20-4558-809B-277FDD50E878}"
 			RelativePathToProject=".\libopenmpt.vcproj"
 		/>
-		<ProjectReference
-			ReferencedProjectIdentifier="{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}"
-			RelativePathToProject="..\vs2008-ext\miniz.vcproj"
-		/>
 	</References>
 	<Files>
 		<File

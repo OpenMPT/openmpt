@@ -345,10 +345,6 @@
 			ReferencedProjectIdentifier="{238CCAB7-5880-4172-B0CF-9B9298ED9D29}"
 			RelativePathToProject=".\libopenmptDLL.vcproj"
 		/>
-		<ProjectReference
-			ReferencedProjectIdentifier="{224C35CD-12DC-4EBC-8183-B38A7199AD4B}"
-			RelativePathToProject="..\vs2008-ext\miniz-shared.vcproj"
-		/>
 	</References>
 	<Files>
 		<File

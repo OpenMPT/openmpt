@@ -39,6 +39,7 @@ copy /y ..\..\include\pugixml\readme.txt                     .\Licenses\License.
 rem copy /y ..\..\include\r8brain\other\License.txt              .\Licenses\License.R8Brain.txt || goto error
 rem copy /y ..\..\include\smbPitchShift\smbPitchShift.cpp        .\Licenses\License.smbPitchShift.txt || goto error
 rem copy /y ..\..\include\soundtouch\COPYING.TXT                 .\Licenses\License.SoundTouch.txt || goto error
+copy /y ..\..\include\stb_vorbis\stb_vorbis.c                .\Licenses\License.stb_vorbis.txt || goto error
 rem copy /y ..\..\include\unrar\license.txt                      .\Licenses\License.UnRAR.txt || goto error
 rem copy /y ..\..\include\vorbis\COPYING                         .\Licenses\License.Vorbis.txt || goto error
 rem copy /y ..\..\include\zlib\README                            .\Licenses\License.zlib.txt || goto error

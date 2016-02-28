@@ -265,7 +265,7 @@ mpt::PathString GetAbsolutePath(const mpt::PathString &path);
 
 #endif // MPT_OS_WINDOWS
 
-#if defined(MODPLUG_TRACKER)
+#if defined(MPT_ENABLE_TEMPFILE)
 #if MPT_OS_WINDOWS
 
 // Returns temporary directory (with trailing backslash added) (e.g. "C:\TEMP\")
@@ -275,7 +275,7 @@ mpt::PathString GetTempDirectory();
 mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix = mpt::PathString(), const mpt::PathString &fileNameExtension = MPT_PATHSTRING("tmp"));
 
 #endif // MPT_OS_WINDOWS
-#endif // MODPLUG_TRACKER
+#endif // MPT_ENABLE_TEMPFILE
 
 } // namespace mpt
 

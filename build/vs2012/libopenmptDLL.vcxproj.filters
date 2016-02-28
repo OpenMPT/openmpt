@@ -281,6 +281,9 @@
     <ClCompile Include="..\..\common\ComponentManager.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\common\FileReader.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\common\Logging.cpp">
       <Filter>common</Filter>
     </ClCompile>
