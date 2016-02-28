@@ -19,6 +19,15 @@ if _ACTION == "vs2010" then
   flags { "Unicode" }
   links { "libopenmpt" }
 	links { "pfc", "foobar2000_SDK", "foobar2000_sdk_helpers", "foobar2000_component_client", "../../include/foobar2000sdk/foobar2000/shared/shared.lib" }
+  filter { "not action:vs2008" }
+  linkoptions {
+   "/DELAYLOAD:mf.dll",
+   "/DELAYLOAD:mfplat.dll",
+   "/DELAYLOAD:mfreadwrite.dll",
+--   "/DELAYLOAD:mfuuid.dll", -- static library
+   "/DELAYLOAD:propsys.dll",
+  }
+  filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"

@@ -17,6 +17,15 @@ if _ACTION ~= "vs2008" then
   characterset "Unicode"
   flags { "Unicode" }
   links { "libopenmpt", "portaudio", "portaudiocpp", "ksuser", "winmm" }
+  filter { "not action:vs2008" }
+  linkoptions {
+   "/DELAYLOAD:mf.dll",
+   "/DELAYLOAD:mfplat.dll",
+   "/DELAYLOAD:mfreadwrite.dll",
+--   "/DELAYLOAD:mfuuid.dll", -- static library
+   "/DELAYLOAD:propsys.dll",
+  }
+  filter {}
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
 
@@ -37,6 +46,15 @@ end
   characterset "Unicode"
   flags { "Unicode" }
   links { "libopenmpt", "portaudio", "ksuser", "winmm" }
+  filter { "not action:vs2008" }
+  linkoptions {
+   "/DELAYLOAD:mf.dll",
+   "/DELAYLOAD:mfplat.dll",
+   "/DELAYLOAD:mfreadwrite.dll",
+--   "/DELAYLOAD:mfuuid.dll", -- static library
+   "/DELAYLOAD:propsys.dll",
+  }
+  filter {}
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
 
@@ -55,6 +73,15 @@ end
   characterset "Unicode"
   flags { "Unicode" }
   links { "libopenmpt", "portaudio", "ksuser", "winmm" }
+  filter { "not action:vs2008" }
+  linkoptions {
+   "/DELAYLOAD:mf.dll",
+   "/DELAYLOAD:mfplat.dll",
+   "/DELAYLOAD:mfreadwrite.dll",
+--   "/DELAYLOAD:mfuuid.dll", -- static library
+   "/DELAYLOAD:propsys.dll",
+  }
+  filter {}
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
 
@@ -73,6 +100,15 @@ end
   characterset "Unicode"
   flags { "Unicode" }
   links { "libopenmpt", "portaudio", "ksuser", "winmm" }
+  filter { "not action:vs2008" }
+  linkoptions {
+   "/DELAYLOAD:mf.dll",
+   "/DELAYLOAD:mfplat.dll",
+   "/DELAYLOAD:mfreadwrite.dll",
+--   "/DELAYLOAD:mfuuid.dll", -- static library
+   "/DELAYLOAD:propsys.dll",
+  }
+  filter {}
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
 
