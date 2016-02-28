@@ -58,6 +58,7 @@
 #  (defaults are 0):
 #
 #  NO_LTDL=1        Do not require libltdl
+#  NO_DL=1          Do not fallback to libdl
 #
 #  NO_ZLIB=1        Avoid using zlib, even if found
 #  NO_MPG123=1      Avoid using libmpg123, even if found
@@ -335,9 +336,12 @@ endif
 endif
 
 ifeq ($(NO_LTDL),1)
+ifeq ($(NO_DL),1)
+else
 ifeq ($(UNAME_S),Linux)
 CPPFLAGS_DL := -DMPT_WITH_DL
 LDLIBS_DL   := -ldl
+endif
 endif
 else
 CPPFLAGS_LTDL := -DMPT_WITH_LTDL
