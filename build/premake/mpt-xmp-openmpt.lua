@@ -23,6 +23,7 @@
   flags { "MFC", "Unicode" }
   links { "libopenmpt", "pugixml" }
   filter { "not action:vs2008" }
+  links { "delayimp" }
   linkoptions {
    "/DELAYLOAD:mf.dll",
    "/DELAYLOAD:mfplat.dll",
