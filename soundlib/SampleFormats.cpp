@@ -561,11 +561,7 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filen
 	}
 	
 	FileTags tags;
-	#if defined(MPT_ENABLE_CHARSET_LOCALE)
-		tags.title = mpt::ToUnicode(mpt::CharsetLocale, m_szNames[nSample]);
-	#else // !MPT_ENABLE_CHARSET_LOCALE
-		tags.title = mpt::ToUnicode(GetCharset(), m_szNames[nSample]);
-	#endif // MPT_ENABLE_CHARSET_LOCALE
+	tags.title = mpt::ToUnicode(GetCharsetLocaleOrModule(), m_szNames[nSample]);
 	tags.encoder = mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetOpenMPTVersionStr());
 	file.WriteMetatags(tags);
 	
@@ -3235,23 +3231,13 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	mptMFSafeRelease(&partialType);
 	mptMFSafeRelease(&sourceReader);
 
-	#if defined(MPT_ENABLE_CHARSET_LOCALE)
-		if(tags.artist.empty())
-		{
-			sampleName = mpt::ToCharset(mpt::CharsetLocale, tags.title);
-		} else
-		{
-			sampleName = mpt::String::Print("%1 (by %2)", mpt::ToCharset(mpt::CharsetLocale, tags.title), mpt::ToCharset(mpt::CharsetLocale, tags.artist));
-		}
-	#else // !MPT_ENABLE_CHARSET_LOCALE
-		if(tags.artist.empty())
-		{
-			sampleName = mpt::ToCharset(GetCharset(), tags.title);
-		} else
-		{
-			sampleName = mpt::String::Print("%1 (by %2)", mpt::ToCharset(GetCharset(), tags.title), mpt::ToCharset(GetCharset(), tags.artist));
-		}
-	#endif // MPT_ENABLE_CHARSET_LOCALE
+	if(tags.artist.empty())
+	{
+		sampleName = mpt::ToCharset(GetCharsetLocaleOrModule(), tags.title);
+	} else
+	{
+		sampleName = mpt::String::Print("%1 (by %2)", mpt::ToCharset(GetCharsetLocaleOrModule(), tags.title), mpt::ToCharset(GetCharsetLocaleOrModule(), tags.artist));
+	}
 
 	SmpLength length = rawData.size() / numChannels / (bitsPerSample/8);
 
