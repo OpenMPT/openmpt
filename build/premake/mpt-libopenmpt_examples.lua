@@ -16,7 +16,7 @@ if _ACTION ~= "vs2008" then
   }
   characterset "Unicode"
   flags { "Unicode" }
-  links { "libopenmpt", "miniz", "portaudio", "portaudiocpp", "ksuser", "winmm" }
+  links { "libopenmpt", "portaudio", "portaudiocpp", "ksuser", "winmm" }
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
 
@@ -36,7 +36,7 @@ end
   }
   characterset "Unicode"
   flags { "Unicode" }
-  links { "libopenmpt", "miniz", "portaudio", "ksuser", "winmm" }
+  links { "libopenmpt", "portaudio", "ksuser", "winmm" }
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
 
@@ -54,7 +54,7 @@ end
   }
   characterset "Unicode"
   flags { "Unicode" }
-  links { "libopenmpt", "miniz", "portaudio", "ksuser", "winmm" }
+  links { "libopenmpt", "portaudio", "ksuser", "winmm" }
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
 
@@ -72,7 +72,7 @@ end
   }
   characterset "Unicode"
   flags { "Unicode" }
-  links { "libopenmpt", "miniz", "portaudio", "ksuser", "winmm" }
+  links { "libopenmpt", "portaudio", "ksuser", "winmm" }
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
 

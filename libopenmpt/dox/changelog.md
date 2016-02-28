@@ -15,6 +15,12 @@ is just a high-level summary.
  *  [**Change**] The Autotools build system renamed `--enable-mo3` to
     `--enable-unmo3` and added `--without-ltdl` accordingly.
 
+ *  libopenmpt MSVC builds with Visual Studio 2010 or later on Windows 7 or
+    later now use an internal MO3 decoder with stb_vorbis and libmpg123 or
+    MediaFoundation suppport by defaut. Visual Studio 2008 builds still use
+    unmo3.dll by default but also support the builtin decoder in which case
+    libmpg123 is required.
+
 ### libopenmpt 0.2-beta16 (2015-11-22)
 
  *  [**Change**] The Autotools build system does strict checking of all

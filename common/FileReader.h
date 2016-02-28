@@ -900,8 +900,7 @@ FileReader GetFileReader(TInputFile &file)
 #endif // MPT_ENABLE_FILEIO
 
 
-#ifdef MODPLUG_TRACKER
-#if MPT_OS_WINDOWS
+#if defined(MPT_ENABLE_TEMPFILE) && MPT_OS_WINDOWS
 
 class OnDiskFileWrapper
 {
@@ -913,70 +912,19 @@ private:
 
 public:
 
-	OnDiskFileWrapper(FileReader &file, const mpt::PathString &fileNameExtension = MPT_PATHSTRING("tmp"))
-		: m_IsTempFile(false)
-	{
-		try
-		{
-			file.Rewind();
-			if(file.GetFileName().empty())
-			{
-				const mpt::PathString tempName = mpt::CreateTempFileName(MPT_PATHSTRING("OpenMPT"), fileNameExtension);
-				HANDLE hFile = NULL;
-				hFile = CreateFileW(tempName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL);
-				if(!hFile || hFile == INVALID_HANDLE_VALUE) throw std::runtime_error("");
-				std::size_t towrite = file.GetLength();
-				std::size_t written = 0;
-				do
-				{
-					DWORD chunkSize = std::min<DWORD>(65536, mpt::saturate_cast<DWORD>(towrite));
-					DWORD chunkDone = 0;
-					WriteFile(hFile, file.GetRawData() + written, chunkSize, &chunkDone, NULL);
-					if(chunkDone != chunkSize) { CloseHandle(hFile); throw std::runtime_error(""); }
-					towrite -= chunkDone;
-					written += chunkDone;
-				} while(towrite > 0);
-				CloseHandle(hFile);
-				hFile = NULL;
-				m_Filename = tempName;
-				m_IsTempFile = true;
-			} else
-			{
-				m_Filename = file.GetFileName();
-			}
-		} catch (const std::runtime_error &)
-		{
-			m_IsTempFile = false;
-			m_Filename = mpt::PathString();
-		}
-	}
+	OnDiskFileWrapper(FileReader &file, const mpt::PathString &fileNameExtension = MPT_PATHSTRING("tmp"));
 
-	~OnDiskFileWrapper()
-	{
-		if(m_IsTempFile)
-		{
-			DeleteFileW(m_Filename.AsNative().c_str());
-			m_IsTempFile = false;
-		}
-		m_Filename = mpt::PathString();
-	}
+	~OnDiskFileWrapper();
 
 public:
 
-	bool IsValid() const
-	{
-		return !m_Filename.empty();
-	}
+	bool IsValid() const;
 
-	mpt::PathString GetFilename() const
-	{
-		return m_Filename;
-	}
+	mpt::PathString GetFilename() const;
 
 }; // class OnDiskFileWrapper
 
-#endif // MPT_OS_WINDOWS
-#endif // MODPLUG_TRACKER
+#endif // MPT_ENABLE_TEMPFILE && MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_END

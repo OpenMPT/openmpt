@@ -17,7 +17,7 @@ if _ACTION == "vs2010" then
   }
   characterset "Unicode"
   flags { "Unicode" }
-  links { "libopenmpt", "miniz" }
+  links { "libopenmpt" }
 	links { "pfc", "foobar2000_SDK", "foobar2000_sdk_helpers", "foobar2000_component_client", "../../include/foobar2000sdk/foobar2000/shared/shared.lib" }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   dofile "../../build/premake/premake-defaults-DLL.lua"

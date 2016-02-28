@@ -14,6 +14,7 @@
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
+#include <rpc.h>
 #endif
 
 
@@ -250,7 +251,7 @@ mpt::PathString GetAbsolutePath(const mpt::PathString &path)
 
 #endif // MPT_OS_WINDOWS
 
-#if defined(MODPLUG_TRACKER)
+#if defined(MPT_ENABLE_TEMPFILE)
 #if MPT_OS_WINDOWS
 
 mpt::PathString GetTempDirectory()
@@ -274,13 +275,37 @@ mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const 
 {
 	mpt::PathString filename = mpt::GetTempDirectory();
 	filename += (!fileNamePrefix.empty() ? fileNamePrefix + MPT_PATHSTRING("_") : mpt::PathString());
-	filename += mpt::PathString::FromWide(Util::UUIDToString(Util::CreateLocalUUID()));
+	#ifdef MODPLUG_TRACKER
+		filename += mpt::PathString::FromWide(Util::UUIDToString(Util::CreateLocalUUID()));
+	#else // !MODPLUG_TRACKER
+		UUID uuid = UUID();
+		RPC_STATUS status = ::UuidCreateSequential(&uuid);
+		if(status != RPC_S_OK && status != RPC_S_UUID_LOCAL_ONLY)
+		{
+			uuid = UUID();
+		}
+		std::wstring str;
+		RPC_WSTR tmp = nullptr;
+		if(::UuidToStringW(&uuid, &tmp) != RPC_S_OK)
+		{
+			str = std::wstring();
+		} else
+		{
+			str = (wchar_t*)tmp;
+			::RpcStringFreeW(&tmp);
+		}
+		filename += mpt::PathString::FromWide(str);
+	#endif // MODPLUG_TRACKER
 	filename += (!fileNameExtension.empty() ? MPT_PATHSTRING(".") + fileNameExtension : mpt::PathString());
 	return filename;
 }
 
+#if defined(LIBOPENMPT_BUILD) && MPT_COMPILER_MSVC
+#pragma comment(lib, "rpcrt4.lib")
+#endif
+
 #endif // MPT_OS_WINDOWS
-#endif // MODPLUG_TRACKER
+#endif // MPT_ENABLE_TEMPFILE
 
 } // namespace mpt
 

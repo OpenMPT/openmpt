@@ -36,6 +36,7 @@
   defines { "LIBOPENMPT_BUILD" }
   links {
    "miniz",
+   "stb_vorbis",
   }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   dofile "../../build/premake/premake-defaults-LIB.lua"

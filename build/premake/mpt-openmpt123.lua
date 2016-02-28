@@ -21,7 +21,6 @@
   flags { "Unicode" }
   links {
    "libopenmpt",
-   "miniz",
    "flac",
    "ogg",
    "portaudio",

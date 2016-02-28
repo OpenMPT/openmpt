@@ -190,9 +190,6 @@
     <ProjectReference Include="libopenmptDLL.vcxproj">
       <Project>{238CCAB7-5880-4172-B0CF-9B9298ED9D29}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\vs2015-ext\miniz-shared.vcxproj">
-      <Project>{224C35CD-12DC-4EBC-8183-B38A7199AD4B}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

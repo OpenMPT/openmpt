@@ -345,6 +345,10 @@
 			ReferencedProjectIdentifier="{224C35CD-12DC-4EBC-8183-B38A7199AD4B}"
 			RelativePathToProject="..\vs2008-ext\miniz-shared.vcproj"
 		/>
+		<ProjectReference
+			ReferencedProjectIdentifier="{79948696-448C-4178-AC96-E27487654B68}"
+			RelativePathToProject="..\vs2008-ext\stb_vorbis-shared.vcproj"
+		/>
 	</References>
 	<Files>
 		<Filter
@@ -376,6 +380,10 @@
 			</File>
 			<File
 				RelativePath="..\..\common\Endianness.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\FileReader.cpp"
 				>
 			</File>
 			<File

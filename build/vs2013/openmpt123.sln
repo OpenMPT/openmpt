@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ogg", "..\vs2013-ext\ogg.vc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudio", "..\vs2013-ext\portaudio.vcxproj", "{189B867F-FF4B-45A1-B741-A97492EE69AF}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stb_vorbis", "..\vs2013-ext\stb_vorbis.vcxproj", "{E0D81662-85EF-4172-B0D8-F8DCFF712607}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -69,6 +71,14 @@ Global
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Release|Win32.Build.0 = Release|Win32
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Release|x64.ActiveCfg = Release|x64
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Release|x64.Build.0 = Release|x64
+		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Debug|Win32.Build.0 = Debug|Win32
+		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Debug|x64.ActiveCfg = Debug|x64
+		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Debug|x64.Build.0 = Debug|x64
+		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Release|Win32.ActiveCfg = Release|Win32
+		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Release|Win32.Build.0 = Release|Win32
+		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Release|x64.ActiveCfg = Release|x64
+		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

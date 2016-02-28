@@ -126,9 +126,6 @@
     <ProjectReference Include="libopenmpt.vcxproj">
       <Project>{9C5101EF-3E20-4558-809B-277FDD50E878}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\vs2015-ext\miniz.vcxproj">
-      <Project>{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\vs2015-ext\pugixml.vcxproj">
       <Project>{07B89124-7C71-42CC-81AB-62B09BB61F9B}</Project>
     </ProjectReference>

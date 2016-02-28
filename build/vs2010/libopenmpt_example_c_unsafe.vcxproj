@@ -184,9 +184,6 @@
     <ProjectReference Include="libopenmpt.vcxproj">
       <Project>{9C5101EF-3E20-4558-809B-277FDD50E878}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\vs2010-ext\miniz.vcxproj">
-      <Project>{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\vs2010-ext\portaudio.vcxproj">
       <Project>{189B867F-FF4B-45A1-B741-A97492EE69AF}</Project>
     </ProjectReference>

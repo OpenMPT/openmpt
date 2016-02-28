@@ -265,6 +265,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\common\AudioCriticalSection.cpp" />
     <ClCompile Include="..\..\common\ComponentManager.cpp" />
+    <ClCompile Include="..\..\common\FileReader.cpp" />
     <ClCompile Include="..\..\common\Logging.cpp" />
     <ClCompile Include="..\..\common\Profiler.cpp" />
     <ClCompile Include="..\..\common\misc_util.cpp" />
@@ -362,6 +363,9 @@
   <ItemGroup>
     <ProjectReference Include="..\vs2010-ext\miniz.vcxproj">
       <Project>{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\vs2010-ext\stb_vorbis.vcxproj">
+      <Project>{E0D81662-85EF-4172-B0D8-F8DCFF712607}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -269,6 +269,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\common\AudioCriticalSection.cpp" />
     <ClCompile Include="..\..\common\ComponentManager.cpp" />
+    <ClCompile Include="..\..\common\FileReader.cpp" />
     <ClCompile Include="..\..\common\Logging.cpp" />
     <ClCompile Include="..\..\common\Profiler.cpp" />
     <ClCompile Include="..\..\common\misc_util.cpp" />
@@ -366,6 +367,9 @@
   <ItemGroup>
     <ProjectReference Include="..\vs2010-ext\miniz-shared.vcxproj">
       <Project>{224C35CD-12DC-4EBC-8183-B38A7199AD4B}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\vs2010-ext\stb_vorbis-shared.vcxproj">
+      <Project>{79948696-448C-4178-AC96-E27487654B68}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

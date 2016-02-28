@@ -51,6 +51,7 @@ LOCAL_SRC_FILES := \
 	common/stdafx.cpp \
 	common/AudioCriticalSection.cpp \
 	common/ComponentManager.cpp \
+	common/FileReader.cpp \
 	common/Logging.cpp \
 	common/misc_util.cpp \
 	common/mptCPU.cpp \
