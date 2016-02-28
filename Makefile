@@ -921,21 +921,22 @@ bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar: bin/dist.mk bin/svn_vers
 	rm -rf bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include
-	svn export ./LICENSE         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE
-	svn export ./README.md       bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/README.md
-	svn export ./TODO            bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/TODO
-	svn export ./Makefile        bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Makefile
-	svn export ./bin             bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin
-	svn export ./build           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build
-	svn export ./common          bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common
-	svn export ./soundlib        bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/soundlib
-	svn export ./test            bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/test
-	svn export ./libopenmpt      bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/libopenmpt
-	svn export ./examples        bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/examples
-	svn export ./openmpt123      bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123
-	svn export ./contrib         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/contrib
-	svn export ./include/miniz   bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/miniz
-	svn export ./include/modplug bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/modplug
+	svn export ./LICENSE            bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE
+	svn export ./README.md          bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/README.md
+	svn export ./TODO               bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/TODO
+	svn export ./Makefile           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Makefile
+	svn export ./bin                bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin
+	svn export ./build              bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build
+	svn export ./common             bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common
+	svn export ./soundlib           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/soundlib
+	svn export ./test               bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/test
+	svn export ./libopenmpt         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/libopenmpt
+	svn export ./examples           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/examples
+	svn export ./openmpt123         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123
+	svn export ./contrib            bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/contrib
+	svn export ./include/miniz      bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/miniz
+	svn export ./include/modplug    bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/modplug
+	svn export ./include/stb_vorbis bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/stb_vorbis
 	cp bin/dist.mk bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
 	cp bin/svn_version_dist.h bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/svn_version/svn_version.h
 	cd bin/dist-tar/ && tar cv libopenmpt-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar
@@ -966,6 +967,7 @@ bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip: bin/dist.mk bin/
 	svn export ./include/foobar2000sdk bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/foobar2000sdk --native-eol CRLF
 	svn export ./include/ogg           bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/ogg           --native-eol CRLF
 	svn export ./include/pugixml       bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/pugixml       --native-eol CRLF
+	svn export ./include/stb_vorbis    bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/stb_vorbis    --native-eol CRLF
 	svn export ./include/winamp        bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/winamp        --native-eol CRLF
 	svn export ./include/xmplay        bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/xmplay        --native-eol CRLF
 	svn export ./include/msinttypes    bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/msinttypes    --native-eol CRLF
