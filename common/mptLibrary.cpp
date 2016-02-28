@@ -18,7 +18,7 @@
 #include <dlfcn.h>
 #elif defined(MPT_WITH_LTDL)
 #include <ltdl.h>
-#elif MPT_OS_LINUX
+#elif defined(MPT_WITH_DL)
 #include <dlfcn.h>
 #endif
 #endif
@@ -291,7 +291,7 @@ public:
 };
 
 
-#elif MPT_OS_LINUX
+#elif defined(MPT_WITH_DL)
 
 
 class LibraryHandle
@@ -412,7 +412,7 @@ mpt::PathString LibraryPath::GetDefaultPrefix()
 		return MPT_PATHSTRING("lib");
 	#elif defined(MPT_WITH_LTDL)
 		return MPT_PATHSTRING("lib");
-	#elif MPT_OS_LINUX
+	#elif defined(MPT_WITH_DL)
 		return MPT_PATHSTRING("lib");
 	#else
 		return MPT_PATHSTRING("lib");
@@ -429,7 +429,7 @@ mpt::PathString LibraryPath::GetDefaultSuffix()
 		return MPT_PATHSTRING(".so");
 	#elif defined(MPT_WITH_LTDL)
 		return MPT_PATHSTRING("");  // handled by libltdl
-	#elif MPT_OS_LINUX
+	#elif defined(MPT_WITH_DL)
 		return MPT_PATHSTRING(".so");
 	#else
 		return mpt::PathString();

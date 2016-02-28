@@ -65,7 +65,7 @@ AS_IF([test "x$with_vorbisfile" != "xno"],
 
 # Optional libopenmpt dependency: libltdl
 AC_ARG_WITH([ltdl], AS_HELP_STRING([--without-ltdl], [Disable the use of libtool libltdl for dynamic loading of third party libraries.]))
-AS_IF([test "x$with_ltdl" = "xno"],
+AS_IF([test "x$with_ltdl" != "xno"],
  [
   AC_CHECK_HEADER([ltdl.h],
    [
@@ -104,6 +104,41 @@ AS_IF([test "x$have_ltdl" = "x1"],
 )
 AC_SUBST([LTDL_CPPFLAGS])
 AC_SUBST([LTDL_LIBS])
+
+# Optional libopenmpt dependency: libdl
+AC_ARG_WITH([dl], AS_HELP_STRING([--without-dl], [Disable the use of libdl for dynamic loading of third party libraries.]))
+AS_IF([test "x$with_dl" != "xno"],
+ [
+  AC_SEARCH_LIBS([dlopen], [dl dld],
+   [
+    have_dl=1
+   ],
+   [
+    have_dl=0
+   ]
+  )
+  AS_IF([test "x$have_dl" = "x0"],
+   [
+    AC_MSG_ERROR([Unable to find libdl.])
+   ]
+  )
+ ],
+ [
+  have_dl=0
+ ]
+)
+AS_IF([test "x$have_dl" = "x1"],
+ [
+  DL_CPPFLAGS=-DMPT_WITH_DL
+  DL_LIBS=  
+ ],
+ [
+  DL_CPPFLAGS=
+  DL_LIBS=
+ ]
+)
+AC_SUBST([DL_CPPFLAGS])
+AC_SUBST([DL_LIBS])
 
 
 # Optional libopenmpt feature: unmo3
