@@ -552,6 +552,14 @@ public:
 
 	// rough heuristic, could be improved
 	mpt::Charset GetCharset() const { return GetCharsetFromModType(GetType()); }
+	mpt::Charset GetCharsetLocaleOrModule() const
+	{
+		#if defined(MPT_ENABLE_CHARSET_LOCALE)
+			return mpt::CharsetLocale;
+		#else // MPT_ENABLE_CHARSET_LOCALE
+			return GetCharset();
+		#endif // MPT_ENABLE_CHARSET_LOCALE
+	}
 
 	void SetPreAmp(uint32 vol);
 	uint32 GetPreAmp() const { return m_MixerSettings.m_nPreAmp; }
