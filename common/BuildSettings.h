@@ -80,8 +80,10 @@
 #define MPT_WITH_UNRAR
 
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
+//#define MPT_WITH_DL
 #define MPT_WITH_FLAC
 //#define MPT_WITH_ICONV
+//#define MPT_WITH_LTDL
 #if MPT_OS_WINDOWS
 #if (_WIN32_WINNT >= 0x0601)
 #define MPT_WITH_MEDIAFOUNDATION
@@ -103,8 +105,10 @@
 #if defined(LIBOPENMPT_BUILD)
 
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
+//#define MPT_WITH_DL
 //#define MPT_WITH_FLAC
 //#define MPT_WITH_ICONV
+//#define MPT_WITH_LTDL
 #if MPT_OS_WINDOWS
 #if MPT_COMPILER_MSVC && (_WIN32_WINNT >= 0x0601)
 #define MPT_WITH_MEDIAFOUNDATION
