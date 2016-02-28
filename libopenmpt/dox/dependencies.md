@@ -29,7 +29,16 @@ Dependencies
  *  **J2B** support requires an inflate (deflate decompression) implementation:
      *  **zlib**
      *  **miniz** can be used internally if no zlib is available.
- *  **MO3** support requires:
+ *  Built-in **MO3** support requires:
+     *  **libmpg123**
+     *  **libogg**
+     *  **libvorbis**
+     *  **libvorbisfile**
+     *  Alternatively, **Media Foundation** can be used on Windows 7 or later
+        instead of libmpg123 to decode mp3 samples.
+     *  Instead of libogg, libvorbis and libvorbisfile, **stb_vorbis** can be
+        used internally to decode Vorbis samples.
+ *  **MO3** support via libunmo3 requires:
      *  closed-source **libunmo3** from un4seen
      *  **libltdl** from libtool on Unix-like platforms
  *  Building on Unix-like systems requires:
@@ -64,7 +73,6 @@ Optional dependencies
      *  **iconv**
      *  **C++11** codecvt_utf8
     instead of the internal conversion tables and functions.
- *  **MO3** support requires the closed-source **unmo3** library.
  *  **doxygen 1.8** or higher is required to build the documentation.
 
 ### openmpt123
@@ -75,3 +83,4 @@ Optional dependencies
      *  **Win32** for WAVE
      *  raw PCM has no external dependencies
  *  **help2man** is required to build the documentation.
+

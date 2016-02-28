@@ -10,9 +10,11 @@ Quick Start {#quickstart}
      -  **gcc >= 4.3** or **clang >= 3.0**
      -  **pkg-config >= 0.24**
      -  **zlib**
+     -  **libltdl**
+     -  **libogg**, **libvorbis**, **libvorbisfile**
+     -  **libmpg123**
      -  **doxygen >= 1.8**
  3. *Optional*:
-     -  **libltdl**
      -  **portaudio-v19**
      -  **libSDL == 1.2.x**
      -  **libFLAC**
@@ -45,6 +47,8 @@ Quick Start {#quickstart}
  2. *Optional*:
      -  **zlib**
      -  **libltdl**
+     -  **libogg**, **libvorbis**, **libvorbisfile**
+     -  **libmpg123**
      -  **portaudio-v19**
      -  **libSDL == 1.2.x**
      -  **doxygen >= 1.8**
