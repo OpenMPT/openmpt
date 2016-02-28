@@ -18,6 +18,7 @@ if _ACTION ~= "vs2008" then
   flags { "Unicode" }
   links { "libopenmpt", "portaudio", "portaudiocpp", "ksuser", "winmm" }
   filter { "not action:vs2008" }
+  links { "delayimp" }
   linkoptions {
    "/DELAYLOAD:mf.dll",
    "/DELAYLOAD:mfplat.dll",
@@ -47,6 +48,7 @@ end
   flags { "Unicode" }
   links { "libopenmpt", "portaudio", "ksuser", "winmm" }
   filter { "not action:vs2008" }
+  links { "delayimp" }
   linkoptions {
    "/DELAYLOAD:mf.dll",
    "/DELAYLOAD:mfplat.dll",
@@ -74,6 +76,7 @@ end
   flags { "Unicode" }
   links { "libopenmpt", "portaudio", "ksuser", "winmm" }
   filter { "not action:vs2008" }
+  links { "delayimp" }
   linkoptions {
    "/DELAYLOAD:mf.dll",
    "/DELAYLOAD:mfplat.dll",
@@ -101,6 +104,7 @@ end
   flags { "Unicode" }
   links { "libopenmpt", "portaudio", "ksuser", "winmm" }
   filter { "not action:vs2008" }
+  links { "delayimp" }
   linkoptions {
    "/DELAYLOAD:mf.dll",
    "/DELAYLOAD:mfplat.dll",
