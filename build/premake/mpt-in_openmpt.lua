@@ -20,7 +20,7 @@
   }
   characterset "Unicode"
   flags { "MFC", "Unicode" }
-  links { "libopenmpt" }
+  links { "libopenmpt", "miniz", "stb_vorbis" }
   filter { "not action:vs2008" }
   links { "delayimp" }
   linkoptions {
