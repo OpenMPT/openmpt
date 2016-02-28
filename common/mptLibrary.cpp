@@ -18,6 +18,8 @@
 #include <dlfcn.h>
 #elif defined(MPT_WITH_LTDL)
 #include <ltdl.h>
+#elif MPT_OS_LINUX
+#include <dlfcn.h>
 #endif
 #endif
 
@@ -289,6 +291,52 @@ public:
 };
 
 
+#elif MPT_OS_LINUX
+
+
+class LibraryHandle
+{
+
+private:
+
+	void* handle;
+
+public:
+
+	LibraryHandle(const mpt::LibraryPath &path)
+		: handle(NULL)
+	{
+		handle = dlopen(path.GetFileName().AsNative().c_str(), RTLD_NOW);
+	}
+
+	~LibraryHandle()
+	{
+		if(IsValid())
+		{
+			dlclose(handle);
+		}
+		handle = NULL;
+	}
+
+public:
+
+	bool IsValid() const
+	{
+		return handle != NULL;
+	}
+
+	FuncPtr GetProcAddress(const std::string &symbol) const
+	{
+		if(!IsValid())
+		{
+			return NULL;
+		}
+		return reinterpret_cast<FuncPtr>(dlsym(handle, symbol.c_str()));
+	}
+
+};
+
+
 #else // MPT_OS
 
 
@@ -360,6 +408,12 @@ mpt::PathString LibraryPath::GetDefaultPrefix()
 {
 	#if MPT_OS_WINDOWS
 		return MPT_PATHSTRING("");
+	#elif MPT_OS_ANDROID
+		return MPT_PATHSTRING("lib");
+	#elif defined(MPT_WITH_LTDL)
+		return MPT_PATHSTRING("lib");
+	#elif MPT_OS_LINUX
+		return MPT_PATHSTRING("lib");
 	#else
 		return MPT_PATHSTRING("lib");
 	#endif
@@ -371,8 +425,14 @@ mpt::PathString LibraryPath::GetDefaultSuffix()
 {
 	#if MPT_OS_WINDOWS
 		return MPT_PATHSTRING(".dll");
-	#else
+	#elif MPT_OS_ANDROID
+		return MPT_PATHSTRING(".so");
+	#elif defined(MPT_WITH_LTDL)
 		return MPT_PATHSTRING("");  // handled by libltdl
+	#elif MPT_OS_LINUX
+		return MPT_PATHSTRING(".so");
+	#else
+		return mpt::PathString();
 	#endif
 }
 
