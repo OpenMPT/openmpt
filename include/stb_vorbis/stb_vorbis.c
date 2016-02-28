@@ -2330,6 +2330,11 @@ static void decode_residue(vorb *f, float *residue_buffers[], int ch, int n, int
    }
   done:
    CHECK(f);
+   #ifndef STB_VORBIS_DIVIDES_IN_RESIDUE // OpenMPT
+   temp_free(f,part_classdata); // OpenMPT
+   #else // OpenMPT
+   temp_free(f,classifications); // OpenMPT
+   #endif // OpenMPT
    temp_alloc_restore(f,temp_alloc_point);
 }
 
@@ -2975,6 +2980,7 @@ static void inverse_mdct(float *buffer, int n, vorb *f, int blocktype)
       }
    }
 
+   temp_free(f,buf2); // OpenMPT
    temp_alloc_restore(f,save_point);
 }
 
