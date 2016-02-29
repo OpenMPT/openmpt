@@ -141,21 +141,6 @@ AC_SUBST([DL_CPPFLAGS])
 AC_SUBST([DL_LIBS])
 
 
-# Optional libopenmpt feature: unmo3
-AC_ARG_ENABLE([unmo3], AS_HELP_STRING([--enable-unmo3], [Enable the use of dynamically loaded libunmo3.]))
-AS_IF([test "x$enable_unmo3" = "xyes"],
- [
-  UNMO3_CPPFLAGS=-DMPT_WITH_UNMO3_DYNBIND
-  UNMO3_LIBS=
- ],
- [
-  UNMO3_CPPFLAGS=
-  UNMO3_LIBS=
- ]
-)
-AC_SUBST([UNMO3_CPPFLAGS])
-AC_SUBST([UNMO3_LIBS])
-
 # Optional openmpt123 and examples dependency
 AC_ARG_WITH([portaudio], AS_HELP_STRING([--without-portaudio], [Disable use of libportaudio.]))
 AS_IF([test "x$with_portaudio" != "xno"],
