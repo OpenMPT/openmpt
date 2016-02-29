@@ -91,11 +91,9 @@
 #endif
 //#define MPT_WITH_MINIZ
 //#define MPT_WITH_MPG123
-#define MPT_WITH_MPG123_DYNBIND
 #define MPT_WITH_OGG
 #define MPT_WITH_STBVORBIS
 //#define MPT_WITH_UNMO3
-#define MPT_WITH_UNMO3_DYNBIND
 //#define MPT_WITH_VORBIS
 //#define MPT_WITH_VORBISFILE
 #define MPT_WITH_ZLIB
@@ -116,13 +114,9 @@
 #endif
 #define MPT_WITH_MINIZ
 //#define MPT_WITH_MPG123
-#define MPT_WITH_MPG123_DYNBIND
 //#define MPT_WITH_OGG
 #define MPT_WITH_STBVORBIS
 //#define MPT_WITH_UNMO3
-#if !(defined(MPT_WITH_MPG123) || defined(MPT_WITH_MEDIAFOUNDATION)) || !((defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)) || defined(MPT_WITH_STBVORBIS))
-#define MPT_WITH_UNMO3_DYNBIND
-#endif
 //#define MPT_WITH_VORBIS
 //#define MPT_WITH_VORBISFILE
 //#define MPT_WITH_ZLIB
@@ -197,8 +191,14 @@
 // (HACK) Define to build without any plugin support
 //#define NO_PLUGINS
 
+// Enable dynamic loading of libmpg123
+#define MPT_ENABLE_MPG123_DYNBIND
+
+// Enable dynamic loading of un4seen unmo3
+#define MPT_ENABLE_UNMO3_DYNBIND
+
 // Enable built-in MO3 decoder
-//#define MPT_BUILTIN_MO3
+//#define MPT_ENABLE_MO3_BUILTIN
 
 // Do not build libopenmpt C api
 #define NO_LIBOPENMPT_C
@@ -246,8 +246,15 @@
 #define NO_VST
 #define NO_DMO
 #define NO_PLUGINS
-#if ((defined(MPT_WITH_MPG123) || defined(MPT_WITH_MPG123_DYNBIND)) || defined(MPT_WITH_MEDIAFOUNDATION)) && ((defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)) || defined(MPT_WITH_STBVORBIS))
-#define MPT_BUILTIN_MO3
+#if MPT_OS_WINDOWS || defined(MPT_WITH_LTDL) || defined(MPT_WIH_DL)
+#define MPT_ENABLE_MPG123_DYNBIND
+//#if !(defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND)) || defined(MPT_WITH_MEDIAFOUNDATION)) || !((defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)) || defined(MPT_WITH_STBVORBIS))
+#if !(defined(MPT_WITH_MPG123)) || !((defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)) || defined(MPT_WITH_STBVORBIS))
+#define MPT_ENABLE_UNMO3_DYNBIND
+#endif
+#endif // MPT_OS_WINDOWS || defined(MPT_WITH_LTDL) || defined(MPT_WIH_DL)
+#if ((defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND)) || defined(MPT_WITH_MEDIAFOUNDATION)) && ((defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)) || defined(MPT_WITH_STBVORBIS))
+#define MPT_ENABLE_MO3_BUILTIN
 #endif
 //#define NO_LIBOPENMPT_C
 //#define NO_LIBOPENMPT_CXX
@@ -430,19 +437,19 @@
 #define MPT_ENABLE_DYNBIND // Tracker requires dynamic library loading for export codecs
 #endif
 
-#if defined(MPT_WITH_MPG123_DYNBIND) && !defined(MPT_ENABLE_DYNBIND)
+#if defined(MPT_ENABLE_MPG123_DYNBIND) && !defined(MPT_ENABLE_DYNBIND)
 #define MPT_ENABLE_DYNBIND // mpg123 is loaded dynamically
 #endif
 
-#if (defined(MPT_WITH_MPG123) || defined(MPT_WITH_MPG123_DYNBIND)) && !defined(MPT_ENABLE_MP3_SAMPLES)
+#if (defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND)) && !defined(MPT_ENABLE_MP3_SAMPLES)
 #define MPT_ENABLE_MP3_SAMPLES
 #endif
 
-#if defined(MPT_WITH_UNMO3) || defined(MPT_WITH_UNMO3_DYNBIND) || defined(MPT_BUILTIN_MO3)
+#if defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND) || defined(MPT_ENABLE_MO3_BUILTIN)
 #define MPT_ENABLE_MO3
 #endif
 
-#if defined(MPT_WITH_UNMO3_DYNBIND) && !defined(MPT_ENABLE_DYNBIND)
+#if defined(MPT_ENABLE_UNMO3_DYNBIND) && !defined(MPT_ENABLE_DYNBIND)
 #define MPT_ENABLE_DYNBIND // unmo3 is loaded dynamically
 #endif
 

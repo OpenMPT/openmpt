@@ -275,7 +275,7 @@ std::string GetBuildFeaturesString()
 		#else
 			retval += " -INFLATE";
 		#endif
-		#if defined(MPT_WITH_UNMO3) || defined(MPT_WITH_UNMO3_DYNBIND)
+		#if defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND)
 			retval += " +UNMO3";
 		#else
 			retval += " -UNMO3";
@@ -505,12 +505,12 @@ mpt::ustring GetFullCreditsString()
 		"http://www.hermannseib.com/english/vsthost.htm\n"
 		"\n"
 #endif
-#if defined(MPT_WITH_UNMO3) || defined(MPT_WITH_UNMO3_DYNBIND)
+#if defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND)
 		"Ian Luck for UNMO3\n"
 		"http://www.un4seen.com/mo3.html\n"
 		"\n"
 #endif
-#ifdef MPT_BUILTIN_MO3
+#ifdef MPT_ENABLE_MO3_BUILTIN
 		"Laurent Cl\xc3\xA9vy for unofficial MO3 documentation and decompression code\n"
 		"https://github.com/lclevy/unmo3\n"
 		"\n"
@@ -549,7 +549,7 @@ mpt::ustring GetFullCreditsString()
 		"https://xiph.org/flac/\n"
 		"\n"
 #endif
-#if defined(MPT_WITH_MPG123) || defined(MPT_WITH_MPG123_DYNBIND)
+#if defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND)
 		"The mpg123 project for libmpg123\n"
 		"http://mpg123.de/\n"
 		"\n"

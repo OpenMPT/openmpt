@@ -2559,9 +2559,9 @@ fail:
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // MP3 Samples
 
-#if defined(MPT_WITH_MPG123) || defined(MPT_WITH_MPG123_DYNBIND)
+#if defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND)
 
-#if !defined(MPT_WITH_MPG123) && defined(MPT_WITH_MPG123_DYNBIND)
+#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
 
 	enum mpg123_parms
 	{
@@ -2598,16 +2598,16 @@ fail:
 
 	typedef struct {int foo;} mpg123_handle;
 
-#endif // !MPT_WITH_MPG123 && MPT_WITH_MPG123_DYNBIND
+#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 
 class ComponentMPG123
-#if !defined(MPT_WITH_MPG123) && defined(MPT_WITH_MPG123_DYNBIND)
+#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
 	: public ComponentLibrary
-#endif // !MPT_WITH_MPG123 && MPT_WITH_MPG123_DYNBIND
+#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 {
-#if !defined(MPT_WITH_MPG123) && defined(MPT_WITH_MPG123_DYNBIND)
+#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
 	MPT_DECLARE_COMPONENT_MEMBERS
-#endif // !MPT_WITH_MPG123 && MPT_WITH_MPG123_DYNBIND
+#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 public:
 
 	int (*mpg123_init )(void);
@@ -2680,7 +2680,7 @@ public:
 			mpg123_exit();
 		}
 	}
-#elif defined(MPT_WITH_MPG123_DYNBIND)
+#elif defined(MPT_ENABLE_MPG123_DYNBIND)
 	ComponentMPG123() : ComponentLibrary(ComponentTypeForeign) { }
 	bool DoInitialize()
 	{
@@ -2718,17 +2718,17 @@ public:
 	}
 #endif // MPT_WITH_MPG123
 };
-#if !defined(MPT_WITH_MPG123) && defined(MPT_WITH_MPG123_DYNBIND)
+#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
 MPT_REGISTERED_COMPONENT(ComponentMPG123, "Mpg123")
-#endif // !MPT_WITH_MPG123 && MPT_WITH_MPG123_DYNBIND
+#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 
-#endif // MPT_WITH_MPG123 || MPT_WITH_MPG123_DYNBIND
+#endif // MPT_WITH_MPG123 || MPT_ENABLE_MPG123_DYNBIND
 
 
 bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Decode)
 //----------------------------------------------------------------------------------
 {
-#if defined(MPT_WITH_MPG123) || defined(MPT_WITH_MPG123_DYNBIND)
+#if defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND)
 
 	// Check file for validity, or else mpg123 will happily munch many files that start looking vaguely resemble an MPEG stream mid-file.
 	file.Rewind();
@@ -2781,7 +2781,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	{
 		return false;
 	}
-#elif defined(MPT_WITH_MPG123_DYNBIND)
+#elif defined(MPT_ENABLE_MPG123_DYNBIND)
 	ComponentHandle<ComponentMPG123> mpg123;
 	if(!IsComponentAvailable(mpg123))
 	{
@@ -2857,7 +2857,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	MPT_UNREFERENCED_PARAMETER(sample);
 	MPT_UNREFERENCED_PARAMETER(file);
 	MPT_UNREFERENCED_PARAMETER(mo3Decode);
-#endif // MPT_WITH_MPG123 || MPT_WITH_MPG123_DYNBIND
+#endif // MPT_WITH_MPG123 || MPT_ENABLE_MPG123_DYNBIND
 	return false;
 }
 

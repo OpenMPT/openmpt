@@ -84,10 +84,10 @@ pkgconfig_DATA += libopenmpt/libopenmpt.pc
 lib_LTLIBRARIES += libopenmpt.la
 libopenmpt_la_LDFLAGS = -version-info 0:16:0
 nobase_include_HEADERS += libopenmpt/libopenmpt.h libopenmpt/libopenmpt.hpp libopenmpt/libopenmpt_version.h libopenmpt/libopenmpt_config.h libopenmpt/libopenmpt_stream_callbacks_fd.h libopenmpt/libopenmpt_stream_callbacks_file.h libopenmpt/libopenmpt_ext.hpp
-libopenmpt_la_CPPFLAGS = -DLIBOPENMPT_BUILD -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(LTDL_CPPFLAGS) $(DL_CPPFLAGS) $(UNMO3_CPPFLAGS)
+libopenmpt_la_CPPFLAGS = -DLIBOPENMPT_BUILD -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(LTDL_CPPFLAGS) $(DL_CPPFLAGS)
 libopenmpt_la_CXXFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
 libopenmpt_la_CFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
-libopenmpt_la_LIBADD = $(ZLIB_LIBS) $(MPG123_LIBS) $(OGG_LIBS) $(VORBIS_LIBS) $(VORBISFILE_LIBS) $(LTDL_LIBS) $(DL_LIBS) $(UNMO3_LIBS)
+libopenmpt_la_LIBADD = $(ZLIB_LIBS) $(MPG123_LIBS) $(OGG_LIBS) $(VORBIS_LIBS) $(VORBISFILE_LIBS) $(LTDL_LIBS) $(DL_LIBS)
 libopenmpt_la_SOURCES = 
 libopenmpt_la_SOURCES += build/svn_version/svn_version.h
 libopenmpt_la_SOURCES += common/AudioCriticalSection.cpp
@@ -302,10 +302,10 @@ libmodplug_la_SOURCES += libopenmpt/libopenmpt_modplug_cpp.cpp
 endif
 
 check_PROGRAMS += libopenmpttest
-libopenmpttest_CPPFLAGS = -DLIBOPENMPT_BUILD -DLIBOPENMPT_BUILD_TEST -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(LTDL_CPPFLAGS) $(DL_CPPFLAGS) $(UNMO3_CPPFLAGS)
+libopenmpttest_CPPFLAGS = -DLIBOPENMPT_BUILD -DLIBOPENMPT_BUILD_TEST -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(LTDL_CPPFLAGS) $(DL_CPPFLAGS)
 libopenmpttest_CXXFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
 libopenmpttest_CFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
-libopenmpttest_LDADD = $(ZLIB_LIBS) $(MPG123_LIBS) $(OGG_LIBS) $(VORBIS_LIBS) $(VORBISFILE_LIBS) $(LTDL_LIBS) $(DL_LIBS) $(UNMO3_LIBS)
+libopenmpttest_LDADD = $(ZLIB_LIBS) $(MPG123_LIBS) $(OGG_LIBS) $(VORBIS_LIBS) $(VORBISFILE_LIBS) $(LTDL_LIBS) $(DL_LIBS)
 libopenmpttest_SOURCES = 
 libopenmpttest_SOURCES += libopenmpt/libopenmpt_test.cpp
 libopenmpttest_SOURCES += test/test.cpp
