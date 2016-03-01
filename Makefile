@@ -66,6 +66,8 @@
 #  NO_VORBIS=1      Avoid using libvorbis, even if found
 #  NO_VORBISFILE=1  Avoid using libvorbisfile, even if found
 #
+#  USE_MINIMP3=1    Use minimp3. You have to copy minimp3 into
+#                   include/minimp3/ yourself.
 #
 # Build flags for openmpt123 (provide on each `make` invocation)
 #
@@ -563,6 +565,14 @@ ifeq ($(NO_ZLIB),1)
 LIBOPENMPT_C_SOURCES += include/miniz/miniz.c
 LIBOPENMPTTEST_C_SOURCES += include/miniz/miniz.c
 CPPFLAGS += -DMPT_WITH_MINIZ
+endif
+
+ifeq ($(NO_MPG123),1)
+ifeq ($(USE_MINIMP3),1)
+LIBOPENMPT_C_SOURCES += include/minimp3/minimp3.c
+LIBOPENMPTTEST_C_SOURCES += include/minimp3/minimp3.c
+CPPFLAGS += -DMPT_WITH_MINIMP3
+endif
 endif
 
 ifeq ($(NO_OGG),1)
