@@ -10,7 +10,7 @@
 static const char * const license =
 "The OpenMPT code is licensed under the BSD license." "\n"
 "" "\n"
-"Copyright (c) 2004-2015, OpenMPT contributors" "\n"
+"Copyright (c) 2004-2016, OpenMPT contributors" "\n"
 "Copyright (c) 1997-2003, Olivier Lapicque" "\n"
 "All rights reserved." "\n"
 "" "\n"
