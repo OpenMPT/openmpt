@@ -44,6 +44,11 @@
 #if defined(MPT_WITH_MPG123)
 #include "mpg123.h"
 #endif // MPT_WITH_MPG123
+#if defined(MPT_WITH_MINIMP3)
+extern "C" {
+#include <minimp3/minimp3.h>
+}
+#endif // MPT_WITH_MINIMP3
 #if defined(MPT_WITH_MEDIAFOUNDATION)
 #include <windows.h>
 #include <mfapi.h>
@@ -2728,7 +2733,7 @@ MPT_REGISTERED_COMPONENT(ComponentMPG123, "Mpg123")
 bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Decode)
 //----------------------------------------------------------------------------------
 {
-#if defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND)
+#if defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND) || defined(MPT_WITH_MINIMP3)
 
 	// Check file for validity, or else mpg123 will happily munch many files that start looking vaguely resemble an MPEG stream mid-file.
 	file.Rewind();
@@ -2773,6 +2778,75 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 			return false;
 		}
 	}
+
+#endif // MPT_WITH_MPG123 || MPT_ENABLE_MPG123_DYNBIND || MPT_WITH_MINIMP3
+
+#if defined(MPT_WITH_MINIMP3)
+
+	file.Rewind();
+	std::vector<uint8> raw_data(file.GetLength());
+	file.ReadRaw(&(raw_data[0]), raw_data.size());
+	int64 bytes_left = raw_data.size();
+	uint8 *file_data = &(raw_data[0]);
+	uint8 *stream_pos = file_data;
+
+	std::vector<int16> raw_sample_data;
+
+	mp3_decoder_t *mp3 = reinterpret_cast<mp3_decoder_t *>(mp3_create()); // workaournd minimp3 header typo
+
+	int rate = 0;
+	int channels = 0;
+
+	mp3_info_t info;
+	int frame_size = 0;
+	do
+	{
+		int16 sample_buf[MP3_MAX_SAMPLES_PER_FRAME];
+		frame_size = mp3_decode(mp3, stream_pos, bytes_left, sample_buf, &info);
+		if(rate != 0 && rate != info.sample_rate) break; // inconsistent stream
+		if(channels != 0 && channels != info.channels) break; // inconsistent stream
+		rate = info.sample_rate;
+		channels = info.channels;
+		if(rate <= 0) break; // broken stream
+		if(channels != 1 && channels != 2) break; // broken stream
+		stream_pos += frame_size;
+		bytes_left -= frame_size;
+		if(info.audio_bytes >= 0)
+		{
+			raw_sample_data.insert(raw_sample_data.end(), sample_buf, sample_buf + (info.audio_bytes / sizeof(int16)));
+		}
+	} while((bytes_left >= 0) && (frame_size > 0));
+
+	mp3_free(mp3);
+
+	if(rate == 0 || channels == 0 || raw_sample_data.empty())
+	{
+		return false;
+	}
+
+	DestroySampleThreadsafe(sample);
+	if(!mo3Decode)
+	{
+		strcpy(m_szNames[sample], "");
+		Samples[sample].Initialize();
+		Samples[sample].nC5Speed = rate;
+	}
+	Samples[sample].nLength = raw_sample_data.size() / channels;
+
+	Samples[sample].uFlags.set(CHN_16BIT);
+	Samples[sample].uFlags.set(CHN_STEREO, channels == 2);
+	Samples[sample].AllocateSample();
+
+	std::copy(raw_sample_data.begin(), raw_sample_data.end(), Samples[sample].pSample16);
+
+	if(!mo3Decode)
+	{
+		Samples[sample].Convert(MOD_TYPE_IT, GetType());
+		Samples[sample].PrecomputeLoops(*this, false);
+	}
+	return Samples[sample].pSample != nullptr;
+
+#elif defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND)
 
 #if defined(MPT_WITH_MPG123)
 	ComponentMPG123 mpg123_;
@@ -2853,11 +2927,15 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		Samples[sample].PrecomputeLoops(*this, false);
 	}
 	return Samples[sample].pSample != nullptr;
+
 #else
+
 	MPT_UNREFERENCED_PARAMETER(sample);
 	MPT_UNREFERENCED_PARAMETER(file);
 	MPT_UNREFERENCED_PARAMETER(mo3Decode);
-#endif // MPT_WITH_MPG123 || MPT_ENABLE_MPG123_DYNBIND
+
+#endif // MPT_WITH_MPG123 || MPT_ENABLE_MPG123_DYNBIND || MPT_WITH_MINIMP3
+
 	return false;
 }
 

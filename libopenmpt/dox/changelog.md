@@ -34,6 +34,11 @@ is just a high-level summary.
  *  The `Autotools` build system got 4 new options --without-mpg123,
     --without-ogg, --without-vorbis, --without-vorbisfile. The default is to use
     the new dependencies automatically.
+ *  Makefile and Android builds got support for using minimp3 instead of
+    libmpg123. For Android, use `Android-minimp3-stbvorbis.mk`, for Makefile use
+    `USE_MINIMP3=1`. You have to download
+    [minimp3](http://keyj.emphy.de/minimp3/) yourself and put its contents into
+    `include/minimp3/`.
 
 ### libopenmpt 0.2-beta16 (2015-11-22)
 
