@@ -261,24 +261,58 @@ std::string GetBuildFeaturesString()
 		#endif
 		#if defined(MPT_CHARSET_WIN32)
 			retval += " +WINAPI";
-		#elif defined(MPT_CHARSET_ICONV)
+		#endif
+		#if defined(MPT_CHARSET_ICONV)
 			retval += " +ICONV";
-		#elif defined(MPT_CHARSET_CODECVTUTF8)
+		#endif
+		#if defined(MPT_CHARSET_CODECVTUTF8)
 			retval += " +CODECVTUTF8";
-		#elif defined(MPT_CHARSET_INTERNAL)
+		#endif
+		#if defined(MPT_CHARSET_INTERNAL)
 			retval += " +INTERNALCHARSETS";
 		#endif
 		#if defined(MPT_WITH_ZLIB)
 			retval += " +ZLIB";
-		#elif defined(MPT_WITH_MINIZ)
+		#endif
+		#if defined(MPT_WITH_MINIZ)
 			retval += " +MINIZ";
-		#else
+		#endif
+		#if !defined(MPT_WITH_ZLIB) && !defined(MPT_WITH_MINIZ)
 			retval += " -INFLATE";
 		#endif
-		#if defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND)
+		#if defined(MPT_WITH_MPG123)
+			retval += " +MPG123";
+		#elif defined(MPT_ENABLE_MPG123_DYNBIND)
+			retval += " +MPG123-DYNBIND";
+		#endif
+		#if defined(MPT_WITH_MINIMP3)
+			retval += " +MINIMP3";
+		#endif
+		#if defined(MPT_WITH_MEDIAFOUNDATION)
+			retval += " +MF";
+		#endif
+		#if !defined(MPT_WITH_MPG123) && !defined(MPT_ENABLE_MPG123_DYNBIND) && !defined(MPT_WITH_MINIMP3) && !defined(MPT_WITH_MEDIAFOUNDATION)
+			retval += " -MP3";
+		#endif
+		#if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)
+			retval += " +VORBIS";
+		#endif
+		#if defined(MPT_WITH_STBVORBIS)
+			retval += " +STBVORBIS";
+		#endif
+		#if !(defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)) && !defined(MPT_WITH_STB_VORBIS)
+			retval += " -VORBIS";
+		#endif
+		#if defined(MPT_ENABLE_MO3_BUILTIN)
+			retval += " +MO3";
+		#endif
+		#if defined(MPT_WITH_UNMO3)
 			retval += " +UNMO3";
-		#else
-			retval += " -UNMO3";
+		#elif defined(MPT_ENABLE_UNMO3_DYNBIND)
+			retval += " +UNMO3-DYNBIND";
+		#endif
+		#if !defined(MPT_WITH_UNMO3) && !defined(MPT_ENABLE_UNMO3_DYNBIND) && !defined(MPT_ENABLE_MO3_BUILTIN)
+			retval += " -MO3";
 		#endif
 	#endif
 	#ifdef MODPLUG_TRACKER
@@ -470,8 +504,8 @@ mpt::ustring GetFullCreditsString()
 		"Copyright \xC2\xA9 1997-2003 Olivier Lapicque\n"
 		"\n"
 		"Contributors:\n"
-		"Johannes Schultz (2008-2015)\n"
-		"J\xC3\xB6rn Heusipp (2012-2015)\n"
+		"Johannes Schultz (2008-2016)\n"
+		"J\xC3\xB6rn Heusipp (2012-2016)\n"
 		"Ahti Lepp\xC3\xA4nen (2005-2011)\n"
 		"Robin Fernandes (2004-2007)\n"
 		"Sergiy Pylypenko (2007)\n"
@@ -518,9 +552,11 @@ mpt::ustring GetFullCreditsString()
 		"Ben \"GreaseMonkey\" Russell for IT sample compression code\n"
 		"https://github.com/iamgreaser/it2everything/\n"
 		"\n"
+#if MPT_COMPILER_MSVC
 		"Alexander Chemeris for msinttypes\n"
 		"https://github.com/chemeris/msinttypes\n"
 		"\n"
+#endif
 #ifdef MPT_WITH_ZLIB
 		"Jean-loup Gailly and Mark Adler for zlib\n"
 		"http://zlib.net/\n"
@@ -531,10 +567,12 @@ mpt::ustring GetFullCreditsString()
 		"https://github.com/richgel999/miniz\n"
 		"\n"
 #endif
-#ifndef NO_ARCHIVE_SUPPORT
+#ifdef MPT_WITH_LHASA
 		"Simon Howard for lhasa\n"
 		"https://fragglet.github.io/lhasa/\n"
 		"\n"
+#endif
+#ifdef MPT_WITH_UNRAR
 		"Alexander L. Roshal for UnRAR\n"
 		"http://rarlab.com/\n"
 		"\n"
@@ -552,6 +590,12 @@ mpt::ustring GetFullCreditsString()
 #if defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND)
 		"The mpg123 project for libmpg123\n"
 		"http://mpg123.de/\n"
+		"\n"
+#endif
+#ifdef MPT_WITH_MINIMP3
+		"Fabrice Bellard, FFMPEG contributors\n"
+		"and Martin J. Fiedler (KeyJ/kakiarts) for minimp3\n"
+		"http://keyj.emphy.de/minimp3/\n"
 		"\n"
 #endif
 #ifdef MPT_WITH_STBVORBIS
@@ -605,7 +649,7 @@ mpt::ustring GetLicenseString()
 	return MPT_UTF8(
 		"The OpenMPT code is licensed under the BSD license." "\n"
 		"" "\n"
-		"Copyright (c) 2004-2015, OpenMPT contributors" "\n"
+		"Copyright (c) 2004-2016, OpenMPT contributors" "\n"
 		"Copyright (c) 1997-2003, Olivier Lapicque" "\n"
 		"All rights reserved." "\n"
 		"" "\n"
