@@ -233,14 +233,18 @@
 #define MPT_FILEREADER_STD_ISTREAM_SEEKABLE
 #define MPT_FILEREADER_CALLBACK_STREAM
 //#define MPT_EXTERNAL_SAMPLES
-#if defined(ENABLE_TESTS)
+#if defined(ENABLE_TESTS) || defined(MPT_BUILD_HACK_ARCHIVE_SUPPORT)
 #define MPT_ENABLE_CHARSET_LOCALE
 #else
 //#define MPT_ENABLE_CHARSET_LOCALE
 #endif
 // Do not use inline asm in library builds. There is just about no codepath which would use it anyway.
 //#define ENABLE_ASM
+#if defined(MPT_BUILD_HACK_ARCHIVE_SUPPORT)
+//#define NO_ARCHIVE_SUPPORT
+#else
 #define NO_ARCHIVE_SUPPORT
+#endif
 #define NO_REVERB
 #define NO_DSP
 #define NO_EQ
