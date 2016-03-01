@@ -18,21 +18,39 @@ goto main
  set MPT_GET_URL="%~2"
  set MPT_GET_FILE="%~3"
  set MPT_GET_SUBDIR="%~4"
+ set MPT_GET_UNPACK_INTERMEDIATE="%~5"
  if not exist "build\externals\%~3" (
   powershell -Command "(New-Object Net.WebClient).DownloadFile('%MPT_GET_URL%', 'build/externals/%~3')" || exit /B 1
+  cd build\externals || exit /B 1
+  if not "%~5" == "-" (
+   "C:\Program Files\7-Zip\7z.exe" x -y "%~3" || exit /B 1
+  )
+  cd ..\.. || exit /B 1
  )
  cd include || exit /B 1
  if exist %MPT_GET_DESTDIR% rmdir /S /Q %MPT_GET_DESTDIR%
  if "%~4" == "." (
   mkdir %MPT_GET_DESTDIR%
   cd %MPT_GET_DESTDIR% || exit /B 1
-  "C:\Program Files\7-Zip\7z.exe" x -y "..\..\build\externals\%~3" || exit /B 1
+  if "%~5" == "-" (
+   "C:\Program Files\7-Zip\7z.exe" x -y "..\..\build\externals\%~3" || exit /B 1
+  )
+  if not "%~5" == "-" (
+   "C:\Program Files\7-Zip\7z.exe" x -y "..\..\build\externals\%~5" || exit /B 1
+  )
   cd .. || exit /B 1
  )
  if not "%~4" == "." (
-  "C:\Program Files\7-Zip\7z.exe" x -y "..\build\externals\%~3" || exit /B 1
+  if "%~5" == "-" (
+   "C:\Program Files\7-Zip\7z.exe" x -y "..\build\externals\%~3" || exit /B 1
+  )
+  if not "%~5" == "-" (
+   "C:\Program Files\7-Zip\7z.exe" x -y "..\build\externals\%~5" || exit /B 1
+  )
   choice /C y /N /T 2 /D y
-  move /Y "%~4" %MPT_GET_DESTDIR% || exit /B 1
+  if not "%~4" == "%~1" (
+   move /Y "%~4" %MPT_GET_DESTDIR% || exit /B 1
+  )
  )
  cd .. || exit /B 1
 exit /B 0
@@ -41,7 +59,7 @@ goto error
 :main
 if not exist "build\externals" mkdir "build\externals"
 
-call :download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha8/premake-5.0.0-alpha8-src.zip" "premake-5.0-alpha8-src.zip" "premake-5.0.0-alpha8" || goto error
+call :download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha8/premake-5.0.0-alpha8-src.zip" "premake-5.0-alpha8-src.zip" "premake-5.0.0-alpha8" "-" || goto error
 
 if exist "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2013.cmd || goto error
@@ -107,10 +125,11 @@ goto error
 
 :premakedone
 
-call :download_and_unpack "winamp"    "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe"              "WA5.55_SDK.exe"                     "."          || goto error
-call :download_and_unpack "xmplay"    "http://us.un4seen.com/files/xmp-sdk.zip"                                    "xmp-sdk.zip"                        "."          || goto error
-call :download_and_unpack "ASIOSDK2"  "https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                     "asiosdk2.3.zip"                     "ASIOSDK2.3" || goto error
-call :download_and_unpack "vstsdk2.4" "https://www.steinberg.net/sdk_downloads/vstsdk365_12_11_2015_build_67.zip"  "vstsdk365_12_11_2015_build_67.zip"  "VST3 SDK"   || goto error
+call :download_and_unpack "winamp"    "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe"              "WA5.55_SDK.exe"                     "."          "-" || goto error
+call :download_and_unpack "xmplay"    "http://us.un4seen.com/files/xmp-sdk.zip"                                    "xmp-sdk.zip"                        "."          "-" || goto error
+call :download_and_unpack "ASIOSDK2"  "https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                     "asiosdk2.3.zip"                     "ASIOSDK2.3" "-" || goto error
+call :download_and_unpack "vstsdk2.4" "https://www.steinberg.net/sdk_downloads/vstsdk365_12_11_2015_build_67.zip"  "vstsdk365_12_11_2015_build_67.zip"  "VST3 SDK"   "-" || goto error
+rem call :download_and_unpack "minimp3"   "http://keyj.emphy.de/files/projects/minimp3.tar.gz"                         "minimp3.tar.gz"                     "minimp3"    "minimp3.tar" || goto error
 
 goto ok
 
