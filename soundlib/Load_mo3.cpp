@@ -28,16 +28,15 @@
 #endif
 
 #if defined(MPT_WITH_VORBIS)
-#include "vorbis/codec.h"
+#include <vorbis/codec.h>
 #endif
 
 #if defined(MPT_WITH_VORBISFILE)
-#include "vorbis/vorbisfile.h"
+#include <vorbis/vorbisfile.h>
 #include "SampleFormatConverters.h"
 #endif
 
 #ifdef MPT_WITH_STBVORBIS
-// Using stb_vorbis for Ogg Vorbis decoding
 #include <stb_vorbis/stb_vorbis.c>
 #include "SampleFormatConverters.h"
 #endif // MPT_WITH_STBVORBIS
@@ -1649,12 +1648,12 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 						ModSample &sample = Samples[smp];
 						sample.AllocateSample();
 						SmpLength offset = 0;
+						int channels = vi->channels;
 						int current_section = 0;
 						long decodedSamples = 0;
 						bool eof = false;
 						while(!eof && offset < sample.nLength && sample.pSample != nullptr)
 						{
-							int channels = vi->channels;
 							float **output = nullptr;
 							long ret = ov_read_float(&vf, &output, 1024, &current_section);
 							if(ret == 0)
