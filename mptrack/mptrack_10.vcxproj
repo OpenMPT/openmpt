@@ -732,6 +732,7 @@
   <ItemGroup>
     <ClCompile Include="..\common\AudioCriticalSection.cpp" />
     <ClCompile Include="..\common\ComponentManager.cpp" />
+    <ClCompile Include="..\common\FileReader.cpp" />
     <ClCompile Include="..\common\Logging.cpp" />
     <ClCompile Include="..\common\misc_util.cpp" />
     <ClCompile Include="..\common\mptCPU.cpp" />
