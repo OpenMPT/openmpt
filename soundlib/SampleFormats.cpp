@@ -2703,12 +2703,13 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 						decodedSamples = ret;
 						if(decodedSamples > 0 && (channels == 1 || channels == 2))
 						{
+							raw_sample_data.resize(raw_sample_data.size() + (channels * decodedSamples));
 							for(int chn = 0; chn < channels; chn++)
 							{
 								CopyChannelToInterleaved<SC::Convert<int16, float> >(&(raw_sample_data[0]) + offset * channels, output[chn], channels, decodedSamples, chn);
 							}
+							offset += decodedSamples;
 						}
-						offset += decodedSamples;
 					}
 				}
 			} else
@@ -2758,8 +2759,8 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 			{
 				CopyChannelToInterleaved<SC::Convert<int16, float> >(&(raw_sample_data[0]) + offset * channels, output[chn], channels, decodedSamples, chn);
 			}
+			offset += decodedSamples;
 		}
-		offset += decodedSamples;
 		error = stb_vorbis_get_error(vorb);
 	}
 	stb_vorbis_close(vorb);
