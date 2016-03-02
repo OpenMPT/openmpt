@@ -607,6 +607,9 @@
     <ClCompile Include="..\soundlib\OggStream.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\FileReader.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
