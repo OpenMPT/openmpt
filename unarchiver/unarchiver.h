@@ -15,12 +15,12 @@
 
 #if (defined(MPT_WITH_ZLIB) && defined(MPT_WITH_MINIZIP)) || defined(MPT_WITH_MINIZ)
 #include "unzip.h"
+#endif
 #ifdef MPT_WITH_LHASA
 #include "unlha.h"
 #endif
 #if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
 #include "ungzip.h"
-#endif
 #endif
 #ifdef MPT_WITH_UNRAR
 #include "unrar.h"
