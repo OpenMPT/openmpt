@@ -208,9 +208,6 @@ CMainFrame::CMainFrame()
 
 	MemsetZero(gcolrefVuMeter);
 
-	// Create Audio Critical Section
-	mpt::CreateGlobalCriticalSectionMutex();
-
 	m_InputHandler = new CInputHandler(this);
 
 }
@@ -270,7 +267,6 @@ void CMainFrame::Initialize()
 CMainFrame::~CMainFrame()
 //-----------------------
 {
-	mpt::DestroyGlobalCriticalSectionMutex();
 
 	delete m_InputHandler;
 
@@ -705,7 +701,7 @@ bool CMainFrame::SoundSourceIsLockedByCurrentThread() const
 //---------------------------------------------------------
 {
 	MPT_TRACE();
-	return CriticalSection::IsLockedByCurrentThread();
+	return theApp.GetGlobalMutexRef().IsLockedByCurrentThread();
 }
 
 
@@ -1367,7 +1363,7 @@ void CMainFrame::SetPlaybackSoundFile(CSoundFile *pSndFile)
 bool CMainFrame::PlayMod(CModDoc *pModDoc)
 //----------------------------------------
 {
-	MPT_ASSERT_ALWAYS(!CriticalSection::IsLockedByCurrentThread());
+	MPT_ASSERT_ALWAYS(!theApp.GetGlobalMutexRef().IsLockedByCurrentThread());
 	if(!pModDoc) return false;
 	CSoundFile &sndFile = pModDoc->GetrSoundFile();
 	if(!IsValidSoundFile(sndFile)) return false;
@@ -1414,7 +1410,7 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc)
 bool CMainFrame::PauseMod(CModDoc *pModDoc)
 //-----------------------------------------
 {
-	MPT_ASSERT_ALWAYS(!CriticalSection::IsLockedByCurrentThread());
+	MPT_ASSERT_ALWAYS(!theApp.GetGlobalMutexRef().IsLockedByCurrentThread());
 	if(pModDoc && (pModDoc != GetModPlaying())) return false;
 	if(!IsPlaying()) return true;
 
@@ -1432,7 +1428,7 @@ bool CMainFrame::PauseMod(CModDoc *pModDoc)
 bool CMainFrame::StopMod(CModDoc *pModDoc)
 //----------------------------------------
 {
-	MPT_ASSERT_ALWAYS(!CriticalSection::IsLockedByCurrentThread());
+	MPT_ASSERT_ALWAYS(!theApp.GetGlobalMutexRef().IsLockedByCurrentThread());
 	if(pModDoc && (pModDoc != GetModPlaying())) return false;
 	if(!IsPlaying()) return true;
 
@@ -1452,7 +1448,7 @@ bool CMainFrame::StopMod(CModDoc *pModDoc)
 bool CMainFrame::StopSoundFile(CSoundFile *pSndFile)
 //--------------------------------------------------
 {
-	MPT_ASSERT_ALWAYS(!CriticalSection::IsLockedByCurrentThread());
+	MPT_ASSERT_ALWAYS(!theApp.GetGlobalMutexRef().IsLockedByCurrentThread());
 	if(!IsValidSoundFile(pSndFile)) return false;
 	if(pSndFile != m_pSndFile) return false;
 	if(!IsPlaying()) return true;
@@ -1471,7 +1467,7 @@ bool CMainFrame::StopSoundFile(CSoundFile *pSndFile)
 bool CMainFrame::PlaySoundFile(CSoundFile *pSndFile)
 //--------------------------------------------------
 {
-	MPT_ASSERT_ALWAYS(!CriticalSection::IsLockedByCurrentThread());
+	MPT_ASSERT_ALWAYS(!theApp.GetGlobalMutexRef().IsLockedByCurrentThread());
 	if(!IsValidSoundFile(pSndFile)) return false;
 
 	PausePlayback();

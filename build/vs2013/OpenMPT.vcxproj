@@ -464,7 +464,6 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\common\AudioCriticalSection.h" />
     <ClInclude Include="..\..\common\BuildSettings.h" />
     <ClInclude Include="..\..\common\CompilerDetect.h" />
     <ClInclude Include="..\..\common\ComponentManager.h" />
@@ -601,6 +600,7 @@
     <ClInclude Include="..\..\sounddsp\DSP.h" />
     <ClInclude Include="..\..\sounddsp\EQ.h" />
     <ClInclude Include="..\..\sounddsp\Reverb.h" />
+    <ClInclude Include="..\..\soundlib\AudioCriticalSection.h" />
     <ClInclude Include="..\..\soundlib\AudioReadTarget.h" />
     <ClInclude Include="..\..\soundlib\ChunkReader.h" />
     <ClInclude Include="..\..\soundlib\Dither.h" />
@@ -665,7 +665,6 @@
     <ClInclude Include="..\..\unarchiver\unzip.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\common\AudioCriticalSection.cpp" />
     <ClCompile Include="..\..\common\ComponentManager.cpp" />
     <ClCompile Include="..\..\common\FileReader.cpp" />
     <ClCompile Include="..\..\common\Logging.cpp" />
@@ -796,6 +795,7 @@
     <ClCompile Include="..\..\sounddsp\DSP.cpp" />
     <ClCompile Include="..\..\sounddsp\EQ.cpp" />
     <ClCompile Include="..\..\sounddsp\Reverb.cpp" />
+    <ClCompile Include="..\..\soundlib\AudioCriticalSection.cpp" />
     <ClCompile Include="..\..\soundlib\Dither.cpp" />
     <ClCompile Include="..\..\soundlib\Dlsbank.cpp" />
     <ClCompile Include="..\..\soundlib\Fastmix.cpp" />

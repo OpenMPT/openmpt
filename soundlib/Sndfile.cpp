@@ -21,7 +21,7 @@
 #include "../common/mptFileIO.h"
 #endif // MPT_EXTERNAL_SAMPLES
 #include "../common/version.h"
-#include "../common/AudioCriticalSection.h"
+#include "../soundlib/AudioCriticalSection.h"
 #include "../common/mptIO.h"
 #include "../common/serialization_utils.h"
 #include "Sndfile.h"

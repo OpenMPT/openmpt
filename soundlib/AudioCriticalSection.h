@@ -11,12 +11,15 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
+#if defined(MODPLUG_TRACKER)
 
-namespace mpt {
-void CreateGlobalCriticalSectionMutex();
-void DestroyGlobalCriticalSectionMutex();
-} // namespace mpt
+namespace Util {
+class recursive_mutex_with_lock_count;
+} // namespace Util
+
+namespace Tracker { // implemented in mptrack/Mptrack.cpp
+Util::recursive_mutex_with_lock_count & GetGlobalMutexRef();
+} // namespace Tracker
 
 // Critical section handling done in (safe) RAII style.
 // Create a CriticalSection object whenever you need exclusive access to CSoundFile.
@@ -25,6 +28,8 @@ void DestroyGlobalCriticalSectionMutex();
 // Enter() and Leave() can also be called manually if needed.
 class CriticalSection
 {
+private:
+	Util::recursive_mutex_with_lock_count & m_refGlobalMutex;
 protected:
 	bool inSection;
 public:
@@ -39,8 +44,6 @@ public:
 	void Enter();
 	void Leave();
 	~CriticalSection();
-public:
-	static bool IsLockedByCurrentThread(); // DEBUGGING only
 };
 
 #else // !MODPLUG_TRACKER
@@ -48,7 +51,14 @@ public:
 class CriticalSection
 {
 public:
+	enum InitialState
+	{
+		InitialLocked = 0,
+		InitialUnlocked = 1
+	};
+public:
 	CriticalSection() {}
+	explicit CriticalSection(InitialState state) { MPT_UNREFERENCED_PARAMETER(state); }
 	void Enter() {}
 	void Leave() {}
 	~CriticalSection() {}

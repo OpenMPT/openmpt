@@ -714,6 +714,15 @@ void CTrackApp::RemoveMruItem(const mpt::PathString &path)
 // CTrackApp initialization
 
 
+namespace Tracker
+{
+Util::recursive_mutex_with_lock_count & GetGlobalMutexRef()
+{
+	return theApp.GetGlobalMutexRef();
+}
+} // namespace Tracker
+
+
 //============================
 class ComponentManagerSettings
 //============================

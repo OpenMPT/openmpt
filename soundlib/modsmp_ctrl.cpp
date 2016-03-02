@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 #include "modsmp_ctrl.h"
-#include "../common/AudioCriticalSection.h"
+#include "../soundlib/AudioCriticalSection.h"
 #include "Sndfile.h"
 
 #define new DEBUG_NEW

@@ -250,9 +250,6 @@
     <ClCompile Include="tuningRatioMapWnd.cpp">
       <Filter>Source Files\mptrack\Tuning</Filter>
     </ClCompile>
-    <ClCompile Include="..\common\AudioCriticalSection.cpp">
-      <Filter>Source Files\common</Filter>
-    </ClCompile>
     <ClCompile Include="..\common\serialization_utils.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
@@ -610,6 +607,9 @@
     <ClCompile Include="..\common\FileReader.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\AudioCriticalSection.cpp">
+      <Filter>Source Files\soundlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -779,9 +779,6 @@
     </ClInclude>
     <ClInclude Include="..\soundlib\Tables.h">
       <Filter>Header Files\soundlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\AudioCriticalSection.h">
-      <Filter>Header Files\common</Filter>
     </ClInclude>
     <ClInclude Include="..\common\version.h">
       <Filter>Header Files\common</Filter>
@@ -1201,6 +1198,9 @@
       <Filter>Header Files\common</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\OggStream.h">
+      <Filter>Header Files\soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\AudioCriticalSection.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
   </ItemGroup>

@@ -18,6 +18,7 @@
 #include "../soundlib/MIDIMacros.h"
 #include "../soundlib/modcommand.h"
 #include "../common/ComponentManager.h"
+#include "../common/mutex.h"
 #include <vector>
 
 OPENMPT_NAMESPACE_BEGIN
@@ -169,6 +170,8 @@ public:
 
 protected:
 
+	Util::recursive_mutex_with_lock_count m_GlobalMutex;
+
 	DWORD m_GuiThreadId;
 
 	IniFileSettingsBackend *m_pSettingsIniFile;
@@ -250,6 +253,7 @@ public:
 	std::vector<CModDoc *> GetOpenDocuments() const;
 
 public:
+	inline Util::recursive_mutex_with_lock_count & GetGlobalMutexRef() { return m_GlobalMutex; }
 	bool InGuiThread() const { return GetCurrentThreadId() == m_GuiThreadId; }
 	CModDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }

@@ -36,6 +36,7 @@ public:
 	mutex() { InitializeCriticalSection(&impl); }
 	~mutex() { DeleteCriticalSection(&impl); }
 	void lock() { EnterCriticalSection(&impl); }
+	bool try_lock() { return TryEnterCriticalSection(&impl) ? true : false; }
 	void unlock() { LeaveCriticalSection(&impl); }
 };
 
@@ -47,6 +48,7 @@ public:
 	recursive_mutex() { InitializeCriticalSection(&impl); }
 	~recursive_mutex() { DeleteCriticalSection(&impl); }
 	void lock() { EnterCriticalSection(&impl); }
+	bool try_lock() { return TryEnterCriticalSection(&impl) ? true : false; }
 	void unlock() { LeaveCriticalSection(&impl); }
 };
 
@@ -66,6 +68,7 @@ public:
 	}
 	~mutex() { pthread_mutex_destroy(&hLock); }
 	void lock() { pthread_mutex_lock(&hLock); }
+	bool try_lock() { return (pthread_mutex_trylock(&hLock) == 0); }
 	void unlock() { pthread_mutex_unlock(&hLock); }
 };
 
@@ -83,10 +86,48 @@ public:
 	}
 	~recursive_mutex() { pthread_mutex_destroy(&hLock); }
 	void lock() { pthread_mutex_lock(&hLock); }
+	bool try_lock() { return (pthread_mutex_trylock(&hLock) == 0); }
 	void unlock() { pthread_mutex_unlock(&hLock); }
 };
 
 #endif // _WIN32
+
+class recursive_mutex_with_lock_count {
+private:
+	Util::recursive_mutex mutex;
+	long lockCount;
+public:
+	recursive_mutex_with_lock_count()
+		: lockCount(0)
+	{
+		return;
+	}
+	~recursive_mutex_with_lock_count()
+	{
+		return;
+	}
+	void lock()
+	{
+		mutex.lock();
+		lockCount++;
+	}
+	void unlock()
+	{
+		lockCount--;
+		mutex.unlock();
+	}
+public:
+	bool IsLockedByCurrentThread() // DEBUGGING only
+	{
+		bool islocked = false;
+		if(mutex.try_lock())
+		{
+			islocked = (lockCount > 0);
+			mutex.unlock();
+		}
+		return islocked;
+	}
+};
 
 // compatible with c++11 std::lock_guard, can eventually be replaced without touching any usage site
 template< typename mutex_type >

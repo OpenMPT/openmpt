@@ -186,7 +186,6 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\common\AudioCriticalSection.h" />
     <ClInclude Include="..\..\common\BuildSettings.h" />
     <ClInclude Include="..\..\common\CompilerDetect.h" />
     <ClInclude Include="..\..\common\ComponentManager.h" />
@@ -229,6 +228,7 @@
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_fd.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_version.h" />
+    <ClInclude Include="..\..\soundlib\AudioCriticalSection.h" />
     <ClInclude Include="..\..\soundlib\AudioReadTarget.h" />
     <ClInclude Include="..\..\soundlib\ChunkReader.h" />
     <ClInclude Include="..\..\soundlib\Dither.h" />
@@ -275,7 +275,6 @@
     <ClInclude Include="..\..\soundlib\tuningcollection.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\common\AudioCriticalSection.cpp" />
     <ClCompile Include="..\..\common\ComponentManager.cpp" />
     <ClCompile Include="..\..\common\FileReader.cpp" />
     <ClCompile Include="..\..\common\Logging.cpp" />
@@ -300,6 +299,7 @@
     <ClCompile Include="..\..\libopenmpt\libopenmpt_cxx.cpp" />
     <ClCompile Include="..\..\libopenmpt\libopenmpt_ext.cpp" />
     <ClCompile Include="..\..\libopenmpt\libopenmpt_impl.cpp" />
+    <ClCompile Include="..\..\soundlib\AudioCriticalSection.cpp" />
     <ClCompile Include="..\..\soundlib\Dither.cpp" />
     <ClCompile Include="..\..\soundlib\Dlsbank.cpp" />
     <ClCompile Include="..\..\soundlib\Fastmix.cpp" />
