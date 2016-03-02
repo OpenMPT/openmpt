@@ -40,6 +40,15 @@
 #include <flac/include/FLAC/metadata.h>
 #include "SampleFormatConverters.h"
 #endif // MPT_WITH_FLAC
+#if defined(MPT_WITH_VORBIS)
+#include <vorbis/codec.h>
+#endif
+#if defined(MPT_WITH_VORBISFILE)
+#include <vorbis/vorbisfile.h>
+#endif
+#ifdef MPT_WITH_STBVORBIS
+#include <stb_vorbis/stb_vorbis.c>
+#endif // MPT_WITH_STBVORBIS
 #include "../common/ComponentManager.h"
 #if defined(MPT_WITH_MPG123)
 #include "mpg123.h"
@@ -81,6 +90,7 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool 
 		&& !ReadIFFSample(nSample, file)
 		&& !ReadS3ISample(nSample, file)
 		&& !ReadFLACSample(nSample, file)
+		&& !ReadVorbisSample(nSample, file)
 		&& !ReadMP3Sample(nSample, file)
 		&& !ReadMediaFoundationSample(nSample, file)
 		)
@@ -2559,6 +2569,237 @@ fail:
 #endif // MPT_WITH_FLAC
 }
 #endif // MODPLUG_NO_FILESAVE
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vorbis
+
+#if defined(MPT_WITH_VORBISFILE)
+
+static size_t VorbisfileFilereaderRead(void *ptr, size_t size, size_t nmemb, void *datasource)
+{
+	FileReader &file = *reinterpret_cast<FileReader*>(datasource);
+	return file.ReadRaw(ptr, size * nmemb) / size;
+}
+
+static int VorbisfileFilereaderSeek(void *datasource, ogg_int64_t offset, int whence)
+{
+	FileReader &file = *reinterpret_cast<FileReader*>(datasource);
+	switch(whence)
+	{
+	case SEEK_SET:
+		{
+			if(!Util::TypeCanHoldValue<FileReader::off_t>(offset))
+			{
+				return -1;
+			}
+			return file.Seek(mpt::saturate_cast<FileReader::off_t>(offset)) ? 0 : -1;
+		}
+		break;
+	case SEEK_CUR:
+		{
+			if(offset < 0)
+			{
+				if(offset == std::numeric_limits<ogg_int64_t>::min())
+				{
+					return -1;
+				}
+				if(!Util::TypeCanHoldValue<FileReader::off_t>(0-offset))
+				{
+					return -1;
+				}
+				return file.SkipBack(mpt::saturate_cast<FileReader::off_t>(0 - offset)) ? 0 : -1;
+			} else
+			{
+				if(!Util::TypeCanHoldValue<FileReader::off_t>(offset))
+				{
+					return -1;
+				}
+				return file.Skip(mpt::saturate_cast<FileReader::off_t>(offset)) ? 0 : -1;
+			}
+		}
+		break;
+	case SEEK_END:
+		{
+			if(!Util::TypeCanHoldValue<FileReader::off_t>(offset))
+			{
+				return -1;
+			}
+			if(!Util::TypeCanHoldValue<FileReader::off_t>(file.GetLength() + offset))
+			{
+				return -1;
+			}
+			return file.Seek(mpt::saturate_cast<FileReader::off_t>(file.GetLength() + offset)) ? 0 : -1;
+		}
+		break;
+	default:
+		return -1;
+	}
+}
+
+static long VorbisfileFilereaderTell(void *datasource)
+{
+	FileReader &file = *reinterpret_cast<FileReader*>(datasource);
+	return file.GetPosition();
+}
+
+#endif // MPT_WITH_VORBISFILE
+
+bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
+//---------------------------------------------------------------------
+{
+
+#if defined(MPT_WITH_VORBISFILE) || defined(MPT_WITH_STBVORBIS)
+
+	file.Rewind();
+
+	int rate = 0;
+	int channels = 0;
+	std::vector<int16> raw_sample_data;
+
+#endif // VORBIS
+
+#if defined(MPT_WITH_VORBISFILE)
+
+	bool unsupportedSample = false;
+
+	MPT_UNUSED_VARIABLE(OV_CALLBACKS_DEFAULT);
+	MPT_UNUSED_VARIABLE(OV_CALLBACKS_NOCLOSE);
+	MPT_UNUSED_VARIABLE(OV_CALLBACKS_STREAMONLY);
+	MPT_UNUSED_VARIABLE(OV_CALLBACKS_STREAMONLY_NOCLOSE);
+	ov_callbacks callbacks = {
+		&VorbisfileFilereaderRead,
+		&VorbisfileFilereaderSeek,
+		NULL,
+		&VorbisfileFilereaderTell
+	};
+	OggVorbis_File vf;
+	MemsetZero(vf);
+	if(ov_open_callbacks(&file, &vf, NULL, 0, callbacks) == 0)
+	{
+		if(ov_streams(&vf) == 1)
+		{ // we do not support chained vorbis samples
+			vorbis_info *vi = ov_info(&vf, -1);
+			if(vi && vi->rate > 0 && vi->channels > 0)
+			{
+				rate = vi->rate;
+				channels = vi->channels;
+				std::size_t offset = 0;
+				int current_section = 0;
+				long decodedSamples = 0;
+				bool eof = false;
+				while(!eof)
+				{
+					float **output = nullptr;
+					long ret = ov_read_float(&vf, &output, 1024, &current_section);
+					if(ret == 0)
+					{
+						eof = true;
+					} else if(ret < 0)
+					{
+						// stream error, just try to continue
+					} else
+					{
+						decodedSamples = ret;
+						if(decodedSamples > 0 && (channels == 1 || channels == 2))
+						{
+							for(int chn = 0; chn < channels; chn++)
+							{
+								CopyChannelToInterleaved<SC::Convert<int16, float> >(&(raw_sample_data[0]) + offset * channels, output[chn], channels, decodedSamples, chn);
+							}
+						}
+						offset += decodedSamples;
+					}
+				}
+			} else
+			{
+				unsupportedSample = true;
+			}
+		} else
+		{
+			unsupportedSample = true;
+		}
+		ov_clear(&vf);
+	} else
+	{
+		unsupportedSample = true;
+	}
+
+	if(unsupportedSample)
+	{
+		return false;
+	}
+
+#elif defined(MPT_WITH_STBVORBIS)
+
+	std::size_t offset = 0;
+	int consumed = 0;
+	int error = 0;
+	stb_vorbis *vorb = stb_vorbis_open_pushdata(reinterpret_cast<const uint8 *>(file.GetRawData()), mpt::saturate_cast<int>(file.BytesLeft()), &consumed, &error, nullptr);
+	if(!vorb)
+	{
+		return false;
+	}
+	rate = stb_vorbis_get_info(vorb).sample_rate;
+	channels = stb_vorbis_get_info(vorb).channels;
+	file.Skip(consumed);
+	while((error == VORBIS__no_error || (error == VORBIS_need_more_data && file.CanRead(1))))
+	{
+		int frame_channels = 0;
+		int decodedSamples = 0;
+		float **output = nullptr;
+		consumed = stb_vorbis_decode_frame_pushdata(vorb, reinterpret_cast<const uint8 *>(file.GetRawData()), mpt::saturate_cast<int>(file.BytesLeft()), &frame_channels, &output, &decodedSamples);
+		file.Skip(consumed);
+		if(frame_channels != channels) break;
+		if(decodedSamples > 0 && (channels == 1 || channels == 2))
+		{
+			raw_sample_data.resize(raw_sample_data.size() + (channels * decodedSamples));
+			for(int chn = 0; chn < channels; chn++)
+			{
+				CopyChannelToInterleaved<SC::Convert<int16, float> >(&(raw_sample_data[0]) + offset * channels, output[chn], channels, decodedSamples, chn);
+			}
+		}
+		offset += decodedSamples;
+		error = stb_vorbis_get_error(vorb);
+	}
+	stb_vorbis_close(vorb);
+
+#endif // VORBIS
+
+#if defined(MPT_WITH_VORBISFILE) || defined(MPT_WITH_STBVORBIS)
+	
+	if(rate <= 0 || channels <= 0 || raw_sample_data.empty())
+	{
+		return false;
+	}
+
+	DestroySampleThreadsafe(sample);
+	strcpy(m_szNames[sample], "");
+	Samples[sample].Initialize();
+	Samples[sample].nC5Speed = rate;
+	Samples[sample].nLength = raw_sample_data.size() / channels;
+
+	Samples[sample].uFlags.set(CHN_16BIT);
+	Samples[sample].uFlags.set(CHN_STEREO, channels == 2);
+	Samples[sample].AllocateSample();
+
+	std::copy(raw_sample_data.begin(), raw_sample_data.end(), Samples[sample].pSample16);
+
+	Samples[sample].Convert(MOD_TYPE_IT, GetType());
+	Samples[sample].PrecomputeLoops(*this, false);
+
+	return Samples[sample].pSample != nullptr;
+
+#else // !VORBIS
+
+	MPT_UNREFERENCED_PARAMETER(sample);
+	MPT_UNREFERENCED_PARAMETER(file);
+
+	return false;
+
+#endif // VORBIS
+
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

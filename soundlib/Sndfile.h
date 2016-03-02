@@ -880,6 +880,7 @@ public:
 	bool ReadITISample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadIFFSample(SAMPLEINDEX nInstr, FileReader &file);
 	bool ReadFLACSample(SAMPLEINDEX sample, FileReader &file);
+	bool ReadVorbisSample(SAMPLEINDEX sample, FileReader &file);
 	bool ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Decode = false);
 	bool ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file, bool mo3Decode = false);
 #ifdef MODPLUG_TRACKER
