@@ -30,6 +30,8 @@
 #include "../common/version.h"
 #include "Loaders.h"
 #include "ChunkReader.h"
+#include "SampleFormatConverters.h"
+#include "../common/ComponentManager.h"
 #ifdef MPT_WITH_OGG
 #include <ogg/ogg.h>
 #endif // MPT_WITH_OGG
@@ -38,7 +40,6 @@
 #include <flac/include/FLAC/stream_decoder.h>
 #include <flac/include/FLAC/stream_encoder.h>
 #include <flac/include/FLAC/metadata.h>
-#include "SampleFormatConverters.h"
 #endif // MPT_WITH_FLAC
 #if defined(MPT_WITH_VORBIS)
 #include <vorbis/codec.h>
@@ -49,9 +50,8 @@
 #ifdef MPT_WITH_STBVORBIS
 #include <stb_vorbis/stb_vorbis.c>
 #endif // MPT_WITH_STBVORBIS
-#include "../common/ComponentManager.h"
 #if defined(MPT_WITH_MPG123)
-#include "mpg123.h"
+#include <mpg123.h>
 #endif // MPT_WITH_MPG123
 #if defined(MPT_WITH_MINIMP3)
 extern "C" {
