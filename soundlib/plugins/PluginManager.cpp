@@ -20,7 +20,7 @@
 #include "../../mptrack/Mptrack.h"
 #include "../../mptrack/TrackerSettings.h"
 #include "../../mptrack/AbstractVstEditor.h"
-#include "../../common/AudioCriticalSection.h"
+#include "../../soundlib/AudioCriticalSection.h"
 #include "../../common/StringFixer.h"
 #include "../Sndfile.h"
 #include "../../pluginBridge/BridgeWrapper.h"

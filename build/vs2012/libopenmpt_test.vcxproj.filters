@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\common\AudioCriticalSection.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\BuildSettings.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -143,6 +140,9 @@
     </ClInclude>
     <ClInclude Include="..\..\libopenmpt\libopenmpt_version.h">
       <Filter>libopenmpt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\AudioCriticalSection.h">
+      <Filter>soundlib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\AudioReadTarget.h">
       <Filter>soundlib</Filter>
@@ -290,9 +290,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\common\AudioCriticalSection.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\common\ComponentManager.cpp">
       <Filter>common</Filter>
     </ClCompile>
@@ -367,6 +364,9 @@
     </ClCompile>
     <ClCompile Include="..\..\libopenmpt\libopenmpt_test.cpp">
       <Filter>libopenmpt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\AudioCriticalSection.cpp">
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Dither.cpp">
       <Filter>soundlib</Filter>

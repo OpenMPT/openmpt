@@ -761,14 +761,6 @@
 			Name="common"
 			>
 			<File
-				RelativePath="..\..\common\AudioCriticalSection.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\common\AudioCriticalSection.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\common\BuildSettings.h"
 				>
 			</File>
@@ -1960,6 +1952,14 @@
 		<Filter
 			Name="soundlib"
 			>
+			<File
+				RelativePath="..\..\soundlib\AudioCriticalSection.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\AudioCriticalSection.h"
+				>
+			</File>
 			<File
 				RelativePath="..\..\soundlib\AudioReadTarget.h"
 				>

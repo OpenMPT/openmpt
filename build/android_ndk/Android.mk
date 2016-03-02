@@ -17,7 +17,6 @@ LOCAL_LDLIBS := -lz
 
 LOCAL_SRC_FILES := \
 	common/stdafx.cpp \
-	common/AudioCriticalSection.cpp \
 	common/ComponentManager.cpp \
 	common/FileReader.cpp \
 	common/Logging.cpp \
@@ -41,6 +40,7 @@ LOCAL_SRC_FILES := \
 	libopenmpt/libopenmpt_cxx.cpp \
 	libopenmpt/libopenmpt_impl.cpp \
 	libopenmpt/libopenmpt_ext.cpp \
+	soundlib/AudioCriticalSection.cpp \
 	soundlib/Dither.cpp \
 	soundlib/Dlsbank.cpp \
 	soundlib/Fastmix.cpp \

@@ -17,7 +17,7 @@
 #include "../mptrack/TrackerSettings.h"
 #include "Dlsbank.h"
 #endif //MODPLUG_TRACKER
-#include "../common/AudioCriticalSection.h"
+#include "../soundlib/AudioCriticalSection.h"
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
 #endif
