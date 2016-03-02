@@ -1212,6 +1212,9 @@
     <ProjectReference Include="..\build\vs2010-ext\soundtouch.vcxproj">
       <Project>{f5f8f6de-84cf-4e9d-91ea-d9b5e2aa36cd}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\build\vs2010-ext\stb_vorbis.vcxproj">
+      <Project>{e0d81662-85ef-4172-b0d8-f8dcff712607}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\build\vs2010-ext\UnRAR.vcxproj">
       <Project>{95cc809b-03fc-4edb-bb20-fd07a698c05f}</Project>
     </ProjectReference>
