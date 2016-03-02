@@ -68,6 +68,7 @@
 #
 #  USE_MINIMP3=1    Use minimp3. You have to copy minimp3 into
 #                   include/minimp3/ yourself.
+#                   Beware that minimp3 is LGPL 2.1 licensed.
 #
 # Build flags for openmpt123 (provide on each `make` invocation)
 #
