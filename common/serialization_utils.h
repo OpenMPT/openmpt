@@ -239,14 +239,14 @@ public:
 		return m_Status;
 	}
 
-	void SetFlag(Rwf flag, bool val) {m_Flags.set(flag, val);}
-	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
-
 protected:
 
 	// When writing, returns the number of entries written.
 	// When reading, returns the number of entries read not including unrecognized entries.
 	NumType GetCounter() const {return m_nCounter;}
+
+	void SetFlag(Rwf flag, bool val) {m_Flags.set(flag, val);}
+	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
 
 protected:
 
@@ -322,10 +322,10 @@ public:
 	template <class T, class FuncObj>
 	ReadRv ReadIterItem(const ReadIterator& iter, T& obj, FuncObj func);
 
+private:
+
 	// Reads map to cache.
 	void CacheMap();
-
-private:
 
 	// Searches for entry with given ID. If found, returns pointer to corresponding entry, else
 	// returns nullptr.
@@ -342,6 +342,14 @@ private:
 	void ResetReadstatus();
 
 private:
+
+	//  mapData is a cache that facilitates faster access to the stored data
+	// without having to reparse on every access.
+	//  Iterator invalidation in CacheMap() is not a problem because every code
+	// path that ever returns an iterator into mapData does CacheMap exactly once
+	// beforehand. Following calls use this already cached map. As the data is
+	// immutable when reading, there is no need to ever invalidate the cache and
+	// redo CacheMap().
 
 	std::istream* m_pIstrm;					// Read: Pointer to read stream.
 
@@ -460,7 +468,9 @@ inline SsbRead::IdMatchStatus SsbRead::CompareId(const ReadIterator& iter, const
 inline SsbRead::ReadIterator SsbRead::GetReadBegin()
 //--------------------------------------------------
 {
-	MPT_ASSERT(GetFlag(RwfRMapHasId) && GetFlag(RwfRMapCached) && (GetFlag(RwfRMapHasStartpos) || GetFlag(RwfRMapHasSize) || m_nFixedEntrySize > 0));
+	MPT_ASSERT(GetFlag(RwfRMapHasId) && (GetFlag(RwfRMapHasStartpos) || GetFlag(RwfRMapHasSize) || m_nFixedEntrySize > 0));
+	if (GetFlag(RwfRMapCached) == false)
+		CacheMap();
 	return mapData.begin();
 }
 
@@ -468,6 +478,8 @@ inline SsbRead::ReadIterator SsbRead::GetReadBegin()
 inline SsbRead::ReadIterator SsbRead::GetReadEnd()
 //------------------------------------------------
 {
+	if (GetFlag(RwfRMapCached) == false)
+		CacheMap();
 	return mapData.end();
 }
 

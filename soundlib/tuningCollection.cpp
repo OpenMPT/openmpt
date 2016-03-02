@@ -172,11 +172,8 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize(std:
 		srlztn::SsbRead ssb(iStrm);
 		ssb.BeginRead("TC", s_SerializationVersion);
 
-		if (ssb.GetFlag(srlztn::RwfRMapCached) == false)
-			ssb.CacheMap();
 		const srlztn::SsbRead::ReadIterator iterBeg = ssb.GetReadBegin();
 		const srlztn::SsbRead::ReadIterator iterEnd = ssb.GetReadEnd();
-
 		for(srlztn::SsbRead::ReadIterator iter = iterBeg; iter != iterEnd; iter++)
 		{
 			if (ssb.CompareId(iter, "0") == srlztn::SsbRead::IdMatch)
