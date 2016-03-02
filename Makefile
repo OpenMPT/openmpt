@@ -336,6 +336,10 @@ endif
 
 endif
 
+ifeq ($(HACK_ARCHIVE_SUPPORT),1)
+NO_ZLIB:=1
+endif
+
 ifeq ($(NO_LTDL),1)
 ifeq ($(NO_DL),1)
 else
