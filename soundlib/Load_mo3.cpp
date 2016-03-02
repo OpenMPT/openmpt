@@ -1553,7 +1553,15 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				// We do not handle multiple muxed logical streams as they do not exist in practice in mo3.
 				// We assume sequence numbers are consecutive at the end of the headers.
 				// Corrupted pages get dropped as required by Ogg spec. We cannot do any further sane parsing on them anyway.
+				// We do not match up multiple muxed stream properly as this wold need parsing of actual packet data to determine or guess the codec.
+				// Ogg Vorbis files may contain at least an additional Ogg Skeleton stream. It is not clear whether these actually exist in MO3.
 				// We do not validate packet structure or logical bitstream structure (i.e. sequence numbers and granule positions).
+
+				// TODO: At least handle Skeleton streams here, as they violate our stream ordering assumptions here.
+
+#if 0
+				// This block may still turn out to be useful as it does a more thourough validation of the stream than the optimized version below.
+
 				// We copy the whole data into a single consecutive buffer in order to keep things simple when interfacing libvorbisfile.
 				// We could in theory only adjust the header and pass 2 chunks to libvorbisfile.
 				// Another option would be to demux both chunks on our own (or using libogg) and pass the raw packet data to libvorbis directly.
@@ -1603,6 +1611,81 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 				std::string mergedStreamData = mergedStream.str();
 				mergedData.insert(mergedData.end(), mergedStreamData.begin(), mergedStreamData.end());
+
+#else
+
+				// We assume same ordering of streams in both header and data if
+				// multiple streams are present.
+
+				mpt::ostringstream mergedStream(std::ios::binary);
+				mergedStream.imbue(std::locale::classic());
+
+				sampleChunks[sharedOggHeader - 1].chunk.Rewind();
+				FileReader sharedChunk = sampleChunks[sharedOggHeader - 1].chunk.ReadChunk(sampleChunk.headerSize);
+				sharedChunk.Rewind();
+
+				std::vector<uint32> dataStreamSerials;
+				std::vector<uint32> headStreamSerials;
+				Ogg::PageInfo oggPageInfo;
+				std::vector<uint8> oggPageData;
+
+				// Gather bitstream serial numbers form sample data chunk
+				dataStreamSerials.clear();
+				while(Ogg::ReadPageAndSkipJunk(sampleChunk.chunk, oggPageInfo, oggPageData))
+				{
+					std::vector<uint32>::iterator it = std::find(dataStreamSerials.begin(), dataStreamSerials.end(), oggPageInfo.header.bitstream_serial_number);
+					if(it == dataStreamSerials.end())
+					{
+						dataStreamSerials.push_back(oggPageInfo.header.bitstream_serial_number);
+					}
+				}
+
+				// Apply the data bitstream serial numbers to the header
+				headStreamSerials.clear();
+				while(Ogg::ReadPageAndSkipJunk(sharedChunk, oggPageInfo, oggPageData))
+				{
+					std::vector<uint32>::iterator it = std::find(headStreamSerials.begin(), headStreamSerials.end(), oggPageInfo.header.bitstream_serial_number);
+					if(it == headStreamSerials.end())
+					{
+						headStreamSerials.push_back(oggPageInfo.header.bitstream_serial_number);
+						it = headStreamSerials.begin() + (headStreamSerials.size() - 1);
+					}
+					uint32 newSerial = 0;
+					if(dataStreamSerials.size() >= static_cast<std::size_t>(it - headStreamSerials.begin()))
+					{
+						// Found corresponding stream in data chunk.
+						newSerial = dataStreamSerials[it - headStreamSerials.begin()];
+					} else
+					{
+						// No corresponding stream in data chunk. Find a free serialno.
+						std::size_t extraIndex = (it - headStreamSerials.begin()) - dataStreamSerials.size();
+						for(newSerial = 1; newSerial < 0xffffffffu; ++newSerial)
+						{
+							std::vector<uint32>::iterator it = std::find(dataStreamSerials.begin(), dataStreamSerials.end(), newSerial);
+							if(it == dataStreamSerials.end())
+							{
+								extraIndex -= 1;
+							}
+							if(extraIndex == 0)
+							{
+								break;
+							}
+						}
+					}
+					oggPageInfo.header.bitstream_serial_number = newSerial;
+					Ogg::UpdatePageCRC(oggPageInfo, oggPageData);
+					Ogg::WritePage(mergedStream, oggPageInfo, oggPageData);
+				}
+
+				outHeaderSize = mpt::saturate_cast<int>(mpt::IO::TellWrite(mergedStream));
+
+				std::string mergedStreamData = mergedStream.str();
+				mergedData.insert(mergedData.end(), mergedStreamData.begin(), mergedStreamData.end());
+
+				sampleChunk.chunk.Rewind();
+				mergedData.insert(mergedData.end(), reinterpret_cast<const uint8*>(sampleChunk.chunk.GetRawData()), reinterpret_cast<const uint8*>(sampleChunk.chunk.GetRawData()) + sampleChunk.chunk.GetLength());
+
+#endif
 
 			}
 			FileReader mergedDataChunk(&(mergedData[0]), mergedData.size());
