@@ -40,7 +40,9 @@ Name: "associate_exotic\mtm"; Description: "MultiTracker Modules (MTM)";
 Name: "associate_exotic\okt"; Description: "Oktalyzer (OKT)";
 Name: "associate_exotic\plm"; Description: "Disorder Tracker 2 (PLM)";
 Name: "associate_exotic\psm"; Description: "Epic Megagames MASI (PSM)";
+Name: "associate_exotic\pt36"; Description: "ProTracker 3.6 (PT36)";
 Name: "associate_exotic\ptm"; Description: "PolyTracker (PTM)";
+Name: "associate_exotic\st26"; Description: "SoundTracker 2.6 (ST26)";
 Name: "associate_exotic\stm"; Description: "Scream Tracker 2 (STM)";
 Name: "associate_exotic\ult"; Description: "UltraTracker (ULT)";
 Name: "associate_exotic\umx"; Description: "Unreal Music (UMX)";
@@ -83,7 +85,9 @@ Root: HKCR; Subkey: ".mtm"; ValueType: string; ValueName: ""; ValueData: "OpenMP
 Root: HKCR; Subkey: ".okt"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\okt
 Root: HKCR; Subkey: ".plm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\plm
 Root: HKCR; Subkey: ".psm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\psm
+Root: HKCR; Subkey: ".pt36"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\pt36
 Root: HKCR; Subkey: ".ptm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\ptm
+Root: HKCR; Subkey: ".st26"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\st26
 Root: HKCR; Subkey: ".stm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\stm
 Root: HKCR; Subkey: ".ult"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\ult
 Root: HKCR; Subkey: ".umx"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\umx
