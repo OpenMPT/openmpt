@@ -2743,6 +2743,10 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 	}
 	rate = stb_vorbis_get_info(vorb).sample_rate;
 	channels = stb_vorbis_get_info(vorb).channels;
+	if(rate <= 0 || channels <= 0)
+	{
+		return false;
+	}
 	file.Skip(consumed);
 	while((error == VORBIS__no_error || (error == VORBIS_need_more_data && file.CanRead(1))))
 	{
@@ -2751,11 +2755,11 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 		float **output = nullptr;
 		consumed = stb_vorbis_decode_frame_pushdata(vorb, reinterpret_cast<const uint8 *>(file.GetRawData()), mpt::saturate_cast<int>(file.BytesLeft()), &frame_channels, &output, &decodedSamples);
 		file.Skip(consumed);
-		if(frame_channels != channels) break;
-		if(decodedSamples > 0 && (channels == 1 || channels == 2))
+		LimitMax(frame_channels, channels);
+		if(decodedSamples > 0 && (frame_channels == 1 || frame_channels == 2))
 		{
 			raw_sample_data.resize(raw_sample_data.size() + (channels * decodedSamples));
-			for(int chn = 0; chn < channels; chn++)
+			for(int chn = 0; chn < frame_channels; chn++)
 			{
 				CopyChannelToInterleaved<SC::Convert<int16, float> >(&(raw_sample_data[0]) + offset * channels, output[chn], channels, decodedSamples, chn);
 			}
