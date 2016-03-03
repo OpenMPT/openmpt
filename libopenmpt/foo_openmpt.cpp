@@ -295,6 +295,7 @@ DECLARE_FILE_TYPE("OpenMPT compatible module files",
 	"*.m15" ";"
 	"*.stk" ";"
 	"*.st26" ";"
+	"*.pt36" ";"
 	"*.ice" ";"
 	"*.wow" ";"
 	"*.ult" ";"

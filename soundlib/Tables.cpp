@@ -59,6 +59,7 @@ static const ModFormatInfo modFormatInfo[] =
 #endif
 	{ MOD_TYPE_MPT,		"OpenMPT",					"mptm" },
 	{ MOD_TYPE_STM,		"ScreamTracker 2",			"stm" },
+	{ MOD_TYPE_MOD,		"ProTracker",				"pt36" },
 	{ MOD_TYPE_MOD,		"NoiseTracker",				"nst" },
 	{ MOD_TYPE_MOD,		"Soundtracker",				"m15" },
 	{ MOD_TYPE_MOD,		"Soundtracker",				"stk" },

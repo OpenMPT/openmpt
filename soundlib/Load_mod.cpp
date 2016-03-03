@@ -334,6 +334,29 @@ struct PACKED MODSampleHeader
 
 STATIC_ASSERT(sizeof(MODSampleHeader) == 30);
 
+struct PACKED PT36IffChunk
+{
+	// IFF chunk names
+	enum ChunkIdentifiers
+	{
+		idVERS	= MAGIC4BE('V','E','R','S'),
+		idINFO	= MAGIC4BE('I','N','F','O'),
+		idCMNT	= MAGIC4BE('C','M','N','T'),
+		idPTDT	= MAGIC4BE('P','T','D','T'),
+	};
+
+	uint32 signature;	// IFF chunk name
+	uint32 chunksize;	// chunk size without header
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesBE(signature);
+		SwapBytesBE(chunksize);
+	}
+};
+
+STATIC_ASSERT(sizeof(PT36IffChunk) == 8);
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
@@ -348,21 +371,24 @@ static bool IsMagic(const char *magic1, const char *magic2)
 }
 
 
-static void ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSample &sample, char (&sampleName)[MAX_SAMPLENAME])
-//----------------------------------------------------------------------------------------------------------------------------
+static uint32 ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSample &sample, char (&sampleName)[MAX_SAMPLENAME])
+//------------------------------------------------------------------------------------------------------------------------------
 {
 	file.ReadConvertEndianness(sampleHeader);
 	sampleHeader.ConvertToMPT(sample);
 
 	mpt::String::Read<mpt::String::spacePadded>(sampleName, sampleHeader.name);
 	// Get rid of weird characters in sample names.
-	for(size_t i = 0; i < CountOf(sampleName); i++)
+	uint32 invalidChars = 0;
+	for(uint32 i = 0; i < CountOf(sampleName); i++)
 	{
 		if(sampleName[i] > 0 && sampleName[i] < ' ')
 		{
 			sampleName[i] = ' ';
+			invalidChars++;
 		}
 	}
+	return invalidChars;
 }
 
 
@@ -490,6 +516,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	// Check MOD Magic
 	if(IsMagic(magic, "M.K.")		// ProTracker and compatible
 		|| IsMagic(magic, "M!K!")	// ProTracker (64+ patterns)
+		|| IsMagic(magic, "PATT")	// ProTracker 3.6
 		|| IsMagic(magic, "NSMS")	// kingdomofpleasure.mod by bee hunter
 		|| IsMagic(magic, "LARD"))	// judgement_day_gvine.mod by 4-mat
 	{
@@ -560,12 +587,13 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	file.ReadString<mpt::String::spacePadded>(m_songName, 20);
 
 	// Load Sample Headers
-	size_t totalSampleLen = 0;
+	SmpLength totalSampleLen = 0;
 	m_nSamples = 31;
+	uint32 invalidChars = 0;
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		MODSampleHeader sampleHeader;
-		ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp]);
+		invalidChars += ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp]);
 		totalSampleLen += Samples[smp].nLength;
 
 		if(isHMNT)
@@ -575,6 +603,11 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			isNoiseTracker = false;
 		}
+	}
+	// If there is too much binary garbage in the sample texts, reject the file.
+	if(invalidChars > 256)
+	{
+		return false;
 	}
 
 	// Read order information
@@ -792,7 +825,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	if(onlyAmigaNotes && (!memcmp(magic, "M.K.", 4) || !memcmp(magic, "M!K!", 4)))
+	if(onlyAmigaNotes && (IsMagic(magic, "M.K.") || IsMagic(magic, "M!K!") || IsMagic(magic, "PATT")))
 	{
 		// M.K. files that don't exceed the Amiga note limit (fixes mod.mothergoose)
 		m_SongFlags.set(SONG_AMIGALIMITS);
@@ -1272,10 +1305,15 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Load Samples
 	m_nSamples = 31;
+	uint32 invalidChars = 0;
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		MODSampleHeader sampleHeader;
-		ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp]);
+		invalidChars += ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp]);
+	}
+	if(invalidChars > 256)
+	{
+		return false;
 	}
 
 	const uint8 numOrders = file.ReadUint8();
@@ -1385,6 +1423,89 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	return true;
+}
+
+
+
+// ProTracker 3.6 version of the MOD format
+// Basically just a normal ProTracker mod with different magic, wrapped in an IFF file.
+// The "PTDT" chunk is passed to the normal MOD loader.
+bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
+//--------------------------------------------------------------------
+{
+	file.Rewind();
+	if(!file.ReadMagic("FORM")
+		|| !file.Skip(4)
+		|| !file.ReadMagic("MODL"))
+	{
+		return false;
+	}
+	
+	bool ok = false;
+	std::string title, message;
+	std::string version = "3.6";
+
+	// Go through IFF chunks...
+	PT36IffChunk iffHead;
+	if(!file.ReadConvertEndianness(iffHead))
+	{
+		return false;
+	}
+	// First chunk includes "MODL" magic in size
+	iffHead.chunksize -= 4;
+	
+	do
+	{
+		// All chunk sizes include chunk header
+		iffHead.chunksize -= 8;
+		if(loadFlags == onlyVerifyHeader && iffHead.signature == PT36IffChunk::idPTDT)
+		{
+			return true;
+		}
+		
+		FileReader chunk = file.ReadChunk(iffHead.chunksize);
+		if(!chunk.IsValid())
+		{
+			break;
+		}
+
+		switch(iffHead.signature)
+		{
+		case PT36IffChunk::idVERS:
+			chunk.Skip(4);
+			if(chunk.ReadMagic("PT") && iffHead.chunksize > 6)
+			{
+				chunk.ReadString<mpt::String::maybeNullTerminated>(version, iffHead.chunksize - 6);
+			}
+			break;
+		
+		case PT36IffChunk::idINFO:
+			chunk.ReadString<mpt::String::maybeNullTerminated>(title, iffHead.chunksize);
+			break;
+		
+		case PT36IffChunk::idCMNT:
+			chunk.ReadString<mpt::String::maybeNullTerminated>(message, iffHead.chunksize);
+			break;
+		
+		case PT36IffChunk::idPTDT:
+			ok = ReadMod(chunk, loadFlags);
+			break;
+		}
+	} while(file.CanRead(sizeof(PT36IffChunk)) && file.ReadConvertEndianness(iffHead));
+	
+	if(ok)
+	{
+		if(!title.empty())
+			m_songName = title;
+	
+		// "message" chunk seems to only be used to store the artist name, despite being pretty long
+		if(message != "UNNAMED AUTHOR")
+			m_songArtist = mpt::ToUnicode(mpt::CharsetISO8859_1, message);
+		
+		m_madeWithTracker = "ProTracker " + version;
+	}
+	
+	return ok;
 }
 
 
