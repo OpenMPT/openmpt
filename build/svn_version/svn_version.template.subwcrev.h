@@ -9,4 +9,4 @@
 
 #define OPENMPT_VERSION_IS_PACKAGE 0
 
-#define OPENMPT_VERSION_DATE "$WCNOW=%Y-%m-%d %H:%M:%S$"
+#define OPENMPT_BUILD_DATE "$WCNOW=%Y-%m-%d %H:%M:%S$"
