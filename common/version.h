@@ -72,23 +72,14 @@ namespace MptVersion
 	// Returns either the URL to download release builds or the URL to download test builds, depending on the current build.
 	mpt::ustring GetDownloadURL();
 
-	// Return a string decribing the working copy state (dirty and/or mixed revisions) (if built from a svn working copy and tsvn was available during build)
-	std::string GetStateString(); // e.g. "" or "+mixed" or "+mixed+dirty" or "+dirty"
-
 	// Return a string decribing the time of the build process (if built from a svn working copy and tsvn was available during build, otherwise it returns the time version.cpp was last rebuild which could be unreliable as it does not get rebuild every time without tsvn)
 	std::string GetBuildDateString();
-
-	// Return a string decribing some of the build flags
-	std::string GetBuildFlagsString(); // e.g. " TEST DEBUG"
 
 	// Return a string decribing some of the build features
 	std::string GetBuildFeaturesString(); // e.g. " NO_VST NO_DSOUND"
 
 	// Return a string describing the compiler version used for building.
 	std::string GetBuildCompilerString(); // e.g. "Microsoft Compiler 15.00.20706.01"
-
-	// Return a string decribing the revision of the svn working copy and if it was dirty (+) or had mixed revisions (!) (if built from a svn working copy and tsvn was available during build)
-	std::string GetRevisionString(); // e.g. "-r1234+"
 
 	// Returns a simple version string
 	std::string GetVersionStringSimple(); // e.g. "1.17.02.08-r1234+ 32 bit"

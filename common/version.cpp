@@ -201,7 +201,7 @@ bool IsPackage()
 	#endif
 }
 
-std::string GetStateString()
+static std::string GetStateString()
 {
 	std::string retval;
 	if(HasMixedRevisions())
@@ -228,7 +228,7 @@ std::string GetBuildDateString()
 	#endif
 }
 
-std::string GetBuildFlagsString()
+static std::string GetBuildFlagsString()
 {
 	std::string retval;
 	#ifdef MODPLUG_TRACKER
@@ -371,7 +371,7 @@ std::string GetBuildCompilerString()
 	return retval;
 }
 
-std::string GetRevisionString()
+static std::string GetRevisionString()
 {
 	std::string result;
 	if(GetRevision() == 0)
