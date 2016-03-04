@@ -892,6 +892,8 @@ public:
 	bool SaveRAWSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const;
 	bool SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const;
 #endif
+	static bool CanReadMP3();
+	static bool CanReadVorbis();
 
 	// Instrument file I/O
 	bool ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, FileReader &file, bool mayNormalize=false);

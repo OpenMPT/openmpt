@@ -858,8 +858,16 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	return false;
 
 #elif defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND)
-	MPT_UNREFERENCED_PARAMETER(version);
 
+	MPT_UNUSED_VARIABLE(version);
+
+	bool shouldUseUnmo3 = true;
+	#ifdef MPT_ENABLE_MO3_BUILTIN
+		shouldUseUnmo3 = !CanReadMP3() || !CanReadVorbis(); 
+	#endif // MPT_ENABLE_MO3_BUILTIN
+
+	if(shouldUseUnmo3)
+	{
 	// Try to load unmo3 dynamically.
 	ComponentHandle<ComponentUnMO3> unmo3;
 	if(IsComponentAvailable(unmo3))
@@ -886,6 +894,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			|| ReadM15(unpackedFile, loadFlags);
 		if(result)
 		{
+			AddToLog(LogNotification, MPT_USTRING("Loading MO3 file used Un4seen unmo3."));
 			m_ContainerType = MOD_CONTAINERTYPE_MO3;
 		}
 
@@ -897,11 +906,13 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	} else
 	{
-#ifndef MPT_ENABLE_MO3_BUILTIN
-		AddToLog(LogError, MPT_USTRING("Loading MO3 file failed because the unmo3 library could not be loaded."));
-		return false;
-#endif // MPT_ENABLE_MO3_BUILTIN
+		#ifndef MPT_ENABLE_MO3_BUILTIN
+			AddToLog(LogError, MPT_USTRING("Loading MO3 file failed because the unmo3 library could not be loaded."));
+			return false;
+		#endif // MPT_ENABLE_MO3_BUILTIN
 	}
+	}
+
 #endif
 
 #ifdef MPT_ENABLE_MO3_BUILTIN
