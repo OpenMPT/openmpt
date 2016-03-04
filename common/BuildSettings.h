@@ -49,7 +49,7 @@
 
 #include "config.h"
 
-// Fixup dependencies which are vurrently not used in libopenmpt itself
+// Fixup dependencies which are currently not used in libopenmpt itself
 #ifdef MPT_WITH_FLAC
 #undef MPT_WITH_FLAC
 #endif
@@ -200,7 +200,7 @@
 #define MPT_ENABLE_UNMO3_DYNBIND
 
 // Enable built-in MO3 decoder
-//#define MPT_ENABLE_MO3_BUILTIN
+#define MPT_ENABLE_MO3_BUILTIN
 
 // Do not build libopenmpt C api
 #define NO_LIBOPENMPT_C

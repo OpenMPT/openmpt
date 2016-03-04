@@ -3621,4 +3621,64 @@ fail:
 }
 
 
+bool CSoundFile::CanReadMP3()
+//---------------------------
+{
+	bool result = false;
+	#if defined(MPT_WITH_MPG123)
+		if(!result)
+		{
+			result = true;
+		}
+	#endif
+	#if defined(MPT_WITH_MINIMP3)
+		if(!result)
+		{
+			result = true;
+		}
+	#endif
+	#if defined(MPT_ENABLE_MPG123_DYNBIND)
+		if(!result)
+		{
+			ComponentHandle<ComponentMPG123> mpg123;
+			if(IsComponentAvailable(mpg123))
+			{
+				result = true;
+			}
+		}
+	#endif
+	#if defined(MPT_WITH_MEDIAFOUNDATION)
+		if(!result)
+		{
+			ComponentHandle<ComponentMediaFoundation> mf;
+			if(IsComponentAvailable(mf))
+			{
+				result = true;
+			}
+		}
+	#endif
+	return result;
+}
+
+
+bool CSoundFile::CanReadVorbis()
+//------------------------------
+{
+	bool result = false;
+	#if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)
+		if(!result)
+		{
+			result = true;
+		}
+	#endif
+	#if defined(MPT_WITH_STBVORBIS)
+		if(!result)
+		{
+			result = true;
+		}
+	#endif
+	return result;
+}
+
+
 OPENMPT_NAMESPACE_END
