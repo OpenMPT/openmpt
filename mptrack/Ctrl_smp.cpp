@@ -957,11 +957,15 @@ bool CCtrlSamples::OpenSample(const CSoundFile &sndFile, SAMPLEINDEX nSample)
 	BeginWaitCursor();
 
 	m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
-	m_sndFile.ReadSampleFromSong(m_nSample, sndFile, nSample);
+	if(m_sndFile.ReadSampleFromSong(m_nSample, sndFile, nSample))
+	{
+		SetModified(SampleHint().Info().Data().Names(), true, false);
+	} else
+	{
+		m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
+	}
 
 	EndWaitCursor();
-
-	SetModified(SampleHint().Info().Data().Names(), true, false);
 
 	return true;
 }
@@ -3308,31 +3312,33 @@ void CCtrlSamples::OnXFade()
 {
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
-	if(sample.pSample == nullptr
+	if(sample.pSample == nullptr || sample.nLength == 0
 		|| sample.nLoopEnd <= sample.nLoopStart || sample.nLoopEnd > sample.nLength)
 	{
 		MessageBeep(MB_ICONWARNING);
 		return;
 	}
-	const SmpLength maxSamples = Util::Min(sample.nLength, sample.nLoopStart, sample.nLoopEnd / 2);
-	if(maxSamples == 0)
+	if(sample.nLoopStart == 0 && sample.nSustainStart == 0)
 	{
 		Reporting::Error("Crossfade requires the sample to have data before the loop start.", this);
 		return;
 	}
 
-	CSampleXFadeDlg dlg(this, sample.nLoopEnd - sample.nLoopStart, maxSamples);
+	CSampleXFadeDlg dlg(this, sample);
 	if(dlg.DoModal() == IDOK)
 	{
+		const SmpLength loopStart = dlg.m_useSustainLoop ? sample.nSustainStart: sample.nLoopStart;
+		const SmpLength loopEnd = dlg.m_useSustainLoop ? sample.nSustainEnd: sample.nLoopEnd;
+		const SmpLength maxSamples = Util::Min(sample.nLength, loopStart, loopEnd / 2);
 		SmpLength fadeSamples = dlg.PercentToSamples(dlg.m_fadeLength);
 		LimitMax(fadeSamples, maxSamples);
 		if(fadeSamples < 2) return;
 
 		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_update, "Crossfade",
-			sample.nLoopEnd - fadeSamples,
-			sample.nLoopEnd + (dlg.m_afterloopFade ? std::min(sample.nLength - sample.nLoopEnd, fadeSamples) : 0));
+			loopEnd - fadeSamples,
+			loopEnd + (dlg.m_afterloopFade ? std::min(sample.nLength - loopEnd, fadeSamples) : 0));
 
-		if(ctrlSmp::XFadeSample(sample, fadeSamples, dlg.m_fadeLaw, dlg.m_afterloopFade, m_sndFile))
+		if(ctrlSmp::XFadeSample(sample, fadeSamples, dlg.m_fadeLaw, dlg.m_afterloopFade, dlg.m_useSustainLoop, m_sndFile))
 		{
 			SetModified(SampleHint().Info().Data(), true, true);
 		} else
