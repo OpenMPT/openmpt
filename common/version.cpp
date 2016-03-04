@@ -467,11 +467,7 @@ std::string GetVersionUrlString()
 	{
 		return "";
 	}
-	#if defined(OPENMPT_VERSION_URL)
-		std::string url = OPENMPT_VERSION_URL;
-	#else
-		std::string url = "";
-	#endif
+	std::string url = GetUrl();
 	std::string baseurl = "https://source.openmpt.org/svn/openmpt/";
 	if(url.substr(0, baseurl.length()) == baseurl)
 	{
