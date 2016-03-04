@@ -221,8 +221,8 @@ static std::string GetStateString()
 
 std::string GetBuildDateString()
 {
-	#if defined(OPENMPT_VERSION_DATE)
-		return OPENMPT_VERSION_DATE;
+	#if defined(OPENMPT_BUILD_DATE)
+		return OPENMPT_BUILD_DATE;
 	#else
 		return __DATE__ " " __TIME__ ;
 	#endif
