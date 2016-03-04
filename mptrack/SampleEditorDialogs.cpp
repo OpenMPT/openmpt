@@ -298,9 +298,12 @@ void CSampleGridDlg::OnOK()
 uint32 CSampleXFadeDlg::m_fadeLength  = 20000;
 uint32 CSampleXFadeDlg::m_fadeLaw = 50000;
 bool CSampleXFadeDlg::m_afterloopFade = true;
+bool CSampleXFadeDlg::m_useSustainLoop = false;
 
 BEGIN_MESSAGE_MAP(CSampleXFadeDlg, CDialog)
 	ON_WM_HSCROLL()
+	ON_COMMAND(IDC_RADIO1,	OnLoopTypeChanged)
+	ON_COMMAND(IDC_RADIO2,	OnLoopTypeChanged)
 	ON_EN_CHANGE(IDC_EDIT1,	OnFadeLengthChanged)
 	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipText)
 END_MESSAGE_MAP()
@@ -315,6 +318,8 @@ void CSampleXFadeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN1,			m_SpinSamples);
 	DDX_Control(pDX, IDC_SLIDER1,		m_SliderLength);
 	DDX_Control(pDX, IDC_SLIDER2,		m_SliderFadeLaw);
+	DDX_Control(pDX, IDC_RADIO1,		m_RadioNormalLoop);
+	DDX_Control(pDX, IDC_RADIO2,		m_RadioSustainLoop);
 	//}}AFX_DATA_MAP
 }
 
@@ -323,21 +328,20 @@ BOOL CSampleXFadeDlg::OnInitDialog()
 //----------------------------------
 {
 	CDialog::OnInitDialog();
-	m_editLocked = true;
-	m_SpinSamples.SetRange32(0, std::min(m_loopLength, m_maxLength));
-	GetDlgItem(IDC_EDIT1)->SetFocus();
+	const bool hasNormal = m_sample.uFlags[CHN_LOOP] && m_sample.nLoopStart > 0;
+	const bool hasSustain = m_sample.uFlags[CHN_SUSTAINLOOP] && m_sample.nSustainStart > 0;
+	const bool hasBothLoops = hasNormal && hasSustain;
+	m_RadioNormalLoop.EnableWindow(hasBothLoops);
+	m_RadioSustainLoop.EnableWindow(hasBothLoops);
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, (m_useSustainLoop && hasSustain) ? IDC_RADIO2 : IDC_RADIO1);
+
 	m_SliderLength.SetRange(0, 100000);
 	m_SliderLength.SetPos(m_fadeLength);
 	m_SliderFadeLaw.SetRange(0, 100000);
 	m_SliderFadeLaw.SetPos(m_fadeLaw);
-	CheckDlgButton(IDC_CHECK1, m_afterloopFade ? BST_CHECKED : BST_UNCHECKED);
 
-	SmpLength numSamples = PercentToSamples(m_SliderLength.GetPos());
-	numSamples = Util::Min(numSamples, m_loopLength, m_maxLength);
-	m_SpinSamples.SetPos(numSamples);
-	SetDlgItemInt(IDC_EDIT1, numSamples, FALSE);
+	OnLoopTypeChanged();
 
-	m_editLocked = false;
 	return TRUE;
 }
 
@@ -348,8 +352,35 @@ void CSampleXFadeDlg::OnOK()
 	m_fadeLength = m_SliderLength.GetPos();
 	m_fadeLaw = m_SliderFadeLaw.GetPos();
 	m_afterloopFade = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
+	m_useSustainLoop = IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED;
 	Limit(m_fadeLength, uint32(0), uint32(100000));
 	CDialog::OnOK();
+}
+
+
+void CSampleXFadeDlg::OnLoopTypeChanged()
+//---------------------------------------
+{
+	SmpLength loopStart = m_sample.nLoopStart, loopEnd = m_sample.nLoopEnd;
+	if(IsDlgButtonChecked(IDC_RADIO2))
+	{
+		loopStart = m_sample.nSustainStart;
+		loopEnd = m_sample.nSustainEnd;
+	}
+	m_maxLength = Util::Min(m_sample.nLength, loopStart, loopEnd / 2u);
+	m_loopLength = loopEnd - loopStart;
+
+	m_editLocked = true;
+	m_SpinSamples.SetRange32(0, std::min(m_loopLength, m_maxLength));
+	GetDlgItem(IDC_EDIT1)->SetFocus();
+	CheckDlgButton(IDC_CHECK1, m_afterloopFade ? BST_CHECKED : BST_UNCHECKED);
+
+	SmpLength numSamples = PercentToSamples(m_SliderLength.GetPos());
+	numSamples = Util::Min(numSamples, m_loopLength, m_maxLength);
+	m_SpinSamples.SetPos(numSamples);
+	SetDlgItemInt(IDC_EDIT1, numSamples, FALSE);
+
+	m_editLocked = false;
 }
 
 

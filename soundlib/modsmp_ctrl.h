@@ -80,7 +80,7 @@ bool UnsignSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &
 bool InvertSample(ModSample &smp, SmpLength iStart, SmpLength iEnd, CSoundFile &sndFile);
 
 // Crossfade sample data to create smooth loops
-bool XFadeSample(ModSample &smp, SmpLength iFadeLength, int fadeLaw, bool afterloopFade, CSoundFile &sndFile);
+bool XFadeSample(ModSample &smp, SmpLength fadeLength, int fadeLaw, bool afterloopFade, bool useSustainLoop, CSoundFile &sndFile);
 
 // Silence parts of the sample data
 bool SilenceSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile);

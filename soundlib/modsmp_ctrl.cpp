@@ -690,30 +690,33 @@ static void XFadeSampleImpl(const T *srcIn, const T *srcOut, T *output, const Sm
 }
 
 // X-Fade sample data to create smooth loop transitions
-bool XFadeSample(ModSample &smp, SmpLength iFadeLength, int fadeLaw, bool afterloopFade, CSoundFile &sndFile)
-//-----------------------------------------------------------------------------------------------------------
+bool XFadeSample(ModSample &smp, SmpLength fadeLength, int fadeLaw, bool afterloopFade, bool useSustainLoop, CSoundFile &sndFile)
+//-------------------------------------------------------------------------------------------------------------------------------
 {
 	if(!smp.HasSampleData()) return false;
-	if(smp.nLoopEnd <= smp.nLoopStart || smp.nLoopEnd > smp.nLength) return false;
-	if(smp.nLoopStart < iFadeLength) return false;
+	const SmpLength loopStart = useSustainLoop ? smp.nSustainStart : smp.nLoopStart;
+	const SmpLength loopEnd = useSustainLoop ? smp.nSustainEnd : smp.nLoopEnd;
+	
+	if(loopEnd <= loopStart || loopEnd > smp.nLength) return false;
+	if(loopStart < fadeLength) return false;
 
-	const SmpLength start = (smp.nLoopStart - iFadeLength) * smp.GetNumChannels();
-	const SmpLength end = (smp.nLoopEnd - iFadeLength) * smp.GetNumChannels();
-	const SmpLength afterloopStart = smp.nLoopStart * smp.GetNumChannels();
-	const SmpLength afterloopEnd = smp.nLoopEnd * smp.GetNumChannels();
-	const SmpLength afterLoopLength = std::min(smp.nLength - smp.nLoopEnd, iFadeLength) * smp.GetNumChannels();
-	iFadeLength *= smp.GetNumChannels();
+	const SmpLength start = (loopStart - fadeLength) * smp.GetNumChannels();
+	const SmpLength end = (loopEnd - fadeLength) * smp.GetNumChannels();
+	const SmpLength afterloopStart = loopStart * smp.GetNumChannels();
+	const SmpLength afterloopEnd = loopEnd * smp.GetNumChannels();
+	const SmpLength afterLoopLength = std::min(smp.nLength - loopEnd, fadeLength) * smp.GetNumChannels();
+	fadeLength *= smp.GetNumChannels();
 
 	// e=0.5: constant power crossfade (for uncorrelated samples), e=1.0: constant volume crossfade (for perfectly correlated samples)
 	const double e = 1.0 - fadeLaw / 200000.0;
 
 	if(smp.GetElementarySampleSize() == 2)
 	{
-		XFadeSampleImpl(smp.pSample16 + start, smp.pSample16 + end, smp.pSample16 + end, iFadeLength, e);
+		XFadeSampleImpl(smp.pSample16 + start, smp.pSample16 + end, smp.pSample16 + end, fadeLength, e);
 		if(afterloopFade) XFadeSampleImpl(smp.pSample16 + afterloopEnd, smp.pSample16 + afterloopStart, smp.pSample16 + afterloopEnd, afterLoopLength, e);
 	} else if(smp.GetElementarySampleSize() == 1)
 	{
-		XFadeSampleImpl(smp.pSample8 + start, smp.pSample8 + end, smp.pSample8 + end, iFadeLength, e);
+		XFadeSampleImpl(smp.pSample8 + start, smp.pSample8 + end, smp.pSample8 + end, fadeLength, e);
 		if(afterloopFade) XFadeSampleImpl(smp.pSample8 + afterloopEnd, smp.pSample8 + afterloopStart, smp.pSample8 + afterloopEnd, afterLoopLength, e);
 	} else
 		return false;
