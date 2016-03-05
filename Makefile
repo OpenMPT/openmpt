@@ -562,6 +562,7 @@ COMMON_CXX_SOURCES += \
 SOUNDLIB_CXX_SOURCES += \
  $(COMMON_CXX_SOURCES) \
  $(sort $(wildcard soundlib/*.cpp)) \
+ $(sort $(wildcard soundlib/plugins/*.cpp)) \
  
 
 ifeq ($(HACK_ARCHIVE_SUPPORT),1)
