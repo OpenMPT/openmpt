@@ -246,11 +246,15 @@ std::string SourceInfo::GetStateString() const
 
 std::string GetBuildDateString()
 {
-	#if defined(OPENMPT_BUILD_DATE)
-		return OPENMPT_BUILD_DATE;
-	#else
-		return __DATE__ " " __TIME__ ;
-	#endif
+	#ifdef MODPLUG_TRACKER
+		#if defined(OPENMPT_BUILD_DATE)
+			return OPENMPT_BUILD_DATE;
+		#else
+			return __DATE__ " " __TIME__ ;
+		#endif
+	#else // !MODPLUG_TRACKER
+		return GetSourceInfo().Date;
+	#endif // MODPLUG_TRACKER
 }
 
 static std::string GetBuildFlagsString()
