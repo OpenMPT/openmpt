@@ -727,6 +727,7 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 void CSelectPluginDlg::ReloadMissingPlugins(const VSTPluginLib *lib) const
 //------------------------------------------------------------------------
 {
+	CVstPluginManager *pManager = theApp.GetPluginManager();
 	std::vector<CModDoc *> docs(theApp.GetOpenDocuments());
 	for(size_t i = 0; i < docs.size(); i++)
 	{
@@ -740,7 +741,7 @@ void CSelectPluginDlg::ReloadMissingPlugins(const VSTPluginLib *lib) const
 				&& plugin.Info.dwPluginId1 == lib->pluginId1
 				&& plugin.Info.dwPluginId2 == lib->pluginId2)
 			{
-				CSoundFile::gpMixPluginCreateProc(plugin, sndFile);
+				pManager->CreateMixPlugin(plugin, sndFile);
 				if(plugin.pMixPlugin)
 				{
 					plugin.pMixPlugin->RestoreAllParameters(plugin.defaultProgram);
