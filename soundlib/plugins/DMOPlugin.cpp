@@ -18,9 +18,13 @@
 #include <uuids.h>
 #include <medparam.h>
 #include <MMSystem.h>
+#endif // !NO_DMO
 
 
 OPENMPT_NAMESPACE_BEGIN
+
+
+#ifndef NO_DMO
 
 
 #define DMO_LOG
@@ -477,6 +481,11 @@ CString DMOPlugin::GetParamDisplay(PlugParamIndex param)
 
 #endif // MODPLUG_TRACKER
 
+#else // NO_DMO
+
+MPT_MSVC_WORKAROUND_LNK4221(DMOPlugin)
+
+#endif // !NO_DMO
+
 OPENMPT_NAMESPACE_END
 
-#endif // NO_DMO
