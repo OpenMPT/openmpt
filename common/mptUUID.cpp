@@ -11,10 +11,9 @@
 #include "stdafx.h"
 #include "mptUUID.h"
 
-#if MPT_OS_WINDOWS
+#if (defined(MODPLUG_TRACKER) || !defined(NO_DMO)) && MPT_OS_WINDOWS
 #include <windows.h>
-#include <WTypes.h>
-#include <ObjBase.h>
+#include <objbase.h>
 #endif
 
 
