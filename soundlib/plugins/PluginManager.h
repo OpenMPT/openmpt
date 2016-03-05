@@ -13,7 +13,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 //#define kBuzzMagic	'Buzz'
-#define kDmoMagic	MAGIC4BE('D', 'X', 'M', 'O')
+#define kDmoMagic	(('D' << 24) | ('X' << 16) | ('M' << 8) | 'O')
 
 class CSoundFile;
 class IMixPlugin;
