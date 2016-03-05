@@ -7,3 +7,5 @@ Modifications:
    to compile.
 Modifications are always additions and have been marked with // OpenMPT.
 
+For building, premake is used to generate Visual Studio project files.
+See ../build/premake/ for details.
