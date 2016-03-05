@@ -51,20 +51,20 @@ namespace MptVersion
 	// Return true if this is a debug build with no optimizations
 	bool IsDebugBuild();
 
-	// Return the svn repository url (if built from a svn working copy and tsvn was available during build)
-	std::string GetUrl();
-
-	// Return the svn revision (if built from a svn working copy and tsvn was available during build)
-	int GetRevision();
-
-	// Return if the svn working copy had local changes during build (if built from a svn working copy and tsvn was available during build)
-	bool IsDirty();
-
-	// Return if the svn working copy had files checked out from different revisions and/or branches (if built from a svn working copy and tsvn was available during build)
-	bool HasMixedRevisions();
-
-	// Return whether the build was done from packaged source code (i.e. from the genertaed .zip or .tar source)
-	bool IsPackage();
+	struct SourceInfo
+	{
+		std::string Url; // svn repository url (or empty string)
+		int Revision; // svn revision (or 0)
+		bool IsDirty; // svn working copy is dirty (or false)
+		bool HasMixedRevisions; // svn working copy has mixed revisions (or false)
+		bool IsPackage; // source code originates from a packaged version of the source code
+		std::string Date; // svn date (ór empty string)
+		SourceInfo() : Url(std::string()), Revision(0), HasMixedRevisions(false), IsDirty(false), IsPackage(false) { }
+	public:
+		std::string GetUrlWithRevision() const; // i.e. "https://source.openmpt.org/svn/openmpt/trunk/OpenMPT@1234" or empty string
+		std::string GetStateString() const; // i.e. "+dirty" or "clean"
+	};
+	SourceInfo GetSourceInfo();
 
 	// Returns true if the build will run on ancient Windows versions.
 	bool IsForOlderWindows();
@@ -86,9 +86,6 @@ namespace MptVersion
 
 	// Returns MptVersion::str if the build is a clean release build straight from the repository or an extended string otherwise (if built from a svn working copy and tsvn was available during build)
 	std::string GetVersionStringExtended(); // e.g. "1.17.02.08-r1234+ 32 bit DEBUG"
-
-	// Returns a string combining the repository url and the revision, suitable for checkout if the working copy was clean (if built from a svn working copy and tsvn was available during build)
-	std::string GetVersionUrlString(); // e.g. "https://source.openmpt.org/svn/openmpt/trunk/OpenMPT@1234+dirty"
 
 	// Returns a multi-line string containing the full credits for the code base
 	mpt::ustring GetFullCreditsString();
