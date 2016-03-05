@@ -86,7 +86,7 @@ bool IsDebugBuild()
 	#endif
 }
 
-std::string GetUrl()
+static std::string GetUrl()
 {
 	#ifdef OPENMPT_VERSION_URL
 		return OPENMPT_VERSION_URL;
@@ -95,7 +95,7 @@ std::string GetUrl()
 	#endif
 }
 
-int GetRevision()
+static int GetRevision()
 {
 	#if defined(OPENMPT_VERSION_REVISION)
 		return OPENMPT_VERSION_REVISION;
@@ -140,7 +140,7 @@ int GetRevision()
 	#endif
 }
 
-bool IsDirty()
+static bool IsDirty()
 {
 	#if defined(OPENMPT_VERSION_DIRTY)
 		return OPENMPT_VERSION_DIRTY != 0;
@@ -160,7 +160,7 @@ bool IsDirty()
 	#endif
 }
 
-bool HasMixedRevisions()
+static bool HasMixedRevisions()
 {
 	#if defined(OPENMPT_VERSION_MIXEDREVISIONS)
 		return OPENMPT_VERSION_MIXEDREVISIONS != 0;
@@ -192,7 +192,7 @@ bool HasMixedRevisions()
 	#endif
 }
 
-bool IsPackage()
+static bool IsPackage()
 {
 	#if defined(OPENMPT_VERSION_IS_PACKAGE)
 		return OPENMPT_VERSION_IS_PACKAGE != 0;
@@ -201,18 +201,43 @@ bool IsPackage()
 	#endif
 }
 
-static std::string GetStateString()
+static std::string GetSourceDate()
+{
+	#if defined(OPENMPT_VERSION_DATE)
+		return OPENMPT_VERSION_DATE;
+	#else
+		return "";
+	#endif
+}
+
+SourceInfo GetSourceInfo()
+{
+	SourceInfo result;
+	result.Url = GetUrl();
+	result.Revision = GetRevision();
+	result.IsDirty = IsDirty();
+	result.HasMixedRevisions = HasMixedRevisions();
+	result.IsPackage = IsPackage();
+	result.Date = GetSourceDate();
+	return result;
+}
+
+std::string SourceInfo::GetStateString() const
 {
 	std::string retval;
-	if(HasMixedRevisions())
-	{
-		retval += "+mixed";
-	}
-	if(IsDirty())
+	if(IsDirty)
 	{
 		retval += "+dirty";
 	}
-	if(IsPackage())
+	if(HasMixedRevisions)
+	{
+		retval += "+mixed";
+	}
+	if(retval.empty())
+	{
+		retval += "clean";
+	}
+	if(IsPackage)
 	{
 		retval += "-pkg";
 	}
@@ -438,6 +463,24 @@ static std::string GetVersionString(bool verbose)
 			retval += mpt::format(" %1 bit")(sizeof(void*) * 8);
 		}
 	#endif
+	#ifndef MODPLUG_TRACKER
+		if(verbose)
+		{
+			const SourceInfo sourceInfo = GetSourceInfo();
+			if(!sourceInfo.GetUrlWithRevision().empty())
+			{
+				retval += mpt::format(" %1")(sourceInfo.GetUrlWithRevision());
+			}
+			if(!sourceInfo.Date.empty())
+			{
+				retval += mpt::format(" (%1)")(sourceInfo.Date);
+			}
+			if(!sourceInfo.GetStateString().empty())
+			{
+				retval += mpt::format(" %1")(sourceInfo.GetStateString());
+			}
+		}
+	#endif
 	if(IsDebugBuild() || IsTestBuild() || IsDirty() || HasMixedRevisions())
 	{
 		retval += GetBuildFlagsString();
@@ -461,19 +504,13 @@ std::string GetVersionStringExtended()
 	return GetVersionString(true);
 }
 
-std::string GetVersionUrlString()
+std::string SourceInfo::GetUrlWithRevision() const
 {
-	if(GetRevision() == 0)
+	if(Url.empty() || (Revision == 0))
 	{
-		return "";
+		return std::string();
 	}
-	std::string url = GetUrl();
-	std::string baseurl = "https://source.openmpt.org/svn/openmpt/";
-	if(url.substr(0, baseurl.length()) == baseurl)
-	{
-		url = url.substr(baseurl.length());
-	}
-	return url + "@" + mpt::ToString(GetRevision()) + GetStateString();
+	return Url + "@" + mpt::ToString(Revision);
 }
 
 mpt::ustring GetContactString()

@@ -64,7 +64,8 @@ namespace openmpt {
 namespace version {
 
 std::uint32_t get_library_version() {
-	return OPENMPT_API_VERSION | ( MptVersion::GetRevision() & 0xffff );
+	const MptVersion::SourceInfo sourceInfo = MptVersion::GetSourceInfo();
+	return OPENMPT_API_VERSION | ( sourceInfo.Revision & 0xffff );
 }
 
 std::uint32_t get_core_version() {
@@ -73,6 +74,7 @@ std::uint32_t get_core_version() {
 
 static std::string get_library_version_string() {
 	std::string str;
+	const MptVersion::SourceInfo sourceInfo = MptVersion::GetSourceInfo();
 	std::uint32_t version = get_library_version();
 	if ( ( version & 0xffff ) == 0 ) {
 		str += mpt::ToString((version>>24) & 0xff);
@@ -85,17 +87,17 @@ static std::string get_library_version_string() {
 		str += ".";
 		str += mpt::ToString((version>>0) & 0xffff);
 	}
-	if ( MptVersion::IsDirty() ) {
+	if ( sourceInfo.IsDirty ) {
 		str += ".2-modified";
-		if ( MptVersion::IsPackage() ) {
+		if ( sourceInfo.IsPackage ) {
 			str += "-pkg";
 		}
-	} else if ( MptVersion::HasMixedRevisions() ) {
+	} else if ( sourceInfo.HasMixedRevisions ) {
 		str += ".1-modified";
-		if ( MptVersion::IsPackage() ) {
+		if ( sourceInfo.IsPackage ) {
 			str += "-pkg";
 		}
-	} else if ( MptVersion::IsPackage() ) {
+	} else if ( sourceInfo.IsPackage ) {
 		str += ".0-pkg";
 	}
 	return str;

@@ -318,7 +318,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += MPT_USTRING("OpenMPT - Open ModPlug Tracker") + lf;
 			text += lf;
 			text += mpt::format(MPT_USTRING("Version: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringExtended())) + lf;
-			text += mpt::format(MPT_USTRING("Source Code URL: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetUrl())) + lf;
+			text += mpt::format(MPT_USTRING("Source Code: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetSourceInfo().GetUrlWithRevision() + " " + MptVersion::GetSourceInfo().GetStateString())) + lf;
 			text += mpt::format(MPT_USTRING("Build Date: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetBuildDateString())) + lf;
 			text += mpt::format(MPT_USTRING("Compiler: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetBuildCompilerString())) + lf;
 			text += mpt::format(MPT_USTRING("Required Windows Kernel Level: %1"))(mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumKernelLevel())) + lf;

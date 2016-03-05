@@ -206,9 +206,10 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 	}
 
 	errorMessage += MPT_ULITERAL("\n\n");
-	errorMessage += mpt::String::Print(MPT_USTRING("OpenMPT %1 (%2)\n")
+	errorMessage += mpt::String::Print(MPT_USTRING("OpenMPT %1 (%2 (%3))\n")
 		, mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringExtended())
-		, mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionUrlString())
+		, mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetSourceInfo().GetUrlWithRevision())
+		, mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetSourceInfo().GetStateString())
 		);
 
 	{
