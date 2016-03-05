@@ -683,6 +683,9 @@ public:
 	Setting<bool> bridgeAllPlugins;
 	Setting<bool> enableAutoSuspend;
 	Setting<std::wstring> pluginProjectPath;
+	Setting<std::string> vstHostProductString;
+	Setting<std::string> vstHostVendorString;
+	Setting<int32> vstHostVendorVersion;
 
 	// Update
 

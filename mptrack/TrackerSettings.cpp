@@ -313,6 +313,9 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, bridgeAllPlugins(conf, "VST Plugins", "BridgeAllPlugins", false)
 	, enableAutoSuspend(conf, "VST Plugins", "EnableAutoSuspend", false)
 	, pluginProjectPath(conf, "VST Plugins", "ProjectPath", std::wstring())
+	, vstHostProductString(conf, "VST Plugins", "HostProductString", "OpenMPT")
+	, vstHostVendorString(conf, "VST Plugins", "HostVendorString", "OpenMPT project")
+	, vstHostVendorVersion(conf, "VST Plugins", "HostVendorVersion", MptVersion::num)
 	// Update
 	, UpdateLastUpdateCheck(conf, "Update", "LastUpdateCheck", mpt::Date::Unix(time_t()))
 	, UpdateUpdateCheckPeriod(conf, "Update", "UpdateCheckPeriod", 7)
@@ -415,7 +418,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	for(uint32 i = 0; i < mruListLength; i++)
 	{
 		char key[16];
-		sprintf(key, "File%d", i);
+		sprintf(key, "File%u", i);
 
 		mpt::PathString path = theApp.RelativePathToAbsolute(conf.Read<mpt::PathString>("Recent File List", key, mpt::PathString()));
 		if(!path.empty())
@@ -434,6 +437,12 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	{
 		// No UUID found - generate one.
 		gcsInstallGUID = Util::UUIDToString(Util::CreateUUID());
+	}
+
+	// Plugins
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,19,03,01) && vstHostProductString.Get() == "OpenMPT")
+	{
+		vstHostVendorVersion = MptVersion::num;
 	}
 
 	// Sound Settings
@@ -996,7 +1005,7 @@ void TrackerSettings::SaveSettings()
 	for(uint32 i = 0; i < (ID_MRU_LIST_LAST - ID_MRU_LIST_FIRST + 1); i++)
 	{
 		char key[16];
-		sprintf(key, "File%d", i);
+		sprintf(key, "File%u", i);
 
 		if(i < mruFiles.size())
 		{

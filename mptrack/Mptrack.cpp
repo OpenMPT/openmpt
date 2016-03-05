@@ -1906,24 +1906,6 @@ BOOL CTrackApp::InitializeDXPlugins()
 	if(!m_pPluginManager) return FALSE;
 	const size_t numPlugins = theApp.GetSettings().Read<int32>("VST Plugins", "NumPlugins", 0);
 
-	#ifndef NO_PLUGINS
-		std::string buffer = theApp.GetSettings().Read<std::string>("VST Plugins", "HostProductString", CVstPluginManager::s_szHostProductString);
-
-		// Version <= 1.19.03.00 had buggy handling of custom host information. If last open was from
-		// such OpenMPT version, clear the related settings to get a clean start.
-		if(TrackerSettings::Instance().PreviousSettingsVersion < MAKE_VERSION_NUMERIC(1,19,03,01) && buffer == "OpenMPT")
-		{
-			theApp.GetSettings().Remove("VST Plugins", "HostProductString");
-			theApp.GetSettings().Remove("VST Plugins", "HostVendorString");
-			theApp.GetSettings().Remove("VST Plugins", "HostVendorVersion");
-		}
-
-		mpt::String::Copy(CVstPluginManager::s_szHostProductString, theApp.GetSettings().Read<std::string>("VST Plugins", "HostProductString", CVstPluginManager::s_szHostProductString));
-		mpt::String::Copy(CVstPluginManager::s_szHostVendorString, theApp.GetSettings().Read<std::string>("VST Plugins", "HostVendorString", CVstPluginManager::s_szHostVendorString));
-		CVstPluginManager::s_nHostVendorVersion = theApp.GetSettings().Read<int32>("VST Plugins", "HostVendorVersion", CVstPluginManager::s_nHostVendorVersion);
-	#endif
-
-
 	std::wstring nonFoundPlugs;
 	const mpt::PathString failedPlugin = theApp.GetSettings().Read<mpt::PathString>("VST Plugins", "FailedPlugin", MPT_PATHSTRING(""));
 

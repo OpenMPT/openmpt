@@ -50,10 +50,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 #ifndef NO_VST
-char CVstPluginManager::s_szHostProductString[64] = "OpenMPT";
-char CVstPluginManager::s_szHostVendorString[64] = "OpenMPT project";
-VstInt32 CVstPluginManager::s_nHostVendorVersion = MptVersion::num;
-
 typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
 #endif // NO_VST
 

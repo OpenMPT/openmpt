@@ -144,11 +144,6 @@ protected:
 	void EnumerateDirectXDMOs();
 #ifndef NO_VST
 	AEffect *LoadPlugin(VSTPluginLib &plugin, HINSTANCE &library, bool forceBridge);
-
-public:
-	static char s_szHostProductString[64];
-	static char s_szHostVendorString[64];
-	static int32 s_nHostVendorVersion;
 #endif // NO_VST
 
 #else // NO_PLUGINS
