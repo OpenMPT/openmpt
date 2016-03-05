@@ -355,15 +355,15 @@ VstIntPtr VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstInt32 opcod
 		break;
 
 	case audioMasterGetVendorString:
-		strcpy((char *) ptr, CVstPluginManager::s_szHostVendorString);
+		strcpy((char *) ptr, TrackerSettings::Instance().vstHostVendorString.Get().c_str());
 		return 1;
 
 	case audioMasterGetProductString:
-		strcpy((char *) ptr, CVstPluginManager::s_szHostProductString);
+		strcpy((char *) ptr, TrackerSettings::Instance().vstHostProductString.Get().c_str());
 		return 1;
 
 	case audioMasterGetVendorVersion:
-		return CVstPluginManager::s_nHostVendorVersion;
+		return TrackerSettings::Instance().vstHostVendorVersion;
 
 	case audioMasterVendorSpecific:
 		return 0;
