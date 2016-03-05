@@ -143,7 +143,7 @@ struct SNDMIXPLUGIN
 	void Destroy();
 };
 
-typedef bool (*PMIXPLUGINCREATEPROC)(SNDMIXPLUGIN &, CSoundFile &);
+bool CreateMixPluginProc(SNDMIXPLUGIN &mixPlugin, CSoundFile &sndFile);
 
 #endif // NO_PLUGINS
 

@@ -123,7 +123,7 @@ public:
 	void ClearOutputBuffers(uint32 numSamples)
 	//----------------------------------------
 	{
-		ASSERT(numSamples <= bufferSize);
+		MPT_ASSERT(numSamples <= bufferSize);
 		for(uint32 i = 0; i < outputs; i++)
 		{
 			memset(outputsArray[i], 0, numSamples * sizeof(buffer_t));

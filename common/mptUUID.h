@@ -10,16 +10,15 @@
 
 #pragma once
 
+#if (defined(MODPLUG_TRACKER) || !defined(NO_DMO)) && MPT_OS_WINDOWS
+
+#include <Guiddef.h>
+#include <Rpc.h>
 
 OPENMPT_NAMESPACE_BEGIN
 
-
-#ifdef MODPLUG_TRACKER
-
 namespace Util
 {
-
-#if MPT_OS_WINDOWS
 
 // COM CLSID<->string conversion
 // A CLSID string is not necessarily a standard UUID string,
@@ -56,11 +55,8 @@ UUID CreateUUID();
 // Create a UUID that contains local, traceable information. Safe for local use.
 UUID CreateLocalUUID();
 
-#endif // MPT_OS_WINDOWS
-
 } // namespace Util
 
-#endif // MODPLUG_TRACKER
-
-
 OPENMPT_NAMESPACE_END
+
+#endif // (defined(MODPLUG_TRACKER) || !defined(NO_DMO)) && MPT_OS_WINDOWS

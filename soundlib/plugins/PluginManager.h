@@ -13,7 +13,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 //#define kBuzzMagic	'Buzz'
-#define kDmoMagic	'DXMO'
+#define kDmoMagic	MAGIC4BE('D', 'X', 'M', 'O')
 
 class CSoundFile;
 class IMixPlugin;
@@ -48,7 +48,7 @@ public:
 	mpt::PathString libraryName;	// Display name
 	mpt::PathString dllPath;		// Full path name
 	mpt::ustring tags;				// User tags
-	int32 pluginId1;				// Plugin type (kEffectMagic, kDmoMagic)
+	int32 pluginId1;				// Plugin type (kEffectMagic, kDmoMagic, ...)
 	int32 pluginId2;				// Plugin unique ID
 	PluginCategory category;
 	bool isInstrument : 1;
@@ -142,14 +142,12 @@ protected:
 	void EnumerateDirectXDMOs();
 #ifndef NO_VST
 	AEffect *LoadPlugin(VSTPluginLib &plugin, HINSTANCE &library, bool forceBridge);
-#endif // NO_VST
-
-	static bool CreateMixPluginProc(SNDMIXPLUGIN &, CSoundFile &);
 
 public:
 	static char s_szHostProductString[64];
 	static char s_szHostVendorString[64];
 	static int32 s_nHostVendorVersion;
+#endif // NO_VST
 
 #else // NO_PLUGINS
 public:

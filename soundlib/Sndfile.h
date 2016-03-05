@@ -337,10 +337,6 @@ public:
 	CAGC m_AGC;
 #endif
 
-#ifndef NO_PLUGINS
-	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
-#endif
-
 	typedef uint32 samplecount_t;	// Number of rendered samples
 
 public:	// for Editing
