@@ -534,8 +534,10 @@ ifeq ($(MPT_SVNVERSION),)
 SVN_INFO:=$(shell svn info . > /dev/null 2>&1 ; echo $$? )
 ifeq ($(SVN_INFO),0)
 # in svn checkout
+MPT_SVNURL :=  $(shell svn info --xml | grep '^<url>' | sed 's/<url>//g' | sed 's/<\/url>//g' )
 MPT_SVNVERSION := $(shell svnversion -n . | tr ':' '-' )
-CPPFLAGS += -D MPT_SVNVERSION=\"$(MPT_SVNVERSION)\"
+MPT_SVNDATE := $(shell svn info --xml | grep '^<date>' | sed 's/<date>//g' | sed 's/<\/date>//g' )
+CPPFLAGS += -D MPT_SVNURL=\"$(MPT_SVNURL)\" -D MPT_SVNVERSION=\"$(MPT_SVNVERSION)\" -D MPT_SVNDATE=\"$(MPT_SVNDATE)\"
 DIST_OPENMPT_VERSION:=r$(MPT_SVNVERSION)
 DIST_LIBOPENMPT_VERSION:=$(LIBOPENMPT_VERSION_MAJOR).$(LIBOPENMPT_VERSION_MINOR).$(MPT_SVNVERSION)
 else
@@ -555,15 +557,15 @@ CPPFLAGS += -DLIBOPENMPT_BUILD
 
 
 COMMON_CXX_SOURCES += \
- $(wildcard common/*.cpp) \
+ $(sort $(wildcard common/*.cpp)) \
  
 SOUNDLIB_CXX_SOURCES += \
  $(COMMON_CXX_SOURCES) \
- $(wildcard soundlib/*.cpp) \
+ $(sort $(wildcard soundlib/*.cpp)) \
  
 
 ifeq ($(HACK_ARCHIVE_SUPPORT),1)
-SOUNDLIB_CXX_SOURCES += $(wildcard unarchiver/*.cpp)
+SOUNDLIB_CXX_SOURCES += $(sort $(wildcard unarchiver/*.cpp))
 endif
 
 LIBOPENMPT_CXX_SOURCES += \
@@ -631,7 +633,7 @@ ALL_DEPENDS += $(LIBOPENMPT_MODPLUG_DEPENDS)
 
 
 OPENMPT123_CXX_SOURCES += \
- $(wildcard openmpt123/*.cpp) \
+ $(sort $(wildcard openmpt123/*.cpp)) \
  
 OPENMPT123_OBJECTS += $(OPENMPT123_CXX_SOURCES:.cpp=.o)
 OPENMPT123_DEPENDS = $(OPENMPT123_OBJECTS:.o=.d)
@@ -642,7 +644,7 @@ ALL_DEPENDS += $(OPENMPT123_DEPENDS)
 LIBOPENMPTTEST_CXX_SOURCES += \
  libopenmpt/libopenmpt_test.cpp \
  $(SOUNDLIB_CXX_SOURCES) \
- $(wildcard test/*.cpp) \
+ $(sort $(wildcard test/*.cpp)) \
  
 LIBOPENMPTTEST_OBJECTS = $(LIBOPENMPTTEST_CXX_SOURCES:.cpp=.test.o) $(LIBOPENMPTTEST_C_SOURCES:.c=.test.o)
 LIBOPENMPTTEST_DEPENDS = $(LIBOPENMPTTEST_CXX_SOURCES:.cpp=.test.d) $(LIBOPENMPTTEST_C_SOURCES:.c=.test.d)
@@ -650,8 +652,8 @@ ALL_OBJECTS += $(LIBOPENMPTTEST_OBJECTS)
 ALL_DEPENDS += $(LIBOPENMPTTEST_DEPENDS)
 
 
-EXAMPLES_CXX_SOURCES += $(wildcard examples/*.cpp)
-EXAMPLES_C_SOURCES += $(wildcard examples/*.c)
+EXAMPLES_CXX_SOURCES += $(sort $(wildcard examples/*.cpp))
+EXAMPLES_C_SOURCES += $(sort $(wildcard examples/*.c))
 
 EXAMPLES_OBJECTS += $(EXAMPLES_CXX_SOURCES:.cpp=.o)
 EXAMPLES_OBJECTS += $(EXAMPLES_C_SOURCES:.c=.o)
@@ -660,8 +662,8 @@ ALL_OBJECTS += $(EXAMPLES_OBJECTS)
 ALL_DEPENDS += $(EXAMPLES_DEPENDS)
 
 
-FUZZ_CXX_SOURCES += $(wildcard contrib/fuzzing/*.cpp)
-FUZZ_C_SOURCES += $(wildcard contrib/fuzzing/*.c)
+FUZZ_CXX_SOURCES += $(sort $(wildcard contrib/fuzzing/*.cpp))
+FUZZ_C_SOURCES += $(sort $(wildcard contrib/fuzzing/*.c))
 
 FUZZ_OBJECTS += $(FUZZ_CXX_SOURCES:.cpp=.o)
 FUZZ_OBJECTS += $(FUZZ_C_SOURCES:.c=.o)
@@ -915,7 +917,10 @@ bin/dist-doc.tar: bin/dist-doc/libopenmpt-doc-$(DIST_LIBOPENMPT_VERSION).tar.gz
 .PHONY: bin/dist.mk
 bin/dist.mk:
 	rm -rf $@
-	echo 'MPT_SVNVERSION=$(MPT_SVNVERSION)' > $@.tmp
+	echo > $@.tmp
+	echo 'MPT_SVNURL=$(MPT_SVNURL)' >> $@.tmp
+	echo 'MPT_SVNVERSION=$(MPT_SVNVERSION)' >> $@.tmp
+	echo 'MPT_SVNDATE=$(MPT_SVNDATE)' >> $@.tmp
 	mv $@.tmp $@
 
 .PHONY: bin/svn_version_dist.h
@@ -923,8 +928,10 @@ bin/svn_version_dist.h:
 	rm -rf $@
 	echo > $@.tmp
 	echo '#pragma once' >> $@.tmp
+	echo '#define OPENMPT_VERSION_SVNURL "$(MPT_SVNURL)"' >> $@.tmp
 	echo '#define OPENMPT_VERSION_SVNVERSION "$(MPT_SVNVERSION)"' >> $@.tmp
-	echo '#define OPENMPT_VERSION_IS_PACKAGE true' >> $@.tmp
+	echo '#define OPENMPT_VERSION_SVNDATE "$(MPT_SVNDATE)"' >> $@.tmp
+	echo '#define OPENMPT_VERSION_IS_PACKAGE 1' >> $@.tmp
 	echo >> $@.tmp
 	mv $@.tmp $@
 

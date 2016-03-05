@@ -20,7 +20,9 @@ AM_PROG_CC_C_O
 AC_PROG_CXX
 AC_PROG_INSTALL
 
+AC_DEFINE([MPT_SVNURL], ["!!MPT_SVNURL!!"], [svn version])
 AC_DEFINE([MPT_SVNVERSION], ["!!MPT_SVNVERSION!!"], [svn version])
+AC_DEFINE([MPT_SVNDATE], ["!!MPT_SVNDATE!!"], [svn date])
 AC_DEFINE([MPT_PACKAGE], [!!MPT_PACKAGE!!], [is package])
 
 # Required libopenmpt dependency: zlib
