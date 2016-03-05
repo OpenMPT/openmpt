@@ -110,6 +110,10 @@ LOCAL_SRC_FILES := \
 	soundlib/WAVTools.cpp \
 	soundlib/WindowedFIR.cpp \
 	soundlib/XMTools.cpp \
+	soundlib/plugins/DigiBoosterEcho.cpp \
+	soundlib/plugins/DMOPlugin.cpp \
+	soundlib/plugins/PluginManager.cpp \
+	soundlib/plugins/PlugInterface.cpp \
 	test/TestToolsLib.cpp \
 	test/test.cpp
 
