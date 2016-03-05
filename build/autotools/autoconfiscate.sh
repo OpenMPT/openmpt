@@ -47,7 +47,9 @@ svn export ./build/autotools/Makefile.am bin/dist-autotools/Makefile.am
 svn export ./build/autotools/ax_cxx_compile_stdcxx_11.m4 bin/dist-autotools/m4/ax_cxx_compile_stdcxx_11.m4
 
 echo "Querying svn version ..."
+BUILD_SVNURL="$(svn info --xml | grep '^<url>' | sed 's/<url>//g' | sed 's/<\/url>//g' )"
 BUILD_SVNVERSION="$(svnversion -n . | tr ':' '-' )"
+BUILD_SVNDATE="$(svn info --xml | grep '^<date>' | sed 's/<date>//g' | sed 's/<\/date>//g' )"
 
 echo "Building man pages ..."
 make bin/openmpt123.1
@@ -64,7 +66,9 @@ OLDDIR="$(pwd)"
 cd bin/dist-autotools/
 
 echo "Setting version in configure.ac ..."
+cat configure.ac | sed "s/!!MPT_SVNURL!!/${BUILD_SVNURL}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
 cat configure.ac | sed "s/!!MPT_SVNVERSION!!/${BUILD_SVNVERSION}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
+cat configure.ac | sed "s/!!MPT_SVNDATE!!/${BUILD_SVNDATE}/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
 cat configure.ac | sed "s/!!MPT_PACKAGE!!/true/g" > configure.ac.tmp && mv configure.ac.tmp configure.ac
 
 echo "Generating 'Doxyfile.in' ..."
