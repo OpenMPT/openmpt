@@ -9,7 +9,7 @@
 
 
 #include "stdafx.h"
-#include "Sndfile.h"
+#include "../Sndfile.h"
 #include "PlugInterface.h"
 #include "PluginManager.h"
 #ifdef MODPLUG_TRACKER
@@ -25,6 +25,8 @@
 #include "../../common/mptFileIO.h"
 #include "../mod_specifications.h"
 #endif // MODPLUG_TRACKER
+
+#include <cmath>
 
 #ifndef NO_PLUGINS
 
@@ -376,8 +378,8 @@ float IMixPlugin::RenderSilence(uint32 numFrames)
 		Process(out[0], out[1], renderSamples);
 		for(size_t i = 0; i < renderSamples; i++)
 		{
-			maxVal = std::max(maxVal, fabs(out[0][i]));
-			maxVal = std::max(maxVal, fabs(out[1][i]));
+			maxVal = std::max(maxVal, std::fabs(out[0][i]));
+			maxVal = std::max(maxVal, std::fabs(out[1][i]));
 		}
 
 		numFrames -= renderSamples;

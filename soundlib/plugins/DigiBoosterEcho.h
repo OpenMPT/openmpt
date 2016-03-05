@@ -10,7 +10,7 @@
 
 #ifndef NO_PLUGINS
 
-#include "plugins/PlugInterface.h"
+#include "PlugInterface.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

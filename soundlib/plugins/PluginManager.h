@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <limits.h>
+
 OPENMPT_NAMESPACE_BEGIN
 
 //#define kBuzzMagic	'Buzz'

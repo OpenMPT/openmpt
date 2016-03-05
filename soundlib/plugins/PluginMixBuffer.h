@@ -70,8 +70,8 @@ public:
 			// Align buffer start.
 			alignedBuffer = reinterpret_cast<buffer_t *>((reinterpret_cast<intptr_t>(mixBuffer) + bufferAlignmentInBytes) & ~bufferAlignmentInBytes);
 
-			inputsArray = new (buffer_t *[inputs]);
-			outputsArray = new (buffer_t *[outputs]);
+			inputsArray = new buffer_t* [inputs];
+			outputsArray = new buffer_t* [outputs];
 		} catch(MPTMemoryException)
 		{
 			return false;

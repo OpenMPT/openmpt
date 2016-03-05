@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "ChunkReader.h"
+#include "../common/StringFixer.h"
 #ifndef NO_PLUGINS
 #include "plugins/DigiBoosterEcho.h"
 #endif // NO_PLUGINS
@@ -611,9 +612,9 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 			plugin.Info.gain = 10;
 			plugin.Info.reserved = 0;
 			plugin.Info.dwOutputRouting = 0;
-			MemsetZero(plugin.Info.dwReserved);
-			strcpy(plugin.Info.szName, "Echo");
-			strcpy(plugin.Info.szLibraryName, "DigiBooster Pro Echo");
+			std::fill(plugin.Info.dwReserved, plugin.Info.dwReserved + CountOf(plugin.Info.dwReserved), 0);
+			mpt::String::Write<mpt::String::nullTerminated>(plugin.Info.szName, "Echo");
+			mpt::String::Write<mpt::String::nullTerminated>(plugin.Info.szLibraryName, "DigiBooster Pro Echo");
 
 			plugin.nPluginDataSize = sizeof(DigiBoosterEcho::PluginChunk);
 			plugin.pPluginData = new (std::nothrow) char[sizeof(DigiBoosterEcho::PluginChunk)];
