@@ -17,6 +17,8 @@
    "../../common/*.h",
    "../../soundlib/*.cpp",
    "../../soundlib/*.h",
+   "../../soundlib/plugins/*.cpp",
+   "../../soundlib/plugins/*.h",
    "../../libopenmpt/libopenmpt.h",
    "../../libopenmpt/libopenmpt.hpp",
    "../../libopenmpt/libopenmpt_config.h",

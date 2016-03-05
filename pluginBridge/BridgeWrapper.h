@@ -10,6 +10,8 @@
 
 #pragma once
 
+#ifndef NO_VST
+
 #include "BridgeCommon.h"
 #include "../common/ComponentManager.h"
 
@@ -148,3 +150,5 @@ protected:
 };
 
 OPENMPT_NAMESPACE_END
+
+#endif // NO_VST

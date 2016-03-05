@@ -448,7 +448,7 @@ static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, O
 	// Keep this assertion in the code to find potential other broken MODs.
 	if(numPatterns != officialPatterns && sizeWithoutPatterns + officialPatterns * numChannels * 256 == file.GetLength())
 	{
-		ASSERT(false);
+		MPT_ASSERT(false);
 	} else
 #endif
 	if(numPatternsIllegal > numPatterns && sizeWithoutPatterns + numPatternsIllegal * numChannels * 256 == file.GetLength())

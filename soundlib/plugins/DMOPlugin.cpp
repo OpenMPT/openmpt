@@ -11,11 +11,13 @@
 #include "stdafx.h"
 
 #ifndef NO_DMO
-#include <uuids.h>
-#include <medparam.h>
 #include "../Sndfile.h"
+#include "../../common/mptUUID.h"
 #include "DMOPlugin.h"
 #include "PluginManager.h"
+#include <uuids.h>
+#include <medparam.h>
+#include <MMSystem.h>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -37,9 +39,7 @@ DMOPlugin* DMOPlugin::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXP
 		} else pMO = nullptr;
 		if ((pMO) && (pMOIP))
 		{
-			DWORD dwInputs, dwOutputs;
-
-			dwInputs = dwOutputs = 0;
+			DWORD dwInputs = 0, dwOutputs = 0;
 			pMO->GetStreamCount(&dwInputs, &dwOutputs);
 			if (dwInputs == 1 && dwOutputs == 1)
 			{

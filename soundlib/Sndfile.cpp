@@ -41,10 +41,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifndef NO_PLUGINS
-PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = nullptr;
-#endif
-
 
 // Module decompression
 bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file);
@@ -450,7 +446,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 #endif // MODPLUG_TRACKER
 	std::vector<SNDMIXPLUGININFO *> notFoundIDs;
 
-	if (gpMixPluginCreateProc && (loadFlags & loadPluginData))
+	if (loadFlags & loadPluginData)
 	{
 		for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 		{
@@ -466,7 +462,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 					CMainFrame::GetMainFrame()->SetHelpText(mpt::ToCString(s));
 				}
 #endif // MODPLUG_TRACKER
-				gpMixPluginCreateProc(m_MixPlugins[plug], *this);
+				CreateMixPluginProc(m_MixPlugins[plug], *this);
 				if (m_MixPlugins[plug].pMixPlugin)
 				{
 					// Plugin was found
