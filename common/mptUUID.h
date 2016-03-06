@@ -12,8 +12,8 @@
 
 #if (defined(MODPLUG_TRACKER) || !defined(NO_DMO)) && MPT_OS_WINDOWS
 
-#include <Guiddef.h>
-#include <Rpc.h>
+#include <guiddef.h>
+#include <rpc.h>
 
 OPENMPT_NAMESPACE_BEGIN
 
