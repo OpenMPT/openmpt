@@ -491,6 +491,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 	VSTPluginLib *pPlug = GetSelectedPlugin();
 	int showBoxes = SW_HIDE;
 	BOOL enableTagsTextBox = FALSE;
+	BOOL enableRemoveButton = FALSE;
 	if (pManager != nullptr && pManager->IsValidPlugin(pPlug))
 	{
 		::SetDlgItemTextW(m_hWnd, IDC_TEXT_CURRENT_VSTPLUG, pPlug->dllPath.ToWide().c_str());
@@ -498,6 +499,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 #ifndef NO_VST
 		if(pPlug->pluginId1 == kEffectMagic)
 		{
+			enableRemoveButton = TRUE;
 			bool isBridgeAvailable =
 					((pPlug->GetDllBits() == 32) && IsComponentAvailable(pluginBridge32))
 				||
@@ -530,6 +532,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 	m_chkBridge.ShowWindow(showBoxes);
 	m_chkShare.ShowWindow(showBoxes);
 	GetDlgItem(IDC_PLUGINTAGS)->EnableWindow(enableTagsTextBox);
+	GetDlgItem(IDC_BUTTON2)->EnableWindow(enableRemoveButton);
 	if (result) *result = 0;
 }
 
@@ -713,7 +716,7 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 	if(update)
 	{
 		// Force selection to last added plug.
-		Reporting::Information(mpt::String::Print("Found %1 plugins.", files).c_str(), parent);
+		Reporting::Information(mpt::String::Print("Found %1 plugin%2.", files, files == 1 ? "" : "s").c_str(), parent);
 		return plugLib;
 	} else
 	{
