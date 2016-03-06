@@ -332,6 +332,14 @@ std::string GetBuildFeaturesString()
 		#if !defined(MPT_WITH_UNMO3) && !defined(MPT_ENABLE_UNMO3_DYNBIND) && !defined(MPT_ENABLE_MO3_BUILTIN)
 			retval += " -MO3";
 		#endif
+		#if !defined(NO_PLUGINS)
+			retval += " +PLUGINS";
+		#else
+			retval += " -PLUGINS";
+		#endif
+		#if !defined(NO_DMO)
+			retval += " +DMO";
+		#endif
 	#endif
 	#ifdef MODPLUG_TRACKER
 		if(IsForOlderWindows())
