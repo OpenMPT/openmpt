@@ -48,6 +48,7 @@ OPENMPT_NAMESPACE_BEGIN
 #endif // MPT_ENABLE_TEMPFILE
 #ifndef NO_DMO
 #pragma comment(lib, "dmoguids.lib")
+#pragma comment(lib, "rpcrt4.lib")
 #pragma comment(lib, "strmiids.lib")
 #endif // !NO_DMO
 #endif // MPT_COMPILER_MSVC
