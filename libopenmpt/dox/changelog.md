@@ -17,9 +17,11 @@ is just a high-level summary.
     MO3 support is not possible because either a MP3 or a Vrobis deocer is
     missing.
 
+ *  libopenmpt now has support for DMO plugins on Windows.
+ *  libopenmpt now supports the DigiBooster Echo DSP.
  *  libopenmpt got native MO3 support with MP3 decoding either via libmpg123 or
     MediaFoundation (on Windows 7 and up) and Vorbis decoding via libogg,
-    libvorbis, libvorsfile or stb_vorbis.
+    libvorbis, libvorbisfile or stb_vorbis.
  *  libopenmpt MSVC builds with Visual Studio 2010 or later on Windows 7 or
     later now use an internal MO3 decoder with stb_vorbis and libmpg123 or
     MediaFoundation suppport by defaut. Visual Studio 2008 builds still use
