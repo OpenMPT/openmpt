@@ -17,7 +17,7 @@ is just a high-level summary.
     MO3 support is not possible because either a MP3 or a Vorbis decoder is
     missing.
  *  [**Change**] The constants used to query library information from
-    `openmpt_string_get()` and `openmpt::string::get()` (i.e. OPENMPT_STRING_FOO
+    `openmpt_get_string()` and `openmpt::string::get()` (i.e. OPENMPT_STRING_FOO
     and openmpt::string::FOO) have been deprecated because having syntactic
     constants for theses keys makes extending the API in a backwards and
     forwards compatible way harder than it should be. Please just use the string
