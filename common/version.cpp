@@ -277,17 +277,6 @@ std::string GetBuildFeaturesString()
 {
 	std::string retval;
 	#ifdef LIBOPENMPT_BUILD
-		#if MPT_COMPILER_GENERIC
-			retval += "*C++11";
-		#elif MPT_COMPILER_MSVC
-			retval += mpt::format("*MSVC-%1.%2")(MPT_COMPILER_MSVC_VERSION / 100, MPT_COMPILER_MSVC_VERSION % 100);
-		#elif MPT_COMPILER_GCC
-			retval += mpt::format("*GCC-%1.%2.%3")(MPT_COMPILER_GCC_VERSION / 10000, (MPT_COMPILER_GCC_VERSION / 100) % 100, MPT_COMPILER_GCC_VERSION % 100);
-		#elif MPT_COMPILER_CLANG
-			retval += mpt::format("*Clang-%1.%2.%3")(MPT_COMPILER_CLANG_VERSION / 10000, (MPT_COMPILER_CLANG_VERSION / 100) % 100, MPT_COMPILER_CLANG_VERSION % 100);
-		#else
-			retval += "*unknown";
-		#endif
 		#if defined(MPT_CHARSET_WIN32)
 			retval += " +WINAPI";
 		#endif

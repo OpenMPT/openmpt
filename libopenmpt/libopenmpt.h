@@ -87,19 +87,19 @@ LIBOPENMPT_API uint32_t openmpt_get_library_version(void);
  */
 LIBOPENMPT_API uint32_t openmpt_get_core_version(void);
 
-/*! Return a verbose library version string from openmpt_get_string(). */
+/*! Return a verbose library version string from openmpt_get_string(). \deprecated Please use \code "library_version" \endcode directly. */
 #define OPENMPT_STRING_LIBRARY_VERSION  "library_version"
-/*! Return a verbose library features string from openmpt_get_string(). */
+/*! Return a verbose library features string from openmpt_get_string(). \deprecated Please use \code "library_features" \endcode directly. */
 #define OPENMPT_STRING_LIBRARY_FEATURES "library_features"
-/*! Return a verbose OpenMPT core version string from openmpt_get_string(). */
+/*! Return a verbose OpenMPT core version string from openmpt_get_string(). \deprecated Please use \code "core_version" \endcode directly. */
 #define OPENMPT_STRING_CORE_VERSION     "core_version"
-/*! Return information about the current build (e.g. the build date or compiler used) from openmpt_get_string(). */
+/*! Return information about the current build (e.g. the build date or compiler used) from openmpt_get_string(). \deprecated Please use \code "build" \endcode directly. */
 #define OPENMPT_STRING_BUILD            "build"
-/*! Return all contributors from openmpt_get_string(). */
+/*! Return all contributors from openmpt_get_string(). \deprecated Please use \code "credits" \endcode directly. */
 #define OPENMPT_STRING_CREDITS          "credits"
-/*! Return contact infromation about libopenmpt from openmpt_get_string(). */
+/*! Return contact infromation about libopenmpt from openmpt_get_string(). \deprecated Please use \code "contact" \endcode directly. */
 #define OPENMPT_STRING_CONTACT          "contact"
-/*! Return the libopenmpt license from openmpt_get_string(). */
+/*! Return the libopenmpt license from openmpt_get_string(). \deprecated Please use \code "license" \endcode directly. */
 #define OPENMPT_STRING_LICENSE          "license"
 
 /*! \brief Free a string returned by libopenmpt
@@ -111,13 +111,18 @@ LIBOPENMPT_API void openmpt_free_string( const char * str );
 /*! \brief Get library related metadata.
  *
  * \param key Key to query.
+ *       Possible keys are:
+ *        -  "library_version": verbose library version string
+ *        -  "library_features": verbose library features string
+ *        -  "core_version": verboseOpenMPT core version string
+ *        -  "source_url": original source code URL
+ *        -  "source_date": original source code date
+ *        -  "build": information about the current build (e.g. the build date or compiler used)
+ *        -  "build_compiler": information about the compiler used to build libopenmpt
+ *        -  "credits": all contributors
+ *        -  "contact": contact infromation about libopenmpt
+ *        -  "license": he libopenmpt license
  * \return A (possibly multi-line) string containing the queried information. If no information is available, the string is empty.
- * \sa OPENMPT_STRING_LIBRARY_VERSION
- * \sa OPENMPT_STRING_CORE_VERSION
- * \sa OPENMPT_STRING_BUILD
- * \sa OPENMPT_STRING_CREDITS
- * \sa OPENMPT_STRING_CONTACT
- * \sa OPENMPT_STRING_LICENSE
  */
 LIBOPENMPT_API const char * openmpt_get_string( const char * key );
 

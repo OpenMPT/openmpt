@@ -399,18 +399,18 @@ static void clear_current_timeinfo() {
 
 static void WINAPI openmpt_About( HWND win ) {
 	std::ostringstream about;
-	about << SHORT_TITLE << " version " << openmpt::string::get( openmpt::string::library_version ) << " " << "(built " << openmpt::string::get( openmpt::string::build ) << ")" << std::endl;
+	about << SHORT_TITLE << " version " << openmpt::string::get( "library_version" ) << " " << "(built " << openmpt::string::get( "build" ) << ")" << std::endl;
 	about << " Copyright (c) 2013-2016 OpenMPT developers (https://openmpt.org/)" << std::endl;
-	about << " OpenMPT version " << openmpt::string::get( openmpt::string::core_version ) << std::endl;
+	about << " OpenMPT version " << openmpt::string::get( "core_version" ) << std::endl;
 	about << std::endl;
-	about << openmpt::string::get( openmpt::string::contact ) << std::endl;
+	about << openmpt::string::get( "contact" ) << std::endl;
 	about << std::endl;
 	about << "Show full credits?" << std::endl;
 	if ( MessageBox( win, StringDecode( about.str(), CP_UTF8 ).c_str(), TEXT(SHORT_TITLE), MB_ICONINFORMATION | MB_YESNOCANCEL | MB_DEFBUTTON1 ) != IDYES ) {
 		return;
 	}
 	std::ostringstream credits;
-	credits << openmpt::string::get( openmpt::string::credits );
+	credits << openmpt::string::get( "credits" );
 	credits << "Additional thanks to:" << std::endl;
 	credits << std::endl;
 	credits << "Arseny Kapoulkine for pugixml" << std::endl;
@@ -1073,7 +1073,7 @@ static void WINAPI openmpt_GetGeneralInfo( char * buf ) {
 	str
 		<< "\r"
 		<< "Tracker" << "\t" << sanitize_xmplay_info_string( self->mod->get_metadata("tracker") ) << "\r"
-		<< "Player" << "\t" << "xmp-openmpt" << " version " << openmpt::string::get( openmpt::string::library_version ) << "\r"
+		<< "Player" << "\t" << "xmp-openmpt" << " version " << openmpt::string::get( "library_version" ) << "\r"
 		;
 	std::string warnings = self->mod->get_metadata("warnings");
 	if ( !warnings.empty() ) {

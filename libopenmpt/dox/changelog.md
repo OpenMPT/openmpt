@@ -16,6 +16,12 @@ is just a high-level summary.
     unmo3 is now always enabled when dynamic loading is possible and built-in
     MO3 support is not possible because either a MP3 or a Vrobis deocer is
     missing.
+ *  [**Change**] The constants used to query library information from
+    `openmpt_string_get()` and `openmpt::string::get()` (i.e. OPENMPT_STRING_FOO
+    and openmpt::string::FOO) have been deprecated because having syntactic
+    constants for theses keys makes extending the API in a backwards and
+    forwards compatible way harder than it should be. Please just use the string
+    literals directly.
 
  *  libopenmpt now has support for DMO plugins on Windows.
  *  libopenmpt now supports the DigiBooster Echo DSP.
@@ -41,6 +47,8 @@ is just a high-level summary.
     `USE_MINIMP3=1`. You have to download
     [minimp3](http://keyj.emphy.de/minimp3/) yourself and put its contents into
     `include/minimp3/`.
+ *  `"source_url"`, `"source_date"` and `"build_compiler"` keys have been added
+    to `openmpt_string_get()` and `openmpt::string::get()`.
 
 ### libopenmpt 0.2-beta16 (2015-11-22)
 
