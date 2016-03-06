@@ -47,6 +47,7 @@ static const char * const license =
 #include <iterator>
 #include <limits>
 #include <map>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -534,7 +535,9 @@ static void show_help( textout & log, bool with_info = true, bool longhelp = fal
 		log << "     --pitch f              Set pitch factor f [default: " << pitch_flag_to_double( commandlineflags().pitch ) << "]" << std::endl;
 		log << "     --dither n             Dither type to use (if applicable for selected output format): [0=off,1=auto,2=0.5bit,3=1bit] [default: " << commandlineflags().dither << "]" << std::endl;
 		log << std::endl;
-		log << "     --[no-]shuffle         Shuffle playlist [default: " << commandlineflags().shuffle << "]" << std::endl;
+		log << "     --[no-]randomize       Randomize playlist [default: " << commandlineflags().randomize << "]" << std::endl;
+		log << "     --[no-]shuffle         Shuffle through playlist [default: " << commandlineflags().shuffle << "]" << std::endl;
+		log << "     --[no-]restart         Restart playlist when finished [default: " << commandlineflags().restart << "]" << std::endl;
 		log << std::endl;
 		log << "     --repeat n             Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
 		log << "     --seek n               Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
@@ -1541,35 +1544,79 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 }
 
 
+static std::string get_random_filename(std::set<std::string> & filenames) {
+	// TODO: actually use a useful random distribution
+	std::size_t index = std::rand() % filenames.size();
+	std::set<std::string>::iterator it = filenames.begin();
+	std::advance( it, index );
+	return *it;
+}
+
+
 static void render_files( commandlineflags & flags, textout & log, write_buffers_interface & audio_stream ) {
-	if ( flags.shuffle ) {
+	if ( flags.randomize ) {
 		std::random_shuffle( flags.filenames.begin(), flags.filenames.end() );
 	}
-	std::vector<std::string>::iterator filename = flags.filenames.begin();
-	while ( true ) {
-		if ( filename == flags.filenames.end() ) {
-			break;
-		}
-		try {
-			flags.playlist_index = filename - flags.filenames.begin();
-			render_file( flags, *filename, log, audio_stream );
-			filename++;
-			continue;
-		} catch ( prev_file & e ) {
-			while ( filename != flags.filenames.begin() && e.count ) {
-				e.count--;
-				--filename;
+	try {
+		while ( true ) {
+			if ( flags.shuffle ) {
+				// TODO: improve prev/next logic
+				std::set<std::string> shuffle_set;
+				shuffle_set.insert( flags.filenames.begin(), flags.filenames.end() );
+				while ( true ) {
+					if ( shuffle_set.empty() ) {
+						break;
+					}
+					std::string filename = get_random_filename( shuffle_set );
+					try {
+						flags.playlist_index = std::find( flags.filenames.begin(), flags.filenames.end(), filename ) - flags.filenames.begin();
+						render_file( flags, filename, log, audio_stream );
+						shuffle_set.erase( filename );
+						continue;
+					} catch ( prev_file & e ) {
+						shuffle_set.erase( filename );
+						continue;
+					} catch ( next_file & e ) {
+						shuffle_set.erase( filename );
+						continue;
+					} catch ( ... ) {
+						throw;
+					}
+				}
+			} else {
+				std::vector<std::string>::iterator filename = flags.filenames.begin();
+				while ( true ) {
+					if ( filename == flags.filenames.end() ) {
+						break;
+					}
+					try {
+						flags.playlist_index = filename - flags.filenames.begin();
+						render_file( flags, *filename, log, audio_stream );
+						filename++;
+						continue;
+					} catch ( prev_file & e ) {
+						while ( filename != flags.filenames.begin() && e.count ) {
+							e.count--;
+							--filename;
+						}
+						continue;
+					} catch ( next_file & e ) {
+						while ( filename != flags.filenames.end() && e.count ) {
+							e.count--;
+							++filename;
+						}
+						continue;
+					} catch ( ... ) {
+						throw;
+					}
+				}
 			}
-			continue;
-		} catch ( next_file & e ) {
-			while ( filename != flags.filenames.end() && e.count ) {
-				e.count--;
-				++filename;
+			if ( !flags.restart ) {
+				break;
 			}
-			continue;
-		} catch ( ... ) {
-			throw;
 		}
+	} catch ( ... ) {
+		throw;
 	}
 }
 
@@ -1778,10 +1825,18 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 				std::istringstream istr( nextarg );
 				istr >> flags.dither;
 				++i;
+			} else if ( arg == "--randomize" ) {
+				flags.randomize = true;
+			} else if ( arg == "--no-randomize" ) {
+				flags.randomize = false;
 			} else if ( arg == "--shuffle" ) {
 				flags.shuffle = true;
 			} else if ( arg == "--no-shuffle" ) {
 				flags.shuffle = false;
+			} else if ( arg == "--restart" ) {
+				flags.restart = true;
+			} else if ( arg == "--no-restart" ) {
+				flags.restart = false;
 			} else if ( arg == "--repeat" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.repeatcount;

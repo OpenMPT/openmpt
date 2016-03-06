@@ -271,7 +271,9 @@ struct commandlineflags {
 	bool show_pattern;
 	bool use_float;
 	bool use_stdout;
+	bool randomize;
 	bool shuffle;
+	bool restart;
 	std::size_t playlist_index;
 	std::vector<std::string> filenames;
 	std::string output_filename;
@@ -373,7 +375,9 @@ struct commandlineflags {
 		show_channel_meters = false;
 		show_pattern = false;
 		use_stdout = false;
+		randomize = false;
 		shuffle = false;
+		restart = false;
 		playlist_index = 0;
 		output_extension = "wav";
 		force_overwrite = false;
