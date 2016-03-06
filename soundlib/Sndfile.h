@@ -68,6 +68,13 @@ extern bool ReadInstrumentHeaderField(ModInstrument * input, uint32 fcode, uint1
 typedef void (* LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
 
 
+#ifdef LIBOPENMPT_BUILD
+#ifndef NO_PLUGINS
+class CVstPluginManager;
+#endif
+#endif
+
+
 typedef std::bitset<kMaxPlayBehaviours> PlayBehaviourSet;
 
 #ifdef MODPLUG_TRACKER
@@ -468,6 +475,13 @@ public:
 
 	std::vector<PatternCuePoint> m_PatternCuePoints;	// For WAV export (writing pattern positions to file)
 #endif // MODPLUG_TRACKER
+
+public:
+#ifdef LIBOPENMPT_BUILD
+#ifndef NO_PLUGINS
+	MPT_SHARED_PTR<CVstPluginManager> m_PluginManager;
+#endif
+#endif
 
 public:
 

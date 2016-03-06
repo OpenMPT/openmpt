@@ -110,8 +110,11 @@ bool CreateMixPluginProc(SNDMIXPLUGIN &mixPlugin, CSoundFile &sndFile)
 	}
 	return false;
 #else
-	static CVstPluginManager manager;
-	return manager.CreateMixPlugin(mixPlugin, sndFile);
+	if(!sndFile.m_PluginManager)
+	{
+		sndFile.m_PluginManager = mpt::make_shared<CVstPluginManager>();
+	}
+	return sndFile.m_PluginManager->CreateMixPlugin(mixPlugin, sndFile);
 #endif // MODPLUG_TRACKER
 }
 
