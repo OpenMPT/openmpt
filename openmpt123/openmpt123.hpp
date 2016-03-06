@@ -192,7 +192,7 @@ static inline long mpt_lround( float val ) {
 }
 
 static inline std::string append_software_tag( std::string software ) {
-	std::string openmpt123 = std::string() + "openmpt123 " + OPENMPT123_VERSION_STRING + " (libopenmpt " + openmpt::string::get( openmpt::string::library_version ) + ", OpenMPT " + openmpt::string::get( openmpt::string::core_version ) + ")";
+	std::string openmpt123 = std::string() + "openmpt123 " + OPENMPT123_VERSION_STRING + " (libopenmpt " + openmpt::string::get( "library_version" ) + ", OpenMPT " + openmpt::string::get( "core_version" ) + ")";
 	if ( software.empty() ) {
 		software = openmpt123;
 	} else {
@@ -202,7 +202,7 @@ static inline std::string append_software_tag( std::string software ) {
 }
 
 static inline std::string get_encoder_tag() {
-	return std::string() + "openmpt123 " + OPENMPT123_VERSION_STRING + " (libopenmpt " + openmpt::string::get( openmpt::string::library_version ) + ", OpenMPT " + openmpt::string::get( openmpt::string::core_version ) + ")";
+	return std::string() + "openmpt123 " + OPENMPT123_VERSION_STRING + " (libopenmpt " + openmpt::string::get( "library_version" ) + ", OpenMPT " + openmpt::string::get( "core_version" ) + ")";
 }
 
 static inline std::string get_extension( std::string filename ) {

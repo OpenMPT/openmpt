@@ -111,8 +111,20 @@ static std::string get_core_version_string() {
 	return MptVersion::GetVersionStringExtended();
 }
 
+static std::string get_source_url_string() {
+	return MptVersion::GetSourceInfo().GetUrlWithRevision();
+}
+
+static std::string get_source_date_string() {
+	return MptVersion::GetSourceInfo().Date;
+}
+
 static std::string get_build_string() {
 	return MptVersion::GetBuildDateString();
+}
+
+static std::string get_build_compiler_string() {
+	return MptVersion::GetBuildCompilerString();
 }
 
 static std::string get_credits_string() {
@@ -130,19 +142,25 @@ static std::string get_license_string() {
 std::string get_string( const std::string & key ) {
 	if ( key == "" ) {
 		return std::string();
-	} else if ( key == string::library_version ) {
+	} else if ( key == "library_version" ) {
 		return get_library_version_string();
-	} else if ( key == string::library_features ) {
+	} else if ( key == "library_features" ) {
 		return get_library_features_string();
-	} else if ( key == string::core_version ) {
+	} else if ( key == "core_version" ) {
 		return get_core_version_string();
-	} else if ( key == string::build ) {
+	} else if ( key == "source_url" ) {
+		return get_source_url_string();
+	} else if ( key == "source_date" ) {
+		return get_source_date_string();
+	} else if ( key == "build" ) {
 		return get_build_string();
-	} else if ( key == string::credits ) {
+	} else if ( key == "build_compiler" ) {
+		return get_build_compiler_string();
+	} else if ( key == "credits" ) {
 		return get_credits_string();
-	} else if ( key == string::contact ) {
+	} else if ( key == "contact" ) {
 		return get_contact_string();
-	} else if ( key == string::license ) {
+	} else if ( key == "license" ) {
 		return get_license_string();
 	} else {
 		return std::string();

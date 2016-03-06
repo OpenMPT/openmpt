@@ -377,14 +377,16 @@ std::string bytes_to_string( T bytes ) {
 }
 
 static void show_info( std::ostream & log, bool verbose ) {
-	log << "openmpt123" << " v" << OPENMPT123_VERSION_STRING << ", libopenmpt " << openmpt::string::get( openmpt::string::library_version ) << " (" << "OpenMPT " << openmpt::string::get( openmpt::string::core_version ) << ")" << std::endl;
+	log << "openmpt123" << " v" << OPENMPT123_VERSION_STRING << ", libopenmpt " << openmpt::string::get( "library_version" ) << " (" << "OpenMPT " << openmpt::string::get( "core_version" ) << ")" << std::endl;
 	log << "Copyright (c) 2013-2016 OpenMPT developers <https://openmpt.org/>" << std::endl;
 	if ( !verbose ) {
 		log << std::endl;
 		return;
 	}
-	log << "  libopenmpt Features: " << openmpt::string::get( openmpt::string::library_features ) << std::endl;
-	log << "  libopenmpt Build: " << openmpt::string::get( openmpt::string::build ) << std::endl;
+	log << "  libopenmpt source..: " << openmpt::string::get( "source_url" ) << std::endl;
+	log << "  libopenmpt date....: " << openmpt::string::get( "source_date" ) << std::endl;
+	log << "  libopenmpt compiler: " << openmpt::string::get( "build_compiler" ) << std::endl;
+	log << "  libopenmpt features: " << openmpt::string::get( "library_features" ) << std::endl;
 #ifdef MPT_WITH_SDL2
 	log << " libSDL2 ";
 	SDL_version sdlver;
@@ -434,7 +436,7 @@ static void show_man_version( textout & log ) {
 }
 
 static void show_short_version( textout & log ) {
-	log << OPENMPT123_VERSION_STRING << " / " << openmpt::string::get( openmpt::string::library_version ) << " / " << openmpt::string::get( openmpt::string::core_version ) << std::endl;
+	log << OPENMPT123_VERSION_STRING << " / " << openmpt::string::get( "library_version" ) << " / " << openmpt::string::get( "core_version" ) << std::endl;
 	log.writeout();
 }
 
@@ -450,9 +452,9 @@ static void show_long_version( textout & log ) {
 
 static void show_credits( textout & log ) {
 	show_info( log, false );
-	log << openmpt::string::get( openmpt::string::contact ) << std::endl;
+	log << openmpt::string::get( "contact" ) << std::endl;
 	log << std::endl;
-	log << openmpt::string::get( openmpt::string::credits ) << std::endl;
+	log << openmpt::string::get( "credits" ) << std::endl;
 	log.writeout();
 }
 

@@ -88,31 +88,36 @@ LIBOPENMPT_CXX_API std::uint32_t get_core_version();
 
 namespace string {
 
-//! Return a verbose library version string from openmpt::string::get().
+//! Return a verbose library version string from openmpt::string::get(). \deprecated Please use \code "library_version" \endcode directly.
 static const char library_version [] = "library_version";
-//! Return a verbose library features string from openmpt::string::get().
+//! Return a verbose library features string from openmpt::string::get(). \deprecated Please use \code "library_features" \endcode directly.
 static const char library_features[] = "library_features";
-//! Return a verbose OpenMPT core version string from openmpt::string::get().
+//! Return a verbose OpenMPT core version string from openmpt::string::get(). \deprecated Please use \code "core_version" \endcode directly.
 static const char core_version    [] = "core_version";
-//! Return information about the current build (e.g. the build date or compiler used) from openmpt::string::get().
+//! Return information about the current build (e.g. the build date or compiler used) from openmpt::string::get(). \deprecated Please use \code "build" \endcode directly.
 static const char build           [] = "build";
-//! Return all contributors from openmpt::string::get().
+//! Return all contributors from openmpt::string::get(). \deprecated Please use \code "credits" \endcode directly.
 static const char credits         [] = "credits";
-//! Return contact infromation about libopenmpt from openmpt::string::get().
+//! Return contact infromation about libopenmpt from openmpt::string::get(). \deprecated Please use \code "contact" \endcode directly.
 static const char contact         [] = "contact";
-//! Return the libopenmpt license from openmpt::string::get().
+//! Return the libopenmpt license from openmpt::string::get(). \deprecated Please use \code "license" \endcode directly.
 static const char license         [] = "license";
 
 //! Get library related metadata.
 /*!
-  \param key Key to query.
-  \return A (possibly multi-line) string containing the queried information. If no information is available, the string is empty.
-  \sa openmpt::string::library_version
-  \sa openmpt::string::core_version
-  \sa openmpt::string::build
-  \sa openmpt::string::credits
-  \sa openmpt::string::contact
-  \sa openmpt::string::license
+	\param key Key to query.
+	       Possible keys are:
+	        -  "library_version": verbose library version string
+	        -  "library_features": verbose library features string
+	        -  "core_version": verboseOpenMPT core version string
+	        -  "source_url": original source code URL
+	        -  "source_date": original source code date
+	        -  "build": information about the current build (e.g. the build date or compiler used)
+	        -  "build_compiler": information about the compiler used to build libopenmpt
+	        -  "credits": all contributors
+	        -  "contact": contact infromation about libopenmpt
+	        -  "license": he libopenmpt license
+	\return A (possibly multi-line) string containing the queried information. If no information is available, the string is empty.
 */
 LIBOPENMPT_CXX_API std::string get( const std::string & key );
 
