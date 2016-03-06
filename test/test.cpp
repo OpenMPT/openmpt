@@ -50,7 +50,11 @@
 #include <windows.h>
 #endif
 #if defined(MPT_WITH_ZLIB)
+#if MPT_COMPILER_MSVC
 #include <zlib/zlib.h>
+#else
+#include <zlib.h>
+#endif
 #elif defined(MPT_WITH_MINIZ)
 #define MINIZ_HEADER_FILE_ONLY
 #define MINIZ_NO_ZLIB_COMPATIBLE_NAMES
