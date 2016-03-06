@@ -969,6 +969,7 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 		for ( std::vector<std::string>::const_iterator i = m_loaderMessages.begin(); i != m_loaderMessages.end(); ++i ) {
 			if ( !first ) {
 				retval += "\n";
+			} else {
 				first = false;
 			}
 			retval += *i;
