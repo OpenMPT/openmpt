@@ -14,7 +14,7 @@ is just a high-level summary.
  *  [**Change**] In the Makefile build system option `USE_MO3` and the Autotools
     build system option `--enable-mo3` are gone. Dynamic loading of un4seen
     unmo3 is now always enabled when dynamic loading is possible and built-in
-    MO3 support is not possible because either a MP3 or a Vrobis deocer is
+    MO3 support is not possible because either a MP3 or a Vorbis decoder is
     missing.
  *  [**Change**] The constants used to query library information from
     `openmpt_string_get()` and `openmpt::string::get()` (i.e. OPENMPT_STRING_FOO
@@ -23,7 +23,7 @@ is just a high-level summary.
     forwards compatible way harder than it should be. Please just use the string
     literals directly.
 
- *  libopenmpt now has support for DMO plugins on Windows.
+ *  libopenmpt now has support for DMO plugins on Windows when built with MSVC.
  *  libopenmpt now supports the DigiBooster Echo DSP.
  *  libopenmpt got native MO3 support with MP3 decoding either via libmpg123 or
     MediaFoundation (on Windows 7 and up) and Vorbis decoding via libogg,
