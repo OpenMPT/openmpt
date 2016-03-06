@@ -223,7 +223,7 @@
 #else
 #define MODPLUG_NO_FILESAVE
 #endif
-#if defined(MPT_BUILD_CHECKED) || defined(ENABLE_TESTS)
+#if defined(MPT_BUILD_ANALZYED) || defined(MPT_BUILD_CHECKED) || defined(ENABLE_TESTS)
 // enable asserts
 #else
 #define NO_ASSERTS
@@ -373,6 +373,12 @@
 
 
 // fixing stuff up
+
+#if defined(MPT_BUILD_ANALYZED) || defined(MPT_BUILD_CHECKED) 
+#ifdef NO_ASSERTS
+#undef NO_ASSERTS // static or dynamic analyzers want assertions on
+#endif
+#endif
 
 #if !MPT_COMPILER_MSVC && defined(ENABLE_ASM)
 #undef ENABLE_ASM // inline assembly requires MSVC compiler
@@ -621,6 +627,15 @@
 #endif
 
 #pragma warning(error:4309) // Treat "truncation of constant value"-warning as error.
+
+#ifdef MPT_BUILD_ANALYZED
+// Disable Visual Studio static analyzer warnings that generate too many false positives in VS2010.
+//#pragma warning(disable:6246)
+//#pragma warning(disable:6262)
+#pragma warning(disable:6326) // Potential comparison of a constant with another constant
+//#pragma warning(disable:6385)
+//#pragma warning(disable:6386)
+#endif // MPT_BUILD_ANALYZED
 
 #endif // MPT_COMPILER_MSVC
 

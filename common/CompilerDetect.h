@@ -67,6 +67,12 @@
 #error "MSVC version 2008 required"
 #endif
 
+#if defined(_PREFAST_)
+#ifndef MPT_BUILD_ANALYZED
+#define MPT_BUILD_ANALYZED
+#endif
+#endif
+
 #else
 
 #error "Your compiler is unknown to openmpt and thus not supported. You might want to edit CompilerDetect.h und typedefs.h."

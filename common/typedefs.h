@@ -243,7 +243,7 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 //#define MPT_CHECKER_ASSUME_ASSERTIONS 0
 
 #if MPT_COMPILER_MSVC
-#ifdef _PREFAST_
+#ifdef MPT_BUILD_ANALYZED
 #if MPT_CHECKER_ASSUME_ASSERTIONS
 #define MPT_CHECKER_ASSUME(x) __analysis_assume(!!(x))
 #endif
