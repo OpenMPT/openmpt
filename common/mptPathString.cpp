@@ -300,10 +300,6 @@ mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const 
 	return filename;
 }
 
-#if defined(LIBOPENMPT_BUILD) && MPT_COMPILER_MSVC
-#pragma comment(lib, "rpcrt4.lib")
-#endif
-
 #endif // MPT_OS_WINDOWS
 #endif // MPT_ENABLE_TEMPFILE
 

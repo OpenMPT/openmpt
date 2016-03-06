@@ -250,7 +250,7 @@
 #define NO_EQ
 #define NO_AGC
 #define NO_VST
-#define NO_DMO
+//#define NO_DMO
 //#define NO_PLUGINS
 #if MPT_OS_WINDOWS || defined(MPT_WITH_LTDL) || defined(MPT_WIH_DL)
 #if !defined(MPT_WITH_MPG123)
