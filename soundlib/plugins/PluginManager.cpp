@@ -36,15 +36,7 @@
 #include "../../mptrack/TrackerSettings.h"
 #include "../../mptrack/AbstractVstEditor.h"
 #include "../../soundlib/AudioCriticalSection.h"
-
-// For CRC32 calculation (to tell plugins with same UID apart in our cache file)
-#if defined(MPT_WITH_ZLIB)
-#include <zlib/zlib.h>
-#elif defined(MPT_WITH_MINIZ)
-#define MINIZ_HEADER_FILE_ONLY
-#include <miniz/miniz.c>
-#endif
-
+#include "../common/mptCRC.h"
 #endif // MODPLUG_TRACKER
 
 OPENMPT_NAMESPACE_BEGIN
@@ -89,7 +81,7 @@ void VSTPluginLib::WriteToCache() const
 	SettingsContainer &cacheFile = theApp.GetPluginCache();
 
 	const std::string libName = libraryName.ToUTF8();
-	const uint32 crc = crc32(0, reinterpret_cast<const Bytef *>(&libName[0]), libName.length());
+	const uint32 crc = mpt::crc32(libName);
 	const mpt::ustring IDs = mpt::ufmt::HEX0<8>(SwapBytesReturnLE(pluginId1)) + mpt::ufmt::HEX0<8>(SwapBytesReturnLE(pluginId2)) + mpt::ufmt::HEX0<8>(SwapBytesReturnLE(crc));
 	const mpt::ustring flagsKey = IDs + MPT_USTRING(".Flags");
 
