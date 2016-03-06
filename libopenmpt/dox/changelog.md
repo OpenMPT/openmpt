@@ -22,6 +22,10 @@ is just a high-level summary.
     constants for theses keys makes extending the API in a backwards and
     forwards compatible way harder than it should be. Please just use the string
     literals directly.
+ *  [**Change**] openmpt123: `--[no-]shuffle` option has been renamed to
+    `--[no-]randomize`. A new `--[no-]shuffle` option hasa been added which
+    shuffles randomly through the playlist as opposed to randomizing the
+    playlist upfront.
 
  *  libopenmpt now has support for DMO plugins on Windows when built with MSVC.
  *  libopenmpt now supports the DigiBooster Echo DSP.
@@ -49,6 +53,8 @@ is just a high-level summary.
     `include/minimp3/`.
  *  `"source_url"`, `"source_date"` and `"build_compiler"` keys have been added
     to `openmpt_string_get()` and `openmpt::string::get()`.
+ *  openmpt123: Add new `--[no-]restart]` option which restarts the playlist
+    when finished.
 
 ### libopenmpt 0.2-beta16 (2015-11-22)
 
