@@ -27,7 +27,8 @@
 #endif // NO_VST
 
 #ifndef NO_DMO
-#include <WinReg.h>
+#include <winreg.h>
+#include <strmif.h>
 #include <tchar.h>
 #endif // NO_DMO
 

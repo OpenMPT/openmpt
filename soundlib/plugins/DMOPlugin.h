@@ -12,6 +12,7 @@
 
 #include "PlugInterface.h"
 #include <dmoreg.h>
+#include <strmif.h>
 
 typedef interface IMediaObject IMediaObject;
 typedef interface IMediaObjectInPlace IMediaObjectInPlace;

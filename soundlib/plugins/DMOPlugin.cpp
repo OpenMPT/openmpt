@@ -17,7 +17,7 @@
 #include "PluginManager.h"
 #include <uuids.h>
 #include <medparam.h>
-#include <MMSystem.h>
+#include <mmsystem.h>
 #endif // !NO_DMO
 
 
