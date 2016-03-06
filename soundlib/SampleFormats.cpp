@@ -3337,14 +3337,6 @@ public:
 };
 MPT_REGISTERED_COMPONENT(ComponentMediaFoundation, "MediaFoundation")
 
-#if defined(LIBOPENMPT_BUILD) && MPT_COMPILER_MSVC
-#pragma comment(lib, "mf.lib")
-#pragma comment(lib, "mfplat.lib")
-#pragma comment(lib, "mfreadwrite.lib")
-#pragma comment(lib, "mfuuid.lib") // static lib
-#pragma comment(lib, "propsys.lib")
-#endif
-
 #endif // MPT_WITH_MEDIAFOUNDATION
 
 
