@@ -49,6 +49,13 @@
 #if MPT_OS_WINDOWS
 #include <windows.h>
 #endif
+#if defined(MPT_WITH_ZLIB)
+#include <zlib/zlib.h>
+#elif defined(MPT_WITH_MINIZ)
+#define MINIZ_HEADER_FILE_ONLY
+#define MINIZ_NO_ZLIB_COMPATIBLE_NAMES
+#include <miniz/miniz.c>
+#endif
 
 #ifdef _DEBUG
 #if MPT_COMPILER_MSVC && defined(_MFC_VER)
@@ -841,6 +848,12 @@ static MPT_NOINLINE void TestMisc()
 		VERIFY_EQUAL(a, 'a');
 	}
 
+#ifdef MPT_WITH_ZLIB
+	VERIFY_EQUAL(crc32(0, reinterpret_cast<const unsigned char*>(std::string("123456789").c_str()), 9), 0xCBF43926u);
+#endif
+#ifdef MPT_WITH_MINIZ
+	VERIFY_EQUAL(mz_crc32(0, reinterpret_cast<const unsigned char*>(std::string("123456789").c_str()), 9), 0xCBF43926u);
+#endif
 	VERIFY_EQUAL(mpt::crc32(std::string("123456789")), 0xCBF43926u);
 	VERIFY_EQUAL(mpt::crc32_ogg(std::string("123456789")), 0x89a1897fu);
 
