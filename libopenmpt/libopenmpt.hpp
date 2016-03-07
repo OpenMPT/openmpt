@@ -750,6 +750,7 @@ public:
 	  \remarks Currently supported ctl values are:
 	           - load.skip_samples: Set to "1" to avoid loading samples into memory
 	           - load.skip_patterns: Set to "1" to avoid loading patterns into memory
+	           - load.skip_plugins: Set to "1" to avoid loading plugins
 	           - load.skip_subsongs_init: Set to "1" to avoid pre-initializing subsongs. Skipping results in faster module loading but slower seeking.
 	           - seek.sync_samples: Set to "1" to sync sample playback when using openmpt::module::set_position_seconds or openmpt::module::set_position_order_row.
 	           - play.tempo_factor: Set a floating point tempo factor. "1.0" is the default tempo.
