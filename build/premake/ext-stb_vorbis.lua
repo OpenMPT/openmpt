@@ -4,6 +4,8 @@
   language "C"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/stb_vorbis"
+  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   includedirs { }
   characterset "MBCS"
   defines { "STB_VORBIS_NO_PULLDATA_API", "STB_VORBIS_NO_STDIO" }
@@ -11,5 +13,3 @@
    "../../include/stb_vorbis/stb_vorbis.c",
   }
   buildoptions { "/wd4005", "/wd4100", "/wd4244", "/wd4245", "/wd4701" }
-  dofile "../../build/premake/premake-defaults-LIB.lua"
-  dofile "../../build/premake/premake-defaults.lua"

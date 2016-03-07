@@ -4,6 +4,8 @@
   language "C"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/zlib"
+  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   includedirs { "../../include/zlib" }
   characterset "MBCS"
   files {
@@ -36,5 +38,3 @@
    "../../include/zlib/zlib.h",
    "../../include/zlib/zutil.h",
   }
-  dofile "../../build/premake/premake-defaults-LIB.lua"
-  dofile "../../build/premake/premake-defaults.lua"

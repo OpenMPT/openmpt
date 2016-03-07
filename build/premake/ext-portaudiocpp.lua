@@ -4,6 +4,8 @@
   language "C++"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/portaudiocpp"
+  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   includedirs { "../../include/portaudio/include", "../../include/portaudio/bindings/cpp/include" }
   characterset "MBCS"
   defines {
@@ -24,5 +26,3 @@
   filter { "configurations:Debug" }
    defines { "PA_ENABLE_DEBUG_OUTPUT" }
   filter {}
-  dofile "../../build/premake/premake-defaults-LIB.lua"
-  dofile "../../build/premake/premake-defaults.lua"

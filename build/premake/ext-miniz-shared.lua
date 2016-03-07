@@ -4,11 +4,11 @@
   language "C"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/miniz-shared"
+  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   characterset "MBCS"
   files {
    "../../include/miniz/miniz.c",
   }
-  dofile "../../build/premake/premake-defaults-LIB.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   filter {}
    removeflags { "StaticRuntime" }

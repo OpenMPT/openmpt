@@ -4,6 +4,8 @@
   language "C++"
   location ( "../../build/" .. _ACTION )
   objdir "../../build/obj/OpenMPT-VSTi"
+  dofile "../../build/premake/premake-defaults-DLL.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   includedirs {
    "../../common",
    "../../soundlib",
@@ -81,5 +83,3 @@
   }
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
-  dofile "../../build/premake/premake-defaults-DLL.lua"
-  dofile "../../build/premake/premake-defaults.lua"

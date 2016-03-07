@@ -4,6 +4,8 @@
   language "C"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/ogg"
+  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   includedirs { "../../include/ogg/include" }
   characterset "MBCS"
   files {
@@ -12,5 +14,3 @@
    "../../include/ogg/src/bitwise.c",
    "../../include/ogg/src/framing.c",
   }
-  dofile "../../build/premake/premake-defaults-LIB.lua"
-  dofile "../../build/premake/premake-defaults.lua"

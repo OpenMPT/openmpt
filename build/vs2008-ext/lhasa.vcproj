@@ -45,7 +45,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\msinttypes\inttypes"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -62,7 +62,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\msinttypes\inttypes"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -114,7 +114,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\msinttypes\inttypes"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -131,7 +131,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\msinttypes\inttypes"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -182,7 +182,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267 /MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\msinttypes\inttypes"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -199,7 +199,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\msinttypes\inttypes"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -251,7 +251,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267 /MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\msinttypes\inttypes"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -268,7 +268,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\msinttypes\inttypes"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -319,7 +319,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\msinttypes\inttypes"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -336,7 +336,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\msinttypes\inttypes"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -388,7 +388,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\msinttypes\inttypes"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -405,7 +405,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\msinttypes\inttypes"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -456,7 +456,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267 /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\msinttypes\inttypes"
 				WholeProgramOptimization="true"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
@@ -474,7 +474,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\msinttypes\inttypes"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -526,7 +526,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4244 /wd4267 /MP"
 				Optimization="3"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\msinttypes\inttypes"
 				WholeProgramOptimization="true"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
@@ -544,7 +544,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\inttypes;..\..\include\msinttypes\stdint"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\msinttypes\inttypes"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"

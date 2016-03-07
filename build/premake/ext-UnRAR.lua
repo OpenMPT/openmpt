@@ -4,6 +4,8 @@
   language "C++"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/unrar"
+  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   includedirs { "../../include/unrar" }
   characterset "MBCS"
   files {
@@ -124,5 +126,3 @@
    "../../include/unrar/version.hpp",
    "../../include/unrar/volume.hpp",
   }
-  dofile "../../build/premake/premake-defaults-LIB.lua"
-  dofile "../../build/premake/premake-defaults.lua"

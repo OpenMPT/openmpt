@@ -4,6 +4,8 @@
   language "C"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/minizip"
+  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   includedirs { "../../include/zlib", "../../include/zlib/contrib/minizip" }
   characterset "MBCS"
   files {
@@ -21,5 +23,3 @@
    "../../include/zlib/contrib/minizip/unzip.h",
    "../../include/zlib/contrib/minizip/zip.h",
   }
-  dofile "../../build/premake/premake-defaults-LIB.lua"
-  dofile "../../build/premake/premake-defaults.lua"

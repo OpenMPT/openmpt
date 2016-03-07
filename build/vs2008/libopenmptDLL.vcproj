@@ -45,8 +45,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version"
+				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -60,8 +60,8 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -124,8 +124,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version"
+				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -139,8 +139,8 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -203,8 +203,8 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -218,8 +218,8 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -285,8 +285,8 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -300,8 +300,8 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version;..\..\include\msinttypes\stdint"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_DLL"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"

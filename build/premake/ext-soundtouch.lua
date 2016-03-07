@@ -4,6 +4,8 @@
   language "C++"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/soundtouch"
+  dofile "../../build/premake/premake-defaults-DLL.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   targetname "OpenMPT_SoundTouch_f32"
   includedirs { "../../include/soundtouch/include" }
   characterset "MBCS"
@@ -46,5 +48,3 @@
    "../../include/soundtouch/source/SoundTouchDLL/SoundTouchDLL.h",
   }
   defines { "DLL_EXPORTS" }
-  dofile "../../build/premake/premake-defaults-DLL.lua"
-  dofile "../../build/premake/premake-defaults.lua"

@@ -6,6 +6,8 @@ if _ACTION == "vs2010" then
   language "C++"
   location ( "../../build/" .. _ACTION )
   objdir "../../build/obj/foo_openmpt"
+  dofile "../../build/premake/premake-defaults-DLL.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   includedirs {
    "../..",
    "../../include/foobar2000sdk",
@@ -30,8 +32,6 @@ if _ACTION == "vs2010" then
   }
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
-  dofile "../../build/premake/premake-defaults-DLL.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   filter { "configurations:Release" }
    flags { "LinkTimeOptimization" }
   filter {}
