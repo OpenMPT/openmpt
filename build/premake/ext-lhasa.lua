@@ -4,6 +4,8 @@
   language "C"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/lhasa"
+  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   includedirs { "../../include/msinttypes/inttypes" }
   characterset "MBCS"
   files {
@@ -46,5 +48,3 @@
    "../../include/lhasa/lib/public/lhasa.h",
   }
   buildoptions { "/wd4244", "/wd4267" }
-  dofile "../../build/premake/premake-defaults-LIB.lua"
-  dofile "../../build/premake/premake-defaults.lua"

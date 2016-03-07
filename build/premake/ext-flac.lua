@@ -4,6 +4,8 @@
   language "C"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/flac"
+  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   includedirs { "../../include/flac/include", "../../include/flac/src/libFLAC/include", "../../include/ogg/include" }
   characterset "MBCS"
   files {
@@ -84,5 +86,3 @@
   filter { "action:not vs2008" }
    defines { "VERSION=\"1.3.1\"" }
   filter {}
-  dofile "../../build/premake/premake-defaults-LIB.lua"
-  dofile "../../build/premake/premake-defaults.lua"

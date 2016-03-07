@@ -4,6 +4,8 @@
   language "C++"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/smbPitchShift"
+  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   includedirs { }
   characterset "MBCS"
   files {
@@ -12,5 +14,3 @@
   files {
    "../../include/smbPitchShift/smbPitchShift.h",
   }
-  dofile "../../build/premake/premake-defaults-LIB.lua"
-  dofile "../../build/premake/premake-defaults.lua"

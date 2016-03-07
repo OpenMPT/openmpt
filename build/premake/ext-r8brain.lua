@@ -4,6 +4,8 @@
   language "C++"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/r8brain"
+  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   includedirs { "../../include/r8brain" }
   characterset "MBCS"
   files {
@@ -22,5 +24,3 @@
    "../../include/r8brain/r8bconf.h",
    "../../include/r8brain/r8butil.h",
   }
-  dofile "../../build/premake/premake-defaults-LIB.lua"
-  dofile "../../build/premake/premake-defaults.lua"

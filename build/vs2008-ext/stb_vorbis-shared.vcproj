@@ -46,7 +46,7 @@
 				AdditionalOptions="/wd4005 /wd4100 /wd4244 /wd4245 /wd4701"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint"
 			/>
 			<Tool
@@ -115,7 +115,7 @@
 				AdditionalOptions="/wd4005 /wd4100 /wd4244 /wd4245 /wd4701"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -130,7 +130,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint"
 			/>
 			<Tool
@@ -183,7 +183,7 @@
 				AdditionalOptions="/wd4005 /wd4100 /wd4244 /wd4245 /wd4701 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -198,7 +198,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint"
 			/>
 			<Tool
@@ -252,7 +252,7 @@
 				AdditionalOptions="/wd4005 /wd4100 /wd4244 /wd4245 /wd4701 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -267,7 +267,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint"
 			/>
 			<Tool
@@ -320,7 +320,7 @@
 				AdditionalOptions="/wd4005 /wd4100 /wd4244 /wd4245 /wd4701"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -335,7 +335,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint"
 			/>
 			<Tool
@@ -389,7 +389,7 @@
 				AdditionalOptions="/wd4005 /wd4100 /wd4244 /wd4245 /wd4701"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint"
-				PreprocessorDefinitions="STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -404,7 +404,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO;DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="DEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint"
 			/>
 			<Tool
@@ -458,7 +458,7 @@
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint"
 				WholeProgramOptimization="true"
-				PreprocessorDefinitions="STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -473,7 +473,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint"
 			/>
 			<Tool
@@ -528,7 +528,7 @@
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint"
 				WholeProgramOptimization="true"
-				PreprocessorDefinitions="STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -543,7 +543,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO;NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;STB_VORBIS_NO_PULLDATA_API;STB_VORBIS_NO_STDIO"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint"
 			/>
 			<Tool

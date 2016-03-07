@@ -2,9 +2,11 @@
  project "OpenMPT"
   uuid "37FC32A4-8DDC-4A9C-A30C-62989DD8ACE9"
   language "C++"
-  targetname "mptrack"
   location ( "../../build/" .. _ACTION )
   objdir "../../build/obj/OpenMPT"
+  dofile "../../build/premake/premake-defaults-EXEGUI.lua"
+  dofile "../../build/premake/premake-defaults.lua"
+  targetname "mptrack"
   includedirs {
    "../../common",
    "../../soundlib",
@@ -83,8 +85,6 @@
   }
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
-  dofile "../../build/premake/premake-defaults-EXEGUI.lua"
-  dofile "../../build/premake/premake-defaults.lua"
 
 
 
@@ -92,8 +92,10 @@
   uuid "a181b7d5-54dd-42b6-9cc3-8ab8de2394be"
   language "C++"
   location ( "../../build/" .. _ACTION )
-	targetname "MIDI Input Output"
   objdir "../../build/obj/PluginMidiInputOutput"
+  dofile "../../build/premake/premake-defaults-DLL.lua"
+  dofile "../../build/premake/premake-defaults.lua"
+  targetname "MIDI Input Output"
   includedirs {
    "../../include/vstsdk2.4",
    "../../include",
@@ -120,5 +122,3 @@
    "winmm",
   }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
-  dofile "../../build/premake/premake-defaults-DLL.lua"
-  dofile "../../build/premake/premake-defaults.lua"

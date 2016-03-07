@@ -4,6 +4,8 @@
   language "C++"
   location ( "../../build/" .. _ACTION )
   objdir "../../build/obj/PluginBridge"
+  dofile "../../build/premake/premake-defaults-EXEGUI.lua"
+  dofile "../../build/premake/premake-defaults.lua"
   includedirs {
    "../../common",
    "../include/vstsdk2.4",
@@ -55,6 +57,4 @@
     "copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\Win32-Debug\\$(TargetFileName)\"",
    }
   filter {}
-  dofile "../../build/premake/premake-defaults-EXEGUI.lua"
-  dofile "../../build/premake/premake-defaults.lua"
 
