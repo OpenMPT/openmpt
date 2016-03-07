@@ -843,6 +843,7 @@ LIBOPENMPT_API const char * openmpt_module_highlight_pattern_row_channel( openmp
  * \remarks Currently supported ctl values are:
  *          - load.skip_samples: Set to "1" to avoid loading samples into memory
  *          - load.skip_patterns: Set to "1" to avoid loading patterns into memory
+ *          - load.skip_plugins: Set to "1" to avoid loading plugins
  *          - load.skip_subsongs_init: Set to "1" to avoid pre-initializing subsongs. Skipping results in faster module loading but slower seeking.
  *          - seek.sync_samples: Set to "1" to sync sample playback when using openmpt_module_set_position_seconds or openmpt_module_set_position_order_row.
  *          - play.tempo_factor: Set a floating point tempo factor. "1.0" is the default tempo.

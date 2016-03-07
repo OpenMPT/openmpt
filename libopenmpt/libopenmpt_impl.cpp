@@ -387,6 +387,7 @@ void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
 	m_Gain = 1.0f;
 	m_ctl_load_skip_samples = false;
 	m_ctl_load_skip_patterns = false;
+	m_ctl_load_skip_plugins = false;
 	m_ctl_load_skip_subsongs_init = false;
 	m_ctl_seek_sync_samples = false;
 	// init member variables that correspond to ctls
@@ -404,6 +405,9 @@ void module_impl::load( const FileReader & file, const std::map< std::string, st
 		}
 		if ( m_ctl_load_skip_patterns ) {
 			load_flags &= ~CSoundFile::loadPatternData;
+		}
+		if ( m_ctl_load_skip_plugins ) {
+			load_flags &= ~CSoundFile::loadPluginData;
 		}
 		if ( !m_sndFile->Create( file, static_cast<CSoundFile::ModLoadingFlags>( load_flags ) ) ) {
 			throw openmpt::exception("error loading file");
@@ -1309,6 +1313,7 @@ std::vector<std::string> module_impl::get_ctls() const {
 	std::vector<std::string> retval;
 	retval.push_back( "load.skip_samples" );
 	retval.push_back( "load.skip_patterns" );
+	retval.push_back( "load.skip_plugins" );
 	retval.push_back( "load.skip_subsongs_init" );
 	retval.push_back( "seek.sync_samples" );
 	retval.push_back( "play.tempo_factor" );
@@ -1334,6 +1339,8 @@ std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const
 		return mpt::ToString( m_ctl_load_skip_samples );
 	} else if ( ctl == "load.skip_patterns" || ctl == "load_skip_patterns" ) {
 		return mpt::ToString( m_ctl_load_skip_patterns );
+	} else if ( ctl == "load.skip_plugins" ) {
+		return mpt::ToString( m_ctl_load_skip_plugins );
 	} else if ( ctl == "load.skip_subsongs_init" ) {
 		return mpt::ToString( m_ctl_load_skip_subsongs_init );
 	} else if ( ctl == "seek.sync_samples" ) {
@@ -1376,6 +1383,8 @@ void module_impl::ctl_set( std::string ctl, const std::string & value, bool thro
 		m_ctl_load_skip_samples = ConvertStrTo<bool>( value );
 	} else if ( ctl == "load.skip_patterns" || ctl == "load_skip_patterns" ) {
 		m_ctl_load_skip_patterns = ConvertStrTo<bool>( value );
+	} else if ( ctl == "load.skip_plugins" ) {
+		m_ctl_load_skip_plugins = ConvertStrTo<bool>( value );
 	} else if ( ctl == "load.skip_subsongs_init" ) {
 		m_ctl_load_skip_subsongs_init = ConvertStrTo<bool>( value );
 	} else if ( ctl == "seek.sync_samples" ) {

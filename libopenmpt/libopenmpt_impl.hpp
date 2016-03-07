@@ -107,6 +107,7 @@ protected:
 	float m_Gain;
 	bool m_ctl_load_skip_samples;
 	bool m_ctl_load_skip_patterns;
+	bool m_ctl_load_skip_plugins;
 	bool m_ctl_load_skip_subsongs_init;
 	bool m_ctl_seek_sync_samples;
 	std::vector<std::string> m_loaderMessages;
