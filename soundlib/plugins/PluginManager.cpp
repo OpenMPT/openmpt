@@ -52,7 +52,9 @@ typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
 #define DMO_LOG
 #endif // NO_DMO
 
+#ifdef MODPLUG_TRACKER
 static const MPT_UCHAR_TYPE *const cacheSection = MPT_ULITERAL("PluginCache");
+#endif // MODPLUG_TRACKER
 
 
 uint8 VSTPluginLib::GetDllBits(bool fromCache) const
@@ -402,8 +404,6 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 	// If this key contains a file name on program launch, a plugin previously crashed OpenMPT.
 	theApp.GetSettings().Write<mpt::PathString>(MPT_USTRING("VST Plugins"), MPT_USTRING("FailedPlugin"), dllPath, SettingWriteThrough);
 
-	AEffect *pEffect;
-	HINSTANCE hLib;
 	bool validPlug = false;
 
 	VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(dllPath, fileName, tags);
@@ -412,10 +412,12 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 		return nullptr;
 	}
 
+#ifndef NO_VST
 	try
 	{
 		// Always scan plugins in a separate process
-		pEffect = LoadPlugin(*plug, hLib, true);
+		HINSTANCE hLib = NULL;
+		AEffect *pEffect = LoadPlugin(*plug, hLib, true);
 
 		if(pEffect != nullptr && pEffect->magic == kEffectMagic && pEffect->dispatcher != nullptr)
 		{
@@ -446,6 +448,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 	{
 		CVstPluginManager::ReportPlugException(mpt::String::Print(L"Exception while trying to load plugin \"%1\"!\n", plug->libraryName));
 	}
+#endif // NO_VST
 
 	// Now it should be safe to assume that this plugin loaded properly. :)
 	theApp.GetSettings().Remove(MPT_USTRING("VST Plugins"), MPT_USTRING("FailedPlugin"));
@@ -547,16 +550,14 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		}
 	}
 
+#ifndef NO_DMO
 	if(mixPlugin.Info.dwPluginId1 == kDmoMagic)
 	{
-#ifndef NO_DMO
 		if (!pFound) return false;
 		IMixPlugin *plugin = DMOPlugin::Create(*pFound, sndFile, &mixPlugin);
 		return plugin != nullptr;
-#else
-		return nullptr;
-#endif // NO_DMO
 	}
+#endif // NO_DMO
 
 #ifdef MODPLUG_TRACKER
 	if(!pFound && strcmp(mixPlugin.GetLibraryName(), ""))
@@ -590,13 +591,13 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		}
 	}
 
-	if(pFound)
+#ifndef NO_VST
+	if(pFound && mixPlugin.Info.dwPluginId1 == kEffectMagic)
 	{
 		AEffect *pEffect = nullptr;
 		HINSTANCE hLibrary = nullptr;
 		bool validPlugin = false;
 
-#ifndef NO_VST
 		try
 		{
 			pEffect = LoadPlugin(*pFound, hLibrary, TrackerSettings::Instance().bridgeAllPlugins);
@@ -625,8 +626,6 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		{
 			CVstPluginManager::ReportPlugException(mpt::String::Print(L"Exception while trying to create plugin \"%1\"!\n", pFound->libraryName));
 		}
-#endif
-
 		return validPlugin;
 	} else
 	{
@@ -635,6 +634,8 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		Log("Unknown plugin\n");
 #endif
 	}
+#endif // NO_VST
+
 #endif // MODPLUG_TRACKER
 	return false;
 }

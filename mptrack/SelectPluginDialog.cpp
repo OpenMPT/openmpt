@@ -147,13 +147,18 @@ void CSelectPluginDlg::OnOK()
 			m_pPlugin->Info.dwPluginId2 = pFactory->pluginId2;
 			m_pPlugin->editorX = m_pPlugin->editorY = int32_min;
 
-			switch(m_pPlugin->Info.dwPluginId2)
+#ifndef NO_VST
+			if(m_pPlugin->Info.dwPluginId1 == kEffectMagic)
 			{
-				// Enable drymix by default for these known plugins
-			case CCONST('S', 'c', 'o', 'p'):
-				m_pPlugin->SetWetMix();
-				break;
+				switch(m_pPlugin->Info.dwPluginId2)
+				{
+					// Enable drymix by default for these known plugins
+				case CCONST('S', 'c', 'o', 'p'):
+					m_pPlugin->SetWetMix();
+					break;
+				}
 			}
+#endif // NO_VST
 
 			mpt::String::Copy(m_pPlugin->Info.szName, pFactory->libraryName.ToLocale().c_str());
 			mpt::String::Copy(m_pPlugin->Info.szLibraryName, pFactory->libraryName.ToUTF8().c_str());
@@ -540,6 +545,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 //-----------------------------------------------------------------
 {
+#ifndef NO_VST
 	// TODO: Keep these lists up-to-date.
 	static const struct
 	{
@@ -593,7 +599,7 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 			break;
 		}
 	}
-
+#endif // NO_VST
 	return true;
 }
 
