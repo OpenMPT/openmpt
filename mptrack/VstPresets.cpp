@@ -12,6 +12,7 @@
 
 #ifndef NO_PLUGINS
 #include "../soundlib/Sndfile.h"
+#include "../soundlib/plugins/PlugInterface.h"
 #ifndef NO_VST
 #include "Vstplug.h"
 #endif // NO_VST
