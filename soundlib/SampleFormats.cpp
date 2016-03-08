@@ -2733,6 +2733,12 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 
 #elif defined(MPT_WITH_STBVORBIS)
 
+	// NOTE/TODO: stb_vorbis does not handle inferred negative PCM sample position
+	// at stream start. (See 
+	// <https://www.xiph.org/vorbis/doc/Vorbis_I_spec.html#x1-132000A.2>). This
+	// means that, for remuxed and re-aligned/cutted (at stream start) Vorbis
+	// files, stb_vorbis will include superfluous samples at the beginning.
+
 	std::size_t offset = 0;
 	int consumed = 0;
 	int error = 0;

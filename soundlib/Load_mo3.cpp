@@ -1792,6 +1792,14 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 #elif defined(MPT_WITH_STBVORBIS)
 
+			// NOTE/TODO: stb_vorbis does not handle inferred negative PCM sample
+			// position at stream start. (See
+			// <https://www.xiph.org/vorbis/doc/Vorbis_I_spec.html#x1-132000A.2>).
+			// This means that, for remuxed and re-aligned/cutted (at stream start)
+			// Vorbis files, stb_vorbis will include superfluous samples at the
+			// beginning. MO3 files with this property are yet to be spotted in the
+			// wild, thus, this behaviour is currently not problematic.
+
 			int consumed = 0, error = 0;
 			stb_vorbis *vorb = stb_vorbis_open_pushdata(reinterpret_cast<const uint8 *>(headerChunk.GetRawData()), initialRead, &consumed, &error, nullptr);
 			if(vorb)
