@@ -14,6 +14,7 @@
 #include "Mainfrm.h"
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/mod_specifications.h"
+#include "../soundlib/plugins/PlugInterface.h"
 #include "../soundlib/plugins/PluginManager.h"
 #include "Vstplug.h"
 #include "dlg_misc.h"
