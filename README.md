@@ -18,7 +18,7 @@ How to compile
         (Express Edition is not supported as it does not include MFC).
 
         You need the DirectX SDK 2010-June to enable DirectSound output. If you
-        don't want this, uncomment `#define NO_DSOUND` in the file
+        don't want this, comment out `#define MPT_WITH_DSOUND` in the file
         `common/BuildSettings.h`.
 
         To compile the project, open `build/vs2008/OpenMPT.sln` and hit the
@@ -28,7 +28,7 @@ How to compile
         version is not supported as it does not include MFC).
 
         You need the DirectX SDK 2010-June to enable DirectSound output. If you
-        don't want this, uncomment `#define NO_DSOUND` in the file
+        don't want this, comment out `#define MPT_WITH_DSOUND` in the file
         `common/BuildSettings.h`.
 
         To compile the project, open `build/vs2010/OpenMPT.sln` and hit the
