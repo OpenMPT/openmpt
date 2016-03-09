@@ -62,6 +62,8 @@ public:
 	CVstPlugin(HINSTANCE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixPlugin, AEffect &effect, CSoundFile &sndFile);
 	virtual ~CVstPlugin();
 
+	static AEffect *LoadPlugin(VSTPluginLib &plugin, HINSTANCE &library, bool forceBridge);
+
 protected:
 	void Initialize();
 

@@ -108,9 +108,6 @@ public:
 };
 
 
-// TODO: LoadPlugin should be part of each plugin type class
-struct AEffect;
-
 //=====================
 class CVstPluginManager
 //=====================
@@ -142,9 +139,6 @@ public:
 
 protected:
 	void EnumerateDirectXDMOs();
-#ifndef NO_VST
-	AEffect *LoadPlugin(VSTPluginLib &plugin, HINSTANCE &library, bool forceBridge);
-#endif // NO_VST
 
 #else // NO_PLUGINS
 public:
