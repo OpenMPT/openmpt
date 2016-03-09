@@ -42,10 +42,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifndef NO_VST
-typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
-#endif // NO_VST
-
 //#define VST_LOG
 
 #ifndef NO_DMO
@@ -205,113 +201,6 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 }
 
 
-#ifndef NO_VST
-
-AEffect *CVstPluginManager::LoadPlugin(VSTPluginLib &plugin, HINSTANCE &library, bool forceBridge)
-//------------------------------------------------------------------------------------------------
-{
-	const mpt::PathString &pluginPath = plugin.dllPath;
-
-	AEffect *effect = nullptr;
-	library = nullptr;
-
-	const bool isNative = plugin.IsNative(false);
-	if(forceBridge || plugin.useBridge || !isNative)
-	{
-		try
-		{
-			effect = BridgeWrapper::Create(plugin);
-			if(effect != nullptr)
-			{
-				return effect;
-			}
-		} catch(BridgeWrapper::BridgeNotFoundException &)
-		{
-			// Try normal loading
-			if(!isNative)
-			{
-				Reporting::Error("Could not locate the plugin bridge executable, which is required for running non-native plugins.", "OpenMPT Plugin Bridge");
-				return false;
-			}
-		} catch(BridgeWrapper::BridgeException &e)
-		{
-			// If there was some error, don't try normal loading as well... unless the user really wants it.
-			if(isNative)
-			{
-				const std::wstring msg = L"The following error occured while trying to load\n" + plugin.dllPath.ToWide() + L"\n\n" + mpt::ToWide(mpt::CharsetUTF8, e.what())
-					+ L"\n\nDo you want to try to load the plugin natively?";
-				if(Reporting::Confirm(msg, L"OpenMPT Plugin Bridge") == cnfNo)
-				{
-					return nullptr;
-				}
-			} else
-			{
-				Reporting::Error(e.what(), "OpenMPT Plugin Bridge");
-				return nullptr;
-			}
-		}
-		// If plugin was marked to use the plugin bridge but this somehow doesn't work (e.g. because the bridge is missing),
-		// disable the plugin bridge for this plugin.
-		plugin.useBridge = false;
-	}
-
-	try
-	{
-		library = LoadLibraryW(pluginPath.AsNative().c_str());
-
-		if(library == nullptr)
-		{
-			DWORD error = GetLastError();
-
-#ifdef _DEBUG
-			if(error != ERROR_MOD_NOT_FOUND)	// "File not found errors" are annoying.
-			{
-				mpt::ustring buf = mpt::String::Print(MPT_USTRING("Warning: encountered problem when loading plugin dll. Error %1: %2")
-					, mpt::ufmt::hex(error)
-					, mpt::ToUnicode(GetErrorMessage(error))
-					);
-				Reporting::Error(buf, "DEBUG: Error when loading plugin dll");
-			}
-#endif //_DEBUG
-
-			if(error == ERROR_MOD_NOT_FOUND)
-			{
-				// No point in trying bridging, either...
-				return nullptr;
-			}
-		}
-	} catch(...)
-	{
-		CVstPluginManager::ReportPlugException(mpt::String::Print(L"Exception caught in LoadLibrary (%1)", pluginPath));
-	}
-
-	if(library != nullptr && library != INVALID_HANDLE_VALUE)
-	{
-		// Try loading the VST plugin.
-		PVSTPLUGENTRY pMainProc = (PVSTPLUGENTRY)GetProcAddress(library, "VSTPluginMain");
-		if(pMainProc == nullptr)
-		{
-			pMainProc = (PVSTPLUGENTRY)GetProcAddress(library, "main");
-		}
-
-		if(pMainProc != nullptr)
-		{
-			effect = pMainProc(CVstPlugin::MasterCallBack);
-		} else
-		{
-#ifdef VST_LOG
-			Log("Entry point not found! (handle=%08X)\n", library);
-#endif // VST_LOG
-		}
-	}
-
-	return effect;
-}
-
-#endif // NO_VST
-
-
-
 // Extract instrument and category information from plugin.
 #ifndef NO_VST
 static void GetPluginInformation(AEffect *effect, VSTPluginLib &library)
@@ -417,7 +306,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 	{
 		// Always scan plugins in a separate process
 		HINSTANCE hLib = NULL;
-		AEffect *pEffect = LoadPlugin(*plug, hLib, true);
+		AEffect *pEffect = CVstPlugin::LoadPlugin(*plug, hLib, true);
 
 		if(pEffect != nullptr && pEffect->magic == kEffectMagic && pEffect->dispatcher != nullptr)
 		{
@@ -600,7 +489,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 
 		try
 		{
-			pEffect = LoadPlugin(*pFound, hLibrary, TrackerSettings::Instance().bridgeAllPlugins);
+			pEffect = CVstPlugin::LoadPlugin(*pFound, hLibrary, TrackerSettings::Instance().bridgeAllPlugins);
 
 			if(pEffect != nullptr && pEffect->dispatcher != nullptr && pEffect->magic == kEffectMagic)
 			{

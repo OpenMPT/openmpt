@@ -25,6 +25,7 @@
 #include "MIDIMappingDialog.h"
 #include "../common/StringFixer.h"
 #include "FileDialog.h"
+#include "../pluginBridge/BridgeWrapper.h"
 #include "../pluginBridge/BridgeOpCodes.h"
 #include "../soundlib/plugins/OpCodes.h"
 #include "../soundlib/plugins/PluginManager.h"
@@ -34,7 +35,111 @@ OPENMPT_NAMESPACE_BEGIN
 
 VstTimeInfo CVstPlugin::timeInfo = { 0 };
 
+typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
+
 //#define VST_LOG
+
+AEffect *CVstPlugin::LoadPlugin(VSTPluginLib &plugin, HINSTANCE &library, bool forceBridge)
+//-----------------------------------------------------------------------------------------
+{
+	const mpt::PathString &pluginPath = plugin.dllPath;
+
+	AEffect *effect = nullptr;
+	library = nullptr;
+
+	const bool isNative = plugin.IsNative(false);
+	if(forceBridge || plugin.useBridge || !isNative)
+	{
+		try
+		{
+			effect = BridgeWrapper::Create(plugin);
+			if(effect != nullptr)
+			{
+				return effect;
+			}
+		} catch(BridgeWrapper::BridgeNotFoundException &)
+		{
+			// Try normal loading
+			if(!isNative)
+			{
+				Reporting::Error("Could not locate the plugin bridge executable, which is required for running non-native plugins.", "OpenMPT Plugin Bridge");
+				return false;
+			}
+		} catch(BridgeWrapper::BridgeException &e)
+		{
+			// If there was some error, don't try normal loading as well... unless the user really wants it.
+			if(isNative)
+			{
+				const std::wstring msg = L"The following error occured while trying to load\n" + plugin.dllPath.ToWide() + L"\n\n" + mpt::ToWide(mpt::CharsetUTF8, e.what())
+					+ L"\n\nDo you want to try to load the plugin natively?";
+				if(Reporting::Confirm(msg, L"OpenMPT Plugin Bridge") == cnfNo)
+				{
+					return nullptr;
+				}
+			} else
+			{
+				Reporting::Error(e.what(), "OpenMPT Plugin Bridge");
+				return nullptr;
+			}
+		}
+		// If plugin was marked to use the plugin bridge but this somehow doesn't work (e.g. because the bridge is missing),
+		// disable the plugin bridge for this plugin.
+		plugin.useBridge = false;
+	}
+
+	try
+	{
+		library = LoadLibraryW(pluginPath.AsNative().c_str());
+
+		if(library == nullptr)
+		{
+			DWORD error = GetLastError();
+
+#ifdef _DEBUG
+			if(error != ERROR_MOD_NOT_FOUND)	// "File not found errors" are annoying.
+			{
+				mpt::ustring buf = mpt::String::Print(MPT_USTRING("Warning: encountered problem when loading plugin dll. Error %1: %2")
+					, mpt::ufmt::hex(error)
+					, mpt::ToUnicode(GetErrorMessage(error))
+					);
+				Reporting::Error(buf, "DEBUG: Error when loading plugin dll");
+			}
+#endif //_DEBUG
+
+			if(error == ERROR_MOD_NOT_FOUND)
+			{
+				// No point in trying bridging, either...
+				return nullptr;
+			}
+		}
+	} catch(...)
+	{
+		CVstPluginManager::ReportPlugException(mpt::String::Print(L"Exception caught in LoadLibrary (%1)", pluginPath));
+	}
+
+	if(library != nullptr && library != INVALID_HANDLE_VALUE)
+	{
+		// Try loading the VST plugin.
+		PVSTPLUGENTRY pMainProc = (PVSTPLUGENTRY)GetProcAddress(library, "VSTPluginMain");
+		if(pMainProc == nullptr)
+		{
+			pMainProc = (PVSTPLUGENTRY)GetProcAddress(library, "main");
+		}
+
+		if(pMainProc != nullptr)
+		{
+			effect = pMainProc(CVstPlugin::MasterCallBack);
+		} else
+		{
+#ifdef VST_LOG
+			Log("Entry point not found! (handle=%08X)\n", library);
+#endif // VST_LOG
+		}
+	}
+
+	return effect;
+}
+
 
 VstIntPtr VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float /*opt*/)
 //-------------------------------------------------------------------------------------------------------------------------------------------
