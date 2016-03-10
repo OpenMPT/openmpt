@@ -21,7 +21,7 @@
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:x86" }
    targetdir "../../bin/Win32-Debug"
   filter { "kind:not StaticLib", "configurations:DebugMDd", "architecture:x86" }
-   targetdir "../../bin/Win32-Debug"
+   targetdir "../../bin/Win32-DebugMDd"
   filter { "kind:not StaticLib", "configurations:Release", "architecture:x86" }
    targetdir "../../bin/Win32"
   filter { "kind:not StaticLib", "configurations:ReleaseLTCG", "architecture:x86" }
@@ -29,7 +29,7 @@
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:x86_64" }
    targetdir "../../bin/x64-Debug"
   filter { "kind:not StaticLib", "configurations:DebugMDd", "architecture:x86_64" }
-   targetdir "../../bin/x64-Debug"
+   targetdir "../../bin/x64-DebugMDd"
   filter { "kind:not StaticLib", "configurations:Release", "architecture:x86_64" }
    targetdir "../../bin/x64"
   filter { "kind:not StaticLib", "configurations:ReleaseLTCG", "architecture:x86_64" }
@@ -40,17 +40,20 @@
 
   filter { "configurations:Debug" }
    defines { "DEBUG" }
+   defines { "MPT_BUILD_MSVC_STATIC" }
    flags { "Symbols" }
    flags { "StaticRuntime" }
    optimize "Debug"
 
   filter { "configurations:DebugMDd" }
    defines { "DEBUG" }
+   defines { "MPT_BUILD_MSVC_STATIC" }
    flags { "Symbols" }
    optimize "Debug"
 
   filter { "configurations:Release" }
    defines { "NDEBUG" }
+   defines { "MPT_BUILD_MSVC_STATIC" }
    flags { "Symbols", "MultiProcessorCompile" }
    flags { "StaticRuntime" }
    optimize "Speed"
@@ -58,6 +61,7 @@
 
   filter { "configurations:ReleaseLTCG" }
    defines { "NDEBUG" }
+   defines { "MPT_BUILD_MSVC_STATIC" }
    flags { "Symbols", "MultiProcessorCompile", "LinkTimeOptimization" }
    flags { "StaticRuntime" }
    optimize "Full"
