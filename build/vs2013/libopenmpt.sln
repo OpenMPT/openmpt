@@ -13,13 +13,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt_example_c_unsafe
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt_modplug", "libopenmpt_modplug.vcxproj", "{F1397660-35F6-4734-837E-88DCE80E4837}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "miniz", "..\vs2013-ext\miniz.vcxproj", "{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudio", "..\vs2013-ext\portaudio.vcxproj", "{189B867F-FF4B-45A1-B741-A97492EE69AF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudiocpp", "..\vs2013-ext\portaudiocpp.vcxproj", "{627CF18A-C8CA-451E-AFD0-8679CADFDA6B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stb_vorbis", "..\vs2013-ext\stb_vorbis.vcxproj", "{E0D81662-85EF-4172-B0D8-F8DCFF712607}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\vs2013-ext\zlib.vcxproj", "{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -129,22 +129,6 @@ Global
 		{F1397660-35F6-4734-837E-88DCE80E4837}.Release|Win32.Build.0 = Release|Win32
 		{F1397660-35F6-4734-837E-88DCE80E4837}.Release|x64.ActiveCfg = Release|x64
 		{F1397660-35F6-4734-837E-88DCE80E4837}.Release|x64.Build.0 = Release|x64
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.DebugShared|Win32.ActiveCfg = DebugShared|Win32
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.DebugShared|Win32.Build.0 = DebugShared|Win32
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.DebugShared|x64.ActiveCfg = DebugShared|x64
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.DebugShared|x64.Build.0 = DebugShared|x64
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Debug|Win32.ActiveCfg = Debug|Win32
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Debug|Win32.Build.0 = Debug|Win32
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Debug|x64.ActiveCfg = Debug|x64
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Debug|x64.Build.0 = Debug|x64
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.ReleaseShared|Win32.ActiveCfg = ReleaseShared|Win32
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.ReleaseShared|Win32.Build.0 = ReleaseShared|Win32
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.ReleaseShared|x64.ActiveCfg = ReleaseShared|x64
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.ReleaseShared|x64.Build.0 = ReleaseShared|x64
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Release|Win32.ActiveCfg = Release|Win32
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Release|Win32.Build.0 = Release|Win32
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Release|x64.ActiveCfg = Release|x64
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Release|x64.Build.0 = Release|x64
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.DebugShared|Win32.ActiveCfg = DebugShared|Win32
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.DebugShared|Win32.Build.0 = DebugShared|Win32
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.DebugShared|x64.ActiveCfg = DebugShared|x64
@@ -193,6 +177,22 @@ Global
 		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Release|Win32.Build.0 = Release|Win32
 		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Release|x64.ActiveCfg = Release|x64
 		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Release|x64.Build.0 = Release|x64
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.DebugShared|Win32.ActiveCfg = DebugShared|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.DebugShared|Win32.Build.0 = DebugShared|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.DebugShared|x64.ActiveCfg = DebugShared|x64
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.DebugShared|x64.Build.0 = DebugShared|x64
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|Win32.Build.0 = Debug|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|x64.ActiveCfg = Debug|x64
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|x64.Build.0 = Debug|x64
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.ReleaseShared|Win32.ActiveCfg = ReleaseShared|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.ReleaseShared|Win32.Build.0 = ReleaseShared|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.ReleaseShared|x64.ActiveCfg = ReleaseShared|x64
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.ReleaseShared|x64.Build.0 = ReleaseShared|x64
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|Win32.ActiveCfg = Release|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|Win32.Build.0 = Release|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|x64.ActiveCfg = Release|x64
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

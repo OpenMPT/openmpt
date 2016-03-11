@@ -678,16 +678,16 @@
 			RelativePathToProject="..\vs2008-ext\portaudio.vcproj"
 		/>
 		<ProjectReference
-			ReferencedProjectIdentifier="{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}"
-			RelativePathToProject="..\vs2008-ext\miniz.vcproj"
-		/>
-		<ProjectReference
 			ReferencedProjectIdentifier="{E0D81662-85EF-4172-B0D8-F8DCFF712607}"
 			RelativePathToProject="..\vs2008-ext\stb_vorbis.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}"
 			RelativePathToProject="..\vs2008-ext\ogg.vcproj"
+		/>
+		<ProjectReference
+			ReferencedProjectIdentifier="{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
+			RelativePathToProject="..\vs2008-ext\zlib.vcproj"
 		/>
 	</References>
 	<Files>

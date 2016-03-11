@@ -5,11 +5,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xmp-openmpt", "xmp-openmpt.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt", "libopenmpt.vcxproj", "{9C5101EF-3E20-4558-809B-277FDD50E878}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "miniz", "..\vs2013-ext\miniz.vcxproj", "{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pugixml", "..\vs2013-ext\pugixml.vcxproj", "{07B89124-7C71-42CC-81AB-62B09BB61F9B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stb_vorbis", "..\vs2013-ext\stb_vorbis.vcxproj", "{E0D81662-85EF-4172-B0D8-F8DCFF712607}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\vs2013-ext\zlib.vcxproj", "{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +25,6 @@ Global
 		{9C5101EF-3E20-4558-809B-277FDD50E878}.Debug|Win32.Build.0 = Debug|Win32
 		{9C5101EF-3E20-4558-809B-277FDD50E878}.Release|Win32.ActiveCfg = Release|Win32
 		{9C5101EF-3E20-4558-809B-277FDD50E878}.Release|Win32.Build.0 = Release|Win32
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Debug|Win32.ActiveCfg = Debug|Win32
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Debug|Win32.Build.0 = Debug|Win32
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Release|Win32.ActiveCfg = Release|Win32
-		{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}.Release|Win32.Build.0 = Release|Win32
 		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Debug|Win32.ActiveCfg = Debug|Win32
 		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Debug|Win32.Build.0 = Debug|Win32
 		{07B89124-7C71-42CC-81AB-62B09BB61F9B}.Release|Win32.ActiveCfg = Release|Win32
@@ -37,6 +33,10 @@ Global
 		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Debug|Win32.Build.0 = Debug|Win32
 		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Release|Win32.ActiveCfg = Release|Win32
 		{E0D81662-85EF-4172-B0D8-F8DCFF712607}.Release|Win32.Build.0 = Release|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|Win32.Build.0 = Debug|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|Win32.ActiveCfg = Release|Win32
+		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

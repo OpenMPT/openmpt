@@ -11,6 +11,7 @@
    "../../common",
    "../../soundlib",
    "../../include",
+   "../../include/zlib",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }
@@ -42,8 +43,8 @@
   flags { "Unicode", "ExtraWarnings" }
   defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_TEST" }
   links {
-   "miniz",
    "stb_vorbis",
+   "zlib",
   }
   filter { "not action:vs2008" }
   links { "delayimp" }

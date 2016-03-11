@@ -114,14 +114,18 @@
 #endif
 #endif
 //#define MPT_WITH_MINIMP3
+#if defined(LIBOPENMPT_BUILD_SMALL)
 #define MPT_WITH_MINIZ
+#endif
 //#define MPT_WITH_MPG123
 //#define MPT_WITH_OGG
 #define MPT_WITH_STBVORBIS
 //#define MPT_WITH_UNMO3
 //#define MPT_WITH_VORBIS
 //#define MPT_WITH_VORBISFILE
-//#define MPT_WITH_ZLIB
+#if !defined(LIBOPENMPT_BUILD_SMALL)
+#define MPT_WITH_ZLIB
+#endif
 
 #endif // LIBOPENMPT_BUILD
 

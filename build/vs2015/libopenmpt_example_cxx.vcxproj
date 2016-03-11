@@ -350,8 +350,8 @@
     <ProjectReference Include="libopenmpt.vcxproj">
       <Project>{9C5101EF-3E20-4558-809B-277FDD50E878}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\vs2015-ext\miniz.vcxproj">
-      <Project>{B5E0C06B-8121-426A-8FFB-4293ECAAE29C}</Project>
+    <ProjectReference Include="..\vs2015-ext\zlib.vcxproj">
+      <Project>{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}</Project>
     </ProjectReference>
     <ProjectReference Include="..\vs2015-ext\stb_vorbis.vcxproj">
       <Project>{E0D81662-85EF-4172-B0D8-F8DCFF712607}</Project>
