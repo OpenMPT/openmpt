@@ -643,6 +643,12 @@
 
 // third-party library configuration
 
+#if defined(MPT_WITH_FLAC)
+#ifdef MPT_BUILD_MSVC_STATIC
+#define FLAC__NO_DLL
+#endif
+#endif
+
 #ifdef MPT_WITH_STBVORBIS
 #define STB_VORBIS_HEADER_ONLY
 #ifndef STB_VORBIS_NO_PULLDATA_API
@@ -653,3 +659,8 @@
 #endif
 #endif
 
+#ifdef MPT_WITH_ZLIB
+#ifdef MPT_BUILD_MSVC_SHARED
+#define ZLIB_DLL
+#endif
+#endif

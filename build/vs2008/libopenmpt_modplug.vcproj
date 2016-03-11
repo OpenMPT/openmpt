@@ -21,9 +21,9 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\bin\Win32-Debug"
+			OutputDirectory="..\lib\x86\Debug"
 			IntermediateDirectory="..\obj\libopenmpt_modplug\x86\Debug"
-			ConfigurationType="2"
+			ConfigurationType="4"
 			CharacterSet="2"
 			>
 			<Tool
@@ -49,7 +49,7 @@
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -67,19 +67,11 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\libmodplug.dll"
-				LinkIncremental="2"
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				ImportLibrary="..\..\bin\Win32-Debug\libmodplug.lib"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\libmodplug.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -91,17 +83,14 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\..\bin\x64-Debug"
+			OutputDirectory="..\lib\x86_64\Debug"
 			IntermediateDirectory="..\obj\libopenmpt_modplug\x86_64\Debug"
-			ConfigurationType="2"
+			ConfigurationType="4"
 			CharacterSet="2"
 			>
 			<Tool
@@ -128,7 +117,7 @@
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -146,12 +135,295 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\libmodplug.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="..\lib\x86\Release"
+			IntermediateDirectory="..\obj\libopenmpt_modplug\x86\Release"
+			ConfigurationType="4"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
+				Optimization="2"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\include\modplug\include;$(IntDir)\svn_version;..\svn_version"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\include\modplug\include;$(IntDir)\svn_version;..\svn_version"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\libmodplug.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|x64"
+			OutputDirectory="..\lib\x86_64\Release"
+			IntermediateDirectory="..\obj\libopenmpt_modplug\x86_64\Release"
+			ConfigurationType="4"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
+				Optimization="2"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\include\modplug\include;$(IntDir)\svn_version;..\svn_version"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\include\modplug\include;$(IntDir)\svn_version;..\svn_version"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\libmodplug.lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="DebugShared|Win32"
+			OutputDirectory="..\..\bin\Win32-Shared-Debug"
+			IntermediateDirectory="..\obj\libopenmpt_modplug\x86\DebugShared"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\include\modplug\include;$(IntDir)\svn_version;..\svn_version"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_USE_DLL"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_USE_DLL"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\include\modplug\include;$(IntDir)\svn_version;..\svn_version"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\libmodplug.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				ImportLibrary="..\..\bin\x64-Debug\libmodplug.lib"
+				ImportLibrary="..\..\bin\Win32-Shared-Debug\libmodplug.lib"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="DebugShared|x64"
+			OutputDirectory="..\..\bin\x64-Shared-Debug"
+			IntermediateDirectory="..\obj\libopenmpt_modplug\x86_64\DebugShared"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\include\modplug\include;$(IntDir)\svn_version;..\svn_version"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_USE_DLL"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_USE_DLL"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\include\modplug\include;$(IntDir)\svn_version;..\svn_version"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\libmodplug.dll"
+				LinkIncremental="2"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				ImportLibrary="..\..\bin\x64-Shared-Debug\libmodplug.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -177,9 +449,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|Win32"
-			OutputDirectory="..\..\bin\Win32"
-			IntermediateDirectory="..\obj\libopenmpt_modplug\x86\Release"
+			Name="ReleaseShared|Win32"
+			OutputDirectory="..\..\bin\Win32-Shared"
+			IntermediateDirectory="..\obj\libopenmpt_modplug\x86\ReleaseShared"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -204,7 +476,7 @@
 				AdditionalOptions="/MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\include\modplug\include;$(IntDir)\svn_version;..\svn_version"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_USE_DLL"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -218,7 +490,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_USE_DLL"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\include\modplug\include;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
@@ -232,7 +504,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\..\bin\Win32\libmodplug.lib"
+				ImportLibrary="..\..\bin\Win32-Shared\libmodplug.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -258,9 +530,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|x64"
-			OutputDirectory="..\..\bin\x64"
-			IntermediateDirectory="..\obj\libopenmpt_modplug\x86_64\Release"
+			Name="ReleaseShared|x64"
+			OutputDirectory="..\..\bin\x64-Shared"
+			IntermediateDirectory="..\obj\libopenmpt_modplug\x86_64\ReleaseShared"
 			ConfigurationType="2"
 			CharacterSet="2"
 			>
@@ -286,7 +558,7 @@
 				AdditionalOptions="/MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\include\modplug\include;$(IntDir)\svn_version;..\svn_version"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_USE_DLL"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -300,7 +572,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_USE_DLL"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\include\modplug\include;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
@@ -314,7 +586,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="..\..\bin\x64\libmodplug.lib"
+				ImportLibrary="..\..\bin\x64-Shared\libmodplug.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -342,8 +614,8 @@
 	</Configurations>
 	<References>
 		<ProjectReference
-			ReferencedProjectIdentifier="{238CCAB7-5880-4172-B0CF-9B9298ED9D29}"
-			RelativePathToProject=".\libopenmptDLL.vcproj"
+			ReferencedProjectIdentifier="{9C5101EF-3E20-4558-809B-277FDD50E878}"
+			RelativePathToProject=".\libopenmpt.vcproj"
 		/>
 	</References>
 	<Files>
@@ -376,6 +648,38 @@
 			</FileConfiguration>
 			<FileConfiguration
 				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					CompileAs="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DebugShared|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					CompileAs="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DebugShared|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					CompileAs="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="ReleaseShared|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					CompileAs="1"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="ReleaseShared|x64"
 				>
 				<Tool
 					Name="VCCLCompilerTool"

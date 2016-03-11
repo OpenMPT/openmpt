@@ -118,10 +118,10 @@ copy /y ..\..\libopenmpt\libopenmpt.hpp inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_config.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_version.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_ext.hpp inc\libopenmpt\ || goto error
-copy /y ..\..\bin\Win32\libopenmpt.lib lib\x86\ || goto error
-copy /y ..\..\bin\Win32\libopenmpt.dll bin\x86\ || goto error
-copy /y ..\..\bin\x64\libopenmpt.lib lib\x86_64\ || goto error
-copy /y ..\..\bin\x64\libopenmpt.dll bin\x86_64\ || goto error
+copy /y ..\..\bin\Win32-Shared\libopenmpt.lib lib\x86\ || goto error
+copy /y ..\..\bin\Win32-Shared\libopenmpt.dll bin\x86\ || goto error
+copy /y ..\..\bin\x64-Shared\libopenmpt.lib lib\x86_64\ || goto error
+copy /y ..\..\bin\x64-Shared\libopenmpt.dll bin\x86_64\ || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-dev-vs2010-r%MPT_REVISION%.7z ^
  LICENSE.txt ^
  Licenses ^

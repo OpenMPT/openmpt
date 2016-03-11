@@ -33,6 +33,22 @@
       <Configuration>ReleaseLTCG</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugShared|Win32">
+      <Configuration>DebugShared</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugShared|x64">
+      <Configuration>DebugShared</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseShared|Win32">
+      <Configuration>ReleaseShared</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseShared|x64">
+      <Configuration>ReleaseShared</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{37FC32A4-8DDC-4A9C-A30C-62989DD8ACE9}</ProjectGuid>
@@ -99,6 +115,34 @@
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <UseOfMfc>Dynamic</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <UseOfMfc>Dynamic</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <UseOfMfc>Dynamic</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <UseOfMfc>Dynamic</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -124,6 +168,18 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -181,6 +237,34 @@
     <OutDir>..\..\bin\x64\</OutDir>
     <IntDir>..\obj\OpenMPT\x86_64\ReleaseLTCG\</IntDir>
     <TargetName>mptrack</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\..\bin\Win32-Shared-Debug\</OutDir>
+    <IntDir>..\obj\OpenMPT\x86\DebugShared\</IntDir>
+    <TargetName>OpenMPT</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\..\bin\x64-Shared-Debug\</OutDir>
+    <IntDir>..\obj\OpenMPT\x86_64\DebugShared\</IntDir>
+    <TargetName>OpenMPT</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\..\bin\Win32-Shared\</OutDir>
+    <IntDir>..\obj\OpenMPT\x86\ReleaseShared\</IntDir>
+    <TargetName>OpenMPT</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\..\bin\x64-Shared\</OutDir>
+    <IntDir>..\obj\OpenMPT\x86_64\ReleaseShared\</IntDir>
+    <TargetName>OpenMPT</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -463,6 +547,143 @@
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <ExceptionHandling>Async</ExceptionHandling>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/DELAYLOAD:uxtheme.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
+    </Manifest>
+    <PreBuildEvent>
+      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <ExceptionHandling>Async</ExceptionHandling>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/DELAYLOAD:uxtheme.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
+    </Manifest>
+    <PreBuildEvent>
+      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/DELAYLOAD:uxtheme.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
+    </Manifest>
+    <PreBuildEvent>
+      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\common;..\..\soundlib;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\vstsdk2.4;..\..\include\ASIOSDK2\common;..\..\include\lhasa\lib\public;..\..\include\ogg\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/DELAYLOAD:uxtheme.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableDPIAwareness>false</EnableDPIAwareness>
+    </Manifest>
+    <PreBuildEvent>
+      <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\BuildSettings.h" />
     <ClInclude Include="..\..\common\CompilerDetect.h" />
@@ -691,6 +912,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugMDd|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\common\typedefs.cpp" />
     <ClCompile Include="..\..\common\version.cpp" />

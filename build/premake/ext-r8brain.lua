@@ -6,6 +6,7 @@
   objdir "../../build/obj/r8brain"
   dofile "../../build/premake/premake-defaults-LIB.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  targetname "openmpt-r8brain"
   includedirs { "../../include/r8brain" }
   characterset "MBCS"
   files {

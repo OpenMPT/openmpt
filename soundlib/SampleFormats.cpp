@@ -36,7 +36,6 @@
 #include <ogg/ogg.h>
 #endif // MPT_WITH_OGG
 #ifdef MPT_WITH_FLAC
-#define FLAC__NO_DLL
 #include <flac/include/FLAC/stream_decoder.h>
 #include <flac/include/FLAC/stream_encoder.h>
 #include <flac/include/FLAC/metadata.h>

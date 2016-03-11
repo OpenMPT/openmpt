@@ -4,8 +4,9 @@
   language "C"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/minizip"
-  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  targetname "openmpt-minizip"
   includedirs { "../../include/zlib", "../../include/zlib/contrib/minizip" }
   characterset "MBCS"
   files {
@@ -23,3 +24,14 @@
    "../../include/zlib/contrib/minizip/unzip.h",
    "../../include/zlib/contrib/minizip/zip.h",
   }
+  links {
+   "zlib"
+  }
+  filter {}
+  filter { "kind:StaticLib" }
+  filter { "kind:SharedLib" }
+   defines { "ZLIB_DLL" }
+  filter {}
+  filter { "kind:SharedLib" }
+   files { "../../build/premake/def/ext-minizip.def" }
+  filter {}

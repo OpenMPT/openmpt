@@ -23,22 +23,27 @@
   flags { "Unicode" }
   links {
    "libopenmpt",
-   "miniz",
-   "stb_vorbis",
    "flac",
-   "ogg",
    "portaudio",
-   "ksuser",
-   "winmm",
-  }
-  filter { "not action:vs2008" }
-  links { "delayimp" }
-  linkoptions {
-   "/DELAYLOAD:mf.dll",
-   "/DELAYLOAD:mfplat.dll",
-   "/DELAYLOAD:mfreadwrite.dll",
---   "/DELAYLOAD:mfuuid.dll", -- static library
-   "/DELAYLOAD:propsys.dll",
-  }
+   "winmm",  }
+  filter { "configurations:*Shared" }
+   defines { "LIBOPENMPT_USE_DLL" }
+  filter { "not configurations:*Shared" }
+   links {
+    "miniz",
+    "stb_vorbis",
+    "ogg",
+    "ksuser",
+    "winmm",
+   }
+  filter { "not configurations:*Shared", "not action:vs2008" }
+   links { "delayimp" }
+   linkoptions {
+    "/DELAYLOAD:mf.dll",
+    "/DELAYLOAD:mfplat.dll",
+    "/DELAYLOAD:mfreadwrite.dll",
+--    "/DELAYLOAD:mfuuid.dll", -- static library
+    "/DELAYLOAD:propsys.dll",
+   }
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

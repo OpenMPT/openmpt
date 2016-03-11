@@ -4,8 +4,9 @@
   language "C"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/zlib"
-  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  targetname "openmpt-zlib"
   includedirs { "../../include/zlib" }
   characterset "MBCS"
   files {
@@ -38,3 +39,8 @@
    "../../include/zlib/zlib.h",
    "../../include/zlib/zutil.h",
   }
+  filter {}
+  filter { "kind:StaticLib" }
+  filter { "kind:SharedLib" }
+   defines { "ZLIB_DLL" }
+  filter {}

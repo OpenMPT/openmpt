@@ -4,7 +4,7 @@
   language "C++"
   location ( "../../build/" .. _ACTION )
   objdir "../../build/obj/libopenmpt"
-  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   includedirs {
    "../..",
@@ -38,6 +38,18 @@
   characterset "Unicode"
   flags { "Unicode", "ExtraWarnings" }
   defines { "LIBOPENMPT_BUILD" }
+  filter { "kind:SharedLib" }
+   defines { "LIBOPENMPT_BUILD_DLL" }
+  filter { "kind:SharedLib", "not action:vs2008" }
+   links { "delayimp" }
+   linkoptions {
+    "/DELAYLOAD:mf.dll",
+    "/DELAYLOAD:mfplat.dll",
+    "/DELAYLOAD:mfreadwrite.dll",
+--   "/DELAYLOAD:mfuuid.dll", -- static library
+    "/DELAYLOAD:propsys.dll",
+   }
+  filter {}
   links {
    "miniz",
    "stb_vorbis"

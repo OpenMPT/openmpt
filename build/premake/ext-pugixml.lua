@@ -6,6 +6,7 @@
   objdir "../../build/obj/pugixml"
   dofile "../../build/premake/premake-defaults-LIB.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  targetname "openmpt-pugixml"
   includedirs { }
   characterset "MBCS"
   files {

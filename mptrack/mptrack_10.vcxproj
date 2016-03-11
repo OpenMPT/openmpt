@@ -189,7 +189,7 @@
       <AdditionalOptions>/EHsc %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\msinttypes\inttypes;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\ogg\include;..\include\zlib;..\;$(IntDir)svn_version;..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;MPT_BUILD_MSVC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -242,7 +242,7 @@
       <AdditionalOptions>/EHsc %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\msinttypes\inttypes;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\ogg\include;..\include\zlib;..\;$(IntDir)svn_version;..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;OPENMPT_VSTI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;OPENMPT_VSTI;MPT_BUILD_MSVC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -294,7 +294,7 @@
       <AdditionalOptions>/EHsc %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\msinttypes\inttypes;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\ogg\include;..\include\zlib;..\;$(IntDir)svn_version;..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;MPT_BUILD_MSVC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -345,7 +345,7 @@
       <AdditionalOptions>/EHsc %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\msinttypes\inttypes;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\ogg\include;..\include\zlib;..\;$(IntDir)svn_version;..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;OPENMPT_VSTI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;OPENMPT_VSTI;MPT_BUILD_MSVC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -397,7 +397,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\msinttypes\inttypes;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\ogg\include;..\include\zlib;..\;$(IntDir)svn_version;..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;MPT_BUILD_MSVC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>true</BufferSecurityCheck>
@@ -456,7 +456,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\msinttypes\inttypes;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\ogg\include;..\include\zlib;..\;$(IntDir)svn_version;..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;OPENMPT_VSTI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;OPENMPT_VSTI;MPT_BUILD_MSVC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>true</BufferSecurityCheck>
@@ -513,7 +513,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\msinttypes\inttypes;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\ogg\include;..\include\zlib;..\;$(IntDir)svn_version;..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;MPT_BUILD_MSVC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>true</BufferSecurityCheck>
@@ -569,7 +569,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\msinttypes\inttypes;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\ogg\include;..\include\zlib;..\;$(IntDir)svn_version;..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;OPENMPT_VSTI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;OPENMPT_VSTI;MPT_BUILD_MSVC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>true</BufferSecurityCheck>
@@ -626,7 +626,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\msinttypes\inttypes;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\ogg\include;..\include\zlib;..\;$(IntDir)svn_version;..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;MPT_BUILD_MSVC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>true</BufferSecurityCheck>
@@ -683,7 +683,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>..\common;..\soundlib;..\include;..\include\msinttypes\inttypes;..\include\vstsdk2.4\;..\include\ASIOSDK2\common\;..\include\lhasa\lib\public;..\include\ogg\include;..\include\zlib;..\;$(IntDir)svn_version;..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;MODPLUG_TRACKER;MPT_BUILD_MSVC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>true</BufferSecurityCheck>

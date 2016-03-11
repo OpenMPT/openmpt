@@ -68,7 +68,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\minizip.lib"
+				OutputFile="$(OutDir)\openmpt-minizip.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -136,7 +136,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\minizip.lib"
+				OutputFile="$(OutDir)\openmpt-minizip.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -204,7 +204,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\minizip.lib"
+				OutputFile="$(OutDir)\openmpt-minizip.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -273,7 +273,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\minizip.lib"
+				OutputFile="$(OutDir)\openmpt-minizip.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -293,7 +293,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugMDd|Win32"
-			OutputDirectory="..\lib\x86\Debug"
+			OutputDirectory="..\lib\x86\DebugMDd"
 			IntermediateDirectory="..\obj\minizip\x86\DebugMDd"
 			ConfigurationType="4"
 			CharacterSet="2"
@@ -340,7 +340,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\minizip.lib"
+				OutputFile="$(OutDir)\openmpt-minizip.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -360,7 +360,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugMDd|x64"
-			OutputDirectory="..\lib\x86_64\Debug"
+			OutputDirectory="..\lib\x86_64\DebugMDd"
 			IntermediateDirectory="..\obj\minizip\x86_64\DebugMDd"
 			ConfigurationType="4"
 			CharacterSet="2"
@@ -408,7 +408,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\minizip.lib"
+				OutputFile="$(OutDir)\openmpt-minizip.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -477,7 +477,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\minizip.lib"
+				OutputFile="$(OutDir)\openmpt-minizip.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -547,7 +547,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\minizip.lib"
+				OutputFile="$(OutDir)\openmpt-minizip.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -565,54 +565,474 @@
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
+		<Configuration
+			Name="DebugShared|Win32"
+			OutputDirectory="..\..\bin\Win32-Shared-Debug"
+			IntermediateDirectory="..\obj\minizip\x86\DebugShared"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ZLIB_DLL"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="4"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ZLIB_DLL"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\openmpt-minizip.dll"
+				LinkIncremental="2"
+				ModuleDefinitionFile="../premake/def/ext-minizip.def"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				ImportLibrary="..\..\bin\Win32-Shared-Debug\openmpt-minizip.lib"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="DebugShared|x64"
+			OutputDirectory="..\..\bin\x64-Shared-Debug"
+			IntermediateDirectory="..\obj\minizip\x86_64\DebugShared"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ZLIB_DLL"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ZLIB_DLL"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\openmpt-minizip.dll"
+				LinkIncremental="2"
+				ModuleDefinitionFile="../premake/def/ext-minizip.def"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				ImportLibrary="..\..\bin\x64-Shared-Debug\openmpt-minizip.lib"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseShared|Win32"
+			OutputDirectory="..\..\bin\Win32-Shared"
+			IntermediateDirectory="..\obj\minizip\x86\ReleaseShared"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
+				Optimization="2"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ZLIB_DLL"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ZLIB_DLL"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\openmpt-minizip.dll"
+				LinkIncremental="1"
+				ModuleDefinitionFile="../premake/def/ext-minizip.def"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				ImportLibrary="..\..\bin\Win32-Shared\openmpt-minizip.lib"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseShared|x64"
+			OutputDirectory="..\..\bin\x64-Shared"
+			IntermediateDirectory="..\obj\minizip\x86_64\ReleaseShared"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
+				Optimization="2"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ZLIB_DLL"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ZLIB_DLL"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\zlib;..\..\include\zlib\contrib\minizip"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\openmpt-minizip.dll"
+				LinkIncremental="1"
+				ModuleDefinitionFile="../premake/def/ext-minizip.def"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				ImportLibrary="..\..\bin\x64-Shared\openmpt-minizip.lib"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
+		<ProjectReference
+			ReferencedProjectIdentifier="{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
+			RelativePathToProject=".\zlib.vcproj"
+		/>
 	</References>
 	<Files>
-		<File
-			RelativePath="..\..\include\zlib\contrib\minizip\crypt.h"
+		<Filter
+			Name="include"
 			>
-		</File>
-		<File
-			RelativePath="..\..\include\zlib\contrib\minizip\ioapi.c"
+			<Filter
+				Name="zlib"
+				>
+				<Filter
+					Name="contrib"
+					>
+					<Filter
+						Name="minizip"
+						>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\crypt.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\ioapi.c"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\ioapi.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\iowin32.c"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\iowin32.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\mztools.c"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\mztools.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\unzip.c"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\unzip.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\zip.c"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\zlib\contrib\minizip\zip.h"
+							>
+						</File>
+					</Filter>
+				</Filter>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="premake"
 			>
-		</File>
-		<File
-			RelativePath="..\..\include\zlib\contrib\minizip\ioapi.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\zlib\contrib\minizip\iowin32.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\zlib\contrib\minizip\iowin32.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\zlib\contrib\minizip\mztools.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\zlib\contrib\minizip\mztools.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\zlib\contrib\minizip\unzip.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\zlib\contrib\minizip\unzip.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\zlib\contrib\minizip\zip.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\zlib\contrib\minizip\zip.h"
-			>
-		</File>
+			<Filter
+				Name="def"
+				>
+				<File
+					RelativePath="..\premake\def\ext-minizip.def"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugMDd|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugMDd|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseLTCG|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseLTCG|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+			</Filter>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

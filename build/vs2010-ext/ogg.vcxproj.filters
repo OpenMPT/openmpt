@@ -10,6 +10,14 @@
     <Filter Include="src">
       <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
     </Filter>
+    <Filter Include="win32">
+      <UniqueIdentifier>{98D2A310-04E7-CBC1-CD68-6F21393CC8F2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\include\ogg\win32\ogg.def">
+      <Filter>win32</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\ogg\include\ogg\ogg.h">

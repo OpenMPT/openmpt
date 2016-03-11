@@ -43,9 +43,10 @@
 
 #define MPT_WITH_FLAC
 #define MPT_WITH_PORTAUDIO
-#define MPT_WITH_ZLIB
 
+#if defined(MPT_BUILD_MSVC_STATIC)
 #define FLAC__NO_DLL
+#endif
 
 #endif // _MSC_VER
 

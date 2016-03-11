@@ -3,35 +3,51 @@
 
   filter { "kind:StaticLib", "configurations:Debug", "architecture:x86" }
    targetdir "../../build/lib/x86/Debug"
+  filter { "kind:StaticLib", "configurations:DebugShared", "architecture:x86" }
+   targetdir "../../build/lib/x86/DebugShared"
   filter { "kind:StaticLib", "configurations:DebugMDd", "architecture:x86" }
-   targetdir "../../build/lib/x86/Debug"
+   targetdir "../../build/lib/x86/DebugMDd"
   filter { "kind:StaticLib", "configurations:Release", "architecture:x86" }
    targetdir "../../build/lib/x86/Release"
+  filter { "kind:StaticLib", "configurations:ReleaseShared", "architecture:x86" }
+   targetdir "../../build/lib/x86/ReleaseShared"
   filter { "kind:StaticLib", "configurations:ReleaseLTCG", "architecture:x86" }
    targetdir "../../build/lib/x86/ReleaseLTCG"
   filter { "kind:StaticLib", "configurations:Debug", "architecture:x86_64" }
    targetdir "../../build/lib/x86_64/Debug"
+  filter { "kind:StaticLib", "configurations:DebugShared", "architecture:x86_64" }
+   targetdir "../../build/lib/x86_64/DebugShared"
   filter { "kind:StaticLib", "configurations:DebugMDd", "architecture:x86_64" }
-   targetdir "../../build/lib/x86_64/Debug"
+   targetdir "../../build/lib/x86_64/DebugMDd"
   filter { "kind:StaticLib", "configurations:Release", "architecture:x86_64" }
    targetdir "../../build/lib/x86_64/Release"
+  filter { "kind:StaticLib", "configurations:ReleaseShared", "architecture:x86_64" }
+   targetdir "../../build/lib/x86_64/ReleaseShared"
   filter { "kind:StaticLib", "configurations:ReleaseLTCG", "architecture:x86_64" }
    targetdir "../../build/lib/x86_64/ReleaseLTCG"
   	
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:x86" }
    targetdir "../../bin/Win32-Debug"
+  filter { "kind:not StaticLib", "configurations:DebugShared", "architecture:x86" }
+   targetdir "../../bin/Win32-Shared-Debug"
   filter { "kind:not StaticLib", "configurations:DebugMDd", "architecture:x86" }
    targetdir "../../bin/Win32-DebugMDd"
   filter { "kind:not StaticLib", "configurations:Release", "architecture:x86" }
    targetdir "../../bin/Win32"
+  filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:x86" }
+   targetdir "../../bin/Win32-Shared"
   filter { "kind:not StaticLib", "configurations:ReleaseLTCG", "architecture:x86" }
    targetdir "../../bin/Win32"
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:x86_64" }
    targetdir "../../bin/x64-Debug"
+  filter { "kind:not StaticLib", "configurations:DebugShared", "architecture:x86_64" }
+   targetdir "../../bin/x64-Shared-Debug"
   filter { "kind:not StaticLib", "configurations:DebugMDd", "architecture:x86_64" }
    targetdir "../../bin/x64-DebugMDd"
   filter { "kind:not StaticLib", "configurations:Release", "architecture:x86_64" }
    targetdir "../../bin/x64"
+  filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:x86_64" }
+   targetdir "../../bin/x64-Shared"
   filter { "kind:not StaticLib", "configurations:ReleaseLTCG", "architecture:x86_64" }
    targetdir "../../bin/x64"
 
@@ -43,6 +59,12 @@
    defines { "MPT_BUILD_MSVC_STATIC" }
    flags { "Symbols" }
    flags { "StaticRuntime" }
+   optimize "Debug"
+
+  filter { "configurations:DebugShared" }
+   defines { "DEBUG" }
+   defines { "MPT_BUILD_MSVC_SHARED" }
+   flags { "Symbols" }
    optimize "Debug"
 
   filter { "configurations:DebugMDd" }
@@ -59,6 +81,13 @@
    optimize "Speed"
    floatingpoint "Fast"
 
+  filter { "configurations:ReleaseShared" }
+   defines { "NDEBUG" }
+   defines { "MPT_BUILD_MSVC_SHARED" }
+   flags { "Symbols", "MultiProcessorCompile" }
+   optimize "Speed"
+   floatingpoint "Fast"
+
   filter { "configurations:ReleaseLTCG" }
    defines { "NDEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
@@ -68,6 +97,9 @@
    floatingpoint "Fast"
 
   filter { "configurations:Release", "not action:vs2008" }
+   vectorextensions "SSE2"
+
+  filter { "configurations:ReleaseShared", "not action:vs2008" }
    vectorextensions "SSE2"
 
   filter { "configurations:ReleaseLTCG", "not action:vs2008" }

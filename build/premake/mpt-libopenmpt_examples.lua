@@ -19,7 +19,7 @@ if _ACTION ~= "vs2008" then
   characterset "Unicode"
   flags { "Unicode" }
   links { "libopenmpt", "miniz", "stb_vorbis", "portaudio", "portaudiocpp", "ksuser", "winmm" }
-  filter { "not action:vs2008" }
+  filter { "not configurations:*Shared", "not action:vs2008" }
   links { "delayimp" }
   linkoptions {
    "/DELAYLOAD:mf.dll",
@@ -28,6 +28,8 @@ if _ACTION ~= "vs2008" then
 --   "/DELAYLOAD:mfuuid.dll", -- static library
    "/DELAYLOAD:propsys.dll",
   }
+  filter { "configurations:*Shared" }
+   defines { "LIBOPENMPT_USE_DLL" }
   filter {}
 
 end
@@ -49,7 +51,7 @@ end
   characterset "Unicode"
   flags { "Unicode" }
   links { "libopenmpt", "miniz", "stb_vorbis", "portaudio", "ksuser", "winmm" }
-  filter { "not action:vs2008" }
+  filter { "not configurations:*Shared", "not action:vs2008" }
   links { "delayimp" }
   linkoptions {
    "/DELAYLOAD:mf.dll",
@@ -58,6 +60,8 @@ end
 --   "/DELAYLOAD:mfuuid.dll", -- static library
    "/DELAYLOAD:propsys.dll",
   }
+  filter { "configurations:*Shared" }
+   defines { "LIBOPENMPT_USE_DLL" }
   filter {}
 
  project "libopenmpt_example_c_mem"
@@ -77,7 +81,7 @@ end
   characterset "Unicode"
   flags { "Unicode" }
   links { "libopenmpt", "miniz", "stb_vorbis", "portaudio", "ksuser", "winmm" }
-  filter { "not action:vs2008" }
+  filter { "not configurations:*Shared", "not action:vs2008" }
   links { "delayimp" }
   linkoptions {
    "/DELAYLOAD:mf.dll",
@@ -86,6 +90,8 @@ end
 --   "/DELAYLOAD:mfuuid.dll", -- static library
    "/DELAYLOAD:propsys.dll",
   }
+  filter { "configurations:*Shared" }
+   defines { "LIBOPENMPT_USE_DLL" }
   filter {}
 
  project "libopenmpt_example_c_unsafe"
@@ -105,7 +111,7 @@ end
   characterset "Unicode"
   flags { "Unicode" }
   links { "libopenmpt", "miniz", "stb_vorbis", "portaudio", "ksuser", "winmm" }
-  filter { "not action:vs2008" }
+  filter { "not configurations:*Shared", "not action:vs2008" }
   links { "delayimp" }
   linkoptions {
    "/DELAYLOAD:mf.dll",
@@ -114,5 +120,7 @@ end
 --   "/DELAYLOAD:mfuuid.dll", -- static library
    "/DELAYLOAD:propsys.dll",
   }
+  filter { "configurations:*Shared" }
+   defines { "LIBOPENMPT_USE_DLL" }
   filter {}
 
