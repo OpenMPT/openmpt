@@ -6,6 +6,7 @@
   objdir "../../build/obj/portaudiocpp"
   dofile "../../build/premake/premake-defaults-LIB.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  targetname "openmpt-portaudiocpp"
   includedirs { "../../include/portaudio/include", "../../include/portaudio/bindings/cpp/include" }
   characterset "MBCS"
   defines {
@@ -23,6 +24,11 @@
   files {
    "../../include/portaudio/bindings/cpp/source/portaudiocpp/*.cxx",
   }
+  links { "portaudio" }
   filter { "configurations:Debug" }
+   defines { "PA_ENABLE_DEBUG_OUTPUT" }
+  filter { "configurations:DebugShared" }
+   defines { "PA_ENABLE_DEBUG_OUTPUT" }
+  filter { "configurations:DebugMDd" }
    defines { "PA_ENABLE_DEBUG_OUTPUT" }
   filter {}

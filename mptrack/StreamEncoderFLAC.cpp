@@ -16,7 +16,6 @@
 #include "Mptrack.h"
 #include "TrackerSettings.h"
 
-#define FLAC__NO_DLL
 #include <flac/include/FLAC/metadata.h>
 #include <flac/include/FLAC/format.h>
 #include <flac/include/FLAC/stream_encoder.h>

@@ -6,6 +6,7 @@
   objdir "../../build/obj/miniz"
   dofile "../../build/premake/premake-defaults-LIB.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  targetname "openmpt-miniz"
   characterset "MBCS"
   files {
    "../../include/miniz/miniz.c",

@@ -69,7 +69,8 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\portaudio.lib"
+				AdditionalDependencies="ksuser.lib winmm.lib"
+				OutputFile="$(OutDir)\openmpt-portaudio.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -138,7 +139,8 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\portaudio.lib"
+				AdditionalDependencies="ksuser.lib winmm.lib"
+				OutputFile="$(OutDir)\openmpt-portaudio.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -206,7 +208,8 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\portaudio.lib"
+				AdditionalDependencies="ksuser.lib winmm.lib"
+				OutputFile="$(OutDir)\openmpt-portaudio.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -275,7 +278,8 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\portaudio.lib"
+				AdditionalDependencies="ksuser.lib winmm.lib"
+				OutputFile="$(OutDir)\openmpt-portaudio.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -295,7 +299,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugMDd|Win32"
-			OutputDirectory="..\lib\x86\Debug"
+			OutputDirectory="..\lib\x86\DebugMDd"
 			IntermediateDirectory="..\obj\portaudio\x86\DebugMDd"
 			ConfigurationType="4"
 			CharacterSet="2"
@@ -320,7 +324,7 @@
 				AdditionalOptions="/wd4018 /wd4267"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;PA_ENABLE_DEBUG_OUTPUT"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -335,7 +339,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;PA_ENABLE_DEBUG_OUTPUT"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
 			/>
 			<Tool
@@ -343,7 +347,8 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\portaudio.lib"
+				AdditionalDependencies="ksuser.lib winmm.lib"
+				OutputFile="$(OutDir)\openmpt-portaudio.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -363,7 +368,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugMDd|x64"
-			OutputDirectory="..\lib\x86_64\Debug"
+			OutputDirectory="..\lib\x86_64\DebugMDd"
 			IntermediateDirectory="..\obj\portaudio\x86_64\DebugMDd"
 			ConfigurationType="4"
 			CharacterSet="2"
@@ -389,7 +394,7 @@
 				AdditionalOptions="/wd4018 /wd4267"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;PA_ENABLE_DEBUG_OUTPUT"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -404,7 +409,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;PA_ENABLE_DEBUG_OUTPUT"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
 			/>
 			<Tool
@@ -412,7 +417,8 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\portaudio.lib"
+				AdditionalDependencies="ksuser.lib winmm.lib"
+				OutputFile="$(OutDir)\openmpt-portaudio.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -481,7 +487,8 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\portaudio.lib"
+				AdditionalDependencies="ksuser.lib winmm.lib"
+				OutputFile="$(OutDir)\openmpt-portaudio.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -551,7 +558,8 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\portaudio.lib"
+				AdditionalDependencies="ksuser.lib winmm.lib"
+				OutputFile="$(OutDir)\openmpt-portaudio.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -569,10 +577,416 @@
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
+		<Configuration
+			Name="DebugShared|Win32"
+			OutputDirectory="..\..\bin\Win32-Shared-Debug"
+			IntermediateDirectory="..\obj\portaudio\x86\DebugShared"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4018 /wd4267"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;PA_ENABLE_DEBUG_OUTPUT"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="4"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;PA_ENABLE_DEBUG_OUTPUT"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="ksuser.lib winmm.lib"
+				OutputFile="$(OutDir)\openmpt-portaudio.dll"
+				LinkIncremental="2"
+				ModuleDefinitionFile="../../include/portaudio/build/msvc/portaudio.def"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				ImportLibrary="..\..\bin\Win32-Shared-Debug\openmpt-portaudio.lib"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="DebugShared|x64"
+			OutputDirectory="..\..\bin\x64-Shared-Debug"
+			IntermediateDirectory="..\obj\portaudio\x86_64\DebugShared"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4018 /wd4267"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;PA_ENABLE_DEBUG_OUTPUT"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1;PA_ENABLE_DEBUG_OUTPUT"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="ksuser.lib winmm.lib"
+				OutputFile="$(OutDir)\openmpt-portaudio.dll"
+				LinkIncremental="2"
+				ModuleDefinitionFile="../../include/portaudio/build/msvc/portaudio.def"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				ImportLibrary="..\..\bin\x64-Shared-Debug\openmpt-portaudio.lib"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseShared|Win32"
+			OutputDirectory="..\..\bin\Win32-Shared"
+			IntermediateDirectory="..\obj\portaudio\x86\ReleaseShared"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4018 /wd4267 /MP"
+				Optimization="2"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="ksuser.lib winmm.lib"
+				OutputFile="$(OutDir)\openmpt-portaudio.dll"
+				LinkIncremental="1"
+				ModuleDefinitionFile="../../include/portaudio/build/msvc/portaudio.def"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				ImportLibrary="..\..\bin\Win32-Shared\openmpt-portaudio.lib"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseShared|x64"
+			OutputDirectory="..\..\bin\x64-Shared"
+			IntermediateDirectory="..\obj\portaudio\x86_64\ReleaseShared"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4018 /wd4267 /MP"
+				Optimization="2"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;PAWIN_USE_WDMKS_DEVICE_INFO;PA_WDMKS_NO_KSGUID_LIB;PA_USE_ASIO=0;PA_USE_DS=1;PA_USE_WMME=1;PA_USE_WASAPI=1;PA_USE_WDMKS=1"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\portaudio\include;..\..\include\portaudio\src\common;..\..\include\portaudio\src\os\win"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="ksuser.lib winmm.lib"
+				OutputFile="$(OutDir)\openmpt-portaudio.dll"
+				LinkIncremental="1"
+				ModuleDefinitionFile="../../include/portaudio/build/msvc/portaudio.def"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				ImportLibrary="..\..\bin\x64-Shared\openmpt-portaudio.lib"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
 	<Files>
+		<Filter
+			Name="build"
+			>
+			<Filter
+				Name="msvc"
+				>
+				<File
+					RelativePath="..\..\include\portaudio\build\msvc\portaudio.def"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugMDd|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugMDd|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseLTCG|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseLTCG|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+			</Filter>
+		</Filter>
 		<Filter
 			Name="include"
 			>

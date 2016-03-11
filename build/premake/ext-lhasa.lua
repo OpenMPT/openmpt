@@ -6,6 +6,7 @@
   objdir "../../build/obj/lhasa"
   dofile "../../build/premake/premake-defaults-LIB.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  targetname "openmpt-lhasa"
   includedirs { "../../include/msinttypes/inttypes" }
   characterset "MBCS"
   files {

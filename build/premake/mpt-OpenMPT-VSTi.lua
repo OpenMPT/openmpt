@@ -71,8 +71,14 @@
   }
   linkoptions {
    "/DELAYLOAD:uxtheme.dll",
-   "/DELAYLOAD:OpenMPT_SoundTouch_f32.dll",
   }
+  filter { "configurations:*Shared" }
+  filter { "not configurations:*Shared" }
+   linkoptions {
+    "/DELAYLOAD:OpenMPT_SoundTouch_f32.dll",
+   }
+   targetname "mptrack"
+  filter {}
   filter { "not action:vs2008" }
   linkoptions {
    "/DELAYLOAD:mf.dll",

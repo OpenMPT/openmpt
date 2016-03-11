@@ -4,7 +4,7 @@
   language "C++"
   location ( "../../build/" .. _ACTION )
   objdir "../../build/obj/libopenmpt_modplug"
-  dofile "../../build/premake/premake-defaults-DLL.lua"
+  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   targetname "libmodplug"
   includedirs {
@@ -18,7 +18,8 @@
    "../../libopenmpt/libopenmpt_modplug_cpp.cpp",
   }
   characterset "MBCS"
-  links { "libopenmptDLL" }
-  prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
+  links { "libopenmpt" }
+  filter { "configurations:*Shared" }
+   defines { "LIBOPENMPT_USE_DLL" }
   filter {}
-   removeflags { "StaticRuntime" }
+  prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

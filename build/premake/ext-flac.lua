@@ -4,8 +4,9 @@
   language "C"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/flac"
-  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  targetname "openmpt-flac"
   includedirs { "../../include/flac/include", "../../include/flac/src/libFLAC/include", "../../include/ogg/include" }
   characterset "MBCS"
   files {
@@ -80,9 +81,15 @@
    "../../include/flac/include/FLAC/stream_encoder.h",
   }
   buildoptions { "/wd4244", "/wd4267", "/wd4334" }
-  defines { "FLAC__NO_DLL", "FLAC__HAS_OGG=1" }
+  defines { "FLAC__HAS_OGG=1" }
+  links { "ogg" }
   filter { "action:vs2008" }
    defines { "VERSION=\\\"1.3.1\\\"" }
   filter { "action:not vs2008" }
    defines { "VERSION=\"1.3.1\"" }
+  filter {}
+  filter { "kind:StaticLib" }
+   defines { "FLAC__NO_DLL" }
+  filter { "kind:SharedLib" }
+   defines { "FLAC_API_EXPORTS" }
   filter {}

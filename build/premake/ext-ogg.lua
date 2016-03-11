@@ -4,8 +4,9 @@
   language "C"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/ogg"
-  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  targetname "openmpt-ogg"
   includedirs { "../../include/ogg/include" }
   characterset "MBCS"
   files {
@@ -14,3 +15,6 @@
    "../../include/ogg/src/bitwise.c",
    "../../include/ogg/src/framing.c",
   }
+  filter { "kind:SharedLib" }
+   files { "../../include/ogg/win32/ogg.def" }
+  filter {}

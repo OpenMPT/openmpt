@@ -6,6 +6,7 @@
   objdir "../../build/obj/portmidi"
   dofile "../../build/premake/premake-defaults-LIB.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  targetname "openmpt-portmidi"
   includedirs { "../../include/portmidi/porttime", "../../include/portmidi/pm_common", "../../include/portmidi/pm_win" }
   characterset "MBCS"
   files {

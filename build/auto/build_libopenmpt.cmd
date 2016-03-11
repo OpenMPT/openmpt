@@ -27,6 +27,7 @@ cd "build\%MPT_VSVER%" || goto error
    devenv foo_openmpt.sln /clean "Release|%MPT_ARCH%" || goto error
   )
  )
+ devenv libopenmpt.sln /clean "ReleaseShared|%MPT_ARCH%" || goto error
  
  devenv libopenmpt.sln /build "Release|%MPT_ARCH%" || goto error
  devenv openmpt123.sln /build "Release|%MPT_ARCH%" || goto error
@@ -37,6 +38,7 @@ cd "build\%MPT_VSVER%" || goto error
    devenv foo_openmpt.sln /build "Release|%MPT_ARCH%" || goto error
   )
  )
+ devenv libopenmpt.sln /build "ReleaseShared|%MPT_ARCH%" || goto error
 
 cd ..\.. || goto error
 

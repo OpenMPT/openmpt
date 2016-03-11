@@ -6,7 +6,11 @@
   objdir "../../build/obj/soundtouch"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  targetname "OpenMPT_SoundTouch_f32"
+  filter { "configurations:*Shared" }
+   targetname "openmpt-soundtouch"
+  filter { "not configurations:*Shared" }
+   targetname "OpenMPT_SoundTouch_f32"
+  filter {}
   includedirs { "../../include/soundtouch/include" }
   characterset "MBCS"
   files {

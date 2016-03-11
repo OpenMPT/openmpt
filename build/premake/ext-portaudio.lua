@@ -4,8 +4,9 @@
   language "C"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/portaudio"
-  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  targetname "openmpt-portaudio"
   includedirs { "../../include/portaudio/include", "../../include/portaudio/src/common", "../../include/portaudio/src/os/win" }
   characterset "MBCS"
   defines {
@@ -73,6 +74,16 @@
    "../../include/portaudio/include/portaudio.h",
   }
   buildoptions { "/wd4018", "/wd4267" }
+  links {
+   "ksuser",
+   "winmm",
+  }
   filter { "configurations:Debug" }
    defines { "PA_ENABLE_DEBUG_OUTPUT" }
+  filter { "configurations:DebugShared" }
+   defines { "PA_ENABLE_DEBUG_OUTPUT" }
+  filter { "configurations:DebugMDd" }
+   defines { "PA_ENABLE_DEBUG_OUTPUT" }
+  filter { "kind:SharedLib" }
+   files { "../../include/portaudio/build/msvc/portaudio.def" }
   filter {}

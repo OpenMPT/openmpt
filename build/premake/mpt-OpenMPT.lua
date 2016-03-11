@@ -6,7 +6,11 @@
   objdir "../../build/obj/OpenMPT"
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  targetname "mptrack"
+  filter { "configurations:*Shared" }
+   targetname "OpenMPT"
+  filter { "not configurations:*Shared" }
+   targetname "mptrack"
+  filter {}
   includedirs {
    "../../common",
    "../../soundlib",
@@ -73,8 +77,14 @@
   }
   linkoptions {
    "/DELAYLOAD:uxtheme.dll",
-   "/DELAYLOAD:OpenMPT_SoundTouch_f32.dll",
   }
+  filter { "configurations:*Shared" }
+  filter { "not configurations:*Shared" }
+   linkoptions {
+    "/DELAYLOAD:OpenMPT_SoundTouch_f32.dll",
+   }
+   targetname "mptrack"
+  filter {}
   filter { "not action:vs2008" }
   linkoptions {
    "/DELAYLOAD:mf.dll",

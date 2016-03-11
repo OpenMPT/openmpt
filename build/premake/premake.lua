@@ -6,6 +6,8 @@
 
 MPT_PREMAKE_VERSION = ""
 
+MPT_WITH_SHARED = true
+
 if _PREMAKE_VERSION == "5.0.0-alpha8" then
  MPT_PREMAKE_VERSION = "5.0"
 else
@@ -145,7 +147,7 @@ solution "libopenmpt-all"
  dofile "../../build/premake/mpt-libopenmpt_test.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt_examples.lua"
- dofile "../../build/premake/mpt-libopenmptDLL.lua"
+-- dofile "../../build/premake/mpt-libopenmpt-small.lua"
  dofile "../../build/premake/mpt-libopenmpt_modplug.lua"
  dofile "../../build/premake/mpt-foo_openmpt.lua"
  dofile "../../build/premake/mpt-in_openmpt.lua"
@@ -153,11 +155,9 @@ solution "libopenmpt-all"
  dofile "../../build/premake/mpt-openmpt123.lua"
  dofile "../../build/premake/ext-flac.lua"
  dofile "../../build/premake/ext-miniz.lua"
- dofile "../../build/premake/ext-miniz-shared.lua"
  dofile "../../build/premake/ext-portaudio.lua"
  dofile "../../build/premake/ext-portaudiocpp.lua"
  dofile "../../build/premake/ext-stb_vorbis.lua"
- dofile "../../build/premake/ext-stb_vorbis-shared.lua"
 
 end
 
@@ -222,19 +222,21 @@ if _OPTIONS["group"] == "libopenmpt" then
 
 solution "libopenmpt"
  location ( "../../build/" .. _ACTION )
+if MPT_WITH_SHARED then
+ configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
+else
  configurations { "Debug", "Release" }
+end
  platforms { "x86", "x86_64" }
 
  dofile "../../build/premake/mpt-libopenmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt_examples.lua"
- dofile "../../build/premake/mpt-libopenmptDLL.lua"
+-- dofile "../../build/premake/mpt-libopenmpt-small.lua"
  dofile "../../build/premake/mpt-libopenmpt_modplug.lua"
  dofile "../../build/premake/ext-miniz.lua"
- dofile "../../build/premake/ext-miniz-shared.lua"
  dofile "../../build/premake/ext-portaudio.lua"
  dofile "../../build/premake/ext-portaudiocpp.lua"
  dofile "../../build/premake/ext-stb_vorbis.lua"
- dofile "../../build/premake/ext-stb_vorbis-shared.lua"
 
 end
 
@@ -242,7 +244,11 @@ if _OPTIONS["group"] == "openmpt123" then
 
 solution "openmpt123"
  location ( "../../build/" .. _ACTION )
+if MPT_WITH_SHARED then
+ configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
+else
  configurations { "Debug", "Release" }
+end
  platforms { "x86", "x86_64" }
 
  dofile "../../build/premake/mpt-openmpt123.lua"
@@ -296,7 +302,11 @@ if _OPTIONS["group"] == "OpenMPT" then
 
 solution "OpenMPT"
  location ( "../../build/" .. _ACTION )
+if MPT_WITH_SHARED then
+ configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
+else
  configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG" }
+end
  platforms { "x86", "x86_64" }
  
  dofile "../../build/premake/mpt-OpenMPT.lua"
@@ -321,13 +331,16 @@ if _OPTIONS["group"] == "all-externals" then
 
 solution "all-externals"
  location ( "../../build/" .. _ACTION .. "-ext" )
+if MPT_WITH_SHARED then
+ configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
+else
  configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG" }
+end
  platforms { "x86", "x86_64" }
 
  dofile "../../build/premake/ext-flac.lua"
  dofile "../../build/premake/ext-lhasa.lua"
  dofile "../../build/premake/ext-miniz.lua"
- dofile "../../build/premake/ext-miniz-shared.lua"
  dofile "../../build/premake/ext-minizip.lua"
  dofile "../../build/premake/ext-ogg.lua"
  dofile "../../build/premake/ext-portaudio.lua"
@@ -337,7 +350,6 @@ solution "all-externals"
  dofile "../../build/premake/ext-smbPitchShift.lua"
  dofile "../../build/premake/ext-soundtouch.lua"
  dofile "../../build/premake/ext-stb_vorbis.lua"
- dofile "../../build/premake/ext-stb_vorbis-shared.lua"
  dofile "../../build/premake/ext-UnRAR.lua"
  dofile "../../build/premake/ext-zlib.lua"
 

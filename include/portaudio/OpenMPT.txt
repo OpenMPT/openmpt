@@ -3,10 +3,12 @@
    to facilitate linking against strmiids.lib . Look for "OpenMPT" there.
  - src/common/pa_front.c has been fixed to compile with a C89 compiler.
    Modifications have been marked with // OpenMPT.
+ - build/msvc/portaudio.def has been modified. Modifications are marked with
+   ";OpenMPT".
  - For building, premake is used to generate Visual Studio project files.
    See ../build/premake/ for details.
  - A couple of unnecessary folders have been omitted in SVN:
-   bindings, build, cmake_support, doc, examples, pablio, test, testcvs
+   bindings, cmake_support, doc, examples, pablio, test, testcvs
 
    NOTE: Various versions of the Windows SDK (such as the one provided with the VS2008 x64 compiler) 
    do not provide ksguid.lib. To simplify the build configuration, PA_WDMKS_NO_KSGUID_LIB

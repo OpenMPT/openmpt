@@ -1906,6 +1906,25 @@ void CCtrlSamples::OnEstimateSampleSize()
 }
 
 
+#ifdef MPT_BUILD_MSVC_SHARED
+
+//=======================
+class ComponentSoundTouch
+//=======================
+	: public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS
+public:
+	ComponentSoundTouch()
+		: ComponentBuiltin()	
+	{
+		return;
+	}
+};
+MPT_REGISTERED_COMPONENT(ComponentSoundTouch, "SoundTouch")
+
+#else
+
 //=======================
 class ComponentSoundTouch
 //=======================
@@ -1914,12 +1933,14 @@ class ComponentSoundTouch
 	MPT_DECLARE_COMPONENT_MEMBERS
 public:
 	ComponentSoundTouch()
-		: ComponentBundledDLL(MPT_PATHSTRING("OpenMPT_SoundTouch_f32"))
+		: ComponentBundledDLL(MPT_PATHSTRING("OpenMPT_SoundTouch_f32"))	
 	{
 		return;
 	}
 };
 MPT_REGISTERED_COMPONENT(ComponentSoundTouch, "SoundTouch")
+
+#endif
 
 
 enum TimeStretchPitchShiftResult

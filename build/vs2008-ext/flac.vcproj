@@ -46,7 +46,7 @@
 				AdditionalOptions="/wd4244 /wd4267 /wd4334"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
 			/>
 			<Tool
@@ -69,7 +69,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\flac.lib"
+				OutputFile="$(OutDir)\openmpt-flac.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -115,7 +115,7 @@
 				AdditionalOptions="/wd4244 /wd4267 /wd4334"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -130,7 +130,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
 			/>
 			<Tool
@@ -138,7 +138,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\flac.lib"
+				OutputFile="$(OutDir)\openmpt-flac.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -183,7 +183,7 @@
 				AdditionalOptions="/wd4244 /wd4267 /wd4334 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -198,7 +198,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
 			/>
 			<Tool
@@ -206,7 +206,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\flac.lib"
+				OutputFile="$(OutDir)\openmpt-flac.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -252,7 +252,7 @@
 				AdditionalOptions="/wd4244 /wd4267 /wd4334 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -267,7 +267,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
 			/>
 			<Tool
@@ -275,7 +275,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\flac.lib"
+				OutputFile="$(OutDir)\openmpt-flac.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -295,7 +295,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugMDd|Win32"
-			OutputDirectory="..\lib\x86\Debug"
+			OutputDirectory="..\lib\x86\DebugMDd"
 			IntermediateDirectory="..\obj\flac\x86\DebugMDd"
 			ConfigurationType="4"
 			CharacterSet="2"
@@ -320,7 +320,7 @@
 				AdditionalOptions="/wd4244 /wd4267 /wd4334"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -335,7 +335,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
 			/>
 			<Tool
@@ -343,7 +343,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\flac.lib"
+				OutputFile="$(OutDir)\openmpt-flac.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -363,7 +363,7 @@
 		</Configuration>
 		<Configuration
 			Name="DebugMDd|x64"
-			OutputDirectory="..\lib\x86_64\Debug"
+			OutputDirectory="..\lib\x86_64\DebugMDd"
 			IntermediateDirectory="..\obj\flac\x86_64\DebugMDd"
 			ConfigurationType="4"
 			CharacterSet="2"
@@ -389,7 +389,7 @@
 				AdditionalOptions="/wd4244 /wd4267 /wd4334"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -404,7 +404,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
 			/>
 			<Tool
@@ -412,7 +412,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\flac.lib"
+				OutputFile="$(OutDir)\openmpt-flac.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -458,7 +458,7 @@
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
 				WholeProgramOptimization="true"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -473,7 +473,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
 			/>
 			<Tool
@@ -481,7 +481,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\flac.lib"
+				OutputFile="$(OutDir)\openmpt-flac.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -528,7 +528,7 @@
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
 				WholeProgramOptimization="true"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -543,7 +543,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__NO_DLL;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC__NO_DLL"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
 			/>
 			<Tool
@@ -551,7 +551,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\flac.lib"
+				OutputFile="$(OutDir)\openmpt-flac.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -569,8 +569,334 @@
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
+		<Configuration
+			Name="DebugShared|Win32"
+			OutputDirectory="..\..\bin\Win32-Shared-Debug"
+			IntermediateDirectory="..\obj\flac\x86\DebugShared"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4244 /wd4267 /wd4334"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC_API_EXPORTS"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="4"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC_API_EXPORTS"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\openmpt-flac.dll"
+				LinkIncremental="2"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				ImportLibrary="..\..\bin\Win32-Shared-Debug\openmpt-flac.lib"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="DebugShared|x64"
+			OutputDirectory="..\..\bin\x64-Shared-Debug"
+			IntermediateDirectory="..\obj\flac\x86_64\DebugShared"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4244 /wd4267 /wd4334"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC_API_EXPORTS"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC_API_EXPORTS"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\openmpt-flac.dll"
+				LinkIncremental="2"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				ImportLibrary="..\..\bin\x64-Shared-Debug\openmpt-flac.lib"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseShared|Win32"
+			OutputDirectory="..\..\bin\Win32-Shared"
+			IntermediateDirectory="..\obj\flac\x86\ReleaseShared"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4244 /wd4267 /wd4334 /MP"
+				Optimization="2"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC_API_EXPORTS"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC_API_EXPORTS"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\openmpt-flac.dll"
+				LinkIncremental="1"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				ImportLibrary="..\..\bin\Win32-Shared\openmpt-flac.lib"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseShared|x64"
+			OutputDirectory="..\..\bin\x64-Shared"
+			IntermediateDirectory="..\obj\flac\x86_64\ReleaseShared"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4244 /wd4267 /wd4334 /MP"
+				Optimization="2"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC_API_EXPORTS"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				FloatingPointModel="2"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;FLAC__HAS_OGG=1;VERSION=\&quot;1.3.1\&quot;;FLAC_API_EXPORTS"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\flac\include;..\..\include\flac\src\libFLAC\include;..\..\include\ogg\include"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\openmpt-flac.dll"
+				LinkIncremental="1"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				ImportLibrary="..\..\bin\x64-Shared\openmpt-flac.lib"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
+		<ProjectReference
+			ReferencedProjectIdentifier="{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}"
+			RelativePathToProject=".\ogg.vcproj"
+		/>
 	</References>
 	<Files>
 		<Filter
