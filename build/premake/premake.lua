@@ -23,6 +23,7 @@ newoption {
   { "libopenmpt-all", "libopenmpt-all" },
   { "libopenmpt_test", "libopenmpt_test" },
   { "libopenmpt", "libopenmpt" },
+  { "libopenmpt-small", "libopenmpt-small" },
   { "foo_openmpt", "foo_openmpt" },
   { "in_openmpt", "in_openmpt" },
   { "xmp-openmpt", "xmp-openmpt" },
@@ -147,7 +148,7 @@ solution "libopenmpt-all"
  dofile "../../build/premake/mpt-libopenmpt_test.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt_examples.lua"
--- dofile "../../build/premake/mpt-libopenmpt-small.lua"
+ dofile "../../build/premake/mpt-libopenmpt-small.lua"
  dofile "../../build/premake/mpt-libopenmpt_modplug.lua"
  dofile "../../build/premake/mpt-foo_openmpt.lua"
  dofile "../../build/premake/mpt-in_openmpt.lua"
@@ -158,6 +159,7 @@ solution "libopenmpt-all"
  dofile "../../build/premake/ext-portaudio.lua"
  dofile "../../build/premake/ext-portaudiocpp.lua"
  dofile "../../build/premake/ext-stb_vorbis.lua"
+ dofile "../../build/premake/ext-zlib.lua"
 
 end
 
@@ -169,8 +171,8 @@ solution "libopenmpt_test"
  platforms { "x86", "x86_64" }
 
  dofile "../../build/premake/mpt-libopenmpt_test.lua"
- dofile "../../build/premake/ext-miniz.lua"
  dofile "../../build/premake/ext-stb_vorbis.lua"
+ dofile "../../build/premake/ext-zlib.lua"
 
 end
 
@@ -183,8 +185,8 @@ solution "foo_openmpt"
 
  dofile "../../build/premake/mpt-foo_openmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
- dofile "../../build/premake/ext-miniz.lua"
  dofile "../../build/premake/ext-stb_vorbis.lua"
+ dofile "../../build/premake/ext-zlib.lua"
 
 end
 
@@ -197,8 +199,8 @@ solution "in_openmpt"
 
  dofile "../../build/premake/mpt-in_openmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
- dofile "../../build/premake/ext-miniz.lua"
  dofile "../../build/premake/ext-stb_vorbis.lua"
+ dofile "../../build/premake/ext-zlib.lua"
 
 end
 
@@ -211,8 +213,25 @@ solution "xmp-openmpt"
 
  dofile "../../build/premake/mpt-xmp-openmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
- dofile "../../build/premake/ext-miniz.lua"
  dofile "../../build/premake/ext-pugixml.lua"
+ dofile "../../build/premake/ext-stb_vorbis.lua"
+ dofile "../../build/premake/ext-zlib.lua"
+
+end
+
+if _OPTIONS["group"] == "libopenmpt-small" then
+
+solution "libopenmpt-small"
+ location ( "../../build/" .. _ACTION )
+if MPT_WITH_SHARED then
+ configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
+else
+ configurations { "Debug", "Release" }
+end
+ platforms { "x86", "x86_64" }
+
+ dofile "../../build/premake/mpt-libopenmpt-small.lua"
+ dofile "../../build/premake/ext-miniz.lua"
  dofile "../../build/premake/ext-stb_vorbis.lua"
 
 end
@@ -231,12 +250,11 @@ end
 
  dofile "../../build/premake/mpt-libopenmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt_examples.lua"
--- dofile "../../build/premake/mpt-libopenmpt-small.lua"
  dofile "../../build/premake/mpt-libopenmpt_modplug.lua"
- dofile "../../build/premake/ext-miniz.lua"
  dofile "../../build/premake/ext-portaudio.lua"
  dofile "../../build/premake/ext-portaudiocpp.lua"
  dofile "../../build/premake/ext-stb_vorbis.lua"
+ dofile "../../build/premake/ext-zlib.lua"
 
 end
 
@@ -254,10 +272,10 @@ end
  dofile "../../build/premake/mpt-openmpt123.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
  dofile "../../build/premake/ext-flac.lua"
- dofile "../../build/premake/ext-miniz.lua"
  dofile "../../build/premake/ext-ogg.lua"
  dofile "../../build/premake/ext-portaudio.lua"
  dofile "../../build/premake/ext-stb_vorbis.lua"
+ dofile "../../build/premake/ext-zlib.lua"
 
 end
 

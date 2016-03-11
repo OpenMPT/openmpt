@@ -30,11 +30,11 @@
    defines { "LIBOPENMPT_USE_DLL" }
   filter { "not configurations:*Shared" }
    links {
-    "miniz",
     "stb_vorbis",
     "ogg",
     "ksuser",
     "winmm",
+    "zlib",
    }
   filter { "not configurations:*Shared", "not action:vs2008" }
    links { "delayimp" }

@@ -16,9 +16,11 @@ is just a high-level summary.
     unmo3 is now always enabled when dynamic loading is possible and built-in
     MO3 support is not possible because either a MP3 or a Vorbis decoder is
     missing.
- *  [**Change**] The MSVC build system chnaged. The `libopenmptDLL` project is
+ *  [**Change**] The MSVC build system changed. The `libopenmptDLL` project is
     gone. Use the new `ReleaseShared` configuration of the `libopenmpt`project
-    instead.
+    instead. libopenmpt now links against zlib by default. A separate project
+    with smaller footprint linking against miniz is still available as
+    `libopenmpt-small`.
  *  [**Change**] The constants used to query library information from
     `openmpt_get_string()` and `openmpt::string::get()` (i.e. OPENMPT_STRING_FOO
     and openmpt::string::FOO) have been deprecated because having syntactic

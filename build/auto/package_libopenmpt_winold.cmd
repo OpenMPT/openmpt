@@ -28,7 +28,7 @@ copy /y ..\..\include\flac\COPYING.Xiph                      .\Licenses\License.
 rem copy /y ..\..\include\foobar2000sdk\sdk-license.txt          .\Licenses\License.Foobar2000SDK.txt || goto error
 rem copy /y ..\..\include\foobar2000sdk\pfc\pfc-license.txt      .\Licenses\License.Foobar2000SDK-pfc.txt || goto error
 rem copy /y ..\..\include\lhasa\COPYING                          .\Licenses\License.lhasa.txt || goto error
-copy /y ..\..\include\miniz\miniz.c                          .\Licenses\License.miniz.txt || goto error
+rem copy /y ..\..\include\miniz\miniz.c                          .\Licenses\License.miniz.txt || goto error
 copy /y ..\..\include\msinttypes\stdint\stdint.h             .\Licenses\License.msinttypes.txt || goto error
 rem copy /y ..\..\include\ogg\COPYING                            .\Licenses\License.ogg.txt || goto error
 rem copy /y ..\..\include\opus\COPYING                           .\Licenses\License.Opus.txt || goto error
@@ -42,7 +42,7 @@ rem copy /y ..\..\include\soundtouch\COPYING.TXT                 .\Licenses\Lice
 copy /y ..\..\include\stb_vorbis\stb_vorbis.c                .\Licenses\License.stb_vorbis.txt || goto error
 rem copy /y ..\..\include\unrar\license.txt                      .\Licenses\License.UnRAR.txt || goto error
 rem copy /y ..\..\include\vorbis\COPYING                         .\Licenses\License.Vorbis.txt || goto error
-rem copy /y ..\..\include\zlib\README                            .\Licenses\License.zlib.txt || goto error
+copy /y ..\..\include\zlib\README                            .\Licenses\License.zlib.txt || goto error
 rem copy /y ..\..\include\zlib\contrib\minizip\MiniZip64_info.txt .\Licenses\License.minizip.txt || goto error
 copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 copy /y ..\..\libopenmpt\dox\changelog.md .\ || goto error

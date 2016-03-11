@@ -31,7 +31,7 @@ copy /y ..\..\include\flac\COPYING.Xiph                      .\Licenses\License.
 copy /y ..\..\include\foobar2000sdk\sdk-license.txt          .\Licenses\License.Foobar2000SDK.txt || goto error
 copy /y ..\..\include\foobar2000sdk\pfc\pfc-license.txt      .\Licenses\License.Foobar2000SDK-pfc.txt || goto error
 rem copy /y ..\..\include\lhasa\COPYING                          .\Licenses\License.lhasa.txt || goto error
-copy /y ..\..\include\miniz\miniz.c                          .\Licenses\License.miniz.txt || goto error
+rem copy /y ..\..\include\miniz\miniz.c                          .\Licenses\License.miniz.txt || goto error
 copy /y ..\..\include\msinttypes\stdint\stdint.h             .\Licenses\License.msinttypes.txt || goto error
 rem copy /y ..\..\include\ogg\COPYING                            .\Licenses\License.ogg.txt || goto error
 rem copy /y ..\..\include\opus\COPYING                           .\Licenses\License.Opus.txt || goto error
@@ -45,7 +45,7 @@ rem copy /y ..\..\include\soundtouch\COPYING.TXT                 .\Licenses\Lice
 copy /y ..\..\include\stb_vorbis\stb_vorbis.c                .\Licenses\License.stb_vorbis.txt || goto error
 rem copy /y ..\..\include\unrar\license.txt                      .\Licenses\License.UnRAR.txt || goto error
 rem copy /y ..\..\include\vorbis\COPYING                         .\Licenses\License.Vorbis.txt || goto error
-rem copy /y ..\..\include\zlib\README                            .\Licenses\License.zlib.txt || goto error
+copy /y ..\..\include\zlib\README                            .\Licenses\License.zlib.txt || goto error
 rem copy /y ..\..\include\zlib\contrib\minizip\MiniZip64_info.txt .\Licenses\License.minizip.txt || goto error
 copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 copy /y ..\..\libopenmpt\dox\changelog.md .\ || goto error
@@ -97,7 +97,7 @@ rem copy /y ..\..\include\flac\COPYING.Xiph                      .\Licenses\Lice
 rem copy /y ..\..\include\foobar2000sdk\sdk-license.txt          .\Licenses\License.Foobar2000SDK.txt || goto error
 rem copy /y ..\..\include\foobar2000sdk\pfc\pfc-license.txt      .\Licenses\License.Foobar2000SDK-pfc.txt || goto error
 rem copy /y ..\..\include\lhasa\COPYING                          .\Licenses\License.lhasa.txt || goto error
-copy /y ..\..\include\miniz\miniz.c                          .\Licenses\License.miniz.txt || goto error
+rem copy /y ..\..\include\miniz\miniz.c                          .\Licenses\License.miniz.txt || goto error
 copy /y ..\..\include\msinttypes\stdint\stdint.h             .\Licenses\License.msinttypes.txt || goto error
 rem copy /y ..\..\include\ogg\COPYING                            .\Licenses\License.ogg.txt || goto error
 rem copy /y ..\..\include\opus\COPYING                           .\Licenses\License.Opus.txt || goto error
@@ -108,9 +108,10 @@ rem copy /y ..\..\include\pugixml\readme.txt                     .\Licenses\Lice
 rem copy /y ..\..\include\r8brain\other\License.txt              .\Licenses\License.R8Brain.txt || goto error
 rem copy /y ..\..\include\smbPitchShift\smbPitchShift.cpp        .\Licenses\License.smbPitchShift.txt || goto error
 rem copy /y ..\..\include\soundtouch\COPYING.TXT                 .\Licenses\License.SoundTouch.txt || goto error
+copy /y ..\..\include\stb_vorbis\stb_vorbis.c                .\Licenses\License.stb_vorbis.txt || goto error
 rem copy /y ..\..\include\unrar\license.txt                      .\Licenses\License.UnRAR.txt || goto error
 rem copy /y ..\..\include\vorbis\COPYING                         .\Licenses\License.Vorbis.txt || goto error
-rem copy /y ..\..\include\zlib\README                            .\Licenses\License.zlib.txt || goto error
+copy /y ..\..\include\zlib\README                            .\Licenses\License.zlib.txt || goto error
 rem copy /y ..\..\include\zlib\contrib\minizip\MiniZip64_info.txt .\Licenses\License.minizip.txt || goto error
 copy /y ..\..\libopenmpt\dox\changelog.md .\changelog.md || goto error
 copy /y ..\..\libopenmpt\libopenmpt.h inc\libopenmpt\ || goto error
@@ -120,8 +121,10 @@ copy /y ..\..\libopenmpt\libopenmpt_version.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_ext.hpp inc\libopenmpt\ || goto error
 copy /y ..\..\bin\Win32-Shared\libopenmpt.lib lib\x86\ || goto error
 copy /y ..\..\bin\Win32-Shared\libopenmpt.dll bin\x86\ || goto error
+copy /y ..\..\bin\Win32-Shared\openmpt-zlib.dll bin\x86\ || goto error
 copy /y ..\..\bin\x64-Shared\libopenmpt.lib lib\x86_64\ || goto error
 copy /y ..\..\bin\x64-Shared\libopenmpt.dll bin\x86_64\ || goto error
+copy /y ..\..\bin\x64-Shared\openmpt-zlib.dll bin\x86_64\ || goto error
 "C:\Program Files\7-Zip\7z.exe" a -t7z -mx=9 ..\libopenmpt-dev-vs2010-r%MPT_REVISION%.7z ^
  LICENSE.txt ^
  Licenses ^
