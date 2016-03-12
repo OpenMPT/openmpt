@@ -399,7 +399,7 @@ void ITDecompression::ChangeWidth(int &curWidth, int width)
 int ITDecompression::ReadBits(int width)
 //--------------------------------------
 {
-	const uint8 *data = reinterpret_cast<const uint8 *>(chunk.GetRawData());
+	const uint8 *data = chunk.GetRawData<uint8>();
 	int v = 0, vPos = 0, vMask = (1 << width) - 1;
 	while(width >= remBits && dataPos < chunk.GetLength())
 	{

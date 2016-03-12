@@ -878,7 +878,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	if(IsComponentAvailable(unmo3))
 	{
 		file.Rewind();
-		const void *stream = file.GetRawData();
+		const void *stream = file.GetRawData<void>();
 		uint32 length = mpt::saturate_cast<uint32>(file.GetLength());
 
 		if(unmo3->UNMO3_Decode(&stream, &length, (loadFlags & loadSampleData) ? 0 : 1) != 0)
@@ -1704,7 +1704,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				mergedData.insert(mergedData.end(), mergedStreamData.begin(), mergedStreamData.end());
 
 				sampleChunk.chunk.Rewind();
-				mergedData.insert(mergedData.end(), reinterpret_cast<const uint8*>(sampleChunk.chunk.GetRawData()), reinterpret_cast<const uint8*>(sampleChunk.chunk.GetRawData()) + sampleChunk.chunk.GetLength());
+				mergedData.insert(mergedData.end(), sampleChunk.chunk.GetRawData<uint8>(), sampleChunk.chunk.GetRawData<uint8>() + sampleChunk.chunk.GetLength());
 
 #endif
 
@@ -1806,7 +1806,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			// wild, thus, this behaviour is currently not problematic.
 
 			int consumed = 0, error = 0;
-			stb_vorbis *vorb = stb_vorbis_open_pushdata(reinterpret_cast<const uint8 *>(headerChunk.GetRawData()), initialRead, &consumed, &error, nullptr);
+			stb_vorbis *vorb = stb_vorbis_open_pushdata(headerChunk.GetRawData<uint8>(), initialRead, &consumed, &error, nullptr);
 			if(vorb)
 			{
 				// Header has been read, proceed to reading the sample data
@@ -1819,7 +1819,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					int channels = 0, decodedSamples = 0;
 					float **output;
-					consumed = stb_vorbis_decode_frame_pushdata(vorb, reinterpret_cast<const uint8 *>(sampleData.GetRawData()), mpt::saturate_cast<int>(sampleData.BytesLeft()), &channels, &output, &decodedSamples);
+					consumed = stb_vorbis_decode_frame_pushdata(vorb, sampleData.GetRawData<uint8>(), mpt::saturate_cast<int>(sampleData.BytesLeft()), &channels, &output, &decodedSamples);
 					sampleData.Skip(consumed);
 					LimitMax(decodedSamples, mpt::saturate_cast<int>(sample.nLength - offset));
 					if(decodedSamples > 0 && channels == sample.GetNumChannels())

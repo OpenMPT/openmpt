@@ -524,7 +524,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 
 	file.Rewind();
 	const FileReader::off_t dwMemLength = file.GetLength();
-	const uint8 *lpStream = reinterpret_cast<const uint8 *>(file.GetRawData());
+	const uint8 *lpStream = file.GetRawData<uint8>();
 	const MMD0SONGHEADER *pmsh;
 	const MMD2SONGHEADER *pmsh2;
 	const MMD0EXP *pmex;

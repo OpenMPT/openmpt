@@ -1184,7 +1184,7 @@ bool CDLSBank::Open(FileReader file)
 
 	file.Rewind();
 	m_szFileName = file.GetFileName();
-	lpMemFile = reinterpret_cast<const uint8 *>(file.GetRawData());
+	lpMemFile = file.GetRawData<uint8>();
 	dwMemLength = file.GetLength();
 	if (!lpMemFile || dwMemLength < 256)
 	{

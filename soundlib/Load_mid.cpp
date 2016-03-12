@@ -537,7 +537,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	const FileReader::off_t dwMemLength = file.BytesLeft();
-	const uint8 *lpStream = reinterpret_cast<const uint8 *>(file.GetRawData());
+	const uint8 *lpStream = file.GetRawData<uint8>();
 
 	const MIDITRACKHEADER *pmth;
 	MODCHANNELSTATE chnstate[MAX_BASECHANNELS];

@@ -312,7 +312,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 
 	file.Rewind();
 	const FileReader::off_t dwMemLength = file.GetLength();
-	const uint8 *lpStream = reinterpret_cast<const uint8 *>(file.GetRawData());
+	const uint8 *lpStream = file.GetRawData<uint8>();
 
 	uint32 dwMemPos, dwPos, blocklen, dwTrackPos;
 	const MDLInfoBlock *pmib;
