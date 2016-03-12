@@ -1688,6 +1688,17 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 					Ogg::WritePage(mergedStream, oggPageInfo, oggPageData);
 				}
 
+				if(headStreamSerials.size() > 1)
+				{
+					AddToLog(LogWarning, mpt::format(MPT_USTRING("Sample %1: Ogg Vorbis data with shared header and multiple logical bitstreams in header chunk found. This may be handled incorrectly."))(smp));
+				} else if(dataStreamSerials.size() > 1)
+				{
+					AddToLog(LogWarning, mpt::format(MPT_USTRING("Sample %1: Ogg Vorbis sample with shared header and multiple logical bitstreams found. This may be handled incorrectly."))(smp));
+				} else if((dataStreamSerials.size() == 1) && (headStreamSerials.size() == 1) && (dataStreamSerials[0] != headStreamSerials[0]))
+				{
+					AddToLog(LogInformation, mpt::format(MPT_USTRING("Sample %1: Ogg Vorbis data with shared header and different logical bitstream serials found."))(smp));
+				}
+
 				outHeaderSize = mpt::saturate_cast<int>(mpt::IO::TellWrite(mergedStream));
 
 				std::string mergedStreamData = mergedStream.str();
@@ -1782,6 +1793,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 					}
 				} else
 				{
+					AddToLog(LogWarning, mpt::format(MPT_USTRING("Sample %1: Unsupported Ogg Vorbis chained stream found."))(smp));
 					unsupportedSamples = true;
 				}
 				ov_clear(&vf);
