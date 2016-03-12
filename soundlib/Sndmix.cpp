@@ -475,7 +475,7 @@ bool CSoundFile::ProcessRow()
 					}
 					//Check for end of song or bad pattern
 					if (m_PlayState.m_nCurrentOrder >= Order.size()
-						|| !Patterns.IsValidPat(Order[m_PlayState.m_nCurrentOrder]))
+						|| !Order.IsValidPat(m_PlayState.m_nCurrentOrder))
 					{
 						visitedSongRows.Initialize(true);
 						return false;

@@ -310,6 +310,15 @@ void ModSequence::resize(ORDERINDEX nNewSize, PATTERNINDEX nFill)
 }
 
 
+bool ModSequence::IsValidPat(ORDERINDEX ord)
+//------------------------------------------
+{
+	if(ord < size())
+		return m_sndFile.Patterns.IsValidPat(At(ord));
+	return false;
+}
+
+
 void ModSequence::clear()
 //-----------------------
 {
@@ -492,7 +501,7 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 	const ORDERINDEX nLengthTt = GetLengthTailTrimmed();
 	for(ORDERINDEX nOrd = 0; nOrd < nLengthTt; nOrd++)
 	{
-		if(!m_sndFile.Patterns.IsValidPat(At(nOrd)) && At(nOrd) != GetIgnoreIndex())
+		if(!IsValidPat(nOrd) && At(nOrd) != GetIgnoreIndex())
 		{
 			hasSepPatterns = true;
 			break;
@@ -509,7 +518,7 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 		for(ORDERINDEX nOrd = 0; nOrd < GetLengthTailTrimmed(); nOrd++)
 		{
 			// end of subsong?
-			if(!m_sndFile.Patterns.IsValidPat(At(nOrd)) && At(nOrd) != GetIgnoreIndex())
+			if(!IsValidPat(nOrd) && At(nOrd) != GetIgnoreIndex())
 			{
 				ORDERINDEX oldLength = GetLengthTailTrimmed();
 				// remove all separator patterns between current and next subsong first

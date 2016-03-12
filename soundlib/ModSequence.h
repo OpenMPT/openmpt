@@ -65,6 +65,9 @@ public:
 	// Remove all references to a given pattern index from the order list. Jump commands are updated accordingly.
 	void RemovePattern(PATTERNINDEX which);
 
+	// Check if pattern at sequence position ord is valid.
+	bool IsValidPat(ORDERINDEX ord);
+
 	void clear();
 	void resize(ORDERINDEX nNewSize) {resize(nNewSize, GetInvalidPatIndex());}
 	void resize(ORDERINDEX nNewSize, PATTERNINDEX nFill);

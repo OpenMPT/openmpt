@@ -869,7 +869,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 
 		// If the first duplicated order is e.g. a +++ item, we need to move the pattern display on or else we'll still edit the previously shown pattern.
 		ORDERINDEX showPattern = std::min(insertWhere, m_sndFile.Order.GetLastIndex());
-		while(!m_sndFile.Patterns.IsValidPat(m_sndFile.Order[showPattern]) && showPattern < m_sndFile.Order.GetLastIndex())
+		while(!m_sndFile.Order.IsValidPat(showPattern) && showPattern < m_sndFile.Order.GetLastIndex())
 		{
 			showPattern++;
 		}
