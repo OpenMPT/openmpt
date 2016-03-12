@@ -38,10 +38,10 @@ is just a high-level summary.
     MediaFoundation (on Windows 7 and up) and Vorbis decoding via libogg,
     libvorbis, libvorbisfile or stb_vorbis.
  *  libopenmpt MSVC builds with Visual Studio 2010 or later on Windows 7 or
-    later now use an internal MO3 decoder with stb_vorbis and libmpg123 or
-    MediaFoundation suppport by defaut. Visual Studio 2008 builds still use
-    unmo3.dll by default but also support the builtin decoder in which case
-    libmpg123 is required.
+    later now use an internal MO3 decoder with libogg, libvorbis, libvorbisfile,
+    and libmpg123 or MediaFoundation suppport by defaut. Visual Studio 2008
+    builds still use unmo3.dll by default but also support the builtin decoder
+    in which case libmpg123 is required.
  *  libopenmpt with Makefile or Autotools build system can now also use
     glibc/libdl instead of libtool/libltdl for dynamic loading of third-party
     libraries. Options `NO_DL=1` and `--without-dl` have been added

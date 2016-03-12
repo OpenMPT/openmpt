@@ -11,6 +11,8 @@
    "../../common",
    "../../soundlib",
    "../../include",
+   "../../include/ogg/include",
+   "../../include/vorbis/include",
    "../../include/zlib",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
@@ -43,7 +45,8 @@
   flags { "Unicode", "ExtraWarnings" }
   defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_TEST" }
   links {
-   "stb_vorbis",
+   "ogg",
+   "vorbis",
    "zlib",
   }
   filter { "not action:vs2008" }

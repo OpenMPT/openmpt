@@ -156,9 +156,10 @@ solution "libopenmpt-all"
  dofile "../../build/premake/mpt-openmpt123.lua"
  dofile "../../build/premake/ext-flac.lua"
  dofile "../../build/premake/ext-miniz.lua"
+ dofile "../../build/premake/ext-ogg.lua"
  dofile "../../build/premake/ext-portaudio.lua"
  dofile "../../build/premake/ext-portaudiocpp.lua"
- dofile "../../build/premake/ext-stb_vorbis.lua"
+ dofile "../../build/premake/ext-vorbis.lua"
  dofile "../../build/premake/ext-zlib.lua"
 
 end
@@ -171,7 +172,8 @@ solution "libopenmpt_test"
  platforms { "x86", "x86_64" }
 
  dofile "../../build/premake/mpt-libopenmpt_test.lua"
- dofile "../../build/premake/ext-stb_vorbis.lua"
+ dofile "../../build/premake/ext-ogg.lua"
+ dofile "../../build/premake/ext-vorbis.lua"
  dofile "../../build/premake/ext-zlib.lua"
 
 end
@@ -185,7 +187,8 @@ solution "foo_openmpt"
 
  dofile "../../build/premake/mpt-foo_openmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
- dofile "../../build/premake/ext-stb_vorbis.lua"
+ dofile "../../build/premake/ext-ogg.lua"
+ dofile "../../build/premake/ext-vorbis.lua"
  dofile "../../build/premake/ext-zlib.lua"
 
 end
@@ -199,7 +202,8 @@ solution "in_openmpt"
 
  dofile "../../build/premake/mpt-in_openmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
- dofile "../../build/premake/ext-stb_vorbis.lua"
+ dofile "../../build/premake/ext-ogg.lua"
+ dofile "../../build/premake/ext-vorbis.lua"
  dofile "../../build/premake/ext-zlib.lua"
 
 end
@@ -213,8 +217,9 @@ solution "xmp-openmpt"
 
  dofile "../../build/premake/mpt-xmp-openmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
+ dofile "../../build/premake/ext-ogg.lua"
  dofile "../../build/premake/ext-pugixml.lua"
- dofile "../../build/premake/ext-stb_vorbis.lua"
+ dofile "../../build/premake/ext-vorbis.lua"
  dofile "../../build/premake/ext-zlib.lua"
 
 end
@@ -251,9 +256,10 @@ end
  dofile "../../build/premake/mpt-libopenmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt_examples.lua"
  dofile "../../build/premake/mpt-libopenmpt_modplug.lua"
+ dofile "../../build/premake/ext-ogg.lua"
  dofile "../../build/premake/ext-portaudio.lua"
  dofile "../../build/premake/ext-portaudiocpp.lua"
- dofile "../../build/premake/ext-stb_vorbis.lua"
+ dofile "../../build/premake/ext-vorbis.lua"
  dofile "../../build/premake/ext-zlib.lua"
 
 end
@@ -274,7 +280,7 @@ end
  dofile "../../build/premake/ext-flac.lua"
  dofile "../../build/premake/ext-ogg.lua"
  dofile "../../build/premake/ext-portaudio.lua"
- dofile "../../build/premake/ext-stb_vorbis.lua"
+ dofile "../../build/premake/ext-vorbis.lua"
  dofile "../../build/premake/ext-zlib.lua"
 
 end
@@ -369,6 +375,7 @@ end
  dofile "../../build/premake/ext-soundtouch.lua"
  dofile "../../build/premake/ext-stb_vorbis.lua"
  dofile "../../build/premake/ext-UnRAR.lua"
+ dofile "../../build/premake/ext-vorbis.lua"
  dofile "../../build/premake/ext-zlib.lua"
 
 end

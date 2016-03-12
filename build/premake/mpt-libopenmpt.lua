@@ -11,6 +11,8 @@
    "../../common",
    "../../soundlib",
    "../../include",
+   "../../include/ogg/include",
+   "../../include/vorbis/include",
    "../../include/zlib",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
@@ -52,7 +54,8 @@
    }
   filter {}
   links {
-   "stb_vorbis",
+   "vorbis",
+   "ogg",
    "zlib",
   }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

@@ -18,7 +18,9 @@
    "../../libopenmpt/libopenmpt_modplug_cpp.cpp",
   }
   characterset "MBCS"
-  links { "libopenmpt" }
+  links {
+   "libopenmpt"
+  }
   filter { "configurations:*Shared" }
    defines { "LIBOPENMPT_USE_DLL" }
   filter {}

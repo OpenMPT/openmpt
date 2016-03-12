@@ -188,8 +188,12 @@
 			RelativePathToProject="..\vs2008-ext\zlib.vcproj"
 		/>
 		<ProjectReference
-			ReferencedProjectIdentifier="{E0D81662-85EF-4172-B0D8-F8DCFF712607}"
-			RelativePathToProject="..\vs2008-ext\stb_vorbis.vcproj"
+			ReferencedProjectIdentifier="{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}"
+			RelativePathToProject="..\vs2008-ext\vorbis.vcproj"
+		/>
+		<ProjectReference
+			ReferencedProjectIdentifier="{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}"
+			RelativePathToProject="..\vs2008-ext\ogg.vcproj"
 		/>
 	</References>
 	<Files>

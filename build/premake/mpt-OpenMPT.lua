@@ -20,6 +20,7 @@
    "../../include/ASIOSDK2/common",
    "../../include/lhasa/lib/public",
    "../../include/ogg/include",
+   "../../include/vorbis/include",
    "../../include/zlib",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
