@@ -691,6 +691,11 @@
 #endif
 #endif
 
+#ifdef MPT_WITH_VORBISFILE
+#ifndef OV_EXCLUDE_STATIC_CALLBACKS
+#define OV_EXCLUDE_STATIC_CALLBACKS
+#endif
+
 #ifdef MPT_WITH_ZLIB
 #ifdef MPT_BUILD_MSVC_SHARED
 #define ZLIB_DLL

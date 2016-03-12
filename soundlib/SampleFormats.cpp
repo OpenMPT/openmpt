@@ -2662,10 +2662,6 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 
 	bool unsupportedSample = false;
 
-	MPT_UNUSED_VARIABLE(OV_CALLBACKS_DEFAULT);
-	MPT_UNUSED_VARIABLE(OV_CALLBACKS_NOCLOSE);
-	MPT_UNUSED_VARIABLE(OV_CALLBACKS_STREAMONLY);
-	MPT_UNUSED_VARIABLE(OV_CALLBACKS_STREAMONLY_NOCLOSE);
 	ov_callbacks callbacks = {
 		&VorbisfileFilereaderRead,
 		&VorbisfileFilereaderSeek,
