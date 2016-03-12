@@ -3832,7 +3832,7 @@ void CSoundFile::Panning(ModChannel *pChn, uint32 param, PanningType panBits) co
 //---------------------------------------------------------------------------------
 {
 	// No panning in ProTracker mode
-	if(m_SongFlags[SONG_PT_MODE])
+	if(m_playBehaviour[kMODIgnorePanning])
 	{
 		return;
 	}

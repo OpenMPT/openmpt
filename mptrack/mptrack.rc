@@ -403,17 +403,17 @@ BEGIN
     LTEXT           "",IDC_CONTAINER,0,47,234,62
 END
 
-IDD_LEGACY_PLAYBACK DIALOGEX 0, 0, 340, 226
+IDD_LEGACY_PLAYBACK DIALOGEX 0, 0, 388, 226
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Legacy Playback Options"
+CAPTION "Playback Compatibility Settings"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "&OK",IDOK,228,204,50,14
-    PUSHBUTTON      "&Cancel",IDCANCEL,282,204,50,14
-    LTEXT           "Enable or disable playback quirks to remain compatible with previous versions of OpenMPT.",IDC_STATIC,6,6,324,12
-    LISTBOX         IDC_LIST1,6,18,324,180,LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "&OK",IDOK,270,204,50,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,324,204,50,14
+    LTEXT           "Enable or disable playback quirks to remain compatible with previous versions of OpenMPT.",IDC_STATIC,6,6,372,12
+    LISTBOX         IDC_LIST1,6,18,372,180,LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "&Select Defaults",IDC_BUTTON1,6,204,60,14
-    LTEXT           "(Best compatibility with other trackers)",IDC_STATIC,72,207,150,8
+    LTEXT           "(Best compatibility with other trackers)",IDC_STATIC,72,207,186,8
 END
 
 
@@ -596,7 +596,7 @@ BEGIN
     IDD_LEGACY_PLAYBACK, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 333
+        RIGHTMARGIN, 381
         TOPMARGIN, 7
         BOTTOMMARGIN, 219
     END
