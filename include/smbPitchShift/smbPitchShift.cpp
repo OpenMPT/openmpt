@@ -2,7 +2,7 @@
 *
 * NAME: smbPitchShift.cpp
 * VERSION: 1.2
-* HOME URL: http://www.dspdimension.com
+* HOME URL: http://blogs.zynaptiq.com/bernsee
 * KNOWN BUGS: none
 *
 * SYNOPSIS: Routine for doing pitch shifting while maintaining
@@ -24,7 +24,7 @@
 * for the data, make sure you scale the data accordingly (for 16bit signed integers
 * you would have to divide (and multiply) by 32768). 
 *
-* COPYRIGHT 1999-2009 Stephan M. Bernsee <smb [AT] dspdimension [DOT] com>
+* COPYRIGHT 1999-2015 Stephan M. Bernsee <s.bernsee [AT] zynaptiq [DOT] com>
 *
 * 						The Wide Open License (WOL)
 *
@@ -59,7 +59,7 @@ void smbPitchShift(float pitchShift, long numSampsToProcess, long fftFrameSize, 
 	Routine smbPitchShift(). See top of file for explanation
 	Purpose: doing pitch shifting while maintaining duration using the Short
 	Time Fourier Transform.
-	Author: (c)1999-2009 Stephan M. Bernsee <smb [AT] dspdimension [DOT] com>
+	Author: (c)1999-2015 Stephan M. Bernsee <s.bernsee [AT] zynaptiq [DOT] com>
 */
 {
 
@@ -254,7 +254,7 @@ void smbFft(float *fftBuffer, long fftFrameSize, long sign)
 			*p1 = *p2; *p2 = temp;
 		}
 	}
-	for (k = 0, le = 2; k < (long)(log((double)fftFrameSize)/log(2.)+.5); k++) {
+	for (k = 0, le = 2; k < (long)(log(fftFrameSize)/log(2.)+.5); k++) {
 		le <<= 1;
 		le2 = le>>1;
 		ur = 1.0;
