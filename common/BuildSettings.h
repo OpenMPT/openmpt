@@ -77,6 +77,7 @@
 #define MPT_WITH_LHASA
 #define MPT_WITH_MINIZIP
 #define MPT_WITH_PORTAUDIO
+#define MPT_WITH_SMBPITCHSHIFT
 #define MPT_WITH_UNRAR
 
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
@@ -668,9 +669,15 @@
 
 // third-party library configuration
 
-#if defined(MPT_WITH_FLAC)
+#ifdef MPT_WITH_FLAC
 #ifdef MPT_BUILD_MSVC_STATIC
 #define FLAC__NO_DLL
+#endif
+#endif
+
+#ifdef MPT_WITH_SMBPITCHSHIFT
+#ifdef MPT_BUILD_MSVC_SHARED
+#define SMBPITCHSHIFT_USE_DLL
 #endif
 #endif
 
