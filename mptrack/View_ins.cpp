@@ -317,8 +317,9 @@ bool CViewInstrument::EnvSetValue(int nPoint, int32 nTick, int32 nValue, bool mo
 	bool ok = false;
 	if(nPoint < (int)envelope->nNodes)
 	{
-		if(nTick >= 0)
+		if(nTick != int32_min)
 		{
+			nTick = std::max(0, nTick);
 			tickDiff = envelope->Ticks[nPoint];
 			int mintick = (nPoint) ? envelope->Ticks[nPoint - 1] : 0;
 			int maxtick = envelope->Ticks[nPoint + 1];
