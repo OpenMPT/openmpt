@@ -958,7 +958,7 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 	OrdSelection selection = GetCurSel(false);
 	for(ORDERINDEX ord = selection.firstOrd; ord <= selection.lastOrd && !patExists; ord++)
 	{
-		patExists = sndFile.Patterns.IsValidPat(sndFile.Order[ord]);
+		patExists = sndFile.Order.IsValidPat(ord);
 	}
 
 	const DWORD greyed = patExists ? 0 : MF_GRAYED;

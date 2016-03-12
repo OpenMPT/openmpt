@@ -387,7 +387,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 		multiPaste = true;
 		mode = pmOverwrite;
 
-		if(sndFile.Patterns.IsValidPat(sndFile.Order[curOrder]))
+		if(sndFile.Order.IsValidPat(curOrder))
 		{
 			// Put new patterns after current pattern, if it exists
 			curOrder++;
