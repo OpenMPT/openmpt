@@ -1731,10 +1731,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 #if defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)
 
-			MPT_UNUSED_VARIABLE(OV_CALLBACKS_DEFAULT);
-			MPT_UNUSED_VARIABLE(OV_CALLBACKS_NOCLOSE);
-			MPT_UNUSED_VARIABLE(OV_CALLBACKS_STREAMONLY);
-			MPT_UNUSED_VARIABLE(OV_CALLBACKS_STREAMONLY_NOCLOSE);
 			ov_callbacks callbacks = {
 				&VorbisfileFilereaderRead,
 				&VorbisfileFilereaderSeek,
