@@ -814,7 +814,12 @@ static int VorbisfileFilereaderSeek(void *datasource, ogg_int64_t offset, int wh
 static long VorbisfileFilereaderTell(void *datasource)
 {
 	FileReader &file = *reinterpret_cast<FileReader*>(datasource);
-	return file.GetPosition();
+	FileReader::off_t result = file.GetPosition();
+	if(!Util::TypeCanHoldValue<long>(result))
+	{
+		return -1;
+	}
+	return static_cast<long>(result);
 }
 
 #endif // MPT_WITH_VORBIS && MPT_WITH_VORBISFILE
@@ -1555,8 +1560,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 #if defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)
 
-			int outHeaderSize = 0;
-
 			std::vector<char> mergedData;
 			if(sharedHeader)
 			{
@@ -1602,8 +1605,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 					Ogg::UpdatePageCRC(oggPageInfo, oggPageData);
 					Ogg::WritePage(mergedStream, oggPageInfo, oggPageData);
 				}
-
-				outHeaderSize = mpt::saturate_cast<int>(mpt::IO::TellWrite(mergedStream));
 
 				streamSerials.clear();
 				while(Ogg::ReadPageAndSkipJunk(sampleChunk.chunk, oggPageInfo, oggPageData))
@@ -1699,8 +1700,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 					AddToLog(LogInformation, mpt::format(MPT_USTRING("Sample %1: Ogg Vorbis data with shared header and different logical bitstream serials found."))(smp));
 				}
 
-				outHeaderSize = mpt::saturate_cast<int>(mpt::IO::TellWrite(mergedStream));
-
 				std::string mergedStreamData = mergedStream.str();
 				mergedData.insert(mergedData.end(), mergedStreamData.begin(), mergedStreamData.end());
 
@@ -1714,16 +1713,14 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 			FileReader &sampleData = sharedHeader ? mergedDataChunk : sampleChunk.chunk;
 			FileReader &headerChunk = sampleData;
-			int initialRead = sharedHeader ? outHeaderSize : headerChunk.GetLength();
-			MPT_UNUSED_VARIABLE(initialRead);
 
-#else
+#else // !(MPT_WITH_VORBIS && MPT_WITH_VORBISFILE)
 
 			FileReader &sampleData = sampleChunk.chunk;
 			FileReader &headerChunk = sharedHeader ? sampleChunks[sharedOggHeader - 1].chunk : sampleData;
 			int initialRead = sharedHeader ? sampleChunk.headerSize : headerChunk.GetLength();
 
-#endif
+#endif // MPT_WITH_VORBIS && MPT_WITH_VORBISFILE
 
 			headerChunk.Rewind();
 			if(sharedHeader && !headerChunk.CanRead(sampleChunk.headerSize))
