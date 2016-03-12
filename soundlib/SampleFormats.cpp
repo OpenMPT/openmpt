@@ -380,7 +380,7 @@ static bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file
 	while(file.CanRead(4u * numChannels) && samplePos < sampleLen)
 	{
 		FileReader block = file.ReadChunk(blockAlign);
-		const uint8 *data = reinterpret_cast<const uint8 *>(block.GetRawData());
+		const uint8 *data = block.GetRawData<uint8>();
 		const uint32 blockSize = static_cast<uint32>(block.GetLength());
 
 		for(uint32 chn = 0; chn < numChannels; chn++)
@@ -2737,7 +2737,7 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 	std::size_t offset = 0;
 	int consumed = 0;
 	int error = 0;
-	stb_vorbis *vorb = stb_vorbis_open_pushdata(reinterpret_cast<const uint8 *>(file.GetRawData()), mpt::saturate_cast<int>(file.BytesLeft()), &consumed, &error, nullptr);
+	stb_vorbis *vorb = stb_vorbis_open_pushdata(file.GetRawData<uint8>(), mpt::saturate_cast<int>(file.BytesLeft()), &consumed, &error, nullptr);
 	if(!vorb)
 	{
 		return false;
@@ -2754,7 +2754,7 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 		int frame_channels = 0;
 		int decodedSamples = 0;
 		float **output = nullptr;
-		consumed = stb_vorbis_decode_frame_pushdata(vorb, reinterpret_cast<const uint8 *>(file.GetRawData()), mpt::saturate_cast<int>(file.BytesLeft()), &frame_channels, &output, &decodedSamples);
+		consumed = stb_vorbis_decode_frame_pushdata(vorb, file.GetRawData<uint8>(), mpt::saturate_cast<int>(file.BytesLeft()), &frame_channels, &output, &decodedSamples);
 		file.Skip(consumed);
 		LimitMax(frame_channels, channels);
 		if(decodedSamples > 0 && (frame_channels == 1 || frame_channels == 2))

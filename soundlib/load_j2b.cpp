@@ -1022,7 +1022,7 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 		|| fileHeader.packedLength != file.BytesLeft()
 		|| fileHeader.packedLength == 0
 #ifndef MPT_BUILD_FUZZER
-		|| fileHeader.crc32 != crc32(0, reinterpret_cast<const Bytef *>(file.GetRawData()), fileHeader.packedLength)
+		|| fileHeader.crc32 != crc32(0, file.GetRawData<Bytef>(), fileHeader.packedLength)
 #endif
 		)
 	{
@@ -1040,7 +1040,7 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	int retVal = uncompress(amFileData, &destSize, reinterpret_cast<const Bytef *>(file.GetRawData()), fileHeader.packedLength);
+	int retVal = uncompress(amFileData, &destSize, file.GetRawData<Bytef>(), fileHeader.packedLength);
 
 	bool result = false;
 

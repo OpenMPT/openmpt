@@ -277,7 +277,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 			bb.bitbuffer = 0;
 			if(!file.Seek(memPos + blk.tt_entries)) return false;
 			if(!file.CanRead(blk.pk_size - blk.tt_entries)) return false;
-			bb.pSrc = reinterpret_cast<const uint8 *>(file.GetRawData());
+			bb.pSrc = file.GetRawData<uint8>();
 			bb.bytesLeft = blk.pk_size - blk.tt_entries;
 			while (subblk < blk.sub_blk)
 			{
@@ -346,13 +346,13 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 			uint32 numbits = blk.num_bits;
 			uint32 oldval = 0;
 			if(!file.Seek(memPos)) return false;
-			const uint8 *ptable = reinterpret_cast<const uint8 *>(file.GetRawData());
+			const uint8 *ptable = file.GetRawData<uint8>();
 
 			bb.bitcount = 0;
 			bb.bitbuffer = 0;
 			if(!file.Seek(memPos + blk.tt_entries)) return false;
 			if(!file.CanRead(blk.pk_size - blk.tt_entries)) return false;
-			bb.pSrc = reinterpret_cast<const uint8 *>(file.GetRawData());
+			bb.pSrc = file.GetRawData<uint8>();
 			bb.bytesLeft = blk.pk_size - blk.tt_entries;
 			while (subblk < blk.sub_blk)
 			{
@@ -757,7 +757,7 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
 	try
 	{
 		unpackedData.resize(header.DstLen);
-		result = XPK_DoUnpack(reinterpret_cast<const uint8 *>(file.GetRawData()), header.SrcLen - (sizeof(XPKFILEHEADER) - 8), reinterpret_cast<uint8 *>(&(unpackedData[0])), header.DstLen);
+		result = XPK_DoUnpack(file.GetRawData<uint8>(), header.SrcLen - (sizeof(XPKFILEHEADER) - 8), reinterpret_cast<uint8 *>(&(unpackedData[0])), header.DstLen);
 	} catch(MPTMemoryException)
 	{
 		return false;
@@ -906,7 +906,7 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
 		return false;
 	}
 	file.Seek(4);
-	bool result = PP20_DoUnpack(reinterpret_cast<const uint8 *>(file.GetRawData()), static_cast<uint32>(length - 4), reinterpret_cast<uint8 *>(&(unpackedData[0])), dstLen);
+	bool result = PP20_DoUnpack(file.GetRawData<uint8>(), static_cast<uint32>(length - 4), reinterpret_cast<uint8 *>(&(unpackedData[0])), dstLen);
 
 	return result;
 }

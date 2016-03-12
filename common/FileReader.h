@@ -331,6 +331,19 @@ public:
 		// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
 		return DataContainer().GetRawData() + streamPos;
 	}
+	template <typename T>
+	FILEREADER_DEPRECATED const T *GetRawData() const
+	{
+		// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
+		STATIC_ASSERT(sizeof(T) == sizeof(char));
+		return reinterpret_cast<const T*>(DataContainer().GetRawData() + streamPos);
+	}
+	template <>
+	FILEREADER_DEPRECATED const void *GetRawData<void>() const
+	{
+		// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
+		return reinterpret_cast<const void*>(DataContainer().GetRawData() + streamPos);
+	}
 
 	std::size_t ReadRaw(char *dst, std::size_t count)
 	{
@@ -338,13 +351,20 @@ public:
 		streamPos += result;
 		return result;
 	}
-	std::size_t ReadRaw(void *dst, std::size_t count)
+	template <typename T>
+	std::size_t ReadRaw(T *dst, std::size_t count)
 	{
-		return ReadRaw(reinterpret_cast<char*>(dst), count);
+		STATIC_ASSERT(sizeof(T) == sizeof(char));
+		std::size_t result = static_cast<std::size_t>(DataContainer().Read(reinterpret_cast<char*>(dst), streamPos, count));
+		streamPos += result;
+		return result;
 	}
-	std::size_t ReadRaw(uint8 *dst, std::size_t count)
+	template <>
+	std::size_t ReadRaw<void>(void *dst, std::size_t count)
 	{
-		return ReadRaw(reinterpret_cast<char*>(dst), count);
+		std::size_t result = static_cast<std::size_t>(DataContainer().Read(reinterpret_cast<char*>(dst), streamPos, count));
+		streamPos += result;
+		return result;
 	}
 	
 protected:

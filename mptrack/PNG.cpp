@@ -70,7 +70,7 @@ PNG::Bitmap *PNG::ReadPNG(FileReader &file)
 			strm.zfree = Z_NULL;
 			strm.opaque = Z_NULL;
 			strm.avail_in = static_cast<uInt>(chunk.GetLength());
-			strm.next_in = (Bytef *)(chunk.GetRawData());
+			strm.next_in = const_cast<Bytef*>(chunk.GetRawData<Bytef>());
 			if(inflateInit2(&strm, 15) != Z_OK)
 			{
 				break;
