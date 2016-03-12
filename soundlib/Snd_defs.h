@@ -443,6 +443,8 @@ enum PlayBehaviour
 	kST3EffectMemory,				// Most effects share the same memory in ST3
 	kST3PortaSampleChange,			// Portamento plus instrument number applies the volume settings of the new sample, but not the new sample itself.
 
+	kMODIgnorePanning,				// Do not process any panning commands
+
 	// Add new play behaviours here.
 
 	kMaxPlayBehaviours,

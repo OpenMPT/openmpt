@@ -585,7 +585,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kFT2RestrictXCommand: desc = _T("Don't allow MPT extensions to Xxx command in XM"); break;
 		case kFT2RetrigWithNoteDelay: desc = _T("Retrigger envelopes if there is a note delay with no note"); break;
 		case kFT2SetPanEnvPos: desc = _T("Lxx only sets the pan env position if the volume envelope's sustain flag is set"); break;
-		case kFT2PortaIgnoreInstr: desc = _T("Portamento plus instrument number applies the volume settings of the new sample, but not the new sample itself."); break;
+		case kFT2PortaIgnoreInstr: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself."); break;
 		case kFT2VolColMemory: desc = _T("No volume column memory in FT2"); break;
 		case kFT2LoopE60Restart: desc = _T("Next pattern starts on the same row as the last E60 command"); break;
 		case kFT2ProcessSilentChannels: desc = _T("Keep processing silent channels for later 3xx pickup"); break;
@@ -603,7 +603,8 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kFT2FinetunePrecision: desc = _T("Only take the upper 4 bits of sample finetune."); break;
 		case kST3NoMutedChannels: desc = _T("Don't process any effects on muted S3M channels"); break;
 		case kST3EffectMemory: desc = _T("Most effects share the same memory in ST3"); break;
-		case kST3PortaSampleChange: desc = _T("Portamento plus instrument number applies the volume settings of the new sample, but not the new sample itself."); break;
+		case kST3PortaSampleChange: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself."); break;
+		case kMODIgnorePanning: desc = _T("Ignore panning commands."); break;
 
 		default: MPT_ASSERT(0);
 		}
@@ -1459,7 +1460,9 @@ void CInputDlg::OnOK()
 	CDialog::OnOK();
 	GetDlgItemText(IDC_EDIT1, resultAsString);
 	resultAsInt = static_cast<int32>(GetDlgItemInt(IDC_EDIT1));
+	Limit(resultAsInt, m_minValueInt, m_maxValueInt);
 	m_edit.GetDecimalValue(resultAsDouble);
+	Limit(resultAsDouble, m_minValueDbl, m_maxValueDbl);
 }
 
 
