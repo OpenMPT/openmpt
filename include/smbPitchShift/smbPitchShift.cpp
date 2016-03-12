@@ -36,14 +36,16 @@
 *
 *****************************************************************************/ 
 
-#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
+#include "smbPitchShift.h" // OpenMPT
 
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
 
 #define M_PI 3.14159265358979323846
+#if 0 // OpenMPT
 #define MAX_FRAME_LENGTH 8192
+#endif // OpenMPT
 
 void smbFft(float *fftBuffer, long fftFrameSize, long sign);
 double smbAtan2(double x, double y);

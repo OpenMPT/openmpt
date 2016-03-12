@@ -4,7 +4,7 @@
   language "C++"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/smbPitchShift"
-  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   targetname "openmpt-smbpitchshift"
   includedirs { }
@@ -15,3 +15,7 @@
   files {
    "../../include/smbPitchShift/smbPitchShift.h",
   }
+  buildoptions { "/wd4244" }
+  filter { "kind:SharedLib" }
+   defines { "SMBPITCHSHIFT_BUILD_DLL" }
+  filter {}
