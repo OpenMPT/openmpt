@@ -30,7 +30,7 @@
    defines { "LIBOPENMPT_USE_DLL" }
   filter { "not configurations:*Shared" }
    links {
-    "stb_vorbis",
+    "vorbis",
     "ogg",
     "ksuser",
     "winmm",

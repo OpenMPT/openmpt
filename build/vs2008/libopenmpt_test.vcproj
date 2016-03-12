@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -123,7 +123,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -139,7 +139,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -201,7 +201,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -217,7 +217,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -282,7 +282,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="2"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -298,7 +298,7 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;LIBOPENMPT_BUILD;LIBOPENMPT_BUILD_TEST"
-				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
+				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..;..\..\common;..\..\soundlib;..\..\include;..\..\include\ogg\include;..\..\include\vorbis\include;..\..\include\zlib;$(IntDir)\svn_version;..\svn_version"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -338,8 +338,12 @@
 	</Configurations>
 	<References>
 		<ProjectReference
-			ReferencedProjectIdentifier="{E0D81662-85EF-4172-B0D8-F8DCFF712607}"
-			RelativePathToProject="..\vs2008-ext\stb_vorbis.vcproj"
+			ReferencedProjectIdentifier="{D8D5E11C-F959-49EF-B741-B3F6DE52DED8}"
+			RelativePathToProject="..\vs2008-ext\ogg.vcproj"
+		/>
+		<ProjectReference
+			ReferencedProjectIdentifier="{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}"
+			RelativePathToProject="..\vs2008-ext\vorbis.vcproj"
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"

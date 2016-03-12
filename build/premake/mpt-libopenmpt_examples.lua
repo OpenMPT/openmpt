@@ -18,7 +18,7 @@ if _ACTION ~= "vs2008" then
   }
   characterset "Unicode"
   flags { "Unicode" }
-  links { "libopenmpt", "zlib", "stb_vorbis", "portaudio", "portaudiocpp", "ksuser", "winmm" }
+  links { "libopenmpt", "zlib", "vorbis", "ogg", "portaudio", "portaudiocpp", "ksuser", "winmm" }
   filter { "not configurations:*Shared", "not action:vs2008" }
   links { "delayimp" }
   linkoptions {
@@ -50,7 +50,7 @@ end
   }
   characterset "Unicode"
   flags { "Unicode" }
-  links { "libopenmpt", "zlib", "stb_vorbis", "portaudio", "ksuser", "winmm" }
+  links { "libopenmpt", "zlib", "vorbis", "ogg", "portaudio", "ksuser", "winmm" }
   filter { "not configurations:*Shared", "not action:vs2008" }
   links { "delayimp" }
   linkoptions {
@@ -80,7 +80,7 @@ end
   }
   characterset "Unicode"
   flags { "Unicode" }
-  links { "libopenmpt", "zlib", "stb_vorbis", "portaudio", "ksuser", "winmm" }
+  links { "libopenmpt", "zlib", "vorbis", "ogg", "portaudio", "ksuser", "winmm" }
   filter { "not configurations:*Shared", "not action:vs2008" }
   links { "delayimp" }
   linkoptions {
@@ -110,7 +110,7 @@ end
   }
   characterset "Unicode"
   flags { "Unicode" }
-  links { "libopenmpt", "zlib", "stb_vorbis", "portaudio", "ksuser", "winmm" }
+  links { "libopenmpt", "zlib", "vorbis", "ogg", "portaudio", "ksuser", "winmm" }
   filter { "not configurations:*Shared", "not action:vs2008" }
   links { "delayimp" }
   linkoptions {

@@ -23,7 +23,7 @@
   }
   characterset "Unicode"
   flags { "MFC", "Unicode" }
-  links { "libopenmpt", "zlib", "stb_vorbis", "pugixml" }
+  links { "libopenmpt", "zlib", "vorbis", "ogg", "pugixml" }
   filter { "not action:vs2008" }
   links { "delayimp" }
   linkoptions {

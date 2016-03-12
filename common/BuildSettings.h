@@ -104,6 +104,8 @@
 #if defined(LIBOPENMPT_BUILD)
 
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
+#if defined(LIBOPENMPT_BUILD_SMALL)
+
 //#define MPT_WITH_DL
 //#define MPT_WITH_FLAC
 //#define MPT_WITH_ICONV
@@ -114,18 +116,37 @@
 #endif
 #endif
 //#define MPT_WITH_MINIMP3
-#if defined(LIBOPENMPT_BUILD_SMALL)
 #define MPT_WITH_MINIZ
-#endif
 //#define MPT_WITH_MPG123
 //#define MPT_WITH_OGG
 #define MPT_WITH_STBVORBIS
 //#define MPT_WITH_UNMO3
 //#define MPT_WITH_VORBIS
 //#define MPT_WITH_VORBISFILE
-#if !defined(LIBOPENMPT_BUILD_SMALL)
-#define MPT_WITH_ZLIB
+//#define MPT_WITH_ZLIB
+
+#else // !LIBOPENMPT_BUILD_SMALL
+
+//#define MPT_WITH_DL
+//#define MPT_WITH_FLAC
+//#define MPT_WITH_ICONV
+//#define MPT_WITH_LTDL
+#if MPT_OS_WINDOWS
+#if MPT_COMPILER_MSVC && (_WIN32_WINNT >= 0x0601)
+#define MPT_WITH_MEDIAFOUNDATION
 #endif
+#endif
+//#define MPT_WITH_MINIMP3
+//#define MPT_WITH_MINIZ
+//#define MPT_WITH_MPG123
+#define MPT_WITH_OGG
+//#define MPT_WITH_STBVORBIS
+//#define MPT_WITH_UNMO3
+#define MPT_WITH_VORBIS
+#define MPT_WITH_VORBISFILE
+#define MPT_WITH_ZLIB
+
+#endif // LIBOPENMPT_BUILD_SMALL
 
 #endif // LIBOPENMPT_BUILD
 
