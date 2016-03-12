@@ -1573,10 +1573,10 @@ static void render_files( commandlineflags & flags, textout & log, write_buffers
 						render_file( flags, filename, log, audio_stream );
 						shuffle_set.erase( filename );
 						continue;
-					} catch ( prev_file & e ) {
+					} catch ( prev_file & ) {
 						shuffle_set.erase( filename );
 						continue;
-					} catch ( next_file & e ) {
+					} catch ( next_file & ) {
 						shuffle_set.erase( filename );
 						continue;
 					} catch ( ... ) {
