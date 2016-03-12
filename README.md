@@ -138,6 +138,11 @@ How to compile
             download to SDK.
             You can disable xmp-openmpt in the solution configuration.
 
+        Alternatively, both, the Winamp and the xmplay SDK, can be downloaded
+        automatically on Windows 7 or later with 7-Zip installed by just running
+        the `build/download_externals.cmd` script (works when run from either
+        the project root or directly from the build directory).
+
  -  Makefile
 
     The makefile supports different build environments and targets via the
