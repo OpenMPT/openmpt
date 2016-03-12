@@ -254,7 +254,11 @@ void smbFft(float *fftBuffer, long fftFrameSize, long sign)
 			*p1 = *p2; *p2 = temp;
 		}
 	}
+#if 0 //  OpenMPT
 	for (k = 0, le = 2; k < (long)(log(fftFrameSize)/log(2.)+.5); k++) {
+#else // OpenMPT
+	for (k = 0, le = 2; k < (long)(log((double)fftFrameSize)/log(2.)+.5); k++) { // OpenMPT
+#endif // OpenMPT
 		le <<= 1;
 		le2 = le>>1;
 		ur = 1.0;
