@@ -3257,7 +3257,7 @@ static FileTags ReadMFMetadata(IMFMediaSource *mediaSource)
 
 		std::wstring stringVal;
 		std::vector<WCHAR> wcharVal(256);
-		while(true)
+		for(;;)
 		{
 			HRESULT hrToString = PropVariantToString(propVal, &wcharVal[0], wcharVal.size());
 			if(hrToString == S_OK)
@@ -3520,7 +3520,7 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	if(samplesPerSecond <= 0) goto fail;
 	if(bitsPerSample != 8 && bitsPerSample != 16 && bitsPerSample != 24 && bitsPerSample != 32) goto fail;
 
-	while(true)
+	for(;;)
 	{
 		mfSampleFlags = 0;
 		MPT_MF_CHECKED(sourceReader->ReadSample((DWORD)MF_SOURCE_READER_FIRST_AUDIO_STREAM, 0, NULL, &mfSampleFlags, NULL, &mfSample));
