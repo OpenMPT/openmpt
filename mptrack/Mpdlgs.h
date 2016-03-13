@@ -213,15 +213,18 @@ class CMidiSetupDlg: public CPropertyPage
 {
 public:
 	DWORD m_dwMidiSetup;
-	LONG m_nMidiDevice;
+	UINT m_nMidiDevice;
 
 protected:
 	CSpinButtonCtrl m_SpinSpd, m_SpinPat, m_SpinAmp;
 	CComboBox m_ATBehaviour;
 
 public:
-	CMidiSetupDlg(DWORD d, LONG n):CPropertyPage(IDD_OPTIONS_MIDI)
-		{ m_dwMidiSetup = d; m_nMidiDevice = n; }
+	CMidiSetupDlg(DWORD d, UINT n)
+		: CPropertyPage(IDD_OPTIONS_MIDI)
+		, m_dwMidiSetup(d)
+		, m_nMidiDevice(n)
+		{ }
 
 protected:
 	virtual BOOL OnInitDialog();

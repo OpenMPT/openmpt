@@ -1826,7 +1826,7 @@ void CMidiSetupDlg::OnOK()
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
 		int n = combo->GetCurSel();
-		if (n >= 0) m_nMidiDevice = static_cast<LONG>(combo->GetItemData(n));
+		if (n >= 0) m_nMidiDevice = static_cast<UINT>(combo->GetItemData(n));
 	}
 
 	TrackerSettings::Instance().aftertouchBehaviour = static_cast<RecordAftertouchOptions>(m_ATBehaviour.GetItemData(m_ATBehaviour.GetCurSel()));
