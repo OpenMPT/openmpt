@@ -36,19 +36,19 @@ Declare Function openmpt_get_library_version() As ULong
  '/
 Declare Function openmpt_get_core_version() As ULong
 
-/'! Return a verbose library version string from openmpt_get_string(). '/
+/'! Return a verbose library version string from openmpt_get_string(). \deprecated Please use \code "library_version" \endcode directly. '/
 #Define OPENMPT_STRING_LIBRARY_VERSION "library_version"
-/'! Return a verbose library features string from openmpt_get_string(). '/
+/'! Return a verbose library features string from openmpt_get_string(). \deprecated Please use \code "library_features" \endcode directly. '/
 #Define OPENMPT_STRING_LIBRARY_FEATURES "library_features"
-/'! Return a verbose OpenMPT core version string from openmpt_get_string(). '/
+/'! Return a verbose OpenMPT core version string from openmpt_get_string(). \deprecated Please use \code "core_version" \endcode directly. '/
 #Define OPENMPT_STRING_CORE_VERSION "core_version"
-/'! Return information about the current build (e.g. the build date or compiler used) from openmpt_get_string(). '/
+/'! Return information about the current build (e.g. the build date or compiler used) from openmpt_get_string(). \deprecated Please use \code "build" \endcode directly. '/
 #Define OPENMPT_STRING_BUILD "build"
-/'! Return all contributors from openmpt_get_string(). '/
+/'! Return all contributors from openmpt_get_string(). \deprecated Please use \code "credits" \endcode directly. '/
 #Define OPENMPT_STRING_CREDITS "credits"
-/'! Return contact infromation about libopenmpt from openmpt_get_string(). '/
+/'! Return contact infromation about libopenmpt from openmpt_get_string(). \deprecated Please use \code "contact" \endcode directly. '/
 #Define OPENMPT_STRING_CONTACT "contact"
-/'! Return the libopenmpt license from openmpt_get_string(). '/
+/'! Return the libopenmpt license from openmpt_get_string(). \deprecated Please use \code "license" \endcode directly. '/
 #Define OPENMPT_STRING_LICENSE "license"
 
 /'! \brief Free a string returned by libopenmpt
@@ -60,13 +60,18 @@ Declare Sub openmpt_free_string(ByVal Str As Const ZString Ptr)
 /'! \brief Get library related metadata.
  '
  ' \param key Key to query.
+ '       Possible keys are:
+ '        -  "library_version": verbose library version string
+ '        -  "library_features": verbose library features string
+ '        -  "core_version": verboseOpenMPT core version string
+ '        -  "source_url": original source code URL
+ '        -  "source_date": original source code date
+ '        -  "build": information about the current build (e.g. the build date or compiler used)
+ '        -  "build_compiler": information about the compiler used to build libopenmpt
+ '        -  "credits": all contributors
+ '        -  "contact": contact infromation about libopenmpt
+ '        -  "license": he libopenmpt license
  ' \return A (possibly multi-line) string containing the queried information. If no information is available, the string is empty.
- ' \sa OPENMPT_STRING_LIBRARY_VERSION
- ' \sa OPENMPT_STRING_CORE_VERSION
- ' \sa OPENMPT_STRING_BUILD
- ' \sa OPENMPT_STRING_CREDITS
- ' \sa OPENMPT_STRING_CONTACT
- ' \sa OPENMPT_STRING_LICENSE
  ' \remarks Use openmpt_get_string to automatically handle the lifetime of the returned pointer.
  '/
 Declare Function openmpt_get_string_ Alias "openmpt_get_string" (ByVal key As Const ZString Ptr) As Const ZString Ptr
@@ -837,6 +842,7 @@ Declare Function openmpt_module_highlight_pattern_row_channel_ Alias "openmpt_mo
  ' \remarks Currently supported ctl values are:
  '          - load.skip_samples: Set to "1" to avoid loading samples into memory
  '          - load.skip_patterns: Set to "1" to avoid loading patterns into memory
+ '          - load.skip_plugins: Set to "1" to avoid loading plugins
  '          - load.skip_subsongs_init: Set to "1" to avoid pre-initializing subsongs. Skipping results in faster module loading but slower seeking.
  '          - seek.sync_samples: Set to "1" to sync sample playback when using openmpt_module_set_position_seconds or openmpt_module_set_position_order_row.
  '          - play.tempo_factor: Set a floating point tempo factor. "1.0" is the default tempo.
