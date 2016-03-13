@@ -1384,7 +1384,8 @@ void CInputDlg::DoDataExchange(CDataExchange* pDX)
 //------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_SPIN1, spin);
+	DDX_Control(pDX, IDC_EDIT1, m_edit);
+	DDX_Control(pDX, IDC_SPIN1, m_spin);
 }
 
 
@@ -1392,7 +1393,7 @@ BOOL CInputDlg::OnInitDialog()
 //----------------------------
 {
 	CDialog::OnInitDialog();
-	SetDlgItemText(IDC_PROMPT, description);
+	SetDlgItemText(IDC_PROMPT, m_description);
 
 	// Get all current control sizes and positions
 	CRect windowRect, labelRect, inputRect, okRect, cancelRect;
@@ -1409,7 +1410,7 @@ BOOL CInputDlg::OnInitDialog()
 	// Find out how big our label shall be
 	HDC dc = ::GetDC(m_hWnd);
 	CRect textRect;
-	DrawText(dc, description, description.GetLength(), textRect, DT_CALCRECT);
+	DrawText(dc, m_description, m_description.GetLength(), textRect, DT_CALCRECT);
 	LPtoDP(dc, &textRect.BottomRight(), 1);
 	::ReleaseDC(m_hWnd, dc);
 	if(textRect.right < 320) textRect.right = 320;
@@ -1426,8 +1427,8 @@ BOOL CInputDlg::OnInitDialog()
 	if(m_minValueInt != m_maxValueInt)
 	{
 		// Numeric (int)
-		spin.SetRange32(m_minValueInt, m_maxValueInt);
-		spin.SetBuddy(GetDlgItem(IDC_EDIT1));
+		m_spin.SetRange32(m_minValueInt, m_maxValueInt);
+		m_spin.SetBuddy(GetDlgItem(IDC_EDIT1));
 		SetDlgItemInt(IDC_EDIT1, resultAsInt);
 		m_edit.SubclassDlgItem(IDC_EDIT1, this);
 		m_edit.ModifyStyle(0, ES_NUMBER);
@@ -1436,8 +1437,8 @@ BOOL CInputDlg::OnInitDialog()
 	} else if(m_minValueDbl != m_maxValueDbl)
 	{
 		// Numeric (double)
-		spin.SetRange32(static_cast<int32>(m_minValueDbl), static_cast<int32>(m_maxValueDbl));
-		spin.SetBuddy(GetDlgItem(IDC_EDIT1));
+		m_spin.SetRange32(static_cast<int32>(m_minValueDbl), static_cast<int32>(m_maxValueDbl));
+		m_spin.SetBuddy(GetDlgItem(IDC_EDIT1));
 		m_edit.SubclassDlgItem(IDC_EDIT1, this);
 		m_edit.ModifyStyle(0, ES_NUMBER);
 		m_edit.AllowNegative(m_minValueDbl < 0);
@@ -1446,7 +1447,7 @@ BOOL CInputDlg::OnInitDialog()
 	} else
 	{
 		// Text
-		spin.ShowWindow(SW_HIDE);
+		m_spin.ShowWindow(SW_HIDE);
 		SetDlgItemText(IDC_EDIT1, resultAsString);
 	}
 

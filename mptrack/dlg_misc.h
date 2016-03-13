@@ -277,8 +277,8 @@ class CInputDlg: public CDialog
 {
 protected:
 	CNumberEdit m_edit;
-	CSpinButtonCtrl spin;
-	CString description;
+	CSpinButtonCtrl m_spin;
+	CString m_description;
 	double m_minValueDbl, m_maxValueDbl;
 	int32 m_minValueInt, m_maxValueInt;
 
@@ -290,20 +290,20 @@ public:
 public:
 	// Initialize text input box
 	CInputDlg(CWnd *parent, const TCHAR *desc, const char *defaultString) : CDialog(IDD_INPUT, parent)
-		, description(desc)
+		, m_description(desc)
 		, resultAsString(defaultString)
 		, m_minValueDbl(0), m_maxValueDbl(0), resultAsDouble(0)
 		, m_minValueInt(0), m_maxValueInt(0), resultAsInt(0)
 	{ }
 	// Initialize numeric input box (float)
 	CInputDlg(CWnd *parent, const TCHAR *desc, double minVal, double maxVal, double defaultNumber) : CDialog(IDD_INPUT, parent)
-		, description(desc)
+		, m_description(desc)
 		, m_minValueDbl(minVal), m_maxValueDbl(maxVal), resultAsDouble(defaultNumber)
 		, m_minValueInt(0), m_maxValueInt(0), resultAsInt(0)
 	{ }
 	// Initialize numeric input box (int)
 	CInputDlg(CWnd *parent, const TCHAR *desc, int32 minVal, int32 maxVal, int32 defaultNumber) : CDialog(IDD_INPUT, parent)
-		, description(desc)
+		, m_description(desc)
 		, m_minValueDbl(0), m_maxValueDbl(0), resultAsDouble(0)
 		, m_minValueInt(minVal), m_maxValueInt(maxVal), resultAsInt(defaultNumber)
 	{ }

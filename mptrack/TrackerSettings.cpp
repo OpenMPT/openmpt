@@ -1110,26 +1110,44 @@ void TrackerSettings::SetMIDIDevice(UINT id)
 }
 
 
-UINT TrackerSettings::GetCurrentMIDIDevice() const
-//------------------------------------------------
+UINT TrackerSettings::GetCurrentMIDIDevice()
+//------------------------------------------
 {
 	if(midiDeviceName.Get().IsEmpty())
 		return m_nMidiDevice;
 	
-	UINT candidate = m_nMidiDevice;
+	CString deviceName = midiDeviceName;
+	deviceName.TrimRight();
+
 	MIDIINCAPS mic;
-	UINT numDevs = midiInGetNumDevs();
+	UINT candidate = m_nMidiDevice, numDevs = midiInGetNumDevs();
 	for(UINT i = 0; i < numDevs; i++)
 	{
 		mic.szPname[0] = 0;
-		if(midiInGetDevCaps(i, &mic, sizeof(mic)) == MMSYSERR_NOERROR && mic.szPname == midiDeviceName)
+		if(midiInGetDevCaps(i, &mic, sizeof(mic)) != MMSYSERR_NOERROR)
+			continue;
+
+		// Some device names have trailing spaces (e.g. "USB MIDI Interface "), but those may get lost in our settings framework.
+		mpt::String::SetNullTerminator(mic.szPname);
+		size_t strLen = _tcslen(mic.szPname);
+		while(strLen-- > 0)
+		{
+			if(mic.szPname[strLen] == _T(' '))
+				mic.szPname[strLen] = 0;
+			else
+				break;
+		}
+		if(mic.szPname == deviceName)
 		{
 			candidate = i;
+			numDevs = m_nMidiDevice + 1;
 			// If the same device name exists twice, try to match both device number and name
 			if(candidate == m_nMidiDevice)
-				return i;
+				return candidate;
 		}
 	}
+	// If the device changed its ID, update it now.
+	m_nMidiDevice = candidate;
 	return candidate;
 }
 

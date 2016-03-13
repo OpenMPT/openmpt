@@ -716,7 +716,7 @@ public:
 	static TrackerSettings &Instance();
 
 	void SetMIDIDevice(UINT id);
-	UINT GetCurrentMIDIDevice() const;
+	UINT GetCurrentMIDIDevice();
 
 protected:
 
