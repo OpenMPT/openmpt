@@ -198,7 +198,7 @@ bool CWaveDevice::InternalOpen()
 	m_nBuffersPending = 0;
 	m_nWriteBuffer = 0;
 	{
-		Util::lock_guard<Util::mutex> guard(m_PositionWraparoundMutex);
+		mpt::lock_guard<mpt::mutex> guard(m_PositionWraparoundMutex);
 		MemsetZero(m_PositionLast);
 		m_PositionWrappedCount = 0;
 	}
@@ -234,7 +234,7 @@ bool CWaveDevice::InternalClose()
 		m_ThreadWakeupEvent = NULL;
 	}
 	{
-		Util::lock_guard<Util::mutex> guard(m_PositionWraparoundMutex);
+		mpt::lock_guard<mpt::mutex> guard(m_PositionWraparoundMutex);
 		MemsetZero(m_PositionLast);
 		m_PositionWrappedCount = 0;
 	}
@@ -249,7 +249,7 @@ void CWaveDevice::StartFromSoundThread()
 	if(m_hWaveOut)
 	{
 		{
-			Util::lock_guard<Util::mutex> guard(m_PositionWraparoundMutex);
+			mpt::lock_guard<mpt::mutex> guard(m_PositionWraparoundMutex);
 			MemsetZero(m_PositionLast);
 			m_PositionWrappedCount = 0;
 		}
@@ -268,7 +268,7 @@ void CWaveDevice::StopFromSoundThread()
 		CheckResult(waveOutPause(m_hWaveOut));
 		m_JustStarted = false;
 		{
-			Util::lock_guard<Util::mutex> guard(m_PositionWraparoundMutex);
+			mpt::lock_guard<mpt::mutex> guard(m_PositionWraparoundMutex);
 			MemsetZero(m_PositionLast);
 			m_PositionWrappedCount = 0;
 		}
@@ -368,7 +368,7 @@ int64 CWaveDevice::InternalGetStreamPositionFrames() const
 	int64 offset = 0;
 	{
 		// handle wraparound
-		Util::lock_guard<Util::mutex> guard(m_PositionWraparoundMutex);
+		mpt::lock_guard<mpt::mutex> guard(m_PositionWraparoundMutex);
 		if(!m_PositionLast.wType)
 		{
 			// first call

@@ -13,12 +13,12 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if defined(MODPLUG_TRACKER)
 
-namespace Util {
+namespace mpt {
 class recursive_mutex_with_lock_count;
-} // namespace Util
+} // namespace mpt
 
 namespace Tracker { // implemented in mptrack/Mptrack.cpp
-Util::recursive_mutex_with_lock_count & GetGlobalMutexRef();
+mpt::recursive_mutex_with_lock_count & GetGlobalMutexRef();
 } // namespace Tracker
 
 // Critical section handling done in (safe) RAII style.
@@ -29,7 +29,7 @@ Util::recursive_mutex_with_lock_count & GetGlobalMutexRef();
 class CriticalSection
 {
 private:
-	Util::recursive_mutex_with_lock_count & m_refGlobalMutex;
+	mpt::recursive_mutex_with_lock_count & m_refGlobalMutex;
 protected:
 	bool inSection;
 public:

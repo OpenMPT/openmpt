@@ -55,7 +55,7 @@ public:
 class Profile
 {
 private:
-	mutable Util::mutex datamutex;
+	mutable mpt::mutex datamutex;
 public:
 	struct Data
 	{

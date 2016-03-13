@@ -170,7 +170,7 @@ public:
 
 protected:
 
-	Util::recursive_mutex_with_lock_count m_GlobalMutex;
+	mpt::recursive_mutex_with_lock_count m_GlobalMutex;
 
 	DWORD m_GuiThreadId;
 
@@ -253,7 +253,7 @@ public:
 	std::vector<CModDoc *> GetOpenDocuments() const;
 
 public:
-	inline Util::recursive_mutex_with_lock_count & GetGlobalMutexRef() { return m_GlobalMutex; }
+	inline mpt::recursive_mutex_with_lock_count & GetGlobalMutexRef() { return m_GlobalMutex; }
 	bool InGuiThread() const { return GetCurrentThreadId() == m_GuiThreadId; }
 	CModDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }

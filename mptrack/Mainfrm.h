@@ -300,7 +300,7 @@ protected:
 	bool m_bOptionsLocked;
 
 	// Notification Buffer
-	Util::mutex m_NotificationBufferMutex; // to avoid deadlocks, this mutex should only be taken as a innermost lock, i.e. do not block on anything while holding this mutex
+	mpt::mutex m_NotificationBufferMutex; // to avoid deadlocks, this mutex should only be taken as a innermost lock, i.e. do not block on anything while holding this mutex
 	Util::fixed_size_queue<Notification,MAX_UPDATE_HISTORY> m_NotifyBuffer;
 
 	// Instrument preview in tree view

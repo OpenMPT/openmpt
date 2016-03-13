@@ -223,10 +223,10 @@ void ComponentFactoryBase::Initialize(ComponentManager &componentManager, MPT_SH
 // An implementation with a simple global list head and no mutex at all would
 //  thus work fine for MSVC (currently).
 
-static Util::mutex & ComponentListMutex()
+static mpt::mutex & ComponentListMutex()
 //---------------------------------------
 {
-	static Util::mutex g_ComponentListMutex;
+	static mpt::mutex g_ComponentListMutex;
 	return g_ComponentListMutex;
 }
 
@@ -240,7 +240,7 @@ static ComponentListEntry * & ComponentListHead()
 bool ComponentListPush(ComponentListEntry *entry)
 //-----------------------------------------------
 {
-	Util::lock_guard<Util::mutex> guard(ComponentListMutex());
+	mpt::lock_guard<mpt::mutex> guard(ComponentListMutex());
 	entry->next = ComponentListHead();
 	ComponentListHead() = entry;
 	return true;
@@ -276,7 +276,7 @@ ComponentManager::ComponentManager(const IComponentManagerSettings &settings)
 //---------------------------------------------------------------------------
 	: m_Settings(settings)
 {
-	Util::lock_guard<Util::mutex> guard(ComponentListMutex());
+	mpt::lock_guard<mpt::mutex> guard(ComponentListMutex());
 	for(ComponentListEntry *entry = ComponentListHead(); entry; entry = entry->next)
 	{
 		entry->reg(*this);
