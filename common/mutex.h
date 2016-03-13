@@ -24,7 +24,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if defined(MPT_ENABLE_THREAD)
 
-namespace Util {
+namespace mpt {
 
 #ifdef _WIN32
 
@@ -94,7 +94,7 @@ public:
 
 class recursive_mutex_with_lock_count {
 private:
-	Util::recursive_mutex mutex;
+	mpt::recursive_mutex mutex;
 	long lockCount;
 public:
 	recursive_mutex_with_lock_count()
@@ -139,7 +139,7 @@ public:
 	~lock_guard() { mutex.unlock(); }
 };
 
-} // namespace Util
+} // namespace mpt
 
 #endif // MPT_ENABLE_THREAD
 

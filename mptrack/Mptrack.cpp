@@ -716,7 +716,7 @@ void CTrackApp::RemoveMruItem(const mpt::PathString &path)
 
 namespace Tracker
 {
-Util::recursive_mutex_with_lock_count & GetGlobalMutexRef()
+mpt::recursive_mutex_with_lock_count & GetGlobalMutexRef()
 {
 	return theApp.GetGlobalMutexRef();
 }

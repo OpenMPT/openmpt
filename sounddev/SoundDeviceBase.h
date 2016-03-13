@@ -59,7 +59,7 @@ private:
 
 	int64 m_StreamPositionRenderFrames; // only updated or read in audio CALLBACK or when device is stopped. requires no further locking
 
-	mutable Util::mutex m_StreamPositionMutex;
+	mutable mpt::mutex m_StreamPositionMutex;
 	int64 m_StreamPositionOutputFrames;
 
 	mpt::atomic_uint32_t m_RequestFlags;

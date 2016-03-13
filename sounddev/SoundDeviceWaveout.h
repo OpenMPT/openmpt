@@ -55,7 +55,7 @@ protected:
 	std::vector<WAVEHDR> m_WaveBuffers;
 	std::vector<std::vector<char> > m_WaveBuffersData;
 
-	mutable Util::mutex m_PositionWraparoundMutex;
+	mutable mpt::mutex m_PositionWraparoundMutex;
 	mutable MMTIME m_PositionLast;
 	mutable std::size_t m_PositionWrappedCount;
 

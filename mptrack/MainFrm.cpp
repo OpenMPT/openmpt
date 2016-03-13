@@ -634,7 +634,7 @@ void CMainFrame::OnTimerNotify()
 	}
 	{
 		// advance to the newest notification, drop the obsolete ones
-		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
+		mpt::lock_guard<mpt::mutex> lock(m_NotificationBufferMutex);
 		const Notification * pnotify = nullptr;
 		const Notification * p = m_NotifyBuffer.peek_p();
 		if(p && currenttotalsamples >= p->timestampSamples)
@@ -1058,7 +1058,7 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 	}
 
 	{
-		Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
+		mpt::lock_guard<mpt::mutex> lock(m_NotificationBufferMutex);
 		if(m_NotifyBuffer.write_size() == 0)
 		{
 			ASSERT(0);
@@ -1223,7 +1223,7 @@ void CMainFrame::ResetNotificationBuffer()
 //----------------------------------------
 {
 	MPT_TRACE();
-	Util::lock_guard<Util::mutex> lock(m_NotificationBufferMutex);
+	mpt::lock_guard<mpt::mutex> lock(m_NotificationBufferMutex);
 	m_NotifyBuffer.clear();
 }
 

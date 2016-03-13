@@ -59,7 +59,7 @@ protected:
 	};
 
 	// For getChunk
-	Util::mutex mutex;
+	mpt::mutex mutex;
 	char *chunk;
 
 	// I/O device settings
