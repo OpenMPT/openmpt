@@ -152,6 +152,8 @@ struct byte_cast_impl
 	{
 		STATIC_ASSERT(sizeof(Tsrc) == sizeof(mpt::byte));
 		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
+		// not checking is_byte_castable here because we are actually
+		// doing a static_cast and converting the value
 #if MPT_COMPILER_HAS_TYPE_TRAITS
 		STATIC_ASSERT(std::is_integral<Tsrc>::value);
 		STATIC_ASSERT(std::is_integral<Tdst>::value);
@@ -166,6 +168,8 @@ struct byte_cast_impl<Tdst*, Tsrc*>
 	{
 		STATIC_ASSERT(sizeof(Tsrc) == sizeof(mpt::byte));
 		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
+		STATIC_ASSERT(mpt::is_byte_castable<Tsrc>::value);
+		STATIC_ASSERT(mpt::is_byte_castable<Tdst>::value);
 #if MPT_COMPILER_HAS_TYPE_TRAITS
 		STATIC_ASSERT(std::is_integral<Tsrc>::value);
 		STATIC_ASSERT(std::is_integral<Tdst>::value);
@@ -179,6 +183,7 @@ struct byte_cast_impl<Tdst*, void*>
 	inline Tdst* operator () (void* src) const
 	{
 		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
+		STATIC_ASSERT(mpt::is_byte_castable<Tdst>::value);
 #if MPT_COMPILER_HAS_TYPE_TRAITS
 		STATIC_ASSERT(std::is_integral<Tdst>::value);
 #endif
@@ -191,6 +196,7 @@ struct byte_cast_impl<Tdst*, const void*>
 	inline Tdst* operator () (const void* src) const
 	{
 		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
+		STATIC_ASSERT(mpt::is_byte_castable<Tdst>::value);
 #if MPT_COMPILER_HAS_TYPE_TRAITS
 		STATIC_ASSERT(std::is_integral<Tdst>::value);
 #endif
@@ -203,6 +209,7 @@ struct byte_cast_impl<void*, Tsrc*>
 	inline void* operator () (Tsrc* src) const
 	{
 		STATIC_ASSERT(sizeof(Tsrc) == sizeof(mpt::byte));
+		STATIC_ASSERT(mpt::is_byte_castable<Tsrc>::value);
 #if MPT_COMPILER_HAS_TYPE_TRAITS
 		STATIC_ASSERT(std::is_integral<Tsrc>::value);
 #endif
@@ -215,6 +222,7 @@ struct byte_cast_impl<const void*, Tsrc*>
 	inline const void* operator () (Tsrc* src) const
 	{
 		STATIC_ASSERT(sizeof(Tsrc) == sizeof(mpt::byte));
+		STATIC_ASSERT(mpt::is_byte_castable<Tsrc>::value);
 #if MPT_COMPILER_HAS_TYPE_TRAITS
 		STATIC_ASSERT(std::is_integral<Tsrc>::value);
 #endif
