@@ -326,11 +326,31 @@ public:
 
 	// Returns raw stream data at cursor position.
 	// Should only be used if absolutely necessary, for example for sample reading, or when used with a small chunk of the file retrieved by ReadChunk().
-	FILEREADER_DEPRECATED inline const char *GetRawData() const;
-	template <typename T> FILEREADER_DEPRECATED inline const T *GetRawData() const;
+	FILEREADER_DEPRECATED const char *GetRawData() const
+	{
+		// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
+		return DataContainer().GetRawData() + streamPos;
+	}
+	template <typename T>
+	FILEREADER_DEPRECATED const T *GetRawData() const
+	{
+		// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
+		return mpt::byte_cast<const T*>(DataContainer().GetRawData() + streamPos);
+	}
 
-	inline std::size_t ReadRaw(char *dst, std::size_t count);
-	template <typename T> inline std::size_t ReadRaw(T *dst, std::size_t count);
+	std::size_t ReadRaw(char *dst, std::size_t count)
+	{
+		std::size_t result = static_cast<std::size_t>(DataContainer().Read(dst, streamPos, count));
+		streamPos += result;
+		return result;
+	}
+	template <typename T>
+	std::size_t ReadRaw(T *dst, std::size_t count)
+	{
+		std::size_t result = static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<char*>(dst), streamPos, count));
+		streamPos += result;
+		return result;
+	}
 	
 protected:
 
@@ -851,35 +871,6 @@ public:
 	}
 
 };
-
-
-FILEREADER_DEPRECATED inline const char *FileReader::GetRawData() const
-{
-	// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
-	return DataContainer().GetRawData() + streamPos;
-}
-
-template <typename T>
-FILEREADER_DEPRECATED inline const T *FileReader::GetRawData() const
-{
-	// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
-	return mpt::byte_cast<const T*>(DataContainer().GetRawData() + streamPos);
-}
-
-inline std::size_t FileReader::ReadRaw(char *dst, std::size_t count)
-{
-	std::size_t result = static_cast<std::size_t>(DataContainer().Read(dst, streamPos, count));
-	streamPos += result;
-	return result;
-}
-
-template <typename T>
-inline std::size_t FileReader::ReadRaw(T *dst, std::size_t count)
-{
-	std::size_t result = static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<char*>(dst), streamPos, count));
-	streamPos += result;
-	return result;
-}
 
 
 #if defined(MPT_ENABLE_FILEIO)
