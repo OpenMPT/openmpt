@@ -144,6 +144,92 @@ inline T &MemCopy(T &destination, const T &source)
 
 namespace mpt {
 
+
+template <typename Tdst, typename Tsrc>
+struct byte_cast_impl
+{
+	inline Tdst operator () (Tsrc src) const
+	{
+		STATIC_ASSERT(sizeof(Tsrc) == sizeof(mpt::byte));
+		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
+#if MPT_COMPILER_HAS_TYPE_TRAITS
+		STATIC_ASSERT(std::is_integral<Tsrc>::value);
+		STATIC_ASSERT(std::is_integral<Tdst>::value);
+#endif
+		return static_cast<Tdst>(src);
+	}
+};
+template <typename Tdst, typename Tsrc>
+struct byte_cast_impl<Tdst*, Tsrc*>
+{
+	inline Tdst* operator () (Tsrc* src) const
+	{
+		STATIC_ASSERT(sizeof(Tsrc) == sizeof(mpt::byte));
+		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
+#if MPT_COMPILER_HAS_TYPE_TRAITS
+		STATIC_ASSERT(std::is_integral<Tsrc>::value);
+		STATIC_ASSERT(std::is_integral<Tdst>::value);
+#endif
+		return reinterpret_cast<Tdst*>(src);
+	}
+};
+template <typename Tdst>
+struct byte_cast_impl<Tdst*, void*>
+{
+	inline Tdst* operator () (void* src) const
+	{
+		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
+#if MPT_COMPILER_HAS_TYPE_TRAITS
+		STATIC_ASSERT(std::is_integral<Tdst>::value);
+#endif
+		return reinterpret_cast<Tdst*>(src);
+	}
+};
+template <typename Tdst>
+struct byte_cast_impl<Tdst*, const void*>
+{
+	inline Tdst* operator () (const void* src) const
+	{
+		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
+#if MPT_COMPILER_HAS_TYPE_TRAITS
+		STATIC_ASSERT(std::is_integral<Tdst>::value);
+#endif
+		return reinterpret_cast<Tdst*>(src);
+	}
+};
+template <typename Tsrc>
+struct byte_cast_impl<void*, Tsrc*>
+{
+	inline void* operator () (Tsrc* src) const
+	{
+		STATIC_ASSERT(sizeof(Tsrc) == sizeof(mpt::byte));
+#if MPT_COMPILER_HAS_TYPE_TRAITS
+		STATIC_ASSERT(std::is_integral<Tsrc>::value);
+#endif
+		return reinterpret_cast<void*>(src);
+	}
+};
+template <typename Tsrc>
+struct byte_cast_impl<const void*, Tsrc*>
+{
+	inline const void* operator () (Tsrc* src) const
+	{
+		STATIC_ASSERT(sizeof(Tsrc) == sizeof(mpt::byte));
+#if MPT_COMPILER_HAS_TYPE_TRAITS
+		STATIC_ASSERT(std::is_integral<Tsrc>::value);
+#endif
+		return reinterpret_cast<const void*>(src);
+	}
+};
+
+// casts between different byte (char) types or pointers to these types
+template <typename Tdst, typename Tsrc>
+inline Tdst byte_cast(Tsrc src)
+{
+	return byte_cast_impl<Tdst, Tsrc>()(src);
+}
+
+
 // Saturate the value of src to the domain of Tdst
 template <typename Tdst, typename Tsrc>
 inline Tdst saturate_cast(Tsrc src)
@@ -216,6 +302,7 @@ inline Tdst saturate_cast(float src)
 	}
 	return static_cast<Tdst>(src);
 }
+
 
 } // namespace mpt
 

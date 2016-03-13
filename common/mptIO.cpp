@@ -294,12 +294,12 @@ bool SeekRelative(std::iostream & f, IO::Offset off)
 	#endif
 	f.seekg(static_cast<std::streamoff>(off), std::ios::cur); f.seekp(static_cast<std::streamoff>(off), std::ios::cur); return !f.fail();
 }
-IO::Offset ReadRaw(std::istream & f, uint8 * data, std::size_t size) { return f.read(reinterpret_cast<char *>(data), size) ? f.gcount() : std::streamsize(0); }
+IO::Offset ReadRaw(std::istream & f, uint8 * data, std::size_t size) { return f.read(mpt::byte_cast<char *>(data), size) ? f.gcount() : std::streamsize(0); }
 IO::Offset ReadRaw(std::istream & f, char * data, std::size_t size) { return f.read(data, size) ? f.gcount() : std::streamsize(0); }
-IO::Offset ReadRaw(std::istream & f, void * data, std::size_t size) { return f.read(reinterpret_cast<char *>(data), size) ? f.gcount() : std::streamsize(0); }
-bool WriteRaw(std::ostream & f, const uint8 * data, std::size_t size) { f.write(reinterpret_cast<const char *>(data), size); return !f.fail(); }
+IO::Offset ReadRaw(std::istream & f, void * data, std::size_t size) { return f.read(mpt::byte_cast<char *>(data), size) ? f.gcount() : std::streamsize(0); }
+bool WriteRaw(std::ostream & f, const uint8 * data, std::size_t size) { f.write(mpt::byte_cast<const char *>(data), size); return !f.fail(); }
 bool WriteRaw(std::ostream & f, const char * data, std::size_t size) { f.write(data, size); return !f.fail(); }
-bool WriteRaw(std::ostream & f, const void * data, std::size_t size) { f.write(reinterpret_cast<const char *>(data), size); return !f.fail(); }
+bool WriteRaw(std::ostream & f, const void * data, std::size_t size) { f.write(mpt::byte_cast<const char *>(data), size); return !f.fail(); }
 bool IsEof(std::istream & f) { return f.eof(); }
 bool Flush(std::ostream & f) { f.flush(); return !f.fail(); }
 
