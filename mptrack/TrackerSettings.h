@@ -575,7 +575,8 @@ public:
 
 	// MIDI Settings
 
-	Setting<LONG> m_nMidiDevice;
+	Setting<UINT> m_nMidiDevice;
+	Setting<CString> midiDeviceName;
 	// FIXME: MIDI recording is currently done in its own callback/thread and
 	// accesses settings framework from in there. Work-around the ASSERTs for
 	// now by using cached settings.
@@ -713,6 +714,9 @@ public:
 
 	// Get settings object singleton
 	static TrackerSettings &Instance();
+
+	void SetMIDIDevice(UINT id);
+	UINT GetCurrentMIDIDevice() const;
 
 protected:
 

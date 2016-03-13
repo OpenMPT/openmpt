@@ -605,10 +605,10 @@ void CMainToolBar::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 		{
 			HMENU hMenu = ::CreatePopupMenu();
 			MIDIINCAPS mic;
-			UINT ndevs = midiInGetNumDevs();
-			if(ndevs > MAX_MIDI_DEVICES) ndevs = MAX_MIDI_DEVICES;
-			UINT current = TrackerSettings::Instance().m_nMidiDevice;
-			for(UINT i = 0; i < ndevs; i++)
+			UINT numDevs = midiInGetNumDevs();
+			if(numDevs > MAX_MIDI_DEVICES) numDevs = MAX_MIDI_DEVICES;
+			UINT current = TrackerSettings::Instance().GetCurrentMIDIDevice();
+			for(UINT i = 0; i < numDevs; i++)
 			{
 				mic.szPname[0] = 0;
 				if(midiInGetDevCaps(i, &mic, sizeof(mic)) == MMSYSERR_NOERROR)
@@ -616,7 +616,7 @@ void CMainToolBar::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 					::AppendMenu(hMenu, MF_STRING | (i == current ? MF_CHECKED : 0), ID_SELECT_MIDI_DEVICE + i, mic.szPname);
 				}
 			}
-			if(!ndevs)
+			if(!numDevs)
 			{
 				::AppendMenu(hMenu, MF_STRING | MF_GRAYED, 0, _T("No MIDI input devices found"));
 			}
@@ -634,7 +634,7 @@ void CMainToolBar::OnSelectMIDIDevice(UINT id)
 //--------------------------------------------
 {
 	CMainFrame::GetMainFrame()->midiCloseDevice();
-	TrackerSettings::Instance().m_nMidiDevice = id - ID_SELECT_MIDI_DEVICE;
+	TrackerSettings::Instance().SetMIDIDevice(id - ID_SELECT_MIDI_DEVICE);
 	CMainFrame::GetMainFrame()->midiOpenDevice();
 }
 

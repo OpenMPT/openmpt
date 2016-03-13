@@ -1809,19 +1809,18 @@ BOOL CMainFrame::SetupMiscOptions()
 }
 
 
-BOOL CMainFrame::SetupMidi(DWORD d, LONG n)
-//-----------------------------------------
+void CMainFrame::SetupMidi(DWORD d, UINT_PTR n)
+//---------------------------------------------
 {
 	bool deviceChanged = (TrackerSettings::Instance().m_nMidiDevice != n);
 	TrackerSettings::Instance().m_dwMidiSetup = d;
-	TrackerSettings::Instance().m_nMidiDevice = n;
+	TrackerSettings::Instance().SetMIDIDevice(n);
 	if(deviceChanged && shMidiIn)
 	{
 		// Device has changed, close the old one.
 		midiCloseDevice();
 		midiOpenDevice();
 	}
-	return TRUE;
 }
 
 
@@ -1925,7 +1924,7 @@ void CMainFrame::OnViewOptions()
 	COptionsKeyboard keyboard;
 	COptionsColors colors;
 	COptionsMixer mixerdlg;
-	CMidiSetupDlg mididlg(TrackerSettings::Instance().m_dwMidiSetup, TrackerSettings::Instance().m_nMidiDevice);
+	CMidiSetupDlg mididlg(TrackerSettings::Instance().m_dwMidiSetup, TrackerSettings::Instance().GetCurrentMIDIDevice());
 	PathConfigDlg pathsdlg;
 	CUpdateSetupDlg updatedlg;
 #if defined(MPT_SETTINGS_CACHE)

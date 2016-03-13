@@ -250,6 +250,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, ResamplerCutoffPercent(conf, "Sound Settings", "ResamplerWFIRCutoff", Util::Round<int32>(CResamplerSettings().gdWFIRCutoff * 100.0))
 	// MIDI Settings
 	, m_nMidiDevice(conf, "MIDI Settings", "MidiDevice", 0)
+	, midiDeviceName(conf, "MIDI Settings", "MidiDeviceName", "")
 	, m_dwMidiSetup(conf, "MIDI Settings", "MidiSetup", MIDISETUP_RECORDVELOCITY | MIDISETUP_RECORDNOTEOFF | MIDISETUP_TRANSPOSEKEYBOARD | MIDISETUP_MIDITOPLUG)
 	, aftertouchBehaviour(conf, "MIDI Settings", "AftertouchBehaviour", atDoNotRecord)
 	, midiVelocityAmp(conf, "MIDI Settings", "MidiVelocityAmp", 100)
@@ -1093,6 +1094,43 @@ void TrackerSettings::SaveChords(MPTChords &chords)
 		sprintf(note, "%s%u", NoteNamesSharp[i % 12], i / 12);
 		conf.Write<int32>("Chords", note, s);
 	}
+}
+
+
+void TrackerSettings::SetMIDIDevice(UINT id)
+//------------------------------------------
+{
+	m_nMidiDevice = id;
+	MIDIINCAPS mic;
+	mic.szPname[0] = 0;
+	if(midiInGetDevCaps(id, &mic, sizeof(mic)) == MMSYSERR_NOERROR)
+	{
+		midiDeviceName = mic.szPname;
+	}
+}
+
+
+UINT TrackerSettings::GetCurrentMIDIDevice() const
+//------------------------------------------------
+{
+	if(midiDeviceName.Get().IsEmpty())
+		return m_nMidiDevice;
+	
+	UINT candidate = m_nMidiDevice;
+	MIDIINCAPS mic;
+	UINT numDevs = midiInGetNumDevs();
+	for(UINT i = 0; i < numDevs; i++)
+	{
+		mic.szPname[0] = 0;
+		if(midiInGetDevCaps(i, &mic, sizeof(mic)) == MMSYSERR_NOERROR && mic.szPname == midiDeviceName)
+		{
+			candidate = i;
+			// If the same device name exists twice, try to match both device number and name
+			if(candidate == m_nMidiDevice)
+				return i;
+		}
+	}
+	return candidate;
 }
 
 
