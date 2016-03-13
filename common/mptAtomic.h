@@ -113,7 +113,7 @@ public:
 }; // class atomic
 
 #elif MPT_MSVC_BEFORE(2012,0)
-	
+
 template < typename T >
 class atomic_impl_32 {
 
@@ -182,6 +182,73 @@ public:
 }; // class atomic_impl_32
 
 #if defined(_M_AMD64)
+
+template < typename T >
+class atomic_impl_64 {
+
+private:
+	mutable __int64 Data;
+
+private: // disabled
+	atomic_impl_64( const atomic_impl_64<T> & src );
+	atomic_impl_64<T> & operator = ( const atomic_impl_64<T> & src );
+
+public:
+	
+	atomic_impl_64() {
+		return;
+	}
+	atomic_impl_64( T init ) {
+		_InterlockedExchange64( &Data, init );
+	}
+	T operator = ( T src ) {
+		_InterlockedExchange64( &Data, src );
+		return src;
+	}
+
+	operator T () const {
+		return _InterlockedExchangeAdd64( &Data, 0 );
+	}
+
+	bool is_lock_free() const {
+		return true;
+	}
+
+	T load() const {
+		return _InterlockedExchangeAdd64( &Data, 0 );
+	}
+	void store( T val ) {
+		_InterlockedExchange64( &Data, val );
+	}
+	T exchange( T val ) {
+		return _InterlockedExchange64( &Data, val );
+	}
+
+	bool compare_exchange_strong( T & expected, T new_value ) {
+		return _InterlockedCompareExchange64( &Data, new_value, expected ) == expected;
+	}
+	bool compare_exchange_weak( T & expected, T new_value ) {
+		return _InterlockedCompareExchange64( &Data, new_value, expected ) == expected;
+	}
+
+	T fetch_add( T val ) {
+		return _InterlockedExchangeAdd64( &Data, val );
+	}
+	T fetch_sub( T val ) {
+		return _InterlockedExchangeAdd64( &Data, -val );
+	}
+
+	T fetch_and( T val ) {
+		return _InterlockedAnd64( &Data, val );
+	}
+	T fetch_or( T val ) {
+		return _InterlockedOr64( &Data, val );
+	}
+	T fetch_xor( T val ) {
+		return _InterlockedXor64( &Data, val );
+	}
+
+}; // class atomic_impl_64
 
 template < typename T >
 class atomic_impl_ptr {
@@ -292,16 +359,147 @@ public:
 #if MPT_GCC_BEFORE(4,4,0) || MPT_CLANG_BEFORE(3,1,0)
 typedef mpt::atomic_impl<uint32> atomic_uint32_t;
 typedef mpt::atomic_impl<int32> atomic_int32_t;
+#if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)
+typedef mpt::atomic_impl<uint64> atomic_uint64_t;
+typedef mpt::atomic_impl<int64> atomic_int64_t;
+#define MPT_ATOMIC_HAVE_64
+#endif
 #define MPT_ATOMIC_PTR mpt::atomic_impl // use as MPT_ATOMIC_PTR<T*>
 #elif MPT_MSVC_BEFORE(2012,0)
 typedef mpt::atomic_impl_32<uint32> atomic_uint32_t;
 typedef mpt::atomic_impl_32<int32> atomic_int32_t;
+#if defined(_M_AMD64)
+typedef mpt::atomic_impl_64<uint64> atomic_uint64_t;
+typedef mpt::atomic_impl_64<int64> atomic_int64_t;
+#define MPT_ATOMIC_HAVE_64
+#endif
 #define MPT_ATOMIC_PTR mpt::atomic_impl_ptr // use as MPT_ATOMIC_PTR<T*>
 #else // MPT_COMPILER_GENERIC
 typedef std::atomic<uint32> atomic_uint32_t;
 typedef std::atomic<int32> atomic_int32_t;
+typedef std::atomic<uint64> atomic_uint64_t;
+typedef std::atomic<int64> atomic_int64_t;
+#define MPT_ATOMIC_HAVE_64
 #define MPT_ATOMIC_PTR std::atomic // use as MPT_ATOMIC_PTR<T*>
 #endif // MPT_COMPILER
+
+
+#if !defined(MPT_ATOMIC_HAVE_64)
+
+} // namespace mpt
+OPENMPT_NAMESPACE_END
+#include "mutex.h"
+OPENMPT_NAMESPACE_BEGIN
+namespace mpt {
+
+template < typename T >
+class atomic_impl_locked {
+
+private:
+	mutable mpt::mutex Mutex;
+	mutable T Data;
+
+private: // disabled
+	atomic_impl_locked( const atomic_impl_locked<T> & src );
+	atomic_impl_locked<T> & operator = ( const atomic_impl_locked<T> & src );
+
+public:
+	
+	atomic_impl_locked() {
+		mpt::lock_guard<mpt::mutex> guard(Mutex);
+	}
+	atomic_impl_locked( T init ) {
+		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		Data = init;
+	}
+	T operator = ( T src ) {
+		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		Data = src;
+		return Data;
+	}
+
+	operator T () const {
+		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		return Data;
+	}
+
+	bool is_lock_free() const {
+		return false;
+	}
+
+	T load() const {
+		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		return Data;
+	}
+	void store( T val ) {
+		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		Data = val;
+	}
+	T exchange( T val ) {
+		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		T old = Data;
+		Data = val;
+		return old;
+	}
+
+	bool compare_exchange_strong( T & expected, T new_value ) {
+		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		if(Data != expected)
+		{
+			return false;
+		}
+		Data = new_value;
+		return true;
+	}
+	bool compare_exchange_weak( T & expected, T new_value ) {
+		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		if(Data != expected)
+		{
+			return false;
+		}
+		Data = new_value;
+		return true;
+	}
+
+	T fetch_add( T val ) {
+		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		T old = Data;
+		Data += val;
+		return old;
+	}
+	T fetch_sub( T val ) {
+		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		T old = Data;
+		Data -= val;
+		return old;
+	}
+
+	T fetch_and( T val ) {
+		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		T old = Data;
+		Data &= val;
+		return old;
+	}
+	T fetch_or( T val ) {
+		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		T old = Data;
+		Data |= val;
+		return old;
+	}
+	T fetch_xor( T val ) {
+		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		T old = Data;
+		Data ^= val;
+		return old;
+	}
+
+}; // class atomic_impl_locked
+
+typedef mpt::atomic_impl_locked<uint64> atomic_uint64_t;
+typedef mpt::atomic_impl_locked<int64> atomic_int64_t;
+#define MPT_ATOMIC_HAVE_64
+
+#endif // !MPT_ATOMIC_HAVE_64
 
 
 } // namespace mpt
