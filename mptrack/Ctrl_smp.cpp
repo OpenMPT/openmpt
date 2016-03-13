@@ -2708,7 +2708,7 @@ void CCtrlSamples::OnFineTuneChangedDone()
 			chn.nFineTune = sample.nFineTune;
 			if(chn.nC5Speed != 0 && sample.nC5Speed != 0)
 			{
-				if(m_sndFile.m_SongFlags[SONG_LINEARSLIDES] && (m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+				if(m_sndFile.m_SongFlags[SONG_LINEARSLIDES] && m_sndFile.m_playBehaviour[kHertzInLinearMode])
 					chn.nPeriod = Util::muldivr(chn.nPeriod, sample.nC5Speed, chn.nC5Speed);
 				else
 					chn.nPeriod = Util::muldivr(chn.nPeriod, chn.nC5Speed, sample.nC5Speed);
