@@ -853,10 +853,10 @@ static MPT_NOINLINE void TestMisc()
 	}
 
 #ifdef MPT_WITH_ZLIB
-	VERIFY_EQUAL(crc32(0, reinterpret_cast<const unsigned char*>(std::string("123456789").c_str()), 9), 0xCBF43926u);
+	VERIFY_EQUAL(crc32(0, mpt::byte_cast<const unsigned char*>(std::string("123456789").c_str()), 9), 0xCBF43926u);
 #endif
 #ifdef MPT_WITH_MINIZ
-	VERIFY_EQUAL(mz_crc32(0, reinterpret_cast<const unsigned char*>(std::string("123456789").c_str()), 9), 0xCBF43926u);
+	VERIFY_EQUAL(mz_crc32(0, mpt::byte_cast<const unsigned char*>(std::string("123456789").c_str()), 9), 0xCBF43926u);
 #endif
 	VERIFY_EQUAL(mpt::crc32(std::string("123456789")), 0xCBF43926u);
 	VERIFY_EQUAL(mpt::crc32_ogg(std::string("123456789")), 0x89a1897fu);

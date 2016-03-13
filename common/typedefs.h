@@ -450,6 +450,17 @@ STATIC_ASSERT(sizeof(float64) == 8);
 
 
 
+namespace mpt {
+
+STATIC_ASSERT(sizeof(char) == 1);
+
+typedef uint8 byte;
+STATIC_ASSERT(sizeof(mpt::byte) == 1);
+
+} // namespace mpt
+
+
+
 #if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define MPT_PRINTF_FUNC(formatstringindex,varargsindex) __attribute__((format(printf, formatstringindex, varargsindex)))
 #else

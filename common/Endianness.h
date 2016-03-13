@@ -588,9 +588,9 @@ public:
 	const_unaligned_ptr_le(const const_unaligned_ptr_le<value_type> & other) : mem(other.mem) {}
 	const_unaligned_ptr_le & operator = (const const_unaligned_ptr_le<value_type> & other) { mem = other.mem; return *this; }
 	explicit const_unaligned_ptr_le(const uint8 *mem) : mem(mem) {}
-	explicit const_unaligned_ptr_le(const int8 *mem) : mem(reinterpret_cast<const uint8*>(mem)) {}
-	explicit const_unaligned_ptr_le(const char *mem) : mem(reinterpret_cast<const uint8*>(mem)) {}
-	explicit const_unaligned_ptr_le(const void *mem) : mem(reinterpret_cast<const uint8*>(mem)) {}
+	explicit const_unaligned_ptr_le(const int8 *mem) : mem(mpt::byte_cast<const uint8*>(mem)) {}
+	explicit const_unaligned_ptr_le(const char *mem) : mem(mpt::byte_cast<const uint8*>(mem)) {}
+	explicit const_unaligned_ptr_le(const void *mem) : mem(mpt::byte_cast<const uint8*>(mem)) {}
 	const_unaligned_ptr_le & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
 	const_unaligned_ptr_le & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
 	const_unaligned_ptr_le & operator ++ () { mem += sizeof(value_type); return *this; }

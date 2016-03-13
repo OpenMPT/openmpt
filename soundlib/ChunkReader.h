@@ -25,6 +25,8 @@ class ChunkReader : public FileReader
 public:
 
 	ChunkReader(const char *data, size_t length) : FileReader(data, length) { }
+	ChunkReader(const unsigned char *data, size_t length) : FileReader(data, length) { }
+	ChunkReader(const void *data, size_t length) : FileReader(data, length) { }
 	ChunkReader(const FileReader &other) : FileReader(other) { }
 
 	template<typename T>

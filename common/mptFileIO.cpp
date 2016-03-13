@@ -292,7 +292,7 @@ InputFile::ContentsRef InputFile::Get()
 	{
 		return result;
 	}
-	result.first.data = reinterpret_cast<const char*>(m_File.Lock());
+	result.first.data = mpt::byte_cast<const char*>(m_File.Lock());
 	result.first.size = m_File.GetLength();
 	result.second = &m_Filename;
 	return result;

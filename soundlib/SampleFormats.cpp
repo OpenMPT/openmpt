@@ -1954,7 +1954,7 @@ struct FLACDecoder
 		{
 			FileReader::off_t readBytes = *bytes;
 			LimitMax(readBytes, file.BytesLeft());
-			file.ReadRaw(reinterpret_cast<char *>(buffer), readBytes);
+			file.ReadRaw(buffer, readBytes);
 			*bytes = readBytes;
 			if(*bytes == 0)
 				return FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
@@ -2069,7 +2069,7 @@ struct FLACDecoder
 		} else if(metadata->type == FLAC__METADATA_TYPE_APPLICATION && !memcmp(metadata->data.application.id, "riff", 4) && client.ready)
 		{
 			// Try reading RIFF loop points and other sample information
-			ChunkReader data(reinterpret_cast<const char*>(metadata->data.application.data), metadata->length);
+			ChunkReader data(metadata->data.application.data, metadata->length);
 			ChunkReader::ChunkList<RIFFChunk> chunks = data.ReadChunks<RIFFChunk>(2);
 
 			// We're not really going to read a WAV file here because there will be only one RIFF chunk per metadata event, but we can still re-use the code for parsing RIFF metadata...
@@ -2082,7 +2082,7 @@ struct FLACDecoder
 			SmpLength loopStart = 0, loopLength = 0;
 			for(FLAC__uint32 i = 0; i < metadata->data.vorbis_comment.num_comments; i++)
 			{
-				const char *tag = reinterpret_cast<const char *>(metadata->data.vorbis_comment.comments[i].entry);
+				const char *tag = mpt::byte_cast<const char *>(metadata->data.vorbis_comment.comments[i].entry);
 				const FLAC__uint32 length = metadata->data.vorbis_comment.comments[i].length;
 				if(length > 6 && !mpt::CompareNoCaseAscii(tag, "TITLE=", 6))
 				{
@@ -3537,7 +3537,7 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 			BYTE *data = NULL;
 			DWORD dataSize = 0;
 			MPT_MF_CHECKED(buffer->Lock(&data, NULL, &dataSize));
-			rawData.insert(rawData.end(), reinterpret_cast<char*>(data), reinterpret_cast<char*>(data + dataSize));
+			rawData.insert(rawData.end(), mpt::byte_cast<char*>(data), mpt::byte_cast<char*>(data + dataSize));
 			MPT_MF_CHECKED(buffer->Unlock());
 		}
 		mptMFSafeRelease(&buffer);
@@ -3591,7 +3591,7 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	} else
 	{
 		// just copy
-		std::copy(&rawData[0], &rawData[0] + rawData.size(), reinterpret_cast<char*>(Samples[sample].pSample));
+		std::copy(&rawData[0], &rawData[0] + rawData.size(), mpt::byte_cast<char*>(Samples[sample].pSample));
 	}
 
 	result = true;

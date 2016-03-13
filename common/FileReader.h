@@ -73,13 +73,13 @@ public:
 	FileReader() : data(mpt::make_shared<FileDataContainerDummy>()), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 
 	// Initialize file reader object with pointer to data and data length.
-	FileReader(const void *voiddata, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(static_cast<const char *>(voiddata), length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(const void *voiddata, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(mpt::byte_cast<const char *>(voiddata), length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 	FileReader(const char *chardata, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(chardata, length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
-	FileReader(const uint8 *uint8data, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(reinterpret_cast<const char *>(uint8data), length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(const uint8 *uint8data, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(mpt::byte_cast<const char *>(uint8data), length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 #if defined(MPT_ENABLE_FILEIO)
-	FileReader(const void *voiddata, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(static_cast<const char *>(voiddata), length)), streamPos(0), fileName(filename) { }
+	FileReader(const void *voiddata, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(mpt::byte_cast<const char *>(voiddata), length)), streamPos(0), fileName(filename) { }
 	FileReader(const char *chardata, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(chardata, length)), streamPos(0), fileName(filename) { }
-	FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(reinterpret_cast<const char *>(uint8data), length)), streamPos(0), fileName(filename) { }
+	FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(mpt::byte_cast<const char *>(uint8data), length)), streamPos(0), fileName(filename) { }
 #endif // MPT_ENABLE_FILEIO
 
 #if defined(MPT_FILEREADER_CALLBACK_STREAM)
@@ -165,13 +165,13 @@ public:
 	FileReader() : data(nullptr, 0), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 
 	// Initialize file reader object with pointer to data and data length.
-	FileReader(const void *voiddata, off_t length) : data(static_cast<const char *>(voiddata), length), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(const void *voiddata, off_t length) : data(mpt::byte_cast<const char *>(voiddata), length), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 	FileReader(const char *chardata, off_t length) : data(chardata, length), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
-	FileReader(const uint8 *uint8data, off_t length) : data(reinterpret_cast<const char *>(uint8data), length), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(const uint8 *uint8data, off_t length) : data(mpt::byte_cast<const char *>(uint8data), length), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 #if defined(MPT_ENABLE_FILEIO)
-	FileReader(const void *voiddata, off_t length, const mpt::PathString *filename) : data(static_cast<const char *>(voiddata), length), streamPos(0), fileName(filename) { }
+	FileReader(const void *voiddata, off_t length, const mpt::PathString *filename) : data(mpt::byte_cast<const char *>(voiddata), length), streamPos(0), fileName(filename) { }
 	FileReader(const char *chardata, off_t length, const mpt::PathString *filename) : data(chardata, length), streamPos(0), fileName(filename) { }
-	FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(reinterpret_cast<const char *>(uint8data), length), streamPos(0), fileName(filename) { }
+	FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(mpt::byte_cast<const char *>(uint8data), length), streamPos(0), fileName(filename) { }
 #endif // MPT_ENABLE_FILEIO
 
 	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
@@ -608,7 +608,7 @@ public:
 			copyBytes = BytesLeft();
 		}
 		DataContainer().Read(reinterpret_cast<char *>(&target), streamPos, copyBytes);
-		memset(reinterpret_cast<char *>(&target) + copyBytes, 0, sizeof(target) - copyBytes);
+		std::memset(reinterpret_cast<char *>(&target) + copyBytes, 0, sizeof(target) - copyBytes);
 		Skip(partialSize);
 		return true;
 	}
@@ -863,15 +863,7 @@ template <typename T>
 FILEREADER_DEPRECATED inline const T *FileReader::GetRawData() const
 {
 	// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
-	STATIC_ASSERT(sizeof(T) == sizeof(char));
-	return reinterpret_cast<const T*>(DataContainer().GetRawData() + streamPos);
-}
-
-template <>
-FILEREADER_DEPRECATED inline const void *FileReader::GetRawData<void>() const
-{
-	// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
-	return reinterpret_cast<const void*>(DataContainer().GetRawData() + streamPos);
+	return mpt::byte_cast<const T*>(DataContainer().GetRawData() + streamPos);
 }
 
 inline std::size_t FileReader::ReadRaw(char *dst, std::size_t count)
@@ -884,16 +876,7 @@ inline std::size_t FileReader::ReadRaw(char *dst, std::size_t count)
 template <typename T>
 inline std::size_t FileReader::ReadRaw(T *dst, std::size_t count)
 {
-	STATIC_ASSERT(sizeof(T) == sizeof(char));
-	std::size_t result = static_cast<std::size_t>(DataContainer().Read(reinterpret_cast<char*>(dst), streamPos, count));
-	streamPos += result;
-	return result;
-}
-
-template <>
-inline std::size_t FileReader::ReadRaw<void>(void *dst, std::size_t count)
-{
-	std::size_t result = static_cast<std::size_t>(DataContainer().Read(reinterpret_cast<char*>(dst), streamPos, count));
+	std::size_t result = static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<char*>(dst), streamPos, count));
 	streamPos += result;
 	return result;
 }

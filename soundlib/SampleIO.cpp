@@ -475,7 +475,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			size_t readLength = (sample.nLength + 1) / 2;
 			LimitMax(readLength, file.BytesLeft());
 
-			const uint8 *inBuf = reinterpret_cast<const uint8*>(sourceBuf) + sizeof(compressionTable);
+			const uint8 *inBuf = mpt::byte_cast<const uint8*>(sourceBuf) + sizeof(compressionTable);
 			int8 *outBuf = sample.pSample8;
 			int8 delta = 0;
 
@@ -506,7 +506,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			LimitMax(sourceSize, mpt::saturate_cast<uint32>(file.BytesLeft()));
 			bytesRead = 9 + sourceSize;
 
-			AMSUnpack(reinterpret_cast<const int8 *>(sourceBuf) + 9, sourceSize, sample.pSample, sample.GetSampleSizeInBytes(), packCharacter);
+			AMSUnpack(mpt::byte_cast<const int8 *>(sourceBuf) + 9, sourceSize, sample.pSample, sample.GetSampleSizeInBytes(), packCharacter);
 		}
 	} else if(GetEncoding() == PTM8Dto16 && GetChannelFormat() == mono && GetBitDepth() == 16)
 	{
@@ -519,7 +519,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		{
 			uint32 bitBuf = file.ReadUint32LE(), bitNum = 32;
 
-			const uint8 *inBuf = reinterpret_cast<const uint8*>(sourceBuf) + 4;
+			const uint8 *inBuf = mpt::byte_cast<const uint8*>(sourceBuf) + 4;
 			size_t bytesLeft = file.BytesLeft();
 
 			uint8 dlt = 0, lowbyte = 0;
@@ -559,7 +559,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		// DMF Huffman compression
 		if(fileSize > 4)
 		{
-			const uint8 *inBuf = reinterpret_cast<const uint8*>(sourceBuf);
+			const uint8 *inBuf = mpt::byte_cast<const uint8*>(sourceBuf);
 			const uint8 *inBufMax = inBuf + fileSize;
 			uint8 *outBuf = static_cast<uint8 *>(sample.pSample);
 			bytesRead = DMFUnpack(outBuf, inBuf, inBufMax, sample.GetSampleSizeInBytes());
