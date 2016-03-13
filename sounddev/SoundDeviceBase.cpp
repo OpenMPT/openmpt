@@ -186,7 +186,6 @@ void Base::SourceAudioPreRead(std::size_t numFrames, std::size_t framesLatency)
 	m_StreamPositionRenderFrames += numFrames;
 	if(!InternalHasGetStreamPosition() && !InternalHasTimeInfo())
 	{
-		mpt::lock_guard<mpt::mutex> lock(m_StreamPositionMutex);
 		m_StreamPositionOutputFrames = m_StreamPositionRenderFrames - framesLatency;
 	} else
 	{
@@ -237,7 +236,6 @@ bool Base::Start()
 	{
 		m_StreamPositionRenderFrames = 0;
 		{
-			mpt::lock_guard<mpt::mutex> lock(m_StreamPositionMutex);
 			m_StreamPositionOutputFrames = 0;
 		}
 		SourceNotifyPreStart();
@@ -271,7 +269,6 @@ void Base::Stop(bool force)
 		SourceNotifyPostStop();
 		m_IsPlaying = false;
 		{
-			mpt::lock_guard<mpt::mutex> lock(m_StreamPositionMutex);
 			m_StreamPositionOutputFrames = 0;
 		}
 		m_StreamPositionRenderFrames = 0;
@@ -302,7 +299,6 @@ SoundDevice::StreamPosition Base::GetStreamPosition() const
 			);
 	} else
 	{
-		mpt::lock_guard<mpt::mutex> lock(m_StreamPositionMutex);
 		frames = m_StreamPositionOutputFrames;
 	}
 	return StreamPositionFromFrames(frames);
