@@ -112,6 +112,22 @@ template <> struct make_unsigned<unsigned long long> { typedef unsigned long lon
 #endif // MPT_COMPILER_HAS_TYPE_TRAITS
 
 
+// Tell which types are safe for mpt::byte_cast.
+// signed char is actually not allowed to alias into an object representation,
+// which means that, if the actual type is not itself signed char but char or
+// unsigned char instead, dereferencing the signed char pointer is undefined
+// behaviour.
+// We allow for void for convenience reasons and because void usages will be
+// reviewed with caution anyway.
+template <typename T> struct is_byte_castable : public mpt::false_type { };
+template <> struct is_byte_castable<char>                : public mpt::true_type { };
+template <> struct is_byte_castable<unsigned char>       : public mpt::true_type { };
+template <> struct is_byte_castable<const char>          : public mpt::true_type { };
+template <> struct is_byte_castable<const unsigned char> : public mpt::true_type { };
+template <> struct is_byte_castable<void>                : public mpt::true_type { };
+template <> struct is_byte_castable<const void>          : public mpt::true_type { };
+
+
 // Tell which types are safe to binary write into files.
 // By default, no types are safe.
 // When a safe type gets defined,

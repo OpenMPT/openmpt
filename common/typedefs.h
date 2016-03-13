@@ -454,7 +454,7 @@ namespace mpt {
 
 STATIC_ASSERT(sizeof(char) == 1);
 
-typedef uint8 byte;
+typedef unsigned char byte;
 STATIC_ASSERT(sizeof(mpt::byte) == 1);
 
 } // namespace mpt
