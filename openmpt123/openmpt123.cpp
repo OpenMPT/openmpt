@@ -362,21 +362,6 @@ static std::string seconds_to_string( double time ) {
 	return str.str();
 }
 
-template < typename T >
-std::string bytes_to_string( T bytes ) {
-	std::ostringstream str;
-	if ( bytes >= std::uint64_t(10) * 1024 * 1024 * 1024 ) {
-		str << bytes / 1024 / 1024 / 1024 << "GiB";
-	} else if ( bytes >= std::uint64_t(10) * 1024 * 1024 ) {
-		str << bytes / 1024 / 1024 << "MiB";
-	} else if ( bytes >= std::uint64_t(10) * 1024 ) {
-		str << bytes / 1024 << "KiB";
-	} else {
-		str << bytes << "B";
-	}
-	return str.str();
-}
-
 static void show_info( std::ostream & log, bool verbose ) {
 	log << "openmpt123" << " v" << OPENMPT123_VERSION_STRING << ", libopenmpt " << openmpt::string::get( "library_version" ) << " (" << "OpenMPT " << openmpt::string::get( "core_version" ) << ")" << std::endl;
 	log << "Copyright (c) 2013-2016 OpenMPT developers <https://openmpt.org/>" << std::endl;
