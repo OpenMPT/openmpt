@@ -330,10 +330,10 @@ static std::string prepend_lines( std::string str, const std::string & prefix ) 
 }
 
 static std::string bytes_to_string( std::uint64_t bytes ) {
-	static const char * const suffixes[] = { "B", "KiB", "MiB", "GiB", "TiB", "PiB" };
+	static const char * const suffixes[] = { "B", "kB", "MB", "GB", "TB", "PB" };
 	int offset = 0;
 	while ( bytes > 9999 ) {
-		bytes /= 1024;
+		bytes /= 1000;
 		offset += 1;
 		if ( offset == 5 ) {
 			break;
