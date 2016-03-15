@@ -313,7 +313,7 @@ public:
 			return FileReader();
 		}
 		#if defined(MPT_FILEREADER_STD_ISTREAM)
-			return FileReader(mpt::make_shared<FileDataContainerWindow>(data, position, std::min(length, DataContainer().GetLength() - position)));
+			return FileReader(MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerWindow>(data, position, std::min(length, DataContainer().GetLength() - position))));
 		#else
 			return FileReader(DataContainer().GetRawData() + position, std::min(length, DataContainer().GetLength() - position));
 		#endif
