@@ -294,12 +294,8 @@ bool SeekRelative(std::iostream & f, IO::Offset off)
 	#endif
 	f.seekg(static_cast<std::streamoff>(off), std::ios::cur); f.seekp(static_cast<std::streamoff>(off), std::ios::cur); return !f.fail();
 }
-IO::Offset ReadRaw(std::istream & f, uint8 * data, std::size_t size) { return f.read(mpt::byte_cast<char *>(data), size) ? f.gcount() : std::streamsize(0); }
-IO::Offset ReadRaw(std::istream & f, char * data, std::size_t size) { return f.read(data, size) ? f.gcount() : std::streamsize(0); }
-IO::Offset ReadRaw(std::istream & f, void * data, std::size_t size) { return f.read(mpt::byte_cast<char *>(data), size) ? f.gcount() : std::streamsize(0); }
-bool WriteRaw(std::ostream & f, const uint8 * data, std::size_t size) { f.write(mpt::byte_cast<const char *>(data), size); return !f.fail(); }
-bool WriteRaw(std::ostream & f, const char * data, std::size_t size) { f.write(data, size); return !f.fail(); }
-bool WriteRaw(std::ostream & f, const void * data, std::size_t size) { f.write(mpt::byte_cast<const char *>(data), size); return !f.fail(); }
+IO::Offset ReadRawImpl(std::istream & f, mpt::byte * data, std::size_t size) { return f.read(mpt::byte_cast<char *>(data), size) ? f.gcount() : std::streamsize(0); }
+bool WriteRawImpl(std::ostream & f, const mpt::byte * data, std::size_t size) { f.write(mpt::byte_cast<const char *>(data), size); return !f.fail(); }
 bool IsEof(std::istream & f) { return f.eof(); }
 bool Flush(std::ostream & f) { f.flush(); return !f.fail(); }
 
@@ -340,12 +336,8 @@ bool SeekRelative(FILE* & f, IO::Offset off) { return OffsetFits<long>(off) && (
 
 #endif
 
-IO::Offset ReadRaw(FILE * & f, uint8 * data, std::size_t size) { return fread(data, 1, size, f); }
-IO::Offset ReadRaw(FILE * & f, char * data, std::size_t size) { return fread(data, 1, size, f); }
-IO::Offset ReadRaw(FILE * & f, void * data, std::size_t size) { return fread(data, 1, size, f); }
-bool WriteRaw(FILE* & f, const uint8 * data, std::size_t size) { return fwrite(data, 1, size, f) == size; }
-bool WriteRaw(FILE* & f, const char * data, std::size_t size) { return fwrite(data, 1, size, f) == size; }
-bool WriteRaw(FILE* & f, const void * data, std::size_t size) { return fwrite(data, 1, size, f) == size; }
+IO::Offset ReadRawImpl(FILE * & f, mpt::byte * data, std::size_t size) { return fread(mpt::byte_cast<void*>(data), 1, size, f); }
+bool WriteRawImpl(FILE* & f, const mpt::byte * data, std::size_t size) { return fwrite(mpt::byte_cast<const void*>(data), 1, size, f) == size; }
 bool IsEof(FILE * & f) { return feof(f) != 0; }
 bool Flush(FILE* & f) { return fflush(f) == 0; }
 
@@ -390,7 +382,12 @@ bool FileDataContainerSeekable::IsValid() const
 	return true;
 }
 
-const char *FileDataContainerSeekable::GetRawData() const
+bool FileDataContainerSeekable::HasPinnedView() const
+{
+	return cached;
+}
+
+const mpt::byte *FileDataContainerSeekable::GetRawData() const
 {
 	CacheStream();
 	return &cache[0];
@@ -401,7 +398,7 @@ IFileDataContainer::off_t FileDataContainerSeekable::GetLength() const
 	return streamLength;
 }
 
-IFileDataContainer::off_t FileDataContainerSeekable::Read(char *dst, IFileDataContainer::off_t pos, IFileDataContainer::off_t count) const
+IFileDataContainer::off_t FileDataContainerSeekable::Read(mpt::byte *dst, IFileDataContainer::off_t pos, IFileDataContainer::off_t count) const
 {
 	if(cached)
 	{
@@ -476,7 +473,7 @@ FileDataContainerStdStreamSeekable::~FileDataContainerStdStreamSeekable()
 	return;
 }
 
-IFileDataContainer::off_t FileDataContainerStdStreamSeekable::InternalRead(char *dst, off_t pos, off_t count) const
+IFileDataContainer::off_t FileDataContainerStdStreamSeekable::InternalRead(mpt::byte *dst, off_t pos, off_t count) const
 {
 	stream->clear(); // tellg needs eof and fail bits unset
 	std::streampos currentpos = stream->tellg();
@@ -484,7 +481,7 @@ IFileDataContainer::off_t FileDataContainerStdStreamSeekable::InternalRead(char 
 	{ // inefficient istream implementations might invalidate their buffer when seeking, even when seeking to the current position
 		stream->seekg(pos);
 	}
-	stream->read(dst, count);
+	stream->read(mpt::byte_cast<char*>(dst), count);
 	return static_cast<IFileDataContainer::off_t>(stream->gcount());
 }
 
@@ -556,7 +553,7 @@ void FileDataContainerUnseekable::CacheStreamUpTo(std::streampos pos) const
 	streamFullyCached = true;
 }
 
-void FileDataContainerUnseekable::ReadCached(char *dst, IFileDataContainer::off_t pos, IFileDataContainer::off_t count) const
+void FileDataContainerUnseekable::ReadCached(mpt::byte *dst, IFileDataContainer::off_t pos, IFileDataContainer::off_t count) const
 {
 	std::copy(cache.begin() + pos, cache.begin() + pos + count, dst);
 }
@@ -566,7 +563,12 @@ bool FileDataContainerUnseekable::IsValid() const
 	return true;
 }
 
-const char *FileDataContainerUnseekable::GetRawData() const
+bool FileDataContainerUnseekable::HasPinnedView() const
+{
+	return true; // we have the cache which is required for seeking anyway
+}
+
+const mpt::byte *FileDataContainerUnseekable::GetRawData() const
 {
 	CacheStream();
 	return &cache[0];
@@ -578,7 +580,7 @@ IFileDataContainer::off_t FileDataContainerUnseekable::GetLength() const
 	return cachesize;
 }
 
-IFileDataContainer::off_t FileDataContainerUnseekable::Read(char *dst, IFileDataContainer::off_t pos, IFileDataContainer::off_t count) const
+IFileDataContainer::off_t FileDataContainerUnseekable::Read(mpt::byte *dst, IFileDataContainer::off_t pos, IFileDataContainer::off_t count) const
 {
 	CacheStreamUpTo(pos + count);
 	if(pos >= IFileDataContainer::off_t(cachesize))
@@ -630,9 +632,9 @@ bool FileDataContainerStdStream::InternalEof() const
 	}
 }
 
-IFileDataContainer::off_t FileDataContainerStdStream::InternalRead(char *dst, off_t count) const
+IFileDataContainer::off_t FileDataContainerStdStream::InternalRead(mpt::byte *dst, off_t count) const
 {
-	stream->read(dst, count);
+	stream->read(mpt::byte_cast<char*>(dst), count);
 	return static_cast<std::size_t>(stream->gcount());
 }
 
@@ -731,7 +733,7 @@ FileDataContainerCallbackStreamSeekable::~FileDataContainerCallbackStreamSeekabl
 	return;
 }
 
-IFileDataContainer::off_t FileDataContainerCallbackStreamSeekable::InternalRead(char *dst, off_t pos, off_t count) const
+IFileDataContainer::off_t FileDataContainerCallbackStreamSeekable::InternalRead(mpt::byte *dst, off_t pos, off_t count) const
 {
 	if(!stream.read)
 	{
@@ -776,7 +778,7 @@ bool FileDataContainerCallbackStream::InternalEof() const
 	return eof_reached;
 }
 
-IFileDataContainer::off_t FileDataContainerCallbackStream::InternalRead(char *dst, off_t count) const
+IFileDataContainer::off_t FileDataContainerCallbackStream::InternalRead(mpt::byte *dst, off_t count) const
 {
 	if(eof_reached)
 	{

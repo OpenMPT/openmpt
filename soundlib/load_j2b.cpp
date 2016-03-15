@@ -1049,7 +1049,7 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 #endif
 	{
 		// Success, now load the RIFF AM(FF) module.
-		FileReader amFile(reinterpret_cast<const char *>(amFileData), destSize);
+		FileReader amFile(mpt::as_span(mpt::byte_cast<const mpt::byte*>(amFileData), destSize));
 		result = ReadAM(amFile, loadFlags);
 	}
 	delete[] amFileData;

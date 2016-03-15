@@ -54,7 +54,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 
 	LimitMax(sample.nLength, MAX_SAMPLE_LENGTH);
 
-	const char * const sourceBuf = file.GetRawData();
+	const char * const sourceBuf = file.GetRawData<char>();
 	const FileReader::off_t fileSize = file.BytesLeft(), filePosition = file.GetPosition();
 	FileReader::off_t bytesRead = 0;	// Amount of memory that has been read from file
 
@@ -647,11 +647,11 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 			bufcount++;
 			if(bufcount >= CountOf(buffer16))
 			{
-				if(f) mpt::IO::WriteRaw(*f, buffer16, bufcount * 2);
+				if(f) mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer16), bufcount * 2);
 				bufcount = 0;
 			}
 		}
-		if (bufcount) if(f) mpt::IO::WriteRaw(*f, buffer16, bufcount * 2);
+		if (bufcount) if(f) mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer16), bufcount * 2);
 	}
 
 	else if(GetBitDepth() == 8 && GetChannelFormat() == stereoSplit &&
@@ -679,11 +679,11 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 				}
 				if(bufcount >= CountOf(buffer8))
 				{
-					if(f) mpt::IO::WriteRaw(*f, buffer8, bufcount);
+					if(f) mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer8), bufcount);
 					bufcount = 0;
 				}
 			}
-			if (bufcount) if(f) mpt::IO::WriteRaw(*f, buffer8, bufcount);
+			if (bufcount) if(f) mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer8), bufcount);
 		}
 		len = numSamples * 2;
 	}
@@ -714,11 +714,11 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 				bufcount++;
 				if(bufcount >= CountOf(buffer16))
 				{
-					if(f) mpt::IO::WriteRaw(*f, buffer16, bufcount * 2);
+					if(f) mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer16), bufcount * 2);
 					bufcount = 0;
 				}
 			}
-			if (bufcount) if(f) mpt::IO::WriteRaw(*f, buffer16, bufcount * 2);
+			if (bufcount) if(f) mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer16), bufcount * 2);
 		}
 		len = numSamples * 4;
 	}
@@ -740,11 +740,11 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 			bufcount++;
 			if(bufcount >= CountOf(buffer8))
 			{
-				if(f) mpt::IO::WriteRaw(*f, buffer8, bufcount);
+				if(f) mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer8), bufcount);
 				bufcount = 0;
 			}
 		}
-		if (bufcount) if(f) mpt::IO::WriteRaw(*f, buffer8, bufcount);
+		if (bufcount) if(f) mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer8), bufcount);
 	}
 
 	else if(GetEncoding() == IT214 || GetEncoding() == IT215)
@@ -783,11 +783,11 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 			}
 			if(bufcount >= CountOf(buffer8))
 			{
-				if(f) mpt::IO::WriteRaw(*f, buffer8, bufcount);
+				if(f) mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer8), bufcount);
 				bufcount = 0;
 			}
 		}
-		if (bufcount) if(f) mpt::IO::WriteRaw(*f, buffer8, bufcount);
+		if (bufcount) if(f) mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer8), bufcount);
 	}
 	return len;
 }

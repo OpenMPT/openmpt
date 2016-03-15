@@ -64,12 +64,8 @@ bool SeekAbsolute(std::iostream & f, IO::Offset pos);
 bool SeekRelative(std::ostream & f, IO::Offset off);
 bool SeekRelative(std::istream & f, IO::Offset off);
 bool SeekRelative(std::iostream & f, IO::Offset off);
-IO::Offset ReadRaw(std::istream & f, uint8 * data, std::size_t size);
-IO::Offset ReadRaw(std::istream & f, char * data, std::size_t size);
-IO::Offset ReadRaw(std::istream & f, void * data, std::size_t size);
-bool WriteRaw(std::ostream & f, const uint8 * data, std::size_t size);
-bool WriteRaw(std::ostream & f, const char * data, std::size_t size);
-bool WriteRaw(std::ostream & f, const void * data, std::size_t size);
+IO::Offset ReadRawImpl(std::istream & f, mpt::byte * data, std::size_t size);
+bool WriteRawImpl(std::ostream & f, const mpt::byte * data, std::size_t size);
 bool IsEof(std::istream & f);
 bool Flush(std::ostream & f);
 
@@ -84,18 +80,26 @@ bool SeekBegin(FILE* & f);
 bool SeekEnd(FILE* & f);
 bool SeekAbsolute(FILE* & f, IO::Offset pos);
 bool SeekRelative(FILE* & f, IO::Offset off);
-IO::Offset ReadRaw(FILE * & f, uint8 * data, std::size_t size);
-IO::Offset ReadRaw(FILE * & f, char * data, std::size_t size);
-IO::Offset ReadRaw(FILE * & f, void * data, std::size_t size);
-bool WriteRaw(FILE* & f, const uint8 * data, std::size_t size);
-bool WriteRaw(FILE* & f, const char * data, std::size_t size);
-bool WriteRaw(FILE* & f, const void * data, std::size_t size);
+IO::Offset ReadRawImpl(FILE * & f, mpt::byte * data, std::size_t size);
+bool WriteRawImpl(FILE* & f, const mpt::byte * data, std::size_t size);
 bool IsEof(FILE * & f);
 bool Flush(FILE* & f);
 
 #endif // MPT_ENABLE_FILEIO_STDIO
 
 
+
+template <typename Tbyte, typename Tfile>
+inline IO::Offset ReadRaw(Tfile & f, Tbyte * data, std::size_t size)
+{
+	return IO::ReadRawImpl(f, mpt::byte_cast<mpt::byte*>(data), size);
+}
+
+template <typename Tbyte, typename Tfile>
+inline bool WriteRaw(Tfile & f, const Tbyte * data, std::size_t size)
+{
+	return IO::WriteRawImpl(f, mpt::byte_cast<const mpt::byte*>(data), size);
+}
 
 template <typename Tbinary, typename Tfile>
 inline bool Read(Tfile & f, Tbinary & v)
@@ -425,9 +429,10 @@ public:
 	virtual ~IFileDataContainer() { }
 public:
 	virtual bool IsValid() const = 0;
-	virtual const char *GetRawData() const = 0;
+	virtual bool HasPinnedView() const = 0;
+	virtual const mpt::byte *GetRawData() const = 0;
 	virtual off_t GetLength() const = 0;
-	virtual off_t Read(char *dst, off_t pos, off_t count) const = 0;
+	virtual off_t Read(mpt::byte *dst, off_t pos, off_t count) const = 0;
 
 	virtual bool CanRead(off_t pos, off_t length) const
 	{
@@ -455,7 +460,12 @@ public:
 		return false;
 	}
 
-	const char *GetRawData() const
+	bool HasPinnedView() const
+	{
+		return true;
+	}
+
+	const mpt::byte *GetRawData() const
 	{
 		return nullptr;
 	}
@@ -464,7 +474,7 @@ public:
 	{
 		return 0;
 	}
-	off_t Read(char * /*dst*/, off_t /*pos*/, off_t /*count*/) const
+	off_t Read(mpt::byte * /*dst*/, off_t /*pos*/, off_t /*count*/) const
 	{
 		return 0;
 	}
@@ -485,13 +495,17 @@ public:
 	{
 		return data->IsValid();
 	}
-	const char *GetRawData() const {
+	bool HasPinnedView() const
+	{
+		return data->HasPinnedView();
+	}
+	const mpt::byte *GetRawData() const {
 		return data->GetRawData() + dataOffset;
 	}
 	off_t GetLength() const {
 		return dataLength;
 	}
-	off_t Read(char *dst, off_t pos, off_t count) const
+	off_t Read(mpt::byte *dst, off_t pos, off_t count) const
 	{
 		if(pos >= dataLength)
 		{
@@ -520,7 +534,7 @@ private:
 	off_t streamLength;
 
 	mutable bool cached;
-	mutable std::vector<char> cache;
+	mutable std::vector<mpt::byte> cache;
 
 protected:
 
@@ -529,19 +543,19 @@ protected:
 
 private:
 	
-	void CacheLength();
 	void CacheStream() const;
 
 public:
 
 	bool IsValid() const;
-	const char *GetRawData() const;
+	bool HasPinnedView() const;
+	const mpt::byte *GetRawData() const;
 	off_t GetLength() const;
-	off_t Read(char *dst, off_t pos, off_t count) const;
+	off_t Read(mpt::byte *dst, off_t pos, off_t count) const;
 
 private:
 
-	virtual off_t InternalRead(char *dst, off_t pos, off_t count) const = 0;
+	virtual off_t InternalRead(mpt::byte *dst, off_t pos, off_t count) const = 0;
 
 };
 
@@ -562,7 +576,7 @@ public:
 
 private:
 
-	off_t InternalRead(char *dst, off_t pos, off_t count) const;
+	off_t InternalRead(mpt::byte *dst, off_t pos, off_t count) const;
 
 };
 
@@ -571,7 +585,7 @@ class FileDataContainerUnseekable : public IFileDataContainer {
 
 private:
 
-	mutable std::vector<char> cache;
+	mutable std::vector<mpt::byte> cache;
 	mutable std::size_t cachesize;
 	mutable bool streamFullyCached;
 
@@ -591,21 +605,22 @@ private:
 
 private:
 
-	void ReadCached(char *dst, off_t pos, off_t count) const;
+	void ReadCached(mpt::byte *dst, off_t pos, off_t count) const;
 
 public:
 
 	bool IsValid() const;
-	const char *GetRawData() const;
+	bool HasPinnedView() const;
+	const mpt::byte *GetRawData() const;
 	off_t GetLength() const;
-	off_t Read(char *dst, off_t pos, off_t count) const;
+	off_t Read(mpt::byte *dst, off_t pos, off_t count) const;
 	bool CanRead(off_t pos, off_t length) const;
 	off_t GetReadableLength(off_t pos, off_t length) const;
 
 private:
 
 	virtual bool InternalEof() const = 0;
-	virtual off_t InternalRead(char *dst, off_t count) const = 0;
+	virtual off_t InternalRead(mpt::byte *dst, off_t count) const = 0;
 
 };
 
@@ -624,7 +639,7 @@ public:
 private:
 
 	bool InternalEof() const;
-	off_t InternalRead(char *dst, off_t count) const;
+	off_t InternalRead(mpt::byte *dst, off_t count) const;
 
 };
 
@@ -654,7 +669,7 @@ public:
 	FileDataContainerCallbackStreamSeekable(CallbackStream s);
 	virtual ~FileDataContainerCallbackStreamSeekable();
 private:
-	off_t InternalRead(char *dst, off_t pos, off_t count) const;
+	off_t InternalRead(mpt::byte *dst, off_t pos, off_t count) const;
 };
 
 
@@ -668,7 +683,7 @@ public:
 	virtual ~FileDataContainerCallbackStream();
 private:
 	bool InternalEof() const;
-	off_t InternalRead(char *dst, off_t count) const;
+	off_t InternalRead(mpt::byte *dst, off_t count) const;
 };
 
 
@@ -691,12 +706,12 @@ public:
 
 private:
 
-	const char *streamData;	// Pointer to memory-mapped file
+	const mpt::byte *streamData;	// Pointer to memory-mapped file
 	off_t streamLength;		// Size of memory-mapped file in bytes
 
 public:
 	FileDataContainerMemory() : streamData(nullptr), streamLength(0) { }
-	FileDataContainerMemory(const char *data, off_t length) : streamData(data), streamLength(length) { }
+	FileDataContainerMemory(mpt::span<const mpt::byte> data) : streamData(data.data()), streamLength(data.size()) { }
 #if defined(MPT_FILEREADER_STD_ISTREAM)
 	virtual
 #endif
@@ -709,7 +724,12 @@ public:
 		return streamData != nullptr;
 	}
 
-	const char *GetRawData() const
+	bool HasPinnedView() const
+	{
+		return true;
+	}
+
+	const mpt::byte *GetRawData() const
 	{
 		return streamData;
 	}
@@ -719,7 +739,7 @@ public:
 		return streamLength;
 	}
 
-	off_t Read(char *dst, off_t pos, off_t count) const
+	off_t Read(mpt::byte *dst, off_t pos, off_t count) const
 	{
 		if(pos >= streamLength)
 		{
