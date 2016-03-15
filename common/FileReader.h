@@ -74,14 +74,18 @@ public:
 
 	// Initialize file reader object with pointer to data and data length.
 	FileReader(mpt::span<const mpt::byte> bytedata) : data(mpt::make_shared<FileDataContainerMemory>(bytedata)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+#ifdef MODPLUG_TRACKER
 	FileReader(const void *voiddata, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(voiddata), length))), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 	FileReader(const char *chardata, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(chardata), length))), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 	FileReader(const uint8 *uint8data, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(uint8data), length))), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+#endif // MODPLUG_TRACKER
 #if defined(MPT_ENABLE_FILEIO)
 	FileReader(mpt::span<const mpt::byte> bytedata, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(bytedata)), streamPos(0), fileName(filename) { }
+#ifdef MODPLUG_TRACKER
 	FileReader(const void *voiddata, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(voiddata), length))), streamPos(0), fileName(filename) { }
 	FileReader(const char *chardata, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(chardata), length))), streamPos(0), fileName(filename) { }
-	//FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(uint8data), length))), streamPos(0), fileName(filename) { }
+	FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(uint8data), length))), streamPos(0), fileName(filename) { }
+#endif // MODPLUG_TRACKER
 #endif // MPT_ENABLE_FILEIO
 
 #if defined(MPT_FILEREADER_CALLBACK_STREAM)
@@ -168,14 +172,18 @@ public:
 
 	// Initialize file reader object with pointer to data and data length.
 	FileReader(mpt::span<const mpt::byte> bytedata) : data(bytedata), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+#ifdef MODPLUG_TRACKER
 	FileReader(const void *voiddata, off_t length) : data(mpt::as_span(mpt::byte_cast<const mpt::byte *>(voiddata), length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 	FileReader(const char *chardata, off_t length) : data(mpt::as_span(mpt::byte_cast<const mpt::byte *>(chardata), length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 	FileReader(const uint8 *uint8data, off_t length) : data(mpt::as_span(mpt::byte_cast<const mpt::byte *>(uint8data), length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+#endif // MODPLUG_TRACKER
 #if defined(MPT_ENABLE_FILEIO)
 	FileReader(mpt::span<const mpt::byte> bytedata, const mpt::PathString *filename) : data(bytedata), streamPos(0), fileName(filename) { }
+#ifdef MODPLUG_TRACKER
 	FileReader(const void *voiddata, off_t length, const mpt::PathString *filename) : data(mpt::as_span(mpt::byte_cast<const mpt::byte *>(voiddata), length)), streamPos(0), fileName(filename) { }
 	FileReader(const char *chardata, off_t length, const mpt::PathString *filename) : data(mpt::as_span(mpt::byte_cast<const mpt::byte *>(chardata), length)), streamPos(0), fileName(filename) { }
 	FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(mpt::as_span(mpt::byte_cast<const mpt::byte *>(uint8data), length)), streamPos(0), fileName(filename) { }
+#endif // MODPLUG_TRACKER
 #endif // MPT_ENABLE_FILEIO
 
 	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
@@ -315,7 +323,7 @@ public:
 		#if defined(MPT_FILEREADER_STD_ISTREAM)
 			return FileReader(MPT_STATIC_POINTER_CAST<IFileDataContainer>(mpt::make_shared<FileDataContainerWindow>(data, position, std::min(length, DataContainer().GetLength() - position))));
 		#else
-			return FileReader(DataContainer().GetRawData() + position, std::min(length, DataContainer().GetLength() - position));
+			return FileReader(mpt::as_span(DataContainer().GetRawData() + position, std::min(length, DataContainer().GetLength() - position)));
 		#endif
 	}
 
@@ -1031,9 +1039,9 @@ FileReader GetFileReader(TInputFile &file)
 	#else
 		typename TInputFile::ContentsRef tmp = file.Get();
 		#ifdef MPT_ENABLE_FILEIO
-			return FileReader(tmp.first.data, tmp.first.size, tmp.second);
+			return FileReader(mpt::as_span(tmp.first.data, tmp.first.size), tmp.second);
 		#else
-			return FileReader(tmp.first.data, tmp.first.size);
+			return FileReader(mpt::as_span(tmp.first.data, tmp.first.size));
 		#endif
 	#endif
 }

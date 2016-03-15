@@ -535,7 +535,7 @@ public:
 	const mpt::PathString * GetpFilename() const { return &m_FileName; }
 	void Close();
 	size_t GetLength();
-	const void *Lock();
+	const mpt::byte *Lock();
 };
 #endif // MPT_OS_WINDOWS
 #endif // MODPLUG_TRACKER
@@ -563,7 +563,7 @@ public:
 #else
 	struct Data
 	{
-		const char *data;
+		const mpt::byte *data;
 		std::size_t size;
 	};
 	typedef std::pair<InputFile::Data, const mpt::PathString*> ContentsRef;

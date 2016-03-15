@@ -641,7 +641,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 
 				if (!smpinfo[i])
 				{
-					FileReader chunk(lpStream + dwPos, dwMemLength - dwPos);
+					FileReader chunk(mpt::as_span(lpStream + dwPos, dwMemLength - dwPos));
 					dwPos += sampleIO.ReadSample(sample, chunk);
 				} else
 				{
@@ -650,7 +650,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 					if ( (dwLen <= dwMemLength) && (dwPos <= dwMemLength - dwLen) && (dwLen > 4) )
 					{
 						sampleIO |= SampleIO::MDL;
-						FileReader chunk(lpStream + dwPos , dwLen);
+						FileReader chunk(mpt::as_span(lpStream + dwPos , dwLen));
 						sampleIO.ReadSample(sample, chunk);
 					}
 					dwPos += dwLen;
