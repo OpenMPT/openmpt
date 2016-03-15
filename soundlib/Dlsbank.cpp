@@ -1167,9 +1167,9 @@ bool CDLSBank::Open(const mpt::PathString &filename)
 {
 	if(filename.empty()) return false;
 	m_szFileName = filename;
-	CMappedFile MapFile;
-	if (!MapFile.Open(filename)) return false;
-	return Open(FileReader(MapFile.Lock(), MapFile.GetLength(), &m_szFileName));
+	InputFile f(filename);
+	if(!f.IsValid()) return false;
+	return Open(GetFileReader(f));
 }
 
 
