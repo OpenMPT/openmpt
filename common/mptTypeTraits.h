@@ -142,30 +142,30 @@ template <> struct is_binary_safe<int8>  : public mpt::true_type { };
 template <typename T>
 struct GetRawBytesFunctor
 {
-	inline const uint8 * operator () (const T & v) const
+	inline const mpt::byte * operator () (const T & v) const
 	{
 		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
-		return reinterpret_cast<const uint8 *>(&v);
+		return reinterpret_cast<const mpt::byte *>(&v);
 	}
-	inline uint8 * operator () (T & v) const
+	inline mpt::byte * operator () (T & v) const
 	{
 		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
-		return reinterpret_cast<uint8 *>(&v);
+		return reinterpret_cast<mpt::byte *>(&v);
 	}
 };
 
 // In order to be able to partially specialize it,
 // GetRawBytes is implemented via a class template.
 // Do not overload or specialize GetRawBytes directly.
-// Using a wrapper (by default just around a cast to const uint8 *),
-// allows for implementing raw memroy access
+// Using a wrapper (by default just around a cast to const mpt::byte *),
+// allows for implementing raw memory access
 // via on-demand generating a cached serialized representation.
-template <typename T> inline const uint8 * GetRawBytes(const T & v)
+template <typename T> inline const mpt::byte * GetRawBytes(const T & v)
 {
 	STATIC_ASSERT(mpt::is_binary_safe<T>::value);
 	return mpt::GetRawBytesFunctor<T>()(v);
 }
-template <typename T> inline uint8 * GetRawBytes(T & v)
+template <typename T> inline mpt::byte * GetRawBytes(T & v)
 {
 	STATIC_ASSERT(mpt::is_binary_safe<T>::value);
 	return mpt::GetRawBytesFunctor<T>()(v);
