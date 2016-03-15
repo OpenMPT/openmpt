@@ -3778,7 +3778,11 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 					if (nPat != m_nPattern || updateOrderList)
 					{
 						if(nPat != m_nPattern) SetCurrentPattern(nPat, nRow);
-						if (nOrd < pSndFile->Order.size()) SetCurrentOrder(nOrd);
+						if (nOrd < pSndFile->Order.size())
+						{
+							m_nOrder = nOrd;
+							SendCtrlMessage(CTRLMSG_NOTIFYCURRENTORDER, nOrd);
+						}
 						updateOrderList = false;
 					}
 					if (nRow != GetCurrentRow())

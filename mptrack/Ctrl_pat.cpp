@@ -382,9 +382,18 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		SetCurrentPattern((PATTERNINDEX)lParam);
 		break;
 
+	case CTRLMSG_NOTIFYCURRENTORDER:
+		if(m_OrderList.GetCurSel(false).GetSelCount() > 1)
+		{
+			// Only update play cursor in case there's a selection
+			m_OrderList.Invalidate(FALSE);
+			break;
+		}
+		// Otherwise, just act the same as a normal selection change
+		MPT_FALLTHROUGH;
 	case CTRLMSG_SETCURRENTORDER:
 		//Set orderlist selection and refresh GUI if change successful
-		m_OrderList.SetCurSel((ORDERINDEX)lParam, FALSE);
+		m_OrderList.SetCurSel((ORDERINDEX)lParam, false);
 		break;
 
 	case CTRLMSG_FORCEREFRESH:
