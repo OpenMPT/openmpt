@@ -253,7 +253,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 			return true;
 		}
 
-		FileReader chunk = file.GetChunk(objOffset, objSize);
+		FileReader chunk = file.GetChunkAt(objOffset, objSize);
 
 		if(chunk.IsValid())
 		{
