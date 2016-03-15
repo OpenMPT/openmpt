@@ -609,11 +609,7 @@ module_impl::module_impl( const std::vector<std::uint8_t> & data, LIBOPENMPT_SHA
 module_impl::module_impl( const std::vector<std::uint8_t> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 #endif
 	ctor( ctls );
-#ifdef LIBOPENMPT_ANCIENT_COMPILER
-	load( FileReader( &(data[0]), data.size() ), ctls );
-#else
-	load( FileReader( data.data(), data.size() ), ctls );
-#endif
+	load( FileReader( mpt::as_span( data ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 #ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
@@ -622,11 +618,7 @@ module_impl::module_impl( const std::vector<char> & data, LIBOPENMPT_SHARED_PTR<
 module_impl::module_impl( const std::vector<char> & data, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 #endif
 	ctor( ctls );
-#ifdef LIBOPENMPT_ANCIENT_COMPILER
-	load( FileReader( &(data[0]), data.size() ), ctls );
-#else
-	load( FileReader( data.data(), data.size() ), ctls );
-#endif
+	load( FileReader( mpt::byte_cast< mpt::span< const mpt::byte > >( mpt::as_span( data ) ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 #ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
@@ -635,7 +627,7 @@ module_impl::module_impl( const std::uint8_t * data, std::size_t size, LIBOPENMP
 module_impl::module_impl( const std::uint8_t * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 #endif
 	ctor( ctls );
-	load( FileReader( data, size ), ctls );
+	load( FileReader( mpt::as_span( data, size ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 #ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
@@ -644,7 +636,7 @@ module_impl::module_impl( const char * data, std::size_t size, LIBOPENMPT_SHARED
 module_impl::module_impl( const char * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 #endif
 	ctor( ctls );
-	load( FileReader( data, size ), ctls );
+	load( FileReader( mpt::byte_cast< mpt::span< const mpt::byte > >( mpt::as_span( data, size ) ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 #ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
@@ -653,7 +645,7 @@ module_impl::module_impl( const void * data, std::size_t size, LIBOPENMPT_SHARED
 module_impl::module_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 #endif
 	ctor( ctls );
-	load( FileReader( data, size ), ctls );
+	load( FileReader( mpt::as_span( mpt::byte_cast< const mpt::byte * >( data ), size ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::~module_impl() {

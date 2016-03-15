@@ -887,7 +887,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		// If decoding was successful, stream and length will keep the new pointers now.
-		FileReader unpackedFile(stream, length);
+		FileReader unpackedFile(mpt::as_span(mpt::byte_cast<const mpt::byte*>(stream), length));
 
 		bool result = false;	// Result of trying to load the module, false == fail.
 

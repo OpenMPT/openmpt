@@ -73,13 +73,15 @@ public:
 	FileReader() : data(mpt::make_shared<FileDataContainerDummy>()), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 
 	// Initialize file reader object with pointer to data and data length.
-	FileReader(const void *voiddata, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(mpt::byte_cast<const char *>(voiddata), length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
-	FileReader(const char *chardata, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(chardata, length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
-	FileReader(const uint8 *uint8data, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(mpt::byte_cast<const char *>(uint8data), length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(mpt::span<const mpt::byte> bytedata) : data(mpt::make_shared<FileDataContainerMemory>(bytedata)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(const void *voiddata, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(voiddata), length))), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(const char *chardata, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(chardata), length))), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(const uint8 *uint8data, off_t length) : data(mpt::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(uint8data), length))), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 #if defined(MPT_ENABLE_FILEIO)
-	FileReader(const void *voiddata, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(mpt::byte_cast<const char *>(voiddata), length)), streamPos(0), fileName(filename) { }
-	FileReader(const char *chardata, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(chardata, length)), streamPos(0), fileName(filename) { }
-	FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(mpt::byte_cast<const char *>(uint8data), length)), streamPos(0), fileName(filename) { }
+	FileReader(mpt::span<const mpt::byte> bytedata, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(bytedata)), streamPos(0), fileName(filename) { }
+	FileReader(const void *voiddata, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(voiddata), length))), streamPos(0), fileName(filename) { }
+	FileReader(const char *chardata, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(chardata), length))), streamPos(0), fileName(filename) { }
+	//FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(mpt::make_shared<FileDataContainerMemory>(mpt::as_span(mpt::byte_cast<const mpt::byte *>(uint8data), length))), streamPos(0), fileName(filename) { }
 #endif // MPT_ENABLE_FILEIO
 
 #if defined(MPT_FILEREADER_CALLBACK_STREAM)
@@ -162,16 +164,18 @@ public:
 #else // !MPT_FILEREADER_STD_ISTREAM
 
 	// Initialize invalid file reader object.
-	FileReader() : data(nullptr, 0), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader() : data(mpt::span<const mpt::byte>()), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 
 	// Initialize file reader object with pointer to data and data length.
-	FileReader(const void *voiddata, off_t length) : data(mpt::byte_cast<const char *>(voiddata), length), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
-	FileReader(const char *chardata, off_t length) : data(chardata, length), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
-	FileReader(const uint8 *uint8data, off_t length) : data(mpt::byte_cast<const char *>(uint8data), length), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(mpt::span<const mpt::byte> bytedata) : data(bytedata), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(const void *voiddata, off_t length) : data(mpt::as_span(mpt::byte_cast<const mpt::byte *>(voiddata), length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(const char *chardata, off_t length) : data(mpt::as_span(mpt::byte_cast<const mpt::byte *>(chardata), length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
+	FileReader(const uint8 *uint8data, off_t length) : data(mpt::as_span(mpt::byte_cast<const mpt::byte *>(uint8data), length)), streamPos(0) MPT_FILEREADER_INIT_FILENAME { }
 #if defined(MPT_ENABLE_FILEIO)
-	FileReader(const void *voiddata, off_t length, const mpt::PathString *filename) : data(mpt::byte_cast<const char *>(voiddata), length), streamPos(0), fileName(filename) { }
-	FileReader(const char *chardata, off_t length, const mpt::PathString *filename) : data(chardata, length), streamPos(0), fileName(filename) { }
-	FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(mpt::byte_cast<const char *>(uint8data), length), streamPos(0), fileName(filename) { }
+	FileReader(mpt::span<const mpt::byte> bytedata, const mpt::PathString *filename) : data(bytedata), streamPos(0), fileName(filename) { }
+	FileReader(const void *voiddata, off_t length, const mpt::PathString *filename) : data(mpt::as_span(mpt::byte_cast<const mpt::byte *>(voiddata), length)), streamPos(0), fileName(filename) { }
+	FileReader(const char *chardata, off_t length, const mpt::PathString *filename) : data(mpt::as_span(mpt::byte_cast<const mpt::byte *>(chardata), length)), streamPos(0), fileName(filename) { }
+	FileReader(const uint8 *uint8data, off_t length, const mpt::PathString *filename) : data(mpt::as_span(mpt::byte_cast<const mpt::byte *>(uint8data), length)), streamPos(0), fileName(filename) { }
 #endif // MPT_ENABLE_FILEIO
 
 	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
@@ -324,9 +328,98 @@ public:
 		return GetChunk(position, length);
 	}
 
+	//=====================
+	class PinnedRawDataView
+	//=====================
+	{
+	private:
+		mpt::span<const mpt::byte> span_;
+		std::vector<mpt::byte> cache;
+	private:
+		void Init(const FileReader &file, std::size_t size)
+		{
+			if(!file.CanRead(size))
+			{
+				size = file.BytesLeft();
+			}
+			if(file.DataContainer().HasPinnedView())
+			{
+				span_ = mpt::as_span(file.DataContainer().GetRawData() + file.GetPosition(), size);
+			} else
+			{
+				cache.resize(size);
+				if(!cache.empty())
+				{
+					file.GetRaw(&(cache[0]), size);
+					span_ = mpt::as_span(cache);
+				}
+			}
+		}
+	public:
+		PinnedRawDataView()
+		{
+			return;
+		}
+		PinnedRawDataView(const FileReader &file)
+		{
+			Init(file, file.BytesLeft());
+		}
+		PinnedRawDataView(const FileReader &file, std::size_t size)
+		{
+			Init(file, size);
+		}
+		PinnedRawDataView(FileReader &file, bool advance)
+		{
+			Init(file, file.BytesLeft());
+			if(advance)
+			{
+				file.Skip(span_.size());
+			}
+		}
+		PinnedRawDataView(FileReader &file, std::size_t size, bool advance)
+		{
+			Init(file, size);
+			if(advance)
+			{
+				file.Skip(span_.size());
+			}
+		}
+	public:
+		mpt::span<const mpt::byte> GetSpan() const { return span_; }
+		mpt::span<const mpt::byte> span() const { return span_; }
+		void invalidate() { cache = std::vector<mpt::byte>(); span_ = mpt::span<const mpt::byte>(); }
+		const mpt::byte *data() const { return span_.data(); }
+		std::size_t size() const { return span_.size(); }
+	};
+
+	// Returns a pinned view into the remaining raw data from cursor position.
+	PinnedRawDataView GetPinnedRawDataView() const
+	{
+		return PinnedRawDataView(*this);
+	}
+	// Returns a pinned view into the remeining raw data from cursor position, clamped at size.
+	PinnedRawDataView GetPinnedRawDataView(std::size_t size) const
+	{
+		return PinnedRawDataView(*this, size);
+	}
+
+	// Returns a pinned view into the remeining raw data from cursor position.
+	// File cursor is advaned by the size of the returned pinned view.
+	PinnedRawDataView ReadPinnedRawDataView()
+	{
+		return PinnedRawDataView(*this, true);
+	}
+	// Returns a pinned view into the remeining raw data from cursor position, clamped at size.
+	// File cursor is advaned by the size of the returned pinned view.
+	PinnedRawDataView ReadPinnedRawDataView(std::size_t size)
+	{
+		return PinnedRawDataView(*this, size, true);
+	}
+
 	// Returns raw stream data at cursor position.
 	// Should only be used if absolutely necessary, for example for sample reading, or when used with a small chunk of the file retrieved by ReadChunk().
-	FILEREADER_DEPRECATED const char *GetRawData() const
+	// Use GetPinnedRawDataView(size) whenever possible.
+	FILEREADER_DEPRECATED const mpt::byte *GetRawData() const
 	{
 		// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
 		return DataContainer().GetRawData() + streamPos;
@@ -338,20 +431,62 @@ public:
 		return mpt::byte_cast<const T*>(DataContainer().GetRawData() + streamPos);
 	}
 
-	std::size_t ReadRaw(char *dst, std::size_t count)
+	template <typename T>
+	std::size_t GetRaw(T *dst, std::size_t count) const
 	{
-		std::size_t result = static_cast<std::size_t>(DataContainer().Read(dst, streamPos, count));
-		streamPos += result;
-		return result;
+		return static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<mpt::byte*>(dst), streamPos, count));
 	}
+
 	template <typename T>
 	std::size_t ReadRaw(T *dst, std::size_t count)
 	{
-		std::size_t result = static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<char*>(dst), streamPos, count));
+		std::size_t result = static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<mpt::byte*>(dst), streamPos, count));
 		streamPos += result;
 		return result;
 	}
 	
+	std::vector<mpt::byte> GetRawDataAsByteVector() const
+	{
+		PinnedRawDataView view = GetPinnedRawDataView();
+		return std::vector<mpt::byte>(view.span().begin(), view.span().end());
+	}
+	std::vector<mpt::byte> ReadRawDataAsByteVector()
+	{
+		PinnedRawDataView view = ReadPinnedRawDataView();
+		return std::vector<mpt::byte>(view.span().begin(), view.span().end());
+	}
+	std::vector<mpt::byte> GetRawDataAsByteVector(std::size_t size) const
+	{
+		PinnedRawDataView view = GetPinnedRawDataView(size);
+		return std::vector<mpt::byte>(view.span().begin(), view.span().end());
+	}
+	std::vector<mpt::byte> ReadRawDataAsByteVector(std::size_t size)
+	{
+		PinnedRawDataView view = ReadPinnedRawDataView(size);
+		return std::vector<mpt::byte>(view.span().begin(), view.span().end());
+	}
+
+	std::string GetRawDataAsString() const
+	{
+		PinnedRawDataView view = GetPinnedRawDataView();
+		return std::string(view.span().begin(), view.span().end());
+	}
+	std::string ReadRawDataAsString()
+	{
+		PinnedRawDataView view = ReadPinnedRawDataView();
+		return std::string(view.span().begin(), view.span().end());
+	}
+	std::string GetRawDataAsString(std::size_t size) const
+	{
+		PinnedRawDataView view = GetPinnedRawDataView(size);
+		return std::string(view.span().begin(), view.span().end());
+	}
+	std::string ReadRawDataAsString(std::size_t size)
+	{
+		PinnedRawDataView view = ReadPinnedRawDataView(size);
+		return std::string(view.span().begin(), view.span().end());
+	}
+
 protected:
 
 	// Read a "T" object from the stream.
@@ -360,7 +495,7 @@ protected:
 	template <typename T>
 	bool Read(T &target)
 	{
-		if(sizeof(T) != DataContainer().Read(reinterpret_cast<char*>(&target), streamPos, sizeof(T)))
+		if(sizeof(T) != DataContainer().Read(reinterpret_cast<mpt::byte*>(&target), streamPos, sizeof(T)))
 		{
 			return false;
 		}
@@ -627,8 +762,8 @@ public:
 		{
 			copyBytes = BytesLeft();
 		}
-		DataContainer().Read(reinterpret_cast<char *>(&target), streamPos, copyBytes);
-		std::memset(reinterpret_cast<char *>(&target) + copyBytes, 0, sizeof(target) - copyBytes);
+		DataContainer().Read(reinterpret_cast<mpt::byte *>(&target), streamPos, copyBytes);
+		std::memset(reinterpret_cast<mpt::byte *>(&target) + copyBytes, 0, sizeof(target) - copyBytes);
 		Skip(partialSize);
 		return true;
 	}
@@ -655,9 +790,9 @@ public:
 	template<mpt::String::ReadWriteMode mode, off_t destSize>
 	bool ReadString(char (&destBuffer)[destSize], const off_t srcSize)
 	{
-		FileReader source = ReadChunk(srcSize);	// Make sure the string is cached properly.
-		off_t realSrcSize = source.GetLength();	// In case fewer bytes are available
-		mpt::String::Read<mode, destSize>(destBuffer, source.GetRawData(), realSrcSize);
+		FileReader::PinnedRawDataView source = ReadPinnedRawDataView(srcSize); // Make sure the string is cached properly.
+		off_t realSrcSize = source.size();	// In case fewer bytes are available
+		mpt::String::Read<mode, destSize>(destBuffer, mpt::byte_cast<const char*>(source.data()), realSrcSize);
 		return (realSrcSize > 0 || srcSize == 0);
 	}
 
@@ -667,9 +802,9 @@ public:
 	template<mpt::String::ReadWriteMode mode>
 	bool ReadString(std::string &dest, const off_t srcSize)
 	{
-		FileReader source = ReadChunk(srcSize);	// Make sure the string is cached properly.
-		off_t realSrcSize = source.GetLength();	// In case fewer bytes are available
-		mpt::String::Read<mode>(dest, source.GetRawData(), realSrcSize);
+		FileReader::PinnedRawDataView source = ReadPinnedRawDataView(srcSize);	// Make sure the string is cached properly.
+		off_t realSrcSize = source.size();	// In case fewer bytes are available
+		mpt::String::Read<mode>(dest, mpt::byte_cast<const char*>(source.data()), realSrcSize);
 		return (realSrcSize > 0 || srcSize == 0);
 	}
 
@@ -679,8 +814,8 @@ public:
 		dest.clear();
 		try
 		{
-			char c;
-			while(Read(c) && c != 0 && dest.length() < maxLength)
+			char c = '\0';
+			while(Read(c) && c != '\0' && dest.length() < maxLength)
 			{
 				dest += c;
 			}
@@ -797,9 +932,9 @@ public:
 			bool identical = true;
 			for(std::size_t i = 0; i < magicLength; ++i)
 			{
-				char c = '\0';
+				mpt::byte c = 0;
 				DataContainer().Read(&c, streamPos + i, 1);
-				if(c != magic[i])
+				if(c != mpt::byte_cast<mpt::byte>(magic[i]))
 				{
 					identical = false;
 					break;
