@@ -952,7 +952,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals();
 	InitializeChannels();
 
-	FileReader musicChunk(musicData, musicSize);
+	FileReader musicChunk(mpt::as_span(musicData, musicSize));
 	musicChunk.ReadNullString(m_songName);
 	musicChunk.ReadNullString(m_songMessage);
 
@@ -1709,7 +1709,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 #endif
 
 			}
-			FileReader mergedDataChunk(&(mergedData[0]), mergedData.size());
+			FileReader mergedDataChunk(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mergedData)));
 
 			FileReader &sampleData = sharedHeader ? mergedDataChunk : sampleChunk.chunk;
 			FileReader &headerChunk = sampleData;

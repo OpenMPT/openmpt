@@ -271,7 +271,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackMMCMP(unpackedData, file)) packedContainerType = MOD_CONTAINERTYPE_MMCMP;
 		if(packedContainerType != MOD_CONTAINERTYPE_NONE)
 		{
-			file = FileReader(mpt::byte_cast<mpt::span<const mpt::byte> >(mpt::as_span(unpackedData)));
+			file = FileReader(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(unpackedData)));
 		}
 
 		if(!ReadXM(file, loadFlags)

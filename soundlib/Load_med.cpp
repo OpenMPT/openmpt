@@ -840,7 +840,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 		Samples[iSmp + 1].nLength = len;
 		if(loadFlags & loadSampleData)
 		{
-			FileReader chunk(psdata, dwMemLength - dwPos - 6);
+			FileReader chunk(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(psdata, dwMemLength - dwPos - 6)));
 			sampleIO.ReadSample(Samples[iSmp + 1], chunk);
 		}
 	}

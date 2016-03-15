@@ -228,6 +228,11 @@ template <typename T> inline span<T> as_span(std::vector<T> & cont) { return spa
 
 template <typename T> inline span<const T> as_span(const std::vector<T> & cont) { return span<const T>(cont); }
 
+template <typename T> inline span<T> as_span(std::basic_string<T> & str) { return span<T>(&(str[0]), str.length()); }
+
+template <typename T> inline span<const T> as_span(const std::basic_string<T> & str) { return span<const T>(&(str[0]), str.length()); }
+
+
 typedef mpt::span<mpt::byte> byte_span;
 typedef mpt::span<const mpt::byte> const_byte_span;
 

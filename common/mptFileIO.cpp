@@ -167,8 +167,8 @@ size_t CMappedFile::GetLength()
 }
 
 
-const void *CMappedFile::Lock()
-//-----------------------------
+const mpt::byte *CMappedFile::Lock()
+//----------------------------------
 {
 	size_t length = GetLength();
 	if(!length) return nullptr;
@@ -194,7 +194,7 @@ const void *CMappedFile::Lock()
 		{
 			m_hFMap = hmf;
 			m_pData = lpStream;
-			return lpStream;
+			return mpt::byte_cast<const mpt::byte*>(lpStream);
 		}
 		CloseHandle(hmf);
 		hmf = nullptr;
@@ -209,7 +209,7 @@ const void *CMappedFile::Lock()
 	{
 		DWORD chunkToRead = mpt::saturate_cast<DWORD>(length);
 		DWORD chunkRead = 0;
-		if(ReadFile(m_hFile, (char*)lpStream + bytesRead, chunkToRead, &chunkRead, NULL) == FALSE)
+		if(ReadFile(m_hFile, mpt::byte_cast<mpt::byte*>(lpStream) + bytesRead, chunkToRead, &chunkRead, NULL) == FALSE)
 		{
 			// error
 			free(lpStream);
@@ -219,7 +219,7 @@ const void *CMappedFile::Lock()
 		bytesToRead -= chunkRead;
 	}
 	m_pData = lpStream;
-	return lpStream;
+	return mpt::byte_cast<const mpt::byte*>(lpStream);
 }
 
 #endif // MPT_OS_WINDOWS
@@ -292,7 +292,7 @@ InputFile::ContentsRef InputFile::Get()
 	{
 		return result;
 	}
-	result.first.data = mpt::byte_cast<const char*>(m_File.Lock());
+	result.first.data = m_File.Lock();
 	result.first.size = m_File.GetLength();
 	result.second = &m_Filename;
 	return result;
