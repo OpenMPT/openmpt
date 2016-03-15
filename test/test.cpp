@@ -2309,7 +2309,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		mpt::IO::WriteVarInt(f, uint16(65535), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 3);
 		mpt::IO::WriteVarInt(f, uint64(0xFFFFFFFFFFFFFFFFull), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 10);
 		std::string data = f.str();
-		FileReader file(&data[0], data.size());
+		FileReader file(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(data)));
 		uint64 v;
 		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 0);
 		file.ReadVarInt(v); VERIFY_EQUAL_NONCONT(v, 127);
@@ -2340,7 +2340,7 @@ static void RunITCompressionTest(const std::vector<int8> &sampleData, FlagSet<Ch
 	}
 
 	{
-		FileReader file(&data[0], data.length());
+		FileReader file(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(data)));
 
 		std::vector<int8> sampleDataNew(sampleData.size(), 0);
 		smp.pSample = &sampleDataNew[0];
