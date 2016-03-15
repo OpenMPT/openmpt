@@ -311,9 +311,9 @@ public:
 		return DataContainer().CanRead(0, size) && !DataContainer().CanRead(size, 1);
 	}
 
-	// Create a new FileReader object for parsing a sub chunk at a given position with a given length.
-	// The file cursor is not modified.
-	FileReader GetChunk(off_t position, off_t length) const
+protected:
+
+	FileReader CreateChunk(off_t position, off_t length) const
 	{
 		off_t readableLength = DataContainer().GetReadableLength(position, length);
 		if(readableLength == 0)
@@ -327,13 +327,28 @@ public:
 		#endif
 	}
 
+public:
+
+	// Create a new FileReader object for parsing a sub chunk at a given position with a given length.
+	// The file cursor is not modified.
+	FileReader GetChunkAt(off_t position, off_t length) const
+	{
+		return CreateChunk(position, length);
+	}
+
+	// Create a new FileReader object for parsing a sub chunk at the current position with a given length.
+	// The file cursor is not advanced.
+	FileReader GetChunk(off_t length)
+	{
+		return CreateChunk(streamPos, length);
+	}
 	// Create a new FileReader object for parsing a sub chunk at the current position with a given length.
 	// The file cursor is advanced by "length" bytes.
 	FileReader ReadChunk(off_t length)
 	{
 		off_t position = streamPos;
 		Skip(length);
-		return GetChunk(position, length);
+		return CreateChunk(position, length);
 	}
 
 	//=====================
