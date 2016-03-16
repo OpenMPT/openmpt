@@ -102,10 +102,14 @@ public:
 	LONG nXBassFlt_A1;
 
 	// DC Removal Biquad
-	LONG nDCRFlt_Y1l;
-	LONG nDCRFlt_X1l;
-	LONG nDCRFlt_Y1r;
-	LONG nDCRFlt_X1r;
+	LONG nDCRFlt_Y1lf;
+	LONG nDCRFlt_X1lf;
+	LONG nDCRFlt_Y1rf;
+	LONG nDCRFlt_X1rf;
+	LONG nDCRFlt_Y1lb;
+	LONG nDCRFlt_X1lb;
+	LONG nDCRFlt_Y1rb;
+	LONG nDCRFlt_X1rb;
 
 public:
 	CMegaBass();
