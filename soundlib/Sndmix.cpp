@@ -96,7 +96,10 @@ void CSoundFile::InitPlayer(bool bReset)
 	m_Reverb.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
 #endif
 #ifndef NO_DSP
-	m_DSP.Initialize(bReset, m_MixerSettings.gdwMixingFreq, m_MixerSettings.DSPMask);
+	m_Surround.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
+#endif
+#ifndef NO_DSP
+	m_MegaBass.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
 #endif
 #ifndef NO_EQ
 	m_EQ.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
@@ -337,9 +340,16 @@ void CSoundFile::ProcessDSP(std::size_t countChunk)
 //-------------------------------------------------
 {
 	#ifndef NO_DSP
-		if(m_MixerSettings.DSPMask & (SNDDSP_SURROUND|SNDDSP_MEGABASS))
+		if(m_MixerSettings.DSPMask & SNDDSP_SURROUND)
 		{
-			m_DSP.Process(MixSoundBuffer, MixRearBuffer, countChunk, m_MixerSettings.gnChannels, m_MixerSettings.DSPMask);
+			m_Surround.Process(MixSoundBuffer, MixRearBuffer, countChunk, m_MixerSettings.gnChannels);
+		}
+	#endif // NO_DSP
+
+	#ifndef NO_DSP
+		if(m_MixerSettings.DSPMask & SNDDSP_MEGABASS)
+		{
+			m_MegaBass.Process(MixSoundBuffer, MixRearBuffer, countChunk, m_MixerSettings.gnChannels);
 		}
 	#endif // NO_DSP
 

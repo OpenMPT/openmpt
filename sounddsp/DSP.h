@@ -21,27 +21,36 @@ OPENMPT_NAMESPACE_BEGIN
 #define SURROUNDBUFFERSIZE		2048	// 50ms @ 48kHz
 
 
-//================
-class CDSPSettings
-//================
+//=====================
+class CSurroundSettings
+//=====================
+{
+public:
+	UINT m_nProLogicDepth;
+	UINT m_nProLogicDelay;
+public:
+	CSurroundSettings();
+};
+
+
+//=====================
+class CMegaBassSettings
+//=====================
 {
 public:
 	UINT m_nXBassDepth;
 	UINT m_nXBassRange;
-	UINT m_nProLogicDepth;
-	UINT m_nProLogicDelay;
 public:
-	CDSPSettings();
+	CMegaBassSettings();
 };
 
 
-//========
-class CDSP
-//========
+//=============
+class CSurround
+//=============
 {
 public:
-	CDSPSettings m_Settings;
-private:
+	CSurroundSettings m_Settings;
 
 	// Surround Encoding: 1 delay line + low-pass filter + high-pass filter
 	LONG nSurroundSize;
@@ -59,6 +68,32 @@ private:
 	LONG nDolbyLP_B1;
 	LONG nDolbyLP_A1;
 
+	LONG SurroundBuffer[SURROUNDBUFFERSIZE];
+
+public:
+	CSurround();
+public:
+	void SetSettings(const CSurroundSettings &settings) { m_Settings = settings; }
+	// [XBass level 0(quiet)-100(loud)], [cutoff in Hz 10-100]
+	bool SetXBassParameters(UINT nDepth, UINT nRange);
+	// [Surround level 0(quiet)-100(heavy)] [delay in ms, usually 5-40ms]
+	bool SetSurroundParameters(UINT nDepth, UINT nDelay);
+	void Initialize(bool bReset, DWORD MixingFreq);
+	void Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nChannels);
+private:
+	void ProcessStereoSurround(int * MixSoundBuffer, int count);
+	void ProcessQuadSurround(int * MixSoundBuffer, int * MixRearBuffer, int count);
+};
+
+
+
+//=============
+class CMegaBass
+//=============
+{
+public:
+	CMegaBassSettings m_Settings;
+
 	// Bass Expansion: low-pass filter
 	LONG nXBassFlt_Y1;
 	LONG nXBassFlt_X1;
@@ -72,22 +107,16 @@ private:
 	LONG nDCRFlt_Y1r;
 	LONG nDCRFlt_X1r;
 
-	LONG SurroundBuffer[SURROUNDBUFFERSIZE];
-
 public:
-	CDSP();
+	CMegaBass();
 public:
-	void SetSettings(const CDSPSettings &settings) { m_Settings = settings; }
+	void SetSettings(const CMegaBassSettings &settings) { m_Settings = settings; }
 	// [XBass level 0(quiet)-100(loud)], [cutoff in Hz 10-100]
 	bool SetXBassParameters(UINT nDepth, UINT nRange);
-	// [Surround level 0(quiet)-100(heavy)] [delay in ms, usually 5-40ms]
-	bool SetSurroundParameters(UINT nDepth, UINT nDelay);
-	void Initialize(bool bReset, DWORD MixingFreq, DWORD DSPMask);
-	void Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nChannels, DWORD DSPMask);
-private:
-	void ProcessStereoSurround(int * MixSoundBuffer, int count);
-	void ProcessQuadSurround(int * MixSoundBuffer, int * MixRearBuffer, int count);
+	void Initialize(bool bReset, DWORD MixingFreq);
+	void Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nChannels);
 };
+
 
 #endif // NO_DSP
 

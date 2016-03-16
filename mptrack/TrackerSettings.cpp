@@ -329,16 +329,16 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 
 	// Effects
 #ifndef NO_DSP
-	m_DSPSettings.m_nXBassDepth = conf.Read<int32>("Effects", "XBassDepth", m_DSPSettings.m_nXBassDepth);
-	m_DSPSettings.m_nXBassRange = conf.Read<int32>("Effects", "XBassRange", m_DSPSettings.m_nXBassRange);
+	m_MegaBassSettings.m_nXBassDepth = conf.Read<int32>("Effects", "XBassDepth", m_MegaBassSettings.m_nXBassDepth);
+	m_MegaBassSettings.m_nXBassRange = conf.Read<int32>("Effects", "XBassRange", m_MegaBassSettings.m_nXBassRange);
 #endif
 #ifndef NO_REVERB
 	m_ReverbSettings.m_nReverbDepth = conf.Read<int32>("Effects", "ReverbDepth", m_ReverbSettings.m_nReverbDepth);
 	m_ReverbSettings.m_nReverbType = conf.Read<int32>("Effects", "ReverbType", m_ReverbSettings.m_nReverbType);
 #endif
 #ifndef NO_DSP
-	m_DSPSettings.m_nProLogicDepth = conf.Read<int32>("Effects", "ProLogicDepth", m_DSPSettings.m_nProLogicDepth);
-	m_DSPSettings.m_nProLogicDelay = conf.Read<int32>("Effects", "ProLogicDelay", m_DSPSettings.m_nProLogicDelay);
+	m_SurroundSettings.m_nProLogicDepth = conf.Read<int32>("Effects", "ProLogicDepth", m_SurroundSettings.m_nProLogicDepth);
+	m_SurroundSettings.m_nProLogicDelay = conf.Read<int32>("Effects", "ProLogicDelay", m_SurroundSettings.m_nProLogicDelay);
 #endif
 #ifndef NO_EQ
 	m_EqSettings = conf.Read<EQPreset>("Effects", "EQ_Settings", FlatEQPreset);
@@ -957,16 +957,16 @@ void TrackerSettings::SaveSettings()
 
 	// Effects
 #ifndef NO_DSP
-	conf.Write<int32>("Effects", "XBassDepth", m_DSPSettings.m_nXBassDepth);
-	conf.Write<int32>("Effects", "XBassRange", m_DSPSettings.m_nXBassRange);
+	conf.Write<int32>("Effects", "XBassDepth", m_MegaBassSettings.m_nXBassDepth);
+	conf.Write<int32>("Effects", "XBassRange", m_MegaBassSettings.m_nXBassRange);
 #endif
 #ifndef NO_REVERB
 	conf.Write<int32>("Effects", "ReverbDepth", m_ReverbSettings.m_nReverbDepth);
 	conf.Write<int32>("Effects", "ReverbType", m_ReverbSettings.m_nReverbType);
 #endif
 #ifndef NO_DSP
-	conf.Write<int32>("Effects", "ProLogicDepth", m_DSPSettings.m_nProLogicDepth);
-	conf.Write<int32>("Effects", "ProLogicDelay", m_DSPSettings.m_nProLogicDelay);
+	conf.Write<int32>("Effects", "ProLogicDepth", m_SurroundSettings.m_nProLogicDepth);
+	conf.Write<int32>("Effects", "ProLogicDelay", m_SurroundSettings.m_nProLogicDelay);
 #endif
 #ifndef NO_EQ
 	conf.Write<EQPreset>("Effects", "EQ_Settings", m_EqSettings);

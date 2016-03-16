@@ -1079,7 +1079,10 @@ void CMainFrame::UpdateDspEffects(CSoundFile &sndFile, bool reset)
 	sndFile.m_Reverb.m_Settings = TrackerSettings::Instance().m_ReverbSettings;
 #endif
 #ifndef NO_DSP
-	sndFile.m_DSP.m_Settings = TrackerSettings::Instance().m_DSPSettings;
+	sndFile.m_Surround.m_Settings = TrackerSettings::Instance().m_SurroundSettings;
+#endif
+#ifndef NO_DSP
+	sndFile.m_MegaBass.m_Settings = TrackerSettings::Instance().m_MegaBassSettings;
 #endif
 #ifndef NO_EQ
 	sndFile.SetEQGains(TrackerSettings::Instance().m_EqSettings.Gains, MAX_EQ_BANDS, TrackerSettings::Instance().m_EqSettings.Freqs, reset);
