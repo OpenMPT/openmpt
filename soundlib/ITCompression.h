@@ -77,7 +77,9 @@ public:
 	ITDecompression(FileReader &file, ModSample &sample, bool it215);
 
 protected:
-	FileReader chunk;			// Currnetly processed block
+	FileReader chunk;			// Currently processed block
+	FileReader::PinnedRawDataView chunkView;	// view into Currently processed block
+
 	ModSample &mptSample;		// Sample that is being processed
 
 	SmpLength writtenSamples;	// Number of samples so far written on this channel
