@@ -36,18 +36,29 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 			const mpt::PathString tempName = mpt::CreateTempFileName(MPT_PATHSTRING("OpenMPT"), fileNameExtension);
 			HANDLE hFile = NULL;
 			hFile = CreateFileW(tempName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL);
-			if(!hFile || hFile == INVALID_HANDLE_VALUE) throw std::runtime_error("");
-			std::size_t towrite = file.GetLength();
-			std::size_t written = 0;
-			do
+			if(hFile == NULL || hFile == INVALID_HANDLE_VALUE)
 			{
-				DWORD chunkSize = std::min<DWORD>(65536, mpt::saturate_cast<DWORD>(towrite));
-				DWORD chunkDone = 0;
-				WriteFile(hFile, file.GetRawData() + written, chunkSize, &chunkDone, NULL);
-				if(chunkDone != chunkSize) { CloseHandle(hFile); throw std::runtime_error(""); }
-				towrite -= chunkDone;
-				written += chunkDone;
-			} while(towrite > 0);
+				throw std::runtime_error("");
+			}
+			while(!file.EndOfFile())
+			{
+				FileReader::PinnedRawDataView view = file.ReadPinnedRawDataView(mpt::IO::BUFFERSIZE_NORMAL);
+				std::size_t towrite = view.size();
+				std::size_t written = 0;
+				do
+				{
+					DWORD chunkSize = towrite;
+					DWORD chunkDone = 0;
+					WriteFile(hFile, view.data() + written, chunkSize, &chunkDone, NULL);
+					if(chunkDone != chunkSize)
+					{
+						CloseHandle(hFile);
+						throw std::runtime_error("");
+					}
+					towrite -= chunkDone;
+					written += chunkDone;
+				} while(towrite > 0);
+			}
 			CloseHandle(hFile);
 			hFile = NULL;
 			m_Filename = tempName;
