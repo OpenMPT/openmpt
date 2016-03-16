@@ -286,12 +286,12 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 
 		if(m_PlayConfig.getGlobalVolumeAppliesToMaster())
 		{
-			ApplyGlobalVolume(MixSoundBuffer, MixRearBuffer, countChunk);
+			ProcessGlobalVolume(countChunk);
 		}
 
 		if(m_MixerSettings.m_nStereoSeparation != MixerSettings::StereoSeparationScale)
 		{
-			ApplyStereoSeparation(MixSoundBuffer, MixRearBuffer, m_MixerSettings.gnChannels, countChunk, m_MixerSettings.m_nStereoSeparation);
+			ProcessStereoSeparation(countChunk);
 		}
 
 		if(m_MixerSettings.DSPMask)
@@ -2401,8 +2401,8 @@ forceinline void ApplyGlobalVolumeWithRamping(int *SoundBuffer, int *RearBuffer,
 }
 
 
-void CSoundFile::ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long lCount)
-//--------------------------------------------------------------------------------
+void CSoundFile::ProcessGlobalVolume(long lCount)
+//-----------------------------------------------
 {
 
 	// should we ramp?
@@ -2453,15 +2453,22 @@ void CSoundFile::ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long lCoun
 	// apply volume and ramping
 	if(m_MixerSettings.gnChannels == 1)
 	{
-		ApplyGlobalVolumeWithRamping<1>(SoundBuffer, RearBuffer, lCount, m_PlayState.m_nGlobalVolume, step, m_PlayState.m_nSamplesToGlobalVolRampDest, m_PlayState.m_lHighResRampingGlobalVolume);
+		ApplyGlobalVolumeWithRamping<1>(MixSoundBuffer, MixRearBuffer, lCount, m_PlayState.m_nGlobalVolume, step, m_PlayState.m_nSamplesToGlobalVolRampDest, m_PlayState.m_lHighResRampingGlobalVolume);
 	} else if(m_MixerSettings.gnChannels == 2)
 	{
-		ApplyGlobalVolumeWithRamping<2>(SoundBuffer, RearBuffer, lCount, m_PlayState.m_nGlobalVolume, step, m_PlayState.m_nSamplesToGlobalVolRampDest, m_PlayState.m_lHighResRampingGlobalVolume);
+		ApplyGlobalVolumeWithRamping<2>(MixSoundBuffer, MixRearBuffer, lCount, m_PlayState.m_nGlobalVolume, step, m_PlayState.m_nSamplesToGlobalVolRampDest, m_PlayState.m_lHighResRampingGlobalVolume);
 	} else if(m_MixerSettings.gnChannels == 4)
 	{
-		ApplyGlobalVolumeWithRamping<4>(SoundBuffer, RearBuffer, lCount, m_PlayState.m_nGlobalVolume, step, m_PlayState.m_nSamplesToGlobalVolRampDest, m_PlayState.m_lHighResRampingGlobalVolume);
+		ApplyGlobalVolumeWithRamping<4>(MixSoundBuffer, MixRearBuffer, lCount, m_PlayState.m_nGlobalVolume, step, m_PlayState.m_nSamplesToGlobalVolRampDest, m_PlayState.m_lHighResRampingGlobalVolume);
 	}
 
+}
+
+
+void CSoundFile::ProcessStereoSeparation(long countChunk)
+//-------------------------------------------------------
+{
+	ApplyStereoSeparation(MixSoundBuffer, MixRearBuffer, m_MixerSettings.gnChannels, countChunk, m_MixerSettings.m_nStereoSeparation);
 }
 
 
