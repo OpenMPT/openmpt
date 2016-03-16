@@ -24,10 +24,10 @@ OPENMPT_NAMESPACE_BEGIN
 // [in]  length: number of characters that should be read, not including a possible trailing null terminator (it is automatically appended).
 // [in]  lineEnding: line ending formatting of the text in memory.
 // [out] returns true on success.
-bool SongMessage::Read(const void *data, size_t length, LineEnding lineEnding)
-//----------------------------------------------------------------------------
+bool SongMessage::Read(const mpt::byte *data, size_t length, LineEnding lineEnding)
+//---------------------------------------------------------------------------------
 {
-	const char *str = static_cast<const char *>(data);
+	const char *str = mpt::byte_cast<const char *>(data);
 	while(length != 0 && str[length - 1] == '\0')
 	{
 		// Ignore trailing null character.
@@ -110,8 +110,8 @@ bool SongMessage::Read(FileReader &file, const size_t length, LineEnding lineEnd
 //----------------------------------------------------------------------------------
 {
 	FileReader::off_t readLength = std::min(static_cast<FileReader::off_t>(length), file.BytesLeft());
-	bool success = Read(file.GetRawData(), readLength, lineEnding);
-	file.Skip(readLength);
+	FileReader::PinnedRawDataView fileView = file.ReadPinnedRawDataView(readLength);
+	bool success = Read(fileView.data(), fileView.size(), lineEnding);
 	return success;
 }
 
@@ -122,10 +122,10 @@ bool SongMessage::Read(FileReader &file, const size_t length, LineEnding lineEnd
 // [in]  lineLength: The fixed length of a line.
 // [in]  lineEndingLength: The padding space between two fixed lines. (there could for example be a null char after every line)
 // [out] returns true on success.
-bool SongMessage::ReadFixedLineLength(const void *data, const size_t length, const size_t lineLength, const size_t lineEndingLength)
-//----------------------------------------------------------------------------------------------------------------------------------
+bool SongMessage::ReadFixedLineLength(const mpt::byte *data, const size_t length, const size_t lineLength, const size_t lineEndingLength)
+//---------------------------------------------------------------------------------------------------------------------------------------
 {
-	const char *str = static_cast<const char *>(data);
+	const char *str = mpt::byte_cast<const char *>(data);
 	if(lineLength == 0)
 		return false;
 
@@ -161,8 +161,8 @@ bool SongMessage::ReadFixedLineLength(FileReader &file, const size_t length, con
 //----------------------------------------------------------------------------------------------------------------------------------
 {
 	FileReader::off_t readLength = std::min(static_cast<FileReader::off_t>(length), file.BytesLeft());
-	bool success = ReadFixedLineLength(file.GetRawData(), readLength, lineLength, lineEndingLength);
-	file.Skip(readLength);
+	FileReader::PinnedRawDataView fileView = file.ReadPinnedRawDataView(readLength);
+	bool success = ReadFixedLineLength(fileView.data(), fileView.size(), lineLength, lineEndingLength);
 	return success;
 }
 
