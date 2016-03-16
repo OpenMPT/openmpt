@@ -288,6 +288,11 @@ public:
 		return DataContainer().GetLength() - streamPos;
 	}
 
+	bool EndOfFile() const
+	{
+		return !CanRead(1);
+	}
+
 	bool NoBytesLeft() const
 	{
 		return !CanRead(1);
