@@ -878,13 +878,16 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	if(IsComponentAvailable(unmo3))
 	{
 		file.Rewind();
-		const void *stream = file.GetRawData<void>();
-		uint32 length = mpt::saturate_cast<uint32>(file.GetLength());
+		FileReader::PinnedRawDataView fileView = file.GetPinnedRawDataView();
+		const void *stream = mpt::byte_cast<const void*>(fileView.data());
+		uint32 length = mpt::saturate_cast<uint32>(fileView.size());
 
 		if(unmo3->UNMO3_Decode(&stream, &length, (loadFlags & loadSampleData) ? 0 : 1) != 0)
 		{
 			return false;
 		}
+
+		fileView.invalidate();
 
 		// If decoding was successful, stream and length will keep the new pointers now.
 		FileReader unpackedFile(mpt::as_span(mpt::byte_cast<const mpt::byte*>(stream), length));
@@ -1704,7 +1707,8 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				mergedData.insert(mergedData.end(), mergedStreamData.begin(), mergedStreamData.end());
 
 				sampleChunk.chunk.Rewind();
-				mergedData.insert(mergedData.end(), sampleChunk.chunk.GetRawData<uint8>(), sampleChunk.chunk.GetRawData<uint8>() + sampleChunk.chunk.GetLength());
+				FileReader::PinnedRawDataView sampleChunkView = sampleChunk.chunk.GetPinnedRawDataView();
+				mergedData.insert(mergedData.end(), sampleChunkView.begin(), sampleChunkView.end());
 
 #endif
 
