@@ -105,10 +105,6 @@ public:
 
 	void SetSlot(PLUGINDEX slot);
 	inline PLUGINDEX GetSlot() const { return m_nSlot; }
-
-	// Get the plugin's editor window
-	CAbstractVstEditor *GetEditor() { return m_pEditor; }
-	const CAbstractVstEditor *GetEditor() const { return m_pEditor; }
 #endif // MODPLUG_TRACKER
 
 	inline VSTPluginLib &GetPluginFactory() const { return m_Factory; }
@@ -194,7 +190,11 @@ public:
 protected:
 	virtual CAbstractVstEditor *OpenEditor();
 public:
+	// Get the plugin's editor window
+	CAbstractVstEditor *GetEditor() { return m_pEditor; }
+	const CAbstractVstEditor *GetEditor() const { return m_pEditor; }
 	void ToggleEditor();
+	void CloseEditor();
 	void SetEditorPos(int32 x, int32 y);
 	void GetEditorPos(int32 &x, int32 &y) const;
 

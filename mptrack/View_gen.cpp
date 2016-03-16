@@ -1231,7 +1231,7 @@ void CViewGlobals::OnEditPlugin()
 {
 	CModDoc *pModDoc = GetDocument();
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
-	pModDoc->TogglePluginEditor(m_nCurrentPlugin);
+	pModDoc->TogglePluginEditor(m_nCurrentPlugin, CMainFrame::GetInputHandler()->ShiftPressed());
 	return;
 }
 

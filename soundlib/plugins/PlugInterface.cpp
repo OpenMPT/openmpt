@@ -76,12 +76,7 @@ IMixPlugin::~IMixPlugin()
 //-----------------------
 {
 #ifdef MODPLUG_TRACKER
-	if(m_pEditor != nullptr)
-	{
-		if(m_pEditor->m_hWnd) m_pEditor->OnClose();
-		delete m_pEditor;
-		m_pEditor = nullptr;
-	}
+	CloseEditor();
 #endif // MODPLUG_TRACKER
 
 	if (m_pNext) m_pNext->m_pPrev = m_pPrev;
@@ -552,9 +547,7 @@ void IMixPlugin::ToggleEditor()
 {
 	if (m_pEditor)
 	{
-		if (m_pEditor->m_hWnd) m_pEditor->DoClose();
-		delete m_pEditor;
-		m_pEditor = nullptr;
+		CloseEditor();
 	} else
 	{
 		m_pEditor = OpenEditor();
@@ -575,6 +568,18 @@ CAbstractVstEditor *IMixPlugin::OpenEditor()
 	} catch(MPTMemoryException)
 	{
 		return nullptr;
+	}
+}
+
+
+void IMixPlugin::CloseEditor()
+//----------------------------
+{
+	if(m_pEditor)
+	{
+		if (m_pEditor->m_hWnd) m_pEditor->DoClose();
+		delete m_pEditor;
+		m_pEditor = nullptr;
 	}
 }
 

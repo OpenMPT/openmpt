@@ -2734,14 +2734,37 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 }
 
 
-void CModDoc::TogglePluginEditor(UINT m_nCurrentPlugin)
-//-----------------------------------------------------
+void CModDoc::TogglePluginEditor(UINT plugin, bool onlyThisEditor)
+//----------------------------------------------------------------
 {
-	if(m_nCurrentPlugin < MAX_MIXPLUGINS)
+	if(plugin < MAX_MIXPLUGINS)
 	{
-		IMixPlugin *pPlugin = m_SndFile.m_MixPlugins[m_nCurrentPlugin].pMixPlugin;
+		IMixPlugin *pPlugin = m_SndFile.m_MixPlugins[plugin].pMixPlugin;
 		if(pPlugin != nullptr)
 		{
+			if(onlyThisEditor)
+			{
+				int32 posX = int32_min, posY = int32_min;
+				for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+				{
+					SNDMIXPLUGIN &otherPlug = m_SndFile.m_MixPlugins[i];
+					if(i != plugin && otherPlug.pMixPlugin != nullptr)
+					{
+						otherPlug.pMixPlugin->CloseEditor();
+						if(otherPlug.editorX != int32_min)
+						{
+							posX = otherPlug.editorX;
+							posY = otherPlug.editorY;
+						}
+					}
+				}
+				if(posX != int32_min)
+				{
+					m_SndFile.m_MixPlugins[plugin].editorX = posX;
+					m_SndFile.m_MixPlugins[plugin].editorY = posY;
+				}
+			}
+
 			pPlugin->ToggleEditor();
 		}
 	}
