@@ -994,9 +994,12 @@ void CAbstractVstEditor::StoreWindowPos()
 		wnd.length = sizeof(WINDOWPLACEMENT);
 		GetWindowPlacement(&wnd);
 		const int cxScreen = GetSystemMetrics(SM_XVIRTUALSCREEN), cyScreen = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-		int32 editorX = Util::muldivr(wnd.rcNormalPosition.left, 1 << 30, cxScreen);
-		int32 editorY = Util::muldivr(wnd.rcNormalPosition.top, 1 << 30, cyScreen);
-		m_VstPlugin.SetEditorPos(editorX, editorY);
+		if(cxScreen && cyScreen)
+		{
+			int32 editorX = Util::muldivr(wnd.rcNormalPosition.left, 1 << 30, cxScreen);
+			int32 editorY = Util::muldivr(wnd.rcNormalPosition.top, 1 << 30, cyScreen);
+			m_VstPlugin.SetEditorPos(editorX, editorY);
+		}
 	}
 }
 
