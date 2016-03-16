@@ -678,7 +678,7 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
 			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 		{
-			CInputHandler *ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+			CInputHandler *ih = CMainFrame::GetInputHandler();
 
 			//Translate message manually
 			UINT nChar = pMsg->wParam;
@@ -1294,7 +1294,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 				// Toggle record state
 				pModDoc->Record1Channel(nItemNo);
 				InvalidateChannelsHeaders();
-			} else if(CMainFrame::GetMainFrame()->GetInputHandler()->AltPressed())
+			} else if(CMainFrame::GetInputHandler()->AltPressed())
 			{
 				// Solo / Unsolo
 				OnSoloChannel(nItemNo);
@@ -1439,7 +1439,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 		quickChannelProperties.Show(GetDocument(), nChn, m_nPattern, pt);
 	} else if(nChn < pSndFile->GetNumChannels() && pSndFile->Patterns.IsValidPat(m_nPattern) && !(flags & (MK_CONTROL | MK_SHIFT)))
 	{
-		CInputHandler *ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+		CInputHandler *ih = CMainFrame::GetInputHandler();
 
 		//------ Plugin Header Menu --------- :
 		if(m_Status[psShowPluginNames] &&
@@ -4026,7 +4026,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 
 	// Handle MIDI messages assigned to shortcuts
-	CInputHandler *ih = pMainFrm->GetInputHandler();
+	CInputHandler *ih = CMainFrame::GetInputHandler();
 	if(ih->HandleMIDIMessage(static_cast<InputTargetContext>(kCtxViewPatterns + 1 + m_Cursor.GetColumnType()), dwMidiData) != kcNull
 		|| ih->HandleMIDIMessage(kCtxAllContexts, dwMidiData) != kcNull)
 	{

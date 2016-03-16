@@ -1479,7 +1479,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 		if (IsDragItemEnvPoint())
 		{
 			// Ctrl pressed -> move tail of envelope
-			bChanged = EnvSetValue(m_nDragItem - 1, nTick, nVal, CMainFrame::GetMainFrame()->GetInputHandler()->CtrlPressed());
+			bChanged = EnvSetValue(m_nDragItem - 1, nTick, nVal, CMainFrame::GetInputHandler()->CtrlPressed());
 		} else
 		{
 			int nPoint = ScreenToPoint(pt.x, pt.y);
@@ -1695,7 +1695,7 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 		} else
 		{
 			// Shift-Click: Insert envelope point here
-			if(CMainFrame::GetMainFrame()->GetInputHandler()->ShiftPressed())
+			if(CMainFrame::GetInputHandler()->ShiftPressed())
 			{
 				m_nDragItem = EnvInsertPoint(ScreenToTick(pt.x), ScreenToValue(pt.y)); // returns point ID + 1 if successful, else 0.
 				if(m_nDragItem > 0)
@@ -2219,7 +2219,7 @@ BOOL CViewInstrument::PreTranslateMessage(MSG *pMsg)
 		if((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
 			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 		{
-			CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+			CInputHandler* ih = CMainFrame::GetInputHandler();
 
 			//Translate message manually
 			UINT nChar = pMsg->wParam;

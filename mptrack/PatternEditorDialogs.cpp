@@ -1841,7 +1841,7 @@ BOOL QuickChannelProperties::PreTranslateMessage(MSG *pMsg)
 		if((pMsg->message == WM_SYSKEYUP) || (pMsg->message == WM_KEYUP) ||
 			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 		{
-			CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+			CInputHandler* ih = CMainFrame::GetInputHandler();
 
 			//Translate message manually
 			UINT nChar = pMsg->wParam;

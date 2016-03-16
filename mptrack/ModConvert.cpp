@@ -623,7 +623,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	EndWaitCursor();
 
 	//rewbs.customKeys: update effect key commands
-	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
+	CInputHandler *ih = CMainFrame::GetInputHandler();
 	ih->SetEffectLetters(m_SndFile.GetModSpecifications());
 	//end rewbs.customKeys
 

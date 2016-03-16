@@ -373,6 +373,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 		break;
 	default:
 		m_SndFile.ChangeModTypeTo(m_SndFile.GetBestSaveFormat());
+		break;
 	}
 
 	ReinitRecordState();
@@ -987,7 +988,7 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 	bool captured = m_SndFile.GetMIDIMapper().OnMIDImsg(midiData, mappedIndex, paramIndex, paramValue);
 
 	// Handle MIDI messages assigned to shortcuts
-	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
+	CInputHandler *ih = CMainFrame::GetInputHandler();
 	if(ih->HandleMIDIMessage(ctx, midiData) != kcNull
 		|| ih->HandleMIDIMessage(kCtxAllContexts, midiData) != kcNull)
 	{
@@ -1870,9 +1871,9 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
 		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 
-		pMainFrm->GetInputHandler()->Bypass(true);
+		CMainFrame::GetInputHandler()->Bypass(true);
 		bool cancel = dwcdlg.DoModal() != IDOK;
-		pMainFrm->GetInputHandler()->Bypass(false);
+		CMainFrame::GetInputHandler()->Bypass(false);
 
 		if(wsdlg.m_Settings.outputToSample)
 		{
@@ -2015,9 +2016,9 @@ void CModDoc::OnFileMidiConvert()
 	if(mididlg.DoModal() == IDOK)
 	{
 		CDoMidiConvert doconv(m_SndFile, dlg.GetFirstFile(), mididlg.m_instrMap);
-		pMainFrm->GetInputHandler()->Bypass(true);
+		CMainFrame::GetInputHandler()->Bypass(true);
 		doconv.DoModal();
-		pMainFrm->GetInputHandler()->Bypass(false);
+		CMainFrame::GetInputHandler()->Bypass(false);
 	}
 #else
 	Reporting::Error("In order to use MIDI export, OpenMPT must be built with plugin support.");
@@ -2745,6 +2746,7 @@ void CModDoc::TogglePluginEditor(UINT m_nCurrentPlugin)
 		}
 	}
 }
+
 
 void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 //-------------------------------------------------

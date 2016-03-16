@@ -73,11 +73,9 @@ static std::wstring FillEmptyCaption(const std::wstring &caption)
 static UINT ShowNotificationImpl(const std::wstring &text, const std::wstring &caption, UINT flags, const CWnd *parent)
 //---------------------------------------------------------------------------------------------------------------------
 {
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-
-	if(pMainFrm != nullptr && pMainFrm->GetInputHandler() != nullptr)
+	if(CMainFrame::GetInputHandler() != nullptr)
 	{
-		pMainFrm->GetInputHandler()->Bypass(true);
+		CMainFrame::GetInputHandler()->Bypass(true);
 	}
 
 	if(parent == nullptr)
@@ -86,9 +84,9 @@ static UINT ShowNotificationImpl(const std::wstring &text, const std::wstring &c
 	}
 	UINT result = ::MessageBoxW((parent ? parent->m_hWnd : NULL), text.c_str(), caption.empty() ? MAINFRAME_TITLEW : caption.c_str(), flags);
 
-	if(pMainFrm != nullptr && pMainFrm->GetInputHandler() != nullptr)
+	if(CMainFrame::GetInputHandler() != nullptr)
 	{
-		pMainFrm->GetInputHandler()->Bypass(false);
+		CMainFrame::GetInputHandler()->Bypass(false);
 	}
 
 	return result;

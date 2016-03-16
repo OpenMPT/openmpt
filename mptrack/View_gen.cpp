@@ -254,7 +254,7 @@ LRESULT CViewGlobals::OnMidiMsg(WPARAM midiData, LPARAM)
 //------------------------------------------------------
 {
 	// Handle MIDI messages assigned to shortcuts
-	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
+	CInputHandler *ih = CMainFrame::GetInputHandler();
 	ih->HandleMIDIMessage(kCtxViewGeneral, midiData) != kcNull
 		|| ih->HandleMIDIMessage(kCtxAllContexts, midiData) != kcNull;
 	return 1;

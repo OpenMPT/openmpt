@@ -1742,7 +1742,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 		const CSoundFile &sndFile = pModDoc->GetrSoundFile();
 		const ModSample &sample = sndFile.GetSample(m_nSample);
 		HMENU hMenu = ::CreatePopupMenu();
-		CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+		CInputHandler* ih = CMainFrame::GetInputHandler();
 		if (!hMenu)	return;
 		if (sample.nLength)
 		{
@@ -2863,7 +2863,7 @@ LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	}
 
 	// Handle MIDI messages assigned to shortcuts
-	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
+	CInputHandler *ih = CMainFrame::GetInputHandler();
 	if(ih->HandleMIDIMessage(kCtxViewSamples, dwMidiData) != kcNull
 		|| ih->HandleMIDIMessage(kCtxAllContexts, dwMidiData) != kcNull)
 	{
@@ -2908,7 +2908,7 @@ BOOL CViewSample::PreTranslateMessage(MSG *pMsg)
 		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
 			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 		{
-			CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+			CInputHandler* ih = CMainFrame::GetInputHandler();
 
 			//Translate message manually
 			UINT nChar = pMsg->wParam;
