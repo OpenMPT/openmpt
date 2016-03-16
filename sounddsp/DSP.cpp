@@ -162,10 +162,14 @@ CMegaBass::CMegaBass()
 	nXBassFlt_A1 = 0;
 
 	// DC Removal Biquad
-	nDCRFlt_Y1l = 0;
-	nDCRFlt_X1l = 0;
-	nDCRFlt_Y1r = 0;
-	nDCRFlt_X1r = 0;
+	nDCRFlt_Y1lf = 0;
+	nDCRFlt_X1lf = 0;
+	nDCRFlt_Y1rf = 0;
+	nDCRFlt_X1rf = 0;
+	nDCRFlt_Y1lb = 0;
+	nDCRFlt_X1lb = 0;
+	nDCRFlt_Y1rb = 0;
+	nDCRFlt_X1rb = 0;
 
 }
 
@@ -173,6 +177,7 @@ CMegaBass::CMegaBass()
 void CSurround::Initialize(bool bReset, DWORD MixingFreq)
 //-------------------------------------------------------
 {
+	MPT_UNREFERENCED_PARAMETER(bReset);
 	if (!m_Settings.m_nProLogicDelay) m_Settings.m_nProLogicDelay = 20;
 
 	// Pro-Logic Surround
@@ -228,10 +233,14 @@ void CMegaBass::Initialize(bool bReset, DWORD MixingFreq)
 	{
 		nXBassFlt_X1 = 0;
 		nXBassFlt_Y1 = 0;
-		nDCRFlt_X1l = 0;
-		nDCRFlt_X1r = 0;
-		nDCRFlt_Y1l = 0;
-		nDCRFlt_Y1r = 0;
+		nDCRFlt_X1lf = 0;
+		nDCRFlt_X1rf = 0;
+		nDCRFlt_Y1lf = 0;
+		nDCRFlt_Y1rf = 0;
+		nDCRFlt_X1lb = 0;
+		nDCRFlt_X1rb = 0;
+		nDCRFlt_Y1lb = 0;
+		nDCRFlt_Y1rb = 0;
 	}
 }
 
@@ -316,11 +325,26 @@ void CMegaBass::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UI
 	if(nChannels >= 2)
 	// Bass Expansion
 	{
-		X86_StereoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1l, &nDCRFlt_X1l, &nDCRFlt_Y1r, &nDCRFlt_X1r);
+		X86_StereoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1lf, &nDCRFlt_X1lf, &nDCRFlt_Y1rf, &nDCRFlt_X1rf);
+		if(nChannels > 2) X86_StereoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1lb, &nDCRFlt_X1lb, &nDCRFlt_Y1rb, &nDCRFlt_X1rb);
 		int *px = MixSoundBuffer;
+		int *py = MixRearBuffer;
 		int x1 = nXBassFlt_X1;
 		int y1 = nXBassFlt_Y1;
-		for (int x=count; x; x--)
+		if(nChannels > 2) (int x=count; x; x--)
+		{
+			int x_m = (px[0]+px[1]+py[0]+py[1]+0x100)>>9;
+
+			y1 = (nXBassFlt_B0 * x_m + nXBassFlt_B1 * x1 + nXBassFlt_A1 * y1) >> (10-8);
+			x1 = x_m;
+			px[0] += y1;
+			px[1] += y1;
+			py[0] += y1;
+			py[1] += y1;
+			y1 = (y1+0x80) >> 8;
+			px += 2;
+			py += 2;
+		} else for (int x=count; x; x--)
 		{
 			int x_m = (px[0]+px[1]+0x100)>>9;
 
@@ -338,7 +362,7 @@ void CMegaBass::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UI
 	{
 
 	// Bass Expansion
-		X86_MonoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1l, &nDCRFlt_X1l);
+		X86_MonoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1lf, &nDCRFlt_X1lf);
 		int *px = MixSoundBuffer;
 		int x1 = nXBassFlt_X1;
 		int y1 = nXBassFlt_Y1;
