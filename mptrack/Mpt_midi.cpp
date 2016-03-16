@@ -111,7 +111,7 @@ void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD_PTR, DWORD_PTR dwParam1, 
 			}
 		}
 		// Pass MIDI to keyboard handler
-		pMainFrm->GetInputHandler()->HandleMIDIMessage(kCtxAllContexts, data);
+		CMainFrame::GetInputHandler()->HandleMIDIMessage(kCtxAllContexts, data);
 	} else if(wMsg == MIM_LONGDATA)
 	{
 		// Sysex...
@@ -124,7 +124,7 @@ bool CMainFrame::midiOpenDevice(bool showSettings)
 {
 	if (shMidiIn) return true;
 	
-	if (midiInOpen(&shMidiIn, TrackerSettings::Instance().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
+	if (midiInOpen(&shMidiIn, TrackerSettings::Instance().GetCurrentMIDIDevice(), (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 	{
 		shMidiIn = NULL;
 
@@ -136,7 +136,7 @@ bool CMainFrame::midiOpenDevice(bool showSettings)
 		}
 
 		// Let's see if the user updated the settings.
-		if(midiInOpen(&shMidiIn, TrackerSettings::Instance().m_nMidiDevice, (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
+		if(midiInOpen(&shMidiIn, TrackerSettings::Instance().GetCurrentMIDIDevice(), (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 		{
 			shMidiIn = NULL;
 			return false;

@@ -70,14 +70,14 @@ CSelectPluginDlg::CSelectPluginDlg(CModDoc *pModDoc, PLUGINDEX nPlugSlot, CWnd *
 		m_pPlugin = &(pModDoc->GetrSoundFile().m_MixPlugins[m_nPlugSlot]);
 	}
 
-	CMainFrame::GetMainFrame()->GetInputHandler()->Bypass(true);
+	CMainFrame::GetInputHandler()->Bypass(true);
 }
 
 
 CSelectPluginDlg::~CSelectPluginDlg()
 //-----------------------------------
 {
-	CMainFrame::GetMainFrame()->GetInputHandler()->Bypass(false);
+	CMainFrame::GetInputHandler()->Bypass(false);
 }
 
 

@@ -30,7 +30,7 @@ CMIDIMappingDialog::CMIDIMappingDialog(CWnd* pParent /*=NULL*/, CSoundFile& rSnd
 	  m_rMIDIMapper(m_rSndFile.GetMIDIMapper())
 //---------------------------------------------------------------------
 {
-	CMainFrame::GetMainFrame()->GetInputHandler()->Bypass(true);
+	CMainFrame::GetInputHandler()->Bypass(true);
 	oldMIDIRecondWnd = CMainFrame::GetMainFrame()->GetMidiRecordWnd();
 }
 
@@ -39,7 +39,7 @@ CMIDIMappingDialog::~CMIDIMappingDialog()
 //---------------------------------------
 {
 	CMainFrame::GetMainFrame()->SetMidiRecordWnd(oldMIDIRecondWnd);
-	CMainFrame::GetMainFrame()->GetInputHandler()->Bypass(false);
+	CMainFrame::GetInputHandler()->Bypass(false);
 }
 
 

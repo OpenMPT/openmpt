@@ -336,7 +336,7 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 	if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
 		(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 	{
-		CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+		CInputHandler* ih = CMainFrame::GetInputHandler();
 
 		//Translate message manually
 		UINT nChar = (UINT)pMsg->wParam;
@@ -3839,7 +3839,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 
 		if(doLabelEdit)
 		{
-			CMainFrame::GetMainFrame()->GetInputHandler()->Bypass(true);
+			CMainFrame::GetInputHandler()->Bypass(true);
 			editCtrl->SetWindowText(text.c_str());
 			*result = FALSE;
 			return;
@@ -3853,7 +3853,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 //----------------------------------------------------------
 {
-	CMainFrame::GetMainFrame()->GetInputHandler()->Bypass(false);
+	CMainFrame::GetInputHandler()->Bypass(false);
 	doLabelEdit = false;
 
 	NMTVDISPINFO *info = reinterpret_cast<NMTVDISPINFO *>(nmhdr);

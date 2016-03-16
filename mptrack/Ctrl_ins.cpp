@@ -75,7 +75,7 @@ BOOL CNoteMapWnd::PreTranslateMessage(MSG* pMsg)
 		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
 			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 		{
-			CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+			CInputHandler* ih = CMainFrame::GetInputHandler();
 
 			//Translate message manually
 			UINT nChar = pMsg->wParam;
@@ -99,7 +99,7 @@ BOOL CNoteMapWnd::PreTranslateMessage(MSG* pMsg)
 	if (pMsg->message == WM_CHAR) //key is a character
 	{
 		UINT nFlags = HIWORD(pMsg->lParam);
-		KeyEventType kT = (CMainFrame::GetMainFrame())->GetInputHandler()->GetKeyEventType(nFlags);
+		KeyEventType kT = CMainFrame::GetInputHandler()->GetKeyEventType(nFlags);
 
 		if (kT == kKeyEventDown)
 			if (HandleChar(wParam))
@@ -1012,7 +1012,7 @@ void CCtrlInstruments::RecalcLayout()
 void CCtrlInstruments::OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult)
 //--------------------------------------------------------------------------
 {
-	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
+	CInputHandler *ih = CMainFrame::GetInputHandler();
 	LPNMTOOLBAR pToolBar = reinterpret_cast<LPNMTOOLBAR>(pNMHDR);
 	ClientToScreen(&(pToolBar->rcButton)); // TrackPopupMenu uses screen coords
 	const int offset = Util::ScalePixels(4, m_hWnd);	// Compared to the main toolbar, the offset seems to be a bit wrong here...?
@@ -2590,7 +2590,7 @@ BOOL CCtrlInstruments::PreTranslateMessage(MSG *pMsg)
 		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
 			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 		{
-			CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+			CInputHandler* ih = CMainFrame::GetInputHandler();
 
 			//Translate message manually
 			UINT nChar = pMsg->wParam;
@@ -2818,7 +2818,7 @@ void CCtrlInstruments::OnBnClickedCheckPitchtempolock()
 	if(IsLocked() || !m_nInstrument) return;
 
 	INSTRUMENTINDEX firstIns = m_nInstrument, lastIns = m_nInstrument;
-	if(CMainFrame::GetMainFrame()->GetInputHandler()->ShiftPressed())
+	if(CMainFrame::GetInputHandler()->ShiftPressed())
 	{
 		firstIns = 1;
 		lastIns = m_sndFile.GetNumInstruments();
