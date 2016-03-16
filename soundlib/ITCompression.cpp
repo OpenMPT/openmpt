@@ -323,6 +323,7 @@ ITDecompression::ITDecompression(FileReader &file, ModSample &sample, bool it215
 		while(writtenSamples < sample.nLength && file.CanRead(sizeof(uint16)))
 		{
 			chunk = file.ReadChunk(file.ReadUint16LE());
+			chunkView = chunk.GetPinnedRawDataView();
 
 			// Initialise bit reader
 			dataPos = 0;
@@ -350,7 +351,7 @@ void ITDecompression::Uncompress(typename Properties::sample_t *target)
 	int width = defWidth;
 	while(curLength > 0)
 	{
-		if(width < 1 || width > defWidth || dataPos >= chunk.GetLength())
+		if(width < 1 || width > defWidth || dataPos >= chunkView.size())
 		{
 			// Error!
 			return;
@@ -399,9 +400,9 @@ void ITDecompression::ChangeWidth(int &curWidth, int width)
 int ITDecompression::ReadBits(int width)
 //--------------------------------------
 {
-	const uint8 *data = chunk.GetRawData<uint8>();
+	const mpt::byte *data = chunkView.begin();
 	int v = 0, vPos = 0, vMask = (1 << width) - 1;
-	while(width >= remBits && dataPos < chunk.GetLength())
+	while(width >= remBits && dataPos < chunkView.size())
 	{
 		v |= (data[dataPos] >> bitPos) << vPos;
 		vPos += remBits;
@@ -411,7 +412,7 @@ int ITDecompression::ReadBits(int width)
 		bitPos = 0;
 	}
 
-	if(width > 0 && dataPos < chunk.GetLength())
+	if(width > 0 && dataPos < chunkView.size())
 	{
 		v |= (data[dataPos] >> bitPos) << vPos;
 		v &= vMask;
