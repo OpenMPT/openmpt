@@ -467,7 +467,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 		str = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS, str);
 
 		// Packed text doesn't include any line breaks!
-		m_songMessage.ReadFixedLineLength(str.c_str(), str.length(), 76, 0);
+		m_songMessage.ReadFixedLineLength(mpt::byte_cast<const mpt::byte*>(str.c_str()), str.length(), 76, 0);
 	}
 
 	// Read Order List
@@ -922,7 +922,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		std::string str(textOut.begin(), textOut.begin() + descriptionHeader.unpackedLen);
 		str = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS2, str);
 		// Packed text doesn't include any line breaks!
-		m_songMessage.ReadFixedLineLength(str.c_str(), str.length(), 74, 0);
+		m_songMessage.ReadFixedLineLength(mpt::byte_cast<const mpt::byte*>(str.c_str()), str.length(), 74, 0);
 	}
 
 	// Read Order List

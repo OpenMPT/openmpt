@@ -148,7 +148,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	// Copy first song message line into song title
 	mpt::String::Read<mpt::String::spacePadded>(m_songName, fileHeader.songMessage, 36);
 	// Song Message
-	m_songMessage.ReadFixedLineLength(fileHeader.songMessage, 108, 36, 0);
+	m_songMessage.ReadFixedLineLength(mpt::byte_cast<const mpt::byte*>(fileHeader.songMessage), 108, 36, 0);
 
 	// Reading Orders
 	Order.ReadFromArray(fileHeader.orders, CountOf(fileHeader.orders), 0xFF, 0xFE);
