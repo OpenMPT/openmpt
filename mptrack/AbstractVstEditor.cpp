@@ -990,11 +990,12 @@ void CAbstractVstEditor::StoreWindowPos()
 	if(m_hWnd)
 	{
 		// Translate screen position into percentage (to make it independent of the actual screen resolution)
-		CRect rect;
-		GetWindowRect(&rect);
-		const int cxScreen = GetSystemMetrics(SM_CXSCREEN), cyScreen = GetSystemMetrics(SM_CYSCREEN);
-		int32 editorX = Util::muldivr(rect.left, 1 << 30, cxScreen);
-		int32 editorY = Util::muldivr(rect.top, 1 << 30, cyScreen);
+		WINDOWPLACEMENT wnd;
+		wnd.length = sizeof(WINDOWPLACEMENT);
+		GetWindowPlacement(&wnd);
+		const int cxScreen = GetSystemMetrics(SM_XVIRTUALSCREEN), cyScreen = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+		int32 editorX = Util::muldivr(wnd.rcNormalPosition.left, 1 << 30, cxScreen);
+		int32 editorY = Util::muldivr(wnd.rcNormalPosition.top, 1 << 30, cyScreen);
 		m_VstPlugin.SetEditorPos(editorX, editorY);
 	}
 }
@@ -1007,20 +1008,22 @@ void CAbstractVstEditor::RestoreWindowPos()
 	int32 editorX, editorY;
 	m_VstPlugin.GetEditorPos(editorX, editorY);
 
-	if((editorX >= 0) && (editorY >= 0))
+	if(editorX > int32_min && editorY > int32_min)
 	{
 		// Translate percentage into screen position (to make it independent of the actual screen resolution)
-		const int cxScreen = GetSystemMetrics(SM_CXSCREEN), cyScreen = GetSystemMetrics(SM_CYSCREEN);
+		const int cxScreen = GetSystemMetrics(SM_XVIRTUALSCREEN), cyScreen = GetSystemMetrics(SM_CYVIRTUALSCREEN);
 		editorX = Util::muldivr(editorX, cxScreen, 1 << 30);
 		editorY = Util::muldivr(editorY, cyScreen, 1 << 30);
 
-		if((editorX + 8 < cxScreen) && (editorY + 8 < cyScreen))
-		{
-			SetWindowPos(NULL, editorX, editorY, 0, 0,
-				SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
-		}
+		WINDOWPLACEMENT wnd;
+		wnd.length = sizeof(wnd);
+		GetWindowPlacement(&wnd);
+		wnd.showCmd = SW_SHOWNOACTIVATE;
+		CRect rect = wnd.rcNormalPosition;
+		rect.MoveToXY(editorX, editorY);
+		wnd.rcNormalPosition = rect;
+		SetWindowPlacement(&wnd);
 	}
-
 }
 
 
