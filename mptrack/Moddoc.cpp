@@ -2748,7 +2748,7 @@ void CModDoc::TogglePluginEditor(UINT plugin, bool onlyThisEditor)
 				for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 				{
 					SNDMIXPLUGIN &otherPlug = m_SndFile.m_MixPlugins[i];
-					if(i != plugin && otherPlug.pMixPlugin != nullptr)
+					if(i != plugin && otherPlug.pMixPlugin != nullptr && otherPlug.pMixPlugin->GetEditor() != nullptr)
 					{
 						otherPlug.pMixPlugin->CloseEditor();
 						if(otherPlug.editorX != int32_min)
