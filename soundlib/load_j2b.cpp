@@ -1021,9 +1021,6 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 		|| fileHeader.fileLength != file.GetLength()
 		|| fileHeader.packedLength != file.BytesLeft()
 		|| fileHeader.packedLength == 0
-#ifndef MPT_BUILD_FUZZER
-		|| fileHeader.crc32 != crc32(0, file.GetRawData<Bytef>(), fileHeader.packedLength)
-#endif
 		)
 	{
 		return false;
@@ -1031,6 +1028,15 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return true;
 	}
+
+	FileReader::PinnedRawDataView filePackedView = file.GetPinnedRawDataView(fileHeader.packedLength);
+
+#ifndef MPT_BUILD_FUZZER
+	if(fileHeader.crc32 != crc32(0, mpt::byte_cast<const Bytef*>(filePackedView.data()), filePackedView.size()))
+	{
+		return false;
+	}
+#endif
 
 	// Header is valid, now unpack the RIFF AM file using inflate
 	uLongf destSize = fileHeader.unpackedLength;
@@ -1040,7 +1046,7 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	int retVal = uncompress(amFileData, &destSize, file.GetRawData<Bytef>(), fileHeader.packedLength);
+	int retVal = uncompress(amFileData, &destSize, mpt::byte_cast<const Bytef*>(filePackedView.data()), filePackedView.size());
 
 	bool result = false;
 
