@@ -160,7 +160,7 @@ CString IMixPlugin::GetFormattedProgramName(int32 index)
 void IMixPlugin::SetEditorPos(int32 x, int32 y)
 //---------------------------------------------
 {
-	m_pMixStruct->editorX= x;
+	m_pMixStruct->editorX = x;
 	m_pMixStruct->editorY = y;
 }
 
