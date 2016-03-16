@@ -1158,7 +1158,7 @@ void CCtrlPatterns::TogglePluginEditor()
 {
 	if(m_sndFile.GetInstrumentPlugin(m_nInstrument) != nullptr)
 	{
-		m_modDoc.TogglePluginEditor(m_sndFile.Instruments[m_nInstrument]->nMixPlug - 1);
+		m_modDoc.TogglePluginEditor(m_sndFile.Instruments[m_nInstrument]->nMixPlug - 1, CMainFrame::GetInputHandler()->ShiftPressed());
 	}
 }
 

@@ -256,7 +256,7 @@ public:
 	void UpdateAllViews(CView *pSender, UpdateHint hint, CObject *pHint=NULL);
 	HWND GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord);
 	LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
-	void TogglePluginEditor(UINT m_nCurrentPlugin);
+	void TogglePluginEditor(UINT m_nCurrentPlugin, bool onlyThisEditor = false);
 	void RecordParamChange(PLUGINDEX slot, PlugParamIndex param);
 	void LearnMacro(int macro, PlugParamIndex param);
 	void SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow, bool setSamplePos);

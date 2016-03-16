@@ -425,7 +425,7 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 			 pMsg->message == WM_SYSKEYDOWN || pMsg->message == WM_KEYDOWN) )
 		{
 
-			CInputHandler *ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+			CInputHandler *ih = CMainFrame::GetInputHandler();
 
 			//Translate message manually
 			UINT nChar = (UINT)pMsg->wParam;
@@ -853,7 +853,7 @@ void CAbstractVstEditor::UpdateOptionsMenu()
 	if(m_OptionsMenu.m_hMenu)
 		m_OptionsMenu.DestroyMenu();
 
-	CInputHandler *ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+	CInputHandler *ih = CMainFrame::GetInputHandler();
 
 	m_OptionsMenu.CreatePopupMenu();
 
