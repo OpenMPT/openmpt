@@ -938,7 +938,8 @@ public:
 #endif // NO_PLUGINS
 
 	uint32 CutOffToFrequency(uint32 nCutOff, int flt_modifier = 256) const; // [0-127] => [1-10KHz]
-	void ApplyGlobalVolume(int *SoundBuffer, int *RearBuffer, long countChunk);
+	void ProcessGlobalVolume(long countChunk);
+	void ProcessStereoSeparation(long countChunk);
 
 private:
 	PLUGINDEX GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const;
