@@ -335,7 +335,8 @@ public:
 	CReverb m_Reverb;
 #endif
 #ifndef NO_DSP
-	CDSP m_DSP;
+	CSurround m_Surround;
+	CMegaBass m_MegaBass;
 #endif
 #ifndef NO_EQ
 	CQuadEQ m_EQ;

@@ -636,7 +636,10 @@ public:
 	CReverbSettings m_ReverbSettings;
 #endif
 #ifndef NO_DSP
-	CDSPSettings m_DSPSettings;
+	CSurroundSettings m_SurroundSettings;
+#endif
+#ifndef NO_DSP
+	CMegaBassSettings m_MegaBassSettings;
 #endif
 #ifndef NO_EQ
 	EQPreset m_EqSettings;

@@ -114,14 +114,21 @@ static void ShelfEQ(LONG scale,
 }
 
 
-CDSPSettings::CDSPSettings() : m_nXBassDepth(DEFAULT_XBASS_DEPTH), m_nXBassRange(DEFAULT_XBASS_RANGE), m_nProLogicDepth(12), m_nProLogicDelay(20)
-//-----------------------------------------------------------------------------------------------------------------------------------------------
+CSurroundSettings::CSurroundSettings() : m_nProLogicDepth(12), m_nProLogicDelay(20)
+//---------------------------------------------------------------------------------
 {
 
 }
 
 
-CDSP::CDSP()
+CMegaBassSettings::CMegaBassSettings() : m_nXBassDepth(DEFAULT_XBASS_DEPTH), m_nXBassRange(DEFAULT_XBASS_RANGE)
+//-----------------------------------------------------------------------------------------------------
+{
+
+}
+
+
+CSurround::CSurround()
 {
 	// Surround Encoding: 1 delay line + low-pass filter + high-pass filter
 	nSurroundSize = 0;
@@ -139,6 +146,14 @@ CDSP::CDSP()
 	nDolbyLP_B1 = 0;
 	nDolbyLP_A1 = 0;
 
+	MemsetZero(SurroundBuffer);
+
+}
+
+
+CMegaBass::CMegaBass()
+{
+
 	// Bass Expansion: low-pass filter
 	nXBassFlt_Y1 = 0;
 	nXBassFlt_X1 = 0;
@@ -152,18 +167,16 @@ CDSP::CDSP()
 	nDCRFlt_Y1r = 0;
 	nDCRFlt_X1r = 0;
 
-	MemsetZero(SurroundBuffer);
-
 }
 
-void CDSP::Initialize(bool bReset, DWORD MixingFreq, DWORD DSPMask)
-//-----------------------------------------------------------------
+
+void CSurround::Initialize(bool bReset, DWORD MixingFreq)
+//-------------------------------------------------------
 {
 	if (!m_Settings.m_nProLogicDelay) m_Settings.m_nProLogicDelay = 20;
 
 	// Pro-Logic Surround
 	nSurroundPos = nSurroundSize = 0;
-	if (DSPMask & SNDDSP_SURROUND)
 	{
 		memset(SurroundBuffer, 0, sizeof(SurroundBuffer));
 		nSurroundSize = (MixingFreq * m_Settings.m_nProLogicDelay) / 1000;
@@ -183,8 +196,14 @@ void CDSP::Initialize(bool bReset, DWORD MixingFreq, DWORD DSPMask)
 		nDolbyLP_B0 *= 2;
 		nDolbyLP_B1 *= 2;
 	}
+}
+
+
+void CMegaBass::Initialize(bool bReset, DWORD MixingFreq)
+//---------------------------------------------------
+{
+
 	// Bass Expansion Reset
-	if (DSPMask & SNDDSP_MEGABASS)
 	{
 		LONG a1 = 0, b0 = 1024, b1 = 0;
 		int nXBassCutOff = 50 + (m_Settings.m_nXBassRange+2) * 20;
@@ -218,8 +237,8 @@ void CDSP::Initialize(bool bReset, DWORD MixingFreq, DWORD DSPMask)
 
 
 // 2-channel surround
-void CDSP::ProcessStereoSurround(int * MixSoundBuffer, int count)
-//---------------------------------------------------------------
+void CSurround::ProcessStereoSurround(int * MixSoundBuffer, int count)
+//--------------------------------------------------------------------
 {
 	int *pr = MixSoundBuffer, hy1 = nDolbyHP_Y1;
 	for (int r=count; r; r--)
@@ -245,8 +264,8 @@ void CDSP::ProcessStereoSurround(int * MixSoundBuffer, int count)
 
 
 // 4-channels surround
-void CDSP::ProcessQuadSurround(int * MixSoundBuffer, int * MixRearBuffer, int count)
-//----------------------------------------------------------------------------------
+void CSurround::ProcessQuadSurround(int * MixSoundBuffer, int * MixRearBuffer, int count)
+//---------------------------------------------------------------------------------------
 {
 	int *pr = MixSoundBuffer, hy1 = nDolbyHP_Y1;
 	for (int r=count; r; r--)
@@ -275,23 +294,27 @@ void CDSP::ProcessQuadSurround(int * MixSoundBuffer, int * MixRearBuffer, int co
 }
 
 
-void CDSP::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nChannels, DWORD DSPMask)
-//-----------------------------------------------------------------------------------------------------
+void CSurround::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nChannels)
+//-------------------------------------------------------------------------------------------
 {
 
-
 	if(nChannels >= 2)
-	{
-
 
 	// Dolby Pro-Logic Surround
-	if (DSPMask & SNDDSP_SURROUND)
 	{
 		if (nChannels > 2) ProcessQuadSurround(MixSoundBuffer, MixRearBuffer, count); else
 		ProcessStereoSurround(MixSoundBuffer, count);
 	}
+
+}
+
+
+void CMegaBass::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nChannels)
+//---------------------------------------------------------------------------------------
+{
+
+	if(nChannels >= 2)
 	// Bass Expansion
-	if (DSPMask & SNDDSP_MEGABASS)
 	{
 		X86_StereoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1l, &nDCRFlt_X1l, &nDCRFlt_Y1r, &nDCRFlt_X1r);
 		int *px = MixSoundBuffer;
@@ -310,16 +333,11 @@ void CDSP::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nC
 		}
 		nXBassFlt_X1 = x1;
 		nXBassFlt_Y1 = y1;
-	}
-
 
 	} else
 	{
 
-
 	// Bass Expansion
-	if (DSPMask & SNDDSP_MEGABASS)
-	{
 		X86_MonoDCRemoval(MixSoundBuffer, count, &nDCRFlt_Y1l, &nDCRFlt_X1l);
 		int *px = MixSoundBuffer;
 		int x1 = nXBassFlt_X1;
@@ -337,10 +355,6 @@ void CDSP::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UINT nC
 		nXBassFlt_X1 = x1;
 		nXBassFlt_Y1 = y1;
 	}
-
-
-	}
-
 
 }
 
@@ -432,15 +446,12 @@ stereodcr:
 }
 
 
-
-
-
 /////////////////////////////////////////////////////////////////
 // Clean DSP Effects interface
 
 // [XBass level 0(quiet)-100(loud)], [cutoff in Hz 20-100]
-bool CDSP::SetXBassParameters(UINT nDepth, UINT nRange)
-//-----------------------------------------------------
+bool CMegaBass::SetXBassParameters(UINT nDepth, UINT nRange)
+//------------------------------------------------------
 {
 	if (nDepth > 100) nDepth = 100;
 	UINT gain = nDepth / 20;
@@ -455,8 +466,8 @@ bool CDSP::SetXBassParameters(UINT nDepth, UINT nRange)
 
 
 // [Surround level 0(quiet)-100(heavy)] [delay in ms, usually 5-50ms]
-bool CDSP::SetSurroundParameters(UINT nDepth, UINT nDelay)
-//--------------------------------------------------------
+bool CSurround::SetSurroundParameters(UINT nDepth, UINT nDelay)
+//-------------------------------------------------------------
 {
 	UINT gain = (nDepth * 16) / 100;
 	if (gain > 16) gain = 16;

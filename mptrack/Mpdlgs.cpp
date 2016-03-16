@@ -1414,9 +1414,9 @@ BOOL COptionsPlayer::OnInitDialog()
 #ifndef NO_DSP
 	// Bass Expansion
 	m_SbXBassDepth.SetRange(0,4);
-	m_SbXBassDepth.SetPos(8-TrackerSettings::Instance().m_DSPSettings.m_nXBassDepth);
+	m_SbXBassDepth.SetPos(8-TrackerSettings::Instance().m_MegaBassSettings.m_nXBassDepth);
 	m_SbXBassRange.SetRange(0,4);
-	m_SbXBassRange.SetPos(4 - (TrackerSettings::Instance().m_DSPSettings.m_nXBassRange - 1) / 5);
+	m_SbXBassRange.SetPos(4 - (TrackerSettings::Instance().m_MegaBassSettings.m_nXBassRange - 1) / 5);
 #else
 	m_SbXBassDepth.EnableWindow(FALSE);
 	m_SbXBassRange.EnableWindow(FALSE);
@@ -1456,13 +1456,13 @@ BOOL COptionsPlayer::OnInitDialog()
 #ifndef NO_DSP
 	// Surround
 	{
-		UINT n = TrackerSettings::Instance().m_DSPSettings.m_nProLogicDepth;
+		UINT n = TrackerSettings::Instance().m_SurroundSettings.m_nProLogicDepth;
 		if (n < 1) n = 1;
 		if (n > 16) n = 16;
 		m_SbSurroundDepth.SetRange(1, 16);
 		m_SbSurroundDepth.SetPos(n);
 		m_SbSurroundDelay.SetRange(0, 8);
-		m_SbSurroundDelay.SetPos((TrackerSettings::Instance().m_DSPSettings.m_nProLogicDelay-5)/5);
+		m_SbSurroundDelay.SetPos((TrackerSettings::Instance().m_SurroundSettings.m_nProLogicDelay-5)/5);
 	}
 #else
 	m_SbSurroundDepth.EnableWindow(FALSE);
@@ -1545,8 +1545,8 @@ void COptionsPlayer::OnOK()
 		UINT nXBassRange = (4-m_SbXBassRange.GetPos()) * 5 + 1;
 		if (nXBassRange < 5) nXBassRange = 5;
 		if (nXBassRange > 21) nXBassRange = 21;
-		TrackerSettings::Instance().m_DSPSettings.m_nXBassDepth = nXBassDepth;
-		TrackerSettings::Instance().m_DSPSettings.m_nXBassRange = nXBassRange;
+		TrackerSettings::Instance().m_MegaBassSettings.m_nXBassDepth = nXBassDepth;
+		TrackerSettings::Instance().m_MegaBassSettings.m_nXBassRange = nXBassRange;
 	}
 #endif
 #ifndef NO_REVERB
@@ -1562,8 +1562,8 @@ void COptionsPlayer::OnOK()
 	{
 		UINT nProLogicDepth = m_SbSurroundDepth.GetPos();
 		UINT nProLogicDelay = 5 + (m_SbSurroundDelay.GetPos() * 5);
-		TrackerSettings::Instance().m_DSPSettings.m_nProLogicDepth = nProLogicDepth;
-		TrackerSettings::Instance().m_DSPSettings.m_nProLogicDelay = nProLogicDelay;
+		TrackerSettings::Instance().m_SurroundSettings.m_nProLogicDepth = nProLogicDepth;
+		TrackerSettings::Instance().m_SurroundSettings.m_nProLogicDelay = nProLogicDelay;
 	}
 #endif
 
