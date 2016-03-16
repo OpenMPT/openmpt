@@ -380,8 +380,9 @@ static bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file
 	while(file.CanRead(4u * numChannels) && samplePos < sampleLen)
 	{
 		FileReader block = file.ReadChunk(blockAlign);
-		const uint8 *data = block.GetRawData<uint8>();
-		const uint32 blockSize = static_cast<uint32>(block.GetLength());
+		FileReader::PinnedRawDataView blockView = block.GetPinnedRawDataView();
+		const mpt::byte *data = blockView.data();
+		const uint32 blockSize = static_cast<uint32>(blockView.size());
 
 		for(uint32 chn = 0; chn < numChannels; chn++)
 		{
