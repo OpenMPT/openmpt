@@ -331,7 +331,7 @@ void CMegaBass::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, UI
 		int *py = MixRearBuffer;
 		int x1 = nXBassFlt_X1;
 		int y1 = nXBassFlt_Y1;
-		if(nChannels > 2) (int x=count; x; x--)
+		if(nChannels > 2) for (int x=count; x; x--)
 		{
 			int x_m = (px[0]+px[1]+py[0]+py[1]+0x100)>>9;
 
