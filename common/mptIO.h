@@ -36,6 +36,11 @@ namespace IO {
 
 typedef int64 Offset;
 
+static const std::size_t BUFFERSIZE_TINY   =    1 * 1024; // on stack usage
+static const std::size_t BUFFERSIZE_SMALL  =    4 * 1024; // on heap
+static const std::size_t BUFFERSIZE_NORMAL =   64 * 1024; // FILE I/O
+static const std::size_t BUFFERSIZE_LARGE  = 1024 * 1024;
+
 
 
 // Returns true iff 'off' fits into 'Toff'.
@@ -120,7 +125,7 @@ inline bool ReadBinaryTruncatedLE(Tfile & f, T & v, std::size_t size)
 	#if MPT_COMPILER_HAS_TYPE_TRAITS
 		static_assert(std::is_trivial<T>::value == true, "");
 	#endif
-	uint8 bytes[sizeof(T)];
+	mpt::byte bytes[sizeof(T)];
 	std::memset(bytes, 0, sizeof(T));
 	const IO::Offset readResult = IO::ReadRaw(f, bytes, std::min(size, sizeof(T)));
 	if(readResult < 0)
@@ -142,7 +147,7 @@ inline bool ReadIntLE(Tfile & f, T & v)
 {
 	bool result = false;
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	uint8 bytes[sizeof(T)];
+	mpt::byte bytes[sizeof(T)];
 	std::memset(bytes, 0, sizeof(T));
 	const IO::Offset readResult = IO::ReadRaw(f, bytes, sizeof(T));
 	if(readResult < 0)
@@ -163,7 +168,7 @@ inline bool ReadIntBE(Tfile & f, T & v)
 {
 	bool result = false;
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	uint8 bytes[sizeof(T)];
+	mpt::byte bytes[sizeof(T)];
 	std::memset(bytes, 0, sizeof(T));
 	const IO::Offset readResult = IO::ReadRaw(f, bytes, sizeof(T));
 	if(readResult < 0)
@@ -183,17 +188,17 @@ template <typename Tfile>
 inline bool ReadAdaptiveInt16LE(Tfile & f, uint16 & v)
 {
 	bool result = true;
-	uint8 byte = 0;
+	mpt::byte byte = 0;
 	std::size_t additionalBytes = 0;
 	v = 0;
 	byte = 0;
-	if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
+	if(!IO::ReadIntLE<mpt::byte>(f, byte)) result = false;
 	additionalBytes = (byte & 0x01);
 	v = byte >> 1;
 	for(std::size_t i = 0; i < additionalBytes; ++i)
 	{
 		byte = 0;
-		if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
+		if(!IO::ReadIntLE<mpt::byte>(f, byte)) result = false;
 		v |= (static_cast<uint16>(byte) << (((i+1)*8) - 1));
 	}
 	return result;
@@ -203,17 +208,17 @@ template <typename Tfile>
 inline bool ReadAdaptiveInt32LE(Tfile & f, uint32 & v)
 {
 	bool result = true;
-	uint8 byte = 0;
+	mpt::byte byte = 0;
 	std::size_t additionalBytes = 0;
 	v = 0;
 	byte = 0;
-	if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
+	if(!IO::ReadIntLE<mpt::byte>(f, byte)) result = false;
 	additionalBytes = (byte & 0x03);
 	v = byte >> 2;
 	for(std::size_t i = 0; i < additionalBytes; ++i)
 	{
 		byte = 0;
-		if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
+		if(!IO::ReadIntLE<mpt::byte>(f, byte)) result = false;
 		v |= (static_cast<uint32>(byte) << (((i+1)*8) - 2));
 	}
 	return result;
@@ -223,17 +228,17 @@ template <typename Tfile>
 inline bool ReadAdaptiveInt64LE(Tfile & f, uint64 & v)
 {
 	bool result = true;
-	uint8 byte = 0;
+	mpt::byte byte = 0;
 	std::size_t additionalBytes = 0;
 	v = 0;
 	byte = 0;
-	if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
+	if(!IO::ReadIntLE<mpt::byte>(f, byte)) result = false;
 	additionalBytes = (1 << (byte & 0x03)) - 1;
 	v = byte >> 2;
 	for(std::size_t i = 0; i < additionalBytes; ++i)
 	{
 		byte = 0;
-		if(!IO::ReadIntLE<uint8>(f, byte)) result = false;
+		if(!IO::ReadIntLE<mpt::byte>(f, byte)) result = false;
 		v |= (static_cast<uint64>(byte) << (((i+1)*8) - 2));
 	}
 	return result;
@@ -271,7 +276,7 @@ inline bool WriteIntLE(Tfile & f, const T v)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	const T val = SwapBytesReturnLE(v);
-	uint8 bytes[sizeof(T)];
+	mpt::byte bytes[sizeof(T)];
 	std::memcpy(bytes, &val, sizeof(T));
 	return IO::WriteRaw(f, bytes, sizeof(T));
 }
@@ -281,7 +286,7 @@ inline bool WriteIntBE(Tfile & f, const T v)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	const T val = SwapBytesReturnBE(v);
-	uint8 bytes[sizeof(T)];
+	mpt::byte bytes[sizeof(T)];
 	std::memcpy(bytes, &val, sizeof(T));
 	return IO::WriteRaw(f, bytes, sizeof(T));
 }
@@ -320,10 +325,10 @@ inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 v, std::size_t minSize 
 	} else if(v < 0x400000 && minSize <= 3 && (3 <= maxSize || maxSize == 0))
 	{
 		uint32 value = static_cast<uint32>(v << 2) | 0x02;
-		uint8 bytes[3];
-		bytes[0] = static_cast<uint8>(value >>  0);
-		bytes[1] = static_cast<uint8>(value >>  8);
-		bytes[2] = static_cast<uint8>(value >> 16);
+		mpt::byte bytes[3];
+		bytes[0] = static_cast<mpt::byte>(value >>  0);
+		bytes[1] = static_cast<mpt::byte>(value >>  8);
+		bytes[2] = static_cast<mpt::byte>(value >> 16);
 		return IO::WriteRaw(f, bytes, 3);
 	} else if(v < 0x40000000 && minSize <= 4 && (4 <= maxSize || maxSize == 0))
 	{
@@ -366,17 +371,16 @@ bool WriteVarInt(Tfile & f, const T v, size_t *bytesWritten = nullptr)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	STATIC_ASSERT(!std::numeric_limits<T>::is_signed);
-
-	uint8 out[(sizeof(T) * 8 + 6) / 7];
+	mpt::byte out[(sizeof(T) * 8 + 6) / 7];
 	size_t numBytes = 0;
 	for(uint32 n = (sizeof(T) * 8) / 7; n > 0; n--)
 	{
 		if(v >= (static_cast<T>(1) << (n * 7u)))
 		{
-			out[numBytes++] = static_cast<uint8>(((v >> (n * 7u)) & 0x7F) | 0x80);
+			out[numBytes++] = static_cast<mpt::byte>(((v >> (n * 7u)) & 0x7F) | 0x80);
 		}
 	}
-	out[numBytes++] = static_cast<uint8>(v & 0x7F);
+	out[numBytes++] = static_cast<mpt::byte>(v & 0x7F);
 	MPT_ASSERT(numBytes <= CountOf(out));
 	if(bytesWritten != nullptr) *bytesWritten = numBytes;
 	return mpt::IO::WriteRaw(f, out, numBytes);
@@ -406,7 +410,7 @@ template <typename T, typename Tfile>
 inline bool WriteConvertEndianness(Tfile & f, T & v)
 {
 	v.ConvertEndianness();
-	bool result = IO::WriteRaw(f, reinterpret_cast<const uint8 *>(&v), sizeof(T));
+	bool result = IO::WriteRaw(f, reinterpret_cast<const mpt::byte *>(&v), sizeof(T));
 	v.ConvertEndianness();
 	return result;
 }
@@ -596,8 +600,8 @@ protected:
 
 private:
 
-	static const std::size_t QUANTUM_SIZE = 4096;
-	static const std::size_t BUFFER_SIZE = 65536;
+	static const std::size_t QUANTUM_SIZE = mpt::IO::BUFFERSIZE_SMALL;
+	static const std::size_t BUFFER_SIZE = mpt::IO::BUFFERSIZE_NORMAL;
 
 	void EnsureCacheBuffer(std::size_t requiredbuffersize) const;
 	void CacheStream() const;
