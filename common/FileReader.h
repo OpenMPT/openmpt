@@ -418,6 +418,10 @@ public:
 		void invalidate() { cache = std::vector<mpt::byte>(); span_ = mpt::span<const mpt::byte>(); }
 		const mpt::byte *data() const { return span_.data(); }
 		std::size_t size() const { return span_.size(); }
+		mpt::span<const mpt::byte>::iterator begin() const { return span_.begin(); }
+		mpt::span<const mpt::byte>::iterator end() const { return span_.end(); }
+		mpt::span<const mpt::byte>::const_iterator cbegin() const { return span_.cbegin(); }
+		mpt::span<const mpt::byte>::const_iterator cend() const { return span_.cend(); }
 	};
 
 	// Returns a pinned view into the remaining raw data from cursor position.
