@@ -1953,11 +1953,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 					case DNA_NOTEOFF:
 					case DNA_NOTEFADE:
 						//switch off duplicated note played on this plugin
-						IMixPlugin *pPlugin =  m_MixPlugins[pIns->nMixPlug-1].pMixPlugin;
-						if(pPlugin && p->nNote != NOTE_NONE)
-						{
-							pPlugin->MidiCommand(GetBestMidiChannel(i), p->pModInstrument->nMidiProgram, p->pModInstrument->wMidiBank, p->nNote + NOTE_MAX_SPECIAL, 0, i);
-						}
+						SendMIDINote(i, p->nNote + NOTE_MAX_SPECIAL, 0);
 						break;
 					}
 #endif // NO_PLUGINS
@@ -2043,7 +2039,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 				case NNA_NOTEFADE:
 					//switch off note played on this plugin, on this tracker channel and midi channel
 					//pPlugin->MidiCommand(pChn->pModInstrument->nMidiChannel, pChn->pModInstrument->nMidiProgram, pChn->nNote + NOTE_MAX_SPECIAL, 0, n);
-					pPlugin->MidiCommand(GetBestMidiChannel(nChn), pChn->pModInstrument->nMidiProgram, pChn->pModInstrument->wMidiBank, NOTE_KEYOFF, 0, nChn);
+					SendMIDINote(nChn, NOTE_KEYOFF, 0);
 					break;
 				}
 			}
@@ -4841,6 +4837,27 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 }
 
 
+void CSoundFile::SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume)
+//-------------------------------------------------------------------------
+{
+	const ModInstrument *pIns = m_PlayState.Chn[chn].pModInstrument;
+	// instro sends to a midi chan
+	if (pIns && pIns->HasValidMIDIChannel())
+	{
+		PLUGINDEX nPlug = pIns->nMixPlug;
+		if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
+		{
+			IMixPlugin *pPlug = m_MixPlugins[nPlug-1].pMixPlugin;
+			if (pPlug != nullptr)
+			{
+				pPlug->MidiCommand(GetBestMidiChannel(chn), pIns->nMidiProgram, pIns->wMidiBank, note, volume, chn);
+			}
+		}
+	}
+
+}
+
+
 void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 //-------------------------------------------------------------------
 {
@@ -5118,22 +5135,8 @@ void CSoundFile::NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample)
 		}
 		pChn->dwFlags.set(CHN_FASTVOLRAMP);
 
-#ifndef NO_PLUGINS
-		const ModInstrument *pIns = pChn->pModInstrument;
 		// instro sends to a midi chan
-		if (pIns && pIns->HasValidMIDIChannel())
-		{
-			PLUGINDEX nPlug = pIns->nMixPlug;
-			if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
-			{
-				IMixPlugin *pPlug = (IMixPlugin*)m_MixPlugins[nPlug-1].pMixPlugin;
-				if (pPlug)
-				{
-					pPlug->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, /*pChn->nNote+*/NOTE_MAX_SPECIAL, 0, nChn);
-				}
-			}
-		}
-#endif // NO_PLUGINS
+		SendMIDINote(nChn, /*pChn->nNote+*/NOTE_MAX_SPECIAL, 0);
 	}
 }
 

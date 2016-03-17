@@ -846,6 +846,7 @@ protected:
 	void ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *macro, uint8 param = 0, PLUGINDEX plugin = 0);
 	float CalculateSmoothParamChange(float currentValue, float param) const;
 	uint32 SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned char *macro, uint32 macroLen, PLUGINDEX plugin);
+	void SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume);
 
 	void SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modifier = 256) const;
 	// Low-Level effect processing
