@@ -1944,20 +1944,20 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			// Duplicate Note Action
 			if (bOk)
 			{
-				if (applyDNAtoPlug)
-				{
 #ifndef NO_PLUGINS
+				if (applyDNAtoPlug && p->nNote != NOTE_NONE)
+				{
 					switch(p->pModInstrument->nDNA)
 					{
 					case DNA_NOTECUT:
 					case DNA_NOTEOFF:
 					case DNA_NOTEFADE:
-						//switch off duplicated note played on this plugin
+						// Switch off duplicated note played on this plugin
 						SendMIDINote(i, p->nNote + NOTE_MAX_SPECIAL, 0);
 						break;
 					}
-#endif // NO_PLUGINS
 				}
+#endif // NO_PLUGINS
 
 				switch(p->pModInstrument->nDNA)
 				{
@@ -4840,6 +4840,7 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 void CSoundFile::SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume)
 //-------------------------------------------------------------------------
 {
+#ifndef NO_PLUGINS
 	const ModInstrument *pIns = m_PlayState.Chn[chn].pModInstrument;
 	// instro sends to a midi chan
 	if (pIns && pIns->HasValidMIDIChannel())
@@ -4854,7 +4855,7 @@ void CSoundFile::SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume)
 			}
 		}
 	}
-
+#endif // NO_PLUGINS
 }
 
 
