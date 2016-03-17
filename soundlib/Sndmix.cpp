@@ -605,6 +605,15 @@ bool CSoundFile::ProcessRow()
 				m_PlayState.m_nNextRow = m_PlayState.m_nNextPatStartRow;
 				m_PlayState.m_nNextPatStartRow = 0;
 			}
+			if(GetType() == MOD_TYPE_S3M)
+			{
+				// Reset pattern loop start
+				// Test case: LoopReset.s3m
+				for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
+				{
+					m_PlayState.Chn[i].nPatternLoop = 0;
+				}
+			}
 		}
 		// Reset channel values
 		ModCommand *m = Patterns[m_PlayState.m_nPattern].GetRow(m_PlayState.m_nRow);
