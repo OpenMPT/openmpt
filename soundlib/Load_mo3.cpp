@@ -851,9 +851,9 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 #if !(defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND)) && !defined(MPT_ENABLE_MO3_BUILTIN)
-	// As of November 2015, the format revision is 5; Versions > 31 are unlikely to exist in the next few years,
+	// As of March 2016, the format revision is 5; Versions > 31 are unlikely to ever exist,
 	// so we will just ignore those if there's no UNMO3 library to tell us if the file is valid or not
-	// (avoid log entry with .MOD files that have a song name starting with "MO3".
+	// (avoid log entry with e.g. .MOD files that have a song name starting with "MO3").
 	if(version > 31)
 	{
 		return false;
@@ -929,17 +929,23 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return false;
 	}
-
-	uint8 *musicData = new (std::nothrow) uint8[musicSize];
-	if(musicData == nullptr)
-	{
-		return false;
-	}
 	uint32 compressedSize = uint32_max;
 	if(version >= 5)
 	{
 		// Size of compressed music chunk
 		compressedSize = file.ReadUint32LE();
+#ifndef MPT_BUILD_FUZZER
+		if(!file.CanRead(compressedSize))
+		{
+			return false;
+		}
+#endif // MPT_BUILD_FUZZER
+	}
+
+	uint8 *musicData = new (std::nothrow) uint8[musicSize];
+	if(musicData == nullptr)
+	{
+		return false;
 	}
 
 	if(!UnpackMO3Data(file, musicData, musicSize))
@@ -1387,12 +1393,12 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	const bool itSampleMode = (m_nType == MOD_TYPE_IT && !(fileHeader.flags & MO3FileHeader::instrumentMode));
+	const bool isSampleMode = (m_nType != MOD_TYPE_XM && !(fileHeader.flags & MO3FileHeader::instrumentMode));
 	std::vector<MO3Instrument::XMVibratoSettings> instrVibrato(m_nType == MOD_TYPE_XM ? m_nInstruments : 0);
 	for(INSTRUMENTINDEX ins = 1; ins <= m_nInstruments; ins++)
 	{
 		ModInstrument *pIns = nullptr;
-		if(itSampleMode || (pIns = AllocateInstrument(ins)) == nullptr)
+		if(isSampleMode || (pIns = AllocateInstrument(ins)) == nullptr)
 		{
 			// Even in IT sample mode, instrument headers are still stored....
 			while(musicChunk.ReadUint8() != 0);
@@ -1421,7 +1427,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		if(m_nType == MOD_TYPE_XM)
 			instrVibrato[ins - 1] = insHeader.vibrato;
 	}
-	if(itSampleMode)
+	if(isSampleMode)
 		m_nInstruments = 0;
 
 	std::vector<MO3SampleChunk> sampleChunks(m_nSamples);
