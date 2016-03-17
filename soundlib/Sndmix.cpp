@@ -2014,6 +2014,8 @@ bool CSoundFile::ReadNote()
 					const int tableOffset = XM2MODFineTune(pChn->nFineTune) * 12;
 					limitLow = ProTrackerTunedPeriods[tableOffset +  11] / 2;
 					limitHigh = ProTrackerTunedPeriods[tableOffset] * 2;
+					// Amiga cannot actually keep up with lower periods
+					if(limitLow < 113 * 4) limitLow = 113 * 4;
 				}
 				Limit(period, limitLow, limitHigh);
 				Limit(pChn->nPeriod, limitLow, limitHigh);
