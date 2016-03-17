@@ -5494,6 +5494,7 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 		}
 	} else
 	{
+		LimitMax(period, Util::MaxValueOfType(period) >> 8);
 		if(m_SongFlags[SONG_LINEARSLIDES])
 		{
 			if(m_playBehaviour[kHertzInLinearMode])
