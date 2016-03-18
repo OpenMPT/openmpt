@@ -2735,10 +2735,17 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 	// means that, for remuxed and re-aligned/cutted (at stream start) Vorbis
 	// files, stb_vorbis will include superfluous samples at the beginning.
 
+	FileReader::PinnedRawDataView fileView = file.GetPinnedRawDataView();
+	const mpt::byte* data = fileView.data();
+	std::size_t dataLeft = fileView.size();
+
 	std::size_t offset = 0;
 	int consumed = 0;
 	int error = 0;
-	stb_vorbis *vorb = stb_vorbis_open_pushdata(file.GetRawData<uint8>(), mpt::saturate_cast<int>(file.BytesLeft()), &consumed, &error, nullptr);
+	stb_vorbis *vorb = stb_vorbis_open_pushdata(data, mpt::saturate_cast<int>(dataLeft), &consumed, &error, nullptr);
+	file.Skip(consumed);
+	data += consumed;
+	dataLeft -= consumed;
 	if(!vorb)
 	{
 		return false;
@@ -2749,14 +2756,15 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 	{
 		return false;
 	}
-	file.Skip(consumed);
-	while((error == VORBIS__no_error || (error == VORBIS_need_more_data && file.CanRead(1))))
+	while((error == VORBIS__no_error || (error == VORBIS_need_more_data && dataLeft > 0)))
 	{
 		int frame_channels = 0;
 		int decodedSamples = 0;
 		float **output = nullptr;
-		consumed = stb_vorbis_decode_frame_pushdata(vorb, file.GetRawData<uint8>(), mpt::saturate_cast<int>(file.BytesLeft()), &frame_channels, &output, &decodedSamples);
+		consumed = stb_vorbis_decode_frame_pushdata(vorb, data, mpt::saturate_cast<int>(dataLeft), &frame_channels, &output, &decodedSamples);
 		file.Skip(consumed);
+		data += consumed;
+		dataLeft -= consumed;
 		LimitMax(frame_channels, channels);
 		if(decodedSamples > 0 && (frame_channels == 1 || frame_channels == 2))
 		{
