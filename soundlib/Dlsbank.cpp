@@ -740,7 +740,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk,
 					{
 					case ART_DEFAULTPAN:
 						{
-							LONG pan = 128 + pblk->lScale / (65536000/128);
+							int32 pan = 128 + pblk->lScale / (65536000/128);
 							if (pan < 0) pan = 0;
 							if (pan > 255) pan = 255;
 							pDlsEnv->nDefPan = (uint8)pan;
@@ -752,9 +752,9 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk,
 						pDlsEnv->wVolAttack = 0;
 						if (pblk->lScale > -0x40000000)
 						{
-							LONG l = pblk->lScale - 78743200; // maximum velocity
+							int32 l = pblk->lScale - 78743200; // maximum velocity
 							if (l > 0) l = 0;
-							LONG attacktime = DLS32BitTimeCentsToMilliseconds(l);
+							int32 attacktime = DLS32BitTimeCentsToMilliseconds(l);
 							if (attacktime < 0) attacktime = 0;
 							if (attacktime > 20000) attacktime = 20000;
 							if (attacktime >= 20) pDlsEnv->wVolAttack = (uint16)(attacktime / 20);
@@ -767,7 +767,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk,
 						pDlsEnv->wVolDecay = 0;
 						if (pblk->lScale > -0x40000000)
 						{
-							LONG decaytime = DLS32BitTimeCentsToMilliseconds(pblk->lScale);
+							int32 decaytime = DLS32BitTimeCentsToMilliseconds(pblk->lScale);
 							if (decaytime > 20000) decaytime = 20000;
 							if (decaytime >= 20) pDlsEnv->wVolDecay = (uint16)(decaytime / 20);
 							//Log("%3d: Envelope Decay Time set to %d (%d time cents)\n", (uint32)(pDlsEnv->ulInstrument & 0x7F)|((pDlsEnv->ulBank >> 16) & 0x8000), decaytime, pblk->lScale);
@@ -779,7 +779,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk,
 						pDlsEnv->wVolRelease = 0;
 						if (pblk->lScale > -0x40000000)
 						{
-							LONG releasetime = DLS32BitTimeCentsToMilliseconds(pblk->lScale);
+							int32 releasetime = DLS32BitTimeCentsToMilliseconds(pblk->lScale);
 							if (releasetime > 20000) releasetime = 20000;
 							if (releasetime >= 20) pDlsEnv->wVolRelease = (uint16)(releasetime / 20);
 							//Log("%3d: Envelope Release Time set to %d (%d time cents)\n", (uint32)(pDlsEnv->ulInstrument & 0x7F)|((pDlsEnv->ulBank >> 16) & 0x8000), pDlsEnv->wVolRelease, pblk->lScale);
@@ -790,7 +790,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk,
 						// 0.1% units
 						if (pblk->lScale >= 0)
 						{
-							LONG l = pblk->lScale / (1000*512);
+							int32 l = pblk->lScale / (1000*512);
 							if ((l >= 0) || (l <= 128)) pDlsEnv->nVolSustainLevel = (uint8)l;
 							//Log("%3d: Envelope Sustain Level set to %d (%d)\n", (uint32)(pDlsIns->ulInstrument & 0x7F)|((pDlsIns->ulBank >> 16) & 0x8000), l, pblk->lScale);
 						}
@@ -805,12 +805,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, void *pvchunk,
 			break;
 
 		case IFFID_INAM:
-			{
-				uint32 len = (pchunk->len < 32) ? pchunk->len : 31;
-				if (len) memcpy(pDlsIns->szName, ((const char *)pchunk)+8, len);
-				pDlsIns->szName[31] = 0;
-				//Log("%s\n", (uint32)pDlsIns->szName);
-			}
+			mpt::String::CopyN(pDlsIns->szName, ((const char *)pchunk) + 8, pchunk->len);
 			break;
 	#if 0
 		default:
@@ -853,7 +848,7 @@ bool CDLSBank::UpdateSF2PresetData(void *pvsf2, void *pvchunk, uint32 dwMaxLen)
 			DLSINSTRUMENT *pDlsIns = m_pInstruments;
 			for (uint32 i=0; i<m_nInstruments; i++, psfh++, pDlsIns++)
 			{
-				memcpy(pDlsIns->szName, psfh->achPresetName, 20);
+				mpt::String::Copy(pDlsIns->szName, psfh->achPresetName);
 				pDlsIns->szName[20] = 0;
 				pDlsIns->ulInstrument = psfh->wPreset & 0x7F;
 				pDlsIns->ulBank = (psfh->wBank >= 128) ? F_INSTRUMENT_DRUMS : (psfh->wBank << 8);
@@ -1583,6 +1578,10 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 			sample.nC5Speed = p->dwSampleRate;
 			sample.RelativeTone = p->byOriginalPitch;
 			sample.nFineTune = p->chPitchCorrection;
+			if (p->szName[0])
+				mpt::String::Copy(sndFile.m_szNames[nSample], p->szName);
+			else if(pDlsIns->szName[0])
+				mpt::String::Copy(sndFile.m_szNames[nSample], pDlsIns->szName);
 
 			FileReader chunk(pWaveForm, dwLen);
 			SampleIO(
@@ -1597,6 +1596,8 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 	{
 		FileReader file(pWaveForm, dwLen);
 		bWaveForm = sndFile.ReadWAVSample(nSample, file, false, &wsmpChunk);
+		if(pDlsIns->szName[0])
+			mpt::String::Copy(sndFile.m_szNames[nSample], pDlsIns->szName);
 	}
 	if (bWaveForm)
 	{
@@ -1682,7 +1683,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 				sample.nPan = m_Envelopes[pDlsIns->nMelodicEnv-1].nDefPan;
 			}
 		}
-		if (pDlsIns->szName[0]) memcpy(sndFile.m_szNames[nSample], pDlsIns->szName, MAX_SAMPLENAME - 1);
+
 		sample.Convert(MOD_TYPE_IT, sndFile.GetType());
 		sample.PrecomputeLoops(sndFile, false);
 		bOk = true;
