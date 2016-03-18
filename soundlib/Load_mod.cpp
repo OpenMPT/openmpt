@@ -505,8 +505,8 @@ static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, O
 }
 
 
-void CSoundFile::ReadMODPatternEntry(FileReader &file, ModCommand &m) const
-//-------------------------------------------------------------------------
+void CSoundFile::ReadMODPatternEntry(FileReader &file, ModCommand &m)
+//-------------------------------------------------------------------
 {
 	uint8 data[4];
 	file.ReadArray(data);
