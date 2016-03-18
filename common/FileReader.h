@@ -361,25 +361,28 @@ public:
 	//=====================
 	{
 	private:
-		mpt::span<const mpt::byte> span_;
+		std::size_t size_;
+		const mpt::byte *pinnedData;
 		std::vector<mpt::byte> cache;
 	private:
 		void Init(const FileReader &file, std::size_t size)
 		{
+			size_ = 0;
+			pinnedData = nullptr;
 			if(!file.CanRead(size))
 			{
 				size = file.BytesLeft();
 			}
+			size_ = size;
 			if(file.DataContainer().HasPinnedView())
 			{
-				span_ = mpt::as_span(file.DataContainer().GetRawData() + file.GetPosition(), size);
+				pinnedData = file.DataContainer().GetRawData() + file.GetPosition();
 			} else
 			{
-				cache.resize(size);
+				cache.resize(size_);
 				if(!cache.empty())
 				{
-					file.GetRaw(&(cache[0]), size);
-					span_ = mpt::as_span(cache);
+					if(file.GetRaw(&(cache[0]), size) != size);
 				}
 			}
 		}
@@ -401,7 +404,7 @@ public:
 			Init(file, file.BytesLeft());
 			if(advance)
 			{
-				file.Skip(span_.size());
+				file.Skip(size_);
 			}
 		}
 		PinnedRawDataView(FileReader &file, std::size_t size, bool advance)
@@ -409,19 +412,31 @@ public:
 			Init(file, size);
 			if(advance)
 			{
-				file.Skip(span_.size());
+				file.Skip(size_);
 			}
 		}
 	public:
-		mpt::span<const mpt::byte> GetSpan() const { return span_; }
-		mpt::span<const mpt::byte> span() const { return span_; }
-		void invalidate() { cache = std::vector<mpt::byte>(); span_ = mpt::span<const mpt::byte>(); }
-		const mpt::byte *data() const { return span_.data(); }
-		std::size_t size() const { return span_.size(); }
-		mpt::span<const mpt::byte>::iterator begin() const { return span_.begin(); }
-		mpt::span<const mpt::byte>::iterator end() const { return span_.end(); }
-		mpt::span<const mpt::byte>::const_iterator cbegin() const { return span_.cbegin(); }
-		mpt::span<const mpt::byte>::const_iterator cend() const { return span_.cend(); }
+		mpt::span<const mpt::byte> GetSpan() const
+		{
+			if(pinnedData)
+			{
+				return mpt::as_span(pinnedData, size_);
+			} else if(!cache.empty())
+			{
+				return mpt::as_span(cache);
+			} else
+			{
+				return mpt::span<const mpt::byte>();
+			}
+		}
+		mpt::span<const mpt::byte> span() const { return GetSpan(); }
+		void invalidate() { size_ = 0; pinnedData = nullptr; cache = std::vector<mpt::byte>(); }
+		const mpt::byte *data() const { return span().data(); }
+		std::size_t size() const { return size_; }
+		mpt::span<const mpt::byte>::iterator begin() const { return span().begin(); }
+		mpt::span<const mpt::byte>::iterator end() const { return span().end(); }
+		mpt::span<const mpt::byte>::const_iterator cbegin() const { return span().cbegin(); }
+		mpt::span<const mpt::byte>::const_iterator cend() const { return span().cend(); }
 	};
 
 	// Returns a pinned view into the remaining raw data from cursor position.
