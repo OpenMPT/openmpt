@@ -694,6 +694,8 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		isNoiseTracker = isMdKd;
 		for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 		{
+			uint16 patternBreaks = 0;
+
 			for(uint32 i = 0; i < 256; i++)
 			{
 				ModCommand m;
@@ -704,7 +706,8 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 				}
 				if((m.command > 0x06 && m.command < 0x0A)
 					|| (m.command == 0x0E && m.param > 0x01)
-					|| (m.command == 0x0F && m.param > 0x1F))
+					|| (m.command == 0x0F && m.param > 0x1F)
+					|| (m.command == 0x0D && ++patternBreaks > 1))
 				{
 					isNoiseTracker = false;
 				}
