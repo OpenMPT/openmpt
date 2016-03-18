@@ -1816,21 +1816,38 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			// wild, thus, this behaviour is currently not problematic.
 
 			int consumed = 0, error = 0;
-			stb_vorbis *vorb = stb_vorbis_open_pushdata(headerChunk.GetRawData<uint8>(), initialRead, &consumed, &error, nullptr);
+			stb_vorbis *vorb = nullptr;
+			if(sharedHeader)
+			{
+				FileReader::PinnedRawDataView headChunkView = headerChunk.GetPinnedRawDataView(initialRead);
+				vorb = stb_vorbis_open_pushdata(headChunkView.data(), headChunkView.size(), &consumed, &error, nullptr);
+				headerChunk.Skip(consumed);
+			}
+			FileReader::PinnedRawDataView sampleDataView = sampleData.GetPinnedRawDataView();
+			const mpt::byte* data = sampleDataView.data();
+			std::size_t dataLeft = sampleDataView.size();
+			if(!sharedHeader)
+			{
+				vorb = stb_vorbis_open_pushdata(data, mpt::saturate_cast<int>(dataLeft), &consumed, &error, nullptr);
+				sampleData.Skip(consumed);
+				data += consumed;
+				dataLeft -= consumed;
+			}
 			if(vorb)
 			{
 				// Header has been read, proceed to reading the sample data
-				headerChunk.Skip(consumed);
 				ModSample &sample = Samples[smp];
 				sample.AllocateSample();
 				SmpLength offset = 0;
-				while((error == VORBIS__no_error || (error == VORBIS_need_more_data && sampleData.CanRead(1)))
+				while((error == VORBIS__no_error || (error == VORBIS_need_more_data && dataLeft > 0))
 					&& offset < sample.nLength && sample.pSample != nullptr)
 				{
 					int channels = 0, decodedSamples = 0;
 					float **output;
-					consumed = stb_vorbis_decode_frame_pushdata(vorb, sampleData.GetRawData<uint8>(), mpt::saturate_cast<int>(sampleData.BytesLeft()), &channels, &output, &decodedSamples);
+					consumed = stb_vorbis_decode_frame_pushdata(vorb, data, mpt::saturate_cast<int>(dataLeft), &channels, &output, &decodedSamples);
 					sampleData.Skip(consumed);
+					data += consumed;
+					dataLeft -= consumed;
 					LimitMax(decodedSamples, mpt::saturate_cast<int>(sample.nLength - offset));
 					if(decodedSamples > 0 && channels == sample.GetNumChannels())
 					{
