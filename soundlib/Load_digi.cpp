@@ -54,11 +54,11 @@ STATIC_ASSERT(sizeof(DIGIFileHeader) == 610);
 #endif
 
 
-static void ReadDIGIPatternEntry(FileReader &file, ModCommand &m, CSoundFile &sndFile)
-//------------------------------------------------------------------------------------
+static void ReadDIGIPatternEntry(FileReader &file, ModCommand &m)
+//---------------------------------------------------------------
 {
-	sndFile.ReadMODPatternEntry(file, m);
-	sndFile.ConvertModCommand(m);
+	CSoundFile::ReadMODPatternEntry(file, m);
+	CSoundFile::ConvertModCommand(m);
 	if(m.command == CMD_MODCMDEX)
 	{
 		switch(m.param & 0xF0)
@@ -177,7 +177,7 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 					if(eventMask[row] & bit)
 					{
 						ModCommand &m = patRow[chn];
-						ReadDIGIPatternEntry(patternChunk, m, *this);
+						ReadDIGIPatternEntry(patternChunk, m);
 					}
 				}
 			}
@@ -188,7 +188,7 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				for(ROWINDEX row = 0; row < 64; row++)
 				{
-					ReadDIGIPatternEntry(patternChunk, *Patterns[pat].GetpModCommand(row, chn), *this);
+					ReadDIGIPatternEntry(patternChunk, *Patterns[pat].GetpModCommand(row, chn));
 				}
 			}
 		}
