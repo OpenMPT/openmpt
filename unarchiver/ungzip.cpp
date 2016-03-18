@@ -113,13 +113,15 @@ bool CGzipArchive::ExtractFile(std::size_t index)
 		return false;
 	}
 
+	FileReader::PinnedRawDataView inFileView = inFile.GetPinnedRawDataView(inFile.BytesLeft() - sizeof(GZtrailer));
+
 	// Inflate!
 	z_stream strm;
 	strm.zalloc = Z_NULL;
 	strm.zfree = Z_NULL;
 	strm.opaque = Z_NULL;
-	strm.avail_in = mpt::saturate_cast<uInt>(inFile.BytesLeft() - sizeof(GZtrailer));
-	strm.next_in = const_cast<Bytef*>(inFile.GetRawData<Bytef>());
+	strm.avail_in = inFileView.size();
+	strm.next_in = const_cast<Bytef*>(mpt::byte_cast<const Bytef*>(inFileView.data()));
 	if(inflateInit2(&strm, -15) != Z_OK)
 	{
 		return false;
