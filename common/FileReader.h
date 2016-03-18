@@ -382,7 +382,7 @@ public:
 				cache.resize(size_);
 				if(!cache.empty())
 				{
-					if(file.GetRaw(&(cache[0]), size) != size);
+					file.GetRaw(&(cache[0]), size);
 				}
 			}
 		}
