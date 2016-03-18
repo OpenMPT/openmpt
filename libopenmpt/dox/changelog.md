@@ -32,6 +32,10 @@ is just a high-level summary.
     shuffles randomly through the playlist as opposed to randomizing the
     playlist upfront.
 
+ *  [**Bug**] Memory consumption during loading has been reduced by about 1/3 in
+    case a seekable input stream is provided (either via C API callback open
+    functions or via C++ API iostream constructors).
+
  *  libopenmpt now has support for DMO plugins on Windows when built with MSVC.
  *  libopenmpt now supports the DigiBooster Echo DSP.
  *  libopenmpt got native MO3 support with MP3 decoding either via libmpg123 or
