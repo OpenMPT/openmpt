@@ -358,6 +358,50 @@ struct PACKED PT36IffChunk
 
 STATIC_ASSERT(sizeof(PT36IffChunk) == 8);
 
+struct PACKED PT36InfoChunk
+{
+	char name[32];
+	uint16 numSamples;
+	uint16 numOrders;
+	uint16 numPatterns;
+	uint16 volume;
+	uint16 tempo;
+	uint16 flags;
+	uint16 dateDay;
+	uint16 dateMonth;
+	uint16 dateYear;
+	uint16 dateHour;
+	uint16 dateMinute;
+	uint16 dateSecond;
+	uint16 playtimeHour;
+	uint16 playtimeMinute;
+	uint16 playtimeSecond;
+	uint16 playtimeMsecond;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesBE(numSamples);
+		SwapBytesBE(numOrders);
+		SwapBytesBE(numPatterns);
+		SwapBytesBE(volume);
+		SwapBytesBE(tempo);
+		SwapBytesBE(flags);
+		SwapBytesBE(dateDay);
+		SwapBytesBE(dateMonth);
+		SwapBytesBE(dateYear);
+		SwapBytesBE(dateHour);
+		SwapBytesBE(dateMinute);
+		SwapBytesBE(dateSecond);
+		SwapBytesBE(playtimeHour);
+		SwapBytesBE(playtimeMinute);
+		SwapBytesBE(playtimeSecond);
+		SwapBytesBE(playtimeMsecond);
+	}
+};
+
+STATIC_ASSERT(sizeof(PT36InfoChunk) == 64);
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
 #endif
@@ -1444,9 +1488,10 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 	
-	bool ok = false;
-	std::string title, message;
+	bool ok = false, infoOk = false;
+	std::string message;
 	std::string version = "3.6";
+	PT36InfoChunk info;
 
 	// Go through IFF chunks...
 	PT36IffChunk iffHead;
@@ -1483,7 +1528,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 		
 		case PT36IffChunk::idINFO:
-			chunk.ReadString<mpt::String::maybeNullTerminated>(title, iffHead.chunksize);
+			infoOk = chunk.ReadConvertEndianness(info);
 			break;
 		
 		case PT36IffChunk::idCMNT:
@@ -1496,11 +1541,29 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	} while(file.CanRead(sizeof(PT36IffChunk)) && file.ReadConvertEndianness(iffHead));
 	
+	// both an info chunk and a module are required
+	if(ok && infoOk)
+	{
+		if(info.volume != 0)
+			m_nSamplePreAmp = std::min(uint16(64), info.volume);
+		if(info.tempo != 0)
+			m_nDefaultTempo.Set(info.tempo);
+	
+		if(info.name[0])
+			mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, info.name);
+	
+		FileHistory mptHistory;
+		MemsetZero(mptHistory.loadDate);
+		mptHistory.loadDate.tm_year = info.dateYear;
+		mptHistory.loadDate.tm_mon = Clamp<uint16, uint16>(info.dateMonth, 1, 12) - 1;
+		mptHistory.loadDate.tm_mday = Clamp<uint16, uint16>(info.dateDay, 1, 31);
+		mptHistory.loadDate.tm_hour = Clamp<uint16, uint16>(info.dateHour, 0, 23);
+		mptHistory.loadDate.tm_min = Clamp<uint16, uint16>(info.dateMinute, 0, 59);
+		mptHistory.loadDate.tm_sec = Clamp<uint16, uint16>(info.dateSecond, 0, 59);
+		m_FileHistory.push_back(mptHistory);
+	}
 	if(ok)
 	{
-		if(!title.empty())
-			m_songName = title;
-	
 		// "message" chunk seems to only be used to store the artist name, despite being pretty long
 		if(message != "UNNAMED AUTHOR")
 			m_songArtist = mpt::ToUnicode(mpt::CharsetISO8859_1, message);
