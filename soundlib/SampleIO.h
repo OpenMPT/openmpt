@@ -221,7 +221,7 @@ public:
 	{
 		if(GetEncoding() == IT214 || GetEncoding() == IT215)
 		{
-			// IT compressed samples use FileReader interface and thus do not need to call GetRawData()
+			// IT compressed samples use FileReader interface and thus do not need to call GetPinnedRawDataView()
 			return true;
 		}
 		if(GetEncoding() == AMS)
