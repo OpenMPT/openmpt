@@ -54,9 +54,32 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 
 	LimitMax(sample.nLength, MAX_SAMPLE_LENGTH);
 
-	const char * const sourceBuf = file.GetRawData<char>();
-	const FileReader::off_t fileSize = file.BytesLeft(), filePosition = file.GetPosition();
 	FileReader::off_t bytesRead = 0;	// Amount of memory that has been read from file
+
+	FileReader::off_t filePosition = file.GetPosition();
+	const char * sourceBuf = nullptr;
+	FileReader::PinnedRawDataView restrictedSampleDataView;
+	FileReader::off_t fileSize = 0;
+	if(UsesFileReaderForDecoding())
+	{
+		sourceBuf = nullptr;
+		fileSize = file.BytesLeft();
+	} else if(!IsVariableLengthEncoded())
+	{
+		restrictedSampleDataView = file.GetPinnedRawDataView(CalculateEncodedSize(sample.nLength));
+		sourceBuf = mpt::byte_cast<const char*>(restrictedSampleDataView.data());
+		fileSize = restrictedSampleDataView.size();
+	} else
+	{
+		// Only DMF or MDL sample compression encodings should fall in this case,
+		MPT_ASSERT(GetEncoding() == DMF || GetEncoding() == MDL);
+		// file is guaranteed by the caller to be ONLY data for this sample,
+		// it is thus efficient to create a view to the whole file object.
+		// See MPT_ASSERT with fileSize below.
+		restrictedSampleDataView = file.GetPinnedRawDataView();
+		sourceBuf = mpt::byte_cast<const char*>(restrictedSampleDataView.data());
+		fileSize = restrictedSampleDataView.size();
+	}
 
 	sample.uFlags.set(CHN_16BIT, GetBitDepth() >= 16);
 	sample.uFlags.set(CHN_STEREO, GetChannelFormat() != mono);
@@ -502,11 +525,13 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			file.Skip(4);	// Target sample size (we already know this)
 			uint32 sourceSize = file.ReadUint32LE();
 			int8 packCharacter = file.ReadUint8();
+			bytesRead += 9;
+			
+			FileReader::PinnedRawDataView packedDataView = file.ReadPinnedRawDataView(sourceSize);
+			LimitMax(sourceSize, mpt::saturate_cast<uint32>(packedDataView.size()));
+			bytesRead += sourceSize;
 
-			LimitMax(sourceSize, mpt::saturate_cast<uint32>(file.BytesLeft()));
-			bytesRead = 9 + sourceSize;
-
-			AMSUnpack(reinterpret_cast<const int8 *>(sourceBuf) + 9, sourceSize, sample.pSample, sample.GetSampleSizeInBytes(), packCharacter);
+			AMSUnpack(reinterpret_cast<const int8 *>(packedDataView.data()), packedDataView.size(), sample.pSample, sample.GetSampleSizeInBytes(), packCharacter);
 		}
 	} else if(GetEncoding() == PTM8Dto16 && GetChannelFormat() == mono && GetBitDepth() == 16)
 	{
@@ -552,6 +577,12 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 				}
 			}
 
+			// This assertion ensures that, when using variable length samples,
+			// the caller actually provided a trimmed chunk to read the sample data from.
+			// This is required as we cannot know the encoded sample data size upfront
+			// to construct a properly sized pinned view.
+			MPT_ASSERT(bytesLeft == 0);
+
 			bytesRead = fileSize;
 		}
 	} else if(GetEncoding() == DMF && GetChannelFormat() == mono && GetBitDepth() <= 16)
@@ -563,6 +594,13 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			const uint8 *inBufMax = inBuf + fileSize;
 			uint8 *outBuf = static_cast<uint8 *>(sample.pSample);
 			bytesRead = DMFUnpack(outBuf, inBuf, inBufMax, sample.GetSampleSizeInBytes());
+
+			// This assertion ensures that, when using variable length samples,
+			// the caller actually provided a trimmed chunk to read the sample data from.
+			// This is required as we cannot know the encoded sample data size upfront
+			// to construct a properly sized pinned view.
+			MPT_ASSERT(bytesRead == fileSize);
+
 		}
 	} else if(GetEncoding() == MT2 && GetChannelFormat() == stereoSplit && GetBitDepth() <= 16)
 	{
