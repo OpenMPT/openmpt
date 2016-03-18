@@ -609,13 +609,13 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		{
 			for(SmpLength i = 0; i <= sample.nLength * 2; i += 2)
 			{
-				sample.pSample8[i + 1] += sample.pSample8[i];
+				sample.pSample8[i + 1] = static_cast<int8>(static_cast<uint8>(sample.pSample8[i + 1]) + static_cast<uint8>(sample.pSample8[i]));
 			}
 		} else
 		{
 			for(SmpLength i = 0; i <= sample.nLength * 2; i += 2)
 			{
-				sample.pSample16[i + 1] += sample.pSample16[i];
+				sample.pSample16[i + 1] += static_cast<int16>(static_cast<uint16>(sample.pSample16[i + 1]) + static_cast<uint16>(sample.pSample16[i]));
 			}
 		}
 	}
