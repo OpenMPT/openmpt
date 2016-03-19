@@ -1491,7 +1491,8 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 	bool ok = false, infoOk = false;
 	std::string message;
 	std::string version = "3.6";
-	PT36InfoChunk info = { 0 };
+	PT36InfoChunk info;
+	MemsetZero(info);
 
 	// Go through IFF chunks...
 	PT36IffChunk iffHead;
