@@ -799,8 +799,11 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	else
 		m_madeWithTracker += "old version)";
 
-	m_nMinPeriod = mainChunk.minPeriod / 4u;
-	m_nMaxPeriod = mainChunk.maxPeriod / 4u;
+	if(mainChunk.minPeriod < mainChunk.maxPeriod)
+	{
+		m_nMinPeriod = mainChunk.minPeriod / 4u;
+		m_nMaxPeriod = mainChunk.maxPeriod / 4u;
+	}
 
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, mainChunk.songname);
 

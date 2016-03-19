@@ -755,7 +755,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					isNoiseTracker = false;
 				}
-				if(m.command == CMD_PANNING8)
+				if(m.command == 0x08)
 				{
 					maxPanning = std::max(maxPanning, m.param);
 					if(m.param < 0x80)
@@ -1598,7 +1598,8 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 
 	if(GetNumInstruments())
 	{
-		for(INSTRUMENTINDEX ins = 1; ins < 32; ins++) if (Instruments[ins])
+		INSTRUMENTINDEX lastIns = std::min(INSTRUMENTINDEX(31), GetNumInstruments());
+		for(INSTRUMENTINDEX ins = 1; ins <= lastIns; ins++) if (Instruments[ins])
 		{
 			// Find some valid sample associated with this instrument.
 			for(size_t i = 0; i < CountOf(Instruments[ins]->Keyboard); i++)
@@ -1612,7 +1613,7 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 		}
 	} else
 	{
-		for(SAMPLEINDEX i = 0; i < 32; i++)
+		for(SAMPLEINDEX i = 1; i <= 31; i++)
 		{
 			sampleSource[i] = i;
 		}
