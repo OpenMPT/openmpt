@@ -178,19 +178,9 @@ void CSelectPluginDlg::OnOK()
 						mpt::String::Copy(m_pPlugin->Info.szName, name.GetString());
 					}
 					// Check if plugin slot is already assigned to any instrument, and if not, create one.
-					if(p->IsInstrument())
+					if(p->IsInstrument() && m_pModDoc->HasInstrumentForPlugin(m_nPlugSlot) == INSTRUMENTINDEX_INVALID)
 					{
-						const CSoundFile &sndFile = m_pModDoc->GetrSoundFile();
-						INSTRUMENTINDEX instr = 0;
-						for(INSTRUMENTINDEX i = 1; i <= sndFile.GetNumInstruments(); i++)
-						{
-							if(sndFile.Instruments[i] != nullptr && sndFile.Instruments[i]->nMixPlug == m_nPlugSlot + 1)
-							{
-								instr = i;
-								break;
-							}
-						}
-						if(instr == 0) m_pModDoc->InsertInstrumentForPlugin(m_nPlugSlot);
+						m_pModDoc->InsertInstrumentForPlugin(m_nPlugSlot);
 					}
 				} else
 				{

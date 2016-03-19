@@ -841,6 +841,20 @@ INSTRUMENTINDEX CModDoc::InsertInstrumentForPlugin(PLUGINDEX plug)
 }
 
 
+INSTRUMENTINDEX CModDoc::HasInstrumentForPlugin(PLUGINDEX plug) const
+//-------------------------------------------------------------------
+{
+	for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
+	{
+		if(m_SndFile.Instruments[i] != nullptr && m_SndFile.Instruments[i]->nMixPlug == plug + 1)
+		{
+			return i;
+		}
+	}
+	return INSTRUMENTINDEX_INVALID;
+}
+
+
 bool CModDoc::RemoveOrder(SEQUENCEINDEX nSeq, ORDERINDEX nOrd)
 //------------------------------------------------------------
 {
@@ -1202,14 +1216,14 @@ bool CModDoc::PasteEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
 
 
 bool CModDoc::LoadEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::PathString &fileName)
-//------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 {
 	InputFile f(fileName);
 	if (nIns < 1 || nIns > m_SndFile.m_nInstruments || !m_SndFile.Instruments[nIns] || !f.IsValid()) return false;
 	BeginWaitCursor();
 	FileReader file = GetFileReader(f);
 	std::string data;
-	file.ReadNullString(data, 1 << 20);
+	file.ReadNullString(data, 1 << 16);
 	bool result = StringToEnvelope(data, m_SndFile.Instruments[nIns]->GetEnvelope(nEnv), m_SndFile.GetModSpecifications());
 	EndWaitCursor();
 	return result;
