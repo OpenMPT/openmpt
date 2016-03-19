@@ -997,8 +997,10 @@ bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)-windows.zip: bin/dist.mk bin/
 	svn export ./include/ogg           bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/ogg           --native-eol CRLF
 	svn export ./include/pugixml       bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/pugixml       --native-eol CRLF
 	svn export ./include/stb_vorbis    bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/stb_vorbis    --native-eol CRLF
+	svn export ./include/vorbis        bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/vorbis        --native-eol CRLF
 	svn export ./include/winamp        bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/winamp        --native-eol CRLF
 	svn export ./include/xmplay        bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/xmplay        --native-eol CRLF
+	svn export ./include/zlib          bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/zlib          --native-eol CRLF
 	svn export ./include/msinttypes    bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/msinttypes    --native-eol CRLF
 	cp bin/dist.mk bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
 	cp bin/svn_version_dist.h bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/svn_version/svn_version.h
