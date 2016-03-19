@@ -57,7 +57,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 	FileReader::off_t bytesRead = 0;	// Amount of memory that has been read from file
 
 	FileReader::off_t filePosition = file.GetPosition();
-	const char * sourceBuf = nullptr;
+	const mpt::byte * sourceBuf = nullptr;
 	FileReader::PinnedRawDataView restrictedSampleDataView;
 	FileReader::off_t fileSize = 0;
 	if(UsesFileReaderForDecoding())
@@ -67,7 +67,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 	} else if(!IsVariableLengthEncoded())
 	{
 		restrictedSampleDataView = file.GetPinnedRawDataView(CalculateEncodedSize(sample.nLength));
-		sourceBuf = mpt::byte_cast<const char*>(restrictedSampleDataView.data());
+		sourceBuf = restrictedSampleDataView.data();
 		fileSize = restrictedSampleDataView.size();
 	} else
 	{
@@ -77,7 +77,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		// it is thus efficient to create a view to the whole file object.
 		// See MPT_ASSERT with fileSize below.
 		restrictedSampleDataView = file.GetPinnedRawDataView();
-		sourceBuf = mpt::byte_cast<const char*>(restrictedSampleDataView.data());
+		sourceBuf = restrictedSampleDataView.data();
 		fileSize = restrictedSampleDataView.size();
 	}
 

@@ -37,13 +37,13 @@ namespace SC { // SC = _S_ample_C_onversion
 // and has to provide a static const input_inc member
 // which describes by how many input_t elements inBuf has to be incremented between invocations.
 // input_inc is normally 1 except when decoding e.g. bigger sample values
-// from multiple char values.
+// from multiple mpt::byte values.
 
 
 // decodes signed 7bit values stored as signed int8
 struct DecodeInt7
 {
-	typedef char input_t;
+	typedef mpt::byte input_t;
 	typedef int8 output_t;
 	static const int input_inc = 1;
 	forceinline output_t operator() (const input_t *inBuf)
@@ -54,7 +54,7 @@ struct DecodeInt7
 
 struct DecodeInt8
 {
-	typedef char input_t;
+	typedef mpt::byte input_t;
 	typedef int8 output_t;
 	static const int input_inc = 1;
 	forceinline output_t operator() (const input_t *inBuf)
@@ -65,7 +65,7 @@ struct DecodeInt8
 
 struct DecodeUint8
 {
-	typedef char input_t;
+	typedef mpt::byte input_t;
 	typedef int8 output_t;
 	static const int input_inc = 1;
 	forceinline output_t operator() (const input_t *inBuf)
@@ -76,7 +76,7 @@ struct DecodeUint8
 
 struct DecodeInt8Delta
 {
-	typedef char input_t;
+	typedef mpt::byte input_t;
 	typedef int8 output_t;
 	static const int input_inc = 1;
 	uint8 delta;
@@ -91,7 +91,7 @@ struct DecodeInt8Delta
 template <uint16 offset, size_t loByteIndex, size_t hiByteIndex>
 struct DecodeInt16
 {
-	typedef char input_t;
+	typedef mpt::byte input_t;
 	typedef int16 output_t;
 	static const int input_inc = 2;
 	forceinline output_t operator() (const input_t *inBuf)
@@ -103,7 +103,7 @@ struct DecodeInt16
 template <size_t loByteIndex, size_t hiByteIndex>
 struct DecodeInt16Delta
 {
-	typedef char input_t;
+	typedef mpt::byte input_t;
 	typedef int16 output_t;
 	static const int input_inc = 2;
 	uint16 delta;
@@ -117,7 +117,7 @@ struct DecodeInt16Delta
 
 struct DecodeInt16Delta8
 {
-	typedef char input_t;
+	typedef mpt::byte input_t;
 	typedef int16 output_t;
 	static const int input_inc = 2;
 	uint16 delta;
@@ -135,7 +135,7 @@ struct DecodeInt16Delta8
 template <uint32 offset, size_t loByteIndex, size_t midByteIndex, size_t hiByteIndex>
 struct DecodeInt24
 {
-	typedef char input_t;
+	typedef mpt::byte input_t;
 	typedef int32 output_t;
 	static const int input_inc = 3;
 	forceinline output_t operator() (const input_t *inBuf)
@@ -147,7 +147,7 @@ struct DecodeInt24
 template <uint32 offset, size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
 struct DecodeInt32
 {
-	typedef char input_t;
+	typedef mpt::byte input_t;
 	typedef int32 output_t;
 	static const int input_inc = 4;
 	forceinline output_t operator() (const input_t *inBuf)
@@ -159,7 +159,7 @@ struct DecodeInt32
 template <size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
 struct DecodeFloat32
 {
-	typedef char input_t;
+	typedef mpt::byte input_t;
 	typedef float32 output_t;
 	static const int input_inc = 4;
 	forceinline output_t operator() (const input_t *inBuf)
@@ -171,7 +171,7 @@ struct DecodeFloat32
 template <size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
 struct DecodeScaledFloat32
 {
-	typedef char input_t;
+	typedef mpt::byte input_t;
 	typedef float32 output_t;
 	static const int input_inc = 4;
 	float factor;
@@ -947,8 +947,8 @@ void CopyInterleavedSampleStreams(typename SampleConversion::output_t * MPT_REST
 
 
 // Copy a mono sample data buffer.
-template <typename SampleConversion>
-size_t CopyMonoSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize, SampleConversion conv = SampleConversion())
+template <typename SampleConversion, typename Tbyte>
+size_t CopyMonoSample(ModSample &sample, const Tbyte *sourceBuffer, size_t sourceSize, SampleConversion conv = SampleConversion())
 //-------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_ASSERT(sample.GetNumChannels() == 1);
@@ -958,7 +958,7 @@ size_t CopyMonoSample(ModSample &sample, const char *sourceBuffer, size_t source
 	const size_t countFrames = std::min<size_t>(sourceSize / frameSize, sample.nLength);
 	size_t numFrames = countFrames;
 	SampleConversion sampleConv(conv);
-	const char * MPT_RESTRICT inBuf = sourceBuffer;
+	const mpt::byte * MPT_RESTRICT inBuf = mpt::byte_cast<const mpt::byte*>(sourceBuffer);
 	typename SampleConversion::output_t * MPT_RESTRICT outBuf = static_cast<typename SampleConversion::output_t *>(sample.pSample);
 	while(numFrames--)
 	{
@@ -971,8 +971,8 @@ size_t CopyMonoSample(ModSample &sample, const char *sourceBuffer, size_t source
 
 
 // Copy a stereo interleaved sample data buffer.
-template <typename SampleConversion>
-size_t CopyStereoInterleavedSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize, SampleConversion conv = SampleConversion())
+template <typename SampleConversion, typename Tbyte>
+size_t CopyStereoInterleavedSample(ModSample &sample, const Tbyte *sourceBuffer, size_t sourceSize, SampleConversion conv = SampleConversion())
 //--------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_ASSERT(sample.GetNumChannels() == 2);
@@ -983,7 +983,7 @@ size_t CopyStereoInterleavedSample(ModSample &sample, const char *sourceBuffer, 
 	size_t numFrames = countFrames;
 	SampleConversion sampleConvLeft(conv);
 	SampleConversion sampleConvRight(conv);
-	const char * MPT_RESTRICT inBuf = sourceBuffer;
+	const mpt::byte * MPT_RESTRICT inBuf = mpt::byte_cast<const mpt::byte*>(sourceBuffer);
 	typename SampleConversion::output_t * MPT_RESTRICT outBuf = static_cast<typename SampleConversion::output_t *>(sample.pSample);
 	while(numFrames--)
 	{
@@ -999,8 +999,8 @@ size_t CopyStereoInterleavedSample(ModSample &sample, const char *sourceBuffer, 
 
 
 // Copy a stereo split sample data buffer.
-template <typename SampleConversion>
-size_t CopyStereoSplitSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize, SampleConversion conv = SampleConversion())
+template <typename SampleConversion, typename Tbyte>
+size_t CopyStereoSplitSample(ModSample &sample, const Tbyte *sourceBuffer, size_t sourceSize, SampleConversion conv = SampleConversion())
 //--------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_ASSERT(sample.GetNumChannels() == 2);
@@ -1014,7 +1014,7 @@ size_t CopyStereoSplitSample(ModSample &sample, const char *sourceBuffer, size_t
 
 	size_t numSamplesLeft = countSamplesLeft;
 	SampleConversion sampleConvLeft(conv);
-	const char * MPT_RESTRICT inBufLeft = sourceBuffer;
+	const mpt::byte * MPT_RESTRICT inBufLeft = mpt::byte_cast<const mpt::byte*>(sourceBuffer);
 	typename SampleConversion::output_t * MPT_RESTRICT outBufLeft = static_cast<typename SampleConversion::output_t *>(sample.pSample);
 	while(numSamplesLeft--)
 	{
@@ -1025,7 +1025,7 @@ size_t CopyStereoSplitSample(ModSample &sample, const char *sourceBuffer, size_t
 
 	size_t numSamplesRight = countSamplesRight;
 	SampleConversion sampleConvRight(conv);
-	const char * MPT_RESTRICT inBufRight = sourceBuffer + sample.nLength * SampleConversion::input_inc;
+	const mpt::byte * MPT_RESTRICT inBufRight = mpt::byte_cast<const mpt::byte*>(sourceBuffer) + sample.nLength * SampleConversion::input_inc;
 	typename SampleConversion::output_t * MPT_RESTRICT outBufRight = static_cast<typename SampleConversion::output_t *>(sample.pSample) + 1;
 	while(numSamplesRight--)
 	{
@@ -1039,8 +1039,8 @@ size_t CopyStereoSplitSample(ModSample &sample, const char *sourceBuffer, size_t
 
 
 // Copy a sample data buffer and normalize it. Requires slightly advanced sample conversion functor.
-template<typename SampleConversion>
-size_t CopyAndNormalizeSample(ModSample &sample, const char *sourceBuffer, size_t sourceSize, typename SampleConversion::peak_t *srcPeak = nullptr, SampleConversion conv = SampleConversion())
+template <typename SampleConversion, typename Tbyte>
+size_t CopyAndNormalizeSample(ModSample &sample, const Tbyte *sourceBuffer, size_t sourceSize, typename SampleConversion::peak_t *srcPeak = nullptr, SampleConversion conv = SampleConversion())
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	const size_t inSize = sizeof(typename SampleConversion::input_t);
@@ -1050,7 +1050,7 @@ size_t CopyAndNormalizeSample(ModSample &sample, const char *sourceBuffer, size_
 	size_t numSamples = sample.nLength * sample.GetNumChannels();
 	LimitMax(numSamples, sourceSize / inSize);
 
-	const char * inBuf = sourceBuffer;
+	const mpt::byte * inBuf = mpt::byte_cast<const mpt::byte*>(sourceBuffer);
 	// Finding max value
 	SampleConversion sampleConv(conv);
 	for(size_t i = numSamples; i != 0; i--)
