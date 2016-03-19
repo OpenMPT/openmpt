@@ -2579,7 +2579,7 @@ fail:
 static size_t VorbisfileFilereaderRead(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
 	FileReader &file = *reinterpret_cast<FileReader*>(datasource);
-	return file.ReadRaw(ptr, size * nmemb) / size;
+	return file.ReadRaw(mpt::void_cast<mpt::byte*>(ptr), size * nmemb) / size;
 }
 
 static int VorbisfileFilereaderSeek(void *datasource, ogg_int64_t offset, int whence)
@@ -3600,7 +3600,7 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	} else
 	{
 		// just copy
-		std::copy(&rawData[0], &rawData[0] + rawData.size(), mpt::byte_cast<char*>(Samples[sample].pSample));
+		std::copy(&rawData[0], &rawData[0] + rawData.size(), mpt::void_cast<char*>(Samples[sample].pSample));
 	}
 
 	result = true;

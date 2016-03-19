@@ -753,7 +753,7 @@ static void UnpackMO3DeltaPredictionSample(FileReader &file, typename Properties
 static size_t VorbisfileFilereaderRead(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
 	FileReader &file = *reinterpret_cast<FileReader*>(datasource);
-	return file.ReadRaw(ptr, size * nmemb) / size;
+	return file.ReadRaw(mpt::void_cast<mpt::byte*>(ptr), size * nmemb) / size;
 }
 
 static int VorbisfileFilereaderSeek(void *datasource, ogg_int64_t offset, int whence)
@@ -879,7 +879,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		file.Rewind();
 		FileReader::PinnedRawDataView fileView = file.GetPinnedRawDataView();
-		const void *stream = mpt::byte_cast<const void*>(fileView.data());
+		const void *stream = mpt::void_cast<const void*>(fileView.data());
 		uint32 length = mpt::saturate_cast<uint32>(fileView.size());
 
 		if(unmo3->UNMO3_Decode(&stream, &length, (loadFlags & loadSampleData) ? 0 : 1) != 0)
@@ -890,7 +890,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		fileView.invalidate();
 
 		// If decoding was successful, stream and length will keep the new pointers now.
-		FileReader unpackedFile(mpt::as_span(mpt::byte_cast<const mpt::byte*>(stream), length));
+		FileReader unpackedFile(mpt::as_span(mpt::void_cast<const mpt::byte*>(stream), length));
 
 		bool result = false;	// Result of trying to load the module, false == fail.
 

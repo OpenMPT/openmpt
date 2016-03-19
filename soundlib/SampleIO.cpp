@@ -765,7 +765,7 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 	{
 		// Stereo signed interleaved
 		len = sample.GetSampleSizeInBytes();
-		if(f) mpt::IO::WriteRaw(*f, pSampleVoid, len);
+		if(f) mpt::IO::WriteRaw(*f, mpt::void_cast<const mpt::byte*>(pSampleVoid), len);
 	}
 
 	else if(GetBitDepth() == 8 && GetChannelFormat() == stereoInterleaved && GetEncoding() == unsignedPCM)

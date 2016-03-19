@@ -25,7 +25,7 @@ static int LHAreadFileReader(void *handle, void *buf, size_t buf_len)
 {
 	FileReader *f = reinterpret_cast<FileReader*>(handle);
 	int read_len = mpt::saturate_cast<int>(buf_len);
-	int result = mpt::saturate_cast<int>(f->ReadRaw(buf, read_len));
+	int result = mpt::saturate_cast<int>(f->ReadRaw(mpt::void_cast<mpt::byte*>(buf), read_len));
 	if(result == 0)
 	{
 		return -1;

@@ -645,7 +645,7 @@ module_impl::module_impl( const void * data, std::size_t size, LIBOPENMPT_SHARED
 module_impl::module_impl( const void * data, std::size_t size, std::shared_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(log) {
 #endif
 	ctor( ctls );
-	load( FileReader( mpt::as_span( mpt::byte_cast< const mpt::byte * >( data ), size ) ), ctls );
+	load( FileReader( mpt::as_span( mpt::void_cast< const mpt::byte * >( data ), size ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::~module_impl() {
