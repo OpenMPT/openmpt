@@ -285,8 +285,12 @@ struct byte_cast_impl<Tdst*, Tsrc*>
 		return reinterpret_cast<Tdst*>(src);
 	}
 };
+
+template <typename Tdst, typename Tsrc>
+struct void_cast_impl;
+
 template <typename Tdst>
-struct byte_cast_impl<Tdst*, void*>
+struct void_cast_impl<Tdst*, void*>
 {
 	inline Tdst* operator () (void* src) const
 	{
@@ -299,7 +303,7 @@ struct byte_cast_impl<Tdst*, void*>
 	}
 };
 template <typename Tdst>
-struct byte_cast_impl<Tdst*, const void*>
+struct void_cast_impl<Tdst*, const void*>
 {
 	inline Tdst* operator () (const void* src) const
 	{
@@ -312,7 +316,7 @@ struct byte_cast_impl<Tdst*, const void*>
 	}
 };
 template <typename Tsrc>
-struct byte_cast_impl<void*, Tsrc*>
+struct void_cast_impl<void*, Tsrc*>
 {
 	inline void* operator () (Tsrc* src) const
 	{
@@ -325,7 +329,7 @@ struct byte_cast_impl<void*, Tsrc*>
 	}
 };
 template <typename Tsrc>
-struct byte_cast_impl<const void*, Tsrc*>
+struct void_cast_impl<const void*, Tsrc*>
 {
 	inline const void* operator () (Tsrc* src) const
 	{
@@ -343,6 +347,13 @@ template <typename Tdst, typename Tsrc>
 inline Tdst byte_cast(Tsrc src)
 {
 	return byte_cast_impl<Tdst, Tsrc>()(src);
+}
+
+// casts between pointers to void and pointers to byte
+template <typename Tdst, typename Tsrc>
+inline Tdst void_cast(Tsrc src)
+{
+	return void_cast_impl<Tdst, Tsrc>()(src);
 }
 
 

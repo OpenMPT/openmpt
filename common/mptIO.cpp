@@ -336,8 +336,8 @@ bool SeekRelative(FILE* & f, IO::Offset off) { return OffsetFits<long>(off) && (
 
 #endif
 
-IO::Offset ReadRawImpl(FILE * & f, mpt::byte * data, std::size_t size) { return fread(mpt::byte_cast<void*>(data), 1, size, f); }
-bool WriteRawImpl(FILE* & f, const mpt::byte * data, std::size_t size) { return fwrite(mpt::byte_cast<const void*>(data), 1, size, f) == size; }
+IO::Offset ReadRawImpl(FILE * & f, mpt::byte * data, std::size_t size) { return fread(mpt::void_cast<void*>(data), 1, size, f); }
+bool WriteRawImpl(FILE* & f, const mpt::byte * data, std::size_t size) { return fwrite(mpt::void_cast<const void*>(data), 1, size, f) == size; }
 bool IsEof(FILE * & f) { return feof(f) != 0; }
 bool Flush(FILE* & f) { return fflush(f) == 0; }
 

@@ -194,7 +194,7 @@ const mpt::byte *CMappedFile::Lock()
 		{
 			m_hFMap = hmf;
 			m_pData = lpStream;
-			return mpt::byte_cast<const mpt::byte*>(lpStream);
+			return mpt::void_cast<const mpt::byte*>(lpStream);
 		}
 		CloseHandle(hmf);
 		hmf = nullptr;
@@ -209,7 +209,7 @@ const mpt::byte *CMappedFile::Lock()
 	{
 		DWORD chunkToRead = mpt::saturate_cast<DWORD>(length);
 		DWORD chunkRead = 0;
-		if(ReadFile(m_hFile, mpt::byte_cast<mpt::byte*>(lpStream) + bytesRead, chunkToRead, &chunkRead, NULL) == FALSE)
+		if(ReadFile(m_hFile, mpt::void_cast<mpt::byte*>(lpStream) + bytesRead, chunkToRead, &chunkRead, NULL) == FALSE)
 		{
 			// error
 			free(lpStream);
@@ -219,7 +219,7 @@ const mpt::byte *CMappedFile::Lock()
 		bytesToRead -= chunkRead;
 	}
 	m_pData = lpStream;
-	return mpt::byte_cast<const mpt::byte*>(lpStream);
+	return mpt::void_cast<const mpt::byte*>(lpStream);
 }
 
 #endif // MPT_OS_WINDOWS
