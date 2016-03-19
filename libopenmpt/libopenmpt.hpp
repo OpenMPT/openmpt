@@ -45,6 +45,34 @@
  * - libopenmpt does not enforce or expect any particular unicode
  * normalization form.
  *
+ * \section libopenmpt_cpp_fileio File I/O
+ *
+ * libopenmpt can use 3 different strategies for file I/O.
+ *
+ * - openmpt::module::module() with any kind of memory buffer as parameter will
+ * load the module from the provided memory buffer, which will require loading
+ * all data upfront by the library
+ * caller.
+ * - openmpt::module::module() with a seekable std::istream as parameter will
+ * load the module via the stream interface. libopenmpt will not implement an
+ * additional buffering layer in this case whih means the callbacks are assumed
+ * to be performant even with small i/o sizes.
+ * - openmpt::module::module() with an unseekable std::istream as parameter will
+ * load the module via the stream interface. libopempt will make an internal
+ * copy as it goes along, and sometimes have to pre-cache the whole file in case
+ * it needs to know the complete file size. This strategy is intended to be used
+ * if the file is located on a high latency network.
+ *
+ * | constructor       | speed  | memory consumption |
+ * | ----------------: | :----: | :----------------: |
+ * | memory buffer     | <p style="background-color:green" >fast  </p> | <p style="background-color:yellow">medium</p> | 
+ * | seekable stream   | <p style="background-color:red"   >slow  </p> | <p style="background-color:green" >low   </p> |
+ * | unseekable stream | <p style="background-color:yellow">medium</p> | <p style="background-color:red"   >high  </p> |
+ *
+ * In all cases, the data or stream passend to the constructor is no longer
+ * needed after the openmpt::module has been constructed and can be destroyed
+ * by the caller.
+ *
  * \section libopenmpt-cpp-detailed Detailed documentation
  *
  * \ref libopenmpt_cpp
