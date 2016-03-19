@@ -54,10 +54,10 @@
  * additional buffering layer in this case whih means the callbacks are assumed
  * to be performant even with small i/o sizes.
  * - openmpt_module_create() with an unseekable stream will load the module via
- * callbacks to the stream interface. libopempt will make an internal copy as it
- * goes along, and sometimes have to pre-cache the whole file in case it needs
- * to know the complete file size. This strategy is intended to be used if the
- * file is located on a high latency network.
+ * callbacks to the stream interface. libopempt will make an internal copy as
+ * it goes along, and sometimes have to pre-cache the whole file in case it
+ * needs to know the complete file size. This strategy is intended to be used
+ * if the file is located on a high latency network.
  *
  * | create function                                | speed  | memory consumption |
  * | ---------------------------------------------: | :----: | :----------------: |

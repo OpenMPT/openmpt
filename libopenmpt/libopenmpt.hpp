@@ -57,11 +57,11 @@
  * load the module via the stream interface. libopenmpt will not implement an
  * additional buffering layer in this case whih means the callbacks are assumed
  * to be performant even with small i/o sizes.
- * - openmpt::module::module() with an unseekable std::istream as parameter will
- * load the module via the stream interface. libopempt will make an internal
- * copy as it goes along, and sometimes have to pre-cache the whole file in case
- * it needs to know the complete file size. This strategy is intended to be used
- * if the file is located on a high latency network.
+ * - openmpt::module::module() with an unseekable std::istream as parameter
+ * will load the module via the stream interface. libopempt will make an
+ * internal copy as it goes along, and sometimes have to pre-cache the whole
+ * file in case it needs to know the complete file size. This strategy is
+ * intended to be used if the file is located on a high latency network.
  *
  * | constructor       | speed  | memory consumption |
  * | ----------------: | :----: | :----------------: |
