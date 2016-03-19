@@ -26,6 +26,7 @@
 #include "InputHandler.h"
 #include "dlg_misc.h"
 #include "../common/mptBufferIO.h"
+#include "Globals.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -912,23 +913,22 @@ bool CAbstractVstEditor::CheckInstrument(INSTRUMENTINDEX ins) const
 INSTRUMENTINDEX CAbstractVstEditor::GetBestInstrumentCandidate() const
 //--------------------------------------------------------------------
 {
-	//First try current instrument:
-/*	CModDoc* pModDoc = m_pVstPlugin->GetModDoc();
-	int currentInst =	//HOW DO WE DO THIS??
-	if (CheckInstrument(currentInst)) {
-		return currentInst;
-	}
-*/
-	//Then just take the first instrument that points to this plug..
-	std::vector<INSTRUMENTINDEX> plugInstrumentList;
-	m_VstPlugin.GetInputInstrumentList(plugInstrumentList);
-	if(plugInstrumentList.size())
+	// First try current instrument:
+	const CModDoc *modDoc = m_VstPlugin.GetModDoc();
+	POSITION pos = modDoc->GetFirstViewPosition();
+	while(pos != NULL)
 	{
-		return static_cast<INSTRUMENTINDEX>(plugInstrumentList[0]);
+		CModControlView *pView = dynamic_cast<CModControlView *>(modDoc->GetNextView(pos));
+		if(pView != nullptr && pView->GetDocument() == modDoc)
+		{
+			INSTRUMENTINDEX ins = static_cast<INSTRUMENTINDEX>(pView->GetInstrumentChange());
+			if(CheckInstrument(ins))
+				return ins;
+		}
 	}
 
-	//No instrument in the entire track points to this plug.
-	return INSTRUMENTINDEX_INVALID;
+	// Just take the first instrument that points to this plug..
+	return modDoc->HasInstrumentForPlugin(m_VstPlugin.m_nSlot);
 }
 
 

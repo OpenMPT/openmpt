@@ -202,6 +202,7 @@ public:
 	SAMPLEINDEX InsertSample(bool bLimit = false);
 	INSTRUMENTINDEX InsertInstrument(SAMPLEINDEX lSample = SAMPLEINDEX_INVALID, INSTRUMENTINDEX lDuplicate = INSTRUMENTINDEX_INVALID);
 	INSTRUMENTINDEX InsertInstrumentForPlugin(PLUGINDEX plug);
+	INSTRUMENTINDEX HasInstrumentForPlugin(PLUGINDEX plug) const;
 	void InitializeInstrument(ModInstrument *pIns);
 	bool RemoveOrder(SEQUENCEINDEX nSeq, ORDERINDEX nOrd);
 	bool RemovePattern(PATTERNINDEX nPat);

@@ -1548,6 +1548,10 @@ void CViewGlobals::OnClonePlug()
 			SNDMIXPLUGIN &newPlugin = sndFile.m_MixPlugins[emptySlots[toIndex]];
 
 			GetDocument()->ClonePlugin(newPlugin, curPlugin);
+			if(GetDocument()->HasInstrumentForPlugin(emptySlots[toIndex]) == INSTRUMENTINDEX_INVALID)
+			{
+				GetDocument()->InsertInstrumentForPlugin(emptySlots[toIndex]);
+			}
 
 			if(curPlugin.IsOutputToMaster() || toIndex == emptySlots.size() - 1)
 			{
