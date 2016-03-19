@@ -581,7 +581,7 @@ public:
 			traits.genres.push_back(mpt::ToUnicode(mpt::CharsetISO8859_1, name));
 		}
 	}
-	Encoder::Traits BuildTraits()
+	Encoder::Traits BuildTraits(bool compatible)
 	{
 		Encoder::Traits traits;
 		if(!IsAvailable())
@@ -589,9 +589,9 @@ public:
 			return traits;
 		}
 		traits.fileExtension = MPT_PATHSTRING("mp3");
-		traits.fileShortDescription = MPT_USTRING("MP3 (Lame)");
-		traits.fileDescription = MPT_USTRING("MPEG-1/2 Layer 3");
-		traits.encoderSettingsName = MPT_USTRING("MP3Lame");
+		traits.fileShortDescription = (compatible ? MPT_USTRING("MP3 (compatible)") : MPT_USTRING("MP3"));
+		traits.fileDescription = (compatible ? MPT_USTRING("MPEG-1 Layer 3") : MPT_USTRING("MPEG-1/2 Layer 3"));
+		traits.encoderSettingsName = (compatible ? MPT_USTRING("MP3LameCompatible") : MPT_USTRING("MP3Lame"));
 		traits.encoderName = MPT_USTRING("libMP3Lame");
 		traits.description += MPT_USTRING("Version: ");
 		traits.description += mpt::ToUnicode(mpt::CharsetASCII, get_lame_version()?get_lame_version():"");
@@ -605,17 +605,20 @@ public:
 		traits.canTags = true;
 		traits.genres.clear();
 		id3tag_genre_list(&GenreEnumCallback, &traits);
-		if(!StreamEncoderSettings::Instance().MP3LameAllowID3v2inCBR)
-		{
-			traits.modesWithFixedGenres = Encoder::ModeCBR;
-		}
+		traits.modesWithFixedGenres = (compatible ? Encoder::ModeCBR : Encoder::ModeInvalid);
 		traits.maxChannels = 2;
-		traits.samplerates = std::vector<uint32>(layer3_samplerates, layer3_samplerates + CountOf(layer3_samplerates));
-		traits.modes = Encoder::ModeCBR | Encoder::ModeQuality;
-		traits.bitrates = std::vector<int>(layer3_bitrates, layer3_bitrates + CountOf(layer3_bitrates));
+		traits.samplerates = (compatible
+			? std::vector<uint32>(mpeg1layer3_samplerates, mpeg1layer3_samplerates + CountOf(mpeg1layer3_samplerates))
+			: std::vector<uint32>(layer3_samplerates, layer3_samplerates + CountOf(layer3_samplerates))
+			);
+		traits.modes = (compatible ? Encoder::ModeCBR : (Encoder::ModeCBR | Encoder::ModeQuality));
+		traits.bitrates = (compatible
+			? std::vector<int>(mpeg1layer3_bitrates, mpeg1layer3_bitrates + CountOf(mpeg1layer3_bitrates))
+			: std::vector<int>(layer3_bitrates, layer3_bitrates + CountOf(layer3_bitrates))
+			);
 		traits.defaultSamplerate = 44100;
 		traits.defaultChannels = 2;
-		traits.defaultMode = Encoder::ModeQuality;
+		traits.defaultMode = (compatible ? Encoder::ModeCBR : Encoder::ModeQuality);
 		traits.defaultBitrate = 256;
 		traits.defaultQuality = 0.8f;
 		return traits;
@@ -627,6 +630,7 @@ class MP3LameStreamWriter : public StreamWriterBase
 {
 private:
 	ComponentLame &lame;
+	bool compatible;
 	Encoder::Mode Mode;
 	bool gfp_inited;
 	lame_t gfp;
@@ -641,9 +645,10 @@ private:
 	std::streamoff id3v2Size;
 	FileTags Tags;
 public:
-	MP3LameStreamWriter(ComponentLame &lame_, std::ostream &stream)
+	MP3LameStreamWriter(ComponentLame &lame_, std::ostream &stream, bool compatible)
 		: StreamWriterBase(stream)
 		, lame(lame_)
+		, compatible(compatible)
 	{
 		Mode = Encoder::ModeInvalid;
 		gfp_inited = false;
@@ -666,7 +671,7 @@ public:
 		uint16 channels = settings.Channels;
 		if(settings.Tags)
 		{
-			if(settings.Mode == Encoder::ModeCBR && !StreamEncoderSettings::Instance().MP3LameAllowID3v2inCBR)
+			if(compatible)
 			{
 				id3type = ID3v1;
 			} else if(StreamEncoderSettings::Instance().MP3LameID3v2UseLame)
@@ -691,7 +696,7 @@ public:
 		if(settings.Mode == Encoder::ModeCBR)
 		{
 
-			if(settings.Bitrate >= 32)
+			if(compatible && settings.Bitrate >= 32)
 			{
 				// For maximum compatibility,
 				// force samplerate to a samplerate supported by MPEG1 streams.
@@ -717,9 +722,15 @@ public:
 			lame.lame_set_brate(gfp, settings.Bitrate);
 			lame.lame_set_VBR(gfp, vbr_off);
 
-			lame.lame_set_bWriteVbrTag(gfp, 0);
-			lame.lame_set_strict_ISO(gfp, 1);
-			lame.lame_set_disable_reservoir(gfp, 1);
+			if(compatible)
+			{
+				lame.lame_set_bWriteVbrTag(gfp, 0);
+				lame.lame_set_strict_ISO(gfp, 1);
+				lame.lame_set_disable_reservoir(gfp, 1);
+			} else
+			{
+				lame.lame_set_bWriteVbrTag(gfp, 1);
+			}
 
 		} else
 		{
@@ -840,16 +851,16 @@ public:
 			tagger.WriteID3v2Tags(f, Tags, replayGain);
 			f.seekp(endPos);
 		}
-		if(Mode != Encoder::ModeCBR)
+		if(id3type == ID3v2Lame)
+		{
+			id3v2Size = lame.lame_get_id3v2_tag(gfp, nullptr, 0);
+		} else if(id3type == ID3v2OpenMPT)
+		{
+			// id3v2Size already set
+		}
+		if(!compatible)
 		{
 			std::streampos endPos = f.tellp();
-			if(id3type == ID3v2Lame)
-			{
-				id3v2Size = lame.lame_get_id3v2_tag(gfp, nullptr, 0);
-			} else if(id3type == ID3v2OpenMPT)
-			{
-				// id3v2Size already set
-			}
 			f.seekp(fStart + id3v2Size);
 			buf.resize(lame.lame_get_lametag_frame(gfp, nullptr, 0));
 			buf.resize(lame.lame_get_lametag_frame(gfp, (unsigned char*)&buf[0], buf.size()));
@@ -961,10 +972,10 @@ public:
 			return traits;
 		}
 		traits.fileExtension = MPT_PATHSTRING("mp3");
-		traits.fileShortDescription = MPT_USTRING("MP3 ") + (isLame ? MPT_USTRING("(Lame_enc)") : MPT_USTRING("(BladeEnc)"));
+		traits.fileShortDescription = MPT_USTRING("MP3");
 		traits.fileDescription = MPT_USTRING("MPEG-1 Layer 3");
 		traits.encoderSettingsName = MPT_USTRING("MP3Blade");
-		traits.encoderName = mpt::String::Print(MPT_USTRING("%1.dll\n"), encoderDLL.ToUnicode());
+		traits.encoderName = mpt::String::Print(MPT_USTRING("%2.dll (%1)"), (isLame ? MPT_USTRING("Lame_enc") : MPT_USTRING("BladeEnc")), encoderDLL.ToUnicode());
 		BE_VERSION ver;
 		MemsetZero(ver);
 		beVersion(&ver);
@@ -1404,7 +1415,7 @@ public:
 			return traits;
 		}
 		traits.fileExtension = MPT_PATHSTRING("mp3");
-		traits.fileShortDescription = MPT_USTRING("MP3 (ACM)");
+		traits.fileShortDescription = MPT_USTRING("MP3");
 		traits.fileDescription = MPT_USTRING("MPEG Layer 3");
 		DWORD ver = acmGetVersion();
 		if(ver & 0xffff)
@@ -1668,7 +1679,16 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 		if(IsComponentAvailable(m_Lame))
 		{
 			m_Type = MP3EncoderLame;
-			SetTraits(m_Lame->BuildTraits());
+			SetTraits(m_Lame->BuildTraits(false));
+			return;
+		}
+	}
+	if(type == MP3EncoderDefault || type == MP3EncoderLameCompatible)
+	{
+		if(IsComponentAvailable(m_Lame))
+		{
+			m_Type = MP3EncoderLameCompatible;
+			SetTraits(m_Lame->BuildTraits(true));
 			return;
 		}
 	}
@@ -1704,6 +1724,7 @@ bool MP3Encoder::IsAvailable() const
 	return false
 #ifdef MPT_MP3ENCODER_LAME
 		|| ((m_Type == MP3EncoderLame) && IsComponentAvailable(m_Lame))
+		|| ((m_Type == MP3EncoderLameCompatible) && IsComponentAvailable(m_Lame))
 #endif // MPT_MP3ENCODER_ACM
 #ifdef MPT_MP3ENCODER_BLADE
 		|| ((m_Type == MP3EncoderBlade) && IsComponentAvailable(m_Blade))
@@ -1730,9 +1751,9 @@ IAudioStreamEncoder *MP3Encoder::ConstructStreamEncoder(std::ostream &file) cons
 	{
 		// nothing
 #ifdef MPT_MP3ENCODER_LAME
-	} else if(m_Type == MP3EncoderLame)
+	} else if(m_Type == MP3EncoderLame || m_Type == MP3EncoderLameCompatible)
 	{
-		result = new MP3LameStreamWriter(*m_Lame, file);
+		result = new MP3LameStreamWriter(*m_Lame, file, (m_Type == MP3EncoderLameCompatible));
 #endif // MPT_MP3ENCODER_LAME
 #ifdef MPT_MP3ENCODER_BLADE
 	} else if(m_Type == MP3EncoderBlade)

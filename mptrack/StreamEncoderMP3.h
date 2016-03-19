@@ -37,6 +37,7 @@ enum MP3EncoderType
 {
 	MP3EncoderDefault,
 	MP3EncoderLame,
+	MP3EncoderLameCompatible,
 	MP3EncoderBlade,
 	MP3EncoderACM,
 };
