@@ -963,6 +963,7 @@ bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).tar: bin/dist.mk bin/svn_vers
 	svn export ./examples           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/examples
 	svn export ./openmpt123         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123
 	svn export ./contrib            bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/contrib
+	svn export ./include/minimp3    bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/minimp3
 	svn export ./include/miniz      bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/miniz
 	svn export ./include/modplug    bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/modplug
 	svn export ./include/stb_vorbis bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/stb_vorbis
