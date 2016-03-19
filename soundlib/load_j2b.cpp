@@ -136,13 +136,15 @@ struct PACKED AMFFMainChunk
 	uint8  channels;
 	uint8  speed;
 	uint8  tempo;
-	uint32 unknown;		// 0x16078035 if original file was MOD, 0xC50100FF for everything else? it's 0xFF00FFFF in Carrotus.j2b (AMFF version)
+	uint16 minPeriod;
+	uint16 maxPeriod;
 	uint8  globalvolume;
 
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
 	{
-		SwapBytesLE(unknown);
+		SwapBytesLE(minPeriod);
+		SwapBytesLE(maxPeriod);
 	}
 };
 
@@ -797,7 +799,8 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	else
 		m_madeWithTracker += "old version)";
 
-	MPT_ASSERT(mainChunk.unknown == LittleEndian(0xFF0001C5) || mainChunk.unknown == LittleEndian(0x35800716) || mainChunk.unknown == LittleEndian(0xFF00FFFF));
+	m_nMinPeriod = mainChunk.minPeriod / 4u;
+	m_nMaxPeriod = mainChunk.maxPeriod / 4u;
 
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, mainChunk.songname);
 
