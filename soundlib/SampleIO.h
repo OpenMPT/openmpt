@@ -65,6 +65,11 @@ public:
 	{
 		littleEndian = 0,
 		bigEndian,
+#ifdef MPT_PLATFORM_LITTLE_ENDIAN
+		nativeEndian = littleEndian,
+#else
+		nativeEndian = bigEndian,
+#endif
 	};
 
 	// Sample encoding
