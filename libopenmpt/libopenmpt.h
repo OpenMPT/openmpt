@@ -198,7 +198,7 @@ typedef int (*openmpt_stream_seek_func)( void * stream, int64_t offset, int when
  * Tell position of stream.
  * \param stream Stream to operate on.
  * \return Current position in stream.
- * \retval -1 Failure. Position does not get updated.
+ * \retval -1 Failure.
  */
 typedef int64_t (*openmpt_stream_tell_func)( void * stream );
 
