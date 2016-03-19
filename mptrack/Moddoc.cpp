@@ -1970,16 +1970,25 @@ void CModDoc::OnFileMP3Convert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, bool 
 	OggOpusEncoder opusencoder;
 	VorbisEncoder vorbisencoder;
 	MP3Encoder mp3lame(MP3EncoderLame);
+	MP3Encoder mp3lamecompatible(MP3EncoderLameCompatible);
 	MP3Encoder mp3blade(MP3EncoderBlade);
 	MP3Encoder mp3acm(MP3EncoderACM);
 	std::vector<EncoderFactoryBase*> encoders;
-	if(wavencoder.IsAvailable())    encoders.push_back(&wavencoder);
-	if(flacencoder.IsAvailable())   encoders.push_back(&flacencoder);
-	if(opusencoder.IsAvailable())   encoders.push_back(&opusencoder);
+	if(wavencoder.IsAvailable()) encoders.push_back(&wavencoder);
+	if(flacencoder.IsAvailable()) encoders.push_back(&flacencoder);
+	if(opusencoder.IsAvailable()) encoders.push_back(&opusencoder);
 	if(vorbisencoder.IsAvailable()) encoders.push_back(&vorbisencoder);
-	if(mp3lame.IsAvailable())       encoders.push_back(&mp3lame);
-	if(mp3blade.IsAvailable())      encoders.push_back(&mp3blade);
-	if(mp3acm.IsAvailable())        encoders.push_back(&mp3acm);
+	if(mp3lame.IsAvailable())
+	{
+		encoders.push_back(&mp3lame);
+	} else if(mp3blade.IsAvailable())
+	{
+		encoders.push_back(&mp3blade);
+	} else if(mp3acm.IsAvailable())
+	{
+		encoders.push_back(&mp3acm);
+	}
+	if(mp3lamecompatible.IsAvailable()) encoders.push_back(&mp3lamecompatible);
 	if(showWarning && encoders.size() == 2)
 	{
 		Reporting::Warning(
