@@ -94,6 +94,84 @@ bool Flush(FILE* & f);
 
 
 
+template <typename Tbyte> bool IsValid(std::pair<mpt::span<Tbyte>, IO::Offset> & f)
+{
+	return (f.second >= 0);
+}
+template <typename Tbyte> IO::Offset TellRead(std::pair<mpt::span<Tbyte>, IO::Offset> & f)
+{
+	return f.second;
+}
+template <typename Tbyte> IO::Offset TellWrite(std::pair<mpt::span<Tbyte>, IO::Offset> & f)
+{
+	return f.second;
+}
+template <typename Tbyte> bool SeekBegin(std::pair<mpt::span<Tbyte>, IO::Offset> & f)
+{
+	f.second = 0;
+	return true;
+}
+template <typename Tbyte> bool SeekEnd(std::pair<mpt::span<Tbyte>, IO::Offset> & f)
+{
+	f.second = f.first.size();
+	return true;
+}
+template <typename Tbyte> bool SeekAbsolute(std::pair<mpt::span<Tbyte>, IO::Offset> & f, IO::Offset pos)
+{
+	f.second = pos;
+	return true;
+}
+template <typename Tbyte> bool SeekRelative(std::pair<mpt::span<Tbyte>, IO::Offset> & f, IO::Offset off)
+{
+	if(f.second < 0)
+	{
+		return false;
+	}
+	f.second += off;
+	return true;
+}
+template <typename Tbyte> IO::Offset ReadRawImpl(std::pair<mpt::span<Tbyte>, IO::Offset> & f, mpt::byte * data, std::size_t size)
+{
+	if(f.second < 0)
+	{
+		return 0;
+	}
+	if(f.second >= f.first.size())
+	{
+		return 0;
+	}
+	std::size_t num = mpt::saturate_cast<std::size_t>(std::min<IO::Offset>(f.second - f.first.size(), size));
+	std::copy(mpt::byte_cast<const mpt::byte*>(f.first.data() + f.second), mpt::byte_cast<const mpt::byte*>(f.first.data() + f.second + num), data);
+	f.second += num;
+	return num;
+}
+template <typename Tbyte> bool WriteRawImpl(std::pair<mpt::span<Tbyte>, IO::Offset> & f, const mpt::byte * data, std::size_t size)
+{
+	if(f.second < 0)
+	{
+		return 0;
+	}
+	if(f.second >= f.first.size())
+	{
+		return 0;
+	}
+	std::size_t num = mpt::saturate_cast<std::size_t>(std::min<IO::Offset>(f.second - f.first.size(), size));
+	std::copy(data, data + num, mpt::byte_cast<mpt::byte*>(f.first.data() + f.second));
+	f.second += num;
+	return num;
+}
+template <typename Tbyte> bool IsEof(std::pair<mpt::span<Tbyte>, IO::Offset> & f)
+{
+	return (f.second >= f.first.size());
+}
+template <typename Tbyte> bool Flush(std::pair<mpt::span<Tbyte>, IO::Offset> & f)
+{
+	MPT_UNREFERENCED_PARAMTER(f);
+	return true;
+}
+
+
+
 template <typename Tbyte, typename Tfile>
 inline IO::Offset ReadRaw(Tfile & f, Tbyte * data, std::size_t size)
 {
