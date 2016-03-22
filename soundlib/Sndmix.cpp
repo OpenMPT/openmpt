@@ -1983,7 +1983,12 @@ bool CSoundFile::ReadNote()
 
 			// ST3 only clamps the final output period, but never the channel's internal period.
 			// Test case: PeriodLimit.s3m
-			if (pChn->nPeriod < m_nMinPeriod && GetType() != MOD_TYPE_S3M) pChn->nPeriod = m_nMinPeriod;
+			if (pChn->nPeriod < m_nMinPeriod
+				&& GetType() != MOD_TYPE_S3M
+				&& !(m_playBehaviour[kHertzInLinearMode] && m_SongFlags[SONG_LINEARSLIDES]))
+			{
+				pChn->nPeriod = m_nMinPeriod;
+			}
 			if(m_playBehaviour[kFT2Periods]) Clamp(pChn->nPeriod, 1, 31999);
 			period = pChn->nPeriod;
 
