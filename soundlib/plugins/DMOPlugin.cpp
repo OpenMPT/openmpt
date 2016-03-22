@@ -72,7 +72,6 @@ DMOPlugin::DMOPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *m
 	, m_pMediaParams(nullptr)
 	, m_nSamplesPerSec(sndFile.GetSampleRate())
 	, m_uid(uid)
-	, m_DataTime(0)
 //--------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(FAILED(m_pMediaObject->QueryInterface(IID_IMediaParamInfo, (void **)&m_pParamInfo)))
@@ -246,21 +245,21 @@ void DMOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //-------------------------------------------------------------------
 {
 	m_mixBuffer.ClearOutputBuffers(numFrames);
+	REFERENCE_TIME startTime = Util::muldiv(m_SndFile.GetTotalSampleCount(), 10000000, m_nSamplesPerSec);
 #ifdef ENABLE_SSE
 	if(GetProcSupport() & PROCSUPPORT_SSE)
 	{
 		SSEInterleaveFloatToInt16(m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1), numFrames);
-		m_pMediaProcess->Process(numFrames * 2 * sizeof(int16), reinterpret_cast<BYTE *>(m_pMixBuffer), m_DataTime, DMO_INPLACE_NORMAL);
+		m_pMediaProcess->Process(numFrames * 2 * sizeof(int16), reinterpret_cast<BYTE *>(m_pMixBuffer), startTime, DMO_INPLACE_NORMAL);
 		SSEDeinterleaveInt16ToFloat(m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
 	} else
 #endif // ENABLE_SSE
 	{
 		InterleaveFloatToInt16(m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1), numFrames);
-		m_pMediaProcess->Process(numFrames * 2 * sizeof(int16), reinterpret_cast<BYTE *>(m_pMixBuffer), m_DataTime, DMO_INPLACE_NORMAL);
+		m_pMediaProcess->Process(numFrames * 2 * sizeof(int16), reinterpret_cast<BYTE *>(m_pMixBuffer), startTime, DMO_INPLACE_NORMAL);
 		DeinterleaveInt16ToFloat(m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
 	}
 
-	m_DataTime += Util::muldiv(numFrames, 10000000, m_nSamplesPerSec);
 	ProcessMixOps(pOutL, pOutR, m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
 }
 
@@ -375,7 +374,6 @@ void DMOPlugin::Suspend()
 	m_pMediaObject->Flush();
 	m_pMediaObject->SetInputType(0, nullptr, DMO_SET_TYPEF_CLEAR);
 	m_pMediaObject->SetOutputType(0, nullptr, DMO_SET_TYPEF_CLEAR);
-	m_DataTime = 0;
 }
 
 

@@ -12,6 +12,7 @@
 #include "../Sndfile.h"
 #include "PlugInterface.h"
 #include "PluginManager.h"
+#include "../../common/mptIO.h"
 #ifdef MODPLUG_TRACKER
 #include "../../mptrack/Moddoc.h"
 #include "../../mptrack/Mainfrm.h"
@@ -490,10 +491,10 @@ void IMixPlugin::SaveAllParameters()
 	m_pMixStruct->defaultProgram = -1;
 	
 	// Default implementation: Save all parameter values
-	PlugParamIndex numParams = std::min<uint32>(GetNumParameters(), std::numeric_limits<uint32>::max() / sizeof(IEEE754binary32LE));
+	PlugParamIndex numParams = std::min<uint32>(GetNumParameters(), (std::numeric_limits<uint32>::max() - sizeof(uint32)) / sizeof(IEEE754binary32LE));
 	uint32 nLen = numParams * sizeof(IEEE754binary32LE);
 	if (!nLen) return;
-	nLen += 4;
+	nLen += sizeof(uint32);
 	if ((m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= nLen))
 	{
 		m_pMixStruct->nPluginDataSize = nLen;
@@ -509,12 +510,11 @@ void IMixPlugin::SaveAllParameters()
 	}
 	if (m_pMixStruct->pPluginData != nullptr)
 	{
-		IEEE754binary32LE *p = reinterpret_cast<IEEE754binary32LE *>(m_pMixStruct->pPluginData);
-		memset(p, 0, sizeof(uint32));	// Plugin data type
-		p++;
+		std::pair<mpt::span<char>, mpt::IO::Offset> memFile = std::make_pair(mpt::as_span(m_pMixStruct->pPluginData, nLen), 0);
+		mpt::IO::WriteIntLE<uint32>(memFile, 0);	// Plugin data type
 		for(PlugParamIndex i = 0; i < numParams; i++)
 		{
-			p[i] = IEEE754binary32LE(GetParameter(i));
+			mpt::IO::Write(memFile, IEEE754binary32LE(GetParameter(i)));
 		}
 	}
 }
@@ -523,17 +523,20 @@ void IMixPlugin::SaveAllParameters()
 void IMixPlugin::RestoreAllParameters(int32 /*program*/)
 //------------------------------------------------------
 {
-	if(m_pMixStruct != nullptr && m_pMixStruct->pPluginData != nullptr && m_pMixStruct->nPluginDataSize >= 4)
+	if(m_pMixStruct != nullptr && m_pMixStruct->pPluginData != nullptr && m_pMixStruct->nPluginDataSize >= sizeof(uint32))
 	{
-		uint32 type = *reinterpret_cast<const uint32 *>(m_pMixStruct->pPluginData);
+		std::pair<mpt::span<const char>, mpt::IO::Offset> memFile = std::make_pair(mpt::as_span(m_pMixStruct->pPluginData, m_pMixStruct->nPluginDataSize), 0);
+		uint32 type = 0;
+		mpt::IO::ReadIntLE<uint32>(memFile, type);
 		if (type == 0)
 		{
-			const uint32 numParams = std::min<uint32>(GetNumParameters(), (m_pMixStruct->nPluginDataSize - 4u) / sizeof(IEEE754binary32LE));
+			const uint32 numParams = std::min<uint32>(GetNumParameters(), (m_pMixStruct->nPluginDataSize - sizeof(uint32)) / sizeof(IEEE754binary32LE));
 			BeginSetProgram(-1);
-			const IEEE754binary32LE *p = reinterpret_cast<const IEEE754binary32LE *>(m_pMixStruct->pPluginData) + 1;
 			for (uint32 i = 0; i < numParams; i++)
 			{
-				SetParameter(i, p[i]);
+				IEEE754binary32LE v(0.0f);
+				mpt::IO::Read(memFile, v);
+				SetParameter(i, v);
 			}
 			EndSetProgram();
 		}

@@ -33,7 +33,6 @@ protected:
 
 	uint32 m_nSamplesPerSec;
 	uint32 m_uid;
-	REFERENCE_TIME m_DataTime;
 	int16 *m_pMixBuffer;
 	int16 m_MixBuffer16[MIXBUFFERSIZE * 2 + 16];		// 16-bit Stereo interleaved
 
