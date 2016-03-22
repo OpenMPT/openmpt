@@ -136,7 +136,7 @@ template <typename Tbyte> IO::Offset ReadRawImpl(std::pair<mpt::span<Tbyte>, IO:
 	{
 		return 0;
 	}
-	if(f.second >= f.first.size())
+	if(f.second >= static_cast<IO::Offset>(f.first.size()))
 	{
 		return 0;
 	}
@@ -151,7 +151,7 @@ template <typename Tbyte> bool WriteRawImpl(std::pair<mpt::span<Tbyte>, IO::Offs
 	{
 		return false;
 	}
-	if(f.second >= f.first.size())
+	if(f.second >= static_cast<IO::Offset>(f.first.size()))
 	{
 		return false;
 	}
@@ -166,7 +166,7 @@ template <typename Tbyte> bool WriteRawImpl(std::pair<mpt::span<Tbyte>, IO::Offs
 }
 template <typename Tbyte> bool IsEof(std::pair<mpt::span<Tbyte>, IO::Offset> & f)
 {
-	return (f.second >= f.first.size());
+	return (f.second >= static_cast<IO::Offset>(f.first.size()));
 }
 template <typename Tbyte> bool Flush(std::pair<mpt::span<Tbyte>, IO::Offset> & f)
 {
