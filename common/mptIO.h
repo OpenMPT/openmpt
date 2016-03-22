@@ -140,7 +140,7 @@ template <typename Tbyte> IO::Offset ReadRawImpl(std::pair<mpt::span<Tbyte>, IO:
 	{
 		return 0;
 	}
-	std::size_t num = mpt::saturate_cast<std::size_t>(std::min<IO::Offset>(f.second - f.first.size(), size));
+	std::size_t num = mpt::saturate_cast<std::size_t>(std::min<IO::Offset>(f.first.size() - f.second, size));
 	std::copy(mpt::byte_cast<const mpt::byte*>(f.first.data() + f.second), mpt::byte_cast<const mpt::byte*>(f.first.data() + f.second + num), data);
 	f.second += num;
 	return num;
@@ -149,16 +149,20 @@ template <typename Tbyte> bool WriteRawImpl(std::pair<mpt::span<Tbyte>, IO::Offs
 {
 	if(f.second < 0)
 	{
-		return 0;
+		return false;
 	}
 	if(f.second >= f.first.size())
 	{
-		return 0;
+		return false;
 	}
-	std::size_t num = mpt::saturate_cast<std::size_t>(std::min<IO::Offset>(f.second - f.first.size(), size));
+	std::size_t num = mpt::saturate_cast<std::size_t>(std::min<IO::Offset>(f.first.size() - f.second, size));
+	if(num != size)
+	{
+		return false;
+	}
 	std::copy(data, data + num, mpt::byte_cast<mpt::byte*>(f.first.data() + f.second));
 	f.second += num;
-	return num;
+	return true;
 }
 template <typename Tbyte> bool IsEof(std::pair<mpt::span<Tbyte>, IO::Offset> & f)
 {
