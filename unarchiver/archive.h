@@ -95,7 +95,7 @@ public:
 	}
 	virtual FileReader GetOutputFile() const
 	{
-		return FileReader(&data[0], data.size());
+		return FileReader(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(data)));
 	}
 	virtual std::size_t size() const { return contents.size(); }
 	virtual IArchive::const_iterator begin() const { return contents.begin(); }
