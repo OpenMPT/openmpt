@@ -1030,7 +1030,7 @@ struct PACKED PSM16SampleHeader
 	uint32 length;			// in bytes
 	uint32 loopStart;		// in samples?
 	uint32 loopEnd;			// in samples?
-	int8   finetune;		// Low nibble = MOD finetune, high nibble = transpose (7 = center)
+	uint8  finetune;		// Low nibble = MOD finetune, high nibble = transpose (7 = center)
 	uint8  volume;			// default volume
 	uint16 c2freq;			// Middle-C frequency, which has to be combined with the finetune and transpose.
 
