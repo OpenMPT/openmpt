@@ -263,8 +263,8 @@ void CModTypeDlg::UpdateDialog()
 	static_cast<CStatic *>(GetDlgItem(IDC_STATIC1))->SetIcon((usesDefaultBehaviour || isMPTM) ? NULL : m_warnIcon);
 	GetDlgItem(IDC_STATIC2)->SetWindowText((usesDefaultBehaviour || isMPTM)
 		? _T("Compatibility settings are currently optimal. It is advised to not edit them.")
-		: _T("Compatibility settings are not optimal for this legacy module. Click \"Set Defaults\" to use the recommended settings."));
-	GetDlgItem(IDC_BUTTON3)->EnableWindow(usesDefaultBehaviour ? FALSE:  TRUE);
+		: _T("Playback settings have been set to compatibility mode. Click \"Set Defaults\" to use the recommended settings instead."));
+	GetDlgItem(IDC_BUTTON3)->EnableWindow(usesDefaultBehaviour ? FALSE : TRUE);
 }
 
 
@@ -523,8 +523,8 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		{
 		case MSF_COMPATIBLE_PLAY: continue;
 
-		case kMPTOldSwingBehaviour: desc = _T("OpenMPT <= 1.17 compatible random variation behaviour for instruments"); break;
-		case kMIDICCBugEmulation: desc = _T("Plugin volume command bug emulation"); break;
+		case kMPTOldSwingBehaviour: desc = _T("OpenMPT 1.17 compatible random variation behaviour for instruments"); break;
+		case kMIDICCBugEmulation: desc = _T("Plugin volume MIDI CC bug emulation"); break;
 		case kOldMIDIPitchBends: desc = _T("Old Pitch Wheel behaviour for instrument plugins"); break;
 		case kFT2VolumeRamping: desc = _T("Use smooth Fasttracker 2 volume ramping"); break;
 
@@ -1384,7 +1384,11 @@ void CInputDlg::DoDataExchange(CDataExchange* pDX)
 //------------------------------------------------
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_EDIT1, m_edit);
+	if(m_minValueInt == m_maxValueInt && m_minValueDbl == m_maxValueDbl)
+	{
+		// Only need this for freeform text
+		DDX_Control(pDX, IDC_EDIT1, m_edit);
+	}
 	DDX_Control(pDX, IDC_SPIN1, m_spin);
 }
 
@@ -1428,22 +1432,22 @@ BOOL CInputDlg::OnInitDialog()
 	{
 		// Numeric (int)
 		m_spin.SetRange32(m_minValueInt, m_maxValueInt);
-		m_spin.SetBuddy(GetDlgItem(IDC_EDIT1));
-		SetDlgItemInt(IDC_EDIT1, resultAsInt);
 		m_edit.SubclassDlgItem(IDC_EDIT1, this);
 		m_edit.ModifyStyle(0, ES_NUMBER);
 		m_edit.AllowNegative(m_minValueInt < 0);
 		m_edit.AllowFractions(false);
+		SetDlgItemInt(IDC_EDIT1, resultAsInt);
+		m_spin.SetBuddy(&m_edit);
 	} else if(m_minValueDbl != m_maxValueDbl)
 	{
 		// Numeric (double)
 		m_spin.SetRange32(static_cast<int32>(m_minValueDbl), static_cast<int32>(m_maxValueDbl));
-		m_spin.SetBuddy(GetDlgItem(IDC_EDIT1));
 		m_edit.SubclassDlgItem(IDC_EDIT1, this);
 		m_edit.ModifyStyle(0, ES_NUMBER);
 		m_edit.AllowNegative(m_minValueDbl < 0);
 		m_edit.AllowFractions(true);
 		m_edit.SetDecimalValue(resultAsDouble);
+		m_spin.SetBuddy(&m_edit);
 	} else
 	{
 		// Text

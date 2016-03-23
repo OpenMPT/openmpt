@@ -46,6 +46,7 @@ OPENMPT_NAMESPACE_BEGIN
 template <class T, size_t limit = _CVTBUFSIZE>
 class CDecimalSupport
 {
+protected:
 	/// the locale dependant decimal separator
 	TCHAR m_DecimalSeparator[5];
 	/// the locale dependant negative sign
@@ -202,7 +203,7 @@ public:
 	LRESULT OnChar(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
 	{
 		bHandled = false;
-		if (static_cast<TCHAR>(wParam) == m_DecimalSeparator[0] || wParam == _T('.') && m_allowFractions)
+		if ((static_cast<TCHAR>(wParam) == m_DecimalSeparator[0] || wParam == _T('.')) && m_allowFractions)
 		{
 			T* pT = static_cast<T*>(this);
 			int nStartChar;
