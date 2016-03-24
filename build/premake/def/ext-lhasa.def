@@ -1,0 +1,22 @@
+LIBRARY
+EXPORTS
+;cat include/lhasa/lib/public/*.h | grep -v '^ ' | sed 's/\*//g' | tr '\t' ' ' | grep -v '^ ' | grep ' lha_' | tr '\(' ' ' | awk '{print $2;}' | sort
+lha_decoder_for_name
+lha_decoder_free
+lha_decoder_get_crc
+lha_decoder_get_length
+lha_decoder_monitor
+lha_decoder_new
+lha_decoder_read
+lha_input_stream_free
+lha_input_stream_from
+lha_input_stream_from_FILE
+lha_input_stream_new
+lha_reader_check
+lha_reader_current_is_fake
+lha_reader_extract
+lha_reader_free
+lha_reader_new
+lha_reader_next_file
+lha_reader_read
+lha_reader_set_dir_policy

@@ -4,7 +4,7 @@
   language "C"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/lhasa"
-  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   targetname "openmpt-lhasa"
   includedirs { "../../include/msinttypes/inttypes" }
@@ -49,3 +49,7 @@
    "../../include/lhasa/lib/public/lhasa.h",
   }
   buildoptions { "/wd4244", "/wd4267" }
+  filter {}
+  filter { "kind:SharedLib" }
+   files { "../../build/premake/def/ext-lhasa.def" }
+  filter {}
