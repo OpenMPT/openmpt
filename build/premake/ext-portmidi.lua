@@ -4,7 +4,7 @@
   language "C"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/portmidi"
-  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   targetname "openmpt-portmidi"
   includedirs { "../../include/portmidi/porttime", "../../include/portmidi/pm_common", "../../include/portmidi/pm_win" }
@@ -24,3 +24,11 @@
    "../../include/portmidi/pm_common/portmidi.h",
    "../../include/portmidi/pm_win/pmwinmm.h",
   }
+  links {
+   "winmm"
+  }
+  filter {}
+  filter { "kind:StaticLib" }
+  filter { "kind:SharedLib" }
+   defines { "_WINDLL" }
+  filter {}
