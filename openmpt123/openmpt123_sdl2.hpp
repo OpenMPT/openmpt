@@ -93,7 +93,7 @@ public:
 		audiospec.callback = &sdl2_callback_wrapper;
 		audiospec.userdata = this;
 		if ( flags.verbose ) {
-			log << "SDL:" << std::endl;
+			log << "SDL2:" << std::endl;
 			log << " latency: " << ( audiospec.samples * 2.0 / flags.samplerate ) << " (2 * " << audiospec.samples << ")" << std::endl;
 			log << std::endl;
 		}
