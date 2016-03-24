@@ -571,9 +571,9 @@
 		</Configuration>
 		<Configuration
 			Name="DebugShared|Win32"
-			OutputDirectory="..\lib\x86\DebugShared"
+			OutputDirectory="..\..\bin\Win32-Shared-Debug"
 			IntermediateDirectory="..\obj\lhasa\x86\DebugShared"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="2"
 			>
 			<Tool
@@ -618,11 +618,20 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\openmpt-lhasa.lib"
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\openmpt-lhasa.dll"
+				LinkIncremental="2"
+				ModuleDefinitionFile="../premake/def/ext-lhasa.def"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				ImportLibrary="..\..\bin\Win32-Shared-Debug\openmpt-lhasa.lib"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -634,14 +643,17 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="DebugShared|x64"
-			OutputDirectory="..\lib\x86_64\DebugShared"
+			OutputDirectory="..\..\bin\x64-Shared-Debug"
 			IntermediateDirectory="..\obj\lhasa\x86_64\DebugShared"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="2"
 			>
 			<Tool
@@ -687,11 +699,20 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\openmpt-lhasa.lib"
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\openmpt-lhasa.dll"
+				LinkIncremental="2"
+				ModuleDefinitionFile="../premake/def/ext-lhasa.def"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				ImportLibrary="..\..\bin\x64-Shared-Debug\openmpt-lhasa.lib"
+				TargetMachine="17"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -703,14 +724,17 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="ReleaseShared|Win32"
-			OutputDirectory="..\lib\x86\ReleaseShared"
+			OutputDirectory="..\..\bin\Win32-Shared"
 			IntermediateDirectory="..\obj\lhasa\x86\ReleaseShared"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="2"
 			>
 			<Tool
@@ -755,11 +779,22 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\openmpt-lhasa.lib"
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\openmpt-lhasa.dll"
+				LinkIncremental="1"
+				ModuleDefinitionFile="../premake/def/ext-lhasa.def"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				ImportLibrary="..\..\bin\Win32-Shared\openmpt-lhasa.lib"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -771,14 +806,17 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="ReleaseShared|x64"
-			OutputDirectory="..\lib\x86_64\ReleaseShared"
+			OutputDirectory="..\..\bin\x64-Shared"
 			IntermediateDirectory="..\obj\lhasa\x86_64\ReleaseShared"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="2"
 			>
 			<Tool
@@ -824,11 +862,22 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\openmpt-lhasa.lib"
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\openmpt-lhasa.dll"
+				LinkIncremental="1"
+				ModuleDefinitionFile="../premake/def/ext-lhasa.def"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				ImportLibrary="..\..\bin\x64-Shared\openmpt-lhasa.lib"
+				TargetMachine="17"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -840,6 +889,9 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -848,149 +900,237 @@
 	</References>
 	<Files>
 		<Filter
-			Name="public"
+			Name="include"
 			>
-			<File
-				RelativePath="..\..\include\lhasa\lib\public\lha_decoder.h"
+			<Filter
+				Name="lhasa"
 				>
-			</File>
-			<File
-				RelativePath="..\..\include\lhasa\lib\public\lha_file_header.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\lhasa\lib\public\lha_input_stream.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\lhasa\lib\public\lha_reader.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\lhasa\lib\public\lhasa.h"
-				>
-			</File>
+				<Filter
+					Name="lib"
+					>
+					<File
+						RelativePath="..\..\include\lhasa\lib\crc16.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\crc16.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\ext_header.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\ext_header.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lh1_decoder.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lh5_decoder.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lh6_decoder.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lh7_decoder.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lha_arch.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lha_arch_unix.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lha_arch_win32.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lha_basic_reader.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lha_basic_reader.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lha_decoder.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lha_decoder.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lha_endian.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lha_endian.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lha_file_header.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lha_file_header.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lha_input_stream.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lha_input_stream.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lha_reader.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lhx_decoder.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lz5_decoder.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\lzs_decoder.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\macbinary.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\macbinary.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\null_decoder.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\pm1_decoder.c"
+						>
+					</File>
+					<File
+						RelativePath="..\..\include\lhasa\lib\pm2_decoder.c"
+						>
+					</File>
+					<Filter
+						Name="public"
+						>
+						<File
+							RelativePath="..\..\include\lhasa\lib\public\lha_decoder.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\lhasa\lib\public\lha_file_header.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\lhasa\lib\public\lha_input_stream.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\lhasa\lib\public\lha_reader.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\include\lhasa\lib\public\lhasa.h"
+							>
+						</File>
+					</Filter>
+				</Filter>
+			</Filter>
 		</Filter>
-		<File
-			RelativePath="..\..\include\lhasa\lib\crc16.c"
+		<Filter
+			Name="premake"
 			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\crc16.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\ext_header.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\ext_header.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lh1_decoder.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lh5_decoder.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lh6_decoder.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lh7_decoder.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lha_arch.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lha_arch_unix.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lha_arch_win32.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lha_basic_reader.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lha_basic_reader.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lha_decoder.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lha_decoder.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lha_endian.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lha_endian.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lha_file_header.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lha_file_header.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lha_input_stream.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lha_input_stream.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lha_reader.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lhx_decoder.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lz5_decoder.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\lzs_decoder.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\macbinary.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\macbinary.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\null_decoder.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\pm1_decoder.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\include\lhasa\lib\pm2_decoder.c"
-			>
-		</File>
+			<Filter
+				Name="def"
+				>
+				<File
+					RelativePath="..\premake\def\ext-lhasa.def"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugMDd|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DebugMDd|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseLTCG|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseLTCG|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+			</Filter>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
