@@ -3869,7 +3869,14 @@ static int start_decoder(vorb *f)
             float last=0;
             // pre-expand the lookup1-style multiplicands, to avoid a divide in the inner loop
             if (sparse) {
+#if 0 // OpenMPT
                if (c->sorted_entries == 0) goto skip;
+#else // OpenMPT
+               if (c->sorted_entries == 0) { // OpenMPT
+                  setup_temp_free(f, mults,sizeof(mults[0])*c->lookup_values); // OpenMPT
+                  goto skip; // OpenMPT
+               } // OpenMPT
+#endif // OpenMPT
                c->multiplicands = (codetype *) setup_malloc(f, sizeof(c->multiplicands[0]) * c->sorted_entries * c->dimensions);
             } else
                c->multiplicands = (codetype *) setup_malloc(f, sizeof(c->multiplicands[0]) * c->entries        * c->dimensions);
