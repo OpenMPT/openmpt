@@ -3337,11 +3337,13 @@ void CCtrlSamples::OnXFade()
 		|| sample.nLoopEnd <= sample.nLoopStart || sample.nLoopEnd > sample.nLength)
 	{
 		MessageBeep(MB_ICONWARNING);
+		SwitchToView();
 		return;
 	}
 	if(sample.nLoopStart == 0 && sample.nSustainStart == 0)
 	{
 		Reporting::Error("Crossfade requires the sample to have data before the loop start.", this);
+		SwitchToView();
 		return;
 	}
 
@@ -3366,8 +3368,8 @@ void CCtrlSamples::OnXFade()
 		{
 			m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
 		}
-
 	}
+	SwitchToView();
 }
 
 
@@ -3393,6 +3395,7 @@ void CCtrlSamples::OnAutotune()
 			EndWaitCursor();
 		}
 	}
+	SwitchToView();
 }
 
 
@@ -3449,6 +3452,7 @@ void CCtrlSamples::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
 	if(nButton == XBUTTON1) OnPrevInstrument();
 	else if(nButton == XBUTTON2) OnNextInstrument();
 	CModControlDlg::OnXButtonUp(nFlags, nButton, point);
+	SwitchToView();
 }
 
 OPENMPT_NAMESPACE_END
