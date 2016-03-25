@@ -748,8 +748,8 @@ public:
 };
 
 
-void CMainFrame::SoundSourceRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CMainFrame::SoundSourceRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer)
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	MPT_UNREFERENCED_PARAMETER(inputBuffer);
@@ -761,8 +761,8 @@ void CMainFrame::SoundSourceRead(const SoundDevice::Settings &settings, const So
 	timingInfo.SystemTimestamp = timeInfo.SyncPointSystemTimestamp;
 	timingInfo.Speed = timeInfo.Speed;
 	m_pSndFile->m_TimingInfo = timingInfo;
-	m_Dither.SetMode((DitherMode)settings.DitherType);
-	StereoVuMeterTargetWrapper target(settings.sampleFormat, flags.NeedsClippedFloat, m_Dither, buffer, m_VUMeter);
+	m_Dither.SetMode((DitherMode)bufferFormat.DitherType);
+	StereoVuMeterTargetWrapper target(bufferFormat.sampleFormat, bufferFormat.NeedsClippedFloat, m_Dither, buffer, m_VUMeter);
 	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(numFrames, target);
 	ASSERT(renderedFrames <= numFrames);
 	CSoundFile::samplecount_t remainingFrames = numFrames - renderedFrames;
@@ -770,8 +770,8 @@ void CMainFrame::SoundSourceRead(const SoundDevice::Settings &settings, const So
 	{
 		// The sound device interface expects the whole buffer to be filled, always.
 		// Clear remaining buffer if not enough samples got rendered.
-		std::size_t frameSize = settings.Channels * (settings.sampleFormat.GetBitsPerSample()/8);
-		if(settings.sampleFormat.IsUnsigned())
+		std::size_t frameSize = bufferFormat.Channels * (bufferFormat.sampleFormat.GetBitsPerSample()/8);
+		if(bufferFormat.sampleFormat.IsUnsigned())
 		{
 			std::memset((char*)(buffer) + renderedFrames * frameSize, 0x80, remainingFrames * frameSize);
 		} else
@@ -782,12 +782,11 @@ void CMainFrame::SoundSourceRead(const SoundDevice::Settings &settings, const So
 }
 
 
-void CMainFrame::SoundSourceDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo)
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CMainFrame::SoundSourceDone(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo)
+//------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
-	MPT_UNREFERENCED_PARAMETER(settings);
-	MPT_UNREFERENCED_PARAMETER(flags);
+	MPT_UNREFERENCED_PARAMETER(bufferFormat);
 	MPT_UNREFERENCED_PARAMETER(bufferAttributes);
 	MPT_ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);

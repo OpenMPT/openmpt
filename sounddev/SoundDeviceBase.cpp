@@ -203,7 +203,7 @@ void Base::SourceAudioRead(void *buffer, const void *inputBuffer, std::size_t nu
 	{
 		return;
 	}
-	m_Source->SoundSourceRead(m_Settings, m_Flags, GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, buffer, inputBuffer);
+	m_Source->SoundSourceRead(GetBufferFormat(), GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, buffer, inputBuffer);
 }
 
 
@@ -211,7 +211,7 @@ void Base::SourceAudioDone()
 //--------------------------
 {
 	MPT_TRACE();
-	m_Source->SoundSourceDone(m_Settings, m_Flags, GetEffectiveBufferAttributes(), m_TimeInfo);
+	m_Source->SoundSourceDone(GetBufferFormat(), GetEffectiveBufferAttributes(), m_TimeInfo);
 }
 
 

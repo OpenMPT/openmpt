@@ -67,6 +67,7 @@ struct TimeInfo
 
 struct Settings;
 struct Flags;
+struct BufferFormat;
 struct BufferAttributes;
 
 
@@ -80,8 +81,8 @@ public:
 	virtual void SoundSourcePostStopCallback() = 0;
 	virtual bool SoundSourceIsLockedByCurrentThread() const = 0;
 	virtual void SoundSourceLock() = 0;
-	virtual void SoundSourceRead(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer) = 0;
-	virtual void SoundSourceDone(const SoundDevice::Settings &settings, const SoundDevice::Flags &flags, const SoundDevice::BufferAttributes &bufferAttributes, SoundDevice::TimeInfo timeInfo) = 0;
+	virtual void SoundSourceRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer) = 0;
+	virtual void SoundSourceDone(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo) = 0;
 	virtual void SoundSourceUnlock() = 0;
 public:
 	class Guard
@@ -412,6 +413,17 @@ struct DynamicCaps
 	{
 		return;
 	}
+};
+
+
+struct BufferFormat
+{
+	uint32 Samplerate;
+	uint32 Channels;
+	uint8 InputChannels;
+	SampleFormat sampleFormat;
+	bool NeedsClippedFloat;
+	int DitherType;
 };
 
 
