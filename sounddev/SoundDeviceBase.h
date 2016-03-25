@@ -147,6 +147,17 @@ public:
 
 	SoundDevice::Settings GetSettings() const { return m_Settings; }
 	SampleFormat GetActualSampleFormat() const { return IsOpen() ? m_Settings.sampleFormat : SampleFormat(SampleFormatInvalid); }
+	SoundDevice::BufferFormat GetBufferFormat() const
+	{
+		BufferFormat bufferFormat;
+		bufferFormat.Samplerate = m_Settings.Samplerate;
+		bufferFormat.Channels = m_Settings.Channels;
+		bufferFormat.InputChannels = m_Settings.InputChannels;
+		bufferFormat.sampleFormat = m_Settings.sampleFormat;
+		bufferFormat.NeedsClippedFloat = m_Flags.NeedsClippedFloat;
+		bufferFormat.DitherType = m_Settings.DitherType;
+		return bufferFormat;
+	}
 	SoundDevice::BufferAttributes GetEffectiveBufferAttributes() const { return (IsOpen() && IsPlaying()) ? InternalGetEffectiveBufferAttributes() : SoundDevice::BufferAttributes(); }
 
 	SoundDevice::TimeInfo GetTimeInfo() const { return m_TimeInfo; }
