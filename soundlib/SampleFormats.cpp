@@ -36,9 +36,9 @@
 #include <ogg/ogg.h>
 #endif // MPT_WITH_OGG
 #ifdef MPT_WITH_FLAC
-#include <flac/include/FLAC/stream_decoder.h>
-#include <flac/include/FLAC/stream_encoder.h>
-#include <flac/include/FLAC/metadata.h>
+#include <FLAC/stream_decoder.h>
+#include <FLAC/stream_encoder.h>
+#include <FLAC/metadata.h>
 #endif // MPT_WITH_FLAC
 #if defined(MPT_WITH_VORBIS)
 #include <vorbis/codec.h>
