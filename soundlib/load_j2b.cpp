@@ -16,17 +16,9 @@
 #include "ChunkReader.h"
 
 #if defined(MPT_WITH_ZLIB)
-
-#if MPT_COMPILER_MSVC
-#include <zlib/zlib.h>
-#else
 #include <zlib.h>
-#endif
-
 #elif defined(MPT_WITH_MINIZ)
-
-#include "miniz/miniz.c"
-
+#include <miniz/miniz.c>
 #endif
 
 
