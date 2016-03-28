@@ -3048,7 +3048,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 
 	std::vector<int16> raw_sample_data;
 
-	mp3_decoder_t *mp3 = reinterpret_cast<mp3_decoder_t *>(mp3_create()); // workaournd minimp3 header typo
+	mp3_decoder_t *mp3 = reinterpret_cast<mp3_decoder_t *>(mp3_create()); // workaround minimp3 header typo
 
 	int rate = 0;
 	int channels = 0;

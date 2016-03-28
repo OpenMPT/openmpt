@@ -17,7 +17,7 @@ is just a high-level summary.
     MO3 support is not possible because either a MP3 or a Vorbis decoder is
     missing.
  *  [**Change**] The MSVC build system changed. The `libopenmptDLL` project is
-    gone. Use the new `ReleaseShared` configuration of the `libopenmpt`project
+    gone. Use the new `ReleaseShared` configuration of the `libopenmpt` project
     instead. libopenmpt now links against zlib by default. A separate project
     with smaller footprint linking against miniz is still available as
     `libopenmpt-small`.
@@ -43,9 +43,9 @@ is just a high-level summary.
     libvorbis, libvorbisfile or stb_vorbis.
  *  libopenmpt MSVC builds with Visual Studio 2010 or later on Windows 7 or
     later now use an internal MO3 decoder with libogg, libvorbis, libvorbisfile,
-    and libmpg123 or MediaFoundation suppport by defaut. Visual Studio 2008
-    builds still use unmo3.dll by default but also support the builtin decoder
-    in which case libmpg123 is required.
+    and libmpg123 or minimp3 or MediaFoundation suppport by defaut. Visual
+    Studio 2008 builds still use unmo3.dll by default but also support the
+    builtin decoder in which case libmpg123 is required.
  *  libopenmpt with Makefile or Autotools build system can now also use
     glibc/libdl instead of libtool/libltdl for dynamic loading of third-party
     libraries. Options `NO_DL=1` and `--without-dl` have been added
