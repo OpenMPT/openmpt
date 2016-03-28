@@ -56,7 +56,6 @@
 #include <zlib.h>
 #endif
 #elif defined(MPT_WITH_MINIZ)
-#define MINIZ_HEADER_FILE_ONLY
 #define MINIZ_NO_ZLIB_COMPATIBLE_NAMES
 #include <miniz/miniz.c>
 #endif

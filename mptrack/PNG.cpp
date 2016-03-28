@@ -16,7 +16,6 @@
 #if defined(MPT_WITH_ZLIB)
 #include <zlib.h>
 #elif defined(MPT_WITH_MINIZ)
-#define MINIZ_HEADER_FILE_ONLY
 #include "miniz/miniz.c"
 #endif
 
