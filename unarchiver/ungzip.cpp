@@ -21,7 +21,6 @@
 #include <zlib.h>
 #endif
 #elif defined(MPT_WITH_MINIZ)
-#define MINIZ_HEADER_FILE_ONLY
 #include <miniz/miniz.c>
 #endif
 

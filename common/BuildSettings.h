@@ -675,6 +675,10 @@
 #endif
 #endif
 
+#ifdef MPT_WITH_MINIZ
+#define MINIZ_HEADER_FILE_ONLY
+#endif
+
 #ifdef MPT_WITH_SMBPITCHSHIFT
 #ifdef MPT_BUILD_MSVC_SHARED
 #define SMBPITCHSHIFT_USE_DLL
