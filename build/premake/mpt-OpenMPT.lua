@@ -18,6 +18,7 @@
    "../../include/msinttypes/inttypes",
    "../../include/vstsdk2.4",
    "../../include/ASIOSDK2/common",
+   "../../include/flac/include",
    "../../include/lhasa/lib/public",
    "../../include/ogg/include",
    "../../include/vorbis/include",

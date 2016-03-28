@@ -16,9 +16,9 @@
 #include "Mptrack.h"
 #include "TrackerSettings.h"
 
-#include <flac/include/FLAC/metadata.h>
-#include <flac/include/FLAC/format.h>
-#include <flac/include/FLAC/stream_encoder.h>
+#include <FLAC/metadata.h>
+#include <FLAC/format.h>
+#include <FLAC/stream_encoder.h>
 
 
 OPENMPT_NAMESPACE_BEGIN
