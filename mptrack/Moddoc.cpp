@@ -373,6 +373,7 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 		break;
 	default:
 		m_SndFile.ChangeModTypeTo(m_SndFile.GetBestSaveFormat());
+		m_ShowSavedialog = true;
 		break;
 	}
 
@@ -383,11 +384,9 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 	// Show warning if file was made with more recent version of OpenMPT except
 	if(MptVersion::RemoveBuildNumber(m_SndFile.m_dwLastSavedWithVersion) > MptVersion::num)
 	{
-		char s[256];
-		wsprintf(s, "Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%s. Current version: v%s.\r\n",
-			MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion).c_str(),
-			MptVersion::str);
-		Reporting::Notification(s);
+		Reporting::Notification(mpt::String::Print("Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%1. Current version: v%2.\r\n",
+			MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion),
+			MptVersion::str));
 	}
 
 	SetModifiedFlag(FALSE); // (bModified);
@@ -626,7 +625,7 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, BOOL)
 		saveFileName = dlg.GetFirstFile();
 	} else
 	{
-		saveFileName = filename.ReplaceExt(ext);
+		saveFileName = filename;
 	}
 
 	// Do we need to create a backup file ?
@@ -2404,26 +2403,26 @@ void CModDoc::OnApproximateBPM()
 	m_SndFile.RecalculateSamplesPerTick();
 	const double bpm = m_SndFile.GetCurrentBPM();
 
-	CString Message;
+	CString s;
 	switch(m_SndFile.m_nTempoMode)
 	{
 		case tempoModeAlternative:
-			Message.Format("Using alternative tempo interpretation.\n\nAssuming:\n. %.8g ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM",
+			s.Format(_T("Using alternative tempo interpretation.\n\nAssuming:\n. %.8g ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM"),
 			m_SndFile.m_PlayState.m_nMusicTempo.ToDouble(), m_SndFile.m_PlayState.m_nMusicSpeed, m_SndFile.m_PlayState.m_nCurrentRowsPerBeat, bpm);
 			break;
 
 		case tempoModeModern:
-			Message.Format("Using modern tempo interpretation.\n\nThe tempo is: %.8g BPM", bpm);
+			s.Format(_T("Using modern tempo interpretation.\n\nThe tempo is: %.8g BPM"), bpm);
 			break;
 
 		case tempoModeClassic:
 		default:
-			Message.Format("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %.8g\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM",
+			s.Format(_T("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %.8g\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM"),
 			m_SndFile.m_PlayState.m_nMusicTempo.ToDouble(), m_SndFile.m_PlayState.m_nMusicSpeed, m_SndFile.m_PlayState.m_nCurrentRowsPerBeat, bpm);
 			break;
 	}
 
-	Reporting::Information(Message);
+	Reporting::Information(s);
 }
 
 
