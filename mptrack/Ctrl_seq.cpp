@@ -1048,7 +1048,7 @@ void COrderList::OnLButtonDblClk(UINT, CPoint)
 	PATTERNINDEX pat = m_pModDoc.GetrSoundFile().Order[m_nScrollPos];
 	if(m_pModDoc.GetrSoundFile().Patterns.IsValidPat(pat))
 		m_pParent.SetCurrentPattern(pat);
-	else
+	else if(pat != m_pModDoc.GetrSoundFile().Order.GetIgnoreIndex())
 		OnCreateNewPattern();
 }
 
