@@ -634,6 +634,13 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 	target.pMixPlugin = nullptr;
 	target.pPluginData = nullptr;
 	target.nPluginDataSize = 0;
+	if(target.editorX != int32_min)
+	{
+		// Move target editor a bit to visually distinguish it from the original editor
+		int addPixels = Util::ScalePixels(16, CMainFrame::GetMainFrame()->m_hWnd);
+		target.editorX += addPixels;
+		target.editorY += addPixels;
+	}
 #ifndef NO_PLUGINS
 	if(theApp.GetPluginManager()->CreateMixPlugin(target, GetrSoundFile()))
 	{
