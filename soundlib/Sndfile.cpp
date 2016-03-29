@@ -1198,31 +1198,43 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(std::vector<bool> &sampleUsed) const
 		return 0;
 	}
 	SAMPLEINDEX nExt = 0;
+	std::vector<ModCommand::INSTR> lastIns;
 
-	for (PATTERNINDEX nPat = 0; nPat < Patterns.Size(); nPat++) if(Patterns.IsValidPat(nPat))
+	for (PATTERNINDEX pat = 0; pat < Patterns.Size(); pat++) if(Patterns.IsValidPat(pat))
 	{
-		CPattern::const_iterator pEnd = Patterns[nPat].End();
-		for(CPattern::const_iterator p = Patterns[nPat].Begin(); p != pEnd; p++)
+		lastIns.assign(GetNumChannels(), 0);
+		const ModCommand *p = Patterns[pat];
+		for(ROWINDEX row = 0; row < Patterns[pat].GetNumRows(); row++)
 		{
-			if(p->IsNote())
+			for(CHANNELINDEX c = 0; c < GetNumChannels(); c++, p++)
 			{
-				if ((p->instr) && (IsInRange(p->instr, (INSTRUMENTINDEX)0, MAX_INSTRUMENTS)))
+				if(p->IsNote())
 				{
-					ModInstrument *pIns = Instruments[p->instr];
-					if (pIns)
+					ModCommand::INSTR instr = p->instr;
+					if(!p->instr) instr = lastIns[c];
+					if (instr)
 					{
-						SAMPLEINDEX n = pIns->Keyboard[p->note-1];
-						if (n <= GetNumSamples()) sampleUsed[n] = true;
-					}
-				} else
-				{
-					for (INSTRUMENTINDEX k = GetNumInstruments(); k >= 1; k--)
-					{
-						ModInstrument *pIns = Instruments[k];
-						if (pIns)
+						if(IsInRange(instr, (INSTRUMENTINDEX)0, MAX_INSTRUMENTS))
 						{
-							SAMPLEINDEX n = pIns->Keyboard[p->note-1];
-							if (n <= GetNumSamples()) sampleUsed[n] = true;
+							ModInstrument *pIns = Instruments[p->instr];
+							if (pIns)
+							{
+								SAMPLEINDEX n = pIns->Keyboard[p->note - NOTE_MIN];
+								if (n <= GetNumSamples()) sampleUsed[n] = true;
+							}
+						}
+						lastIns[c] = instr;
+					} else
+					{
+						// No idea which instrument this note belongs to, so mark it used in any instruments.
+						for (INSTRUMENTINDEX k = GetNumInstruments(); k >= 1; k--)
+						{
+							ModInstrument *pIns = Instruments[k];
+							if (pIns)
+							{
+								SAMPLEINDEX n = pIns->Keyboard[p->note - NOTE_MIN];
+								if (n <= GetNumSamples()) sampleUsed[n] = true;
+							}
 						}
 					}
 				}
