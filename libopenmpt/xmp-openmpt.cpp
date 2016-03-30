@@ -703,6 +703,27 @@ static std::string sanitize_xmplay_info_string( const std::string & str ) {
 	return result;
 }
 
+static std::string sanitize_xmplay_multiline_info_string( const std::string & str ) {
+	std::string result;
+	for ( std::size_t i = 0; i < str.length(); ++i ) {
+		const char c = str[i];
+		switch ( c ) {
+			case '\0':
+			case '\t':
+			case '\r':
+				break;
+			case '\n':
+				result.push_back( '\r' );
+				result.push_back( '\t' );
+				break;
+			default:
+				result.push_back( c );
+				break;
+		}
+	}
+	return result;
+}
+
 static std::string sanitize_xmplay_multiline_string( const std::string & str ) {
 	std::string result;
 	for ( std::size_t i = 0; i < str.length(); ++i ) {
@@ -1077,7 +1098,7 @@ static void WINAPI openmpt_GetGeneralInfo( char * buf ) {
 		;
 	std::string warnings = self->mod->get_metadata("warnings");
 	if ( !warnings.empty() ) {
-		str << "Warnings" << "\t" << sanitize_xmplay_info_string( string_replace( warnings, "\n", "\r\t" ) ) << "\r";
+		str << "Warnings" << "\t" << sanitize_xmplay_multiline_info_string( warnings ) << "\r";
 	}
 	str << "\r";
 	write_xmplay_string( buf, str.str() );
