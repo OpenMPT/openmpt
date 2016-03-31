@@ -650,6 +650,9 @@ BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPSTR pszText)
 		case IDC_BUTTON_MODTYPE:
 			_tcscpy(pszText, _T("Song Properties"));
 			return TRUE;
+		case IDC_BUTTON1:
+			_tcscpy(pszText, _T("Click button multiple times to tap in the desired tempo."));
+			return TRUE;
 		case IDC_SLIDER_SAMPLEPREAMP:
 			_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_nSamplePreAmp, m_sndFile.GetPlayConfig().getNormalSamplePreAmp()) : moreRecentMixModeNote);
 			return TRUE;
