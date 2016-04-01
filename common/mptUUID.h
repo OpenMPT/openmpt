@@ -38,16 +38,16 @@ std::wstring IIDToString(IID iid);
 GUID StringToGUID(const std::wstring &str);
 std::wstring GUIDToString(GUID guid);
 
+// Create a COM GUID
+GUID CreateGUID();
+
 // General UUID<->string conversion.
 // The string must/will be in standard UUID format: 4f9a455d-e7ef-4367-b2f0-0c83a38a5c72
-UUID StringToUUID(const std::wstring &str);
-std::wstring UUIDToString(UUID uuid);
+UUID StringToUUID(const mpt::ustring &str);
+mpt::ustring UUIDToString(UUID uuid);
 
 // Checks the UUID against the NULL UUID. Returns false if it is NULL, true otherwise.
 bool IsValid(UUID uuid);
-
-// Create a COM GUID
-GUID CreateGUID();
 
 // Create a UUID
 UUID CreateUUID();

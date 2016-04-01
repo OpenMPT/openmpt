@@ -115,11 +115,24 @@ GUID StringToGUID(const std::wstring &str)
 }
 
 
-UUID StringToUUID(const std::wstring &str)
+GUID CreateGUID()
+//---------------
+{
+	GUID guid = GUID();
+	if(::CoCreateGuid(&guid) != S_OK)
+	{
+		return GUID();
+	}
+	return guid;
+}
+
+
+UUID StringToUUID(const mpt::ustring &str)
 //----------------------------------------
 {
 	UUID uuid = UUID();
-	std::vector<wchar_t> tmp(str.c_str(), str.c_str() + str.length() + 1);
+	std::wstring wstr = mpt::ToWide(str);
+	std::vector<wchar_t> tmp(wstr.c_str(), wstr.c_str() + wstr.length() + 1);
 	if(::UuidFromStringW((RPC_WSTR)(&(tmp[0])), &uuid) != RPC_S_OK)
 	{
 		return UUID();
@@ -128,18 +141,18 @@ UUID StringToUUID(const std::wstring &str)
 }
 
 
-std::wstring UUIDToString(UUID uuid)
+mpt::ustring UUIDToString(UUID uuid)
 //----------------------------------
 {
-	std::wstring str;
+	std::wstring wstr;
 	RPC_WSTR tmp = nullptr;
 	if(::UuidToStringW(&uuid, &tmp) != RPC_S_OK)
 	{
-		return std::wstring();
+		return mpt::ustring();
 	}
-	str = (wchar_t*)tmp;
+	wstr = (wchar_t*)tmp;
 	::RpcStringFreeW(&tmp);
-	return str;
+	return mpt::ToUnicode(wstr);
 }
 
 
@@ -159,18 +172,6 @@ bool IsValid(UUID uuid)
 		|| uuid.Data4[6] != 0
 		|| uuid.Data4[7] != 0
 		;
-}
-
-
-GUID CreateGUID()
-//---------------
-{
-	GUID guid = GUID();
-	if(::CoCreateGuid(&guid) != S_OK)
-	{
-		return GUID();
-	}
-	return guid;
 }
 
 

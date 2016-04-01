@@ -490,7 +490,7 @@ public:
 	Setting<std::string> IniVersion;
 	const bool FirstRun;
 	const MptVersion::VersionNum PreviousSettingsVersion;
-	Setting<std::wstring> gcsInstallGUID;
+	Setting<mpt::ustring> gcsInstallGUID;
 
 	// Display
 
