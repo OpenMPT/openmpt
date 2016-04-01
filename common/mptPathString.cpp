@@ -276,7 +276,7 @@ mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const 
 	mpt::PathString filename = mpt::GetTempDirectory();
 	filename += (!fileNamePrefix.empty() ? fileNamePrefix + MPT_PATHSTRING("_") : mpt::PathString());
 	#ifdef MODPLUG_TRACKER
-		filename += mpt::PathString::FromWide(Util::UUIDToString(Util::CreateLocalUUID()));
+		filename += mpt::PathString::FromUnicode(Util::UUIDToString(Util::CreateLocalUUID()));
 	#else // !MODPLUG_TRACKER
 		UUID uuid = UUID();
 		RPC_STATUS status = ::UuidCreateSequential(&uuid);

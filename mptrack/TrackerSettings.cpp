@@ -190,7 +190,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, IniVersion(conf, "Version", "Version", std::string())
 	, FirstRun(IniVersion.Get() == std::string())
 	, PreviousSettingsVersion(GetPreviousSettingsVersion(IniVersion))
-	, gcsInstallGUID(conf, "Version", "InstallGUID", std::wstring())
+	, gcsInstallGUID(conf, "Version", "InstallGUID", mpt::ustring())
 	// Display
 	, m_ShowSplashScreen(conf, "Display", "ShowSplashScreen", true)
 	, gbMdiMaximize(conf, "Display", "MDIMaximize", true)
