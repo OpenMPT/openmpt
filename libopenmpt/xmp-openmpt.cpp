@@ -556,13 +556,16 @@ static std::string extract_date( const openmpt::module & mod ) {
 
 #define MPT_NUMERIC( x ) ( ( x >= '0' ) && ( x <= '9' ) )
 		for ( std::string::const_iterator i = s.begin(); i != s.end(); ++i ) {
-			if ( !MPT_NUMERIC( i[0] ) && MPT_NUMERIC( i[1] ) && MPT_NUMERIC( i[2] ) && MPT_NUMERIC( i[3] ) && MPT_NUMERIC( i[4] ) && !MPT_NUMERIC( i[5] ) ) {
+			std::size_t len = s.length();
+			std::size_t idx = i - s.begin();
+			std::size_t remaining = len - idx;
+			if ( ( remaining >= 6 ) && !MPT_NUMERIC( i[0] ) && MPT_NUMERIC( i[1] ) && MPT_NUMERIC( i[2] ) && MPT_NUMERIC( i[3] ) && MPT_NUMERIC( i[4] ) && !MPT_NUMERIC( i[5] ) ) {
 				// Four-digit year
 				const int32_t year = ( i[1] - '0' ) * 1000 + ( i[2] - '0' ) * 100 + ( i[3] - '0' ) * 10 + ( i[4] - '0' );
 				if ( year >= 1988 && year <= current_year ) {
 					best_year = std::max( year, best_year );
 				}
-			} else if ( i[0] == '\'' && MPT_NUMERIC( i[1] ) && MPT_NUMERIC( i[2] ) && !MPT_NUMERIC( i[3] ) ) {
+			} else if ( ( remaining >= 4 ) && ( i[0] == '\'' ) && MPT_NUMERIC( i[1] ) && MPT_NUMERIC( i[2] ) && !MPT_NUMERIC( i[3] ) ) {
 				// Apostrophe + two-digit year
 				const int32_t year = ( i[1] - '0' ) * 10 + ( i[2] - '0' );
 				if ( year >= 88 && year <= 99 ) {
