@@ -65,9 +65,14 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND)
 
-class ComponentUnMO3 : public ComponentLibrary
+class ComponentUnMO3
+#if defined(MPT_ENABLE_DYNBIND)
+	: public ComponentLibrary
+#endif // MPT_ENABLE_DYNBIND
 {
+#if defined(MPT_ENABLE_DYNBIND)
 	MPT_DECLARE_COMPONENT_MEMBERS
+#endif // MPT_ENABLE_DYNBIND
 public:
 	uint32 (UNMO3_API * UNMO3_GetVersion)();
 	// Decode a MO3 file (returns the same "exit codes" as UNMO3.EXE, eg. 0=success)
@@ -83,7 +88,15 @@ public:
 		return (UNMO3_Decode_New ? UNMO3_Decode_New(data, len, flags) : UNMO3_Decode_Old(data, len));
 	}
 public:
-	ComponentUnMO3() : ComponentLibrary(ComponentTypeForeign) { }
+	ComponentUnMO3()
+#if defined(MPT_ENABLE_DYNBIND)
+		: ComponentLibrary(ComponentTypeForeign)
+#endif // MPT_ENABLE_DYNBIND
+	{
+#if !defined(MPT_ENABLE_DYNBIND)
+		DoInitialize();
+#endif // !MPT_ENABLE_DYNBIND
+	}
 	bool DoInitialize()
 	{
 #if !defined(MPT_ENABLE_UNMO3_DYNBIND)
@@ -109,7 +122,9 @@ public:
 #endif
 	}
 };
+#if defined(MPT_ENABLE_DYNBIND)
 MPT_REGISTERED_COMPONENT(ComponentUnMO3, "UnMO3")
+#endif // MPT_ENABLE_DYNBIND
 
 #endif // MPT_WITH_UNMO3 || MPT_ENABLE_UNMO3_DYNBIND
 
@@ -874,8 +889,14 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	if(shouldUseUnmo3)
 	{
 	// Try to load unmo3 dynamically.
+#if defined(MPT_ENABLE_DYNBIND)
 	ComponentHandle<ComponentUnMO3> unmo3;
 	if(IsComponentAvailable(unmo3))
+#else // !MPT_ENABLE_DYNBIND
+	ComponentUnMO3 unmo3_;
+	ComponentUnMO3 *unmo3 = &unmo3_;
+	MPT_CONSTANT_IF(true)
+#endif // MPT_ENABLE_DYNBIND
 	{
 		file.Rewind();
 		FileReader::PinnedRawDataView fileView = file.GetPinnedRawDataView();
