@@ -989,17 +989,10 @@ void CAbstractVstEditor::StoreWindowPos()
 {
 	if(m_hWnd)
 	{
-		// Translate screen position into percentage (to make it independent of the actual screen resolution)
 		WINDOWPLACEMENT wnd;
 		wnd.length = sizeof(WINDOWPLACEMENT);
 		GetWindowPlacement(&wnd);
-		const int cxScreen = GetSystemMetrics(SM_CXVIRTUALSCREEN), cyScreen = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-		if(cxScreen && cyScreen)
-		{
-			int32 editorX = Util::muldivr(wnd.rcNormalPosition.left, 1 << 30, cxScreen);
-			int32 editorY = Util::muldivr(wnd.rcNormalPosition.top, 1 << 30, cyScreen);
-			m_VstPlugin.SetEditorPos(editorX, editorY);
-		}
+		m_VstPlugin.SetEditorPos(wnd.rcNormalPosition.left, wnd.rcNormalPosition.top);
 	}
 }
 
@@ -1011,13 +1004,8 @@ void CAbstractVstEditor::RestoreWindowPos()
 	int32 editorX, editorY;
 	m_VstPlugin.GetEditorPos(editorX, editorY);
 
-	if(editorX > int32_min && editorY > int32_min)
+	if(editorX != int32_min && editorY != int32_min)
 	{
-		// Translate percentage into screen position (to make it independent of the actual screen resolution)
-		const int cxScreen = GetSystemMetrics(SM_CXVIRTUALSCREEN), cyScreen = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-		editorX = Util::muldivr(editorX, cxScreen, 1 << 30);
-		editorY = Util::muldivr(editorY, cyScreen, 1 << 30);
-
 		WINDOWPLACEMENT wnd;
 		wnd.length = sizeof(wnd);
 		GetWindowPlacement(&wnd);

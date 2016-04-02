@@ -2849,35 +2849,34 @@ void CModDoc::LearnMacro(int macroToSet, PlugParamIndex paramToUse)
 		return;
 	}
 
-	//if macro already exists for this param, alert user and return
+	// If macro already exists for this param, inform user and return
 	for (int checkMacro = 0; checkMacro < NUM_MACROS; checkMacro++)
 	{
-		int macroType = m_SndFile.m_MidiCfg.GetParameteredMacroType(checkMacro);
-
-		if (macroType == sfx_plug && m_SndFile.m_MidiCfg.MacroToPlugParam(checkMacro) == paramToUse)
+		if (m_SndFile.m_MidiCfg.GetParameteredMacroType(checkMacro) == sfx_plug
+			&& m_SndFile.m_MidiCfg.MacroToPlugParam(checkMacro) == paramToUse)
 		{
 			CString message;
-			message.Format("Parameter %02d can already be controlled with macro %X.", paramToUse, checkMacro);
-			Reporting::Information(message, "Macro exists for this parameter");
+			message.Format(_T("Parameter %u can already be controlled with macro %X."), paramToUse, checkMacro);
+			Reporting::Information(message, _T("Macro exists for this parameter"));
 			return;
 		}
 	}
 
-	//set new macro
+	// Set new macro
 	if(paramToUse < 384)
 	{
 		m_SndFile.m_MidiCfg.CreateParameteredMacro(macroToSet, sfx_plug, paramToUse);
 	} else
 	{
 		CString message;
-		message.Format("Parameter %02d beyond controllable range. Use Parameter Control Events to automate this parameter.", paramToUse);
-		Reporting::Information(message, "Macro not assigned for this parameter");
+		message.Format(_T("Parameter %u beyond controllable range. Use Parameter Control Events to automate this parameter."), paramToUse);
+		Reporting::Information(message, _T("Macro not assigned for this parameter"));
 		return;
 	}
 
 	CString message;
-	message.Format("Parameter %02d can now be controlled with macro %X.", paramToUse, macroToSet);
-	Reporting::Information(message, "Macro assigned for this parameter");
+	message.Format(_T("Parameter %u can now be controlled with macro %X."), paramToUse, macroToSet);
+	Reporting::Information(message, _T("Macro assigned for this parameter"));
 
 	return;
 }
@@ -3009,7 +3008,7 @@ CString CModDoc::GetPatternViewInstrumentName(INSTRUMENTINDEX nInstr,
 void CModDoc::SafeFileClose()
 //---------------------------
 {
-	// Verify that the main window has the focus. This saves us a lot of trouble because active dialogs normally don't check if their pSndFile pointers are still valid.
+	// Verify that the main window has the focus. This saves us a lot of trouble because active modal dialogs cannot know if their pSndFile pointers are still valid.
 	if(GetActiveWindow() == CMainFrame::GetMainFrame()->m_hWnd)
 		OnFileClose();
 }
@@ -3171,6 +3170,8 @@ void CModDoc::SerializeViews() const
 	const int width = mdiRect.Width();
 	const int height = mdiRect.Height();
 
+	const int cxScreen = GetSystemMetrics(SM_CXVIRTUALSCREEN), cyScreen = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+
 	// Document view positions and sizes
 	POSITION pos = GetFirstViewPosition();
 	while(pos != nullptr && !mdiRect.IsRectEmpty())
@@ -3203,13 +3204,17 @@ void CModDoc::SerializeViews() const
 	// Plugin window positions
 	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
-		if(m_SndFile.m_MixPlugins[i].IsValidPlugin() && m_SndFile.m_MixPlugins[i].editorX != int32_min)
+		if(m_SndFile.m_MixPlugins[i].IsValidPlugin() && m_SndFile.m_MixPlugins[i].editorX != int32_min && cxScreen && cyScreen)
 		{
+			// Translate screen position into percentage (to make it independent of the actual screen resolution)
+			int32 editorX = Util::muldivr(m_SndFile.m_MixPlugins[i].editorX, 1 << 30, cxScreen);
+			int32 editorY = Util::muldivr(m_SndFile.m_MixPlugins[i].editorY, 1 << 30, cyScreen);
+
 			mpt::IO::WriteIntLE<uint8_t>(f, 1);	// Window type
 			mpt::IO::WriteIntLE<uint8_t>(f, 0);	// Version
 			mpt::IO::WriteVarInt(f, i);
-			mpt::IO::WriteIntLE<int32_t>(f, m_SndFile.m_MixPlugins[i].editorX);
-			mpt::IO::WriteIntLE<int32_t>(f, m_SndFile.m_MixPlugins[i].editorY);
+			mpt::IO::WriteIntLE<int32_t>(f, editorX);
+			mpt::IO::WriteIntLE<int32_t>(f, editorY);
 		}
 	}
 
@@ -3251,6 +3256,8 @@ void CModDoc::DeserializeViews()
 	::GetWindowRect(CMainFrame::GetMainFrame()->m_hWndMDIClient, &mdiRect);
 	const int width = mdiRect.Width();
 	const int height = mdiRect.Height();
+
+	const int cxScreen = GetSystemMetrics(SM_CXVIRTUALSCREEN), cyScreen = GetSystemMetrics(SM_CYVIRTUALSCREEN);
 
 	POSITION pos = GetFirstViewPosition();
 	CChildFrame *pChildFrm = nullptr;
@@ -3315,8 +3322,13 @@ void CModDoc::DeserializeViews()
 			PLUGINDEX plug = 0;
 			if(file.ReadVarInt(plug) && plug < MAX_MIXPLUGINS)
 			{
-				m_SndFile.m_MixPlugins[plug].editorX = file.ReadInt32LE();
-				m_SndFile.m_MixPlugins[plug].editorY = file.ReadInt32LE();
+				int32 editorX = file.ReadInt32LE();
+				int32 editorY = file.ReadInt32LE();
+				if(editorX != int32_min && editorY != int32_min)
+				{
+					m_SndFile.m_MixPlugins[plug].editorX = Util::muldivr(editorX, cxScreen, 1 << 30);
+					m_SndFile.m_MixPlugins[plug].editorY = Util::muldivr(editorY, cyScreen, 1 << 30);
+				}
 			}
 		}
 	}
