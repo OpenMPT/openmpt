@@ -155,6 +155,7 @@ public:
 	bool ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nIns, uint32 nRgn, int transpose=0);
 	bool ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, uint32 nIns, uint32 nDrumRgn);
 	const char *GetRegionName(uint32 nIns, uint32 nRgn) const;
+	uint8 GetPanning(uint32 ins, uint32 region) const;
 
 // Internal Loader Functions
 protected:
