@@ -20,6 +20,7 @@
 #include "../common/FileReader.h"
 #include "../common/Endianness.h"
 #include "SampleIO.h"
+#include "modsmp_ctrl.h"
 
 #include <math.h>
 
@@ -1669,19 +1670,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 			if (lVolume < 16) lVolume = 16;
 			sample.nGlobalVol = (uint8)(lVolume / 4);	// 0-64
 		}
-		if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
-		{
-			if ((pRgn->uPercEnv) && (pRgn->uPercEnv <= m_nEnvelopes))
-			{
-				sample.nPan = m_Envelopes[pRgn->uPercEnv-1].nDefPan;
-			}
-		} else
-		{
-			if ((pDlsIns->nMelodicEnv) && (pDlsIns->nMelodicEnv <= m_nEnvelopes))
-			{
-				sample.nPan = m_Envelopes[pDlsIns->nMelodicEnv-1].nDefPan;
-			}
-		}
+		sample.nPan = GetPanning(nIns, nRgn);
 
 		sample.Convert(MOD_TYPE_IT, sndFile.GetType());
 		sample.PrecomputeLoops(sndFile, false);
@@ -1801,7 +1790,8 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 		// Elimitate Duplicate Regions
 		nSmp = 0;
 		bDupRgn = false;
-		for (uint32 iDup=nRgnMin; iDup<nRgn; iDup++)
+		uint32 iDup;
+		for (iDup=nRgnMin; iDup<nRgn; iDup++)
 		{
 			DLSREGION *pRgn2 = &pDlsIns->Regions[iDup];
 			if (((pRgn2->nWaveLink == pRgn->nWaveLink)
@@ -1832,6 +1822,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 				nLoadedSmp++;
 			}
 		}
+
 		RgnToSmp[nRgn] = (uint8)nSmp;
 		// Map all notes to the right sample
 		if (nSmp)
@@ -1844,7 +1835,33 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 				}
 			}
 			// Load the sample
-			if (!bDupRgn) ExtractSample(sndFile, nSample, nIns, nRgn, nTranspose);
+			if(!bDupRgn)
+			{
+				ExtractSample(sndFile, nSample, nIns, nRgn, nTranspose);
+			} else if(sndFile.GetSample(nSample).GetNumChannels() == 1)
+			{
+				// Try to combine stereo samples
+				uint8 pan1 = GetPanning(nIns, nRgn), pan2 = GetPanning(nIns, iDup);
+				if((pan1 == 0 || pan1 == 255) && (pan2 == 0 || pan2 == 255))
+				{
+					ModSample &sample = sndFile.GetSample(nSample);
+					ctrlSmp::ConvertToStereo(sample, sndFile);
+					uint8 *pWaveForm = nullptr;
+					uint32 dwLen = 0;
+					if(ExtractWaveForm(nIns, nRgn, &pWaveForm, &dwLen) && pWaveForm && dwLen >= sample.GetSampleSizeInBytes() / 2)
+					{
+						SmpLength len = sample.nLength;
+						const int16 *src = reinterpret_cast<int16 *>(pWaveForm);
+						int16 *dst = sample.pSample16 + ((pan1 == 0) ? 0 : 1);
+						while(len--)
+						{
+							*dst = *src;
+							src++;
+							dst += 2;
+						}
+					}
+				}
+			}
 		}
 	}
 	// Initializes Envelope
@@ -2005,6 +2022,30 @@ const char *CDLSBank::GetRegionName(uint32 nIns, uint32 nRgn) const
 		}
 	}
 	return nullptr;
+}
+
+
+uint8 CDLSBank::GetPanning(uint32 ins, uint32 region) const
+//---------------------------------------------------------
+{
+	const DLSINSTRUMENT &dlsIns = m_pInstruments[ins];
+	if(region >= CountOf(dlsIns.Regions))
+		return 128;
+	const DLSREGION &rgn = dlsIns.Regions[region];
+	if(dlsIns.ulBank & F_INSTRUMENT_DRUMS)
+	{
+		if(rgn.uPercEnv > 0 && rgn.uPercEnv <= m_nEnvelopes)
+		{
+			return m_Envelopes[rgn.uPercEnv - 1].nDefPan;
+		}
+	} else
+	{
+		if(dlsIns.nMelodicEnv > 0 && dlsIns.nMelodicEnv <= m_nEnvelopes)
+		{
+			return m_Envelopes[dlsIns.nMelodicEnv - 1].nDefPan;
+		}
+	}
+	return 128;
 }
 
 

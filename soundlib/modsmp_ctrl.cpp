@@ -837,6 +837,48 @@ bool ConvertToMono(ModSample &smp, CSoundFile &sndFile, StereoToMonoMode convers
 }
 
 
+template <class T>
+static void ConvertMonoToStereoImpl(const T * MPT_RESTRICT src, T * MPT_RESTRICT dst, SmpLength length)
+//-----------------------------------------------------------------------------------------------------
+{
+	while(length--)
+	{
+		dst[0] = *src;
+		dst[1] = *src;
+		dst += 2;
+		src++;
+	}
+}
+
+
+// Convert a multichannel sample to mono (currently only implemented for stereo)
+bool ConvertToStereo(ModSample &smp, CSoundFile &sndFile)
+//-------------------------------------------------------
+{
+	if(!smp.HasSampleData() || smp.GetNumChannels() != 1) return false;
+
+	void *newSample = ModSample::AllocateSample(smp.nLength, smp.GetBytesPerSample() * 2);
+	if(newSample == nullptr)
+	{
+		return 0;
+	}
+
+	if(smp.GetElementarySampleSize() == 2)
+		ConvertMonoToStereoImpl(smp.pSample16, (int16 *)newSample, smp.nLength);
+	else if(smp.GetElementarySampleSize() == 1)
+		ConvertMonoToStereoImpl(smp.pSample8, (int8 *)newSample, smp.nLength);
+	else
+		return false;
+
+	CriticalSection cs;
+	smp.uFlags.set(CHN_STEREO);
+	ReplaceSample(smp, newSample, smp.nLength, sndFile);
+
+	PrecomputeLoops(smp, sndFile, false);
+	return true;
+}
+
+
 } // namespace ctrlSmp
 
 
