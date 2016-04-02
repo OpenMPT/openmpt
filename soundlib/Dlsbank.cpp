@@ -1632,7 +1632,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 			int lVolume = pRgn->usVolume;
 
 			WSMPCHUNK wsmp;
-			if(!(pRgn->fuOptions & DLSREGION_OVERRIDEWSMP) && wsmpChunk.ReadStructPartial(wsmp))
+			if(!(pRgn->fuOptions & DLSREGION_OVERRIDEWSMP) && wsmpChunk.IsValid() && wsmpChunk.ReadStructPartial(wsmp))
 			{
 				usUnityNote = wsmp.usUnityNote;
 				sFineTune = wsmp.sFineTune;
@@ -1650,8 +1650,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 						sample.nLoopEnd = loop.ulLoopStart + loop.ulLoopLength;
 					}
 				}
-			} else
-			if (m_nType & SOUNDBANK_TYPE_SF2)
+			} else if (m_nType & SOUNDBANK_TYPE_SF2)
 			{
 				usUnityNote = (usUnityNote < 0x80) ? usUnityNote : sample.RelativeTone;
 				sFineTune += sample.nFineTune;
