@@ -2330,6 +2330,7 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 								}
 							}
 						}
+						pModDoc->UpdateAllViews(this, InstrumentHint(rightIns).Info().Envelope().Names(), this);
 					}
 
 					// Finally, adjust sample panning
@@ -2340,6 +2341,7 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 						right.uFlags.set(CHN_PANNING);
 						right.nPan = 256;
 					}
+					pModDoc->UpdateAllViews(this, SampleHint(rightSmp).Info().Data().Names(), this);
 				}
 				SetModified(SampleHint().Info().Data().Names(), true, true);
 			} else
