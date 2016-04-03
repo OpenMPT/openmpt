@@ -351,6 +351,10 @@ static uint8_t *extend_raw_data(LHAFileHeader **header,
 	size_t new_raw_len;
 	uint8_t *result;
 
+	if (nbytes > LEVEL_3_MAX_HEADER_LEN) {
+		return NULL;
+	}
+
 	// Reallocate the header and raw_data area to be larger.
 
 	new_raw_len = RAW_DATA_LEN(header) + nbytes;
@@ -797,7 +801,8 @@ static int decode_level3_header(LHAFileHeader **header, LHAInputStream *stream)
 
 	header_len = lha_decode_uint32(&RAW_DATA(header, 24));
 
-	if (header_len > LEVEL_3_MAX_HEADER_LEN) {
+	if (header_len > LEVEL_3_MAX_HEADER_LEN
+	 || header_len < RAW_DATA_LEN(header)) {
 		return 0;
 	}
 
