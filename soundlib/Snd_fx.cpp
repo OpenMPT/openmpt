@@ -5267,9 +5267,9 @@ ROWINDEX CSoundFile::PatternLoop(ModChannel *pChn, uint32 param)
 			pChn->nPatternLoopCount--;
 			if(!pChn->nPatternLoopCount)
 			{
-				// IT compatibility 10. Pattern loops (+ same fix for MOD / S3M files)
+				// IT compatibility 10. Pattern loops (+ same fix for S3M files)
 				// When finishing a pattern loop, the next loop without a dedicated SB0 starts on the first row after the previous loop.
-				if(m_playBehaviour[kITPatternLoopTargetReset] || (GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)))
+				if(m_playBehaviour[kITPatternLoopTargetReset] || (GetType() == MOD_TYPE_S3M))
 				{
 					pChn->nPatternLoop = m_PlayState.m_nRow + 1;
 				}
