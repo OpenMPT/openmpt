@@ -1356,6 +1356,13 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, uint32 instr, bool bPorta, b
 		return;
 	}
 
+	if(bPorta && pChn->nLength == 0 && (m_playBehaviour[kFT2PortaNoNote] || m_playBehaviour[kITPortaNoNote]))
+	{
+		// IT/FT2 compatibility: If the note just stopped on the previous tick, prevent it from restarting.
+		// Test cases: PortaJustStoppedNote.xm, PortaJustStoppedNote.it
+		pChn->nInc = 0;
+	}
+
 	pChn->pModSample = pSmp;
 	pChn->nLength = pSmp->nLength;
 	pChn->nLoopStart = pSmp->nLoopStart;
