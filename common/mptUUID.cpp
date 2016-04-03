@@ -11,7 +11,9 @@
 #include "stdafx.h"
 #include "mptUUID.h"
 
-#if (defined(MODPLUG_TRACKER) || !defined(NO_DMO)) && MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS
+
+#if defined(MODPLUG_TRACKER) || !defined(NO_DMO)
 #include <windows.h>
 #include <objbase.h>
 #endif
@@ -20,11 +22,11 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if (defined(MODPLUG_TRACKER) || !defined(NO_DMO)) && MPT_OS_WINDOWS
-
-
 namespace Util
 {
+
+
+#if defined(MODPLUG_TRACKER) || !defined(NO_DMO)
 
 
 std::wstring CLSIDToString(CLSID clsid)
@@ -127,6 +129,12 @@ GUID CreateGUID()
 }
 
 
+#endif // MODPLUG_TRACKER || !NO_DMO
+
+
+#if defined(MODPLUG_TRACKER) || !defined(NO_DMO) || defined(MPT_ENABLE_TEMPFILE)
+
+
 UUID StringToUUID(const mpt::ustring &str)
 //----------------------------------------
 {
@@ -201,18 +209,19 @@ UUID CreateLocalUUID()
 }
 
 
+#endif // MODPLUG_TRACKER || !NO_DMO || MPT_ENABLE_TEMPFILE
 
 
 } // namespace Util
 
 
-#else // !((defined(MODPLUG_TRACKER) || !defined(NO_DMO)) && MPT_OS_WINDOWS)
+#else // !MPT_OS_WINDOWS
 
 
 MPT_MSVC_WORKAROUND_LNK4221(mptUUID)
 
 
-#endif // (defined(MODPLUG_TRACKER) || !defined(NO_DMO)) && MPT_OS_WINDOWS
+#endif // MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_END

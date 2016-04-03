@@ -275,27 +275,7 @@ mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const 
 {
 	mpt::PathString filename = mpt::GetTempDirectory();
 	filename += (!fileNamePrefix.empty() ? fileNamePrefix + MPT_PATHSTRING("_") : mpt::PathString());
-	#ifdef MODPLUG_TRACKER
-		filename += mpt::PathString::FromUnicode(Util::UUIDToString(Util::CreateLocalUUID()));
-	#else // !MODPLUG_TRACKER
-		UUID uuid = UUID();
-		RPC_STATUS status = ::UuidCreateSequential(&uuid);
-		if(status != RPC_S_OK && status != RPC_S_UUID_LOCAL_ONLY)
-		{
-			uuid = UUID();
-		}
-		std::wstring str;
-		RPC_WSTR tmp = nullptr;
-		if(::UuidToStringW(&uuid, &tmp) != RPC_S_OK)
-		{
-			str = std::wstring();
-		} else
-		{
-			str = (wchar_t*)tmp;
-			::RpcStringFreeW(&tmp);
-		}
-		filename += mpt::PathString::FromWide(str);
-	#endif // MODPLUG_TRACKER
+	filename += mpt::PathString::FromUnicode(Util::UUIDToString(Util::CreateLocalUUID()));
 	filename += (!fileNameExtension.empty() ? MPT_PATHSTRING(".") + fileNameExtension : mpt::PathString());
 	return filename;
 }
