@@ -218,8 +218,8 @@ void CASIODevice::InitMembers()
 	m_DeviceRunning = false;
 	m_TotalFramesWritten = 0;
 	m_BufferIndex = 0;
-	InterlockedExchange(&m_RenderSilence, 0);
-	InterlockedExchange(&m_RenderingSilence, 0);
+	m_RenderSilence = 0;
+	m_RenderingSilence = 0;
 
 	m_AsioRequestFlags = 0;
 
@@ -538,13 +538,13 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 //---------------------------------------------------------
 {
 	MPT_TRACE();
-	InterlockedExchange(&m_RenderSilence, silence?1:0);
+	m_RenderSilence = (silence ? 1 : 0);
 	if(!wait)
 	{
 		return;
 	}
 	DWORD pollingstart = GetTickCount();
-	while(InterlockedExchangeAdd(&m_RenderingSilence, 0) != (silence?1:0))
+	while(m_RenderingSilence != (silence ? 1 : 0))
 	{
 		if(GetTickCount() - pollingstart > 250)
 		{
@@ -1314,8 +1314,8 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 		ApplyAsioTimeInfo(asioTimeInfo);
 	}
 	m_BufferIndex = doubleBufferIndex;
-	bool rendersilence = (InterlockedExchangeAdd(&m_RenderSilence, 0) == 1);
-	InterlockedExchange(&m_RenderingSilence, rendersilence ? 1 : 0 );
+	bool rendersilence = (m_RenderSilence == 1);
+	m_RenderingSilence = (rendersilence ? 1 : 0);
 	if(rendersilence)
 	{
 		m_StreamPositionOffset += m_nAsioBufferLen;

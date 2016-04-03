@@ -81,8 +81,8 @@ protected:
 	bool m_DeviceRunning;
 	uint64 m_TotalFramesWritten;
 	long m_BufferIndex;
-	LONG m_RenderSilence;
-	LONG m_RenderingSilence;
+	mpt::atomic_uint32_t m_RenderSilence;
+	mpt::atomic_uint32_t m_RenderingSilence;
 
 	int64 m_StreamPositionOffset;
 
