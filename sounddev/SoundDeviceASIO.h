@@ -13,6 +13,8 @@
 
 #include "SoundDeviceBase.h"
 
+#include "../common/mptAtomic.h"
+
 #include "../common/ComponentManager.h"
 
 #include "../common/FlagSet.h"
@@ -84,8 +86,8 @@ protected:
 
 	int64 m_StreamPositionOffset;
 
-	static const LONG AsioRequestFlagLatenciesChanged = 1<<0;
-	LONG m_AsioRequestFlags;
+	static const uint32 AsioRequestFlagLatenciesChanged = 1<<0;
+	mpt::atomic_uint32_t m_AsioRequestFlags;
 
 	FlagSet<AsioFeatures> m_QueriedFeatures;
 	FlagSet<AsioFeatures> m_UsedFeatures;
