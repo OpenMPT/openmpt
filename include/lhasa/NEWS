@@ -1,4 +1,11 @@
-v0.3.0 (2015-??-??):
+v0.3.1 (2016-03-29):
+
+     * This release fixes an integer underflow vulnerability in the
+       code for doing LZH level 3 header decodes (TALOS-CAN-0095).
+       Thanks go to Marcin Noga and Regina Wilson of Cisco TALOS for
+       reporting this vulnerability.
+
+v0.3.0 (2015-04-20):
 
      * PMarc -pm1- archives that contain truncated compressed data (the
        decompressed length is longer than what can be read from the
