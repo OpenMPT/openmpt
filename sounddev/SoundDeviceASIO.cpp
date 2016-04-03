@@ -221,7 +221,7 @@ void CASIODevice::InitMembers()
 	InterlockedExchange(&m_RenderSilence, 0);
 	InterlockedExchange(&m_RenderingSilence, 0);
 
-	InterlockedExchange(&m_AsioRequestFlags, 0);
+	m_AsioRequestFlags = 0;
 
 	m_DebugRealtimeThreadID.store(0);
 
@@ -233,7 +233,7 @@ bool CASIODevice::HandleRequests()
 {
 	MPT_TRACE();
 	bool result = false;
-	LONG flags = InterlockedExchange(&m_AsioRequestFlags, 0);
+	uint32 flags = m_AsioRequestFlags.exchange(0);
 	if(flags & AsioRequestFlagLatenciesChanged)
 	{
 		UpdateLatency();
@@ -1474,7 +1474,7 @@ long CASIODevice::AsioMessage(long selector, long value, void* message, double* 
 		result = 1;
 		break;
 	case kAsioLatenciesChanged:
-		_InterlockedOr(&m_AsioRequestFlags, AsioRequestFlagLatenciesChanged);
+		m_AsioRequestFlags.fetch_or(AsioRequestFlagLatenciesChanged);
 		result = 1;
 		break;
 	case kAsioOverload:
