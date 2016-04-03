@@ -16,7 +16,7 @@
 #if defined(MODPLUG_TRACKER) || !defined(NO_DMO)
 #include <windows.h>
 #include <objbase.h>
-#endif
+#endif // MODPLUG_TRACKER || !NO_DMO
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -215,13 +215,19 @@ UUID CreateLocalUUID()
 } // namespace Util
 
 
+OPENMPT_NAMESPACE_END
+
+
 #else // !MPT_OS_WINDOWS
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 MPT_MSVC_WORKAROUND_LNK4221(mptUUID)
 
 
-#endif // MPT_OS_WINDOWS
-
-
 OPENMPT_NAMESPACE_END
+
+
+#endif // MPT_OS_WINDOWS
