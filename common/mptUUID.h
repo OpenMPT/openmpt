@@ -10,15 +10,25 @@
 
 #pragma once
 
-#if (defined(MODPLUG_TRACKER) || !defined(NO_DMO)) && MPT_OS_WINDOWS
 
+#if MPT_OS_WINDOWS
+
+
+#if defined(MODPLUG_TRACKER) || !defined(NO_DMO)
 #include <guiddef.h>
+#endif // MODPLUG_TRACKER || !NO_DMO
+
+#if defined(MODPLUG_TRACKER) || !defined(NO_DMO) || defined(MPT_ENABLE_TEMPFILE)
 #include <rpc.h>
+#endif // MODPLUG_TRACKER || !NO_DMO || MPT_ENABLE_TEMPFILE
+
 
 OPENMPT_NAMESPACE_BEGIN
 
 namespace Util
 {
+
+#if defined(MODPLUG_TRACKER) || !defined(NO_DMO)
 
 // COM CLSID<->string conversion
 // A CLSID string is not necessarily a standard UUID string,
@@ -41,6 +51,10 @@ std::wstring GUIDToString(GUID guid);
 // Create a COM GUID
 GUID CreateGUID();
 
+#endif // MODPLUG_TRACKER || !NO_DMO
+
+#if defined(MODPLUG_TRACKER) || !defined(NO_DMO) || defined(MPT_ENABLE_TEMPFILE)
+
 // General UUID<->string conversion.
 // The string must/will be in standard UUID format: 4f9a455d-e7ef-4367-b2f0-0c83a38a5c72
 UUID StringToUUID(const mpt::ustring &str);
@@ -55,8 +69,11 @@ UUID CreateUUID();
 // Create a UUID that contains local, traceable information. Safe for local use.
 UUID CreateLocalUUID();
 
+#endif // MODPLUG_TRACKER || !NO_DMO || MPT_ENABLE_TEMPFILE
+
 } // namespace Util
 
 OPENMPT_NAMESPACE_END
 
-#endif // (defined(MODPLUG_TRACKER) || !defined(NO_DMO)) && MPT_OS_WINDOWS
+
+#endif // MPT_OS_WINDOWS
