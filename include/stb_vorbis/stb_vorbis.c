@@ -3515,7 +3515,11 @@ static int is_whole_packet_present(stb_vorbis *f, int end_page)
       }
       // either this continues, or it ends it...
       if (end_page)
+#if 1 // OpenMPT
+         if (s < f->segment_count-1)               return error(f, VORBIS_invalid_stream); // OpenMPT
+#else // OpenMPT
          if (s < f->segment_count)               return error(f, VORBIS_invalid_stream);
+#endif // OpenMPT
       if (s == f->segment_count)
          s = -1; // set 'crosses page' flag
       if (p > f->stream_end)                     return error(f, VORBIS_need_more_data);
