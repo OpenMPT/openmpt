@@ -122,6 +122,7 @@ LOCAL_SRC_FILES := \
 	soundlib/ModSequence.cpp \
 	soundlib/modsmp_ctrl.cpp \
 	soundlib/mod_specifications.cpp \
+	soundlib/MPEGFrame.cpp \
 	soundlib/OggStream.cpp \
 	soundlib/patternContainer.cpp \
 	soundlib/pattern.cpp \
