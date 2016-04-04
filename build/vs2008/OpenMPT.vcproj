@@ -2858,6 +2858,14 @@
 						RelativePath="..\..\soundlib\plugins\dmo\Echo.h"
 						>
 					</File>
+					<File
+						RelativePath="..\..\soundlib\plugins\dmo\ParamEq.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\soundlib\plugins\dmo\ParamEq.h"
+						>
+					</File>
 				</Filter>
 			</Filter>
 		</Filter>

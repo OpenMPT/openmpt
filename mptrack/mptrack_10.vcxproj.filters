@@ -475,9 +475,6 @@
     <ClCompile Include="..\soundlib\plugins\PluginManager.cpp">
       <Filter>Source Files\soundlib\plugins</Filter>
     </ClCompile>
-    <ClCompile Include="..\soundlib\plugins\DMOPlugin.cpp">
-      <Filter>Source Files\soundlib\plugins</Filter>
-    </ClCompile>
     <ClCompile Include="..\common\Logging.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
@@ -611,6 +608,12 @@
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\soundlib\plugins\dmo\Echo.cpp">
+      <Filter>Source Files\soundlib\plugins\dmo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\plugins\dmo\ParamEq.cpp">
+      <Filter>Source Files\soundlib\plugins\dmo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\soundlib\plugins\dmo\DMOPlugin.cpp">
       <Filter>Source Files\soundlib\plugins\dmo</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1191,9 +1194,6 @@
     <ClInclude Include="..\soundlib\plugins\DigiBoosterEcho.h">
       <Filter>Header Files\soundlib\plugins</Filter>
     </ClInclude>
-    <ClInclude Include="..\soundlib\plugins\DMOPlugin.h">
-      <Filter>Header Files\soundlib\plugins</Filter>
-    </ClInclude>
     <ClInclude Include="..\soundlib\plugins\PluginStructs.h">
       <Filter>Header Files\soundlib\plugins</Filter>
     </ClInclude>
@@ -1207,6 +1207,12 @@
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\plugins\dmo\Echo.h">
+      <Filter>Header Files\soundlib\plugins\dmo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\plugins\dmo\ParamEq.h">
+      <Filter>Header Files\soundlib\plugins\dmo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\plugins\dmo\DMOPlugin.h">
       <Filter>Header Files\soundlib\plugins\dmo</Filter>
     </ClInclude>
   </ItemGroup>

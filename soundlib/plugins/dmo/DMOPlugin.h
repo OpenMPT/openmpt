@@ -10,7 +10,7 @@
 
 #ifndef NO_DMO
 
-#include "PlugInterface.h"
+#include "../PlugInterface.h"
 #include <dmoreg.h>
 #include <strmif.h>
 
