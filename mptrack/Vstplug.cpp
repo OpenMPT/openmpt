@@ -805,10 +805,6 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 
 	// Open plugin and initialize data structures
 	Initialize();
-	// Now we should be ready to go
-	m_pMixStruct->pMixPlugin = this;
-
-	// Insert ourselves in the beginning of the list
 	InsertIntoFactoryList();
 
 	m_isInitialized = true;

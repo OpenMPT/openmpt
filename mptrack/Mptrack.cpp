@@ -1976,7 +1976,7 @@ BOOL CTrackApp::UninitializeDXPlugins()
 	size_t plug = 0;
 	for(CVstPluginManager::const_iterator pPlug = m_pPluginManager->begin(); pPlug != m_pPluginManager->end(); pPlug++)
 	{
-		if((**pPlug).pluginId1 != kDmoMagic)
+		if((**pPlug).pluginId1 != kDmoMagic && !(**pPlug).dllPath.empty())
 		{
 			char tmp[32];
 			sprintf(tmp, "Plugin%u", plug);

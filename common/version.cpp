@@ -550,6 +550,7 @@ mpt::ustring GetFullCreditsString()
 		"Additional patch submitters:\n"
 		"coda (http://coda.s3m.us/)\n"
 		"kode54 (https://kode54.net/)\n"
+		"Revenant (http://revenant1.net/)\n"
 		"xaimus (http://xaimus.com/)\n"
 		"\n"
 		"Thanks to:\n"
@@ -659,6 +660,9 @@ mpt::ustring GetFullCreditsString()
 		"https://twitter.com/nobuyukinyuu\n"
 		"\n"
 #endif
+		"Daniel Collin (emoon/TBL) for providing test infrastructure\n"
+		"https://twitter.com/daniel_collin\n"
+		"\n"
 		"The people at ModPlug forums for crucial contribution\n"
 		"in the form of ideas, testing and support;\n"
 		"thanks particularly to:\n"

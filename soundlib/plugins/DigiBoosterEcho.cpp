@@ -16,6 +16,13 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+IMixPlugin* DigiBoosterEcho::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
+//------------------------------------------------------------------------------------------------------
+{
+	return new (std::nothrow) DigiBoosterEcho(factory, sndFile, mixStruct);
+}
+
+
 DigiBoosterEcho::DigiBoosterEcho(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	: IMixPlugin(factory, sndFile, mixStruct)
 	, m_bufferSize(0)
@@ -24,8 +31,7 @@ DigiBoosterEcho::DigiBoosterEcho(VSTPluginLib &factory, CSoundFile &sndFile, SND
 //---------------------------------------------------------------------------------------------------
 {
 	RecalculateEchoParams();
-
-	m_pMixStruct->pMixPlugin = this;
+	InsertIntoFactoryList();
 }
 
 

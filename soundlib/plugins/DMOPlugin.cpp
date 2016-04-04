@@ -29,8 +29,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 #define DMO_LOG
 
-DMOPlugin* DMOPlugin::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
-//-----------------------------------------------------------------------------------------------
+IMixPlugin* DMOPlugin::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
+//------------------------------------------------------------------------------------------------
 {
 	CLSID clsid;
 	if (Util::VerifyStringToCLSID(factory.dllPath.ToWide(), clsid))
@@ -84,7 +84,8 @@ DMOPlugin::DMOPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *m
 	m_MixState.pOutBufferL = m_mixBuffer.GetInputBuffer(0);
 	m_MixState.pOutBufferR = m_mixBuffer.GetInputBuffer(1);
 
-	m_pMixStruct->pMixPlugin = this;
+	InsertIntoFactoryList();
+
 }
 
 

@@ -122,7 +122,7 @@ Type openmpt_stream_seek_func As Function(ByVal stream As Any Ptr, ByVal offset 
  ' Tell position of stream.
  ' \param stream Stream to operate on.
  ' \return Current position in stream.
- ' \retval -1 Failure. Position does not get updated.
+ ' \retval -1 Failure.
  '/
 Type openmpt_stream_tell_func As Function(ByVal stream As Any Ptr) As LongInt
 

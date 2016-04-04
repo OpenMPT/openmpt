@@ -37,7 +37,7 @@ protected:
 	int16 m_MixBuffer16[MIXBUFFERSIZE * 2 + 16];		// 16-bit Stereo interleaved
 
 public:
-	static DMOPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
+	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 
 protected:
 	DMOPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct, IMediaObject *pMO, IMediaObjectInPlace *pMOIP, uint32 uid);

@@ -610,6 +610,9 @@
     <ClCompile Include="..\soundlib\AudioCriticalSection.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\plugins\dmo\Echo.cpp">
+      <Filter>Source Files\soundlib\plugins\dmo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1203,6 +1206,9 @@
     <ClInclude Include="..\soundlib\AudioCriticalSection.h">
       <Filter>Header Files\soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\soundlib\plugins\dmo\Echo.h">
+      <Filter>Header Files\soundlib\plugins\dmo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">
@@ -1362,6 +1368,12 @@
     </Filter>
     <Filter Include="Source Files\pluginBridgeWrapper">
       <UniqueIdentifier>{c5ca412e-0120-4e25-a6c0-945eedd7a0de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\soundlib\plugins\dmo">
+      <UniqueIdentifier>{ce632194-128d-42ea-bf4e-87d7a31c5a1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\soundlib\plugins\dmo">
+      <UniqueIdentifier>{847e2b5c-5a53-4a3c-8d7f-7d12e14386a7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
