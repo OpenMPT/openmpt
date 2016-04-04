@@ -25,6 +25,9 @@
     <Filter Include="soundlib\plugins">
       <UniqueIdentifier>{F688F7E8-E281-163B-0BB4-FBBFF70BF646}</UniqueIdentifier>
     </Filter>
+    <Filter Include="soundlib\plugins\dmo">
+      <UniqueIdentifier>{A591FA3A-9120-8404-3A3F-98FF26AD94AA}</UniqueIdentifier>
+    </Filter>
     <Filter Include="test">
       <UniqueIdentifier>{65689E7C-519F-9F0D-FA8B-8510E6A11B0F}</UniqueIdentifier>
     </Filter>
@@ -646,6 +649,9 @@
     </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\PluginStructs.h">
       <Filter>soundlib\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Echo.h">
+      <Filter>soundlib\plugins\dmo</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\tuning.h">
       <Filter>soundlib</Filter>
@@ -1269,6 +1275,9 @@
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\PluginManager.cpp">
       <Filter>soundlib\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Echo.cpp">
+      <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\tuning.cpp">
       <Filter>soundlib</Filter>

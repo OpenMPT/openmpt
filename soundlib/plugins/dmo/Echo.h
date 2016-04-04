@@ -1,74 +1,57 @@
 /*
- * DigiBoosterEcho.h
- * -----------------
- * Purpose: Implementation of the DigiBooster Pro Echo DSP
+ * Echo.h
+ * ------
+ * Purpose: Implementation of the DMO Echo DSP (for non-Windows platforms)
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 
-#ifndef NO_PLUGINS
+#if !defined(NO_PLUGINS) && defined(NO_DMO)
 
-#include "PlugInterface.h"
+#include "../PlugInterface.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
-//=======================================
-class DigiBoosterEcho : public IMixPlugin
-//=======================================
+namespace DMO
+{
+
+//============================
+class Echo : public IMixPlugin
+//============================
 {
 public:
 	enum Parameters
 	{
-		kEchoDelay = 0,
+		kEchoWetDry = 0,
 		kEchoFeedback,
-		kEchoMix,
-		kEchoCross,
+		kEchoLeftDelay,
+		kEchoRightDelay,
+		kEchoPanDelay,
 		kEchoNumParameters
-	};
-
-	// Our settings chunk for file I/O, as it will be written to files
-	struct PluginChunk
-	{
-		char  id[4];
-		uint8 param[kEchoNumParameters];
-
-		PluginChunk(uint8 delay = 80, uint8 feedback = 150, uint8 mix = 80, uint8 cross = 255)
-		{
-			memcpy(id, "Echo", 4);
-			param[kEchoDelay] = delay;
-			param[kEchoFeedback] = feedback;
-			param[kEchoMix] = mix;
-			param[kEchoCross] = cross;
-
-			STATIC_ASSERT(sizeof(PluginChunk) == 8);
-		}
 	};
 
 protected:
 	std::vector<float> m_delayLine;	// Echo delay line
+	float m_param[kEchoNumParameters];
 	uint32 m_bufferSize;			// Delay line length in frames
 	uint32 m_writePos;				// Current write position in the delay line
-	uint32 m_delayTime;				// In frames
+	uint32 m_delayTime[2];			// In frames
 	uint32 m_sampleRate;
 
 	// Echo calculation coefficients
-	float m_PMix, m_NMix;
-	float m_PCrossPBack, m_PCrossNBack;
-	float m_NCrossPBack, m_NCrossNBack;
-
-	// Settings chunk for file I/O
-	PluginChunk chunk;
+	float m_initialFeedback;
+	bool m_crossEcho;
 
 public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
-	DigiBoosterEcho(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
+	Echo(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 
 	virtual void Release() { delete this; }
-	virtual void SaveAllParameters();
-	virtual void RestoreAllParameters(int32 program);
-	virtual int32 GetUID() const { int32 id; memcpy(&id, "Echo", 4); return id; }
+	//virtual void SaveAllParameters();
+	//virtual void RestoreAllParameters(int32 program);
+	virtual int32 GetUID() const { return 0xEF3E932C; }
 	virtual int32 GetVersion() const { return 0; }
 	virtual void Idle() { }
 	virtual uint32 GetLatency() const { return 0; }
@@ -122,15 +105,17 @@ public:
 	virtual int GetNumInputChannels() const { return 2; }
 	virtual int GetNumOutputChannels() const { return 2; }
 
-	virtual bool ProgramsAreChunks() const { return true; }
+	virtual bool ProgramsAreChunks() const { return false; }
 
-	virtual size_t GetChunk(char *(&data), bool);
-	virtual void SetChunk(size_t size, char *data, bool);
+	virtual size_t GetChunk(char *(&), bool) { return 0; }
+	virtual void SetChunk(size_t, char *, bool) { }
 
 protected:
 	void RecalculateEchoParams();
 };
 
+} // namespace DMO
+
 OPENMPT_NAMESPACE_END
 
-#endif // NO_PLUGINS
+#endif // !NO_PLUGINS && NO_DMO

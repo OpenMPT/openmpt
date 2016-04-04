@@ -46,7 +46,10 @@ public:
 	};
 
 public:
+	typedef IMixPlugin* (*CreateProc)(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
+
 	IMixPlugin *pPluginsList;		// Pointer to first plugin instance (this instance carries pointers to other instances)
+	CreateProc Create;				// Factory to call for this plugin
 	mpt::PathString libraryName;	// Display name
 	mpt::PathString dllPath;		// Full path name
 	mpt::ustring tags;				// User tags
@@ -59,14 +62,15 @@ protected:
 	mutable uint8 dllBits;
 
 public:
-	VSTPluginLib(const mpt::PathString &dllPath, const mpt::PathString &libraryName, const mpt::ustring &tags)
-		: pPluginsList(nullptr),
-		libraryName(libraryName), dllPath(dllPath),
-		tags(tags),
-		pluginId1(0), pluginId2(0),
-		category(catUnknown),
-		isInstrument(false), useBridge(false), shareBridgeInstance(true),
-		dllBits(0)
+	VSTPluginLib(CreateProc factoryProc, const mpt::PathString &dllPath, const mpt::PathString &libraryName, const mpt::ustring &tags)
+		: pPluginsList(nullptr)
+		, Create(factoryProc)
+		, libraryName(libraryName), dllPath(dllPath)
+		, tags(tags)
+		, pluginId1(0), pluginId2(0)
+		, category(catUnknown)
+		, isInstrument(false), useBridge(false), shareBridgeInstance(true)
+		, dllBits(0)
 	{
 	}
 

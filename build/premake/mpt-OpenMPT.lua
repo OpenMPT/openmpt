@@ -36,6 +36,8 @@
    "../../soundlib/*.h",
    "../../soundlib/plugins/*.cpp",
    "../../soundlib/plugins/*.h",
+   "../../soundlib/plugins/dmo/*.cpp",
+   "../../soundlib/plugins/dmo/*.h",
    "../../sounddsp/*.cpp",
    "../../sounddsp/*.h",
    "../../sounddev/*.cpp",

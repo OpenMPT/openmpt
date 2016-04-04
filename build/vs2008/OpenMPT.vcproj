@@ -2847,6 +2847,18 @@
 					RelativePath="..\..\soundlib\plugins\PluginStructs.h"
 					>
 				</File>
+				<Filter
+					Name="dmo"
+					>
+					<File
+						RelativePath="..\..\soundlib\plugins\dmo\Echo.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\soundlib\plugins\dmo\Echo.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter

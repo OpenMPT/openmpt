@@ -17,6 +17,7 @@
 #include "PlugInterface.h"
 #include "DMOPlugin.h"
 #include "DigiBoosterEcho.h"
+#include "dmo/Echo.h"
 #include "../../common/StringFixer.h"
 #include "../Sndfile.h"
 #include "../Loaders.h"
@@ -56,6 +57,9 @@ static const MPT_UCHAR_TYPE *const cacheSection = MPT_ULITERAL("PluginCache");
 uint8 VSTPluginLib::GetDllBits(bool fromCache) const
 //--------------------------------------------------
 {
+	// Built-in plugins are always native.
+	if(dllPath.empty())
+		return sizeof(void *) * CHAR_BIT;
 #ifndef NO_VST
 	if(!dllBits || !fromCache)
 	{
@@ -120,7 +124,33 @@ bool CreateMixPluginProc(SNDMIXPLUGIN &mixPlugin, CSoundFile &sndFile)
 CVstPluginManager::CVstPluginManager()
 //------------------------------------
 {
+	// DirectX Media Objects
 	EnumerateDirectXDMOs();
+
+	// Hard-coded "plugins"
+	VSTPluginLib *plug;
+
+	// DigiBooster Pro Echo DSP
+	plug = new (std::nothrow) VSTPluginLib(DigiBoosterEcho::Create, mpt::PathString(), MPT_PATHSTRING("DigiBooster Echo"), mpt::ustring());
+	if(plug != nullptr)
+	{
+		pluginList.push_back(plug);
+		memcpy(&plug->pluginId1, "DBM0", 4);
+		memcpy(&plug->pluginId2, "Echo", 4);
+		plug->category = VSTPluginLib::catRoomFx;
+	}
+
+#ifdef NO_DMO
+	// DirectX Media Objects Emulation
+	plug = new (std::nothrow) VSTPluginLib(DMO::Echo::Create, MPT_PATHSTRING("{EF3E932C-D40B-4F51-8CCF-3F98F1B29D5D}"), MPT_PATHSTRING("Echo"), mpt::ustring());
+	if(plug != nullptr)
+	{
+		pluginList.push_back(plug);
+		plug->pluginId1 = kDmoMagic;
+		plug->pluginId2 = 0xEF3E932C;
+		plug->category = VSTPluginLib::catDMO;
+	}
+#endif // NO_DMO
 }
 
 
@@ -178,7 +208,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 					{
 						mpt::String::SetNullTerminator(name);
 
-						VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(mpt::PathString::FromNative(Util::GUIDToString(clsid)), mpt::PathString::FromNative(name), mpt::ustring());
+						VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(DMOPlugin::Create, mpt::PathString::FromNative(Util::GUIDToString(clsid)), mpt::PathString::FromNative(name), mpt::ustring());
 						if(plug != nullptr)
 						{
 							pluginList.push_back(plug);
@@ -252,7 +282,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 
 			if(!realPath.empty() && !dllPath.CompareNoCase(realPath, dllPath))
 			{
-				VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(dllPath, fileName, tags);
+				VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(nullptr, dllPath, fileName, tags);
 				if(plug == nullptr)
 				{
 					return nullptr;
@@ -295,7 +325,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 
 	bool validPlug = false;
 
-	VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(dllPath, fileName, tags);
+	VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(nullptr, dllPath, fileName, tags);
 	if(plug == nullptr)
 	{
 		return nullptr;
@@ -398,14 +428,6 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	mixPlugin.SetAutoSuspend(TrackerSettings::Instance().enableAutoSuspend);
 #endif // MODPLUG_TRACKER
 
-	// Hard-coded "plugins"
-	if(!memcmp(&mixPlugin.Info.dwPluginId1, "DBM0", 4) && !memcmp(&mixPlugin.Info.dwPluginId2, "Echo", 4))
-	{
-		// DigiBooster Pro Echo DSP
-		IMixPlugin *pVstPlug = new (std::nothrow) DigiBoosterEcho(*pFound, sndFile, &mixPlugin);
-		return pVstPlug != nullptr;
-	}
-
 	// Find plugin in library
 	int8 match = 0;	// "Match quality" of found plugin. Higher value = better match.
 	for(const_iterator p = begin(); p != end(); p++)
@@ -439,14 +461,11 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		}
 	}
 
-#ifndef NO_DMO
-	if(mixPlugin.Info.dwPluginId1 == kDmoMagic)
+	if(pFound != nullptr && pFound->Create != nullptr)
 	{
-		if (!pFound) return false;
-		IMixPlugin *plugin = DMOPlugin::Create(*pFound, sndFile, &mixPlugin);
+		IMixPlugin *plugin = pFound->Create(*pFound, sndFile, &mixPlugin);
 		return plugin != nullptr;
 	}
-#endif // NO_DMO
 
 #ifdef MODPLUG_TRACKER
 	if(!pFound && strcmp(mixPlugin.GetLibraryName(), ""))
