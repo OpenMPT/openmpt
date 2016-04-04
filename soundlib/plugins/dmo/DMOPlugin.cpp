@@ -11,10 +11,10 @@
 #include "stdafx.h"
 
 #ifndef NO_DMO
-#include "../Sndfile.h"
-#include "../../common/mptUUID.h"
+#include "../../Sndfile.h"
+#include "../../../common/mptUUID.h"
 #include "DMOPlugin.h"
-#include "PluginManager.h"
+#include "../PluginManager.h"
 #include <uuids.h>
 #include <medparam.h>
 #include <mmsystem.h>

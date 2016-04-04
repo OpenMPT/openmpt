@@ -113,8 +113,9 @@ LOCAL_SRC_FILES := \
 	soundlib/WindowedFIR.cpp \
 	soundlib/XMTools.cpp \
 	soundlib/plugins/DigiBoosterEcho.cpp \
+	soundlib/plugins/dmo/DMOPlugin.cpp \
 	soundlib/plugins/dmo/Echo.cpp \
-	soundlib/plugins/DMOPlugin.cpp \
+	soundlib/plugins/dmo/ParamEQ.cpp \
 	soundlib/plugins/PluginManager.cpp \
 	soundlib/plugins/PlugInterface.cpp \
 	test/TestToolsLib.cpp \

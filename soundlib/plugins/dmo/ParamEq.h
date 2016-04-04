@@ -1,7 +1,7 @@
 /*
- * Echo.h
- * ------
- * Purpose: Implementation of the DMO Echo DSP (for non-Windows platforms)
+ * ParamEq.h
+ * ---------
+ * Purpose: Implementation of the DMO Parametric Equalizer DSP (for non-Windows platforms)
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -17,39 +17,36 @@ OPENMPT_NAMESPACE_BEGIN
 namespace DMO
 {
 
-//============================
-class Echo : public IMixPlugin
-//============================
+//===============================
+class ParamEq : public IMixPlugin
+//===============================
 {
 public:
 	enum Parameters
 	{
-		kEchoWetDry = 0,
-		kEchoFeedback,
-		kEchoLeftDelay,
-		kEchoRightDelay,
-		kEchoPanDelay,
-		kEchoNumParameters
+		kEqCenter = 0,
+		kEqBandwidth,
+		kEqGain,
+		kEqNumParameters
 	};
 
 protected:
-	std::vector<float> m_delayLine;	// Echo delay line
-	float m_param[kEchoNumParameters];
-	uint32 m_bufferSize;			// Delay line length in frames
-	uint32 m_writePos;				// Current write position in the delay line
-	uint32 m_delayTime[2];			// In frames
+	float m_param[kEqNumParameters];
 	uint32 m_sampleRate;
 
-	// Echo calculation coefficients
-	float m_initialFeedback;
-	bool m_crossEcho;
+	// Equalizer coefficients
+	float a0, a1, a2;
+	float b0, b1, b2;
+	// Equalizer memory
+	float x1[2], x2[2];
+	float y1[2], y2[2];
 
 public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
-	Echo(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
+	ParamEq(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 
 	virtual void Release() { delete this; }
-	virtual int32 GetUID() const { return 0xEF3E932C; }
+	virtual int32 GetUID() const { return 0x120CED89; }
 	virtual int32 GetVersion() const { return 0; }
 	virtual void Idle() { }
 	virtual uint32 GetLatency() const { return 0; }
@@ -70,7 +67,7 @@ public:
 	virtual int32 GetCurrentProgram() { return 0; }
 	virtual void SetCurrentProgram(int32) { }
 
-	virtual PlugParamIndex GetNumParameters() const { return kEchoNumParameters; }
+	virtual PlugParamIndex GetNumParameters() const { return kEqNumParameters; }
 	virtual PlugParamValue GetParameter(PlugParamIndex index);
 	virtual void SetParameter(PlugParamIndex index, PlugParamValue value);
 
@@ -81,7 +78,7 @@ public:
 	virtual bool ShouldProcessSilence() { return true; }
 
 #ifdef MODPLUG_TRACKER
-	virtual CString GetDefaultEffectName() { return _T("Echo"); }
+	virtual CString GetDefaultEffectName() { return _T("ParamEq"); }
 
 	virtual void CacheProgramNames(int32, int32) { }
 	virtual void CacheParameterNames(int32, int32) { }
@@ -109,7 +106,10 @@ public:
 	virtual void SetChunk(size_t, char *, bool) { }
 
 protected:
-	void RecalculateEchoParams();
+	float BandwidthInSemitones() const { return 1.0f + m_param[kEqBandwidth] * 35.0f; }
+	float FreqInHertz() const { return 80.0f + m_param[kEqCenter] * 15920.0f; }
+	float GainInDecibel() const { return (m_param[kEqGain] - 0.5f) * 30.0f; }
+	void RecalculateEqParams();
 };
 
 } // namespace DMO

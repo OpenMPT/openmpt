@@ -15,9 +15,10 @@
 #include "../../common/version.h"
 #include "PluginManager.h"
 #include "PlugInterface.h"
-#include "DMOPlugin.h"
 #include "DigiBoosterEcho.h"
+#include "dmo/DMOPlugin.h"
 #include "dmo/Echo.h"
+#include "dmo/ParamEq.h"
 #include "../../common/StringFixer.h"
 #include "../Sndfile.h"
 #include "../Loaders.h"
@@ -148,6 +149,15 @@ CVstPluginManager::CVstPluginManager()
 		pluginList.push_back(plug);
 		plug->pluginId1 = kDmoMagic;
 		plug->pluginId2 = 0xEF3E932C;
+		plug->category = VSTPluginLib::catDMO;
+	}
+
+	plug = new (std::nothrow) VSTPluginLib(DMO::ParamEq::Create, MPT_PATHSTRING("{120CED89-3BF4-4173-A132-3CB406CF3231}"), MPT_PATHSTRING("ParamEq"), mpt::ustring());
+	if(plug != nullptr)
+	{
+		pluginList.push_back(plug);
+		plug->pluginId1 = kDmoMagic;
+		plug->pluginId2 = 0x120CED89;
 		plug->category = VSTPluginLib::catDMO;
 	}
 #endif // NO_DMO

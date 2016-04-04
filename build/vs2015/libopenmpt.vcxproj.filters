@@ -581,9 +581,6 @@
     <ClCompile Include="..\..\soundlib\patternContainer.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\plugins\DMOPlugin.cpp">
-      <Filter>soundlib\plugins</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\DigiBoosterEcho.cpp">
       <Filter>soundlib\plugins</Filter>
     </ClCompile>
