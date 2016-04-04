@@ -44,7 +44,7 @@ DisableWelcomePage=yes
 [Tasks]
 ; icons and install mode
 Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}
-Name: startmenuicon; Description: "Create a start menu icon"; GroupDescription: {cm:AdditionalIcons}
+Name: startmenuicon; Description: "Create a Start Menu icon"; GroupDescription: {cm:AdditionalIcons}
 Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
 #ifdef DOWNLOAD_MO3
 Name: downloadmo3; Description: Download unmo3 (library needed for reading MO3 files, recommended); GroupDescription: Options:
@@ -325,6 +325,11 @@ begin
     case CurUninstallStep of
     usUninstall:
         begin
+            if UninstallSilent() then
+            begin
+                // Keep user settings if uninstalling silently
+                Exit;
+            end;
             if MsgBox('Do you want to keep your OpenMPT settings files (mptrack.ini, SongSettings.ini, Keybindings.mkb, plugin.cache and local_tunings.tc)?', mbConfirmation, MB_YESNO or MB_DEFBUTTON1) = IDNO then
             begin
                 if(GetIniInt('Paths', 'UseAppDataDirectory', 1, 0, 0, ExpandConstant('{app}\mptrack.ini')) = 1) then
