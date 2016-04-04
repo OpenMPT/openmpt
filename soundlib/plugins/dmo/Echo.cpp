@@ -141,9 +141,11 @@ CString Echo::GetParamName(PlugParamIndex param)
 }
 
 
-CString Echo::GetParamLabel(PlugParamIndex)
-//-----------------------------------------
+CString Echo::GetParamLabel(PlugParamIndex param)
+//-----------------------------------------------
 {
+	if(param == kEchoLeftDelay || param == kEchoRightDelay)
+		return _T("ms");
 	return CString();
 }
 
