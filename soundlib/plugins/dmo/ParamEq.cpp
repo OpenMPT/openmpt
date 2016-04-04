@@ -50,7 +50,7 @@ void ParamEq::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		for(uint8 channel = 0; channel < 2; channel++)
 		{
 			float x = *(in[channel])++;
-			float y = (b0 / a0) * x + (b1 / a0) * x1[channel] + (b2 / a0) * x2[channel] - (a1 / a0) * y1[channel] - (a2 / a0) * y2[channel];
+			float y = b0DIVa0 * x + b1DIVa0 * x1[channel] + b2DIVa0 * x2[channel] - a1DIVa0 * y1[channel] - a2DIVa0 * y2[channel];
 
 			x2[channel] = x1[channel];
 			x1[channel] = x;
@@ -154,12 +154,18 @@ void ParamEq::RecalculateEqParams()
 	const float cosW0 = std::cos(w0);
 	const float alpha = sinW0 * std::sinh((BandwidthInSemitones() * (float(M_LN2) / 24.0f)) * w0 / sinW0);
 
-	b0 = 1.0f + alpha * a;
-	b1 = -2.0f * cosW0;
-	b2 = 1.0f - alpha * a;
-	a0 = 1.0f + alpha / a;
-	a1 = -2.0f * cosW0;
-	a2 = 1.0f - alpha / a;
+	const float b0 = 1.0f + alpha * a;
+	const float b1 = -2.0f * cosW0;
+	const float b2 = 1.0f - alpha * a;
+	const float a0 = 1.0f + alpha / a;
+	const float a1 = -2.0f * cosW0;
+	const float a2 = 1.0f - alpha / a;
+
+	b0DIVa0 = b0 / a0;
+	b1DIVa0 = b1 / a0;
+	b2DIVa0 = b2 / a0;
+	a1DIVa0 = a1 / a0;
+	a2DIVa0 = a2 / a0;
 
 	x1[0] = x2[0] = 0;
 	x1[1] = x2[1] = 0;

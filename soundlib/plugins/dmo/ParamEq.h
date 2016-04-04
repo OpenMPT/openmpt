@@ -35,8 +35,7 @@ protected:
 	uint32 m_sampleRate;
 
 	// Equalizer coefficients
-	float a0, a1, a2;
-	float b0, b1, b2;
+	float b0DIVa0, b1DIVa0, b2DIVa0, a1DIVa0, a2DIVa0;
 	// Equalizer memory
 	float x1[2], x2[2];
 	float y1[2], y2[2];
