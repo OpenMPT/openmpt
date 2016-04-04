@@ -24,6 +24,8 @@
    "../../soundlib/*.h",
    "../../soundlib/plugins/*.cpp",
    "../../soundlib/plugins/*.h",
+   "../../soundlib/plugins/dmo/*.cpp",
+   "../../soundlib/plugins/dmo/*.h",
    "../../test/*.cpp",
    "../../test/*.h",
    "../../libopenmpt/libopenmpt.h",

@@ -2800,14 +2800,6 @@
 				Name="plugins"
 				>
 				<File
-					RelativePath="..\..\soundlib\plugins\DMOPlugin.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\soundlib\plugins\DMOPlugin.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\soundlib\plugins\DigiBoosterEcho.cpp"
 					>
 				</File>
@@ -2850,6 +2842,14 @@
 				<Filter
 					Name="dmo"
 					>
+					<File
+						RelativePath="..\..\soundlib\plugins\dmo\DMOPlugin.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\soundlib\plugins\dmo\DMOPlugin.h"
+						>
+					</File>
 					<File
 						RelativePath="..\..\soundlib\plugins\dmo\Echo.cpp"
 						>

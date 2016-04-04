@@ -13,6 +13,9 @@
     <Filter Include="soundlib\plugins">
       <UniqueIdentifier>{F688F7E8-E281-163B-0BB4-FBBFF70BF646}</UniqueIdentifier>
     </Filter>
+    <Filter Include="soundlib\plugins\dmo">
+      <UniqueIdentifier>{A591FA3A-9120-8404-3A3F-98FF26AD94AA}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\BuildSettings.h">
@@ -267,9 +270,6 @@
     <ClInclude Include="..\..\soundlib\patternContainer.h">
       <Filter>soundlib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\soundlib\plugins\DMOPlugin.h">
-      <Filter>soundlib\plugins</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\DigiBoosterEcho.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
@@ -290,6 +290,15 @@
     </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\PluginStructs.h">
       <Filter>soundlib\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\dmo\DMOPlugin.h">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Echo.h">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\dmo\ParamEq.h">
+      <Filter>soundlib\plugins\dmo</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\tuning.h">
       <Filter>soundlib</Filter>
@@ -581,9 +590,6 @@
     <ClCompile Include="..\..\soundlib\patternContainer.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\plugins\DMOPlugin.cpp">
-      <Filter>soundlib\plugins</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\DigiBoosterEcho.cpp">
       <Filter>soundlib\plugins</Filter>
     </ClCompile>
@@ -592,6 +598,15 @@
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\PluginManager.cpp">
       <Filter>soundlib\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\DMOPlugin.cpp">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Echo.cpp">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\ParamEq.cpp">
+      <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\tuning.cpp">
       <Filter>soundlib</Filter>

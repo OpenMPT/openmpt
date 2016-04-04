@@ -626,9 +626,6 @@
     <ClInclude Include="..\..\soundlib\patternContainer.h">
       <Filter>soundlib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\soundlib\plugins\DMOPlugin.h">
-      <Filter>soundlib\plugins</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\DigiBoosterEcho.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
@@ -649,6 +646,9 @@
     </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\PluginStructs.h">
       <Filter>soundlib\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\dmo\DMOPlugin.h">
+      <Filter>soundlib\plugins\dmo</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\dmo\Echo.h">
       <Filter>soundlib\plugins\dmo</Filter>
