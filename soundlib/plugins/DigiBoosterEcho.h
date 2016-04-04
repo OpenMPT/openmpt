@@ -64,6 +64,7 @@ protected:
 public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 	DigiBoosterEcho(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
+	~DigiBoosterEcho() { }
 
 	virtual void Release() { delete this; }
 	virtual void SaveAllParameters();

@@ -32,7 +32,7 @@ Echo::Echo(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	, m_writePos(0)
 	, m_sampleRate(sndFile.GetSampleRate())
 	, m_initialFeedback(0.0f)
-//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 {
 	m_param[kEchoWetDry] = 0.5f;
 	m_param[kEchoFeedback] = 0.5f;
