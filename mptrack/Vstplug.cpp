@@ -948,14 +948,6 @@ CVstPlugin::~CVstPlugin()
 	Suspend();
 	m_isInitialized = false;
 
-	// First thing to do, if we don't want to hang in a loop
-	if (m_Factory.pPluginsList == this) m_Factory.pPluginsList = m_pNext;
-	if (m_pMixStruct)
-	{
-		m_pMixStruct->pMixPlugin = nullptr;
-		m_pMixStruct = nullptr;
-	}
-
 	Dispatch(effClose, 0, 0, nullptr, 0);
 	if(m_hLibrary)
 	{

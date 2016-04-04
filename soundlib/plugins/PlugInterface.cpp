@@ -78,7 +78,16 @@ IMixPlugin::~IMixPlugin()
 {
 #ifdef MODPLUG_TRACKER
 	CloseEditor();
+	CriticalSection cs;
 #endif // MODPLUG_TRACKER
+
+	// First thing to do, if we don't want to hang in a loop
+	if (m_Factory.pPluginsList == this) m_Factory.pPluginsList = m_pNext;
+	if (m_pMixStruct)
+	{
+		m_pMixStruct->pMixPlugin = nullptr;
+		m_pMixStruct = nullptr;
+	}
 
 	if (m_pNext) m_pNext->m_pPrev = m_pPrev;
 	if (m_pPrev) m_pPrev->m_pNext = m_pNext;
