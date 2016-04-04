@@ -131,7 +131,7 @@ CVstPluginManager::CVstPluginManager()
 	VSTPluginLib *plug;
 
 	// DigiBooster Pro Echo DSP
-	plug = new (std::nothrow) VSTPluginLib(DigiBoosterEcho::Create, mpt::PathString(), MPT_PATHSTRING("DigiBooster Echo"), mpt::ustring());
+	plug = new (std::nothrow) VSTPluginLib(DigiBoosterEcho::Create, mpt::PathString(), MPT_PATHSTRING("DigiBooster Pro Echo"), mpt::ustring());
 	if(plug != nullptr)
 	{
 		pluginList.push_back(plug);

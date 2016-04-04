@@ -38,6 +38,9 @@
 #ifndef MODPLUG_TRACKER
 #include "../common/mptFileIO.h"
 #endif // !MODPLUG_TRACKER
+#ifndef NO_PLUGINS
+#include "../soundlib/plugins/PlugInterface.h"
+#endif
 #include "../common/mptBufferIO.h"
 #include <limits>
 #include <istream>
@@ -1897,6 +1900,8 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(plug.fDryRatio, 0.26f);
 	VERIFY_EQUAL_NONCONT(plug.IsMasterEffect(), true);
 	VERIFY_EQUAL_NONCONT(plug.GetGain(), 11);
+	VERIFY_EQUAL_NONCONT(plug.pMixPlugin->GetParameter(1), 0.5f);
+	VERIFY_EQUAL_NONCONT(plug.pMixPlugin->IsInstrument(), false);
 #endif // NO_PLUGINS
 
 #ifdef MODPLUG_TRACKER
