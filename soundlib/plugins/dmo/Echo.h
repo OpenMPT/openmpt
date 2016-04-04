@@ -47,7 +47,6 @@ protected:
 public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 	Echo(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
-	~Echo() { }
 
 	virtual void Release() { delete this; }
 	//virtual void SaveAllParameters();
