@@ -28,7 +28,7 @@ IMixPlugin* Gargle::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLU
 
 Gargle::Gargle(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	: IMixPlugin(factory, sndFile, mixStruct)
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
 {
 	m_param[kGargleRate] = 0.02f;
 	m_param[kGargleWaveShape] = 0.0f;
@@ -41,7 +41,7 @@ void Gargle::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //----------------------------------------------------------------
 {
 	float *inL = m_mixBuffer.GetInputBuffer(0), *inR = m_mixBuffer.GetInputBuffer(1);
-	const bool triangle = m_param[kGargleWaveShape] < 0.5f;
+	const bool triangle = m_param[kGargleWaveShape] < 1.0f;
 
 	while(numFrames > 0)
 	{
@@ -55,15 +55,15 @@ void Gargle::Process(float *pOutL, float *pOutR, uint32 numFrames)
 				const float factor = 1.0f / m_periodHalf;
 				for(uint32 i = m_counter; i < stop; i++)
 				{
-					*pOutL++ = *inL++ * i * factor;
-					*pOutR++ = *inR++ * i * factor;
+					*pOutL++ += *inL++ * i * factor;
+					*pOutR++ += *inR++ * i * factor;
 				}
 			} else
 			{
 				for(uint32 i = 0; i < remain; i++)
 				{
-					*pOutL++ = *inL++;
-					*pOutR++ = *inR++;
+					*pOutL++ += *inL++;
+					*pOutR++ += *inR++;
 				}
 			}
 			numFrames -= remain;
@@ -78,16 +78,13 @@ void Gargle::Process(float *pOutL, float *pOutR, uint32 numFrames)
 				const float factor = 1.0f / m_periodHalf;
 				for(uint32 i = m_period - m_counter; i > stop; i--)
 				{
-					*pOutL++ = *inL++ * i * factor;
-					*pOutR++ = *inR++ * i * factor;
+					*pOutL++ += *inL++ * i * factor;
+					*pOutR++ += *inR++ * i * factor;
 				}
 			} else
 			{
-				for(uint32 i = 0; i < remain; i++)
-				{
-					*pOutL++ = 0.0f;
-					*pOutR++ = 0.0f;
-				}
+				pOutL += remain;
+				pOutR += remain;
 				inL += remain;
 				inR += remain;
 
@@ -117,8 +114,8 @@ void Gargle::SetParameter(PlugParamIndex index, PlugParamValue value)
 	if(index < kEqNumParameters)
 	{
 		Limit(value, 0.0f, 1.0f);
-		if(index == kGargleWaveShape)
-			value = Util::Round(value);
+		if(index == kGargleWaveShape && value < 1.0f)
+			value = 0.0f;
 		m_param[index] = value;
 		RecalculateGargleParams();
 	}
@@ -182,12 +179,14 @@ int Gargle::RateInHertz() const
 	return std::max(1, Util::Round<int>(m_param[kGargleRate] * 1000.0f));
 }
 
+
 void Gargle::RecalculateGargleParams()
 //------------------------------------
 {
 	m_period = m_SndFile.GetSampleRate() / RateInHertz();
 	if(m_period < 2) m_period = 2;
 	m_periodHalf = m_period / 2;
+	LimitMax(m_counter, m_period);
 }
 
 } // namespace DMO
