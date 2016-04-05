@@ -18,6 +18,7 @@
 #include "DigiBoosterEcho.h"
 #include "dmo/DMOPlugin.h"
 #include "dmo/Echo.h"
+#include "dmo/Gargle.h"
 #include "dmo/ParamEq.h"
 #include "../../common/StringFixer.h"
 #include "../Sndfile.h"
@@ -149,6 +150,15 @@ CVstPluginManager::CVstPluginManager()
 		pluginList.push_back(plug);
 		plug->pluginId1 = kDmoMagic;
 		plug->pluginId2 = 0xEF3E932C;
+		plug->category = VSTPluginLib::catDMO;
+	}
+
+	plug = new (std::nothrow) VSTPluginLib(DMO::Gargle::Create, MPT_PATHSTRING("{DAFD8210-5711-4B91-9FE3-F75B7AE279BF}"), MPT_PATHSTRING("Gargle"), mpt::ustring());
+	if(plug != nullptr)
+	{
+		pluginList.push_back(plug);
+		plug->pluginId1 = kDmoMagic;
+		plug->pluginId2 = 0xDAFD8210;
 		plug->category = VSTPluginLib::catDMO;
 	}
 

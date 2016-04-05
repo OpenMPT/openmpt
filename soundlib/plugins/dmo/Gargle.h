@@ -1,7 +1,7 @@
 /*
- * ParamEq.h
- * ---------
- * Purpose: Implementation of the DMO Parametric Equalizer DSP (for non-Windows platforms)
+ * Gargle.h
+ * --------
+ * Purpose: Implementation of the DMO Gargle DSP (for non-Windows platforms)
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -18,33 +18,28 @@ namespace DMO
 {
 
 //===============================
-class ParamEq : public IMixPlugin
+class Gargle : public IMixPlugin
 //===============================
 {
 public:
 	enum Parameters
 	{
-		kEqCenter = 0,
-		kEqBandwidth,
-		kEqGain,
+		kGargleRate = 0,
+		kGargleWaveShape,
 		kEqNumParameters
 	};
 
 protected:
 	float m_param[kEqNumParameters];
 
-	// Equalizer coefficients
-	float b0DIVa0, b1DIVa0, b2DIVa0, a1DIVa0, a2DIVa0;
-	// Equalizer memory
-	float x1[2], x2[2];
-	float y1[2], y2[2];
+	uint32 m_period, m_periodHalf, m_counter;	// In frames
 
 public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
-	ParamEq(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
+	Gargle(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 
 	virtual void Release() { delete this; }
-	virtual int32 GetUID() const { return 0x120CED89; }
+	virtual int32 GetUID() const { return 0xDAFD8210; }
 	virtual int32 GetVersion() const { return 0; }
 	virtual void Idle() { }
 	virtual uint32 GetLatency() const { return 0; }
@@ -76,7 +71,7 @@ public:
 	virtual bool ShouldProcessSilence() { return true; }
 
 #ifdef MODPLUG_TRACKER
-	virtual CString GetDefaultEffectName() { return _T("ParamEq"); }
+	virtual CString GetDefaultEffectName() { return _T("Gargle"); }
 
 	virtual void CacheProgramNames(int32, int32) { }
 	virtual void CacheParameterNames(int32, int32) { }
@@ -104,10 +99,8 @@ public:
 	virtual void SetChunk(size_t, char *, bool) { }
 
 protected:
-	float BandwidthInSemitones() const { return 1.0f + m_param[kEqBandwidth] * 35.0f; }
-	float FreqInHertz() const { return 80.0f + m_param[kEqCenter] * 15920.0f; }
-	float GainInDecibel() const { return (m_param[kEqGain] - 0.5f) * 30.0f; }
-	void RecalculateEqParams();
+	int RateInHertz() const;
+	void RecalculateGargleParams();
 };
 
 } // namespace DMO

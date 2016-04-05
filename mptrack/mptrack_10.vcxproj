@@ -802,6 +802,7 @@
     <ClCompile Include="..\soundlib\plugins\DigiBoosterEcho.cpp" />
     <ClCompile Include="..\soundlib\plugins\dmo\DMOPlugin.cpp" />
     <ClCompile Include="..\soundlib\plugins\dmo\Echo.cpp" />
+    <ClCompile Include="..\soundlib\plugins\dmo\Gargle.cpp" />
     <ClCompile Include="..\soundlib\plugins\dmo\ParamEq.cpp" />
     <ClCompile Include="..\soundlib\plugins\PluginManager.cpp" />
     <ClCompile Include="..\soundlib\plugins\PlugInterface.cpp" />
@@ -1043,6 +1044,7 @@
     <ClInclude Include="..\soundlib\plugins\DigiBoosterEcho.h" />
     <ClInclude Include="..\soundlib\plugins\dmo\DMOPlugin.h" />
     <ClInclude Include="..\soundlib\plugins\dmo\Echo.h" />
+    <ClInclude Include="..\soundlib\plugins\dmo\Gargle.h" />
     <ClInclude Include="..\soundlib\plugins\dmo\ParamEq.h" />
     <ClInclude Include="..\soundlib\plugins\OpCodes.h" />
     <ClInclude Include="..\soundlib\plugins\PluginEventQueue.h" />

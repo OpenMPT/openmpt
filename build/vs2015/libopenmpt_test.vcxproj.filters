@@ -300,6 +300,9 @@
     <ClInclude Include="..\..\soundlib\plugins\dmo\Echo.h">
       <Filter>soundlib\plugins\dmo</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Gargle.h">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\dmo\ParamEq.h">
       <Filter>soundlib\plugins\dmo</Filter>
     </ClInclude>
@@ -621,6 +624,9 @@
       <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\Echo.cpp">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Gargle.cpp">
       <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\ParamEq.cpp">

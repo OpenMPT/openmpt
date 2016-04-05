@@ -28,7 +28,6 @@ IMixPlugin* ParamEq::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPL
 
 ParamEq::ParamEq(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	: IMixPlugin(factory, sndFile, mixStruct)
-	, m_sampleRate(sndFile.GetSampleRate())
 //-----------------------------------------------------------------------------------
 {
 	m_param[kEqCenter] = 0.497487f;
@@ -89,7 +88,6 @@ void ParamEq::SetParameter(PlugParamIndex index, PlugParamValue value)
 void ParamEq::Resume()
 //--------------------
 {
-	m_sampleRate = m_SndFile.GetSampleRate();
 	RecalculateEqParams();
 }
 
@@ -147,9 +145,9 @@ CString ParamEq::GetParamDisplay(PlugParamIndex param)
 void ParamEq::RecalculateEqParams()
 //---------------------------------
 {
-	const float f0 = std::min(FreqInHertz(), m_sampleRate * 0.5f);
+	const float freq = std::min(FreqInHertz() / m_SndFile.GetSampleRate(), 0.5f);
 	const float a = std::pow(10, GainInDecibel() / 40.0f);
-	const float w0 = 2.0f * float(M_PI) * f0 / m_sampleRate;
+	const float w0 = 2.0f * float(M_PI) * freq;
 	const float sinW0 = std::sin(w0);
 	const float cosW0 = std::cos(w0);
 	const float alpha = sinW0 * std::sinh((BandwidthInSemitones() * (float(M_LN2) / 24.0f)) * w0 / sinW0);
