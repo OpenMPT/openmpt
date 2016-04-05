@@ -19,6 +19,11 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 #if defined(MPT_ENABLE_DYNBIND)
+#define MPT_ENABLE_COMPONENTS
+#endif
+
+
+#if defined(MPT_ENABLE_COMPONENTS)
 
 
 #if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
@@ -111,6 +116,24 @@ protected:
 };
 
 
+class ComponentBuiltin : public ComponentBase
+{
+public:
+	ComponentBuiltin()
+		: ComponentBase(ComponentTypeBuiltin)
+	{
+		return;
+	}
+	virtual bool DoInitialize()
+	{
+		return true;
+	}
+};
+
+
+#if defined(MPT_ENABLE_DYNBIND)
+
+
 class ComponentLibrary
 	: public ComponentBase
 {
@@ -161,21 +184,6 @@ protected:
 #define MPT_COMPONENT_BIND_SYMBOL_OPTIONAL(libName, symbol, func) Bind( func , libName , symbol )
 
 
-class ComponentBuiltin : public ComponentBase
-{
-public:
-	ComponentBuiltin()
-		: ComponentBase(ComponentTypeBuiltin)
-	{
-		return;
-	}
-	virtual bool DoInitialize()
-	{
-		return true;
-	}
-};
-
-
 class ComponentSystemDLL : public ComponentLibrary
 {
 private:
@@ -212,6 +220,9 @@ public:
 		return GetLibrary(m_FullName.ToUTF8()).IsValid();
 	}
 };
+
+
+#endif // MPT_ENABLE_DYNBIND
 
 
 #if MPT_COMPONENT_MANAGER
@@ -451,7 +462,7 @@ bool IsComponentAvailable(const ComponentHandle<T> &handle)
 }
 
 
-#endif // MPT_ENABLE_DYNBIND
+#endif // MPT_ENABLE_COMPONENTS
 
 
 OPENMPT_NAMESPACE_END
