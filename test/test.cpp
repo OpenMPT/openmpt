@@ -117,11 +117,19 @@ void DoTests()
 		// prefix for test suite
 		std::wstring pathprefix = std::wstring();
 
+		bool libopenmpt = false;
+		#ifdef LIBOPENMPT_BUILD
+			libopenmpt = true;
+		#endif
+
 		// set path prefix for test files (if provided)
 		std::vector<WCHAR> buf(GetEnvironmentVariableW(L"srcdir", NULL, 0) + 1);
 		if(GetEnvironmentVariableW(L"srcdir", &buf[0], static_cast<DWORD>(buf.size())) > 0)
 		{
 			pathprefix = &buf[0];
+		} else if(libopenmpt && IsDebuggerPresent())
+		{
+			pathprefix = L"../../";
 		}
 
 		PathPrefix = new mpt::PathString(mpt::PathString::FromNative(pathprefix));
@@ -1900,6 +1908,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(plug.fDryRatio, 0.26f);
 	VERIFY_EQUAL_NONCONT(plug.IsMasterEffect(), true);
 	VERIFY_EQUAL_NONCONT(plug.GetGain(), 11);
+	VERIFY_EQUAL_NONCONT(plug.pMixPlugin != nullptr, true);
 	VERIFY_EQUAL_NONCONT(plug.pMixPlugin->GetParameter(1), 0.5f);
 	VERIFY_EQUAL_NONCONT(plug.pMixPlugin->IsInstrument(), false);
 #endif // NO_PLUGINS
