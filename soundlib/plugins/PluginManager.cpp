@@ -125,7 +125,19 @@ bool CreateMixPluginProc(SNDMIXPLUGIN &mixPlugin, CSoundFile &sndFile)
 
 CVstPluginManager::CVstPluginManager()
 //------------------------------------
+#if MPT_OS_WINDOWS && !defined(NO_DMO)
+	: MustUnInitilizeCOM(false)
+#endif
 {
+
+	#if MPT_OS_WINDOWS && !defined(NO_DMO)
+		HRESULT COMinit = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+		if(COMinit == S_OK || COMinit == S_FALSE)
+		{
+			MustUnInitilizeCOM = true;
+		}
+	#endif
+
 	// DirectX Media Objects
 	EnumerateDirectXDMOs();
 
@@ -185,6 +197,13 @@ CVstPluginManager::~CVstPluginManager()
 		}
 		delete *p;
 	}
+	#if MPT_OS_WINDOWS && !defined(NO_DMO)
+		if(MustUnInitilizeCOM)
+		{
+			CoUninitialize();
+			MustUnInitilizeCOM = false;
+		}
+	#endif
 }
 
 
