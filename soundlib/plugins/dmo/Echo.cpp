@@ -165,7 +165,7 @@ CString Echo::GetParamDisplay(PlugParamIndex param)
 		s.Format("%.2f", m_param[param] * 2000.0f);
 		break;
 	case kEchoPanDelay:
-		s = m_param[param] < 0.5 ? _T("No") : _T("Yes");
+		s = (m_param[param] <= 0.5) ? _T("No") : _T("Yes");
 	}
 	return s;
 }
@@ -179,7 +179,7 @@ void Echo::RecalculateEchoParams()
 	m_initialFeedback = std::sqrt(1.0f - (m_param[kEchoFeedback] * m_param[kEchoFeedback]));
 	m_delayTime[0] = static_cast<uint32>(m_param[kEchoLeftDelay] * (2 * m_sampleRate));
 	m_delayTime[1] = static_cast<uint32>(m_param[kEchoRightDelay] * (2 * m_sampleRate));
-	m_crossEcho = (m_param[kEchoPanDelay]) >= 0.5f;
+	m_crossEcho = (m_param[kEchoPanDelay]) > 0.5f;
 }
 
 } // namespace DMO

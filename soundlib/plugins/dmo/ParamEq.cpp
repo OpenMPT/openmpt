@@ -56,7 +56,7 @@ void ParamEq::Process(float *pOutL, float *pOutR, uint32 numFrames)
 			y2[channel] = y1[channel];
 			y1[channel] = y;
 
-			*(out[channel])++ = y;
+			*(out[channel])++ += y;
 		}
 	}
 }
