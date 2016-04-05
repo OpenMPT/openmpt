@@ -31,6 +31,9 @@ is just a high-level summary.
     `--[no-]randomize`. A new `--[no-]shuffle` option hasa been added which
     shuffles randomly through the playlist as opposed to randomizing the
     playlist upfront.
+ *  [**Change**] Support for Un4seen unmo3 has generally been deprecated in
+    favour of the new internal mo3 decoder. Un4seen unmo3 support will be
+    removed on 2018-01-01.
 
  *  [**Bug**] Memory consumption during loading has been reduced by about 1/3 in
     case a seekable input stream is provided (either via C API callback open

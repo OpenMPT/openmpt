@@ -35,12 +35,10 @@ Dependencies
      *  **libvorbis**
      *  **libvorbisfile**
      *  Alternatively, **Media Foundation** can be used on Windows 7 or later
-        instead of libmpg123 to decode mp3 samples.
+        instead of libmpg123 to decode mp3 samples. It's also possible to use
+        **minimp3**.
      *  Instead of libogg, libvorbis and libvorbisfile, **stb_vorbis** can be
         used internally to decode Vorbis samples.
- *  **MO3** support via libunmo3 requires:
-     *  closed-source **libunmo3** from un4seen
-     *  **libltdl** from libtool on Unix-like platforms
  *  Building on Unix-like systems requires:
      *  **GNU make**
      *  **pkg-config**
@@ -84,3 +82,9 @@ Optional dependencies
      *  raw PCM has no external dependencies
  *  **help2man** is required to build the documentation.
 
+
+Deprecated features
+-------------------
+ *  **MO3** support via libunmo3 requires:
+     *  closed-source **libunmo3** from un4seen
+     *  **libltdl** from libtool on Unix-like platforms or **libdl**
