@@ -16,7 +16,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MPT_ENABLE_DYNBIND)
+#if defined(MPT_ENABLE_COMPONENTS)
 
 
 ComponentBase::ComponentBase(ComponentType type)
@@ -66,6 +66,52 @@ void ComponentBase::SetAvailable()
 }
 
 
+ComponentType ComponentBase::GetType() const
+//------------------------------------------
+{
+	return m_Type;
+}
+
+
+bool ComponentBase::IsInitialized() const
+//---------------------------------------
+{
+	return m_Initialized;
+}
+
+
+bool ComponentBase::IsAvailable() const
+//-------------------------------------
+{
+	return m_Initialized && m_Available;
+}
+
+
+mpt::ustring ComponentBase::GetVersion() const
+//--------------------------------------------
+{
+	return mpt::ustring();
+}
+
+
+void ComponentBase::Initialize()
+//------------------------------
+{
+	if(IsInitialized())
+	{
+		return;
+	}
+	if(DoInitialize())
+	{
+		SetAvailable();
+	}
+	SetInitialized();
+}
+
+
+#if defined(MPT_ENABLE_DYNBIND)
+
+
 bool ComponentLibrary::AddLibrary(const std::string &libName, const mpt::LibraryPath &libPath)
 //--------------------------------------------------------------------------------------------
 {
@@ -112,34 +158,6 @@ bool ComponentLibrary::HasBindFailed() const
 }
 
 
-ComponentType ComponentBase::GetType() const
-//------------------------------------------
-{
-	return m_Type;
-}
-
-
-bool ComponentBase::IsInitialized() const
-//---------------------------------------
-{
-	return m_Initialized;
-}
-
-
-bool ComponentBase::IsAvailable() const
-//-------------------------------------
-{
-	return m_Initialized && m_Available;
-}
-	
-
-mpt::ustring ComponentBase::GetVersion() const
-//--------------------------------------------
-{
-	return mpt::ustring();
-}
-
-
 mpt::Library ComponentLibrary::GetLibrary(const std::string &libName) const
 //-------------------------------------------------------------------------
 {
@@ -152,19 +170,7 @@ mpt::Library ComponentLibrary::GetLibrary(const std::string &libName) const
 }
 
 
-void ComponentBase::Initialize()
-//------------------------------
-{
-	if(IsInitialized())
-	{
-		return;
-	}
-	if(DoInitialize())
-	{
-		SetAvailable();
-	}
-	SetInitialized();
-}
+#endif // MPT_ENABLE_DYNBIND
 
 
 #if MPT_COMPONENT_MANAGER
@@ -423,7 +429,7 @@ ComponentInfo ComponentManager::GetComponentInfo(std::string name) const
 #endif // MPT_COMPONENT_MANAGER
 
 
-#endif // MPT_ENABLE_DYNBIND
+#endif // MPT_ENABLE_COMPONENTS
 
 
 OPENMPT_NAMESPACE_END
