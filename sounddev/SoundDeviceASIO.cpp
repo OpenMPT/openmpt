@@ -544,7 +544,7 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 		return;
 	}
 	DWORD pollingstart = GetTickCount();
-	while(m_RenderingSilence != (silence ? 1 : 0))
+	while(m_RenderingSilence != (silence ? 1u : 0u))
 	{
 		if(GetTickCount() - pollingstart > 250)
 		{
