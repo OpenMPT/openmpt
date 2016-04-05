@@ -36,22 +36,6 @@ ComponentBase::~ComponentBase()
 }
 
 
-ComponentLibrary::ComponentLibrary(ComponentType type)
-//----------------------------------------------------
-	: ComponentBase(type)
-	, m_BindFailed(false)
-{
-	return;
-}
-
-
-ComponentLibrary::~ComponentLibrary()
-//-----------------------------------
-{
-	return;
-}
-
-
 void ComponentBase::SetInitialized()
 //----------------------------------
 {
@@ -110,6 +94,22 @@ void ComponentBase::Initialize()
 
 
 #if defined(MPT_ENABLE_DYNBIND)
+
+
+ComponentLibrary::ComponentLibrary(ComponentType type)
+//----------------------------------------------------
+	: ComponentBase(type)
+	, m_BindFailed(false)
+{
+	return;
+}
+
+
+ComponentLibrary::~ComponentLibrary()
+//-----------------------------------
+{
+	return;
+}
 
 
 bool ComponentLibrary::AddLibrary(const std::string &libName, const mpt::LibraryPath &libPath)
