@@ -65,7 +65,7 @@
  * | openmpt_module_create() with seekable stream   | <p style="background-color:red"   >slow  </p> | <p style="background-color:green" >low   </p> |
  * | openmpt_module_create() with unseekable stream | <p style="background-color:yellow">medium</p> | <p style="background-color:red"   >high  </p> |
  *
- * In all cases, the data or stream passend to the create function is no longer
+ * In all cases, the data or stream passed to the create function is no longer
  * needed after the the openmpt_module has been created and can be freed by the
  * caller.
  *

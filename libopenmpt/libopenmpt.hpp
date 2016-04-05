@@ -69,7 +69,7 @@
  * | seekable stream   | <p style="background-color:red"   >slow  </p> | <p style="background-color:green" >low   </p> |
  * | unseekable stream | <p style="background-color:yellow">medium</p> | <p style="background-color:red"   >high  </p> |
  *
- * In all cases, the data or stream passend to the constructor is no longer
+ * In all cases, the data or stream passed to the constructor is no longer
  * needed after the openmpt::module has been constructed and can be destroyed
  * by the caller.
  *
