@@ -616,6 +616,9 @@
     <ClCompile Include="..\soundlib\plugins\dmo\DMOPlugin.cpp">
       <Filter>Source Files\soundlib\plugins\dmo</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\plugins\dmo\Gargle.cpp">
+      <Filter>Source Files\soundlib\plugins\dmo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1213,6 +1216,9 @@
       <Filter>Header Files\soundlib\plugins\dmo</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\plugins\dmo\DMOPlugin.h">
+      <Filter>Header Files\soundlib\plugins\dmo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\plugins\dmo\Gargle.h">
       <Filter>Header Files\soundlib\plugins\dmo</Filter>
     </ClInclude>
   </ItemGroup>

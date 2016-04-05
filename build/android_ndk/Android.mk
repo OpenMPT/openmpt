@@ -115,6 +115,7 @@ LOCAL_SRC_FILES := \
 	soundlib/plugins/DigiBoosterEcho.cpp \
 	soundlib/plugins/dmo/DMOPlugin.cpp \
 	soundlib/plugins/dmo/Echo.cpp \
+	soundlib/plugins/dmo/Gargle.cpp \
 	soundlib/plugins/dmo/ParamEq.cpp \
 	soundlib/plugins/PluginManager.cpp \
 	soundlib/plugins/PlugInterface.cpp \

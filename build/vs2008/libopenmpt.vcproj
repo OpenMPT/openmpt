@@ -1433,6 +1433,14 @@
 						>
 					</File>
 					<File
+						RelativePath="..\..\soundlib\plugins\dmo\Gargle.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\soundlib\plugins\dmo\Gargle.h"
+						>
+					</File>
+					<File
 						RelativePath="..\..\soundlib\plugins\dmo\ParamEq.cpp"
 						>
 					</File>
