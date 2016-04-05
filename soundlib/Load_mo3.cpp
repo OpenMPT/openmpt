@@ -923,7 +923,11 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			|| ReadM15(unpackedFile, loadFlags);
 		if(result)
 		{
-			AddToLog(LogNotification, MPT_USTRING("Loading MO3 file used Un4seen unmo3."));
+			#ifdef MODPLUG_TRACKER
+				AddToLog(LogNotification, MPT_USTRING("Loading MO3 file used Un4seen unmo3."));
+			#else
+				AddToLog(LogWarning, MPT_USTRING("Loading MO3 file used Un4seen unmo3. Un4seen unmo3 support is deprecated in libopenmpt and will be removed in favour of the built-in decoder on 2018-01-01."));
+			#endif
 			m_ContainerType = MOD_CONTAINERTYPE_MO3;
 		}
 
