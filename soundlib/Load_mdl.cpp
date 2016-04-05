@@ -316,7 +316,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 
 	uint32 dwMemPos, dwPos, blocklen, dwTrackPos;
 	const MDLInfoBlock *pmib;
-	uint32 i,j, norders = 0, npatterns = 0, ntracks = 0;
+	uint32 j, norders = 0, npatterns = 0, ntracks = 0;
 	uint32 ninstruments = 0, nsamples = 0;
 	uint16 block;
 	uint16 patterntracks[MAX_PATTERNS*32];
@@ -359,6 +359,8 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		#ifdef MDL_LOG
 			Log("infoblock: %d bytes\n", blocklen);
 		#endif
+			if(blocklen < sizeof(MDLInfoBlock) - 256)
+				return false;
 			pmib = (const MDLInfoBlock *)(lpStream+dwMemPos);
 			mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, pmib->songname);
 			{
@@ -368,13 +370,15 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			norders = pmib->norders;
-			if (norders > MAX_ORDERS) norders = MAX_ORDERS;
+			LimitMax(norders, ORDERINDEX_MAX);
+			LimitMax(norders, blocklen - (sizeof(MDLInfoBlock) - 256));
+			
 			Order.SetRestartPos(pmib->repeatpos);
 			m_nDefaultGlobalVolume = pmib->globalvol;
 			m_nDefaultTempo.Set(pmib->tempo);
 			m_nDefaultSpeed = pmib->speed;
 			m_nChannels = 4;
-			for (i=0; i<32; i++)
+			for (uint8 i=0; i<32; i++)
 			{
 				ChnSettings[i].Reset();
 				ChnSettings[i].nPan = (pmib->channelinfo[i] & 0x7F) << 1;
@@ -400,13 +404,15 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		#ifdef MDL_LOG
 			Log("pattern data: %d bytes\n", blocklen);
 		#endif
+			if(!blocklen)
+				break;
 			npatterns = lpStream[dwMemPos];
 			if (npatterns > MAX_PATTERNS) npatterns = MAX_PATTERNS;
 			dwPos = dwMemPos + 1;
 
 			patternLength.assign(npatterns, 64);
 
-			for (i=0; i<npatterns; i++)
+			for (uint32 i=0; i<npatterns; i++)
 			{
 				const_unaligned_ptr_le<uint16> pdata;
 				uint32 ch;
@@ -449,12 +455,17 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		#ifdef MDL_LOG
 			Log("instruments: %d bytes\n", blocklen);
 		#endif
+			if(!blocklen)
+				break;
 			ninstruments = lpStream[dwMemPos];
 			dwPos = dwMemPos+1;
-			for (i=0; i<ninstruments; i++)
+			for (uint32 remain = blocklen - 1, i=0; i<ninstruments && remain > 2; i++)
 			{
 				uint32 nins = lpStream[dwPos];
 				if ((nins >= MAX_INSTRUMENTS) || (!nins)) break;
+				uint32 insLength = 34u + 14u * lpStream[dwPos + 1];
+				if(remain < insLength)
+					break;
 				if (m_nInstruments < nins) m_nInstruments = nins;
 				if (!Instruments[nins])
 				{
@@ -506,7 +517,8 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 							pIns->nFadeOut = 8192;
 					}
 				}
-				dwPos += 34 + 14 * lpStream[dwPos + 1];
+				remain -= insLength;
+				dwPos += insLength;
 			}
 			for (j=1; j<=m_nInstruments; j++) if (!Instruments[j])
 			{
@@ -544,7 +556,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		#endif
 			nsamples = std::min<uint32>(lpStream[dwMemPos], blocklen / ((pmsh.version > 0) ? sizeof(MDLSampleHeader) : sizeof(MDLSampleHeaderv0)));
 			dwPos = dwMemPos + 1;
-			for (i = 0; i < nsamples; i++, dwPos += (pmsh.version > 0) ? sizeof(MDLSampleHeader) : sizeof(MDLSampleHeaderv0))
+			for (uint32 i = 0; i < nsamples; i++, dwPos += (pmsh.version > 0) ? sizeof(MDLSampleHeader) : sizeof(MDLSampleHeaderv0))
 			{
 				const MDLSampleHeaderCommon *info = reinterpret_cast<const MDLSampleHeaderCommon *>(lpStream + dwPos);
 				if(!IsInRange(info->sampleIndex, 1, MAX_SAMPLES-1))
@@ -630,7 +642,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 				break;
 			}
 			dwPos = dwMemPos;
-			for (i=1; i<=m_nSamples; i++) if ((Samples[i].nLength) && (!Samples[i].pSample) && (smpinfo[i] != 3) && (dwPos < dwMemLength))
+			for (uint32 i=1; i<=m_nSamples; i++) if ((Samples[i].nLength) && (!Samples[i].pSample) && (smpinfo[i] != 3) && (dwPos < dwMemLength))
 			{
 				ModSample &sample = Samples[i];
 				SampleIO sampleIO(
