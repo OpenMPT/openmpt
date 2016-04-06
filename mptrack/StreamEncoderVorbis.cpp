@@ -208,12 +208,14 @@ private:
 		ogg_packet header_code;
 		vorbis.vorbis_analysis_headerout(&vd, &vc, &header, &header_comm, &header_code);
 		ogg_stream_packetin(&os, &header);
+		while(ogg_stream_flush(&os, &og))
+		{
+			WritePage();
+		}
 		ogg_stream_packetin(&os, &header_comm);
 		ogg_stream_packetin(&os, &header_code);
-		while(true)
+		while(ogg_stream_flush(&os, &og))
 		{
-			int gotPage = ogg_stream_flush(&os, &og);
-			if(!gotPage) break;
 			WritePage();
 		}
 		started = true;
@@ -236,13 +238,13 @@ private:
 				while(vorbis.vorbis_bitrate_flushpacket(&vd, &op))
 				{
 					ogg_stream_packetin(&os, &op);
-					while(true)
+					while(ogg_stream_flush(&os, &og))
 					{
-						int gotPage = ogg_stream_flush(&os, &og);
-						if(!gotPage) break;
 						WritePage();
 						if(ogg_page_eos(&og))
+						{
 							break;
+						}
 					}
 				}
 			}
@@ -367,10 +369,8 @@ public:
 				while(vorbis.vorbis_bitrate_flushpacket(&vd, &op))
 				{
 					ogg_stream_packetin(&os, &op);
-					while(true)
+					while(ogg_stream_pageout(&os, &og))
 					{
-						int gotPage = ogg_stream_pageout(&os, &og);
-						if(!gotPage) break;
 						WritePage();
 					}
 				}
