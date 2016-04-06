@@ -2862,13 +2862,13 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 #endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 
 class ComponentMPG123
-#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
+#if defined(MPT_WITH_MPG123)
+	: public ComponentBuiltin
+#elif defined(MPT_ENABLE_MPG123_DYNBIND)
 	: public ComponentLibrary
-#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
+#endif
 {
-#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
 	MPT_DECLARE_COMPONENT_MEMBERS
-#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 public:
 
 	int (*mpg123_init )(void);
@@ -2914,37 +2914,30 @@ public:
 	}
 
 public:
-#if defined(MPT_WITH_MPG123)
-	bool initialized;
 	ComponentMPG123()
-		: initialized(false)
-	{
-		#define MPT_GLOBAL_BIND(lib, name) name = &::name;
-			MPT_GLOBAL_BIND("mpg123", mpg123_init);
-			MPT_GLOBAL_BIND("mpg123", mpg123_exit);
-			MPT_GLOBAL_BIND("mpg123", mpg123_new);
-			MPT_GLOBAL_BIND("mpg123", mpg123_delete);
-			MPT_GLOBAL_BIND("mpg123", mpg123_param);
-			MPT_GLOBAL_BIND("mpg123", mpg123_open_handle);
-			MPT_GLOBAL_BIND("mpg123", mpg123_replace_reader_handle);
-			MPT_GLOBAL_BIND("mpg123", mpg123_read);
-			MPT_GLOBAL_BIND("mpg123", mpg123_getformat);
-			MPT_GLOBAL_BIND("mpg123", mpg123_scan);
-			MPT_GLOBAL_BIND("mpg123", mpg123_length);
-		#undef MPT_GLOBAL_BIND
-		initialized = (mpg123_init() == 0);
-	}
-	virtual ~ComponentMPG123()
-	{
-		if(initialized)
-		{
-			mpg123_exit();
-		}
-	}
+#if defined(MPT_WITH_MPG123)
+		: ComponentBuiltin()
 #elif defined(MPT_ENABLE_MPG123_DYNBIND)
-	ComponentMPG123() : ComponentLibrary(ComponentTypeForeign) { }
+		: ComponentLibrary(ComponentTypeForeign)
+#endif
+	{
+		return;
+	}
 	bool DoInitialize()
 	{
+#if defined(MPT_WITH_MPG123)
+		MPT_GLOBAL_BIND("mpg123", mpg123_init);
+		MPT_GLOBAL_BIND("mpg123", mpg123_exit);
+		MPT_GLOBAL_BIND("mpg123", mpg123_new);
+		MPT_GLOBAL_BIND("mpg123", mpg123_delete);
+		MPT_GLOBAL_BIND("mpg123", mpg123_param);
+		MPT_GLOBAL_BIND("mpg123", mpg123_open_handle);
+		MPT_GLOBAL_BIND("mpg123", mpg123_replace_reader_handle);
+		MPT_GLOBAL_BIND("mpg123", mpg123_read);
+		MPT_GLOBAL_BIND("mpg123", mpg123_getformat);
+		MPT_GLOBAL_BIND("mpg123", mpg123_scan);
+		MPT_GLOBAL_BIND("mpg123", mpg123_length);
+#elif defined(MPT_ENABLE_MPG123_DYNBIND)
 		AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libmpg123-0")));
 		AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("libmpg123")));
 		AddLibrary("mpg123", mpt::LibraryPath::AppFullName(MPT_PATHSTRING("mpg123-0")));
@@ -2964,6 +2957,7 @@ public:
 		{
 			return false;
 		}
+#endif
 		if(mpg123_init() != 0)
 		{
 			return false;
@@ -2977,11 +2971,8 @@ public:
 			mpg123_exit();
 		}
 	}
-#endif // MPT_WITH_MPG123
 };
-#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
 MPT_REGISTERED_COMPONENT(ComponentMPG123, "Mpg123")
-#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 
 #endif // MPT_WITH_MPG123 || MPT_ENABLE_MPG123_DYNBIND
 
@@ -3104,20 +3095,11 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 
 #elif defined(MPT_WITH_MPG123) || defined(MPT_ENABLE_MPG123_DYNBIND)
 
-#if defined(MPT_WITH_MPG123)
-	ComponentMPG123 mpg123_;
-	ComponentMPG123 *mpg123 = &mpg123_;
-	if(!mpg123->initialized)
-	{
-		return false;
-	}
-#elif defined(MPT_ENABLE_MPG123_DYNBIND)
 	ComponentHandle<ComponentMPG123> mpg123;
 	if(!IsComponentAvailable(mpg123))
 	{
 		return false;
 	}
-#endif // MPT_WITH_MPG123
 
 	mpg123_handle *mh;
 	int err;
