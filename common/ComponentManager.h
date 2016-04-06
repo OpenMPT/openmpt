@@ -18,9 +18,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MPT_ENABLE_DYNBIND)
 #define MPT_ENABLE_COMPONENTS
-#endif
 
 
 #if defined(MPT_ENABLE_COMPONENTS)
@@ -129,6 +127,9 @@ public:
 		return true;
 	}
 };
+
+
+#define MPT_GLOBAL_BIND(lib, name) name = &::name;
 
 
 #if defined(MPT_ENABLE_DYNBIND)

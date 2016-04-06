@@ -66,13 +66,13 @@ OPENMPT_NAMESPACE_BEGIN
 #if defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND)
 
 class ComponentUnMO3
-#if defined(MPT_ENABLE_DYNBIND)
+#if defined(MPT_ENABLE_UNMO3)
+	: public ComponentBuiltin
+#elif defined(MPT_ENABLE_UNMO3_DYNBIND)
 	: public ComponentLibrary
-#endif // MPT_ENABLE_DYNBIND
+#endif
 {
-#if defined(MPT_ENABLE_DYNBIND)
 	MPT_DECLARE_COMPONENT_MEMBERS
-#endif // MPT_ENABLE_DYNBIND
 public:
 	uint32 (UNMO3_API * UNMO3_GetVersion)();
 	// Decode a MO3 file (returns the same "exit codes" as UNMO3.EXE, eg. 0=success)
@@ -89,23 +89,23 @@ public:
 	}
 public:
 	ComponentUnMO3()
-#if defined(MPT_ENABLE_DYNBIND)
+#if defined(MPT_ENABLE_UNMO3)
+		: ComponentBuiltin()
+#elif defined(MPT_ENABLE_UNMO3_DYNBIND)
 		: ComponentLibrary(ComponentTypeForeign)
-#endif // MPT_ENABLE_DYNBIND
+#endif
 	{
-#if !defined(MPT_ENABLE_DYNBIND)
-		DoInitialize();
-#endif // !MPT_ENABLE_DYNBIND
+		return;
 	}
 	bool DoInitialize()
 	{
-#if !defined(MPT_ENABLE_UNMO3_DYNBIND)
+#if defined(MPT_ENABLE_UNMO3)
 		UNMO3_GetVersion = &(::UNMO3_GetVersion);
 		UNMO3_Free = &(::UNMO3_Free);
 		UNMO3_Decode_Old = nullptr;
 		UNMO3_Decode_New = &(::UNMO3_Decode);
 		return true;
-#else
+#elif defined(MPT_ENABLE_UNMO3_DYNBIND)
 		AddLibrary("unmo3", mpt::LibraryPath::App(MPT_PATHSTRING("unmo3")));
 		MPT_COMPONENT_BIND("unmo3", UNMO3_Free);
 		if(MPT_COMPONENT_BIND_OPTIONAL("unmo3", UNMO3_GetVersion))
@@ -122,9 +122,7 @@ public:
 #endif
 	}
 };
-#if defined(MPT_ENABLE_DYNBIND)
 MPT_REGISTERED_COMPONENT(ComponentUnMO3, "UnMO3")
-#endif // MPT_ENABLE_DYNBIND
 
 #endif // MPT_WITH_UNMO3 || MPT_ENABLE_UNMO3_DYNBIND
 
@@ -889,14 +887,8 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	if(shouldUseUnmo3)
 	{
 	// Try to load unmo3 dynamically.
-#if defined(MPT_ENABLE_DYNBIND)
 	ComponentHandle<ComponentUnMO3> unmo3;
 	if(IsComponentAvailable(unmo3))
-#else // !MPT_ENABLE_DYNBIND
-	ComponentUnMO3 unmo3_;
-	ComponentUnMO3 *unmo3 = &unmo3_;
-	MPT_CONSTANT_IF(true)
-#endif // MPT_ENABLE_DYNBIND
 	{
 		file.Rewind();
 		FileReader::PinnedRawDataView fileView = file.GetPinnedRawDataView();
