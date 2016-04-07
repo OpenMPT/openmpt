@@ -76,6 +76,21 @@ extern "C" {
 OPENMPT_NAMESPACE_BEGIN
 
 
+static mpt::ustring GetSampleNameFromTags(const FileTags &tags)
+//-------------------------------------------------------------
+{
+	mpt::ustring result;
+	if(tags.artist.empty())
+	{
+		result = tags.title;
+	} else
+	{
+		result = mpt::String::Print(MPT_USTRING("%1 (by %2)"), tags.title, tags.artist);
+	}
+	return result;
+}
+
+
 bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize, bool includeInstrumentFormats)
 //--------------------------------------------------------------------------------------------------------------------------
 {
@@ -3539,13 +3554,7 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	mptMFSafeRelease(&partialType);
 	mptMFSafeRelease(&sourceReader);
 
-	if(tags.artist.empty())
-	{
-		sampleName = mpt::ToCharset(GetCharsetLocaleOrModule(), tags.title);
-	} else
-	{
-		sampleName = mpt::String::Print("%1 (by %2)", mpt::ToCharset(GetCharsetLocaleOrModule(), tags.title), mpt::ToCharset(GetCharsetLocaleOrModule(), tags.artist));
-	}
+	sampleName = mpt::ToCharset(GetCharsetLocaleOrModule(), GetSampleNameFromTags(tags));
 
 	SmpLength length = rawData.size() / numChannels / (bitsPerSample/8);
 
