@@ -337,10 +337,6 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// "SONG" - Subsong information (channel count etc)
 	std::vector<FileReader> songChunks = chunks.GetAllChunks(PSMChunk::idSONG);
-	if(songChunks.empty())
-	{
-		return false;
-	}
 
 	for(std::vector<FileReader>::iterator subsongIter = songChunks.begin(); subsongIter != songChunks.end(); subsongIter++)
 	{
@@ -576,8 +572,11 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		// attach this subsong to the subsong list - finally, all "sub sub sub ..." chunks are parsed.
-		subsongs.push_back(subsong);
+		if(subsong.startOrder != ORDERINDEX_INVALID && subsong.endOrder != ORDERINDEX_INVALID)
+			subsongs.push_back(subsong);
 	}
+	if(subsongs.empty())
+		return false;
 
 	// DSMP - Samples
 	if(loadFlags & loadSampleData)
@@ -895,13 +894,14 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		// write subsong "configuration" to patterns (only if there are multiple subsongs)
 		for(size_t i = 0; i < subsongs.size(); i++)
 		{
-			PATTERNINDEX startPattern = Order[subsongs[i].startOrder], endPattern = Order[subsongs[i].endOrder];
+			const PSMSubSong &subsong = subsongs[i];
+			PATTERNINDEX startPattern = Order[subsong.startOrder], endPattern = Order[subsong.endOrder];
 			if(startPattern == PATTERNINDEX_INVALID || endPattern == PATTERNINDEX_INVALID) continue; // what, invalid subtune?
 
 			// set the subsong name to all pattern names
 			for(PATTERNINDEX pat = startPattern; pat <= endPattern; pat++)
 			{
-				Patterns[pat].SetName(subsongs[i].songName);
+				Patterns[pat].SetName(subsong.songName);
 			}
 
 			// subsongs with different panning setup -> write to pattern (MUSIC_C.PSM)
@@ -909,23 +909,23 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 				{
-					if(subsongs[i].channelSurround[chn])
+					if(subsong.channelSurround[chn])
 					{
 						Patterns[startPattern].WriteEffect(EffectWriter(CMD_S3MCMDEX, 0x91).Row(0).Channel(chn).Retry(EffectWriter::rmTryNextRow));
 					} else
 					{
-						Patterns[startPattern].WriteEffect(EffectWriter(CMD_PANNING8, subsongs[i].channelPanning[chn]).Row(0).Channel(chn).Retry(EffectWriter::rmTryNextRow));
+						Patterns[startPattern].WriteEffect(EffectWriter(CMD_PANNING8, subsong.channelPanning[chn]).Row(0).Channel(chn).Retry(EffectWriter::rmTryNextRow));
 					}
 				}
 			}
 			// write default tempo/speed to pattern
-			Patterns[startPattern].WriteEffect(EffectWriter(CMD_SPEED, subsongs[i].defaultSpeed).Row(0).Retry(EffectWriter::rmTryNextRow));
-			Patterns[startPattern].WriteEffect(EffectWriter(CMD_TEMPO, subsongs[i].defaultTempo).Row(0).Retry(EffectWriter::rmTryNextRow));
+			Patterns[startPattern].WriteEffect(EffectWriter(CMD_SPEED, subsong.defaultSpeed).Row(0).Retry(EffectWriter::rmTryNextRow));
+			Patterns[startPattern].WriteEffect(EffectWriter(CMD_TEMPO, subsong.defaultTempo).Row(0).Retry(EffectWriter::rmTryNextRow));
 
 			// don't write channel volume for now, as it's always set to 100% anyway
 
 			// there's a restart pos, so let's try to insert a Bxx command in the last pattern
-			if(subsongs[i].restartPos != ORDERINDEX_INVALID)
+			if(subsong.restartPos != ORDERINDEX_INVALID)
 			{
 				ROWINDEX lastRow = Patterns[endPattern].GetNumRows() - 1;
 				ModCommand *m;
@@ -938,7 +938,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 					}
 				}
-				Patterns[endPattern].WriteEffect(EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(subsongs[i].restartPos)).Row(lastRow).Retry(EffectWriter::rmTryPreviousRow));
+				Patterns[endPattern].WriteEffect(EffectWriter(CMD_POSITIONJUMP, static_cast<ModCommand::PARAM>(subsong.restartPos)).Row(lastRow).Retry(EffectWriter::rmTryPreviousRow));
 			}
 		}
 	}
