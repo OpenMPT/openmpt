@@ -76,6 +76,8 @@ extern "C" {
 OPENMPT_NAMESPACE_BEGIN
 
 
+#if defined(MPT_WITH_MEDIAFOUNDATION)
+
 static mpt::ustring GetSampleNameFromTags(const FileTags &tags)
 //-------------------------------------------------------------
 {
@@ -89,6 +91,8 @@ static mpt::ustring GetSampleNameFromTags(const FileTags &tags)
 	}
 	return result;
 }
+
+#endif // MPT_WITH_MEDIAFOUNDATION 
 
 
 bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize, bool includeInstrumentFormats)
