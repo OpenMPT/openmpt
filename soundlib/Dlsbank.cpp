@@ -1514,36 +1514,6 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, uint8 **ppWave, uint32 
 }
 
 
-// returns 12*128*log2(freq/8363)+midiftune*(128/100)
-static int DlsFreqToTranspose(uint32 freq, int nMidiFTune)
-//--------------------------------------------------------
-{
-	if (!freq) return 0;
-#ifdef ENABLE_X86
-	const float _f1_8363 = 1.0f / 8363.0f;
-	const float _factor = 128 * 12;
-	const float _fct_100 = 128.0f / 100.0f;
-	int result;
-
-	_asm {
-	fild nMidiFTune
-	fld _fct_100
-	fmulp st(1), st(0)
-	fld _factor
-	fild freq
-	fld _f1_8363
-	fmulp st(1), st(0)
-	fyl2x
-	faddp st(1), st(0)
-	fistp result
-	}
-	return result;
-#else
-	return Util::Round<int>((12 * 128) * log(freq * (1.0f / 8363.0f)) / log(2.0f) + nMidiFTune * (128.0f / 100.0f));
-#endif // ENABLE_X86
-}
-
-
 bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nIns, uint32 nRgn, int transpose)
 //-------------------------------------------------------------------------------------------------------------
 {
@@ -1660,14 +1630,10 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 			Log("WSMP: usUnityNote=%d.%d, %dHz (transp=%d)\n", usUnityNote, sFineTune, sample.nC5Speed, transpose);
 		#endif
 			if (usUnityNote > 0x7F) usUnityNote = 60;
-			int nBaseTune = DlsFreqToTranspose(
-								sample.nC5Speed,
-								sFineTune+(60 + transpose - usUnityNote)*100);
-			sample.nFineTune = static_cast<int8>(nBaseTune & 0x7F);
-			sample.RelativeTone = mpt::saturate_cast<int8>(nBaseTune >> 7);
-			sample.TransposeToFrequency();
-			if (lVolume > 256) lVolume = 256;
-			if (lVolume < 16) lVolume = 16;
+			int steps = (60 + transpose - usUnityNote) * 128 + sFineTune;
+			sample.nC5Speed = Util::Round<uint32>(std::pow(2.0f, steps * (1.0f / (12.0f * 128.0f))) * sample.nC5Speed);
+
+			Limit(lVolume, 16, 256);
 			sample.nGlobalVol = (uint8)(lVolume / 4);	// 0-64
 		}
 		sample.nPan = GetPanning(nIns, nRgn);
