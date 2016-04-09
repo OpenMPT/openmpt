@@ -76,7 +76,7 @@ extern "C" {
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MPT_WITH_MEDIAFOUNDATION)
+#if defined(MPT_WITH_MEDIAFOUNDATION) || defined(MPT_WITH_VORBISFILE)
 
 static mpt::ustring GetSampleNameFromTags(const FileTags &tags)
 //-------------------------------------------------------------
@@ -92,7 +92,7 @@ static mpt::ustring GetSampleNameFromTags(const FileTags &tags)
 	return result;
 }
 
-#endif // MPT_WITH_MEDIAFOUNDATION 
+#endif // MPT_WITH_MEDIAFOUNDATION || MPT_WITH_VORBISFILE
 
 
 bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize, bool includeInstrumentFormats)
@@ -2662,6 +2662,38 @@ static long VorbisfileFilereaderTell(void *datasource)
 	return file.GetPosition();
 }
 
+#if defined(MPT_WITH_VORBIS)
+static mpt::ustring UStringFromVorbis(const char *str)
+//----------------------------------------------------
+{
+	return str ? mpt::ToUnicode(mpt::CharsetUTF8, str) : mpt::ustring();
+}
+#endif // MPT_WITH_VORBIS
+
+static FileTags GetVorbisFileTags(OggVorbis_File &vf)
+//---------------------------------------------------
+{
+	FileTags tags;
+	#if defined(MPT_WITH_VORBIS)
+		vorbis_comment *vc = ov_comment(&vf, -1);
+		if(!vc)
+		{
+			return tags;
+		}
+		tags.encoder = UStringFromVorbis(vorbis_comment_query(vc, "ENCODER", 0));
+		tags.title = UStringFromVorbis(vorbis_comment_query(vc, "TITLE", 0));
+		tags.comments = UStringFromVorbis(vorbis_comment_query(vc, "DESCRIPTION", 0));
+		tags.bpm = UStringFromVorbis(vorbis_comment_query(vc, "BPM", 0)); // non-standard
+		tags.artist = UStringFromVorbis(vorbis_comment_query(vc, "ARTIST", 0));
+		tags.album = UStringFromVorbis(vorbis_comment_query(vc, "ALBUM", 0));
+		tags.trackno = UStringFromVorbis(vorbis_comment_query(vc, "TRACKNUMBER", 0));
+		tags.year = UStringFromVorbis(vorbis_comment_query(vc, "DATE", 0));
+		tags.url = UStringFromVorbis(vorbis_comment_query(vc, "CONTACT", 0));
+		tags.genre = UStringFromVorbis(vorbis_comment_query(vc, "GENRE", 0));
+	#endif // MPT_WITH_VORBIS
+	return tags;
+}
+
 #endif // MPT_WITH_VORBISFILE
 
 bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
@@ -2675,6 +2707,8 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 	int rate = 0;
 	int channels = 0;
 	std::vector<int16> raw_sample_data;
+
+	std::string sampleName;
 
 #endif // VORBIS
 
@@ -2697,6 +2731,7 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 			vorbis_info *vi = ov_info(&vf, -1);
 			if(vi && vi->rate > 0 && vi->channels > 0)
 			{
+				sampleName = mpt::ToCharset(GetCharsetLocaleOrModule(), GetSampleNameFromTags(GetVorbisFileTags(vf)));
 				rate = vi->rate;
 				channels = vi->channels;
 				std::size_t offset = 0;
@@ -2808,7 +2843,7 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 	}
 
 	DestroySampleThreadsafe(sample);
-	strcpy(m_szNames[sample], "");
+	mpt::String::Copy(m_szNames[sample], sampleName);
 	Samples[sample].Initialize();
 	Samples[sample].nC5Speed = rate;
 	Samples[sample].nLength = raw_sample_data.size() / channels;
