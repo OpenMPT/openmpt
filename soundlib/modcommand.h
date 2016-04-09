@@ -141,8 +141,8 @@ public:
 			&& (instr == mc.instr)
 			&& (volcmd == mc.volcmd)
 			&& (command == mc.command)
-			&& (volcmd == VOLCMD_NONE || vol == mc.vol)
-			&& (command == CMD_NONE || param == mc.param);
+			&& ((volcmd == VOLCMD_NONE && !IsPcNote()) || vol == mc.vol)
+			&& ((command == CMD_NONE && !IsPcNote()) || param == mc.param);
 	}
 	bool operator!=(const ModCommand& mc) const { return !(*this == mc); }
 
