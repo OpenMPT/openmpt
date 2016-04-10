@@ -20,6 +20,7 @@
 #include <mmsystem.h>
 #endif // !NO_DMO
 
+//#define DMO_FLOATING_POINT
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -247,6 +248,28 @@ void DMOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 {
 	m_mixBuffer.ClearOutputBuffers(numFrames);
 	REFERENCE_TIME startTime = Util::muldiv(m_SndFile.GetTotalSampleCount(), 10000000, m_nSamplesPerSec);
+#ifdef DMO_FLOATING_POINT
+	// Some plugins only have the same output characteristics in the floating point code path (compared to integer PCM)
+	// if we feed them input in the range [-32768, +32768] rather than the more usual [-1, +1].
+	float buffer[MIXBUFFERSIZE * 2];
+	float *p = buffer, *pLeft = m_mixBuffer.GetInputBuffer(0), *pRight = m_mixBuffer.GetInputBuffer(1);
+	for(uint32 i = 0; i < numFrames; i++)
+	{
+		*(p++) = *(pLeft++) * 32768.0f;
+		*(p++) = *(pRight++) * 32768.0f;
+	}
+	m_pMediaProcess->Process(numFrames * 2 * sizeof(float), reinterpret_cast<BYTE *>(buffer), startTime, DMO_INPLACE_NORMAL);
+	p = buffer;
+	pLeft = m_mixBuffer.GetOutputBuffer(0);
+	pRight = m_mixBuffer.GetOutputBuffer(1);
+	for(uint32 i = 0; i < numFrames; i++)
+	{
+		*(pLeft++) = *(p++) * (1.0f / 32768.0f);
+		*(pRight++) = *(p++) * (1.0f / 32768.0f);
+	}
+
+#else // DMO_FLOATING_POINT
+
 #ifdef ENABLE_SSE
 	if(GetProcSupport() & PROCSUPPORT_SSE)
 	{
@@ -260,6 +283,7 @@ void DMOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		m_pMediaProcess->Process(numFrames * 2 * sizeof(int16), reinterpret_cast<BYTE *>(m_pMixBuffer), startTime, DMO_INPLACE_NORMAL);
 		DeinterleaveInt16ToFloat(m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
 	}
+#endif
 
 	ProcessMixOps(pOutL, pOutR, m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
 }
@@ -351,11 +375,19 @@ void DMOPlugin::Resume()
 	mt.pUnk = nullptr;
 	mt.pbFormat = (LPBYTE)&wfx;
 	mt.cbFormat = sizeof(WAVEFORMATEX);
+#ifdef DMO_FLOATING_POINT
+	mt.lSampleSize = 2 * sizeof(float);
+	wfx.wFormatTag = 3; // WAVE_FORMAT_IEEE_FLOAT;
+	wfx.nChannels = 2;
+	wfx.nSamplesPerSec = m_nSamplesPerSec;
+	wfx.wBitsPerSample = sizeof(float) * 8;
+#else
 	mt.lSampleSize = 2 * sizeof(int16);
 	wfx.wFormatTag = WAVE_FORMAT_PCM;
 	wfx.nChannels = 2;
 	wfx.nSamplesPerSec = m_nSamplesPerSec;
 	wfx.wBitsPerSample = sizeof(int16) * 8;
+#endif
 	wfx.nBlockAlign = wfx.nChannels * (wfx.wBitsPerSample / 8);
 	wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
 	wfx.cbSize = 0;
