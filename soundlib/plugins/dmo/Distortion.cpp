@@ -1,6 +1,6 @@
 /*
  * Distortion.cpp
- * -----------
+ * --------------
  * Purpose: Implementation of the DMO Distortion DSP (for non-Windows platforms)
  * Notes  : The original plugin's integer and floating point code paths only
  *          behave identically when feeding floating point numbers in range
@@ -88,13 +88,7 @@ void Distortion::Process(float *pOutL, float *pOutR, uint32 numFrames)
 				intSample &= 0x7FFFFFFF;
 				edge++;
 			}
-			// Work out the magical shift factor
-			uint32 shift = 5;
-			if(m_edge <= 7)
-				shift = (-(3 - (3 + (3 < 3 + (3 < m_edge))))) + 2;
-			else if(m_edge <= 15)
-				shift = 4;
-			intSample = (edge << (31 - shift)) | (intSample >> shift);
+			intSample = (edge << (31 - m_shift)) | (intSample >> m_shift);
 			if(sign)
 				intSample = ~intSample | sign;
 			z = static_cast<float>(static_cast<int32>(intSample));
@@ -194,7 +188,7 @@ CString Distortion::GetParamDisplay(PlugParamIndex param)
 	case kDistPreLowpassCutoff:
 	case kDistPostEQCenterFrequency:
 	case kDistPostEQBandwidth:
-		value = FreqInHertz(m_param[param]);
+		value = FreqInHertz(value);
 		break;
 	}
 	CString s;
@@ -214,8 +208,17 @@ void Distortion::RecalculateDistortionParams()
 
 	// Distortion
 	float edge = 2.0f + m_param[kDistEdge] * 29.0f;
-	m_edge = static_cast<uint32>(edge);
-	Limit(m_edge, 0u, 31u);
+	m_edge = static_cast<uint8>(edge);	// 2...31 shifted bits
+
+	// Work out the magical shift factor
+	if(m_edge <= 3)
+		m_shift = 2;
+	else if(m_edge <= 7)
+		m_shift = 3;
+	else if(m_edge <= 15)
+		m_shift = 4;
+	else
+		m_shift = 5;
 
 	static const double LogNorm[32] =
 	{
