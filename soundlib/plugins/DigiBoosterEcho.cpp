@@ -74,8 +74,8 @@ void DigiBoosterEcho::Process(float *pOutL, float *pOutR, uint32 numFrames)
 			m_writePos = 0;
 
 		// Output samples now
-		*pOutL++ += (l * m_NMix + lDelay * m_PMix);
-		*pOutR++ += (r * m_NMix + rDelay * m_PMix);
+		*outL++ = (l * m_NMix + lDelay * m_PMix);
+		*outR++ = (r * m_NMix + rDelay * m_PMix);
 	}
 
 	ProcessMixOps(pOutL, pOutR, m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
