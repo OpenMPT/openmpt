@@ -8,7 +8,7 @@
  */
 
 
-#if !defined(NO_PLUGINS) //&& defined(NO_DMO)
+#if !defined(NO_PLUGINS) && defined(NO_DMO)
 
 #include "../PlugInterface.h"
 
@@ -39,7 +39,7 @@ protected:
 	float m_preEQz1[2], m_preEQb1, m_preEQa0;
 	// Post-EQ coefficients
 	float m_postEQz1[2], m_postEQz2[2], m_postEQa0, m_postEQb0, m_postEQb1;
-	uint32 m_edge;
+	uint8 m_edge, m_shift;
 
 public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
@@ -108,7 +108,6 @@ public:
 protected:
 	static float FreqInHertz(float param) { return 100.0f + param * 7900.0f; }
 	float GainInDecibel() const { return -60.0f + m_param[kDistGain] * 60.0f; }
-	float BandwidthInSemitones() const { return 1.0f + m_param[kDistPostEQBandwidth] * 35.0f; }	// TODO
 	void RecalculateDistortionParams();
 };
 
