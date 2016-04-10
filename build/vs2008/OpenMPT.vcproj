@@ -2808,14 +2808,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\soundlib\plugins\Distortion.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\soundlib\plugins\Distortion.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\soundlib\plugins\OpCodes.h"
 					>
 				</File>
@@ -2861,102 +2853,6 @@
 					<File
 						RelativePath="..\..\soundlib\plugins\dmo\Distortion.cpp"
 						>
-						<FileConfiguration
-							Name="Debug|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)\Distortion1.obj"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug|x64"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)\Distortion1.obj"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)\Distortion1.obj"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|x64"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)\Distortion1.obj"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugMDd|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)\Distortion1.obj"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugMDd|x64"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)\Distortion1.obj"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="ReleaseLTCG|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)\Distortion1.obj"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="ReleaseLTCG|x64"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)\Distortion1.obj"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugShared|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)\Distortion1.obj"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="DebugShared|x64"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)\Distortion1.obj"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="ReleaseShared|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)\Distortion1.obj"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="ReleaseShared|x64"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)\Distortion1.obj"
-							/>
-						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\..\soundlib\plugins\dmo\Distortion.h"
