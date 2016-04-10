@@ -273,6 +273,9 @@
     <ClInclude Include="..\..\soundlib\plugins\DigiBoosterEcho.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\Distortion.h">
+      <Filter>soundlib\plugins</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\OpCodes.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
@@ -292,6 +295,9 @@
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\dmo\DMOPlugin.h">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Distortion.h">
       <Filter>soundlib\plugins\dmo</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\dmo\Echo.h">
@@ -596,6 +602,9 @@
     <ClCompile Include="..\..\soundlib\plugins\DigiBoosterEcho.cpp">
       <Filter>soundlib\plugins</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\Distortion.cpp">
+      <Filter>soundlib\plugins</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\PlugInterface.cpp">
       <Filter>soundlib\plugins</Filter>
     </ClCompile>
@@ -603,6 +612,9 @@
       <Filter>soundlib\plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\DMOPlugin.cpp">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Distortion.cpp">
       <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\Echo.cpp">

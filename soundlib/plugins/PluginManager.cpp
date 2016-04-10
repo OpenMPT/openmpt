@@ -17,6 +17,7 @@
 #include "PlugInterface.h"
 #include "DigiBoosterEcho.h"
 #include "dmo/DMOPlugin.h"
+#include "dmo/Distortion.h"
 #include "dmo/Echo.h"
 #include "dmo/Gargle.h"
 #include "dmo/ParamEq.h"
@@ -46,6 +47,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 //#define VST_LOG
+//#define DMO_LOG
 
 #ifndef NO_DMO
 #define DMO_LOG
@@ -156,6 +158,15 @@ CVstPluginManager::CVstPluginManager()
 
 #ifdef NO_DMO
 	// DirectX Media Objects Emulation
+	plug = new (std::nothrow) VSTPluginLib(DMO::Distortion::Create, MPT_PATHSTRING("{EF114C90-CD1D-484E-96E5-09CFAF912A21}"), MPT_PATHSTRING("Distortion"), mpt::ustring());
+	if(plug != nullptr)
+	{
+		pluginList.push_back(plug);
+		plug->pluginId1 = kDmoMagic;
+		plug->pluginId2 = 0xEF114C90;
+		plug->category = VSTPluginLib::catDMO;
+	}
+
 	plug = new (std::nothrow) VSTPluginLib(DMO::Echo::Create, MPT_PATHSTRING("{EF3E932C-D40B-4F51-8CCF-3F98F1B29D5D}"), MPT_PATHSTRING("Echo"), mpt::ustring());
 	if(plug != nullptr)
 	{

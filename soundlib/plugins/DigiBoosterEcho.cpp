@@ -39,8 +39,9 @@ void DigiBoosterEcho::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //-------------------------------------------------------------------------
 {
 	const float *srcL = m_mixBuffer.GetInputBuffer(0), *srcR = m_mixBuffer.GetInputBuffer(1);
+	float *outL = m_mixBuffer.GetOutputBuffer(0), *outR = m_mixBuffer.GetOutputBuffer(1);
 
-	while(numFrames--)
+	for(uint32 i = numFrames; i != 0; i--)
 	{
 		int readPos = m_writePos - m_delayTime;
 		if(readPos < 0)
@@ -76,6 +77,8 @@ void DigiBoosterEcho::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		*pOutL++ += (l * m_NMix + lDelay * m_PMix);
 		*pOutR++ += (r * m_NMix + rDelay * m_PMix);
 	}
+
+	ProcessMixOps(pOutL, pOutR, m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
 }
 
 

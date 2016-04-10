@@ -432,6 +432,7 @@
     <ClInclude Include="..\..\soundlib\pattern.h" />
     <ClInclude Include="..\..\soundlib\patternContainer.h" />
     <ClInclude Include="..\..\soundlib\plugins\DigiBoosterEcho.h" />
+    <ClInclude Include="..\..\soundlib\plugins\Distortion.h" />
     <ClInclude Include="..\..\soundlib\plugins\OpCodes.h" />
     <ClInclude Include="..\..\soundlib\plugins\PlugInterface.h" />
     <ClInclude Include="..\..\soundlib\plugins\PluginEventQueue.h" />
@@ -439,6 +440,7 @@
     <ClInclude Include="..\..\soundlib\plugins\PluginMixBuffer.h" />
     <ClInclude Include="..\..\soundlib\plugins\PluginStructs.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\DMOPlugin.h" />
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Distortion.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\Echo.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\Gargle.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\ParamEq.h" />
@@ -541,9 +543,20 @@
     <ClCompile Include="..\..\soundlib\pattern.cpp" />
     <ClCompile Include="..\..\soundlib\patternContainer.cpp" />
     <ClCompile Include="..\..\soundlib\plugins\DigiBoosterEcho.cpp" />
+    <ClCompile Include="..\..\soundlib\plugins\Distortion.cpp" />
     <ClCompile Include="..\..\soundlib\plugins\PlugInterface.cpp" />
     <ClCompile Include="..\..\soundlib\plugins\PluginManager.cpp" />
     <ClCompile Include="..\..\soundlib\plugins\dmo\DMOPlugin.cpp" />
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Distortion.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)\Distortion1.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)\Distortion1.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)\Distortion1.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)\Distortion1.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">$(IntDir)\Distortion1.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">$(IntDir)\Distortion1.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">$(IntDir)\Distortion1.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">$(IntDir)\Distortion1.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\Echo.cpp" />
     <ClCompile Include="..\..\soundlib\plugins\dmo\Gargle.cpp" />
     <ClCompile Include="..\..\soundlib\plugins\dmo\ParamEq.cpp" />
