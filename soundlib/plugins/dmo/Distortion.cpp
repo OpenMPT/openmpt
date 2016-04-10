@@ -2,12 +2,13 @@
  * Distortion.cpp
  * -----------
  * Purpose: Implementation of the DMO Distortion DSP (for non-Windows platforms)
- * Notes  : This emulates the 16-bit PCM code path of the Distortion plugin.
- *          It behaves somewhat differently than the floating-point code path.
- *          OpenMPT has always been using the integer code path, so it makes sense
- *          to emulate this instead. #define DMO_EMUALTE_FP_CODE to use the floating
- *          point code path instead. I'm not sure if this code path is actually supposed
- *          to make sense, since it doesn't distort.
+ * Notes  : The original plugin's integer and floating point code paths only
+ *          behave identically when feeding floating point numbers in range
+ *          [-32768, +32768] rather than the usual [-1, +1] into the plugin.
+ *          Since OpenMPT has always been using the integer code path, we emulate
+ *          the floating point path by scaling the input by a factor of 32768.
+ *          Internally, the input is scaled a second time by 32768, hence we
+ *          just combine these two into a single factor.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -15,11 +16,9 @@
 
 #include "stdafx.h"
 
-#if !defined(NO_PLUGINS) //&& defined(NO_DMO)
+#if !defined(NO_PLUGINS) && defined(NO_DMO)
 #include "../../Sndfile.h"
 #include "Distortion.h"
-
-//#define DMO_EMUALTE_FP_CODE
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -55,7 +54,7 @@ Distortion::Distortion(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 void Distortion::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //--------------------------------------------------------------------
 {
-	float *in[2] = { m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1) };
+	const float *in[2] = { m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1) };
 	float *out[2] = { m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1)};
 
 	for(uint32 i = numFrames; i != 0; i--)
@@ -68,11 +67,7 @@ void Distortion::Process(float *pOutL, float *pOutR, uint32 numFrames)
 			float z = x * m_preEQa0 + m_preEQz1[channel] * m_preEQb1;
 			m_preEQz1[channel] = z;
 
-#ifdef DMO_EMUALTE_FP_CODE
-			z *= 32768.0f;
-#else
 			z *= 1073741824.0f;	// 32768^2
-#endif
 
 			// Distortion
 			uint32 intSample = static_cast<uint32>(static_cast<int32>(z));
@@ -109,12 +104,7 @@ void Distortion::Process(float *pOutL, float *pOutR, uint32 numFrames)
 			m_postEQz1[channel] = z * m_postEQb0 + m_postEQz2[channel];
 			m_postEQz2[channel] = z;
 
-#ifdef DMO_EMUALTE_FP_CODE
-			z *= (1.0f / 32768.0f);
-#else
 			z *= (1.0f / 1073741824.0f);	// 32768^2
-			Limit(z, -1.0f, 1.0f);
-#endif
 			*(out[channel])++ = z;
 		}
 	}
