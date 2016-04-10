@@ -33,6 +33,11 @@ Gargle::Gargle(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStru
 	m_param[kGargleRate] = 0.02f;
 	m_param[kGargleWaveShape] = 0.0f;
 	RecalculateGargleParams();
+
+	m_mixBuffer.Initialize(2, 2);
+	m_MixState.pOutBufferL = m_mixBuffer.GetInputBuffer(0);
+	m_MixState.pOutBufferR = m_mixBuffer.GetInputBuffer(1);
+
 	InsertIntoFactoryList();
 }
 
@@ -40,60 +45,66 @@ Gargle::Gargle(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStru
 void Gargle::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //----------------------------------------------------------------
 {
-	float *inL = m_mixBuffer.GetInputBuffer(0), *inR = m_mixBuffer.GetInputBuffer(1);
+	const float *inL = m_mixBuffer.GetInputBuffer(0), *inR = m_mixBuffer.GetInputBuffer(1);
+	float *outL = m_mixBuffer.GetOutputBuffer(0), *outR = m_mixBuffer.GetOutputBuffer(1);
 	const bool triangle = m_param[kGargleWaveShape] < 1.0f;
 
-	while(numFrames > 0)
+	for(uint32 frame = numFrames; frame != 0;)
 	{
 		if(m_counter < m_periodHalf)
 		{
 			// First half of gargle period
-			const uint32 remain = std::min(numFrames, m_periodHalf - m_counter);
+			const uint32 remain = std::min(frame, m_periodHalf - m_counter);
 			if(triangle)
 			{
 				const uint32 stop = m_counter + remain;
 				const float factor = 1.0f / m_periodHalf;
 				for(uint32 i = m_counter; i < stop; i++)
 				{
-					*pOutL++ += *inL++ * i * factor;
-					*pOutR++ += *inR++ * i * factor;
+					*outL++ = *inL++ * i * factor;
+					*outR++ = *inR++ * i * factor;
 				}
 			} else
 			{
 				for(uint32 i = 0; i < remain; i++)
 				{
-					*pOutL++ += *inL++;
-					*pOutR++ += *inR++;
+					*outL++ = *inL++;
+					*outR++ = *inR++;
 				}
 			}
-			numFrames -= remain;
+			frame -= remain;
 			m_counter += remain;
 		} else
 		{
 			// Second half of gargle period
-			const uint32 remain = std::min(numFrames, m_period - m_counter);
+			const uint32 remain = std::min(frame, m_period - m_counter);
 			if(triangle)
 			{
 				const uint32 stop = m_period - m_counter - remain;
 				const float factor = 1.0f / m_periodHalf;
 				for(uint32 i = m_period - m_counter; i > stop; i--)
 				{
-					*pOutL++ += *inL++ * i * factor;
-					*pOutR++ += *inR++ * i * factor;
+					*outL++ = *inL++ * i * factor;
+					*outR++ = *inR++ * i * factor;
 				}
 			} else
 			{
-				pOutL += remain;
-				pOutR += remain;
+				for(uint32 i = 0; i < remain; i++)
+				{
+					*outL++ = 0;
+					*outR++ = 0;
+				}
 				inL += remain;
 				inR += remain;
 
 			}
-			numFrames -= remain;
+			frame -= remain;
 			m_counter += remain;
 			if(m_counter >= m_period) m_counter = 0;
 		}
 	}
+
+	ProcessMixOps(pOutL, pOutR, m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
 }
 
 

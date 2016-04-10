@@ -34,6 +34,11 @@ ParamEq::ParamEq(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixSt
 	m_param[kEqBandwidth] = 0.314286f;
 	m_param[kEqGain] = 0.5f;
 	RecalculateEqParams();
+
+	m_mixBuffer.Initialize(2, 2);
+	m_MixState.pOutBufferL = m_mixBuffer.GetInputBuffer(0);
+	m_MixState.pOutBufferR = m_mixBuffer.GetInputBuffer(1);
+
 	InsertIntoFactoryList();
 }
 
@@ -41,10 +46,10 @@ ParamEq::ParamEq(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixSt
 void ParamEq::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //-----------------------------------------------------------------
 {
-	float *in[2] = { m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1) };
-	float *out[2] = { pOutL, pOutR };
+	const float *in[2] = { m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1) };
+	float *out[2] = { m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1) };
 
-	while(numFrames--)
+	for(uint32 i = numFrames; i != 0; i--)
 	{
 		for(uint8 channel = 0; channel < 2; channel++)
 		{
@@ -56,9 +61,11 @@ void ParamEq::Process(float *pOutL, float *pOutR, uint32 numFrames)
 			y2[channel] = y1[channel];
 			y1[channel] = y;
 
-			*(out[channel])++ += y;
+			*(out[channel])++ = y;
 		}
 	}
+
+	ProcessMixOps(pOutL, pOutR, m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
 }
 
 
@@ -89,6 +96,12 @@ void ParamEq::Resume()
 //--------------------
 {
 	RecalculateEqParams();
+
+	// Reset filter state
+	x1[0] = x2[0] = 0;
+	x1[1] = x2[1] = 0;
+	y1[0] = y2[0] = 0;
+	y1[1] = y2[1] = 0;
 }
 
 
@@ -123,19 +136,21 @@ CString ParamEq::GetParamLabel(PlugParamIndex param)
 CString ParamEq::GetParamDisplay(PlugParamIndex param)
 //----------------------------------------------------
 {
-	CString s;
+	float value = 0.0f;
 	switch(param)
 	{
 	case kEqCenter:
-		s.Format("%.2f", FreqInHertz());
+		value = FreqInHertz();
 		break;
 	case kEqBandwidth:
-		s.Format("%.2f", BandwidthInSemitones());
+		value = BandwidthInSemitones();
 		break;
 	case kEqGain:
-		s.Format("%.2f", GainInDecibel());
+		value = GainInDecibel();
 		break;
 	}
+	CString s;
+	s.Format("%.2f", value);
 	return s;
 }
 
@@ -164,11 +179,6 @@ void ParamEq::RecalculateEqParams()
 	b2DIVa0 = b2 / a0;
 	a1DIVa0 = a1 / a0;
 	a2DIVa0 = a2 / a0;
-
-	x1[0] = x2[0] = 0;
-	x1[1] = x2[1] = 0;
-	y1[0] = y2[0] = 0;
-	y1[1] = y2[1] = 0;
 }
 
 } // namespace DMO
