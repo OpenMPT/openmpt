@@ -516,8 +516,8 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(sampleReserved == 0 && madeWith[verNewModPlug] && memchr(fileHeader.songName, '\0', sizeof(fileHeader.songName)) != nullptr)
 	{
-		// Null-terminated song name: Quite possibly MPT.
-		madeWith |= verConfirmed;
+		// Null-terminated song name: Quite possibly MPT. (could really be an MPT-made file resaved in FT2, though)
+		madeWith.set(verConfirmed);
 	}
 
 	if(fileHeader.version < 0x0104)
@@ -541,7 +541,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	if(file.ReadMagic("text"))
 	{
 		m_songMessage.Read(file, file.ReadUint32LE(), SongMessage::leCR);
-		madeWith |= verConfirmed;
+		madeWith.set(verConfirmed);
 	}
 	
 	// Read midi config: "MIDI"
@@ -550,7 +550,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		file.ReadStructPartial(m_MidiCfg, file.ReadUint32LE());
 		m_MidiCfg.Sanitize();
 		m_SongFlags |= SONG_EMBEDMIDICFG;
-		madeWith |= verConfirmed;
+		madeWith.set(verConfirmed);
 	}
 
 	// Read pattern names: "PNAM"
@@ -564,7 +564,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			file.ReadString<mpt::String::maybeNullTerminated>(patName, MAX_PATTERNNAME);
 			Patterns[pat].SetName(patName);
 		}
-		madeWith |= verConfirmed;
+		madeWith.set(verConfirmed);
 	}
 
 	// Read channel names: "CNAM"
@@ -575,7 +575,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			file.ReadString<mpt::String::maybeNullTerminated>(ChnSettings[chn].szName, MAX_CHANNELNAME);
 		}
-		madeWith |= verConfirmed;
+		madeWith.set(verConfirmed);
 	}
 
 	// Read mix plugins information
@@ -585,7 +585,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		LoadMixPlugins(file);
 		if(file.GetPosition() != oldPos)
 		{
-			madeWith |= verConfirmed;
+			madeWith.set(verConfirmed);
 		}
 	}
 
