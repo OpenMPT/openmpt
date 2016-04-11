@@ -33,8 +33,17 @@ protected:
 
 	uint32 m_nSamplesPerSec;
 	uint32 m_uid;
-	int16 *m_pMixBuffer;
-	int16 m_MixBuffer16[MIXBUFFERSIZE * 2 + 16];		// 16-bit Stereo interleaved
+	union
+	{
+		int16 *i16;
+		float *f32;
+	} m_alignedBuffer;
+	union
+	{
+		int16 i16[MIXBUFFERSIZE * 2 + 16];		// 16-bit PCM Stereo interleaved
+		float f32[MIXBUFFERSIZE * 2 + 16];		// 32-bit Float Stereo interleaved
+	} m_interleavedBuffer;
+	bool m_useFloat;
 
 public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
@@ -49,15 +58,6 @@ public:
 	virtual int32 GetVersion() const { return 2; }
 	virtual void Idle() { }
 	virtual uint32 GetLatency() const;
-
-	void InterleaveFloatToInt16(const float *inLeft, const float *inRight, uint32 numFrames);
-	void DeinterleaveInt16ToFloat(float *outLeft, float *outRight, uint32 numFrames) const;
-
-#ifdef ENABLE_SSE
-	// Interleave two float streams into one int16 stereo stream using SSE magic.
-	void SSEInterleaveFloatToInt16(const float *inLeft, const float *inRight, uint32 numFrames);
-	void SSEDeinterleaveInt16ToFloat(float *outLeft, float *outRight, uint32 numFrames) const;
-#endif // ENABLE_SSE
 
 	virtual void Process(float *pOutL, float *pOutR, uint32 numFrames);
 
