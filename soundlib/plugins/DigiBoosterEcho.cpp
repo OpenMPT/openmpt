@@ -38,6 +38,8 @@ DigiBoosterEcho::DigiBoosterEcho(VSTPluginLib &factory, CSoundFile &sndFile, SND
 void DigiBoosterEcho::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //-------------------------------------------------------------------------
 {
+	if(!m_bufferSize)
+		return;
 	const float *srcL = m_mixBuffer.GetInputBuffer(0), *srcR = m_mixBuffer.GetInputBuffer(1);
 	float *outL = m_mixBuffer.GetOutputBuffer(0), *outR = m_mixBuffer.GetOutputBuffer(1);
 
