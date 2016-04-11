@@ -31,6 +31,11 @@ DigiBoosterEcho::DigiBoosterEcho(VSTPluginLib &factory, CSoundFile &sndFile, SND
 //---------------------------------------------------------------------------------------------------
 {
 	RecalculateEchoParams();
+
+	m_mixBuffer.Initialize(2, 2);
+	m_MixState.pOutBufferL = m_mixBuffer.GetInputBuffer(0);
+	m_MixState.pOutBufferR = m_mixBuffer.GetInputBuffer(1);
+
 	InsertIntoFactoryList();
 }
 
