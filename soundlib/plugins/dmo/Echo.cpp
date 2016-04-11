@@ -52,6 +52,8 @@ Echo::Echo(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 void Echo::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //--------------------------------------------------------------
 {
+	if(!m_bufferSize)
+		return;
 	const float wetMix = m_param[kEchoWetDry], dryMix = 1 - wetMix;
 	const float *in[2] = { m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1) };
 	float *out[2] = { pOutL, pOutR };
