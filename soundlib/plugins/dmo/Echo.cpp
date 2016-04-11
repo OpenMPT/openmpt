@@ -56,7 +56,7 @@ void Echo::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		return;
 	const float wetMix = m_param[kEchoWetDry], dryMix = 1 - wetMix;
 	const float *in[2] = { m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1) };
-	float *out[2] = { pOutL, pOutR };
+	float *out[2] = { m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1) };
 
 	for(uint32 i = numFrames; i != 0; i--)
 	{
@@ -80,7 +80,7 @@ void Echo::Process(float *pOutL, float *pOutR, uint32 numFrames)
 
 			m_delayLine[m_writePos * 2 + channel] = chnOutput;
 			// Output samples now
-			*(out[channel])++ += (chnInput * dryMix + chnDelay * wetMix);
+			*(out[channel])++ = (chnInput * dryMix + chnDelay * wetMix);
 		}
 		m_writePos++;
 		if(m_writePos == m_bufferSize)
