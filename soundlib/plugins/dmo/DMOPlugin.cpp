@@ -20,8 +20,6 @@
 #include <mmsystem.h>
 #endif // !NO_DMO
 
-//#define DMO_FLOATING_POINT
-
 OPENMPT_NAMESPACE_BEGIN
 
 
@@ -79,7 +77,7 @@ DMOPlugin::DMOPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *m
 		m_pParamInfo = nullptr;
 	if (FAILED(m_pMediaObject->QueryInterface(IID_IMediaParams, (void **)&m_pMediaParams)))
 		m_pMediaParams = nullptr;
-	m_pMixBuffer = (int16 *)((((intptr_t)m_MixBuffer16) + 15) & ~15);
+	m_alignedBuffer.f32 = (float *)((((intptr_t)m_interleavedBuffer.f32) + 15) & ~15);
 
 	m_mixBuffer.Initialize(2, 2);
 	m_MixState.pOutBufferL = m_mixBuffer.GetInputBuffer(0);
@@ -131,159 +129,177 @@ uint32 DMOPlugin::GetLatency() const
 static const float _f2si = 32768.0f;
 static const float _si2f = 1.0f / 32768.0f;
 
-// Interleave two float streams into one int16 stereo stream.
-void DMOPlugin::InterleaveFloatToInt16(const float *inLeft, const float *inRight, uint32 numFrames)
-//-------------------------------------------------------------------------------------------------
+
+static void InterleaveStereo(const float * MPT_RESTRICT inputL, const float * MPT_RESTRICT inputR, float * MPT_RESTRICT output, uint32 numFrames)
+//-----------------------------------------------------------------------------------------------------------------------------------------------
 {
-	int16 *outBuf = m_pMixBuffer;
+#if (defined(ENABLE_SSE) || defined(ENABLE_SSE2))
+	if(GetProcSupport() & PROCSUPPORT_SSE)
+	{
+		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
+		__m128 factor = _mm_set_ps1(_f2si);
+		numFrames = (numFrames + 3) / 4;
+		do
+		{
+			__m128 fl = _mm_loadu_ps(inputL);		// Load four float values, LLLL
+			__m128 fr = _mm_loadu_ps(inputR);		// Load four float values, RRRR
+			fl = _mm_mul_ps(fl, factor);			// Scale them
+			fr = _mm_mul_ps(fr, factor);			// Scale them
+			inputL += 4;
+			inputR += 4;
+			__m128 f1 = _mm_unpacklo_ps(fl, fr);	// LL__+RR__ => LRLR
+			__m128 f2 = _mm_unpackhi_ps(fl, fr);	// __LL+__RR => LRLR
+			_mm_store_ps(output, f1);				// Store four int values, LRLR
+			_mm_store_ps(output + 4, f2);			// Store four int values, LRLR
+			output += 8;
+		} while(--numFrames);
+		return;
+	}
+#endif
 	while(numFrames--)
 	{
-		*(outBuf++) = static_cast<int16>(Clamp(*(inLeft++) * _f2si, static_cast<float>(int16_min), static_cast<float>(int16_max)));
-		*(outBuf++) = static_cast<int16>(Clamp(*(inRight++) * _f2si, static_cast<float>(int16_min), static_cast<float>(int16_max)));
+		*(output++) = *(inputL++) * _f2si;
+		*(output++) = *(inputR++) * _f2si;
+	}
+}
+
+
+static void DeinterleaveStereo(const float * MPT_RESTRICT input, float * MPT_RESTRICT outputL, float * MPT_RESTRICT outputR, uint32 numFrames)
+//--------------------------------------------------------------------------------------------------------------------------------------------
+{
+#if (defined(ENABLE_SSE) || defined(ENABLE_SSE2))
+	if(GetProcSupport() & PROCSUPPORT_SSE)
+	{
+		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
+		__m128 factor = _mm_set_ps1(_si2f);
+		numFrames = (numFrames + 3) / 4;
+		do
+		{
+			__m128 f1 = _mm_load_ps(input);		// Load four float values, LRLR
+			__m128 f2 = _mm_load_ps(input + 4);	// Load four float values, LRLR
+			f1 = _mm_mul_ps(f1, factor);		// Scale them
+			f2 = _mm_mul_ps(f2, factor);		// Scale them
+			input += 8;
+			__m128 fl = _mm_shuffle_ps(f1, f2, _MM_SHUFFLE(2, 0, 2, 0));	// LRLR+LRLR => LLLL
+			__m128 fr = _mm_shuffle_ps(f1, f2, _MM_SHUFFLE(3, 1, 3, 1));	// LRLR+LRLR => RRRR
+			_mm_storeu_ps(outputL, fl);				// Store four float values, LLLL
+			_mm_storeu_ps(outputR, fr);				// Store four float values, RRRR
+			outputL += 4;
+			outputR += 4;
+		} while(--numFrames);
+		return;
+	}
+#endif
+	while(numFrames--)
+	{
+		*(outputL++) = *(input++) * _si2f;
+		*(outputR++) = *(input++) * _si2f;
+	}
+}
+
+
+// Interleave two float streams into one int16 stereo stream.
+static void InterleaveFloatToInt16(const float * MPT_RESTRICT inputL, const float * MPT_RESTRICT inputR, int16 * MPT_RESTRICT output, uint32 numFrames)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
+{
+#if (defined(ENABLE_SSE) || defined(ENABLE_SSE2))
+	if(GetProcSupport() & PROCSUPPORT_SSE)
+	{
+		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
+		STATIC_ASSERT((MIXBUFFERSIZE & 15) == 0);
+		__m128i *out = reinterpret_cast<__m128i *>(output);
+		__m128 factor = _mm_set_ps1(_f2si);
+		numFrames = (numFrames + 3) / 4;
+		do
+		{
+			__m128 fl = _mm_loadu_ps(inputL);		// Load four float values, LLLL
+			__m128 fr = _mm_loadu_ps(inputR);		// Load four float values, RRRR
+			fl = _mm_mul_ps(fl, factor);			// Scale them
+			fr = _mm_mul_ps(fr, factor);			// Scale them
+			inputL += 4;
+			inputR += 4;
+			__m128 f1 = _mm_unpacklo_ps(fl, fr);	// LL__+RR__ => LRLR
+			__m128 f2 = _mm_unpackhi_ps(fl, fr);	// __LL+__RR => LRLR
+			__m128i i1 = _mm_cvtps_epi32(f1);		// Convert to four ints, LRLR
+			__m128i i2 = _mm_cvtps_epi32(f2);		// Convert to four ints, LRLR
+			__m128i sat = _mm_packs_epi32(i1, i2);	// Pack and saturate them to 16-bit
+			_mm_store_si128(out, sat);				// Store eight int16 values, LRLR
+			out++;
+		} while(--numFrames);
+		return;
+	}
+#endif
+	while(numFrames--)
+	{
+		*(output++) = static_cast<int16>(Clamp(*(inputL++) * _f2si, static_cast<float>(int16_min), static_cast<float>(int16_max)));
+		*(output++) = static_cast<int16>(Clamp(*(inputR++) * _f2si, static_cast<float>(int16_min), static_cast<float>(int16_max)));
 	}
 }
 
 
 // Deinterleave an int16 stereo stream into two float streams.
-void DMOPlugin::DeinterleaveInt16ToFloat(float *outLeft, float *outRight, uint32 numFrames) const
-//-----------------------------------------------------------------------------------------------
+static void DeinterleaveInt16ToFloat(const int16 * MPT_RESTRICT input, float * MPT_RESTRICT outputL, float * MPT_RESTRICT outputR, uint32 numFrames)
+//--------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	const int16 *inBuf = m_pMixBuffer;
+#if (defined(ENABLE_SSE) || defined(ENABLE_SSE2))
+	if(GetProcSupport() & PROCSUPPORT_SSE)
+	{
+		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
+		STATIC_ASSERT((MIXBUFFERSIZE & 15) == 0);
+		const __m128i *in = reinterpret_cast<const __m128i *>(input);
+		__m128 factor = _mm_set_ps1(_si2f);
+		numFrames = (numFrames + 3) / 4;
+		do
+		{
+			__m128i in16 = _mm_load_si128(in);		// Load eight int16 values, LRLRLRLR
+			in++;
+			__m128i lo = _mm_unpacklo_epi16(_mm_setzero_si128(), in16);	// 0L0R0L0R (1)
+			__m128i hi = _mm_unpackhi_epi16(_mm_setzero_si128(), in16);	// 0L0R0L0R (2)
+			lo = _mm_srai_epi32(lo, 16);			// LsRsLsRs, s = sign (1)
+			hi = _mm_srai_epi32(hi, 16);			// LsRsLsRs, s = sign (2)
+			__m128 f1 = _mm_cvtepi32_ps(lo);		// Convert to four floats, LRLR
+			__m128 f2 = _mm_cvtepi32_ps(hi);		// Convert to four floats, LRLR
+			f1 = _mm_mul_ps(f1, factor);			// Scale them
+			f2 = _mm_mul_ps(f2, factor);			// Scale them
+			__m128 fl = _mm_shuffle_ps(f1, f2, _MM_SHUFFLE(2, 0, 2, 0));	// LRLR+LRLR => LLLL
+			__m128 fr = _mm_shuffle_ps(f1, f2, _MM_SHUFFLE(3, 1, 3, 1));	// LRLR+LRLR => RRRR
+			_mm_storeu_ps(outputL, fl);				// Store four float values, LLLL
+			_mm_storeu_ps(outputR, fr);				// Store four float values, RRRR
+			outputL += 4;
+			outputR += 4;
+		} while(--numFrames);
+		return;
+	}
+#endif
 	while(numFrames--)
 	{
-		*outLeft++ += _si2f * static_cast<float>(*inBuf++);
-		*outRight++ += _si2f * static_cast<float>(*inBuf++);
+		*outputL++ += _si2f * static_cast<float>(*input++);
+		*outputR++ += _si2f * static_cast<float>(*input++);
 	}
 }
-
-
-#ifdef ENABLE_SSE
-// Interleave two float streams into one int16 stereo stream using SSE magic.
-void DMOPlugin::SSEInterleaveFloatToInt16(const float *inLeft, const float *inRight, uint32 numFrames)
-//----------------------------------------------------------------------------------------------------
-{
-	int16 *outBuf = m_pMixBuffer;
-	_asm
-	{
-		mov eax, inLeft
-			mov edx, inRight
-			mov ebx, outBuf
-			mov ecx, numFrames
-			movss xmm2, _f2si
-			xorps xmm0, xmm0
-			xorps xmm1, xmm1
-			shufps xmm2, xmm2, 0x00
-			pxor mm0, mm0
-			inc ecx
-			shr ecx, 1
-mainloop:
-		movlps xmm0, [eax]
-		movlps xmm1, [edx]
-		mulps xmm0, xmm2
-			mulps xmm1, xmm2
-			add ebx, 8
-			cvtps2pi mm0, xmm0	// mm0 = [ x2l | x1l ]
-			add eax, 8
-			cvtps2pi mm1, xmm1	// mm1 = [ x2r | x1r ]
-			add edx, 8
-			packssdw mm0, mm1	// mm0 = [x2r|x1r|x2l|x1l]
-			pshufw mm0, mm0, 0xD8
-			dec ecx
-			movq [ebx-8], mm0
-			jnz mainloop
-			emms
-	}
-}
-
-
-// Deinterleave an int16 stereo stream into two float streams using SSE magic.
-void DMOPlugin::SSEDeinterleaveInt16ToFloat(float *outLeft, float *outRight, uint32 numFrames) const
-//--------------------------------------------------------------------------------------------------
-{
-	const int16 *inBuf = m_pMixBuffer;
-	_asm {
-		mov ebx, inBuf
-			mov eax, outLeft
-			mov edx, outRight
-			mov ecx, numFrames
-			movss xmm7, _si2f
-			inc ecx
-			shr ecx, 1
-			shufps xmm7, xmm7, 0x00
-			xorps xmm0, xmm0
-			xorps xmm1, xmm1
-			xorps xmm2, xmm2
-mainloop:
-		movq mm0, [ebx]		// mm0 = [x2r|x2l|x1r|x1l]
-		add ebx, 8
-			pxor mm1, mm1
-			pxor mm2, mm2
-			punpcklwd mm1, mm0	// mm1 = [x1r|0|x1l|0]
-			punpckhwd mm2, mm0	// mm2 = [x2r|0|x2l|0]
-			psrad mm1, 16		// mm1 = [x1r|x1l]
-			movlps xmm2, [eax]
-		psrad mm2, 16		// mm2 = [x2r|x2l]
-			cvtpi2ps xmm0, mm1	// xmm0 = [ ? | ? |x1r|x1l]
-			dec ecx
-			cvtpi2ps xmm1, mm2	// xmm1 = [ ? | ? |x2r|x2l]
-			movhps xmm2, [edx]	// xmm2 = [y2r|y1r|y2l|y1l]
-		movlhps xmm0, xmm1	// xmm0 = [x2r|x2l|x1r|x1l]
-			shufps xmm0, xmm0, 0xD8
-			lea eax, [eax+8]
-		mulps xmm0, xmm7
-			addps xmm0, xmm2
-			lea edx, [edx+8]
-		movlps [eax-8], xmm0
-			movhps [edx-8], xmm0
-			jnz mainloop
-			emms
-	}
-}
-
-#endif // ENABLE_SSE
 
 
 void DMOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //-------------------------------------------------------------------
 {
+	if(!numFrames)
+		return;
 	m_mixBuffer.ClearOutputBuffers(numFrames);
 	REFERENCE_TIME startTime = Util::muldiv(m_SndFile.GetTotalSampleCount(), 10000000, m_nSamplesPerSec);
-#ifdef DMO_FLOATING_POINT
-	// Some plugins only have the same output characteristics in the floating point code path (compared to integer PCM)
-	// if we feed them input in the range [-32768, +32768] rather than the more usual [-1, +1].
-	float buffer[MIXBUFFERSIZE * 2];
-	float *p = buffer, *pLeft = m_mixBuffer.GetInputBuffer(0), *pRight = m_mixBuffer.GetInputBuffer(1);
-	for(uint32 i = 0; i < numFrames; i++)
+	
+	if(m_useFloat)
 	{
-		*(p++) = *(pLeft++) * 32768.0f;
-		*(p++) = *(pRight++) * 32768.0f;
-	}
-	m_pMediaProcess->Process(numFrames * 2 * sizeof(float), reinterpret_cast<BYTE *>(buffer), startTime, DMO_INPLACE_NORMAL);
-	p = buffer;
-	pLeft = m_mixBuffer.GetOutputBuffer(0);
-	pRight = m_mixBuffer.GetOutputBuffer(1);
-	for(uint32 i = 0; i < numFrames; i++)
-	{
-		*(pLeft++) = *(p++) * (1.0f / 32768.0f);
-		*(pRight++) = *(p++) * (1.0f / 32768.0f);
-	}
-
-#else // DMO_FLOATING_POINT
-
-#ifdef ENABLE_SSE
-	if(GetProcSupport() & PROCSUPPORT_SSE)
-	{
-		SSEInterleaveFloatToInt16(m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1), numFrames);
-		m_pMediaProcess->Process(numFrames * 2 * sizeof(int16), reinterpret_cast<BYTE *>(m_pMixBuffer), startTime, DMO_INPLACE_NORMAL);
-		SSEDeinterleaveInt16ToFloat(m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
+		// Some plugins only have the same output characteristics in the floating point code path (compared to integer PCM)
+		// if we feed them input in the range [-32768, +32768] rather than the more usual [-1, +1].
+		InterleaveStereo(m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1), m_alignedBuffer.f32, numFrames);
+		m_pMediaProcess->Process(numFrames * 2 * sizeof(float), reinterpret_cast<BYTE *>(m_alignedBuffer.f32), startTime, DMO_INPLACE_NORMAL);
+		DeinterleaveStereo(m_alignedBuffer.f32, m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
 	} else
-#endif // ENABLE_SSE
 	{
-		InterleaveFloatToInt16(m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1), numFrames);
-		m_pMediaProcess->Process(numFrames * 2 * sizeof(int16), reinterpret_cast<BYTE *>(m_pMixBuffer), startTime, DMO_INPLACE_NORMAL);
-		DeinterleaveInt16ToFloat(m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
+		InterleaveFloatToInt16(m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1), m_alignedBuffer.i16, numFrames);
+		m_pMediaProcess->Process(numFrames * 2 * sizeof(int16), reinterpret_cast<BYTE *>(m_alignedBuffer.i16), startTime, DMO_INPLACE_NORMAL);
+		DeinterleaveInt16ToFloat(m_alignedBuffer.i16, m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
 	}
-#endif
 
 	ProcessMixOps(pOutL, pOutR, m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1), numFrames);
 }
@@ -375,28 +391,34 @@ void DMOPlugin::Resume()
 	mt.pUnk = nullptr;
 	mt.pbFormat = (LPBYTE)&wfx;
 	mt.cbFormat = sizeof(WAVEFORMATEX);
-#ifdef DMO_FLOATING_POINT
 	mt.lSampleSize = 2 * sizeof(float);
 	wfx.wFormatTag = 3; // WAVE_FORMAT_IEEE_FLOAT;
 	wfx.nChannels = 2;
 	wfx.nSamplesPerSec = m_nSamplesPerSec;
 	wfx.wBitsPerSample = sizeof(float) * 8;
-#else
-	mt.lSampleSize = 2 * sizeof(int16);
-	wfx.wFormatTag = WAVE_FORMAT_PCM;
-	wfx.nChannels = 2;
-	wfx.nSamplesPerSec = m_nSamplesPerSec;
-	wfx.wBitsPerSample = sizeof(int16) * 8;
-#endif
 	wfx.nBlockAlign = wfx.nChannels * (wfx.wBitsPerSample / 8);
 	wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
 	wfx.cbSize = 0;
+
+	// First try 32-bit float (DirectX 9+)
+	m_useFloat = true;
 	if(FAILED(m_pMediaObject->SetInputType(0, &mt, 0))
 		|| FAILED(m_pMediaObject->SetOutputType(0, &mt, 0)))
 	{
+		m_useFloat = false;
+		// Try again with 16-bit PCM
+		mt.lSampleSize = 2 * sizeof(int16);
+		wfx.wFormatTag = WAVE_FORMAT_PCM;
+		wfx.wBitsPerSample = sizeof(int16) * 8;
+		wfx.nBlockAlign = wfx.nChannels * (wfx.wBitsPerSample / 8);
+		wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
+		if(FAILED(m_pMediaObject->SetInputType(0, &mt, 0))
+			|| FAILED(m_pMediaObject->SetOutputType(0, &mt, 0)))
+		{
 #ifdef DMO_LOG
 		Log(MPT_USTRING("DMO: Failed to set I/O media type"));
 #endif
+		}
 	}
 }
 
