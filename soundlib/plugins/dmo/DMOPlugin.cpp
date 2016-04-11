@@ -137,6 +137,7 @@ static void InterleaveStereo(const float * MPT_RESTRICT inputL, const float * MP
 	if(GetProcSupport() & PROCSUPPORT_SSE)
 	{
 		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
+		STATIC_ASSERT((MIXBUFFERSIZE & 7) == 0);
 		__m128 factor = _mm_set_ps1(_f2si);
 		numFrames = (numFrames + 3) / 4;
 		do
@@ -171,6 +172,7 @@ static void DeinterleaveStereo(const float * MPT_RESTRICT input, float * MPT_RES
 	if(GetProcSupport() & PROCSUPPORT_SSE)
 	{
 		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
+		STATIC_ASSERT((MIXBUFFERSIZE & 7) == 0);
 		__m128 factor = _mm_set_ps1(_si2f);
 		numFrames = (numFrames + 3) / 4;
 		do
@@ -202,11 +204,11 @@ static void DeinterleaveStereo(const float * MPT_RESTRICT input, float * MPT_RES
 static void InterleaveFloatToInt16(const float * MPT_RESTRICT inputL, const float * MPT_RESTRICT inputR, int16 * MPT_RESTRICT output, uint32 numFrames)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 {
-#if (defined(ENABLE_SSE) || defined(ENABLE_SSE2))
-	if(GetProcSupport() & PROCSUPPORT_SSE)
+#ifdef ENABLE_SSE2
+	if(GetProcSupport() & PROCSUPPORT_SSE2)
 	{
 		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
-		STATIC_ASSERT((MIXBUFFERSIZE & 15) == 0);
+		STATIC_ASSERT((MIXBUFFERSIZE & 7) == 0);
 		__m128i *out = reinterpret_cast<__m128i *>(output);
 		__m128 factor = _mm_set_ps1(_f2si);
 		numFrames = (numFrames + 3) / 4;
@@ -241,11 +243,11 @@ static void InterleaveFloatToInt16(const float * MPT_RESTRICT inputL, const floa
 static void DeinterleaveInt16ToFloat(const int16 * MPT_RESTRICT input, float * MPT_RESTRICT outputL, float * MPT_RESTRICT outputR, uint32 numFrames)
 //--------------------------------------------------------------------------------------------------------------------------------------------------
 {
-#if (defined(ENABLE_SSE) || defined(ENABLE_SSE2))
-	if(GetProcSupport() & PROCSUPPORT_SSE)
+#ifdef ENABLE_SSE2
+	if(GetProcSupport() & PROCSUPPORT_SSE2)
 	{
 		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
-		STATIC_ASSERT((MIXBUFFERSIZE & 15) == 0);
+		STATIC_ASSERT((MIXBUFFERSIZE & 7) == 0);
 		const __m128i *in = reinterpret_cast<const __m128i *>(input);
 		__m128 factor = _mm_set_ps1(_si2f);
 		numFrames = (numFrames + 3) / 4;
