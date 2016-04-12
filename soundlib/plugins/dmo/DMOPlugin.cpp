@@ -434,8 +434,8 @@ void DMOPlugin::Resume()
 
 	// First try 32-bit float (DirectX 9+)
 	m_useFloat = true;
-	//if(FAILED(m_pMediaObject->SetInputType(0, &mt, 0))
-	//	|| FAILED(m_pMediaObject->SetOutputType(0, &mt, 0)))
+	if(FAILED(m_pMediaObject->SetInputType(0, &mt, 0))
+		|| FAILED(m_pMediaObject->SetOutputType(0, &mt, 0)))
 	{
 		m_useFloat = false;
 		// Try again with 16-bit PCM
