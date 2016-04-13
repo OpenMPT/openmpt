@@ -622,6 +622,9 @@
     <ClCompile Include="..\soundlib\plugins\dmo\Distortion.cpp">
       <Filter>Source Files\soundlib\plugins\dmo</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\plugins\dmo\WavesReverb.cpp">
+      <Filter>Source Files\soundlib\plugins\dmo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1225,6 +1228,9 @@
       <Filter>Header Files\soundlib\plugins\dmo</Filter>
     </ClInclude>
     <ClInclude Include="..\soundlib\plugins\dmo\Distortion.h">
+      <Filter>Header Files\soundlib\plugins\dmo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\plugins\dmo\WavesReverb.h">
       <Filter>Header Files\soundlib\plugins\dmo</Filter>
     </ClInclude>
   </ItemGroup>

@@ -805,6 +805,7 @@
     <ClCompile Include="..\soundlib\plugins\dmo\Echo.cpp" />
     <ClCompile Include="..\soundlib\plugins\dmo\Gargle.cpp" />
     <ClCompile Include="..\soundlib\plugins\dmo\ParamEq.cpp" />
+    <ClCompile Include="..\soundlib\plugins\dmo\WavesReverb.cpp" />
     <ClCompile Include="..\soundlib\plugins\PluginManager.cpp" />
     <ClCompile Include="..\soundlib\plugins\PlugInterface.cpp" />
     <ClCompile Include="..\soundlib\RowVisitor.cpp" />
@@ -1048,6 +1049,7 @@
     <ClInclude Include="..\soundlib\plugins\dmo\Echo.h" />
     <ClInclude Include="..\soundlib\plugins\dmo\Gargle.h" />
     <ClInclude Include="..\soundlib\plugins\dmo\ParamEq.h" />
+    <ClInclude Include="..\soundlib\plugins\dmo\WavesReverb.h" />
     <ClInclude Include="..\soundlib\plugins\OpCodes.h" />
     <ClInclude Include="..\soundlib\plugins\PluginEventQueue.h" />
     <ClInclude Include="..\soundlib\plugins\PluginManager.h" />

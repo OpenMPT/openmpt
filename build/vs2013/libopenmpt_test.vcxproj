@@ -280,6 +280,7 @@
     <ClInclude Include="..\..\soundlib\pattern.h" />
     <ClInclude Include="..\..\soundlib\patternContainer.h" />
     <ClInclude Include="..\..\soundlib\plugins\DigiBoosterEcho.h" />
+    <ClInclude Include="..\..\soundlib\plugins\Distortion.h" />
     <ClInclude Include="..\..\soundlib\plugins\OpCodes.h" />
     <ClInclude Include="..\..\soundlib\plugins\PlugInterface.h" />
     <ClInclude Include="..\..\soundlib\plugins\PluginEventQueue.h" />
@@ -291,6 +292,7 @@
     <ClInclude Include="..\..\soundlib\plugins\dmo\Echo.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\Gargle.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\ParamEq.h" />
+    <ClInclude Include="..\..\soundlib\plugins\dmo\WavesReverb.h" />
     <ClInclude Include="..\..\soundlib\tuning.h" />
     <ClInclude Include="..\..\soundlib\tuningbase.h" />
     <ClInclude Include="..\..\soundlib\tuningcollection.h" />
@@ -402,6 +404,7 @@
     <ClCompile Include="..\..\soundlib\plugins\dmo\Echo.cpp" />
     <ClCompile Include="..\..\soundlib\plugins\dmo\Gargle.cpp" />
     <ClCompile Include="..\..\soundlib\plugins\dmo\ParamEq.cpp" />
+    <ClCompile Include="..\..\soundlib\plugins\dmo\WavesReverb.cpp" />
     <ClCompile Include="..\..\soundlib\tuning.cpp" />
     <ClCompile Include="..\..\soundlib\tuningCollection.cpp" />
     <ClCompile Include="..\..\soundlib\tuningbase.cpp" />

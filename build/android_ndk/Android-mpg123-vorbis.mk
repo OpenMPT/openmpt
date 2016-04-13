@@ -117,7 +117,7 @@ LOCAL_SRC_FILES := \
 	soundlib/plugins/dmo/Echo.cpp \
 	soundlib/plugins/dmo/Gargle.cpp \
 	soundlib/plugins/dmo/ParamEq.cpp \
-	soundlib/plugins/DMOPlugin.cpp \
+	soundlib/plugins/dmo/WavesReverb.cpp \
 	soundlib/plugins/PluginManager.cpp \
 	soundlib/plugins/PlugInterface.cpp \
 	test/TestToolsLib.cpp \

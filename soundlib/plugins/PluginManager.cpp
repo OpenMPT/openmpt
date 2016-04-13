@@ -21,6 +21,7 @@
 #include "dmo/Echo.h"
 #include "dmo/Gargle.h"
 #include "dmo/ParamEq.h"
+#include "dmo/WavesReverb.h"
 #include "../../common/StringFixer.h"
 #include "../Sndfile.h"
 #include "../Loaders.h"
@@ -191,6 +192,15 @@ CVstPluginManager::CVstPluginManager()
 		pluginList.push_back(plug);
 		plug->pluginId1 = kDmoMagic;
 		plug->pluginId2 = 0x120CED89;
+		plug->category = VSTPluginLib::catDMO;
+	}
+
+	plug = new (std::nothrow) VSTPluginLib(DMO::WavesReverb::Create, MPT_PATHSTRING("{87FC0268-9A55-4360-95AA-004A1D9DE26C}"), MPT_PATHSTRING("WavesReverb"), mpt::ustring());
+	if(plug != nullptr)
+	{
+		pluginList.push_back(plug);
+		plug->pluginId1 = kDmoMagic;
+		plug->pluginId2 = 0x87FC0268;
 		plug->category = VSTPluginLib::catDMO;
 	}
 #endif // NO_DMO
