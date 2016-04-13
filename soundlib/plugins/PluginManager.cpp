@@ -50,10 +50,6 @@ OPENMPT_NAMESPACE_BEGIN
 //#define VST_LOG
 //#define DMO_LOG
 
-#ifndef NO_DMO
-#define DMO_LOG
-#endif // NO_DMO
-
 #ifdef MODPLUG_TRACKER
 static const MPT_UCHAR_TYPE *const cacheSection = MPT_ULITERAL("PluginCache");
 #endif // MODPLUG_TRACKER
