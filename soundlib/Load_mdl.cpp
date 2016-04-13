@@ -417,18 +417,19 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 				const_unaligned_ptr_le<uint16> pdata;
 				uint32 ch;
 
-				if (dwPos+18 >= dwMemLength) break;
 				if (pmsh.version > 0)
 				{
+					if (dwPos + sizeof(MDLPatternHeader) >= dwMemLength) break;
 					const MDLPatternHeader *pmpd = (const MDLPatternHeader *)(lpStream + dwPos);
 					if (pmpd->channels > 32) break;
+					if (dwPos + sizeof(MDLPatternHeader) + 2 * pmpd->channels >= dwMemLength) break;
 					patternLength[i] = pmpd->lastrow + 1;
 					if (m_nChannels < pmpd->channels) m_nChannels = pmpd->channels;
-					dwPos += 18 + 2*pmpd->channels;
 					pdata = const_unaligned_ptr_le<uint16>(reinterpret_cast<const uint8*>(pmpd->data));
 					ch = pmpd->channels;
 				} else
 				{
+					if(dwPos + 2 * 32 >= dwMemLength) break;
 					pdata = const_unaligned_ptr_le<uint16>(lpStream + dwPos);
 					//Patterns[i].Resize(64, false);
 					if (m_nChannels < 32) m_nChannels = 32;
