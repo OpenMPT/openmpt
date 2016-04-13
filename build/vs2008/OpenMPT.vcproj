@@ -2808,6 +2808,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\soundlib\plugins\Distortion.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\soundlib\plugins\OpCodes.h"
 					>
 				</File>
@@ -2880,6 +2884,14 @@
 					</File>
 					<File
 						RelativePath="..\..\soundlib\plugins\dmo\ParamEq.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\soundlib\plugins\dmo\WavesReverb.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\soundlib\plugins\dmo\WavesReverb.h"
 						>
 					</File>
 				</Filter>
