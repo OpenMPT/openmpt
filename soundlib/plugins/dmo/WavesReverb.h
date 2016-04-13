@@ -41,7 +41,7 @@ protected:
 	uint32 m_delay[6];
 
 	// State
-	struct
+	struct ReverbState
 	{
 		uint32 combPos, allpassPos;
 		float comb[16384];
