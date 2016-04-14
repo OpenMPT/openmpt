@@ -276,9 +276,6 @@
     <ClInclude Include="..\..\soundlib\plugins\DigiBoosterEcho.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\soundlib\plugins\Distortion.h">
-      <Filter>soundlib\plugins</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\OpCodes.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>

@@ -1378,10 +1378,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\soundlib\plugins\Distortion.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\soundlib\plugins\OpCodes.h"
 					>
 				</File>
