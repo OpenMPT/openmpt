@@ -864,7 +864,6 @@
     <ClInclude Include="..\..\soundlib\pattern.h" />
     <ClInclude Include="..\..\soundlib\patternContainer.h" />
     <ClInclude Include="..\..\soundlib\plugins\DigiBoosterEcho.h" />
-    <ClInclude Include="..\..\soundlib\plugins\Distortion.h" />
     <ClInclude Include="..\..\soundlib\plugins\OpCodes.h" />
     <ClInclude Include="..\..\soundlib\plugins\PlugInterface.h" />
     <ClInclude Include="..\..\soundlib\plugins\PluginEventQueue.h" />
