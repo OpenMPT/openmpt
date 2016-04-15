@@ -599,6 +599,8 @@ void CSoundFile::ProcessPlugins(uint32 nCount)
 	float *pMixL = MixFloatBuffer[0];
 	float *pMixR = MixFloatBuffer[1];
 
+	const bool positionChanged = HasPositionChanged();
+
 	// Process Plugins
 	for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
 	{
@@ -712,6 +714,8 @@ void CSoundFile::ProcessPlugins(uint32 nCount)
 				}
 			} else
 			{
+				if(positionChanged)
+					pObject->PositionChanged();
 				pObject->Process(pOutL, pOutR, nCount);
 
 				state.inputSilenceCount += nCount;

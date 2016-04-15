@@ -153,6 +153,8 @@ public:
 	virtual bool IsResumed() const { return m_bPlugResumed; }
 	virtual void Resume() = 0;
 	virtual void Suspend() = 0;
+	// Tell the plugin that there is a discontinuity between the previous and next render call (e.g. aftert jumping around in the module)
+	virtual void PositionChanged() = 0;
 	virtual void Bypass(bool = true);
 	bool ToggleBypass() { Bypass(!IsBypassed()); return IsBypassed(); };
 	virtual bool IsInstrument() const = 0;

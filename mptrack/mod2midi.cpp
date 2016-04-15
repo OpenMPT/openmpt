@@ -318,6 +318,8 @@ namespace MidiExport
 
 		virtual void Resume() { }
 		virtual void Suspend() { }
+		virtual void PositionChanged() { }
+
 		virtual bool IsInstrument() const { return true; }
 		virtual bool CanRecieveMidiEvents() { return true; }
 		virtual bool ShouldProcessSilence() { return true; }
