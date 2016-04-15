@@ -294,6 +294,9 @@
     <ClInclude Include="..\..\soundlib\plugins\PluginStructs.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\dmo\Compressor.h">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\dmo\DMOPlugin.h">
       <Filter>soundlib\plugins\dmo</Filter>
     </ClInclude>
@@ -625,6 +628,9 @@
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\PluginManager.cpp">
       <Filter>soundlib\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\Compressor.cpp">
+      <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\DMOPlugin.cpp">
       <Filter>soundlib\plugins\dmo</Filter>

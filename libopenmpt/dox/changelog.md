@@ -40,8 +40,8 @@ is just a high-level summary.
     functions or via C++ API iostream constructors).
 
  *  libopenmpt now has support for DMO plugins on Windows when built with MSVC.
-    Additionally, the DMO Distortion, Echo, Gargle, ParamEQ and WavesReverb DSPs
-    are emulated on on all other platforms.
+    Additionally, the DMO Compression, Distortion, Echo, Gargle, ParamEQ and
+    WavesReverb DSPs are emulated on on all other platforms.
  *  libopenmpt now supports the DigiBooster Echo DSP.
  *  To avoid any of the aforementioned plugins to be used, the load.skip_plugins
     ctl can be passed when loading a module.

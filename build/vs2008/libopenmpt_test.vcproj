@@ -1145,6 +1145,14 @@
 					Name="dmo"
 					>
 					<File
+						RelativePath="..\..\soundlib\plugins\dmo\Compressor.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\soundlib\plugins\dmo\Compressor.h"
+						>
+					</File>
+					<File
 						RelativePath="..\..\soundlib\plugins\dmo\DMOPlugin.cpp"
 						>
 					</File>
