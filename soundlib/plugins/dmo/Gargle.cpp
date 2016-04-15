@@ -125,8 +125,8 @@ void Gargle::SetParameter(PlugParamIndex index, PlugParamValue value)
 	if(index < kEqNumParameters)
 	{
 		Limit(value, 0.0f, 1.0f);
-		if(index == kGargleWaveShape && value < 1.0f)
-			value = 0.0f;
+		if(index == kGargleWaveShape)
+			value = Util::Round(value);
 		m_param[index] = value;
 		RecalculateGargleParams();
 	}
