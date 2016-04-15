@@ -5,10 +5,6 @@
  * Notes  : The original plugin's integer and floating point code paths only
  *          behave identically when feeding floating point numbers in range
  *          [-32768, +32768] rather than the usual [-1, +1] into the plugin.
- *          Since OpenMPT has always been using the integer code path, we emulate
- *          the floating point path by scaling the input by a factor of 32768.
- *          Internally, the input is scaled a second time by 32768, hence we
- *          just combine these two into a single factor.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -24,6 +20,34 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace DMO
 {
+
+// Computes (log2(x) + 1) * 2 ^ (shiftL - shiftR) (x = -2^31...2^31)
+float logGain(float x, int32 shiftL, int32 shiftR)
+//------------------------------------------------
+{
+	uint32 intSample = static_cast<uint32>(static_cast<int32>(x));
+	const uint32 sign = intSample & 0x80000000;
+	if(sign)
+		intSample = (~intSample) + 1;
+
+	// Multiply until overflow (or edge shift factor is reached)
+	while(shiftL > 0 && intSample < 0x80000000)
+	{
+		intSample += intSample;
+		shiftL--;
+	}
+	// Unsign clipped sample
+	if(intSample >= 0x80000000)
+	{
+		intSample &= 0x7FFFFFFF;
+		shiftL++;
+	}
+	intSample = (shiftL << (31 - shiftR)) | (intSample >> shiftR);
+	if(sign)
+		intSample = ~intSample | sign;
+	return static_cast<float>(static_cast<int32>(intSample));
+}
+
 
 IMixPlugin* Distortion::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 //-------------------------------------------------------------------------------------------------
@@ -55,7 +79,7 @@ void Distortion::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //--------------------------------------------------------------------
 {
 	const float *in[2] = { m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1) };
-	float *out[2] = { m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1)};
+	float *out[2] = { m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1) };
 
 	for(uint32 i = numFrames; i != 0; i--)
 	{
@@ -69,29 +93,8 @@ void Distortion::Process(float *pOutL, float *pOutR, uint32 numFrames)
 
 			z *= 1073741824.0f;	// 32768^2
 
-			// Distortion
-			uint32 intSample = static_cast<uint32>(static_cast<int32>(z));
-			const uint32 sign = intSample & 0x80000000;
-			if(sign)
-				intSample = (~intSample) + 1;
-
-			// Multiply until overflow (or edge shift factor is reached)
-			uint32 edge = m_edge;
-			while(edge > 0 && intSample < 0x80000000)
-			{
-				intSample += intSample;
-				edge--;
-			}
-			// Unsign clipped sample
-			if(intSample >= 0x80000000)
-			{
-				intSample &= 0x7FFFFFFF;
-				edge++;
-			}
-			intSample = (edge << (31 - m_shift)) | (intSample >> m_shift);
-			if(sign)
-				intSample = ~intSample | sign;
-			z = static_cast<float>(static_cast<int32>(intSample));
+			// The actual distortion
+			z = logGain(z, m_edge, m_shift);
 
 			// Post EQ / Gain
 			z = (z * m_postEQa0) - m_postEQz1[channel] * m_postEQb1 - m_postEQz2[channel] * m_postEQb0;
@@ -210,15 +213,17 @@ void Distortion::RecalculateDistortionParams()
 	float edge = 2.0f + m_param[kDistEdge] * 29.0f;
 	m_edge = static_cast<uint8>(edge);	// 2...31 shifted bits
 
-	// Work out the magical shift factor
+	// Work out the magical shift factor (= floor(log2(edge)) + 1 / index of highest bit + 1)
+	uint8 shift;
 	if(m_edge <= 3)
-		m_shift = 2;
+		shift = 2;
 	else if(m_edge <= 7)
-		m_shift = 3;
+		shift = 3;
 	else if(m_edge <= 15)
-		m_shift = 4;
+		shift = 4;
 	else
-		m_shift = 5;
+		shift = 5;
+	m_shift = shift;
 
 	static const double LogNorm[32] =
 	{

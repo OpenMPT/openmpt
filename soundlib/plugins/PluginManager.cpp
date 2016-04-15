@@ -17,6 +17,7 @@
 #include "PlugInterface.h"
 #include "DigiBoosterEcho.h"
 #include "dmo/DMOPlugin.h"
+#include "dmo/Compressor.h"
 #include "dmo/Distortion.h"
 #include "dmo/Echo.h"
 #include "dmo/Gargle.h"
@@ -155,6 +156,15 @@ CVstPluginManager::CVstPluginManager()
 
 #ifdef NO_DMO
 	// DirectX Media Objects Emulation
+	plug = new (std::nothrow) VSTPluginLib(DMO::Compressor::Create, MPT_PATHSTRING("{EF011F79-4000-406D-87AF-BFFB3FC39D57}"), MPT_PATHSTRING("Compressor"), mpt::ustring());
+	if(plug != nullptr)
+	{
+		pluginList.push_back(plug);
+		plug->pluginId1 = kDmoMagic;
+		plug->pluginId2 = 0xEF011F79;
+		plug->category = VSTPluginLib::catDMO;
+	}
+
 	plug = new (std::nothrow) VSTPluginLib(DMO::Distortion::Create, MPT_PATHSTRING("{EF114C90-CD1D-484E-96E5-09CFAF912A21}"), MPT_PATHSTRING("Distortion"), mpt::ustring());
 	if(plug != nullptr)
 	{

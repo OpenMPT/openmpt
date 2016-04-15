@@ -800,6 +800,7 @@
     <ClCompile Include="..\soundlib\pattern.cpp" />
     <ClCompile Include="..\soundlib\patternContainer.cpp" />
     <ClCompile Include="..\soundlib\plugins\DigiBoosterEcho.cpp" />
+    <ClCompile Include="..\soundlib\plugins\dmo\Compressor.cpp" />
     <ClCompile Include="..\soundlib\plugins\dmo\Distortion.cpp" />
     <ClCompile Include="..\soundlib\plugins\dmo\DMOPlugin.cpp" />
     <ClCompile Include="..\soundlib\plugins\dmo\Echo.cpp" />
@@ -1044,6 +1045,7 @@
     <ClInclude Include="..\soundlib\pattern.h" />
     <ClInclude Include="..\soundlib\patternContainer.h" />
     <ClInclude Include="..\soundlib\plugins\DigiBoosterEcho.h" />
+    <ClInclude Include="..\soundlib\plugins\dmo\Compressor.h" />
     <ClInclude Include="..\soundlib\plugins\dmo\Distortion.h" />
     <ClInclude Include="..\soundlib\plugins\dmo\DMOPlugin.h" />
     <ClInclude Include="..\soundlib\plugins\dmo\Echo.h" />

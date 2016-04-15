@@ -521,11 +521,8 @@ CString DMOPlugin::GetParamDisplay(PlugParamIndex param)
 				{
 				case MPT_FLOAT:
 					{
-						int nValue = (int)(md * 100.0f + 0.5f);
-						bool bNeg = false;
-						if (nValue < 0) { bNeg = true; nValue = -nValue; }
 						CString s;
-						s.Format(bNeg ? _T("-%d.%02d") : _T("%d.%02d"), nValue / 100, nValue % 100);
+						s.Format("%.2f", md);
 						return s;
 					}
 					break;
@@ -539,7 +536,7 @@ CString DMOPlugin::GetParamDisplay(PlugParamIndex param)
 						WCHAR *text = nullptr;
 						m_pParamInfo->GetParamText(param, &text);
 
-						const int nValue = (int)(md * (mpi.mpdMaxValue - mpi.mpdMinValue) + 0.5f);
+						const int nValue = Util::Round<int>(md * (mpi.mpdMaxValue - mpi.mpdMinValue));
 						// Always skip first two strings (param name, unit name)
 						for(int i = 0; i < nValue + 2; i++)
 						{
