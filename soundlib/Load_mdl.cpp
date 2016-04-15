@@ -531,24 +531,24 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		#ifdef MDL_LOG
 			Log("volume envelope: %d bytes\n", blocklen);
 		#endif
-			if ((nvolenv = lpStream[dwMemPos]) == 0) break;
-			if (dwMemPos + nvolenv*32 + 1 <= dwMemLength) pvolenv = lpStream + dwMemPos + 1;
+			if (pvolenv != nullptr || (nvolenv = lpStream[dwMemPos]) == 0) break;
+			if (dwMemPos + nvolenv*33 + 1 <= dwMemLength) pvolenv = lpStream + dwMemPos + 1;
 			break;
 		// PE: Panning Envelope
 		case 0x4550:
 		#ifdef MDL_LOG
 			Log("panning envelope: %d bytes\n", blocklen);
 		#endif
-			if ((npanenv = lpStream[dwMemPos]) == 0) break;
-			if (dwMemPos + npanenv*32 + 1 <= dwMemLength) ppanenv = lpStream + dwMemPos + 1;
+			if (ppanenv != nullptr || (npanenv = lpStream[dwMemPos]) == 0) break;
+			if (dwMemPos + npanenv*33 + 1 <= dwMemLength) ppanenv = lpStream + dwMemPos + 1;
 			break;
 		// FE: Pitch Envelope
 		case 0x4546:
 		#ifdef MDL_LOG
 			Log("pitch envelope: %d bytes\n", blocklen);
 		#endif
-			if ((npitchenv = lpStream[dwMemPos]) == 0) break;
-			if (dwMemPos + npitchenv*32 + 1 <= dwMemLength) ppitchenv = lpStream + dwMemPos + 1;
+			if (ppitchenv != nullptr || (npitchenv = lpStream[dwMemPos]) == 0) break;
+			if (dwMemPos + npitchenv*33 + 1 <= dwMemLength) ppitchenv = lpStream + dwMemPos + 1;
 			break;
 		// IS: Sample Infoblock
 		case 0x5349:
