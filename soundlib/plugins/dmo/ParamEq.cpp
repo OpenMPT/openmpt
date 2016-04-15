@@ -46,6 +46,8 @@ ParamEq::ParamEq(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixSt
 void ParamEq::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //-----------------------------------------------------------------
 {
+	if(m_param[kEqGain] == 1.0f)
+		return;
 	const float *in[2] = { m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1) };
 	float *out[2] = { m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1) };
 

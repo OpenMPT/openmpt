@@ -80,6 +80,7 @@ public:
 
 	virtual void Resume();
 	virtual void Suspend();
+	virtual void PositionChanged() { }
 
 	virtual bool IsInstrument() const { return false; }
 	virtual bool CanRecieveMidiEvents() { return false; }

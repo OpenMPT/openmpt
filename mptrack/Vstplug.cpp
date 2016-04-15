@@ -220,7 +220,7 @@ VstIntPtr VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstInt32 opcod
 				timeInfo.flags |= kVstTransportPlaying;
 				if(pVstPlugin->GetSoundFile().m_SongFlags[SONG_PATTERNLOOP]) timeInfo.flags |= kVstTransportCycleActive;
 				timeInfo.samplePos = sndFile.GetTotalSampleCount();
-				if(sndFile.HasPositionChanged())
+				if(pVstPlugin->m_positionChanged)
 				{
 					timeInfo.flags |= kVstTransportChanged;
 					pVstPlugin->lastBarStartPos = -1.0;
@@ -932,12 +932,7 @@ CVstPlugin::~CVstPlugin()
 {
 	CriticalSection cs;
 
-	if (m_pEditor)
-	{
-		if (m_pEditor->m_hWnd) m_pEditor->OnClose();
-		if ((volatile void *)m_pEditor) delete m_pEditor;
-		m_pEditor = nullptr;
-	}
+	CloseEditor();
 	if (m_bIsVst2)
 	{
 		Dispatch(effConnectInput, 0, 0, nullptr, 0);
@@ -1422,7 +1417,6 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 			ProcessMixOps(pOutL, pOutR, outputBuffers[0], outputBuffers[numOutputs > 1 ? 1 : 0], numFrames);
 		}
 
-
 		// If the I/O format of the bridge changed in the meanwhile, update it now.
 		if(isBridged && Dispatch(effVendorSpecific, kVendorOpenMPT, kCloseOldProcessingMemory, nullptr, 0.0f) != 0)
 		{
@@ -1431,6 +1425,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 	}
 
 	vstEvents.Clear();
+	m_positionChanged = false;
 }
 
 

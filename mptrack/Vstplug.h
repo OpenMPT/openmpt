@@ -50,6 +50,7 @@ protected:
 	bool m_bIsInstrument : 1;
 	bool m_isInitialized : 1;
 	bool m_bNeedIdle : 1;
+	bool m_positionChanged : 1;
 
 	PluginEventQueue<vstNumProcessEvents> vstEvents;	// MIDI events that should be sent to the plugin
 
@@ -119,8 +120,10 @@ public:
 	virtual bool MidiSysexSend(const char *message, uint32 length);
 	virtual void HardAllNotesOff();
 	virtual void NotifySongPlaying(bool playing);
+
 	virtual void Resume();
 	virtual void Suspend();
+	virtual void PositionChanged() { m_positionChanged = true; }
 
 	// Check whether a VST parameter can be automated
 	bool CanAutomateParameter(PlugParamIndex index);
