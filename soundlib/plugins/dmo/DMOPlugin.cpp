@@ -400,7 +400,7 @@ void DMOPlugin::SetParameter(PlugParamIndex index, PlugParamValue value)
 			if (fMax > fMin) value *= (fMax - fMin);
 			value += fMin;
 			Limit(value, fMin, fMax);
-			if (mpi.mpType != MPT_FLOAT) value = (float)(int)value;
+			if (mpi.mpType != MPT_FLOAT) value = Util::Round(value);
 			m_pMediaParams->SetParam(index, value);
 		}
 	}
