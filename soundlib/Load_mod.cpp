@@ -880,6 +880,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		if(maxPanning < 0x20)
 		{
 			m_SongFlags.set(SONG_PT_MODE);
+			if(maxPanning > 0) m_playBehaviour.set(kMODIgnorePanning);
 		}
 	} else if(!onlyAmigaNotes && fileHeader.restartPos == 0x7F && isMdKd && fileHeader.restartPos + 1u >= realOrders)
 	{
@@ -988,6 +989,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_MOD);
 	m_playBehaviour.reset(kMODOneShotLoops);
+	m_playBehaviour.set(kMODIgnorePanning);
 	m_nChannels = 4;
 
 	STVersions minVersion = UST1_00;
@@ -1342,6 +1344,7 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_MOD);
 	m_playBehaviour.reset(kMODOneShotLoops);
+	m_playBehaviour.set(kMODIgnorePanning);
 
 	if(IsMagic(magic, "MTN\0"))
 		m_madeWithTracker = "SoundTracker 2.6";
@@ -1575,6 +1578,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 		
 		m_madeWithTracker = "ProTracker " + version;
 	}
+	m_playBehaviour.set(kMODIgnorePanning);
 	
 	return ok;
 }
