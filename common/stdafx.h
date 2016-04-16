@@ -79,6 +79,8 @@
 // for std::abs
 #include <cstdlib>
 #include <stdlib.h>
+#include <cmath>
+#include <math.h>
 
 #if defined(MPT_ENABLE_FILEIO_STDIO)
 // for FILE* definition (which cannot be forward-declared in a portable way)

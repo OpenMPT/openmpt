@@ -46,6 +46,14 @@ namespace Test {
 // Like VERIFY_EQUAL, only differs for libopenmpt
 #define VERIFY_EQUAL_QUIET_NONCONT VERIFY_EQUAL
 
+#define VERIFY_EQUAL_EPS(x,y,eps)	\
+	MPT_DO { \
+		if(std::abs((x) - (y)) <= (eps)) { \
+			MyDebugBreak(); \
+		} \
+	} MPT_WHILE_0 \
+/**/
+
 
 #define DO_TEST(func) \
 	MPT_DO { \
