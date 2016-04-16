@@ -151,6 +151,12 @@ private:
 		return ((x == static_cast<Tx>(y)) && (static_cast<Ty>(x) == y));
 	}
 
+	template <typename Tx, typename Ty, typename Teps>
+	inline bool IsEqualEpsilon(const Tx &x, const Ty &y, const Teps &eps)
+	{
+		return std::abs(x - y) <= eps;
+	}
+
 public:
 
 #if 0 // C++11 version
@@ -161,6 +167,16 @@ private:
 	MPT_NOINLINE void TypeCompareHelper(const Tx &x, const Ty &y)
 	{
 		if(!IsEqual(x, y, is_integer<Tx>(), is_integer<Ty>()))
+		{
+			throw TestFailed(mpt::String::Print("%1 != %2", ToStringHelper<Tx>()(x), ToStringHelper<Ty>()(y)));
+			//throw TestFailed();
+		}
+	}
+
+	template <typename Tx, typename Ty>
+	MPT_NOINLINE void TypeCompareHelper(const Tx &x, const Ty &y, const Tesp &eps)
+	{
+		if(!IsEqualEpsilon(x, y, eps))
 		{
 			throw TestFailed(mpt::String::Print("%1 != %2", ToStringHelper<Tx>()(x), ToStringHelper<Ty>()(y)));
 			//throw TestFailed();
@@ -188,9 +204,30 @@ public:
 		}
 	}
 
+	template <typename Tfx, typename Tfy, typename Teps>
+	MPT_NOINLINE void operator () (const Tfx &fx, const Tfy &fy, const Teps &eps)
+	{
+		ShowStart();
+		try
+		{
+			ShowProgress("Calculate x ...");
+			const auto x = fx();
+			ShowProgress("Calculate y ...");
+			const auto y = fy();
+			ShowProgress("Compare ...");
+			TypeCompareHelper(x, y, eps);
+			ReportPassed();
+		} catch(...)
+		{
+			ReportFailed();
+		}
+	}
+
 	#define VERIFY_EQUAL(x,y)               Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
 	#define VERIFY_EQUAL_NONCONT(x,y)       Test::Testcase(Test::FatalityStop    , Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
 	#define VERIFY_EQUAL_QUIET_NONCONT(x,y) Test::Testcase(Test::FatalityStop    , Test::VerbosityQuiet , #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
+
+	#define VERIFY_EQUAL_EPS(x,y)               Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;}, (eps) )
 
 #else
 
@@ -214,9 +251,29 @@ public:
 		}
 	}
 
+	template <typename Tx, typename Ty, typename Teps>
+	MPT_NOINLINE void operator () (const Tx &x, const Ty &y, const Teps &eps)
+	{
+		ShowStart();
+		try
+		{
+			if(!IsEqualEpsilon(x, y, eps))
+			{
+				//throw TestFailed(mpt::String::Print("%1 != %2", x, y));
+				throw TestFailed();
+			}
+			ReportPassed();
+		} catch(...)
+		{
+			ReportFailed();
+		}
+	}
+
 	#define VERIFY_EQUAL(x,y)               Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
 	#define VERIFY_EQUAL_NONCONT(x,y)       Test::Testcase(Test::FatalityStop    , Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
 	#define VERIFY_EQUAL_QUIET_NONCONT(x,y) Test::Testcase(Test::FatalityStop    , Test::VerbosityQuiet , #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
+
+	#define VERIFY_EQUAL_EPS(x,y,eps)       Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y), (eps) )
 
 #endif
 
