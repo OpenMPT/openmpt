@@ -141,7 +141,13 @@ copy /y ..\..\bin\x64-Shared\openmpt-zlib.dll bin\x86_64\ || goto error
  lib\x86\libopenmpt.lib ^
  lib\x86_64\libopenmpt.lib ^
  bin\x86\libopenmpt.dll ^
+ bin\x86\openmpt-ogg.dll ^
+ bin\x86\openmpt-vorbis.dll ^
+ bin\x86\openmpt-zlib.dll ^
  bin\x86_64\libopenmpt.dll ^
+ bin\x86_64\openmpt-ogg.dll ^
+ bin\x86_64\openmpt-vorbis.dll ^
+ bin\x86_64\openmpt-zlib.dll ^
  || goto error
 cd .. || goto error
 "C:\Program Files\7-Zip\7z.exe" a -ttar libopenmpt-dev-vs2010.tar libopenmpt-dev-vs2010-r%MPT_REVISION%.7z || goto error
