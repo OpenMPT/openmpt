@@ -538,7 +538,7 @@ mpt::ustring GetURL(std::string key)
 		result = MPT_USTRING("https://openmpt.org/download");
 	} else if(key == "top_picks")
 	{
-		result = MPT_USTRING("https://openmpt.org/top_pick");
+		result = MPT_USTRING("https://openmpt.org/top_picks");
 	}
 	return result;
 }
