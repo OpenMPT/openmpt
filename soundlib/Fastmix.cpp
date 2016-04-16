@@ -651,7 +651,6 @@ void CSoundFile::ProcessPlugins(uint32 nCount)
 					&& m_MixPlugins[nOutput].pMixPlugin != nullptr)
 				{
 					IMixPlugin *outPlugin = m_MixPlugins[nOutput].pMixPlugin;
-					SNDMIXPLUGINSTATE &outState = outPlugin->m_MixState;
 					if(!(state.dwFlags & SNDMIXPLUGINSTATE::psfSilenceBypass)) outPlugin->ResetSilence();
 
 					if(outPlugin->m_mixBuffer.Ok())
