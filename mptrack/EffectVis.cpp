@@ -443,7 +443,7 @@ void CEffectVis::DrawNodes()
 	} else
 	{
 		int x = RowToScreenX(m_nRowToErase);
-		CRect r(x - nodeSizeHalf, m_rcDraw.top, x + nodeSizeHalf, m_rcDraw.bottom);
+		CRect r(x - nodeSizeHalf, m_rcDraw.top, x + nodeSizeHalf + 1, m_rcDraw.bottom);
 		m_dcNodes.FillSolidRect(&r, 0);
 	}
 
@@ -470,10 +470,8 @@ void CEffectVis::InvalidateRow(int row)
 	invalidated.bottom = m_rcDraw.bottom;
 	invalidated.top = m_rcDraw.top;
 	invalidated.left = x - m_nodeSizeHalf;
-	invalidated.right = x + m_nodeSizeHalf;
+	invalidated.right = x + m_nodeSizeHalf + 1;
 	InvalidateRect(&invalidated, FALSE);
-
-	InvalidateRect(NULL, FALSE);
 }
 
 
@@ -643,21 +641,10 @@ void CEffectVis::OnRButtonDown(UINT nFlags, CPoint point)
 		SetFocus();
 		SetCapture();
 
-		CRect rect;
-		// Look if dragging a point
-		m_nDragItem = -1;
-		for (ROWINDEX row = m_startRow; row <= m_endRow; row++)
-		{
-			int x = RowToScreenX(row);
-			int y = RowToScreenY(row);
-			rect.SetRect(x - m_nodeSizeHalf, y - m_nodeSizeHalf, x + m_nodeSizeHalf + 1, y + m_nodeSizeHalf + 1);
-			if (rect.PtInRect(point))
-			{
-				m_pModDoc->GetPatternUndo().PrepareUndo(static_cast<PATTERNINDEX>(m_nPattern), m_nChan, row, m_nChan + 1, row + 1, "Parameter Editor entry");
-				m_nDragItem = row;
-			}
-		}
+		m_nDragItem = ScreenXToRow(point.x);
 		m_dwStatus |= FXVSTATUS_RDRAGGING;
+		m_pModDoc->GetPatternUndo().PrepareUndo(static_cast<PATTERNINDEX>(m_nPattern), m_nChan, m_nDragItem, 1, 1, "Parameter Editor entry");
+		OnMouseMove(nFlags, point);
 	}
 
 	CDialog::OnRButtonDown(nFlags, point);
@@ -748,8 +735,10 @@ void CEffectVis::OnLButtonDown(UINT nFlags, CPoint point)
 		SetFocus();
 		SetCapture();
 
-		m_pModDoc->GetPatternUndo().PrepareUndo(static_cast<PATTERNINDEX>(m_nPattern), m_nChan, m_startRow, m_nChan + 1, m_endRow + 1, "Parameter Editor entry");
+		m_nDragItem = ScreenXToRow(point.x);
 		m_dwStatus |= FXVSTATUS_LDRAGGING;
+		m_pModDoc->GetPatternUndo().PrepareUndo(static_cast<PATTERNINDEX>(m_nPattern), m_nChan, m_startRow, 1, m_endRow - m_startRow + 1, "Parameter Editor entry");
+		OnMouseMove(nFlags, point);
 	}
 
 	CDialog::OnLButtonDown(nFlags, point);
