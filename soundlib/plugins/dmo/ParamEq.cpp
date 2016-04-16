@@ -33,12 +33,8 @@ ParamEq::ParamEq(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixSt
 	m_param[kEqCenter] = 0.497487f;
 	m_param[kEqBandwidth] = 0.314286f;
 	m_param[kEqGain] = 0.5f;
-	RecalculateEqParams();
 
 	m_mixBuffer.Initialize(2, 2);
-	m_MixState.pOutBufferL = m_mixBuffer.GetInputBuffer(0);
-	m_MixState.pOutBufferR = m_mixBuffer.GetInputBuffer(1);
-
 	InsertIntoFactoryList();
 }
 
@@ -46,7 +42,7 @@ ParamEq::ParamEq(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixSt
 void ParamEq::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //-----------------------------------------------------------------
 {
-	if(m_param[kEqGain] == 1.0f)
+	if(m_param[kEqGain] == 1.0f || !m_mixBuffer.Ok())
 		return;
 	const float *in[2] = { m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1) };
 	float *out[2] = { m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1) };

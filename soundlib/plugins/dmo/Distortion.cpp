@@ -65,12 +65,8 @@ Distortion::Distortion(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 	m_param[kDistPreLowpassCutoff] = 1.0f;
 	m_param[kDistPostEQCenterFrequency] = 0.291f;
 	m_param[kDistPostEQBandwidth] = 0.291f;
-	RecalculateDistortionParams();
 
 	m_mixBuffer.Initialize(2, 2);
-	m_MixState.pOutBufferL = m_mixBuffer.GetInputBuffer(0);
-	m_MixState.pOutBufferR = m_mixBuffer.GetInputBuffer(1);
-
 	InsertIntoFactoryList();
 }
 
@@ -78,6 +74,9 @@ Distortion::Distortion(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 void Distortion::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //--------------------------------------------------------------------
 {
+	if(!m_mixBuffer.Ok())
+		return;
+
 	const float *in[2] = { m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1) };
 	float *out[2] = { m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1) };
 

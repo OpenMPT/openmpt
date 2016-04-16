@@ -35,12 +35,7 @@ WavesReverb::WavesReverb(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGI
 	m_param[kRvbReverbTime] = 1.0f / 3.0f;
 	m_param[kRvbHighFreqRTRatio] = 0.0f;
 
-	RecalculateWavesReverbParams();
-
 	m_mixBuffer.Initialize(2, 2);
-	m_MixState.pOutBufferL = m_mixBuffer.GetInputBuffer(0);
-	m_MixState.pOutBufferR = m_mixBuffer.GetInputBuffer(1);
-
 	InsertIntoFactoryList();
 }
 
@@ -48,6 +43,9 @@ WavesReverb::WavesReverb(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGI
 void WavesReverb::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //---------------------------------------------------------------------
 {
+	if(!m_mixBuffer.Ok())
+		return;
+
 	const float *in[2] = { m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1) };
 	float *out[2] = { m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1) };
 

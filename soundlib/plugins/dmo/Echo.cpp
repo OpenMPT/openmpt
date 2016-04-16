@@ -39,12 +39,8 @@ Echo::Echo(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	m_param[kEchoLeftDelay] = 0.25f;
 	m_param[kEchoRightDelay] = 0.25f;
 	m_param[kEchoPanDelay] = 0.0f;
-	RecalculateEchoParams();
 
 	m_mixBuffer.Initialize(2, 2);
-	m_MixState.pOutBufferL = m_mixBuffer.GetInputBuffer(0);
-	m_MixState.pOutBufferR = m_mixBuffer.GetInputBuffer(1);
-
 	InsertIntoFactoryList();
 }
 
@@ -52,7 +48,7 @@ Echo::Echo(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 void Echo::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //--------------------------------------------------------------
 {
-	if(!m_bufferSize)
+	if(!m_bufferSize || !m_mixBuffer.Ok())
 		return;
 	const float wetMix = m_param[kEchoWetDry], dryMix = 1 - wetMix;
 	const float *in[2] = { m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1) };

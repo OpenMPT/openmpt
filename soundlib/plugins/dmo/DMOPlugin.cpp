@@ -80,9 +80,6 @@ DMOPlugin::DMOPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *m
 	m_alignedBuffer.f32 = (float *)((((intptr_t)m_interleavedBuffer.f32) + 15) & ~15);
 
 	m_mixBuffer.Initialize(2, 2);
-	m_MixState.pOutBufferL = m_mixBuffer.GetInputBuffer(0);
-	m_MixState.pOutBufferR = m_mixBuffer.GetInputBuffer(1);
-
 	InsertIntoFactoryList();
 
 }
@@ -314,7 +311,7 @@ static void DeinterleaveInt16ToFloat(const int16 * MPT_RESTRICT input, float * M
 void DMOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //-------------------------------------------------------------------
 {
-	if(!numFrames)
+	if(!numFrames || !m_mixBuffer.Ok())
 		return;
 	m_mixBuffer.ClearOutputBuffers(numFrames);
 	REFERENCE_TIME startTime = Util::muldiv(m_SndFile.GetTotalSampleCount(), 10000000, m_nSamplesPerSec);
