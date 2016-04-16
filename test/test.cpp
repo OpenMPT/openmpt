@@ -867,6 +867,23 @@ static MPT_NOINLINE void TestMisc()
 	VERIFY_EQUAL(mpt::crc32(std::string("123456789")), 0xCBF43926u);
 	VERIFY_EQUAL(mpt::crc32_ogg(std::string("123456789")), 0x89a1897fu);
 
+	// Check floating-point accuracy in TransposeToFrequency
+	int32 transposeToFrequency[] =
+	{
+		      5,       5,       5,       5,
+		     31,      32,      33,      34,
+		    196,     202,     207,     214,
+		   1243,    1280,    1317,    1356,
+		   7894,    8125,    8363,    8608,
+		  50121,   51590,   53102,   54658,
+		 318251,  327576,  337175,  347055,
+		2020767, 2079980, 2140928, 2203663,
+	};
+
+	int freqIndex = 0;
+	for(int32 transpose = -128; transpose < 128; transpose += 32)
+		for(int32 finetune = -128; finetune < 128; finetune += 64, freqIndex++)
+			VERIFY_EQUAL_EPS(transposeToFrequency[freqIndex], static_cast<int32>(ModSample::TransposeToFrequency(transpose, finetune)), 1);
 }
 
 
