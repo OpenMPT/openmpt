@@ -32,12 +32,8 @@ Gargle::Gargle(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStru
 {
 	m_param[kGargleRate] = 0.02f;
 	m_param[kGargleWaveShape] = 0.0f;
-	RecalculateGargleParams();
 
 	m_mixBuffer.Initialize(2, 2);
-	m_MixState.pOutBufferL = m_mixBuffer.GetInputBuffer(0);
-	m_MixState.pOutBufferR = m_mixBuffer.GetInputBuffer(1);
-
 	InsertIntoFactoryList();
 }
 
@@ -45,6 +41,9 @@ Gargle::Gargle(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStru
 void Gargle::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //----------------------------------------------------------------
 {
+	if(!m_mixBuffer.Ok())
+		return;
+
 	const float *inL = m_mixBuffer.GetInputBuffer(0), *inR = m_mixBuffer.GetInputBuffer(1);
 	float *outL = m_mixBuffer.GetOutputBuffer(0), *outR = m_mixBuffer.GetOutputBuffer(1);
 	const bool triangle = m_param[kGargleWaveShape] < 1.0f;

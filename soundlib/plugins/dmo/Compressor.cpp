@@ -42,12 +42,7 @@ Compressor::Compressor(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 	m_param[kCompRatio] = 0.02f;
 	m_param[kCompPredelay] = 1.0f;
 
-	RecalculateCompressorParams();
-
 	m_mixBuffer.Initialize(2, 2);
-	m_MixState.pOutBufferL = m_mixBuffer.GetInputBuffer(0);
-	m_MixState.pOutBufferR = m_mixBuffer.GetInputBuffer(1);
-
 	InsertIntoFactoryList();
 }
 
@@ -55,7 +50,7 @@ Compressor::Compressor(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 void Compressor::Process(float *pOutL, float *pOutR, uint32 numFrames)
 //--------------------------------------------------------------------
 {
-	if(!m_bufSize)
+	if(!m_bufSize || !m_mixBuffer.Ok())
 		return;
 
 	const float *in[2] = { m_mixBuffer.GetInputBuffer(0), m_mixBuffer.GetInputBuffer(1) };

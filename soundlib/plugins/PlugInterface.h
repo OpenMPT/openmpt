@@ -37,8 +37,6 @@ struct SNDMIXPLUGINSTATE
 	};
 
 	mixsample_t *pMixBuffer;			// Stereo effect send buffer
-	float *pOutBufferL;					// Temp storage for int -> float conversion
-	float *pOutBufferR;
 	uint32 dwFlags;						// PluginStateFlags
 	uint32 inputSilenceCount;			// How much silence has been processed? (for plugin auto-turnoff)
 	mixsample_t nVolDecayL, nVolDecayR;	// End of sample click removal
@@ -71,9 +69,9 @@ protected:
 
 public:
 	SNDMIXPLUGINSTATE m_MixState;
+	PluginMixBuffer<float, MIXBUFFERSIZE> m_mixBuffer;	// Float buffers (input and output) for plugins
 
 protected:
-	PluginMixBuffer<float, MIXBUFFERSIZE> m_mixBuffer;	// Float buffers (input and output) for plugins
 	mixsample_t m_MixBuffer[MIXBUFFERSIZE * 2 + 2];		// Stereo interleaved input (sample mixer renders here)
 
 	float m_fGain;

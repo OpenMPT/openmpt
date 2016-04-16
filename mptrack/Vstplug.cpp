@@ -919,11 +919,7 @@ bool CVstPlugin::InitializeIOBuffers()
 {
 	// Input pointer array size must be >= 2 for now - the input buffer assignment might write to non allocated mem. otherwise
 	// In case of a bridged plugin, the AEffect struct has been updated before calling this opcode, so we don't have to worry about it being up-to-date.
-	bool result = m_mixBuffer.Initialize(std::max<size_t>(m_Effect.numInputs, 2), m_Effect.numOutputs);
-	m_MixState.pOutBufferL = m_mixBuffer.GetInputBuffer(0);
-	m_MixState.pOutBufferR = m_mixBuffer.GetInputBuffer(1);
-
-	return result;
+	return m_mixBuffer.Initialize(std::max<size_t>(m_Effect.numInputs, 2), m_Effect.numOutputs);
 }
 
 
@@ -1348,7 +1344,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 	ProcessVSTEvents();
 
 	// If the plug is found & ok, continue
-	if(m_pProcessFP != nullptr && (m_mixBuffer.GetInputBufferArray()) && m_mixBuffer.GetOutputBufferArray() && m_pMixStruct != nullptr)
+	if(m_pProcessFP != nullptr && m_mixBuffer.Ok())
 	{
 		VstInt32 numInputs = m_Effect.numInputs, numOutputs = m_Effect.numOutputs;
 		//RecalculateGain();
