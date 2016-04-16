@@ -281,6 +281,9 @@ void IMixPlugin::ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput
 	wetRatio *= m_fGain;
 	dryRatio *= m_fGain;
 
+	float *plugInputL = m_mixBuffer.GetInputBuffer(0);
+	float *plugInputR = m_mixBuffer.GetInputBuffer(1);
+
 	// Mix operation
 	switch(mixop)
 	{
@@ -290,8 +293,8 @@ void IMixPlugin::ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput
 		for(uint32 i = 0; i < numFrames; i++)
 		{
 			//rewbs.wetratio - added the factors. [20040123]
-			pOutL[i] += leftPlugOutput[i] * wetRatio + m_MixState.pOutBufferL[i] * dryRatio;
-			pOutR[i] += rightPlugOutput[i] * wetRatio + m_MixState.pOutBufferR[i] * dryRatio;
+			pOutL[i] += leftPlugOutput[i] * wetRatio + plugInputL[i] * dryRatio;
+			pOutR[i] += rightPlugOutput[i] * wetRatio + plugInputR[i] * dryRatio;
 		}
 		break;
 
@@ -299,8 +302,8 @@ void IMixPlugin::ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput
 	case 1:
 		for(uint32 i = 0; i < numFrames; i++)
 		{
-			pOutL[i] += m_MixState.pOutBufferL[i] - leftPlugOutput[i] * wetRatio;
-			pOutR[i] += m_MixState.pOutBufferR[i] - rightPlugOutput[i] * wetRatio;
+			pOutL[i] += plugInputL[i] - leftPlugOutput[i] * wetRatio;
+			pOutR[i] += plugInputR[i] - rightPlugOutput[i] * wetRatio;
 		}
 		break;
 
@@ -308,8 +311,8 @@ void IMixPlugin::ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput
 	case 2:
 		for(uint32 i = 0; i < numFrames; i++)
 		{
-			pOutL[i] += leftPlugOutput[i] - m_MixState.pOutBufferL[i] * dryRatio;
-			pOutR[i] += rightPlugOutput[i] - m_MixState.pOutBufferR[i] * dryRatio;
+			pOutL[i] += leftPlugOutput[i] - plugInputL[i] * dryRatio;
+			pOutR[i] += rightPlugOutput[i] - plugInputR[i] * dryRatio;
 		}
 		break;
 
@@ -317,8 +320,8 @@ void IMixPlugin::ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput
 	case 3:
 		for(uint32 i = 0; i < numFrames; i++)
 		{
-			pOutL[i] -= leftPlugOutput[i] - m_MixState.pOutBufferL[i] * wetRatio;
-			pOutR[i] -= rightPlugOutput[i] - m_MixState.pOutBufferR[i] * wetRatio;
+			pOutL[i] -= leftPlugOutput[i] - plugInputL[i] * wetRatio;
+			pOutR[i] -= rightPlugOutput[i] - plugInputR[i] * wetRatio;
 		}
 		break;
 
@@ -326,9 +329,9 @@ void IMixPlugin::ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput
 	case 4:
 		for(uint32 i = 0; i < numFrames; i++)
 		{
-			float middle = (pOutL[i] + m_MixState.pOutBufferL[i] + pOutR[i] + m_MixState.pOutBufferR[i]) / 2.0f;
-			pOutL[i] -= middle - leftPlugOutput[i] * wetRatio + middle - m_MixState.pOutBufferL[i];
-			pOutR[i] -= middle - rightPlugOutput[i] * wetRatio + middle - m_MixState.pOutBufferR[i];
+			float middle = (pOutL[i] + plugInputL[i] + pOutR[i] + plugInputR[i]) / 2.0f;
+			pOutL[i] -= middle - leftPlugOutput[i] * wetRatio + middle - plugInputL[i];
+			pOutR[i] -= middle - rightPlugOutput[i] * wetRatio + middle - plugInputR[i];
 		}
 		break;
 
@@ -342,8 +345,8 @@ void IMixPlugin::ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput
 
 		for(uint32 i = 0; i < numFrames; i++)
 		{
-			pOutL[i] += wetRatio * (leftPlugOutput[i] - m_MixState.pOutBufferL[i]) + dryRatio * (m_MixState.pOutBufferR[i] - rightPlugOutput[i]);
-			pOutR[i] += dryRatio * (leftPlugOutput[i] - m_MixState.pOutBufferL[i]) + wetRatio * (m_MixState.pOutBufferR[i] - rightPlugOutput[i]);
+			pOutL[i] += wetRatio * (leftPlugOutput[i] - plugInputL[i]) + dryRatio * (plugInputR[i] - rightPlugOutput[i]);
+			pOutR[i] += dryRatio * (leftPlugOutput[i] - plugInputL[i]) + wetRatio * (plugInputR[i] - rightPlugOutput[i]);
 		}
 		break;
 	}
@@ -354,8 +357,8 @@ void IMixPlugin::ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput
 	{
 		for(uint32 i = 0; i < numFrames; i++)
 		{
-			pOutL[i] += m_MixState.pOutBufferL[i];
-			pOutR[i] += m_MixState.pOutBufferR[i];
+			pOutL[i] += plugInputL[i];
+			pOutR[i] += plugInputR[i];
 		}
 	}
 }
