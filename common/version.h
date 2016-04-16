@@ -87,11 +87,11 @@ namespace MptVersion
 	// Returns MptVersion::str if the build is a clean release build straight from the repository or an extended string otherwise (if built from a svn working copy and tsvn was available during build)
 	std::string GetVersionStringExtended(); // e.g. "1.17.02.08-r1234+ 32 bit DEBUG"
 
+	// Returns a URL for the respective keys. Supported keys: "website", "forum", "bugtracker", "updates", "top_picks"
+	mpt::ustring GetURL(std::string key);
+
 	// Returns a multi-line string containing the full credits for the code base
 	mpt::ustring GetFullCreditsString();
-
-	// Returns a multi-line string containing developer contact and community addresses
-	mpt::ustring GetContactString();
 
 	// Returns the OpenMPT license text
 	mpt::ustring GetLicenseString();

@@ -133,19 +133,23 @@ static const char license         [] = "license";
 
 //! Get library related metadata.
 /*!
-	\param key Key to query.
-	       Possible keys are:
-	        -  "library_version": verbose library version string
-	        -  "library_features": verbose library features string
-	        -  "core_version": verboseOpenMPT core version string
-	        -  "source_url": original source code URL
-	        -  "source_date": original source code date
-	        -  "build": information about the current build (e.g. the build date or compiler used)
-	        -  "build_compiler": information about the compiler used to build libopenmpt
-	        -  "credits": all contributors
-	        -  "contact": contact infromation about libopenmpt
-	        -  "license": he libopenmpt license
-	\return A (possibly multi-line) string containing the queried information. If no information is available, the string is empty.
+  \param key Key to query.
+         Possible keys are:
+          -  "library_version": verbose library version string
+          -  "library_features": verbose library features string
+          -  "core_version": verboseOpenMPT core version string
+          -  "source_url": original source code URL
+          -  "source_date": original source code date
+          -  "build": information about the current build (e.g. the build date or compiler used)
+          -  "build_compiler": information about the compiler used to build libopenmpt
+          -  "credits": all contributors
+          -  "contact": contact infromation about libopenmpt
+          -  "license": the libopenmpt license
+          -  "url": libopenmpt website URL
+          -  "support_forum_url": libopenmpt support and discussions forum URL
+          -  "bugtracker_url": libopenmpt bug and issue tracker URL
+
+  \return A (possibly multi-line) string containing the queried information. If no information is available, the string is empty.
 */
 LIBOPENMPT_CXX_API std::string get( const std::string & key );
 
