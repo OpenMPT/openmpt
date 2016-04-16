@@ -304,7 +304,7 @@ void ModSample::SanitizeLoops()
 uint32 ModSample::TransposeToFrequency(int transpose, int finetune)
 //-----------------------------------------------------------------
 {
-	return Util::Round<uint32>(std::pow(2.0f, (transpose * 128.0f + finetune) * (1.0f / (12.0f * 128.0f))) * 8363.0f);
+	return Util::Round<uint32>(std::pow(2.0, (transpose * 128.0 + finetune) * (1.0 / (12.0 * 128.0))) * 8363.0);
 }
 
 
@@ -319,8 +319,7 @@ void ModSample::TransposeToFrequency()
 int ModSample::FrequencyToTranspose(uint32 freq)
 //----------------------------------------------
 {
-	const float inv_log_2 = 1.44269504089f; // 1.0f/std::log(2.0f)
-	return Util::Round<int>(std::log(freq * (1.0f / 8363.0f)) * (12.0f * 128.0f * inv_log_2));
+	return Util::Round<int>(std::log(freq * (1.0 / 8363.0)) * (12.0 * 128.0 * (1.0 / M_LN2)));
 }
 
 
