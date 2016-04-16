@@ -48,7 +48,7 @@ namespace Test {
 
 #define VERIFY_EQUAL_EPS(x,y,eps)	\
 	MPT_DO { \
-		if(std::abs((x) - (y)) <= (eps)) { \
+		if(std::abs((x) - (y)) > (eps)) { \
 			MyDebugBreak(); \
 		} \
 	} MPT_WHILE_0 \
