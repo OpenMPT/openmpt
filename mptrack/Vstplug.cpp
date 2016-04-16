@@ -1356,9 +1356,11 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		// Merge stereo input before sending to the plug if the plug can only handle one input.
 		if (numInputs == 1)
 		{
+			float *plugInputL = m_mixBuffer.GetInputBuffer(0);
+			float *plugInputR = m_mixBuffer.GetInputBuffer(1);
 			for (uint32 i = 0; i < numFrames; i++)
 			{
-				m_MixState.pOutBufferL[i] = 0.5f * (m_MixState.pOutBufferL[i] + m_MixState.pOutBufferR[i]);
+				plugInputL[i] = 0.5f * (plugInputL[i] + plugInputR[i]);
 			}
 		}
 
