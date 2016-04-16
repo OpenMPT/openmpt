@@ -148,7 +148,10 @@ LIBOPENMPT_API void openmpt_free_string( const char * str );
  *        -  "build_compiler": information about the compiler used to build libopenmpt
  *        -  "credits": all contributors
  *        -  "contact": contact infromation about libopenmpt
- *        -  "license": he libopenmpt license
+ *        -  "license": the libopenmpt license
+ *        -  "url": libopenmpt website URL
+ *        -  "support_forum_url": libopenmpt support and discussions forum URL
+ *        -  "bugtracker_url": libopenmpt bug and issue tracker URL
  * \return A (possibly multi-line) string containing the queried information. If no information is available, the string is empty.
  */
 LIBOPENMPT_API const char * openmpt_get_string( const char * key );

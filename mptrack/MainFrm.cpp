@@ -2375,24 +2375,22 @@ void CMainFrame::OnOctaveChanged()
 void CMainFrame::OnReportBug()
 //----------------------------
 {
-	CTrackApp::OpenURL("https://bugs.openmpt.org/");
-	return;
+	CTrackApp::OpenURL(MptVersion::GetURL("bugtracker"));
 }
 
 
 BOOL CMainFrame::OnInternetLink(UINT nID)
 //---------------------------------------
 {
-	LPCSTR pszURL = nullptr;
-
+	mpt::ustring url;
 	switch(nID)
 	{
-	case ID_NETLINK_MODPLUG:	pszURL = "https://openmpt.org/"; break;
-	case ID_NETLINK_TOP_PICKS:	pszURL = "https://openmpt.org/top_picks"; break;
+	case ID_NETLINK_MODPLUG:	url = MptVersion::GetURL("website"); break;
+	case ID_NETLINK_TOP_PICKS:	url = MptVersion::GetURL("top_picks"); break;
 	}
-	if(pszURL != nullptr)
+	if(!url.empty())
 	{
-		return CTrackApp::OpenURL(pszURL) ? TRUE : FALSE;
+		return CTrackApp::OpenURL(url) ? TRUE : FALSE;
 	}
 	return FALSE;
 }

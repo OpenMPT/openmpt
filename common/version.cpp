@@ -514,15 +514,33 @@ std::string SourceInfo::GetUrlWithRevision() const
 	return Url + "@" + mpt::ToString(Revision);
 }
 
-mpt::ustring GetContactString()
+mpt::ustring GetURL(std::string key)
 {
-	return MPT_UTF8(
-		"Contact / Discussion:\n"
-		"https://forum.openmpt.org/\n"
-		"\n"
-		"Updates:\n"
-		"https://openmpt.org/download\n"
-		);
+	mpt::ustring result;
+	if(key.empty())
+	{
+		result = mpt::ustring();
+	} else if(key == "website")
+	{
+		#ifdef LIBOPENMPT_BUILD
+			result = MPT_USTRING("https://lib.openmpt.org/");
+		#else
+			result = MPT_USTRING("https://openmpt.org/");
+		#endif
+	} else if(key == "forum")
+	{
+		result = MPT_USTRING("https://forum.openmpt.org/");
+	} else if(key == "bugtracker")
+	{
+		result = MPT_USTRING("https://bugs.openmpt.org/");
+	} else if(key == "updates")
+	{
+		result = MPT_USTRING("https://openmpt.org/download");
+	} else if(key == "top_picks")
+	{
+		result = MPT_USTRING("https://openmpt.org/top_pick");
+	}
+	return result;
 }
 
 mpt::ustring GetFullCreditsString()

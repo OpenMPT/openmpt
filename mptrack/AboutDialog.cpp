@@ -266,7 +266,7 @@ BOOL CAboutDlg::OnInitDialog()
 		+ MPT_USTRING("\n");
 	app += MPT_USTRING("Version ") + mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringSimple()) + MPT_USTRING("\n");
 	app += MPT_USTRING("\n");
-	app += MPT_USTRING("https://openmpt.org/\n");
+	app += MptVersion::GetURL("website") + MPT_USTRING("\n");
 	SetDlgItemText(IDC_EDIT3, mpt::ToCString(mpt::String::Replace(app, MPT_USTRING("\n"), MPT_USTRING("\r\n"))));
 
 	m_bmp.SubclassDlgItem(IDC_BITMAP1, this);
@@ -275,7 +275,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_Tab.InsertItem(TCIF_TEXT, 1, _T("Components"), 0, 0, 0, 0);
 	m_Tab.InsertItem(TCIF_TEXT, 2, _T("Credits"), 0, 0, 0, 0);
 	m_Tab.InsertItem(TCIF_TEXT, 3, _T("License"), 0, 0, 0, 0);
-	m_Tab.InsertItem(TCIF_TEXT, 4, _T("Contact"), 0, 0, 0, 0);
+	m_Tab.InsertItem(TCIF_TEXT, 4, _T("Resources"), 0, 0, 0, 0);
 	m_Tab.SetCurSel(0);
 
 	OnTabChange(nullptr, nullptr);
@@ -479,7 +479,15 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += MptVersion::GetLicenseString();
 			break;
 		case 4:
-			text += MptVersion::GetContactString();
+			text += lf;
+			text += MPT_USTRING("Website: ") + lf + MptVersion::GetURL("website") + lf;
+			text += lf;
+			text += MPT_USTRING("Forum: ") + lf + MptVersion::GetURL("forum") + lf;
+			text += lf;
+			text += MPT_USTRING("Bug Tracker: ") + lf + MptVersion::GetURL("bugtracker") + lf;
+			text += lf;
+			text += MPT_USTRING("Updates: ") + lf + MptVersion::GetURL("updates") + lf;
+			text += lf;
 			break;
 	}
 	return text;

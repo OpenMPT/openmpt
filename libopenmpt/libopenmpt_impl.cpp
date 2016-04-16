@@ -150,11 +150,23 @@ static std::string get_credits_string() {
 }
 
 static std::string get_contact_string() {
-	return mpt::ToCharset(mpt::CharsetUTF8, MptVersion::GetContactString());
+	return mpt::ToCharset(mpt::CharsetUTF8, MPT_USTRING("Forum: ") +  MptVersion::GetURL("forum"));
 }
 
 static std::string get_license_string() {
 	return mpt::ToCharset(mpt::CharsetUTF8, MptVersion::GetLicenseString());
+}
+
+static std::string get_url_string() {
+	return mpt::ToCharset(mpt::CharsetUTF8, MptVersion::GetURL("website"));
+}
+
+static std::string get_support_forum_url_string() {
+	return mpt::ToCharset(mpt::CharsetUTF8, MptVersion::GetURL("forum"));
+}
+
+static std::string get_bugtracker_url_string() {
+	return mpt::ToCharset(mpt::CharsetUTF8, MptVersion::GetURL("bugtracker"));
 }
 
 std::string get_string( const std::string & key ) {
@@ -180,6 +192,12 @@ std::string get_string( const std::string & key ) {
 		return get_contact_string();
 	} else if ( key == "license" ) {
 		return get_license_string();
+	} else if ( key == "url" ) {
+		return get_url_string();
+	} else if ( key == "support_forum_url" ) {
+		return get_support_forum_url_string();
+	} else if ( key == "bugtracker_url" ) {
+		return get_bugtracker_url_string();
 	} else {
 		return std::string();
 	}
