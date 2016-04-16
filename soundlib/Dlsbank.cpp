@@ -1631,7 +1631,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 		#endif
 			if (usUnityNote > 0x7F) usUnityNote = 60;
 			int steps = (60 + transpose - usUnityNote) * 128 + sFineTune;
-			sample.nC5Speed = Util::Round<uint32>(std::pow(2.0f, steps * (1.0f / (12.0f * 128.0f))) * sample.nC5Speed);
+			sample.nC5Speed = Util::Round<uint32>(std::pow(2.0, steps * (1.0 / (12.0 * 128.0))) * sample.nC5Speed);
 
 			Limit(lVolume, 16, 256);
 			sample.nGlobalVol = (uint8)(lVolume / 4);	// 0-64
