@@ -28,7 +28,7 @@ is just a high-level summary.
     forwards compatible way harder than it should be. Please just use the string
     literals directly.
  *  [**Change**] openmpt123: `--[no-]shuffle` option has been renamed to
-    `--[no-]randomize`. A new `--[no-]shuffle` option hasa been added which
+    `--[no-]randomize`. A new `--[no-]shuffle` option has been added which
     shuffles randomly through the playlist as opposed to randomizing the
     playlist upfront.
  *  [**Change**] Support for Un4seen unmo3 has generally been deprecated in
@@ -38,6 +38,7 @@ is just a high-level summary.
  *  [**Bug**] Memory consumption during loading has been reduced by about 1/3 in
     case a seekable input stream is provided (either via C API callback open
     functions or via C++ API iostream constructors).
+ *  [**Bug**] Some samples in AMS modules were detuned when using Emscripten.
 
  *  libopenmpt now has support for DMO plugins on Windows when built with MSVC.
     Additionally, the DMO Compression, Distortion, Echo, Gargle, ParamEQ and

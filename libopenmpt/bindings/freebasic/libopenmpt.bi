@@ -70,7 +70,10 @@ Declare Sub openmpt_free_string(ByVal Str As Const ZString Ptr)
  '        -  "build_compiler": information about the compiler used to build libopenmpt
  '        -  "credits": all contributors
  '        -  "contact": contact infromation about libopenmpt
- '        -  "license": he libopenmpt license
+ '        -  "license": the libopenmpt license
+ '        -  "url": libopenmpt website URL
+ '        -  "support_forum_url": libopenmpt support and discussions forum URL
+ '        -  "bugtracker_url": libopenmpt bug and issue tracker URL
  ' \return A (possibly multi-line) string containing the queried information. If no information is available, the string is empty.
  ' \remarks Use openmpt_get_string to automatically handle the lifetime of the returned pointer.
  '/
