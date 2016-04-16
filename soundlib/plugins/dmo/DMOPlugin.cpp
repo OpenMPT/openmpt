@@ -550,7 +550,7 @@ CString DMOPlugin::GetParamDisplay(PlugParamIndex param)
 				default:
 					{
 						CString s;
-						s.Format(_T("%d"), (int)md);
+						s.Format(_T("%d"), Util::Round<int>(md));
 						return s;
 					}
 					break;
