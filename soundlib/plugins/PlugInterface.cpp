@@ -860,18 +860,13 @@ void IMidiPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, 
 	uint8 volume = static_cast<uint8>(std::min(vol / 2, 127));
 
 	// Bank change
-	if(wMidiBank < 0x4000 && bankChanged)
+	if(bankChanged)
 	{
 		uint8 high = static_cast<uint8>(wMidiBank >> 7);
 		uint8 low = static_cast<uint8>(wMidiBank & 0x7F);
 
-		if((channel.currentBank >> 7) != high)
-		{
-			// High byte changed
-			MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_BankSelect_Coarse, nMidiCh, high));
-		}
-		// Low byte
 		//GetSoundFile()->ProcessMIDIMacro(trackChannel, false, GetSoundFile()->m_MidiCfg.szMidiGlb[MIDIOUT_BANKSEL], 0);
+		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_BankSelect_Coarse, nMidiCh, high));
 		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_BankSelect_Fine, nMidiCh, low));
 
 		channel.currentBank = wMidiBank;
@@ -880,7 +875,7 @@ void IMidiPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, 
 	// Program change
 	// According to the MIDI specs, a bank change alone doesn't have to change the active program - it will only change the bank of subsequent program changes.
 	// Thus we send program changes also if only the bank has changed.
-	if(nMidiProg < 0x80 && (progChanged || bankChanged))
+	if(progChanged || (nMidiProg < 0x80 && bankChanged))
 	{
 		channel.currentProgram = nMidiProg;
 		//GetSoundFile()->ProcessMIDIMacro(trackChannel, false, GetSoundFile()->m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM], 0);
