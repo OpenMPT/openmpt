@@ -3085,11 +3085,9 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 #if defined(MPT_WITH_MINIMP3)
 
 	file.Rewind();
-	std::vector<uint8> raw_data(file.GetLength());
-	file.ReadRaw(&(raw_data[0]), raw_data.size());
-	int64 bytes_left = raw_data.size();
-	uint8 *file_data = &(raw_data[0]);
-	uint8 *stream_pos = file_data;
+	FileReader::PinnedRawDataView  rawDataView = file.GetPinnedRawDataView(file.GetLength());
+	int64 bytes_left = rawDataView.size();
+	uint8 *stream_pos = const_cast<uint8 *>(mpt::byte_cast<const uint8 *>(rawDataView.data())); // workaround lack of const qualifier in mp3_decode (all internal functions have the required const correctness)
 
 	std::vector<int16> raw_sample_data;
 
@@ -3114,7 +3112,13 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		bytes_left -= frame_size;
 		if(info.audio_bytes >= 0)
 		{
-			raw_sample_data.insert(raw_sample_data.end(), sample_buf, sample_buf + (info.audio_bytes / sizeof(int16)));
+			try
+			{
+				raw_sample_data.insert(raw_sample_data.end(), sample_buf, sample_buf + (info.audio_bytes / sizeof(int16)));
+			} catch(MPTMemoryException)
+			{
+				break;
+			}
 		}
 	} while((bytes_left >= 0) && (frame_size > 0));
 
@@ -3138,7 +3142,10 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	Samples[sample].uFlags.set(CHN_STEREO, channels == 2);
 	Samples[sample].AllocateSample();
 
-	std::copy(raw_sample_data.begin(), raw_sample_data.end(), Samples[sample].pSample16);
+	if(Samples[sample].pSample != nullptr)
+	{
+		std::copy(raw_sample_data.begin(), raw_sample_data.end(), Samples[sample].pSample16);
+	}
 
 	if(!mo3Decode)
 	{
@@ -3209,8 +3216,11 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	Samples[sample].uFlags.set(CHN_STEREO, nchannels == 2);
 	Samples[sample].AllocateSample();
 
-	size_t ndecoded;
-	mpg123->mpg123_read(mh, static_cast<unsigned char *>(Samples[sample].pSample), Samples[sample].GetSampleSizeInBytes(), &ndecoded);
+	if(Samples[sample].pSample != nullptr)
+	{
+		size_t ndecoded;
+		mpg123->mpg123_read(mh, static_cast<unsigned char *>(Samples[sample].pSample), Samples[sample].GetSampleSizeInBytes(), &ndecoded);
+	}
 	mpg123->mpg123_delete(mh);
 
 	if(!mo3Decode)
@@ -3608,6 +3618,11 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	Samples[sample].uFlags.set(CHN_16BIT, bitsPerSample >= 16);
 	Samples[sample].uFlags.set(CHN_STEREO, numChannels == 2);
 	Samples[sample].AllocateSample();
+	if(Samples[sample].pSample == nullptr)
+	{
+		result = false;
+		goto fail;
+	}
 
 	if(bitsPerSample == 24)
 	{
