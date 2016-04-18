@@ -2503,10 +2503,9 @@ void CViewPattern::PatternStep(ROWINDEX row)
 		pModDoc->SetNotifications(Notification::Position | Notification::VUMeters);
 		if(row == ROWINDEX_INVALID)
 		{
-			if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
-				SetCurrentRow(GetCurrentRow() + 1, true);
-			else
-				SetCurrentRow((GetCurrentRow() + 1) % pSndFile->Patterns[m_nPattern].GetNumRows(), false);
+			SetCurrentRow(GetCurrentRow() + 1,
+				(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) ||	// Wrap around to next pattern if continous scroll is enabled...
+				(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_WRAP));			// ...or otherwise if cursor wrap is enabled.
 		}
 		SetFocus();
 	}
