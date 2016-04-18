@@ -695,9 +695,11 @@ void CSoundFile::ProcessPlugins(uint32 nCount)
 					// Samples or plugins are being rendered, so turn off auto-bypass for this master effect.
 					if(plugin.pMixPlugin != nullptr) plugin.pMixPlugin->ResetSilence();
 					SNDMIXPLUGIN *chain = &plugin;
-					while(chain->GetOutputPlugin() != PLUGINDEX_INVALID)
+					PLUGINDEX out = chain->GetOutputPlugin();
+					while(out > plug && out < MAX_MIXPLUGINS)
 					{
-						chain = &m_MixPlugins[chain->GetOutputPlugin()];
+						chain = &m_MixPlugins[out];
+						out = chain->GetOutputPlugin();
 						if(chain->pMixPlugin)
 						{
 							chain->pMixPlugin->ResetSilence();
