@@ -1,0 +1,370 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Tord Jansson">
+   <meta name="GENERATOR" content="Mozilla/4.7 [en] (Win98; I) [Netscape]">
+   <title>BladeEnc DLL Manual</title>
+</head>
+<body>
+&nbsp;
+<center>
+<p><font size=+4>BladeEnc DLL</font>
+<br><font size=+2>version 1.0</font>
+<br>(BladeEnc engine version 0.75, 0.82 and 0.88)
+<br><font size=+3>Programmers Manual</font>
+<p><i>BladeEnc.DLL and this manual is copyright Tord Jansson and may be
+distributed freely</i>
+<br><i>as long as no modifications are made to neither one of them.</i>
+<p><i>The BladeEnc engine is heavily based on distribution 10 of ISO's
+reference</i>
+<br><i>source code for MPEG Layer 3 encoding.</i>
+<p><i>The DLL-Interface for the BladeEnc engine was written by</i>
+<br><i>Jukka Poikolainen</i>
+<br>&nbsp;
+<p><b>Homepage</b>: <a href="http://bladeenc.mp3.no">http://bladeenc.mp3.no</a>
+<br><b>E-mail:</b> <a href="mailto: tord.jansson@swipnet.se">tord.jansson@swipnet.se</a></center>
+
+<p><br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<p><font size=+2>Distribution</font>
+<p>People and companies&nbsp; who wants to distribute BladeEnc.DLL with
+their commercial products are free to do so as far as I'm concerned, but
+should be aware that BladeEnc.DLL might infringe certain MP3 related software
+patents held by Fraunhofer IIS in certain countries.
+<p>However, these patents are not valid in countries that doesn't approve
+of software patents, which includes Sweden and, as far as I know,&nbsp;
+most other European Countries as well. Don't ask me for specific information
+about any other countries, I don't have that information.
+<br>&nbsp;
+<br>&nbsp;
+<p><font size=+2>Disclaimer</font>
+<p>BladeEnc.DLL and this manual is distributed 'as is' with no warranty
+of any kind. The Author is not to be held responsible for the result of
+any use or misuse of this product.
+<br>&nbsp;
+<br>&nbsp;
+<p><font size=+2>Current Bugs and Limitations</font>
+<p>Although the interface is designed to be able to handle multiple parallel
+streams it can't be done yet due to limitations in the engine, only one
+stream is allowed.
+<br>&nbsp;
+<p><font size=+2>Future Compatibility</font>
+<p>This interface should be compatible with all future versions of BladeEnc.DLL
+without any need to recompile your programs. You should therefore <b>not</b>
+check the version number upon start and prevent users from running your
+program with a later version of BladeEnc.DLL.
+<br>&nbsp;
+<p><font size=+2>How to use the DLL</font>
+<p>1. Fill in a PBE_CONFIG structure and send it to beInitStream(). Make
+sure that BE_ERR_SUCCESSFUL is returned.
+<p>2. Reserve at least the amount of memory returned in dwBufferSize as
+your output buffer.
+<p>3. Call beEncodeChunk() until you've encoded everything you want.
+<p>4. Call beDeinitStream() to make sure that all encoded data is flushed
+out before closing the stream.
+<p>5. Close the stream using beCloseStream().
+<br>&nbsp;
+<p><font size=+2>Return Values</font>
+<p>See the header-file for a complete list of function return values. All
+functions should return BE_ERR_SUCCESSFUL unless something went wrong.
+<br>&nbsp;
+<p><font size=+2>The BE_CONFIG - structure</font>
+<p>These are the members of the BE_CONFIG structure you need to fill in
+before you call beInitStream():
+<br>&nbsp;
+<table>
+<tr>
+<td><b>dwConfig</b></td>
+
+<td>Specifies what kind of output you want. Since only MP3 currently is
+supported you must set this to <b>BE_CONFIG_MP3</b></td>
+</tr>
+
+<tr>
+<td><b>format.mp3.dwSampleRate</b></td>
+
+<td>Samplerate in Hz for MP3 file. This can be set to either <b>32000</b>,
+<b>44100</b>
+or <b>48000</b>.</td>
+</tr>
+
+<tr>
+<td><b>format.mp3.byMode</b></td>
+
+<td>Stereomode for MP3 file. This can be either <b>BE_MP3_MODE_STEREO</b>,
+<b>BE_MP3_MODE_DUALCHANNEL</b>
+or <b>BE_MP3_MODE_MONO.</b></td>
+</tr>
+
+<tr>
+<td><b>format.mp3.bitrate</b></td>
+
+<td>Bitrate (i.e. size) of MP3 file in kBit/s. Allowed bitrates are: <b>32,
+40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256</b> and <b>320</b>.</td>
+</tr>
+
+<tr>
+<td><b>format.mp3.bCopyright</b></td>
+
+<td>If this is set to TRUE the Copyright bit in the MP3 stream will be
+set.</td>
+</tr>
+
+<tr>
+<td><b>format.mp3.bCRC</b></td>
+
+<td>Set this to TRUE in order to enable CRC-checksum in the bitstream.</td>
+</tr>
+
+<tr>
+<td><b>format.mp3.bOriginal</b></td>
+
+<td>If this is set to TRUE the Original bit in the MP3 stream will be set.</td>
+</tr>
+
+<tr>
+<td><b>format.mp3.bPrivate</b></td>
+
+<td>If this is set to TRUE the Private bit in the MP3 stream will be set.</td>
+</tr>
+</table>
+
+<br>&nbsp;
+<p>
+<hr WIDTH="100%">
+<p><font size=+2>beInitStream()</font>
+<table CELLSPACING=16 WIDTH="100%" >
+<tr VALIGN=TOP>
+<td WIDTH="20%"><b>Synopsis:</b></td>
+
+<td WIDTH="80%">&nbsp;BE_ERR beInitStream( PBE_CONFIG <i>pbeConfig</i>,
+PDWORD <i>dwSamples</i>, PDWORD <i>dwBufferSize</i>, PHBE_STREAM <i>phbeStream</i>
+)</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td WIDTH="20%"><b>Parameters:</b></td>
+
+<td WIDTH="80%">
+<table CELLSPACING=10 WIDTH="100%" >
+<tr>
+<td VALIGN=TOP WIDTH="20%"><i>pbeConfig</i></td>
+
+<td>Pointer at the struct containing encoder settings.</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP><i>dwSamples</i></td>
+
+<td>Pointer at double word where number of samples to send to each <i>beEncodeChunk()</i>
+is returned.</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP><i>dwBufferSize</i></td>
+
+<td>Pointer at double word where minimum size in bytes of output buffer
+is returned.</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP><i>phbeStream</i></td>
+
+<td>Pointer at integer where Stream handle is returned.</td>
+</tr>
+</table>
+</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td WIDTH="20%"><b>Description:</b></td>
+
+<td WIDTH="80%">This function is the first to call before starting an encoding
+stream.</td>
+</tr>
+</table>
+
+<hr WIDTH="100%">
+<p><font size=+2>beEncodeChunk()</font>
+<table CELLSPACING=16 WIDTH="100%" >
+<tr VALIGN=TOP>
+<td WIDTH="20%"><b>Synopsis:</b></td>
+
+<td WIDTH="80%">BE_ERR beEncodeChunk( HBE_STREAM <i>hbeStream</i>, DWORD
+<i>nSamples</i>,
+PSHORT <i>pSamples</i>, PBYTE <i>pOutput</i>, PDWORD <i>pdwOutput</i> )</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td WIDTH="20%"><b>Parameters:</b></td>
+
+<td>
+<table CELLSPACING=10 WIDTH="100%" >
+<tr>
+<td VALIGN=TOP WIDTH="20%"><i>hbeStream</i></td>
+
+<td WIDTH="80%">Handle of the stream.</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="90"><i>nSamples</i></td>
+
+<td>Number of samples to be encoded for this call. This should be identical
+to what is returned by <i>beInitStream()</i>, unless you are encoding the
+last chunk, which might be smaller.</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="90"><i>pSamples</i></td>
+
+<td>Pointer at the 16-bit signed samples to be encoded. These should be
+in stereo when encoding a stereo MP3 and mono when encoding a mono MP3.</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="90"><i>pOutput</i></td>
+
+<td>Where to write the encoded data. This buffer should be at least of
+the minimum size returned by <i>beInitStream()</i>.</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="90"><i>pdwOutput</i></td>
+
+<td>Where to return number of bytes of encoded data written. The amount
+of data written might vary from chunk to chunk.</td>
+</tr>
+</table>
+</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td WIDTH="20%"><b>Description:</b></td>
+
+<td>Encodes a chunk of samples. <i>Please note that if you have set the
+output to generate mono MP3 files you must feed beEncodeChunk() with mono
+samples!</i></td>
+</tr>
+</table>
+
+<hr WIDTH="100%">
+<p><font size=+2>beDeinitStream()</font>
+<table CELLSPACING=16 WIDTH="100%" >
+<tr VALIGN=TOP>
+<td WIDTH="20%"><b>Synopsis:</b></td>
+
+<td WIDTH="80%">BE_ERR beDeinitStream( HBE_STREAM <i>hbeStream</i>, PBYTE
+<i>pOutput</i>,
+PDWORD <i>pdwOutput</i> )</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td WIDTH="20%"><b>Parameters:</b></td>
+
+<td>
+<table CELLSPACING=10 WIDTH="100%" >
+<tr>
+<td VALIGN=TOP WIDTH="20%"><i>hbeStream</i></td>
+
+<td WIDTH="80%">Handle of the stream.</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP><i>pOutput</i></td>
+
+<td>Where to write the encoded data. This buffer should be at least of
+the minimum size returned by <i>beInitStream()</i>.</td>
+</tr>
+
+<tr>
+<td><i>pdwOutput</i></td>
+
+<td>Where to return number of bytes of encoded data written.</td>
+</tr>
+</table>
+</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td WIDTH="20%"><b>Description:</b></td>
+
+<td>This function should be called after encoding the last chunk in order
+to flush the encoder. It writes any encoded data that still might be left
+inside the encoder to the output buffer. This function should NOT be called
+unless you have encoded all of the chunks in your stream.</td>
+</tr>
+</table>
+
+<hr WIDTH="100%">
+<p><font size=+2>beCloseStream()</font>
+<table CELLSPACING=16 WIDTH="100%" >
+<tr VALIGN=TOP>
+<td WIDTH="20%"><b>Synopsis:</b></td>
+
+<td>BE_ERR beCloseStream( HBE_STREAM <i>hbeStream</i> )</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td WIDTH="90"><b>Parameters:</b></td>
+
+<td>
+<table CELLSPACING=10 WIDTH="100%" >
+<tr>
+<td WIDTH="20%"><i>hbeStream</i></td>
+
+<td>Handle of the stream.</td>
+</tr>
+</table>
+</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td WIDTH="90"><b>Description:</b></td>
+
+<td>Last function to be called when finished encoding a stream. Should
+unlike <i>beDeinitStream()</i> also be called if the encoding is canceled.</td>
+</tr>
+</table>
+
+<hr WIDTH="100%">
+<p><font size=+2>beVersion()</font>
+<table CELLSPACING=16 WIDTH="100%" >
+<tr VALIGN=TOP>
+<td WIDTH="20%"><b>Synopsis:</b></td>
+
+<td>VOID beVersion( PBE_VERSION <i>pbeVersion</i> )</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><b>Parameters:</b></td>
+
+<td>
+<table CELLSPACING=10 WIDTH="100%" >
+<tr>
+<td VALIGN=TOP WIDTH="20%"><i>pbeVersion</i></td>
+
+<td>Pointer at struct where version number, release date and URL for homepage
+is returned.</td>
+</tr>
+</table>
+</td>
+</tr>
+
+<tr VALIGN=TOP>
+<td><b>Description:</b></td>
+
+<td>Returns information like version numbers (both of the DLL and encoding
+engine), release date and URL for BladeEnc's homepage. All this information
+should be made available to the user of your product through a dialog box
+or something similar.</td>
+</tr>
+</table>
+
+<br>&nbsp;
+</body>
+</html>
