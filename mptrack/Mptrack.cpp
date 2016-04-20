@@ -1360,8 +1360,8 @@ void CTrackApp::OnFileNewMPT()
 }
 
 
-void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files)
-//--------------------------------------------------------------------
+void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files, const mpt::PathString &overridePath)
+//---------------------------------------------------------------------------------------------------------
 {
 	files.clear();
 
@@ -1395,23 +1395,25 @@ void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files)
 		"Wave Files (*.wav)|*.wav|"
 		"MIDI Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
 		"All Files (*.*)|*.*||")
-		.WorkingDirectory(TrackerSettings::Instance().PathSongs.GetWorkingDir())
+		.WorkingDirectory(overridePath.empty() ? TrackerSettings::Instance().PathSongs.GetWorkingDir() : overridePath)
 		.FilterIndex(&nFilterIndex);
 	if(!dlg.Show()) return;
 
-	TrackerSettings::Instance().PathSongs.SetWorkingDir(dlg.GetWorkingDirectory());
+	if(overridePath.empty())
+		TrackerSettings::Instance().PathSongs.SetWorkingDir(dlg.GetWorkingDirectory());
 
 	files = dlg.GetFilenames();
 }
+
 
 void CTrackApp::OnFileOpen()
 //--------------------------
 {
 	FileDialog::PathList files;
 	OpenModulesDialog(files);
-	for(size_t counter = 0; counter < files.size(); counter++)
+	for(FileDialog::PathList::const_iterator file = files.begin(); file != files.end(); file++)
 	{
-		OpenDocumentFile(files[counter]);
+		OpenDocumentFile(*file);
 	}
 }
 

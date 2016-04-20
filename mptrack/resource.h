@@ -799,9 +799,7 @@
 #define IDC_CHK_MIDICCBUG               2322
 #define IDC_CHK_OLDRANDOM               2323
 #define IDC_CHECKCAPTURE                2324
-#define IDC_CHK_OLDPITCH                2324
 #define IDC_SPINMOVEMAPPING             2325
-#define IDC_CHK_FT2VOLRAMP              2325
 #define IDC_BUTTON_HALF                 2326
 #define IDC_BUTTON_DOUBLE               2327
 #define IDC_GROUPBOX_PITCH_TIME         2328
@@ -1167,10 +1165,10 @@
 #define ID_RUN_SCRIPT                   43003
 #define ID_EXAMPLE_MODULES              43004
 // From here: Command range [ID_EXAMPLE_MODULES, ID_EXAMPLE_MODULES_LASTINRANGE]
-#define ID_EXAMPLE_MODULES_LASTINRANGE  43053
-#define ID_FILE_OPENTEMPLATE            43054
+#define ID_EXAMPLE_MODULES_LASTINRANGE  43054
+#define ID_FILE_OPENTEMPLATE            43055
 // From here: Command range [ID_FILE_OPENTEMPLATE, ID_FILE_OPENTEMPLATE_LASTINRANGE]
-#define ID_FILE_OPENTEMPLATE_LASTINRANGE 43103
+#define ID_FILE_OPENTEMPLATE_LASTINRANGE 43105
 #define ID_INDICATOR_TIME               43143
 #define ID_INDICATOR_USER               43144
 #define ID_INDICATOR_INFO               43145
