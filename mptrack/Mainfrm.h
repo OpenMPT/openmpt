@@ -465,7 +465,7 @@ protected:
 	//}}AFX_VIRTUAL
 
 	/// Opens either template or example menu item.
-	void OpenMenuItemFile(const UINT nId, const bool bTemplateFile);
+	void OpenMenuItemFile(const UINT nId, const bool isTemplateFile);
 
 public:
 	void UpdateMRUList();

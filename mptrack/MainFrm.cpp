@@ -2243,11 +2243,11 @@ void CMainFrame::OnPlayerPause()
 }
 
 
-void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
-//-------------------------------------------------------------------------
+void CMainFrame::OpenMenuItemFile(const UINT nId, const bool isTemplateFile)
+//--------------------------------------------------------------------------
 {
-	const UINT nIdBegin = (bTemplateFile) ? ID_FILE_OPENTEMPLATE : ID_EXAMPLE_MODULES;
-	const std::vector<mpt::PathString>& vecFilePaths = (bTemplateFile) ? s_TemplateModulePaths : s_ExampleModulePaths;
+	const UINT nIdBegin = (isTemplateFile) ? ID_FILE_OPENTEMPLATE : ID_EXAMPLE_MODULES;
+	const std::vector<mpt::PathString>& vecFilePaths = (isTemplateFile) ? s_TemplateModulePaths : s_ExampleModulePaths;
 
 	const UINT nIndex = nId - nIdBegin;
 	if (nIndex < vecFilePaths.size())
@@ -2257,15 +2257,22 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool bTemplateFile)
 		CDocument *pDoc = nullptr;
 		if(bExists)
 		{
-			pDoc = theApp.GetModDocTemplate()->OpenTemplateFile(sPath, !bTemplateFile);
+			pDoc = theApp.GetModDocTemplate()->OpenTemplateFile(sPath, !isTemplateFile);
 		}
 		if(!pDoc)
 		{
 			Reporting::Notification(L"The file '" + sPath.ToWide() + L"' " + (bExists ? L"exists but can't be read" : L"does not exist"));
 		}
+	} else
+	{
+		MPT_ASSERT(nId == UINT(isTemplateFile ? ID_FILE_OPENTEMPLATE_LASTINRANGE : ID_EXAMPLE_MODULES_LASTINRANGE));
+		FileDialog::PathList files;
+		theApp.OpenModulesDialog(files, isTemplateFile ? theApp.GetConfigPath() + MPT_PATHSTRING("TemplateModules") : theApp.GetAppDirPath() + MPT_PATHSTRING("ExampleSongs"));
+		for(FileDialog::PathList::const_iterator file = files.begin(); file != files.end(); file++)
+		{
+			theApp.OpenDocumentFile(*file);
+		}
 	}
-	else
-		ASSERT(false);
 }
 
 
@@ -2731,8 +2738,14 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathSt
 
 		}
 
-		if (nAddCounter == 0)
+		if(nAddCounter == 0)
+		{
 			AppendMenu(hMenu, MF_STRING | MF_GRAYED | MF_DISABLED, 0, _T("No items found"));
+		} else
+		{
+			AppendMenu(hMenu, MF_SEPARATOR, 0, 0);
+			AppendMenu(hMenu, MF_STRING, nIdRangeBegin + nMaxCount, _T("Browse..."));
+		}
 	}
 
 	return hMenu;
@@ -2742,7 +2755,7 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathSt
 void CMainFrame::CreateExampleModulesMenu()
 //-----------------------------------------
 {
-	static_assert(nMaxItemsInExampleModulesMenu == ID_EXAMPLE_MODULES_LASTINRANGE - ID_EXAMPLE_MODULES + 1,
+	static_assert(nMaxItemsInExampleModulesMenu == ID_EXAMPLE_MODULES_LASTINRANGE - ID_EXAMPLE_MODULES,
 				  "Make sure that there's a proper range for menu commands in resources.");
 	HMENU hMenu = CreateFileMenu(nMaxItemsInExampleModulesMenu, s_ExampleModulePaths, MPT_PATHSTRING("ExampleSongs\\"), ID_EXAMPLE_MODULES);
 	CMenu* const pMainMenu = GetMenu();
@@ -2773,7 +2786,7 @@ CMenu *CMainFrame::GetFileMenu() const
 void CMainFrame::CreateTemplateModulesMenu()
 //------------------------------------------
 {
-	static_assert(nMaxItemsInTemplateModulesMenu == ID_FILE_OPENTEMPLATE_LASTINRANGE - ID_FILE_OPENTEMPLATE + 1,
+	static_assert(nMaxItemsInTemplateModulesMenu == ID_FILE_OPENTEMPLATE_LASTINRANGE - ID_FILE_OPENTEMPLATE,
 				  "Make sure that there's a proper range for menu commands in resources.");
 	HMENU hMenu = CreateFileMenu(nMaxItemsInTemplateModulesMenu, s_TemplateModulePaths, MPT_PATHSTRING("TemplateModules\\"), ID_FILE_OPENTEMPLATE);
 	CMenu *pFileMenu = GetFileMenu();
