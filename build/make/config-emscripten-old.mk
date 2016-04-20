@@ -5,8 +5,8 @@ LD  = em++
 AR  = emar
 
 CPPFLAGS += 
-CXXFLAGS += -std=c++11 -fPIC -O3 -s PRECISE_F32=1 -ffast-math 
-CFLAGS   += -std=c99   -fPIC -O3 -s PRECISE_F32=1 -ffast-math -fno-strict-aliasing 
+CXXFLAGS += -std=c++11 -fPIC -O3 -ffast-math 
+CFLAGS   += -std=c99   -fPIC -O3 -ffast-math -fno-strict-aliasing 
 LDFLAGS  += -O3 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1
 LDLIBS   += 
 ARFLAGS  := rcs
