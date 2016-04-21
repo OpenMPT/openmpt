@@ -1634,7 +1634,10 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 
 		case IDC_EDIT7:
 			// Fade Out
-			_tcscpy(pszText, _T("Higher value <-> Faster fade out"));
+			if(!pIns->nFadeOut)
+				_tcscpy(pszText, _T("Fade disabled"));
+			else
+				wsprintf(pszText, _T("%u ticks (Higher value <-> Faster fade out)"), 0x8000 / pIns->nFadeOut);
 			return TRUE;
 
 		case IDC_EDIT8:
