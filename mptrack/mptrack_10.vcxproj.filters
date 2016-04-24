@@ -592,6 +592,9 @@
     <ClCompile Include="..\soundlib\MPEGFrame.cpp">
       <Filter>Source Files\soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="PatternFindReplace.cpp">
+      <Filter>Source Files\mptrack</Filter>
+    </ClCompile>
     <ClCompile Include="..\soundlib\plugins\PlugInterface.cpp">
       <Filter>Source Files\soundlib\plugins</Filter>
     </ClCompile>
@@ -627,6 +630,9 @@
     </ClCompile>
     <ClCompile Include="..\soundlib\plugins\dmo\Compressor.cpp">
       <Filter>Source Files\soundlib\plugins\dmo</Filter>
+    </ClCompile>
+    <ClCompile Include="PatternFindReplaceDlg.cpp">
+      <Filter>Source Files\mptrack\Dialogs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1238,6 +1244,12 @@
     </ClInclude>
     <ClInclude Include="..\soundlib\plugins\dmo\Compressor.h">
       <Filter>Header Files\soundlib\plugins\dmo</Filter>
+    </ClInclude>
+    <ClInclude Include="PatternFindReplace.h">
+      <Filter>Header Files\mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="PatternFindReplaceDlg.h">
+      <Filter>Header Files\mptrack\Dialogs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

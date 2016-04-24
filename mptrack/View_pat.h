@@ -18,8 +18,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 class CModDoc;
 class CEditCommand;
-class CEffectVis;	//rewbs.fxvis
+class CEffectVis;
 class CPatternGotoDialog;
+class CInputHandler;
 
 // Drag & Drop info
 #define DRAGITEM_VALUEMASK		0x00FFFFFF
@@ -75,34 +76,6 @@ struct RowMask
 		note = instrument = volume = command = parameter = false;
 	}
 };
-
-
-// Find/Replace data
-struct FindReplace
-{
-	enum Flags
-	{
-		Note			= 0x01,		// Search for note
-		Instr			= 0x02,		// Search for instrument
-		VolCmd			= 0x04,		// Search for volume effect
-		Volume			= 0x08,		// Search for volume
-		Command			= 0x10,		// Search for effect
-		Param			= 0x20,		// Search for effect parameter
-		InChannels		= 0x40,		// Limit search to channels
-		FullSearch		= 0x100,	// Search whole song
-		InPatSelection	= 0x200,	// Search in current pattern selection
-		Replace			= 0x400,	// Replace
-		ReplaceAll		= 0x800,	// Replace all
-	};
-
-	ModCommand cmdFind, cmdReplace;				// Find/replace notes/instruments/effects
-	FlagSet<Flags> findFlags, replaceFlags;		// See Flags
-	PatternRect selection;						// Find in this selection (if FindReplace::InPatSelection is set)
-	CHANNELINDEX findMinChn, findMaxChn;		// Find in these channels (if FindReplace::InChannels is set)
-	signed char instrRelChange;					// relative instrument change (quick'n'dirty fix, this should be implemented in a less cryptic way)
-};
-
-DECLARE_FLAGSET(FindReplace::Flags);
 
 
 struct ModCommandPos
@@ -193,7 +166,6 @@ protected:
 
 	ModCommand m_PCNoteEditMemory;		// PC Note edit memory
 	static ModCommand m_cmdOld;			// Quick cursor copy/paste data
-	static FindReplace m_findReplace;	// Find/replace data
 
 	QuickChannelProperties quickChannelProperties;
 

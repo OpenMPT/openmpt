@@ -301,6 +301,11 @@ public:
 		, m_minValueDbl(minVal), m_maxValueDbl(maxVal), resultAsDouble(defaultNumber)
 		, m_minValueInt(0), m_maxValueInt(0), resultAsInt(0)
 	{ }
+	CInputDlg(CWnd *parent, const TCHAR *desc, float minVal, float maxVal, float defaultNumber) : CDialog(IDD_INPUT, parent)
+		, m_description(desc)
+		, m_minValueDbl(minVal), m_maxValueDbl(maxVal), resultAsDouble(defaultNumber)
+		, m_minValueInt(0), m_maxValueInt(0), resultAsInt(0)
+	{ }
 	// Initialize numeric input box (int)
 	CInputDlg(CWnd *parent, const TCHAR *desc, int32 minVal, int32 maxVal, int32 defaultNumber) : CDialog(IDD_INPUT, parent)
 		, m_description(desc)

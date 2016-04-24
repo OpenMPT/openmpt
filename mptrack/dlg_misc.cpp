@@ -1566,9 +1566,9 @@ void CMsgBoxHidable::DoDataExchange(CDataExchange* pDX)
 void AppendNotesToControl(CComboBox& combobox, ModCommand::NOTE noteStart, ModCommand::NOTE noteEnd)
 //--------------------------------------------------------------------------------------------------
 {
-	const ModCommand::NOTE upperLimit = std::min(ModCommand::NOTE(NOTE_MAX - NOTE_MIN), noteEnd);
+	const ModCommand::NOTE upperLimit = std::min(ModCommand::NOTE(NOTE_MAX), noteEnd);
 	for(ModCommand::NOTE note = noteStart; note <= upperLimit; note++)
-		combobox.SetItemData(combobox.AddString(CSoundFile::GetNoteName(note + NOTE_MIN).c_str()), note);
+		combobox.SetItemData(combobox.AddString(CSoundFile::GetNoteName(note).c_str()), note);
 }
 
 

@@ -10,11 +10,11 @@
 
 
 #include "stdafx.h"
-#include "mptrack.h"
+#include "Mptrack.h"
 #include "Mainfrm.h"
 #include "InputHandler.h"
 #include "Moddoc.h"
-#include "view_pat.h"
+#include "View_pat.h"
 #include "PatternEditorDialogs.h"
 #include "TempoSwingDialog.h"
 #include "../soundlib/mod_specifications.h"
@@ -101,367 +101,6 @@ static void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELIND
 	xparam = xp;
 }
 // -! NEW_FEATURE#0010
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Find/Replace Dialog
-
-BEGIN_MESSAGE_MAP(CFindReplaceTab, CPropertyPage)
-	ON_CBN_SELCHANGE(IDC_COMBO1,	OnNoteChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO2,	OnInstrChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO3,	OnVolCmdChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO4,	OnVolumeChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO5,	OnEffectChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO6,	OnParamChanged)
-	ON_COMMAND(IDC_CHECK1,			OnCheckNote)
-	ON_COMMAND(IDC_CHECK2,			OnCheckInstr)
-	ON_COMMAND(IDC_CHECK3,			OnCheckVolCmd)
-	ON_COMMAND(IDC_CHECK4,			OnCheckVolume)
-	ON_COMMAND(IDC_CHECK5,			OnCheckEffect)
-	ON_COMMAND(IDC_CHECK6,			OnCheckParam)
-
-	ON_COMMAND(IDC_CHECK7,			OnCheckChannelSearch)
-END_MESSAGE_MAP()
-
-
-BOOL CFindReplaceTab::OnInitDialog()
-//----------------------------------
-{
-	TCHAR s[256];
-	CComboBox *combo;
-
-	CPropertyPage::OnInitDialog();
-	// Search flags
-	CheckDlgButton(IDC_CHECK1, m_Flags[FindReplace::Note] ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(IDC_CHECK2, m_Flags[FindReplace::Instr] ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(IDC_CHECK3, m_Flags[FindReplace::VolCmd] ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(IDC_CHECK4, m_Flags[FindReplace::Volume] ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(IDC_CHECK5, m_Flags[FindReplace::Command] ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(IDC_CHECK6, m_Flags[FindReplace::Param] ? BST_CHECKED : BST_UNCHECKED);
-	if(m_bReplace)
-	{
-		CheckDlgButton(IDC_CHECK7, m_Flags[FindReplace::Replace] ? BST_CHECKED : BST_UNCHECKED);
-		CheckDlgButton(IDC_CHECK8, m_Flags[FindReplace::ReplaceAll] ? BST_CHECKED : BST_UNCHECKED);
-	} else
-	{
-		CheckDlgButton(IDC_CHECK7, m_Flags[FindReplace::InChannels] ? BST_CHECKED : BST_UNCHECKED);
-		int nButton = IDC_RADIO1;
-		if(m_Flags[FindReplace::FullSearch])
-			nButton = IDC_RADIO2;
-		else if(m_bPatSel)
-			nButton = IDC_RADIO3;
-		
-		CheckRadioButton(IDC_RADIO1, IDC_RADIO3, nButton);
-		GetDlgItem(IDC_RADIO3)->EnableWindow(m_bPatSel ? TRUE : FALSE);
-		SetDlgItemInt(IDC_EDIT1, m_nMinChannel + 1);
-		SetDlgItemInt(IDC_EDIT2, m_nMaxChannel + 1);
-		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1))->SetRange32(1, sndFile.GetNumChannels());
-		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN2))->SetRange32(1, sndFile.GetNumChannels());
-	}
-	// Note
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
-	{
-		combo->SetRedraw(FALSE);
-		combo->InitStorage(150, 6);
-		combo->SetItemData(combo->AddString(_T("...")), 0);
-		if (m_bReplace)
-		{
-			combo->SetItemData(combo->AddString(_T("note -1")), replaceNoteMinusOne);
-			combo->SetItemData(combo->AddString(_T("note +1")), replaceNotePlusOne);
-			combo->SetItemData(combo->AddString(_T("-1 oct")), replaceNoteMinusOctave);
-			combo->SetItemData(combo->AddString(_T("+1 oct")), replaceNotePlusOctave);
-		} else
-		{
-			combo->SetItemData(combo->AddString(_T("any")), findAny);
-		}
-		AppendNotesToControlEx(*combo, sndFile);
-
-		UINT ncount = combo->GetCount();
-		for (UINT i=0; i<ncount; i++) if (m_Cmd.note == combo->GetItemData(i))
-		{
-			combo->SetCurSel(i);
-			break;
-		}
-		combo->SetRedraw(TRUE);
-	}
-	// Instrument
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO2)) != NULL)
-	{
-		combo->SetRedraw(FALSE);
-		combo->SetItemData(combo->AddString(_T("..")), 0);
-		if (m_bReplace)
-		{
-			combo->SetItemData(combo->AddString(_T("ins -1")), replaceInstrumentMinusOne);
-			combo->SetItemData(combo->AddString(_T("ins +1")), replaceInstrumentPlusOne);
-		}
-		for(INSTRUMENTINDEX n = 1; n < MAX_INSTRUMENTS; n++)
-		{
-			if(sndFile.GetNumInstruments())
-			{
-				_stprintf(s, _T("%03d:%s"), n, sndFile.GetInstrumentName(n));
-			} else
-			{
-				_stprintf(s, _T("%03d:%s"), n, sndFile.m_szNames[n]);
-			}
-			combo->SetItemData(combo->AddString(s), n);
-		}
-		UINT ncount = combo->GetCount();
-		for (UINT i=0; i<ncount; i++)
-		{
-			if (m_Cmd.instr == combo->GetItemData(i) || (cInstrRelChange == -1 && combo->GetItemData(i) == replaceInstrumentMinusOne) || (cInstrRelChange == 1 && combo->GetItemData(i) == replaceInstrumentPlusOne))
-			{
-				combo->SetCurSel(i);
-				break;
-			}
-		}
-		combo->SetRedraw(TRUE);
-	}
-	// Volume Command
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO3)) != NULL)
-	{
-		combo->SetRedraw(FALSE);
-		combo->InitStorage(effectInfo.GetNumVolCmds(), 15);
-		combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
-		UINT count = effectInfo.GetNumVolCmds();
-		for (UINT n=0; n<count; n++)
-		{
-			if(effectInfo.GetVolCmdInfo(n, s) && s[0])
-			{
-				combo->SetItemData(combo->AddString(s), n);
-			}
-		}
-		combo->SetCurSel(0);
-		UINT fxndx = effectInfo.GetIndexFromVolCmd(m_Cmd.volcmd);
-		for (UINT i=0; i<=count; i++) if (fxndx == combo->GetItemData(i))
-		{
-			combo->SetCurSel(i);
-			break;
-		}
-		combo->SetRedraw(TRUE);
-	}
-	// Volume
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO4)) != NULL)
-	{
-		combo->SetRedraw(FALSE);
-		combo->InitStorage(64, 4);
-		for (UINT n=0; n<=64; n++)
-		{
-			_stprintf(s, _T("%02d"), n);
-			combo->SetItemData(combo->AddString(s), n);
-		}
-		UINT ncount = combo->GetCount();
-		for (UINT i=0; i<ncount; i++) if (m_Cmd.vol == combo->GetItemData(i))
-		{
-			combo->SetCurSel(i);
-			break;
-		}
-		combo->SetRedraw(TRUE);
-	}
-	// Command
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO5)) != NULL)
-	{
-		combo->SetRedraw(FALSE);
-		combo->InitStorage(effectInfo.GetNumEffects(), 20);
-		combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
-		UINT count = effectInfo.GetNumEffects();
-		for (UINT n=0; n<count; n++)
-		{
-			if(effectInfo.GetEffectInfo(n, s, true) && s[0])
-			{
-				combo->SetItemData(combo->AddString(s), n);
-			}
-		}
-		combo->SetCurSel(0);
-		UINT fxndx = effectInfo.GetIndexFromEffect(m_Cmd.command, m_Cmd.param);
-		for (UINT i=0; i<=count; i++) if (fxndx == combo->GetItemData(i))
-		{
-			combo->SetCurSel(i);
-			break;
-		}
-		combo->SetRedraw(TRUE);
-	}
-	ChangeEffect();
-	ChangeVolCmd();
-	OnCheckChannelSearch();
-	return TRUE;
-}
-
-
-void CFindReplaceTab::ChangeEffect()
-//----------------------------------
-{
-	int fxndx = -1;
-	CComboBox *combo;
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO5)) != NULL)
-	{
-		fxndx = combo->GetItemData(combo->GetCurSel());
-	}
-	// Update Param range
-	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO6)) != NULL))
-	{
-		UINT oldcount = combo->GetCount();
-		UINT newcount = effectInfo.IsExtendedEffect(fxndx) ? 16 : 256;
-		if (oldcount != newcount)
-		{
-			TCHAR s[16];
-			int newpos;
-			if (oldcount) newpos = combo->GetCurSel() % newcount; else newpos = m_Cmd.param % newcount;
-			combo->SetRedraw(FALSE);
-			combo->ResetContent();
-			combo->InitStorage(newcount, 4);
-			for (UINT i=0; i<newcount; i++)
-			{
-				_stprintf(s, (newcount == 256) ? _T("%02X") : _T("%X"), i);
-				combo->SetItemData(combo->AddString(s), i);
-			}
-			combo->SetCurSel(newpos);
-			combo->SetRedraw(TRUE);
-		}
-	}
-}
-
-
-void CFindReplaceTab::ChangeVolCmd()
-//----------------------------------
-{
-	int fxndx = -1;
-	CComboBox *combo;
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO3)) != NULL)
-	{
-		fxndx = combo->GetItemData(combo->GetCurSel());
-	}
-	// Update Param range
-	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO4)) != NULL))
-	{
-		ModCommand::VOL rangeMin, rangeMax;
-		if(!effectInfo.GetVolCmdInfo(fxndx, nullptr, &rangeMin, &rangeMax))
-		{
-			rangeMin = 0;
-			rangeMax = 64;
-		}
-		UINT oldcount = combo->GetCount();
-		UINT newcount = rangeMax - rangeMin + 1;
-		if (oldcount != newcount)
-		{
-			TCHAR s[16];
-			int newpos;
-			if (oldcount) newpos = combo->GetCurSel() % newcount; else newpos = m_Cmd.param % newcount;
-			combo->SetRedraw(FALSE);
-			combo->ResetContent();
-			for (UINT i = rangeMin; i <= rangeMax; i++)
-			{
-				_stprintf(s, (rangeMax < 10) ? _T("%d") : _T("%02d"), i);
-				combo->SetItemData(combo->AddString(s), i);
-			}
-			combo->SetCurSel(newpos);
-			combo->SetRedraw(TRUE);
-		}
-	}
-}
-
-
-void CFindReplaceTab::OnCheckChannelSearch()
-//------------------------------------------
-{
-	if (!m_bReplace)
-	{
-		BOOL b = IsDlgButtonChecked(IDC_CHECK7);
-		GetDlgItem(IDC_EDIT1)->EnableWindow(b);
-		GetDlgItem(IDC_SPIN1)->EnableWindow(b);
-		GetDlgItem(IDC_EDIT2)->EnableWindow(b);
-		GetDlgItem(IDC_SPIN2)->EnableWindow(b);
-	}
-}
-
-
-void CFindReplaceTab::OnOK()
-//--------------------------
-{
-	CComboBox *combo;
-
-	// Search flags
-	m_Flags.reset();
-	m_Flags.set(FindReplace::Note, !!IsDlgButtonChecked(IDC_CHECK1));
-	m_Flags.set(FindReplace::Instr, !!IsDlgButtonChecked(IDC_CHECK2));
-	m_Flags.set(FindReplace::VolCmd, !!IsDlgButtonChecked(IDC_CHECK3));
-	m_Flags.set(FindReplace::Volume, !!IsDlgButtonChecked(IDC_CHECK4));
-	m_Flags.set(FindReplace::Command, !!IsDlgButtonChecked(IDC_CHECK5));
-	m_Flags.set(FindReplace::Param, !!IsDlgButtonChecked(IDC_CHECK6));
-	if(m_bReplace)
-	{
-		m_Flags.set(FindReplace::Replace, !!IsDlgButtonChecked(IDC_CHECK7));
-		m_Flags.set(FindReplace::ReplaceAll, !!IsDlgButtonChecked(IDC_CHECK8));
-	} else
-	{
-		m_Flags.set(FindReplace::InChannels, !!IsDlgButtonChecked(IDC_CHECK7));
-		m_Flags.set(FindReplace::FullSearch, !!IsDlgButtonChecked(IDC_RADIO2));
-		m_Flags.set(FindReplace::InPatSelection, !!IsDlgButtonChecked(IDC_RADIO3));
-	}
-	// Note
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
-	{
-		m_Cmd.note = static_cast<ModCommand::NOTE>(combo->GetItemData(combo->GetCurSel()));
-	}
-	// Instrument
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO2)) != NULL)
-	{
-		m_Cmd.instr = 0;
-		cInstrRelChange = 0;
-		switch(combo->GetItemData(combo->GetCurSel()))
-		{
-		case replaceInstrumentMinusOne:
-			cInstrRelChange = -1;
-			break;
-		case replaceInstrumentPlusOne:
-			cInstrRelChange = 1;
-			break;
-		default:
-			m_Cmd.instr = static_cast<ModCommand::INSTR>(combo->GetItemData(combo->GetCurSel()));
-			break;
-		}
-	}
-	// Volume Command
-	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO3)) != NULL))
-	{
-		m_Cmd.volcmd = effectInfo.GetVolCmdFromIndex(combo->GetItemData(combo->GetCurSel()));
-	}
-	// Volume
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO4)) != NULL)
-	{
-		m_Cmd.vol = static_cast<ModCommand::VOL>(combo->GetItemData(combo->GetCurSel()));
-	}
-	// Effect
-	int effectIndex = -1;
-	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO5)) != NULL))
-	{
-		ModCommand::PARAM n = 0; // unused parameter adjustment
-		effectIndex = combo->GetItemData(combo->GetCurSel());
-		m_Cmd.command = effectInfo.GetEffectFromIndex(effectIndex, n);
-	}
-	// Param
-	m_Cmd.param = 0;
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO6)) != NULL)
-	{
-		m_Cmd.param = static_cast<ModCommand::PARAM>(combo->GetItemData(combo->GetCurSel()));
-
-		// Apply parameter value mask if required (e.g. SDx has mask D0).
-		if (effectIndex > -1)
-		{
-			m_Cmd.param |= effectInfo.GetEffectMaskFromIndex(effectIndex);
-		}
-	}
-	// Min/Max channels
-	if (!m_bReplace)
-	{
-		m_nMinChannel = static_cast<CHANNELINDEX>(GetDlgItemInt(IDC_EDIT1) - 1);
-		m_nMaxChannel = static_cast<CHANNELINDEX>(GetDlgItemInt(IDC_EDIT2) - 1);
-		if (m_nMaxChannel < m_nMinChannel)
-		{
-			std::swap(m_nMinChannel, m_nMaxChannel);
-		}
-	}
-	CPropertyPage::OnOK();
-}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -1263,12 +902,12 @@ BOOL CChordEditor::OnInitDialog()
 	pMainFrm = CMainFrame::GetMainFrame();
 	if (!pMainFrm) return TRUE;
 	// Fills the shortcut key combo box
-	AppendNotesToControl(m_CbnShortcut, 0, 3 * 12 - 1);
+	AppendNotesToControl(m_CbnShortcut, NOTE_MIN, NOTE_MIN + 3 * 12 - 1);
 
 	m_CbnShortcut.SetCurSel(0);
 	// Base Note combo box
 	m_CbnBaseNote.SetItemData(m_CbnBaseNote.AddString("Relative"), MPTChord::relativeMode);
-	AppendNotesToControl(m_CbnBaseNote, 0, 3 * 12 - 1);
+	AppendNotesToControl(m_CbnBaseNote, NOTE_MIN, NOTE_MIN + 3 * 12 - 1);
 
 	// Minor notes
 	for (int inotes=-1; inotes<24; inotes++)
@@ -1291,7 +930,7 @@ MPTChord &CChordEditor::GetChord()
 {
 	MPTChords &chords = TrackerSettings::GetChords();
 	int chord = m_CbnShortcut.GetCurSel();
-	if(chord >= 0) chord = m_CbnShortcut.GetItemData(chord);
+	if(chord >= 0) chord = m_CbnShortcut.GetItemData(chord) - NOTE_MIN;
 	if(chord < 0 || chord >= CountOf(chords)) chord = 0;
 	return chords[chord];
 }
@@ -1374,7 +1013,7 @@ void CChordEditor::OnBaseNoteChanged()
 //------------------------------------
 {
 	MPTChord &chord = GetChord();
-	int basenote = m_CbnBaseNote.GetItemData(m_CbnBaseNote.GetCurSel());
+	int basenote = m_CbnBaseNote.GetItemData(m_CbnBaseNote.GetCurSel()) - NOTE_MIN;
 	chord.key = (uint8)basenote;
 	UpdateKeyboard();
 }
@@ -1450,7 +1089,7 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 	CHAR s[64];
 
 	// Split Notes
-	AppendNotesToControl(m_CbnSplitNote, sndFile.GetModSpecifications().noteMin - NOTE_MIN, sndFile.GetModSpecifications().noteMax - NOTE_MIN);
+	AppendNotesToControl(m_CbnSplitNote, sndFile.GetModSpecifications().noteMin, sndFile.GetModSpecifications().noteMax);
 	m_CbnSplitNote.SetCurSel(m_Settings.splitNote - (sndFile.GetModSpecifications().noteMin - NOTE_MIN));
 
 	// Octave modifier
@@ -1513,7 +1152,7 @@ void CSplitKeyboadSettings::OnOK()
 {
 	CDialog::OnOK();
 
-	m_Settings.splitNote = static_cast<ModCommand::NOTE>(m_CbnSplitNote.GetCurSel() + (sndFile.GetModSpecifications().noteMin - NOTE_MIN));
+	m_Settings.splitNote = static_cast<ModCommand::NOTE>(m_CbnSplitNote.GetItemData(m_CbnSplitNote.GetCurSel()) - 1);
 	m_Settings.octaveModifier = m_CbnOctaveModifier.GetCurSel() - SplitKeyboardSettings::splitOctaveRange;
 	m_Settings.octaveLink = (IsDlgButtonChecked(IDC_PATTERN_OCTAVELINK) == TRUE);
 	m_Settings.splitVolume = static_cast<ModCommand::VOL>(m_CbnSplitVolume.GetCurSel());

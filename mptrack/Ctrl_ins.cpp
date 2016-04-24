@@ -980,7 +980,6 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_EditPPS.AllowFractions(false);
 	m_SpinPPS.SetRange(-32, +32);
 	// Pitch/Pan Center
-	AppendNotesToControl(m_ComboPPC, 0, NOTE_MAX - NOTE_MIN);
 	SetWindowLongPtr(m_ComboPPC.m_hWnd, GWLP_USERDATA, 0);
 
 	// Volume ramping (attack)
