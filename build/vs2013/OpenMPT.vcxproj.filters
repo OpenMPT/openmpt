@@ -347,6 +347,12 @@
     <ClInclude Include="..\..\mptrack\PatternEditorDialogs.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\PatternFindReplace.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\PatternFindReplaceDlg.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\PatternFont.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -929,6 +935,12 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\PatternEditorDialogs.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\PatternFindReplace.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\PatternFindReplaceDlg.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\PatternFont.cpp">

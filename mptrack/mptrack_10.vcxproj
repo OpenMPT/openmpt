@@ -885,6 +885,8 @@
     <ClCompile Include="PathConfigDlg.cpp" />
     <ClCompile Include="PatternClipboard.cpp" />
     <ClCompile Include="PatternEditorDialogs.cpp" />
+    <ClCompile Include="PatternFindReplace.cpp" />
+    <ClCompile Include="PatternFindReplaceDlg.cpp" />
     <ClCompile Include="PatternFont.cpp" />
     <ClCompile Include="PatternGotoDialog.cpp" />
     <ClCompile Include="PNG.cpp" />
@@ -1126,6 +1128,8 @@
     <ClInclude Include="PathConfigDlg.h" />
     <ClInclude Include="PatternClipboard.h" />
     <ClInclude Include="PatternCursor.h" />
+    <ClInclude Include="PatternFindReplace.h" />
+    <ClInclude Include="PatternFindReplaceDlg.h" />
     <ClInclude Include="PatternFont.h" />
     <ClInclude Include="PNG.h" />
     <ClInclude Include="ProgressDialog.h" />

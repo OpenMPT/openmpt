@@ -769,6 +769,8 @@
     <ClInclude Include="..\..\mptrack\PatternClipboard.h" />
     <ClInclude Include="..\..\mptrack\PatternCursor.h" />
     <ClInclude Include="..\..\mptrack\PatternEditorDialogs.h" />
+    <ClInclude Include="..\..\mptrack\PatternFindReplace.h" />
+    <ClInclude Include="..\..\mptrack\PatternFindReplaceDlg.h" />
     <ClInclude Include="..\..\mptrack\PatternFont.h" />
     <ClInclude Include="..\..\mptrack\PatternGotoDialog.h" />
     <ClInclude Include="..\..\mptrack\ProgressDialog.h" />
@@ -978,6 +980,8 @@
     <ClCompile Include="..\..\mptrack\PathConfigDlg.cpp" />
     <ClCompile Include="..\..\mptrack\PatternClipboard.cpp" />
     <ClCompile Include="..\..\mptrack\PatternEditorDialogs.cpp" />
+    <ClCompile Include="..\..\mptrack\PatternFindReplace.cpp" />
+    <ClCompile Include="..\..\mptrack\PatternFindReplaceDlg.cpp" />
     <ClCompile Include="..\..\mptrack\PatternFont.cpp" />
     <ClCompile Include="..\..\mptrack\PatternGotoDialog.cpp" />
     <ClCompile Include="..\..\mptrack\ProgressDialog.cpp" />

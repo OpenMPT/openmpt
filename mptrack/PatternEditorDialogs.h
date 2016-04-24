@@ -17,79 +17,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-/////////////////////////////////////////////////////////////////////////
-// Search/Replace
-
-//=========================================
-class CFindReplaceTab: public CPropertyPage
-//=========================================
-{
-protected:
-	CSoundFile &sndFile;
-	EffectInfo effectInfo;
-	bool m_bReplace;	// is this the replace tab?
-
-public:
-	FlagSet<FindReplace::Flags> m_Flags;
-	ModCommand m_Cmd;
-	CHANNELINDEX m_nMinChannel, m_nMaxChannel;
-	signed char cInstrRelChange;
-	bool m_bPatSel;
-
-	enum findItem
-	{
-		findAny = NOTE_MIN_SPECIAL - 1
-	};
-
-
-	enum replaceItem
-	{
-		replaceNotePlusOne = NOTE_MAX + 1,
-		replaceNoteMinusOne = NOTE_MAX + 2,
-		replaceNotePlusOctave = NOTE_MAX + 3,
-		replaceNoteMinusOctave = NOTE_MAX + 4,
-
-		replaceInstrumentPlusOne = MAX_INSTRUMENTS + 1,
-		replaceInstrumentMinusOne = MAX_INSTRUMENTS + 2,
-	};
-
-	// Make sure there's unused notes between NOTE_MAX and NOTE_MIN_SPECIAL.
-	STATIC_ASSERT(NOTE_MIN_SPECIAL - 4 > NOTE_MAX);
-
-protected:
-	void ChangeEffect();
-	void ChangeVolCmd();
-
-public:
-	CFindReplaceTab(UINT nIDD, bool bReplaceTab, CSoundFile &sf) : CPropertyPage(nIDD), effectInfo(sf), sndFile(sf) { m_bReplace = bReplaceTab; }
-
-protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-
-	// When a combobox is focussed, check the corresponding checkbox.
-	void CheckOnChange(int nIDButton) { CheckDlgButton(nIDButton, BST_CHECKED); CheckReplace(nIDButton); };
-	afx_msg void OnNoteChanged()	{ CheckOnChange(IDC_CHECK1); };
-	afx_msg void OnInstrChanged()	{ CheckOnChange(IDC_CHECK2); };
-	afx_msg void OnVolCmdChanged()	{ CheckOnChange(IDC_CHECK3); ChangeVolCmd(); };
-	afx_msg void OnVolumeChanged()	{ CheckOnChange(IDC_CHECK4); };
-	afx_msg void OnEffectChanged()	{ CheckOnChange(IDC_CHECK5); ChangeEffect(); };
-	afx_msg void OnParamChanged()	{ CheckOnChange(IDC_CHECK6); };
-	// When a checkbox is checked, also check "Replace By".
-	afx_msg void OnCheckNote()		{ CheckReplace(IDC_CHECK1); };
-	afx_msg void OnCheckInstr()		{ CheckReplace(IDC_CHECK2); };
-	afx_msg void OnCheckVolCmd()	{ CheckReplace(IDC_CHECK3); };
-	afx_msg void OnCheckVolume()	{ CheckReplace(IDC_CHECK4); };
-	afx_msg void OnCheckEffect()	{ CheckReplace(IDC_CHECK5); };
-	afx_msg void OnCheckParam()		{ CheckReplace(IDC_CHECK6); };
-	// Check "Replace By"
-	afx_msg void CheckReplace(int nIDButton)	{ if(m_bReplace && IsDlgButtonChecked(nIDButton)) CheckDlgButton(IDC_CHECK7, BST_CHECKED); };
-
-	afx_msg void OnCheckChannelSearch();
-	DECLARE_MESSAGE_MAP()
-};
-
-
 //=========================================
 class CPatternPropertiesDlg: public CDialog
 //=========================================
@@ -176,6 +103,8 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////
 // Chord Editor
+
+struct MPTChord;
 
 //================================
 class CChordEditor: public CDialog

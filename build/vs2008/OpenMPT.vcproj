@@ -1841,6 +1841,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\mptrack\PatternFindReplace.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\mptrack\PatternFindReplace.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\mptrack\PatternFindReplaceDlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\mptrack\PatternFindReplaceDlg.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\mptrack\PatternFont.cpp"
 				>
 			</File>

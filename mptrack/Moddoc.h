@@ -361,6 +361,9 @@ protected:
 
 	uint8 GetPlaybackMidiChannel(const ModInstrument *pIns, CHANNELINDEX nChn) const;
 
+	// Get the sample index for the current pattern cell (resolves instrument note maps, etc)
+	SAMPLEINDEX GetSampleIndex(const ModCommand &m) const;
+
 	// Convert a linear volume property to decibels
 	static CString LinearToDecibels(double value, double valueAtZeroDB);
 	// Convert a panning value to a more readable string

@@ -144,7 +144,7 @@ void WavesReverb::Resume()
 {
 	// Recalculate delays
 	uint32 delay0 = Util::Round<uint32>(m_SndFile.GetSampleRate() * 0.045);
-	uint32 delay1 = Util::Round<uint32>(delay0 * 1.189207077026367);
+	uint32 delay1 = Util::Round<uint32>(delay0 * 1.189207077026367);	// 2^0.25
 	uint32 delay2 = Util::Round<uint32>(delay1 * 1.189207077026367);
 	uint32 delay3 = Util::Round<uint32>(delay2 * 1.189207077026367);
 	uint32 delay4 = Util::Round<uint32>((delay0 + delay2) * 0.1154666692018509);

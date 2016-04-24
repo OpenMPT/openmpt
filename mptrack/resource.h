@@ -104,6 +104,7 @@
 #define IDD_EDIT_GOTO                   444
 #define IDD_MOVEFXSLOT                  501
 #define IDD_LEGACY_PLAYBACK             502
+#define IDD_FIND_RANGE                  503
 #define IDD_CONTROL_GRAPH               507
 #define IDD_SCALE_ENV_POINTS            510
 #define IDD_TUNING                      511
@@ -929,8 +930,8 @@
 #define IDC_UNDOSIZE                    2449
 #define IDC_SYSLINK1                    2450
 #define IDC_VERSION1                    2451
-#define IDC_VERSION2                    2552
-#define IDC_DATE                        2553
+#define IDC_VERSION2                    2452
+#define IDC_DATE                        2453
 #define IDC_SLIDER_NUMBUFFERS           2454
 #define IDC_EDIT_STATISTICS             2455
 #define IDC_VUMETER                     2456
