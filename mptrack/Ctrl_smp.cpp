@@ -1098,11 +1098,14 @@ void CCtrlSamples::OnSampleOpen()
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
 		.EnableAudioPreview()
-		.ExtensionFilter("All Samples|*.wav;*.flac;*.oga;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.iff;*.8sv;*.8svx;*.svx;*.pcm;*.ogg;*.oga;*.mp1;*.mp2;*.mp3" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
+		.ExtensionFilter("All Samples|*.wav;*.flac;*.oga;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.iff;*.8sv;*.8svx;*.svx;*.pcm;*.opus;*.ogg;*.oga;*.mp1;*.mp2;*.mp3" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
 			"Wave Files (*.wav)|*.wav|"
 	#ifdef MPT_WITH_FLAC
 			"FLAC Files (*.flac,*.oga)|*.flac;*.oga|"
 	#endif // MPT_WITH_FLAC
+	#if defined(MPT_WITH_OPUSFILE)
+			"Opus Files (*.opus,*.oga)|*.opus;*.oga|"
+	#endif // MPT_WITH_OPUSFILE
 	#if defined(MPT_WITH_VORBISFILE) || defined(MPT_WITH_STBVORBIS)
 			"Ogg Vorbis Files (*.ogg,*.oga)|*.ogg;*.oga|"
 	#endif // VORBIS
@@ -1150,11 +1153,14 @@ void CCtrlSamples::OnSampleOpenKnown()
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
 		.EnableAudioPreview()
-		.ExtensionFilter("All Samples|*.wav;*.flac;*.oga;*.pat;*.s3i;*.smp;*.xi;*.aif;*.aiff;*.its;*.iff;*.8sv;*.8svx;*.svx;*.ogg;*.oga;*.mp1;*.mp2;*.mp3" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
+		.ExtensionFilter("All Samples|*.wav;*.flac;*.oga;*.pat;*.s3i;*.smp;*.xi;*.aif;*.aiff;*.its;*.iff;*.8sv;*.8svx;*.svx;*.opus;*.ogg;*.oga;*.mp1;*.mp2;*.mp3" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
 			"Wave Files (*.wav)|*.wav|"
 	#ifdef MPT_WITH_FLAC
 			"FLAC Files (*.flac,*.oga)|*.flac;*.oga|"
 	#endif // MPT_WITH_FLAC
+	#if defined(MPT_WITH_OPUSFILE)
+			"Opus Files (*.opus,*.oga)|*.opus;*.oga|"
+	#endif // MPT_WITH_OPUSFILE
 	#if defined(MPT_WITH_VORBISFILE) || defined(MPT_WITH_STBVORBIS)
 			"Ogg Vorbis Files (*.ogg,*.oga)|*.ogg;*.oga|"
 	#endif // VORBIS
