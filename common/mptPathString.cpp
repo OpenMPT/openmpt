@@ -14,7 +14,6 @@
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
-#include <rpc.h>
 #endif
 
 
