@@ -12,20 +12,12 @@
 
 #include "StreamEncoder.h"
 
-#include "../common/ComponentManager.h"
-
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-class ComponentVorbis;
-
 class VorbisEncoder : public EncoderFactoryBase
 {
-
-private:
-
-	ComponentHandle<ComponentVorbis> m_Vorbis;
 
 public:
 
