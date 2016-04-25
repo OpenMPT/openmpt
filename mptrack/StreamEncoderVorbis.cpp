@@ -20,7 +20,12 @@
 #ifdef MPT_WITH_OGG
 #include <ogg/ogg.h>
 #endif
+#ifdef MPT_WITH_VORBIS
+#include <vorbis/codec.h>
+#endif
+#ifdef MPT_WITH_VORBISENC
 #include <vorbis/vorbisenc.h>
+#endif
 
 
 
@@ -28,143 +33,17 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-class ComponentVorbis
-	: public ComponentLibrary
-{
-
-	MPT_DECLARE_COMPONENT_MEMBERS
-
-public:
-
-	// vorbis
-	const char *(*vorbis_version_string)(void);
-	void     (*vorbis_info_init)(vorbis_info *vi);
-	void     (*vorbis_comment_init)(vorbis_comment *vc);
-	void     (*vorbis_comment_add_tag)(vorbis_comment *vc, const char *tag, const char *contents);
-	int      (*vorbis_analysis_init)(vorbis_dsp_state *v,vorbis_info *vi);
-	int      (*vorbis_block_init)(vorbis_dsp_state *v, vorbis_block *vb);
-	int      (*vorbis_analysis_headerout)(vorbis_dsp_state *v, vorbis_comment *vc, ogg_packet *op, ogg_packet *op_comm, ogg_packet *op_code);
-	float  **(*vorbis_analysis_buffer)(vorbis_dsp_state *v,int vals);
-	int      (*vorbis_analysis_wrote)(vorbis_dsp_state *v,int vals);
-	int      (*vorbis_analysis_blockout)(vorbis_dsp_state *v,vorbis_block *vb);
-	int      (*vorbis_analysis)(vorbis_block *vb,ogg_packet *op);
-	int      (*vorbis_bitrate_addblock)(vorbis_block *vb);
-	int      (*vorbis_bitrate_flushpacket)(vorbis_dsp_state *vd, ogg_packet *op);
-	int      (*vorbis_block_clear)(vorbis_block *vb);
-	void     (*vorbis_dsp_clear)(vorbis_dsp_state *v);
-	void     (*vorbis_comment_clear)(vorbis_comment *vc);
-	void     (*vorbis_info_clear)(vorbis_info *vi);
-
-	// vorbisenc
-	int (*vorbis_encode_init)(vorbis_info *vi, long channels, long rate, long max_bitrate, long nominal_bitrate, long min_bitrate);
-	int (*vorbis_encode_init_vbr)(vorbis_info *vi, long channels, long rate, float base_quality);
-
-private:
-
-	void Reset()
-	{
-		ClearLibraries();
-	}
-
-public:
-
-	ComponentVorbis()
-		: ComponentLibrary(ComponentTypeForeign)
-	{
-		return;
-	}
-
-protected:
-
-	bool DoInitialize()
-	{
-		Reset();
-		struct dll_names_t {
-			const char *vorbis;
-			const char *vorbisenc;
-		};
-		// start with trying all symbols from a single dll first
-		static const dll_names_t dll_names[] = {
-			{ "libvorbis"  , "libvorbis"     }, // official xiph.org builds
-			{ "vorbis"     , "vorbis"        },
-			{ "libvorbis-0", "libvorbis-0"   }, // mingw builds
-			{ "libvorbis"  , "libvorbisenc"  },
-			{ "vorbis"     , "vorbisenc"     },
-			{ "libvorbis-0", "libvorbisenc-0"}, // mingw builds
-			{ "libvorbis-0", "libvorbisenc-2"}  // mingw 64-bit builds
-		};
-		bool ok = false;
-		for(std::size_t i=0; i<CountOf(dll_names); ++i)
-		{
-			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].vorbis), mpt::PathString::FromUTF8(dll_names[i].vorbisenc)))
-			{
-				ok = true;
-				break;
-			}
-		}
-#ifdef MPT_WITH_OGG
-		return ok;
-#else
-		return false;
-#endif
-	}
-	bool TryLoad(const mpt::PathString &Vorbis_fn, const mpt::PathString &VorbisEnc_fn)
-	{
-		Reset();
-		ClearBindFailed();
-		if(!AddLibrary("vorbis", mpt::LibraryPath::AppFullName(Vorbis_fn)))
-		{
-			Reset();
-			return false;
-		}
-		if(!AddLibrary("vorbisenc", mpt::LibraryPath::AppFullName(VorbisEnc_fn)))
-		{
-			Reset();
-			return false;
-		}
-		MPT_COMPONENT_BIND_OPTIONAL("vorbis",vorbis_version_string);
-		MPT_COMPONENT_BIND("vorbis",vorbis_info_init);
-		MPT_COMPONENT_BIND("vorbis",vorbis_comment_init);
-		MPT_COMPONENT_BIND("vorbis",vorbis_comment_add_tag);
-		MPT_COMPONENT_BIND("vorbis",vorbis_analysis_init);
-		MPT_COMPONENT_BIND("vorbis",vorbis_block_init);
-		MPT_COMPONENT_BIND("vorbis",vorbis_analysis_headerout);
-		MPT_COMPONENT_BIND("vorbis",vorbis_analysis_buffer);
-		MPT_COMPONENT_BIND("vorbis",vorbis_analysis_wrote);
-		MPT_COMPONENT_BIND("vorbis",vorbis_analysis_blockout);
-		MPT_COMPONENT_BIND("vorbis",vorbis_analysis);
-		MPT_COMPONENT_BIND("vorbis",vorbis_bitrate_addblock);
-		MPT_COMPONENT_BIND("vorbis",vorbis_bitrate_flushpacket);
-		MPT_COMPONENT_BIND("vorbis",vorbis_block_clear);
-		MPT_COMPONENT_BIND("vorbis",vorbis_dsp_clear);
-		MPT_COMPONENT_BIND("vorbis",vorbis_comment_clear);
-		MPT_COMPONENT_BIND("vorbis",vorbis_info_clear);
-		MPT_COMPONENT_BIND("vorbisenc",vorbis_encode_init);
-		MPT_COMPONENT_BIND("vorbisenc",vorbis_encode_init_vbr);
-		if(HasBindFailed())
-		{
-			Reset();
-			return false;
-		}
-		return true;
-	}
-
-public:
-
-	Encoder::Traits BuildTraits()
+static Encoder::Traits VorbisBuildTraits()
 	{
 		Encoder::Traits traits;
-		if(!IsAvailable())
-		{
-			return traits;
-		}
+#if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISENC)
 		traits.fileExtension = MPT_PATHSTRING("ogg");
 		traits.fileShortDescription = MPT_USTRING("Vorbis");
 		traits.fileDescription = MPT_USTRING("Ogg Vorbis");
 		traits.encoderSettingsName = MPT_USTRING("Vorbis");
 		traits.encoderName = MPT_USTRING("libVorbis");
 		traits.description += MPT_USTRING("Version: ");
-		traits.description += mpt::ToUnicode(mpt::CharsetASCII, vorbis_version_string&&vorbis_version_string()?vorbis_version_string():"unknown");
+		traits.description += mpt::ToUnicode(mpt::CharsetASCII, vorbis_version_string()?vorbis_version_string():"unknown");
 		traits.description += MPT_USTRING("\n");
 		traits.canTags = true;
 		traits.maxChannels = 4;
@@ -176,17 +55,15 @@ public:
 		traits.defaultMode = Encoder::ModeQuality;
 		traits.defaultBitrate = 160;
 		traits.defaultQuality = 0.5;
+#endif
 		return traits;
 	}
-};
-MPT_REGISTERED_COMPONENT(ComponentVorbis, "Vorbis")
 
-#ifdef MPT_WITH_OGG
+#if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISENC)
 
 class VorbisStreamWriter : public StreamWriterBase
 {
 private:
-	ComponentVorbis &vorbis;
   ogg_stream_state os;
   ogg_page         og;
   ogg_packet       op;
@@ -206,7 +83,7 @@ private:
 		ogg_packet header;
 		ogg_packet header_comm;
 		ogg_packet header_code;
-		vorbis.vorbis_analysis_headerout(&vd, &vc, &header, &header_comm, &header_code);
+		vorbis_analysis_headerout(&vd, &vc, &header, &header_comm, &header_code);
 		ogg_stream_packetin(&os, &header);
 		while(ogg_stream_flush(&os, &og))
 		{
@@ -230,12 +107,12 @@ private:
 				StartStream();
 			}
 			ASSERT(inited && started);
-			vorbis.vorbis_analysis_wrote(&vd, 0);
-			while(vorbis.vorbis_analysis_blockout(&vd, &vb) == 1)
+			vorbis_analysis_wrote(&vd, 0);
+			while(vorbis_analysis_blockout(&vd, &vb) == 1)
 			{
-				vorbis.vorbis_analysis(&vb, NULL);
-				vorbis.vorbis_bitrate_addblock(&vb);
-				while(vorbis.vorbis_bitrate_flushpacket(&vd, &op))
+				vorbis_analysis(&vb, NULL);
+				vorbis_bitrate_addblock(&vb);
+				while(vorbis_bitrate_flushpacket(&vd, &op))
 				{
 					ogg_stream_packetin(&os, &op);
 					while(ogg_stream_flush(&os, &og))
@@ -249,10 +126,10 @@ private:
 				}
 			}
 			ogg_stream_clear(&os);
-			vorbis.vorbis_block_clear(&vb);
-			vorbis.vorbis_dsp_clear(&vd);
-			vorbis.vorbis_comment_clear(&vc);
-			vorbis.vorbis_info_clear(&vi);
+			vorbis_block_clear(&vb);
+			vorbis_dsp_clear(&vd);
+			vorbis_comment_clear(&vc);
+			vorbis_info_clear(&vi);
 			started = false;
 			inited = false;
 		}
@@ -272,13 +149,12 @@ private:
 	{
 		if(!field.empty() && !data.empty())
 		{
-			vorbis.vorbis_comment_add_tag(&vc, field.c_str(), mpt::ToCharset(mpt::CharsetUTF8, data).c_str());
+			vorbis_comment_add_tag(&vc, field.c_str(), mpt::ToCharset(mpt::CharsetUTF8, data).c_str());
 		}
 	}
 public:
-	VorbisStreamWriter(ComponentVorbis &vorbis_, std::ostream &stream)
+	VorbisStreamWriter(std::ostream &stream)
 		: StreamWriterBase(stream)
-		, vorbis(vorbis_)
 	{
 		inited = false;
 		started = false;
@@ -303,19 +179,19 @@ public:
 		vorbis_channels = channels;
 		vorbis_tags = settings.Tags;
 
-		vorbis.vorbis_info_init(&vi);
-		vorbis.vorbis_comment_init(&vc);
+		vorbis_info_init(&vi);
+		vorbis_comment_init(&vc);
 
 		if(settings.Mode == Encoder::ModeQuality)
 		{
-			vorbis.vorbis_encode_init_vbr(&vi, vorbis_channels, samplerate, settings.Quality);
+			vorbis_encode_init_vbr(&vi, vorbis_channels, samplerate, settings.Quality);
 		} else
 		{
-			vorbis.vorbis_encode_init(&vi, vorbis_channels, samplerate, -1, settings.Bitrate * 1000, -1);
+			vorbis_encode_init(&vi, vorbis_channels, samplerate, -1, settings.Bitrate * 1000, -1);
 		}
 
-		vorbis.vorbis_analysis_init(&vd, &vi);
-		vorbis.vorbis_block_init(&vd, &vb);
+		vorbis_analysis_init(&vd, &vi);
+		vorbis_block_init(&vd, &vb);
 		ogg_stream_init(&os, std::rand());
 
 		inited = true;
@@ -353,7 +229,7 @@ public:
 		{
 			int countChunk = mpt::saturate_cast<int>(countTotal);
 			countTotal -= countChunk;
-			float **buffer = vorbis.vorbis_analysis_buffer(&vd, countChunk);
+			float **buffer = vorbis_analysis_buffer(&vd, countChunk);
 			for(int frame = 0; frame < countChunk; ++frame)
 			{
 				for(int channel = 0; channel < vorbis_channels; ++channel)
@@ -361,12 +237,12 @@ public:
 					buffer[channel][frame] = interleaved[frame*vorbis_channels+channel];
 				}
 			}
-			vorbis.vorbis_analysis_wrote(&vd, countChunk);
-			while(vorbis.vorbis_analysis_blockout(&vd, &vb) == 1)
+			vorbis_analysis_wrote(&vd, countChunk);
+			while(vorbis_analysis_blockout(&vd, &vb) == 1)
 			{
-				vorbis.vorbis_analysis(&vb, NULL);
-				vorbis.vorbis_bitrate_addblock(&vb);
-				while(vorbis.vorbis_bitrate_flushpacket(&vd, &op))
+				vorbis_analysis(&vb, NULL);
+				vorbis_bitrate_addblock(&vb);
+				while(vorbis_bitrate_flushpacket(&vd, &op))
 				{
 					ogg_stream_packetin(&os, &op);
 					while(ogg_stream_pageout(&os, &og))
@@ -385,24 +261,25 @@ public:
 	}
 };
 
-#endif // MPT_WITH_OGG
+#endif // MPT_WITH_OGG && MPT_WITH_VORBIS && MPT_WITH_VORBISENC
 
 
 
 VorbisEncoder::VorbisEncoder()
 //----------------------------
 {
-	if(IsComponentAvailable(m_Vorbis))
-	{
-		SetTraits(m_Vorbis->BuildTraits());
-	}
+	SetTraits(VorbisBuildTraits());
 }
 
 
 bool VorbisEncoder::IsAvailable() const
 //-------------------------------------
 {
-	return IsComponentAvailable(m_Vorbis);
+#if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISENC)
+	return true;
+#else
+	return false;
+#endif
 }
 
 
@@ -416,12 +293,8 @@ VorbisEncoder::~VorbisEncoder()
 IAudioStreamEncoder *VorbisEncoder::ConstructStreamEncoder(std::ostream &file) const
 //----------------------------------------------------------------------------------
 {
-	if(!IsAvailable())
-	{
-		return nullptr;
-	}
-#ifdef MPT_WITH_OGG
-	return new VorbisStreamWriter(*m_Vorbis, file);
+#if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISENC)
+	return new VorbisStreamWriter(file);
 #else
 	return nullptr;
 #endif
