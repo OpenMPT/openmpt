@@ -2633,11 +2633,11 @@ bool CSoundFile::ReadOpusSample(SAMPLEINDEX sample, FileReader &file)
 {
 	file.Rewind();
 
+#if defined(MPT_WITH_OPUSFILE)
+
 	int rate = 0;
 	int channels = 0;
 	std::vector<int16> raw_sample_data;
-
-#if defined(MPT_WITH_OPUSFILE)
 
 	FileReader initial = file.GetChunk(65536); // 512 is recommended by libopusfile
 	if(op_test(NULL, initial.GetRawData<unsigned char>(), initial.GetLength()) != 0)
