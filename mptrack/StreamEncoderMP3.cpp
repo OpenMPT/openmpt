@@ -696,27 +696,30 @@ public:
 		if(settings.Mode == Encoder::ModeCBR)
 		{
 
-			if(compatible && settings.Bitrate >= 32)
+			if(compatible)
 			{
-				// For maximum compatibility,
-				// force samplerate to a samplerate supported by MPEG1 streams.
-				if(samplerate <= 32000)
+				if(settings.Bitrate >= 32)
 				{
-					samplerate = 32000;
-				} else if(samplerate >= 48000)
-				{
-					samplerate = 48000;
+					// For maximum compatibility,
+					// force samplerate to a samplerate supported by MPEG1 streams.
+					if(samplerate <= 32000)
+					{
+						samplerate = 32000;
+					} else if(samplerate >= 48000)
+					{
+						samplerate = 48000;
+					} else
+					{
+						samplerate = 44100;
+					}
+					lame.lame_set_out_samplerate(gfp, samplerate);
 				} else
 				{
-					samplerate = 44100;
+					// A very low bitrate was chosen,
+					// force samplerate to lowest possible for MPEG2.
+					// Disable unofficial MPEG2.5 however.
+					lame.lame_set_out_samplerate(gfp, 16000);
 				}
-				lame.lame_set_out_samplerate(gfp, samplerate);
-			} else
-			{
-				// A very low bitrate was chosen,
-				// force samplerate to lowest possible for MPEG2.
-				// Disable unofficial MPEG2.5 however.
-				lame.lame_set_out_samplerate(gfp, 16000);
 			}
 
 			lame.lame_set_brate(gfp, settings.Bitrate);
