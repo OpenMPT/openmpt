@@ -374,16 +374,16 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	for(INSTRUMENTINDEX instr = 1; instr <= m_nInstruments; instr++)
 	{
 		// First, try to read instrument header length...
-		XMInstrumentHeader instrHeader;
-		instrHeader.size = file.ReadUint32LE();
-		if(instrHeader.size == 0)
+		uint32 headerSize = file.ReadUint32LE();
+		if(headerSize == 0)
 		{
-			instrHeader.size = sizeof(XMInstrumentHeader);
+			headerSize = sizeof(XMInstrumentHeader);
 		}
 
 		// Now, read the complete struct.
 		file.SkipBack(4);
-		file.ReadStructPartial(instrHeader, instrHeader.size);
+		XMInstrumentHeader instrHeader;
+		file.ReadStructPartial(instrHeader, headerSize);
 		instrHeader.ConvertEndianness();
 
 		// Time for some version detection stuff.
@@ -467,14 +467,14 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			// Need to memorize those if we're going to skip any samples...
 			std::vector<uint32> sampleSize(instrHeader.numSamples);
 
-			// Early versions of Sk@le Tracker didn't set sampleHeaderSize (this fixes IFULOVE.XM)
-			const size_t copyBytes = (instrHeader.sampleHeaderSize > 0) ? instrHeader.sampleHeaderSize : sizeof(XMSample);
+			// Early versions of Sk@le Tracker set instrHeader.sampleHeaderSize = 0 (IFULOVE.XM)
+			// cybernostra weekend has instrHeader.sampleHeaderSize = 0x12, which would leave out the sample name, but FT2 still reads the name.
+			MPT_ASSERT(instrHeader.sampleHeaderSize == 0 || instrHeader.sampleHeaderSize == sizeof(XMSample));
 
 			for(SAMPLEINDEX sample = 0; sample < instrHeader.numSamples; sample++)
 			{
 				XMSample sampleHeader;
-				file.ReadStructPartial(sampleHeader, copyBytes);
-				sampleHeader.ConvertEndianness();
+				file.ReadConvertEndianness(sampleHeader);
 
 				sampleFlags.push_back(sampleHeader.GetSampleFormat());
 				sampleSize[sample] = sampleHeader.length;
