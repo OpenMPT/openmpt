@@ -1228,14 +1228,14 @@
     <ProjectReference Include="..\build\vs2010-ext\soundtouch.vcxproj">
       <Project>{f5f8f6de-84cf-4e9d-91ea-d9b5e2aa36cd}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build\vs2010-ext\stb_vorbis.vcxproj">
-      <Project>{e0d81662-85ef-4172-b0d8-f8dcff712607}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\build\vs2010-ext\UnRAR.vcxproj">
       <Project>{95cc809b-03fc-4edb-bb20-fd07a698c05f}</Project>
     </ProjectReference>
     <ProjectReference Include="..\build\vs2010-ext\minizip.vcxproj">
       <Project>{63af9025-a6ce-4147-a05d-6e2ccfd3a0d7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\vs2010-ext\vorbis.vcxproj">
+      <Project>{b544dcb7-16e5-41bc-b51b-7ead8cfdfa05}</Project>
     </ProjectReference>
     <ProjectReference Include="..\build\vs2010-ext\zlib.vcxproj">
       <Project>{1654fb18-fde6-406f-9d84-ba12bfbd67b2}</Project>

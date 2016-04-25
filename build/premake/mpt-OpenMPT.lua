@@ -77,7 +77,7 @@
    "portaudio",
    "r8brain",
    "soundtouch",
-   "stb_vorbis",
+   "vorbis",
   }
   linkoptions {
    "/DELAYLOAD:uxtheme.dll",

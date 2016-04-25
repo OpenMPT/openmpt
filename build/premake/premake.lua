@@ -315,8 +315,8 @@ solution "OpenMPT-VSTi"
  dofile "../../build/premake/ext-r8brain.lua"
  dofile "../../build/premake/ext-smbPitchShift.lua"
  dofile "../../build/premake/ext-soundtouch.lua"
- dofile "../../build/premake/ext-stb_vorbis.lua"
  dofile "../../build/premake/ext-UnRAR.lua"
+ dofile "../../build/premake/ext-vorbis.lua"
  dofile "../../build/premake/ext-zlib.lua"
 
 end
@@ -344,8 +344,8 @@ end
  dofile "../../build/premake/ext-r8brain.lua"
  dofile "../../build/premake/ext-smbPitchShift.lua"
  dofile "../../build/premake/ext-soundtouch.lua"
- dofile "../../build/premake/ext-stb_vorbis.lua"
  dofile "../../build/premake/ext-UnRAR.lua"
+ dofile "../../build/premake/ext-vorbis.lua"
  dofile "../../build/premake/ext-zlib.lua"
 
 end
