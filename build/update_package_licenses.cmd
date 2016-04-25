@@ -21,6 +21,7 @@ rem copy /y ..\include\miniz\miniz.c                          .\Licenses\License
 copy /y ..\include\msinttypes\stdint\stdint.h             .\Licenses\License.msinttypes.txt || goto error
 copy /y ..\include\ogg\COPYING                            .\Licenses\License.ogg.txt || goto error
 copy /y ..\include\opus\COPYING                           .\Licenses\License.Opus.txt || goto error
+copy /y ..\include\opusfile\COPYING                       .\Licenses\License.Opusfile.txt || goto error
 copy /y ..\include\portaudio\LICENSE.txt                  .\Licenses\License.PortAudio.txt || goto error
 rem copy /y ..\include\portaudio\bindings\cpp\COPYING         .\Licenses\License.portaudiocpp.txt || goto error
 copy /y ..\include\portmidi\license.txt                   .\Licenses\License.PortMIDI.txt || goto error

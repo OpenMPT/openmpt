@@ -666,6 +666,18 @@ mpt::ustring GetFullCreditsString()
 		"https://xiph.org/vorbis/\n"
 		"\n"
 #endif
+#if defined(MPT_WITH_OPUS)
+		"Xiph.Org, Skype Limited, Octasic, Jean-Marc Valin, Timothy B. Terriberry,\n"
+		"CSIRO, Gregory Maxwell, Mark Borgerding, Erik de Castro Lopo,\n"
+		"Xiph.Org Foundation, Microsoft Corporation, Broadcom Corporation for libopus\n"
+		"https://opus-codec.org/\n"
+		"\n"
+#endif
+#if defined(MPT_WITH_OPUSFILE)
+		"Xiph.Org Foundation and contributors for libopusfile\n"
+		"https://opus-codec.org/\n"
+		"\n"
+#endif
 		"Storlek for all the IT compatibility hints and testcases\n"
 		"as well as the IMF, OKT and ULT loaders\n"
 		"http://schismtracker.org/\n"

@@ -25,121 +25,27 @@
 #ifdef MPT_WITH_OGG
 #include <ogg/ogg.h>
 #endif
-#include <opus/opus.h>
-#include <opus/opus_multistream.h>
+#ifdef MPT_WITH_OPUS
+#include <opus.h>
+#include <opus_multistream.h>
+#endif
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
 
-class ComponentOpus
-	: public ComponentLibrary
-{
-
-	MPT_DECLARE_COMPONENT_MEMBERS
-
-public:
-
-	// opus
-	const char * (*opus_get_version_string)();
-
-	int (*opus_multistream_encoder_ctl)(OpusMSEncoder *st, int request, ...);
-	int (*opus_multistream_encode_float)(OpusMSEncoder *st, const float *pcm, int frame_size, unsigned char *data, opus_int32 max_data_bytes);
-	void (*opus_multistream_encoder_destroy)(OpusMSEncoder *st);
-
-	// 1.0
-	OpusMSEncoder * (*opus_multistream_encoder_create)(opus_int32 Fs, int channels, int streams, int coupled_streams, const unsigned char *mapping, int application, int *error);
-
-	// 1.1
-	OpusMSEncoder * (*opus_multistream_surround_encoder_create)(opus_int32 Fs, int channels, int mapping_family, int *streams, int *coupled_streams, unsigned char *mapping, int application, int *error);
-		
-private:
-
-	void Reset()
-	{
-		ClearLibraries();
-	}
-
-public:
-
-	ComponentOpus()
-		: ComponentLibrary(ComponentTypeForeign)
-	{
-		return;
-	}
-
-protected:
-
-	bool DoInitialize()
-	{
-		Reset();
-		struct dll_names_t {
-			const char *opus;
-		};
-		// start with trying all symbols from a single dll first
-		static const dll_names_t dll_names[] = {
-			{ "libopus-0"  }, // official xiph.org builds
-			{ "libopus"    },
-			{ "opus"       }
-		};
-		bool ok = false;
-		for(std::size_t i=0; i<CountOf(dll_names); ++i)
-		{
-			if(TryLoad(mpt::PathString::FromUTF8(dll_names[i].opus)))
-			{
-				ok = true;
-				break;
-			}
-		}
-		return ok;
-	}
-
-private:
-
-	bool TryLoad(const mpt::PathString &Opus_fn)
-	{
-		Reset();
-		ClearBindFailed();
-		if(!AddLibrary("opus", mpt::LibraryPath::AppFullName(Opus_fn)))
-		{
-			Reset();
-			return false;
-		}
-		MPT_COMPONENT_BIND_OPTIONAL("opus", opus_get_version_string);
-		MPT_COMPONENT_BIND("opus", opus_multistream_encoder_ctl);
-		MPT_COMPONENT_BIND("opus", opus_multistream_encode_float);
-		MPT_COMPONENT_BIND("opus", opus_multistream_encoder_destroy);
-		MPT_COMPONENT_BIND("opus", opus_multistream_encoder_create);
-		MPT_COMPONENT_BIND_OPTIONAL("opus", opus_multistream_surround_encoder_create);
-		if(HasBindFailed())
-		{
-			Reset();
-			return false;
-		}
-#ifdef MPT_WITH_OGG
-		return true;
-#else
-		return false;
-#endif
-	}
-
-public:
-
-	Encoder::Traits BuildTraits()
+static Encoder::Traits BuildTraits()
 	{
 		Encoder::Traits traits;
-		if(!IsAvailable())
-		{
-			return traits;
-		}
+#if defined(MPT_WITH_OGG) && defined(MPT_WITH_OPUS)
 		traits.fileExtension = MPT_PATHSTRING("opus");
 		traits.fileShortDescription = MPT_USTRING("Opus");
 		traits.fileDescription = MPT_USTRING("Opus");
 		traits.encoderSettingsName = MPT_USTRING("Opus");
 		traits.encoderName = MPT_USTRING("libOpus");
 		traits.description += MPT_USTRING("Version: ");
-		traits.description += mpt::ToUnicode(mpt::CharsetASCII, opus_get_version_string && opus_get_version_string() ? opus_get_version_string() : "");
+		traits.description += mpt::ToUnicode(mpt::CharsetASCII, opus_get_version_string() ? opus_get_version_string() : "");
 		traits.description += MPT_USTRING("\n");
 		traits.canTags = true;
 		traits.maxChannels = 4;
@@ -150,20 +56,17 @@ public:
 		traits.defaultChannels = 2;
 		traits.defaultMode = Encoder::ModeVBR;
 		traits.defaultBitrate = 128;
+#endif
 		return traits;
 	}
 
-};
-MPT_REGISTERED_COMPONENT(ComponentOpus, "Opus")
 
 
-
-#ifdef MPT_WITH_OGG
+#if defined(MPT_WITH_OGG) && defined(MPT_WITH_OPUS)
 
 class OpusStreamWriter : public StreamWriterBase
 {
 private:
-	ComponentOpus &opus;
   ogg_stream_state os;
   ogg_page         og;
   ogg_packet       op;
@@ -204,7 +107,7 @@ private:
 		{
 			opus_comments_buf.push_back(*it);
 		}
-		const char *version_string = opus.opus_get_version_string ? opus.opus_get_version_string() : nullptr;
+		const char *version_string = opus_get_version_string();
 		if(version_string)
 		{
 			PushUint32LE(opus_comments_buf, mpt::saturate_cast<uint32>(std::strlen(version_string)));
@@ -273,7 +176,7 @@ private:
 			opus_sampleBuf.clear();
 
 			opus_frameData.resize(65536);
-			opus_frameData.resize(opus.opus_multistream_encode_float(st, &opus_frameBuf[0], cur_frame_size, &opus_frameData[0], static_cast<opus_int32>(opus_frameData.size())));
+			opus_frameData.resize(opus_multistream_encode_float(st, &opus_frameBuf[0], cur_frame_size, &opus_frameData[0], static_cast<opus_int32>(opus_frameData.size())));
 			enc_granulepos += last_frame_size * 48000 / opus_samplerate;
 
 			op.b_o_s = 0;
@@ -316,9 +219,8 @@ private:
 		}
 	}
 public:
-	OpusStreamWriter(ComponentOpus &opus_, std::ostream &stream)
+	OpusStreamWriter(std::ostream &stream)
 		: StreamWriterBase(stream)
-		, opus(opus_)
 	{
 		inited = false;
 		started = false;
@@ -353,14 +255,12 @@ public:
 		int num_coupled = 0;
 		unsigned char mapping[4] = { 0, 0, 0, 0 };
 
-		if(opus.opus_multistream_surround_encoder_create)
-		{
+		#if 1
 			// 1.1
 
-			st = opus.opus_multistream_surround_encoder_create(samplerate, opus_channels, opus_channels > 2 ? 1 : 0, &num_streams, &num_coupled, mapping, OPUS_APPLICATION_AUDIO, &opus_error);
+			st = opus_multistream_surround_encoder_create(samplerate, opus_channels, opus_channels > 2 ? 1 : 0, &num_streams, &num_coupled, mapping, OPUS_APPLICATION_AUDIO, &opus_error);
 
-		} else
-		{
+		#else
 			// 1.0
 
 			struct opus_channels_to_streams_t {
@@ -381,7 +281,7 @@ public:
 				{ 0, 1, 2, 3 }
 			};
 
-			st = opus.opus_multistream_encoder_create(samplerate, opus_channels, channels_to_streams[channels].streams, channels_to_streams[channels].coupled, channels_to_mapping[channels], OPUS_APPLICATION_AUDIO, &opus_error);
+			st = opus_multistream_encoder_create(samplerate, opus_channels, channels_to_streams[channels].streams, channels_to_streams[channels].coupled, channels_to_mapping[channels], OPUS_APPLICATION_AUDIO, &opus_error);
 
 			num_streams = channels_to_streams[channels].streams;
 			num_coupled = channels_to_streams[channels].coupled;
@@ -389,30 +289,31 @@ public:
 			{
 				mapping[channel] = channels_to_mapping[opus_channels][channel];
 			}
-		}
+
+		#endif
 
 		opus_int32 ctl_lookahead = 0;
-		opus.opus_multistream_encoder_ctl(st, OPUS_GET_LOOKAHEAD(&ctl_lookahead));
+		opus_multistream_encoder_ctl(st, OPUS_GET_LOOKAHEAD(&ctl_lookahead));
 
 		opus_int32 ctl_bitrate = opus_bitrate;
-		opus.opus_multistream_encoder_ctl(st, OPUS_SET_BITRATE(ctl_bitrate));
+		opus_multistream_encoder_ctl(st, OPUS_SET_BITRATE(ctl_bitrate));
 
 		if(settings.Mode == Encoder::ModeCBR)
 		{
 			opus_int32 ctl_vbr = 0;
-			opus.opus_multistream_encoder_ctl(st, OPUS_SET_VBR(ctl_vbr));
+			opus_multistream_encoder_ctl(st, OPUS_SET_VBR(ctl_vbr));
 		} else
 		{
 			opus_int32 ctl_vbr = 1;
-			opus.opus_multistream_encoder_ctl(st, OPUS_SET_VBR(ctl_vbr));
+			opus_multistream_encoder_ctl(st, OPUS_SET_VBR(ctl_vbr));
 			opus_int32 ctl_vbrcontraint = 0;
-			opus.opus_multistream_encoder_ctl(st, OPUS_SET_VBR_CONSTRAINT(ctl_vbrcontraint));
+			opus_multistream_encoder_ctl(st, OPUS_SET_VBR_CONSTRAINT(ctl_vbrcontraint));
 		}
 
 		opus_int32 complexity = StreamEncoderSettings::Instance().OpusComplexity;
 		if(complexity >= 0)
 		{
-			opus.opus_multistream_encoder_ctl(st, OPUS_SET_COMPLEXITY(complexity));
+			opus_multistream_encoder_ctl(st, OPUS_SET_COMPLEXITY(complexity));
 		}
 
 		opus_extrasamples = ctl_lookahead;
@@ -508,7 +409,7 @@ public:
 			}
 
 			opus_frameData.resize(65536);
-			opus_frameData.resize(opus.opus_multistream_encode_float(st, &opus_frameBuf[0], cur_frame_size, &opus_frameData[0], static_cast<opus_int32>(opus_frameData.size())));
+			opus_frameData.resize(opus_multistream_encode_float(st, &opus_frameBuf[0], cur_frame_size, &opus_frameData[0], static_cast<opus_int32>(opus_frameData.size())));
 			enc_granulepos += cur_frame_size * 48000 / opus_samplerate;
 
 			op.b_o_s = 0;
@@ -543,17 +444,18 @@ public:
 OggOpusEncoder::OggOpusEncoder()
 //------------------------------
 {
-	if(IsComponentAvailable(m_Opus))
-	{
-		SetTraits(m_Opus->BuildTraits());
-	}
+	SetTraits(BuildTraits());
 }
 
 
 bool OggOpusEncoder::IsAvailable() const
 //--------------------------------------
 {
-	return IsComponentAvailable(m_Opus);
+#if defined(MPT_WITH_OGG) && defined(MPT_WITH_OPUS)
+	return true;
+#else
+	return false;
+#endif
 }
 
 
@@ -571,8 +473,8 @@ IAudioStreamEncoder *OggOpusEncoder::ConstructStreamEncoder(std::ostream &file) 
 	{
 		return nullptr;
 	}
-#ifdef MPT_WITH_OGG
-	return new OpusStreamWriter(*m_Opus, file);
+#if defined(MPT_WITH_OGG) && defined(MPT_WITH_OPUS)
+	return new OpusStreamWriter(file);
 #else
 	return nullptr;
 #endif

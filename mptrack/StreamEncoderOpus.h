@@ -18,14 +18,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-class ComponentOpus;
-
 class OggOpusEncoder : public EncoderFactoryBase
 {
-
-private:
-
-	ComponentHandle<ComponentOpus> m_Opus;
 
 public:
 

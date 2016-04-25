@@ -1,0 +1,6 @@
+libopus library version 1.1.2.
+The following changes have been made:
+- Obviously, unnecessary folders and files have been removed.
+- version.h got added. OpenMPT modifications are marked with "// OpenMPT".
+- For building, premake is used to generate Visual Studio project files.
+  See ../build/premake/ for details.
