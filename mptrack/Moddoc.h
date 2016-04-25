@@ -273,7 +273,7 @@ public:
 	CSize GetOldPatternScrollbarsPos() const { return m_szOldPatternScrollbarsPos; };
 	void SetOldPatternScrollbarsPos( CSize s ){ m_szOldPatternScrollbarsPos = s; };
 
-	void OnFileMP3Convert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, bool showWarning = false);
+	void OnFileMP3Convert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder);
 	void OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder);
 	void OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, const std::vector<EncoderFactoryBase*> &encFactories);
 
