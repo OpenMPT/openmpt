@@ -1216,6 +1216,12 @@
     <ProjectReference Include="..\build\vs2010-ext\ogg.vcxproj">
       <Project>{d8d5e11c-f959-49ef-b741-b3f6de52ded8}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\build\vs2010-ext\opus.vcxproj">
+      <Project>{9a2d9099-e1a2-4287-b845-e3598ad24d70}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\vs2010-ext\opusfile.vcxproj">
+      <Project>{f8517509-9317-4a46-b5ed-06ae5a399e6c}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\build\vs2010-ext\portaudio.vcxproj">
       <Project>{189b867f-ff4b-45a1-b741-a97492ee69af}</Project>
     </ProjectReference>
