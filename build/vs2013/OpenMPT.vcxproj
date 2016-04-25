@@ -1174,8 +1174,8 @@
     <ProjectReference Include="..\vs2013-ext\soundtouch.vcxproj">
       <Project>{F5F8F6DE-84CF-4E9D-91EA-D9B5E2AA36CD}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\vs2013-ext\stb_vorbis.vcxproj">
-      <Project>{E0D81662-85EF-4172-B0D8-F8DCFF712607}</Project>
+    <ProjectReference Include="..\vs2013-ext\vorbis.vcxproj">
+      <Project>{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

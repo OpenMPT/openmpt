@@ -79,6 +79,7 @@
 #define MPT_WITH_PORTAUDIO
 #define MPT_WITH_SMBPITCHSHIFT
 #define MPT_WITH_UNRAR
+#define MPT_WITH_VORBISENC
 
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
 //#define MPT_WITH_DL
@@ -94,10 +95,10 @@
 //#define MPT_WITH_MINIZ
 //#define MPT_WITH_MPG123
 #define MPT_WITH_OGG
-#define MPT_WITH_STBVORBIS
+//#define MPT_WITH_STBVORBIS
 //#define MPT_WITH_UNMO3
-//#define MPT_WITH_VORBIS
-//#define MPT_WITH_VORBISFILE
+#define MPT_WITH_VORBIS
+#define MPT_WITH_VORBISFILE
 #define MPT_WITH_ZLIB
 
 #endif // MODPLUG_TRACKER
