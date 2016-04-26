@@ -934,28 +934,19 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 
 
 // Check if a name string is valid (i.e. doesn't contain binary garbage data)
-static bool IsValidName(const char *s, size_t length, char minChar)
-//-----------------------------------------------------------------
+template<size_t N>
+static uint32 CountInvalidChars(char (&name)[N])
+//----------------------------------------------
 {
-	size_t i;
-	// Check for garbage characters
-	for(i = 0; i < length; i++)
+	uint32 invalidChars = 0;
+	for(size_t i = 0; i < N; i++)
 	{
-		if(s[i] && s[i] < minChar)
-		{
-			return false;
-		}
+		int8 c = name[i];
+		// Check for any Extended ASCII and control characters
+		if(c != 0 && c < 32)
+			invalidChars++;
 	}
-	// Check for garbage after null terminator.
-	i = static_cast<const char *>(memchr(s, '\0', length)) - s;
-	for(; i < length; i++)
-	{
-		if(s[i] && s[i] < ' ')
-		{
-			return false;
-		}
-	}
-	return true;
+	return invalidChars;
 }
 
 
@@ -981,8 +972,13 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 
 	char songname[20];
 	file.ReadArray(songname);
-	if(!IsValidName(songname, sizeof(songname), ' ')
-		|| !file.CanRead(sizeof(MODSampleHeader) * 15 + sizeof(MODFileHeader)))
+
+	// In theory, sample and song names should only ever contain printable ASCII chars and null.
+	// However, there are quite a few SoundTracker modules in the wild with random
+	// characters. To still be able to distguish them from other formats, we just reject
+	// files with *too* many bogus characters. Arbitrary threshold: 32 bogus characters.
+	uint32 invalidChars =  CountInvalidChars(songname);
+	if(invalidChars > 8 || !file.CanRead(sizeof(MODSampleHeader) * 15 + sizeof(MODFileHeader)))
 	{
 		return false;
 	}
@@ -998,22 +994,11 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	size_t totalSampleLen = 0;
 	m_nSamples = 15;
 
-	// In theory, sample names should only ever contain printable ASCII chars and null.
-	// However, there are quite a few SoundTracker modules in the wild with random
-	// characters. To still be able to distguish them from other formats, we just reject
-	// files with *too* many bogus characters. Arbitrary threshold: 32 bogus characters.
-	uint32 invalidChars = 0;
 	for(SAMPLEINDEX smp = 1; smp <= 15; smp++)
 	{
 		MODSampleHeader sampleHeader;
 		ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp]);
-
-		for(size_t i = 0; i < CountOf(sampleHeader.name); i++)
-		{
-			uint8 c = sampleHeader.name[i];
-			if(c != 0 && (c < 32 || c > 127))
-				invalidChars++;
-		}
+		invalidChars += CountInvalidChars(sampleHeader.name);
 
 		// Sanity checks
 		if(invalidChars > 32
@@ -1078,6 +1063,9 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	// Now we can be pretty sure that this is a valid Soundtracker file. Set up default song settings.
 	// explora3-death.mod has a tempo of 0
 	if(!fileHeader.restartPos)
+		fileHeader.restartPos = 0x78;
+	// jjk55 by Jesper Kyd has a weird tempo set, but it needs to be ignored.
+	if(!memcmp(songname, "jjk55", 6))
 		fileHeader.restartPos = 0x78;
 	// Sample 7 in echoing.mod won't "loop" correctly if we don't convert the VBlank tempo.
 	m_nDefaultTempo.Set(fileHeader.restartPos * 25 / 24);
@@ -1156,6 +1144,11 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				// This doesn't look like an arpeggio.
 				minVersion = std::max(minVersion, ST2_00_Exterminator);
+			} else if(eff == 1 && (param == 0x37 || param == 0x47) && minVersion <= ST2_00_Exterminator)
+			{
+				// This suspiciously looks like an arpeggio.
+				// Catch sleepwalk.mod by Karsten Obarski, which has a default tempo of 125 rather than 120 in the header, so gets mis-identified as a later tracker version.
+				minVersion = hasDiskNames ? UST1_80 : UST1_00;
 			}
 			break;
 		case 0x0B:
