@@ -114,6 +114,7 @@ BEGIN_MESSAGE_MAP(CFindReplaceTab, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_COMBO4,	OnVolumeChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO5,	OnEffectChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO6,	OnParamChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO7,	OnPCParamChanged)
 
 	ON_COMMAND(IDC_CHECK1,			OnCheckNote)
 	ON_COMMAND(IDC_CHECK2,			OnCheckInstr)
@@ -136,6 +137,7 @@ void CFindReplaceTab::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO4, m_cbnVolume);
 	DDX_Control(pDX, IDC_COMBO5, m_cbnCommand);
 	DDX_Control(pDX, IDC_COMBO6, m_cbnParam);
+	DDX_Control(pDX, IDC_COMBO7, m_cbnPCParam);
 }
 
 
@@ -148,12 +150,12 @@ BOOL CFindReplaceTab::OnInitDialog()
 	// Search flags
 	FlagSet<FindReplace::Flags> flags = m_isReplaceTab ? m_settings.replaceFlags : m_settings.findFlags;
 
-	CheckDlgButton(IDC_CHECK1, flags[FindReplace::Note]    ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(IDC_CHECK2, flags[FindReplace::Instr]   ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(IDC_CHECK3, flags[FindReplace::VolCmd]  ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(IDC_CHECK4, flags[FindReplace::Volume]  ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(IDC_CHECK5, flags[FindReplace::Command] ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(IDC_CHECK6, flags[FindReplace::Param]   ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK1, flags[FindReplace::Note]                           ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK2, flags[FindReplace::Instr]                          ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK3, flags[FindReplace::VolCmd | FindReplace::PCParam]  ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK4, flags[FindReplace::Volume | FindReplace::PCValue]  ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK5, flags[FindReplace::Command]                        ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK6, flags[FindReplace::Param]                          ? BST_CHECKED : BST_UNCHECKED);
 	if(m_isReplaceTab)
 	{
 		CheckDlgButton(IDC_CHECK7, flags[FindReplace::Replace]    ? BST_CHECKED : BST_UNCHECKED);
@@ -174,6 +176,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1))->SetRange32(1, m_sndFile.GetNumChannels());
 		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN2))->SetRange32(1, m_sndFile.GetNumChannels());
 	}
+
 	// Note
 	{
 		int sel = -1;
@@ -222,70 +225,30 @@ BOOL CFindReplaceTab::OnInitDialog()
 		m_cbnNote.SetCurSel(sel);
 		m_cbnNote.SetRedraw(TRUE);
 	}
-	// Instrument
-	{
-		int sel = (m_settings.findInstrMin == 0) ? 0 : -1;
-		m_cbnInstr.SetRedraw(FALSE);
-		m_cbnInstr.SetItemData(m_cbnInstr.AddString(_T("..")), 0);
-		if (m_isReplaceTab)
-		{
-			m_cbnInstr.SetItemData(m_cbnInstr.AddString(_T("Instrument -1")), kReplaceInstrumentMinusOne);
-			m_cbnInstr.SetItemData(m_cbnInstr.AddString(_T("Instrument +1")), kReplaceInstrumentPlusOne);
-			m_cbnInstr.SetItemData(m_cbnInstr.AddString(_T("Other...")), kReplaceRelative);
-			if(m_settings.replaceInstrAction == FindReplace::ReplaceRelative)
-			{
-				switch(m_settings.replaceInstr)
-				{
-				case -1: sel = 1; break;
-				case  1: sel = 2; break;
-				default: sel = 3; break;
-				}
-			}
-		} else
-		{
-			m_cbnInstr.SetItemData(m_cbnInstr.AddString(_T("Range...")), kFindRange);
-			if(m_settings.findInstrMin < m_settings.findInstrMax)
-				sel = 1;
-		}
-		for(INSTRUMENTINDEX n = 1; n < MAX_INSTRUMENTS; n++)
-		{
-			if(m_sndFile.GetNumInstruments())
-			{
-				_stprintf(s, _T("%03d:%s"), n, m_sndFile.GetInstrumentName(n));
-			} else
-			{
-				_stprintf(s, _T("%03d:%s"), n, m_sndFile.m_szNames[n]);
-			}
-			int i = m_cbnInstr.AddString(s);
-			m_cbnInstr.SetItemData(i, n);
-			if(m_settings.findInstrMin == n && sel == -1)
-				sel = i;
-		}
-		m_cbnInstr.SetCurSel(sel);
-		m_cbnInstr.SetRedraw(TRUE);
-	}
+
 	// Volume Command
+	m_cbnVolCmd.SetRedraw(FALSE);
+	m_cbnVolCmd.InitStorage(m_effectInfo.GetNumVolCmds(), 15);
+	m_cbnVolCmd.SetItemData(m_cbnVolCmd.AddString(" None"), (DWORD_PTR)-1);
+	UINT count = m_effectInfo.GetNumVolCmds();
+	for (UINT n=0; n<count; n++)
 	{
-		m_cbnVolCmd.SetRedraw(FALSE);
-		m_cbnVolCmd.InitStorage(m_effectInfo.GetNumVolCmds(), 15);
-		m_cbnVolCmd.SetItemData(m_cbnVolCmd.AddString(" None"), (DWORD_PTR)-1);
-		UINT count = m_effectInfo.GetNumVolCmds();
-		for (UINT n=0; n<count; n++)
+		if(m_effectInfo.GetVolCmdInfo(n, s) && s[0])
 		{
-			if(m_effectInfo.GetVolCmdInfo(n, s) && s[0])
-			{
-				m_cbnVolCmd.SetItemData(m_cbnVolCmd.AddString(s), n);
-			}
+			m_cbnVolCmd.SetItemData(m_cbnVolCmd.AddString(s), n);
 		}
-		m_cbnVolCmd.SetCurSel(0);
-		UINT fxndx = m_effectInfo.GetIndexFromVolCmd(m_isReplaceTab ? m_settings.replaceVolCmd : m_settings.findVolCmd);
-		for (UINT i=0; i<=count; i++) if (fxndx == m_cbnVolCmd.GetItemData(i))
-		{
-			m_cbnVolCmd.SetCurSel(i);
-			break;
-		}
-		m_cbnVolCmd.SetRedraw(TRUE);
 	}
+	m_cbnVolCmd.SetCurSel(0);
+	UINT fxndx = m_effectInfo.GetIndexFromVolCmd(m_isReplaceTab ? m_settings.replaceVolCmd : m_settings.findVolCmd);
+	for (UINT i=0; i<=count; i++) if (fxndx == m_cbnVolCmd.GetItemData(i))
+	{
+		m_cbnVolCmd.SetCurSel(i);
+		break;
+	}
+	m_cbnVolCmd.SetRedraw(TRUE);
+	m_cbnVolCmd.ShowWindow(SW_SHOW);
+	m_cbnPCParam.ShowWindow(SW_HIDE);
+
 	// Command
 	{
 		m_cbnCommand.SetRedraw(FALSE);
@@ -300,7 +263,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 			}
 		}
 		m_cbnCommand.SetCurSel(0);
-		UINT fxndx = m_effectInfo.GetIndexFromEffect(m_isReplaceTab ? m_settings.replaceCommand : m_settings.findCommand, m_isReplaceTab ? static_cast<ModCommand::PARAM>(m_settings.replaceParam) : m_settings.findParamMin);
+		UINT fxndx = m_effectInfo.GetIndexFromEffect(m_isReplaceTab ? m_settings.replaceCommand : m_settings.findCommand, static_cast<ModCommand::PARAM>(m_isReplaceTab ? m_settings.replaceParam : m_settings.findParamMin));
 		for (UINT i=0; i<=count; i++) if (fxndx == m_cbnCommand.GetItemData(i))
 		{
 			m_cbnCommand.SetCurSel(i);
@@ -308,16 +271,98 @@ BOOL CFindReplaceTab::OnInitDialog()
 		}
 		m_cbnCommand.SetRedraw(TRUE);
 	}
-	ChangeEffect();
-	ChangeVolCmd();
+	UpdateInstrumentList();
+	UpdateVolumeList();
+	UpdateParamList();
 	OnCheckChannelSearch();
 	return TRUE;
 }
 
 
-void CFindReplaceTab::ChangeEffect()
-//----------------------------------
+bool CFindReplaceTab::IsPCEvent() const
+//-------------------------------------
 {
+	if(m_isReplaceTab)
+	{
+		if(ModCommand::IsPcNote(static_cast<ModCommand::NOTE>(m_settings.replaceNote)))
+			return true;
+		else if(m_settings.replaceFlags[FindReplace::Note])
+			return false;
+		// If we don't replace the note, still show the PC-related settings if we search for PC events.
+	}
+	return ModCommand::IsPcNote(m_settings.findNoteMin);
+}
+
+
+void CFindReplaceTab::UpdateInstrumentList()
+//------------------------------------------
+{
+	const bool isPCEvent = IsPCEvent();
+	if(m_cbnInstr.GetCount() != 0 && !!GetWindowLongPtr(m_cbnInstr.m_hWnd, GWLP_USERDATA) == isPCEvent)
+		return;
+	SetWindowLongPtr(m_cbnInstr.m_hWnd, GWLP_USERDATA, isPCEvent);
+
+	int oldSelection = (m_isReplaceTab ? m_settings.replaceInstr : m_settings.findInstrMin);
+	int sel = (oldSelection == 0) ? 0 : -1;
+	m_cbnInstr.SetRedraw(FALSE);
+	m_cbnInstr.ResetContent();
+	m_cbnInstr.InitStorage((isPCEvent ? MAX_MIXPLUGINS : MAX_INSTRUMENTS) + 3, 32);
+	m_cbnInstr.SetItemData(m_cbnInstr.AddString(_T("..")), 0);
+	if (m_isReplaceTab)
+	{
+		m_cbnInstr.SetItemData(m_cbnInstr.AddString(isPCEvent ? _T("Plugin -1") : _T("Instrument -1")), kReplaceInstrumentMinusOne);
+		m_cbnInstr.SetItemData(m_cbnInstr.AddString(isPCEvent ? _T("Plugin +1") : _T("Instrument +1")), kReplaceInstrumentPlusOne);
+		m_cbnInstr.SetItemData(m_cbnInstr.AddString(_T("Other...")), kReplaceRelative);
+		if(m_settings.replaceInstrAction == FindReplace::ReplaceRelative)
+		{
+			switch(m_settings.replaceInstr)
+			{
+			case -1: sel = 1; break;
+			case  1: sel = 2; break;
+			default: sel = 3; break;
+			}
+		}
+	} else
+	{
+		m_cbnInstr.SetItemData(m_cbnInstr.AddString(_T("Range...")), kFindRange);
+		if(m_settings.findInstrMin < m_settings.findInstrMax)
+			sel = 1;
+	}
+	if(sel == -1)
+		sel = m_cbnInstr.GetCount() + oldSelection - 1;
+	if(isPCEvent)
+	{
+		AddPluginNamesToCombobox(m_cbnInstr, m_sndFile.m_MixPlugins, false);
+	} else
+	{
+		TCHAR s[256];
+		for(INSTRUMENTINDEX n = 1; n < MAX_INSTRUMENTS; n++)
+		{
+			if(m_sndFile.GetNumInstruments())
+			{
+				wsprintf(s, _T("%03d:%s"), n, m_sndFile.GetInstrumentName(n));
+			} else
+			{
+				wsprintf(s, _T("%03d:%s"), n, m_sndFile.m_szNames[n]);
+			}
+			m_cbnInstr.SetItemData(m_cbnInstr.AddString(s), n);
+		}
+	}
+	m_cbnInstr.SetCurSel(sel);
+	m_cbnInstr.SetRedraw(TRUE);
+	m_cbnInstr.Invalidate(FALSE);
+}
+
+
+void CFindReplaceTab::UpdateParamList()
+//-------------------------------------
+{
+	const bool isPCEvent = IsPCEvent();
+	if(m_cbnInstr.GetCount() == 0 || !!GetWindowLongPtr(m_cbnInstr.m_hWnd, GWLP_USERDATA) != isPCEvent)
+	{
+		SetWindowLongPtr(m_cbnInstr.m_hWnd, GWLP_USERDATA, isPCEvent);
+	}
+
 	int effectIndex = m_cbnCommand.GetItemData(m_cbnCommand.GetCurSel());
 	ModCommand::PARAM n = 0; // unused parameter adjustment
 	ModCommand::COMMAND cmd = m_effectInfo.GetEffectFromIndex(effectIndex, n);
@@ -359,48 +404,105 @@ void CFindReplaceTab::ChangeEffect()
 				sel = 0;
 		}
 
+		if(sel == -1)
+			sel = m_cbnParam.GetCount() + newpos;
 		for(int param = 0; param < newcount; param++)
 		{
 			wsprintf(s, (newcount == 256) ? _T("%02X") : _T("%X"), param);
 			int i = m_cbnParam.AddString(s);
 			m_cbnParam.SetItemData(i, param);
-			if(param == newpos && sel == -1)
-				sel = i;
 		}
 		m_cbnParam.SetCurSel(sel);
 		m_cbnParam.SetRedraw(TRUE);
+		m_cbnParam.Invalidate(FALSE);
 	}
 }
 
 
-void CFindReplaceTab::ChangeVolCmd()
-//----------------------------------
+void CFindReplaceTab::UpdateVolumeList()
+//--------------------------------------
 {
-	int effectIndex = m_cbnVolCmd.GetItemData(m_cbnVolCmd.GetCurSel());
-	ModCommand::VOLCMD cmd = m_effectInfo.GetVolCmdFromIndex(effectIndex);
-	if(m_isReplaceTab)
-		m_settings.replaceVolCmd = cmd;
-	else
-		m_settings.findVolCmd = cmd;
+	TCHAR s[256];
+	const bool isPCEvent = IsPCEvent();
 
-	// Update Param range
-	int sel = -1;
-	ModCommand::VOL rangeMin, rangeMax;
-	if(!m_effectInfo.GetVolCmdInfo(effectIndex, nullptr, &rangeMin, &rangeMax))
+	BOOL enable = isPCEvent ? FALSE : TRUE;
+	GetDlgItem(IDC_CHECK5)->EnableWindow(enable);
+	GetDlgItem(IDC_CHECK6)->EnableWindow(enable);
+	m_cbnCommand.EnableWindow(enable);
+	m_cbnParam.EnableWindow(enable);
+
+	// Update plugin parameter list
+	int plug = m_cbnInstr.GetItemData(m_cbnInstr.GetCurSel());
+	if(isPCEvent && (m_cbnPCParam.GetCount() == 0 || GetWindowLongPtr(m_cbnPCParam.m_hWnd, GWLP_USERDATA) != plug))
+	{
+		SetWindowLongPtr(m_cbnPCParam.m_hWnd, GWLP_USERDATA, plug);
+
+		CheckDlgButton(IDC_CHECK5, BST_UNCHECKED);
+		CheckDlgButton(IDC_CHECK6, BST_UNCHECKED);
+
+		int i = m_isReplaceTab ? m_settings.replaceParam : m_settings.findParamMin;
+		plug--;
+		m_cbnPCParam.SetRedraw(FALSE);
+		m_cbnPCParam.ResetContent();
+		if(plug >= 0 && plug < MAX_MIXPLUGINS && m_sndFile.m_MixPlugins[plug].pMixPlugin != nullptr)
+		{
+			AddPluginParameternamesToCombobox(m_cbnPCParam, *m_sndFile.m_MixPlugins[plug].pMixPlugin);
+		} else
+		{
+			m_cbnPCParam.InitStorage(ModCommand::maxColumnValue, 20);
+			for(int i = 0; i < ModCommand::maxColumnValue; i++)
+			{
+				wsprintf(s, _T("%02u: Parameter %02u"), i, i);
+				m_cbnPCParam.SetItemData(m_cbnPCParam.AddString(s), i);
+			}
+		}
+		m_cbnPCParam.SetCurSel(i);
+		m_cbnPCParam.SetRedraw(TRUE);
+		m_cbnPCParam.Invalidate(FALSE);
+	}
+
+	m_cbnVolCmd.ShowWindow(isPCEvent ? SW_HIDE : SW_SHOW);
+	m_cbnPCParam.ShowWindow(isPCEvent ? SW_SHOW : SW_HIDE);
+
+	int rangeMin, rangeMax, curVal;
+
+	if(isPCEvent)
 	{
 		rangeMin = 0;
-		rangeMax = 64;
+		rangeMax = ModCommand::maxColumnValue;
+		curVal = (m_isReplaceTab ? m_settings.replaceParam : m_settings.findParamMin);
+	} else
+	{
+		int effectIndex = m_cbnVolCmd.GetItemData(m_cbnVolCmd.GetCurSel());
+		ModCommand::VOLCMD cmd = m_effectInfo.GetVolCmdFromIndex(effectIndex);
+		if(m_isReplaceTab)
+			m_settings.replaceVolCmd = cmd;
+		else
+			m_settings.findVolCmd = cmd;
+
+		// Update Param range
+		ModCommand::VOL volMin, volMax;
+		if(!m_effectInfo.GetVolCmdInfo(effectIndex, nullptr, &volMin, &volMax))
+		{
+			volMin = 0;
+			volMax = 64;
+		}
+		rangeMin = volMin;
+		rangeMax = volMax;
+		curVal = (m_isReplaceTab ? m_settings.replaceVolume : m_settings.findVolumeMin);
 	}
+
 	int oldcount = m_cbnVolume.GetCount();
 	int newcount = rangeMax - rangeMin + 1;
 	if (oldcount != newcount)
 	{
-		TCHAR s[16];
+		int sel = -1;
 		int newpos;
 		if (oldcount)
-			newpos = m_cbnVolume.GetItemData(m_cbnVolume.GetCurSel()) % newcount;
+			newpos = m_cbnVolume.GetItemData(m_cbnVolume.GetCurSel());
 		else
-			newpos = (m_isReplaceTab ? m_settings.replaceVolume : m_settings.findVolumeMin) % newcount;
+			newpos = curVal;
+		newpos %= newcount;
 		m_cbnVolume.SetRedraw(FALSE);
 		m_cbnVolume.ResetContent();
 		m_cbnVolume.InitStorage(newcount + 2, 4);
@@ -421,16 +523,17 @@ void CFindReplaceTab::ChangeVolCmd()
 				sel = 0;
 		}
 
+		if(sel == -1)
+			sel = m_cbnVolume.GetCount() + newpos - rangeMin;
 		for (int vol = rangeMin; vol <= rangeMax; vol++)
 		{
-			_stprintf(s, (rangeMax < 10) ? _T("%d") : _T("%02d"), vol);
+			wsprintf(s, (rangeMax < 10 || rangeMax > 99) ? _T("%d") : _T("%02d"), vol);
 			int i = m_cbnVolume.AddString(s);
 			m_cbnVolume.SetItemData(i, vol);
-			if(vol == newpos && sel == -1)
-				sel = i;
 		}
 		m_cbnVolume.SetCurSel(sel);
 		m_cbnVolume.SetRedraw(TRUE);
+		m_cbnVolume.Invalidate(FALSE);
 	}
 }
 
@@ -486,6 +589,8 @@ void CFindReplaceTab::OnNoteChanged()
 			m_settings.findNoteMin = m_settings.findNoteMax = static_cast<ModCommand::NOTE>(item);
 		}
 	}
+	UpdateInstrumentList();
+	UpdateVolumeList();
 }
 
 
@@ -536,6 +641,8 @@ void CFindReplaceTab::OnInstrChanged()
 			m_settings.findInstrMin = m_settings.findInstrMax = static_cast<ModCommand::INSTR>(item);
 		}
 	}
+	if(IsPCEvent())
+		UpdateVolumeList();
 }
 
 
@@ -560,6 +667,7 @@ void CFindReplaceTab::RelativeOrMultiplyPrompt(CComboBox &comboBox, FindReplace:
 			format = _T("* %d%%");
 		}
 
+		range *= 100;
 		CInputDlg dlg(this, prompt, -range, range, value);
 		if(dlg.DoModal() == IDOK)
 		{
@@ -567,7 +675,7 @@ void CFindReplaceTab::RelativeOrMultiplyPrompt(CComboBox &comboBox, FindReplace:
 			action = act;
 
 			TCHAR s[32];
-			_stprintf(s, format, value);
+			wsprintf(s, format, value);
 			comboBox.DeleteString(sel);
 			comboBox.InsertString(sel, s);
 			comboBox.SetItemData(sel, item);
@@ -589,25 +697,26 @@ void CFindReplaceTab::OnVolumeChanged()
 {
 	CheckOnChange(IDC_CHECK4);
 	int item = m_cbnVolume.GetItemData(m_cbnVolume.GetCurSel());
+	int rangeMax = IsPCEvent() ? ModCommand::maxColumnValue : 64;
 	if(m_isReplaceTab)
 	{
-		RelativeOrMultiplyPrompt(m_cbnVolume, m_settings.replaceVolumeAction, m_settings.replaceVolume, 64);
+		RelativeOrMultiplyPrompt(m_cbnVolume, m_settings.replaceVolumeAction, m_settings.replaceVolume, rangeMax);
 	} else
 	{
 		if(item == kFindRange)
 		{
-			CFindRangeDlg dlg(this, 0, m_settings.findVolumeMin, 64, m_settings.findVolumeMax, CFindRangeDlg::kDecimal);
+			CFindRangeDlg dlg(this, 0, m_settings.findVolumeMin, rangeMax, m_settings.findVolumeMax, CFindRangeDlg::kDecimal);
 			if(dlg.DoModal() == IDOK)
 			{
-				m_settings.findVolumeMin = static_cast<ModCommand::VOL>(dlg.GetMinVal());
-				m_settings.findVolumeMax = static_cast<ModCommand::VOL>(dlg.GetMaxVal());
+				m_settings.findVolumeMin = dlg.GetMinVal();
+				m_settings.findVolumeMax = dlg.GetMaxVal();
 			} else
 			{
 				// TODO undo selection
 			}
 		} else
 		{
-			m_settings.findVolumeMin = m_settings.findVolumeMax = static_cast<ModCommand::VOL>(item);
+			m_settings.findVolumeMin = m_settings.findVolumeMax = item;
 		}
 	}
 }
@@ -637,15 +746,45 @@ void CFindReplaceTab::OnParamChanged()
 			CFindRangeDlg dlg(this, 0, m_settings.findParamMin & ~mask, m_cbnParam.GetCount() - 2, m_settings.findParamMax & ~mask, CFindRangeDlg::kHex);
 			if(dlg.DoModal() == IDOK)
 			{
-				m_settings.findParamMin = static_cast<ModCommand::PARAM>(dlg.GetMinVal() | mask);
-				m_settings.findParamMax = static_cast<ModCommand::PARAM>(dlg.GetMaxVal() | mask);
+				m_settings.findParamMin = dlg.GetMinVal() | mask;
+				m_settings.findParamMax = dlg.GetMaxVal() | mask;
 			} else
 			{
 				// TODO undo selection
 			}
 		} else
 		{
-			m_settings.findParamMin = m_settings.findParamMax = static_cast<ModCommand::PARAM>(item | mask);
+			m_settings.findParamMin = m_settings.findParamMax = (item | mask);
+		}
+	}
+}
+
+
+void CFindReplaceTab::OnPCParamChanged()
+//--------------------------------------
+{
+	CheckOnChange(IDC_CHECK3);
+	int item = m_cbnPCParam.GetItemData(m_cbnPCParam.GetCurSel());
+
+	if(m_isReplaceTab)
+	{
+		RelativeOrMultiplyPrompt(m_cbnPCParam, m_settings.replaceParamAction, m_settings.replaceParam, 256);
+	} else
+	{
+		if(item == kFindRange)
+		{
+			CFindRangeDlg dlg(this, 0, m_settings.findParamMin, ModCommand::maxColumnValue, m_settings.findParamMax, CFindRangeDlg::kDecimal);
+			if(dlg.DoModal() == IDOK)
+			{
+				m_settings.findParamMin = dlg.GetMinVal();
+				m_settings.findParamMax = dlg.GetMaxVal();
+			} else
+			{
+				// TODO undo selection
+			}
+		} else
+		{
+			m_settings.findParamMin = m_settings.findParamMax = item;
 		}
 	}
 }
@@ -673,10 +812,17 @@ void CFindReplaceTab::OnOK()
 	flags.reset();
 	flags.set(FindReplace::Note, !!IsDlgButtonChecked(IDC_CHECK1));
 	flags.set(FindReplace::Instr, !!IsDlgButtonChecked(IDC_CHECK2));
-	flags.set(FindReplace::VolCmd, !!IsDlgButtonChecked(IDC_CHECK3));
-	flags.set(FindReplace::Volume, !!IsDlgButtonChecked(IDC_CHECK4));
-	flags.set(FindReplace::Command, !!IsDlgButtonChecked(IDC_CHECK5));
-	flags.set(FindReplace::Param, !!IsDlgButtonChecked(IDC_CHECK6));
+	if(IsPCEvent())
+	{
+		flags.set(FindReplace::PCParam, !!IsDlgButtonChecked(IDC_CHECK3));
+		flags.set(FindReplace::PCValue, !!IsDlgButtonChecked(IDC_CHECK4));
+	} else
+	{
+		flags.set(FindReplace::VolCmd, !!IsDlgButtonChecked(IDC_CHECK3));
+		flags.set(FindReplace::Volume, !!IsDlgButtonChecked(IDC_CHECK4));
+		flags.set(FindReplace::Command, !!IsDlgButtonChecked(IDC_CHECK5));
+		flags.set(FindReplace::Param, !!IsDlgButtonChecked(IDC_CHECK6));
+	}
 	if(m_isReplaceTab)
 	{
 		flags.set(FindReplace::Replace, !!IsDlgButtonChecked(IDC_CHECK7));

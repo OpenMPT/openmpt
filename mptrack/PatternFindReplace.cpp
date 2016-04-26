@@ -105,7 +105,7 @@ void CViewPattern::OnEditFindNext()
 	bool isExtendedEffect = false;
 	if(FindReplace::instance.findFlags[FindReplace::Command])
 	{
-		UINT fxndx = effectInfo.GetIndexFromEffect(FindReplace::instance.findCommand, FindReplace::instance.findParamMin);
+		UINT fxndx = effectInfo.GetIndexFromEffect(FindReplace::instance.findCommand, static_cast<ModCommand::PARAM>(FindReplace::instance.findParamMin));
 		isExtendedEffect = effectInfo.IsExtendedEffect(fxndx);
 	}
 
@@ -194,213 +194,256 @@ void CViewPattern::OnEditFindNext()
 					}
 				}
 
-				bool foundHere = true;
-
 				if((FindReplace::instance.findFlags[FindReplace::Note] && (!findWhere.note || m->note < FindReplace::instance.findNoteMin || m->note > FindReplace::instance.findNoteMax))
-					|| (FindReplace::instance.findFlags[FindReplace::Instr] && (!findWhere.instrument || m->instr < FindReplace::instance.findInstrMin || m->instr > FindReplace::instance.findInstrMax))
-					|| (FindReplace::instance.findFlags[FindReplace::VolCmd] && (!findWhere.volume || m->volcmd != FindReplace::instance.findVolCmd))
+					|| (FindReplace::instance.findFlags[FindReplace::Instr] && (!findWhere.instrument || m->instr < FindReplace::instance.findInstrMin || m->instr > FindReplace::instance.findInstrMax)))
+				{
+					continue;
+				}
+
+				if(!m->IsPcNote())
+				{
+					if((FindReplace::instance.findFlags[FindReplace::VolCmd] && (!findWhere.volume || m->volcmd != FindReplace::instance.findVolCmd))
 					|| (FindReplace::instance.findFlags[FindReplace::Volume] && (!findWhere.volume || m->volcmd == VOLCMD_NONE || m->vol < FindReplace::instance.findVolumeMin || m->vol > FindReplace::instance.findVolumeMax))
 					|| (FindReplace::instance.findFlags[FindReplace::Command] && (!findWhere.command || m->command != FindReplace::instance.findCommand))
 					|| (FindReplace::instance.findFlags[FindReplace::Param] && (!findWhere.parameter || m->command == CMD_NONE ||  m->param < FindReplace::instance.findParamMin || m->param > FindReplace::instance.findParamMax)))
-				{
-					foundHere = false;
+					{
+						continue;
+					}
+					MPT_ASSERT(!FindReplace::instance.findFlags[FindReplace::PCParam | FindReplace::PCValue]);
 				} else
 				{
-					if((FindReplace::instance.findFlags & (FindReplace::Command | FindReplace::Param)) == FindReplace::Command && isExtendedEffect)
+					if((FindReplace::instance.findFlags[FindReplace::PCParam] && (!findWhere.volume || m->GetValueVolCol() < FindReplace::instance.findParamMin || m->GetValueVolCol() > FindReplace::instance.findParamMax))
+						|| (FindReplace::instance.findFlags[FindReplace::PCValue] && (!(findWhere.command || findWhere.parameter) || m->GetValueVolCol() < FindReplace::instance.findVolumeMin || m->GetValueVolCol() > FindReplace::instance.findVolumeMax)))
 					{
-						if((m->param & 0xF0) != (FindReplace::instance.findParamMin & 0xF0)) foundHere = false;
+						continue;
 					}
+					MPT_ASSERT(!FindReplace::instance.findFlags[FindReplace::VolCmd | FindReplace::Volume | FindReplace::Command | FindReplace::Param]);
+				}
 
-					// Ignore modcommands with PC/PCS notes when searching from volume or effect column.
-					if(m->IsPcNote() && FindReplace::instance.findFlags[FindReplace::VolCmd | FindReplace::Volume | FindReplace::Command | FindReplace::Param])
-					{
-						foundHere = false;
-					}
+				if((FindReplace::instance.findFlags & (FindReplace::Command | FindReplace::Param)) == FindReplace::Command && isExtendedEffect)
+				{
+					if((m->param & 0xF0) != (FindReplace::instance.findParamMin & 0xF0))
+						continue;
 				}
 
 				// Found!
-				if(foundHere)
+				
+				// Do we want to jump to the finding in this pattern?
+				const bool updatePos = !FindReplace::instance.replaceFlags.test_all(FindReplace::ReplaceAll | FindReplace::Replace);
+				nFound++;
+
+				if(updatePos)
 				{
-					// Do we want to jump to the finding in this pattern?
-					const bool updatePos = !FindReplace::instance.replaceFlags.test_all(FindReplace::ReplaceAll | FindReplace::Replace);
-					nFound++;
-
-					if(updatePos)
+					if(IsLiveRecord())
 					{
-						if(IsLiveRecord())
+						// turn off "follow song"
+						m_Status.reset(psFollowSong);
+						SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG, 0);
+					}
+					// This doesn't find the order if it's in another sequence :(
+					ORDERINDEX matchingOrder = sndFile.Order.FindOrder(pat, GetCurrentOrder());
+					if(matchingOrder != ORDERINDEX_INVALID)
+					{
+						SetCurrentOrder(matchingOrder);
+					}
+					// go to place of finding
+					SetCurrentPattern(pat);
+				}
+
+				PatternCursor::Columns foundCol = PatternCursor::firstColumn;
+				if(FindReplace::instance.findFlags[FindReplace::Note])
+					foundCol = PatternCursor::noteColumn;
+				else if(FindReplace::instance.findFlags[FindReplace::Instr])
+					foundCol = PatternCursor::instrColumn;
+				else if(FindReplace::instance.findFlags[FindReplace::VolCmd | FindReplace::Volume | FindReplace::PCParam])
+					foundCol = PatternCursor::volumeColumn;
+				else if(FindReplace::instance.findFlags[FindReplace::Command | FindReplace::PCValue])
+					foundCol = PatternCursor::effectColumn;
+				else if(FindReplace::instance.findFlags[FindReplace::Param])
+					foundCol = PatternCursor::paramColumn;
+
+				if(updatePos)
+				{
+					// Jump to pattern cell
+					SetCursorPosition(PatternCursor(row, chn, foundCol));
+				}
+
+				if(!FindReplace::instance.replaceFlags[FindReplace::Replace]) goto EndSearch;
+
+				bool replace = true;
+
+				if(!FindReplace::instance.replaceFlags[FindReplace::ReplaceAll])
+				{
+					ConfirmAnswer result = Reporting::Confirm("Replace this occurrence?", "Replace", true);
+					if(result == cnfCancel)
+					{
+						goto EndSearch;	// Yuck!
+					} else
+					{
+						replace = (result == cnfYes);
+					}
+				}
+				if(replace)
+				{
+					if(FindReplace::instance.replaceFlags[FindReplace::ReplaceAll])
+					{
+						// Just create one logic undo step per pattern when auto-replacing all occurences.
+						if(firstInPat)
 						{
-							// turn off "follow song"
-							m_Status.reset(psFollowSong);
-							SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG, 0);
+							GetDocument()->GetPatternUndo().PrepareUndo(pat, firstChannel, row, lastChannel - firstChannel + 1, numRows - row + 1, "Find / Replace", (nFound > 1));
+							firstInPat = false;
 						}
-						// This doesn't find the order if it's in another sequence :(
-						ORDERINDEX matchingOrder = sndFile.Order.FindOrder(pat, GetCurrentOrder());
-						if(matchingOrder != ORDERINDEX_INVALID)
-						{
-							SetCurrentOrder(matchingOrder);
-						}
-						// go to place of finding
-						SetCurrentPattern(pat);
+					} else
+					{
+						// Create separately undo-able items when replacing manually.
+						GetDocument()->GetPatternUndo().PrepareUndo(pat, chn, row, 1, 1, "Find / Replace");
 					}
 
-					PatternCursor::Columns foundCol = PatternCursor::firstColumn;
-					if(FindReplace::instance.findFlags[FindReplace::Note])
-						foundCol = PatternCursor::noteColumn;
-					else if(FindReplace::instance.findFlags[FindReplace::Instr])
-						foundCol = PatternCursor::instrColumn;
-					else if(FindReplace::instance.findFlags[FindReplace::VolCmd | FindReplace::Volume])
-						foundCol = PatternCursor::volumeColumn;
-					else if(FindReplace::instance.findFlags[FindReplace::Command])
-						foundCol = PatternCursor::effectColumn;
-					else if(FindReplace::instance.findFlags[FindReplace::Param])
-						foundCol = PatternCursor::paramColumn;
-
-					if(updatePos)
+					if(FindReplace::instance.replaceFlags[FindReplace::Note])
 					{
-						// Jump to pattern cell
-						SetCursorPosition(PatternCursor(row, chn, foundCol));
+						int noteReplace = static_cast<int>(FindReplace::instance.replaceNote);
+						if(FindReplace::instance.replaceNoteAction == FindReplace::ReplaceRelative && m->IsNote())
+						{
+							// TODO +/-1 octave with custom tuning
+							int note = Clamp(m->note + noteReplace, specs.noteMin, specs.noteMax);
+							m->note = static_cast<ModCommand::NOTE>(note);
+						} else if(FindReplace::instance.replaceNoteAction == FindReplace::ReplaceValue)
+						{
+							// Replace with another note
+							// If we're going to remove a PC Note or replace a normal note by a PC note, wipe out the complete column.
+							if(m->IsPcNote() != ModCommand::IsPcNote(static_cast<ModCommand::NOTE>(noteReplace)))
+							{
+								m->Clear();
+							}
+							m->note = static_cast<ModCommand::NOTE>(noteReplace);
+						}
 					}
 
-					if(!FindReplace::instance.replaceFlags[FindReplace::Replace]) goto EndSearch;
-
-					bool replace = true;
-
-					if(!FindReplace::instance.replaceFlags[FindReplace::ReplaceAll])
+					if(FindReplace::instance.replaceFlags[FindReplace::Instr])
 					{
-						ConfirmAnswer result = Reporting::Confirm("Replace this occurrence?", "Replace", true);
-						if(result == cnfCancel)
+						int instrReplace = FindReplace::instance.replaceInstr;
+						int instr = m->instr;
+						if(FindReplace::instance.replaceInstrAction == FindReplace::ReplaceRelative && instr > 0)
 						{
-							goto EndSearch;	// Yuck!
-						} else
+							instr += instrReplace;
+						} else if(FindReplace::instance.replaceInstrAction == FindReplace::ReplaceValue)
 						{
-							replace = (result == cnfYes);
+							instr = instrReplace;
 						}
+						m->instr = mpt::saturate_cast<ModCommand::INSTR>(instr);
 					}
-					if(replace)
+
+					bool hadVolume = (m->volcmd == VOLCMD_VOLUME);
+					if(FindReplace::instance.replaceFlags[FindReplace::VolCmd])
 					{
-						if(FindReplace::instance.replaceFlags[FindReplace::ReplaceAll])
+						m->volcmd = FindReplace::instance.replaceVolCmd;
+					}
+
+					if(FindReplace::instance.replaceFlags[FindReplace::Volume])
+					{
+						int volReplace = FindReplace::instance.replaceVolume;
+						int vol = m->vol;
+						if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceRelative || FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceMultiply)
 						{
-							// Just create one logic undo step per pattern when auto-replacing all occurences.
-							if(firstInPat)
+							if(!hadVolume && m->volcmd == VOLCMD_VOLUME)
 							{
-								GetDocument()->GetPatternUndo().PrepareUndo(pat, firstChannel, row, lastChannel - firstChannel + 1, numRows - row + 1, "Find / Replace", (nFound > 1));
-								firstInPat = false;
+								vol = GetDefaultVolume(*m);
 							}
-						} else
-						{
-							// Create separately undo-able items when replacing manually.
-							GetDocument()->GetPatternUndo().PrepareUndo(pat, chn, row, 1, 1, "Find / Replace");
-						}
 
-						if(FindReplace::instance.replaceFlags[FindReplace::Note])
-						{
-							int noteReplace = static_cast<int>(FindReplace::instance.replaceNote);
-							if(FindReplace::instance.replaceNoteAction == FindReplace::ReplaceRelative && m->IsNote())
-							{
-								// TODO +/-1 octave with custom tuning
-								// TODO format-base note clamping
-								int note = Clamp(m->note + noteReplace, specs.noteMin, specs.noteMax);
-								m->note = static_cast<ModCommand::NOTE>(note);
-							} else if(FindReplace::instance.replaceNoteAction == FindReplace::ReplaceValue)
-							{
-								// Replace with another note
-								// If we're going to remove a PC Note or replace a normal note by a PC note, wipe out the complete column.
-								if(m->IsPcNote() != ModCommand::IsPcNote(static_cast<ModCommand::NOTE>(noteReplace)))
-								{
-									m->Clear();
-								}
-								m->note = static_cast<ModCommand::NOTE>(noteReplace);
-							}
-						}
-
-						if(FindReplace::instance.replaceFlags[FindReplace::Instr])
-						{
-							int instrReplace = FindReplace::instance.replaceInstr;
-							int instr = m->instr;
-							if(FindReplace::instance.replaceInstrAction == FindReplace::ReplaceRelative && instr > 0)
-							{
-								instr += instrReplace;
-							} else if(FindReplace::instance.replaceInstrAction == FindReplace::ReplaceValue)
-							{
-								instr = instrReplace;
-							}
-							m->instr = mpt::saturate_cast<ModCommand::INSTR>(instr);
-						}
-
-						bool hadVolume = (m->volcmd == VOLCMD_VOLUME);
-						if(FindReplace::instance.replaceFlags[FindReplace::VolCmd])
-						{
-							m->volcmd = FindReplace::instance.replaceVolCmd;
-						}
-
-						if(FindReplace::instance.replaceFlags[FindReplace::Volume])
-						{
-							int volReplace = FindReplace::instance.replaceVolume;
-							int vol = m->vol;
-							if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceRelative || FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceMultiply)
-							{
-								if(!hadVolume && m->volcmd == VOLCMD_VOLUME)
-								{
-									vol = GetDefaultVolume(*m);
-								}
-
-								if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceRelative)
-									vol += volReplace;
-								else
-									vol = Util::muldivr(vol, volReplace, 100);
-							} else if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceValue)
-							{
-								vol = volReplace;
-							}
-							m->vol = mpt::saturate_cast<ModCommand::VOL>(vol);
-						}
-
-						if(FindReplace::instance.replaceFlags[FindReplace::VolCmd | FindReplace::Volume] && m->volcmd != VOLCMD_NONE)
-						{
-							// Fix volume command parameters if necessary. This is necesary e.g.
-							// When there was a command "v24" and the user searched for v and replaced it by d.
-							// In that case, d24 wouldn't be a valid command.
-							ModCommand::VOL minVal = 0, maxVal = 64;
-							if(effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m->volcmd), nullptr, &minVal, &maxVal))
-							{
-								Limit(m->vol, minVal, maxVal);
-							}
-						}
-
-						hadVolume = (m->command == CMD_VOLUME);
-						if(FindReplace::instance.replaceFlags[FindReplace::Command])
-						{
-							m->command = FindReplace::instance.replaceCommand;
-						}
-
-						if(FindReplace::instance.replaceFlags[FindReplace::Param])
-						{
-							int paramReplace = FindReplace::instance.replaceParam;
-							int param = m->param;
-							if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceRelative || FindReplace::instance.replaceParamAction == FindReplace::ReplaceMultiply)
-							{
-								if(!hadVolume && m->command == CMD_VOLUME)
-								{
-									param = GetDefaultVolume(*m);
-								}
-
-								if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceRelative)
-									param += paramReplace;
-								else
-									param = Util::muldivr(param, paramReplace, 100);
-							} else if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceValue)
-							{
-								param = paramReplace;
-							}
-							if(isExtendedEffect && !FindReplace::instance.replaceFlags[FindReplace::Command])
-								m->param = static_cast<ModCommand::PARAM>((m->param & 0xF0) | Clamp(static_cast<int>(param), 0, 15));
+							if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceRelative)
+								vol += volReplace;
 							else
-								m->param = mpt::saturate_cast<ModCommand::PARAM>(param);
+								vol = Util::muldivr(vol, volReplace, 100);
+						} else if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceValue)
+						{
+							vol = volReplace;
 						}
-						SetModified(false);
-						if(updatePos)
-							InvalidateRow();
+						m->vol = mpt::saturate_cast<ModCommand::VOL>(vol);
 					}
+
+					if(FindReplace::instance.replaceFlags[FindReplace::VolCmd | FindReplace::Volume] && m->volcmd != VOLCMD_NONE)
+					{
+						// Fix volume command parameters if necessary. This is necesary e.g.
+						// When there was a command "v24" and the user searched for v and replaced it by d.
+						// In that case, d24 wouldn't be a valid command.
+						ModCommand::VOL minVal = 0, maxVal = 64;
+						if(effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m->volcmd), nullptr, &minVal, &maxVal))
+						{
+							Limit(m->vol, minVal, maxVal);
+						}
+					}
+
+					hadVolume = (m->command == CMD_VOLUME);
+					if(FindReplace::instance.replaceFlags[FindReplace::Command])
+					{
+						m->command = FindReplace::instance.replaceCommand;
+					}
+
+					if(FindReplace::instance.replaceFlags[FindReplace::Param])
+					{
+						int paramReplace = FindReplace::instance.replaceParam;
+						int param = m->param;
+						if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceRelative || FindReplace::instance.replaceParamAction == FindReplace::ReplaceMultiply)
+						{
+							if(!hadVolume && m->command == CMD_VOLUME)
+							{
+								param = GetDefaultVolume(*m);
+							}
+
+							if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceRelative)
+								param += paramReplace;
+							else
+								param = Util::muldivr(param, paramReplace, 100);
+						} else if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceValue)
+						{
+							param = paramReplace;
+						}
+						
+						if(isExtendedEffect && !FindReplace::instance.replaceFlags[FindReplace::Command])
+							m->param = static_cast<ModCommand::PARAM>((m->param & 0xF0) | Clamp(param, 0, 15));
+						else
+							m->param = mpt::saturate_cast<ModCommand::PARAM>(param);
+					}
+
+					if(FindReplace::instance.replaceFlags[FindReplace::PCParam])
+					{
+						int paramReplace = FindReplace::instance.replaceParam;
+						int param = m->GetValueVolCol();
+						if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceRelative || FindReplace::instance.replaceParamAction == FindReplace::ReplaceMultiply)
+						{
+							if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceRelative)
+								param += paramReplace;
+							else
+								param = Util::muldivr(param, paramReplace, 100);
+						} else if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceValue)
+						{
+							param = paramReplace;
+						}
+
+						m->SetValueVolCol(static_cast<uint16>(Clamp(param, 0, ModCommand::maxColumnValue)));
+					}
+
+					if(FindReplace::instance.replaceFlags[FindReplace::PCValue])
+					{
+						int valueReplace = FindReplace::instance.replaceVolume;
+						int value = m->GetValueEffectCol();
+						if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceRelative || FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceMultiply)
+						{
+							if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceRelative)
+								value += valueReplace;
+							else
+								value = Util::muldivr(value, valueReplace, 100);
+						} else if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceValue)
+						{
+							value = valueReplace;
+						}
+
+						m->SetValueEffectCol(static_cast<uint16>(Clamp(value, 0, ModCommand::maxColumnValue)));
+					}
+
+					SetModified(false);
+					if(updatePos)
+						InvalidateRow();
 				}
 			}
 			chn = firstChannel;

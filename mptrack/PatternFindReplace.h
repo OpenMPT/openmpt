@@ -23,11 +23,14 @@ struct FindReplace
 		Volume			= 0x08,		// Search for volume
 		Command			= 0x10,		// Search for effect
 		Param			= 0x20,		// Search for effect parameter
-		InChannels		= 0x40,		// Limit search to channels
-		FullSearch		= 0x100,	// Search whole song
-		InPatSelection	= 0x200,	// Search in current pattern selection
-		Replace			= 0x400,	// Replace
-		ReplaceAll		= 0x800,	// Replace all
+		PCParam			= 0x40,		// Parameter of PC event
+		PCValue			= 0x80,		// Value of PC event
+
+		InChannels		= 0x100,	// Limit search to channels
+		FullSearch		= 0x200,	// Search whole song
+		InPatSelection	= 0x400,	// Search in current pattern selection
+		Replace			= 0x800,	// Replace
+		ReplaceAll		= 0x1000,	// Replace all
 	};
 
 	enum ReplaceMode
@@ -49,9 +52,9 @@ struct FindReplace
 	ModCommand::NOTE    findNoteMin, findNoteMax;
 	ModCommand::INSTR   findInstrMin, findInstrMax;
 	ModCommand::VOLCMD  findVolCmd;
-	ModCommand::VOL     findVolumeMin, findVolumeMax;
+	int                 findVolumeMin, findVolumeMax;
 	ModCommand::COMMAND findCommand;
-	ModCommand::PARAM   findParamMin, findParamMax;
+	int                 findParamMin, findParamMax;
 
 	PatternRect selection;					// Find in this selection (if FindReplace::InPatSelection is set)
 	CHANNELINDEX findChnMin, findChnMax;	// Find in these channels (if FindReplace::InChannels is set)
