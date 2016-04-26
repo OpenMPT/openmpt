@@ -605,6 +605,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kST3EffectMemory: desc = _T("Most effects share the same memory in ST3"); break;
 		case kST3PortaSampleChange: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself."); break;
 		case kMODIgnorePanning: desc = _T("Ignore panning commands."); break;
+		case kMODSampleSwap: desc = _T("Enable on-the-fly sample swapping"); break;
 
 		default: MPT_ASSERT(0);
 		}

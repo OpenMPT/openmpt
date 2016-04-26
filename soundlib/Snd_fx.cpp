@@ -2391,7 +2391,7 @@ bool CSoundFile::ProcessEffects()
 			bool reloadSampleSettings = (m_playBehaviour[kFT2ReloadSampleSettings] && instr != 0);
 			// ProTracker Compatibility: If a sample was stopped before, lone instrument numbers can retrigger it
 			// Test case: PTSwapEmpty.mod
-			bool keepInstr = (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (m_SongFlags[SONG_PT_MODE] && pChn->nInc == 0 && pChn->pModSample != nullptr && pChn->pModSample->pSample == nullptr);
+			bool keepInstr = (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (m_playBehaviour[kMODSampleSwap] && pChn->nInc == 0 && pChn->pModSample != nullptr && pChn->pModSample->pSample == nullptr);
 
 			// Now it's time for some FT2 crap...
 			if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
@@ -2581,7 +2581,7 @@ bool CSoundFile::ProcessEffects()
 				{
 					// Special IT case: portamento+note causes sample change -> ignore portamento
 					bPorta = false;
-				} else if(m_SongFlags[SONG_PT_MODE] && pChn->nInc == 0)
+				} else if(m_playBehaviour[kMODSampleSwap] && pChn->nInc == 0)
 				{
 					// If channel was paused and is resurrected by a lone instrument number, reset the sample position.
 					// Test case: PTSwapEmpty.mod

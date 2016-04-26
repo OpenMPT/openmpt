@@ -996,6 +996,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kMODVBlankTiming);
 		playBehaviour.set(kMODOneShotLoops);
 		playBehaviour.set(kMODIgnorePanning);
+		playBehaviour.set(kMODSampleSwap);
 		break;
 
 	default:
@@ -1029,6 +1030,7 @@ PlayBehaviourSet CSoundFile::GetDefaultPlaybackBehaviour(MODTYPE type)
 
 	case MOD_TYPE_MOD:
 		playBehaviour.set(kMODOneShotLoops);
+		playBehaviour.set(kMODSampleSwap);
 		break;
 
 	default:
