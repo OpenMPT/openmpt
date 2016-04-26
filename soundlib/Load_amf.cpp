@@ -443,13 +443,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	const FileReader::off_t trackStartPos = file.GetPosition() + (fileHeader.version >= 14 ? 2 : 0);
 	if(fileHeader.version >= 14)
 	{
-		try
-		{
-			patternLength.resize(fileHeader.numOrders);
-		} catch(MPTMemoryException)
-		{
-			return false;
-		}
+		patternLength.resize(fileHeader.numOrders);
 	}
 
 	for(ORDERINDEX ord = 0; ord < fileHeader.numOrders; ord++)
@@ -464,14 +458,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read Sample Headers
-	std::vector<uint32> samplePos;
-	try
-	{
-		samplePos.resize(GetNumSamples(), 0);
-	} catch(MPTMemoryException)
-	{
-		return false;
-	}
+	std::vector<uint32> samplePos(GetNumSamples(), 0);
 	uint32 maxSamplePos = 0;
 
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
@@ -541,14 +528,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Store Tracks Positions
-	std::vector<FileReader> trackData;
-	try
-	{
-		trackData.resize(trackCount);
-	} catch(MPTMemoryException)
-	{
-		return false;
-	}
+	std::vector<FileReader> trackData(trackCount);
 	for(uint16 i = 0; i < trackCount; i++)
 	{
 		// Track size is a 24-Bit value describing the number of byte triplets in this track.
@@ -570,14 +550,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 		// (re-using the same sample data for different sample slots maybe?)
 
 		// First, try compacting the sample indices so that the loop won't have 2^32 iterations in the worst case.
-		std::vector<uint32> samplePosCompact;
-		try
-		{
-			samplePosCompact = samplePos;
-		} catch(MPTMemoryException)
-		{
-			return false;
-		}
+		std::vector<uint32> samplePosCompact = samplePos;
 		std::sort(samplePosCompact.begin(), samplePosCompact.end());
 		std::vector<uint32>::const_iterator end = std::unique(samplePosCompact.begin(), samplePosCompact.end());
 
