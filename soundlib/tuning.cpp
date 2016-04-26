@@ -375,7 +375,8 @@ CTuningRTI::NOTEINDEXTYPE CTuningRTI::GetRefNote(const NOTEINDEXTYPE note) const
 	if(!IsOfType(TT_GROUPGEOMETRIC)) return 0;
 
 	if(note >= 0) return note % GetGroupSize();
-	else return (GetGroupSize() -  (abs(note) % GetGroupSize())) % GetGroupSize();
+	// static_cast<int>(note) because g++-6 template-disables std::abs overloads for 8bit and 16bit integer types via std::enable_if.
+	else return (GetGroupSize() - (std::abs(static_cast<int>(note)) % GetGroupSize())) % GetGroupSize();
 }
 
 
