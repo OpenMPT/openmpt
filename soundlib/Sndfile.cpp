@@ -256,87 +256,97 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 
 	if(file.IsValid())
 	{
-#ifndef NO_ARCHIVE_SUPPORT
-		CUnarchiver unarchiver(file);
-		if(unarchiver.ExtractBestFile(GetSupportedExtensions(true)))
+		try
 		{
-			file = unarchiver.GetOutputFile();
-		}
+#ifndef NO_ARCHIVE_SUPPORT
+			CUnarchiver unarchiver(file);
+			if(unarchiver.ExtractBestFile(GetSupportedExtensions(true)))
+			{
+				file = unarchiver.GetOutputFile();
+			}
 #endif
 
-		MODCONTAINERTYPE packedContainerType = MOD_CONTAINERTYPE_NONE;
-		std::vector<char> unpackedData;
-		if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackXPK(unpackedData, file)) packedContainerType = MOD_CONTAINERTYPE_XPK;
-		if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackPP20(unpackedData, file)) packedContainerType = MOD_CONTAINERTYPE_PP20;
-		if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackMMCMP(unpackedData, file)) packedContainerType = MOD_CONTAINERTYPE_MMCMP;
-		if(packedContainerType != MOD_CONTAINERTYPE_NONE)
-		{
-			file = FileReader(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(unpackedData)));
-		}
+			MODCONTAINERTYPE packedContainerType = MOD_CONTAINERTYPE_NONE;
+			std::vector<char> unpackedData;
+			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackXPK(unpackedData, file)) packedContainerType = MOD_CONTAINERTYPE_XPK;
+			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackPP20(unpackedData, file)) packedContainerType = MOD_CONTAINERTYPE_PP20;
+			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackMMCMP(unpackedData, file)) packedContainerType = MOD_CONTAINERTYPE_MMCMP;
+			if(packedContainerType != MOD_CONTAINERTYPE_NONE)
+			{
+				file = FileReader(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(unpackedData)));
+			}
 
-		if(!ReadXM(file, loadFlags)
-		 && !ReadIT(file, loadFlags)
-		 && !ReadS3M(file, loadFlags)
-		 && !ReadSTM(file, loadFlags)
-		 && !ReadMed(file, loadFlags)
-		 && !ReadMTM(file, loadFlags)
-		 && !ReadMDL(file, loadFlags)
-		 && !ReadDBM(file, loadFlags)
-		 && !ReadFAR(file, loadFlags)
-		 && !ReadAMS(file, loadFlags)
-		 && !ReadAMS2(file, loadFlags)
-		 && !ReadOKT(file, loadFlags)
-		 && !ReadPTM(file, loadFlags)
-		 && !ReadUlt(file, loadFlags)
-		 && !ReadDMF(file, loadFlags)
-		 && !ReadDSM(file, loadFlags)
-		 && !ReadUMX(file, loadFlags)
-		 && !ReadAMF_Asylum(file, loadFlags)
-		 && !ReadAMF_DSMI(file, loadFlags)
-		 && !ReadPSM(file, loadFlags)
-		 && !ReadPSM16(file, loadFlags)
-		 && !ReadMT2(file, loadFlags)
-		 && !ReadITProject(file, loadFlags)
+			if(!ReadXM(file, loadFlags)
+			 && !ReadIT(file, loadFlags)
+			 && !ReadS3M(file, loadFlags)
+			 && !ReadSTM(file, loadFlags)
+			 && !ReadMed(file, loadFlags)
+			 && !ReadMTM(file, loadFlags)
+			 && !ReadMDL(file, loadFlags)
+			 && !ReadDBM(file, loadFlags)
+			 && !ReadFAR(file, loadFlags)
+			 && !ReadAMS(file, loadFlags)
+			 && !ReadAMS2(file, loadFlags)
+			 && !ReadOKT(file, loadFlags)
+			 && !ReadPTM(file, loadFlags)
+			 && !ReadUlt(file, loadFlags)
+			 && !ReadDMF(file, loadFlags)
+			 && !ReadDSM(file, loadFlags)
+			 && !ReadUMX(file, loadFlags)
+			 && !ReadAMF_Asylum(file, loadFlags)
+			 && !ReadAMF_DSMI(file, loadFlags)
+			 && !ReadPSM(file, loadFlags)
+			 && !ReadPSM16(file, loadFlags)
+			 && !ReadMT2(file, loadFlags)
+			 && !ReadITProject(file, loadFlags)
 #ifdef MODPLUG_TRACKER
-		 // this makes little sense for a module player library
-		 && !ReadWav(file, loadFlags)
-		 && !ReadMID(file, loadFlags)
+			 // this makes little sense for a module player library
+			 && !ReadWav(file, loadFlags)
+			 && !ReadMID(file, loadFlags)
 #endif // MODPLUG_TRACKER
-		 && !ReadGDM(file, loadFlags)
-		 && !ReadIMF(file, loadFlags)
-		 && !ReadDIGI(file, loadFlags)
-		 && !ReadPLM(file, loadFlags)
-		 && !ReadAM(file, loadFlags)
-		 && !ReadJ2B(file, loadFlags)
-		 && !ReadMO3(file, loadFlags)
-		 && !ReadPT36(file, loadFlags)
-		 && !ReadMod(file, loadFlags)
-		 && !Read669(file, loadFlags)
-		 && !ReadICE(file, loadFlags)
-		 && !ReadM15(file, loadFlags))
-		{
-			m_nType = MOD_TYPE_NONE;
-			m_ContainerType = MOD_CONTAINERTYPE_NONE;
-		}
+			 && !ReadGDM(file, loadFlags)
+			 && !ReadIMF(file, loadFlags)
+			 && !ReadDIGI(file, loadFlags)
+			 && !ReadPLM(file, loadFlags)
+			 && !ReadAM(file, loadFlags)
+			 && !ReadJ2B(file, loadFlags)
+			 && !ReadPT36(file, loadFlags)
+			 && !ReadMod(file, loadFlags)
+			 && !ReadICE(file, loadFlags)
+			 && !Read669(file, loadFlags)
+			 && !ReadMO3(file, loadFlags)
+			 && !ReadM15(file, loadFlags))
+			{
+				m_nType = MOD_TYPE_NONE;
+				m_ContainerType = MOD_CONTAINERTYPE_NONE;
+			}
 
-		if(packedContainerType != MOD_CONTAINERTYPE_NONE && m_ContainerType == MOD_CONTAINERTYPE_NONE)
-		{
-			m_ContainerType = packedContainerType;
-		}
+			if(packedContainerType != MOD_CONTAINERTYPE_NONE && m_ContainerType == MOD_CONTAINERTYPE_NONE)
+			{
+				m_ContainerType = packedContainerType;
+			}
 
-		if(m_madeWithTracker.empty())
-		{
-			m_madeWithTracker = ModTypeToTracker(GetType());
-		}
+			if(m_madeWithTracker.empty())
+			{
+				m_madeWithTracker = ModTypeToTracker(GetType());
+			}
 
 #ifndef NO_ARCHIVE_SUPPORT
-		// Read archive comment if there is no song comment
-		if(m_songMessage.empty())
-		{
-			m_songMessage.assign(mpt::ToCharset(mpt::CharsetLocale, unarchiver.GetComment()));
-		}
+			// Read archive comment if there is no song comment
+			if(m_songMessage.empty())
+			{
+				m_songMessage.assign(mpt::ToCharset(mpt::CharsetLocale, unarchiver.GetComment()));
+			}
 #endif
-
+		} catch(MPTMemoryException)
+		{
+#ifdef MODPLUG_TRACKER
+			return false;
+#else
+			// libopenmpt already handles this.
+			throw;
+#endif // MODPLUG_TRACKER
+		}
 	} else
 	{
 		// New song

@@ -880,9 +880,9 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	MPT_UNUSED_VARIABLE(version);
 
 	bool shouldUseUnmo3 = true;
-	#ifdef MPT_ENABLE_MO3_BUILTIN
-		shouldUseUnmo3 = !CanReadMP3() || !CanReadVorbis(); 
-	#endif // MPT_ENABLE_MO3_BUILTIN
+#ifdef MPT_ENABLE_MO3_BUILTIN
+	shouldUseUnmo3 = !CanReadMP3() || !CanReadVorbis();
+#endif // MPT_ENABLE_MO3_BUILTIN
 
 	if(shouldUseUnmo3)
 	{
@@ -959,15 +959,10 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 #endif // MPT_BUILD_FUZZER
 	}
 
-	uint8 *musicData = new (std::nothrow) uint8[musicSize];
-	if(musicData == nullptr)
-	{
-		return false;
-	}
+	std::vector<uint8> musicData(musicSize);
 
-	if(!UnpackMO3Data(file, musicData, musicSize))
+	if(!UnpackMO3Data(file, &musicData[0], musicSize))
 	{
-		delete[] musicData;
 		return false;
 	}
 	if(version >= 5)
@@ -978,7 +973,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals();
 	InitializeChannels();
 
-	FileReader musicChunk(mpt::as_span(musicData, musicSize));
+	FileReader musicChunk(mpt::as_span(musicData));
 	musicChunk.ReadNullString(m_songName);
 	musicChunk.ReadNullString(m_songMessage);
 
@@ -989,7 +984,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		|| fileHeader.numInstruments >= MAX_INSTRUMENTS
 		|| fileHeader.numSamples >= MAX_SAMPLES)
 	{
-		delete[] musicData;
 		return false;
 	}
 
@@ -2018,8 +2012,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		m_madeWithTracker = mpt::String::Print("MO3 v%1", version);
 	else
 		m_madeWithTracker = mpt::String::Print("MO3 v%1 (%2)", version, m_madeWithTracker);
-
-	delete[] musicData;
 
 	if(unsupportedSamples)
 	{
