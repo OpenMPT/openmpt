@@ -25,7 +25,7 @@ class CFindReplaceTab: public CPropertyPage
 //=========================================
 {
 protected:
-	CComboBox m_cbnNote, m_cbnInstr, m_cbnVolCmd, m_cbnVolume, m_cbnCommand, m_cbnParam;
+	CComboBox m_cbnNote, m_cbnInstr, m_cbnVolCmd, m_cbnVolume, m_cbnCommand, m_cbnParam, m_cbnPCParam;
 
 	CSoundFile &m_sndFile;
 	FindReplace &m_settings;
@@ -50,10 +50,6 @@ protected:
 		kReplaceInstrumentPlusOne = INT_MAX - 6,
 	};
 
-protected:
-	void ChangeEffect();
-	void ChangeVolCmd();
-
 public:
 	CFindReplaceTab(UINT nIDD, bool isReplaceTab, CSoundFile &sf, FindReplace &settings)
 		: CPropertyPage(nIDD)
@@ -68,14 +64,21 @@ protected:
 	virtual void OnOK();
 	virtual void DoDataExchange(CDataExchange* pDX);
 
+	bool IsPCEvent() const;
+	
+	void UpdateInstrumentList();
+	void UpdateVolumeList();
+	void UpdateParamList();
+
 	// When a combobox is focussed, check the corresponding checkbox.
 	void CheckOnChange(int nIDButton) { CheckDlgButton(nIDButton, BST_CHECKED); CheckReplace(nIDButton); };
 	afx_msg void OnNoteChanged();
 	afx_msg void OnInstrChanged();
-	afx_msg void OnVolCmdChanged()	{ CheckOnChange(IDC_CHECK3); ChangeVolCmd(); };
+	afx_msg void OnVolCmdChanged()	{ CheckOnChange(IDC_CHECK3); UpdateVolumeList(); };
 	afx_msg void OnVolumeChanged();
-	afx_msg void OnEffectChanged()	{ CheckOnChange(IDC_CHECK5); ChangeEffect(); };
+	afx_msg void OnEffectChanged()	{ CheckOnChange(IDC_CHECK5); UpdateParamList(); };
 	afx_msg void OnParamChanged();
+	afx_msg void OnPCParamChanged();
 	// When a checkbox is checked, also check "Replace By".
 	afx_msg void OnCheckNote()		{ CheckReplace(IDC_CHECK1); };
 	afx_msg void OnCheckInstr()		{ CheckReplace(IDC_CHECK2); };
