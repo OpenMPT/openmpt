@@ -852,10 +852,10 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 					{
 						if(lastInstrument[chn] > 0 && lastInstrument[chn] != m.instr)
 						{
-							// Arbitrary threshold for going into PT1/2 mode: 4 consecutive "sample swaps" in one pattern.
+							// Arbitrary threshold for enabling sample swapping: 4 consecutive "sample swaps" in one pattern.
 							if(++instrWithoutNoteCount[chn] >= 4)
 							{
-								m_SongFlags.set(SONG_PT_MODE);
+								m_playBehaviour.set(kMODSampleSwap);
 							}
 						}
 					} else if(m.note != NOTE_NONE)
@@ -880,6 +880,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		if(maxPanning < 0x20)
 		{
 			m_SongFlags.set(SONG_PT_MODE);
+			m_playBehaviour.set(kMODSampleSwap);
 			if(maxPanning > 0) m_playBehaviour.set(kMODIgnorePanning);
 		}
 	} else if(!onlyAmigaNotes && fileHeader.restartPos == 0x7F && isMdKd && fileHeader.restartPos + 1u >= realOrders)
@@ -986,6 +987,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_MOD);
 	m_playBehaviour.reset(kMODOneShotLoops);
 	m_playBehaviour.set(kMODIgnorePanning);
+	m_playBehaviour.set(kMODSampleSwap);	// untested
 	m_nChannels = 4;
 
 	STVersions minVersion = UST1_00;
@@ -1338,6 +1340,7 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_MOD);
 	m_playBehaviour.reset(kMODOneShotLoops);
 	m_playBehaviour.set(kMODIgnorePanning);
+	m_playBehaviour.set(kMODSampleSwap);	// untested
 
 	if(IsMagic(magic, "MTN\0"))
 		m_madeWithTracker = "SoundTracker 2.6";
