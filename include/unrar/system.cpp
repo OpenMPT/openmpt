@@ -88,6 +88,7 @@ clock_t MonoClock()
 #ifndef SETUP
 void Wait()
 {
+  return; // OPENMPT ADITION
   if (ErrHandler.UserBreak)
     ErrHandler.Exit(RARX_USERBREAK);
 #if defined(_WIN_ALL) && !defined(SFX_MODULE)
@@ -114,6 +115,7 @@ void Wait()
 #if defined(_WIN_ALL) && !defined(SFX_MODULE) && !defined(SHELL_EXT) && !defined(SETUP)
 void Shutdown()
 {
+  return; // OPENMPT ADDITION
   HANDLE hToken;
   TOKEN_PRIVILEGES tkp;
   if (OpenProcessToken(GetCurrentProcess(),TOKEN_ADJUST_PRIVILEGES|TOKEN_QUERY,&hToken))
@@ -128,6 +130,21 @@ void Shutdown()
 }
 #endif
 
+
+
+
+#ifdef _WIN_ALL
+// Load library from Windows System32 folder. Use this function to prevent
+// loading a malicious code from current folder or same folder as exe.
+HMODULE WINAPI LoadSysLibrary(const wchar *Name)
+{
+  wchar SysDir[NM];
+  if (GetSystemDirectory(SysDir,ASIZE(SysDir))==0)
+    return NULL;
+  MakeName(SysDir,Name,SysDir,ASIZE(SysDir));
+  return LoadLibrary(SysDir);
+}
+#endif
 
 
 #ifdef USE_SSE

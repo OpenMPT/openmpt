@@ -8,6 +8,7 @@ ScanTree::ScanTree(StringList *FileMasks,RECURSE_MODE Recurse,bool GetLinks,SCAN
   ScanTree::GetDirs=GetDirs;
 
   ScanEntireDisk=false;
+  FolderWildcards=false;
 
   SetAllMaskDepth=0;
   *CurMask=0;
@@ -71,17 +72,73 @@ SCAN_CODE ScanTree::GetNext(FindData *FD)
 }
 
 
+// For masks like dir1\dir2*\*.ext in non-recursive mode.
+bool ScanTree::ExpandFolderMask()
+{
+  bool WildcardFound=false;
+  uint SlashPos=0;
+  for (int I=0;CurMask[I]!=0;I++)
+  {
+    if (CurMask[I]=='?' || CurMask[I]=='*')
+      WildcardFound=true;
+    if (WildcardFound && IsPathDiv(CurMask[I]))
+    {
+      // First path separator position after folder wildcard mask.
+      // In case of dir1\dir2*\dir3\name.ext mask it may point not to file
+      // name, so we cannot use PointToName() here.
+      SlashPos=I; 
+      break;
+    }
+  }
+
+  wchar Mask[NM];
+  wcsncpyz(Mask,CurMask,ASIZE(Mask));
+  Mask[SlashPos]=0;
+
+  // Prepare the list of all folders matching the wildcard mask.
+  ExpandedFolderList.Reset();
+  FindFile Find;
+  Find.SetMask(Mask);
+  FindData FD;
+  while (Find.Next(&FD))
+    if (FD.IsDir)
+    {
+      wcsncatz(FD.Name,CurMask+SlashPos,ASIZE(FD.Name));
+
+      // Treat dir*\* or dir*\*.* as dir, so empty 'dir' is also matched
+      // by such mask. Skipping empty dir with dir*\*.* confused some users.
+      wchar *LastMask=PointToName(FD.Name);
+      if (wcscmp(LastMask,L"*")==0 || wcscmp(LastMask,L"*.*")==0)
+        RemoveNameFromPath(FD.Name);
+
+      ExpandedFolderList.AddString(FD.Name);
+    }
+  if (ExpandedFolderList.ItemsCount()==0)
+    return false;
+  // Return the first matching folder name now.
+  ExpandedFolderList.GetString(CurMask,ASIZE(CurMask));
+  return true;
+}
+
+
 // For masks like dir1\dir2*\file.ext this function sets 'dir1' recursive mask
 // and '*\dir2*\file.ext' filter. Masks without folder wildcards are
 // returned as is.
 bool ScanTree::GetFilteredMask()
 {
+  // If we have some matching folders left for non-recursive folder wildcard
+  // mask, we return it here.
+  if (ExpandedFolderList.ItemsCount()>0 && ExpandedFolderList.GetString(CurMask,ASIZE(CurMask)))
+    return true;
+
+  FolderWildcards=false;
   FilterList.Reset();
   if (!FileMasks->GetString(CurMask,ASIZE(CurMask)))
     return false;
 
   // Check if folder wildcards present.
-  bool WildcardFound=false,FolderWildcardFound=false;
+  bool WildcardFound=false;
+  uint FolderWildcardCount=0;
   uint SlashPos=0;
   for (int I=0;CurMask[I]!=0;I++)
   {
@@ -91,14 +148,24 @@ bool ScanTree::GetFilteredMask()
     {
       if (WildcardFound)
       {
-        FolderWildcardFound=true;
-        break;
+        // Calculate a number of folder wildcards in current mask.
+        FolderWildcardCount++;
+        WildcardFound=false;
       }
-      SlashPos=I;
+      if (FolderWildcardCount==0)
+        SlashPos=I; // Slash position before first folder wildcard mask.
     }
   }
-  if (!FolderWildcardFound)
+  if (FolderWildcardCount==0)
     return true;
+  FolderWildcards=true; // Global folder wildcards flag.
+
+  // If we have only one folder wildcard component and -r is missing or -r-
+  // is specified, prepare matching folders in non-recursive mode.
+  // We assume -r for masks like dir1*\dir2*\file*, because it is complicated
+  // to fast find them using OS file find API call.
+  if ((Recurse==RECURSE_NONE || Recurse==RECURSE_DISABLE) && FolderWildcardCount==1)
+    return ExpandFolderMask();
 
   wchar Filter[NM];
   // Convert path\dir*\ to *\dir filter to search for 'dir' in all 'path' subfolders.
@@ -185,9 +252,10 @@ SCAN_CODE ScanTree::FindProc(FindData *FD)
     // SearchAll means that we'll use "*" mask for search, so we'll find
     // subdirectories and will be able to recurse into them.
     // We do not use "*" for directories at any level or for files
-    // at top level in recursion mode.
+    // at top level in recursion mode. We always comrpess the entire directory
+    // if folder wildcard is specified.
     bool SearchAll=!IsDir && (Depth>0 || Recurse==RECURSE_ALWAYS ||
-                   FilterList.ItemsCount()>0 ||
+                   FolderWildcards && Recurse!=RECURSE_DISABLE || 
                    Wildcards && Recurse==RECURSE_WILDCARDS || 
                    ScanEntireDisk && Recurse!=RECURSE_DISABLE);
     if (Depth==0)

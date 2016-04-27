@@ -627,6 +627,7 @@ void Unpack::UnpWriteBuf30()
         while (I+1<PrgStack.Size())
         {
           UnpackFilter30 *NextFilter=PrgStack[I+1];
+          // It is required to check NextWindow here.
           if (NextFilter==NULL || NextFilter->BlockStart!=BlockStart ||
               NextFilter->BlockLength!=FilteredDataSize || NextFilter->NextWindow)
             break;

@@ -74,7 +74,6 @@ int main(int argc, char *argv[])
     InitConsoleOptions(Cmd->MsgStream,Cmd->RedirectCharset);
     InitLogOptions(Cmd->LogName,Cmd->ErrlogCharset);
     ErrHandler.SetSilent(Cmd->AllYes || Cmd->MsgStream==MSG_NULL);
-    ErrHandler.SetShutdown(Cmd->Shutdown);
 
     Cmd->OutTitle();
     Cmd->ProcessCommand();
@@ -95,7 +94,7 @@ int main(int argc, char *argv[])
   }
 
 #if defined(_WIN_ALL) && !defined(SFX_MODULE) && !defined(SHELL_EXT)
-  if (ShutdownOnClose)
+  if (ShutdownOnClose && ErrHandler.IsShutdownEnabled())
     Shutdown();
 #endif
   ErrHandler.MainExit=true;

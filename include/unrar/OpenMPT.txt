@@ -1,4 +1,4 @@
-This folder is based on http://www.rarlab.com/rar/unrarsrc-5.3.2.tar.gz
+This folder is based on http://www.rarlab.com/rar/unrarsrc-5.3.11.tar.gz
 
 All modifications to existing files have been done in a manner so that no
 existing lines were edited; only new lines were added.
@@ -12,7 +12,7 @@ never be used in OpenMPT's context.
 The following files have been modified:
 arcread.cpp, extract.cpp, filcreat.cpp, file.hpp, file.cpp, filefn.cpp,
 find.cpp, match.cpp, os.hpp, pathfn.cpp, rar.hpp, rdwrfn.cpp, secpassword.cpp,
-timefn.cpp, volume.cpp, win32acl.cpp, win32lnk.cpp
+system.cpp, timefn.cpp, volume.cpp, win32acl.cpp, win32lnk.cpp
 
 The following new files have been added:
 openmpt.hpp, openmpt-callback.hpp
