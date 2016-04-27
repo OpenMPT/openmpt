@@ -267,12 +267,10 @@ void MidiInOut::Process(float *, float *, uint32)
 		{
 			// Start of SysEx message...
 			if(message[1] != 0xF7 && message[2] != 0xF7 && message[3] != 0xF7)
-			{
-				// ...but not the end!
-				bufferedMessage.push_back(buffer.message);
-				continue;
-			}
-			ReceiveSysex(message, 4);
+				bufferedMessage.push_back(buffer.message);	// ...but not the end!
+			else
+				ReceiveSysex(message, 4);
+			continue;
 		}
 
 		ReceiveMidi(buffer.message);
