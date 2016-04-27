@@ -149,17 +149,17 @@ inline long long abs(long long x)
 inline float abs(float x)
 //-----------------------
 {
-	return std::fabs(x);
+	return std::abs(x);
 }
 inline double abs(double x)
 //-------------------------
 {
-	return std::fabs(x);
+	return std::abs(x);
 }
 inline long double abs(long double x)
 //-----------------------------------
 {
-	return std::fabs(x);
+	return std::abs(x);
 }
 
 } // namespace mpt
