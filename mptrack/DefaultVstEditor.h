@@ -73,11 +73,7 @@ public:
 
 	virtual void UpdateParamDisplays() { CAbstractVstEditor::UpdateParamDisplays(); UpdateControls(false); };
 
-	virtual void OnOK();
-	virtual void OnCancel();
-	bool OpenEditor(CWnd *parent);
-	void DoClose();
-	afx_msg void OnClose();
+	virtual bool OpenEditor(CWnd *parent);
 
 	// Plugins may not request to change the GUI size, since we use our own GUI.
 	virtual bool IsResizable() const { return false; };

@@ -423,47 +423,8 @@ bool CDefaultVstEditor::OpenEditor(CWnd *parent)
 //----------------------------------------------
 {
 	Create(IDD_DEFAULTPLUGINEDITOR, parent);
-	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
-
-	SetTitle();
-	SetupMenu();
-
 	CreateControls();
-
-	RestoreWindowPos();
-	
-	ShowWindow(SW_SHOW);
-
-	return true;
-}
-
-
-void CDefaultVstEditor::OnClose()
-//-------------------------------
-{
-	DoClose();
-}
-
-
-void CDefaultVstEditor::OnOK()
-//----------------------------
-{
-	OnClose();
-}
-
-
-void CDefaultVstEditor::OnCancel()
-//--------------------------------
-{
-	OnClose();
-}
-
-
-void CDefaultVstEditor::DoClose()
-//-------------------------------
-{
-	StoreWindowPos();
-	DestroyWindow();
+	return CAbstractVstEditor::OpenEditor(parent);
 }
 
 

@@ -93,6 +93,7 @@ void ParamEq::SetParameter(PlugParamIndex index, PlugParamValue value)
 void ParamEq::Resume()
 //--------------------
 {
+	m_isResumed = true;
 	RecalculateEqParams();
 
 	// Reset filter state

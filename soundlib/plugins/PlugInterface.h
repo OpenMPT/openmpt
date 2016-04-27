@@ -77,13 +77,13 @@ protected:
 	float m_fGain;
 	PLUGINDEX m_nSlot;
 
-	bool m_bSongPlaying : 1;
-	bool m_bPlugResumed : 1;
+	bool m_isSongPlaying : 1;
+	bool m_isResumed : 1;
 
 public:
-	bool m_bRecordAutomation : 1;
-	bool m_bPassKeypressesToPlug : 1;
-	bool m_bRecordMIDIOut : 1;
+	bool m_recordAutomation : 1;
+	bool m_passKeypressesToPlug : 1;
+	bool m_recordMIDIOut : 1;
 
 protected:
 	virtual ~IMixPlugin();
@@ -112,6 +112,8 @@ public:
 	void SetDryRatio(uint32 param);
 	bool IsBypassed() const;
 	void RecalculateGain();
+	// Query output latency from host (in seconds)
+	double GetOutputLatency() const;
 
 	// Destroy the plugin
 	virtual void Release() = 0;
@@ -136,7 +138,7 @@ public:
 	void ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput, float *rightPlugOutput, uint32 numFrames) const;
 	// Render silence and return the highest resulting output level
 	virtual float RenderSilence(uint32 numSamples);
-	virtual bool MidiSend(uint32 dwMidiCode) = 0;
+	virtual bool MidiSend(uint32 midiCode) = 0;
 	virtual bool MidiSysexSend(const char *message, uint32 length) = 0;
 	virtual void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) = 0;
 	virtual void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd) = 0;
@@ -144,11 +146,14 @@ public:
 	virtual void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel) = 0;
 	virtual void HardAllNotesOff() = 0;
 	virtual bool IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn) = 0;
+	// Plugin wants to send MIDI to OpenMPT
+	virtual void ReceiveMidi(uint32 midiCode);
+	virtual void ReceiveSysex(const char *message, uint32 length);
 	// Modify parameter by given amount. Only needs to be re-implemented if plugin architecture allows this to be performed atomically.
 	virtual void ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff);
-	virtual void NotifySongPlaying(bool playing) { m_bSongPlaying = playing; }
-	virtual bool IsSongPlaying() const { return m_bSongPlaying; }
-	virtual bool IsResumed() const { return m_bPlugResumed; }
+	virtual void NotifySongPlaying(bool playing) { m_isSongPlaying = playing; }
+	virtual bool IsSongPlaying() const { return m_isSongPlaying; }
+	virtual bool IsResumed() const { return m_isResumed; }
 	virtual void Resume() = 0;
 	virtual void Suspend() = 0;
 	// Tell the plugin that there is a discontinuity between the previous and next render call (e.g. aftert jumping around in the module)

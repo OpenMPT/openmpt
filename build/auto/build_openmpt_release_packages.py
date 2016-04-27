@@ -38,13 +38,13 @@ def copy_tree(from_path, to_path, pathname):
 
 def copy_binaries(from_path, to_path):
     os.makedirs(to_path)
-    os.makedirs(to_path + "Plugins/MIDI")
+    #os.makedirs(to_path + "Plugins/MIDI")
     copy_file(from_path, to_path, "mptrack.exe")
     copy_file(from_path, to_path, "PluginBridge32.exe")
     copy_file(from_path, to_path, "PluginBridge64.exe")
     copy_file(from_path, to_path, "OpenMPT_SoundTouch_f32.dll")
     copy_file(from_path, to_path, "unmo3.dll")
-    copy_file(from_path, to_path + "Plugins/MIDI/", "MIDI Input Output.dll")
+    #copy_file(from_path, to_path + "Plugins/MIDI/", "MIDI Input Output.dll")
 
 def copy_other(to_path, openmpt_version_short):
     copy_tree("packageTemplate/", to_path, "ExampleSongs")

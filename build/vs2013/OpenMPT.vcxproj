@@ -811,6 +811,8 @@
     <ClInclude Include="..\..\mptrack\view_com.h" />
     <ClInclude Include="..\..\pluginBridge\BridgeCommon.h" />
     <ClInclude Include="..\..\pluginBridge\BridgeWrapper.h" />
+    <ClInclude Include="..\..\plugins\MidiInOut\MidiInOut.h" />
+    <ClInclude Include="..\..\plugins\MidiInOut\MidiInOutEditor.h" />
     <ClInclude Include="..\..\sounddev\SoundDevice.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceASIO.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceBase.h" />
@@ -1018,6 +1020,8 @@
     <ClCompile Include="..\..\mptrack\tuningRatioMapWnd.cpp" />
     <ClCompile Include="..\..\mptrack\view_com.cpp" />
     <ClCompile Include="..\..\pluginBridge\BridgeWrapper.cpp" />
+    <ClCompile Include="..\..\plugins\MidiInOut\MidiInOut.cpp" />
+    <ClCompile Include="..\..\plugins\MidiInOut\MidiInOutEditor.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDevice.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceASIO.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceBase.cpp" />
@@ -1173,6 +1177,9 @@
     </ProjectReference>
     <ProjectReference Include="..\vs2013-ext\portaudio.vcxproj">
       <Project>{189B867F-FF4B-45A1-B741-A97492EE69AF}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\vs2013-ext\portmidi.vcxproj">
+      <Project>{2512E2CA-578A-4F10-9363-4BFC9A5EF960}</Project>
     </ProjectReference>
     <ProjectReference Include="..\vs2013-ext\r8brain.vcxproj">
       <Project>{BC116B29-9958-4389-B294-7529BB7C7D37}</Project>

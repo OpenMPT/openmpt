@@ -13,6 +13,12 @@
     <Filter Include="pluginBridge">
       <UniqueIdentifier>{E1FAE259-CD5D-72FE-76E3-AAB462253E81}</UniqueIdentifier>
     </Filter>
+    <Filter Include="plugins">
+      <UniqueIdentifier>{07D1A6B5-73B0-2551-7CC8-B027E8268CB2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="plugins\MidiInOut">
+      <UniqueIdentifier>{E80B1C8D-5422-1A23-9D99-A54409EFEAAA}</UniqueIdentifier>
+    </Filter>
     <Filter Include="sounddev">
       <UniqueIdentifier>{8DE8B016-79B5-0B22-A2CE-F9C98EFA40B0}</UniqueIdentifier>
     </Filter>
@@ -469,6 +475,12 @@
     </ClInclude>
     <ClInclude Include="..\..\pluginBridge\BridgeWrapper.h">
       <Filter>pluginBridge</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plugins\MidiInOut\MidiInOut.h">
+      <Filter>plugins\MidiInOut</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\plugins\MidiInOut\MidiInOutEditor.h">
+      <Filter>plugins\MidiInOut</Filter>
     </ClInclude>
     <ClInclude Include="..\..\sounddev\SoundDevice.h">
       <Filter>sounddev</Filter>
@@ -1047,6 +1059,12 @@
     </ClCompile>
     <ClCompile Include="..\..\pluginBridge\BridgeWrapper.cpp">
       <Filter>pluginBridge</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plugins\MidiInOut\MidiInOut.cpp">
+      <Filter>plugins\MidiInOut</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\plugins\MidiInOut\MidiInOutEditor.cpp">
+      <Filter>plugins\MidiInOut</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDevice.cpp">
       <Filter>sounddev</Filter>

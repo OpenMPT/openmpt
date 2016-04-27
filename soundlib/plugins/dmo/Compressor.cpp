@@ -135,7 +135,7 @@ void Compressor::Resume()
 //-----------------------
 {
 	uint64 bufferSize = Util::mul32to64_unsigned(m_SndFile.GetSampleRate(), 200) / 1000;
-	if(bufferSize > int32_max)
+	if(bufferSize > uint64(int32_max))
 	{
 		m_bufSize = 0;
 		return;
@@ -149,6 +149,7 @@ void Compressor::Resume()
 		m_bufSize = 0;
 	}
 
+	m_isResumed = true;
 	m_bufPos = 0;
 	m_peak = 0.0f;
 	RecalculateCompressorParams();

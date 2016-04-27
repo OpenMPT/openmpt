@@ -7,91 +7,52 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#define MODPLUG_TRACKER
-#define OPENMPT_NAMESPACE
-#define OPENMPT_NAMESPACE_BEGIN
-#define OPENMPT_NAMESPACE_END
-#define MPT_ENABLE_THREAD
-#define VC_EXTRALEAN
-#define NOMINMAX
-#ifdef _MSC_VER
-#if (_MSC_VER < 1600)
-#define nullptr 0
-#endif
-#endif
+#include "stdafx.h"
 
-#include "MidiInOutEditor.h"
+#ifdef MODPLUG_TRACKER
 #include "MidiInOut.h"
-#include "windows.h"
+#include "MidiInOutEditor.h"
+#include "../../mptrack/resource.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-MidiInOutEditor::MidiInOutEditor(AudioEffect *effect) : AEffEditor(effect)
-//------------------------------------------------------------------------
-{
-	editRect.top = editRect.left = 0;
-	editRect.bottom = 130;
-	editRect.right = 350;
+BEGIN_MESSAGE_MAP(MidiInOutEditor, CAbstractVstEditor)
+	//{{AFX_MSG_MAP(MidiInOutEditor)
+	ON_CBN_SELCHANGE(IDC_COMBO1,	OnInputChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO2,	OnOutputChanged)
+	ON_COMMAND(IDC_CHECK1,			OnLatencyToggled)
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
 
-	editRectDPI.top = editRectDPI.left = 0;
-	editRectDPI.bottom = WindowBase::ScaleY(NULL, editRect.bottom);
-	editRectDPI.right = WindowBase::ScaleX(NULL, editRect.right);
+
+void MidiInOutEditor::DoDataExchange(CDataExchange* pDX)
+//------------------------------------------------------
+{
+	CDialog::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(MidiInOutEditor)
+	DDX_Control(pDX, IDC_COMBO1,	m_inputCombo);
+	DDX_Control(pDX, IDC_COMBO2,	m_outputCombo);
+	DDX_Control(pDX, IDC_CHECK1,	m_latencyCheck);
+	//}}AFX_DATA_MAP
 }
 
 
-// Retrieve editor size
-bool MidiInOutEditor::getRect(ERect **rect)
-//-----------------------------------------
+MidiInOutEditor::MidiInOutEditor(IMixPlugin &plugin)
+	: CAbstractVstEditor(plugin)
+//--------------------------------------------------
 {
-	if(rect == nullptr)
-	{
-		return false;
-	}
-
-	*rect = &editRectDPI;
-	return true;
 }
 
 
-// Retrieve editor size
-bool MidiInOutEditor::open(void *ptr)
-//-----------------------------------
+bool MidiInOutEditor::OpenEditor(CWnd *parent)
+//--------------------------------------------
 {
-	AEffEditor::open(ptr);
-	HWND parent = static_cast<HWND>(ptr);
-
-	Create(parent, editRect, _T("MIDIInputOutputEditor"));
-
-	inputLabel.Create(hwnd, "MIDI Input Device (Sends MIDI data to host):", 10, 5, 330, 20);
-	inputCombo.Create(hwnd, 10, 25, 330, 20);
-
-	outputLabel.Create(hwnd, "MIDI Output Device (Receives MIDI data from host):", 10, 55, 330, 20);
-	outputCombo.Create(hwnd, 10, 75, 330, 20);
-
-	latencyCheck.Create(hwnd, "Compensate for host output latency", 10, 105, 330, 20);
-	MidiInOut *realEffect = static_cast<MidiInOut *>(effect);
-	latencyCheck.SetState(realEffect != nullptr ? realEffect->latencyCompensation : true);
-
+	Create(IDD_MIDI_IO_PLUGIN, parent);
+	m_latencyCheck.SetCheck(static_cast<MidiInOut &>(m_VstPlugin).latencyCompensation ? BST_CHECKED : BST_UNCHECKED);
 	PopulateLists();
-
-	return true;
-}
-
-
-// Close editor size
-void MidiInOutEditor::close()
-//---------------------------
-{
-	inputLabel.Destroy();
-	inputCombo.Destroy();
-
-	outputLabel.Destroy();
-	outputCombo.Destroy();
-
-	Destroy();
-	AEffEditor::close();
+	return CAbstractVstEditor::OpenEditor(parent);
 }
 
 
@@ -100,22 +61,21 @@ void MidiInOutEditor::PopulateLists()
 //-----------------------------------
 {
 	// Clear lists
-	inputCombo.ResetContent();
-	outputCombo.ResetContent();
+	m_inputCombo.ResetContent();
+	m_outputCombo.ResetContent();
 
 	// Add dummy devices
-	inputCombo.AddString("<none>", reinterpret_cast<void *>(MidiInOut::noDevice));
-	outputCombo.AddString("<none>", reinterpret_cast<void *>(MidiInOut::noDevice));
+	m_inputCombo.SetItemData(m_inputCombo.AddString(_T("<none>")), static_cast<DWORD_PTR>(MidiInOut::kNoDevice));
+	m_inputCombo.SetItemData(m_outputCombo.AddString(_T("<none>")), static_cast<DWORD_PTR>(MidiInOut::kNoDevice));
 
 	int selectInputItem = 0;
 	int selectOutputItem = 0;
-	MidiInOut *realEffect = static_cast<MidiInOut *>(effect);
+	MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
 
-	PmDeviceID i = 0;
 	const PmDeviceInfo *device;
 
 	// Go through all PortMidi devices
-	while((device = Pm_GetDeviceInfo(i)) != nullptr)
+	for(PmDeviceID i = 0; (device = Pm_GetDeviceInfo(i)) != nullptr; i++)
 	{
 		std::string deviceName = std::string(device->name) + std::string(" [") + std::string(device->interf) + std::string("]");
 		// We could make use of Pm_GetDefaultInputDeviceID / Pm_GetDefaultOutputDeviceID here, but is it useful to show those actually?
@@ -123,105 +83,78 @@ void MidiInOutEditor::PopulateLists()
 		if(device->input)
 		{
 			// We can actually receive MIDI data on this device.
-			int result = inputCombo.AddString(static_cast<LPCTSTR>(deviceName.c_str()), reinterpret_cast<void *>(i));
+			int result = m_inputCombo.AddString(deviceName.c_str());
+			m_inputCombo.SetItemData(result, i);
 
-			if(realEffect != nullptr && result != -1 && i == realEffect->inputDevice.index)
-			{
+			if(result != CB_ERR && i == plugin.inputDevice.index)
 				selectInputItem = result;
-			}
 		}
 
 		if(device->output)
 		{
 			// We can actually output MIDI data on this device.
-			int result = outputCombo.AddString(static_cast<LPCTSTR>(deviceName.c_str()), reinterpret_cast<void *>(i));
+			int result = m_outputCombo.AddString(deviceName.c_str());
+			m_outputCombo.SetItemData(result, i);
 
-			if(realEffect != nullptr && result != -1 && i == realEffect->outputDevice.index)
-			{
+			if(result != CB_ERR && i == plugin.outputDevice.index)
 				selectOutputItem = result;
-			}
 		}
-
-		i++;
 	}
 
 	// Set selections to current devices
-	inputCombo.SetSelection(selectInputItem);
-	outputCombo.SetSelection(selectOutputItem);
+	m_inputCombo.SetCurSel(selectInputItem);
+	m_outputCombo.SetCurSel(selectOutputItem);
 }
 
 
 // Refresh current input / output device in GUI
-void MidiInOutEditor::SetCurrentDevice(ComboBox &combo, PmDeviceID device)
-//------------------------------------------------------------------------
+void MidiInOutEditor::SetCurrentDevice(CComboBox &combo, PmDeviceID device)
+//-------------------------------------------------------------------------
 {
-	MidiInOut *realEffect = static_cast<MidiInOut *>(effect);
-
-	if(isOpen() && realEffect != nullptr)
+	int items = combo.GetCount();
+	for(int i = 0; i < items; i++)
 	{
-		int items = combo.GetCount();
-		for(int i = 0; i < items; i++)
+		if(static_cast<PmDeviceID>(combo.GetItemData(i)) == device)
 		{
-			if(reinterpret_cast<PmDeviceID>(combo.GetItemData(i)) == device)
-			{
-				combo.SetSelection(i);
-				break;
-			}
+			combo.SetCurSel(i);
+			break;
 		}
 	}
 }
 
 
-// Window processing callback function
-intptr_t MidiInOutEditor::WindowCallback(int message, void *param1, void *param2)
-//-------------------------------------------------------------------------------
+void MidiInOutEditor::OnInputChanged()
+//------------------------------------
 {
-	MidiInOut *realEffect = static_cast<MidiInOut *>(effect);
-	HWND hwnd = static_cast<HWND>(param2);
+	// Update device ID and notify plugin.
+	MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
+	PmDeviceID newDevice = static_cast<PmDeviceID>(m_inputCombo.GetItemData(m_inputCombo.GetCurSel()));
+	plugin.SetParameter(MidiInOut::kInputParameter, MidiInOut::DeviceIDToParameter(newDevice));
+	plugin.AutomateParameter(MidiInOut::kInputParameter);
+}
 
-	if(message == WM_COMMAND && realEffect != nullptr)
-	{
-		switch(HIWORD(param1))
-		{
-		case CBN_SELCHANGE:
-			if(hwnd == inputCombo.GetHwnd() || hwnd == outputCombo.GetHwnd())
-			{
-				// A combo box selection has been changed by the user.
-				bool isInputBox = hwnd == inputCombo.GetHwnd();
-				const ComboBox &combo = isInputBox ? inputCombo : outputCombo;
 
-				// Update device ID and notify plugin.
-				PmDeviceID newDevice = reinterpret_cast<PmDeviceID>(combo.GetSelectionData());
-				VstInt32 paramID = isInputBox ? MidiInOut::inputParameter : MidiInOut::outputParameter;
-				realEffect->beginEdit(paramID);
-				realEffect->setParameterAutomated(paramID, realEffect->DeviceIDToParameter(newDevice));
-				realEffect->endEdit(paramID);
-			}
-			return 0;
+void MidiInOutEditor::OnOutputChanged()
+//-------------------------------------
+{
+	// Update device ID and notify plugin.
+	MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
+	PmDeviceID newDevice = static_cast<PmDeviceID>(m_outputCombo.GetItemData(m_outputCombo.GetCurSel()));
+	plugin.SetParameter(MidiInOut::kOutputParameter, MidiInOut::DeviceIDToParameter(newDevice));
+	plugin.AutomateParameter(MidiInOut::kOutputParameter);
+}
 
-		case CBN_DROPDOWN:
-			if(hwnd == inputCombo.GetHwnd() || hwnd == outputCombo.GetHwnd())
-			{
-				// Combo box is about to drop down -> dynamically size the dropdown list
-				bool isInputBox = hwnd == inputCombo.GetHwnd();
-				ComboBox &combo = isInputBox ? inputCombo : outputCombo;
-				combo.SizeDropdownList();
-			}
-			return 0;
 
-		case BN_CLICKED:
-			if(hwnd == latencyCheck.GetHwnd())
-			{
-				// Update latency compensation
-				realEffect->CloseDevice(realEffect->outputDevice);
-				realEffect->latencyCompensation = latencyCheck.GetState();
-				realEffect->OpenDevice(realEffect->outputDevice.index, false);
-			}
-			return 0;
-		}
-	}
-	return Window::WindowCallback(message, param1, param2);
+void MidiInOutEditor::OnLatencyToggled()
+//--------------------------------------
+{
+	MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
+	plugin.CloseDevice(plugin.outputDevice);
+	plugin.latencyCompensation = m_latencyCheck.GetState() != BST_UNCHECKED;
+	plugin.OpenDevice(plugin.outputDevice.index, false);
 }
 
 
 OPENMPT_NAMESPACE_END
+
+#endif // MODPLUG_TRACKER

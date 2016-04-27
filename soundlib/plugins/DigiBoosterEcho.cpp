@@ -140,6 +140,7 @@ void DigiBoosterEcho::SetParameter(PlugParamIndex index, PlugParamValue value)
 void DigiBoosterEcho::Resume()
 //----------------------------
 {
+	m_isResumed = true;
 	m_sampleRate = m_SndFile.GetSampleRate();
 	m_bufferSize = (m_sampleRate >> 1) + (m_sampleRate >> 6);
 	RecalculateEchoParams();

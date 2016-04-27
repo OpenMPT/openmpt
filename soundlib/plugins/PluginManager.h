@@ -14,8 +14,11 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//#define kBuzzMagic	'Buzz'
-#define kDmoMagic	(('D' << 24) | ('X' << 16) | ('M' << 8) | 'O')
+#define PLUGMAGIC(a, b, c, d) \
+	((((int32)a) << 24) | (((int32)b) << 16) | (((int32)c) << 8) | (((int32)d) << 0))
+
+//#define kBuzzMagic	PLUGMAGIC('B', 'u', 'z', 'z')
+#define kDmoMagic	PLUGMAGIC('D', 'X', 'M', 'O')
 
 class CSoundFile;
 class IMixPlugin;

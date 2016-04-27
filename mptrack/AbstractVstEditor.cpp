@@ -293,6 +293,39 @@ void CAbstractVstEditor::OnRandomizePreset()
 }
 
 
+bool CAbstractVstEditor::OpenEditor(CWnd *)
+//-----------------------------------------
+{
+	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
+	RestoreWindowPos();
+	SetTitle();
+
+	CRect window;
+	GetWindowRect(&window);
+	MENUBARINFO mbi;
+	MemsetZero(mbi);
+	mbi.cbSize = sizeof(mbi);
+	GetMenuBarInfo(m_hWnd, OBJID_MENU, 0, &mbi);
+	window.bottom -= (mbi.rcBar.bottom - mbi.rcBar.top);
+	SetupMenu();
+	// Extend window height by the menu size
+	GetMenuBarInfo(m_hWnd, OBJID_MENU, 0, &mbi);
+	window.bottom += (mbi.rcBar.bottom - mbi.rcBar.top);
+	MoveWindow(&window);
+
+	ShowWindow(SW_SHOW);
+	return true;
+}
+
+
+void CAbstractVstEditor::DoClose()
+//--------------------------------
+{
+	StoreWindowPos();
+	DestroyWindow();
+}
+
+
 void CAbstractVstEditor::SetupMenu(bool force)
 //--------------------------------------------
 {
@@ -397,21 +430,21 @@ void CAbstractVstEditor::OnBypassPlug()
 void CAbstractVstEditor::OnRecordAutomation()
 //-------------------------------------------
 {
-	m_VstPlugin.m_bRecordAutomation = !m_VstPlugin.m_bRecordAutomation;
+	m_VstPlugin.m_recordAutomation = !m_VstPlugin.m_recordAutomation;
 }
 
 
 void CAbstractVstEditor::OnRecordMIDIOut()
 //----------------------------------------
 {
-	m_VstPlugin.m_bRecordMIDIOut = !m_VstPlugin.m_bRecordMIDIOut;
+	m_VstPlugin.m_recordMIDIOut = !m_VstPlugin.m_recordMIDIOut;
 }
 
 
 void CAbstractVstEditor::OnPassKeypressesToPlug()
 //-----------------------------------------------
 {
-	m_VstPlugin.m_bPassKeypressesToPlug  = !m_VstPlugin.m_bPassKeypressesToPlug;
+	m_VstPlugin.m_passKeypressesToPlug  = !m_VstPlugin.m_passKeypressesToPlug;
 }
 
 
@@ -421,7 +454,7 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 	if (pMsg)
 	{
 		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
-		if(!m_VstPlugin.m_bPassKeypressesToPlug &&
+		if(!m_VstPlugin.m_passKeypressesToPlug &&
 			(pMsg->message == WM_SYSKEYUP   || pMsg->message == WM_KEYUP ||
 			 pMsg->message == WM_SYSKEYDOWN || pMsg->message == WM_KEYDOWN) )
 		{
@@ -862,13 +895,13 @@ void CAbstractVstEditor::UpdateOptionsMenu()
 	m_OptionsMenu.AppendMenu(MF_STRING | m_VstPlugin.IsBypassed() ? MF_CHECKED : 0,
 							   ID_PLUG_BYPASS, "&Bypass Plugin\t" + ih->GetKeyTextFromCommand(kcVSTGUIBypassPlug));
 	//Record Params
-	m_OptionsMenu.AppendMenu(MF_STRING | m_VstPlugin.m_bRecordAutomation ? MF_CHECKED : 0,
+	m_OptionsMenu.AppendMenu(MF_STRING | m_VstPlugin.m_recordAutomation ? MF_CHECKED : 0,
 							   ID_PLUG_RECORDAUTOMATION, "Record &Parameter Changes\t" + ih->GetKeyTextFromCommand(kcVSTGUIToggleRecordParams));
 	//Record MIDI Out
-	m_OptionsMenu.AppendMenu(MF_STRING | m_VstPlugin.m_bRecordMIDIOut ? MF_CHECKED : 0,
+	m_OptionsMenu.AppendMenu(MF_STRING | m_VstPlugin.m_recordMIDIOut ? MF_CHECKED : 0,
 							   ID_PLUG_RECORD_MIDIOUT, "Record &MIDI Out to Pattern Editor\t" + ih->GetKeyTextFromCommand(kcVSTGUIToggleRecordMIDIOut));
 	//Pass on keypresses
-	m_OptionsMenu.AppendMenu(MF_STRING | m_VstPlugin.m_bPassKeypressesToPlug ? MF_CHECKED : 0,
+	m_OptionsMenu.AppendMenu(MF_STRING | m_VstPlugin.m_passKeypressesToPlug ? MF_CHECKED : 0,
 							   ID_PLUG_PASSKEYS, "Pass &Keys to Plugin\t" + ih->GetKeyTextFromCommand(kcVSTGUIToggleSendKeysToPlug));
 
 

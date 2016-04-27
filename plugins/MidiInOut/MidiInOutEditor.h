@@ -10,62 +10,53 @@
 
 #pragma once
 
-#include <vstsdk2.4/public.sdk/source/vst2.x/aeffeditor.h>
-#include <portmidi/pm_common/portmidi.h>
-#include "../common/Window.h"
-#include "../common/Label.h"
-#include "../common/ComboBox.h"
-#include "../common/CheckBox.h"
+#ifdef MODPLUG_TRACKER
 
+#include "../../mptrack/AbstractVstEditor.h"
+#include <portmidi/pm_common/portmidi.h>
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-//======================================================
-class MidiInOutEditor : public AEffEditor, public Window
-//======================================================
+//===============================================
+class MidiInOutEditor : public CAbstractVstEditor
+//===============================================
 {
 protected:
-	ERect editRect, editRectDPI;
-
-	Label inputLabel, outputLabel;
-	ComboBox inputCombo, outputCombo;
-	CheckBox latencyCheck;
+	CComboBox m_inputCombo, m_outputCombo;
+	CButton m_latencyCheck;
 
 public:
 
-	MidiInOutEditor(AudioEffect *effect);
-
-	~MidiInOutEditor()
-	{
-		AEffEditor::~AEffEditor();
-		Window::~Window();
-	}
-
-	// Retrieve editor size
-	virtual bool getRect(ERect **rect);
-	// Open editor window
-	virtual bool open(void *ptr);
-	// Close editor size
-	virtual void close();
+	MidiInOutEditor(IMixPlugin &plugin);
 
 	// Refresh current input / output device in GUI
 	void SetCurrentDevice(bool asInputDevice, PmDeviceID device)
 	{
-		ComboBox &combo = asInputDevice ? inputCombo : outputCombo;
+		CComboBox &combo = asInputDevice ? m_inputCombo : m_outputCombo;
 		SetCurrentDevice(combo, device);
 	}
+
+	virtual bool OpenEditor(CWnd *parent);
+	virtual bool IsResizable() const { return false; }
+	virtual bool SetSize(int, int) { return false; }
 
 protected:
 
 	// Update lists of available input / output devices
 	void PopulateLists();
 	// Refresh current input / output device in GUI
-	void SetCurrentDevice(ComboBox &combo, PmDeviceID device);
+	void SetCurrentDevice(CComboBox &combo, PmDeviceID device);
 
-	// Window processing callback function
-	virtual intptr_t WindowCallback(int message, void *param1, void *param2);
+	virtual void DoDataExchange(CDataExchange* pDX);
+
+	afx_msg void OnInputChanged();
+	afx_msg void OnOutputChanged();
+	afx_msg void OnLatencyToggled();
+
+	DECLARE_MESSAGE_MAP()
 };
 
-
 OPENMPT_NAMESPACE_END
+
+#endif // MODPLUG_TRACKER

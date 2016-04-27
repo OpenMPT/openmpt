@@ -135,6 +135,7 @@ void Distortion::SetParameter(PlugParamIndex index, PlugParamValue value)
 void Distortion::Resume()
 //-----------------------
 {
+	m_isResumed = true;
 	RecalculateDistortionParams();
 
 	// Reset filter state

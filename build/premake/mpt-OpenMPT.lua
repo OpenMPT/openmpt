@@ -53,6 +53,8 @@
    "../../pluginBridge/BridgeCommon.h",
    "../../pluginBridge/BridgeWrapper.cpp",
    "../../pluginBridge/BridgeWrapper.h",
+   "../../plugins/MidiInOut/*.cpp",
+   "../../plugins/MidiInOut/*.h",
   }
   files {
    "../../mptrack/mptrack.rc",
@@ -79,6 +81,7 @@
    "opus",
    "opusfile",
    "portaudio",
+   "portmidi",
    "r8brain",
    "soundtouch",
    "vorbis",
@@ -102,41 +105,4 @@
    "/DELAYLOAD:propsys.dll",
   }
   filter {}
-  prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
-
-
-
- project "VST MIDI Input Output"
-  uuid "a181b7d5-54dd-42b6-9cc3-8ab8de2394be"
-  language "C++"
-  location ( "../../build/" .. _ACTION )
-  objdir "../../build/obj/PluginMidiInputOutput"
-  dofile "../../build/premake/premake-defaults-DLL.lua"
-  dofile "../../build/premake/premake-defaults.lua"
-  targetname "MIDI Input Output"
-  includedirs {
-   "../../include/vstsdk2.4",
-   "../../include",
-  }
-  files {
-   "../../plugins/MidiInOut/MidiInOut.cpp",
-   "../../plugins/MidiInOut/MidiInOut.h",
-   "../../plugins/MidiInOut/MidiInOutEditor.cpp",
-   "../../plugins/MidiInOut/MidiInOutEditor.h",
-   "../../plugins/common/*.h",
-   "../../include/vstsdk2.4/pluginterfaces/vst2.x/aeffect.h",
-   "../../include/vstsdk2.4/pluginterfaces/vst2.x/aeffectx.h",
-   "../../include/vstsdk2.4/pluginterfaces/vst2.x/vstfxstore.h",
-   "../../include/vstsdk2.4/public.sdk/source/vst2.x/aeffeditor.h",
-   "../../include/vstsdk2.4/public.sdk/source/vst2.x/audioeffect.cpp",
-   "../../include/vstsdk2.4/public.sdk/source/vst2.x/audioeffect.h",
-   "../../include/vstsdk2.4/public.sdk/source/vst2.x/audioeffectx.cpp",
-   "../../include/vstsdk2.4/public.sdk/source/vst2.x/audioeffectx.h",
-   "../../include/vstsdk2.4/public.sdk/source/vst2.x/vstplugmain.cpp",
-  }
-  characterset "MBCS"
-  links {
-   "portmidi",
-   "winmm",
-  }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

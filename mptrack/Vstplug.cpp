@@ -1220,7 +1220,7 @@ void CVstPlugin::Resume()
 		//reset some stuff
 		m_MixState.nVolDecayL = 0;
 		m_MixState.nVolDecayR = 0;
-		if(m_bPlugResumed)
+		if(m_isResumed)
 		{
 			Dispatch(effStopProcess, 0, 0, nullptr, 0.0f);
 			Dispatch(effMainsChanged, 0, 0, nullptr, 0.0f);	// calls plugin's suspend
@@ -1234,7 +1234,7 @@ void CVstPlugin::Resume()
 		//start off some stuff
 		Dispatch(effMainsChanged, 0, 1, nullptr, 0.0f);	// calls plugin's resume
 		Dispatch(effStartProcess, 0, 0, nullptr, 0.0f);
-		m_bPlugResumed = true;
+		m_isResumed = true;
 	} catch (...)
 	{
 		ReportPlugException(L"Exception in Resume()!");
@@ -1245,13 +1245,13 @@ void CVstPlugin::Resume()
 void CVstPlugin::Suspend()
 //------------------------
 {
-	if(m_bPlugResumed)
+	if(m_isResumed)
 	{
 		try
 		{
 			Dispatch(effStopProcess, 0, 0, nullptr, 0.0f);
 			Dispatch(effMainsChanged, 0, 0, nullptr, 0.0f); // calls plugin's suspend (theoretically, plugins should clean their buffers here, but oh well, the number of plugins which don't do this is surprisingly high.)
-			m_bPlugResumed = false;
+			m_isResumed = false;
 		} catch (...)
 		{
 			ReportPlugException(L"Exception in Suspend()!");
@@ -1322,7 +1322,7 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
 	}
 
 #ifdef MODPLUG_TRACKER
-	if(m_bRecordMIDIOut)
+	if(m_recordMIDIOut)
 	{
 		// Spam MIDI data to all views
 		for(VstInt32 i = 0; i < events->numEvents; i++)
@@ -1645,7 +1645,7 @@ void CVstPlugin::Bypass(bool bypass)
 void CVstPlugin::NotifySongPlaying(bool playing)
 //----------------------------------------------
 {
-	m_bSongPlaying = playing;
+	m_isSongPlaying = playing;
 }
 
 

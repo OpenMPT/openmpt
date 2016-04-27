@@ -516,8 +516,8 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 			m_chkShare.EnableWindow(m_chkBridge.GetCheck() != BST_UNCHECKED);
 
 			showBoxes = SW_SHOW;
-			enableTagsTextBox = TRUE;
 		}
+		enableTagsTextBox = TRUE;
 #endif
 	} else
 	{
@@ -549,6 +549,7 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 		{ kEffectMagic, CCONST('m', 'd', 'a', 'C'), "MDA Degrade", "*  Old versions of this plugin can crash OpenMPT.\nEnsure that you have the latest version of this plugin.  *" },
 		{ kEffectMagic, CCONST('f', 'V', '2', 's'), "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins or use it brigded mode only.  *" },
 		{ kEffectMagic, CCONST('f', 'r', 'V', '2'), "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins or use it brigded mode only.  *" },
+		{ kEffectMagic, CCONST('M', 'M', 'I', 'D'), "MIDI Input Output", "* The MIDI Input / Output plugin is now built right into OpenMPT and should not be loaded from an external file. *" },
 	};
 
 	// Plugins that should always be bridged.

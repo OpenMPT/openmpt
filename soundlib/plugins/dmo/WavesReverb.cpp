@@ -142,6 +142,7 @@ void WavesReverb::SetParameter(PlugParamIndex index, PlugParamValue value)
 void WavesReverb::Resume()
 //------------------------
 {
+	m_isResumed = true;
 	// Recalculate delays
 	uint32 delay0 = Util::Round<uint32>(m_SndFile.GetSampleRate() * 0.045);
 	uint32 delay1 = Util::Round<uint32>(delay0 * 1.189207077026367);	// 2^0.25

@@ -408,6 +408,7 @@ void DMOPlugin::Resume()
 //----------------------
 {
 	m_nSamplesPerSec = m_SndFile.GetSampleRate();
+	m_isResumed = true;
 
 	DMO_MEDIA_TYPE mt;
 	WAVEFORMATEX wfx;
@@ -455,6 +456,7 @@ void DMOPlugin::Resume()
 void DMOPlugin::Suspend()
 //-----------------------
 {
+	m_isResumed = false;
 	m_pMediaObject->Flush();
 	m_pMediaObject->SetInputType(0, nullptr, DMO_SET_TYPEF_CLEAR);
 	m_pMediaObject->SetOutputType(0, nullptr, DMO_SET_TYPEF_CLEAR);
