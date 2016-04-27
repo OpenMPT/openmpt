@@ -296,7 +296,7 @@ public:
 	void TempEnterFXparam(int v);
 	void EnterAftertouch(ModCommand::NOTE note, int atValue);
 
-	int GetDefaultVolume(const ModCommand &m) const;
+	int GetDefaultVolume(const ModCommand &m, ModCommand::INSTR lastInstr = 0) const;
 
 	// Construct a chord from the chord presets. Returns number of notes in chord.
 	int ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord::notesPerChord], ModCommand::NOTE baseNote);

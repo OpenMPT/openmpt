@@ -152,6 +152,7 @@ void CViewPattern::OnEditFindNext()
 
 		bool firstInPat = true;
 		const ROWINDEX numRows = sndFile.Patterns[pat].GetNumRows();
+		std::vector<ModCommand::INSTR> lastInstr(sndFile.GetNumChannels(), 0);
 
 		for(; row < numRows; row++)
 		{
@@ -193,6 +194,9 @@ void CViewPattern::OnEditFindNext()
 						}
 					}
 				}
+
+				if(m->instr > 0)
+					lastInstr[chn] = m->instr;
 
 				if((FindReplace::instance.findFlags[FindReplace::Note] && (!findWhere.note || m->note < FindReplace::instance.findNoteMin || m->note > FindReplace::instance.findNoteMax))
 					|| (FindReplace::instance.findFlags[FindReplace::Instr] && (!findWhere.instrument || m->instr < FindReplace::instance.findInstrMin || m->instr > FindReplace::instance.findInstrMax)))
@@ -299,26 +303,6 @@ void CViewPattern::OnEditFindNext()
 						GetDocument()->GetPatternUndo().PrepareUndo(pat, chn, row, 1, 1, "Find / Replace");
 					}
 
-					if(FindReplace::instance.replaceFlags[FindReplace::Note])
-					{
-						int noteReplace = static_cast<int>(FindReplace::instance.replaceNote);
-						if(FindReplace::instance.replaceNoteAction == FindReplace::ReplaceRelative && m->IsNote())
-						{
-							// TODO +/-1 octave with custom tuning
-							int note = Clamp(m->note + noteReplace, specs.noteMin, specs.noteMax);
-							m->note = static_cast<ModCommand::NOTE>(note);
-						} else if(FindReplace::instance.replaceNoteAction == FindReplace::ReplaceValue)
-						{
-							// Replace with another note
-							// If we're going to remove a PC Note or replace a normal note by a PC note, wipe out the complete column.
-							if(m->IsPcNote() != ModCommand::IsPcNote(static_cast<ModCommand::NOTE>(noteReplace)))
-							{
-								m->Clear();
-							}
-							m->note = static_cast<ModCommand::NOTE>(noteReplace);
-						}
-					}
-
 					if(FindReplace::instance.replaceFlags[FindReplace::Instr])
 					{
 						int instrReplace = FindReplace::instance.replaceInstr;
@@ -331,6 +315,35 @@ void CViewPattern::OnEditFindNext()
 							instr = instrReplace;
 						}
 						m->instr = mpt::saturate_cast<ModCommand::INSTR>(instr);
+						if(m->instr > 0)
+							lastInstr[chn] = m->instr;
+					}
+
+					if(FindReplace::instance.replaceFlags[FindReplace::Note])
+					{
+						int noteReplace = FindReplace::instance.replaceNote;
+						if(FindReplace::instance.replaceNoteAction == FindReplace::ReplaceRelative && m->IsNote())
+						{
+							if(noteReplace == FindReplace::ReplaceOctaveUp || noteReplace == FindReplace::ReplaceOctaveDown)
+							{
+								INSTRUMENTINDEX instr = lastInstr[chn];
+								if(instr <= sndFile.GetNumInstruments() && sndFile.Instruments[instr] != nullptr && sndFile.Instruments[instr]->pTuning != nullptr)
+									noteReplace = sndFile.Instruments[instr]->pTuning->GetGroupSize() * sgn(noteReplace);
+								else
+									noteReplace = (noteReplace == FindReplace::ReplaceOctaveUp) ? 12 : -12;
+							}
+							int note = Clamp(m->note + noteReplace, specs.noteMin, specs.noteMax);
+							m->note = static_cast<ModCommand::NOTE>(note);
+						} else if(FindReplace::instance.replaceNoteAction == FindReplace::ReplaceValue)
+						{
+							// Replace with another note
+							// If we're going to remove a PC Note or replace a normal note by a PC note, wipe out the complete column.
+							if(m->IsPcNote() != ModCommand::IsPcNote(static_cast<ModCommand::NOTE>(noteReplace)))
+							{
+								m->Clear();
+							}
+							m->note = static_cast<ModCommand::NOTE>(noteReplace);
+						}
 					}
 
 					bool hadVolume = (m->volcmd == VOLCMD_VOLUME);
@@ -347,7 +360,7 @@ void CViewPattern::OnEditFindNext()
 						{
 							if(!hadVolume && m->volcmd == VOLCMD_VOLUME)
 							{
-								vol = GetDefaultVolume(*m);
+								vol = GetDefaultVolume(*m, lastInstr[chn]);
 							}
 
 							if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceRelative)
@@ -387,7 +400,7 @@ void CViewPattern::OnEditFindNext()
 						{
 							if(!hadVolume && m->command == CMD_VOLUME)
 							{
-								param = GetDefaultVolume(*m);
+								param = GetDefaultVolume(*m, lastInstr[chn]);
 							}
 
 							if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceRelative)
