@@ -17,6 +17,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+class MidiInOut;
 
 //===============================================
 class MidiInOutEditor : public CAbstractVstEditor
@@ -28,7 +29,7 @@ protected:
 
 public:
 
-	MidiInOutEditor(IMixPlugin &plugin);
+	MidiInOutEditor(MidiInOut &plugin);
 
 	// Refresh current input / output device in GUI
 	void SetCurrentDevice(bool asInputDevice, PmDeviceID device)

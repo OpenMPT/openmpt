@@ -250,6 +250,9 @@ void MidiInOut::Process(float *, float *, uint32)
 		if(IsBypassed())
 			continue;
 
+		char message[4];
+		memcpy(message, &buffer.message, 4);
+
 		if(!bufferedMessage.empty())
 		{
 			bufferedMessage.push_back(buffer.message);
@@ -260,15 +263,16 @@ void MidiInOut::Process(float *, float *, uint32)
 				bufferedMessage.clear();
 			}
 			continue;
-		} else if((buffer.message & 0xFF) == 0xF0)
+		} else if(message[0] == 0xF0)
 		{
 			// Start of SysEx message...
-			if((buffer.message & 0xFF00) != 0xF700 && (buffer.message & 0xFF0000) != 0xF70000 && (buffer.message & 0xFF000000) != 0xF7000000)
+			if(message[1] != 0xF7 && message[2] != 0xF7 && message[3] != 0xF7)
 			{
 				// ...but not the end!
 				bufferedMessage.push_back(buffer.message);
 				continue;
 			}
+			ReceiveSysex(message, 4);
 		}
 
 		ReceiveMidi(buffer.message);

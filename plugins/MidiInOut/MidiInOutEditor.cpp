@@ -39,9 +39,9 @@ void MidiInOutEditor::DoDataExchange(CDataExchange* pDX)
 }
 
 
-MidiInOutEditor::MidiInOutEditor(IMixPlugin &plugin)
+MidiInOutEditor::MidiInOutEditor(MidiInOut &plugin)
 	: CAbstractVstEditor(plugin)
-//--------------------------------------------------
+//-------------------------------------------------
 {
 }
 
@@ -61,12 +61,14 @@ void MidiInOutEditor::PopulateLists()
 //-----------------------------------
 {
 	// Clear lists
+	m_inputCombo.SetRedraw(FALSE);
+	m_outputCombo.SetRedraw(FALSE);
 	m_inputCombo.ResetContent();
 	m_outputCombo.ResetContent();
 
 	// Add dummy devices
 	m_inputCombo.SetItemData(m_inputCombo.AddString(_T("<none>")), static_cast<DWORD_PTR>(MidiInOut::kNoDevice));
-	m_inputCombo.SetItemData(m_outputCombo.AddString(_T("<none>")), static_cast<DWORD_PTR>(MidiInOut::kNoDevice));
+	m_outputCombo.SetItemData(m_outputCombo.AddString(_T("<none>")), static_cast<DWORD_PTR>(MidiInOut::kNoDevice));
 
 	int selectInputItem = 0;
 	int selectOutputItem = 0;
@@ -104,6 +106,8 @@ void MidiInOutEditor::PopulateLists()
 	// Set selections to current devices
 	m_inputCombo.SetCurSel(selectInputItem);
 	m_outputCombo.SetCurSel(selectOutputItem);
+	m_inputCombo.SetRedraw(TRUE);
+	m_outputCombo.SetRedraw(TRUE);
 }
 
 
@@ -123,25 +127,27 @@ void MidiInOutEditor::SetCurrentDevice(CComboBox &combo, PmDeviceID device)
 }
 
 
+static void IOChanged(MidiInOut &plugin, CComboBox &combo, PlugParamIndex param)
+//------------------------------------------------------------------------------
+{
+	// Update device ID and notify plugin.
+	PmDeviceID newDevice = static_cast<PmDeviceID>(combo.GetItemData(combo.GetCurSel()));
+	plugin.SetParameter(param, MidiInOut::DeviceIDToParameter(newDevice));
+	plugin.AutomateParameter(param);
+}
+
+
 void MidiInOutEditor::OnInputChanged()
 //------------------------------------
 {
-	// Update device ID and notify plugin.
-	MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
-	PmDeviceID newDevice = static_cast<PmDeviceID>(m_inputCombo.GetItemData(m_inputCombo.GetCurSel()));
-	plugin.SetParameter(MidiInOut::kInputParameter, MidiInOut::DeviceIDToParameter(newDevice));
-	plugin.AutomateParameter(MidiInOut::kInputParameter);
+	IOChanged(static_cast<MidiInOut &>(m_VstPlugin), m_inputCombo, MidiInOut::kInputParameter);
 }
 
 
 void MidiInOutEditor::OnOutputChanged()
 //-------------------------------------
 {
-	// Update device ID and notify plugin.
-	MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
-	PmDeviceID newDevice = static_cast<PmDeviceID>(m_outputCombo.GetItemData(m_outputCombo.GetCurSel()));
-	plugin.SetParameter(MidiInOut::kOutputParameter, MidiInOut::DeviceIDToParameter(newDevice));
-	plugin.AutomateParameter(MidiInOut::kOutputParameter);
+	IOChanged(static_cast<MidiInOut &>(m_VstPlugin), m_outputCombo, MidiInOut::kOutputParameter);
 }
 
 
@@ -150,7 +156,7 @@ void MidiInOutEditor::OnLatencyToggled()
 {
 	MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
 	plugin.CloseDevice(plugin.outputDevice);
-	plugin.latencyCompensation = m_latencyCheck.GetState() != BST_UNCHECKED;
+	plugin.latencyCompensation = (m_latencyCheck.GetCheck() != BST_UNCHECKED);
 	plugin.OpenDevice(plugin.outputDevice.index, false);
 }
 
