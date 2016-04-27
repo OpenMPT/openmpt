@@ -191,8 +191,8 @@ public:
 
 public:
 
-	const CSoundFile *GetSoundFile() const { return (GetDocument() != nullptr) ? GetDocument()->GetSoundFile() : nullptr; };
-	CSoundFile *GetSoundFile() { return (GetDocument() != nullptr) ? GetDocument()->GetSoundFile() : nullptr; };
+	inline const CSoundFile *GetSoundFile() const;
+	inline CSoundFile *GetSoundFile();
 
 	void SetModified(bool updateAllViews = true);
 

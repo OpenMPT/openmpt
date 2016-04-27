@@ -133,6 +133,10 @@ END_MESSAGE_MAP()
 
 static_assert(ModCommand::maxColumnValue <= 999, "Command range for ID_CHANGE_PCNOTE_PARAM is designed for 999");
 
+const CSoundFile *CViewPattern::GetSoundFile() const { return (GetDocument() != nullptr) ? GetDocument()->GetSoundFile() : nullptr; };
+CSoundFile *CViewPattern::GetSoundFile() { return (GetDocument() != nullptr) ? GetDocument()->GetSoundFile() : nullptr; };
+
+
 CViewPattern::CViewPattern()
 //--------------------------
 {

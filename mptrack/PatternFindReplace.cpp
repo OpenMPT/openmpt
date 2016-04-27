@@ -308,12 +308,10 @@ void CViewPattern::OnEditFindNext()
 						int instrReplace = FindReplace::instance.replaceInstr;
 						int instr = m->instr;
 						if(FindReplace::instance.replaceInstrAction == FindReplace::ReplaceRelative && instr > 0)
-						{
 							instr += instrReplace;
-						} else if(FindReplace::instance.replaceInstrAction == FindReplace::ReplaceValue)
-						{
+						else if(FindReplace::instance.replaceInstrAction == FindReplace::ReplaceValue)
 							instr = instrReplace;
-						}
+
 						m->instr = mpt::saturate_cast<ModCommand::INSTR>(instr);
 						if(m->instr > 0)
 							lastInstr[chn] = m->instr;
@@ -359,9 +357,7 @@ void CViewPattern::OnEditFindNext()
 						if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceRelative || FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceMultiply)
 						{
 							if(!hadVolume && m->volcmd == VOLCMD_VOLUME)
-							{
 								vol = GetDefaultVolume(*m, lastInstr[chn]);
-							}
 
 							if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceRelative)
 								vol += volReplace;
@@ -377,7 +373,7 @@ void CViewPattern::OnEditFindNext()
 					if(FindReplace::instance.replaceFlags[FindReplace::VolCmd | FindReplace::Volume] && m->volcmd != VOLCMD_NONE)
 					{
 						// Fix volume command parameters if necessary. This is necesary e.g.
-						// When there was a command "v24" and the user searched for v and replaced it by d.
+						// when there was a command "v24" and the user searched for v and replaced it by d.
 						// In that case, d24 wouldn't be a valid command.
 						ModCommand::VOL minVal = 0, maxVal = 64;
 						if(effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m->volcmd), nullptr, &minVal, &maxVal))
@@ -399,9 +395,7 @@ void CViewPattern::OnEditFindNext()
 						if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceRelative || FindReplace::instance.replaceParamAction == FindReplace::ReplaceMultiply)
 						{
 							if(!hadVolume && m->command == CMD_VOLUME)
-							{
 								param = GetDefaultVolume(*m, lastInstr[chn]);
-							}
 
 							if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceRelative)
 								param += paramReplace;
@@ -422,16 +416,12 @@ void CViewPattern::OnEditFindNext()
 					{
 						int paramReplace = FindReplace::instance.replaceParam;
 						int param = m->GetValueVolCol();
-						if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceRelative || FindReplace::instance.replaceParamAction == FindReplace::ReplaceMultiply)
-						{
-							if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceRelative)
-								param += paramReplace;
-							else
-								param = Util::muldivr(param, paramReplace, 100);
-						} else if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceValue)
-						{
+						if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceRelative)
+							param += paramReplace;
+						else if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceMultiply)
+							param = Util::muldivr(param, paramReplace, 100);
+						else if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceValue)
 							param = paramReplace;
-						}
 
 						m->SetValueVolCol(static_cast<uint16>(Clamp(param, 0, ModCommand::maxColumnValue)));
 					}
@@ -440,16 +430,12 @@ void CViewPattern::OnEditFindNext()
 					{
 						int valueReplace = FindReplace::instance.replaceVolume;
 						int value = m->GetValueEffectCol();
-						if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceRelative || FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceMultiply)
-						{
-							if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceRelative)
-								value += valueReplace;
-							else
-								value = Util::muldivr(value, valueReplace, 100);
-						} else if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceValue)
-						{
+						if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceRelative)
+							value += valueReplace;
+						else if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceMultiply)
+							value = Util::muldivr(value, valueReplace, 100);
+						else if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceValue)
 							value = valueReplace;
-						}
 
 						m->SetValueEffectCol(static_cast<uint16>(Clamp(value, 0, ModCommand::maxColumnValue)));
 					}
