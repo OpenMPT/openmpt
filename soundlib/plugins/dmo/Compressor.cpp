@@ -68,11 +68,11 @@ void Compressor::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		m_buffer[writeOffset * 2] = leftIn;
 		m_buffer[writeOffset * 2 + 1] = rightIn;
 
-		leftIn = std::abs(leftIn);
-		rightIn = std::abs(rightIn);
+		leftIn = mpt::abs(leftIn);
+		rightIn = mpt::abs(rightIn);
 
 		float mono = (leftIn + rightIn) * (0.5f * 32768.0f * 32768.0f);
-		float monoLog = std::abs(logGain(mono, 31, 5)) * (1.0f / float(1u << 31));
+		float monoLog = mpt::abs(logGain(mono, 31, 5)) * (1.0f / float(1u << 31));
 
 		float newPeak = monoLog + (m_peak - monoLog) * ((m_peak <= monoLog) ? m_attack : m_release);
 		m_peak = newPeak;

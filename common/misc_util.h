@@ -119,6 +119,52 @@ std::vector<T> Split(const std::string &str, const std::string &sep=std::string(
 } } // namespace mpt::String
 
 
+namespace mpt {
+
+//  GCC 4.5 and up provides templated overloads of std::abs that convert
+// integer type narrower than int to double.
+//  It is not clear whether this is actually demanded by the standard and the
+// bug is effectively in all other compilers or not.
+//  In any case, avoid this insanity and provide our own mpt::abs implementation
+// for signed integer and floating point types.
+//  Note: We stick to a C++98-style implementation only overloading int and
+// greater types in order to keep promotion rules consistent for narrower types,
+// which a templated version returning the argument type would not do. OpenMPT
+// probably assumes this semantic when calling abs(int8) in various places.
+inline int abs(int x)
+//-------------------
+{
+	return std::abs(x);
+}
+inline long abs(long x)
+//---------------------
+{
+	return std::abs(x);
+}
+inline long long abs(long long x)
+//-------------------------------
+{
+	return std::abs(x);
+}
+inline float abs(float x)
+//-----------------------
+{
+	return std::fabs(x);
+}
+inline double abs(double x)
+//-------------------------
+{
+	return std::fabs(x);
+}
+inline long double abs(long double x)
+//-----------------------------------
+{
+	return std::fabs(x);
+}
+
+} // namespace mpt
+
+
 // Memset given object to zero.
 template <class T>
 inline void MemsetZero(T &a)

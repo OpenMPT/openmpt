@@ -1629,7 +1629,7 @@ uint32 CSoundFile::GetTickDuration(PlayState &playState) const
 				bufferCount--;
 				playState.m_dBufferDiff++;
 			}
-			MPT_ASSERT(std::abs(playState.m_dBufferDiff) < 1.0);
+			MPT_ASSERT(mpt::abs(playState.m_dBufferDiff) < 1.0);
 			retval = bufferCount;
 		}
 		break;
@@ -1891,7 +1891,7 @@ void TempoSwing::Normalize()
 		*i = Util::muldivr_unsigned(*i, Unity, static_cast<int32>(sum));
 		remain -= *i;
 	}
-	//MPT_ASSERT(static_cast<uint32>(std::abs(static_cast<int32>(remain))) <= size());
+	//MPT_ASSERT(static_cast<uint32>(mpt::abs(static_cast<int32>(remain))) <= size());
 	at(0) += static_cast<int32>(remain);
 }
 

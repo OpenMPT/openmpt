@@ -678,7 +678,7 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 	{
 		// Interpolate if we detect that rows have been skipped but the left mouse button was not released.
 		// This ensures we produce a smooth curve even when we are not notified of mouse movements at a high frequency (e.g. if CPU usage is high)
-		const int steps = abs((int)row - (int)m_nLastDrawnRow);
+		const int steps = mpt::abs((int)row - (int)m_nLastDrawnRow);
 		if (m_nLastDrawnRow != ROWINDEX_INVALID && m_nLastDrawnRow > m_startRow && steps > 1)
 		{
 			int direction = ((int)(row - m_nLastDrawnRow) > 0) ? 1 : -1;

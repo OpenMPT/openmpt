@@ -1095,7 +1095,7 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 	// Octave modifier
 	for(int i = -SplitKeyboardSettings::splitOctaveRange; i < SplitKeyboardSettings::splitOctaveRange + 1; i++)
 	{
-		wsprintf(s, i < 0 ? "Octave -%d" : i > 0 ? "Octave +%d" : "No Change", abs(i));
+		wsprintf(s, i < 0 ? "Octave -%d" : i > 0 ? "Octave +%d" : "No Change", mpt::abs(i));
 		int n = m_CbnOctaveModifier.AddString(s);
 		m_CbnOctaveModifier.SetItemData(n, i);
 	}

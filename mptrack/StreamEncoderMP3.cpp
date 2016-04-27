@@ -298,7 +298,7 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 		if(gainTimes100 < 0)
 		{
 			content += "-";
-			gainTimes100 = std::abs(gainTimes100);
+			gainTimes100 = mpt::abs(gainTimes100);
 		}
 		content += mpt::fmt::dec(gainTimes100 / 100);
 		content += ".";

@@ -1616,13 +1616,13 @@ void CViewInstrument::UpdateIndicator(int tick, int val)
 		if(m_nEnv != ENV_PANNING)
 			wsprintf(s, _T("Tick %d, [%d]"), tick, displayVal);
 		else	// panning envelope: display right/center/left chars
-			wsprintf(s, _T("Tick %d, [%d %c]"), tick, abs(displayVal), displayVal > 0 ? _T('R') : (displayVal < 0 ? _T('L') : _T('C')));
+			wsprintf(s, _T("Tick %d, [%d %c]"), tick, mpt::abs(displayVal), displayVal > 0 ? _T('R') : (displayVal < 0 ? _T('L') : _T('C')));
 	} else
 	{
 		// ticks after release node
 		int displayVal = (val - EnvGetReleaseNodeValue()) * 2;
 		displayVal = (m_nEnv != ENV_VOLUME) ? displayVal - 32 : displayVal;
-		wsprintf(s, _T("Tick %d, [Rel%c%d]"),  tick, displayVal > 0 ? _T('+') : _T('-'), abs(displayVal));
+		wsprintf(s, _T("Tick %d, [Rel%c%d]"),  tick, displayVal > 0 ? _T('+') : _T('-'), mpt::abs(displayVal));
 	}
 	CModScrollView::UpdateIndicator(s);
 }

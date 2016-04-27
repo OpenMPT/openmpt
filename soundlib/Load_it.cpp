@@ -1275,7 +1275,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	{
 		if(Instruments[ins] != nullptr && Instruments[ins]->midiPWD != 0)
 		{
-			itHeader.pwd = (uint8)abs(Instruments[ins]->midiPWD);
+			itHeader.pwd = (uint8)mpt::abs(Instruments[ins]->midiPWD);
 			break;
 		}
 	}

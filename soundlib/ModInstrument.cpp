@@ -225,7 +225,7 @@ void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 		}
 
 		// FT2 only has unsigned Pitch Wheel Depth, and it's limited to 0...36 (in the GUI, at least. As you would expect it from FT2, this value is actually not sanitized on load).
-		midiPWD = static_cast<int8>(abs(midiPWD));
+		midiPWD = static_cast<int8>(mpt::abs(midiPWD));
 		Limit(midiPWD, int8(0), int8(36));
 
 		nGlobalVol = 64;
