@@ -146,6 +146,27 @@ typedef uint64_t uint64_t;
 #endif
 #endif
 
+#if !defined(LIBOPENMPT_NO_DEPRECATE)
+#if defined(__clang__)
+#define LIBOPENMPT_DEPRECATED __attribute__((deprecated))
+#elif defined(__GNUC__)
+#define LIBOPENMPT_DEPRECATED __attribute__((deprecated))
+#elif defined(_MSC_VER)
+#define LIBOPENMPT_DEPRECATED __declspec(deprecated)
+#else
+#define LIBOPENMPT_DEPRECATED
+#endif
+#ifndef __cplusplus
+LIBOPENMPT_DEPRECATED static const int LIBOPENMPT_DEPRECATED_STRING_CONSTANT = 0;
+#define LIBOPENMPT_DEPRECATED_STRING( str ) ( LIBOPENMPT_DEPRECATED_STRING_CONSTANT ? ( str ) : ( str ) )
+#endif
+#else
+#define LIBOPENMPT_DEPRECATED
+#ifndef __cplusplus
+#define LIBOPENMPT_DEPRECATED_STRING( str ) str
+#endif
+#endif
+
 #include "libopenmpt_version.h"
 
 #endif /* LIBOPENMPT_CONFIG_H */

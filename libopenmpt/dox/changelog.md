@@ -27,6 +27,9 @@ is just a high-level summary.
     constants for theses keys makes extending the API in a backwards and
     forwards compatible way harder than it should be. Please just use the string
     literals directly.
+ *  [**Change**] Deprecated API identifiers will now cause deprecation warnings
+    with MSVC, GCC and clang. `#define LIBOPENMPT_NO_DEPRECATE` to disable the
+    warnings.
  *  [**Change**] openmpt123: `--[no-]shuffle` option has been renamed to
     `--[no-]randomize`. A new `--[no-]shuffle` option has been added which
     shuffles randomly through the playlist as opposed to randomizing the
