@@ -24,7 +24,11 @@
 #include <vector>
 
 #include <cmath>
+#include <cstdlib>
 #include <cstring>
+
+#include <math.h>
+#include <stdlib.h>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -149,17 +153,17 @@ inline long long abs(long long x)
 inline float abs(float x)
 //-----------------------
 {
-	return std::abs(x);
+	return std::fabs(x);
 }
 inline double abs(double x)
 //-------------------------
 {
-	return std::abs(x);
+	return std::fabs(x);
 }
 inline long double abs(long double x)
 //-----------------------------------
 {
-	return std::abs(x);
+	return std::fabs(x);
 }
 
 } // namespace mpt
