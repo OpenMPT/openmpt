@@ -81,9 +81,10 @@ void MidiInOut::SaveAllParameters()
 }
 
 
-void MidiInOut::RestoreAllParameters(int32)
-//-----------------------------------------
+void MidiInOut::RestoreAllParameters(int32 program)
+//-------------------------------------------------
 {
+	IMixPlugin::RestoreAllParameters(program);	// First plugin version didn't use chunks.
 	SetChunk(m_pMixStruct->nPluginDataSize, m_pMixStruct->pPluginData, false);
 }
 
@@ -96,6 +97,7 @@ size_t MidiInOut::GetChunk(char *(&chunk), bool /*isBank*/)
 	const std::string outputName8 = mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetLocale, outputDevice.name);
 
 	std::ostringstream s;
+	mpt::IO::WriteRaw(s, "fEvN", 4);	// VST program chunk magic
 	mpt::IO::WriteIntLE< int32>(s, GetVersion());
 	mpt::IO::WriteIntLE<uint32>(s, 1);	// Number of programs
 	mpt::IO::WriteIntLE<uint32>(s, static_cast<uint32>(programName8.size()));
@@ -117,14 +119,10 @@ void MidiInOut::SetChunk(size_t size, char *chunk, bool /*isBank*/)
 //-----------------------------------------------------------------
 {
 	FileReader file(chunk, size);
-	if(!file.CanRead(8 * sizeof(uint32)))
-		return;
-
-	if(file.ReadInt32LE() > GetVersion())
-		return;
-
-	// Number of programs
-	if(file.ReadUint32LE() < 1)
+	if(!file.CanRead(9 * sizeof(uint32))
+		|| !file.ReadMagic("fEvN")				// VST program chunk magic
+		|| file.ReadInt32LE() > GetVersion()	// Plugin version
+		|| file.ReadUint32LE() < 1)				// Number of programs
 		return;
 
 	uint32 nameStrSize = file.ReadUint32LE();
