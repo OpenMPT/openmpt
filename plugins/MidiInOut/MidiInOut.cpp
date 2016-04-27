@@ -250,6 +250,27 @@ void MidiInOut::Process(float *, float *, uint32)
 		if(IsBypassed())
 			continue;
 
+		if(!bufferedMessage.empty())
+		{
+			bufferedMessage.push_back(buffer.message);
+			if(buffer.message & 0x80808080)
+			{
+				// End of message found!
+				ReceiveSysex(reinterpret_cast<const char *>(&bufferedMessage[0]), bufferedMessage.size() * sizeof(bufferedMessage[0]));
+				bufferedMessage.clear();
+			}
+			continue;
+		} else if((buffer.message & 0xFF) == 0xF0)
+		{
+			// Start of SysEx message...
+			if((buffer.message & 0xFF00) != 0xF700 && (buffer.message & 0xFF0000) != 0xF70000 && (buffer.message & 0xFF000000) != 0xF7000000)
+			{
+				// ...but not the end!
+				bufferedMessage.push_back(buffer.message);
+				continue;
+			}
+		}
+
 		ReceiveMidi(buffer.message);
 	}
 }
