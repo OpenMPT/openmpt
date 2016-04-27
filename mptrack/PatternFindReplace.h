@@ -40,6 +40,12 @@ struct FindReplace
 		ReplaceMultiply,
 	};
 
+	enum
+	{
+		ReplaceOctaveUp   =  12000,
+		ReplaceOctaveDown = -12000,
+	};
+
 	FlagSet<Flags> findFlags, replaceFlags;	// See Flags
 
 	// Data to replace with

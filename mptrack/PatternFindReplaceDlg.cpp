@@ -194,11 +194,11 @@ BOOL CFindReplaceTab::OnInitDialog()
 			{
 				switch(m_settings.replaceNote)
 				{
-				case  -1: sel = 1; break;
-				case   1: sel = 2; break;
-				case -12: sel = 3; break;
-				case  12: sel = 4; break;
-				default:  sel = 5; break;
+				case -1: sel = 1; break;
+				case  1: sel = 2; break;
+				case FindReplace::ReplaceOctaveDown: sel = 3; break;
+				case FindReplace::ReplaceOctaveUp  : sel = 4; break;
+				default: sel = 5; break;
 				}
 			}
 		} else
@@ -548,10 +548,10 @@ void CFindReplaceTab::OnNoteChanged()
 		m_settings.replaceNoteAction = FindReplace::ReplaceRelative;
 		switch(item)
 		{
-		case kReplaceNoteMinusOne:    m_settings.replaceNote =  -1; break;
-		case kReplaceNotePlusOne:     m_settings.replaceNote =   1; break;
-		case kReplaceNoteMinusOctave: m_settings.replaceNote = -12; break;	// TODO custom tunings!
-		case kReplaceNotePlusOctave:  m_settings.replaceNote =  12; break;	// TODO custom tunings!
+		case kReplaceNoteMinusOne:    m_settings.replaceNote = -1; break;
+		case kReplaceNotePlusOne:     m_settings.replaceNote =  1; break;
+		case kReplaceNoteMinusOctave: m_settings.replaceNote = FindReplace::ReplaceOctaveDown; break;
+		case kReplaceNotePlusOctave:  m_settings.replaceNote = FindReplace::ReplaceOctaveUp; break;
 
 		case kReplaceRelative:
 			{

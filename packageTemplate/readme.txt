@@ -44,9 +44,9 @@ See History.txt.
 Questions, comments, bug reports...
 -----------------------------------
 
-For help and general talk, visit our forums at http://forum.openmpt.org/.
+For help and general talk, visit our forums at https://forum.openmpt.org/.
 If you found a bug or want to request a new feature, you can do so at our issue
-tracker at http://bugs.openmpt.org/
+tracker at https://bugs.openmpt.org/
 
 
 Release package contents

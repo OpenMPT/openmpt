@@ -1,6 +1,6 @@
 ; OpenMPT Install script
 ; Written by Johannes Schultz
-; http://openmpt.org/
+; https://openmpt.org/
 ; http://sagamusix.de/
 
 ; This file cannot be compiled on its own. You need to compile any of these files:
@@ -25,9 +25,9 @@ AppVerName=OpenMPT {#GetAppVersionShort} ({#PlatformName})
 AppVersion={#GetAppVersion}
 AppName=OpenMPT ({#PlatformName})
 AppPublisher=OpenMPT Devs / Olivier Lapicque
-AppPublisherURL=http://openmpt.org/
-AppSupportURL=http://forum.openmpt.org/
-AppUpdatesURL=http://openmpt.org/
+AppPublisherURL=https://openmpt.org/
+AppSupportURL=https://forum.openmpt.org/
+AppUpdatesURL=https://openmpt.org/
 DefaultDirName={pf}\OpenMPT
 DisableDirPage=no
 DisableProgramGroupPage=yes
@@ -131,7 +131,7 @@ Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\OpenMPT; Filename: 
 ; enable portable mode
 Filename: {app}\mptrack.ini; Section: Paths; Key: UseAppDataDirectory; String: 0; Flags: createkeyifdoesntexist; Tasks: portable
 ; internet shortcut
-Filename: {app}\ModPlug Central.url; Section: InternetShortcut; Key: URL; String: http://forum.openmpt.org/; Flags: createkeyifdoesntexist
+Filename: {app}\ModPlug Central.url; Section: InternetShortcut; Key: URL; String: https://forum.openmpt.org/; Flags: createkeyifdoesntexist
 
 [Run]
 ; duh

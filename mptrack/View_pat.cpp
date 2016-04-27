@@ -2683,11 +2683,11 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 
 
 // Get the velocity at which a given note would be played
-int CViewPattern::GetDefaultVolume(const ModCommand &m) const
-//-----------------------------------------------------------
+int CViewPattern::GetDefaultVolume(const ModCommand &m, ModCommand::INSTR lastInstr) const
+//----------------------------------------------------------------------------------------
 {
 	const CSoundFile &sndFile = *GetSoundFile();
-	SAMPLEINDEX sample = GetDocument()->GetSampleIndex(m);
+	SAMPLEINDEX sample = GetDocument()->GetSampleIndex(m, lastInstr);
 	if(sample)
 		return sndFile.GetSample(sample).nVolume / 4;
 	else if(m.instr > 0 && m.instr <= sndFile.GetNumInstruments() && sndFile.Instruments[m.instr] != nullptr && sndFile.Instruments[m.instr]->HasValidMIDIChannel())

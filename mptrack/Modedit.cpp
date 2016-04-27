@@ -1305,20 +1305,21 @@ bool CModDoc::GlobalVolumeToPattern()
 }
 
 
-SAMPLEINDEX CModDoc::GetSampleIndex(const ModCommand &m) const
-//------------------------------------------------------------
+SAMPLEINDEX CModDoc::GetSampleIndex(const ModCommand &m, ModCommand::INSTR lastInstr) const
+//-----------------------------------------------------------------------------------------
 {
 	if(m.IsPcNote())
 		return 0;
 
+	ModCommand::INSTR instr = m.instr > 0 ? m.instr : lastInstr;
 	SAMPLEINDEX smp = 0;
 	if(m_SndFile.GetNumInstruments())
 	{
-		if(m.IsNote() && m.instr <= m_SndFile.GetNumInstruments() && m_SndFile.Instruments[m.instr] != nullptr)
-			smp = m_SndFile.Instruments[m.instr]->Keyboard[m.note - NOTE_MIN];
+		if(m.IsNote() && instr <= m_SndFile.GetNumInstruments() && m_SndFile.Instruments[instr] != nullptr)
+			smp = m_SndFile.Instruments[instr]->Keyboard[m.note - NOTE_MIN];
 	} else
 	{
-		smp = m.instr;
+		smp = instr;
 	}
 	if(smp <= m_SndFile.GetNumSamples())
 		return smp;
