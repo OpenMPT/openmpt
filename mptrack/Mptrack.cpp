@@ -1915,6 +1915,14 @@ BOOL CTrackApp::InitializeDXPlugins()
 	DWORD scanStart = GetTickCount();
 	bool dialogShown = false;
 
+	// Read tags for built-in plugins
+	for(CVstPluginManager::iterator plug = m_pPluginManager->begin(); plug != m_pPluginManager->end(); plug++)
+	{
+		char tmp[32];
+		sprintf(tmp, "Plugin%08X%08X.Tags", (**plug).pluginId1, (**plug).pluginId2);
+		(**plug).tags = theApp.GetSettings().Read<mpt::ustring>("VST Plugins", tmp, mpt::ustring());
+	}
+
 	m_pPluginManager->reserve(numPlugins);
 	for(size_t plug = 0; plug < numPlugins; plug++)
 	{
@@ -1937,7 +1945,12 @@ BOOL CTrackApp::InitializeDXPlugins()
 			sprintf(tmp, "Plugin%u.Tags", plug);
 			mpt::ustring plugTags = theApp.GetSettings().Read<mpt::ustring>("VST Plugins", tmp, mpt::ustring());
 
-			m_pPluginManager->AddPlugin(plugPath, plugTags, true, true, &nonFoundPlugs);
+			VSTPluginLib *lib = m_pPluginManager->AddPlugin(plugPath, plugTags, true, true, &nonFoundPlugs);
+			if(lib != nullptr && lib->libraryName == MPT_PATHSTRING("MIDI Input Output") && lib->pluginId1 == 'VstP' && lib->pluginId2 == 'MMID')
+			{
+				// This appears to be an old version of our MIDI I/O plugin, which is not built right into the main executable.
+				m_pPluginManager->RemovePlugin(lib);
+			}
 		}
 
 		if(!dialogShown && GetTickCount() >= scanStart + 2000)
@@ -1978,9 +1991,9 @@ BOOL CTrackApp::UninitializeDXPlugins()
 	size_t plug = 0;
 	for(CVstPluginManager::const_iterator pPlug = m_pPluginManager->begin(); pPlug != m_pPluginManager->end(); pPlug++)
 	{
+		char tmp[32];
 		if((**pPlug).pluginId1 != kDmoMagic && !(**pPlug).dllPath.empty())
 		{
-			char tmp[32];
 			sprintf(tmp, "Plugin%u", plug);
 			mpt::PathString plugPath = (**pPlug).dllPath;
 			if(theApp.IsPortableMode())
@@ -1993,6 +2006,10 @@ BOOL CTrackApp::UninitializeDXPlugins()
 			theApp.GetSettings().Write("VST Plugins", tmp, (**pPlug).tags);
 
 			plug++;
+		} else
+		{
+			sprintf(tmp, "Plugin%08X%08X.Tags", (**pPlug).pluginId1, (**pPlug).pluginId2);
+			theApp.GetSettings().Write("VST Plugins", tmp, (**pPlug).tags);
 		}
 	}
 	theApp.GetSettings().Write<int32>("VST Plugins", "NumPlugins", plug);

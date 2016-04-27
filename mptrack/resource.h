@@ -105,6 +105,7 @@
 #define IDD_MOVEFXSLOT                  501
 #define IDD_LEGACY_PLAYBACK             502
 #define IDD_FIND_RANGE                  503
+#define IDD_MIDI_IO_PLUGIN              504
 #define IDD_CONTROL_GRAPH               507
 #define IDD_SCALE_ENV_POINTS            510
 #define IDD_TUNING                      511

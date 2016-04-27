@@ -26,7 +26,6 @@ copy /y ..\..\packageTemplate\Licenses\*.* .\Licenses\ || goto error
  Licenses ^
  mptrack.exe ^
  OpenMPT_SoundTouch_f32.dll ^
- "MIDI Input Output.dll" ^
  PluginBridge32.exe ^
  PluginBridge64.exe ^
  || goto error

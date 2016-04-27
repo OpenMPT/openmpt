@@ -77,10 +77,6 @@ Source: ..\bin\Win32old\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignor
 Source: ..\bin\{#PlatformFolder}\unmo3.dll; DestDir: {app}; Flags: ignoreversion
 #endif
 
-; Plugins
-;Source: ..\packageTemplate\Plugins\*.*; DestDir: {app}\Plugins\; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: ..\bin\{#PlatformFolder}\MIDI Input Output.dll; DestDir: {app}\Plugins\MIDI\; Flags: ignoreversion
-
 Source: ..\packageTemplate\ExampleSongs\*.*; DestDir: {app}\ExampleSongs\; Flags: ignoreversion sortfilesbyextension recursesubdirs
 
 Source: packageTemplate\readme.txt; DestDir: {app}; Flags: ignoreversion

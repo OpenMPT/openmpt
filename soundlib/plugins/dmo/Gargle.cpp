@@ -137,6 +137,7 @@ void Gargle::Resume()
 {
 	RecalculateGargleParams();
 	m_counter = 0;
+	m_isResumed = true;
 }
 
 
@@ -183,10 +184,10 @@ CString Gargle::GetParamDisplay(PlugParamIndex param)
 #endif // MODPLUG_TRACKER
 
 
-int Gargle::RateInHertz() const
-//-----------------------------
+uint32 Gargle::RateInHertz() const
+//--------------------------------
 {
-	return Util::Round<int>(m_param[kGargleRate] * 999.0f) + 1;
+	return Util::Round<uint32>(m_param[kGargleRate] * 999.0f) + 1;
 }
 
 

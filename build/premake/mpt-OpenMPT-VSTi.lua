@@ -48,6 +48,8 @@
    "../../pluginBridge/BridgeCommon.h",
    "../../pluginBridge/BridgeWrapper.cpp",
    "../../pluginBridge/BridgeWrapper.h",
+   "../../plugins/MidiInOut/*.cpp",
+   "../../plugins/MidiInOut/*.h",
   }
   files {
    "../../mptrack/mptrack.rc",
@@ -73,6 +75,7 @@
    "opus",
    "opusfile",
    "portaudio",
+   "portmidi",
    "r8brain",
    "soundtouch",
    "vorbis",

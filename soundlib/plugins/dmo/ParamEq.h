@@ -70,7 +70,7 @@ public:
 	virtual void SetParameter(PlugParamIndex index, PlugParamValue value);
 
 	virtual void Resume();
-	virtual void Suspend() { }
+	virtual void Suspend() { m_isResumed = false; }
 	virtual void PositionChanged() { }
 
 	virtual bool IsInstrument() const { return false; }

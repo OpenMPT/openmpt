@@ -634,6 +634,12 @@
     <ClCompile Include="PatternFindReplaceDlg.cpp">
       <Filter>Source Files\mptrack\Dialogs</Filter>
     </ClCompile>
+    <ClCompile Include="..\plugins\MidiInOut\MidiInOut.cpp">
+      <Filter>Source Files\soundlib\plugins\MidiInOut</Filter>
+    </ClCompile>
+    <ClCompile Include="..\plugins\MidiInOut\MidiInOutEditor.cpp">
+      <Filter>Source Files\soundlib\plugins\MidiInOut</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1251,6 +1257,12 @@
     <ClInclude Include="PatternFindReplaceDlg.h">
       <Filter>Header Files\mptrack\Dialogs</Filter>
     </ClInclude>
+    <ClInclude Include="..\plugins\MidiInOut\MidiInOut.h">
+      <Filter>Header Files\soundlib\plugins\MidiInOut</Filter>
+    </ClInclude>
+    <ClInclude Include="..\plugins\MidiInOut\MidiInOutEditor.h">
+      <Filter>Header Files\soundlib\plugins\MidiInOut</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp">
@@ -1416,6 +1428,12 @@
     </Filter>
     <Filter Include="Header Files\soundlib\plugins\dmo">
       <UniqueIdentifier>{847e2b5c-5a53-4a3c-8d7f-7d12e14386a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\soundlib\plugins\MidiInOut">
+      <UniqueIdentifier>{54141e97-e6c2-4d4b-baa9-45afe8e449d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\soundlib\plugins\MidiInOut">
+      <UniqueIdentifier>{77af2436-f5ba-4672-baef-6c85a792a13d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

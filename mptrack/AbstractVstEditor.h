@@ -73,13 +73,14 @@ public:
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg void OnMove(int x, int y);
 
-	//Overridden methods:
-	virtual void OnOK() = 0;
-	virtual void OnCancel() = 0;
-	virtual bool OpenEditor(CWnd *parent) = 0;
-	virtual void DoClose() = 0;
+	// Overridden methods:
+	virtual void OnOK() { DoClose(); }
+	virtual void OnCancel() { DoClose(); }
+	virtual void OnClose() { DoClose(); }
+
+	virtual bool OpenEditor(CWnd *parent);
+	virtual void DoClose();
 	virtual void UpdateParamDisplays() { if(m_updateDisplay) { SetupMenu(true); m_updateDisplay = false; } }
-	virtual afx_msg void OnClose() = 0;
 	virtual void OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized);
 	virtual void PostNcDestroy();
 

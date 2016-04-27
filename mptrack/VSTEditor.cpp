@@ -10,7 +10,6 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "../soundlib/Sndfile.h"
 #include "VstPlug.h"
 #include "VSTEditor.h"
 
@@ -39,8 +38,8 @@ void COwnerVstEditor::OnPaint()
 	CAbstractVstEditor::OnPaint();
 	if(static_cast<CVstPlugin &>(m_VstPlugin).isBridged)
 	{
-		// Instantly redraw bridged plugins so that we don't have to wait for their periodic refresh.
-		// This usually makes the timer used in the bridge unnecessary, but not always.
+		// Force redrawing for the plugin window in the bridged process.
+		// Otherwise, bridged plugin GUIs will not always be refreshed properly.
 		CRect rect;
 		if(m_plugWindow.GetUpdateRect(&rect, FALSE))
 		{
@@ -55,12 +54,9 @@ bool COwnerVstEditor::OpenEditor(CWnd *parent)
 //--------------------------------------------
 {
 	Create(IDD_PLUGINEDITOR, parent);
-	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
 
 	// Some plugins (e.g. ProteusVX) need to be planted into another control or else they will break our window proc, making the window unusable.
 	m_plugWindow.Create(nullptr, WS_CHILD | WS_VISIBLE, CRect(0, 0, 100, 100), this);
-
-	SetupMenu();
 
 	// Set editor window size
 	ERect rect;
@@ -78,49 +74,24 @@ bool COwnerVstEditor::OpenEditor(CWnd *parent)
 		SetSize(rect.right - rect.left, rect.bottom - rect.top);
 	}
 
-	RestoreWindowPos();
-	SetTitle();
-
 	vstPlug.Dispatch(effEditTop, 0,0, NULL, 0);
 	vstPlug.Dispatch(effEditIdle, 0,0, NULL, 0);
 
 	// Set knob mode to linear (2) instead of circular (0) for those plugins that support it (e.g. Steinberg VB-1)
 	vstPlug.Dispatch(effSetEditKnobMode, 0, 2, nullptr, 0.0f);
 
-	ShowWindow(SW_SHOW);
-	return TRUE;
-}
-
-
-void COwnerVstEditor::OnClose()
-//-----------------------------
-{
-	DoClose();
-}
-
-
-void COwnerVstEditor::OnOK()
-//--------------------------
-{
-	OnClose();
-}
-
-
-void COwnerVstEditor::OnCancel()
-//------------------------------
-{
-	OnClose();
+	return CAbstractVstEditor::OpenEditor(parent);
 }
 
 
 void COwnerVstEditor::DoClose()
 //-----------------------------
 {
+	// Prevent some plugins from storing a bogus window size (e.g. Electri-Q)
 	ShowWindow(SW_HIDE);
 	if(m_isMinimized) OnNcLButtonDblClk(HTCAPTION, CPoint(0, 0));
-	StoreWindowPos();
 	static_cast<CVstPlugin &>(m_VstPlugin).Dispatch(effEditClose, 0, 0, NULL, 0);
-	DestroyWindow();
+	CAbstractVstEditor::DoClose();
 }
 
 

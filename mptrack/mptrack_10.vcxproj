@@ -750,6 +750,8 @@
     <ClCompile Include="..\common\typedefs.cpp" />
     <ClCompile Include="..\common\version.cpp" />
     <ClCompile Include="..\pluginBridge\BridgeWrapper.cpp" />
+    <ClCompile Include="..\plugins\MidiInOut\MidiInOut.cpp" />
+    <ClCompile Include="..\plugins\MidiInOut\MidiInOutEditor.cpp" />
     <ClCompile Include="..\sounddev\SoundDevice.cpp" />
     <ClCompile Include="..\sounddev\SoundDeviceASIO.cpp" />
     <ClCompile Include="..\sounddev\SoundDeviceBase.cpp" />
@@ -1007,6 +1009,8 @@
     <ClInclude Include="..\pluginBridge\AEffectWrapper.h" />
     <ClInclude Include="..\pluginBridge\BridgeCommon.h" />
     <ClInclude Include="..\pluginBridge\BridgeWrapper.h" />
+    <ClInclude Include="..\plugins\MidiInOut\MidiInOut.h" />
+    <ClInclude Include="..\plugins\MidiInOut\MidiInOutEditor.h" />
     <ClInclude Include="..\sounddev\SoundDevice.h" />
     <ClInclude Include="..\sounddev\SoundDeviceASIO.h" />
     <ClInclude Include="..\sounddev\SoundDeviceBase.h" />
@@ -1224,6 +1228,9 @@
     </ProjectReference>
     <ProjectReference Include="..\build\vs2010-ext\portaudio.vcxproj">
       <Project>{189b867f-ff4b-45a1-b741-a97492ee69af}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\vs2010-ext\portmidi.vcxproj">
+      <Project>{2512e2ca-578a-4f10-9363-4bfc9a5ef960}</Project>
     </ProjectReference>
     <ProjectReference Include="..\build\vs2010-ext\r8brain.vcxproj">
       <Project>{bc116b29-9958-4389-b294-7529bb7c7d37}</Project>

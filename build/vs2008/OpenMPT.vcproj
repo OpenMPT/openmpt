@@ -1096,6 +1096,10 @@
 			RelativePathToProject="..\vs2008-ext\portaudio.vcproj"
 		/>
 		<ProjectReference
+			ReferencedProjectIdentifier="{2512E2CA-578A-4F10-9363-4BFC9A5EF960}"
+			RelativePathToProject="..\vs2008-ext\portmidi.vcproj"
+		/>
+		<ProjectReference
 			ReferencedProjectIdentifier="{BC116B29-9958-4389-B294-7529BB7C7D37}"
 			RelativePathToProject="..\vs2008-ext\r8brain.vcproj"
 		/>
@@ -2244,6 +2248,30 @@
 				RelativePath="..\..\pluginBridge\BridgeWrapper.h"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="plugins"
+			>
+			<Filter
+				Name="MidiInOut"
+				>
+				<File
+					RelativePath="..\..\plugins\MidiInOut\MidiInOut.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\plugins\MidiInOut\MidiInOut.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\plugins\MidiInOut\MidiInOutEditor.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\plugins\MidiInOut\MidiInOutEditor.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="sounddev"

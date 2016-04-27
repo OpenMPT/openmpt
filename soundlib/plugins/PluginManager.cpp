@@ -15,6 +15,8 @@
 #include "../../common/version.h"
 #include "PluginManager.h"
 #include "PlugInterface.h"
+
+// Built-in plugins
 #include "DigiBoosterEcho.h"
 #include "dmo/DMOPlugin.h"
 #include "dmo/Compressor.h"
@@ -23,6 +25,10 @@
 #include "dmo/Gargle.h"
 #include "dmo/ParamEq.h"
 #include "dmo/WavesReverb.h"
+#ifdef MODPLUG_TRACKER
+#include "../../plugins/MidiInOut/MidiInOut.h"
+#endif // MODPLUG_TRACKER
+
 #include "../../common/StringFixer.h"
 #include "../Sndfile.h"
 #include "../Loaders.h"
@@ -153,6 +159,18 @@ CVstPluginManager::CVstPluginManager()
 		memcpy(&plug->pluginId2, "Echo", 4);
 		plug->category = VSTPluginLib::catRoomFx;
 	}
+
+#ifdef MODPLUG_TRACKER
+	plug = new (std::nothrow) VSTPluginLib(MidiInOut::Create, mpt::PathString(), MPT_PATHSTRING("MIDI Input Output"), mpt::ustring());
+	if(plug != nullptr)
+	{
+		pluginList.push_back(plug);
+		plug->pluginId1 = PLUGMAGIC('V','s','t','P');
+		plug->pluginId2 = PLUGMAGIC('M','M','I','D');
+		plug->category = VSTPluginLib::catSynth;
+		plug->isInstrument = true;
+	}
+#endif // MODPLUG_TRACKER
 
 #ifdef NO_DMO
 	// DirectX Media Objects Emulation

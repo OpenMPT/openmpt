@@ -1,43 +1,19 @@
 /*
  * MidiInOut.cpp
  * -------------
- * Purpose: A VST plugin for sending and receiving MIDI data.
+ * Purpose: A plugin for sending and receiving MIDI data.
  * Notes  : (currently none)
  * Authors: Johannes Schultz (OpenMPT Devs)
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#define MODPLUG_TRACKER
-#define OPENMPT_NAMESPACE
-#define OPENMPT_NAMESPACE_BEGIN
-#define OPENMPT_NAMESPACE_END
-#define MPT_ENABLE_THREAD
-#define VC_EXTRALEAN
-#define NOMINMAX
-#ifdef _MSC_VER
-#if (_MSC_VER < 1600)
-#define nullptr 0
-#endif
-#endif
-
+#include "stdafx.h"
 #include "MidiInOut.h"
 #include "MidiInOutEditor.h"
+#include "../../common/FileReader.h"
+#include "../../mptrack/Reporting.h"
 #include <algorithm>
-
-#ifdef _WIN64
-#pragma comment(linker, "/EXPORT:VSTPluginMain")
-#pragma comment(linker, "/EXPORT:main=VSTPluginMain")
-#else
-#pragma comment(linker, "/EXPORT:_VSTPluginMain")
-#pragma comment(linker, "/EXPORT:_main=_VSTPluginMain")
-#endif
-
-
-AudioEffect *createEffectInstance(audioMasterCallback audioMaster)
-//----------------------------------------------------------------
-{
-	return new OPENMPT_NAMESPACE::MidiInOut(audioMaster);
-}
+#include <sstream>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -45,42 +21,34 @@ OPENMPT_NAMESPACE_BEGIN
 
 int MidiInOut::numInstances = 0;
 
-
-MidiInOut::MidiInOut(audioMasterCallback audioMaster) : AudioEffectX(audioMaster, maxPrograms, maxParams)
-//-------------------------------------------------------------------------------------------------------
+IMixPlugin* MidiInOut::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
+//------------------------------------------------------------------------------------------------
 {
-	editor = new MidiInOutEditor(static_cast<AudioEffect *>(this));
+	return new (std::nothrow) MidiInOut(factory, sndFile, mixStruct);
+}
 
-	setNumInputs(0);			// No Input
-	setNumOutputs(0);			// No Output
-	setUniqueID(CCONST('M', 'M', 'I', 'D'));	// Effect ID (ModPlug MIDI :)
-	canProcessReplacing();		// Supports replacing output (default)
-	isSynth(true);				// Not strictly a synth, but an instrument plugin in the broadest sense
-	cEffect.version = 2;		// Why is there a setter for everything, but not the plugin version?
-	programsAreChunks(true);	// Version 2 of our plugin stores program chunks, including the device name.
 
-	setEditor(editor);
-
+MidiInOut::MidiInOut(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
+	: IMidiPlugin(factory, sndFile, mixStruct)
+	, latencyCompensation(true)
+	, programName(_T("Default"))
+//---------------------------------------------------------------------------------------
+{
 	if(!numInstances++)
 	{
 		Pt_Start(1, nullptr, nullptr);
 		Pm_Initialize();
 	}
 
-	chunk = nullptr;
-	isProcessing = false;
-	isBypassed = false;
-	latencyCompensation = true;
-
-	vst_strncpy(programName, "Default", kVstMaxProgNameLen);	// default program name
+	m_mixBuffer.Initialize(2, 2);
+	InsertIntoFactoryList();
 }
 
 
 MidiInOut::~MidiInOut()
 //---------------------
 {
-	suspend();
-	delete[] chunk;
+	Suspend();
 
 	if(--numInstances == 0)
 	{
@@ -91,236 +59,188 @@ MidiInOut::~MidiInOut()
 }
 
 
-void MidiInOut::setProgramName(char *name)
-//----------------------------------------
+void MidiInOut::SaveAllParameters()
+//---------------------------------
 {
-	vst_strncpy(programName, name, kVstMaxProgNameLen);
-}
+	char *chunk = nullptr;
+	size_t size = GetChunk(chunk, false);
+	if(size == 0 || chunk == nullptr)
+		return;
 
-
-void MidiInOut::getProgramName(char *name)
-//----------------------------------------
-{
-	vst_strncpy(name, programName, kVstMaxProgNameLen);
-}
-
-
-VstInt32 MidiInOut::getChunk(void **data, bool /*isPreset*/)
-//----------------------------------------------------------
-{
-	const VstInt32 programNameLen = static_cast<VstInt32>(strlen(programName));
-	VstInt32 byteSize = static_cast<VstInt32>(8 * sizeof(VstInt32)
-		+ programNameLen
-		+ inputDevice.name.size()
-		+ outputDevice.name.size());
-
-	delete[] chunk;
-	(*data) = chunk = new (std::nothrow) char[byteSize];
-	if(chunk)
+	m_pMixStruct->defaultProgram = -1;
+	if(m_pMixStruct->nPluginDataSize != size || m_pMixStruct->pPluginData == nullptr)
 	{
-		VstInt32 *header = reinterpret_cast<VstInt32 *>(chunk);
-		header[0] = cEffect.version;
-		header[1] = 1;	// Number of programs
-		header[2] = programNameLen;
-		header[3] = inputDevice.index;
-		header[4] = static_cast<VstInt32>(inputDevice.name.size());
-		header[5] = outputDevice.index;
-		header[6] = static_cast<VstInt32>(outputDevice.name.size());
-		header[7] = latencyCompensation;
-		strncpy(chunk + 8 * sizeof(VstInt32), programName, programNameLen);
-		strncpy(chunk + 8 * sizeof(VstInt32) + programNameLen, inputDevice.name.c_str(), header[4]);
-		strncpy(chunk + 8 * sizeof(VstInt32) + programNameLen + header[4], outputDevice.name.c_str(), header[6]);
-		return byteSize;
-	} else
+		delete[] m_pMixStruct->pPluginData;
+		m_pMixStruct->nPluginDataSize = size;
+		m_pMixStruct->pPluginData = new (std::nothrow) char[size];
+	}
+	if(m_pMixStruct->pPluginData != nullptr)
 	{
-		return 0;
+		memcpy(m_pMixStruct->pPluginData, chunk, size);
 	}
 }
 
 
-VstInt32 MidiInOut::setChunk(void *data, VstInt32 byteSize, bool /*isPreset*/)
-//----------------------------------------------------------------------------
+void MidiInOut::RestoreAllParameters(int32)
+//-----------------------------------------
 {
-	if(byteSize < 8 * sizeof(VstInt32))
-	{
-		return 0;
-	}
+	SetChunk(m_pMixStruct->nPluginDataSize, m_pMixStruct->pPluginData, false);
+}
 
-	const VstInt32 *header = reinterpret_cast<const VstInt32 *>(data);
 
-	VstInt32 version = header[0];
-	if(version > cEffect.version)
-	{
-		return 0;
-	}
+size_t MidiInOut::GetChunk(char *(&chunk), bool /*isBank*/)
+//---------------------------------------------------------
+{
+	const std::string programName8 = mpt::ToCharset(mpt::CharsetUTF8, programName);
+	const std::string inputName8 = mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetLocale, inputDevice.name);
+	const std::string outputName8 = mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetLocale, outputDevice.name);
 
-	VstInt32 nameStrSize = std::min(header[2], byteSize - VstInt32(8 * sizeof(VstInt32)));
-	VstInt32 inStrSize = std::min(header[4], byteSize - VstInt32(8 * sizeof(VstInt32) - nameStrSize));
-	VstInt32 outStrSize = std::min(header[6], byteSize - VstInt32(8 * sizeof(VstInt32) - nameStrSize - inStrSize));
+	std::ostringstream s;
+	mpt::IO::WriteIntLE< int32>(s, GetVersion());
+	mpt::IO::WriteIntLE<uint32>(s, 1);	// Number of programs
+	mpt::IO::WriteIntLE<uint32>(s, static_cast<uint32>(programName8.size()));
+	mpt::IO::WriteIntLE<uint32>(s, inputDevice.index);
+	mpt::IO::WriteIntLE<uint32>(s, static_cast<uint32>(inputDevice.name.size()));
+	mpt::IO::WriteIntLE<uint32>(s, outputDevice.index);
+	mpt::IO::WriteIntLE<uint32>(s, static_cast<uint32>(outputDevice.name.size()));
+	mpt::IO::WriteIntLE<uint32>(s, latencyCompensation);
+	mpt::IO::WriteRaw(s, programName8.c_str(), programName8.size());
+	mpt::IO::WriteRaw(s, inputName8.c_str(), inputName8.size());
+	mpt::IO::WriteRaw(s, outputName8.c_str(), outputName8.size());
+	chunkData = s.str();
+	chunk = const_cast<char *>(chunkData.c_str());
+	return chunkData.size();
+}
 
-	const char *nameStr = reinterpret_cast<const char *>(data) + 8 * sizeof(VstInt32);
-	const char *inStr = reinterpret_cast<const char *>(data) + 8 * sizeof(VstInt32) + nameStrSize;
-	const char *outStr = reinterpret_cast<const char *>(data) + 8 * sizeof(VstInt32) + nameStrSize + inStrSize;
 
-	PmDeviceID inID = header[3];
-	PmDeviceID outID = header[5];
-	latencyCompensation = header[7] != 0;
+void MidiInOut::SetChunk(size_t size, char *chunk, bool /*isBank*/)
+//-----------------------------------------------------------------
+{
+	FileReader file(chunk, size);
+	if(!file.CanRead(8 * sizeof(uint32)))
+		return;
 
-	vst_strncpy(programName, nameStr, std::min(nameStrSize, VstInt32(kVstMaxProgNameLen)));
+	if(file.ReadInt32LE() > GetVersion())
+		return;
 
-	if(strncmp(inStr, GetDeviceName(inID), inStrSize))
+	// Number of programs
+	if(file.ReadUint32LE() < 1)
+		return;
+
+	uint32 nameStrSize = file.ReadUint32LE();
+	PmDeviceID inID = file.ReadUint32LE();
+	uint32 inStrSize = file.ReadUint32LE();
+	PmDeviceID outID = file.ReadUint32LE();
+	uint32 outStrSize = file.ReadUint32LE();
+	latencyCompensation = file.ReadUint32LE() != 0;
+
+	std::string s;
+	file.ReadString<mpt::String::maybeNullTerminated>(s, nameStrSize);
+	programName = mpt::ToCString(mpt::CharsetUTF8, s);
+
+	file.ReadString<mpt::String::maybeNullTerminated>(s, inStrSize);
+	s = mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, s);
+	if(s != GetDeviceName(inID))
 	{
 		// Stored name differs from actual device name - try finding another device with the same name.
-		PmDeviceID i = 0;
 		const PmDeviceInfo *device;
-		while((device = Pm_GetDeviceInfo(i)) != nullptr)
+		for(PmDeviceID i = 0; (device = Pm_GetDeviceInfo(i)) != nullptr; i++)
 		{
-			if(device->input && !strncmp(inStr, device->name, inStrSize))
+			if(device->input && s == device->name)
 			{
 				inID = i;
 				break;
 			}
-			i++;
 		}
 	}
-	if(strncmp(outStr, GetDeviceName(outID), outStrSize))
+
+	file.ReadString<mpt::String::maybeNullTerminated>(s, outStrSize);
+	s = mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, s);
+	if(s != GetDeviceName(outID))
 	{
 		// Stored name differs from actual device name - try finding another device with the same name.
-		PmDeviceID i = 0;
 		const PmDeviceInfo *device;
-		while((device = Pm_GetDeviceInfo(i)) != nullptr)
+		for(PmDeviceID i = 0; (device = Pm_GetDeviceInfo(i)) != nullptr; i++)
 		{
-			if(device->output && !strncmp(outStr, device->name, outStrSize))
+			if(device->output && s == device->name)
 			{
 				outID = i;
 				break;
 			}
-			i++;
 		}
 	}
 
-	setParameter(MidiInOut::inputParameter, DeviceIDToParameter(inID));
-	setParameter(MidiInOut::outputParameter, DeviceIDToParameter(outID));
-
-	return 1;
+	SetParameter(MidiInOut::kInputParameter, DeviceIDToParameter(inID));
+	SetParameter(MidiInOut::kOutputParameter, DeviceIDToParameter(outID));
 }
 
 
-void MidiInOut::setParameter(VstInt32 index, float value)
-//-------------------------------------------------------
+void MidiInOut::SetParameter(PlugParamIndex index, PlugParamValue value)
+//----------------------------------------------------------------------
 {
 	PmDeviceID newDevice = ParameterToDeviceID(value);
-	OpenDevice(newDevice, (index == inputParameter));
+	OpenDevice(newDevice, (index == kInputParameter));
 
-	MidiInOutEditor *realEditor = dynamic_cast<MidiInOutEditor *>(editor);
-	if(realEditor != nullptr)
-	{
-		// Update selection in editor
-		realEditor->SetCurrentDevice((index == inputParameter), newDevice);
-	}
+	// Update selection in editor
+	MidiInOutEditor *editor = dynamic_cast<MidiInOutEditor *>(GetEditor());
+	if(editor != nullptr)
+		editor->SetCurrentDevice((index == kInputParameter), newDevice);
 }
 
 
-float MidiInOut::getParameter(VstInt32 index)
-//-------------------------------------------
+float MidiInOut::GetParameter(PlugParamIndex index)
+//-------------------------------------------------
 {
-	const MidiDevice &device = (index == inputParameter) ? inputDevice : outputDevice;
+	const MidiDevice &device = (index == kInputParameter) ? inputDevice : outputDevice;
 	return DeviceIDToParameter(device.index);
 }
 
 
-// Parameter name
-void MidiInOut::getParameterName(VstInt32 index, char *label)
-//-----------------------------------------------------------
+#ifdef MODPLUG_TRACKER
+
+CString MidiInOut::GetParamName(PlugParamIndex param)
+//---------------------------------------------------
 {
-	if(index == inputParameter)
-	{
-		vst_strncpy(label, "MIDI In", kVstMaxParamStrLen);
-	} else
-	{
-		vst_strncpy(label, "MIDI Out", kVstMaxParamStrLen);
-	}
+	if(param == kInputParameter)
+		return _T("MIDI In");
+	else
+		return _T("MIDI Out");
 }
 
 
 // Parameter value as text
-void MidiInOut::getParameterDisplay(VstInt32 index, char *text)
-//-------------------------------------------------------------
+CString MidiInOut::GetParamDisplay(PlugParamIndex param)
+//------------------------------------------------------
 {
-	const MidiDevice &device = (index == inputParameter) ? inputDevice : outputDevice;
-	vst_strncpy(text, device.name.c_str(), kVstMaxParamStrLen);
+	const MidiDevice &device = (param == kInputParameter) ? inputDevice : outputDevice;
+	return device.name.c_str();
 }
 
 
-// Unit label for parameters
-void MidiInOut::getParameterLabel(VstInt32 index, char *label)
-//------------------------------------------------------------
-{
-	vst_strncpy(label, "", kVstMaxParamStrLen);
-}
-
-
-// Plugin name
-bool MidiInOut::getEffectName(char *name)
-//---------------------------------------
-{
-	vst_strncpy(name, "MIDI Input / Output", kVstMaxEffectNameLen);
-	return true;
-}
-
-
-// Plugin name
-bool MidiInOut::getProductString(char *text)
-//------------------------------------------
-{
-	vst_strncpy(text, "MIDI Input / Output", kVstMaxProductStrLen);
-	return true;
-}
-
-
-// Plugin developer
-bool MidiInOut::getVendorString(char *text)
+CAbstractVstEditor *MidiInOut::OpenEditor()
 //-----------------------------------------
 {
-	vst_strncpy(text, "OpenMPT Project", kVstMaxVendorStrLen);
-	return true;
+	try
+	{
+		return new MidiInOutEditor(*this);
+	} catch(MPTMemoryException)
+	{
+		return nullptr;
+	}
 }
 
-
-// Plugin version
-VstInt32 MidiInOut::getVendorVersion()
-//------------------------------------
-{ 
-	return 1000;
-}
-
-
-// Check plugin capabilities
-VstInt32 MidiInOut::canDo(char *text)
-//-----------------------------------
-{
-	return (!strcmp(text, "sendVstEvents")
-		|| !strcmp(text, "sendVstMidiEvent")
-		|| !strcmp(text, "receiveVstEvents")
-		|| !strcmp(text, "receiveVstMidiEvent")) ? 1 : -1;
-}
+#endif // MODPLUG_TRACKER
 
 
 // Processing (we don't process any audio, only MIDI messages)
-void MidiInOut::processReplacing(float **inputs, float **outputs, VstInt32 sampleFrames)
-//--------------------------------------------------------------------------------------
+void MidiInOut::Process(float *, float *, uint32)
+//-----------------------------------------------
 {
 	// We don't do any audio processing here, but we process incoming MIDI events.
 	if(inputDevice.stream == nullptr)
-	{
 		return;
-	}
 
 	mpt::lock_guard<mpt::mutex> lock(mutex);
-
-	VstEvents events;
-	events.numEvents = 1;
-	events.reserved = 0;
 
 	while(Pm_Poll(inputDevice.stream))
 	{
@@ -328,94 +248,106 @@ void MidiInOut::processReplacing(float **inputs, float **outputs, VstInt32 sampl
 		PmEvent buffer;
 		Pm_Read(inputDevice.stream, &buffer, 1);
 
-		if(isBypassed)
-		{
-			// Discard events if bypassed
+		// Discard events if bypassed
+		if(IsBypassed())
 			continue;
-		}
 
-		VstMidiEvent midiEvent;
-		midiEvent.type = kVstMidiType;
-		midiEvent.byteSize = sizeof(VstMidiEvent);
-		midiEvent.deltaFrames = 0;
-		midiEvent.flags = 0;
-		midiEvent.noteLength = 0;
-		midiEvent.noteOffset = 0;
-		memcpy(midiEvent.midiData, &buffer.message, 4);
-
-		midiEvent.detune = 0;
-		midiEvent.noteOffVelocity = 0;
-		midiEvent.reserved1 = 0;
-		midiEvent.reserved2 = 0;
-
-		events.events[0] = reinterpret_cast<VstEvent *>(&midiEvent);
-
-		sendVstEventsToHost(&events);
+		ReceiveMidi(buffer.message);
 	}
 }
 
 
 // Resume playback
-void MidiInOut::resume()
+void MidiInOut::Resume()
 //----------------------
 {
 	// Resume MIDI I/O
-	isProcessing = true;
+	m_isResumed = true;
 	OpenDevice(inputDevice.index, true);
 	OpenDevice(outputDevice.index, false);
 }
 
 
 // Stop playback
-void MidiInOut::suspend()
+void MidiInOut::Suspend()
 //-----------------------
 {
 	// Suspend MIDI I/O
 	CloseDevice(inputDevice);
 	CloseDevice(outputDevice);
-	isProcessing = false;
+	m_isResumed = false;
 }
 
 
-// Process incoming events
-VstInt32 MidiInOut::processEvents(VstEvents *events)
-//--------------------------------------------------
+bool MidiInOut::MidiSend(uint32 midiCode)
+//---------------------------------------
 {
-	if(outputDevice.stream == nullptr || isBypassed)
+	if(outputDevice.stream == nullptr || IsBypassed())
 	{
 		// We need an output device to send MIDI messages to.
-		return 1;
+		return true;
 	}
 
 	const PtTimestamp now = (latencyCompensation ? Pt_Time() : 0);
 
-	for(VstInt32 i = 0; i < events->numEvents; i++)
+	// Create and send PortMidi event
+	PmEvent event;
+	memcpy(&event.message, &midiCode, 4);
+	event.timestamp = now;
+	Pm_Write(outputDevice.stream, &event, 1);
+	return true;
+}
+
+
+bool MidiInOut::MidiSysexSend(const char *message, uint32 /*length*/)
+//-------------------------------------------------------------------
+{
+	if(outputDevice.stream == nullptr || IsBypassed())
 	{
-		switch(events->events[i]->type)
+		// We need an output device to send MIDI messages to.
+		return true;
+	}
+
+	const PtTimestamp now = (latencyCompensation ? Pt_Time() : 0);
+	Pm_WriteSysEx(outputDevice.stream, now, const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(message)));
+	return true;
+}
+
+
+void MidiInOut::HardAllNotesOff()
+//-------------------------------
+{
+	const bool wasSuspended = !IsResumed();
+	if(wasSuspended)
+	{
+		Resume();
+	}
+
+	for(uint8 mc = 0; mc < CountOf(m_MidiCh); mc++)		//all midi chans
+	{
+		PlugInstrChannel &channel = m_MidiCh[mc];
+		channel.ResetProgram();
+
+		MidiPitchBend(mc, EncodePitchBendParam(MIDIEvents::pitchBendCentre));		// centre pitch bend
+		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllSoundOff, mc, 0));			// all sounds off
+
+		for(size_t i = 0; i < CountOf(channel.noteOnMap); i++)	//all notes
 		{
-		case kVstMidiType:
+			for(CHANNELINDEX c = 0; c < CountOf(channel.noteOnMap[i]); c++)
 			{
-				VstMidiEvent *midiEvent = reinterpret_cast<VstMidiEvent *>(events->events[i]);
-				
-				// Create and send PortMidi event
-				PmEvent event;
-				memcpy(&event.message, midiEvent->midiData, 4);
-				event.timestamp = now;
-				Pm_Write(outputDevice.stream, &event, 1);
+				while(channel.noteOnMap[i][c])
+				{
+					MidiSend(MIDIEvents::NoteOff(mc, static_cast<uint8>(i), 0));
+					channel.noteOnMap[i][c]--;
+				}
 			}
-			break;
-
-		case kVstSysExType:
-			{
-				VstMidiSysexEvent *midiEvent = reinterpret_cast<VstMidiSysexEvent *>(events->events[i]);
-
-				// Send a PortMidi sysex event
-				Pm_WriteSysEx(outputDevice.stream, now, reinterpret_cast<unsigned char*>(midiEvent->sysexDump));
-			}
-			break;
 		}
 	}
-	return 1;
+
+	if(wasSuspended)
+	{
+		Suspend();
+	}
 }
 
 
@@ -442,7 +374,7 @@ void MidiInOut::OpenDevice(PmDeviceID newDevice, bool asInputDevice)
 
 	device.index = newDevice;
 
-	if(device.index == noDevice)
+	if(device.index == kNoDevice)
 	{
 		// Dummy device
 		device = MidiDevice();
@@ -450,7 +382,7 @@ void MidiInOut::OpenDevice(PmDeviceID newDevice, bool asInputDevice)
 	}
 
 	PmError result = pmNoError;
-	if(isProcessing)
+	if(m_isResumed)
 	{
 		// Don't open MIDI devices if we're not processing.
 		// This has to be done since we receive MIDI events in processReplacing(),
@@ -464,7 +396,7 @@ void MidiInOut::OpenDevice(PmDeviceID newDevice, bool asInputDevice)
 			if(latencyCompensation)
 			{
 				// buffer of 10000 events
-				result = Pm_OpenOutput(&device.stream, newDevice, nullptr, 10000, PtTimeWrapper, nullptr, static_cast<PtTimestamp>(1000.0 * getOutputLatency() / getSampleRate()));
+				result = Pm_OpenOutput(&device.stream, newDevice, nullptr, 10000, PtTimeWrapper, nullptr, Util::Round<PtTimestamp>(1000.0 * GetOutputLatency()));
 			} else
 			{
 				result = Pm_OpenOutput(&device.stream, newDevice, nullptr, 0, nullptr, nullptr, 0);
@@ -475,12 +407,11 @@ void MidiInOut::OpenDevice(PmDeviceID newDevice, bool asInputDevice)
 	// Update current device name
 	device.name = GetDeviceName(device.index);
 
-	MidiInOutEditor *realEditor = dynamic_cast<MidiInOutEditor *>(editor);
-
-	if(result != pmNoError && realEditor != nullptr && realEditor->isOpen())
+	MidiInOutEditor *editor = dynamic_cast<MidiInOutEditor *>(GetEditor());
+	if(result != pmNoError && editor != nullptr)
 	{
 		// Display a warning if the editor is open.
-		MessageBox(realEditor->GetHwnd(), "MIDI device cannot be opened!", "MIDI Input / Output", MB_OK | MB_ICONERROR);
+		Reporting::Error("MIDI device cannot be opened!", "MIDI Input / Output", editor);
 	}
 }
 
@@ -505,12 +436,9 @@ const char *MidiInOut::GetDeviceName(PmDeviceID index) const
 	const PmDeviceInfo *deviceInfo = Pm_GetDeviceInfo(index);
 
 	if(deviceInfo != nullptr)
-	{
 		return deviceInfo->name;
-	} else
-	{
+	else
 		return "Unavailable";
-	}
 }
 
 

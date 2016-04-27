@@ -52,11 +52,11 @@ IMixPlugin::IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 #endif // MODPLUG_TRACKER
 	, m_fGain(1.0f)
 	, m_nSlot(0)
-	, m_bSongPlaying(false)
-	, m_bPlugResumed(false)
-	, m_bRecordAutomation(false)
-	, m_bPassKeypressesToPlug(false)
-	, m_bRecordMIDIOut(false)
+	, m_isSongPlaying(false)
+	, m_isResumed(false)
+	, m_recordAutomation(false)
+	, m_passKeypressesToPlug(false)
+	, m_recordMIDIOut(false)
 {
 	m_MixState.pMixBuffer = (mixsample_t *)((((intptr_t)m_MixBuffer) + 7) & ~7);
 
@@ -125,10 +125,10 @@ CString IMixPlugin::GetFormattedParamName(PlugParamIndex param)
 	CString name;
 	if(paramName.IsEmpty())
 	{
-		name.Format("%02u: Parameter %02u", param, param);
+		name.Format(_T("%02u: Parameter %02u"), param, param);
 	} else
 	{
-		name.Format("%02u: %s", param, paramName);
+		name.Format(_T("%02u: %s"), param, paramName);
 	}
 	return name;
 }
@@ -225,6 +225,16 @@ void IMixPlugin::Bypass(bool bypass)
 	if(m_SndFile.GetpModDoc())
 		m_SndFile.GetpModDoc()->UpdateAllViews(nullptr, PluginHint(m_nSlot).Info(), nullptr);
 #endif // MODPLUG_TRACKER
+}
+
+
+double IMixPlugin::GetOutputLatency() const
+//-----------------------------------------
+{
+	if(GetSoundFile().IsRenderingToDisc())
+		return 0;
+	else
+		return GetSoundFile().m_TimingInfo.OutputLatency;
 }
 
 
@@ -399,6 +409,48 @@ float IMixPlugin::RenderSilence(uint32 numFrames)
 	}
 
 	return maxVal;
+}
+
+
+void IMixPlugin::ReceiveMidi(uint32 midiCode)
+//-------------------------------------------
+{
+	ResetSilence();
+
+	// I think we should only route events to plugins that are explicitely specified as output plugins of the current plugin.
+	// This should probably use GetOutputPlugList here if we ever get to support multiple output plugins.
+	PLUGINDEX receiver;
+	if(m_pMixStruct != nullptr && (receiver = m_pMixStruct->GetOutputPlugin()) != PLUGINDEX_INVALID)
+	{
+		IMixPlugin *plugin = m_SndFile.m_MixPlugins[receiver].pMixPlugin;
+		// Add all events to the plugin's queue.
+		plugin->MidiSend(midiCode);
+	}
+
+#ifdef MODPLUG_TRACKER
+	if(m_recordMIDIOut)
+	{
+		// Spam MIDI data to all views
+		::PostMessage(CMainFrame::GetMainFrame()->GetMidiRecordWnd(), WM_MOD_MIDIMSG, midiCode, reinterpret_cast<LPARAM>(this));
+	}
+#endif // MODPLUG_TRACKER
+}
+
+
+void IMixPlugin::ReceiveSysex(const char *message, uint32 length)
+//---------------------------------------------------------------
+{
+	ResetSilence();
+
+	// I think we should only route events to plugins that are explicitely specified as output plugins of the current plugin.
+	// This should probably use GetOutputPlugList here if we ever get to support multiple output plugins.
+	PLUGINDEX receiver;
+	if(m_pMixStruct != nullptr && (receiver = m_pMixStruct->GetOutputPlugin()) != PLUGINDEX_INVALID)
+	{
+		IMixPlugin *plugin = m_SndFile.m_MixPlugins[receiver].pMixPlugin;
+		// Add all events to the plugin's queue.
+		plugin->MidiSysexSend(message, length);
+	}
 }
 
 
@@ -611,7 +663,7 @@ void IMixPlugin::AutomateParameter(PlugParamIndex param)
 
 	// TODO: Check if any params are actually automatable, and if there are but this one isn't, chicken out
 
-	if(m_bRecordAutomation)
+	if(m_recordAutomation)
 	{
 		// Record parameter change
 		modDoc->RecordParamChange(GetSlot(), param);
