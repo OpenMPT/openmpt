@@ -784,7 +784,12 @@ size_t Archive::ReadHeader50()
 
         uint CompInfo=(uint)Raw.GetV();
         hd->Method=(CompInfo>>7) & 7;
-        hd->UnpVer=CompInfo & 0x3f;
+
+        // "+ 50" to not mix with old RAR format algorithms. For example,
+        // we may need to use the compression algorithm 15 in the future,
+        // but it was already used in RAR 1.5 and Unpack needs to distinguish
+        // them.
+        hd->UnpVer=(CompInfo & 0x3f) + 50;
 
         hd->HostOS=(byte)Raw.GetV();
         size_t NameSize=(size_t)Raw.GetV();

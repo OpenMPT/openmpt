@@ -109,9 +109,9 @@ RARFORMAT Archive::IsSignature(const byte *D,size_t Size)
 #endif
       if (Size>=7 && D[1]==0x61 && D[2]==0x72 && D[3]==0x21 && D[4]==0x1a && D[5]==0x07)
       {
-        // We check for non-zero last signature byte, so we can return
-        // a sensible warning in case we'll want to change the archive
-        // format sometimes in the future.
+        // We check the last signature byte, so we can return a sensible
+        // warning in case we'll want to change the archive format
+        // sometimes in the future.
         if (D[6]==0)
           Type=RARFMT15;
         else

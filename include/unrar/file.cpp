@@ -619,9 +619,25 @@ bool File::Truncate()
 #ifdef _WIN_ALL
   return SetEndOfFile(hFile)==TRUE;
 #else
-  return false;
+  return ftruncate(GetFD(),(off_t)Tell())==0;
 #endif
   */	// OPENMPT ADDITION
+}
+
+
+void File::Flush()
+{
+  return; // OPENMPT ADDITION
+  /*	// OPENMPT ADDITION
+#ifdef _WIN_ALL
+  FlushFileBuffers(hFile);
+#else
+#ifndef FILE_USE_OPEN
+  fflush(hFile);
+#endif
+  fsync(GetFD());
+#endif
+  */	// OPENMPT EDDITION
 }
 
 
