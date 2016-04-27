@@ -1605,7 +1605,7 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 			}
 
 			vdelta = (vdelta * adepth) >> 6;
-			int l = abs(vdelta);
+			int l = mpt::abs(vdelta);
 			if(vdelta < 0)
 			{
 				vdelta = Util::muldiv(period, upTable[l >> 2], 0x10000) - period;
@@ -2458,7 +2458,7 @@ void CSoundFile::ProcessGlobalVolume(long lCount)
 			// Warning: This increases the volume ramp length by EXTREME amounts (factors of 100 are easily reachable)
 			// compared to the user-defined setting, so this really should not be used!
 			int32 maxStep = std::max(50, (10000 / (m_PlayState.m_nGlobalVolumeRampAmount + 1)));
-			while(abs(step) > maxStep)
+			while(mpt::abs(step) > maxStep)
 			{
 				m_PlayState.m_nSamplesToGlobalVolRampDest += m_PlayState.m_nGlobalVolumeRampAmount;
 				step = delta / static_cast<int32>(m_PlayState.m_nSamplesToGlobalVolRampDest);

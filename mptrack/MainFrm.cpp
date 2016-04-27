@@ -888,7 +888,7 @@ void VUMeter::Process(const int *mixbuffer, std::size_t numChannels, std::size_t
 		{
 			Channel &c = channels[channel];
 			const int sample = mixbuffer[frame*numChannels + channel];
-			c.peak = std::max(c.peak, std::abs(sample));
+			c.peak = std::max(c.peak, mpt::abs(sample));
 			if(sample < MIXING_CLIPMIN || MIXING_CLIPMAX < sample)
 			{
 				c.clipped = true;

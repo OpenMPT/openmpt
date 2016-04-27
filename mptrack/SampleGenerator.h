@@ -61,7 +61,7 @@ protected:
 	static mu::value_type PWMCallback(mu::value_type pos, mu::value_type duty, mu::value_type width) { if(width == 0) return 0; else return (fmod(pos, width) < ((duty / 100) * width)) ? 1 : -1; };
 	static mu::value_type RndCallback(mu::value_type v) { return v * std::rand() / (mu::value_type)(RAND_MAX + 1.0); };
 	static mu::value_type SampleDataCallback(mu::value_type v);
-	static mu::value_type TriangleCallback(mu::value_type pos, mu::value_type width) { if((int)width == 0) return 0; else return abs(((int)pos % (int)(width)) - width / 2) / (width / 4) - 1; };
+	static mu::value_type TriangleCallback(mu::value_type pos, mu::value_type width) { if((int)width == 0) return 0; else return mpt::abs(((int)pos % (int)(width)) - width / 2) / (width / 4) - 1; };
 
 	// binary operators
 	static mu::value_type ModuloCallback(mu::value_type x, mu::value_type y) { if(y == 0) return 0; else return fmod(x , y); };

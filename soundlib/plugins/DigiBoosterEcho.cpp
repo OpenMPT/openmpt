@@ -64,9 +64,9 @@ void DigiBoosterEcho::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		ar += lDelay * m_PCrossPBack;
 
 		// Prevent denormals
-		if(std::abs(al) < 1e-24f)
+		if(mpt::abs(al) < 1e-24f)
 			al = 0.0f;
-		if(std::abs(ar) < 1e-24f)
+		if(mpt::abs(ar) < 1e-24f)
 			ar = 0.0f;
 
 		m_delayLine[m_writePos * 2] = al;

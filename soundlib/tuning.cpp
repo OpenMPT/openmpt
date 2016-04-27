@@ -63,7 +63,7 @@ static RATIOTYPE Pow(const RATIOTYPE r, const STEPINDEXTYPE s)
 {
 	if(s == 0) return 1;
 	RATIOTYPE result = r;
-	STEPINDEXTYPE absS = std::abs(s);
+	STEPINDEXTYPE absS = mpt::abs(s);
 	for(STEPINDEXTYPE i = 1; i < absS; i++) result *= r;
 	return (s > 0) ? result : 1/result;
 }
@@ -229,7 +229,7 @@ CTuning::RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& baseNote, const STE
 	else
 	{
 		note = static_cast<NOTEINDEXTYPE>(baseNote + ((baseStepDiff+1) / (fsCount+1)) - 1);
-		fineStep = ((fsCount + 1) - (abs(baseStepDiff) % (fsCount+1))) % (fsCount+1);
+		fineStep = ((fsCount + 1) - (mpt::abs(baseStepDiff) % (fsCount+1))) % (fsCount+1);
 	}
 
 	if(note < m_StepMin) return s_DefaultFallbackRatio;
@@ -375,8 +375,7 @@ CTuningRTI::NOTEINDEXTYPE CTuningRTI::GetRefNote(const NOTEINDEXTYPE note) const
 	if(!IsOfType(TT_GROUPGEOMETRIC)) return 0;
 
 	if(note >= 0) return note % GetGroupSize();
-	// static_cast<int>(note) because g++-6 template-disables std::abs overloads for 8bit and 16bit integer types via std::enable_if.
-	else return (GetGroupSize() - (std::abs(static_cast<int>(note)) % GetGroupSize())) % GetGroupSize();
+	else return (GetGroupSize() - (mpt::abs(static_cast<int>(note)) % GetGroupSize())) % GetGroupSize();
 }
 
 

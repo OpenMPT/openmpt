@@ -806,7 +806,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		const int compRow = row + TrackerSettings::Instance().rowDisplayOffset;
 
 		if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY))
-			wsprintf(s, "%s%02X", compRow < 0 ? "-" : "", abs(compRow));
+			wsprintf(s, "%s%02X", compRow < 0 ? "-" : "", mpt::abs(compRow));
 		else
 			wsprintf(s, "%d", compRow);
 

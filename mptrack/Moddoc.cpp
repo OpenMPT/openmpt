@@ -3137,7 +3137,7 @@ CString CModDoc::PanningToString(int32 value, int32 valueAtCenter)
 		return _T("Center");
 
 	CString s;
-	s.Format(_T("%u%% %s"), (std::abs(static_cast<int>(value) - valueAtCenter) * 100) / valueAtCenter, value < valueAtCenter ? _T("Left") : _T("Right"));
+	s.Format(_T("%u%% %s"), (mpt::abs(static_cast<int>(value) - valueAtCenter) * 100) / valueAtCenter, value < valueAtCenter ? _T("Left") : _T("Right"));
 	return s;
 }
 
