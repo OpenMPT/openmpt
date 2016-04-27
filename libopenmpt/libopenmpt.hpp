@@ -117,19 +117,19 @@ LIBOPENMPT_CXX_API std::uint32_t get_core_version();
 namespace string {
 
 //! Return a verbose library version string from openmpt::string::get(). \deprecated Please use \code "library_version" \endcode directly.
-static const char library_version [] = "library_version";
+LIBOPENMPT_DEPRECATED static const char library_version [] = "library_version";
 //! Return a verbose library features string from openmpt::string::get(). \deprecated Please use \code "library_features" \endcode directly.
-static const char library_features[] = "library_features";
+LIBOPENMPT_DEPRECATED static const char library_features[] = "library_features";
 //! Return a verbose OpenMPT core version string from openmpt::string::get(). \deprecated Please use \code "core_version" \endcode directly.
-static const char core_version    [] = "core_version";
+LIBOPENMPT_DEPRECATED static const char core_version    [] = "core_version";
 //! Return information about the current build (e.g. the build date or compiler used) from openmpt::string::get(). \deprecated Please use \code "build" \endcode directly.
-static const char build           [] = "build";
+LIBOPENMPT_DEPRECATED static const char build           [] = "build";
 //! Return all contributors from openmpt::string::get(). \deprecated Please use \code "credits" \endcode directly.
-static const char credits         [] = "credits";
+LIBOPENMPT_DEPRECATED static const char credits         [] = "credits";
 //! Return contact infromation about libopenmpt from openmpt::string::get(). \deprecated Please use \code "contact" \endcode directly.
-static const char contact         [] = "contact";
+LIBOPENMPT_DEPRECATED static const char contact         [] = "contact";
 //! Return the libopenmpt license from openmpt::string::get(). \deprecated Please use \code "license" \endcode directly.
-static const char license         [] = "license";
+LIBOPENMPT_DEPRECATED static const char license         [] = "license";
 
 //! Get library related metadata.
 /*!

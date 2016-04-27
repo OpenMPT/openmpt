@@ -115,19 +115,19 @@ LIBOPENMPT_API uint32_t openmpt_get_library_version(void);
 LIBOPENMPT_API uint32_t openmpt_get_core_version(void);
 
 /*! Return a verbose library version string from openmpt_get_string(). \deprecated Please use \code "library_version" \endcode directly. */
-#define OPENMPT_STRING_LIBRARY_VERSION  "library_version"
+#define OPENMPT_STRING_LIBRARY_VERSION  LIBOPENMPT_DEPRECATED_STRING( "library_version" )
 /*! Return a verbose library features string from openmpt_get_string(). \deprecated Please use \code "library_features" \endcode directly. */
-#define OPENMPT_STRING_LIBRARY_FEATURES "library_features"
+#define OPENMPT_STRING_LIBRARY_FEATURES LIBOPENMPT_DEPRECATED_STRING( "library_features" )
 /*! Return a verbose OpenMPT core version string from openmpt_get_string(). \deprecated Please use \code "core_version" \endcode directly. */
-#define OPENMPT_STRING_CORE_VERSION     "core_version"
+#define OPENMPT_STRING_CORE_VERSION     LIBOPENMPT_DEPRECATED_STRING( "core_version" )
 /*! Return information about the current build (e.g. the build date or compiler used) from openmpt_get_string(). \deprecated Please use \code "build" \endcode directly. */
-#define OPENMPT_STRING_BUILD            "build"
+#define OPENMPT_STRING_BUILD            LIBOPENMPT_DEPRECATED_STRING( "build" )
 /*! Return all contributors from openmpt_get_string(). \deprecated Please use \code "credits" \endcode directly. */
-#define OPENMPT_STRING_CREDITS          "credits"
+#define OPENMPT_STRING_CREDITS          LIBOPENMPT_DEPRECATED_STRING( "credits" )
 /*! Return contact infromation about libopenmpt from openmpt_get_string(). \deprecated Please use \code "contact" \endcode directly. */
-#define OPENMPT_STRING_CONTACT          "contact"
+#define OPENMPT_STRING_CONTACT          LIBOPENMPT_DEPRECATED_STRING( "contact" )
 /*! Return the libopenmpt license from openmpt_get_string(). \deprecated Please use \code "license" \endcode directly. */
-#define OPENMPT_STRING_LICENSE          "license"
+#define OPENMPT_STRING_LICENSE          LIBOPENMPT_DEPRECATED_STRING( "license" )
 
 /*! \brief Free a string returned by libopenmpt
  *
