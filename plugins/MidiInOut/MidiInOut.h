@@ -56,9 +56,9 @@ protected:
 		kMaxDevices = 65536,		// Should be a power of 2 to avoid rounding errors.
 	};
 
-	// For getChunk
+	std::string chunkData;					// Storage for GetChunk
+	std::vector<uint32> bufferedMessage;	// For receiving SysEx messages
 	mpt::mutex mutex;
-	std::string chunkData;
 
 	// I/O device settings
 	MidiDevice inputDevice;
