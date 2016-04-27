@@ -11,11 +11,13 @@
 #pragma once
 
 #include "dlg_misc.h"	// for keyboard control
-#include "Moddoc.h"		// for SplitKeyboardSettings
 #include "EffectInfo.h"
 #include "PatternCursor.h"
 
 OPENMPT_NAMESPACE_BEGIN
+
+class CModDoc;
+struct SplitKeyboardSettings;
 
 //=========================================
 class CPatternPropertiesDlg: public CDialog
