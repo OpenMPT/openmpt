@@ -267,6 +267,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		m_playBehaviour.reset(kST3NoMutedChannels);
 		m_playBehaviour.reset(kST3EffectMemory);
 		m_playBehaviour.reset(kST3PortaSampleChange);
+		m_playBehaviour.reset(kST3VibratoMemory);
 	}
 
 	if((fileHeader.cwtv & S3MFileHeader::trackerMask) > S3MFileHeader::trkScreamTracker)

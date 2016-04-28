@@ -586,14 +586,14 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kFT2RetrigWithNoteDelay: desc = _T("Retrigger envelopes if there is a note delay with no note"); break;
 		case kFT2SetPanEnvPos: desc = _T("Lxx only sets the pan envelope position if the volume envelope's sustain flag is set"); break;
 		case kFT2PortaIgnoreInstr: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself"); break;
-		case kFT2VolColMemory: desc = _T("No volume column memory in FT2"); break;
+		case kFT2VolColMemory: desc = _T("No volume column memory"); break;
 		case kFT2LoopE60Restart: desc = _T("Next pattern starts on the same row as the last E60 command"); break;
 		case kFT2ProcessSilentChannels: desc = _T("Keep processing faded channels for later portamento pickup"); break;
 		case kFT2ReloadSampleSettings: desc = _T("Reload sample settings even if a note-off is placed next to an instrument number"); break;
 		case kFT2PortaDelay: desc = _T("Portamento with note delay next to it is ignored"); break;
 		case kFT2Transpose: desc = _T("Ignore out-of-range transposed notes"); break;
-		case kFT2PatternLoopWithJumps: desc = _T("Bxx or Dxx on the same row as E6x terminates the loop in FT2"); break;
-		case kFT2PortaTargetNoReset: desc = _T("Portamento target is not reset with new notes in FT2"); break;
+		case kFT2PatternLoopWithJumps: desc = _T("Bxx or Dxx on the same row as E6x terminates the loop"); break;
+		case kFT2PortaTargetNoReset: desc = _T("Portamento target is not reset with new notes"); break;
 		case kFT2EnvelopeEscape: desc = _T("Sustain point at end of envelope loop stops the loop after release"); break;
 		case kFT2Tremor: desc = _T("Txx behaves like in FT2"); break;
 		case kFT2OutOfRangeDelay: desc = _T("Do not trigger notes with out-of-range note delay"); break;
@@ -604,6 +604,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kST3NoMutedChannels: desc = _T("Do not process any effects on muted S3M channels"); break;
 		case kST3EffectMemory: desc = _T("Most effects share the same memory in"); break;
 		case kST3PortaSampleChange: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself."); break;
+		case kST3VibratoMemory: desc = _T("Do not remember vibrato type in effect memory"); break;
 		case kMODIgnorePanning: desc = _T("Ignore panning commands."); break;
 		case kMODSampleSwap: desc = _T("Enable on-the-fly sample swapping"); break;
 

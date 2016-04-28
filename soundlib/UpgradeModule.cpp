@@ -493,6 +493,8 @@ void CSoundFile::UpgradeModule()
 			m_playBehaviour.reset(kST3EffectMemory);
 		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 00, 00))
 			m_playBehaviour.reset(kST3PortaSampleChange);
+		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
+			m_playBehaviour.reset(kST3VibratoMemory);
 	}
 
 	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 00, 00))
