@@ -1882,29 +1882,23 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 	}
 	if(instr >= MAX_INSTRUMENTS) instr = 0;
 	const ModSample *pSample = pChn->pModSample;
-	pIns = pChn->pModInstrument;
-	if(instr && note)
+	// If no instrument is given, assume previous instrument to still be valid.
+	// Test case: DNA-NoInstr.it
+	pIns = instr > 0 ? Instruments[instr] : pChn->pModInstrument;
+	if(pIns != nullptr)
 	{
-		pIns = Instruments[instr];
-		if (pIns)
+		uint32 n = pIns->Keyboard[note - NOTE_MIN];
+		note = pIns->NoteMap[note - NOTE_MIN];
+		if ((n) && (n < MAX_SAMPLES))
 		{
-			uint32 n = 0;
-			if (note <= NOTE_MAX)
-			{
-				n = pIns->Keyboard[note - 1];
-				note = pIns->NoteMap[note - 1];
-				if ((n) && (n < MAX_SAMPLES))
-				{
-					pSample = &Samples[n];
-				} else if(m_playBehaviour[kITEmptyNoteMapSlot] && !pIns->HasValidMIDIChannel())
-				{
-					// Impulse Tracker ignores empty slots.
-					// We won't ignore them if a plugin is assigned to this slot, so that VSTis still work as intended.
-					// Test case: emptyslot.it, PortaInsNum.it, gxsmp.it, gxsmp2.it
-					return CHANNELINDEX_INVALID;
-				}
-			}
-		} else pSample = nullptr;
+			pSample = &Samples[n];
+		} else if(m_playBehaviour[kITEmptyNoteMapSlot] && !pIns->HasValidMIDIChannel())
+		{
+			// Impulse Tracker ignores empty slots.
+			// We won't ignore them if a plugin is assigned to this slot, so that VSTis still work as intended.
+			// Test case: emptyslot.it, PortaInsNum.it, gxsmp.it, gxsmp2.it
+			return CHANNELINDEX_INVALID;
+		}
 	}
 	ModChannel *p = pChn;
 	//if (!pIns) return;
