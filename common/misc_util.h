@@ -148,7 +148,11 @@ inline long abs(long x)
 inline long long abs(long long x)
 //-------------------------------
 {
-	return std::abs(x);
+	#if MPT_MSVC_BEFORE(2010,0)
+		return (x >= 0) ? x : -x;
+	#else
+		return std::abs(x);
+	#endif
 }
 inline float abs(float x)
 //-----------------------
