@@ -555,6 +555,8 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		#ifdef MDL_LOG
 			Log("sample infoblock: %d bytes\n", blocklen);
 		#endif
+			if(nsamples)
+				break;
 			nsamples = std::min<uint32>(lpStream[dwMemPos], blocklen / ((pmsh.version > 0) ? sizeof(MDLSampleHeader) : sizeof(MDLSampleHeaderv0)));
 			dwPos = dwMemPos + 1;
 			for (uint32 i = 0; i < nsamples; i++, dwPos += (pmsh.version > 0) ? sizeof(MDLSampleHeader) : sizeof(MDLSampleHeaderv0))
