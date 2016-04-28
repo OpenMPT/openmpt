@@ -250,8 +250,8 @@ void MidiInOut::Process(float *, float *, uint32)
 		if(IsBypassed())
 			continue;
 
-		char message[4];
-		memcpy(message, &buffer.message, 4);
+		mpt::byte message[sizeof(buffer.message)];
+		memcpy(message, &buffer.message, sizeof(message));
 
 		if(!bufferedMessage.empty())
 		{
@@ -259,7 +259,7 @@ void MidiInOut::Process(float *, float *, uint32)
 			if(buffer.message & 0x80808080)
 			{
 				// End of message found!
-				ReceiveSysex(reinterpret_cast<const char *>(&bufferedMessage[0]), bufferedMessage.size() * sizeof(bufferedMessage[0]));
+				ReceiveSysex(&bufferedMessage[0], bufferedMessage.size() * sizeof(bufferedMessage[0]));
 				bufferedMessage.clear();
 			}
 			continue;
@@ -269,7 +269,7 @@ void MidiInOut::Process(float *, float *, uint32)
 			if(message[1] != 0xF7 && message[2] != 0xF7 && message[3] != 0xF7)
 				bufferedMessage.push_back(buffer.message);	// ...but not the end!
 			else
-				ReceiveSysex(message, 4);
+				ReceiveSysex(message, sizeof(message));
 			continue;
 		}
 
@@ -320,7 +320,7 @@ bool MidiInOut::MidiSend(uint32 midiCode)
 }
 
 
-bool MidiInOut::MidiSysexSend(const char *message, uint32 /*length*/)
+bool MidiInOut::MidiSysexSend(const void *message, uint32 /*length*/)
 //-------------------------------------------------------------------
 {
 	if(outputDevice.stream == nullptr || IsBypassed())
@@ -330,7 +330,7 @@ bool MidiInOut::MidiSysexSend(const char *message, uint32 /*length*/)
 	}
 
 	const PtTimestamp now = (latencyCompensation ? Pt_Time() : 0);
-	Pm_WriteSysEx(outputDevice.stream, now, const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(message)));
+	Pm_WriteSysEx(outputDevice.stream, now, const_cast<unsigned char *>(static_cast<const unsigned char *>(message)));
 	return true;
 }
 

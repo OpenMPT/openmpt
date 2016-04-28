@@ -366,13 +366,7 @@ VstIntPtr VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstInt32 opcod
 	case audioMasterGetOutputLatency:
 		if(pVstPlugin)
 		{
-			if(pVstPlugin->GetSoundFile().IsRenderingToDisc())
-			{
-				return 0;
-			} else
-			{
-				return Util::Round<VstIntPtr>(pVstPlugin->GetSoundFile().m_TimingInfo.OutputLatency * pVstPlugin->m_nSampleRate);
-			}
+			return Util::Round<VstIntPtr>(pVstPlugin->GetOutputLatency() * pVstPlugin->GetSoundFile().GetSampleRate());
 		}
 		break;
 
@@ -1455,7 +1449,7 @@ bool CVstPlugin::MidiSend(uint32 dwMidiCode)
 }
 
 
-bool CVstPlugin::MidiSysexSend(const char *message, uint32 length)
+bool CVstPlugin::MidiSysexSend(const void *message, uint32 length)
 //----------------------------------------------------------------
 {
 	VstMidiSysexEvent event;
@@ -1465,7 +1459,7 @@ bool CVstPlugin::MidiSysexSend(const char *message, uint32 length)
 	event.flags = 0;
 	event.dumpBytes = length;
 	event.resvd1 = 0;
-	event.sysexDump = const_cast<char *>(message);	// We will make our own copy in VstEventQueue::Enqueue
+	event.sysexDump = const_cast<char *>(static_cast<const char *>(message));	// We will make our own copy in VstEventQueue::Enqueue
 	event.resvd2 = 0;
 
 	ResetSilence();

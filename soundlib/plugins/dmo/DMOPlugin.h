@@ -62,7 +62,7 @@ public:
 	virtual void Process(float *pOutL, float *pOutR, uint32 numFrames);
 
 	virtual bool MidiSend(uint32) { return true; }
-	virtual bool MidiSysexSend(const char *, uint32) { return true; }
+	virtual bool MidiSysexSend(const void *, uint32) { return true; }
 	virtual void MidiCC(uint8, MIDIEvents::MidiCC, uint8, CHANNELINDEX) { }
 	virtual void MidiPitchBend(uint8, int32, int8) { }
 	virtual void MidiVibrato(uint8, int32, int8) { }

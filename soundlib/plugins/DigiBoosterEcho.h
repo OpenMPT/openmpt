@@ -77,7 +77,7 @@ public:
 
 	virtual float RenderSilence(uint32) { return 0.0f; }
 	virtual bool MidiSend(uint32) { return true; }
-	virtual bool MidiSysexSend(const char *, uint32) { return true; }
+	virtual bool MidiSysexSend(const void *, uint32) { return true; }
 	virtual void MidiCC(uint8, MIDIEvents::MidiCC, uint8, CHANNELINDEX) { }
 	virtual void MidiPitchBend(uint8, int32, int8) { }
 	virtual void MidiVibrato(uint8, int32, int8) { }
