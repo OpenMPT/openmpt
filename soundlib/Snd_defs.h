@@ -442,6 +442,7 @@ enum PlayBehaviour
 	kST3NoMutedChannels,			// Don't process any effects on muted S3M channels
 	kST3EffectMemory,				// Most effects share the same memory in ST3
 	kST3PortaSampleChange,			// Portamento plus instrument number applies the volume settings of the new sample, but not the new sample itself.
+	kST3VibratoMemory,				// Do not remember vibrato type in effect memory
 
 	kMODIgnorePanning,				// Do not process any panning commands
 	kMODSampleSwap,					// On-the-fly sample swapping

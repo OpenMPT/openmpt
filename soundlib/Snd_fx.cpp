@@ -3823,6 +3823,12 @@ void CSoundFile::FineVibrato(ModChannel *p, uint32 param) const
 	if (param & 0x0F) p->nVibratoDepth = param & 0x0F;
 	if (param & 0xF0) p->nVibratoSpeed = (param >> 4) & 0x0F;
 	p->dwFlags.set(CHN_VIBRATO);
+	// ST3 compatibility: Do not distinguish between vibrato types in effect memory
+	// Test case: VibratoTypeChange.s3m
+	if(m_playBehaviour[kST3VibratoMemory] && (param & 0x0F))
+	{
+		p->nVibratoDepth *= 4u;
+	}
 }
 
 
@@ -3992,14 +3998,14 @@ void CSoundFile::PanningSlide(ModChannel *pChn, ModCommand::PARAM param, bool me
 		{
 			if(m_SongFlags[SONG_FIRSTTICK])
 			{
-				param = (param & 0xF0) >> 2;
+				param = (param & 0xF0) / 4u;
 				nPanSlide = - (int)param;
 			}
 		} else if (((param & 0xF0) == 0xF0) && (param & 0x0F))
 		{
 			if(m_SongFlags[SONG_FIRSTTICK])
 			{
-				nPanSlide = (param & 0x0F) << 2;
+				nPanSlide = (param & 0x0F) * 4u;
 			}
 		} else if(!m_SongFlags[SONG_FIRSTTICK])
 		{
@@ -4007,10 +4013,10 @@ void CSoundFile::PanningSlide(ModChannel *pChn, ModCommand::PARAM param, bool me
 			{
 				// IT compatibility: Ignore slide commands with both nibbles set.
 				if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (param & 0xF0) == 0)
-					nPanSlide = (int)((param & 0x0F) << 2);
+					nPanSlide = (int)((param & 0x0F) * 4u);
 			} else
 			{
-				nPanSlide = -(int)((param & 0xF0) >> 2);
+				nPanSlide = -(int)((param & 0xF0) / 4u);
 			}
 		}
 	} else
@@ -4019,14 +4025,14 @@ void CSoundFile::PanningSlide(ModChannel *pChn, ModCommand::PARAM param, bool me
 		{
 			if (param & 0xF0)
 			{
-				nPanSlide = (int)((param & 0xF0) >> 2);
+				nPanSlide = (int)((param & 0xF0) / 4u);
 			} else
 			{
-				nPanSlide = -(int)((param & 0x0F) << 2);
+				nPanSlide = -(int)((param & 0x0F) * 4u);
 			}
 			// FT2 compatibility: FT2's panning slide is like IT's fine panning slide (not as deep)
 			if(m_playBehaviour[kFT2PanSlide])
-				nPanSlide >>= 2;
+				nPanSlide /= 4;
 		}
 	}
 	if (nPanSlide)
@@ -4810,7 +4816,7 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 				{
 					if(macro[0] == 0xF0)
 					{
-						pPlugin->MidiSysexSend(reinterpret_cast<const char *>(macro), macroLen);
+						pPlugin->MidiSysexSend(macro, macroLen);
 					} else
 					{
 						for(uint32 pos = 0; pos < macroLen;)

@@ -990,6 +990,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kST3NoMutedChannels);
 		playBehaviour.set(kST3PortaSampleChange);
 		playBehaviour.set(kST3EffectMemory);
+		playBehaviour.set(kST3VibratoMemory);
 		break;
 
 	case MOD_TYPE_MOD:
@@ -1020,6 +1021,7 @@ PlayBehaviourSet CSoundFile::GetDefaultPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kHertzInLinearMode);
 		playBehaviour.set(kPerChannelGlobalVolSlide);
 		playBehaviour.set(kPanOverride);
+		playBehaviour.set(kITMultiSampleBehaviour);
 		break;
 
 	case MOD_TYPE_XM:
