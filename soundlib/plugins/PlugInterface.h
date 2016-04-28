@@ -139,16 +139,13 @@ public:
 	// Render silence and return the highest resulting output level
 	virtual float RenderSilence(uint32 numSamples);
 	virtual bool MidiSend(uint32 midiCode) = 0;
-	virtual bool MidiSysexSend(const char *message, uint32 length) = 0;
+	virtual bool MidiSysexSend(const void *message, uint32 length) = 0;
 	virtual void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) = 0;
 	virtual void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd) = 0;
 	virtual void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd) = 0;
 	virtual void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel) = 0;
 	virtual void HardAllNotesOff() = 0;
 	virtual bool IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn) = 0;
-	// Plugin wants to send MIDI to OpenMPT
-	virtual void ReceiveMidi(uint32 midiCode);
-	virtual void ReceiveSysex(const char *message, uint32 length);
 	// Modify parameter by given amount. Only needs to be re-implemented if plugin architecture allows this to be performed atomically.
 	virtual void ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff);
 	virtual void NotifySongPlaying(bool playing) { m_isSongPlaying = playing; }
@@ -264,6 +261,10 @@ public:
 	virtual bool IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn);
 
 protected:
+	// Plugin wants to send MIDI to OpenMPT
+	virtual void ReceiveMidi(uint32 midiCode);
+	virtual void ReceiveSysex(const void *message, uint32 length);
+
 	// Converts a 14-bit MIDI pitch bend position to our internal pitch bend position representation
 	static int32 EncodePitchBendParam(int32 position) { return (position << vstPitchBendShift); }
 	// Converts the internal pitch bend position to a 14-bit MIDI pitch bend position

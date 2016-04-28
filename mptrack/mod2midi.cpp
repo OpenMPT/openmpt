@@ -251,7 +251,7 @@ namespace MidiExport
 			return true;
 		}
 
-		virtual bool MidiSysexSend(const char *message, uint32 length)
+		virtual bool MidiSysexSend(const void *message, uint32 length)
 		{
 			UpdateGlobals();
 			UpdateTicksSinceLastEvent();
@@ -261,7 +261,7 @@ namespace MidiExport
 				WriteTicks();
 				mpt::IO::WriteIntBE<uint8>(f, 0xF0);
 				mpt::IO::WriteVarInt(f, static_cast<uint32>(length - 1));
-				mpt::IO::WriteRaw(f, message + 1, length - 1);
+				mpt::IO::WriteRaw(f, static_cast<const mpt::byte *>(message) + 1, length - 1);
 			}
 			return true;
 		}

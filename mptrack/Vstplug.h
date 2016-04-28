@@ -117,7 +117,7 @@ public:
 	virtual void RestoreAllParameters(int32 program);
 	virtual void Process(float *pOutL, float *pOutR, uint32 numFrames);
 	virtual bool MidiSend(uint32 dwMidiCode);
-	virtual bool MidiSysexSend(const char *message, uint32 length);
+	virtual bool MidiSysexSend(const void *message, uint32 length);
 	virtual void HardAllNotesOff();
 	virtual void NotifySongPlaying(bool playing);
 
