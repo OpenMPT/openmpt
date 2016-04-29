@@ -92,7 +92,7 @@ CDocument *CModDocTemplate::OpenDocumentFile(const mpt::PathString &filename, BO
 	if(!mpt::PathString::CompareNoCase(filename.GetFileExt(), MPT_PATHSTRING(".dll")))
 	{
 		CVstPluginManager *pPluginManager = theApp.GetPluginManager();
-		if(pPluginManager && pPluginManager->AddPlugin(filename, mpt::ustring()) != nullptr)
+		if(pPluginManager && pPluginManager->AddPlugin(filename) != nullptr)
 		{
 			return nullptr;
 		}
@@ -1973,6 +1973,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 			}
 		}
 	}
+	GetPluginCache().Flush();
 	if(!nonFoundPlugs.empty())
 	{
 		Reporting::Notification(L"Problems were encountered with plugins:\n" + nonFoundPlugs, L"OpenMPT", CWnd::GetDesktopWindow());
@@ -1992,7 +1993,7 @@ BOOL CTrackApp::UninitializeDXPlugins()
 	for(CVstPluginManager::const_iterator pPlug = m_pPluginManager->begin(); pPlug != m_pPluginManager->end(); pPlug++)
 	{
 		char tmp[32];
-		if((**pPlug).pluginId1 != kDmoMagic && !(**pPlug).dllPath.empty())
+		if(!(**pPlug).isBuiltIn)
 		{
 			sprintf(tmp, "Plugin%u", plug);
 			mpt::PathString plugPath = (**pPlug).dllPath;

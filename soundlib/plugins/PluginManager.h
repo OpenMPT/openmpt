@@ -55,24 +55,36 @@ public:
 	CreateProc Create;				// Factory to call for this plugin
 	mpt::PathString libraryName;	// Display name
 	mpt::PathString dllPath;		// Full path name
+#ifdef MODPLUG_TRACKER
 	mpt::ustring tags;				// User tags
+	CString vendor;
+#endif // MODPLUG_TRACKER
 	int32 pluginId1;				// Plugin type (kEffectMagic, kDmoMagic, ...)
 	int32 pluginId2;				// Plugin unique ID
 	PluginCategory category;
+	const bool isBuiltIn : 1;
 	bool isInstrument : 1;
 	bool useBridge : 1, shareBridgeInstance : 1;
 protected:
 	mutable uint8 dllBits;
 
 public:
-	VSTPluginLib(CreateProc factoryProc, const mpt::PathString &dllPath, const mpt::PathString &libraryName, const mpt::ustring &tags)
+	VSTPluginLib(CreateProc factoryProc, bool isBuiltIn, const mpt::PathString &dllPath, const mpt::PathString &libraryName
+#ifdef MODPLUG_TRACKER
+		, const mpt::ustring &tags = mpt::ustring(), const CString &vendor = CString()
+#endif // MODPLUG_TRACKER
+		)
 		: pPluginsList(nullptr)
 		, Create(factoryProc)
 		, libraryName(libraryName), dllPath(dllPath)
+#ifdef MODPLUG_TRACKER
 		, tags(tags)
+		, vendor(vendor)
+#endif // MODPLUG_TRACKER
 		, pluginId1(0), pluginId2(0)
 		, category(catUnknown)
-		, isInstrument(false), useBridge(false), shareBridgeInstance(true)
+		, isBuiltIn(isBuiltIn), isInstrument(false)
+		, useBridge(false), shareBridgeInstance(true)
 		, dllBits(0)
 	{
 	}
@@ -140,7 +152,7 @@ public:
 	void reserve(size_t num) { pluginList.reserve(num); }
 
 	bool IsValidPlugin(const VSTPluginLib *pLib) const;
-	VSTPluginLib *AddPlugin(const mpt::PathString &dllPath, const mpt::ustring &tags, bool fromCache = true, const bool checkFileExistence = false, std::wstring* const errStr = nullptr);
+	VSTPluginLib *AddPlugin(const mpt::PathString &dllPath, const mpt::ustring &tags = mpt::ustring(), bool fromCache = true, const bool checkFileExistence = false, std::wstring* const errStr = nullptr);
 	bool RemovePlugin(VSTPluginLib *);
 	bool CreateMixPlugin(SNDMIXPLUGIN &, CSoundFile &);
 	void OnIdle();
@@ -152,8 +164,6 @@ protected:
 
 #else // NO_PLUGINS
 public:
-	VSTPluginLib *AddPlugin(const mpt::PathString &, const mpt::ustring &, bool = true, const bool = false, std::wstring* const = nullptr) { return 0; }
-
 	const VSTPluginLib **begin() const { return nullptr; }
 	const VSTPluginLib **end() const { return nullptr; }
 	void reserve(size_t) { }
