@@ -1862,6 +1862,8 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		if(wsdlg.m_Settings.outputToSample)
 		{
 			thisName = mpt::CreateTempFileName(MPT_PATHSTRING("OpenMPT"));
+			// Ensure this temporary file is marked as temporary in the file system, to increase the chance it will never be written to disk
+			::CloseHandle(::CreateFileW(thisName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL));
 		}
 
 		// Render song (or current channel, or current sample/instrument)
