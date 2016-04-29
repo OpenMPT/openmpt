@@ -358,7 +358,7 @@ namespace MidiExport
 	public:
 		Conversion(CSoundFile &sndFile, const InstrMap &instrMap, mpt::ofstream &file)
 			: m_oldInstruments(sndFile.GetNumInstruments())
-			, m_plugFactory(nullptr, mpt::PathString(), mpt::PathString(), mpt::ustring())
+			, m_plugFactory(nullptr, true, mpt::PathString(), mpt::PathString(), mpt::ustring())
 			, m_sndFile(sndFile)
 			, m_file(file)
 			, m_wasInstrumentMode(sndFile.GetNumInstruments() > 0)

@@ -206,7 +206,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, gnPlugWindowX(conf, "Display", "PlugSelectWindowX", 243)
 	, gnPlugWindowY(conf, "Display", "PlugSelectWindowY", 273)
 	, gnPlugWindowWidth(conf, "Display", "PlugSelectWindowWidth", 450)
-	, gnPlugWindowHeight(conf, "Display", "PlugSelectWindowHeight", 500)
+	, gnPlugWindowHeight(conf, "Display", "PlugSelectWindowHeight", 540)
 	, gnPlugWindowLast(conf, "Display", "PlugSelectWindowLast", 0)
 	, gnMsgBoxVisiblityFlags(conf, "Display", "MsgBoxVisibilityFlags", uint32_max)
 	, GUIUpdateInterval(conf, "Display", "GUIUpdateInterval", 0)
@@ -641,6 +641,12 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,25) && oldUndoSize != SampleUndoBufferSize::defaultSize && oldUndoSize != 0)
 	{
 		m_SampleUndoBufferSize = SampleUndoBufferSize(static_cast<int32>(100 * (oldUndoSize << 20) / SampleUndoBufferSize(100).GetSizeInBytes()));
+	}
+
+	// More controls in the plugin selection dialog
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,26,00,26))
+	{
+		gnPlugWindowHeight += 40;
 	}
 
 	// Last fixup: update config version

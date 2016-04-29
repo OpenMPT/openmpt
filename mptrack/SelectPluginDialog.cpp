@@ -369,6 +369,15 @@ void CSelectPluginDlg::UpdatePluginsList(int32 forceSelect /* = 0*/)
 						}
 					}
 				}
+				// Search in plugin vendors
+				if(!matches)
+				{
+					mpt::ustring vendor = mpt::ToLowerCase(mpt::ToUnicode(plug.vendor));
+					if(vendor.find(m_nameFilter, 0) != vendor.npos)
+					{
+						matches = true;
+					}
+				}
 				if(!matches) continue;
 			}
 
@@ -484,17 +493,24 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 {
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	VSTPluginLib *pPlug = GetSelectedPlugin();
-	int showBoxes = SW_HIDE;
+	bool  showBoxes = false;
 	BOOL enableTagsTextBox = FALSE;
 	BOOL enableRemoveButton = FALSE;
 	if (pManager != nullptr && pManager->IsValidPlugin(pPlug))
 	{
-		::SetDlgItemTextW(m_hWnd, IDC_TEXT_CURRENT_VSTPLUG, pPlug->dllPath.ToWide().c_str());
+		if(pPlug->vendor.IsEmpty())
+			SetDlgItemText(IDC_VENDOR, _T(""));
+		else
+			SetDlgItemText(IDC_VENDOR, _T("Vendor: ") + pPlug->vendor);
+		if(pPlug->dllPath.empty())
+			SetDlgItemText(IDC_TEXT_CURRENT_VSTPLUG, _T("Built-in plugin"));
+		else
+			::SetDlgItemTextW(m_hWnd, IDC_TEXT_CURRENT_VSTPLUG, pPlug->dllPath.ToWide().c_str());
 		::SetDlgItemTextW(m_hWnd, IDC_PLUGINTAGS, mpt::ToWide(pPlug->tags).c_str());
+		enableRemoveButton = pPlug->isBuiltIn ? FALSE : TRUE;
 #ifndef NO_VST
-		if(pPlug->pluginId1 == kEffectMagic)
+		if(pPlug->pluginId1 == kEffectMagic && !pPlug->isBuiltIn)
 		{
-			enableRemoveButton = TRUE;
 			bool isBridgeAvailable =
 					((pPlug->GetDllBits() == 32) && IsComponentAvailable(pluginBridge32))
 				||
@@ -515,19 +531,25 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 			m_chkShare.SetCheck(pPlug->shareBridgeInstance ? BST_CHECKED : BST_UNCHECKED);
 			m_chkShare.EnableWindow(m_chkBridge.GetCheck() != BST_UNCHECKED);
 
-			showBoxes = SW_SHOW;
+			showBoxes = true;
 		}
 		enableTagsTextBox = TRUE;
 #endif
 	} else
 	{
+		SetDlgItemText(IDC_VENDOR, _T(""));
 		SetDlgItemText(IDC_TEXT_CURRENT_VSTPLUG, _T(""));
 		SetDlgItemText(IDC_PLUGINTAGS, "");
 	}
-	m_chkBridge.ShowWindow(showBoxes);
-	m_chkShare.ShowWindow(showBoxes);
 	GetDlgItem(IDC_PLUGINTAGS)->EnableWindow(enableTagsTextBox);
 	GetDlgItem(IDC_BUTTON2)->EnableWindow(enableRemoveButton);
+	if(!showBoxes)
+	{
+		m_chkBridge.EnableWindow(FALSE);
+		m_chkShare.EnableWindow(FALSE);
+		m_chkBridge.SetCheck(BST_UNCHECKED);
+		m_chkShare.SetCheck(BST_UNCHECKED);
+	}
 	if (result) *result = 0;
 }
 
@@ -803,25 +825,30 @@ void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 
 	if (m_treePlugins)
 	{
-		m_treePlugins.MoveWindow(MulDiv(8, dpiX, 96), MulDiv(36, dpiY, 96), cx - MulDiv(109, dpiX, 96), cy - MulDiv(118, dpiY, 96), FALSE);
+		const int leftOff = MulDiv(8, dpiX, 96), leftOffFrame = MulDiv(18, dpiX, 96);
+		m_treePlugins.MoveWindow(leftOff, MulDiv(36, dpiY, 96), cx - MulDiv(109, dpiX, 96), cy - MulDiv(158, dpiY, 96), FALSE);
 
-		GetDlgItem(IDC_STATIC_VSTNAMEFILTER)->MoveWindow(MulDiv(8, dpiX, 96), MulDiv(11, dpiY, 96), MulDiv(40, dpiX, 96), MulDiv(21, dpiY, 96), FALSE);
+		GetDlgItem(IDC_STATIC_VSTNAMEFILTER)->MoveWindow(leftOff, MulDiv(11, dpiY, 96), MulDiv(40, dpiX, 96), MulDiv(21, dpiY, 96), FALSE);
 		GetDlgItem(IDC_NAMEFILTER)->MoveWindow(MulDiv(40, dpiX, 96), MulDiv(8, dpiY, 96), cx - MulDiv(141, dpiX, 96), MulDiv(21, dpiY, 96), FALSE);
 
-		GetDlgItem(IDC_STATIC_PLUGINTAGS)->MoveWindow(MulDiv(8, dpiX, 96), cy - MulDiv(71, dpiY, 96), MulDiv(40, dpiX, 96), MulDiv(21, dpiY, 96), FALSE);
-		GetDlgItem(IDC_PLUGINTAGS)->MoveWindow(MulDiv(40, dpiX, 96), cy - MulDiv(74, dpiY, 96), cx - MulDiv(141, dpiX, 96), MulDiv(21, dpiY, 96), FALSE);
+		GetDlgItem(IDC_PLUGFRAME)->MoveWindow(leftOff, cy - MulDiv(5 * 20 + 15, dpiY, 96), cx - MulDiv(22, dpiX, 96), MulDiv(5 * 20 + 10, dpiY, 96), FALSE);
 
-		GetDlgItem(IDC_TEXT_CURRENT_VSTPLUG)->MoveWindow(MulDiv(8, dpiX, 96), cy - MulDiv(45, dpiY, 96), cx - MulDiv(22, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
-		m_chkBridge.MoveWindow(MulDiv(8, dpiX, 96), cy - MulDiv(25, dpiY, 96), MulDiv(110, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
-		m_chkShare.MoveWindow(MulDiv(120, dpiX, 96), cy - MulDiv(25, dpiY, 96), cx - MulDiv(128, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
+		GetDlgItem(IDC_STATIC_PLUGINTAGS)->MoveWindow(leftOffFrame, cy - MulDiv(94, dpiY, 96), MulDiv(40, dpiX, 96), MulDiv(21, dpiY, 96), FALSE);
+		GetDlgItem(IDC_PLUGINTAGS)->MoveWindow(leftOffFrame + MulDiv(32, dpiX, 96), cy - MulDiv(97, dpiY, 96), cx - MulDiv(76, dpiX, 96), MulDiv(21, dpiY, 96), FALSE);
+
+		m_chkBridge.MoveWindow(leftOffFrame, cy - MulDiv(72, dpiY, 96), MulDiv(110, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
+		m_chkShare.MoveWindow(leftOffFrame + MulDiv(112, dpiX, 96), cy - MulDiv(72, dpiY, 96), cx - MulDiv(143, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
+
+		GetDlgItem(IDC_TEXT_CURRENT_VSTPLUG)->MoveWindow(leftOffFrame, cy - MulDiv(48, dpiY, 96), cx - MulDiv(37, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
+		GetDlgItem(IDC_VENDOR)->MoveWindow(leftOffFrame, cy - MulDiv(28, dpiY, 96), cx - MulDiv(37, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
 
 		const int rightOff = cx - MulDiv(90, dpiX, 96);	// Offset of right button column
 		const int buttonWidth = MulDiv(80, dpiX, 96), buttonHeight = MulDiv(23, dpiY, 96);
 		GetDlgItem(IDOK)->MoveWindow(		rightOff,	MulDiv(8, dpiY, 96),		buttonWidth, buttonHeight, FALSE);
 		GetDlgItem(IDCANCEL)->MoveWindow(	rightOff,	MulDiv(39, dpiY, 96),		buttonWidth, buttonHeight, FALSE);
-		GetDlgItem(IDC_BUTTON1)->MoveWindow(rightOff,	cy - MulDiv(133, dpiY, 96),	buttonWidth, buttonHeight, FALSE);
-		GetDlgItem(IDC_BUTTON3)->MoveWindow(rightOff,	cy - MulDiv(105, dpiY, 96),	buttonWidth, buttonHeight, FALSE);
-		GetDlgItem(IDC_BUTTON2)->MoveWindow(rightOff,	cy - MulDiv(77, dpiY, 96),	buttonWidth, buttonHeight, FALSE);
+		GetDlgItem(IDC_BUTTON1)->MoveWindow(rightOff,	cy - MulDiv(201, dpiY, 96),	buttonWidth, buttonHeight, FALSE);
+		GetDlgItem(IDC_BUTTON3)->MoveWindow(rightOff,	cy - MulDiv(173, dpiY, 96),	buttonWidth, buttonHeight, FALSE);
+		GetDlgItem(IDC_BUTTON2)->MoveWindow(rightOff,	cy - MulDiv(145, dpiY, 96),	buttonWidth, buttonHeight, FALSE);
 		Invalidate();
 	}
 }
@@ -831,7 +858,7 @@ void CSelectPluginDlg::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 //-------------------------------------------------------
 {
 	lpMMI->ptMinTrackSize.x = MulDiv(350, Util::GetDPIx(m_hWnd), 96);
-	lpMMI->ptMinTrackSize.y = MulDiv(270, Util::GetDPIy(m_hWnd), 96);
+	lpMMI->ptMinTrackSize.y = MulDiv(310, Util::GetDPIy(m_hWnd), 96);
 	CDialog::OnGetMinMaxInfo(lpMMI);
 }
 

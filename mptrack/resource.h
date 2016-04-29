@@ -810,6 +810,7 @@
 #define IDC_TEXT_FFT                    2331
 #define IDC_TEXT_PERCENT                2332
 #define IDC_EQ_WARNING                  2333
+#define IDC_PLUGFRAME                   2334
 #define IDC_TEXT_STRETCHPARAMS          2337
 #define IDC_EDIT_STRETCHPARAMS          2338
 #define IDC_MIDI_MACRO_CONTROL          2339
@@ -842,7 +843,7 @@
 #define IDC_STATIC_VSTNAMEFILTER        2362
 #define IDC_TEXT_SAVEDWITH              2362
 #define IDC_TEXT_CURRENT_VSTPLUG        2363
-#define IDC_STATIC_SCALE_ENV            2364
+#define IDC_VENDOR                      2364
 #define IDC_FRAME_MPTEXT                2365
 #define IDC_COMBO_MIXLEVELS             2366
 #define IDC_COMBO_TEMPOMODE             2367
