@@ -293,7 +293,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 					{
 						mpt::String::SetNullTerminator(name);
 
-						VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(DMOPlugin::Create, true, mpt::PathString::FromNative(Util::GUIDToString(clsid)), mpt::PathString::FromNative(name), mpt::ustring());
+						VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(DMOPlugin::Create, true, mpt::PathString::FromNative(Util::GUIDToString(clsid)), mpt::PathString::FromNative(name));
 						if(plug != nullptr)
 						{
 							pluginList.push_back(plug);
