@@ -837,7 +837,7 @@ void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 		GetDlgItem(IDC_PLUGINTAGS)->MoveWindow(leftOffFrame + MulDiv(32, dpiX, 96), cy - MulDiv(97, dpiY, 96), cx - MulDiv(76, dpiX, 96), MulDiv(21, dpiY, 96), FALSE);
 
 		m_chkBridge.MoveWindow(leftOffFrame, cy - MulDiv(72, dpiY, 96), MulDiv(110, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
-		m_chkShare.MoveWindow(leftOffFrame + MulDiv(112, dpiX, 96), cy - MulDiv(72, dpiY, 96), cx - MulDiv(143, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
+		m_chkShare.MoveWindow(leftOffFrame + MulDiv(112, dpiX, 96), cy - MulDiv(72, dpiY, 96), cx - MulDiv(148, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
 
 		GetDlgItem(IDC_TEXT_CURRENT_VSTPLUG)->MoveWindow(leftOffFrame, cy - MulDiv(48, dpiY, 96), cx - MulDiv(37, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
 		GetDlgItem(IDC_VENDOR)->MoveWindow(leftOffFrame, cy - MulDiv(28, dpiY, 96), cx - MulDiv(37, dpiX, 96), MulDiv(20, dpiY, 96), FALSE);
