@@ -611,7 +611,7 @@ public:
 			? std::vector<uint32>(mpeg1layer3_samplerates, mpeg1layer3_samplerates + CountOf(mpeg1layer3_samplerates))
 			: std::vector<uint32>(layer3_samplerates, layer3_samplerates + CountOf(layer3_samplerates))
 			);
-		traits.modes = (compatible ? Encoder::ModeCBR : (Encoder::ModeCBR | Encoder::ModeQuality));
+		traits.modes = (compatible ? Encoder::ModeCBR : (Encoder::ModeABR | Encoder::ModeQuality));
 		traits.bitrates = (compatible
 			? std::vector<int>(mpeg1layer3_bitrates, mpeg1layer3_bitrates + CountOf(mpeg1layer3_bitrates))
 			: std::vector<int>(layer3_bitrates, layer3_bitrates + CountOf(layer3_bitrates))
@@ -734,6 +734,14 @@ public:
 			{
 				lame.lame_set_bWriteVbrTag(gfp, 1);
 			}
+
+		} else if(settings.Mode == Encoder::ModeABR)
+		{
+
+			lame.lame_set_brate(gfp, settings.Bitrate);
+			lame.lame_set_VBR(gfp, vbr_abr);
+
+			lame.lame_set_bWriteVbrTag(gfp, 1);
 
 		} else
 		{
