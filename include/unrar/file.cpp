@@ -1,5 +1,4 @@
 #include "rar.hpp"
-#include "openmpt-callback.hpp"	// OPENMPT ADDITION
 
 File::File()
 {
@@ -23,13 +22,11 @@ File::File()
 
 File::~File()
 {
-  /*	// OPENMPT ADDITION
   if (hFile!=FILE_BAD_HANDLE && !SkipClose)
     if (NewFile)
       Delete();
     else
       Close();
-  */	// OPENMPT ADDITION
 }
 
 
@@ -46,10 +43,6 @@ void File::operator = (File &SrcFile)
 
 bool File::Open(const wchar *Name,uint Mode)
 {
-  hFile = reinterpret_cast<RARFileCallbacks *>(const_cast<wchar *>(Name));	// OPENMPT ADDITION
-  hFile->Seek(hFile->file, 0);	// OPENMPT ADDITION
-  return true;	// OPENMPT ADDITION
-  /*	// OPENMPT ADDITION
   ErrorType=FILE_SUCCESS;
   FileHandle hNewFile;
   bool OpenShared=File::OpenShared || (Mode & FMF_OPENSHARED)!=0;
@@ -147,7 +140,6 @@ bool File::Open(const wchar *Name,uint Mode)
     wcsncpyz(FileName,Name,ASIZE(FileName));
   }
   return Success;
-  */	// OPENMPT ADDITION
 }
 
 
@@ -246,7 +238,6 @@ bool File::WCreate(const wchar *Name,uint Mode)
 bool File::Close()
 {
   bool Success=true;
-  /*	// OPENMPT ADDITION
 
   if (hFile!=FILE_BAD_HANDLE)
   {
@@ -270,15 +261,12 @@ bool File::Close()
   HandleType=FILE_HANDLENORMAL;
   if (!Success && AllowExceptions)
     ErrHandler.CloseError(FileName);
-  */	// OPENMPT ADDITION
   return Success;
 }
 
 
 bool File::Delete()
 {
-  return false;	// OPENMPT ADDITION
-  /*	// OPENMPT ADDITION
   if (HandleType!=FILE_HANDLENORMAL)
     return false;
   if (hFile!=FILE_BAD_HANDLE)
@@ -286,14 +274,11 @@ bool File::Delete()
   if (!AllowDelete)
     return false;
   return DelFile(FileName);
-  */	// OPENMPT ADDITION
 }
 
 
 bool File::Rename(const wchar *NewName)
 {
-  return false;	// OPENMPT ADDITION
-  /*	// OPENMPT ADDITION
   // No need to rename if names are already same.
   bool Success=wcscmp(FileName,NewName)==0;
 
@@ -304,7 +289,6 @@ bool File::Rename(const wchar *NewName)
     wcscpy(FileName,NewName);
 
   return Success;
-  */	// OPENMPT ADDITION
 }
 
 
@@ -382,22 +366,13 @@ bool File::Write(const void *Data,size_t Size)
     break;
   }
   LastWrite=true;
+  return Success; // It can return false only if AllowExceptions is disabled.
   */	// OPENMPT ADDITION
 }
 
 
 int File::Read(void *Data,size_t Size)
 {
-	if(sizeof(size_t) >= sizeof(int)) // OPENMPT ADDITION
-	{ // OPENMPT ADDITION
-		const size_t maxReadSize = (1<<((sizeof(int)*8)-2))-1; // 30 bit // OPENMPT ADDITION
-		if(Size >= maxReadSize) // OPENMPT ADDITION
-		{ // OPENMPT ADDITION
-			Size = maxReadSize; // OPENMPT ADDITION
-		} // OPENMPT ADDITION
-	} // OPENMPT ADDITION
-  return static_cast<int>(hFile->ReadRaw(hFile->file, reinterpret_cast<char *>(Data), Size)); // OPENMPT ADDITION
-  /*	// OPENMPT ADDITION
   int64 FilePos=0; // Initialized only to suppress some compilers warning.
 
   if (IgnoreReadErrors)
@@ -431,15 +406,12 @@ int File::Read(void *Data,size_t Size)
     break;
   }
   return ReadSize;
-  */	// OPENMPT ADDITION
 }
 
 
 // Returns -1 in case of error.
 int File::DirectRead(void *Data,size_t Size)
 {
-  return Read(Data, Size);	// OPENMPT ADDITION
-  /*	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   const size_t MaxDeviceRead=20000;
   const size_t MaxLockedRead=32768;
@@ -500,7 +472,7 @@ int File::DirectRead(void *Data,size_t Size)
     return -1;
   return (int)ReadSize;
 #endif
-  */	// OPENMPT ADDITION
+#endif
 }
 
 
@@ -520,8 +492,6 @@ bool File::RawSeek(int64 Offset,int Method)
     Offset=(Method==SEEK_CUR ? Tell():FileLength())+Offset;
     Method=SEEK_SET;
   }
-  return hFile->Seek(hFile->file, (size_t)Offset);	// OPENMPT ADDITION
-  /*	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   LONG HighDist=(LONG)(Offset>>32);
   if (SetFilePointer(hFile,(LONG)Offset,&HighDist,Method)==0xffffffff &&
@@ -541,14 +511,11 @@ bool File::RawSeek(int64 Offset,int Method)
 #endif
 #endif
   return true;
-  */	// OPENMPT ADDITION
 }
 
 
 int64 File::Tell()
 {
-  return hFile->GetPosition(hFile->file);	// OPENMPT ADDITION
-  /*	// OPENMPT ADDITION
   if (hFile==FILE_BAD_HANDLE)
     if (AllowExceptions)
       ErrHandler.SeekError(FileName);
@@ -572,7 +539,6 @@ int64 File::Tell()
   return ftell(hFile);
 #endif
 #endif
-  */	// OPENMPT ADDITION
 }
 
 
@@ -722,19 +688,14 @@ void File::GetOpenFileTime(RarTime *ft)
 
 int64 File::FileLength()
 {
-  return hFile->GetLength(hFile->file);	// OPENMPT ADDITION
-  /*	// OPENMPT ADDITION
   SaveFilePos SavePos(*this);
   Seek(0,SEEK_END);
   return Tell();
-  */	// OPENMPT ADDITION
 }
 
 
 bool File::IsDevice()
 {
-  return false;	// OPENMPT ADDITION
-  /*	// OPENMPT ADDITION
   if (hFile==FILE_BAD_HANDLE)
     return false;
 #ifdef _WIN_ALL
@@ -743,7 +704,6 @@ bool File::IsDevice()
 #else
   return isatty(GetFD());
 #endif
-  */	// OPENMPT ADDITION
 }
 
 

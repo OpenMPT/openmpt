@@ -1,7 +1,6 @@
 #ifndef _RAR_RARCOMMON_
 #define _RAR_RARCOMMON_
 
-#include "openmpt.hpp"	// OPENMPT ADDITION
 #include "raros.hpp"
 #include "rartypes.hpp"
 #include "os.hpp"
