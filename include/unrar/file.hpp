@@ -5,11 +5,6 @@
 #define FILE_USE_OPEN
 #endif
 
-struct RARFileCallbacks;	// OPENMPT ADDITION
-typedef RARFileCallbacks* FileHandle;	// OPENMPT ADDITION
-#define FILE_BAD_HANDLE NULL	// OPENMPT ADDITION
-
-/*	// OPENMPT ADDITION
 #ifdef _WIN_ALL
   typedef HANDLE FileHandle;
   #define FILE_BAD_HANDLE INVALID_HANDLE_VALUE
@@ -20,7 +15,6 @@ typedef RARFileCallbacks* FileHandle;	// OPENMPT ADDITION
   typedef FILE* FileHandle;
   #define FILE_BAD_HANDLE NULL
 #endif
-*/	// OPENMPT ADDITION
 
 class RAROptions;
 

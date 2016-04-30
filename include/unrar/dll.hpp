@@ -1,7 +1,11 @@
 #ifndef _UNRAR_DLL_
 #define _UNRAR_DLL_
 
+#if 1 // OPENMPT ADDITION
+#pragma pack(push, 1) // OPENMPT ADDITION
+#else // OPENMPT ADDITION
 #pragma pack(1)
+#endif // // OPENMPT ADDITION
 
 #define ERAR_SUCCESS             0
 #define ERAR_END_ARCHIVE        10
@@ -159,11 +163,16 @@ void   PASCAL RARSetChangeVolProc(HANDLE hArcData,CHANGEVOLPROC ChangeVolProc);
 void   PASCAL RARSetProcessDataProc(HANDLE hArcData,PROCESSDATAPROC ProcessDataProc);
 void   PASCAL RARSetPassword(HANDLE hArcData,char *Password);
 int    PASCAL RARGetDllVersion();
+int    PASCAL RARGetCommentW(HANDLE hArcData, wchar_t *CmtData, unsigned int CmtBufSize, unsigned int *CmtSize); // OPENMPT ADDITION
 
 #ifdef __cplusplus
 }
 #endif
 
+#if 1 // OPENMPT ADDITION
+#pragma pack(pop) // OPENMPT ADDITION
+#else // // OPENMPT ADDITION
 #pragma pack()
+#endif // OPENMPT ADDITION
 
 #endif

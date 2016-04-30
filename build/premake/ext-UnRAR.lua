@@ -4,11 +4,18 @@
   language "C++"
   location ( "../../build/" .. _ACTION .. "-ext" )
   objdir "../../build/obj/unrar"
-  dofile "../../build/premake/premake-defaults-LIB.lua"
+  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-   targetname "openmpt-unrar"
+  targetname "openmpt-unrar"
   includedirs { "../../include/unrar" }
   characterset "MBCS"
+  defines {
+   "NOMINMAX",
+   "NOVOLUME",
+   "RAR_NOCRYPT",
+   "RARDLL",
+   "SILENT",
+  }
   files {
    "../../include/unrar/archive.cpp",
    "../../include/unrar/arcread.cpp",
@@ -17,6 +24,7 @@
    "../../include/unrar/consio.cpp",
    "../../include/unrar/crc.cpp",
    "../../include/unrar/crypt.cpp",
+   "../../include/unrar/dll.cpp",
    "../../include/unrar/encname.cpp",
    "../../include/unrar/errhnd.cpp",
    "../../include/unrar/extinfo.cpp",
@@ -89,8 +97,6 @@
    "../../include/unrar/log.hpp",
    "../../include/unrar/match.hpp",
    "../../include/unrar/model.hpp",
-   "../../include/unrar/openmpt.hpp",
-   "../../include/unrar/openmpt-callback.hpp",
    "../../include/unrar/options.hpp",
    "../../include/unrar/os.hpp",
    "../../include/unrar/pathfn.hpp",
@@ -127,3 +133,7 @@
    "../../include/unrar/version.hpp",
    "../../include/unrar/volume.hpp",
   }
+  filter {}
+  filter { "kind:SharedLib" }
+   files { "../../include/unrar/dll.def" }
+  filter {}

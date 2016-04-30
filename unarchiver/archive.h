@@ -64,9 +64,10 @@ public:
 	virtual const ArchiveFileInfo & operator [] (std::size_t index) const = 0;
 };
 
-//=================================
-class ArchiveBase : public IArchive
-//=================================
+//===============
+class ArchiveBase
+//===============
+ : public IArchive
 {
 protected:
 	FileReader inFile;

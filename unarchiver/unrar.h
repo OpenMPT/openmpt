@@ -15,21 +15,32 @@ OPENMPT_NAMESPACE_BEGIN
 
 #ifdef MPT_WITH_UNRAR
 
-struct RARData;
-
-//====================================
-class CRarArchive : public ArchiveBase
-//====================================
+//===============
+class CRarArchive
+//===============
+	: public ArchiveBase
 {
+
 protected:
-	friend struct RARData;
-	RARData *rarData;
+
+	MPT_SHARED_PTR<OnDiskFileWrapper> diskFile;
+	bool captureCurrentFile;
 
 public:
 	CRarArchive(FileReader &file);
 	virtual ~CRarArchive();
 	
 	virtual bool ExtractFile(std::size_t index);
+
+public:
+
+	void RARCallbackProcessData(const char * data, std::intptr_t size);
+
+private:
+
+	void Reset();
+	void ResetFile();
+
 };
 
 #endif // MPT_WITH_UNRAR
