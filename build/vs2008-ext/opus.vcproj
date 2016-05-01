@@ -46,7 +46,7 @@
 				AdditionalOptions="/wd4244"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT="
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT="
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 			/>
 			<Tool
@@ -115,7 +115,7 @@
 				AdditionalOptions="/wd4244"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT="
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -130,7 +130,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT="
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 			/>
 			<Tool
@@ -183,7 +183,7 @@
 				AdditionalOptions="/wd4244 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT="
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -198,7 +198,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT="
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 			/>
 			<Tool
@@ -252,7 +252,7 @@
 				AdditionalOptions="/wd4244 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT="
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -267,7 +267,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT="
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 			/>
 			<Tool
@@ -320,7 +320,7 @@
 				AdditionalOptions="/wd4244"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT="
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -335,7 +335,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT="
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 			/>
 			<Tool
@@ -389,7 +389,7 @@
 				AdditionalOptions="/wd4244"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT="
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -404,7 +404,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT"
+				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT="
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 			/>
 			<Tool
@@ -458,7 +458,7 @@
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 				WholeProgramOptimization="true"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT="
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -473,7 +473,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT="
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 			/>
 			<Tool
@@ -528,7 +528,7 @@
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 				WholeProgramOptimization="true"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT="
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -543,7 +543,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT"
+				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;OPUS_EXPORT="
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 			/>
 			<Tool
