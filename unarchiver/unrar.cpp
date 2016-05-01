@@ -74,8 +74,8 @@ static int CALLBACK RARCallback(unsigned int msg, LPARAM userData, LPARAM p1, LP
 }
 
 
-void CRarArchive::RARCallbackProcessData(const char * buf, std::intptr_t size)
-//----------------------------------------------------------------------------
+void CRarArchive::RARCallbackProcessData(const char * buf, std::size_t size)
+//--------------------------------------------------------------------------
 {
 	if(!captureCurrentFile)
 	{

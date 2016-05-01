@@ -34,7 +34,7 @@ public:
 
 public:
 
-	void RARCallbackProcessData(const char * data, std::intptr_t size);
+	void RARCallbackProcessData(const char * data, std::size_t size);
 
 private:
 
