@@ -49,5 +49,5 @@
   links { }
   buildoptions { "/wd4244" }
   filter { "kind:StaticLib" }
-   defines { "OPUS_EXPORT" }
+   defines { "OPUS_EXPORT=" }
   filter {}
