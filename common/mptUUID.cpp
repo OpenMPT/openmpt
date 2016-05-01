@@ -199,13 +199,22 @@ UUID CreateUUID()
 UUID CreateLocalUUID()
 //--------------------
 {
-	UUID uuid = UUID();
-	RPC_STATUS status = ::UuidCreateSequential(&uuid);
-	if(status != RPC_S_OK && status != RPC_S_UUID_LOCAL_ONLY)
-	{
-		return UUID();
-	}
-	return uuid;
+	#if _WIN32_WINNT >= 0x0501
+		// Available since Win2000, but we check for WinXP in order to not use this
+		// function in Win32old builds. It is not available on some non-fully
+		// patched Win98SE installs in the wild.
+		UUID uuid = UUID();
+		RPC_STATUS status = ::UuidCreateSequential(&uuid);
+		if(status != RPC_S_OK && status != RPC_S_UUID_LOCAL_ONLY)
+		{
+			return UUID();
+		}
+		return uuid;
+	#else
+		// Fallback to ::UuidCreate is safe as ::UuidCreateSequential is only a
+		// tiny performance optimization.
+		return CreateUUID();
+	#endif
 }
 
 
