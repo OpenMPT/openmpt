@@ -370,8 +370,10 @@ static bool SystemIsWine(bool allowDetection = true)
 		}
 		return gs_SystemIsWineCache.SystemIsWine;
 	#elif MPT_OS_WINDOWS
+		MPT_UNREFERENCED_PARAMETER(allowDetection);
 		return GatherSystemIsWine();
 	#else
+		MPT_UNREFERENCED_PARAMETER(allowDetection);
 		return false;
 	#endif
 }
