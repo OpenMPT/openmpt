@@ -83,6 +83,8 @@ public:
 
 #if defined(MODPLUG_TRACKER)
 
+void PreventWineDetection();
+
 bool IsOriginal();
 bool IsWine();
 

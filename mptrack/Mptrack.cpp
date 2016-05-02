@@ -332,7 +332,7 @@ class CMPTCommandLineInfo: public CCommandLineInfo
 //================================================
 {
 public:
-	bool m_bNoDls, m_bNoPlugins, m_bNoAssembly, m_bNoSysCheck,
+	bool m_bNoDls, m_bNoPlugins, m_bNoAssembly, m_bNoSysCheck, m_bNoWine,
 		 m_bPortable;
 #ifdef _DEBUG
 	bool m_bNoTests;
@@ -358,6 +358,7 @@ public:
 			if (!lstrcmpi(lpszParam, _T("fullMemDump"))) { ExceptionHandler::fullMemDump = true; return; }
 			if (!lstrcmpi(lpszParam, _T("noAssembly"))) { m_bNoAssembly = true; return; }
 			if (!lstrcmpi(lpszParam, _T("noSysCheck"))) { m_bNoSysCheck = true; return; }
+			if (!lstrcmpi(lpszParam, _T("noWine"))) { m_bNoWine = true; return; }
 #ifdef _DEBUG
 			if (!lstrcmpi(lpszParam, _T("noTests"))) { m_bNoTests = true; return; }
 #endif
@@ -1023,6 +1024,11 @@ BOOL CTrackApp::InitInstance()
 	// Parse command line for standard shell commands, DDE, file open
 	CMPTCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
+
+	if(cmdInfo.m_bNoWine)
+	{
+		mpt::Windows::PreventWineDetection();
+	}
 
 	#ifdef ENABLE_ASM
 		if(cmdInfo.m_bNoAssembly)
