@@ -350,21 +350,36 @@ struct SystemIsWineCache
 	{
 		return;
 	}
+	SystemIsWineCache(bool isWine)
+		: SystemIsWine(isWine)
+	{
+		return;
+	}
 };
 }
 
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
-static bool SystemIsWine()
+static bool SystemIsWine(bool allowDetection = true)
 {
 	#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
-		static SystemIsWineCache gs_SystemIsWineCache;
+		static SystemIsWineCache gs_SystemIsWineCache = allowDetection ? SystemIsWineCache() : SystemIsWineCache(false);
+		if(!allowDetection)
+		{ // catch too late calls of PreventWineDetection
+			MPT_ASSERT(!gs_SystemIsWineCache.SystemIsWine);
+		}
 		return gs_SystemIsWineCache.SystemIsWine;
 	#elif MPT_OS_WINDOWS
 		return GatherSystemIsWine();
 	#else
 		return false;
 	#endif
+}
+
+void PreventWineDetection()
+//-------------------------
+{
+	SystemIsWine(false);
 }
 
 bool IsOriginal()
