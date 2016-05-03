@@ -527,9 +527,9 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kMIDICCBugEmulation: desc = _T("Plugin volume MIDI CC bug emulation"); break;
 		case kOldMIDIPitchBends: desc = _T("Old Pitch Wheel behaviour for instrument plugins"); break;
 		case kFT2VolumeRamping: desc = _T("Use smooth Fasttracker 2 volume ramping"); break;
-
 		case kMODVBlankTiming: desc = _T("VBlank timing: F21 and above sets speed instead of tempo"); break;
-		case kMODOneShotLoops: desc = _T("ProTracker one-shot loops"); break;
+
+		case kSlidesAtSpeed1: desc = _T("Execute regular slides at speed 1"); break;
 		case kHertzInLinearMode: desc = _T("Compute note frequency in hertz rather than periods"); break;
 		case kTempoClamp: desc = _T("Clamp tempo to 32-255 range"); break;
 		case kPerChannelGlobalVolSlide: desc = _T("Global volume slide memory is per-channel"); break;
@@ -602,9 +602,10 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kFT2VolColDelay: desc = _T("FT2-style volume column handling if there is a note delay"); break;
 		case kFT2FinetunePrecision: desc = _T("Round sample finetune to multiples of 16"); break;
 		case kST3NoMutedChannels: desc = _T("Do not process any effects on muted S3M channels"); break;
-		case kST3EffectMemory: desc = _T("Most effects share the same memory in"); break;
+		case kST3EffectMemory: desc = _T("Most effects share the same memory"); break;
 		case kST3PortaSampleChange: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself."); break;
 		case kST3VibratoMemory: desc = _T("Do not remember vibrato type in effect memory"); break;
+		case kMODOneShotLoops: desc = _T("ProTracker one-shot loops"); break;
 		case kMODIgnorePanning: desc = _T("Ignore panning commands."); break;
 		case kMODSampleSwap: desc = _T("Enable on-the-fly sample swapping"); break;
 
