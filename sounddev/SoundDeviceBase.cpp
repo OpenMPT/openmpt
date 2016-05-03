@@ -115,6 +115,18 @@ uint64 Base::SourceGetReferenceClockNowNanoseconds() const
 }
 
 
+uint64 Base::SourceLockedGetReferenceClockNowNanoseconds() const
+//--------------------------------------------------------------
+{
+	MPT_TRACE();
+	if(!m_Source)
+	{
+		return 0;
+	}
+	return m_Source->SoundSourceLockedGetReferenceClockNowNanoseconds();
+}
+
+
 void Base::SourceNotifyPreStart()
 //-------------------------------
 {
@@ -161,8 +173,8 @@ void Base::SourceFillAudioBufferLocked()
 }
 
 
-void Base::SourceAudioPreRead(std::size_t numFrames, std::size_t framesLatency)
-//-----------------------------------------------------------------------------
+void Base::SourceLockedAudioPreRead(std::size_t numFrames, std::size_t framesLatency)
+//-----------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	if(!InternalHasTimeInfo())
@@ -171,12 +183,12 @@ void Base::SourceAudioPreRead(std::size_t numFrames, std::size_t framesLatency)
 		if(InternalHasGetStreamPosition())
 		{
 			timeInfo.SyncPointStreamFrames = InternalHasGetStreamPosition();
-			timeInfo.SyncPointSystemTimestamp = SourceGetReferenceClockNowNanoseconds();
+			timeInfo.SyncPointSystemTimestamp = SourceLockedGetReferenceClockNowNanoseconds();
 			timeInfo.Speed = 1.0;
 		} else
 		{
 			timeInfo.SyncPointStreamFrames = m_StreamPositionRenderFrames + numFrames;
-			timeInfo.SyncPointSystemTimestamp = SourceGetReferenceClockNowNanoseconds() + Util::Round<int64>(GetEffectiveBufferAttributes().Latency * 1000000000.0);
+			timeInfo.SyncPointSystemTimestamp = SourceLockedGetReferenceClockNowNanoseconds() + Util::Round<int64>(GetEffectiveBufferAttributes().Latency * 1000000000.0);
 			timeInfo.Speed = 1.0;
 		}
 		timeInfo.RenderStreamPositionBefore = StreamPositionFromFrames(m_StreamPositionRenderFrames);
@@ -195,23 +207,23 @@ void Base::SourceAudioPreRead(std::size_t numFrames, std::size_t framesLatency)
 }
 
 
-void Base::SourceAudioRead(void *buffer, const void *inputBuffer, std::size_t numFrames)
-//--------------------------------------------------------------------------------------
+void Base::SourceLockedAudioRead(void *buffer, const void *inputBuffer, std::size_t numFrames)
+//--------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	if(numFrames <= 0)
 	{
 		return;
 	}
-	m_Source->SoundSourceRead(GetBufferFormat(), GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, buffer, inputBuffer);
+	m_Source->SoundSourceLockedRead(GetBufferFormat(), GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, buffer, inputBuffer);
 }
 
 
-void Base::SourceAudioDone()
-//--------------------------
+void Base::SourceLockedAudioDone()
+//--------------------------------
 {
 	MPT_TRACE();
-	m_Source->SoundSourceDone(GetBufferFormat(), GetEffectiveBufferAttributes(), m_TimeInfo);
+	m_Source->SoundSourceLockedDone(GetBufferFormat(), GetEffectiveBufferAttributes(), m_TimeInfo);
 }
 
 

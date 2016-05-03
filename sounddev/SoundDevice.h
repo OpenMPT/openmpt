@@ -76,13 +76,16 @@ class ISource
 //===========
 {
 public:
+	// main thread
 	virtual uint64 SoundSourceGetReferenceClockNowNanoseconds() const = 0; // timeGetTime()*1000000 on Windows
 	virtual void SoundSourcePreStartCallback() = 0;
 	virtual void SoundSourcePostStopCallback() = 0;
 	virtual bool SoundSourceIsLockedByCurrentThread() const = 0;
+	// audio thread
 	virtual void SoundSourceLock() = 0;
-	virtual void SoundSourceRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer) = 0;
-	virtual void SoundSourceDone(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo) = 0;
+	virtual uint64 SoundSourceLockedGetReferenceClockNowNanoseconds() const = 0; // timeGetTime()*1000000 on Windows
+	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer) = 0;
+	virtual void SoundSourceLockedDone(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo) = 0;
 	virtual void SoundSourceUnlock() = 0;
 public:
 	class Guard

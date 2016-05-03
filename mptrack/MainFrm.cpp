@@ -693,6 +693,16 @@ uint64 CMainFrame::SoundSourceGetReferenceClockNowNanoseconds() const
 //-------------------------------------------------------------------
 {
 	MPT_TRACE();
+	MPT_ASSERT(!InAudioThread());
+	return m_SoundDeviceClock.NowNanoseconds();
+}
+
+
+uint64 CMainFrame::SoundSourceLockedGetReferenceClockNowNanoseconds() const
+//-------------------------------------------------------------------------
+{
+	MPT_TRACE();
+	MPT_ASSERT(InAudioThread());
 	return m_SoundDeviceClock.NowNanoseconds();
 }
 
@@ -748,8 +758,8 @@ public:
 };
 
 
-void CMainFrame::SoundSourceRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer)
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer)
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	MPT_UNREFERENCED_PARAMETER(inputBuffer);
@@ -782,8 +792,8 @@ void CMainFrame::SoundSourceRead(SoundDevice::BufferFormat bufferFormat, SoundDe
 }
 
 
-void CMainFrame::SoundSourceDone(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo)
-//------------------------------------------------------------------------------------------------------------------------------------------------------
+void CMainFrame::SoundSourceLockedDone(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo)
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
 	MPT_UNREFERENCED_PARAMETER(bufferFormat);

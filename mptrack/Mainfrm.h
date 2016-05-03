@@ -327,8 +327,9 @@ public:
 	void SoundSourcePostStopCallback();
 	bool SoundSourceIsLockedByCurrentThread() const;
 	void SoundSourceLock();
-	void SoundSourceRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer);
-	void SoundSourceDone(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo);
+	uint64 SoundSourceLockedGetReferenceClockNowNanoseconds() const;
+	void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer);
+	void SoundSourceLockedDone(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo);
 	void SoundSourceUnlock();
 
 	// from SoundDevice::IMessageReceiver

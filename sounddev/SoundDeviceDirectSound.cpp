@@ -459,10 +459,10 @@ void CDSoundDevice::InternalFillAudioBuffer()
 			return;
 		}
 
-		SourceAudioPreRead(dwSize1/bytesPerFrame + dwSize2/bytesPerFrame, dwLatency/bytesPerFrame);
+		SourceLockedAudioPreRead(dwSize1/bytesPerFrame + dwSize2/bytesPerFrame, dwLatency/bytesPerFrame);
 
-		SourceAudioRead(buf1, nullptr, dwSize1/bytesPerFrame);
-		SourceAudioRead(buf2, nullptr, dwSize2/bytesPerFrame);
+		SourceLockedAudioRead(buf1, nullptr, dwSize1/bytesPerFrame);
+		SourceLockedAudioRead(buf2, nullptr, dwSize2/bytesPerFrame);
 
 		if(m_pMixBuffer->Unlock(buf1, dwSize1, buf2, dwSize2) != DS_OK)
 		{
@@ -509,7 +509,7 @@ void CDSoundDevice::InternalFillAudioBuffer()
 
 		m_StatisticLatencyFrames.store(dwLatency/bytesPerFrame);
 		m_StatisticPeriodFrames.store(dwSize1/bytesPerFrame + dwSize2/bytesPerFrame);
-		SourceAudioDone();
+		SourceLockedAudioDone();
 
 		if(dwBytes < m_nDSoundBufferSize/2)
 		{

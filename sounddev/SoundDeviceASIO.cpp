@@ -1052,19 +1052,19 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 		}
 	} else
 	{
-		SourceAudioPreRead(countChunk, m_nAsioBufferLen);
+		SourceLockedAudioPreRead(countChunk, m_nAsioBufferLen);
 		if(m_Settings.sampleFormat == SampleFormatFloat32)
 		{
-			SourceAudioRead(&m_SampleBufferFloat[0], (m_SampleInputBufferFloat.size() > 0) ? &m_SampleInputBufferFloat[0] : nullptr, countChunk);
+			SourceLockedAudioRead(&m_SampleBufferFloat[0], (m_SampleInputBufferFloat.size() > 0) ? &m_SampleInputBufferFloat[0] : nullptr, countChunk);
 		} else if(m_Settings.sampleFormat == SampleFormatInt16)
 		{
-			SourceAudioRead(&m_SampleBufferInt16[0], (m_SampleInputBufferInt16.size() > 0) ? &m_SampleInputBufferInt16[0] : nullptr, countChunk);
+			SourceLockedAudioRead(&m_SampleBufferInt16[0], (m_SampleInputBufferInt16.size() > 0) ? &m_SampleInputBufferInt16[0] : nullptr, countChunk);
 		} else if(m_Settings.sampleFormat == SampleFormatInt24)
 		{
-			SourceAudioRead(&m_SampleBufferInt24[0], (m_SampleInputBufferInt24.size() > 0) ? &m_SampleInputBufferInt24[0] : nullptr, countChunk);
+			SourceLockedAudioRead(&m_SampleBufferInt24[0], (m_SampleInputBufferInt24.size() > 0) ? &m_SampleInputBufferInt24[0] : nullptr, countChunk);
 		} else if(m_Settings.sampleFormat == SampleFormatInt32)
 		{
-			SourceAudioRead(&m_SampleBufferInt32[0], (m_SampleInputBufferInt32.size() > 0) ? &m_SampleInputBufferInt32[0] : nullptr, countChunk);
+			SourceLockedAudioRead(&m_SampleBufferInt32[0], (m_SampleInputBufferInt32.size() > 0) ? &m_SampleInputBufferInt32[0] : nullptr, countChunk);
 		} else
 		{
 			MPT_ASSERT_NOTREACHED();
@@ -1182,7 +1182,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 	}
 	if(!rendersilence)
 	{
-		SourceAudioDone();
+		SourceLockedAudioDone();
 	}
 }
 
@@ -1228,7 +1228,7 @@ void CASIODevice::ApplyAsioTimeInfo(AsioTimeInfo asioTimeInfo)
 			timeInfo.Speed = speed;
 		} else
 		{ // spec violation or nothing provided at all, better to estimate this stuff ourselves
-			const uint64 asioNow = SourceGetReferenceClockNowNanoseconds();
+			const uint64 asioNow = SourceLockedGetReferenceClockNowNanoseconds();
 			timeInfo.SyncPointStreamFrames = m_TotalFramesWritten + m_nAsioBufferLen - m_StreamPositionOffset;
 			timeInfo.SyncPointSystemTimestamp = asioNow + Util::Round<int64>(m_BufferLatency * 1000.0 * 1000.0 * 1000.0);
 			timeInfo.Speed = 1.0;
