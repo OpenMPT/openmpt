@@ -81,9 +81,10 @@ protected:
 	void SourceNotifyPostStop();
 	bool SourceIsLockedByCurrentThread() const;
 	void SourceFillAudioBufferLocked();
-	void SourceAudioPreRead(std::size_t numFrames, std::size_t framesLatency);
-	void SourceAudioRead(void *buffer, const void *inputBuffer, std::size_t numFrames);
-	void SourceAudioDone();
+	uint64 SourceLockedGetReferenceClockNowNanoseconds() const;
+	void SourceLockedAudioPreRead(std::size_t numFrames, std::size_t framesLatency);
+	void SourceLockedAudioRead(void *buffer, const void *inputBuffer, std::size_t numFrames);
+	void SourceLockedAudioDone();
 
 	void RequestClose() { m_RequestFlags.fetch_or(RequestFlagClose); }
 	void RequestReset() { m_RequestFlags.fetch_or(RequestFlagReset); }

@@ -193,10 +193,10 @@ void CPortaudioDevice::InternalFillAudioBuffer()
 //----------------------------------------------
 {
 	if(m_CurrentFrameCount == 0) return;
-	SourceAudioPreRead(m_CurrentFrameCount, Util::Round<std::size_t>(m_CurrentRealLatency * m_StreamInfo->sampleRate));
-	SourceAudioRead(m_CurrentFrameBuffer, m_CurrentFrameBufferInput, m_CurrentFrameCount);
+	SourceLockedAudioPreRead(m_CurrentFrameCount, Util::Round<std::size_t>(m_CurrentRealLatency * m_StreamInfo->sampleRate));
+	SourceLockedAudioRead(m_CurrentFrameBuffer, m_CurrentFrameBufferInput, m_CurrentFrameCount);
 	m_StatisticPeriodFrames.store(m_CurrentFrameCount);
-	SourceAudioDone();
+	SourceLockedAudioDone();
 }
 
 

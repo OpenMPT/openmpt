@@ -314,8 +314,8 @@ void CWaveDevice::InternalFillAudioBuffer()
 	while((oldBuffersPending < m_nPreparedHeaders) && !m_Failed)
 	{
 		nLatency += m_nWaveBufferSize;
-		SourceAudioPreRead(m_nWaveBufferSize / bytesPerFrame, nLatency / bytesPerFrame);
-		SourceAudioRead(m_WaveBuffers[m_nWriteBuffer].lpData, nullptr, m_nWaveBufferSize / bytesPerFrame);
+		SourceLockedAudioPreRead(m_nWaveBufferSize / bytesPerFrame, nLatency / bytesPerFrame);
+		SourceLockedAudioRead(m_WaveBuffers[m_nWriteBuffer].lpData, nullptr, m_nWaveBufferSize / bytesPerFrame);
 		nBytesWritten += m_nWaveBufferSize;
 		m_WaveBuffers[m_nWriteBuffer].dwBufferLength = m_nWaveBufferSize;
 		InterlockedIncrement(&m_nBuffersPending);
@@ -323,7 +323,7 @@ void CWaveDevice::InternalFillAudioBuffer()
 		CheckResult(waveOutWrite(m_hWaveOut, &m_WaveBuffers[m_nWriteBuffer], sizeof(WAVEHDR)));
 		m_nWriteBuffer++;
 		m_nWriteBuffer %= m_nPreparedHeaders;
-		SourceAudioDone();
+		SourceLockedAudioDone();
 	}
 
 	if(m_JustStarted && !m_Failed)
