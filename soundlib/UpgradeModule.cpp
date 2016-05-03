@@ -501,6 +501,10 @@ void CSoundFile::UpgradeModule()
 	{
 		// MPT 1.16 has a maximum tempo of 255.
 		m_playBehaviour.set(kTempoClamp);
+	} else if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 00, 00) && m_dwLastSavedWithVersion <= MAKE_VERSION_NUMERIC(1, 20, 01, 03) && m_dwLastSavedWithVersion != MAKE_VERSION_NUMERIC(1, 20, 00, 00))
+	{
+		// OpenMPT introduced some "fixes" that execute regular portamentos also at speed 1.
+		m_playBehaviour.set(kSlidesAtSpeed1);
 	}
 
 	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 24, 00, 00))

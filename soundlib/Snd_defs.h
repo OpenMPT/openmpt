@@ -364,8 +364,7 @@ enum PlayBehaviour
 	kOldMIDIPitchBends,				// Old VST MIDI pitch bend behaviour (IT/MPT/XM, deprecated)
 	kFT2VolumeRamping,				// Smooth volume ramping like in FT2 (XM)
 	kMODVBlankTiming,				// F21 and above set speed instead of tempo
-	kMODOneShotLoops,				// Allow ProTracker-like oneshot loops
-
+	kSlidesAtSpeed1,				// Execute normal slides at speed 1 as if they were fine slides
 	kHertzInLinearMode,				// Compute note frequency in hertz rather than periods
 	kTempoClamp,					// Clamp tempo to 32-255 range.
 	kPerChannelGlobalVolSlide,		// Global volume slide memory is per-channel
@@ -444,6 +443,7 @@ enum PlayBehaviour
 	kST3PortaSampleChange,			// Portamento plus instrument number applies the volume settings of the new sample, but not the new sample itself.
 	kST3VibratoMemory,				// Do not remember vibrato type in effect memory
 
+	kMODOneShotLoops,				// Allow ProTracker-like oneshot loops
 	kMODIgnorePanning,				// Do not process any panning commands
 	kMODSampleSwap,					// On-the-fly sample swapping
 
