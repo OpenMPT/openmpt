@@ -261,10 +261,6 @@ struct PACKED MODSampleHeader
 			{
 				mptSmp.nLoopStart = mptSmp.nLength - 1;
 			}
-			if(mptSmp.nLoopEnd > mptSmp.nLength)
-			{
-				mptSmp.nLoopEnd = mptSmp.nLength;
-			}
 			if(mptSmp.nLoopStart > mptSmp.nLoopEnd || mptSmp.nLoopEnd < 4 || mptSmp.nLoopEnd - mptSmp.nLoopStart < 4)
 			{
 				mptSmp.nLoopStart = 0;
@@ -893,12 +889,20 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		for(SAMPLEINDEX smp = 1; smp <= 31; smp++) if(Samples[smp].nLength)
 		{
+			SampleIO::Encoding encoding = file.ReadMagic("ADPCM") ? SampleIO::ADPCM : SampleIO::signedPCM;
+			// Fix sample 6 in MOD.shorttune2, which has a replen longer than the sample itself.
+			// ProTracker reads beyond the end of the sample when playing, so we just extend the sample with zeros.
+			// ReadSample will automatically do this for us if the sample chunk itself is too short.
+			FileReader sample = file.ReadChunk(Samples[smp].nLength);
+			if(isMdKd)
+				Samples[smp].nLength = std::max(Samples[smp].nLength, Samples[smp].nLoopEnd);
+
 			SampleIO(
 				SampleIO::_8bit,
 				SampleIO::mono,
 				SampleIO::littleEndian,
-				file.ReadMagic("ADPCM") ? SampleIO::ADPCM : SampleIO::signedPCM)
-				.ReadSample(Samples[smp], file);
+				encoding)
+				.ReadSample(Samples[smp], sample);
 		}
 	}
 
