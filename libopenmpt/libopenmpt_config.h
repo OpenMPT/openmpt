@@ -36,22 +36,33 @@
 #define LIBOPENMPT_API_HELPER_PUBLIC 
 #define LIBOPENMPT_API_HELPER_LOCAL  
 
-#elif defined(__GNUC__) || defined(__clang__)
+#elif defined(__EMSCIPTEN__)
 
-#if !defined(__EMSCRIPTEN__)
-#if defined(_WIN32)
-#define LIBOPENMPT_API_HELPER_EXPORT __declspec(dllexport)
-#define LIBOPENMPT_API_HELPER_IMPORT __declspec(dllimport)
-#else
-#define LIBOPENMPT_API_HELPER_EXPORT __attribute__((visibility("default")))
-#define LIBOPENMPT_API_HELPER_IMPORT __attribute__((visibility("default")))
-#endif
-#define LIBOPENMPT_API_HELPER_PUBLIC __attribute__((visibility("default")))
-#define LIBOPENMPT_API_HELPER_LOCAL  __attribute__((visibility("hidden")))
-#else
+#define LIBOPENMPT_API_HELPER_EXPORT __attribute__((visibility("default"))) __attribute__((used))
+#define LIBOPENMPT_API_HELPER_IMPORT __attribute__((visibility("default"))) __attribute__((used))
 #define LIBOPENMPT_API_HELPER_PUBLIC __attribute__((visibility("default"))) __attribute__((used))
 #define LIBOPENMPT_API_HELPER_LOCAL  __attribute__((visibility("hidden")))
-#endif
+
+#elif (defined(__GNUC__) || defined(__clang__)) && defined(_WIN32)
+
+#define LIBOPENMPT_API_HELPER_EXPORT __declspec(dllexport)
+#define LIBOPENMPT_API_HELPER_IMPORT __declspec(dllimport)
+#define LIBOPENMPT_API_HELPER_PUBLIC __attribute__((visibility("default")))
+#define LIBOPENMPT_API_HELPER_LOCAL  __attribute__((visibility("hidden")))
+
+#elif defined(__GNUC__) || defined(__clang__)
+
+#define LIBOPENMPT_API_HELPER_EXPORT __attribute__((visibility("default")))
+#define LIBOPENMPT_API_HELPER_IMPORT __attribute__((visibility("default")))
+#define LIBOPENMPT_API_HELPER_PUBLIC __attribute__((visibility("default")))
+#define LIBOPENMPT_API_HELPER_LOCAL  __attribute__((visibility("hidden")))
+
+#elif defined(_WIN32)
+
+#define LIBOPENMPT_API_HELPER_EXPORT __declspec(dllexport)
+#define LIBOPENMPT_API_HELPER_IMPORT __declspec(dllimport)
+#define LIBOPENMPT_API_HELPER_PUBLIC 
+#define LIBOPENMPT_API_HELPER_LOCAL  
 
 #else
 
