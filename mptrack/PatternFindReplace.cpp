@@ -60,6 +60,7 @@ void CViewPattern::OnEditFind()
 		if(dlg.DoModal() == IDOK)
 		{
 			FindReplace::instance = settings;
+			FindReplace::instance.selection = m_Selection;
 			m_bContinueSearch = false;
 			OnEditFindNext();
 		}
