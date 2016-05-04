@@ -372,7 +372,7 @@ UINT CSoundFile::Read( LPVOID lpBuffer, UINT cbBuffer ) {
 	mpcpplog();
 	std::memset( lpBuffer, 0, cbBuffer );
 	const std::size_t frames_torender = cbBuffer / get_frame_size();
-	std::int16_t * out = (std::int16_t*)lpBuffer;
+	std::int16_t * out = reinterpret_cast<std::int16_t*>( lpBuffer );
 	std::vector<std::int16_t> tmpbuf;
 	if ( get_sample_size() == 1 || get_sample_size() == 4 ) {
 		tmpbuf.resize( frames_torender * get_num_channels() );
@@ -390,12 +390,12 @@ UINT CSoundFile::Read( LPVOID lpBuffer, UINT cbBuffer ) {
 	}
 
 	if ( get_sample_size() == 1 ) {
-		std::uint8_t * dst = (std::uint8_t*)lpBuffer;
+		std::uint8_t * dst = reinterpret_cast<std::uint8_t*>( lpBuffer );
 		for ( std::size_t sample = 0; sample < frames_rendered * get_num_channels(); ++sample ) {
 			dst[sample] = ( tmpbuf[sample] / 0x100 ) + 0x80;
 		}
 	} else if ( get_sample_size() == 4 ) {
-		std::int32_t * dst = (std::int32_t*)lpBuffer;
+		std::int32_t * dst = reinterpret_cast<std::int32_t*>( lpBuffer );
 		for ( std::size_t sample = 0; sample < frames_rendered * get_num_channels(); ++sample ) {
 			dst[sample] = tmpbuf[sample] << (32-16-1-MIXING_ATTENUATION);
 		}
