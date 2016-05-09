@@ -27,6 +27,7 @@
   }
   defines { "MODPLUG_TRACKER" }
   exceptionhandling "SEH"
+  defines { "MPT_EXCEPTIONS_SEH" }
   largeaddressaware ( true )
   characterset "Unicode"
   flags { "Unicode", "WinMain", "ExtraWarnings" }
