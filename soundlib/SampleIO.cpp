@@ -608,13 +608,13 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		// MT2 stereo samples (right channel is stored as a difference from the left channel)
 		if(GetBitDepth() == 8)
 		{
-			for(SmpLength i = 0; i <= sample.nLength * 2; i += 2)
+			for(SmpLength i = 0; i < sample.nLength * 2; i += 2)
 			{
 				sample.pSample8[i + 1] = static_cast<int8>(static_cast<uint8>(sample.pSample8[i + 1]) + static_cast<uint8>(sample.pSample8[i]));
 			}
 		} else
 		{
-			for(SmpLength i = 0; i <= sample.nLength * 2; i += 2)
+			for(SmpLength i = 0; i < sample.nLength * 2; i += 2)
 			{
 				sample.pSample16[i + 1] = static_cast<int16>(static_cast<uint16>(sample.pSample16[i + 1]) + static_cast<uint16>(sample.pSample16[i]));
 			}

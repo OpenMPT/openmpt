@@ -696,19 +696,20 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 					} else
 					{
 						mixPlug.defaultProgram = vstHeader.programNr;
-						LimitMax(vstHeader.n, Util::MaxValueOfType(mixPlug.nPluginDataSize) / 4u);
-						mixPlug.nPluginDataSize = vstHeader.n * 4;
+						LimitMax(vstHeader.n, (Util::MaxValueOfType(mixPlug.nPluginDataSize) / 4u) - 1);
+						mixPlug.nPluginDataSize = vstHeader.n * 4 + 4;
 					}
 					mixPlug.pPluginData = new (std::nothrow) char[mixPlug.nPluginDataSize];
 					if(mixPlug.pPluginData != nullptr)
 					{
 						if(vstHeader.useChunks)
 						{
-							memcpy(mixPlug.pPluginData, "fEvN", 4);	// 'NvEf'
+							memcpy(mixPlug.pPluginData, "fEvN", 4);	// 'NvEf' plugin data type
 							chunk.ReadRaw(mixPlug.pPluginData + 4, vstHeader.n);
 						} else
 						{
 							float32 *f = reinterpret_cast<float32 *>(mixPlug.pPluginData);
+							*(f++) = 0;	// Plugin data type
 							for(uint32 param = 0; param < vstHeader.n; param++, f++)
 							{
 								*f = chunk.ReadFloatLE();
