@@ -67,6 +67,7 @@
 	pchsource "../../common/stdafx.cpp"
   defines { "MODPLUG_TRACKER" }
   exceptionhandling "SEH"
+  defines { "MPT_EXCEPTIONS_SEH" }
   largeaddressaware ( true )
   characterset "MBCS"
   flags { "MFC", "ExtraWarnings", "WinMain" }
