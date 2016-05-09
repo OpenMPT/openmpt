@@ -21,9 +21,17 @@
 #include <stdexcept>
 #include <vector>
 
+#if defined(MODPLUG_TRACKER)
+#include <cwctype>
+#endif // MODPLUG_TRACKER
+
 #if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #include <strings.h> // for strncasecmp
 #endif
+
+#if defined(MODPLUG_TRACKER)
+#include <wctype.h>
+#endif // MODPLUG_TRACKER
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
