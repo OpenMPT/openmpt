@@ -4879,6 +4879,15 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 
 	if(chn.rowCommand.IsNote())
 	{
+		// IT compatibility: If this note is not mapped to a sample, ignore it.
+		// Test case: empty_sample_offset.it
+		if(chn.rowCommand.instr <= GetNumInstruments() && Instruments[chn.rowCommand.instr] != nullptr)
+		{
+			SAMPLEINDEX smp = Instruments[chn.rowCommand.instr]->Keyboard[chn.rowCommand.note - NOTE_MIN];
+			if(smp == 0 || smp >= GetNumSamples())
+				return;
+		}
+
 		if(m_SongFlags[SONG_PT_MODE])
 		{
 			// ProTracker compatbility: PT1/2-style funky 9xx offset command
