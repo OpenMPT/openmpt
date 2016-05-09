@@ -191,8 +191,8 @@ public:
 
 public:
 
-	inline const CSoundFile *GetSoundFile() const;
-	inline CSoundFile *GetSoundFile();
+	const CSoundFile *GetSoundFile() const;
+	CSoundFile *GetSoundFile();
 
 	void SetModified(bool updateAllViews = true);
 
