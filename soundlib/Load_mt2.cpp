@@ -463,6 +463,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultRowsPerBeat = fileHeader.linesPerBeat;
 	if(!m_nDefaultRowsPerBeat) m_nDefaultRowsPerBeat = 4;
 	m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat * 4;
+	m_nVSTiVolume = 48;
+	m_nSamplePreAmp = 48 * 2;	// Double pre-amp because we will halve the volume of all non-drum instruments, because the volume of drum samples can exceed that of normal samples
 
 	if(fileHeader.samplesPerTick > 100 && fileHeader.samplesPerTick < 5000)
 	{
@@ -574,8 +576,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 
 		case MAGIC4LE('T','R','K','S'):
-			m_nSamplePreAmp = chunk.ReadUint16LE() >> 9;	// 131072 is 0dB... I think (that's how MTIOModule_MT2.cpp reads)
-			m_nVSTiVolume = m_nSamplePreAmp;
+			m_nSamplePreAmp = chunk.ReadUint16LE() / 256u;	// 131072 is 0dB... I think (that's how MTIOModule_MT2.cpp reads)
+			m_nVSTiVolume = m_nSamplePreAmp / 2u;
 			for(CHANNELINDEX c = 0; c < GetNumChannels(); c++)
 			{
 				MT2TrackSettings trackSettings;
@@ -809,8 +811,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 							m->param = 0xD0 | delay;
 						}
 						m->volcmd = VOLCMD_VOLUME;
-						// Volume is actually 0...255, but 128 is equivalent to v64 :/
-						m->vol = (std::min(drums[1], uint8(128)) + 1) / 2u;
+						// Volume is 0...255, but 128 is equivalent to v64 - we compensate this by halving the global volume of all non-drum instruments
+						m->vol = static_cast<ModCommand::VOL>((static_cast<uint16>(drums[1]) + 3) / 4u);
 					}
 				}
 			}
@@ -1029,8 +1031,10 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				file.ReadConvertEndianness(groups[grp]);
 			}
 
+			// Instruments with plugin assignments never play samples at the same time!
 			if(mptIns != nullptr && mptIns->nMixPlug == 0)
 			{
+				mptIns->nGlobalVol = 32;	// Compensate for extended dynamic range of drum instruments
 				for(uint32 note = 0; note < 96; note++)
 				{
 					if(insHeader.groupMap[note] < insHeader.numSamples)
