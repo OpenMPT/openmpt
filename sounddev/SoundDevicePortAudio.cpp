@@ -24,6 +24,9 @@
 #include "../include/portaudio/src/common/pa_debugprint.h"
 #endif
 #endif
+#if MPT_OS_WINDOWS
+#include <shellapi.h>
+#endif
 #endif
 
 
