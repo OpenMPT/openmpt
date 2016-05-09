@@ -18,6 +18,7 @@
    "../../include/ogg/include",
    "../../include/opus/include",
    "../../include/opusfile/include",
+   "../../include/portaudio/include",
    "../../include/vorbis/include",
    "../../include/zlib",
    "$(IntDir)/svn_version",

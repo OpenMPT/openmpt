@@ -15,14 +15,10 @@
 #include "../common/ComponentManager.h"
 
 #ifdef MPT_WITH_PORTAUDIO
-#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
-#include "portaudio/include/portaudio.h"
-#if MPT_OS_WINDOWS
-#include "portaudio/include/pa_win_wasapi.h"
-#endif // MPT_OS_WINDOWS
-#else
 #include <portaudio.h>
-#endif
+#if MPT_OS_WINDOWS
+#include <pa_win_wasapi.h>
+#endif // MPT_OS_WINDOWS
 #endif
 
 OPENMPT_NAMESPACE_BEGIN
