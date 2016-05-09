@@ -835,7 +835,9 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			nMeasure = sndFile.Patterns[nPattern].GetRowsPerMeasure();
 		}
 		// secondary highlight (beats)
-		ROWINDEX highlightRow = compRow % nMeasure;
+		ROWINDEX highlightRow = compRow;
+		if(nMeasure > 0)
+			highlightRow %= nMeasure;
 		if ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_2NDHIGHLIGHT)
 			&& nBeat > 0)
 		{
