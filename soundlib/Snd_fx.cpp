@@ -4881,9 +4881,9 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 	{
 		// IT compatibility: If this note is not mapped to a sample, ignore it.
 		// Test case: empty_sample_offset.it
-		if(chn.rowCommand.instr <= GetNumInstruments() && Instruments[chn.rowCommand.instr] != nullptr)
+		if(chn.pModInstrument != nullptr)
 		{
-			SAMPLEINDEX smp = Instruments[chn.rowCommand.instr]->Keyboard[chn.rowCommand.note - NOTE_MIN];
+			SAMPLEINDEX smp = chn.pModInstrument->Keyboard[chn.rowCommand.note - NOTE_MIN];
 			if(smp == 0 || smp >= GetNumSamples())
 				return;
 		}
