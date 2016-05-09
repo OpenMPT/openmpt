@@ -95,7 +95,20 @@ public:
 } while(0)
 
 
-#define asioCallUncatched(asiocall) m_pAsioDrv-> asiocall
+#define asioCallUnchecked(pasioresult, asiocall) do { \
+	try { \
+		if(( pasioresult )) { \
+			*( pasioresult ) = ASE_InvalidParameter; \
+		} \
+		ASIOError e = m_pAsioDrv-> asiocall ; \
+		if(( pasioresult )) { \
+			*( pasioresult ) = e; \
+		} \
+	} catch(...) { \
+		CASIODevice::ReportASIOException( #asiocall + std::string(" crashed!")); \
+		throw ASIOException(std::string("Exception in '") + #asiocall + std::string("'!")); \
+	} \
+} while(0)
 
 
 #define ASIO_MAXDRVNAMELEN	1024
@@ -483,7 +496,9 @@ bool CASIODevice::InternalOpen()
 		m_CanOutputReady = false;
 		try
 		{
-			m_CanOutputReady = (asioCallUncatched(outputReady()) == ASE_OK);
+			ASIOError asioresult = ASE_InvalidParameter;
+			asioCallUnchecked(&asioresult, outputReady());
+			m_CanOutputReady = (asioresult == ASE_OK);
 		} catch(...)
 		{
 			// continue, failure is not fatal here
@@ -1252,6 +1267,7 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 //-----------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
+	ASIOError asioresult = ASE_InvalidParameter;
 	struct DebugRealtimeThreadIdGuard
 	{
 		mpt::atomic_uint32_t & ThreadID;
@@ -1286,7 +1302,8 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 				ASIOTimeStamp systemTime;
 				MemsetZero(samplePosition);
 				MemsetZero(systemTime);
-				if(asioCallUncatched(getSamplePosition(&samplePosition, &systemTime)) == ASE_OK)
+				asioCallUnchecked(&asioresult, getSamplePosition(&samplePosition, &systemTime));
+				if(asioresult == ASE_OK)
 				{
 					AsioTimeInfo asioTimeInfoQueried;
 					MemsetZero(asioTimeInfoQueried);
@@ -1296,7 +1313,8 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 					asioTimeInfoQueried.speed = 1.0;
 					ASIOSampleRate sampleRate;
 					MemsetZero(sampleRate);
-					if(asioCallUncatched(getSampleRate(&sampleRate)) == ASE_OK)
+					asioCallUnchecked(&asioresult, getSampleRate(&sampleRate));
+					if(asioresult == ASE_OK)
 					{
 						if(sampleRate >= 0.0)
 						{
@@ -1605,7 +1623,9 @@ SoundDevice::DynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uin
 	{
 		try
 		{
-			if(asioCallUncatched(canSampleRate((ASIOSampleRate)baseSampleRates[i])) == ASE_OK)
+			ASIOError asioresult = ASE_InvalidParameter;
+			asioCallUnchecked(&asioresult, canSampleRate((ASIOSampleRate)baseSampleRates[i]));
+			if(asioresult == ASE_OK)
 			{
 				caps.supportedSampleRates.push_back(baseSampleRates[i]);
 				caps.supportedExclusiveSampleRates.push_back(baseSampleRates[i]);
