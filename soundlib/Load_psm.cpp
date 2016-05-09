@@ -925,7 +925,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			// don't write channel volume for now, as it's always set to 100% anyway
 
 			// there's a restart pos, so let's try to insert a Bxx command in the last pattern
-			if(subsong.restartPos != ORDERINDEX_INVALID)
+			if(subsong.restartPos != ORDERINDEX_INVALID && Patterns.IsValidPat(endPattern))
 			{
 				ROWINDEX lastRow = Patterns[endPattern].GetNumRows() - 1;
 				ModCommand *m;
