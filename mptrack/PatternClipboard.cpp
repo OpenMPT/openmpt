@@ -428,7 +428,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 						patList.resize(insertPat + 1, PATTERNINDEX_INVALID);
 					}
 
-					patList[insertPat] = sndFile.Patterns.Insert(64);
+					patList[insertPat] = sndFile.Patterns.InsertAny(64, true);
 					insertPat = patList[insertPat];
 				}
 			}

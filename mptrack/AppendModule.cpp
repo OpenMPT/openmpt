@@ -196,7 +196,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 			{
 				if(patternMapping[srcPat] == PATTERNINDEX_INVALID && source.Patterns.IsValidPat(srcPat))
 				{
-					patternMapping[srcPat] = m_SndFile.Patterns.Insert(Clamp(source.Patterns[srcPat].GetNumRows(), specs.patternRowsMin, specs.patternRowsMax));
+					patternMapping[srcPat] = m_SndFile.Patterns.InsertAny(Clamp(source.Patterns[srcPat].GetNumRows(), specs.patternRowsMin, specs.patternRowsMax), true);
 					if(patternMapping[srcPat] == PATTERNINDEX_INVALID)
 					{
 						AddToLog("Too many patterns!");

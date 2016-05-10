@@ -662,7 +662,7 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 PATTERNINDEX CModDoc::InsertPattern(ORDERINDEX nOrd, ROWINDEX nRows)
 //------------------------------------------------------------------
 {
-	const PATTERNINDEX i = m_SndFile.Patterns.Insert(nRows);
+	const PATTERNINDEX i = m_SndFile.Patterns.InsertAny(nRows, true);
 	if(i == PATTERNINDEX_INVALID)
 		return i;
 

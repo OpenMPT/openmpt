@@ -279,7 +279,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			if(curOrd >= Order.size())
 			{
-				PATTERNINDEX pat = Patterns.Insert(rowsPerPat);
+				PATTERNINDEX pat = Patterns.InsertAny(rowsPerPat);
 				Order.resize(curOrd + 1);
 				Order[curOrd] = pat;
 			}
@@ -390,7 +390,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			if(blankPat == PATTERNINDEX_INVALID)
 			{
-				blankPat = Patterns.Insert(rowsPerPat);
+				blankPat = Patterns.InsertAny(rowsPerPat);
 			}
 			Order[i] = blankPat;
 		}

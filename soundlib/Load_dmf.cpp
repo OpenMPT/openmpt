@@ -398,7 +398,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 	file.ReadConvertEndianness(patHead);
 
 	const ROWINDEX numRows = Clamp(ROWINDEX(patHead.numRows), ROWINDEX(1), MAX_PATTERN_ROWS);
-	const PATTERNINDEX pat = sndFile.Patterns.Insert(numRows);
+	const PATTERNINDEX pat = sndFile.Patterns.InsertAny(numRows);
 	if(pat == PATTERNINDEX_INVALID)
 	{
 		return pat;

@@ -48,16 +48,17 @@ public:
 	// Delete all patterns.
 	void DestroyPatterns();
 	
-	//Insert (default)pattern to given position. If pattern already exists at that position,
-	//ignoring request. Returns true on success, false otherwise.
+	// Insert (default)pattern to given position. If pattern already exists at that position,
+	// ignoring request. Returns true on success, false otherwise.
 	bool Insert(const PATTERNINDEX index, const ROWINDEX rows);
 	
-	//Insert pattern to position with the lowest index, and return that index, PATTERNINDEX_INVALID
-	//on failure.
-	PATTERNINDEX Insert(const ROWINDEX rows);
+	// Insert pattern to position with the lowest index, and return that index, PATTERNINDEX_INVALID on failure.
+	// If respectQtyLimits is true, inserting patterns will fail if the resulting pattern index would exceed the current format's pattern quantity limits.
+	PATTERNINDEX InsertAny(const ROWINDEX rows, bool respectQtyLimits = false);
 
 	// Duplicate an existing pattern. Returns new pattern index on success, or PATTERNINDEX_INVALID on failure.
-	PATTERNINDEX Duplicate(PATTERNINDEX from);
+	// If respectQtyLimits is true, inserting patterns will fail if the resulting pattern index would exceed the current format's pattern quantity limits.
+	PATTERNINDEX Duplicate(PATTERNINDEX from, bool respectQtyLimits = false);
 
 	//Remove pattern from given position. Currently it actually makes the pattern
 	//'invisible' - the pattern data is cleared but the actual pattern object won't get removed.
