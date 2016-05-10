@@ -3339,10 +3339,16 @@ void CCtrlSamples::OnXFade()
 {
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
-	if(sample.pSample == nullptr || sample.nLength == 0
-		|| sample.nLoopEnd <= sample.nLoopStart || sample.nLoopEnd > sample.nLength)
+	if(sample.pSample == nullptr || sample.nLength == 0)
 	{
 		MessageBeep(MB_ICONWARNING);
+		SwitchToView();
+		return;
+	}
+	if((sample.nLoopEnd <= sample.nLoopStart || sample.nLoopEnd > sample.nLength)
+		&& (sample.nSustainEnd <= sample.nSustainStart|| sample.nSustainEnd > sample.nLength))
+	{
+		Reporting::Error("Crossfade requires a sample loop to work.", this);
 		SwitchToView();
 		return;
 	}
