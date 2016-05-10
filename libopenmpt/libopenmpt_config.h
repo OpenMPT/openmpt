@@ -36,7 +36,7 @@
 #define LIBOPENMPT_API_HELPER_PUBLIC 
 #define LIBOPENMPT_API_HELPER_LOCAL  
 
-#elif defined(__EMSCIPTEN__)
+#elif defined(__EMSCRIPTEN__)
 
 #define LIBOPENMPT_API_HELPER_EXPORT __attribute__((visibility("default"))) __attribute__((used))
 #define LIBOPENMPT_API_HELPER_IMPORT __attribute__((visibility("default"))) __attribute__((used))
