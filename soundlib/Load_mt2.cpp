@@ -94,7 +94,7 @@ struct PACKED MT2TrackSettings
 {
 	uint16 volume;
 	uint8  trackfx;		// Built-in effect type is used
-	int8   output;
+	uint8  output;
 	uint16 fxID;
 	uint16 trackEffectParam[64][8];
 
@@ -554,6 +554,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read extra data
 	uint32 numVST = 0;
+	std::vector<int8> trackRouting(GetNumChannels(), 0);
 	while(extraData.CanRead(8))
 	{
 		uint32 id = extraData.ReadUint32LE();
@@ -584,6 +585,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				if(chunk.ReadConvertEndianness(trackSettings))
 				{
 					ChnSettings[c].nVolume = trackSettings.volume >> 10;	// 32768 is 0dB
+					trackRouting[c] = trackSettings.output;
 					LimitMax(ChnSettings[c].nVolume, uint16(64));
 				}
 			}
@@ -723,6 +725,31 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			}
 #endif // NO_VST
 			break;
+		}
+	}
+
+	// Now that we have both the track settings and plugins, establish the track routing by applying the same plugins to the source track as to the target track:
+	for(CHANNELINDEX c = 0; c < GetNumChannels(); c++)
+	{
+		int8 outTrack = trackRouting[c];
+		if(outTrack > c && outTrack < GetNumChannels() && ChnSettings[outTrack].nMixPlugin != 0)
+		{
+			if(ChnSettings[c].nMixPlugin == 0)
+			{
+				ChnSettings[c].nMixPlugin = ChnSettings[outTrack].nMixPlugin;
+			} else
+			{
+				PLUGINDEX outPlug = ChnSettings[c].nMixPlugin - 1;
+				while(true)
+				{
+					if(m_MixPlugins[outPlug].GetOutputPlugin() == PLUGINDEX_INVALID)
+					{
+						m_MixPlugins[outPlug].SetOutputPlugin(ChnSettings[outTrack].nMixPlugin - 1);
+						break;
+					}
+					outPlug = m_MixPlugins[outPlug].GetOutputPlugin();
+				}
+			}
 		}
 	}
 
