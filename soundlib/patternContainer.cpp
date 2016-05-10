@@ -37,8 +37,8 @@ void CPatternContainer::DestroyPatterns()
 }
 
 
-PATTERNINDEX CPatternContainer::Duplicate(PATTERNINDEX from)
-//----------------------------------------------------------
+PATTERNINDEX CPatternContainer::Duplicate(PATTERNINDEX from, bool respectQtyLimits)
+//---------------------------------------------------------------------------------
 {
 	if(!IsValidPat(from))
 	{
@@ -46,7 +46,7 @@ PATTERNINDEX CPatternContainer::Duplicate(PATTERNINDEX from)
 	}
 
 	const CPattern oldPat = m_Patterns[from];
-	PATTERNINDEX newPatIndex = Insert(oldPat.GetNumRows());
+	PATTERNINDEX newPatIndex = InsertAny(oldPat.GetNumRows(), respectQtyLimits);
 
 	if(newPatIndex != PATTERNINDEX_INVALID)
 	{
@@ -61,12 +61,14 @@ PATTERNINDEX CPatternContainer::Duplicate(PATTERNINDEX from)
 }
 
 
-PATTERNINDEX CPatternContainer::Insert(const ROWINDEX rows)
-//---------------------------------------------------------
+PATTERNINDEX CPatternContainer::InsertAny(const ROWINDEX rows, bool respectQtyLimits)
+//-----------------------------------------------------------------------------------
 {
 	PATTERNINDEX i = 0;
 	for(i = 0; i < m_Patterns.size(); i++)
 		if(!m_Patterns[i]) break;
+	if(respectQtyLimits && i >= m_rSndFile.GetModSpecifications().patternsMax)
+		return PATTERNINDEX_INVALID;
 	if(!Insert(i, rows))
 		return PATTERNINDEX_INVALID;
 	else return i;

@@ -826,7 +826,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 		PATTERNINDEX curPat = m_sndFile.Order[selection.firstOrd + i];
 		if(m_sndFile.Patterns.IsValidIndex(curPat) && patReplaceIndex[curPat] == PATTERNINDEX_INVALID)
 		{
-			PATTERNINDEX newPat = m_sndFile.Patterns.Duplicate(curPat);
+			PATTERNINDEX newPat = m_sndFile.Patterns.Duplicate(curPat, true);
 			if(newPat != PATTERNINDEX_INVALID)
 			{
 				m_sndFile.Order.Insert(insertWhere + i, 1, newPat);

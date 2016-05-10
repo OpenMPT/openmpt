@@ -646,7 +646,7 @@ bool ModSequenceSet::MergeSequences()
 					if(patternsFixed[nPat] != SEQUENCEINDEX_INVALID && patternsFixed[nPat] != removedSequences)
 					{
 						// Oops, some other sequence uses this pattern already.
-						const PATTERNINDEX newPat = m_sndFile.Patterns.Insert(m_sndFile.Patterns[nPat].GetNumRows());
+						const PATTERNINDEX newPat = m_sndFile.Patterns.InsertAny(m_sndFile.Patterns[nPat].GetNumRows(), true);
 						if(newPat != SEQUENCEINDEX_INVALID)
 						{
 							// could create new pattern - copy data over and continue from here.
