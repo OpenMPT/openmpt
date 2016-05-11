@@ -338,8 +338,9 @@ static void ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 	// Effects
 	if(p.fxcmd || p.fxparam1 || p.fxparam2)
 	{
-		if(!p.fxcmd)
+		switch(p.fxcmd)
 		{
+		case 0x00:	// FastTracker effect
 			m.command = p.fxparam2;
 			m.param = p.fxparam1;
 			CSoundFile::ConvertModCommand(m);
@@ -348,41 +349,50 @@ static void ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 #else
 			MPT_UNREFERENCED_PARAMETER(that);
 #endif // MODPLUG_TRACKER
-		} else
-		{
-			switch(p.fxcmd)
-			{
-			case 0x20:	// Cutoff + Resonance
-				m.command = CMD_MIDI;
-				m.param = p.fxparam2 >> 1;
-				break;
+			break;
+
+		case 0x08:	// Panning + Polarity (we can only import panning for now)
+			m.command = CMD_PANNING8;
+			m.param = p.fxparam1;
+			break;
+
+		case 0x10:	// Impulse Tracker effect
+			m.command = p.fxparam2;
+			m.param = p.fxparam1;
+			CSoundFile::S3MConvert(m, true);
+			break;
+
+		case 0x20:	// Cutoff + Resonance (we can only import cutoff for now)
+			m.command = CMD_MIDI;
+			m.param = p.fxparam2 >> 1;
+			break;
 				
-			case 0x22:	// Cutoff + Resonance + Attack + Decay
-				m.command = CMD_MIDI;
-				m.param = (p.fxparam1 & 0xF0) >> 1;
-				break;
+		case 0x22:	// Cutoff + Resonance + Attack + Decay (we can only import cutoff for now)
+			m.command = CMD_MIDI;
+			m.param = (p.fxparam1 & 0xF0) >> 1;
+			break;
 
-			case 0x24:	// Reverse
-				m.command = CMD_S3MCMDEX;
-				m.param = 0x9F;
-				break;
+		case 0x24:	// Reverse
+			m.command = CMD_S3MCMDEX;
+			m.param = 0x9F;
+			break;
 
-			case 0x80:	// Track volume
-				m.command = CMD_CHANNELVOLUME;
-				m.param = p.fxparam1 / 4u;
-				break;
+		case 0x80:	// Track volume
+			m.command = CMD_CHANNELVOLUME;
+			m.param = p.fxparam1 / 4u;
+			break;
 
-			case 0x9D:	// Offset + delay
-				m.volcmd = CMD_OFFSET;
-				m.vol = p.fxparam1 >> 3;
-				m.command = CMD_S3MCMDEX;
-				m.param = 0xD0 | std::min(p.fxparam2, uint8(0x0F));
-				break;
+		case 0x9D:	// Offset + delay
+			m.volcmd = CMD_OFFSET;
+			m.vol = p.fxparam1 >> 3;
+			m.command = CMD_S3MCMDEX;
+			m.param = 0xD0 | std::min(p.fxparam2, uint8(0x0F));
+			break;
 
-			case 0xCC:	// MIDI CC
-				//m.command = CMD_MIDI;
-				break;
-			}
+		case 0xCC:	// MIDI CC
+			//m.command = CMD_MIDI;
+			break;
+
 			// TODO: More MT2 Effects
 		}
 	}
@@ -932,7 +942,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			envMask >>= 1;
 		}
-		if(!mptIns->VolEnv.dwFlags[ENV_ENABLED])
+		if(!mptIns->VolEnv.dwFlags[ENV_ENABLED] && mptIns->nNNA != NNA_NOTEFADE)
 		{
 			mptIns->nFadeOut = int16_max;
 		}
