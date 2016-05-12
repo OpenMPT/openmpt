@@ -946,13 +946,7 @@ CVstPlugin::~CVstPlugin()
 void CVstPlugin::Release()
 //------------------------
 {
-	try
-	{
-		delete this;
-	} catch (...)
-	{
-		ReportPlugException(L"Exception while destroying plugin!");
-	}
+	delete this;
 }
 
 
@@ -1181,7 +1175,7 @@ CString CVstPlugin::GetParamName(PlugParamIndex param)
 {
 	VstParameterProperties properties;
 	MemsetZero(properties.label);
-	if(Dispatch(effGetParameterProperties, param, 0, &properties, 0.0f) == 1)
+	if(param < m_Effect.numParams && Dispatch(effGetParameterProperties, param, 0, &properties, 0.0f) == 1)
 	{
 		mpt::String::SetNullTerminator(properties.label);
 		return mpt::ToCString(mpt::CharsetLocale, properties.label);
@@ -1209,30 +1203,24 @@ void CVstPlugin::Resume()
 {
 	const uint32 sampleRate = m_SndFile.GetSampleRate();
 
-	try
+	//reset some stuff
+	m_MixState.nVolDecayL = 0;
+	m_MixState.nVolDecayR = 0;
+	if(m_isResumed)
 	{
-		//reset some stuff
-		m_MixState.nVolDecayL = 0;
-		m_MixState.nVolDecayR = 0;
-		if(m_isResumed)
-		{
-			Dispatch(effStopProcess, 0, 0, nullptr, 0.0f);
-			Dispatch(effMainsChanged, 0, 0, nullptr, 0.0f);	// calls plugin's suspend
-		}
-		if (sampleRate != m_nSampleRate)
-		{
-			m_nSampleRate = sampleRate;
-			Dispatch(effSetSampleRate, 0, 0, nullptr, static_cast<float>(m_nSampleRate));
-		}
-		Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, nullptr, 0.0f);
-		//start off some stuff
-		Dispatch(effMainsChanged, 0, 1, nullptr, 0.0f);	// calls plugin's resume
-		Dispatch(effStartProcess, 0, 0, nullptr, 0.0f);
-		m_isResumed = true;
-	} catch (...)
-	{
-		ReportPlugException(L"Exception in Resume()!");
+		Dispatch(effStopProcess, 0, 0, nullptr, 0.0f);
+		Dispatch(effMainsChanged, 0, 0, nullptr, 0.0f);	// calls plugin's suspend
 	}
+	if (sampleRate != m_nSampleRate)
+	{
+		m_nSampleRate = sampleRate;
+		Dispatch(effSetSampleRate, 0, 0, nullptr, static_cast<float>(m_nSampleRate));
+	}
+	Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, nullptr, 0.0f);
+	//start off some stuff
+	Dispatch(effMainsChanged, 0, 1, nullptr, 0.0f);	// calls plugin's resume
+	Dispatch(effStartProcess, 0, 0, nullptr, 0.0f);
+	m_isResumed = true;
 }
 
 
@@ -1241,15 +1229,9 @@ void CVstPlugin::Suspend()
 {
 	if(m_isResumed)
 	{
-		try
-		{
-			Dispatch(effStopProcess, 0, 0, nullptr, 0.0f);
-			Dispatch(effMainsChanged, 0, 0, nullptr, 0.0f); // calls plugin's suspend (theoretically, plugins should clean their buffers here, but oh well, the number of plugins which don't do this is surprisingly high.)
-			m_isResumed = false;
-		} catch (...)
-		{
-			ReportPlugException(L"Exception in Suspend()!");
-		}
+		Dispatch(effStopProcess, 0, 0, nullptr, 0.0f);
+		Dispatch(effMainsChanged, 0, 0, nullptr, 0.0f); // calls plugin's suspend (theoretically, plugins should clean their buffers here, but oh well, the number of plugins which don't do this is surprisingly high.)
+		m_isResumed = false;
 	}
 }
 
@@ -1372,11 +1354,10 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 			ReportPlugException(mpt::String::Print(L"The plugin threw an exception in %1. It has automatically been set to \"Bypass\".", processMethod));
 		}
 
-		ASSERT(outputBuffers != nullptr);
-
 		// Mix outputs of multi-output VSTs:
 		if(numOutputs > 2)
 		{
+			MPT_ASSERT(outputBuffers != nullptr);
 			// first, mix extra outputs on a stereo basis
 			VstInt32 outs = numOutputs;
 			// so if nOuts is not even, let process the last output later
@@ -1406,6 +1387,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 
 		if(numOutputs != 0)
 		{
+			MPT_ASSERT(outputBuffers != nullptr);
 			ProcessMixOps(pOutL, pOutR, outputBuffers[0], outputBuffers[numOutputs > 1 ? 1 : 0], numFrames);
 		}
 
