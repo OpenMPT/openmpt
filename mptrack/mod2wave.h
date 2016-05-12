@@ -121,6 +121,7 @@ public:
 	afx_msg void OnDitherChanged();
 	afx_msg void OnFormatChanged();
 	afx_msg void OnPlayerOptions();
+	afx_msg void OnExportModeChanged();
 	afx_msg void OnSampleSlotChanged();
 	DECLARE_MESSAGE_MAP()
 };
