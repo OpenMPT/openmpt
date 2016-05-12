@@ -506,7 +506,13 @@ void CSoundFile::ReadMODPatternEntry(FileReader &file, ModCommand &m)
 {
 	uint8 data[4];
 	file.ReadArray(data);
+	ReadMODPatternEntry(data, m);
+}
 
+
+void CSoundFile::ReadMODPatternEntry(const uint8 (&data)[4], ModCommand &m)
+//-------------------------------------------------------------------------
+{
 	// Read Period
 	uint16 period = (((static_cast<uint16>(data[0]) & 0x0F) << 8) | data[1]);
 	m.note = NOTE_NONE;

@@ -640,6 +640,9 @@
     <ClCompile Include="..\plugins\MidiInOut\MidiInOutEditor.cpp">
       <Filter>Source Files\soundlib\plugins\MidiInOut</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\Load_sfx.cpp">
+      <Filter>Source Files\soundlib\Module Loaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">

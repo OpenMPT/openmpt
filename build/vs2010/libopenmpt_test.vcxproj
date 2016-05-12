@@ -353,6 +353,7 @@
     <ClCompile Include="..\..\soundlib\Load_psm.cpp" />
     <ClCompile Include="..\..\soundlib\Load_ptm.cpp" />
     <ClCompile Include="..\..\soundlib\Load_s3m.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_sfx.cpp" />
     <ClCompile Include="..\..\soundlib\Load_stm.cpp" />
     <ClCompile Include="..\..\soundlib\Load_ult.cpp" />
     <ClCompile Include="..\..\soundlib\Load_umx.cpp" />
