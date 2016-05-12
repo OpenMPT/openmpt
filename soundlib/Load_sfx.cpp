@@ -129,6 +129,8 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 
 	file.Skip(4);
 	uint16 speed = file.ReadUint16BE();
+	if(speed < 178)
+		return false;
 	m_nDefaultTempo = TEMPO((14565.0 * 122.0) / speed);
 
 	file.Skip(14);
