@@ -1063,6 +1063,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\soundlib\Load_sfx.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\soundlib\Load_stm.cpp"
 				>
 			</File>

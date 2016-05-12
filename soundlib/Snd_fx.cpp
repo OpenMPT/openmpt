@@ -3914,7 +3914,7 @@ void CSoundFile::VolumeSlide(ModChannel *pChn, ModCommand::PARAM param)
 	}
 
 	int newvolume = pChn->nVolume;
-	if(!(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_MED)))
+	if(!(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_AMF0 | MOD_TYPE_MED | MOD_TYPE_DIGI)))
 	{
 		if ((param & 0x0F) == 0x0F) //Fine upslide or slide -15
 		{
@@ -5474,7 +5474,7 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 //------------------------------------------------------------------------------------------
 {
 	if (!period) return 0;
-	if (GetType() & (MOD_TYPE_MED|MOD_TYPE_MOD|MOD_TYPE_DIGI|MOD_TYPE_MTM|MOD_TYPE_AMF0))
+	if (GetType() & (MOD_TYPE_MED | MOD_TYPE_MOD | MOD_TYPE_DIGI | MOD_TYPE_MTM | MOD_TYPE_AMF0 | MOD_TYPE_SFX))
 	{
 		return ((3546895L * 4) << FREQ_FRACBITS) / period;
 	} else if (GetType() == MOD_TYPE_XM)

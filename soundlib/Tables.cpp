@@ -87,6 +87,9 @@ static const ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_IMF,		"Imago Orpheus",			"imf" },
 	{ MOD_TYPE_J2B,		"Galaxy Sound System",		"j2b" },
 	{ MOD_TYPE_PLM,		"Disorder Tracker 2",		"plm" },
+	{ MOD_TYPE_SFX,		"SoundFX",					"sfx" },
+	{ MOD_TYPE_SFX,		"SoundFX",					"sfx2" },
+	{ MOD_TYPE_SFX,		"MultiMedia Sound",			"mms" },
 
 #ifndef NO_ARCHIVE_SUPPORT
 	// Compressed modules
@@ -147,6 +150,7 @@ static const ModCharsetInfo ModCharsetInfos[] =
 	{ MOD_TYPE_OKT , mpt::CharsetISO8859_1  },
 	{ MOD_TYPE_DBM , mpt::CharsetISO8859_1  },
 	{ MOD_TYPE_DIGI, mpt::CharsetISO8859_1  },
+	{ MOD_TYPE_SFX , mpt::CharsetISO8859_1  },
 	// Amiga // DOS
 	{ MOD_TYPE_MOD , mpt::CharsetISO8859_1  },
 	{ MOD_TYPE_MED , mpt::CharsetISO8859_1  },
