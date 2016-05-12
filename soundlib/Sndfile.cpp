@@ -364,7 +364,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	// Checking samples, load external samples
 	for(SAMPLEINDEX nSmp = 1; nSmp <= m_nSamples; nSmp++)
 	{
-		// Adjust song / sample names
+		// Sanitize sample names
 		mpt::String::SetNullTerminator(m_szNames[nSmp]);
 		ModSample &sample = Samples[nSmp];
 
@@ -987,6 +987,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(MSF_COMPATIBLE_PLAY);
 		playBehaviour.set(kTempoClamp);
 		playBehaviour.set(kPanOverride);
+		playBehaviour.set(kITPanbrelloHold);
 		playBehaviour.set(kST3NoMutedChannels);
 		playBehaviour.set(kST3PortaSampleChange);
 		playBehaviour.set(kST3EffectMemory);
