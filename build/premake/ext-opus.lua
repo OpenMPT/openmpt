@@ -48,6 +48,6 @@
   defines { "HAVE_CONFIG_H" }
   links { }
   buildoptions { "/wd4244" }
-  filter { "kind:StaticLib" }
-   defines { "OPUS_EXPORT=" }
+  filter { "kind:SharedLib" }
+   defines { "DLL_EXPORT" }
   filter {}
