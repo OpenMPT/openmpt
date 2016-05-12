@@ -70,8 +70,8 @@ BEGIN_MESSAGE_MAP(CWaveConvert, CDialog)
 	ON_COMMAND(IDC_CHECK6,			OnCheckInstrMode)
 	ON_COMMAND(IDC_RADIO1,			UpdateDialog)
 	ON_COMMAND(IDC_RADIO2,			UpdateDialog)
-	ON_COMMAND(IDC_RADIO3,			UpdateDialog)
-	ON_COMMAND(IDC_RADIO4,			UpdateDialog)
+	ON_COMMAND(IDC_RADIO3,			OnExportModeChanged)
+	ON_COMMAND(IDC_RADIO4,			OnExportModeChanged)
 	ON_COMMAND(IDC_PLAYEROPTIONS,	OnPlayerOptions)
 	ON_COMMAND(IDC_BUTTON1,			OnShowEncoderInfo)
 	ON_CBN_SELCHANGE(IDC_COMBO5,	OnFileTypeChanged)
@@ -360,6 +360,14 @@ void CWaveConvert::FillChannels()
 		{
 			continue;
 		}
+		if(IsDlgButtonChecked(IDC_RADIO4) != BST_UNCHECKED)
+		{
+			if(channels > 2)
+			{
+				// sample export only supports 2 channels max
+				continue;
+			}
+		}
 		int ndx = m_CbnChannels.AddString(gszChnCfgNames[(channels+2)/2-1]);
 		m_CbnChannels.SetItemData(ndx, channels);
 		if(channels == encSettings.Channels)
@@ -592,10 +600,21 @@ void CWaveConvert::UpdateDialog()
 	GetDlgItem(IDC_EDIT5)->EnableWindow(!bSel);
 	m_SpinLoopCount.EnableWindow(!bSel);
 
-	bSel = (IsDlgButtonChecked(IDC_RADIO4) != BST_UNCHECKED) ? FALSE : TRUE;
-	m_CbnFileType.EnableWindow(bSel);
-	m_CbnSampleSlot.EnableWindow(!bSel && !IsDlgButtonChecked(IDC_CHECK4) && !IsDlgButtonChecked(IDC_CHECK6));
-	if(!bSel)
+	// No free slots => Cannot do instrument- or channel-based export to sample
+	BOOL canDoMultiExport = (bSel /* normal export */ || m_CbnSampleSlot.GetItemData(0) == 0 /* "free slot" is in list */) ? TRUE : FALSE;
+	GetDlgItem(IDC_CHECK4)->EnableWindow(canDoMultiExport);
+	GetDlgItem(IDC_CHECK6)->EnableWindow(canDoMultiExport);
+}
+
+
+void CWaveConvert::OnExportModeChanged()
+//--------------------------------------
+{
+	SaveEncoderSettings();
+	bool sampleExport = (IsDlgButtonChecked(IDC_RADIO4) != BST_UNCHECKED);
+	m_CbnFileType.EnableWindow(sampleExport ? FALSE : TRUE);
+	m_CbnSampleSlot.EnableWindow(sampleExport && !IsDlgButtonChecked(IDC_CHECK4) && !IsDlgButtonChecked(IDC_CHECK6));
+	if(sampleExport)
 	{
 		// Render to sample: Always use WAV
 		if(m_CbnFileType.GetCurSel() != 0)
@@ -604,10 +623,10 @@ void CWaveConvert::UpdateDialog()
 			OnFileTypeChanged();
 		}
 	}
-	// No free slots => Cannot do instrument- or channel-based export to sample
-	BOOL canDoMultiExport = (bSel /* normal export */ || m_CbnSampleSlot.GetItemData(0) == 0 /* "free slot" is in list */) ? TRUE : FALSE;
-	GetDlgItem(IDC_CHECK4)->EnableWindow(canDoMultiExport);
-	GetDlgItem(IDC_CHECK6)->EnableWindow(canDoMultiExport);
+	FillChannels();
+	FillFormats();
+	FillDither();
+	FillTags();
 }
 
 
