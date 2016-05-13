@@ -32,6 +32,11 @@
 #include "ChunkReader.h"
 #include "SampleFormatConverters.h"
 #include "../common/ComponentManager.h"
+#ifdef MPT_ENABLE_MP3_SAMPLES
+#include "MPEGFrame.h"
+#endif // MPT_ENABLE_MP3_SAMPLES
+//#include "../common/mptCRC.h"
+#include "OggStream.h"
 #ifdef MPT_WITH_OGG
 #include <ogg/ogg.h>
 #endif // MPT_WITH_OGG
@@ -52,9 +57,6 @@
 #ifdef MPT_WITH_STBVORBIS
 #include <stb_vorbis/stb_vorbis.c>
 #endif // MPT_WITH_STBVORBIS
-#if defined(MPT_WITH_MPG123)
-#include <mpg123.h>
-#endif // MPT_WITH_MPG123
 #if defined(MPT_WITH_MINIMP3)
 extern "C" {
 #include <minimp3/minimp3.h>
@@ -67,13 +69,159 @@ extern "C" {
 #include <mfreadwrite.h>
 #include <mferror.h>
 #include <Propvarutil.h>
-#include "SampleFormatConverters.h"
 #endif // MPT_WITH_MEDIAFOUNDATION
-#ifdef MPT_ENABLE_MP3_SAMPLES
-#include "MPEGFrame.h"
-#endif // MPT_ENABLE_MP3_SAMPLES
-//#include "../common/mptCRC.h"
-#include "OggStream.h"
+
+// mpg123 must be last because of mpg123 largfile support insanity
+#if defined(MPT_WITH_MPG123)
+
+#include <stdlib.h>
+#include <sys/types.h>
+
+#include <mpg123.h>
+
+// check for utterly weird mpg123 largefile support
+
+#if !defined(MPG123_API_VERSION)
+#error "libmpg123 API version unknown. Assuming too old."
+#else
+
+#if (MPG123_API_VERSION < 11)
+#error "libmpg123 API version too old."
+
+#elif (MPG123_API_VERSION < 23)
+// OK
+
+#elif (MPG123_API_VERSION < 25) // < 1.12.0
+#if MPT_COMPILER_MSVC
+#pragma message("libmpg123 API version with split largefile support detected. This has not been tested at all.")
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#warning "libmpg123 API version with split largefile support detected. This has not been tested at all."
+#else
+// There is no portable way to display a warning.
+// Try to provoke a warning with an unused function.
+static void OpenMPT_libmpg123_API_version_with_split_largefile_support_detected__This_has_not_been_tested_at_all_() { } 
+#endif
+
+#elif (MPG123_API_VERSION == 25) // == 1.12.x and some later
+// 1.12.2 introduced dumb wrappers for suffixed _32 and _64 functions.
+// We cannot detect whether it's one of the broken versions 1.12.0 or 1.12.1,
+// and thus have to implement a work-around for all of them (does not hurt though).
+#define MPT_LIBMPG123_WORKAROUND_LARGEFILE_SUFFIX
+
+#else // modern
+// OK
+
+#endif // MPG123_API_VERSION
+#endif // MPG123_API_VERSION
+
+#if defined(MPT_LIBMPG123_WORKAROUND_LARGEFILE_SUFFIX)
+
+// We are always compiling with _FILE_OFFSET_BITS==64, even on 64 bit platforms.
+// libmpg123 does not provide the suffixed _64 versions in this case.
+// Thus, on 64 bit, #undef all the wrapper macros.
+
+extern "C" {
+
+#ifdef mpg123_open
+#undef mpg123_open
+#endif
+EXPORT int mpg123_open(mpg123_handle *mh, const char *path);
+
+#ifdef mpg123_open_fd
+#undef mpg123_open_fd
+#endif
+EXPORT int mpg123_open_fd(mpg123_handle *mh, int fd);
+
+#ifdef mpg123_open_handle  
+#undef mpg123_open_handle
+#endif
+EXPORT int mpg123_open_handle(mpg123_handle *mh, void *iohandle);
+
+#ifdef mpg123_framebyframe_decode 
+#undef mpg123_framebyframe_decode
+#endif
+EXPORT int mpg123_framebyframe_decode(mpg123_handle *mh, off_t *num, unsigned char **audio, size_t *bytes);
+
+#ifdef mpg123_decode_frame 
+#undef mpg123_decode_frame
+#endif
+EXPORT int mpg123_decode_frame(mpg123_handle *mh, off_t *num, unsigned char **audio, size_t *bytes);
+
+#ifdef mpg123_tell         
+#undef mpg123_tell
+#endif
+EXPORT off_t mpg123_tell(mpg123_handle *mh);
+
+#ifdef mpg123_tellframe    
+#undef mpg123_tellframe
+#endif
+EXPORT off_t mpg123_tellframe(mpg123_handle *mh);
+
+#ifdef mpg123_tell_stream  
+#undef mpg123_tell_stream
+#endif
+EXPORT off_t mpg123_tell_stream(mpg123_handle *mh);
+
+#ifdef mpg123_seek         
+#undef mpg123_seek
+#endif
+EXPORT off_t mpg123_seek(mpg123_handle *mh, off_t sampleoff, int whence);
+
+#ifdef mpg123_feedseek     
+#undef mpg123_feedseek
+#endif
+EXPORT off_t mpg123_feedseek(mpg123_handle *mh, off_t sampleoff, int whence, off_t *input_offset);
+
+#ifdef mpg123_seek_frame   
+#undef mpg123_seek_frame
+#endif
+EXPORT off_t mpg123_seek_frame(mpg123_handle *mh, off_t frameoff, int whence);
+
+#ifdef mpg123_timeframe    
+#undef mpg123_timeframe
+#endif
+EXPORT off_t mpg123_timeframe(mpg123_handle *mh, double sec);
+
+#ifdef mpg123_index        
+#undef mpg123_index
+#endif
+EXPORT int mpg123_index(mpg123_handle *mh, off_t **offsets, off_t *step, size_t *fill);
+
+#ifdef mpg123_set_index    
+#undef mpg123_set_index
+#endif
+EXPORT int mpg123_set_index(mpg123_handle *mh, off_t *offsets, off_t step, size_t fill);
+
+#ifdef mpg123_position     
+#undef mpg123_position
+#endif
+EXPORT int mpg123_position( mpg123_handle *mh, off_t frame_offset, off_t buffered_bytes, off_t *current_frame, off_t *frames_left, double *current_seconds, double *seconds_left);
+
+#ifdef mpg123_length       
+#undef mpg123_length
+#endif
+EXPORT off_t mpg123_length(mpg123_handle *mh);
+
+#ifdef mpg123_set_filesize 
+#undef mpg123_set_filesize
+#endif
+EXPORT int mpg123_set_filesize(mpg123_handle *mh, off_t size);
+
+#ifdef mpg123_replace_reader 
+#undef mpg123_replace_reader
+#endif
+EXPORT int mpg123_replace_reader(mpg123_handle *mh, ssize_t (*r_read) (int, void *, size_t), off_t (*r_lseek)(int, off_t, int));
+
+#ifdef mpg123_replace_reader_handle 
+#undef mpg123_replace_reader_handle
+#endif
+EXPORT int mpg123_replace_reader_handle(mpg123_handle *mh, ssize_t (*r_read) (void *, void *, size_t), off_t (*r_lseek)(void *, off_t, int), void (*cleanup)(void*));
+
+} // extern "C"
+
+#endif // MPT_LIBMPG123_WORKAROUND_LARGEFILE_SUFFIX
+
+#endif // MPT_WITH_MPG123
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -3074,21 +3222,39 @@ public:
 	void (*mpg123_delete )(mpg123_handle*);
 	int (*mpg123_param )(mpg123_handle*, enum mpg123_parms, long, double);
 	int (*mpg123_open_handle )(mpg123_handle*, void*);
+#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
+	int (*mpg123_open_handle_64 )(mpg123_handle*, void*);
+#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 #if MPT_COMPILER_MSVC
 	int (*mpg123_replace_reader_handle)(mpg123_handle*, 
 		size_t(*)(void *, void *, size_t),
 		off_t(*)(void *, off_t, int),
 		void(*)(void *));
+#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
+	int (*mpg123_replace_reader_handle_64)(mpg123_handle*, 
+		size_t(*)(void *, void *, size_t),
+		off_t(*)(void *, off_t, int),
+		void(*)(void *));
+#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 #else // !MPT_COMPILER_MSVC
 	int (*mpg123_replace_reader_handle)(mpg123_handle*, 
 		ssize_t(*)(void *, void *, size_t),
 		off_t(*)(void *, off_t, int),
 		void(*)(void *));
+#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
+	int (*mpg123_replace_reader_handle_64)(mpg123_handle*, 
+		ssize_t(*)(void *, void *, size_t),
+		off_t(*)(void *, off_t, int),
+		void(*)(void *));
+#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 #endif // MPT_COMPILER_MSVC
 	int (*mpg123_read )(mpg123_handle*, unsigned char*, size_t, size_t*);
 	int (*mpg123_getformat )(mpg123_handle*, long*, int*, int*);
 	int (*mpg123_scan )(mpg123_handle*);
 	off_t (*mpg123_length )(mpg123_handle*);
+#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
+	off_t (*mpg123_length_64 )(mpg123_handle*);
+#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 
 #if MPT_COMPILER_MSVC
 	static size_t FileReaderRead(void *fp, void *buf, size_t count)
@@ -3144,12 +3310,33 @@ public:
 		MPT_COMPONENT_BIND("mpg123", mpg123_new);
 		MPT_COMPONENT_BIND("mpg123", mpg123_delete);
 		MPT_COMPONENT_BIND("mpg123", mpg123_param);
-		MPT_COMPONENT_BIND("mpg123", mpg123_open_handle);
-		MPT_COMPONENT_BIND("mpg123", mpg123_replace_reader_handle);
+		MPT_COMPONENT_BIND_OPTIONAL("mpg123", mpg123_open_handle);
+		MPT_COMPONENT_BIND_OPTIONAL("mpg123", mpg123_open_handle_64);
+		if(!mpg123_open_handle && !mpg123_open_handle_64)
+		{
+			return false;
+		}
+		MPT_COMPONENT_BIND_OPTIONAL("mpg123", mpg123_replace_reader_handle);
+		MPT_COMPONENT_BIND_OPTIONAL("mpg123", mpg123_replace_reader_handle_64);
+		if(!mpg123_replace_reader_handle && !mpg123_replace_reader_handle_64)
+		{
+			return false;
+		}
 		MPT_COMPONENT_BIND("mpg123", mpg123_read);
 		MPT_COMPONENT_BIND("mpg123", mpg123_getformat);
 		MPT_COMPONENT_BIND("mpg123", mpg123_scan);
-		MPT_COMPONENT_BIND("mpg123", mpg123_length);
+		MPT_COMPONENT_BIND_OPTIONAL("mpg123", mpg123_length);
+		MPT_COMPONENT_BIND_OPTIONAL("mpg123", mpg123_length_64);
+		if(!mpg123_length && !mpg123_length_64)
+		{
+			return false;
+		}
+		#if MPT_COMPILER_MSVC
+			if(!mpg123_open_handle || !mpg123_replace_reader_handle || !mpg123_length)
+			{
+				return false;
+			}
+		#endif
 		if(HasBindFailed())
 		{
 			return false;
@@ -3318,11 +3505,25 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		mpg123->mpg123_delete(mh);
 		return false;
 	}
+#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND) && !MPT_COMPILER_MSVC
+	if(mpg123->mpg123_replace_reader_handle_64 && mpg123->mpg123_replace_reader_handle_64(mh, ComponentMPG123::FileReaderRead, ComponentMPG123::FileReaderLSeek, 0))
+	{
+		mpg123->mpg123_delete(mh);
+		return false;
+	} else
+#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 	if(mpg123->mpg123_replace_reader_handle(mh, ComponentMPG123::FileReaderRead, ComponentMPG123::FileReaderLSeek, 0))
 	{
 		mpg123->mpg123_delete(mh);
 		return false;
 	}
+#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND) && !MPT_COMPILER_MSVC
+	if(mpg123->mpg123_open_handle_64 && mpg123->mpg123_open_handle_64(mh, &file))
+	{
+		mpg123->mpg123_delete(mh);
+		return false;	
+	} else
+#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 	if(mpg123->mpg123_open_handle(mh, &file))
 	{
 		mpg123->mpg123_delete(mh);
@@ -3340,10 +3541,24 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	}
 	if(!nchannels || nchannels > 2
 		|| (encoding & (MPG123_ENC_16 | MPG123_ENC_SIGNED)) != (MPG123_ENC_16 | MPG123_ENC_SIGNED)
-		|| (length = mpg123->mpg123_length(mh)) == 0)
+		)
 	{
 		mpg123->mpg123_delete(mh);
 		return false;
+	}
+#if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND) && !MPT_COMPILER_MSVC
+	if(mpg123->mpg123_length_64)
+	{
+		length = mpg123->mpg123_length_64(mh);
+	} else
+#endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
+	{
+		length = mpg123->mpg123_length(mh);
+	}
+	if(length == 0)
+	{
+		mpg123->mpg123_delete(mh);
+		return false;	
 	}
 
 	DestroySampleThreadsafe(sample);
