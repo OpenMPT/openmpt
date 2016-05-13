@@ -2571,6 +2571,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 
 	const ROWINDEX startRow = m_Selection.GetStartRow(), endRow = m_Selection.GetEndRow();
 	const CHANNELINDEX startChan = m_Selection.GetStartChannel(), endChan = m_Selection.GetEndChannel();
+	const PatternCursor::Columns column = m_Selection.GetStartColumn();
 
 	// Don't allow notes outside our supported note range.
 	const ModCommand::NOTE noteMin = pSndFile->GetModSpecifications().noteMin;
@@ -2588,7 +2589,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 		PatternRow m = pSndFile->Patterns[m_nPattern].GetRow(row);
 		for(CHANNELINDEX chn = startChan; chn <= endChan; chn++)
 		{
-			if(m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::noteColumn)))
+			if(column == PatternCursor::noteColumn && m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::noteColumn)))
 			{
 				// Increase / decrease note
 				if(m[chn].IsNote())
@@ -2625,20 +2626,14 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 					}
 				}
 			}
-			if(m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::instrColumn)))
+			if(column == PatternCursor::instrColumn && m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::instrColumn)) && m[chn].instr != 0)
 			{
 				// Increase / decrease instrument
 				int instr = m[chn].instr + offset * (coarse ? 10 : 1);
-				if(m[chn].IsInstrPlug())
-				{
-					Limit(instr, 0, int(MAX_MIXPLUGINS));
-				} else
-				{
-					Limit(instr, 0, instrMax);
-				}
+				Limit(instr, 1, m[chn].IsInstrPlug() ? MAX_MIXPLUGINS : instrMax);
 				m[chn].instr = (ModCommand::INSTR)instr;
 			}
-			if(m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::volumeColumn)))
+			if(column == PatternCursor::volumeColumn && m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::volumeColumn)))
 			{
 				// Increase / decrease volume parameter
 				if(m[chn].IsPcNote())
@@ -2660,7 +2655,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 					m[chn].vol = (ModCommand::VOL)vol;
 				}
 			}
-			if(m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::effectColumn)) || m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::paramColumn)))
+			if((column == PatternCursor::effectColumn || column == PatternCursor::paramColumn) && m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::effectColumn)) || m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::paramColumn)))
 			{
 				// Increase / decrease effect parameter
 				if(m[chn].IsPcNote())
