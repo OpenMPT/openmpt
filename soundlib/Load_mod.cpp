@@ -883,6 +883,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			m_SongFlags.set(SONG_PT_MODE);
 			m_playBehaviour.set(kMODSampleSwap);
+			m_playBehaviour.set(kMODOneShotLoops);
 			if(maxPanning > 0) m_playBehaviour.set(kMODIgnorePanning);
 		}
 	} else if(!onlyAmigaNotes && fileHeader.restartPos == 0x7F && isMdKd && fileHeader.restartPos + 1u >= realOrders)

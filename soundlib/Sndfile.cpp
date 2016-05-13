@@ -1033,7 +1033,6 @@ PlayBehaviourSet CSoundFile::GetDefaultPlaybackBehaviour(MODTYPE type)
 		break;
 
 	case MOD_TYPE_MOD:
-		playBehaviour.set(kMODOneShotLoops);
 		playBehaviour.set(kMODSampleSwap);
 		break;
 

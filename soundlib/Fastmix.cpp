@@ -484,9 +484,9 @@ void CSoundFile::CreateStereoMix(int count)
 				}
 			}
 
-			if((m_playBehaviour[kMODSampleSwap] || m_playBehaviour[kMODOneShotLoops]) && chn.nPos >= chn.nLoopEnd && chn.dwFlags[CHN_LOOP])
+			if(chn.nPos >= chn.nLoopEnd && chn.dwFlags[CHN_LOOP])
 			{
-				if(chn.nNewIns && chn.nNewIns <= GetNumSamples() && chn.pModSample != &Samples[chn.nNewIns])
+				if(m_playBehaviour[kMODSampleSwap] && chn.nNewIns && chn.nNewIns <= GetNumSamples() && chn.pModSample != &Samples[chn.nNewIns])
 				{
 					// ProTracker compatibility: Instrument changes without a note do not happen instantly, but rather when the sample loop has finished playing.
 					// Test case: PTInstrSwap.mod
@@ -503,7 +503,7 @@ void CSoundFile::CreateStereoMix(int count)
 					{
 						break;
 					}
-				} else if(chn.nLoopStart == 0 && m_playBehaviour[kMODOneShotLoops])
+				} else if(m_playBehaviour[kMODOneShotLoops] && chn.nLoopStart == 0)
 				{
 					// ProTracker "oneshot" loops (if loop start is 0, play the whole sample once and then repeat until loop end)
 					chn.nPos = 0;
