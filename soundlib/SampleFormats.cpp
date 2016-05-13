@@ -116,6 +116,10 @@ static void OpenMPT_libmpg123_API_version_with_split_largefile_support_detected_
 
 #if defined(MPT_LIBMPG123_WORKAROUND_LARGEFILE_SUFFIX)
 
+#if !MPT_COMPILER_MSVC
+#if defined(MPT_ARCH_BITS)
+#if MPT_ARCH_BITS_64
+
 // We are always compiling with _FILE_OFFSET_BITS==64, even on 64 bit platforms.
 // libmpg123 does not provide the suffixed _64 versions in this case.
 // Thus, on 64 bit, #undef all the wrapper macros.
@@ -218,6 +222,10 @@ EXPORT int mpg123_replace_reader(mpg123_handle *mh, ssize_t (*r_read) (int, void
 EXPORT int mpg123_replace_reader_handle(mpg123_handle *mh, ssize_t (*r_read) (void *, void *, size_t), off_t (*r_lseek)(void *, off_t, int), void (*cleanup)(void*));
 
 } // extern "C"
+
+#endif
+#endif
+#endif
 
 #endif // MPT_LIBMPG123_WORKAROUND_LARGEFILE_SUFFIX
 
