@@ -196,6 +196,9 @@ private:
 
 			ogg_stream_clear(&os);
 
+			opus_multistream_encoder_destroy(st);
+			st = nullptr;
+
 			started = false;
 			inited = false;
 		}
