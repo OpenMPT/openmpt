@@ -66,7 +66,7 @@ OPENMPT_NAMESPACE_BEGIN
 #if defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND)
 
 class ComponentUnMO3
-#if defined(MPT_ENABLE_UNMO3)
+#if defined(MPT_WITH_UNMO3)
 	: public ComponentBuiltin
 #elif defined(MPT_ENABLE_UNMO3_DYNBIND)
 	: public ComponentLibrary
@@ -89,7 +89,7 @@ public:
 	}
 public:
 	ComponentUnMO3()
-#if defined(MPT_ENABLE_UNMO3)
+#if defined(MPT_WITH_UNMO3)
 		: ComponentBuiltin()
 #elif defined(MPT_ENABLE_UNMO3_DYNBIND)
 		: ComponentLibrary(ComponentTypeForeign)
@@ -99,7 +99,7 @@ public:
 	}
 	bool DoInitialize()
 	{
-#if defined(MPT_ENABLE_UNMO3)
+#if defined(MPT_WITH_UNMO3)
 		UNMO3_GetVersion = &(::UNMO3_GetVersion);
 		UNMO3_Free = &(::UNMO3_Free);
 		UNMO3_Decode_Old = nullptr;
