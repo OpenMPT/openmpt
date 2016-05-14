@@ -117,6 +117,7 @@ static void OpenMPT_libmpg123_API_version_with_split_largefile_support_detected_
 #if defined(MPT_LIBMPG123_WORKAROUND_LARGEFILE_SUFFIX)
 
 #if !MPT_COMPILER_MSVC
+#if defined(_FILE_OFFSET_BITS) && !defined(MPG123_LARGESUFFIX)
 #if defined(MPT_ARCH_BITS)
 #if MPT_ARCH_BITS_64
 
@@ -223,6 +224,7 @@ EXPORT int mpg123_replace_reader_handle(mpg123_handle *mh, ssize_t (*r_read) (vo
 
 } // extern "C"
 
+#endif
 #endif
 #endif
 #endif
