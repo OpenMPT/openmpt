@@ -376,6 +376,11 @@ BOOL CModDoc::OnOpenDocument(const mpt::PathString &filename)
 		m_ShowSavedialog = true;
 		break;
 	}
+	// If the file was packed in some kind of container (e.g. ZIP, or simply a format like MO3), prompt for new file extension as well
+	if(m_SndFile.GetContainerType() != MOD_CONTAINERTYPE_NONE)
+	{
+		m_ShowSavedialog = true;
+	}
 
 	ReinitRecordState();
 
