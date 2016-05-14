@@ -2089,7 +2089,7 @@ bool CSoundFile::ProcessEffects()
 	for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, pChn++)
 	{
 		const uint32 tickCount = m_PlayState.m_nTickCount % (m_PlayState.m_nMusicSpeed + m_PlayState.m_nFrameDelay);
-		uint32 instr = pChn->rowCommand.instr;
+		ModCommand::INSTR instr = pChn->rowCommand.instr;
 		uint32 volcmd = pChn->rowCommand.volcmd;
 		uint32 vol = pChn->rowCommand.vol;
 		uint32 cmd = pChn->rowCommand.command;
@@ -2203,15 +2203,7 @@ bool CSoundFile::ProcessEffects()
 					// Additional test case: tickdelay.it
 					if(instr)
 					{
-						if(GetNumInstruments() == 0)
-						{
-							if(instr < MAX_SAMPLES)
-								pChn->pModSample = &Samples[instr];
-						} else
-						{
-							if(instr < MAX_INSTRUMENTS)
-								pChn->pModInstrument = Instruments[instr];
-						}
+						pChn->nNewIns = instr;
 					}
 					continue;
 				}
@@ -2946,6 +2938,10 @@ bool CSoundFile::ProcessEffects()
 
 		// Set Global Volume
 		case CMD_GLOBALVOLUME:
+			// IT compatibility: Only apply global volume on first tick (and multiples)
+			// Test case: GlobalVolFirstTick.it
+			if(!m_SongFlags[SONG_FIRSTTICK])
+				break;
 			// ST3 applies global volume on tick 1 and does other weird things, but we won't emulate this for now.
 // 			if(((GetType() & MOD_TYPE_S3M) && m_nTickCount != 1)
 // 				|| (!(GetType() & MOD_TYPE_S3M) && !m_SongFlags[SONG_FIRSTTICK]))
