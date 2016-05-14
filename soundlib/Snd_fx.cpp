@@ -2089,7 +2089,7 @@ bool CSoundFile::ProcessEffects()
 	for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, pChn++)
 	{
 		const uint32 tickCount = m_PlayState.m_nTickCount % (m_PlayState.m_nMusicSpeed + m_PlayState.m_nFrameDelay);
-		ModCommand::INSTR instr = pChn->rowCommand.instr;
+		uint32 instr = pChn->rowCommand.instr;
 		uint32 volcmd = pChn->rowCommand.volcmd;
 		uint32 vol = pChn->rowCommand.vol;
 		uint32 cmd = pChn->rowCommand.command;
@@ -2203,7 +2203,7 @@ bool CSoundFile::ProcessEffects()
 					// Additional test case: tickdelay.it
 					if(instr)
 					{
-						pChn->nNewIns = instr;
+						pChn->nNewIns = static_cast<ModCommand::INSTR>(instr);
 					}
 					continue;
 				}
