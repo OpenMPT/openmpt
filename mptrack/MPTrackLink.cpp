@@ -18,6 +18,7 @@ OPENMPT_NAMESPACE_BEGIN
 #pragma comment(lib, "delayimp.lib")
 #pragma comment(lib, "version.lib")
 #pragma comment(lib, "rpcrt4.lib")
+#pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib, "wininet.lib")
 #pragma comment(lib, "htmlhelp.lib")
 #pragma comment(lib, "uxtheme.lib")
