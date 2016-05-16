@@ -498,9 +498,12 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Reading instrument, sample and pattern offsets
 	std::vector<uint32> insPos, smpPos, patPos;
-	file.ReadVectorLE(insPos, fileHeader.insnum);
-	file.ReadVectorLE(smpPos, fileHeader.smpnum);
-	file.ReadVectorLE(patPos, fileHeader.patnum);
+	if(!file.ReadVectorLE(insPos, fileHeader.insnum)
+		|| !file.ReadVectorLE(smpPos, fileHeader.smpnum)
+		|| !file.ReadVectorLE(patPos, fileHeader.patnum))
+	{
+		return false;
+	}
 
 	// Find the first parapointer.
 	// This is used for finding out whether the edit history is actually stored in the file or not,
@@ -1055,11 +1058,12 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 		case 1:
 			m_madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
-			// Schism Tracker considers this quirk to be a bug and does not emulate it.
-			m_playBehaviour.reset(kITShortSampleRetrig);
-			// Hertz in linear mode: Added 2015-01-29, http://schismtracker.org/hg/rev/ba3f9ecff466
+			// Hertz in linear mode: Added 2015-01-29, https://github.com/schismtracker/schismtracker/commit/671b30311082a0e7df041fca25f989b5d2478f69
 			if(fileHeader.cwtv < 0x17CC)
 				m_playBehaviour.reset(kHertzInLinearMode);
+			// Qxx with short samples: Added 2016-05-13, https://github.com/schismtracker/schismtracker/commit/e7b1461fe751554309fd403713c2a1ef322105ca
+			if(fileHeader.cwtv < 0x19A2)
+				m_playBehaviour.reset(kITShortSampleRetrig);
 			break;
 		case 4:
 			m_madeWithTracker = mpt::format("pyIT %1.%2")((fileHeader.cwtv & 0x0F00) >> 8, mpt::fmt::hex0<2>((fileHeader.cwtv & 0xFF)));
