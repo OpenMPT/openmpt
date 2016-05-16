@@ -137,7 +137,7 @@ CZipArchive::CZipArchive(FileReader &file)
 				if(unzGetGlobalComment(zipFile, &commentData[0], info.size_comment) >= 0)
 				{
 					commentData[info.size_comment - 1] = '\0';
-					comment = mpt::ToUnicode(mpt::CharsetCP437, &commentData[0]);
+					comment = mpt::ToUnicode(mpt::IsUTF8(&commentData[0]) ? mpt::CharsetUTF8 : mpt::CharsetCP437, &commentData[0]);
 				}
 			}
 		}
@@ -157,7 +157,7 @@ CZipArchive::CZipArchive(FileReader &file)
 		unz_file_info info;
 		char name[256];
 		unzGetCurrentFileInfo(zipFile, &info, name, sizeof(name), nullptr, 0, nullptr, 0);
-		fileinfo.name = mpt::PathString::FromWide(mpt::ToWide(mpt::CharsetCP437, std::string(name)));
+		fileinfo.name = mpt::PathString::FromUnicode(mpt::ToUnicode((info.flag & (1<<11)) ? mpt::CharsetUTF8 : mpt::CharsetCP437, std::string(name)));
 		fileinfo.size = info.uncompressed_size;
 
 		unzGetFilePos(zipFile, &curFile);
@@ -249,7 +249,7 @@ CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
 		if(mz_zip_reader_file_stat(zip, i, &stat))
 		{
 			info.type = ArchiveFileNormal;
-			info.name = mpt::PathString::FromUnicode(mpt::ToUnicode(mpt::CharsetCP437, stat.m_filename));
+			info.name = mpt::PathString::FromUnicode(mpt::ToUnicode((stat.m_bit_flag & (1<<11)) ? mpt::CharsetUTF8 : mpt::CharsetCP437, stat.m_filename));
 			info.size = stat.m_uncomp_size;
 		}
 		if(mz_zip_reader_is_file_a_directory(zip, i))
