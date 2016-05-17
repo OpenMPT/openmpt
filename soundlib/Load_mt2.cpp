@@ -738,6 +738,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
+#ifndef NO_PLUGINS
 	// Now that we have both the track settings and plugins, establish the track routing by applying the same plugins to the source track as to the target track:
 	for(CHANNELINDEX c = 0; c < GetNumChannels(); c++)
 	{
@@ -762,6 +763,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 	}
+#endif // NO_PLUGINS
 
 	// Read drum channels
 	INSTRUMENTINDEX drumMap[8] = { 0 };
@@ -1056,6 +1058,11 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	for(INSTRUMENTINDEX ins = 0; ins < 255; ins++)
 	{
 		ModInstrument *mptIns = Instruments[ins + 1];
+
+		// Instruments with plugin assignments never play samples at the same time!
+		if(mptIns == nullptr || mptIns->nMixPlug != 0)
+			continue;
+
 		if(instrChunks[ins].GetLength())
 		{
 			FileReader &chunk = instrChunks[ins];
@@ -1069,38 +1076,41 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				file.ReadConvertEndianness(groups[grp]);
 			}
 
-			// Instruments with plugin assignments never play samples at the same time!
-			if(mptIns != nullptr && mptIns->nMixPlug == 0)
+			mptIns->nGlobalVol = 32;	// Compensate for extended dynamic range of drum instruments
+			for(uint32 note = 0; note < 96; note++)
 			{
-				mptIns->nGlobalVol = 32;	// Compensate for extended dynamic range of drum instruments
-				for(uint32 note = 0; note < 96; note++)
+				if(insHeader.groupMap[note] < insHeader.numSamples)
 				{
-					if(insHeader.groupMap[note] < insHeader.numSamples)
+					const MT2Group &group = groups[insHeader.groupMap[note]];
+					SAMPLEINDEX sample = group.sample + 1;
+					mptIns->Keyboard[note + 11 + NOTE_MIN] = sample;
+					if(sample > 0 && sample <= m_nSamples)
 					{
-						const MT2Group &group = groups[insHeader.groupMap[note]];
-						SAMPLEINDEX sample = group.sample + 1;
-						mptIns->Keyboard[note + 11 + NOTE_MIN] = sample;
-						if(sample > 0 && sample <= m_nSamples)
+						ModSample &mptSmp = Samples[sample];
+						mptSmp.nVibType = insHeader.vibtype;
+						mptSmp.nVibSweep = insHeader.vibsweep;
+						mptSmp.nVibDepth = insHeader.vibdepth;
+						mptSmp.nVibRate = insHeader.vibrate;
+						mptSmp.nGlobalVol = uint16(group.vol) * 2;
+						mptSmp.nFineTune = group.pitch;
+						if(sampleNoInterpolation[sample - 1])
 						{
-							ModSample &mptSmp = Samples[sample];
-							mptSmp.nVibType = insHeader.vibtype;
-							mptSmp.nVibSweep = insHeader.vibsweep;
-							mptSmp.nVibDepth = insHeader.vibdepth;
-							mptSmp.nVibRate = insHeader.vibrate;
-							mptSmp.nGlobalVol = uint16(group.vol) * 2;
-							mptSmp.nFineTune = group.pitch;
-							if(sampleNoInterpolation[sample - 1])
-							{
-								mptIns->nResampling = SRCMODE_NEAREST;
-							}
-							if(sampleSynchronized[sample - 1])
-							{
-								mptIns->NoteMap[note + 11 + NOTE_MIN] = NOTE_MIDDLEC;
-							}
+							mptIns->nResampling = SRCMODE_NEAREST;
 						}
-						// TODO: volume, finetune for duplicated samples
+						if(sampleSynchronized[sample - 1])
+						{
+							mptIns->NoteMap[note + 11 + NOTE_MIN] = NOTE_MIDDLEC;
+						}
 					}
+					// TODO: volume, finetune for duplicated samples
 				}
+			}
+		} else
+		{
+			// Default assignment? Fixes e.g. instrument 33 in Destiny - Dream Alone.mt2
+			for(uint32 note = 0; note < 96; note++)
+			{
+				mptIns->Keyboard[note + 11 + NOTE_MIN] = ins + 1;
 			}
 		}
 	}
