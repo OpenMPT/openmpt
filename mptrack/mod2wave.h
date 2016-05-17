@@ -111,8 +111,8 @@ public:
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange *pDX);
 	virtual void OnOK();
-	afx_msg void OnCheck1();
-	afx_msg void OnCheck2();
+	afx_msg void OnCheckSizeLimit();
+	afx_msg void OnCheckTimeLimit();
 	afx_msg void OnCheckChannelMode();
 	afx_msg void OnCheckInstrMode();
 	afx_msg void OnFileTypeChanged();
