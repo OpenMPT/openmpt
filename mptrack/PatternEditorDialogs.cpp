@@ -23,8 +23,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-// -> CODE#0010
-// -> DESC="add extended parameter mechanism to pattern effects"
 static void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nChannel, CSoundFile &sndFile, UINT &xparam, UINT &multiplier)
 //-----------------------------------------------------------------------------------------------------------------------------------------------
 {
@@ -40,7 +38,7 @@ static void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELIND
 		while(nCmdRow >= 0)
 		{
 			const ModCommand *m = sndFile.Patterns[nPat].GetpModCommand(nCmdRow, nChannel);
-			if(m->command == CMD_OFFSET || m->command == CMD_PATTERNBREAK || m->command == CMD_TEMPO)
+			if(m->command == CMD_OFFSET || m->command == CMD_PATTERNBREAK || m->command == CMD_POSITIONJUMP || m->command == CMD_TEMPO)
 				break;
 			if(m->command != CMD_XPARAM)
 			{
@@ -49,7 +47,7 @@ static void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELIND
 			}
 			nCmdRow--;
 		}
-	} else if(command != CMD_OFFSET && command != CMD_PATTERNBREAK && command != CMD_TEMPO)
+	} else if(command != CMD_OFFSET && command != CMD_PATTERNBREAK || command == CMD_POSITIONJUMP && command != CMD_TEMPO)
 	{
 		// If current row do not own any satisfying command parameter to extend, set return state
 		nCmdRow = -1;
@@ -100,7 +98,6 @@ static void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELIND
 	multiplier = mult;
 	xparam = xp;
 }
-// -! NEW_FEATURE#0010
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -721,7 +718,7 @@ void CEditCommand::OnCommandChanged()
 		newCommand = static_cast<ModCommand::COMMAND>((ndx >= 0) ? effectInfo.GetEffectFromIndex(ndx, newParam) : CMD_NONE);
 	}
 
-	if(newCommand == CMD_OFFSET || newCommand == CMD_PATTERNBREAK || newCommand == CMD_TEMPO || newCommand == CMD_XPARAM)
+	if(newCommand == CMD_OFFSET || newCommand == CMD_PATTERNBREAK || newCommand == CMD_POSITIONJUMP || newCommand == CMD_TEMPO || newCommand == CMD_XPARAM)
 	{
 		xParam = 0;
 		xMultiplier = 1;
