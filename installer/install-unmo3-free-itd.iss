@@ -23,7 +23,7 @@ begin
     begin
         if(GetSHA1OfFile(ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp')) <> '8ea5880d4e64f2366d923627ccea30c1cc34e36c') then
       	begin
-            MsgBox('Warning: unmo3.dll has been downloaded, but its checksum is wrong! This means that the downloaded file might corrupted or manipulated. The file has thus not been installed. Please obtain unmo3.dll from https://openmpt.org/ and verify its checksum.', mbCriticalError, MB_OK)
+            MsgBox('Warning: unmo3.dll has been downloaded, but its checksum is wrong! This means that the downloaded file might corrupted or manipulated. The file has thus not been installed. Please re-download the OpenMPT installer from https://openmpt.org/ instead.', mbCriticalError, MB_OK)
       	end else
       	begin
         	  FileCopy(ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp'), ExpandConstant('{app}\unmo3.dll'), true);
