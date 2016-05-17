@@ -116,6 +116,9 @@ BEGIN_MESSAGE_MAP(CFindReplaceTab, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_COMBO6,	OnParamChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO7,	OnPCParamChanged)
 
+	ON_CBN_EDITCHANGE(IDC_COMBO4,	OnVolumeChanged)
+	ON_CBN_EDITCHANGE(IDC_COMBO6,	OnParamChanged)
+
 	ON_COMMAND(IDC_CHECK1,			OnCheckNote)
 	ON_COMMAND(IDC_CHECK2,			OnCheckInstr)
 	ON_COMMAND(IDC_CHECK3,			OnCheckVolCmd)
@@ -149,6 +152,19 @@ BOOL CFindReplaceTab::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	// Search flags
 	FlagSet<FindReplace::Flags> flags = m_isReplaceTab ? m_settings.replaceFlags : m_settings.findFlags;
+
+	COMBOBOXINFO info;
+	info.cbSize = sizeof(info);
+	if(m_cbnVolume.GetComboBoxInfo(&info))
+	{
+		::SetWindowLong(info.hwndItem, GWL_STYLE, ::GetWindowLong(info.hwndItem, GWL_STYLE) | ES_NUMBER);
+		::SendMessage(info.hwndItem, EM_SETLIMITTEXT, 4, 0);
+	}
+	if(m_cbnParam.GetComboBoxInfo(&info))
+	{
+		::SetWindowLong(info.hwndItem, GWL_STYLE, ::GetWindowLong(info.hwndItem, GWL_STYLE) | ES_NUMBER);
+		::SendMessage(info.hwndItem, EM_SETLIMITTEXT, 4, 0);
+	}
 
 	CheckDlgButton(IDC_CHECK1, flags[FindReplace::Note]                           ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(IDC_CHECK2, flags[FindReplace::Instr]                          ? BST_CHECKED : BST_UNCHECKED);
@@ -338,13 +354,11 @@ void CFindReplaceTab::UpdateInstrumentList()
 		TCHAR s[256];
 		for(INSTRUMENTINDEX n = 1; n < MAX_INSTRUMENTS; n++)
 		{
+			wsprintf(s, _T("%03d:"), n);
 			if(m_sndFile.GetNumInstruments())
-			{
-				wsprintf(s, _T("%03d:%s"), n, m_sndFile.GetInstrumentName(n));
-			} else
-			{
-				wsprintf(s, _T("%03d:%s"), n, m_sndFile.m_szNames[n]);
-			}
+				_tcscat(s, m_sndFile.GetInstrumentName(n));
+			else
+				_tcscat(s, m_sndFile.m_szNames[n]);
 			m_cbnInstr.SetItemData(m_cbnInstr.AddString(s), n);
 		}
 	}
@@ -380,9 +394,10 @@ void CFindReplaceTab::UpdateParamList()
 		TCHAR s[16];
 		int newpos;
 		if(oldcount)
-			newpos = m_cbnParam.GetItemData(m_cbnParam.GetCurSel()) % newcount;
+			newpos = m_cbnParam.GetItemData(m_cbnParam.GetCurSel());
 		else
-			newpos = (m_isReplaceTab ? m_settings.replaceParam : m_settings.findParamMin) % newcount;
+			newpos = (m_isReplaceTab ? m_settings.replaceParam : m_settings.findParamMin);
+		Limit(newpos, 0, newcount - 1);
 		m_cbnParam.SetRedraw(FALSE);
 		m_cbnParam.ResetContent();
 		m_cbnParam.InitStorage(newcount + 2, 4);
@@ -502,7 +517,7 @@ void CFindReplaceTab::UpdateVolumeList()
 			newpos = m_cbnVolume.GetItemData(m_cbnVolume.GetCurSel());
 		else
 			newpos = curVal;
-		newpos %= newcount;
+		Limit(newpos, 0, newcount - 1);
 		m_cbnVolume.SetRedraw(FALSE);
 		m_cbnVolume.ResetContent();
 		m_cbnVolume.InitStorage(newcount + 2, 4);
@@ -651,6 +666,30 @@ void CFindReplaceTab::RelativeOrMultiplyPrompt(CComboBox &comboBox, FindReplace:
 {
 	int sel = comboBox.GetCurSel();
 	int item = comboBox.GetItemData(sel);
+
+	if(sel == CB_ERR)
+	{
+		item = 0;
+		CString s;
+		comboBox.GetWindowText(s);
+		s.TrimLeft();
+		if(s.GetLength() >= 1)
+		{
+			TCHAR first = s[0];
+			if(first == _T('+'))
+			{
+				item = kReplaceRelative;
+				sel = 0;
+			} else if(first == _T('*'))
+			{
+				item = kReplaceMultiply;
+				sel = 1;
+			}
+		}
+		if(!item)
+			item = ConvertStrTo<int>(s);
+	}
+
 	if(item == kReplaceRelative || item == kReplaceMultiply)
 	{
 		const TCHAR *prompt, *format;
@@ -696,7 +735,12 @@ void CFindReplaceTab::OnVolumeChanged()
 //-------------------------------------
 {
 	CheckOnChange(IDC_CHECK4);
-	int item = m_cbnVolume.GetItemData(m_cbnVolume.GetCurSel());
+	int item = m_cbnVolume.GetCurSel();
+	if(item != CB_ERR)
+		item = m_cbnVolume.GetItemData(item);
+	else
+		item = GetDlgItemInt(IDC_COMBO4);
+
 	int rangeMax = IsPCEvent() ? ModCommand::maxColumnValue : 64;
 	if(m_isReplaceTab)
 	{
@@ -726,7 +770,11 @@ void CFindReplaceTab::OnParamChanged()
 //------------------------------------
 {
 	CheckOnChange(IDC_CHECK6);
-	int item = m_cbnParam.GetItemData(m_cbnParam.GetCurSel());
+	int item = m_cbnParam.GetCurSel();
+	if(item != CB_ERR)
+		item = m_cbnParam.GetItemData(item);
+	else
+		item = GetDlgItemInt(IDC_COMBO6);
 
 	// Apply parameter value mask if required (e.g. SDx has mask D0).
 	int effectIndex = m_cbnCommand.GetItemData(m_cbnCommand.GetCurSel());

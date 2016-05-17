@@ -64,8 +64,8 @@ StoredTags::StoredTags(SettingsContainer &conf)
 // CWaveConvert - setup for converting a wave file
 
 BEGIN_MESSAGE_MAP(CWaveConvert, CDialog)
-	ON_COMMAND(IDC_CHECK1,			OnCheck1)
-	ON_COMMAND(IDC_CHECK2,			OnCheck2)
+	ON_COMMAND(IDC_CHECK1,			OnCheckSizeLimit)
+	ON_COMMAND(IDC_CHECK2,			OnCheckTimeLimit)
 	ON_COMMAND(IDC_CHECK4,			OnCheckChannelMode)
 	ON_COMMAND(IDC_CHECK6,			OnCheckInstrMode)
 	ON_COMMAND(IDC_RADIO1,			UpdateDialog)
@@ -645,8 +645,8 @@ void CWaveConvert::OnSampleSlotChanged()
 }
 
 
-void CWaveConvert::OnCheck1()
-//---------------------------
+void CWaveConvert::OnCheckSizeLimit()
+//-----------------------------------
 {
 	if (IsDlgButtonChecked(IDC_CHECK1))
 	{
@@ -675,8 +675,8 @@ void CWaveConvert::OnPlayerOptions()
 }
 
 
-void CWaveConvert::OnCheck2()
-//---------------------------
+void CWaveConvert::OnCheckTimeLimit()
+//-----------------------------------
 {
 	if (IsDlgButtonChecked(IDC_CHECK2))
 	{
@@ -746,10 +746,11 @@ void CWaveConvert::OnOK()
 		if(showWarning && Reporting::Confirm("You only need slow render if you are experiencing dropped notes with a Kontakt based sampler with Direct-From-Disk enabled, or buggy plugins that use the system time for parameter automation.\nIt will make rendering *very* slow.\n\nAre you sure you want to enable slow render?",
 			"Really enable slow render?") == cnfNo)
 		{
-			CheckDlgButton(IDC_GIVEPLUGSIDLETIME, BST_UNCHECKED);
-			return;
+			m_bGivePlugsIdleTime = false;
+		} else
+		{
+			showWarning = false;
 		}
-		showWarning = false;
 	}
 
 	m_bChannelMode = IsDlgButtonChecked(IDC_CHECK4) != BST_UNCHECKED;
