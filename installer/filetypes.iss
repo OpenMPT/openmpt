@@ -34,6 +34,7 @@ Name: "associate_exotic\j2b"; Description: "Jazz Jackrabbit 2 Music (J2B)";
 Name: "associate_exotic\m15"; Description: "Ultimate Soundtracker (M15)";
 Name: "associate_exotic\mdl"; Description: "DigiTrakker (MDL)";
 Name: "associate_exotic\med"; Description: "OctaMED (MED)";
+Name: "associate_exotic\mms"; Description: "MultiMedia Sound (MMS)";
 Name: "associate_exotic\mo3"; Description: "MO3 compressed modules (MO3)";
 Name: "associate_exotic\mt2"; Description: "MadTracker 2 (MT2)";
 Name: "associate_exotic\mtm"; Description: "MultiTracker Modules (MTM)";
@@ -42,6 +43,8 @@ Name: "associate_exotic\plm"; Description: "Disorder Tracker 2 (PLM)";
 Name: "associate_exotic\psm"; Description: "Epic Megagames MASI (PSM)";
 Name: "associate_exotic\pt36"; Description: "ProTracker 3.6 (PT36)";
 Name: "associate_exotic\ptm"; Description: "PolyTracker (PTM)";
+Name: "associate_exotic\sfx"; Description: "SoundFX (SFX)";
+Name: "associate_exotic\sfx2"; Description: "SoundFX 2 (SFX2)";
 Name: "associate_exotic\st26"; Description: "SoundTracker 2.6 (ST26)";
 Name: "associate_exotic\stm"; Description: "Scream Tracker 2 (STM)";
 Name: "associate_exotic\ult"; Description: "UltraTracker (ULT)";
@@ -79,6 +82,7 @@ Root: HKCR; Subkey: ".j2b"; ValueType: string; ValueName: ""; ValueData: "OpenMP
 Root: HKCR; Subkey: ".m15"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\m15
 Root: HKCR; Subkey: ".mdl"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\mdl
 Root: HKCR; Subkey: ".med"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\med
+Root: HKCR; Subkey: ".mms"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\mms
 Root: HKCR; Subkey: ".mo3"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\mo3
 Root: HKCR; Subkey: ".mt2"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\mt2
 Root: HKCR; Subkey: ".mtm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\mtm
@@ -87,6 +91,8 @@ Root: HKCR; Subkey: ".plm"; ValueType: string; ValueName: ""; ValueData: "OpenMP
 Root: HKCR; Subkey: ".psm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\psm
 Root: HKCR; Subkey: ".pt36"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\pt36
 Root: HKCR; Subkey: ".ptm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\ptm
+Root: HKCR; Subkey: ".sfx"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\sfx
+Root: HKCR; Subkey: ".sfx2"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\sfx2
 Root: HKCR; Subkey: ".st26"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\st26
 Root: HKCR; Subkey: ".stm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\stm
 Root: HKCR; Subkey: ".ult"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\ult
