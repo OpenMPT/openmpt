@@ -2541,7 +2541,6 @@ bool CSoundFile::ProcessEffects()
 					pChn->nCutOff = pChn->nRestoreCutoffOnNewNote - 1;
 					pChn->nRestoreCutoffOnNewNote = 0;
 				}
-
 			}
 
 			// Instrument Change ?
@@ -4881,7 +4880,7 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 		if(chn.pModInstrument != nullptr)
 		{
 			SAMPLEINDEX smp = chn.pModInstrument->Keyboard[chn.rowCommand.note - NOTE_MIN];
-			if(smp == 0 || smp >= GetNumSamples())
+			if(smp == 0 || smp > GetNumSamples())
 				return;
 		}
 
