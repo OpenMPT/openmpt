@@ -1686,7 +1686,10 @@ void CViewPattern::UpdateIndicator()
 						LONG fxndx = effectInfo.GetIndexFromEffect(m->command, m->param);
 						if(fxndx >= 0)
 						{
-							effectInfo.GetEffectNameEx(sztmp, fxndx, m->param, nChn);
+							UINT xParam = 0, xMultiplier = 1;
+							getXParam(m->command, m_nPattern, GetCurrentRow(), nChn, *pSndFile, xParam, xMultiplier);
+
+							effectInfo.GetEffectNameEx(sztmp, fxndx, m->param * xMultiplier + xParam, nChn);
 						}
 						//effectInfo.GetEffectName(sztmp, m->command, m->param, false, nChn);
 						if(sztmp[0]) s.Format(_T("%c%02X: %s"), pSndFile->GetModSpecifications().GetEffectLetter(m->command), m->param, sztmp);

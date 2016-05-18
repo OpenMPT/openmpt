@@ -521,5 +521,6 @@ public:
 
 DECLARE_FLAGSET(CViewPattern::PatternStatus);
 
+void getXParam(ModCommand::COMMAND command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nChannel, const CSoundFile &sndFile, UINT &xparam, UINT &multiplier);
 
 OPENMPT_NAMESPACE_END

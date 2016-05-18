@@ -23,8 +23,10 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-static void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nChannel, const CSoundFile &sndFile, UINT &xparam, UINT &multiplier)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------
+// For a given pattern cell, check if it contains a command supported by the X-Param mechanism.
+// If so, calculate the multipler for this cell and the value of all the other cells belonging to this param.
+void getXParam(ModCommand::COMMAND command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nChannel, const CSoundFile &sndFile, UINT &xparam, UINT &multiplier)
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	UINT xp = 0, mult = 1;
 	int nCmdRow = (int)nRow;
