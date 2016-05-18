@@ -304,9 +304,11 @@ STATIC_ASSERT(sizeof(MT2VST) == 128);
 #endif
 
 
-static void ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
+static bool ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 //---------------------------------------------------------------------------
 {
+	bool hasLegacyTempo = false;
+
 	// Note
 	m.note = NOTE_NONE;
 	if(p.note) m.note = (p.note > 96) ? NOTE_KEYOFF : (p.note + NOTE_MIN + 11);
@@ -320,7 +322,7 @@ static void ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 	} else if(p.vol >= 0xA0 && p.vol <= 0xAF)
 	{
 		m.volcmd = VOLCMD_VOLSLIDEDOWN;
-		m.vol = (p.vol & 0x0f);
+		m.vol = (p.vol & 0x0F);
 	} else if(p.vol >= 0xB0 && p.vol <= 0xBF)
 	{
 		m.volcmd = VOLCMD_VOLSLIDEUP;
@@ -349,6 +351,13 @@ static void ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 #else
 			MPT_UNREFERENCED_PARAMETER(that);
 #endif // MODPLUG_TRACKER
+			if(p.fxparam2 == 0x0F)
+				hasLegacyTempo = true;
+			break;
+
+		case 0x04:	// Vibrato
+			m.command = CMD_VIBRATO;
+			m.param = (p.fxparam2 & 0xF0) | (p.fxparam1 >> 4);
 			break;
 
 		case 0x08:	// Panning + Polarity (we can only import panning for now)
@@ -356,10 +365,22 @@ static void ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 			m.param = p.fxparam1;
 			break;
 
+		case 0x0C:	// Set volume (0x80 = 100%)
+			m.command = CMD_VOLUME;
+			m.param = p.fxparam2 / 2;
+			break;
+
+		case 0x0F:	// Set tempo, LPB and ticks (we can only import tempo for now)
+			m.command = CMD_TEMPO;
+			m.param = p.fxparam2;
+			break;
+
 		case 0x10:	// Impulse Tracker effect
 			m.command = p.fxparam2;
 			m.param = p.fxparam1;
 			CSoundFile::S3MConvert(m, true);
+			if(m.command == CMD_TEMPO || m.command == CMD_SPEED)
+				hasLegacyTempo = true;
 			break;
 
 		case 0x20:	// Cutoff + Resonance (we can only import cutoff for now)
@@ -409,6 +430,8 @@ static void ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 			m.vol = p.pan / 4;
 		}
 	}
+
+	return hasLegacyTempo;
 }
 
 
@@ -494,6 +517,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		m_nChannels += 8;
 	}
 
+	bool hasLegacyTempo = false;
+
 	// Read patterns
 	for(PATTERNINDEX pat = 0; pat < fileHeader.numPatterns; pat++)
 	{
@@ -534,7 +559,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 					if(infobyte & 0x10) cmd.fxcmd = chunk.ReadUint8();
 					if(infobyte & 0x20) cmd.fxparam1 = chunk.ReadUint8();
 					if(infobyte & 0x40) cmd.fxparam2 = chunk.ReadUint8();
-					ConvertMT2Command(this, *m, cmd);
+					hasLegacyTempo |= ConvertMT2Command(this, *m, cmd);
 					const ModCommand &orig = *m;
 					const ROWINDEX fillRows = std::min((uint32)repeatCount, (uint32)numRows - (row + 1));
 					for(ROWINDEX r = 0; r < fillRows; r++)
@@ -556,7 +581,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					MT2Command cmd;
 					chunk.ReadStruct(cmd);
-					ConvertMT2Command(this, *m, cmd);
+					hasLegacyTempo |= ConvertMT2Command(this, *m, cmd);
 				}
 			}
 		}
@@ -573,12 +598,13 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		switch(id)
 		{
 		case MAGIC4LE('B','P','M','+'):
-			MPT_CONSTANT_IF(0)
+			if(!hasLegacyTempo)
 			{
+				m_nTempoMode = tempoModeModern;
 				double d = chunk.ReadDoubleLE();
-				if(fileHeader.samplesPerTick != 0 && d != 0.0)
+				if(d != 0.0)
 				{
-					m_nDefaultTempo = TEMPO(44100.0 * 60.0 / (m_nDefaultSpeed * m_nDefaultRowsPerBeat * fileHeader.samplesPerTick * d));
+					m_nDefaultTempo = TEMPO(44100.0 * 60.0 / (m_nDefaultSpeed * m_nDefaultRowsPerBeat * d));
 				}
 			}
 			break;
