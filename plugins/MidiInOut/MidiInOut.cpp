@@ -12,6 +12,7 @@
 #include "MidiInOutEditor.h"
 #include "../../common/FileReader.h"
 #include "../../mptrack/Reporting.h"
+#include "../../soundlib/Sndfile.h"
 #include <algorithm>
 #include <sstream>
 
@@ -231,9 +232,24 @@ CAbstractVstEditor *MidiInOut::OpenEditor()
 
 
 // Processing (we don't process any audio, only MIDI messages)
-void MidiInOut::Process(float *, float *, uint32)
-//-----------------------------------------------
+void MidiInOut::Process(float *, float *, uint32 numFrames)
+//---------------------------------------------------------
 {
+	if(outputDevice.stream != nullptr)
+	{
+		// Send MIDI clock
+		if(nextClock < 1)
+		{
+			Pm_WriteShort(outputDevice.stream, Now(), 0xF8);
+			double bpm = m_SndFile.GetCurrentBPM();
+			if(bpm != 0.0)
+			{
+				nextClock += 2.5 * m_SndFile.GetSampleRate() / bpm;
+			}
+		}
+		nextClock -= numFrames;
+	}
+
 	// We don't do any audio processing here, but we process incoming MIDI events.
 	if(inputDevice.stream == nullptr)
 		return;
@@ -284,8 +300,13 @@ void MidiInOut::Resume()
 {
 	// Resume MIDI I/O
 	m_isResumed = true;
+	nextClock = 0;
 	OpenDevice(inputDevice.index, true);
 	OpenDevice(outputDevice.index, false);
+	if(outputDevice.stream != nullptr)
+	{
+		Pm_WriteShort(outputDevice.stream, Now(), 0xFA);	// Start
+	}
 }
 
 
@@ -294,10 +315,28 @@ void MidiInOut::Suspend()
 //-----------------------
 {
 	// Suspend MIDI I/O
+	if(outputDevice.stream != nullptr)
+	{
+		Pm_WriteShort(outputDevice.stream, Now(), 0xFC);	// Stop
+	}
 	CloseDevice(inputDevice);
 	CloseDevice(outputDevice);
 	m_isResumed = false;
 }
+
+
+// Playback discontinuity
+void MidiInOut::PositionChanged()
+//-------------------------------
+{
+	if(outputDevice.stream != nullptr)
+	{
+		const PtTimestamp now = Now();
+		Pm_WriteShort(outputDevice.stream, now, 0xFC);	// Stop
+		Pm_WriteShort(outputDevice.stream, now, 0xFA);	// Start
+	}
+}
+
 
 
 bool MidiInOut::MidiSend(uint32 midiCode)
@@ -309,13 +348,7 @@ bool MidiInOut::MidiSend(uint32 midiCode)
 		return true;
 	}
 
-	const PtTimestamp now = (latencyCompensation ? Pt_Time() : 0);
-
-	// Create and send PortMidi event
-	PmEvent event;
-	memcpy(&event.message, &midiCode, 4);
-	event.timestamp = now;
-	Pm_Write(outputDevice.stream, &event, 1);
+	Pm_WriteShort(outputDevice.stream, Now(), midiCode);
 	return true;
 }
 
@@ -329,8 +362,7 @@ bool MidiInOut::MidiSysexSend(const void *message, uint32 /*length*/)
 		return true;
 	}
 
-	const PtTimestamp now = (latencyCompensation ? Pt_Time() : 0);
-	Pm_WriteSysEx(outputDevice.stream, now, const_cast<unsigned char *>(static_cast<const unsigned char *>(message)));
+	Pm_WriteSysEx(outputDevice.stream, Now(), const_cast<unsigned char *>(static_cast<const unsigned char *>(message)));
 	return true;
 }
 
@@ -460,6 +492,13 @@ const char *MidiInOut::GetDeviceName(PmDeviceID index) const
 		return deviceInfo->name;
 	else
 		return "Unavailable";
+}
+
+
+PtTimestamp MidiInOut::Now() const
+//--------------------------------
+{
+	return (latencyCompensation ? Pt_Time() : 0);
 }
 
 
