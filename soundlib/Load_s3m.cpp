@@ -572,11 +572,6 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	fileHeader.dosEof = S3MFileHeader::idEOF;
 	fileHeader.fileType = S3MFileHeader::idS3MType;
 
-	if(!m_playBehaviour[MSF_COMPATIBLE_PLAY])
-	{
-		AddToLog("Compatible playback mode is currently disabled. This setting is not saved in S3M files and will be enabled automatically once the file is reloaded.");
-	}
-
 	// Orders
 	ORDERINDEX writeOrders = Order.GetLengthTailTrimmed();
 	if(writeOrders < 2)

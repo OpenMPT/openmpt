@@ -376,8 +376,16 @@ static bool ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 			break;
 
 		case 0x08:	// Panning + Polarity (we can only import panning for now)
-			m.command = CMD_PANNING8;
-			m.param = p.fxparam1;
+			if(p.fxparam1)
+			{
+				m.command = CMD_PANNING8;
+				m.param = p.fxparam1;
+			} else if(p.fxparam2 == 1 || p.fxparam2 == 2)
+			{
+				// Invert left or right channel
+				m.command = CMD_S3MCMDEX;
+				m.param = 0x91;
+			}
 			break;
 
 		case 0x0C:	// Set volume (0x80 = 100%)
@@ -396,6 +404,11 @@ static bool ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 			CSoundFile::S3MConvert(m, true);
 			if(m.command == CMD_TEMPO || m.command == CMD_SPEED)
 				hasLegacyTempo = true;
+			break;
+
+		case 0x1D:	// Gapper (like IT Tremor with old FX, i.e. 1D 00 XY = ontime X + 1 ticks, offtime Y + 1 ticks)
+			m.command = CMD_TREMOR;
+			m.param = p.fxparam1;
 			break;
 
 		case 0x20:	// Cutoff + Resonance (we can only import cutoff for now)
@@ -420,9 +433,9 @@ static bool ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 
 		case 0x9D:	// Offset + delay
 			m.volcmd = CMD_OFFSET;
-			m.vol = p.fxparam1 >> 3;
+			m.vol = p.fxparam2 >> 3;
 			m.command = CMD_S3MCMDEX;
-			m.param = 0xD0 | std::min(p.fxparam2, uint8(0x0F));
+			m.param = 0xD0 | std::min(p.fxparam1, uint8(0x0F));
 			break;
 
 		case 0xCC:	// MIDI CC
@@ -625,6 +638,9 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 
 		case MAGIC4LE('T','F','X','M'):
+			break;
+
+		case MAGIC4LE('T','R','K','O'):
 			break;
 
 		case MAGIC4LE('T','R','K','S'):

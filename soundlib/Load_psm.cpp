@@ -637,10 +637,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		ChnSettings[chn].dwFlags.set(CHN_SURROUND, subsongs[0].channelSurround[chn]);
 	}
 
-	if(newFormat)
-		m_madeWithTracker = "Epic MegaGames MASI (New Version / Sinaria)";
-	else
-		m_madeWithTracker = "Epic MegaGames MASI (New Version)";
+	m_madeWithTracker = newFormat ? "Epic MegaGames MASI (New Version / Sinaria)" : "Epic MegaGames MASI (New Version)";
 
 	if(!(loadFlags & loadPatternData) || m_nChannels == 0)
 	{
