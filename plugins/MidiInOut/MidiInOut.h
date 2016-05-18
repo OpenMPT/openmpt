@@ -59,6 +59,7 @@ protected:
 	std::string chunkData;					// Storage for GetChunk
 	std::vector<uint32> bufferedMessage;	// For receiving SysEx messages
 	mpt::mutex mutex;
+	double nextClock;
 
 	// I/O device settings
 	MidiDevice inputDevice;
@@ -115,7 +116,7 @@ public:
 	virtual void Resume();
 	virtual void Suspend();
 	// Tell the plugin that there is a discontinuity between the previous and next render call (e.g. aftert jumping around in the module)
-	virtual void PositionChanged() { }
+	virtual void PositionChanged();
 	virtual bool IsInstrument() const { return true; }
 	virtual bool CanRecieveMidiEvents() { return true; }
 	// If false is returned, mixing this plugin can be skipped if its input are currently completely silent.
@@ -158,6 +159,9 @@ protected:
 	void CloseDevice(MidiDevice &device);
 	// Get a device name
 	const char *GetDeviceName(PmDeviceID index) const;
+
+	// Get current timestamp for sending
+	PtTimestamp Now() const;
 };
 
 
