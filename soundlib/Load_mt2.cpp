@@ -355,6 +355,21 @@ static bool ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 				hasLegacyTempo = true;
 			break;
 
+		case 0x01:	// Portamento up (on every tick)
+			m.command = CMD_PORTAMENTOUP;
+			m.param = mpt::saturate_cast<ModCommand::PARAM>((p.fxparam2 << 4) | (p.fxparam1 >> 4));
+			break;
+
+		case 0x02:	// Portamento down (on every tick)
+			m.command = CMD_PORTAMENTODOWN;
+			m.param = mpt::saturate_cast<ModCommand::PARAM>((p.fxparam2 << 4) | (p.fxparam1 >> 4));
+			break;
+
+		case 0x03:	// Tone Portamento (on every tick)
+			m.command = CMD_TONEPORTAMENTO;
+			m.param = mpt::saturate_cast<ModCommand::PARAM>((p.fxparam2 << 4) | (p.fxparam1 >> 4));
+			break;
+
 		case 0x04:	// Vibrato
 			m.command = CMD_VIBRATO;
 			m.param = (p.fxparam2 & 0xF0) | (p.fxparam1 >> 4);
@@ -390,7 +405,7 @@ static bool ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 				
 		case 0x22:	// Cutoff + Resonance + Attack + Decay (we can only import cutoff for now)
 			m.command = CMD_MIDI;
-			m.param = (p.fxparam1 & 0xF0) >> 1;
+			m.param = (p.fxparam2 & 0xF0) >> 1;
 			break;
 
 		case 0x24:	// Reverse
@@ -400,7 +415,7 @@ static bool ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 
 		case 0x80:	// Track volume
 			m.command = CMD_CHANNELVOLUME;
-			m.param = p.fxparam1 / 4u;
+			m.param = p.fxparam2 / 4u;
 			break;
 
 		case 0x9D:	// Offset + delay
@@ -916,7 +931,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		ModInstrument *mptIns = nullptr;
 		if(i < fileHeader.numInstruments)
 		{
-			mptIns = AllocateInstrument(i + 1);
+			// Default sample assignment if there is no data chunk? Fixes e.g. instrument 33 in Destiny - Dream Alone.mt2
+			mptIns = AllocateInstrument(i + 1, i + 1);
 		}
 		if(mptIns == nullptr)
 			continue;
@@ -1011,6 +1027,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 						mptIns->NoteMap[i] = static_cast<uint8>(note);
 					}
 				}
+				// Instruments with plugin assignments never play samples at the same time!
+				mptIns->AssignSample(0);
 			}
 		}
 	}
@@ -1130,13 +1148,6 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 					}
 					// TODO: volume, finetune for duplicated samples
 				}
-			}
-		} else
-		{
-			// Default assignment? Fixes e.g. instrument 33 in Destiny - Dream Alone.mt2
-			for(uint32 note = 0; note < 96; note++)
-			{
-				mptIns->Keyboard[note + 11 + NOTE_MIN] = ins + 1;
 			}
 		}
 	}
