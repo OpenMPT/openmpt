@@ -23,8 +23,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-static void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nChannel, CSoundFile &sndFile, UINT &xparam, UINT &multiplier)
-//-----------------------------------------------------------------------------------------------------------------------------------------------
+static void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nChannel, const CSoundFile &sndFile, UINT &xparam, UINT &multiplier)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	UINT xp = 0, mult = 1;
 	int nCmdRow = (int)nRow;
@@ -47,7 +47,7 @@ static void getXParam(BYTE command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELIND
 			}
 			nCmdRow--;
 		}
-	} else if(command != CMD_OFFSET && command != CMD_PATTERNBREAK || command == CMD_POSITIONJUMP && command != CMD_TEMPO)
+	} else if(command != CMD_OFFSET && command != CMD_PATTERNBREAK && command != CMD_POSITIONJUMP && command != CMD_TEMPO)
 	{
 		// If current row do not own any satisfying command parameter to extend, set return state
 		nCmdRow = -1;
@@ -782,7 +782,7 @@ void CEditCommand::UpdateVolCmdValue()
 void CEditCommand::UpdateEffectValue(bool set)
 //--------------------------------------------
 {
-	CHAR s[128] = "";
+	TCHAR s[128] = _T("");
 
 	uint16 newPlugParam = 0;
 	ModCommand::PARAM newParam = 0;
@@ -791,7 +791,7 @@ void CEditCommand::UpdateEffectValue(bool set)
 	{
 		// plugin param control note
 		newPlugParam = static_cast<uint16>(sldParam.GetPos());
-		wsprintf(s, "Value: %u", newPlugParam);
+		wsprintf(s, _T("Value: %u"), newPlugParam);
 	} else
 	{
 		// process as effect
