@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "Mainfrm.h"
 #include "Mptrack.h"
+#include "AboutDialog.h"
 #include "../sounddev/SoundDevice.h"
 #include "Moddoc.h"
 #include <shlwapi.h>
@@ -262,6 +263,18 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 	}
 	*/
 
+	{
+		mpt::ofstream f(crashDirectory.path + MPT_PATHSTRING("about-openmpt.txt"), std::ios::binary);
+		f.imbue(std::locale::classic());
+		f << mpt::ToCharset(mpt::CharsetUTF8, CAboutDlg::GetTabText(0));
+	}
+
+	{
+		mpt::ofstream f(crashDirectory.path + MPT_PATHSTRING("about-components.txt"), std::ios::binary);
+		f.imbue(std::locale::classic());
+		f << mpt::ToCharset(mpt::CharsetUTF8, CAboutDlg::GetTabText(1));
+	}
+
 	Reporting::Error(errorMessage, (mode == DumpModeWarning) ? "OpenMPT Warning" : "OpenMPT Crash", CMainFrame::GetMainFrame());
 
 }
@@ -394,6 +407,13 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 }
 
 #endif MPT_ASSERT_HANDLER_NEEDED
+
+
+void DebugInjectCrash()
+//---------------------
+{
+	DebugReporter(DumpModeCrash, nullptr).ReportError(MPT_USTRING("Injected crash."));
+}
 
 
 void DebugTraceDump()

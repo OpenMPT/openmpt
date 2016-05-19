@@ -30,6 +30,8 @@ protected:
 
 };
 
+void DebugInjectCrash();
+
 void DebugTraceDump();
 
 OPENMPT_NAMESPACE_END

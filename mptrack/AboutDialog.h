@@ -69,7 +69,8 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	afx_msg void OnTabChange(NMHDR *pNMHDR, LRESULT *pResult);
 	void OnTimer(UINT_PTR nIDEvent);
-	mpt::ustring GetTabText(int tab);
+public:
+	static mpt::ustring GetTabText(int tab);
 };
 
 OPENMPT_NAMESPACE_END
