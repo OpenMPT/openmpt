@@ -434,7 +434,7 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 		GetCurrentDirectoryW(CountOf(curDir), curDir);
 		UltraSndPath = mpt::PathString::FromNative(curDir);
 	}
-	for (UINT iMidi=0; iMidi<256; iMidi++)
+	for (uint32 iMidi=0; iMidi<256; iMidi++)
 	{
 		mpt::PathString filename;
 		char section[32];
@@ -487,7 +487,7 @@ BOOL CTrackApp::ExportMidiConfig(const mpt::PathString &filename)
 BOOL CTrackApp::ExportMidiConfig(SettingsContainer &file)
 //-------------------------------------------------------
 {
-	for(size_t iMidi = 0; iMidi < 256; iMidi++) if (!midiLibrary.MidiMap[iMidi].empty())
+	for(uint32 iMidi = 0; iMidi < 256; iMidi++) if (!midiLibrary.MidiMap[iMidi].empty())
 	{
 		mpt::PathString szFileName = midiLibrary.MidiMap[iMidi];
 

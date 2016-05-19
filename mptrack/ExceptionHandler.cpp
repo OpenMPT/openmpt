@@ -400,7 +400,7 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 			errorMessage.Format("Internal state inconsistency detected at %s(%d). This is just a warning that could potentially lead to a crash later on: %s [%s].", file, line, msg, function);
 		} else
 		{
-			errorMessage.Format("Internal error occured at %s(%d): ASSERT(%s) failed in [%s].", file, line, expr, function);
+			errorMessage.Format("Internal error occurred at %s(%d): ASSERT(%s) failed in [%s].", file, line, expr, function);
 		}
 		report.ReportError(mpt::ToUnicode(mpt::CharsetLocale, errorMessage.GetString()));
 	}
