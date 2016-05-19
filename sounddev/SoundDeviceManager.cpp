@@ -115,7 +115,16 @@ void Manager::ReEnumerate()
 #endif // MPT_WITH_PORTAUDIO
 
 	std::map<SoundDevice::Type, int> typePriorities;
-	if(GetSysInfo().IsWine)
+	if(GetSysInfo().IsWine && GetSysInfo().WineHostIsLinux && GetSysInfo().WineVersion.IsAtLeast(mpt::Wine::Version(1,8,0)))
+	{ // Wine >= 1.8 on Linux
+		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = 29;
+		typePriorities[SoundDevice::TypeWAVEOUT] = 28;
+		typePriorities[SoundDevice::TypeASIO] = 21;
+		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
+		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = -1;
+		typePriorities[SoundDevice::TypeDSOUND] = -2;
+		typePriorities[SoundDevice::TypePORTAUDIO_DS] = -3;
+	} else if(GetSysInfo().IsWine)
 	{ // Wine
 		typePriorities[SoundDevice::TypeDSOUND] = 29;
 		typePriorities[SoundDevice::TypeWAVEOUT] = 28;

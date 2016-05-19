@@ -250,6 +250,8 @@ struct SysInfo
 {
 	mpt::Windows::Version WindowsVersion;
 	bool IsWine;
+	bool WineHostIsLinux;
+	mpt::Wine::Version WineVersion;
 public:
 	static SysInfo Current();
 private:
