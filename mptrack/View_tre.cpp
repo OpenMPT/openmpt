@@ -282,7 +282,6 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 						{
 							// Ctrl+Enter: Load sample into currently selected sample or instrument slot
 							CModScrollView *view = static_cast<CModScrollView *>(CMainFrame::GetMainFrame()->GetActiveView());
-							HTREEITEM hItem = GetSelectedItem();
 							const ModItem modItem = GetModItem(hItem);
 							if(view && (modItem.type == MODITEM_INSLIB_SAMPLE || modItem.type == MODITEM_INSLIB_INSTRUMENT))
 							{

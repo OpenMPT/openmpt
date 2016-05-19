@@ -988,7 +988,8 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	// In theory, sample and song names should only ever contain printable ASCII chars and null.
 	// However, there are quite a few SoundTracker modules in the wild with random
 	// characters. To still be able to distguish them from other formats, we just reject
-	// files with *too* many bogus characters. Arbitrary threshold: 32 bogus characters.
+	// files with *too* many bogus characters. Arbitrary threshold: 32 bogus characters in total
+	// or more than 8 invalid characters just in the title alone.
 	uint32 invalidChars =  CountInvalidChars(songname);
 	if(invalidChars > 8 || !file.CanRead(sizeof(MODSampleHeader) * 15 + sizeof(MODFileHeader)))
 	{

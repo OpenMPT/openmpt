@@ -189,37 +189,37 @@ public:
 	};
 
 	// Constructors with effect commands
-	EffectWriter(EffectCommands cmd, ModCommand::PARAM value) : command(static_cast<uint8>(cmd)), param(value), isVolEffect(false) { Init(); }
-	EffectWriter(VolumeCommands cmd, ModCommand::VOL value) : command(static_cast<uint8>(cmd)), param(value), isVolEffect(true) { Init(); }
+	EffectWriter(EffectCommands cmd, ModCommand::PARAM param) : m_command(static_cast<uint8>(cmd)), m_param(param), m_isVolEffect(false) { Init(); }
+	EffectWriter(VolumeCommands cmd, ModCommand::VOL param) : m_command(static_cast<uint8>(cmd)), m_param(param), m_isVolEffect(true) { Init(); }
 
 	// Additional constructors:
 	// Set row in which writing should start
-	EffectWriter &Row(ROWINDEX row) { this->row = row; return *this; }
+	EffectWriter &Row(ROWINDEX row) { m_row = row; return *this; }
 	// Set channel to which writing should be restricted to
-	EffectWriter &Channel(CHANNELINDEX chn) { channel = chn; return *this; }
+	EffectWriter &Channel(CHANNELINDEX chn) { m_channel = chn; return *this; }
 	// Allow multiple effects of the same kind to be written in the same row.
-	EffectWriter &AllowMultiple() { allowMultiple = true; return *this; }
+	EffectWriter &AllowMultiple() { m_allowMultiple = true; return *this; }
 	// Set retry mode.
-	EffectWriter &Retry(RetryMode retryMode) { this->retryMode = retryMode; return *this; }
+	EffectWriter &Retry(RetryMode retryMode) { m_retryMode = retryMode; return *this; }
 
 protected:
-	uint8 command, param;
-	bool isVolEffect;
+	uint8 m_command, m_param;
 	
-	ROWINDEX row;
-	CHANNELINDEX channel;
-	bool allowMultiple;
-	RetryMode retryMode;
-	bool retry;
+	ROWINDEX m_row;
+	CHANNELINDEX m_channel;
+	RetryMode m_retryMode;
+	bool m_retry : 1;
+	bool m_allowMultiple : 1;
+	bool m_isVolEffect : 1;
 
 	// Common data initialisation
 	void Init()
 	{
-		row = 0;
-		channel = CHANNELINDEX_INVALID;	// Any channel
-		allowMultiple = false;			// Stop if same type of effect is encountered
-		retryMode = rmIgnore;			// If effect couldn't be written, abort.
-		retry = true;
+		m_row = 0;
+		m_channel = CHANNELINDEX_INVALID;	// Any channel
+		m_retryMode = rmIgnore;			// If effect couldn't be written, abort.
+		m_retry = true;
+		m_allowMultiple = false;		// Stop if same type of effect is encountered
 	}
 };
 

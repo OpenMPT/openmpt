@@ -450,9 +450,8 @@ void CTuningDialog::OnCbnSelchangeComboTtype()
 	if(m_pActiveTuning != NULL)
 	{
 		const TUNINGTYPE oldType = m_pActiveTuning->GetTuningType();
-		const size_t BS = 20;
-		char buffer[BS];
-		m_CombobTuningType.GetWindowText(buffer, BS);
+		TCHAR buffer[20];
+		m_CombobTuningType.GetWindowText(buffer, CountOf(buffer));
 		const std::string strNewType = buffer;
 		TUNINGTYPE newType = GetTuningTypeFromStr(strNewType);
 		if(!m_pActiveTuning->IsOfType(newType))
@@ -461,12 +460,10 @@ void CTuningDialog::OnCbnSelchangeComboTtype()
 			{
 				m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 
-				const size_t BS = 20;
-				char buffer[BS];
-				m_EditSteps.GetWindowText(buffer, BS);
+				m_EditSteps.GetWindowText(buffer, CountOf(buffer));
 				NOTEINDEXTYPE steps = ConvertStrTo<NOTEINDEXTYPE>(buffer);
 
-				m_EditRatioPeriod.GetWindowText(buffer, BS);
+				m_EditRatioPeriod.GetWindowText(buffer, CountOf(buffer));
 				RATIOTYPE pr = ConvertStrTo<RATIOTYPE>(buffer);
 
 				if(steps <= 0)
