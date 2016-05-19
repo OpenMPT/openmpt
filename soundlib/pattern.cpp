@@ -264,33 +264,33 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 {
 	// First, reject invalid parameters.
 	if(!m_ModCommands
-		|| settings.row >= GetNumRows()
-		|| (settings.channel >= GetNumChannels() && settings.channel != CHANNELINDEX_INVALID))
+		|| settings.m_row >= GetNumRows()
+		|| (settings.m_channel >= GetNumChannels() && settings.m_channel != CHANNELINDEX_INVALID))
 	{
 		return false;
 	}
 
-	CHANNELINDEX scanChnMin = settings.channel, scanChnMax = settings.channel;
+	CHANNELINDEX scanChnMin = settings.m_channel, scanChnMax = settings.m_channel;
 
 	// Scan all channels
-	if(settings.channel == CHANNELINDEX_INVALID)
+	if(settings.m_channel == CHANNELINDEX_INVALID)
 	{
 		scanChnMin = 0;
 		scanChnMax = GetNumChannels() - 1;
 	}
 
-	ModCommand * const baseCommand = GetpModCommand(settings.row, scanChnMin);
+	ModCommand * const baseCommand = GetpModCommand(settings.m_row, scanChnMin);
 	ModCommand *m;
 
 	// Scan channel(s) for same effect type - if an effect of the same type is already present, exit.
-	if(!settings.allowMultiple)
+	if(!settings.m_allowMultiple)
 	{
 		m = baseCommand;
 		for(CHANNELINDEX i = scanChnMin; i <= scanChnMax; i++, m++)
 		{
-			if(!settings.isVolEffect && m->command == settings.command)
+			if(!settings.m_isVolEffect && m->command == settings.m_command)
 				return true;
-			if(settings.isVolEffect && m->volcmd == settings.command)
+			if(settings.m_isVolEffect && m->volcmd == settings.m_command)
 				return true;
 		}
 	}
@@ -299,27 +299,27 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 	m = baseCommand;
 	for(CHANNELINDEX i = scanChnMin; i <= scanChnMax; i++, m++)
 	{
-		if(!settings.isVolEffect && m->command == CMD_NONE)
+		if(!settings.m_isVolEffect && m->command == CMD_NONE)
 		{
-			m->command = settings.command;
-			m->param = settings.param;
+			m->command = settings.m_command;
+			m->param = settings.m_param;
 			return true;
 		}
-		if(settings.isVolEffect && m->volcmd == VOLCMD_NONE)
+		if(settings.m_isVolEffect && m->volcmd == VOLCMD_NONE)
 		{
-			m->volcmd = settings.command;
-			m->vol = settings.param;
+			m->volcmd = settings.m_command;
+			m->vol = settings.m_param;
 			return true;
 		}
 	}
 
 	// Ok, apparently there's no space. If we haven't tried already, try to map it to the volume column or effect column instead.
-	if(settings.retry)
+	if(settings.m_retry)
 	{
 		const bool isS3M = (GetSoundFile().GetType() & MOD_TYPE_S3M);
 
 		// Move some effects that also work in the volume column, so there's place for our new effect.
-		if(!settings.isVolEffect)
+		if(!settings.m_isVolEffect)
 		{
 			m = baseCommand;
 			for(CHANNELINDEX i = scanChnMin; i <= scanChnMax; i++, m++)
@@ -329,18 +329,18 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 				case CMD_VOLUME:
 					m->volcmd = VOLCMD_VOLUME;
 					m->vol = m->param;
-					m->command = settings.command;
-					m->param = settings.param;
+					m->command = settings.m_command;
+					m->param = settings.m_param;
 					return true;
 
 				case CMD_PANNING8:
-					if(isS3M && settings.param > 0x80)
+					if(isS3M && settings.m_param > 0x80)
 					{
 						break;
 					}
 
 					m->volcmd = VOLCMD_PANNING;
-					m->command = settings.command;
+					m->command = settings.m_command;
 
 					if(isS3M)
 					{
@@ -350,18 +350,18 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 						m->vol = (m->param >> 2) + 1;
 					}
 
-					m->param = settings.param;
+					m->param = settings.m_param;
 					return true;
 				}
 			}
 		}
 
 		// Let's try it again by writing into the "other" effect column.
-		uint8 newCommand = CMD_NONE, newParam = settings.param;
-		if(settings.isVolEffect)
+		uint8 newCommand = CMD_NONE, newParam = settings.m_param;
+		if(settings.m_isVolEffect)
 		{
 			// Convert volume effect to normal effect
-			switch(settings.command)
+			switch(settings.m_command)
 			{
 			case VOLCMD_PANNING:
 				newCommand = CMD_PANNING8;
@@ -370,7 +370,7 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 					newParam <<= 1;
 				} else
 				{
-					newParam = MIN(settings.param << 2, 0xFF);
+					newParam = MIN(settings.m_param << 2, 0xFF);
 				}
 				break;
 			case VOLCMD_VOLUME:
@@ -380,10 +380,10 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 		} else
 		{
 			// Convert normal effect to volume effect
-			if(settings.command == CMD_PANNING8 && isS3M)
+			if(settings.m_command == CMD_PANNING8 && isS3M)
 			{
 				// This needs some manual fixing.
-				if(settings.param <= 0x80)
+				if(settings.m_param <= 0x80)
 				{
 					// Can't have surround in volume column, only normal panning
 					newCommand = VOLCMD_PANNING;
@@ -391,7 +391,7 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 				}
 			} else
 			{
-				newCommand = settings.command;
+				newCommand = settings.m_command;
 				if(!ModCommand::ConvertVolEffect(newCommand, newParam, true))
 				{
 					// No Success :(
@@ -402,10 +402,10 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 
 		if(newCommand != CMD_NONE)
 		{
-			settings.command = newCommand;
-			settings.param = newParam;
-			settings.retry = false;
-			settings.isVolEffect = !settings.isVolEffect;
+			settings.m_command = newCommand;
+			settings.m_param = newParam;
+			settings.m_retry = false;
+			settings.m_isVolEffect = !settings.m_isVolEffect;
 			if(WriteEffect(settings))
 			{
 				return true;
@@ -414,15 +414,15 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 	}
 
 	// Try in the next row if possible (this may also happen if we already retried)
-	if(settings.retryMode == EffectWriter::rmTryNextRow && settings.row + 1 < GetNumRows())
+	if(settings.m_retryMode == EffectWriter::rmTryNextRow && settings.m_row + 1 < GetNumRows())
 	{
-		settings.row++;
-		settings.retry = true;
+		settings.m_row++;
+		settings.m_retry = true;
 		return WriteEffect(settings);
-	} else if(settings.retryMode == EffectWriter::rmTryPreviousRow && settings.row > 0)
+	} else if(settings.m_retryMode == EffectWriter::rmTryPreviousRow && settings.m_row > 0)
 	{
-		settings.row--;
-		settings.retry = true;
+		settings.m_row--;
+		settings.m_retry = true;
 		return WriteEffect(settings);
 	}
 

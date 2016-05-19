@@ -70,13 +70,13 @@ void Autotune::CopySamples(const T* origSample, SmpLength sampleLoopStart, SmpLe
 			pos = sampleLoopStart;
 		}
 
-		const T* sample = origSample + pos;
+		const T* smp = origSample + pos;
 
 		int32 data = 0;	// More than enough for 256 channels... :)
 		for(uint8 chn = 0; chn < channels; chn++)
 		{
 			// We only want the MSB.
-			data += static_cast<int32>(sample[chn] >> ((sizeof(T) - 1) * 8));
+			data += static_cast<int32>(smp[chn] >> ((sizeof(T) - 1) * 8));
 		}
 
 		data /= channels;

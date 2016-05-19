@@ -272,7 +272,7 @@ static void ReadDBMEnvelopeChunk(FileReader chunk, EnvelopeType envType, CSoundF
 //----------------------------------------------------------------------------------------------------------
 {
 	uint16 numEnvs = chunk.ReadUint16BE();
-	for(uint16 i = 0; i < numEnvs; i++)
+	for(uint16 env = 0; env < numEnvs; env++)
 	{
 		DBMEnvelope dbmEnv;
 		chunk.ReadConvertEndianness(dbmEnv);

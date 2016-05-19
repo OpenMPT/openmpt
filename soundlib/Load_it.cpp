@@ -208,9 +208,7 @@ static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0
 				continue;
 
 			//Checking if not found tuning already noticed.
-			std::vector<std::string>::iterator iter;
-			iter = std::find(notFoundTunings.begin(), notFoundTunings.end(), str);
-			if(iter == notFoundTunings.end())
+			if(std::find(notFoundTunings.begin(), notFoundTunings.end(), str) == notFoundTunings.end())
 			{
 				notFoundTunings.push_back(str);
 				std::string erm = std::string("Tuning ") + str + std::string(" used by the module was not found.");

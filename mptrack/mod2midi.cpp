@@ -106,7 +106,7 @@ namespace MidiExport
 			for(uint8 i = firstCh; i < lastCh; i++)
 			{
 				uint8 ch = 0xB0 | i;
-				uint8 msg[12] = { 0x00, ch, 0x64, 0x00, 0x00, ch, 0x65, 0x00, 0x00, ch, 0x06, m_instr.midiPWD };
+				uint8 msg[12] = { 0x00, ch, 0x64, 0x00, 0x00, ch, 0x65, 0x00, 0x00, ch, 0x06, static_cast<uint8>(mpt::abs(m_instr.midiPWD)) };
 				mpt::IO::WriteRaw(f, msg, 12);
 			}
 		}
@@ -141,8 +141,8 @@ namespace MidiExport
 				// Write MIDI tempo
 				WriteTicks();
 
-				int32 mspq = Util::Round<int32>(60000000.0 / curTempo);
-				uint8 msg[6] = { 0xFF, 0x51, 0x03, (mspq >> 16) & 0xFF, (mspq >> 8) & 0xFF, mspq & 0xFF };
+				uint32 mspq = Util::Round<uint32>(60000000.0 / curTempo);
+				uint8 msg[6] = { 0xFF, 0x51, 0x03, static_cast<uint8>(mspq >> 16), static_cast<uint8>(mspq >> 8), static_cast<uint8>(mspq) };
 				mpt::IO::WriteRaw(f, msg, 6);
 			}
 
@@ -151,7 +151,7 @@ namespace MidiExport
 				// Write MIDI time signature
 				WriteTicks();
 
-				uint8 msg[7] = { 0xFF, 0x58, 0x04, static_cast<char>(timeSigNumerator), 2, 24, 8 };
+				uint8 msg[7] = { 0xFF, 0x58, 0x04, static_cast<uint8>(timeSigNumerator), 2, 24, 8 };
 				mpt::IO::WriteRaw(f, msg, 7);
 			}
 
@@ -161,7 +161,7 @@ namespace MidiExport
 				WriteTicks();
 
 				int32 midiVol = Util::muldiv(m_oldGlobalVol, 0x3FFF, MAX_GLOBAL_VOLUME);
-				uint8 msg[9] = { 0xF0, 0x07, 0x7F, 0x7F, 0x04, 0x01, midiVol & 0x7F, (midiVol >> 7) & 0x7F, 0xF7 };
+				uint8 msg[9] = { 0xF0, 0x07, 0x7F, 0x7F, 0x04, 0x01, static_cast<uint8>(midiVol & 0x7F), static_cast<uint8>(midiVol >> 7) & 0x7F, 0xF7 };
 				mpt::IO::WriteRaw(f, msg, 9);
 			}
 		}
