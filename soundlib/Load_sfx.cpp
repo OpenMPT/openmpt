@@ -111,7 +111,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX smp = 0; smp < m_nSamples; smp++)
 	{
 		sampleLen[smp] = file.ReadUint32BE();
-		if(sampleLen[smp] > 65535)
+		if(sampleLen[smp] > 131072)
 			return false;
 	}
 
