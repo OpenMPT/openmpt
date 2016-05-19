@@ -163,6 +163,11 @@ void Manager::ReEnumerate()
 	}
 	std::stable_sort(m_SoundDevices.begin(), m_SoundDevices.end(), CompareInfo(typePriorities));
 
+	for(std::vector<SoundDevice::Info>::iterator it = m_SoundDevices.begin(); it != m_SoundDevices.end(); ++it)
+	{
+		(*it).extraData[MPT_USTRING("priority")] = mpt::ufmt::dec(typePriorities[(*it).type]); 
+	}
+
 	MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("Sound Devices enumerated:"))());
 	for(std::size_t i = 0; i < m_SoundDevices.size(); ++i)
 	{

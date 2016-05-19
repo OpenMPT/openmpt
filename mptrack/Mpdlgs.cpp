@@ -337,6 +337,8 @@ void COptionsSoundcard::UpdateEverything()
 
 		for(std::vector<SoundDevice::Info>::const_iterator it = theApp.GetSoundDevicesManager()->begin(); it != theApp.GetSoundDevicesManager()->end(); ++it)
 		{
+			std::map<mpt::ustring, mpt::ustring> extraData = it->extraData;
+			int priority = ConvertStrTo<int>(extraData[MPT_USTRING("priority")]);
 
 			if(!TrackerSettings::Instance().m_MorePortaudio)
 			{
@@ -344,6 +346,14 @@ void COptionsSoundcard::UpdateEverything()
 				{
 					// skip those portaudio apis that are already implemented via our own SoundDevice class
 					// can be overwritten via [Sound Settings]MorePortaudio=1
+					continue;
+				}
+			}
+
+			if(!TrackerSettings::Instance().m_SoundShowDeprecatedDevices)
+			{
+				if(priority < 0)
+				{
 					continue;
 				}
 			}
@@ -382,6 +392,10 @@ void COptionsSoundcard::UpdateEverything()
 				cbi.iSelectedImage = cbi.iImage;
 				cbi.iOverlay = cbi.iImage;
 				mpt::ustring name = it->name + (it->isDefault ? MPT_USTRING(" [default]") : MPT_USTRING(""));
+				if(TrackerSettings::Instance().m_SoundShowNotRecommendedDeviceWarning && (priority < 0))
+				{
+					name += MPT_USTRING(" [not recommended]");
+				}
 				if(it->type == SoundDevice::TypeWAVEOUT || it->type == SoundDevice::TypeDSOUND || it->type == SoundDevice::TypeASIO)
 				{
 					// leave name alone

@@ -227,6 +227,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, MiscAllowMultipleCommandsPerKey(conf, "Misc", "AllowMultipleCommandsPerKey", false)
 	, MiscDistinguishModifiers(conf, "Misc", "DistinguishModifiers", false)
 	// Sound Settings
+	, m_SoundShowDeprecatedDevices(conf, "Sound Settings", "ShowDeprecatedDevices", false)
+	, m_SoundShowNotRecommendedDeviceWarning(conf, "Sound Settings", "ShowNotRecommendedDeviceWarning", true)
 	, m_SoundSampleRates(conf, "Sound Settings", "SampleRates", GetDefaultSampleRates())
 	, m_MorePortaudio(conf, "Sound Settings", "MorePortaudio", false)
 	, m_SoundSettingsOpenDeviceAtStartup(conf, "Sound Settings", "OpenDeviceAtStartup", false)
@@ -447,6 +449,10 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 
 	// Sound Settings
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,26,00,30))
+	{
+		m_SoundShowDeprecatedDevices = true;
+	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,30))
 	{
 		if(conf.Read<bool>("Sound Settings", "KeepDeviceOpen", false))
