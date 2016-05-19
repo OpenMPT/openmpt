@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "Mainfrm.h"
+#include "Mptrack.h"
 #include "../sounddev/SoundDevice.h"
 #include "Moddoc.h"
 #include <shlwapi.h>
@@ -217,6 +218,49 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 		f.imbue(std::locale::classic());
 		f << mpt::String::Replace(mpt::ToCharset(mpt::CharsetUTF8, errorMessage), "\n", "\r\n");
 	}
+
+	{
+		mpt::ofstream f(crashDirectory.path + MPT_PATHSTRING("active-settings.txt"), std::ios::binary);
+		f.imbue(std::locale::classic());
+		if(&theApp.GetSettings())
+		{
+			SettingsContainer & settings = theApp.GetSettings();
+			for(SettingsContainer::SettingsMap::const_iterator it = settings.begin(); it != settings.end(); ++it)
+			{
+				f
+					<< mpt::ToCharset(mpt::CharsetUTF8, (*it).first.FormatAsString())
+					<< std::string(" = ")
+					<< mpt::ToCharset(mpt::CharsetUTF8, (*it).second.GetRefValue().FormatValueAsString())
+					<< std::endl;
+			}
+		}
+	}
+
+	{
+		CopyFileW
+			( theApp.GetConfigFileName().AsNative().c_str()
+			, (crashDirectory.path + MPT_PATHSTRING("stored-mptrack.ini")).AsNative().c_str()
+			, FALSE
+			);
+	}
+
+	/*
+	// This is very slow, we instead write active-settings.txt above.
+	{
+		IniFileSettingsBackend f(crashDirectory.path + MPT_PATHSTRING("active-mptrack.ini"));
+		if(&theApp.GetSettings())
+		{
+			if(&theApp.GetSettings())
+			{
+				SettingsContainer & settings = theApp.GetSettings();
+				for(SettingsContainer::SettingsMap::const_iterator it = settings.begin(); it != settings.end(); ++it)
+				{
+					f.WriteSetting((*it).first, (*it).second.GetRefValue());
+				}
+			}
+		}
+	}
+	*/
 
 	Reporting::Error(errorMessage, (mode == DumpModeWarning) ? "OpenMPT Warning" : "OpenMPT Crash", CMainFrame::GetMainFrame());
 
