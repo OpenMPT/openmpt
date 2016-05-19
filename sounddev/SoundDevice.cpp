@@ -28,6 +28,8 @@ SysInfo::SysInfo()
 //----------------
 	: WindowsVersion(mpt::Windows::Version::Current())
 	, IsWine(mpt::Windows::IsWine())
+	, WineHostIsLinux(mpt::Wine::HostIsLinux())
+	, WineVersion(mpt::Wine::GetVersion())
 {
 	return;
 }
