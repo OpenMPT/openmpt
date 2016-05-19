@@ -1287,7 +1287,9 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
 				if(events->events[i]->type == kVstMidiType)
 				{
 					VstMidiEvent *event = reinterpret_cast<VstMidiEvent *>(events->events[i]);
-					plugin->MidiSend(reinterpret_cast<uint32>(event->midiData));
+					uint32 midiData;
+					memcpy(&midiData, event->midiData, 4);
+					plugin->MidiSend(midiData);
 				} else if(events->events[i]->type == kVstSysExType)
 				{
 					VstMidiSysexEvent *event = reinterpret_cast<VstMidiSysexEvent *>(events->events[i]);
