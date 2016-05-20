@@ -29,8 +29,8 @@ protected:
 
 	// Align buffer to 16 bytes
 	static_assert(sizeof(buffer_t) < 16, "Check buffer alignment code");
-	static const uint32 bufferAlignmentInBytes = (16 - 1);
-	static const uint32 additionalBuffer = bufferAlignmentInBytes / sizeof(buffer_t);
+	static const size_t bufferAlignmentInBytes = (16 - 1);
+	static const size_t additionalBuffer = bufferAlignmentInBytes / sizeof(buffer_t);
 
 	// Return pointer to an aligned buffer
 	buffer_t *GetBuffer(uint32 index) const
@@ -58,7 +58,7 @@ public:
 			outputs.resize(numOutputs);
 
 			// Create inputs + outputs buffers with additional alignment.
-			const uint32 totalBufferSize = bufferSize * (numInputs + numOutputs) + additionalBuffer;
+			const size_t totalBufferSize = bufferSize * (numInputs + numOutputs) + additionalBuffer;
 			mixBuffer.assign(totalBufferSize, 0);
 
 			// Align buffer start.
