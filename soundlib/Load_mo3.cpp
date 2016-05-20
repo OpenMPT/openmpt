@@ -350,7 +350,7 @@ struct PACKED MO3Instrument
 		mptIns.nDCT = dct;
 		mptIns.nDNA = dca;
 		mptIns.nVolSwing = static_cast<uint8>(std::min(volSwing, uint16(100)));
-		mptIns.nPanSwing = static_cast<uint8>(std::min(panSwing, uint16(64)) / 4u);
+		mptIns.nPanSwing = static_cast<uint8>(std::min(panSwing, uint16(256)) / 4u);
 		mptIns.SetCutoff(cutoff & 0x7F, (cutoff & 0x80) != 0);
 		mptIns.SetResonance(resonance & 0x7F, (resonance & 0x80) != 0);
 	}
@@ -864,7 +864,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 #if !(defined(MPT_WITH_UNMO3) || defined(MPT_ENABLE_UNMO3_DYNBIND)) && !defined(MPT_ENABLE_MO3_BUILTIN)
-	// As of March 2016, the format revision is 5; Versions > 31 are unlikely to ever exist,
+	// As of May 2016, the format revision is 5; Versions > 31 are unlikely to ever exist,
 	// so we will just ignore those if there's no UNMO3 library to tell us if the file is valid or not
 	// (avoid log entry with e.g. .MOD files that have a song name starting with "MO3").
 	if(version > 31)
@@ -977,10 +977,9 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	musicChunk.ReadNullString(m_songName);
 	musicChunk.ReadNullString(m_songMessage);
 
-	STATIC_ASSERT(MAX_BASECHANNELS >= 64);
 	MO3FileHeader fileHeader;
 	if(!musicChunk.ReadConvertEndianness(fileHeader)
-		|| fileHeader.numChannels == 0 || fileHeader.numChannels > 64
+		|| fileHeader.numChannels == 0 || fileHeader.numChannels > MAX_BASECHANNELS
 		|| fileHeader.numInstruments >= MAX_INSTRUMENTS
 		|| fileHeader.numSamples >= MAX_SAMPLES)
 	{
@@ -1031,7 +1030,9 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	else
 		m_nSamplePreAmp = static_cast<uint32>(std::exp(fileHeader.sampleVolume * 3.1 / 20.0)) + 51;
 
-	for(CHANNELINDEX i = 0; i < m_nChannels; i++)
+	// Header only has room for 64 channels, like in IT
+	const CHANNELINDEX headerChannels = std::min(m_nChannels, CHANNELINDEX(64));
+	for(CHANNELINDEX i = 0; i < headerChannels; i++)
 	{
 		if(m_nType == MOD_TYPE_IT)
 			ChnSettings[i].nVolume = std::min(fileHeader.chnVolume[i], uint8(64));
