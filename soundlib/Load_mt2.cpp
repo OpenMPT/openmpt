@@ -394,8 +394,15 @@ static bool ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 			break;
 
 		case 0x0F:	// Set tempo, LPB and ticks (we can only import tempo for now)
-			m.command = CMD_TEMPO;
-			m.param = p.fxparam2;
+			if(p.fxparam2 != 0)
+			{
+				m.command = CMD_TEMPO;
+				m.param = p.fxparam2;
+			} else
+			{
+				m.command = CMD_SPEED;
+				m.param = (p.fxparam1 & 0x0F);
+			}
 			break;
 
 		case 0x10:	// Impulse Tracker effect
