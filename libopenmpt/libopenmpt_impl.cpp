@@ -1273,9 +1273,6 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 	if ( c < 0 || c >= numchannels ) {
 		return std::make_pair( text, high );
 	}
-	if ( width == 0 ) {
-		return std::make_pair( text, high );
-	}
 	//  0000000001111
 	//  1234567890123
 	// "NNN IIvVV EFF"
@@ -1284,30 +1281,30 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 	high.clear();
 	text += ( cell.IsNote() || cell.IsSpecialNote() ) ? m_sndFile->GetNoteName( cell.note, cell.instr ) : std::string("...");
 	high += ( cell.IsNote() ) ? std::string("nnn") : cell.IsSpecialNote() ? std::string("mmm") : std::string("...");
-	if ( width >= 6 ) {
+	if ( ( width == 0 ) || ( width >= 6 ) ) {
 		text += std::string(" ");
 		high += std::string(" ");
 		text += cell.instr ? mpt::fmt::HEX0<2>( cell.instr ) : std::string("..");
 		high += cell.instr ? std::string("ii") : std::string("..");
 	}
-	if ( width >= 9 ) {
+	if ( ( width == 0 ) || ( width >= 9 ) ) {
 		text += cell.IsPcNote() ? std::string(" ") + mpt::fmt::HEX0<2>( cell.GetValueVolCol() & 0xff ) : cell.volcmd != VOLCMD_NONE ? std::string( 1, m_sndFile->GetModSpecifications().GetVolEffectLetter( cell.volcmd ) ) + mpt::fmt::HEX0<2>( cell.vol ) : std::string(" ..");
 		high += cell.IsPcNote() ? std::string(" vv") : cell.volcmd != VOLCMD_NONE ? std::string("uvv") : std::string(" ..");
 	}
-	if ( width >= 13 ) {
+	if ( ( width == 0 ) || ( width >= 13 ) ) {
 		text += std::string(" ");
 		high += std::string(" ");
 		text += cell.IsPcNote() ? mpt::fmt::HEX0<3>( cell.GetValueEffectCol() & 0x0fff ) : cell.command != CMD_NONE ? std::string( 1, m_sndFile->GetModSpecifications().GetEffectLetter( cell.command ) ) + mpt::fmt::HEX0<2>( cell.param ) : std::string("...");
 		high += cell.IsPcNote() ? std::string("eff") : cell.command != CMD_NONE ? std::string("eff") : std::string("...");
 	}
-	if ( text.length() > width ) {
+	if ( ( width != 0 ) && ( text.length() > width ) ) {
 		text = text.substr( 0, width );
-	} else if ( pad ) {
+	} else if ( ( width != 0 ) && pad ) {
 		text += std::string( width - text.length(), ' ' );
 	}
-	if ( high.length() > width ) {
+	if ( ( width != 0 ) && ( high.length() > width ) ) {
 		high = high.substr( 0, width );
-	} else if ( pad ) {
+	} else if ( ( width != 0 ) && pad ) {
 		high += std::string( width - high.length(), ' ' );
 	}
 	return std::make_pair( text, high );
