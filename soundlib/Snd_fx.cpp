@@ -1571,14 +1571,12 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 			// Volume Swing
 			if(pIns->nVolSwing)
 			{
-				const double delta = 2 * (((double) rand()) / RAND_MAX) - 1;
-				pChn->nVolSwing = static_cast<int32>(std::floor(delta * (m_playBehaviour[kITSwingBehaviour] ? pChn->nInsVol : ((pChn->nVolume + 1) / 2)) * pIns->nVolSwing / 100.0));
+				pChn->nVolSwing = ((static_cast<int8>(rand()) * pIns->nVolSwing) / 64 + 1) * (m_playBehaviour[kITSwingBehaviour] ? pChn->nInsVol : ((pChn->nVolume + 1) / 2)) / 199;
 			}
 			// Pan Swing
 			if(pIns->nPanSwing)
 			{
-				const double delta = 2 * (((double) rand()) / RAND_MAX) - 1;
-				pChn->nPanSwing = static_cast<int32>(std::floor(delta * (m_playBehaviour[kITSwingBehaviour] ? 4 : 1) * pIns->nPanSwing));
+				pChn->nPanSwing = ((static_cast<int8>(rand()) * pIns->nPanSwing * 4) / 128);
 				if(!m_playBehaviour[kITSwingBehaviour])
 				{
 					pChn->nRestorePanOnNewNote = pChn->nPan + 1;

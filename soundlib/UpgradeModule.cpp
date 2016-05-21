@@ -368,11 +368,18 @@ void CSoundFile::UpgradeModule()
 
 	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
 	{
-		// Even after fixing it in OpenMPT 1.18, instrument PPS was only half the depth.
 		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr)
 		{
 			ModInstrument *ins = Instruments[i];
+			// Even after fixing it in OpenMPT 1.18, instrument PPS was only half the depth.
 			ins->nPPS = (ins->nPPS + (ins->nPPS >= 0 ? 1 : -1)) / 2;
+
+			// OpenMPT 1.18 fixed the depth of random pan in compatible mode.
+			// OpenMPT 1.26 fixes it in normal mode too.
+			if(!compatModeIT || m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00))
+			{
+				ins->nPanSwing = (ins->nPanSwing + 3) / 4u;
+			}
 		}
 	}
 
