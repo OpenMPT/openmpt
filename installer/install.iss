@@ -92,9 +92,6 @@ Source: ..\packageTemplate\OMPT_{#GetAppVersionShort}_ReleaseNotes.html; DestDir
 Source: ..\packageTemplate\License.txt; DestDir: {app}; Flags: ignoreversion
 Source: ..\packageTemplate\Licenses\*.*; DestDir: {app}\Licenses; Flags: ignoreversion sortfilesbyextension
 
-; soundtouch license stuff
-Source: ..\packageTemplate\SoundTouch\*.*; DestDir: {app}\SoundTouch; Flags: ignoreversion sortfilesbyextension
-
 ; keymaps
 Source: ..\packageTemplate\ExtraKeymaps\*.*; DestDir: {app}\ExtraKeymaps; Flags: ignoreversion sortfilesbyextension
 
