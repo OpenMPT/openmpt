@@ -82,6 +82,7 @@ public:
 private:
 
 	bool CheckResult(MMRESULT result);
+	bool CheckResult(MMRESULT result, DWORD param);
 
 	void HandleWaveoutDone();
 

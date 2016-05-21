@@ -296,6 +296,30 @@ bool CWaveDevice::CheckResult(MMRESULT result)
 }
 
 
+bool CWaveDevice::CheckResult(MMRESULT result, DWORD param)
+//---------------------------------------------------------
+{
+	if(result == MMSYSERR_NOERROR)
+	{
+		return true;
+	}
+	if(!m_Failed)
+	{ // only show the first error
+		m_Failed = true;
+		WCHAR errortext[MAXERRORLENGTH + 1];
+		MemsetZero(errortext);
+		waveOutGetErrorTextW(result, errortext, MAXERRORLENGTH);
+		SendDeviceMessage(LogError, mpt::format(MPT_USTRING("WaveOut error: 0x%1 (param 0x%2): %3"))
+			( mpt::ufmt::hex0<8>(result)
+			, mpt::ufmt::hex0<8>(param)
+			, mpt::ToUnicode(errortext)
+			));
+	}
+	RequestClose();
+	return false;
+}
+
+
 void CWaveDevice::InternalFillAudioBuffer()
 //-----------------------------------------
 {
@@ -313,6 +337,7 @@ void CWaveDevice::InternalFillAudioBuffer()
 	ULONG nBytesWritten = 0;
 	while((oldBuffersPending < m_nPreparedHeaders) && !m_Failed)
 	{
+		volatile DWORD oldFlags = m_WaveBuffers[m_nWriteBuffer].dwFlags;
 		nLatency += m_nWaveBufferSize;
 		SourceLockedAudioPreRead(m_nWaveBufferSize / bytesPerFrame, nLatency / bytesPerFrame);
 		SourceLockedAudioRead(m_WaveBuffers[m_nWriteBuffer].lpData, nullptr, m_nWaveBufferSize / bytesPerFrame);
@@ -320,7 +345,7 @@ void CWaveDevice::InternalFillAudioBuffer()
 		m_WaveBuffers[m_nWriteBuffer].dwBufferLength = m_nWaveBufferSize;
 		InterlockedIncrement(&m_nBuffersPending);
 		oldBuffersPending++; // increment separately to avoid looping without leaving at all when rendering takes more than 100% CPU
-		CheckResult(waveOutWrite(m_hWaveOut, &m_WaveBuffers[m_nWriteBuffer], sizeof(WAVEHDR)));
+		CheckResult(waveOutWrite(m_hWaveOut, &m_WaveBuffers[m_nWriteBuffer], sizeof(WAVEHDR)), oldFlags);
 		m_nWriteBuffer++;
 		m_nWriteBuffer %= m_nPreparedHeaders;
 		SourceLockedAudioDone();
