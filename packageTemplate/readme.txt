@@ -54,7 +54,6 @@ Release package contents
 extraKeymaps (folder): Additional key bindings for the keyboard manager,
     available in several flavours (including MPT classic, Fasttracker 2 and
     Impulse Tracker) and country-specific layouts.
-SoundTouch (folder): SoundTouch readme and license
 ReleaseNotesImages (folder): Files used in the release notes document.
 Plugins (folder): Contains standard audio and MIDI processing plugins that ship
     with OpenMPT.
@@ -82,10 +81,6 @@ Steinberg Media Technologies GmbH
 ASIO is a trademark and software of Steinberg Media Technologies GmbH
 VST is a trademark of Steinberg Media Technologies GmbH
 
-SoundTouch
-----------
-For more information about SoundTouch, see folder SoundTouch.
-
 unmo3.dll
 ---------
 Copyright (c) 2001-2014 Ian Luck. All rights reserved
@@ -105,7 +100,7 @@ Visit http://www.un4seen.com/mo3.html for more information.
 libmpg123
 ---------
 OpenMPT makes use of libmpg123, which is released under the LGPL license.
-A copy of the LGPL license can be found in SoundTouch\COPYING.TXT
+A copy of the LGPL license can be found in Licenses\License.SoundTouch.txt
 Visit http://mpg123.de/ for more information.
 
 other liberaries
