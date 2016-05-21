@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt svn
+
 ### libopenmpt 0.2-beta17 (2016-05-21)
 
  *  [**Change**] The Makefile and Autotools build systems now require to
