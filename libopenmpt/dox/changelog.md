@@ -37,9 +37,6 @@ is just a high-level summary.
  *  [**Change**] Support for Un4seen unmo3 has generally been deprecated in
     favour of the new internal mo3 decoder. Un4seen unmo3 support will be
     removed on 2018-01-01.
- *  [**Change**] More fine-grained internal legacy module compatibility settings
-    to correctly play back modules made with older versions of OpenMPT and a few
-    other trackers.
 
  *  [**Bug**] Memory consumption during loading has been reduced by about 1/3 in
     case a seekable input stream is provided (either via C API callback open
@@ -48,13 +45,14 @@ is just a high-level summary.
  *  [**Bug**] Playing a sample at a sample rate close to the mix rate could lead
     to small clicks when using vibrato.
  *  [**Bug**] Possible crash with excessive portmento down in some formats.
- *  [**Bug**] Improved Ultimate SoundTracker version detection heuristics.
  *  [**Bug**] Some probably hex-edited XM files (e.g. cybernostra weekend.xm)
     were not loaded correctly.
  *  [**Bug**] The tail of compressed MDL samples was slightly off.
- *  [**Bug**] Countless playback fixes for MOD, XM, S3M, IT and MT2 files.
  *  [**Bug**] Possible crashes with malformed AMF, AMS, DBM, IT, MDL, MED, MPTM,
     MT2, PSM and MMCMP-, XPK- and PP20-compressed files.
+ *  [**Bug**] `openmpt::module::format_pattern_row_channel` with `width == 0`
+    was returning an empty string instead of an string with unconstrained
+    length.
 
  *  Support for ProTracker 3.6 IFF-style modules and SoundFX / MultiMedia Sound
     (SFX / MMS) modules.
@@ -90,6 +88,11 @@ is just a high-level summary.
     to `openmpt_string_get()` and `openmpt::string::get()`.
  *  openmpt123: Add new `--[no-]restart]` option which restarts the playlist
     when finished.
+ *  Improved Ultimate SoundTracker version detection heuristics.
+ *  More fine-grained internal legacy module compatibility settings to correctly
+    play back modules made with older versions of OpenMPT and a few other
+    trackers.
+ *  Countless playback fixes for MOD, XM, S3M, IT and MT2 files.
 
 ### libopenmpt 0.2-beta16 (2015-11-22)
 
