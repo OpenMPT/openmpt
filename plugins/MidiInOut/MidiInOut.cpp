@@ -235,6 +235,8 @@ CAbstractVstEditor *MidiInOut::OpenEditor()
 void MidiInOut::Process(float *, float *, uint32 numFrames)
 //---------------------------------------------------------
 {
+	mpt::lock_guard<mpt::mutex> lock(mutex);
+
 	if(outputDevice.stream != nullptr)
 	{
 		// Send MIDI clock
@@ -253,8 +255,6 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 	// We don't do any audio processing here, but we process incoming MIDI events.
 	if(inputDevice.stream == nullptr)
 		return;
-
-	mpt::lock_guard<mpt::mutex> lock(mutex);
 
 	while(Pm_Poll(inputDevice.stream))
 	{
