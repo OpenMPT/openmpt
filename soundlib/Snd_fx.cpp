@@ -788,10 +788,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			break;
 		}
 
-		m_PlayState.m_nCurrentRowsPerBeat = m_nDefaultRowsPerBeat;
+		memory.state.m_nCurrentRowsPerBeat = m_nDefaultRowsPerBeat;
 		if(Patterns[memory.state.m_nPattern].GetOverrideSignature())
 		{
-			m_PlayState.m_nCurrentRowsPerBeat = Patterns[memory.state.m_nPattern].GetRowsPerBeat();
+			memory.state.m_nCurrentRowsPerBeat = Patterns[memory.state.m_nPattern].GetRowsPerBeat();
 		}
 
 		const uint32 tickDuration = GetTickDuration(memory.state);
