@@ -582,7 +582,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kFT2KeyOff: desc = _T("FT2-style Kxx handling"); break;
 		case kFT2PanSlide: desc = _T("Volume-column pan slides are finer"); break;
 		case kFT2OffsetOutOfRange: desc = _T("FT2-style 9xx edge case handling"); break;
-		case kFT2RestrictXCommand: desc = _T("Do not allow MPT extensions to Xxx command in XM"); break;
+		case kFT2RestrictXCommand: desc = _T("Do not allow ModPlug extensions to X command"); break;
 		case kFT2RetrigWithNoteDelay: desc = _T("Retrigger envelopes if there is a note delay with no note"); break;
 		case kFT2SetPanEnvPos: desc = _T("Lxx only sets the pan envelope position if the volume envelope's sustain flag is set"); break;
 		case kFT2PortaIgnoreInstr: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself"); break;

@@ -131,6 +131,14 @@ Filename: {app}\ModPlug Central.url; Section: InternetShortcut; Key: URL; String
 Filename: "{app}\OMPT_{#GetAppVersionShort}_ReleaseNotes.html"; Description: "View Release Notes"; Flags: shellexec nowait postinstall skipifsilent
 Filename: {app}\mptrack.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: nowait postinstall skipifsilent
 
+[InstallDelete]
+; i16 -> f32
+Type: files; Name: {app}\OpenMPT_SoundTouch_i16.dll
+; Old SoundTouch documents
+Type: files; Name: {app}\SoundTouch\README.html
+Type: files; Name: {app}\SoundTouch\COPYING.TXT
+Type: dirifempty; Name: {app}\SoundTouch
+
 [UninstallDelete]
 ; internet shortcut has to be deleted manually
 Type: files; Name: {app}\ModPlug Central.url
@@ -148,7 +156,6 @@ Type: files; Name: {app}\unmo3.dll; Tasks: downloadmo3
 #endif
 
 #include "utilities.iss"
-#include "plugins.iss"
 
 [Code]
 #ifdef WIN32OLD
@@ -305,8 +312,6 @@ begin
 #ifdef DOWNLOAD_MO3
             VerifyUNMO3Checksum();
 #endif
-
-            RegisterPlugin('MIDI\MIDI Input Output.dll');
 
             // Copy old config files from app's directory, if possible and necessary.
             CopyConfigsToAppDataDir();
