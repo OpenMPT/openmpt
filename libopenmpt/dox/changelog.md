@@ -8,7 +8,7 @@ is just a high-level summary.
 ### libopenmpt svn
 
  *  [**Change**] The Makefile and Autotools build systems now require to
-    explicitely specify `NO_LTDL=1` or `--without-ltdl` respectively if no
+    explicitly specify `NO_LTDL=1` or `--without-ltdl` respectively if no
     support for dynamic loading of third party libraries via libtool libltdl is
     desired.
  *  [**Change**] In the Makefile build system option `USE_MO3` and the Autotools
@@ -42,12 +42,7 @@ is just a high-level summary.
     case a seekable input stream is provided (either via C API callback open
     functions or via C++ API iostream constructors).
  *  [**Bug**] Some samples in AMS modules were detuned when using Emscripten.
- *  [**Bug**] Playing a sample at a sample rate close to the mix rate could lead
-    to small clicks when using vibrato.
- *  [**Bug**] Possible crash with excessive portmento down in some formats.
- *  [**Bug**] Some probably hex-edited XM files (e.g. cybernostra weekend.xm)
-    were not loaded correctly.
- *  [**Bug**] The tail of compressed MDL samples was slightly off.
+ *  [**Bug**] Possible crash with excessive portamento down in some formats.
  *  [**Bug**] Possible crashes with malformed AMF, AMS, DBM, IT, MDL, MED, MPTM,
     MT2, PSM and MMCMP-, XPK- and PP20-compressed files.
  *  [**Bug**] `openmpt::module::format_pattern_row_channel` with `width == 0`
@@ -67,9 +62,9 @@ is just a high-level summary.
     libvorbis, libvorbisfile or stb_vorbis.
  *  libopenmpt MSVC builds with Visual Studio 2010 or later on Windows 7 or
     later now use an internal MO3 decoder with libogg, libvorbis, libvorbisfile,
-    and libmpg123 or minimp3 or MediaFoundation suppport by defaut. Visual
+    and libmpg123 or minimp3 or MediaFoundation suppport by default. Visual
     Studio 2008 builds still use unmo3.dll by default but also support the
-    builtin decoder in which case libmpg123 is required.
+    built-in decoder in which case libmpg123 is required.
  *  libopenmpt with Makefile or Autotools build system can now also use
     glibc/libdl instead of libtool/libltdl for dynamic loading of third-party
     libraries. Options `NO_DL=1` and `--without-dl` have been added
@@ -89,10 +84,15 @@ is just a high-level summary.
  *  openmpt123: Add new `--[no-]restart]` option which restarts the playlist
     when finished.
  *  Improved Ultimate SoundTracker version detection heuristics.
+ *  Playing a sample at a sample rate close to the mix rate could lead to small
+    clicks when using vibrato.
  *  More fine-grained internal legacy module compatibility settings to correctly
     play back modules made with older versions of OpenMPT and a few other
     trackers.
- *  Countless playback fixes for MOD, XM, S3M, IT and MT2 files.
+ *  The tail of compressed MDL samples was slightly off.
+ *  Some probably hex-edited XM files (e.g. cybernostra weekend.xm) were not
+    loaded correctly.
+ *  Countless other playback fixes for MOD, XM, S3M, IT and MT2 files.
 
 ### libopenmpt 0.2-beta16 (2015-11-22)
 
@@ -175,7 +175,7 @@ is just a high-level summary.
     SEEK_END. These are defined to 0, 1 and 2 respectively which corresponds to
     the definition in all common C libraries. If your C library uses different
     constants, this theoretically breaks binary compatibility. The old
-    libopenmpt code, however, never actually called the seek funtion, thus,
+    libopenmpt code, however, never actually called the seek function, thus,
     there will be no problem in practice.
  *  [**Change**] openmpt123: When both SDL1.2 and PortAudio are available,
     SDL is now the preferred backend because SDL is more widespread and better
@@ -210,7 +210,7 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta8 (2014-12-21)
 
- *  [**Change**] foo_openmpt: Settings are now accessable via foobar2000
+ *  [**Change**] foo_openmpt: Settings are now accessible via foobar2000
     advanced settings.
  *  [**Change**] Autotools based build now supports libunmo3. Specify
     --enable-unmo3.
@@ -286,7 +286,7 @@ is just a high-level summary.
     emscripten.
 
  *  [**Bug**] Fix ping-pong loop behaviour which broke in 0.2-beta3.
- *  [**Bug**] Fix crashs when accessing invalid patterns through libopenmpt
+ *  [**Bug**] Fix crashes when accessing invalid patterns through libopenmpt
     API.
  *  [**Bug**] Makefile: Support building with missing optional dependencies
     without them being stated explicitely.
@@ -314,7 +314,7 @@ is just a high-level summary.
  *  [**Bug**] openmpt_module_get_num_samples() returned the wrong value.
  *  [**Bug**] in_openmpt: DSP plugins did not work properly.
  *  [**Bug**] in_openmpt/xmp-openmpt: Setting name for stereo separation was
-    mis-spelled. This version will revert your stereo separation settings to
+    misspelled. This version will revert your stereo separation settings to
     default.
  *  [**Bug**] Crash when loading some corrupted modules with stereo samples.
 

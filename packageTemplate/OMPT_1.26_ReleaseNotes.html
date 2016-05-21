@@ -1,0 +1,198 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+  <title>OpenMPT 1.26 Release Notes</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="language" content="en" />
+  <style type="text/css">
+    * { font-family: Calibri, sans-serif; }
+    body
+    {
+        color: #222;
+        background: #eee;
+        font-size: 13pt;
+        margin: 0 0 1em 0;
+        padding: 0;
+        border: none;
+    }
+
+    a { color: #b30; text-decoration: none; }
+    a:visited { color: #910; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .screenshots
+    {
+        float:right;
+        text-align:right;
+    }
+
+    .screenshots img, h1
+    {
+        border: 1px solid #ccc;
+        padding: 3px;
+        background: #f0f0f0;
+        margin: 0 0 3px 3px;
+    }
+
+    p { margin: 0.5em 1em; padding: 0; }
+
+    h1
+    {
+        margin: 0 0 1em 0;
+        padding: 10px;
+        font-size: 24pt;
+        color: #444;
+        text-shadow: 1px 1px 1px #999;
+        background: #ddd;
+        background-image: linear-gradient(bottom, #ddd 20%, #eee 60%);
+        background-image: -o-linear-gradient(bottom, #ddd 20%, #eee 60%);
+        background-image: -moz-linear-gradient(bottom, #ddd 20%, #eee 60%);
+        background-image: -webkit-linear-gradient(bottom, #ddd 20%, #eee 60%);
+        background-image: -ms-linear-gradient(bottom, #ddd 20%, #eee 60%);
+        background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0.2, #ddd), color-stop(0.6, #eee));
+        border-width: 0 0 1px 0;
+    }
+
+    h1 img { vertical-align: middle; margin-right: 1em; }
+
+    h2, h3, h4
+    {
+        border: 1px solid #ccc;
+        border-width: 0 0 0 3em;
+        margin: 1em 0.5em;
+        padding: 0px 5px;
+        font-size: 18pt;
+        color: #333;
+        text-shadow: 1px 1px #fff;
+    }
+
+    h3 { border-left-width: 2em; }
+    h4 { border-left-width: 1em; }
+
+    li {list-style-type: none; padding: 0 0 0.5em 0; }
+    li:before { content: "» "; }
+
+    li li { padding: 0; }
+
+    /* use this for pattern data */
+    pre
+    {
+        font-family: monospace;
+        display: inline;
+        color: #006;
+    }
+
+    tt
+    {
+        font-family: monospace;
+    }
+
+  </style>
+  </head>
+  <body>
+
+    <h1>
+        <img src="ReleaseNotesImages/general/modplug.png" width="80" height="80" alt="OpenMPT Logo" />
+        OpenMPT 1.26 - Release Notes
+    </h1>
+
+    <p>
+        It's been a while since the last official release (version 1.25.04.00), and we have been working on a bunch of great new features for this new version.
+        This document should give a rough overview about the greatest changes in OpenMPT 1.26.
+    </p>
+
+    <h2>What's new?</h2>
+
+    <h3>General</h3>
+    <ul>
+        <li>Song cleanup can now <strong>merge identical patterns</strong>.</li>
+        <li>Ogg Vorbis and Opus support is now built-in and no longer requires an external library for stream export.</li>
+        <li>Add a new "MP3 (compatible)" export file type that is implemented only via libmp3lame and is the same as the old libmp3lame CBR mode with strictly ID3v1 tags only. The regular MP3 export mode uses more modern defaults for better audio quality.</li>
+        <li>Added hidden setting Misc.DistinguishModifiers to distinguish between left and right modifiers (e.g. to create FT2-like play pattern shortcuts).</li>
+    </ul>
+
+    <h3>Pattern Editor</h3>
+    <div class="screenshots">
+        <a href="ReleaseNotesImages/1.26/findreplace.png"><img src="ReleaseNotesImages/1.26/findreplace.png" width="255" height="262" alt="Enhanced Find/Replace dialog" title="Enhanced Find/Replace dialog" /></a> <br />
+        <a href="ReleaseNotesImages/1.26/compatibility.png"><img src="ReleaseNotesImages/1.26/compatibility.png" width="255" height="170" alt="Legacy playback compatibility dialog" title="Legacy playback compatibility dialog" /></a>
+    </div>
+    <ul>
+        <li>Double-clicking an <strong>empty order list cell</strong> creates a new pattern.</li>
+        <li>To make <strong>Data Entry</strong> more useful, it is now only applied to the first column type of selection, even if it spans several channels (e.g. if the selection starts in the volume column, only volume will be changed).</li>
+        <li><strong>Find &amp; Replace</strong> can now find ranges of data (e.g. notes C-5 to D-6) and replace them also with relative values or percentages. PC events are now also fully supported by Find &amp; Replace.</li>
+    </ul>
+    
+    <h3>Plugins</h3>
+    <ul>
+        <li>Shift-clicking a plugin editor toggle button closes all other editors.</li>
+        <li>OpenMPT now reads the VST <strong>plugin vendor</strong>. Searching for a plugin in the plugin manager also searches in the vendor names.</li>
+        <li>When opening an instrument plugin editor, check if the currently selected instrument would be suitable input instrument for the plugin, rather than just the first instrument that uses this plugin.</li>
+        <li>If available (on DirectX 9 and newer), DMO plugins now process in <strong>floating-point precision</strong> rather than 16-bit PCM.</li>
+        <li>Plugin editor position is now restored properly on multi-monitor setups.</li>
+        <li>The MIDI Input / Output plugin now sends <strong>MIDI Clock</strong> events. It is now directly integrated into OpenMPT and no longer shipped as a separate VST plugin.</li>
+        <li>The <strong>DigiBooster Pro Echo DSP</strong> is now fully emulated and can also be used in other formats as a plugin.</li>
+    </ul>
+
+    <h3>Sample / Instrument Editor</h3>
+    <ul>
+        <li>Loop <strong>cross-fader</strong> now also works with sustain loops.</li>
+        <li>Try to load <strong>SF2 instruments</strong> with left and right layer as stereo samples. Detuned SF2 samples are now finally fixed!</li>
+        <li>Ogg Vorbis and Opus sample loading support.</li>
+    </ul>
+
+    <h3>Playback</h3>
+    <p>
+        A couple of playback behaviours have been changed and improved:
+    </p>
+    <ul>
+        <li>Instead of having one "compatible playback" per file, every <strong>playback quirk</strong> now has its own flag. This includes a dialog to edit these flags. These flags should not be edited manually, except for the "Set Defaults" functionality.</li>
+        <li>For old files made with MPT / OpenMPT before v1.24, sample rates are now computed in periods again in linear slide mode. This fixes for example the drum line sample in Zanoma's "Late At Night". Similarly, old OpenMPT-made files that use portamento at speed 1 now sound as in OpenMPT 1.17 - 1.20 again.</li>
+        <li>Each sequence now has its own <strong>restart position</strong> in the MPTM format.</li>
+        <li>Parameter Extension (#xx) now also works with <strong>Position Jump</strong> command in the MPTM format, adding the possibility to jump order list items &ge; 256.</li>
+        <li>Samples in MPTM files are now <strong>compressed</strong> by default (lossless IT compression).</li>
+        <li><strong>Extra fine portamento</strong> now works properly with custom tunings.</li>
+        <li>Playing a sample at a sample rate close to the mix rate could lead to small clicks when using <strong>vibrato</strong>.</li>
+        <li>If no instrument number was provided, New Note Action with empty sample slot and Duplicate Note Action sample checks were broken.</li>
+        <li>Countless other <strong>playback fixes</strong>.</li>
+    </ul>
+
+    <h3>File Format Support</h3>
+    <ul>
+        <li>Improved <strong>MT2</strong> support.</li>
+        <li>Support for <strong>SoundFX / MultiMedia Sound</strong> (SFX / MMS) and ProTracker 3.6 IFF-style modules has been added.</li>
+        <li>Better tracker detection heuristics for Ultimate SoundTracker modules.</li>
+        <li><strong>MO3 support</strong> is now built right into OpenMPT, no longer requiring the closed-source UNMO3 on Windows 7 and newer.</li>
+    </ul>
+
+    <h3>There's more...</h3>
+    <p>
+        For a detailed description of what has changed, check <a href="History.txt">History.txt</a>. If you are new to OpenMPT, be sure to read the manual as well.
+    </p>
+
+    <h2>Known Issues</h2>
+    <p>
+        <i>This list has mostly been copied over from the old OpenMPT 1.17 RC2 release notes, so this not very comprehensive... :-)</i>
+    </p>
+    <ul>
+        <li>The plugin bridge is new and hasn't been tested very much yet. It is known that some plugins don't work in it at all. Custom plugin GUIs are known to not work in Wine. Please report any other issues you may be having with the plugin bridge!</li>
+        <li>Far from perfect VST support (no buses for audio / MIDI routing, not all tracker effects are supported, etc...)</li>
+        <li>Previewing samples from the tree view's file browser stops the playing module.</li>
+        <li>Cannot preview soundfont instruments directly from the MIDI Library in the tree view.</li>
+        <li>Excessive performance drop when dragging over the graphical parameter editor during playback.</li>
+        <li>There is no really <em>convenient</em> way to find out what features of the tracker are supported by the original trackers (Impulse Tracker, Fasttracker 2, etc...) when working with those file formats...</li>
+    </ul>
+    <p>
+        Known issues regarding specific VST plugins can be found in the <a href="https://wiki.openmpt.org/Manual:_Known_Issues">manual</a>.
+    </p>
+
+    <h2>Contact</h2>
+    <p>
+        Helpful bug reports, new ideas and brave volunteers to test early development builds or contribute to the code are more than welcome!<br />
+        Our issue tracker is located at <a href="https://bugs.openmpt.org/">https://bugs.openmpt.org/</a> and can be used to report bugs and feature requests.<br />
+        You can also meet us at the ModPlug Central forums: <a href="https://forum.openmpt.org/">https://forum.openmpt.org/</a>.
+    </p>
+
+  </body>
+</html>
