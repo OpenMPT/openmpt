@@ -229,9 +229,7 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 			for(SettingsContainer::SettingsMap::const_iterator it = settings.begin(); it != settings.end(); ++it)
 			{
 				f
-					<< mpt::ToCharset(mpt::CharsetUTF8, (*it).first.FormatAsString())
-					<< std::string(" = ")
-					<< mpt::ToCharset(mpt::CharsetUTF8, (*it).second.GetRefValue().FormatValueAsString())
+					<< mpt::ToCharset(mpt::CharsetUTF8, (*it).first.FormatAsString() + MPT_USTRING(" = ") + (*it).second.GetRefValue().FormatValueAsString())
 					<< std::endl;
 			}
 		}
