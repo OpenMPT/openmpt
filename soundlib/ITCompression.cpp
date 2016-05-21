@@ -52,8 +52,11 @@ static const int ITWidthChangeSize[] = { 4, 5, 6, 7, 8, 9, 7, 8, 9, 10, 11, 12, 
 // IT 2.14 compression
 
 
-ITCompression::ITCompression(const ModSample &sample, bool it215, std::ostream *f) : file(f), mptSample(sample), is215(it215)
-//---------------------------------------------------------------------------------------------------------------------------
+ITCompression::ITCompression(const ModSample &sample, bool it215, std::ostream *f, SmpLength maxLength)
+	: file(f)
+	, mptSample(sample)
+	, is215(it215)
+//-----------------------------------------------------------------------------------------------------
 {
 	packedData = new (std::nothrow) uint8[bufferSize];
 	sampleData = new (std::nothrow) uint8[blockSize];
@@ -63,10 +66,12 @@ ITCompression::ITCompression(const ModSample &sample, bool it215, std::ostream *
 		return;
 	}
 
+	if(maxLength == 0 || maxLength > mptSample.nLength)
+		maxLength = mptSample.nLength;
 	for(uint8 chn = 0; chn < mptSample.GetNumChannels(); chn++)
 	{
 		SmpLength offset = 0;
-		SmpLength remain = mptSample.nLength;
+		SmpLength remain = maxLength;
 		while(remain > 0)
 		{
 			// Initialise output buffer and bit writer positions
@@ -314,8 +319,10 @@ void ITCompression::WriteByte(uint8 v)
 // IT 2.14 decompression
 
 
-ITDecompression::ITDecompression(FileReader &file, ModSample &sample, bool it215) : mptSample(sample), is215(it215)
-//-----------------------------------------------------------------------------------------------------------------
+ITDecompression::ITDecompression(FileReader &file, ModSample &sample, bool it215)
+	: mptSample(sample)
+	, is215(it215)
+//-------------------------------------------------------------------------------
 {
 	for(uint8 chn = 0; chn < mptSample.GetNumChannels(); chn++)
 	{

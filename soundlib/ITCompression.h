@@ -25,7 +25,7 @@ class ITCompression
 //=================
 {
 public:
-	ITCompression(const ModSample &sample, bool it215, std::ostream *f);
+	ITCompression(const ModSample &sample, bool it215, std::ostream *f, SmpLength maxLength = 0);
 	size_t GetCompressedSize() const { return packedTotalLength; }
 
 	static const size_t bufferSize = 2 + 0xFFFF;	// Our output buffer can't be longer than this.

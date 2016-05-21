@@ -793,8 +793,7 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 	else if(GetEncoding() == IT214 || GetEncoding() == IT215)
 	{
 		// IT2.14-encoded samples
-		MPT_ASSERT(!maxSamples);
-		ITCompression its(sample, GetEncoding() == IT215, f);
+		ITCompression its(sample, GetEncoding() == IT215, f, numSamples);
 		len = its.GetCompressedSize();
 	}
 
