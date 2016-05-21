@@ -1192,7 +1192,8 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 	uint32 dwChnNamLen;
 	ITFileHeader itHeader;
-	uint32 dwPos = 0, dwHdrPos = 0, dwExtra = 0;
+	uint64 dwPos = 0;
+	uint32 dwHdrPos = 0, dwExtra = 0;
 	FILE *f;
 
 	if(filename.empty() || ((f = mpt_fopen(filename, "wb")) == NULL)) return false;
@@ -1431,7 +1432,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		}
 
 		// Writing instrument
-		inspos[nins - 1] = dwPos;
+		inspos[nins - 1] = static_cast<uint32>(dwPos);
 		dwPos += instSize;
 		iti.ConvertEndianness();
 		fwrite(&iti, 1, instSize, f);
@@ -1442,7 +1443,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	MemsetZero(itss);
 	for(SAMPLEINDEX smp = 0; smp < itHeader.smpnum; smp++)
 	{
-		smppos[smp] = dwPos;
+		smppos[smp] = static_cast<uint32>(dwPos);
 		dwPos += sizeof(ITSample);
 		fwrite(&itss, 1, sizeof(ITSample), f);
 	}
@@ -1451,7 +1452,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	bool bNeedsMptPatSave = false;
 	for(PATTERNINDEX pat = 0; pat < itHeader.patnum; pat++)
 	{
-		uint32 dwPatPos = dwPos;
+		uint32 dwPatPos = static_cast<uint32>(dwPos);
 		if (!Patterns[pat]) continue;
 
 		if(Patterns[pat].GetOverrideSignature())
@@ -1464,7 +1465,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 			continue;
 		}
 
-		patpos[pat] = dwPos;
+		patpos[pat] = static_cast<uint32>(dwPos);
 
 		// Write pattern header
 		ROWINDEX writeRows = mpt::saturate_cast<uint16>(Patterns[pat].GetNumRows());
@@ -1631,7 +1632,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		fseek(f, dwPatPos, SEEK_SET);
 		SwapBytesLE(patinfo[0]);
 		fwrite(patinfo, 8, 1, f);
-		fseek(f, dwPos, SEEK_SET);
+		fseek(f, static_cast<long>(dwPos), SEEK_SET);
 	}
 	// Writing Sample Data
 	for(SAMPLEINDEX smp = 1; smp <= itHeader.smpnum; smp++)
@@ -1650,14 +1651,32 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 		mpt::String::Write<mpt::String::nullTerminated>(itss.name, m_szNames[smp]);
 
-		itss.samplepointer = dwPos;
+		itss.samplepointer = static_cast<uint32>(dwPos);
+		if(dwPos > uint32_max)
+		{
+			// Sample position does not fit into sample pointer!
+			AddToLog(mpt::String::Print("Cannot save sample %1: File size exceeds 4 GB.", smp));
+			itss.samplepointer = 0;
+			itss.length = 0;
+		}
+		SmpLength smpLength = itss.length;	// Possibly truncated to 2^32 samples
 		itss.ConvertEndianness();
 		fseek(f, smppos[smp - 1], SEEK_SET);
 		fwrite(&itss, 1, sizeof(ITSample), f);
-		fseek(f, dwPos, SEEK_SET);
+		if(dwPos > uint32_max)
+		{
+			continue;
+		}
+		// TODO this actually wraps around at 2 GB, so we either need to use the 64-bit seek API or warn earlier!
+		fseek(f, static_cast<long>(dwPos), SEEK_SET);
 		if(!isExternal)
 		{
-			dwPos += itss.GetSampleFormat().WriteSample(f, Samples[smp]);
+			if(Samples[smp].nLength != smpLength)
+			{
+				// Sample length does not fit into IT header!
+				AddToLog(mpt::String::Print("Truncating sample %1: Length exceeds exceeds 4 gigasamples.", smp));
+			}
+			dwPos += itss.GetSampleFormat().WriteSample(f, Samples[smp], smpLength);
 		} else
 		{
 #ifdef MPT_EXTERNAL_SAMPLES
