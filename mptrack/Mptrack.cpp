@@ -341,7 +341,7 @@ public:
 public:
 	CMPTCommandLineInfo()
 	{
-		m_bNoDls = m_bNoPlugins = m_bNoAssembly = m_bNoSysCheck =
+		m_bNoDls = m_bNoPlugins = m_bNoAssembly = m_bNoSysCheck = m_bNoWine =
 		m_bPortable = false;
 #ifdef _DEBUG
 		m_bNoTests = false;
