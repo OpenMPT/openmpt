@@ -157,6 +157,7 @@ bool CWaveDevice::InternalOpen()
 		return false;
 	}
 	m_Failed = false;
+	m_DriverBugs = 0;
 	m_hWaveOut = NULL;
 	if(waveOutOpen(&m_hWaveOut, nWaveDev, pwfx, (DWORD_PTR)WaveOutCallBack, (DWORD_PTR)this, CALLBACK_FUNCTION | (m_Settings.ExclusiveMode ? WAVE_FORMAT_DIRECT : 0)) != MMSYSERR_NOERROR)
 	{
@@ -197,6 +198,7 @@ bool CWaveDevice::InternalOpen()
 	}
 	m_nBuffersPending = 0;
 	m_nWriteBuffer = 0;
+	m_nDoneBuffer = 0;
 	{
 		mpt::lock_guard<mpt::mutex> guard(m_PositionWraparoundMutex);
 		MemsetZero(m_PositionLast);
@@ -219,6 +221,7 @@ bool CWaveDevice::InternalClose()
 		m_JustStarted = false;
 		InterlockedExchange(&m_nBuffersPending, 0);
 		m_nWriteBuffer = 0;
+		m_nDoneBuffer = 0;
 		while(m_nPreparedHeaders > 0)
 		{
 			m_nPreparedHeaders--;
@@ -227,6 +230,13 @@ bool CWaveDevice::InternalClose()
 		waveOutClose(m_hWaveOut);
 		m_hWaveOut = NULL;
 	}
+	#ifdef _DEBUG
+		if(m_DriverBugs.load())
+		{
+				SendDeviceMessage(LogError, MPT_USTRING("Errors were detected while playing sound:\n") + GetStatistics().text);
+		}
+	#endif
+	m_DriverBugs = 0;
 	m_Failed = false;
 	if(m_ThreadWakeupEvent)
 	{
@@ -337,11 +347,40 @@ void CWaveDevice::InternalFillAudioBuffer()
 	ULONG nBytesWritten = 0;
 	while((oldBuffersPending < m_nPreparedHeaders) && !m_Failed)
 	{
-		volatile DWORD oldFlags = m_WaveBuffers[m_nWriteBuffer].dwFlags;
+		DWORD oldFlags = static_cast<volatile WAVEHDR*>(&(m_WaveBuffers[m_nWriteBuffer]))->dwFlags;
+		if((oldFlags & WHDR_INQUEUE))
+		{
+			m_DriverBugs.fetch_or(DriverBugBufferFillAndHeaderInQueue);
+		}
+		if(!(oldFlags & WHDR_DONE))
+		{
+			m_DriverBugs.fetch_or(DriverBugBufferFillAndHeaderNotDone);
+		}
+		if((oldFlags & WHDR_INQUEUE))
+		{
+			if(m_DriverBugs.load() & DriverBugDoneNotificationOutOfOrder)
+			{
+				//  Some drivers/setups can return WaveHeader notifications out of
+				// order. WaveHeaders which have not yet been notified to be ready stay
+				// in the INQUEUE and !DONE state internally and cannot be reused yet
+				// even though they causally should be able to. waveOutWrite fails for
+				// them.
+				//  In this case we skip filling the buffers until we actually see the
+				// next expected buffer to be ready for refilling.
+				//  This problem has been spotted on Wine 1.7.46 (non-official packages)
+				// running on Debian 8 Jessie 32bit. It may also be related to WaveOut
+				// playback being too fast and crackling which had benn reported on
+				// Wine 1.6 + WinePulse on UbuntuStudio 12.04 32bit (this has not been
+				// verified yet because the problem is not always reproducable on the
+				// system in question).
+				return;
+			}
+		}
 		nLatency += m_nWaveBufferSize;
 		SourceLockedAudioPreRead(m_nWaveBufferSize / bytesPerFrame, nLatency / bytesPerFrame);
 		SourceLockedAudioRead(m_WaveBuffers[m_nWriteBuffer].lpData, nullptr, m_nWaveBufferSize / bytesPerFrame);
 		nBytesWritten += m_nWaveBufferSize;
+		m_WaveBuffers[m_nWriteBuffer].dwFlags &= ~(WHDR_INQUEUE|WHDR_DONE);
 		m_WaveBuffers[m_nWriteBuffer].dwBufferLength = m_nWaveBufferSize;
 		InterlockedIncrement(&m_nBuffersPending);
 		oldBuffersPending++; // increment separately to avoid looping without leaving at all when rendering takes more than 100% CPU
@@ -446,23 +485,39 @@ int64 CWaveDevice::InternalGetStreamPositionFrames() const
 }
 
 
-void CWaveDevice::HandleWaveoutDone()
-//-----------------------------------
+void CWaveDevice::HandleWaveoutDone(WAVEHDR *hdr)
+//-----------------------------------------------
 {
 	MPT_TRACE();
+	DWORD flags = static_cast<volatile WAVEHDR*>(hdr)->dwFlags;
+	uint32 hdrIndex = hdr - &(m_WaveBuffers[0]);
+	if(hdrIndex != m_nDoneBuffer)
+	{
+		m_DriverBugs.fetch_or(DriverBugDoneNotificationOutOfOrder);
+	}
+	if(!(flags & WHDR_DONE))
+	{
+		m_DriverBugs.fetch_or(DriverBugDoneNotificationAndHeaderNotDone);
+	}
+	if((flags & WHDR_INQUEUE))
+	{
+		m_DriverBugs.fetch_or(DriverBugDoneNotificationAndHeaderInQueue);
+	}
+	m_nDoneBuffer += 1;
+	m_nDoneBuffer %= m_nPreparedHeaders;
 	InterlockedDecrement(&m_nBuffersPending);
 	SetEvent(m_ThreadWakeupEvent);
 }
 
 
-void CWaveDevice::WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR, DWORD_PTR)
-//--------------------------------------------------------------------------------------------
+void CWaveDevice::WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR param1, DWORD_PTR /* param2 */)
+//----------------------------------------------------------------------------------------------------------------
 {
 	MPT_TRACE();
-	if((uMsg == MM_WOM_DONE) && (dwUser))
+	if((uMsg == WOM_DONE) && (dwUser))
 	{
 		CWaveDevice *that = (CWaveDevice *)dwUser;
-		that->HandleWaveoutDone();
+		that->HandleWaveoutDone((WAVEHDR*)param1);
 	}
 }
 
@@ -485,7 +540,14 @@ SoundDevice::Statistics CWaveDevice::GetStatistics() const
 	SoundDevice::Statistics result;
 	result.InstantaneousLatency = InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond();
 	result.LastUpdateInterval = 1.0 * m_nWaveBufferSize / m_Settings.GetBytesPerSecond();
-	result.text = mpt::ustring();
+	uint32 bugs = m_DriverBugs.load();
+	if(bugs != 0)
+	{
+		result.text = mpt::format(MPT_USTRING("Problematic driver detected! Error flags: %1"))(mpt::ufmt::hex0<8>(bugs));
+	} else
+	{
+		result.text = mpt::format(MPT_USTRING("Driver working as expected."))();
+	}
 	return result;
 }
 
