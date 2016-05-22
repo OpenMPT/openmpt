@@ -26,7 +26,17 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
-v1.26.01.00 (21 May 2015, revision 6400)
+v1.26.02.00 (22 May 2016, revision 6410)
+----------------------------------------
+Audio I/O
+   [Fix] <jh> Fix playback on some Wave Out drivers (e.g. in Wine 1.7.46, possibly also fixes http://bugs.openmpt.org/view.php?id=620).
+
+Misc
+   [Fix] <js> Song length estimation: Length was reported incorrectly for some modules in modern tempo mode and estimation disturbed real-time playback in songs with per-pattern time signature.
+   [Fix] <jh> OpenMPT did not detect Wine reliably in the previous release.
+
+
+v1.26.01.00 (21 May 2016, revision 6400)
 ----------------------------------------
 General tab
    [Imp] <js> In the plugin "Output To" box, there is now also an option to add a new plugin to which the output should be routed.
