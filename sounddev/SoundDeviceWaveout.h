@@ -51,6 +51,7 @@ protected:
 	bool m_JustStarted;
 	ULONG m_nPreparedHeaders;
 	ULONG m_nWriteBuffer;
+	ULONG m_nDoneBuffer;
 	mutable LONG m_nBuffersPending;
 	std::vector<WAVEHDR> m_WaveBuffers;
 	std::vector<std::vector<char> > m_WaveBuffersData;
@@ -58,6 +59,13 @@ protected:
 	mutable mpt::mutex m_PositionWraparoundMutex;
 	mutable MMTIME m_PositionLast;
 	mutable std::size_t m_PositionWrappedCount;
+
+	static const uint32 DriverBugDoneNotificationAndHeaderInQueue = (1u<<0u); //  1
+	static const uint32 DriverBugDoneNotificationAndHeaderNotDone = (1u<<1u); //  2
+	static const uint32 DriverBugBufferFillAndHeaderInQueue = (1u<<2u);       //  4
+	static const uint32 DriverBugBufferFillAndHeaderNotDone = (1u<<3u);       //  8
+	static const uint32 DriverBugDoneNotificationOutOfOrder = (1u<<4u);       // 10
+	mpt::atomic_uint32_t m_DriverBugs;
 
 public:
 	CWaveDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
@@ -84,7 +92,7 @@ private:
 	bool CheckResult(MMRESULT result);
 	bool CheckResult(MMRESULT result, DWORD param);
 
-	void HandleWaveoutDone();
+	void HandleWaveoutDone(WAVEHDR *hdr);
 
 	int GetDeviceIndex() const;
 	
