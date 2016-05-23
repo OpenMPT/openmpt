@@ -490,7 +490,7 @@ void CWaveDevice::HandleWaveoutDone(WAVEHDR *hdr)
 {
 	MPT_TRACE();
 	DWORD flags = static_cast<volatile WAVEHDR*>(hdr)->dwFlags;
-	uint32 hdrIndex = hdr - &(m_WaveBuffers[0]);
+	std::size_t hdrIndex = hdr - &(m_WaveBuffers[0]);
 	if(hdrIndex != m_nDoneBuffer)
 	{
 		m_DriverBugs.fetch_or(DriverBugDoneNotificationOutOfOrder);
