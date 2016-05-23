@@ -47,7 +47,7 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 				std::size_t written = 0;
 				do
 				{
-					DWORD chunkSize = towrite;
+					DWORD chunkSize = mpt::saturate_cast<DWORD>(towrite);
 					DWORD chunkDone = 0;
 					WriteFile(hFile, view.data() + written, chunkSize, &chunkDone, NULL);
 					if(chunkDone != chunkSize)

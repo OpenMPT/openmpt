@@ -56,7 +56,7 @@ mpt::PathString GetAppPath()
 {
 #if defined(MODPLUG_TRACKER)
 	std::vector<WCHAR> exeFileName(MAX_PATH);
-	while(GetModuleFileNameW(0, &exeFileName[0], exeFileName.size()) >= exeFileName.size())
+	while(GetModuleFileNameW(0, &exeFileName[0], mpt::saturate_cast<DWORD>(exeFileName.size())) >= exeFileName.size())
 	{
 		exeFileName.resize(exeFileName.size() * 2);
 	}
