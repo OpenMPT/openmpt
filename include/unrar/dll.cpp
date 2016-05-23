@@ -457,11 +457,11 @@ int PASCAL RARGetCommentW(HANDLE hArcData, wchar_t *CmtData, unsigned int CmtBuf
 		{ // OPENMPT ADDITION
 			if (CmtDataW.Size()>CmtBufSize) // OPENMPT ADDITION
 			{ // OPENMPT ADDITION
-				*CmtSize=CmtDataW.Size(); // OPENMPT ADDITION
+				*CmtSize=(unsigned int)CmtDataW.Size(); // OPENMPT ADDITION
 				return ERAR_SMALL_BUF; // OPENMPT ADDITION
 			} // OPENMPT ADDITION
 			memcpy(CmtData,&CmtDataW[0],CmtDataW.Size()*sizeof(wchar)); // OPENMPT ADDITION
-			*CmtSize=CmtDataW.Size(); // OPENMPT ADDITION
+			*CmtSize=(unsigned int)CmtDataW.Size(); // OPENMPT ADDITION
 			return 1; // OPENMPT ADDITION
 		} else // OPENMPT ADDITION
 		{ // OPENMPT ADDITION
