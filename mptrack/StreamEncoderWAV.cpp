@@ -129,7 +129,7 @@ public:
 		{
 			// Cue point header
 			fileWAV->StartChunk(RIFFChunk::idcue_);
-			uint32 numPoints = cues.size();
+			uint32 numPoints = mpt::saturate_cast<uint32>(cues.size());
 			SwapBytesLE(numPoints);
 			fileWAV->Write(numPoints);
 
