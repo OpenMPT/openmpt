@@ -1771,10 +1771,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\opus\src\repacketizer_demo.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\include\opus\src\tansig_table.h"
 				>
 			</File>

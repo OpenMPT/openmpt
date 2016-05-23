@@ -703,7 +703,6 @@
     <ClCompile Include="..\..\include\opus\src\opus_multistream_decoder.c" />
     <ClCompile Include="..\..\include\opus\src\opus_multistream_encoder.c" />
     <ClCompile Include="..\..\include\opus\src\repacketizer.c" />
-    <ClCompile Include="..\..\include\opus\src\repacketizer_demo.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -43,7 +43,7 @@
    "../../include/opus/celt/opus_custom_demo.c",
    "../../include/opus/src/opus_compare.c",
    "../../include/opus/src/opus_demo.c",
-   "../../include/opus/src/repaketizer_demo.c",
+   "../../include/opus/src/repacketizer_demo.c",
   }
   defines { "HAVE_CONFIG_H" }
   links { }

@@ -665,8 +665,5 @@
     <ClCompile Include="..\..\include\opus\src\repacketizer.c">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\include\opus\src\repacketizer_demo.c">
-      <Filter>src</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
