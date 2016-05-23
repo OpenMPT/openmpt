@@ -392,7 +392,7 @@ bool CASIODevice::InternalOpen()
 		}
 	
 		m_BufferInfo.resize(m_Settings.GetTotalChannels());
-		for(std::size_t channel = 0; channel < m_Settings.GetTotalChannels(); ++channel)
+		for(uint32 channel = 0; channel < m_Settings.GetTotalChannels(); ++channel)
 		{
 			MemsetZero(m_BufferInfo[channel]);
 			if(channel < m_Settings.InputChannels)
@@ -416,7 +416,7 @@ bool CASIODevice::InternalOpen()
 		m_BuffersCreated = true;
 
 		m_ChannelInfo.resize(m_Settings.GetTotalChannels());
-		for(std::size_t channel = 0; channel < m_Settings.GetTotalChannels(); ++channel)
+		for(uint32 channel = 0; channel < m_Settings.GetTotalChannels(); ++channel)
 		{
 			MemsetZero(m_ChannelInfo[channel]);
 			if(channel < m_Settings.InputChannels)
