@@ -353,7 +353,7 @@ public:
 		std::vector<unsigned char> header_buf(header_str.data(), header_str.data() + header_str.size());
 
 		op.packet = &(header_buf[0]);
-		op.bytes = header_buf.size();
+		op.bytes = static_cast<long>(header_buf.size());
 		op.b_o_s = 1;
 		op.e_o_s = 0;
 		op.granulepos = 0;
