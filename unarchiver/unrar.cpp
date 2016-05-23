@@ -126,7 +126,7 @@ CRarArchive::CRarArchive(FileReader &file)
 	ArchiveData.OpenMode = RAR_OM_LIST;
 	ArchiveData.ArcNameW = &(ArcNameBuf[0]);
 	ArchiveData.CmtBuf = &(CmtBuf[0]);
-	ArchiveData.CmtBufSize = CmtBuf.size() - 1;
+	ArchiveData.CmtBufSize = static_cast<unsigned int>(CmtBuf.size() - 1);
 	rar = RAROpenArchiveEx(&ArchiveData);
 	if(!rar)
 	{
