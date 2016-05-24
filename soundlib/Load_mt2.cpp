@@ -522,23 +522,16 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songName);
 	m_nChannels = fileHeader.numChannels;
 	Order.SetRestartPos(fileHeader.restartPos);
-	m_nDefaultSpeed = fileHeader.ticksPerLine;
-	if(!m_nDefaultSpeed) m_nDefaultSpeed = 6;
+	m_nDefaultSpeed = Clamp(fileHeader.ticksPerLine, uint8(1), uint8(31));
 	m_nDefaultTempo.Set(125);
 	m_SongFlags = SONG_LINEARSLIDES | SONG_ITCOMPATGXX | SONG_EXFILTERRANGE;
 	m_nInstruments = fileHeader.numInstruments;
 	m_nSamples = fileHeader.numSamples;
-	m_nDefaultRowsPerBeat = fileHeader.linesPerBeat;
-	if(!m_nDefaultRowsPerBeat) m_nDefaultRowsPerBeat = 4;
+	m_nDefaultRowsPerBeat = Clamp(fileHeader.linesPerBeat, uint8(1), uint8(32));
 	m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat * 4;
 	m_nVSTiVolume = 48;
 	m_nSamplePreAmp = 48 * 2;	// Double pre-amp because we will halve the volume of all non-drum instruments, because the volume of drum samples can exceed that of normal samples
 
-	if(fileHeader.samplesPerTick > 100 && fileHeader.samplesPerTick < 5000)
-	{
-		m_nDefaultTempo.SetRaw(Util::muldivr(110250, TEMPO::fractFact, fileHeader.samplesPerTick));
-		//m_nDefaultTempo = 44100 * 60 / (m_nDefaultSpeed * m_nDefaultRowsPerBeat * fileHeader.samplesPerTick);
-	}
 	Order.ReadFromArray(fileHeader.Orders, fileHeader.numOrders);
 
 	FileReader drumData = file.ReadChunk(file.ReadUint16LE());
@@ -619,6 +612,19 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 					hasLegacyTempo |= ConvertMT2Command(this, *m, cmd);
 				}
 			}
+		}
+	}
+
+	if(fileHeader.samplesPerTick > 1 && fileHeader.samplesPerTick < 5000)
+	{
+		if(hasLegacyTempo)
+		{
+			m_nDefaultTempo.SetRaw(Util::muldivr(110250, TEMPO::fractFact, fileHeader.samplesPerTick));
+			m_nTempoMode = tempoModeClassic;
+		} else
+		{
+			m_nDefaultTempo = TEMPO(44100.0 * 60.0 / (m_nDefaultSpeed * m_nDefaultRowsPerBeat * fileHeader.samplesPerTick));
+			m_nTempoMode = tempoModeModern;
 		}
 	}
 
@@ -1144,6 +1150,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			mptIns->nGlobalVol = 32;	// Compensate for extended dynamic range of drum instruments
+			mptIns->AssignSample(0);
 			for(uint32 note = 0; note < 96; note++)
 			{
 				if(insHeader.groupMap[note] < insHeader.numSamples)
