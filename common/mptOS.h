@@ -94,7 +94,7 @@ bool IsWine();
 } // namespace mpt
 
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+#if defined(MODPLUG_TRACKER)
 
 namespace mpt
 {
@@ -111,12 +111,12 @@ class Version
 {
 private:
 	bool valid;
-	uint8 major;
-	uint8 minor;
-	uint8 update;
+	uint8 vmajor;
+	uint8 vminor;
+	uint8 vupdate;
 public:
 	Version();
-	Version(uint8 major, uint8 minor, uint8 update);
+	Version(uint8 vmajor, uint8 vminor, uint8 vupdate);
 	explicit Version(const mpt::ustring &version);
 public:
 	bool IsValid() const;
@@ -137,7 +137,7 @@ bool HostIsLinux();
 
 } // namespace mpt
 
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER
 
 
 OPENMPT_NAMESPACE_END
