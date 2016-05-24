@@ -405,12 +405,15 @@ bool IsWine()
 
 
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+#if defined(MODPLUG_TRACKER)
 
 namespace mpt
 {
 namespace Wine
 {
+
+
+#if MPT_OS_WINDOWS
 
 
 std::string RawGetVersion()
@@ -520,12 +523,40 @@ std::string RawGetHostRelease()
 }
 
 
+#else // !MPT_OS_WINDOWS
+
+
+std::string RawGetVersion()
+{
+	return std::string();
+}
+
+std::string RawGetBuildID()
+{
+	return std::string();
+}
+
+std::string RawGetHostSysName()
+{
+	return std::string();
+}
+
+std::string RawGetHostRelease()
+{
+	return std::string();
+}
+
+
+#endif // MPT_OS_WINDOWS
+
+
+
 Version::Version()
 //----------------
 	: valid(false)
-	, major(0)
-	, minor(0)
-	, update(0)
+	, vmajor(0)
+	, vminor(0)
+	, vupdate(0)
 {
 	return;
 }
@@ -534,9 +565,9 @@ Version::Version()
 Version::Version(const mpt::ustring &rawVersion)
 //----------------------------------------------
 	: valid(false)
-	, major(0)
-	, minor(0)
-	, update(0)
+	, vmajor(0)
+	, vminor(0)
+	, vupdate(0)
 {
 	if(rawVersion.empty())
 	{
@@ -558,18 +589,18 @@ Version::Version(const mpt::ustring &rawVersion)
 		return;
 	}
 	valid = true;
-	major = version[0];
-	minor = version[1];
-	update = version[2];
+	vmajor = version[0];
+	vminor = version[1];
+	vupdate = version[2];
 }
 
 
-Version::Version(uint8 major, uint8 minor, uint8 update)
-//------------------------------------------------------
-	: valid((major > 0) || (minor > 0) || (update > 0)) 
-	, major(major)
-	, minor(minor)
-	, update(update)
+Version::Version(uint8 vmajor, uint8 vminor, uint8 vupdate)
+//---------------------------------------------------------
+	: valid((vmajor > 0) || (vminor > 0) || (vupdate > 0)) 
+	, vmajor(vmajor)
+	, vminor(vminor)
+	, vupdate(vupdate)
 {
 	return;
 }
@@ -580,9 +611,9 @@ mpt::Wine::Version Version::FromInteger(uint32 version)
 {
 	mpt::Wine::Version result;
 	result.valid = (version <= 0xffffff);
-	result.major = static_cast<uint8>(version >> 16);
-	result.minor = static_cast<uint8>(version >> 8);
-	result.update = static_cast<uint8>(version >> 0);
+	result.vmajor = static_cast<uint8>(version >> 16);
+	result.vminor = static_cast<uint8>(version >> 8);
+	result.vupdate = static_cast<uint8>(version >> 0);
 	return result;
 }
 
@@ -597,16 +628,16 @@ bool Version::IsValid() const
 mpt::ustring Version::AsString() const
 //------------------------------------
 {
-	return mpt::ufmt::dec(major) + MPT_USTRING(".") + mpt::ufmt::dec(minor) + MPT_USTRING(".") + mpt::ufmt::dec(update);
+	return mpt::ufmt::dec(vmajor) + MPT_USTRING(".") + mpt::ufmt::dec(vminor) + MPT_USTRING(".") + mpt::ufmt::dec(vupdate);
 }
 
 
 uint32 Version::AsInteger() const
 {
 	uint32 version = 0;
-	version |= static_cast<uint32>(major) << 16;
-	version |= static_cast<uint32>(minor) << 8;
-	version |= static_cast<uint32>(update) << 0;
+	version |= static_cast<uint32>(vmajor) << 16;
+	version |= static_cast<uint32>(vminor) << 8;
+	version |= static_cast<uint32>(vupdate) << 0;
 	return version;
 }
 
@@ -658,7 +689,7 @@ bool HostIsLinux()
 } // namespace Wine
 } // namespace mpt
 
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER
 
 
 
