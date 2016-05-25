@@ -54,10 +54,9 @@ struct PACKED MDLPatternHeader
 	uint8  channels;
 	uint8  lastrow;	// nrows = lastrow+1
 	char   name[16];
-	uint16 data[1];
 };
 
-STATIC_ASSERT(sizeof(MDLPatternHeader) == 20);
+STATIC_ASSERT(sizeof(MDLPatternHeader) == 18);
 
 
 struct PACKED MDLSampleHeaderCommon
@@ -422,20 +421,20 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 					if (dwPos + sizeof(MDLPatternHeader) >= dwMemLength) break;
 					const MDLPatternHeader *pmpd = (const MDLPatternHeader *)(lpStream + dwPos);
 					if (pmpd->channels > 32) break;
-					if (dwPos + sizeof(MDLPatternHeader) + 2 * pmpd->channels >= dwMemLength) break;
+					dwPos += sizeof(MDLPatternHeader);
 					patternLength[i] = pmpd->lastrow + 1;
 					if (m_nChannels < pmpd->channels) m_nChannels = pmpd->channels;
-					pdata = const_unaligned_ptr_le<uint16>(reinterpret_cast<const uint8*>(pmpd->data));
 					ch = pmpd->channels;
 				} else
 				{
-					if(dwPos + 2 * 32 >= dwMemLength) break;
-					pdata = const_unaligned_ptr_le<uint16>(lpStream + dwPos);
 					//Patterns[i].Resize(64, false);
 					if (m_nChannels < 32) m_nChannels = 32;
-					dwPos += 2*32;
 					ch = 32;
 				}
+				if(2 * ch >= dwMemLength - dwPos) break;
+				pdata = const_unaligned_ptr_le<uint16>(lpStream + dwPos);
+				dwPos += 2 * ch;
+
 				for (j=0; j<ch; j++) if (j<m_nChannels)
 				{
 					patterntracks[i*32+j] = pdata[j];
