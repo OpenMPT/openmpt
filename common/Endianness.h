@@ -135,9 +135,9 @@ inline char   SwapBytesBE_(char   value) { return value; }
 
 // SwapBytesLE/SwapBytesBE is mostly used throughout the code with in-place
 // argument-modifying semantics.
-// As GCC will not bind references to members of packed structures,
-// we implement reference semantics by explicitly assigning to a macro
-// argument.
+// As GCC will (rightfully) not bind references to members of packed
+// structures, we implement reference semantics by explicitly assigning to a
+// macro argument.
 
 // In-place modifying version:
 #define SwapBytesBE(value) MPT_DO { (value) = SwapBytesBE_((value)); } MPT_WHILE_0
