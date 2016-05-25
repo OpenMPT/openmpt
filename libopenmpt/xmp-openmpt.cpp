@@ -110,6 +110,7 @@ public:
 
 static XMPFUNC_IN * xmpfin = NULL;
 static XMPFUNC_MISC * xmpfmisc = NULL;
+static XMPFUNC_REGISTRY * xmpfregistry = NULL;
 static XMPFUNC_FILE * xmpffile = NULL;
 static XMPFUNC_TEXT * xmpftext = NULL;
 static XMPFUNC_STATUS * xmpfstatus = NULL;
@@ -122,11 +123,40 @@ static void save_options();
 
 static void apply_and_save_options();
 
+class xmp_openmpt_settings
+ : public libopenmpt::plugin::settings
+{
+protected:
+	virtual void read_setting( const std::string & key, const std::wstring & keyW, int & val ) {
+		libopenmpt::plugin::settings::read_setting( key, keyW, val );
+		int storedVal = 0;
+		if ( xmpfregistry->GetInt( "OpenMPT", key.c_str(), &storedVal ) ) {
+			val = storedVal;
+		}
+	}
+	virtual void write_setting( const std::string & key, const std::wstring & /* keyW */ , int val ) {
+		if ( !xmpfregistry->SetInt( "OpenMPT", key.c_str(), &val ) ) {
+			// error
+		}
+		// ok
+	}
+public:
+	xmp_openmpt_settings()
+		: libopenmpt::plugin::settings(TEXT(SHORT_TITLE), false)
+	{
+		return;
+	}
+	virtual ~xmp_openmpt_settings()
+	{
+		return;
+	}
+};
+
 struct self_xmplay_t {
 	std::vector<float> subsong_lengths;
 	std::size_t samplerate;
 	std::size_t num_channels;
-	libopenmpt::plugin::settings settings;
+	xmp_openmpt_settings settings;
 	openmpt::module_ext * mod;
 	openmpt::ext::pattern_vis * pattern_vis;
 	std::int32_t tempo_factor, pitch_factor;
@@ -134,7 +164,7 @@ struct self_xmplay_t {
 	self_xmplay_t()
 		: samplerate(48000)
 		, num_channels(2)
-		, settings(TEXT(SHORT_TITLE), false)
+		, settings()
 		, mod(0)
 		, pattern_vis(0)
 		, tempo_factor(0)
@@ -142,7 +172,6 @@ struct self_xmplay_t {
 		, single_subsong_mode(false)
 	{
 		settings.changed = apply_and_save_options;
-		settings.load();
 	}
 	void on_new_mod() {
 		self->pattern_vis = static_cast<openmpt::ext::pattern_vis *>( self->mod->get_interface( openmpt::ext::pattern_vis_id ) );
@@ -280,7 +309,7 @@ static void apply_and_save_options() {
 }
 
 static void reset_options() {
-	self->settings = libopenmpt::plugin::settings( TEXT(SHORT_TITLE), false );
+	self->settings = xmp_openmpt_settings();
 	self->settings.changed = apply_and_save_options;
 	self->settings.load();
 }
@@ -1728,6 +1757,7 @@ static XMPIN * XMPIN_GetInterface_cxx( DWORD face, InterfaceProc faceproc ) {
 	if (face!=XMPIN_FACE) return NULL;
 	xmpfin=(XMPFUNC_IN*)faceproc(XMPFUNC_IN_FACE);
 	xmpfmisc=(XMPFUNC_MISC*)faceproc(XMPFUNC_MISC_FACE);
+	xmpfregistry=(XMPFUNC_REGISTRY*)faceproc(XMPFUNC_REGISTRY_FACE);
 	xmpffile=(XMPFUNC_FILE*)faceproc(XMPFUNC_FILE_FACE);
 	xmpftext=(XMPFUNC_TEXT*)faceproc(XMPFUNC_TEXT_FACE);
 	xmpfstatus=(XMPFUNC_STATUS*)faceproc(XMPFUNC_STATUS_FACE);
@@ -1747,6 +1777,8 @@ static XMPIN * XMPIN_GetInterface_cxx( DWORD face, InterfaceProc faceproc ) {
 	cut.id = openmpt_shortcut_ex | openmpt_shortcut_pitch_increase;
 	cut.text = "OpenMPT - Increase Pitch";
 	xmpfmisc->RegisterShortcut( &cut );
+
+	self->settings.load();
 
 	return &xmpin;
 }
