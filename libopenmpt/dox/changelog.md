@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt svn
 
+ *  [**Change**] xmp-openmpt: Settings are now stored in xmplay.ini like with
+    every other plugin.
+
 ### libopenmpt 0.2-beta17 (2016-05-21)
 
  *  [**Change**] The Makefile and Autotools build systems now require to
