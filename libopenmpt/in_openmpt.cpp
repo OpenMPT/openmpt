@@ -202,7 +202,7 @@ static void about( HWND hwndParent ) {
 	}
 	std::ostringstream credits;
 	credits << openmpt::string::get( "credits" );
-	MessageBox( hwndParent, StringDecode( credits.str(), CP_UTF8 ).c_str(), TEXT(SHORT_TITLE), MB_ICONINFORMATION );
+	libopenmpt::plugin::gui_show_file_info( hwndParent, TEXT(SHORT_TITLE), StringReplace( StringDecode( credits.str(), CP_UTF8 ), L"\n", L"\r\n" ) );
 }
 
 static void init() {

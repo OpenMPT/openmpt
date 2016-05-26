@@ -222,6 +222,18 @@ static std::wstring StringDecode( const std::string & src, UINT codepage )
 	return &decoded_string[0];
 }
 
+template <typename Tstring, typename Tstring2, typename Tstring3>
+static inline Tstring StringReplace( Tstring str, const Tstring2 & oldStr_, const Tstring3 & newStr_ ) {
+	std::size_t pos = 0;
+	const Tstring oldStr = oldStr_;
+	const Tstring newStr = newStr_;
+	while ( ( pos = str.find( oldStr, pos ) ) != Tstring::npos ) {
+		str.replace( pos, oldStr.length(), newStr );
+		pos += newStr.length();
+	}
+	return str;
+}
+
 static std::string seconds_to_string( float time ) {
 	std::int64_t time_ms = static_cast<std::int64_t>( time * 1000 );
 	std::int64_t seconds = ( time_ms / 1000 ) % 60;
@@ -444,7 +456,7 @@ static void WINAPI openmpt_About( HWND win ) {
 	credits << std::endl;
 	credits << "Arseny Kapoulkine for pugixml" << std::endl;
 	credits << "http://pugixml.org/" << std::endl;
-	MessageBox( win, StringDecode( credits.str(), CP_UTF8 ).c_str(), TEXT(SHORT_TITLE), MB_ICONINFORMATION );
+	libopenmpt::plugin::gui_show_file_info( win, TEXT(SHORT_TITLE), StringReplace( StringDecode( credits.str(), CP_UTF8 ), L"\n", L"\r\n" ) );
 }
 
 static void WINAPI openmpt_Config( HWND win ) {
