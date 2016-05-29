@@ -34,6 +34,24 @@ class Base
 
 private:
 
+	class SourceLockedGuard
+	{
+	private:
+		ISource &m_Source;
+	public:
+		SourceLockedGuard(ISource &source)
+			: m_Source(source)
+		{
+			m_Source.SoundSourceLock();
+		}
+		~SourceLockedGuard()
+		{
+			m_Source.SoundSourceUnlock();
+		}
+	};
+
+private:
+
 	SoundDevice::ISource *m_Source;
 	SoundDevice::IMessageReceiver *m_MessageReceiver;
 
