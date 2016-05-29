@@ -27,14 +27,14 @@ struct ArchiveFileInfo
 	mpt::PathString name;
 	ArchiveFileType type;
 	uint64 size;
-	std::string comment;
+	mpt::ustring comment;
 	uint64 cookie1;
 	uint64 cookie2;
 	ArchiveFileInfo()
 		: name(mpt::PathString())
 		, type(ArchiveFileInvalid)
 		, size(0)
-		, comment(std::string())
+		, comment(mpt::ustring())
 		, cookie1(0)
 		, cookie2(0)
 	{
