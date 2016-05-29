@@ -24,7 +24,7 @@ OPENMPT_NAMESPACE_BEGIN
 #if defined(MPT_ENABLE_COMPONENTS)
 
 
-#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
+#if defined(MODPLUG_TRACKER)
 #define MPT_COMPONENT_MANAGER 1
 #else
 #define MPT_COMPONENT_MANAGER 0
@@ -256,6 +256,7 @@ private:
 	std::string m_SettingsKey;
 protected:
 	ComponentFactoryBase(const std::string &id, const std::string &settingsKey);
+	void PreConstruct() const;
 	void Initialize(ComponentManager &componentManager, MPT_SHARED_PTR<IComponent> component) const;
 public:
 	virtual ~ComponentFactoryBase();
@@ -283,6 +284,7 @@ public:
 public:
 	virtual MPT_SHARED_PTR<IComponent> Construct(ComponentManager &componentManager) const
 	{
+		PreConstruct();
 		MPT_SHARED_PTR<IComponent> component = mpt::make_shared<T>();
 		Initialize(componentManager, component);
 		return component;
@@ -362,6 +364,7 @@ public:
 	void Register(const IComponentFactory &componentFactory);
 	void Startup();
 	MPT_SHARED_PTR<IComponent> GetComponent(const IComponentFactory &componentFactory);
+	MPT_SHARED_PTR<IComponent> ReloadComponent(const IComponentFactory &componentFactory);
 	std::vector<std::string> GetRegisteredComponents() const;
 	ComponentInfo GetComponentInfo(std::string name) const;
 };
@@ -393,6 +396,13 @@ template <typename type>
 MPT_SHARED_PTR<type> GetComponent()
 {
 	return MPT_DYNAMIC_POINTER_CAST<type>(ComponentManager::Instance()->GetComponent(ComponentFactory<type>()));
+}
+
+
+template <typename type>
+MPT_SHARED_PTR<type> ReloadComponent()
+{
+	return MPT_DYNAMIC_POINTER_CAST<type>(ComponentManager::Instance()->ReloadComponent(ComponentFactory<type>()));
 }
 
 

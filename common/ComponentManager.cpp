@@ -11,6 +11,8 @@
 #include "stdafx.h"
 #include "ComponentManager.h"
 
+#include "Logging.h"
+
 #include "mutex.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -206,6 +208,17 @@ std::string ComponentFactoryBase::GetSettingsKey() const
 }
 
 
+void ComponentFactoryBase::PreConstruct() const
+//---------------------------------------------
+{
+	MPT_LOG(LogInformation, "Components", 
+		mpt::format(MPT_USTRING("Constructing Component %1"))
+			( mpt::ToUnicode(mpt::CharsetASCII, m_ID)
+			)
+		);
+}
+
+
 void ComponentFactoryBase::Initialize(ComponentManager &componentManager, MPT_SHARED_PTR<IComponent> component) const
 //-------------------------------------------------------------------------------------------------------------------
 {
@@ -259,6 +272,7 @@ static MPT_SHARED_PTR<ComponentManager> g_ComponentManager;
 void ComponentManager::Init(const IComponentManagerSettings &settings)
 //--------------------------------------------------------------------
 {
+	MPT_LOG(LogInformation, "Components", MPT_USTRING("Init"));
 	// cannot use make_shared because the constructor is private
 	g_ComponentManager = MPT_SHARED_PTR<ComponentManager>(new ComponentManager(settings));
 }
@@ -267,6 +281,7 @@ void ComponentManager::Init(const IComponentManagerSettings &settings)
 void ComponentManager::Release()
 //------------------------------
 {
+	MPT_LOG(LogInformation, "Components", MPT_USTRING("Release"));
 	g_ComponentManager = MPT_SHARED_PTR<ComponentManager>();
 }
 
@@ -308,6 +323,7 @@ void ComponentManager::Register(const IComponentFactory &componentFactory)
 void ComponentManager::Startup()
 //------------------------------
 {
+	MPT_LOG(LogDebug, "Components", MPT_USTRING("Startup"));
 	if(m_Settings.LoadOnStartup())
 	{
 		for(TComponentMap::iterator it = m_Components.begin(); it != m_Components.end(); ++it)
@@ -364,6 +380,32 @@ MPT_SHARED_PTR<IComponent> ComponentManager::GetComponent(const IComponentFactor
 			{ // keep the component loaded
 				(*it).second.instance = component;
 			}
+		}
+	} else
+	{ // unregistered component
+		component = componentFactory.Construct(*this);
+	}
+	MPT_ASSERT(component);
+	return component;
+}
+
+
+MPT_SHARED_PTR<IComponent> ComponentManager::ReloadComponent(const IComponentFactory &componentFactory)
+//-----------------------------------------------------------------------------------------------------
+{
+	MPT_SHARED_PTR<IComponent> component = MPT_SHARED_PTR<IComponent>();
+	TComponentMap::iterator it = m_Components.find(componentFactory.GetID());
+	if(it != m_Components.end())
+	{ // registered component
+		if((*it).second.instance)
+		{ // loaded
+			(*it).second.instance = MPT_SHARED_PTR<IComponent>();
+		}
+		// not loaded
+		component = (*it).second.factoryMethod(*this);
+		if(m_Settings.KeepLoaded())
+		{ // keep the component loaded
+			(*it).second.instance = component;
 		}
 	} else
 	{ // unregistered component
