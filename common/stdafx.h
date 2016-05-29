@@ -93,6 +93,22 @@
 #include <stdio.h>
 #endif
 
+#ifndef NO_VST
+// VST SDK includes these headers after messing with default compiler structure
+// packing. No problem in practice as VST SDK sets packing matching the default
+// packing and we are compiling with default packing and standard headers should
+// be careful about structure packing anyway, but it is very much unclean
+// nonetheless. Pre-include the affected headers here as a future-proof
+// safe-guard and let their own include guards handle the further including by
+// VST SDK.
+#if !((MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2010,0)) || (MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,3,0)))
+#include <cstdint>
+#endif
+#include <stdint.h>
+#include <cstring>
+#include <string.h>
+#endif
+
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
