@@ -106,7 +106,11 @@ static void OpenMPT_libmpg123_API_version_with_split_largefile_support_detected_
 // 1.12.2 introduced dumb wrappers for suffixed _32 and _64 functions.
 // We cannot detect whether it's one of the broken versions 1.12.0 or 1.12.1,
 // and thus have to implement a work-around for all of them (does not hurt though).
+#if defined(MPT_ARCH_BITS)
 #define MPT_LIBMPG123_WORKAROUND_LARGEFILE_SUFFIX
+#else // !MPT_ARCH_BITS
+#error message("libmpg123 API version largefile work-around requires MPT_ARCH_BITS to be defined. Please edit common/CompilerDetect.h and add support for your compiler.")
+#endif // MPT_ARCH_BITS
 
 #else // modern
 // OK
