@@ -11,6 +11,9 @@
 #pragma once
 
 
+#include "mptLibrary.h"
+
+
 OPENMPT_NAMESPACE_BEGIN
 
 
@@ -102,11 +105,6 @@ namespace mpt
 namespace Wine
 {
 
-std::string RawGetVersion();
-std::string RawGetBuildID();
-std::string RawGetHostSysName();
-std::string RawGetHostRelease();
-
 class Version
 {
 private:
@@ -129,9 +127,29 @@ public:
 	bool IsAtLeast(mpt::Wine::Version other) const;
 };
 
-mpt::Wine::Version GetVersion();
-
-bool HostIsLinux();
+class VersionContext
+{
+protected:
+	bool m_IsWine;
+	mpt::Library m_NTDLL;
+	std::string m_RawVersion;
+	std::string m_RawBuildID;
+	std::string m_RawHostSysName;
+	std::string m_RawHostRelease;
+	mpt::Wine::Version m_Version;
+	bool m_HostIsLinux;
+public:
+	VersionContext();
+public:
+	bool IsWine() const { return m_IsWine; }
+	mpt::Library NTDLL() const { return m_NTDLL; }
+	std::string RawVersion() const { return m_RawVersion; }
+	std::string RawBuildID() const { return m_RawBuildID; }
+	std::string RawHostSysName() const { return m_RawHostSysName; }
+	std::string RawHostRelease() const { return m_RawHostRelease; }
+	mpt::Wine::Version Version() const { return m_Version; }
+	bool HostIsLinux() const { return m_HostIsLinux; }
+};
 
 } // namespace Wine
 

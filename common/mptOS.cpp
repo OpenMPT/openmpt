@@ -271,16 +271,17 @@ mpt::ustring Version::GetName() const
 	#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 		if(mpt::Windows::IsWine())
 		{
-			if(mpt::Wine::GetVersion().IsValid())
+			mpt::Wine::VersionContext v;
+			if(v.Version().IsValid())
 			{
 				result = mpt::format(MPT_USTRING("Wine %1 (%2)"))(
-					  mpt::Wine::GetVersion().AsString()
+					  v.Version().AsString()
 					, name
 					);
 			} else
 			{
 				result = mpt::format(MPT_USTRING("Wine (unknown version: '%1') (%2)"))(
-					  mpt::ToUnicode(mpt::CharsetUTF8, mpt::Wine::RawGetVersion())
+					  mpt::ToUnicode(mpt::CharsetUTF8, v.RawVersion())
 					, name
 					);
 			}
@@ -413,144 +414,6 @@ namespace Wine
 {
 
 
-#if MPT_OS_WINDOWS
-
-
-std::string RawGetVersion()
-//-------------------------
-{
-	if(!mpt::Windows::IsWine())
-	{
-		return std::string();
-	}
-	mpt::Library wine(mpt::LibraryPath::FullPath(MPT_PATHSTRING("ntdll.dll")));
-	if(!wine.IsValid())
-	{
-		return std::string();
-	}
-	const char * (__cdecl * wine_get_version)(void) = nullptr;
-	if(!wine.Bind(wine_get_version, "wine_get_version"))
-	{
-		return std::string();
-	}
-	const char * wine_version = nullptr;
-	wine_version = wine_get_version();
-	if(!wine_version)
-	{
-		return std::string();
-	}
-	return wine_version;
-}
-
-std::string RawGetBuildID()
-//-------------------------
-{
-	if(!mpt::Windows::IsWine())
-	{
-		return std::string();
-	}
-	mpt::Library wine(mpt::LibraryPath::FullPath(MPT_PATHSTRING("ntdll.dll")));
-	if(!wine.IsValid())
-	{
-		return std::string();
-	}
-	const char * (__cdecl * wine_get_build_id)(void) = nullptr;
-	if(!wine.Bind(wine_get_build_id, "wine_get_build_id"))
-	{
-		return std::string();
-	}
-	const char * wine_build_id = nullptr;
-	wine_build_id = wine_get_build_id();
-	if(!wine_build_id)
-	{
-		return std::string();
-	}
-	return wine_build_id;
-}
-
-std::string RawGetHostSysName()
-//-----------------------------
-{
-	if(!mpt::Windows::IsWine())
-	{
-		return std::string();
-	}
-	mpt::Library wine(mpt::LibraryPath::FullPath(MPT_PATHSTRING("ntdll.dll")));
-	if(!wine.IsValid())
-	{
-		return std::string();
-	}
-	void (__cdecl * wine_get_host_version)(const char * *, const char * *) = nullptr;
-	if(!wine.Bind(wine_get_host_version, "wine_get_host_version"))
-	{
-		return std::string();
-	}
-	const char * wine_host_sysname = nullptr;
-	const char * wine_host_release = nullptr;
-	wine_get_host_version(&wine_host_sysname, &wine_host_release);
-	if(!wine_host_sysname)
-	{
-		return std::string();
-	}
-	return wine_host_sysname;
-}
-
-std::string RawGetHostRelease()
-//-----------------------------
-{
-	if(!mpt::Windows::IsWine())
-	{
-		return std::string();
-	}
-	mpt::Library wine(mpt::LibraryPath::FullPath(MPT_PATHSTRING("ntdll.dll")));
-	if(!wine.IsValid())
-	{
-		return std::string();
-	}
-	void (__cdecl * wine_get_host_version)(const char * *, const char * *) = nullptr;
-	if(!wine.Bind(wine_get_host_version, "wine_get_host_version"))
-	{
-		return std::string();
-	}
-	const char * wine_host_sysname = nullptr;
-	const char * wine_host_release = nullptr;
-	wine_get_host_version(&wine_host_sysname, &wine_host_release);
-	if(!wine_host_release)
-	{
-		return std::string();
-	}
-	return wine_host_release;
-}
-
-
-#else // !MPT_OS_WINDOWS
-
-
-std::string RawGetVersion()
-{
-	return std::string();
-}
-
-std::string RawGetBuildID()
-{
-	return std::string();
-}
-
-std::string RawGetHostSysName()
-{
-	return std::string();
-}
-
-std::string RawGetHostRelease()
-{
-	return std::string();
-}
-
-
-#endif // MPT_OS_WINDOWS
-
-
-
 Version::Version()
 //----------------
 	: valid(false)
@@ -642,17 +505,6 @@ uint32 Version::AsInteger() const
 }
 
 
-mpt::Wine::Version GetVersion()
-//-----------------------------
-{
-	if(!mpt::Windows::IsWine())
-	{
-		return mpt::Wine::Version();
-	}
-	return mpt::Wine::Version(mpt::ToUnicode(mpt::CharsetUTF8, Wine::RawGetVersion()));
-}
-
-
 bool Version::IsBefore(mpt::Wine::Version other) const
 //----------------------------------------------------
 {
@@ -675,14 +527,44 @@ bool Version::IsAtLeast(mpt::Wine::Version other) const
 }
 
 
-bool HostIsLinux()
-//----------------
+VersionContext::VersionContext()
+//------------------------------
+	: m_IsWine(false)
+	, m_HostIsLinux(false)
 {
-	if(!mpt::Windows::IsWine())
-	{
-		return false;
-	}
-	return Wine::RawGetHostSysName() == "Linux";
+	#if MPT_OS_WINDOWS
+		m_IsWine = mpt::Windows::IsWine();
+		if(!m_IsWine)
+		{
+			return;
+		}
+		m_NTDLL = mpt::Library(mpt::LibraryPath::FullPath(MPT_PATHSTRING("ntdll.dll")));
+		if(m_NTDLL.IsValid())
+		{
+			const char * (__cdecl * wine_get_version)(void) = nullptr;
+			const char * (__cdecl * wine_get_build_id)(void) = nullptr;
+			void (__cdecl * wine_get_host_version)(const char * *, const char * *) = nullptr;
+			m_NTDLL.Bind(wine_get_version, "wine_get_version");
+			m_NTDLL.Bind(wine_get_build_id, "wine_get_build_id");
+			m_NTDLL.Bind(wine_get_host_version, "wine_get_host_version");
+			const char * wine_version = nullptr;
+			const char * wine_build_id = nullptr;
+			const char * wine_host_sysname = nullptr;
+			const char * wine_host_release = nullptr;
+			wine_version = wine_get_version ? wine_get_version() : "";
+			wine_build_id = wine_get_build_id ? wine_get_build_id() : "";
+			if(wine_get_host_version)
+			{
+				wine_get_host_version(&wine_host_sysname, &wine_host_release);
+			}
+			m_RawVersion = wine_version ? wine_version : "";
+			m_RawBuildID = wine_build_id ? wine_build_id : "";
+			m_RawHostSysName = wine_host_sysname ? wine_host_sysname : "";
+			m_RawHostRelease = wine_host_release ? wine_host_release : "";
+		}
+		m_Version = mpt::Wine::Version(mpt::ToUnicode(mpt::CharsetUTF8, m_RawVersion));
+		m_HostIsLinux = (m_RawHostSysName == "Linux");
+	#endif // MPT_OS_WINDOWS
 }
 
 

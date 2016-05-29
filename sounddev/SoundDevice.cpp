@@ -28,10 +28,12 @@ SysInfo::SysInfo()
 //----------------
 	: WindowsVersion(mpt::Windows::Version::Current())
 	, IsWine(mpt::Windows::IsWine())
-	, WineHostIsLinux(mpt::Wine::HostIsLinux())
-	, WineVersion(mpt::Wine::GetVersion())
+	, WineHostIsLinux(false)
+	, WineVersion(mpt::Wine::Version())
 {
-	return;
+	mpt::Wine::VersionContext wineVersionContext;
+	WineHostIsLinux = wineVersionContext.HostIsLinux();
+	WineVersion = wineVersionContext.Version();
 }
 
 
