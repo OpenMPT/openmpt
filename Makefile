@@ -478,10 +478,10 @@ endif
 ifeq ($(NO_FLAC),1)
 else
 #LDLIBS   += -lFLAC
-ifeq ($(shell pkg-config --exists flac && echo yes),yes)
-CPPFLAGS_FLAC := $(shell pkg-config --cflags-only-I flac ) -DMPT_WITH_FLAC
-LDFLAGS_FLAC  := $(shell pkg-config --libs-only-L   flac ) $(shell pkg-config --libs-only-other flac )
-LDLIBS_FLAC   := $(shell pkg-config --libs-only-l   flac )
+ifeq ($(shell pkg-config --exists 'flac >= 1.3.0' && echo yes),yes)
+CPPFLAGS_FLAC := $(shell pkg-config --cflags-only-I 'flac >= 1.3.0' ) -DMPT_WITH_FLAC
+LDFLAGS_FLAC  := $(shell pkg-config --libs-only-L   'flac >= 1.3.0' ) $(shell pkg-config --libs-only-other 'flac >= 1.3.0' )
+LDLIBS_FLAC   := $(shell pkg-config --libs-only-l   'flac >= 1.3.0' )
 else
 NO_FLAC:=1
 endif

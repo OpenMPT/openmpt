@@ -14,6 +14,10 @@ is just a high-level summary.
  *  [**Change**] xmp-openmpt: Settings are now stored in xmplay.ini like with
     every other plugin.
 
+ *  [**Regression**] openmpt123: Support for FLAC < 1.3.0 has been removed. FLAC
+    before 1.3.0 is broken beyond repair as it provides `assert.h` in the
+    include path.
+
 ### libopenmpt 0.2-beta17 (2016-05-21)
 
  *  [**Change**] The Makefile and Autotools build systems now require to
