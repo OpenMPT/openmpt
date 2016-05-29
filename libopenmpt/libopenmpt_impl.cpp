@@ -122,7 +122,7 @@ static std::string get_library_version_string() {
 }
 
 static std::string get_library_features_string() {
-	return MptVersion::GetBuildFeaturesString();
+	return mpt::String::Trim(MptVersion::GetBuildFeaturesString());
 }
 
 static std::string get_core_version_string() {
