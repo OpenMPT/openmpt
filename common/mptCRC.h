@@ -231,6 +231,8 @@ typename crc<T, polynomial, initial, resultXOR, reverseData>::value_type crc<T, 
 
 typedef crc<uint32, 0x04C11DB7, 0xFFFFFFFF, 0xFFFFFFFF, true> crc32;
 typedef crc<uint32, 0x04C11DB7, 0, 0, false> crc32_ogg;
+typedef crc<uint32, 0x1EDC6F41, 0xFFFFFFFF, 0xFFFFFFFF, true> crc32c;
+typedef crc<uint64, 0xAD93D23594C935A9, 0xFFFFFFFFFFFFFFFF, 0, true> crc64_jones;
 
 } // namespace checksum
 
