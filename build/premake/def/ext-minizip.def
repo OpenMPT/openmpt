@@ -1,5 +1,10 @@
 LIBRARY
 EXPORTS
+;
+fill_win32_filefunc
+fill_win32_filefunc64
+fill_win32_filefunc64A
+fill_win32_filefunc64W
 ;zlib/contrib/minizip $ cat *.h | grep ZEXPORT | tr '(' ' ' | awk '{print $4;}' | sort
 unzClose
 unzCloseCurrentFile
