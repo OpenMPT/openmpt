@@ -114,7 +114,7 @@ void Logger::SendLogMessage(const Context &context, LogLevel level, const char *
 	const mpt::ustring file = mpt::ToUnicode(mpt::CharsetASCII, context.file);
 	const mpt::ustring function = mpt::ToUnicode(mpt::CharsetASCII, context.function);
 	const mpt::ustring line = mpt::ufmt::dec(context.line);
-	#if defined(MODPLUG_TRACKER)
+	#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 #if MPT_OS_WINDOWS
 		static uint64 s_lastlogtime = 0;
 		uint64 cur = mpt::Date::ANSI::Now();
@@ -166,6 +166,13 @@ void Logger::SendLogMessage(const Context &context, LogLevel level, const char *
 			DWORD dummy = 0;
 			WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), consoletext.c_str(), consoletext.length(), &dummy, NULL);
 		}
+	#elif defined(MODPLUG_TRACKER) && defined(MPT_BUILD_WINESUPPORT)
+		std::clog
+			<< "NativeSupport: "
+			<< mpt::ToCharset(mpt::CharsetLocaleOrUTF8, file) << "(" << mpt::ToCharset(mpt::CharsetLocaleOrUTF8, line) << ")" << ": "
+			<< mpt::ToCharset(mpt::CharsetLocaleOrUTF8, message)
+			<< " [" << mpt::ToCharset(mpt::CharsetLocaleOrUTF8, function) << "]"
+			<< std::endl;
 	#else // !MODPLUG_TRACKER
 		std::clog
 			<< "libopenmpt: "
