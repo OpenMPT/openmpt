@@ -168,14 +168,16 @@
 
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 
-	#if (__SIZEOF_POINTER__ == 8)
-		#define MPT_ARCH_BITS 64
-		#define MPT_ARCH_BITS_32 0
-		#define MPT_ARCH_BITS_64 1
-	#elif (__SIZEOF_POINTER__ == 4)
-		#define MPT_ARCH_BITS 32
-		#define MPT_ARCH_BITS_32 1
-		#define MPT_ARCH_BITS_64 0
+	#if defined(__SIZEOF_POINTER__)
+		#if (__SIZEOF_POINTER__ == 8)
+			#define MPT_ARCH_BITS 64
+			#define MPT_ARCH_BITS_32 0
+			#define MPT_ARCH_BITS_64 1
+		#elif (__SIZEOF_POINTER__ == 4)
+			#define MPT_ARCH_BITS 32
+			#define MPT_ARCH_BITS_32 1
+			#define MPT_ARCH_BITS_64 0
+		#endif
 	#endif
 
 #endif // MPT_COMPILER
