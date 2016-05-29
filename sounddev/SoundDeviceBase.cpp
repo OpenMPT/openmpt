@@ -111,7 +111,9 @@ uint64 Base::SourceGetReferenceClockNowNanoseconds() const
 	{
 		return 0;
 	}
-	return m_Source->SoundSourceGetReferenceClockNowNanoseconds();
+	uint64 result = m_Source->SoundSourceGetReferenceClockNowNanoseconds();
+	//MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("clock: %1"))(result));
+	return result;
 }
 
 
@@ -123,7 +125,9 @@ uint64 Base::SourceLockedGetReferenceClockNowNanoseconds() const
 	{
 		return 0;
 	}
-	return m_Source->SoundSourceLockedGetReferenceClockNowNanoseconds();
+	uint64 result = m_Source->SoundSourceLockedGetReferenceClockNowNanoseconds();
+	//MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("clock-rt: %1"))(result));
+	return result;
 }
 
 
@@ -167,7 +171,7 @@ void Base::SourceFillAudioBufferLocked()
 	MPT_TRACE();
 	if(m_Source)
 	{
-		ISource::Guard lock(*m_Source);
+		SourceLockedGuard lock(*m_Source);
 		InternalFillAudioBuffer();
 	}
 }
@@ -215,7 +219,10 @@ void Base::SourceLockedAudioRead(void *buffer, const void *inputBuffer, std::siz
 	{
 		return;
 	}
-	m_Source->SoundSourceLockedRead(GetBufferFormat(), GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, buffer, inputBuffer);
+	if(m_Source)
+	{
+		m_Source->SoundSourceLockedRead(GetBufferFormat(), GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, buffer, inputBuffer);
+	}
 }
 
 
@@ -223,7 +230,10 @@ void Base::SourceLockedAudioDone()
 //--------------------------------
 {
 	MPT_TRACE();
-	m_Source->SoundSourceLockedDone(GetBufferFormat(), GetEffectiveBufferAttributes(), m_TimeInfo);
+	if(m_Source)
+	{
+		m_Source->SoundSourceLockedDone(GetBufferFormat(), GetEffectiveBufferAttributes(), m_TimeInfo);
+	}
 }
 
 

@@ -87,22 +87,6 @@ public:
 	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer) = 0;
 	virtual void SoundSourceLockedDone(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo) = 0;
 	virtual void SoundSourceUnlock() = 0;
-public:
-	class Guard
-	{
-	private:
-		ISource &m_Source;
-	public:
-		Guard(ISource &source)
-			: m_Source(source)
-		{
-			m_Source.SoundSourceLock();
-		}
-		~Guard()
-		{
-			m_Source.SoundSourceUnlock();
-		}
-	};
 };
 
 
@@ -488,8 +472,8 @@ public:
 
 public:
 
-	virtual void SetSource(SoundDevice::ISource *source) = 0;
 	virtual void SetMessageReceiver(SoundDevice::IMessageReceiver *receiver) = 0;
+	virtual void SetSource(SoundDevice::ISource *source) = 0;
 
 	virtual SoundDevice::Info GetDeviceInfo() const = 0;
 
