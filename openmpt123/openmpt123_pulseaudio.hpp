@@ -15,10 +15,6 @@
 
 #if defined(MPT_WITH_PULSEAUDIO)
 
-// Some PulseAudio versions fail to include assert.h.
-#include <cassert>
-#include <assert.h>
-
 #include <pulse/pulseaudio.h>
 #include <pulse/simple.h>
 

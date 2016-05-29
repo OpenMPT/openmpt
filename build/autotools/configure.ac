@@ -233,7 +233,7 @@ AS_IF([test "x$with_sndfile" != "xno"],
 AC_ARG_WITH([flac], AS_HELP_STRING([--without-flac], [Disable use of libflac.]))
 AS_IF([test "x$with_flac" != "xno"],
  [
-  PKG_CHECK_MODULES([FLAC], [flac], [AC_DEFINE([MPT_WITH_FLAC], [], [with libflac])], [AC_MSG_ERROR([Unable to find libflac.])])
+  PKG_CHECK_MODULES([FLAC], [flac >= 1.3.0], [AC_DEFINE([MPT_WITH_FLAC], [], [with libflac])], [AC_MSG_ERROR([Unable to find libflac >= 1.3.0.])])
  ]
 )
 
