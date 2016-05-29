@@ -73,6 +73,7 @@
 # Build flags for openmpt123 (provide on each `make` invocation)
 #
 #  (defaults are 0):
+#  NO_PULSEAUDIO=1     Avoid using PulseAudio, even if found
 #  NO_SDL=1            Avoid using SDL, even if found
 #  NO_SDL2=1           Avoid using SDL2, even if found
 #  NO_PORTAUDIO=1      Avoid using PortAudio, even if found
@@ -462,6 +463,18 @@ NO_PORTAUDIOCPP:=1
 endif
 endif
 
+ifeq ($(NO_PULSEAUDIO),1)
+else
+#LDLIBS   += -lpulse-simple
+ifeq ($(shell pkg-config --exists libpulse libpulse-simple && echo yes),yes)
+CPPFLAGS_PULSEAUDIO := $(shell pkg-config --cflags-only-I libpulse libpulse-simple ) -DMPT_WITH_PULSEAUDIO
+LDFLAGS_PULSEAUDIO  := $(shell pkg-config --libs-only-L   libpulse libpulse-simple ) $(shell pkg-config --libs-only-other libpulse libpulse-simple )
+LDLIBS_PULSEAUDIO   := $(shell pkg-config --libs-only-l   libpulse libpulse-simple )
+else
+NO_PULSEAUDIO:=1
+endif
+endif
+
 ifeq ($(NO_FLAC),1)
 else
 #LDLIBS   += -lFLAC
@@ -494,9 +507,9 @@ CPPFLAGS += $(CPPFLAGS_LTDL) $(CPPFLAGS_DL) $(CPPFLAGS_ZLIB) $(CPPFLAGS_MPG123) 
 LDFLAGS += $(LDFLAGS_LTDL) $(LDFLAGS_DL) $(LDFLAGS_ZLIB) $(LDFLAGS_MPG123) $(LDFLAGS_OGG) $(LDFLAGS_VORBIS) $(LDFLAGS_VORBISFILE)
 LDLIBS += $(LDLIBS_LTDL) $(LDLIBS_DL) $(LDLIBS_ZLIB) $(LDLIBS_MPG123) $(LDLIBS_OGG) $(LDLIBS_VORBIS) $(LDLIBS_VORBISFILE)
 
-CPPFLAGS_OPENMPT123 += $(CPPFLAGS_SDL2) $(CPPFLAGS_SDL) $(CPPFLAGS_PORTAUDIO) $(CPPFLAGS_FLAC) $(CPPFLAGS_SNDFILE)
-LDFLAGS_OPENMPT123  += $(LDFLAGS_SDL2) $(LDFLAGS_SDL) $(LDFLAGS_PORTAUDIO) $(LDFLAGS_FLAC) $(LDFLAGS_SNDFILE)
-LDLIBS_OPENMPT123   += $(LDLIBS_SDL2) $(LDLIBS_SDL) $(LDLIBS_PORTAUDIO) $(LDLIBS_FLAC) $(LDLIBS_SNDFILE)
+CPPFLAGS_OPENMPT123 += $(CPPFLAGS_SDL2) $(CPPFLAGS_SDL) $(CPPFLAGS_PORTAUDIO) $(CPPFLAGS_PULSEAUDIO) $(CPPFLAGS_FLAC) $(CPPFLAGS_SNDFILE)
+LDFLAGS_OPENMPT123  += $(LDFLAGS_SDL2) $(LDFLAGS_SDL) $(LDFLAGS_PORTAUDIO) $(LDFLAGS_PULSEAUDIO) $(LDFLAGS_FLAC) $(LDFLAGS_SNDFILE)
+LDLIBS_OPENMPT123   += $(LDLIBS_SDL2) $(LDLIBS_SDL) $(LDLIBS_PORTAUDIO) $(LDLIBS_PULSEAUDIO) $(LDLIBS_FLAC) $(LDLIBS_SNDFILE)
 
 
 %: %.o
