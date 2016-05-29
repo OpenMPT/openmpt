@@ -1082,6 +1082,8 @@ size_t CopyAndNormalizeSample(ModSample &sample, const Tbyte *sourceBuffer, size
 	return numSamples * inSize;
 }
 
+#endif
+
 
 template<int fractionalBits, bool clipOutput, typename Tsample, typename Tfixed>
 void ConvertInterleavedFixedPointToInterleaved(Tsample * MPT_RESTRICT p, const Tfixed * MPT_RESTRICT mixbuffer, std::size_t channels, std::size_t count)
@@ -1141,8 +1143,6 @@ void CopyChannelToInterleaved(typename SampleConversion::output_t * MPT_RESTRICT
 		dst += channels;
 	}
 }
-
-#endif
 
 
 OPENMPT_NAMESPACE_END
