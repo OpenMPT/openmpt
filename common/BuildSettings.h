@@ -170,13 +170,13 @@
 
 // Disable any debug logging
 //#define NO_LOGGING
-#ifndef _DEBUG
+#if !defined(_DEBUG) && !defined(MPT_BUILD_WINESUPPORT)
 #define MPT_LOG_GLOBAL_LEVEL_STATIC
 #define MPT_LOG_GLOBAL_LEVEL 0
 #endif
 
 // Disable all runtime asserts
-#ifndef _DEBUG
+#if !defined(_DEBUG) && !defined(MPT_BUILD_WINESUPPORT)
 #define NO_ASSERTS
 #endif
 
@@ -538,7 +538,7 @@
 
 
 
-#if defined(MODPLUG_TRACKER)
+#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT) && !defined(MPT_BUILD_WINESUPPORT_WRAPPER)
 #ifndef MPT_NO_NAMESPACE
 #define MPT_NO_NAMESPACE
 #endif
