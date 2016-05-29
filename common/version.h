@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "FlagSet.h"
+
 #include <string>
 
 
@@ -81,8 +83,26 @@ namespace MptVersion
 	// Return a string describing the compiler version used for building.
 	std::string GetBuildCompilerString(); // e.g. "Microsoft Compiler 15.00.20706.01"
 
+	enum Strings
+	{
+		StringsNone         = 0,
+		StringVersion       = 1<<0, // "1.23.35.45"
+		StringRevision      = 1<<2, // "-r1234+"
+		StringBitness       = 1<<3, // "32 bit"
+		StringSourceInfo    = 1<<4, // "https://source.openmpt.org/svn/openmpt/trunk/OpenMPT@1234 (2016-01-02) +dirty"
+		StringBuildFlags    = 1<<5, // "TEST DEBUG"
+		StringBuildFeatures = 1<<6, // "NO_VST NO_DSOUND"
+	};
+	MPT_DECLARE_ENUM(Strings)
+
+	// Returns a versions string with the fields selected via @strings.
+	std::string GetVersionString(FlagSet<MptVersion::Strings> strings);
+
+	// Returns a pure version string
+	std::string GetVersionStringPure(); // e.g. "1.17.02.08-r1234+ 32 bit"
+
 	// Returns a simple version string
-	std::string GetVersionStringSimple(); // e.g. "1.17.02.08-r1234+ 32 bit"
+	std::string GetVersionStringSimple(); // e.g. "1.17.02.08-r1234+ TEST"
 
 	// Returns MptVersion::str if the build is a clean release build straight from the repository or an extended string otherwise (if built from a svn working copy and tsvn was available during build)
 	std::string GetVersionStringExtended(); // e.g. "1.17.02.08-r1234+ 32 bit DEBUG"

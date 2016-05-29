@@ -448,61 +448,90 @@ mpt::ustring GetDownloadURL()
 	#endif
 }
 
-static std::string GetVersionString(bool verbose)
+std::string GetVersionString(FlagSet<MptVersion::Strings> strings)
 {
-	#if !defined(MODPLUG_TRACKER)
-		MPT_UNREFERENCED_PARAMETER(verbose);
-	#endif
-	std::string retval = MPT_VERSION_STR;
-	if(IsDebugBuild() || IsTestBuild() || IsDirty() || HasMixedRevisions())
+	std::vector<std::string> result;
+	if(strings[StringVersion])
 	{
-		retval += GetRevisionString();
+		result.push_back(MPT_VERSION_STR);
 	}
-	#ifdef MODPLUG_TRACKER
-		if(verbose)
-		{
-			retval += mpt::format(" %1 bit")(sizeof(void*) * 8);
-		}
-	#endif
-	#ifndef MODPLUG_TRACKER
-		if(verbose)
-		{
-			const SourceInfo sourceInfo = GetSourceInfo();
-			if(!sourceInfo.GetUrlWithRevision().empty())
-			{
-				retval += mpt::format(" %1")(sourceInfo.GetUrlWithRevision());
-			}
-			if(!sourceInfo.Date.empty())
-			{
-				retval += mpt::format(" (%1)")(sourceInfo.Date);
-			}
-			if(!sourceInfo.GetStateString().empty())
-			{
-				retval += mpt::format(" %1")(sourceInfo.GetStateString());
-			}
-		}
-	#endif
-	if(IsDebugBuild() || IsTestBuild() || IsDirty() || HasMixedRevisions())
+	if(strings[StringRevision])
 	{
-		retval += GetBuildFlagsString();
-	}
-	#ifdef MODPLUG_TRACKER
-		if(verbose)
+		if(IsDebugBuild() || IsTestBuild() || IsDirty() || HasMixedRevisions())
 		{
-			retval += GetBuildFeaturesString();
+			result.push_back(GetRevisionString());
 		}
+	}
+	if(strings[StringBitness])
+	{
+		result.push_back(mpt::format(" %1 bit")(sizeof(void*)*8));
+	}
+	if(strings[StringSourceInfo])
+	{
+		const SourceInfo sourceInfo = GetSourceInfo();
+		if(!sourceInfo.GetUrlWithRevision().empty())
+		{
+			result.push_back(mpt::format( "%1")(sourceInfo.GetUrlWithRevision()));
+		}
+		if(!sourceInfo.Date.empty())
+		{
+			result.push_back(mpt::format(" (%1)")(sourceInfo.Date));
+		}
+		if(!sourceInfo.GetStateString().empty())
+		{
+			result.push_back(mpt::format(" %1")(sourceInfo.GetStateString()));
+		}
+	}
+	if(strings[StringBuildFlags])
+	{
+		if(IsDebugBuild() || IsTestBuild() || IsDirty() || HasMixedRevisions())
+		{
+			result.push_back(GetBuildFlagsString());
+		}
+	}
+	if(strings[StringBuildFeatures])
+	{
+		result.push_back(GetBuildFeaturesString());
+	}
+	return mpt::String::Trim(mpt::String::Combine<std::string>(result, std::string("")));
+}
+
+std::string GetVersionStringPure()
+{
+	FlagSet<MptVersion::Strings> strings;
+	strings |= MptVersion::StringVersion;
+	strings |= MptVersion::StringRevision;
+	#ifdef MODPLUG_TRACKER
+		strings |= MptVersion::StringBitness;
 	#endif
-	return retval;
+	return GetVersionString(strings);
 }
 
 std::string GetVersionStringSimple()
 {
-	return GetVersionString(false);
+	FlagSet<MptVersion::Strings> strings;
+	strings |= MptVersion::StringVersion;
+	strings |= MptVersion::StringRevision;
+	strings |= MptVersion::StringBuildFlags;
+	return GetVersionString(strings);
 }
 
 std::string GetVersionStringExtended()
 {
-	return GetVersionString(true);
+	FlagSet<MptVersion::Strings> strings;
+	strings |= MptVersion::StringVersion;
+	strings |= MptVersion::StringRevision;
+	#ifdef MODPLUG_TRACKER
+		strings |= MptVersion::StringBitness;
+	#endif
+	#ifndef MODPLUG_TRACKER
+		strings |= MptVersion::StringSourceInfo;
+	#endif
+	strings |= MptVersion::StringBuildFlags;
+	#ifdef MODPLUG_TRACKER
+		strings |= MptVersion::StringBuildFeatures;
+	#endif
+	return GetVersionString(strings);
 }
 
 std::string SourceInfo::GetUrlWithRevision() const
@@ -676,6 +705,11 @@ mpt::ustring GetFullCreditsString()
 #if defined(MPT_WITH_OPUSFILE)
 		"Xiph.Org Foundation and contributors for libopusfile\n"
 		"https://opus-codec.org/\n"
+		"\n"
+#endif
+#if defined(MPT_WITH_PICOJSON)
+		"Cybozu Labs Inc. and Kazuho Oku et. al. for picojson\n"
+		"https://github.com/kazuho/picojson\n"
 		"\n"
 #endif
 		"Storlek for all the IT compatibility hints and testcases\n"
