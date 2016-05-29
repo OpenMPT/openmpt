@@ -15,8 +15,9 @@ Quick Start {#quickstart}
      -  **libmpg123**
      -  **doxygen >= 1.8**
  3. *Optional*:
+     -  **libpulse**, **libpulse-simple**
+     -  **libSDL >= 1.2.x**
      -  **portaudio-v19**
-     -  **libSDL == 1.2.x**
      -  **libFLAC**
      -  **libsndfile**
  4. Run:
@@ -49,8 +50,9 @@ Quick Start {#quickstart}
      -  **libltdl**
      -  **libogg**, **libvorbis**, **libvorbisfile**
      -  **libmpg123**
+     -  **libpulse**, **libpulse-simple**
+     -  **libSDL >= 1.2.x**
      -  **portaudio-v19**
-     -  **libSDL == 1.2.x**
      -  **doxygen >= 1.8**
      -  **help2man**
      -  **libFLAC**

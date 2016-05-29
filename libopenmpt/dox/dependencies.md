@@ -56,8 +56,10 @@ Dependencies
      *  **MinGW-W64 4.6** or higher
      *  any **C++11 compliant** compiler should also work
  *  Live sound output requires one of:
-     *  **PortAudio v19**
+     *  **PulseAudio**
+     *  **SDL 2**
      *  **SDL 1.2**
+     *  **PortAudio v19**
      *  **Win32**
 
 
@@ -88,3 +90,4 @@ Deprecated features
  *  To be removed 2018-01-01: **MO3** support via libunmo3 requires:
      *  closed-source **libunmo3** from un4seen
      *  **libltdl** from libtool on Unix-like platforms or **libdl**
+

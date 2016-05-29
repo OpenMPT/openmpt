@@ -92,6 +92,7 @@ static const char * const license =
 #include "openmpt123_raw.hpp"
 #include "openmpt123_stdout.hpp"
 #include "openmpt123_portaudio.hpp"
+#include "openmpt123_pulseaudio.hpp"
 #include "openmpt123_sdl.hpp"
 #include "openmpt123_sdl2.hpp"
 #include "openmpt123_waveout.hpp"
@@ -400,6 +401,9 @@ static void show_info( std::ostream & log, bool verbose ) {
 	SDL_VERSION( &sdlver );
 	log << "(API: " << static_cast<int>( sdlver.major ) << "." << static_cast<int>( sdlver.minor ) << "." << static_cast<int>( sdlver.patch ) << ")";
 	log << " <https://libsdl.org/>" << std::endl;
+#endif
+#ifdef MPT_WITH_PULSEAUDIO
+	log << " " << "libpulse, libpulse-simple" << " (headers " << pa_get_headers_version()  << ", API " << PA_API_VERSION << ", PROTOCOL " << PA_PROTOCOL_VERSION << ", library " << ( pa_get_library_version() ? pa_get_library_version() : "unkown" ) << ") <https://www.freedesktop.org/wiki/Software/PulseAudio/>" << std::endl;
 #endif
 #ifdef MPT_WITH_PORTAUDIO
 	log << " " << Pa_GetVersionText() << " (" << Pa_GetVersion() << ") <http://portaudio.com/>" << std::endl;
@@ -1700,6 +1704,9 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 					std::ostringstream drivers;
 					drivers << " Available drivers:" << std::endl;
 					drivers << "    " << "default" << std::endl;
+#if defined( MPT_WITH_PULSEAUDIO )
+					drivers << "    " << "pulseaudio" << std::endl;
+#endif
 #if defined( MPT_WITH_SDL2 )
 					drivers << "    " << "sdl2" << std::endl;
 #endif
@@ -1726,6 +1733,9 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 					std::ostringstream devices;
 					devices << " Available devices:" << std::endl;
 					devices << "    " << "default" << ": " << "default" << std::endl;
+#if defined( MPT_WITH_PULSEAUDIO )
+					devices << show_pulseaudio_devices( log );
+#endif
 #if defined( MPT_WITH_SDL2 )
 					devices << show_sdl2_devices( log );
 #endif
@@ -2048,6 +2058,11 @@ static int main( int argc, char * argv [] ) {
 					flags.apply_default_buffer_sizes();
 					file_audio_stream_raii file_audio_stream( flags, flags.output_filename, log );
 					render_files( flags, log, file_audio_stream );
+#if defined( MPT_WITH_PULSEAUDIO )
+				} else if ( flags.driver == "pulseaudio" || flags.driver.empty() ) {
+					pulseaudio_stream_raii pulseaudio_stream( flags, log );
+					render_files( flags, log, pulseaudio_stream );
+#endif
 #if defined( MPT_WITH_SDL2 )
 				} else if ( flags.driver == "sdl2" || flags.driver.empty() ) {
 					sdl2_stream_raii sdl2_stream( flags, log );
@@ -2091,6 +2106,12 @@ static int main( int argc, char * argv [] ) {
 	} catch ( args_error_exception & ) {
 		show_help( std_out );
 		return 1;
+#ifdef MPT_WITH_PULSEAUDIO
+	} catch ( pulseaudio_exception & e ) {
+		std_err << "PulseAudio error: " << e.what() << std::endl;
+		std_err.writeout();
+		return 1;
+#endif
 #ifdef MPT_WITH_PORTAUDIO
 	} catch ( portaudio_exception & e ) {
 		std_err << "PortAudio error: " << e.what() << std::endl;

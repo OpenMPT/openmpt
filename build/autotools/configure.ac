@@ -143,6 +143,26 @@ AC_SUBST([DL_CPPFLAGS])
 AC_SUBST([DL_LIBS])
 
 
+# Optional openmpt123 dependency
+AC_ARG_WITH([pulseaudio], AS_HELP_STRING([--without-pulseaudio], [Disable use of libpulse and libpulse-simple.]))
+AS_IF([test "x$with_pulseaudio" != "xno"],
+ [
+  PKG_CHECK_MODULES([PULSEAUDIO], [libpulse libpulse-simple],
+   [
+    have_pulseaudio=1
+    AC_DEFINE([MPT_WITH_PULSEAUDIO], [], [with libpulseaudio])
+   ],
+   [
+    have_pulseaudio=0
+    AC_MSG_ERROR([Unable to find libpulse and/or libpulse-simple.])
+   ]
+  )
+ ],
+ [
+  have_pulseaudio=0
+ ]
+)
+
 # Optional openmpt123 and examples dependency
 AC_ARG_WITH([portaudio], AS_HELP_STRING([--without-portaudio], [Disable use of libportaudio.]))
 AS_IF([test "x$with_portaudio" != "xno"],

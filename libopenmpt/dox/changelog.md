@@ -7,6 +7,10 @@ is just a high-level summary.
 
 ### libopenmpt svn
 
+ *  [**Change**] openmpt123: Add PulseAudio output support. Autotools and
+    `Makefile` build systems now depend on `libpulse` and `libpulse-simple` by
+    default. Disable with `--without-pulseaudio` or `NO_PULSEAUDIO=1`
+    respectively. When enabled, PulseAudio will be the default output driver,
  *  [**Change**] xmp-openmpt: Settings are now stored in xmplay.ini like with
     every other plugin.
 
