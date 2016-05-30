@@ -248,6 +248,61 @@ mpt::PathString GetAbsolutePath(const mpt::PathString &path)
 	return mpt::PathString::FromNative(&fullPathName[0]);
 }
 
+#ifdef MODPLUG_TRACKER
+
+bool DeleteWholeDirectoryTree(mpt::PathString path)
+{
+	if(path.AsNative().empty())
+	{
+		return false;
+	}
+	if(!path.FileOrDirectoryExists())
+	{
+		return true;
+	}
+	if(!path.IsDirectory())
+	{
+		return false;
+	}
+	path.EnsureTrailingSlash();
+	HANDLE hFind = NULL;
+	WIN32_FIND_DATAW wfd;
+	MemsetZero(wfd);
+	hFind = FindFirstFileW((path + MPT_PATHSTRING("*.*")).AsNative().c_str(), &wfd);
+	if(hFind != NULL && hFind != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			mpt::PathString filename = mpt::PathString::FromNative(wfd.cFileName);
+			if(filename != MPT_PATHSTRING(".") && filename != MPT_PATHSTRING(".."))
+			{
+				filename = path + filename;
+				if(filename.IsDirectory())
+				{
+					if(!DeleteWholeDirectoryTree(filename))
+					{
+						return false;
+					}
+				} else if(filename.IsFile())
+				{
+					if(DeleteFileW(filename.AsNative().c_str()) == 0)
+					{
+						return false;
+					}
+				}
+			}
+		} while(FindNextFileW(hFind, &wfd));
+		FindClose(hFind);
+	}
+	if(RemoveDirectoryW(path.AsNative().c_str()) == 0)
+	{
+		return false;
+	}
+	return true;
+}
+
+#endif // MODPLUG_TRACKER
+
 #endif // MPT_OS_WINDOWS
 
 #if defined(MPT_ENABLE_TEMPFILE)
@@ -276,6 +331,10 @@ mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const 
 	filename += (!fileNamePrefix.empty() ? fileNamePrefix + MPT_PATHSTRING("_") : mpt::PathString());
 	filename += mpt::PathString::FromUnicode(Util::UUIDToString(Util::CreateLocalUUID()));
 	filename += (!fileNameExtension.empty() ? MPT_PATHSTRING(".") + fileNameExtension : mpt::PathString());
+	if(filename.empty())
+	{
+		filename += MPT_PATHSTRING("tmp"); // in case other things fail, we will still have a non-empty filename
+	}
 	return filename;
 }
 
