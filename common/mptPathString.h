@@ -284,6 +284,15 @@ namespace mpt
 // Returns the absolute path for a potentially relative path and removes ".." or "." components. (same as GetFullPathNameW)
 mpt::PathString GetAbsolutePath(const mpt::PathString &path);
 
+#ifdef MODPLUG_TRACKER
+
+// Deletes a complete directory tree. Handle with EXTREME care.
+// Returns false if any file could not be removed and aborts as soon as it
+// encounters any error.
+bool DeleteWholeDirectoryTree(mpt::PathString path);
+
+#endif // MODPLUG_TRACKER
+
 #endif // MPT_OS_WINDOWS
 
 #if defined(MPT_ENABLE_TEMPFILE)
