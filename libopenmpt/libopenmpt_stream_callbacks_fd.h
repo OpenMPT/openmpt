@@ -17,20 +17,16 @@
 #endif
 #include <limits.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 #ifndef _MSC_VER
 #include <unistd.h>
-#endif
-#ifdef _MSC_VER
-#include <wchar.h> /* off_t */
 #endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* This stuff has to be in a header file because of possibly different MSVC CRTs which cause problems for FILE * crossing CRT boundaries. */
+/* This stuff has to be in a header file because of possibly different MSVC CRTs which cause problems for fd crossing CRT boundaries. */
 
 static size_t openmpt_stream_fd_read_func( void * stream, void * dst, size_t bytes ) {
 	int fd = 0;
