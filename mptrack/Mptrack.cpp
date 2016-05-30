@@ -40,6 +40,8 @@
 #include <crtdbg.h>
 //end  rewbs.memLeak
 
+#include <ctime>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -998,6 +1000,8 @@ BOOL CTrackApp::InitInstance()
 	#if MPT_COMPILER_MSVC
 		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
 	#endif
+	
+	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	m_GuiThreadId = GetCurrentThreadId();
 
