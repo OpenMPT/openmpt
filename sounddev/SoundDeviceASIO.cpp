@@ -72,19 +72,56 @@ public:
 	{
 		return;
 	}
-	ASIOException(const std::string &call, ASIOError err)
-		: std::runtime_error(call + std::string(" failed: ") + mpt::ToString(err))
+};
+
+
+class ASIOCallError
+	: public ASIOException
+{
+public:
+	ASIOCallError(const std::string &call, ASIOError err)
+		: ASIOException(call + std::string(" failed: ") + mpt::ToString(err))
 	{
 		return;
 	}
 };
 
 
+class ASIOCallBoolResult
+	: public ASIOException
+{
+public:
+	ASIOCallBoolResult(const std::string &call, ASIOBool err)
+		: ASIOException(call + std::string(" failed: ") + mpt::ToString(err))
+	{
+		return;
+	}
+};
+
+
+#if defined(MPT_EXCEPTIONS_SEH)
+
+
 #define asioCall(asiocall) do { \
 	try { \
 		ASIOError e = m_pAsioDrv-> asiocall ; \
 		if(e != ASE_OK) { \
-			throw ASIOException( #asiocall , e); \
+			throw ASIOCallError( #asiocall , e); \
+		} \
+	} catch(const ASIOException &) { \
+		throw; \
+	} catch(...) { \
+		CASIODevice::ReportASIOException( #asiocall + std::string(" crashed!")); \
+		throw ASIOException(std::string("Exception in '") + #asiocall + std::string("'!")); \
+	} \
+} while(0)
+
+
+#define asioCallCheckedBool(asiocall) do { \
+	try { \
+		ASIOBool e = m_pAsioDrv-> asiocall ; \
+		if(e != ASIOTrue) { \
+			throw ASIOCallBoolResult( #asiocall , e); \
 		} \
 	} catch(const ASIOException &) { \
 		throw; \
@@ -109,6 +146,213 @@ public:
 		throw ASIOException(std::string("Exception in '") + #asiocall + std::string("'!")); \
 	} \
 } while(0)
+
+
+#else // !MPT_EXCEPTIONS_SEH
+
+
+struct ASIOCrash {};
+
+
+struct SafeASIO
+{
+
+	IASIO * asio;
+
+	SafeASIO(IASIO * asio) : asio(asio) {}
+
+	#define MPT_ASIO_SEH_TRY \
+		bool crashed = false; \
+		__try { \
+	/**/
+
+	#define MPT_ASIO_SEH_CATCH \
+		} __except(EXCEPTION_EXECUTE_HANDLER) { \
+			crashed = true; \
+		} \
+		if(crashed) { \
+			throw ASIOCrash(); \
+		} \
+	/**/
+
+	ASIOBool init(void *sysHandle) {
+		MPT_ASIO_SEH_TRY
+			return asio->init(sysHandle);
+		MPT_ASIO_SEH_CATCH
+		return ASIOFalse;
+	}
+	void getDriverName(char *name) {
+		MPT_ASIO_SEH_TRY
+			asio->getDriverName(name);
+		MPT_ASIO_SEH_CATCH
+	}	
+	long getDriverVersion() {
+		MPT_ASIO_SEH_TRY
+			return asio->getDriverVersion();
+		MPT_ASIO_SEH_CATCH
+		return 0;
+	}
+	void getErrorMessage(char *string) {
+		MPT_ASIO_SEH_TRY
+			asio->getErrorMessage(string);
+		MPT_ASIO_SEH_CATCH
+	}	
+	ASIOError start() {
+		MPT_ASIO_SEH_TRY
+			return asio->start();
+		MPT_ASIO_SEH_CATCH
+		return ASE_InvalidParameter;
+	}
+	ASIOError stop() {
+		MPT_ASIO_SEH_TRY
+			return asio->stop();
+		MPT_ASIO_SEH_CATCH
+		return ASE_InvalidParameter;
+	}
+	ASIOError getChannels(long *numInputChannels, long *numOutputChannels) {
+		MPT_ASIO_SEH_TRY
+			return asio->getChannels(numInputChannels, numOutputChannels);
+		MPT_ASIO_SEH_CATCH
+		return ASE_InvalidParameter;
+	}
+	ASIOError getLatencies(long *inputLatency, long *outputLatency) {
+		MPT_ASIO_SEH_TRY
+			return asio->getLatencies(inputLatency, outputLatency);
+		MPT_ASIO_SEH_CATCH
+		return ASE_InvalidParameter;
+	}
+	ASIOError getBufferSize(long *minSize, long *maxSize, long *preferredSize, long *granularity) {
+		MPT_ASIO_SEH_TRY
+			return asio->getBufferSize(minSize, maxSize, preferredSize, granularity);
+		MPT_ASIO_SEH_CATCH
+		return ASE_InvalidParameter;
+	}
+	ASIOError canSampleRate(ASIOSampleRate sampleRate) {
+		MPT_ASIO_SEH_TRY
+			return asio->canSampleRate(sampleRate);
+		MPT_ASIO_SEH_CATCH
+		return ASE_InvalidParameter;
+	}
+	ASIOError getSampleRate(ASIOSampleRate *sampleRate) {
+		MPT_ASIO_SEH_TRY
+			return asio->getSampleRate(sampleRate);
+		MPT_ASIO_SEH_CATCH
+		return ASE_InvalidParameter;
+	}
+	ASIOError setSampleRate(ASIOSampleRate sampleRate) {
+		MPT_ASIO_SEH_TRY
+			return asio->setSampleRate(sampleRate);
+		MPT_ASIO_SEH_CATCH
+		return ASE_InvalidParameter;
+	}
+	ASIOError getClockSources(ASIOClockSource *clocks, long *numSources) {
+		MPT_ASIO_SEH_TRY
+			return asio->getClockSources(clocks, numSources);
+		MPT_ASIO_SEH_CATCH
+		return ASE_InvalidParameter;
+	}
+	ASIOError setClockSource(long reference) {
+		MPT_ASIO_SEH_TRY
+			return asio->setClockSource(reference);
+		MPT_ASIO_SEH_CATCH
+		return ASE_InvalidParameter;
+	}
+	ASIOError getSamplePosition(ASIOSamples *sPos, ASIOTimeStamp *tStamp) {
+		MPT_ASIO_SEH_TRY
+			return asio->getSamplePosition(sPos, tStamp);
+		MPT_ASIO_SEH_CATCH
+		return ASE_InvalidParameter;
+	}
+	ASIOError getChannelInfo(ASIOChannelInfo *info) {
+		MPT_ASIO_SEH_TRY
+			return asio->getChannelInfo(info);
+		MPT_ASIO_SEH_CATCH
+		return ASE_InvalidParameter;
+	}
+	ASIOError createBuffers(ASIOBufferInfo *bufferInfos, long numChannels, long bufferSize, ASIOCallbacks *callbacks) {
+		MPT_ASIO_SEH_TRY
+			return asio->createBuffers(bufferInfos, numChannels, bufferSize, callbacks);
+		MPT_ASIO_SEH_CATCH
+		return ASE_InvalidParameter;
+	}
+	ASIOError disposeBuffers() {
+		MPT_ASIO_SEH_TRY
+			return asio->disposeBuffers();
+		MPT_ASIO_SEH_CATCH
+		return ASE_InvalidParameter;
+	}
+	ASIOError controlPanel() {
+		MPT_ASIO_SEH_TRY
+			return asio->controlPanel();
+		MPT_ASIO_SEH_CATCH
+		return ASE_InvalidParameter;
+	}
+	ASIOError future(long selector, void *opt) {
+		MPT_ASIO_SEH_TRY
+			return asio->future(selector, opt);
+		MPT_ASIO_SEH_CATCH
+		return ASE_InvalidParameter;
+	}
+	ASIOError outputReady() {
+		MPT_ASIO_SEH_TRY
+			return asio->outputReady();
+		MPT_ASIO_SEH_CATCH
+		return ASE_InvalidParameter;
+	}
+
+	#undef MPT_ASIO_SEH_TRY
+
+	#undef MPT_ASIO_SEH_CATCH
+
+}; // struct SafeASIO
+
+
+#define asioCall(asiocall) do { \
+	ASIOError e = ASE_InvalidParameter; \
+	try { \
+		e = SafeASIO(m_pAsioDrv). asiocall ; \
+	} catch(const ASIOCrash &) { \
+		CASIODevice::ReportASIOException( #asiocall + std::string(" crashed!")); \
+		throw ASIOException(std::string("Exception in '") + #asiocall + std::string("'!")); \
+	} \
+	if(e != ASE_OK) { \
+		throw ASIOCallError( #asiocall , e); \
+	} \
+} while(0)
+
+
+#define asioCallCheckedBool(asiocall) do { \
+	ASIOBool e = ASIOFalse; \
+	try { \
+		e = SafeASIO(m_pAsioDrv). asiocall ; \
+	} catch(const ASIOCrash &) { \
+		CASIODevice::ReportASIOException( #asiocall + std::string(" crashed!")); \
+		throw ASIOException(std::string("Exception in '") + #asiocall + std::string("'!")); \
+	} \
+	if(e != ASIOTrue) { \
+		throw ASIOCallBoolResult( #asiocall , e); \
+	} \
+} while(0)
+
+
+#define asioCallUnchecked(pasioresult, asiocall) do { \
+	if(( pasioresult )) { \
+		*( pasioresult ) = ASE_InvalidParameter; \
+	} \
+	ASIOError e = ASE_InvalidParameter; \
+	try { \
+		e = SafeASIO(m_pAsioDrv). asiocall ; \
+	} catch(const ASIOCrash &) { \
+		CASIODevice::ReportASIOException( #asiocall + std::string(" crashed!")); \
+		throw ASIOException(std::string("Exception in '") + #asiocall + std::string("'!")); \
+	} \
+	if(( pasioresult )) { \
+		*( pasioresult ) = e; \
+	} \
+} while(0)
+
+
+#endif // MPT_EXCEPTIONS_SEH
 
 
 #define ASIO_MAXDRVNAMELEN	1024
@@ -739,12 +983,12 @@ void CASIODevice::OpenDriver()
 	}
 	try
 	{
-		if(m_pAsioDrv->init((void *)m_AppInfo.GetHWND()) != ASIOTrue)
-		{
-			Log(mpt::String::Print("ASIO: init() failed!"));
-			CloseDriver();
-			return;
-		}
+		asioCallCheckedBool(init(reinterpret_cast<void *>(m_AppInfo.GetHWND())));
+	} catch(const ASIOException &)
+	{
+		Log(mpt::String::Print("ASIO: init() failed!"));
+		CloseDriver();
+		return;
 	} catch(...)
 	{
 		Log(mpt::String::Print("ASIO: init() crashed!"));
