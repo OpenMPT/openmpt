@@ -19,10 +19,8 @@
 
 
 #ifdef MPT_WITH_PORTAUDIO
-#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
-#if MPT_COMPILER_MSVC
+#if defined(MODPLUG_TRACKER) && MPT_COMPILER_MSVC
 #include "../include/portaudio/src/common/pa_debugprint.h"
-#endif
 #endif
 #if MPT_OS_WINDOWS
 #include <shellapi.h>
@@ -416,7 +414,6 @@ int CPortaudioDevice::StreamCallback(
 //-----------------------------------------
 {
 	MPT_UNREFERENCED_PARAMETER(input);
-	MPT_UNREFERENCED_PARAMETER(statusFlags);
 	if(!output) return paAbort;
 	if(m_HostApiType == paWDMKS)
 	{
@@ -433,6 +430,12 @@ int CPortaudioDevice::StreamCallback(
 		// The current chunk, however, appears to be compensated for.
 		// Repair the confusion.
 		m_CurrentRealLatency = timeInfo->outputBufferDacTime - timeInfo->currentTime + m_StreamInfo->outputLatency - (static_cast<double>(frameCount) / static_cast<double>(m_Settings.Samplerate));
+	} else if(m_HostApiType == paALSA)
+	{
+		// PortAudio latency calculation appears to miss the buffering latency.
+		// The current chunk, however, appears to be compensated for.
+		// Repair the confusion.
+		m_CurrentRealLatency = timeInfo->outputBufferDacTime - timeInfo->currentTime + m_StreamInfo->outputLatency - (static_cast<double>(frameCount) / static_cast<double>(m_Settings.Samplerate));
 	} else
 	{
 		m_CurrentRealLatency = timeInfo->outputBufferDacTime - timeInfo->currentTime;
@@ -444,6 +447,11 @@ int CPortaudioDevice::StreamCallback(
 	m_CurrentFrameCount = 0;
 	m_CurrentFrameBuffer = 0;
 	m_CurrentFrameBufferInput = 0;
+	if((m_HostApiType == paALSA) && (statusFlags & paOutputUnderflow))
+	{
+		// PortAudio ALSA does not recover well from buffer underruns
+		RequestRestart();
+	}
 	return paContinue;
 }
 
@@ -626,11 +634,9 @@ ComponentPortAudio::ComponentPortAudio()
 
 bool ComponentPortAudio::DoInitialize()
 {
-#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
-#if MPT_COMPILER_MSVC
-	PaUtil_SetDebugPrintFunction(PortaudioLog);
-#endif // MPT_COMPILER_MSVC
-#endif
+	#if defined(MODPLUG_TRACKER) && MPT_COMPILER_MSVC
+		PaUtil_SetDebugPrintFunction(PortaudioLog);
+	#endif
 	return (Pa_Initialize() == paNoError);
 }
 
