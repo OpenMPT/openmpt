@@ -145,6 +145,27 @@ public:
 		return *this;
 	}
 
+	mpt::PathString WithoutTrailingSlash() const
+	{
+		mpt::PathString result = *this;
+		while(result.HasTrailingSlash())
+		{
+			if(result.Length() == 1)
+			{
+				return result;
+			}
+			result = result.AsNative().substr(0, result.AsNative().length() - 1);
+		}
+		return result;
+	}
+
+	mpt::PathString WithTrailingSlash() const
+	{
+		mpt::PathString result = *this;
+		result.EnsureTrailingSlash();
+		return result;
+	}
+
 	// Relative / absolute paths conversion
 	mpt::PathString AbsolutePathToRelative(const mpt::PathString &relativeTo) const;
 	mpt::PathString RelativePathToAbsolute(const mpt::PathString &relativeTo) const;
