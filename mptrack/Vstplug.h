@@ -42,7 +42,7 @@ protected:
 
 	HINSTANCE m_hLibrary;
 	AEffect &m_Effect;
-	void (*m_pProcessFP)(AEffect*, float**, float**, VstInt32); //Function pointer to AEffect processReplacing if supported, else process.
+	AEffectProcessProc m_pProcessFP; //Function pointer to AEffect processReplacing if supported, else process.
 
 	double lastBarStartPos;
 	uint32 m_nSampleRate;
