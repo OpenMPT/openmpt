@@ -812,6 +812,10 @@ void CVstPlugin::Initialize()
 	m_Effect.resvd1 = ToVstPtr(this);
 	m_nSampleRate = m_SndFile.GetSampleRate();
 
+	// First try to let the plugin know the render parameters.
+	Dispatch(effSetSampleRate, 0, 0, nullptr, static_cast<float>(m_nSampleRate));
+	Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, nullptr, 0.0f);
+
 	Dispatch(effOpen, 0, 0, nullptr, 0.0f);
 	// VST 2.0 plugins return 2 here, VST 2.4 plugins return 2400... Great!
 	m_bIsVst2 = Dispatch(effGetVstVersion, 0,0, nullptr, 0.0f) >= 2;
@@ -867,6 +871,7 @@ void CVstPlugin::Initialize()
 
 	}
 
+	// Second try to let the plugin know the render parameters.
 	Dispatch(effSetSampleRate, 0, 0, nullptr, static_cast<float>(m_nSampleRate));
 	Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, nullptr, 0.0f);
 	if(m_Effect.numPrograms > 0)
