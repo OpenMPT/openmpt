@@ -135,15 +135,17 @@ public:
 	const CWaveConvertSettings &m_Settings;
 	CSoundFile &m_SndFile;
 	const mpt::PathString &m_lpszFileName;
+	const CString &caption;
 	uint64 m_dwFileLimit, m_dwSongLimit;
 	bool m_bGivePlugsIdleTime;
 
 public:
-	CDoWaveConvert(CSoundFile &sndFile, const mpt::PathString &filename, const CWaveConvertSettings &settings, CWnd *parent = NULL)
+	CDoWaveConvert(CSoundFile &sndFile, const mpt::PathString &filename, const CString &caption, const CWaveConvertSettings &settings, CWnd *parent = NULL)
 		: CProgressDialog(parent)
 		, m_SndFile(sndFile)
 		, m_Settings(settings)
 		, m_lpszFileName(filename)
+		, caption(caption)
 		, m_dwFileLimit(0), m_dwSongLimit(0)
 	{ }
 	void Run();

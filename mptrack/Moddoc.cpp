@@ -1806,6 +1806,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 	for(int i = 0 ; i < nRenderPasses ; i++)
 	{
 		mpt::PathString thisName = fileName;
+		CString caption = "file";
 		char fileNameAdd[_MAX_FNAME] = "";
 
 		// Channel mode
@@ -1817,11 +1818,18 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			// Was this channel actually muted? Don't process it then.
 			if(!usedChannels[i])
 				continue;
+
 			// Add channel number & name (if available) to path string
 			if(strcmp(m_SndFile.ChnSettings[i].szName, ""))
+			{
 				sprintf(fileNameAdd, "-%03d_%s", i + 1, m_SndFile.ChnSettings[i].szName);
-			else
+				caption.Format("%u:", i + 1);
+				caption += m_SndFile.ChnSettings[i].szName;
+			} else
+			{
 				sprintf(fileNameAdd, "-%03d", i + 1);
+				caption.Format("channel %u", i + 1);
+			}
 			// Unmute channel to process
 			m_SndFile.ChnSettings[i].dwFlags.reset(CHN_MUTE);
 		}
@@ -1833,13 +1841,20 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 				// Re-mute previously processed sample
 				if(i > 0) MuteSample((SAMPLEINDEX)i, true);
 
-				if(m_SndFile.GetSample((SAMPLEINDEX)(i + 1)).pSample == nullptr || !m_SndFile.IsSampleUsed((SAMPLEINDEX)(i + 1)))
+				if(m_SndFile.GetSample((SAMPLEINDEX)(i + 1)).pSample == nullptr || !m_SndFile.IsSampleUsed((SAMPLEINDEX)(i + 1)) || instrMuteState[i])
 					continue;
+
 				// Add sample number & name (if available) to path string
 				if(strcmp(m_SndFile.m_szNames[i + 1], ""))
+				{
 					sprintf(fileNameAdd, "-%03d_%s", i + 1, m_SndFile.m_szNames[i + 1]);
-				else
+					caption.Format("%u: ", i + 1);
+					caption += m_SndFile.m_szNames[i + 1];
+				} else
+				{
 					sprintf(fileNameAdd, "-%03d", i + 1);
+					caption.Format("sample %u", i + 1);
+				}
 				// Unmute sample to process
 				MuteSample((SAMPLEINDEX)(i + 1), false);
 			} else
@@ -1847,12 +1862,19 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 				// Re-mute previously processed instrument
 				if(i > 0) MuteInstrument((INSTRUMENTINDEX)i, true);
 
-				if(m_SndFile.Instruments[i + 1] == nullptr || !m_SndFile.IsInstrumentUsed((INSTRUMENTINDEX)(i + 1)))
+				if(m_SndFile.Instruments[i + 1] == nullptr || !m_SndFile.IsInstrumentUsed((INSTRUMENTINDEX)(i + 1)) || instrMuteState[i])
 					continue;
+
 				if(strcmp(m_SndFile.Instruments[i + 1]->name, ""))
+				{
 					sprintf(fileNameAdd, "-%03d_%s", i + 1, m_SndFile.Instruments[i + 1]->name);
-				else
+					caption.Format("%u:", i + 1);
+					caption += m_SndFile.Instruments[i + 1]->name;
+				} else
+				{
 					sprintf(fileNameAdd, "-%03d", i + 1);
+					caption.Format("instrument %u", i + 1);
+				}
 				// Unmute instrument to process
 				MuteInstrument((INSTRUMENTINDEX)(i + 1), false);
 			}
@@ -1872,7 +1894,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		}
 
 		// Render song (or current channel, or current sample/instrument)
-		CDoWaveConvert dwcdlg(m_SndFile, thisName, wsdlg.m_Settings, pMainFrm);
+		CDoWaveConvert dwcdlg(m_SndFile, thisName, caption, wsdlg.m_Settings, pMainFrm);
 		dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
 		dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
 		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
