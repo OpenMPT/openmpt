@@ -88,7 +88,6 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_COMMAND(IDC_BUTTON6,		OnLoadParam)
 	ON_COMMAND(IDC_BUTTON8,		OnSaveParam)
 
-	ON_COMMAND(IDC_BUTTON7,		OnSetWetDry)
 	ON_EN_UPDATE(IDC_EDIT13,	OnPluginNameChanged)
 	ON_EN_UPDATE(IDC_EDIT14,	OnSetParameter)
 	ON_EN_SETFOCUS(IDC_EDIT14,	OnFocusParam)
@@ -435,10 +434,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		GetDlgItem(IDC_MOVEFXSLOT)->EnableWindow((pPlugin) ? TRUE : FALSE);
 		GetDlgItem(IDC_INSERTFXSLOT)->EnableWindow((pPlugin) ? TRUE : FALSE);
 		GetDlgItem(IDC_CLONEPLUG)->EnableWindow((pPlugin) ? TRUE : FALSE);
-		int n = static_cast<int>(plugin.fDryRatio * 100);
-		wsprintf(s, _T("%d%% wet, %d%% dry"), 100 - n, n);
-		SetDlgItemText(IDC_STATIC8, s);
-		m_sbDryRatio.SetPos(100 - n);
+		UpdateDryWetDisplay();
 
 		if(pPlugin && pPlugin->IsInstrument())
 		{
@@ -714,7 +710,6 @@ void CViewGlobals::OnEditPan4() {OnEditPan(3, IDC_EDIT8);}
 void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 //---------------------------------------------------------------------------
 {
-	CHAR s[64];
 	CModDoc *pModDoc;
 	CHANNELINDEX nChn;
 
@@ -770,11 +765,10 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 				if(plugin.pMixPlugin)
 				{
-					wsprintf(s, "%d%% wet, %d%% dry", 100 - n, n);
-					SetDlgItemText(IDC_STATIC8, s);
 					plugin.fDryRatio = static_cast<float>(n) / 100.0f;
 					SetPluginModified();
 				}
+				UpdateDryWetDisplay();
 			}
 		}
 
@@ -1133,22 +1127,22 @@ void CViewGlobals::OnSetParameter()
 }
 
 
-void CViewGlobals::OnSetWetDry()
-//------------------------------
+void CViewGlobals::UpdateDryWetDisplay()
+//--------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile;
-
-	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
-	pSndFile = pModDoc->GetSoundFile();
-	SNDMIXPLUGIN &plugin = pSndFile->m_MixPlugins[m_nCurrentPlugin];
-
-	if (plugin.pMixPlugin != nullptr)
+	SNDMIXPLUGIN &plugin = GetDocument()->GetSoundFile()->m_MixPlugins[m_nCurrentPlugin];
+	float wetRatio = 1.0f - plugin.fDryRatio, dryRatio = plugin.fDryRatio;
+	m_sbDryRatio.SetPos(Util::Round<int>(wetRatio * 100));
+	if(plugin.IsExpandedMix())
 	{
-		UINT value = GetDlgItemIntEx(IDC_EDIT15);
-		plugin.fDryRatio = (float)value / 100.0f;
-		SetPluginModified();
+		wetRatio = 2.0f * wetRatio - 1.0f;
+		dryRatio = -wetRatio;
 	}
+	int wetInt = Util::Round<int>(wetRatio * 100), dryInt = Util::Round<int>(dryRatio * 100);
+	TCHAR s[32];
+	wsprintf(s, _T("%d%% wet, %d%% dry"), wetInt, dryInt);
+	SetDlgItemText(IDC_STATIC8, s);
+
 }
 
 
@@ -1192,6 +1186,7 @@ void CViewGlobals::OnWetDryExpandChanged()
 	pSndFile = pModDoc->GetSoundFile();
 
 	pSndFile->m_MixPlugins[m_nCurrentPlugin].SetExpandedMix(IsDlgButtonChecked(IDC_CHECK12) != BST_UNCHECKED);
+	UpdateDryWetDisplay();
 
 	SetPluginModified();
 }
