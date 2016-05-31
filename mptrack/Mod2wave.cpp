@@ -1095,6 +1095,12 @@ void CDoWaveConvert::Run()
 	m_SndFile.m_PatternCuePoints.clear();
 	m_SndFile.m_PatternCuePoints.reserve(m_SndFile.Order.GetLength());
 
+	CString progressStr;
+	if(m_Settings.normalize)
+		progressStr =  _T("Rendering ") + caption + _T("... (%umn%02us, %umn%02us remaining)");
+	else
+		progressStr =  _T("Writing ") + caption + _T("... (%lluKB, %umn%02us, %umn%02us remaining)");
+
 	// Process the conversion
 
 	// For calculating the remaining time
@@ -1193,12 +1199,9 @@ void CDoWaveConvert::Run()
 			}
 
 			if(m_Settings.normalize)
-			{
-				_stprintf(s, _T("Rendering file... (%umn%02us, %umn%02us remaining)"), l / 60, l % 60, timeRemaining / 60, timeRemaining % 60u);
-			} else
-			{
-				_stprintf(s, _T("Writing file... (%lluKB, %umn%02us, %umn%02us remaining)"), bytesWritten >> 10, l / 60, l % 60u, timeRemaining / 60, timeRemaining % 60u);
-			}
+				_stprintf(s, progressStr, l / 60, l % 60, timeRemaining / 60, timeRemaining % 60u);
+			else
+				_stprintf(s, progressStr, bytesWritten >> 10, l / 60, l % 60u, timeRemaining / 60, timeRemaining % 60u);
 			SetText(s);
 		}
 		if (static_cast<uint32>(ullSamples >> 14) != pos)
