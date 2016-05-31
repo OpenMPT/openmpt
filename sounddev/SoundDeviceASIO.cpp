@@ -480,6 +480,9 @@ void CASIODevice::InitMembers()
 
 	m_AsioRequestFlags = 0;
 
+	m_ThreadPrioritySet = false;
+	m_OldThreadPriority = THREAD_PRIORITY_NORMAL;
+
 	m_DebugRealtimeThreadID.store(0);
 
 }
@@ -848,6 +851,9 @@ bool CASIODevice::InternalStart()
 		}
 	}
 
+	m_ThreadPrioritySet = false;
+	m_OldThreadPriority = THREAD_PRIORITY_NORMAL;
+
 	SetRenderSilence(false);
 	try
 	{
@@ -900,6 +906,8 @@ void CASIODevice::InternalStopImpl(bool force)
 	m_TotalFramesWritten = 0;
 	SetRenderSilence(false);
 
+	m_ThreadPrioritySet = false;
+	m_OldThreadPriority = THREAD_PRIORITY_NORMAL;
 }
 
 
@@ -1580,10 +1588,28 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 	m_RenderingSilence = (rendersilence ? 1 : 0);
 	if(rendersilence)
 	{
+		if(m_AppInfo.ASIODriverThreadPriorityOverride)
+		{
+			if(!m_ThreadPrioritySet)
+			{
+				m_OldThreadPriority = GetThreadPriority(GetCurrentThread());
+				SetThreadPriority(GetCurrentThread(), m_AppInfo.BoostedThreadPriorityXP);
+				m_ThreadPrioritySet = true;
+			}
+		}
 		m_StreamPositionOffset += m_nAsioBufferLen;
 		FillAsioBuffer(false);
 	} else
 	{
+		if(m_AppInfo.ASIODriverThreadPriorityOverride)
+		{
+			if(m_ThreadPrioritySet)
+			{
+				SetThreadPriority(GetCurrentThread(), m_OldThreadPriority);
+				m_OldThreadPriority = THREAD_PRIORITY_NORMAL;
+				m_ThreadPrioritySet = false;
+			}
+		}
 		SourceFillAudioBufferLocked();
 	}
 	m_TotalFramesWritten += m_nAsioBufferLen;

@@ -73,6 +73,7 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice)
 	: m_SoundDevice(SoundDevice)
 {
 	MPT_TRACE();
+	m_MMCSSClass = mpt::ToWide(m_SoundDevice.m_AppInfo.BoostedThreadMMCSSClassVista);
 	m_WakeupInterval = 0.0;
 	m_hPlayThread = NULL;
 	m_dwPlayThreadId = 0;
@@ -152,13 +153,15 @@ ComponentAvRt::~ComponentAvRt()
 }
 
 
-CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle<ComponentAvRt> & avrt, bool boostPriority)
-//-------------------------------------------------------------------------------------------------------------------------
+CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle<ComponentAvRt> & avrt, bool boostPriority, const std::wstring & priorityClass, int priority)
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	: m_SysInfo(sysInfo)
 	, m_AvRt(avrt)
 	, m_BoostPriority(boostPriority)
+	, m_Priority(priority)
 	, task_idx(0)
 	, hTask(NULL)
+	, oldPriority(THREAD_PRIORITY_NORMAL)
 {
 	MPT_TRACE();
 	#ifdef _DEBUG
@@ -168,10 +171,14 @@ CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle
 	{
 		if(m_SysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista) && IsComponentAvailable(m_AvRt))
 		{
-			hTask = m_AvRt->AvSetMmThreadCharacteristicsW(L"Pro Audio", &task_idx);
+			if(!priorityClass.empty())
+			{
+				hTask = m_AvRt->AvSetMmThreadCharacteristicsW(priorityClass.c_str(), &task_idx);
+			}
 		} else
 		{
-			SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
+			oldPriority = GetThreadPriority(GetCurrentThread());
+			SetThreadPriority(GetCurrentThread(), priority);
 		}
 	}
 }
@@ -185,12 +192,15 @@ CPriorityBooster::~CPriorityBooster()
 	{
 		if(m_SysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista) && IsComponentAvailable(m_AvRt))
 		{
-			m_AvRt->AvRevertMmThreadCharacteristics(hTask);
+			if(hTask)
+			{
+				m_AvRt->AvRevertMmThreadCharacteristics(hTask);
+			}
 			hTask = NULL;
 			task_idx = 0;
 		} else
 		{
-			SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
+			SetThreadPriority(GetCurrentThread(), oldPriority);
 		}
 	}
 }
@@ -342,7 +352,7 @@ DWORD CAudioThread::AudioThread()
 		if(!terminate)
 		{
 
-			CPriorityBooster priorityBooster(m_SoundDevice.GetSysInfo(), m_AvRt, m_SoundDevice.m_Settings.BoostThreadPriority);
+			CPriorityBooster priorityBooster(m_SoundDevice.GetSysInfo(), m_AvRt, m_SoundDevice.m_Settings.BoostThreadPriority, m_MMCSSClass, m_SoundDevice.m_AppInfo.BoostedThreadPriorityXP);
 			CPeriodicWaker periodicWaker(*this, m_WakeupInterval);
 
 			m_SoundDevice.StartFromSoundThread();

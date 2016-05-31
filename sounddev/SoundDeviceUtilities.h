@@ -58,10 +58,12 @@ private:
 	SoundDevice::SysInfo m_SysInfo;
 	ComponentHandle<ComponentAvRt> & m_AvRt;
 	bool m_BoostPriority;
+	int m_Priority;
 	DWORD task_idx;
 	HANDLE hTask;
+	int oldPriority;
 public:
-	CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle<ComponentAvRt> & avrt, bool boostPriority);
+	CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle<ComponentAvRt> & avrt, bool boostPriority, const std::wstring & priorityClass, int priority);
 	~CPriorityBooster();
 };
 
@@ -73,6 +75,7 @@ private:
 	CSoundDeviceWithThread & m_SoundDevice;
 
 	ComponentHandle<ComponentAvRt> m_AvRt;
+	std::wstring m_MMCSSClass;
 	double m_WakeupInterval;
 	HANDLE m_hAudioWakeUp;
 	HANDLE m_hPlayThread;

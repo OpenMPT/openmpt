@@ -13,6 +13,7 @@
 
 #include "../common/FlagSet.h"
 #include "../common/mptOS.h"
+#include "../common/thread.h"
 #include "../soundlib/SampleFormat.h"
 
 #include <map>
@@ -247,8 +248,14 @@ struct AppInfo
 {
 	mpt::ustring Name;
 	uintptr_t UIHandle; // HWND on Windows
+	int BoostedThreadPriorityXP;
+	mpt::ustring BoostedThreadMMCSSClassVista;
+	bool ASIODriverThreadPriorityOverride;
 	AppInfo()
 		: UIHandle(0)
+		, BoostedThreadPriorityXP(mpt::ThreadPriorityHighest)
+		, BoostedThreadMMCSSClassVista(MPT_USTRING("Pro Audio"))
+		, ASIODriverThreadPriorityOverride(false)
 	{
 		return;
 	}

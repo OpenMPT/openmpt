@@ -1073,6 +1073,11 @@ BOOL CTrackApp::InitInstance()
 	// requires SetupPaths called
 	LoadStdProfileSettings(0);
 
+	// Set process priority class
+	#ifndef _DEBUG
+		SetPriorityClass(GetCurrentProcess(), TrackerSettings::Instance().MiscProcessPriorityClass);
+	#endif
+
 	// Dynamic DPI-awareness. Some users might want to disable DPI-awareness because of their DPI-unaware VST plugins.
 	bool setDPI = false;
 	// For Windows 8.1 and newer
@@ -1143,7 +1148,13 @@ BOOL CTrackApp::InitInstance()
 	// Load sound APIs
 	// requires TrackerSettings
 	SoundDevice::SysInfo sysInfo = SoundDevice::SysInfo::Current();
-	m_pSoundDevicesManager = new SoundDevice::Manager(sysInfo, SoundDevice::AppInfo().SetName(MPT_USTRING("OpenMPT")).SetHWND(*m_pMainWnd));
+	SoundDevice::AppInfo appInfo;
+	appInfo.SetName(MPT_USTRING("OpenMPT"));
+	appInfo.SetHWND(*m_pMainWnd);
+	appInfo.BoostedThreadPriorityXP = TrackerSettings::Instance().SoundBoostedThreadPriority;
+	appInfo.BoostedThreadMMCSSClassVista = TrackerSettings::Instance().SoundBoostedThreadMMCSSClass;
+	appInfo.ASIODriverThreadPriorityOverride = TrackerSettings::Instance().SoundASIODriverThreadPriorityOverride;
+	m_pSoundDevicesManager = new SoundDevice::Manager(sysInfo, appInfo);
 	m_pTrackerSettings->MigrateOldSoundDeviceSettings(*m_pSoundDevicesManager);
 
 	// Load static tunings
