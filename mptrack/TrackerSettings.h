@@ -325,6 +325,78 @@ template<> inline SoundDeviceStopMode FromSettingValue(const SettingValue &val)
 	return static_cast<SoundDeviceStopMode>(static_cast<int32>(val));
 }
 
+
+enum ProcessPriorityClass
+{
+	ProcessPriorityClassIDLE     = IDLE_PRIORITY_CLASS,
+	ProcessPriorityClassBELOW    = BELOW_NORMAL_PRIORITY_CLASS,
+	ProcessPriorityClassNORMAL   = NORMAL_PRIORITY_CLASS,
+	ProcessPriorityClassABOVE    = ABOVE_NORMAL_PRIORITY_CLASS,
+	ProcessPriorityClassHIGH     = HIGH_PRIORITY_CLASS,
+	ProcessPriorityClassREALTIME = REALTIME_PRIORITY_CLASS
+};
+template<> inline SettingValue ToSettingValue(const ProcessPriorityClass &val)
+{
+	mpt::ustring s;
+	switch(val)
+	{
+	case ProcessPriorityClassIDLE:
+		s = MPT_USTRING("idle");
+		break;
+	case ProcessPriorityClassBELOW:
+		s = MPT_USTRING("below");
+		break;
+	case ProcessPriorityClassNORMAL:
+		s = MPT_USTRING("normal");
+		break;
+	case ProcessPriorityClassABOVE:
+		s = MPT_USTRING("above");
+		break;
+	case ProcessPriorityClassHIGH:
+		s = MPT_USTRING("high");
+		break;
+	case ProcessPriorityClassREALTIME:
+		s = MPT_USTRING("realtime");
+		break;
+	default:
+		s = MPT_USTRING("normal");
+		break;
+	}
+	return SettingValue(s);
+}
+template<> inline ProcessPriorityClass FromSettingValue(const SettingValue &val)
+{
+	ProcessPriorityClass result = ProcessPriorityClassNORMAL;
+	mpt::ustring s = val.as<mpt::ustring>();
+	if(s.empty())
+	{
+		result = ProcessPriorityClassNORMAL;
+	} else if(s == MPT_USTRING("idle"))
+	{
+		result = ProcessPriorityClassIDLE;
+	} else if(s == MPT_USTRING("below"))
+	{
+		result = ProcessPriorityClassBELOW;
+	} else if(s == MPT_USTRING("normal"))
+	{
+		result = ProcessPriorityClassNORMAL;
+	} else if(s == MPT_USTRING("above"))
+	{
+		result = ProcessPriorityClassABOVE;
+	} else if(s == MPT_USTRING("high"))
+	{
+		result = ProcessPriorityClassHIGH;
+	} else if(s == MPT_USTRING("realtime"))
+	{
+		result = ProcessPriorityClassREALTIME;
+	} else
+	{
+		result = ProcessPriorityClassNORMAL;
+	}
+	return result;
+}
+
+
 template<> inline SettingValue ToSettingValue(const mpt::Date::Unix &val)
 {
 	time_t t = val;
@@ -534,6 +606,7 @@ public:
 	Setting<uint32> MiscITCompressionMono;   // Mask: bit0: IT, bit1: Compat IT, bit2: MPTM
 	CachedSetting<bool> MiscAllowMultipleCommandsPerKey;
 	CachedSetting<bool> MiscDistinguishModifiers;
+	Setting<ProcessPriorityClass> MiscProcessPriorityClass;
 
 	// Sound Settings
 
@@ -574,6 +647,11 @@ public:
 	Setting<int32> ResamplerCutoffPercent;
 	CResamplerSettings GetResamplerSettings() const;
 	void SetResamplerSettings(const CResamplerSettings &settings);
+
+	Setting<int> SoundBoostedThreadPriority;
+	Setting<mpt::ustring> SoundBoostedThreadMMCSSClass;
+
+	Setting<bool> SoundASIODriverThreadPriorityOverride;
 
 	// MIDI Settings
 
