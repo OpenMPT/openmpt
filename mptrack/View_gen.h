@@ -86,6 +86,8 @@ private:
 	void FillPluginProgramBox(int32 firstProg, int32 lastProg);
 	void SetPluginModified();
 
+	void UpdateDryWetDisplay();
+
 protected:
 	//{{AFX_MSG(CViewGlobals)
 	afx_msg void OnMute1();
@@ -123,7 +125,6 @@ protected:
 	afx_msg void OnSaveParam();
 	afx_msg void OnSelectPlugin();
 	afx_msg void OnSetParameter();
-	afx_msg void OnSetWetDry();
 	afx_msg void OnEditPlugin();
 	afx_msg void OnMixModeChanged();
 	afx_msg void OnBypassChanged();
