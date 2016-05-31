@@ -79,6 +79,9 @@ int _tmain(int argc, TCHAR *argv[])
 
 	::SetUnhandledExceptionFilter(CrashHandler);
 
+	// We don't need COM, but some plugins do and don't initialize it themselves.
+	CoInitializeEx(NULL, COINIT_MULTITHREADED);
+
 	OPENMPT_NAMESPACE::PluginBridge::InitializeStaticVariables();
 	uint32 parentProcessId = _ttoi(argv[1]);
 	new OPENMPT_NAMESPACE::PluginBridge(argv[0], OpenProcess(SYNCHRONIZE, FALSE, parentProcessId));
@@ -406,10 +409,10 @@ void PluginBridge::InitBridge(InitMsg *msg)
 #endif
 
 	nativeEffect = nullptr;
-	try
+	__try
 	{
 		library = LoadLibraryW(msg->str);
-	} catch(...)
+	} __except(EXCEPTION_EXECUTE_HANDLER)
 	{
 		library = nullptr;
 	}
@@ -434,10 +437,10 @@ void PluginBridge::InitBridge(InitMsg *msg)
 
 	if(pMainProc != nullptr)
 	{
-		try
+		__try
 		{
 			nativeEffect = pMainProc(MasterCallback);
-		} catch(...)
+		} __except(EXCEPTION_EXECUTE_HANDLER)
 		{
 			nativeEffect = nullptr;
 		}
@@ -469,6 +472,23 @@ void PluginBridge::SendErrorMessage(const wchar_t *str)
 	BridgeMessage msg;
 	msg.Error(str);
 	SendToHost(msg);
+}
+
+
+// Wrapper for VST dispatch call with structured exception handling.
+static VstIntPtr DispatchSEH(AEffect *effect, VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt, bool &exception)
+{
+	__try
+	{
+		if(effect->dispatcher != nullptr)
+		{
+			return effect->dispatcher(effect, opCode, index, value, ptr, opt);
+		}
+	} __except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		exception = true;
+	}
+	return 0;
 }
 
 
@@ -670,10 +690,9 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 
 	//std::cout << "about to dispatch " << msg->opcode << " to effect...";
 	//std::flush(std::cout);
-	try
-	{
-		msg->result = static_cast<int32>(nativeEffect->dispatcher(nativeEffect, msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt));
-	} catch(...)
+	bool exception = false;
+	msg->result = DispatchSEH(nativeEffect, msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt, exception);
+	if(exception)
 	{
 		msg->type = MsgHeader::exceptionMsg;
 		return;
@@ -750,10 +769,10 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 
 VstIntPtr PluginBridge::Dispatch(VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
 {
-	try
+	__try
 	{
 		return nativeEffect->dispatcher(nativeEffect, opcode, index, value, ptr, opt);
-	} catch(...)
+	} __except(EXCEPTION_EXECUTE_HANDLER)
 	{
 		SendErrorMessage(L"Exception in dispatch()!");
 	}
@@ -764,10 +783,10 @@ VstIntPtr PluginBridge::Dispatch(VstInt32 opcode, VstInt32 index, VstIntPtr valu
 // Set a plugin parameter.
 void PluginBridge::SetParameter(ParameterMsg *msg)
 {
-	try
+	__try
 	{
 		nativeEffect->setParameter(nativeEffect, msg->index, msg->value);
-	} catch(...)
+	} __except(EXCEPTION_EXECUTE_HANDLER)
 	{
 		msg->type = MsgHeader::exceptionMsg;
 	}
@@ -777,10 +796,10 @@ void PluginBridge::SetParameter(ParameterMsg *msg)
 // Get a plugin parameter.
 void PluginBridge::GetParameter(ParameterMsg *msg)
 {
-	try
+	__try
 	{
 		msg->value = nativeEffect->getParameter(nativeEffect, msg->index);
-	} catch(...)
+	} __except(EXCEPTION_EXECUTE_HANDLER)
 	{
 		msg->type = MsgHeader::exceptionMsg;
 	}
@@ -790,7 +809,7 @@ void PluginBridge::GetParameter(ParameterMsg *msg)
 // Execute received parameter automation messages
 void PluginBridge::AutomateParameters()
 {
-	try
+	__try
 	{
 		uint32 numEvents = InterlockedExchange(&sharedMem->automationQueue.pendingEvents, 0);
 		const AutomationQueue::Parameter *param = sharedMem->automationQueue.params;
@@ -798,7 +817,7 @@ void PluginBridge::AutomateParameters()
 		{
 			nativeEffect->setParameter(nativeEffect, param->index, param->value);
 		}
-	} catch(...)
+	} __except(EXCEPTION_EXECUTE_HANDLER)
 	{
 		SendErrorMessage(L"Exception in setParameter()!");
 	}
@@ -858,10 +877,10 @@ void PluginBridge::Process()
 	{
 		float **inPointers, **outPointers;
 		int32 sampleFrames = BuildProcessPointers(inPointers, outPointers);
-		try
+		__try
 		{
 			nativeEffect->process(nativeEffect, inPointers, outPointers, sampleFrames);
-		} catch(...)
+		} __except(EXCEPTION_EXECUTE_HANDLER)
 		{
 			SendErrorMessage(L"Exception in process()!");
 		}
@@ -876,10 +895,10 @@ void PluginBridge::ProcessReplacing()
 	{
 		float **inPointers, **outPointers;
 		int32 sampleFrames = BuildProcessPointers(inPointers, outPointers);
-		try
+		__try
 		{
 			nativeEffect->processReplacing(nativeEffect, inPointers, outPointers, sampleFrames);
-		} catch(...)
+		} __except(EXCEPTION_EXECUTE_HANDLER)
 		{
 			SendErrorMessage(L"Exception in processReplacing()!");
 		}
@@ -894,10 +913,10 @@ void PluginBridge::ProcessDoubleReplacing()
 	{
 		double **inPointers, **outPointers;
 		int32 sampleFrames = BuildProcessPointers(inPointers, outPointers);
-		try
+		__try
 		{
 			nativeEffect->processDoubleReplacing(nativeEffect, inPointers, outPointers, sampleFrames);
-		} catch(...)
+		} __except(EXCEPTION_EXECUTE_HANDLER)
 		{
 			SendErrorMessage(L"Exception in processDoubleReplacing()!");
 		}
@@ -1158,12 +1177,6 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 		// Name in [return value]
 		vst_strncpy(host2PlugMem.name, extraData, CountOf(host2PlugMem.name) - 1);
 		return ToVstPtr<char>(host2PlugMem.name);
-
-	case audioMasterOpenFileSelector:
-	case audioMasterCloseFileSelector:
-		// VstFileSelect* in [ptr]
-		// TODO
-		break;
 
 	case audioMasterGetChunkFile:
 		// Name in [ptr]

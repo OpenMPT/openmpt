@@ -54,9 +54,9 @@ static bool LoadLibrarySEH(const mpt::RawPathString &pluginPath, HINSTANCE &libr
 }
 
 
-// Try loading the VST plugin and retrieve the dispatcher.
-static AEffect *GetDispatcherSEH(HINSTANCE library)
-//-------------------------------------------------
+// Try loading the VST plugin and retrieve the AEffect structure.
+static AEffect *GetAEffectSEH(HINSTANCE library)
+//----------------------------------------------
 {
 	__try
 	{
@@ -154,7 +154,7 @@ AEffect *CVstPlugin::LoadPlugin(VSTPluginLib &plugin, HINSTANCE &library, bool f
 
 	if(library != nullptr && library != INVALID_HANDLE_VALUE)
 	{
-		effect = GetDispatcherSEH(library);
+		effect = GetAEffectSEH(library);
 	}
 
 	return effect;
