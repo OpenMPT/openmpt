@@ -171,7 +171,7 @@ CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle
 			hTask = m_AvRt->AvSetMmThreadCharacteristicsW(L"Pro Audio", &task_idx);
 		} else
 		{
-			SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
+			SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 		}
 	}
 }
