@@ -3105,7 +3105,7 @@ bool CSoundFile::ProcessEffects()
 			nPosJump = static_cast<ORDERINDEX>(CalculateXParam(m_PlayState.m_nPattern, m_PlayState.m_nRow, nChn));
 			if(m_SongFlags[SONG_PATTERNLOOP] && m_PlayState.m_nSeqOverride == ORDERINDEX_INVALID)
 			{
-				m_PlayState.m_nSeqOverride = static_cast<ORDERINDEX>(param);
+				m_PlayState.m_nSeqOverride = nPosJump;
 				//Releasing pattern loop after position jump could cause
 				//instant jumps - modifying behavior so that now position jumps
 				//occurs also when pattern loop is enabled.
