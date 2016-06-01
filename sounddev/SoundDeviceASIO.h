@@ -125,9 +125,12 @@ public:
 	void InternalFillAudioBuffer();
 	bool InternalStart();
 	void InternalStop();
-	void InternalStopForce();
 	bool InternalIsOpen() const { return m_BuffersCreated; }
 
+	bool InternalIsPlayingSilence() const;
+	void InternalStopAndAvoidPlayingSilence();
+	void InternalEndPlayingSilence();
+	
 	bool OnIdle() { return HandleRequests(); }
 
 	SoundDevice::Caps InternalGetDeviceCaps();

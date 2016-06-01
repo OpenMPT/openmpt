@@ -869,8 +869,39 @@ bool CASIODevice::InternalStart()
 }
 
 
-void CASIODevice::InternalStopForce()
-//-----------------------------------
+bool CASIODevice::InternalIsPlayingSilence() const
+//------------------------------------------------
+{
+	MPT_TRACE();
+	return m_Settings.KeepDeviceRunning && m_DeviceRunning && m_RenderSilence.load();
+}
+
+
+void CASIODevice::InternalEndPlayingSilence()
+//-------------------------------------------
+{
+	MPT_TRACE();
+	if(!InternalIsPlayingSilence())
+	{
+		return;
+	}
+	m_DeviceRunning = false;
+	try
+	{
+		asioCall(stop());
+	} catch(...)
+	{
+		// continue
+	}
+	m_TotalFramesWritten = 0;
+	SetRenderSilence(false);
+	m_ThreadPrioritySet = false;
+	m_OldThreadPriority = THREAD_PRIORITY_NORMAL;
+}
+
+
+void CASIODevice::InternalStopAndAvoidPlayingSilence()
+//----------------------------------------------------
 {
 	MPT_TRACE();
 	InternalStopImpl(true);

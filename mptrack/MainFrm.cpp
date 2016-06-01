@@ -1297,7 +1297,7 @@ bool CMainFrame::RestartPlayback()
 	if(!m_pSndFile) return false; // nothing to play
 	if(!IsAudioDeviceOpen()) return false;
 	if(!gpSoundDevice->IsPlaying()) return false;
-	gpSoundDevice->Stop(true);
+	gpSoundDevice->StopAndAvoidPlayingSilence();
 	if(m_NotifyTimer)
 	{
 		KillTimer(m_NotifyTimer);
