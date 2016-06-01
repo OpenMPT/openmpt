@@ -644,6 +644,7 @@ VstIntPtr CVstPlugin::VstFileSelector(bool destructor, VstFileSelect *fileSel)
 
 	if(!destructor)
 	{
+		fileSel->returnMultiplePaths = nullptr;
 		fileSel->nbReturnPath = 0;
 		fileSel->reserved = 0;
 
@@ -721,7 +722,6 @@ VstIntPtr CVstPlugin::VstFileSelector(bool destructor, VstFileSelect *fileSel)
 
 				if(fileSel->returnPath == nullptr || fileSel->sizeReturnPath == 0)
 				{
-
 					// Provide some memory for the return path.
 					fileSel->sizeReturnPath = dlg.GetFirstFile().ToLocale().length() + 1;
 					fileSel->returnPath = new (std::nothrow) char[fileSel->sizeReturnPath];
@@ -911,12 +911,6 @@ void CVstPlugin::Initialize()
 
 	Dispatch(effSetProcessPrecision, 0, kVstProcessPrecision32, nullptr, 0.0f);
 
-#ifdef VST_LOG
-	Log("%s: vst ver %d.0, flags=%04X, %d programs, %d parameters\n",
-		m_Factory.libraryName, (m_bIsVst2) ? 2 : 1, m_Effect.flags,
-		m_Effect.numPrograms, m_Effect.numParams);
-#endif
-
 	m_bIsInstrument = IsInstrument();
 	RecalculateGain();
 	m_pProcessFP = (m_Effect.flags & effFlagsCanReplacing) ? m_Effect.processReplacing : m_Effect.process;
@@ -1055,7 +1049,14 @@ VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 {
 	unsigned long exception = 0;
 #ifdef VST_LOG
-	Log(mpt::String::Print(L"About to Dispatch(%1) (Plugin=\"%2\"), index: %3, value: %4, ptr: %5, opt: %6!\n", opCode, m_Factory.libraryName, index, mpt::wfmt::HEX0<sizeof(VstIntPtr) * 2>(value), mpt::wfmt::Ptr(ptr), mpt::wfmt::flt(opt, 0, 3)));
+	{
+		std::wstring codeStr;
+		if(opCode < CountOf(VstOpCodes))
+			codeStr = mpt::ToWide(mpt::CharsetASCII, VstOpCodes[opCode]);
+		else
+			codeStr = mpt::ToWString(opCode);
+		Log(mpt::String::Print(L"About to Dispatch(%1) (Plugin=\"%2\"), index: %3, value: %4, ptr: %5, opt: %6!\n", codeStr, m_Factory.libraryName, index, mpt::wfmt::HEX0<sizeof(VstIntPtr) * 2>(value), mpt::wfmt::Ptr(ptr), mpt::wfmt::flt(opt, 0, 3)));
+	}
 #endif
 	VstIntPtr result = DispatchSEH(&m_Effect, opCode, index, value, ptr, opt, exception);
 

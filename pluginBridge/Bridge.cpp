@@ -1199,6 +1199,7 @@ VstIntPtr PluginBridge::VstFileSelector(bool destructor, VstFileSelect *fileSel)
 
 	if(!destructor)
 	{
+		fileSel->returnMultiplePaths = nullptr;
 		fileSel->nbReturnPath = 0;
 		fileSel->reserved = 0;
 
