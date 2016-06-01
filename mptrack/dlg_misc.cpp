@@ -1416,7 +1416,7 @@ BOOL CInputDlg::OnInitDialog()
 
 	// Find out how big our label shall be
 	HDC dc = ::GetDC(m_hWnd);
-	CRect textRect;
+	CRect textRect(0,0,0,0);
 	DrawText(dc, m_description, m_description.GetLength(), textRect, DT_CALCRECT);
 	LPtoDP(dc, &textRect.BottomRight(), 1);
 	::ReleaseDC(m_hWnd, dc);
