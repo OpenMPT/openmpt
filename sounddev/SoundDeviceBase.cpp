@@ -273,28 +273,57 @@ bool Base::Start()
 }
 
 
-void Base::Stop(bool force)
-//-------------------------
+void Base::Stop()
+//---------------
 {
 	MPT_TRACE();
 	if(!IsOpen()) return;
 	if(IsPlaying())
 	{
-		if(force)
-		{
-			InternalStopForce();
-		} else
-		{
-			InternalStop();
-		}
+		InternalStop();
 		m_RequestFlags.fetch_and((~RequestFlagRestart).as_bits());
 		SourceNotifyPostStop();
 		m_IsPlaying = false;
-		{
-			m_StreamPositionOutputFrames = 0;
-		}
+		m_StreamPositionOutputFrames = 0;
 		m_StreamPositionRenderFrames = 0;
 	}
+}
+
+
+void Base::StopAndAvoidPlayingSilence()
+//-------------------------------------
+{
+	MPT_TRACE();
+	if(!IsOpen())
+	{
+		return;
+	}
+	if(!IsPlaying())
+	{
+		return;
+	}
+	InternalStopAndAvoidPlayingSilence();
+	m_RequestFlags.fetch_and((~RequestFlagRestart).as_bits());
+	SourceNotifyPostStop();
+	m_IsPlaying = false;
+	m_StreamPositionOutputFrames = 0;
+	m_StreamPositionRenderFrames = 0;
+}
+
+
+void Base::EndPlayingSilence()
+//----------------------------
+{
+	MPT_TRACE();
+	if(!IsOpen())
+	{
+		return;
+	}
+	if(IsPlaying())
+	{
+		return;
+	}
+	InternalEndPlayingSilence();
 }
 
 

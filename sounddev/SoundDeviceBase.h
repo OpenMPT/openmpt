@@ -126,8 +126,11 @@ protected:
 	virtual bool InternalOpen() = 0;
 	virtual bool InternalStart() = 0;
 	virtual void InternalStop() = 0;
-	virtual void InternalStopForce() { InternalStop(); }
 	virtual bool InternalClose() = 0;
+
+	virtual bool InternalIsPlayingSilence() const { return false; }
+	virtual void InternalStopAndAvoidPlayingSilence() { InternalStop(); }
+	virtual void InternalEndPlayingSilence() { return; }
 
 	virtual SoundDevice::Caps InternalGetDeviceCaps() = 0;
 
@@ -153,7 +156,7 @@ public:
 	bool Open(const SoundDevice::Settings &settings);
 	bool Close();
 	bool Start();
-	void Stop(bool force = false);
+	void Stop();
 
 	FlagSet<RequestFlags> GetRequestFlags() const { return FlagSet<RequestFlags>(m_RequestFlags.load()); }
 
@@ -162,6 +165,10 @@ public:
 	bool IsAvailable() const { return m_Caps.Available && !m_DeviceUnavailableOnOpen; }
 	bool IsPlaying() const { return m_IsPlaying; }
 
+	virtual bool IsPlayingSilence() const { return IsOpen() && !IsPlaying() && InternalIsPlayingSilence(); }
+	virtual void StopAndAvoidPlayingSilence();
+	virtual void EndPlayingSilence();
+	
 	virtual bool OnIdle() { return false; }
 
 	SoundDevice::Settings GetSettings() const { return m_Settings; }

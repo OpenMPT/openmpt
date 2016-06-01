@@ -491,7 +491,7 @@ public:
 	virtual bool Open(const SoundDevice::Settings &settings) = 0;
 	virtual bool Close() = 0;
 	virtual bool Start() = 0;
-	virtual void Stop(bool force = false) = 0;
+	virtual void Stop() = 0;
 
 	virtual FlagSet<RequestFlags> GetRequestFlags() const = 0;
 
@@ -499,6 +499,10 @@ public:
 	virtual bool IsOpen() const = 0;
 	virtual bool IsAvailable() const = 0;
 	virtual bool IsPlaying() const = 0;
+
+	virtual bool IsPlayingSilence() const = 0;
+	virtual void StopAndAvoidPlayingSilence() = 0;
+	virtual void EndPlayingSilence() = 0;
 
 	virtual bool OnIdle() = 0; // return true if any work has been done
 
