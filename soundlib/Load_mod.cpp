@@ -1209,6 +1209,12 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 				ModCommand &m = rowBase[chn];
 				ReadMODPatternEntry(file, m);
 
+				if(m.note != NOTE_NONE && (m.note < NOTE_MIDDLEC - 12 || m.note >= NOTE_MIDDLEC + 24))
+				{
+					// Out of Amiga range...
+					return false;
+				}
+
 				if(!m.param || m.command == 0x0E)
 				{
 					autoSlide[chn] = 0;
