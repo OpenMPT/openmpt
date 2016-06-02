@@ -142,7 +142,9 @@ COrderList::COrderList(CCtrlPatterns &parent, CModDoc &document) : m_pParent(par
 ORDERINDEX COrderList::GetOrderFromPoint(const CRect& rect, const CPoint& pt) const
 //---------------------------------------------------------------------------------
 {
-	return static_cast<ORDERINDEX>(m_nXScroll + (pt.x - rect.left) / m_cxFont);
+	if(m_cxFont)
+		return static_cast<ORDERINDEX>(m_nXScroll + (pt.x - rect.left) / m_cxFont);
+	return 0;
 }
 
 
