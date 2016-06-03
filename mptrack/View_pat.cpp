@@ -2596,6 +2596,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 				{
 					if(m[chn].instr > 0 && m[chn].instr <= pSndFile->GetNumInstruments())
 					{
+						lastGroupSize[chn] = 12;
 						const ModInstrument *pIns = pSndFile->Instruments[m[chn].instr];
 						if(pIns != nullptr && pIns->pTuning != nullptr)
 						{
@@ -6693,20 +6694,23 @@ bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &past
 	bool result = PatternClipboard::Paste(*GetSoundFile(), pos, mode, curOrder, rect);
 	EndWaitCursor();
 
+	PatternHint updateHint = PatternHint(PATTERNINDEX_INVALID).Data();
 	if(pos.pattern != nPattern)
 	{
 		// Multipaste: Switch to pasted pattern.
 		SetCurrentPattern(pos.pattern);
 		curOrder = GetSoundFile()->Order.FindOrder(pos.pattern, curOrder);
 		SetCurrentOrder(curOrder);
+
+		updateHint.Names();
+		GetDocument()->UpdateAllViews(NULL, SequenceHint(GetSoundFile()->Order.GetCurrentSequenceIndex()).Data(), nullptr);
 	}
 
 	if(result)
 	{
 		SetCurSel(rect);
 		GetDocument()->SetModified();
-		GetDocument()->UpdateAllViews(NULL, PatternHint().Data(), nullptr);
-		GetDocument()->UpdateAllViews(NULL, SequenceHint(GetSoundFile()->Order.GetCurrentSequenceIndex()).Data(), nullptr);
+		GetDocument()->UpdateAllViews(NULL, updateHint, nullptr);
 	}
 
 	return result;
