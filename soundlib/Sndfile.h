@@ -875,8 +875,6 @@ public:
 
 	ModInstrument *AllocateInstrument(INSTRUMENTINDEX instr, SAMPLEINDEX assignedSample = 0);
 	bool DestroyInstrument(INSTRUMENTINDEX nInstr, deleteInstrumentSamples removeSamples);
-	bool IsSampleUsed(SAMPLEINDEX nSample) const;
-	bool IsInstrumentUsed(INSTRUMENTINDEX nInstr) const;
 	bool RemoveInstrumentSamples(INSTRUMENTINDEX nInstr, SAMPLEINDEX keepSample = SAMPLEINDEX_INVALID);
 	SAMPLEINDEX DetectUnusedSamples(std::vector<bool> &sampleUsed) const;
 	SAMPLEINDEX RemoveSelectedSamples(const std::vector<bool> &keepSamples);

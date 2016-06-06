@@ -559,7 +559,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 	// This doesn't check yet if a sample is referenced by an instrument, but actually unused in the patterns.
 	for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++) if (sndFile.GetSample(smp).pSample)
 	{
-		if(!sndFile.IsSampleUsed(smp))
+		if(!modDoc.IsSampleUsed(smp))
 		{
 			samplesUsed[smp] = false;
 		}
@@ -763,7 +763,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 	INSTRUMENTINDEX numUsed = 0, lastUsed = 1;
 	for(INSTRUMENTINDEX i = 0; i < sndFile.GetNumInstruments(); i++)
 	{
-		instrUsed[i] = (sndFile.IsInstrumentUsed(i + 1));
+		instrUsed[i] = (modDoc.IsInstrumentUsed(i + 1));
 		if(instrUsed[i])
 		{
 			numUsed++;

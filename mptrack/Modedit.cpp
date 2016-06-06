@@ -1283,6 +1283,64 @@ bool CModDoc::IsChannelUnused(CHANNELINDEX nChn) const
 }
 
 
+bool CModDoc::IsSampleUsed(SAMPLEINDEX sample, bool searchInMutedChannels) const
+//------------------------------------------------------------------------------
+{
+	if(!sample || sample > GetNumSamples()) return false;
+	if(GetNumInstruments())
+	{
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
+		{
+			if(m_SndFile.IsSampleReferencedByInstrument(sample, i))
+			{
+				return true;
+			}
+		}
+	} else
+	{
+		for(PATTERNINDEX i = 0; i < m_SndFile.Patterns.Size(); i++) if (m_SndFile.Patterns.IsValidPat(i))
+		{
+			const CPattern &pattern = m_SndFile.Patterns[i];
+			const ModCommand *m = pattern.Begin();
+			for(ROWINDEX row = 0; row < pattern.GetNumRows(); row++)
+			{
+				for(CHANNELINDEX chn = 0; chn < pattern.GetNumChannels(); chn++, m++)
+				{
+					if(searchInMutedChannels || !m_SndFile.ChnSettings[chn].dwFlags[CHN_MUTE])
+					{
+						if(m->instr == sample && !m->IsPcNote()) return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+
+bool CModDoc::IsInstrumentUsed(INSTRUMENTINDEX instr, bool searchInMutedChannels) const
+//-------------------------------------------------------------------------------------
+{
+	if(instr < 1 || instr > GetNumInstruments()) return false;
+	for(PATTERNINDEX i = 0; i < m_SndFile.Patterns.Size(); i++) if (m_SndFile.Patterns.IsValidPat(i))
+	{
+		const CPattern &pattern = m_SndFile.Patterns[i];
+		const ModCommand *m = pattern.Begin();
+		for(ROWINDEX row = 0; row < pattern.GetNumRows(); row++)
+		{
+			for(CHANNELINDEX chn = 0; chn < pattern.GetNumChannels(); chn++, m++)
+			{
+				if(searchInMutedChannels || !m_SndFile.ChnSettings[chn].dwFlags[CHN_MUTE])
+				{
+					if(m->instr == instr && !m->IsPcNote()) return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+
 // Convert module's default global volume to a pattern command.
 bool CModDoc::GlobalVolumeToPattern()
 //-----------------------------------

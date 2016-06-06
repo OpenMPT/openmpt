@@ -285,6 +285,12 @@ public:
 
 	// Check if a given channel contains data.
 	bool IsChannelUnused(CHANNELINDEX nChn) const;
+	// Check whether a sample is used.
+	// In sample mode, the sample numbers in all patterns are checked.
+	// In instrument mode, it is only checked if a sample is referenced by an instrument (but not if the sample is actually played anywhere)
+	bool IsSampleUsed(SAMPLEINDEX sample, bool searchInMutedChannels = true) const;
+	// Check whether an instrument is used (only for instrument mode).
+	bool IsInstrumentUsed(INSTRUMENTINDEX instr, bool searchInMutedChannels = true) const;
 
 // protected members
 protected:
