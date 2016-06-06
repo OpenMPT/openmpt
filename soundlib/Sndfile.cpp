@@ -1155,53 +1155,6 @@ bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 }
 
 
-// Check whether a sample is used.
-// In sample mode, the sample numbers in all patterns are checked.
-// In instrument mode, it is only checked if a sample is referenced by an instrument (but not if the sample is actually played anywhere)
-bool CSoundFile::IsSampleUsed(SAMPLEINDEX nSample) const
-//------------------------------------------------------
-{
-	if ((!nSample) || (nSample > GetNumSamples())) return false;
-	if (GetNumInstruments())
-	{
-		for (INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
-		{
-			if(IsSampleReferencedByInstrument(nSample, i))
-			{
-				return true;
-			}
-		}
-	} else
-	{
-		for (PATTERNINDEX i = 0; i < Patterns.Size(); i++) if (Patterns.IsValidPat(i))
-		{
-			CPattern::const_iterator mEnd = Patterns[i].End();
-			for(CPattern::const_iterator m = Patterns[i].Begin(); m != mEnd; m++)
-			{
-				if (m->instr == nSample && !m->IsPcNote()) return true;
-			}
-		}
-	}
-	return false;
-}
-
-
-bool CSoundFile::IsInstrumentUsed(INSTRUMENTINDEX nInstr) const
-//-------------------------------------------------------------
-{
-	if (nInstr < 1 || nInstr > GetNumInstruments()) return false;
-	for (PATTERNINDEX i = 0; i < Patterns.Size(); i++) if (Patterns.IsValidPat(i))
-	{
-		CPattern::const_iterator mEnd = Patterns[i].End();
-		for(CPattern::const_iterator m = Patterns[i].Begin(); m != mEnd; m++)
-		{
-			if (m->instr == nInstr && !m->IsPcNote()) return true;
-		}
-	}
-	return false;
-}
-
-
 // Detect samples that are referenced by an instrument, but actually not used in a song.
 // Only works in instrument mode. Unused samples are marked as false in the vector.
 SAMPLEINDEX CSoundFile::DetectUnusedSamples(std::vector<bool> &sampleUsed) const

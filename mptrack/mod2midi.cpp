@@ -385,7 +385,7 @@ namespace MidiExport
 			for(INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
 			{
 				m_sndFile.Instruments[i] = nullptr;
-				if(!m_sndFile.IsInstrumentUsed(i) || (m_wasInstrumentMode && m_oldInstruments[i - 1] == nullptr) || nextPlug >= MAX_MIXPLUGINS)
+				if(!m_sndFile.GetpModDoc()->IsInstrumentUsed(i) || (m_wasInstrumentMode && m_oldInstruments[i - 1] == nullptr) || nextPlug >= MAX_MIXPLUGINS)
 				{
 					continue;
 				}
@@ -552,7 +552,7 @@ BOOL CModToMidi::OnInitDialog()
 		for(INSTRUMENTINDEX nIns = 1; nIns <= m_sndFile.GetNumInstruments(); nIns++)
 		{
 			ModInstrument *pIns = m_sndFile.Instruments[nIns];
-			if ((pIns) && (m_sndFile.IsInstrumentUsed(nIns)))
+			if ((pIns) && (m_sndFile.GetpModDoc()->IsInstrumentUsed(nIns, false)))
 			{
 				const CString name = m_sndFile.GetpModDoc()->GetPatternViewInstrumentName(nIns);
 				m_CbnInstrument.SetItemData(m_CbnInstrument.AddString(name), nIns);
@@ -563,7 +563,7 @@ BOOL CModToMidi::OnInitDialog()
 		for(SAMPLEINDEX nSmp = 1; nSmp <= m_sndFile.GetNumSamples(); nSmp++)
 		{
 			if ((m_sndFile.GetSample(nSmp).pSample)
-			 && (m_sndFile.IsSampleUsed(nSmp)))
+			 && (m_sndFile.GetpModDoc()->IsSampleUsed(nSmp, false)))
 			{
 				wsprintf(s, "%02d: %s", nSmp, m_sndFile.m_szNames[nSmp]);
 				m_CbnInstrument.SetItemData(m_CbnInstrument.AddString(s), nSmp);

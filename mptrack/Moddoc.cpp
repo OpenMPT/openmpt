@@ -1841,7 +1841,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 				// Re-mute previously processed sample
 				if(i > 0) MuteSample((SAMPLEINDEX)i, true);
 
-				if(m_SndFile.GetSample((SAMPLEINDEX)(i + 1)).pSample == nullptr || !m_SndFile.IsSampleUsed((SAMPLEINDEX)(i + 1)) || instrMuteState[i])
+				if(m_SndFile.GetSample((SAMPLEINDEX)(i + 1)).pSample == nullptr || !IsSampleUsed((SAMPLEINDEX)(i + 1), false) || instrMuteState[i])
 					continue;
 
 				// Add sample number & name (if available) to path string
@@ -1862,7 +1862,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 				// Re-mute previously processed instrument
 				if(i > 0) MuteInstrument((INSTRUMENTINDEX)i, true);
 
-				if(m_SndFile.Instruments[i + 1] == nullptr || !m_SndFile.IsInstrumentUsed((INSTRUMENTINDEX)(i + 1)) || instrMuteState[i])
+				if(m_SndFile.Instruments[i + 1] == nullptr || !IsInstrumentUsed((INSTRUMENTINDEX)(i + 1), false) || instrMuteState[i])
 					continue;
 
 				if(strcmp(m_SndFile.Instruments[i + 1]->name, ""))
@@ -1927,8 +1927,10 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 							strcpy(m_SndFile.m_szNames[smp], "Render To Sample");
 							strncat(m_SndFile.m_szNames[smp], fileNameAdd, MAX_SAMPLENAME - strlen("Render To Sample") - 1);
 							UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
-							if(m_SndFile.GetNumInstruments() && !m_SndFile.IsSampleUsed(smp))
+							if(m_SndFile.GetNumInstruments() && !IsSampleUsed(smp))
 							{
+								// Insert new instrument for the generated sample in case it is not referenced by any instruments yet.
+								// It should only be already referenced if the user chose to export to an existing sample slot.
 								InsertInstrument(smp);
 								UpdateAllViews(nullptr, InstrumentHint().Info().Names());
 							}
