@@ -47,7 +47,7 @@
   }
   defines { "HAVE_CONFIG_H" }
   links { }
-  buildoptions { "/wd4244" }
+  buildoptions { "/wd4244", "/wd4334" }
   filter { "kind:SharedLib" }
    defines { "DLL_EXPORT" }
   filter {}
