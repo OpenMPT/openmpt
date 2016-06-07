@@ -102,7 +102,7 @@ public:
 #if defined(MPT_EXCEPTIONS_SEH)
 
 
-#define asioCall(asiocall) do { \
+#define asioCall(asiocall) MPT_DO { \
 	try { \
 		ASIOError e = m_pAsioDrv-> asiocall ; \
 		if(e != ASE_OK) { \
@@ -114,10 +114,10 @@ public:
 		CASIODevice::ReportASIOException( #asiocall + std::string(" crashed!")); \
 		throw ASIOException(std::string("Exception in '") + #asiocall + std::string("'!")); \
 	} \
-} while(0)
+} MPT_WHILE_0
 
 
-#define asioCallCheckedBool(asiocall) do { \
+#define asioCallCheckedBool(asiocall) MPT_DO { \
 	try { \
 		ASIOBool e = m_pAsioDrv-> asiocall ; \
 		if(e != ASIOTrue) { \
@@ -129,10 +129,10 @@ public:
 		CASIODevice::ReportASIOException( #asiocall + std::string(" crashed!")); \
 		throw ASIOException(std::string("Exception in '") + #asiocall + std::string("'!")); \
 	} \
-} while(0)
+} MPT_WHILE_0
 
 
-#define asioCallUnchecked(pasioresult, asiocall) do { \
+#define asioCallUnchecked(pasioresult, asiocall) MPT_DO { \
 	try { \
 		if(( pasioresult )) { \
 			*( pasioresult ) = ASE_InvalidParameter; \
@@ -145,7 +145,7 @@ public:
 		CASIODevice::ReportASIOException( #asiocall + std::string(" crashed!")); \
 		throw ASIOException(std::string("Exception in '") + #asiocall + std::string("'!")); \
 	} \
-} while(0)
+} MPT_WHILE_0
 
 
 #else // !MPT_EXCEPTIONS_SEH
@@ -307,7 +307,7 @@ struct SafeASIO
 }; // struct SafeASIO
 
 
-#define asioCall(asiocall) do { \
+#define asioCall(asiocall) MPT_DO { \
 	ASIOError e = ASE_InvalidParameter; \
 	try { \
 		e = SafeASIO(m_pAsioDrv). asiocall ; \
@@ -318,10 +318,10 @@ struct SafeASIO
 	if(e != ASE_OK) { \
 		throw ASIOCallError( #asiocall , e); \
 	} \
-} while(0)
+} MPT_WHILE_0
 
 
-#define asioCallCheckedBool(asiocall) do { \
+#define asioCallCheckedBool(asiocall) MPT_DO { \
 	ASIOBool e = ASIOFalse; \
 	try { \
 		e = SafeASIO(m_pAsioDrv). asiocall ; \
@@ -349,7 +349,7 @@ struct SafeASIO
 	if(( pasioresult )) { \
 		*( pasioresult ) = e; \
 	} \
-} while(0)
+} MPT_WHILE_0
 
 
 #endif // MPT_EXCEPTIONS_SEH
