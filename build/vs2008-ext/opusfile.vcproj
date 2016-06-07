@@ -43,6 +43,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4267"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
@@ -111,6 +112,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4267"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
@@ -178,7 +180,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP"
+				AdditionalOptions="/wd4267 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
@@ -247,7 +249,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP"
+				AdditionalOptions="/wd4267 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
@@ -315,6 +317,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4267"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
@@ -383,6 +386,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4267"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
@@ -450,7 +454,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP"
+				AdditionalOptions="/wd4267 /MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include"
 				WholeProgramOptimization="true"
@@ -520,7 +524,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP"
+				AdditionalOptions="/wd4267 /MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include"
 				WholeProgramOptimization="true"
@@ -589,6 +593,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4267"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
@@ -669,6 +674,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4267"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
@@ -748,7 +754,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP"
+				AdditionalOptions="/wd4267 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
@@ -831,7 +837,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP"
+				AdditionalOptions="/wd4267 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opusfile\include"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
