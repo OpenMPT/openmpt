@@ -21,11 +21,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\premake\def\ext-lhasa.def">
-      <Filter>premake\def</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\include\lhasa\lib\crc16.h">
       <Filter>include\lhasa\lib</Filter>
     </ClInclude>
@@ -133,5 +128,10 @@
     <ClCompile Include="..\..\include\lhasa\lib\pm2_decoder.c">
       <Filter>include\lhasa\lib</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\premake\def\ext-lhasa.def">
+      <Filter>premake\def</Filter>
+    </None>
   </ItemGroup>
 </Project>

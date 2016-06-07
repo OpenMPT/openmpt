@@ -15,11 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\include\ogg\win32\ogg.def">
-      <Filter>win32</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\include\ogg\include\ogg\ogg.h">
       <Filter>include\ogg</Filter>
     </ClInclude>
@@ -34,5 +29,10 @@
     <ClCompile Include="..\..\include\ogg\src\framing.c">
       <Filter>src</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\include\ogg\win32\ogg.def">
+      <Filter>win32</Filter>
+    </None>
   </ItemGroup>
 </Project>
