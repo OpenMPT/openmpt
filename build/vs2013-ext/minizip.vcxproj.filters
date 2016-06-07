@@ -21,11 +21,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\premake\def\ext-minizip.def">
-      <Filter>premake\def</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\include\zlib\contrib\minizip\crypt.h">
       <Filter>include\zlib\contrib\minizip</Filter>
     </ClInclude>
@@ -61,5 +56,10 @@
     <ClCompile Include="..\..\include\zlib\contrib\minizip\zip.c">
       <Filter>include\zlib\contrib\minizip</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\premake\def\ext-minizip.def">
+      <Filter>premake\def</Filter>
+    </None>
   </ItemGroup>
 </Project>

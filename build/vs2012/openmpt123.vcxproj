@@ -384,6 +384,7 @@
     <ClInclude Include="..\..\openmpt123\openmpt123_flac.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_mmio.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_portaudio.hpp" />
+    <ClInclude Include="..\..\openmpt123\openmpt123_pulseaudio.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_raw.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_sdl.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_sdl2.hpp" />

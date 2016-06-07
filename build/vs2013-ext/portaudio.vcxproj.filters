@@ -42,11 +42,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\include\portaudio\build\msvc\portaudio.def">
-      <Filter>build\msvc</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\include\portaudio\include\pa_asio.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -202,5 +197,10 @@
     <ClCompile Include="..\..\include\portaudio\src\os\win\pa_x86_plain_converters.c">
       <Filter>src\os\win</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\include\portaudio\build\msvc\portaudio.def">
+      <Filter>build\msvc</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -716,6 +716,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\openmpt123\openmpt123_pulseaudio.hpp"
+			>
+		</File>
+		<File
 			RelativePath="..\..\openmpt123\openmpt123_raw.hpp"
 			>
 		</File>

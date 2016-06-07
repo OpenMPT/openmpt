@@ -21,11 +21,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\premake\def\ext-opusfile.def">
-      <Filter>premake\def</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\include\opusfile\include\opusfile.h">
       <Filter>include\opusfile\include</Filter>
     </ClInclude>
@@ -55,5 +50,10 @@
     <ClCompile Include="..\..\include\opusfile\src\wincerts.c">
       <Filter>include\opusfile\src</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\premake\def\ext-opusfile.def">
+      <Filter>premake\def</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -42,62 +42,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\mptrack\res\COLORS.BMP">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\DRAGGING.CUR">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\MPTRACK.ICO">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\MPTRACK.RC2">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\NODROP.CUR">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\OpenMPT.manifest">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\defaultKeybindings.mkb">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\envelope_toolbar.png">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\icons.png">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\main_toolbar.png">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\moddoc.ico">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\mptrack.png">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\nodrag.cur">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\pattern_toolbar.png">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\sample_toolbar.png">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\splashno.png">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\view_pat.bmp">
-      <Filter>mptrack\res</Filter>
-    </None>
-    <None Include="..\..\mptrack\res\vumeters.bmp">
-      <Filter>mptrack\res</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\common\BuildSettings.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -1372,6 +1316,62 @@
     <ClCompile Include="..\..\unarchiver\unzip.cpp">
       <Filter>unarchiver</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\mptrack\res\COLORS.BMP">
+      <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\..\mptrack\res\DRAGGING.CUR">
+      <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\..\mptrack\res\MPTRACK.ICO">
+      <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\..\mptrack\res\MPTRACK.RC2">
+      <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\..\mptrack\res\NODROP.CUR">
+      <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\..\mptrack\res\OpenMPT.manifest">
+      <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\..\mptrack\res\defaultKeybindings.mkb">
+      <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\..\mptrack\res\envelope_toolbar.png">
+      <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\..\mptrack\res\icons.png">
+      <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\..\mptrack\res\main_toolbar.png">
+      <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\..\mptrack\res\moddoc.ico">
+      <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\..\mptrack\res\mptrack.png">
+      <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\..\mptrack\res\nodrag.cur">
+      <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\..\mptrack\res\pattern_toolbar.png">
+      <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\..\mptrack\res\sample_toolbar.png">
+      <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\..\mptrack\res\splashno.png">
+      <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\..\mptrack\res\view_pat.bmp">
+      <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\..\mptrack\res\vumeters.bmp">
+      <Filter>mptrack\res</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\mptrack\mptrack.rc">
