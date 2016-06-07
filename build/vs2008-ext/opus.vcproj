@@ -43,7 +43,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4244"
+				AdditionalOptions="/wd4244 /wd4334"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H"
@@ -112,7 +112,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4244"
+				AdditionalOptions="/wd4244 /wd4334"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H"
@@ -180,7 +180,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4244 /MP"
+				AdditionalOptions="/wd4244 /wd4334 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H"
@@ -249,7 +249,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4244 /MP"
+				AdditionalOptions="/wd4244 /wd4334 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H"
@@ -317,7 +317,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4244"
+				AdditionalOptions="/wd4244 /wd4334"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H"
@@ -386,7 +386,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4244"
+				AdditionalOptions="/wd4244 /wd4334"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H"
@@ -454,7 +454,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4244 /MP"
+				AdditionalOptions="/wd4244 /wd4334 /MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 				WholeProgramOptimization="true"
@@ -524,7 +524,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4244 /MP"
+				AdditionalOptions="/wd4244 /wd4334 /MP"
 				Optimization="3"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 				WholeProgramOptimization="true"
@@ -593,7 +593,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4244"
+				AdditionalOptions="/wd4244 /wd4334"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;DLL_EXPORT"
@@ -673,7 +673,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4244"
+				AdditionalOptions="/wd4244 /wd4334"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 				PreprocessorDefinitions="DEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;DLL_EXPORT"
@@ -752,7 +752,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4244 /MP"
+				AdditionalOptions="/wd4244 /wd4334 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;DLL_EXPORT"
@@ -834,7 +834,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/wd4244 /MP"
+				AdditionalOptions="/wd4244 /wd4334 /MP"
 				Optimization="2"
 				AdditionalIncludeDirectories="..\..\include\msinttypes\stdint;..\..\include\ogg\include;..\..\include\opus\include;..\..\include\opus\celt;..\..\include\opus\silk;..\..\include\opus\silk\float;..\..\include\opus\src;..\..\include\opus\win32;..\..\include\opus"
 				PreprocessorDefinitions="NDEBUG;MPT_BUILD_MSVC_SHARED;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;HAVE_CONFIG_H;DLL_EXPORT"
