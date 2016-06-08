@@ -227,10 +227,15 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			{
 				switch(m->command)
 				{
+					// No effect memory in XM / MOD
 				case CMD_ARPEGGIO:
 				case CMD_S3MCMDEX:
 				case CMD_MODCMDEX:
-					// No effect memory in XM / MOD
+
+					// These  have effect memory in XM, but it is spread over several commands (for fine and extra-fine slides), so the easiest way to fix this is to just always use the previous value.
+				case CMD_PORTAMENTOUP:
+				case CMD_PORTAMENTODOWN:
+				case CMD_VOLUMESLIDE:
 					if(m->param == 0)
 						m->param = effMemory[chn][m->command];
 					else
