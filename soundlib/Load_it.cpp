@@ -1486,7 +1486,8 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		for(ROWINDEX row = 0; row < writeRows; row++)
 		{
 			uint32 len = 0;
-			uint8 buf[8 * MAX_BASECHANNELS];
+			// Maximum 7 bytes per cell, plus end of row marker, so this buffer is always large enough to cover one row.
+			uint8 buf[7 * MAX_BASECHANNELS + 1];
 			const ModCommand *m = Patterns[pat].GetRow(row);
 
 			for(CHANNELINDEX ch = 0; ch < maxChannels; ch++, m++)
@@ -2045,7 +2046,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		WRITEMODULAR(MAGIC4BE('C','.','.','.'), m_nChannels);
 	}
 
-	if(TypeIsIT_MPT() && GetNumChannels() > 64)
+	if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetNumChannels() > 64)
 	{
 		// IT header has only room for 64 channels. Save the settings that do not fit to the header here as an extension.
 		WRITEMODULARHEADER(MAGIC4BE('C','h','n','S'), (GetNumChannels() - 64) * 2);
@@ -2258,20 +2259,20 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 				if(size <= (MAX_BASECHANNELS - 64) * 2 && (size % 2u) == 0)
 				{
 					STATIC_ASSERT(CountOf(ChnSettings) >= 64);
-					const CHANNELINDEX loopLimit = std::min(uint16(size / 2), uint16(CountOf(ChnSettings) - 64));
+					const CHANNELINDEX loopLimit = std::min(uint16(64 + size / 2), uint16(CountOf(ChnSettings)));
 
-					for(CHANNELINDEX i = 0; i < loopLimit; i++)
+					for(CHANNELINDEX chn = 64; chn < loopLimit; chn++)
 					{
 						uint8 pan = chunk.ReadUint8(), vol = chunk.ReadUint8();
 						if(pan != 0xFF)
 						{
-							ChnSettings[i + 64].nVolume = vol;
-							ChnSettings[i + 64].nPan = 128;
-							ChnSettings[i + 64].dwFlags.reset();
-							if(pan & 0x80) ChnSettings[i + 64].dwFlags.set(CHN_MUTE);
+							ChnSettings[chn].nVolume = vol;
+							ChnSettings[chn].nPan = 128;
+							ChnSettings[chn].dwFlags.reset();
+							if(pan & 0x80) ChnSettings[chn].dwFlags.set(CHN_MUTE);
 							pan &= 0x7F;
-							if(pan <= 64) ChnSettings[i + 64].nPan = pan << 2;
-							if(pan == 100) ChnSettings[i + 64].dwFlags.set(CHN_SURROUND);
+							if(pan <= 64) ChnSettings[chn].nPan = pan << 2;
+							if(pan == 100) ChnSettings[chn].dwFlags.set(CHN_SURROUND);
 						}
 					}
 				}

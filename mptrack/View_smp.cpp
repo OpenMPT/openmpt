@@ -1572,8 +1572,8 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 				const SmpLength xHigh = x / 0x10000;
 
 				const char cOffsetChar = sndFile.GetModSpecifications().GetEffectLetter(CMD_OFFSET);
-				const bool bHasHighOffset = (sndFile.TypeIsS3M_IT_MPT() || (sndFile.GetType() == MOD_TYPE_XM));
-				const char cHighOffsetChar = sndFile.GetModSpecifications().GetEffectLetter(static_cast<ModCommand::COMMAND>(sndFile.TypeIsS3M_IT_MPT() ? CMD_S3MCMDEX : CMD_XFINEPORTAUPDOWN));
+				const bool bHasHighOffset = (sndFile.GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM));
+				const char cHighOffsetChar = sndFile.GetModSpecifications().GetEffectLetter(static_cast<ModCommand::COMMAND>(sndFile.GetModSpecifications().HasCommand(CMD_S3MCMDEX) ? CMD_S3MCMDEX : CMD_XFINEPORTAUPDOWN));
 
 				if(xHigh == 0)
 					wsprintf(s, "Offset: %c%02X", cOffsetChar, xLow);
