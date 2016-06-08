@@ -87,7 +87,7 @@ const CModSpecifications mod =
 	128,										// Pattern max.
 	128,										// Order max.
 	1,											// Only one order list
-	4,											// Channel min
+	1,											// Channel min
 	99,											// Channel max
 	TEMPO(32, 0),								// Min tempo
 	TEMPO(255, 0),								// Max tempo
