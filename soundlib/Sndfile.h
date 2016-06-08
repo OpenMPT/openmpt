@@ -555,9 +555,6 @@ public:
 
 	bool Destroy();
 	Enum<MODTYPE> GetType() const { return m_nType; }
-	bool TypeIsIT_MPT() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)); }
-	bool TypeIsIT_MPT_XM() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)); }
-	bool TypeIsS3M_IT_MPT() const { return (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)); }
 
 	MODCONTAINERTYPE GetContainerType() const { return m_ContainerType; }
 
