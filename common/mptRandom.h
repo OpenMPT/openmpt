@@ -66,7 +66,13 @@ inline T random(Trng & rng)
 	unsigned_T result = 0;
 	for(std::size_t entropy = 0; entropy < (sizeof(T) * 8); entropy += rng_bits)
 	{
-		result = (result << rng_bits) ^ static_cast<unsigned_T>(rng());
+		MPT_CONSTANT_IF(rng_bits < (sizeof(T) * 8))
+		{
+			result = (result << rng_bits) ^ static_cast<unsigned_T>(rng());
+		} else
+		{
+			result = static_cast<unsigned_T>(rng());
+		}
 	}
 	return static_cast<T>(result);
 }
@@ -80,7 +86,7 @@ inline T random(Trng & rng)
 	unsigned_T result = 0;
 	for(std::size_t entropy = 0; entropy < std::min<std::size_t>(required_entropy_bits, sizeof(T) * 8); entropy += rng_bits)
 	{
-		if(rng_bits < sizeof(T) * 8)
+		if(rng_bits < (sizeof(T) * 8))
 		{
 			result = (result << rng_bits) ^ static_cast<unsigned_T>(rng());
 		} else
@@ -106,7 +112,7 @@ inline T random(Trng & rng, std::size_t required_entropy_bits)
 	unsigned_T result = 0;
 	for(std::size_t entropy = 0; entropy < std::min<std::size_t>(required_entropy_bits, sizeof(T) * 8); entropy += rng_bits)
 	{
-		if(rng_bits < sizeof(T) * 8)
+		if(rng_bits < (sizeof(T) * 8))
 		{
 			result = (result << rng_bits) ^ static_cast<unsigned_T>(rng());
 		} else
