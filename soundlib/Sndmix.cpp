@@ -698,7 +698,7 @@ int CSoundFile::GetVibratoDelta(int type, int position) const
 		case 2:
 			return position < 128 ? 64 : 0;
 		case 3:
-			return (rand() & 0x7F) - 0x40;
+			return mpt::random<int, 7>(AccessPRNG()) - 0x40;
 		}
 	} else
 	{
@@ -1591,7 +1591,7 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 			switch(pSmp->nVibType)
 			{
 			case VIB_RANDOM:
-				vdelta = (rand() & 0x7F) - 0x40;
+				vdelta = mpt::random<int, 7>(AccessPRNG()) - 0x40;
 				break;
 			case VIB_RAMP_DOWN:
 				vdelta = ITRampDownTable[vibpos];

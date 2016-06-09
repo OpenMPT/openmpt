@@ -323,7 +323,7 @@ public:
 
 		opus_comments.clear();
 
-		ogg_stream_init(&os, (std::rand() << 16) ^ std::rand());
+		ogg_stream_init(&os, mpt::random<uint32>(theApp.PRNG()));
 
 		inited = true;
 

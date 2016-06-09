@@ -192,7 +192,7 @@ public:
 
 		vorbis_analysis_init(&vd, &vi);
 		vorbis_block_init(&vd, &vb);
-		ogg_stream_init(&os, (std::rand() << 16) ^ std::rand());
+		ogg_stream_init(&os, mpt::random<uint32>(theApp.PRNG()));
 
 		inited = true;
 

@@ -367,6 +367,7 @@
     <ClInclude Include="..\..\common\mptLibrary.h" />
     <ClInclude Include="..\..\common\mptOS.h" />
     <ClInclude Include="..\..\common\mptPathString.h" />
+    <ClInclude Include="..\..\common\mptRandom.h" />
     <ClInclude Include="..\..\common\mptString.h" />
     <ClInclude Include="..\..\common\mptStringFormat.h" />
     <ClInclude Include="..\..\common\mptStringParse.h" />
@@ -461,6 +462,7 @@
     <ClCompile Include="..\..\common\mptLibrary.cpp" />
     <ClCompile Include="..\..\common\mptOS.cpp" />
     <ClCompile Include="..\..\common\mptPathString.cpp" />
+    <ClCompile Include="..\..\common\mptRandom.cpp" />
     <ClCompile Include="..\..\common\mptString.cpp" />
     <ClCompile Include="..\..\common\mptStringFormat.cpp" />
     <ClCompile Include="..\..\common\mptStringParse.cpp" />

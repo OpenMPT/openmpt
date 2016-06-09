@@ -40,8 +40,6 @@
 #include <crtdbg.h>
 //end  rewbs.memLeak
 
-#include <ctime>
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -1001,9 +999,16 @@ BOOL CTrackApp::InitInstance()
 		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
 	#endif
 	
-	std::srand(static_cast<unsigned int>(std::time(nullptr)));
-
 	m_GuiThreadId = GetCurrentThreadId();
+
+	// create the tracker-global random device
+	m_RD = mpt::make_shared<mpt::random_device>();
+	// make the device available to non-tracker-only code
+	mpt::set_global_random_device(m_RD.get());
+	// create and seed the traker-global PRNG with the random device
+	m_PRNG = mpt::make_shared<mpt::prng>(mpt::make_prng<mpt::prng>(RandomDevice()));
+	// additionally, seed the C rand() PRNG, just in case any third party library calls rand()
+	mpt::rng::crand::reseed(RandomDevice());
 
 	mpt::log::Trace::SetThreadId(mpt::log::Trace::ThreadKindGUI, m_GuiThreadId);
 
@@ -1280,6 +1285,10 @@ int CTrackApp::ExitInstance()
 	delete m_pSongSettingsIniFile;
 	m_pSongSettingsIniFile = nullptr;
 
+	m_PRNG = MPT_SHARED_PTR<mpt::prng>();
+	mpt::set_global_random_device(nullptr);
+	m_RD = MPT_SHARED_PTR<mpt::random_device>();
+	
 	return CWinApp::ExitInstance();
 }
 

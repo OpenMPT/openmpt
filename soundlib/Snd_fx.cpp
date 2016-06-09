@@ -1571,12 +1571,12 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 			// Volume Swing
 			if(pIns->nVolSwing)
 			{
-				pChn->nVolSwing = ((static_cast<int8>(rand()) * pIns->nVolSwing) / 64 + 1) * (m_playBehaviour[kITSwingBehaviour] ? pChn->nInsVol : ((pChn->nVolume + 1) / 2)) / 199;
+				pChn->nVolSwing = ((mpt::random<int8>(AccessPRNG()) * pIns->nVolSwing) / 64 + 1) * (m_playBehaviour[kITSwingBehaviour] ? pChn->nInsVol : ((pChn->nVolume + 1) / 2)) / 199;
 			}
 			// Pan Swing
 			if(pIns->nPanSwing)
 			{
-				pChn->nPanSwing = ((static_cast<int8>(rand()) * pIns->nPanSwing * 4) / 128);
+				pChn->nPanSwing = ((mpt::random<int8>(AccessPRNG()) * pIns->nPanSwing * 4) / 128);
 				if(!m_playBehaviour[kITSwingBehaviour])
 				{
 					pChn->nRestorePanOnNewNote = pChn->nPan + 1;
@@ -1585,14 +1585,14 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 			// Cutoff Swing
 			if(pIns->nCutSwing)
 			{
-				int32 d = ((int32)pIns->nCutSwing * (int32)((rand() & 0xFF) - 0x7F)) / 128;
+				int32 d = ((int32)pIns->nCutSwing * (int32)(static_cast<int32>(mpt::random<int8>(AccessPRNG())) + 1)) / 128;
 				pChn->nCutSwing = (int16)((d * pChn->nCutOff + 1) / 128);
 				pChn->nRestoreCutoffOnNewNote = pChn->nCutOff + 1;
 			}
 			// Resonance Swing
 			if(pIns->nResSwing)
 			{
-				int32 d = ((int32)pIns->nResSwing * (int32)((rand() & 0xFF) - 0x7F)) / 128;
+				int32 d = ((int32)pIns->nResSwing * (int32)(static_cast<int32>(mpt::random<int8>(AccessPRNG())) + 1)) / 128;
 				pChn->nResSwing = (int16)((d * pChn->nResonance + 1) / 128);
 				pChn->nRestoreResonanceOnNewNote = pChn->nResonance + 1;
 			}

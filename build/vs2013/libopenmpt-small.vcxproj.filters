@@ -78,6 +78,9 @@
     <ClInclude Include="..\..\common\mptPathString.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\mptRandom.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\mptString.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -354,6 +357,9 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptPathString.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptRandom.cpp">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptString.cpp">

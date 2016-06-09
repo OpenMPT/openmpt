@@ -12,6 +12,9 @@
 #pragma once
 
 
+#include "../common/mptRandom.h"
+
+
 OPENMPT_NAMESPACE_BEGIN
 
 
@@ -29,13 +32,11 @@ struct DitherModPlugState
 struct DitherSimpleState
 {
 	int32 error[4];
-	uint32 rng;
 	DitherSimpleState() {
 		error[0] = 0;
 		error[1] = 0;
 		error[2] = 0;
 		error[3] = 0;
-		rng = 0x12345678;
 	}
 };
 
@@ -43,6 +44,18 @@ struct DitherState
 {
 	DitherModPlugState modplug;
 	DitherSimpleState  simple;
+	mpt::fast_prng prng;
+	void Reset()
+	{
+		modplug = DitherModPlugState();
+		simple = DitherSimpleState();
+	}
+	template <typename Trd>
+	DitherState(Trd & rd)
+		: prng(mpt::make_prng<mpt::fast_prng>(rd))
+	{
+		return;
+	}
 };
 
 enum DitherMode
@@ -60,7 +73,13 @@ private:
 	DitherState state;
 	DitherMode mode;
 public:
-	Dither();
+	template <typename Trd>
+	Dither(Trd & rd)
+	//--------------
+		: state(rd)
+	{
+		mode = DitherDefault;
+	}
 	void SetMode(DitherMode mode_);
 	DitherMode GetMode() const;
 	void Reset();

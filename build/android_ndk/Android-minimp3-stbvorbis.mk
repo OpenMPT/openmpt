@@ -28,6 +28,7 @@ LOCAL_SRC_FILES := \
 	common/mptLibrary.cpp \
 	common/mptOS.cpp \
 	common/mptPathString.cpp \
+	common/mptRandom.cpp \
 	common/mptString.cpp \
 	common/mptStringFormat.cpp \
 	common/mptStringParse.cpp \
