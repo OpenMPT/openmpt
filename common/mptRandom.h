@@ -62,7 +62,7 @@ inline T random(Trng & rng)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	typedef typename mpt::make_unsigned<T>::type unsigned_T;
-	const int rng_bits = mpt::engine_traits<Trng>::entropy_bits();
+	const unsigned int rng_bits = mpt::engine_traits<Trng>::entropy_bits();
 	unsigned_T result = 0;
 	for(std::size_t entropy = 0; entropy < (sizeof(T) * 8); entropy += rng_bits)
 	{
@@ -76,7 +76,7 @@ inline T random(Trng & rng)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	typedef typename mpt::make_unsigned<T>::type unsigned_T;
-	const int rng_bits = mpt::engine_traits<Trng>::entropy_bits();
+	const unsigned int rng_bits = mpt::engine_traits<Trng>::entropy_bits();
 	unsigned_T result = 0;
 	for(std::size_t entropy = 0; entropy < std::min<std::size_t>(required_entropy_bits, sizeof(T) * 8); entropy += rng_bits)
 	{
@@ -102,7 +102,7 @@ inline T random(Trng & rng, std::size_t required_entropy_bits)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	typedef typename mpt::make_unsigned<T>::type unsigned_T;
-	const int rng_bits = mpt::engine_traits<Trng>::entropy_bits();
+	const unsigned int rng_bits = mpt::engine_traits<Trng>::entropy_bits();
 	unsigned_T result = 0;
 	for(std::size_t entropy = 0; entropy < std::min<std::size_t>(required_entropy_bits, sizeof(T) * 8); entropy += rng_bits)
 	{
