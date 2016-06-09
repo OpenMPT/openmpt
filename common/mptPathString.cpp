@@ -329,12 +329,8 @@ mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const 
 {
 	mpt::PathString filename = mpt::GetTempDirectory();
 	filename += (!fileNamePrefix.empty() ? fileNamePrefix + MPT_PATHSTRING("_") : mpt::PathString());
-	filename += mpt::PathString::FromUnicode(Util::UUIDToString(Util::CreateLocalUUID()));
+	filename += mpt::PathString::FromUnicode(mpt::UUID::GenerateLocalUseOnly().ToUString());
 	filename += (!fileNameExtension.empty() ? MPT_PATHSTRING(".") + fileNameExtension : mpt::PathString());
-	if(filename.empty())
-	{
-		filename += MPT_PATHSTRING("tmp"); // in case other things fail, we will still have a non-empty filename
-	}
 	return filename;
 }
 
