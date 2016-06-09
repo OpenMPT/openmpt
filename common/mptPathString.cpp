@@ -355,11 +355,6 @@ TempFileGuard::~TempFileGuard()
 
 #ifdef MODPLUG_TRACKER
 
-class TempDirGuard
-{
-private:
-	mpt::PathString dirname;
-public:
 TempDirGuard::TempDirGuard(const mpt::PathString &dirname_)
 	: dirname(dirname_.WithTrailingSlash())
 {
