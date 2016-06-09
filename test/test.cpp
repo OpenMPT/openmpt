@@ -720,7 +720,9 @@ static MPT_NOINLINE void TestMisc()
 	VERIFY_EQUAL(IsEqualUUID(uuid, Util::StringToGUID(Util::GUIDToString(uuid))), true);
 	VERIFY_EQUAL(IsEqualUUID(uuid, Util::StringToIID(Util::IIDToString(uuid))), true);
 	VERIFY_EQUAL(IsEqualUUID(uuid, Util::StringToCLSID(Util::CLSIDToString(uuid))), true);
+	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetASCII, mpt::UUID(uuid).ToString()), Util::UUIDToString(uuid));
 #endif
+	VERIFY_EQUAL(mpt::UUID::Generate() != mpt::UUID::Generate(), true);
 
 	// check that empty stringstream behaves correctly with our MSVC workarounds
 	{ mpt::ostringstream ss; VERIFY_EQUAL(mpt::IO::TellWrite(ss), 0); }
