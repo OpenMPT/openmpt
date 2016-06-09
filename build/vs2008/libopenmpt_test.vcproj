@@ -479,6 +479,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\common\mptRandom.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\common\mptRandom.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\mptString.cpp"
 				>
 			</File>

@@ -229,6 +229,7 @@ public:
 template <typename T, T polynomial, T initial, T resultXOR, bool reverseData>
 typename crc<T, polynomial, initial, resultXOR, reverseData>::value_type crc<T, polynomial, initial, resultXOR, reverseData>::table[256];
 
+typedef crc<uint16, 0x8005, 0, 0, true> crc16;
 typedef crc<uint32, 0x04C11DB7, 0xFFFFFFFF, 0xFFFFFFFF, true> crc32;
 typedef crc<uint32, 0x04C11DB7, 0, 0, false> crc32_ogg;
 typedef crc<uint32, 0x1EDC6F41, 0xFFFFFFFF, 0xFFFFFFFF, true> crc32c;

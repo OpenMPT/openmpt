@@ -390,9 +390,9 @@ void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
 #endif
 	m_loaded = false;
 #ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
-	m_Dither = LIBOPENMPT_SHARED_PTR<Dither>(new Dither());
+	m_Dither = LIBOPENMPT_SHARED_PTR<Dither>(new Dither(mpt::global_random_device()));
 #else
-	m_Dither = std::unique_ptr<Dither>(new Dither());
+	m_Dither = std::unique_ptr<Dither>(new Dither(mpt::global_random_device()));
 #endif
 #ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
 	m_LogForwarder = LIBOPENMPT_SHARED_PTR<log_forwarder>(new log_forwarder(m_Log));

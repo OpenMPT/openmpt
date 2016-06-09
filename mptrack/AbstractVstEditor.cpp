@@ -284,7 +284,7 @@ void CAbstractVstEditor::OnRandomizePreset()
 		for(PlugParamIndex p = 0; p < numParams; p++)
 		{
 			PlugParamValue val = m_VstPlugin.GetParameter(p);
-			val += (2.0f * PlugParamValue(rand()) / PlugParamValue(RAND_MAX) - 1.0f) * factor;
+			val += mpt::random(theApp.PRNG(), PlugParamValue(-1.0), PlugParamValue(1.0)) * factor;
 			Limit(val, 0.0f, 1.0f);
 			m_VstPlugin.SetParameter(p, val);
 		}

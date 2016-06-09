@@ -68,6 +68,10 @@
 #include "TestTools.h"
 
 
+// enable tests which may fail spuriously
+//#define FLAKY_TESTS
+
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -80,6 +84,7 @@ namespace Test {
 static MPT_NOINLINE void TestVersion();
 static MPT_NOINLINE void TestTypes();
 static MPT_NOINLINE void TestMisc();
+static MPT_NOINLINE void TestRandom();
 static MPT_NOINLINE void TestCharsets();
 static MPT_NOINLINE void TestStringFormatting();
 static MPT_NOINLINE void TestSettings();
@@ -94,6 +99,7 @@ static MPT_NOINLINE void TestLoadSaveFile();
 
 
 static mpt::PathString *PathPrefix = nullptr;
+static mpt::prng * s_PRNG = nullptr;
 
 
 
@@ -149,9 +155,13 @@ void DoTests()
 
 	#endif
 
+	mpt::random_device rd;
+	s_PRNG = new mpt::prng(mpt::make_prng<mpt::prng>(rd));
+
 	DO_TEST(TestVersion);
 	DO_TEST(TestTypes);
 	DO_TEST(TestMisc);
+	DO_TEST(TestRandom);
 	DO_TEST(TestCharsets);
 	DO_TEST(TestStringFormatting);
 	DO_TEST(TestSettings);
@@ -164,6 +174,9 @@ void DoTests()
 	// slower tests, require opening a CModDoc
 	DO_TEST(TestPCnoteSerialization);
 	DO_TEST(TestLoadSaveFile);
+
+	delete s_PRNG;
+	s_PRNG = nullptr;
 
 	delete PathPrefix;
 	PathPrefix = nullptr;
@@ -884,6 +897,84 @@ static MPT_NOINLINE void TestMisc()
 	for(int32 transpose = -128; transpose < 128; transpose += 32)
 		for(int32 finetune = -128; finetune < 128; finetune += 64, freqIndex++)
 			VERIFY_EQUAL_EPS(transposeToFrequency[freqIndex], static_cast<int32>(ModSample::TransposeToFrequency(transpose, finetune)), 1);
+}
+
+
+static MPT_NOINLINE void TestRandom()
+//-----------------------------------
+{
+	mpt::prng & prng = *s_PRNG;
+	for(std::size_t i = 0; i < 10000; ++i)
+	{
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<uint16, 7>(prng), 0u, 127u), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<uint16, 8>(prng), 0u, 255u), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<uint16, 9>(prng), 0u, 511u), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<uint64, 1>(prng), 0u, 1u), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<uint16>(prng, 7), 0u, 127u), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<uint16>(prng, 8), 0u, 255u), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<uint16>(prng, 9), 0u, 511u), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<uint64>(prng, 1), 0u, 1u), true);
+
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<int16, 7>(prng), 0, 127), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<int16, 8>(prng), 0, 255), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<int16, 9>(prng), 0, 511), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<int64, 1>(prng), 0, 1), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<int16>(prng, 7), 0, 127), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<int16>(prng, 8), 0, 255), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<int16>(prng, 9), 0, 511), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<int64>(prng, 1), 0, 1), true);
+
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<float>(prng, 0.0f, 1.0f), 0.0f, 1.0f), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<double>(prng, 0.0, 1.0), 0.0, 1.0), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<double>(prng, -1.0, 1.0), -1.0, 1.0), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<double>(prng, -1.0, 0.0), -1.0, 0.0), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<double>(prng, 1.0, 2.0), 1.0, 2.0), true);
+		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<double>(prng, 1.0, 3.0), 1.0, 3.0), true);
+	}
+	#ifdef FLAKY_TESTS
+		{
+			std::vector<std::size_t> hist(256);
+			for(std::size_t i = 0; i < 256*256; ++i)
+			{
+				uint8 value = mpt::random<uint8>(prng);
+				hist[value] += 1;
+			}
+			for(std::size_t i = 0; i < 256; ++i)
+			{
+				VERIFY_EQUAL_QUIET_NONCONT(IsInRange(hist[i], 16u, 65520u), true);
+			}
+		}
+		{
+			std::vector<std::size_t> hist(256);
+			for(std::size_t i = 0; i < 256*256; ++i)
+			{
+				int8 value = mpt::random<int8>(prng);
+				hist[static_cast<int>(value) + 0x80] += 1;
+			}
+			for(std::size_t i = 0; i < 256; ++i)
+			{
+				VERIFY_EQUAL_QUIET_NONCONT(IsInRange(hist[i], 16u, 65520u), true);
+			}
+		}
+		{
+			std::vector<std::size_t> hist(256);
+			for(std::size_t i = 0; i < 256*256; ++i)
+			{
+				uint8 value = mpt::random<uint8>(prng, 1);
+				hist[value] += 1;
+			}
+			for(std::size_t i = 0; i < 256; ++i)
+			{
+				if(i < 2)
+				{
+					VERIFY_EQUAL_QUIET_NONCONT(IsInRange(hist[i], 16u, 65520u), true);
+				} else
+				{
+					VERIFY_EQUAL_QUIET_NONCONT(hist[i], 0u);
+				}
+			}
+		}
+	#endif
 }
 
 
@@ -2386,7 +2477,7 @@ static MPT_NOINLINE void TestITCompression()
 	std::srand(0);
 	for(int i = 0; i < sampleDataSize; i++)
 	{
-		sampleData[i] = (int8)std::rand();
+		sampleData[i] = mpt::random<int8>(*s_PRNG);
 	}
 
 	// Run each compression test with IT215 compression and without.
@@ -2504,11 +2595,16 @@ static MPT_NOINLINE void TestTunings()
 
 
 
-static double Rand01() {return rand() / double(RAND_MAX);}
+static double Rand01()
+{
+	return mpt::random(*s_PRNG, 0.0, 1.0);
+}
+
 template <class T>
-T Rand(const T min, const T max) {return Util::Round<T>(min + Rand01() * (max - min));}
-
-
+T Rand(const T min, const T max)
+{
+	return Util::Round<T>(min + Rand01() * (max - min));
+}
 
 static void GenerateCommands(CPattern& pat, const double dProbPcs, const double dProbPc)
 //--------------------------------------------------------------------------------------

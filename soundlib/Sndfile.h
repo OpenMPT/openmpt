@@ -14,6 +14,7 @@
 #include "SoundFilePlayConfig.h"
 #include "MixerSettings.h"
 #include "../common/misc_util.h"
+#include "../common/mptRandom.h"
 #include <vector>
 #include <bitset>
 #include <set>
@@ -408,6 +409,12 @@ public:
 	uint32 m_dwLastSavedWithVersion;
 
 	PlayBehaviourSet m_playBehaviour;
+
+protected:
+
+	mpt::fast_prng m_PRNG;
+	inline mpt::fast_prng & AccessPRNG() const { return const_cast<CSoundFile*>(this)->m_PRNG; }
+	inline mpt::fast_prng & AccessPRNG() { return m_PRNG; }
 
 protected:
 	// Mix level stuff

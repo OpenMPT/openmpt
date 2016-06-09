@@ -141,35 +141,13 @@ static void Dither_ModPlug(int *pBuffer, std::size_t count, std::size_t channels
 }
 
 
-#define FASTRAND_MAX 0x7fff
-#define FASTRAND_BITS 15
-
-static forceinline int fastrand(uint32 &state)
-//--------------------------------------------
-{
-	state = 214013 * state + 2531011;
-	return (state >> 16) & 0x7FFF;
-}
-
-static forceinline int fastrandbits(uint32 &state, int bits)
-//----------------------------------------------------------
-{
-	int result = 0;
-	if(bits > 0 * FASTRAND_BITS) result = (result << FASTRAND_BITS) | fastrand(state);
-	if(bits > 1 * FASTRAND_BITS) result = (result << FASTRAND_BITS) | fastrand(state);
-	if(bits > 2 * FASTRAND_BITS) result = (result << FASTRAND_BITS) | fastrand(state);
-	result &= (1 << bits) - 1;
-	return result;
-}
-
 template<int targetbits, int channels, int ditherdepth = 1, bool triangular = false, bool shaped = true>
 struct Dither_SimpleTemplate
 {
-MPT_NOINLINE void operator () (int *mixbuffer, std::size_t count, DitherSimpleState &state)
-//-----------------------------------------------------------------------------------------
+MPT_NOINLINE void operator () (int *mixbuffer, std::size_t count, DitherSimpleState &state, mpt::fast_prng &prng)
+//---------------------------------------------------------------------------------------------------------------
 {
 	STATIC_ASSERT(sizeof(int) == 4);
-	STATIC_ASSERT(FASTRAND_BITS * 3 >= (32-targetbits) - MIXING_ATTENUATION);
 	const int rshift = (32-targetbits) - MIXING_ATTENUATION;
 	MPT_CONSTANT_IF(rshift <= 0)
 	{
@@ -185,15 +163,15 @@ MPT_NOINLINE void operator () (int *mixbuffer, std::size_t count, DitherSimpleSt
 	{
 		for(std::size_t channel = 0; channel < channels; ++channel)
 		{
-			int noise = 0;
+			unsigned int unoise = 0;
 			MPT_CONSTANT_IF(triangular)
 			{
-				noise = (fastrandbits(s.rng, noise_bits) + fastrandbits(s.rng, noise_bits)) >> 1;
+				unoise = (mpt::random<unsigned int>(prng, noise_bits) + mpt::random<unsigned int>(prng, noise_bits)) >> 1;
 			} else
 			{
-				noise = fastrandbits(s.rng, noise_bits);
+				unoise = mpt::random<unsigned int>(prng, noise_bits);
 			}
-			noise -= noise_bias; // un-bias
+			int noise = static_cast<int>(unoise) - noise_bias; // un-bias
 			int val = *mixbuffer;
 			MPT_CONSTANT_IF(shaped)
 			{
@@ -209,8 +187,8 @@ MPT_NOINLINE void operator () (int *mixbuffer, std::size_t count, DitherSimpleSt
 }
 };
 
-static void Dither_Simple(int *mixbuffer, std::size_t count, std::size_t channels, int bits, DitherSimpleState &state)
-//--------------------------------------------------------------------------------------------------------------------
+static void Dither_Simple(int *mixbuffer, std::size_t count, std::size_t channels, int bits, DitherSimpleState &state, mpt::fast_prng &prng)
+//------------------------------------------------------------------------------------------------------------------------------------------
 {
 	switch(bits)
 	{
@@ -218,13 +196,13 @@ static void Dither_Simple(int *mixbuffer, std::size_t count, std::size_t channel
 			switch(channels)
 			{
 				case 1:
-					Dither_SimpleTemplate<8,1>()(mixbuffer, count, state);
+					Dither_SimpleTemplate<8,1>()(mixbuffer, count, state, prng);
 					break;
 				case 2:
-					Dither_SimpleTemplate<8,2>()(mixbuffer, count, state);
+					Dither_SimpleTemplate<8,2>()(mixbuffer, count, state, prng);
 					break;
 				case 4:
-					Dither_SimpleTemplate<8,4>()(mixbuffer, count, state);
+					Dither_SimpleTemplate<8,4>()(mixbuffer, count, state, prng);
 					break;
 			}
 			break;
@@ -232,13 +210,13 @@ static void Dither_Simple(int *mixbuffer, std::size_t count, std::size_t channel
 			switch(channels)
 			{
 				case 1:
-					Dither_SimpleTemplate<16,1>()(mixbuffer, count, state);
+					Dither_SimpleTemplate<16,1>()(mixbuffer, count, state, prng);
 					break;
 				case 2:
-					Dither_SimpleTemplate<16,2>()(mixbuffer, count, state);
+					Dither_SimpleTemplate<16,2>()(mixbuffer, count, state, prng);
 					break;
 				case 4:
-					Dither_SimpleTemplate<16,4>()(mixbuffer, count, state);
+					Dither_SimpleTemplate<16,4>()(mixbuffer, count, state, prng);
 					break;
 			}
 			break;
@@ -246,13 +224,13 @@ static void Dither_Simple(int *mixbuffer, std::size_t count, std::size_t channel
 			switch(channels)
 			{
 				case 1:
-					Dither_SimpleTemplate<24,1>()(mixbuffer, count, state);
+					Dither_SimpleTemplate<24,1>()(mixbuffer, count, state, prng);
 					break;
 				case 2:
-					Dither_SimpleTemplate<24,2>()(mixbuffer, count, state);
+					Dither_SimpleTemplate<24,2>()(mixbuffer, count, state, prng);
 					break;
 				case 4:
-					Dither_SimpleTemplate<24,4>()(mixbuffer, count, state);
+					Dither_SimpleTemplate<24,4>()(mixbuffer, count, state, prng);
 					break;
 			}
 			break;
@@ -263,15 +241,8 @@ static void Dither_Simple(int *mixbuffer, std::size_t count, std::size_t channel
 void Dither::Reset()
 //------------------
 {
-	state = DitherState();
-}
-
-
-Dither::Dither()
-//--------------
-{
-	mode = DitherDefault;
-}
+	state.Reset();
+	}
 
 
 void Dither::SetMode(DitherMode mode_)
@@ -300,7 +271,7 @@ void Dither::Process(int *mixbuffer, std::size_t count, std::size_t channels, in
 			Dither_ModPlug(mixbuffer, count, channels, bits, state.modplug);
 			break;
 		case DitherSimple:
-			Dither_Simple(mixbuffer, count, channels, bits, state.simple);
+			Dither_Simple(mixbuffer, count, channels, bits, state.simple, state.prng);
 			break;
 		case DitherDefault:
 		default:
