@@ -334,6 +334,60 @@ mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const 
 	return filename;
 }
 
+TempFileGuard::TempFileGuard(const mpt::PathString &filename)
+	: filename(filename)
+{
+	return;
+}
+
+mpt::PathString TempFileGuard::GetFilename() const
+{
+	return filename;
+}
+
+TempFileGuard::~TempFileGuard()
+{
+	if(!filename.empty())
+	{
+		DeleteFileW(filename.AsNative().c_str());
+	}
+}
+
+#ifdef MODPLUG_TRACKER
+
+class TempDirGuard
+{
+private:
+	mpt::PathString dirname;
+public:
+TempDirGuard::TempDirGuard(const mpt::PathString &dirname_)
+	: dirname(dirname_.WithTrailingSlash())
+{
+	if(dirname.empty())
+	{
+		return;
+	}
+	if(::CreateDirectoryW(dirname.AsNative().c_str(), NULL) == 0)
+	{ // fail
+		dirname = mpt::PathString();
+	}
+}
+
+mpt::PathString TempDirGuard::GetDirname() const
+{
+	return dirname;
+}
+
+TempDirGuard::~TempDirGuard()
+{
+	if(!dirname.empty())
+	{
+		DeleteWholeDirectoryTree(dirname);
+	}
+}
+
+#endif // MODPLUG_TRACKER
+
 #endif // MPT_OS_WINDOWS
 #endif // MPT_ENABLE_TEMPFILE
 
