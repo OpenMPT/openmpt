@@ -43,79 +43,6 @@ namespace mpt
 {
 
 
-namespace rng
-{
-
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable:4724) // potential mod by 0
-#endif // MPT_COMPILER_MSVC
-
-template <typename Tstate, typename Tvalue, Tstate m, Tstate a, Tstate c, Tstate result_mask, int result_shift, int result_bits>
-class lcg
-{
-public:
-	typedef Tstate state_type;
-	typedef Tvalue result_type;
-private:
-	state_type state;
-public:
-	template <typename Trng>
-	explicit inline lcg(Trng & rd)
-		: state(mpt::random<state_type>(rd))
-	{
-		random(); // we return results from the current state and update state after returning. results in better pipelining.
-	}
-	explicit inline lcg(state_type seed)
-		: state(seed)
-	{
-		random(); // we return results from the current state and update state after returning. results in better pipelining.
-	}
-public:
-	static inline result_type min()
-	{
-		return static_cast<result_type>(0);
-	}
-	static inline result_type max()
-	{
-		STATIC_ASSERT(((result_mask >> result_shift) << result_shift) == result_mask);
-		return static_cast<result_type>(result_mask >> result_shift);
-	}
-	static inline int bits()
-	{
-		STATIC_ASSERT(((static_cast<Tstate>(1) << result_bits) - 1) == (result_mask >> result_shift));
-		return result_bits;
-	}
-	inline result_type operator()()
-	{
-		return random();
-	}
-	inline result_type random()
-	{
-		// we return results from the current state and update state after returning. results in better pipelining.
-		state_type s = state;
-		result_type result = static_cast<result_type>((s & result_mask) >> result_shift);
-		s = (m == 0) ? ((a * s) + c) : (((a * s) + c) % m);
-		state = s;
-		return result;
-	}
-	inline result_type random_bits()
-	{
-		return random();
-	}
-};
-
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif // MPT_COMPILER_MSVC
-
-typedef lcg<uint32, uint16, 0u, 214013u, 2531011u, 0x7fff0000u, 16, 15> lcg_msvc;
-typedef lcg<uint32, uint16, 0x80000000u, 1103515245u, 12345u, 0x7fff0000u, 16, 15> lcg_c99;
-typedef lcg<uint64, uint32, 0ull, 6364136223846793005ull, 1ull, 0xffffffff00000000ull, 32, 32> lcg_musl;
-
-} // namespace rng
-
-
 template <typename Trng> struct engine_traits
 {
 	static inline int entropy_bits()
@@ -241,6 +168,79 @@ inline T random(Trng & rng, T min, T max)
 	dis_type dis(min, max);
 	return static_cast<T>(dis(rng));
 }
+
+
+namespace rng
+{
+
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4724) // potential mod by 0
+#endif // MPT_COMPILER_MSVC
+
+template <typename Tstate, typename Tvalue, Tstate m, Tstate a, Tstate c, Tstate result_mask, int result_shift, int result_bits>
+class lcg
+{
+public:
+	typedef Tstate state_type;
+	typedef Tvalue result_type;
+private:
+	state_type state;
+public:
+	template <typename Trng>
+	explicit inline lcg(Trng & rd)
+		: state(mpt::random<state_type>(rd))
+	{
+		random(); // we return results from the current state and update state after returning. results in better pipelining.
+	}
+	explicit inline lcg(state_type seed)
+		: state(seed)
+	{
+		random(); // we return results from the current state and update state after returning. results in better pipelining.
+	}
+public:
+	static inline result_type min()
+	{
+		return static_cast<result_type>(0);
+	}
+	static inline result_type max()
+	{
+		STATIC_ASSERT(((result_mask >> result_shift) << result_shift) == result_mask);
+		return static_cast<result_type>(result_mask >> result_shift);
+	}
+	static inline int bits()
+	{
+		STATIC_ASSERT(((static_cast<Tstate>(1) << result_bits) - 1) == (result_mask >> result_shift));
+		return result_bits;
+	}
+	inline result_type operator()()
+	{
+		return random();
+	}
+	inline result_type random()
+	{
+		// we return results from the current state and update state after returning. results in better pipelining.
+		state_type s = state;
+		result_type result = static_cast<result_type>((s & result_mask) >> result_shift);
+		s = (m == 0) ? ((a * s) + c) : (((a * s) + c) % m);
+		state = s;
+		return result;
+	}
+	inline result_type random_bits()
+	{
+		return random();
+	}
+};
+
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
+
+typedef lcg<uint32, uint16, 0u, 214013u, 2531011u, 0x7fff0000u, 16, 15> lcg_msvc;
+typedef lcg<uint32, uint16, 0x80000000u, 1103515245u, 12345u, 0x7fff0000u, 16, 15> lcg_c99;
+typedef lcg<uint64, uint32, 0ull, 6364136223846793005ull, 1ull, 0xffffffff00000000ull, 32, 32> lcg_musl;
+
+} // namespace rng
 
 
 #ifdef MODPLUG_TRACKER
