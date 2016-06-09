@@ -304,6 +304,63 @@ mpt::PathString GetTempDirectory();
 // Returns a new unique absolute path.
 mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix = mpt::PathString(), const mpt::PathString &fileNameExtension = MPT_PATHSTRING("tmp"));
 
+// Scoped temporary file guard. Deletes the file when going out of scope.
+// The file itself is not created automatically.
+class TempFileGuard
+{
+private:
+	const mpt::PathString filename;
+public:
+	TempFileGuard(const mpt::PathString &filename = CreateTempFileName())
+		: filename(filename)
+	{
+		return;
+	}
+	mpt::PathString GetFilename() const
+	{
+		return filename;
+	}
+	~TempFileGuard()
+	{
+		if(!filename.empty())
+		{
+			DeleteFileW(filename.AsNative().c_str());
+		}
+	}
+};
+
+// Scoped temporary directory guard. Deletes the directory when going out of scope.
+// The directory itself is created automatically.
+class TempDirGuard
+{
+private:
+	mpt::PathString dirname;
+public:
+	TempDirGuard(const mpt::PathString &dirname_ = CreateTempFileName())
+		: dirname(dirname_.WithTrailingSlash())
+	{
+		if(dirname.empty())
+		{
+			return;
+		}
+		if(::CreateDirectoryW(dirname.AsNative().c_str(), NULL) == 0)
+		{ // fail
+			dirname = mpt::PathString();
+		}
+	}
+	mpt::PathString GetDirname() const
+	{
+		return dirname;
+	}
+	~TempDirGuard()
+	{
+		if(!dirname.empty())
+		{
+			DeleteWholeDirectoryTree(dirname);
+		}
+	}
+};
+
 #endif // MPT_OS_WINDOWS
 #endif // MPT_ENABLE_TEMPFILE
 
