@@ -249,7 +249,7 @@ namespace mpt
 
 UUID UUID::Generate()
 {
-	#if defined(MODPLUG_TRACKER) || !defined(NO_DMO) || defined(MPT_ENABLE_TEMPFILE)
+	#if MPT_OS_WINDOWS && (defined(MODPLUG_TRACKER) || !defined(NO_DMO) || defined(MPT_ENABLE_TEMPFILE))
 		return mpt::UUID(Util::CreateUUID());
 	#else
 		return RFC4122Random();
@@ -258,7 +258,7 @@ UUID UUID::Generate()
 
 UUID UUID::GenerateLocalUseOnly()
 {
-	#if defined(MODPLUG_TRACKER) || !defined(NO_DMO) || defined(MPT_ENABLE_TEMPFILE)
+	#if MPT_OS_WINDOWS && (defined(MODPLUG_TRACKER) || !defined(NO_DMO) || defined(MPT_ENABLE_TEMPFILE))
 		return mpt::UUID(Util::CreateLocalUUID());
 	#else
 		return RFC4122Random();
