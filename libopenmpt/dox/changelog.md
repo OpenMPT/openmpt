@@ -18,6 +18,9 @@ is just a high-level summary.
     before 1.3.0 is broken beyond repair as it provides `assert.h` in the
     include path.
 
+ *  [**Bug**] libopenmpt no longer uses the non-thread-safe global std::rand()
+    function.
+
 ### libopenmpt 0.2-beta17 (2016-05-21)
 
  *  [**Change**] The Makefile and Autotools build systems now require to
