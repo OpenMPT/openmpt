@@ -233,12 +233,12 @@ int sane_random_device::bits()
 sane_random_device::result_type sane_random_device::operator()()
 {
 	result_type result = 0;
-	if(std::random_device::min() != 0 || !mpt::is_mask(std::random_device::max()))
+	if(rd.min() != 0 || !mpt::is_mask(rd.max()))
 	{ // insane std::random_device
 		//  This implementation is not exactly uniformly distributed but good enough
 		// for OpenMPT.
-		double rd_min = static_cast<double>(std::random_device::min());
-		double rd_max = static_cast<double>(std::random_device::max());
+		double rd_min = static_cast<double>(rd.min());
+		double rd_max = static_cast<double>(rd.max());
 		double rd_range = rd_max - rd_min;
 		double rd_size = rd_range + 1.0;
 		double rd_entropy = mpt::log2(rd_size);
@@ -253,7 +253,7 @@ sane_random_device::result_type sane_random_device::operator()()
 	} else
 	{ // sane std::random_device
 		result = 0;
-		std::size_t rd_bits = mpt::lower_bound_entropy_bits(std::random_device::max());
+		std::size_t rd_bits = mpt::lower_bound_entropy_bits(rd.max());
 		for(std::size_t entropy = 0; entropy < (sizeof(result_type) * 8); entropy += rd_bits)
 		{
 			result = (result << rd_bits) | static_cast<result_type>(rd());
