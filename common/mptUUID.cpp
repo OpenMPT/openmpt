@@ -17,13 +17,18 @@
 
 #include <cstdlib>
 
+#if MPT_OS_WINDOWS
 #if defined(MODPLUG_TRACKER) || !defined(NO_DMO)
 #include <windows.h>
 #include <objbase.h>
 #endif // MODPLUG_TRACKER || !NO_DMO
+#endif // MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_BEGIN
+
+
+#if MPT_OS_WINDOWS
 
 
 namespace Util
@@ -234,6 +239,9 @@ UUID CreateLocalUUID()
 
 
 } // namespace Util
+
+
+#endif // MPT_OS_WINDOWS
 
 
 namespace mpt

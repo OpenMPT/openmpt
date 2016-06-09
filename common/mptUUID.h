@@ -13,7 +13,6 @@
 
 #if MPT_OS_WINDOWS
 
-
 #if defined(MODPLUG_TRACKER) || !defined(NO_DMO)
 #include <guiddef.h>
 #endif // MODPLUG_TRACKER || !NO_DMO
@@ -22,8 +21,12 @@
 #include <rpc.h>
 #endif // MODPLUG_TRACKER || !NO_DMO || MPT_ENABLE_TEMPFILE
 
+#endif // MPT_OS_WINDOWS
+
 
 OPENMPT_NAMESPACE_BEGIN
+
+#if MPT_OS_WINDOWS
 
 namespace Util
 {
@@ -72,6 +75,8 @@ UUID CreateLocalUUID();
 #endif // MODPLUG_TRACKER || !NO_DMO || MPT_ENABLE_TEMPFILE
 
 } // namespace Util
+
+#endif // MPT_OS_WINDOWS
 
 namespace mpt {
 
@@ -177,6 +182,3 @@ STATIC_ASSERT(sizeof(mpt::UUID) == 16);
 
 
 OPENMPT_NAMESPACE_END
-
-
-#endif // MPT_OS_WINDOWS
