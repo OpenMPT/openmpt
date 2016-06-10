@@ -123,6 +123,7 @@ public:
 	void ConvertEndianness();
 public:
 #if MPT_OS_WINDOWS
+#if defined(MODPLUG_TRACKER) || !defined(NO_DMO) || defined(MPT_ENABLE_TEMPFILE)
 	explicit UUID(GUID guid)
 		: Data1(guid.Data1)
 		, Data2(guid.Data2)
@@ -156,6 +157,7 @@ public:
 		retval.Data4[7] = static_cast<uint8>(Data4 >>  0);
 		return retval;
 	}
+#endif // MODPLUG_TRACKER || !NO_DMO || MPT_ENABLE_TEMPFILE
 #endif // MPT_OS_WINDOWS
 public:
 	UUID() : Data1(0), Data2(0), Data3(0), Data4(0) { }
