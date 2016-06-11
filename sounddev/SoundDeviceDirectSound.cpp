@@ -92,7 +92,7 @@ static BOOL WINAPI DSEnumCallbackW(GUID * lpGuid, LPCWSTR lpstrDescription, LPCW
 	}
 	if(lpGuid)
 	{
-		info.extraData[MPT_USTRING("UUID")] = Util::UUIDToString(guid);
+		info.extraData[MPT_USTRING("UUID")] = mpt::UUID(guid).ToUString();
 	}
 	info.apiName = MPT_USTRING("DirectSound");
 	info.useNameAsIdentifier = false;
