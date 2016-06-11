@@ -266,7 +266,12 @@ UUID UUID::Generate()
 		{
 			return mpt::UUID::RFC4122Random();
 		}
-		if(!Util::IsValid(uuid))
+		status = RPC_S_OK;
+		if(UuidIsNil(&uuid, &status) != FALSE)
+		{
+			return mpt::UUID::RFC4122Random();
+		}
+		if(status != RPC_S_OK)
 		{
 			return mpt::UUID::RFC4122Random();
 		}
@@ -289,7 +294,12 @@ UUID UUID::GenerateLocalUseOnly()
 			{
 				return Generate();
 			}
-			if(!Util::IsValid(uuid))
+			status = RPC_S_OK;
+			if(UuidIsNil(&uuid, &status) != FALSE)
+			{
+				return mpt::UUID::RFC4122Random();
+			}
+			if(status != RPC_S_OK)
 			{
 				return mpt::UUID::RFC4122Random();
 			}
