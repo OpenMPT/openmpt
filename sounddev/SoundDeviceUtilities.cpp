@@ -415,6 +415,13 @@ void CAudioThread::SetWakeupInterval(double seconds)
 }
 
 
+bool CAudioThread::IsActive()
+//---------------------------
+{
+	return InterlockedExchangeAdd(&m_AudioThreadActive, 0) ? true : false;
+}
+
+
 void CAudioThread::Activate()
 //---------------------------
 {
@@ -441,6 +448,21 @@ void CAudioThread::Deactivate()
 	}
 	InterlockedExchange(&m_AudioThreadActive, 0);
 	WaitForSingleObject(m_hAudioThreadGoneIdle, INFINITE);
+}
+
+
+CSoundDeviceWithThread::CSoundDeviceWithThread(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+//--------------------------------------------------------------------------------------------------
+	: SoundDevice::Base(info, sysInfo), m_AudioThread(*this)
+{
+	return;
+}
+
+
+CSoundDeviceWithThread::~CSoundDeviceWithThread()
+//-----------------------------------------------
+{
+	return;
 }
 
 
@@ -485,6 +507,59 @@ void CSoundDeviceWithThread::InternalStop()
 }
 
 #endif // MPT_OS_WINDOWS
+
+
+#if defined(MODPLUG_TRACKER) && defined(MPT_BUILD_WINESUPPORT) && !MPT_OS_WINDOWS
+
+
+ThreadBase::ThreadBase(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+	: Base(info, sysInfo)
+	, m_ThreadStopRequest(false)
+{
+	return;
+}
+
+bool ThreadBase::InternalStart()
+{
+	m_ThreadStopRequest.store(false);
+	m_Thread = std::move(std::thread(&ThreadProcStatic, this));
+	m_ThreadStarted.wait();
+	m_ThreadStarted.post();
+	return true;
+}
+
+void ThreadBase::ThreadProcStatic(ThreadBase * this_)
+{
+	this_->ThreadProc();
+}
+
+void ThreadBase::ThreadProc()
+{
+	m_ThreadStarted.post();
+	InternalStartFromSoundThread();
+	while(!m_ThreadStopRequest.load())
+	{
+		SourceFillAudioBufferLocked();
+		InternalWaitFromSoundThread();
+	}
+	InternalStopFromSoundThread();
+}
+
+void ThreadBase::InternalStop()
+{
+	m_ThreadStopRequest.store(true);
+	m_Thread.join();
+	m_Thread = std::move(std::thread());
+	m_ThreadStopRequest.store(false);
+}
+
+ThreadBase::~ThreadBase()
+{
+	return;
+}
+
+
+#endif // MODPLUG_TRACKER && MPT_BUILD_WINESUPPORT && !MPT_OS_WINDOWS
 
 
 } // namespace SoundDevice
