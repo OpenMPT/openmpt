@@ -358,6 +358,8 @@ inline void SetCurrentThreadPriority(mpt::ThreadPriority /*priority*/ )
 
 #if defined(MODPLUG_TRACKER)
 
+#if MPT_OS_WINDOWS
+
 // Default WinAPI thread
 class UnmanagedThread
 {
@@ -397,6 +399,8 @@ inline void SetThreadPriority(mpt::UnmanagedThread &t, mpt::ThreadPriority prior
 {
 	::SetThreadPriority(t, priority);
 }
+
+#endif // MPT_OS_WINDOWS
 
 #endif // MODPLUG_TRACKER
 
