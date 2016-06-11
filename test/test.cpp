@@ -713,16 +713,18 @@ static MPT_NOINLINE void TestMisc()
 	// UUID
 #ifdef MODPLUG_TRACKER
 	VERIFY_EQUAL(Util::IsValid(Util::CreateGUID()), true);
-	VERIFY_EQUAL(Util::IsValid(Util::CreateUUID()), true);
-	VERIFY_EQUAL(Util::IsValid(Util::CreateLocalUUID()), true);
-	UUID uuid = Util::CreateUUID();
+	UUID uuid = mpt::UUID::Generate();
+	VERIFY_EQUAL(IsEqualUUID(uuid, mpt::UUID::FromString(mpt::UUID(uuid).ToUString())), true);
 	VERIFY_EQUAL(IsEqualUUID(uuid, Util::StringToUUID(Util::UUIDToString(uuid))), true);
 	VERIFY_EQUAL(IsEqualUUID(uuid, Util::StringToGUID(Util::GUIDToString(uuid))), true);
 	VERIFY_EQUAL(IsEqualUUID(uuid, Util::StringToIID(Util::IIDToString(uuid))), true);
 	VERIFY_EQUAL(IsEqualUUID(uuid, Util::StringToCLSID(Util::CLSIDToString(uuid))), true);
-	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetASCII, mpt::UUID(uuid).ToString()), Util::UUIDToString(uuid));
 #endif
+	VERIFY_EQUAL(mpt::UUID::Generate().IsValid(), true);
+	VERIFY_EQUAL(mpt::UUID::GenerateLocalUseOnly().IsValid(), true);
 	VERIFY_EQUAL(mpt::UUID::Generate() != mpt::UUID::Generate(), true);
+	mpt::UUID a = mpt::UUID::Generate();
+	VERIFY_EQUAL(a, mpt::UUID::FromString(a.ToUString()));
 
 	// check that empty stringstream behaves correctly with our MSVC workarounds
 	{ mpt::ostringstream ss; VERIFY_EQUAL(mpt::IO::TellWrite(ss), 0); }

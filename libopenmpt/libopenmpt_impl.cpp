@@ -36,6 +36,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 #if MPT_COMPILER_MSVC
+#pragma comment(lib, "rpcrt4.lib")
 #if defined(MPT_WITH_MEDIAFOUNDATION)
 #pragma comment(lib, "mf.lib")
 #pragma comment(lib, "mfplat.lib")
@@ -43,12 +44,8 @@ OPENMPT_NAMESPACE_BEGIN
 #pragma comment(lib, "mfuuid.lib") // static lib
 #pragma comment(lib, "propsys.lib")
 #endif // MPT_WITH_MEDIAFOUNDATION
-#if defined(MPT_ENABLE_TEMPFILE)
-#pragma comment(lib, "rpcrt4.lib")
-#endif // MPT_ENABLE_TEMPFILE
 #ifndef NO_DMO
 #pragma comment(lib, "dmoguids.lib")
-#pragma comment(lib, "rpcrt4.lib")
 #pragma comment(lib, "strmiids.lib")
 #endif // !NO_DMO
 #endif // MPT_COMPILER_MSVC

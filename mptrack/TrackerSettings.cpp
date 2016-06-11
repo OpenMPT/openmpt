@@ -443,7 +443,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	if(gcsInstallGUID.Get().empty())
 	{
 		// No UUID found - generate one.
-		gcsInstallGUID = Util::UUIDToString(Util::CreateUUID());
+		gcsInstallGUID = mpt::UUID::Generate().ToUString();
 	}
 
 	// Plugins
