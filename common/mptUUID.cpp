@@ -317,7 +317,7 @@ UUID UUID::GenerateLocalUseOnly()
 UUID UUID::RFC4122Random()
 {
 	UUID result;
-	mpt::best_prng prng = mpt::make_prng<mpt::best_prng>(mpt::global_random_device());
+	mpt::thread_safe_prng<mpt::best_prng> & prng = mpt::global_prng();
 	result.Data1 = mpt::random<uint32>(prng);
 	result.Data2 = mpt::random<uint16>(prng);
 	result.Data3 = mpt::random<uint16>(prng);

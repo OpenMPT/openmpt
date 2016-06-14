@@ -1005,8 +1005,12 @@ BOOL CTrackApp::InitInstance()
 	m_RD = mpt::make_shared<mpt::random_device>();
 	// make the device available to non-tracker-only code
 	mpt::set_global_random_device(m_RD.get());
+	// create and seed the traker-global best PRNG with the random device
+	m_BestPRNG = mpt::make_shared<mpt::thread_safe_prng<mpt::best_prng> >(mpt::make_prng<mpt::best_prng>(RandomDevice()));
+	// make the best PRNG available to non-tracker-only code
+	mpt::set_global_prng(m_BestPRNG.get());
 	// create and seed the traker-global PRNG with the random device
-	m_PRNG = mpt::make_shared<mpt::prng>(mpt::make_prng<mpt::prng>(RandomDevice()));
+	m_PRNG = mpt::make_shared<mpt::thread_safe_prng<mpt::prng> >(mpt::make_prng<mpt::prng>(RandomDevice()));
 	// additionally, seed the C rand() PRNG, just in case any third party library calls rand()
 	mpt::rng::crand::reseed(RandomDevice());
 
@@ -1285,7 +1289,9 @@ int CTrackApp::ExitInstance()
 	delete m_pSongSettingsIniFile;
 	m_pSongSettingsIniFile = nullptr;
 
-	m_PRNG = MPT_SHARED_PTR<mpt::prng>();
+	m_PRNG = MPT_SHARED_PTR<mpt::thread_safe_prng<mpt::prng> >();
+	mpt::set_global_prng(nullptr);
+	m_BestPRNG = MPT_SHARED_PTR<mpt::thread_safe_prng<mpt::best_prng> >();
 	mpt::set_global_random_device(nullptr);
 	m_RD = MPT_SHARED_PTR<mpt::random_device>();
 	

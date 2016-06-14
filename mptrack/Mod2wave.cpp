@@ -1035,7 +1035,7 @@ void CDoWaveConvert::Run()
 #endif
 	}
 
-	Dither dither(theApp.RandomDevice());
+	Dither dither(theApp.BestPRNG());
 	dither.SetMode((DitherMode)encSettings.Dither.Get());
 
 	m_SndFile.ResetChannels();
