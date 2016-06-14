@@ -13,7 +13,7 @@
 
 #include "../common/FlagSet.h"
 #include "../common/mptOS.h"
-#include "../common/thread.h"
+#include "../common/mptThread.h"
 #include "../soundlib/SampleFormat.h"
 
 #include <map>

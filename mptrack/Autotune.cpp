@@ -11,7 +11,7 @@
 #include "stdafx.h"
 #include <math.h>
 #include "../common/misc_util.h"
-#include "../common/thread.h"
+#include "../common/mptThread.h"
 #include "../soundlib/Sndfile.h"
 #include "Autotune.h"
 #ifdef ENABLE_SSE2

@@ -1,6 +1,6 @@
 /*
- * mutex.h
- * -------
+ * mptMutex.h
+ * ----------
  * Purpose: Partially implement c++ mutexes as far as openmpt needs them. Can eventually go away when we only support c++11 compilers some time.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
@@ -9,24 +9,37 @@
 
 #pragma once
 
-#if defined(MPT_ENABLE_THREAD)
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#define VC_EXTRALEAN
-#define NOMINMAX
-#include <windows.h>
+#if defined(MPT_ENABLE_THREADSAFE)
+#if MPT_COMPILER_GENERIC || MPT_MSVC_AT_LEAST(2012,0) || MPT_GCC_AT_LEAST(4,4,0) || MPT_CLANG_AT_LEAST(3,6,0)
+#define MPT_STD_MUTEX 1
 #else
-#include <pthread.h>
+#define MPT_STD_MUTEX 0
 #endif
-#endif // MPT_ENABLE_THREAD
+#if MPT_STD_MUTEX
+#include <mutex>
+#else // !MPT_STD_MUTEX
+#if MPT_OS_WINDOWS
+#include <windows.h>
+#else // !MPT_OS_WINDOWS
+#include <pthread.h>
+#endif // MPT_OS_WINDOWS
+#endif // MPT_STD_MUTEX
+#endif // MPT_ENABLE_THREADSAFE
 
 OPENMPT_NAMESPACE_BEGIN
 
-#if defined(MPT_ENABLE_THREAD)
-
 namespace mpt {
 
-#ifdef _WIN32
+#if defined(MPT_ENABLE_THREADSAFE)
+
+#if MPT_STD_MUTEX
+
+typedef std::_Mutex mutex;
+typedef std::recursive_mutex recursive_mutex;
+
+#else // MPT_STD_MUTEX
+
+#if MPT_OS_WINDOWS
 
 // compatible with c++11 std::mutex, can eventually be replaced without touching any usage site
 class mutex {
@@ -52,7 +65,7 @@ public:
 	void unlock() { LeaveCriticalSection(&impl); }
 };
 
-#else // !_WIN32
+#else // !MPT_OS_WINDOWS
 
 class mutex {
 private:
@@ -90,7 +103,55 @@ public:
 	void unlock() { pthread_mutex_unlock(&hLock); }
 };
 
-#endif // _WIN32
+#endif // MPT_OS_WINDOWS
+
+#endif // MPT_STD_MUTEX
+
+#else // !MPT_ENABLE_THREADSAFE
+
+class mutex {
+public:
+	mutex() { }
+	~mutex() { }
+	void lock() { }
+	bool try_lock() { return true; }
+	void unlock() { }
+};
+
+class recursive_mutex {
+public:
+	recursive_mutex() { }
+	~recursive_mutex() { }
+	void lock() { }
+	bool try_lock() { return true; }
+	void unlock() { }
+};
+
+#endif // MPT_ENABLE_THREADSAFE
+
+#if defined(MPT_ENABLE_THREADSAFE) && MPT_STD_MUTEX
+
+#define MPT_LOCK_GUARD std::lock_guard
+
+#else //!(MPT_ENABLE_THREADSAFE && MPT_STD_MUTEX)
+
+// compatible with c++11 std::lock_guard, can eventually be replaced without touching any usage site
+template< typename mutex_type >
+class lock_guard {
+private:
+	mutex_type & mutex;
+public:
+	lock_guard( mutex_type & m ) : mutex(m) { mutex.lock(); }
+	~lock_guard() { mutex.unlock(); }
+};
+
+#define MPT_LOCK_GUARD mpt::lock_guard
+
+#endif // MPT_ENABLE_THREADSAFE && MPT_STD_MUTEX
+
+#if defined(MPT_ENABLE_THREADSAFE)
+
+#ifdef MODPLUG_TRACKER
 
 class recursive_mutex_with_lock_count {
 private:
@@ -129,18 +190,10 @@ public:
 	}
 };
 
-// compatible with c++11 std::lock_guard, can eventually be replaced without touching any usage site
-template< typename mutex_type >
-class lock_guard {
-private:
-	mutex_type & mutex;
-public:
-	lock_guard( mutex_type & m ) : mutex(m) { mutex.lock(); }
-	~lock_guard() { mutex.unlock(); }
-};
+#endif // MODPLUG_TRACKER
+
+#endif // MPT_ENABLE_THREADSAFE
 
 } // namespace mpt
-
-#endif // MPT_ENABLE_THREAD
 
 OPENMPT_NAMESPACE_END

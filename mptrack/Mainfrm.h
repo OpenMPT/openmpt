@@ -15,7 +15,7 @@
 #include "AutoSaver.h"
 #include "UpdateHints.h"
 #include "../soundlib/AudioCriticalSection.h"
-#include "../common/mutex.h"
+#include "../common/mptMutex.h"
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/Dither.h"
 

@@ -9,10 +9,10 @@
 
 #include "stdafx.h"
 
-#include "../soundlib/AudioCriticalSection.h"
+#include "AudioCriticalSection.h"
 
 #if defined(MODPLUG_TRACKER)
-#include "mutex.h"
+#include "../common/mptMutex.h"
 #endif
 
 OPENMPT_NAMESPACE_BEGIN

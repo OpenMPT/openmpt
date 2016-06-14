@@ -64,7 +64,7 @@ public:
 
 OPENMPT_NAMESPACE_END
 #include "CTreeCtrl.h"
-#include "../common/thread.h"
+#include "../common/mptThread.h"
 OPENMPT_NAMESPACE_BEGIN
 
 

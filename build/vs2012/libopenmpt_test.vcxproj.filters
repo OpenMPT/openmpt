@@ -75,6 +75,9 @@
     <ClInclude Include="..\..\common\mptLibrary.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\mptMutex.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\mptOS.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -93,6 +96,9 @@
     <ClInclude Include="..\..\common\mptStringParse.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\mptThread.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\mptTime.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -102,16 +108,10 @@
     <ClInclude Include="..\..\common\mptUUID.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\mutex.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\serialization_utils.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\stdafx.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\thread.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\typedefs.h">

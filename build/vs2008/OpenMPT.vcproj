@@ -1225,6 +1225,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\common\mptMutex.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\mptOS.cpp"
 				>
 			</File>
@@ -1273,6 +1277,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\common\mptThread.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\mptTime.cpp"
 				>
 			</File>
@@ -1290,10 +1298,6 @@
 			</File>
 			<File
 				RelativePath="..\..\common\mptUUID.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\common\mutex.h"
 				>
 			</File>
 			<File
@@ -1406,10 +1410,6 @@
 			</File>
 			<File
 				RelativePath="..\..\common\stdafx.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\common\thread.h"
 				>
 			</File>
 			<File

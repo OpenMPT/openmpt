@@ -16,7 +16,7 @@
 #include "TrackerSettings.h"
 // Setup dialog stuff
 #include "Mainfrm.h"
-#include "../common/thread.h"
+#include "../common/mptThread.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

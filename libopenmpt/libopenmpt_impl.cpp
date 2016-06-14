@@ -50,6 +50,18 @@ OPENMPT_NAMESPACE_BEGIN
 #endif // !NO_DMO
 #endif // MPT_COMPILER_MSVC
 
+#if !defined(MPT_ENABLE_THREADSAFE)
+#if MPT_COMPILER_MSVC
+#pragma message("Warning: libopenmpt built in non thread-safe mode.")
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#warning "Warning: libopenmpt built in non thread-safe mode."
+#else
+	// There is no portable way to display a warning.
+	// Try to provoke a warning with an unused variable.
+	int Warning_libopenmpt_built_in_non_thread_safe_mode;
+#endif
+#endif //!MPT_ENABLE_THREADSAFE
+
 #if defined(MPT_ASSERT_HANDLER_NEEDED) && !defined(ENABLE_TESTS)
 
 MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)

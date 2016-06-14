@@ -13,7 +13,7 @@
 
 #include "Logging.h"
 
-#include "mutex.h"
+#include "mptMutex.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -259,7 +259,7 @@ static ComponentListEntry * & ComponentListHead()
 bool ComponentListPush(ComponentListEntry *entry)
 //-----------------------------------------------
 {
-	mpt::lock_guard<mpt::mutex> guard(ComponentListMutex());
+	MPT_LOCK_GUARD<mpt::mutex> guard(ComponentListMutex());
 	entry->next = ComponentListHead();
 	ComponentListHead() = entry;
 	return true;
@@ -297,7 +297,7 @@ ComponentManager::ComponentManager(const IComponentManagerSettings &settings)
 //---------------------------------------------------------------------------
 	: m_Settings(settings)
 {
-	mpt::lock_guard<mpt::mutex> guard(ComponentListMutex());
+	MPT_LOCK_GUARD<mpt::mutex> guard(ComponentListMutex());
 	for(ComponentListEntry *entry = ComponentListHead(); entry; entry = entry->next)
 	{
 		entry->reg(*this);
