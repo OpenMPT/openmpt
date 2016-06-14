@@ -34,7 +34,7 @@ namespace mpt {
 
 #if MPT_STD_MUTEX
 
-typedef std::_Mutex mutex;
+typedef std::mutex mutex;
 typedef std::recursive_mutex recursive_mutex;
 
 #else // MPT_STD_MUTEX
