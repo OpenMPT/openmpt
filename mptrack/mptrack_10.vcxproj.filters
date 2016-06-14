@@ -643,6 +643,9 @@
     <ClCompile Include="..\soundlib\Load_sfx.cpp">
       <Filter>Source Files\soundlib\Module Loaders</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\mptRandom.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -823,9 +826,6 @@
       <Filter>Header Files\common</Filter>
     </ClInclude>
     <ClInclude Include="..\common\mptString.h">
-      <Filter>Header Files\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\mutex.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
     <ClInclude Include="..\common\Profiler.h">
@@ -1059,9 +1059,6 @@
     <ClInclude Include="..\common\mptPathString.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\thread.h">
-      <Filter>Header Files\common</Filter>
-    </ClInclude>
     <ClInclude Include="CTreeCtrl.h">
       <Filter>Header Files\mptrack</Filter>
     </ClInclude>
@@ -1265,6 +1262,12 @@
     </ClInclude>
     <ClInclude Include="..\plugins\MidiInOut\MidiInOutEditor.h">
       <Filter>Header Files\soundlib\plugins\MidiInOut</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\mptMutex.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\mptThread.h">
+      <Filter>Header Files\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
