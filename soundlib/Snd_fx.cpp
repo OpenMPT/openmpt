@@ -3748,7 +3748,7 @@ void CSoundFile::TonePortamento(ModChannel *pChn, uint32 param) const
 		return;
 	} //End candidate MPT behavior.
 
-	bool doPorta = !pChn->isFirstTick || GetType() == MOD_TYPE_DBM || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1]);
+	bool doPorta = !pChn->isFirstTick || (GetType() & (MOD_TYPE_DBM | MOD_TYPE_669)) || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1]);
 	if(GetType() == MOD_TYPE_PLM && param >= 0xF0)
 	{
 		param -= 0xF0;
