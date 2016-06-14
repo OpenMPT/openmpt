@@ -518,6 +518,10 @@
 #define MPT_ENABLE_THREADSAFE // Always enable thread-safe code in tracker and libopenmpt on windows or with a C++11 compiler (i.e. guard globals with mutexes). (i.e. do not reply on or require pthreads as fallback)
 #endif
 
+#if MPT_OS_EMSCRIPTEN && defined(MPT_ENABLE_THREADSAFE)
+#undef MPT_ENABLE_THREADSAFE // no threading on Emscripten
+#endif
+
 #if defined(MODPLUG_TRACKER) && !defined(MPT_ENABLE_THREAD)
 #define MPT_ENABLE_THREAD // Tracker requires threads
 #endif
