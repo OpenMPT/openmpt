@@ -496,6 +496,41 @@ public:
 #endif // MPT_STD_RANDOM
 
 
+#if MPT_STD_RANDOM
+
+// mpt::random_device always generates 32 bits of entropy
+typedef mpt::sane_random_device random_device;
+
+// We cannot use std::minstd_rand here because it has not a power-of-2 sized
+// output domain which we rely upon.
+typedef mpt::rng::lcg_msvc fast_prng; // about 3 ALU operations, ~32bit of state, suited for inner loops
+typedef std::mt19937       main_prng;
+typedef std::ranlux48      best_prng;
+
+#else // !MPT_STD_RANDOM
+
+// easy to implement fallbacks, only used on very old compilers
+
+typedef mpt::prng_random_device<mpt::rng::lcg_musl> random_device;
+
+typedef mpt::rng::lcg_msvc fast_prng;
+typedef mpt::rng::lcg_c99  main_prng;
+typedef mpt::rng::lcg_musl best_prng;
+
+#endif // MPT_STD_RANDOM
+
+
+typedef mpt::main_prng default_prng;
+typedef mpt::main_prng prng;
+
+
+template <typename Trng, typename Trd>
+inline Trng make_prng(Trd & rd)
+{
+	return mpt::engine_traits<Trng>::make(rd);
+}
+
+
 template <typename Trng>
 class thread_safe_prng
 	: private Trng
@@ -546,41 +581,6 @@ public:
 		return Trng::random_bits();
 	}
 };
-
-
-#if MPT_STD_RANDOM
-
-// mpt::random_device always generates 32 bits of entropy
-typedef mpt::sane_random_device random_device;
-
-// We cannot use std::minstd_rand here because it has not a power-of-2 sized
-// output domain which we rely upon.
-typedef mpt::rng::lcg_msvc fast_prng; // about 3 ALU operations, ~32bit of state, suited for inner loops
-typedef std::mt19937       main_prng;
-typedef std::ranlux48      best_prng;
-
-#else // !MPT_STD_RANDOM
-
-// easy to implement fallbacks, only used on very old compilers
-
-typedef mpt::prng_random_device<mpt::rng::lcg_musl> random_device;
-
-typedef mpt::rng::lcg_msvc fast_prng;
-typedef mpt::rng::lcg_c99  main_prng;
-typedef mpt::rng::lcg_musl best_prng;
-
-#endif // MPT_STD_RANDOM
-
-
-typedef mpt::main_prng default_prng;
-typedef mpt::main_prng prng;
-
-
-template <typename Trng, typename Trd>
-inline Trng make_prng(Trd & rd)
-{
-	return mpt::engine_traits<Trng>::make(rd);
-}
 
 
 mpt::random_device & global_random_device();
