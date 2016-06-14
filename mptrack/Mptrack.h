@@ -176,7 +176,8 @@ protected:
 	DWORD m_GuiThreadId;
 
 	MPT_SHARED_PTR<mpt::random_device> m_RD;
-	MPT_SHARED_PTR<mpt::prng> m_PRNG;
+	MPT_SHARED_PTR<mpt::thread_safe_prng<mpt::best_prng> > m_BestPRNG;
+	MPT_SHARED_PTR<mpt::thread_safe_prng<mpt::prng> > m_PRNG;
 
 	IniFileSettingsBackend *m_pSettingsIniFile;
 	SettingsContainer *m_pSettings;
@@ -260,7 +261,8 @@ public:
 	inline mpt::recursive_mutex_with_lock_count & GetGlobalMutexRef() { return m_GlobalMutex; }
 	bool InGuiThread() const { return GetCurrentThreadId() == m_GuiThreadId; }
 	mpt::random_device & RandomDevice() { return *m_RD; }
-	mpt::prng & PRNG() { return *m_PRNG; }
+	mpt::thread_safe_prng<mpt::best_prng> & BestPRNG() { return *m_BestPRNG; }
+	mpt::thread_safe_prng<mpt::prng> & PRNG() { return *m_PRNG; }
 	CModDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }
 	SoundDevice::Manager *GetSoundDevicesManager() const { return m_pSoundDevicesManager; }

@@ -89,13 +89,7 @@ CSoundFile::CSoundFile() :
 #ifdef MODPLUG_TRACKER
 	m_MIDIMapper(*this),
 #endif
-	m_PRNG(
-		#if defined(MODPLUG_TRACKER)
-			mpt::make_prng<mpt::fast_prng>(theApp.RandomDevice())
-		#elif defined(LIBOPENMPT_BUILD)
-			mpt::make_prng<mpt::fast_prng>(mpt::global_random_device())
-		#endif
-	),
+	m_PRNG(mpt::make_prng<mpt::fast_prng>(mpt::global_prng())),
 	visitedSongRows(*this),
 	m_pCustomLog(nullptr)
 //----------------------

@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "mptMutex.h"
+
 #if MPT_COMPILER_GENERIC || (MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2010,0)) || (MPT_COMPILER_GCC && MPT_GCC_AT_LEAST(4,5,0)) || (MPT_COMPILER_CLANG && MPT_CLANG_AT_LEAST(3,0,0))
 #define MPT_STD_RANDOM 1
 #else // MPT_COMPILER
@@ -45,6 +47,7 @@ namespace mpt
 
 template <typename Trng> struct engine_traits
 {
+	typedef typename Trng::result_type result_type;
 	static inline int entropy_bits()
 	{
 		return Trng::bits();
@@ -295,6 +298,7 @@ public:
 class sane_random_device
 {
 private:
+	mpt::mutex m;
 	bool rd_reliable;
 	std::random_device rd;
 	MPT_SHARED_PTR<std::mt19937> rd_fallback;
@@ -342,6 +346,7 @@ public:
 template <> struct engine_traits<std::mt19937> {
 	static const std::size_t seed_bits = sizeof(std::mt19937::result_type) * 8 * std::mt19937::state_size;
 	typedef std::mt19937 rng_type;
+	typedef rng_type::result_type result_type;
 	static inline int entropy_bits() { return rng_type::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
@@ -354,6 +359,7 @@ template <> struct engine_traits<std::mt19937> {
 template <> struct engine_traits<std::mt19937_64> {
 	static const std::size_t seed_bits = sizeof(std::mt19937_64::result_type) * 8 * std::mt19937_64::state_size;
 	typedef std::mt19937_64 rng_type;
+	typedef rng_type::result_type result_type;
 	static inline int entropy_bits() { return rng_type::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
@@ -366,6 +372,7 @@ template <> struct engine_traits<std::mt19937_64> {
 template <> struct engine_traits<std::ranlux24_base> {
 	static const std::size_t seed_bits = std::ranlux24_base::word_size;
 	typedef std::ranlux24_base rng_type;
+	typedef rng_type::result_type result_type;
 	static inline int entropy_bits() { return rng_type::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
@@ -378,6 +385,7 @@ template <> struct engine_traits<std::ranlux24_base> {
 template <> struct engine_traits<std::ranlux48_base> {
 	static const std::size_t seed_bits = std::ranlux48_base::word_size;
 	typedef std::ranlux48_base rng_type;
+	typedef rng_type::result_type result_type;
 	static inline int entropy_bits() { return rng_type::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
@@ -390,6 +398,7 @@ template <> struct engine_traits<std::ranlux48_base> {
 template <> struct engine_traits<std::ranlux24> {
 	static const std::size_t seed_bits = std::ranlux24_base::word_size;
 	typedef std::ranlux24 rng_type;
+	typedef rng_type::result_type result_type;
 	static inline int entropy_bits() { return std::ranlux24_base::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
@@ -402,6 +411,7 @@ template <> struct engine_traits<std::ranlux24> {
 template <> struct engine_traits<std::ranlux48> {
 	static const std::size_t seed_bits = std::ranlux48_base::word_size;
 	typedef std::ranlux48 rng_type;
+	typedef rng_type::result_type result_type;
 	static inline int entropy_bits() { return std::ranlux48_base::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
@@ -440,6 +450,7 @@ class prng_random_device
 public:
 	typedef unsigned int result_type;
 private:
+	mpt::mutex m;
 	Trng rng;
 public:
 	prng_random_device()
@@ -466,20 +477,75 @@ public:
 	}
 	result_type operator()()
 	{
+		MPT_LOCK_GUARD<mpt::mutex> l(m);
 		return mpt::random<unsigned int>(rng);
 	}
 	result_type random()
 	{
-		return operator()();
+		MPT_LOCK_GUARD<mpt::mutex> l(m);
+		return mpt::random<unsigned int>(rng);
 	}
 	result_type random_bits()
 	{
-		return operator()();
+		MPT_LOCK_GUARD<mpt::mutex> l(m);
+		return mpt::random<unsigned int>(rng);
 	}
 };
 
 
 #endif // MPT_STD_RANDOM
+
+
+template <typename Trng>
+class thread_safe_prng
+	: private Trng
+{
+private:
+	mpt::mutex m;
+public:
+	typedef typename Trng::result_type result_type;
+public:
+	template <typename Trd>
+	explicit thread_safe_prng(Trd & rd)
+		: Trng(mpt::make_prng<Trng>(rd))
+	{
+		return;
+	}
+	thread_safe_prng(Trng rng)
+		: Trng(rng)
+	{
+		return;
+	}
+public:
+	static typename engine_traits<Trng>::result_type min()
+	{
+		return Trng::min();
+	}
+	static typename engine_traits<Trng>::result_type max()
+	{
+		return Trng::max();
+	}
+	static int bits()
+	{
+		return engine_traits<Trng>::entropy_bits();
+	}
+public:
+	typename engine_traits<Trng>::result_type operator()()
+	{
+		MPT_LOCK_GUARD<mpt::mutex> l(m);
+		return Trng::operator()();
+	}
+	typename engine_traits<Trng>::result_type random()
+	{
+		MPT_LOCK_GUARD<mpt::mutex> l(m);
+		return Trng::random();
+	}
+	typename engine_traits<Trng>::result_type random_bits()
+	{
+		MPT_LOCK_GUARD<mpt::mutex> l(m);
+		return Trng::random_bits();
+	}
+};
 
 
 #if MPT_STD_RANDOM
@@ -518,9 +584,11 @@ inline Trng make_prng(Trd & rd)
 
 
 mpt::random_device & global_random_device();
+mpt::thread_safe_prng<mpt::best_prng> & global_prng();
 
 #if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 void set_global_random_device(mpt::random_device *rd);
+void set_global_prng(mpt::thread_safe_prng<mpt::best_prng> *rng);
 #endif // MODPLUG_TRACKER && !MPT_BUILD_WINESUPPORT
 
 
