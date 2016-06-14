@@ -117,15 +117,13 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	//bool has669Ext = fileHeader.sig == _669FileHeader::magic669Ext;
-
 	InitializeGlobals(MOD_TYPE_669);
-	m_SongFlags = SONG_LINEARSLIDES;
 	m_nMinPeriod = 28 << 2;
 	m_nMaxPeriod = 1712 << 3;
 	m_nDefaultTempo.Set(78);
 	m_nDefaultSpeed = 4;
 	m_nChannels = 8;
+	m_playBehaviour.set(kHertzInLinearMode);
 
 	if(fileHeader.sig == _669FileHeader::magic669)
 		m_madeWithTracker = "Composer 669";
@@ -173,8 +171,8 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 
 		const ModCommand::COMMAND effTrans[] =
 		{
-			CMD_PORTAMENTOUP,	CMD_PORTAMENTODOWN,	CMD_TONEPORTAMENTO,	CMD_PORTAMENTOUP,
-			CMD_ARPEGGIO,		CMD_SPEED,			CMD_PANNINGSLIDE,	CMD_RETRIG,
+			CMD_PORTAMENTOUP,	CMD_PORTAMENTODOWN,	CMD_TONEPORTAMENTO,	CMD_S3MCMDEX,
+			CMD_VIBRATO,		CMD_SPEED,			CMD_PANNINGSLIDE,	CMD_RETRIG,
 		};
 
 		uint8 effect[8] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
@@ -218,9 +216,10 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 
 				m->param = effect[chn] & 0x0F;
 
-				if((effect[chn] >> 4) < static_cast<uint8>(CountOf(effTrans)))
+				uint8 command = effect[chn] >> 4;
+				if(command < static_cast<uint8>(CountOf(effTrans)))
 				{
-					m->command = effTrans[effect[chn] >> 4];
+					m->command = effTrans[command];
 				} else
 				{
 					m->command = CMD_NONE;
@@ -228,31 +227,31 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 				}
 
 				// Fix some commands
-				switch(effect[chn] >> 4)
+				switch(command)
 				{
 				case 3:
 					// D - frequency adjust
-					if(m->param)
-					{
-						m->param |= 0xF0;
-					} else
-					{
-						// Restore original note
-						m->command = CMD_TONEPORTAMENTO;
-						m->param = 0xFF;
-					}
+#ifdef MODPLUG_TRACKER
+					// Since we convert to S3M, the finetune command will not quite do what we intend to do (it can adjust the frequency upwards and downwards), so try to approximate it using a fine slide.
+					m->command = CMD_PORTAMENTOUP;
+					m->param |= 0xF0;
+#else
+					m->param |= 0x20;
+#endif
 					effect[chn] = 0xFF;
 					break;
 
 				case 4:
-					// E - frequency vibrato - sounds like an arpeggio, sometimes goes up, sometimes goes down,
-					// depending on when you restart playback? weird!
+					// E - frequency vibrato - almost like an arpeggio, but does not arpeggiate by a given note but by a frequency amount.
+#ifdef MODPLUG_TRACKER
+					m->command = CMD_ARPEGGIO;
+#endif
 					m->param |= (m->param << 4);
 					break;
 
 				case 5:
 					// F - set tempo
-					// TODO: param 0 is a "super fast tempo" in extended mode (?)
+					// TODO: param 0 is a "super fast tempo" in Unis 669 mode (?)
 					effect[chn] = 0xFF;
 					break;
 

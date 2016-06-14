@@ -3400,7 +3400,7 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, ModCommand::PARAM param, const 
 		}
 	}
 	// Regular Slide
-	if(!pChn->isFirstTick || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1]))
+	if(!pChn->isFirstTick || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1]) || GetType() == MOD_TYPE_669)
 	{
 		DoFreqSlide(pChn, -int(param) * 4);
 	}
@@ -3459,7 +3459,7 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, ModCommand::PARAM param, cons
 		}
 	}
 
-	if(!pChn->isFirstTick || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1]))
+	if(!pChn->isFirstTick || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1]) || GetType() == MOD_TYPE_669)
 	{
 		DoFreqSlide(pChn, int(param) * 4);
 	}
@@ -3803,7 +3803,6 @@ void CSoundFile::Vibrato(ModChannel *p, uint32 param) const
 {
 	p->m_VibratoDepth = (param & 0x0F) / 15.0F;
 	//'New tuning'-thing: 0 - 1 <-> No depth - Full depth.
-
 
 	if (param & 0x0F) p->nVibratoDepth = (param & 0x0F) * 4;
 	if (param & 0xF0) p->nVibratoSpeed = (param >> 4) & 0x0F;
@@ -4213,9 +4212,18 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 	case 0x10:	pChn->dwFlags.set(CHN_GLISSANDO, param != 0); break;
 	// S2x: Set FineTune
 	case 0x20:	if(!m_SongFlags[SONG_FIRSTTICK]) break;
-				pChn->nC5Speed = S3MFineTuneTable[param];
-				pChn->nFineTune = MOD2XMFineTune(param);
-				if (pChn->nPeriod) pChn->nPeriod = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC5Speed);
+				if(GetType() != MOD_TYPE_669)
+				{
+					pChn->nC5Speed = S3MFineTuneTable[param];
+					pChn->nFineTune = MOD2XMFineTune(param);
+					if (pChn->nPeriod) pChn->nPeriod = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC5Speed);
+				} else if(param)
+				{
+					// TODO: This should undo a previous finetune effect on the same note, but it currently doesn't.
+					// I have yet to find a module which would exploit this behaviour, though.
+					// Might need to add a permanent "period offset" (reset with each note-on event), which would also fix volume-column vibrato in XM.
+					pChn->nPeriod += param * 80;
+				}
 				break;
 	// S3x: Set Vibrato Waveform
 	case 0x30:	if(GetType() == MOD_TYPE_S3M)
@@ -5090,6 +5098,13 @@ void CSoundFile::DoFreqSlide(ModChannel *pChn, int32 nFreqSlide) const
 //--------------------------------------------------------------------
 {
 	if(!pChn->nPeriod) return;
+	if(GetType() == MOD_TYPE_669)
+	{
+		// Like other oldskool trackers, Composer 669 doesn't have linear slides...
+		// But the slides are done in Hertz rather than periods, meaning that they
+		// are more effective in the lower notes (rather than the higher notes).
+		nFreqSlide *= -20;
+	}
 	if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 	{
 		// IT Linear slides
@@ -5397,7 +5412,7 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 	if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_MT2|MOD_TYPE_S3M|MOD_TYPE_STM|MOD_TYPE_MDL|MOD_TYPE_ULT|MOD_TYPE_WAV|MOD_TYPE_669|MOD_TYPE_PLM
 				|MOD_TYPE_FAR|MOD_TYPE_DMF|MOD_TYPE_PTM|MOD_TYPE_AMS|MOD_TYPE_AMS2|MOD_TYPE_DBM|MOD_TYPE_AMF|MOD_TYPE_PSM|MOD_TYPE_J2B|MOD_TYPE_IMF|MOD_TYPE_UAX))
 	{
-		if(m_SongFlags[SONG_LINEARSLIDES])
+		if(m_SongFlags[SONG_LINEARSLIDES] || GetType() == MOD_TYPE_669)
 		{
 			// In IT linear slide mode, periods are equal to frequency.
 			if(m_playBehaviour[kHertzInLinearMode])
@@ -5505,7 +5520,7 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 	} else
 	{
 		LimitMax(period, Util::MaxValueOfType(period) >> 8);
-		if(m_SongFlags[SONG_LINEARSLIDES])
+		if(m_SongFlags[SONG_LINEARSLIDES] || GetType() == MOD_TYPE_669)
 		{
 			if(m_playBehaviour[kHertzInLinearMode])
 			{
