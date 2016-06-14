@@ -21,6 +21,8 @@ is just a high-level summary.
  *  [**Bug**] libopenmpt no longer uses the non-thread-safe global std::rand()
     function.
 
+ *  Various playback fixes for 669 files.
+
 ### libopenmpt 0.2-beta17 (2016-05-21)
 
  *  [**Change**] The Makefile and Autotools build systems now require to
