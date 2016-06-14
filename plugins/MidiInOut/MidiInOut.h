@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "../../common/mutex.h"
+#include "../../common/mptMutex.h"
 #include "../../soundlib/plugins/PlugInterface.h"
 #include <portmidi/pm_common/portmidi.h>
 #include <portmidi/porttime/porttime.h>

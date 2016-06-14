@@ -1,6 +1,6 @@
 /*
- * thread.h
- * --------
+ * mptThread.h
+ * -----------
  * Purpose: Helper class for running threads, with a more or less platform-independent interface.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
@@ -9,48 +9,56 @@
 
 #pragma once
 
- 
 #if defined(MPT_ENABLE_THREAD)
 
-#if MPT_OS_WINDOWS && MPT_MSVC_BEFORE(2012,0)
-// our own
+#if MPT_COMPILER_GENERIC || MPT_MSVC_AT_LEAST(2012,0) || MPT_GCC_AT_LEAST(4,4,0) || MPT_CLANG_AT_LEAST(3,6,0)
+#define MPT_STD_THREAD 1
 #else
-#include <thread>
+#define MPT_STD_THREAD 0
 #endif
+#if MPT_STD_THREAD
+#include <thread>
+#else // !MPT_STD_THREAD
+#if MPT_OS_WINDOWS
+#include <windows.h>
+#else // !MPT_OS_WINDOWS
+#include <pthread.h>
+#endif // MPT_OS_WINDOWS
+#endif // MPT_STD_THREAD
+
+#if defined(MODPLUG_TRACKER)
+#if MPT_OS_WINDOWS
+#include <windows.h>
+#endif // MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER
+
+#endif // MPT_ENABLE_THREAD
+
 
 OPENMPT_NAMESPACE_BEGIN
+
+
+#if defined(MPT_ENABLE_THREAD)
 
 namespace mpt
 {
 
 
+
+#if MPT_STD_THREAD
+
+
+
+typedef std::thread::native_handle_type native_handle_type;
+typedef std::thread thread;
+
+
+
+#else // !MPT_STD_THREAD
+
+
+
 #if MPT_OS_WINDOWS
-
-enum ThreadPriority
-{
-	ThreadPriorityLowest  = THREAD_PRIORITY_LOWEST,
-	ThreadPriorityLower   = THREAD_PRIORITY_BELOW_NORMAL,
-	ThreadPriorityNormal  = THREAD_PRIORITY_NORMAL,
-	ThreadPriorityHigh    = THREAD_PRIORITY_ABOVE_NORMAL,
-	ThreadPriorityHighest = THREAD_PRIORITY_HIGHEST
-};
-
-#else
-
-enum ThreadPriority
-{
-	ThreadPriorityLowest  = -2,
-	ThreadPriorityLower   = -1,
-	ThreadPriorityNormal  =  0,
-	ThreadPriorityHigh    =  1,
-	ThreadPriorityHighest =  2
-};
-
-#endif
-
-
-
-#if MPT_OS_WINDOWS && MPT_MSVC_BEFORE(2012,0)
 
 
 
@@ -291,15 +299,11 @@ public:
 
 
 
-#else // !(MPT_OS_WINDOWS && MPT_MSVC_BEFORE(2012,0))
+#endif // MPT_OS_WINDOWS
 
 
 
-typedef std::thread thread;
-
-
-
-#endif // MPT_OS_WINDOWS && MPT_MSVC_BEFORE(2012,0)
+#endif // MPT_STD_THREAD
 
 
 
@@ -328,7 +332,18 @@ public:
 
 
 
+#if defined(MODPLUG_TRACKER)
+
 #if MPT_OS_WINDOWS
+
+enum ThreadPriority
+{
+	ThreadPriorityLowest  = THREAD_PRIORITY_LOWEST,
+	ThreadPriorityLower   = THREAD_PRIORITY_BELOW_NORMAL,
+	ThreadPriorityNormal  = THREAD_PRIORITY_NORMAL,
+	ThreadPriorityHigh    = THREAD_PRIORITY_ABOVE_NORMAL,
+	ThreadPriorityHighest = THREAD_PRIORITY_HIGHEST
+};
 
 inline void SetThreadPriority(mpt::thread &t, mpt::ThreadPriority priority)
 {
@@ -352,7 +367,18 @@ inline void SetCurrentThreadPriority(mpt::ThreadPriority /*priority*/ )
 	// nothing
 }
 
+enum ThreadPriority
+{
+	ThreadPriorityLowest  = -2,
+	ThreadPriorityLower   = -1,
+	ThreadPriorityNormal  =  0,
+	ThreadPriorityHigh    =  1,
+	ThreadPriorityHighest =  2
+};
+
 #endif // MPT_OS_WINDOWS
+
+#endif // MODPLUG_TRACKER
 
 
 
@@ -408,7 +434,6 @@ inline void SetThreadPriority(mpt::UnmanagedThread &t, mpt::ThreadPriority prior
 
 }	// namespace mpt
 
-OPENMPT_NAMESPACE_END
-
 #endif // MPT_ENABLE_THREAD
 
+OPENMPT_NAMESPACE_END

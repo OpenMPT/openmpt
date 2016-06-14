@@ -18,7 +18,7 @@
 #include "../soundlib/MIDIMacros.h"
 #include "../soundlib/modcommand.h"
 #include "../common/ComponentManager.h"
-#include "../common/mutex.h"
+#include "../common/mptMutex.h"
 #include "../common/mptRandom.h"
 #include <vector>
 

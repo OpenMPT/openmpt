@@ -28,7 +28,7 @@ static void PushToVector(std::vector<char> &data, const T &obj, size_t writeSize
 
 #include "AEffectWrapper.h"
 #include "BridgeOpCodes.h"
-#include "../common/thread.h"
+#include "../common/mptThread.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

@@ -235,7 +235,7 @@ CAbstractVstEditor *MidiInOut::OpenEditor()
 void MidiInOut::Process(float *, float *, uint32 numFrames)
 //---------------------------------------------------------
 {
-	mpt::lock_guard<mpt::mutex> lock(mutex);
+	MPT_LOCK_GUARD<mpt::mutex> lock(mutex);
 
 	if(outputDevice.stream != nullptr)
 	{
@@ -440,7 +440,7 @@ void MidiInOut::OpenDevice(PmDeviceID newDevice, bool asInputDevice)
 		// Don't open MIDI devices if we're not processing.
 		// This has to be done since we receive MIDI events in processReplacing(),
 		// so if no processing is happening, some irrelevant events might be queued until the next processing happens...
-		mpt::lock_guard<mpt::mutex> lock(mutex);
+		MPT_LOCK_GUARD<mpt::mutex> lock(mutex);
 		if(asInputDevice)
 		{
 			result = Pm_OpenInput(&device.stream, newDevice, nullptr, 0, nullptr, nullptr);
@@ -475,7 +475,7 @@ void MidiInOut::CloseDevice(MidiDevice &device)
 {
 	if(device.stream != nullptr)
 	{
-		mpt::lock_guard<mpt::mutex> lock(mutex);
+		MPT_LOCK_GUARD<mpt::mutex> lock(mutex);
 		Pm_Close(device.stream);
 		device.stream = nullptr;
 	}

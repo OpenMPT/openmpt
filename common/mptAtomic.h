@@ -388,7 +388,7 @@ typedef std::atomic<int64> atomic_int64_t;
 
 } // namespace mpt
 OPENMPT_NAMESPACE_END
-#include "mutex.h"
+#include "mptMutex.h"
 OPENMPT_NAMESPACE_BEGIN
 namespace mpt {
 
@@ -406,20 +406,20 @@ private: // disabled
 public:
 	
 	atomic_impl_locked() {
-		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		MPT_LOCK_GUARD<mpt::mutex> guard(Mutex);
 	}
 	atomic_impl_locked( T init ) {
-		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		MPT_LOCK_GUARD<mpt::mutex> guard(Mutex);
 		Data = init;
 	}
 	T operator = ( T src ) {
-		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		MPT_LOCK_GUARD<mpt::mutex> guard(Mutex);
 		Data = src;
 		return Data;
 	}
 
 	operator T () const {
-		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		MPT_LOCK_GUARD<mpt::mutex> guard(Mutex);
 		return Data;
 	}
 
@@ -428,22 +428,22 @@ public:
 	}
 
 	T load() const {
-		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		MPT_LOCK_GUARD<mpt::mutex> guard(Mutex);
 		return Data;
 	}
 	void store( T val ) {
-		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		MPT_LOCK_GUARD<mpt::mutex> guard(Mutex);
 		Data = val;
 	}
 	T exchange( T val ) {
-		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		MPT_LOCK_GUARD<mpt::mutex> guard(Mutex);
 		T old = Data;
 		Data = val;
 		return old;
 	}
 
 	bool compare_exchange_strong( T & expected, T new_value ) {
-		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		MPT_LOCK_GUARD<mpt::mutex> guard(Mutex);
 		if(Data != expected)
 		{
 			return false;
@@ -452,7 +452,7 @@ public:
 		return true;
 	}
 	bool compare_exchange_weak( T & expected, T new_value ) {
-		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		MPT_LOCK_GUARD<mpt::mutex> guard(Mutex);
 		if(Data != expected)
 		{
 			return false;
@@ -462,32 +462,32 @@ public:
 	}
 
 	T fetch_add( T val ) {
-		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		MPT_LOCK_GUARD<mpt::mutex> guard(Mutex);
 		T old = Data;
 		Data += val;
 		return old;
 	}
 	T fetch_sub( T val ) {
-		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		MPT_LOCK_GUARD<mpt::mutex> guard(Mutex);
 		T old = Data;
 		Data -= val;
 		return old;
 	}
 
 	T fetch_and( T val ) {
-		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		MPT_LOCK_GUARD<mpt::mutex> guard(Mutex);
 		T old = Data;
 		Data &= val;
 		return old;
 	}
 	T fetch_or( T val ) {
-		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		MPT_LOCK_GUARD<mpt::mutex> guard(Mutex);
 		T old = Data;
 		Data |= val;
 		return old;
 	}
 	T fetch_xor( T val ) {
-		mpt::lock_guard<mpt::mutex> guard(Mutex);
+		MPT_LOCK_GUARD<mpt::mutex> guard(Mutex);
 		T old = Data;
 		Data ^= val;
 		return old;

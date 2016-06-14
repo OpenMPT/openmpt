@@ -13,7 +13,7 @@
 
 #include "SoundDevice.h"
 
-#include "../common/mutex.h"
+#include "../common/mptMutex.h"
 #include "../common/misc_util.h"
 #include "../common/mptAtomic.h"
 
