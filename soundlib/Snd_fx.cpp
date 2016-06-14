@@ -3755,7 +3755,14 @@ void CSoundFile::TonePortamento(ModChannel *pChn, uint32 param) const
 		doPorta = pChn->isFirstTick;
 	}
 
-	if(param) pChn->nPortamentoSlide = param * 4;
+	if(param)
+	{
+		if(GetType() == MOD_TYPE_669)
+		{
+			param *= 10;
+		}
+		pChn->nPortamentoSlide = param * 4;
+	}
 
 	if(pChn->nPeriod && pChn->nPortamentoDest && doPorta)
 	{
