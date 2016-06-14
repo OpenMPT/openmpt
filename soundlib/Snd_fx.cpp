@@ -4224,12 +4224,9 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 					pChn->nC5Speed = S3MFineTuneTable[param];
 					pChn->nFineTune = MOD2XMFineTune(param);
 					if (pChn->nPeriod) pChn->nPeriod = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC5Speed);
-				} else if(param)
+				} else if(pChn->pModSample != nullptr)
 				{
-					// TODO: This should undo a previous finetune effect on the same note, but it currently doesn't.
-					// I have yet to find a module which would exploit this behaviour, though.
-					// Might need to add a permanent "period offset" (reset with each note-on event), which would also fix volume-column vibrato in XM.
-					pChn->nPeriod += param * 80;
+					pChn->nC5Speed = pChn->pModSample->nC5Speed + param * 80;
 				}
 				break;
 	// S3x: Set Vibrato Waveform
@@ -5524,6 +5521,10 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 			if(!period) period = 1;
 			return ((8363 * 1712L) << FREQ_FRACBITS) / period;
 		}
+	} else if(GetType() == MOD_TYPE_669)
+	{
+		// We only really use c5speed for the finetune pattern command. All samples in 669 files have the same middle-C speed (imported as 8363 Hz).
+		return (period + c5speed - 8363) <<  FREQ_FRACBITS;
 	} else
 	{
 		LimitMax(period, Util::MaxValueOfType(period) >> 8);
