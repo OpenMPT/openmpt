@@ -99,17 +99,22 @@ static inline bool is_mask(T x)
 
 
 namespace {
-template <typename T> struct default_crc { };
-template <> struct default_crc<uint8>  { typedef mpt::checksum::crc16 type; };
-template <> struct default_crc<uint16> { typedef mpt::checksum::crc16 type; };
-template <> struct default_crc<uint32> { typedef mpt::checksum::crc32c type; };
-template <> struct default_crc<uint64> { typedef mpt::checksum::crc64_jones type; };
+template <typename T> struct default_hash { };
+template <> struct default_hash<uint8>  { typedef mpt::checksum::crc16 type; };
+template <> struct default_hash<uint16> { typedef mpt::checksum::crc16 type; };
+template <> struct default_hash<uint32> { typedef mpt::checksum::crc32c type; };
+template <> struct default_hash<uint64> { typedef mpt::checksum::crc64_jones type; };
 }
 
 template <typename T>
 static T generate_timeseed()
 {
-	typename mpt::default_crc<T>::type crc;
+	// Note: CRC is actually not that good a choice here, but it is simple and we
+	// already have an implementaion available. Better choices for mixing entropy
+	// would be a hash function with proper avalanche characteristics or a block
+	// or stream cipher with any pre-choosen random key and IV. The only aspect we
+	// really need here is whitening of the bits.
+	typename mpt::default_hash<T>::type hash;
 	
 	{
 		#if MPT_OS_WINDOWS
@@ -124,7 +129,7 @@ static T generate_timeseed()
 		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
 			std::reverse(bytes + 0, bytes + CountOf(bytes));
 		#endif
-		crc(bytes + 0, bytes + CountOf(bytes));
+		hash(bytes + 0, bytes + CountOf(bytes));
 	}
 
 	{
@@ -134,10 +139,10 @@ static T generate_timeseed()
 		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
 			std::reverse(bytes + 0, bytes + CountOf(bytes));
 		#endif
-		crc(bytes + 0, bytes + CountOf(bytes));
+		hash(bytes + 0, bytes + CountOf(bytes));
 	}
 
-	return static_cast<T>(crc.result());
+	return static_cast<T>(hash.result());
 }
 
 
