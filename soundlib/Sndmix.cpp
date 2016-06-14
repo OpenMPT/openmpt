@@ -1425,8 +1425,17 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 
 	if(chn.dwFlags[CHN_VIBRATO])
 	{
-		uint32 vibpos = chn.nVibratoPos;
+		if(GetType() == MOD_TYPE_669)
+		{
+			if(chn.nVibratoPos % 2u)
+			{
+				period += chn.nVibratoDepth * 166;	// Already multiplied by 4, and it seems like the real factor here is 669... how original =)
+			}
+			chn.nVibratoPos++;
+			return;
+		}
 
+		uint32 vibpos = chn.nVibratoPos;
 		int vdelta = GetVibratoDelta(chn.nVibratoType, vibpos);
 
 		if(GetType() == MOD_TYPE_MPT && chn.pModInstrument && chn.pModInstrument->pTuning)
@@ -1638,9 +1647,7 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 				// Calculate current autovibrato depth using vibsweep
 				if (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
 				{
-					// Note: changed bitshift from 3 to 1 as the variable is not divided by 4 in the IT loader anymore
-					// - so we divide sweep by 4 here.
-					pChn->nAutoVibDepth += pSmp->nVibSweep << 1;
+					pChn->nAutoVibDepth += pSmp->nVibSweep * 2u;
 				} else
 				{
 					if(!pChn->dwFlags[CHN_KEYOFF])
