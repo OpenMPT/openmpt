@@ -187,7 +187,7 @@ namespace rng
 #pragma warning(disable:4724) // potential mod by 0
 #endif // MPT_COMPILER_MSVC
 
-template <typename Tstate, typename Tvalue, Tstate m, Tstate a, Tstate c, Tstate result_mask, int result_shift, int result_bits>
+template <typename Tstate, typename Tvalue, Tstate m, Tstate a, Tstate c, Tstate result_mask, int result_shift, int result_bits_>
 class lcg
 {
 public:
@@ -219,8 +219,8 @@ public:
 	}
 	static inline int result_bits()
 	{
-		STATIC_ASSERT(((static_cast<Tstate>(1) << result_bits) - 1) == (result_mask >> result_shift));
-		return result_bits;
+		STATIC_ASSERT(((static_cast<Tstate>(1) << result_bits_) - 1) == (result_mask >> result_shift));
+		return result_bits_;
 	}
 	inline result_type operator()()
 	{
