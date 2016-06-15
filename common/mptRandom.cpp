@@ -116,6 +116,12 @@ static T generate_timeseed()
 	// really need here is whitening of the bits.
 	typename mpt::default_hash<T>::type hash;
 	
+#ifdef MPT_BUILD_FUZZER
+
+	return mpt::FUZZER_RNG_SEED;
+
+#else // !MPT_BUILD_FUZZER
+
 	{
 		#if MPT_OS_WINDOWS
 			FILETIME t;
@@ -143,6 +149,9 @@ static T generate_timeseed()
 	}
 
 	return static_cast<T>(hash.result());
+
+#endif // MPT_BUILD_FUZZER
+
 }
 
 
@@ -272,7 +281,7 @@ sane_random_device::result_type sane_random_device::operator()()
 	return result;
 }
 
-#else // !MPT_STD_RANDOM
+#endif // MPT_STD_RANDOM
 
 prng_random_device_seeder::prng_random_device_seeder()
 {
@@ -298,8 +307,6 @@ uint64 prng_random_device_seeder::generate_seed64()
 {
 	return mpt::generate_timeseed<uint64>();
 }
-
-#endif // MPT_STD_RANDOM
 
 #if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 

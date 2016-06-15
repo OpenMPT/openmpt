@@ -45,6 +45,11 @@ namespace mpt
 {
 
 
+#ifdef MPT_BUILD_FUZZER
+static const uint32 FUZZER_RNG_SEED = 3141592653u; // pi
+#endif // MPT_BUILD_FUZZER
+
+
 template <typename Trng> struct engine_traits
 {
 	typedef typename Trng::result_type result_type;
@@ -413,7 +418,7 @@ template <> struct engine_traits<std::ranlux48> {
 };
 
 
-#else // !MPT_STD_RANDOM
+#endif // MPT_STD_RANDOM
 
 
 class prng_random_device_seeder
@@ -474,8 +479,18 @@ public:
 };
 
 
-#endif // MPT_STD_RANDOM
+#ifdef MPT_BUILD_FUZZER
 
+//  1. Use deterministic seeding
+typedef mpt::prng_random_device<mpt::rng::lcg_musl> random_device;
+
+//  2. Use fast PRNGs in order to not waste time fuzzing more complex PRNG
+//     implementations.
+typedef mpt::rng::lcg_msvc fast_prng;
+typedef mpt::rng::lcg_c99  main_prng;
+typedef mpt::rng::lcg_musl best_prng;
+
+#else // !MPT_BUILD_FUZZER
 
 #if MPT_STD_RANDOM
 
@@ -499,6 +514,8 @@ typedef mpt::rng::lcg_c99  main_prng;
 typedef mpt::rng::lcg_musl best_prng;
 
 #endif // MPT_STD_RANDOM
+
+#endif // MPT_BUILD_FUZZER
 
 
 typedef mpt::main_prng default_prng;
