@@ -206,8 +206,8 @@ sane_random_device::sane_random_device()
 }
 
 sane_random_device::sane_random_device(const std::string & token)
-	: rd_reliable(rd.entropy() > 0.0)
-	, rd(token)
+	: rd(token)
+	, rd_reliable(rd.entropy() > 0.0)
 {
 	if(!rd_reliable)
 	{
