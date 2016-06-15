@@ -48,9 +48,9 @@ namespace mpt
 template <typename Trng> struct engine_traits
 {
 	typedef typename Trng::result_type result_type;
-	static inline int entropy_bits()
+	static inline int result_bits()
 	{
-		return Trng::bits();
+		return Trng::result_bits();
 	}
 	template<typename Trd>
 	static inline Trng make(Trd & rd)
@@ -65,7 +65,7 @@ inline T random(Trng & rng)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	typedef typename mpt::make_unsigned<T>::type unsigned_T;
-	const unsigned int rng_bits = mpt::engine_traits<Trng>::entropy_bits();
+	const unsigned int rng_bits = mpt::engine_traits<Trng>::result_bits();
 	unsigned_T result = 0;
 	for(std::size_t entropy = 0; entropy < (sizeof(T) * 8); entropy += rng_bits)
 	{
@@ -85,7 +85,7 @@ inline T random(Trng & rng)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	typedef typename mpt::make_unsigned<T>::type unsigned_T;
-	const unsigned int rng_bits = mpt::engine_traits<Trng>::entropy_bits();
+	const unsigned int rng_bits = mpt::engine_traits<Trng>::result_bits();
 	unsigned_T result = 0;
 	for(std::size_t entropy = 0; entropy < std::min<std::size_t>(required_entropy_bits, sizeof(T) * 8); entropy += rng_bits)
 	{
@@ -111,7 +111,7 @@ inline T random(Trng & rng, std::size_t required_entropy_bits)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	typedef typename mpt::make_unsigned<T>::type unsigned_T;
-	const unsigned int rng_bits = mpt::engine_traits<Trng>::entropy_bits();
+	const unsigned int rng_bits = mpt::engine_traits<Trng>::result_bits();
 	unsigned_T result = 0;
 	for(std::size_t entropy = 0; entropy < std::min<std::size_t>(required_entropy_bits, sizeof(T) * 8); entropy += rng_bits)
 	{
@@ -200,12 +200,12 @@ public:
 	explicit inline lcg(Trng & rd)
 		: state(mpt::random<state_type>(rd))
 	{
-		random(); // we return results from the current state and update state after returning. results in better pipelining.
+		operator()(); // we return results from the current state and update state after returning. results in better pipelining.
 	}
 	explicit inline lcg(state_type seed)
 		: state(seed)
 	{
-		random(); // we return results from the current state and update state after returning. results in better pipelining.
+		operator()(); // we return results from the current state and update state after returning. results in better pipelining.
 	}
 public:
 	static inline result_type min()
@@ -217,16 +217,12 @@ public:
 		STATIC_ASSERT(((result_mask >> result_shift) << result_shift) == result_mask);
 		return static_cast<result_type>(result_mask >> result_shift);
 	}
-	static inline int bits()
+	static inline int result_bits()
 	{
 		STATIC_ASSERT(((static_cast<Tstate>(1) << result_bits) - 1) == (result_mask >> result_shift));
 		return result_bits;
 	}
 	inline result_type operator()()
-	{
-		return random();
-	}
-	inline result_type random()
 	{
 		// we return results from the current state and update state after returning. results in better pipelining.
 		state_type s = state;
@@ -234,10 +230,6 @@ public:
 		s = (m == 0) ? ((a * s) + c) : (((a * s) + c) % m);
 		state = s;
 		return result;
-	}
-	inline result_type random_bits()
-	{
-		return random();
 	}
 };
 
@@ -276,8 +268,7 @@ public:
 public:
 	static result_type min();
 	static result_type max();
-	static int bits();
-	result_type random();
+	static int result_bits();
 	result_type operator()();
 };
 
@@ -309,7 +300,7 @@ public:
 	sane_random_device(const std::string & token);
 	static result_type min();
 	static result_type max();
-	static int bits();
+	static int result_bits();
 	result_type operator()();
 };
 
@@ -347,7 +338,7 @@ template <> struct engine_traits<std::mt19937> {
 	static const std::size_t seed_bits = sizeof(std::mt19937::result_type) * 8 * std::mt19937::state_size;
 	typedef std::mt19937 rng_type;
 	typedef rng_type::result_type result_type;
-	static inline int entropy_bits() { return rng_type::word_size; }
+	static inline int result_bits() { return rng_type::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
 		mpt::seed_seq_values<seed_bits / sizeof(unsigned int)> values(rd);
@@ -360,7 +351,7 @@ template <> struct engine_traits<std::mt19937_64> {
 	static const std::size_t seed_bits = sizeof(std::mt19937_64::result_type) * 8 * std::mt19937_64::state_size;
 	typedef std::mt19937_64 rng_type;
 	typedef rng_type::result_type result_type;
-	static inline int entropy_bits() { return rng_type::word_size; }
+	static inline int result_bits() { return rng_type::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
 		mpt::seed_seq_values<seed_bits / sizeof(unsigned int)> values(rd);
@@ -373,7 +364,7 @@ template <> struct engine_traits<std::ranlux24_base> {
 	static const std::size_t seed_bits = std::ranlux24_base::word_size;
 	typedef std::ranlux24_base rng_type;
 	typedef rng_type::result_type result_type;
-	static inline int entropy_bits() { return rng_type::word_size; }
+	static inline int result_bits() { return rng_type::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
 		mpt::seed_seq_values<seed_bits / sizeof(unsigned int)> values(rd);
@@ -386,7 +377,7 @@ template <> struct engine_traits<std::ranlux48_base> {
 	static const std::size_t seed_bits = std::ranlux48_base::word_size;
 	typedef std::ranlux48_base rng_type;
 	typedef rng_type::result_type result_type;
-	static inline int entropy_bits() { return rng_type::word_size; }
+	static inline int result_bits() { return rng_type::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
 		mpt::seed_seq_values<seed_bits / sizeof(unsigned int)> values(rd);
@@ -399,7 +390,7 @@ template <> struct engine_traits<std::ranlux24> {
 	static const std::size_t seed_bits = std::ranlux24_base::word_size;
 	typedef std::ranlux24 rng_type;
 	typedef rng_type::result_type result_type;
-	static inline int entropy_bits() { return std::ranlux24_base::word_size; }
+	static inline int result_bits() { return std::ranlux24_base::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
 		mpt::seed_seq_values<seed_bits / sizeof(unsigned int)> values(rd);
@@ -412,7 +403,7 @@ template <> struct engine_traits<std::ranlux48> {
 	static const std::size_t seed_bits = std::ranlux48_base::word_size;
 	typedef std::ranlux48 rng_type;
 	typedef rng_type::result_type result_type;
-	static inline int entropy_bits() { return std::ranlux48_base::word_size; }
+	static inline int result_bits() { return std::ranlux48_base::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
 		mpt::seed_seq_values<seed_bits / sizeof(unsigned int)> values(rd);
@@ -471,21 +462,11 @@ public:
 	{
 		return std::numeric_limits<unsigned int>::max();
 	}
-	static int bits()
+	static int result_bits()
 	{
 		return sizeof(unsigned int) * 8;
 	}
 	result_type operator()()
-	{
-		MPT_LOCK_GUARD<mpt::mutex> l(m);
-		return mpt::random<unsigned int>(rng);
-	}
-	result_type random()
-	{
-		MPT_LOCK_GUARD<mpt::mutex> l(m);
-		return mpt::random<unsigned int>(rng);
-	}
-	result_type random_bits()
 	{
 		MPT_LOCK_GUARD<mpt::mutex> l(m);
 		return mpt::random<unsigned int>(rng);
@@ -560,25 +541,15 @@ public:
 	{
 		return Trng::max();
 	}
-	static int bits()
+	static int result_bits()
 	{
-		return engine_traits<Trng>::entropy_bits();
+		return engine_traits<Trng>::result_bits();
 	}
 public:
 	typename engine_traits<Trng>::result_type operator()()
 	{
 		MPT_LOCK_GUARD<mpt::mutex> l(m);
 		return Trng::operator()();
-	}
-	typename engine_traits<Trng>::result_type random()
-	{
-		MPT_LOCK_GUARD<mpt::mutex> l(m);
-		return Trng::random();
-	}
-	typename engine_traits<Trng>::result_type random_bits()
-	{
-		MPT_LOCK_GUARD<mpt::mutex> l(m);
-		return Trng::random_bits();
 	}
 };
 

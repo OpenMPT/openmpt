@@ -166,19 +166,14 @@ crand::result_type crand::max()
 	return RAND_MAX;
 }
 
-int crand::bits()
+int crand::result_bits()
 {
 	return lower_bound_entropy_bits(RAND_MAX);
 }
 
-crand::result_type crand::random()
-{
-	return std::rand();
-}
-
 crand::result_type crand::operator()()
 {
-	return random();
+	return std::rand();
 }
 
 } // namespace rng
@@ -230,7 +225,7 @@ sane_random_device::result_type sane_random_device::max()
 	return std::numeric_limits<result_type>::max();
 }
 
-int sane_random_device::bits()
+int sane_random_device::result_bits()
 {
 	return sizeof(result_type) * 8;
 }
@@ -248,7 +243,7 @@ sane_random_device::result_type sane_random_device::operator()()
 		double rd_range = rd_max - rd_min;
 		double rd_size = rd_range + 1.0;
 		double rd_entropy = mpt::log2(rd_size);
-		int iterations = static_cast<int>(std::ceil(bits() / rd_entropy));
+		int iterations = static_cast<int>(std::ceil(result_bits() / rd_entropy));
 		double result = 0.0;
 		for(int i = 0; i < iterations; ++i)
 		{
