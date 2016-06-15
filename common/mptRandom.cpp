@@ -118,7 +118,7 @@ static T generate_timeseed()
 	
 #ifdef MPT_BUILD_FUZZER
 
-	return mpt::FUZZER_RNG_SEED;
+	return static_cast<T>(mpt::FUZZER_RNG_SEED);
 
 #else // !MPT_BUILD_FUZZER
 
