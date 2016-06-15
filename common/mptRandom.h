@@ -295,8 +295,8 @@ class sane_random_device
 {
 private:
 	mpt::mutex m;
-	bool rd_reliable;
 	std::random_device rd;
+	bool rd_reliable;
 	MPT_SHARED_PTR<std::mt19937> rd_fallback;
 public:
 	typedef unsigned int result_type;
