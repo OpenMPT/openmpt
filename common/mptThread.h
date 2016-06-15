@@ -357,6 +357,15 @@ inline void SetCurrentThreadPriority(mpt::ThreadPriority priority)
 
 #else // !MPT_OS_WINDOWS
 
+enum ThreadPriority
+{
+	ThreadPriorityLowest  = -2,
+	ThreadPriorityLower   = -1,
+	ThreadPriorityNormal  =  0,
+	ThreadPriorityHigh    =  1,
+	ThreadPriorityHighest =  2
+};
+
 inline void SetThreadPriority(mpt::thread & /*t*/ , mpt::ThreadPriority /*priority*/ )
 {
 	// nothing
@@ -366,15 +375,6 @@ inline void SetCurrentThreadPriority(mpt::ThreadPriority /*priority*/ )
 {
 	// nothing
 }
-
-enum ThreadPriority
-{
-	ThreadPriorityLowest  = -2,
-	ThreadPriorityLower   = -1,
-	ThreadPriorityNormal  =  0,
-	ThreadPriorityHigh    =  1,
-	ThreadPriorityHighest =  2
-};
 
 #endif // MPT_OS_WINDOWS
 
