@@ -1155,7 +1155,7 @@ static void WINAPI openmpt_GetMessage( char * buf ) {
 		clear_xmplay_string( buf );
 		return;
 	}
-	write_xmplay_string( buf, convert_to_native( sanitize_xmplay_multiline_string( string_replace( self->mod->get_metadata("message"), "\n", "\r" ) ) ) );
+	write_xmplay_string( buf, convert_to_native( sanitize_xmplay_multiline_string( string_replace( self->mod->get_metadata("message_raw"), "\n", "\r" ) ) ) );
 }
 
 // Seek to a position (in granularity units)
@@ -1238,7 +1238,7 @@ static DWORD WINAPI openmpt_Process( float * dstbuf, DWORD count ) {
 	return frames_rendered * self->num_channels;
 }
 
-static void add_names( std::ostream & str, const std::string & title, const std::vector<std::string> & names ) {
+static void add_names( std::ostream & str, const std::string & title, const std::vector<std::string> & names, int display_offset ) {
 	if ( names.size() > 0 ) {
 		bool valid = false;
 		for ( std::size_t i = 0; i < names.size(); i++ ) {
@@ -1251,7 +1251,7 @@ static void add_names( std::ostream & str, const std::string & title, const std:
 		}
 		str << title << " names:" << "\r";
 		for ( std::size_t i = 0; i < names.size(); i++ ) {
-			str << std::setfill('0') << std::setw(2) << i << std::setw(0) << "\t" << convert_to_native( names[i] ) << "\r";
+			str << std::setfill('0') << std::setw(2) << i << std::setw(0) << "\t" << convert_to_native( names[display_offset + i] ) << "\r";
 		}
 		str << "\r";
 	}
@@ -1263,11 +1263,11 @@ static void WINAPI openmpt_GetSamples( char * buf ) {
 		return;
 	}
 	std::ostringstream str;
-	add_names( str, "instrument", self->mod->get_instrument_names() );
-	add_names( str, "sample", self->mod->get_sample_names() );
-	add_names( str, "channel", self->mod->get_channel_names() );
-	add_names( str, "order", self->mod->get_order_names() );
-	add_names( str, "pattern", self->mod->get_pattern_names() );
+	add_names( str, "instrument", self->mod->get_instrument_names(), 1 );
+	add_names( str, "sample", self->mod->get_sample_names(), 1 );
+	add_names( str, "channel", self->mod->get_channel_names(), 1 );
+	add_names( str, "order", self->mod->get_order_names(), 0 );
+	add_names( str, "pattern", self->mod->get_pattern_names(), 0 );
 	write_xmplay_string( buf, str.str() );
 }
 
