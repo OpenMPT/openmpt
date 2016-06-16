@@ -178,10 +178,10 @@ Declare Sub openmpt_log_func_silent(ByVal message As Const ZString Ptr, ByVal us
  '
  ' \param stream_callbacks Input stream callback operations.
  ' \param stream Input stream to scan.
- ' \param effort Effort to make when validating stream. Effort 0.0 does not even look at stream at all and effort 1.0 completely loads the file from stream. A lower effort requires less data to be loaded but only gives a rough estimate answer.
+ ' \param effort Effort to make when validating stream. Effort 0.0 does not even look at stream at all and effort 1.0 completely loads the file from stream. A lower effort requires less data to be loaded but only gives a rough estimate answer. Use an effort of 0.25 to only verify the header data of the module file.
  ' \param logfunc Logging function where warning and errors are written.
  ' \param user Logging function user context.
- ' \return Propability between 0.0 and 1.0.
+ ' \return Probability between 0.0 and 1.0.
  ' \sa openmpt_stream_callbacks
  '/
 Declare Function openmpt_could_open_propability(ByVal stream_callbacks As openmpt_stream_callbacks, ByVal stream As Any Ptr, ByVal effort As Double, ByVal logfunc As openmpt_log_func, ByVal user As Any Ptr) As Double
@@ -655,6 +655,7 @@ Declare Function openmpt_module_get_num_subsongs(ByVal module As openmpt_module 
  '
  ' \param module The module handle to work on.
  ' \return The number of pattern channels in the module. Not all channels do necessarily contain data.
+ ' \remarks The number of pattern channels is completely independent of the number of output channels. libopenmpt can render modules in mono, stereo or quad surround, but the choice of which of the three modes to use must not be made based on the return value of this function, which may be any positive integer amount. Only use this function for informational purposes.
  '/
 Declare Function openmpt_module_get_num_channels(ByVal module As openmpt_module Ptr) As Long
 

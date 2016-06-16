@@ -171,7 +171,7 @@ LIBOPENMPT_CXX_API bool is_extension_supported( const std::string & extension );
 //! Roughly scan the input stream to find out whether libopenmpt might be able to open it
 /*!
   \param stream Input stream to scan.
-  \param effort Effort to make when validating stream. Effort 0.0 does not even look at stream at all and effort 1.0 completely loads the file from stream. A lower effort requires less data to be loaded but only gives a rough estimate answer.
+  \param effort Effort to make when validating stream. Effort 0.0 does not even look at stream at all and effort 1.0 completely loads the file from stream. A lower effort requires less data to be loaded but only gives a rough estimate answer. Use an effort of 0.25 to only verify the header data of the module file.
   \param log Log where warning and errors are written.
   \return Probability between 0.0 and 1.0.
 */
@@ -636,6 +636,7 @@ public:
 	//! Get the number of pattern channels
 	/*!
 	  \return The number of pattern channels in the module. Not all channels do necessarily contain data.
+	  \remarks The number of pattern channels is completely independent of the number of output channels. libopenmpt can render modules in mono, stereo or quad surround, but the choice of which of the three modes to use must not be made based on the return value of this function, which may be any positive integer amount. Only use this function for informational purposes.
 	*/
 	std::int32_t get_num_channels() const;
 	//! Get the number of orders
