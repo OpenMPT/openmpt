@@ -261,6 +261,7 @@ public:
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
+	  \sa \ref libopenmpt_cpp_fileio
 	*/
 	module( std::istream & stream, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	/*!
@@ -269,6 +270,7 @@ public:
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
+	  \sa \ref libopenmpt_cpp_fileio
 	*/
 	module( const std::vector<std::uint8_t> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	/*!
@@ -278,6 +280,7 @@ public:
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
+	  \sa \ref libopenmpt_cpp_fileio
 	*/
 	module( const std::uint8_t * beg, const std::uint8_t * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	/*!
@@ -287,6 +290,7 @@ public:
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
+	  \sa \ref libopenmpt_cpp_fileio
 	*/
 	module( const std::uint8_t * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	/*!
@@ -295,6 +299,7 @@ public:
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
+	  \sa \ref libopenmpt_cpp_fileio
 	*/
 	module( const std::vector<char> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	/*!
@@ -304,6 +309,7 @@ public:
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
+	  \sa \ref libopenmpt_cpp_fileio
 	*/
 	module( const char * beg, const char * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	/*!
@@ -313,6 +319,7 @@ public:
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
+	  \sa \ref libopenmpt_cpp_fileio
 	*/
 	module( const char * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	/*!
@@ -322,6 +329,7 @@ public:
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
+	  \sa \ref libopenmpt_cpp_fileio
 	*/
 	module( const void * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	virtual ~module();

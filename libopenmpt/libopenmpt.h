@@ -283,6 +283,7 @@ typedef struct openmpt_module_initial_ctl {
  * \return A pointer to the constructed openmpt_module, or NULL on failure.
  * \remarks The input data can be discarded after an openmpt_module has been constructed succesfully.
  * \sa openmpt_stream_callbacks
+ * \sa \ref libopenmpt_c_fileio
  */
 LIBOPENMPT_API openmpt_module * openmpt_module_create( openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * user, const openmpt_module_initial_ctl * ctls );
 
@@ -295,6 +296,7 @@ LIBOPENMPT_API openmpt_module * openmpt_module_create( openmpt_stream_callbacks 
  * \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
  * \return A pointer to the constructed openmpt_module, or NULL on failure.
  * \remarks The input data can be discarded after an openmpt_module has been constructed succesfully.
+ * \sa \ref libopenmpt_c_fileio
  */
 LIBOPENMPT_API openmpt_module * openmpt_module_create_from_memory( const void * filedata, size_t filesize, openmpt_log_func logfunc, void * user, const openmpt_module_initial_ctl * ctls );
 
