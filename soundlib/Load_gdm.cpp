@@ -381,13 +381,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 						STATIC_ASSERT(CountOf(gdmEffTrans) == 0x20);
 
 						// Translate effect
-						if(m.command < CountOf(gdmEffTrans))
-						{
-							m.command = gdmEffTrans[m.command];
-						} else
-						{
-							m.command = CMD_NONE;
-						}
+						m.command = (m.command < CountOf(gdmEffTrans)) ? gdmEffTrans[m.command] : CMD_NONE;
 
 						// Fix some effects
 						switch(m.command)
@@ -425,7 +419,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 							break;
 
 						case CMD_MODCMDEX:
-							if(!modSpecs.HasVolCommand(CMD_MODCMDEX))
+							if(!modSpecs.HasCommand(CMD_MODCMDEX))
 							{
 								m.ExtendedMODtoS3MEffect();
 							}
