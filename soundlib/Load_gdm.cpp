@@ -228,12 +228,12 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		// Sample format
 		if(gdmSample.flags & GDMSampleHeader::smp16Bit)
 		{
-			sample.uFlags |= CHN_16BIT;
+			sample.uFlags.set(CHN_16BIT);
 			sample.nLength /= 2;
 		}
 
-		sample.nLoopStart = std::min<SmpLength>(gdmSample.loopBegin, sample.nLength);	// in samples
-		sample.nLoopEnd = std::min<SmpLength>(gdmSample.loopEnd - 1, sample.nLength);	// ditto
+		sample.nLoopStart = gdmSample.loopBegin;	// in samples
+		sample.nLoopEnd = gdmSample.loopEnd - 1;	// ditto
 		sample.FrequencyToTranspose();	// set transpose + finetune for mod files
 
 		// Fix transpose + finetune for some rare cases where transpose is not C-5 (e.g. sample 4 in wander2.gdm)
@@ -297,11 +297,6 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	file.Seek(fileHeader.patternOffset);
 	for(PATTERNINDEX pat = 0; pat <= fileHeader.lastPattern; pat++)
 	{
-		if(!file.CanRead(2))
-		{
-			break;
-		}
-
 		// Read pattern length *including* the two "length" bytes
 		uint16 patternLength = file.ReadUint16LE();
 

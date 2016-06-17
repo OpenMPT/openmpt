@@ -91,6 +91,8 @@ How to compile
 
 ### libopenmpt and openmpt123
 
+For detailed requirements, see `libopenmpt/dox/quickstart.md`.
+
  -  Autotools
 
     Grab a `libopenmpt-VERSION-autotools.tar.gz` tarball.
