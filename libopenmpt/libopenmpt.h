@@ -260,6 +260,9 @@ LIBOPENMPT_API void openmpt_log_func_silent( const char * message, void * user )
  * \param logfunc Logging function where warning and errors are written.
  * \param user Logging function user context.
  * \return Probability between 0.0 and 1.0.
+ * \remarks openmpt_could_open_propability() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below menas that loading may fail.
+ * \remarks openmpt_could_open_propability() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_propability() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_propability() returned 0.5.
+ * \sa \ref libopenmpt_c_fileio
  * \sa openmpt_stream_callbacks
  */
 LIBOPENMPT_API double openmpt_could_open_propability( openmpt_stream_callbacks stream_callbacks, void * stream, double effort, openmpt_log_func logfunc, void * user );
