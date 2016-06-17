@@ -20,6 +20,7 @@ is just a high-level summary.
 
  *  [**Bug**] libopenmpt no longer uses the non-thread-safe global std::rand()
     function.
+ *  [**Bug**] Sample loops in GDM modules did not work when using Emscripten.
 
  *  Various playback fixes for 669 files.
 
