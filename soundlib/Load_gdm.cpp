@@ -44,8 +44,10 @@ struct PACKED GDMFileHeader
 	uint8  tempo;					// Initial music tempo (6)
 	uint8  bpm;						// Initial music BPM (125)
 	uint16 originalFormat;			// Original format ID:
-		// 1-MOD, 2-MTM, 3-S3M, 4-669, 5-FAR, 6-ULT, 7-STM, 8-MED
+		// 1-MOD, 2-MTM, 3-S3M, 4-669, 5-FAR, 6-ULT, 7-STM, 8-MED, 9-PSM
 		// (versions of 2GDM prior to v1.15 won't set this correctly)
+		// 2GDM v1.17 will only spit out 0-byte files when trying to convert a PSM16 file,
+		// and fail outright when trying to convert a new PSM file.
 
 	uint32 orderOffset;
 	uint8  lastOrder;				// Number of orders in module - 1
@@ -131,10 +133,9 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 {
 	file.Rewind();
 
-	// 1-MOD, 2-MTM, 3-S3M, 4-669, 5-FAR, 6-ULT, 7-STM, 8-MED
 	const MODTYPE gdmFormatOrigin[] =
 	{
-		MOD_TYPE_NONE, MOD_TYPE_MOD, MOD_TYPE_MTM, MOD_TYPE_S3M, MOD_TYPE_669, MOD_TYPE_FAR, MOD_TYPE_ULT, MOD_TYPE_STM, MOD_TYPE_MED
+		MOD_TYPE_NONE, MOD_TYPE_MOD, MOD_TYPE_MTM, MOD_TYPE_S3M, MOD_TYPE_669, MOD_TYPE_FAR, MOD_TYPE_ULT, MOD_TYPE_STM, MOD_TYPE_MED, MOD_TYPE_PSM
 	};
 
 	GDMFileHeader fileHeader;
@@ -378,7 +379,6 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 							CMD_NONE, CMD_NONE, CMD_NONE, CMD_NONE,
 							CMD_NONE, CMD_NONE, CMD_S3MCMDEX, CMD_TEMPO,
 						};
-						STATIC_ASSERT(CountOf(gdmEffTrans) == 0x20);
 
 						// Translate effect
 						if(m.command < CountOf(gdmEffTrans))
