@@ -51,7 +51,7 @@ void CSoundFile::S3MConvert(ModCommand &m, bool fromIT)
 	case 'X':	m.command = CMD_PANNING8; break;
 	case 'Y':	m.command = CMD_PANBRELLO; break;
 	case 'Z':	m.command = CMD_MIDI; break;
-	case '\\':	m.command = static_cast<ModCommand::COMMAND>(fromIT ? CMD_SMOOTHMIDI : CMD_MIDI); break; //rewbs.smoothVST
+	case '\\':	m.command = static_cast<ModCommand::COMMAND>(fromIT ? CMD_SMOOTHMIDI : CMD_MIDI); break;
 	// Chars under 0x40 don't save properly, so map : to ] and # to [.
 	case ']':	m.command = CMD_DELAYCUT; break;
 	case '[':	m.command = CMD_XPARAM; break;
@@ -102,7 +102,7 @@ void CSoundFile::S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool co
 		break;
 	case CMD_PANBRELLO:			command = 'Y'; break;
 	case CMD_MIDI:				command = 'Z'; break;
-	case CMD_SMOOTHMIDI:  //rewbs.smoothVST
+	case CMD_SMOOTHMIDI:
 		if(compatibilityExport || !toIT)
 			command = 'Z';
 		else
@@ -616,7 +616,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	memcpy(fileHeader.magic, "SCRM", 4);
 
 	// Song Variables
-	fileHeader.globalVol = static_cast<uint8>(MIN(m_nDefaultGlobalVolume / 4, 64u));
+	fileHeader.globalVol = static_cast<uint8>(std::min(m_nDefaultGlobalVolume / 4u, 64u));
 	fileHeader.speed = static_cast<uint8>(Clamp(m_nDefaultSpeed, 1u, 254u));
 	fileHeader.tempo = static_cast<uint8>(Clamp(m_nDefaultTempo.GetInt(), 33u, 255u));
 	fileHeader.masterVolume = static_cast<uint8>(Clamp(m_nSamplePreAmp, 16u, 127u) | 0x80);
@@ -642,7 +642,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 			{
 				ch += 8 - midCh;
 			}
-			if(ChnSettings[chn].dwFlags & CHN_MUTE)
+			if(ChnSettings[chn].dwFlags[CHN_MUTE])
 			{
 				ch |= 0x80;
 			}
@@ -698,12 +698,9 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	for(CHANNELINDEX chn = 0; chn < 32; chn++)
 	{
 		if(chn < GetNumChannels())
-		{
 			chnPan[chn] = static_cast<uint8>(((ChnSettings[chn].nPan * 15 + 128) / 256)) | 0x20;
-		} else
-		{
+		else
 			chnPan[chn] = 0x08;
-		}
 	}
 	fwrite(chnPan, 32, 1, f);
 
@@ -727,8 +724,14 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 			continue;
 		}
 
-		MPT_ASSERT((ftell(f) % 16) == 0);
-		patternOffsets[pat] = static_cast<uint16>(ftell(f) / 16);
+		long patOffset = ftell(f);
+		if(patOffset > 0xFFFF0)
+		{
+			AddToLog(LogError, mpt::String::Print(MPT_USTRING("Too much pattern data! Writing patterns failed starting from pattern %1."), pat));
+			break;
+		}
+		MPT_ASSERT((patOffset % 16) == 0);
+		patternOffsets[pat] = static_cast<uint16>(patOffset / 16);
 		SwapBytesLE(patternOffsets[pat]);
 
 		std::vector<uint8> buffer;
@@ -837,14 +840,14 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 			buffer.insert(buffer.end(), 64, s3mEndOfRow);
 		}
 
-		size_t length = std::min(buffer.size(), size_t(uint16_max));
+		uint16 length = mpt::saturate_cast<uint16>(buffer.size());
 		buffer[0] = static_cast<uint8>(length & 0xFF);
 		buffer[1] = static_cast<uint8>((length >> 8) & 0xFF);
 
-		if((buffer.size() % 16) != 0)
+		if((buffer.size() % 16u) != 0)
 		{
 			// Add padding bytes
-			buffer.insert(buffer.end(), 16 - (buffer.size() % 16), 0);
+			buffer.insert(buffer.end(), 16 - (buffer.size() % 16u), 0);
 		}
 
 		fwrite(&buffer[0], buffer.size(), 1, f);
@@ -883,6 +886,12 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 		if(Samples[realSmp].pSample)
 		{
 			// Write sample data
+			if(sampleDataOffset > 0xFFFFFF0)
+			{
+				AddToLog(LogError, mpt::String::Print(MPT_USTRING("Too much sample data! Writing samples failed starting from sample %1."), realSmp));
+				break;
+			}
+
 			sampleHeader[smp].dataPointer[1] = static_cast<uint8>((sampleDataOffset >> 4) & 0xFF);
 			sampleHeader[smp].dataPointer[2] = static_cast<uint8>((sampleDataOffset >> 12) & 0xFF);
 			sampleHeader[smp].dataPointer[0] = static_cast<uint8>((sampleDataOffset >> 20) & 0xFF);
