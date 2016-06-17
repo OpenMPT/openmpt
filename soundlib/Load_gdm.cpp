@@ -381,7 +381,10 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 						STATIC_ASSERT(CountOf(gdmEffTrans) == 0x20);
 
 						// Translate effect
-						m.command = static_cast<ModCommand::COMMAND>((m.command < CountOf(gdmEffTrans)) ? gdmEffTrans[m.command] : CMD_NONE);
+						if(m.command < CountOf(gdmEffTrans))
+							m.command = gdmEffTrans[m.command];
+						else
+							m.command = CMD_NONE;
 
 						// Fix some effects
 						switch(m.command)
