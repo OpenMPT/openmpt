@@ -471,7 +471,7 @@ std::string GetVersionString(FlagSet<MptVersion::Strings> strings)
 		const SourceInfo sourceInfo = GetSourceInfo();
 		if(!sourceInfo.GetUrlWithRevision().empty())
 		{
-			result.push_back(mpt::format( "%1")(sourceInfo.GetUrlWithRevision()));
+			result.push_back(mpt::format(" %1")(sourceInfo.GetUrlWithRevision()));
 		}
 		if(!sourceInfo.Date.empty())
 		{
