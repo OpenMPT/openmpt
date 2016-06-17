@@ -269,8 +269,8 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Check header
 	if(memcmp(fileHeader.formatID, "PSM ", 4)
-		|| fileHeader.fileSize != file.BytesLeft()
-		|| memcmp(fileHeader.fileInfoID, "FILE", 4))
+		|| memcmp(fileHeader.fileInfoID, "FILE", 4)
+		|| fileHeader.fileSize != file.BytesLeft())
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -553,6 +553,9 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						subsong.channelPanning[chn] = 128;
 						subsong.channelSurround[chn] = false;
 						break;
+
+					default:
+						MPT_ASSERT(false);
 					}
 				}
 				break;

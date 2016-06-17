@@ -144,7 +144,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	if(!file.ReadConvertEndianness(fileHeader)
 		|| memcmp(fileHeader.magic, "FAR\xFE", 4) != 0
 		|| memcmp(fileHeader.eof, "\x0D\x0A\x1A", 3)
-		|| file.GetLength() < static_cast<size_t>(fileHeader.headerLength))
+		|| !file.LengthIsAtLeast(fileHeader.headerLength))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
