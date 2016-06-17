@@ -182,6 +182,8 @@ Declare Sub openmpt_log_func_silent(ByVal message As Const ZString Ptr, ByVal us
  ' \param logfunc Logging function where warning and errors are written.
  ' \param user Logging function user context.
  ' \return Probability between 0.0 and 1.0.
+ ' \remarks openmpt_could_open_propability() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below menas that loading may fail.
+ ' \remarks openmpt_could_open_propability() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_propability() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_propability() returned 0.5.
  ' \sa openmpt_stream_callbacks
  '/
 Declare Function openmpt_could_open_propability(ByVal stream_callbacks As openmpt_stream_callbacks, ByVal stream As Any Ptr, ByVal effort As Double, ByVal logfunc As openmpt_log_func, ByVal user As Any Ptr) As Double
