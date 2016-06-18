@@ -514,6 +514,10 @@
 #define MPT_ENABLE_FILEIO // Tracker requires disk file io
 #endif
 
+#if defined(MODPLUG_TRACKER) && !defined(MPT_ENABLE_THREAD)
+#define MPT_ENABLE_THREAD // Tracker requires threads
+#endif
+
 #if defined(MODPLUG_TRACKER) && !defined(MPT_ENABLE_ATOMIC)
 #define MPT_ENABLE_ATOMIC // Tracker requires threads
 #endif
