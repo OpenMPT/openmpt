@@ -29,6 +29,7 @@
 #include "common/misc_util.h"
 #include "common/FileReader.h"
 #include "common/Logging.h"
+#include "common/mptMutex.h"
 #include "soundlib/Sndfile.h"
 #include "soundlib/mod_specifications.h"
 #include "soundlib/AudioReadTarget.h"
@@ -50,17 +51,17 @@ OPENMPT_NAMESPACE_BEGIN
 #endif // !NO_DMO
 #endif // MPT_COMPILER_MSVC
 
-#if !defined(MPT_ENABLE_THREADSAFE)
+#if MPT_MUTEX_NONE && !MPT_OS_EMSCRIPTEN
 #if MPT_COMPILER_MSVC
-#pragma message("Warning: libopenmpt built in non thread-safe mode.")
+#pragma message("Warning: libopenmpt built in non thread-safe mode because mutexes are not supported by the C++ standard library available.")
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
-#warning "Warning: libopenmpt built in non thread-safe mode."
+#warning "Warning: libopenmpt built in non thread-safe mode because mutexes are not supported by the C++ standard library available."
 #else
-	// There is no portable way to display a warning.
-	// Try to provoke a warning with an unused variable.
-	int Warning_libopenmpt_built_in_non_thread_safe_mode;
+// There is no portable way to display a warning.
+// Try to provoke a warning with an unused variable.
+static int Warning_libopenmpt_built_in_non_thread_safe_mode_because_mutexes_are_not_supported_by_the_CPlusPlus_standard_library_available;
 #endif
-#endif //!MPT_ENABLE_THREADSAFE
+#endif // MPT_MUTEX_NONE
 
 #if defined(MPT_ASSERT_HANDLER_NEEDED) && !defined(ENABLE_TESTS)
 
