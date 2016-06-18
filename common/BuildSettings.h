@@ -514,18 +514,6 @@
 #define MPT_ENABLE_FILEIO // Tracker requires disk file io
 #endif
 
-#if (defined(MODPLUG_TRACKER) || MPT_OS_WINDOWS || MPT_COMPILER_GENERIC || MPT_MSVC_AT_LEAST(2012,0) || MPT_GCC_AT_LEAST(4,4,0) || MPT_CLANG_AT_LEAST(3,6,0)) && !defined(MPT_ENABLE_THREADSAFE)
-#define MPT_ENABLE_THREADSAFE // Always enable thread-safe code in tracker and libopenmpt on windows or with a C++11 compiler (i.e. guard globals with mutexes). (i.e. do not reply on or require pthreads as fallback)
-#endif
-
-#if MPT_OS_EMSCRIPTEN && defined(MPT_ENABLE_THREADSAFE)
-#undef MPT_ENABLE_THREADSAFE // no threading on Emscripten
-#endif
-
-#if defined(MODPLUG_TRACKER) && !defined(MPT_ENABLE_THREAD)
-#define MPT_ENABLE_THREAD // Tracker requires threads
-#endif
-
 #if defined(MODPLUG_TRACKER) && !defined(MPT_ENABLE_ATOMIC)
 #define MPT_ENABLE_ATOMIC // Tracker requires threads
 #endif

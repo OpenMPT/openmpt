@@ -9,37 +9,78 @@
 
 #pragma once
 
-#if defined(MPT_ENABLE_THREADSAFE)
-#if (MPT_COMPILER_GENERIC || MPT_MSVC_AT_LEAST(2012,0) || (MPT_GCC_AT_LEAST(4,4,0) && !MPT_OS_WINDOWS) || MPT_CLANG_AT_LEAST(3,6,0)) && !MPT_OS_ANDROID
-#define MPT_STD_MUTEX 1
+#include <vector> // some C++ header in order to have the C++ standard library version information available
+
+#if MPT_OS_ANDROID
+#define MPT_MUTEX_STD     0
+#define MPT_MUTEX_PTHREAD 1
+#define MPT_MUTEX_WIN32   0
+#elif MPT_OS_EMSCRIPTEN
+#define MPT_MUTEX_STD     0
+#define MPT_MUTEX_PTHREAD 0
+#define MPT_MUTEX_WIN32   0
+#elif MPT_COMPILER_GENERIC
+#define MPT_MUTEX_STD     1
+#define MPT_MUTEX_PTHREAD 0
+#define MPT_MUTEX_WIN32   0
+#elif MPT_MSVC_AT_LEAST(2012,0)
+#define MPT_MUTEX_STD     1
+#define MPT_MUTEX_PTHREAD 0
+#define MPT_MUTEX_WIN32   0
+#elif MPT_GCC_AT_LEAST(4,4,0) && !MPT_OS_WINDOWS
+#define MPT_MUTEX_STD     1
+#define MPT_MUTEX_PTHREAD 0
+#define MPT_MUTEX_WIN32   0
+#elif MPT_CLANG_AT_LEAST(3,0,0) && defined(__GLIBCXX__)
+#define MPT_MUTEX_STD     1
+#define MPT_MUTEX_PTHREAD 0
+#define MPT_MUTEX_WIN32   0
+#elif (MPT_OS_MACOSX_OR_IOS || MPT_OS_FREEBSD) && MPT_CLANG_AT_LEAST(3,0,0)
+#define MPT_MUTEX_STD     1
+#define MPT_MUTEX_PTHREAD 0
+#define MPT_MUTEX_WIN32   0
+#elif MPT_CLANG_AT_LEAST(3,6,0) && defined(_LIBCPP_VERSION)
+#define MPT_MUTEX_STD     1
+#define MPT_MUTEX_PTHREAD 0
+#define MPT_MUTEX_WIN32   0
+#elif MPT_OS_WINDOWS
+#define MPT_MUTEX_STD     0
+#define MPT_MUTEX_PTHREAD 0
+#define MPT_MUTEX_WIN32   1
 #else
-#define MPT_STD_MUTEX 0
+#define MPT_MUTEX_STD     0
+#define MPT_MUTEX_PTHREAD 0
+#define MPT_MUTEX_WIN32   0
 #endif
-#if MPT_STD_MUTEX
+
+#if !MPT_MUTEX_STD && !MPT_MUTEX_PTHREAD && !MPT_MUTEX_WIN32
+#define MPT_MUTEX_NONE 1
+#else
+#define MPT_MUTEX_NONE 0
+#endif
+
+#if defined(MODPLUG_TRACKER) && MPT_MUTEX_NONE
+#error "OpenMPT requires mutexes."
+#endif
+
+#if MPT_MUTEX_STD
 #include <mutex>
-#else // !MPT_STD_MUTEX
-#if MPT_OS_WINDOWS
+#elif MPT_MUTEX_WIN32
 #include <windows.h>
-#else // !MPT_OS_WINDOWS
+#elif MPT_MUTEX_PTHREAD
 #include <pthread.h>
-#endif // MPT_OS_WINDOWS
-#endif // MPT_STD_MUTEX
-#endif // MPT_ENABLE_THREADSAFE
+#endif // MPT_MUTEX
 
 OPENMPT_NAMESPACE_BEGIN
 
 namespace mpt {
 
-#if defined(MPT_ENABLE_THREADSAFE)
-
-#if MPT_STD_MUTEX
+#if MPT_MUTEX_STD
 
 typedef std::mutex mutex;
 typedef std::recursive_mutex recursive_mutex;
 
-#else // MPT_STD_MUTEX
-
-#if MPT_OS_WINDOWS
+#elif MPT_MUTEX_WIN32
 
 // compatible with c++11 std::mutex, can eventually be replaced without touching any usage site
 class mutex {
@@ -65,7 +106,7 @@ public:
 	void unlock() { LeaveCriticalSection(&impl); }
 };
 
-#else // !MPT_OS_WINDOWS
+#elif MPT_MUTEX_PTHREAD
 
 class mutex {
 private:
@@ -103,11 +144,7 @@ public:
 	void unlock() { pthread_mutex_unlock(&hLock); }
 };
 
-#endif // MPT_OS_WINDOWS
-
-#endif // MPT_STD_MUTEX
-
-#else // !MPT_ENABLE_THREADSAFE
+#else // MPT_MUTEX_NONE
 
 class mutex {
 public:
@@ -127,13 +164,13 @@ public:
 	void unlock() { }
 };
 
-#endif // MPT_ENABLE_THREADSAFE
+#endif // MPT_MUTEX
 
-#if defined(MPT_ENABLE_THREADSAFE) && MPT_STD_MUTEX
+#if MPT_MUTEX_STD
 
 #define MPT_LOCK_GUARD std::lock_guard
 
-#else //!(MPT_ENABLE_THREADSAFE && MPT_STD_MUTEX)
+#else // !MPT_MUTEX_STD
 
 // compatible with c++11 std::lock_guard, can eventually be replaced without touching any usage site
 template< typename mutex_type >
@@ -147,9 +184,7 @@ public:
 
 #define MPT_LOCK_GUARD mpt::lock_guard
 
-#endif // MPT_ENABLE_THREADSAFE && MPT_STD_MUTEX
-
-#if defined(MPT_ENABLE_THREADSAFE)
+#endif // MPT_MUTEX_STD
 
 #ifdef MODPLUG_TRACKER
 
@@ -192,8 +227,7 @@ public:
 
 #endif // MODPLUG_TRACKER
 
-#endif // MPT_ENABLE_THREADSAFE
-
 } // namespace mpt
 
 OPENMPT_NAMESPACE_END
+

@@ -11,11 +11,26 @@
 
 #if defined(MPT_ENABLE_THREAD)
 
-#if MPT_COMPILER_GENERIC || MPT_MSVC_AT_LEAST(2012,0) || (MPT_GCC_AT_LEAST(4,4,0) && !MPT_OS_WINDOWS) || MPT_CLANG_AT_LEAST(3,6,0)
+#include <vector> // some C++ header in order to have the C++ standard library version information available
+
+#if MPT_OS_ANDROID
+#define MPT_STD_THREAD 0
+#elif MPT_COMPILER_GENERIC
+#define MPT_STD_THREAD 1
+#elif MPT_MSVC_AT_LEAST(2012,0)
+#define MPT_STD_THREAD 1
+#elif MPT_GCC_AT_LEAST(4,4,0) && !MPT_OS_WINDOWS
+#define MPT_STD_THREAD 1
+#elif MPT_CLANG_AT_LEAST(3,0,0) && defined(__GLIBCXX__)
+#define MPT_STD_THREAD 1
+#elif (MPT_OS_MACOSX_OR_IOS || MPT_OS_FREEBSD) && MPT_CLANG_AT_LEAST(3,0,0)
+#define MPT_STD_THREAD 1
+#elif MPT_CLANG_AT_LEAST(3,6,0) && defined(_LIBCPP_VERSION)
 #define MPT_STD_THREAD 1
 #else
 #define MPT_STD_THREAD 0
 #endif
+
 #if MPT_STD_THREAD
 #include <thread>
 #else // !MPT_STD_THREAD
