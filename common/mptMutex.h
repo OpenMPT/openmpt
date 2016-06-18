@@ -31,7 +31,7 @@
 #define MPT_MUTEX_STD     1
 #define MPT_MUTEX_PTHREAD 0
 #define MPT_MUTEX_WIN32   0
-#elif MPT_CLANG_AT_LEAST(3,0,0) && defined(__GLIBCXX__)
+#elif MPT_CLANG_AT_LEAST(3,2,0) && defined(__GLIBCXX__)
 #define MPT_MUTEX_STD     1
 #define MPT_MUTEX_PTHREAD 0
 #define MPT_MUTEX_WIN32   0
