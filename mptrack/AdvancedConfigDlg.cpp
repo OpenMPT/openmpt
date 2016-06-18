@@ -81,9 +81,9 @@ BOOL COptionsAdvanced::OnInitDialog()
 	{
 		const CListCtrlEx::Header headers[] =
 		{
-			{ _T("Setting"), 100, LVCFMT_LEFT },
+			{ _T("Setting"), 150, LVCFMT_LEFT },
 			{ _T("Type"),    40, LVCFMT_LEFT },
-			{ _T("Value"),   190, LVCFMT_LEFT },
+			{ _T("Value"),   140, LVCFMT_LEFT },
 			{ _T("Default"), 62, LVCFMT_LEFT },
 		};
 		m_List.SetHeaders(headers);
@@ -91,9 +91,9 @@ BOOL COptionsAdvanced::OnInitDialog()
 	{
 		const CListCtrlEx::Header headers[] =
 		{
-			{ _T("Setting"), 150, LVCFMT_LEFT },
+			{ _T("Setting"), 200, LVCFMT_LEFT },
 			{ _T("Type"),    40, LVCFMT_LEFT },
-			{ _T("Value"),   150, LVCFMT_LEFT },
+			{ _T("Value"),   100, LVCFMT_LEFT },
 			{ _T("Default"), 52, LVCFMT_LEFT },
 		};
 		m_List.SetHeaders(headers);
