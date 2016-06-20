@@ -13,6 +13,62 @@
 
 #Inclib "openmpt"
 
+/'!
+ ' \page libopenmpt_freebasic_overview FreeBASIC API
+ '
+ ' \section libopenmpt_freebasic_error Error Handling
+ '
+ ' - Functions with no return value in the corresponding C++ API return 0 on
+ ' failure and 1 on success.
+ ' - Functions that return a string in the corresponding C++ API return a
+ ' dynamically allocated const char '. I case of failure or memory allocation
+ ' failure, a NULL pointer is returned.
+ ' - Functions that return integer values signal error condition by returning
+ ' an invalid value (-1 in most cases, 0 in some cases).
+ '
+ ' \section libopenmpt_freebasic_strings Strings
+ '
+ ' - All strings returned from libopenmpt are encoded in UTF-8.
+ ' - All strings passed to libopenmpt should also be encoded in UTF-8.
+ ' Behaviour in case of invalid UTF-8 is unspecified.
+ ' - libopenmpt does not enforce or expect any particular unicode
+ ' normalization form.
+ ' - Some libopenmpt functions return strings and are provided in two flavours:
+ ' The raw libopenmpt function (with a trailing underscore) and a FreeBASIC
+ ' wrapper function that completely takes care of memory handling (recommended).
+ ' All strings returned from raw libopenmpt functions are dynamically
+ ' allocated and must be freed with openmpt_free_string().
+ ' When using the FreeBASIC wrappers (which is the recommended way), FreeBASIC
+ ' automatically takes care of this.
+ ' - All strings passed to libopenmpt are copied. No ownership is assumed or
+ ' transferred.
+ '
+ ' \section libopenmpt_freebasic_outputformat Output Format
+ '
+ ' libopenmpt supports a wide range of PCM output formats:
+ ' [8000..192000]/[mono|stereo|quad]/[f32|i16]
+ ' Unless you have some very specific requirements demanding a particular aspect
+ ' of the output format, you should always prefer 48000/stereo/f32 as the
+ ' libopenmpt PCM format.
+ '
+ ' - Please prefer 48000Hz unless the user explicitly demands something else.
+ ' Practically all audio equipment and file formats use 48000Hz nowadays.
+ ' - Practically all module formats are made for stereo output. Mono will not
+ ' give you any measurable speed improvements and can trivially be obtained from
+ ' the stereo output anyway. Quad is not expected by almost all modules and even
+ ' if they do use surround effects, they expect the effects to be mixed to
+ ' stereo.
+ ' - Floating point output provides haedroom instead of hard clipping if the
+ ' module is louder than 0dBFs, will give you a better signal-to-noise ratio
+ ' than int16 output, and avoid the need to apply an additional dithering to the
+ ' output by libopenmpt. Unless your platform has no floating point unit at all,
+ ' floating point will thus also be slightly faster.
+ '
+ ' \section libopenmpt_freebasic_detailed Detailed documentation
+ '
+ ' \ref libopenmpt_freebasic
+ '/
+
 Extern "C"
 
 /'! API version of this header file '/
@@ -182,7 +238,7 @@ Declare Sub openmpt_log_func_silent(ByVal message As Const ZString Ptr, ByVal us
  ' \param logfunc Logging function where warning and errors are written.
  ' \param user Logging function user context.
  ' \return Probability between 0.0 and 1.0.
- ' \remarks openmpt_could_open_propability() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below menas that loading may fail.
+ ' \remarks openmpt_could_open_propability() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below 1.0 means that loading may fail. If you want a threshold in between, use >=0.5.
  ' \remarks openmpt_could_open_propability() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_propability() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_propability() returned 0.5.
  ' \sa openmpt_stream_callbacks
  '/
@@ -389,6 +445,7 @@ Declare Function openmpt_module_set_render_param(ByVal module As openmpt_module 
  ' \remarks The output buffers are only written to up to the returned number of elements.
  ' \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
  ' \remarks It is recommended to use the floating point API because of the greater dynamic range and no implied clipping.
+ ' \sa \ref libopenmpt_freebasic_outputformat
  '/
 Declare Function openmpt_module_read_mono(ByVal module As openmpt_module Ptr, ByVal samplerate As Long, ByVal count As UInteger, ByVal mono As Short Ptr) As UInteger
 
@@ -404,6 +461,7 @@ Declare Function openmpt_module_read_mono(ByVal module As openmpt_module Ptr, By
  ' \remarks The output buffers are only written to up to the returned number of elements.
  ' \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
  ' \remarks It is recommended to use the floating point API because of the greater dynamic range and no implied clipping.
+ ' \sa \ref libopenmpt_freebasic_outputformat
  '/
 Declare Function openmpt_module_read_stereo(ByVal module As openmpt_module Ptr, ByVal samplerate As Long, ByVal count As UInteger, ByVal Left As Short Ptr, ByVal Right As Short Ptr) As UInteger
 
@@ -421,6 +479,7 @@ Declare Function openmpt_module_read_stereo(ByVal module As openmpt_module Ptr, 
  ' \remarks The output buffers are only written to up to the returned number of elements.
  ' \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
  ' \remarks It is recommended to use the floating point API because of the greater dynamic range and no implied clipping.
+ ' \sa \ref libopenmpt_freebasic_outputformat
  '/
 Declare Function openmpt_module_read_quad(ByVal module As openmpt_module Ptr, ByVal samplerate As Long, ByVal count As UInteger, ByVal Left As Short Ptr, ByVal Right As Short Ptr, ByVal rear_left As Short Ptr, ByVal rear_right As Short Ptr) As UInteger
 
@@ -435,6 +494,7 @@ Declare Function openmpt_module_read_quad(ByVal module As openmpt_module Ptr, By
  ' \remarks The output buffers are only written to up to the returned number of elements.
  ' \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
  ' \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
+ ' \sa \ref libopenmpt_freebasic_outputformat
  '/
 Declare Function openmpt_module_read_float_mono(ByVal module As openmpt_module Ptr, ByVal samplerate As Long, ByVal count As UInteger, ByVal mono As Single Ptr) As UInteger
 
@@ -450,6 +510,7 @@ Declare Function openmpt_module_read_float_mono(ByVal module As openmpt_module P
  ' \remarks The output buffers are only written to up to the returned number of elements.
  ' \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
  ' \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
+ ' \sa \ref libopenmpt_freebasic_outputformat
  '/
 Declare Function openmpt_module_read_float_stereo(ByVal module As openmpt_module Ptr, ByVal samplerate As Long, ByVal count As UInteger, ByVal Left As Single Ptr, ByVal Right As Single Ptr) As UInteger
 
@@ -467,6 +528,7 @@ Declare Function openmpt_module_read_float_stereo(ByVal module As openmpt_module
  ' \remarks The output buffers are only written to up to the returned number of elements.
  ' \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
  ' \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
+ ' \sa \ref libopenmpt_freebasic_outputformat
  '/
 Declare Function openmpt_module_read_float_quad(ByVal module As openmpt_module Ptr, ByVal samplerate As Long, ByVal count As UInteger, ByVal Left As Single Ptr, ByVal Right As Single Ptr, ByVal rear_left As Single Ptr, ByVal rear_right As Single Ptr) As UInteger
 
@@ -481,6 +543,7 @@ Declare Function openmpt_module_read_float_quad(ByVal module As openmpt_module P
  ' \remarks The output buffers are only written to up to the returned number of elements.
  ' \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
  ' \remarks It is recommended to use the floating point API because of the greater dynamic range and no implied clipping.
+ ' \sa \ref libopenmpt_freebasic_outputformat
  '/
 Declare Function openmpt_module_read_interleaved_stereo(ByVal module As openmpt_module Ptr, ByVal samplerate As Long, ByVal count As UInteger, ByVal interleaved_stereo As Short Ptr) As UInteger
 
@@ -495,6 +558,7 @@ Declare Function openmpt_module_read_interleaved_stereo(ByVal module As openmpt_
  ' \remarks The output buffers are only written to up to the returned number of elements.
  ' \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
  ' \remarks It is recommended to use the floating point API because of the greater dynamic range and no implied clipping.
+ ' \sa \ref libopenmpt_freebasic_outputformat
  '/
 Declare Function openmpt_module_read_interleaved_quad(ByVal module As openmpt_module Ptr, ByVal samplerate As Long, ByVal count As UInteger, ByVal interleaved_quad As Short Ptr) As UInteger
 
@@ -509,6 +573,7 @@ Declare Function openmpt_module_read_interleaved_quad(ByVal module As openmpt_mo
  ' \remarks The output buffers are only written to up to the returned number of elements.
  ' \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
  ' \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
+ ' \sa \ref libopenmpt_freebasic_outputformat
  '/
 Declare Function openmpt_module_read_interleaved_float_stereo(ByVal module As openmpt_module Ptr, ByVal samplerate As Long, ByVal count As UInteger, ByVal interleaved_stereo As Single Ptr) As UInteger
 
@@ -523,6 +588,7 @@ Declare Function openmpt_module_read_interleaved_float_stereo(ByVal module As op
  ' \remarks The output buffers are only written to up to the returned number of elements.
  ' \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
  ' \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
+ ' \sa \ref libopenmpt_freebasic_outputformat
  '/
 Declare Function openmpt_module_read_interleaved_float_quad(ByVal module As openmpt_module Ptr, ByVal samplerate As Long, ByVal count As UInteger, ByVal interleaved_quad As Single Ptr) As UInteger
 /'@}'/
