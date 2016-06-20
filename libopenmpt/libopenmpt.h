@@ -22,7 +22,7 @@
  * - Functions with no return value in the corresponding C++ API return 0 on
  * failure and 1 on success.
  * - Functions that return a string in the corresponding C++ API return a
- * dynamically allocated const char *. I case of failure or memory allocation
+ * dynamically allocated const char *. In case of failure or memory allocation
  * failure, a NULL pointer is returned.
  * - Functions that return integer values signal error condition by returning
  * an invalid value (-1 in most cases, 0 in some cases).
@@ -32,7 +32,7 @@
  * - All strings returned from libopenmpt are encoded in UTF-8.
  * - All strings passed to libopenmpt should also be encoded in UTF-8.
  * Behaviour in case of invalid UTF-8 is unspecified.
- * - libopenmpt does not enforce or expect any particular unicode
+ * - libopenmpt does not enforce or expect any particular Unicode
  * normalization form.
  * - All strings returned from libopenmpt are dynamically allocated and must
  * be freed with openmpt_free_string(). Do NOT use the C standard library
@@ -84,7 +84,7 @@
  * the stereo output anyway. Quad is not expected by almost all modules and even
  * if they do use surround effects, they expect the effects to be mixed to 
  * stereo. 
- * - Floating point output provides haedroom instead of hard clipping if the
+ * - Floating point output provides headroom instead of hard clipping if the
  * module is louder than 0dBFs, will give you a better signal-to-noise ratio
  * than int16 output, and avoid the need to apply an additional dithering to the
  * output by libopenmpt. Unless your platform has no floating point unit at all,
@@ -145,7 +145,7 @@ LIBOPENMPT_API uint32_t openmpt_get_core_version(void);
 #define OPENMPT_STRING_BUILD            LIBOPENMPT_DEPRECATED_STRING( "build" )
 /*! Return all contributors from openmpt_get_string(). \deprecated Please use \code "credits" \endcode directly. */
 #define OPENMPT_STRING_CREDITS          LIBOPENMPT_DEPRECATED_STRING( "credits" )
-/*! Return contact infromation about libopenmpt from openmpt_get_string(). \deprecated Please use \code "contact" \endcode directly. */
+/*! Return contact information about libopenmpt from openmpt_get_string(). \deprecated Please use \code "contact" \endcode directly. */
 #define OPENMPT_STRING_CONTACT          LIBOPENMPT_DEPRECATED_STRING( "contact" )
 /*! Return the libopenmpt license from openmpt_get_string(). \deprecated Please use \code "license" \endcode directly. */
 #define OPENMPT_STRING_LICENSE          LIBOPENMPT_DEPRECATED_STRING( "license" )
@@ -162,13 +162,13 @@ LIBOPENMPT_API void openmpt_free_string( const char * str );
  *       Possible keys are:
  *        -  "library_version": verbose library version string
  *        -  "library_features": verbose library features string
- *        -  "core_version": verboseOpenMPT core version string
+ *        -  "core_version": verbose OpenMPT core version string
  *        -  "source_url": original source code URL
  *        -  "source_date": original source code date
  *        -  "build": information about the current build (e.g. the build date or compiler used)
  *        -  "build_compiler": information about the compiler used to build libopenmpt
  *        -  "credits": all contributors
- *        -  "contact": contact infromation about libopenmpt
+ *        -  "contact": contact information about libopenmpt
  *        -  "license": the libopenmpt license
  *        -  "url": libopenmpt website URL
  *        -  "support_forum_url": libopenmpt support and discussions forum URL
@@ -305,7 +305,7 @@ typedef struct openmpt_module_initial_ctl {
  * \param user User-defined data associated with this module. This value will be passed to the logging callback function (logfunc) 
  * \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
  * \return A pointer to the constructed openmpt_module, or NULL on failure.
- * \remarks The input data can be discarded after an openmpt_module has been constructed succesfully.
+ * \remarks The input data can be discarded after an openmpt_module has been constructed successfully.
  * \sa openmpt_stream_callbacks
  * \sa \ref libopenmpt_c_fileio
  */
@@ -319,7 +319,7 @@ LIBOPENMPT_API openmpt_module * openmpt_module_create( openmpt_stream_callbacks 
  * \param user User-defined data associated with this module. This value will be passed to the logging callback function (logfunc) 
  * \param ctls A map of initial ctl values, see openmpt_module_get_ctls.
  * \return A pointer to the constructed openmpt_module, or NULL on failure.
- * \remarks The input data can be discarded after an openmpt_module has been constructed succesfully.
+ * \remarks The input data can be discarded after an openmpt_module has been constructed successfully.
  * \sa \ref libopenmpt_c_fileio
  */
 LIBOPENMPT_API openmpt_module * openmpt_module_create_from_memory( const void * filedata, size_t filesize, openmpt_log_func logfunc, void * user, const openmpt_module_initial_ctl * ctls );
@@ -381,10 +381,10 @@ LIBOPENMPT_API void openmpt_module_destroy( openmpt_module * mod );
 #define OPENMPT_MODULE_COMMAND_PARAMETER    5
 /** @}*/
 
-/*! \brief Select a subsong from a multi-song module
+/*! \brief Select a sub-song from a multi-song module
  *
  * \param mod The module handle to work on.
- * \param subsong Index of the subsong. -1 plays all subsongs consecutively.
+ * \param subsong Index of the sub-song. -1 plays all sub-songs consecutively.
  * \return 1 on success, 0 on failure.
  * \sa openmpt_module_get_num_subsongs, openmpt_module_get_subsong_names
  */
@@ -414,7 +414,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_repeat_count( openmpt_module * mod );
 /*! \brief approximate song duration
  *
  * \param mod The module handle to work on.
- * \return Approximate duration of current subsong in seconds.
+ * \return Approximate duration of current sub-song in seconds.
  */
 LIBOPENMPT_API double openmpt_module_get_duration_seconds( openmpt_module * mod );
 
@@ -477,7 +477,7 @@ LIBOPENMPT_API int openmpt_module_set_render_param( openmpt_module * mod, int pa
 /*! \brief Render audio data
  *
  * \param mod The module handle to work on.
- * \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+ * \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
  * \param count Number of audio frames to render per channel.
  * \param mono Pointer to a buffer of at least count elements that receives the mono/center output.
  * \return The number of frames actually rendered.
@@ -491,7 +491,7 @@ LIBOPENMPT_API size_t openmpt_module_read_mono(   openmpt_module * mod, int32_t 
 /*! \brief Render audio data
  *
  * \param mod The module handle to work on.
- * \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+ * \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
  * \param count Number of audio frames to render per channel.
  * \param left Pointer to a buffer of at least count elements that receives the left output.
  * \param right Pointer to a buffer of at least count elements that receives the right output.
@@ -506,7 +506,7 @@ LIBOPENMPT_API size_t openmpt_module_read_stereo( openmpt_module * mod, int32_t 
 /*! \brief Render audio data
  *
  * \param mod The module handle to work on.
- * \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+ * \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
  * \param count Number of audio frames to render per channel.
  * \param left Pointer to a buffer of at least count elements that receives the left output.
  * \param right Pointer to a buffer of at least count elements that receives the right output.
@@ -523,7 +523,7 @@ LIBOPENMPT_API size_t openmpt_module_read_quad(   openmpt_module * mod, int32_t 
 /*! \brief Render audio data
  *
  * \param mod The module handle to work on.
- * \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+ * \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
  * \param count Number of audio frames to render per channel.
  * \param mono Pointer to a buffer of at least count elements that receives the mono/center output.
  * \return The number of frames actually rendered.
@@ -537,7 +537,7 @@ LIBOPENMPT_API size_t openmpt_module_read_float_mono(   openmpt_module * mod, in
 /*! \brief Render audio data
  *
  * \param mod The module handle to work on.
- * \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+ * \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
  * \param count Number of audio frames to render per channel.
  * \param left Pointer to a buffer of at least count elements that receives the left output.
  * \param right Pointer to a buffer of at least count elements that receives the right output.
@@ -552,7 +552,7 @@ LIBOPENMPT_API size_t openmpt_module_read_float_stereo( openmpt_module * mod, in
 /*! \brief Render audio data
  *
  * \param mod The module handle to work on.
- * \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+ * \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
  * \param count Number of audio frames to render per channel.
  * \param left Pointer to a buffer of at least count elements that receives the left output.
  * \param right Pointer to a buffer of at least count elements that receives the right output.
@@ -569,7 +569,7 @@ LIBOPENMPT_API size_t openmpt_module_read_float_quad(   openmpt_module * mod, in
 /*! \brief Render audio data
  *
  * \param mod The module handle to work on.
- * \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+ * \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
  * \param count Number of audio frames to render per channel.
  * \param interleaved_stereo Pointer to a buffer of at least count*2 elements that receives the interleaved stereo output in the order (L,R).
  * \return The number of frames actually rendered.
@@ -583,7 +583,7 @@ LIBOPENMPT_API size_t openmpt_module_read_interleaved_stereo( openmpt_module * m
 /*! \brief Render audio data
  *
  * \param mod The module handle to work on.
- * \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+ * \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
  * \param count Number of audio frames to render per channel.
  * \param interleaved_quad Pointer to a buffer of at least count*4 elements that receives the interleaved suad surround output in the order (L,R,RL,RR).
  * \return The number of frames actually rendered.
@@ -597,7 +597,7 @@ LIBOPENMPT_API size_t openmpt_module_read_interleaved_quad(   openmpt_module * m
 /*! \brief Render audio data
  *
  * \param mod The module handle to work on.
- * \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+ * \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
  * \param count Number of audio frames to render per channel.
  * \param interleaved_stereo Pointer to a buffer of at least count*2 elements that receives the interleaved stereo output in the order (L,R).
  * \return The number of frames actually rendered.
@@ -611,7 +611,7 @@ LIBOPENMPT_API size_t openmpt_module_read_interleaved_float_stereo( openmpt_modu
 /*! \brief Render audio data
  *
  * \param mod The module handle to work on.
- * \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+ * \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
  * \param count Number of audio frames to render per channel.
  * \param interleaved_quad Pointer to a buffer of at least count*4 elements that receives the interleaved suad surround output in the order (L,R,RL,RR).
  * \return The number of frames actually rendered.
@@ -730,10 +730,10 @@ LIBOPENMPT_API float openmpt_module_get_current_channel_vu_rear_left( openmpt_mo
  */
 LIBOPENMPT_API float openmpt_module_get_current_channel_vu_rear_right( openmpt_module * mod, int32_t channel );
 
-/*! \brief Get the number of subsongs
+/*! \brief Get the number of sub-songs
  *
  * \param mod The module handle to work on.
- * \return The number of subsongs in the module. This includes any "hidden" songs (songs that share the same sequence, but start at different order indices) and "normal" subsongs or "sequences" (if the format supports them).
+ * \return The number of sub-songs in the module. This includes any "hidden" songs (songs that share the same sequence, but start at different order indices) and "normal" sub-songs or "sequences" (if the format supports them).
  * \sa openmpt_module_get_subsong_names, openmpt_module_select_subsong
  */
 LIBOPENMPT_API int32_t openmpt_module_get_num_subsongs( openmpt_module * mod );
@@ -769,18 +769,18 @@ LIBOPENMPT_API int32_t openmpt_module_get_num_instruments( openmpt_module * mod 
  */
 LIBOPENMPT_API int32_t openmpt_module_get_num_samples( openmpt_module * mod );
 
-/*! \brief Get a subsong name
+/*! \brief Get a sub-song name
  *
  * \param mod The module handle to work on.
- * \param index The subsong whose name should be retreived
- * \return The subsong name.
+ * \param index The sub-song whose name should be retrieved
+ * \return The sub-song name.
  * \sa openmpt_module_get_num_subsongs, openmpt_module_select_subsong
  */
 LIBOPENMPT_API const char * openmpt_module_get_subsong_name( openmpt_module * mod, int32_t index );
 /*! \brief Get a channel name
  *
  * \param mod The module handle to work on.
- * \param index The channel whose name should be retreived
+ * \param index The channel whose name should be retrieved
  * \return The channel name.
  * \sa openmpt_module_get_num_channels
  */
@@ -788,7 +788,7 @@ LIBOPENMPT_API const char * openmpt_module_get_channel_name( openmpt_module * mo
 /*! \brief Get an order name
  *
  * \param mod The module handle to work on.
- * \param index The order whose name should be retreived
+ * \param index The order whose name should be retrieved
  * \return The order name.
  * \sa openmpt_module_get_num_orders
  */
@@ -796,7 +796,7 @@ LIBOPENMPT_API const char * openmpt_module_get_order_name( openmpt_module * mod,
 /*! \brief Get a pattern name
  *
  * \param mod The module handle to work on.
- * \param index The pattern whose name should be retreived
+ * \param index The pattern whose name should be retrieved
  * \return The pattern name.
  * \sa openmpt_module_get_num_patterns
  */
@@ -804,7 +804,7 @@ LIBOPENMPT_API const char * openmpt_module_get_pattern_name( openmpt_module * mo
 /*! \brief Get an instrument name
  *
  * \param mod The module handle to work on.
- * \param index The instrument whose name should be retreived
+ * \param index The instrument whose name should be retrieved
  * \return The instrument name.
  * \sa openmpt_module_get_num_instruments
  */
@@ -812,7 +812,7 @@ LIBOPENMPT_API const char * openmpt_module_get_instrument_name( openmpt_module *
 /*! \brief Get a sample name
  *
  * \param mod The module handle to work on.
- * \param index The sample whose name should be retreived
+ * \param index The sample whose name should be retrieved
  * \return The sample name.
  * \sa openmpt_module_get_num_samples
  */
@@ -862,7 +862,7 @@ LIBOPENMPT_API const char * openmpt_module_format_pattern_row_channel_command( o
  * \param row The row from which the data should be retrieved.
  * \param channel The channel from which the data should be retrieved.
  * \param command The cell index at which the data should be retrieved. See openmpt_module_command_index
- * \return The highlighting string for the formatted pattern data as retrived by openmpt_module_get_pattern_row_channel_command at the given pattern position.
+ * \return The highlighting string for the formatted pattern data as retrieved by openmpt_module_get_pattern_row_channel_command at the given pattern position.
  * \remarks The returned string will map each character position of the string returned by openmpt_module_get_pattern_row_channel_command to a highlighting instruction.
  *          Possible highlighting characters are:
  *          - " " : empty/space
@@ -898,7 +898,7 @@ LIBOPENMPT_API const char * openmpt_module_format_pattern_row_channel( openmpt_m
  * \param channel The channel from which the data should be retrieved.
  * \param width The maximum number of characters the string should contain. 0 means no limit.
  * \param pad If true, the string will be resized to the exact length provided in the width parameter.
- * \return The highlighting string for the formatted pattern data as retrived by openmpt_module_format_pattern_row_channel at the given pattern position.
+ * \return The highlighting string for the formatted pattern data as retrieved by openmpt_module_format_pattern_row_channel at the given pattern position.
  * \sa openmpt_module_format_pattern_row_channel
  */
 LIBOPENMPT_API const char * openmpt_module_highlight_pattern_row_channel( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, size_t width, int pad );
@@ -911,7 +911,7 @@ LIBOPENMPT_API const char * openmpt_module_highlight_pattern_row_channel( openmp
  *          - load.skip_samples: Set to "1" to avoid loading samples into memory
  *          - load.skip_patterns: Set to "1" to avoid loading patterns into memory
  *          - load.skip_plugins: Set to "1" to avoid loading plugins
- *          - load.skip_subsongs_init: Set to "1" to avoid pre-initializing subsongs. Skipping results in faster module loading but slower seeking.
+ *          - load.skip_subsongs_init: Set to "1" to avoid pre-initializing sub-songs. Skipping results in faster module loading but slower seeking.
  *          - seek.sync_samples: Set to "1" to sync sample playback when using openmpt_module_set_position_seconds or openmpt_module_set_position_order_row.
  *          - play.tempo_factor: Set a floating point tempo factor. "1.0" is the default tempo.
  *          - play.pitch_factor: Set a floating point pitch factor. "1.0" is the default pitch.

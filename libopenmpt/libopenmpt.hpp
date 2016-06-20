@@ -42,7 +42,7 @@
  * - All strings returned from libopenmpt are encoded in UTF-8.
  * - All strings passed to libopenmpt should also be encoded in UTF-8.
  * Behaviour in case of invalid UTF-8 is unspecified.
- * - libopenmpt does not enforce or expect any particular unicode
+ * - libopenmpt does not enforce or expect any particular Unicode
  * normalization form.
  *
  * \section libopenmpt_cpp_fileio File I/O
@@ -88,7 +88,7 @@
  * the stereo output anyway. Quad is not expected by almost all modules and even
  * if they do use surround effects, they expect the effects to be mixed to 
  * stereo. 
- * - Floating point output provides haedroom instead of hard clipping if the
+ * - Floating point output provides headroom instead of hard clipping if the
  * module is louder than 0dBFs, will give you a better signal-to-noise ratio
  * than int16 output, and avoid the need to apply an additional dithering to the
  * output by libopenmpt. Unless your platform has no floating point unit at all,
@@ -147,7 +147,7 @@ LIBOPENMPT_DEPRECATED static const char core_version    [] = "core_version";
 LIBOPENMPT_DEPRECATED static const char build           [] = "build";
 //! Return all contributors from openmpt::string::get(). \deprecated Please use \code "credits" \endcode directly.
 LIBOPENMPT_DEPRECATED static const char credits         [] = "credits";
-//! Return contact infromation about libopenmpt from openmpt::string::get(). \deprecated Please use \code "contact" \endcode directly.
+//! Return contact information about libopenmpt from openmpt::string::get(). \deprecated Please use \code "contact" \endcode directly.
 LIBOPENMPT_DEPRECATED static const char contact         [] = "contact";
 //! Return the libopenmpt license from openmpt::string::get(). \deprecated Please use \code "license" \endcode directly.
 LIBOPENMPT_DEPRECATED static const char license         [] = "license";
@@ -158,13 +158,13 @@ LIBOPENMPT_DEPRECATED static const char license         [] = "license";
          Possible keys are:
           -  "library_version": verbose library version string
           -  "library_features": verbose library features string
-          -  "core_version": verboseOpenMPT core version string
+          -  "core_version": verbose OpenMPT core version string
           -  "source_url": original source code URL
           -  "source_date": original source code date
           -  "build": information about the current build (e.g. the build date or compiler used)
           -  "build_compiler": information about the compiler used to build libopenmpt
           -  "credits": all contributors
-          -  "contact": contact infromation about libopenmpt
+          -  "contact": contact information about libopenmpt
           -  "license": the libopenmpt license
           -  "url": libopenmpt website URL
           -  "support_forum_url": libopenmpt support and discussions forum URL
@@ -284,7 +284,7 @@ public:
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
-	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed successfully.
 	  \sa \ref libopenmpt_cpp_fileio
 	*/
 	module( std::istream & stream, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
@@ -293,7 +293,7 @@ public:
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
-	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed successfully.
 	  \sa \ref libopenmpt_cpp_fileio
 	*/
 	module( const std::vector<std::uint8_t> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
@@ -303,7 +303,7 @@ public:
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
-	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed successfully.
 	  \sa \ref libopenmpt_cpp_fileio
 	*/
 	module( const std::uint8_t * beg, const std::uint8_t * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
@@ -313,7 +313,7 @@ public:
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
-	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed successfully.
 	  \sa \ref libopenmpt_cpp_fileio
 	*/
 	module( const std::uint8_t * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
@@ -322,7 +322,7 @@ public:
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
-	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed successfully.
 	  \sa \ref libopenmpt_cpp_fileio
 	*/
 	module( const std::vector<char> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
@@ -332,7 +332,7 @@ public:
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
-	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed successfully.
 	  \sa \ref libopenmpt_cpp_fileio
 	*/
 	module( const char * beg, const char * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
@@ -342,7 +342,7 @@ public:
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
-	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed successfully.
 	  \sa \ref libopenmpt_cpp_fileio
 	*/
 	module( const char * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
@@ -352,17 +352,17 @@ public:
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
 	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
-	  \remarks The input data can be discarded after an openmpt::module has been constructed succesfully.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed successfully.
 	  \sa \ref libopenmpt_cpp_fileio
 	*/
 	module( const void * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	virtual ~module();
 public:
 
-	//! Select a subsong from a multi-song module
+	//! Select a sub-song from a multi-song module
 	/*!
-	  \param subsong Index of the subsong. -1 plays all subsongs consecutively.
-	  \throws openmpt::exception Throws an exception derived from openmpt::exception if subsong is not in range [-1,openmpt::module::get_num_subsongs()[
+	  \param subsong Index of the sub-song. -1 plays all sub-songs consecutively.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if sub-song is not in range [-1,openmpt::module::get_num_subsongs()[
 	  \sa openmpt::module::get_num_subsongs, openmpt::module::get_subsong_names
 	*/
 	void select_subsong( std::int32_t subsong );
@@ -387,7 +387,7 @@ public:
 
 	//! Get approximate song duration
 	/*!
-	  \return Approximate duration of current subsong in seconds.
+	  \return Approximate duration of current sub-song in seconds.
 	*/
 	double get_duration_seconds() const;
 
@@ -438,7 +438,7 @@ public:
 	/*@{*/
 	//! Render audio data
 	/*!
-	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+	  \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
 	  \param count Number of audio frames to render per channel.
 	  \param mono Pointer to a buffer of at least count elements that receives the mono/center output.
 	  \return The number of frames actually rendered.
@@ -451,7 +451,7 @@ public:
 	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * mono );
 	//! Render audio data
 	/*!
-	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+	  \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
 	  \param count Number of audio frames to render per channel.
 	  \param left Pointer to a buffer of at least count elements that receives the left output.
 	  \param right Pointer to a buffer of at least count elements that receives the right output.
@@ -465,7 +465,7 @@ public:
 	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right );
 	//! Render audio data
 	/*!
-	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+	  \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
 	  \param count Number of audio frames to render per channel.
 	  \param left Pointer to a buffer of at least count elements that receives the left output.
 	  \param right Pointer to a buffer of at least count elements that receives the right output.
@@ -481,7 +481,7 @@ public:
 	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right );
 	//! Render audio data
 	/*!
-	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+	  \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
 	  \param count Number of audio frames to render per channel.
 	  \param mono Pointer to a buffer of at least count elements that receives the mono/center output.
 	  \return The number of frames actually rendered.
@@ -494,7 +494,7 @@ public:
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * mono );
 	//! Render audio data
 	/*!
-	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+	  \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
 	  \param count Number of audio frames to render per channel.
 	  \param left Pointer to a buffer of at least count elements that receives the left output.
 	  \param right Pointer to a buffer of at least count elements that receives the right output.
@@ -508,7 +508,7 @@ public:
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * left, float * right );
 	//! Render audio data
 	/*!
-	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+	  \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
 	  \param count Number of audio frames to render per channel.
 	  \param left Pointer to a buffer of at least count elements that receives the left output.
 	  \param right Pointer to a buffer of at least count elements that receives the right output.
@@ -524,7 +524,7 @@ public:
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * left, float * right, float * rear_left, float * rear_right );
 	//! Render audio data
 	/*!
-	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+	  \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
 	  \param count Number of audio frames to render per channel.
 	  \param interleaved_stereo Pointer to a buffer of at least count*2 elements that receives the interleaved stereo output in the order (L,R).
 	  \return The number of frames actually rendered.
@@ -537,7 +537,7 @@ public:
 	std::size_t read_interleaved_stereo( std::int32_t samplerate, std::size_t count, std::int16_t * interleaved_stereo );
 	//! Render audio data
 	/*!
-	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+	  \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
 	  \param count Number of audio frames to render per channel.
 	  \param interleaved_quad Pointer to a buffer of at least count*4 elements that receives the interleaved suad surround output in the order (L,R,RL,RR).
 	  \return The number of frames actually rendered.
@@ -550,7 +550,7 @@ public:
 	std::size_t read_interleaved_quad( std::int32_t samplerate, std::size_t count, std::int16_t * interleaved_quad );
 	//! Render audio data
 	/*!
-	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+	  \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
 	  \param count Number of audio frames to render per channel.
 	  \param interleaved_stereo Pointer to a buffer of at least count*2 elements that receives the interleaved stereo output in the order (L,R).
 	  \return The number of frames actually rendered.
@@ -563,7 +563,7 @@ public:
 	std::size_t read_interleaved_stereo( std::int32_t samplerate, std::size_t count, float * interleaved_stereo );
 	//! Render audio data
 	/*!
-	  \param samplerate Samplerate to render output. Should be in [8000,192000], but this is not enforced.
+	  \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
 	  \param count Number of audio frames to render per channel.
 	  \param interleaved_quad Pointer to a buffer of at least count*4 elements that receives the interleaved suad surround output in the order (L,R,RL,RR).
 	  \return The number of frames actually rendered.
@@ -669,9 +669,9 @@ public:
 	*/
 	float get_current_channel_vu_rear_right( std::int32_t channel ) const;
 
-	//! Get the number of subsongs
+	//! Get the number of sub-songs
 	/*!
-	  \return The number of subsongs in the module. This includes any "hidden" songs (songs that share the same sequence, but start at different order indices) and "normal" subsongs or "sequences" (if the format supports them).
+	  \return The number of sub-songs in the module. This includes any "hidden" songs (songs that share the same sequence, but start at different order indices) and "normal" sub-songs or "sequences" (if the format supports them).
 	  \sa openmpt::module::get_subsong_names, openmpt::module::select_subsong
 	*/
 	std::int32_t get_num_subsongs() const;
@@ -702,9 +702,9 @@ public:
 	*/
 	std::int32_t get_num_samples() const;
 
-	//! Get a list of subsong names
+	//! Get a list of sub-song names
 	/*!
-	  \return All subsong names.
+	  \return All sub-song names.
 	  \sa openmpt::module::get_num_subsongs, openmpt::module::select_subsong
 	*/
 	std::vector<std::string> get_subsong_names() const;
@@ -780,7 +780,7 @@ public:
 	  \param row The row from which the data should be retrieved.
 	  \param channel The channel from which the data should be retrieved.
 	  \param command The cell index at which the data should be retrieved. See openmpt::module::command_index
-	  \return The highlighting string for the formatted pattern data as retrived by openmpt::module::get_pattern_row_channel_command at the given pattern position.
+	  \return The highlighting string for the formatted pattern data as retrieved by openmpt::module::get_pattern_row_channel_command at the given pattern position.
 	  \remarks The returned string will map each character position of the string returned by openmpt::module::get_pattern_row_channel_command to a highlighting instruction.
 	           Possible highlighting characters are:
 	           - " " : empty/space
@@ -814,7 +814,7 @@ public:
 	  \param channel The channel from which the data should be retrieved.
 	  \param width The maximum number of characters the string should contain. 0 means no limit.
 	  \param pad If true, the string will be resized to the exact length provided in the width parameter.
-	  \return The highlighting string for the formatted pattern data as retrived by openmpt::module::format_pattern_row_channel at the given pattern position.
+	  \return The highlighting string for the formatted pattern data as retrieved by openmpt::module::format_pattern_row_channel at the given pattern position.
 	  \sa openmpt::module::format_pattern_row_channel
 	*/
 	std::string highlight_pattern_row_channel( std::int32_t pattern, std::int32_t row, std::int32_t channel, std::size_t width = 0, bool pad = true ) const;
@@ -826,7 +826,7 @@ public:
 	           - load.skip_samples: Set to "1" to avoid loading samples into memory
 	           - load.skip_patterns: Set to "1" to avoid loading patterns into memory
 	           - load.skip_plugins: Set to "1" to avoid loading plugins
-	           - load.skip_subsongs_init: Set to "1" to avoid pre-initializing subsongs. Skipping results in faster module loading but slower seeking.
+	           - load.skip_subsongs_init: Set to "1" to avoid pre-initializing sub-songs. Skipping results in faster module loading but slower seeking.
 	           - seek.sync_samples: Set to "1" to sync sample playback when using openmpt::module::set_position_seconds or openmpt::module::set_position_order_row.
 	           - play.tempo_factor: Set a floating point tempo factor. "1.0" is the default tempo.
 	           - play.pitch_factor: Set a floating point pitch factor. "1.0" is the default pitch.
