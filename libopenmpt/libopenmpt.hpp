@@ -73,6 +73,27 @@
  * needed after the openmpt::module has been constructed and can be destroyed
  * by the caller.
  *
+ * \section libopenmpt_cpp_outputformat Output Format
+ *
+ * libopenmpt supports a wide range of PCM output formats:
+ * [8000..192000]/[mono|stereo|quad]/[f32|i16]
+ * Unless you have some very specific requirements demanding a particular aspect
+ * of the output format, you should always prefer 48000/stereo/f32 as the
+ * libopenmpt PCM format.
+ *
+ * - Please prefer 48000Hz unless the user explicitly demands something else.
+ * Practically all audio equipment and file formats use 48000Hz nowadays.
+ * - Practically all module formats are made for stereo output. Mono will not
+ * give you any measurable speed improvements and can trivially be obtained from
+ * the stereo output anyway. Quad is not expected by almost all modules and even
+ * if they do use surround effects, they expect the effects to be mixed to 
+ * stereo. 
+ * - Floating point output provides haedroom instead of hard clipping if the
+ * module is louder than 0dBFs, will give you a better signal-to-noise ratio
+ * than int16 output, and avoid the need to apply an additional dithering to the
+ * output by libopenmpt. Unless your platform has no floating point unit at all,
+ * floating point will thus also be slightly faster.
+ *
  * \section libopenmpt-cpp-detailed Detailed documentation
  *
  * \ref libopenmpt_cpp
@@ -425,6 +446,7 @@ public:
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
 	  \remarks It is recommended to use the floating point API because of the greater dynamic range and no implied clipping.
+	  \sa \ref libopenmpt_cpp_outputformat
 	*/
 	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * mono );
 	//! Render audio data
@@ -438,6 +460,7 @@ public:
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
 	  \remarks It is recommended to use the floating point API because of the greater dynamic range and no implied clipping.
+	  \sa \ref libopenmpt_cpp_outputformat
 	*/
 	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right );
 	//! Render audio data
@@ -453,6 +476,7 @@ public:
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
 	  \remarks It is recommended to use the floating point API because of the greater dynamic range and no implied clipping.
+	  \sa \ref libopenmpt_cpp_outputformat
 	*/
 	std::size_t read( std::int32_t samplerate, std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right );
 	//! Render audio data
@@ -465,6 +489,7 @@ public:
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
 	  \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
+	  \sa \ref libopenmpt_cpp_outputformat
 	*/
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * mono );
 	//! Render audio data
@@ -478,6 +503,7 @@ public:
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
 	  \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
+	  \sa \ref libopenmpt_cpp_outputformat
 	*/
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * left, float * right );
 	//! Render audio data
@@ -493,6 +519,7 @@ public:
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
 	  \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
+	  \sa \ref libopenmpt_cpp_outputformat
 	*/
 	std::size_t read( std::int32_t samplerate, std::size_t count, float * left, float * right, float * rear_left, float * rear_right );
 	//! Render audio data
@@ -505,6 +532,7 @@ public:
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
 	  \remarks It is recommended to use the floating point API because of the greater dynamic range and no implied clipping.
+	  \sa \ref libopenmpt_cpp_outputformat
 	*/
 	std::size_t read_interleaved_stereo( std::int32_t samplerate, std::size_t count, std::int16_t * interleaved_stereo );
 	//! Render audio data
@@ -517,6 +545,7 @@ public:
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
 	  \remarks It is recommended to use the floating point API because of the greater dynamic range and no implied clipping.
+	  \sa \ref libopenmpt_cpp_outputformat
 	*/
 	std::size_t read_interleaved_quad( std::int32_t samplerate, std::size_t count, std::int16_t * interleaved_quad );
 	//! Render audio data
@@ -529,6 +558,7 @@ public:
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
 	  \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
+	  \sa \ref libopenmpt_cpp_outputformat
 	*/
 	std::size_t read_interleaved_stereo( std::int32_t samplerate, std::size_t count, float * interleaved_stereo );
 	//! Render audio data
@@ -541,6 +571,7 @@ public:
 	  \remarks The output buffers are only written to up to the returned number of elements.
 	  \remarks You can freely switch between any of these function if you see a need to do so. libopenmpt tries to introduce as little switching annoyances as possible. Normally, you would only use a single one of these functions for rendering a particular module.
 	  \remarks Floating point samples are in the [-1.0..1.0] nominal range. They are not clipped to that range though and thus might overshoot.
+	  \sa \ref libopenmpt_cpp_outputformat
 	*/
 	std::size_t read_interleaved_quad( std::int32_t samplerate, std::size_t count, float * interleaved_quad );
 	/*@}*/
