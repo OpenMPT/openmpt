@@ -720,7 +720,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	// Prevent clipping based on number of channels... If all channels are playing at full volume, "256 / #channels"
 	// is the maximum possible sample pre-amp without getting distortion (Compatible mix levels given).
 	// The more channels we have, the less likely it is that all of them are used at the same time, though, so cap at 32...
-	m_nSamplePreAmp = std::max(32, 256 / m_nChannels);
+	m_nSamplePreAmp = Clamp(256 / m_nChannels, 32, 128);
 	m_SongFlags.reset();
 
 	// Setup channel pan positions and volume
@@ -1045,6 +1045,10 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 			minVersion = std::max(minVersion, MST1_00);
 	}
 
+	// Reject any files with no samples at all, as this might just be a random binary file (e.g. ID3 tags with tons of padding)
+	if(totalSampleLen == 0)
+		return false;
+
 	MODFileHeader fileHeader;
 	file.ReadStruct(fileHeader);
 
@@ -1086,7 +1090,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileHeader.restartPos != 0x78)
 	{
 		// Convert to CIA timing
-		//m_nDefaultTempo = static_cast<TEMPO>(((709378.92f / 50.0f) * 125.0f) / ((240.0f - static_cast<float>(fileHeader.restartPos)) * 122.0f));
+		//m_nDefaultTempo = TEMPO(((709378.92 / 50.0) * 125.0) / ((240 - fileHeader.restartPos) * 122.0));
 		m_nDefaultTempo.Set((709379 / ((240 - fileHeader.restartPos) * 122)) * 125 / 50);
 		if(minVersion > UST1_80)
 		{
