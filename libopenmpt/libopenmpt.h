@@ -72,7 +72,8 @@
  * \section libopenmpt_c_outputformat Output Format
  *
  * libopenmpt supports a wide range of PCM output formats:
- * [8000..192000]/[mono|stereo|quad]/[f32|i16]
+ * [8000..192000]/[mono|stereo|quad]/[f32|i16].
+ *
  * Unless you have some very specific requirements demanding a particular aspect
  * of the output format, you should always prefer 48000/stereo/f32 as the
  * libopenmpt PCM format.
