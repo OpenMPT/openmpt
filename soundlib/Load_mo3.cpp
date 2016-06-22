@@ -338,7 +338,7 @@ struct PACKED MO3Instrument
 		mptIns.nMidiProgram = midiPatch;
 		mptIns.midiPWD =  midiBend;
 		if(type == MOD_TYPE_IT)
-			mptIns.nGlobalVol = std::min<uint8>(globalVol, 128) / 2u;
+			mptIns.nGlobalVol = std::min(globalVol, uint8(128)) / 2u;
 		if(panning <= 256)
 		{
 			mptIns.nPan = panning;
@@ -2007,6 +2007,15 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			break;
 		}
+	}
+
+	if((GetType() == MOD_TYPE_IT && cwtv > 0x0100 && cwtv < 0x0214)
+		|| (GetType() == MOD_TYPE_S3M && cwtv > 0x3100 && cwtv < 0x3214))
+	{
+		// Ignore MIDI data in files made with IT older than version 2.14.
+		MemsetZero(m_MidiCfg.szMidiSFXExt);
+		MemsetZero(m_MidiCfg.szMidiZXXExt);
+		m_SongFlags.set(SONG_EMBEDMIDICFG);
 	}
 
 	if(m_madeWithTracker.empty())

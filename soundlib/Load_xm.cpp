@@ -4,7 +4,6 @@
  * Purpose: XM (FastTracker II) module loader / saver
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
- *          Adam Goode (endian and char fixes for PPC)
  *          OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -257,7 +256,8 @@ enum TrackerVersions
 	verFT2Generic	= 0x20,		// "FastTracker v2.00", but FastTracker has NOT been ruled out
 	verOther		= 0x40,		// Something we don't know, testing for DigiTrakker.
 	verFT2Clone		= 0x80,		// NOT FT2: itype changed between instruments, or \0 found in song title
-	verDigiTracker	= 0x100,	// Probably DigiTrakker
+	verDigiTrakker	= 0x100,	// Probably DigiTrakker
+	verUNMO3		= 0x200,	// TODO: UNMO3-ed XMs are detected as MPT 1.16
 };
 DECLARE_FLAGSET(TrackerVersions)
 
@@ -331,6 +331,9 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		} else if(!memcmp(fileHeader.trackerName, "Skale Tracker\0", 14))
 		{
 			m_playBehaviour.reset(kFT2OffsetOutOfRange);
+		} else if(!memcmp(fileHeader.trackerName, "*Converted ", 11))
+		{
+			madeWith = verDigiTrakker;
 		}
 	}
 
@@ -410,8 +413,8 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			// Empty instruments make tracker identification pretty easy!
 			if(instrHeader.size == 263 && instrHeader.sampleHeaderSize == 0 && madeWith[verNewModPlug])
 				madeWith.set(verConfirmed);
-			else if(instrHeader.size != 29 && madeWith[verDigiTracker])
-				madeWith.reset(verDigiTracker);
+			else if(instrHeader.size != 29 && madeWith[verDigiTrakker])
+				madeWith.reset(verDigiTrakker);
 			else if(madeWith[verFT2Clone | verFT2Generic] && instrHeader.size != 33)
 			{
 				// Sure isn't FT2.
@@ -648,7 +651,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(m_madeWithTracker.empty())
 	{
-		if(madeWith[verDigiTracker] && sampleReserved == 0 && (instrType ? instrType : -1) == -1)
+		if(madeWith[verDigiTrakker] && sampleReserved == 0 && (instrType ? instrType : -1) == -1)
 		{
 			m_madeWithTracker = "DigiTrakker";
 		} else if(madeWith[verFT2Generic])
