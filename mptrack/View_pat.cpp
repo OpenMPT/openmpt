@@ -6028,18 +6028,23 @@ bool CViewPattern::BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler *ih) const
 bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu, CInputHandler *ih) const
 //---------------------------------------------------------------------------------
 {
+	const CModSpecifications &specs = GetDocument()->GetrSoundFile().GetModSpecifications();
+	CHANNELINDEX numChannels = GetDocument()->GetNumChannels();
+	DWORD canAddChannels = (numChannels < specs.channelsMax) ? 0 : MF_GRAYED;
+	DWORD canRemoveChannels = (numChannels > specs.channelsMin) ? 0 : MF_GRAYED;
+
 	AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSPOSECHANNEL, "&Transpose Channel\t" + ih->GetKeyTextFromCommand(kcChannelTranspose));
-	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DUPLICATECHANNEL, "&Duplicate Channel\t" + ih->GetKeyTextFromCommand(kcChannelDuplicate));
+	AppendMenu(hMenu, MF_STRING | canAddChannels, ID_PATTERN_DUPLICATECHANNEL, "&Duplicate Channel\t" + ih->GetKeyTextFromCommand(kcChannelDuplicate));
 
 	HMENU addChannelMenu = ::CreatePopupMenu();
-	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(addChannelMenu), "&Add Channel\t");
+	AppendMenu(hMenu, MF_POPUP | canAddChannels, reinterpret_cast<UINT_PTR>(addChannelMenu), "&Add Channel\t");
 	AppendMenu(addChannelMenu, MF_STRING, ID_PATTERN_ADDCHANNEL_FRONT, "&Before this channel");
 	AppendMenu(addChannelMenu, MF_STRING, ID_PATTERN_ADDCHANNEL_AFTER, "&After this channel");
 	
 	HMENU removeChannelMenu = ::CreatePopupMenu();
-	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(removeChannelMenu), "Remo&ve Channel\t");
+	AppendMenu(hMenu, MF_POPUP | canRemoveChannels, reinterpret_cast<UINT_PTR>(removeChannelMenu), "Remo&ve Channel\t");
 	AppendMenu(removeChannelMenu, MF_STRING, ID_PATTERN_REMOVECHANNEL, "&Remove this channel\t");
 	AppendMenu(removeChannelMenu, MF_STRING, ID_PATTERN_REMOVECHANNELDIALOG, "&Choose channels to remove...\t");
 
