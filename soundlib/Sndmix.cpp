@@ -1481,7 +1481,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, CTuning::RATIOTY
 			} else
 			{
 				vdepth = ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || m_SongFlags[SONG_ITOLDEFFECTS]) ? 6 : 7;
-				if(GetType() == MOD_TYPE_DBM) vdepth = 7;	// Closer than 6, but not quite.
+				if(GetType() & (MOD_TYPE_DBM | MOD_TYPE_MTM)) vdepth = 7;	// Closer than 6, but not quite.
 				if(m_SongFlags[SONG_S3MOLDVIBRATO]) vdepth = 5;
 				// ST3 compatibility: Do not distinguish between vibrato types in effect memory
 				// Test case: VibratoTypeChange.s3m

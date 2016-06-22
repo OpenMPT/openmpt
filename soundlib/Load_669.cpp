@@ -123,7 +123,10 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultTempo.Set(78);
 	m_nDefaultSpeed = 4;
 	m_nChannels = 8;
-	m_playBehaviour.set(kHertzInLinearMode);
+#ifdef MODPLUG_TRACEKR
+	// 669 uses frequencies rather than periods, so linear slides mode will sound better in the higher octaves.
+	m_SongFlags.set(SONG_LINEARSLIDES);
+#endif // MODPLUG_TRACKER
 
 	if(fileHeader.sig == _669FileHeader::magic669)
 		m_madeWithTracker = "Composer 669";
@@ -171,8 +174,14 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 
 		const ModCommand::COMMAND effTrans[] =
 		{
-			CMD_PORTAMENTOUP,	CMD_PORTAMENTODOWN,	CMD_TONEPORTAMENTO,	CMD_S3MCMDEX,
-			CMD_VIBRATO,		CMD_SPEED,			CMD_PANNINGSLIDE,	CMD_RETRIG,
+			CMD_PORTAMENTOUP,	// Slide up (param * 80) Hz on every tick
+			CMD_PORTAMENTODOWN,	// Slide down (param * 80) Hz on every tick
+			CMD_TONEPORTAMENTO,	// Slide to note by (param * 40) Hz on every tick
+			CMD_S3MCMDEX,		// Add (param * 80) Hz to sample frequency
+			CMD_VIBRATO,		// Add (param * 669) Hz on every other tick
+			CMD_SPEED,			// Set ticks per row
+			CMD_PANNINGSLIDE,	// Extended UNIS 669 effect
+			CMD_RETRIG,			// Extended UNIS 669 effect
 		};
 
 		uint8 effect[8] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
