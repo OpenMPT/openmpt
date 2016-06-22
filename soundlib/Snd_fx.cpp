@@ -1663,6 +1663,8 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 				// IT Compatibilty: Slightly different waveform offsets (why does MPT have two different offsets here with IT old effects enabled and disabled?)
 				if(!m_playBehaviour[kITVibratoTremoloPanbrello] && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS])
 					pChn->nVibratoPos = 0x10;
+				else if(GetType() & (MOD_TYPE_MDL | MOD_TYPE_MTM))
+					pChn->nVibratoPos = 0x20;
 				else
 					pChn->nVibratoPos = 0;
 			}
@@ -5418,8 +5420,8 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 	{
 		if(m_SongFlags[SONG_LINEARSLIDES] || GetType() == MOD_TYPE_669)
 		{
-			// In IT linear slide mode, periods are equal to frequency.
-			if(m_playBehaviour[kHertzInLinearMode])
+			// In IT linear slide mode, directly use frequency in Hertz rather than periods.
+			if(m_playBehaviour[kHertzInLinearMode] || GetType() == MOD_TYPE_669)
 				return Util::muldiv_unsigned(nC5Speed, LinearSlideUpTable[(note % 12u) * 16u] << (note / 12u), 65536 << 5);
 			else
 				return (FreqS3MTable[note % 12u] << 5) >> (note / 12);
