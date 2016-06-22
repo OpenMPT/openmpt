@@ -882,32 +882,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 					}
 				}
 
-				// Do that dance.
-				// Maybe I should quit rewriting this everywhere and make a generic version :P
-				int n;
-				for (n = 0; n < 4; n++)
-				{
-					if(ModCommand::ConvertVolEffect(effect2, effectParam2, (n >> 1) != 0))
-					{
-						n = 5;
-						break;
-					}
-					std::swap(effect2, effect3);
-					std::swap(effectParam2, effectParam3);
-				}
-				if (n < 5)
-				{
-					if (ModCommand::GetEffectWeight((ModCommand::COMMAND)effect2) > ModCommand::GetEffectWeight((ModCommand::COMMAND)effect3))
-					{
-						std::swap(effect2, effect3);
-						std::swap(effectParam2, effectParam3);
-					}
-					effect2 = CMD_NONE;
-				}
-				if (!effect2)
-					effectParam2 = 0;
-				if (!effect3)
-					effectParam3 = 0;
+				ModCommand::TwoRegularCommandsToMPT(effect2, effectParam2, effect3, effectParam3);
 
 				if(m->volcmd == VOLCMD_NONE && effect2 != VOLCMD_NONE)
 				{

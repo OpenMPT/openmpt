@@ -657,7 +657,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					FileReader chunk(mpt::as_span(lpStream + dwPos, dwMemLength - dwPos));
 					dwPos += sampleIO.ReadSample(sample, chunk);
-				} else
+				} else if(dwPos < dwMemLength - 4)
 				{
 					uint32 dwLen = *(const_unaligned_ptr_le<uint32>(lpStream+dwPos));
 					dwPos += 4;
