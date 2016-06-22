@@ -99,18 +99,17 @@ MPEGFrame::MPEGFrame(FileReader &file)
 	if(frameSize < lameOffset + 8)
 		return;
 
+	uint8 frame[36];
+	file.ReadStructPartial(frame, lameOffset + 4);
 	// Don't check first two bytes, might be CRC
-	file.Skip(2);
 	for(uint32 i = 2; i < lameOffset; i++)
 	{
-		if(file.ReadUint8() != 0)
+		if(frame[i] != 0)
 			return;
 	}
 
-	uint8 magic[4];
-	file.ReadArray(magic);
 	// This is all we really need to know for our purposes in the MO3 decoder.
-	isLAME = !memcmp(magic, "Info", 4) || !memcmp(magic, "Xing", 4);
+	isLAME = !memcmp(frame + lameOffset, "Info", 4) || !memcmp(frame + lameOffset, "Xing", 4);
 }
 
 OPENMPT_NAMESPACE_END

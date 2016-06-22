@@ -131,6 +131,7 @@ void InstrumentEnvelope::Sanitize(uint8 maxValue)
 {
 	LimitMax(nNodes, uint32(MAX_ENVPOINTS));
 	Ticks[0] = 0;
+	LimitMax(Values[0], maxValue);
 	for(uint32 i = 1; i < nNodes; i++)
 	{
 		if(Ticks[i] < Ticks[i - 1])

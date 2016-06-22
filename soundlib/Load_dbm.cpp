@@ -509,37 +509,13 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 					ConvertDBMEffect(cmd1, param1);
 					ConvertDBMEffect(cmd2, param2);
 
-					// this is the same conversion algorithm as in the ULT loader. maybe this should be merged at some point...
 					if (cmd2 == CMD_VOLUME || (cmd2 == CMD_NONE && cmd1 != CMD_VOLUME))
 					{
 						std::swap(cmd1, cmd2);
 						std::swap(param1, param2);
 					}
 
-					int n;
-					for(n = 0; n < 4; n++)
-					{
-						if(ModCommand::ConvertVolEffect(cmd1, param1, (n >> 1) != 0))
-						{
-							n = 5;
-							break;
-						}
-						std::swap(cmd1, cmd2);
-						std::swap(param1, param2);
-					}
-					if(n < 5)
-					{
-						if (ModCommand::GetEffectWeight((ModCommand::COMMAND)cmd1) > ModCommand::GetEffectWeight((ModCommand::COMMAND)cmd2))
-						{
-							std::swap(cmd1, cmd2);
-							std::swap(param1, param2);
-						}
-						cmd1 = CMD_NONE;
-					}
-					if(cmd1 == CMD_NONE)
-						param1 = 0;
-					if(cmd2 == CMD_NONE)
-						param2 = 0;
+					ModCommand::TwoRegularCommandsToMPT(cmd1, param1,  cmd2, param2);
 
 					m.volcmd = cmd1;
 					m.vol = param1;

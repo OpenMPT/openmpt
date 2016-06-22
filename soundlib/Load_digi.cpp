@@ -2,7 +2,7 @@
  * Load_digi.cpp
  * -------------
  * Purpose: Digi Booster module loader
- * Notes  : Basically these are like ProTracker MODs with a few extra features such as more channels, longer channels and a few more effects.
+ * Notes  : Basically these are like ProTracker MODs with a few extra features such as more channels, longer samples and a few more effects.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */

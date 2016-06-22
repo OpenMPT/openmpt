@@ -1061,4 +1061,29 @@ bool ModCommand::CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &
 }
 
 
+bool ModCommand::TwoRegularCommandsToMPT(uint8 &effect1, uint8 &param1, uint8 effect2, uint8 &param2)
+//---------------------------------------------------------------------------------------------------
+{
+	for(uint8 n = 0; n < 4; n++)
+	{
+		if(ModCommand::ConvertVolEffect(effect1, param1, (n >> 1) != 0))
+		{
+			return true;
+		}
+		std::swap(effect1, effect2);
+		std::swap(param1, param2);
+	}
+
+	// Can only keep one command :(
+	if(GetEffectWeight(static_cast<COMMAND>(effect1)) > GetEffectWeight(static_cast<COMMAND>(effect2)))
+	{
+		std::swap(effect1, effect2);
+		std::swap(param1, param2);
+	}
+	effect1 = VOLCMD_NONE;
+	param1 = 0;
+	return false;
+}
+
+
 OPENMPT_NAMESPACE_END
