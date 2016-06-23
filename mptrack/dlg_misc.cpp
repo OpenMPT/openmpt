@@ -209,7 +209,8 @@ void CModTypeDlg::UpdateDialog()
 		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC2")),	mixLevels1_17RC2);
 	if(sndFile.GetMixLevels() == mixLevels1_17RC1)	// Ditto
 		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC1")),	mixLevels1_17RC1);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Original (MPT 1.16)")),	mixLevelsOriginal);
+	if(sndFile.GetMixLevels() == mixLevelsOriginal)	// Ditto
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Original (MPT 1.16)")),	mixLevelsOriginal);
 	int compatMixMode = m_PlugMixBox.AddString(_T("Compatible"));
 	m_PlugMixBox.SetItemData(compatMixMode,										mixLevelsCompatible);
 	if(m_nType == MOD_TYPE_XM)
