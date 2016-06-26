@@ -73,6 +73,10 @@ public:
 		}
 	};
 
+#ifndef NO_PLUGINS
+	typedef std::map<std::pair<PLUGINDEX, PlugParamIndex>, PlugParamValue> PlugParamMap;
+	PlugParamMap plugParams;
+#endif
 	std::vector<ChnSettings> chnSettings;
 	double elapsedTime;
 	static const uint32 IGNORE_CHANNEL = uint32_max;
@@ -87,6 +91,7 @@ public:
 
 	void Reset()
 	{
+		plugParams.clear();
 		elapsedTime = 0.0;
 		state.m_lTotalSampleCount = 0;
 		state.m_nMusicSpeed = sndFile.m_nDefaultSpeed;
@@ -431,6 +436,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				continue;
 			if(p->IsPcNote())
 			{
+#ifndef NO_PLUGINS
+				if((adjustMode & eAdjust) && p->instr > 0 && p->instr <= MAX_MIXPLUGINS)
+				{
+					memory.plugParams[std::make_pair<PLUGINDEX, PlugParamIndex>(p->instr, p->GetValueVolCol())] = p->GetValueEffectCol();
+				}
+#endif // NO_PLUGINS
 				pChn[nChn].rowCommand.Clear();
 				continue;
 			}
@@ -1075,6 +1086,18 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					m_PlayState.Chn[n].nVolume = memory.chnSettings[n].vol * 4;
 				}
 			}
+
+#ifndef NO_PLUGINS
+			// If there were any PC events, update plugin parameters to their latest value.
+			for(GetLengthMemory::PlugParamMap::const_iterator param = memory.plugParams.begin(); param != memory.plugParams.end(); param++)
+			{
+				IMixPlugin *plugin = m_MixPlugins[param->first.first - 1].pMixPlugin;
+				if(plugin != nullptr)
+				{
+					plugin->SetParameter(param->first.second, param->second / PlugParamValue(ModCommand::maxColumnValue));
+				}
+			}
+#endif // NO_PLUGINS
 		} else if(adjustMode != eAdjustOnSuccess)
 		{
 			// Target not found (e.g. when jumping to a hidden sub song), reset global variables...
@@ -2106,8 +2129,8 @@ bool CSoundFile::ProcessEffects()
 		{
 #ifndef NO_PLUGINS
 			const PLUGINDEX plug = pChn->rowCommand.instr;
-			const PlugParamIndex plugparam = ModCommand::GetValueVolCol(pChn->rowCommand.volcmd, pChn->rowCommand.vol);
-			const PlugParamValue value = ModCommand::GetValueEffectCol(pChn->rowCommand.command, pChn->rowCommand.param) / PlugParamValue(ModCommand::maxColumnValue);
+			const PlugParamIndex plugparam = pChn->rowCommand.GetValueVolCol();
+			const PlugParamValue value = pChn->rowCommand.GetValueEffectCol() / PlugParamValue(ModCommand::maxColumnValue);
 
 			if(plug > 0 && plug <= MAX_MIXPLUGINS && m_MixPlugins[plug - 1].pMixPlugin)
 				m_MixPlugins[plug-1].pMixPlugin->SetParameter(plugparam, value);
