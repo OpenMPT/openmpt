@@ -74,7 +74,7 @@ public:
 	};
 
 #ifndef NO_PLUGINS
-	typedef std::map<std::pair<PLUGINDEX, PlugParamIndex>, PlugParamValue> PlugParamMap;
+	typedef std::map<std::pair<ModCommand::INSTR, uint16>, uint16> PlugParamMap;
 	PlugParamMap plugParams;
 #endif
 	std::vector<ChnSettings> chnSettings;
@@ -439,7 +439,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 #ifndef NO_PLUGINS
 				if((adjustMode & eAdjust) && p->instr > 0 && p->instr <= MAX_MIXPLUGINS)
 				{
-					memory.plugParams[std::make_pair<PLUGINDEX, PlugParamIndex>(p->instr, p->GetValueVolCol())] = p->GetValueEffectCol();
+					memory.plugParams[std::make_pair<ModCommand::INSTR, uint16>(p->instr, p->GetValueVolCol())] = p->GetValueEffectCol();
 				}
 #endif // NO_PLUGINS
 				pChn[nChn].rowCommand.Clear();
