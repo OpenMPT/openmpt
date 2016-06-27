@@ -1619,23 +1619,25 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 
 			vdelta = (vdelta * adepth) >> 6;
 			int l = mpt::abs(vdelta);
+			LimitMax(period, Util::MaxValueOfType(period) >> 8);
+			period <<= 8;
 			if(vdelta < 0)
-			{
-				vdelta = Util::muldiv(period, upTable[l >> 2], 0x10000) - period;
-				if (l & 0x03)
-				{
-					vdelta += Util::muldiv(period, fineUpTable[l & 0x03], 0x10000) - period;
-				}
-			} else
 			{
 				vdelta = Util::muldiv(period, downTable[l >> 2], 0x10000) - period;
 				if (l & 0x03)
 				{
 					vdelta += Util::muldiv(period, fineDownTable[l & 0x03], 0x10000) - period;
 				}
+			} else
+			{
+				vdelta = Util::muldiv(period, upTable[l >> 2], 0x10000) - period;
+				if (l & 0x03)
+				{
+					vdelta += Util::muldiv(period, fineUpTable[l & 0x03], 0x10000) - period;
+				}
 			}
-			period -= vdelta;
-
+			period = (period + vdelta) / 256;
+			nPeriodFrac = vdelta & 0xFF;
 		} else
 		{
 			// MPT's autovibrato code
