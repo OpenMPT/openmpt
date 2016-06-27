@@ -36,7 +36,7 @@ OPENMPT_NAMESPACE_BEGIN
 // complicated code having to deal with partial bits of entropy.
 //  Our interface still somewhat follows the mindset of C++11 <random> (with the
 // addition of a simple wrapper function mpt::random which saves the caller from
-// instatiating distribution objects for the common uniform distribution case.
+// instantiating distribution objects for the common uniform distribution case.
 //  We are still using std::random_device for initial seeding when avalable and
 // after working around its set of problems.
 
@@ -232,7 +232,7 @@ public:
 		// we return results from the current state and update state after returning. results in better pipelining.
 		state_type s = state;
 		result_type result = static_cast<result_type>((s & result_mask) >> result_shift);
-		s = (m == 0) ? ((a * s) + c) : (((a * s) + c) % m);
+		s = Util::ModIfNotZero<state_type, m>((a * s) + c);
 		state = s;
 		return result;
 	}

@@ -548,6 +548,34 @@ using namespace mpt::Legacy;
 namespace Util
 {
 
+namespace detail
+{
+template <typename Tmod, Tmod m>
+struct ModIfNotZeroImpl
+{
+	template <typename Tval>
+	inline Tval mod(Tval x)
+	{
+		STATIC_ASSERT(std::numeric_limits<Tmod>::is_integer);
+		STATIC_ASSERT(!std::numeric_limits<Tmod>::is_signed);
+		STATIC_ASSERT(std::numeric_limits<Tval>::is_integer);
+		STATIC_ASSERT(!std::numeric_limits<Tval>::is_signed);
+		return static_cast<Tval>(x % m);
+	}
+};
+template <> struct ModIfNotZeroImpl<uint8 , 0> { template <typename Tval> inline Tval mod(Tval x) { return x; } };
+template <> struct ModIfNotZeroImpl<uint16, 0> { template <typename Tval> inline Tval mod(Tval x) { return x; } };
+template <> struct ModIfNotZeroImpl<uint32, 0> { template <typename Tval> inline Tval mod(Tval x) { return x; } };
+template <> struct ModIfNotZeroImpl<uint64, 0> { template <typename Tval> inline Tval mod(Tval x) { return x; } };
+} // namespace detail
+// Returns x % m if m != 0, x otherwise.
+// i.e. "return (m == 0) ? x : (x % m);", but without causing a warning with stupid older compilers
+template <typename Tmod, Tmod m, typename Tval>
+inline Tval ModIfNotZero(Tval x)
+{
+	return detail::ModIfNotZeroImpl<Tmod, m>().mod(x);
+}
+
 // Returns true iff Tdst can represent the value val.
 // Use as if(Util::TypeCanHoldValue<uint8>(-1)).
 template <typename Tdst, typename Tsrc>
