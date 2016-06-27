@@ -74,7 +74,7 @@ public:
 	};
 
 #ifndef NO_PLUGINS
-	typedef std::map<std::pair<PLUGINDEX, PlugParamIndex>, PlugParamValue> PlugParamMap;
+	typedef std::map<std::pair<ModCommand::INSTR, uint16>, uint16> PlugParamMap;
 	PlugParamMap plugParams;
 #endif
 	std::vector<ChnSettings> chnSettings;
