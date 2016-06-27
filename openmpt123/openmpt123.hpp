@@ -474,6 +474,10 @@ template < > std::int16_t convert_sample_to( float val ) {
 }
 
 class write_buffers_interface {
+protected:
+	virtual ~write_buffers_interface() {
+		return;
+	}
 public:
 	virtual void write_metadata( std::map<std::string,std::string> metadata ) {
 		(void)metadata;
@@ -504,7 +508,10 @@ protected:
 	std::size_t channels;
 	std::size_t sampleQueueMaxFrames;
 	std::deque<float> sampleQueue;
-private:
+protected:
+	virtual ~write_buffers_blocking_wrapper() {
+		return;
+	}
 protected:
 	write_buffers_blocking_wrapper( const commandlineflags & flags )
 		: channels(flags.channels)
@@ -568,6 +575,11 @@ public:
 };
 
 class void_audio_stream : public write_buffers_interface {
+public:
+	virtual ~void_audio_stream() {
+		return;
+	}
+public:
 	virtual void write( const std::vector<float*> buffers, std::size_t frames ) {
 		(void)buffers;
 		(void)frames;
