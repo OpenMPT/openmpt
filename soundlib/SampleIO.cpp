@@ -94,8 +94,130 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 	MPT_ASSERT(sampleSize >= sample.GetSampleSizeInBytes());
 
 	//////////////////////////////////////////////////////
+	// Compressed samples
+
+	if(*this == SampleIO(_8bit, mono, littleEndian, ADPCM))
+	{
+		// 4-Bit ADPCM data
+		int8 compressionTable[16];	// ADPCM Compression LUT
+		if(file.ReadArray(compressionTable))
+		{
+			size_t readLength = (sample.nLength + 1) / 2;
+			LimitMax(readLength, file.BytesLeft());
+
+			const uint8 *inBuf = mpt::byte_cast<const uint8*>(sourceBuf) + sizeof(compressionTable);
+			int8 *outBuf = sample.pSample8;
+			int8 delta = 0;
+
+			for(size_t i = readLength; i != 0; i--)
+			{
+				delta += compressionTable[*inBuf & 0x0F];
+				*(outBuf++) = delta;
+				delta += compressionTable[(*inBuf >> 4) & 0x0F];
+				*(outBuf++) = delta;
+				inBuf++;
+			}
+			bytesRead = sizeof(compressionTable) + readLength;
+		}
+	} else if(GetEncoding() == IT214 || GetEncoding() == IT215)
+	{
+		// IT 2.14 / 2.15 compressed samples
+		ITDecompression(file, sample, GetEncoding() == IT215);
+		bytesRead = file.GetPosition() - filePosition;
+	} else if(GetEncoding() == AMS && GetChannelFormat() == mono)
+	{
+		// AMS compressed samples
+		if(fileSize > 9)
+		{
+			file.Skip(4);	// Target sample size (we already know this)
+			uint32 sourceSize = file.ReadUint32LE();
+			int8 packCharacter = file.ReadUint8();
+			bytesRead += 9;
+			
+			FileReader::PinnedRawDataView packedDataView = file.ReadPinnedRawDataView(sourceSize);
+			LimitMax(sourceSize, mpt::saturate_cast<uint32>(packedDataView.size()));
+			bytesRead += sourceSize;
+
+			AMSUnpack(reinterpret_cast<const int8 *>(packedDataView.data()), packedDataView.size(), sample.pSample, sample.GetSampleSizeInBytes(), packCharacter);
+		}
+	} else if(GetEncoding() == PTM8Dto16 && GetChannelFormat() == mono && GetBitDepth() == 16)
+	{
+		// PTM 8-Bit delta to 16-Bit sample
+		bytesRead = CopyMonoSample<SC::DecodeInt16Delta8>(sample, sourceBuf, fileSize);
+	} else if(GetEncoding() == MDL && GetChannelFormat() == mono && GetBitDepth() <= 16)
+	{
+		// Huffman MDL compressed samples
+		if(fileSize > 4)
+		{
+			uint32 bitBuf = file.ReadUint32LE(), bitNum = 32;
+
+			const uint8 *inBuf = reinterpret_cast<const uint8*>(sourceBuf) + 4;
+			size_t bytesLeft = file.BytesLeft();
+
+			uint8 dlt = 0, lowbyte = 0;
+			const bool _16bit = GetBitDepth() == 16;
+			for(SmpLength j = 0; j < sample.nLength; j++)
+			{
+				uint8 hibyte;
+				uint8 sign;
+				if(_16bit)
+				{
+					lowbyte = static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 8));
+				}
+				sign = static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1));
+				if (MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1))
+				{
+					hibyte = static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 3));
+				} else
+				{
+					hibyte = 8;
+					while (!MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1)) hibyte += 0x10;
+					hibyte += static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 4));
+				}
+				if (sign) hibyte = ~hibyte;
+				dlt += hibyte;
+				if(!_16bit)
+				{
+					sample.pSample8[j] = dlt;
+				} else
+				{
+					sample.pSample16[j] = lowbyte | (dlt << 8);
+				}
+			}
+
+			// This assertion ensures that, when using variable length samples,
+			// the caller actually provided a trimmed chunk to read the sample data from.
+			// This is required as we cannot know the encoded sample data size upfront
+			// to construct a properly sized pinned view.
+			MPT_ASSERT(bytesLeft == 0);
+
+			bytesRead = fileSize;
+		}
+	} else if(GetEncoding() == DMF && GetChannelFormat() == mono && GetBitDepth() <= 16)
+	{
+		// DMF Huffman compression
+		if(fileSize > 4)
+		{
+			const uint8 *inBuf = mpt::byte_cast<const uint8*>(sourceBuf);
+			const uint8 *inBufMax = inBuf + fileSize;
+			uint8 *outBuf = static_cast<uint8 *>(sample.pSample);
+			bytesRead = DMFUnpack(outBuf, inBuf, inBufMax, sample.GetSampleSizeInBytes());
+
+			// This assertion ensures that, when using variable length samples,
+			// the caller actually provided a trimmed chunk to read the sample data from.
+			// This is required as we cannot know the encoded sample data size upfront
+			// to construct a properly sized pinned view.
+			MPT_ASSERT(bytesRead == fileSize);
+
+		}
+	}
+
+	/////////////////////////
+	// Uncompressed samples
+
+	//////////////////////////////////////////////////////
 	// 8-Bit / Mono / PCM
-	if(GetBitDepth() == 8 && GetChannelFormat() == mono)
+	else if(GetBitDepth() == 8 && GetChannelFormat() == mono)
 	{
 		switch(GetEncoding())
 		{
@@ -496,124 +618,6 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 				SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeScaledFloat32<bigEndian32> >
 				(SC::Convert<int16, float32>(), SC::DecodeScaledFloat32<bigEndian32>(1.0f / static_cast<float>(1<<23)))
 				);
-		}
-	}
-
-	//////////////////////////////////////////////////////
-	// Compressed samples
-	if(*this == SampleIO(_8bit, mono, littleEndian, ADPCM))
-	{
-		// 4-Bit ADPCM data
-		int8 compressionTable[16];	// ADPCM Compression LUT
-		if(file.ReadArray(compressionTable))
-		{
-			size_t readLength = (sample.nLength + 1) / 2;
-			LimitMax(readLength, file.BytesLeft());
-
-			const uint8 *inBuf = mpt::byte_cast<const uint8*>(sourceBuf) + sizeof(compressionTable);
-			int8 *outBuf = sample.pSample8;
-			int8 delta = 0;
-
-			for(size_t i = readLength; i != 0; i--)
-			{
-				delta += compressionTable[*inBuf & 0x0F];
-				*(outBuf++) = delta;
-				delta += compressionTable[(*inBuf >> 4) & 0x0F];
-				*(outBuf++) = delta;
-				inBuf++;
-			}
-			bytesRead = sizeof(compressionTable) + readLength;
-		}
-	} else if(GetEncoding() == IT214 || GetEncoding() == IT215)
-	{
-		// IT 2.14 / 2.15 compressed samples
-		ITDecompression(file, sample, GetEncoding() == IT215);
-		bytesRead = file.GetPosition() - filePosition;
-	} else if(GetEncoding() == AMS && GetChannelFormat() == mono)
-	{
-		// AMS compressed samples
-		if(fileSize > 9)
-		{
-			file.Skip(4);	// Target sample size (we already know this)
-			uint32 sourceSize = file.ReadUint32LE();
-			int8 packCharacter = file.ReadUint8();
-			bytesRead += 9;
-			
-			FileReader::PinnedRawDataView packedDataView = file.ReadPinnedRawDataView(sourceSize);
-			LimitMax(sourceSize, mpt::saturate_cast<uint32>(packedDataView.size()));
-			bytesRead += sourceSize;
-
-			AMSUnpack(reinterpret_cast<const int8 *>(packedDataView.data()), packedDataView.size(), sample.pSample, sample.GetSampleSizeInBytes(), packCharacter);
-		}
-	} else if(GetEncoding() == PTM8Dto16 && GetChannelFormat() == mono && GetBitDepth() == 16)
-	{
-		// PTM 8-Bit delta to 16-Bit sample
-		bytesRead = CopyMonoSample<SC::DecodeInt16Delta8>(sample, sourceBuf, fileSize);
-	} else if(GetEncoding() == MDL && GetChannelFormat() == mono && GetBitDepth() <= 16)
-	{
-		// Huffman MDL compressed samples
-		if(fileSize > 4)
-		{
-			uint32 bitBuf = file.ReadUint32LE(), bitNum = 32;
-
-			const uint8 *inBuf = reinterpret_cast<const uint8*>(sourceBuf) + 4;
-			size_t bytesLeft = file.BytesLeft();
-
-			uint8 dlt = 0, lowbyte = 0;
-			const bool _16bit = GetBitDepth() == 16;
-			for(SmpLength j = 0; j < sample.nLength; j++)
-			{
-				uint8 hibyte;
-				uint8 sign;
-				if(_16bit)
-				{
-					lowbyte = static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 8));
-				}
-				sign = static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1));
-				if (MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1))
-				{
-					hibyte = static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 3));
-				} else
-				{
-					hibyte = 8;
-					while (!MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1)) hibyte += 0x10;
-					hibyte += static_cast<uint8>(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 4));
-				}
-				if (sign) hibyte = ~hibyte;
-				dlt += hibyte;
-				if(!_16bit)
-				{
-					sample.pSample8[j] = dlt;
-				} else
-				{
-					sample.pSample16[j] = lowbyte | (dlt << 8);
-				}
-			}
-
-			// This assertion ensures that, when using variable length samples,
-			// the caller actually provided a trimmed chunk to read the sample data from.
-			// This is required as we cannot know the encoded sample data size upfront
-			// to construct a properly sized pinned view.
-			MPT_ASSERT(bytesLeft == 0);
-
-			bytesRead = fileSize;
-		}
-	} else if(GetEncoding() == DMF && GetChannelFormat() == mono && GetBitDepth() <= 16)
-	{
-		// DMF Huffman compression
-		if(fileSize > 4)
-		{
-			const uint8 *inBuf = mpt::byte_cast<const uint8*>(sourceBuf);
-			const uint8 *inBufMax = inBuf + fileSize;
-			uint8 *outBuf = static_cast<uint8 *>(sample.pSample);
-			bytesRead = DMFUnpack(outBuf, inBuf, inBufMax, sample.GetSampleSizeInBytes());
-
-			// This assertion ensures that, when using variable length samples,
-			// the caller actually provided a trimmed chunk to read the sample data from.
-			// This is required as we cannot know the encoded sample data size upfront
-			// to construct a properly sized pinned view.
-			MPT_ASSERT(bytesRead == fileSize);
-
 		}
 	}
 
