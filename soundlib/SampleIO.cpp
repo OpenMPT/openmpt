@@ -128,8 +128,14 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			bytesRead = CopyStereoSplitSample<SC::DecodeUint8>(sample, sourceBuf, fileSize);
 			break;
 		case deltaPCM:		// 8-Bit / Stereo Split / Delta / PCM
-		case MT2:
 			bytesRead = CopyStereoSplitSample<SC::DecodeInt8Delta>(sample, sourceBuf, fileSize);
+			break;
+		case MT2:		// same as deltaPCM, but right channel is stored as a difference from the left channel
+			bytesRead = CopyStereoSplitSample<SC::DecodeInt8Delta>(sample, sourceBuf, fileSize);
+			for(SmpLength i = 0; i < sample.nLength * 2; i += 2)
+			{
+				sample.pSample8[i + 1] = static_cast<int8>(static_cast<uint8>(sample.pSample8[i + 1]) + static_cast<uint8>(sample.pSample8[i]));
+			}
 			break;
 		}
 	}
@@ -202,8 +208,14 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			bytesRead = CopyStereoSplitSample<SC::DecodeInt16<0x8000u, littleEndian16> >(sample, sourceBuf, fileSize);
 			break;
 		case deltaPCM:		// 16-Bit / Stereo Split / Delta / PCM
-		case MT2:
 			bytesRead = CopyStereoSplitSample<SC::DecodeInt16Delta<littleEndian16> >(sample, sourceBuf, fileSize);
+			break;
+		case MT2:		// same as deltaPCM, but right channel is stored as a difference from the left channel
+			bytesRead = CopyStereoSplitSample<SC::DecodeInt16Delta<littleEndian16> >(sample, sourceBuf, fileSize);
+			for(SmpLength i = 0; i < sample.nLength * 2; i += 2)
+			{
+				sample.pSample16[i + 1] = static_cast<int16>(static_cast<uint16>(sample.pSample16[i + 1]) + static_cast<uint16>(sample.pSample16[i]));
+			}
 			break;
 		}
 	}
@@ -602,22 +614,6 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			// to construct a properly sized pinned view.
 			MPT_ASSERT(bytesRead == fileSize);
 
-		}
-	} else if(GetEncoding() == MT2 && GetChannelFormat() == stereoSplit && GetBitDepth() <= 16)
-	{
-		// MT2 stereo samples (right channel is stored as a difference from the left channel)
-		if(GetBitDepth() == 8)
-		{
-			for(SmpLength i = 0; i < sample.nLength * 2; i += 2)
-			{
-				sample.pSample8[i + 1] = static_cast<int8>(static_cast<uint8>(sample.pSample8[i + 1]) + static_cast<uint8>(sample.pSample8[i]));
-			}
-		} else
-		{
-			for(SmpLength i = 0; i < sample.nLength * 2; i += 2)
-			{
-				sample.pSample16[i + 1] = static_cast<int16>(static_cast<uint16>(sample.pSample16[i + 1]) + static_cast<uint16>(sample.pSample16[i]));
-			}
 		}
 	}
 
