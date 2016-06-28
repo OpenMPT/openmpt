@@ -1590,9 +1590,9 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 			const int vibpos = pChn->nAutoVibPos & 0xFF;
 			int adepth = pChn->nAutoVibDepth; // (1)
 			adepth += pSmp->nVibSweep; // (2 & 3)
-			adepth = MIN(adepth, (int)(pSmp->nVibDepth << 8));
+			LimitMax(adepth, static_cast<int>(pSmp->nVibDepth * 256u));
 			pChn->nAutoVibDepth = adepth; // (5)
-			adepth >>= 8; // (4)
+			adepth /= 256; // (4)
 
 			pChn->nAutoVibPos += pSmp->nVibRate;
 
@@ -1617,10 +1617,10 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 				break;
 			}
 
-			vdelta = (vdelta * adepth) >> 6;
-			int l = mpt::abs(vdelta);
-			LimitMax(period, Util::MaxValueOfType(period) >> 8);
-			period <<= 8;
+			vdelta = (vdelta * adepth) / 64;
+			uint32 l = mpt::abs(vdelta);
+			LimitMax(period, Util::MaxValueOfType(period) / 256);
+			period *= 256;
 			if(vdelta < 0)
 			{
 				vdelta = Util::muldiv(period, downTable[l >> 2], 0x10000) - period;
@@ -1643,7 +1643,7 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 			// MPT's autovibrato code
 			if (pSmp->nVibSweep == 0 && !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 			{
-				pChn->nAutoVibDepth = pSmp->nVibDepth << 8;
+				pChn->nAutoVibDepth = pSmp->nVibDepth * 256;
 			} else
 			{
 				// Calculate current autovibrato depth using vibsweep
@@ -1654,11 +1654,10 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 				{
 					if(!pChn->dwFlags[CHN_KEYOFF])
 					{
-						pChn->nAutoVibDepth += (pSmp->nVibDepth << 8) /	pSmp->nVibSweep;
+						pChn->nAutoVibDepth += (pSmp->nVibDepth * 256u) / pSmp->nVibSweep;
 					}
 				}
-				if ((pChn->nAutoVibDepth >> 8) > pSmp->nVibDepth)
-					pChn->nAutoVibDepth = pSmp->nVibDepth << 8;
+				LimitMax(pChn->nAutoVibDepth, static_cast<int>(pSmp->nVibDepth * 256u));
 			}
 			pChn->nAutoVibPos += pSmp->nVibRate;
 			int vdelta;
@@ -1690,7 +1689,7 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 					vdelta = (ft2VibratoTable[(pChn->nAutoVibPos + 192) & 0xFF] + 64) / 2;
 				}
 			}
-			int n = ((vdelta * pChn->nAutoVibDepth) >> 8);
+			int n = (vdelta * pChn->nAutoVibDepth) / 256;
 
 			if(alternativeTuning)
 			{
@@ -1713,22 +1712,22 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel *pChn, int &period, CTuning
 					if (n < 0)
 					{
 						n = -n;
-						uint32 n1 = n >> 8;
+						uint32 n1 = n / 256;
 						df1 = downTable[n1];
 						df2 = downTable[n1+1];
 					} else
 					{
-						uint32 n1 = n >> 8;
+						uint32 n1 = n / 256;
 						df1 = upTable[n1];
 						df2 = upTable[n1+1];
 					}
-					n >>= 2;
-					period = Util::muldiv(period, df1 + ((df2 - df1) * (n & 0x3F) >> 6), 256);
+					n /= 4;
+					period = Util::muldiv(period, df1 + ((df2 - df1) * (n & 0x3F) / 64), 256);
 					nPeriodFrac = period & 0xFF;
-					period >>= 8;
+					period /= 256;
 				} else
 				{
-					period += (n >> 6);
+					period += (n / 64);
 				}
 			} //Original MPT behavior
 		}
