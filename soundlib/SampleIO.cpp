@@ -29,20 +29,6 @@ uint16 MDLReadBits(uint32 &bitbuf, uint32 &bitnum, const uint8 *(&ibuf), size_t 
 uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen);
 
 
-#if MPT_COMPILER_GCC
-#if MPT_GCC_AT_LEAST(4,6,0)
-#pragma GCC diagnostic push
-#endif
-#pragma GCC diagnostic ignored "-Wswitch"
-#elif MPT_COMPILER_CLANG
-#pragma clang diagnostic push
-#if MPT_CLANG_AT_LEAST(3,3,0)
-#pragma clang diagnostic ignored "-Wswitch"
-#else
-#pragma clang diagnostic ignored "-Wswitch-enum"
-#endif
-#endif
-
 // Read a sample from memory
 size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 //--------------------------------------------------------------------
@@ -234,6 +220,9 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		case PCM7to8:		// 7 Bit stored as 8-Bit with highest bit unused / Mono / Signed / PCM
 			bytesRead = CopyMonoSample<SC::DecodeInt7>(sample, sourceBuf, fileSize);
 			break;
+		default:
+			MPT_ASSERT_NOTREACHED();
+			break;
 		}
 	}
 
@@ -259,6 +248,9 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 				sample.pSample8[i + 1] = static_cast<int8>(static_cast<uint8>(sample.pSample8[i + 1]) + static_cast<uint8>(sample.pSample8[i]));
 			}
 			break;
+		default:
+			MPT_ASSERT_NOTREACHED();
+			break;
 		}
 	}
 
@@ -276,6 +268,9 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			break;
 		case deltaPCM:		// 8-Bit / Stereo Interleaved / Delta / PCM
 			bytesRead = CopyStereoInterleavedSample<SC::DecodeInt8Delta>(sample, sourceBuf, fileSize);
+			break;
+		default:
+			MPT_ASSERT_NOTREACHED();
 			break;
 		}
 	}
@@ -296,6 +291,9 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		case MT2:
 			bytesRead = CopyMonoSample<SC::DecodeInt16Delta<littleEndian16> >(sample, sourceBuf, fileSize);
 			break;
+		default:
+			MPT_ASSERT_NOTREACHED();
+			break;
 		}
 	}
 
@@ -313,6 +311,9 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			break;
 		case deltaPCM:		// 16-Bit / Mono / Delta / PCM
 			bytesRead = CopyMonoSample<SC::DecodeInt16Delta<bigEndian16> >(sample, sourceBuf, fileSize);
+			break;
+		default:
+			MPT_ASSERT_NOTREACHED();
 			break;
 		}
 	}
@@ -339,6 +340,9 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 				sample.pSample16[i + 1] = static_cast<int16>(static_cast<uint16>(sample.pSample16[i + 1]) + static_cast<uint16>(sample.pSample16[i]));
 			}
 			break;
+		default:
+			MPT_ASSERT_NOTREACHED();
+			break;
 		}
 	}
 
@@ -356,6 +360,9 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			break;
 		case deltaPCM:		// 16-Bit / Stereo Split / Delta / PCM
 			bytesRead = CopyStereoSplitSample<SC::DecodeInt16Delta<bigEndian16> >(sample, sourceBuf, fileSize);
+			break;
+		default:
+			MPT_ASSERT_NOTREACHED();
 			break;
 		}
 	}
@@ -375,6 +382,9 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		case deltaPCM:		// 16-Bit / Stereo Interleaved / Delta / PCM
 			bytesRead = CopyStereoInterleavedSample<SC::DecodeInt16Delta<littleEndian16> >(sample, sourceBuf, fileSize);
 			break;
+		default:
+			MPT_ASSERT_NOTREACHED();
+			break;
 		}
 	}
 
@@ -392,6 +402,9 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			break;
 		case deltaPCM:		// 16-Bit / Stereo Interleaved / Delta / PCM
 			bytesRead = CopyStereoInterleavedSample<SC::DecodeInt16Delta<bigEndian16> >(sample, sourceBuf, fileSize);
+			break;
+		default:
+			MPT_ASSERT_NOTREACHED();
 			break;
 		}
 	}
@@ -621,18 +634,17 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		}
 	}
 
+	////////////////
+	// Unsupported
+	else
+	{
+		MPT_ASSERT_NOTREACHED();
+	}
+
 	MPT_ASSERT(filePosition + bytesRead <= file.GetLength());
 	file.Seek(filePosition + bytesRead);
 	return bytesRead;
 }
-
-#if MPT_COMPILER_GCC
-#if MPT_GCC_AT_LEAST(4,6,0)
-#pragma GCC diagnostic pop
-#endif
-#elif MPT_COMPILER_CLANG
-#pragma clang diagnostic pop
-#endif
 
 
 #ifndef MODPLUG_NO_FILESAVE
