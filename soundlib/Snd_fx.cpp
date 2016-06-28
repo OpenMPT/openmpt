@@ -1089,12 +1089,30 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 #ifndef NO_PLUGINS
 			// If there were any PC events, update plugin parameters to their latest value.
+			std::bitset<MAX_MIXPLUGINS> plugSetProgram;
 			for(GetLengthMemory::PlugParamMap::const_iterator param = memory.plugParams.begin(); param != memory.plugParams.end(); param++)
 			{
-				IMixPlugin *plugin = m_MixPlugins[param->first.first - 1].pMixPlugin;
+				PLUGINDEX plug = param->first.first - 1;
+				IMixPlugin *plugin = m_MixPlugins[plug].pMixPlugin;
 				if(plugin != nullptr)
 				{
+					if(!plugSetProgram[plug])
+					{
+						// Used for bridged plugins to avoid sending out individual messages for each parameter.
+						plugSetProgram.set(plug);
+						plugin->BeginSetProgram();
+					}
 					plugin->SetParameter(param->first.second, param->second / PlugParamValue(ModCommand::maxColumnValue));
+				}
+			}
+			if(plugSetProgram.any())
+			{
+				for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+				{
+					if(plugSetProgram[i])
+					{
+						m_MixPlugins[i].pMixPlugin->EndSetProgram();
+					}
 				}
 			}
 #endif // NO_PLUGINS
