@@ -1072,7 +1072,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 
 	// Most likely just a file with lots of NULs at the start
-	if(totalSampleLen == 0 && invalidChars == 0 && fileHeader.restartPos == 0 && fileHeader.numOrders == 0 && numPatterns <= 1)
+	if(fileHeader.restartPos == 0 && fileHeader.numOrders == 0 && numPatterns <= 1)
 		return false;
 
 	if(loadFlags == onlyVerifyHeader)
