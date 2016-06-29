@@ -22,6 +22,7 @@ is just a high-level summary.
     function.
  *  [**Bug**] Sample loops in GDM modules did not work when using Emscripten.
 
+ *  openmpt123: Added subsong support.
  *  Various playback fixes for 669 files.
 
 ### libopenmpt 0.2-beta17 (2016-05-21)

@@ -528,6 +528,7 @@ static void show_help( textout & log, bool with_info = true, bool longhelp = fal
 		log << "     --[no-]shuffle         Shuffle through playlist [default: " << commandlineflags().shuffle << "]" << std::endl;
 		log << "     --[no-]restart         Restart playlist when finished [default: " << commandlineflags().restart << "]" << std::endl;
 		log << std::endl;
+		log << "     --subsong n            Select subsong n (-1 means play all subsongs consecutively) [default: " << commandlineflags().subsong << "]" << std::endl;
 		log << "     --repeat n             Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << std::endl;
 		log << "     --seek n               Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << std::endl;
 		log << "     --end-time n           Play until position is n seconds (0 means until the end) [default: " << commandlineflags().end_time << "]" << std::endl;
@@ -1378,6 +1379,9 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 			set_field( fields, "Container" ).ostream() << mod.get_metadata( "container" ) << " (" << mod.get_metadata( "container_long" ) << ")";
 		}
 		set_field( fields, "Type" ).ostream() << mod.get_metadata( "type" ) << " (" << mod.get_metadata( "type_long" ) << ")";
+		if ( ( mod.get_num_subsongs() > 1 ) && ( flags.subsong != -1 ) ) {
+			set_field( fields, "Subsong" ).ostream() << flags.subsong;
+		}
 		set_field( fields, "Tracker" ).ostream() << mod.get_metadata( "tracker" );
 		if ( !mod.get_metadata( "date" ).empty() ) {
 			set_field( fields, "Date" ).ostream() << mod.get_metadata( "date" );
@@ -1391,6 +1395,7 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 		set_field( fields, "Duration" ).ostream() << seconds_to_string( duration );
 	}
 	if ( flags.show_details ) {
+		set_field( fields, "Subsongs" ).ostream() << mod.get_num_subsongs();
 		set_field( fields, "Channels" ).ostream() << mod.get_num_channels();
 		set_field( fields, "Orders" ).ostream() << mod.get_num_orders();
 		set_field( fields, "Patterns" ).ostream() << mod.get_num_patterns();
@@ -1499,7 +1504,7 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 
 		{
 			openmpt::module mod( data_stream, silentlog, flags.ctls );
-			mod.select_subsong( -1 ); // play all subsongs consecutively
+			mod.select_subsong( flags.subsong );
 			silentlog.str( std::string() ); // clear, loader messages get stored to get_metadata( "warnings" ) by libopenmpt internally
 			render_mod_file( flags, filename, filesize, mod, log, audio_stream );
 		}
@@ -1832,6 +1837,10 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 				flags.restart = true;
 			} else if ( arg == "--no-restart" ) {
 				flags.restart = false;
+			} else if ( arg == "--subsong" && nextarg != "" ) {
+				std::istringstream istr( nextarg );
+				istr >> flags.subsong;
+				++i;
 			} else if ( arg == "--repeat" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.repeatcount;

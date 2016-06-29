@@ -255,6 +255,7 @@ struct commandlineflags {
 	std::int32_t pitch;
 	std::int32_t dither;
 	std::int32_t repeatcount;
+	std::int32_t subsong;
 	std::map<std::string, std::string> ctls;
 	double seek_target;
 	double end_time;
@@ -315,6 +316,7 @@ struct commandlineflags {
 		pitch = 0;
 		dither = 1;
 		repeatcount = 0;
+		subsong = -1;
 		seek_target = 0.0;
 		end_time = 0.0;
 		quiet = false;
