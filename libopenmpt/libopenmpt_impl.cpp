@@ -881,7 +881,7 @@ double module_impl::set_position_seconds( double seconds ) {
 		// When playing all subsongs, find out which subsong this time would belong to.
 		subsong = &subsongs.back();
 		for ( std::size_t i = 0; i < subsongs.size(); ++i ) {
-			if ( base_seconds + subsong->duration > seconds ) {
+			if ( base_seconds + subsongs[i].duration > seconds ) {
 				subsong = &subsongs[i];
 				break;
 			}
