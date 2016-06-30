@@ -821,7 +821,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			} else
 			{
 				PLUGINDEX outPlug = ChnSettings[c].nMixPlugin - 1;
-				while(true)
+				for(;;)
 				{
 					if(m_MixPlugins[outPlug].GetOutputPlugin() == PLUGINDEX_INVALID)
 					{

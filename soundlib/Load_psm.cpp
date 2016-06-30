@@ -555,7 +555,8 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 
 					default:
-						MPT_ASSERT(false);
+						MPT_ASSERT_NOTREACHED();
+						break;
 					}
 				}
 				break;
