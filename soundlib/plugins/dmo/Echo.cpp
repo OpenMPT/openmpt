@@ -13,8 +13,11 @@
 #if !defined(NO_PLUGINS) && defined(NO_DMO)
 #include "../../Sndfile.h"
 #include "Echo.h"
+#endif // !NO_PLUGINS && NO_DMO
 
 OPENMPT_NAMESPACE_BEGIN
+
+#if !defined(NO_PLUGINS) && defined(NO_DMO)
 
 namespace DMO
 {
@@ -190,6 +193,9 @@ void Echo::RecalculateEchoParams()
 
 } // namespace DMO
 
-OPENMPT_NAMESPACE_END
+#else
+MPT_MSVC_WORKAROUND_LNK4221(Echo)
 
 #endif // !NO_PLUGINS && NO_DMO
+
+OPENMPT_NAMESPACE_END
