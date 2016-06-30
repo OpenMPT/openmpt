@@ -13,8 +13,11 @@
 #if !defined(NO_PLUGINS) && defined(NO_DMO)
 #include "../../Sndfile.h"
 #include "Gargle.h"
+#endif // !NO_PLUGINS && NO_DMO
 
 OPENMPT_NAMESPACE_BEGIN
+
+#if !defined(NO_PLUGINS) && defined(NO_DMO)
 
 namespace DMO
 {
@@ -202,6 +205,9 @@ void Gargle::RecalculateGargleParams()
 
 } // namespace DMO
 
-OPENMPT_NAMESPACE_END
+#else
+MPT_MSVC_WORKAROUND_LNK4221(Gargle)
 
 #endif // !NO_PLUGINS && NO_DMO
+
+OPENMPT_NAMESPACE_END
