@@ -280,7 +280,7 @@ CStringA PatternClipboard::CreateClipboardString(CSoundFile &sndFile, PATTERNIND
 						data.AppendChar('.');
 					}
 
-					if(m->param != 0 && m->param <= 0xFF)
+					if(m->param != 0 && m->command != CMD_NONE)
 					{
 						data.AppendFormat("%02X", m->param);
 					} else
