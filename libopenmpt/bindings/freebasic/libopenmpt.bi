@@ -43,7 +43,8 @@
   \section libopenmpt_freebasic_outputformat Output Format
 
   libopenmpt supports a wide range of PCM output formats:
-  [8000..192000]/[mono|stereo|quad]/[f32|i16]
+  [8000..192000]/[mono|stereo|quad]/[f32|i16].
+
   Unless you have some very specific requirements demanding a particular aspect
   of the output format, you should always prefer 48000/stereo/f32 as the
   libopenmpt PCM format.
@@ -233,7 +234,7 @@ Declare Sub openmpt_log_func_silent(ByVal message As Const ZString Ptr, ByVal us
   \param logfunc Logging function where warning and errors are written.
   \param user Logging function user context.
   \return Probability between 0.0 and 1.0.
-  \remarks openmpt_could_open_propability() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below 1.0 means that loading may fail. If you want a threshold in between, use >=0.5.
+  \remarks openmpt_could_open_propability() can return any value between 0.0 and 1.0. Only 0.0 and 1.0 are definitive answers, all values in between are just estimates. In general, any return value >0.0 means that you should try loading the file, and any value below 1.0 means that loading may fail. If you want a threshold above which you an be reasonably ure that libopenmpt will be able to load the file, use >=0.5. If you see the need for a threshold below which you could reasonably outright reject a file, use <0.25 (Note: Such a threshold for rejecting on the lower end is not recommended, but may be required for better integration into some other framework's probe scoring.).
   \remarks openmpt_could_open_propability() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_propability() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_propability() returned 0.5.
   \sa openmpt_stream_callbacks
 '/
@@ -337,6 +338,7 @@ Const OPENMPT_MODULE_COMMAND_PARAMETER = 5
   \param subsong Index of the sub-song. -1 plays all sub-songs consecutively.
   \return 1 on success, 0 on failure.
   \sa openmpt_module_get_num_subsongs, openmpt_module_get_subsong_names
+  \remarks Whether subsong -1 (all subsongs consecutively), subsong 0 or some other subsong is selected by default, is an implementation detail and subject to change. If you do not want to care about subsongs, it is recommended to just not call openmpt_module_select_subsong() at all.
 '/
 Declare Function openmpt_module_select_subsong(ByVal module As openmpt_module Ptr, ByVal subsong As Long) As Long
 
