@@ -747,7 +747,7 @@ static void UnpackMO3DeltaPredictionSample(FileReader &file, typename Properties
 			*p = val;
 			p += numChannels;
 			sval = static_cast<typename Properties::sample_t>(val);
-			next = (sval << 1) + (delta >> 1) - previous;  // corrected next value
+			next = (sval * (1<<1)) + (delta >> 1) - previous;  // corrected next value
 
 			Limit(next, std::numeric_limits<typename Properties::sample_t>::min(), std::numeric_limits<typename Properties::sample_t>::max());
 
