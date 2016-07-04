@@ -1764,8 +1764,8 @@ void CSoundFile::ProcessRamping(ModChannel *pChn) const
 			rampLength = 1;
 		}
 
-		int32 leftDelta = ((pChn->newLeftVol - pChn->leftVol) << VOLUMERAMPPRECISION);
-		int32 rightDelta = ((pChn->newRightVol - pChn->rightVol) << VOLUMERAMPPRECISION);
+		int32 leftDelta = ((pChn->newLeftVol - pChn->leftVol) * (1<<VOLUMERAMPPRECISION));
+		int32 rightDelta = ((pChn->newRightVol - pChn->rightVol) * (1<<VOLUMERAMPPRECISION));
 		if(!enableCustomRamp)
 		{
 			// Extra-smooth ramping, unless we're forced to use the default values
@@ -1796,8 +1796,8 @@ void CSoundFile::ProcessRamping(ModChannel *pChn) const
 		pChn->leftVol = pChn->newLeftVol;
 		pChn->rightVol = pChn->newRightVol;
 	}
-	pChn->rampLeftVol = pChn->leftVol << VOLUMERAMPPRECISION;
-	pChn->rampRightVol = pChn->rightVol << VOLUMERAMPPRECISION;
+	pChn->rampLeftVol = pChn->leftVol * (1<<VOLUMERAMPPRECISION);
+	pChn->rampRightVol = pChn->rightVol * (1<<VOLUMERAMPPRECISION);
 }
 
 
