@@ -79,6 +79,9 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetASCII, expr)
 			);
 	}
+	#if defined(MPT_BUILD_FATAL_ASSERTS)
+		std::abort();
+	#endif // MPT_BUILD_FATAL_ASSERTS
 }
 
 #endif // MPT_ASSERT_HANDLER_NEEDED && !ENABLE_TESTS
