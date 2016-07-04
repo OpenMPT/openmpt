@@ -29,7 +29,7 @@ struct IntToIntTraits : public MixerTraits<channelsOut, channelsIn, out, in>
 		static_assert(std::numeric_limits<output_t>::is_integer, "Output must be integer");
 		static_assert(sizeof(out) * 8 >= mixPrecision, "Mix precision is higher than output type can handle");
 		static_assert(sizeof(in) * 8 <= mixPrecision, "Mix precision is lower than input type");
-		return static_cast<output_t>(x) << (mixPrecision - sizeof(in) * 8);
+		return static_cast<output_t>(x) * (1<<(mixPrecision - sizeof(in) * 8));
 	}
 };
 
