@@ -266,7 +266,13 @@ sane_random_device::result_type sane_random_device::operator()()
 		std::size_t rd_bits = mpt::lower_bound_entropy_bits(rd.max());
 		for(std::size_t entropy = 0; entropy < (sizeof(result_type) * 8); entropy += rd_bits)
 		{
-			result = (result << rd_bits) | static_cast<result_type>(rd());
+			if(rd_bits < (sizeof(result_type) * 8))
+			{
+				result = (result << rd_bits) | static_cast<result_type>(rd());
+			} else
+			{
+				result = result | static_cast<result_type>(rd());
+			}
 		}
 	}
 	if(!rd_reliable)
