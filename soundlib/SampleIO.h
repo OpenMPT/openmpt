@@ -39,7 +39,7 @@ protected:
 		bitMask			= 0xFF << bitOffset,
 		channelMask		= 0xFF << channelOffset,
 		endianMask		= 0xFF << endianOffset,
-		encodingMask	= 0xFF << encodingOffset,
+		encodingMask	= 0x7F << encodingOffset, // 0xff will overflow signed 32bit int, which is the base type for an enum that fits, causing warnings when shifted
 	};
 
 public:
