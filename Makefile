@@ -285,8 +285,8 @@ ARFLAGS  +=
 
 ifeq ($(DEBUG),1)
 CPPFLAGS += -DMPT_BUILD_DEBUG
-CXXFLAGS += -O0 -g
-CFLAGS   += -O0 -g
+CXXFLAGS += -O0 -g -fno-omit-frame-pointer
+CFLAGS   += -O0 -g -fno-omit-frame-pointer
 else
 ifeq ($(OPTIMIZE_SIZE),1)
 CXXFLAGS += -ffunction-sections -fdata-sections -Os -ffast-math
@@ -302,8 +302,8 @@ endif
 
 ifeq ($(CHECKED),1)
 CPPFLAGS += -DMPT_BUILD_CHECKED
-CXXFLAGS += -g
-CFLAGS   += -g
+CXXFLAGS += -g -fno-omit-frame-pointer
+CFLAGS   += -g -fno-omit-frame-pointer
 endif
 
 CXXFLAGS += -Wall -Wextra -Wundef -Wcast-qual -Wcast-align $(CXXFLAGS_WARNINGS)
