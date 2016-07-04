@@ -11,8 +11,8 @@ LDFLAGS  +=
 LDLIBS   += -lm
 ARFLAGS  := rcs
 
-CXXFLAGS_WARNINGS += -Wmissing-declarations
-CFLAGS_WARNINGS   += -Wmissing-prototypes
+CXXFLAGS_WARNINGS += -Wmissing-declarations -Wshift-count-negative -Wshift-count-overflow -Wshift-overflow -Wshift-sign-overflow
+CFLAGS_WARNINGS   += -Wmissing-prototypes   -Wshift-count-negative -Wshift-count-overflow -Wshift-overflow -Wshift-sign-overflow
 
 ifeq ($(CHECKED_ADDRESS),1)
 CXXFLAGS += -fsanitize=address
