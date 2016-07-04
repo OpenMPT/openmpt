@@ -602,5 +602,94 @@ public:
 	operator bool () const { return mem != nullptr; }
 };
 
+template <typename T>
+class const_unaligned_ptr_be
+{
+public:
+	typedef T value_type;
+private:
+	const mpt::byte *mem;
+	value_type Read() const
+	{
+		mpt::byte bytes[sizeof(value_type)];
+		std::memcpy(bytes, mem, sizeof(value_type));
+		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
+			std::reverse(bytes, bytes + sizeof(value_type));
+		#endif
+		value_type val = value_type();
+		std::memcpy(&val, bytes, sizeof(value_type));
+		return val;
+	}
+public:
+	const_unaligned_ptr_be() : mem(nullptr) {}
+	const_unaligned_ptr_be(const const_unaligned_ptr_be<value_type> & other) : mem(other.mem) {}
+	const_unaligned_ptr_be & operator = (const const_unaligned_ptr_be<value_type> & other) { mem = other.mem; return *this; }
+	explicit const_unaligned_ptr_be(const uint8 *mem) : mem(mem) {}
+	explicit const_unaligned_ptr_be(const char *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
+	const_unaligned_ptr_be & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
+	const_unaligned_ptr_be & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
+	const_unaligned_ptr_be & operator ++ () { mem += sizeof(value_type); return *this; }
+	const_unaligned_ptr_be & operator -- () { mem -= sizeof(value_type); return *this; }
+	const_unaligned_ptr_be operator ++ (int) { const_unaligned_ptr_be<value_type> result = *this; ++result; return result; }
+	const_unaligned_ptr_be operator -- (int) { const_unaligned_ptr_be<value_type> result = *this; --result; return result; }
+	const_unaligned_ptr_be operator + (std::size_t count) const { const_unaligned_ptr_be<value_type> result = *this; result += count; return result; }
+	const_unaligned_ptr_be operator - (std::size_t count) const { const_unaligned_ptr_be<value_type> result = *this; result -= count; return result; }
+	const value_type operator * () const { return Read(); }
+	const value_type operator [] (std::size_t i) const { return *((*this) + i); }
+	operator bool () const { return mem != nullptr; }
+};
+
+template <typename T>
+class const_unaligned_ptr
+{
+public:
+	typedef T value_type;
+private:
+	const mpt::byte *mem;
+	value_type Read() const
+	{
+		value_type val = value_type();
+		std::memcpy(&val, mem, sizeof(value_type));
+		return val;
+	}
+public:
+	const_unaligned_ptr() : mem(nullptr) {}
+	const_unaligned_ptr(const const_unaligned_ptr<value_type> & other) : mem(other.mem) {}
+	const_unaligned_ptr & operator = (const const_unaligned_ptr<value_type> & other) { mem = other.mem; return *this; }
+	explicit const_unaligned_ptr(const uint8 *mem) : mem(mem) {}
+	explicit const_unaligned_ptr(const char *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
+	const_unaligned_ptr & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
+	const_unaligned_ptr & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
+	const_unaligned_ptr & operator ++ () { mem += sizeof(value_type); return *this; }
+	const_unaligned_ptr & operator -- () { mem -= sizeof(value_type); return *this; }
+	const_unaligned_ptr operator ++ (int) { const_unaligned_ptr<value_type> result = *this; ++result; return result; }
+	const_unaligned_ptr operator -- (int) { const_unaligned_ptr<value_type> result = *this; --result; return result; }
+	const_unaligned_ptr operator + (std::size_t count) const { const_unaligned_ptr<value_type> result = *this; result += count; return result; }
+	const_unaligned_ptr operator - (std::size_t count) const { const_unaligned_ptr<value_type> result = *this; result -= count; return result; }
+	const value_type operator * () const { return Read(); }
+	const value_type operator [] (std::size_t i) const { return *((*this) + i); }
+	operator bool () const { return mem != nullptr; }
+};
+
+//  Reference binding to unaligned strucutre field resulting from packed
+// structures result in undefined behaviour as soon as the reference gets used.
+//  Both Clang and GCC do not statically warn for this problem, but asan+ubsan
+// is able to catch it at runtime. Note however that this will not catch all
+// problematic accesses as actual alignedness may depend on the actual memory
+// layout at runtime and the sanitizers will only catch the cases where it is
+// actually misaligned at the particular point of occurence.
+//  read_unaligned_fiel() takes the argument by value which will cause the
+// compiler to copy it to an aligned stack slot or register.
+//  This has been verified to work with Clang (sanitizers wont warn anymore). In
+// case it does not work with GCC, at least all known offending call sites can
+// easily identified by grepping for read_unaligned_field.
+//  See https://bugs.openmpt.org/view.php?id=572 .
+// TODO: Verify this works as intended on GCC.
+template <typename T>
+T read_unaligned_field(T val)
+{
+	return val;
+}
 
 OPENMPT_NAMESPACE_END
+
