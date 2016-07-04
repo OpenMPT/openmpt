@@ -233,7 +233,7 @@ void XMInstrument::ConvertToMPT(ModInstrument &mptIns) const
 	{
 		mptIns.nMidiChannel = midiChannel + MidiFirstChannel;
 		Limit(mptIns.nMidiChannel, uint8(MidiFirstChannel), uint8(MidiLastChannel));
-		mptIns.nMidiProgram = static_cast<uint8>(std::min(midiProgram, uint16(127)) + 1);
+		mptIns.nMidiProgram = static_cast<uint8>(std::min(read_unaligned_field(midiProgram), uint16(127)) + 1);
 	}
 	mptIns.midiPWD = static_cast<int8>(pitchWheelRange);
 }
