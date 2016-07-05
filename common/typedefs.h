@@ -259,7 +259,7 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 OPENMPT_NAMESPACE_END
 #include <cassert>
 OPENMPT_NAMESPACE_BEGIN
-#define MPT_CHECKER_ASSUME(x) std::assert(!!(x))
+#define MPT_CHECKER_ASSUME(x) assert(!!(x))
 #endif
 
 #endif // MPT_COMPILER
