@@ -106,7 +106,7 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 		//...and write the map with tuning names replacing
 		//the addresses.
 		const uint16 tuningMapSize = static_cast<uint16>(tNameToShort_Map.size());
-		oStrm.write(reinterpret_cast<const char*>(&tuningMapSize), sizeof(tuningMapSize));
+		mpt::IO::WriteIntLE<uint16>(oStrm, tuningMapSize);
 		for(TNTS_MAP_ITER iter = tNameToShort_Map.begin(); iter != tNameToShort_Map.end(); iter++)
 		{
 			if(iter->first)
@@ -141,18 +141,18 @@ static bool ReadTuningMapTemplate(std::istream& iStrm, std::map<uint16, std::str
 //-------------------------------------------------------------------------------------------------------------------------------
 {
 	TUNNUMTYPE numTuning = 0;
-	iStrm.read(reinterpret_cast<char*>(&numTuning), sizeof(numTuning));
+	mpt::IO::ReadIntLE<uint16>(iStrm, numTuning);
 	if(numTuning > maxNum)
 		return true;
 
 	for(size_t i = 0; i<numTuning; i++)
 	{
 		std::string temp;
-		uint16 ui;
+		uint16 ui = 0;
 		if(!mpt::IO::ReadSizedStringLE<STRSIZETYPE>(iStrm, temp, 255))
 			return true;
 
-		iStrm.read(reinterpret_cast<char*>(&ui), sizeof(ui));
+		mpt::IO::ReadIntLE<uint16>(iStrm, ui);
 		shortToTNameMap[ui] = temp;
 	}
 	if(iStrm.good())
@@ -174,8 +174,8 @@ static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t = 0
 	std::vector<std::string> notFoundTunings;
 	for(INSTRUMENTINDEX i = 1; i<=csf.GetNumInstruments(); i++)
 	{
-		uint16 ui;
-		iStrm.read(reinterpret_cast<char*>(&ui), sizeof(ui));
+		uint16 ui = 0;
+		mpt::IO::ReadIntLE<uint16>(iStrm, ui);
 		MAP_ITER iter = shortToTNameMap.find(ui);
 		if(csf.Instruments[i] && iter != shortToTNameMap.end())
 		{
