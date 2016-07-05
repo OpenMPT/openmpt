@@ -4649,7 +4649,7 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 		if(out[sendPos] == 0xF0)
 		{
 			// SysEx start
-			if((sendPos <= outPos - 4) && (out[sendPos + 1] == 0xF0 || out[sendPos + 1] == 0xF1))
+			if((outPos - sendPos >= 4) && (out[sendPos + 1] == 0xF0 || out[sendPos + 1] == 0xF1))
 			{
 				// Internal macro (normal (F0F0) or extended (F0F1)), 4 bytes long
 				sendLen = 4;
