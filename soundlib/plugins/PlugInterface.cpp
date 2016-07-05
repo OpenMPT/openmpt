@@ -266,8 +266,10 @@ void IMixPlugin::ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput
 	// -> mixop == 5 : MIX_L += wetRatio * (WET_L - DRY_L) + dryRatio * (DRY_R - WET_R)
 	//                 MIX_R += dryRatio * (WET_L - DRY_L) + wetRatio * (DRY_R - WET_R)
 
+	MPT_ASSERT(m_pMixStruct != nullptr);
+
 	int mixop;
-	if(IsInstrument() || m_pMixStruct == nullptr)
+	if(IsInstrument())
 	{
 		// Force normal mix mode for instruments
 		mixop = 0;
