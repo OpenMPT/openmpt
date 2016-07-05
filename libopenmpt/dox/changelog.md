@@ -21,6 +21,11 @@ is just a high-level summary.
  *  [**Bug**] libopenmpt no longer uses the non-thread-safe global std::rand()
     function.
  *  [**Bug**] Sample loops in GDM modules did not work when using Emscripten.
+ *  [**Bug**] XM and MO3 loaders could crash due to unaligned memory accesses.
+ *  [**Bug**] Fixed incorrect handling of custom MPTM tunings on big endian
+    platforms.
+ *  [**Bug**] Fixed various problems found with clang 3.8 static analyzer,
+    address sanitizer and undefined behaviour sanitizer.
 
  *  Seeking in allsubsongs-mode now works correctly.
  *  openmpt123: Added subsong support.
