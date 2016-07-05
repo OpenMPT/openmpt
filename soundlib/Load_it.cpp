@@ -93,13 +93,18 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 		TNTS_MAP tNameToShort_Map;
 
 		unsigned short figMap = 0;
-		for(INSTRUMENTINDEX i = 1; i <= sf.GetNumInstruments(); i++) if (sf.Instruments[i] != nullptr)
+		for(INSTRUMENTINDEX i = 1; i <= sf.GetNumInstruments(); i++)
 		{
-			TNTS_MAP_ITER iter = tNameToShort_Map.find(sf.Instruments[i]->pTuning);
+			CTuning *pTuning = nullptr;
+			if(sf.Instruments[i] != nullptr)
+			{
+				pTuning = sf.Instruments[i]->pTuning;
+			}
+			TNTS_MAP_ITER iter = tNameToShort_Map.find(pTuning);
 			if(iter != tNameToShort_Map.end())
 				continue; //Tuning already mapped.
 
-			tNameToShort_Map[sf.Instruments[i]->pTuning] = figMap;
+			tNameToShort_Map[pTuning] = figMap;
 			figMap++;
 		}
 
@@ -120,7 +125,12 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 		//Writing tuning data for instruments.
 		for(INSTRUMENTINDEX i = 1; i <= sf.GetNumInstruments(); i++)
 		{
-			TNTS_MAP_ITER iter = tNameToShort_Map.find(sf.Instruments[i]->pTuning);
+			CTuning *pTuning = nullptr;
+			if(sf.Instruments[i] != nullptr)
+			{
+				pTuning = sf.Instruments[i]->pTuning;
+			}
+			TNTS_MAP_ITER iter = tNameToShort_Map.find(pTuning);
 			if(iter == tNameToShort_Map.end()) //Should never happen
 			{
 				sf.AddToLog("Error: 210807_1");
