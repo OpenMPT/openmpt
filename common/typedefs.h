@@ -242,13 +242,29 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 #define MPT_CHECKER_ASSUME_ASSERTIONS 1
 //#define MPT_CHECKER_ASSUME_ASSERTIONS 0
 
-#if MPT_COMPILER_MSVC
 #ifdef MPT_BUILD_ANALYZED
+
+#if MPT_COMPILER_MSVC
+
 #if MPT_CHECKER_ASSUME_ASSERTIONS
 #define MPT_CHECKER_ASSUME(x) __analysis_assume(!!(x))
 #endif
+
+#elif MPT_COMPILER_CLANG
+
+#if MPT_CHECKER_ASSUME_ASSERTIONS
+#ifdef NDEBUG
+#error "Builds for static analyzers depend on std::asert being enabled, but the current build has #define NDEBUG. This makes no sense."
 #endif
+OPENMPT_NAMESPACE_END
+#include <cassert>
+OPENMPT_NAMESPACE_BEGIN
+#define MPT_CHECKER_ASSUME(x) std::assert(!!(x))
 #endif
+
+#endif // MPT_COMPILER
+
+#endif // MPT_BUILD_ANALYZED
 
 #ifndef MPT_CHECKER_ASSUME
 #define MPT_CHECKER_ASSUME(x) MPT_DO { } MPT_WHILE_0
