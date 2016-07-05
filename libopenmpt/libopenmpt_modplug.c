@@ -383,9 +383,9 @@ LIBOPENMPT_MODPLUG_API int ModPlug_GetModuleType(ModPlugFile* file)
 	int retval;
 	if(!file) return 0;
 	type = openmpt_module_get_metadata(file->mod,"type");
-	retval = 0;
+	retval = MOD_TYPE_NONE;
 	if(!type){
-		return MOD_TYPE_NONE;
+		return retval;
 	}
 	if(!strcmp(type,"mod")){
 		retval = MOD_TYPE_MOD;
