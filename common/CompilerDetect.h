@@ -33,6 +33,12 @@
 #error "clang version 3.0 required"
 #endif
 
+#if defined(__clang_analyzer__) 
+#ifndef MPT_BUILD_ANALYZED
+#define MPT_BUILD_ANALYZED
+#endif
+#endif
+
 #elif defined(__GNUC__)
 
 #define MPT_COMPILER_GCC                             1
