@@ -253,12 +253,12 @@ sane_random_device::result_type sane_random_device::operator()()
 		double rd_size = rd_range + 1.0;
 		double rd_entropy = mpt::log2(rd_size);
 		int iterations = static_cast<int>(std::ceil(result_bits() / rd_entropy));
-		double result = 0.0;
+		double tmp = 0.0;
 		for(int i = 0; i < iterations; ++i)
 		{
-			result = (result * rd_size) + (static_cast<double>(rd()) - rd_min);
+			tmp = (tmp * rd_size) + (static_cast<double>(rd()) - rd_min);
 		}
-		double result_01 = std::floor(result / std::pow(rd_size, iterations));
+		double result_01 = std::floor(tmp / std::pow(rd_size, iterations));
 		result = static_cast<result_type>(std::floor(result_01 * (static_cast<double>(max() - min()) + 1.0))) + min();
 	} else
 	{ // sane std::random_device
