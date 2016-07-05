@@ -91,7 +91,7 @@ protected:
 
 	afx_msg void OnCheckChannelSearch();
 
-	void RelativeOrMultiplyPrompt(CComboBox &comboBox, FindReplace::ReplaceMode &action, int &value, int range);
+	void RelativeOrMultiplyPrompt(CComboBox &comboBox, FindReplace::ReplaceMode &action, int &value, int range, bool isHex);
 	DECLARE_MESSAGE_MAP()
 };
 

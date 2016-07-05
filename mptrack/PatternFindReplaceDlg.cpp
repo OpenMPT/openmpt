@@ -162,7 +162,8 @@ BOOL CFindReplaceTab::OnInitDialog()
 	}
 	if(m_cbnParam.GetComboBoxInfo(&info))
 	{
-		::SetWindowLong(info.hwndItem, GWL_STYLE, ::GetWindowLong(info.hwndItem, GWL_STYLE) | ES_NUMBER);
+		// Might need to enter hex values
+		//::SetWindowLong(info.hwndItem, GWL_STYLE, ::GetWindowLong(info.hwndItem, GWL_STYLE) | ES_NUMBER);
 		::SendMessage(info.hwndItem, EM_SETLIMITTEXT, 4, 0);
 	}
 
@@ -661,8 +662,8 @@ void CFindReplaceTab::OnInstrChanged()
 }
 
 
-void CFindReplaceTab::RelativeOrMultiplyPrompt(CComboBox &comboBox, FindReplace::ReplaceMode &action, int &value, int range)
-//--------------------------------------------------------------------------------------------------------------------------
+void CFindReplaceTab::RelativeOrMultiplyPrompt(CComboBox &comboBox, FindReplace::ReplaceMode &action, int &value, int range, bool isHex)
+//--------------------------------------------------------------------------------------------------------------------------------------
 {
 	int sel = comboBox.GetCurSel();
 	int item = comboBox.GetItemData(sel);
@@ -687,7 +688,17 @@ void CFindReplaceTab::RelativeOrMultiplyPrompt(CComboBox &comboBox, FindReplace:
 			}
 		}
 		if(!item)
-			item = ConvertStrTo<int>(s);
+		{
+			if(isHex)
+			{
+				std::string sHex(m_cbnParam.GetWindowTextLengthA(), ' ');
+				m_cbnParam.GetWindowTextA(&sHex[0], sHex.length() + 1);
+				item = mpt::String::Parse::HexToUnsignedInt(sHex);
+			} else
+			{
+				item = ConvertStrTo<int>(s);
+			}
+		}
 	}
 
 	if(item == kReplaceRelative || item == kReplaceMultiply)
@@ -744,7 +755,7 @@ void CFindReplaceTab::OnVolumeChanged()
 	int rangeMax = IsPCEvent() ? ModCommand::maxColumnValue : 64;
 	if(m_isReplaceTab)
 	{
-		RelativeOrMultiplyPrompt(m_cbnVolume, m_settings.replaceVolumeAction, m_settings.replaceVolume, rangeMax);
+		RelativeOrMultiplyPrompt(m_cbnVolume, m_settings.replaceVolumeAction, m_settings.replaceVolume, rangeMax, false);
 	} else
 	{
 		if(item == kFindRange)
@@ -772,9 +783,14 @@ void CFindReplaceTab::OnParamChanged()
 	CheckOnChange(IDC_CHECK6);
 	int item = m_cbnParam.GetCurSel();
 	if(item != CB_ERR)
+	{
 		item = m_cbnParam.GetItemData(item);
-	else
-		item = GetDlgItemInt(IDC_COMBO6);
+	} else
+	{
+		std::string s(m_cbnParam.GetWindowTextLengthA(), ' ');
+		m_cbnParam.GetWindowTextA(&s[0], s.length() + 1);
+		item = mpt::String::Parse::HexToUnsignedInt(s);
+	}
 
 	// Apply parameter value mask if required (e.g. SDx has mask D0).
 	int effectIndex = m_cbnCommand.GetItemData(m_cbnCommand.GetCurSel());
@@ -782,7 +798,7 @@ void CFindReplaceTab::OnParamChanged()
 
 	if(m_isReplaceTab)
 	{
-		RelativeOrMultiplyPrompt(m_cbnParam, m_settings.replaceParamAction, m_settings.replaceParam, 256);
+		RelativeOrMultiplyPrompt(m_cbnParam, m_settings.replaceParamAction, m_settings.replaceParam, 256, true);
 		if(m_settings.replaceParamAction == FindReplace::ReplaceValue && effectIndex > -1)
 		{
 			m_settings.replaceParam |= mask;
@@ -816,7 +832,7 @@ void CFindReplaceTab::OnPCParamChanged()
 
 	if(m_isReplaceTab)
 	{
-		RelativeOrMultiplyPrompt(m_cbnPCParam, m_settings.replaceParamAction, m_settings.replaceParam, 256);
+		RelativeOrMultiplyPrompt(m_cbnPCParam, m_settings.replaceParamAction, m_settings.replaceParam, 256, false);
 	} else
 	{
 		if(item == kFindRange)
