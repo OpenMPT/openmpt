@@ -1392,7 +1392,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				}
 #ifdef MODPLUG_TRACKER
 				if(m_nType == MOD_TYPE_MTM)
-					m.Convert(MOD_TYPE_MOD, MOD_TYPE_S3M, *this);
+					m.Convert(MOD_TYPE_MTM, MOD_TYPE_S3M, *this);
 #endif
 				ROWINDEX targetRow = std::min(row + rep, numRows);
 				while(row < targetRow)
