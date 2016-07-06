@@ -72,8 +72,8 @@ const MixFuncInterface Functions[5 * 16] =
 #undef BuildMixFuncTable
 
 
-forceinline ResamplingIndex ResamplingModeToMixFlags(ResamplingMode resamplingMode)
-//---------------------------------------------------------------------------------
+ResamplingIndex ResamplingModeToMixFlags(ResamplingMode resamplingMode)
+//---------------------------------------------------------------------
 {
 	switch(resamplingMode)
 	{
