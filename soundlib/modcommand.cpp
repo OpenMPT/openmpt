@@ -133,6 +133,24 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 		return;
 	}
 
+	if(fromType == MOD_TYPE_MTM)
+	{
+		// Special MTM fixups.
+		// Retrigger with param 0
+		if(command == CMD_MODCMDEX && param == 0x90)
+		{
+			command = CMD_NONE;
+		} else if(command == CMD_VIBRATO)
+		{
+			// Vibrato is approximately half as deep compared to MOD/S3M.
+			uint8 speed = (param & 0xF0);
+			uint8 depth = (param & 0x0F) >> 1;
+			param = speed | depth;
+		}
+		// Apart from these special fixups, do a regular conversion from MOD.
+		fromType = MOD_TYPE_MOD;
+	}
+
 	// helper variables
 	const bool oldTypeIsMOD = (fromType == MOD_TYPE_MOD), oldTypeIsXM = (fromType == MOD_TYPE_XM),
 		oldTypeIsS3M = (fromType == MOD_TYPE_S3M), oldTypeIsIT = (fromType == MOD_TYPE_IT),

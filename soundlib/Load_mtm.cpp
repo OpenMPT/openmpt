@@ -189,16 +189,7 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					ConvertModCommand(*m);
 #ifdef MODPLUG_TRACKER
-					m->Convert(MOD_TYPE_MOD, MOD_TYPE_S3M, *this);
-					if(m->command == CMD_RETRIG && !m->param)
-						m->command = CMD_NONE;
-					if(m->command == CMD_VIBRATO)
-					{
-						// Vibrato is approximately half as deep compared to MOD/S3M.
-						uint8 speed = (m->param & 0xF0);
-						uint8 depth = (m->param & 0x0F) >> 1;
-						m->param = speed | depth;
-					}
+					m->Convert(MOD_TYPE_MTM, MOD_TYPE_S3M, *this);
 #endif
 				}
 			}
