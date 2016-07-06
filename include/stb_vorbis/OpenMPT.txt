@@ -5,6 +5,7 @@ https://github.com/nothings/stb/blob/master/stb_vorbis.c
 Modifications:
  * Use of alloca has been replaced with malloc, as alloca is not in C99 and fails
    to compile.
+ * Macro redefinition of STB_VORBIS_NO_STDIO has been fixed.
 Modifications are always additions and have been marked with // OpenMPT.
 
 For building, premake is used to generate Visual Studio project files.
