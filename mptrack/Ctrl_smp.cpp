@@ -1823,7 +1823,7 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 			chn.pCurrentSample = sample.pSample;
 			chn.nInc = Util::muldivr_unsigned(oldRate, 0x10000, newRate);
 			chn.nPos = selection.nStart;
-			chn.leftVol = chn.rightVol = (1 << 16);
+			chn.leftVol = chn.rightVol = (1 << 8);
 			chn.nLength = sample.nLength;
 
 			SmpLength writeCount = newSelLength;
@@ -1840,10 +1840,10 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 					switch(sample.GetElementarySampleSize())
 					{
 					case 1:
-						CopySample<SC::ConversionChain<SC::Convert<int8, mixsample_t>, SC::DecodeIdentity<mixsample_t> > >(static_cast<int8 *>(newSample) + writeOffset + chn, procCount, sample.GetNumChannels(), buffer + chn, sizeof(buffer), 2);
+						CopySample<SC::ConversionChain<SC::ConvertFixedPoint<int8, mixsample_t, 23, false>, SC::DecodeIdentity<mixsample_t> > >(static_cast<int8 *>(newSample) + writeOffset + chn, procCount, sample.GetNumChannels(), buffer + chn, sizeof(buffer), 2);
 						break;
 					case 2:
-						CopySample<SC::ConversionChain<SC::Convert<int16, mixsample_t>, SC::DecodeIdentity<mixsample_t> > >(static_cast<int16 *>(newSample) + writeOffset + chn, procCount, sample.GetNumChannels(), buffer + chn, sizeof(buffer), 2);
+						CopySample<SC::ConversionChain<SC::ConvertFixedPoint<int16, mixsample_t, 23, false>, SC::DecodeIdentity<mixsample_t> > >(static_cast<int16 *>(newSample) + writeOffset + chn, procCount, sample.GetNumChannels(), buffer + chn, sizeof(buffer), 2);
 						break;
 					}
 				}

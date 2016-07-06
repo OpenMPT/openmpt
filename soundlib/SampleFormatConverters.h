@@ -580,6 +580,23 @@ struct ConvertFixedPoint<uint8, int32, fractionalBits, clipOutput>
 };
 
 template <int fractionalBits, bool clipOutput>
+struct ConvertFixedPoint<int8, int32, fractionalBits, clipOutput>
+{
+	typedef int32 input_t;
+	typedef int8 output_t;
+	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
+	forceinline output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		STATIC_ASSERT(shiftBits >= 1);
+		val = (val + (1<<(shiftBits-1))) >> shiftBits; // round
+		if(val < int8_min) val = int8_min;
+		if(val > int8_max) val = int8_max;
+		return static_cast<int8>(val);
+	}
+};
+
+template <int fractionalBits, bool clipOutput>
 struct ConvertFixedPoint<int16, int32, fractionalBits, clipOutput>
 {
 	typedef int32 input_t;
