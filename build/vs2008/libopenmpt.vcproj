@@ -1131,6 +1131,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\soundlib\MixFuncTable.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\soundlib\MixFuncTable.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\soundlib\Mixer.h"
 				>
 			</File>

@@ -13,6 +13,7 @@
 #include "resource.h"
 #include "Reporting.h"
 #include "MPTrackUtil.h"
+#include "Mptrack.h"
 #include "../common/misc_util.h"
 #include "../soundlib/Snd_defs.h"
 #include "../soundlib/ModSample.h"
@@ -451,6 +452,7 @@ BOOL CSampleXFadeDlg::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
 
 CResamplingDlg::ResamplingOption CResamplingDlg::lastChoice = CResamplingDlg::Upsample;
 uint32 CResamplingDlg::lastFrequency = 0;
+ResamplingMode CResamplingDlg::lastFilter = SRCMODE_DEFAULT;
 
 BEGIN_MESSAGE_MAP(CResamplingDlg, CDialog)
 	ON_EN_SETFOCUS(IDC_EDIT1, OnFocusEdit)
@@ -472,6 +474,23 @@ BOOL CResamplingDlg::OnInitDialog()
 	CSpinButtonCtrl *spin = static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1));
 	spin->SetRange32(100, 999999);
 	spin->SetPos32(lastFrequency);
+
+	CComboBox *cbnResampling = static_cast<CComboBox *>(GetDlgItem(IDC_COMBO_FILTER));
+	cbnResampling->SetRedraw(FALSE);
+	const ResamplingMode resamplingModes[] = { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_SPLINE, SRCMODE_POLYPHASE, SRCMODE_FIRFILTER, SRCMODE_DEFAULT };
+	for(uint32 i = 0; i < CountOf(resamplingModes); i++)
+	{
+		const TCHAR *desc = _T("r8brain (High Quality)");
+		if(resamplingModes[i] != SRCMODE_DEFAULT)
+			desc = CTrackApp::GetResamplingModeName(resamplingModes[i], false);
+
+		int index = cbnResampling->AddString(desc);
+		cbnResampling->SetItemData(index, resamplingModes[i]);
+		if(lastFilter == resamplingModes[i])
+			cbnResampling->SetCurSel(index);
+	}
+	cbnResampling->SetRedraw(TRUE);
+
 	return TRUE;
 }
 
@@ -501,6 +520,9 @@ void CResamplingDlg::OnOK()
 			return;
 		}
 	}
+
+	CComboBox *cbnResampling = static_cast<CComboBox *>(GetDlgItem(IDC_COMBO_FILTER));
+	lastFilter = static_cast<ResamplingMode>(cbnResampling->GetItemData(cbnResampling->GetCurSel()));
 
 	CDialog::OnOK();
 }

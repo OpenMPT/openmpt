@@ -116,6 +116,7 @@ LOCAL_SRC_FILES := \
 	soundlib/MIDIMacros.cpp \
 	soundlib/MixerLoops.cpp \
 	soundlib/MixerSettings.cpp \
+	soundlib/MixFuncTable.cpp \
 	soundlib/Mmcmp.cpp \
 	soundlib/ModChannel.cpp \
 	soundlib/modcommand.cpp \

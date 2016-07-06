@@ -965,12 +965,14 @@ BOOL COptionsMixer::OnInitDialog()
 
 	// Resampling type
 	{
-		m_CbnResampling.AddString(_T("No Interpolation (1 tap)"));
-		m_CbnResampling.AddString(_T("Linear (2 tap)"));
-		m_CbnResampling.AddString(_T("Cubic spline (4 tap)"));
-		m_CbnResampling.AddString(_T("Polyphase (8 tap)"));
-		m_CbnResampling.AddString(_T("XMMS-ModPlug (8 tap)"));
-		m_CbnResampling.SetCurSel(TrackerSettings::Instance().ResamplerMode);
+		const ResamplingMode resamplingModes[] = { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_SPLINE, SRCMODE_POLYPHASE, SRCMODE_FIRFILTER };
+		for(uint32 i = 0; i < CountOf(resamplingModes); i++)
+		{
+			int index = m_CbnResampling.AddString(CTrackApp::GetResamplingModeName(resamplingModes[i], true));
+			m_CbnResampling.SetItemData(index, resamplingModes[i]);
+			if(TrackerSettings::Instance().ResamplerMode == resamplingModes[i])
+				m_CbnResampling.SetCurSel(index);
+		}
 	}
 
 	// Resampler bandwidth
@@ -1053,8 +1055,8 @@ BOOL COptionsMixer::OnSetActive()
 void COptionsMixer::OnResamplerChanged()
 //--------------------------------------
 {
-	int dwSrcMode = m_CbnResampling.GetCurSel();
-	switch(dwSrcMode)
+	ResamplingMode srcMode = static_cast<ResamplingMode>(m_CbnResampling.GetItemData(m_CbnResampling.GetCurSel()));
+	switch(srcMode)
 	{
 		case SRCMODE_FIRFILTER:
 			m_CbnWFIRType.ResetContent();
@@ -1094,7 +1096,7 @@ void COptionsMixer::OnResamplerChanged()
 			break;
 	}
 	CSpinButtonCtrl *spinWFIRCutoff = static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1));
-	switch(dwSrcMode)
+	switch(srcMode)
 	{
 		case SRCMODE_POLYPHASE:
 			m_CEditWFIRCutoff.EnableWindow(FALSE);
@@ -1170,7 +1172,7 @@ void COptionsMixer::OnOK()
 {
 	// resampler mode
 	{
-		TrackerSettings::Instance().ResamplerMode = (ResamplingMode)m_CbnResampling.GetCurSel();
+		TrackerSettings::Instance().ResamplerMode = static_cast<ResamplingMode>(m_CbnResampling.GetItemData(m_CbnResampling.GetCurSel()));
 	}
 
 	// resampler bandwidth

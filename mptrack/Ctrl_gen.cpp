@@ -204,26 +204,15 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 	FlagSet<HintType> hintType = hint.GetType();
 	const bool updateAll = hintType[HINT_MODTYPE];
 
-	const struct
-	{
-		const TCHAR *name;
-		ResamplingMode mode;
-	} interpolationTypes[] =
-	{
-		{ _T("No Interpolation"), SRCMODE_NEAREST },
-		{ _T("Linear"), SRCMODE_LINEAR },
-		{ _T("Cubic Spline"), SRCMODE_SPLINE },
-		{ _T("Polyphase"), SRCMODE_POLYPHASE },
-		{ _T("XMMS-ModPlug"), SRCMODE_FIRFILTER },
-	};
+	const ResamplingMode resamplingModes[] = { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_SPLINE, SRCMODE_POLYPHASE, SRCMODE_FIRFILTER };
 
 	if (hintType == HINT_MPTOPTIONS || updateAll)
 	{
 		m_CbnResampling.ResetContent();
-		m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("Default (") + CString(interpolationTypes[TrackerSettings::Instance().ResamplerMode].name) + _T(")")), SRCMODE_DEFAULT);
-		for(int i = 0; i < CountOf(interpolationTypes); i++)
+		m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("Default (") + CString(CTrackApp::GetResamplingModeName(TrackerSettings::Instance().ResamplerMode, false)) + _T(")")), SRCMODE_DEFAULT);
+		for(uint32 i = 0; i < CountOf(resamplingModes); i++)
 		{
-			m_CbnResampling.SetItemData(m_CbnResampling.AddString(interpolationTypes[i].name), interpolationTypes[i].mode);
+			m_CbnResampling.SetItemData(m_CbnResampling.AddString(CTrackApp::GetResamplingModeName(resamplingModes[i], false)), resamplingModes[i]);
 		}
 		m_CbnResampling.Invalidate(FALSE);
 	}
@@ -317,9 +306,9 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 	if(updateAll || hintType == HINT_MPTOPTIONS || (hint.GetCategory() == HINTCAT_GENERAL && hintType[HINT_MODGENERAL]))
 	{
 		int srcMode = 0;
-		for(int i = 0; i < CountOf(interpolationTypes); i++)
+		for(int i = 0; i < CountOf(resamplingModes); i++)
 		{
-			if(m_sndFile.m_nResampling == interpolationTypes[i].mode) srcMode = i + 1;
+			if(m_sndFile.m_nResampling == resamplingModes[i]) srcMode = i + 1;
 		}
 		m_CbnResampling.SetCurSel(srcMode);
 	}
