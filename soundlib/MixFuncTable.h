@@ -43,7 +43,7 @@ namespace MixFuncTable
 
 	extern const MixFuncInterface Functions[5 * 16];
 
-	extern forceinline ResamplingIndex ResamplingModeToMixFlags(ResamplingMode resamplingMode);
+	ResamplingIndex ResamplingModeToMixFlags(ResamplingMode resamplingMode);
 }
 
 OPENMPT_NAMESPACE_END
