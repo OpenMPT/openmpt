@@ -521,7 +521,9 @@ enum STBVorbisError
 
 #ifdef STB_VORBIS_NO_PULLDATA_API
    #define STB_VORBIS_NO_INTEGER_CONVERSION
+   #ifndef STB_VORBIS_NO_STDIO // OpenMPT
    #define STB_VORBIS_NO_STDIO
+   #endif // OpenMPT
 #endif
 
 #if defined(STB_VORBIS_NO_CRT) && !defined(STB_VORBIS_NO_STDIO)
