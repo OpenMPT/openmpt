@@ -1162,7 +1162,6 @@ BOOL CTrackApp::InitInstance()
 	appInfo.SetHWND(*m_pMainWnd);
 	appInfo.BoostedThreadPriorityXP = TrackerSettings::Instance().SoundBoostedThreadPriority;
 	appInfo.BoostedThreadMMCSSClassVista = TrackerSettings::Instance().SoundBoostedThreadMMCSSClass;
-	appInfo.ASIODriverThreadPriorityOverride = TrackerSettings::Instance().SoundASIODriverThreadPriorityOverride;
 	m_pSoundDevicesManager = new SoundDevice::Manager(sysInfo, appInfo);
 	m_pTrackerSettings->MigrateOldSoundDeviceSettings(*m_pSoundDevicesManager);
 

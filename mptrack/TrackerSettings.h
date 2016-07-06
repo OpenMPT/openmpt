@@ -651,8 +651,6 @@ public:
 	Setting<int> SoundBoostedThreadPriority;
 	Setting<mpt::ustring> SoundBoostedThreadMMCSSClass;
 
-	Setting<bool> SoundASIODriverThreadPriorityOverride;
-
 	// MIDI Settings
 
 	Setting<UINT> m_nMidiDevice;
