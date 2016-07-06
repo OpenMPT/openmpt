@@ -7,4 +7,5 @@ Modifications for OpenMPT:
  * Macros optionally defined to 1 are defined to 0 in the other case in order to avoid warnings.
  * GCC warning 'include/miniz/miniz.c:2823:111: warning: cast discards ‘__attribute__((const))’ qualifier from pointer target type [-Wcast-qual]' has been silenced.
  * GCC warning 'include/miniz/miniz.c:3311:28: warning: cast discards ‘__attribute__((const))’ qualifier from pointer target type [-Wcast-qual]' has been silenced.
+ * Various warnings in platform detection logic using undefined macros have been fixed.
 No further changes have been made.
