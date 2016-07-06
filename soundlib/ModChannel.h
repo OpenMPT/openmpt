@@ -10,6 +10,10 @@
 
 #pragma once
 
+#include "ModSample.h"
+#include "ModInstrument.h"
+#include "modcommand.h"
+
 OPENMPT_NAMESPACE_BEGIN
 
 class CSoundFile;

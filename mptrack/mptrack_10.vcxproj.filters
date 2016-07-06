@@ -646,6 +646,9 @@
     <ClCompile Include="..\common\mptRandom.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
+    <ClCompile Include="..\soundlib\MixFuncTable.cpp">
+      <Filter>Source Files\soundlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\soundlib\Loaders.h">
@@ -1268,6 +1271,9 @@
     </ClInclude>
     <ClInclude Include="..\common\mptThread.h">
       <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\soundlib\MixFuncTable.h">
+      <Filter>Header Files\soundlib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -40,6 +40,7 @@
 #endif
 
 #include "../include/r8brain/CDSPResampler.h"
+#include "../soundlib/MixFuncTable.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1682,12 +1683,12 @@ void CCtrlSamples::OnResample()
 	{
 		return;
 	}
-	ApplyResample(dlg.GetFrequency());
+	ApplyResample(dlg.GetFrequency(), dlg.GetFilter());
 }
 
 
-void CCtrlSamples::ApplyResample(uint32_t newRate)
-//------------------------------------------------
+void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
+//---------------------------------------------------------------------
 {
 	BeginWaitCursor();
 
@@ -1718,95 +1719,137 @@ void CCtrlSamples::ApplyResample(uint32_t newRate)
 		std::memcpy(newSample, sample.pSample, selection.nStart * bps);
 		std::memcpy(static_cast<char *>(newSample) + newSelEnd * bps, static_cast<char *>(sample.pSample) + selection.nEnd * bps, (sample.nLength - selection.nEnd) * bps);
 
-		const SmpLength bufferSize = std::min(std::max(selLength, SmpLength(oldRate)), SmpLength(1024 * 1024));
-		std::vector<double> convBuffer(bufferSize);
-		r8b::CDSPResampler16 resampler(oldRate, newRate, convBuffer.size());
-
-		for(uint8 chn = 0; chn < numChannels; chn++)
+		if(mode == SRCMODE_DEFAULT)
 		{
-			if(chn != 0) resampler.clear();
+			// Resample using r8brain
+			const SmpLength bufferSize = std::min(std::max(selLength, SmpLength(oldRate)), SmpLength(1024 * 1024));
+			std::vector<double> convBuffer(bufferSize);
+			r8b::CDSPResampler16 resampler(oldRate, newRate, convBuffer.size());
 
-			SmpLength readCount = selLength, writeCount = newSelLength;
-			SmpLength readOffset = selection.nStart * numChannels + chn, writeOffset = readOffset;
-			SmpLength outLatency = newRate;
-			double *outBuffer, lastVal = 0.0;
-
+			for(uint8 chn = 0; chn < numChannels; chn++)
 			{
-				// Pre-fill the resampler with the first sampling point.
-				// Otherwise, it will assume that all samples before the first sampling point are 0,
-				// which can lead to unwanted artefacts (ripples) if the sample doesn't start with a zero crossing.
-				double firstVal = 0.0;
-				switch(sample.GetElementarySampleSize())
+				if(chn != 0) resampler.clear();
+
+				SmpLength readCount = selLength, writeCount = newSelLength;
+				SmpLength readOffset = selection.nStart * numChannels + chn, writeOffset = readOffset;
+				SmpLength outLatency = newRate;
+				double *outBuffer, lastVal = 0.0;
+
 				{
-				case 1:
-					firstVal = SC::Convert<double, int8>()(sample.pSample8[readOffset]);
-					lastVal = SC::Convert<double, int8>()(sample.pSample8[readOffset + selLength - numChannels]);
-					break;
-				case 2:
-					firstVal = SC::Convert<double, int16>()(sample.pSample16[readOffset]);
-					lastVal = SC::Convert<double, int16>()(sample.pSample16[readOffset + selLength - numChannels]);
-					break;
-				default:
-					// When higher bit depth is added, feel free to also replace CDSPResampler16 by CDSPResampler24 above.
-					MPT_ASSERT_MSG(false, "Bit depth not implemented");
+					// Pre-fill the resampler with the first sampling point.
+					// Otherwise, it will assume that all samples before the first sampling point are 0,
+					// which can lead to unwanted artefacts (ripples) if the sample doesn't start with a zero crossing.
+					double firstVal = 0.0;
+					switch(sample.GetElementarySampleSize())
+					{
+					case 1:
+						firstVal = SC::Convert<double, int8>()(sample.pSample8[readOffset]);
+						lastVal = SC::Convert<double, int8>()(sample.pSample8[readOffset + selLength - numChannels]);
+						break;
+					case 2:
+						firstVal = SC::Convert<double, int16>()(sample.pSample16[readOffset]);
+						lastVal = SC::Convert<double, int16>()(sample.pSample16[readOffset + selLength - numChannels]);
+						break;
+					default:
+						// When higher bit depth is added, feel free to also replace CDSPResampler16 by CDSPResampler24 above.
+						MPT_ASSERT_MSG(false, "Bit depth not implemented");
+					}
+
+					// 10ms or less would probably be enough, but we will pre-fill the buffer with exactly "oldRate" samples
+					// to prevent any further rounding errors when using smaller buffers or when dividing oldRate or newRate.
+					uint32 remain = oldRate;
+					for(SmpLength i = 0; i < bufferSize; i++) convBuffer[i] = firstVal;
+					while(remain > 0)
+					{
+						uint32 procIn = std::min<uint32>(remain, bufferSize);
+						SmpLength procCount = resampler.process(&convBuffer[0], procIn, outBuffer);
+						MPT_ASSERT(procCount <= outLatency);
+						LimitMax(procCount, outLatency);
+						outLatency -= procCount;
+						remain -= procIn;
+					}
 				}
 
-				// 10ms or less would probably be enough, but we will pre-fill the buffer with exactly "oldRate" samples
-				// to prevent any further rounding errors when using smaller buffers or when dividing oldRate or newRate.
-				uint32 remain = oldRate;
-				for(SmpLength i = 0; i < bufferSize; i++) convBuffer[i] = firstVal;
-				while(remain > 0)
+				// Now we can start with the actual resampling work...
+				while(writeCount > 0)
 				{
-					uint32 procIn = std::min<uint32>(remain, bufferSize);
-					SmpLength procCount = resampler.process(&convBuffer[0], procIn, outBuffer);
-					MPT_ASSERT(procCount <= outLatency);
-					LimitMax(procCount, outLatency);
-					outLatency -= procCount;
-					remain -= procIn;
-				}
-			}
+					SmpLength smpCount = (SmpLength)convBuffer.size();
+					if(readCount != 0)
+					{
+						LimitMax(smpCount, readCount);
 
-			// Now we can start with the actual resampling work...
-			while(writeCount > 0)
-			{
-				SmpLength smpCount = (SmpLength)convBuffer.size();
-				if(readCount != 0)
-				{
-					LimitMax(smpCount, readCount);
+						switch(sample.GetElementarySampleSize())
+						{
+						case 1:
+							CopySample<SC::ConversionChain<SC::Convert<double, int8>, SC::DecodeIdentity<int8> > >(&convBuffer[0], smpCount, 1, sample.pSample8 + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
+							break;
+						case 2:
+							CopySample<SC::ConversionChain<SC::Convert<double, int16>, SC::DecodeIdentity<int16> > >(&convBuffer[0], smpCount, 1, sample.pSample16 + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
+							break;
+						}
+						readOffset += smpCount * numChannels;
+						readCount -= smpCount;
+					} else
+					{
+						// Nothing to read, but still to write (compensate for r8brain's output latency)
+						for(SmpLength i = 0; i < smpCount; i++) convBuffer[i] = lastVal;
+					}
+
+					SmpLength procCount = resampler.process(&convBuffer[0], smpCount, outBuffer);
+					const SmpLength procLatency = std::min(outLatency, procCount);
+					procCount = std::min(procCount- procLatency, writeCount);
 
 					switch(sample.GetElementarySampleSize())
 					{
 					case 1:
-						CopySample<SC::ConversionChain<SC::Convert<double, int8>, SC::DecodeIdentity<int8> > >(&convBuffer[0], smpCount, 1, sample.pSample8 + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
+						CopySample<SC::ConversionChain<SC::Convert<int8, double>, SC::DecodeIdentity<double> > >(static_cast<int8 *>(newSample) + writeOffset, procCount, sample.GetNumChannels(), outBuffer + procLatency, procCount * sizeof(double), 1);
 						break;
 					case 2:
-						CopySample<SC::ConversionChain<SC::Convert<double, int16>, SC::DecodeIdentity<int16> > >(&convBuffer[0], smpCount, 1, sample.pSample16 + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
+						CopySample<SC::ConversionChain<SC::Convert<int16, double>, SC::DecodeIdentity<double> > >(static_cast<int16 *>(newSample) + writeOffset, procCount, sample.GetNumChannels(), outBuffer + procLatency, procCount * sizeof(double), 1);
 						break;
 					}
-					readOffset += smpCount * numChannels;
-					readCount -= smpCount;
-				} else
+					writeOffset += procCount * numChannels;
+					writeCount -= procCount;
+					outLatency -= procLatency;
+				}
+			}
+		} else
+		{
+			// Resample using built-in filters
+			uint32 functionNdx = MixFuncTable::ResamplingModeToMixFlags(mode);
+			if(sample.uFlags[CHN_16BIT]) functionNdx |= MixFuncTable::ndx16Bit;
+			if(sample.uFlags[CHN_STEREO]) functionNdx |= MixFuncTable::ndxStereo;
+			ModChannel chn;
+			chn.pCurrentSample = sample.pSample;
+			chn.nInc = Util::muldivr_unsigned(oldRate, 0x10000, newRate);
+			chn.nPos = selection.nStart;
+			chn.leftVol = chn.rightVol = (1 << 16);
+			chn.nLength = sample.nLength;
+
+			SmpLength writeCount = newSelLength;
+			SmpLength writeOffset = selection.nStart * sample.GetNumChannels();
+			while(writeCount > 0)
+			{
+				SmpLength procCount = std::min<SmpLength>(MIXBUFFERSIZE, writeCount);
+				mixsample_t buffer[MIXBUFFERSIZE * 2];
+				MemsetZero(buffer);
+				MixFuncTable::Functions[functionNdx](chn, m_sndFile.m_Resampler, buffer, procCount);
+
+				for(uint8 chn = 0; chn < numChannels; chn++)
 				{
-					// Nothing to read, but still to write (compensate for r8brain's output latency)
-					for(SmpLength i = 0; i < smpCount; i++) convBuffer[i] = lastVal;
+					switch(sample.GetElementarySampleSize())
+					{
+					case 1:
+						CopySample<SC::ConversionChain<SC::Convert<int8, mixsample_t>, SC::DecodeIdentity<mixsample_t> > >(static_cast<int8 *>(newSample) + writeOffset + chn, procCount, sample.GetNumChannels(), buffer + chn, sizeof(buffer), 2);
+						break;
+					case 2:
+						CopySample<SC::ConversionChain<SC::Convert<int16, mixsample_t>, SC::DecodeIdentity<mixsample_t> > >(static_cast<int16 *>(newSample) + writeOffset + chn, procCount, sample.GetNumChannels(), buffer + chn, sizeof(buffer), 2);
+						break;
+					}
 				}
 
-				SmpLength procCount = resampler.process(&convBuffer[0], smpCount, outBuffer);
-				const SmpLength procLatency = std::min(outLatency, procCount);
-				procCount = std::min(procCount- procLatency, writeCount);
-
-				switch(sample.GetElementarySampleSize())
-				{
-				case 1:
-					CopySample<SC::ConversionChain<SC::Convert<int8, double>, SC::DecodeIdentity<double> > >(static_cast<int8 *>(newSample) + writeOffset, procCount, sample.GetNumChannels(), outBuffer + procLatency, procCount * sizeof(double), 1);
-					break;
-				case 2:
-					CopySample<SC::ConversionChain<SC::Convert<int16, double>, SC::DecodeIdentity<double> > >(static_cast<int16 *>(newSample) + writeOffset, procCount, sample.GetNumChannels(), outBuffer + procLatency, procCount * sizeof(double), 1);
-					break;
-				}
-				writeOffset += procCount * numChannels;
 				writeCount -= procCount;
-				outLatency -= procLatency;
+				writeOffset += procCount * sample.GetNumChannels();
 			}
 		}
 
@@ -3260,7 +3303,7 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	case kcSampleDownsample:
 		{
 			uint32_t oldRate = m_sndFile.GetSample(m_nSample).GetSampleRate(m_sndFile.GetType());
-			ApplyResample(wParam == kcSampleUpsample ? oldRate * 2 : oldRate / 2);
+			ApplyResample(wParam == kcSampleUpsample ? oldRate * 2 : oldRate / 2, CResamplingDlg::GetFilter());
 		}
 		break;
 	case kcSampleResample:

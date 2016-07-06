@@ -768,18 +768,7 @@
     <ClCompile Include="..\soundlib\AudioCriticalSection.cpp" />
     <ClCompile Include="..\soundlib\Dither.cpp" />
     <ClCompile Include="..\soundlib\Dlsbank.cpp" />
-    <ClCompile Include="..\soundlib\Fastmix.cpp">
-      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">ProgramDatabase</DebugInformationFormat>
-      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='VSTi-Debug|Win32'">ProgramDatabase</DebugInformationFormat>
-      <InlineFunctionExpansion Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AnySuitable</InlineFunctionExpansion>
-      <InlineFunctionExpansion Condition="'$(Configuration)|$(Platform)'=='VSTi-Debug|Win32'">AnySuitable</InlineFunctionExpansion>
-      <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</IntrinsicFunctions>
-      <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='VSTi-Debug|Win32'">true</IntrinsicFunctions>
-      <InlineFunctionExpansion Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AnySuitable</InlineFunctionExpansion>
-      <InlineFunctionExpansion Condition="'$(Configuration)|$(Platform)'=='VSTi-Debug|x64'">AnySuitable</InlineFunctionExpansion>
-      <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</IntrinsicFunctions>
-      <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='VSTi-Debug|x64'">true</IntrinsicFunctions>
-    </ClCompile>
+    <ClCompile Include="..\soundlib\Fastmix.cpp" />
     <ClCompile Include="..\soundlib\InstrumentExtensions.cpp" />
     <ClCompile Include="..\soundlib\ITCompression.cpp" />
     <ClCompile Include="..\soundlib\ITTools.cpp" />
@@ -791,6 +780,18 @@
     <ClCompile Include="..\soundlib\MIDIMacros.cpp" />
     <ClCompile Include="..\soundlib\MixerLoops.cpp" />
     <ClCompile Include="..\soundlib\MixerSettings.cpp" />
+    <ClCompile Include="..\soundlib\MixFuncTable.cpp">
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">ProgramDatabase</DebugInformationFormat>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='VSTi-Debug|Win32'">ProgramDatabase</DebugInformationFormat>
+      <InlineFunctionExpansion Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AnySuitable</InlineFunctionExpansion>
+      <InlineFunctionExpansion Condition="'$(Configuration)|$(Platform)'=='VSTi-Debug|Win32'">AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</IntrinsicFunctions>
+      <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='VSTi-Debug|Win32'">true</IntrinsicFunctions>
+      <InlineFunctionExpansion Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AnySuitable</InlineFunctionExpansion>
+      <InlineFunctionExpansion Condition="'$(Configuration)|$(Platform)'=='VSTi-Debug|x64'">AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</IntrinsicFunctions>
+      <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='VSTi-Debug|x64'">true</IntrinsicFunctions>
+    </ClCompile>
     <ClCompile Include="..\soundlib\Mmcmp.cpp" />
     <ClCompile Include="..\soundlib\ModChannel.cpp" />
     <ClCompile Include="..\soundlib\modcommand.cpp" />
@@ -1041,6 +1042,7 @@
     <ClInclude Include="..\soundlib\MixerInterface.h" />
     <ClInclude Include="..\soundlib\MixerLoops.h" />
     <ClInclude Include="..\soundlib\MixerSettings.h" />
+    <ClInclude Include="..\soundlib\MixFuncTable.h" />
     <ClInclude Include="..\soundlib\ModChannel.h" />
     <ClInclude Include="..\soundlib\modcommand.h" />
     <ClInclude Include="..\soundlib\ModInstrument.h" />

@@ -3,10 +3,6 @@
  * -----------
  * Purpose: Mixer core for rendering samples, mixing plugins, etc...
  * Notes  : If this is Fastmix.cpp, where is Slowmix.cpp? :)
- *          The Visual Studio project settings for this file have been adjusted
- *          to force function inlining, so that the mixer has a somewhat acceptable
- *          performance in debug mode. If you need to debug anything here, be sure
- *          to disable those optimizations if needed.
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -23,105 +19,13 @@
 #include "stdafx.h"
 #include "Sndfile.h"
 #include "MixerLoops.h"
+#include "MixFuncTable.h"
 #include <cfloat>	// For FLT_EPSILON
-#ifdef MPT_INTMIXER
-#include "IntMixer.h"
-#else
-#include "FloatMixer.h"
-#endif // MPT_INTMIXER
 #include "plugins/PlugInterface.h"
 #include <algorithm>
 
 
 OPENMPT_NAMESPACE_BEGIN
-
-
-namespace MixFuncTable
-{
-#ifdef MPT_INTMIXER
-	typedef Int8MToIntS I8M;
-	typedef Int16MToIntS I16M;
-	typedef Int8SToIntS I8S;
-	typedef Int16SToIntS I16S;
-#else
-	typedef Int8MToFloatS I8M;
-	typedef Int16MToFloatS I16M;
-	typedef Int8SToFloatS I8S;
-	typedef Int16SToFloatS I16S;
-#endif // MPT_INTMIXER
-
-// Table index:
-//	[b1-b0]	format (8-bit-mono, 16-bit-mono, 8-bit-stereo, 16-bit-stereo)
-//	[b2]	ramp
-//	[b3]	filter
-//	[b6-b4]	src type
-
-// Sample type / processing type index
-enum FunctionIndex
-{
-	ndx16Bit		= 0x01,
-	ndxStereo		= 0x02,
-	ndxRamp			= 0x04,
-	ndxFilter		= 0x08,
-};
-
-// SRC index
-enum ResamplingIndex
-{
-	ndxNoInterpolation	= 0x00,
-	ndxLinear			= 0x10,
-	ndxFastSinc			= 0x20,
-	ndxKaiser			= 0x30,
-	ndxFIRFilter		= 0x40,
-};
-
-// Build mix function table for given resampling, filter and ramping settings: One function each for 8-Bit / 16-Bit Mono / Stereo
-#define BuildMixFuncTableRamp(resampling, filter, ramp) \
-	SampleLoop<I8M, resampling<I8M>, filter<I8M>, MixMono ## ramp<I8M> >, \
-	SampleLoop<I16M, resampling<I16M>, filter<I16M>, MixMono ## ramp<I16M> >, \
-	SampleLoop<I8S, resampling<I8S>, filter<I8S>, MixStereo ## ramp<I8S> >, \
-	SampleLoop<I16S, resampling<I16S>, filter<I16S>, MixStereo ## ramp<I16S> >
-
-// Build mix function table for given resampling, filter settings: With and without ramping
-#define BuildMixFuncTableFilter(resampling, filter) \
-	BuildMixFuncTableRamp(resampling, filter, NoRamp), \
-	BuildMixFuncTableRamp(resampling, filter, Ramp)
-
-// Build mix function table for given resampling settings: With and without filter
-#define BuildMixFuncTable(resampling) \
-	BuildMixFuncTableFilter(resampling, NoFilter), \
-	BuildMixFuncTableFilter(resampling, ResonantFilter)
-
-const MixFuncInterface Functions[5 * 16] =
-{
-	BuildMixFuncTable(NoInterpolation),			// No SRC
-	BuildMixFuncTable(LinearInterpolation),		// Linear SRC
-	BuildMixFuncTable(FastSincInterpolation),	// Fast Sinc (Cubic Spline) SRC
-	BuildMixFuncTable(PolyphaseInterpolation),	// Kaiser SRC
-	BuildMixFuncTable(FIRFilterInterpolation),	// FIR SRC
-};
-
-
-#undef BuildMixFuncTableRamp
-#undef BuildMixFuncTableFilter
-#undef BuildMixFuncTable
-
-
-static forceinline ResamplingIndex ResamplingModeToMixFlags(uint8 resamplingMode)
-//-------------------------------------------------------------------------------
-{
-	switch(resamplingMode)
-	{
-	case SRCMODE_NEAREST:   return ndxNoInterpolation;
-	case SRCMODE_LINEAR:    return ndxLinear;
-	case SRCMODE_SPLINE:    return ndxFastSinc;
-	case SRCMODE_POLYPHASE: return ndxKaiser;
-	case SRCMODE_FIRFILTER: return ndxFIRFilter;
-	}
-	return ndxNoInterpolation;
-}
-
-} // namespace MixFuncTable
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -274,14 +178,14 @@ static forceinline int32 GetSampleCount(ModChannel &chn, int32 nSamples, bool IT
 
 
 // Calculate offset of loop wrap-around buffer for this sample.
-static inline void UpdateLookaheadPointers(const int8* &samplePointer, const int8* &lookaheadPointer, SmpLength &lookaheadStart, const ModChannel &chn, const MixFuncTable::ResamplingIndex resamplingMode)
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+static inline void UpdateLookaheadPointers(const int8* &samplePointer, const int8* &lookaheadPointer, SmpLength &lookaheadStart, const ModChannel &chn)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	samplePointer = static_cast<const int8 *>(chn.pCurrentSample);
 	lookaheadStart = chn.nLoopEnd - InterpolationMaxLookahead;
 	// We only need to apply the loop wrap-around logic if the sample is actually looping and if interpolation is applied.
 	// If there is no interpolation happening, there is no lookahead happening the sample read-out is exact.
-	if(chn.dwFlags[CHN_LOOP] && resamplingMode != MixFuncTable::ndxNoInterpolation)
+	if(chn.dwFlags[CHN_LOOP] && chn.resamplingMode != SRCMODE_NEAREST)
 	{
 		const bool loopEndsAtSampleEnd = chn.pModSample->uFlags[CHN_LOOP] && chn.pModSample->nLoopEnd == chn.pModSample->nLength && chn.pModSample->nLength >= InterpolationMaxLookahead;
 		const bool inSustainLoop = chn.InSustainLoop();
@@ -320,19 +224,17 @@ void CSoundFile::CreateStereoMix(int count)
 	for(uint32 nChn = 0; nChn < m_nMixChannels; nChn++)
 	{
 		ModChannel &chn = m_PlayState.Chn[m_PlayState.ChnMix[nChn]];
-		uint32 functionNdx = 0;
 
 		if(!chn.pCurrentSample) continue;
 		pOfsR = &gnDryROfsVol;
 		pOfsL = &gnDryLOfsVol;
+
+		uint32 functionNdx = MixFuncTable::ResamplingModeToMixFlags(static_cast<ResamplingMode>(chn.resamplingMode));
 		if(chn.dwFlags[CHN_16BIT]) functionNdx |= MixFuncTable::ndx16Bit;
 		if(chn.dwFlags[CHN_STEREO]) functionNdx |= MixFuncTable::ndxStereo;
-	#ifndef NO_FILTER
+#ifndef NO_FILTER
 		if(chn.dwFlags[CHN_FILTER]) functionNdx |= MixFuncTable::ndxFilter;
-	#endif
-
-		const MixFuncTable::ResamplingIndex resamplingMode = MixFuncTable::ResamplingModeToMixFlags(chn.resamplingMode);
-		functionNdx |= resamplingMode;
+#endif
 
 		mixsample_t *pbuffer = MixSoundBuffer;
 #ifndef NO_REVERB
@@ -377,7 +279,7 @@ void CSoundFile::CreateStereoMix(int count)
 		const int8 * lookaheadPointer = nullptr;
 		SmpLength lookaheadStart = 0;
 
-		UpdateLookaheadPointers(samplePointer, lookaheadPointer, lookaheadStart, chn, resamplingMode);
+		UpdateLookaheadPointers(samplePointer, lookaheadPointer, lookaheadStart, chn);
 
 		////////////////////////////////////////////////////
 		CHANNELINDEX naddmix = 0;
@@ -498,7 +400,7 @@ void CSoundFile::CreateStereoMix(int count)
 					chn.nLoopStart = smp.nLoopStart;
 					chn.nLoopEnd = smp.nLoopEnd;
 					chn.nPos = chn.nLoopStart;
-					UpdateLookaheadPointers(samplePointer, lookaheadPointer, lookaheadStart, chn, resamplingMode);
+					UpdateLookaheadPointers(samplePointer, lookaheadPointer, lookaheadStart, chn);
 					if(!chn.pCurrentSample)
 					{
 						break;

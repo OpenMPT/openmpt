@@ -2104,4 +2104,26 @@ bool CTrackApp::OpenURL(const mpt::PathString &lpszURL)
 	return false;
 }
 
+
+const TCHAR *CTrackApp::GetResamplingModeName(ResamplingMode mode, bool addTaps)
+//------------------------------------------------------------------------------
+{
+	switch(mode)
+	{
+	case SRCMODE_NEAREST:
+		return addTaps ? _T("No Interpolation (1 tap)") : _T("No Interpolation");
+	case SRCMODE_LINEAR:
+		return addTaps ? _T("Linear (2 tap)"):_T("Linear");
+	case SRCMODE_SPLINE:
+		return addTaps ? _T("Cubic Spline (4 tap)"): _T("Cubic Spline");
+	case SRCMODE_POLYPHASE:
+		return addTaps ? _T("Polyphase (8 tap)"): _T("Polyphase");
+	case SRCMODE_FIRFILTER:
+		return addTaps ? _T("XMMS-ModPlug (8 tap)"): _T("XMMS-ModPlug");
+	default:
+		MPT_ASSERT_NOTREACHED();
+	}
+	return _T("");
+}
+
 OPENMPT_NAMESPACE_END

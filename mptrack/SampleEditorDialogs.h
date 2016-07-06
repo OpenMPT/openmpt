@@ -206,10 +206,12 @@ protected:
 	uint32 frequency;
 	static uint32 lastFrequency;
 	static ResamplingOption lastChoice;
+	static ResamplingMode lastFilter;
 
 public:
 	CResamplingDlg(CWnd *parent, uint32 curFreq) : CDialog(IDD_RESAMPLE, parent), frequency(curFreq) { };
 	uint32 GetFrequency() const { return frequency; }
+	static ResamplingMode GetFilter() { return lastFilter; }
 
 protected:
 	virtual BOOL OnInitDialog();

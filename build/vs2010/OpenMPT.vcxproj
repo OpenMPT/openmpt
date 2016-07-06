@@ -827,6 +827,7 @@
     <ClInclude Include="..\..\soundlib\MIDIMacros.h" />
     <ClInclude Include="..\..\soundlib\MPEGFrame.h" />
     <ClInclude Include="..\..\soundlib\Message.h" />
+    <ClInclude Include="..\..\soundlib\MixFuncTable.h" />
     <ClInclude Include="..\..\soundlib\Mixer.h" />
     <ClInclude Include="..\..\soundlib\MixerInterface.h" />
     <ClInclude Include="..\..\soundlib\MixerLoops.h" />
@@ -1064,6 +1065,7 @@
     <ClCompile Include="..\..\soundlib\MIDIMacros.cpp" />
     <ClCompile Include="..\..\soundlib\MPEGFrame.cpp" />
     <ClCompile Include="..\..\soundlib\Message.cpp" />
+    <ClCompile Include="..\..\soundlib\MixFuncTable.cpp" />
     <ClCompile Include="..\..\soundlib\MixerLoops.cpp" />
     <ClCompile Include="..\..\soundlib\MixerSettings.cpp" />
     <ClCompile Include="..\..\soundlib\Mmcmp.cpp" />

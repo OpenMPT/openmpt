@@ -1,7 +1,7 @@
 /*
  * SampleConfigDlg.cpp
  * -------------------
- * Purpose: Implementation of the advanced settings dialog.
+ * Purpose: Implementation of the sample/instrument editor settings dialog.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.

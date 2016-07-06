@@ -64,7 +64,7 @@ protected:
 	// Applies amplification to sample. Negative values
 	// can be used to invert phase.
 	void ApplyAmplify(int32 nAmp, bool fadeIn, bool fadeOut, Fade::Law fadeLaw);
-	void ApplyResample(uint32_t newRate);
+	void ApplyResample(uint32_t newRate, ResamplingMode mode);
 
 	SampleSelectionPoints GetSelectionPoints();
 	void SetSelectionPoints(SmpLength nStart, SmpLength nEnd);
