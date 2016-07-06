@@ -92,9 +92,6 @@ protected:
 	FlagSet<AsioFeatures> m_QueriedFeatures;
 	FlagSet<AsioFeatures> m_UsedFeatures;
 
-	bool m_ThreadPrioritySet;
-	int m_OldThreadPriority;
-
 	mutable mpt::atomic_uint32_t m_DebugRealtimeThreadID;
 
 private:

@@ -253,7 +253,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, ResamplerCutoffPercent(conf, "Sound Settings", "ResamplerWFIRCutoff", Util::Round<int32>(CResamplerSettings().gdWFIRCutoff * 100.0))
 	, SoundBoostedThreadPriority(conf, "Sound Settings", "BoostedThreadPriority", SoundDevice::AppInfo().BoostedThreadPriorityXP)
 	, SoundBoostedThreadMMCSSClass(conf, "Sound Settings", "BoostedThreadMMCSSClass", SoundDevice::AppInfo().BoostedThreadMMCSSClassVista)
-	, SoundASIODriverThreadPriorityOverride(conf, "Sound Settings", "ASIODriverThreadPriorityOverride", SoundDevice::AppInfo().ASIODriverThreadPriorityOverride)
 	// MIDI Settings
 	, m_nMidiDevice(conf, "MIDI Settings", "MidiDevice", 0)
 	, midiDeviceName(conf, "MIDI Settings", "MidiDeviceName", "")

@@ -250,12 +250,10 @@ struct AppInfo
 	uintptr_t UIHandle; // HWND on Windows
 	int BoostedThreadPriorityXP;
 	mpt::ustring BoostedThreadMMCSSClassVista;
-	bool ASIODriverThreadPriorityOverride;
 	AppInfo()
 		: UIHandle(0)
 		, BoostedThreadPriorityXP(mpt::ThreadPriorityHighest)
 		, BoostedThreadMMCSSClassVista(MPT_USTRING("Pro Audio"))
-		, ASIODriverThreadPriorityOverride(false)
 	{
 		return;
 	}
