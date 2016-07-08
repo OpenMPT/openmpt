@@ -84,20 +84,9 @@ struct PACKED STMFileHeader
 	uint8 numPatterns;				// number of patterns
 	uint8 globalVolume;
 	uint8 reserved[13];
-	STMSampleHeader samples[31];	// Sample headers
-	uint8 order[128];				// Order list
-
-	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
-	void ConvertEndianness()
-	{
-		for(std::size_t i = 0; i < 31; ++i)
-		{
-			samples[i].ConvertEndianness();
-		}
-	}
 };
 
-STATIC_ASSERT(sizeof(STMFileHeader) == 1168);
+STATIC_ASSERT(sizeof(STMFileHeader) == 48);
 
 
 // Pattern note entry
@@ -131,11 +120,12 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	file.Rewind();
 
 	STMFileHeader fileHeader;
-	if(!file.ReadConvertEndianness(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| fileHeader.filetype != 2
 		|| fileHeader.dosEof != 0x1A
 		|| (mpt::CompareNoCaseAscii(fileHeader.trackername, "!SCREAM!", 8)
-			&& mpt::CompareNoCaseAscii(fileHeader.trackername, "BMOD2STM", 8)))
+			&& mpt::CompareNoCaseAscii(fileHeader.trackername, "BMOD2STM", 8))
+		|| !file.CanRead(31 * sizeof(STMSampleHeader) + 128))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -171,14 +161,18 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read samples
-	for(SAMPLEINDEX smp = 0; smp < 31; smp++)
+	uint16 sampleOffsets[31];
+	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
-		fileHeader.samples[smp].ConvertToMPT(Samples[smp + 1]);
-		mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp + 1], fileHeader.samples[smp].filename);
+		STMSampleHeader sampleHeader;
+		file.ReadConvertEndianness(sampleHeader);
+		sampleHeader.ConvertToMPT(Samples[smp]);
+		mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.filename);
+		sampleOffsets[smp - 1] = sampleHeader.offset;
 	}
 
 	// Read order list
-	Order.ReadFromArray(fileHeader.order, CountOf(fileHeader.order), 0xFF, 0xFE);
+	Order.ReadAsByte(file, 128);
 	for(ORDERINDEX ord = 0; ord < 128; ord++)
 	{
 		if(Order[ord] >= 99)
@@ -315,7 +309,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 			ModSample &sample = Samples[smp];
 			if(sample.nLength)
 			{
-				FileReader::off_t sampleOffset = fileHeader.samples[smp - 1].offset << 4;
+				FileReader::off_t sampleOffset = sampleOffsets[smp - 1] << 4;
 				if(sampleOffset > sizeof(STMPatternEntry) && sampleOffset < file.GetLength())
 				{
 					file.Seek(sampleOffset);
