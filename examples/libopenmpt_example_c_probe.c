@@ -55,6 +55,7 @@ static size_t libopenmpt_example_stream_read_func_prefix_probe( void * stream, v
 	int64_t offset = bytes;
 	int64_t begpos = s->file_pos;
 	int64_t endpos = s->file_pos;
+	size_t valid_bytes = 0;
 	endpos = (uint64_t)endpos + (uint64_t)offset;
 	if ( ( offset > 0 ) && !( (uint64_t)endpos > (uint64_t)begpos ) ) {
 		/* integer wrapped */
@@ -63,7 +64,7 @@ static size_t libopenmpt_example_stream_read_func_prefix_probe( void * stream, v
 	if ( bytes == 0 ) {
 		return 0;
 	}
-	if ( begpos >= s->prefix_size ) {
+	if ( begpos >= s->file_size ) {
 		return 0;
 	}
 	if ( endpos > s->file_size ) {
@@ -71,12 +72,17 @@ static size_t libopenmpt_example_stream_read_func_prefix_probe( void * stream, v
 		bytes = bytes - (size_t)( endpos - s->file_size );
 		endpos = endpos - ( endpos - s->file_size );
 	}
-	if ( endpos > s->prefix_size ) {
+	memset( dst, 0, bytes );
+	if ( begpos >= s->prefix_size ) {
 		s->overflow = 1;
-		bytes = bytes - (size_t)( endpos - s->prefix_size );
-		endpos = endpos - ( endpos - s->prefix_size );
+		valid_bytes = 0;
+	} else if ( endpos > s->prefix_size ) {
+		s->overflow = 1;
+		valid_bytes = bytes - (size_t)( endpos - s->prefix_size );
+	} else {
+		valid_bytes = bytes;
 	}
-	memcpy( dst, (const char*)s->prefix_data + s->file_pos, bytes );
+	memcpy( dst, (const char*)s->prefix_data + s->file_pos, valid_bytes );
 	s->file_pos = s->file_pos + bytes;
 	return bytes;
 }
