@@ -9,6 +9,7 @@ EXTRA_DIST += Doxyfile.in
 EXTRA_DIST += libopenmpt/dox/changelog.md
 EXTRA_DIST += libopenmpt/dox/dependencies.md
 EXTRA_DIST += libopenmpt/dox/index.dox
+EXTRA_DIST += libopenmpt/dox/packaging.md
 EXTRA_DIST += libopenmpt/dox/quickstart.md
 EXTRA_DIST += libopenmpt/dox/tests.md
 EXTRA_DIST += libopenmpt/dox/todo.md
