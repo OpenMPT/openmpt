@@ -757,6 +757,7 @@ INPUT                  = libopenmpt/dox/index.dox \
                          libopenmpt/dox/quickstart.md \
                          README.md \
                          libopenmpt/dox/dependencies.md \
+                         libopenmpt/dox/packaging.md \
                          libopenmpt/dox/tests.md \
                          libopenmpt/dox/changelog.md \
                          libopenmpt/dox/todo.md \
