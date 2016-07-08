@@ -757,12 +757,20 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 
 	ChunkReader chunkFile(file);
-	// RIFF AM has a padding byte so that all chunks have an even size.
-	ChunkReader::ChunkList<AMFFRiffChunk> chunks = chunkFile.ReadChunks<AMFFRiffChunk>(isAM ? 2 : 1);
 
+	// The main chunk is almost identical in both formats but uses different chunk IDs.
 	// "MAIN" - Song info (AMFF)
 	// "INIT" - Song info (AM)
-	FileReader chunk(chunks.GetChunk(isAM ? AMFFRiffChunk::idINIT : AMFFRiffChunk::idMAIN));
+	AMFFRiffChunk::ChunkIdentifiers mainChunkID = isAM ? AMFFRiffChunk::idINIT : AMFFRiffChunk::idMAIN;
+
+	// RIFF AM has a padding byte so that all chunks have an even size.
+	ChunkReader::ChunkList<AMFFRiffChunk> chunks;
+	if(loadFlags == onlyVerifyHeader)
+		chunks = chunkFile.ReadChunksUntil<AMFFRiffChunk>(isAM ? 2 : 1, mainChunkID);
+	else
+		chunks = chunkFile.ReadChunks<AMFFRiffChunk>(isAM ? 2 : 1);
+
+	FileReader chunk(chunks.GetChunk(mainChunkID));
 	AMFFMainChunk mainChunk;
 	if(!chunk.IsValid() 
 		|| !chunk.ReadConvertEndianness(mainChunk)
