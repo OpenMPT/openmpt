@@ -265,12 +265,22 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	bool newFormat = false; // The game "Sinaria" uses a slightly modified PSM structure
-
 	// Check header
 	if(memcmp(fileHeader.formatID, "PSM ", 4)
-		|| memcmp(fileHeader.fileInfoID, "FILE", 4)
-		|| fileHeader.fileSize != file.BytesLeft())
+		|| memcmp(fileHeader.fileInfoID, "FILE", 4))
+	{
+		return false;
+	}
+
+	ChunkReader chunkFile(file);
+	ChunkReader::ChunkList<PSMChunk> chunks;
+	if(loadFlags == onlyVerifyHeader)
+		chunks = chunkFile.ReadChunksUntil<PSMChunk>(1, PSMChunk::idSDFT);
+	else
+		chunks = chunkFile.ReadChunks<PSMChunk>(1);
+
+	// "SDFT" - Format info (song data starts here)
+	if(!chunks.GetChunk(PSMChunk::idSDFT).ReadMagic("MAINSONG"))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -291,19 +301,11 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	// subsong setup
 	std::vector<PSMSubSong> subsongs;
 	bool subsongPanningDiffers = false; // do we have subsongs with different panning positions?
-
-	ChunkReader chunkFile(file);
-	ChunkReader::ChunkList<PSMChunk> chunks = chunkFile.ReadChunks<PSMChunk>(1);
+	bool newFormat = false; // The game "Sinaria" uses a slightly modified PSM structure
 
 	// "TITL" - Song Title
 	FileReader titleChunk = chunks.GetChunk(PSMChunk::idTITL);
 	titleChunk.ReadString<mpt::String::spacePadded>(m_songName, titleChunk.GetLength());
-
-	// "SDFT" - Format info (song data starts here)
-	if(!chunks.GetChunk(PSMChunk::idSDFT).ReadMagic("MAINSONG"))
-	{
-		return false;
-	}
 
 	// "PBOD" - Pattern data of a single pattern
 	std::vector<FileReader> pattChunks = chunks.GetAllChunks(PSMChunk::idPBOD);

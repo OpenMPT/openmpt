@@ -98,36 +98,66 @@ public:
 		}
 	};
 
+	// Read a single "T" chunk.
+	// T is required to have the methods GetID() and GetLength(), as well as an id_type typedef.
+	// GetLength() must return the chunk size in bytes, and GetID() the chunk ID.
+	// id_type must reflect the type that is returned by GetID().
+	template<typename T>
+	ChunkListItem<T> GetNextChunk(off_t padding)
+	{
+		T chunkHeader;
+		off_t dataSize = 0;
+		if(Read(chunkHeader))
+		{
+			dataSize = chunkHeader.GetLength();
+		}
+		ChunkListItem<T> resultItem(chunkHeader, ReadChunk(dataSize));
+
+		// Skip padding bytes
+		if(padding != 0 && dataSize % padding != 0)
+		{
+			Skip(padding - (dataSize % padding));
+		}
+
+		return resultItem;
+	}
 
 	// Read a series of "T" chunks until the end of file is reached.
 	// T is required to have the methods GetID() and GetLength(), as well as an id_type typedef.
-	// GetLength() should return the chunk size in bytes, and GetID() the chunk ID.
+	// GetLength() must return the chunk size in bytes, and GetID() the chunk ID.
 	// id_type must reflect the type that is returned by GetID().
 	template<typename T>
-	ChunkList<T> ReadChunks(size_t padding)
+	ChunkList<T> ReadChunks(off_t padding)
 	{
 		ChunkList<T> result;
 		while(CanRead(sizeof(T)))
 		{
-			T chunkHeader;
-			if(!Read(chunkHeader))
+			result.push_back(GetNextChunk<T>(padding));
+		}
+
+		return result;
+	}
+
+	// Read a series of "T" chunks until a given chunk ID is found.
+	// T is required to have the methods GetID() and GetLength(), as well as an id_type typedef.
+	// GetLength() must return the chunk size in bytes, and GetID() the chunk ID.
+	// id_type must reflect the type that is returned by GetID().
+	template<typename T>
+	ChunkList<T> ReadChunksUntil(off_t padding, typename T::id_type stopAtID)
+	{
+		ChunkList<T> result;
+		while(CanRead(sizeof(T)))
+		{
+			result.push_back(GetNextChunk<T>(padding));
+			if(result.back().GetHeader().GetID() == stopAtID)
 			{
 				break;
-			}
-
-			size_t dataSize = chunkHeader.GetLength();
-			ChunkListItem<T> resultItem(chunkHeader, ReadChunk(dataSize));
-			result.push_back(resultItem);
-
-			// Skip padding bytes
-			if(padding != 0 && dataSize % padding != 0)
-			{
-				Skip(padding - (dataSize % padding));
 			}
 		}
 
 		return result;
 	}
+
 };
 
 
