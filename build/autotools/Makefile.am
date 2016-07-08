@@ -30,6 +30,7 @@ nobase_dist_doc_DATA += examples/libopenmpt_example_cxx.cpp
 nobase_dist_doc_DATA += examples/libopenmpt_example_c_mem.c
 nobase_dist_doc_DATA += examples/libopenmpt_example_c_unsafe.c
 nobase_dist_doc_DATA += examples/libopenmpt_example_c.c
+nobase_dist_doc_DATA += examples/libopenmpt_example_c_probe.c
 nobase_dist_doc_DATA += examples/libopenmpt_example_c_stdout.c
 
 bin_PROGRAMS = 
@@ -38,6 +39,7 @@ lib_LTLIBRARIES =
 TESTS = libopenmpttest
 
 check_PROGRAMS += libopenmpt_example_c_stdout
+check_PROGRAMS += libopenmpt_example_c_probe
 if HAVE_PORTAUDIO
 check_PROGRAMS += libopenmpt_example_c
 check_PROGRAMS += libopenmpt_example_c_mem
@@ -48,6 +50,7 @@ check_PROGRAMS += libopenmpt_example_cxx
 endif
 
 libopenmpt_example_c_stdout_SOURCES = examples/libopenmpt_example_c_stdout.c
+libopenmpt_example_c_probe_SOURCES = examples/libopenmpt_example_c_probe.c
 if HAVE_PORTAUDIO
 libopenmpt_example_c_SOURCES = examples/libopenmpt_example_c.c
 libopenmpt_example_c_mem_SOURCES = examples/libopenmpt_example_c_mem.c
@@ -58,6 +61,7 @@ libopenmpt_example_cxx_SOURCES = examples/libopenmpt_example_cxx.cpp
 endif
 
 libopenmpt_example_c_stdout_CPPFLAGS = 
+libopenmpt_example_c_probe_CPPFLAGS = 
 if HAVE_PORTAUDIO
 libopenmpt_example_c_CPPFLAGS = $(PORTAUDIO_CFLAGS)
 libopenmpt_example_c_mem_CPPFLAGS = $(PORTAUDIO_CFLAGS)
@@ -67,7 +71,8 @@ if HAVE_PORTAUDIOCPP
 libopenmpt_example_cxx_CPPFLAGS = $(PORTAUDIOCPP_CFLAGS)
 endif
 
-libopenmpt_example_c_stdout_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIO_LIBS)
+libopenmpt_example_c_stdout_LDADD = $(lib_LTLIBRARIES)
+libopenmpt_example_c_probe_LDADD = $(lib_LTLIBRARIES)
 if HAVE_PORTAUDIO
 libopenmpt_example_c_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIO_LIBS)
 libopenmpt_example_c_mem_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIO_LIBS)

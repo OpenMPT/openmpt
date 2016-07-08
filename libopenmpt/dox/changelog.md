@@ -31,6 +31,9 @@ is just a high-level summary.
  *  Seeking in allsubsongs-mode now works correctly.
  *  openmpt123: Added subsong support.
  *  Various playback fixes for 669 files.
+ *  A new example `libopenmpt_example_c_probe` has been added which demonstrates
+    the usage and flexibility of openmpt_could_open_propability() in the C API
+    under various constraints.
 
 ### libopenmpt 0.2-beta17 (2016-05-21)
 
