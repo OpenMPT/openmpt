@@ -2,14 +2,14 @@
  * libopenmpt_example_c_probe.c
  * ----------------------------
  * Purpose: libopenmpt C API probing example
- * Notes  : PortAudio is used for sound output.
+ * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 /*
  * Usage: libopenmpt_example_c_probe SOMEMODULE
- * Returns 0 on successfull probing.
+ * Returns 0 on successful probing.
  * Returns 1 on failed probing.
  * Returns 2 on error.
  */
