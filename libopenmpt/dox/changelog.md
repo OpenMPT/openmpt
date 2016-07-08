@@ -26,6 +26,7 @@ is just a high-level summary.
     platforms.
  *  [**Bug**] Fixed various problems found with clang 3.8 static analyzer,
     address sanitizer and undefined behaviour sanitizer.
+ *  [**Bug**] File header probing functionality was broken for most formats.
 
  *  Seeking in allsubsongs-mode now works correctly.
  *  openmpt123: Added subsong support.
