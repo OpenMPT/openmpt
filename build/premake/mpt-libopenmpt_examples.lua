@@ -124,3 +124,28 @@ end
    defines { "LIBOPENMPT_USE_DLL" }
   filter {}
 
+ project "libopenmpt_example_c_probe"
+  uuid "3fbc000d-2574-4a02-96ba-db82d7e7d7bb"
+  language "C"
+  location ( "../../build/" .. _ACTION )
+  objdir "../../build/obj/libopenmpt_example_c_probe"
+  dofile "../../build/premake/premake-defaults-EXE.lua"
+  dofile "../../build/premake/premake-defaults.lua"
+  includedirs {
+   "../..",
+   "../../include/portaudio/include",
+  }
+  files {
+   "../../examples/libopenmpt_example_c_probe.c",
+  }
+  characterset "Unicode"
+  flags { "Unicode" }
+  links { "libopenmpt", "zlib", "vorbis", "ogg" }
+  filter { "not configurations:*Shared", "not action:vs2008" }
+  links { "delayimp" }
+  linkoptions {
+  }
+  filter { "configurations:*Shared" }
+   defines { "LIBOPENMPT_USE_DLL" }
+  filter {}
+
