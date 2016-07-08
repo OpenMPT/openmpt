@@ -209,13 +209,7 @@ bool UnpackMMCMP(std::vector<char> &unpackedData, FileReader &file)
 	if(mmh.blktable > file.GetLength()) return false;
 	if(mmh.blktable + 4 * mmh.nblocks > file.GetLength()) return false;
 
-	try
-	{
-		unpackedData.resize(mmh.filesize);
-	} catch(MPTMemoryException)
-	{
-		return false;
-	}
+	unpackedData.resize(mmh.filesize);
 
 	for (uint32 nBlock=0; nBlock<mmh.nblocks; nBlock++)
 	{
@@ -776,9 +770,6 @@ bool UnpackXPK(std::vector<char> &unpackedData, FileReader &file)
 //
 
 
-static const uint32 PP20_PACKED_SIZE_MIN = 8;
-
-
 struct PPBITBUFFER
 {
 	uint32 bitcount;
@@ -877,9 +868,8 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
 	file.Rewind();
 	unpackedData.clear();
 
-	if(!Util::TypeCanHoldValue<uint32>(file.GetLength())) return false;
-	if(!file.CanRead(PP20_PACKED_SIZE_MIN)) return false;
 	if(!file.ReadMagic("PP20")) return false;
+	if(!file.CanRead(8)) return false;
 	uint8 efficiency[4];
 	file.ReadArray(efficiency);
 	if(efficiency[0] < 9 || efficiency[0] > 15
@@ -888,6 +878,7 @@ bool UnpackPP20(std::vector<char> &unpackedData, FileReader &file)
 		|| efficiency[3] < 9 || efficiency[3] > 15)
 		return false;
 	FileReader::off_t length = file.GetLength();
+	if(!Util::TypeCanHoldValue<uint32>(length)) return false;
 	// Length word must be aligned
 	if((length % 2u) != 0)
 		return false;
