@@ -85,6 +85,7 @@ newaction {
 
   postprocess_vs2008_main("build/vs2008/libopenmpt_test.vcproj")
   postprocess_vs2008_main("build/vs2008/openmpt123.vcproj")
+  postprocess_vs2008_main("build/vs2008/libopenmpt_example_c_probe.vcproj")
   postprocess_vs2008_main("build/vs2008/libopenmpt_example_c.vcproj")
   postprocess_vs2008_main("build/vs2008/libopenmpt_example_c_mem.vcproj")
   postprocess_vs2008_main("build/vs2008/libopenmpt_example_c_unsafe.vcproj")
@@ -93,6 +94,7 @@ newaction {
 
   postprocess_vs2010_main("build/vs2010/libopenmpt_test.vcxproj")
   postprocess_vs2010_main("build/vs2010/openmpt123.vcxproj")
+  postprocess_vs2010_main("build/vs2010/libopenmpt_example_c_probe.vcxproj")
   postprocess_vs2010_main("build/vs2010/libopenmpt_example_c.vcxproj")
   postprocess_vs2010_main("build/vs2010/libopenmpt_example_c_mem.vcxproj")
   postprocess_vs2010_main("build/vs2010/libopenmpt_example_c_unsafe.vcxproj")
@@ -104,6 +106,7 @@ newaction {
   
   postprocess_vs2010_main("build/vs2012/libopenmpt_test.vcxproj")
   postprocess_vs2010_main("build/vs2012/openmpt123.vcxproj")
+  postprocess_vs2010_main("build/vs2012/libopenmpt_example_c_probe.vcxproj")
   postprocess_vs2010_main("build/vs2012/libopenmpt_example_c.vcxproj")
   postprocess_vs2010_main("build/vs2012/libopenmpt_example_c_mem.vcxproj")
   postprocess_vs2010_main("build/vs2012/libopenmpt_example_c_unsafe.vcxproj")
@@ -115,6 +118,7 @@ newaction {
 	
   postprocess_vs2010_main("build/vs2013/libopenmpt_test.vcxproj")
   postprocess_vs2010_main("build/vs2013/openmpt123.vcxproj")
+  postprocess_vs2010_main("build/vs2013/libopenmpt_example_c_probe.vcxproj")
   postprocess_vs2010_main("build/vs2013/libopenmpt_example_c.vcxproj")
   postprocess_vs2010_main("build/vs2013/libopenmpt_example_c_mem.vcxproj")
   postprocess_vs2010_main("build/vs2013/libopenmpt_example_c_unsafe.vcxproj")
@@ -126,6 +130,7 @@ newaction {
 
   postprocess_vs2010_main("build/vs2015/libopenmpt_test.vcxproj")
   postprocess_vs2010_main("build/vs2015/openmpt123.vcxproj")
+  postprocess_vs2010_main("build/vs2015/libopenmpt_example_c_probe.vcxproj")
   postprocess_vs2010_main("build/vs2015/libopenmpt_example_c.vcxproj")
   postprocess_vs2010_main("build/vs2015/libopenmpt_example_c_mem.vcxproj")
   postprocess_vs2010_main("build/vs2015/libopenmpt_example_c_unsafe.vcxproj")
