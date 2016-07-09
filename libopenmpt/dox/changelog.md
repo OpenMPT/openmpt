@@ -18,6 +18,8 @@ is just a high-level summary.
     before 1.3.0 is broken beyond repair as it provides `assert.h` in the
     include path.
 
+ *  [**Bug**] Generated pkg-config file libopenmpt.pc by both `Makefile` and
+    Autotools build systems was totally broken.
  *  [**Bug**] libopenmpt no longer uses the non-thread-safe global std::rand()
     function.
  *  [**Bug**] Sample loops in GDM modules did not work when using Emscripten.
