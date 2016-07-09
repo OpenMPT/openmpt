@@ -347,11 +347,13 @@ else
 ifeq ($(UNAME_S),Linux)
 CPPFLAGS_DL := -DMPT_WITH_DL
 LDLIBS_DL   := -ldl
+PC_LIBS_DL := -ldl
 endif
 endif
 else
 CPPFLAGS_LTDL := -DMPT_WITH_LTDL
 LDLIBS_LTDL   := -lltdl
+PC_LIBS_LTDL := -lltdl
 endif
 
 ifeq ($(NO_ZLIB),1)
@@ -361,6 +363,7 @@ ifeq ($(shell pkg-config --exists zlib && echo yes),yes)
 CPPFLAGS_ZLIB := $(shell pkg-config --cflags-only-I zlib ) -DMPT_WITH_ZLIB
 LDFLAGS_ZLIB  := $(shell pkg-config --libs-only-L   zlib ) $(shell pkg-config --libs-only-other zlib )
 LDLIBS_ZLIB   := $(shell pkg-config --libs-only-l   zlib )
+PC_REQUIRES_ZLIB := zlib
 else
 NO_ZLIB:=1
 endif
@@ -373,6 +376,7 @@ ifeq ($(shell pkg-config --exists libmpg123 && echo yes),yes)
 CPPFLAGS_MPG123 := $(shell pkg-config --cflags-only-I libmpg123 ) -DMPT_WITH_MPG123
 LDFLAGS_MPG123  := $(shell pkg-config --libs-only-L   libmpg123 ) $(shell pkg-config --libs-only-other libmpg123 )
 LDLIBS_MPG123   := $(shell pkg-config --libs-only-l   libmpg123 )
+PC_REQUIRES_MPG123 := libmpg123
 else
 NO_MPG123:=1
 endif
@@ -385,6 +389,7 @@ ifeq ($(shell pkg-config --exists ogg && echo yes),yes)
 CPPFLAGS_OGG := $(shell pkg-config --cflags-only-I ogg ) -DMPT_WITH_OGG
 LDFLAGS_OGG  := $(shell pkg-config --libs-only-L   ogg ) $(shell pkg-config --libs-only-other ogg )
 LDLIBS_OGG   := $(shell pkg-config --libs-only-l   ogg )
+PC_REQUIRES_OGG := ogg
 else
 NO_OGG:=1
 endif
@@ -397,6 +402,7 @@ ifeq ($(shell pkg-config --exists vorbis && echo yes),yes)
 CPPFLAGS_VORBIS := $(shell pkg-config --cflags-only-I vorbis ) -DMPT_WITH_VORBIS
 LDFLAGS_VORBIS  := $(shell pkg-config --libs-only-L   vorbis ) $(shell pkg-config --libs-only-other vorbis )
 LDLIBS_VORBIS   := $(shell pkg-config --libs-only-l   vorbis )
+PC_REQUIRES_VORBIS := vorbis
 else
 NO_VORBIS:=1
 endif
@@ -409,6 +415,7 @@ ifeq ($(shell pkg-config --exists vorbisfile && echo yes),yes)
 CPPFLAGS_VORBISFILE := $(shell pkg-config --cflags-only-I vorbisfile ) -DMPT_WITH_VORBISFILE
 LDFLAGS_VORBISFILE  := $(shell pkg-config --libs-only-L   vorbisfile ) $(shell pkg-config --libs-only-other vorbisfile )
 LDLIBS_VORBISFILE   := $(shell pkg-config --libs-only-l   vorbisfile )
+PC_REQUIRES_VORBISFILE := vorbisfile
 else
 NO_VORBISFILE:=1
 endif
@@ -824,8 +831,9 @@ bin/libopenmpt.pc:
 	$(VERYSILENT)echo 'Name: libopenmpt' >> $@.tmp
 	$(VERYSILENT)echo 'Description: Tracker module player based on OpenMPT' >> $@.tmp
 	$(VERYSILENT)echo 'Version: $(DIST_LIBOPENMPT_VERSION)' >> $@.tmp
+	$(VERYSILENT)echo 'Requires.private: $(PC_REQUIRES_ZLIB) $(PC_REQUIRES_MPG123) $(PC_REQUIRES_OGG) $(PC_REQUIRES_VORBIS) $(PC_REQUIRES_VORBISFILE)' >> $@.tmp
 	$(VERYSILENT)echo 'Libs: -L$${libdir} -lopenmpt' >> $@.tmp
-	$(VERYSILENT)echo 'Libs.private: -lzlib -lmpg123 -logg -lvorbis -lvorbisfile' >> $@.tmp
+	$(VERYSILENT)echo 'Libs.private: $(PC_LIBS_DL) $(PC_LIBS_LTDL)' >> $@.tmp
 	$(VERYSILENT)echo 'Cflags: -I$${includedir}' >> $@.tmp
 	$(VERYSILENT)mv $@.tmp $@
 

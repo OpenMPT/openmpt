@@ -7,6 +7,8 @@ libdir=@libdir@
 Name: libopenmpt
 Description: Tracker module player based on OpenMPT
 Version: @VERSION@
+Requires.private: @LIBOPENMPT_REQUIRES_PRIVATE@
 Libs: -L${libdir} -lopenmpt
-Libs.private: zlib
+Libs.private: @LIBOPENMPT_LIBS_PRIVATE@
 Cflags: -I${includedir}
+
