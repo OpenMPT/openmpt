@@ -95,6 +95,19 @@
  * output by libopenmpt. Unless your platform has no floating point unit at all,
  * floating point will thus also be slightly faster.
  *
+ * \section libopenmpt_cpp_threads libopenmpt in multi-threaded environments
+ *
+ * - libopenmpt is tread-aware.
+ * - Individual libopenmpt objects are not thread-safe.
+ * - libopenmpt itself does not spawn any user-visible threads but may spawn
+ * threads for internal use.
+ * - You must ensure to only ever access a particular libopenmpt object via
+ * non-const member functions from a single thread at a time.
+ * - You may access a particular libopenmpt objects concurrently from different
+ * threads when using only const member functions from all threads.
+ * - Consecutive accesses can happen from different threads.
+ * - Different objects can be accessed concurrently from different threads.
+ *
  * \section libopenmpt-cpp-detailed Detailed documentation
  *
  * \ref libopenmpt_cpp
