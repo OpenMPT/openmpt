@@ -494,7 +494,13 @@ static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, O
 	if(numPatternsIllegal > numPatterns && sizeWithoutPatterns + numPatternsIllegal * numChannels * 256 == file.GetLength())
 	{
 		// Even those illegal pattern indexes (> 128) appear to be valid... What a weird file!
+		// e.g. NIETNU.MOD, where the end of the order list is filled with FF rather than 00, and the file actually contains 256 patterns.
 		numPatterns = numPatternsIllegal;
+	} else if(numPatternsIllegal >= 0xFF)
+	{
+		// Patterns FE and FF are used with S3M semantics (e.g. some MODs written with old OpenMPT versions)
+		Order.Replace(0xFE, Order.GetIgnoreIndex());
+		Order.Replace(0xFF, Order.GetInvalidPatIndex());
 	}
 
 	return numPatterns;
@@ -661,7 +667,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	file.ReadStruct(fileHeader);
 	file.Skip(4);	// Magic bytes (we already parsed these)
 
-	Order.ReadFromArray(fileHeader.orderList, CountOf(fileHeader.orderList), 0xFF, 0xFE);
+	Order.ReadFromArray(fileHeader.orderList, CountOf(fileHeader.orderList));
 
 	ORDERINDEX realOrders = fileHeader.numOrders;
 	if(realOrders > 128)
@@ -778,99 +784,96 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	// Reading patterns
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
-		if(pat < MAX_PATTERNS)
-		{
-			PATTERNINDEX actualPattern = pat;
+		PATTERNINDEX actualPattern = pat;
 
-			if(isFLT8)
+		if(isFLT8)
+		{
+			if((pat % 2u) == 0)
 			{
-				if((pat % 2u) == 0)
-				{
-					// Only create "even" patterns for FLT8 files
-					if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat / 2, 64))
-					{
-						file.Skip(readChannels * 64 * 4);
-						continue;
-					}
-				}
-				actualPattern /= 2;
-			} else
-			{
-				if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))
+				// Only create "even" patterns for FLT8 files
+				if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat / 2, 64))
 				{
 					file.Skip(readChannels * 64 * 4);
 					continue;
 				}
 			}
-
-			// For detecting PT1x mode
-			std::vector<ModCommand::INSTR> lastInstrument(GetNumChannels(), 0);
-			std::vector<int> instrWithoutNoteCount(GetNumChannels(), 0);
-
-			for(ROWINDEX row = 0; row < 64; row++)
+			actualPattern /= 2;
+		} else
+		{
+			if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))
 			{
-				// FLT8: either write to channel 1 to 4 (even patterns) or 5 to 8 (odd patterns).
-				PatternRow rowBase = Patterns[actualPattern].GetpModCommand(row, ((pat % 2u) == 0 || !isFLT8) ? 0 : 4);
+				file.Skip(readChannels * 64 * 4);
+				continue;
+			}
+		}
 
-				// If we have more than one Fxx command on this row and one can be interpreted as speed
-				// and the other as tempo, we can be rather sure that it is not a VBlank mod.
-				bool hasSpeedOnRow = false, hasTempoOnRow = false;
+		// For detecting PT1x mode
+		std::vector<ModCommand::INSTR> lastInstrument(GetNumChannels(), 0);
+		std::vector<int> instrWithoutNoteCount(GetNumChannels(), 0);
 
-				for(CHANNELINDEX chn = 0; chn < readChannels; chn++)
+		for(ROWINDEX row = 0; row < 64; row++)
+		{
+			// FLT8: either write to channel 1 to 4 (even patterns) or 5 to 8 (odd patterns).
+			PatternRow rowBase = Patterns[actualPattern].GetpModCommand(row, ((pat % 2u) == 0 || !isFLT8) ? 0 : 4);
+
+			// If we have more than one Fxx command on this row and one can be interpreted as speed
+			// and the other as tempo, we can be rather sure that it is not a VBlank mod.
+			bool hasSpeedOnRow = false, hasTempoOnRow = false;
+
+			for(CHANNELINDEX chn = 0; chn < readChannels; chn++)
+			{
+				ModCommand &m = rowBase[chn];
+				ReadMODPatternEntry(file, m);
+
+				if(m.command || m.param)
 				{
-					ModCommand &m = rowBase[chn];
-					ReadMODPatternEntry(file, m);
+					ConvertModCommand(m);
+				}
 
-					if(m.command || m.param)
+				// Perform some checks for our heuristics...
+				if(m.command == CMD_TEMPO)
+				{
+					hasTempoOnRow = true;
+					if(m.param < 100)
+						hasTempoCommands = true;
+				} else if(m.command == CMD_SPEED)
+				{
+					hasSpeedOnRow = true;
+				} else if(m.command == CMD_PATTERNBREAK && isNoiseTracker)
+				{
+					m.param = 0;
+				} else if(m.command == CMD_PANNING8 && fix7BitPanning)
+				{
+					// Fix MODs with 7-bit + surround panning
+					if(m.param == 0xA4)
 					{
-						ConvertModCommand(m);
-					}
-
-					// Perform some checks for our heuristics...
-					if(m.command == CMD_TEMPO)
+						m.command = CMD_S3MCMDEX;
+						m.param = 0x91;
+					} else
 					{
-						hasTempoOnRow = true;
-						if(m.param < 100)
-							hasTempoCommands = true;
-					} else if(m.command == CMD_SPEED)
-					{
-						hasSpeedOnRow = true;
-					} else if(m.command == CMD_PATTERNBREAK && isNoiseTracker)
-					{
-						m.param = 0;
-					} else if(m.command == CMD_PANNING8 && fix7BitPanning)
-					{
-						// Fix MODs with 7-bit + surround panning
-						if(m.param == 0xA4)
-						{
-							m.command = CMD_S3MCMDEX;
-							m.param = 0x91;
-						} else
-						{
-							m.param = MIN(m.param * 2, 0xFF);
-						}
-					}
-					if(m.note == NOTE_NONE && m.instr > 0 && !isFLT8)
-					{
-						if(lastInstrument[chn] > 0 && lastInstrument[chn] != m.instr)
-						{
-							// Arbitrary threshold for enabling sample swapping: 4 consecutive "sample swaps" in one pattern.
-							if(++instrWithoutNoteCount[chn] >= 4)
-							{
-								m_playBehaviour.set(kMODSampleSwap);
-							}
-						}
-					} else if(m.note != NOTE_NONE)
-					{
-						instrWithoutNoteCount[chn] = 0;
-					}
-					if(m.instr != 0)
-					{
-						lastInstrument[chn] = m.instr;
+						m.param = MIN(m.param * 2, 0xFF);
 					}
 				}
-				if(hasSpeedOnRow && hasTempoOnRow) definitelyCIA = true;
+				if(m.note == NOTE_NONE && m.instr > 0 && !isFLT8)
+				{
+					if(lastInstrument[chn] > 0 && lastInstrument[chn] != m.instr)
+					{
+						// Arbitrary threshold for enabling sample swapping: 4 consecutive "sample swaps" in one pattern.
+						if(++instrWithoutNoteCount[chn] >= 4)
+						{
+							m_playBehaviour.set(kMODSampleSwap);
+						}
+					}
+				} else if(m.note != NOTE_NONE)
+				{
+					instrWithoutNoteCount[chn] = 0;
+				}
+				if(m.instr != 0)
+				{
+					lastInstrument[chn] = m.instr;
+				}
 			}
+			if(hasSpeedOnRow && hasTempoOnRow) definitelyCIA = true;
 		}
 	}
 
@@ -988,10 +991,10 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	// In theory, sample and song names should only ever contain printable ASCII chars and null.
 	// However, there are quite a few SoundTracker modules in the wild with random
 	// characters. To still be able to distguish them from other formats, we just reject
-	// files with *too* many bogus characters. Arbitrary threshold: 32 bogus characters in total
-	// or more than 8 invalid characters just in the title alone.
+	// files with *too* many bogus characters. Arbitrary threshold: 20 bogus characters in total
+	// or more than 5 invalid characters just in the title alone.
 	uint32 invalidChars =  CountInvalidChars(songname);
-	if(invalidChars > 8 || !file.CanRead(sizeof(MODSampleHeader) * 15 + sizeof(MODFileHeader)))
+	if(invalidChars > 5 || !file.CanRead(sizeof(MODSampleHeader) * 15 + sizeof(MODFileHeader)))
 	{
 		return false;
 	}
@@ -1015,7 +1018,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		invalidChars += CountInvalidChars(sampleHeader.name);
 
 		// Sanity checks
-		if(invalidChars > 32
+		if(invalidChars > 20
 			|| sampleHeader.volume > 64
 			|| (sampleHeader.finetune >> 4) != 0
 			|| sampleHeader.length > 32768)
