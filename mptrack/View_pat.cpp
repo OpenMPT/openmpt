@@ -1416,8 +1416,8 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 	pSndFile = pModDoc->GetSoundFile();
 	m_MenuCursor = GetPositionFromPoint(pt);
 
-	// Right-click outside selection? Reposition cursor to the new location
-	if(!m_Selection.Contains(m_MenuCursor))
+	// Right-click outside single-point selection? Reposition cursor to the new location
+	if(!m_Selection.Contains(m_MenuCursor) && m_Selection.GetUpperLeft() == m_Selection.GetLowerRight())
 	{
 		if (pt.y > m_szHeader.cy)
 		{
