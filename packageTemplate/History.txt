@@ -26,6 +26,73 @@ Patch submitters:
    <ks>    coda       / Ken Snyder
 
 
+v1.26.03.00 (11 July 2016, revision 6609)
+-----------------------------------------
+General tab
+   [Fix] <js> Show scaled Dry / Wet ratio when Expanded Mix is enabled.
+
+Pattern tab
+   [Imp] <js> When jumping around in the song, update plugin parameters to their latest value.
+   [Imp] <js> Grey out add / duplicate / remove channel context menu entries when the maximum / minimum number of channels is reached (http://bugs.openmpt.org/view.php?id=820).
+   [Mod] <js> Right-clicking outside a selection no longer cancels the selection (http://bugs.openmpt.org/view.php?id=823).
+   [Fix] <js> Position Jump with Parameter Extension was not interpreted correctly if pattern loop was active (http://bugs.openmpt.org/view.php?id=806).
+   [Fix] <js> Clicking very quickly on the order list while it was not fully initialized yet could lead to a crash.
+   [Fix] <js> Pasting multiple patterns didn't update the pattern list in the tree view (http://bugs.openmpt.org/view.php?id=811).
+   [Fix] <js> After removing commands from patterns, their parameters could still show up in clipboard data.
+
+Pattern tab::Find/Replace
+   [Fix] <js> Manually entering hexadecimal parameters did not work (http://bugs.openmpt.org/view.php?id=825).
+
+Sample tab
+   [New] <js> Can now use any of OpenMPT's own filters for resampling (http://bugs.openmpt.org/view.php?id=740).
+
+Mod Conversion
+   [Imp] <js> Better handling of volume slide and portamento command memory when converting from IT / MPTM / S3M to XM.
+
+VST::Specific Plugin Fixes
+   [Fix] <js> VOPM no longer crashes randomly when pressing cancel in OPM import / export dialogs.
+
+VST::Plugin Bridge
+   [Mod] <js> Initialize COM for plugins that need it.
+
+MPTM
+   [Fix] <jh> Fix possible crash when saving modules with custom tunings after deleting instruments from the tree view.
+
+IT
+   [Fix] <js> IT-compatible auto-vibrato jumped very coarsely when being applied to high-pitched notes in non-linear mode.
+
+S3M
+   [Imp] <js> Warn when writing too much pattern or sample data when saving S3M files.
+
+MOD
+   [Mod] <js> Allow MOD files with 1 to 3 channels to be created.
+   [Fix] <js> MOD files with more than 128 patterns were not loaded correctly (e.g. NIETNU.MOD).
+
+Other formats
+   [Fix] <js> GDM: Some pattern commands were not imported properly since OpenMPT 1.20.
+   [Fix] <js> MT2: Fix some modules with "modern" tempo interpretation.
+   [Fix] <js> MDL: Pattern import was broken for all but the first pattern.
+   [Fix] <js> MTM: Vibrato depth is approximately half as deep as in MOD.
+   [Fix] <js> Tighten SoundTracker heuristics to reject more non-module files (e.g. SNES SPC and MP3 files).
+
+Stream Export
+   [Imp] <js> Show which sample / instrument / channel is being exported (http://bugs.openmpt.org/view.php?id=808).
+   [Imp] <js> Do not export sampless and instruments that only appear on muted channels in instrument export mode (http://bugs.openmpt.org/view.php?id=808).
+   [Fix] <js> Do not export muted samples and instruments in instrument export mode (http://bugs.openmpt.org/view.php?id=808).
+   [Fix] <jh> Exported Ogg and Opus streams almost always had the same serial number.
+
+Audio I/O
+   [Imp] <jh> Allow setting the priority (XP) or MMCSS class (Vista) used for boosting the sound device thread. The hidden options and defaults are "Sound Settings.BoostedThreadPriority" (2) and "Sound Settings.BoostedThreadMMCSSClass" (Pro Audio) (http://forum.openmpt.org/index.php?topic=5655.0).
+
+Misc
+   [New] <jh> Allow setting the process priority class through hidden setting "Misc.ProcessPriorityClass" (default is "normal", http://forum.openmpt.org/index.php?topic=5655.0).
+   [Mod] <js> Finally completely deprecate MPT 1.16 mix mode and only show it for legacy modules.
+   [Fix] <jh> Some input dialogs were not sized correctly when using the build for old Windows versions (http://bugs.openmpt.org/view.php?id=810).
+
+Third-Party Libraries
+   [Mod] Update opusfile (v0.8) and UnRAR (v5.4.2).
+
+
 v1.26.02.00 (22 May 2016, revision 6410)
 ----------------------------------------
 Audio I/O
@@ -1166,7 +1233,7 @@ Stream Export
 
 Audio I/O
    [New] <jh> Add an alternate (1-bit) dithering algorithm. Default is still the original ModPlug Tracker dither (0.5-bit).
-   [Mod] <js> Since Windows Vista, there is an unpleasant limiter / compressor in the audio path for floating-point audio APIs with non-exclusive access. OpenMPT clips floating-point samples automatically to prevent this limiter from kicking in when necessary.
+   [Mod] <jh> Since Windows Vista, there is an unpleasant limiter / compressor in the audio path for floating-point audio APIs with non-exclusive access. OpenMPT clips floating-point samples automatically to prevent this limiter from kicking in when necessary.
    [Imp] <jh> Sound device settings are now remembered per device.
    [Imp] <jh> Added options to open the sound device right at the program start and keep playing silence when stopping sound (useful for ASIO drivers with long initialization times).
    [Imp] <jh> Various improvements to sound device latency handling and ASIO buffer size selection.

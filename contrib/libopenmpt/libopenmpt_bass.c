@@ -30,8 +30,8 @@ DWORD CALLBACK StreamProc(HSTREAM handle, void *buffer, DWORD length, void *user
 {
 	// length is in bytes, but libopenmpt wants samples => divide by number of channels (2) and size of a sample (float = 4)
 	// same for return value.
-	size_t count = openmpt_module_read_interleaved_float_stereo( (openmpt_module *)user, SAMPLERATE, length / 8, (float *)buffer );
-	count *= 8;
+	size_t count = openmpt_module_read_interleaved_float_stereo( (openmpt_module *)user, SAMPLERATE, length / (2 * sizeof(float)), (float *)buffer );
+	count *= (2 * sizeof(float));
 	// Reached end of stream?
 	if(count < length) count |= BASS_STREAMPROC_END;
 	return (DWORD)count;

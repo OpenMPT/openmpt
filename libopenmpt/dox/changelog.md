@@ -34,7 +34,9 @@ is just a high-level summary.
 
  *  Seeking in allsubsongs-mode now works correctly.
  *  openmpt123: Added subsong support.
- *  Various playback fixes for 669 files.
+ *  Various playback fixes for 669, IT, MT2 and MTM files.
+ *  Some MOD files with more than 128 patterns (e.g. NIETNU.MOD) were not loaded
+    correctly.
  *  A new example `libopenmpt_example_c_probe` has been added which demonstrates
     the usage and flexibility of openmpt_could_open_propability() in the C API
     under various constraints.
