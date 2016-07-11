@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt svn
+### libopenmpt 0.2-beta18 (2016-07-11)
 
  *  [**Change**] openmpt123: Add PulseAudio output support. Autotools and
     `Makefile` build systems now depend on `libpulse` and `libpulse-simple` by
