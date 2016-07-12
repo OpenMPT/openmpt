@@ -21,10 +21,13 @@ echo 'int main() { return 0; }' >> bin/headercheck.c
 cc             -pedantic -Wall -Wextra                        -Werror -I. bin/headercheck.c -o bin/headercheck.cc.out
 cc    -std=c89 -pedantic -Wall -Wextra                        -Werror -I. bin/headercheck.c -o bin/headercheck.cc89.out
 cc    -std=c99 -pedantic -Wall -Wextra                        -Werror -I. bin/headercheck.c -o bin/headercheck.cc99.out
+cc    -std=c11 -pedantic -Wall -Wextra                        -Werror -I. bin/headercheck.c -o bin/headercheck.cc11.out
 gcc   -std=c89 -pedantic -Wall -Wextra                        -Werror -I. bin/headercheck.c -o bin/headercheck.gcc89.out
 gcc   -std=c99 -pedantic -Wall -Wextra                        -Werror -I. bin/headercheck.c -o bin/headercheck.gcc99.out
+gcc   -std=c11 -pedantic -Wall -Wextra                        -Werror -I. bin/headercheck.c -o bin/headercheck.gcc11.out
 clang -std=c89 -pedantic -Wall -Wextra -Wpedantic             -Werror -I. bin/headercheck.c -o bin/headercheck.clang89.out
 clang -std=c99 -pedantic -Wall -Wextra -Wpedantic             -Werror -I. bin/headercheck.c -o bin/headercheck.clang99.out
+clang -std=c11 -pedantic -Wall -Wextra -Wpedantic             -Werror -I. bin/headercheck.c -o bin/headercheck.clang11.out
 tcc                      -Wall -Wunusupported -Wwrite-strings -Werror -I. bin/headercheck.c -o bin/headercheck.tcc.out
 rm bin/headercheck.*.out
 rm bin/headercheck.c
@@ -35,10 +38,13 @@ echo 'int main() { return 0; }' >> bin/headercheck.cpp
 c++                -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp.out       -DLIBOPENMPT_ANCIENT_COMPILER_STDINT
 c++     -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp98.out     -DLIBOPENMPT_ANCIENT_COMPILER_STDINT
 c++     -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp11.out
+c++     -std=c++14 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp14.out
 g++     -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp98.out     -DLIBOPENMPT_ANCIENT_COMPILER_STDINT
 g++     -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp11.out
+g++     -std=c++14 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp14.out
 clang++ -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp98.out -DLIBOPENMPT_ANCIENT_COMPILER_STDINT
 clang++ -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp11.out
+clang++ -std=c++14 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp14.out
 rm bin/headercheck.*.out
 rm bin/headercheck.cpp
 
