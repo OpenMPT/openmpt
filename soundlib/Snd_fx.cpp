@@ -1246,6 +1246,13 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, uint32 instr, bool bPorta, b
 		}
 	}
 
+	if(returnAfterVolumeAdjust && sampleChanged && m_playBehaviour[kMODSampleSwap] && pSmp != nullptr)
+	{
+		// ProTracker applies new instrument's finetune but keeps the old sample playing.
+		// Test case: PortaSwapPT.mod
+		pChn->nFineTune = pSmp->nFineTune;
+	}
+
 	if(returnAfterVolumeAdjust) return;
 
 
@@ -2593,7 +2600,14 @@ bool CSoundFile::ProcessEffects()
 				InstrumentChange(pChn, instr, bPorta, true);
 				// IT compatibility: Keep new instrument number for next instrument-less note even if sample playback is stopped
 				// Test case: StoppedInstrSwap.it
-				if(!m_playBehaviour[kITInstrWithNoteOff] || ModCommand::IsNote(note)) pChn->nNewIns = 0;
+				if(GetType() == MOD_TYPE_MOD)
+				{
+					// Test case: PortaSwapPT.mod
+					if(!bPorta || !m_playBehaviour[kMODSampleSwap]) pChn->nNewIns = 0;
+				} else
+				{
+					if(!m_playBehaviour[kITInstrWithNoteOff] || ModCommand::IsNote(note)) pChn->nNewIns = 0;
+				}
 
 				if(m_playBehaviour[kITPortamentoSwapResetsPos])
 				{
