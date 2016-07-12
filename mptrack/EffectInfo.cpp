@@ -766,7 +766,8 @@ bool EffectInfo::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param, CHANNELIND
 					{
 						switch(param & 0xF0)
 						{
-						case 0x10:
+						case 0x00:
+							// Filter
 							if(param & 1)
 								_tcscpy(s, _T("off"));
 							else
