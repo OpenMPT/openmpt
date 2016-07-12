@@ -130,9 +130,9 @@ class LIBOPENMPT_CXX_API exception : public std::exception {
 private:
 	char * text;
 public:
-	exception( const std::string & text ) throw();
-	virtual ~exception() throw();
-	virtual const char * what() const throw();
+	exception( const std::string & text ) LIBOPENMPT_NOEXCEPT;
+	virtual ~exception() LIBOPENMPT_NOEXCEPT;
+	virtual const char * what() const LIBOPENMPT_NOEXCEPT;
 }; // class exception
 
 //! Get the libopenmpt version number

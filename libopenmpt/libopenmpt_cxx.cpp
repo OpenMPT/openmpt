@@ -21,7 +21,7 @@
 
 namespace openmpt {
 
-exception::exception( const std::string & text ) throw()
+exception::exception( const std::string & text ) LIBOPENMPT_NOEXCEPT
 	: std::exception()
 	, text(0)
 {
@@ -31,14 +31,14 @@ exception::exception( const std::string & text ) throw()
 	}
 }
 
-exception::~exception() throw() {
+exception::~exception() LIBOPENMPT_NOEXCEPT {
 	if ( text ) {
 		std::free( text );
 		text = 0;
 	}
 }
 
-const char * exception::what() const throw() {
+const char * exception::what() const LIBOPENMPT_NOEXCEPT {
 	if ( text ) {
 		return text;
 	} else {
