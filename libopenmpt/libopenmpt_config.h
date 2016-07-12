@@ -112,9 +112,16 @@
 /* handle known broken compilers here by defining LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED appropriately */
 #endif
 
+#ifndef LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT
+/* handle known broken compilers here by defining LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT appropriately */
+#endif
+
 #if defined(LIBOPENMPT_ASSUME_CPLUSPLUS)
 #ifndef LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED
 #define LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED LIBOPENMPT_ASSUME_CPLUSPLUS
+#endif
+#ifndef LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT
+#define LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT LIBOPENMPT_ASSUME_CPLUSPLUS
 #endif
 #endif
 
@@ -209,6 +216,20 @@ LIBOPENMPT_DEPRECATED static const int LIBOPENMPT_DEPRECATED_STRING_CONSTANT = 0
 #endif
 #ifndef __cplusplus
 #define LIBOPENMPT_DEPRECATED_STRING( str ) str
+#endif
+#endif
+
+#ifdef __cplusplus
+#if defined(LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT)
+#if (LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT >= 201103L)
+#define LIBOPENMPT_NOEXCEPT noexcept
+#else
+#define LIBOPENMPT_NOEXCEPT throw()
+#endif
+#elif (__cplusplus >= 201103L)
+#define LIBOPENMPT_NOEXCEPT noexcept
+#else
+#define LIBOPENMPT_NOEXCEPT throw()
 #endif
 #endif
 

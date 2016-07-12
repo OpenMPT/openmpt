@@ -9,6 +9,11 @@ is just a high-level summary.
 
  *  [**Change**] libopenmpt now uses C++14 `[[deprecated]]` attribute instead
     of compiler-specific solutions when appropriate.
+ *  [**Change**] libopenmpt C++ header now uses C++11 `noexcept` instead of
+    C++98 `throw()` exception specification when supported. `throw()` is
+    deprecated since C++11. This does not change API or ABI as they are
+    equivalent. Use `LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT` to override the
+    default.
 
  *  The public libopenmpt C++ header has auto-detection logics for the used C++
     standard now. I case your client code compiler misreports the standard
