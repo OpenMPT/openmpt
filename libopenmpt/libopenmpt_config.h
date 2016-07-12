@@ -106,6 +106,20 @@
   @}
 */
 
+#ifdef __cplusplus
+
+#ifndef LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED
+/* handle known broken compilers here by defining LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED appropriately */
+#endif
+
+#if defined(LIBOPENMPT_ASSUME_CPLUSPLUS)
+#ifndef LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED
+#define LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED LIBOPENMPT_ASSUME_CPLUSPLUS
+#endif
+#endif
+
+#endif
+
 #if defined(_MSC_VER)
 #if (_MSC_VER >= 1500) && (_MSC_VER < 1600)
 #ifndef LIBOPENMPT_ANCIENT_COMPILER
@@ -167,12 +181,32 @@ typedef uint64_t uint64_t;
 #else
 #define LIBOPENMPT_DEPRECATED
 #endif
+#ifdef __cplusplus
+#if defined(LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED)
+#if (LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED >= 201402L)
+#define LIBOPENMPT_ATTR_DEPRECATED [[deprecated]]
+#undef LIBOPENMPT_DEPRECATED
+#define LIBOPENMPT_DEPRECATED
+#else
+#define LIBOPENMPT_ATTR_DEPRECATED
+#endif
+#elif (__cplusplus >= 201402L)
+#define LIBOPENMPT_ATTR_DEPRECATED [[deprecated]]
+#undef LIBOPENMPT_DEPRECATED
+#define LIBOPENMPT_DEPRECATED
+#else
+#define LIBOPENMPT_ATTR_DEPRECATED
+#endif
+#endif
 #ifndef __cplusplus
 LIBOPENMPT_DEPRECATED static const int LIBOPENMPT_DEPRECATED_STRING_CONSTANT = 0;
 #define LIBOPENMPT_DEPRECATED_STRING( str ) ( LIBOPENMPT_DEPRECATED_STRING_CONSTANT ? ( str ) : ( str ) )
 #endif
 #else
 #define LIBOPENMPT_DEPRECATED
+#ifdef __cplusplus
+#define LIBOPENMPT_ATTR_DEPRECATED
+#endif
 #ifndef __cplusplus
 #define LIBOPENMPT_DEPRECATED_STRING( str ) str
 #endif
