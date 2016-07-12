@@ -7,6 +7,17 @@ is just a high-level summary.
 
 ### libopenmpt svn
 
+ *  [**Change**] libopenmpt now uses C++14 `[[deprecated]]` attribute instead
+    of compiler-specific solutions when appropriate.
+
+ *  The public libopenmpt C++ header has auto-detection logics for the used C++
+    standard now. I case your client code compiler misreports the standard
+    version or you want to override it for other reasons,
+    `#define LIBOPENMPT_ASSUME_CPLUSPLUS` to the value of the standard version
+    you desire to be used. There is also a macro for each individual aspect,
+    like `LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED` which takes precedence over
+    the genreal macro.
+
 ### libopenmpt 0.2-beta18 (2016-07-11)
 
  *  [**Change**] openmpt123: Add PulseAudio output support. Autotools and
