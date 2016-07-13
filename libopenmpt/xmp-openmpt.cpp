@@ -30,6 +30,9 @@
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif
+#ifndef _SCL_SECURE_NO_WARNINGS
+#define _SCL_SECURE_NO_WARNINGS
+#endif
 #endif // _MSC_VER
 
 #define LIBOPENMPT_EXT_IS_EXPERIMENTAL
@@ -43,6 +46,7 @@
 #include "libopenmpt.hpp"
 #include "libopenmpt_ext.hpp"
 #ifdef LIBOPENMPT_QUIRK_NO_CSTDINT
+#include <stdint.h>
 namespace std {
 typedef ::int8_t   int8_t;
 typedef ::int16_t  int16_t;
