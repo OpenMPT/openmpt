@@ -1150,6 +1150,7 @@
 #define ID_NEXTVSTPRESET                36030
 #define ID_VSTPRESETBACKWARDJUMP        36031
 #define ID_VSTPRESETFORWARDJUMP         36032
+#define ID_VSTPRESETNAME                36033
 #define ID_SELECTINST                   36100
 // From here: Command range [ID_SELECTINST, ID_SELECTINST + MAX_INSTRUMENTS]
 #define ID_PLUG_RECORDAUTOMATION        37003

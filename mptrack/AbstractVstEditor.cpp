@@ -60,6 +60,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_COMMAND(ID_NEXTVSTPRESET,		OnSetNextVSTPreset)
 	ON_COMMAND(ID_VSTPRESETBACKWARDJUMP,OnVSTPresetBackwardJump)
 	ON_COMMAND(ID_VSTPRESETFORWARDJUMP,	OnVSTPresetForwardJump)
+	ON_COMMAND(ID_VSTPRESETNAME,		OnVSTPresetRename)
 	ON_COMMAND(ID_PLUGINTOINSTRUMENT,	OnCreateInstrument)
 	ON_COMMAND_RANGE(ID_PRESET_SET, ID_PRESET_SET + PRESETS_PER_GROUP, OnSetPreset)
 	ON_MESSAGE(WM_MOD_MIDIMSG,		OnMidiMsg)
@@ -352,12 +353,12 @@ void CAbstractVstEditor::UpdatePresetField()
 			m_Menu.AppendMenu(MF_BYPOSITION, ID_PREVIOUSVSTPRESET, _T("<"));
 			m_Menu.AppendMenu(MF_BYPOSITION, ID_NEXTVSTPRESET, _T(">"));
 			m_Menu.AppendMenu(MF_BYPOSITION, ID_VSTPRESETFORWARDJUMP, _T(">>"));
-			m_Menu.AppendMenu(MF_BYPOSITION|MF_DISABLED, 0, _T(""));
+			m_Menu.AppendMenu(MF_BYPOSITION|MF_DISABLED, ID_VSTPRESETNAME, _T(""));
 		}
 
 		CString programName = m_VstPlugin.GetFormattedProgramName(m_VstPlugin.GetCurrentProgram());
 		programName.Replace("&", "&&");
-		m_Menu.ModifyMenu(8, MF_BYPOSITION, 0, programName);
+		m_Menu.ModifyMenu(8, MF_BYPOSITION, ID_VSTPRESETNAME, programName);
 	}
 
 	DrawMenuBar();
@@ -412,6 +413,20 @@ void CAbstractVstEditor::SetPreset(int32 preset)
 		{
 			m_VstPlugin.GetModDoc()->SetModified();
 		}
+	}
+}
+
+
+void CAbstractVstEditor::OnVSTPresetRename()
+//------------------------------------------
+{
+	if(m_VstPlugin.GetCurrentProgram() >= m_VstPlugin.GetNumPrograms())
+		return;
+	CInputDlg dlg(this, _T("New program name:"), m_VstPlugin.GetCurrentProgramName());
+	if(dlg.DoModal() == IDOK)
+	{
+		m_VstPlugin.SetCurrentProgramName(dlg.resultAsString);
+		UpdatePresetField();
 	}
 }
 
