@@ -66,6 +66,7 @@ public:
 	afx_msg void OnSetNextVSTPreset();
 	afx_msg void OnVSTPresetBackwardJump();
 	afx_msg void OnVSTPresetForwardJump();
+	afx_msg void OnVSTPresetRename();
 	afx_msg void OnCreateInstrument();
 	afx_msg void OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hMenu);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
