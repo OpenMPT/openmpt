@@ -193,21 +193,28 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 	for(uint32 i = 0; i < fileHeader.nameCount && file.CanRead(4); i++)
 	{
 		names.push_back(ReadUMXNameTableEntry(file, fileHeader.packageVersion));
-		if(names.back() == "music")
-			hasContent = true;
+		if(names.back() == "music"
 #ifdef MPT_IMPORT_UAX
-		else if(names.back() == "sound")
-			hasContent = true;
+			|| names.back() == "sound"
 #endif // MPT_IMPORT_UAX
+			)
+		{
+			// Note that this can be a false positive, e.g. Unreal maps will have music and sound
+			// in their name table because they usually import such files. However, it spares us
+			// from wildly seeking through the file, as the name table is usually right at the
+			// start of the file, so it is hopefully a good enough heuristic for our purposes.
+			if(loadFlags == onlyVerifyHeader)
+			{
+				return true;
+			}
+			hasContent = true;
+		}
 	}
 
 	// No music or sounds in this file
 	if(!hasContent)
 	{
 		return false;
-	} else if(loadFlags == onlyVerifyHeader)
-	{
-		return true;
 	}
 
 	// Read import table
