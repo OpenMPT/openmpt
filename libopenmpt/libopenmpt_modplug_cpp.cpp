@@ -315,7 +315,7 @@ UINT CSoundFile::GetCurrentPos() const {
 	return 0;
 }
 
-static std::int32_t get_filter_length() {
+static int get_filter_length() {
 	mpcpplog();
 	if ( ( CSoundFile::gdwSoundSetup & (SNDMIX_HQRESAMPLER|SNDMIX_ULTRAHQSRCMODE) ) == (SNDMIX_HQRESAMPLER|SNDMIX_ULTRAHQSRCMODE) ) {
 		return 8;
@@ -340,7 +340,7 @@ static std::size_t get_frame_size() {
 	return get_sample_size() * get_num_channels();
 }
 
-static std::int32_t get_samplerate() {
+static int get_samplerate() {
 	return CSoundFile::gdwMixingFreq;
 }
 
@@ -372,8 +372,8 @@ UINT CSoundFile::Read( LPVOID lpBuffer, UINT cbBuffer ) {
 	mpcpplog();
 	std::memset( lpBuffer, 0, cbBuffer );
 	const std::size_t frames_torender = cbBuffer / get_frame_size();
-	std::int16_t * out = reinterpret_cast<std::int16_t*>( lpBuffer );
-	std::vector<std::int16_t> tmpbuf;
+	short * out = reinterpret_cast<short*>( lpBuffer );
+	std::vector<short> tmpbuf;
 	if ( get_sample_size() == 1 || get_sample_size() == 4 ) {
 		tmpbuf.resize( frames_torender * get_num_channels() );
 		out = &tmpbuf[0];
@@ -390,12 +390,12 @@ UINT CSoundFile::Read( LPVOID lpBuffer, UINT cbBuffer ) {
 	}
 
 	if ( get_sample_size() == 1 ) {
-		std::uint8_t * dst = reinterpret_cast<std::uint8_t*>( lpBuffer );
+		unsigned char * dst = reinterpret_cast<unsigned char*>( lpBuffer );
 		for ( std::size_t sample = 0; sample < frames_rendered * get_num_channels(); ++sample ) {
 			dst[sample] = ( tmpbuf[sample] / 0x100 ) + 0x80;
 		}
 	} else if ( get_sample_size() == 4 ) {
-		std::int32_t * dst = reinterpret_cast<std::int32_t*>( lpBuffer );
+		int * dst = reinterpret_cast<int*>( lpBuffer );
 		for ( std::size_t sample = 0; sample < frames_rendered * get_num_channels(); ++sample ) {
 			dst[sample] = tmpbuf[sample] << (32-16-1-MIXING_ATTENUATION);
 		}

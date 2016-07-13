@@ -14,14 +14,24 @@ is just a high-level summary.
     deprecated since C++11. This does not change API or ABI as they are
     equivalent. Use `LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT` to override the
     default.
+ *  [**Change**] The preprocessor macro `LIBOPENMPT_ANCIENT_COMPILER_STDINT` is
+    gone. Please use `LIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT instead`.
+    Additionally, the typedefs moved from illegal namespace ::std into somewhat
+    less dangerous namespace ::openmpt::std. You can test
+    `#ifdef LIBOPENMPT_QUIRK_NO_CSTDINT` client-side to check whether
+    `libopenmpt.hpp` used the non-standard types. (Note: Of all supported
+    compilers, this change only affects the 3 compilers with only limited
+    support: MSVC 2008, GCC 4.1, GCC 4.2.)
 
- *  The public libopenmpt C++ header has auto-detection logics for the used C++
-    standard now. I case your client code compiler misreports the standard
+ *  The public libopenmpt C++ header has auto-detection logic for the used C++
+    standard now. In case your client code compiler misreports the standard
     version or you want to override it for other reasons,
     `#define LIBOPENMPT_ASSUME_CPLUSPLUS` to the value of the standard version
     you desire to be used. There is also a macro for each individual aspect,
-    like `LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED` which takes precedence over
-    the genreal macro.
+    like `LIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT`,
+    `LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED`,
+    `LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT` which take precedence over the
+    general macro.
 
 ### libopenmpt 0.2-beta18 (2016-07-11)
 

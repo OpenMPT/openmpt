@@ -106,58 +106,8 @@
   @}
 */
 
-#ifdef __cplusplus
 
-#ifndef LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED
-/* handle known broken compilers here by defining LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED appropriately */
-#endif
-
-#ifndef LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT
-/* handle known broken compilers here by defining LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT appropriately */
-#endif
-
-#if defined(LIBOPENMPT_ASSUME_CPLUSPLUS)
-#ifndef LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED
-#define LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED LIBOPENMPT_ASSUME_CPLUSPLUS
-#endif
-#ifndef LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT
-#define LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT LIBOPENMPT_ASSUME_CPLUSPLUS
-#endif
-#endif
-
-#endif
-
-#if defined(_MSC_VER)
-#if (_MSC_VER >= 1500) && (_MSC_VER < 1600)
-#ifndef LIBOPENMPT_ANCIENT_COMPILER_STDINT
-#define LIBOPENMPT_ANCIENT_COMPILER_STDINT
-#endif
-#endif
-#endif
-
-#if defined(__GNUC__) && !defined(__clang__)
-#if (__GNUC__*10000 + __GNUC_MINOR__*100 + __GNUC_PATCHLEVEL__*1 < 40300)
-#ifndef LIBOPENMPT_ANCIENT_COMPILER_STDINT
-#define LIBOPENMPT_ANCIENT_COMPILER_STDINT
-#endif
-#endif
-#endif
-
-#ifdef __cplusplus
-#ifdef LIBOPENMPT_ANCIENT_COMPILER_STDINT
-#include <stdint.h>
-namespace std {
-typedef int8_t   int8_t;
-typedef int16_t  int16_t;
-typedef int32_t  int32_t;
-typedef int64_t  int64_t;
-typedef uint8_t  uint8_t;
-typedef uint16_t uint16_t;
-typedef uint32_t uint32_t;
-typedef uint64_t uint64_t;
-}
-#endif
-#endif
+/* C */
 
 #if !defined(LIBOPENMPT_NO_DEPRECATE)
 #if defined(__clang__)
@@ -169,7 +119,71 @@ typedef uint64_t uint64_t;
 #else
 #define LIBOPENMPT_DEPRECATED
 #endif
+#endif
+
+#ifndef __cplusplus
+#if !defined(LIBOPENMPT_NO_DEPRECATE)
+LIBOPENMPT_DEPRECATED static const int LIBOPENMPT_DEPRECATED_STRING_CONSTANT = 0;
+#define LIBOPENMPT_DEPRECATED_STRING( str ) ( LIBOPENMPT_DEPRECATED_STRING_CONSTANT ? ( str ) : ( str ) )
+#else
+#define LIBOPENMPT_DEPRECATED_STRING( str ) str
+#endif
+#endif
+
+
+/* C++ */
+
 #ifdef __cplusplus
+
+#ifndef LIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT
+/* handle known broken compilers here by defining LIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT appropriately */
+/* Note: We force the known compilers to C++11 here in order to retain compatibility with libopenmpt <= 0.2.661-beta18. */
+#if defined(__clang__)
+#define LIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT 201103L
+#elif defined(_MSC_VER)
+#if (_MSC_VER >= 1600)
+#define LIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT 201103L
+#else
+#define LIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT 199711L
+#endif
+#elif defined(__GNUC__)
+#if (__GNUC__*10000 + __GNUC_MINOR__*100 + __GNUC_PATCHLEVEL__*1 < 40300)
+#define LIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT 199711L
+#else
+#define LIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT 201103L
+#endif
+#endif
+#endif
+
+#ifndef LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED
+/* handle known broken compilers here by defining LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED appropriately */
+#endif
+
+#ifndef LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT
+/* handle known broken compilers here by defining LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT appropriately */
+#endif
+
+#if defined(LIBOPENMPT_ASSUME_CPLUSPLUS)
+#ifndef LIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT
+#define LIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT LIBOPENMPT_ASSUME_CPLUSPLUS
+#endif
+#ifndef LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED
+#define LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED LIBOPENMPT_ASSUME_CPLUSPLUS
+#endif
+#ifndef LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT
+#define LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT LIBOPENMPT_ASSUME_CPLUSPLUS
+#endif
+#endif
+
+#if defined(LIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT)
+#if (LIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT < 201103L)
+#define LIBOPENMPT_QUIRK_NO_CSTDINT
+#endif
+#elif (__cplusplus < 201103L)
+#define LIBOPENMPT_QUIRK_NO_CSTDINT
+#endif
+
+#if !defined(LIBOPENMPT_NO_DEPRECATE)
 #if defined(LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED)
 #if (LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED >= 201402L)
 #define LIBOPENMPT_ATTR_DEPRECATED [[deprecated]]
@@ -185,22 +199,12 @@ typedef uint64_t uint64_t;
 #else
 #define LIBOPENMPT_ATTR_DEPRECATED
 #endif
-#endif
-#ifndef __cplusplus
-LIBOPENMPT_DEPRECATED static const int LIBOPENMPT_DEPRECATED_STRING_CONSTANT = 0;
-#define LIBOPENMPT_DEPRECATED_STRING( str ) ( LIBOPENMPT_DEPRECATED_STRING_CONSTANT ? ( str ) : ( str ) )
-#endif
 #else
+#undef LIBOPENMPT_DEPRECATED
 #define LIBOPENMPT_DEPRECATED
-#ifdef __cplusplus
 #define LIBOPENMPT_ATTR_DEPRECATED
 #endif
-#ifndef __cplusplus
-#define LIBOPENMPT_DEPRECATED_STRING( str ) str
-#endif
-#endif
 
-#ifdef __cplusplus
 #if defined(LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT)
 #if (LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT >= 201103L)
 #define LIBOPENMPT_NOEXCEPT noexcept
@@ -212,7 +216,9 @@ LIBOPENMPT_DEPRECATED static const int LIBOPENMPT_DEPRECATED_STRING_CONSTANT = 0
 #else
 #define LIBOPENMPT_NOEXCEPT throw()
 #endif
+
 #endif
+
 
 #include "libopenmpt_version.h"
 
