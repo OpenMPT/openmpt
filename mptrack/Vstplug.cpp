@@ -750,10 +750,10 @@ VstIntPtr CVstPlugin::VstFileSelector(bool destructor, VstFileSelect *fileSel)
 				const std::string dir = dlg.GetDirectory().ToLocale();
 				if(CCONST('V', 'S', 'T', 'r') == GetUID() && fileSel->returnPath != nullptr && fileSel->sizeReturnPath == 0)
 				{
-					// old versions of reViSiT (which still relied on the host's file selection code) seem to be dodgy.
+					// Old versions of reViSiT (which still relied on the host's file selector) seem to be dodgy.
 					// They report a path size of 0, but when using an own buffer, they will crash.
 					// So we'll just assume that reViSiT can handle long enough (_MAX_PATH) paths here.
-					fileSel->sizeReturnPath = dir.length() + 1;
+					fileSel->sizeReturnPath = mpt::saturate_cast<VstInt32>(dir.length() + 1);
 					fileSel->returnPath[fileSel->sizeReturnPath - 1] = '\0';
 				}
 				if(fileSel->returnPath == nullptr || fileSel->sizeReturnPath == 0)
@@ -865,19 +865,27 @@ void CVstPlugin::Initialize()
 			{
 			case 0:
 				sa.speakers[i].type = kSpeakerL;
-				vst_strncpy(sa.speakers[i].name, "Left", kVstMaxNameLen - 1);
+				mpt::String::Copy(sa.speakers[i].name, "Left");
 				break;
 			case 1:
 				sa.speakers[i].type = kSpeakerR;
-				vst_strncpy(sa.speakers[i].name, "Right", kVstMaxNameLen - 1);
+				mpt::String::Copy(sa.speakers[i].name, "Right");
 				break;
 			default:
 				sa.speakers[i].type = kSpeakerUndefined;
 				break;
 			}
 		}
-		// For now, input setup = output setup.
-		Dispatch(effSetSpeakerArrangement, 0, ToVstPtr(&sa), &sa, 0.0f);
+
+		// For some reason, this call crashes in a call to free() in AdmiralQuality NaiveLPF / SCAMP 1.2 (newer versions are fine).
+		// This does not happen when running the plugin in pretty much any host, or when running in OpenMPT 1.22 and older
+		// (EXCEPT when recompiling those old versions with VS2010), so I do not really know what's going on here.
+		// AdmiralQuality also doesn't know what to do.
+		if(GetUID() != CCONST('C', 'S', 'I', '4'))
+		{
+			// For now, input setup = output setup.
+			Dispatch(effSetSpeakerArrangement, 0, ToVstPtr(&sa), &sa, 0.0f);
+		}
 
 		// Dummy pin properties collection.
 		// We don't use them but some plugs might do inits in here.
@@ -895,7 +903,6 @@ void CVstPlugin::Initialize()
 		for (int i=2; i<m_Effect.numOutputs; i++)
 			Dispatch(effConnectOutput, i, 0, nullptr, 0.0f);
 		//end rewbs.VSTCompliance
-
 	}
 
 	// Second try to let the plugin know the render parameters.
@@ -1098,7 +1105,7 @@ CString CVstPlugin::GetCurrentProgramName()
 void CVstPlugin::SetCurrentProgramName(const CString &name)
 //---------------------------------------------------------
 {
-	Dispatch(effSetProgramName, 0, 0, (void *)mpt::ToCharset(mpt::CharsetLocale, name).c_str(), 0.0f);
+	Dispatch(effSetProgramName, 0, 0, (void *)mpt::ToCharset(mpt::CharsetLocale, name.Left(kVstMaxProgNameLen)).c_str(), 0.0f);
 }
 
 
