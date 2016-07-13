@@ -289,7 +289,7 @@ public:
 
 public:
 	// Initialize text input box
-	CInputDlg(CWnd *parent, const TCHAR *desc, const char *defaultString) : CDialog(IDD_INPUT, parent)
+	CInputDlg(CWnd *parent, const TCHAR *desc, const TCHAR *defaultString) : CDialog(IDD_INPUT, parent)
 		, m_description(desc)
 		, resultAsString(defaultString)
 		, m_minValueDbl(0), m_maxValueDbl(0), resultAsDouble(0)
