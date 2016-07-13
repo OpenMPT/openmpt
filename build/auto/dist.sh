@@ -35,14 +35,14 @@ echo "Checking C++ header ..."
 echo '' > bin/headercheck.cpp
 echo '#include "libopenmpt/libopenmpt.hpp"' >> bin/headercheck.cpp
 echo 'int main() { return 0; }' >> bin/headercheck.cpp
-c++                -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp.out       -DLIBOPENMPT_ANCIENT_COMPILER_STDINT
-c++     -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp98.out     -DLIBOPENMPT_ANCIENT_COMPILER_STDINT
+c++                -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp.out       -DLIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT=199711L
+c++     -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp98.out     -DLIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT=199711L
 c++     -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp11.out
 c++     -std=c++14 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp14.out
-g++     -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp98.out     -DLIBOPENMPT_ANCIENT_COMPILER_STDINT
+g++     -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp98.out     -DLIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT=199711L
 g++     -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp11.out
 g++     -std=c++14 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp14.out
-clang++ -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp98.out -DLIBOPENMPT_ANCIENT_COMPILER_STDINT
+clang++ -std=c++98 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp98.out -DLIBOPENMPT_ASSUME_CPLUSPLUS_CSTDINT=199711L
 clang++ -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp11.out
 clang++ -std=c++14 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp14.out
 rm bin/headercheck.*.out
