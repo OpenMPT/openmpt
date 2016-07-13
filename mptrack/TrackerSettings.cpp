@@ -300,7 +300,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, AutosaveIntervalMinutes(conf, "AutoSave", "IntervalMinutes", 10)
 	, AutosaveHistoryDepth(conf, "AutoSave", "BackupHistory", 3)
 	, AutosaveUseOriginalPath(conf, "AutoSave", "UseOriginalPath", true)
-	, AutosavePath(conf, "AutoSave", "Path", mpt::PathString())
+	, AutosavePath(conf, "AutoSave", "Path", mpt::GetTempDirectory())
 	// Paths
 	, PathSongs(conf, "Paths", "Songs_Directory", mpt::PathString())
 	, PathSamples(conf, "Paths", "Samples_Directory", mpt::PathString())
