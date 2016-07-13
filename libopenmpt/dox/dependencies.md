@@ -18,14 +18,8 @@ Dependencies
      *  Any **C89** / **C99** / **C11** compatible compiler should work with
         the C API as long as a **C99** compatible **stdint.h** is available.
      *  Any **C++98** / **C++03** / **C++11** / **C++14** / **C++1z** compatible
-        compiler should work with the C++ API.
-        **Note:** As it is impossible to reliably detect C++11 support short of
-        looking at the compiler version itself, the libopenmpt public header
-        file can not detect when a C++11-capable compiler is running in
-        C++98/C++03 mode. In this case, please `define` the preprocessor symbol
-        `LIBOPENMPT_ANCIENT_COMPILER_STDINT` before including
-        `"libopenmpt/libopenmpt.hpp"` or provide a custom `<cstdint>` header in
-        the include path. 
+        compiler should work with the C++ API. **C++98** and **C++03** compilers
+        require a **C99** compatible **stdint.h** to be avilable.
  *  **J2B** support requires an inflate (deflate decompression) implementation:
      *  **zlib**
      *  **miniz** can be used internally if no zlib is available.
