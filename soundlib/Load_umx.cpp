@@ -59,6 +59,10 @@ STATIC_ASSERT(sizeof(UMXFileHeader) == 36);
 #pragma pack(pop)
 #endif
 
+#ifdef MODPLUG_TRACKER
+#define MPT_IMPORT_UAX	// Support loading of sound files (load sounds into sample slots)
+#endif // MODPLUG_TRACKER
+
 
 // Read compressed unreal integers - similar to MIDI integers, but signed values are possible.
 static int32 ReadUMXIndex(FileReader &chunk)
@@ -185,9 +189,25 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 	// Read name table
 	std::vector<std::string> names;
 	names.reserve(fileHeader.nameCount);
+	bool hasContent = false;
 	for(uint32 i = 0; i < fileHeader.nameCount && file.CanRead(4); i++)
 	{
 		names.push_back(ReadUMXNameTableEntry(file, fileHeader.packageVersion));
+		if(names.back() == "music")
+			hasContent = true;
+#ifdef MPT_IMPORT_UAX
+		else if(names.back() == "sound")
+			hasContent = true;
+#endif // MPT_IMPORT_UAX
+	}
+
+	// No music or sounds in this file
+	if(!hasContent)
+	{
+		return false;
+	} else if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
 	}
 
 	// Read import table
@@ -230,27 +250,24 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 		// Look up object class name (we only want music and sounds).
 		objClass = -objClass - 1;
 		bool isMusic = false;
-#ifdef MODPLUG_TRACKER
+#ifdef MPT_IMPORT_UAX
 		bool isSound = false;
-#endif // MODPLUG_TRACKER
+#endif // MPT_IMPORT_UAX
 		if(static_cast<size_t>(objClass) < classes.size())
 		{
 			const char *objClassName = names[classes[objClass]].c_str();
 			isMusic = !strcmp(objClassName, "music");
-#ifdef MODPLUG_TRACKER
+#ifdef MPT_IMPORT_UAX
 			isSound = !strcmp(objClassName, "sound");
-#endif // MODPLUG_TRACKER
+#endif // MPT_IMPORT_UAX
 		}
 		if(!isMusic
-#ifdef MODPLUG_TRACKER
+#ifdef MPT_IMPORT_UAX
 			&& !isSound
-#endif // MODPLUG_TRACKER
+#endif // MPT_IMPORT_UAX
 			)
 		{
 			continue;
-		} else if(loadFlags == onlyVerifyHeader)
-		{
-			return true;
 		}
 
 		FileReader chunk = file.GetChunkAt(objOffset, objSize);
@@ -323,7 +340,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 					m_ContainerType = MOD_CONTAINERTYPE_UMX;
 					return true;
 				}
-#ifdef MODPLUG_TRACKER
+#ifdef MPT_IMPORT_UAX
 			} else if(isSound && GetNumSamples() < MAX_SAMPLES - 1)
 			{
 				// Read as sample
@@ -334,12 +351,12 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 						mpt::String::Copy(m_szNames[GetNumSamples()], names[objName]);
 					}
 				}
-#endif // MODPLUG_TRACKER
+#endif // MPT_IMPORT_UAX
 			}
 		}
 	}
 
-#ifdef MODPLUG_TRACKER
+#ifdef MPT_IMPORT_UAX
 	if(m_nSamples != 0)
 	{
 		InitializeChannels();
@@ -349,7 +366,7 @@ bool CSoundFile::ReadUMX(FileReader &file, ModLoadingFlags loadFlags)
 		Order[0] = 0;
 		return true;
 	} else
-#endif // MODPLUG_TRACKER
+#endif // MPT_IMPORT_UAX
 	{
 		return false;
 	}
