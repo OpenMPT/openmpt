@@ -64,7 +64,7 @@ int main( int argc, char * argv[] ) {
 	(void)argv;
 
 	if ( argc != 1 ) {
-		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'libopenmpt_example_c_pip' and connect stdin and stdout." );
+		fprintf( stderr, "Error: %s\n", "Wrong invocation. Use 'libopenmpt_example_c_pipe' and connect stdin and stdout." );
 		goto fail;
 	}
 
