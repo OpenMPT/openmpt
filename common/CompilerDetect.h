@@ -194,7 +194,7 @@
 
 // This is only a rough estimate to facilitate conditional compilation
 
-#define MPT_CXX_98          19971L // STD
+#define MPT_CXX_98         199711L // STD
 #define MPT_CXX_03_TR1     200301L // custom
 #define MPT_CXX_11_PARTIAL 201100L // custom
 #define MPT_CXX_11_FULL    201103L // STD
