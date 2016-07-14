@@ -202,7 +202,7 @@ public:
 	// Try to convert a an effect into a volume column effect. Returns true on success.
 	static bool ConvertVolEffect(uint8 &effect, uint8 &param, bool force);
 	// Takes two "normal" effect commands and converts them to volume column + effect column commands. Returns true on success, false (if one effect was lost) otherwise.
-	static bool TwoRegularCommandsToMPT(uint8 &effect1, uint8 &param1, uint8 effect2, uint8 &param2);
+	static bool TwoRegularCommandsToMPT(uint8 &effect1, uint8 &param1, uint8 &effect2, uint8 &param2);
 	// Try to combine two commands into one. Returns true on success and the combined command is placed in eff1 / param1.
 	static bool CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &param2);
 
