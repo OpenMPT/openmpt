@@ -1079,8 +1079,8 @@ bool ModCommand::CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &
 }
 
 
-bool ModCommand::TwoRegularCommandsToMPT(uint8 &effect1, uint8 &param1, uint8 effect2, uint8 &param2)
-//---------------------------------------------------------------------------------------------------
+bool ModCommand::TwoRegularCommandsToMPT(uint8 &effect1, uint8 &param1, uint8 &effect2, uint8 &param2)
+//----------------------------------------------------------------------------------------------------
 {
 	for(uint8 n = 0; n < 4; n++)
 	{
