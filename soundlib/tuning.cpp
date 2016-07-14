@@ -94,7 +94,13 @@ void CTuningRTI::SetDummyValues()
 bool CTuningRTI::CreateRatioTableGG(const std::vector<RATIOTYPE>& v, const RATIOTYPE r, const VRPAIR& vr, const NOTEINDEXTYPE ratiostartpos)
 //------------------------------------------------------------------------------------------------------------------------------------------
 {
-	if(v.size() == 0 || r <= 0) return true;
+	if(v.size() == 0
+		|| r <= 0
+		|| vr.second < vr.first
+		|| ratiostartpos < vr.first)
+	{
+		return true;
+	}
 
 	m_StepMin = vr.first;
 	ProSetGroupSize(static_cast<UNOTEINDEXTYPE>(v.size()));
@@ -103,11 +109,11 @@ bool CTuningRTI::CreateRatioTableGG(const std::vector<RATIOTYPE>& v, const RATIO
 	m_RatioTable.resize(vr.second-vr.first+1);
 	std::copy(v.begin(), v.end(), m_RatioTable.begin() + (ratiostartpos - vr.first));
 
-	for(NOTEINDEXTYPE i = ratiostartpos-1; i>=m_StepMin && ratiostartpos > NOTEINDEXTYPE_MIN; i--)
+	for(int32 i = ratiostartpos-1; i>=m_StepMin && ratiostartpos > NOTEINDEXTYPE_MIN; i--)
 	{
 		m_RatioTable[i-m_StepMin] = m_RatioTable[i - m_StepMin + m_GroupSize] / m_GroupRatio;
 	}
-	for(NOTEINDEXTYPE i = ratiostartpos+m_GroupSize; i<=vr.second && ratiostartpos <= (NOTEINDEXTYPE_MAX - m_GroupSize); i++)
+	for(int32 i = ratiostartpos+m_GroupSize; i<=vr.second && ratiostartpos <= (NOTEINDEXTYPE_MAX - m_GroupSize); i++)
 	{
 		m_RatioTable[i-m_StepMin] = m_GroupRatio * m_RatioTable[i - m_StepMin - m_GroupSize];
 	}
@@ -137,7 +143,7 @@ bool CTuningRTI::ProCreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r,
 	const RATIOTYPE stepRatio = pow(r, static_cast<RATIOTYPE>(1)/s);
 
 	m_RatioTable.resize(vr.second - vr.first + 1);
-	for(NOTEINDEXTYPE i = vr.first; i<=vr.second; i++)
+	for(int32 i = vr.first; i<=vr.second; i++)
 	{
 		m_RatioTable[i-m_StepMin] = Pow(stepRatio, i);
 	}
