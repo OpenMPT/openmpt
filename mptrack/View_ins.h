@@ -234,8 +234,6 @@ protected:
 
 private:
 	uint8 EnvGetReleaseNode();
-	uint16 EnvGetReleaseNodeValue();
-	uint16 EnvGetReleaseNodeTick();
 };
 
 
