@@ -1056,18 +1056,18 @@ static bool EnvelopeToString(CStringA &s, const InstrumentEnvelope &env)
 //----------------------------------------------------------------------
 {
 	// We don't want to copy empty envelopes
-	if(env.nNodes == 0)
+	if(env.empty())
 	{
 		return false;
 	}
 
 	s.Preallocate(2048);
 	s = pszEnvHdr;
-	s.AppendFormat(pszEnvFmt, env.nNodes, env.nSustainStart, env.nSustainEnd, env.nLoopStart, env.nLoopEnd,
+	s.AppendFormat(pszEnvFmt, env.size(), env.nSustainStart, env.nSustainEnd, env.nLoopStart, env.nLoopEnd,
 		env.dwFlags[ENV_SUSTAIN] ? 1 : 0, env.dwFlags[ENV_LOOP] ? 1 : 0, env.dwFlags[ENV_CARRY] ? 1 : 0);
-	for(uint32 i = 0; i < env.nNodes; i++)
+	for(InstrumentEnvelope::const_iterator i = env.begin(); i != env.end(); i++)
 	{
-		s.AppendFormat("%d,%d\r\n", env.Ticks[i], env.Values[i]);
+		s.AppendFormat("%d,%d\r\n", i->tick, i->value);
 	}
 
 	// Writing release node
@@ -1094,7 +1094,13 @@ static bool StringToEnvelope(const std::string &s, InstrumentEnvelope &env, cons
 	if (loopEnd >= nPoints) loopEnd = 0;
 	if (loopBegin > loopEnd) loopBegin = loopEnd;
 
-	env.nNodes = nPoints;
+	try
+	{
+		env.resize(nPoints);
+	} catch(MPTMemoryException)
+	{
+		return false;
+	}
 	env.nSustainStart = susBegin;
 	env.nSustainEnd = susEnd;
 	env.nLoopStart = loopBegin;
@@ -1106,7 +1112,7 @@ static bool StringToEnvelope(const std::string &s, InstrumentEnvelope &env, cons
 	env.dwFlags.set(ENV_ENABLED, nPoints > 0);
 
 	int oldn = 0;
-	for (uint32 i = 0; i < nPoints; i++)
+	for(InstrumentEnvelope::iterator i = env.begin(); i != env.end(); i++)
 	{
 		while (pos < length && (s[pos] < '0' || s[pos] > '9')) pos++;
 		if (pos >= length) break;
@@ -1117,13 +1123,13 @@ static bool StringToEnvelope(const std::string &s, InstrumentEnvelope &env, cons
 		int n2 = atoi(&s[pos]);
 		if (n1 < oldn) n1 = oldn + 1;
 		Limit(n2, ENVELOPE_MIN, ENVELOPE_MAX);
-		env.Ticks[i] = (uint16)n1;
-		env.Values[i] = (uint8)n2;
+		i->tick = (uint16)n1;
+		i->value = (uint8)n2;
 		oldn = n1;
 		while (pos < length && s[pos] != '\r' && s[pos] != '\n') pos++;
 		if (pos >= length) break;
 	}
-	env.Ticks[0] = 0;
+	env.Sanitize();
 
 	// Read release node information.
 	env.nReleaseNode = ENV_RELEASE_NODE_UNSET;

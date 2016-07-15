@@ -917,7 +917,7 @@ bool CSoundFile::IsEnvelopeProcessed(const ModChannel *pChn, EnvelopeType env) c
 	// IT Compatibility: S77/S79/S7B do not disable the envelope, they just pause the counter
 	// Test cases: s77.it, EnvLoops.xm
 	return ((pChn->GetEnvelope(env).flags[ENV_ENABLED] || (insEnv.dwFlags[ENV_ENABLED] && m_playBehaviour[kITEnvelopePositionHandling]))
-		&& insEnv.nNodes != 0);
+		&& !insEnv.empty());
 }
 
 
@@ -941,16 +941,16 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel *pChn, int &vol) const
 		// rescale envelope factor so that it is proportional to the release point
 		// and release envelope beginning.
 		if(pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET
-			&& envpos >= pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode]
+			&& envpos >= pIns->VolEnv[pIns->VolEnv.nReleaseNode].tick
 			&& pChn->VolEnv.nEnvValueAtReleaseJump != NOT_YET_RELEASED)
 		{
 			int envValueAtReleaseJump = pChn->VolEnv.nEnvValueAtReleaseJump;
-			int envValueAtReleaseNode = pIns->VolEnv.Values[pIns->VolEnv.nReleaseNode] * 4;
+			int envValueAtReleaseNode = pIns->VolEnv[pIns->VolEnv.nReleaseNode].value * 4;
 
 			//If we have just hit the release node, force the current env value
 			//to be that of the release node. This works around the case where
 			// we have another node at the same position as the release node.
-			if(envpos == pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode])
+			if(envpos == pIns->VolEnv[pIns->VolEnv.nReleaseNode].tick)
 				envval = envValueAtReleaseNode;
 
 			int relativeVolumeChange = (envval - envValueAtReleaseNode) * 2;
@@ -1073,7 +1073,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, EnvelopeType envTyp
 	uint32 position = chnEnv.nEnvPosition + (m_playBehaviour[kITEnvelopePositionHandling] ? 0 : 1);
 
 	const InstrumentEnvelope &insEnv = pChn->pModInstrument->GetEnvelope(envType);
-	if(!insEnv.nNodes)
+	if(insEnv.empty())
 	{
 		return;
 	}
@@ -1086,7 +1086,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, EnvelopeType envTyp
 		if(insEnv.dwFlags[ENV_LOOP])
 		{
 			// Normal loop active
-			uint32 end = insEnv.Ticks[insEnv.nLoopEnd];
+			uint32 end = insEnv[insEnv.nLoopEnd].tick;
 			if(!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))) end++;
 
 			// FT2 compatibility: If the sustain point is at the loop end and the sustain loop has been released, don't loop anymore.
@@ -1095,24 +1095,24 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, EnvelopeType envTyp
 
 			if(position == end && !escapeLoop)
 			{
-				position = insEnv.Ticks[insEnv.nLoopStart];
+				position = insEnv[insEnv.nLoopStart].tick;
 			}
 		}
 
 		if(insEnv.dwFlags[ENV_SUSTAIN] && !pChn->dwFlags[CHN_KEYOFF])
 		{
 			// Envelope sustained
-			if(position == insEnv.Ticks[insEnv.nSustainEnd] + 1u)
+			if(position == insEnv[insEnv.nSustainEnd].tick + 1u)
 			{
-				position = insEnv.Ticks[insEnv.nSustainStart];
+				position = insEnv[insEnv.nSustainStart].tick;
 			}
 		} else
 		{
 			// Limit to last envelope point
-			if(position > insEnv.Ticks[insEnv.nNodes - 1])
+			if(position > insEnv.back().tick)
 			{
 				// Env of envelope
-				position = insEnv.Ticks[insEnv.nNodes - 1];
+				position = insEnv.back().tick;
 				endReached = true;
 			}
 		}
@@ -1127,17 +1127,17 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, EnvelopeType envTyp
 		if(insEnv.dwFlags[ENV_SUSTAIN] && !pChn->dwOldFlags[CHN_KEYOFF])
 		{
 			// Envelope sustained
-			start = insEnv.Ticks[insEnv.nSustainStart];
-			end = insEnv.Ticks[insEnv.nSustainEnd] + 1;
+			start = insEnv[insEnv.nSustainStart].tick;
+			end = insEnv[insEnv.nSustainEnd].tick + 1;
 		} else if(insEnv.dwFlags[ENV_LOOP])
 		{
 			// Normal loop active
-			start = insEnv.Ticks[insEnv.nLoopStart];
-			end = insEnv.Ticks[insEnv.nLoopEnd] + 1;
+			start = insEnv[insEnv.nLoopStart].tick;
+			end = insEnv[insEnv.nLoopEnd].tick + 1;
 		} else
 		{
 			// Limit to last envelope point
-			start = end = insEnv.Ticks[insEnv.nNodes - 1];
+			start = end = insEnv.back().tick;
 			if(position > end)
 			{
 				// Env of envelope
@@ -1159,7 +1159,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, EnvelopeType envTyp
 			pChn->dwFlags.set(CHN_NOTEFADE);
 		}
 
-		if(insEnv.Values[insEnv.nNodes - 1] == 0 && (pChn->nMasterChn > 0 || (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))))
+		if(insEnv.back().value == 0 && (pChn->nMasterChn > 0 || (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))))
 		{
 			// Stop channel if the last envelope node is silent anyway.
 			pChn->dwFlags.set(CHN_NOTEFADE);

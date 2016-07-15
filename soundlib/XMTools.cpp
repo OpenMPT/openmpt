@@ -55,20 +55,20 @@ void XMInstrument::ConvertEndianness()
 void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8 &numPoints, uint8 &flags, uint8 &sustain, uint8 &loopStart, uint8 &loopEnd, EnvType env)
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	numPoints = static_cast<uint8>(std::min(12u, mptEnv.nNodes));
+	numPoints = static_cast<uint8>(std::min(12u, mptEnv.size()));
 
 	// Envelope Data
-	for(size_t i = 0; i < numPoints; i++)
+	for(uint8 i = 0; i < numPoints; i++)
 	{
 		switch(env)
 		{
 		case EnvTypeVol:
-			volEnv[i * 2] = std::min(mptEnv.Ticks[i], uint16_max);
-			volEnv[i * 2 + 1] = std::min(mptEnv.Values[i], uint8(64));
+			volEnv[i * 2] = std::min(mptEnv[i].tick, uint16_max);
+			volEnv[i * 2 + 1] = std::min(mptEnv[i].value, uint8(64));
 			break;
 		case EnvTypePan:
-			panEnv[i * 2] = std::min(mptEnv.Ticks[i], uint16_max);
-			panEnv[i * 2 + 1] = std::min(mptEnv.Values[i], uint8(63));
+			panEnv[i * 2] = std::min(mptEnv[i].tick, uint16_max);
+			panEnv[i * 2 + 1] = std::min(mptEnv[i].value, uint8(63));
 			break;
 		}
 	}
@@ -161,41 +161,39 @@ std::vector<SAMPLEINDEX> XMInstrument::GetSampleList(const ModInstrument &mptIns
 void XMInstrument::ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8 numPoints, uint8 flags, uint8 sustain, uint8 loopStart, uint8 loopEnd, EnvType env) const
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	mptEnv.nNodes = MIN(numPoints, 12);
+	mptEnv.resize(std::min(numPoints, uint8(12)));
 
 	// Envelope Data
-	for(size_t i = 0; i < 12; i++)
+	for(uint32 i = 0; i < mptEnv.size(); i++)
 	{
 		switch(env)
 		{
 		case EnvTypeVol:
-			mptEnv.Ticks[i] = volEnv[i * 2];
-			mptEnv.Values[i] = static_cast<uint8>(volEnv[i * 2 + 1]);
+			mptEnv[i].tick = volEnv[i * 2];
+			mptEnv[i].value = static_cast<uint8>(volEnv[i * 2 + 1]);
 			break;
 		case EnvTypePan:
-			mptEnv.Ticks[i] = panEnv[i * 2];
-			mptEnv.Values[i] = static_cast<uint8>(panEnv[i * 2 + 1]);
+			mptEnv[i].tick = panEnv[i * 2];
+			mptEnv[i].value = static_cast<uint8>(panEnv[i * 2 + 1]);
 			break;
 		}
 
-		if(i > 0 && mptEnv.Ticks[i] < mptEnv.Ticks[i - 1])
+		if(i > 0 && mptEnv[i].tick < mptEnv[i - 1].tick)
 		{
 			// libmikmod code says: "Some broken XM editing program will only save the low byte of the position
 			// value. Try to compensate by adding the missing high byte" - I guess that's what this code is for.
 			// Note: It appears that MPT 1.07's XI instrument saver omitted the high byte of envelope nodes.
 			// This might be the source for some broken envelopes in IT and XM files.
 
-			mptEnv.Ticks[i] &= 0xFF;
-			mptEnv.Ticks[i] += mptEnv.Ticks[i - 1] & 0xFF00;
-			if(mptEnv.Ticks[i] < mptEnv.Ticks[i - 1]) mptEnv.Ticks[i] += 0x100;
+			mptEnv[i].tick &= 0xFF;
+			mptEnv[i].tick += mptEnv[i - 1].tick & 0xFF00;
+			if(mptEnv[i].tick < mptEnv[i - 1].tick) mptEnv[i].tick += 0x100;
 		}
 	}
-	// Sanitize envelope
-	mptEnv.Ticks[0] = 0;
 
 	// Envelope Flags
 	mptEnv.dwFlags.reset();
-	if((flags & XMInstrument::envEnabled) != 0 && mptEnv.nNodes != 0) mptEnv.dwFlags.set(ENV_ENABLED);
+	if((flags & XMInstrument::envEnabled) != 0 && !mptEnv.empty()) mptEnv.dwFlags.set(ENV_ENABLED);
 
 	// Envelope Loops
 	if(sustain < 12)

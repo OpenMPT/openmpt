@@ -173,7 +173,7 @@ bool IsNegative(const T &val)
 	if(writeAll) \
 	{ \
 		mpt::IO::WriteIntLE<uint32>(file, fcode); \
-		mpt::IO::WriteIntLE<int16>(file, fsize); \
+		mpt::IO::WriteIntLE<uint16>(file, fsize); \
 	} else if(only_this_code == fcode)\
 	{ \
 		MPT_ASSERT(fixedsize == fsize); \
@@ -196,7 +196,7 @@ bool IsNegative(const T &val)
 	if(writeAll) \
 	{ \
 		mpt::IO::WriteIntLE<uint32>(file, fcode); \
-		mpt::IO::WriteIntLE<int16>(file, fsize); \
+		mpt::IO::WriteIntLE<uint16>(file, fsize); \
 		type tmp = (type)(input-> name ); \
 		tmp = SwapBytesReturnLE(tmp); \
 		fwrite(&tmp , 1 , fsize , file); \
@@ -231,7 +231,7 @@ bool IsNegative(const T &val)
 	if(writeAll) \
 	{ \
 		mpt::IO::WriteIntLE<uint32>(file, fcode); \
-		mpt::IO::WriteIntLE<int16>(file, fsize); \
+		mpt::IO::WriteIntLE<uint16>(file, fsize); \
 	} else if(only_this_code == fcode)\
 	{ \
 		/* MPT_ASSERT(fixedsize <= fsize); */ \
@@ -249,12 +249,52 @@ bool IsNegative(const T &val)
 	} \
 /**/
 
+// ------------------------------------------------------------------------
+// Convenient macro to help WRITE_HEADER declaration for envelope members ONLY
+// ------------------------------------------------------------------------
+#define WRITE_MPTHEADER_envelope_member(envType,envField,type,code) \
+	{\
+		const InstrumentEnvelope &env = input->GetEnvelope(envType); \
+		STATIC_ASSERT(sizeof(type) == sizeof(env[0]. envField)); \
+		fcode = code;\
+		fsize = mpt::saturate_cast<int16>(sizeof( type ) * env.size());\
+		MPT_ASSERT(size_t(fsize) == sizeof( type ) * env.size()); \
+		\
+		if(writeAll) \
+		{ \
+			mpt::IO::WriteIntLE<uint32>(file, fcode); \
+			mpt::IO::WriteIntLE<uint16>(file, fsize); \
+		} else if(only_this_code == fcode)\
+		{ \
+			fsize = fixedsize; /* just trust the size we got passed */ \
+		} \
+		if(only_this_code == fcode || only_this_code == Util::MaxValueOfType(only_this_code)) \
+		{ \
+			uint32 maxNodes = std::min<uint32>(fsize/sizeof(type), env.size()); \
+			for(uint32 i = 0; i < maxNodes; ++i) \
+			{ \
+				type tmp; \
+				tmp = env[i]. envField; \
+				tmp = SwapBytesReturnLE(tmp); \
+				fwrite(&tmp, 1, sizeof(type), file); \
+			} \
+			/* Not every instrument's envelope will be the same length. fill up with zeros. */ \
+			for(uint32 i = maxNodes; i < fsize/sizeof(type); ++i) \
+			{ \
+				type tmp = 0; \
+				tmp = SwapBytesReturnLE(tmp); \
+				fwrite(&tmp, 1, sizeof(type), file); \
+			} \
+		} \
+	}\
+/**/
+
 
 // Write (in 'file') 'input' ModInstrument with 'code' & 'size' extra field infos for each member
-void WriteInstrumentHeaderStructOrField(ModInstrument * input, FILE * file, uint32 only_this_code, int16 fixedsize)
+void WriteInstrumentHeaderStructOrField(ModInstrument * input, FILE * file, uint32 only_this_code, uint16 fixedsize)
 {
 uint32 fcode;
-int16 fsize;
+uint16 fsize;
 // If true, all extension are written to the file; otherwise only the specified extension is written.
 // writeAll is true iff we are saving an instrument (or, hypothetically, the legacy ITP format)
 const bool writeAll = only_this_code == Util::MaxValueOfType(only_this_code);
@@ -266,18 +306,18 @@ if(!writeAll)
 
 	WRITE_MPTHEADER_sized_member(	nFadeOut					, uint32	, MAGIC4BE('F','O','.','.')	)
 	WRITE_MPTHEADER_sized_member(	nPan						, uint32	, MAGIC4BE('P','.','.','.')	)
-	WRITE_MPTHEADER_sized_member(	VolEnv.nNodes				, uint32	, MAGIC4BE('V','E','.','.')	)
-	WRITE_MPTHEADER_sized_member(	PanEnv.nNodes				, uint32	, MAGIC4BE('P','E','.','.')	)
-	WRITE_MPTHEADER_sized_member(	PitchEnv.nNodes				, uint32	, MAGIC4BE('P','i','E','.')	)
+	WRITE_MPTHEADER_sized_member(	VolEnv.size()				, uint32	, MAGIC4BE('V','E','.','.')	)
+	WRITE_MPTHEADER_sized_member(	PanEnv.size()				, uint32	, MAGIC4BE('P','E','.','.')	)
+	WRITE_MPTHEADER_sized_member(	PitchEnv.size()				, uint32	, MAGIC4BE('P','i','E','.')	)
 	WRITE_MPTHEADER_sized_member(	wMidiBank					, uint16	, MAGIC4BE('M','B','.','.')	)
 	WRITE_MPTHEADER_sized_member(	nMidiProgram				, uint8		, MAGIC4BE('M','P','.','.')	)
 	WRITE_MPTHEADER_sized_member(	nMidiChannel				, uint8		, MAGIC4BE('M','C','.','.')	)
-	WRITE_MPTHEADER_array_member(	VolEnv.Ticks				, uint16	, MAGIC4BE('V','P','[','.')	, (int16) input->VolEnv.nNodes)
-	WRITE_MPTHEADER_array_member(	PanEnv.Ticks				, uint16	, MAGIC4BE('P','P','[','.')	, (int16) input->PanEnv.nNodes)
-	WRITE_MPTHEADER_array_member(	PitchEnv.Ticks				, uint16	, MAGIC4BE('P','i','P','[')	, (int16) input->PitchEnv.nNodes)
-	WRITE_MPTHEADER_array_member(	VolEnv.Values				, uint8		, MAGIC4BE('V','E','[','.')	, (int16) input->VolEnv.nNodes)
-	WRITE_MPTHEADER_array_member(	PanEnv.Values				, uint8		, MAGIC4BE('P','E','[','.')	, (int16) input->PanEnv.nNodes)
-	WRITE_MPTHEADER_array_member(	PitchEnv.Values				, uint8		, MAGIC4BE('P','i','E','[')	, (int16) input->PitchEnv.nNodes)
+	WRITE_MPTHEADER_envelope_member(	ENV_VOLUME	, tick		, uint16	, MAGIC4BE('V','P','[','.')	)
+	WRITE_MPTHEADER_envelope_member(	ENV_PANNING	, tick		, uint16	, MAGIC4BE('P','P','[','.')	)
+	WRITE_MPTHEADER_envelope_member(	ENV_PITCH	, tick		, uint16	, MAGIC4BE('P','i','P','[')	)
+	WRITE_MPTHEADER_envelope_member(	ENV_VOLUME	, value		, uint8		, MAGIC4BE('V','E','[','.')	)
+	WRITE_MPTHEADER_envelope_member(	ENV_PANNING	, value		, uint8		, MAGIC4BE('P','E','[','.')	)
+	WRITE_MPTHEADER_envelope_member(	ENV_PITCH	, value		, uint8		, MAGIC4BE('P','i','E','[')	)
 	WRITE_MPTHEADER_sized_member(	nMixPlug					, uint8		, MAGIC4BE('M','i','P','.')	)
 	WRITE_MPTHEADER_sized_member(	nVolRampUp					, uint16	, MAGIC4BE('V','R','.','.')	)
 	WRITE_MPTHEADER_trunc_member(	nResampling					, uint16	, MAGIC4BE('R','.','.','.')	)
@@ -342,37 +382,37 @@ void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, 
 		uint32 maxNodes[3] = { 0 };
 		for(INSTRUMENTINDEX i = 1; i <= m_nInstruments; i++) if(Instruments[i] != nullptr)
 		{
-			maxNodes[0] = std::max(maxNodes[0], Instruments[i]->VolEnv.nNodes);
-			maxNodes[1] = std::max(maxNodes[1], Instruments[i]->PanEnv.nNodes);
-			maxNodes[2] = std::max(maxNodes[2], Instruments[i]->PitchEnv.nNodes);
+			maxNodes[0] = std::max(maxNodes[0], Instruments[i]->VolEnv.size());
+			maxNodes[1] = std::max(maxNodes[1], Instruments[i]->PanEnv.size());
+			maxNodes[2] = std::max(maxNodes[2], Instruments[i]->PitchEnv.size());
 		}
 		// write full envelope information for MPTM files (more env points)
 		if(maxNodes[0] > 25)
 		{
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','E','.','.'), sizeof(ModInstrument().VolEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','P','[','.'), sizeof(ModInstrument().VolEnv.Ticks),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','E','[','.'), sizeof(ModInstrument().VolEnv.Values), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','E','.','.'), sizeof(ModInstrument().VolEnv.size()), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','P','[','.'), static_cast<uint16>(maxNodes[0] * sizeof(EnvelopeNode().tick)),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('V','E','[','.'), static_cast<uint16>(maxNodes[0] * sizeof(EnvelopeNode().value)), f, nInstruments);
 		}
 		if(maxNodes[1] > 25)
 		{
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','E','.','.'), sizeof(ModInstrument().PanEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','P','[','.'), sizeof(ModInstrument().PanEnv.Ticks),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','E','[','.'), sizeof(ModInstrument().PanEnv.Values), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','E','.','.'), sizeof(ModInstrument().PanEnv.size()), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','P','[','.'), static_cast<uint16>(maxNodes[1] * sizeof(EnvelopeNode().tick)),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','E','[','.'), static_cast<uint16>(maxNodes[1] * sizeof(EnvelopeNode().value)), f, nInstruments);
 		}
 		if(maxNodes[2] > 25)
 		{
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','E','.'), sizeof(ModInstrument().PitchEnv.nNodes), f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','P','['), sizeof(ModInstrument().PitchEnv.Ticks),  f, nInstruments);
-			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','E','['), sizeof(ModInstrument().PitchEnv.Values), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','E','.'), sizeof(ModInstrument().PitchEnv.size()), f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','P','['), static_cast<uint16>(maxNodes[2] * sizeof(EnvelopeNode().tick)),  f, nInstruments);
+			WriteInstrumentPropertyForAllInstruments(MAGIC4BE('P','i','E','['), static_cast<uint16>(maxNodes[2] * sizeof(EnvelopeNode().value)), f, nInstruments);
 		}
 	}
 }
 
-void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, int16 size, FILE *f, INSTRUMENTINDEX nInstruments) const
-//-----------------------------------------------------------------------------------------------------------------------------
+void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, uint16 size, FILE *f, INSTRUMENTINDEX nInstruments) const
+//------------------------------------------------------------------------------------------------------------------------------
 {
 	mpt::IO::WriteIntLE<uint32>(f, code);		//write code
-	mpt::IO::WriteIntLE<int16>(f, size);		//write size
+	mpt::IO::WriteIntLE<uint16>(f, size);		//write size
 	for(INSTRUMENTINDEX i = 1; i <= nInstruments; i++)	//for all instruments...
 	{
 		if (Instruments[i])
@@ -427,6 +467,21 @@ void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, int16 siz
 		} \
 	}
 
+// --------------------------------------------------------------------------------------------
+// Convenient macro to help GET_HEADER declaration for envelope tick/value members
+// --------------------------------------------------------------------------------------------
+#define GET_MPTHEADER_envelope_member(envType,envField,type,code) \
+	case code: \
+	{\
+		FileReader arrayChunk = file.ReadChunk(fsize); \
+		InstrumentEnvelope &env = input->GetEnvelope(envType); \
+		for(uint32 i = 0; i < env.size(); i++) \
+		{ \
+			env[i]. envField = arrayChunk.ReadIntLE<type>(); \
+		} \
+		return true; \
+	}
+
 
 // Return a pointer on the wanted field in 'input' ModInstrument given field code & size
 bool ReadInstrumentHeaderField(ModInstrument *input, uint32 fcode, uint16 fsize, FileReader &file)
@@ -440,9 +495,6 @@ bool ReadInstrumentHeaderField(ModInstrument *input, uint32 fcode, uint16 fsize,
 	GET_MPTHEADER_sized_member(	dwFlags					, uint32		, MAGIC4BE('d','F','.','.')	)
 	GET_MPTHEADER_sized_member(	nGlobalVol				, uint32		, MAGIC4BE('G','V','.','.')	)
 	GET_MPTHEADER_sized_member(	nPan					, uint32		, MAGIC4BE('P','.','.','.')	)
-	GET_MPTHEADER_sized_member(	VolEnv.nNodes			, uint32		, MAGIC4BE('V','E','.','.')	)
-	GET_MPTHEADER_sized_member(	PanEnv.nNodes			, uint32		, MAGIC4BE('P','E','.','.')	)
-	GET_MPTHEADER_sized_member(	PitchEnv.nNodes			, uint32		, MAGIC4BE('P','i','E','.')	)
 	GET_MPTHEADER_sized_member(	VolEnv.nLoopStart		, uint8			, MAGIC4BE('V','L','S','.')	)
 	GET_MPTHEADER_sized_member(	VolEnv.nLoopEnd			, uint8			, MAGIC4BE('V','L','E','.')	)
 	GET_MPTHEADER_sized_member(	VolEnv.nSustainStart	, uint8			, MAGIC4BE('V','S','B','.')	)
@@ -467,12 +519,12 @@ bool ReadInstrumentHeaderField(ModInstrument *input, uint32 fcode, uint16 fsize,
 	GET_MPTHEADER_sized_member(	nMidiChannel			, uint8			, MAGIC4BE('M','C','.','.')	)
 	GET_MPTHEADER_sized_member(	nPPS					, int8			, MAGIC4BE('P','P','S','.')	)
 	GET_MPTHEADER_sized_member(	nPPC					, uint8			, MAGIC4BE('P','P','C','.')	)
-	GET_MPTHEADER_array_member(	VolEnv.Ticks			, uint16		, MAGIC4BE('V','P','[','.')	)
-	GET_MPTHEADER_array_member(	PanEnv.Ticks			, uint16		, MAGIC4BE('P','P','[','.')	)
-	GET_MPTHEADER_array_member(	PitchEnv.Ticks			, uint16		, MAGIC4BE('P','i','P','[')	)
-	GET_MPTHEADER_array_member(	VolEnv.Values			, uint8			, MAGIC4BE('V','E','[','.')	)
-	GET_MPTHEADER_array_member(	PanEnv.Values			, uint8			, MAGIC4BE('P','E','[','.')	)
-	GET_MPTHEADER_array_member(	PitchEnv.Values			, uint8			, MAGIC4BE('P','i','E','[')	)
+	GET_MPTHEADER_envelope_member(ENV_VOLUME	, tick	, uint16		, MAGIC4BE('V','P','[','.')	)
+	GET_MPTHEADER_envelope_member(ENV_PANNING	, tick	, uint16		, MAGIC4BE('P','P','[','.')	)
+	GET_MPTHEADER_envelope_member(ENV_PITCH		, tick	, uint16		, MAGIC4BE('P','i','P','[')	)
+	GET_MPTHEADER_envelope_member(ENV_VOLUME	, value	, uint8			, MAGIC4BE('V','E','[','.')	)
+	GET_MPTHEADER_envelope_member(ENV_PANNING	, value	, uint8			, MAGIC4BE('P','E','[','.')	)
+	GET_MPTHEADER_envelope_member(ENV_PITCH		, value	, uint8			, MAGIC4BE('P','i','E','[')	)
 	GET_MPTHEADER_array_member(	NoteMap					, uint8			, MAGIC4BE('N','M','[','.')	)
 	GET_MPTHEADER_array_member(	Keyboard				, uint16		, MAGIC4BE('K','[','.','.')	)
 	GET_MPTHEADER_array_member(	name					, char			, MAGIC4BE('n','[','.','.')	)
@@ -506,6 +558,16 @@ bool ReadInstrumentHeaderField(ModInstrument *input, uint32 fcode, uint16 fsize,
 		input->pitchToTempoLock.Set(input->pitchToTempoLock.GetInt(), tmp);
 		return true;
 	}
+
+	case MAGIC4BE('V','E','.','.'):
+		input->VolEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadTruncatedIntLE<uint32>(fsize)));
+		return true;
+	case MAGIC4BE('P','E','.','.'):
+		input->PanEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadTruncatedIntLE<uint32>(fsize)));
+		return true;
+	case MAGIC4BE('P','i','E','.'):
+		input->PitchEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadTruncatedIntLE<uint32>(fsize)));
+		return true;
 	}
 
 	return false;

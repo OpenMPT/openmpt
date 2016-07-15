@@ -43,13 +43,13 @@ void CScaleEnvPointsDlg::OnOK()
 
 	if(m_fFactorX > 0 && m_fFactorX != 1)
 	{
-		for(uint32 i = 0; i < m_Env.nNodes; i++)
+		for(uint32 i = 0; i < m_Env.size(); i++)
 		{
-			m_Env.Ticks[i] = static_cast<uint16>(m_fFactorX * m_Env.Ticks[i]);
+			m_Env[i].tick = static_cast<uint16>(m_fFactorX * m_Env[i].tick);
 
 			// Checking that the order of points is preserved.
-			if(i > 0 && m_Env.Ticks[i] <= m_Env.Ticks[i - 1])
-				m_Env.Ticks[i] = m_Env.Ticks[i - 1] + 1;
+			if(i > 0 && m_Env[i].tick <= m_Env[i - 1].tick)
+				m_Env[i].tick = m_Env[i - 1].tick + 1;
 		}
 	}
 
@@ -62,10 +62,10 @@ void CScaleEnvPointsDlg::OnOK()
 			invert = true;
 			factor = -factor;
 		}
-		for(uint32 i = 0; i < m_Env.nNodes; i++)
+		for(uint32 i = 0; i < m_Env.size(); i++)
 		{
-			if(invert) m_Env.Values[i] = ENVELOPE_MAX - m_Env.Values[i];
-			m_Env.Values[i] = Clamp(static_cast<uint8>((factor * ((int)m_Env.Values[i] - m_nCenter)) + m_nCenter), uint8(ENVELOPE_MIN), uint8(ENVELOPE_MAX));
+			if(invert) m_Env[i].value = ENVELOPE_MAX - m_Env[i].value;
+			m_Env[i].value = Clamp(static_cast<uint8>((factor * ((int)m_Env[i].value - m_nCenter)) + m_nCenter), uint8(ENVELOPE_MIN), uint8(ENVELOPE_MAX));
 		}
 	}
 

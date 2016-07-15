@@ -452,15 +452,11 @@ uint32 CSoundFile::MapMidiInstrument(uint32 dwBankProgram, uint32 nChannel, uint
 	}
 	pIns->VolEnv.dwFlags.set(ENV_ENABLED);
 	if (nChannel != MIDI_DRUMCHANNEL) pIns->VolEnv.dwFlags.set(ENV_SUSTAIN);
-	pIns->VolEnv.nNodes = 4;
-	pIns->VolEnv.Ticks[0] = 0;
-	pIns->VolEnv.Values[0] = ENVELOPE_MAX;
-	pIns->VolEnv.Ticks[1] = 10;
-	pIns->VolEnv.Values[1] = ENVELOPE_MAX;
-	pIns->VolEnv.Ticks[2] = 15;
-	pIns->VolEnv.Values[2] = (ENVELOPE_MAX + ENVELOPE_MID) / 2;
-	pIns->VolEnv.Ticks[3] = 20;
-	pIns->VolEnv.Values[3] = ENVELOPE_MIN;
+	pIns->VolEnv.reserve(4);
+	pIns->VolEnv.push_back(EnvelopeNode(0, ENVELOPE_MAX));
+	pIns->VolEnv.push_back(EnvelopeNode(10, ENVELOPE_MAX));
+	pIns->VolEnv.push_back(EnvelopeNode(15, (ENVELOPE_MAX + ENVELOPE_MID) / 2));
+	pIns->VolEnv.push_back(EnvelopeNode(20, ENVELOPE_MIN));
 	pIns->VolEnv.nSustainStart = pIns->VolEnv.nSustainEnd = 1;
 	// Sample
 	Samples[m_nSamples].nPan = 128;

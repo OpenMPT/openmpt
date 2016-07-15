@@ -91,14 +91,14 @@ bool FindIncompatibleEnvelopes(InstrumentEnvelope &env, bool autofix)
 //-------------------------------------------------------------------
 {
 	bool found = false;
-	for(uint32 i = 1; i < env.nNodes; i++)
+	for(uint32 i = 1; i < env.size(); i++)
 	{
-		if(env.Ticks[i] <= env.Ticks[i - 1])	// "<=" so we can fix envelopes "on the fly"
+		if(env[i].tick <= env[i - 1].tick)	// "<=" so we can fix envelopes "on the fly"
 		{
 			found = true;
 			if(autofix)
 			{
-				env.Ticks[i] = env.Ticks[i - 1] + 1;
+				env[i].tick = env[i - 1].tick + 1;
 			}
 		}
 	}

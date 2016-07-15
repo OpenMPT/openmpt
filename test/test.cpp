@@ -1634,23 +1634,23 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	}
 
 	VERIFY_EQUAL_NONCONT(pIns->VolEnv.dwFlags, ENV_ENABLED | ENV_SUSTAIN);
-	VERIFY_EQUAL_NONCONT(pIns->VolEnv.nNodes, 3);
+	VERIFY_EQUAL_NONCONT(pIns->VolEnv.size(), 3);
 	VERIFY_EQUAL_NONCONT(pIns->VolEnv.nReleaseNode, ENV_RELEASE_NODE_UNSET);
-	VERIFY_EQUAL_NONCONT(pIns->VolEnv.Ticks[2], 96);
-	VERIFY_EQUAL_NONCONT(pIns->VolEnv.Values[2], 0);
+	VERIFY_EQUAL_NONCONT(pIns->VolEnv[2].tick, 96);
+	VERIFY_EQUAL_NONCONT(pIns->VolEnv[2].value, 0);
 	VERIFY_EQUAL_NONCONT(pIns->VolEnv.nSustainStart, 1);
 	VERIFY_EQUAL_NONCONT(pIns->VolEnv.nSustainEnd, 1);
 
 	VERIFY_EQUAL_NONCONT(pIns->PanEnv.dwFlags, ENV_LOOP);
-	VERIFY_EQUAL_NONCONT(pIns->PanEnv.nNodes, 12);
+	VERIFY_EQUAL_NONCONT(pIns->PanEnv.size(), 12);
 	VERIFY_EQUAL_NONCONT(pIns->PanEnv.nLoopStart, 9);
 	VERIFY_EQUAL_NONCONT(pIns->PanEnv.nLoopEnd, 11);
 	VERIFY_EQUAL_NONCONT(pIns->PanEnv.nReleaseNode, ENV_RELEASE_NODE_UNSET);
-	VERIFY_EQUAL_NONCONT(pIns->PanEnv.Ticks[9], 46);
-	VERIFY_EQUAL_NONCONT(pIns->PanEnv.Values[9], 23);
+	VERIFY_EQUAL_NONCONT(pIns->PanEnv[9].tick, 46);
+	VERIFY_EQUAL_NONCONT(pIns->PanEnv[9].value, 23);
 
 	VERIFY_EQUAL_NONCONT(pIns->PitchEnv.dwFlags, EnvelopeFlags(0));
-	VERIFY_EQUAL_NONCONT(pIns->PitchEnv.nNodes, 0);
+	VERIFY_EQUAL_NONCONT(pIns->PitchEnv.size(), 0);
 
 	// Sequences
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetNumSequences(), 1);
@@ -1930,25 +1930,25 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		}
 
 		VERIFY_EQUAL_NONCONT(pIns->VolEnv.dwFlags, ENV_ENABLED | ENV_CARRY);
-		VERIFY_EQUAL_NONCONT(pIns->VolEnv.nNodes, 3);
+		VERIFY_EQUAL_NONCONT(pIns->VolEnv.size(), 3);
 		VERIFY_EQUAL_NONCONT(pIns->VolEnv.nReleaseNode, 1);
-		VERIFY_EQUAL_NONCONT(pIns->VolEnv.Ticks[2], 96);
-		VERIFY_EQUAL_NONCONT(pIns->VolEnv.Values[2], 0);
+		VERIFY_EQUAL_NONCONT(pIns->VolEnv[2].tick, 96);
+		VERIFY_EQUAL_NONCONT(pIns->VolEnv[2].value, 0);
 
 		VERIFY_EQUAL_NONCONT(pIns->PanEnv.dwFlags, ENV_LOOP);
-		VERIFY_EQUAL_NONCONT(pIns->PanEnv.nNodes, 76);
+		VERIFY_EQUAL_NONCONT(pIns->PanEnv.size(), 76);
 		VERIFY_EQUAL_NONCONT(pIns->PanEnv.nLoopStart, 22);
 		VERIFY_EQUAL_NONCONT(pIns->PanEnv.nLoopEnd, 29);
 		VERIFY_EQUAL_NONCONT(pIns->PanEnv.nReleaseNode, ENV_RELEASE_NODE_UNSET);
-		VERIFY_EQUAL_NONCONT(pIns->PanEnv.Ticks[75], 427);
-		VERIFY_EQUAL_NONCONT(pIns->PanEnv.Values[75], 27);
+		VERIFY_EQUAL_NONCONT(pIns->PanEnv[75].tick, 427);
+		VERIFY_EQUAL_NONCONT(pIns->PanEnv[75].value, 27);
 
 		VERIFY_EQUAL_NONCONT(pIns->PitchEnv.dwFlags, ENV_ENABLED | ENV_CARRY | ENV_SUSTAIN | ENV_FILTER);
-		VERIFY_EQUAL_NONCONT(pIns->PitchEnv.nNodes, 3);
+		VERIFY_EQUAL_NONCONT(pIns->PitchEnv.size(), 3);
 		VERIFY_EQUAL_NONCONT(pIns->PitchEnv.nSustainStart, 1);
 		VERIFY_EQUAL_NONCONT(pIns->PitchEnv.nSustainEnd, 2);
-		VERIFY_EQUAL_NONCONT(pIns->PitchEnv.Ticks[1], 96);
-		VERIFY_EQUAL_NONCONT(pIns->PitchEnv.Values[1], 64);
+		VERIFY_EQUAL_NONCONT(pIns->PitchEnv[1].tick, 96);
+		VERIFY_EQUAL_NONCONT(pIns->PitchEnv[1].value, 64);
 	}
 	// Sequences
 	VERIFY_EQUAL_NONCONT(sndFile.Order.GetNumSequences(), 2);

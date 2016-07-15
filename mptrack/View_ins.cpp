@@ -282,8 +282,8 @@ UINT CViewInstrument::EnvGetTick(int nPoint) const
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
-	if((nPoint >= 0) && (nPoint < (int)envelope->nNodes))
-		return envelope->Ticks[nPoint];
+	if((nPoint >= 0) && (nPoint < (int)envelope->size()))
+		return envelope->at(nPoint).tick;
 	else
 		return 0;
 }
@@ -294,8 +294,8 @@ UINT CViewInstrument::EnvGetValue(int nPoint) const
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
-	if(nPoint >= 0 && nPoint < (int)envelope->nNodes)
-		return envelope->Values[nPoint];
+	if(nPoint >= 0 && nPoint < (int)envelope->size())
+		return envelope->at(nPoint).value;
 	else
 		return 0;
 }
@@ -315,27 +315,30 @@ bool CViewInstrument::EnvSetValue(int nPoint, int32 nTick, int32 nValue, bool mo
 	int tickDiff = 0;
 
 	bool ok = false;
-	if(nPoint < (int)envelope->nNodes)
+	if(nPoint < (int)envelope->size())
 	{
 		if(nTick != int32_min)
 		{
 			nTick = std::max(0, nTick);
-			tickDiff = envelope->Ticks[nPoint];
-			int mintick = (nPoint) ? envelope->Ticks[nPoint - 1] : 0;
-			int maxtick = envelope->Ticks[nPoint + 1];
-			if(nPoint + 1 == (int)envelope->nNodes || moveTail) maxtick = Util::MaxValueOfType(maxtick);
+			tickDiff = envelope->at(nPoint).tick;
+			int mintick = (nPoint > 0) ? envelope->at(nPoint - 1).tick : 0;
+			int maxtick;
+			if(nPoint + 1 >= (int)envelope->size() || moveTail)
+				maxtick = Util::MaxValueOfType(maxtick);
+			else
+				maxtick = envelope->at(nPoint + 1).tick;
 
 			// Can't have multiple points on same tick
 			if(nPoint > 0 && mintick < maxtick - 1)
 			{
 				mintick++;
-				if(nPoint + 1 < (int)envelope->nNodes) maxtick--;
+				if(nPoint + 1 < (int)envelope->size()) maxtick--;
 			}
 			if(nTick < mintick) nTick = mintick;
 			if(nTick > maxtick) nTick = maxtick;
-			if(nTick != envelope->Ticks[nPoint])
+			if(nTick != envelope->at(nPoint).tick)
 			{
-				envelope->Ticks[nPoint] = (uint16)nTick;
+				envelope->at(nPoint).tick = (uint16)nTick;
 				ok = true;
 			}
 		}
@@ -343,9 +346,9 @@ bool CViewInstrument::EnvSetValue(int nPoint, int32 nTick, int32 nValue, bool mo
 		if(nValue != int32_min)
 		{
 			Limit(nValue, 0, maxVal);
-			if(nValue != envelope->Values[nPoint])
+			if(nValue != envelope->at(nPoint).value)
 			{
-				envelope->Values[nPoint] = (uint8)nValue;
+				envelope->at(nPoint).value = (uint8)nValue;
 				ok = true;
 			}
 		}
@@ -354,10 +357,10 @@ bool CViewInstrument::EnvSetValue(int nPoint, int32 nTick, int32 nValue, bool mo
 	if(ok && moveTail)
 	{
 		// Move all points after modified point as well.
-		tickDiff = envelope->Ticks[nPoint] - tickDiff;
-		for(uint32 i = nPoint + 1; i < envelope->nNodes; i++)
+		tickDiff = envelope->at(nPoint).tick - tickDiff;
+		for(InstrumentEnvelope::iterator it = envelope->begin() + nPoint + 1; it != envelope->end(); it++)
 		{
-			envelope->Ticks[i] = (uint16)(std::max(0, (int)envelope->Ticks[i] + tickDiff));
+			it->tick = (uint16)(std::max(0, (int)it->tick + tickDiff));
 		}
 	}
 
@@ -370,7 +373,7 @@ UINT CViewInstrument::EnvGetNumPoints() const
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
-	return envelope->nNodes;
+	return envelope->size();
 }
 
 
@@ -580,7 +583,7 @@ bool CViewInstrument::EnvSetFlag(EnvelopeFlags flag, bool enable) const
 //---------------------------------------------------------------------
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr || envelope->nNodes == 0) return false;
+	if(envelope == nullptr || envelope->empty()) return false;
 
 	bool modified = envelope->dwFlags[flag] != enable;
 	envelope->dwFlags.set(flag, enable);
@@ -596,12 +599,11 @@ bool CViewInstrument::EnvToggleEnv(EnvelopeType envelope, CSoundFile &sndFile, M
 	const FlagSet<EnvelopeFlags> flags = (ENV_ENABLED | extraFlags);
 
 	env.dwFlags.set(flags, enable);
-	if(enable && !env.nNodes)
+	if(enable && env.empty())
 	{
-		env.Values[0] = env.Values[1] = defaultValue;
-		env.Ticks[0] = 0;
-		env.Ticks[1] = 10;
-		env.nNodes = 2;
+		env.reserve(2);
+		env.push_back(EnvelopeNode(0, defaultValue));
+		env.push_back(EnvelopeNode(10, defaultValue));
 		InvalidateRect(NULL, FALSE);
 	}
 
@@ -1011,24 +1013,6 @@ uint8 CViewInstrument::EnvGetReleaseNode()
 }
 
 
-uint16 CViewInstrument::EnvGetReleaseNodeValue()
-//----------------------------------------------
-{
-	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr) return 0;
-	return envelope->Values[EnvGetReleaseNode()];
-}
-
-
-uint16 CViewInstrument::EnvGetReleaseNodeTick()
-//---------------------------------------------
-{
-	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr) return 0;
-	return envelope->Ticks[EnvGetReleaseNode()];
-}
-
-
 bool CViewInstrument::EnvRemovePoint(UINT nPoint)
 //---------------------------------------------
 {
@@ -1039,26 +1023,22 @@ bool CViewInstrument::EnvRemovePoint(UINT nPoint)
 		if (pIns)
 		{
 			InstrumentEnvelope *envelope = GetEnvelopePtr();
-			if(envelope == nullptr || envelope->nNodes == 0) return false;
+			if(envelope == nullptr || envelope->empty()) return false;
 
-			envelope->nNodes--;
-			for (UINT i = nPoint; i < envelope->nNodes; i++)
-			{
-				envelope->Ticks[i] = envelope->Ticks[i + 1];
-				envelope->Values[i] = envelope->Values[i + 1];
-			}
-			if (nPoint >= envelope->nNodes) nPoint = envelope->nNodes - 1;
+			envelope->erase(envelope->begin() + nPoint);
+			if (nPoint >= envelope->size()) nPoint = envelope->size() - 1;
 			if (envelope->nLoopStart > nPoint) envelope->nLoopStart--;
 			if (envelope->nLoopEnd > nPoint) envelope->nLoopEnd--;
 			if (envelope->nSustainStart > nPoint) envelope->nSustainStart--;
 			if (envelope->nSustainEnd > nPoint) envelope->nSustainEnd--;
 			if (envelope->nReleaseNode>nPoint && envelope->nReleaseNode != ENV_RELEASE_NODE_UNSET) envelope->nReleaseNode--;
-			envelope->Ticks[0] = 0;
+			envelope->at(0).tick = 0;
 
-			if(envelope->nNodes <= 1)
+			if(envelope->size() <= 1)
 			{
 				// if only one node is left, just disable the envelope completely
-				envelope->nNodes = envelope->nLoopStart = envelope->nLoopEnd = envelope->nSustainStart = envelope->nSustainEnd = 0;
+				envelope->clear();
+				envelope->nLoopStart = envelope->nLoopEnd = envelope->nSustainStart = envelope->nSustainEnd = 0;
 				envelope->dwFlags.reset();
 				envelope->nReleaseNode = ENV_RELEASE_NODE_UNSET;
 			}
@@ -1071,7 +1051,7 @@ bool CViewInstrument::EnvRemovePoint(UINT nPoint)
 }
 
 
-// Insert point. Returns 0 if error occured, else point ID + 1.
+// Insert point. Returns 0 if error occurred, else point ID + 1.
 UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 //---------------------------------------------------------
 {
@@ -1088,7 +1068,14 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 			InstrumentEnvelope *envelope = GetEnvelopePtr();
 			if(envelope == nullptr) return 0;
 
-			if(std::binary_search(envelope->Ticks, envelope->Ticks + envelope->nNodes, nTick))
+			struct TickComperator
+			{
+				bool operator() (const EnvelopeNode &l, const EnvelopeNode &r) const
+				{
+					return l.tick < r.tick;
+				}
+			};
+			if(std::binary_search(envelope->begin(), envelope->end(), EnvelopeNode(static_cast<uint16>(nTick), 0), TickComperator()))
 			{
 				// Don't want to insert a node at the same position as another node.
 				return 0;
@@ -1106,31 +1093,22 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 				defaultValue = 32;
 				break;
 			case ENV_PITCH:
-				defaultValue = (pIns->PitchEnv.dwFlags & ENV_FILTER) ? 64 : 32;
+				defaultValue = pIns->PitchEnv.dwFlags[ENV_FILTER] ? 64 : 32;
 				break;
 			default:
 				return 0;
 			}
 
-			if (envelope->nNodes < sndFile.GetModSpecifications().envelopePointsMax)
+			if (envelope->size() < sndFile.GetModSpecifications().envelopePointsMax)
 			{
-				if (!envelope->nNodes)
+				if (envelope->empty())
 				{
-					envelope->Ticks[0] = 0;
-					envelope->Values[0] = defaultValue;
-					envelope->nNodes = 1;
+					envelope->push_back(EnvelopeNode(0, defaultValue));
 					envelope->dwFlags.set(ENV_ENABLED);
 				}
 				uint32 i = 0;
-				for (i = 0; i < envelope->nNodes; i++) if (nTick <= envelope->Ticks[i]) break;
-				for (uint32 j = envelope->nNodes; j > i; j--)
-				{
-					envelope->Ticks[j] = envelope->Ticks[j - 1];
-					envelope->Values[j] = envelope->Values[j - 1];
-				}
-				envelope->Ticks[i] = (WORD)nTick;
-				envelope->Values[i] = (BYTE)nValue;
-				envelope->nNodes++;
+				for (i = 0; i < envelope->size(); i++) if (nTick <= envelope->at(i).tick) break;
+				envelope->insert(envelope->begin() + i, EnvelopeNode(mpt::saturate_cast<uint16>(nTick), static_cast<uint8>(nValue)));
 				if (envelope->nLoopStart >= i) envelope->nLoopStart++;
 				if (envelope->nLoopEnd >= i) envelope->nLoopEnd++;
 				if (envelope->nSustainStart >= i) envelope->nSustainStart++;
@@ -1596,9 +1574,9 @@ void CViewInstrument::UpdateIndicator()
 	else if(m_nDragItem == ENV_DRAGSUSTAINEND) point = pEnv->nSustainEnd;
 	else point = m_nDragItem - 1;
 
-	if(point < pEnv->nNodes)
+	if(point < pEnv->size())
 	{
-		UpdateIndicator(pEnv->Ticks[point], pEnv->Values[point]);
+		UpdateIndicator(pEnv->at(point).tick, pEnv->at(point).value);
 	}
 }
 
@@ -1609,7 +1587,14 @@ void CViewInstrument::UpdateIndicator(int tick, int val)
 	ModInstrument *pIns = GetInstrumentPtr();
 	if (pIns == nullptr) return;
 	TCHAR s[64];
-	if (tick <= EnvGetReleaseNodeTick() + 1 || EnvGetReleaseNode() == ENV_RELEASE_NODE_UNSET)
+	const bool hasReleaseNode = EnvGetReleaseNode() != ENV_RELEASE_NODE_UNSET;
+	EnvelopeNode releaseNode;
+	if(hasReleaseNode)
+	{
+		releaseNode = pIns->GetEnvelope(m_nEnv)[EnvGetReleaseNode()];
+	}
+
+	if (!hasReleaseNode || tick <= releaseNode.tick + 1)
 	{
 		// ticks before release node (or no release node)
 		const int displayVal = (m_nEnv != ENV_VOLUME && !(m_nEnv == ENV_PITCH && pIns->PitchEnv.dwFlags[ENV_FILTER])) ? val - 32 : val;
@@ -1620,7 +1605,7 @@ void CViewInstrument::UpdateIndicator(int tick, int val)
 	} else
 	{
 		// ticks after release node
-		int displayVal = (val - EnvGetReleaseNodeValue()) * 2;
+		int displayVal = (val - releaseNode.value) * 2;
 		displayVal = (m_nEnv != ENV_VOLUME) ? displayVal - 32 : displayVal;
 		wsprintf(s, _T("Tick %d, [Rel%c%d]"),  tick, displayVal > 0 ? _T('+') : _T('-'), mpt::abs(displayVal));
 	}
@@ -1836,7 +1821,7 @@ void CViewInstrument::OnEnvLoopChanged()
 		{
 			// Enabled loop => set loop points if no loop has been specified yet.
 			pEnv->nLoopStart = 0;
-			pEnv->nLoopEnd = static_cast<uint8>(pEnv->nNodes - 1);
+			pEnv->nLoopEnd = mpt::saturate_cast<uint8>(pEnv->size() - 1);
 		}
 		SetModified(InstrumentHint().Envelope(), true);
 	}
@@ -1853,7 +1838,7 @@ void CViewInstrument::OnEnvSustainChanged()
 		if(EnvGetSustain() && pEnv != nullptr && pEnv->nSustainStart == pEnv->nSustainEnd && IsDragItemEnvPoint())
 		{
 			// Enabled sustain loop => set sustain loop points if no sustain loop has been specified yet.
-			pEnv->nSustainStart = pEnv->nSustainEnd = static_cast<uint8>(m_nDragItem - 1);
+			pEnv->nSustainStart = pEnv->nSustainEnd = mpt::saturate_cast<uint8>(m_nDragItem - 1);
 		}
 		SetModified(InstrumentHint().Envelope(), true);
 	}
@@ -2364,13 +2349,13 @@ void CViewInstrument::EnvKbdSelectPoint(DragPoints point)
 		m_nDragItem = point;
 		break;
 	case ENV_DRAGPREVIOUS:
-		if(m_nDragItem <= 1 || m_nDragItem > pEnv->nNodes)
-			m_nDragItem = pEnv->nNodes;
+		if(m_nDragItem <= 1 || m_nDragItem > pEnv->size())
+			m_nDragItem = pEnv->size();
 		else
 			m_nDragItem--;
 		break;
 	case ENV_DRAGNEXT:
-		if(m_nDragItem >= pEnv->nNodes)
+		if(m_nDragItem >= pEnv->size())
 			m_nDragItem = 1;
 		else
 			m_nDragItem++;
@@ -2413,7 +2398,7 @@ void CViewInstrument::EnvKbdMovePointLeft(int stepsize)
 		// Move envelope node
 		if(!IsDragItemEnvPoint() || m_nDragItem <= 1)
 			return;
-		if(!EnvSetValue(m_nDragItem - 1, pEnv->Ticks[m_nDragItem - 1] - stepsize))
+		if(!EnvSetValue(m_nDragItem - 1, pEnv->at(m_nDragItem - 1).tick - stepsize))
 			return;
 	}
 	UpdateIndicator();
@@ -2431,29 +2416,29 @@ void CViewInstrument::EnvKbdMovePointRight(int stepsize)
 	// Move loop points?
 	if(m_nDragItem == ENV_DRAGSUSTAINSTART)
 	{
-		if(pEnv->nSustainStart >= pEnv->nNodes - 1) return;
+		if(pEnv->nSustainStart >= pEnv->size() - 1) return;
 		if(pEnv->nSustainStart >= pEnv->nSustainEnd) pEnv->nSustainEnd++;
 		pEnv->nSustainStart++;
 	} else if(m_nDragItem == ENV_DRAGSUSTAINEND)
 	{
-		if(pEnv->nSustainEnd >= pEnv->nNodes - 1) return;
+		if(pEnv->nSustainEnd >= pEnv->size() - 1) return;
 		pEnv->nSustainEnd++;
 		if(modType == MOD_TYPE_XM) pEnv->nSustainStart = pEnv->nSustainEnd;
 	} else if(m_nDragItem == ENV_DRAGLOOPSTART)
 	{
-		if(pEnv->nLoopStart >= pEnv->nNodes - 1) return;
+		if(pEnv->nLoopStart >= pEnv->size() - 1) return;
 		if(pEnv->nLoopStart >= pEnv->nLoopEnd) pEnv->nLoopEnd++;
 		pEnv->nLoopStart++;
 	} else if(m_nDragItem == ENV_DRAGLOOPEND)
 	{
-		if(pEnv->nLoopEnd >= pEnv->nNodes - 1) return;
+		if(pEnv->nLoopEnd >= pEnv->size() - 1) return;
 		pEnv->nLoopEnd++;
 	} else
 	{
 		// Move envelope node
 		if(!IsDragItemEnvPoint() || m_nDragItem <= 1)
 			return;
-		if(!EnvSetValue(m_nDragItem - 1, pEnv->Ticks[m_nDragItem - 1] + stepsize))
+		if(!EnvSetValue(m_nDragItem - 1, pEnv->at(m_nDragItem - 1).tick + stepsize))
 			return;
 	}
 	UpdateIndicator();
@@ -2466,7 +2451,7 @@ void CViewInstrument::EnvKbdMovePointVertical(int stepsize)
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
-	int val = pEnv->Values[m_nDragItem - 1] + stepsize;
+	int val = pEnv->at(m_nDragItem - 1).value + stepsize;
 	if(EnvSetValue(m_nDragItem - 1, int32_min, val, false))
 	{
 		UpdateIndicator();
@@ -2480,14 +2465,19 @@ void CViewInstrument::EnvKbdInsertPoint()
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr) return;
-	if(!IsDragItemEnvPoint()) m_nDragItem = pEnv->nNodes;
-	uint16 newTick = pEnv->Ticks[pEnv->nNodes - 1] + 4;	// if last point is selected: add point after last point
-	uint8 newVal = pEnv->Values[pEnv->nNodes - 1];
-	// if some other point is selected: interpolate between this and next point (if there's room between them)
-	if(m_nDragItem < pEnv->nNodes && (pEnv->Ticks[m_nDragItem] - pEnv->Ticks[m_nDragItem - 1] > 1))
+	if(!IsDragItemEnvPoint()) m_nDragItem = pEnv->size();
+	uint16 newTick = 10;
+	uint8 newVal = m_nEnv == ENV_VOLUME ? ENVELOPE_MAX : ENVELOPE_MID;
+	if(m_nDragItem < pEnv->size() && (pEnv->at(m_nDragItem).tick - pEnv->at(m_nDragItem - 1).tick > 1))
 	{
-		newTick = (pEnv->Ticks[m_nDragItem - 1] + pEnv->Ticks[m_nDragItem]) / 2;
-		newVal = (pEnv->Values[m_nDragItem - 1] + pEnv->Values[m_nDragItem]) / 2;
+		// If some other point than the last is selected: interpolate between this and next point (if there's room between them)
+		newTick = (pEnv->at(m_nDragItem - 1).tick + pEnv->at(m_nDragItem).tick) / 2;
+		newVal = (pEnv->at(m_nDragItem - 1).value + pEnv->at(m_nDragItem).value) / 2;
+	} else if(!pEnv->empty())
+	{
+		// Last point is selected: add point after last point
+		newTick = pEnv->back().tick + 4;
+		newVal = pEnv->back().value;
 	}
 
 	UINT newPoint = EnvInsertPoint(newTick, newVal);
@@ -2500,8 +2490,8 @@ void CViewInstrument::EnvKbdRemovePoint()
 //---------------------------------------
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || !IsDragItemEnvPoint() || pEnv->nNodes == 0) return;
-	if(m_nDragItem > pEnv->nNodes) m_nDragItem = pEnv->nNodes;
+	if(pEnv == nullptr || !IsDragItemEnvPoint() || pEnv->empty()) return;
+	if(m_nDragItem > pEnv->size()) m_nDragItem = pEnv->size();
 	EnvRemovePoint(m_nDragItem - 1);
 	UpdateIndicator();
 }
@@ -2609,12 +2599,12 @@ bool CViewInstrument::CanMovePoint(UINT envPoint, int step)
 		return false;
 	}
 	// Can't move left of previous point
-	if((step < 0) && (pEnv->Ticks[envPoint] - pEnv->Ticks[envPoint - 1] <= -step))
+	if((step < 0) && (pEnv->at(envPoint).tick - pEnv->at(envPoint - 1).tick <= -step))
 	{
 		return false;
 	}
 	// Can't move right of next point
-	if((step > 0) && (envPoint < pEnv->nNodes - 1) && (pEnv->Ticks[envPoint + 1] - pEnv->Ticks[envPoint] <= step))
+	if((step > 0) && (envPoint < pEnv->size() - 1) && (pEnv->at(envPoint + 1).tick - pEnv->at(envPoint).tick <= step))
 	{
 		return false;
 	}
@@ -2669,7 +2659,7 @@ void CViewInstrument::OnEnvSave()
 //-------------------------------
 {
 	InstrumentEnvelope *env = GetEnvelopePtr();
-	if(env == nullptr || env->nNodes == 0)
+	if(env == nullptr || env->empty())
 	{
 		MessageBeep(MB_ICONWARNING);
 		return;

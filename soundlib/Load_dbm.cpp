@@ -289,15 +289,15 @@ static void ReadDBMEnvelopeChunk(FileReader chunk, EnvelopeType envType, CSoundF
 				if(dbmEnv.flags & DBMEnvelope::envLoop) mptEnv.dwFlags.set(ENV_LOOP);
 			}
 
-			mptEnv.nNodes = std::min<uint32>(dbmEnv.numSegments + 1, MAX_ENVPOINTS);
+			mptEnv.resize(std::min<uint32>(dbmEnv.numSegments + 1, 32));
 
 			mptEnv.nLoopStart = dbmEnv.loopBegin;
 			mptEnv.nLoopEnd = dbmEnv.loopEnd;
 			mptEnv.nSustainStart = mptEnv.nSustainEnd = dbmEnv.sustain1;
 
-			for(uint32 i = 0; i < mptEnv.nNodes; i++)
+			for(uint32 i = 0; i < mptEnv.size(); i++)
 			{
-				mptEnv.Ticks[i] = dbmEnv.data[i * 2];
+				mptEnv[i].tick = dbmEnv.data[i * 2];
 				uint16 val = dbmEnv.data[i * 2 + 1];
 				if(scaleEnv)
 				{
@@ -305,7 +305,7 @@ static void ReadDBMEnvelopeChunk(FileReader chunk, EnvelopeType envType, CSoundF
 					val = (val + 128) / 4;
 				}
 				LimitMax(val, uint16(64));
-				mptEnv.Values[i] = static_cast<uint8>(val);
+				mptEnv[i].value = static_cast<uint8>(val);
 			}
 		}
 	}

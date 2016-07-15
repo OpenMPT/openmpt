@@ -545,7 +545,7 @@ struct PACKED AMS2FileHeader
 STATIC_ASSERT(sizeof(AMS2FileHeader) == 7);
 
 
-// AMS2 Instument Envelope 
+// AMS2 Instument Envelope
 struct PACKED AMS2Envelope
 {
 	uint8 speed;		// Envelope speed (currently not supported, always the same as current BPM)
@@ -570,18 +570,18 @@ struct PACKED AMS2Envelope
 		}
 
 		STATIC_ASSERT(MAX_ENVPOINTS >= CountOf(data));
-		mptEnv.nNodes = std::min(numPoints, uint8(CountOf(data)));
+		mptEnv.resize(std::min(numPoints, uint8(CountOf(data))));
 		mptEnv.nLoopStart = loopStart;
 		mptEnv.nLoopEnd = loopEnd;
 		mptEnv.nSustainStart = mptEnv.nSustainEnd = sustainPoint;
 
-		for(size_t i = 0; i < mptEnv.nNodes; i++)
+		for(uint32 i = 0; i < mptEnv.size(); i++)
 		{
 			if(i != 0)
 			{
-				mptEnv.Ticks[i] = mptEnv.Ticks[i - 1] + static_cast<uint16>(std::max(1, data[i][0] | ((data[i][1] & 0x01) << 8)));
+				mptEnv[i].tick = mptEnv[i - 1].tick + static_cast<uint16>(std::max(1, data[i][0] | ((data[i][1] & 0x01) << 8)));
 			}
-			mptEnv.Values[i] = data[i][2];
+			mptEnv[i].value = data[i][2];
 		}
 	}
 };
@@ -836,13 +836,13 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		// Scale envelopes to correct range
 		for(size_t i = 0; i < MAX_ENVPOINTS; i++)
 		{
-			instrument->VolEnv.Values[i] = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>((instrument->VolEnv.Values[i] * ENVELOPE_MAX + 64u) / 127u));
-			instrument->PanEnv.Values[i] = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>((instrument->PanEnv.Values[i] * ENVELOPE_MAX + 128u) / 255u));
+			instrument->VolEnv[i].value = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>((instrument->VolEnv[i].value * ENVELOPE_MAX + 64u) / 127u));
+			instrument->PanEnv[i].value = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>((instrument->PanEnv[i].value * ENVELOPE_MAX + 128u) / 255u));
 #ifdef MODPLUG_TRACKER
-			instrument->PitchEnv.Values[i] = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>(32 + Util::muldivrfloor(static_cast<int8>(instrument->PitchEnv.Values[i] - 128), vibAmp, 255)));
+			instrument->PitchEnv[i].value = std::min(uint8(ENVELOPE_MAX), static_cast<uint8>(32 + Util::muldivrfloor(static_cast<int8>(instrument->PitchEnv[i].value - 128), vibAmp, 255)));
 #else
 			// Try to keep as much precision as possible... divide by 8 since that's the highest possible vibAmp factor.
-			instrument->PitchEnv.Values[i] = static_cast<uint8>(128 + Util::muldivrfloor(static_cast<int8>(instrument->PitchEnv.Values[i] - 128), vibAmp, 8));
+			instrument->PitchEnv[i].value = static_cast<uint8>(128 + Util::muldivrfloor(static_cast<int8>(instrument->PitchEnv[i].value - 128), vibAmp, 8));
 #endif
 		}
 

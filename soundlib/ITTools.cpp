@@ -46,27 +46,27 @@ void ITEnvelope::ConvertToIT(const InstrumentEnvelope &mptEnv, uint8 envOffset, 
 	if(mptEnv.dwFlags[ENV_CARRY]) flags |= ITEnvelope::envCarry;
 
 	// Nodes and Loops
-	num = (uint8)std::min(mptEnv.nNodes, uint32(25));
+	num = (uint8)std::min(mptEnv.size(), uint32(25));
 	lpb = (uint8)mptEnv.nLoopStart;
 	lpe = (uint8)mptEnv.nLoopEnd;
 	slb = (uint8)mptEnv.nSustainStart;
 	sle = (uint8)mptEnv.nSustainEnd;
 
 	// Envelope Data
-	if(mptEnv.nNodes > 0)
+	MemsetZero(data);
+	if(!mptEnv.empty())
 	{
 		// Attention: Full MPTM envelope is stored in extended instrument properties
-		for(size_t ev = 0; ev < 25; ev++)
+		for(uint32 ev = 0; ev < num; ev++)
 		{
-			data[ev * 3] = mptEnv.Values[ev] - envOffset;
-			data[ev * 3 + 1] = mptEnv.Ticks[ev] & 0xFF;
-			data[ev * 3 + 2] = mptEnv.Ticks[ev] >> 8;
+			data[ev * 3] = mptEnv[ev].value - envOffset;
+			data[ev * 3 + 1] = mptEnv[ev].tick & 0xFF;
+			data[ev * 3 + 2] = mptEnv[ev].tick >> 8;
 		}
 	} else
 	{
 		// Fix non-existing envelopes so that they can still be edited in Impulse Tracker.
 		num = 2;
-		MemsetZero(data);
 		data[0] = data[3] = envDefault - envOffset;
 		data[4] = 10;
 	}
@@ -84,7 +84,7 @@ void ITEnvelope::ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envOffset, uint8
 	mptEnv.dwFlags.set(ENV_CARRY, (flags & ITEnvelope::envCarry) != 0);
 
 	// Nodes and Loops
-	mptEnv.nNodes = std::min(num, maxNodes);
+	mptEnv.resize(std::min(num, maxNodes));
 	mptEnv.nLoopStart = std::min(lpb, maxNodes);
 	mptEnv.nLoopEnd = Clamp(lpe, mptEnv.nLoopStart, maxNodes);
 	mptEnv.nSustainStart = std::min(slb, maxNodes);
@@ -92,27 +92,24 @@ void ITEnvelope::ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envOffset, uint8
 
 	// Envelope Data
 	// Attention: Full MPTM envelope is stored in extended instrument properties
-	for(size_t ev = 0; ev < 25; ev++)
+	for(uint32 ev = 0; ev < std::min<uint32>(25, num); ev++)
 	{
-		mptEnv.Values[ev] = data[ev * 3] + envOffset;
-		mptEnv.Ticks[ev] = (data[ev * 3 + 2] << 8) | (data[ev * 3 + 1]);
-		if(ev > 0 && ev < num && mptEnv.Ticks[ev] < mptEnv.Ticks[ev - 1])
+		mptEnv[ev].value = data[ev * 3] + envOffset;
+		mptEnv[ev].tick = (data[ev * 3 + 2] << 8) | (data[ev * 3 + 1]);
+		if(ev > 0 && ev < num && mptEnv[ev].tick < mptEnv[ev - 1].tick)
 		{
 			// Fix broken envelopes... Instruments 2 and 3 in NoGap.it by Werewolf have envelope points where the high byte of envelope nodes is missing.
 			// NoGap.it was saved with MPT 1.07 or MPT 1.09, which *normally* doesn't do this in IT files.
 			// However... It turns out that MPT 1.07 omitted the high byte of envelope nodes when saving an XI instrument file, and it looks like
 			// Instrument 2 and 3 in NoGap.it were loaded from XI files.
-			mptEnv.Ticks[ev] &= 0xFF;
-			mptEnv.Ticks[ev] |= (mptEnv.Ticks[ev] & ~0xFF);
-			if(mptEnv.Ticks[ev] < mptEnv.Ticks[ev - 1])
+			mptEnv[ev].tick &= 0xFF;
+			mptEnv[ev].tick |= (mptEnv[ev].tick & ~0xFF);
+			if(mptEnv[ev].tick < mptEnv[ev - 1].tick)
 			{
-				mptEnv.Ticks[ev] += 0x100;
+				mptEnv[ev].tick += 0x100;
 			}
 		}
 	}
-
-	// Sanitize envelope
-	mptEnv.Ticks[0] = 0;
 }
 
 
@@ -175,21 +172,21 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 	mptIns.VolEnv.nLoopEnd = vle;
 	mptIns.VolEnv.nSustainStart = sls;
 	mptIns.VolEnv.nSustainEnd = sle;
-	mptIns.VolEnv.nNodes = 25;
+	mptIns.VolEnv.resize(25);
 
 	// Volume Envelope Data
 	for(uint32 i = 0; i < 25; i++)
 	{
-		if((mptIns.VolEnv.Ticks[i] = nodes[i * 2]) == 0xFF)
+		if((mptIns.VolEnv[i].tick = nodes[i * 2]) == 0xFF)
 		{
-			mptIns.VolEnv.nNodes = i;
+			mptIns.VolEnv.resize(i);
 			break;
 		}
-		mptIns.VolEnv.Values[i] = nodes[i * 2 + 1];
+		mptIns.VolEnv[i].value = nodes[i * 2 + 1];
 	}
 
-	if(std::max(mptIns.VolEnv.nLoopStart, mptIns.VolEnv.nLoopEnd) >= mptIns.VolEnv.nNodes) mptIns.VolEnv.dwFlags.reset(ENV_LOOP);
-	if(std::max(mptIns.VolEnv.nSustainStart, mptIns.VolEnv.nSustainEnd) >= mptIns.VolEnv.nNodes) mptIns.VolEnv.dwFlags.reset(ENV_SUSTAIN);
+	if(std::max(mptIns.VolEnv.nLoopStart, mptIns.VolEnv.nLoopEnd) >= mptIns.VolEnv.size()) mptIns.VolEnv.dwFlags.reset(ENV_LOOP);
+	if(std::max(mptIns.VolEnv.nSustainStart, mptIns.VolEnv.nSustainEnd) >= mptIns.VolEnv.size()) mptIns.VolEnv.dwFlags.reset(ENV_SUSTAIN);
 }
 
 

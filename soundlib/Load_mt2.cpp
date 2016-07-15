@@ -1001,16 +1001,15 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				mptEnv.dwFlags.set(ENV_ENABLED, (mt2Env.flags & 1) != 0);
 				mptEnv.dwFlags.set(ENV_SUSTAIN, (mt2Env.flags & 2) != 0);
 				mptEnv.dwFlags.set(ENV_LOOP, (mt2Env.flags & 4) != 0);
-				mptEnv.nNodes = mt2Env.numPoints;
-				LimitMax(mptEnv.nNodes, 16u);
+				mptEnv.resize(std::min(mt2Env.numPoints, uint8(16)));
 				mptEnv.nSustainStart = mptEnv.nSustainEnd = mt2Env.sustainPos;
 				mptEnv.nLoopStart = mt2Env.loopStart;
 				mptEnv.nLoopEnd = mt2Env.loopEnd;
 
-				for(uint32 i = 0; i < mptEnv.nNodes; i++)
+				for(uint32 i = 0; i < mptEnv.size(); i++)
 				{
-					mptEnv.Ticks[i] = mt2Env.points[i].x;
-					mptEnv.Values[i] = static_cast<uint8>(Clamp(mt2Env.points[i].y, uint16(0), uint16(64)));
+					mptEnv[i].tick = mt2Env.points[i].x;
+					mptEnv[i].value = static_cast<uint8>(Clamp(mt2Env.points[i].y, uint16(0), uint16(64)));
 				}
 			}
 			envMask >>= 1;

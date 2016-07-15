@@ -60,9 +60,13 @@ static void UpdateEnvelopes(InstrumentEnvelope &mptEnv, const CModSpecifications
 	// shorten instrument envelope if necessary (for mod conversion)
 	const uint8 envMax = specs.envelopePointsMax;
 
-#define TRIMENV(envLen) if(envLen > envMax) { envLen = envMax; CHANGEMODTYPE_WARNING(wTrimmedEnvelopes); }
+#define TRIMENV(envLen) if(envLen >= envMax) { envLen = envMax - 1; CHANGEMODTYPE_WARNING(wTrimmedEnvelopes); }
 
-	TRIMENV(mptEnv.nNodes);
+	if(mptEnv.size() > envMax)
+	{
+		mptEnv.resize(envMax);
+		CHANGEMODTYPE_WARNING(wTrimmedEnvelopes);
+	}
 	TRIMENV(mptEnv.nLoopStart);
 	TRIMENV(mptEnv.nLoopEnd);
 	TRIMENV(mptEnv.nSustainStart);
