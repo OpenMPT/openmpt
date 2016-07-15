@@ -1834,7 +1834,6 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 	if ((nEnv) && (nEnv <= m_nEnvelopes))
 	{
 		DLSENVELOPE *part = &m_Envelopes[nEnv-1];
-		uint32 nPoint = 0;
 		// Volume Envelope
 		if ((part->wVolAttack) || (part->wVolDecay < 20*50) || (part->nVolSustainLevel) || (part->wVolRelease < 20*50))
 		{
@@ -1842,18 +1841,17 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 			// Delay section
 			// -> DLS level 2
 			// Attack section
-			pIns->VolEnv.Ticks[nPoint] = 0;
+			pIns->VolEnv.assign(2, EnvelopeNode());
 			if (part->wVolAttack)
 			{
-				pIns->VolEnv.Values[nPoint] = (uint8)(ENVELOPE_MAX / (part->wVolAttack / 2 + 2) + 8);   //	/-----
-				pIns->VolEnv.Ticks[nPoint+1] = part->wVolAttack;                                       //	|
+				pIns->VolEnv[0].value = (uint8)(ENVELOPE_MAX / (part->wVolAttack / 2 + 2) + 8);   //	/-----
+				pIns->VolEnv[1].tick = part->wVolAttack;                                          //	|
 			} else
 			{
-				pIns->VolEnv.Values[nPoint] = ENVELOPE_MAX;  //	|-----
-				pIns->VolEnv.Ticks[nPoint + 1] = 1;          //	|
+				pIns->VolEnv[0].value = ENVELOPE_MAX;  //	|-----
+				pIns->VolEnv[1].tick = 1;              //	|
 			}
-			pIns->VolEnv.Values[nPoint + 1] = ENVELOPE_MAX;
-			nPoint += 2;
+			pIns->VolEnv[1].value = ENVELOPE_MAX;
 			// Hold section
 			// -> DLS Level 2
 			// Sustain Level
@@ -1861,7 +1859,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 			{
 				if (part->nVolSustainLevel < 128)
 				{
-					LONG lStartTime = pIns->VolEnv.Ticks[nPoint-1];
+					LONG lStartTime = pIns->VolEnv.back().tick;
 					LONG lSusLevel = - DLS32BitRelativeLinearToGain(part->nVolSustainLevel << 9) / 65536;
 					LONG lDecayTime = 1;
 					if (lSusLevel > 0)
@@ -1878,39 +1876,33 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 								if ((ltime > 1) && (ltime < lDecayTime))
 								{
 									ltime += lStartTime;
-									if (ltime > pIns->VolEnv.Ticks[nPoint-1])
+									if (ltime > pIns->VolEnv.back().tick)
 									{
-										pIns->VolEnv.Ticks[nPoint] = (uint16)ltime;
-										pIns->VolEnv.Values[nPoint] = (uint8)(lFactor / 2);
-										nPoint++;
+										pIns->VolEnv.push_back(EnvelopeNode((uint16)ltime, (uint8)(lFactor / 2)));
 									}
 								}
 							}
 						}
 					}
 
-					if (lStartTime + lDecayTime > (LONG)pIns->VolEnv.Ticks[nPoint-1])
+					if (lStartTime + lDecayTime > (LONG)pIns->VolEnv.back().tick)
 					{
-						pIns->VolEnv.Values[nPoint] = (uint8)((part->nVolSustainLevel+1) / 2);
-						pIns->VolEnv.Ticks[nPoint] = (uint16)(lStartTime+lDecayTime);
-						nPoint++;
+						pIns->VolEnv.push_back(EnvelopeNode((uint16)(lStartTime+lDecayTime), (uint8)((part->nVolSustainLevel+1) / 2)));
 					}
 				}
 				pIns->VolEnv.dwFlags.set(ENV_SUSTAIN);
 			} else
 			{
 				pIns->VolEnv.dwFlags.set(ENV_SUSTAIN);
-				pIns->VolEnv.Ticks[nPoint] = (uint16)(pIns->VolEnv.Ticks[nPoint-1]+1);
-				pIns->VolEnv.Values[nPoint] = pIns->VolEnv.Values[nPoint-1];
-				nPoint++;
+				pIns->VolEnv.push_back(EnvelopeNode((uint16)(pIns->VolEnv.back().tick + 1), pIns->VolEnv.back().value));
 			}
-			pIns->VolEnv.nSustainStart = pIns->VolEnv.nSustainEnd = (uint8)(nPoint - 1);
+			pIns->VolEnv.nSustainStart = pIns->VolEnv.nSustainEnd = (uint8)(pIns->VolEnv.size() - 1);
 			// Release section
-			if ((part->wVolRelease) && (pIns->VolEnv.Values[nPoint-1] > 1))
+			if ((part->wVolRelease) && (pIns->VolEnv.back().value > 1))
 			{
 				LONG lReleaseTime = part->wVolRelease;
-				LONG lStartTime = pIns->VolEnv.Ticks[nPoint-1];
-				LONG lStartFactor = pIns->VolEnv.Values[nPoint-1];
+				LONG lStartTime = pIns->VolEnv.back().tick;
+				LONG lStartFactor = pIns->VolEnv.back().value;
 				LONG lSusLevel = - DLS32BitRelativeLinearToGain(lStartFactor << 10) / 65536;
 				LONG lDecayEndTime = (lReleaseTime * lSusLevel) / 960;
 				lReleaseTime -= lDecayEndTime;
@@ -1925,26 +1917,19 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 						if ((ltime > 1) && (ltime < lReleaseTime))
 						{
 							ltime += lStartTime;
-							if (ltime > pIns->VolEnv.Ticks[nPoint-1])
+							if (ltime > pIns->VolEnv.back().tick)
 							{
-								pIns->VolEnv.Ticks[nPoint] = (uint16)ltime;
-								pIns->VolEnv.Values[nPoint] = (uint8)lFactor;
-								nPoint++;
+								pIns->VolEnv.push_back(EnvelopeNode((uint16)ltime, (uint8)lFactor));
 							}
 						}
 					}
 				}
 				if (lReleaseTime < 1) lReleaseTime = 1;
-				pIns->VolEnv.Ticks[nPoint] = (uint16)(lStartTime + lReleaseTime);
-				pIns->VolEnv.Values[nPoint] = ENVELOPE_MIN;
-				nPoint++;
+				pIns->VolEnv.push_back(EnvelopeNode((uint16)(lStartTime + lReleaseTime), ENVELOPE_MIN));
 			} else
 			{
-				pIns->VolEnv.Ticks[nPoint] = (uint8)(pIns->VolEnv.Ticks[nPoint-1] + 1);
-				pIns->VolEnv.Values[nPoint] = ENVELOPE_MIN;
-				nPoint++;
+				pIns->VolEnv.push_back(EnvelopeNode((uint16)(pIns->VolEnv.back().tick + 1), ENVELOPE_MIN));
 			}
-			pIns->VolEnv.nNodes = (uint8)nPoint;
 		}
 	}
 	if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
@@ -1954,15 +1939,15 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 		if(!pIns->VolEnv.dwFlags[ENV_ENABLED])
 		{
 			pIns->VolEnv.dwFlags.set(ENV_ENABLED);
-			pIns->VolEnv.Ticks[0] = 0;
-			pIns->VolEnv.Values[0] = ENVELOPE_MAX;
-			pIns->VolEnv.Ticks[1] = 5;
-			pIns->VolEnv.Values[1] = ENVELOPE_MAX;
-			pIns->VolEnv.Ticks[2] = 10;
-			pIns->VolEnv.Values[2] = ENVELOPE_MID;
-			pIns->VolEnv.Ticks[3] = 20;	// 1 second max. for drums
-			pIns->VolEnv.Values[3] = ENVELOPE_MIN;
-			pIns->VolEnv.nNodes = 4;
+			pIns->VolEnv.resize(4);
+			pIns->VolEnv[0].tick = 0;
+			pIns->VolEnv[0].value = ENVELOPE_MAX;
+			pIns->VolEnv[1].tick = 5;
+			pIns->VolEnv[1].value = ENVELOPE_MAX;
+			pIns->VolEnv[2].tick = 10;
+			pIns->VolEnv[2].value = ENVELOPE_MID;
+			pIns->VolEnv[3].tick = 20;	// 1 second max. for drums
+			pIns->VolEnv[3].value = ENVELOPE_MIN;
 		}
 	}
 	return true;

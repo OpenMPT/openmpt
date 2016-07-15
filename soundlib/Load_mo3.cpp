@@ -227,17 +227,17 @@ struct PACKED MO3Envelope
 		if(flags & envLoop) mptEnv.dwFlags.set(ENV_LOOP);
 		if(flags & envFilter) mptEnv.dwFlags.set(ENV_FILTER);
 		if(flags & envCarry) mptEnv.dwFlags.set(ENV_CARRY);
-		mptEnv.nNodes = std::min<uint8>(numNodes, 25);
+		mptEnv.resize(std::min<uint8>(numNodes, 25));
 		mptEnv.nSustainStart = sustainStart;
 		mptEnv.nSustainEnd = sustainEnd;
 		mptEnv.nLoopStart = loopStart;
 		mptEnv.nLoopEnd = loopEnd;
-		for(uint32 ev = 0; ev < mptEnv.nNodes; ev++)
+		for(uint32 ev = 0; ev < mptEnv.size(); ev++)
 		{
-			mptEnv.Ticks[ev] = points[ev][0];
-			if(ev > 0 && mptEnv.Ticks[ev] < mptEnv.Ticks[ev - 1])
-				mptEnv.Ticks[ev] = mptEnv.Ticks[ev - 1] + 1;
-			mptEnv.Values[ev] = static_cast<uint8>(Clamp(points[ev][1] >> envShift, 0, 64));
+			mptEnv[ev].tick = points[ev][0];
+			if(ev > 0 && mptEnv[ev].tick < mptEnv[ev - 1].tick)
+				mptEnv[ev].tick = mptEnv[ev - 1].tick + 1;
+			mptEnv[ev].value = static_cast<uint8>(Clamp(points[ev][1] >> envShift, 0, 64));
 		}
 	}
 };

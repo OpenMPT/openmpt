@@ -117,18 +117,17 @@ struct PACKED IMFInstrument
 		mptEnv.dwFlags.set(ENV_SUSTAIN, (env[e].flags & 2) != 0);
 		mptEnv.dwFlags.set(ENV_LOOP, (env[e].flags & 4) != 0);
 
-		mptEnv.nNodes = env[e].points;
-		Limit(mptEnv.nNodes, 2u, 16u);
+		mptEnv.resize(Clamp(env[e].points, uint8(2), uint8(16)));
 		mptEnv.nLoopStart = env[e].loop_start;
 		mptEnv.nLoopEnd = env[e].loop_end;
 		mptEnv.nSustainStart = mptEnv.nSustainEnd = env[e].sustain;
 
 		uint16 minTick = 0; // minimum tick value for next node
-		for(uint32 n = 0; n < mptEnv.nNodes; n++)
+		for(uint32 n = 0; n < mptEnv.size(); n++)
 		{
-			minTick = mptEnv.Ticks[n] = std::max(minTick, nodes[e][n].tick);
+			minTick = mptEnv[n].tick = std::max(minTick, nodes[e][n].tick);
 			minTick++;
-			mptEnv.Values[n] = static_cast<uint8>(std::min(nodes[e][n].value >> shift, ENVELOPE_MAX));
+			mptEnv[n].value = static_cast<uint8>(std::min(nodes[e][n].value >> shift, ENVELOPE_MAX));
 		}
 	}
 

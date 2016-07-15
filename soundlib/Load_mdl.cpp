@@ -183,15 +183,15 @@ static void ConvertMDLEnvelope(const unsigned char *pMDLEnv, InstrumentEnvelope 
 //---------------------------------------------------------------------------------------
 {
 	uint16 nCurTick = 1;
-	pMPTEnv->nNodes = 15;
+	pMPTEnv->resize(15);
 	for (uint32 nTick = 0; nTick < 15; nTick++)
 	{
 		if (nTick) nCurTick += pMDLEnv[nTick * 2 + 1];
-		pMPTEnv->Ticks[nTick] = nCurTick;
-		pMPTEnv->Values[nTick] = pMDLEnv[nTick * 2 + 2];
+		pMPTEnv->at(nTick).tick = nCurTick;
+		pMPTEnv->at(nTick).value = pMDLEnv[nTick * 2 + 2];
 		if (!pMDLEnv[nTick * 2 + 1]) // last point reached
 		{
-			pMPTEnv->nNodes = nTick + 1;
+			pMPTEnv->resize(nTick + 1);
 			break;
 		}
 	}

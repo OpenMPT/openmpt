@@ -28,9 +28,9 @@ void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 
 		if(nLoopEnd > nLoopStart && dwFlags[ENV_LOOP])
 		{
-			for(uint32 node = nLoopEnd; node < nNodes; node++)
+			for(uint32 node = nLoopEnd; node < size(); node++)
 			{
-				Ticks[node]++;
+				at(node).tick++;
 			}
 		}
 	} else if((fromType & MOD_TYPE_XM) && !(toType & MOD_TYPE_XM))
@@ -46,26 +46,12 @@ void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 		// XM -> IT / MPTM: Shorten loop by one tick by inserting bogus point
 		if(nLoopEnd > nLoopStart && dwFlags[ENV_LOOP])
 		{
-			if(Ticks[nLoopEnd] - 1 > Ticks[nLoopEnd - 1])
+			if(at(nLoopEnd).tick - 1 > at(nLoopEnd - 1).tick)
 			{
 				// Insert an interpolated point just before the loop point.
-				uint8 interpolatedValue = static_cast<uint8>(GetValueFromPosition(Ticks[nLoopEnd] - 1, 64));
-				
-
-				if(nNodes +  1 < MAX_ENVPOINTS)
-				{
-					// Should always be possible, since XM only allows for 12 envelope points anyway.
-					for(uint32 node = nNodes; node >= nLoopEnd; node--)
-					{
-						Ticks[node + 1] = Ticks[node];
-						Values[node + 1] = Values[node];
-					}
-
-					nNodes++;
-				}
-
-				Ticks[nLoopEnd]--;
-				Values[nLoopEnd] = interpolatedValue;
+				uint16 tick = at(nLoopEnd).tick - 1;
+				uint8 interpolatedValue = static_cast<uint8>(GetValueFromPosition(tick, 64));
+				insert(begin() + nLoopEnd, EnvelopeNode(tick, interpolatedValue));
 			} else
 			{
 				// There is already a point before the loop point: Use it as new loop end.
@@ -81,26 +67,26 @@ void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 int32 InstrumentEnvelope::GetValueFromPosition(int position, int32 rangeOut, int32 rangeIn) const
 //-----------------------------------------------------------------------------------------------
 {
-	uint32 pt = nNodes - 1u;
+	uint32 pt = size() - 1u;
 	const int32 ENV_PRECISION = 1 << 16;
 
 	// Checking where current 'tick' is relative to the envelope points.
-	for(uint32 i = 0; i < nNodes - 1u; i++)
+	for(uint32 i = 0; i < size() - 1u; i++)
 	{
-		if (position <= Ticks[i])
+		if (position <= at(i).tick)
 		{
 			pt = i;
 			break;
 		}
 	}
 
-	int x2 = Ticks[pt];
+	int x2 = at(pt).tick;
 	int32 value = 0;
 
 	if(position >= x2)
 	{
 		// Case: current 'tick' is on a envelope point.
-		value = Values[pt] * ENV_PRECISION / rangeIn;
+		value = at(pt).value * ENV_PRECISION / rangeIn;
 	} else
 	{
 		// Case: current 'tick' is between two envelope points.
@@ -109,15 +95,15 @@ int32 InstrumentEnvelope::GetValueFromPosition(int position, int32 rangeOut, int
 		if(pt)
 		{
 			// Get previous node's value and tick.
-			value = Values[pt - 1] * ENV_PRECISION / rangeIn;
-			x1 = Ticks[pt - 1];
+			value = at(pt - 1).value * ENV_PRECISION / rangeIn;
+			x1 = at(pt - 1).tick;
 		}
 
 		if(x2 > x1 && position > x1)
 		{
 			// Linear approximation between the points;
 			// f(x + d) ~ f(x) + f'(x) * d, where f'(x) = (y2 - y1) / (x2 - x1)
-			value += ((position - x1) * (Values[pt] * ENV_PRECISION / rangeIn - value)) / (x2 - x1);
+			value += ((position - x1) * (at(pt).value * ENV_PRECISION / rangeIn - value)) / (x2 - x1);
 		}
 	}
 
@@ -129,22 +115,23 @@ int32 InstrumentEnvelope::GetValueFromPosition(int position, int32 rangeOut, int
 void InstrumentEnvelope::Sanitize(uint8 maxValue)
 //-----------------------------------------------
 {
-	LimitMax(nNodes, uint32(MAX_ENVPOINTS));
-	Ticks[0] = 0;
-	LimitMax(Values[0], maxValue);
-	for(uint32 i = 1; i < nNodes; i++)
+	if(!empty())
 	{
-		if(Ticks[i] < Ticks[i - 1])
-			Ticks[i] = Ticks[i - 1];
-		LimitMax(Values[i], maxValue);
+		front().tick = 0;
+		LimitMax(front().value, maxValue);
+		for(iterator it = begin() + 1; it != end(); it++)
+		{
+			it->tick = std::max(it->tick, (it - 1)->tick);
+			LimitMax(it->value, maxValue);
+		}
 	}
 	STATIC_ASSERT(MAX_ENVPOINTS <= 255);
-	LimitMax(nLoopEnd, static_cast<uint8>(nNodes));
+	LimitMax(nLoopEnd, static_cast<uint8>(size()));
 	LimitMax(nLoopStart, nLoopEnd);
-	LimitMax(nSustainEnd, static_cast<uint8>(nNodes));
+	LimitMax(nSustainEnd, static_cast<uint8>(size()));
 	LimitMax(nSustainStart, nSustainEnd);
 	if(nReleaseNode != ENV_RELEASE_NODE_UNSET)
-		LimitMax(nReleaseNode, static_cast<uint8>(nNodes));
+		LimitMax(nReleaseNode, static_cast<uint8>(size()));
 }
 
 

@@ -18,27 +18,31 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+// Instrument Nodes
+struct EnvelopeNode
+{
+	uint16 tick;	// Envelope node position (x axis)
+	uint8 value;	// Envelope node value (y axis)
+
+	EnvelopeNode() : tick(0), value(0) { }
+	EnvelopeNode(uint16 tick, uint8 value) : tick(tick), value(value) { }
+};
+
 // Instrument Envelopes
-struct InstrumentEnvelope
+struct InstrumentEnvelope : public std::vector<EnvelopeNode>
 {
 	FlagSet<EnvelopeFlags> dwFlags;	// Envelope flags
-	uint32 nNodes;					// Amount of nodes used
-	uint8  nLoopStart;				// Loop start node
-	uint8  nLoopEnd;				// Loop end node
-	uint8  nSustainStart;			// Sustain start node
-	uint8  nSustainEnd;				// Sustain end node
-	uint8  nReleaseNode;			// Release node
-	uint16 Ticks[MAX_ENVPOINTS];	// Envelope point position (x axis)
-	uint8  Values[MAX_ENVPOINTS];	// Envelope point value (y axis)
+	uint8 nLoopStart;				// Loop start node
+	uint8 nLoopEnd;					// Loop end node
+	uint8 nSustainStart;			// Sustain start node
+	uint8 nSustainEnd;				// Sustain end node
+	uint8 nReleaseNode;				// Release node
 
 	InstrumentEnvelope()
 	{
-		nNodes = 0;
 		nLoopStart = nLoopEnd = 0;
 		nSustainStart = nSustainEnd = 0;
 		nReleaseNode = ENV_RELEASE_NODE_UNSET;
-		MemsetZero(Ticks);
-		MemsetZero(Values);
 	}
 
 	// Convert envelope data between various formats.
@@ -50,6 +54,8 @@ struct InstrumentEnvelope
 
 	// Ensure that ticks are ordered in increasing order and values are within the allowed range.
 	void Sanitize(uint8 maxValue = ENVELOPE_MAX);
+
+	uint32 size() const { return static_cast<uint32>(std::vector<EnvelopeNode>::size()); }
 };
 
 // Instrument Struct

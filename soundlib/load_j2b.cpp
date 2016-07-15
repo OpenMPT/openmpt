@@ -190,28 +190,28 @@ struct PACKED AMFFEnvelope
 	// Convert weird envelope data to OpenMPT's internal format.
 	void ConvertEnvelope(uint8 flags, uint8 numPoints, uint8 sustainPoint, uint8 loopStart, uint8 loopEnd, const AMFFEnvelopePoint *points, InstrumentEnvelope &mptEnv) const
 	{
-		mptEnv.dwFlags.set(ENV_ENABLED, (flags & AMFFEnvelope::envEnabled) != 0);
-		mptEnv.dwFlags.set(ENV_SUSTAIN, (flags & AMFFEnvelope::envSustain) && mptEnv.nSustainStart <= mptEnv.nNodes);
-		mptEnv.dwFlags.set(ENV_LOOP, (flags & AMFFEnvelope::envLoop) && mptEnv.nLoopStart <= mptEnv.nLoopEnd && mptEnv.nLoopStart <= mptEnv.nNodes);
-
 		// The buggy mod2j2b converter will actually NOT limit this to 10 points if the envelope is longer.
-		mptEnv.nNodes = std::min(numPoints, static_cast<uint8>(10));
+		mptEnv.resize(std::min(numPoints, static_cast<uint8>(10)));
 
 		mptEnv.nSustainStart = mptEnv.nSustainEnd = sustainPoint;
 
 		mptEnv.nLoopStart = loopStart;
 		mptEnv.nLoopEnd = loopEnd;
 
-		for(size_t i = 0; i < 10; i++)
+		for(uint32 i = 0; i < mptEnv.size(); i++)
 		{
-			mptEnv.Ticks[i] = points[i].tick >> 4;
+			mptEnv[i].tick = points[i].tick >> 4;
 			if(i == 0)
-				mptEnv.Ticks[0] = 0;
-			else if(mptEnv.Ticks[i] < mptEnv.Ticks[i - 1])
-				mptEnv.Ticks[i] = mptEnv.Ticks[i - 1] + 1;
+				mptEnv[0].tick = 0;
+			else if(mptEnv[i].tick < mptEnv[i - 1].tick)
+				mptEnv[i].tick = mptEnv[i - 1].tick + 1;
 
-			mptEnv.Values[i] = Clamp(points[i].value, uint8(0), uint8(0x40));
+			mptEnv[i].value = Clamp(points[i].value, uint8(0), uint8(0x40));
 		}
+
+		mptEnv.dwFlags.set(ENV_ENABLED, (flags & AMFFEnvelope::envEnabled) != 0);
+		mptEnv.dwFlags.set(ENV_SUSTAIN, (flags & AMFFEnvelope::envSustain) && mptEnv.nSustainStart <= mptEnv.size());
+		mptEnv.dwFlags.set(ENV_LOOP, (flags & AMFFEnvelope::envLoop) && mptEnv.nLoopStart <= mptEnv.nLoopEnd && mptEnv.nLoopStart <= mptEnv.size());
 	}
 
 	void ConvertToMPT(ModInstrument &mptIns) const
@@ -405,40 +405,40 @@ struct PACKED AMEnvelope
 		if(numPoints == 0xFF || numPoints == 0)
 			return;
 
-		mptEnv.dwFlags.set(ENV_ENABLED, (flags & AMFFEnvelope::envEnabled) != 0);
-		mptEnv.dwFlags.set(ENV_SUSTAIN, (flags & AMFFEnvelope::envSustain) && mptEnv.nSustainStart <= mptEnv.nNodes);
-		mptEnv.dwFlags.set(ENV_LOOP, (flags & AMFFEnvelope::envLoop) && mptEnv.nLoopStart <= mptEnv.nLoopEnd && mptEnv.nLoopStart <= mptEnv.nNodes);
-
-		mptEnv.nNodes = std::min(numPoints + 1, 10);
+		mptEnv.resize(std::min(numPoints + 1, 10));
 
 		mptEnv.nSustainStart = mptEnv.nSustainEnd = sustainPoint;
 
 		mptEnv.nLoopStart = loopStart;
 		mptEnv.nLoopEnd = loopEnd;
 
-		for(size_t i = 0; i < 10; i++)
+		for(uint32 i = 0; i < mptEnv.size(); i++)
 		{
-			mptEnv.Ticks[i] = values[i].tick >> 4;
+			mptEnv[i].tick = values[i].tick >> 4;
 			if(i == 0)
-				mptEnv.Ticks[i] = 0;
-			else if(mptEnv.Ticks[i] < mptEnv.Ticks[i - 1])
-				mptEnv.Ticks[i] = mptEnv.Ticks[i - 1] + 1;
+				mptEnv[i].tick = 0;
+			else if(mptEnv[i].tick < mptEnv[i - 1].tick)
+				mptEnv[i].tick = mptEnv[i - 1].tick + 1;
 
 			const uint16 val = values[i].value;
 			switch(envType)
 			{
 			case ENV_VOLUME:	// 0....32767
-				mptEnv.Values[i] = (uint8)((val + 1) >> 9);
+				mptEnv[i].value = (uint8)((val + 1) >> 9);
 				break;
 			case ENV_PITCH:		// -4096....4096
-				mptEnv.Values[i] = (uint8)((((int16)val) + 0x1001) >> 7);
+				mptEnv[i].value = (uint8)((((int16)val) + 0x1001) >> 7);
 				break;
 			case ENV_PANNING:	// -32768...32767
-				mptEnv.Values[i] = (uint8)((((int16)val) + 0x8001) >> 10);
+				mptEnv[i].value = (uint8)((((int16)val) + 0x8001) >> 10);
 				break;
 			}
-			Limit(mptEnv.Values[i], uint8(ENVELOPE_MIN), uint8(ENVELOPE_MAX));
+			Limit(mptEnv[i].value, uint8(ENVELOPE_MIN), uint8(ENVELOPE_MAX));
 		}
+
+		mptEnv.dwFlags.set(ENV_ENABLED, (flags & AMFFEnvelope::envEnabled) != 0);
+		mptEnv.dwFlags.set(ENV_SUSTAIN, (flags & AMFFEnvelope::envSustain) && mptEnv.nSustainStart <= mptEnv.size());
+		mptEnv.dwFlags.set(ENV_LOOP, (flags & AMFFEnvelope::envLoop) && mptEnv.nLoopStart <= mptEnv.nLoopEnd && mptEnv.nLoopStart <= mptEnv.size());
 	}
 };
 
