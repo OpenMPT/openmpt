@@ -60,7 +60,7 @@ class FileReader;
 // MODULAR ModInstrument FIELD ACCESS : body content in InstrumentExtensions.cpp
 // -----------------------------------------------------------------------------
 #ifndef MODPLUG_NO_FILESAVE
-extern void WriteInstrumentHeaderStructOrField(ModInstrument * input, FILE * file, uint32 only_this_code = -1 /* -1 for all */, int16 fixedsize = 0);
+extern void WriteInstrumentHeaderStructOrField(ModInstrument * input, FILE * file, uint32 only_this_code = -1 /* -1 for all */, uint16 fixedsize = 0);
 #endif // !MODPLUG_NO_FILESAVE
 extern bool ReadInstrumentHeaderField(ModInstrument * input, uint32 fcode, uint16 fsize, FileReader &file);
 // --------------------------------------------------------------------------------------------
@@ -692,7 +692,7 @@ public:
 	bool SaveMod(const mpt::PathString &filename) const;
 	bool SaveIT(const mpt::PathString &filename, bool compatibilityExport = false);
 	uint32 SaveMixPlugins(FILE *f=NULL, bool bUpdate=true);
-	void WriteInstrumentPropertyForAllInstruments(uint32 code,  int16 size, FILE* f, INSTRUMENTINDEX nInstruments) const;
+	void WriteInstrumentPropertyForAllInstruments(uint32 code,  uint16 size, FILE* f, INSTRUMENTINDEX nInstruments) const;
 	void SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, FILE* f) const;
 	void SaveExtendedSongProperties(FILE* f) const;
 #endif // MODPLUG_NO_FILESAVE
