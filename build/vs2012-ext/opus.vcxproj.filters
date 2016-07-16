@@ -150,6 +150,9 @@
     <ClInclude Include="..\..\include\opus\silk\MacroDebug.h">
       <Filter>silk</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\opus\silk\NSQ.h">
+      <Filter>silk</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\opus\silk\PLC.h">
       <Filter>silk</Filter>
     </ClInclude>
