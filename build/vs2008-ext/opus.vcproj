@@ -1235,6 +1235,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\opus\silk\NSQ.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\opus\silk\NSQ_del_dec.c"
 				>
 			</File>

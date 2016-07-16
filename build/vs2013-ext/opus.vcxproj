@@ -543,6 +543,7 @@
     <ClInclude Include="..\..\include\opus\silk\Inlines.h" />
     <ClInclude Include="..\..\include\opus\silk\MacroCount.h" />
     <ClInclude Include="..\..\include\opus\silk\MacroDebug.h" />
+    <ClInclude Include="..\..\include\opus\silk\NSQ.h" />
     <ClInclude Include="..\..\include\opus\silk\PLC.h" />
     <ClInclude Include="..\..\include\opus\silk\SigProc_FIX.h" />
     <ClInclude Include="..\..\include\opus\silk\control.h" />
