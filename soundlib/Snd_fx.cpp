@@ -5278,7 +5278,7 @@ void CSoundFile::KeyOff(ModChannel *pChn) const
 	if (pChn->pModInstrument)
 	{
 		const ModInstrument *pIns = pChn->pModInstrument;
-		if((pIns->VolEnv.dwFlags[ENV_LOOP] || (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))) && pIns->nFadeOut != 0)
+		if((pIns->VolEnv.dwFlags[ENV_LOOP] || (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MDL))) && pIns->nFadeOut != 0)
 		{
 			pChn->dwFlags.set(CHN_NOTEFADE);
 		}

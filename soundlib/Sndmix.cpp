@@ -1015,7 +1015,13 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period) const
 		// TODO: AMS2 envelopes behave differently when linear slides are off - emulate with 15 * (-128...127) >> 6
 		// Copy over vibrato behaviour for that?
 		const int32 range = GetType() == MOD_TYPE_AMS2 ? uint8_max : ENVELOPE_MAX;
-		const int32 amp = GetType() == MOD_TYPE_AMS2 ? 64 : 512;
+		int32 amp;
+		switch(GetType())
+		{
+		case MOD_TYPE_AMS2: amp = 64; break;
+		case MOD_TYPE_MDL: amp = 192; break;
+		default: amp = 512;
+		}
 #endif
 		const int envval = pIns->PitchEnv.GetValueFromPosition(envpos, amp, range) - amp / 2;
 
@@ -1154,7 +1160,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel *pChn, EnvelopeType envTyp
 	if(envType == ENV_VOLUME && endReached)
 	{
 		// Special handling for volume envelopes at end of envelope
-		if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || pChn->dwFlags[CHN_KEYOFF])
+		if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (pChn->dwFlags[CHN_KEYOFF] && GetType() != MOD_TYPE_MDL))
 		{
 			pChn->dwFlags.set(CHN_NOTEFADE);
 		}
