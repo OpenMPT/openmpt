@@ -657,7 +657,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		for(SAMPLEINDEX smp = 0; smp < numSamples; smp++)
 		{
 			MDLSampleInfoCommon header;
-			if(!chunk.ReadStruct(header) || header.sampleIndex == 0 || header.sampleIndex >= MAX_SAMPLES)
+			MPT_MAYBE_CONSTANT_IF(!chunk.ReadStruct(header) || header.sampleIndex == 0 || header.sampleIndex >= MAX_SAMPLES)
 				continue;
 			
 			if(header.sampleIndex > GetNumSamples())
@@ -716,7 +716,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				MDLSampleHeader sampleHeader;
 				chunk.ReadConvertEndianness(sampleHeader);
-				if(sampleHeader.smpNum == 0 || sampleHeader.smpNum >= MAX_SAMPLES)
+				MPT_MAYBE_CONSTANT_IF(sampleHeader.smpNum == 0 || sampleHeader.smpNum >= MAX_SAMPLES)
 					continue;
 
 				LimitMax(sampleHeader.lastNote, static_cast<uint8>(CountOf(mptIns->Keyboard)));
