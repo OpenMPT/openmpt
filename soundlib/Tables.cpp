@@ -71,7 +71,7 @@ static const ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_MTM,		"MultiTracker",				"mtm" },
 	{ MOD_TYPE_MED,		"OctaMed",					"med" },
 	{ MOD_TYPE_FAR,		"Farandole Composer",		"far" },
-	{ MOD_TYPE_MDL,		"DigiTracker",				"mdl" },
+	{ MOD_TYPE_MDL,		"Digitrakker",				"mdl" },
 	{ MOD_TYPE_AMS,		"Extreme's Tracker",		"ams" },
 	{ MOD_TYPE_AMS2,	"Velvet Studio",			"ams" },
 	{ MOD_TYPE_DSM,		"DSIK Format",				"dsm" },
@@ -704,6 +704,7 @@ const uint32 LinearSlideDownTable[256] =
 
 
 // LUT for 2 * damping factor
+// pow(10, -n * (24 / 128) / 20) for n=0...127
 const float ITResonanceTable[128] =
 {
 	1.0000000000000000f, 0.9786446094512940f, 0.9577452540397644f, 0.9372922182083130f,

@@ -354,11 +354,14 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 							m->param |= 0x0F;
 						}
 						break;
+#ifdef MODPLUG_TRACKER
 					case 0x16:	// Percentage offset
 						if(m->instr > 0 && m->instr <= m_nSamples)
 						{
 							m->param = mpt::saturate_cast<ModCommand::PARAM>(((m->param * Samples[m->instr].nLength) / 255) >> 8);
 						}
+						break;
+#endif // MODPLUG_TRACKER
 					}
 					if((data[3] == 0x13 || data[3] == 0x16) && m->note == NOTE_NONE)
 					{

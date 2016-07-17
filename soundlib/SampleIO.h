@@ -229,7 +229,7 @@ public:
 			// IT compressed samples use FileReader interface and thus do not need to call GetPinnedRawDataView()
 			return true;
 		}
-		if(GetEncoding() == AMS)
+		if(GetEncoding() == AMS || GetEncoding() == MDL)
 		{
 			return true;
 		}

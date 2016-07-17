@@ -713,7 +713,7 @@ mpt::ustring GetFullCreditsString()
 		"\n"
 #endif
 		"Storlek for all the IT compatibility hints and testcases\n"
-		"as well as the IMF, OKT and ULT loaders\n"
+		"as well as the IMF, MDL, OKT and ULT loaders\n"
 		"http://schismtracker.org/\n"
 		"\n"
 #ifdef MODPLUG_TRACKER
