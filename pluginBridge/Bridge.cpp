@@ -691,7 +691,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 	//std::cout << "about to dispatch " << msg->opcode << " to effect...";
 	//std::flush(std::cout);
 	bool exception = false;
-	msg->result = DispatchSEH(nativeEffect, msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt, exception);
+	msg->result = static_cast<int32>(DispatchSEH(nativeEffect, msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt, exception));
 	if(exception)
 	{
 		msg->type = MsgHeader::exceptionMsg;
