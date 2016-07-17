@@ -388,7 +388,7 @@ static void ConvertMDLCommand(uint8_t &cmd, uint8_t &param)
 		case 0x0: // unused
 		case 0x3: // unused
 		case 0x5: // Set Finetune
-		case 0x8: // Set Samplestatus (what?)
+		case 0x8: // Set Samplestatus (loop type)
 			cmd = CMD_NONE;
 			break;
 		case 0x1: // Pan Slide Left
@@ -606,7 +606,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals(MOD_TYPE_MDL);
-	m_SongFlags = SONG_ITCOMPATGXX | SONG_LINEARSLIDES;
+	m_SongFlags = SONG_ITCOMPATGXX;
 	m_playBehaviour.set(kPerChannelGlobalVolSlide);
 
 	m_madeWithTracker = std::string("Digitrakker ") + (
@@ -730,10 +730,25 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 				CopyEnvelope(mptIns->PanEnv, sampleHeader.panEnvFlags, panEnvs);
 				CopyEnvelope(mptIns->PitchEnv, sampleHeader.freqEnvFlags, pitchEnvs);
 				mptIns->nFadeOut = sampleHeader.fadeout;
+#ifdef MODPLUG_TRACKER
+				if((mptIns->VolEnv.dwFlags & (ENV_ENABLED | ENV_LOOP)) == ENV_ENABLED)
+				{
+					// Fade-out is only supposed to happen on key-off, not at the end of a volume envelope.
+					// Fake it by putting a loop at the end.
+					mptIns->VolEnv.nLoopStart = mptIns->VolEnv.nLoopEnd = static_cast<uint8>(mptIns->VolEnv.size() - 1);
+					mptIns->VolEnv.dwFlags.set(ENV_LOOP);
+				}
+				for(InstrumentEnvelope::iterator it = mptIns->PitchEnv.begin(); it != mptIns->PitchEnv.end(); it++)
+				{
+					// Scale pitch envelope
+					it->value = Util::muldivr(it->value, 6, 16);
+				}
+#endif // MODPLUG_TRACKER
 
 				ModSample &mptSmp = Samples[sampleHeader.smpNum];
 				// Samples were already initialized above. Let's hope they are not going to be re-used with different volume / panning / vibrato...
-				mptSmp.nVolume = sampleHeader.volume;
+				if(sampleHeader.volEnvFlags & 0x40)
+					mptSmp.nVolume = sampleHeader.volume;
 				mptSmp.nPan = std::min<uint16>(sampleHeader.panning * 2, 254);
 				mptSmp.nVibType = MDLVibratoType[sampleHeader.vibType & 3];
 				mptSmp.nVibSweep = sampleHeader.vibSweep;
