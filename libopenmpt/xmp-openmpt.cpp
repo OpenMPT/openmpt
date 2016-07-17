@@ -729,7 +729,10 @@ static void write_xmplay_tags( char * tags[8], const openmpt::module & mod ) {
 	write_xmplay_tag( &tags[4], convert_to_native( mod.get_metadata("xmplay-tracknumber") ) ); // todo, libopenmpt does not support that
 	write_xmplay_tag( &tags[5], convert_to_native( mod.get_metadata("xmplay-genre") ) ); // todo, libopenmpt does not support that
 	write_xmplay_tag( &tags[6], convert_to_native( mod.get_metadata("message") ) );
-	write_xmplay_tag( &tags[7], convert_to_native( mod.get_metadata("type") ) );
+	// Be consistent with XMPlay and report file format in upper-case.
+	std::string type = mod.get_metadata("type");
+	std::transform( type.begin(), type.end(), type.begin(), ::toupper );
+	write_xmplay_tag( &tags[7], convert_to_native( type ) );
 }
 
 static void clear_xmlpay_tags( char * tags[8] ) {
@@ -1265,9 +1268,9 @@ static void add_names( std::ostream & str, const std::string & title, const std:
 		if ( !valid ) {
 			return;
 		}
-		str << title << " names:" << "\r";
+		str << title << " Names:" << "\r";
 		for ( std::size_t i = 0; i < names.size(); i++ ) {
-			str << std::setfill('0') << std::setw(2) << i << std::setw(0) << "\t" << convert_to_native( names[display_offset + i] ) << "\r";
+			str << std::setfill('0') << std::setw(2) << (display_offset + i) << std::setw(0) << "\t" << convert_to_native( names[i] ) << "\r";
 		}
 		str << "\r";
 	}
@@ -1279,11 +1282,11 @@ static void WINAPI openmpt_GetSamples( char * buf ) {
 		return;
 	}
 	std::ostringstream str;
-	add_names( str, "instrument", self->mod->get_instrument_names(), 1 );
-	add_names( str, "sample", self->mod->get_sample_names(), 1 );
-	add_names( str, "channel", self->mod->get_channel_names(), 1 );
-	add_names( str, "order", self->mod->get_order_names(), 0 );
-	add_names( str, "pattern", self->mod->get_pattern_names(), 0 );
+	add_names( str, "Instrument", self->mod->get_instrument_names(), 1 );
+	add_names( str, "Sample", self->mod->get_sample_names(), 1 );
+	add_names( str, "Channel", self->mod->get_channel_names(), 1 );
+	add_names( str, "Order", self->mod->get_order_names(), 0 );
+	add_names( str, "Pattern", self->mod->get_pattern_names(), 0 );
 	write_xmplay_string( buf, str.str() );
 }
 
