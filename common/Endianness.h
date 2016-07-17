@@ -671,18 +671,18 @@ public:
 	operator bool () const { return mem != nullptr; }
 };
 
-//  Reference binding to unaligned strucutre field resulting from packed
+//  Reference binding to unaligned structure fields resulting from packed
 // structures result in undefined behaviour as soon as the reference gets used.
 //  Both Clang and GCC do not statically warn for this problem, but asan+ubsan
 // is able to catch it at runtime. Note however that this will not catch all
 // problematic accesses as actual alignedness may depend on the actual memory
 // layout at runtime and the sanitizers will only catch the cases where it is
 // actually misaligned at the particular point of occurence.
-//  read_unaligned_fiel() takes the argument by value which will cause the
+//  read_unaligned_field() takes the argument by value which will cause the
 // compiler to copy it to an aligned stack slot or register.
-//  This has been verified to work with Clang (sanitizers wont warn anymore). In
-// case it does not work with GCC, at least all known offending call sites can
-// easily identified by grepping for read_unaligned_field.
+//  This has been verified to work with Clang (sanitizers won't warn anymore).
+// In case it does not work with GCC, at least all known offending call sites
+// can easily identified by grepping for read_unaligned_field.
 //  See https://bugs.openmpt.org/view.php?id=572 .
 // TODO: Verify this works as intended on GCC.
 template <typename T>
