@@ -608,6 +608,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_MDL);
 	m_SongFlags = SONG_ITCOMPATGXX;
 	m_playBehaviour.set(kPerChannelGlobalVolSlide);
+	m_playBehaviour.reset(kITVibratoTremoloPanbrello);
 
 	m_madeWithTracker = std::string("Digitrakker ") + (
 		(fileHeader.version == 0x11) ? "3" // really could be 2.99b - close enough
