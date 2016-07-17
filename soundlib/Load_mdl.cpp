@@ -609,6 +609,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags = SONG_ITCOMPATGXX;
 	m_playBehaviour.set(kPerChannelGlobalVolSlide);
 	m_playBehaviour.reset(kITVibratoTremoloPanbrello);
+	m_playBehaviour.reset(kITSCxStopsSample);	// Gate effect in underbeat.mdl
 
 	m_madeWithTracker = std::string("Digitrakker ") + (
 		(fileHeader.version == 0x11) ? "3" // really could be 2.99b - close enough
