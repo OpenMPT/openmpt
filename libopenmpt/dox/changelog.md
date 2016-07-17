@@ -23,6 +23,8 @@ is just a high-level summary.
     compilers, this change only affects the 3 compilers with only limited
     support: MSVC 2008, GCC 4.1, GCC 4.2.)
 
+ *  [**Bug**] xmp-openmpt: Crash when viewing sample texts.
+
  *  The public libopenmpt C++ header has auto-detection logic for the used C++
     standard now. In case your client code compiler misreports the standard
     version or you want to override it for other reasons,
@@ -32,6 +34,10 @@ is just a high-level summary.
     `LIBOPENMPT_ASSUME_CPLUSPLUS_DEPRECATED`,
     `LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT` which take precedence over the
     general macro.
+ *  Portamento with sample swap behaviour was wrong for ProTracker MODs.
+ *  Various playback fixes for MDL files.
+ *  libopenmpt 0.2-beta18 broke import of many pattern commands in DBM, DMF and
+    ULT files.
 
 ### libopenmpt 0.2-beta18 (2016-07-11)
 
