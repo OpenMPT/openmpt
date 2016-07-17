@@ -57,8 +57,8 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		fileSize = restrictedSampleDataView.size();
 	} else
 	{
-		// Only DMF or MDL sample compression encodings should fall in this case,
-		MPT_ASSERT(GetEncoding() == DMF || GetEncoding() == MDL);
+		// Only DMF sample compression encoding should fall in this case,
+		MPT_ASSERT(GetEncoding() == DMF);
 		// file is guaranteed by the caller to be ONLY data for this sample,
 		// it is thus efficient to create a view to the whole file object.
 		// See MPT_ASSERT with fileSize below.
@@ -133,12 +133,18 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 	} else if(GetEncoding() == MDL && GetChannelFormat() == mono && GetBitDepth() <= 16)
 	{
 		// Huffman MDL compressed samples
-		if(fileSize > 4)
+		fileSize = file.ReadUint32LE();
+		FileReader chunk = file.ReadChunk(fileSize);
+		bytesRead = chunk.GetLength() + 4;
+		if(chunk.CanRead(4))
 		{
-			uint32 bitBuf = file.ReadUint32LE(), bitNum = 32;
+			uint32 bitBuf = chunk.ReadUint32LE(), bitNum = 32;
 
-			const uint8 *inBuf = reinterpret_cast<const uint8*>(sourceBuf) + 4;
-			size_t bytesLeft = file.BytesLeft();
+			restrictedSampleDataView = chunk.GetPinnedRawDataView();
+			sourceBuf = restrictedSampleDataView.data();
+
+			const uint8 *inBuf = reinterpret_cast<const uint8*>(sourceBuf);
+			size_t bytesLeft = chunk.GetLength() - 4;
 
 			uint8 dlt = 0, lowbyte = 0;
 			const bool _16bit = GetBitDepth() == 16;
@@ -170,14 +176,6 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 					sample.pSample16[j] = lowbyte | (dlt << 8);
 				}
 			}
-
-			// This assertion ensures that, when using variable length samples,
-			// the caller actually provided a trimmed chunk to read the sample data from.
-			// This is required as we cannot know the encoded sample data size upfront
-			// to construct a properly sized pinned view.
-			MPT_ASSERT(bytesLeft == 0);
-
-			bytesRead = fileSize;
 		}
 	} else if(GetEncoding() == DMF && GetChannelFormat() == mono && GetBitDepth() <= 16)
 	{

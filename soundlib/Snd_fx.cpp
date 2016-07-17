@@ -33,7 +33,7 @@ OPENMPT_NAMESPACE_BEGIN
 #else
 #define GLOBALVOL_7BIT_FORMATS_EXT Enum<MODTYPE>::value_type()
 #endif // MODPLUG_TRACKER
-#define GLOBALVOL_7BIT_FORMATS (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM | MOD_TYPE_PTM | GLOBALVOL_7BIT_FORMATS_EXT)
+#define GLOBALVOL_7BIT_FORMATS (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM | MOD_TYPE_PTM | MOD_TYPE_MDL | GLOBALVOL_7BIT_FORMATS_EXT)
 
 
 // Compensate frequency slide LUTs depending on whether we are handling periods or frequency - "up" and "down" in function name are seen from frequency perspective.
@@ -4940,6 +4940,16 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 		param = (param - chn.nLoopStart) % (chn.nLoopEnd - chn.nLoopStart) + chn.nLoopStart;
 	}
 
+	if(GetType() == MOD_TYPE_MDL && chn.dwFlags[CHN_16BIT])
+	{
+		// Digitrakker really uses byte offsets, not sample offsets. WTF!
+		param /= 2u;
+	} else if(GetType() == MOD_TYPE_PLM)
+	{
+		// Offset in Disorder Tracker 2 is a percentage
+		param = Util::muldiv_unsigned(chn.nLength, param >> 8, 255);
+	}
+
 	if(chn.rowCommand.IsNote())
 	{
 		// IT compatibility: If this note is not mapped to a sample, ignore it.
@@ -5307,15 +5317,17 @@ void CSoundFile::SetTempo(TEMPO param, bool setAsNonModcommand)
 {
 	const CModSpecifications& specs = GetModSpecifications();
 
+	const TEMPO minTempo = (GetType() == MOD_TYPE_MDL) ? TEMPO(1, 0) : TEMPO(32, 0);
+
 	if(setAsNonModcommand)
 	{
 		// Set tempo from UI - ignore slide commands and such.
 		m_PlayState.m_nMusicTempo = Clamp(param, specs.tempoMin, specs.tempoMax);
-	} else if (param >= TEMPO(0x20, 0) && m_SongFlags[SONG_FIRSTTICK])
+	} else if (param >= minTempo && m_SongFlags[SONG_FIRSTTICK])
 	{
 		m_PlayState.m_nMusicTempo = param;
 		if (param > GetModSpecifications().tempoMax) param = GetModSpecifications().tempoMax;
-	} else if (param < TEMPO(0x20, 0) && !m_SongFlags[SONG_FIRSTTICK])
+	} else if (param < minTempo && !m_SongFlags[SONG_FIRSTTICK])
 	{
 		// Tempo Slide
 		TEMPO tempDiff(param.GetInt() & 0x0F, 0);

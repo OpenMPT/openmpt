@@ -1,100 +1,309 @@
 /*
  * Load_mdl.cpp
  * ------------
- * Purpose: DigiTrakker (MDL) module loader
+ * Purpose: Digitrakker (MDL) module loader
  * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
+ * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 
 #include "stdafx.h"
 #include "Loaders.h"
+#include "ChunkReader.h"
 
 OPENMPT_NAMESPACE_BEGIN
-
-//#define MDL_LOG
-
-#if MPT_COMPILER_MSVC
-#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
-#endif
 
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(push, 1)
 #endif
 
+// MDL file header
 struct PACKED MDLFileHeader
 {
-	uint32 id;	// "DMDL" = 0x4C444D44
-	uint8  version;
+	char  id[4];	// "DMDL"
+	uint8 version;
 };
 
 STATIC_ASSERT(sizeof(MDLFileHeader) == 5);
 
 
+// RIFF-style Chunk
+struct PACKED MDLChunk
+{
+	// 16-Bit chunk identifiers
+	enum ChunkIdentifiers
+	{
+		idInfo			= MAGIC2LE('I','N'),
+		idMessage		= MAGIC2LE('M','E'),
+		idPats			= MAGIC2LE('P','A'),
+		idPatNames		= MAGIC2LE('P','N'),
+		idTracks		= MAGIC2LE('T','R'),
+		idInstrs		= MAGIC2LE('I','I'),
+		idVolEnvs		= MAGIC2LE('V','E'),
+		idPanEnvs		= MAGIC2LE('P','E'),
+		idFreqEnvs		= MAGIC2LE('F','E'),
+		idSampleInfo	= MAGIC2LE('I','S'),
+		ifSampleData	= MAGIC2LE('S','A'),
+	};
+
+	typedef ChunkIdentifiers id_type;
+
+	uint16 id;
+	uint32 length;
+
+	size_t GetLength() const
+	{
+		return SwapBytesReturnLE(length);
+	}
+
+	id_type GetID() const
+	{
+		return static_cast<id_type>(SwapBytesReturnLE(id));
+	}
+};
+
+STATIC_ASSERT(sizeof(MDLChunk) == 6);
+
+
 struct PACKED MDLInfoBlock
 {
-	char   songname[32];
+	char   title[32];
 	char   composer[20];
-	uint16 norders;
-	uint16 repeatpos;
-	uint8  globalvol;
-	uint8  speed;
-	uint8  tempo;
-	uint8  channelinfo[32];
-	uint8  seq[256];
+	uint16 numOrders;
+	uint16 restartPos;
+	uint8  globalVol;		// 1...255
+	uint8  speed;			// 1...255
+	uint8  tempo;			// 4...255
+	uint8  chnSetup[32];
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(numOrders);
+		SwapBytesLE(restartPos);
+	}
 };
 
-STATIC_ASSERT(sizeof(MDLInfoBlock) == 347);
+STATIC_ASSERT(sizeof(MDLInfoBlock) == 91);
 
 
-struct PACKED MDLPatternHeader
+// Sample header in II block
+struct PACKED MDLSampleHeader
 {
-	uint8  channels;
-	uint8  lastrow;	// nrows = lastrow+1
-	char   name[16];
+	uint8  smpNum;
+	uint8  lastNote;
+	uint8  volume;
+	uint8  volEnvFlags; // 6 bits env #, 2 bits flags
+	uint8  panning;
+	uint8  panEnvFlags;
+	uint16 fadeout;
+	uint8  vibSpeed;
+	uint8  vibDepth;
+	uint8  vibSweep;
+	uint8  vibType;
+	uint8  reserved; // zero
+	uint8  freqEnvFlags;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(fadeout);
+	}
 };
 
-STATIC_ASSERT(sizeof(MDLPatternHeader) == 18);
+STATIC_ASSERT(sizeof(MDLSampleHeader) == 14);
 
 
-struct PACKED MDLSampleHeaderCommon
+// Part of the sample header that's common between v0 and v1.
+struct PACKED MDLSampleInfoCommon
 {
 	uint8 sampleIndex;
 	char  name[32];
 	char  filename[8];
 };
 
-STATIC_ASSERT(sizeof(MDLSampleHeaderCommon) == 41);
+STATIC_ASSERT(sizeof(MDLSampleInfoCommon) == 41);
 
 
-struct PACKED MDLSampleHeader
+struct PACKED MDLSampleInfov0
 {
-	MDLSampleHeaderCommon info;
-	uint32 c4Speed;
-	uint32 length;
-	uint32 loopStart;
-	uint32 loopLength;
-	uint8  unused; // was volume in v0.0, why it was changed I have no idea
-	uint8  flags;
-};
+	enum SampleFlags
+	{
+		smp16Bit		= 0x01,
+		smpPingPong		= 0x02,
 
-STATIC_ASSERT(sizeof(MDLSampleHeader) == 59);
+		smpNoPack		= 0x00,
+		smpPack8Bit		= 0x04,
+		smpPack16Bit	= 0x08,
+		smpPackMask		= 0x0C,
+	};
 
-
-struct PACKED MDLSampleHeaderv0
-{
-	MDLSampleHeaderCommon info;
-	uint16 c4Speed;
+	uint16 c4speed;
 	uint32 length;
 	uint32 loopStart;
 	uint32 loopLength;
 	uint8  volume;
 	uint8  flags;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(c4speed);
+		SwapBytesLE(length);
+		SwapBytesLE(loopStart);
+		SwapBytesLE(loopLength);
+	}
+
+	// Convert an MDL sample header to OpenMPT's internal sample header.
+	SampleIO ConvertToMPT(ModSample &mptSmp) const
+	{
+		mptSmp.nC5Speed = c4speed * 2;
+		mptSmp.nLength = length;
+		mptSmp.nVolume = volume;
+		mptSmp.nLoopStart = loopStart;
+		mptSmp.nLoopEnd = loopLength;
+		if(loopLength != 0)
+		{
+			mptSmp.nLoopEnd += mptSmp.nLoopStart;
+			mptSmp.uFlags.set(CHN_LOOP);
+		}
+
+		if(flags & smp16Bit)
+		{
+			mptSmp.uFlags.set(CHN_16BIT);
+			mptSmp.nLength /= 2;
+			mptSmp.nLoopStart /= 2;
+			mptSmp.nLoopEnd /= 2;
+		}
+
+		if(flags & smpPingPong)
+		{
+			mptSmp.uFlags.set(CHN_PINGPONGLOOP);
+		}
+
+		return SampleIO(
+			(flags & smp16Bit) ? SampleIO::_16bit : SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			(flags & smpPackMask) ? SampleIO::MDL : SampleIO::signedPCM);
+	}
 };
 
-STATIC_ASSERT(sizeof(MDLSampleHeaderv0) == 57);
+STATIC_ASSERT(sizeof(MDLSampleInfov0) == 16);
+
+
+struct PACKED MDLSampleInfo
+{
+	enum SampleFlags
+	{
+		smp16Bit		= 0x01,
+		smpPingPong		= 0x02,
+
+		smpNoPack		= 0x00,
+		smpPack8Bit		= 0x04,
+		smpPack16Bit	= 0x08,
+		smpPackMask		= 0x0C,
+	};
+
+	uint32 c4speed;
+	uint32 length;
+	uint32 loopStart;
+	uint32 loopLength;
+	uint8  unused;		// was volume in v0.0, why it was changed I have no idea
+	uint8  flags;
+
+	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
+	void ConvertEndianness()
+	{
+		SwapBytesLE(c4speed);
+		SwapBytesLE(length);
+		SwapBytesLE(loopStart);
+		SwapBytesLE(loopLength);
+	}
+
+	// Convert an MDL sample header to OpenMPT's internal sample header.
+	SampleIO ConvertToMPT(ModSample &mptSmp) const
+	{
+		mptSmp.nC5Speed = c4speed * 2;
+		mptSmp.nLength = length;
+		mptSmp.nLoopStart = loopStart;
+		mptSmp.nLoopEnd = loopLength;
+		if(loopLength != 0)
+		{
+			mptSmp.nLoopEnd += mptSmp.nLoopStart;
+			mptSmp.uFlags.set(CHN_LOOP);
+		}
+
+		if(flags & smp16Bit)
+		{
+			mptSmp.uFlags.set(CHN_16BIT);
+			mptSmp.nLength /= 2;
+			mptSmp.nLoopStart /= 2;
+			mptSmp.nLoopEnd /= 2;
+		}
+
+		if(flags & smpPingPong)
+		{
+			mptSmp.uFlags.set(CHN_PINGPONGLOOP);
+		}
+
+		return SampleIO(
+			(flags & smp16Bit) ? SampleIO::_16bit : SampleIO::_8bit,
+			SampleIO::mono,
+			SampleIO::littleEndian,
+			(flags & smpPackMask) ? SampleIO::MDL : SampleIO::signedPCM);
+	}
+};
+
+STATIC_ASSERT(sizeof(MDLSampleInfo) == 18);
+
+
+struct PACKED MDLEnvelope
+{
+	uint8 envNum;
+	struct
+	{
+		uint8 x;	// Delta value from last point, 0 means no more points defined
+		uint8 y;	// 0...63
+	} nodes[15];
+	uint8 flags;
+	uint8 loop;		// Lower 4 bits = start, upper 4 bits = end
+
+	void ConvertToMPT(InstrumentEnvelope &mptEnv) const
+	{
+		mptEnv.dwFlags.reset();
+		mptEnv.clear();
+		mptEnv.reserve(15);
+		int16 tick = -nodes[0].x;
+		for(uint8 n = 0; n < 15; n++)
+		{
+			if(!nodes[n].x)
+				break;
+			tick += nodes[n].x;
+			mptEnv.push_back(EnvelopeNode(tick, std::min(nodes[n].y, uint8(64)))); // actually 0-63
+		}
+
+		mptEnv.nLoopStart = (loop & 0x0F);
+		mptEnv.nLoopEnd = (loop >> 4);
+		mptEnv.nSustainStart = mptEnv.nSustainEnd = (flags & 0x0F);
+
+		if(flags & 0x10) mptEnv.dwFlags.set(ENV_SUSTAIN);
+		if(flags & 0x20) mptEnv.dwFlags.set(ENV_LOOP);
+	}
+};
+
+STATIC_ASSERT(sizeof(MDLEnvelope) == 33);
+
+
+struct PACKED MDLPatternHeader
+{
+	uint8 channels;
+	uint8 lastRow;
+	char  name[16];
+};
+
+STATIC_ASSERT(sizeof(MDLPatternHeader) == 18);
 
 
 #ifdef NEEDS_PRAGMA_PACK
@@ -102,206 +311,282 @@ STATIC_ASSERT(sizeof(MDLSampleHeaderv0) == 57);
 #endif
 
 
-static void ConvertMDLCommand(ModCommand *m, uint32 eff, uint32 data)
-//-------------------------------------------------------------------
+enum
 {
-	uint32 command = 0, param = data;
-	switch(eff)
-	{
-	case 0x01:	command = CMD_PORTAMENTOUP; break;
-	case 0x02:	command = CMD_PORTAMENTODOWN; break;
-	case 0x03:	command = CMD_TONEPORTAMENTO; break;
-	case 0x04:	command = CMD_VIBRATO; break;
-	case 0x05:	command = CMD_ARPEGGIO; break;
-	case 0x07:	command = (param < 0x20) ? CMD_SPEED : CMD_TEMPO; break;
-	case 0x08:	command = CMD_PANNING8; param <<= 1; break;
-	case 0x0B:	command = CMD_POSITIONJUMP; break;
-	case 0x0C:	command = CMD_GLOBALVOLUME; break;
-	case 0x0D:	command = CMD_PATTERNBREAK; param = (data & 0x0F) + (data>>4)*10; break;
-	case 0x0E:
-		command = CMD_S3MCMDEX;
-		switch(data & 0xF0)
-		{
-		case 0x00:	command = 0; break; // What is E0x in MDL (there is a bunch) ?
-		case 0x10:	if (param & 0x0F) { param |= 0xF0; command = CMD_PANNINGSLIDE; } else command = 0; break;
-		case 0x20:	if (param & 0x0F) { param = (param << 4) | 0x0F; command = CMD_PANNINGSLIDE; } else command = 0; break;
-		case 0x30:	param = (data & 0x0F) | 0x10; break; // glissando
-		case 0x40:	param = (data & 0x0F) | 0x30; break; // vibrato waveform
-		case 0x60:	param = (data & 0x0F) | 0xB0; break;
-		case 0x70:	param = (data & 0x0F) | 0x40; break; // tremolo waveform
-		case 0x90:	command = CMD_RETRIG; param &= 0x0F; break;
-		case 0xA0:	param = (data & 0x0F) << 4; command = CMD_GLOBALVOLSLIDE; break;
-		case 0xB0:	param = data & 0x0F; command = CMD_GLOBALVOLSLIDE; break;
-		case 0xF0:	param = ((data >> 8) & 0x0F) | 0xA0; break;
-		}
-		break;
-	case 0x0F:	command = CMD_SPEED; break;
-	case 0x10:
-		if ((param & 0xF0) != 0xE0)
-		{
-			command = CMD_VOLUMESLIDE;
-			if ((param & 0xF0) == 0xF0)
-			{
-				param = ((param << 4) | 0x0F);
-			} else
-			{
-				param >>= 2;
-				if (param > 0xF)
-					param = 0xF;
-				param <<= 4;
-			}
-		}
-		break;
-	case 0x20:
-		if ((param & 0xF0) != 0xE0)
-		{
-			command = CMD_VOLUMESLIDE;
-			if ((param & 0xF0) != 0xF0)
-			{
-				param >>= 2;
-				if (param > 0xF)
-					param = 0xF;
-			}
-		}
-		break;
+	MDLNOTE_NOTE	= 1 << 0,
+	MDLNOTE_SAMPLE	= 1 << 1,
+	MDLNOTE_VOLUME	= 1 << 2,
+	MDLNOTE_EFFECTS	= 1 << 3,
+	MDLNOTE_PARAM1	= 1 << 4,
+	MDLNOTE_PARAM2	= 1 << 5,
+};
 
-	case 0x30:	command = CMD_RETRIG; break;
-	case 0x40:	command = CMD_TREMOLO; break;
-	case 0x50:	command = CMD_TREMOR; break;
-	case 0xEF:	if (param > 0xFF) param = 0xFF; command = CMD_OFFSET; break;
-	}
-	if (command)
+
+static const uint8 MDLVibratoType[] = { VIB_SINE, VIB_RAMP_DOWN, VIB_SQUARE };
+
+static const ModCommand::COMMAND MDLEffTrans[] =
+{
+	/* 0 */ CMD_NONE,
+	/* 1st column only */
+	/* 1 */ CMD_PORTAMENTOUP,
+	/* 2 */ CMD_PORTAMENTODOWN,
+	/* 3 */ CMD_TONEPORTAMENTO,
+	/* 4 */ CMD_VIBRATO,
+	/* 5 */ CMD_ARPEGGIO,
+	/* 6 */ CMD_NONE,
+	/* Either column */
+	/* 7 */ CMD_TEMPO,
+	/* 8 */ CMD_PANNING8,
+	/* 9 */ CMD_SETENVPOSITION,
+	/* A */ CMD_NONE,
+	/* B */ CMD_POSITIONJUMP,
+	/* C */ CMD_GLOBALVOLUME,
+	/* D */ CMD_PATTERNBREAK,
+	/* E */ CMD_S3MCMDEX,
+	/* F */ CMD_SPEED,
+	/* 2nd column only */
+	/* G */ CMD_VOLUMESLIDE, // up
+	/* H */ CMD_VOLUMESLIDE, // down
+	/* I */ CMD_RETRIG,
+	/* J */ CMD_TREMOLO,
+	/* K */ CMD_TREMOR,
+	/* L */ CMD_NONE,
+};
+
+
+// receive an MDL effect, give back a 'normal' one.
+static void ConvertMDLCommand(uint8_t &cmd, uint8_t &param)
+//---------------------------------------------------------
+{
+	if(cmd >= CountOf(MDLEffTrans))
+		return;
+
+	uint8 origCmd = cmd;
+	cmd = MDLEffTrans[cmd];
+
+	switch(origCmd)
 	{
-		m->command = command;
-		m->param = param;
+#ifdef MODPLUG_TRACKER
+	case 0x07: // Tempo
+		// MDL supports any nonzero tempo value, but OpenMPT doesn't
+		param = std::max(param, uint8(0x20));
+		break;
+#endif // MODPLUG_TRACKER
+	case 0x08: // Panning
+		param = mpt::saturate_cast<uint8>(param * 2u);
+		break;
+	case 0x0C:	// Global volume
+		param = (param + 1) / 2u;
+		break;
+	case 0x0D: // Pattern Break
+		// Convert from BCD
+		param = 10 * (param >> 4) + (param & 0x0F);
+		break;
+	case 0x0E: // Special
+		switch(param >> 4)
+		{
+		case 0x0: // unused
+		case 0x3: // unused
+		case 0x5: // Set Finetune
+		case 0x8: // Set Samplestatus (what?)
+			cmd = CMD_NONE;
+			break;
+		case 0x1: // Pan Slide Left
+			cmd = CMD_PANNINGSLIDE;
+			param = (std::min<uint8>(param & 0x0F, 0x0E) << 4) | 0x0F;
+			break;
+		case 0x2: // Pan Slide Right
+			cmd = CMD_PANNINGSLIDE;
+			param = 0xF0 | std::min<uint8>(param & 0x0F, 0x0E);
+			break;
+		case 0x4: // Vibrato Waveform
+			param = 0x30 | (param & 0x0F);
+			break;
+		case 0x6: // Pattern Loop
+			param = 0xB0 | (param & 0x0F);
+			break;
+		case 0x7: // Tremolo Waveform
+			param = 0x40 | (param & 0x0F);
+			break;
+		case 0x9: // Retrig
+			cmd = CMD_RETRIG;
+			param &= 0x0F;
+			break;
+		case 0xA: // Global vol slide up
+			cmd = CMD_GLOBALVOLSLIDE;
+			param = 0xF0 & (((param & 0x0F) + 1) << 3);
+			break;
+		case 0xB: // Global vol slide down
+			cmd = CMD_GLOBALVOLSLIDE;
+			param = ((param & 0x0F) + 1) >> 1;
+			break;
+		case 0xC: // Note cut
+		case 0xD: // Note delay
+		case 0xE: // Pattern delay
+			// Nothing to change here
+			break;
+		case 0xF: // Offset -- further mangled later.
+			cmd = CMD_OFFSET;
+			break;
+		}
+		break;
+	case 0x10: // Volslide up
+		if(param < 0xE0)
+		{
+			// 00...DF regular slide - four times more precise than in XM
+			param >>= 2;
+			if(param > 0x0F)
+				param = 0x0F;
+			param <<= 4;
+		} else if(param < 0xF0)
+		{
+			// E0...EF extra fine slide (on first tick, 4 times finer)
+			param = (((param & 0x0F) << 2) | 0x0F);
+		} else
+		{
+			// F0...FF regular fine slide (on first tick) - like in XM
+			param = ((param << 4) | 0x0F);
+		}
+		break;
+	case 0x11: // Volslide down
+		if(param < 0xE0)
+		{
+			// 00...DF regular slide - four times more precise than in XM
+			param >>= 2;
+			if(param > 0x0F)
+				param = 0x0F;
+		} else if(param < 0xF0)
+		{
+			// E0...EF extra fine slide (on first tick, 4 times finer)
+			param = (((param & 0x0F) >> 2) | 0xF0);
+		} else
+		{
+			// F0...FF regular fine slide (on first tick) - like in XM
+		}
+		break;
 	}
 }
 
 
-// Convert MDL envelope data (env points and flags)
-static void ConvertMDLEnvelope(const unsigned char *pMDLEnv, InstrumentEnvelope *pMPTEnv)
-//---------------------------------------------------------------------------------------
+// Returns true if command was lost
+static bool ImportMDLCommands(ModCommand &m, uint8 vol, uint8 e1, uint8 e2, uint8 p1, uint8 p2)
+//---------------------------------------------------------------------------------------------
 {
-	uint16 nCurTick = 1;
-	pMPTEnv->resize(15);
-	for (uint32 nTick = 0; nTick < 15; nTick++)
+	// Map second effect values 1-6 to effects G-L
+	if(e2 >= 1 && e2 <= 6)
+		e2 += 15;
+
+	ConvertMDLCommand(e1, p1);
+	ConvertMDLCommand(e2, p2);
+	/* From the Digitrakker documentation:
+		* EFx -xx - Set Sample Offset
+		This  is a  double-command.  It starts the
+		sample at adress xxx*256.
+		Example: C-5 01 -- EF1 -23 ->starts sample
+		01 at address 12300 (in hex).
+	Kind of screwy, but I guess it's better than the mess required to do it with IT (which effectively
+	requires 3 rows in order to set the offset past 0xff00). If we had access to the entire track, we
+	*might* be able to shove the high offset SAy into surrounding rows (or MPTM #xx), but it wouldn't
+	always be possible, it'd make the loader a lot uglier, and generally would be more trouble than
+	it'd be worth to implement.
+
+	What's more is, if there's another effect in the second column, it's ALSO processed in addition to the
+	offset, and the second data byte is shared between the two effects.
+	And: an offset effect without a note will retrigger the previous note, but I'm not even going to try to
+	handle that behavior. */
+	if(e1 == CMD_OFFSET)
 	{
-		if (nTick) nCurTick += pMDLEnv[nTick * 2 + 1];
-		pMPTEnv->at(nTick).tick = nCurTick;
-		pMPTEnv->at(nTick).value = pMDLEnv[nTick * 2 + 2];
-		if (!pMDLEnv[nTick * 2 + 1]) // last point reached
+		// EFy -xx => offset yxx00
+		p1 = (p1 & 0x0F) ? 0xFF : p2;
+		if(e2 == CMD_OFFSET)
+			e2 = CMD_NONE;
+	} else if (e2 == CMD_OFFSET)
+	{
+		// --- EFy => offset y0000 (best we can do without doing a ton of extra work is 0xff00)
+		p2 = (p2 & 0x0F) ? 0xFF : 0;
+	}
+
+	if(vol)
+	{
+		m.volcmd = VOLCMD_VOLUME;
+		m.vol = (vol + 2) / 4u;
+	}
+
+	// If we have Dxx + G00, or Dxx + H00, combine them into Lxx/Kxx.
+	ModCommand::CombineEffects(e1, p1, e2, p2);
+
+	bool lostCommand = false;
+	// Try to fit the "best" effect into e2.
+	if(e1 == CMD_NONE)
+	{
+		// Easy
+	} else if(e2 == CMD_NONE)
+	{
+		// Almost as easy
+		e2 = e1;
+		p2 = p1;
+		e1 = CMD_NONE;
+	} else if(e1 == e2 && e1 != CMD_S3MCMDEX)
+	{
+		// Digitrakker processes the effects left-to-right, so if both effects are the same, the
+		// second essentially overrides the first.
+		e1 = CMD_NONE;
+	} else if(!vol)
+	{
+		lostCommand |= !ModCommand::TwoRegularCommandsToMPT(e1, p1, e2, p2);
+		m.volcmd = e1;
+		m.vol = e2;
+	} else
+	{
+		if(ModCommand::GetEffectWeight((ModCommand::COMMAND)e1) > ModCommand::GetEffectWeight((ModCommand::COMMAND)e2))
 		{
-			pMPTEnv->resize(nTick + 1);
-			break;
+			std::swap(e1, e2);
+			std::swap(p1, p2);
 		}
 	}
-	pMPTEnv->nSustainStart = pMPTEnv->nSustainEnd = pMDLEnv[31] & 0x0F;
-	pMPTEnv->dwFlags.set(ENV_SUSTAIN, (pMDLEnv[31] & 0x10) != 0);
-	pMPTEnv->dwFlags.set(ENV_LOOP, (pMDLEnv[31] & 0x20) != 0);
-	pMPTEnv->nLoopStart = pMDLEnv[32] & 0x0F;
-	pMPTEnv->nLoopEnd = pMDLEnv[32] >> 4;
+
+	m.command = e2;
+	m.param = p2;
+	return lostCommand;
 }
 
 
-static void UnpackMDLTrack(ModCommand *pat, uint32 nChannels, uint32 nRows, uint32 nTrack, const uint8 *lpTracks, uint32 memLength)
-//---------------------------------------------------------------------------------------------------------------------------------
+static void MDLReadEnvelopes(FileReader file, std::vector<MDLEnvelope> &envelopes)
+//--------------------------------------------------------------------------------
 {
-	ModCommand cmd, *m = pat;
-	if(memLength < 2) return;
-	uint32 len = *(const_unaligned_ptr_le<uint16>(lpTracks));
-	uint32 pos = 0, row = 0, i;
-	lpTracks += 2;
-	memLength -=2 ;
-	for (uint32 ntrk=1; ntrk<nTrack; ntrk++)
+	if(!file.CanRead(1))
+		return;
+
+	envelopes.resize(64);
+	uint8 numEnvs = file.ReadUint8();
+	while(numEnvs--)
 	{
-		if(memLength < len + 2) return;
-		lpTracks += len;
-		memLength -= len;
-		len = *(const_unaligned_ptr_le<uint16>(lpTracks));
-		lpTracks += 2;
-		memLength -= 2;
-		LimitMax(len, memLength);
-	}
-	cmd.note = cmd.instr = 0;
-	cmd.volcmd = cmd.vol = 0;
-	cmd.command = cmd.param = 0;
-	while ((row < nRows) && (pos < len))
-	{
-		uint32 xx;
-		uint8 b = lpTracks[pos++];
-		xx = b >> 2;
-		switch(b & 0x03)
-		{
-		case 0x01:
-			for (i=0; i<=xx; i++)
-			{
-				if (row) *m = *(m-nChannels);
-				m += nChannels;
-				row++;
-				if (row >= nRows) break;
-			}
-			break;
-
-		case 0x02:
-			if (xx < row) *m = pat[nChannels*xx];
-			m += nChannels;
-			row++;
-			break;
-
-		case 0x03:
-			{
-				cmd.note = (xx & 0x01) ? lpTracks[pos++] : 0;
-				cmd.instr = (xx & 0x02) ? lpTracks[pos++] : 0;
-				cmd.volcmd = cmd.vol = 0;
-				cmd.command = cmd.param = 0;
-				uint32 volume = (xx & 0x04) ? lpTracks[pos++] : 0;
-				uint32 commands = (xx & 0x08) ? lpTracks[pos++] : 0;
-				uint32 command1 = commands & 0x0F;
-				uint32 command2 = commands & 0xF0;
-				uint32 param1 = (xx & 0x10) ? lpTracks[pos++] : 0;
-				uint32 param2 = (xx & 0x20) ? lpTracks[pos++] : 0;
-				if ((command1 == 0x0E) && ((param1 & 0xF0) == 0xF0) && (!command2))
-				{
-					param1 = ((param1 & 0x0F) << 8) | param2;
-					command1 = 0xEF;
-					command2 = param2 = 0;
-				}
-				if (volume)
-				{
-					cmd.volcmd = VOLCMD_VOLUME;
-					cmd.vol = (volume+1) >> 2;
-				}
-				ConvertMDLCommand(&cmd, command1, param1);
-				if ((cmd.command != CMD_SPEED)
-				 && (cmd.command != CMD_TEMPO)
-				 && (cmd.command != CMD_PATTERNBREAK))
-					ConvertMDLCommand(&cmd, command2, param2);
-				*m = cmd;
-				m += nChannels;
-				row++;
-			}
-			break;
-
-		// Empty Slots
-		default:
-			row += xx+1;
-			m += (xx+1)*nChannels;
-			if (row >= nRows) break;
-		}
+		MDLEnvelope mdlEnv;
+		if(!file.ReadStruct(mdlEnv) || mdlEnv.envNum > 63)
+			continue;
+		envelopes[mdlEnv.envNum] = mdlEnv;
 	}
 }
 
+
+static void CopyEnvelope(InstrumentEnvelope &mptEnv, uint8 flags, std::vector<MDLEnvelope> &envelopes)
+//----------------------------------------------------------------------------------------------------
+{
+	uint8 envNum = flags & 0x3F;
+	if(envNum < envelopes.size())
+		envelopes[envNum].ConvertToMPT(mptEnv);
+	mptEnv.dwFlags.set(ENV_ENABLED, (flags & 0x80) && !mptEnv.empty());
+}
 
 
 bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 //-------------------------------------------------------------------
 {
 	file.Rewind();
-	MDLFileHeader pmsh;
-	if(!file.ReadStruct(pmsh)
-		|| !file.CanRead(1024)
-		|| pmsh.id != LittleEndian(0x4C444D44)
-		|| (pmsh.version & 0xF0) > 0x10)
+	MDLFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader)
+		|| memcmp(fileHeader.id, "DMDL", 4)
+		|| fileHeader.version >= 0x20)
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
@@ -309,415 +594,305 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	file.Rewind();
-	const FileReader::off_t dwMemLength = file.GetLength();
-	const uint8 *lpStream = file.GetRawData<uint8>();
+	ChunkReader chunkFile(file);
+	ChunkReader::ChunkList<MDLChunk> chunks = chunkFile.ReadChunks<MDLChunk>(0);
 
-	uint32 dwMemPos, dwPos, blocklen, dwTrackPos;
-	const MDLInfoBlock *pmib;
-	uint32 j, norders = 0, npatterns = 0, ntracks = 0;
-	uint32 ninstruments = 0, nsamples = 0;
-	uint16 block;
-	uint16 patterntracks[MAX_PATTERNS*32];
-	uint8 smpinfo[MAX_SAMPLES];
-	uint8 insvolenv[MAX_INSTRUMENTS];
-	uint8 inspanenv[MAX_INSTRUMENTS];
-	const uint8 *pvolenv, *ppanenv, *ppitchenv;
-	uint32 nvolenv, npanenv, npitchenv;
-	std::vector<ROWINDEX> patternLength;
-
-#ifdef MDL_LOG
-	Log("MDL v%d.%d\n", pmsh.version>>4, pmsh.version&0x0f);
-#endif
-	MemsetZero(patterntracks);
-	MemsetZero(smpinfo);
-	MemsetZero(insvolenv);
-	MemsetZero(inspanenv);
-	dwMemPos = 5;
-	dwTrackPos = 0;
-	pvolenv = ppanenv = ppitchenv = NULL;
-	nvolenv = npanenv = npitchenv = 0;
+	// Read global info
+	FileReader chunk = chunks.GetChunk(MDLChunk::idInfo);
+	MDLInfoBlock info;
+	if(!chunk.IsValid() || !chunk.ReadConvertEndianness(info))
+	{
+		return false;
+	}
 
 	InitializeGlobals(MOD_TYPE_MDL);
-	m_SongFlags = SONG_LINEARSLIDES;
+	m_SongFlags = SONG_ITCOMPATGXX | SONG_LINEARSLIDES;
+	m_playBehaviour.set(kPerChannelGlobalVolSlide);
 
-	while (dwMemPos+6 < dwMemLength)
+	m_madeWithTracker = std::string("Digitrakker ") + (
+		(fileHeader.version == 0x11) ? "3" // really could be 2.99b - close enough
+		: (fileHeader.version == 0x10) ? "2.3"
+		: (fileHeader.version == 0x00) ? "2.0 - 2.2b" // there was no 1.x release
+		: "");
+
+	mpt::String::Read<mpt::String::spacePadded>(m_songName, info.title);
 	{
-		block = *(const_unaligned_ptr_le<uint16>(lpStream+dwMemPos));
-		blocklen = *(const_unaligned_ptr_le<uint32>(lpStream+dwMemPos+2));
-		dwMemPos += 6;
-		if (blocklen > dwMemLength - dwMemPos)
-		{
-			if (dwMemPos == 11) return false;
-			break;
-		}
-		switch(block)
-		{
-		// IN: infoblock
-		case 0x4E49:
-		#ifdef MDL_LOG
-			Log("infoblock: %d bytes\n", blocklen);
-		#endif
-			if(blocklen < sizeof(MDLInfoBlock) - 256)
-				return false;
-			pmib = (const MDLInfoBlock *)(lpStream+dwMemPos);
-			mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, pmib->songname);
-			{
-				std::string artist;
-				mpt::String::Read<mpt::String::maybeNullTerminated>(artist, pmib->composer);
-				m_songArtist = mpt::ToUnicode(mpt::CharsetCP437, artist);
-			}
+		std::string artist;
+		mpt::String::Read<mpt::String::spacePadded>(artist, info.composer);
+		m_songArtist = mpt::ToUnicode(mpt::CharsetCP437, artist);
+	}
 
-			norders = pmib->norders;
-			LimitMax(norders, ORDERINDEX_MAX);
-			LimitMax(norders, blocklen - (sizeof(MDLInfoBlock) - 256));
+	m_nDefaultGlobalVolume = info.globalVol + 1;
+	m_nDefaultSpeed = Clamp(info.speed, uint8(1), uint8(255));
+	m_nDefaultTempo.Set(Clamp(info.tempo, uint8(4), uint8(255)));
+
+	Order.ReadAsByte(chunk, info.numOrders);
+	Order.SetRestartPos(info.restartPos);
+
+	m_nChannels = 0;
+	for(CHANNELINDEX c = 0; c < 32; c++)
+	{
+		ChnSettings[c].Reset();
+		ChnSettings[c].nPan = (info.chnSetup[c] & 0x7F) * 2u;
+		if(ChnSettings[c].nPan == 254)
+			ChnSettings[c].nPan = 256;
+		if(info.chnSetup[c] & 0x80)
+			ChnSettings[c].dwFlags.set(CHN_MUTE);
+		else
+			m_nChannels = c + 1;
+		chunk.ReadString<mpt::String::spacePadded>(ChnSettings[c].szName, 8);
+	}
+
+	// Read song message
+	chunk = chunks.GetChunk(MDLChunk::idMessage);
+	m_songMessage.Read(chunk, chunk.GetLength(), SongMessage::leCR);
+
+	// Read sample info and data
+	chunk = chunks.GetChunk(MDLChunk::idSampleInfo);
+	if(chunk.IsValid())
+	{
+		FileReader dataChunk = chunks.GetChunk(MDLChunk::ifSampleData);
+
+		SAMPLEINDEX numSamples = chunk.ReadUint8();
+		for(SAMPLEINDEX smp = 0; smp < numSamples; smp++)
+		{
+			MDLSampleInfoCommon header;
+			if(!chunk.ReadStruct(header) || header.sampleIndex == 0 || header.sampleIndex >= MAX_SAMPLES)
+				continue;
 			
-			Order.SetRestartPos(pmib->repeatpos);
-			m_nDefaultGlobalVolume = pmib->globalvol;
-			m_nDefaultTempo.Set(pmib->tempo);
-			m_nDefaultSpeed = pmib->speed;
-			m_nChannels = 4;
-			for (uint8 i=0; i<32; i++)
+			if(header.sampleIndex > GetNumSamples())
+				m_nSamples = header.sampleIndex;
+
+			ModSample &sample = Samples[header.sampleIndex];
+			sample.Initialize();
+
+			mpt::String::Read<mpt::String::spacePadded>(m_szNames[header.sampleIndex], header.name);
+			mpt::String::Read<mpt::String::spacePadded>(sample.filename, header.filename);
+
+			SampleIO sampleIO;
+			if(fileHeader.version >= 0x10)
 			{
-				ChnSettings[i].Reset();
-				ChnSettings[i].nPan = (pmib->channelinfo[i] & 0x7F) << 1;
-				if (pmib->channelinfo[i] & 0x80)
-					ChnSettings[i].dwFlags.set(CHN_MUTE);
-				else
-					m_nChannels = i+1;
+				MDLSampleInfo sampleHeader;
+				chunk.ReadConvertEndianness(sampleHeader);
+				sampleIO = sampleHeader.ConvertToMPT(sample);
+			} else
+			{
+				MDLSampleInfov0 sampleHeader;
+				chunk.ReadConvertEndianness(sampleHeader);
+				sampleIO = sampleHeader.ConvertToMPT(sample);
 			}
-			Order.ReadFromArray(pmib->seq, norders, 0xFF, 0xFE);
-			break;
-		// ME: song message
-		case 0x454D:
-		#ifdef MDL_LOG
-			Log("song message: %d bytes\n", blocklen);
-		#endif
-			if(blocklen)
+
+			if((loadFlags & loadSampleData) && (sample.nLength || sampleIO.GetEncoding() == SampleIO::MDL))
 			{
-				m_songMessage.Read(lpStream + dwMemPos, blocklen - 1, SongMessage::leCR);
+				sampleIO.ReadSample(sample, dataChunk);
 			}
-			break;
-		// PA: Pattern Data
-		case 0x4150:
-		#ifdef MDL_LOG
-			Log("pattern data: %d bytes\n", blocklen);
-		#endif
-			if(!blocklen)
-				break;
-			npatterns = lpStream[dwMemPos];
-			if (npatterns > MAX_PATTERNS) npatterns = MAX_PATTERNS;
-			dwPos = dwMemPos + 1;
+		}
+	}
 
-			patternLength.assign(npatterns, 64);
+	chunk = chunks.GetChunk(MDLChunk::idInstrs);
+	if(chunk.IsValid())
+	{
+		std::vector<MDLEnvelope> volEnvs, panEnvs, pitchEnvs;
+		MDLReadEnvelopes(chunks.GetChunk(MDLChunk::idVolEnvs), volEnvs);
+		MDLReadEnvelopes(chunks.GetChunk(MDLChunk::idPanEnvs), panEnvs);
+		MDLReadEnvelopes(chunks.GetChunk(MDLChunk::idFreqEnvs), pitchEnvs);
 
-			for (uint32 i=0; i<npatterns; i++)
+		m_nInstruments = std::min<INSTRUMENTINDEX>(chunk.ReadUint8(), MAX_INSTRUMENTS - 1);
+		while(chunk.CanRead(34))
+		{
+			uint8 ins = chunk.ReadUint8();
+			uint8 numSamples = chunk.ReadUint8();
+			uint8 firstNote = 0;
+			ModInstrument *mptIns = nullptr;
+			if(ins == 0 || ins > m_nInstruments
+				|| !chunk.CanRead(sizeof(MDLSampleHeader) * numSamples)
+				|| (mptIns = AllocateInstrument(ins)) == nullptr)
 			{
-				const_unaligned_ptr_le<uint16> pdata;
-				uint32 ch;
+				chunk.Skip(32 + sizeof(MDLSampleHeader) * numSamples);
+				continue;
+			}
+			chunk.ReadString<mpt::String::spacePadded>(mptIns->name, 32);
+			while(numSamples--)
+			{
+				MDLSampleHeader sampleHeader;
+				chunk.ReadConvertEndianness(sampleHeader);
+				if(sampleHeader.smpNum == 0 || sampleHeader.smpNum >= MAX_SAMPLES)
+					continue;
 
-				if (pmsh.version > 0)
+				LimitMax(sampleHeader.lastNote, static_cast<uint8>(CountOf(mptIns->Keyboard)));
+				for(uint8 n = firstNote; n <= sampleHeader.lastNote; n++)
 				{
-					if (dwPos + sizeof(MDLPatternHeader) >= dwMemLength) break;
-					const MDLPatternHeader *pmpd = (const MDLPatternHeader *)(lpStream + dwPos);
-					if (pmpd->channels > 32) break;
-					dwPos += sizeof(MDLPatternHeader);
-					patternLength[i] = pmpd->lastrow + 1;
-					if (m_nChannels < pmpd->channels) m_nChannels = pmpd->channels;
-					ch = pmpd->channels;
-				} else
-				{
-					//Patterns[i].Resize(64, false);
-					if (m_nChannels < 32) m_nChannels = 32;
-					ch = 32;
+					mptIns->Keyboard[n] = sampleHeader.smpNum;
 				}
-				if(2 * ch >= dwMemLength - dwPos) break;
-				pdata = const_unaligned_ptr_le<uint16>(lpStream + dwPos);
-				dwPos += 2 * ch;
+				firstNote = sampleHeader.lastNote + 1;
 
-				for (j=0; j<ch; j++) if (j<m_nChannels)
-				{
-					patterntracks[i*32+j] = pdata[j];
-				}
+				CopyEnvelope(mptIns->VolEnv, sampleHeader.volEnvFlags, volEnvs);
+				CopyEnvelope(mptIns->PanEnv, sampleHeader.panEnvFlags, panEnvs);
+				CopyEnvelope(mptIns->PitchEnv, sampleHeader.freqEnvFlags, pitchEnvs);
+				mptIns->nFadeOut = sampleHeader.fadeout;
+
+				ModSample &mptSmp = Samples[sampleHeader.smpNum];
+				// Samples were already initialized above. Let's hope they are not going to be re-used with different volume / panning / vibrato...
+				mptSmp.nVolume = sampleHeader.volume;
+				mptSmp.nPan = std::min<uint16>(sampleHeader.panning * 2, 254);
+				mptSmp.nVibType = MDLVibratoType[sampleHeader.vibType & 3];
+				mptSmp.nVibSweep = sampleHeader.vibSweep;
+				mptSmp.nVibDepth = sampleHeader.vibDepth;
+				mptSmp.nVibRate = sampleHeader.vibSpeed;
+				if(sampleHeader.panEnvFlags & 0x40)
+					mptSmp.uFlags.set(CHN_PANNING);
 			}
-			break;
-		// TR: Track Data
-		case 0x5254:
-		#ifdef MDL_LOG
-			Log("track data: %d bytes\n", blocklen);
-		#endif
-			if (dwTrackPos) break;
-			ntracks = *(const_unaligned_ptr_le<uint16>(lpStream+dwMemPos));
-			dwTrackPos = dwMemPos+2;
-			break;
-		// II: Instruments
-		case 0x4949:
-		#ifdef MDL_LOG
-			Log("instruments: %d bytes\n", blocklen);
-		#endif
-			if(!blocklen)
-				break;
-			ninstruments = lpStream[dwMemPos];
-			dwPos = dwMemPos+1;
-			for (uint32 remain = blocklen - 1, i=0; i<ninstruments && remain > 2; i++)
+		}
+	}
+
+	// Read pattern tracks
+	std::vector<FileReader> tracks;
+	if((loadFlags & loadPatternData) && (chunk = chunks.GetChunk(MDLChunk::idTracks)).IsValid())
+	{
+		uint32 numTracks = chunk.ReadUint16LE();
+		tracks.resize(numTracks + 1);
+		for(uint32 i = 1; i <= numTracks; i++)
+		{
+			tracks[i] = chunk.ReadChunk(chunk.ReadUint16LE());
+		}
+	}
+
+	// Read actual patterns
+	if((loadFlags & loadPatternData) && (chunk = chunks.GetChunk(MDLChunk::idPats)).IsValid())
+	{
+		PATTERNINDEX numPats = chunk.ReadUint8();
+
+		// In case any muted channels contain data, be sure that we import them as well.
+		for(PATTERNINDEX pat = 0; pat < numPats; pat++)
+		{
+			CHANNELINDEX numChans = 32;
+			if(fileHeader.version >= 0x10)
 			{
-				uint32 nins = lpStream[dwPos];
-				if ((nins >= MAX_INSTRUMENTS) || (!nins)) break;
-				uint32 insLength = 34u + 14u * lpStream[dwPos + 1];
-				if(remain < insLength)
-					break;
-				if (m_nInstruments < nins) m_nInstruments = nins;
-				if (!Instruments[nins])
+				MDLPatternHeader patHead;
+				chunk.ReadStruct(patHead);
+				if(patHead.channels > m_nChannels && patHead.channels <= 32)
+					m_nChannels = patHead.channels;
+				numChans = patHead.channels;
+			}
+			for(CHANNELINDEX chn = 0; chn < numChans; chn++)
+			{
+				if(chunk.ReadUint16LE() > 0 && chn >= m_nChannels)
+					m_nChannels = chn + 1;
+			}
+		}
+		chunk.Seek(1);
+
+		for(PATTERNINDEX pat = 0; pat < numPats; pat++)
+		{
+			CHANNELINDEX numChans = 32;
+			ROWINDEX numRows = 64;
+			char name[17] = "";
+			if(fileHeader.version >= 0x10)
+			{
+				MDLPatternHeader patHead;
+				chunk.ReadStruct(patHead);
+				numChans = patHead.channels;
+				numRows = patHead.lastRow + 1;
+				mpt::String::Read<mpt::String::spacePadded>(name, patHead.name);
+			}
+
+			if(!Patterns.Insert(pat, numRows))
+			{
+				chunk.Skip(2 * numChans);
+				continue;
+			}
+			Patterns[pat].SetName(name);
+
+			for(CHANNELINDEX chn = 0; chn < numChans; chn++)
+			{
+				uint16 trkNum = chunk.ReadUint16LE();
+				if(!trkNum || trkNum >= tracks.size() || chn >= m_nChannels)
+					continue;
+
+				FileReader &track = tracks[trkNum];
+				track.Rewind();
+				ROWINDEX row = 0;
+				while(row < numRows && track.CanRead(1))
 				{
-					uint32 note = 12;
-					ModInstrument *pIns = AllocateInstrument(nins);
-					if(pIns == nullptr)
+					ModCommand *m = Patterns[pat].GetpModCommand(row, chn);
+					uint8 b = track.ReadUint8();
+					uint8 x = (b >> 2), y = (b & 3);
+					switch(y)
 					{
+					case 0:
+						// (x + 1) empty notes follow
+						row += x + 1;
+						break;
+					case 1:
+						// Repeat previous note (x + 1) times
+						if(row > 0)
+						{
+							ModCommand &orig = *Patterns[pat].GetpModCommand(row - 1, chn);
+							do
+							{
+								*m = orig;
+								m += m_nChannels;
+								row++;
+							} while (row < numRows && x--);
+						}
+						break;
+					case 2:
+						// Copy note from row x
+						if(row > x)
+						{
+							*m = *Patterns[pat].GetpModCommand(x, chn);
+						}
+						row++;
+						break;
+					case 3:
+						// New note data
+						if(x & MDLNOTE_NOTE)
+						{
+							b = track.ReadUint8();
+							m->note = (b > 120) ? NOTE_KEYOFF : b;
+						}
+						if(x & MDLNOTE_SAMPLE)
+						{
+							m->instr = track.ReadUint8();
+						}
+						{
+							uint8 vol = 0, e1 = 0, e2 = 0, p1 = 0, p2 = 0;
+							if(x & MDLNOTE_VOLUME)
+							{
+								vol = track.ReadUint8();
+							}
+							if(x & MDLNOTE_EFFECTS)
+							{
+								b = track.ReadUint8();
+								e1 = (b & 0x0F);
+								e2 = (b >> 4);
+							}
+							if(x & MDLNOTE_PARAM1)
+								p1 = track.ReadUint8();
+							if(x & MDLNOTE_PARAM2)
+								p2 = track.ReadUint8();
+							ImportMDLCommands(*m, vol, e1, e2, p1, p2);
+						}
+
+						row++;
 						break;
 					}
-
-					// I give up. better rewrite this crap (or take SchismTracker's MDL loader).
-					mpt::String::Read<mpt::String::maybeNullTerminated>(pIns->name, reinterpret_cast<const char *>(lpStream + dwPos + 2), 32);
-
-					for (j=0; j<lpStream[dwPos+1]; j++)
-					{
-						const uint8 *ps = lpStream+dwPos+34+14*j;
-						while ((note < (uint32)(ps[1]+12)) && (note < NOTE_MAX))
-						{
-							SAMPLEINDEX ismp = ps[0];
-							if(ismp < MAX_SAMPLES)
-							{
-								pIns->Keyboard[note] = ps[0];
-								Samples[ismp].nVolume = ps[2];
-								Samples[ismp].nPan = ps[4] << 1;
-								Samples[ismp].nVibType = ps[11];
-								Samples[ismp].nVibSweep = ps[10];
-								Samples[ismp].nVibDepth = ps[9];
-								Samples[ismp].nVibRate = ps[8];
-							}
-							pIns->nFadeOut = (ps[7] << 8) | ps[6];
-							if (pIns->nFadeOut == 0xFFFF) pIns->nFadeOut = 0;
-							note++;
-						}
-						// Use volume envelope ?
-						if (ps[3] & 0x80)
-						{
-							pIns->VolEnv.dwFlags.set(ENV_ENABLED);
-							insvolenv[nins] = (ps[3] & 0x3F) + 1;
-						}
-						// Use panning envelope ?
-						if (ps[5] & 0x80)
-						{
-							pIns->PanEnv.dwFlags.set(ENV_ENABLED);
-							inspanenv[nins] = (ps[5] & 0x3F) + 1;
-						}
-
-						// taken from load_xm.cpp - seems to fix wakingup.mdl
-						if(!pIns->VolEnv.dwFlags[ENV_ENABLED] && !pIns->nFadeOut)
-							pIns->nFadeOut = 8192;
-					}
-				}
-				remain -= insLength;
-				dwPos += insLength;
-			}
-			for (j=1; j<=m_nInstruments; j++) if (!Instruments[j])
-			{
-				AllocateInstrument(j);
-			}
-			break;
-		// VE: Volume Envelope
-		case 0x4556:
-		#ifdef MDL_LOG
-			Log("volume envelope: %d bytes\n", blocklen);
-		#endif
-			if (pvolenv != nullptr || (nvolenv = lpStream[dwMemPos]) == 0) break;
-			if (dwMemPos + nvolenv*33 + 1 <= dwMemLength) pvolenv = lpStream + dwMemPos + 1;
-			break;
-		// PE: Panning Envelope
-		case 0x4550:
-		#ifdef MDL_LOG
-			Log("panning envelope: %d bytes\n", blocklen);
-		#endif
-			if (ppanenv != nullptr || (npanenv = lpStream[dwMemPos]) == 0) break;
-			if (dwMemPos + npanenv*33 + 1 <= dwMemLength) ppanenv = lpStream + dwMemPos + 1;
-			break;
-		// FE: Pitch Envelope
-		case 0x4546:
-		#ifdef MDL_LOG
-			Log("pitch envelope: %d bytes\n", blocklen);
-		#endif
-			if (ppitchenv != nullptr || (npitchenv = lpStream[dwMemPos]) == 0) break;
-			if (dwMemPos + npitchenv*33 + 1 <= dwMemLength) ppitchenv = lpStream + dwMemPos + 1;
-			break;
-		// IS: Sample Infoblock
-		case 0x5349:
-		#ifdef MDL_LOG
-			Log("sample infoblock: %d bytes\n", blocklen);
-		#endif
-			if(nsamples)
-				break;
-			nsamples = std::min<uint32>(lpStream[dwMemPos], blocklen / ((pmsh.version > 0) ? sizeof(MDLSampleHeader) : sizeof(MDLSampleHeaderv0)));
-			dwPos = dwMemPos + 1;
-			for (uint32 i = 0; i < nsamples; i++, dwPos += (pmsh.version > 0) ? sizeof(MDLSampleHeader) : sizeof(MDLSampleHeaderv0))
-			{
-				const MDLSampleHeaderCommon *info = reinterpret_cast<const MDLSampleHeaderCommon *>(lpStream + dwPos);
-				if(!IsInRange(info->sampleIndex, 1, MAX_SAMPLES-1))
-				{
-					continue;
-				}
-
-				if(m_nSamples < info->sampleIndex)
-				{
-					m_nSamples = info->sampleIndex;
-				}
-				ModSample &sample = Samples[info->sampleIndex];
-
-				mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[info->sampleIndex], info->name);
-				mpt::String::Read<mpt::String::maybeNullTerminated>(sample.filename, info->filename);
-
-				if(pmsh.version > 0)
-				{
-					const MDLSampleHeader *sampleHeader = reinterpret_cast<const MDLSampleHeader *>(lpStream + dwPos);
-
-					sample.nC5Speed = LittleEndian(sampleHeader->c4Speed) * 2;
-					sample.nLength = LittleEndian(sampleHeader->length);
-					sample.nLoopStart = LittleEndian(sampleHeader->loopStart);
-					sample.nLoopEnd = sample.nLoopStart + LittleEndian(sampleHeader->loopLength);
-					if(sample.nLoopEnd > sample.nLoopStart)
-					{
-						sample.uFlags |= CHN_LOOP;
-						if((sampleHeader->flags & 0x02))
-						{
-							sample.uFlags |= CHN_PINGPONGLOOP;
-						}
-					}
-					sample.nGlobalVol = 64;
-					//sample.nVolume = 256;
-
-					if((sampleHeader->flags & 0x01))
-					{
-						sample.uFlags |= CHN_16BIT;
-						sample.nLength /= 2;
-						sample.nLoopStart /= 2;
-						sample.nLoopEnd /= 2;
-					}
-
-					smpinfo[info->sampleIndex] = (sampleHeader->flags >> 2) & 3;
-				} else
-				{
-					const MDLSampleHeaderv0 *sampleHeader = reinterpret_cast<const MDLSampleHeaderv0 *>(lpStream + dwPos);
-
-					sample.nC5Speed = LittleEndianW(sampleHeader->c4Speed) * 2;
-					sample.nLength = LittleEndian(sampleHeader->length);
-					sample.nLoopStart = LittleEndian(sampleHeader->loopStart);
-					sample.nLoopEnd = sample.nLoopStart + LittleEndian(sampleHeader->loopLength);
-					if(sample.nLoopEnd > sample.nLoopStart)
-					{
-						sample.uFlags |= CHN_LOOP;
-						if((sampleHeader->flags & 0x02))
-						{
-							sample.uFlags |= CHN_PINGPONGLOOP;
-						}
-					}
-					sample.nGlobalVol = 64;
-					sample.nVolume = sampleHeader->volume;
-
-					if((sampleHeader->flags & 0x01))
-					{
-						sample.uFlags |= CHN_16BIT;
-						sample.nLength /= 2;
-						sample.nLoopStart /= 2;
-						sample.nLoopEnd /= 2;
-					}
-
-					smpinfo[info->sampleIndex] = (sampleHeader->flags >> 2) & 3;
 				}
 			}
-			break;
-		// SA: Sample Data
-		case 0x4153:
-		#ifdef MDL_LOG
-			Log("sample data: %d bytes\n", blocklen);
-		#endif
-			if(!(loadFlags & loadSampleData))
-			{
-				break;
-			}
-			dwPos = dwMemPos;
-			for (uint32 i=1; i<=m_nSamples; i++) if ((Samples[i].nLength) && (!Samples[i].pSample) && (smpinfo[i] != 3) && (dwPos < dwMemLength))
-			{
-				ModSample &sample = Samples[i];
-				SampleIO sampleIO(
-					(sample.uFlags & CHN_16BIT) ? SampleIO::_16bit : SampleIO::_8bit,
-					SampleIO::mono,
-					SampleIO::littleEndian,
-					SampleIO::signedPCM);
-
-				if (!smpinfo[i])
-				{
-					FileReader chunk(mpt::as_span(lpStream + dwPos, dwMemLength - dwPos));
-					dwPos += sampleIO.ReadSample(sample, chunk);
-				} else if(dwPos < dwMemLength - 4)
-				{
-					uint32 dwLen = *(const_unaligned_ptr_le<uint32>(lpStream+dwPos));
-					dwPos += 4;
-					if ( (dwLen <= dwMemLength) && (dwPos <= dwMemLength - dwLen) && (dwLen > 4) )
-					{
-						sampleIO |= SampleIO::MDL;
-						FileReader chunk(mpt::as_span(lpStream + dwPos , dwLen));
-						sampleIO.ReadSample(sample, chunk);
-					}
-					dwPos += dwLen;
-				}
-			}
-			break;
-		#ifdef MDL_LOG
-		default:
-			Log("unknown block (%c%c): %d bytes\n", block&0xff, block>>8, blocklen);
-		#endif
 		}
-		dwMemPos += blocklen;
 	}
-	// Unpack Patterns
-	if((loadFlags & loadPatternData) && (dwTrackPos) && (npatterns) && (m_nChannels) && (ntracks))
+
+	if((loadFlags & loadPatternData) && (chunk = chunks.GetChunk(MDLChunk::idPatNames)).IsValid())
 	{
-		for (uint32 ipat=0; ipat<npatterns; ipat++)
+		PATTERNINDEX i = 0;
+		while(i < Patterns.Size() && chunk.CanRead(16))
 		{
-			if(!Patterns.Insert(ipat, patternLength[ipat]))
-			{
-				break;
-			}
-			for (uint32 chn=0; chn<m_nChannels; chn++) if ((patterntracks[ipat*32+chn]) && (patterntracks[ipat*32+chn] <= ntracks))
-			{
-				ModCommand *m = Patterns[ipat] + chn;
-				UnpackMDLTrack(m, m_nChannels, Patterns[ipat].GetNumRows(), patterntracks[ipat*32+chn], lpStream + dwTrackPos, dwMemLength - dwTrackPos);
-			}
+			char name[17];
+			chunk.ReadString<mpt::String::spacePadded>(name, 16);
+			Patterns[i].SetName(name);
 		}
 	}
-	// Set up envelopes
-	for (uint32 iIns=1; iIns<=m_nInstruments; iIns++) if (Instruments[iIns])
-	{
-		// Setup volume envelope
-		if ((nvolenv) && (pvolenv) && (insvolenv[iIns]))
-		{
-			const uint8 *pve = pvolenv;
-			for (uint32 nve = 0; nve < nvolenv; nve++, pve += 33)
-			{
-				if (pve[0] + 1 == insvolenv[iIns])
-					ConvertMDLEnvelope(pve, &Instruments[iIns]->VolEnv);
-			}
-		}
-		// Setup panning envelope
-		if ((npanenv) && (ppanenv) && (inspanenv[iIns]))
-		{
-			const uint8 *ppe = ppanenv;
-			for (uint32 npe = 0; npe < npanenv; npe++, ppe += 33)
-			{
-				if (ppe[0] + 1 == inspanenv[iIns])
-					ConvertMDLEnvelope(ppe, &Instruments[iIns]->PanEnv);
-			}
-		}
-	}
+
 	return true;
 }
 
