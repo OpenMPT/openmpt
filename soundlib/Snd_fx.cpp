@@ -1711,7 +1711,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 				// IT Compatibilty: Slightly different waveform offsets (why does MPT have two different offsets here with IT old effects enabled and disabled?)
 				if(!m_playBehaviour[kITVibratoTremoloPanbrello] && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS])
 					pChn->nVibratoPos = 0x10;
-				else if(GetType() & (MOD_TYPE_MDL | MOD_TYPE_MTM))
+				else if(GetType() == MOD_TYPE_MTM)
 					pChn->nVibratoPos = 0x20;
 				else
 					pChn->nVibratoPos = 0;
@@ -1784,13 +1784,6 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 		{
 			pChn->nAutoVibDepth = 0;
 			pChn->nAutoVibPos = 0;
-			// IT Compatibility: Vibrato reset
-			if(m_playBehaviour[kITVibratoTremoloPanbrello])
-			{
-				// I think this is not necessary, so let's check if it is actually called.
-				MPT_ASSERT(pChn->nVibratoPos == 0);
-				pChn->nVibratoPos = 0;
-			}
 		}
 		pChn->rightVol = pChn->leftVol = 0;
 		bool useFilter = !m_SongFlags[SONG_MPTFILTERMODE];
@@ -5482,7 +5475,7 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 {
 	if (note == NOTE_NONE || (note >= NOTE_MIN_SPECIAL)) return 0;
 	note -= NOTE_MIN;
-	if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_MT2|MOD_TYPE_S3M|MOD_TYPE_STM|MOD_TYPE_MDL|MOD_TYPE_ULT|MOD_TYPE_WAV|MOD_TYPE_669|MOD_TYPE_PLM
+	if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_MT2|MOD_TYPE_S3M|MOD_TYPE_STM|MOD_TYPE_ULT|MOD_TYPE_WAV|MOD_TYPE_669|MOD_TYPE_PLM
 				|MOD_TYPE_FAR|MOD_TYPE_DMF|MOD_TYPE_PTM|MOD_TYPE_AMS|MOD_TYPE_AMS2|MOD_TYPE_DBM|MOD_TYPE_AMF|MOD_TYPE_PSM|MOD_TYPE_J2B|MOD_TYPE_IMF|MOD_TYPE_UAX))
 	{
 		if(m_SongFlags[SONG_LINEARSLIDES] || GetType() == MOD_TYPE_669)
@@ -5494,12 +5487,17 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 				return (FreqS3MTable[note % 12u] << 5) >> (note / 12);
 		} else
 		{
-			if (!nC5Speed) nC5Speed = 8363;
+			if (!nC5Speed)
+				nC5Speed = 8363;
 			LimitMax(nC5Speed, uint32_max >> (note / 12u));
 			//(a*b)/c
 			return Util::muldiv_unsigned(8363, (FreqS3MTable[note % 12u] << 5), nC5Speed << (note / 12u));
 			//8363 * freq[note%12] / nC5Speed * 2^(5-note/12)
 		}
+	} else if (GetType() == MOD_TYPE_MDL)
+	{
+		// MDL uses non-linear slides, but their effectiveness does not depend on the middle-C frequency.
+		return (FreqS3MTable[note % 12u] << 4) >> (note / 12);
 	} else if (GetType() == MOD_TYPE_XM)
 	{
 		if (note < 12) note = 12;
@@ -5594,10 +5592,14 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 	{
 		// We only really use c5speed for the finetune pattern command. All samples in 669 files have the same middle-C speed (imported as 8363 Hz).
 		return (period + c5speed - 8363) <<  FREQ_FRACBITS;
+	} else if(GetType() == MOD_TYPE_MDL)
+	{
+		if (!c5speed) c5speed = 8363;
+		return Util::muldiv(c5speed, (1712L << 7) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
 	} else
 	{
 		LimitMax(period, Util::MaxValueOfType(period) >> 8);
-		if(m_SongFlags[SONG_LINEARSLIDES] || GetType() == MOD_TYPE_669)
+		if(m_SongFlags[SONG_LINEARSLIDES])
 		{
 			if(m_playBehaviour[kHertzInLinearMode])
 			{

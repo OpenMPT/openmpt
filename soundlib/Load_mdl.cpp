@@ -741,10 +741,11 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 				for(InstrumentEnvelope::iterator it = mptIns->PitchEnv.begin(); it != mptIns->PitchEnv.end(); it++)
 				{
 					// Scale pitch envelope
-					it->value = Util::muldivr(it->value, 6, 16);
+					it->value = (it->value * 6u) / 16u;
 				}
 #endif // MODPLUG_TRACKER
 
+				// Samples were already initialized above. Let's hope they are not going to be re-used with different volume / panning / vibrato...
 				ModSample &mptSmp = Samples[sampleHeader.smpNum];
 
 				// Not quite correct - this flag literally enables and disables the default volume of a sample. If you disable this flag,
