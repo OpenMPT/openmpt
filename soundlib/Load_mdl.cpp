@@ -535,7 +535,7 @@ static bool ImportMDLCommands(ModCommand &m, uint8 vol, uint8 e1, uint8 e2, uint
 	{
 		lostCommand |= !ModCommand::TwoRegularCommandsToMPT(e1, p1, e2, p2);
 		m.volcmd = e1;
-		m.vol = e2;
+		m.vol = p1;
 	} else
 	{
 		if(ModCommand::GetEffectWeight((ModCommand::COMMAND)e1) > ModCommand::GetEffectWeight((ModCommand::COMMAND)e2))
@@ -729,7 +729,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 				CopyEnvelope(mptIns->VolEnv, sampleHeader.volEnvFlags, volEnvs);
 				CopyEnvelope(mptIns->PanEnv, sampleHeader.panEnvFlags, panEnvs);
 				CopyEnvelope(mptIns->PitchEnv, sampleHeader.freqEnvFlags, pitchEnvs);
-				mptIns->nFadeOut = sampleHeader.fadeout;
+				mptIns->nFadeOut = (sampleHeader.fadeout + 1u) / 2u;
 #ifdef MODPLUG_TRACKER
 				if((mptIns->VolEnv.dwFlags & (ENV_ENABLED | ENV_LOOP)) == ENV_ENABLED)
 				{
@@ -746,7 +746,9 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 #endif // MODPLUG_TRACKER
 
 				ModSample &mptSmp = Samples[sampleHeader.smpNum];
-				// Samples were already initialized above. Let's hope they are not going to be re-used with different volume / panning / vibrato...
+
+				// Not quite correct - this flag literally enables and disables the default volume of a sample. If you disable this flag,
+				// the sample volume of a previously sample is re-used, even if you put an instrument number next to the note.
 				if(sampleHeader.volEnvFlags & 0x40)
 					mptSmp.nVolume = sampleHeader.volume;
 				mptSmp.nPan = std::min<uint16>(sampleHeader.panning * 2, 254);
