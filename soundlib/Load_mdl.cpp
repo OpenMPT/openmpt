@@ -653,8 +653,8 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		FileReader dataChunk = chunks.GetChunk(MDLChunk::ifSampleData);
 
-		SAMPLEINDEX numSamples = chunk.ReadUint8();
-		for(SAMPLEINDEX smp = 0; smp < numSamples; smp++)
+		uint8 numSamples = chunk.ReadUint8();
+		for(uint8 smp = 0; smp < numSamples; smp++)
 		{
 			MDLSampleInfoCommon header;
 			MPT_MAYBE_CONSTANT_IF(!chunk.ReadStruct(header) || header.sampleIndex == 0 || header.sampleIndex >= MAX_SAMPLES)
@@ -697,20 +697,22 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		MDLReadEnvelopes(chunks.GetChunk(MDLChunk::idPanEnvs), panEnvs);
 		MDLReadEnvelopes(chunks.GetChunk(MDLChunk::idFreqEnvs), pitchEnvs);
 
-		m_nInstruments = std::min<INSTRUMENTINDEX>(chunk.ReadUint8(), MAX_INSTRUMENTS - 1);
-		while(chunk.CanRead(34))
+		uint8 numInstruments = chunk.ReadUint8();
+		for(uint8 i = 0; i < numInstruments; i++)
 		{
 			uint8 ins = chunk.ReadUint8();
 			uint8 numSamples = chunk.ReadUint8();
 			uint8 firstNote = 0;
 			ModInstrument *mptIns = nullptr;
-			if(ins == 0 || ins > m_nInstruments
-				|| !chunk.CanRead(sizeof(MDLSampleHeader) * numSamples)
+			if(ins == 0
+				|| !chunk.CanRead(32 + sizeof(MDLSampleHeader) * numSamples)
 				|| (mptIns = AllocateInstrument(ins)) == nullptr)
 			{
 				chunk.Skip(32 + sizeof(MDLSampleHeader) * numSamples);
 				continue;
 			}
+			m_nInstruments = std::max<INSTRUMENTINDEX>(m_nInstruments, ins);
+
 			chunk.ReadString<mpt::String::spacePadded>(mptIns->name, 32);
 			while(numSamples--)
 			{
