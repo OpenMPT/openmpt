@@ -966,16 +966,6 @@ namespace Util {
 } // namespace Util
 
 
-#ifdef MODPLUG_TRACKER
-
-namespace Util
-{
-
-
-} // namespace Util
-
-#endif // MODPLUG_TRACKER
-
 namespace Util
 {
 
