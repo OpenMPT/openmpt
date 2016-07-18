@@ -293,6 +293,7 @@ template <typename T, typename T1, typename T2, typename T3, typename T4> inline
 #define MPT_MAYBE_CONSTANT_IF(x) \
   _Pragma("clang diagnostic push") \
   _Pragma("clang diagnostic ignored \"-Wtype-limits\"") \
+  _Pragma("clang diagnostic ignored \"-Wtautological-constant-out-of-range-compare\"") \
   if(x) \
   _Pragma("clang diagnostic pop") \
 /**/
