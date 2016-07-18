@@ -23,7 +23,7 @@ class CRarArchive
 
 protected:
 
-	MPT_SHARED_PTR<OnDiskFileWrapper> diskFile;
+	mpt::scoped_ptr<OnDiskFileWrapper> diskFile;
 	bool captureCurrentFile;
 
 public:
