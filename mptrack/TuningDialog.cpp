@@ -413,7 +413,7 @@ void CTuningDialog::DoErrorExit()
 	m_pActiveTuning = NULL;
 	m_pActiveTuningCollection = NULL;
 	MsgBox(IDS_ERR_DIALOG, this, NULL, MB_ICONINFORMATION);
-    OnOK();
+	OnOK();
 }
 
 
@@ -1370,7 +1370,7 @@ void CTuningDialog::OnOK()
 //------------------------
 {
 	// Prevent return-key from closing the window.
-	if(GetKeyState(VK_RETURN) <= -127)
+	if(GetKeyState(VK_RETURN) <= -127 && GetFocus() != GetDlgItem(IDOK))
 		return;
 	else
 		CDialog::OnOK();
