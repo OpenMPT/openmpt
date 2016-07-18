@@ -201,7 +201,7 @@ sane_random_device::sane_random_device()
 		seeds[0] = static_cast<uint32>(seed_val >> 32);
 		seeds[1] = static_cast<uint32>(seed_val >>  0);
 		std::seed_seq seed(seeds + 0, seeds + 2);
-		rd_fallback = MPT_SHARED_PTR<std::mt19937>(new std::mt19937(seed));
+		rd_fallback = mpt::scoped_ptr<std::mt19937>::initializer(new std::mt19937(seed));
 	}
 }
 
@@ -220,7 +220,7 @@ sane_random_device::sane_random_device(const std::string & token)
 			seeds.push_back(static_cast<unsigned int>(static_cast<unsigned char>(token[i])));
 		}
 		std::seed_seq seed(seeds.begin(), seeds.end());
-		rd_fallback = MPT_SHARED_PTR<std::mt19937>(new std::mt19937(seed));
+		rd_fallback = mpt::scoped_ptr<std::mt19937>::initializer(new std::mt19937(seed));
 	}
 }
 
