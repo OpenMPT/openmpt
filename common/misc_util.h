@@ -671,6 +671,20 @@ namespace Util
 	// Returns maximum value of given integer type.
 	template <class T> inline T MaxValueOfType(const T&) {static_assert(std::numeric_limits<T>::is_integer == true, "Only integer types are allowed."); return (std::numeric_limits<T>::max)();}
 
+	// The following MPT_MAX_* macros are useful as std::numeric_limits is not
+	// usable in constexpr-like contexts like static_assert in pre-C++11
+	// compilers.
+
+	// Returns the maximum value for the signed type or expression at compile time.
+	#define MPT_MAX_SIGNED_VALUE(integral_expression_or_type) ( ( 1ull << ( sizeof(integral_expression_or_type) * 8 - 1 ) ) - 1 )
+
+	// Returns the maximum value for the unsigned type or expression at compile time.
+	// Implemented in terms of MPT_MAX_SIGNED_VALUE in order to avoid overflow in left-shift.
+	#define MPT_MAX_UNSIGNED_VALUE(integral_expression_or_type) ( ( MPT_MAX_SIGNED_VALUE(integral_expression_or_type) << 1 ) | 1ull )
+
+	// Return the maximum value of an integral type at compile time.
+	#define MPT_MAX_VALUE_OF_TYPE(integral_type) ( std::numeric_limits<integral_type>::is_signed ? MPT_MAX_SIGNED_VALUE(integral_type) : MPT_MAX_UNSIGNED_VALUE(integral_type) )
+
 	/// Returns value rounded to nearest integer.
 #if (MPT_COMPILER_MSVC && MPT_MSVC_BEFORE(2013,0)) || (MPT_COMPILER_GCC && MPT_GCC_BEFORE(4,3,0)) || defined(ANDROID) || MPT_OS_EMSCRIPTEN
 	// MSVC before 2013 does not support C99/C++11.
