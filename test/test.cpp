@@ -306,6 +306,20 @@ static MPT_NOINLINE void TestTypes()
 	VERIFY_EQUAL(int64_min, (std::numeric_limits<int64>::min)());
 	VERIFY_EQUAL(int64_max, (std::numeric_limits<int64>::max)());
 	VERIFY_EQUAL(uint64_max, (std::numeric_limits<uint64>::max)());
+
+
+	STATIC_ASSERT(int8_max == MPT_MAX_VALUE_OF_TYPE(int8));
+	STATIC_ASSERT(uint8_max == MPT_MAX_VALUE_OF_TYPE(uint8));
+
+	STATIC_ASSERT(int16_max == MPT_MAX_VALUE_OF_TYPE(int16));
+	STATIC_ASSERT(uint16_max == MPT_MAX_VALUE_OF_TYPE(uint16));
+
+	STATIC_ASSERT(int32_max == MPT_MAX_VALUE_OF_TYPE(int32));
+	STATIC_ASSERT(uint32_max == MPT_MAX_VALUE_OF_TYPE(uint32));
+
+	STATIC_ASSERT(int64_max == MPT_MAX_VALUE_OF_TYPE(int64));
+	STATIC_ASSERT(uint64_max == MPT_MAX_VALUE_OF_TYPE(uint64));
+
 }
 
 
