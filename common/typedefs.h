@@ -239,7 +239,9 @@ public:
 	T * get() const { return m_p; }
 	// Give away ownership of the owned object.
 	T * release() { T * ret = m_p; m_p = nullptr; return ret; }
-	// Deletes the currently owned object (if any), and assumes ownership of the passed object p (if any).	
+	// Creates a scoped_ptr and assumes ownership of the passed object init (if any).
+	scoped_ptr (const initializer & init) : m_p(init.m_p) {}
+	// Deletes the currently owned object (if any), and assumes ownership of the passed object init (if any).
 	scoped_ptr & operator=(const initializer & init) { if(m_p) { delete m_p; m_p = nullptr; } m_p = init.m_p; return *this; }
 	// Returns true iff the scoped_ptr currently owns an object (i.e. same as (bool)p).
 	operator bool() const { return m_p ? true : false; }
