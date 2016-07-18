@@ -244,11 +244,11 @@ public:
 	// Returns true iff the scoped_ptr currently owns an object (i.e. same as (bool)p).
 	operator bool() const { return m_p ? true : false; }
 };
-template <typename T> inline typename mpt::scoped_ptr<T>::initializer_impl_result make_scoped() { return mpt::scoped_ptr<T>::initializer_impl::make<T>(); }
-template <typename T, typename T1> inline typename mpt::scoped_ptr<T>::initializer_impl_result make_scoped(const T1 &x1) { return mpt::scoped_ptr<T>::initializer_impl::make<T>(x1); }
-template <typename T, typename T1, typename T2> inline typename mpt::scoped_ptr<T>::initializer_impl_result make_scoped(const T1 &x1, const T2 &x2) { return mpt::scoped_ptr<T>::initializer_impl::make<T>(x1, x2); }
-template <typename T, typename T1, typename T2, typename T3> inline typename mpt::scoped_ptr<T>::initializer_impl_result make_scoped(const T1 &x1, const T2 &x2, const T3 &x3) { return mpt::scoped_ptr<T>::initializer_impl::make<T>(x1, x2, x3); }
-template <typename T, typename T1, typename T2, typename T3, typename T4> inline typename mpt::scoped_ptr<T>::initializer_impl_result make_scoped(const T1 &x1, const T2 &x2, const T3 &x3, const T4 &x4) { return mpt::scoped_ptr<T>::initializer_impl::make<T>(x1, x2, x3, x4); }
+template <typename T> inline typename mpt::scoped_ptr<T>::initializer_impl_result make_scoped() { typedef typename mpt::scoped_ptr<T>::initializer_impl init; return init::template make<T>(); }
+template <typename T, typename T1> inline typename mpt::scoped_ptr<T>::initializer_impl_result make_scoped(const T1 &x1) { typedef typename mpt::scoped_ptr<T>::initializer_impl init; return init::template make<T>(x1); }
+template <typename T, typename T1, typename T2> inline typename mpt::scoped_ptr<T>::initializer_impl_result make_scoped(const T1 &x1, const T2 &x2) { typedef typename mpt::scoped_ptr<T>::initializer_impl init; return init::template make<T>(x1, x2); }
+template <typename T, typename T1, typename T2, typename T3> inline typename mpt::scoped_ptr<T>::initializer_impl_result make_scoped(const T1 &x1, const T2 &x2, const T3 &x3) { typedef typename mpt::scoped_ptr<T>::initializer_impl init; return init::template make<T>(x1, x2, x3); }
+template <typename T, typename T1, typename T2, typename T3, typename T4> inline typename mpt::scoped_ptr<T>::initializer_impl_result make_scoped(const T1 &x1, const T2 &x2, const T3 &x3, const T4 &x4) { typedef typename mpt::scoped_ptr<T>::initializer_impl init; return init::template make<T>(x1, x2, x3, x4); }
 } // namespace mpt
 
 
