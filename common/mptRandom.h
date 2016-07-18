@@ -297,7 +297,7 @@ private:
 	mpt::mutex m;
 	std::random_device rd;
 	bool rd_reliable;
-	MPT_SHARED_PTR<std::mt19937> rd_fallback;
+	mpt::scoped_ptr<std::mt19937> rd_fallback;
 public:
 	typedef unsigned int result_type;
 public:
