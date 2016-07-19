@@ -80,9 +80,9 @@ protected:
 
 enum enmAddSilenceOptions
 {
-	addsilence_at_beginning = 1,	// Add at beginning of sample
-	addsilence_at_end,				// Add at end of sample
-	addsilence_resize,				// Resize sample
+	addsilence_at_beginning,	// Add at beginning of sample
+	addsilence_at_end,			// Add at end of sample
+	addsilence_resize,			// Resize sample
 };
 
 //==================================
@@ -203,15 +203,15 @@ protected:
 		Custom
 	};
 
+	ResamplingMode srcMode;
 	uint32 frequency;
 	static uint32 lastFrequency;
 	static ResamplingOption lastChoice;
-	static ResamplingMode lastFilter;
 
 public:
-	CResamplingDlg(CWnd *parent, uint32 curFreq) : CDialog(IDD_RESAMPLE, parent), frequency(curFreq) { };
+	CResamplingDlg(CWnd *parent, uint32 frequency, ResamplingMode srcMode) : CDialog(IDD_RESAMPLE, parent), frequency(frequency), srcMode(srcMode) { };
 	uint32 GetFrequency() const { return frequency; }
-	static ResamplingMode GetFilter() { return lastFilter; }
+	ResamplingMode GetFilter() const { return srcMode; }
 
 protected:
 	virtual BOOL OnInitDialog();

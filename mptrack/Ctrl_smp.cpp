@@ -1678,11 +1678,12 @@ void CCtrlSamples::OnResample()
 	if(sample.pSample == nullptr) return;
 
 	const uint32 oldRate = sample.GetSampleRate(m_sndFile.GetType());
-	CResamplingDlg dlg(this, oldRate);
+	CResamplingDlg dlg(this, oldRate, TrackerSettings::Instance().sampleEditorDefaultResampler);
 	if(dlg.DoModal() != IDOK || oldRate == dlg.GetFrequency())
 	{
 		return;
 	}
+	TrackerSettings::Instance().sampleEditorDefaultResampler = dlg.GetFilter();
 	ApplyResample(dlg.GetFrequency(), dlg.GetFilter());
 }
 
@@ -3303,7 +3304,7 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	case kcSampleDownsample:
 		{
 			uint32_t oldRate = m_sndFile.GetSample(m_nSample).GetSampleRate(m_sndFile.GetType());
-			ApplyResample(wParam == kcSampleUpsample ? oldRate * 2 : oldRate / 2, CResamplingDlg::GetFilter());
+			ApplyResample(wParam == kcSampleUpsample ? oldRate * 2 : oldRate / 2, TrackerSettings::Instance().sampleEditorDefaultResampler);
 		}
 		break;
 	case kcSampleResample:
