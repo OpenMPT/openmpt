@@ -452,7 +452,6 @@ BOOL CSampleXFadeDlg::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
 
 CResamplingDlg::ResamplingOption CResamplingDlg::lastChoice = CResamplingDlg::Upsample;
 uint32 CResamplingDlg::lastFrequency = 0;
-ResamplingMode CResamplingDlg::lastFilter = SRCMODE_DEFAULT;
 
 BEGIN_MESSAGE_MAP(CResamplingDlg, CDialog)
 	ON_EN_SETFOCUS(IDC_EDIT1, OnFocusEdit)
@@ -486,7 +485,7 @@ BOOL CResamplingDlg::OnInitDialog()
 
 		int index = cbnResampling->AddString(desc);
 		cbnResampling->SetItemData(index, resamplingModes[i]);
-		if(lastFilter == resamplingModes[i])
+		if(srcMode == resamplingModes[i])
 			cbnResampling->SetCurSel(index);
 	}
 	cbnResampling->SetRedraw(TRUE);
@@ -522,7 +521,7 @@ void CResamplingDlg::OnOK()
 	}
 
 	CComboBox *cbnResampling = static_cast<CComboBox *>(GetDlgItem(IDC_COMBO_FILTER));
-	lastFilter = static_cast<ResamplingMode>(cbnResampling->GetItemData(cbnResampling->GetCurSel()));
+	srcMode = static_cast<ResamplingMode>(cbnResampling->GetItemData(cbnResampling->GetCurSel()));
 
 	CDialog::OnOK();
 }

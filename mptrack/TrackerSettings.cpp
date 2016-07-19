@@ -284,6 +284,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, m_SampleUndoBufferSize(conf, "Sample Editor", "UndoBufferSize", SampleUndoBufferSize())
 	, sampleEditorKeyBehaviour(conf, "Sample Editor", "KeyBehaviour", seNoteOffOnNewKey)
 	, m_defaultSampleFormat(conf, "Sample Editor", "DefaultFormat", dfFLAC)
+	, sampleEditorDefaultResampler(conf, "Sample Editor", "DefaultResampler", SRCMODE_DEFAULT)
 	, m_nFinetuneStep(conf, "Sample Editor", "FinetuneStep", 10)
 	, m_FLACCompressionLevel(conf, "Sample Editor", "FLACCompressionLevel", 5)
 	, compressITI(conf, "Sample Editor", "CompressITI", true)
@@ -652,6 +653,12 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,26,00,26))
 	{
 		gnPlugWindowHeight += 40;
+	}
+
+	// Sanitize resampling mode for sample editor
+	if(!IsKnownResamplingMode(sampleEditorDefaultResampler) && sampleEditorDefaultResampler != SRCMODE_DEFAULT)
+	{
+		sampleEditorDefaultResampler = SRCMODE_DEFAULT;
 	}
 
 	// Last fixup: update config version
