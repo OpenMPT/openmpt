@@ -88,7 +88,7 @@ nobase_include_HEADERS =
 
 pkgconfig_DATA += libopenmpt/libopenmpt.pc
 lib_LTLIBRARIES += libopenmpt.la
-libopenmpt_la_LDFLAGS = -version-info 0:18:0
+libopenmpt_la_LDFLAGS = -version-info 0:19:0
 nobase_include_HEADERS += libopenmpt/libopenmpt.h libopenmpt/libopenmpt.hpp libopenmpt/libopenmpt_version.h libopenmpt/libopenmpt_config.h libopenmpt/libopenmpt_stream_callbacks_fd.h libopenmpt/libopenmpt_stream_callbacks_file.h libopenmpt/libopenmpt_ext.hpp
 libopenmpt_la_CPPFLAGS = -DLIBOPENMPT_BUILD -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(LTDL_CPPFLAGS) $(DL_CPPFLAGS)
 libopenmpt_la_CXXFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
