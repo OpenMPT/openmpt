@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt svn
+
 ### libopenmpt 0.2-beta19 (2016-07-23)
 
  *  [**Change**] libopenmpt now uses C++14 `[[deprecated]]` attribute instead
