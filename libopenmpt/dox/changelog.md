@@ -35,7 +35,7 @@ is just a high-level summary.
     `LIBOPENMPT_ASSUME_CPLUSPLUS_NOEXCEPT` which take precedence over the
     general macro.
  *  Portamento with sample swap behaviour was wrong for ProTracker MODs.
- *  Various playback fixes for MDL files.
+ *  Rewritten loader and various playback fixes for MDL files.
  *  libopenmpt 0.2-beta18 broke import of many pattern commands in DBM, DMF and
     ULT files.
 
