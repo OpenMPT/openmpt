@@ -92,9 +92,10 @@ void CSoundFile::S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool co
 		command = 'X';
 		if(toIT && !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM | MOD_TYPE_MOD)))
 		{
-			if (param == 0xA4) { command = 'S'; param = 0x91; }	else
-			if (param <= 0x80) { if((param << 1) > 255) param = 255; else param <<= 1; } else
-			command = 0;
+			if (param == 0xA4) { command = 'S'; param = 0x91; }
+			else if (param == 0x80) { param = 0xFF; }
+			else if (param < 0x80) { param <<= 1; }
+			else command = 0;
 		} else if (!toIT && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM | MOD_TYPE_MOD)))
 		{
 			param >>= 1;
@@ -220,6 +221,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			m_madeWithTracker = "ModPlug Tracker / OpenMPT";
 			keepMidiMacros = true;
 			nonCompatTracker = true;
+			m_playBehaviour.set(kST3LimitPeriod);
 		} else if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && fileHeader.ultraClicks == 0 && fileHeader.flags == 0 && fileHeader.usePanningTable == 0)
 		{
 			m_madeWithTracker = "Velvet Studio";
