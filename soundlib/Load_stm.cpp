@@ -313,8 +313,8 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 				if(sampleOffset > sizeof(STMPatternEntry) && sampleOffset < file.GetLength())
 				{
 					file.Seek(sampleOffset);
+					sampleIO.ReadSample(sample, file);
 				}
-				sampleIO.ReadSample(sample, file);
 			}
 		}
 	}
