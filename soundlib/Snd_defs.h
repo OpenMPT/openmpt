@@ -356,7 +356,7 @@ enum VibratoType
 
 
 // Tracker-specific playback behaviour
-// Note: The index of every flag has to be fixed, so do not remove flags and add new flags at the end!
+// Note: The index of every flag has to be fixed, so do not remove flags. Always add new flags at the end!
 enum PlayBehaviour
 {
 	MSF_COMPATIBLE_PLAY,			// No-op - only used during loading (Old general compatibility flag for IT/MPT/XM)
@@ -443,6 +443,7 @@ enum PlayBehaviour
 	kST3EffectMemory,				// Most effects share the same memory in ST3
 	kST3PortaSampleChange,			// Portamento plus instrument number applies the volume settings of the new sample, but not the new sample itself.
 	kST3VibratoMemory,				// Do not remember vibrato type in effect memory
+	kST3LimitPeriod,				// Cut note instead of limiting  final period (ModPlug Tracker style)
 
 	kMODOneShotLoops,				// Allow ProTracker-like oneshot loops
 	kMODIgnorePanning,				// Do not process any panning commands
@@ -464,7 +465,7 @@ public:
 	void resize(size_type _Newsize, value_type val = Unity) { std::vector<uint32>::resize(_Newsize, val); Normalize(); }
 
 	static void Serialize(std::ostream &oStrm, const TempoSwing &swing);
-	static void Deserialize(std::istream& iStrm, TempoSwing &swing, const size_t);
+	static void Deserialize(std::istream &iStrm, TempoSwing &swing, const size_t);
 };
 
 

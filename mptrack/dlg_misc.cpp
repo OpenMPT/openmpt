@@ -456,16 +456,13 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 		text = _T("Gxx and Exx/Fxx won't share effect memory. Gxx resets instrument envelopes.");
 		break;
 	case IDC_CHECK5:
-		text = _T("The resonant filter's frequency range is increased from about 5KHz to 10KHz.");
-		break;
-	case IDC_CHECK6:
-		text = _T("The instrument settings of the external ITI files will be ignored.");
+		text = _T("The resonant filter's frequency range is increased from about 5kHz to 10kHz.");
 		break;
 	case IDC_CHECK_PT1X:
 		text = _T("Enforce Amiga frequency limits, ProTracker offset bug emulation.");
 		break;
 	case IDC_COMBO_MIXLEVELS:
-		text = _T("Mixing method of sample and VST levels.");
+		text = _T("Mixing method of sample and instrument plugin levels.");
 		break;
 	case IDC_BUTTON1:
 		if(!GetDlgItem(IDC_BUTTON1)->IsWindowEnabled())
@@ -606,6 +603,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kST3EffectMemory: desc = _T("Most effects share the same memory"); break;
 		case kST3PortaSampleChange: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself."); break;
 		case kST3VibratoMemory: desc = _T("Do not remember vibrato type in effect memory"); break;
+		case kST3LimitPeriod: desc = _T("ModPlug Tracker frequency limits"); break;
 		case kMODOneShotLoops: desc = _T("ProTracker one-shot loops"); break;
 		case kMODIgnorePanning: desc = _T("Ignore panning commands."); break;
 		case kMODSampleSwap: desc = _T("Enable on-the-fly sample swapping"); break;

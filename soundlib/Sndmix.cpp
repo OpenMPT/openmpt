@@ -2077,6 +2077,7 @@ bool CSoundFile::ReadNote()
 			// Test case: PeriodLimit.s3m
 			if (period <= m_nMinPeriod)
 			{
+				if(m_playBehaviour[kST3LimitPeriod]) pChn->nLength = 0;	// Pattern 15 in watcha.s3m
 				period = m_nMinPeriod;
 			}
 
