@@ -50,6 +50,7 @@ public:
 		_16bit	= 16,
 		_24bit	= 24,
 		_32bit	= 32,
+		_64bit	= 64,
 	};
 
 	// Number of channels + channel format
@@ -92,6 +93,8 @@ public:
 		floatPCM23,         // Floating point PCM with 2^23 full scale
 		floatPCMnormalize,  // Floating point PCM and data will be normalized while reading
 		signedPCMnormalize, // Integer PCM and data will be normalized while reading
+		uLaw,               // 8-to-16 bit G.711 u-law compression
+		aLaw,               // 8-to-16 bit G.711 a-law compression
 	};
 
 	SampleIO(Bitdepth bits = _8bit, Channels channels = mono, Endianness endianness = littleEndian, Encoding encoding = signedPCM)
@@ -200,6 +203,12 @@ public:
 				break;
 			case signedPCMnormalize:// Integer PCM and data will be normalized while reading
 				result = GetBitDepth();
+				break;
+			case uLaw:// G.711 u-law
+				result = 8;
+				break;
+			case aLaw:// G.711 a-law
+				result = 8;
 				break;
 		}
 		return result;
