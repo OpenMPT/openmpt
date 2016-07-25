@@ -272,6 +272,7 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool 
 		&& !(includeInstrumentFormats && ReadPATSample(nSample, file))
 		&& !ReadIFFSample(nSample, file)
 		&& !ReadS3ISample(nSample, file)
+		&& !ReadAUSample(nSample, file, mayNormalize)
 		&& !ReadFLACSample(nSample, file)
 		&& !ReadOpusSample(nSample, file)
 		&& !ReadVorbisSample(nSample, file)
@@ -626,8 +627,9 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 		|| wavFile.GetNumChannels() == 0
 		|| wavFile.GetNumChannels() > 2
 		|| (wavFile.GetBitsPerSample() == 0 && wavFile.GetSampleFormat() != WAVFormatChunk::fmtMP3)
-		|| wavFile.GetBitsPerSample() > 32
-		|| (wavFile.GetSampleFormat() != WAVFormatChunk::fmtPCM && wavFile.GetSampleFormat() != WAVFormatChunk::fmtFloat && wavFile.GetSampleFormat() != WAVFormatChunk::fmtIMA_ADPCM && wavFile.GetSampleFormat() != WAVFormatChunk::fmtMP3))
+		|| (wavFile.GetBitsPerSample() > 32 && wavFile.GetSampleFormat() != WAVFormatChunk::fmtFloat)
+		|| (wavFile.GetBitsPerSample() > 64 && wavFile.GetSampleFormat() == WAVFormatChunk::fmtFloat)
+		|| (wavFile.GetSampleFormat() != WAVFormatChunk::fmtPCM && wavFile.GetSampleFormat() != WAVFormatChunk::fmtFloat && wavFile.GetSampleFormat() != WAVFormatChunk::fmtIMA_ADPCM && wavFile.GetSampleFormat() != WAVFormatChunk::fmtMP3 && wavFile.GetSampleFormat() != WAVFormatChunk::fmtALaw && wavFile.GetSampleFormat() != WAVFormatChunk::fmtULaw))
 	{
 		return false;
 	}
@@ -641,6 +643,12 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 	wavFile.ApplySampleSettings(sample, m_szNames[nSample]);
 
 	FileReader sampleChunk = wavFile.GetSampleData();
+
+	SampleIO sampleIO(
+		SampleIO::_8bit,
+		(wavFile.GetNumChannels() > 1) ? SampleIO::stereoInterleaved : SampleIO::mono,
+		SampleIO::littleEndian,
+		SampleIO::signedPCM);
 
 	if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtIMA_ADPCM && wavFile.GetNumChannels() <= 2)
 	{
@@ -665,11 +673,8 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 		//  (This is parsed in WAVTools.cpp and returned via MayBeCoolEdit16_8()).
 		// The data actually stored in this case is little endian 32bit floating point PCM with 2**15 full scale.
 		// Cool Edit calls this format "16.8 float".
-		SampleIO sampleIO(
-			SampleIO::_32bit,
-			(wavFile.GetNumChannels() > 1) ? SampleIO::stereoInterleaved : SampleIO::mono,
-			SampleIO::littleEndian,
-			SampleIO::floatPCM15);
+		sampleIO |= SampleIO::_32bit;
+		sampleIO |= SampleIO::floatPCM15;
 		sampleIO.ReadSample(sample, sampleChunk);
 	} else if(!wavFile.IsExtensibleFormat() && wavFile.GetSampleFormat() == WAVFormatChunk::fmtPCM && wavFile.GetBitsPerSample() == 24 && wavFile.GetBlockAlign() == wavFile.GetNumChannels() * 4)
 	{
@@ -677,19 +682,31 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 		// Format is described as 24bit integer PCM contained in 32bit blocks.
 		// The data actually stored in this case is little endian 32bit floating point PCM with 2**23 full scale.
 		// Cool Edit calls this format "24.0 float".
-		SampleIO sampleIO(
-			SampleIO::_32bit,
-			(wavFile.GetNumChannels() > 1) ? SampleIO::stereoInterleaved : SampleIO::mono,
-			SampleIO::littleEndian,
-			SampleIO::floatPCM23);
+		sampleIO |= SampleIO::_32bit;
+		sampleIO |= SampleIO::floatPCM23;
+		sampleIO.ReadSample(sample, sampleChunk);
+	} else if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtALaw || wavFile.GetSampleFormat() == WAVFormatChunk::fmtULaw)
+	{
+		// a-law / u-law
+		sampleIO |= SampleIO::_16bit;
+		sampleIO |= wavFile.GetSampleFormat() == WAVFormatChunk::fmtALaw ? SampleIO::aLaw : SampleIO::uLaw;
 		sampleIO.ReadSample(sample, sampleChunk);
 	} else
 	{
 		// PCM / Float
-		static const SampleIO::Bitdepth bitDepth[] = { SampleIO::_8bit, SampleIO::_16bit, SampleIO::_24bit, SampleIO::_32bit };
+		SampleIO::Bitdepth bitDepth;
+		switch((wavFile.GetBitsPerSample() - 1) / 8u)
+		{
+		default:
+		case 0: bitDepth = SampleIO::_8bit; break;
+		case 1: bitDepth = SampleIO::_16bit; break;
+		case 2: bitDepth = SampleIO::_24bit; break;
+		case 3: bitDepth = SampleIO::_32bit; break;
+		case 7: bitDepth = SampleIO::_64bit; break;
+		}
 
 		SampleIO sampleIO(
-			bitDepth[(wavFile.GetBitsPerSample() - 1) / 8],
+			bitDepth,
 			(wavFile.GetNumChannels() > 1) ? SampleIO::stereoInterleaved : SampleIO::mono,
 			SampleIO::littleEndian,
 			(wavFile.GetBitsPerSample() > 8) ? SampleIO::signedPCM : SampleIO::unsignedPCM);
@@ -1607,7 +1624,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 	// Is this a proper sample?
 	if(sampleInfo.numSampleFrames == 0
 		|| sampleInfo.numChannels == 0 || sampleInfo.numChannels > 2
-		|| sampleInfo.sampleSize == 0 || sampleInfo.sampleSize > 32)
+		|| sampleInfo.sampleSize == 0 || sampleInfo.sampleSize > 64)
 	{
 		return false;
 	}
@@ -1636,16 +1653,28 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 		return false;
 	}
 
-	static const SampleIO::Bitdepth bitDepth[] = { SampleIO::_8bit, SampleIO::_16bit, SampleIO::_24bit, SampleIO::_32bit };
+	static const SampleIO::Bitdepth bitDepth[] = { SampleIO::_8bit, SampleIO::_16bit, SampleIO::_24bit, SampleIO::_32bit, SampleIO::_64bit };
 
 	SampleIO sampleIO(bitDepth[(sampleInfo.sampleSize - 1) / 8],
 		(sampleInfo.numChannels == 2) ? SampleIO::stereoInterleaved : SampleIO::mono,
 		endian,
 		SampleIO::signedPCM);
 
-	if(!memcmp(compression, "fl32", 4) || !memcmp(compression, "FL32", 4))
+	if(!memcmp(compression, "fl32", 4) || !memcmp(compression, "FL32", 4) || !memcmp(compression, "fl64", 4))
 	{
 		sampleIO |= SampleIO::floatPCM;
+	} else if(!memcmp(compression, "alaw", 4) || !memcmp(compression, "ALAW", 4))
+	{
+		sampleIO |= SampleIO::aLaw;
+		sampleIO |= SampleIO::_16bit;
+	} else if(!memcmp(compression, "ulaw", 4) || !memcmp(compression, "ULAW", 4))
+	{
+		sampleIO |= SampleIO::uLaw;
+		sampleIO |= SampleIO::_16bit;
+	} else if(sampleInfo.sampleSize > 32)
+	{
+		// Double-precision floating point is the only 64-bit type supported at the moment.
+		return false;
 	}
 
 	if(mayNormalize)
@@ -1726,6 +1755,66 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 	{
 		strcpy(m_szNames[nSample], "");
 	}
+
+	mptSample.Convert(MOD_TYPE_IT, GetType());
+	mptSample.PrecomputeLoops(*this, false);
+	return true;
+}
+
+
+bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize)
+//-------------------------------------------------------------------------------------
+{
+	file.Rewind();
+
+	// Verify header
+	if(!file.ReadMagic(".snd"))
+		return false;
+
+	uint32 dataOffset = file.ReadUint32BE();
+	uint32 dataSize = file.ReadUint32BE();
+	uint32 encoding = file.ReadUint32BE();
+	uint32 sampleRate = file.ReadUint32BE();
+	uint32 channels = file.ReadUint32BE();
+
+	if(channels < 1 || channels > 2)
+		return false;
+
+	SampleIO sampleIO(SampleIO::_8bit, channels == 1 ? SampleIO::mono : SampleIO::stereoInterleaved, SampleIO::bigEndian, SampleIO::signedPCM);
+	switch(encoding)
+	{
+	case 1: sampleIO |= SampleIO::_16bit;			// u-law
+		sampleIO |= SampleIO::uLaw; break;
+	case 2: break;									// 8-bit linear PCM
+	case 3: sampleIO |= SampleIO::_16bit; break;	// 16-bit linear PCM
+	case 4: sampleIO |= SampleIO::_24bit; break;	// 24-bit linear PCM
+	case 5: sampleIO |= SampleIO::_32bit; break;	// 32-bit linear PCM
+	case 6: sampleIO |= SampleIO::_32bit;			// 32-bit IEEE floating point
+		sampleIO |= SampleIO::floatPCM;
+		break;
+	case 7: sampleIO |= SampleIO::_64bit;			// 64-bit IEEE floating point
+		sampleIO |= SampleIO::floatPCM;
+		break;
+	case 27: sampleIO |= SampleIO::_16bit;			// a-law
+		sampleIO |= SampleIO::aLaw; break;
+	default: return false;
+	}
+
+	if(!file.Seek(dataOffset))
+		return false;
+
+	ModSample &mptSample = Samples[nSample];
+	DestroySampleThreadsafe(nSample);
+	mptSample.Initialize();
+	mptSample.nLength = (std::min<FileReader::off_t>(file.BytesLeft(), dataSize) * 8u) / (sampleIO.GetEncodedBitsPerSample() * channels);
+	mptSample.nC5Speed = sampleRate;
+
+	if(mayNormalize)
+	{
+		sampleIO.MayNormalize();
+	}
+
+	sampleIO.ReadSample(mptSample, file);
 
 	mptSample.Convert(MOD_TYPE_IT, GetType());
 	mptSample.PrecomputeLoops(*this, false);

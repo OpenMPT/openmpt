@@ -892,6 +892,7 @@ public:
 	bool ReadPATSample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadS3ISample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize = false);
+	bool ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize = false);
 	bool ReadXISample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewind = true);
 	bool ReadITISample(SAMPLEINDEX nSample, FileReader &file);

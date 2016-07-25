@@ -1795,11 +1795,12 @@ void CCtrlInstruments::OnInstrumentOpen()
 {
 	static int nLastIndex = 0;
 
+	std::vector<FileType> mediaFoundationTypes = CSoundFile::GetMediaFoundationFileTypes();
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
 		.EnableAudioPreview()
 		.ExtensionFilter(
-			"All Instruments|*.xi;*.pat;*.iti;*.flac;*.oga;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls|"
+			"All Instruments|*.xi;*.pat;*.iti;*.flac;*.wav;*.aif;*.aiff;*.au;*.snd;*.sf2;*.sbk;*.dls;*.oga;*.ogg;*.opus" + ToFilterOnlyString(mediaFoundationTypes, true).ToLocale() + "|"
 			"FastTracker II Instruments (*.xi)|*.xi|"
 			"GF1 Patches (*.pat)|*.pat|"
 			"Impulse Tracker Instruments (*.iti)|*.iti|"

@@ -115,6 +115,8 @@ struct PACKED WAVFormatChunk
 	{
 		fmtPCM			= 1,
 		fmtFloat		= 3,
+		fmtALaw			= 6,
+		fmtULaw			= 7,
 		fmtIMA_ADPCM	= 17,
 		fmtMP3			= 85,
 		fmtExtensible	= 0xFFFE,

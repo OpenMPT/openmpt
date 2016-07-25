@@ -18,10 +18,12 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Byte offsets, from lowest significant to highest significant byte (for various functor template parameters)
+#define littleEndian64 0, 1, 2, 3, 4, 5, 6, 7
 #define littleEndian32 0, 1, 2, 3
 #define littleEndian24 0, 1, 2
 #define littleEndian16 0, 1
 
+#define bigEndian64 7, 6, 5, 4, 3, 2, 1, 0
 #define bigEndian32 3, 2, 1, 0
 #define bigEndian24 2, 1, 0
 #define bigEndian16 1, 0
@@ -183,6 +185,18 @@ struct DecodeScaledFloat32
 		: factor(scaleFactor)
 	{
 		return;
+	}
+};
+
+template <size_t b0, size_t b1, size_t b2, size_t b3, size_t b4, size_t b5, size_t b6, size_t b7>
+struct DecodeFloat64
+{
+	typedef mpt::byte input_t;
+	typedef float64 output_t;
+	static const int input_inc = 8;
+	forceinline output_t operator() (const input_t *inBuf)
+	{
+		return IEEE754binary64LE(uint8(inBuf[b0]), uint8(inBuf[b1]), uint8(inBuf[b2]), uint8(inBuf[b3]), uint8(inBuf[b4]), uint8(inBuf[b5]), uint8(inBuf[b6]), uint8(inBuf[b7]));
 	}
 };
 
@@ -839,6 +853,45 @@ struct Normalize<float32>
 		} else
 		{
 			maxValInv = 1.0f / maxVal;
+			return false;
+		}
+	}
+	forceinline output_t operator() (input_t val)
+	{
+		return val * maxValInv;
+	}
+	forceinline peak_t GetSrcPeak() const
+	{
+		return maxVal;
+	}
+};
+
+template <>
+struct Normalize<float64>
+{
+	typedef float64 input_t;
+	typedef float64 output_t;
+	typedef float64 peak_t;
+	double maxVal;
+	double maxValInv;
+	forceinline Normalize() : maxVal(0.0), maxValInv(1.0) { }
+	forceinline void FindMax(input_t val)
+	{
+		double absval = std::fabs(val);
+		if(absval > maxVal)
+		{
+			maxVal = absval;
+		}
+	}
+	forceinline bool IsSilent()
+	{
+		if(maxVal == 0.0)
+		{
+			maxValInv = 1.0;
+			return true;
+		} else
+		{
+			maxValInv = 1.0 / maxVal;
 			return false;
 		}
 	}
