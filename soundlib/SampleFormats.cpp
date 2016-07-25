@@ -99,7 +99,7 @@ extern "C" {
 #else
 // There is no portable way to display a warning.
 // Try to provoke a warning with an unused function.
-static void OpenMPT_libmpg123_API_version_with_split_largefile_support_detected__This_has_not_been_tested_at_all_() { } 
+static void OpenMPT_libmpg123_API_version_with_split_largefile_support_detected__This_has_not_been_tested_at_all_() { }
 #endif
 
 #elif (MPG123_API_VERSION == 25) // == 1.12.x and some later
@@ -141,87 +141,87 @@ EXPORT int mpg123_open(mpg123_handle *mh, const char *path);
 #endif
 EXPORT int mpg123_open_fd(mpg123_handle *mh, int fd);
 
-#ifdef mpg123_open_handle  
+#ifdef mpg123_open_handle
 #undef mpg123_open_handle
 #endif
 EXPORT int mpg123_open_handle(mpg123_handle *mh, void *iohandle);
 
-#ifdef mpg123_framebyframe_decode 
+#ifdef mpg123_framebyframe_decode
 #undef mpg123_framebyframe_decode
 #endif
 EXPORT int mpg123_framebyframe_decode(mpg123_handle *mh, off_t *num, unsigned char **audio, size_t *bytes);
 
-#ifdef mpg123_decode_frame 
+#ifdef mpg123_decode_frame
 #undef mpg123_decode_frame
 #endif
 EXPORT int mpg123_decode_frame(mpg123_handle *mh, off_t *num, unsigned char **audio, size_t *bytes);
 
-#ifdef mpg123_tell         
+#ifdef mpg123_tell
 #undef mpg123_tell
 #endif
 EXPORT off_t mpg123_tell(mpg123_handle *mh);
 
-#ifdef mpg123_tellframe    
+#ifdef mpg123_tellframe
 #undef mpg123_tellframe
 #endif
 EXPORT off_t mpg123_tellframe(mpg123_handle *mh);
 
-#ifdef mpg123_tell_stream  
+#ifdef mpg123_tell_stream
 #undef mpg123_tell_stream
 #endif
 EXPORT off_t mpg123_tell_stream(mpg123_handle *mh);
 
-#ifdef mpg123_seek         
+#ifdef mpg123_seek
 #undef mpg123_seek
 #endif
 EXPORT off_t mpg123_seek(mpg123_handle *mh, off_t sampleoff, int whence);
 
-#ifdef mpg123_feedseek     
+#ifdef mpg123_feedseek
 #undef mpg123_feedseek
 #endif
 EXPORT off_t mpg123_feedseek(mpg123_handle *mh, off_t sampleoff, int whence, off_t *input_offset);
 
-#ifdef mpg123_seek_frame   
+#ifdef mpg123_seek_frame
 #undef mpg123_seek_frame
 #endif
 EXPORT off_t mpg123_seek_frame(mpg123_handle *mh, off_t frameoff, int whence);
 
-#ifdef mpg123_timeframe    
+#ifdef mpg123_timeframe
 #undef mpg123_timeframe
 #endif
 EXPORT off_t mpg123_timeframe(mpg123_handle *mh, double sec);
 
-#ifdef mpg123_index        
+#ifdef mpg123_index
 #undef mpg123_index
 #endif
 EXPORT int mpg123_index(mpg123_handle *mh, off_t **offsets, off_t *step, size_t *fill);
 
-#ifdef mpg123_set_index    
+#ifdef mpg123_set_index
 #undef mpg123_set_index
 #endif
 EXPORT int mpg123_set_index(mpg123_handle *mh, off_t *offsets, off_t step, size_t fill);
 
-#ifdef mpg123_position     
+#ifdef mpg123_position
 #undef mpg123_position
 #endif
 EXPORT int mpg123_position( mpg123_handle *mh, off_t frame_offset, off_t buffered_bytes, off_t *current_frame, off_t *frames_left, double *current_seconds, double *seconds_left);
 
-#ifdef mpg123_length       
+#ifdef mpg123_length
 #undef mpg123_length
 #endif
 EXPORT off_t mpg123_length(mpg123_handle *mh);
 
-#ifdef mpg123_set_filesize 
+#ifdef mpg123_set_filesize
 #undef mpg123_set_filesize
 #endif
 EXPORT int mpg123_set_filesize(mpg123_handle *mh, off_t size);
 
-#ifdef mpg123_replace_reader 
+#ifdef mpg123_replace_reader
 #undef mpg123_replace_reader
 #endif
 EXPORT int mpg123_replace_reader(mpg123_handle *mh, ssize_t (*r_read) (int, void *, size_t), off_t (*r_lseek)(int, off_t, int));
 
-#ifdef mpg123_replace_reader_handle 
+#ifdef mpg123_replace_reader_handle
 #undef mpg123_replace_reader_handle
 #endif
 EXPORT int mpg123_replace_reader_handle(mpg123_handle *mh, ssize_t (*r_read) (void *, void *, size_t), off_t (*r_lseek)(void *, off_t, int), void (*cleanup)(void*));
@@ -342,7 +342,7 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file
 	// Remove all samples which are only referenced by the old instrument, except for the one we just loaded our new sample into.
 	RemoveInstrumentSamples(nInstr, nSample);
 
-	// Replace the instrument 
+	// Replace the instrument
 	DestroyInstrument(nInstr, doNoDeleteAssociatedSamples);
 	Instruments[nInstr] = pIns;
 
@@ -776,12 +776,12 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filen
 	{
 		file.WriteCueInformation(sample);
 	}
-	
+
 	FileTags tags;
 	tags.title = mpt::ToUnicode(GetCharsetLocaleOrModule(), m_szNames[nSample]);
 	tags.encoder = mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetOpenMPTVersionStr());
 	file.WriteMetatags(tags);
-	
+
 	return true;
 }
 
@@ -911,7 +911,7 @@ STATIC_ASSERT(sizeof(GF1SampleHeader) == 96);
 //	It can be represented like this (the envelope is totally bogus, it is
 //	just to show the concept):
 //
-//	|                               
+//	|
 //	|           /----`               | |
 //	|   /------/      `\         | | | | |
 //	|  /                 \       | | | | |
@@ -1417,23 +1417,14 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 // AIFF header
 struct PACKED AIFFHeader
 {
-	// 32-Bit chunk identifiers
-	enum AIFFMagic
-	{
-		idFORM	= 0x464F524D,
-		idAIFF	= 0x41494646,
-		idAIFC	= 0x41494643,
-	};
-
-	uint32 magic;	// FORM
-	uint32 length;	// Size of the file, not including magic and length
-	uint32 type;	// AIFF or AIFC
+	char   magic[4];	// FORM
+	uint32 length;		// Size of the file, not including magic and length
+	char   type[4];		// AIFF or AIFC
 
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
 	{
-		SwapBytesBE(magic);
-		SwapBytesBE(type);
+		//SwapBytesBE(length);	// We ignore this field
 	}
 };
 
@@ -1605,8 +1596,8 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 	// Verify header
 	AIFFHeader fileHeader;
 	if(!chunkFile.ReadConvertEndianness(fileHeader)
-		|| fileHeader.magic != AIFFHeader::idFORM
-		|| (fileHeader.type != AIFFHeader::idAIFF && fileHeader.type != AIFFHeader::idAIFC))
+		|| memcmp(fileHeader.magic, "FORM", 4)
+		|| (memcmp(fileHeader.type, "AIFF", 4) && memcmp(fileHeader.type, "AIFC", 4)))
 	{
 		return false;
 	}
@@ -1623,8 +1614,8 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 
 	// Is this a proper sample?
 	if(sampleInfo.numSampleFrames == 0
-		|| sampleInfo.numChannels == 0 || sampleInfo.numChannels > 2
-		|| sampleInfo.sampleSize == 0 || sampleInfo.sampleSize > 64)
+		|| sampleInfo.numChannels < 1 || sampleInfo.numChannels > 2
+		|| sampleInfo.sampleSize < 1 || sampleInfo.sampleSize > 64)
 	{
 		return false;
 	}
@@ -1632,7 +1623,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 	// Read compression type in AIFF-C files.
 	uint8 compression[4] = { 'N', 'O', 'N', 'E' };
 	SampleIO::Endianness endian = SampleIO::bigEndian;
-	if(fileHeader.type == AIFFHeader::idAIFC)
+	if(!memcmp(fileHeader.type, "AIFC", 4))
 	{
 		if(!commChunk.ReadArray(compression))
 		{
@@ -1706,9 +1697,10 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 	AIFFInstrumentChunk instrHeader;
 	if(markerChunk.IsValid() && chunks.GetChunk(AIFFChunk::idINST).ReadConvertEndianness(instrHeader))
 	{
-		size_t numMarkers = markerChunk.ReadUint16BE();
+		uint16 numMarkers = markerChunk.ReadUint16BE();
 
 		std::vector<AIFFMarker> markers;
+		markers.reserve(numMarkers);
 		for(size_t i = 0; i < numMarkers; i++)
 		{
 			AIFFMarker marker;
@@ -1817,6 +1809,7 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 	mptSample.Initialize();
 	mptSample.nLength = (std::min<FileReader::off_t>(file.BytesLeft(), dataSize) * 8u) / (sampleIO.GetEncodedBitsPerSample() * channels);
 	mptSample.nC5Speed = sampleRate;
+	strcpy(m_szNames[nSample], "");
 
 	if(mayNormalize)
 	{
@@ -1990,7 +1983,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 
 	if((!pIns) || filename.empty()) return false;
 	if((f = mpt_fopen(filename, "wb")) == NULL) return false;
-	
+
 	size_t instSize = iti.ConvertToIT(*pIns, false, *this);
 
 	// Create sample assignment table
@@ -2179,7 +2172,7 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
 	{
 		return false;
 	}
-	
+
 	DestroySampleThreadsafe(nSample);
 	// Default values
 	ModSample &sample = Samples[nSample];
@@ -2754,7 +2747,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		chunk.info.ConvertEndianness();
 		chunk.loops[0].ConvertEndianness();
 		chunk.loops[1].ConvertEndianness();
-		
+
 		FLAC__metadata_object_application_set_data(metadata[numBlocks], reinterpret_cast<FLAC__byte *>(&chunk), length, true);
 		numBlocks++;
 	}
@@ -2834,7 +2827,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 	// Do the actual conversion.
 	FLAC__stream_encoder_process_interleaved(encoder, sampleData, sample.nLength);
 	result = true;
-	
+
 fail:
 	FLAC__stream_encoder_finish(encoder);
 
@@ -3187,7 +3180,7 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 #elif defined(MPT_WITH_STBVORBIS)
 
 	// NOTE/TODO: stb_vorbis does not handle inferred negative PCM sample position
-	// at stream start. (See 
+	// at stream start. (See
 	// <https://www.xiph.org/vorbis/doc/Vorbis_I_spec.html#x1-132000A.2>). This
 	// means that, for remuxed and re-aligned/cutted (at stream start) Vorbis
 	// files, stb_vorbis will include superfluous samples at the beginning.
@@ -3239,7 +3232,7 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 #endif // VORBIS
 
 #if defined(MPT_WITH_VORBISFILE) || defined(MPT_WITH_STBVORBIS)
-	
+
 	if(rate <= 0 || channels <= 0 || raw_sample_data.empty())
 	{
 		return false;
@@ -3303,12 +3296,12 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 		MPG123_FEEDPOOL,
 		MPG123_FEEDBUFFER
 	};
-	
+
 	enum mpg123_parms_flags
 	{
 		MPG123_QUIET = 0x20
 	};
-  
+
 	enum mpg123_enc_enum
 	{
 		MPG123_ENC_16 = 0x040, MPG123_ENC_SIGNED = 0x080
@@ -3338,23 +3331,23 @@ public:
 	int (*mpg123_open_handle_64 )(mpg123_handle*, void*);
 #endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 #if MPT_COMPILER_MSVC
-	int (*mpg123_replace_reader_handle)(mpg123_handle*, 
+	int (*mpg123_replace_reader_handle)(mpg123_handle*,
 		size_t(*)(void *, void *, size_t),
 		off_t(*)(void *, off_t, int),
 		void(*)(void *));
 #if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
-	int (*mpg123_replace_reader_handle_64)(mpg123_handle*, 
+	int (*mpg123_replace_reader_handle_64)(mpg123_handle*,
 		size_t(*)(void *, void *, size_t),
 		off_t(*)(void *, off_t, int),
 		void(*)(void *));
 #endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 #else // !MPT_COMPILER_MSVC
-	int (*mpg123_replace_reader_handle)(mpg123_handle*, 
+	int (*mpg123_replace_reader_handle)(mpg123_handle*,
 		ssize_t(*)(void *, void *, size_t),
 		off_t(*)(void *, off_t, int),
 		void(*)(void *));
 #if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
-	int (*mpg123_replace_reader_handle_64)(mpg123_handle*, 
+	int (*mpg123_replace_reader_handle_64)(mpg123_handle*,
 		ssize_t(*)(void *, void *, size_t),
 		off_t(*)(void *, off_t, int),
 		void(*)(void *));
@@ -3633,7 +3626,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	if(mpg123->mpg123_open_handle_64 && mpg123->mpg123_open_handle_64(mh, &file))
 	{
 		mpg123->mpg123_delete(mh);
-		return false;	
+		return false;
 	} else
 #endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 	if(mpg123->mpg123_open_handle(mh, &file))
@@ -3670,7 +3663,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	if(length == 0)
 	{
 		mpg123->mpg123_delete(mh);
-		return false;	
+		return false;
 	}
 
 	DestroySampleThreadsafe(sample);
