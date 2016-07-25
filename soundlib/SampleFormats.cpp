@@ -1653,9 +1653,18 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 		return false;
 	}
 
-	static const SampleIO::Bitdepth bitDepth[] = { SampleIO::_8bit, SampleIO::_16bit, SampleIO::_24bit, SampleIO::_32bit, SampleIO::_64bit };
+	SampleIO::Bitdepth bitDepth;
+	switch((sampleInfo.sampleSize - 1) / 8)
+	{
+	default:
+	case 0: bitDepth = SampleIO::_8bit; break;
+	case 1: bitDepth = SampleIO::_16bit; break;
+	case 2: bitDepth = SampleIO::_24bit; break;
+	case 3: bitDepth = SampleIO::_32bit; break;
+	case 7: bitDepth = SampleIO::_64bit; break;
+	}
 
-	SampleIO sampleIO(bitDepth[(sampleInfo.sampleSize - 1) / 8],
+	SampleIO sampleIO(bitDepth,
 		(sampleInfo.numChannels == 2) ? SampleIO::stereoInterleaved : SampleIO::mono,
 		endian,
 		SampleIO::signedPCM);
