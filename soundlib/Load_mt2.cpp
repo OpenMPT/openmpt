@@ -729,7 +729,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				MT2VST vstHeader;
 				if(chunk.ReadConvertEndianness(vstHeader))
 				{
-					if(fileHeader.version > 0x0250)
+					if(fileHeader.version >= 0x0250)
 						chunk.Skip(16 * 4);	// Parameter automation map for 16 parameters
 
 					SNDMIXPLUGIN &mixPlug = m_MixPlugins[i];
