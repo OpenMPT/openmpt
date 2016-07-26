@@ -40,41 +40,59 @@ OPENMPT_NAMESPACE_BEGIN
 #define MPT_bswap64 _byteswap_uint64
 #endif
 
+namespace mpt { namespace detail {
 // catch system macros
 #ifndef MPT_bswap16
 #ifdef bswap16
-#define MPT_bswap16 bswap16
+static forceinline uint16 mpt_bswap16(uint16 x) { return bswap16(x); }
+#define MPT_bswap16 mpt::detail::mpt_bswap16
 #endif
 #endif
 #ifndef MPT_bswap32
 #ifdef bswap32
-#define MPT_bswap32 bswap32
+static forceinline uint32 mpt_bswap32(uint32 x) { return bswap32(x); }
+#define MPT_bswap32 mpt::detail::mpt_bswap32
 #endif
 #endif
 #ifndef MPT_bswap64
 #ifdef bswap64
-#define MPT_bswap64 bswap64
+static forceinline uint64 mpt_bswap16(uint64 x) { return bswap64(x); }
+#define MPT_bswap64 mpt::detail::mpt_bswap64
 #endif
 #endif
+} } // namespace mpt::detail
+
 
 // No intrinsics available
 #ifndef MPT_bswap16
-#define MPT_bswap16(x) (((x >> 8) & 0xFF) | ((x << 8) & 0xFF00))
+#define MPT_bswap16(x) \
+	( uint16(0) \
+		| ((static_cast<uint16>(x) >> 8) & 0x00FFu) \
+		| ((static_cast<uint16>(x) << 8) & 0xFF00u) \
+	) \
+/**/
 #endif
 #ifndef MPT_bswap32
-#define MPT_bswap32(x) (((x & 0xFF) << 24) | ((x & 0xFF00) << 8) | ((x & 0xFF0000) >> 8) | ((x & 0xFF000000) >> 24))
+#define MPT_bswap32(x) \
+	( uint32(0) \
+		| ((static_cast<uint32>(x) & 0x000000FFu) << 24) \
+		| ((static_cast<uint32>(x) & 0x0000FF00u) <<  8) \
+		| ((static_cast<uint32>(x) & 0x00FF0000u) >>  8) \
+		| ((static_cast<uint32>(x) & 0xFF000000u) >> 24) \
+	) \
+/**/
 #endif
 #ifndef MPT_bswap64
 #define MPT_bswap64(x) \
 	( uint64(0) \
-		| (((x >>  0) & 0xff) << 56) \
-		| (((x >>  8) & 0xff) << 48) \
-		| (((x >> 16) & 0xff) << 40) \
-		| (((x >> 24) & 0xff) << 32) \
-		| (((x >> 32) & 0xff) << 24) \
-		| (((x >> 40) & 0xff) << 16) \
-		| (((x >> 48) & 0xff) <<  8) \
-		| (((x >> 56) & 0xff) <<  0) \
+		| (((static_cast<uint64>(x) >>  0) & 0xffu) << 56) \
+		| (((static_cast<uint64>(x) >>  8) & 0xffu) << 48) \
+		| (((static_cast<uint64>(x) >> 16) & 0xffu) << 40) \
+		| (((static_cast<uint64>(x) >> 24) & 0xffu) << 32) \
+		| (((static_cast<uint64>(x) >> 32) & 0xffu) << 24) \
+		| (((static_cast<uint64>(x) >> 40) & 0xffu) << 16) \
+		| (((static_cast<uint64>(x) >> 48) & 0xffu) <<  8) \
+		| (((static_cast<uint64>(x) >> 56) & 0xffu) <<  0) \
 	) \
 /**/
 #endif
