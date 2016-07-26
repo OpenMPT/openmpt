@@ -729,7 +729,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				MT2VST vstHeader;
 				if(chunk.ReadConvertEndianness(vstHeader))
 				{
-					chunk.Skip(64);	// Seems to always contain values 0-15 as uint32? Maybe some MIDI routing info?
+					if(fileHeader.version > 0x0250)
+						chunk.Skip(16 * 4);	// Parameter automation map for 16 parameters
 
 					SNDMIXPLUGIN &mixPlug = m_MixPlugins[i];
 					mixPlug.Destroy();
@@ -932,11 +933,12 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	// Read automation envelopes
 	if(fileHeader.flags & MT2FileHeader::automation)
 	{
+		const uint32 numEnvelopes = ((fileHeader.flags & MT2FileHeader::drumsAutomation) ? m_nChannels : channelsWithoutDrums)
+			+ ((fileHeader.version >= 0x0250) ? numVST : 0)
+			+ ((fileHeader.flags & MT2FileHeader::masterAutomation) ? 1 : 0);
+
 		for(uint32 pat = 0; pat < fileHeader.numPatterns; pat++)
 		{
-			const uint32 numEnvelopes = ((fileHeader.flags & MT2FileHeader::drumsAutomation) ? m_nChannels : channelsWithoutDrums)
-				+ numVST
-				+ ((fileHeader.flags & MT2FileHeader::masterAutomation) ? 1 : 0);
 			for(uint32 env = 0; env < numEnvelopes && file.CanRead(4); env++)
 			{
 				// TODO
