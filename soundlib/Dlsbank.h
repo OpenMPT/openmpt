@@ -151,7 +151,7 @@ public:
 	DLSINSTRUMENT *FindInstrument(bool bDrum, uint32 nBank=0xFF, uint32 dwProgram=0xFF, uint32 dwKey=0xFF, uint32 *pInsNo=NULL);
 	uint32 GetRegionFromKey(uint32 nIns, uint32 nKey);
 	bool FreeWaveForm(uint8 *p);
-	bool ExtractWaveForm(uint32 nIns, uint32 nRgn, uint8 **ppWave, uint32 *pLen);
+	bool ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &waveData, uint32 &length);
 	bool ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nIns, uint32 nRgn, int transpose=0);
 	bool ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, uint32 nIns, uint32 nDrumRgn);
 	const char *GetRegionName(uint32 nIns, uint32 nRgn) const;
