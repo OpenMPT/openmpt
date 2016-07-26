@@ -259,8 +259,8 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 #endif // MODPLUG_TRACKER
 
 		InputFile f(instrPaths[ins]);
-		FileReader file = GetFileReader(f);
-		if(!ReadInstrumentFromFile(ins + 1, file, true))
+		FileReader instrFile = GetFileReader(f);
+		if(!ReadInstrumentFromFile(ins + 1, instrFile, true))
 		{
 			AddToLog(LogWarning, MPT_USTRING("Unable to open instrument: ") + instrPaths[ins].ToUnicode());
 		}

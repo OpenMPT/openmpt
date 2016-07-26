@@ -1314,7 +1314,7 @@ void CCtrlSamples::OnSampleSave()
 	{
 		if (m_sndFile.GetSample(smp).pSample)
 		{
-			mpt::PathString fileName = dlg.GetFirstFile();
+			fileName = dlg.GetFirstFile();
 			if(doBatchSave)
 			{
 				CStringW sSampleNumber;
@@ -3492,11 +3492,11 @@ void CCtrlSamples::PropagateAutoVibratoChanges()
 			const std::set<SAMPLEINDEX> referencedSamples = m_sndFile.Instruments[i]->GetSamples();
 
 			// Propagate changes to all samples that belong to this instrument.
-			const ModSample &sample = m_sndFile.GetSample(m_nSample);
-			m_sndFile.PropagateXMAutoVibrato(i, sample.nVibType, sample.nVibSweep, sample.nVibDepth, sample.nVibRate);
-			for(std::set<SAMPLEINDEX>::const_iterator sample = referencedSamples.begin(); sample != referencedSamples.end(); sample++)
+			const ModSample &it = m_sndFile.GetSample(m_nSample);
+			m_sndFile.PropagateXMAutoVibrato(i, it.nVibType, it.nVibSweep, it.nVibDepth, it.nVibRate);
+			for(std::set<SAMPLEINDEX>::const_iterator it = referencedSamples.begin(); it != referencedSamples.end(); it++)
 			{
-				m_modDoc.UpdateAllViews(nullptr, SampleHint(*sample).Info(), this);
+				m_modDoc.UpdateAllViews(nullptr, SampleHint(*it).Info(), this);
 			}
 		}
 	}

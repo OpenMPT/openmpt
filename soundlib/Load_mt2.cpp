@@ -1008,10 +1008,10 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				mptEnv.nLoopStart = mt2Env.loopStart;
 				mptEnv.nLoopEnd = mt2Env.loopEnd;
 
-				for(uint32 i = 0; i < mptEnv.size(); i++)
+				for(uint32 p = 0; p < mptEnv.size(); p++)
 				{
-					mptEnv[i].tick = mt2Env.points[i].x;
-					mptEnv[i].value = static_cast<uint8>(Clamp(mt2Env.points[i].y, uint16(0), uint16(64)));
+					mptEnv[p].tick = mt2Env.points[p].x;
+					mptEnv[p].value = static_cast<uint8>(Clamp(mt2Env.points[p].y, uint16(0), uint16(64)));
 				}
 			}
 			envMask >>= 1;
@@ -1050,11 +1050,11 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				}
 				if(synthData.transpose)
 				{
-					for(uint32 i = 0; i < CountOf(mptIns->NoteMap); i++)
+					for(uint32 n = 0; n < CountOf(mptIns->NoteMap); n++)
 					{
-						int note = NOTE_MIN + i + synthData.transpose;
+						int note = NOTE_MIN + n + synthData.transpose;
 						Limit(note, NOTE_MIN, NOTE_MAX);
-						mptIns->NoteMap[i] = static_cast<uint8>(note);
+						mptIns->NoteMap[n] = static_cast<uint8>(note);
 					}
 				}
 				// Instruments with plugin assignments never play samples at the same time!

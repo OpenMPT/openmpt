@@ -651,9 +651,9 @@ void ReadData(std::istream& iStrm, CPattern& pat, const size_t)
 		if(diffmask & extraData)
 		{
 			//Ignore additional data.
-			uint8 temp;
-			mpt::IO::ReadIntLE<uint8>(iStrm, temp);
-			iStrm.ignore(temp);
+			uint8 size;
+			mpt::IO::ReadIntLE<uint8>(iStrm, size);
+			iStrm.ignore(size);
 		}
 	}
 }

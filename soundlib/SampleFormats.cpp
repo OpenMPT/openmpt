@@ -3474,10 +3474,10 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	file.Rewind();
 	while(file.CanRead(4))
 	{
-		uint8 header[3];
-		file.ReadArray(header);
+		uint8 magic[3];
+		file.ReadArray(magic);
 
-		if(!memcmp(header, "ID3", 3))
+		if(!memcmp(magic, "ID3", 3))
 		{
 			// Skip ID3 tags
 			uint8 header[7];
@@ -3491,19 +3491,19 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 				size = (size << 7) | header[i];
 			}
 			file.Skip(size);
-		} else if(!memcmp(header, "APE", 3) && file.ReadMagic("TAGEX"))
+		} else if(!memcmp(magic, "APE", 3) && file.ReadMagic("TAGEX"))
 		{
 			// Skip APE tags
 			uint32 size = file.ReadUint32LE();
 			file.Skip(16 + size);
-		} else if(!memcmp(header, "\x00\x00\x00", 3) || !memcmp(header, "\xFF\x00\x00", 3))
+		} else if(!memcmp(magic, "\x00\x00\x00", 3) || !memcmp(magic, "\xFF\x00\x00", 3))
 		{
 			// Some MP3 files are padded with zeroes...
-		} else if(header[0] == 0)
+		} else if(magic[0] == 0)
 		{
 			// This might be some padding, followed by an MPEG header, so try again.
 			file.SkipBack(2);
-		} else if(MPEGFrame::IsMPEGHeader(header))
+		} else if(MPEGFrame::IsMPEGHeader(magic))
 		{
 			// This is what we want!
 			break;

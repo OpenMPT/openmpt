@@ -528,7 +528,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kMODVBlankTiming: desc = _T("VBlank timing: F21 and above sets speed instead of tempo"); break;
 
 		case kSlidesAtSpeed1: desc = _T("Execute regular portamento slides at speed 1"); break;
-		case kHertzInLinearMode: desc = _T("Compute note frequency in hertz rather than periods"); break;
+		case kHertzInLinearMode: desc = _T("Compute note frequency in Hertz rather than periods"); break;
 		case kTempoClamp: desc = _T("Clamp tempo to 32-255 range"); break;
 		case kPerChannelGlobalVolSlide: desc = _T("Global volume slide memory is per-channel"); break;
 		case kPanOverride: desc = _T("Panning commands override surround and random pan variation"); break;

@@ -1200,7 +1200,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 				const uint8 numCommands = (b & 0x0F), rep = (b >> 4);
 				ModCommand m = ModCommand::Empty();
-				for(uint8 i = 0; i < numCommands; i++)
+				for(uint8 c = 0; c < numCommands; c++)
 				{
 					uint8 cmd[2];
 					track.ReadArray(cmd);
@@ -1694,8 +1694,8 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 						std::size_t extraIndex = (it - headStreamSerials.begin()) - dataStreamSerials.size();
 						for(newSerial = 1; newSerial < 0xffffffffu; ++newSerial)
 						{
-							std::vector<uint32>::iterator it = std::find(dataStreamSerials.begin(), dataStreamSerials.end(), newSerial);
-							if(it == dataStreamSerials.end())
+							std::vector<uint32>::iterator dss = std::find(dataStreamSerials.begin(), dataStreamSerials.end(), newSerial);
+							if(dss == dataStreamSerials.end())
 							{
 								extraIndex -= 1;
 							}
@@ -1954,8 +1954,8 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				break;
 			case MOD_TYPE_MTM:
 				{
-					uint8 version = chunk.ReadUint8();
-					m_madeWithTracker = mpt::String::Print("MultiTracker %1.%2", version >> 4, version & 0x0F);
+					uint8 mtmVersion = chunk.ReadUint8();
+					m_madeWithTracker = mpt::String::Print("MultiTracker %1.%2", mtmVersion >> 4, mtmVersion & 0x0F);
 				}
 				break;
 			default:
