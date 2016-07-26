@@ -902,9 +902,9 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			if(startPattern == PATTERNINDEX_INVALID || endPattern == PATTERNINDEX_INVALID) continue; // what, invalid subtune?
 
 			// set the subsong name to all pattern names
-			for(PATTERNINDEX pat = startPattern; pat <= endPattern; pat++)
+			for(PATTERNINDEX p = startPattern; p <= endPattern; p++)
 			{
-				Patterns[pat].SetName(subsong.songName);
+				Patterns[p].SetName(subsong.songName);
 			}
 
 			// subsongs with different panning setup -> write to pattern (MUSIC_C.PSM)

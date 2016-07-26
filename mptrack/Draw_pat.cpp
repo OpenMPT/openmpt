@@ -505,7 +505,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 	GetClientRect(&rcClient);
 
 	HDC hdc;
-	HBITMAP oldBitmap;
+	HBITMAP oldBitmap = NULL;
 	if(doSmoothScroll)
 	{
 		if(rcClient != m_oldClient)
@@ -650,7 +650,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 			if (ncolhdr < ncols)
 			{
 				const char *pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr]? "[Channel %u]" : "Channel %u";
-				if ((sndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) && sndFile.ChnSettings[ncolhdr].szName[0] != 0)
+				if (sndFile.ChnSettings[ncolhdr].szName[0] != 0)
 					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "%u: [%s]" : "%u: %s";
 				else if (m_nDetailLevel < PatternCursor::volumeColumn) pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Ch%u]" : "Ch%u";
 				else if (m_nDetailLevel < PatternCursor::effectColumn) pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Chn %u]" : "Chn %u";

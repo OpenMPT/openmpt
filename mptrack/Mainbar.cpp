@@ -575,12 +575,8 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 				}
 				m_SpinRowsPerBeat.SetPos(0);
 
-				//update pattern editor
-				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-				if (pMainFrm)
-				{
-					pMainFrm->PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTOPTIONS);
-				}
+				// Update pattern editor
+				pMainFrm->PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTOPTIONS);
 			}
 
 			SetCurrentSong(pSndFile);
