@@ -1785,19 +1785,17 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 	switch(encoding)
 	{
 	case 1: sampleIO |= SampleIO::_16bit;			// u-law
-		sampleIO |= SampleIO::uLaw; break;
+	        sampleIO |= SampleIO::uLaw; break;
 	case 2: break;									// 8-bit linear PCM
 	case 3: sampleIO |= SampleIO::_16bit; break;	// 16-bit linear PCM
 	case 4: sampleIO |= SampleIO::_24bit; break;	// 24-bit linear PCM
 	case 5: sampleIO |= SampleIO::_32bit; break;	// 32-bit linear PCM
 	case 6: sampleIO |= SampleIO::_32bit;			// 32-bit IEEE floating point
-		sampleIO |= SampleIO::floatPCM;
-		break;
+	        sampleIO |= SampleIO::floatPCM; break;
 	case 7: sampleIO |= SampleIO::_64bit;			// 64-bit IEEE floating point
-		sampleIO |= SampleIO::floatPCM;
-		break;
+	        sampleIO |= SampleIO::floatPCM; break;
 	case 27: sampleIO |= SampleIO::_16bit;			// a-law
-		sampleIO |= SampleIO::aLaw; break;
+	        sampleIO |= SampleIO::aLaw; break;
 	default: return false;
 	}
 
@@ -2765,6 +2763,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 
 		chunk.header.id = RIFFChunk::idcue_;
 		chunk.header.length = 4 + sizeof(chunk.cues);
+		chunk.numPoints = SwapBytesReturnLE(CountOf(sample.cues));
 
 		for(uint32 i = 0; i < CountOf(sample.cues); i++)
 		{
