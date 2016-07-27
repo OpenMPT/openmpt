@@ -62,7 +62,7 @@
   output by libopenmpt. Unless your platform has no floating point unit at all,
   floating point will thus also be slightly faster.
 
-  \section libopenmpt_c_threads libopenmpt in multi-threaded environments
+  \section libopenmpt_freebasic_threads libopenmpt in multi-threaded environments
 
   - libopenmpt is tread-aware.
   - Individual libopenmpt objects are not thread-safe.
