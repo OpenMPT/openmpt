@@ -1,8 +1,19 @@
 /*
  * Load_dsm.cpp
  * ------------
- * Purpose: Digisound Interface Kit (DSIK) Internal Format (DSM) module loader
- * Notes  : There is also another fundamentally different DSIK "DSM" module format, not handled here.
+ * Purpose: Digisound Interface Kit (DSIK) Internal Format (DSM v2 / RIFF) module loader
+ * Notes  : 1. There is also another fundamentally different DSIK DSM v1 module format, not handled here.
+ *          MilkyTracker can load it, but the only files of this format seen in the wild are also
+ *          available in their original format, so I did not bother implementing it so far.
+ *
+ *          2. Using PLAY.EXE v1.02, commands not supported in MOD do not seem to do anything at all.
+ *          In particular commands 0x11-0x13 handled below are ignored, and no files have been spotted
+ *          in the wild using any commands > 0x0F at all.
+ *          S3M-style retrigger does not seem to exist - it is translated to volume slides by CONV.EXE,
+ *          and J00 in S3M files is not converted either.
+ *          Command 8 (set panning) uses 00-80 for regular panning and A4 for surround, probably
+ *          making DSIK one of the first applications to use this particular encoding scheme still
+ *          used in "extended" S3Ms today.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -108,12 +119,9 @@ struct PACKED DSMSampleHeader
 			SampleIO::littleEndian,
 			SampleIO::unsignedPCM);
 		if(flags & 0x40)
-		{
 			sampleIO |= SampleIO::deltaPCM;	// fairlight.dsm by Comrade J
-		} else if(flags & 0x02)
-		{
+		else if(flags & 0x02)
 			sampleIO |= SampleIO::signedPCM;
-		}
 		return sampleIO;
 	}
 };
@@ -180,7 +188,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 	if(!m_nDefaultGlobalVolume) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	if(songHeader.mastervol == 0x80)
 	{
-		m_nSamplePreAmp = 256 / m_nChannels;
+		m_nSamplePreAmp = std::min(256u / m_nChannels, 128u);
 	} else
 	{
 		m_nSamplePreAmp = songHeader.mastervol & 0x7F;
@@ -253,18 +261,6 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 					uint8 param = chunk.ReadUint8();
 					switch(command)
 					{
-						// 4-bit Panning
-					case 0x08:
-						switch(param & 0xF0)
-						{
-						case 0x00: param <<= 4; break;
-						case 0x10: command = 0x0A; param = (param & 0x0F) << 4; break;
-						case 0x20: command = 0x0E; param = (param & 0x0F) | 0xA0; break;
-						case 0x30: command = 0x0E; param = (param & 0x0F) | 0x10; break;
-						case 0x40: command = 0x0E; param = (param & 0x0F) | 0x20; break;
-						default: command = 0;
-						}
-						break;
 						// Portamentos
 					case 0x11:
 					case 0x12:
@@ -278,14 +274,11 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 					default:
 						// Volume + Offset (?)
 						if(command > 0x10)
-							command = ((command & 0xF0) == 0x20) ? 0x09 : 0;
+							command = ((command & 0xF0) == 0x20) ? 0x09 : 0xFF;
 					}
-					if(command)
-					{
-						m.command = command;
-						m.param = param;
-						ConvertModCommand(m);
-					}
+					m.command = command;
+					m.param = param;
+					ConvertModCommand(m);
 				}
 			}
 			patNum++;
