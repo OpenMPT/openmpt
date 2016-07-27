@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt svn
 
+ *  There is a new `"subsong"` ctl, which can return the currently selected
+    subsong.
+
 ### libopenmpt 0.2-beta19 (2016-07-23)
 
  *  [**Change**] libopenmpt now uses C++14 `[[deprecated]]` attribute instead

@@ -924,6 +924,7 @@ Declare Function openmpt_module_highlight_pattern_row_channel_ Alias "openmpt_mo
            - load.skip_plugins: Set to "1" to avoid loading plugins
            - load.skip_subsongs_init: Set to "1" to avoid pre-initializing sub-songs. Skipping results in faster module loading but slower seeking.
            - seek.sync_samples: Set to "1" to sync sample playback when using openmpt_module_set_position_seconds or openmpt_module_set_position_order_row.
+           - subsong: The current subsong. Setting it has identical semantics as openmpt_module_select_subsong(), getting it returns the currently selected subsong.
            - play.tempo_factor: Set a floating point tempo factor. "1.0" is the default tempo.
            - play.pitch_factor: Set a floating point pitch factor. "1.0" is the default pitch.
            - dither: Set the dither algorithm that is used for the 16 bit versions of openmpt_module_read. Supported values are:
