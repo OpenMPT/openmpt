@@ -1336,6 +1336,7 @@ std::vector<std::string> module_impl::get_ctls() const {
 	retval.push_back( "load.skip_plugins" );
 	retval.push_back( "load.skip_subsongs_init" );
 	retval.push_back( "seek.sync_samples" );
+	retval.push_back( "subsong" );
 	retval.push_back( "play.tempo_factor" );
 	retval.push_back( "play.pitch_factor" );
 	retval.push_back( "dither" );
@@ -1365,6 +1366,8 @@ std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const
 		return mpt::ToString( m_ctl_load_skip_subsongs_init );
 	} else if ( ctl == "seek.sync_samples" ) {
 		return mpt::ToString( m_ctl_seek_sync_samples );
+	} else if ( ctl == "subsong" ) {
+		return mpt::ToString( m_current_subsong );
 	} else if ( ctl == "play.tempo_factor" ) {
 		if ( !is_loaded() ) {
 			return "1.0";
@@ -1409,6 +1412,8 @@ void module_impl::ctl_set( std::string ctl, const std::string & value, bool thro
 		m_ctl_load_skip_subsongs_init = ConvertStrTo<bool>( value );
 	} else if ( ctl == "seek.sync_samples" ) {
 		m_ctl_seek_sync_samples = ConvertStrTo<bool>( value );
+	} else if ( ctl == "subsong" ) {
+		select_subsong( ConvertStrTo<int32>( value ) );
 	} else if ( ctl == "play.tempo_factor" ) {
 		if ( !is_loaded() ) {
 			return;
