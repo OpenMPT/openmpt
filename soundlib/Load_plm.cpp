@@ -193,8 +193,6 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 			sample.nLoopStart /= 2;
 			sample.nLoopEnd /= 2;
 			sample.nLength /= 2;
-			// Apparently there is a bug in DT2 which adds an extra byte before the sample data.
-			sampleHeader.headerSize++;
 		}
 		if(sample.nLoopEnd > sample.nLoopStart)
 		{
@@ -209,7 +207,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 			SampleIO(
 				(sampleHeader.flags & PLMSampleHeader::smp16Bit) ? SampleIO::_16bit : SampleIO::_8bit,
 				SampleIO::mono,
-				SampleIO::bigEndian,
+				SampleIO::littleEndian,
 				SampleIO::unsignedPCM)
 				.ReadSample(sample, file);
 		}
@@ -263,8 +261,8 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		file.ReadConvertEndianness(patHeader);
 		if(!patHeader.numRows) continue;
 		
-		ORDERINDEX curOrd = ord.x / rowsPerPat;
-		ROWINDEX curRow = ord.x % rowsPerPat;
+		ORDERINDEX curOrd = static_cast<ORDERINDEX>(ord.x / rowsPerPat);
+		ROWINDEX curRow = static_cast<ROWINDEX>(ord.x % rowsPerPat);
 		const CHANNELINDEX numChannels = std::min<uint8>(patHeader.numChannels, fileHeader.numChannels - ord.y);
 		const uint32 patternEnd = ord.x + patHeader.numRows;
 		maxPos = std::max(maxPos, patternEnd);
