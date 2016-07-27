@@ -40,6 +40,7 @@ is just a high-level summary.
  *  Rewritten loader and various playback fixes for MDL files.
  *  libopenmpt 0.2-beta18 broke import of many pattern commands in DBM, DMF and
     ULT files.
+ *  libopenmpt 0.2-beta18 broke ADPCM samples in MOD files.
 
 ### libopenmpt 0.2-beta18 (2016-07-11)
 
