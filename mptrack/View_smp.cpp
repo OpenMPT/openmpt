@@ -1760,8 +1760,9 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				if (dwPos <= sample.nLength)
 				{
 					//Set loop points
+					SmpLength loopEnd = (sample.nLoopEnd > 0) ? sample.nLoopEnd : sample.nLength;
 					wsprintf(s, _T("Set &Loop Start to:\t%u"), dwPos);
-					::AppendMenu(hMenu, MF_STRING | (dwPos + 4 <= sample.nLoopEnd ? 0 : MF_GRAYED),
+					::AppendMenu(hMenu, MF_STRING | (dwPos + 4 <= loopEnd ? 0 : MF_GRAYED),
 						ID_SAMPLE_SETLOOPSTART, s);
 					wsprintf(s, _T("Set &Loop End to:\t%u"), dwPos);
 					::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nLoopStart + 4 ? 0 : MF_GRAYED),
@@ -1770,9 +1771,10 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 					if (sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 					{
 						//Set sustain loop points
+						SmpLength sustainEnd = (sample.nSustainEnd > 0) ? sample.nSustainEnd : sample.nLength;
 						::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 						wsprintf(s, _T("Set &Sustain Start to:\t%u"), dwPos);
-						::AppendMenu(hMenu, MF_STRING | (dwPos + 4 <= sample.nSustainEnd ? 0 : MF_GRAYED),
+						::AppendMenu(hMenu, MF_STRING | (dwPos + 4 <= sustainEnd ? 0 : MF_GRAYED),
 							ID_SAMPLE_SETSUSTAINSTART, s);
 						wsprintf(s, _T("Set &Sustain End to:\t%u"), dwPos);
 						::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nSustainStart + 4 ? 0 : MF_GRAYED),
@@ -2664,10 +2666,11 @@ void CViewSample::OnSetLoopStart()
 	{
 		CSoundFile &sndFile = pModDoc->GetrSoundFile();
 		ModSample &sample = sndFile.GetSample(m_nSample);
-		if ((m_dwMenuParam+4 <= sample.nLoopEnd) && (sample.nLoopStart != m_dwMenuParam))
+		SmpLength loopEnd = (sample.nLoopEnd > 0) ? sample.nLoopEnd : sample.nLength;
+		if ((m_dwMenuParam + 4 <= loopEnd) && (sample.nLoopStart != m_dwMenuParam))
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Loop Start");
-			sample.SetLoop(m_dwMenuParam, sample.nLoopEnd, true, sample.uFlags[CHN_PINGPONGLOOP], sndFile);
+			sample.SetLoop(m_dwMenuParam, loopEnd, true, sample.uFlags[CHN_PINGPONGLOOP], sndFile);
 			SetModified(SampleHint().Info().Data(), true, false);
 		}
 	}
@@ -2682,7 +2685,7 @@ void CViewSample::OnSetLoopEnd()
 	{
 		CSoundFile &sndFile = pModDoc->GetrSoundFile();
 		ModSample &sample = sndFile.GetSample(m_nSample);
-		if ((m_dwMenuParam >= sample.nLoopStart+4) && (sample.nLoopEnd != m_dwMenuParam))
+		if ((m_dwMenuParam >= sample.nLoopStart + 4) && (sample.nLoopEnd != m_dwMenuParam))
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Loop End");
 			sample.SetLoop(sample.nLoopStart, m_dwMenuParam, true, sample.uFlags[CHN_PINGPONGLOOP], sndFile);
@@ -2700,10 +2703,11 @@ void CViewSample::OnSetSustainStart()
 	{
 		CSoundFile &sndFile = pModDoc->GetrSoundFile();
 		ModSample &sample = sndFile.GetSample(m_nSample);
-		if ((m_dwMenuParam+4 <= sample.nSustainEnd) && (sample.nSustainStart != m_dwMenuParam))
+		SmpLength sustainEnd = (sample.nSustainEnd > 0) ? sample.nSustainEnd : sample.nLength;
+		if ((m_dwMenuParam + 4 <= sustainEnd) && (sample.nSustainStart != m_dwMenuParam))
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Sustain Start");
-			sample.SetSustainLoop(m_dwMenuParam, sample.nSustainEnd, true, sample.uFlags[CHN_PINGPONGSUSTAIN], sndFile);
+			sample.SetSustainLoop(m_dwMenuParam, sustainEnd, true, sample.uFlags[CHN_PINGPONGSUSTAIN], sndFile);
 			SetModified(SampleHint().Info().Data(), true, false);
 		}
 	}
@@ -2718,7 +2722,7 @@ void CViewSample::OnSetSustainEnd()
 	{
 		CSoundFile &sndFile = pModDoc->GetrSoundFile();
 		ModSample &sample = sndFile.GetSample(m_nSample);
-		if ((m_dwMenuParam >= sample.nSustainStart+4) && (sample.nSustainEnd != m_dwMenuParam))
+		if ((m_dwMenuParam >= sample.nSustainStart + 4) && (sample.nSustainEnd != m_dwMenuParam))
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Sustain End");
 			sample.SetSustainLoop(sample.nSustainStart, m_dwMenuParam, true, sample.uFlags[CHN_PINGPONGSUSTAIN], sndFile);
@@ -2803,6 +2807,11 @@ void CViewSample::OnAddSilence()
 	}
 
 	BeginWaitCursor();
+
+	if(sample.nLength == 0 && sample.nVolume == 0)
+	{
+		sample.nVolume = 256;
+	}
 
 	if(dlg.m_nEditOption == addsilence_resize)
 	{
