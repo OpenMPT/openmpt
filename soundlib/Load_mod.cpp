@@ -480,15 +480,23 @@ static PATTERNINDEX GetNumPatterns(const FileReader &file, ModSequence &Order, O
 #ifdef _DEBUG
 	// Check if the "hidden" patterns in the order list are actually real, i.e. if they are saved in the file.
 	// OpenMPT did this check in the past, but no other tracker appears to do this.
-	// Interestingly, only taking the "official" patterns into account, a (broken) variant
-	// of the module "killing butterfly" (MD5 bd676358b1dbb40d40f25435e845cf6b, SHA1 9df4ae21214ff753802756b616a0cafaeced8021)
-	// and "quartex" by Reflex (MD5 35526bef0fb21cb96394838d94c14bab, SHA1 116756c68c7b6598dcfbad75a043477fcc54c96c)
-	// seem to have the correct file size when only taking the official patterns into account, but it only plays correctly
-	// when also loading the inofficial patterns.
+	// Interestingly, (broken) variants of the ProTracker modules
+	// "killing butterfly" (MD5 bd676358b1dbb40d40f25435e845cf6b, SHA1 9df4ae21214ff753802756b616a0cafaeced8021),
+	// "quartex" by Reflex (MD5 35526bef0fb21cb96394838d94c14bab, SHA1 116756c68c7b6598dcfbad75a043477fcc54c96c),
+	// and the SoundTracker modules
+	// razor-1911.mod (MD5 b75f0f471b0ae400185585ca05bf7fe8, SHA1 4de31af234229faec00f1e85e1e8f78f405d454b)
+	// and captain_fizz.mod (MD5 55bd89fe5a8e345df65438dbfc2df94e, SHA1 9e0e8b7dc67939885435ea8d3ff4be7704207a43)
+	// seem to have the "correct" file size when only taking the "official" patterns into account, but they only play
+	// correctly when also loading the inofficial patterns.
+	// On the other hand, the SoundTracker module
+	// wolf1.mod (MD5 a4983d7a432d324ce8261b019257f4ed, SHA1 aa6b399d02546bcb6baf9ec56a8081730dea3f44)
+	// does not play correctly with the current code. It's just a short jingle, though, so it's probably less
+	// important to play correctly than the aforementioned modules.
 	// Keep this assertion in the code to find potential other broken MODs.
 	if(numPatterns != officialPatterns && sizeWithoutPatterns + officialPatterns * numChannels * 256 == file.GetLength())
 	{
 		MPT_ASSERT(false);
+		//numPatterns = officialPatterns;
 	} else
 #endif
 	if(numPatternsIllegal > numPatterns && sizeWithoutPatterns + numPatternsIllegal * numChannels * 256 == file.GetLength())
@@ -672,7 +680,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 	ORDERINDEX realOrders = fileHeader.numOrders;
 	if(realOrders > 128)
 	{
-		// beatwave.mod by Sidewinder (the version from ModArchive, not ModLand) claims to have 129 orders.
+		// beatwave.mod by Sidewinder claims to have 129 orders. (MD5: 8a029ac498d453beb929db9a73c3c6b4, SHA1: f7b76fb9f477b07a2e78eb10d8624f0df262cde7 - the version from ModArchive, not ModLand)
 		realOrders = 128;
 	} else if(realOrders == 0)
 	{
@@ -1014,7 +1022,8 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	STVersions minVersion = UST1_00;
 
 	bool hasDiskNames = true;
-	size_t totalSampleLen = 0;
+	SmpLength totalSampleLen = 0;
+	uint8 allVolumes = 0;
 	m_nSamples = 15;
 
 	for(SAMPLEINDEX smp = 1; smp <= 15; smp++)
@@ -1026,14 +1035,14 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		// Sanity checks
 		if(invalidChars > 20
 			|| sampleHeader.volume > 64
-			|| (sampleHeader.finetune >> 4) != 0
+			|| sampleHeader.finetune != 0
 			|| sampleHeader.length > 32768)
 		{
 			return false;
 		}
-		MPT_ASSERT(sampleHeader.finetune == 0);
 
 		totalSampleLen += Samples[smp].nLength;
+		allVolumes |= sampleHeader.volume;
 
 		if(m_szNames[smp][0] && ((memcmp(m_szNames[smp], "st-", 3) && memcmp(m_szNames[smp], "ST-", 3)) || m_szNames[smp][5] != ':'))
 		{
@@ -1054,8 +1063,8 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 			minVersion = std::max(minVersion, MST1_00);
 	}
 
-	// Reject any files with no samples at all, as this might just be a random binary file (e.g. ID3 tags with tons of padding)
-	if(totalSampleLen == 0)
+	// Reject any files with no (or only silent) samples at all, as this might just be a random binary file (e.g. ID3 tags with tons of padding)
+	if(totalSampleLen == 0 || allVolumes == 0)
 		return false;
 
 	MODFileHeader fileHeader;
@@ -1221,12 +1230,6 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				ModCommand &m = rowBase[chn];
 				ReadMODPatternEntry(file, m);
-
-				if(m.note != NOTE_NONE && (m.note < NOTE_MIDDLEC - 12 || m.note >= NOTE_MIDDLEC + 24))
-				{
-					// Out of Amiga range...
-					return false;
-				}
 
 				if(!m.param || m.command == 0x0E)
 				{
