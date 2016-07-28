@@ -5,4 +5,7 @@ OpenMPT specific changes:
     "Win32 implementation of minizip ZTELL64 broken"
     from https://github.com/akrylysov/zlib/commit/0b5c0c94ffa8a11789c31726e13ebe59f93263fe
     has been applied on top of zlib 1.2.8 release.
+ *  iowin32.c ha sbeen modified to only use Windows 8 WinRT API when actually
+    compiling for Windows 8 or later.
+ *  All custom modifications are marked with // OpenMPT
 No further changes have been made.
