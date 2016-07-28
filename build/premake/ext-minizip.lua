@@ -6,6 +6,7 @@
   objdir "../../build/obj/minizip"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-minizip"
   includedirs { "../../include/zlib", "../../include/zlib/contrib/minizip" }
   characterset "MBCS"

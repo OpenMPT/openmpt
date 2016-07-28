@@ -7,6 +7,7 @@
   objdir "../../build/obj/vorbis"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-vorbis"
   includedirs {
    "../../include/ogg/include",

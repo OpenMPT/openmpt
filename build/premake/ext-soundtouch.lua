@@ -6,6 +6,7 @@
   objdir "../../build/obj/soundtouch"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  dofile "../../build/premake/premake-defaults-winver.lua"
   filter { "configurations:*Shared" }
    targetname "openmpt-soundtouch"
   filter { "not configurations:*Shared" }

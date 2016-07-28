@@ -6,6 +6,7 @@
   objdir "../../build/obj/flac"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-flac"
   includedirs { "../../include/flac/include", "../../include/flac/src/libFLAC/include", "../../include/ogg/include" }
   characterset "MBCS"
