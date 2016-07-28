@@ -122,6 +122,7 @@ enum
 #define MIDISETUP_MIDIMACROCONTROL			0x80	// Record MIDI controller changes a MIDI macro changes in pattern
 #define MIDISETUP_PLAYPATTERNONMIDIIN		0x100	// Play pattern if MIDI Note is received and playback is paused
 #define MIDISETUP_ENABLE_RECORD_DEFAULT		0x200	// Enable MIDI recording by default
+#define MIDISETUP_MIDIMACROPITCHBEND		0x400	// Record MIDI pitch bend messages a MIDI macro changes in pattern
 
 
 // EQ

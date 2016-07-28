@@ -3583,108 +3583,123 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		return 1;
 	}
 
+	bool recordParamAsZxx = false;
+
 	switch(event)
 	{
-		case MIDIEvents::evNoteOff: // Note Off
-			// The following method takes care of:
-			// . Silencing specific active notes (just setting nNote to 255 as was done before is not acceptible)
-			// . Entering a note off in pattern if required
-			TempStopNote(nNote, ((TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_RECORDNOTEOFF) != 0));
+	case MIDIEvents::evNoteOff: // Note Off
+		// The following method takes care of:
+		// . Silencing specific active notes (just setting nNote to 255 as was done before is not acceptible)
+		// . Entering a note off in pattern if required
+		TempStopNote(nNote, ((TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_RECORDNOTEOFF) != 0));
 		break;
 
-		case MIDIEvents::evNoteOn: // Note On
-			// continue playing as soon as MIDI notes are being received (http://forum.openmpt.org/index.php?topic=2813.0)
-			if(!IsLiveRecord() && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))
-				pModDoc->OnPatternPlayNoLoop();
+	case MIDIEvents::evNoteOn: // Note On
+		// continue playing as soon as MIDI notes are being received (http://forum.openmpt.org/index.php?topic=2813.0)
+		if(!IsLiveRecord() && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))
+			pModDoc->OnPatternPlayNoLoop();
 
-			nVol = CMainFrame::ApplyVolumeRelatedSettings(dwMidiData, midivolume);
-			if(nVol < 0) nVol = -1;
-			else nVol = (nVol + 3) / 4; //Value from [0,256] to [0,64]
-			TempEnterNote(nNote, nVol, true);
+		nVol = CMainFrame::ApplyVolumeRelatedSettings(dwMidiData, midivolume);
+		if(nVol < 0) nVol = -1;
+		else nVol = (nVol + 3) / 4; //Value from [0,256] to [0,64]
+		TempEnterNote(nNote, nVol, true);
+		break;
+
+	case MIDIEvents::evPolyAftertouch:	// Polyphonic aftertouch
+		EnterAftertouch(nNote, nVol);
+		break;
+
+	case MIDIEvents::evChannelAftertouch:	// Channel aftertouch
+		EnterAftertouch(NOTE_NONE, nByte1);
+		break;
+
+	case MIDIEvents::evPitchBend:	// Pitch wheel
+		recordParamAsZxx = (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIMACROPITCHBEND) != 0;
+		break;
+
+	case MIDIEvents::evControllerChange:	//Controller change
+		switch(nByte1)
+		{
+			case MIDIEvents::MIDICC_Volume_Coarse: //Volume
+				midivolume = nByte2;
 			break;
+		}
 
-		case MIDIEvents::evPolyAftertouch:	// Polyphonic aftertouch
-			EnterAftertouch(nNote, nVol);
-			break;
+		// Checking whether to record MIDI controller change as MIDI macro change.
+		// Don't write this if command was already written by MIDI mapping.
+		if((paramValue == uint16_max || sndFile.GetType() != MOD_TYPE_MPT)
+			&& (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL)
+			&& !TrackerSettings::Instance().midiIgnoreCCs.Get()[nByte1 & 0x7F])
+		{
+			recordParamAsZxx = true;
+		}
+		break;
 
-		case MIDIEvents::evChannelAftertouch:	// Channel aftertouch
-			EnterAftertouch(NOTE_NONE, nByte1);
-			break;
-
-		case MIDIEvents::evControllerChange: //Controller change
-			switch(nByte1)
+	case MIDIEvents::evSystem:
+		if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_RESPONDTOPLAYCONTROLMSGS)
+		{
+			// Respond to MIDI song messages
+			switch(channel)
 			{
-				case MIDIEvents::MIDICC_Volume_Coarse: //Volume
-					midivolume = nByte2;
+			case MIDIEvents::sysStart: //Start song
+				if(GetDocument())
+					GetDocument()->OnPlayerPlayFromStart();
+				break;
+
+			case MIDIEvents::sysContinue: //Continue song
+				if(GetDocument())
+					GetDocument()->OnPlayerPlay();
+				break;
+
+			case MIDIEvents::sysStop: //Stop song
+				if(GetDocument())
+					GetDocument()->OnPlayerStop();
 				break;
 			}
-
-			// Checking whether to record MIDI controller change as MIDI macro change.
-			// Don't write this if command was already written by MIDI mapping.
-			if((paramValue == uint16_max || sndFile.GetType() != MOD_TYPE_MPT)
-				&& IsEditingEnabled()
-				&& (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL)
-				&& !TrackerSettings::Instance().midiIgnoreCCs.Get()[nByte1 & 0x7F])
-			{
-				const bool liveRecord = IsLiveRecord();
-
-				ModCommandPos editpos = GetEditPos(sndFile, liveRecord);
-				ModCommand &m = GetModCommand(sndFile, editpos);
-
-				if(m.command == CMD_NONE || m.command == CMD_SMOOTHMIDI || m.command == CMD_MIDI)
-				{
-					// Write command only if there's no existing command or already a midi macro command.
-					pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Record Entry");
-					m.command = CMD_SMOOTHMIDI;
-					m.param = nByte2;
-					pMainFrm->ThreadSafeSetModified(pModDoc);
-					pModDoc->UpdateAllViews(this, PatternHint(editpos.pattern).Data(), this);
-
-					// Update GUI only if not recording live.
-					if(!liveRecord)
-						InvalidateRow(editpos.row);
-				}
-			}
-			MPT_FALLTHROUGH;
-		default:
-			if(event == MIDIEvents::evSystem && TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_RESPONDTOPLAYCONTROLMSGS)
-			{
-				// Respond to MIDI song messages
-				switch(channel)
-				{
-				case MIDIEvents::sysStart: //Start song
-					if(GetDocument())
-						GetDocument()->OnPlayerPlayFromStart();
-					break;
-
-				case MIDIEvents::sysContinue: //Continue song
-					if(GetDocument())
-						GetDocument()->OnPlayerPlay();
-					break;
-
-				case MIDIEvents::sysStop: //Stop song
-					if(GetDocument())
-						GetDocument()->OnPlayerStop();
-					break;
-				}
-			}
-
-			if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDITOPLUG
-				&& pMainFrm->GetModPlaying() == pModDoc)
-			{
-				const INSTRUMENTINDEX instr = static_cast<INSTRUMENTINDEX>(GetCurrentInstrument());
-				IMixPlugin* plug = sndFile.GetInstrumentPlugin(instr);
-				if(plug)
-				{	
-					plug->MidiSend(dwMidiData);
-					// Sending MIDI may modify the plugin. For now, if MIDI data
-					// is not active sensing, set modified.
-					if(dwMidiData != MIDIEvents::System(MIDIEvents::sysActiveSense))
-						pMainFrm->ThreadSafeSetModified(pModDoc);
-				}
-				
-			}
+		}
 		break;
+	}
+
+	// Write CC or pitch bend message as MIDI macro change.
+	if(recordParamAsZxx && IsEditingEnabled())
+	{
+		const bool liveRecord = IsLiveRecord();
+
+		ModCommandPos editpos = GetEditPos(sndFile, liveRecord);
+		ModCommand &m = GetModCommand(sndFile, editpos);
+
+		if(m.command == CMD_NONE || m.command == CMD_SMOOTHMIDI || m.command == CMD_MIDI)
+		{
+			// Write command only if there's no existing command or already a midi macro command.
+			pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Record Entry");
+			m.command = CMD_SMOOTHMIDI;
+			m.param = nByte2;
+			pMainFrm->ThreadSafeSetModified(pModDoc);
+			pModDoc->UpdateAllViews(this, PatternHint(editpos.pattern).Data(), this);
+
+			// Update GUI only if not recording live.
+			if(!liveRecord)
+				InvalidateRow(editpos.row);
+		}
+	}
+
+	// Pass MIDI to plugin
+	if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDITOPLUG
+		&& pMainFrm->GetModPlaying() == pModDoc
+		&& event != MIDIEvents::evNoteOn
+		&& event != MIDIEvents::evNoteOff)
+	{
+		const INSTRUMENTINDEX instr = static_cast<INSTRUMENTINDEX>(GetCurrentInstrument());
+		IMixPlugin* plug = sndFile.GetInstrumentPlugin(instr);
+		if(plug)
+		{	
+			plug->MidiSend(dwMidiData);
+			// Sending MIDI may modify the plugin. For now, if MIDI data
+			// is not active sensing, set modified.
+			if(dwMidiData != MIDIEvents::System(MIDIEvents::sysActiveSense))
+				pMainFrm->ThreadSafeSetModified(pModDoc);
+		}
+
 	}
 
 	return 1;
