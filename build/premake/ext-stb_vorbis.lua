@@ -6,6 +6,7 @@
   objdir "../../build/obj/stb_vorbis"
   dofile "../../build/premake/premake-defaults-LIB.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-stb_vorbis"
   includedirs { }
   characterset "MBCS"

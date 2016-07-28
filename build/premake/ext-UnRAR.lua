@@ -6,6 +6,7 @@
   objdir "../../build/obj/unrar"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-unrar"
   includedirs { "../../include/unrar" }
   characterset "MBCS"
