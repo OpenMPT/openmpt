@@ -51,7 +51,9 @@
 #include <stdio.h>
 #include <string.h> /* strlen() */
 
+#ifndef _WIN32_WINNT // OpenMPT
 #define _WIN32_WINNT 0x0400 /* required to get waitable timer APIs */
+#endif // OpenMPT
 #include <initguid.h> /* make sure ds guids get defined */
 #include <windows.h>
 #include <objbase.h>
