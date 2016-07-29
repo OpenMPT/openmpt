@@ -327,29 +327,29 @@ public:
 
 		inited = true;
 
-		mpt::ostringstream buf(std::ios::binary);
-		buf.imbue(std::locale::classic());
+		mpt::ostringstream tmpbuf(std::ios::binary);
+		tmpbuf.imbue(std::locale::classic());
 
-		mpt::IO::WriteRaw(buf, "Opus", 4);
-		mpt::IO::WriteRaw(buf, "Head", 4);
-		mpt::IO::WriteIntLE<uint8>(buf, 1); // version
-		mpt::IO::WriteIntLE<uint8>(buf, static_cast<uint8>(opus_channels)); // channels
-		mpt::IO::WriteIntLE<uint16>(buf, static_cast<uint16>(ctl_lookahead * (48000/samplerate))); // preskip
-		mpt::IO::WriteIntLE<uint32>(buf, samplerate); // samplerate
-		mpt::IO::WriteIntLE<uint16>(buf, 0); // gain
-		mpt::IO::WriteIntLE<uint8>(buf, (opus_channels > 2) ? 1 : 0); //chanmap
+		mpt::IO::WriteRaw(tmpbuf, "Opus", 4);
+		mpt::IO::WriteRaw(tmpbuf, "Head", 4);
+		mpt::IO::WriteIntLE<uint8>(tmpbuf, 1); // version
+		mpt::IO::WriteIntLE<uint8>(tmpbuf, static_cast<uint8>(opus_channels)); // channels
+		mpt::IO::WriteIntLE<uint16>(tmpbuf, static_cast<uint16>(ctl_lookahead * (48000/samplerate))); // preskip
+		mpt::IO::WriteIntLE<uint32>(tmpbuf, samplerate); // samplerate
+		mpt::IO::WriteIntLE<uint16>(tmpbuf, 0); // gain
+		mpt::IO::WriteIntLE<uint8>(tmpbuf, (opus_channels > 2) ? 1 : 0); //chanmap
 
 		if(opus_channels > 2)
 		{
-			mpt::IO::WriteIntLE<uint8>(buf, static_cast<uint8>(num_streams));
-			mpt::IO::WriteIntLE<uint8>(buf, static_cast<uint8>(num_coupled));
+			mpt::IO::WriteIntLE<uint8>(tmpbuf, static_cast<uint8>(num_streams));
+			mpt::IO::WriteIntLE<uint8>(tmpbuf, static_cast<uint8>(num_coupled));
 			for(int channel=0; channel<opus_channels; ++channel)
 			{
-				mpt::IO::WriteIntLE<uint8>(buf, mapping[channel]);
+				mpt::IO::WriteIntLE<uint8>(tmpbuf, mapping[channel]);
 			}
 		}
 
-		std::string header_str = buf.str();
+		std::string header_str = tmpbuf.str();
 		std::vector<unsigned char> header_buf(header_str.data(), header_str.data() + header_str.size());
 
 		op.packet = &(header_buf[0]);
