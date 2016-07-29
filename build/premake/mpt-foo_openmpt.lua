@@ -5,6 +5,7 @@ if _ACTION == "vs2010" then
   uuid "749102d3-b183-420c-a7d7-d8ff343c1a0c"
   language "C++"
   location ( "../../build/" .. _ACTION )
+  vpaths { ["*"] = "../../libopenmpt/" }
   objdir "../../build/obj/foo_openmpt"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"

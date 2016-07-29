@@ -3,6 +3,7 @@
   uuid "1A147336-891E-49AC-9EAD-A750599A224C"
   language "C++"
   location ( "../../build/" .. _ACTION )
+  vpaths { ["*"] = "../../pluginBridge/" }
   objdir "../../build/obj/PluginBridge"
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
   dofile "../../build/premake/premake-defaults.lua"
