@@ -3,6 +3,7 @@
   uuid "AEA14F53-ADB0-45E5-9823-81F4F36886C2"
   language "C++"
   location ( "../../build/" .. _ACTION )
+  vpaths { ["*"] = "../../libopenmpt/" }
   objdir "../../build/obj/xmp-openmpt"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"

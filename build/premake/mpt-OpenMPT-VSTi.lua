@@ -3,6 +3,7 @@
   uuid "d1ad4072-c810-4eea-95d0-27fdfa764834"
   language "C++"
   location ( "../../build/" .. _ACTION )
+  vpaths { ["*"] = "../../" }
   objdir "../../build/obj/OpenMPT-VSTi"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
