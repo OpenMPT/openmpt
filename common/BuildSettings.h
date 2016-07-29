@@ -646,6 +646,10 @@
 #define _SCL_SECURE_NO_WARNINGS
 #endif
 
+#ifndef NO_WARN_MBCS_MFC_DEPRECATION
+#define NO_WARN_MBCS_MFC_DEPRECATION
+#endif
+
 #pragma warning(disable:4355) // 'this' : used in base member initializer list
 
 // happens for immutable classes (i.e. classes containing const members)
