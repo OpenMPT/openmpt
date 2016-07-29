@@ -750,6 +750,7 @@ static void clear_xmplay_string( char * str ) {
 
 static std::string sanitize_xmplay_info_string( const std::string & str ) {
 	std::string result;
+	result.reserve(str.size());
 	for ( std::size_t i = 0; i < str.length(); ++i ) {
 		const char c = str[i];
 		switch ( c ) {
@@ -768,6 +769,7 @@ static std::string sanitize_xmplay_info_string( const std::string & str ) {
 
 static std::string sanitize_xmplay_multiline_info_string( const std::string & str ) {
 	std::string result;
+	result.reserve(str.size());
 	for ( std::size_t i = 0; i < str.length(); ++i ) {
 		const char c = str[i];
 		switch ( c ) {
@@ -789,6 +791,7 @@ static std::string sanitize_xmplay_multiline_info_string( const std::string & st
 
 static std::string sanitize_xmplay_multiline_string( const std::string & str ) {
 	std::string result;
+	result.reserve(str.size());
 	for ( std::size_t i = 0; i < str.length(); ++i ) {
 		const char c = str[i];
 		switch ( c ) {
