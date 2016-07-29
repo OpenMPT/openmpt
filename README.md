@@ -48,6 +48,11 @@ How to compile
         To compile the project, open `build/vs2013/OpenMPT.sln` and hit the
         compile button.
 
+     -  Visual Studio 2015 Update 3 Community/Professional/Enterprise
+
+        To compile the project, open `build/vs2015/OpenMPT.sln` and hit the
+        compile button.
+
  -  The VST and ASIO SDKs are needed for compiling with VST and ASIO support.
 
     If you don't want this, uncomment `#define NO_VST` and comment out
