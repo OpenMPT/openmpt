@@ -476,7 +476,6 @@ void CDSoundDevice::InternalFillAudioBuffer()
 		m_pMixBuffer->GetStatus(&dwStatus);
 		if(!m_bMixRunning || !(dwStatus & DSBSTATUS_PLAYING))
 		{
-			HRESULT hr;
 			if(!(dwStatus & DSBSTATUS_BUFFERLOST))
 			{
 				// start playing
