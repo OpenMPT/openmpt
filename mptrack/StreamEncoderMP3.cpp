@@ -1024,7 +1024,6 @@ private:
 	PBE_CONFIG becfg;
 	HBE_STREAM bestream;
 
-	std::vector<float> interleaved;
 	std::vector<SHORT> samples;
 public:
 	MP3BladeStreamWriter(ComponentBlade &blade_, std::ostream &stream)
@@ -1477,7 +1476,6 @@ private:
 	std::vector<BYTE> acmDstBuf;
 	std::deque<int16> acm_sampleBuf;
 
-	std::vector<float> interleaved;
 	std::vector<int16> samples;
 public:
 	MP3AcmStreamWriter(ComponentAcmMP3 &acm_, std::ostream &stream)
