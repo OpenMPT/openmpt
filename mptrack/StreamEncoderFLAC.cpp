@@ -36,37 +36,37 @@ private:
 	FLAC__StreamEncoder *encoder;
 	std::vector<FLAC__int32> sampleBuf;
 private:
-	static FLAC__StreamEncoderWriteStatus FLACWriteCallback(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame, void *client_data)
+	static FLAC__StreamEncoderWriteStatus FLACWriteCallback(const FLAC__StreamEncoder *flacenc, const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame, void *client_data)
 	{
-		return reinterpret_cast<FLACStreamWriter*>(client_data)->WriteCallback(encoder, buffer, bytes, samples, current_frame);
+		return reinterpret_cast<FLACStreamWriter*>(client_data)->WriteCallback(flacenc, buffer, bytes, samples, current_frame);
 	}
-	static FLAC__StreamEncoderSeekStatus FLACSeekCallback(const FLAC__StreamEncoder *encoder, FLAC__uint64 absolute_byte_offset, void *client_data)
+	static FLAC__StreamEncoderSeekStatus FLACSeekCallback(const FLAC__StreamEncoder *flacenc, FLAC__uint64 absolute_byte_offset, void *client_data)
 	{
-		return reinterpret_cast<FLACStreamWriter*>(client_data)->SeekCallback(encoder, absolute_byte_offset);
+		return reinterpret_cast<FLACStreamWriter*>(client_data)->SeekCallback(flacenc, absolute_byte_offset);
 	}
-	static FLAC__StreamEncoderTellStatus FLACTellCallback(const FLAC__StreamEncoder *encoder, FLAC__uint64 *absolute_byte_offset, void *client_data)
+	static FLAC__StreamEncoderTellStatus FLACTellCallback(const FLAC__StreamEncoder *flacenc, FLAC__uint64 *absolute_byte_offset, void *client_data)
 	{
-		return reinterpret_cast<FLACStreamWriter*>(client_data)->TellCallback(encoder, absolute_byte_offset);
+		return reinterpret_cast<FLACStreamWriter*>(client_data)->TellCallback(flacenc, absolute_byte_offset);
 	}
-	FLAC__StreamEncoderWriteStatus WriteCallback(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame)
+	FLAC__StreamEncoderWriteStatus WriteCallback(const FLAC__StreamEncoder *flacenc, const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame)
 	{
-		MPT_UNREFERENCED_PARAMETER(encoder);
+		MPT_UNREFERENCED_PARAMETER(flacenc);
 		MPT_UNREFERENCED_PARAMETER(samples);
 		MPT_UNREFERENCED_PARAMETER(current_frame);
 		f.write(reinterpret_cast<const char*>(buffer), bytes);
 		if(!f) return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
 		return FLAC__STREAM_ENCODER_WRITE_STATUS_OK;
 	}
-	FLAC__StreamEncoderSeekStatus SeekCallback(const FLAC__StreamEncoder *encoder, FLAC__uint64 absolute_byte_offset)
+	FLAC__StreamEncoderSeekStatus SeekCallback(const FLAC__StreamEncoder *flacenc, FLAC__uint64 absolute_byte_offset)
 	{
-		MPT_UNREFERENCED_PARAMETER(encoder);
+		MPT_UNREFERENCED_PARAMETER(flacenc);
 		f.seekp(absolute_byte_offset);
 		if(!f) return FLAC__STREAM_ENCODER_SEEK_STATUS_ERROR;
 		return FLAC__STREAM_ENCODER_SEEK_STATUS_OK;
 	}
-	FLAC__StreamEncoderTellStatus TellCallback(const FLAC__StreamEncoder *encoder, FLAC__uint64 *absolute_byte_offset)
+	FLAC__StreamEncoderTellStatus TellCallback(const FLAC__StreamEncoder *flacenc, FLAC__uint64 *absolute_byte_offset)
 	{
-		MPT_UNREFERENCED_PARAMETER(encoder);
+		MPT_UNREFERENCED_PARAMETER(flacenc);
 		if(absolute_byte_offset)
 		{
 			*absolute_byte_offset = f.tellp();
