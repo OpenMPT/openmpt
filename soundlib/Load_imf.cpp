@@ -50,8 +50,6 @@ struct PACKED IMFFileHeader
 	char   im10[4];				// 'IM10'
 	IMFChannel channels[32];	// Channel settings
 
-	uint8 orderlist[256];		// Order list (0xFF = +++; blank out anything beyond ordnum)
-
 	// Convert all multi-byte numeric values to current platform's endianness or vice versa.
 	void ConvertEndianness()
 	{
@@ -62,7 +60,7 @@ struct PACKED IMFFileHeader
 	}
 };
 
-STATIC_ASSERT(sizeof(IMFFileHeader) == 832);
+STATIC_ASSERT(sizeof(IMFFileHeader) == 576);
 
 struct PACKED IMFEnvelope
 {
@@ -400,7 +398,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 	file.Rewind();
 	if(!file.ReadConvertEndianness(fileHeader)
 		|| memcmp(fileHeader.im10, "IM10", 4)
-		|| fileHeader.ordNum > CountOf(fileHeader.orderlist)
+		|| fileHeader.ordNum > 256
 		|| fileHeader.insNum >= MAX_INSTRUMENTS)
 	{
 		return false;
@@ -471,9 +469,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 	m_nInstruments = fileHeader.insNum;
 	m_nSamples = 0; // Will be incremented later
 
-	Order.resize(fileHeader.ordNum);
-	for(ORDERINDEX ord = 0; ord < fileHeader.ordNum; ord++)
-		Order[ord] = ((fileHeader.orderlist[ord] == 0xFF) ? Order.GetIgnoreIndex() : (PATTERNINDEX)fileHeader.orderlist[ord]);
+	Order.ReadAsByte(file, 256, fileHeader.ordNum, uint16_max, 0xFF);
 
 	// Read patterns
 	for(PATTERNINDEX pat = 0; pat < fileHeader.patNum; pat++)
