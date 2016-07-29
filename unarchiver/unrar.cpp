@@ -137,13 +137,13 @@ CRarArchive::CRarArchive(FileReader &file)
 	#if 1
 		// Use RARGetCommentW (OPENMPT ADDITION)
 		{
-			std::vector<wchar_t> CmtBuf(65536);
+			std::vector<wchar_t> CmtBufW(65536);
 			unsigned int CmtSize = 0;
-			RARResult = RARGetCommentW(rar, &(CmtBuf[0]), static_cast<unsigned int>(CmtBuf.size()), &CmtSize);
+			RARResult = RARGetCommentW(rar, &(CmtBufW[0]), static_cast<unsigned int>(CmtBufW.size()), &CmtSize);
 			switch(RARResult)
 			{
 			case 1:
-				comment = mpt::ToUnicode(std::wstring(&(CmtBuf[0]), &(CmtBuf[0]) + CmtSize));
+				comment = mpt::ToUnicode(std::wstring(&(CmtBufW[0]), &(CmtBufW[0]) + CmtSize));
 				break;
 			case 0:
 				comment = mpt::ustring();
