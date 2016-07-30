@@ -684,24 +684,25 @@ module_impl::~module_impl() {
 }
 
 std::int32_t module_impl::get_render_param( int param ) const {
+	std::int32_t result = 0;
 	switch ( param ) {
 		case module::RENDER_MASTERGAIN_MILLIBEL: {
-			return static_cast<std::int32_t>( 1000.0f * 2.0f * std::log10( m_Gain ) );
+			result = static_cast<std::int32_t>( 1000.0f * 2.0f * std::log10( m_Gain ) );
 		} break;
 		case module::RENDER_STEREOSEPARATION_PERCENT: {
-			return m_sndFile->m_MixerSettings.m_nStereoSeparation * 100 / MixerSettings::StereoSeparationScale;
+			result = m_sndFile->m_MixerSettings.m_nStereoSeparation * 100 / MixerSettings::StereoSeparationScale;
 		} break;
 		case module::RENDER_INTERPOLATIONFILTER_LENGTH: {
-			return resamplingmode_to_filterlength( m_sndFile->m_Resampler.m_Settings.SrcMode );
+			result = resamplingmode_to_filterlength( m_sndFile->m_Resampler.m_Settings.SrcMode );
 		} break;
 		case module::RENDER_VOLUMERAMPING_STRENGTH: {
 			int ramping = 0;
 			mixersettings_to_ramping( ramping, m_sndFile->m_MixerSettings );
-			return ramping;
+			result = ramping;
 		} break;
 		default: throw openmpt::exception("unknown render param"); break;
 	}
-	return 0;
+	return result;
 }
 void module_impl::set_render_param( int param, std::int32_t value ) {
 	switch ( param ) {
