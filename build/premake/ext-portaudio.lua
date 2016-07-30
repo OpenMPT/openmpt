@@ -6,7 +6,13 @@
   objdir "../../build/obj/portaudio"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  dofile "../../build/premake/premake-defaults-winver.lua"
+
+--  dofile "../../build/premake/premake-defaults-winver.lua"
+  filter {}
+  filter { "not action:vs2008" }
+   defines { "_WIN32_WINNT=0x0601" }
+  filter {}
+
   targetname "openmpt-portaudio"
   includedirs { "../../include/portaudio/include", "../../include/portaudio/src/common", "../../include/portaudio/src/os/win" }
   characterset "MBCS"
