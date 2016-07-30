@@ -291,6 +291,27 @@ mpt::ustring Version::GetName() const
 }
 
 
+#ifdef MODPLUG_TRACKER
+mpt::ustring Version::GetNameShort() const
+//----------------------------------------
+{
+	mpt::ustring name;
+	if(mpt::Windows::IsWine())
+	{
+		mpt::Wine::VersionContext v;
+		if(v.Version().IsValid())
+			name = mpt::format(MPT_USTRING("wine-%1"))(v.Version().AsString());
+		else
+			name = MPT_USTRING("wine-unknown");
+	} else
+	{
+		name = mpt::format(MPT_USTRING("%1.%2"))(mpt::ufmt::dec(SystemVersion >> 8), mpt::ufmt::HEX0<2>(SystemVersion & 0xFF));
+	}
+	return name;
+}
+#endif // MODPLUG_TRACKER
+
+
 uint16 Version::GetMinimumKernelLevel()
 //-------------------------------------
 {
@@ -496,6 +517,7 @@ mpt::ustring Version::AsString() const
 
 
 uint32 Version::AsInteger() const
+//-------------------------------
 {
 	uint32 version = 0;
 	version |= static_cast<uint32>(vmajor) << 16;

@@ -191,6 +191,15 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 #else
 #error "Platform-specific identifier missing"
 #endif
+	// Windows Version statistics
+	versionStr.Append(_T("-"));
+	if(TrackerSettings::Instance().UpdateSendGUID)
+	{
+		versionStr.Append(mpt::ToCString(mpt::Windows::Version::Current().GetNameShort()));
+	} else
+	{
+		versionStr.Append(_T("unknown"));
+	}
 	updateURL.Replace(_T("$VERSION"), versionStr);
 	updateURL.Replace(_T("$GUID"), settings.guidString);
 
@@ -268,7 +277,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 		DWORD availableSize = 0;
 		if(InternetQueryDataAvailable(requestHandle, &availableSize, 0, NULL) == FALSE)
 		{
-			throw CUpdateCheck::Error("Error while downloading update information data:\n", GetLastError());
+			throw CUpdateCheck::Error(_T("Error while downloading update information data:\n"), GetLastError());
 		}
 
 		LimitMax(availableSize, (DWORD)DOWNLOAD_BUFFER_SIZE);
@@ -277,7 +286,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 		char downloadBuffer[DOWNLOAD_BUFFER_SIZE];
 		if(InternetReadFile(requestHandle, downloadBuffer, availableSize, &bytesRead) == FALSE)
 		{
-			throw CUpdateCheck::Error("Error while downloading update information data:\n", GetLastError());
+			throw CUpdateCheck::Error(_T("Error while downloading update information data:\n"), GetLastError());
 		}
 		resultBuffer.append(downloadBuffer, downloadBuffer + bytesRead);
 
@@ -301,7 +310,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 			case 0:
 				if(token.CompareNoCase(_T("update")) != 0)
 				{
-					throw CUpdateCheck::Error("Could not understand server response. Maybe your version of OpenMPT is too old!");
+					throw CUpdateCheck::Error(_T("Could not understand server response. Maybe your version of OpenMPT is too old!"));
 				}
 				break;
 			case 1:
@@ -317,7 +326,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 		}
 		if(parseStep < 4)
 		{
-			throw CUpdateCheck::Error("Could not understand server response. Maybe your version of OpenMPT is too old!");
+			throw CUpdateCheck::Error(_T("Could not understand server response. Maybe your version of OpenMPT is too old!"));
 		}
 		result.UpdateAvailable = true;
 	}
