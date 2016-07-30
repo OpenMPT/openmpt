@@ -139,7 +139,7 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 			m_nPattern,
 			pattern.GetNumRows(),
 			(pattern.GetNumRows() == 1) ? _T("") : _T("s"),
-			(pattern.GetNumRows() * sndFile.GetNumChannels() * sizeof(ModCommand)) / 1024);
+			static_cast<int>((pattern.GetNumRows() * sndFile.GetNumChannels() * sizeof(ModCommand)) / 1024));
 		SetDlgItemText(IDC_TEXT1, s);
 
 		// Window title

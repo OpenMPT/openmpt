@@ -523,9 +523,7 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 	UINT numBanks = theApp.GetSettings().Read<int32>("DLS Banks", "NumBanks", 0);
 	for(size_t i = 0; i < numBanks; i++)
 	{
-		char s[16];
-		sprintf(s, "Bank%d", i + 1);
-		mpt::PathString path = theApp.GetSettings().Read<mpt::PathString>("DLS Banks", s, mpt::PathString());
+		mpt::PathString path = theApp.GetSettings().Read<mpt::PathString>("DLS Banks", mpt::format("Bank%1")(i + 1), mpt::PathString());
 		path = theApp.RelativePathToAbsolute(path);
 		AddDLSBank(path);
 	}
@@ -1961,9 +1959,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 	m_pPluginManager->reserve(numPlugins);
 	for(size_t plug = 0; plug < numPlugins; plug++)
 	{
-		char tmp[32];
-		sprintf(tmp, "Plugin%u", plug);
-		mpt::PathString plugPath = theApp.GetSettings().Read<mpt::PathString>("VST Plugins", tmp, MPT_PATHSTRING(""));
+		mpt::PathString plugPath = theApp.GetSettings().Read<mpt::PathString>("VST Plugins", mpt::format("Plugin%1")(plug), MPT_PATHSTRING(""));
 		if(!plugPath.empty())
 		{
 			plugPath = RelativePathToAbsolute(plugPath);
@@ -1977,8 +1973,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 				}
 			}
 
-			sprintf(tmp, "Plugin%u.Tags", plug);
-			mpt::ustring plugTags = theApp.GetSettings().Read<mpt::ustring>("VST Plugins", tmp, mpt::ustring());
+			mpt::ustring plugTags = theApp.GetSettings().Read<mpt::ustring>("VST Plugins", mpt::format("Plugin%1.Tags")(plug), mpt::ustring());
 
 			VSTPluginLib *lib = m_pPluginManager->AddPlugin(plugPath, plugTags, true, true, &nonFoundPlugs);
 			if(lib != nullptr && lib->libraryName == MPT_PATHSTRING("MIDI Input Output") && lib->pluginId1 == 'VstP' && lib->pluginId2 == 'MMID')
@@ -2027,23 +2022,21 @@ BOOL CTrackApp::UninitializeDXPlugins()
 	size_t plug = 0;
 	for(CVstPluginManager::const_iterator pPlug = m_pPluginManager->begin(); pPlug != m_pPluginManager->end(); pPlug++)
 	{
-		char tmp[32];
 		if(!(**pPlug).isBuiltIn)
 		{
-			sprintf(tmp, "Plugin%u", plug);
 			mpt::PathString plugPath = (**pPlug).dllPath;
 			if(theApp.IsPortableMode())
 			{
 				plugPath = AbsolutePathToRelative(plugPath);
 			}
-			theApp.GetSettings().Write<mpt::PathString>("VST Plugins", tmp, plugPath);
+			theApp.GetSettings().Write<mpt::PathString>("VST Plugins", mpt::format("Plugin%1")(plug), plugPath);
 
-			sprintf(tmp, "Plugin%u.Tags", plug);
-			theApp.GetSettings().Write("VST Plugins", tmp, (**pPlug).tags);
+			theApp.GetSettings().Write("VST Plugins", mpt::format("Plugin%1.Tags")(plug), (**pPlug).tags);
 
 			plug++;
 		} else
 		{
+			char tmp[32];
 			sprintf(tmp, "Plugin%08X%08X.Tags", (**pPlug).pluginId1, (**pPlug).pluginId2);
 			theApp.GetSettings().Write("VST Plugins", tmp, (**pPlug).tags);
 		}
