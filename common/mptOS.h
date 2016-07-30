@@ -76,6 +76,9 @@ public:
 	bool IsNT() const;
 
 	mpt::ustring GetName() const;
+#ifdef MODPLUG_TRACKER
+	mpt::ustring GetNameShort() const;
+#endif // MODPLUG_TRACKER
 
 public:
 
