@@ -1566,7 +1566,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 				{
 					fprintf(outStream, "%d:%d:%d:%d:%d\t\t//%s: %s (%s)\n",
 							ctx, commands[cmd].UID,	kc.Modifier(), kc.KeyCode(), kc.EventType().GetRaw(),
-							GetCommandText((CommandID)cmd), kc.GetKeyText(), kc.GetKeyEventText());
+							GetCommandText((CommandID)cmd).GetString(), kc.GetKeyText().GetString(), kc.GetKeyEventText().GetString());
 				}
 
 			}
