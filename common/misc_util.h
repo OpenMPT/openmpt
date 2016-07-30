@@ -127,8 +127,9 @@ namespace mpt {
 
 //  GCC 4.5 and up provides templated overloads of std::abs that convert
 // integer type narrower than int to double.
-//  It is not clear whether this is actually demanded by the standard and the
-// bug is effectively in all other compilers or not.
+//  As this is apparently valid by the current standard, Library Working Group
+// Issue #2735 has been filed (see
+// <https://cplusplus.github.io/LWG/lwg-active.html#2735>).
 //  In any case, avoid this insanity and provide our own mpt::abs implementation
 // for signed integer and floating point types.
 //  Note: We stick to a C++98-style implementation only overloading int and
