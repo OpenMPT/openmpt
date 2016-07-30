@@ -191,13 +191,13 @@ public:
 public:
 	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
 	{
-		const std::size_t countRendered = Tbase::GetRenderedCount();
+		const std::size_t countRendered_ = Tbase::GetRenderedCount();
 
 		ApplyGainBeforeConversionIfAppropriate<Tsample>(MixSoundBuffer, channels, countChunk, gainFactor);
 
 		Tbase::DataCallback(MixSoundBuffer, channels, countChunk);
 
-		ApplyGainAfterConversionIfAppropriate<Tsample>(Tbase::outputBuffer, Tbase::outputBuffers, countRendered, channels, countChunk, gainFactor);
+		ApplyGainAfterConversionIfAppropriate<Tsample>(Tbase::outputBuffer, Tbase::outputBuffers, countRendered_, channels, countChunk, gainFactor);
 
 	}
 };
