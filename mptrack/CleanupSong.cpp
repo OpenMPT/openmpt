@@ -15,24 +15,25 @@
 #include "modsmp_ctrl.h"
 #include "CleanupSong.h"
 #include "../common/StringFixer.h"
+#include "../soundlib/mod_specifications.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
 // Default checkbox state
-bool CModCleanupDlg::m_bCheckBoxes[CU_MAX_CLEANUP_OPTIONS] =
+bool CModCleanupDlg::m_CheckBoxes[kMaxCleanupOptions] =
 {
 	true,	false,	true,	true,	// patterns
 	false,	false,					// orders
 	true,	false,	false,	true,	// samples
 	true,	false,					// instruments
 	true,	false,					// plugins
-	false,							// misc
+	false,	true,					// misc
 };
 
 // Checkbox -> Control ID LUT
-WORD const CModCleanupDlg::m_nCleanupIDtoDlgID[CU_MAX_CLEANUP_OPTIONS] =
+WORD const CModCleanupDlg::m_CleanupIDtoDlgID[kMaxCleanupOptions] =
 {
 	// patterns
 	IDC_CHK_CLEANUP_PATTERNS,		IDC_CHK_REMOVE_PATTERNS,
@@ -47,26 +48,26 @@ WORD const CModCleanupDlg::m_nCleanupIDtoDlgID[CU_MAX_CLEANUP_OPTIONS] =
 	// plugins
 	IDC_CHK_CLEANUP_PLUGINS,		IDC_CHK_REMOVE_PLUGINS,
 	// misc
-	IDC_CHK_RESET_VARIABLES,
+	IDC_CHK_RESET_VARIABLES,		IDC_CHK_UNUSED_CHANNELS,
 };
 
 // Options that are mutually exclusive to each other
-CModCleanupDlg::ENUM_CLEANUP_OPTIONS const CModCleanupDlg::m_nMutuallyExclusive[CModCleanupDlg::CU_MAX_CLEANUP_OPTIONS] =
+CModCleanupDlg::CleanupOptions const CModCleanupDlg::m_MutuallyExclusive[CModCleanupDlg::kMaxCleanupOptions] =
 {
 	// patterns
-	CU_REMOVE_PATTERNS,		CU_CLEANUP_PATTERNS,
-	CU_REMOVE_PATTERNS,		CU_REMOVE_PATTERNS,
+	kRemovePatterns,		kCleanupPatterns,
+	kRemovePatterns,		kRemovePatterns,
 	// orders
-	CU_REMOVE_ORDERS,		CU_MERGE_SEQUENCES,
+	kRemoveOrders,			kMergeSequences,
 	// samples
-	CU_REMOVE_SAMPLES,		CU_CLEANUP_SAMPLES,
-	CU_REMOVE_SAMPLES,		CU_REMOVE_SAMPLES,
+	kRemoveSamples,			kCleanupSamples,
+	kRemoveSamples,			kRemoveSamples,
 	// instruments
-	CU_REMOVE_INSTRUMENTS,	CU_CLEANUP_INSTRUMENTS,
+	kRemoveAllInstruments,	kCleanupInstruments,
 	// plugins
-	CU_REMOVE_PLUGINS,		CU_CLEANUP_PLUGINS,
+	kRemoveAllPlugins,		kCleanupPlugins,
 	// misc
-	CU_NONE,
+	kNone,					kNone,
 
 };
 
@@ -93,6 +94,7 @@ BEGIN_MESSAGE_MAP(CModCleanupDlg, CDialog)
 	ON_COMMAND(IDC_CHK_CLEANUP_PLUGINS,			OnVerifyMutualExclusive)
 	ON_COMMAND(IDC_CHK_REMOVE_PLUGINS,			OnVerifyMutualExclusive)
 	ON_COMMAND(IDC_CHK_RESET_VARIABLES,			OnVerifyMutualExclusive)
+	ON_COMMAND(IDC_CHK_UNUSED_CHANNELS,			OnVerifyMutualExclusive)
 
 	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipNotify)
 	//}}AFX_MSG_MAP
@@ -103,20 +105,20 @@ BOOL CModCleanupDlg::OnInitDialog()
 //---------------------------------
 {
 	CDialog::OnInitDialog();
-	for(int i = 0; i < CU_MAX_CLEANUP_OPTIONS; i++)
+	for(int i = 0; i < kMaxCleanupOptions; i++)
 	{
-		CheckDlgButton(m_nCleanupIDtoDlgID[i], (m_bCheckBoxes[i]) ? BST_CHECKED : BST_UNCHECKED);
+		CheckDlgButton(m_CleanupIDtoDlgID[i], (m_CheckBoxes[i]) ? BST_CHECKED : BST_UNCHECKED);
 	}
 
 	CSoundFile &sndFile = modDoc.GetrSoundFile();
 
-	GetDlgItem(m_nCleanupIDtoDlgID[CU_MERGE_SEQUENCES])->EnableWindow((sndFile.GetType() & MOD_TYPE_MPT) ? TRUE : FALSE);
+	GetDlgItem(m_CleanupIDtoDlgID[kMergeSequences])->EnableWindow((sndFile.GetType() & MOD_TYPE_MPT) ? TRUE : FALSE);
 
-	GetDlgItem(m_nCleanupIDtoDlgID[CU_REMOVE_SAMPLES])->EnableWindow((sndFile.GetNumSamples() > 0) ? TRUE : FALSE);
-	GetDlgItem(m_nCleanupIDtoDlgID[CU_REARRANGE_SAMPLES])->EnableWindow((sndFile.GetNumSamples() > 1) ? TRUE : FALSE);
+	GetDlgItem(m_CleanupIDtoDlgID[kRemoveSamples])->EnableWindow((sndFile.GetNumSamples() > 0) ? TRUE : FALSE);
+	GetDlgItem(m_CleanupIDtoDlgID[kRearrangeSamples])->EnableWindow((sndFile.GetNumSamples() > 1) ? TRUE : FALSE);
 
-	GetDlgItem(m_nCleanupIDtoDlgID[CU_CLEANUP_INSTRUMENTS])->EnableWindow((sndFile.GetNumInstruments() > 0) ? TRUE : FALSE);
-	GetDlgItem(m_nCleanupIDtoDlgID[CU_REMOVE_INSTRUMENTS])->EnableWindow((sndFile.GetNumInstruments() > 0) ? TRUE : FALSE);
+	GetDlgItem(m_CleanupIDtoDlgID[kCleanupInstruments])->EnableWindow((sndFile.GetNumInstruments() > 0) ? TRUE : FALSE);
+	GetDlgItem(m_CleanupIDtoDlgID[kRemoveAllInstruments])->EnableWindow((sndFile.GetNumInstruments() > 0) ? TRUE : FALSE);
 
 	EnableToolTips(TRUE);
 	return TRUE;
@@ -127,45 +129,48 @@ void CModCleanupDlg::OnOK()
 //-------------------------
 {
 	ScopedLogCapturer logcapturer(modDoc, "cleanup", this);
-	for(int i = 0; i < CU_MAX_CLEANUP_OPTIONS; i++)
+	for(int i = 0; i < kMaxCleanupOptions; i++)
 	{
-		m_bCheckBoxes[i] = IsDlgButtonChecked(m_nCleanupIDtoDlgID[i]) != BST_UNCHECKED;
+		m_CheckBoxes[i] = IsDlgButtonChecked(m_CleanupIDtoDlgID[i]) != BST_UNCHECKED;
 	}
 
 	bool modified = false;
 
 	// Orders
-	if(m_bCheckBoxes[CU_MERGE_SEQUENCES]) modified |= MergeSequences();
-	if(m_bCheckBoxes[CU_REMOVE_ORDERS]) modified |= RemoveAllOrders();
+	if(m_CheckBoxes[kMergeSequences]) modified |= MergeSequences();
+	if(m_CheckBoxes[kRemoveOrders]) modified |= RemoveAllOrders();
 
 	// Patterns
-	if(m_bCheckBoxes[CU_REMOVE_PATTERNS]) modified |= RemoveAllPatterns();
-	if(m_bCheckBoxes[CU_CLEANUP_PATTERNS]) modified |= RemoveUnusedPatterns();
-	if(m_bCheckBoxes[CU_REMOVE_DUPLICATE_PATTERNS]) modified |= RemoveDuplicatePatterns();
-	if(m_bCheckBoxes[CU_REARRANGE_PATTERNS]) modified |= RearrangePatterns();
+	if(m_CheckBoxes[kRemovePatterns]) modified |= RemoveAllPatterns();
+	if(m_CheckBoxes[kCleanupPatterns]) modified |= RemoveUnusedPatterns();
+	if(m_CheckBoxes[kRemoveDuplicatePatterns]) modified |= RemoveDuplicatePatterns();
+	if(m_CheckBoxes[kRearrangePatterns]) modified |= RearrangePatterns();
 
 	// Instruments
 	if(modDoc.GetSoundFile()->m_nInstruments > 0)
 	{
-		if(m_bCheckBoxes[CU_REMOVE_INSTRUMENTS]) modified |= RemoveAllInstruments();
-		if(m_bCheckBoxes[CU_CLEANUP_INSTRUMENTS]) modified |= RemoveUnusedInstruments();
+		if(m_CheckBoxes[kRemoveAllInstruments]) modified |= RemoveAllInstruments();
+		if(m_CheckBoxes[kCleanupInstruments]) modified |= RemoveUnusedInstruments();
 	}
 
 	// Samples
-	if(m_bCheckBoxes[CU_REMOVE_SAMPLES]) modified |= RemoveAllSamples();
-	if(m_bCheckBoxes[CU_CLEANUP_SAMPLES]) modified |= RemoveUnusedSamples();
-	if(m_bCheckBoxes[CU_OPTIMIZE_SAMPLES]) modified |= OptimizeSamples();
+	if(m_CheckBoxes[kRemoveSamples]) modified |= RemoveAllSamples();
+	if(m_CheckBoxes[kCleanupSamples]) modified |= RemoveUnusedSamples();
+	if(m_CheckBoxes[kOptimizeSamples]) modified |= OptimizeSamples();
 	if(modDoc.GetSoundFile()->m_nSamples > 1)
 	{
-		if(m_bCheckBoxes[CU_REARRANGE_SAMPLES]) modified |= RearrangeSamples();
+		if(m_CheckBoxes[kRearrangeSamples]) modified |= RearrangeSamples();
 	}
 
 	// Plugins
-	if(m_bCheckBoxes[CU_REMOVE_PLUGINS]) modified |= RemoveAllPlugins();
-	if(m_bCheckBoxes[CU_CLEANUP_PLUGINS]) modified |= RemoveUnusedPlugins();
+	if(m_CheckBoxes[kRemoveAllPlugins]) modified |= RemoveAllPlugins();
+	if(m_CheckBoxes[kCleanupPlugins]) modified |= RemoveUnusedPlugins();
 
 	// Create samplepack
-	if(m_bCheckBoxes[CU_RESET_VARIABLES]) modified |= ResetVariables();
+	if(m_CheckBoxes[kResetVariables]) modified |= ResetVariables();
+
+	// Remove unused channels
+	if(m_CheckBoxes[kCleanupChannels]) modified |= RemoveUnusedChannels();
 
 	if(modified) modDoc.SetModified();
 	modDoc.UpdateAllViews(nullptr, UpdateHint().ModType());
@@ -178,23 +183,23 @@ void CModCleanupDlg::OnVerifyMutualExclusive()
 //--------------------------------------------
 {
 	HWND hFocus = GetFocus()->m_hWnd;
-	for(int i = 0; i < CU_MAX_CLEANUP_OPTIONS; i++)	
+	for(int i = 0; i < kMaxCleanupOptions; i++)	
 	{
 		// if this item is focussed, we have just (un)checked it.
-		if(hFocus == GetDlgItem(m_nCleanupIDtoDlgID[i])->m_hWnd)
+		if(hFocus == GetDlgItem(m_CleanupIDtoDlgID[i])->m_hWnd)
 		{
 			// if we just unchecked it, there's nothing to verify.
-			if(IsDlgButtonChecked(m_nCleanupIDtoDlgID[i]) == BST_UNCHECKED)
+			if(IsDlgButtonChecked(m_CleanupIDtoDlgID[i]) == BST_UNCHECKED)
 				return;
 
 			// now we can disable all elements that are mutually exclusive.
-			if(m_nMutuallyExclusive[i] != CU_NONE)
-				CheckDlgButton(m_nCleanupIDtoDlgID[m_nMutuallyExclusive[i]], BST_UNCHECKED);
+			if(m_MutuallyExclusive[i] != kNone)
+				CheckDlgButton(m_CleanupIDtoDlgID[m_MutuallyExclusive[i]], BST_UNCHECKED);
 			// find other elements which are mutually exclusive with the selected element.
-			for(int j = 0; j < CU_MAX_CLEANUP_OPTIONS; j++)	
+			for(int j = 0; j < kMaxCleanupOptions; j++)	
 			{
-				if(m_nMutuallyExclusive[j] == i)
-					CheckDlgButton(m_nCleanupIDtoDlgID[j], BST_UNCHECKED);
+				if(m_MutuallyExclusive[j] == i)
+					CheckDlgButton(m_CleanupIDtoDlgID[j], BST_UNCHECKED);
 			}
 			return;
 		}
@@ -226,6 +231,7 @@ void CModCleanupDlg::OnPresetCleanupSong()
 	CheckDlgButton(IDC_CHK_REMOVE_PLUGINS, BST_UNCHECKED);
 	// misc
 	CheckDlgButton(IDC_CHK_SAMPLEPACK, BST_UNCHECKED);
+	CheckDlgButton(IDC_CHK_UNUSED_CHANNELS, BST_CHECKED);
 }
 
 
@@ -253,6 +259,7 @@ void CModCleanupDlg::OnPresetCompoCleanup()
 	CheckDlgButton(IDC_CHK_REMOVE_PLUGINS, BST_CHECKED);
 	// misc
 	CheckDlgButton(IDC_CHK_SAMPLEPACK, BST_CHECKED);
+	CheckDlgButton(IDC_CHK_UNUSED_CHANNELS, BST_CHECKED);
 }
 
 
@@ -319,6 +326,9 @@ BOOL CModCleanupDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 	// misc
 	case IDC_CHK_SAMPLEPACK:
 		pTTT->lpszText = _T("Convert the module to .IT and reset song / sample / instrument variables");
+		break;
+	case IDC_CHK_UNUSED_CHANNELS:
+		pTTT->lpszText = _T("Removes all empty pattern channels.");
 		break;
 	default:
 		pTTT->lpszText = _T("");
@@ -940,6 +950,16 @@ bool CModCleanupDlg::ResetVariables()
 
 	return true;
 }
+
+
+bool CModCleanupDlg::RemoveUnusedChannels()
+//-----------------------------------------
+{
+	std::vector<bool> usedChannels;
+	modDoc.CheckUsedChannels(usedChannels, modDoc.GetNumChannels() - modDoc.GetrSoundFile().GetModSpecifications().channelsMin);
+	return modDoc.RemoveChannels(usedChannels);
+}
+
 
 // Remove all patterns
 bool CModCleanupDlg::RemoveAllPatterns()

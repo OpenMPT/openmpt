@@ -590,7 +590,7 @@ PLUGINDEX CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
 {
 	//Remove all plugins whose keepMask[plugindex] is false.
 	PLUGINDEX nRemoved = 0;
-	const PLUGINDEX maxPlug = MIN(MAX_MIXPLUGINS, keepMask.size());
+	const PLUGINDEX maxPlug = static_cast<PLUGINDEX>(MIN(MAX_MIXPLUGINS, keepMask.size()));
 
 	for(PLUGINDEX nPlug = 0; nPlug < maxPlug; nPlug++)
 	{
@@ -1248,13 +1248,13 @@ void CModDoc::CheckUsedChannels(std::vector<bool> &usedMask, CHANNELINDEX maxRem
 //---------------------------------------------------------------------------------------------
 {
 	// Checking for unused channels
-	const int nChannels = GetNumChannels();
-	usedMask.resize(nChannels);
-	for(int iRst = nChannels - 1; iRst >= 0; iRst--)
+	CHANNELINDEX chn = GetNumChannels();
+	usedMask.assign(chn, true);
+	while(chn-- > 0)
 	{
-		usedMask[iRst] = !IsChannelUnused(iRst);
-		if(!usedMask[iRst])
+		if(IsChannelUnused(chn))
 		{
+			usedMask[chn] = false;
 			// Found enough empty channels yet?
 			if((--maxRemoveCount) == 0) break;
 		}

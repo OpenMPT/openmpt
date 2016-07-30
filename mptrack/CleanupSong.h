@@ -17,38 +17,39 @@ class CModCleanupDlg: public CDialog
 //==================================
 {
 private:
-	enum ENUM_CLEANUP_OPTIONS
+	enum CleanupOptions
 	{
 		// patterns
-		CU_CLEANUP_PATTERNS = 0,
-		CU_REMOVE_PATTERNS,
-		CU_REARRANGE_PATTERNS,
-		CU_REMOVE_DUPLICATE_PATTERNS,
+		kCleanupPatterns = 0,
+		kRemovePatterns,
+		kRearrangePatterns,
+		kRemoveDuplicatePatterns,
 		// orders
-		CU_MERGE_SEQUENCES,
-		CU_REMOVE_ORDERS,
+		kMergeSequences,
+		kRemoveOrders,
 		// samples
-		CU_CLEANUP_SAMPLES,
-		CU_REMOVE_SAMPLES,
-		CU_REARRANGE_SAMPLES,
-		CU_OPTIMIZE_SAMPLES,
+		kCleanupSamples,
+		kRemoveSamples,
+		kRearrangeSamples,
+		kOptimizeSamples,
 		// instruments
-		CU_CLEANUP_INSTRUMENTS,
-		CU_REMOVE_INSTRUMENTS,
+		kCleanupInstruments,
+		kRemoveAllInstruments,
 		// plugins
-		CU_CLEANUP_PLUGINS,
-		CU_REMOVE_PLUGINS,
+		kCleanupPlugins,
+		kRemoveAllPlugins,
 		// misc
-		CU_RESET_VARIABLES,
+		kResetVariables,
+		kCleanupChannels,
 
-		CU_NONE,
-		CU_MAX_CLEANUP_OPTIONS = CU_NONE
+		kNone,
+		kMaxCleanupOptions = kNone
 	};
 
 	CModDoc &modDoc;
-	static bool m_bCheckBoxes[CU_MAX_CLEANUP_OPTIONS]; // Checkbox state
-	static const WORD m_nCleanupIDtoDlgID[CU_MAX_CLEANUP_OPTIONS]; // Checkbox -> Control ID LUT
-	static const ENUM_CLEANUP_OPTIONS m_nMutuallyExclusive[CU_MAX_CLEANUP_OPTIONS]; // Options that are mutually exclusive to each other.
+	static bool m_CheckBoxes[kMaxCleanupOptions]; // Checkbox state
+	static const WORD m_CleanupIDtoDlgID[kMaxCleanupOptions]; // Checkbox -> Control ID LUT
+	static const CleanupOptions m_MutuallyExclusive[kMaxCleanupOptions]; // Options that are mutually exclusive to each other.
 
 	// Actual cleanup implementations:
 	// Patterns
@@ -72,6 +73,7 @@ private:
 	bool RemoveAllPlugins();
 	// Misc
 	bool ResetVariables(); // Turn module into samplepack (convert to IT, remove patterns, etc.)
+	bool RemoveUnusedChannels();
 
 public:
 	CModCleanupDlg(CModDoc &modParent, CWnd *parent) : CDialog(IDD_CLEANUP_SONG, parent), modDoc(modParent) { }
