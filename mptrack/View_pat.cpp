@@ -698,10 +698,16 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 					{
 						return true; // Mapped to a command, no need to pass message on.
 					}
-				}
-				if (ctx==kCtxViewPatternsFXparam)
+				} else if (ctx==kCtxViewPatternsFXparam)
 				{
 					if (ih->KeyEvent(kCtxViewPatternsFX, nChar, nRepCnt, nFlags, kT) != kcNull)
+					{
+						return true; // Mapped to a command, no need to pass message on.
+					}
+				} else if (ctx == kCtxViewPatternsIns)
+				{
+					// Do the same with instrument->note column
+					if (ih->KeyEvent(kCtxViewPatternsNote, nChar, nRepCnt, nFlags, kT) != kcNull)
 					{
 						return true; // Mapped to a command, no need to pass message on.
 					}
