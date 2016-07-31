@@ -110,6 +110,7 @@
 #define IDD_SCALE_ENV_POINTS            510
 #define IDD_TUNING                      511
 #define IDD_UPDATE                      512
+#define IDD_MIXSAMPLES                  513
 #define IDS_ERR_TUNING_SERIALISATION    514
 #define IDD_MIDIPARAMCONTROL            515
 #define IDD_MSGBOX_HIDABLE              516
@@ -970,6 +971,12 @@
 #define IDC_SAMPLE_OPENKNOWN            2486
 #define IDC_SAMPLE_OPENRAW              2487
 #define IDC_SAMPLE_DUPLICATE            2488
+#define IDC_EDIT_SAMPVOL1               2489
+#define IDC_SPIN_SAMPVOL1               2490
+#define IDC_EDIT_SAMPVOL2               2491
+#define IDC_SPIN_SAMPVOL2               2492
+#define IDC_EDIT_OFFSET                 2493
+#define IDC_SPIN_OFFSET                 2494
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1267,7 +1274,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        541
 #define _APS_NEXT_COMMAND_VALUE         44645
-#define _APS_NEXT_CONTROL_VALUE         2489
+#define _APS_NEXT_CONTROL_VALUE         2495
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

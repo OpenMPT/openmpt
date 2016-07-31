@@ -527,4 +527,68 @@ void CResamplingDlg::OnOK()
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////
+// Sample mix dialog
+
+SmpLength CMixSampleDlg::sampleOffset = 0;
+int CMixSampleDlg::amplifyOriginal = 50;
+int CMixSampleDlg::amplifyMix = 50;
+
+
+void CMixSampleDlg::DoDataExchange(CDataExchange* pDX)
+//----------------------------------------------------
+{
+	CDialog::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CMixSampleDlg)
+	DDX_Control(pDX, IDC_EDIT_OFFSET,			m_EditOffset);
+	DDX_Control(pDX, IDC_SPIN_OFFSET,			m_SpinOffset);
+	DDX_Control(pDX, IDC_SPIN_SAMPVOL1,			m_SpinVolOriginal);
+	DDX_Control(pDX, IDC_SPIN_SAMPVOL2,			m_SpinVolMix);
+	//}}AFX_DATA_MAP
+}
+
+
+CMixSampleDlg::CMixSampleDlg(CWnd *parent, const ModSample &modSample)
+	: CDialog(IDD_MIXSAMPLES, parent)
+//--------------------------------------------------------------------
+{
+	maxSampleOffset = modSample.nLength;
+	sampleOffset = std::min(sampleOffset, maxSampleOffset);
+}
+
+
+BOOL CMixSampleDlg::OnInitDialog()
+//--------------------------------
+{
+	CDialog::OnInitDialog();
+
+	// Offset
+	m_SpinOffset.SetRange32(0, maxSampleOffset);
+	SetDlgItemInt(IDC_EDIT_OFFSET, sampleOffset);
+
+	// Volumes
+	m_SpinVolOriginal.SetRange(-10000, 10000);
+	m_SpinVolMix.SetRange(-10000, 10000);
+
+	m_EditVolOriginal.SubclassDlgItem(IDC_EDIT_SAMPVOL1, this);
+	m_EditVolOriginal.AllowNegative(true);
+	m_EditVolMix.SubclassDlgItem(IDC_EDIT_SAMPVOL2, this);
+	m_EditVolMix.AllowNegative(true);
+
+	SetDlgItemInt(IDC_EDIT_SAMPVOL1, amplifyOriginal);
+	SetDlgItemInt(IDC_EDIT_SAMPVOL2, amplifyMix);
+
+	return TRUE;
+}
+
+
+void CMixSampleDlg::OnOK()
+//------------------------
+{
+	CDialog::OnOK();
+	sampleOffset = Clamp<SmpLength, SmpLength>(GetDlgItemInt(IDC_EDIT_OFFSET), 0, maxSampleOffset);
+	amplifyOriginal = Clamp<int, int>(GetDlgItemInt(IDC_EDIT_SAMPVOL1), -10000, 10000);
+	amplifyMix = Clamp<int, int>(GetDlgItemInt(IDC_EDIT_SAMPVOL2), -10000, 10000);
+}
+
 OPENMPT_NAMESPACE_END
