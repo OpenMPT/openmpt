@@ -1035,8 +1035,8 @@ VstInt32 CVstPlugin::GetVersion() const
 
 
 // Wrapper for VST dispatch call with structured exception handling.
-static VstIntPtr DispatchSEH(AEffect *effect, VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt, unsigned long &exception)
-//---------------------------------------------------------------------------------------------------------------------------------------------
+VstIntPtr CVstPlugin::DispatchSEH(AEffect *effect, VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt, unsigned long &exception)
+//--------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	__try
 	{
@@ -1665,7 +1665,7 @@ CAbstractVstEditor *CVstPlugin::OpenEditor()
 			return new COwnerVstEditor(*this);
 		else
 			return new CDefaultVstEditor(*this);
-	} catch(...)
+	} catch(CMemoryException &)
 	{
 		ReportPlugException(L"Exception in OpenEditor()");
 		return nullptr;
