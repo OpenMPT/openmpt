@@ -99,6 +99,12 @@ bool ConvertToMono(ModSample &smp, CSoundFile &sndFile, StereoToMonoMode convers
 // Convert a mono sample to stereo
 bool ConvertToStereo(ModSample &smp, CSoundFile &sndFile);
 
+// Convert 16-bit sample to 8-bit
+bool ConvertTo8Bit(ModSample &smp, CSoundFile &sndFile);
+
+// Convert 8-bit sample to 16-bit
+bool ConvertTo16Bit(ModSample &smp, CSoundFile &sndFile);
+
 } // Namespace ctrlSmp
 
 namespace ctrlChn

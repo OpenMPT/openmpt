@@ -90,6 +90,7 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_EDIT_COPY,				OnEditCopy)
 	ON_COMMAND(ID_EDIT_PASTE,				OnEditPaste)
 	ON_COMMAND(ID_EDIT_MIXPASTE,			OnEditMixPaste)
+	ON_COMMAND(ID_EDIT_PUSHFORWARDPASTE,	OnEditInsertPaste)
 	ON_COMMAND(ID_SAMPLE_SETLOOP,			OnSetLoop)
 	ON_COMMAND(ID_SAMPLE_SETSUSTAINLOOP,	OnSetSustainLoop)
 	ON_COMMAND(ID_SAMPLE_8BITCONVERT,		On8BitConvert)
@@ -1846,8 +1847,9 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, _T("&Copy\t") + ih->GetKeyTextFromCommand(kcEditCopy));
 		}
 		const UINT clipboardFlag = (IsClipboardFormatAvailable(CF_WAVE) ? 0 : MF_GRAYED);
-		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_PASTE, _T("&Paste\t") + ih->GetKeyTextFromCommand(kcEditPaste));
-		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_MIXPASTE, _T("M&ix Paste\t") + ih->GetKeyTextFromCommand(kcEditMixPaste));
+		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_PASTE, _T("&Paste (Replace)\t") + ih->GetKeyTextFromCommand(kcEditPaste));
+		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_PUSHFORWARDPASTE, _T("Paste (&Insert)\t") + ih->GetKeyTextFromCommand(kcEditPushForwardPaste));
+		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_MIXPASTE, _T("Mi&x Paste\t") + ih->GetKeyTextFromCommand(kcEditMixPaste));
 		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanUndo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_UNDO, _T("&Undo " + CString(pModDoc->GetSampleUndo().GetUndoName(m_nSample))) + _T("\t") + ih->GetKeyTextFromCommand(kcEditUndo));
 		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanRedo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_REDO, _T("&Redo " + CString(pModDoc->GetSampleUndo().GetRedoName(m_nSample))) + _T("\t") + ih->GetKeyTextFromCommand(kcEditRedo));
 		ClientToScreen(&pt);
@@ -2151,7 +2153,7 @@ void CViewSample::OnEditCopy()
 void CViewSample::OnEditPaste()
 //-----------------------------
 {
-	DoPaste(false);
+	DoPaste(kReplace);
 }
 
 
@@ -2159,7 +2161,16 @@ void CViewSample::OnEditMixPaste()
 //--------------------------------
 {
 	CMixSampleDlg::sampleOffset = m_dwMenuParam;
-	DoPaste(true);
+	DoPaste(kMixPaste);
+}
+
+
+void CViewSample::OnEditInsertPaste()
+//-----------------------------------
+{
+	if(m_dwBeginSel <= m_dwEndSel)
+		m_dwBeginSel = m_dwEndSel = m_dwBeginDrag = m_dwEndDrag = m_dwMenuParam;
+	DoPaste(kInsert);
 }
 
 
@@ -2195,8 +2206,8 @@ static void MixSample(const ModSample &sample, SmpLength offset, int amplify, ui
 }
 
 
-void CViewSample::DoPaste(bool mixPaste)
-//--------------------------------------
+void CViewSample::DoPaste(PasteMode pasteMode)
+//--------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	BeginWaitCursor();
@@ -2214,9 +2225,9 @@ void CViewSample::DoPaste(bool mixPaste)
 			ModSample &sample = sndFile.GetSample(m_nSample);
 
 			if(sample.pSample == nullptr)
-				mixPaste = false;
+				pasteMode = kReplace;
 			// Show mix paste dialog
-			if(mixPaste)
+			if(pasteMode == kMixPaste)
 			{
 				CMixSampleDlg dlg(this, sample);
 				if(dlg.DoModal() != IDOK)
@@ -2231,7 +2242,7 @@ void CViewSample::DoPaste(bool mixPaste)
 			ModSample oldSample = sample;
 			std::string oldSampleName = sndFile.m_szNames[m_nSample];
 
-			if(mixPaste)
+			if(pasteMode != kReplace)
 			{
 				sndFile.GetSample(m_nSample).pSample = nullptr;	// prevent old sample from being deleted.
 			}
@@ -2240,7 +2251,7 @@ void CViewSample::DoPaste(bool mixPaste)
 			CriticalSection cs;
 			bool ok = sndFile.ReadSampleFromFile(m_nSample, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
 			GlobalUnlock(hCpy);
-			if (!sndFile.m_szNames[m_nSample][0] || mixPaste)
+			if (!sndFile.m_szNames[m_nSample][0] || pasteMode != kReplace)
 			{
 				mpt::String::Copy(sndFile.m_szNames[m_nSample], oldSampleName);
 			}
@@ -2249,7 +2260,7 @@ void CViewSample::DoPaste(bool mixPaste)
 				mpt::String::Copy(sample.filename, oldSample.filename);
 			}
 
-			if(mixPaste && ok)
+			if(pasteMode == kMixPaste && ok)
 			{
 				// Mix new sample (stored in the actual sample slot) and old sample (stored in oldSample)
 				SmpLength newLength = std::max(oldSample.nLength, CMixSampleDlg::sampleOffset + sample.nLength);
@@ -2276,6 +2287,62 @@ void CViewSample::DoPaste(bool mixPaste)
 					sample.uFlags.set(CHN_STEREO, newNumChannels == 2);
 					ctrlSmp::ReplaceSample(sample, pNewSample, newLength, sndFile);
 				}
+			} else if(pasteMode == kInsert && ok)
+			{
+				// Insert / replace selection
+				SmpLength oldLength = oldSample.nLength;
+				SmpLength selLength = m_dwEndSel - m_dwBeginSel;
+				if(m_dwEndSel > m_dwBeginSel)
+				{
+					// Replace selection with pasted data
+					if(selLength >= sample.nLength)
+						ok = true;
+					else
+						ok = ctrlSmp::InsertSilence(oldSample, sample.nLength - selLength, m_dwBeginSel, sndFile) > oldLength;
+				} else
+				{
+					m_dwBeginSel = m_dwBeginDrag;
+					ok = ctrlSmp::InsertSilence(oldSample, sample.nLength, m_dwBeginSel, sndFile) > oldLength;
+				}
+				if(ok && sample.GetNumChannels() > oldSample.GetNumChannels())
+				{
+					// Keep channel configuration with higher channel count
+					ok = ctrlSmp::ConvertToStereo(oldSample, sndFile);
+				}
+				if(ok && sample.GetElementarySampleSize() > oldSample.GetElementarySampleSize())
+				{
+					// Keep higher bit depth of the two samples
+					ok = ctrlSmp::ConvertTo16Bit(oldSample, sndFile);
+				}
+				if(ok)
+				{
+					selBegin = m_dwBeginSel;
+					selEnd = selBegin + sample.nLength;
+					uint8 numChannels = oldSample.GetNumChannels();
+					SmpLength offset = m_dwBeginSel * numChannels;
+					for(uint8 chn = 0; chn < numChannels; chn++)
+					{
+						uint8 newChn = chn % sample.GetNumChannels();
+						if(oldSample.GetElementarySampleSize() == 1 && sample.GetElementarySampleSize() == 1)
+						{
+							CopySample(oldSample.pSample8 + offset + chn, sample.nLength, numChannels, sample.pSample8 + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::ConversionChain<SC::Convert<int8, int8>, SC::DecodeIdentity<int8> >());
+						} else if(oldSample.GetElementarySampleSize() == 2 && sample.GetElementarySampleSize() == 1)
+						{
+							CopySample(oldSample.pSample16 + offset + chn, sample.nLength, numChannels, sample.pSample8 + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8> >());
+						} else if(oldSample.GetElementarySampleSize() == 2 && sample.GetElementarySampleSize() == 2)
+						{
+							CopySample(oldSample.pSample16 + offset + chn, sample.nLength, numChannels, sample.pSample16 + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::ConversionChain<SC::Convert<int16, int16>, SC::DecodeIdentity<int16> >());
+						} else
+						{
+							MPT_ASSERT_NOTREACHED();
+						}
+					}
+				} else
+				{
+					ErrorBox(IDS_ERR_OUTOFMEMORY, this);
+				}
+				sndFile.DestroySample(m_nSample);
+				sample = oldSample;
 			}
 
 			if(ok)
@@ -2283,11 +2350,11 @@ void CViewSample::DoPaste(bool mixPaste)
 				SetCurSel(selBegin, selEnd);
 				sample.PrecomputeLoops(sndFile, true);
 				SetModified(SampleHint().Info().Data().Names(), true, false);
-				if(!mixPaste)
+				if(pasteMode == kReplace)
 					sndFile.ResetSamplePath(m_nSample);
 			} else
 			{
-				if(mixPaste)
+				if(pasteMode == kMixPaste)
 					ModSample::FreeSample(oldSample.pSample);
 				pModDoc->GetSampleUndo().Undo(m_nSample);
 				mpt::String::Copy(sndFile.m_szNames[m_nSample], oldSampleName);
@@ -2338,20 +2405,7 @@ void CViewSample::On8BitConvert()
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "8-Bit Conversion");
 
 			CriticalSection cs;
-
-			int8 *p = sample.pSample8;
-			SmpLength len = (sample.nLength + 1) * sample.GetNumChannels();
-			for (SmpLength i=0; i<=len; i++)
-			{
-				p[i] = (int8) ((*((int16 *)(p+i*2))) / 256);
-			}
-			sample.uFlags.reset(CHN_16BIT);
-			for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++) if (sndFile.m_PlayState.Chn[j].pModSample == &sample)
-			{
-				sndFile.m_PlayState.Chn[j].dwFlags.reset(CHN_16BIT);
-			}
-
-			sample.PrecomputeLoops(sndFile, false);
+			ctrlSmp::ConvertTo8Bit(sample, sndFile);
 			cs.Leave();
 
 			SetModified(SampleHint().Info().Data(), true, true);
@@ -2373,15 +2427,12 @@ void CViewSample::On16BitConvert()
 		if(!sample.uFlags[CHN_16BIT] && sample.pSample != nullptr && sample.nLength != 0)
 		{
 			ASSERT(sample.GetElementarySampleSize() == 1);
-			int16 *newSample = static_cast<int16 *>(ModSample::AllocateSample(sample.nLength, 2 * sample.GetNumChannels()));
-			if(newSample != nullptr)
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "16-Bit Conversion");
+			if(!ctrlSmp::ConvertTo16Bit(sample, sndFile))
 			{
-				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "16-Bit Conversion");
-				CopySample<SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8> > >(newSample, sample.nLength * sample.GetNumChannels(), 1, sample.pSample8, sample.GetSampleSizeInBytes(), 1);
-				sample.uFlags.set(CHN_16BIT);
-				ctrlSmp::ReplaceSample(sample, newSample, sample.nLength, sndFile);
-				sample.PrecomputeLoops(sndFile, false);
-
+				pModDoc->GetSampleUndo().RemoveLastUndoStep(m_nSample);
+			} else
+			{
 				SetModified(SampleHint().Info().Data(), true, true);
 			}
 		}
@@ -3098,7 +3149,8 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcEditCopy:		OnEditCopy(); return wParam;
 		case kcEditPaste:		OnEditPaste(); return wParam;
 		case kcEditMixPasteITStyle:
-		case kcEditMixPaste:	DoPaste(true); return wParam;
+		case kcEditMixPaste:	DoPaste(kMixPaste); return wParam;
+		case kcEditPushForwardPaste: DoPaste(kInsert); return wParam;
 		case kcEditUndo:		OnEditUndo(); return wParam;
 		case kcEditRedo:		OnEditRedo(); return wParam;
 		case kcSample8Bit:		if(sndFile.GetSample(m_nSample).uFlags[CHN_16BIT])
