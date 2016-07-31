@@ -12,7 +12,7 @@
 #include "../Sndfile.h"
 #include "PlugInterface.h"
 #include "PluginManager.h"
-#include "../../common/mptIO.h"
+#include "../../common/FileReader.h"
 #ifdef MODPLUG_TRACKER
 #include "../../mptrack/Moddoc.h"
 #include "../../mptrack/Mainfrm.h"
@@ -22,7 +22,6 @@
 // LoadProgram/SaveProgram
 #include "../../mptrack/FileDialog.h"
 #include "../../mptrack/VstPresets.h"
-#include "../../common/FileReader.h"
 #include "../../common/mptFileIO.h"
 #include "../mod_specifications.h"
 #endif // MODPLUG_TRACKER
