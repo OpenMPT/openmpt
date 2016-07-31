@@ -1204,6 +1204,8 @@ protected:
 
 private:
 
+	struct Crash : public std::exception { };
+
 	static BOOL CALLBACK AcmFormatEnumCallback(HACMDRIVERID driver, LPACMFORMATDETAILS pafd, DWORD_PTR inst, DWORD fdwSupport)
 	{
 		return reinterpret_cast<ComponentAcmMP3*>(inst)->AcmFormatEnumCB(driver, pafd, fdwSupport);
@@ -1214,6 +1216,40 @@ private:
 		{
 			s += field + MPT_USTRING(": ") + val + MPT_USTRING("\n");
 		}
+	}
+	static MMRESULT acmDriverDetailsSafe(HACMDRIVERID hadid, LPACMDRIVERDETAILS padd, DWORD fdwDetails)
+	{
+		MMRESULT result = static_cast<MMRESULT>(-1);
+		bool crashed = false;
+		__try
+		{
+			result = acmDriverDetails(hadid, padd, fdwDetails);
+		} __except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			crashed = true;
+		}
+		if(crashed)
+		{
+			throw Crash();
+		}
+		return result;
+	}
+	static MMRESULT acmFormatEnumSafe(HACMDRIVER had, LPACMFORMATDETAILS pafd, ACMFORMATENUMCB fnCallback, DWORD_PTR dwInstance, DWORD fdwEnum)
+	{
+		MMRESULT result = static_cast<MMRESULT>(-1);
+		bool crashed = false;
+		__try
+		{
+			result = acmFormatEnum(had, pafd, fnCallback, dwInstance, fdwEnum);
+		} __except (EXCEPTION_EXECUTE_HANDLER)
+		{
+			crashed = true;
+		}
+		if(crashed)
+		{
+			throw Crash();
+		}
+		return result;
 	}
 	BOOL AcmFormatEnumCB(HACMDRIVERID driver, LPACMFORMATDETAILS pafd, DWORD fdwSupport)
 	{
@@ -1242,7 +1278,7 @@ private:
 			add.cbStruct = sizeof(add);
 			try
 			{
-				if(acmDriverDetails(driver, &add, 0) != MMSYSERR_NOERROR)
+				if(acmDriverDetailsSafe(driver, &add, 0) != MMSYSERR_NOERROR)
 				{
 					ACMLOG(" acmDriverDetails = ERROR");
 					// No driver details? Skip it.
@@ -1264,7 +1300,7 @@ private:
 				ACMLOG(mpt::String::Print("  Copyright = %1", mpt::FromTcharBuf(add.szCopyright)));
 				ACMLOG(mpt::String::Print("  Licensing = %1", mpt::FromTcharBuf(add.szLicensing)));
 				ACMLOG(mpt::String::Print("  Features = %1", mpt::FromTcharBuf(add.szFeatures)));
-			} catch(...)
+			} catch(const Crash &)
 			{
 				ACMLOG(" acmDriverDetails = EXCEPTION");
 				// Driver crashed? Skip it.
@@ -1375,7 +1411,7 @@ private:
 		pwfx->wBitsPerSample = 16;
 		pwfx->nBlockAlign = (WORD)((pwfx->nChannels * pwfx->wBitsPerSample) / 8);
 		pwfx->nAvgBytesPerSec = pwfx->nSamplesPerSec * pwfx->nBlockAlign;
-		acmFormatEnum(NULL, &afd, AcmFormatEnumCallback, reinterpret_cast<DWORD_PTR>(this), ACM_FORMATENUMF_CONVERT);
+		acmFormatEnumSafe(NULL, &afd, AcmFormatEnumCallback, reinterpret_cast<DWORD_PTR>(this), ACM_FORMATENUMF_CONVERT);
 	}
 
 private:
@@ -1393,7 +1429,7 @@ private:
 			{
 				EnumFormats(mpeg1layer3_samplerates[i], 2);
 			}
-		} catch(...)
+		} catch(const Crash &)
 		{
 			// continue
 		}
@@ -1403,7 +1439,7 @@ private:
 			{
 				EnumFormats(mpeg1layer3_samplerates[i], 1);
 			}
-		} catch(...)
+		} catch(const Crash &)
 		{
 			// continue
 		}
